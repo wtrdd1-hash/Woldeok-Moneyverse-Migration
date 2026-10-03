@@ -30,9 +30,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useViewer } from '@/lib/use-viewer';
 import { useLocale } from '@/components/locale-provider';
+import type { Locale } from '@/lib/locale';
 import { synthSound } from '@/lib/audio/synth-sound';
 import { cn } from '@/lib/cn';
 import { toast } from 'sonner';
+
+function localeLabel(locale: Locale, ko: string, en: string, ja?: string, zh?: string): string {
+  if (locale === 'en') return en;
+  if (locale === 'ja') return ja || en;
+  if (locale === 'zh') return zh || en;
+  return ko;
+}
 
 // ==========================================
 // 1. 모델 인터페이스 (고객지원 & 1:1 쪽지)
@@ -80,45 +88,133 @@ interface DirectChatMessage {
   readonly is_mine: boolean;
 }
 
-const CATEGORY_PRESETS = [
-  { label: '계정/인증', prefix: '[계정/인증] ' },
-  { label: 'WLD 원장', prefix: '[WLD 원장] ' },
-  { label: '주식/거래소', prefix: '[주식/거래소] ' },
-  { label: '버그 제보', prefix: '[버그 제보] ' },
-  { label: '건의사항', prefix: '[건의사항] ' },
+const CATEGORY_PRESETS: readonly {
+  readonly ko: string;
+  readonly en: string;
+  readonly ja: string;
+  readonly zh: string;
+  readonly prefixKo: string;
+  readonly prefixEn: string;
+  readonly prefixJa: string;
+  readonly prefixZh: string;
+}[] = [
+  {
+    ko: '계정/인증',
+    en: 'Account/Auth',
+    ja: 'アカウント/認証',
+    zh: '账户/认证',
+    prefixKo: '[계정/인증] ',
+    prefixEn: '[Account] ',
+    prefixJa: '[アカウント] ',
+    prefixZh: '[账户] ',
+  },
+  {
+    ko: 'WLD 원장',
+    en: 'WLD Ledger',
+    ja: 'WLD元帳',
+    zh: 'WLD账本',
+    prefixKo: '[WLD 원장] ',
+    prefixEn: '[WLD] ',
+    prefixJa: '[WLD元帳] ',
+    prefixZh: '[WLD账本] ',
+  },
+  {
+    ko: '주식/거래소',
+    en: 'Stock/Exchange',
+    ja: '株式/取引所',
+    zh: '股票/交易所',
+    prefixKo: '[주식/거래소] ',
+    prefixEn: '[Stock] ',
+    prefixJa: '[株式] ',
+    prefixZh: '[股票] ',
+  },
+  {
+    ko: '버그 제보',
+    en: 'Bug Report',
+    ja: 'バグ報告',
+    zh: '漏洞反馈',
+    prefixKo: '[버그 제보] ',
+    prefixEn: '[Bug] ',
+    prefixJa: '[バグ報告] ',
+    prefixZh: '[漏洞反馈] ',
+  },
+  {
+    ko: '건의사항',
+    en: 'Suggestions',
+    ja: 'ご意見・提案',
+    zh: '意见建议',
+    prefixKo: '[건의사항] ',
+    prefixEn: '[Suggestion] ',
+    prefixJa: '[ご意見] ',
+    prefixZh: '[建议] ',
+  },
 ] as const;
 
-const STATUS_MAP: Record<string, { labelKo: string; labelEn: string; color: string; badge: string }> = {
+const STATUS_MAP: Record<
+  string,
+  {
+    labelKo: string;
+    labelEn: string;
+    labelJa: string;
+    labelZh: string;
+    color: string;
+    badgeKo: string;
+    badgeEn: string;
+    badgeJa: string;
+    badgeZh: string;
+  }
+> = {
   open: {
     labelKo: '답변 대기 중',
     labelEn: 'Waiting Reply',
+    labelJa: '回答待ち',
+    labelZh: '等待回复',
     color: 'text-amber-500 bg-amber-500/10 border-amber-500/30',
-    badge: '대기',
+    badgeKo: '대기',
+    badgeEn: 'Waiting',
+    badgeJa: '待機',
+    badgeZh: '等待',
   },
   waiting_user: {
     labelKo: '관리자 답변 도착',
     labelEn: 'Admin Replied',
+    labelJa: 'サポート回答あり',
+    labelZh: '客服已回复',
     color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30',
-    badge: '답변완료',
+    badgeKo: '답변완료',
+    badgeEn: 'Replied',
+    badgeJa: '回答済',
+    badgeZh: '已回复',
   },
   resolved: {
     labelKo: '처리 완료',
     labelEn: 'Resolved',
+    labelJa: '対応完了',
+    labelZh: '处理完毕',
     color: 'text-muted-foreground bg-muted/40 border-border',
-    badge: '완료',
+    badgeKo: '완료',
+    badgeEn: 'Done',
+    badgeJa: '完了',
+    badgeZh: '完成',
   },
 };
 
-function formatTimeAgo(isoString: string, isEn: boolean): string {
+function formatTimeAgo(isoString: string, locale: Locale): string {
   try {
     const diffMs = Date.now() - new Date(isoString).getTime();
     const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 1) return isEn ? 'Just now' : '방금 전';
-    if (diffMin < 60) return isEn ? `${diffMin}m ago` : `${diffMin}분 전`;
+    if (diffMin < 1) {
+      return localeLabel(locale, '방금 전', 'Just now', 'たった今', '刚刚');
+    }
+    if (diffMin < 60) {
+      return localeLabel(locale, `${diffMin}분 전`, `${diffMin}m ago`, `${diffMin}分前`, `${diffMin}分钟前`);
+    }
     const diffHours = Math.floor(diffMin / 60);
-    if (diffHours < 24) return isEn ? `${diffHours}h ago` : `${diffHours}시간 전`;
+    if (diffHours < 24) {
+      return localeLabel(locale, `${diffHours}시간 전`, `${diffHours}h ago`, `${diffHours}時間前`, `${diffHours}小时前`);
+    }
     const diffDays = Math.floor(diffHours / 24);
-    return isEn ? `${diffDays}d ago` : `${diffDays}일 전`;
+    return localeLabel(locale, `${diffDays}일 전`, `${diffDays}d ago`, `${diffDays}日前`, `${diffDays}天前`);
   } catch {
     return '';
   }
@@ -131,7 +227,6 @@ function formatTimeAgo(isoString: string, isEn: boolean): string {
 export function FloatingSupportChatWidget() {
   const viewer = useViewer();
   const { locale } = useLocale();
-  const isEn = locale === 'en';
   const isSignedIn = Boolean(viewer?.signedIn);
 
   // 팝오버 열림/닫힘 및 메인 탭 ('support' | 'direct')
@@ -214,24 +309,33 @@ export function FloatingSupportChatWidget() {
           if (!isMuted) {
             synthSound.playNotificationChime();
           }
-          toast.success(isEn ? 'New admin reply received!' : '관리자 답변이 도착했습니다!', {
-            description: isEn ? 'Check your 1:1 support chat.' : '1:1 문의 대화창에서 확인해 보세요.',
-            action: {
-              label: isEn ? 'View' : '보기',
-              onClick: () => {
-                setIsOpen(true);
-                setActiveTab('support');
-                setSupportView('list');
+          toast.success(
+            localeLabel(locale, '관리자 답변이 도착했습니다!', 'New admin reply received!', 'サポートからの回答が届きました！', '客服回复已送达！'),
+            {
+              description: localeLabel(
+                locale,
+                '1:1 문의 대화창에서 확인해 보세요.',
+                'Check your 1:1 support chat.',
+                '1:1サポートチャットで確認してください。',
+                '请在1:1客服对话框中查看。'
+              ),
+              action: {
+                label: localeLabel(locale, '보기', 'View', '見る', '查看'),
+                onClick: () => {
+                  setIsOpen(true);
+                  setActiveTab('support');
+                  setSupportView('list');
+                },
               },
-            },
-          });
+            }
+          );
         }
         prevWaitingCount.current = waitingCount;
       }
     } catch {
       // ignore
     }
-  }, [isSignedIn, isEn, isMuted]);
+  }, [isSignedIn, locale, isMuted]);
 
   const fetchSupportMessages = useCallback(
     async (threadId: string) => {
@@ -278,24 +382,33 @@ export function FloatingSupportChatWidget() {
           if (!isMuted) {
             synthSound.playNotificationChime();
           }
-          toast.info(isEn ? 'New direct message received!' : '새 1:1 쪽지가 도착했습니다!', {
-            description: isEn ? 'Check your direct chat hub.' : '1:1 쪽지 대화창에서 확인해 보세요.',
-            action: {
-              label: isEn ? 'Open' : '열기',
-              onClick: () => {
-                setIsOpen(true);
-                setActiveTab('direct');
-                setDirectView('list');
+          toast.info(
+            localeLabel(locale, '새 1:1 쪽지가 도착했습니다!', 'New direct message received!', '新しいダイレクトメッセージが届きました！', '收到新的私信！'),
+            {
+              description: localeLabel(
+                locale,
+                '1:1 쪽지 대화창에서 확인해 보세요.',
+                'Check your direct chat hub.',
+                '1:1メッセージ画面で確認してください。',
+                '请在私信对话框中查看。'
+              ),
+              action: {
+                label: localeLabel(locale, '열기', 'Open', '開く', '打开'),
+                onClick: () => {
+                  setIsOpen(true);
+                  setActiveTab('direct');
+                  setDirectView('list');
+                },
               },
-            },
-          });
+            }
+          );
         }
         prevDirectUnread.current = totalUnread;
       }
     } catch {
       // ignore
     }
-  }, [isSignedIn, isEn, isMuted]);
+  }, [isSignedIn, locale, isMuted]);
 
   const fetchDirectMessages = useCallback(
     async (convId: string) => {
@@ -425,7 +538,9 @@ export function FloatingSupportChatWidget() {
       if (res.ok) {
         const data = await res.json();
         if (!isMuted) synthSound.playMessageSent();
-        toast.success(isEn ? 'Support inquiry submitted!' : '문의가 성공적으로 접수되었습니다!');
+        toast.success(
+          localeLabel(locale, '문의가 성공적으로 접수되었습니다!', 'Support inquiry submitted!', 'お問い合わせを送信しました！', '工单提交成功！')
+        );
         setNewSubject('');
         setNewBody('');
         await fetchThreads();
@@ -435,10 +550,20 @@ export function FloatingSupportChatWidget() {
           setSupportView('list');
         }
       } else {
-        toast.error(isEn ? 'Failed to submit inquiry.' : '문의 접수에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+        toast.error(
+          localeLabel(
+            locale,
+            '문의 접수에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+            'Failed to submit inquiry. Please try again.',
+            'お問い合わせの送信に失敗しました。',
+            '工单提交失败，请稍后重试。'
+          )
+        );
       }
     } catch {
-      toast.error(isEn ? 'Network error occurred.' : '네트워크 통신 중 오류가 발생했습니다.');
+      toast.error(
+        localeLabel(locale, '네트워크 통신 중 오류가 발생했습니다.', 'Network error occurred.', '通信エラーが発生しました。', '网络通信异常。')
+      );
     } finally {
       setIsSending(false);
     }
@@ -474,11 +599,11 @@ export function FloatingSupportChatWidget() {
         if (!isMuted) synthSound.playMessageSent();
         await fetchSupportMessages(selectedThread.thread_id);
       } else {
-        toast.error(isEn ? 'Failed to send message.' : '메시지 전송에 실패했습니다.');
+        toast.error(localeLabel(locale, '메시지 전송에 실패했습니다.', 'Failed to send message.', '送信に失敗しました。', '消息发送失败。'));
         setSupportReplyText(textToSend);
       }
     } catch {
-      toast.error(isEn ? 'Network error occurred.' : '네트워크 오류가 발생했습니다.');
+      toast.error(localeLabel(locale, '네트워크 오류가 발생했습니다.', 'Network error occurred.', 'ネットワークエラーが発生しました。', '网络错误。'));
       setSupportReplyText(textToSend);
     } finally {
       setIsSending(false);
@@ -553,11 +678,11 @@ export function FloatingSupportChatWidget() {
         await fetchDirectMessages(selectedConversation.conversation_id);
         fetchConversations();
       } else {
-        toast.error(isEn ? 'Failed to send direct message.' : '쪽지 전송에 실패했습니다.');
+        toast.error(localeLabel(locale, '쪽지 전송에 실패했습니다.', 'Failed to send direct message.', 'メッセージ送信に失敗しました。', '私信发送失败。'));
         setDirectReplyText(textToSend);
       }
     } catch {
-      toast.error(isEn ? 'Network error occurred.' : '네트워크 오류가 발생했습니다.');
+      toast.error(localeLabel(locale, '네트워크 오류가 발생했습니다.', 'Network error occurred.', 'ネットワークエラーが発生しました。', '网络错误。'));
       setDirectReplyText(textToSend);
     } finally {
       setIsSending(false);
@@ -566,17 +691,23 @@ export function FloatingSupportChatWidget() {
 
   const handleCopyChat = (kind: 'support' | 'direct') => {
     let text = '';
+    const adminTag = localeLabel(locale, '운영팀', 'Admin', '運営チーム', '官方客服');
+    const meTag = localeLabel(locale, '나', 'Me', '自分', '我');
+    const peerTag = localeLabel(locale, '상대', 'Peer', '相手', '对方');
+
     if (kind === 'support') {
-      text = supportMessages.map((m) => `[${m.sender_kind === 'admin' ? '운영팀' : '나'}] ${m.body}`).join('\n\n');
+      text = supportMessages.map((m) => `[${m.sender_kind === 'admin' ? adminTag : meTag}] ${m.body}`).join('\n\n');
     } else {
       text = directMessages
-        .map((m) => `[${m.is_mine ? '나' : selectedConversation?.peer_display_name ?? '상대'}] ${m.body}`)
+        .map((m) => `[${m.is_mine ? meTag : selectedConversation?.peer_display_name ?? peerTag}] ${m.body}`)
         .join('\n\n');
     }
     if (!text) return;
     navigator.clipboard.writeText(text);
     setCopied(true);
-    toast.success(isEn ? 'Chat transcript copied!' : '대화 내용이 클립보드에 복사되었습니다.');
+    toast.success(
+      localeLabel(locale, '대화 내용이 클립보드에 복사되었습니다.', 'Chat transcript copied!', '会話内容をコピーしました。', '对话内容已复制到剪贴板。')
+    );
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -600,7 +731,7 @@ export function FloatingSupportChatWidget() {
         {!isOpen && (
           <div className="hidden md:flex items-center gap-1.5 px-3 py-1 mb-2 rounded-full bg-card/95 border border-border/80 shadow-lg text-[11px] font-bold text-foreground backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-300">
             <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>{isEn ? '1:1 Chat & Support' : '1:1 채팅 · 고객지원'}</span>
+            <span>{localeLabel(locale, '1:1 채팅 · 고객지원', '1:1 Chat & Support', '1:1チャット・サポート', '1:1聊天与客服')}</span>
           </div>
         )}
 
@@ -616,7 +747,13 @@ export function FloatingSupportChatWidget() {
               ? 'bg-muted border-2 border-border text-foreground'
               : 'bg-gradient-to-br from-amber-500 via-primary to-amber-600 text-primary-foreground border-2 border-amber-400/50 hover:scale-105 hover:shadow-primary/40 ring-4 ring-amber-500/20 hover:ring-amber-500/40'
           )}
-          aria-label={isEn ? 'Toggle chat & support hub' : '1:1 채팅 및 고객센터 열기/닫기'}
+          aria-label={localeLabel(
+            locale,
+            '1:1 채팅 및 고객센터 열기/닫기',
+            'Toggle chat & support hub',
+            'チャット・サポートを開閉',
+            '打开/关闭聊天与客服中心'
+          )}
         >
           {isOpen ? (
             <X className="size-5 transition-transform duration-200 group-hover:rotate-90" />
@@ -656,7 +793,7 @@ export function FloatingSupportChatWidget() {
                     }
                   }}
                   className="p-1 -ml-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={isEn ? 'Back to list' : '목록으로 돌아가기'}
+                  aria-label={localeLabel(locale, '목록으로 돌아가기', 'Back to list', '一覧に戻る', '返回列表')}
                 >
                   <ChevronLeft className="size-4.5" />
                 </button>
@@ -672,15 +809,19 @@ export function FloatingSupportChatWidget() {
                     ? supportView === 'chat' && selectedThread
                       ? selectedThread.subject
                       : supportView === 'new'
-                      ? (isEn ? 'New Support Ticket' : '새 문의 접수')
-                      : (isEn ? 'Customer Support' : '고객센터 · 1:1 문의')
+                      ? localeLabel(locale, '새 문의 접수', 'New Support Ticket', '新規お問い合わせ', '发起新工单')
+                      : localeLabel(locale, '고객센터 · 1:1 문의', 'Customer Support', 'カスタマーサポート', '客服中心 · 1:1工单')
                     : directView === 'chat' && selectedConversation
                     ? selectedConversation.peer_display_name
-                    : (isEn ? '1:1 Direct Chat' : '1:1 개인 쪽지함')}
+                    : localeLabel(locale, '1:1 개인 쪽지함', '1:1 Direct Chat', '1:1メッセージ', '1:1私信')}
                 </p>
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                   <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>{activeTab === 'support' ? (isEn ? 'Admin Online' : '운영진 상담 가동') : (isEn ? 'Encrypted Direct Chat' : '비공개 1:1 실시간 대화')}</span>
+                  <span>
+                    {activeTab === 'support'
+                      ? localeLabel(locale, '운영진 상담 가동', 'Admin Online', 'サポート稼働中', '客服在线')
+                      : localeLabel(locale, '비공개 1:1 실시간 대화', 'Encrypted Direct Chat', '暗号化1:1チャット', '加密1:1私信')}
+                  </span>
                 </div>
               </div>
             </div>
@@ -693,7 +834,11 @@ export function FloatingSupportChatWidget() {
                 size="icon"
                 onClick={toggleMute}
                 className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
-                title={isMuted ? (isEn ? 'Unmute sound' : '효과음 켜기') : (isEn ? 'Mute sound' : '효과음 끄기')}
+                title={
+                  isMuted
+                    ? localeLabel(locale, '효과음 켜기', 'Unmute sound', '効果音をオン', '开启提示音')
+                    : localeLabel(locale, '효과음 끄기', 'Mute sound', '効果音をオフ', '关闭提示音')
+                }
                 aria-label={isMuted ? 'Unmute sound' : 'Mute sound'}
               >
                 {isMuted ? <VolumeX className="size-3.5 text-muted-foreground" /> : <Volume2 className="size-3.5 text-primary" />}
@@ -705,7 +850,7 @@ export function FloatingSupportChatWidget() {
                 variant="ghost"
                 size="icon"
                 className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
-                title={isEn ? 'Open in full page' : '전체 화면으로 열기'}
+                title={localeLabel(locale, '전체 화면으로 열기', 'Open in full page', '全画面で開く', '在新页面打开')}
               >
                 <Link
                   href={
@@ -729,7 +874,7 @@ export function FloatingSupportChatWidget() {
                 size="icon"
                 onClick={() => setIsOpen(false)}
                 className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
-                aria-label={isEn ? 'Close' : '닫기'}
+                aria-label={localeLabel(locale, '닫기', 'Close', '閉じる', '关闭')}
               >
                 <X className="size-4" />
               </Button>
@@ -753,7 +898,7 @@ export function FloatingSupportChatWidget() {
                 )}
               >
                 <Headphones className="size-3.5" />
-                <span>{isEn ? 'Support' : '고객센터'}</span>
+                <span>{localeLabel(locale, '고객센터', 'Support', 'サポート', '客服中心')}</span>
                 {waitingAdminReplies > 0 && (
                   <span className="size-4 rounded-full bg-emerald-600 text-white font-mono text-[9px] font-black flex items-center justify-center">
                     {waitingAdminReplies}
@@ -775,7 +920,7 @@ export function FloatingSupportChatWidget() {
                 )}
               >
                 <MessageSquare className="size-3.5" />
-                <span>{isEn ? '1:1 Direct' : '1:1 쪽지'}</span>
+                <span>{localeLabel(locale, '1:1 쪽지', '1:1 Direct', '1:1メッセージ', '1:1私信')}</span>
                 {totalDirectUnread > 0 && (
                   <span className="size-4 rounded-full bg-primary text-primary-foreground font-mono text-[9px] font-black flex items-center justify-center">
                     {totalDirectUnread}
@@ -795,40 +940,66 @@ export function FloatingSupportChatWidget() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-black text-foreground">
-                    {isEn ? 'Sign in to use 1:1 Chat & Support' : '로그인 후 1:1 대화를 이용하세요'}
+                    {localeLabel(
+                      locale,
+                      '로그인 후 1:1 대화를 이용하세요',
+                      'Sign in to use 1:1 Chat & Support',
+                      'ログインして1:1チャットを利用',
+                      '登录后使用1:1私信与客服'
+                    )}
                   </p>
                   <p className="text-xs text-muted-foreground leading-relaxed [word-break:keep-all]">
-                    {isEn
-                      ? 'Secure, encrypted 1:1 member conversations and official admin inquiries are tied to your account.'
-                      : '회원 계정으로 로그인하시면 1:1 개인 쪽지 및 운영진 1:1 고객지원 서비스를 안전하게 이용하실 수 있습니다.'}
+                    {localeLabel(
+                      locale,
+                      '회원 계정으로 로그인하시면 1:1 개인 쪽지 및 운영진 1:1 고객지원 서비스를 안전하게 이용하실 수 있습니다.',
+                      'Secure, encrypted 1:1 member conversations and official admin inquiries are tied to your account.',
+                      '会員ログインすると、1:1メッセージや公式カスタマーサポートを安全にご利用いただけます。',
+                      '登录会员账号即可安全体验1:1私信与官方客服咨询。'
+                    )}
                   </p>
                 </div>
 
                 <Button asChild className="w-full h-10 font-bold text-xs gap-1.5 rounded-xl shadow-md">
                   <Link href="/login">
                     <LogIn className="size-4" />
-                    <span>{isEn ? 'Sign In Now' : '로그인하러 가기'}</span>
+                    <span>{localeLabel(locale, '로그인하러 가기', 'Sign In Now', 'ログインする', '立即登录')}</span>
                   </Link>
                 </Button>
 
                 <div className="w-full pt-3 border-t border-border/60 text-left space-y-1.5 text-xs">
                   <p className="text-[11px] font-bold text-muted-foreground flex items-center gap-1">
                     <BookOpen className="size-3.5" />
-                    <span>{isEn ? 'Helpful Guides' : '자주 찾는 가이드'}</span>
+                    <span>{localeLabel(locale, '자주 찾는 가이드', 'Helpful Guides', 'よくあるガイド', '常用指南')}</span>
                   </p>
                   <div className="grid gap-1">
                     <Link
                       href="/guide/getting-started"
                       className="p-2 rounded-lg bg-muted/40 hover:bg-muted text-[11px] font-medium transition-colors flex items-center justify-between"
                     >
-                      <span>💡 3분 머니버스 입문 가이드</span>
+                      <span>
+                        {localeLabel(
+                          locale,
+                          '💡 3분 머니버스 입문 가이드',
+                          '💡 3-Min Getting Started Guide',
+                          '💡 3分マネーバース入門ガイド',
+                          '💡 3分钟新手入门指南'
+                        )}
+                      </span>
                       <ChevronLeft className="size-3 rotate-180 text-muted-foreground" />
                     </Link>
                     <Link
                       href="/guide/stock-trading"
                       className="p-2 rounded-lg bg-muted/40 hover:bg-muted text-[11px] font-medium transition-colors flex items-center justify-between"
                     >
-                      <span>📈 가상 주식 거래소 이용 안내</span>
+                      <span>
+                        {localeLabel(
+                          locale,
+                          '📈 가상 주식 거래소 이용 안내',
+                          '📈 Virtual Stock Exchange Guide',
+                          '📈 仮想株式取引所の使い方',
+                          '📈 模拟股票交易所使用指南'
+                        )}
+                      </span>
                       <ChevronLeft className="size-3 rotate-180 text-muted-foreground" />
                     </Link>
                   </div>
@@ -844,14 +1015,14 @@ export function FloatingSupportChatWidget() {
                     className="w-full h-10 font-bold text-xs gap-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
                   >
                     <Plus className="size-4" />
-                    <span>{isEn ? 'Open New Support Inquiry' : '새 1:1 문의 작성하기'}</span>
+                    <span>{localeLabel(locale, '새 1:1 문의 작성하기', 'Open New Support Inquiry', '新規お問い合わせを作成', '发起新工单')}</span>
                   </Button>
 
                   <div className="flex-1 overflow-y-auto space-y-2 pr-0.5">
                     {isLoading ? (
                       <div className="py-12 text-center text-xs text-muted-foreground space-y-2">
                         <RotateCw className="size-5 animate-spin mx-auto text-primary" />
-                        <p>{isEn ? 'Loading inquiries…' : '문의 내역을 불러오는 중…'}</p>
+                        <p>{localeLabel(locale, '문의 내역을 불러오는 중…', 'Loading inquiries…', 'お問い合わせ履歴を読込中…', '正在加载工单…')}</p>
                       </div>
                     ) : threads.length === 0 ? (
                       <div className="py-12 text-center space-y-2">
@@ -859,15 +1030,28 @@ export function FloatingSupportChatWidget() {
                           <Headphones className="size-5" />
                         </div>
                         <p className="text-xs font-bold text-foreground">
-                          {isEn ? 'No support tickets yet' : '접수된 문의 내역이 없습니다'}
+                          {localeLabel(locale, '접수된 문의 내역이 없습니다', 'No support tickets yet', 'お問い合わせ履歴がありません', '暂无工单记录')}
                         </p>
                         <p className="text-[11px] text-muted-foreground [word-break:keep-all]">
-                          {isEn ? 'Click the button above to ask anything.' : '궁금한 점이나 건의사항이 있다면 문의를 남겨주세요.'}
+                          {localeLabel(
+                            locale,
+                            '궁금한 점이나 건의사항이 있다면 문의를 남겨주세요.',
+                            'Click the button above to ask anything.',
+                            'ご質問やご意見があればお気軽にお問い合わせください。',
+                            '如有任何疑问或建议，欢迎随时提交工单。'
+                          )}
                         </p>
                       </div>
                     ) : (
                       threads.map((thread) => {
                         const statusMeta = STATUS_MAP[thread.status] ?? STATUS_MAP.open!;
+                        const statusLabel = localeLabel(
+                          locale,
+                          statusMeta.labelKo,
+                          statusMeta.labelEn,
+                          statusMeta.labelJa,
+                          statusMeta.labelZh
+                        );
                         return (
                           <button
                             key={thread.thread_id}
@@ -880,12 +1064,14 @@ export function FloatingSupportChatWidget() {
                                 {thread.subject}
                               </span>
                               <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded-md border shrink-0', statusMeta.color)}>
-                                {isEn ? statusMeta.labelEn : statusMeta.labelKo}
+                                {statusLabel}
                               </span>
                             </div>
                             <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
-                              <span>{formatTimeAgo(thread.last_message_at || thread.created_at, isEn)}</span>
-                              <span className="group-hover:translate-x-0.5 transition-transform">대화 열기 →</span>
+                              <span>{formatTimeAgo(thread.last_message_at || thread.created_at, locale)}</span>
+                              <span className="group-hover:translate-x-0.5 transition-transform">
+                                {localeLabel(locale, '대화 열기 →', 'Open →', '開く →', '打开 →')}
+                              </span>
                             </div>
                           </button>
                         );
@@ -900,7 +1086,15 @@ export function FloatingSupportChatWidget() {
                     <div className="flex items-center gap-1.5 font-bold">
                       <span className="truncate max-w-[200px]">{selectedThread.subject}</span>
                       <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 font-mono">
-                        {STATUS_MAP[selectedThread.status]?.badge ?? selectedThread.status}
+                        {STATUS_MAP[selectedThread.status]
+                          ? localeLabel(
+                              locale,
+                              STATUS_MAP[selectedThread.status]!.badgeKo,
+                              STATUS_MAP[selectedThread.status]!.badgeEn,
+                              STATUS_MAP[selectedThread.status]!.badgeJa,
+                              STATUS_MAP[selectedThread.status]!.badgeZh
+                            )
+                          : selectedThread.status}
                       </Badge>
                     </div>
                     <button
@@ -909,7 +1103,11 @@ export function FloatingSupportChatWidget() {
                       className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {copied ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
-                      <span>{copied ? '복사됨' : '복사'}</span>
+                      <span>
+                        {copied
+                          ? localeLabel(locale, '복사됨', 'Copied', 'コピー済', '已复制')
+                          : localeLabel(locale, '복사', 'Copy', 'コピー', '复制')}
+                      </span>
                     </button>
                   </div>
 
@@ -918,11 +1116,11 @@ export function FloatingSupportChatWidget() {
                     {isLoading && supportMessages.length === 0 ? (
                       <div className="py-8 text-center text-xs text-muted-foreground">
                         <RotateCw className="size-4 animate-spin mx-auto mb-1 text-primary" />
-                        <span>{isEn ? 'Loading messages…' : '대화 내역을 불러오는 중…'}</span>
+                        <span>{localeLabel(locale, '대화 내역을 불러오는 중…', 'Loading messages…', 'メッセージ読込中…', '正在加载消息…')}</span>
                       </div>
                     ) : supportMessages.length === 0 ? (
                       <p className="text-center py-6 text-xs text-muted-foreground">
-                        {isEn ? 'No messages in this inquiry.' : '메시지가 없습니다.'}
+                        {localeLabel(locale, '메시지가 없습니다.', 'No messages in this inquiry.', 'メッセージがありません。', '暂无消息。')}
                       </p>
                     ) : (
                       supportMessages.map((m) => {
@@ -932,7 +1130,11 @@ export function FloatingSupportChatWidget() {
                             key={m.message_id}
                             className={cn('flex flex-col space-y-1 max-w-[88%] text-xs', isAdminMsg ? 'mr-auto' : 'ml-auto items-end')}
                           >
-                            <span className="text-[10px] font-bold text-muted-foreground px-1">{isAdminMsg ? '👑 운영진 답변' : '나'}</span>
+                            <span className="text-[10px] font-bold text-muted-foreground px-1">
+                              {isAdminMsg
+                                ? localeLabel(locale, '👑 운영진 답변', '👑 Admin Support', '👑 運営サポート', '👑 官方客服')
+                                : localeLabel(locale, '나', 'You', '自分', '我')}
+                            </span>
                             <div
                               className={cn(
                                 'p-3 rounded-2xl leading-relaxed whitespace-pre-wrap break-words shadow-xs',
@@ -943,7 +1145,7 @@ export function FloatingSupportChatWidget() {
                             >
                               {m.body}
                             </div>
-                            <span className="text-[9px] text-muted-foreground font-mono px-1">{formatTimeAgo(m.created_at, isEn)}</span>
+                            <span className="text-[9px] text-muted-foreground font-mono px-1">{formatTimeAgo(m.created_at, locale)}</span>
                           </div>
                         );
                       })
@@ -957,19 +1159,23 @@ export function FloatingSupportChatWidget() {
                   <div className="space-y-2.5">
                     {/* 카테고리 프리셋 칩 */}
                     <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-muted-foreground">빠른 카테고리 선택</label>
+                      <label className="text-[11px] font-bold text-muted-foreground">
+                        {localeLabel(locale, '빠른 카테고리 선택', 'Quick Category', 'カテゴリ選択', '快捷分类')}
+                      </label>
                       <div className="flex flex-wrap gap-1">
                         {CATEGORY_PRESETS.map((cat) => {
-                          const isSelected = newSubject.startsWith(cat.prefix);
+                          const catLabel = localeLabel(locale, cat.ko, cat.en, cat.ja, cat.zh);
+                          const currentPrefix = localeLabel(locale, cat.prefixKo, cat.prefixEn, cat.prefixJa, cat.prefixZh);
+                          const isSelected = newSubject.startsWith(currentPrefix) || newSubject.startsWith(cat.prefixKo);
                           return (
                             <button
-                              key={cat.label}
+                              key={cat.ko}
                               type="button"
                               onClick={() => {
                                 if (isSelected) {
                                   setNewSubject(newSubject.replace(/^\[[^\]]+\]\s*/, ''));
                                 } else {
-                                  setNewSubject(`${cat.prefix}${newSubject.replace(/^\[[^\]]+\]\s*/, '')}`);
+                                  setNewSubject(`${currentPrefix}${newSubject.replace(/^\[[^\]]+\]\s*/, '')}`);
                                 }
                               }}
                               className={cn(
@@ -979,7 +1185,7 @@ export function FloatingSupportChatWidget() {
                                   : 'border-border/80 bg-card hover:bg-muted text-muted-foreground hover:text-foreground'
                               )}
                             >
-                              {cat.label}
+                              {catLabel}
                             </button>
                           );
                         })}
@@ -988,7 +1194,7 @@ export function FloatingSupportChatWidget() {
 
                     <div className="space-y-1">
                       <label htmlFor="inquiry-subject" className="text-xs font-bold text-foreground">
-                        문의 제목
+                        {localeLabel(locale, '문의 제목', 'Subject', '件名', '工单标题')}
                       </label>
                       <input
                         id="inquiry-subject"
@@ -997,14 +1203,14 @@ export function FloatingSupportChatWidget() {
                         required
                         value={newSubject}
                         onChange={(e) => setNewSubject(e.target.value)}
-                        placeholder={isEn ? 'Brief inquiry title' : '문의 제목을 입력하세요'}
+                        placeholder={localeLabel(locale, '문의 제목을 입력하세요', 'Brief inquiry title', '件名を入力してください', '请输入工单标题')}
                         className="w-full h-9 px-3 rounded-xl border border-border/80 bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
                       />
                     </div>
 
                     <div className="space-y-1">
                       <label htmlFor="inquiry-body" className="text-xs font-bold text-foreground">
-                        상세 내용
+                        {localeLabel(locale, '상세 내용', 'Description', '詳細内容', '详细描述')}
                       </label>
                       <textarea
                         id="inquiry-body"
@@ -1013,11 +1219,13 @@ export function FloatingSupportChatWidget() {
                         rows={5}
                         value={newBody}
                         onChange={(e) => setNewBody(e.target.value)}
-                        placeholder={
-                          isEn
-                            ? 'Please describe your inquiry in detail.'
-                            : '문의 내용이나 발생한 현상을 구체적으로 적어주세요.'
-                        }
+                        placeholder={localeLabel(
+                          locale,
+                          '문의 내용이나 발생한 현상을 구체적으로 적어주세요.',
+                          'Please describe your inquiry in detail.',
+                          'お問い合わせ内容や発生した現象を詳しく入力してください。',
+                          '请详细描述您的问题或反馈。'
+                        )}
                         className="w-full p-3 rounded-xl border border-border/80 bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner resize-none"
                       />
                     </div>
@@ -1032,12 +1240,12 @@ export function FloatingSupportChatWidget() {
                       {isSending ? (
                         <>
                           <RotateCw className="size-3.5 animate-spin" />
-                          <span>{isEn ? 'Submitting…' : '접수 중…'}</span>
+                          <span>{localeLabel(locale, '접수 중…', 'Submitting…', '送信中…', '正在提交…')}</span>
                         </>
                       ) : (
                         <>
                           <Send className="size-3.5" />
-                          <span>{isEn ? 'Submit Inquiry' : '1:1 문의 접수하기'}</span>
+                          <span>{localeLabel(locale, '1:1 문의 접수하기', 'Submit Inquiry', '送信する', '提交工单')}</span>
                         </>
                       )}
                     </Button>
@@ -1055,7 +1263,13 @@ export function FloatingSupportChatWidget() {
                       type="text"
                       value={directSearch}
                       onChange={(e) => setDirectSearch(e.target.value)}
-                      placeholder={isEn ? 'Search conversation or user' : '대화 상대 또는 메시지 검색'}
+                      placeholder={localeLabel(
+                        locale,
+                        '대화 상대 또는 메시지 검색',
+                        'Search conversation or user',
+                        '相手またはメッセージ検索',
+                        '搜索联系人或消息'
+                      )}
                       className="w-full h-8 pl-8 pr-3 rounded-xl border border-border/70 bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
                     />
                   </div>
@@ -1065,7 +1279,7 @@ export function FloatingSupportChatWidget() {
                     {isLoading && conversations.length === 0 ? (
                       <div className="py-12 text-center text-xs text-muted-foreground space-y-2">
                         <RotateCw className="size-5 animate-spin mx-auto text-primary" />
-                        <p>{isEn ? 'Loading direct messages…' : '쪽지 대화 목록을 불러오는 중…'}</p>
+                        <p>{localeLabel(locale, '쪽지 대화 목록을 불러오는 중…', 'Loading direct messages…', 'メッセージ一覧を読込中…', '正在加载私信…')}</p>
                       </div>
                     ) : filteredConversations.length === 0 ? (
                       <div className="py-12 text-center space-y-2">
@@ -1073,10 +1287,18 @@ export function FloatingSupportChatWidget() {
                           <MessageSquare className="size-5" />
                         </div>
                         <p className="text-xs font-bold text-foreground">
-                          {directSearch.trim() ? (isEn ? 'No results found' : '검색 결과가 없습니다') : (isEn ? 'No direct messages yet' : '주고받은 1:1 쪽지가 없습니다')}
+                          {directSearch.trim()
+                            ? localeLabel(locale, '검색 결과가 없습니다', 'No results found', '検索結果がありません', '未找到搜索结果')
+                            : localeLabel(locale, '주고받은 1:1 쪽지가 없습니다', 'No direct messages yet', 'メッセージがありません', '暂无私信记录')}
                         </p>
                         <p className="text-[11px] text-muted-foreground [word-break:keep-all]">
-                          {isEn ? 'Start a conversation from any member profile.' : '게시판이나 프로필에서 [쪽지 보내기]로 대화를 시작해 보세요.'}
+                          {localeLabel(
+                            locale,
+                            '게시판이나 프로필에서 [쪽지 보내기]로 대화를 시작해 보세요.',
+                            'Start a conversation from any member profile.',
+                            '掲示板やプロフィールからメッセージを開始できます。',
+                            '可通过论坛或会员主页发送私信开启对话。'
+                          )}
                         </p>
                       </div>
                     ) : (
@@ -1099,12 +1321,13 @@ export function FloatingSupportChatWidget() {
                                 </span>
                                 {conv.last_message_at && (
                                   <span className="text-[10px] text-muted-foreground font-mono shrink-0">
-                                    {formatTimeAgo(conv.last_message_at, isEn)}
+                                    {formatTimeAgo(conv.last_message_at, locale)}
                                   </span>
                                 )}
                               </div>
                               <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                                {conv.last_message_body || (isEn ? 'No messages yet' : '대화 내용이 없습니다')}
+                                {conv.last_message_body ||
+                                  localeLabel(locale, '대화 내용이 없습니다', 'No messages yet', '会話内容がありません', '暂无对话内容')}
                               </p>
                             </div>
                             {unread > 0 && (
@@ -1127,7 +1350,7 @@ export function FloatingSupportChatWidget() {
                       <span className="truncate max-w-[200px]">{selectedConversation.peer_display_name}</span>
                       {selectedConversation.is_peer_blocked && (
                         <Badge variant="destructive" className="text-[9px] px-1 py-0 h-3.5">
-                          차단됨
+                          {localeLabel(locale, '차단됨', 'Blocked', 'ブロック中', '已拉黑')}
                         </Badge>
                       )}
                     </div>
@@ -1137,7 +1360,11 @@ export function FloatingSupportChatWidget() {
                       className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {copied ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
-                      <span>{copied ? '복사됨' : '복사'}</span>
+                      <span>
+                        {copied
+                          ? localeLabel(locale, '복사됨', 'Copied', 'コピー済', '已复制')
+                          : localeLabel(locale, '복사', 'Copy', 'コピー', '复制')}
+                      </span>
                     </button>
                   </div>
 
@@ -1146,11 +1373,17 @@ export function FloatingSupportChatWidget() {
                     {isLoading && directMessages.length === 0 ? (
                       <div className="py-8 text-center text-xs text-muted-foreground">
                         <RotateCw className="size-4 animate-spin mx-auto mb-1 text-primary" />
-                        <span>{isEn ? 'Loading messages…' : '쪽지 대화 내역을 불러오는 중…'}</span>
+                        <span>{localeLabel(locale, '쪽지 대화 내역을 불러오는 중…', 'Loading messages…', 'メッセージ読込中…', '正在加载私信…')}</span>
                       </div>
                     ) : directMessages.length === 0 ? (
                       <p className="text-center py-6 text-xs text-muted-foreground">
-                        {isEn ? 'No messages yet. Say hello!' : '주고받은 메시지가 없습니다. 첫 인사를 건네보세요!'}
+                        {localeLabel(
+                          locale,
+                          '주고받은 메시지가 없습니다. 첫 인사를 건네보세요!',
+                          'No messages yet. Say hello!',
+                          'メッセージがありません。挨拶してみましょう！',
+                          '暂无消息记录，打个招呼吧！'
+                        )}
                       </p>
                     ) : (
                       directMessages.map((m) => (
@@ -1159,7 +1392,7 @@ export function FloatingSupportChatWidget() {
                           className={cn('flex flex-col space-y-1 max-w-[88%] text-xs', m.is_mine ? 'ml-auto items-end' : 'mr-auto')}
                         >
                           <span className="text-[10px] font-bold text-muted-foreground px-1">
-                            {m.is_mine ? '나' : selectedConversation.peer_display_name}
+                            {m.is_mine ? localeLabel(locale, '나', 'You', '自分', '我') : selectedConversation.peer_display_name}
                           </span>
                           <div
                             className={cn(
@@ -1171,7 +1404,7 @@ export function FloatingSupportChatWidget() {
                           >
                             {m.body}
                           </div>
-                          <span className="text-[9px] text-muted-foreground font-mono px-1">{formatTimeAgo(m.created_at, isEn)}</span>
+                          <span className="text-[9px] text-muted-foreground font-mono px-1">{formatTimeAgo(m.created_at, locale)}</span>
                         </div>
                       ))
                     )}
@@ -1200,7 +1433,13 @@ export function FloatingSupportChatWidget() {
                           handleSendSupportReply();
                         }
                       }}
-                      placeholder={isEn ? 'Type reply… (Enter to send)' : '답변 입력… (Enter 전송)'}
+                      placeholder={localeLabel(
+                        locale,
+                        '답변 입력… (Enter 전송)',
+                        'Type reply… (Enter to send)',
+                        '返信を入力… (Enterで送信)',
+                        '输入回复… (按Enter发送)'
+                      )}
                       className="flex-1 h-9 px-3 rounded-xl border border-border/80 bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
                       disabled={isSending}
                     />
@@ -1209,7 +1448,7 @@ export function FloatingSupportChatWidget() {
                       size="icon"
                       disabled={isSending || !supportReplyText.trim()}
                       className="size-9 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shrink-0"
-                      aria-label={isEn ? 'Send message' : '메시지 전송'}
+                      aria-label={localeLabel(locale, '메시지 전송', 'Send message', 'メッセージ送信', '发送消息')}
                     >
                       <Send className="size-3.5" />
                     </Button>
@@ -1232,7 +1471,13 @@ export function FloatingSupportChatWidget() {
                           handleSendDirectReply();
                         }
                       }}
-                      placeholder={isEn ? 'Type message… (Enter to send)' : '쪽지 내용 입력… (Enter 전송)'}
+                      placeholder={localeLabel(
+                        locale,
+                        '쪽지 내용 입력… (Enter 전송)',
+                        'Type message… (Enter to send)',
+                        'メッセージを入力… (Enterで送信)',
+                        '输入私信… (按Enter发送)'
+                      )}
                       className="flex-1 h-9 px-3 rounded-xl border border-border/80 bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
                       disabled={isSending || Boolean(selectedConversation.is_peer_blocked)}
                     />
@@ -1241,7 +1486,7 @@ export function FloatingSupportChatWidget() {
                       size="icon"
                       disabled={isSending || !directReplyText.trim() || Boolean(selectedConversation.is_peer_blocked)}
                       className="size-9 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shrink-0"
-                      aria-label={isEn ? 'Send message' : '쪽지 전송'}
+                      aria-label={localeLabel(locale, '쪽지 전송', 'Send message', 'メッセージ送信', '发送私信')}
                     >
                       <Send className="size-3.5" />
                     </Button>

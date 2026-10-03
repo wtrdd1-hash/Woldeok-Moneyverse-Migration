@@ -244,11 +244,130 @@ const CHINESE_LABELS: Readonly<Record<string, string>> = {
   '감사 로그': '审计日志',
 };
 
+const ENGLISH_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  '가상 주식 매매, 덕지갑 자산 관리, 가상 은행 금융 상품, 주간 경제 브리프': 'Virtual stock trading, wallet assets, banking yield products, weekly briefs',
+  '직업 업무 수행, 법인 사업체 운영, 아이템 상점 및 커리어': 'Daily career work, corporate business operations, item shop & progression',
+  '월드 시즌 패스, 경제 일정 및 소셜 클럽': 'World season passes, economic calendar & social clubs',
+  '회원 간 커뮤니티, 사진 갤러리 및 공지사항': 'Community forum, photo gallery & official announcements',
+  '실시간 가상 주식 매매 및 차트 호가': 'Real-time virtual stock orderbook & chart trading',
+  '실시간 월드 펄스 및 AI 시장 시나리오 속보': 'Real-time World Pulse & AI market scenario breaking news',
+  '총 보유 자산 현황 및 즉시 송금': 'Total net worth overview & instant peer transfers',
+  '예적금 이자 수령 및 대출 상품': 'Savings deposit yield claiming & credit loan products',
+  '수익 및 지출 원장 타임라인': 'Income & expense ledger transaction timeline',
+  '일일 업무 수행 및 WLD 보상 획득': 'Execute daily shifts & earn WLD career rewards',
+  '사업체 인수, 수익 일괄 정산 및 부스트': 'Acquire enterprises, batch claim revenue & boost efficiency',
+  '인벤토리 장비 및 소비 아이템 구매': 'Purchase inventory equipment & consumable utility items',
+  '숙련도 성장 단계 및 전직 해금': 'Proficiency mastery progression & career promotions',
+  '일일 및 주간 미션 달성 추가 보상': 'Daily & weekly quest missions with bonus rewards',
+  '시즌 랭킹, 미션 패스 및 한정 보상': 'Seasonal leaderboard rankings, battle pass & limited rewards',
+  '경제 이벤트 및 시장 일정 캘린더': 'Economic events & market schedule calendar',
+  '유저 길드 창설, 가입 및 협동 펀딩': 'Found or join user guilds & co-op venture funding',
+  '소장품 전시관 및 D1~D7 리텐션 큐레이션': 'Rare collectibles showcase & retention curations',
+  '가상 도시 부지 및 개인 룸 공간': 'Virtual mega-city parcels & personal spaces',
+  '전체 회원 자유 토론 및 정보 공유': 'Member discussions & financial market insights',
+  '회원 일상 및 월덕 인증샷 갤러리': 'Community lifestyle & verified photo gallery',
+  '패치노트, 이벤트 및 시스템 점검 공지': 'Patch notes, events & maintenance notices',
+  '초보자 튜토리얼 및 시스템 가이드': 'Getting started tutorials & game system guides',
+  '운영진 1:1 고객지원 문의 접수': 'Official 1:1 admin support & ticket desk',
+};
+
+const JAPANESE_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  '가상 주식 매매, 덕지갑 자산 관리, 가상 은행 금융 상품, 주간 경제 브리프': '仮想株式取引、ウォレット資産管理、仮想銀行金融商品、週間経済ブリーフ',
+  '직업 업무 수행, 법인 사업체 운영, 아이템 상점 및 커리어': '職業業務遂行、法人事業体運営、アイテムショップおよびキャリア',
+  '월드 시즌 패스, 경제 일정 및 소셜 클럽': 'ワールドシーズンパス、経済日程およびソーシャルクラブ',
+  '회원 간 커뮤니티, 사진 갤러리 및 공지사항': 'コミュニティ掲示板、写真ギャラリーおよび公式お知らせ',
+  '실시간 가상 주식 매매 및 차트 호가': 'リアルタイム仮想株式売買および板気配値チャート',
+  '실시간 월드 펄스 및 AI 시장 시나리오 속보': 'リアルタイム・ワールドパルス＆AI市場シナリオ速報',
+  '총 보유 자산 현황 및 즉시 송금': '総保有資産状況および即時送金',
+  '예적금 이자 수령 및 대출 상품': '預金・積立利息受取および融資商品',
+  '수익 및 지출 원장 타임라인': '収益・支出元帳タイムライン',
+  '일일 업무 수행 및 WLD 보상 획득': '日々の業務遂行およびWLD報酬獲得',
+  '사업체 인수, 수익 일괄 정산 및 부스트': '事業体の買収、収益一括精算およびブースト',
+  '인벤토리 장비 및 소비 아이템 구매': 'インベントリ装備および消費アイテムの購入',
+  '숙련도 성장 단계 및 전직 해금': '熟練度成長ステージおよび転職アンロック',
+  '일일 및 주간 미션 달성 추가 보상': 'デイリー＆ウィークリーミッション達成の追加報酬',
+  '시즌 랭킹, 미션 패스 및 한정 보상': 'シーズンランキング、ミッションパスおよび限定報酬',
+  '경제 이벤트 및 시장 일정 캘린더': '経済イベントおよび市場日程カレンダー',
+  '유저 길드 창설, 가입 및 협동 펀딩': 'ギルド創設・加入および協同ファンディング',
+  '소장품 전시관 및 D1~D7 리텐션 큐레이션': 'コレクション展示館およびリテンション・キュレーション',
+  '가상 도시 부지 및 개인 룸 공간': '仮想メガシティ区画および個人スペース',
+  '전체 회원 자유 토론 및 정보 공유': '全会員の自由討論および情報共有',
+  '회원 일상 및 월덕 인증샷 갤러리': '会員の日常および認証ショットギャラリー',
+  '패치노트, 이벤트 및 시스템 점검 공지': 'パッチノート、イベントおよびメンテナンス告知',
+  '초보자 튜토리얼 및 시스템 가이드': '初心者チュートリアルおよびシステムガイド',
+  '운영진 1:1 고객지원 문의 접수': '運営1:1サポート受付',
+};
+
+const CHINESE_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  '가상 주식 매매, 덕지갑 자산 관리, 가상 은행 금융 상품, 주간 경제 브리프': '虚拟股票交易、钱包资产管理、虚拟银行金融产品、每周经济简报',
+  '직업 업무 수행, 법인 사업체 운영, 아이템 상점 및 커리어': '职业工作执行、法人企业运营、道具商城及职业进阶',
+  '월드 시즌 패스, 경제 일정 및 소셜 클럽': '世界赛季通行证、经济日程及社交俱乐部',
+  '회원 간 커뮤니티, 사진 갤러리 및 공지사항': '社区论坛、照片画廊及官方公告',
+  '실시간 가상 주식 매매 및 차트 호가': '实时虚拟股票买卖及委托盘图表',
+  '실시간 월드 펄스 및 AI 시장 시나리오 속보': '实时世界脉搏与AI市场情景快讯',
+  '총 보유 자산 현황 및 즉시 송금': '总资产概览及即时转账',
+  '예적금 이자 수령 및 대출 상품': '储蓄存款利息领取及贷款产品',
+  '수익 및 지출 원장 타임라인': '收益与支出账本时间线',
+  '일일 업무 수행 및 WLD 보상 획득': '执行每日工作并获取WLD报酬',
+  '사업체 인수, 수익 일괄 정산 및 부스트': '收购企业、批量结算收益及加速提升',
+  '인벤토리 장비 및 소비 아이템 구매': '购买背包装备及消耗品道具',
+  '숙련도 성장 단계 및 전직 해금': '熟练度成长阶段及转职解锁',
+  '일일 및 주간 미션 달성 추가 보상': '每日及每周任务达成额外奖励',
+  '시즌 랭킹, 미션 패스 및 한정 보상': '赛季排行榜、任务通行证及限定奖励',
+  '경제 이벤트 및 시장 일정 캘린더': '经济事件及市场日程日历',
+  '유저 길드 창설, 가입 및 협동 펀딩': '创建或加入公会及协同众筹',
+  '소장품 전시관 및 D1~D7 리텐션 큐레이션': '藏品展览馆及留存精选',
+  '가상 도시 부지 및 개인 룸 공간': '虚拟大都市地块及个人空间',
+  '전체 회원 자유 토론 및 정보 공유': '全体会员自由讨论与见解分享',
+  '회원 일상 및 월덕 인증샷 갤러리': '会员日常及认证照片画廊',
+  '패치노트, 이벤트 및 시스템 점검 공지': '更新日志、活动及维护公告',
+  '초보자 튜토리얼 및 시스템 가이드': '新手教程及系统指南',
+  '운영진 1:1 고객지원 문의 접수': '官方1对1客服咨询受理',
+};
+
+const ENGLISH_BADGES: Readonly<Record<string, string>> = {
+  '인기': 'HOT',
+  '필수': 'CORE',
+  '금융': 'BANK',
+  'HOT': 'HOT',
+  'NEW': 'NEW',
+};
+
+const JAPANESE_BADGES: Readonly<Record<string, string>> = {
+  '인기': '人気',
+  '필수': '必須',
+  '금융': '金融',
+  'HOT': 'HOT',
+  'NEW': 'NEW',
+};
+
+const CHINESE_BADGES: Readonly<Record<string, string>> = {
+  '인기': '热门',
+  '필수': '必做',
+  '금융': '金融',
+  'HOT': 'HOT',
+  'NEW': 'NEW',
+};
+
 export function navLabel(label: string, locale: Locale): string {
   if (locale === 'ja') return JAPANESE_LABELS[label] ?? ENGLISH_LABELS[label] ?? label;
   if (locale === 'zh') return CHINESE_LABELS[label] ?? ENGLISH_LABELS[label] ?? label;
   if (locale === 'en') return ENGLISH_LABELS[label] ?? label;
   return label;
+}
+
+export function navCategoryDescription(description: string, locale: Locale): string {
+  if (locale === 'ja') return JAPANESE_DESCRIPTIONS[description] ?? ENGLISH_DESCRIPTIONS[description] ?? description;
+  if (locale === 'zh') return CHINESE_DESCRIPTIONS[description] ?? ENGLISH_DESCRIPTIONS[description] ?? description;
+  if (locale === 'en') return ENGLISH_DESCRIPTIONS[description] ?? description;
+  return description;
+}
+
+export function navCategoryBadge(badge: string, locale: Locale): string {
+  if (locale === 'ja') return JAPANESE_BADGES[badge] ?? badge;
+  if (locale === 'zh') return CHINESE_BADGES[badge] ?? badge;
+  if (locale === 'en') return ENGLISH_BADGES[badge] ?? badge;
+  return badge;
 }
 
 /**

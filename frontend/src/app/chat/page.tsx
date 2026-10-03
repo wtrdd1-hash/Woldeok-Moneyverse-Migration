@@ -4,16 +4,27 @@ import { PageHeader } from '@/components/page-header';
 import { apiOrNull } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
 import { requireMember } from '@/lib/session';
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import type { ChatConversation, ChatMessage } from './actions';
 import { ChatView } from './chat-view';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: '쪽지함',
-  description: '회원 간 1:1 비공개 쪽지 및 실시간 대화',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  return {
+    title: `${localeLabel(locale, '쪽지함', 'Direct Messages', 'メッセージ', '私信箱')} | Woldeok Moneyverse`,
+    description: localeLabel(
+      locale,
+      '회원 간 1:1 비공개 쪽지 및 실시간 대화',
+      'Exchange private 1:1 messages and real-time conversations with members',
+      '会員間の1:1非公開メッセージおよびリアルタイムチャット',
+      '会员间1对1私密消息及实时对话',
+    ),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function ChatPage({
   searchParams,
@@ -21,6 +32,7 @@ export default async function ChatPage({
   readonly searchParams: Promise<{ readonly conversationId?: string; readonly peer?: string }>;
 }) {
   await requireMember();
+  const locale = await getServerLocale();
   const params = await searchParams;
 
   // 1. Fetch conversations list
@@ -65,8 +77,17 @@ export default async function ChatPage({
 
   return (
     <div data-page="chat" className="mv-page mv-page--member grid gap-4 max-w-6xl mx-auto">
-      <PageHeader eyebrow="MESSAGES" title="쪽지함">
-        회원 간 1:1 비공개 쪽지를 실시간으로 안전하게 주고받을 수 있습니다. 부적절한 언행이나 사기 유도는 운영진에 의해 제재될 수 있습니다.
+      <PageHeader
+        eyebrow={localeLabel(locale, '메시지', 'MESSAGES', 'メッセージ', '私信')}
+        title={localeLabel(locale, '쪽지함', 'Direct Messages', 'メッセージ', '私信箱')}
+      >
+        {localeLabel(
+          locale,
+          '회원 간 1:1 비공개 쪽지를 실시간으로 안전하게 주고받을 수 있습니다. 부적절한 언행이나 사기 유도는 운영진에 의해 제재될 수 있습니다.',
+          'Exchange secure, private 1:1 direct messages with members in real time. Inappropriate conduct or fraud attempts will be penalized by moderators.',
+          '会員間で1:1の非公開メッセージを安全にリアルタイムで送受信できます。不適切な発言や詐欺行為は運営により制限される場合があります。',
+          '实时安全收发会员间的1对1私密消息。任何不当言论或欺诈行为将受到管理团队的严厉制裁。',
+        )}
       </PageHeader>
 
       <ChatView

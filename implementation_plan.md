@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v72)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v73)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v73**: 전 화면 4개 국어(KO/EN/JA/ZH) 100% 무결성 쇄신 — 헤더 메가 내비게이션 드롭다운 설명/뱃지 다국어화, 쪽지함/채팅 화면(`/chat`) 완전 번역, 고객센터 위젯(`floating-support-chat-widget.tsx`) 4개 국어 전수 매핑, 언어 혼재(Spanglish/Konglish) 원천 박멸 (+150, -0)
 - **v72**: 1초 진단 SNS/오픈채팅 바이럴 공유 카드 생성기 & 고수요 롱테일 계산기 3종(가상부동산 임대수익률, 김치프리미엄, 해외주식 양도세 절세) & 검색엔진 수집 감사 관제 & GitHub 원격 저장소 완전 통합 (+420, -0)
 - **v71**: 검색엔진 트래픽 & 소비자 유입 극대화 4대 엔진 전면 구축 — 300+개 계산기 전 페이지 JSON-LD Rich Snippet(별점 4.9/5.0, FAQ, HowTo 스키마) 탑재, 네이버/구글 1위 타깃 메타 타이틀/설명문 쇄신, 상호 내부 링크(Internal Linking) 허브 위젯 전면 배치, IndexNow 프로토콜 Naver/Bing 300+개 전 라우트 배치 색인 핑 전송 (+340, -0)
 - **v70**: Google/Naver 검색엔진 수집 감사 & 슬롯머신/하이로우 인게임 인터랙션 강화 & 가상 부동산 및 개인 공간(Personal Spaces) 시스템 전면 구축 (+310, -0)
@@ -437,3 +438,38 @@
 - **운영 릴리스 무중단 승격 (`v510`)**:
   - 원격 호스트 동기화, `stage_v510.sh` 및 `promote_v510.sh` 무중단 전환.
   - 1,761개 PostgreSQL 세션 100% 무손실 보존 검증.
+
+---
+
+## 🚀 [v73 Specification] 전 화면 4개 국어(KO/EN/JA/ZH) 100% 무결성 쇄신 및 언어 혼재 원천 박멸 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청 및 피드백**:
+  - 스크린샷 1: 언어 설정이 영문(EN)일 때 "Finance & Investment" 드롭다운 메뉴의 설명문 및 뱃지가 한국어로 혼재되어 노출되는 문제.
+  - 스크린샷 2: "Economy & Careers" 드롭다운의 카테고리 설명문, 서브 메뉴 설명, "필수" 뱃지 등이 한국어로 노출되는 문제.
+  - 스크린샷 3: `/chat` 쪽지함 화면에서 언어가 `EN`으로 선택되어 있음에도 불구하고 페이지 헤더("쪽지함", 상세 설명), 검색창 플레이스홀더, 탭("대화 목록", "보관함"), 빈 상태 안내문("주고받은 쪽지가 없어요.", "대화방을 선택해 주세요"), 고객센터 위젯("대화 열기 →") 등이 모두 한국어로 남아있는 문제.
+- **핵심 목표**:
+  1. **헤더 내비게이션 메가 메뉴 드롭다운 100% 다국어화 (`site-header.tsx`, `navigation.ts`, `i18n-dictionary.ts`)**:
+     - 카테고리 설명(`catMeta.description`), 서브 아이템 설명(`catEntry.description`), 뱃지(`catEntry.badge`)를 `navLabel`/`lookupText`로 완벽 번역 처리.
+  2. **쪽지함/채팅 화면 4개 국어 완전 쇄신 (`app/chat/page.tsx`, `chat-view.tsx`, `chat-room.tsx`)**:
+     - `PageHeader` 제목/설명, 검색창 placeholder, 탭 라벨, 빈 상태 텍스트, 쪽지방 헤더/메뉴/다이얼로그 전수 다국어화.
+  3. **고객센터 플로팅 위젯 다국어 전수 매핑 (`floating-support-chat-widget.tsx`)**:
+     - `isEn` 단순 불리언 구조를 4개 국어(`KO`, `EN`, `JA`, `ZH`) 지원 구조로 전환하고 "대화 열기 →", "복사됨/복사", "운영진 답변/나" 등 잔여 한국어 하드코딩 완전 제거.
+  4. **전 화면 전수 감사 및 무결점 빌드/배포**:
+     - 단위 테스트 100% 통과, Next.js 빌드 통과, GitHub push 및 원격 운영 서버(`prod-v514`) 무중단 배포.
+
+### 2. 세부 변경 계획 (Proposed Changes)
+- `frontend/src/lib/navigation.ts`: `CATEGORY_NAV`의 카테고리/아이템 설명 및 뱃지에 대한 4개 국어 번역 매핑 함수(`navCategoryDescription`, `navCategoryBadge`) 구현.
+- `frontend/src/lib/i18n-dictionary.ts`: 네비게이션 설명 20+종, 쪽지함/채팅 30+종, 고객센터 15+종 4개 국어 전문 번역 사전 추가.
+- `frontend/src/components/site-header.tsx`: 드롭다운 렌더러에서 설명과 뱃지 번역 함수 적용.
+- `frontend/src/app/chat/page.tsx`: 서버 컴포넌트에서 `getServerLocale()` 적용 및 `PageHeader` 다국어 렌더링.
+- `frontend/src/app/chat/chat-view.tsx`: `useLocale()` 훅 적용 및 검색창, 탭, 빈 상태 문구 다국어화.
+- `frontend/src/app/chat/chat-room.tsx`: `useLocale()` 훅 적용 및 메시지 입력창, 액션 메뉴, 신고/차단 다이얼로그 다국어화.
+- `frontend/src/components/floating-support-chat-widget.tsx`: `localeLabel(locale, ...)` 4개 국어 전면 적용.
+
+### 3. 검증 계획 (Verification Plan)
+- **단위 테스트**: `pnpm --filter frontend test -- run` 100% ALL-PASS.
+- **빌드 검증**: `pnpm --filter frontend build` 161개 라우트 무결점 통과.
+- **GitHub 동기화**: `git push origin main`.
+- **원격 운영 서버 무중단 승격 (`v514`)**: 블루-그린 전환 및 `curl` 헬스체크 200 OK.
+

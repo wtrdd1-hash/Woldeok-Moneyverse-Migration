@@ -44,6 +44,8 @@ import {
   isGroup,
   isGroupCurrent,
   navLabel,
+  navCategoryDescription,
+  navCategoryBadge,
 } from '@/lib/navigation';
 import { useViewer } from '@/lib/use-viewer';
 import type { Viewer } from '@/lib/viewer-state';
@@ -239,7 +241,7 @@ export function MobileSessionAction({
       <Button asChild className="min-h-11 w-full font-bold">
         <Link href="/login">
           <LogIn />
-          <span>{locale === 'en' ? 'Sign in' : '로그인'}</span>
+          <span>{localeLabel(locale, '로그인', 'Sign in', 'ログイン', '登录')}</span>
         </Link>
       </Button>
     );
@@ -248,7 +250,7 @@ export function MobileSessionAction({
     <form action={logout}>
       <Button type="submit" variant="outline" className="min-h-11 w-full font-bold">
         <LogOut />
-        <span>{locale === 'en' ? 'Sign out' : '로그아웃'}</span>
+        <span>{localeLabel(locale, '로그아웃', 'Sign out', 'ログアウト', '退出登录')}</span>
       </Button>
     </form>
   );
@@ -320,7 +322,7 @@ function HeaderGroup({
         {catMeta && (
           <div className="px-3 py-2 mb-1 border-b border-border/50">
             <p className="text-xs font-bold text-foreground">{navLabel(catMeta.label, locale)}</p>
-            <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-1">{catMeta.description}</p>
+            <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-1">{navCategoryDescription(catMeta.description, locale)}</p>
           </div>
         )}
         <div className="grid gap-0.5">
@@ -346,7 +348,7 @@ function HeaderGroup({
                     </span>
                     {catEntry?.description && (
                       <span className="text-[11px] text-muted-foreground line-clamp-1 font-normal group-hover/item:text-foreground/80">
-                        {catEntry.description}
+                        {navCategoryDescription(catEntry.description, locale)}
                       </span>
                     )}
                   </div>
@@ -361,7 +363,7 @@ function HeaderGroup({
                         catEntry.badge === '금융' && 'bg-purple-500/15 text-purple-500 dark:text-purple-400',
                       )}
                     >
-                      {catEntry.badge}
+                      {navCategoryBadge(catEntry.badge, locale)}
                     </span>
                   )}
                 </Link>
