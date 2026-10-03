@@ -19,7 +19,7 @@ describe('FeaturesPage & FeaturesView', () => {
     // 2. 6 Core Feature Titles
     expect(screen.getByText(/WDX 가상 주식 거래소 & 10-Depth 호가창/i)).toBeDefined();
     expect(screen.getByText(/중앙은행 스마트 복리 포켓 & 가상 국채/i)).toBeDefined();
-    expect(screen.getByText(/직업 커리어 & 실시간 일일 파밍 루틴/i)).toBeDefined();
+    expect(screen.getByText(/8대 전문 직업 2\.0 & 실시간 급여 파밍 루틴/i)).toBeDefined();
     expect(screen.getByText(/가상 부동산 메가시티 랜드 분양 & 임대 수익/i)).toBeDefined();
     expect(screen.getByText(/5대 고수익 금융 계산기 & 1초 바이럴 카드/i)).toBeDefined();
     expect(screen.getByText(/도파민 아케이드 미니게임 & 럭키 룰렛/i)).toBeDefined();
