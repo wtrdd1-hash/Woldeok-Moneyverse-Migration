@@ -2,11 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.03.510
-> Implementation/evidence sync: 2026-09-23
+> Current integrated version: v2026.10.03.512
+> Implementation/evidence sync: 2026-10-03 (planning baseline main SHA: 6fc3adc20bf21c7a447c4693fa07625da014f336)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Search index recovery and advertising-revenue prerequisite gate — v2026.10.03.512 (2026-10-03)
+
+- **Observed planning trigger:** user-provided Search Console / AdSense screenshots show Search Console total clicks 183, 46 indexed pages and 103 non-indexed pages, with the daily-click graph declining from roughly 12–18/day in mid-August to roughly 0–2/day in late September. The supplied AdSense recent-7-day snapshot shows 236 pageviews (+17%), 193 impressions (+10%), Page RPM US$0.26 (-41%), 0 clicks, page CTR 0.00%, and estimated revenue US$0.06. These are screenshot observations, not substitutes for URL-level exclusion exports or finalized earnings.
+- **P0-SEO-512-01 / exclusion-first:** do not treat all 103 non-indexed URLs as defects and do not force them all into the index. Classify URL-level reasons into intentional exclusion vs defect, including crawled/discovered-not-indexed, duplicate/canonical, redirect, robots blocked, noindex, 404, soft-404, server errors and Google-selected-canonical differences.
+- **P0-SEO-512-02 / indexability invariant:** only public search landings may be final-200, index/follow, self-or-approved canonical and sitemap-eligible. Account, wallet, transfer, loan, trade/order, admin, private-user-data, sensitive consent/policy and duplicate locale/parameter surfaces remain intentionally non-indexed and absent from sitemaps.
+- **P0-SEO-512-03 / canonical graph:** sitemap, canonical, hreflang, OpenGraph URL, internal links and locale routing must resolve to one coherent canonical-production URL graph. Redirect/404/noindex/duplicate-canonical targets are excluded from sitemap; alternate locale URLs publish only after meaningful localization quality gates pass.
+- **P0-SEO-512-04 / content and linking quality:** thin, duplicate and template-cloned pages must not be created to increase indexed count or ad inventory. Prioritize distinct calculators, guides and public-data explainers that satisfy search intent; orphan indexable URLs are release defects.
+- **P0-SEO-512-05 / acceptance:** assign every candidate URL an owner state of INDEX_EXPECTED, NOINDEX_EXPECTED, REDIRECT_EXPECTED or REMOVE_EXPECTED and compare pre/post inventories under the same rules. Test verifies status/robots/sitemap/canonical/noindex/internal-link behavior across the complete search surface; actual Google indexing is monitored after Production in 7/28/90-day cohorts. Raw indexed-page growth alone is not success.
+- **P1-REV-512-01 / revenue ordering:** do not respond to the observed low RPM/zero-click snapshot by increasing ad density first. Ordering is index-defect repair -> qualified organic-session growth -> landing usefulness and next-page movement -> only then viewability/format/load experiments, while preserving sensitive-route, invalid-traffic, Core Web Vitals and task-completion guardrails.
+- **Measurement contract:** 7 days for crawl/serving errors and release regression, 28 days for query/landing impressions/clicks/CTR/average-position/index-cohort movement, and 90 days for qualified organic sessions, pageviews/session, return rate, Page RPM and revenue per 1,000 organic sessions. Reporting windows/time zones/finalization state must be recorded; mismatched periods are not treated as causal proof.
+- Detailed advertising linkage: [Advertising-Only Revenue Specification](AD_ONLY_ADVERTISING_REVENUE_SPEC.md). v512 is planning/docs only; it makes no claim of Search Console or AdSense configuration, runtime change, Test verification, or Production promotion.
 
 ## Global-growth execution architecture and deep evidence — v2026.10.03.510 (2026-10-03)
 
