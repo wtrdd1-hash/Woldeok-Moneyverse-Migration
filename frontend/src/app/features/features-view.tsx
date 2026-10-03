@@ -22,12 +22,15 @@ import {
   Eye,
   Activity,
   Award,
+  Search,
+  X,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/components/locale-provider';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
+import { InvestorProfileQuiz } from '@/components/investor-profile-quiz';
 
 interface FeatureSection {
   readonly id: string;
@@ -317,6 +320,7 @@ const FEATURE_DATA: readonly FeatureSection[] = [
 export function FeaturesView() {
   const locale = useLocale();
   const [activeTab, setActiveTab] = useState<string>('stock-exchange');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const scrollToSection = (id: string) => {
     setActiveTab(id);
@@ -325,6 +329,18 @@ export function FeaturesView() {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
+
+  const filteredFeatures = FEATURE_DATA.filter((feature) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase().trim();
+    return (
+      feature.title.toLowerCase().includes(query) ||
+      feature.subtitle.toLowerCase().includes(query) ||
+      feature.description.toLowerCase().includes(query) ||
+      feature.badge.toLowerCase().includes(query) ||
+      feature.steps.some((s) => s.title.toLowerCase().includes(query) || s.desc.toLowerCase().includes(query))
+    );
+  });
 
   return (
     <div className="space-y-16 py-6 sm:py-10">
@@ -362,20 +378,36 @@ export function FeaturesView() {
               variant="outline"
               className="border-zinc-700 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 h-11 px-5"
             >
-              <Link href="/stocks">
-                지금 바로 시작하기
+              <Link href="/roadmap">
+                초·중·후반 로드맵 보기
                 <ArrowUpRight className="ml-1.5 h-4 w-4" />
               </Link>
             </Button>
           </div>
         </div>
 
-        {/* 퀵 앵커 스크롤 바 */}
-        <div className="mt-8 border-t border-zinc-800/80 pt-6">
-          <div className="text-xs font-semibold text-zinc-400 mb-3 flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span>빠른 기능 탐색 (Quick Jump):</span>
+        {/* 실시간 가이드 검색 바 */}
+        <div className="mt-8 border-t border-zinc-800/80 pt-6 space-y-3">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="궁금한 기능이나 키워드를 검색하세요 (예: 호가창, 복리, 랜드, 계산기)"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/80 pl-10 pr-10 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
+
+          {/* 퀵 앵커 스크롤 바 */}
           <div className="flex flex-wrap gap-2">
             {FEATURE_DATA.map((item) => {
               const Icon = item.icon;
@@ -401,7 +433,7 @@ export function FeaturesView() {
 
       {/* 2. 6대 핵심 기능 상세 섹션 */}
       <div className="space-y-20">
-        {FEATURE_DATA.map((feature, index) => {
+        {filteredFeatures.map((feature, index) => {
           const Icon = feature.icon;
           return (
             <section
@@ -726,6 +758,9 @@ export function FeaturesView() {
 
       {/* 인아티클 네이티브 광고 */}
       <InArticleAdvertisement className="my-8" />
+
+      {/* 2.5. AI 맞춤형 투자 성향 진단기 */}
+      <InvestorProfileQuiz />
 
       {/* 3. 자주 묻는 질문 (FAQ) 아코디언 */}
       <Card className="border-zinc-800 bg-zinc-950 p-6 sm:p-8 shadow-xl space-y-6">

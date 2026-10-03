@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
+import { InvestorProfileQuiz } from '@/components/investor-profile-quiz';
 
 type RoadmapStage = 'early' | 'mid' | 'late';
 
@@ -114,6 +115,16 @@ export function RoadmapView() {
               }`}
             >
               👑 3단계: 후반 부동산 건물주 (15일+)
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="h-11 px-4 font-semibold text-xs border-primary/50 text-primary hover:bg-primary/10 bg-primary/5"
+            >
+              <a href="#quiz">
+                <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                🎯 30초 내 투자 성향 진단
+              </a>
             </Button>
           </div>
         </div>
@@ -448,6 +459,9 @@ export function RoadmapView() {
           </div>
         </div>
       </div>
+
+      {/* 2.5. AI 맞춤형 투자 성향 진단기 */}
+      <InvestorProfileQuiz />
 
       {/* 3. 3단계 상세 실행 가이드 (초반 / 중반 / 후반 카드) */}
       <div className="space-y-12">

@@ -12,10 +12,10 @@ describe('onboarding-tracker engine', () => {
     saveOnboardingState({ completed: [], claimed: [], totalEarnedWld: 0 });
   });
 
-  it('contains 6 defined onboarding steps summing to 150,000 WLD', () => {
-    expect(ONBOARDING_STEPS).toHaveLength(6);
+  it('contains 7 defined onboarding steps summing to 170,000 WLD', () => {
+    expect(ONBOARDING_STEPS).toHaveLength(7);
     const totalWld = ONBOARDING_STEPS.reduce((acc, step) => acc + step.rewardWld, 0);
-    expect(totalWld).toBe(150000);
+    expect(totalWld).toBe(170000);
   });
 
   it('marks an action complete and avoids duplicate marking', () => {

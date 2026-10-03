@@ -13,6 +13,7 @@
 export type OnboardingActionType =
   | 'spin_roulette'
   | 'complete_work'
+  | 'take_quiz'
   | 'open_savings'
   | 'buy_stock'
   | 'use_calculator'
@@ -46,6 +47,15 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     rewardXp: 75,
     linkHref: '/work',
     badge: '초반 2단계',
+  },
+  {
+    id: 'take_quiz',
+    title: 'AI 투자 성향 진단 & 포트폴리오 설계',
+    description: '30초 퀴즈로 내 성향을 진단하고 맞춤형 최적 자산 배분 비중을 확인하세요.',
+    rewardWld: 20000,
+    rewardXp: 80,
+    linkHref: '/roadmap#quiz',
+    badge: '초반 3단계',
   },
   {
     id: 'open_savings',
