@@ -21,3 +21,9 @@
 - `git diff --check`: trailing-space 1건 수정 후 PASS.
 - v523 상세명세 영/한 쌍과 권위표기 확인.
 - 런타임/Test/Production 변경 없음.
+
+## 종료 기록
+- 최종 commit 전 `origin/main`: `065ee42204a4238c5010897212c7fc2a6c848f64`; 추가 drift 없음.
+- 통합 commit: `77a4f5fa` (v523 상세명세/작업기록 commit 이후).
+- 문서 검증: `git diff --check` / `git show --check` PASS.
+- 본 회차는 기획/문서 작업이므로 런타임, Test, Production은 의도적으로 변경하지 않았다.

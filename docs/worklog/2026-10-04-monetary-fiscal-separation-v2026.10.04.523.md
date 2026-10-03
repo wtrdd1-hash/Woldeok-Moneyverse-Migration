@@ -40,3 +40,9 @@
 - `git diff --check`: PASS after one trailing-space correction.
 - EN/KO v523 specification and authority markers: present.
 - No runtime/Test/Production change.
+
+## End record
+- Final pre-commit `origin/main`: `065ee42204a4238c5010897212c7fc2a6c848f64`; no further drift.
+- Integrated commit: `77a4f5fa` after the v523 spec/worklog commits.
+- Documentation validation: `git diff --check` / `git show --check` PASS.
+- Runtime, Test and Production were intentionally not changed because this is a planning/documentation cycle.
