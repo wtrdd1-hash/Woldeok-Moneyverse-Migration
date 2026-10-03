@@ -1,11 +1,19 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.10.03.510
+> 현재 원장 버전: v2026.10.03.512
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.10.03.512 — 2026-10-03 — Search Console 색인 회복·광고수익 선행게이트
+- 시작/중간 origin/main=6fc3adc20bf21c7a447c4693fa07625da014f336; 격리 브랜치 docs/seo-index-recovery-v2026.10.03.512.
+- 사용자 제공 스크린샷 관측값을 planning trigger로 기록: Search Console 총 클릭 183, 색인 46/미색인 103, 최근 일 클릭 약 0~2 수준; AdSense 최근 7일 페이지뷰 236, 노출 193, Page RPM US$0.26, 클릭 0, CTR 0.00%, 예상수입 US$0.06.
+- **P0-SEO-512-01..05:** 제외사유 우선분류, indexability 불변식, sitemap/canonical/locale 정합성, 얇은/중복 콘텐츠 금지와 내부링크 품질, URL 상태원장 및 7/28/90일 수용측정 계약을 현재 기획 권위로 채택한다.
+- **P1-REV-512-01:** 광고 밀도 확대보다 자격 자연검색 회복을 선행하고 이후에만 viewability/format 실험을 허용한다.
+- 색인 성공을 raw indexed count로 정의하지 않으며 의도적 noindex/redirect/remove URL은 올바른 제외 상태로 관리한다.
+- PROJECT_PLAN 및 광고 전용 수익화 명세에 영/한 동기화했다. 기획/문서 전용이며 Search Console/AdSense 설정, 런타임, Test, Production 변경을 주장하지 않는다.
 
 ## v2026.10.03.510 — 2026-10-03 — 글로벌 성장 실행설계·레퍼런스 심화
 - 시작/중간 `origin/main=ac4dd484a90b266d945993d7bd8be57a74e8e1df`; 격리 문서 브랜치 `docs/global-growth-deep-plan-v2026.10.03.510`.
