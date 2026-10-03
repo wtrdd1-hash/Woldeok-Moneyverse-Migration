@@ -108,7 +108,7 @@ export function AdSenseAd({
           data-ad-slot={slot}
           {...(layout ? { 'data-ad-layout': layout } : {})}
           data-ad-format={layout === 'in-article' ? 'fluid' : format}
-          {...(layout === 'in-article' ? {} : fullWidthResponsive ? { 'data-full-width-responsive': 'true' } : {})}
+          {...(layout === 'in-article' || format === 'autorelaxed' ? {} : fullWidthResponsive ? { 'data-full-width-responsive': 'true' } : {})}
         />
       </div>
     </section>

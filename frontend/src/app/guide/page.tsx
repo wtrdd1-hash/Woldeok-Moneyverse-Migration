@@ -38,7 +38,7 @@ import { GlossarySearch } from './components/glossary-search';
 import { PowerUserCheatSheet } from './components/power-user-cheat-sheet';
 import { canonicalUrl, breadcrumbJsonLd, faqPageJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
-import { InArticleAdvertisement } from '@/components/public-advertisement';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 export const metadata: Metadata = {
   title: '사이트 이용 가이드 & 인터랙티브 온보딩 허브 (User Guide)',
@@ -357,6 +357,9 @@ export default function GuidePage() {
           ))}
         </div>
       </section>
+
+      {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}
+      <MultiplexAdvertisement className="my-10" />
 
       {/* 10. Bottom CTA */}
       <section className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 via-background to-primary/5 px-6 py-12 text-center shadow-sm">

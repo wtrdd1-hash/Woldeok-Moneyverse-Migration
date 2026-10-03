@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { getServerLocale } from '@/lib/locale-server';
-import { InArticleAdvertisement } from '@/components/public-advertisement';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 export const revalidate = 3600;
 
@@ -183,6 +183,9 @@ export default async function GlossaryPage() {
           </React.Fragment>
         ))}
       </div>
+
+      {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}
+      <MultiplexAdvertisement className="my-6" />
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl border border-primary/20 bg-primary/5 mt-4">
         <div>

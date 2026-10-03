@@ -545,4 +545,50 @@
 - GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v516` 무중단 승격 배포.
 - 실제 도메인(`https://easy-scraping.com`) curl 및 `6000051656` 광고 슬롯 서빙 검증.
 
+---
+
+## 🚀 [v76 Specification] 구글 애드센스 멀티플렉스 일치하는 콘텐츠 광고 단위(Slot 9751074883, autorelaxed) 전격 연동 및 추천 지면 최적화 (누적 추가)
+
+### 1. 사용자 제공 공식 멀티플렉스 광고 단위 사양
+- **클라이언트 ID**: `ca-pub-5220225531544323`
+- **멀티플렉스 광고 슬롯 ID**: `9751074883`
+- **광고 포맷**: `data-ad-format="autorelaxed"`, `display: block;`
+- **목적**: 콘텐츠 하단 및 관련 도구 추천 영역에서 사용자 체류 시간 동안 맞춤형 연관 콘텐츠/그리드 광고를 노출하여 추가적인 수익 창출 및 이탈 방지.
+
+### 2. 컴포넌트 아키텍처 및 설정 확장
+1. **광고 환경설정 계층 (`frontend/src/lib/adsense.ts`)**:
+   - `multiplexSlot`: `process.env.NEXT_PUBLIC_ADSENSE_MULTIPLEX_SLOT || '9751074883'`
+   - `multiplexAdSense`: `enabled` 유효성 검증 및 불변 객체 내보내기 완비.
+2. **반응형 렌더링 계층 (`frontend/src/components/adsense-ad.tsx`)**:
+   - `format="autorelaxed"` 지정 시 `data-ad-format="autorelaxed"` 바인딩 및 `data-full-width-responsive` 속성 간섭 제거.
+3. **공개 광고 래퍼 계층 (`frontend/src/components/public-advertisement.tsx`)**:
+   - `variant="multiplex"` 옵션 및 독립 편의 컴포넌트 `<MultiplexAdvertisement />` 구현.
+
+### 3. 고체류 추천 지면 및 계산기 허브 배치 전략
+1. **온보딩 & 이용 가이드 허브 (`/guide`)**:
+   - FAQ 및 파워유저 치트시트 하단에 `<MultiplexAdvertisement className="my-10" />` 배치.
+2. **주식 실전 매매 가이드 (`/guide/stock-trading`)**:
+   - 본문 최하단 추천 콘텐츠 영역에 멀티플렉스 광고 배치.
+3. **가상 금융 & 복리 예금 가이드 (`/guide/virtual-banking`)**:
+   - 예적금 가이드 최하단에 멀티플렉스 광고 배치.
+4. **직업 & 파밍 루틴 가이드 (`/guide/career-mastery`)**:
+   - 커리어 가이드 최하단에 멀티플렉스 광고 배치.
+5. **도파민 시스템 & 확률 가이드 (`/guide/dopamine-system`)**:
+   - 시스템 가이드 최하단에 멀티플렉스 광고 배치.
+6. **핀테크 핵심 용어사전 (`/guide/glossary`)**:
+   - 용어사전 스트림 최하단에 멀티플렉스 광고 배치.
+7. **주간 경제 신문 (`/newspaper`)**:
+   - 주간 리포트 최하단에 멀티플렉스 광고 배치.
+8. **공지사항 상세 (`/announcements/[announcementId]`)**:
+   - 공지 본문 및 관련 링크 하단에 멀티플렉스 광고 배치.
+9. **5대 금융 계산기 공통 추천 허브 (`PopularCalculatorsHub`)**:
+   - 물타기 계산기, 복리 계산기, 가상 부동산 계산기, 김프 계산기, 양도세 계산기 등 모든 계산기 페이지의 5대 추천 섹션 하단에 `<MultiplexAdvertisement className="mt-8" />` 공통 탑재.
+
+### 4. 검증 및 무중단 배포 계획
+- Vitest 180개 파일 1021개 테스트 100% ALL-PASS.
+- Next.js 16.3.4 프로덕션 빌드 161개 라우트 무결점 컴파일.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v517` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com`) curl 및 `9751074883` 슬롯 서빙 검증.
+
+
 

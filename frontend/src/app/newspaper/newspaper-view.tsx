@@ -24,7 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { InArticleAdvertisement } from '@/components/public-advertisement';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 import { formatMoment, groupDigits } from '@/lib/money';
@@ -716,6 +716,9 @@ export function NewspaperView({
           </CardContent>
         </Card>
       </section>
+
+      {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}
+      <MultiplexAdvertisement className="my-6" />
 
       {/* 6. Action Dock */}
       <footer className="rounded-2xl border border-border/80 bg-muted/30 p-6 text-center space-y-4">

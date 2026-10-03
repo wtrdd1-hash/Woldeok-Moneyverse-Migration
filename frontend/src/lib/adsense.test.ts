@@ -15,6 +15,10 @@ async function inArticleSettings() {
   return (await import('./adsense')).inArticleAdSense;
 }
 
+async function multiplexSettings() {
+  return (await import('./adsense')).multiplexAdSense;
+}
+
 describe('home AdSense settings', () => {
   it('defaults to the reviewed public unit when no ad switch is provided', async () => {
     delete process.env.ADS_ENABLED;
@@ -64,4 +68,17 @@ describe('home AdSense settings', () => {
       slot: '6000051656',
     });
   });
+
+  it('defaults to the reviewed multiplex autorelaxed ad unit (slot 9751074883)', async () => {
+    delete process.env.ADS_ENABLED;
+    delete process.env.NEXT_PUBLIC_ADS_ENABLED;
+    delete process.env.ADSENSE_MULTIPLEX_SLOT;
+    delete process.env.NEXT_PUBLIC_ADSENSE_MULTIPLEX_SLOT;
+    expect(await multiplexSettings()).toMatchObject({
+      enabled: true,
+      publisherId: 'ca-pub-5220225531544323',
+      slot: '9751074883',
+    });
+  });
 });
+

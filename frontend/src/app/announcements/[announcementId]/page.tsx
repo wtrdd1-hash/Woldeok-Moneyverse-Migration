@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar } from 'lucide-react';
-import { InArticleAdvertisement } from '@/components/public-advertisement';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { publicApi } from '@/lib/api';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
@@ -154,6 +154,9 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
         </div>
       </article>
 
+      {/* 본문 직후 인아티클 네이티브 광고 */}
+      <InArticleAdvertisement className="my-4" />
+
       {/* 다른 공지사항 추천 */}
       {others.length > 0 && (
         <section aria-labelledby="other-notices-title" className="grid gap-3 pt-4">
@@ -182,8 +185,8 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* 본문 하단 인아티클 스폰서 광고 */}
-      <InArticleAdvertisement className="my-6" />
+      {/* 페이지 최하단 멀티플렉스 추천 광고 그리드 */}
+      <MultiplexAdvertisement className="my-6" />
     </div>
   );
 }

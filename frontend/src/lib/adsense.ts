@@ -19,6 +19,11 @@ const inArticleSlot =
   process.env.ADSENSE_IN_ARTICLE_SLOT ||
   '6000051656';
 
+const multiplexSlot =
+  process.env.NEXT_PUBLIC_ADSENSE_MULTIPLEX_SLOT ||
+  process.env.ADSENSE_MULTIPLEX_SLOT ||
+  '9751074883';
+
 const adsEnabled =
   (process.env.NEXT_PUBLIC_ADS_ENABLED || process.env.ADS_ENABLED || 'true') === 'true';
 
@@ -38,4 +43,13 @@ export const inArticleAdSense = Object.freeze({
     /^\d+$/.test(inArticleSlot),
   publisherId,
   slot: inArticleSlot,
+});
+
+export const multiplexAdSense = Object.freeze({
+  enabled:
+    adsEnabled &&
+    /^ca-pub-\d+$/.test(publisherId) &&
+    /^\d+$/.test(multiplexSlot),
+  publisherId,
+  slot: multiplexSlot,
 });

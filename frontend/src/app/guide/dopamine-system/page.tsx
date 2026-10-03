@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Sparkles, Shield, Flame, Trophy, Crown, Gavel, Landmark, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
-import { InArticleAdvertisement } from '@/components/public-advertisement';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 export const metadata: Metadata = {
   title: '도파민 보상 루프 & 지속 가능한 수익화 시스템 가이드 — 월덕 머니버스',
@@ -151,6 +151,9 @@ export default function DopamineSystemGuidePage() {
             </div>
           </div>
         </div>
+
+        {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}
+        <MultiplexAdvertisement className="my-6" />
 
         {/* CTA */}
         <div className="border-t border-slate-800 pt-6 flex flex-wrap gap-3">

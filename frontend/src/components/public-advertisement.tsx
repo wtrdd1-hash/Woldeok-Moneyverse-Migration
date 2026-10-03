@@ -1,4 +1,4 @@
-import { homeAdSense, inArticleAdSense } from '@/lib/adsense';
+import { homeAdSense, inArticleAdSense, multiplexAdSense } from '@/lib/adsense';
 import { AdSenseAd } from './adsense-ad';
 
 export function PublicAdvertisement({
@@ -7,10 +7,16 @@ export function PublicAdvertisement({
   className,
 }: {
   readonly slot?: string | undefined;
-  readonly variant?: 'display' | 'in-article' | undefined;
+  readonly variant?: 'display' | 'in-article' | 'multiplex' | undefined;
   readonly className?: string | undefined;
 }) {
-  const config = variant === 'in-article' ? inArticleAdSense : homeAdSense;
+  const config =
+    variant === 'multiplex'
+      ? multiplexAdSense
+      : variant === 'in-article'
+      ? inArticleAdSense
+      : homeAdSense;
+
   if (!config.enabled) return null;
 
   return (
@@ -19,7 +25,13 @@ export function PublicAdvertisement({
         publisherId={config.publisherId}
         slot={slot || config.slot}
         layout={variant === 'in-article' ? 'in-article' : undefined}
-        format={variant === 'in-article' ? 'fluid' : 'auto'}
+        format={
+          variant === 'multiplex'
+            ? 'autorelaxed'
+            : variant === 'in-article'
+            ? 'fluid'
+            : 'auto'
+        }
       />
     </div>
   );
@@ -33,5 +45,15 @@ export function InArticleAdvertisement({
   readonly className?: string | undefined;
 }) {
   return <PublicAdvertisement slot={slot} variant="in-article" className={className} />;
+}
+
+export function MultiplexAdvertisement({
+  slot,
+  className,
+}: {
+  readonly slot?: string | undefined;
+  readonly className?: string | undefined;
+}) {
+  return <PublicAdvertisement slot={slot} variant="multiplex" className={className} />;
 }
 
