@@ -2,6 +2,9 @@ import type { MetadataRoute } from 'next';
 import { getPublicSitemapRoutes } from '@/config/routes.config';
 import { ALL_SEO_PRESETS } from '@/config/seo-presets.config';
 import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
+import { REAL_ESTATE_PRESETS } from '@/config/real-estate-presets.config';
+import { KIMCHI_PREMIUM_PRESETS } from '@/config/kimchi-premium-presets.config';
+import { CAPITAL_GAINS_TAX_PRESETS } from '@/config/capital-gains-tax-presets.config';
 
 /**
  * 1-Hour ISR Caching for Sitemap.
@@ -107,7 +110,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     addEntry(`/tools/stock-calculator/${slug}`, 0.85, 'daily');
   }
 
-  // 3. 10 Virtual Stocks Clean Canonical URLs
+  // 2.6. 신규 가상 부동산 월세 임대수익률 10대 프리셋
+  for (const p of REAL_ESTATE_PRESETS) {
+    addEntry(`/tools/real-estate-calculator/${p.slug}`, 0.9, 'daily');
+  }
+
+  // 2.7. 신규 코인 김치프리미엄 10대 프리셋
+  for (const p of KIMCHI_PREMIUM_PRESETS) {
+    addEntry(`/tools/kimchi-premium-calculator/${p.slug}`, 0.9, 'daily');
+  }
+
+  // 2.8. 신규 주식 양도소득세 & 절세 10대 프리셋
+  for (const p of CAPITAL_GAINS_TAX_PRESETS) {
+    addEntry(`/tools/capital-gains-tax-calculator/${p.slug}`, 0.9, 'daily');
+  }
+
+  // 3. 18 Virtual Stocks Clean Canonical URLs
   for (const symbol of STOCK_SYMBOLS) {
     addEntry(`/stocks/${symbol}`, 0.9, 'daily');
   }

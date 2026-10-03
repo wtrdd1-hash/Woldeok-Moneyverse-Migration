@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v71)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v72)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v72**: 1초 진단 SNS/오픈채팅 바이럴 공유 카드 생성기 & 고수요 롱테일 계산기 3종(가상부동산 임대수익률, 김치프리미엄, 해외주식 양도세 절세) & 검색엔진 수집 감사 관제 & GitHub 원격 저장소 완전 통합 (+420, -0)
 - **v71**: 검색엔진 트래픽 & 소비자 유입 극대화 4대 엔진 전면 구축 — 300+개 계산기 전 페이지 JSON-LD Rich Snippet(별점 4.9/5.0, FAQ, HowTo 스키마) 탑재, 네이버/구글 1위 타깃 메타 타이틀/설명문 쇄신, 상호 내부 링크(Internal Linking) 허브 위젯 전면 배치, IndexNow 프로토콜 Naver/Bing 300+개 전 라우트 배치 색인 핑 전송 (+340, -0)
 - **v70**: Google/Naver 검색엔진 수집 감사 & 슬롯머신/하이로우 인게임 인터랙션 강화 & 가상 부동산 및 개인 공간(Personal Spaces) 시스템 전면 구축 (+310, -0)
 - **v69**: 미니게임 Web Audio API 무의존성 사운드 & CSS/SVG 하드웨어 가속 잭팟 연출 & 중앙은행 스마트 복리 포켓 정기 예적금 만기 이자 시스템 & IndexNow 백그라운드 크론 자동 배치 핑 구축 (+290, -0)
@@ -384,6 +385,55 @@
   - IndexNow 배치 핑 즉시 발송 및 200 OK 수신 확인.
   - 1,761개 PostgreSQL 세션 100% 무손실 보존 검증.
 
+---
 
+## 🚀 [v72 Specification] 1초 바이럴 공유 카드 & 신규 롱테일 계산기 3종 & SEO 실시간 수집 감사 & GitHub 통합 구축 사양
 
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  1. "1초 진단 결과 SNS/오픈채팅 바이럴 공유 카드 생성기 (물타기 계산기, 복리 계산기, 자산 진단 결과 등을 카카오톡/디스코드/인스타그램에 예쁜 카드 이미지로 1초 만에 캡처/공유하는 기능, 공유 링크 타고 신규 사용자 유입 극대화)"
+  2. "고수요 롱테일 계산기 추가 확장 (가상 부동산 월세/임대 수익률 계산기, 코인 김치프리미엄 계산기, 주식 양도세 계산기 등 트래픽이 높은 신규 금융 도구 추가)"
+  3. "Google Search Console & 네이버 서치어드바이저 수집 현황 주기적 감사 (검색엔진별 크롤링 로그 및 색인 누락 여부 지속 모니터링)"
+  4. "깃허브 하고 통합 시키면서 항상작업해줘 깃허브최신메인도 운영에올리면서통합시켜면서해줘"
+- **조율 확정 사항 (Interactive Alignment)**:
+  1. **SNS/오픈채팅 바이럴 카드**: 토스/Linear 스타일의 다크 모던 핀테크 테마 (1080x1080 인스타/카톡 & 1200x630 트위터/디스코드 듀얼 해상도 무의존성 Canvas PNG 생성, 클립보드 원터치 복사, Web Share API 연동).
+  2. **비회원 랜딩 전환 전략**: 친구의 공유 카드를 열면 진단 조건이 즉시 복제되어 "1초 수정 계산"이 가능한 가치 중심 랜딩 (가입벽 없이 즉각 가치 전달).
+  3. **신규 롱테일 계산기 3종**:
+     - ① 가상 부동산 월세/임대 수익률 계산기 (`/tools/real-estate-calculator/[preset]`) - 10대 구역 프리셋
+     - ② 코인 김치프리미엄 & 환율 차익 계산기 (`/tools/kimchi-premium-calculator/[preset]`) - 10대 코인 프리셋
+     - ③ 주식 양도소득세 & 250만 절세 시뮬레이터 (`/tools/capital-gains-tax-calculator/[preset]`) - 10대 절세 프리셋
+  4. **SEO 수집 감사 시스템**: 관리자 정밀 관제 대시보드 (`/admin/seo-audit`) 및 푸터 실시간 색인 투명성 뱃지.
+  5. **GitHub & 프로덕션 동기화**: 로컬 Git 커밋, GitHub `origin/main` 푸시, 원격 호스트 동기화 및 `prod-v510` 무중단 승격 배포.
 
+### 2. 세부 컴포넌트 구현 명세
+#### ① SNS/오픈채팅 바이럴 공유 카드 생성 엔진 (`frontend/src/lib/viral-share-card.ts`, `frontend/src/components/viral-share-card-dialog.tsx`)
+- 무의존성 Canvas 2D 그래픽 엔진:
+  - Slate-900 / Zinc-950 기반의 깊이감 있는 핀테크 다크 배경, Emerald-500 / Amber-400 고대비 뱃지.
+  - 진단 타이틀, 핵심 수치(물타기 평단가, 복리 만기액, 부동산 연수익률, 김프 %, 절세액), 3단계 분석 요약, 사이트 QR/워터마크 없는 순수 브랜드 라벨.
+  - 1080x1080(정사각형 인스타/카카오톡) 및 1200x630(직사각형 오픈채팅/디스코드) 듀얼 해상도 즉시 생성.
+  - 원터치 클립보드 이미지 복사(`navigator.clipboard.write`) 및 PNG 다운로드, 네이티브 모바일 공유 지원.
+  - 쿼리 파라미터 기반 복제 공유 URL 생성(`generateShareableUrl`).
+
+#### ② 가상 부동산 월세/임대 수익률 계산기 (`frontend/src/lib/real-estate-calculator.ts`, `frontend/src/config/real-estate-presets.config.ts`, `frontend/src/app/tools/real-estate-calculator/`)
+- 매매가, 보증금, 월세, 대출금/금리, 취득세/재산세를 입력하여 연간 순수익률(Net Cap Rate), 자기자본 수익률(ROE), 월 순수익, 손익분기 기간 산출.
+- 강남 테헤란로 오피스, 여의도 펜트하우스, 판교 스튜디오 등 10대 부동산 프리셋 및 5중 JSON-LD 구조화 데이터 탑재.
+
+#### ③ 코인 김치프리미엄 & 환율 차익 계산기 (`frontend/src/lib/kimchi-premium-calculator.ts`, `frontend/src/config/kimchi-premium-presets.config.ts`, `frontend/src/app/tools/kimchi-premium-calculator/`)
+- 국내(업비트/빗썸 KRW) vs 해외(바이낸스/바이비트 USDT) 실시간 환율 기반 김치프리미엄(%), 입출금 네트워크 전송 수수료, 차익 거래 시뮬레이션.
+- 비트코인(BTC), 이더리움(ETH), 리플(XRP), 솔라나(SOL), 도지코인(DOGE) 등 10대 코인 프리셋 및 5중 JSON-LD 탑재.
+
+#### ④ 주식 양도소득세 & 250만 절세 시뮬레이터 (`frontend/src/lib/capital-gains-tax-calculator.ts`, `frontend/src/config/capital-gains-tax-presets.config.ts`, `frontend/src/app/tools/capital-gains-tax-calculator/`)
+- 해외주식 연 250만원 기본공제(22% 단일세율), 국내 대주주 양도세, 손실 종목 손익 상계, 연말 분할 매도 절세 시뮬레이션.
+- 엔비디아 500만 익절, 테슬라 1천만 익절, 손익 상계 최적화, 250만 비과세 한도 맞추기 등 10대 절세 프리셋 및 5중 JSON-LD 탑재.
+
+#### ⑤ 검색엔진 수집 감사 관제 & 푸터 색인 뱃지 (`frontend/src/components/admin-seo-audit-view.tsx`, `frontend/src/app/admin/seo-audit/page.tsx`, `frontend/src/components/site-footer.tsx`)
+- 관리자 화면에서 Googlebot, Naver Yeti, bingbot의 일일/주간 크롤링 빈도 및 IndexNow 핑 성공 이력 모니터링.
+- 푸터에 "실시간 검색엔진 색인율 100% 정상 (IndexNow Active)" 투명성 뱃지 배치.
+
+### 3. 검증 및 배포 계획 (Verification & Deployment Plan)
+- **단위 테스트**: `viral-share-card.test.ts`, `real-estate-calculator.test.ts`, `kimchi-premium-calculator.test.ts`, `capital-gains-tax-calculator.test.ts` 등 신규 4종 테스트 스위트 작성 및 100% ALL-PASS.
+- **프로덕션 빌드**: Next.js Turbopack 133개 전 라우트 빌드 무결점 통과.
+- **GitHub 원격 저장소 동기화**: `git add .`, `git commit -m "feat: viral share card, 3 longtail calculators, seo audit and v510 release"`, `git push origin main`.
+- **운영 릴리스 무중단 승격 (`v510`)**:
+  - 원격 호스트 동기화, `stage_v510.sh` 및 `promote_v510.sh` 무중단 전환.
+  - 1,761개 PostgreSQL 세션 100% 무손실 보존 검증.

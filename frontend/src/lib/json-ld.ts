@@ -10,11 +10,12 @@ export interface CalculatorSnippetOptions {
   readonly name: string;
   readonly description: string;
   readonly url: string;
-  readonly category?: string;
-  readonly datePublished?: string;
-  readonly dateModified?: string;
-  readonly faqs?: readonly { readonly question: string; readonly answer: string }[];
-  readonly howToSteps?: readonly { readonly name: string; readonly text: string }[];
+  readonly category?: string | undefined;
+  readonly datePublished?: string | undefined;
+  readonly dateModified?: string | undefined;
+  readonly faqs?: readonly { readonly question: string; readonly answer: string }[] | undefined;
+  readonly faqItems?: readonly { readonly question: string; readonly answer: string }[] | undefined;
+  readonly howToSteps?: readonly { readonly name: string; readonly text: string }[] | undefined;
 }
 
 /**
@@ -23,6 +24,7 @@ export interface CalculatorSnippetOptions {
  */
 export function buildCalculatorRichSnippet(opts: CalculatorSnippetOptions): readonly Record<string, unknown>[] {
   const schemas: Record<string, unknown>[] = [];
+  const faqsList = opts.faqs || opts.faqItems;
 
   // 1. SoftwareApplication with AggregateRating (Rich Snippet Star Rating)
   schemas.push({
@@ -56,11 +58,11 @@ export function buildCalculatorRichSnippet(opts: CalculatorSnippetOptions): read
   });
 
   // 2. FAQPage Schema (SERP Accordion Rich Results)
-  if (opts.faqs && opts.faqs.length > 0) {
+  if (faqsList && faqsList.length > 0) {
     schemas.push({
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
-      mainEntity: opts.faqs.map((faq) => ({
+      mainEntity: faqsList.map((faq) => ({
         '@type': 'Question',
         name: faq.question,
         acceptedAnswer: {
