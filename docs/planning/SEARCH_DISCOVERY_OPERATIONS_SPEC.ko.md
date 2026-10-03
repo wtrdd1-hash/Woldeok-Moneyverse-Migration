@@ -3,6 +3,7 @@
 > 버전: v2026.10.02.507
 > 상태: 구현 지향형 Living SEO/검색 운영 명세
 > 기준일: 2026-10-02
+> 권위 채택: v507 글로벌 SEO 결정을 v2026.10.03.509에서 현재 기획 권위로 통합.
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`
 > 영문 기준 문서: [SEARCH_DISCOVERY_OPERATIONS_SPEC.md](SEARCH_DISCOVERY_OPERATIONS_SPEC.md)
 

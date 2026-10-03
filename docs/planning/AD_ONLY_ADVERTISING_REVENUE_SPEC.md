@@ -3,6 +3,7 @@
 > Version: v2026.10.02.507
 > Status: PLANNING / cash monetization authority
 > Date: 2026-10-02
+> Authority adoption: v507 international ad-economics decisions adopted into current planning authority by v2026.10.03.509.
 > Korean counterpart: [AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md](AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md)
 
 ## 1. Authority and business constraint

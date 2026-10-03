@@ -3,6 +3,7 @@
 > 버전: v2026.10.02.507
 > 상태: `PROJECT_PLAN.md`를 보완하는 Living 제품 기획
 > 기준일: 2026-10-02
+> 권위 채택: v507 해외 성장 결정을 v2026.10.03.509에서 현재 기획 권위로 통합.
 > 영문 기준 문서: [PRODUCT_GROWTH_PLAN.md](PRODUCT_GROWTH_PLAN.md)
 
 ## 1. 제품 목표

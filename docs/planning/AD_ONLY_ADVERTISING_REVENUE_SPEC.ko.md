@@ -3,6 +3,7 @@
 > 버전: v2026.10.02.507
 > 상태: PLANNING / 현금 수익화 권위
 > 날짜: 2026-10-02
+> 권위 채택: v507 해외 광고경제 결정을 v2026.10.03.509에서 현재 기획 권위로 통합.
 > 영문 기준 문서: [AD_ONLY_ADVERTISING_REVENUE_SPEC.md](AD_ONLY_ADVERTISING_REVENUE_SPEC.md)
 
 ## 1. 권위와 사업자 제약

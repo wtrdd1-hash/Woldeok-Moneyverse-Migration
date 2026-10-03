@@ -2,9 +2,10 @@
 
 [English canonical](INDEX.md) | **한국어**
 
-> **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)  
-> **공식 구현 권위 릴리스**: **v2026.09.28.477** (최신 main 기준 동기화 완료)  
-> **상태**: **AUTHORITY_SYNCHRONIZED (권위 기획·런타임 100% 일치)**
+> **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
+> **현재 기획 권위**: **v2026.10.03.509**
+> **통합 시작 시 최신 main 런타임/보안 증거**: **v2026.10.02.508 / ddec006e**
+> **상태**: **PLANNING_AUTHORITY_INTEGRATED** — v507/v509 글로벌 성장 설계의 런타임 구현은 별도 Test/Production 증거가 필요
 
 ---
 
@@ -23,11 +24,11 @@
 3. **[UI/UX 프론트엔드 크래프트맨십 원칙](planning/PRODUCT_DESIGN_SPEC.ko.md)**: 320px~1920px 무결점 반응형 레이아웃 및 44px 터치 타깃 가이드
 
 ### 03. 🌐 트래픽 성장 & 프로그래매틱 SEO (pSEO) 엔진
-1. **[글로벌 성장·해외 SEO·광고수익 v507](planning/GLOBAL_GROWTH_SEO_REVENUE_SPEC.ko.md)**: 한국어 기본 글로벌 locale, 해외 utility/리텐션, 검색수요 provenance, 품질게이트 pSEO, 광고경제
+1. **[글로벌 성장·해외 SEO·광고수익 — v507 설계 / v509 권위채택](planning/GLOBAL_GROWTH_SEO_REVENUE_SPEC.ko.md)**: 한국어 기본 글로벌 locale, 해외 utility/리텐션, 검색수요 provenance, 품질게이트 pSEO, 광고경제
 2. **[제품 성장·리텐션 기획](planning/PRODUCT_GROWTH_PLAN.ko.md)**
 3. **[검색 노출 운영 명세](planning/SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md)**
 4. **[단일 진실 공급원 라우트 레지스트리](../frontend/src/config/routes.config.ts)**: 공개 라우트 및 사이트맵 색인 매트릭스
-5. **[광고 전용 수익화 명세 v507](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md)**: 광고수익 전용 권위, 해외 Page RPM/세션 경제성, invalid-traffic 및 광고실험 게이트
+5. **[광고 전용 수익화 명세 — v507 설계 / v509 권위채택](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md)**: 광고수익 전용 권위, 해외 Page RPM/세션 경제성, invalid-traffic 및 광고실험 게이트
 
 ### 04. 📈 가상 주식 거래소 & 시장 역학
 1. **[주식 포트폴리오 & 실시간 호가창 사양서](2026-09-22-stocks-portfolio-and-trade-presets-v2026.09.22.356.ko.md)**: 10-Depth 오더북, 웹소켓 틱 플래시 펄스, 시장 감성 게이지

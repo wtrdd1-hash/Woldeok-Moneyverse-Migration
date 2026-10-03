@@ -3,6 +3,7 @@
 > Version: v2026.10.02.507
 > Status: PLANNING / architectural design
 > Date: 2026-10-02
+> Authority adoption: integrated into current planning authority by v2026.10.03.509 on 2026-10-03.
 > Korean counterpart: [GLOBAL_GROWTH_SEO_REVENUE_SPEC.ko.md](GLOBAL_GROWTH_SEO_REVENUE_SPEC.ko.md)
 > Parent authority: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 

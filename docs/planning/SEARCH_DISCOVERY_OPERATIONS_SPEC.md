@@ -3,6 +3,7 @@
 > Version: v2026.10.02.507
 > Status: Living implementation-oriented SEO/search operations specification
 > Date: 2026-10-02
+> Authority adoption: v507 global SEO decisions adopted into current planning authority by v2026.10.03.509.
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`
 > Korean counterpart: [SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md](SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md)
 

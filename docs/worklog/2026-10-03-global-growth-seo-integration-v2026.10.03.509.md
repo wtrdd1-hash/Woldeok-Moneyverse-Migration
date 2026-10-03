@@ -26,3 +26,25 @@ Scope: integrate the approved v507 global SEO, Korea-default locale, GeoIP-assis
 
 ## Work status
 STARTED
+
+## Mid-work record
+- User approval to proceed was received in the current project conversation.
+- Re-fetched origin mid-work; `origin/main` remained `ddec006e75ffcaf866c3c6d0a82edc2b96372917`, matching the integration baseline.
+- Cherry-picked the v507 planning commit cleanly on top of latest main; no path conflicts occurred with v508.
+- Updated PROJECT_PLAN and INTEGRATED_PLANNING_MASTER to v509 authority status while preserving the v507 detailed-design/research identity.
+- Corrected the documentation index so it no longer claims stale v477 planning/runtime 100% synchronization.
+- Added explicit v509 authority-adoption notes to the maintained global-growth, international-locale, search-discovery, product-growth and advertising-revenue EN/KO specs.
+
+## Work status
+AUTHORITY_INTEGRATION_DRAFTED
+
+## End record
+- Final pre-commit fetch confirmed `origin/main=ddec006e75ffcaf866c3c6d0a82edc2b96372917`, unchanged from start and mid-work.
+- v507 global-growth design is now represented in the current planning authority as v509 while retaining v507 detailed-spec/research provenance.
+- EN/KO maintained pairs are synchronized for the authority documents, delta, internal update and GitHub update.
+- Documentation validation passed: `git diff --check`, changed-Markdown relative-link scan, EN/KO pair scan, conflict-marker scan and placeholder scan.
+- No runtime code, database, Test environment or Production environment changed. Therefore no Test-server or Production promotion was appropriate for this docs-only cycle.
+- Next implementation gate is a separate runtime branch from then-current main with exact-SHA Test deployment/backend-health verification before zero-downtime Production promotion.
+
+## Work status
+READY_FOR_PR

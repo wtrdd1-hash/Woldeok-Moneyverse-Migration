@@ -2,11 +2,20 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.02.507
+> Current integrated version: v2026.10.03.509
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Approved global-growth authority integration — v2026.10.03.509 (2026-10-03)
+
+- **Authority action:** the user-approved v507 written design is now adopted into the latest implementation-facing planning authority rather than remaining only on its isolated planning branch.
+- **Latest-main baseline:** integration started and was rechecked mid-work against `origin/main=ddec006e75ffcaf866c3c6d0a82edc2b96372917` (v508 security remediation). The v508 security/runtime evidence is preserved; this docs-only integration does not overwrite it.
+- **Adopted scope:** Korean product/public fallback, GeoIP-assisted language recommendation, explicit-locale/user-choice precedence, locale/jurisdiction separation, overseas utility and retention features, multilingual search architecture, quality-gated pSEO, search-demand provenance, and advertising-only international unit economics.
+- **Detailed design identity:** the detailed global-growth design remains versioned as v2026.10.02.507 for provenance. v509 changes its authority status by integrating it into the current planning chain.
+- **Implementation state:** planning authority is integrated, but runtime implementation, Test verification and Production rollout remain separate evidence gates. No code, database, Test or Production change is claimed by v509.
+- **Implementation gate:** any later runtime work must use a new branch from the then-current main, retain the Korean-default/SEO-safety contracts, validate the exact candidate on Test including backend health, and only then use the project's zero-downtime Production promotion procedure.
 
 ## Global growth, Korean-default locale and search/revenue architecture — v2026.10.02.507 (2026-10-02)
 

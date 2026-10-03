@@ -26,3 +26,25 @@
 
 ## 작업 상태
 STARTED
+
+## 중간 작업 기록
+- 현재 프로젝트 대화에서 사용자의 진행 승인을 확인했다.
+- 작업 중간 origin을 다시 fetch했고 `origin/main`은 통합 시작점과 동일한 `ddec006e75ffcaf866c3c6d0a82edc2b96372917`이었다.
+- 최신 main 위에 v507 기획 커밋을 clean cherry-pick했으며 v508과 파일 경로 충돌이 없었다.
+- PROJECT_PLAN과 INTEGRATED_PLANNING_MASTER를 v509 권위 상태로 갱신하면서 v507 상세설계/조사기록의 원 버전은 보존했다.
+- 문서 인덱스의 과거 v477 기획/런타임 100% 동기화 주장을 제거했다.
+- 글로벌 성장, 국제 locale, 검색 노출, 제품 성장, 광고수익 유지관리 명세의 영/한 문서에 v509 권위 채택 표시를 추가했다.
+
+## 작업 상태
+AUTHORITY_INTEGRATION_DRAFTED
+
+## 종료 기록
+- 커밋 직전 최종 fetch에서 `origin/main=ddec006e75ffcaf866c3c6d0a82edc2b96372917`을 확인했고 시작/중간과 동일했다.
+- v507 글로벌 성장 설계는 상세명세/조사 provenance를 v507로 보존하면서 현재 기획 권위에는 v509로 통합됐다.
+- 권위 문서, delta, 내부 업데이트, GitHub 업데이트의 영/한 유지 문서쌍을 동기화했다.
+- 문서 검증은 `git diff --check`, 변경 Markdown 상대링크, 영/한 쌍, conflict marker, placeholder 검사까지 통과했다.
+- 런타임 코드, DB, Test 환경, Production 환경은 변경하지 않았다. 따라서 이번 문서 전용 회차에는 Test 서버/Production 승격을 수행하지 않는 것이 맞다.
+- 이후 실제 구현은 당시 최신 main에서 별도 런타임 브랜치를 만들고 exact-SHA Test 배포와 백엔드 health 검증 후 무중단 Production 승격 게이트를 따라야 한다.
+
+## 작업 상태
+READY_FOR_PR

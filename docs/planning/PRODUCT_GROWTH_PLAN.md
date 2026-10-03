@@ -3,6 +3,7 @@
 > Version: v2026.10.02.507
 > Status: Living product-planning companion to `PROJECT_PLAN.md`
 > Date: 2026-10-02
+> Authority adoption: v507 overseas growth decisions adopted into current planning authority by v2026.10.03.509.
 > Korean counterpart: [PRODUCT_GROWTH_PLAN.ko.md](PRODUCT_GROWTH_PLAN.ko.md)
 
 ## 1. Product objective

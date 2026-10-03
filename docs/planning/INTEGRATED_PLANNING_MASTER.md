@@ -1,11 +1,19 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.02.507
+> Current ledger version: v2026.10.03.509
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.03.509 — 2026-10-03 — Global-growth authority integration onto latest main
+- User approval advanced the v507 written design from review-ready isolated planning into the current planning authority chain.
+- Integration branch: `docs/global-growth-seo-integration-v2026.10.03.509`; start and mid-work `origin/main=ddec006e75ffcaf866c3c6d0a82edc2b96372917`.
+- The v507 global-growth commit applied cleanly because post-v507 v508 main changes and the v507 planning paths do not overlap; v508 security/runtime evidence remains intact.
+- PROJECT_PLAN now treats Korean-default locale, assistive GeoIP, overseas product value, multilingual SEO/search-demand provenance, quality-gated pSEO and advertising-only international economics as current planning authority.
+- The v507 detailed specifications/research keep their original version for provenance; v509 records their authority adoption rather than falsely relabeling the source research.
+- Documentation-only integration. Runtime code, DB, Test and Production were not modified or promoted. Implementation requires a separate branch and exact-SHA Test/backend-health evidence.
 
 ## v2026.10.02.507 — 2026-10-02 — Korean-default global growth, international SEO and ad-revenue design
 - Docs/planning-only cycle from start origin/main 5a7c658b38853f564983d19f961c689a494dc4b6 on isolated branch docs/global-growth-seo-v2026.10.02.507.

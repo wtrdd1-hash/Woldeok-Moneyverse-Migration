@@ -3,6 +3,7 @@
 > 버전: v2026.10.02.507
 > 상태: PLANNING / 아키텍처 설계
 > 일자: 2026-10-02
+> 권위 채택: 2026-10-03 v2026.10.03.509에서 현재 기획 권위로 통합됨.
 > 영문 정본: [GLOBAL_GROWTH_SEO_REVENUE_SPEC.md](GLOBAL_GROWTH_SEO_REVENUE_SPEC.md)
 > 상위 권위: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
