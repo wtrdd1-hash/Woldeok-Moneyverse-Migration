@@ -40,7 +40,10 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '덕지갑': 'Wallet',
   '커뮤니티': 'Community',
   '안내': 'Guide',
+  '핵심 기능 안내': 'Visual Features Guide',
+  '기능 안내': 'Features Guide',
   '내 대시보드': 'Dashboard',
+
   '활동': 'Activity',
   '소식': 'News',
   '운영': 'Operations',
@@ -419,6 +422,7 @@ export const CATEGORY_NAV: readonly NavCategory[] = [
     icon: 'MessageSquare',
     description: '자유 토론 게시판, 사진 갤러리, 운영 소식 및 1:1 고객지원',
     entries: [
+      { href: '/features', label: '핵심 기능 안내', description: '실제 화면 스크린샷과 함께 보는 6대 기능 완벽 조작법', badge: 'NEW' },
       { href: '/board', label: '커뮤니티 게시판', description: '종목 토론, 자유 소통 및 정보 공유' },
       { href: '/gallery', label: '사진 갤러리', description: '유저 인증샷 및 미디어 갤러리' },
       { href: '/announcements', label: '운영 소식', description: '시스템 패치 노트 및 공식 공지사항' },
@@ -442,6 +446,7 @@ export const PRIMARY_NAV: readonly NavEntry[] = [
 /** Readable by anyone, indexed, and the only group a signed-out visitor sees. */
 export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/', label: '홈' },
+  { href: '/features', label: '기능 안내' },
   { href: '/stocks', label: '거래소' },
   { href: '/newspaper', label: '주간 경제 브리프' },
   { href: '/wallet', label: '자산' },
@@ -455,6 +460,7 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/bank', label: '가상 금융' },
   { href: '/shop', label: '아이템 상점' },
 ];
+
 
 /** Needs a session and current consent. Every one of these is `noindex`. */
 export const MEMBER_NAV: readonly NavEntry[] = [

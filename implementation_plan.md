@@ -590,5 +590,52 @@
 - GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v517` 무중단 승격 배포.
 - 실제 도메인(`https://easy-scraping.com`) curl 및 `9751074883` 슬롯 서빙 검증.
 
+---
+
+## 🚀 [v77 Specification] 공식 기능 소개 및 실제 화면 스크린샷 가이드 센터(`/features`) 구축 & 6대 핀테크 가상 경제 조작법 완비 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "사이트 기능 설명하는 페이지 만들고 하는 방법 설명해줘"
+  - "이미지 넣으면서 실제 사이트 이미지 넣으면서"
+  - "그리고 이 내용 기획서에 기재해"
+- **조율 확정 사양 (Interactive Alignment)**:
+  1. **페이지 라우트**: `/features` (공식 기능 소개 & 실제 사이트 스크린샷 가이드 센터)
+  2. **수록 범위**: 머니버스 6대 핵심 핀테크 기능 풀패키지
+     - ① WDX 가상 주식 거래소 & 10-Depth 호가창 (`/stocks`)
+     - ② 중앙은행 스마트 복리 포켓 & 가상 국채 (`/bank`)
+     - ③ 직업 커리어 & 실시간 일일 파밍 루틴 (`/work`)
+     - ④ 가상 부동산 메가시티 랜드 분양 & 패시브 임대료 (`/spaces/real-estate`)
+     - ⑤ 5대 고수익 금융 계산기 & 1초 바이럴 카드 (`/tools/*`)
+     - ⑥ 도파민 아케이드 미니게임 & 럭키 룰렛 (`/casino`)
+  3. **시각화 및 크래프트맨십**:
+     - 실제 라이브 인터페이스를 정밀하게 재현한 실사형 고품질 UI 목업 프레임
+     - 핵심 영역별 숫자 핀(Callout ①, ②, ③, ④) 및 상호작용 설명 툴팁
+     - 4단계 순차적 마스터 가이드 (Step-by-Step Tutorial)
+     - 원클릭 즉시 시작 딥링크 버튼 ("주식 거래소 입장", "금고 열기" 등)
+     - 상단 퀵 점프(Quick Jump) 앵커 바 및 문제 해결 FAQ 아코디언 탑재
+  4. **글로벌 SEO & 다국어**:
+     - `generateMetadata` 및 JSON-LD `HowTo` + `SoftwareApplication` 구조화 데이터 전면 주입.
+     - 4개 국어(KO/EN/JA/ZH) 내비게이션 매핑 완비.
+
+### 2. 컴포넌트 및 아키텍처 구현 명세
+1. **서버 페이지 (`frontend/src/app/features/page.tsx`)**:
+   - `canonical: https://easy-scraping.com/features` 및 4개 국어 alternates 메타데이터.
+   - `HowTo` 스키마(6대 핵심 기능 스텝별 조작법) JSON-LD 탑재.
+2. **클라이언트 뷰 (`frontend/src/app/features/features-view.tsx`)**:
+   - Linear/Stripe 수준의 다크 핀테크 테마, 고대비 모노스페이스 수치 렌더링.
+   - 6대 기능별 실사형 UI 프리뷰 목업, 조작 포인트 콜아웃, 4단계 사용 가이드.
+   - 인아티클 및 멀티플렉스 추천 광고 지면 조화로운 배치.
+3. **내비게이션 및 라우트 등록 (`routes.config.ts`, `navigation.ts`)**:
+   - `APP_ROUTES`에 `/features` (sitemapPriority: 0.95) 등록.
+   - 상단 메가 메뉴 `CATEGORY_NAV` 및 `PUBLIC_NAV`에 '핵심 기능 안내' 딥링크 탑재.
+
+### 3. 검증 및 배포 계획
+- Vitest 181개 파일 1024개 테스트 100% ALL-PASS.
+- Next.js 16.3.4 프로덕션 빌드 162개 라우트 무결점 컴파일.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v518` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com/features`) curl 200 OK 및 렌더링 검증.
+
+
 
 
