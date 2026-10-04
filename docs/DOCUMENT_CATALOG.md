@@ -2,19 +2,19 @@
 
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
-> **Snapshot Version**: `v2026.09.28.478`  
-> **Target Branch**: `main` (Full-Stack SEO Overhaul, 7 Dedicated Layouts, Clean Sitemap & IndexNow Push)  
+> **Snapshot Version**: `v2026.10.04.522`  
+> **Target Branch**: `main` (Treasury Automated Social Recirculation, 4-Language Translation Parity, 3-Stage Roadmap & 163-Route Zero-Downtime Release)  
 > **Purpose**: Official master inventory certifying documentation organization status.
 
 ---
 
 ## 🏛️ Authoritative Master Documents
 
-1. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**
-2. **[Specification Traceability Matrix & Deep QA Report (v473)](QA_TRACEABILITY_MATRIX_V473.md)**
-3. **[2026 Next-Gen FinTech Design System Guidelines](DESIGN_SYSTEM_GUIDELINES.md)**
-4. **[2026 Official Responsive Design Guidelines](RESPONSIVE_DESIGN_GUIDELINES.md)**
-5. **[Full-Stack Comprehensive QA Audit Report (v473)](QA_AUDIT_REPORT_V473.md)**
+1. **[Treasury Automated Social Recirculation Specification](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Floor
+2. **[Integrated Planning Master](planning/INTEGRATED_PLANNING_MASTER.md)**: v522 Latest Production Release & 15-Domain Authority Planning
+3. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**
+4. **[2026 Next-Gen FinTech Design System Guidelines](DESIGN_SYSTEM_GUIDELINES.md)**
+5. **[2026 Official Responsive Design Guidelines](RESPONSIVE_DESIGN_GUIDELINES.md)**
 6. **[Master Index](INDEX.md)**
 7. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**
 8. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**
