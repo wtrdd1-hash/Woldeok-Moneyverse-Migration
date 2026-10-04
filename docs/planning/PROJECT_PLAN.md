@@ -2,11 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.04.527
+> Current integrated version: v2026.10.04.528
 > Implementation/evidence sync: 2026-10-04 (exact main SHA: `f6e89a31`)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Deep Retention Product Operating Model — v2026.10.04.528 (2026-10-04)
+
+- **Implementation depth:** converts v527 principles into a 100-part operating model with explicit lifecycle entry/exit conditions, page hierarchy, progressive unlocks, starter paths, goal/opportunity schemas and ranking formulas, absence/recovery state machines, content cadence, LiveOps tooling, data and API contracts.
+- **Home contract:** return recap -> maximum-three Today priorities -> daily/weekly/season/long-term goal stack -> economic snapshot -> world -> optional social/public surfaces. Quick, normal and deep session modes are all first-class.
+- **Progression:** NEW -> ACTIVATED -> EXPLORING -> ESTABLISHED -> optional CONNECTED -> INVESTED -> VETERAN, with AT_RISK/DORMANT/RETURNING/REACTIVATED recovery states. Account age alone never grants veteran power.
+- **Recommendation contract:** deterministic eligibility precedes AI. Goals and opportunities use explainable relevance/feasibility/diversity/novelty/preference/recovery factors; CTR-only ranking and hidden eligibility are prohibited.
+- **No-ruin invariant:** no ordinary user state may lack an income path, affordable action and recovery/relocation/education/support route. Real-world absence alone cannot cause irreversible ruin.
+- **LiveOps:** every content item declares objective, audience, prerequisites, duration, economy effect, localization, abuse/accessibility/analytics/rollback/retirement; admin previews cohort, locale, viewport and economic impact before publish.
+- **Measurement:** lifecycle funnel, anchor-event retention, feature breadth/frequency, session-mode health, fatigue, dormant/reactivation and recovery must be measured alongside D1/D7/D30. Aggregate retention lift cannot hide cohort harm.
+- **Reference refresh:** Unity 2026 reports broad use of daily missions, leaderboards, achievements, regular content updates and social/timed events; Apple guidance reinforces timely high-value, consented, non-duplicative notifications with accurate urgency. These are patterns, not mandatory mechanics.
+- **Detailed authority:** [Deep Retention Product Operating Model v528](LIFE_ECONOMY_RETENTION_OPERATING_MODEL_SPEC.md).
+- **Evidence boundary:** planning/docs only; no runtime, DB, Test or Production completion is claimed.
 
 ## Long-Term Retention & Economic Life Continuity — v2026.10.04.527 (2026-10-04)
 

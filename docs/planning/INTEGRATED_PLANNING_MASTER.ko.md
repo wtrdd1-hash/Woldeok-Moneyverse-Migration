@@ -1,11 +1,19 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.10.04.527
+> 현재 원장 버전: v2026.10.04.528
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.10.04.528 — 2026-10-04 — 장기 리텐션 제품 운영모델
+- 작업 중 origin/main이 a069e639에서 광고/계산기 런타임 작업 4db90a530dd7a002b39be8d0d7d45e4df0e72330으로 변경됐다. v526/v527 기획권위와 변경경로가 겹치지 않아 최신 main으로 rebase한 뒤 v528 권위편집을 진행했다.
+- 100개 구현지향 항목의 영/한 `LIFE_ECONOMY_RETENTION_OPERATING_MODEL_SPEC`을 추가했다.
+- lifecycle 진입/종료, 홈 IA, Quick/Normal/Deep, 단계적 해금, 시작경로, 목표/기회 추천, 미접속 보호/회복, 직업/사업/시즌/소셜/베테랑, 알림 적격성·빈도, 콘텐츠 피로/쿨다운, LiveOps 캘린더/관리자 preview, 실험레지스트리, DB/API, 수용게이트를 정의했다.
+- No-Ruin을 P0 제품 불변식으로 추가하고 리텐션/개인화 서비스와 금융원장 write를 분리했다.
+- Unity 2026 LiveOps 패턴, Apple 알림 가치/긴급성/동의 지침, autonomy-supportive digital intervention 근거를 갱신했다.
+- 기획/문서 전용이며 런타임/Test/Production 구현 완료를 주장하지 않는다.
 
 ## v2026.10.04.527 — 2026-10-04 — 장기 리텐션·경제인생 연속성
 - v526을 첫 세션/D1/D7/D30/D90/베테랑 생애주기까지 다루는 영/한 리텐션 상세권위로 확장했다.

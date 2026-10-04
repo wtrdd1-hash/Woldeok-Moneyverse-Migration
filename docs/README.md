@@ -10,6 +10,7 @@ Start here. Do not infer current product truth from the newest-looking filename,
 - [Central Bank, Mint, Treasury & Economy Core specification](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md) / [한국어](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md) — **v2026.10.04.523**
 - [Life Economy & User World specification](planning/LIFE_ECONOMY_USER_WORLD_SPEC.md) / [한국어](planning/LIFE_ECONOMY_USER_WORLD_SPEC.ko.md) — **v2026.10.04.526**
 - [Long-Term Retention & Economic Life Continuity](planning/LIFE_ECONOMY_RETENTION_CONTINUITY_SPEC.md) / [한국어](planning/LIFE_ECONOMY_RETENTION_CONTINUITY_SPEC.ko.md) — **v2026.10.04.527**
+- [Deep Retention Product Operating Model](planning/LIFE_ECONOMY_RETENTION_OPERATING_MODEL_SPEC.md) / [한국어](planning/LIFE_ECONOMY_RETENTION_OPERATING_MODEL_SPEC.ko.md) — **v2026.10.04.528**
 - [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) / [한국어](planning/INTEGRATED_PLANNING_MASTER.ko.md)
 - [Treasury Automated Social Recirculation Spec](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md) / [한국어](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md) — **v2026.10.04.522**
 - [Advertising-only revenue specification](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md) / [한국어](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md) — **v2026.09.30.487**

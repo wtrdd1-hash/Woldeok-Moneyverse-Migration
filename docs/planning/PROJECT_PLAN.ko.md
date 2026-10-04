@@ -2,12 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
 > **최초 기준:** 2026-08-26  
-> **현재 통합 버전:** v2026.10.04.527
+> **현재 통합 버전:** v2026.10.04.528
 > **구현·증거 동기화:** 2026-10-04 (최신 main SHA: `f6e89a31`)  
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
 > **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
 ---
+
+## 장기 리텐션 제품 운영모델 — v2026.10.04.528 (2026-10-04)
+
+- **구현 깊이:** v527 원칙을 100개 운영항목으로 내려 사용자 상태 진입/종료, 화면구조, 단계적 해금, 시작경로, 목표/기회 스키마·점수식, 미접속/회복 상태머신, 콘텐츠 운영, LiveOps 관리자, 데이터/API까지 정의한다.
+- **홈 계약:** 복귀요약 → 오늘 우선순위 최대 3개 → 일/주/시즌/장기 목표스택 → 경제스냅샷 → 세계 → 선택형 사회/공공. Quick/Normal/Deep 세션 모두 정식 모드다.
+- **성장상태:** NEW → ACTIVATED → EXPLORING → ESTABLISHED → 선택형 CONNECTED → INVESTED → VETERAN이며 AT_RISK/DORMANT/RETURNING/REACTIVATED 복귀상태를 둔다. 계정 나이만으로 베테랑 경제권한을 주지 않는다.
+- **추천 계약:** AI 전에 결정론적 적격성을 검증한다. 목표/기회는 관련성·실현성·다양성·신규성·선호·회복가치를 설명가능하게 사용하며 CTR 단독추천과 숨은 조건을 금지한다.
+- **No-Ruin 불변식:** 일반 사용자가 수입경로·감당가능 행동·회복/이사/교육/지원 경로를 모두 잃는 상태를 P0 설계결함으로 본다. 현실 미접속만으로 영구파국이 일어나지 않는다.
+- **LiveOps:** 모든 콘텐츠는 목적·대상·조건·기간·경제효과·번역·악용·접근성·분석·롤백·폐기를 선언하고 게시 전 cohort/locale/화면/경제영향 preview를 거친다.
+- **측정:** lifecycle funnel, anchor-event retention, feature breadth/frequency, 세션모드, fatigue, dormant/reactivation, recovery를 D1/D7/D30과 함께 본다. 전체 retention 상승이 cohort 악화를 숨길 수 없다.
+- **근거 갱신:** Unity 2026은 일일미션·리더보드·업적·정기 콘텐츠·소셜/시즌 등 LiveOps 활용을 보고하며 Apple은 고가치·시의성·동의·중복방지·정확한 긴급성 알림을 권고한다. 이는 설계패턴이지 강제 메커닉이 아니다.
+- **상세 권위:** [장기 리텐션 제품 운영모델 v528](LIFE_ECONOMY_RETENTION_OPERATING_MODEL_SPEC.ko.md).
+- **증거 경계:** 기획/문서 전용이며 런타임·DB·Test·Production 구현 완료를 주장하지 않는다.
 
 ## 장기 리텐션·경제인생 연속성 — v2026.10.04.527 (2026-10-04)
 

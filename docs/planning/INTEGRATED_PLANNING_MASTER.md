@@ -1,11 +1,19 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.04.527
+> Current ledger version: v2026.10.04.528
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.04.528 — 2026-10-04 — Deep retention product operating model
+- During the cycle, origin/main advanced from a069e639 to 4db90a530dd7a002b39be8d0d7d45e4df0e72330 via monetization/calculator runtime work. Changed paths did not overlap v526/v527 planning authority, so the isolated branch was rebased onto latest main before v528 authority edits.
+- Added EN/KO `LIFE_ECONOMY_RETENTION_OPERATING_MODEL_SPEC` with 100 implementation-oriented sections.
+- Defines lifecycle entry/exit, home IA, quick/normal/deep sessions, progressive unlocks, starter paths, goal/opportunity ranking, absence protection/recovery, job/business/season/social/veteran progression, notification eligibility/frequency, content fatigue/cooldowns, LiveOps calendar/admin preview, experiment registry, DB/API and acceptance gates.
+- Adds No-Ruin as a P0 product invariant and separates financial ledger mutations from retention/personalization services.
+- Research refresh includes Unity 2026 live-ops engagement patterns, Apple notification value/urgency/consent guidance and autonomy-supportive digital intervention evidence.
+- Planning/docs only; no runtime/Test/Production implementation is claimed.
 
 ## v2026.10.04.527 — 2026-10-04 — Long-term retention and economic-life continuity
 - Extended v526 with a dedicated EN/KO retention/continuity authority covering first-session, D1, D7, D30, D90 and veteran lifecycle design.
