@@ -125,11 +125,11 @@ export function WatchlistPromotionEngine() {
           <h4 className="text-sm font-semibold text-zinc-100">
             {promotedSuccess ? (
               <span className="flex items-center gap-1.5 text-emerald-400">
-                <CheckCircle2 className="w-4 h-4" /> 관심 포트폴리오로 승격 저장되었습니다!
+                <CheckCircle2 className="w-4 h-4" /> 내 관심 포트폴리오 및 시뮬레이션 원장으로 승격 저장되었습니다!
               </span>
             ) : (
               <>
-                계산기에서 저장한 <span className="text-emerald-400 font-bold">{firstItem?.stockName ?? '종목'}</span>
+                계산기에서 저장한 <span className="text-emerald-400 font-bold">{firstItem?.stockName ?? '시나리오'}</span>
                 {otherCount > 0 ? ` 외 ${otherCount}건` : ''}을 내 포트폴리오에 등록할까요?
               </>
             )}
@@ -137,7 +137,7 @@ export function WatchlistPromotionEngine() {
           <p className="text-xs text-zinc-400 mt-1">
             {promotedSuccess 
               ? '주식 거래소 및 대시보드 관심 종목 탭에서 바로 확인하실 수 있습니다.'
-              : `목표 평단가(${firstItem?.targetPrice ?? '-'}) 및 반등 시나리오가 회원 관심 원장에 안전하게 동기화됩니다.`}
+              : `목표 탈출가 및 절세 시뮬레이션(${firstItem?.targetPrice ?? '-'})이 회원 계정에 안전하게 동기화됩니다.`}
           </p>
         </div>
 

@@ -1,6 +1,7 @@
 # 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v100)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v101**: 토스·뱅크샐러드형 1초 시나리오 저장 & 내 관심 포트폴리오 원장 자동 승격 회원 전환 퍼널 풀스택 구축 — 검색 유입자가 계산 결과 확인 후 이탈하지 않고 즉시 서비스 핵심 유저로 안착할 수 있도록, 580개 주식 물타기 계산기 및 3대 세금 계산기 전 지면에 '📌 이 시뮬레이션 내 계정에 저장하기' 원클릭 플로팅/인라인 버튼 탑재, 비로그인 시 브라우저 LocalStorage에 안전 임시 보관 후 원클릭 회원가입/로그인 모달 팝업, 로그인 즉시 유저 관심종목/시뮬레이션 원장으로 자동 승격 저장 및 데일리 목표가/절세 도달 알림 연동 (+120, -0)
 - **v100**: 수익 누수 원천 차단 — 580개 pSEO 주식 물타기 계산기 및 직장인 3대 세금 계산기, 301 가이드 지면 고단가 금융 Google AdSense(인아티클/멀티플렉스) 전면 마운트 및 1초 진단서 바이럴 공유 카드 풀스택 구축 — 검색엔진 트래픽이 집중되는 `stock-calculator/[preset]`, `retirement-calculator`, `pension-tax-calculator`, `isa-calculator`, `guide/career-mastery` 지면에 `InArticleAdvertisement`(슬롯 6000051656) 및 `MultiplexAdvertisement`(슬롯 9751074883) 전진 배치, 계산 결과 즉시 카카오톡/SNS로 퍼져나가는 `ViralShareCardDialog` 연동, 유입 트래픽 100% 현금화 파이프라인 가동 (+110, -0)
 - **v99**: 데스크톱 헤더 내비게이션 바 메뉴 텍스트 겹침(Overlapping/Zero-Width Shrink Bug) 원천 박멸 및 적응형 반응형 레이아웃 복원 — 브라우저 줌(67% 등) 및 1024px~1399px 데스크톱 구간에서 우측 위젯(`shrink-0`)에 밀려 `<nav>` 및 메뉴 버튼들이 너비 0px로 압축되면서 발생하던 글자 겹침 현상을 `shrink-0`, `min-h-9 2xl:min-h-10`, 반응형 패딩(`px-1.5 xl:px-2 2xl:px-3`) 및 글자 크기(`text-[11px] xl:text-xs 2xl:text-sm`)로 완벽 해결, 초대형 화면 전용 위젯(`실전 가이드 HOT`, `ServerClockPill`) 2xl 임계치 격상으로 중앙 내비게이션 가용 영역 대폭 확보 (+45, -0)
 - **v98**: 비로그인 계산기 저장 시나리오의 회원 관심종목(Watchlist) 원장 자동 승격 동기화 & 직장인 고검색량 3대 금융 계산기(퇴직금·연금저축/IRP·ISA 비과세) pSEO 허브 및 롱테일 확장 풀스택 구축 — LocalStorage에 보관된 계산기 시나리오를 로그인 시 감지하여 토스트 알림과 함께 회원 DB 관심종목으로 원클릭 승격하는 `WatchlistPromotionEngine` 구현, 직장인 대상 퇴직금 실수령액/IRP 절세 계산기(`/tools/retirement-calculator`), 연금저축/IRP 세액공제(16.5%/13.2%) 계산기(`/tools/pension-tax-calculator`), ISA 계좌 비과세(200만/400만) 절세 계산기(`/tools/isa-calculator`) 3종 신설, 5대 근속/납입 시나리오 롱테일 URL 및 Schema.org 구조화 데이터(`FinancialProduct`, `SoftwareApplication`, `FAQPage`) 주입, '머니버스 가상 연금/퇴직 IRP 포켓 10,000 WLD 무료 예치' 모의 시뮬레이터 연결 (+180, -0)
@@ -1410,3 +1411,40 @@
 ### 3. 검증 계획
 - Next.js Turbopack 빌드 통과.
 - 원격 프로덕션 배포 및 curl 응답 검증.
+
+---
+
+## 🚀 [v101 Specification] 토스·뱅크샐러드형 1초 시나리오 저장 & 내 관심 포트폴리오 원장 자동 승격 회원 전환 퍼널 풀스택 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 및 문제점**:
+  1. 580개 롱테일 주식 계산기 및 3대 세금 계산기를 통해 대량의 검색 유입(SEO)이 이루어지고 있으나, 일반 검색 유입자의 특성상 계산 결과만 확인하고 이탈(Bounce Rate 80% 이상)하는 구조적 한계가 존재함.
+  2. 핀테크 실측 레퍼런스(토스, 뱅크샐러드) 조사 결과, 고관여 계산기 방문자를 실제 회원으로 안착시키는 가장 강력한 레버는 **'점진적 프로파일링(Progressive Profiling)'**임.
+  3. 로그인 장벽 없이 즉시 계산을 체험하게 한 뒤, 계산 결과 패널 바로 옆에 **"📌 이 시뮬레이션 내 계정에 저장하기"** 1클릭 액션을 제공하여, 비로그인 상태에서는 브라우저 LocalStorage에 안전 임시 보관하고, 즉시 가입/로그인 모달을 띄워 로그인 완료 시 유저의 실제 원장(관심 포트폴리오/절세 시나리오)으로 1초 만에 자동 승격(Promotion) 저장하는 파이프라인이 필수적임.
+- **핵심 목표**:
+  1. `frontend/src/components/calculator-save-action.tsx`:
+     - 토스/뱅크샐러드 감성의 원클릭 저장 인터랙티브 컴포넌트 신규 구현.
+     - 시뮬레이션 요약 데이터(종목/유형, 입력값, 목표 탈출가/세후 수령액, 계산 일시 등) 구조화 패키징.
+     - 비로그인 유저: LocalStorage `wdmv_saved_calculator_scenarios`에 안전 저장 + "내 계정에 영구 저장하고 목표가 도달 알림을 받으시겠어요?" 원클릭 회원가입 유도 다이얼로그 팝업.
+     - 로그인 유저: 백엔드 관심종목/시뮬레이션 원장 API(`/api/stocks/watchlist` 또는 시뮬레이션 북마크)로 즉시 영속화 및 성공 토스트 피드백.
+  2. 전 지면 일괄 연동:
+     - 580개 주식 물타기 계산기 (`frontend/src/app/tools/stock-calculator/[preset]/page.tsx`)
+     - 퇴직금 계산기 (`frontend/src/app/tools/retirement-calculator/page.tsx`)
+     - 연금저축/IRP 세금 계산기 (`frontend/src/app/tools/pension-tax-calculator/page.tsx`)
+     - ISA 비과세 계산기 (`frontend/src/app/tools/isa-calculator/page.tsx`)
+  3. 전역 자동 승격 동기화기 (`frontend/src/components/watchlist-promotion-engine.tsx`) 확장:
+     - 신규 가입/로그인 감지 시 로컬에 저장된 계산기 시나리오를 자동 감지하여 1초 만에 유저 원장으로 승격하고 "계산기에서 저장하신 N개의 시나리오가 내 관심 포트폴리오로 등록되었습니다!" 축하 배너/토스트 브로드캐스트.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/components/calculator-save-action.tsx` (신규):
+   - 원클릭 저장 버튼 및 회원가입 전환 팝업.
+2. `frontend/src/components/watchlist-promotion-engine.tsx` (고도화):
+   - 세금 및 주식 계산기 저장 시나리오의 자동 원장 승격 및 영속화.
+3. 4대 계산기 페이지 마운트:
+   - 결과 카드 바로 옆 최상위 강조 구역에 `CalculatorSaveAction` 탑재.
+
+### 3. 검증 계획
+- Vitest 단위 테스트 및 컴포넌트 동작 검증.
+- Next.js Turbopack 빌드 통과.
+- 원격 프로덕션 배포 및 라이브 렌더링/LocalStorage 저장/로그인 승격 연동 검증.
+

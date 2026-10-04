@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ISA_SCENARIOS } from '@/config/pseo-tax-retirement.config';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
+import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
 export default function IsaCalculatorPage() {
   const profitId = useId();
@@ -169,13 +170,37 @@ export default function IsaCalculatorPage() {
 
         <div className="lg:col-span-7 p-6 rounded-2xl bg-zinc-900/60 border border-emerald-500/30 shadow-2xl space-y-6 flex flex-col justify-between">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
                 ISA 계좌 절세 결과
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400">
-                실효세율 {effectiveTaxRate}%
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400">
+                  실효세율 {effectiveTaxRate}%
+                </span>
+                <CalculatorSaveAction
+                  scenario={{
+                    type: 'isa',
+                    title: `ISA ${isaType === 'general' ? '일반형' : '서민형'} ${savedTax.toLocaleString()}원 절세`,
+                    badge: `실효세율 ${effectiveTaxRate}%`,
+                    primaryMetric: {
+                      label: '총 절세액',
+                      value: `${savedTax.toLocaleString()}원`,
+                    },
+                    secondaryMetric: {
+                      label: '비과세 한도',
+                      value: `${taxExemptLimit.toLocaleString()}원`,
+                    },
+                    details: {
+                      isaType,
+                      totalProfit,
+                      savedTax,
+                      regularAccountTax,
+                      isaTax,
+                    },
+                  }}
+                />
+              </div>
             </div>
 
             <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800/80 flex items-baseline justify-between">

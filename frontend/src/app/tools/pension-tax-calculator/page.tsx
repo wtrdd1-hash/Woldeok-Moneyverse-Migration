@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { PENSION_TAX_SCENARIOS } from '@/config/pseo-tax-retirement.config';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
+import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
 export default function PensionTaxCalculatorPage() {
   const salaryId = useId();
@@ -188,13 +189,37 @@ export default function PensionTaxCalculatorPage() {
 
         <div className="lg:col-span-7 p-6 rounded-2xl bg-zinc-900/60 border border-emerald-500/30 shadow-2xl space-y-6 flex flex-col justify-between">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
                 연말정산 13월의 월급 예상 환급액
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400">
-                공제 인정액 {totalEligibleDeposit.toLocaleString()}원
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400">
+                  공제 인정액 {totalEligibleDeposit.toLocaleString()}원
+                </span>
+                <CalculatorSaveAction
+                  scenario={{
+                    type: 'pension',
+                    title: `연금저축/IRP 세액공제 ${estimatedRefund.toLocaleString()}원 환급`,
+                    badge: `${rateLabel} 공제율`,
+                    primaryMetric: {
+                      label: '예상 환급 세액',
+                      value: `${estimatedRefund.toLocaleString()}원`,
+                    },
+                    secondaryMetric: {
+                      label: '10년 누적 절세액',
+                      value: `${tenYearsRefund.toLocaleString()}원`,
+                    },
+                    details: {
+                      annualSalary,
+                      pensionDeposit,
+                      irpDeposit,
+                      rateLabel,
+                      totalEligibleDeposit,
+                    },
+                  }}
+                />
+              </div>
             </div>
 
             <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800/80 flex items-baseline justify-between">
