@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.04.526
+> Current integrated version: v2026.10.04.527
 > Implementation/evidence sync: 2026-10-04 (exact main SHA: `f6e89a31`)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Long-Term Retention & Economic Life Continuity — v2026.10.04.527 (2026-10-04)
+
+- **Retention objective:** optimize voluntary return, meaningful progress, social continuity and safe re-entry rather than raw session count or punitive loss-aversion.
+- **Lifecycle contract:** first-session -> D1 -> D7 -> D30 -> D90 -> veteran horizons each receive explicit goals, unlocks, social/world continuity and analytics gates.
+- **Motivation model:** autonomy, competence and relatedness are explicit product requirements. Users keep several viable life paths, receive understandable mastery feedback and can form optional durable economic-social relationships.
+- **Goal stack:** every active user should normally have an actionable now/today goal, a weekly goal, a season goal and a long-horizon career/economic goal.
+- **Absence safety:** real-world absence cannot by itself cause irreversible debt spiral, company destruction or total season loss; grace/caps/pause/catch-up and recovery plans are required.
+- **Return/recovery:** dormant users receive recap -> backlog compression -> recovery task -> new opportunity -> old/new path choice, without shame or fake urgency.
+- **Notifications:** optional categories are contextual opt-in, user-controlled, quiet-hour/digest capable and frequency-capped; security urgency may not be imitated for engagement.
+- **Ethical hard gate:** fake countdowns, misleading scarcity, permanent streak destruction, hidden recurring loss, forced ads, manipulative shame and dark-pattern purchasing are prohibited.
+- **Measurement:** event-based retention, cohorts, lifecycle states, feature breadth/frequency, social-edge formation, dormant/reactivated and softlock/recovery metrics are required; blended D1/D7/D30 alone is insufficient.
+- **Detailed authority:** [Long-Term Retention & Economic Life Continuity Specification v527](LIFE_ECONOMY_RETENTION_CONTINUITY_SPEC.md).
+- **Evidence boundary:** v527 is planning/docs only; no runtime, DB, Test or Production implementation is claimed.
 
 ## Life Economy & User World product layer — v2026.10.04.526 (2026-10-04)
 

@@ -1,11 +1,20 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.10.04.526
+> 현재 원장 버전: v2026.10.04.527
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.10.04.527 — 2026-10-04 — 장기 리텐션·경제인생 연속성
+- v526을 첫 세션/D1/D7/D30/D90/베테랑 생애주기까지 다루는 영/한 리텐션 상세권위로 확장했다.
+- 리텐션을 streak/FOMO 압박이 아니라 자율성·유능감·관계성, 다층목표, 세계/서사연속성, 선택형 사회관계, 미접속 보호, 복귀회복, 베테랑 유산 중심으로 재정의했다.
+- 일/주/시즌 루프, 개인목표/기회피드, dormant 복귀, 멘토/공동사업/도시/라이벌, 콘텐츠주기, endgame, softlock 방지, adaptive challenge, FTUE funnel, story archive를 추가했다.
+- contextual notification opt-in, quiet/digest, 빈도상한 및 dark-pattern 하드금지를 정의했다.
+- 이벤트 기반 retention, cohort/lifecycle, 안전한 churn-risk 대응, 실험가드, 관리자 리텐션 대시보드를 정의했다.
+- Self-Determination Theory/PENS, GameAnalytics, Unity, Android/Apple 알림 가이드, FTC dark-pattern 자료를 근거로 연결했다.
+- 기획/문서 전용이며 런타임/Test/Production 구현 완료를 주장하지 않는다.
 
 ## v2026.10.04.526 — 2026-10-04 — 생애경제·사용자 경제세계 통합
 - 시작/중간 기준은 `origin/main=a069e639b897acacb9754e5d04c58b3c642bcf28`이며 중간 fetch에서 드리프트가 없었다. 격리 브랜치 `docs/life-economy-v2026.10.04.526`에서 작업했다.

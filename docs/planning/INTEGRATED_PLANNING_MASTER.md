@@ -1,11 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.04.526
+> Current ledger version: v2026.10.04.527
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.04.527 — 2026-10-04 — Long-term retention and economic-life continuity
+- Extended v526 with a dedicated EN/KO retention/continuity authority covering first-session, D1, D7, D30, D90 and veteran lifecycle design.
+- Reframed retention around autonomy/competence/relatedness, multi-horizon goals, world/narrative continuity, optional social edges, absence safety, recovery and veteran legacy instead of punitive streak/FOMO patterns.
+- Added daily/weekly/season loops, goal/opportunity feeds, dormant-user recovery, mentorship/co-business/city/rival continuity, content cadence, endgame, softlock prevention, adaptive challenge, FTUE funnel and story archive.
+- Added ethical notification rules, contextual opt-in, quiet/digest controls, frequency caps and explicit dark-pattern prohibitions.
+- Added event-trigger retention, cohort/lifecycle segmentation, churn-risk-safe interventions, experiment guardrails and admin retention dashboards.
+- Reference basis includes Self-Determination Theory/PENS, current GameAnalytics retention/cohort/progression guidance, Unity live-ops/retention patterns, Android/Apple notification guidance and FTC dark-pattern enforcement guidance.
+- Planning/docs only; no runtime/Test/Production implementation is claimed.
 
 ## v2026.10.04.526 — 2026-10-04 — Life Economy & User World integration
 - Start and mid-work baseline: `origin/main=a069e639b897acacb9754e5d04c58b3c642bcf28`; mid-work fetch found no drift. Work used isolated branch `docs/life-economy-v2026.10.04.526`.

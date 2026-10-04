@@ -9,6 +9,7 @@
 - [구현 기준 프로젝트 기획](planning/PROJECT_PLAN.ko.md) / [English](planning/PROJECT_PLAN.md) — **v2026.10.04.523**
 - [중앙은행·조폐국·중앙국고·경제코어 통합 명세](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md) / [English](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md) — **v2026.10.04.523**
 - [생애경제·사용자 경제세계 통합 명세](planning/LIFE_ECONOMY_USER_WORLD_SPEC.ko.md) / [English](planning/LIFE_ECONOMY_USER_WORLD_SPEC.md) — **v2026.10.04.526**
+- [장기 리텐션·경제인생 연속성 상세 명세](planning/LIFE_ECONOMY_RETENTION_CONTINUITY_SPEC.ko.md) / [English](planning/LIFE_ECONOMY_RETENTION_CONTINUITY_SPEC.md) — **v2026.10.04.527**
 - [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md) / [English](planning/INTEGRATED_PLANNING_MASTER.md)
 - [국고 세수 자동 사회 환원 및 재정 선순환 기획](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md) / [English](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md) — **v2026.10.04.522**
 - [광고 전용 수익화 명세](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md) / [English](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md) — **v2026.09.30.487**
