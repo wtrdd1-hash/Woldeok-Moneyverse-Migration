@@ -13,6 +13,16 @@
 
 ---
 
+
+## 🌐 Planning Segmentation Rule — KR / Global Separation
+- **Mandatory planning rule:** Every new planning/specification cycle must separate **domestic (KR)** and **international/global (Global)** planning instead of combining them into one undifferentiated plan.
+- **KR plan must explicitly cover:** Korean user journey, Korean-language/public fallback behavior, domestic search/SEO channels, applicable Korean policy/compliance constraints, KR monetization/ads constraints, domestic release/measurement considerations, and any KR-only blocked or fail-closed surfaces.
+- **Global plan must explicitly cover:** target countries/markets, locale-by-locale rollout, international SEO/hreflang/canonical strategy, localization/translation quality, jurisdiction-specific availability/compliance, overseas acquisition/retention, monetization economics, and market-specific release/measurement gates.
+- **Shared architecture may be documented once**, but every material product, SEO, growth, monetization, compliance, rollout, and KPI decision must state whether it applies to KR, Global, or both.
+- **No silent inheritance:** a KR decision must not automatically be assumed valid globally, and a Global decision must not automatically be assumed valid in Korea. Differences must be recorded explicitly.
+- **Default document shape:** `공통/Shared -> 국내(KR) -> 해외(Global) -> 차이/예외 -> 공통 수용·QA 게이트`.
+
+---
 ## 🌟 Production Release Overview (v462 - Latest)
 - **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v462`
 - **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v462`
