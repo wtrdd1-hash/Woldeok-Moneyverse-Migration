@@ -1544,5 +1544,41 @@
 - Vitest 단위 테스트 통과.
 - 원격 서버 배포 및 라이브 서빙(HTTP 200 OK) 실측 검증.
 
+---
+
+## 🚀 [v105 Specification] 국내외 초고수요 금융 대량 pSEO 허브(대출이자 50대 롱테일 + 글로벌 60대 주식 배당락일/세후 실수령액) 구축 명세
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 및 기획 의도 (`국내외 SEO 페이지 대량 구축 및 오가닉 트래픽 극대화`)**:
+  1. 국내외 포털(네이버, 구글KR, 구글US, 야후재팬)에서 일일 수십만 건 이상 발생하는 2대 초고수요 금융 롱테일 키워드:
+     - **대출이자 금액별/만기별 50대 롱테일 프리셋**: `5000만원 대출이자`, `1억 대출이자`, `2억 원리금균등`, `3억 아파트 주택담보대출`, `5억 대출이자`, `10억 대출이자` 등 세부 금액/금리/만기 조합 50개 URL.
+     - **글로벌 및 국내 60대 핵심 주식 배당락일 & 15.4% 세후 실수령액 pSEO 허브**: 미국 인기 배당주(AAPL, TSLA, NVDA, MSFT, O, KO, SCHD, JEPI 등 30종목) + 국내 우량 배당주(삼성전자, 현대차, POSCO홀딩스, KB금융, 맥쿼리인프라 등 30종목) 총 60개 종목별 배당수익률, 세후 실수령액, 2000만원 종합과세 분석 URL.
+  2. 4대 언어(한국어, 영어, 일본어, 중국어) 완벽 대응 `hreflang` alternate 메타데이터 및 다국어 SEO 구조화 데이터 탑재.
+  3. 모든 신규 pSEO 지면에 Google AdSense 고단가 인아티클(slot: 6000051656) 및 멀티플렉스(slot: 9751074883) 2중 마운트.
+  4. 토스식 `CalculatorSaveAction` 1초 보관 + `ToolsGuestConversionBar` 하단 스티키 바 + 가입 즉시 10,000 WLD 첫 모의 매수 온보딩 모달 전면 연동.
+
+### 2. 세부 컴포넌트 및 데이터셋 명세
+1. `frontend/src/config/pseo-loan.config.ts` (신규):
+   - 50개 대출이자 롱테일 프리셋 (slug, title, loanAmount, annualRate, termYears, repaymentType, description).
+   - 금액별/기간별 사전 계산 함수 및 메타데이터 생성 유틸.
+2. `frontend/src/app/tools/loan-interest-calculator/[preset]/page.tsx` (신규):
+   - `generateStaticParams`: 50개 프리셋 정적 프리렌더링.
+   - 4개 국어(KO, EN, JA, ZH) `generateMetadata` 및 hreflang alternate 태그.
+   - 상환방식별 총이자 비교표, AdSense 인아티클/멀티플렉스 광고, `CalculatorSaveAction` 연동.
+3. `frontend/src/config/pseo-dividend.config.ts` (신규):
+   - 60개 국내외 대표 배당주 데이터셋 (ticker, nameKo, nameEn, nameJa, nameZh, country, dividendYield, annualDividend, frequency, exDividendDate).
+4. `frontend/src/app/tools/dividend-tax-calculator/[ticker]/page.tsx` (신규):
+   - `generateStaticParams`: 60개 종목 정적 프리렌더링.
+   - 종목별 1주당 세후 배당금, 100주/1000주 보유 시 실수령액, 2,000만원 종합과세 도달 주식 수 역산 표.
+   - AdSense 광고 슬롯 및 회원 전환 액션 연동.
+5. `frontend/src/app/sitemap.ts`:
+   - 신규 110여 개 pSEO URL 일괄 등록 (우선순위 0.85~0.9).
+
+### 3. 검증 계획
+- `tsc --noEmit` 타입 검사 통과.
+- Next.js Turbopack 정적 프리렌더링 빌드 통과.
+- 원격 서버 무중단 배포 및 라이브 curl 응답(HTTP 200 OK) 실측 검증.
+- IndexNow 실시간 배치 색인 요청 전송.
+
 
 
