@@ -5,9 +5,18 @@ import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
 import { REAL_ESTATE_PRESETS } from '@/config/real-estate-presets.config';
 import { KIMCHI_PREMIUM_PRESETS } from '@/config/kimchi-premium-presets.config';
 import { CAPITAL_GAINS_TAX_PRESETS } from '@/config/capital-gains-tax-presets.config';
+import { 
+  RETIREMENT_SCENARIOS, 
+  PENSION_TAX_SCENARIOS, 
+  ISA_SCENARIOS 
+} from '@/config/pseo-tax-retirement.config';
+import { PSEO_LOAN_PRESETS } from '@/config/pseo-loan.config';
+import { PSEO_DIVIDEND_STOCKS } from '@/config/pseo-dividend.config';
+import { GLOSSARY_TERMS } from '@/config/pseo-glossary.config';
 
 /**
  * 1-Hour ISR Caching for Sitemap.
+
  * Prevents unnecessary re-computation and shields backend from crawler storms.
  */
 export const revalidate = 3600;
@@ -125,7 +134,48 @@ export default function sitemap(): MetadataRoute.Sitemap {
     addEntry(`/tools/capital-gains-tax-calculator/${p.slug}`, 0.9, 'daily');
   }
 
+  // 2.9. 신규 직장인 3대 고검색량 금융 계산기 허브 및 롱테일 시나리오
+  addEntry('/tools/retirement-calculator', 0.95, 'daily');
+  for (const sc of RETIREMENT_SCENARIOS) {
+    addEntry(`/tools/retirement-calculator/${sc.slug}`, 0.9, 'daily');
+  }
+
+  addEntry('/tools/pension-tax-calculator', 0.95, 'daily');
+  for (const sc of PENSION_TAX_SCENARIOS) {
+    addEntry(`/tools/pension-tax-calculator/${sc.slug}`, 0.9, 'daily');
+  }
+
+  addEntry('/tools/isa-calculator', 0.95, 'daily');
+  for (const sc of ISA_SCENARIOS) {
+    addEntry(`/tools/isa-calculator/${sc.slug}`, 0.9, 'daily');
+  }
+
+  // 2.10. 신규 대출이자 및 배당소득세 계산기 허브 & 롱테일 프리셋
+  addEntry('/tools/loan-interest-calculator', 0.95, 'daily');
+  for (const lp of PSEO_LOAN_PRESETS) {
+    addEntry(`/tools/loan-interest-calculator/${lp.slug}`, 0.9, 'daily');
+  }
+
+  addEntry('/tools/dividend-tax-calculator', 0.95, 'daily');
+  for (const ds of PSEO_DIVIDEND_STOCKS) {
+    addEntry(`/tools/dividend-tax-calculator/${ds.ticker.toLowerCase()}`, 0.9, 'daily');
+  }
+
+  // 2.11. 신규 50대 투자 & 금융 용어사전 pSEO 허브 및 4개 언어 상세 사전 라우트 (총 200개 URL)
+  addEntry('/guide/glossary', 0.95, 'daily');
+  addEntry('/en/guide/glossary', 0.95, 'daily');
+  addEntry('/ja/guide/glossary', 0.95, 'daily');
+  addEntry('/zh/guide/glossary', 0.95, 'daily');
+  for (const term of GLOSSARY_TERMS) {
+    addEntry(`/guide/glossary/${term.slug}`, 0.9, 'daily');
+    addEntry(`/en/guide/glossary/${term.slug}`, 0.9, 'daily');
+    addEntry(`/ja/guide/glossary/${term.slug}`, 0.9, 'daily');
+    addEntry(`/zh/guide/glossary/${term.slug}`, 0.9, 'daily');
+  }
+
+
   // 3. 18 Virtual Stocks Clean Canonical URLs
+
   for (const symbol of STOCK_SYMBOLS) {
     addEntry(`/stocks/${symbol}`, 0.9, 'daily');
   }

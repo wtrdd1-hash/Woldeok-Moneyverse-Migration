@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { FiatBadge } from '@/components/fiat-amount';
 import { InArticleAdvertisement } from '@/components/public-advertisement';
 import { ViralShareCardDialog } from '@/components/viral-share-card-dialog';
+import { CalculatorRetentionFunnel } from '@/components/calculator-retention-funnel';
 import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 export default function CompoundCalculatorPage() {
@@ -377,6 +378,15 @@ export default function CompoundCalculatorPage() {
 
           {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
           <InArticleAdvertisement className="my-6" />
+
+          {/* 방문자 ➡️ 이용자 전환 및 리텐션 온보딩 퍼널 */}
+          <CalculatorRetentionFunnel
+            stockName="스마트 복리 예적금"
+            ticker="compound-savings"
+            targetPrice={`${calculation.totalFinal.toLocaleString()} WLD`}
+            reboundRate={`+${Math.round((calculation.totalInterest / (calculation.totalDeposited || 1)) * 100)}%`}
+            category="compound"
+          />
         </div>
       </div>
 

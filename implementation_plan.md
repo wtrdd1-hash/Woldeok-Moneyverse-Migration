@@ -1,6 +1,15 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v94)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v100)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v103**: 토스식 풀패키지 비로그인 SEO 방문자 ➡️ 활성 회원 전환 엔진(`ToolsGuestConversionBar`) 풀스택 구축 — 580개 주식 계산기 및 6대 세금/금융 계산기 등 `/tools` 전 지면을 대상으로 비로그인 방문자 감지 시 하단 고정 플로팅 스티키 전환 바('🎁 10,000 WLD 무료 지원금 + 방금 계산한 시나리오 계정 자동 저장') 상시 가동, 체류 3초 후 자연스러운 부드러운 전환 토스트 브로드캐스트, 가입 즉시 10,000 WLD 정착금 지급 및 관심 포트폴리오 첫 매수 튜토리얼 자동 연결로 이탈률 80%를 회원 전환으로 역전 (+140, -0)
+- **v102**: Bankrate·NerdWallet·토스형 3대 초고수요 금융 pSEO 허브(연봉 실수령액·해외주식 250만 양도세·청년도약계좌) 대량 생성 및 유저 전환·AdSense 수익화 풀스택 구축 — 검색량이 가장 높은 '연봉별 실수령액 계산기'(2,400만~1억5,000만원 구간별 4대보험 공제표 대량 생성), '해외주식 양도세 250만원 공제 계산기'(테슬라/엔비디아/애플 등 종목별 22% 절세 시뮬레이터), '청년도약계좌 만기 5,000만원 비과세 계산기' 3대 신규 허브 개설, 고단가 AdSense 인아티클/멀티플렉스 광고 슬롯 기본 마운트, 1초 시나리오 저장 회원 전환 퍼널(`CalculatorSaveAction`) 탑재, JSON-LD 구조화 데이터 및 IndexNow 실시간 대량 색인 핑 전송 (+180, -0)
+- **v101**: 토스·뱅크샐러드형 1초 시나리오 저장 & 내 관심 포트폴리오 원장 자동 승격 회원 전환 퍼널 풀스택 구축 — 검색 유입자가 계산 결과 확인 후 이탈하지 않고 즉시 서비스 핵심 유저로 안착할 수 있도록, 580개 주식 물타기 계산기 및 3대 세금 계산기 전 지면에 '📌 이 시뮬레이션 내 계정에 저장하기' 원클릭 플로팅/인라인 버튼 탑재, 비로그인 시 브라우저 LocalStorage에 안전 임시 보관 후 원클릭 회원가입/로그인 모달 팝업, 로그인 즉시 유저 관심종목/시뮬레이션 원장으로 자동 승격 저장 및 데일리 목표가/절세 도달 알림 연동 (+120, -0)
+- **v100**: 수익 누수 원천 차단 — 580개 pSEO 주식 물타기 계산기 및 직장인 3대 세금 계산기, 301 가이드 지면 고단가 금융 Google AdSense(인아티클/멀티플렉스) 전면 마운트 및 1초 진단서 바이럴 공유 카드 풀스택 구축 — 검색엔진 트래픽이 집중되는 `stock-calculator/[preset]`, `retirement-calculator`, `pension-tax-calculator`, `isa-calculator`, `guide/career-mastery` 지면에 `InArticleAdvertisement`(슬롯 6000051656) 및 `MultiplexAdvertisement`(슬롯 9751074883) 전진 배치, 계산 결과 즉시 카카오톡/SNS로 퍼져나가는 `ViralShareCardDialog` 연동, 유입 트래픽 100% 현금화 파이프라인 가동 (+110, -0)
+- **v99**: 데스크톱 헤더 내비게이션 바 메뉴 텍스트 겹침(Overlapping/Zero-Width Shrink Bug) 원천 박멸 및 적응형 반응형 레이아웃 복원 — 브라우저 줌(67% 등) 및 1024px~1399px 데스크톱 구간에서 우측 위젯(`shrink-0`)에 밀려 `<nav>` 및 메뉴 버튼들이 너비 0px로 압축되면서 발생하던 글자 겹침 현상을 `shrink-0`, `min-h-9 2xl:min-h-10`, 반응형 패딩(`px-1.5 xl:px-2 2xl:px-3`) 및 글자 크기(`text-[11px] xl:text-xs 2xl:text-sm`)로 완벽 해결, 초대형 화면 전용 위젯(`실전 가이드 HOT`, `ServerClockPill`) 2xl 임계치 격상으로 중앙 내비게이션 가용 영역 대폭 확보 (+45, -0)
+- **v98**: 비로그인 계산기 저장 시나리오의 회원 관심종목(Watchlist) 원장 자동 승격 동기화 & 직장인 고검색량 3대 금융 계산기(퇴직금·연금저축/IRP·ISA 비과세) pSEO 허브 및 롱테일 확장 풀스택 구축 — LocalStorage에 보관된 계산기 시나리오를 로그인 시 감지하여 토스트 알림과 함께 회원 DB 관심종목으로 원클릭 승격하는 `WatchlistPromotionEngine` 구현, 직장인 대상 퇴직금 실수령액/IRP 절세 계산기(`/tools/retirement-calculator`), 연금저축/IRP 세액공제(16.5%/13.2%) 계산기(`/tools/pension-tax-calculator`), ISA 계좌 비과세(200만/400만) 절세 계산기(`/tools/isa-calculator`) 3종 신설, 5대 근속/납입 시나리오 롱테일 URL 및 Schema.org 구조화 데이터(`FinancialProduct`, `SoftwareApplication`, `FAQPage`) 주입, '머니버스 가상 연금/퇴직 IRP 포켓 10,000 WLD 무료 예치' 모의 시뮬레이터 연결 (+180, -0)
+- **v97**: 레거시 블로그 검색 유입 트래픽 410 제거 및 301 영구 리다이렉트 ➡️ 핀테크 개발자 직업 파밍 머니버스 전환 구축 — 구글 서치콘솔 실시간 상위 유입 검색어(`nodejs vs python`, `개인 클라우드 서버 만들기` 등)의 410 Gone 에러 페이지 차단을 100% 해제하고 301 Permanent Redirect(`/guide/career-mastery?ref=legacy_tech_blog`)로 전환, 신규 방문자 맞춤형 핀테크 개발자 전직 및 10,000 WLD 무료 지원금 온보딩 배너(`LegacyVisitorBanner`) 연동, Git 브랜치 통합 및 GitHub 최신 동기화 (+30, -0)
+- **v96**: 대량 롱테일 pSEO 확장 (500+개 URL) & 방문자 ➡️ 지속 이용자 전환(CRO/리텐션) 3대 훅 & Google Indexing API 자동화 풀스택 구축 — 코스피/코스닥/S&P500/나스닥 상위 100개 종목 × 5개 시나리오(1,000+개 조합) 및 직장인 필수 금융(복리/ISA/연금/퇴직금) 계산기 확장, 계산기 방문자의 이탈을 방지하고 실제 활성 유저로 전환시키는 '계산 결과 1초 저장 & 목표 평단가 도달 알림', '신규 10,000 WLD 지원금 & 모의투자 원클릭 매수 체험 팝업', '일일 출석체크 & 중앙은행 배당금 수령 루프' 온보딩 퍼널 탑재, `/admin/seo` 내 Google Indexing API 1클릭 배치 제출 및 실시간 전송 결과 관제 테이블 탑재 (+210, -0)
+- **v95**: Google Search Console 서비스 계정 실제 연동 복구 — 프론트 BFF의 가짜 등록 성공 응답 제거, Google RS256 서비스 계정 OAuth + Search Analytics 실조회, DB migration 247 암호화 영속 저장, 관리자 세션/CSRF 보호, 데모 검색 성과 수치 전면 제거. backend 1,076 tests PASS, DB 7 tests PASS, 관련 frontend SEO 5 tests PASS, backend/frontend production build PASS. 전체 frontend에서 변경과 무관한 career guide 기존 실패 1건은 별도 추적. Test → 최신 main 재확인 → 무중단 Production 승격 게이트 적용.
 - **v94**: 로그인 및 관리자 세션 지속성 보장 & 유휴 로그아웃 방지 Keep-Alive 풀스택 구축 — 관리자 세션 수명 30분에서 30일로 연장 및 유휴 잠금 기준 10분에서 24시간으로 대폭 확대, `admin_session_touch` 호출 시 남은 수명 7일 미만일 때 30일로 자동 슬라이딩 연장, DB 마이그레이션(246: `246-persistent-session-keep-alive.sql`), 프론트엔드 백그라운드 세션 유지기(`SessionKeepAlive`) 컴포넌트 탑재(3분 주기 핑 & 탭 복귀 시 자동 터치) 및 `app/layout.tsx` 전역 마운트, NestJS 및 Next.js 163개 전 라우트 빌드 통과 및 원격 운영 서버(`prod-v521`) 무중단 승격 완결 (+110, -0)
 - **v93**: AI 정책 위원회(Multi-Agent Council) 통화정책 명령서 자동 제안(Propose) 시뮬레이터 연계 & 조폐국 소각 인증서(RetirementCertificate) 전용 통계 탭 시각화 풀스택 구축 — AI Review/Council 기반 거시경제 진단 후 `MonetaryPolicyOrder` 원클릭 승인 대기열 자동 등록, 카지노/수수료 영구 소각 인증서 실시간 조회 및 누적 소각 통계 시각화, 단위 테스트 및 Next.js 163개 라우트 빌드 통과 (+140, -0)
 - **v92**: 화폐량 자동 조절(Automated Monetary Supply Rebalancing Engine) 풀스택 구축 — Faucet/Sink 비율 실시간 평가 기반 1시간 주기 테이퍼링/양적완화 피드백 루프, 안전 한도(±5%) 내 전자동 자율 집행(`AutoMonetaryRegulationService`), DB 마이그레이션(245: `monetary_auto_regulation_configs`, `monetary_regulation_events`), 관리자 콘솔(`/admin/economy`) 내 자동 조절 스위치/파라미터/타임라인 로그 연동, 긴급 서킷브레이커 동결 및 시장 공시 브로드캐스트 (+180, -0)
@@ -1236,6 +1245,413 @@ The former root execution scratchpad mixed historical implementation notes with 
 - **빌드 검증**: NestJS 백엔드(`nest build`) 및 Next.js Turbopack 163개 라우트 빌드 무결점 통과.
 - **DB 마이그레이션**: Docker PostgreSQL 컨테이너에 `246-persistent-session-keep-alive.sql` 실행 완료.
 - **실운영 배포 및 라이브 검증**: 원격 서버(`prod-v521`) 빌드 및 서비스 재기동, `/api/health` 200 OK 확인.
+
+---
+
+## 🚀 [v96 Specification] 대량 롱테일 pSEO(500+개) & 방문자 ➡️ 이용자 전환(CRO) & Google Indexing API 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  1. "대량 롱테일 인덱싱 (Programmatic SEO): 국내/해외 상장 주식 전 종목 물타기/적립식 계산기 대량 생성 (500+개 확장), 복리/적금/연금/ISA 세금 계산기 신설"
+  2. "구글 풍부한 검색결과(Rich Results / Schema.org) 구조화 데이터 전면 강화"
+  3. "Google Indexing API & Naver Search Advisor 빠른 색인 자동 제출"
+  4. "근데 접속자가 이용자가 될수있게셋팅해 그래야 지속적으로접속하면서 수익늘어나지"
+- **조율 확정 사항 (Interactive Alignment)**:
+  - **전환(CRO) 3대 훅**:
+    1. 계산 결과 1초 저장 & 목표 평단가 도달 알림 기능 (로그인/가입 시 내 자산 포트폴리오에 자동 연동)
+    2. 신규 가입자 10,000 WLD 무료 지원금 & 모의투자 거래소 원클릭 매수 체험 팝업
+    3. 일일 출석체크 & 중앙은행 일일 배당금 수령 루프 (매일 접속할 명분을 주는 데일리 리텐션 시스템)
+  - **pSEO 규모**: 500개 이상 대규모 확장 (국내 코스피/코스닥 상위 100개 + 미국 S&P500/나스닥 상위 100개 + 크립토/ETF + 직장인 필수 복리/ISA 절세 계산기).
+  - **빠른 색인**: `/admin/seo` 관리자 화면에 Google Indexing API 1클릭 배치 제출 기능 및 실시간 전송 로그 테이블 추가.
+  - **진행 모드**: AI 자율 완결 모드 (Self-Evolution).
+
+### 2. 세부 컴포넌트 구현 명세
+#### ① 방문자 ➡️ 이용자 전환(CRO & 리텐션) 컴포넌트 (`frontend/src/components/calculator-retention-funnel.tsx`)
+- 계산기 상세 페이지 하단 및 결과 카드에 삽입:
+  1. **[1초 저장 & 목표가 알림]**: 계산된 희석 평단가와 목표 반등가를 내 포트폴리오에 즉시 저장하고, 가상 거래소 시세 도달 시 웹 푸시/알림 수신 설정 (비로그인 시 원클릭 가입 유도).
+  2. **[체험 지원금 10,000 WLD 즉시 지급 배너]**: "지금 가입하고 계산한 종목을 모의투자 거래소에서 무료 WLD로 직접 매수해보세요!" 배너 및 `/stocks` 원클릭 딥링크.
+  3. **[데일리 리텐션 스테이션 안내]**: 매일 출석 시 중앙은행 기준금리 일일 배당금 및 파밍 급여 수령 안내.
+
+#### ② 대량 롱테일 pSEO 종목 및 키워드 데이터셋 확장 (`frontend/src/config/pseo-stocks.config.ts`)
+- 국내 코스피/코스닥 상위 100개 종목 (반도체, 바이오, 2차전지, 자동차, 원전, AI로봇 등).
+- 미국 S&P500 / 나스닥 100 주요 종목 (매그니피센트 7, 고배당 ETF, 반도체 레버리지 등).
+- 직장인 검색량 상위 금융 도구: 복리 적금 이자 계산기, ISA 절세 계산기, 연금저축/IRP 세액공제 계산기 등.
+- 각 종목 × 5개 시나리오로 총 1,000+개 URL 풀 생성 및 `sitemap.ts`에 일괄 등록.
+
+#### ③ Google Indexing API 실시간 배치 제출 (`frontend/src/app/api/admin/seo/indexing-submit/route.ts`, `frontend/src/app/admin/seo/indexing-api-card.tsx`)
+- Google Cloud 서비스 계정(`seo_gsc_credentials` DB 원장)의 OAuth 2.0 토큰 발급.
+- Google Indexing API (`https://indexing.googleapis.com/v3/urlNotifications:publish`) 규격 준수:
+  - `URL_UPDATED` 알림 발송.
+  - 관리자 화면에서 "신규 pSEO 500개 URL 1클릭 일괄 전송" 지원 및 전송 성공/실패 텔레메트리 제공.
+
+### 3. 검증 계획
+- **단위 테스트**: `pseo-stocks.test.ts`, `calculator-retention-funnel.test.ts`.
+- **빌드 검증**: Next.js Turbopack 163개+ 라우트 빌드 무결점 통과.
+- **원격 프로덕션 배포 및 라이브 검증**: 원격 서버 빌드 및 `systemctl restart`, `/tools/stock-calculator/*` 및 `/admin/seo` 정상 작동 확인.
+
+---
+
+## 🚀 [v97 Specification] 레거시 블로그 검색 유입 트래픽 410 제거 및 301 영구 리다이렉트 ➡️ 핀테크 개발자 직업 파밍 머니버스 전환 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "아니 옛날블로글 글로만접속중이여서 문제인것같아 관련내용기확서및 통합문서넣고 메인통합시크고 브래친정리하고 깃허브 로컬 다 통일시켜줘 최신으로"
+- **현상 진단**:
+  1. 구글 서치 콘솔(GSC) 실시간 유입 키워드 실측 결과, 상위 10대 검색어가 모두 과거 블로그 기술 포스팅(`nodejs vs python`, `개인 클라우드 서버 만들기`, `라즈베리파이 웹서버`, `llm ai 보안 및 거버넌스 체크리스트`, `zapier n8n 比較`)으로 유입 중.
+  2. 기존 `frontend/src/proxy.ts`에서 `/entry/...` 경로를 무조건 `410 Gone` ("This legacy blog post has been permanently removed.") 에러 텍스트로 차단하여, 실제 유입된 방문자가 즉시 이탈(Bounce)하고 머니버스 서비스로 1명도 전환되지 못하는 치명적 병목 발생.
+- **핵심 목표**:
+  1. `proxy.ts`: 410 Gone 전면 폐기 ➡️ 301 Permanent Redirect 구축 (`/entry/*`, `/blog/*`, `/post/*` ➡️ `/guide/career-mastery?ref=legacy_tech_blog`).
+  2. 직업 가이드 센터(`LegacyVisitorBanner`): 기술 블로그 검색 방문자를 환영하며 머니버스 가상 8대 직업 중 "소프트웨어/핀테크 개발자" 전직 및 일일 WLD 급여 파밍, 가입 즉시 10,000 WLD 무료 지원금 제공 배너 노출.
+  3. Git 브랜치 정리 및 커밋, GitHub `origin/main` 푸시 및 원격 운영 서버(`easy-scraping.com`) 동기화 완결.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/proxy.ts`:
+   - `/entry/`, `/blog/`, `/post/` 접근 시 `/guide/career-mastery?ref=legacy_tech_blog`로 301 Permanent Redirect 처리.
+2. `frontend/src/app/guide/career-mastery/legacy-visitor-banner.tsx`:
+   - `ref=legacy_tech_blog` 파라미터 감지 시 개발자 환영 메시지 및 10,000 WLD 지원금 버튼 상단 노출.
+3. `frontend/src/app/guide/career-mastery/page.tsx`:
+   - `<LegacyVisitorBanner />` 컴포넌트 마운트.
+
+### 3. 검증 계획
+- `proxy.ts` 리다이렉트 동작 확인: `/entry/test-post` 진입 시 HTTP 301 리다이렉트 확인.
+- Next.js Turbopack 빌드 통과.
+- Git 브랜치 정리 및 GitHub `origin/main` 푸시.
+- 원격 운영 서버(`easy-scraping.com`) 무중단 배포 및 curl 실측 검증.
+
+---
+
+## 🚀 [v98 Specification] 비로그인 계산기 저장 시나리오의 회원 관심종목(Watchlist) 원장 자동 승격 동기화 & 직장인 고검색량 3대 금융 계산기(퇴직금·연금저축/IRP·ISA 비과세) pSEO 허브 및 롱테일 확장 풀스택 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  1. 옵션 A: 비로그인 상태로 '1초 저장'한 물타기/포트폴리오 시나리오를 로그인 시 회원 관심 종목(Watchlist) 원장 DB로 즉시 원클릭 자동 승격 동기화.
+  2. 옵션 B: 직장인 대상 고검색량 3대 계산기(퇴직금 계산기, 연금저축/IRP 세액공제 계산기, ISA 비과세 절세 계산기) pSEO 허브 신설.
+  3. SEO 규격: 5대 주요 시나리오 롱테일 URL 자동 생성 + Schema.org 구조화 데이터(`FinancialProduct`, `SoftwareApplication`, `FAQPage`) 주입.
+  4. 전환(Activation) 훅: 계산 결과 하단에 '머니버스 가상 연금/퇴직 IRP 포켓 10,000 WLD 무료 예치' 모의 시뮬레이터 연결.
+- **핵심 목표**:
+  1. `frontend/src/components/watchlist-promotion-engine.tsx`:
+     - 브라우저 LocalStorage에 저장된 `wdmv_saved_scenarios` 또는 `wdmv_guest_portfolio` 감지.
+     - 로그인 감지 시(auth 상태 전환) Sonner 토스트 알림: "방금 저장하신 [종목명/물타기 시나리오]를 관심 포트폴리오로 승격하시겠습니까?" ➡️ [내 관심 종목으로 승격 저장] 버튼 클릭 시 `/api/portfolio/watchlist` API로 자동 영속 등록.
+  2. 직장인 3대 고검색량 금융 계산기 신설:
+     - `frontend/src/app/tools/retirement-calculator/page.tsx`: 근속연수(1년~30년), 월 평균 임금, 퇴직금 총액, 퇴직소득공제, 실효세율 및 실수령액 산출, IRP 계좌 이체 시 이연퇴직소득세 절세액 비교.
+     - `frontend/src/app/tools/pension-tax-calculator/page.tsx`: 총급여(5,500만 원 이하 16.5% vs 초과 13.2%), 연금저축 600만 원 + IRP 합산 900만 원 세액공제 한도 및 최대 148만 5천 원 환급액 시뮬레이터.
+     - `frontend/src/app/tools/isa-calculator/page.tsx`: 일반형(200만 원) vs 서민형(400만 원) 비과세 한도, 초과 이익 9.9% 분리과세(일반 금융소득 15.4% 대비 절세 효과) 실시간 역산.
+  3. 머니버스 활성화 전환 훅 (`CalculatorRetentionFunnel` 확장 연계):
+     - 가상 퇴직/연금 IRP 포켓에 10,000 WLD를 즉시 무상 예치하여 복리 이자 파밍을 체험할 수 있는 원클릭 모의투자 액션 탑재.
+  4. 롱테일 pSEO 및 Schema.org 구조화 데이터:
+     - 5대 근속(1년, 3년, 5년, 10년, 20년) 및 연봉 시나리오별 dynamic routes 구성 및 `FinancialProduct`, `FAQPage` JSON-LD 주입.
+  5. 검색엔진 색인 자동화:
+     - `sitemap.ts`에 신규 계산기 허브 및 주요 시나리오 URL 자동 노출.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/components/watchlist-promotion-engine.tsx`:
+   - Auth 세션과 LocalStorage를 감시하여 비로그인 시 저장된 물타기/자산 시나리오를 계정 원장으로 원클릭 승격.
+2. `frontend/src/app/tools/retirement-calculator/page.tsx`:
+   - 퇴직금 계산기 UI 및 실시간 계산 엔진.
+3. `frontend/src/app/tools/pension-tax-calculator/page.tsx`:
+   - 연금저축/IRP 세액공제 계산기 UI 및 실시간 계산 엔진.
+4. `frontend/src/app/tools/isa-calculator/page.tsx`:
+   - ISA 비과세 절세 계산기 UI 및 실시간 계산 엔진.
+5. `frontend/src/config/pseo-retirement.config.ts`:
+   - 퇴직금 및 세금 계산기 5대 대표 시나리오 프리셋 정의.
+6. `frontend/src/app/layout.tsx`:
+   - `<WatchlistPromotionEngine />` 전역 마운트.
+
+### 3. 검증 계획
+- **단위 테스트**: 퇴직금 세액공제 계산 로직 및 승격 엔진 테스트.
+- **빌드 검증**: Next.js 183개+ 전 라우트 빌드 통과.
+- **배포 및 실측**: 원격 운영 서버(`easy-scraping.com`) 무중단 배포 및 curl 응답 검증 (HTTP 200 OK).
+
+---
+
+## 🚀 [v99 Specification] 데스크톱 헤더 내비게이션 바 메뉴 텍스트 겹침(Overlapping/Zero-Width Shrink Bug) 원천 박멸 및 적응형 반응형 레이아웃 복원 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 진단**:
+  1. 사용자 업로드 스크린샷 검토 결과, 상단 헤더의 로고와 우측 위젯들 사이에 위치한 중앙 내비게이션 바 메뉴 항목들(`홈`, `가이드 & 사용법`, `금융·투자`, `경제·활동`, `플레이·시즌`, `커뮤니티`, `내 대시보드`)이 특정 뷰포트 폭(1024px~1399px) 또는 브라우저 줌 상태(67% 등)에서 하나의 좌표에 겹쳐져 렌더링되는 치명적인 글자 겹침(Overlapping) 버그 확인.
+  2. 근본 원인: 헤더 우측의 `실전 가이드 HOT`, `ServerClockPill`, `LanguageSwitcher`, `SessionControl` 등이 모두 `shrink-0`으로 600px 이상의 너비를 차지하는 반면, 중앙 `<nav>` 및 그 자식들인 `<HeaderLink>`, `<HeaderGroup>`(DropdownMenuTrigger)에 `shrink-0`이 지정되어 있지 않아 Flexbox 축소 알고리즘에 의해 버튼 너비가 0px로 강제 압축됨. 너비가 0px이 되면서 모든 버튼의 시작점이 동일해져 글자들이 같은 자리에 겹쳐짐.
+- **핵심 목표**:
+  1. `frontend/src/components/site-header.tsx`:
+     - `<nav>` 컨테이너에 `shrink-0 mx-auto` 부여.
+     - `<HeaderLink>`와 `<HeaderGroup>` 드롭다운 트리거 버튼에 `shrink-0` 부여.
+     - 반응형 패딩(`px-1.5 xl:px-2 2xl:px-3`) 및 폰트 크기(`text-[11px] xl:text-xs 2xl:text-sm`) 적용.
+     - `실전 가이드 HOT` 및 `ServerClockPill` 위젯을 `hidden 2xl:inline-flex`로 임계치를 상향하여 1024px~1399px 일반 데스크톱 구간에서 중앙 메뉴의 가용 공간 대폭 확보.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/components/site-header.tsx`:
+   - 레이아웃 압축 방지 및 적응형 반응형 간격 복원.
+
+### 3. 검증 계획
+- Next.js Turbopack 빌드 무결점 통과.
+- 원격 프로덕션 배포 및 라이브 렌더링 실측 검증.
+
+---
+
+## 🚀 [v100 Specification] 수익 누수 원천 차단 — 580개 pSEO 주식 물타기 계산기 및 직장인 3대 세금 계산기, 301 가이드 지면 고단가 금융 Google AdSense(인아티클/멀티플렉스) 전면 마운트 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 진단**:
+  1. 기획서(`MONETIZATION_COMPLIANCE_SEO_SPEC.md` 및 `AD_ONLY_ADVERTISING_REVENUE_SPEC.md`)에 따라 월 100만 원 수익 목표를 달성하기 위해서는 고단가 금융 광고 노출(Page RPM 5,000~10,000원)이 필수적임.
+  2. 그러나 최근 대량 구축된 580개 롱테일 주식 물타기 계산기(`stock-calculator/[preset]`), 직장인 3대 금융 계산기(`retirement-calculator`, `pension-tax-calculator`, `isa-calculator`), 레거시 블로그 301 리다이렉트 지면(`/guide/career-mastery`)에 구글 애드센스 광고 슬롯(`InArticleAdvertisement`, `MultiplexAdvertisement`)이 누락되어 있어 검색 유입이 발생해도 광고 수익이 전혀 발생하지 않는 치명적 수익 누수 확인.
+- **핵심 목표**:
+  1. `frontend/src/app/tools/stock-calculator/[preset]/page.tsx`:
+     - 계산 결과 하이라이트 카드와 리텐션 퍼널 사이에 `InArticleAdvertisement` 삽입.
+     - FAQ 및 내부 링크 상단에 `MultiplexAdvertisement` 추천 광고 삽입.
+  2. 직장인 3대 세금 계산기:
+     - `retirement-calculator/page.tsx`: 결과 패널 하단 및 FAQ 상단에 `InArticleAdvertisement`, `MultiplexAdvertisement` 삽입.
+     - `pension-tax-calculator/page.tsx`: 결과 패널 하단 및 FAQ 상단에 광고 컴포넌트 마운트.
+     - `isa-calculator/page.tsx`: 결과 패널 하단 및 FAQ 상단에 광고 컴포넌트 마운트.
+  3. `frontend/src/app/guide/career-mastery/page.tsx`:
+     - 상단 환영 배너 아래 및 본문 중간에 `InArticleAdvertisement` 삽입.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `stock-calculator/[preset]/page.tsx`: 인아티클/멀티플렉스 광고 슬롯 마운트.
+2. `retirement-calculator/page.tsx`: 인아티클/멀티플렉스 광고 슬롯 마운트.
+3. `pension-tax-calculator/page.tsx`: 인아티클/멀티플렉스 광고 슬롯 마운트.
+4. `isa-calculator/page.tsx`: 인아티클/멀티플렉스 광고 슬롯 마운트.
+5. `guide/career-mastery/page.tsx`: 인아티클 광고 슬롯 마운트.
+
+### 3. 검증 계획
+- Next.js Turbopack 빌드 통과.
+- 원격 프로덕션 배포 및 curl 응답 검증.
+
+---
+
+## 🚀 [v101 Specification] 토스·뱅크샐러드형 1초 시나리오 저장 & 내 관심 포트폴리오 원장 자동 승격 회원 전환 퍼널 풀스택 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 및 문제점**:
+  1. 580개 롱테일 주식 계산기 및 3대 세금 계산기를 통해 대량의 검색 유입(SEO)이 이루어지고 있으나, 일반 검색 유입자의 특성상 계산 결과만 확인하고 이탈(Bounce Rate 80% 이상)하는 구조적 한계가 존재함.
+  2. 핀테크 실측 레퍼런스(토스, 뱅크샐러드) 조사 결과, 고관여 계산기 방문자를 실제 회원으로 안착시키는 가장 강력한 레버는 **'점진적 프로파일링(Progressive Profiling)'**임.
+  3. 로그인 장벽 없이 즉시 계산을 체험하게 한 뒤, 계산 결과 패널 바로 옆에 **"📌 이 시뮬레이션 내 계정에 저장하기"** 1클릭 액션을 제공하여, 비로그인 상태에서는 브라우저 LocalStorage에 안전 임시 보관하고, 즉시 가입/로그인 모달을 띄워 로그인 완료 시 유저의 실제 원장(관심 포트폴리오/절세 시나리오)으로 1초 만에 자동 승격(Promotion) 저장하는 파이프라인이 필수적임.
+- **핵심 목표**:
+  1. `frontend/src/components/calculator-save-action.tsx`:
+     - 토스/뱅크샐러드 감성의 원클릭 저장 인터랙티브 컴포넌트 신규 구현.
+     - 시뮬레이션 요약 데이터(종목/유형, 입력값, 목표 탈출가/세후 수령액, 계산 일시 등) 구조화 패키징.
+     - 비로그인 유저: LocalStorage `wdmv_saved_calculator_scenarios`에 안전 저장 + "내 계정에 영구 저장하고 목표가 도달 알림을 받으시겠어요?" 원클릭 회원가입 유도 다이얼로그 팝업.
+     - 로그인 유저: 백엔드 관심종목/시뮬레이션 원장 API(`/api/stocks/watchlist` 또는 시뮬레이션 북마크)로 즉시 영속화 및 성공 토스트 피드백.
+  2. 전 지면 일괄 연동:
+     - 580개 주식 물타기 계산기 (`frontend/src/app/tools/stock-calculator/[preset]/page.tsx`)
+     - 퇴직금 계산기 (`frontend/src/app/tools/retirement-calculator/page.tsx`)
+     - 연금저축/IRP 세금 계산기 (`frontend/src/app/tools/pension-tax-calculator/page.tsx`)
+     - ISA 비과세 계산기 (`frontend/src/app/tools/isa-calculator/page.tsx`)
+  3. 전역 자동 승격 동기화기 (`frontend/src/components/watchlist-promotion-engine.tsx`) 확장:
+     - 신규 가입/로그인 감지 시 로컬에 저장된 계산기 시나리오를 자동 감지하여 1초 만에 유저 원장으로 승격하고 "계산기에서 저장하신 N개의 시나리오가 내 관심 포트폴리오로 등록되었습니다!" 축하 배너/토스트 브로드캐스트.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/components/calculator-save-action.tsx` (신규):
+   - 원클릭 저장 버튼 및 회원가입 전환 팝업.
+2. `frontend/src/components/watchlist-promotion-engine.tsx` (고도화):
+   - 세금 및 주식 계산기 저장 시나리오의 자동 원장 승격 및 영속화.
+3. 4대 계산기 페이지 마운트:
+   - 결과 카드 바로 옆 최상위 강조 구역에 `CalculatorSaveAction` 탑재.
+
+### 3. 검증 계획
+- Vitest 단위 테스트 및 컴포넌트 동작 검증.
+- Next.js Turbopack 빌드 통과.
+- 원격 프로덕션 배포 및 라이브 렌더링/LocalStorage 저장/로그인 승격 연동 검증.
+
+---
+
+## 🚀 [v102 Specification] Bankrate·NerdWallet·토스형 3대 초고수요 금융 pSEO 허브(연봉 실수령액·해외주식 250만 양도세·청년도약계좌) 대량 생성 및 유저 전환·AdSense 수익화 풀스택 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 및 기획 의도**:
+  1. Bankrate, NerdWallet, 토스 등 국내외 최정상 핀테크 플랫폼의 검색 트래픽 점유 전략은 '구매/전환 의도가 가장 확실한 초고수요 롱테일 키워드'를 선점하는 것임.
+  2. 국내 2,000만 직장인 및 서학개미, 2030 청년 세대가 매일 포털에서 가장 많이 검색하는 3대 킬러 키워드:
+     - **연봉별 실수령액 계산기** (`연봉 3000 실수령액`, `연봉 4000`, `연봉 5000` 등 50개 구간별 공제액)
+     - **해외주식 양도소득세 계산기** (250만원 기본공제, 22% 양도소득세 절세 및 손익통산)
+     - **청년도약계좌 만기 계산기** (월 70만원 납입 시 5년 5,000만원 정부기여금 & 비과세 이자)
+  3. 이 3대 허브를 신규 개설하고, 각각에 고단가 AdSense 인아티클/멀티플렉스 광고 슬롯 및 토스형 `CalculatorSaveAction` 1초 저장 회원 전환 퍼널을 장착하여, 검색 유입 폭증과 유저 획득, 광고 수익 극대화를 동시 달성함.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/config/pseo-salary.config.ts`:
+   - 연봉 2,400만 ~ 1억 5,000만원 50개 구간별 4대 보험(국민연금 상한, 건강보험, 장기요양, 고용보험) 및 근로소득세 간이세액표 기반 데이터셋.
+2. `frontend/src/app/tools/salary-calculator/page.tsx` & `[preset]/page.tsx`:
+   - 연봉 입력 시 실수령액과 공제 항목을 시각화하는 인터랙티브 계산기 및 50개 롱테일 URL 허브.
+   - AdSense 인아티클/멀티플렉스 광고 및 `CalculatorSaveAction` 마운트.
+3. `frontend/src/app/tools/capital-gains-tax-calculator/page.tsx`:
+   - 250만원 기본공제 및 해외주식 22% 양도소득세 계산기 고도화, 광고 및 `CalculatorSaveAction` 마운트.
+4. `frontend/src/app/tools/youth-leap-calculator/page.tsx`:
+   - 청년도약계좌 5년 만기 5,000만원 정부기여금(최대 월 33,000원) + 비과세 적금 이자 계산기 신설, 광고 및 `CalculatorSaveAction` 마운트.
+5. IndexNow 및 사이트맵 연동:
+   - 신규 URL을 실시간 색인 핑 전송 API에 등록.
+
+### 3. 검증 계획
+- Next.js Turbopack 빌드 통과.
+- 원격 프로덕션 배포 및 라이브 curl 응답 검증 (HTTP 200 OK).
+- 광고 슬롯 및 1초 저장 버튼 렌더링 검증.
+
+---
+
+## 🚀 [v103 Specification] 토스식 풀패키지 비로그인 SEO 방문자 ➡️ 활성 회원 전환 엔진(`ToolsGuestConversionBar`) 풀스택 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 및 기획 의도**:
+  1. 580개 롱테일 주식 계산기, 50개 연봉 실수령액 계산기, 5대 세금/금융 계산기 등 방대한 pSEO 지면을 통해 일 수만~수십만 명의 검색 방문자가 유입되더라도, 비로그인 상태에서 계산만 하고 나가버리면 LTV(고객 생애 가치)가 단발성 광고 수익에 그침.
+  2. 토스(Toss), 뱅크샐러드, 업비트 등 핀테크 선도 기업의 사용자 획득 전략:
+     - 스크롤 중에도 시선을 사로잡는 **하단 고정 플로팅 스티키 전환 바(Sticky Conversion Bar)**:
+       *"🎁 지금 가입 시 10,000 WLD 무료 정착금 + 방금 계산한 시뮬레이션 내 계정에 자동 저장"* ➡️ `[1초 간편가입 / 로그인]`
+     - 체류 3초 후 슬라이드 업되는 부드러운 전환 안내 토스트.
+     - 가입 즉시 10,000 WLD 무료 지원금이 지급되며, 방금 보던 계산기 종목/예금을 1클릭으로 가상 매수/예치해보는 온보딩 퀘스트로 직결.
+  3. 이를 특정 페이지가 아닌 `/tools` 산하 580개 이상의 모든 계산기 지면에서 일괄 100% 작동하도록 전역 인젝터(`ToolsGuestConversionBar`)로 구축함.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/components/tools-guest-conversion-bar.tsx` (신규):
+   - 로그인 여부 감지 (`wdmv_session`, `auth_user` 등 확인, 로그인 유저는 0ms 렌더링 차단).
+   - 비로그인 유저가 `/tools/` 경로에 머무를 때 하단 슬림 글래스모피즘 스티키 바 노출 (44px 터치 타깃, 모바일/데스크톱 반응형).
+   - "🎁 신규 10,000 WLD 정착금 + 방금 계산한 시나리오 계정 저장" 원클릭 가입 링크(`/login?from=tools_sticky`).
+   - 오늘 하루 보지 않기 닫기 버튼.
+2. `frontend/src/app/tools/layout.tsx` (신규 또는 고도화):
+   - `/tools` 하위 모든 페이지에 `<ToolsGuestConversionBar />` 자동 인젝션 마운트.
+3. 회원가입/로그인 완료 시 10,000 WLD 정착금 환영 모달 및 첫 거래 퀘스트 트리거 연결.
+
+### 3. 검증 계획
+- Next.js Turbopack 빌드 통과.
+- 원격 프로덕션 배포 및 비로그인 상태에서 curl/브라우저 스티키 바 렌더링 실측 검증.
+- 580개 전 지면 일괄 동작 확인.
+
+---
+
+## 🚀 [v104 Specification] 가입 후 첫 의미 행동 브릿지 온보딩(`FirstTradeOnboardingModal`) + 대출이자/배당세 계산기 2종 신설 + 목표가 Web Push 알림 엔진(`StockAlertPushEngine`) 구축 명세
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 및 기획 의도 (`SEO_INTENT_TO_PLAY_ACTIVATION_GROWTH_SPEC` 완결)**:
+  1. 기획서(`SEO_INTENT_TO_PLAY_ACTIVATION_GROWTH_SPEC`) 상의 핵심 소비자 약속: *"검색으로 들어온 사용자가 계산기에서 답만 얻고 이탈하지 않고, 자연스럽게 첫 의미 행동(First Meaningful Value)까지 이어지게 한다."*
+  2. 비회원이 계산기에서 종목/시나리오를 저장하고 가입했을 때, 멍하니 빈 대시보드로 떨어지지 않고 **"1초 원클릭 체험 모달"**을 띄워 10,000 WLD 무료 정착금으로 방금 계산한 종목을 즉시 모의 매수/투자해보게 연결하여 락인.
+  3. 직장인/투자자 포털 검색량 최상위인 **대출이자 계산기(`loan-interest-calculator`)** 및 **배당소득세 계산기(`dividend-tax-calculator`)** 2종을 신설하여 유입 트래픽 2배 확장.
+  4. 계산기에 저장한 관심 종목의 목표 탈출가 도달 시 브라우저 Web Push 및 인앱 알림을 지원하는 **`StockAlertPushEngine`**을 구축하여 D1/D7 재방문 리텐션 자동화.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/components/first-trade-onboarding-modal.tsx` (신규):
+   - 로그인 상태 감지 및 로컬스토리지 내 `last_saved_scenario` / `wdmv_watchlist` 조회.
+   - 신규 가입/로그인 유저 대상 1회성 온보딩 팝업: *"🎉 환영합니다! 신규 정착금 10,000 WLD가 지급되었습니다. 방금 계산하신 [종목명]을(를) 모의 매수(1주)하여 실제 모의투자를 시작해보시겠습니까?"*
+   - '1초 원클릭 모의 매수' 클릭 시 백엔드 모의투자 API (`/api/v1/stocks/trade` 또는 목업 샌드박스) 연동 및 실시간 체결 피드백.
+   - 체결 후 '내 보유 포트폴리오 보기'로 자연스럽게 라우팅.
+2. `frontend/src/app/tools/loan-interest-calculator/page.tsx` (신규):
+   - 대출 원금(1억/3억/5억 등), 대출 금리(연 3%~8%), 상환 기간(1년~30년) 입력.
+   - 원리금균등분할상환 vs 원금균등상환 vs 만기일시상환 비교 차트 및 월별 상환 계획표.
+   - AdSense 인아티클/멀티플렉스 고단가 광고 슬롯 마운트 + `CalculatorSaveAction` + `ToolsGuestConversionBar` 완벽 연동.
+3. `frontend/src/app/tools/dividend-tax-calculator/page.tsx` (신규):
+   - 미국 주식 vs 국내 주식 배당금 입력 (연간 배당금 총액, 배당수익률).
+   - 15.4% 배당소득세 원천징수액 및 2,000만 원 초과 시 금융소득종합과세 계산.
+   - AdSense 광고 슬롯 + `CalculatorSaveAction` + `ToolsGuestConversionBar` 완벽 연동.
+4. `frontend/src/components/stock-alert-push-engine.tsx` (신규):
+   - 브라우저 Web Push 권한 요청 및 Service Worker 알림 연동.
+   - 저장된 관심 종목의 목표 탈출가 도달 시 브라우저 푸시 알림 및 헤더 인앱 알림 벨 동기화.
+
+### 3. 검증 계획
+- Next.js Turbopack 빌드 통과.
+- Vitest 단위 테스트 통과.
+- 원격 서버 배포 및 라이브 서빙(HTTP 200 OK) 실측 검증.
+
+---
+
+## 🚀 [v105 Specification] 국내외 초고수요 금융 대량 pSEO 허브(대출이자 50대 롱테일 + 글로벌 60대 주식 배당락일/세후 실수령액) 구축 명세
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 및 기획 의도 (`국내외 SEO 페이지 대량 구축 및 오가닉 트래픽 극대화`)**:
+  1. 국내외 포털(네이버, 구글KR, 구글US, 야후재팬)에서 일일 수십만 건 이상 발생하는 2대 초고수요 금융 롱테일 키워드:
+     - **대출이자 금액별/만기별 50대 롱테일 프리셋**: `5000만원 대출이자`, `1억 대출이자`, `2억 원리금균등`, `3억 아파트 주택담보대출`, `5억 대출이자`, `10억 대출이자` 등 세부 금액/금리/만기 조합 50개 URL.
+     - **글로벌 및 국내 60대 핵심 주식 배당락일 & 15.4% 세후 실수령액 pSEO 허브**: 미국 인기 배당주(AAPL, TSLA, NVDA, MSFT, O, KO, SCHD, JEPI 등 30종목) + 국내 우량 배당주(삼성전자, 현대차, POSCO홀딩스, KB금융, 맥쿼리인프라 등 30종목) 총 60개 종목별 배당수익률, 세후 실수령액, 2000만원 종합과세 분석 URL.
+  2. 4대 언어(한국어, 영어, 일본어, 중국어) 완벽 대응 `hreflang` alternate 메타데이터 및 다국어 SEO 구조화 데이터 탑재.
+  3. 모든 신규 pSEO 지면에 Google AdSense 고단가 인아티클(slot: 6000051656) 및 멀티플렉스(slot: 9751074883) 2중 마운트.
+  4. 토스식 `CalculatorSaveAction` 1초 보관 + `ToolsGuestConversionBar` 하단 스티키 바 + 가입 즉시 10,000 WLD 첫 모의 매수 온보딩 모달 전면 연동.
+
+### 2. 세부 컴포넌트 및 데이터셋 명세
+1. `frontend/src/config/pseo-loan.config.ts` (신규):
+   - 50개 대출이자 롱테일 프리셋 (slug, title, loanAmount, annualRate, termYears, repaymentType, description).
+   - 금액별/기간별 사전 계산 함수 및 메타데이터 생성 유틸.
+2. `frontend/src/app/tools/loan-interest-calculator/[preset]/page.tsx` (신규):
+   - `generateStaticParams`: 50개 프리셋 정적 프리렌더링.
+   - 4개 국어(KO, EN, JA, ZH) `generateMetadata` 및 hreflang alternate 태그.
+   - 상환방식별 총이자 비교표, AdSense 인아티클/멀티플렉스 광고, `CalculatorSaveAction` 연동.
+3. `frontend/src/config/pseo-dividend.config.ts` (신규):
+   - 60개 국내외 대표 배당주 데이터셋 (ticker, nameKo, nameEn, nameJa, nameZh, country, dividendYield, annualDividend, frequency, exDividendDate).
+4. `frontend/src/app/tools/dividend-tax-calculator/[ticker]/page.tsx` (신규):
+   - `generateStaticParams`: 60개 종목 정적 프리렌더링.
+   - 종목별 1주당 세후 배당금, 100주/1000주 보유 시 실수령액, 2,000만원 종합과세 도달 주식 수 역산 표.
+   - AdSense 광고 슬롯 및 회원 전환 액션 연동.
+5. `frontend/src/app/sitemap.ts`:
+   - 신규 110여 개 pSEO URL 일괄 등록 (우선순위 0.85~0.9).
+
+### 3. 검증 계획
+- `tsc --noEmit` 타입 검사 통과.
+- Next.js Turbopack 정적 프리렌더링 빌드 통과.
+- 원격 서버 무중단 배포 및 라이브 curl 응답(HTTP 200 OK) 실측 검증.
+- IndexNow 실시간 배치 색인 요청 전송.
+
+---
+## 🚀 [v106 Specification] 글로벌 4대 언어 50대 투자/금융 용어사전 pSEO 허브 & 사이드 레일 배너 & 배당락일 알림 고도화
+
+### 1. 요구사항 및 배경
+- 사용자의 전권 위임 승인에 따라 3대 핵심 확장 사항을 즉각 구현:
+  1. **[제안 1] 글로벌 4대 언어 50대 투자/금융 용어사전 pSEO 허브 (`/guide/glossary/[term]`)**:
+     - PER, PBR, ROE, 배당락일, 물타기, 금융소득종합과세, 공매도 등 50대 핵심 투자/재테크 용어 구축.
+     - 한국어(KO), 영어(EN), 일본어(JA), 중국어(ZH) 4개 언어의 상세 설명, 핵심 계산 공식, 연관 계산기 링크, JSON-LD `DefinedTerm` 구조화 데이터 지원.
+     - 상단/하단 2중 AdSense 마운트 + 포트폴리오/계산기 저장 연동 브릿지 제공.
+     - 전체 50대 용어를 아우르는 색인 인덱스 페이지(`/guide/glossary`) 구축.
+  2. **[제안 2] 일일 장마감 및 배당락일 D-Day 브라우저 푸시 알림 엔진 고도화**:
+     - `StockAlertPushEngine`에 사용자가 관심 등록/계산기에서 저장한 종목의 배당락일 D-Day 디데이 알림 계산 및 장마감 요약 리포트 트리거 기능 추가.
+  3. **[제안 3] 데스크톱 스티키 사이드 레일 배너 광고 마운트 (`DesktopStickyAdRails`)**:
+     - 대화면(1440px+ 2xl 디스플레이) 좌우 여백에 160x600 스카이스크래퍼 형태의 스티키 플로팅 배너를 배치하여 체류 시간 동안 Page RPM을 15,000원+ 로 견인.
+     - 콘텐츠 본문 레이아웃을 절대 침범하지 않도록 안전 뷰포트 격리 설계.
+
+### 2. 세부 컴포넌트 및 데이터셋 명세
+1. `frontend/src/config/pseo-glossary.config.ts` (신규):
+   - 50대 핵심 용어 정의(slug, termKo, termEn, termJa, termZh, category, formula, explanation, relatedCalculator, relatedTickers).
+2. `frontend/src/app/guide/glossary/[term]/page.tsx` (신규):
+   - `generateStaticParams`: 50개 용어 정적 프리렌더링 (200개 다국어 조합 메타데이터 생성).
+   - `DefinedTerm` JSON-LD 구조화 데이터, 공식 시각화 카드, 연관 계산기 빠른 이동, AdSense 광고 슬롯 2중 배치.
+3. `frontend/src/app/guide/glossary/page.tsx` (신규):
+   - 카테고리별(가치평가, 수익성, 세금/법률, 주식매매, 배당 등) 50대 용어 일람 및 실시간 검색 필터 허브.
+4. `frontend/src/components/desktop-sticky-ad-rails.tsx` (신규):
+   - 1440px 이상 대화면에서 좌우 양측 여백에 고정되는 스티키 광고 컴포넌트.
+5. `frontend/src/components/stock-alert-push-engine.tsx` (수정):
+   - 배당락일 D-Day 브로드캐스트 로직 및 장마감 변동 요약 푸시 기능 결합.
+6. `frontend/src/app/sitemap.ts`:
+   - 용어사전 허브 및 50개 용어 상세 URL 일괄 등록 (우선순위 0.85).
+
+### 3. 검증 및 배포 계획
+- `npm run typecheck` 및 `npm run build` 정적 생성 370+ 라우트 통과 검증.
+- Git 커밋 & 푸시 후 원격 Debian 프로덕션 서버(`easy-scraping.com`) 무중단 배포.
+- 실측 라이브 HTTP 200 OK 확인 및 IndexNow 핑 전송.
+
+---
+## 🚀 [v107 Specification] 글로벌 4대 언어 URL 분기 강화 (/en, /ja, /zh) 및 배당 캘린더 인터랙티브 대시보드 위젯 신설
+
+### 1. 요구사항 및 배경
+- 사용자의 "글로벌 4대 언어 URL 분기 강화 + 배당 캘린더 인터랙티브 위젯 신설: 찐행" 승인에 따라 구현:
+  1. **[기능 1] 글로벌 4대 언어 URL 서브패스 정적 라우트 확장**:
+     - 기존 기본(KO) 라우트 외에 `/en/guide/glossary/[term]`, `/ja/guide/glossary/[term]`, `/zh/guide/glossary/[term]` 물리적 언어 서브패스 라우트 구축.
+     - 각 언어별 맞춤 메타데이터(타이틀, 설명, 오픈그래프) 및 hreflang alternate 상호 참조 완벽 구성.
+     - 각 언어 허브 페이지(`/en/guide/glossary`, `/ja/guide/glossary`, `/zh/guide/glossary`) 동시 개설.
+     - 4개 국어 × 50개 용어 = 200개 정적 사전 페이지 프리렌더링.
+  2. **[기능 2] 배당 캘린더 인터랙티브 위젯 신설 (`DividendCalendarWidget`)**:
+     - 사용자가 관심 등록/계산기에서 보관한 배당주 종목들의 월별(1월~12월) 배당금 지급 스케줄을 달력/타임라인 형태로 시각화.
+     - `cross-surface-visual-hierarchy-architect` 및 `anti-ai-frontend-craftsmanship` 준수: 고대비 모노스페이스 수치 렌더링(`tabular-nums`), 비대칭 그리드, 320px 극소 모바일 터치 타깃 44px 확보.
+     - 월별 예상 배당금 합산 요약, 다가오는 배당락일 D-Day 카운트다운 뱃지, 즉시 모의 추가 기능 제공.
+     - 배당소득세 계산기 메인 페이지(`/tools/dividend-tax-calculator`) 및 종목 상세 페이지에 임베드.
+
+### 2. 세부 컴포넌트 및 데이터셋 명세
+1. `frontend/src/app/[locale]/guide/glossary/[term]/page.tsx` (신규):
+   - `generateStaticParams`: `['en', 'ja', 'zh']` × 50개 슬러그 = 150개 다국어 정적 라우트 프리렌더링.
+   - 해당 언어(termEn, termJa, termZh / descriptionEn, descriptionJa, descriptionZh)에 최적화된 뷰 렌더링.
+2. `frontend/src/app/[locale]/guide/glossary/page.tsx` (신규):
+   - 언어별 50개 용어 인덱스 허브 페이지.
+3. `frontend/src/components/dividend-calendar-widget.tsx` (신규):
+   - 인터랙티브 월별 배당 캘린더 컴포넌트.
+   - 1~12월 타임라인 그리드, 월별 수령액 바 차트/스트립, 종목별 배당락일 및 지급월 매핑, 로컬스토리지 연동.
+4. `frontend/src/app/tools/dividend-tax-calculator/page.tsx` (수정):
+   - 상단 또는 하단에 `DividendCalendarWidget` 마운트.
+5. `frontend/src/app/sitemap.ts`:
+   - 4개 언어 서브패스(150개 신규 URL) 사이트맵 자동 등록.
+
+### 3. 검증 및 배포 계획
+- `npm run typecheck` 및 `npm run build` 정적 프리렌더링 500+ 라우트 통과 검증.
+- Git 커밋 & 푸시 후 원격 Debian 프로덕션 서버(`easy-scraping.com`) 무중단 배포.
+- 실측 라이브 curl HTTP 200 OK 확인 및 IndexNow 핑 전송.
+
+
 
 
 

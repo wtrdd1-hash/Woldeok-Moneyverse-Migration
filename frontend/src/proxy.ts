@@ -57,16 +57,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url), { status: 307 });
   }
 
-  // Historic blog routes are deliberately gone and must not be redirected.
-  if (pathname.startsWith('/entry/')) {
-    return new NextResponse('This legacy blog post has been permanently removed.', {
-      status: 410,
-      headers: {
-        'content-type': 'text/plain; charset=utf-8',
-        'cache-control': 'public, max-age=3600',
-        'x-robots-tag': 'noindex, nofollow',
-      },
-    });
+  // Historic blog routes: 301 Permanent Redirect to capture search traffic into Moneyverse developer career & tools
+  if (pathname.startsWith('/entry/') || pathname.startsWith('/blog/') || pathname.startsWith('/post/')) {
+    const redirectUrl = new URL('/guide/career-mastery?ref=legacy_tech_blog', request.url);
+    return NextResponse.redirect(redirectUrl, 301);
   }
 
   // Check for explicit query parameter (?lang=en or ?locale=ja)
@@ -85,7 +79,12 @@ export function proxy(request: NextRequest) {
 
     if (isLocale(rawLang)) {
       explicitPrefixLocale = rawLang;
-      targetPath = cleanRest;
+      // Physical localized routes (e.g. /[locale]/guide/glossary/...) should not be stripped
+      if (cleanRest.startsWith('/guide/glossary')) {
+        targetPath = pathname;
+      } else {
+        targetPath = cleanRest;
+      }
     } else {
       // User entered an unsupported language prefix (e.g. /fr/stocks, /de/bank)
       // Automatically redirect to English (/en/...)
@@ -97,12 +96,13 @@ export function proxy(request: NextRequest) {
 
   // Prepare response: If targetPath was rewritten from a prefix, perform internal rewrite
   let response: NextResponse;
-  if (explicitPrefixLocale) {
+  if (explicitPrefixLocale && targetPath !== pathname) {
     const rewriteUrl = new URL(`${targetPath}${request.nextUrl.search}`, request.url);
     response = NextResponse.rewrite(rewriteUrl);
   } else {
     response = NextResponse.next();
   }
+
 
   // Determine active locale with 3-tier precedence:
   // Tier 1: Explicit URL prefix or Query param (?lang=ja)

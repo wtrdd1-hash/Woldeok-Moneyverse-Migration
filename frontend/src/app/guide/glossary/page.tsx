@@ -1,37 +1,42 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Search, HelpCircle, Check, DollarSign } from 'lucide-react';
+import { ArrowLeft, BookOpen, Search, HelpCircle, ArrowRight, Sparkles, Filter } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
+import { canonicalUrl, buildOgImageUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { getServerLocale } from '@/lib/locale-server';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
+import { GLOSSARY_TERMS, GLOSSARY_CATEGORIES } from '@/config/pseo-glossary.config';
+import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
 
 export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const url = canonicalUrl('/guide/glossary');
   const ogImageUrl = buildOgImageUrl({
-    title: '핀테크 & 가상경제 핵심 금융 용어사전',
-    description: '스프레드, 슬리피지, M0 통화량, 10-Depth 호가, 코스트 베이시스 등 가상경제 핵심 용어 15선.',
+    title: '글로벌 50대 투자 & 금융 용어사전',
+    description: 'PER, PBR, ROE, 배당락일, 금융소득종합과세 등 50대 실전 금융 개념과 공식 완벽 정리.',
     type: 'default',
-    badge: '용어사전',
+    badge: '금융 백과사전',
   });
 
   return {
-    title: '핀테크 & 가상경제 핵심 금융 용어사전 — 월덕 머니버스',
-    description: '가상 주식 호가 스프레드, 슬리피지, M0 통화량, 리저브 비율, 매수원가(Cost Basis), 멱등성(Idempotency) 등 가상경제 핵심 용어를 쉽게 설명합니다.',
+    title: '50대 핵심 투자 & 금융 용어사전 — 월덕 머니버스',
+    description: '주식 밸류에이션(PER·PBR·ROE), 배당락일 및 배당소득세, 물타기 평단가 계산, 공매도·숏스퀴즈, 거시경제 금리 지표까지 50대 핵심 재테크 개념과 실전 공식을 한눈에 확인하세요.',
     keywords: [
-      '가상경제 용어사전',
-      '호가 스프레드 뜻',
-      '슬리피지 의미',
-      'M0 통화량',
-      '코스트 베이시스',
-      '핀테크 용어',
-      '월덕 머니버스 용어',
+      '금융 용어사전',
+      '주식 용어 정리',
+      'PER 뜻',
+      'PBR 뜻',
+      'ROE 계산',
+      '배당락일 뜻',
+      '배당소득세율',
+      '금융소득종합과세 기준',
+      '물타기 뜻',
+      '재테크 용어',
     ],
     alternates: {
       canonical: url,
@@ -44,166 +49,169 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     robots: { index: true, follow: true },
     openGraph: {
-      title: '핀테크 & 가상경제 핵심 금융 용어사전',
-      description: '가상경제 및 핀테크 핵심 용어 해설집',
+      title: '50대 핵심 투자 & 금융 용어사전 | 월덕 머니버스',
+      description: '실전 주식 투자와 절세, 배당 전략을 위한 50대 핵심 금융 용어와 계산 공식 총정리',
       url,
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
   };
 }
 
-const GLOSSARY_ITEMS = [
-  {
-    term: '10-Depth 호가창 (10-Depth Orderbook)',
-    en: '10-Depth Orderbook',
-    category: '주식/거래',
-    summary: '현재 시장 최우선 매수/매도 주문 상위 10개 단계의 가격과 수량을 실시간으로 보여주는 체결창.',
-    detail: '거래 참여자들의 대기 주문 분포를 한눈에 파악할 수 있어 단기 매수세/매도세를 가늠하는 핵심 도구입니다.',
-  },
-  {
-    term: '스프레드 (Spread bps)',
-    en: 'Bid-Ask Spread',
-    category: '주식/거래',
-    summary: '최우선 매도 호가(Ask)와 최우선 매수 호가(Bid) 간의 가격 차이.',
-    detail: '스프레드가 좁을수록(낮은 bps) 거래 유동성이 풍부하며, 주문 시 가격 손실 없이 즉시 체결될 확률이 높습니다.',
-  },
-  {
-    term: '슬리피지 (Slippage)',
-    en: 'Slippage',
-    category: '주식/거래',
-    summary: '주문 시점의 예상 가격과 실제 시장에서 체결된 최종 가격 간의 괴리.',
-    detail: '대량 시장가 주문을 넣을 때 호가 잔량이 얇으면 상위 호가를 갉아먹으며 평균 체결 단가가 불리해집니다.',
-  },
-  {
-    term: '매수원가 환급 (Cost-Basis Settlement)',
-    en: 'Cost-Basis Settlement',
-    category: '투자자 보호',
-    summary: '종목 거래정지 시 시장가가 아닌 실제 유저가 취득한 평균 매입 단가로 100% 원금을 환급하는 시스템.',
-    detail: '시장 급변으로 인한 거래정지 발생 시 사용자의 자산 손실을 방지하고 수수료와 세금을 전액 면제합니다.',
-  },
-  {
-    term: 'M0 통화량 (M0 Monetary Base)',
-    en: 'M0 Money Supply',
-    category: '거시경제',
-    summary: '월덕 머니버스 경제 시스템 내에 유통 중인 지갑 및 은행 예치 WLD의 총합.',
-    detail: '국고 비축률과 함께 인플레이션 및 디플레이션을 측정하는 척도로 사용되며, AI 중앙은행이 실시간 모니터링합니다.',
-  },
-  {
-    term: '국고 비축률 (Treasury Reserve Ratio)',
-    en: 'Reserve Ratio',
-    category: '거시경제',
-    summary: '총 유통 통화량 대비 중앙은행 금고에 비축된 유동성 자산의 비율.',
-    detail: '높은 비축률은 경제 위기 시 경기 부양 보조금 지급 및 주식 거래정지 환급을 안정적으로 지탱합니다.',
-  },
-  {
-    term: '복리 연이율 (Compounding APR)',
-    en: 'Annual Percentage Rate',
-    category: '은행/금융',
-    summary: '발생한 이자가 매일 원금에 가산되어 다시 이자를 발생시키는 연간 환산 수익률.',
-    detail: '단리보다 장기 예치 시 자산 증가 속도가 기하급수적으로 빨라지는 금융의 마법입니다.',
-  },
-  {
-    term: '멱등성 (Idempotency)',
-    en: 'Idempotency Key',
-    category: '보안/엔지니어링',
-    summary: '네트워크 장애나 다중 클릭 시 동일한 요청이 여러 번 전송되어도 계좌에서 1회만 처리되도록 보장하는 기술.',
-    detail: '송금 및 결제 시 유니크한 멱등키(UUID)를 발급하여 중복 인출 사고를 100% 원천 차단합니다.',
-  },
-];
-
 export default async function GlossaryPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: '홈', path: '/' },
+    { name: '가이드 허브', path: '/guide' },
+    { name: '금융 용어사전', path: '/guide/glossary' },
+  ]);
+
   const jsonLdData = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: GLOSSARY_ITEMS.map((item) => ({
+    mainEntity: GLOSSARY_TERMS.slice(0, 20).map((item) => ({
       '@type': 'Question',
-      name: `${item.term} (${item.en})`,
+      name: `${item.termKo} (${item.termEn})`,
       acceptedAnswer: {
         '@type': 'Answer',
-        text: `${item.summary} ${item.detail}`,
+        text: `${item.descriptionKo} ${item.formula ? `공식: ${item.formula}` : ''}`,
       },
     })),
   };
 
   return (
-    <div data-page="guide-glossary" className="mv-page mv-page--public grid gap-6 max-w-4xl mx-auto">
+    <div data-page="guide-glossary" className="mv-page mv-page--public min-h-screen py-8 px-4 sm:px-6">
+      <DesktopStickyAdRails />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
       />
 
-      <Button asChild variant="ghost" className="w-fit -ml-3 text-muted-foreground">
-        <Link href="/guide">
-          <ArrowLeft />
-          {isEn ? 'Back to guides' : '가이드 센터로 돌아가기'}
-        </Link>
-      </Button>
-
-      <PageHeader
-        eyebrow="FINTECH KNOWLEDGE BASE"
-        title={isEn ? 'FinTech & Economy Glossary' : '핀테크 & 가상경제 핵심 금융 용어사전'}
-      >
-        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-          {isEn
-            ? 'Clear, concise definitions for virtual trading, algorithmic economics, and financial safety mechanics in Woldeok Moneyverse.'
-            : '가상 주식 호가창, 스프레드, 복리 예금, 통화량, 멱등성 등 가상경제 시뮬레이터에서 사용되는 핵심 금융·엔지니어링 용어를 알기 쉽게 정리했습니다.'}
-        </p>
-      </PageHeader>
-
-      <div className="grid gap-3.5">
-        {GLOSSARY_ITEMS.map((item, index) => (
-          <React.Fragment key={index}>
-            <Card className="border-border/80 bg-card/60">
-              <CardHeader className="p-4 sm:p-5 pb-2">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-primary/10 text-primary">
-                      <BookOpen className="size-4" />
-                    </div>
-                    <CardTitle className="text-sm sm:text-base font-bold text-foreground">
-                      {item.term}
-                    </CardTitle>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {item.category}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-5 pt-1 space-y-1.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                <p className="text-foreground font-medium">{item.summary}</p>
-                <p className="text-xs text-muted-foreground/90">{item.detail}</p>
-              </CardContent>
-            </Card>
-            {index === 3 && (
-              <InArticleAdvertisement className="my-2" />
-            )}
-          </React.Fragment>
-        ))}
-      </div>
-
-      {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}
-      <MultiplexAdvertisement className="my-6" />
-
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl border border-primary/20 bg-primary/5 mt-4">
-        <div>
-          <h4 className="font-bold text-sm text-foreground">
-            {isEn ? 'Have more questions?' : '더 궁금한 가상 경제 기능이 있으신가요?'}
-          </h4>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {isEn
-              ? 'Visit our beginner guide or ask in the community board.'
-              : '초보자 가이드 및 커뮤니티 자유게시판에서 다른 유저들과 토론해보세요.'}
-          </p>
-        </div>
-        <Button asChild className="shrink-0 w-full sm:w-auto">
+      <div className="max-w-5xl mx-auto space-y-6">
+        <Button asChild variant="ghost" className="w-fit -ml-3 text-muted-foreground">
           <Link href="/guide">
-            <HelpCircle className="size-4 mr-1.5" />
-            {isEn ? 'Beginner Guide' : '초보자 가이드 메인'}
+            <ArrowLeft className="size-4 mr-1.5" />
+            {isEn ? 'Back to guides' : '가이드 센터로 돌아가기'}
           </Link>
         </Button>
+
+        <PageHeader
+          eyebrow="GLOBAL FINANCIAL GLOSSARY"
+          title={isEn ? '50 Essential Investment & Finance Terms' : '50대 핵심 실전 투자 & 금융 용어사전'}
+        >
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-3xl">
+            {isEn
+              ? 'Comprehensive definitions, formulas, and actionable strategies for 50 essential finance terms covering Valuation, Dividends, Taxes, and Trading.'
+              : '주식 가치평가(PER·PBR·ROE)부터 배당락일, 금융소득종합과세, 물타기 평단가 공식까지 실전 투자와 절세를 위한 50대 핵심 지표를 완벽 정리했습니다.'}
+          </p>
+        </PageHeader>
+
+        {/* 상단 통계 하이라이트 바 */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="rounded-xl border border-border/80 bg-card p-4 text-center">
+            <span className="text-xs text-muted-foreground font-medium">총 수록 용어</span>
+            <div className="text-xl sm:text-2xl font-mono font-bold text-foreground mt-0.5">50개</div>
+          </div>
+          <div className="rounded-xl border border-border/80 bg-card p-4 text-center">
+            <span className="text-xs text-muted-foreground font-medium">지원 글로벌 언어</span>
+            <div className="text-xl sm:text-2xl font-mono font-bold text-foreground mt-0.5">4개 국어</div>
+          </div>
+          <div className="rounded-xl border border-border/80 bg-card p-4 text-center">
+            <span className="text-xs text-muted-foreground font-medium">연계 계산기 도구</span>
+            <div className="text-xl sm:text-2xl font-mono font-bold text-foreground mt-0.5">4종 웹앱</div>
+          </div>
+          <div className="rounded-xl border border-border/80 bg-card p-4 text-center">
+            <span className="text-xs text-muted-foreground font-medium">구글 검색 색인</span>
+            <div className="text-xl sm:text-2xl font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">100% 정적 생성</div>
+          </div>
+        </div>
+
+        {/* 최상단 AdSense 광고 */}
+        <InArticleAdvertisement className="my-2" />
+
+        {/* 50대 용어 카드 그리드 */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+              <BookOpen className="size-5 text-primary" />
+              전체 용어 백과사전 목차
+            </h3>
+            <span className="text-xs text-muted-foreground font-mono">50 Terms Available</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {GLOSSARY_TERMS.map((item, index) => (
+              <React.Fragment key={item.slug}>
+                <Link
+                  href={`/guide/glossary/${item.slug}`}
+                  className="group rounded-xl border border-border/80 bg-card hover:border-primary/50 hover:bg-primary/5 p-4 sm:p-5 transition-all flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <Badge variant="outline" className="text-[10px] uppercase font-mono bg-zinc-100 dark:bg-zinc-800">
+                        {item.category}
+                      </Badge>
+                      <ArrowRight className="size-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                    <div>
+                      <h4 className="text-base font-bold text-foreground group-hover:text-primary transition-colors">
+                        {item.termKo}
+                      </h4>
+                      <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                        {item.termEn}
+                      </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                      {item.descriptionKo}
+                    </p>
+                  </div>
+
+                  {item.formula && (
+                    <div className="mt-3 pt-2.5 border-t border-border/50 text-[11px] font-mono text-zinc-500 dark:text-zinc-400 line-clamp-1">
+                      {item.formula}
+                    </div>
+                  )}
+                </Link>
+
+                {/* 중간 6번째, 20번째에 AdSense 인아티클 광고 배치 */}
+                {index === 5 && (
+                  <div className="md:col-span-2 my-2">
+                    <InArticleAdvertisement />
+                  </div>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        {/* 하단 멀티플렉스 추천 광고 */}
+        <MultiplexAdvertisement className="my-6" />
+
+        {/* 초보자 가이드 연결 배너 */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl border border-primary/20 bg-primary/5">
+          <div>
+            <h4 className="font-bold text-base text-foreground">
+              {isEn ? 'Looking for interactive calculators?' : '직접 계산해볼 수 있는 웹 도구가 필요하신가요?'}
+            </h4>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              {isEn
+                ? 'Check out our escape price, dividend tax, and compound interest calculators.'
+                : '물타기 본전 탈출 계산기, 배당소득세 계산기, 대출이자 계산기를 무료로 실행해보세요.'}
+            </p>
+          </div>
+          <Button asChild className="shrink-0 w-full sm:w-auto">
+            <Link href="/tools">
+              <Sparkles className="size-4 mr-1.5" />
+              금융 계산기 허브 바로가기
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
