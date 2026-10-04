@@ -8,6 +8,7 @@ import {
   Bot,
   Building2,
   CheckCircle2,
+  Coins,
   FileCheck2,
   Flame,
   History,
@@ -17,6 +18,7 @@ import {
   Settings2,
   ShieldAlert,
   ShieldCheck,
+  Sparkles,
   TrendingDown,
   TrendingUp,
   Zap,
@@ -83,6 +85,16 @@ export interface MintCertificateItem {
   readonly created_at: string;
 }
 
+export interface RetirementCertificateItem {
+  readonly id: string;
+  readonly policy_order_id: string | null;
+  readonly amount_wld: string;
+  readonly source_type: string;
+  readonly reason: string;
+  readonly idempotency_key: string;
+  readonly created_at: string;
+}
+
 export interface MonetaryAutoRegulationConfigData {
   readonly id: number;
   readonly is_enabled: boolean;
@@ -113,6 +125,7 @@ interface MonetaryBureauCardProps {
   readonly initialTelemetry: MonetaryTelemetryData | null;
   readonly initialOrders: readonly MonetaryPolicyOrderItem[];
   readonly initialMints: readonly MintCertificateItem[];
+  readonly initialRetirements?: readonly RetirementCertificateItem[];
   readonly initialAutoConfig?: MonetaryAutoRegulationConfigData | null;
   readonly initialAutoEvents?: readonly MonetaryRegulationEventItem[];
 }
@@ -121,19 +134,23 @@ export function MonetaryBureauCard({
   initialTelemetry,
   initialOrders,
   initialMints,
+  initialRetirements = [],
   initialAutoConfig,
   initialAutoEvents = [],
 }: MonetaryBureauCardProps) {
   const [telemetry, setTelemetry] = useState<MonetaryTelemetryData | null>(initialTelemetry);
   const [orders, setOrders] = useState<readonly MonetaryPolicyOrderItem[]>(initialOrders);
   const [mints, setMints] = useState<readonly MintCertificateItem[]>(initialMints);
+  const [retirements, setRetirements] = useState<readonly RetirementCertificateItem[]>(
+    initialRetirements,
+  );
   const [autoConfig, setAutoConfig] = useState<MonetaryAutoRegulationConfigData | null>(
     initialAutoConfig ?? null,
   );
   const [autoEvents, setAutoEvents] = useState<readonly MonetaryRegulationEventItem[]>(
     initialAutoEvents,
   );
-  const [activeTab, setActiveTab] = useState<'orders' | 'mints' | 'auto'>('auto');
+  const [activeTab, setActiveTab] = useState<'orders' | 'mints' | 'retirements' | 'auto'>('auto');
 
   const [isProposeOpen, setIsProposeOpen] = useState(false);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -142,6 +159,7 @@ export function MonetaryBureauCard({
   const [maxAmountWld, setMaxAmountWld] = useState('1000000');
   const [proposeReason, setProposeReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
 
   // Auto Regulation form state
@@ -155,17 +173,24 @@ export function MonetaryBureauCard({
     autoConfig?.max_step_pct?.toString() ?? '5.0',
   );
 
+  const totalRetiredAmount = retirements.reduce(
+    (acc, cur) => acc + BigInt(cur.amount_wld || '0'),
+    BigInt(0),
+  );
+
   const refreshData = async () => {
     try {
-      const [tRes, oRes, mRes, aRes] = await Promise.all([
+      const [tRes, oRes, mRes, rRes, aRes] = await Promise.all([
         fetch('/api/v1/admin/economy/monetary/telemetry'),
         fetch('/api/v1/admin/economy/monetary/orders'),
         fetch('/api/v1/admin/economy/monetary/certificates/mints'),
+        fetch('/api/v1/admin/economy/monetary/certificates/retirements'),
         fetch('/api/v1/admin/economy/monetary/auto-regulation/status'),
       ]);
       if (tRes.ok) setTelemetry(await tRes.json());
       if (oRes.ok) setOrders(await oRes.json());
       if (mRes.ok) setMints(await mRes.json());
+      if (rRes.ok) setRetirements(await rRes.json());
       if (aRes.ok) {
         const aData = await aRes.json();
         if (aData.config) setAutoConfig(aData.config);
@@ -173,6 +198,42 @@ export function MonetaryBureauCard({
       }
     } catch {
       // ignore
+    }
+  };
+
+  const handleFetchAiRecommendation = async () => {
+    setIsLoadingAi(true);
+    setFeedbackMsg(null);
+    try {
+      const res = await fetch('/api/v1/admin/economy/monetary/ai-council/recommendation');
+      if (res.ok) {
+        const data = await res.json();
+        setOrderType(data.order_type);
+        setTargetEnvelope(data.target_envelope);
+        setMaxAmountWld(data.recommended_amount_wld);
+        setProposeReason(data.synthesis_reason);
+      }
+    } finally {
+      setIsLoadingAi(false);
+    }
+  };
+
+  const handleAutoProposeFromAiCouncil = async () => {
+    setIsSubmitting(true);
+    setFeedbackMsg(null);
+    try {
+      const res = await fetch('/api/v1/admin/economy/monetary/ai-council/propose-policy', {
+        method: 'POST',
+      });
+      if (res.ok) {
+        setActiveTab('orders');
+        await refreshData();
+      } else {
+        const err = await res.json();
+        setFeedbackMsg(err.message || 'AI 정책 위원회 명령서 자동 등록 실패');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -314,7 +375,7 @@ export function MonetaryBureauCard({
               </Badge>
               {autoConfig?.is_enabled && (
                 <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-mono text-[10px] flex items-center gap-1">
-                  <Bot className="size-3" /> 자동 화폐량 조절 가동 중
+                  <Bot className="size-3" /> 화폐량 자동 조절 가동 중
                 </Badge>
               )}
             </div>
@@ -323,7 +384,7 @@ export function MonetaryBureauCard({
               중앙은행(MCB) 통화정책 & 조폐국(MMB) 실행 관제 타워
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
-              1시간 주기 Faucet/Sink 피드백 자동 조절, 안전 한도(±5%) 자율 집행, 긴급 서킷브레이커 동결
+              1시간 주기 Faucet/Sink 피드백 자동 조절, AI 정책 위원회 시뮬레이터 연계, 조폐국 영구 소각 인증서 관제
             </CardDescription>
           </div>
 
@@ -405,18 +466,18 @@ export function MonetaryBureauCard({
 
           <div className="p-3 bg-muted/40 rounded-xl border border-border/50">
             <div className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
-              <FileCheck2 className="size-3.5 text-amber-500" /> 자동 피드백 상태
+              <Flame className="size-3.5 text-rose-500" /> 누적 영구 소각량 (Sink)
             </div>
-            <div className="text-lg font-bold font-mono mt-1 text-foreground">
-              {autoConfig?.last_action_taken ?? 'NEUTRAL'}
+            <div className="text-lg font-bold font-mono mt-1 text-rose-600 dark:text-rose-400">
+              {groupDigits(totalRetiredAmount.toString())} <span className="text-xs font-normal">WLD</span>
             </div>
             <div className="text-[10px] text-muted-foreground mt-0.5">
-              목표 비율: {autoConfig?.target_faucet_sink_ratio ?? 1.0} (오차 ±{autoConfig?.tolerance_band_pct ?? 5}%)
+              소각 인증서 {retirements.length}건 발급 완료
             </div>
           </div>
         </div>
 
-        {/* Tab switcher: Policy Orders vs Mint Certificates vs Auto Regulation */}
+        {/* Tab switcher: Policy Orders vs Mint Certificates vs Retirements vs Auto Regulation */}
         <div className="flex items-center justify-between border-b pb-2 mb-3 flex-wrap gap-2">
           <div className="flex items-center gap-2 flex-wrap">
             <Button
@@ -425,7 +486,7 @@ export function MonetaryBureauCard({
               onClick={() => setActiveTab('auto')}
               className="text-xs h-7 gap-1"
             >
-              <Bot className="size-3" /> 화폐량 자동 조절 타임라인 ({autoEvents.length})
+              <Bot className="size-3" /> 자동 조절 타임라인 ({autoEvents.length})
             </Button>
             <Button
               variant={activeTab === 'orders' ? 'default' : 'ghost'}
@@ -443,10 +504,18 @@ export function MonetaryBureauCard({
             >
               조폐국 발행 인증서 ({mints.length})
             </Button>
+            <Button
+              variant={activeTab === 'retirements' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('retirements')}
+              className="text-xs h-7 gap-1 text-rose-600 dark:text-rose-400"
+            >
+              <Flame className="size-3" /> 영구 소각 인증서 ({retirements.length})
+            </Button>
           </div>
 
           {activeTab === 'auto' && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Button
                 size="sm"
                 variant="outline"
@@ -514,80 +583,104 @@ export function MonetaryBureauCard({
           )}
 
           {activeTab === 'orders' && (
-            <Dialog open={isProposeOpen} onOpenChange={setIsProposeOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="text-xs h-7 gap-1">
-                  <PlusCircle className="size-3" /> 정책 명령 발의
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <form onSubmit={handleProposeOrder}>
-                  <DialogHeader>
-                    <DialogTitle className="text-base">신규 통화정책 명령서 발의 (PROPOSE)</DialogTitle>
-                    <DialogDescription className="text-xs">
-                      중앙은행(MCB) 정책 승인을 위한 발행/폐기 한도 명령서를 발의합니다.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-3 py-3">
-                    <div className="grid gap-1">
-                      <Label htmlFor="orderType" className="text-xs">명령 유형</Label>
-                      <select
-                        id="orderType"
-                        value={orderType}
-                        onChange={(e) => setOrderType(e.target.value as 'MINT' | 'RETIRE')}
-                        className="h-8 rounded-md border border-input bg-background px-3 text-xs"
-                      >
-                        <option value="MINT">MINT (신규 통화 발행 승인)</option>
-                        <option value="RETIRE">RETIRE (통화 영구 폐기 승인)</option>
-                      </select>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleAutoProposeFromAiCouncil}
+                disabled={isSubmitting}
+                className="text-xs h-7 gap-1 text-primary border-primary/30"
+              >
+                <Sparkles className="size-3 text-amber-500" /> 🤖 AI 위원회 권고안 자동 등록
+              </Button>
+              <Dialog open={isProposeOpen} onOpenChange={setIsProposeOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="text-xs h-7 gap-1">
+                    <PlusCircle className="size-3" /> 정책 명령 발의
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <form onSubmit={handleProposeOrder}>
+                    <DialogHeader>
+                      <div className="flex items-center justify-between">
+                        <DialogTitle className="text-base">신규 통화정책 명령서 발의 (PROPOSE)</DialogTitle>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleFetchAiRecommendation}
+                          disabled={isLoadingAi}
+                          className="text-xs h-6 px-2 text-primary"
+                        >
+                          <Sparkles className="size-3 mr-1 text-amber-500" />
+                          {isLoadingAi ? 'AI 분석 중...' : 'AI 권고안 주입'}
+                        </Button>
+                      </div>
+                      <DialogDescription className="text-xs">
+                        중앙은행(MCB) 정책 승인을 위한 발행/폐기 한도 명령서를 발의합니다.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-3 py-3">
+                      <div className="grid gap-1">
+                        <Label htmlFor="orderType" className="text-xs">명령 유형</Label>
+                        <select
+                          id="orderType"
+                          value={orderType}
+                          onChange={(e) => setOrderType(e.target.value as 'MINT' | 'RETIRE')}
+                          className="h-8 rounded-md border border-input bg-background px-3 text-xs"
+                        >
+                          <option value="MINT">MINT (신규 통화 발행 승인)</option>
+                          <option value="RETIRE">RETIRE (통화 영구 폐기 승인)</option>
+                        </select>
+                      </div>
+                      <div className="grid gap-1">
+                        <Label htmlFor="targetEnvelope" className="text-xs">발행 목적 엔벨로프</Label>
+                        <select
+                          id="targetEnvelope"
+                          value={targetEnvelope}
+                          onChange={(e) => setTargetEnvelope(e.target.value)}
+                          className="h-8 rounded-md border border-input bg-background px-3 text-xs"
+                        >
+                          <option value="WORK_REWARD">WORK_REWARD (직업 급여 보상)</option>
+                          <option value="QUEST_REWARD">QUEST_REWARD (퀘스트/온보딩 보상)</option>
+                          <option value="EVENT_REWARD">EVENT_REWARD (시즌 이벤트 보상)</option>
+                          <option value="STABILIZATION_POOL">STABILIZATION_POOL (통화 안정화 풀)</option>
+                          <option value="HARD_SINK_PURGE">HARD_SINK_PURGE (영구 소각)</option>
+                        </select>
+                      </div>
+                      <div className="grid gap-1">
+                        <Label htmlFor="maxAmount" className="text-xs">최대 한도 (WLD)</Label>
+                        <Input
+                          id="maxAmount"
+                          value={maxAmountWld}
+                          onChange={(e) => setMaxAmountWld(e.target.value)}
+                          placeholder="1000000"
+                          className="text-xs font-mono h-8"
+                        />
+                      </div>
+                      <div className="grid gap-1">
+                        <Label htmlFor="proposeReason" className="text-xs">정책 발의 감사 사유 (최소 10자)</Label>
+                        <Input
+                          id="proposeReason"
+                          value={proposeReason}
+                          onChange={(e) => setProposeReason(e.target.value)}
+                          placeholder="2026년 4분기 직업 보상 풀 중앙은행 승인 요청"
+                          className="text-xs h-8"
+                        />
+                      </div>
+                      {feedbackMsg && (
+                        <p className="text-[11px] text-destructive">{feedbackMsg}</p>
+                      )}
                     </div>
-                    <div className="grid gap-1">
-                      <Label htmlFor="targetEnvelope" className="text-xs">발행 목적 엔벨로프</Label>
-                      <select
-                        id="targetEnvelope"
-                        value={targetEnvelope}
-                        onChange={(e) => setTargetEnvelope(e.target.value)}
-                        className="h-8 rounded-md border border-input bg-background px-3 text-xs"
-                      >
-                        <option value="WORK_REWARD">WORK_REWARD (직업 급여 보상)</option>
-                        <option value="QUEST_REWARD">QUEST_REWARD (퀘스트/온보딩 보상)</option>
-                        <option value="EVENT_REWARD">EVENT_REWARD (시즌 이벤트 보상)</option>
-                        <option value="STABILIZATION_POOL">STABILIZATION_POOL (통화 안정화 풀)</option>
-                        <option value="HARD_SINK_PURGE">HARD_SINK_PURGE (영구 소각)</option>
-                      </select>
-                    </div>
-                    <div className="grid gap-1">
-                      <Label htmlFor="maxAmount" className="text-xs">최대 한도 (WLD)</Label>
-                      <Input
-                        id="maxAmount"
-                        value={maxAmountWld}
-                        onChange={(e) => setMaxAmountWld(e.target.value)}
-                        placeholder="1000000"
-                        className="text-xs font-mono h-8"
-                      />
-                    </div>
-                    <div className="grid gap-1">
-                      <Label htmlFor="proposeReason" className="text-xs">정책 발의 감사 사유 (최소 10자)</Label>
-                      <Input
-                        id="proposeReason"
-                        value={proposeReason}
-                        onChange={(e) => setProposeReason(e.target.value)}
-                        placeholder="2026년 4분기 직업 보상 풀 중앙은행 승인 요청"
-                        className="text-xs h-8"
-                      />
-                    </div>
-                    {feedbackMsg && (
-                      <p className="text-[11px] text-destructive">{feedbackMsg}</p>
-                    )}
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit" size="sm" disabled={isSubmitting} className="text-xs">
-                      {isSubmitting ? '발의 중...' : '명령서 발의 등록'}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+                    <DialogFooter>
+                      <Button type="submit" size="sm" disabled={isSubmitting} className="text-xs">
+                        {isSubmitting ? '발의 중...' : '명령서 발의 등록'}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
           )}
         </div>
 
@@ -671,7 +764,7 @@ export function MonetaryBureauCard({
                   <TableHead className="text-[11px] py-2">한도 WLD</TableHead>
                   <TableHead className="text-[11px] py-2">집행량</TableHead>
                   <TableHead className="text-[11px] py-2">상태</TableHead>
-                  <TableHead className="text-[11px] py-2">사유</TableHead>
+                  <TableHead className="text-[11px] py-2">사유 / 발의자</TableHead>
                   <TableHead className="text-[11px] py-2 text-right">관리</TableHead>
                 </TableRow>
               </TableHeader>
@@ -703,8 +796,13 @@ export function MonetaryBureauCard({
                           {o.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="py-2 text-[11px] max-w-[200px] truncate" title={o.reason}>
-                        {o.reason}
+                      <TableCell className="py-2 text-[11px] max-w-[240px] truncate" title={o.reason}>
+                        <span className="text-foreground">{o.reason}</span>
+                        {o.proposed_by && (
+                          <span className="block text-[10px] text-muted-foreground font-mono">
+                            발의: {o.proposed_by}
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell className="py-2 text-right">
                         {o.status === 'PROPOSED' && (
@@ -770,29 +868,59 @@ export function MonetaryBureauCard({
             </Table>
           </div>
         )}
+
+        {/* Tab 3: Retirement Certificates Table (Sink / Burn Ledger) */}
+        {activeTab === 'retirements' && (
+          <div className="overflow-x-auto rounded-lg border border-border/60">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/30">
+                  <TableHead className="text-[11px] py-2">소각 인증서 ID</TableHead>
+                  <TableHead className="text-[11px] py-2">소각 수량 (WLD)</TableHead>
+                  <TableHead className="text-[11px] py-2">소각 출처/채널</TableHead>
+                  <TableHead className="text-[11px] py-2">소각 감사 사유</TableHead>
+                  <TableHead className="text-[11px] py-2">멱등성 키</TableHead>
+                  <TableHead className="text-[11px] py-2 text-right">소각 일시</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {retirements.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">
+                      발급된 조폐국 영구 소각 인증서가 없습니다.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  retirements.map((r) => (
+                    <TableRow key={r.id} className="text-xs">
+                      <TableCell className="py-2 font-mono text-[10px] text-muted-foreground">
+                        {r.id.substring(0, 8)}...
+                      </TableCell>
+                      <TableCell className="py-2 font-mono font-bold text-rose-600 dark:text-rose-400">
+                        -{groupDigits(r.amount_wld)} WLD
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <Badge variant="outline" className="font-mono text-[10px]">
+                          {r.source_type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-2 text-[11px] max-w-[200px] truncate" title={r.reason}>
+                        {r.reason}
+                      </TableCell>
+                      <TableCell className="py-2 font-mono text-[10px] text-muted-foreground max-w-[120px] truncate" title={r.idempotency_key}>
+                        {r.idempotency_key}
+                      </TableCell>
+                      <TableCell className="py-2 text-[10px] text-muted-foreground text-right">
+                        {new Date(r.created_at).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </CardContent>
     </Card>
-  );
-}
-
-function Coins(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="8" cy="8" r="6" />
-      <path d="M18.09 10.37A6 6 0 1 1 10.34 18" />
-      <path d="M7 6h1v4" />
-      <path d="m16.71 13.88.7.71-2.82 2.82" />
-    </svg>
   );
 }

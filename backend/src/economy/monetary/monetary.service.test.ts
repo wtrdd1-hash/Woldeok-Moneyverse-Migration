@@ -209,4 +209,55 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
       expect(res.amount_wld).toBe('15000');
     });
   });
+
+  describe('CentralBankService - AI Council Integration', () => {
+    it('generates multi-agent council recommendation and proposes order successfully', async () => {
+      const mockPool = {
+        query: vi.fn().mockImplementation((queryText: string) => {
+          if (queryText.includes('FROM public.system_treasury_vaults')) {
+            return Promise.resolve({
+              rows: [
+                {
+                  treasury_wld: '50000000',
+                  user_balances_wld: '30000',
+                  is_issuance_frozen: false,
+                },
+              ],
+            });
+          }
+          if (queryText.includes('FROM public.monetary_policy_orders WHERE status')) {
+            return Promise.resolve({
+              rows: [{ active_orders: '1', mints: '2', retirements: '3' }],
+            });
+          }
+          if (queryText.includes('INSERT INTO public.monetary_policy_orders')) {
+            return Promise.resolve({
+              rows: [
+                {
+                  id: 'order-ai-1',
+                  order_type: 'MINT',
+                  target_envelope: 'WORK_REWARD',
+                  max_amount_wld: '300000',
+                  status: 'PROPOSED',
+                  reason: '[AI 정책 위원회 정기 권고안]...',
+                },
+              ],
+            });
+          }
+          return Promise.resolve({ rows: [] });
+        }),
+      } as unknown as Queryable;
+      const cbService = new CentralBankService(mockPool);
+
+      const rec = await cbService.generateAiCouncilRecommendation();
+      expect(rec.consensus_score).toBeGreaterThan(0.8);
+      expect(rec.agent_opinions.length).toBe(3);
+      expect(rec.synthesis_reason).toContain('[AI 정책 위원회 정기 권고안]');
+
+      const order = await cbService.proposeFromAiCouncil('admin-test');
+      expect(order.id).toBe('order-ai-1');
+      expect(order.status).toBe('PROPOSED');
+    });
+  });
 });
+

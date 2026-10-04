@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v92)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v93)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v93**: AI 정책 위원회(Multi-Agent Council) 통화정책 명령서 자동 제안(Propose) 시뮬레이터 연계 & 조폐국 소각 인증서(RetirementCertificate) 전용 통계 탭 시각화 풀스택 구축 — AI Review/Council 기반 거시경제 진단 후 `MonetaryPolicyOrder` 원클릭 승인 대기열 자동 등록, 카지노/수수료 영구 소각 인증서 실시간 조회 및 누적 소각 통계 시각화, 단위 테스트 및 Next.js 163개 라우트 빌드 통과 (+140, -0)
 - **v92**: 화폐량 자동 조절(Automated Monetary Supply Rebalancing Engine) 풀스택 구축 — Faucet/Sink 비율 실시간 평가 기반 1시간 주기 테이퍼링/양적완화 피드백 루프, 안전 한도(±5%) 내 전자동 자율 집행(`AutoMonetaryRegulationService`), DB 마이그레이션(245: `monetary_auto_regulation_configs`, `monetary_regulation_events`), 관리자 콘솔(`/admin/economy`) 내 자동 조절 스위치/파라미터/타임라인 로그 연동, 긴급 서킷브레이커 동결 및 시장 공시 브로드캐스트 (+180, -0)
 - **v91**: 관리자 경제 콘솔(`/admin/economy`) 중앙은행(MCB) 및 조폐국(MMB) 통합 관제 패널(`MonetaryBureauCard`) 풀스택 탑재 & 프론트엔드/백엔드 원격 운영 서버(`prod-v521`) 무중단 승격 완결 — 5대 통화 지표($M_{\text{total}}$, $M_{\text{circulating}}$, $M_{\text{treasury}}$ 등) 실시간 텔레메트리, 통화발행 비상 동결/해제 스위치, 통화정책 명령서(MINT/RETIRE) 발의/승인 모달, 조폐국 실행 인증서 테이블, Vitest 및 Next.js 163개 라우트 빌드 통과 (+95, -0)
 - **v90**: v523 경제기관 3분립 (중앙은행·조폐국·중앙국고·경제코어) 런타임/DB 코드 분리 & $M_{\text{total}}$ 통화량 불변식 가드 엔진 구현 — `monetary_policy_orders`, `mint_certificates`, `retirement_certificates` DB 마이그레이션(244) 신설, `CentralBankService` 및 `MintBureauService` 분리 구현, `MonetaryController` 제어 API 탑재, 국고 지출 불변식 가드(`assertFiscalTransferOnly`) 연동, 단위 테스트 10종 전수 통과 및 NestJS/Turbopack 빌드 통과 (+140, -0)
@@ -1164,5 +1165,39 @@
 - **단위 테스트**: `auto-monetary-regulation.service.test.ts` 작성 및 통과.
 - **빌드 검증**: NestJS 백엔드 및 Next.js Turbopack 163개 라우트 빌드 통과.
 - **실운영 배포 및 라이브 검증**: 원격 서버 DB 마이그레이션 적용, 코드 승격, 자동 조절 스케줄러 가동 확인.
+
+---
+
+## 🚀 [v93 Specification] AI 정책 위원회 통화정책 명령서 자동 제안 연계 & 조폐국 소각 인증서(RetirementCertificate) 시각화 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  1. "자동 정책 시뮬레이터 연계: 향후 AI 정책 위원회가 통화정책 명령서(MonetaryPolicyOrder)를 자동 제안하고 관리자가 승인만 하도록 오토메이션 확장."
+  2. "소각 인증서(RetirementCertificate) UI 추가 시각화: 카지노 및 수수료 하드 싱크로 영구 소각된 WLD 누적 인증서 전용 통계 탭 추가."
+  3. "승인"
+- **핵심 구현 목표**:
+  1. **AI 정책 위원회(Multi-Agent Council) 시뮬레이션 연계**:
+     - 기존 `MultiAgentCouncilService` 및 AI Review 지표를 바탕으로 최적의 통화정책 권고안 도출.
+     - 중앙은행 정책 제안 API(`POST /api/v1/admin/economy/monetary/ai-council/propose-policy`) 신설: AI 위원회가 시장 시나리오(인플레이션, 유통속도, Faucet/Sink)를 종합 평가하여 정밀한 제안 사유와 함께 `MonetaryPolicyOrder`를 `PROPOSED` 상태로 자동 등록.
+     - 관리자 콘솔에서 원클릭으로 "AI 정책 위원회 권고안 불러와 명령서 자동 등록" 지원.
+  2. **조폐국 소각 인증서(`RetirementCertificate`) UI 통계 탭**:
+     - 카지노 베팅 손실금 소각, 장터 거래세 소각, 사업 소득세 소각 등 하드 싱크로 영구 폐기된 인증서 목록 조회(`GET /api/v1/admin/economy/monetary/certificates/retirements`).
+     - 누적 총 소각량($\Sigma \text{Retirements}$) 지표 카드, 소각 원인별(카지노/장터세/하드싱크) 분포 태그, 멱등성 키, 타임스탬프를 명확한 모노스페이스 테이블로 시각화.
+
+### 2. 세부 컴포넌트 구현 명세
+1. **백엔드 서비스 & 컨트롤러 확장**:
+   - `CentralBankService`: `proposeFromAiCouncil(councilRecommendation)` 헬퍼 구현.
+   - `MonetaryController`: `POST /api/v1/admin/economy/monetary/ai-council/propose-policy` 라우트 탑재.
+2. **프론트엔드 관제 카드 확장 (`monetary-bureau-card.tsx`)**:
+   - `RetirementCertificateItem` 타입 정의 및 `initialRetirements` props 수신.
+   - 4번째 탭 **"조폐국 소각 인증서 (Retirements)"** 탭 추가: 영구 소각 인증서 내역, 누적 소각 합계, 소각 사유/출처 시각화.
+   - 정책 명령 발의 모달에 **"🤖 AI 정책 위원회 권고안 자동 주입"** 버튼 탑재: 클릭 시 AI 위원회 분석 사유 및 최적 금액을 폼에 자동 입력.
+3. **페이지 연동 (`page.tsx`)**:
+   - 서버 사이드에서 `/api/v1/admin/economy/monetary/certificates/retirements` 비동기 조회 및 주입.
+
+### 3. 검증 계획
+- **단위 테스트**: 백엔드 중앙은행 및 AI 위원회 연계 테스트 작성 및 통과.
+- **빌드 검증**: NestJS 및 Next.js Turbopack 163개 라우트 빌드 통과.
+- **실운영 배포 및 라이브 검증**: 원격 서버 배포, 소각 인증서 탭 렌더링 및 AI 제안 기능 정상 작동 확인.
 
 

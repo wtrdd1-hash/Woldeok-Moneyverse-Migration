@@ -65,6 +65,20 @@ export class MonetaryController {
     return this.autoRegulation.getRecentEvents(limit ? Number(limit) : 20);
   }
 
+  @Get('ai-council/recommendation')
+  @ApiOperation({ summary: 'AI 정책 위원회 거시 분석 권고안 미리보기' })
+  async getAiCouncilRecommendation() {
+    return this.centralBank.generateAiCouncilRecommendation();
+  }
+
+  @Post('ai-council/propose-policy')
+  @ApiOperation({ summary: 'AI 정책 위원회 권고안 기반 통화정책 명령서 자동 등록 (PROPOSED)' })
+  async proposeFromAiCouncil(@Req() req: RequestWithSession) {
+    const adminId = requireUserId(req);
+    const order = await this.centralBank.proposeFromAiCouncil(adminId);
+    return { order };
+  }
+
   @Get('telemetry')
   @ApiOperation({ summary: '통화정책 및 중앙은행-조폐국 텔레메트리 대사 집계' })
   async getTelemetry() {

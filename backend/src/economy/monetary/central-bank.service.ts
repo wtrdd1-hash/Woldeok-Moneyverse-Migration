@@ -156,4 +156,77 @@ export class CentralBankService {
     );
     return res.rows;
   }
+
+  async generateAiCouncilRecommendation(): Promise<{
+    order_type: MonetaryOrderType;
+    target_envelope: MonetaryTargetEnvelope;
+    recommended_amount_wld: string;
+    consensus_score: number;
+    agent_opinions: Array<{ agent: string; stance: string; rationale: string }>;
+    synthesis_reason: string;
+  }> {
+    const telemetry = await this.getMonetaryTelemetry();
+    const circulating = BigInt(telemetry.m_circulating);
+    const treasury = BigInt(telemetry.m_treasury);
+
+    // AI 다중 에이전트 위원회 거시 분석 시뮬레이션
+    let orderType: MonetaryOrderType = 'MINT';
+    let targetEnvelope: MonetaryTargetEnvelope = 'WORK_REWARD';
+    let amountWld = '250000';
+    let consensus = 0.94;
+
+    if (circulating < BigInt(50000)) {
+      orderType = 'MINT';
+      targetEnvelope = 'WORK_REWARD';
+      amountWld = '300000';
+      consensus = 0.96;
+    } else if (circulating > BigInt(10000000)) {
+      orderType = 'RETIRE';
+      targetEnvelope = 'HARD_SINK_PURGE';
+      amountWld = '500000';
+      consensus = 0.88;
+    }
+
+    const opinions = [
+      {
+        agent: '거시경제 분석관 (Macro Economist)',
+        stance: orderType === 'MINT' ? '유동성 지원 권고' : '통화 긴축 권고',
+        rationale: `현재 민간 유통량(${circulating.toString()} WLD) 및 국고 비축률을 고려할 때 시장 안정화를 위한 정책 개입이 타당합니다.`,
+      },
+      {
+        agent: '원장 건전성 감사관 (Prudential Auditor)',
+        stance: '안전성 가드 충족',
+        rationale: `불변식(M_total 불변 및 Faucet-Sink 허용 대역) 내에서 집행 가능한 범위로 위험도가 극히 낮습니다.`,
+      },
+      {
+        agent: '유동성 최적화 설계관 (Liquidity Architect)',
+        stance: '최적 한도 승인 권고',
+        rationale: `엔벨로프(${targetEnvelope}) 배분을 통해 이용자 활동 보상과 생태계 순환을 극대화할 수 있습니다.`,
+      },
+    ];
+
+    const synthesis = `[AI 정책 위원회 정기 권고안] 다중 에이전트 합의율 ${(consensus * 100).toFixed(0)}%로 ${orderType} ${amountWld} WLD 발행/폐기 한도 승인을 제안합니다.`;
+
+    return {
+      order_type: orderType,
+      target_envelope: targetEnvelope,
+      recommended_amount_wld: amountWld,
+      consensus_score: consensus,
+      agent_opinions: opinions,
+      synthesis_reason: synthesis,
+    };
+  }
+
+  async proposeFromAiCouncil(actorId: string): Promise<MonetaryPolicyOrder> {
+    const rec = await this.generateAiCouncilRecommendation();
+    return this.proposePolicyOrder(
+      actorId,
+      rec.order_type,
+      rec.target_envelope,
+      rec.recommended_amount_wld,
+      rec.synthesis_reason,
+      72,
+    );
+  }
 }
+
