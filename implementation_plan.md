@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v99)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v100)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v100**: 수익 누수 원천 차단 — 580개 pSEO 주식 물타기 계산기 및 직장인 3대 세금 계산기, 301 가이드 지면 고단가 금융 Google AdSense(인아티클/멀티플렉스) 전면 마운트 및 1초 진단서 바이럴 공유 카드 풀스택 구축 — 검색엔진 트래픽이 집중되는 `stock-calculator/[preset]`, `retirement-calculator`, `pension-tax-calculator`, `isa-calculator`, `guide/career-mastery` 지면에 `InArticleAdvertisement`(슬롯 6000051656) 및 `MultiplexAdvertisement`(슬롯 9751074883) 전진 배치, 계산 결과 즉시 카카오톡/SNS로 퍼져나가는 `ViralShareCardDialog` 연동, 유입 트래픽 100% 현금화 파이프라인 가동 (+110, -0)
 - **v99**: 데스크톱 헤더 내비게이션 바 메뉴 텍스트 겹침(Overlapping/Zero-Width Shrink Bug) 원천 박멸 및 적응형 반응형 레이아웃 복원 — 브라우저 줌(67% 등) 및 1024px~1399px 데스크톱 구간에서 우측 위젯(`shrink-0`)에 밀려 `<nav>` 및 메뉴 버튼들이 너비 0px로 압축되면서 발생하던 글자 겹침 현상을 `shrink-0`, `min-h-9 2xl:min-h-10`, 반응형 패딩(`px-1.5 xl:px-2 2xl:px-3`) 및 글자 크기(`text-[11px] xl:text-xs 2xl:text-sm`)로 완벽 해결, 초대형 화면 전용 위젯(`실전 가이드 HOT`, `ServerClockPill`) 2xl 임계치 격상으로 중앙 내비게이션 가용 영역 대폭 확보 (+45, -0)
 - **v98**: 비로그인 계산기 저장 시나리오의 회원 관심종목(Watchlist) 원장 자동 승격 동기화 & 직장인 고검색량 3대 금융 계산기(퇴직금·연금저축/IRP·ISA 비과세) pSEO 허브 및 롱테일 확장 풀스택 구축 — LocalStorage에 보관된 계산기 시나리오를 로그인 시 감지하여 토스트 알림과 함께 회원 DB 관심종목으로 원클릭 승격하는 `WatchlistPromotionEngine` 구현, 직장인 대상 퇴직금 실수령액/IRP 절세 계산기(`/tools/retirement-calculator`), 연금저축/IRP 세액공제(16.5%/13.2%) 계산기(`/tools/pension-tax-calculator`), ISA 계좌 비과세(200만/400만) 절세 계산기(`/tools/isa-calculator`) 3종 신설, 5대 근속/납입 시나리오 롱테일 URL 및 Schema.org 구조화 데이터(`FinancialProduct`, `SoftwareApplication`, `FAQPage`) 주입, '머니버스 가상 연금/퇴직 IRP 포켓 10,000 WLD 무료 예치' 모의 시뮬레이터 연결 (+180, -0)
 - **v97**: 레거시 블로그 검색 유입 트래픽 410 제거 및 301 영구 리다이렉트 ➡️ 핀테크 개발자 직업 파밍 머니버스 전환 구축 — 구글 서치콘솔 실시간 상위 유입 검색어(`nodejs vs python`, `개인 클라우드 서버 만들기` 등)의 410 Gone 에러 페이지 차단을 100% 해제하고 301 Permanent Redirect(`/guide/career-mastery?ref=legacy_tech_blog`)로 전환, 신규 방문자 맞춤형 핀테크 개발자 전직 및 10,000 WLD 무료 지원금 온보딩 배너(`LegacyVisitorBanner`) 연동, Git 브랜치 통합 및 GitHub 최신 동기화 (+30, -0)
@@ -1379,3 +1380,33 @@
 ### 3. 검증 계획
 - Next.js Turbopack 빌드 무결점 통과.
 - 원격 프로덕션 배포 및 라이브 렌더링 실측 검증.
+
+---
+
+## 🚀 [v100 Specification] 수익 누수 원천 차단 — 580개 pSEO 주식 물타기 계산기 및 직장인 3대 세금 계산기, 301 가이드 지면 고단가 금융 Google AdSense(인아티클/멀티플렉스) 전면 마운트 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 진단**:
+  1. 기획서(`MONETIZATION_COMPLIANCE_SEO_SPEC.md` 및 `AD_ONLY_ADVERTISING_REVENUE_SPEC.md`)에 따라 월 100만 원 수익 목표를 달성하기 위해서는 고단가 금융 광고 노출(Page RPM 5,000~10,000원)이 필수적임.
+  2. 그러나 최근 대량 구축된 580개 롱테일 주식 물타기 계산기(`stock-calculator/[preset]`), 직장인 3대 금융 계산기(`retirement-calculator`, `pension-tax-calculator`, `isa-calculator`), 레거시 블로그 301 리다이렉트 지면(`/guide/career-mastery`)에 구글 애드센스 광고 슬롯(`InArticleAdvertisement`, `MultiplexAdvertisement`)이 누락되어 있어 검색 유입이 발생해도 광고 수익이 전혀 발생하지 않는 치명적 수익 누수 확인.
+- **핵심 목표**:
+  1. `frontend/src/app/tools/stock-calculator/[preset]/page.tsx`:
+     - 계산 결과 하이라이트 카드와 리텐션 퍼널 사이에 `InArticleAdvertisement` 삽입.
+     - FAQ 및 내부 링크 상단에 `MultiplexAdvertisement` 추천 광고 삽입.
+  2. 직장인 3대 세금 계산기:
+     - `retirement-calculator/page.tsx`: 결과 패널 하단 및 FAQ 상단에 `InArticleAdvertisement`, `MultiplexAdvertisement` 삽입.
+     - `pension-tax-calculator/page.tsx`: 결과 패널 하단 및 FAQ 상단에 광고 컴포넌트 마운트.
+     - `isa-calculator/page.tsx`: 결과 패널 하단 및 FAQ 상단에 광고 컴포넌트 마운트.
+  3. `frontend/src/app/guide/career-mastery/page.tsx`:
+     - 상단 환영 배너 아래 및 본문 중간에 `InArticleAdvertisement` 삽입.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `stock-calculator/[preset]/page.tsx`: 인아티클/멀티플렉스 광고 슬롯 마운트.
+2. `retirement-calculator/page.tsx`: 인아티클/멀티플렉스 광고 슬롯 마운트.
+3. `pension-tax-calculator/page.tsx`: 인아티클/멀티플렉스 광고 슬롯 마운트.
+4. `isa-calculator/page.tsx`: 인아티클/멀티플렉스 광고 슬롯 마운트.
+5. `guide/career-mastery/page.tsx`: 인아티클 광고 슬롯 마운트.
+
+### 3. 검증 계획
+- Next.js Turbopack 빌드 통과.
+- 원격 프로덕션 배포 및 curl 응답 검증.

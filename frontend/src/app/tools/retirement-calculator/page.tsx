@@ -17,6 +17,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { RETIREMENT_SCENARIOS } from '@/config/pseo-tax-retirement.config';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 export default function RetirementCalculatorPage() {
   const yearsId = useId();
@@ -348,6 +349,9 @@ export default function RetirementCalculatorPage() {
         </div>
       </div>
 
+      {/* 고단가 금융 인아티클 네이티브 광고 단위 */}
+      <InArticleAdvertisement className="my-6" />
+
       {/* 5대 근속 시나리오 롱테일 네비게이션 */}
       <section className="space-y-4 pt-4">
         <h2 className="text-lg font-bold text-zinc-100 flex items-center gap-2">
@@ -395,6 +399,9 @@ export default function RetirementCalculatorPage() {
           </div>
         </div>
       </section>
+
+      {/* 고단가 멀티플렉스 추천 광고 단위 */}
+      <MultiplexAdvertisement className="my-8" />
     </main>
   );
 }

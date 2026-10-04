@@ -14,6 +14,7 @@ import {
   Percent
 } from 'lucide-react';
 import { ISA_SCENARIOS } from '@/config/pseo-tax-retirement.config';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 export default function IsaCalculatorPage() {
   const profitId = useId();
@@ -243,6 +244,9 @@ export default function IsaCalculatorPage() {
         </div>
       </div>
 
+      {/* 고단가 금융 인아티클 네이티브 광고 단위 */}
+      <InArticleAdvertisement className="my-6" />
+
       <section className="space-y-4 pt-4">
         <h2 className="text-lg font-bold text-zinc-100 flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-emerald-400" /> 추천 ISA 비과세 시나리오
@@ -286,6 +290,9 @@ export default function IsaCalculatorPage() {
           </div>
         </div>
       </section>
+
+      {/* 고단가 멀티플렉스 추천 광고 단위 */}
+      <MultiplexAdvertisement className="my-8" />
     </main>
   );
 }

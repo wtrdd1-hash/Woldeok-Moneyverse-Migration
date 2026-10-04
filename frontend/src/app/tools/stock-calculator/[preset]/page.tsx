@@ -9,6 +9,7 @@ import { ReferralSystem } from '@/components/viral/referral-system';
 import { buildCalculatorRichSnippet, jsonLd } from '@/lib/json-ld';
 import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
 import { CalculatorRetentionFunnel } from '@/components/calculator-retention-funnel';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 interface PresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
@@ -165,6 +166,9 @@ export default async function StockPresetPage({ params }: PresetPageProps) {
           </div>
         </div>
 
+        {/* 고단가 금융 인아티클 네이티브 광고 (결과 직후 최고 주목도 지면) */}
+        <InArticleAdvertisement className="my-6" />
+
         {/* 방문자 ➡️ 이용자 전환 및 리텐션 온보딩 퍼널 (1초 저장, 10,000 WLD 지원금, 데일리 배당) */}
         <CalculatorRetentionFunnel
           stockName={data.title.split(' ')[0] || '가상 종목'}
@@ -209,6 +213,9 @@ export default async function StockPresetPage({ params }: PresetPageProps) {
             ))}
           </div>
         </div>
+
+        {/* 고단가 멀티플렉스 추천 광고 단위 (콘텐츠 종료 후 전환/이탈 방지 지면) */}
+        <MultiplexAdvertisement className="my-8" />
 
         {/* 바이럴 리퍼럴 배너 */}
         <div className="border-t border-border pt-6">

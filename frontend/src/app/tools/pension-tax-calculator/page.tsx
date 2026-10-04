@@ -14,6 +14,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { PENSION_TAX_SCENARIOS } from '@/config/pseo-tax-retirement.config';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 export default function PensionTaxCalculatorPage() {
   const salaryId = useId();
@@ -262,6 +263,9 @@ export default function PensionTaxCalculatorPage() {
         </div>
       </div>
 
+      {/* 고단가 금융 인아티클 네이티브 광고 단위 */}
+      <InArticleAdvertisement className="my-6" />
+
       <section className="space-y-4 pt-4">
         <h2 className="text-lg font-bold text-zinc-100 flex items-center gap-2">
           <PiggyBank className="w-5 h-5 text-emerald-400" /> 추천 세액공제 납입 시나리오
@@ -306,6 +310,9 @@ export default function PensionTaxCalculatorPage() {
           </div>
         </div>
       </section>
+
+      {/* 고단가 멀티플렉스 추천 광고 단위 */}
+      <MultiplexAdvertisement className="my-8" />
     </main>
   );
 }
