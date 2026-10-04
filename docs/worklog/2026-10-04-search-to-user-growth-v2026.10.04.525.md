@@ -12,10 +12,20 @@
 - Safety boundary: public-safe pages may become index candidates only after quality/privacy/jurisdiction gates; private/account/admin/transaction/security/moderation and regulated-risk surfaces remain authenticated and/or `noindex`.
 
 ## Mid-work record
-Pending.
+- First mid-work `git fetch origin --prune` recheck: `origin/main=12e575435dc53e7f864758f248e6acda00006070`, unchanged from the starting SHA.
+- Confirmed concurrent `origin/plan/v524-ai-auto-money-supply=75dba67f10dfedc33b7d738905b39163b6bb3bfb`; its economy-spec change is not touched.
+- Compared overlapping v63 intent-to-play, v17 pre-signup, signup intent recovery, return-promise, v90 acquisition allocation, and v507/v510 global SEO authority.
+- The new v525 spec does not repeat those feature specs; it composes route-family indexability, the search portfolio, exact auth intent handoff, retained funnel events/KPIs and rollout/acceptance gates into an operating contract.
+- Found KR-wide `noindex` shorthand in `PROJECT_PLAN.ko.md`; v525 separates public-safe route candidates from sensitive/regulatory routes at planning authority while explicitly making no runtime-change claim.
 
 ## Verification checkpoint
-Pending.
+- Final pre-integration `origin/main=12e575435dc53e7f864758f248e6acda00006070`, unchanged from start/mid-work.
+- `git diff --check`: PASS.
+- Maintained new EN/KO document pairs exist: PASS.
+- PROJECT_PLAN / INTEGRATED_PLANNING_MASTER / PRODUCT_GROWTH_PLAN English/Korean v525 authority markers: PASS.
+- New detailed-spec relative Markdown links: PASS.
+- Working-tree scope contains only `docs/`: PASS.
+- This cycle is docs-only, so runtime test/build/Test-server/Production verification is not applicable and is not claimed.
 
 ## Closeout record
 Pending.

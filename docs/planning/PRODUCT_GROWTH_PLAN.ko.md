@@ -1,10 +1,16 @@
 # 월덕 머니버스 — 제품 성장·리텐션 기획서
 
-> 버전: v2026.10.02.507
+> 버전: v2026.10.04.525
 > 상태: `PROJECT_PLAN.md`를 보완하는 Living 제품 기획
-> 기준일: 2026-10-02
-> 권위 채택: v507 해외 성장 결정을 v2026.10.03.509에서 현재 기획 권위로 통합.
+> 기준일: 2026-10-04
+> 권위 채택: v507 해외 성장 결정을 v509에서 통합했고, v525에서 검색노출→가입→활성화→D1/D7/D30 운영 루프를 상위 성장 계약으로 채택.
 > 영문 기준 문서: [PRODUCT_GROWTH_PLAN.md](PRODUCT_GROWTH_PLAN.md)
+
+## v525 검색→유지 사용자 성장 우선순위
+
+제품 성장은 검색 노출을 raw traffic으로 끝내지 않는다. 현재 획득 우선순위는 `적합한 검색의도 -> 독립 공개가치 -> preview 하나 -> 사용자 직접 intent -> contextual signup -> exact continuation -> meaningful activation -> return promise -> D1/D7/D30`이다.
+
+공개 안전한 한국어 가이드·용어집·도구/시뮬레이션·세계/시즌 archive·검수 커뮤니티/artifact는 route-family 품질·privacy·jurisdiction 게이트를 통과하면 index 후보가 될 수 있다. 개인/거래/보안/관리자/규제위험 상태는 계속 auth/noindex다. URL 개수, raw signup, 광고 클릭은 성공 KPI가 아니며 D30 retained user와 retained contribution으로 획득 품질을 평가한다. 상세 권위는 [검색→사용자 성장 루프 명세](SEARCH_TO_USER_GROWTH_LOOP_SPEC.ko.md)를 따른다.
 
 ## 1. 제품 목표
 

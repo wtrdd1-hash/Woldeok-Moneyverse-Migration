@@ -2,12 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
 > **최초 기준:** 2026-08-26  
-> **현재 통합 버전:** v2026.10.04.523  
-> **구현·증거 동기화:** 2026-10-04 (최신 main SHA: `f6e89a31`)  
+> **현재 통합 버전:** v2026.10.04.525
+> **기획 기준·증거 동기화:** 2026-10-04 (`origin/main=12e575435dc53e7f864758f248e6acda00006070`; v525는 문서 전용)
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
 > **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
 ---
+
+## 검색 노출 → 유지 사용자 성장 권위 — v2026.10.04.525 (2026-10-04)
+
+- **권위 결정:** 검색 노출과 방문자 전환을 하나의 end-to-end 제품 루프로 관리한다. `적합한 discovery -> 공개 가치 -> 맥락형 preview 하나 -> authored intent -> contextual signup -> exact-intent continuation -> meaningful activation -> return promise -> D1/D7/D30`. raw 노출·클릭·가입 수는 North Star가 아니다.
+- **KR 색인 규칙 보정:** 한국 웹 전체가 `noindex`로 읽힐 수 있는 광역 문구를 기획 권위 차원에서 route-family 분류로 supersede한다. 공개 안전한 한국어 브랜드/가이드/도구/archive 및 검수 커뮤니티/artifact는 품질·개인정보·jurisdiction 게이트 후 index 후보가 될 수 있다. 지갑·잔액·포트폴리오/주문·개인화 은행/신용·계정/보안/복구·admin/moderation/private social·규제위험 확률 action은 인증 및/또는 `noindex`를 유지한다. 이번 문서 회차가 런타임 robots를 바꿨다는 뜻은 아니다.
+- **검색 포트폴리오:** evergreen 가이드/용어집, public-safe 계산기/시뮬레이션, 세계/시즌/이벤트 archive, 선별 공개토론, opt-in 지속 artifact/profile, 유용한 Images/video, 다국어 self-canonical/hreflang, 내부 topic hub, 자연 획득 외부 인용을 사용한다. doorway, thin AI 대량생성, fake freshness, link scheme, 실제 금융/도박 bait는 금지한다.
+- **전환 계약:** 인증 전에 검색질문을 해결하고 의도에 맞는 preview 하나를 제공한다. 방문자가 되돌릴 수 있는 intent 하나를 직접 만든 뒤 지속 저장/참여가 필요할 때만 가입을 요구하고, 인증 성공 후 generic dashboard가 아니라 정확한 safe continuation으로 복구한다. 로그인 자체는 activation이 아니다.
+- **측정:** `search_landing_view`부터 preview/intent/signup/intent restore/meaningful activation/return promise/D1/D7/D30까지 semantic funnel로 운영한다. intent/landing/locale/device별로 보되 민감 query·경제·보안 데이터를 획득 profile에 결합하지 않는다. incremental fraud-adjusted D30 user와 retained contribution을 최적화한다.
+- **실행 순서:** route/index 진실 inventory -> 소수 수동검수 pilot -> contextual signup/exact handoff -> retained-user bridge -> 선별 검색면 확대 -> 승자 확대·약한 중복 통합/noindex. URL 수는 KPI가 아니다.
+- **상세 권위:** [검색→사용자 성장 루프 명세 v525](SEARCH_TO_USER_GROWTH_LOOP_SPEC.ko.md). 기존 intent-to-play, pre-signup, signup-recovery, return-promise, acquisition-allocation, global SEO 명세는 지원 권위로 유지한다.
+- **증거 경계:** v525는 기획/문서 전용이며 runtime robots/indexing, analytics 구현, Test 검증, Production 승격 완료를 주장하지 않는다.
 
 ## 중앙은행·조폐국·중앙국고·경제코어 기관 분리 — v2026.10.04.523
 
@@ -26,7 +37,7 @@
 
 | 플랫폼 (Surface) | 대상 국가 (Jurisdiction) | 제공 기능 범위 | 카지노/사행성 통제 정책 | SEO & 인덱싱 정책 | 계약 상태 |
 |---|---|---|---|---|---|
-| **Web (PC/Mobile)** | **대한민국 (KR)** | 가상 주식, 모의투자, 가상 은행, 메가시티 부동산, 국고 배당, 커뮤니티 | **fail-closed**: 사행성 환전 불가, 가상 코인 게임 접근 시 자가 한도 엄격 통제, 과장 문구 배제 | `robots: { index: false, follow: false }` 강제 | **GO (COMPLIANT)** |
+| **Web (PC/Mobile)** | **대한민국 (KR)** | 가상 주식, 모의투자, 가상 은행, 메가시티 부동산, 국고 배당, 커뮤니티 | **fail-closed**: 사행성 환전 불가, 가상 코인 게임 접근 시 자가 한도 엄격 통제, 과장 문구 배제 | **v525 planning:** 공개 안전 정보/도구/검수 콘텐츠만 품질게이트 후 index 후보; 개인·거래·보안·규제위험 route는 `noindex`/auth. 실제 runtime 상태는 별도 구현 증거 필요 | **PLANNING SUPERSEDE / RUNTIME VERIFY** |
 | **Web (PC/Mobile)** | **글로벌 (EN/JA/CN)** | 다국어 5-Tier 금융 포털, 실시간 시세, 가상 부동산, 퀘스트 | 글로벌 표준 Provably Fair 통계 검증 모드 제공 | Canonical hreflang 및 정상 색인 (`index: true`) | **GO (ACTIVE)** |
 | **Android App** | **전체 (KR/Global)** | 지갑 자산, 주식 포트폴리오, 시세 푸시 알림, 출석 보상 | 구글 플레이 정책에 따라 카지노 탭 UI 기본 비활성화 | 앱 전용 네이티브 BFF 통신 | **GO (STABLE)** |
 | **Discord Bot** | **전체 (KR/Global)** | 계정 연동 잔액 조회, 주식 시세 알림, 일일 퀘스트 체크 | 카지노 및 게임 베팅 명령 원천 배제 | N/A (채팅 인터페이스) | **GO (ACTIVE)** |

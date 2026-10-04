@@ -12,10 +12,20 @@
 - 안전 경계: 공개 안전 페이지는 품질·개인정보·jurisdiction 게이트 통과 후에만 index 후보가 된다. 개인/계정/admin/거래/보안/제재 및 규제위험 surface는 인증 및/또는 `noindex`를 유지한다.
 
 ## 중간 기록
-대기.
+- 1차 중간 `git fetch origin --prune` 재확인: `origin/main=12e575435dc53e7f864758f248e6acda00006070`; 시작 SHA와 동일해 drift 없음.
+- `origin/plan/v524-ai-auto-money-supply=75dba67f10dfedc33b7d738905b39163b6bb3bfb` 동시 브랜치를 확인했고 해당 경제 명세 변경을 건드리지 않았다.
+- 기존 v63 intent-to-play, v17 pre-signup, signup intent recovery, return-promise, v90 acquisition allocation, v507/v510 global SEO 명세의 중복 범위를 대조했다.
+- 신규 v525 명세는 기존 기능을 반복하지 않고 route-family indexability + search portfolio + exact intent handoff + retained funnel event/KPI + rollout/acceptance gate를 상위 운영계약으로 조합한다.
+- `PROJECT_PLAN.ko.md`의 KR 전체 `noindex` 광역 문구를 발견해 공개 안전 route와 민감/규제 route를 분리하는 planning supersede로 정리했다. Runtime 상태 변경은 주장하지 않는다.
 
 ## 검증 체크포인트
-대기.
+- 최종 통합 전 `origin/main=12e575435dc53e7f864758f248e6acda00006070`; 시작/중간과 동일해 drift 없음.
+- `git diff --check`: PASS.
+- 신규 유지 문서 영/한 pair 존재: PASS.
+- PROJECT_PLAN / INTEGRATED_PLANNING_MASTER / PRODUCT_GROWTH_PLAN 영/한 v525 권위표기: PASS.
+- 신규 상세명세 상대 Markdown 링크 존재검사: PASS.
+- working-tree 변경이 전부 `docs/` 아래인지 검사: PASS.
+- 본 회차는 문서 전용이므로 런타임 test/build/Test-server/Production 검증은 수행 대상이 아니며 완료로 주장하지 않는다.
 
 ## 종료 기록
 대기.

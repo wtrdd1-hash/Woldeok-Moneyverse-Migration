@@ -1,11 +1,21 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.04.523
+> Current ledger version: v2026.10.04.525
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.04.525 — 2026-10-04 — Search visibility to retained-user growth loop
+- Start/mid-work `origin/main=12e575435dc53e7f864758f248e6acda00006070`; concurrent `origin/plan/v524-ai-auto-money-supply` remains isolated and no overlapping work is overwritten.
+- Re-read documentation governance/catalog, PROJECT_PLAN, integrated master, PRODUCT_GROWTH_PLAN, v510/v507 global SEO specs, and existing intent-to-play/pre-signup/signup-recovery/return-promise/acquisition-allocation specs. Enumerated 1,729 tracked Markdown files and used a broad 724-document search/acquisition/activation/retention relevance sweep to locate overlapping authority.
+- Added `SEARCH_TO_USER_GROWTH_LOOP_SPEC.md` / `.ko.md` to compose search visibility, route indexability, public value, preview, contextual signup, post-auth intent restoration, meaningful activation, return promise and D1/D7/D30 into one operational contract.
+- Planning shorthand that can be read as KR-wide web `noindex` is superseded by route-family policy: public-safe guides/tools/archives/reviewed community/artifacts can become index candidates after quality/privacy/jurisdiction gates; sensitive/personalized/transaction/security/admin/regulatory-risk routes remain auth/noindex. Runtime behavior requires a separate implementation cycle.
+- Search portfolio includes evergreen guides/glossaries, public-safe tools/simulations, world/season archives, curated discussions, opt-in durable public artifacts/profiles, Images/video, multilingual self-canonical/hreflang, topic hubs, earned citations and Naver/IndexNow operations.
+- North star is incremental fraud-adjusted D30 retained users and retained contribution, not raw impressions/signups. URL-count targets, thin-AI scale, doorway/cloaking, fake freshness, link schemes, fabricated search metrics and private indexing are prohibited.
+- Current official Google/Naver/IndexNow operational guidance was rechecked; no ranking, traffic or revenue guarantee is claimed.
+- Planning/docs only. No runtime robots/indexing, analytics, Test or Production implementation/promotion is claimed.
 
 ## v2026.10.04.523 — 2026-10-04 — Central Bank / Mint / Treasury institutional separation
 - Start `origin/main=c10e1582ccc0c058dff5c5356ad8b1893759f72c`; mid-work recheck detected `origin/main=065ee42204a4238c5010897212c7fc2a6c848f64`, which added treasury English/architecture documentation. The isolated branch was rebased onto that latest main before authority edits, preserving concurrent work.

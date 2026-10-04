@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.04.523
-> Implementation/evidence sync: 2026-10-04 (exact main SHA: `f6e89a31`)
+> Current integrated version: v2026.10.04.525
+> Planning baseline/evidence sync: 2026-10-04 (`origin/main=12e575435dc53e7f864758f248e6acda00006070`; v525 is docs-only)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Search visibility -> retained-user growth authority — v2026.10.04.525 (2026-10-04)
+
+- **Authority decision:** search visibility and visitor conversion are one end-to-end product loop: `qualified discovery -> public value -> one contextual preview -> authored intent -> contextual signup -> exact-intent continuation -> meaningful activation -> return promise -> D1/D7/D30`. Raw impressions, clicks or registrations are not the north star.
+- **KR indexability correction:** broad wording that can be read as all Korean web routes being `noindex` is superseded at planning level by route-family classification. Public-safe Korean brand/guide/tool/archive and reviewed community/artifact pages may be index candidates after quality/privacy/jurisdiction gates; wallet, balances, portfolio/orders, personalized bank/credit state, account/security/recovery, admin/moderation/private social and restricted chance-action surfaces remain authenticated and/or `noindex`. Runtime robots behavior is unchanged by this docs-only cycle.
+- **Search portfolio:** grow through useful evergreen guides/glossaries, public-safe calculators/simulations, world/season/event archives, curated discussions, opt-in durable public artifacts/profiles, Images/video where useful, multilingual self-canonical/hreflang pages, internal topic hubs and earned external citations. Doorway pages, mass thin AI content, fake freshness, link schemes and broad finance/gambling bait are prohibited.
+- **Conversion contract:** answer the search question before authentication, show one intent-matched preview, let the visitor author one reversible intent, ask for signup only when persistence/participation requires it, then restore the exact safe continuation after auth instead of dropping the user on a generic dashboard. Login itself is not activation.
+- **Measurement:** operate a semantic funnel from `search_landing_view` through preview/intent/signup/intent-restore/meaningful-activation/return-promise to D1/D7/D30. Segment by intent/landing/locale/device while keeping sensitive query/economy/security data out of acquisition profiles. Optimize incremental fraud-adjusted D30 users and retained contribution.
+- **Rollout:** route/index truth inventory -> small manually reviewed pilot assets -> contextual signup/exact handoff -> retained-user bridge -> curated search-surface expansion -> scale winners and consolidate/noindex weak duplicates. URL count is not a KPI.
+- **Detailed authority:** [Search-to-User Growth Loop Specification v525](SEARCH_TO_USER_GROWTH_LOOP_SPEC.md). Earlier intent-to-play, pre-signup, signup-recovery, return-promise, acquisition-allocation and global-SEO specifications remain supporting authority.
+- **Evidence boundary:** v525 is planning/documentation only. It does not claim runtime robots/indexing changes, analytics implementation, Test verification or Production promotion.
 
 ## Central Bank / Mint / Treasury institutional separation — v2026.10.04.523 (2026-10-04)
 

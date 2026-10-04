@@ -1,10 +1,16 @@
 # Woldeok Moneyverse — Product Growth & Retention Plan
 
-> Version: v2026.10.02.507
+> Version: v2026.10.04.525
 > Status: Living product-planning companion to `PROJECT_PLAN.md`
-> Date: 2026-10-02
-> Authority adoption: v507 overseas growth decisions adopted into current planning authority by v2026.10.03.509.
+> Date: 2026-10-04
+> Authority adoption: v507 overseas growth decisions were adopted by v509; v525 adopts the search-visibility -> signup -> activation -> D1/D7/D30 loop as the top-level acquisition contract.
 > Korean counterpart: [PRODUCT_GROWTH_PLAN.ko.md](PRODUCT_GROWTH_PLAN.ko.md)
+
+## v525 search-to-retained-user growth priority
+
+Product growth does not end at search traffic. The current acquisition priority is `qualified search intent -> independent public value -> one preview -> authored intent -> contextual signup -> exact continuation -> meaningful activation -> return promise -> D1/D7/D30`.
+
+Public-safe Korean guides/glossaries, tools/simulations, world/season archives and reviewed community/artifact surfaces may become index candidates after route-family quality/privacy/jurisdiction gates. Personalized, transactional, security, admin and regulatory-risk state remains authenticated/noindex. URL count, raw registration and ad clicks are not success KPIs; acquisition quality is judged by D30 retained users and retained contribution. Detailed authority: [Search-to-User Growth Loop Specification](SEARCH_TO_USER_GROWTH_LOOP_SPEC.md).
 
 ## 1. Product objective
 

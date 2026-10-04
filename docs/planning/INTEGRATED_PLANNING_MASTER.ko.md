@@ -1,11 +1,21 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.10.04.523
+> 현재 원장 버전: v2026.10.04.525
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.10.04.525 — 2026-10-04 — 검색 노출→유지 사용자 통합 성장 루프
+- 시작/중간 `origin/main=12e575435dc53e7f864758f248e6acda00006070`; `origin/plan/v524-ai-auto-money-supply` 동시작업은 별도 브랜치로 보존하고 겹치는 파일을 덮어쓰지 않았다.
+- 문서 거버넌스, 카탈로그, PROJECT_PLAN, 통합마스터, PRODUCT_GROWTH_PLAN, v510/v507 글로벌 SEO 명세와 intent-to-play/pre-signup/signup-recovery/return-promise/acquisition-allocation 명세를 다시 읽었다. 추적 Markdown 1,729개를 열거하고 광역 검색/획득/활성화/리텐션 관련 724개 문서로 중복 권위를 탐색했다.
+- `SEARCH_TO_USER_GROWTH_LOOP_SPEC.md` / `.ko.md`를 추가해 검색 노출, route indexability, 공개가치, preview, contextual signup, post-auth intent 복구, meaningful activation, return promise, D1/D7/D30을 하나의 운영 계약으로 통합했다.
+- 한국 전체 웹 `noindex`로 읽힐 수 있는 광역 기획 문구는 route-family 정책으로 supersede한다. public-safe 가이드/도구/archive/검수 community/artifact는 품질·privacy·jurisdiction gate 후 index 후보가 될 수 있고 민감·개인화·거래·보안·관리자·규제위험 route는 계속 auth/noindex다. 런타임 변경은 별도다.
+- 검색 노출 포트폴리오는 evergreen guide/glossary, public-safe tool/simulation, world/season archive, curated discussion, opt-in durable public artifact/profile, Images/video, 다국어 self-canonical/hreflang, topic hub, earned citation 및 Naver/IndexNow 운영을 포함한다.
+- North Star는 raw impression/signup가 아니라 incremental fraud-adjusted D30 retained user와 retained contribution이다. URL 수 목표, thin AI scale, doorway/cloaking, fake freshness, link scheme, 가짜 검색지표, private indexing을 금지한다.
+- Google/Naver/IndexNow의 현재 공식 운영 가이드를 다시 확인했으며 순위·트래픽·수익 보장을 주장하지 않는다.
+- 기획/문서 전용. Runtime robots/index, analytics, Test, Production 구현/승격을 주장하지 않는다.
 
 ## v2026.10.04.523 — 2026-10-04 — 중앙은행·조폐국·중앙국고 기관 분리
 - 시작 `origin/main=c10e1582ccc0c058dff5c5356ad8b1893759f72c`; 중간 재확인에서 국고 영문/아키텍처 문서가 추가된 `origin/main=065ee42204a4238c5010897212c7fc2a6c848f64` 드리프트를 감지했다. 권위문서 편집 전 격리 브랜치를 최신 main으로 rebase해 동시 작업을 보존했다.
