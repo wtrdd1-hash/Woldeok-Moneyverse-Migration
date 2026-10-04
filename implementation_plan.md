@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v91)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v92)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v92**: 화폐량 자동 조절(Automated Monetary Supply Rebalancing Engine) 풀스택 구축 — Faucet/Sink 비율 실시간 평가 기반 1시간 주기 테이퍼링/양적완화 피드백 루프, 안전 한도(±5%) 내 전자동 자율 집행(`AutoMonetaryRegulationService`), DB 마이그레이션(245: `monetary_auto_regulation_configs`, `monetary_regulation_events`), 관리자 콘솔(`/admin/economy`) 내 자동 조절 스위치/파라미터/타임라인 로그 연동, 긴급 서킷브레이커 동결 및 시장 공시 브로드캐스트 (+180, -0)
 - **v91**: 관리자 경제 콘솔(`/admin/economy`) 중앙은행(MCB) 및 조폐국(MMB) 통합 관제 패널(`MonetaryBureauCard`) 풀스택 탑재 & 프론트엔드/백엔드 원격 운영 서버(`prod-v521`) 무중단 승격 완결 — 5대 통화 지표($M_{\text{total}}$, $M_{\text{circulating}}$, $M_{\text{treasury}}$ 등) 실시간 텔레메트리, 통화발행 비상 동결/해제 스위치, 통화정책 명령서(MINT/RETIRE) 발의/승인 모달, 조폐국 실행 인증서 테이블, Vitest 및 Next.js 163개 라우트 빌드 통과 (+95, -0)
 - **v90**: v523 경제기관 3분립 (중앙은행·조폐국·중앙국고·경제코어) 런타임/DB 코드 분리 & $M_{\text{total}}$ 통화량 불변식 가드 엔진 구현 — `monetary_policy_orders`, `mint_certificates`, `retirement_certificates` DB 마이그레이션(244) 신설, `CentralBankService` 및 `MintBureauService` 분리 구현, `MonetaryController` 제어 API 탑재, 국고 지출 불변식 가드(`assertFiscalTransferOnly`) 연동, 단위 테스트 10종 전수 통과 및 NestJS/Turbopack 빌드 통과 (+140, -0)
 - **v89**: 기획서 ↔ 운영 서버 대조 검증 및 릴리스 계보 전수 대사 완결 — 과거 `prod-v520` 미커밋 잔여 파일 안전 백업/정리, 현재 운영 `prod-v521` 100% Clean Immutable 상태 확증, 백엔드 서비스(`moneyverse-backend`) 최신 릴리스 리로드 및 `/health` 200 OK 복원, GitHub 최신 `c606ce75` 형상 동기화 완결 (+68, -0)
@@ -1126,5 +1127,42 @@
 - **프론트엔드 Next.js Turbopack 빌드**: 163개 전체 라우트(정적/동적) 100% 컴파일 성공 (0 에러).
 - **불변성 검증**: 총 통화량 불변식 가드 정상 작동 확증.
 - **배포 계획**: `git add` & `git commit` & GitHub `origin/main` 푸시 후 원격 운영 서버(`prod-v521`) 승격 배포.
+
+---
+
+## 🚀 [v92 Specification] 화폐량 자동 조절(Automated Monetary Supply Rebalancing Engine) 풀스택 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "화폐량는 자동 조절되게해줘"
+- **조율 확정 사항 (Interactive Alignment)**:
+  1. **핵심 경제 알고리즘**: Faucet/Sink(유입-소각) 균형 기반 자동 테이퍼링(Tapering) & 기본소득 양적완화(QE) 피드백 루프.
+     - 24시간 발행량(Faucet) > 소각량(Sink) (비율 > 1.05): 인플레이션 방지를 위해 Faucet 보상 한도 축소(테이퍼링), 싱크/수수료 배율 상향.
+     - 24시간 소각량(Sink) > 발행량(Faucet) (비율 < 0.95): 유통경색/디플레이션 방지를 위해 조폐국 완화적 발행 한도 상향 및 국고 기본소득 배당율 확대.
+  2. **평가 및 집행 주기**: 1시간 단위 실시간 백그라운드 자동 스케줄러 (`AutoMonetaryRegulationService`).
+  3. **자율 집행 권한**: 안전 한도(1회 최대 ±5% 이내) 내 전자동 자율 집행 (`AUTONOMOUS_EXECUTION`).
+  4. **고급 연계 기능**:
+     - 관리자 콘솔(`/admin/economy`) 내 자동 조절 ON/OFF 스위치 및 목표 파라미터(목표 Faucet/Sink 비율, 최대 변동폭) 제어판.
+     - 통화량 자동 변동 내역 및 사유 투명 공개 타임라인 로그 테이블 (`monetary_regulation_events`).
+     - 비정상 급격 변동(유통량 폭증 등) 감지 시 자동 서킷브레이커 동결(`FREEZE`) 발동.
+     - 중앙은행 완화/긴축 기조 변동 실시간 브로드캐스트 공시 연동.
+
+### 2. 세부 컴포넌트 구현 명세
+1. **DB 마이그레이션 (`packages/database/migrations/245-automated-monetary-regulation.sql`)**:
+   - `monetary_auto_regulation_configs`: 자동 조절 활성화 여부(`is_enabled`), 목표 Faucet/Sink 비율(`target_ratio`, 기본 1.0), 1회 최대 변동 허용율(`max_step_pct`, 기본 5%), 평가 주기(초), 최근 실행 시간.
+   - `monetary_regulation_events`: 자동 조절 집행 기록 (`trigger_reason`, `previous_m_total`, `adjusted_m_total`, `policy_action`, `created_at`).
+2. **백엔드 서비스 (`AutoMonetaryRegulationService`)**:
+   - 1시간 크론 스케줄러 및 수동 트리거 지원.
+   - Faucet/Sink 비율 및 유동성 계산 후 중앙은행 통화정책 명령서(`MonetaryPolicyOrder`) 자동 발의 및 조폐국/국고 완화 집행.
+   - 안전 한도 초과 시 자동 서킷브레이커 동결 호출.
+3. **관리자 API 및 프론트엔드 연동**:
+   - `GET /api/v1/admin/economy/monetary/auto-regulation/status`
+   - `POST /api/v1/admin/economy/monetary/auto-regulation/toggle`
+   - `POST /api/v1/admin/economy/monetary/auto-regulation/run`
+   - `/admin/economy` UI 내 `MonetaryBureauCard`에 자동 조절 제어 스위치 및 타임라인 로그 탭 추가.
+
+### 3. 검증 계획
+- **단위 테스트**: `auto-monetary-regulation.service.test.ts` 작성 및 통과.
+- **빌드 검증**: NestJS 백엔드 및 Next.js Turbopack 163개 라우트 빌드 통과.
+- **실운영 배포 및 라이브 검증**: 원격 서버 DB 마이그레이션 적용, 코드 승격, 자동 조절 스케줄러 가동 확인.
 
 

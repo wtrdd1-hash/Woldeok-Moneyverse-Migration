@@ -14,6 +14,8 @@ import {
   type MonetaryPolicyOrderItem,
   type MonetaryTelemetryData,
   type MintCertificateItem,
+  type MonetaryAutoRegulationConfigData,
+  type MonetaryRegulationEventItem,
 } from './monetary-bureau-card';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader, SectionHeader } from '@/components/page-header';
@@ -147,6 +149,7 @@ export default async function AdminEconomyPage({
     monetaryTelemetry,
     monetaryOrdersRes,
     monetaryMintsRes,
+    autoRegRes,
   ] = await Promise.all([
     apiOrNull<FaucetSinkStats>('/api/v1/admin/economy/stats'),
     apiOrNull<MonetaryVelocityTelemetry>('/api/v1/admin/economy/velocity'),
@@ -154,9 +157,15 @@ export default async function AdminEconomyPage({
     apiOrNull<MonetaryTelemetryData>('/api/v1/admin/economy/monetary/telemetry'),
     apiOrNull<{ orders: MonetaryPolicyOrderItem[] }>('/api/v1/admin/economy/monetary/policy-orders'),
     apiOrNull<{ mints: MintCertificateItem[] }>('/api/v1/admin/economy/monetary/mint-certificates'),
+    apiOrNull<{
+      config: MonetaryAutoRegulationConfigData;
+      events: MonetaryRegulationEventItem[];
+    }>('/api/v1/admin/economy/monetary/auto-regulation/status'),
   ]);
   const monetaryOrders = monetaryOrdersRes?.orders ?? [];
   const monetaryMints = monetaryMintsRes?.mints ?? [];
+  const autoConfig = autoRegRes?.config ?? null;
+  const autoEvents = autoRegRes?.events ?? [];
   const engineProblem = problem(autoPolicy, '자동 조정 엔진 상태를 불러오지 못했어요.');
 
   // Three answers, and the middle one only exists once a payout id is in the
@@ -194,6 +203,8 @@ export default async function AdminEconomyPage({
         initialTelemetry={monetaryTelemetry}
         initialOrders={monetaryOrders}
         initialMints={monetaryMints}
+        initialAutoConfig={autoConfig}
+        initialAutoEvents={autoEvents}
       />
 
       <Card>

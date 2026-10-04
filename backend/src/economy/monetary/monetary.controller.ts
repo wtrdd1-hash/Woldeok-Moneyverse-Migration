@@ -8,6 +8,7 @@ import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { CentralBankService } from './central-bank.service';
 import { MintBureauService } from './mint-bureau.service';
+import { AutoMonetaryRegulationService } from './auto-monetary-regulation.service';
 import type { MonetaryOrderType, MonetaryTargetEnvelope } from './monetary.types';
 
 @ApiTags('Admin Monetary & Central Bank')
@@ -18,7 +19,51 @@ export class MonetaryController {
   constructor(
     private readonly centralBank: CentralBankService,
     private readonly mintBureau: MintBureauService,
+    private readonly autoRegulation: AutoMonetaryRegulationService,
   ) {}
+
+  @Get('auto-regulation/status')
+  @ApiOperation({ summary: '화폐량 자동 조절 엔진 설정 및 상태 조회' })
+  async getAutoRegulationStatus() {
+    const config = await this.autoRegulation.getConfig();
+    const events = await this.autoRegulation.getRecentEvents(10);
+    return { config, events };
+  }
+
+  @Post('auto-regulation/update')
+  @ApiOperation({ summary: '화폐량 자동 조절 설정값 변경' })
+  async updateAutoRegulation(
+    @Body()
+    body: {
+      is_enabled?: boolean;
+      target_faucet_sink_ratio?: number;
+      tolerance_band_pct?: number;
+      max_step_pct?: number;
+      circuit_breaker_freeze_pct?: number;
+    },
+  ) {
+    return this.autoRegulation.updateConfig(
+      body.is_enabled,
+      body.target_faucet_sink_ratio,
+      body.tolerance_band_pct,
+      body.max_step_pct,
+      body.circuit_breaker_freeze_pct,
+    );
+  }
+
+  @Post('auto-regulation/run')
+  @ApiOperation({ summary: '화폐량 자동 조절 즉시 1회 수동 평가 및 집행' })
+  async runAutoRegulationManually(@Req() req: RequestWithSession) {
+    const adminId = requireUserId(req);
+    const event = await this.autoRegulation.evaluateAndExecute(adminId);
+    return { event };
+  }
+
+  @Get('auto-regulation/events')
+  @ApiOperation({ summary: '화폐량 자동 조절 집행 타임라인 로그 목록' })
+  async getAutoRegulationEvents(@Query('limit') limit?: number) {
+    return this.autoRegulation.getRecentEvents(limit ? Number(limit) : 20);
+  }
 
   @Get('telemetry')
   @ApiOperation({ summary: '통화정책 및 중앙은행-조폐국 텔레메트리 대사 집계' })

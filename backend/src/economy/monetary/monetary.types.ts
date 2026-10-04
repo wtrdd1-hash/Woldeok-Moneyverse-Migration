@@ -61,3 +61,36 @@ export interface MonetaryTelemetryOverview {
   verified_invariant: boolean;
   last_reconciled_at: string;
 }
+
+export interface MonetaryAutoRegulationConfig {
+  id: number;
+  is_enabled: boolean;
+  target_faucet_sink_ratio: number;
+  tolerance_band_pct: number;
+  max_step_pct: number;
+  evaluation_interval_seconds: number;
+  circuit_breaker_freeze_pct: number;
+  last_evaluated_at: string | null;
+  last_action_taken: string;
+  updated_at: string;
+}
+
+export type MonetaryRegulationActionType =
+  | 'TAPER_CONTRACTION'
+  | 'QE_EXPANSION'
+  | 'NEUTRAL_BALANCED'
+  | 'CIRCUIT_BREAKER_FREEZE';
+
+export interface MonetaryRegulationEvent {
+  id: string;
+  evaluation_time: string;
+  faucet_24h_wld: string;
+  sink_24h_wld: string;
+  current_ratio: number;
+  action_type: MonetaryRegulationActionType;
+  adjustment_amount_wld: string;
+  policy_order_id: string | null;
+  reason: string;
+  created_at: string;
+}
+

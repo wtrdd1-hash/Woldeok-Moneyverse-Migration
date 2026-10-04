@@ -4,6 +4,7 @@ import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { CentralBankService } from './monetary/central-bank.service';
 import { MintBureauService } from './monetary/mint-bureau.service';
+import { AutoMonetaryRegulationService } from './monetary/auto-monetary-regulation.service';
 import { MonetaryController } from './monetary/monetary.controller';
 import { QuantController } from './quant.controller';
 import { PostgresEconomyReconciliationRepository } from './reconciliation.repository';
@@ -16,6 +17,7 @@ import { EconomyReconciliationService } from './reconciliation.service';
   providers: [
     CentralBankService,
     MintBureauService,
+    AutoMonetaryRegulationService,
     {
       provide: EconomyReconciliationService,
       inject: [PG_POOL],
@@ -27,7 +29,12 @@ import { EconomyReconciliationService } from './reconciliation.service';
           : null,
     },
   ],
-  exports: [EconomyReconciliationService, CentralBankService, MintBureauService],
+  exports: [
+    EconomyReconciliationService,
+    CentralBankService,
+    MintBureauService,
+    AutoMonetaryRegulationService,
+  ],
 })
 export class EconomyModule {}
 

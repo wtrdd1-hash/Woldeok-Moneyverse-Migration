@@ -3,16 +3,23 @@
 import React, { useState } from 'react';
 import {
   AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  Bot,
   Building2,
   CheckCircle2,
   FileCheck2,
   Flame,
+  History,
   Landmark,
   PlusCircle,
   RefreshCw,
+  Settings2,
   ShieldAlert,
   ShieldCheck,
+  TrendingDown,
   TrendingUp,
+  Zap,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -76,23 +83,60 @@ export interface MintCertificateItem {
   readonly created_at: string;
 }
 
+export interface MonetaryAutoRegulationConfigData {
+  readonly id: number;
+  readonly is_enabled: boolean;
+  readonly target_faucet_sink_ratio: number;
+  readonly tolerance_band_pct: number;
+  readonly max_step_pct: number;
+  readonly evaluation_interval_seconds: number;
+  readonly circuit_breaker_freeze_pct: number;
+  readonly last_evaluated_at: string | null;
+  readonly last_action_taken: string;
+  readonly updated_at: string;
+}
+
+export interface MonetaryRegulationEventItem {
+  readonly id: string;
+  readonly evaluation_time: string;
+  readonly faucet_24h_wld: string;
+  readonly sink_24h_wld: string;
+  readonly current_ratio: number;
+  readonly action_type: string;
+  readonly adjustment_amount_wld: string;
+  readonly policy_order_id: string | null;
+  readonly reason: string;
+  readonly created_at: string;
+}
+
 interface MonetaryBureauCardProps {
   readonly initialTelemetry: MonetaryTelemetryData | null;
   readonly initialOrders: readonly MonetaryPolicyOrderItem[];
   readonly initialMints: readonly MintCertificateItem[];
+  readonly initialAutoConfig?: MonetaryAutoRegulationConfigData | null;
+  readonly initialAutoEvents?: readonly MonetaryRegulationEventItem[];
 }
 
 export function MonetaryBureauCard({
   initialTelemetry,
   initialOrders,
   initialMints,
+  initialAutoConfig,
+  initialAutoEvents = [],
 }: MonetaryBureauCardProps) {
   const [telemetry, setTelemetry] = useState<MonetaryTelemetryData | null>(initialTelemetry);
   const [orders, setOrders] = useState<readonly MonetaryPolicyOrderItem[]>(initialOrders);
   const [mints, setMints] = useState<readonly MintCertificateItem[]>(initialMints);
-  const [activeTab, setActiveTab] = useState<'orders' | 'mints'>('orders');
+  const [autoConfig, setAutoConfig] = useState<MonetaryAutoRegulationConfigData | null>(
+    initialAutoConfig ?? null,
+  );
+  const [autoEvents, setAutoEvents] = useState<readonly MonetaryRegulationEventItem[]>(
+    initialAutoEvents,
+  );
+  const [activeTab, setActiveTab] = useState<'orders' | 'mints' | 'auto'>('auto');
 
   const [isProposeOpen, setIsProposeOpen] = useState(false);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [orderType, setOrderType] = useState<'MINT' | 'RETIRE'>('MINT');
   const [targetEnvelope, setTargetEnvelope] = useState('WORK_REWARD');
   const [maxAmountWld, setMaxAmountWld] = useState('1000000');
@@ -100,25 +144,92 @@ export function MonetaryBureauCard({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
 
+  // Auto Regulation form state
+  const [cfgTargetRatio, setCfgTargetRatio] = useState(
+    autoConfig?.target_faucet_sink_ratio?.toString() ?? '1.0',
+  );
+  const [cfgTolerancePct, setCfgTolerancePct] = useState(
+    autoConfig?.tolerance_band_pct?.toString() ?? '5.0',
+  );
+  const [cfgMaxStepPct, setCfgMaxStepPct] = useState(
+    autoConfig?.max_step_pct?.toString() ?? '5.0',
+  );
+
   const refreshData = async () => {
     try {
-      const res = await fetch('/api/v1/admin/economy/monetary/telemetry');
-      if (res.ok) {
-        const data = await res.json();
-        setTelemetry(data);
-      }
-      const ordersRes = await fetch('/api/v1/admin/economy/monetary/orders');
-      if (ordersRes.ok) {
-        const ordersData = await ordersRes.json();
-        setOrders(ordersData);
-      }
-      const mintsRes = await fetch('/api/v1/admin/economy/monetary/certificates/mints');
-      if (mintsRes.ok) {
-        const mintsData = await mintsRes.json();
-        setMints(mintsData);
+      const [tRes, oRes, mRes, aRes] = await Promise.all([
+        fetch('/api/v1/admin/economy/monetary/telemetry'),
+        fetch('/api/v1/admin/economy/monetary/orders'),
+        fetch('/api/v1/admin/economy/monetary/certificates/mints'),
+        fetch('/api/v1/admin/economy/monetary/auto-regulation/status'),
+      ]);
+      if (tRes.ok) setTelemetry(await tRes.json());
+      if (oRes.ok) setOrders(await oRes.json());
+      if (mRes.ok) setMints(await mRes.json());
+      if (aRes.ok) {
+        const aData = await aRes.json();
+        if (aData.config) setAutoConfig(aData.config);
+        if (aData.events) setAutoEvents(aData.events);
       }
     } catch {
       // ignore
+    }
+  };
+
+  const handleToggleAutoRegulation = async () => {
+    if (!autoConfig) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/v1/admin/economy/monetary/auto-regulation/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_enabled: !autoConfig.is_enabled }),
+      });
+      if (res.ok) {
+        await refreshData();
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveAutoConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/v1/admin/economy/monetary/auto-regulation/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          target_faucet_sink_ratio: Number(cfgTargetRatio),
+          tolerance_band_pct: Number(cfgTolerancePct),
+          max_step_pct: Number(cfgMaxStepPct),
+        }),
+      });
+      if (res.ok) {
+        setIsConfigOpen(false);
+        await refreshData();
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRunAutoRegulationNow = async () => {
+    setIsSubmitting(true);
+    setFeedbackMsg(null);
+    try {
+      const res = await fetch('/api/v1/admin/economy/monetary/auto-regulation/run', {
+        method: 'POST',
+      });
+      if (res.ok) {
+        await refreshData();
+      } else {
+        const err = await res.json();
+        setFeedbackMsg(err.message || '평가 실행 실패');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -194,24 +305,39 @@ export function MonetaryBureauCard({
       <CardHeader className="p-4 sm:p-6 pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                 AUTHORITATIVE MONETARY & MINT BUREAU (v523)
               </span>
               <Badge variant="outline" className="font-mono text-[10px]">
                 INSTITUTIONAL SEPARATION
               </Badge>
+              {autoConfig?.is_enabled && (
+                <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-mono text-[10px] flex items-center gap-1">
+                  <Bot className="size-3" /> 자동 화폐량 조절 가동 중
+                </Badge>
+              )}
             </div>
             <CardTitle className="text-base sm:text-lg font-bold text-foreground mt-1.5 flex items-center gap-2">
               <Landmark className="size-4 text-emerald-500" />
               중앙은행(MCB) 통화정책 & 조폐국(MMB) 실행 관제 타워
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
-              통화정책 결정(승인), 조폐국 실행(인증서), 중앙국고(재정지출), 경제코어(불변식) 기관 분리 (기획서 §1~§5 준용)
+              1시간 주기 Faucet/Sink 피드백 자동 조절, 안전 한도(±5%) 자율 집행, 긴급 서킷브레이커 동결
             </CardDescription>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant={autoConfig?.is_enabled ? 'default' : 'secondary'}
+              size="sm"
+              onClick={handleToggleAutoRegulation}
+              disabled={isSubmitting}
+              className="text-xs h-8 gap-1.5"
+            >
+              <Bot className="size-3.5" />
+              {autoConfig?.is_enabled ? '자동 조절 ON' : '자동 조절 OFF'}
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -279,25 +405,35 @@ export function MonetaryBureauCard({
 
           <div className="p-3 bg-muted/40 rounded-xl border border-border/50">
             <div className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
-              <FileCheck2 className="size-3.5 text-amber-500" /> 승인 명령 / 인증서
+              <FileCheck2 className="size-3.5 text-amber-500" /> 자동 피드백 상태
             </div>
             <div className="text-lg font-bold font-mono mt-1 text-foreground">
-              {telemetry?.active_policy_orders_count ?? 0} <span className="text-xs font-normal">건</span> / {telemetry?.total_mint_certificates_count ?? 0} <span className="text-xs font-normal">인증</span>
+              {autoConfig?.last_action_taken ?? 'NEUTRAL'}
             </div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">소각 인증: {telemetry?.total_retirement_certificates_count ?? 0}건</div>
+            <div className="text-[10px] text-muted-foreground mt-0.5">
+              목표 비율: {autoConfig?.target_faucet_sink_ratio ?? 1.0} (오차 ±{autoConfig?.tolerance_band_pct ?? 5}%)
+            </div>
           </div>
         </div>
 
-        {/* Tab switcher: Policy Orders vs Mint Certificates */}
-        <div className="flex items-center justify-between border-b pb-2 mb-3">
-          <div className="flex items-center gap-2">
+        {/* Tab switcher: Policy Orders vs Mint Certificates vs Auto Regulation */}
+        <div className="flex items-center justify-between border-b pb-2 mb-3 flex-wrap gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant={activeTab === 'auto' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('auto')}
+              className="text-xs h-7 gap-1"
+            >
+              <Bot className="size-3" /> 화폐량 자동 조절 타임라인 ({autoEvents.length})
+            </Button>
             <Button
               variant={activeTab === 'orders' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveTab('orders')}
               className="text-xs h-7"
             >
-              중앙은행 통화정책 명령서 ({orders.length})
+              중앙은행 정책 명령서 ({orders.length})
             </Button>
             <Button
               variant={activeTab === 'mints' ? 'default' : 'ghost'}
@@ -308,6 +444,74 @@ export function MonetaryBureauCard({
               조폐국 발행 인증서 ({mints.length})
             </Button>
           </div>
+
+          {activeTab === 'auto' && (
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRunAutoRegulationNow}
+                disabled={isSubmitting}
+                className="text-xs h-7 gap-1 text-primary"
+              >
+                <Zap className="size-3 text-amber-500" /> 지금 즉시 자동 평가·집행
+              </Button>
+              <Dialog open={isConfigOpen} onOpenChange={setIsConfigOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline" className="text-xs h-7 gap-1">
+                    <Settings2 className="size-3" /> 파라미터 설정
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <form onSubmit={handleSaveAutoConfig}>
+                    <DialogHeader>
+                      <DialogTitle className="text-base">화폐량 자동 조절 파라미터 설정</DialogTitle>
+                      <DialogDescription className="text-xs">
+                        1시간 주기 Faucet/Sink 평가 및 자율 긴축/완화 한도를 설정합니다.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-3 py-3">
+                      <div className="grid gap-1">
+                        <Label htmlFor="cfgTarget" className="text-xs">목표 Faucet / Sink 비율</Label>
+                        <Input
+                          id="cfgTarget"
+                          value={cfgTargetRatio}
+                          onChange={(e) => setCfgTargetRatio(e.target.value)}
+                          placeholder="1.0"
+                          className="text-xs font-mono h-8"
+                        />
+                      </div>
+                      <div className="grid gap-1">
+                        <Label htmlFor="cfgTolerance" className="text-xs">허용 오차 밴드 (±%)</Label>
+                        <Input
+                          id="cfgTolerance"
+                          value={cfgTolerancePct}
+                          onChange={(e) => setCfgTolerancePct(e.target.value)}
+                          placeholder="5.0"
+                          className="text-xs font-mono h-8"
+                        />
+                      </div>
+                      <div className="grid gap-1">
+                        <Label htmlFor="cfgMaxStep" className="text-xs">1회 최대 자율 변동폭 (%)</Label>
+                        <Input
+                          id="cfgMaxStep"
+                          value={cfgMaxStepPct}
+                          onChange={(e) => setCfgMaxStepPct(e.target.value)}
+                          placeholder="5.0"
+                          className="text-xs font-mono h-8"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit" size="sm" disabled={isSubmitting} className="text-xs">
+                        설정 저장
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
 
           {activeTab === 'orders' && (
             <Dialog open={isProposeOpen} onOpenChange={setIsProposeOpen}>
@@ -386,6 +590,76 @@ export function MonetaryBureauCard({
             </Dialog>
           )}
         </div>
+
+        {/* Tab 0: Auto Regulation Timeline */}
+        {activeTab === 'auto' && (
+          <div className="overflow-x-auto rounded-lg border border-border/60">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/30">
+                  <TableHead className="text-[11px] py-2">조절 액션</TableHead>
+                  <TableHead className="text-[11px] py-2">Faucet / Sink (24h)</TableHead>
+                  <TableHead className="text-[11px] py-2">비율</TableHead>
+                  <TableHead className="text-[11px] py-2">조정 규모 (WLD)</TableHead>
+                  <TableHead className="text-[11px] py-2">자율 결정 사유</TableHead>
+                  <TableHead className="text-[11px] py-2 text-right">집행 일시</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {autoEvents.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">
+                      기록된 자동 조절 이벤트가 없습니다. (1시간 후 자동 실행되거나 상단의 즉시 실행 버튼을 누르면 기록됩니다)
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  autoEvents.map((e) => (
+                    <TableRow key={e.id} className="text-xs">
+                      <TableCell className="py-2">
+                        {e.action_type === 'TAPER_CONTRACTION' && (
+                          <Badge variant="destructive" className="text-[10px] px-1.5 py-0 flex items-center gap-1 w-fit">
+                            <TrendingDown className="size-3" /> 테이퍼링 긴축
+                          </Badge>
+                        )}
+                        {e.action_type === 'QE_EXPANSION' && (
+                          <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] px-1.5 py-0 flex items-center gap-1 w-fit">
+                            <TrendingUp className="size-3" /> 유동성 완화 (QE)
+                          </Badge>
+                        )}
+                        {e.action_type === 'NEUTRAL_BALANCED' && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 flex items-center gap-1 w-fit">
+                            <CheckCircle2 className="size-3 text-emerald-500" /> 중립 균형
+                          </Badge>
+                        )}
+                        {e.action_type === 'CIRCUIT_BREAKER_FREEZE' && (
+                          <Badge variant="destructive" className="text-[10px] px-1.5 py-0 flex items-center gap-1 w-fit font-bold">
+                            <ShieldAlert className="size-3" /> 서킷브레이커 동결
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="py-2 font-mono text-[11px]">
+                        <span className="text-emerald-600 dark:text-emerald-400">+{groupDigits(e.faucet_24h_wld)}</span> /{' '}
+                        <span className="text-rose-500">-{groupDigits(e.sink_24h_wld)}</span>
+                      </TableCell>
+                      <TableCell className="py-2 font-mono font-bold text-[11px]">
+                        {Number(e.current_ratio).toFixed(2)}x
+                      </TableCell>
+                      <TableCell className="py-2 font-mono">
+                        {BigInt(e.adjustment_amount_wld) > BigInt(0) ? `${groupDigits(e.adjustment_amount_wld)} WLD` : '-'}
+                      </TableCell>
+                      <TableCell className="py-2 text-[11px] max-w-[280px] truncate" title={e.reason}>
+                        {e.reason}
+                      </TableCell>
+                      <TableCell className="py-2 text-[10px] text-muted-foreground text-right">
+                        {new Date(e.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
         {/* Tab 1: Policy Orders Table */}
         {activeTab === 'orders' && (
