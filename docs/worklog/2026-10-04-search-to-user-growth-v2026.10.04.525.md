@@ -28,4 +28,8 @@
 - This cycle is docs-only, so runtime test/build/Test-server/Production verification is not applicable and is not claimed.
 
 ## Closeout record
-Pending.
+- Core planning integration commit: `004a8cf65a33773a39fc657d888985ff21acfb73` (`docs(plan): add v525 search-to-user growth loop`).
+- Final pre-close `origin/main=12e575435dc53e7f864758f248e6acda00006070` recheck; start/mid/final SHA remained unchanged.
+- v525 integrates search visibility -> user conversion -> D1/D7/D30 into current planning authority and replaces broad KR search shorthand with route-family classification.
+- All changes remain under `docs/`; no runtime, DB, API, Test or Production change is claimed.
+- GitHub push/PR state is recorded after this closeout commit.

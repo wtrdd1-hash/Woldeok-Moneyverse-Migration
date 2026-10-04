@@ -28,4 +28,8 @@
 - 본 회차는 문서 전용이므로 런타임 test/build/Test-server/Production 검증은 수행 대상이 아니며 완료로 주장하지 않는다.
 
 ## 종료 기록
-대기.
+- 핵심 기획 통합 commit: `004a8cf65a33773a39fc657d888985ff21acfb73` (`docs(plan): add v525 search-to-user growth loop`).
+- 종료 전 `origin/main=12e575435dc53e7f864758f248e6acda00006070` 재확인; 시작/중간/최종 모두 동일해 drift 없음.
+- v525는 검색노출→사용자전환→D1/D7/D30을 현재 기획 권위에 통합하고 한국 공개검색을 route-family 기준으로 세분화했다.
+- 모든 변경은 `docs/`에만 있으며 런타임·DB·API·Test·Production 변경 없음.
+- GitHub push/PR 상태는 이 closeout 커밋 이후 별도 기록한다.
