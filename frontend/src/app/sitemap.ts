@@ -12,9 +12,11 @@ import {
 } from '@/config/pseo-tax-retirement.config';
 import { PSEO_LOAN_PRESETS } from '@/config/pseo-loan.config';
 import { PSEO_DIVIDEND_STOCKS } from '@/config/pseo-dividend.config';
+import { GLOSSARY_TERMS } from '@/config/pseo-glossary.config';
 
 /**
  * 1-Hour ISR Caching for Sitemap.
+
  * Prevents unnecessary re-computation and shields backend from crawler storms.
  */
 export const revalidate = 3600;
@@ -159,7 +161,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     addEntry(`/tools/dividend-tax-calculator/${ds.ticker.toLowerCase()}`, 0.9, 'daily');
   }
 
+  // 2.11. 신규 50대 투자 & 금융 용어사전 pSEO 허브 및 상세 사전 라우트
+  addEntry('/guide/glossary', 0.95, 'daily');
+  for (const term of GLOSSARY_TERMS) {
+    addEntry(`/guide/glossary/${term.slug}`, 0.9, 'daily');
+  }
+
   // 3. 18 Virtual Stocks Clean Canonical URLs
+
   for (const symbol of STOCK_SYMBOLS) {
     addEntry(`/stocks/${symbol}`, 0.9, 'daily');
   }

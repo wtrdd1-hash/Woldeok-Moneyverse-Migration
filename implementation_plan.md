@@ -1580,5 +1580,42 @@
 - 원격 서버 무중단 배포 및 라이브 curl 응답(HTTP 200 OK) 실측 검증.
 - IndexNow 실시간 배치 색인 요청 전송.
 
+---
+## 🚀 [v106 Specification] 글로벌 4대 언어 50대 투자/금융 용어사전 pSEO 허브 & 사이드 레일 배너 & 배당락일 알림 고도화
+
+### 1. 요구사항 및 배경
+- 사용자의 전권 위임 승인에 따라 3대 핵심 확장 사항을 즉각 구현:
+  1. **[제안 1] 글로벌 4대 언어 50대 투자/금융 용어사전 pSEO 허브 (`/guide/glossary/[term]`)**:
+     - PER, PBR, ROE, 배당락일, 물타기, 금융소득종합과세, 공매도 등 50대 핵심 투자/재테크 용어 구축.
+     - 한국어(KO), 영어(EN), 일본어(JA), 중국어(ZH) 4개 언어의 상세 설명, 핵심 계산 공식, 연관 계산기 링크, JSON-LD `DefinedTerm` 구조화 데이터 지원.
+     - 상단/하단 2중 AdSense 마운트 + 포트폴리오/계산기 저장 연동 브릿지 제공.
+     - 전체 50대 용어를 아우르는 색인 인덱스 페이지(`/guide/glossary`) 구축.
+  2. **[제안 2] 일일 장마감 및 배당락일 D-Day 브라우저 푸시 알림 엔진 고도화**:
+     - `StockAlertPushEngine`에 사용자가 관심 등록/계산기에서 저장한 종목의 배당락일 D-Day 디데이 알림 계산 및 장마감 요약 리포트 트리거 기능 추가.
+  3. **[제안 3] 데스크톱 스티키 사이드 레일 배너 광고 마운트 (`DesktopStickyAdRails`)**:
+     - 대화면(1440px+ 2xl 디스플레이) 좌우 여백에 160x600 스카이스크래퍼 형태의 스티키 플로팅 배너를 배치하여 체류 시간 동안 Page RPM을 15,000원+ 로 견인.
+     - 콘텐츠 본문 레이아웃을 절대 침범하지 않도록 안전 뷰포트 격리 설계.
+
+### 2. 세부 컴포넌트 및 데이터셋 명세
+1. `frontend/src/config/pseo-glossary.config.ts` (신규):
+   - 50대 핵심 용어 정의(slug, termKo, termEn, termJa, termZh, category, formula, explanation, relatedCalculator, relatedTickers).
+2. `frontend/src/app/guide/glossary/[term]/page.tsx` (신규):
+   - `generateStaticParams`: 50개 용어 정적 프리렌더링 (200개 다국어 조합 메타데이터 생성).
+   - `DefinedTerm` JSON-LD 구조화 데이터, 공식 시각화 카드, 연관 계산기 빠른 이동, AdSense 광고 슬롯 2중 배치.
+3. `frontend/src/app/guide/glossary/page.tsx` (신규):
+   - 카테고리별(가치평가, 수익성, 세금/법률, 주식매매, 배당 등) 50대 용어 일람 및 실시간 검색 필터 허브.
+4. `frontend/src/components/desktop-sticky-ad-rails.tsx` (신규):
+   - 1440px 이상 대화면에서 좌우 양측 여백에 고정되는 스티키 광고 컴포넌트.
+5. `frontend/src/components/stock-alert-push-engine.tsx` (수정):
+   - 배당락일 D-Day 브로드캐스트 로직 및 장마감 변동 요약 푸시 기능 결합.
+6. `frontend/src/app/sitemap.ts`:
+   - 용어사전 허브 및 50개 용어 상세 URL 일괄 등록 (우선순위 0.85).
+
+### 3. 검증 및 배포 계획
+- `npm run typecheck` 및 `npm run build` 정적 생성 370+ 라우트 통과 검증.
+- Git 커밋 & 푸시 후 원격 Debian 프로덕션 서버(`easy-scraping.com`) 무중단 배포.
+- 실측 라이브 HTTP 200 OK 확인 및 IndexNow 핑 전송.
+
+
 
 
