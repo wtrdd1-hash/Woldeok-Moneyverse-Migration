@@ -1,6 +1,7 @@
 # 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v100)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v102**: Bankrate·NerdWallet·토스형 3대 초고수요 금융 pSEO 허브(연봉 실수령액·해외주식 250만 양도세·청년도약계좌) 대량 생성 및 유저 전환·AdSense 수익화 풀스택 구축 — 검색량이 가장 높은 '연봉별 실수령액 계산기'(2,400만~1억5,000만원 구간별 4대보험 공제표 대량 생성), '해외주식 양도세 250만원 공제 계산기'(테슬라/엔비디아/애플 등 종목별 22% 절세 시뮬레이터), '청년도약계좌 만기 5,000만원 비과세 계산기' 3대 신규 허브 개설, 고단가 AdSense 인아티클/멀티플렉스 광고 슬롯 기본 마운트, 1초 시나리오 저장 회원 전환 퍼널(`CalculatorSaveAction`) 탑재, JSON-LD 구조화 데이터 및 IndexNow 실시간 대량 색인 핑 전송 (+180, -0)
 - **v101**: 토스·뱅크샐러드형 1초 시나리오 저장 & 내 관심 포트폴리오 원장 자동 승격 회원 전환 퍼널 풀스택 구축 — 검색 유입자가 계산 결과 확인 후 이탈하지 않고 즉시 서비스 핵심 유저로 안착할 수 있도록, 580개 주식 물타기 계산기 및 3대 세금 계산기 전 지면에 '📌 이 시뮬레이션 내 계정에 저장하기' 원클릭 플로팅/인라인 버튼 탑재, 비로그인 시 브라우저 LocalStorage에 안전 임시 보관 후 원클릭 회원가입/로그인 모달 팝업, 로그인 즉시 유저 관심종목/시뮬레이션 원장으로 자동 승격 저장 및 데일리 목표가/절세 도달 알림 연동 (+120, -0)
 - **v100**: 수익 누수 원천 차단 — 580개 pSEO 주식 물타기 계산기 및 직장인 3대 세금 계산기, 301 가이드 지면 고단가 금융 Google AdSense(인아티클/멀티플렉스) 전면 마운트 및 1초 진단서 바이럴 공유 카드 풀스택 구축 — 검색엔진 트래픽이 집중되는 `stock-calculator/[preset]`, `retirement-calculator`, `pension-tax-calculator`, `isa-calculator`, `guide/career-mastery` 지면에 `InArticleAdvertisement`(슬롯 6000051656) 및 `MultiplexAdvertisement`(슬롯 9751074883) 전진 배치, 계산 결과 즉시 카카오톡/SNS로 퍼져나가는 `ViralShareCardDialog` 연동, 유입 트래픽 100% 현금화 파이프라인 가동 (+110, -0)
 - **v99**: 데스크톱 헤더 내비게이션 바 메뉴 텍스트 겹침(Overlapping/Zero-Width Shrink Bug) 원천 박멸 및 적응형 반응형 레이아웃 복원 — 브라우저 줌(67% 등) 및 1024px~1399px 데스크톱 구간에서 우측 위젯(`shrink-0`)에 밀려 `<nav>` 및 메뉴 버튼들이 너비 0px로 압축되면서 발생하던 글자 겹침 현상을 `shrink-0`, `min-h-9 2xl:min-h-10`, 반응형 패딩(`px-1.5 xl:px-2 2xl:px-3`) 및 글자 크기(`text-[11px] xl:text-xs 2xl:text-sm`)로 완벽 해결, 초대형 화면 전용 위젯(`실전 가이드 HOT`, `ServerClockPill`) 2xl 임계치 격상으로 중앙 내비게이션 가용 영역 대폭 확보 (+45, -0)
@@ -1447,4 +1448,36 @@
 - Vitest 단위 테스트 및 컴포넌트 동작 검증.
 - Next.js Turbopack 빌드 통과.
 - 원격 프로덕션 배포 및 라이브 렌더링/LocalStorage 저장/로그인 승격 연동 검증.
+
+---
+
+## 🚀 [v102 Specification] Bankrate·NerdWallet·토스형 3대 초고수요 금융 pSEO 허브(연봉 실수령액·해외주식 250만 양도세·청년도약계좌) 대량 생성 및 유저 전환·AdSense 수익화 풀스택 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 및 기획 의도**:
+  1. Bankrate, NerdWallet, 토스 등 국내외 최정상 핀테크 플랫폼의 검색 트래픽 점유 전략은 '구매/전환 의도가 가장 확실한 초고수요 롱테일 키워드'를 선점하는 것임.
+  2. 국내 2,000만 직장인 및 서학개미, 2030 청년 세대가 매일 포털에서 가장 많이 검색하는 3대 킬러 키워드:
+     - **연봉별 실수령액 계산기** (`연봉 3000 실수령액`, `연봉 4000`, `연봉 5000` 등 50개 구간별 공제액)
+     - **해외주식 양도소득세 계산기** (250만원 기본공제, 22% 양도소득세 절세 및 손익통산)
+     - **청년도약계좌 만기 계산기** (월 70만원 납입 시 5년 5,000만원 정부기여금 & 비과세 이자)
+  3. 이 3대 허브를 신규 개설하고, 각각에 고단가 AdSense 인아티클/멀티플렉스 광고 슬롯 및 토스형 `CalculatorSaveAction` 1초 저장 회원 전환 퍼널을 장착하여, 검색 유입 폭증과 유저 획득, 광고 수익 극대화를 동시 달성함.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/config/pseo-salary.config.ts`:
+   - 연봉 2,400만 ~ 1억 5,000만원 50개 구간별 4대 보험(국민연금 상한, 건강보험, 장기요양, 고용보험) 및 근로소득세 간이세액표 기반 데이터셋.
+2. `frontend/src/app/tools/salary-calculator/page.tsx` & `[preset]/page.tsx`:
+   - 연봉 입력 시 실수령액과 공제 항목을 시각화하는 인터랙티브 계산기 및 50개 롱테일 URL 허브.
+   - AdSense 인아티클/멀티플렉스 광고 및 `CalculatorSaveAction` 마운트.
+3. `frontend/src/app/tools/capital-gains-tax-calculator/page.tsx`:
+   - 250만원 기본공제 및 해외주식 22% 양도소득세 계산기 고도화, 광고 및 `CalculatorSaveAction` 마운트.
+4. `frontend/src/app/tools/youth-leap-calculator/page.tsx`:
+   - 청년도약계좌 5년 만기 5,000만원 정부기여금(최대 월 33,000원) + 비과세 적금 이자 계산기 신설, 광고 및 `CalculatorSaveAction` 마운트.
+5. IndexNow 및 사이트맵 연동:
+   - 신규 URL을 실시간 색인 핑 전송 API에 등록.
+
+### 3. 검증 계획
+- Next.js Turbopack 빌드 통과.
+- 원격 프로덕션 배포 및 라이브 curl 응답 검증 (HTTP 200 OK).
+- 광고 슬롯 및 1초 저장 버튼 렌더링 검증.
+
 
