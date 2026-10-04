@@ -2,14 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, X, Coins, ShieldCheck, BookmarkCheck } from 'lucide-react';
+import { Sparkles, ArrowRight, X, Coins } from 'lucide-react';
 
 export function ToolsGuestConversionBar() {
-  const [isVisible, setIsVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     try {
       // 1. 이미 오늘 하루 닫았는지 확인
       const dismissedUntil = localStorage.getItem('wdmv_guest_bar_dismissed_until');
@@ -28,22 +29,13 @@ export function ToolsGuestConversionBar() {
 
       if (hasAuth) {
         setIsLoggedIn(true);
-        return;
       }
-
-      // 3. 체류 2.5초 후 자연스럽게 슬라이드 인
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, 2500);
-
-      return () => clearTimeout(timer);
     } catch {
       // ignore
     }
   }, []);
 
   const handleDismiss = () => {
-    setIsVisible(false);
     setIsDismissed(true);
     try {
       // 24시간 동안 노출 차단
@@ -56,14 +48,13 @@ export function ToolsGuestConversionBar() {
     }
   };
 
-  if (!isVisible || isDismissed || isLoggedIn) {
+  if (mounted && (isDismissed || isLoggedIn)) {
     return null;
   }
 
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-emerald-500/40 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom duration-300"
-      role="banner"
+    <aside
+      className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-emerald-500/40 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] transition-all duration-300 transform translate-y-0"
       aria-label="신규 회원 혜택 및 계산 결과 계정 저장 안내"
     >
       <div className="max-w-6xl mx-auto px-4 py-2.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -109,6 +100,6 @@ export function ToolsGuestConversionBar() {
           </button>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
