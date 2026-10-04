@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { ArrowLeft, Coins, HelpCircle, Info, PieChart, ShieldCheck } from 'lucide-react';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { DividendCalculatorClient } from './dividend-calculator-client';
+import { DividendCalendarWidget } from '@/components/dividend-calendar-widget';
 
 export const metadata: Metadata = {
+
   title: '배당소득세 계산기 - 국내·미국 주식 15.4% 원천징수 및 2천만원 금융종합과세',
   description: '국내 및 미국 주식 배당금의 15.4% 세금 원천징수 실수령액과 2,000만원 초과 시 금융소득종합과세 세부담을 실시간으로 계산하고 절세 전략을 확인하세요.',
   keywords: ['배당소득세 계산기', '배당금 세금', '금융소득종합과세 2000만원', '미국 배당주 세금', '배당 실수령액', 'ISA 계좌 배당 절세'],
@@ -100,7 +102,13 @@ export default function DividendTaxCalculatorPage() {
         {/* 인터랙티브 배당 계산기 클라이언트 컴포넌트 */}
         <DividendCalculatorClient />
 
+        {/* 신규 배당 캘린더 인터랙티브 대시보드 위젯 */}
+        <div className="my-8">
+          <DividendCalendarWidget />
+        </div>
+
         {/* 중간 멀티플렉스 고단가 광고 */}
+
         <div className="my-10">
           <MultiplexAdvertisement />
         </div>

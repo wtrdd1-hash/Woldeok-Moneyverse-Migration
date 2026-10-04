@@ -1616,6 +1616,42 @@
 - Git 커밋 & 푸시 후 원격 Debian 프로덕션 서버(`easy-scraping.com`) 무중단 배포.
 - 실측 라이브 HTTP 200 OK 확인 및 IndexNow 핑 전송.
 
+---
+## 🚀 [v107 Specification] 글로벌 4대 언어 URL 분기 강화 (/en, /ja, /zh) 및 배당 캘린더 인터랙티브 대시보드 위젯 신설
+
+### 1. 요구사항 및 배경
+- 사용자의 "글로벌 4대 언어 URL 분기 강화 + 배당 캘린더 인터랙티브 위젯 신설: 찐행" 승인에 따라 구현:
+  1. **[기능 1] 글로벌 4대 언어 URL 서브패스 정적 라우트 확장**:
+     - 기존 기본(KO) 라우트 외에 `/en/guide/glossary/[term]`, `/ja/guide/glossary/[term]`, `/zh/guide/glossary/[term]` 물리적 언어 서브패스 라우트 구축.
+     - 각 언어별 맞춤 메타데이터(타이틀, 설명, 오픈그래프) 및 hreflang alternate 상호 참조 완벽 구성.
+     - 각 언어 허브 페이지(`/en/guide/glossary`, `/ja/guide/glossary`, `/zh/guide/glossary`) 동시 개설.
+     - 4개 국어 × 50개 용어 = 200개 정적 사전 페이지 프리렌더링.
+  2. **[기능 2] 배당 캘린더 인터랙티브 위젯 신설 (`DividendCalendarWidget`)**:
+     - 사용자가 관심 등록/계산기에서 보관한 배당주 종목들의 월별(1월~12월) 배당금 지급 스케줄을 달력/타임라인 형태로 시각화.
+     - `cross-surface-visual-hierarchy-architect` 및 `anti-ai-frontend-craftsmanship` 준수: 고대비 모노스페이스 수치 렌더링(`tabular-nums`), 비대칭 그리드, 320px 극소 모바일 터치 타깃 44px 확보.
+     - 월별 예상 배당금 합산 요약, 다가오는 배당락일 D-Day 카운트다운 뱃지, 즉시 모의 추가 기능 제공.
+     - 배당소득세 계산기 메인 페이지(`/tools/dividend-tax-calculator`) 및 종목 상세 페이지에 임베드.
+
+### 2. 세부 컴포넌트 및 데이터셋 명세
+1. `frontend/src/app/[locale]/guide/glossary/[term]/page.tsx` (신규):
+   - `generateStaticParams`: `['en', 'ja', 'zh']` × 50개 슬러그 = 150개 다국어 정적 라우트 프리렌더링.
+   - 해당 언어(termEn, termJa, termZh / descriptionEn, descriptionJa, descriptionZh)에 최적화된 뷰 렌더링.
+2. `frontend/src/app/[locale]/guide/glossary/page.tsx` (신규):
+   - 언어별 50개 용어 인덱스 허브 페이지.
+3. `frontend/src/components/dividend-calendar-widget.tsx` (신규):
+   - 인터랙티브 월별 배당 캘린더 컴포넌트.
+   - 1~12월 타임라인 그리드, 월별 수령액 바 차트/스트립, 종목별 배당락일 및 지급월 매핑, 로컬스토리지 연동.
+4. `frontend/src/app/tools/dividend-tax-calculator/page.tsx` (수정):
+   - 상단 또는 하단에 `DividendCalendarWidget` 마운트.
+5. `frontend/src/app/sitemap.ts`:
+   - 4개 언어 서브패스(150개 신규 URL) 사이트맵 자동 등록.
+
+### 3. 검증 및 배포 계획
+- `npm run typecheck` 및 `npm run build` 정적 프리렌더링 500+ 라우트 통과 검증.
+- Git 커밋 & 푸시 후 원격 Debian 프로덕션 서버(`easy-scraping.com`) 무중단 배포.
+- 실측 라이브 curl HTTP 200 OK 확인 및 IndexNow 핑 전송.
+
+
 
 
 

@@ -161,11 +161,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     addEntry(`/tools/dividend-tax-calculator/${ds.ticker.toLowerCase()}`, 0.9, 'daily');
   }
 
-  // 2.11. 신규 50대 투자 & 금융 용어사전 pSEO 허브 및 상세 사전 라우트
+  // 2.11. 신규 50대 투자 & 금융 용어사전 pSEO 허브 및 4개 언어 상세 사전 라우트 (총 200개 URL)
   addEntry('/guide/glossary', 0.95, 'daily');
+  addEntry('/en/guide/glossary', 0.95, 'daily');
+  addEntry('/ja/guide/glossary', 0.95, 'daily');
+  addEntry('/zh/guide/glossary', 0.95, 'daily');
   for (const term of GLOSSARY_TERMS) {
     addEntry(`/guide/glossary/${term.slug}`, 0.9, 'daily');
+    addEntry(`/en/guide/glossary/${term.slug}`, 0.9, 'daily');
+    addEntry(`/ja/guide/glossary/${term.slug}`, 0.9, 'daily');
+    addEntry(`/zh/guide/glossary/${term.slug}`, 0.9, 'daily');
   }
+
 
   // 3. 18 Virtual Stocks Clean Canonical URLs
 
