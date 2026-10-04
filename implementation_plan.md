@@ -1510,5 +1510,39 @@
 - 원격 프로덕션 배포 및 비로그인 상태에서 curl/브라우저 스티키 바 렌더링 실측 검증.
 - 580개 전 지면 일괄 동작 확인.
 
+---
+
+## 🚀 [v104 Specification] 가입 후 첫 의미 행동 브릿지 온보딩(`FirstTradeOnboardingModal`) + 대출이자/배당세 계산기 2종 신설 + 목표가 Web Push 알림 엔진(`StockAlertPushEngine`) 구축 명세
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 및 기획 의도 (`SEO_INTENT_TO_PLAY_ACTIVATION_GROWTH_SPEC` 완결)**:
+  1. 기획서(`SEO_INTENT_TO_PLAY_ACTIVATION_GROWTH_SPEC`) 상의 핵심 소비자 약속: *"검색으로 들어온 사용자가 계산기에서 답만 얻고 이탈하지 않고, 자연스럽게 첫 의미 행동(First Meaningful Value)까지 이어지게 한다."*
+  2. 비회원이 계산기에서 종목/시나리오를 저장하고 가입했을 때, 멍하니 빈 대시보드로 떨어지지 않고 **"1초 원클릭 체험 모달"**을 띄워 10,000 WLD 무료 정착금으로 방금 계산한 종목을 즉시 모의 매수/투자해보게 연결하여 락인.
+  3. 직장인/투자자 포털 검색량 최상위인 **대출이자 계산기(`loan-interest-calculator`)** 및 **배당소득세 계산기(`dividend-tax-calculator`)** 2종을 신설하여 유입 트래픽 2배 확장.
+  4. 계산기에 저장한 관심 종목의 목표 탈출가 도달 시 브라우저 Web Push 및 인앱 알림을 지원하는 **`StockAlertPushEngine`**을 구축하여 D1/D7 재방문 리텐션 자동화.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/components/first-trade-onboarding-modal.tsx` (신규):
+   - 로그인 상태 감지 및 로컬스토리지 내 `last_saved_scenario` / `wdmv_watchlist` 조회.
+   - 신규 가입/로그인 유저 대상 1회성 온보딩 팝업: *"🎉 환영합니다! 신규 정착금 10,000 WLD가 지급되었습니다. 방금 계산하신 [종목명]을(를) 모의 매수(1주)하여 실제 모의투자를 시작해보시겠습니까?"*
+   - '1초 원클릭 모의 매수' 클릭 시 백엔드 모의투자 API (`/api/v1/stocks/trade` 또는 목업 샌드박스) 연동 및 실시간 체결 피드백.
+   - 체결 후 '내 보유 포트폴리오 보기'로 자연스럽게 라우팅.
+2. `frontend/src/app/tools/loan-interest-calculator/page.tsx` (신규):
+   - 대출 원금(1억/3억/5억 등), 대출 금리(연 3%~8%), 상환 기간(1년~30년) 입력.
+   - 원리금균등분할상환 vs 원금균등상환 vs 만기일시상환 비교 차트 및 월별 상환 계획표.
+   - AdSense 인아티클/멀티플렉스 고단가 광고 슬롯 마운트 + `CalculatorSaveAction` + `ToolsGuestConversionBar` 완벽 연동.
+3. `frontend/src/app/tools/dividend-tax-calculator/page.tsx` (신규):
+   - 미국 주식 vs 국내 주식 배당금 입력 (연간 배당금 총액, 배당수익률).
+   - 15.4% 배당소득세 원천징수액 및 2,000만 원 초과 시 금융소득종합과세 계산.
+   - AdSense 광고 슬롯 + `CalculatorSaveAction` + `ToolsGuestConversionBar` 완벽 연동.
+4. `frontend/src/components/stock-alert-push-engine.tsx` (신규):
+   - 브라우저 Web Push 권한 요청 및 Service Worker 알림 연동.
+   - 저장된 관심 종목의 목표 탈출가 도달 시 브라우저 푸시 알림 및 헤더 인앱 알림 벨 동기화.
+
+### 3. 검증 계획
+- Next.js Turbopack 빌드 통과.
+- Vitest 단위 테스트 통과.
+- 원격 서버 배포 및 라이브 서빙(HTTP 200 OK) 실측 검증.
+
 
 

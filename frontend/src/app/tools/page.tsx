@@ -170,6 +170,28 @@ const TOOLS = [
     iconColor: 'text-indigo-400 bg-indigo-500/10',
     features: ['일반형 200만 vs 서민형 400만 비과세', '초과분 9.9% 저율 분리과세', '금융소득종합과세 방어', '가상 배당 투자 포켓 체험'],
   },
+  {
+    id: 'loan-interest-calculator',
+    title: '대출이자 계산기 (원리금균등 · 원금균등)',
+    badge: '대출 필수',
+    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    description: '1억·3억·5억 주택담보대출 및 신용대출의 원리금균등, 원금균등, 만기일시 상환방식별 총 이자와 월 상환액을 한눈에 비교합니다.',
+    href: '/tools/loan-interest-calculator',
+    icon: Landmark,
+    iconColor: 'text-emerald-400 bg-emerald-500/10',
+    features: ['원리금균등 vs 원금균등 총이자 비교', '월별 상환 스케줄 시각화', '주택담보대출 소득공제 가이드', '중도상환수수료 면제 시점'],
+  },
+  {
+    id: 'dividend-tax-calculator',
+    title: '배당소득세 계산기 (국내 · 미국주식)',
+    badge: '배당 투자',
+    badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    description: '국내 및 미국 주식 배당금의 15.4% 원천징수 실수령액과 2,000만원 초과 시 금융소득종합과세 해당 여부를 정밀 계산합니다.',
+    href: '/tools/dividend-tax-calculator',
+    icon: Coins,
+    iconColor: 'text-amber-400 bg-amber-500/10',
+    features: ['국내 15.4% vs 미국 15.0% 원천징수', '2,000만원 금융종합과세 한도 소진율', '실수령 배당금 및 절세 방안', 'ISA 계좌 배당 비과세 비교'],
+  },
 ];
 
 export default function ToolsHubPage() {

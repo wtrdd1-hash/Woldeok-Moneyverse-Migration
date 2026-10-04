@@ -146,6 +146,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     addEntry(`/tools/isa-calculator/${sc.slug}`, 0.9, 'daily');
   }
 
+  // 2.10. 신규 대출이자 및 배당소득세 계산기 허브
+  addEntry('/tools/loan-interest-calculator', 0.95, 'daily');
+  addEntry('/tools/dividend-tax-calculator', 0.95, 'daily');
+
   // 3. 18 Virtual Stocks Clean Canonical URLs
   for (const symbol of STOCK_SYMBOLS) {
     addEntry(`/stocks/${symbol}`, 0.9, 'daily');
