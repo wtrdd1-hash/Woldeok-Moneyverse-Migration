@@ -160,7 +160,7 @@ export default async function AccountPage({
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" asChild className="rounded-xl border-border/80 text-xs font-semibold hover:bg-muted/60 min-h-[40px]">
-            <Link href="/profile/settings">
+            <Link href="/profile">
               <Edit3 className="mr-1.5 size-3.5 text-primary shrink-0" />
               프로필 수정
             </Link>

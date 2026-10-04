@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { ArrowLeft, MessageSquare } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -67,6 +68,12 @@ export default async function MemberProfilePage({
 }) {
   await requireMember();
   const { userId } = await params;
+
+  // settings 경로로 진입한 경우 내 프로필 페이지로 직행
+  if (userId === 'settings') {
+    redirect('/profile');
+  }
+
   const outcome = await readProfile(userId);
 
   return (

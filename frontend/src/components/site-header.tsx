@@ -538,8 +538,14 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
           </div>
           <Separator className="my-1 opacity-60" />
           <DropdownMenuItem asChild>
+            <Link href="/profile" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors text-primary">
+              <User className="size-4 text-primary" />
+              <span>{localeLabel(locale, '내 프로필', 'My profile', 'マイプロフィール', '个人主页')}</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <Link href="/account" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
-              <User className="size-4 text-muted-foreground" />
+              <ShieldCheck className="size-4 text-muted-foreground" />
               <span>{localeLabel(locale, '내 계정', 'My account', 'マイアカウント', '我的账户')}</span>
             </Link>
           </DropdownMenuItem>
