@@ -9,6 +9,12 @@ import { CasinoEconomyDashboard } from './casino-economy-dashboard';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Amount } from '@/components/amount';
+import {
+  MonetaryBureauCard,
+  type MonetaryPolicyOrderItem,
+  type MonetaryTelemetryData,
+  type MintCertificateItem,
+} from './monetary-bureau-card';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
@@ -134,11 +140,23 @@ export default async function AdminEconomyPage({
   const alertList = alerts.ok ? alerts.data.alerts : null;
   const alertProblem = problem(alerts, '알림을 불러오지 못했어요.');
   const engine = autoPolicy.ok ? autoPolicy.data : null;
-  const [faucetSinkStats, velocityTelemetry, councilDebate] = await Promise.all([
+  const [
+    faucetSinkStats,
+    velocityTelemetry,
+    councilDebate,
+    monetaryTelemetry,
+    monetaryOrdersRes,
+    monetaryMintsRes,
+  ] = await Promise.all([
     apiOrNull<FaucetSinkStats>('/api/v1/admin/economy/stats'),
     apiOrNull<MonetaryVelocityTelemetry>('/api/v1/admin/economy/velocity'),
     apiOrNull<{ debate: CouncilDebateData }>('/api/v1/admin/economy/council-debate'),
+    apiOrNull<MonetaryTelemetryData>('/api/v1/admin/economy/monetary/telemetry'),
+    apiOrNull<{ orders: MonetaryPolicyOrderItem[] }>('/api/v1/admin/economy/monetary/policy-orders'),
+    apiOrNull<{ mints: MintCertificateItem[] }>('/api/v1/admin/economy/monetary/mint-certificates'),
   ]);
+  const monetaryOrders = monetaryOrdersRes?.orders ?? [];
+  const monetaryMints = monetaryMintsRes?.mints ?? [];
   const engineProblem = problem(autoPolicy, '자동 조정 엔진 상태를 불러오지 못했어요.');
 
   // Three answers, and the middle one only exists once a payout id is in the
@@ -171,6 +189,12 @@ export default async function AdminEconomyPage({
       )}
 
       <CouncilDebateCard initialData={councilDebate?.debate} />
+
+      <MonetaryBureauCard
+        initialTelemetry={monetaryTelemetry}
+        initialOrders={monetaryOrders}
+        initialMints={monetaryMints}
+      />
 
       <Card>
         <CardHeader>

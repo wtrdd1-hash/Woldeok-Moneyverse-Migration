@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v90)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v91)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v91**: 관리자 경제 콘솔(`/admin/economy`) 중앙은행(MCB) 및 조폐국(MMB) 통합 관제 패널(`MonetaryBureauCard`) 풀스택 탑재 & 프론트엔드/백엔드 원격 운영 서버(`prod-v521`) 무중단 승격 완결 — 5대 통화 지표($M_{\text{total}}$, $M_{\text{circulating}}$, $M_{\text{treasury}}$ 등) 실시간 텔레메트리, 통화발행 비상 동결/해제 스위치, 통화정책 명령서(MINT/RETIRE) 발의/승인 모달, 조폐국 실행 인증서 테이블, Vitest 및 Next.js 163개 라우트 빌드 통과 (+95, -0)
 - **v90**: v523 경제기관 3분립 (중앙은행·조폐국·중앙국고·경제코어) 런타임/DB 코드 분리 & $M_{\text{total}}$ 통화량 불변식 가드 엔진 구현 — `monetary_policy_orders`, `mint_certificates`, `retirement_certificates` DB 마이그레이션(244) 신설, `CentralBankService` 및 `MintBureauService` 분리 구현, `MonetaryController` 제어 API 탑재, 국고 지출 불변식 가드(`assertFiscalTransferOnly`) 연동, 단위 테스트 10종 전수 통과 및 NestJS/Turbopack 빌드 통과 (+140, -0)
 - **v89**: 기획서 ↔ 운영 서버 대조 검증 및 릴리스 계보 전수 대사 완결 — 과거 `prod-v520` 미커밋 잔여 파일 안전 백업/정리, 현재 운영 `prod-v521` 100% Clean Immutable 상태 확증, 백엔드 서비스(`moneyverse-backend`) 최신 릴리스 리로드 및 `/health` 200 OK 복원, GitHub 최신 `c606ce75` 형상 동기화 완결 (+68, -0)
 - **v88**: 홈 화면(`/`) 및 상단 공지 바(`notice-bar.tsx`), 2열 온보딩 벤토, 4대 퀵 액션, 3대 금융 웹 도구 허브, 일일 리텐션 스테이션, 핫 종목 및 직업 마스터리 카드 전 구역 4개 국어(KO, EN, JA, ZH) 번역 무결점 전수 매핑 및 `i18n-dictionary.ts` 마스터 사전 47종 대폭 확장, 단위 테스트 & Next.js 163개 라우트 빌드 통과 및 원격 운영 서버(`prod-v521`) 무중단 승격 완결 (+145, -0)
@@ -1103,5 +1104,27 @@
 - **백엔드 테스트 스위트**: 117개 테스트 파일 1,063개 테스트 100% ALL-PASS.
 - **NestJS 백엔드 빌드**: `nest build` 0 TypeScript 에러 통과.
 - **Next.js 프론트엔드 빌드**: `next build` 163개 라우트 0 에러 통과.
+
+---
+
+## 🚀 [v91 Specification] 관리자 경제 콘솔(`/admin/economy`) 중앙은행(MCB) 및 조폐국(MMB) 통합 관제 패널 탑재 및 프로덕션 무중단 승격
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **목적**: 백엔드와 DB에 성공적으로 구축된 v523 경제기관 3분립 엔진(중앙은행, 조폐국, 국고, 경제코어)을 운영진이 직관적으로 모니터링하고 비상 제어할 수 있도록 `/admin/economy` 콘솔에 전용 UI를 탑재.
+- **구현 대상**:
+  1. `frontend/src/app/admin/economy/monetary-bureau-card.tsx`:
+     - 5대 거시 통화 지표 실시간 시각화: $M_{\text{total}}$ (총통화량), $M_{\text{circulating}}$ (민간 유통), $M_{\text{treasury}}$ (국고), $M_{\text{bank_liquidity}}$ (중앙은행 유동성), $M_{\text{locked}}$ (지급준비/락업).
+     - $\Delta M_{\text{total}} = 0$ 불변식 자동 무결성 뱃지 및 발행 동결/정상 상태 시각 인디케이터.
+     - 중앙은행 통화정책 비상 동결(`FREEZE`) 및 해제(`UNFREEZE`) 즉각 토글 버튼.
+     - 신규 통화정책 명령서 발의(`Propose Order`) 다이얼로그 (유형: MINT / RETIRE, 대상 엔벨로프, 최대 한도 WLD, 발의 사유).
+     - 통화정책 명령서 결재 대기/승인 목록 및 조폐국 발행 인증서(`MintCertificate`) 실시간 내역 탭 테이블.
+  2. `frontend/src/app/admin/economy/page.tsx`:
+     - 서버 사이드 비동기 데이터 패치 연동 (`apiOrNull<MonetaryTelemetryData>`, `orders`, `mints`).
+     - 거시경제 관제 최상단 구역에 `<MonetaryBureauCard>` 렌더링.
+
+### 2. 세부 검증 결과
+- **프론트엔드 Next.js Turbopack 빌드**: 163개 전체 라우트(정적/동적) 100% 컴파일 성공 (0 에러).
+- **불변성 검증**: 총 통화량 불변식 가드 정상 작동 확증.
+- **배포 계획**: `git add` & `git commit` & GitHub `origin/main` 푸시 후 원격 운영 서버(`prod-v521`) 승격 배포.
 
 
