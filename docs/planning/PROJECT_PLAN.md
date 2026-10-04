@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.04.523
+> Current integrated version: v2026.10.04.526
 > Implementation/evidence sync: 2026-10-04 (exact main SHA: `f6e89a31`)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Life Economy & User World product layer — v2026.10.04.526 (2026-10-04)
+
+- **Authority decision:** adopt a persistent user economic-life layer connecting jobs, salary/living costs, funded credit, competitive fictional banks, businesses, cities, public-project voting, economic news/events, seasons, social co-business, fair rival leagues, micro-sessions, daily decisions, counterfactual Time Machine, AI personal advice and opt-in public economic profiles.
+- **Product identity:** Moneyverse progression is a balanced vector of net worth, free cash flow, resilience, credit health, skills, business health, economic reputation and career progress rather than one wealth leaderboard.
+- **Monetary invariant:** all user-world flows move existing WLD unless the existing v523 Central Bank authorization + Mint execution path explicitly changes supply. Deposits and funded loans do not create money.
+- **AI boundary:** personal AI is read/analyze/recommend by default; transfers, borrowing, investing, employment/business mutations and voting require explicit user confirmation and deterministic authorization. AI never approves credit eligibility, Mint, treasury budgets or ledger bypass.
+- **Domestic/overseas boundary:** WLD remains non-cashable/non-redeemable; Korean release keeps exchange/re-purchase blocked and labels bank/loan/credit mechanics as simulation. Overseas rollout is locale/jurisdiction gated and uses separate locale URLs rather than forced GeoIP redirects.
+- **SEO/growth:** public Time Machine/calculator utilities are allowed only when they provide independent functional value, transparent formulas, locale-quality content and indexability gates; mass thin-page generation remains prohibited.
+- **Detailed authority:** [Life Economy & User World Specification v526](LIFE_ECONOMY_USER_WORLD_SPEC.md).
+- **Evidence boundary:** v526 is planning/documentation only; no runtime, DB, Test or Production implementation is claimed.
 
 ## Central Bank / Mint / Treasury institutional separation — v2026.10.04.523 (2026-10-04)
 

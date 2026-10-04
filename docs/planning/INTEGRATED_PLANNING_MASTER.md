@@ -1,11 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.04.523
+> Current ledger version: v2026.10.04.526
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.04.526 — 2026-10-04 — Life Economy & User World integration
+- Start and mid-work baseline: `origin/main=a069e639b897acacb9754e5d04c58b3c642bcf28`; mid-work fetch found no drift. Work used isolated branch `docs/life-economy-v2026.10.04.526`.
+- Re-read current PROJECT_PLAN/integrated master and monetary/fiscal/AI/economy simulation/season/global-growth authority before defining the new layer.
+- Added EN/KO `LIFE_ECONOMY_USER_WORLD_SPEC` covering all 18 user-approved features as one persistent life-economy product contract.
+- The design keeps v523 money-supply authority intact, uses fully funded lending initially, makes personal AI recommend/confirm rather than autonomously transact, and adds explicit anti-abuse, data/API, KPI, accessibility, domestic/overseas and phased-release contracts.
+- Reference basis includes CFPB/World Bank financial capability, BIS/IMF monetary transmission, ILO/OECD/World Bank jobs and entrepreneurship, OECD/World Bank cities and participatory budgeting, GameAnalytics retention/progression, NIST/OECD/OWASP AI governance, Google international SEO, and current Korean game/virtual-asset/e-finance statutory boundary sources.
+- Public calculator/Time Machine SEO is quality-gated and functional-value-first; personalized/private economic surfaces remain non-indexable.
+- Planning/docs only. No runtime, DB, Test or Production implementation is claimed.
 
 ## v2026.10.04.523 — 2026-10-04 — Central Bank / Mint / Treasury institutional separation
 - Start `origin/main=c10e1582ccc0c058dff5c5356ad8b1893759f72c`; mid-work recheck detected `origin/main=065ee42204a4238c5010897212c7fc2a6c848f64`, which added treasury English/architecture documentation. The isolated branch was rebased onto that latest main before authority edits, preserving concurrent work.
