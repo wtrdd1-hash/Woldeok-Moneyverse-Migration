@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v89)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v90)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v90**: v523 경제기관 3분립 (중앙은행·조폐국·중앙국고·경제코어) 런타임/DB 코드 분리 & $M_{\text{total}}$ 통화량 불변식 가드 엔진 구현 — `monetary_policy_orders`, `mint_certificates`, `retirement_certificates` DB 마이그레이션(244) 신설, `CentralBankService` 및 `MintBureauService` 분리 구현, `MonetaryController` 제어 API 탑재, 국고 지출 불변식 가드(`assertFiscalTransferOnly`) 연동, 단위 테스트 10종 전수 통과 및 NestJS/Turbopack 빌드 통과 (+140, -0)
 - **v89**: 기획서 ↔ 운영 서버 대조 검증 및 릴리스 계보 전수 대사 완결 — 과거 `prod-v520` 미커밋 잔여 파일 안전 백업/정리, 현재 운영 `prod-v521` 100% Clean Immutable 상태 확증, 백엔드 서비스(`moneyverse-backend`) 최신 릴리스 리로드 및 `/health` 200 OK 복원, GitHub 최신 `c606ce75` 형상 동기화 완결 (+68, -0)
 - **v88**: 홈 화면(`/`) 및 상단 공지 바(`notice-bar.tsx`), 2열 온보딩 벤토, 4대 퀵 액션, 3대 금융 웹 도구 허브, 일일 리텐션 스테이션, 핫 종목 및 직업 마스터리 카드 전 구역 4개 국어(KO, EN, JA, ZH) 번역 무결점 전수 매핑 및 `i18n-dictionary.ts` 마스터 사전 47종 대폭 확장, 단위 테스트 & Next.js 163개 라우트 빌드 통과 및 원격 운영 서버(`prod-v521`) 무중단 승격 완결 (+145, -0)
 - **v87**: 국고 세수 자동 사회 환원(기본소득 배당, 복지 보조금, 인프라 펀딩, 역매수 소각) 전수 점검 & 10대 법정 세제율 및 5대 금고 원장 무결성 검증 & `/admin/treasury` 긴급 제어 타워 2FA 모달 리팩터링 및 반응형 헤더 찌그러짐 원천 차단 & 종합 기획서(`TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md`) 구축 완비 (+190, -0)
@@ -1060,5 +1061,47 @@
 - **서비스 가동 상태**: 프론트엔드 및 백엔드 둘 다 `active (running)` 정상 가동.
 - **릴리스 정합성**: GitHub `origin/main` exact SHA `c606ce75` ↔ 원격 호스트 `production-current` (`prod-v521`) 100% 일치.
 - **국고 5대 금고**: `VAULT_MAIN` (991만 WLD), `VAULT_EMERGENCY` (4,997만 WLD), `VAULT_WELFARE` (1.3만 WLD), `VAULT_INFRA` (0), `VAULT_RESERVE` (0) 가동 및 30% 안전 비축금 하한선 정상 적용 중.
+
+---
+
+## 🚀 [v90 Specification] v523 경제기관 3분립 (중앙은행·조폐국·중앙국고·경제코어) 런타임/DB 코드 분리 & $M_{\text{total}}$ 통화량 불변식 가드 엔진 구현
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **기획 권위 계약**: `CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md` (v2026.10.04.523)
+- **핵심 목표**:
+  1. 기획 전용(docs-only) 상태였던 v523 경제기관 분리를 실제 DB 스키마, 백엔드 서비스, 관리자 API로 정식 구현.
+  2. 중앙은행(통화정책 결정 및 승인) ↔ 조폐국(고무결성 1회 실행 전용) ↔ 중앙국고(세입·예산·재정지출) ↔ 경제코어(복식원장·불변식) 간의 권한 경계 확립.
+  3. 세금, 송금, 국고지출, 대출, 예적금 이동 시 시스템 총통화량($M_{\text{total}}$) 변동량이 0임을 보증하는 불변식 가드 연동.
+
+### 2. 세부 컴포넌트 구현 명세
+1. **DB 마이그레이션 (`packages/database/migrations/244-central-bank-mint-separation.sql`)**:
+   - `monetary_policy_orders`: 통화정책 명령서 테이블 (`order_type`, `target_envelope`, `max_amount_wld`, `executed_amount_wld`, `status`, `expires_at` 등).
+   - `mint_certificates`: 조폐국 발행 인증서 테이블 (`policy_order_id`, `idempotency_key`, `recipient_user_id` 등).
+   - `retirement_certificates`: 조폐국 영구 폐기/소각 인증서 테이블 (`source_type`, `idempotency_key`, `reason` 등).
+   - `monetary_system_status`: 글로벌 발행 동결 상태 및 제어 테이블 (`is_issuance_frozen`, `freeze_reason` 등).
+   - `verify_economy_supply_invariant()`: 통화량 합산 검증 함수.
+2. **중앙은행 서비스 (`CentralBankService`)**:
+   - `proposePolicyOrder`: 통화정책 명령서 발의 (최소 사유 10자, 유효기간, 한도 정수 검증).
+   - `approvePolicyOrder`: 발의된 명령서 공식 승인 (`APPROVED`).
+   - `freezeIssuance` / `unfreezeIssuance`: 비상 통화 발행 동결 및 해제.
+   - `getMonetaryTelemetry`: $M_{\text{total}}$, $M_{\text{circulating}}$, $M_{\text{treasury}}$, 정책명령/인증서 카운트 집계.
+3. **조폐국 서비스 (`MintBureauService`)**:
+   - `executeAuthorizedMint`: 승인된 유효 명령서에 한해 잔여 한도 내에서 멱등성 키로 정확히 1회 조폐 및 `MintCertificate` 발급 (미승인/초과/동결 시 `ForbiddenException` 강제 차단).
+   - `retireAuthorizedAmount`: 룬스케이프형 하드 싱크/소각 시 `RetirementCertificate` 발급 및 영구 차감.
+4. **관리자 제어 API (`MonetaryController`)**:
+   - `/api/v1/admin/economy/monetary/telemetry`
+   - `/api/v1/admin/economy/monetary/orders` (GET, POST propose, POST approve)
+   - `/api/v1/admin/economy/monetary/freeze` (POST)
+   - `/api/v1/admin/economy/monetary/certificates/mints` (GET)
+   - `/api/v1/admin/economy/monetary/certificates/retirements` (GET)
+   - `/api/v1/admin/economy/monetary/execute-mint` (POST)
+5. **국고 지출 불변식 가드 연동 (`TreasuryService`)**:
+   - `assertFiscalTransferOnly`: 국고 배당, 보조금, 펀딩, 환급 집행 시 단순 재정 이전임을 검증하고 $\Delta M_{\text{total}} = 0$ 불변식 강제.
+
+### 3. 검증 결과
+- **단위 테스트 (`monetary.service.test.ts`)**: 10개 신규 테스트 100% ALL-PASS.
+- **백엔드 테스트 스위트**: 117개 테스트 파일 1,063개 테스트 100% ALL-PASS.
+- **NestJS 백엔드 빌드**: `nest build` 0 TypeScript 에러 통과.
+- **Next.js 프론트엔드 빌드**: `next build` 163개 라우트 0 에러 통과.
 
 
