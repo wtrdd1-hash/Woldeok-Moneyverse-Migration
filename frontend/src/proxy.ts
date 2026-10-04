@@ -57,16 +57,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url), { status: 307 });
   }
 
-  // Historic blog routes are deliberately gone and must not be redirected.
-  if (pathname.startsWith('/entry/')) {
-    return new NextResponse('This legacy blog post has been permanently removed.', {
-      status: 410,
-      headers: {
-        'content-type': 'text/plain; charset=utf-8',
-        'cache-control': 'public, max-age=3600',
-        'x-robots-tag': 'noindex, nofollow',
-      },
-    });
+  // Historic blog routes: 301 Permanent Redirect to capture search traffic into Moneyverse developer career & tools
+  if (pathname.startsWith('/entry/') || pathname.startsWith('/blog/') || pathname.startsWith('/post/')) {
+    const redirectUrl = new URL('/guide/career-mastery?ref=legacy_tech_blog', request.url);
+    return NextResponse.redirect(redirectUrl, 301);
   }
 
   // Check for explicit query parameter (?lang=en or ?locale=ja)

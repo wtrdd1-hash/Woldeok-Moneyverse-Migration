@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
 import { GscAnalyticsCard } from './gsc-analytics-card';
 import { AdMonetizationCard } from './ad-monetization-card';
+import { IndexingApiCard } from './indexing-api-card';
 
 export interface CrawlerLog {
   readonly id: string;
@@ -364,6 +365,9 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
 
       {/* Google Search Console Search Analytics 30-Day Trend & Top Queries */}
       <GscAnalyticsCard />
+
+      {/* Google Indexing API 빠른 색인 1클릭 전송 및 관제 */}
+      <IndexingApiCard />
 
       {/* Google AdSense 광고 수익화 & 트래픽 관제 타워 */}
       <AdMonetizationCard totalHits24h={initialData.totalHits24h} />

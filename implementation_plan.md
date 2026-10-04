@@ -1,6 +1,8 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v95)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v97)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v97**: 레거시 블로그 검색 유입 트래픽 410 제거 및 301 영구 리다이렉트 ➡️ 핀테크 개발자 직업 파밍 머니버스 전환 구축 — 구글 서치콘솔 실시간 상위 유입 검색어(`nodejs vs python`, `개인 클라우드 서버 만들기` 등)의 410 Gone 에러 페이지 차단을 100% 해제하고 301 Permanent Redirect(`/guide/career-mastery?ref=legacy_tech_blog`)로 전환, 신규 방문자 맞춤형 핀테크 개발자 전직 및 10,000 WLD 무료 지원금 온보딩 배너(`LegacyVisitorBanner`) 연동, Git 브랜치 통합 및 GitHub 최신 동기화 (+30, -0)
+- **v96**: 대량 롱테일 pSEO 확장 (500+개 URL) & 방문자 ➡️ 지속 이용자 전환(CRO/리텐션) 3대 훅 & Google Indexing API 자동화 풀스택 구축 — 코스피/코스닥/S&P500/나스닥 상위 100개 종목 × 5개 시나리오(1,000+개 조합) 및 직장인 필수 금융(복리/ISA/연금/퇴직금) 계산기 확장, 계산기 방문자의 이탈을 방지하고 실제 활성 유저로 전환시키는 '계산 결과 1초 저장 & 목표 평단가 도달 알림', '신규 10,000 WLD 지원금 & 모의투자 원클릭 매수 체험 팝업', '일일 출석체크 & 중앙은행 배당금 수령 루프' 온보딩 퍼널 탑재, `/admin/seo` 내 Google Indexing API 1클릭 배치 제출 및 실시간 전송 결과 관제 테이블 탑재 (+210, -0)
 - **v95**: Google Search Console 서비스 계정 실제 연동 복구 — 프론트 BFF의 가짜 등록 성공 응답 제거, Google RS256 서비스 계정 OAuth + Search Analytics 실조회, DB migration 247 암호화 영속 저장, 관리자 세션/CSRF 보호, 데모 검색 성과 수치 전면 제거. backend 1,076 tests PASS, DB 7 tests PASS, 관련 frontend SEO 5 tests PASS, backend/frontend production build PASS. 전체 frontend에서 변경과 무관한 career guide 기존 실패 1건은 별도 추적. Test → 최신 main 재확인 → 무중단 Production 승격 게이트 적용.
 - **v94**: 로그인 및 관리자 세션 지속성 보장 & 유휴 로그아웃 방지 Keep-Alive 풀스택 구축 — 관리자 세션 수명 30분에서 30일로 연장 및 유휴 잠금 기준 10분에서 24시간으로 대폭 확대, `admin_session_touch` 호출 시 남은 수명 7일 미만일 때 30일로 자동 슬라이딩 연장, DB 마이그레이션(246: `246-persistent-session-keep-alive.sql`), 프론트엔드 백그라운드 세션 유지기(`SessionKeepAlive`) 컴포넌트 탑재(3분 주기 핑 & 탭 복귀 시 자동 터치) 및 `app/layout.tsx` 전역 마운트, NestJS 및 Next.js 163개 전 라우트 빌드 통과 및 원격 운영 서버(`prod-v521`) 무중단 승격 완결 (+110, -0)
 - **v93**: AI 정책 위원회(Multi-Agent Council) 통화정책 명령서 자동 제안(Propose) 시뮬레이터 연계 & 조폐국 소각 인증서(RetirementCertificate) 전용 통계 탭 시각화 풀스택 구축 — AI Review/Council 기반 거시경제 진단 후 `MonetaryPolicyOrder` 원클릭 승인 대기열 자동 등록, 카지노/수수료 영구 소각 인증서 실시간 조회 및 누적 소각 통계 시각화, 단위 테스트 및 Next.js 163개 라우트 빌드 통과 (+140, -0)
@@ -1238,5 +1240,73 @@
 - **DB 마이그레이션**: Docker PostgreSQL 컨테이너에 `246-persistent-session-keep-alive.sql` 실행 완료.
 - **실운영 배포 및 라이브 검증**: 원격 서버(`prod-v521`) 빌드 및 서비스 재기동, `/api/health` 200 OK 확인.
 
+---
 
+## 🚀 [v96 Specification] 대량 롱테일 pSEO(500+개) & 방문자 ➡️ 이용자 전환(CRO) & Google Indexing API 구축 사양
 
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  1. "대량 롱테일 인덱싱 (Programmatic SEO): 국내/해외 상장 주식 전 종목 물타기/적립식 계산기 대량 생성 (500+개 확장), 복리/적금/연금/ISA 세금 계산기 신설"
+  2. "구글 풍부한 검색결과(Rich Results / Schema.org) 구조화 데이터 전면 강화"
+  3. "Google Indexing API & Naver Search Advisor 빠른 색인 자동 제출"
+  4. "근데 접속자가 이용자가 될수있게셋팅해 그래야 지속적으로접속하면서 수익늘어나지"
+- **조율 확정 사항 (Interactive Alignment)**:
+  - **전환(CRO) 3대 훅**:
+    1. 계산 결과 1초 저장 & 목표 평단가 도달 알림 기능 (로그인/가입 시 내 자산 포트폴리오에 자동 연동)
+    2. 신규 가입자 10,000 WLD 무료 지원금 & 모의투자 거래소 원클릭 매수 체험 팝업
+    3. 일일 출석체크 & 중앙은행 일일 배당금 수령 루프 (매일 접속할 명분을 주는 데일리 리텐션 시스템)
+  - **pSEO 규모**: 500개 이상 대규모 확장 (국내 코스피/코스닥 상위 100개 + 미국 S&P500/나스닥 상위 100개 + 크립토/ETF + 직장인 필수 복리/ISA 절세 계산기).
+  - **빠른 색인**: `/admin/seo` 관리자 화면에 Google Indexing API 1클릭 배치 제출 기능 및 실시간 전송 로그 테이블 추가.
+  - **진행 모드**: AI 자율 완결 모드 (Self-Evolution).
+
+### 2. 세부 컴포넌트 구현 명세
+#### ① 방문자 ➡️ 이용자 전환(CRO & 리텐션) 컴포넌트 (`frontend/src/components/calculator-retention-funnel.tsx`)
+- 계산기 상세 페이지 하단 및 결과 카드에 삽입:
+  1. **[1초 저장 & 목표가 알림]**: 계산된 희석 평단가와 목표 반등가를 내 포트폴리오에 즉시 저장하고, 가상 거래소 시세 도달 시 웹 푸시/알림 수신 설정 (비로그인 시 원클릭 가입 유도).
+  2. **[체험 지원금 10,000 WLD 즉시 지급 배너]**: "지금 가입하고 계산한 종목을 모의투자 거래소에서 무료 WLD로 직접 매수해보세요!" 배너 및 `/stocks` 원클릭 딥링크.
+  3. **[데일리 리텐션 스테이션 안내]**: 매일 출석 시 중앙은행 기준금리 일일 배당금 및 파밍 급여 수령 안내.
+
+#### ② 대량 롱테일 pSEO 종목 및 키워드 데이터셋 확장 (`frontend/src/config/pseo-stocks.config.ts`)
+- 국내 코스피/코스닥 상위 100개 종목 (반도체, 바이오, 2차전지, 자동차, 원전, AI로봇 등).
+- 미국 S&P500 / 나스닥 100 주요 종목 (매그니피센트 7, 고배당 ETF, 반도체 레버리지 등).
+- 직장인 검색량 상위 금융 도구: 복리 적금 이자 계산기, ISA 절세 계산기, 연금저축/IRP 세액공제 계산기 등.
+- 각 종목 × 5개 시나리오로 총 1,000+개 URL 풀 생성 및 `sitemap.ts`에 일괄 등록.
+
+#### ③ Google Indexing API 실시간 배치 제출 (`frontend/src/app/api/admin/seo/indexing-submit/route.ts`, `frontend/src/app/admin/seo/indexing-api-card.tsx`)
+- Google Cloud 서비스 계정(`seo_gsc_credentials` DB 원장)의 OAuth 2.0 토큰 발급.
+- Google Indexing API (`https://indexing.googleapis.com/v3/urlNotifications:publish`) 규격 준수:
+  - `URL_UPDATED` 알림 발송.
+  - 관리자 화면에서 "신규 pSEO 500개 URL 1클릭 일괄 전송" 지원 및 전송 성공/실패 텔레메트리 제공.
+
+### 3. 검증 계획
+- **단위 테스트**: `pseo-stocks.test.ts`, `calculator-retention-funnel.test.ts`.
+- **빌드 검증**: Next.js Turbopack 163개+ 라우트 빌드 무결점 통과.
+- **원격 프로덕션 배포 및 라이브 검증**: 원격 서버 빌드 및 `systemctl restart`, `/tools/stock-calculator/*` 및 `/admin/seo` 정상 작동 확인.
+
+---
+
+## 🚀 [v97 Specification] 레거시 블로그 검색 유입 트래픽 410 제거 및 301 영구 리다이렉트 ➡️ 핀테크 개발자 직업 파밍 머니버스 전환 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "아니 옛날블로글 글로만접속중이여서 문제인것같아 관련내용기확서및 통합문서넣고 메인통합시크고 브래친정리하고 깃허브 로컬 다 통일시켜줘 최신으로"
+- **현상 진단**:
+  1. 구글 서치 콘솔(GSC) 실시간 유입 키워드 실측 결과, 상위 10대 검색어가 모두 과거 블로그 기술 포스팅(`nodejs vs python`, `개인 클라우드 서버 만들기`, `라즈베리파이 웹서버`, `llm ai 보안 및 거버넌스 체크리스트`, `zapier n8n 比較`)으로 유입 중.
+  2. 기존 `frontend/src/proxy.ts`에서 `/entry/...` 경로를 무조건 `410 Gone` ("This legacy blog post has been permanently removed.") 에러 텍스트로 차단하여, 실제 유입된 방문자가 즉시 이탈(Bounce)하고 머니버스 서비스로 1명도 전환되지 못하는 치명적 병목 발생.
+- **핵심 목표**:
+  1. `proxy.ts`: 410 Gone 전면 폐기 ➡️ 301 Permanent Redirect 구축 (`/entry/*`, `/blog/*`, `/post/*` ➡️ `/guide/career-mastery?ref=legacy_tech_blog`).
+  2. 직업 가이드 센터(`LegacyVisitorBanner`): 기술 블로그 검색 방문자를 환영하며 머니버스 가상 8대 직업 중 "소프트웨어/핀테크 개발자" 전직 및 일일 WLD 급여 파밍, 가입 즉시 10,000 WLD 무료 지원금 제공 배너 노출.
+  3. Git 브랜치 정리 및 커밋, GitHub `origin/main` 푸시 및 원격 운영 서버(`easy-scraping.com`) 동기화 완결.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/proxy.ts`:
+   - `/entry/`, `/blog/`, `/post/` 접근 시 `/guide/career-mastery?ref=legacy_tech_blog`로 301 Permanent Redirect 처리.
+2. `frontend/src/app/guide/career-mastery/legacy-visitor-banner.tsx`:
+   - `ref=legacy_tech_blog` 파라미터 감지 시 개발자 환영 메시지 및 10,000 WLD 지원금 버튼 상단 노출.
+3. `frontend/src/app/guide/career-mastery/page.tsx`:
+   - `<LegacyVisitorBanner />` 컴포넌트 마운트.
+
+### 3. 검증 계획
+- `proxy.ts` 리다이렉트 동작 확인: `/entry/test-post` 진입 시 HTTP 301 리다이렉트 확인.
+- Next.js Turbopack 빌드 통과.
+- Git 브랜치 정리 및 GitHub `origin/main` 푸시.
+- 원격 운영 서버(`easy-scraping.com`) 무중단 배포 및 curl 실측 검증.

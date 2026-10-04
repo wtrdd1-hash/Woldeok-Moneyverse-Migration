@@ -8,6 +8,7 @@ import { ShareDiagnosisCard } from '@/components/viral/share-diagnosis-card';
 import { ReferralSystem } from '@/components/viral/referral-system';
 import { buildCalculatorRichSnippet, jsonLd } from '@/lib/json-ld';
 import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
+import { CalculatorRetentionFunnel } from '@/components/calculator-retention-funnel';
 
 interface PresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
@@ -17,7 +18,7 @@ export const revalidate = 86400; // 24시간 On-Demand ISR 캐싱
 
 export async function generateStaticParams() {
   const stockPresets = STOCK_PRESETS.map((p) => ({ preset: p.slug }));
-  const popularPseo = ALL_PSEO_POPULAR_SLUGS.slice(0, 60).map((slug) => ({ preset: slug }));
+  const popularPseo = ALL_PSEO_POPULAR_SLUGS.slice(0, 80).map((slug) => ({ preset: slug }));
   return [...stockPresets, ...popularPseo];
 }
 
@@ -163,6 +164,15 @@ export default async function StockPresetPage({ params }: PresetPageProps) {
             </div>
           </div>
         </div>
+
+        {/* 방문자 ➡️ 이용자 전환 및 리텐션 온보딩 퍼널 (1초 저장, 10,000 WLD 지원금, 데일리 배당) */}
+        <CalculatorRetentionFunnel
+          stockName={data.title.split(' ')[0] || '가상 종목'}
+          ticker={data.slug}
+          targetPrice={data.calculatedResult.primaryValue}
+          reboundRate={data.calculatedResult.secondaryValue}
+          category="stock"
+        />
 
         {/* 단계별 HowTo 가이드 */}
         <div className="space-y-4">

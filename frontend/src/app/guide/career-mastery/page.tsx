@@ -28,6 +28,7 @@ import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { getServerLocale } from '@/lib/locale-server';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CareerStepByStepGuide } from './career-step-by-step-guide';
+import { LegacyVisitorBanner } from './legacy-visitor-banner';
 
 export const revalidate = 3600;
 
@@ -125,6 +126,9 @@ export default async function CareerMasteryGuidePage() {
             : '투자금 0원으로 시작하는 머니버스 공식 기본소득 엔진! 8대 전문 직업군으로 자유롭게 전직하고, 4단계 업무를 완수하여 매일 최대 100,000 WLD 이상의 급여와 3배 숙련도 보너스를 획득하세요.'}
         </p>
       </PageHeader>
+
+      {/* 레거시 기술 블로그 검색 유입자 환영 및 개발자 직업 전직 전환 배너 */}
+      <LegacyVisitorBanner />
 
       {/* 핵심 4대 탭 인터랙티브 시뮬레이터 & 도감 */}
       <CareerStepByStepGuide />
