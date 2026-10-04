@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v93)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v94)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v94**: 로그인 및 관리자 세션 지속성 보장 & 유휴 로그아웃 방지 Keep-Alive 풀스택 구축 — 관리자 세션 수명 30분에서 30일로 연장 및 유휴 잠금 기준 10분에서 24시간으로 대폭 확대, `admin_session_touch` 호출 시 남은 수명 7일 미만일 때 30일로 자동 슬라이딩 연장, DB 마이그레이션(246: `246-persistent-session-keep-alive.sql`), 프론트엔드 백그라운드 세션 유지기(`SessionKeepAlive`) 컴포넌트 탑재(3분 주기 핑 & 탭 복귀 시 자동 터치) 및 `app/layout.tsx` 전역 마운트, NestJS 및 Next.js 163개 전 라우트 빌드 통과 및 원격 운영 서버(`prod-v521`) 무중단 승격 완결 (+110, -0)
 - **v93**: AI 정책 위원회(Multi-Agent Council) 통화정책 명령서 자동 제안(Propose) 시뮬레이터 연계 & 조폐국 소각 인증서(RetirementCertificate) 전용 통계 탭 시각화 풀스택 구축 — AI Review/Council 기반 거시경제 진단 후 `MonetaryPolicyOrder` 원클릭 승인 대기열 자동 등록, 카지노/수수료 영구 소각 인증서 실시간 조회 및 누적 소각 통계 시각화, 단위 테스트 및 Next.js 163개 라우트 빌드 통과 (+140, -0)
 - **v92**: 화폐량 자동 조절(Automated Monetary Supply Rebalancing Engine) 풀스택 구축 — Faucet/Sink 비율 실시간 평가 기반 1시간 주기 테이퍼링/양적완화 피드백 루프, 안전 한도(±5%) 내 전자동 자율 집행(`AutoMonetaryRegulationService`), DB 마이그레이션(245: `monetary_auto_regulation_configs`, `monetary_regulation_events`), 관리자 콘솔(`/admin/economy`) 내 자동 조절 스위치/파라미터/타임라인 로그 연동, 긴급 서킷브레이커 동결 및 시장 공시 브로드캐스트 (+180, -0)
 - **v91**: 관리자 경제 콘솔(`/admin/economy`) 중앙은행(MCB) 및 조폐국(MMB) 통합 관제 패널(`MonetaryBureauCard`) 풀스택 탑재 & 프론트엔드/백엔드 원격 운영 서버(`prod-v521`) 무중단 승격 완결 — 5대 통화 지표($M_{\text{total}}$, $M_{\text{circulating}}$, $M_{\text{treasury}}$ 등) 실시간 텔레메트리, 통화발행 비상 동결/해제 스위치, 통화정책 명령서(MINT/RETIRE) 발의/승인 모달, 조폐국 실행 인증서 테이블, Vitest 및 Next.js 163개 라우트 빌드 통과 (+95, -0)
@@ -1199,5 +1200,42 @@
 - **단위 테스트**: 백엔드 중앙은행 및 AI 위원회 연계 테스트 작성 및 통과.
 - **빌드 검증**: NestJS 및 Next.js Turbopack 163개 라우트 빌드 통과.
 - **실운영 배포 및 라이브 검증**: 원격 서버 배포, 소각 인증서 탭 렌더링 및 AI 제안 기능 정상 작동 확인.
+
+---
+
+## 🚀 [v94 Specification] 로그인 및 세션 지속성 보장 & 유휴 로그아웃 원천 차단 Keep-Alive 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "아니 로그인 잘안풀리게셋팅해"
+- **현상 진단**:
+  1. 관리자 콘솔 접근 시 DB 함수(`admin_session_open`, `admin_session_touch`)가 세션 수명을 **불과 30분**, 유휴 잠금(idle lock)을 **불과 10분**으로 엄격하게 하드코딩하여 10분만 탭을 딴 곳에 두거나 화면을 보고 있어도 즉시 세션이 잠겨(`/admin`으로 리다이렉트되어) 로그인이 풀리는 체감 발생.
+  2. 프론트엔드 전역에서 세션이 유휴 상태로 방치되지 않도록 백그라운드에서 주기적으로 터치해주는 Heartbeat(Keep-Alive) 메커니즘 부재.
+  3. 일반 회원 세션은 180일이지만 관리자 세션이 열린 후 CSRF 토큰 회전 시 수명 슬라이딩에서 제외되었던 문제.
+- **핵심 목표**:
+  1. 관리자 세션 수명 대폭 확대: 30분 -> **30일 (720시간)**.
+  2. 관리자 세션 유휴 타임아웃 확대: 10분 -> **24시간 (1,440분)**.
+  3. 자동 슬라이딩 세션 갱신 (Auto-sliding Refresh): 터치 시 남은 만료 시간이 7일 미만이면 자동으로 **30일 뒤로 롤링 연장**.
+  4. 프론트엔드 백그라운드 세션 유지기 (`SessionKeepAlive`): 브라우저 탭이 열려있는 동안 3분 주기 및 탭 포커스 복귀 시 무소음 세션 갱신 핑 전송.
+  5. 전역 레이아웃 탑재 및 운영 서버 배포 완결.
+
+### 2. 세부 컴포넌트 구현 명세
+1. **DB 마이그레이션 (`packages/database/migrations/246-persistent-session-keep-alive.sql`)**:
+   - `public.admin_session_open`: 30일 절대 수명(`v_now + make_interval(days => 30)`), 24시간 유휴 만료(`v_now + make_interval(hours => 24)`).
+   - `public.admin_session_touch`: 24시간 유휴 검증, 잔여 수명 7일 미만 시 30일로 슬라이딩 연장, `admin_last_seen_at = v_now` 갱신.
+   - `public.admin_recovery_code_open_session`: 조건부 30일 / 24시간 연장 반영.
+2. **백엔드 세션 저장소 (`backend/src/auth/session.repository.ts`)**:
+   - `rotateCsrf`: 관리자 세션에 대해서도 잔여 7일 미만 시 30일로 슬라이딩 연장 및 `admin_last_seen_at` 갱신.
+3. **프론트엔드 세션 유지기 (`frontend/src/components/session-keep-alive.tsx`)**:
+   - 클라이언트 전역 컴포넌트: 3분 주기 타이머 + `visibilitychange` + `focus` 이벤트 감지.
+   - 회원 세션 및 CSRF 최신 동기화 (`GET /api/v1/auth/session`).
+   - 관리자 경로 진입 시 관리자 유휴 타이머 즉시 터치 (`GET /api/v1/admin/security`).
+4. **전역 레이아웃 마운트 (`frontend/src/app/layout.tsx`)**:
+   - `<SessionKeepAlive />` 컴포넌트를 `ThemeProvider` 하단에 마운트하여 전 사이트 적용.
+
+### 3. 검증 계획
+- **빌드 검증**: NestJS 백엔드(`nest build`) 및 Next.js Turbopack 163개 라우트 빌드 무결점 통과.
+- **DB 마이그레이션**: Docker PostgreSQL 컨테이너에 `246-persistent-session-keep-alive.sql` 실행 완료.
+- **실운영 배포 및 라이브 검증**: 원격 서버(`prod-v521`) 빌드 및 서비스 재기동, `/api/health` 200 OK 확인.
+
 
 
