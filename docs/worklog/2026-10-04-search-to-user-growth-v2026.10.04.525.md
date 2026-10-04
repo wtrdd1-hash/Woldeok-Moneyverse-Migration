@@ -32,4 +32,4 @@
 - Final pre-close `origin/main=12e575435dc53e7f864758f248e6acda00006070` recheck; start/mid/final SHA remained unchanged.
 - v525 integrates search visibility -> user conversion -> D1/D7/D30 into current planning authority and replaces broad KR search shorthand with route-family classification.
 - All changes remain under `docs/`; no runtime, DB, API, Test or Production change is claimed.
-- GitHub push/PR state is recorded after this closeout commit.
+- GitHub branch pushed: `plan/search-to-user-growth-v2026.10.04.525`; PR opened as `#778` (`https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/778`).

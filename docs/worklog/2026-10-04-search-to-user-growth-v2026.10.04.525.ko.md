@@ -32,4 +32,4 @@
 - 종료 전 `origin/main=12e575435dc53e7f864758f248e6acda00006070` 재확인; 시작/중간/최종 모두 동일해 drift 없음.
 - v525는 검색노출→사용자전환→D1/D7/D30을 현재 기획 권위에 통합하고 한국 공개검색을 route-family 기준으로 세분화했다.
 - 모든 변경은 `docs/`에만 있으며 런타임·DB·API·Test·Production 변경 없음.
-- GitHub push/PR 상태는 이 closeout 커밋 이후 별도 기록한다.
+- GitHub 브랜치 push 완료: `plan/search-to-user-growth-v2026.10.04.525`; PR `#778` 생성 (`https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/778`).
