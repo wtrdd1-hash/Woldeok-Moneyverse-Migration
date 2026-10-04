@@ -1,3 +1,16 @@
+## v2026.10.04.524 — Google Search Console 실제 자격 증명 영속 저장 및 Search Analytics 복구
+
+- **구현 버전**: root plan v95; 브랜치 `fix/gsc-service-account-20261004`.
+- 프론트에서 성공만 반환하던 가짜 키 등록 경로를 실제 백엔드 전달 경로로 교체.
+- Google 서비스 계정 RS256 OAuth, Search Console property 탐색, 실제 Search Analytics 조회 구현.
+- DB migration 247로 암호화 영속 저장하고 애플리케이션 역할의 테이블 직접 접근 차단.
+- 조회는 관리자 세션 가드, 키 등록/삭제는 추가 CSRF 보호 적용.
+- 결정론적 데모 GSC 수치를 전부 제거하고 미설정/연동 오류 상태를 명시적으로 노출.
+- Test 전 검증: backend 1,076 tests PASS, database 7 tests PASS, 관련 frontend SEO 5 tests PASS, backend/frontend production build PASS.
+- 전체 frontend의 career guide 1건은 본 변경과 무관하며 단독 실행에서도 재현됨; 해당 기능 파일은 수정하지 않음.
+- 기존에 입력된 키는 구버전이 백엔드로 전달/저장하지 않아 복구할 수 없으므로 릴리스 후 1회 재등록 필요.
+- **현재 릴리스 상태**: Test 전; 격리 Test와 무중단 Production 게이트 대기.
+
 ## v2026.09.29.486 — 엄격 145,579건 데이터베이스 레퍼런스 코퍼스 및 PostgreSQL 17 근거 보강
 
 - **문서 버전:** `v2026.09.29.486`

@@ -1,7 +1,10 @@
-import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import type { Pool } from 'pg';
 import { PG_POOL } from '../core/pool.provider';
+import { EncryptionService } from '../security/encryption.service';
 import { safeFetch } from '../security/ssrf-defense';
+import { fetchGscAnalyticsSnapshot, parseGscServiceAccount } from './gsc-client';
+import type { GscAnalyticsSnapshot, GscServiceAccount } from './gsc-client';
 
 export interface CrawlerLogEntry {
   readonly id: string;
@@ -72,6 +75,9 @@ export interface GscAnalyticsData {
   readonly hasCredentials: boolean;
   readonly clientEmail: string | null;
   readonly updatedAt: string | null;
+  readonly propertyUrl: string | null;
+  readonly source: 'unconfigured' | 'search-console' | 'error';
+  readonly syncError: string | null;
   readonly totalClicks30d: number;
   readonly totalImpressions30d: number;
   readonly avgCtr30d: number;
@@ -133,7 +139,10 @@ export class SeoService {
   private readonly indexNowKey: string;
   private readonly baseUrl: string;
 
-  constructor(@Optional() @Inject(PG_POOL) private readonly pool?: Pool) {
+  constructor(
+    @Optional() @Inject(PG_POOL) private readonly pool?: Pool,
+    @Optional() @Inject(EncryptionService) private readonly encryptionService?: EncryptionService,
+  ) {
     this.indexNowKey = process.env.INDEXNOW_KEY || 'moneyverse-indexnow-key-2026';
     this.baseUrl = (process.env.APP_BASE_URL || 'https://easy-scraping.com').replace(/\/$/, '');
   }
@@ -364,114 +373,262 @@ export class SeoService {
   }
 
   // --- Google Search Console API & Analytics ---
-  private gscCredentialsState: { clientEmail: string; keyJson: string; updatedAt: string } | null = null;
-  private cachedGscAnalytics: { data: GscAnalyticsData; cachedAt: number } | null = null;
+  private gscCredentialsState: {
+    clientEmail: string;
+    keyJson: string;
+    propertyUrl: string | null;
+    updatedAt: string;
+  } | null = null;
+  private cachedGscAnalytics: { data: GscAnalyticsData; cachedAt: number; ttlMs: number } | null = null;
+
+  private emptyGscAnalytics(
+    state: {
+      readonly clientEmail: string | null;
+      readonly updatedAt: string | null;
+      readonly propertyUrl: string | null;
+      readonly source: 'unconfigured' | 'error';
+      readonly syncError: string | null;
+    },
+  ): GscAnalyticsData {
+    return {
+      hasCredentials: state.clientEmail !== null,
+      clientEmail: state.clientEmail,
+      updatedAt: state.updatedAt,
+      propertyUrl: state.propertyUrl,
+      source: state.source,
+      syncError: state.syncError,
+      totalClicks30d: 0,
+      totalImpressions30d: 0,
+      avgCtr30d: 0,
+      avgPosition30d: 0,
+      timeSeries: [],
+      topQueries: [],
+    };
+  }
+
+  private encryption(): EncryptionService {
+    return this.encryptionService ?? new EncryptionService();
+  }
+
+  private safeGscError(error: unknown): string {
+    const message = error instanceof Error ? error.message : 'unknown Search Console error';
+    return message.replace(/[\r\n]+/g, ' ').slice(0, 300);
+  }
+
+  private async loadGscCredentials(): Promise<typeof this.gscCredentialsState> {
+    if (this.gscCredentialsState) return this.gscCredentialsState;
+
+    if (this.pool) {
+      try {
+        const result = await this.pool.query<{
+          readonly clientEmail: string;
+          readonly keyJsonSealed: string;
+          readonly propertyUrl: string | null;
+          readonly updatedAt: Date | string;
+        }>(
+          `SELECT client_email AS "clientEmail",
+                  key_json_sealed AS "keyJsonSealed",
+                  property_url AS "propertyUrl",
+                  updated_at AS "updatedAt"
+             FROM public.seo_gsc_credential_runtime()`,
+        );
+        const row = result.rows[0];
+        if (row) {
+          const keyJson = this.encryption().decrypt(row.keyJsonSealed);
+          if (!keyJson || keyJson.startsWith('enc:v1:')) {
+            throw new Error('stored Search Console credential cannot be decrypted');
+          }
+          const parsed = parseGscServiceAccount(keyJson);
+          this.gscCredentialsState = {
+            clientEmail: parsed.clientEmail,
+            keyJson,
+            propertyUrl: row.propertyUrl,
+            updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
+          };
+          return this.gscCredentialsState;
+        }
+      } catch (error) {
+        this.logger.warn(`Failed to load persisted GSC credential: ${this.safeGscError(error)}`);
+      }
+    }
+
+    const environmentKey = process.env.GSC_SERVICE_ACCOUNT_KEY;
+    if (!environmentKey) return null;
+
+    try {
+      const parsed = parseGscServiceAccount(environmentKey);
+      this.gscCredentialsState = {
+        clientEmail: parsed.clientEmail,
+        keyJson: environmentKey,
+        propertyUrl: process.env.GSC_SITE_URL?.trim() || null,
+        updatedAt: new Date().toISOString(),
+      };
+      return this.gscCredentialsState;
+    } catch (error) {
+      this.logger.error(`Configured GSC_SERVICE_ACCOUNT_KEY is invalid: ${this.safeGscError(error)}`);
+      return null;
+    }
+  }
 
   async getGscAnalytics(): Promise<GscAnalyticsData> {
     const now = Date.now();
-    // Return from 1-hour TTL cache if still fresh (< 3600s)
-    if (this.cachedGscAnalytics && now - this.cachedGscAnalytics.cachedAt < 3600 * 1000) {
+    if (
+      this.cachedGscAnalytics &&
+      now - this.cachedGscAnalytics.cachedAt < this.cachedGscAnalytics.ttlMs
+    ) {
       return this.cachedGscAnalytics.data;
     }
 
-    const hasCreds = !!this.gscCredentialsState || !!process.env.GSC_SERVICE_ACCOUNT_KEY;
-    const clientEmail = this.gscCredentialsState?.clientEmail || process.env.GSC_CLIENT_EMAIL || (hasCreds ? 'seo-service-account@moneyverse-gsc.iam.gserviceaccount.com' : null);
-    const updatedAt = this.gscCredentialsState?.updatedAt || (hasCreds ? new Date(Date.now() - 3600000).toISOString() : null);
-
-    // Generate 30-day realistic time series for canonical routes
-    const timeSeries: GscTimeSeriesEntry[] = [];
-    const nowDate = new Date();
-    let totalClicks = 0;
-    let totalImpressions = 0;
-    let weightedPositionSum = 0;
-
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(nowDate.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = d.toISOString().slice(0, 10);
-      // Realistic weekday/weekend wave pattern
-      const dayOfWeek = d.getDay();
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-      const baseImp = isWeekend ? 1200 : 2100;
-      const noise = Math.floor(Math.sin(i * 0.7) * 200); // Deterministic pattern without Math.random() noise
-      const impressions = Math.max(800, baseImp + noise + (30 - i) * 35);
-      const ctr = 0.052 + (Math.sin(i * 0.4) * 0.012) + (30 - i) * 0.0008;
-      const clicks = Math.max(30, Math.round(impressions * ctr));
-      const position = Number((8.4 - (30 - i) * 0.08 + (Math.sin(i * 0.5) * 0.4)).toFixed(1));
-
-      timeSeries.push({
-        date: dateStr,
-        clicks,
-        impressions,
-        ctr: Number((ctr * 100).toFixed(2)),
-        position,
+    const stored = await this.loadGscCredentials();
+    if (!stored) {
+      const result = this.emptyGscAnalytics({
+        clientEmail: null,
+        updatedAt: null,
+        propertyUrl: null,
+        source: 'unconfigured',
+        syncError: null,
       });
-
-      totalClicks += clicks;
-      totalImpressions += impressions;
-      weightedPositionSum += position * impressions;
+      this.cachedGscAnalytics = { data: result, cachedAt: now, ttlMs: 60 * 60 * 1000 };
+      return result;
     }
 
-    const avgCtr30d = totalImpressions > 0 ? Number(((totalClicks / totalImpressions) * 100).toFixed(2)) : 0;
-    const avgPosition30d = totalImpressions > 0 ? Number((weightedPositionSum / totalImpressions).toFixed(1)) : 0;
-
-    // Top 10 High-Ranking Search Queries
-    const topQueries: GscTopQueryEntry[] = [
-      { query: '가상 주식 모의투자', clicks: Math.round(totalClicks * 0.22), impressions: Math.round(totalImpressions * 0.20), ctr: 6.8, position: 2.1 },
-      { query: '침팬지 반도체 주가', clicks: Math.round(totalClicks * 0.18), impressions: Math.round(totalImpressions * 0.16), ctr: 7.2, position: 1.8 },
-      { query: '월덕 머니버스', clicks: Math.round(totalClicks * 0.15), impressions: Math.round(totalImpressions * 0.12), ctr: 8.5, position: 1.2 },
-      { query: '가상 복리 예금 계산기', clicks: Math.round(totalClicks * 0.11), impressions: Math.round(totalImpressions * 0.13), ctr: 5.4, position: 3.4 },
-      { query: 'WLD 가상경제 게임', clicks: Math.round(totalClicks * 0.09), impressions: Math.round(totalImpressions * 0.10), ctr: 5.8, position: 4.1 },
-      { query: '도지 밈 파이낸스 호가', clicks: Math.round(totalClicks * 0.08), impressions: Math.round(totalImpressions * 0.09), ctr: 5.2, position: 3.9 },
-      { query: '덕스페이스 로켓 주식', clicks: Math.round(totalClicks * 0.06), impressions: Math.round(totalImpressions * 0.07), ctr: 4.9, position: 4.8 },
-      { query: '핀테크 용어 사전', clicks: Math.round(totalClicks * 0.05), impressions: Math.round(totalImpressions * 0.06), ctr: 4.5, position: 5.2 },
-      { query: '골든덕 홀딩스 시세', clicks: Math.round(totalClicks * 0.04), impressions: Math.round(totalImpressions * 0.04), ctr: 6.1, position: 3.2 },
-      { query: '일일 파밍 퀘스트 루틴', clicks: Math.round(totalClicks * 0.02), impressions: Math.round(totalImpressions * 0.03), ctr: 4.2, position: 6.4 },
-    ];
-
-    const result: GscAnalyticsData = {
-      hasCredentials: hasCreds,
-      clientEmail,
-      updatedAt,
-      totalClicks30d: totalClicks,
-      totalImpressions30d: totalImpressions,
-      avgCtr30d,
-      avgPosition30d,
-      timeSeries,
-      topQueries,
-    };
-
-    this.cachedGscAnalytics = { data: result, cachedAt: Date.now() };
-    return result;
-  }
-
-  async saveGscCredentials(rawJson: string): Promise<{ success: boolean; clientEmail: string; message: string }> {
     try {
-      const parsed = JSON.parse(rawJson);
-      const clientEmail = parsed.client_email || parsed.clientEmail;
-      if (!clientEmail || typeof clientEmail !== 'string') {
-        throw new Error('Invalid service account key JSON: missing client_email');
+      const credential = parseGscServiceAccount(stored.keyJson);
+      const snapshot = await fetchGscAnalyticsSnapshot(
+        credential,
+        this.baseUrl,
+        stored.propertyUrl || process.env.GSC_SITE_URL?.trim() || null,
+      );
+      if (stored.propertyUrl !== snapshot.propertyUrl) {
+        stored.propertyUrl = snapshot.propertyUrl;
       }
 
-      this.gscCredentialsState = {
-        clientEmail,
-        keyJson: rawJson,
-        updatedAt: new Date().toISOString(),
+      const result: GscAnalyticsData = {
+        hasCredentials: true,
+        clientEmail: stored.clientEmail,
+        updatedAt: stored.updatedAt,
+        propertyUrl: snapshot.propertyUrl,
+        source: 'search-console',
+        syncError: null,
+        totalClicks30d: snapshot.totalClicks30d,
+        totalImpressions30d: snapshot.totalImpressions30d,
+        avgCtr30d: snapshot.avgCtr30d,
+        avgPosition30d: snapshot.avgPosition30d,
+        timeSeries: snapshot.timeSeries,
+        topQueries: snapshot.topQueries,
       };
-      this.cachedGscAnalytics = null; // Invalidate cache
-
-      return {
-        success: true,
-        clientEmail,
-        message: `Google Search Console 서비스 계정(${clientEmail})이 등록되었습니다.`,
-      };
-    } catch (err) {
-      throw new Error(`서비스 계정 키 파싱 실패: ${(err as Error).message}`);
+      this.cachedGscAnalytics = { data: result, cachedAt: now, ttlMs: 60 * 60 * 1000 };
+      return result;
+    } catch (error) {
+      const syncError = this.safeGscError(error);
+      this.logger.warn(`Google Search Console sync failed: ${syncError}`);
+      const result = this.emptyGscAnalytics({
+        clientEmail: stored.clientEmail,
+        updatedAt: stored.updatedAt,
+        propertyUrl: stored.propertyUrl,
+        source: 'error',
+        syncError,
+      });
+      this.cachedGscAnalytics = { data: result, cachedAt: now, ttlMs: 5 * 60 * 1000 };
+      return result;
     }
+  }
+
+  async saveGscCredentials(
+    rawJson: string,
+  ): Promise<{ success: boolean; clientEmail: string; propertyUrl: string; message: string }> {
+    let credential: GscServiceAccount;
+    try {
+      credential = parseGscServiceAccount(rawJson);
+    } catch (error) {
+      throw new BadRequestException(`서비스 계정 키 형식 오류: ${this.safeGscError(error)}`);
+    }
+
+    let snapshot: GscAnalyticsSnapshot;
+    try {
+      snapshot = await fetchGscAnalyticsSnapshot(
+        credential,
+        this.baseUrl,
+        process.env.GSC_SITE_URL?.trim() || null,
+      );
+    } catch (error) {
+      throw new BadRequestException(
+        `Google Search Console 연결 검증 실패: ${this.safeGscError(error)}`,
+      );
+    }
+
+    const sealed = this.encryption().encrypt(rawJson);
+    if (!sealed) {
+      throw new Error('Search Console credential encryption failed');
+    }
+
+    const updatedAt = new Date().toISOString();
+    if (this.pool) {
+      try {
+        const result = await this.pool.query<{ readonly updatedAt: Date | string }>(
+          `SELECT public.seo_gsc_credential_set($1, $2, $3) AS "updatedAt"`,
+          [credential.clientEmail, sealed, snapshot.propertyUrl],
+        );
+        const persisted = result.rows[0]?.updatedAt;
+        if (persisted) {
+          const parsed = persisted instanceof Date ? persisted.toISOString() : String(persisted);
+          this.gscCredentialsState = {
+            clientEmail: credential.clientEmail,
+            keyJson: rawJson,
+            propertyUrl: snapshot.propertyUrl,
+            updatedAt: parsed,
+          };
+        }
+      } catch (error) {
+        this.logger.error(`Failed to persist GSC credential: ${this.safeGscError(error)}`);
+        throw new Error('Google Search Console credential persistence failed');
+      }
+    }
+
+    this.gscCredentialsState ??= {
+      clientEmail: credential.clientEmail,
+      keyJson: rawJson,
+      propertyUrl: snapshot.propertyUrl,
+      updatedAt,
+    };
+
+    const analytics: GscAnalyticsData = {
+      hasCredentials: true,
+      clientEmail: credential.clientEmail,
+      updatedAt: this.gscCredentialsState.updatedAt,
+      propertyUrl: snapshot.propertyUrl,
+      source: 'search-console',
+      syncError: null,
+      totalClicks30d: snapshot.totalClicks30d,
+      totalImpressions30d: snapshot.totalImpressions30d,
+      avgCtr30d: snapshot.avgCtr30d,
+      avgPosition30d: snapshot.avgPosition30d,
+      timeSeries: snapshot.timeSeries,
+      topQueries: snapshot.topQueries,
+    };
+    this.cachedGscAnalytics = {
+      data: analytics,
+      cachedAt: Date.now(),
+      ttlMs: 60 * 60 * 1000,
+    };
+
+    return {
+      success: true,
+      clientEmail: credential.clientEmail,
+      propertyUrl: snapshot.propertyUrl,
+      message: `Google Search Console 서비스 계정(${credential.clientEmail}) 연결을 검증하고 저장했습니다.`,
+    };
   }
 
   async deleteGscCredentials(): Promise<{ success: boolean; message: string }> {
+    if (process.env.GSC_SERVICE_ACCOUNT_KEY) {
+      throw new BadRequestException('배포 환경변수로 설정된 Search Console 키는 관리자 화면에서 삭제할 수 없습니다.');
+    }
+    if (this.pool) {
+      await this.pool.query('SELECT public.seo_gsc_credential_delete()');
+    }
     this.gscCredentialsState = null;
-    this.cachedGscAnalytics = null; // Invalidate cache
+    this.cachedGscAnalytics = null;
     return {
       success: true,
       message: 'Google Search Console 서비스 계정 키가 삭제되었습니다.',

@@ -10,11 +10,8 @@ import {
   Key,
   Trash2,
   CheckCircle2,
-  ExternalLink,
   ShieldCheck,
   AlertCircle,
-  RefreshCw,
-  Search,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -41,6 +38,9 @@ export interface GscAnalyticsData {
   readonly hasCredentials: boolean;
   readonly clientEmail: string | null;
   readonly updatedAt: string | null;
+  readonly propertyUrl: string | null;
+  readonly source: 'unconfigured' | 'search-console' | 'error';
+  readonly syncError: string | null;
   readonly totalClicks30d: number;
   readonly totalImpressions30d: number;
   readonly avgCtr30d: number;
@@ -50,37 +50,18 @@ export interface GscAnalyticsData {
 }
 
 const DEFAULT_GSC_DATA: GscAnalyticsData = {
-  hasCredentials: true,
-  clientEmail: 'seo-service-account@moneyverse-gsc.iam.gserviceaccount.com',
-  updatedAt: new Date().toISOString(),
-  totalClicks30d: 8420,
-  totalImpressions30d: 148500,
-  avgCtr30d: 5.67,
-  avgPosition30d: 3.4,
-  timeSeries: Array.from({ length: 30 }).map((_, i) => {
-    const d = new Date(Date.now() - (29 - i) * 86400000);
-    const imp = 3500 + Math.floor(Math.sin(i * 0.6) * 800) + i * 40;
-    const clk = Math.round(imp * (0.05 + i * 0.0005));
-    return {
-      date: d.toISOString().slice(0, 10),
-      clicks: clk,
-      impressions: imp,
-      ctr: Number(((clk / imp) * 100).toFixed(2)),
-      position: Number((4.8 - i * 0.04).toFixed(1)),
-    };
-  }),
-  topQueries: [
-    { query: '가상 주식 모의투자', clicks: 1850, impressions: 29700, ctr: 6.2, position: 2.1 },
-    { query: '침팬지 반도체 주가', clicks: 1520, impressions: 23800, ctr: 6.4, position: 1.8 },
-    { query: '월덕 머니버스', clicks: 1260, impressions: 17800, ctr: 7.1, position: 1.2 },
-    { query: '가상 복리 예금 계산기', clicks: 920, impressions: 19300, ctr: 4.8, position: 3.4 },
-    { query: 'WLD 가상경제 게임', clicks: 760, impressions: 14900, ctr: 5.1, position: 4.1 },
-    { query: '도지 밈 파이낸스 호가', clicks: 670, impressions: 13400, ctr: 5.0, position: 3.9 },
-    { query: '덕스페이스 로켓 주식', clicks: 510, impressions: 10400, ctr: 4.9, position: 4.8 },
-    { query: '핀테크 용어 사전', clicks: 420, impressions: 8900, ctr: 4.7, position: 5.2 },
-    { query: '골든덕 홀딩스 시세', clicks: 340, impressions: 5900, ctr: 6.1, position: 3.2 },
-    { query: '일일 파밍 퀘스트 루틴', clicks: 170, impressions: 4500, ctr: 3.8, position: 6.4 },
-  ],
+  hasCredentials: false,
+  clientEmail: null,
+  updatedAt: null,
+  propertyUrl: null,
+  source: 'unconfigured',
+  syncError: null,
+  totalClicks30d: 0,
+  totalImpressions30d: 0,
+  avgCtr30d: 0,
+  avgPosition30d: 0,
+  timeSeries: [],
+  topQueries: [],
 };
 
 export function GscAnalyticsCard() {
@@ -89,23 +70,29 @@ export function GscAnalyticsCard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [keyJsonInput, setKeyJsonInput] = useState('');
   const [modalFeedback, setModalFeedback] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [activeMetric, setActiveMetric] = useState<'clicks' | 'impressions'>('clicks');
-  const [hoveredPoint, setHoveredPoint] = useState<GscTimeSeriesEntry | null>(null);
 
   const fetchGscData = async () => {
     setIsLoading(true);
     try {
-      if (typeof window !== 'undefined') {
-        const res = await fetch('/api/seo/gsc').catch(() => null);
-        if (res && res.ok) {
-          const json = await res.json().catch(() => null);
-          if (json && typeof json === 'object') {
-            setData((prev) => ({ ...prev, ...json }));
-          }
-        }
+      if (typeof window === 'undefined') return;
+      const res = await fetch('/api/seo/gsc', { cache: 'no-store' });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        setLoadError(
+          json && typeof json === 'object' && 'message' in json && typeof json.message === 'string'
+            ? json.message
+            : 'Google Search Console 데이터를 불러오지 못했습니다.',
+        );
+        return;
+      }
+      if (json && typeof json === 'object') {
+        setData((prev) => ({ ...prev, ...json }));
+        setLoadError(null);
       }
     } catch {
-      // Ignored
+      setLoadError('Google Search Console 데이터를 불러오지 못했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -124,7 +111,7 @@ export function GscAnalyticsCard() {
         body: JSON.stringify({ keyJson: keyJsonInput }),
       });
       const result = await res.json();
-      if (result.success) {
+      if (res.ok && result.success) {
         setModalFeedback(result.message || '서비스 계정 키가 성공적으로 등록되었습니다.');
         setTimeout(() => {
           setIsModalOpen(false);
@@ -143,14 +130,20 @@ export function GscAnalyticsCard() {
   const handleDeleteCredentials = async () => {
     if (!confirm('등록된 Google Search Console 서비스 계정 키를 삭제하시겠습니까?')) return;
     try {
-      await fetch('/api/seo/gsc', {
+      const res = await fetch('/api/seo/gsc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'delete' }),
       });
-      fetchGscData();
+      const result = await res.json().catch(() => null);
+      if (!res.ok || !result?.success) {
+        setModalFeedback(result?.message || '키 삭제에 실패했습니다.');
+        return;
+      }
+      setModalFeedback(result.message || '서비스 계정 키가 삭제되었습니다.');
+      await fetchGscData();
     } catch {
-      // Ignored
+      setModalFeedback('키 삭제 처리 중 오류가 발생했습니다.');
     }
   };
 
@@ -195,14 +188,21 @@ export function GscAnalyticsCard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {data?.hasCredentials ? (
-              <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+            {data?.source === 'search-console' ? (
+              <div
+                className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400"
+                title={data.propertyUrl || undefined}
+              >
                 <ShieldCheck className="size-3.5" />
-                <span className="max-w-[140px] truncate">{data.clientEmail}</span>
+                <span className="max-w-[180px] truncate">{data.clientEmail}</span>
               </div>
+            ) : data?.hasCredentials ? (
+              <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-[11px] font-bold text-amber-500">
+                GSC 연동 오류
+              </Badge>
             ) : (
               <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-[11px] font-bold text-amber-500">
-                키 미등록 (데모 집계 모드)
+                키 미등록
               </Badge>
             )}
 
@@ -220,6 +220,22 @@ export function GscAnalyticsCard() {
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {(loadError || data.syncError) && (
+          <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-300">
+            <AlertCircle className="mt-0.5 size-4 shrink-0" />
+            <div>
+              <p className="font-bold">Search Console 연결 상태를 확인해 주세요.</p>
+              <p className="mt-1 break-words">{loadError || data.syncError}</p>
+            </div>
+          </div>
+        )}
+
+        {!data.hasCredentials && !loadError && (
+          <div className="rounded-xl border border-border/70 bg-surface/40 p-3 text-xs text-muted-foreground">
+            서비스 계정 키를 등록하면 Google Search Console의 실제 데이터만 표시됩니다. 데모 수치는 사용하지 않습니다.
+          </div>
+        )}
+
         {/* 4 Analytics Metric Counters */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-xl border border-border/70 bg-surface/50 p-3">
@@ -228,7 +244,7 @@ export function GscAnalyticsCard() {
               <MousePointerClick className="size-3.5 text-emerald-500" />
             </div>
             <div className="mt-1 font-mono text-xl font-black text-foreground">
-              {(data?.totalClicks30d ?? 8420).toLocaleString()}
+              {(data?.totalClicks30d ?? 0).toLocaleString()}
               <span className="ml-1 text-xs font-normal text-muted-foreground">회</span>
             </div>
           </div>
@@ -239,7 +255,7 @@ export function GscAnalyticsCard() {
               <Eye className="size-3.5 text-primary" />
             </div>
             <div className="mt-1 font-mono text-xl font-black text-foreground">
-              {(data?.totalImpressions30d ?? 148500).toLocaleString()}
+              {(data?.totalImpressions30d ?? 0).toLocaleString()}
               <span className="ml-1 text-xs font-normal text-muted-foreground">회</span>
             </div>
           </div>
@@ -250,7 +266,7 @@ export function GscAnalyticsCard() {
               <Percent className="size-3.5 text-amber-500" />
             </div>
             <div className="mt-1 font-mono text-xl font-black text-foreground">
-              {data?.avgCtr30d ?? 5.67}%
+              {data?.avgCtr30d ?? 0}%
             </div>
           </div>
 
@@ -260,7 +276,7 @@ export function GscAnalyticsCard() {
               <Award className="size-3.5 text-purple-400" />
             </div>
             <div className="mt-1 font-mono text-xl font-black text-foreground">
-              {data?.avgPosition30d ?? 3.4}위
+              {data?.avgPosition30d ?? 0}위
             </div>
           </div>
         </div>

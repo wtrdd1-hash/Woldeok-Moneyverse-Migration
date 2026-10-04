@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import * as gscClient from './gsc-client';
 import { SeoService } from './seo.service';
 
 describe('SeoService', () => {
@@ -58,46 +59,76 @@ describe('SeoService', () => {
     expect(result.googlePingStatus).toBeDefined();
   });
 
-  it('should compute GSC Search Analytics 30-day time series and top queries', async () => {
+  it('returns an explicit unconfigured state instead of fabricated GSC metrics', async () => {
     const service = new SeoService();
     const analytics = await service.getGscAnalytics();
 
-    expect(analytics).toBeDefined();
-    expect(analytics.timeSeries.length).toBe(30);
-    expect(analytics.totalClicks30d).toBeGreaterThan(0);
-    expect(analytics.totalImpressions30d).toBeGreaterThan(0);
-    expect(analytics.avgCtr30d).toBeGreaterThan(0);
-    expect(analytics.avgPosition30d).toBeGreaterThan(0);
-    expect(analytics.topQueries.length).toBe(10);
-    expect(analytics.topQueries[0].query).toBe('가상 주식 모의투자');
+    expect(analytics).toMatchObject({
+      hasCredentials: false,
+      clientEmail: null,
+      propertyUrl: null,
+      source: 'unconfigured',
+      syncError: null,
+      totalClicks30d: 0,
+      totalImpressions30d: 0,
+      avgCtr30d: 0,
+      avgPosition30d: 0,
+    });
+    expect(analytics.timeSeries).toEqual([]);
+    expect(analytics.topQueries).toEqual([]);
   });
 
-  it('should save and delete GSC service account credentials', async () => {
+  it('validates a GSC credential before caching it and removes it cleanly', async () => {
+    const parsed = {
+      type: 'service_account' as const,
+      clientEmail: 'test-sa@moneyverse-gsc.iam.gserviceaccount.com',
+      privateKey: 'test-signing-material',
+      projectId: 'moneyverse-gsc',
+    };
+    const snapshot = {
+      propertyUrl: 'sc-domain:easy-scraping.com',
+      timeSeries: [{ date: '2026-10-04', clicks: 12, impressions: 120, ctr: 10, position: 2.5 }],
+      topQueries: [{ query: 'moneyverse', clicks: 12, impressions: 120, ctr: 10, position: 2.5 }],
+      totalClicks30d: 12,
+      totalImpressions30d: 120,
+      avgCtr30d: 10,
+      avgPosition30d: 2.5,
+    };
+    const parseSpy = vi.spyOn(gscClient, 'parseGscServiceAccount').mockReturnValue(parsed);
+    const fetchSpy = vi.spyOn(gscClient, 'fetchGscAnalyticsSnapshot').mockResolvedValue(snapshot);
     const service = new SeoService();
-    const sampleKey = JSON.stringify({
-      type: 'service_account',
-      project_id: 'moneyverse-gsc',
-      client_email: 'test-sa@moneyverse-gsc.iam.gserviceaccount.com',
-      private_key: 'test-private-key',
-    });
 
-    const saveResult = await service.saveGscCredentials(sampleKey);
-    expect(saveResult.success).toBe(true);
-    expect(saveResult.clientEmail).toBe('test-sa@moneyverse-gsc.iam.gserviceaccount.com');
+    try {
+      const saveResult = await service.saveGscCredentials('test-service-account-json');
+      expect(saveResult).toMatchObject({
+        success: true,
+        clientEmail: parsed.clientEmail,
+        propertyUrl: snapshot.propertyUrl,
+      });
 
-    const analytics = await service.getGscAnalytics();
-    expect(analytics.hasCredentials).toBe(true);
-    expect(analytics.clientEmail).toBe('test-sa@moneyverse-gsc.iam.gserviceaccount.com');
+      const analytics = await service.getGscAnalytics();
+      expect(analytics).toMatchObject({
+        hasCredentials: true,
+        source: 'search-console',
+        totalClicks30d: 12,
+        totalImpressions30d: 120,
+      });
 
-    const deleteResult = await service.deleteGscCredentials();
-    expect(deleteResult.success).toBe(true);
+      const deleteResult = await service.deleteGscCredentials();
+      expect(deleteResult.success).toBe(true);
+      const afterDelete = await service.getGscAnalytics();
+      expect(afterDelete.source).toBe('unconfigured');
+      expect(afterDelete.hasCredentials).toBe(false);
+    } finally {
+      fetchSpy.mockRestore();
+      parseSpy.mockRestore();
+    }
   });
 });
 
 import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
 import { SeoDailyDigestService } from './seo-daily-digest.service';
 import type { DiscordAlertService } from '../discord/discord-alert.service';
-import { vi } from 'vitest';
 
 describe('SeoCrawlerAuditService', () => {
   it('should run crawl audit and generate comprehensive health summary', async () => {
@@ -138,9 +169,9 @@ describe('SeoDailyDigestService', () => {
 
     const result = await digestService.sendDailyDigest();
     expect(result).toBeDefined();
-    expect(result.totalClicks30d).toBeGreaterThan(0);
-    expect(result.totalImpressions30d).toBeGreaterThan(0);
-    expect(result.topQueriesCount).toBe(5);
+    expect(result.totalClicks30d).toBe(0);
+    expect(result.totalImpressions30d).toBe(0);
+    expect(result.topQueriesCount).toBe(0);
     expect(result.discordNotified).toBe(true);
     expect(result.message).toContain('성공적으로 전송');
     expect(mockDiscordAlertService.sendDiscordEmbed).toHaveBeenCalledTimes(1);

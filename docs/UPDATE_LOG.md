@@ -1,3 +1,16 @@
+## v2026.10.04.524 — Google Search Console Real Credential Persistence & Search Analytics Repair
+
+- **Implementation Version**: root plan v95; branch `fix/gsc-service-account-20261004`.
+- Replaced the false local credential-success path with a real backend credential flow.
+- Added Google service-account RS256 OAuth, property discovery, and real Search Analytics queries.
+- Added encrypted-at-rest PostgreSQL persistence through migration 247 with direct table access denied to the application role.
+- Added administrator-session guards to reads and CSRF protection to credential mutations.
+- Removed deterministic demo Search Console metrics and made unconfigured/error states explicit.
+- Pre-Test verification: backend 1,076 tests PASS, database 7 tests PASS, related frontend SEO 5 tests PASS, backend/frontend production builds PASS.
+- One unrelated career-guide frontend test remains failing and reproduces in isolation; no career-guide file is touched by this patch.
+- The legacy submitted credential was never forwarded/persisted and cannot be recovered; it must be entered once after release.
+- **Release state at this record**: pre-Test; isolated Test and zero-downtime Production gates remain pending.
+
 ## v2026.09.29.486 — Strict 145,579-Record Database Reference Corpus & PostgreSQL 17 Evidence Hardening
 
 - **Documentation Version:** `v2026.09.29.486`

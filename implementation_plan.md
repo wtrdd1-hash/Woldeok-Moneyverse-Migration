@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v94)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v95)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v95**: Google Search Console 서비스 계정 실제 연동 복구 — 프론트 BFF의 가짜 등록 성공 응답 제거, Google RS256 서비스 계정 OAuth + Search Analytics 실조회, DB migration 247 암호화 영속 저장, 관리자 세션/CSRF 보호, 데모 검색 성과 수치 전면 제거. backend 1,076 tests PASS, DB 7 tests PASS, 관련 frontend SEO 5 tests PASS, backend/frontend production build PASS. 전체 frontend에서 변경과 무관한 career guide 기존 실패 1건은 별도 추적. Test → 최신 main 재확인 → 무중단 Production 승격 게이트 적용.
 - **v94**: 로그인 및 관리자 세션 지속성 보장 & 유휴 로그아웃 방지 Keep-Alive 풀스택 구축 — 관리자 세션 수명 30분에서 30일로 연장 및 유휴 잠금 기준 10분에서 24시간으로 대폭 확대, `admin_session_touch` 호출 시 남은 수명 7일 미만일 때 30일로 자동 슬라이딩 연장, DB 마이그레이션(246: `246-persistent-session-keep-alive.sql`), 프론트엔드 백그라운드 세션 유지기(`SessionKeepAlive`) 컴포넌트 탑재(3분 주기 핑 & 탭 복귀 시 자동 터치) 및 `app/layout.tsx` 전역 마운트, NestJS 및 Next.js 163개 전 라우트 빌드 통과 및 원격 운영 서버(`prod-v521`) 무중단 승격 완결 (+110, -0)
 - **v93**: AI 정책 위원회(Multi-Agent Council) 통화정책 명령서 자동 제안(Propose) 시뮬레이터 연계 & 조폐국 소각 인증서(RetirementCertificate) 전용 통계 탭 시각화 풀스택 구축 — AI Review/Council 기반 거시경제 진단 후 `MonetaryPolicyOrder` 원클릭 승인 대기열 자동 등록, 카지노/수수료 영구 소각 인증서 실시간 조회 및 누적 소각 통계 시각화, 단위 테스트 및 Next.js 163개 라우트 빌드 통과 (+140, -0)
 - **v92**: 화폐량 자동 조절(Automated Monetary Supply Rebalancing Engine) 풀스택 구축 — Faucet/Sink 비율 실시간 평가 기반 1시간 주기 테이퍼링/양적완화 피드백 루프, 안전 한도(±5%) 내 전자동 자율 집행(`AutoMonetaryRegulationService`), DB 마이그레이션(245: `monetary_auto_regulation_configs`, `monetary_regulation_events`), 관리자 콘솔(`/admin/economy`) 내 자동 조절 스위치/파라미터/타임라인 로그 연동, 긴급 서킷브레이커 동결 및 시장 공시 브로드캐스트 (+180, -0)

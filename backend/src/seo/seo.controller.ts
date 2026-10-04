@@ -7,11 +7,18 @@ import {
   HttpStatus,
   Post,
   Req,
+  UseGuards,
   VERSION_NEUTRAL,
   Version,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
+import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { SessionGuard } from '../auth/guards/session.guard';
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
 import { SeoDailyDigestService } from './seo-daily-digest.service';
@@ -70,6 +77,7 @@ export class SeoController {
   }
 
   @Get('gsc/analytics')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: 'Get Google Search Console Search Analytics 30-day time series and top queries' })
   async getGscAnalytics() {
     return this.seoService.getGscAnalytics();
@@ -77,13 +85,15 @@ export class SeoController {
 
   @Post('gsc/credentials')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Register and validate Google Cloud service account key JSON' })
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+  @ApiOperation({ summary: 'Register, validate, and persist Google Cloud service account key JSON' })
   async saveGscCredentials(@Body() body: SaveGscCredentialsDto) {
     return this.seoService.saveGscCredentials(body.keyJson);
   }
 
   @Post('gsc/credentials/delete')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Delete registered Google Search Console service account key' })
   async deleteGscCredentials() {
     return this.seoService.deleteGscCredentials();
