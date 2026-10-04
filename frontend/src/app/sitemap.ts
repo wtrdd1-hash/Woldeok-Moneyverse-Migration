@@ -5,6 +5,11 @@ import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
 import { REAL_ESTATE_PRESETS } from '@/config/real-estate-presets.config';
 import { KIMCHI_PREMIUM_PRESETS } from '@/config/kimchi-premium-presets.config';
 import { CAPITAL_GAINS_TAX_PRESETS } from '@/config/capital-gains-tax-presets.config';
+import { 
+  RETIREMENT_SCENARIOS, 
+  PENSION_TAX_SCENARIOS, 
+  ISA_SCENARIOS 
+} from '@/config/pseo-tax-retirement.config';
 
 /**
  * 1-Hour ISR Caching for Sitemap.
@@ -123,6 +128,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // 2.8. 신규 주식 양도소득세 & 절세 10대 프리셋
   for (const p of CAPITAL_GAINS_TAX_PRESETS) {
     addEntry(`/tools/capital-gains-tax-calculator/${p.slug}`, 0.9, 'daily');
+  }
+
+  // 2.9. 신규 직장인 3대 고검색량 금융 계산기 허브 및 롱테일 시나리오
+  addEntry('/tools/retirement-calculator', 0.95, 'daily');
+  for (const sc of RETIREMENT_SCENARIOS) {
+    addEntry(`/tools/retirement-calculator/${sc.slug}`, 0.9, 'daily');
+  }
+
+  addEntry('/tools/pension-tax-calculator', 0.95, 'daily');
+  for (const sc of PENSION_TAX_SCENARIOS) {
+    addEntry(`/tools/pension-tax-calculator/${sc.slug}`, 0.9, 'daily');
+  }
+
+  addEntry('/tools/isa-calculator', 0.95, 'daily');
+  for (const sc of ISA_SCENARIOS) {
+    addEntry(`/tools/isa-calculator/${sc.slug}`, 0.9, 'daily');
   }
 
   // 3. 18 Virtual Stocks Clean Canonical URLs

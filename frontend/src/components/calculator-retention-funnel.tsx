@@ -64,6 +64,21 @@ export function CalculatorRetentionFunnel({
         list.push(ticker);
         localStorage.setItem('wdmv_calculator_watchlist', JSON.stringify(list));
       }
+
+      // v98: 상세 시나리오 객체 저장 (로그인 시 회원 원장 승격용)
+      const savedScenariosStr = localStorage.getItem('wdmv_saved_scenarios');
+      const scenarios: Array<{ ticker: string; stockName: string; targetPrice: string; reboundRate: string; savedAt: number }> = 
+        savedScenariosStr ? JSON.parse(savedScenariosStr) : [];
+      
+      const existingIdx = scenarios.findIndex(s => s.ticker === ticker);
+      const scenarioObj = { ticker, stockName, targetPrice, reboundRate, savedAt: Date.now() };
+      if (existingIdx >= 0) {
+        scenarios[existingIdx] = scenarioObj;
+      } else {
+        scenarios.push(scenarioObj);
+      }
+      localStorage.setItem('wdmv_saved_scenarios', JSON.stringify(scenarios));
+
       setIsSaved(true);
       triggerToast(`'${stockName}' 목표 평단가(${targetPrice})가 관심 자산에 1초 저장되었습니다!`);
     } catch {

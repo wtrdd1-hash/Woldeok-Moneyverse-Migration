@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v97)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v98)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v98**: 비로그인 계산기 저장 시나리오의 회원 관심종목(Watchlist) 원장 자동 승격 동기화 & 직장인 고검색량 3대 금융 계산기(퇴직금·연금저축/IRP·ISA 비과세) pSEO 허브 및 롱테일 확장 풀스택 구축 — LocalStorage에 보관된 계산기 시나리오를 로그인 시 감지하여 토스트 알림과 함께 회원 DB 관심종목으로 원클릭 승격하는 `WatchlistPromotionEngine` 구현, 직장인 대상 퇴직금 실수령액/IRP 절세 계산기(`/tools/retirement-calculator`), 연금저축/IRP 세액공제(16.5%/13.2%) 계산기(`/tools/pension-tax-calculator`), ISA 계좌 비과세(200만/400만) 절세 계산기(`/tools/isa-calculator`) 3종 신설, 5대 근속/납입 시나리오 롱테일 URL 및 Schema.org 구조화 데이터(`FinancialProduct`, `SoftwareApplication`, `FAQPage`) 주입, '머니버스 가상 연금/퇴직 IRP 포켓 10,000 WLD 무료 예치' 모의 시뮬레이터 연결 (+180, -0)
 - **v97**: 레거시 블로그 검색 유입 트래픽 410 제거 및 301 영구 리다이렉트 ➡️ 핀테크 개발자 직업 파밍 머니버스 전환 구축 — 구글 서치콘솔 실시간 상위 유입 검색어(`nodejs vs python`, `개인 클라우드 서버 만들기` 등)의 410 Gone 에러 페이지 차단을 100% 해제하고 301 Permanent Redirect(`/guide/career-mastery?ref=legacy_tech_blog`)로 전환, 신규 방문자 맞춤형 핀테크 개발자 전직 및 10,000 WLD 무료 지원금 온보딩 배너(`LegacyVisitorBanner`) 연동, Git 브랜치 통합 및 GitHub 최신 동기화 (+30, -0)
 - **v96**: 대량 롱테일 pSEO 확장 (500+개 URL) & 방문자 ➡️ 지속 이용자 전환(CRO/리텐션) 3대 훅 & Google Indexing API 자동화 풀스택 구축 — 코스피/코스닥/S&P500/나스닥 상위 100개 종목 × 5개 시나리오(1,000+개 조합) 및 직장인 필수 금융(복리/ISA/연금/퇴직금) 계산기 확장, 계산기 방문자의 이탈을 방지하고 실제 활성 유저로 전환시키는 '계산 결과 1초 저장 & 목표 평단가 도달 알림', '신규 10,000 WLD 지원금 & 모의투자 원클릭 매수 체험 팝업', '일일 출석체크 & 중앙은행 배당금 수령 루프' 온보딩 퍼널 탑재, `/admin/seo` 내 Google Indexing API 1클릭 배치 제출 및 실시간 전송 결과 관제 테이블 탑재 (+210, -0)
 - **v95**: Google Search Console 서비스 계정 실제 연동 복구 — 프론트 BFF의 가짜 등록 성공 응답 제거, Google RS256 서비스 계정 OAuth + Search Analytics 실조회, DB migration 247 암호화 영속 저장, 관리자 세션/CSRF 보호, 데모 검색 성과 수치 전면 제거. backend 1,076 tests PASS, DB 7 tests PASS, 관련 frontend SEO 5 tests PASS, backend/frontend production build PASS. 전체 frontend에서 변경과 무관한 career guide 기존 실패 1건은 별도 추적. Test → 최신 main 재확인 → 무중단 Production 승격 게이트 적용.
@@ -1310,3 +1311,47 @@
 - Next.js Turbopack 빌드 통과.
 - Git 브랜치 정리 및 GitHub `origin/main` 푸시.
 - 원격 운영 서버(`easy-scraping.com`) 무중단 배포 및 curl 실측 검증.
+
+---
+
+## 🚀 [v98 Specification] 비로그인 계산기 저장 시나리오의 회원 관심종목(Watchlist) 원장 자동 승격 동기화 & 직장인 고검색량 3대 금융 계산기(퇴직금·연금저축/IRP·ISA 비과세) pSEO 허브 및 롱테일 확장 풀스택 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  1. 옵션 A: 비로그인 상태로 '1초 저장'한 물타기/포트폴리오 시나리오를 로그인 시 회원 관심 종목(Watchlist) 원장 DB로 즉시 원클릭 자동 승격 동기화.
+  2. 옵션 B: 직장인 대상 고검색량 3대 계산기(퇴직금 계산기, 연금저축/IRP 세액공제 계산기, ISA 비과세 절세 계산기) pSEO 허브 신설.
+  3. SEO 규격: 5대 주요 시나리오 롱테일 URL 자동 생성 + Schema.org 구조화 데이터(`FinancialProduct`, `SoftwareApplication`, `FAQPage`) 주입.
+  4. 전환(Activation) 훅: 계산 결과 하단에 '머니버스 가상 연금/퇴직 IRP 포켓 10,000 WLD 무료 예치' 모의 시뮬레이터 연결.
+- **핵심 목표**:
+  1. `frontend/src/components/watchlist-promotion-engine.tsx`:
+     - 브라우저 LocalStorage에 저장된 `wdmv_saved_scenarios` 또는 `wdmv_guest_portfolio` 감지.
+     - 로그인 감지 시(auth 상태 전환) Sonner 토스트 알림: "방금 저장하신 [종목명/물타기 시나리오]를 관심 포트폴리오로 승격하시겠습니까?" ➡️ [내 관심 종목으로 승격 저장] 버튼 클릭 시 `/api/portfolio/watchlist` API로 자동 영속 등록.
+  2. 직장인 3대 고검색량 금융 계산기 신설:
+     - `frontend/src/app/tools/retirement-calculator/page.tsx`: 근속연수(1년~30년), 월 평균 임금, 퇴직금 총액, 퇴직소득공제, 실효세율 및 실수령액 산출, IRP 계좌 이체 시 이연퇴직소득세 절세액 비교.
+     - `frontend/src/app/tools/pension-tax-calculator/page.tsx`: 총급여(5,500만 원 이하 16.5% vs 초과 13.2%), 연금저축 600만 원 + IRP 합산 900만 원 세액공제 한도 및 최대 148만 5천 원 환급액 시뮬레이터.
+     - `frontend/src/app/tools/isa-calculator/page.tsx`: 일반형(200만 원) vs 서민형(400만 원) 비과세 한도, 초과 이익 9.9% 분리과세(일반 금융소득 15.4% 대비 절세 효과) 실시간 역산.
+  3. 머니버스 활성화 전환 훅 (`CalculatorRetentionFunnel` 확장 연계):
+     - 가상 퇴직/연금 IRP 포켓에 10,000 WLD를 즉시 무상 예치하여 복리 이자 파밍을 체험할 수 있는 원클릭 모의투자 액션 탑재.
+  4. 롱테일 pSEO 및 Schema.org 구조화 데이터:
+     - 5대 근속(1년, 3년, 5년, 10년, 20년) 및 연봉 시나리오별 dynamic routes 구성 및 `FinancialProduct`, `FAQPage` JSON-LD 주입.
+  5. 검색엔진 색인 자동화:
+     - `sitemap.ts`에 신규 계산기 허브 및 주요 시나리오 URL 자동 노출.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/components/watchlist-promotion-engine.tsx`:
+   - Auth 세션과 LocalStorage를 감시하여 비로그인 시 저장된 물타기/자산 시나리오를 계정 원장으로 원클릭 승격.
+2. `frontend/src/app/tools/retirement-calculator/page.tsx`:
+   - 퇴직금 계산기 UI 및 실시간 계산 엔진.
+3. `frontend/src/app/tools/pension-tax-calculator/page.tsx`:
+   - 연금저축/IRP 세액공제 계산기 UI 및 실시간 계산 엔진.
+4. `frontend/src/app/tools/isa-calculator/page.tsx`:
+   - ISA 비과세 절세 계산기 UI 및 실시간 계산 엔진.
+5. `frontend/src/config/pseo-retirement.config.ts`:
+   - 퇴직금 및 세금 계산기 5대 대표 시나리오 프리셋 정의.
+6. `frontend/src/app/layout.tsx`:
+   - `<WatchlistPromotionEngine />` 전역 마운트.
+
+### 3. 검증 계획
+- **단위 테스트**: 퇴직금 세액공제 계산 로직 및 승격 엔진 테스트.
+- **빌드 검증**: Next.js 183개+ 전 라우트 빌드 통과.
+- **배포 및 실측**: 원격 운영 서버(`easy-scraping.com`) 무중단 배포 및 curl 응답 검증 (HTTP 200 OK).
