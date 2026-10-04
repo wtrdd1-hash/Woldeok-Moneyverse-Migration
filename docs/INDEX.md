@@ -3,20 +3,23 @@
 **English canonical** | [한국어](INDEX.ko.md)
 
 > **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
-> **Current Planning Authority**: **v2026.10.03.510**
-> **v510 exact-main research baseline**: **ac4dd484 / PR #774 merged v509 authority**
-> **Status**: **DEEP_PLANNING_AUTHORITY** — v510 defines implementation-ready global-growth contracts; runtime implementation still requires separate Test/Production evidence
+> **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
+> **Current Planning Authority**: **v2026.10.04.522**
+> **v522 exact-main production baseline**: **065ee422 / Treasury Fiscal Recirculation & 4-Language Translation Parity Promoted**
+> **Status**: **AUTHORITATIVE_PRODUCTION_INTEGRATED** — Treasury automated social recirculation pipeline and 4-language translation parity live in production
 
 ---
 
 ## 🚀 15-Domain Master Documentation Map
 
 ### 01. 📱 Master Specs & User Guide
-1. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**
-2. **[Specification Traceability Matrix & Deep QA Report (v473)](QA_TRACEABILITY_MATRIX_V473.md)**
-3. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**
-4. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**
-5. **[Master Document Catalog](DOCUMENT_CATALOG.md)**
+1. **[Treasury Automated Social Recirculation Specification](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Redistribution Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Floor
+2. **[Integrated Planning Master](planning/INTEGRATED_PLANNING_MASTER.md)**: v522 Latest Production Release & 15-Domain Authority Planning
+3. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**
+4. **[Specification Traceability Matrix & Deep QA Report (v473)](QA_TRACEABILITY_MATRIX_V473.md)**
+5. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**
+6. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**
+7. **[Master Document Catalog](DOCUMENT_CATALOG.md)**
 
 ### 02. 🎨 2026 Next-Gen Design System & UI/UX Guidelines
 1. **[2026 Next-Gen FinTech Design System Guidelines](DESIGN_SYSTEM_GUIDELINES.md)**
@@ -35,10 +38,12 @@
 1. **[Stock Portfolio & Real-time Orderbook Spec](2026-09-22-stocks-portfolio-and-trade-presets-v2026.09.22.356.md)**
 2. **[Stock Trading Halt & Cost-Basis Settlement Governance](2026-09-22-stocks-halt-cost-basis-settlement-visibility-v2026.09.22.357.md)**
 
-### 05. 🏦 Virtual Banking & Bonds
-1. **[Economic Balance & 6-Profitability Audit Report (v473)](ECONOMIC_PROFITABILITY_AUDIT.md)**
-2. **[Virtual Compound Interest & Saving Pockets](features/README.md)**
-3. **[Virtual Treasury Bond Simulator](features/README.md)**
+### 05. 🏦 Virtual Banking, Treasury & Fiscal Recirculation
+1. **[Treasury Automated Social Recirculation Spec](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Invariant
+2. **[Treasury & Fiscal Recirculation Architecture](architecture/TREASURY_AND_FISCAL_RECIRCULATION_ARCHITECTURE.md)**: Mermaid system diagram and ledger specifications
+3. **[Economic Balance & 6-Profitability Audit Report (v473)](ECONOMIC_PROFITABILITY_AUDIT.md)**
+4. **[Virtual Compound Interest & Saving Pockets](features/README.md)**
+5. **[Virtual Treasury Bond Simulator](features/README.md)**
 
 ### 06. 💼 Jobs, Businesses & Economy Governance
 1. **[Job Mastery & Daily Farming Routine Spec](planning/JOBS_PROFESSION_MASTERY_SPEC.md)**

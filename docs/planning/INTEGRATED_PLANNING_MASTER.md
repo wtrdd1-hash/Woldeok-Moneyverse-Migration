@@ -19,6 +19,28 @@ Every planning review records start/mid-work `origin/main` exact SHA, authority-
 - Primary/first-party reference set includes IMF treasury-central-bank/TSA guidance, ECB issuance/production, Federal Reserve/BEP and U.S. Mint separation, Bank of Korea, Bank of England money-creation material and EVE first-party economic reporting.
 - Planning/docs only. No runtime, DB, Test or Production implementation or promotion is claimed.
 
+## v2026.10.04.522 — 2026-10-04 — Treasury Automated Social Recirculation Pipeline & 4-Language Translation Parity Integration
+- Start/final `origin/main=065ee422` (production release `prod-v521` live and operational).
+- **Treasury Automated Social Recirculation Authority Adoption (`TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md` / `.ko.md`)**:
+  - Officialized 5 System Vaults architecture: `VAULT_MAIN`, `VAULT_WELFARE`, `VAULT_EMERGENCY`, `VAULT_INFRA`, `VAULT_RESERVE`.
+  - 4 Core Social Redistribution functions: Universal Citizen Dividend (`CITIZEN_DIVIDEND`, 40%), Settlement & Low-Income Subsidy (`WELFARE_SUBSIDY`, 40%), Public Community Infrastructure Funding (`COMMUNITY_FUNDING`, 30%), RuneScape-Style Deflationary Buyback & Burn (`MARKET_BUYBACK_BURN`, 10%), Trading Halt Full Refund (`STOCK_HALT_SETTLEMENT`, 20%).
+  - Authoritative 10-Tier Tax Schedule: Marketplace 2%, Stocks 1%, Business 3%, B2B/Commerce 1~3%, Progressive Wealth Tax (0.05~0.5%).
+  - Inviolable 30% Safe Reserve Floor rule: $\max(100{,}000\text{ WLD}, \text{Gross Assets} \times 30\%)$ preventing fiscal default, verified with 0-error reconciliation.
+  - `/admin/treasury` Emergency Control Tower: Step-Up 2FA modal refactoring and responsive header layout fix preventing text clipping.
+- **Flawless 4-Language Translation Parity (KO, EN, JA, ZH)**:
+  - Extended master dictionary with 47 new `home.*` entries and reverse lookup mapping in `i18n-dictionary.ts`.
+  - Full multi-language coverage across Notice Bar (`notice-bar.tsx`), Hero Balance Card, 4 Quick Actions, 2-Column Onboarding Bento, 3-Stage Mini Chips, 6 Core Feature Badges, Financial Tools Hub, Daily Retention Station, Hot Stock Highlights, and Career Mastery Cards.
+- **Stage 1~3 Early-Game 100k Seed Roadmap & 60fps Video Simulator (`/roadmap`)**:
+  - Integrated 12-scene interactive motion simulator and 3-stage progression guide.
+- **8 Core Professions 2.0 & Career Farming Guide (`/guide/career-mastery`)**:
+  - Integrated 4-step simulator, 8-career catalog, 7 promotion tiers, and certification bonus multipliers.
+- **Floating Widget Stack Separation**:
+  - Segregated support widget and onboarding quest floating launcher with high-contrast close button.
+- **Verification and Release State**:
+  - Vitest: 1,048 tests 100% ALL-PASS.
+  - Next.js 16.3.8 Turbopack: 163 routes build cleanly with 0 TypeScript errors.
+  - Production host (`https://easy-scraping.com` / `prod-v521`) verified operational with HTTP/2 200 OK.
+
 ## v2026.10.03.510 — 2026-10-03 — Global-growth execution design and reference expansion
 - Start/mid-work `origin/main=ac4dd484a90b266d945993d7bd8be57a74e8e1df`; isolated docs branch `docs/global-growth-deep-plan-v2026.10.03.510`.
 - Re-audited exact-main locale/proxy/layout/GSC/sitemap/pSEO source against the v509 authority and registered concrete P0/P1 implementation gaps instead of assuming the planning design already exists at runtime.

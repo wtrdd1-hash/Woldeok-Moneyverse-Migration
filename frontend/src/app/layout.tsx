@@ -11,6 +11,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { StaleTabNotice } from '@/components/stale-tab-notice';
 import { InteractiveOnboardingTracker } from '@/components/interactive-onboarding-tracker';
 import { ConsentGuard } from '@/components/consent-guard';
+import { SessionKeepAlive } from '@/components/session-keep-alive';
 
 import { currentViewer } from '@/lib/viewer';
 import { fetchLatestPolicy } from '@/lib/api';
@@ -329,6 +330,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Toaster />
               <StaleTabNotice />
               <InteractiveOnboardingTracker />
+              <SessionKeepAlive />
             </ThemeProvider>
 
           </CurrencyProvider>

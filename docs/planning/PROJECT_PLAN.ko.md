@@ -2,8 +2,8 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
 > **최초 기준:** 2026-08-26  
-> **현재 통합 버전:** v2026.10.04.523
-> **구현·증거 동기화:** 2026-10-03 (최신 main SHA: `fc9af624`)  
+> **현재 통합 버전:** v2026.10.04.523  
+> **구현·증거 동기화:** 2026-10-04 (최신 main SHA: `f6e89a31`)  
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
 > **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
@@ -20,7 +20,7 @@
 - **상세 권위:** [중앙은행·조폐국·중앙국고·경제코어 통합 상세 기획서 v523](CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md).
 - **증거 경계:** 본 v523은 기획/문서 전용이며 런타임·DB·Test·Production 구현을 주장하지 않는다.
 
-## 🌟 CURRENT DOMAIN STATE (v511 최신 프로덕션 권위 및 호환성 원장)
+## 🌟 CURRENT DOMAIN STATE (v522 최신 프로덕션 권위 및 호환성 원장)
 
 ### 1. 플랫폼 및 국가별 Product Availability Matrix (fail-closed 계약)
 
@@ -39,16 +39,16 @@
 |---|---|---|---|
 | **Android App Git SHA** | `e24a2f8c6b12a8d1...` (main) | `b109e3a...` | Android 공식 리포지토리 최신 빌드 |
 | **Android Version** | **v1.3.4** (versionCode: `134`) | **v1.2.0** (versionCode: `120`) | v1.2.0 미만은 강제 업데이트 안내 (`UPDATE_REQUIRED`) |
-| **Backend Git SHA** | **fc9af624** (v511, 2026-10-03) | `ddec006e` | 블루-그린 무중단 릴리스 배포 |
+| **Backend Git SHA** | **065ee422** (v522, 2026-10-04) | `ddec006e` | 블루-그린 무중단 릴리스 배포 |
 | **API Contract Version** | **v2.4.0** (`/api/v1/**`, `/api/mobile/**`) | **v2.0.0** | 하위 호환성 100% 보장 (Additive only) |
 | **Session & Token Format** | Dual Session (NextAuth + JWT HttpOnly) | SHA-256 HMAC | 1,721개 활성 세션 무손실 연속성 유지 |
 | **Crash / ANR Target** | Crash-free > 99.8%, ANR < 0.05% | SLA 준수 | Crashlytics 및 Sentry 모니터링 연동 |
 
 ---
 
-### 3. 기획 Gap 항목별 v511 종결 상태 원장 (Planning Gap Closure Ledger)
+### 3. 기획 Gap 항목별 v522 종결 상태 원장 (Planning Gap Closure Ledger)
 
-| Gap ID | 도메인 | 이슈 요약 | 해결 커밋 및 조치 내용 | v511 상태 |
+| Gap ID | 도메인 | 이슈 요약 | 해결 커밋 및 조치 내용 | v522 상태 |
 |---|---|---|---|---|
 | **GAP-AUTH-01** | 인증/세션 | 장기 세션 유지 및 2FA 관리자 보안 | 365일 HttpOnly 세션 및 관리자 TOTP 2FA 스텝업 적용 | **FIXED** |
 | **GAP-SEO-01** | 글로벌 SEO | 폐기된 Google ping 및 random 노이즈 | ping 410 처리 및 결정론적 통계 산출 모델로 정규화 | **FIXED** |
@@ -56,6 +56,8 @@
 | **GAP-CASINO-01** | 카지노/컴플라이언스 | KR 법률 충돌 및 인덱싱/과장 문구 | `robots: noindex` 및 통계적 오차 검증 문구로 개편 | **FIXED** |
 | **GAP-TREASURY-01**| 국고/재정 | 30% 법정 비축금 및 4대 공공 지출 | `227-treasury-redistribution.sql` DB 원자적 제약 완비 | **FIXED** |
 | **GAP-TREASURY-02**| 국고/거버넌스 | 8단계 State Machine 및 Saga 보상 | `TREASURY_EXPENDITURE_SPEC` v511 상향 및 Saga 설계 | **FIXED** |
+| **GAP-TREASURY-03**| 국고/사회환원 | 국고 세수 자동 재순환 & 관제 모달 | 5대 금고, 4대 사회 기능, 10대 세율 및 2FA 모달 리팩터링 | **FIXED** |
+| **GAP-I18N-01** | 다국어/번역 | 전 화면 영어 노출 결함 박멸 | 4개 국어(KO, EN, JA, ZH) 100% 매핑 및 홈 마스터 사전 47종 등록 | **FIXED** |
 | **GAP-TAX-01** | 조세/부유세 | 초고액 자산가 4구간 누진세 및 소각 | 토요일 00:00 KST 원천징수 및 초과 세수 역매수 소각 | **FIXED** |
 | **GAP-SPACES-01** | 가상 부동산 | 10대 메가시티 랜드 분양 및 임대 | `PersonalSpacesView` 컴포넌트 및 일일 임대료 배당 완비 | **FIXED** |
 | **GAP-SECURITY-01**| 보안 마스터 | Next.js 16.3.8 승격 및 CI 스캐너 | CVE DoS 패치 및 GitLeaks/TruffleHog 시크릿 차단기 탑재 | **FIXED** |

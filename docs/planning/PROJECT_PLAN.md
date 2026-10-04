@@ -3,7 +3,7 @@
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
 > Current integrated version: v2026.10.04.523
-> Implementation/evidence sync: 2026-09-23
+> Implementation/evidence sync: 2026-10-04 (exact main SHA: `f6e89a31`)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
@@ -18,6 +18,14 @@ This is the current implementation-facing contract. Historical details remain re
 - **Migration/release gate:** classify every WLD increase/burn path, split ambiguous injection semantics, preserve historical ledger records, prove independent supply and treasury reconciliation, and require exact-SHA isolated Test evidence before zero-downtime Production promotion.
 - **Detailed authority:** [Central Bank, Mint, Treasury & Economy Core Specification v523](CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md).
 - **Evidence boundary:** v523 is planning/documentation only. It does not claim runtime, DB, Test or Production implementation.
+
+## Treasury Automated Social Recirculation & 4-Language Translation Parity — v2026.10.04.522 (2026-10-04)
+
+- **Authority Scope:** integrates the official Treasury Automated Social Recirculation pipeline (`TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md` / `.ko.md`), 4-Language (KO, EN, JA, ZH) translation parity across all public surfaces, 3-Stage 100k Seed Roadmap with 60fps video simulator, and 8 Core Professions 2.0 career mastery center.
+- **5 System Vaults & Inviolable Invariant:** `VAULT_MAIN`, `VAULT_WELFARE`, `VAULT_EMERGENCY`, `VAULT_INFRA`, `VAULT_RESERVE`. Enforces 30% safe reserve floor ($\max(100{,}000\text{ WLD}, \text{Gross Assets} \times 30\%)$) to eliminate sovereign default risk.
+- **4 Core Redistribution Functions:** Citizen Dividend (40%), Welfare Subsidy (40%), Public Community Funding (30%), RuneScape-Style Deflationary Buyback & Burn (10%), Trading Halt Full Refund (20%).
+- **Translation Parity:** 47 new `home.*` dictionary entries in `i18n-dictionary.ts` eliminating all English fallback leakage on Korean, Japanese, and Chinese interfaces.
+- **Production Verification:** Vitest 1,048 tests 100% ALL-PASS, Next.js 163 routes Turbopack build 0-Error, live operational on `https://easy-scraping.com` (`prod-v521`).
 
 ## Global-growth execution architecture and deep evidence — v2026.10.03.510 (2026-10-03)
 

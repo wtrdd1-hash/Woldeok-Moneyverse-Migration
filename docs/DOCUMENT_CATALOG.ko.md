@@ -2,19 +2,19 @@
 
 [English canonical](DOCUMENT_CATALOG.md) | **한국어**
 
-> **스냅샷 버전**: `v2026.10.01.495`
-> **기준 브랜치**: `security/public-repo-sanitization-v2026.10.01.495` (공개 저장소 보안 위생)
+> **스냅샷 버전**: `v2026.10.04.522`  
+> **기준 브랜치**: `main` (국고 세수 자동 사회 환원, 4개 국어 번역 무결점 매핑, 3단계 로드맵 및 163개 라우트 무중단 배포)  
 > **용도**: 전체 프로젝트 문서 체계의 인벤토리 및 정리 상태를 공증하는 공식 카탈로그 원장.
 
 ---
 
 ## 🏛️ 공식 권위 문서 (Authoritative Master Docs)
 
-1. **[통합 앱 명세서 및 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 15대 전 도메인 공식 구현 스펙 및 사용자 안내
-2. **[기획서 전 기능 추적 매트릭스 & 심화 QA 보고서 (v473)](QA_TRACEABILITY_MATRIX_V473.ko.md)**: 14대 도메인 42개 기획 기능 전수 대조 및 100% 검증 원장
-3. **[2026 차세대 핀테크 디자인 시스템 공식 지침서](DESIGN_SYSTEM_GUIDELINES.ko.md)**: Linear/Stripe/Apple 20만+ 래퍼런스 기반 디자인 규격
-4. **[2026 반응형 디자인 기준 공식 지침서](RESPONSIVE_DESIGN_GUIDELINES.ko.md)**: 320px~1920px 5대 뷰포트 매트릭스 및 Zero-Overflow 방어 지침
-5. **[풀스택 전체 QA 전수 감사 보고서 (v473)](QA_AUDIT_REPORT_V473.ko.md)**: 300+ API, 11대 관리자 화면, 5대 뷰포트 ALL_GREEN_PASS 검증 원장
+1. **[국고 세수 자동 사회 환원 및 재정 선순환 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 국고 5대 금고, 4대 사회 환원, 10대 법정 세율 및 30% 안전 비축금 원장
+2. **[통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md)**: v522 최신 프로덕션 릴리스 및 15대 도메인 권위 통합 기획
+3. **[통합 앱 명세서 및 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 15대 전 도메인 공식 구현 스펙 및 사용자 안내
+4. **[2026 차세대 핀테크 디자인 시스템 공식 지침서](DESIGN_SYSTEM_GUIDELINES.ko.md)**: Linear/Stripe/Apple 20만+ 래퍼런스 기반 디자인 규격
+5. **[2026 반응형 디자인 기준 공식 지침서](RESPONSIVE_DESIGN_GUIDELINES.ko.md)**: 320px~1920px 5대 뷰포트 매트릭스 및 Zero-Overflow 방어 지침
 6. **[문서 인덱스 (INDEX.ko.md)](INDEX.ko.md)**: 15대 도메인별 선별 탐색 경로
 7. **[현재 런타임/OS 기준](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian/systemd/Nginx/Docker/PostgreSQL 인프라 베이스라인
 8. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT) 및 버전 관리 불변식

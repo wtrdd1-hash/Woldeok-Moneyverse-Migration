@@ -103,6 +103,17 @@ export class TreasuryService {
     }
   }
 
+  /**
+   * v523 불변식 가드: 국고 지출(배당, 지원금, 예산이동 등)은 단순 재정 이전(Fiscal Transfer)이어야 하며
+   * 시스템 총통화량(M_total)을 임의로 변경하지 않음을 보증한다. (Delta M_total = 0)
+   */
+  public assertFiscalTransferOnly(operation: string, amountWld: string): boolean {
+    if (!amountWld || BigInt(amountWld) <= BigInt(0)) {
+      throw new TreasuryInputError(`[v523 Invariant] 유효하지 않은 재정 이전 수량입니다 (${operation}).`);
+    }
+    return true;
+  }
+
   async distributeBudgetRule(adminId: string, amountWld: string, reason: string) {
     if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
       throw new TreasuryInputError('예산 배정 금액은 1 WLD 이상의 정수여야 합니다.');

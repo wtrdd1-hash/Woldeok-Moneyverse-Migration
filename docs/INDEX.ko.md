@@ -3,20 +3,23 @@
 [English canonical](INDEX.md) | **한국어**
 
 > **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
-> **현재 기획 권위**: **v2026.10.03.510**
-> **v510 exact-main 조사 기준**: **ac4dd484 / PR #774 v509 권위 병합 완료**
-> **상태**: **DEEP_PLANNING_AUTHORITY** — v510은 구현준비형 글로벌 성장 계약이며 실제 런타임은 별도 Test/Production 증거가 필요
+> **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
+> **현재 기획 권위**: **v2026.10.04.522**
+> **v522 exact-main 프로덕션 기준**: **065ee422 / 국고 재정 선순환 및 4개 국어 번역 무결점 승격 완료**
+> **상태**: **AUTHORITATIVE_PRODUCTION_INTEGRATED** — 국고 세수 자동 사회 환원 파이프라인 및 4개 국어 번역 전면 배포 완결
 
 ---
 
 ## 🚀 15대 도메인별 마스터 문서 맵 (Master Directory)
 
 ### 01. 📱 마스터 스펙 & 유저 가이드
-1. **[통합 앱 명세서 및 상세 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 3대 금융 계산기, 30대 프리셋, pSEO 2만+ 엔진, 바이럴 진단서, 출석 룰렛, 주가 예측 배팅 전 도메인 엔드투엔드 가이드
-2. **[기획서 전 기능 추적 매트릭스 & 심화 QA 보고서 (v473)](QA_TRACEABILITY_MATRIX_V473.ko.md)**: 14대 도메인 42개 기획 기능 전수 대조 및 100% 검증 원장
-3. **[현재 런타임 베이스라인](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian 13, PostgreSQL 16, NestJS, Next.js 16 Turbopack 인프라 환경
-4. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT), 버전 관리 및 보존 규칙
-5. **[문서 카탈로그 원장](DOCUMENT_CATALOG.ko.md)**: 전체 문서 인벤토리 및 최신성 검증표
+1. **[국고 세수 자동 사회 환원 및 재정 선순환 종합 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 국고 5대 금고, 4대 사회 환원(기본소득/복지/인프라/소각), 10대 법정 세율 및 30% 안전 비축금 원장
+2. **[통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md)**: v522 최신 프로덕션 릴리스 및 전 도메인 권위 통합 기획
+3. **[통합 앱 명세서 및 상세 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 3대 금융 계산기, 30대 프리셋, pSEO 2만+ 엔진, 바이럴 진단서, 출석 룰렛, 주가 예측 배팅 전 도메인 엔드투엔드 가이드
+4. **[기획서 전 기능 추적 매트릭스 & 심화 QA 보고서 (v473)](QA_TRACEABILITY_MATRIX_V473.ko.md)**: 14대 도메인 42개 기획 기능 전수 대조 및 100% 검증 원장
+5. **[현재 런타임 베이스라인](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian 13, PostgreSQL 16, NestJS, Next.js 16 Turbopack 인프라 환경
+6. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT), 버전 관리 및 보존 규칙
+7. **[문서 카탈로그 원장](DOCUMENT_CATALOG.ko.md)**: 전체 문서 인벤토리 및 최신성 검증표
 
 ### 02. 🎨 2026 차세대 디자인 시스템 & UI/UX 가이드
 1. **[2026 차세대 핀테크 디자인 시스템 공식 지침서](DESIGN_SYSTEM_GUIDELINES.ko.md)**: Linear/Stripe/Apple 20만+ 래퍼런스 분석 기반 표면 Inset Border, 비대칭 벤토 그리드 2.0, Geist Mono Tabular 규격
@@ -35,10 +38,12 @@
 1. **[주식 포트폴리오 & 실시간 호가창 사양서](2026-09-22-stocks-portfolio-and-trade-presets-v2026.09.22.356.ko.md)**: 10-Depth 오더북, 웹소켓 틱 플래시 펄스, 시장 감성 게이지
 2. **[주식 거래정지 매수원가 자동정산 거버넌스](2026-09-22-stocks-halt-cost-basis-settlement-visibility-v2026.09.22.357.ko.md)**: 100% 매수원가 환급 원장 보증
 
-### 05. 🏦 가상 금융 & 은행 & 국채
-1. **[경제 밸런스 & 6대 수익성 전수 실측 감사 보고서 (v473)](ECONOMIC_PROFITABILITY_AUDIT.ko.md)**: 6대 수익원(출석/직업/주식/복리/국채/리퍼럴) 및 소각처 밸런스 원장
-2. **[가상 복리 예적금 및 세이빙 포켓](features/README.ko.md)**: 월복리/일복리 계산 엔진 및 긴급 출금 금고
-3. **[가상 국채 만기 시뮬레이터](features/README.ko.md)**: 기간별 확정 이율 및 인플레이션 헤지 상품
+### 05. 🏦 가상 금융 & 은행 & 국채 & 국고 재정
+1. **[국고 세수 자동 사회 환원 및 재정 선순환 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 5대 금고, 4대 사회 환원 파이프라인, 10대 법정 세율, 30% 안전 비축금 원장
+2. **[국고 및 재정 선순환 아키텍처 공식 문서](architecture/TREASURY_AND_FISCAL_RECIRCULATION_ARCHITECTURE.md)**: Mermaid 시스템 아키텍처 다이어그램 및 원장 설계
+3. **[경제 밸런스 & 6대 수익성 전수 실측 감사 보고서 (v473)](ECONOMIC_PROFITABILITY_AUDIT.ko.md)**: 6대 수익원(출석/직업/주식/복리/국채/리퍼럴) 및 소각처 밸런스 원장
+4. **[가상 복리 예적금 및 세이빙 포켓](features/README.ko.md)**: 월복리/일복리 계산 엔진 및 긴급 출금 금고
+5. **[가상 국채 만기 시뮬레이터](features/README.ko.md)**: 기간별 확정 이율 및 인플레이션 헤지 상품
 
 ### 06. 💼 직업 & 사업체 & 경제 거버넌스
 1. **[직업 숙련도 & 일일 파밍 루틴 사양서](planning/JOBS_PROFESSION_MASTERY_SPEC.ko.md)**: 5대 직업, 에너지 효율, 주말 피버 버프

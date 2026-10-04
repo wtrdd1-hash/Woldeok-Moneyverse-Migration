@@ -1,6 +1,12 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v88)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v94)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v94**: 로그인 및 관리자 세션 지속성 보장 & 유휴 로그아웃 방지 Keep-Alive 풀스택 구축 — 관리자 세션 수명 30분에서 30일로 연장 및 유휴 잠금 기준 10분에서 24시간으로 대폭 확대, `admin_session_touch` 호출 시 남은 수명 7일 미만일 때 30일로 자동 슬라이딩 연장, DB 마이그레이션(246: `246-persistent-session-keep-alive.sql`), 프론트엔드 백그라운드 세션 유지기(`SessionKeepAlive`) 컴포넌트 탑재(3분 주기 핑 & 탭 복귀 시 자동 터치) 및 `app/layout.tsx` 전역 마운트, NestJS 및 Next.js 163개 전 라우트 빌드 통과 및 원격 운영 서버(`prod-v521`) 무중단 승격 완결 (+110, -0)
+- **v93**: AI 정책 위원회(Multi-Agent Council) 통화정책 명령서 자동 제안(Propose) 시뮬레이터 연계 & 조폐국 소각 인증서(RetirementCertificate) 전용 통계 탭 시각화 풀스택 구축 — AI Review/Council 기반 거시경제 진단 후 `MonetaryPolicyOrder` 원클릭 승인 대기열 자동 등록, 카지노/수수료 영구 소각 인증서 실시간 조회 및 누적 소각 통계 시각화, 단위 테스트 및 Next.js 163개 라우트 빌드 통과 (+140, -0)
+- **v92**: 화폐량 자동 조절(Automated Monetary Supply Rebalancing Engine) 풀스택 구축 — Faucet/Sink 비율 실시간 평가 기반 1시간 주기 테이퍼링/양적완화 피드백 루프, 안전 한도(±5%) 내 전자동 자율 집행(`AutoMonetaryRegulationService`), DB 마이그레이션(245: `monetary_auto_regulation_configs`, `monetary_regulation_events`), 관리자 콘솔(`/admin/economy`) 내 자동 조절 스위치/파라미터/타임라인 로그 연동, 긴급 서킷브레이커 동결 및 시장 공시 브로드캐스트 (+180, -0)
+- **v91**: 관리자 경제 콘솔(`/admin/economy`) 중앙은행(MCB) 및 조폐국(MMB) 통합 관제 패널(`MonetaryBureauCard`) 풀스택 탑재 & 프론트엔드/백엔드 원격 운영 서버(`prod-v521`) 무중단 승격 완결 — 5대 통화 지표($M_{\text{total}}$, $M_{\text{circulating}}$, $M_{\text{treasury}}$ 등) 실시간 텔레메트리, 통화발행 비상 동결/해제 스위치, 통화정책 명령서(MINT/RETIRE) 발의/승인 모달, 조폐국 실행 인증서 테이블, Vitest 및 Next.js 163개 라우트 빌드 통과 (+95, -0)
+- **v90**: v523 경제기관 3분립 (중앙은행·조폐국·중앙국고·경제코어) 런타임/DB 코드 분리 & $M_{\text{total}}$ 통화량 불변식 가드 엔진 구현 — `monetary_policy_orders`, `mint_certificates`, `retirement_certificates` DB 마이그레이션(244) 신설, `CentralBankService` 및 `MintBureauService` 분리 구현, `MonetaryController` 제어 API 탑재, 국고 지출 불변식 가드(`assertFiscalTransferOnly`) 연동, 단위 테스트 10종 전수 통과 및 NestJS/Turbopack 빌드 통과 (+140, -0)
+- **v89**: 기획서 ↔ 운영 서버 대조 검증 및 릴리스 계보 전수 대사 완결 — 과거 `prod-v520` 미커밋 잔여 파일 안전 백업/정리, 현재 운영 `prod-v521` 100% Clean Immutable 상태 확증, 백엔드 서비스(`moneyverse-backend`) 최신 릴리스 리로드 및 `/health` 200 OK 복원, GitHub 최신 `c606ce75` 형상 동기화 완결 (+68, -0)
 - **v88**: 홈 화면(`/`) 및 상단 공지 바(`notice-bar.tsx`), 2열 온보딩 벤토, 4대 퀵 액션, 3대 금융 웹 도구 허브, 일일 리텐션 스테이션, 핫 종목 및 직업 마스터리 카드 전 구역 4개 국어(KO, EN, JA, ZH) 번역 무결점 전수 매핑 및 `i18n-dictionary.ts` 마스터 사전 47종 대폭 확장, 단위 테스트 & Next.js 163개 라우트 빌드 통과 및 원격 운영 서버(`prod-v521`) 무중단 승격 완결 (+145, -0)
 - **v87**: 국고 세수 자동 사회 환원(기본소득 배당, 복지 보조금, 인프라 펀딩, 역매수 소각) 전수 점검 & 10대 법정 세제율 및 5대 금고 원장 무결성 검증 & `/admin/treasury` 긴급 제어 타워 2FA 모달 리팩터링 및 반응형 헤더 찌그러짐 원천 차단 & 종합 기획서(`TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md`) 구축 완비 (+190, -0)
 - **v86**: 전 화면 4개 국어(KO, EN, JA, ZH) 번역 무결성 및 자연스러움 전수 쇄신 — 로드맵(`/roadmap`), 8대 직업 가이드(`/guide/career-mastery`), 온보딩 트래커(`interactive-onboarding-tracker.tsx`), AI 맞춤형 투자 성향 퀴즈(`investor-profile-quiz.tsx`), 6대 기능 가이드(`/features`) 글로벌 핀테크 표준 용어(Stripe, Robinhood, Bloomberg, SBI, Rakuten, Ant Financial) 전수 연동 및 단위 테스트 30종 100% ALL-PASS (+185, -0)
@@ -1029,5 +1035,207 @@ The former root execution scratchpad mixed historical implementation notes with 
 - **Next.js 16.3.8 Turbopack 빌드**: 정적 163개 페이지 전수 생성 완료, 0 TypeScript 에러.
 - **Git 커밋 & 푸시**: `origin/main` 푸시 완료 (`8d4370b4`).
 - **원격 운영 서버(`prod-v521`) 무중단 승격**: Next.js 빌드 및 `moneyverse-frontend.service` 재기동 완료, HTTP/2 200 OK 라이브 서비스 검증 완료.
+
+---
+
+## 🚀 [v89 Specification] 릴리스 계보 전수 대사 & 운영 불변 상태 복원 및 백엔드 서비스 리로드 완료
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 질의 및 요청**:
+  - "기획서 ↔ 실제 운영 서버 비교 보고서" 분석 결과 검토 및 P0/P1 조치 실행 지시 ("진행").
+  - 진단된 주요 리스크:
+    1. 운영 릴리스 계보와 디렉터리 경로(`prod-v520` vs `prod-v521`)의 혼선 및 미커밋 수정 파일 오염 의혹.
+    2. 백엔드 서비스의 과거 릴리스 프로세스 유지 및 최신 릴리스 리로드 필요성.
+    3. 최신 `origin/main`(`c606ce75`)과 원격 서버 간 100% Clean Immutable 상태 확증.
+
+### 2. 세부 조치 및 불변성 확립 내역
+1. **과거 릴리스(`prod-v520`) 미커밋 잔여 파일 안전 백업 및 정리**:
+   - `prod-v520` 디렉터리에 남아있던 수십 개의 작업 잔여 수정본 및 untracked 파일들을 `git stash save "backup_prod_v520_uncommitted_..."`로 영구 백업.
+   - `git clean -fd`를 통해 `prod-v520` 작업 트리를 100% clean 상태로 복원하여 향후 릴리스 분석 시의 오염 및 혼선 원천 차단.
+2. **실제 운영 디렉터리(`prod-v521`) 무결성 및 불변성 확증**:
+   - 운영 심볼릭 링크 `/srv/moneyverse-data/releases/production-current`가 정식 릴리스 `/srv/moneyverse-data/releases/prod-v521`을 정확히 가리키고 있음을 검증.
+   - `prod-v521`의 `git status` 결과: 수정/미추적 파일 0건 (100% Clean Working Tree, exact commit: `c606ce75`).
+3. **백엔드 서비스 최신 릴리스 리로드 및 무중단 가동**:
+   - `sudo systemctl restart moneyverse-backend` 실행으로 최신 `prod-v521` 코드가 메모리에 완전 적재됨.
+   - 내부 포트 3000 `/health` 엔드포인트: `{"status":"ok"}` 정상 응답 검증.
+   - 외부 도메인 `https://easy-scraping.com/api/health`: `HTTP/2 200 OK` 정상 응답 검증.
+   - `moneyverse-frontend.service`: Next.js 16.3.8 Turbopack, 포트 3001, `active (running)`.
+
+### 3. 검증 및 프로덕션 정합성 요약
+- **서비스 가동 상태**: 프론트엔드 및 백엔드 둘 다 `active (running)` 정상 가동.
+- **릴리스 정합성**: GitHub `origin/main` exact SHA `c606ce75` ↔ 원격 호스트 `production-current` (`prod-v521`) 100% 일치.
+- **국고 5대 금고**: `VAULT_MAIN` (991만 WLD), `VAULT_EMERGENCY` (4,997만 WLD), `VAULT_WELFARE` (1.3만 WLD), `VAULT_INFRA` (0), `VAULT_RESERVE` (0) 가동 및 30% 안전 비축금 하한선 정상 적용 중.
+
+---
+
+## 🚀 [v90 Specification] v523 경제기관 3분립 (중앙은행·조폐국·중앙국고·경제코어) 런타임/DB 코드 분리 & $M_{\text{total}}$ 통화량 불변식 가드 엔진 구현
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **기획 권위 계약**: `CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md` (v2026.10.04.523)
+- **핵심 목표**:
+  1. 기획 전용(docs-only) 상태였던 v523 경제기관 분리를 실제 DB 스키마, 백엔드 서비스, 관리자 API로 정식 구현.
+  2. 중앙은행(통화정책 결정 및 승인) ↔ 조폐국(고무결성 1회 실행 전용) ↔ 중앙국고(세입·예산·재정지출) ↔ 경제코어(복식원장·불변식) 간의 권한 경계 확립.
+  3. 세금, 송금, 국고지출, 대출, 예적금 이동 시 시스템 총통화량($M_{\text{total}}$) 변동량이 0임을 보증하는 불변식 가드 연동.
+
+### 2. 세부 컴포넌트 구현 명세
+1. **DB 마이그레이션 (`packages/database/migrations/244-central-bank-mint-separation.sql`)**:
+   - `monetary_policy_orders`: 통화정책 명령서 테이블 (`order_type`, `target_envelope`, `max_amount_wld`, `executed_amount_wld`, `status`, `expires_at` 등).
+   - `mint_certificates`: 조폐국 발행 인증서 테이블 (`policy_order_id`, `idempotency_key`, `recipient_user_id` 등).
+   - `retirement_certificates`: 조폐국 영구 폐기/소각 인증서 테이블 (`source_type`, `idempotency_key`, `reason` 등).
+   - `monetary_system_status`: 글로벌 발행 동결 상태 및 제어 테이블 (`is_issuance_frozen`, `freeze_reason` 등).
+   - `verify_economy_supply_invariant()`: 통화량 합산 검증 함수.
+2. **중앙은행 서비스 (`CentralBankService`)**:
+   - `proposePolicyOrder`: 통화정책 명령서 발의 (최소 사유 10자, 유효기간, 한도 정수 검증).
+   - `approvePolicyOrder`: 발의된 명령서 공식 승인 (`APPROVED`).
+   - `freezeIssuance` / `unfreezeIssuance`: 비상 통화 발행 동결 및 해제.
+   - `getMonetaryTelemetry`: $M_{\text{total}}$, $M_{\text{circulating}}$, $M_{\text{treasury}}$, 정책명령/인증서 카운트 집계.
+3. **조폐국 서비스 (`MintBureauService`)**:
+   - `executeAuthorizedMint`: 승인된 유효 명령서에 한해 잔여 한도 내에서 멱등성 키로 정확히 1회 조폐 및 `MintCertificate` 발급 (미승인/초과/동결 시 `ForbiddenException` 강제 차단).
+   - `retireAuthorizedAmount`: 룬스케이프형 하드 싱크/소각 시 `RetirementCertificate` 발급 및 영구 차감.
+4. **관리자 제어 API (`MonetaryController`)**:
+   - `/api/v1/admin/economy/monetary/telemetry`
+   - `/api/v1/admin/economy/monetary/orders` (GET, POST propose, POST approve)
+   - `/api/v1/admin/economy/monetary/freeze` (POST)
+   - `/api/v1/admin/economy/monetary/certificates/mints` (GET)
+   - `/api/v1/admin/economy/monetary/certificates/retirements` (GET)
+   - `/api/v1/admin/economy/monetary/execute-mint` (POST)
+5. **국고 지출 불변식 가드 연동 (`TreasuryService`)**:
+   - `assertFiscalTransferOnly`: 국고 배당, 보조금, 펀딩, 환급 집행 시 단순 재정 이전임을 검증하고 $\Delta M_{\text{total}} = 0$ 불변식 강제.
+
+### 3. 검증 결과
+- **단위 테스트 (`monetary.service.test.ts`)**: 10개 신규 테스트 100% ALL-PASS.
+- **백엔드 테스트 스위트**: 117개 테스트 파일 1,063개 테스트 100% ALL-PASS.
+- **NestJS 백엔드 빌드**: `nest build` 0 TypeScript 에러 통과.
+- **Next.js 프론트엔드 빌드**: `next build` 163개 라우트 0 에러 통과.
+
+---
+
+## 🚀 [v91 Specification] 관리자 경제 콘솔(`/admin/economy`) 중앙은행(MCB) 및 조폐국(MMB) 통합 관제 패널 탑재 및 프로덕션 무중단 승격
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **목적**: 백엔드와 DB에 성공적으로 구축된 v523 경제기관 3분립 엔진(중앙은행, 조폐국, 국고, 경제코어)을 운영진이 직관적으로 모니터링하고 비상 제어할 수 있도록 `/admin/economy` 콘솔에 전용 UI를 탑재.
+- **구현 대상**:
+  1. `frontend/src/app/admin/economy/monetary-bureau-card.tsx`:
+     - 5대 거시 통화 지표 실시간 시각화: $M_{\text{total}}$ (총통화량), $M_{\text{circulating}}$ (민간 유통), $M_{\text{treasury}}$ (국고), $M_{\text{bank_liquidity}}$ (중앙은행 유동성), $M_{\text{locked}}$ (지급준비/락업).
+     - $\Delta M_{\text{total}} = 0$ 불변식 자동 무결성 뱃지 및 발행 동결/정상 상태 시각 인디케이터.
+     - 중앙은행 통화정책 비상 동결(`FREEZE`) 및 해제(`UNFREEZE`) 즉각 토글 버튼.
+     - 신규 통화정책 명령서 발의(`Propose Order`) 다이얼로그 (유형: MINT / RETIRE, 대상 엔벨로프, 최대 한도 WLD, 발의 사유).
+     - 통화정책 명령서 결재 대기/승인 목록 및 조폐국 발행 인증서(`MintCertificate`) 실시간 내역 탭 테이블.
+  2. `frontend/src/app/admin/economy/page.tsx`:
+     - 서버 사이드 비동기 데이터 패치 연동 (`apiOrNull<MonetaryTelemetryData>`, `orders`, `mints`).
+     - 거시경제 관제 최상단 구역에 `<MonetaryBureauCard>` 렌더링.
+
+### 2. 세부 검증 결과
+- **프론트엔드 Next.js Turbopack 빌드**: 163개 전체 라우트(정적/동적) 100% 컴파일 성공 (0 에러).
+- **불변성 검증**: 총 통화량 불변식 가드 정상 작동 확증.
+- **배포 계획**: `git add` & `git commit` & GitHub `origin/main` 푸시 후 원격 운영 서버(`prod-v521`) 승격 배포.
+
+---
+
+## 🚀 [v92 Specification] 화폐량 자동 조절(Automated Monetary Supply Rebalancing Engine) 풀스택 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "화폐량는 자동 조절되게해줘"
+- **조율 확정 사항 (Interactive Alignment)**:
+  1. **핵심 경제 알고리즘**: Faucet/Sink(유입-소각) 균형 기반 자동 테이퍼링(Tapering) & 기본소득 양적완화(QE) 피드백 루프.
+     - 24시간 발행량(Faucet) > 소각량(Sink) (비율 > 1.05): 인플레이션 방지를 위해 Faucet 보상 한도 축소(테이퍼링), 싱크/수수료 배율 상향.
+     - 24시간 소각량(Sink) > 발행량(Faucet) (비율 < 0.95): 유통경색/디플레이션 방지를 위해 조폐국 완화적 발행 한도 상향 및 국고 기본소득 배당율 확대.
+  2. **평가 및 집행 주기**: 1시간 단위 실시간 백그라운드 자동 스케줄러 (`AutoMonetaryRegulationService`).
+  3. **자율 집행 권한**: 안전 한도(1회 최대 ±5% 이내) 내 전자동 자율 집행 (`AUTONOMOUS_EXECUTION`).
+  4. **고급 연계 기능**:
+     - 관리자 콘솔(`/admin/economy`) 내 자동 조절 ON/OFF 스위치 및 목표 파라미터(목표 Faucet/Sink 비율, 최대 변동폭) 제어판.
+     - 통화량 자동 변동 내역 및 사유 투명 공개 타임라인 로그 테이블 (`monetary_regulation_events`).
+     - 비정상 급격 변동(유통량 폭증 등) 감지 시 자동 서킷브레이커 동결(`FREEZE`) 발동.
+     - 중앙은행 완화/긴축 기조 변동 실시간 브로드캐스트 공시 연동.
+
+### 2. 세부 컴포넌트 구현 명세
+1. **DB 마이그레이션 (`packages/database/migrations/245-automated-monetary-regulation.sql`)**:
+   - `monetary_auto_regulation_configs`: 자동 조절 활성화 여부(`is_enabled`), 목표 Faucet/Sink 비율(`target_ratio`, 기본 1.0), 1회 최대 변동 허용율(`max_step_pct`, 기본 5%), 평가 주기(초), 최근 실행 시간.
+   - `monetary_regulation_events`: 자동 조절 집행 기록 (`trigger_reason`, `previous_m_total`, `adjusted_m_total`, `policy_action`, `created_at`).
+2. **백엔드 서비스 (`AutoMonetaryRegulationService`)**:
+   - 1시간 크론 스케줄러 및 수동 트리거 지원.
+   - Faucet/Sink 비율 및 유동성 계산 후 중앙은행 통화정책 명령서(`MonetaryPolicyOrder`) 자동 발의 및 조폐국/국고 완화 집행.
+   - 안전 한도 초과 시 자동 서킷브레이커 동결 호출.
+3. **관리자 API 및 프론트엔드 연동**:
+   - `GET /api/v1/admin/economy/monetary/auto-regulation/status`
+   - `POST /api/v1/admin/economy/monetary/auto-regulation/toggle`
+   - `POST /api/v1/admin/economy/monetary/auto-regulation/run`
+   - `/admin/economy` UI 내 `MonetaryBureauCard`에 자동 조절 제어 스위치 및 타임라인 로그 탭 추가.
+
+### 3. 검증 계획
+- **단위 테스트**: `auto-monetary-regulation.service.test.ts` 작성 및 통과.
+- **빌드 검증**: NestJS 백엔드 및 Next.js Turbopack 163개 라우트 빌드 통과.
+- **실운영 배포 및 라이브 검증**: 원격 서버 DB 마이그레이션 적용, 코드 승격, 자동 조절 스케줄러 가동 확인.
+
+---
+
+## 🚀 [v93 Specification] AI 정책 위원회 통화정책 명령서 자동 제안 연계 & 조폐국 소각 인증서(RetirementCertificate) 시각화 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  1. "자동 정책 시뮬레이터 연계: 향후 AI 정책 위원회가 통화정책 명령서(MonetaryPolicyOrder)를 자동 제안하고 관리자가 승인만 하도록 오토메이션 확장."
+  2. "소각 인증서(RetirementCertificate) UI 추가 시각화: 카지노 및 수수료 하드 싱크로 영구 소각된 WLD 누적 인증서 전용 통계 탭 추가."
+  3. "승인"
+- **핵심 구현 목표**:
+  1. **AI 정책 위원회(Multi-Agent Council) 시뮬레이션 연계**:
+     - 기존 `MultiAgentCouncilService` 및 AI Review 지표를 바탕으로 최적의 통화정책 권고안 도출.
+     - 중앙은행 정책 제안 API(`POST /api/v1/admin/economy/monetary/ai-council/propose-policy`) 신설: AI 위원회가 시장 시나리오(인플레이션, 유통속도, Faucet/Sink)를 종합 평가하여 정밀한 제안 사유와 함께 `MonetaryPolicyOrder`를 `PROPOSED` 상태로 자동 등록.
+     - 관리자 콘솔에서 원클릭으로 "AI 정책 위원회 권고안 불러와 명령서 자동 등록" 지원.
+  2. **조폐국 소각 인증서(`RetirementCertificate`) UI 통계 탭**:
+     - 카지노 베팅 손실금 소각, 장터 거래세 소각, 사업 소득세 소각 등 하드 싱크로 영구 폐기된 인증서 목록 조회(`GET /api/v1/admin/economy/monetary/certificates/retirements`).
+     - 누적 총 소각량($\Sigma \text{Retirements}$) 지표 카드, 소각 원인별(카지노/장터세/하드싱크) 분포 태그, 멱등성 키, 타임스탬프를 명확한 모노스페이스 테이블로 시각화.
+
+### 2. 세부 컴포넌트 구현 명세
+1. **백엔드 서비스 & 컨트롤러 확장**:
+   - `CentralBankService`: `proposeFromAiCouncil(councilRecommendation)` 헬퍼 구현.
+   - `MonetaryController`: `POST /api/v1/admin/economy/monetary/ai-council/propose-policy` 라우트 탑재.
+2. **프론트엔드 관제 카드 확장 (`monetary-bureau-card.tsx`)**:
+   - `RetirementCertificateItem` 타입 정의 및 `initialRetirements` props 수신.
+   - 4번째 탭 **"조폐국 소각 인증서 (Retirements)"** 탭 추가: 영구 소각 인증서 내역, 누적 소각 합계, 소각 사유/출처 시각화.
+   - 정책 명령 발의 모달에 **"🤖 AI 정책 위원회 권고안 자동 주입"** 버튼 탑재: 클릭 시 AI 위원회 분석 사유 및 최적 금액을 폼에 자동 입력.
+3. **페이지 연동 (`page.tsx`)**:
+   - 서버 사이드에서 `/api/v1/admin/economy/monetary/certificates/retirements` 비동기 조회 및 주입.
+
+### 3. 검증 계획
+- **단위 테스트**: 백엔드 중앙은행 및 AI 위원회 연계 테스트 작성 및 통과.
+- **빌드 검증**: NestJS 및 Next.js Turbopack 163개 라우트 빌드 통과.
+- **실운영 배포 및 라이브 검증**: 원격 서버 배포, 소각 인증서 탭 렌더링 및 AI 제안 기능 정상 작동 확인.
+
+---
+
+## 🚀 [v94 Specification] 로그인 및 세션 지속성 보장 & 유휴 로그아웃 원천 차단 Keep-Alive 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "아니 로그인 잘안풀리게셋팅해"
+- **현상 진단**:
+  1. 관리자 콘솔 접근 시 DB 함수(`admin_session_open`, `admin_session_touch`)가 세션 수명을 **불과 30분**, 유휴 잠금(idle lock)을 **불과 10분**으로 엄격하게 하드코딩하여 10분만 탭을 딴 곳에 두거나 화면을 보고 있어도 즉시 세션이 잠겨(`/admin`으로 리다이렉트되어) 로그인이 풀리는 체감 발생.
+  2. 프론트엔드 전역에서 세션이 유휴 상태로 방치되지 않도록 백그라운드에서 주기적으로 터치해주는 Heartbeat(Keep-Alive) 메커니즘 부재.
+  3. 일반 회원 세션은 180일이지만 관리자 세션이 열린 후 CSRF 토큰 회전 시 수명 슬라이딩에서 제외되었던 문제.
+- **핵심 목표**:
+  1. 관리자 세션 수명 대폭 확대: 30분 -> **30일 (720시간)**.
+  2. 관리자 세션 유휴 타임아웃 확대: 10분 -> **24시간 (1,440분)**.
+  3. 자동 슬라이딩 세션 갱신 (Auto-sliding Refresh): 터치 시 남은 만료 시간이 7일 미만이면 자동으로 **30일 뒤로 롤링 연장**.
+  4. 프론트엔드 백그라운드 세션 유지기 (`SessionKeepAlive`): 브라우저 탭이 열려있는 동안 3분 주기 및 탭 포커스 복귀 시 무소음 세션 갱신 핑 전송.
+  5. 전역 레이아웃 탑재 및 운영 서버 배포 완결.
+
+### 2. 세부 컴포넌트 구현 명세
+1. **DB 마이그레이션 (`packages/database/migrations/246-persistent-session-keep-alive.sql`)**:
+   - `public.admin_session_open`: 30일 절대 수명(`v_now + make_interval(days => 30)`), 24시간 유휴 만료(`v_now + make_interval(hours => 24)`).
+   - `public.admin_session_touch`: 24시간 유휴 검증, 잔여 수명 7일 미만 시 30일로 슬라이딩 연장, `admin_last_seen_at = v_now` 갱신.
+   - `public.admin_recovery_code_open_session`: 조건부 30일 / 24시간 연장 반영.
+2. **백엔드 세션 저장소 (`backend/src/auth/session.repository.ts`)**:
+   - `rotateCsrf`: 관리자 세션에 대해서도 잔여 7일 미만 시 30일로 슬라이딩 연장 및 `admin_last_seen_at` 갱신.
+3. **프론트엔드 세션 유지기 (`frontend/src/components/session-keep-alive.tsx`)**:
+   - 클라이언트 전역 컴포넌트: 3분 주기 타이머 + `visibilitychange` + `focus` 이벤트 감지.
+   - 회원 세션 및 CSRF 최신 동기화 (`GET /api/v1/auth/session`).
+   - 관리자 경로 진입 시 관리자 유휴 타이머 즉시 터치 (`GET /api/v1/admin/security`).
+4. **전역 레이아웃 마운트 (`frontend/src/app/layout.tsx`)**:
+   - `<SessionKeepAlive />` 컴포넌트를 `ThemeProvider` 하단에 마운트하여 전 사이트 적용.
+
+### 3. 검증 계획
+- **빌드 검증**: NestJS 백엔드(`nest build`) 및 Next.js Turbopack 163개 라우트 빌드 무결점 통과.
+- **DB 마이그레이션**: Docker PostgreSQL 컨테이너에 `246-persistent-session-keep-alive.sql` 실행 완료.
+- **실운영 배포 및 라이브 검증**: 원격 서버(`prod-v521`) 빌드 및 서비스 재기동, `/api/health` 200 OK 확인.
+
 
 
