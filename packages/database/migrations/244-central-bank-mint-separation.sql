@@ -95,13 +95,13 @@ BEGIN
   INTO v_treasury_total
   FROM public.system_treasury_vaults;
 
-  -- 2. Sum Active User Wallets
-  SELECT coalesce(sum(balance_wld::numeric), 0)
+  -- 2. Sum Active User Account Balances
+  SELECT coalesce(sum(available_amount), 0)
   INTO v_users_total
-  FROM public.wallets;
+  FROM public.account_balances;
 
   -- 3. Check issuance frozen state
-  SELECT is_issuance_frozen
+  SELECT coalesce(is_issuance_frozen, false)
   INTO v_is_frozen
   FROM public.monetary_system_status
   WHERE id = 1;
@@ -111,7 +111,7 @@ BEGIN
   v_result := jsonb_build_object(
     'is_valid', true,
     'treasury_wld', v_treasury_total::text,
-    'user_wallets_wld', v_users_total::text,
+    'user_balances_wld', v_users_total::text,
     'total_monetary_base_wld', v_total_circulating::text,
     'is_issuance_frozen', v_is_frozen,
     'verified_at', pg_catalog.clock_timestamp()

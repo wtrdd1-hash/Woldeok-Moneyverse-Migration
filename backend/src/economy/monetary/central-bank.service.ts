@@ -16,19 +16,19 @@ export class CentralBankService {
     // 1. Invariant check from DB function or raw queries
     const invRes = await this.pool.query<{
       treasury_wld: string;
-      user_wallets_wld: string;
+      user_balances_wld: string;
       total_monetary_base_wld: string;
       is_issuance_frozen: boolean;
     }>(`
       SELECT
         coalesce((SELECT sum(balance_wld::numeric) FROM public.system_treasury_vaults), 0)::bigint::text AS treasury_wld,
-        coalesce((SELECT sum(balance_wld::numeric) FROM public.wallets), 0)::bigint::text AS user_wallets_wld,
+        coalesce((SELECT sum(available_amount) FROM public.account_balances), 0)::bigint::text AS user_balances_wld,
         coalesce((SELECT is_issuance_frozen FROM public.monetary_system_status WHERE id = 1), false) AS is_issuance_frozen
     `);
 
     const row = invRes.rows[0];
     const treasuryWld = BigInt(row?.treasury_wld || '0');
-    const userWld = BigInt(row?.user_wallets_wld || '0');
+    const userWld = BigInt(row?.user_balances_wld || '0');
     const mTotal = (treasuryWld + userWld).toString();
 
     // 2. Counts
