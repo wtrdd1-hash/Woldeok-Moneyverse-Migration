@@ -87,10 +87,10 @@ export function SiteHeader() {
 
   return (
     <header className="moneyverse-site-header sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur-xl w-full max-w-full overflow-hidden transition-colors">
-      <div className="mx-auto flex h-[60px] min-[400px]:h-[64px] sm:h-[68px] lg:h-[76px] w-full max-w-[1440px] items-center justify-between gap-1.5 px-2 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-3 xl:gap-4 2xl:gap-6 lg:px-5 xl:px-8">
+      <div className="mx-auto flex h-[60px] min-[400px]:h-[64px] sm:h-[68px] lg:h-[76px] w-full max-w-[1440px] items-center justify-between gap-1.5 px-2 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-2 xl:gap-3 2xl:gap-4 lg:px-4 xl:px-6 2xl:px-8">
         <Brand />
 
-        <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="ml-auto hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-4 lg:flex">
+        <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="hidden lg:flex items-center gap-1 xl:gap-1.5 2xl:gap-3 shrink-0 mx-auto">
           {items.map((item) =>
             isGroup(item) ? (
               <HeaderGroup key={item.label} group={item} pathname={pathname} locale={locale} />
@@ -100,16 +100,16 @@ export function SiteHeader() {
           )}
         </nav>
 
-        <div className={cn('flex min-w-0 items-center gap-1 min-[400px]:gap-1.5 sm:gap-2 lg:gap-2 2xl:gap-3 shrink-0', 'ml-auto lg:ml-2.5 xl:ml-4')}>
+        <div className={cn('flex items-center gap-1 min-[400px]:gap-1.5 sm:gap-2 lg:gap-1.5 xl:gap-2 2xl:gap-3 shrink-0', 'ml-auto lg:ml-0')}>
           <Link
             href="/roadmap"
-            className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold transition-all shadow-xs shrink-0"
+            className="hidden 2xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold transition-all shadow-xs shrink-0"
           >
             <Sparkles className="size-3.5" />
             <span>{localeLabel(locale, '실전 가이드', 'Quick Guide', '実践ガイド', '快速指南')}</span>
             <Badge className="bg-emerald-500 text-black text-[9px] px-1 py-0 h-4 font-black">HOT</Badge>
           </Link>
-          <ServerClockPill className="hidden md:inline-flex lg:hidden 2xl:inline-flex" />
+          <ServerClockPill className="hidden 2xl:inline-flex" />
           <LanguageSwitcher compact className="flex shrink-0" />
           <div className="hidden sm:block">
             <ThemeMenu />
@@ -325,7 +325,7 @@ function HeaderLink({
       prefetch={!entry.href.startsWith('/admin')}
       aria-current={current ? 'page' : undefined}
       className={cn(
-        'group relative flex min-h-10 items-center justify-center whitespace-nowrap rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs 2xl:text-sm font-bold transition-all duration-200 outline-none',
+        'group relative shrink-0 flex min-h-9 2xl:min-h-10 items-center justify-center whitespace-nowrap rounded-xl px-1.5 xl:px-2 2xl:px-3 py-1.5 text-[11px] xl:text-xs 2xl:text-sm font-bold transition-all duration-200 outline-none',
         current
           ? 'text-foreground font-black'
           : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60',
@@ -355,7 +355,7 @@ function HeaderGroup({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          'group relative flex min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs 2xl:text-sm font-bold transition-all duration-200 outline-none',
+          'group relative shrink-0 flex min-h-9 2xl:min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-1.5 xl:px-2 2xl:px-3 py-1.5 text-[11px] xl:text-xs 2xl:text-sm font-bold transition-all duration-200 outline-none',
           current
             ? 'text-foreground font-black'
             : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60',

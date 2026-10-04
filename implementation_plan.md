@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v98)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v99)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v99**: 데스크톱 헤더 내비게이션 바 메뉴 텍스트 겹침(Overlapping/Zero-Width Shrink Bug) 원천 박멸 및 적응형 반응형 레이아웃 복원 — 브라우저 줌(67% 등) 및 1024px~1399px 데스크톱 구간에서 우측 위젯(`shrink-0`)에 밀려 `<nav>` 및 메뉴 버튼들이 너비 0px로 압축되면서 발생하던 글자 겹침 현상을 `shrink-0`, `min-h-9 2xl:min-h-10`, 반응형 패딩(`px-1.5 xl:px-2 2xl:px-3`) 및 글자 크기(`text-[11px] xl:text-xs 2xl:text-sm`)로 완벽 해결, 초대형 화면 전용 위젯(`실전 가이드 HOT`, `ServerClockPill`) 2xl 임계치 격상으로 중앙 내비게이션 가용 영역 대폭 확보 (+45, -0)
 - **v98**: 비로그인 계산기 저장 시나리오의 회원 관심종목(Watchlist) 원장 자동 승격 동기화 & 직장인 고검색량 3대 금융 계산기(퇴직금·연금저축/IRP·ISA 비과세) pSEO 허브 및 롱테일 확장 풀스택 구축 — LocalStorage에 보관된 계산기 시나리오를 로그인 시 감지하여 토스트 알림과 함께 회원 DB 관심종목으로 원클릭 승격하는 `WatchlistPromotionEngine` 구현, 직장인 대상 퇴직금 실수령액/IRP 절세 계산기(`/tools/retirement-calculator`), 연금저축/IRP 세액공제(16.5%/13.2%) 계산기(`/tools/pension-tax-calculator`), ISA 계좌 비과세(200만/400만) 절세 계산기(`/tools/isa-calculator`) 3종 신설, 5대 근속/납입 시나리오 롱테일 URL 및 Schema.org 구조화 데이터(`FinancialProduct`, `SoftwareApplication`, `FAQPage`) 주입, '머니버스 가상 연금/퇴직 IRP 포켓 10,000 WLD 무료 예치' 모의 시뮬레이터 연결 (+180, -0)
 - **v97**: 레거시 블로그 검색 유입 트래픽 410 제거 및 301 영구 리다이렉트 ➡️ 핀테크 개발자 직업 파밍 머니버스 전환 구축 — 구글 서치콘솔 실시간 상위 유입 검색어(`nodejs vs python`, `개인 클라우드 서버 만들기` 등)의 410 Gone 에러 페이지 차단을 100% 해제하고 301 Permanent Redirect(`/guide/career-mastery?ref=legacy_tech_blog`)로 전환, 신규 방문자 맞춤형 핀테크 개발자 전직 및 10,000 WLD 무료 지원금 온보딩 배너(`LegacyVisitorBanner`) 연동, Git 브랜치 통합 및 GitHub 최신 동기화 (+30, -0)
 - **v96**: 대량 롱테일 pSEO 확장 (500+개 URL) & 방문자 ➡️ 지속 이용자 전환(CRO/리텐션) 3대 훅 & Google Indexing API 자동화 풀스택 구축 — 코스피/코스닥/S&P500/나스닥 상위 100개 종목 × 5개 시나리오(1,000+개 조합) 및 직장인 필수 금융(복리/ISA/연금/퇴직금) 계산기 확장, 계산기 방문자의 이탈을 방지하고 실제 활성 유저로 전환시키는 '계산 결과 1초 저장 & 목표 평단가 도달 알림', '신규 10,000 WLD 지원금 & 모의투자 원클릭 매수 체험 팝업', '일일 출석체크 & 중앙은행 배당금 수령 루프' 온보딩 퍼널 탑재, `/admin/seo` 내 Google Indexing API 1클릭 배치 제출 및 실시간 전송 결과 관제 테이블 탑재 (+210, -0)
@@ -1355,3 +1356,26 @@
 - **단위 테스트**: 퇴직금 세액공제 계산 로직 및 승격 엔진 테스트.
 - **빌드 검증**: Next.js 183개+ 전 라우트 빌드 통과.
 - **배포 및 실측**: 원격 운영 서버(`easy-scraping.com`) 무중단 배포 및 curl 응답 검증 (HTTP 200 OK).
+
+---
+
+## 🚀 [v99 Specification] 데스크톱 헤더 내비게이션 바 메뉴 텍스트 겹침(Overlapping/Zero-Width Shrink Bug) 원천 박멸 및 적응형 반응형 레이아웃 복원 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **현상 진단**:
+  1. 사용자 업로드 스크린샷 검토 결과, 상단 헤더의 로고와 우측 위젯들 사이에 위치한 중앙 내비게이션 바 메뉴 항목들(`홈`, `가이드 & 사용법`, `금융·투자`, `경제·활동`, `플레이·시즌`, `커뮤니티`, `내 대시보드`)이 특정 뷰포트 폭(1024px~1399px) 또는 브라우저 줌 상태(67% 등)에서 하나의 좌표에 겹쳐져 렌더링되는 치명적인 글자 겹침(Overlapping) 버그 확인.
+  2. 근본 원인: 헤더 우측의 `실전 가이드 HOT`, `ServerClockPill`, `LanguageSwitcher`, `SessionControl` 등이 모두 `shrink-0`으로 600px 이상의 너비를 차지하는 반면, 중앙 `<nav>` 및 그 자식들인 `<HeaderLink>`, `<HeaderGroup>`(DropdownMenuTrigger)에 `shrink-0`이 지정되어 있지 않아 Flexbox 축소 알고리즘에 의해 버튼 너비가 0px로 강제 압축됨. 너비가 0px이 되면서 모든 버튼의 시작점이 동일해져 글자들이 같은 자리에 겹쳐짐.
+- **핵심 목표**:
+  1. `frontend/src/components/site-header.tsx`:
+     - `<nav>` 컨테이너에 `shrink-0 mx-auto` 부여.
+     - `<HeaderLink>`와 `<HeaderGroup>` 드롭다운 트리거 버튼에 `shrink-0` 부여.
+     - 반응형 패딩(`px-1.5 xl:px-2 2xl:px-3`) 및 폰트 크기(`text-[11px] xl:text-xs 2xl:text-sm`) 적용.
+     - `실전 가이드 HOT` 및 `ServerClockPill` 위젯을 `hidden 2xl:inline-flex`로 임계치를 상향하여 1024px~1399px 일반 데스크톱 구간에서 중앙 메뉴의 가용 공간 대폭 확보.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/components/site-header.tsx`:
+   - 레이아웃 압축 방지 및 적응형 반응형 간격 복원.
+
+### 3. 검증 계획
+- Next.js Turbopack 빌드 무결점 통과.
+- 원격 프로덕션 배포 및 라이브 렌더링 실측 검증.
