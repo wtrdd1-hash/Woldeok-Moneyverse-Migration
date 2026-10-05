@@ -11,6 +11,7 @@ import { FiatBadge } from '@/components/fiat-amount';
 import { InArticleAdvertisement } from '@/components/public-advertisement';
 import { ViralShareCardDialog } from '@/components/viral-share-card-dialog';
 import { CalculatorRetentionFunnel } from '@/components/calculator-retention-funnel';
+import { UserConversionLockInWidget } from '@/components/user-conversion-lockin-widget';
 import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 export default function CompoundCalculatorPage() {
@@ -387,6 +388,16 @@ export default function CompoundCalculatorPage() {
             reboundRate={`+${Math.round((calculation.totalInterest / (calculation.totalDeposited || 1)) * 100)}%`}
             category="compound"
           />
+
+          {/* 맞춤형 결과 보존 & 웰컴 리워드 센터 (A/B 유저 락인 전환 위젯) */}
+          <div className="mt-6">
+            <UserConversionLockInWidget
+              title="복리 예적금 만기 수령액"
+              summaryLabel="만기 예상 총 자산"
+              summaryValue={`${calculation.totalFinal.toLocaleString()} WLD`}
+              toolCategory="compound"
+            />
+          </div>
         </div>
       </div>
 

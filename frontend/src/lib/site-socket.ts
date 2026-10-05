@@ -13,11 +13,36 @@ import type { Socket } from 'socket.io-client';
  * 4. Active room subscription tracking to automatically resubscribe upon socket reconnect.
  * 5. Latency & Connection Quality Telemetry.
  */
-
 type Connect = () => Socket;
 
-const defaultConnect: Connect = () =>
-  io({
+function isSearchCrawler(): boolean {
+  if (typeof window === 'undefined' || !navigator?.userAgent) return false;
+  const ua = navigator.userAgent.toLowerCase();
+  return (
+    ua.includes('googlebot') ||
+    ua.includes('yeti') ||
+    ua.includes('bingbot') ||
+    ua.includes('baiduspider') ||
+    ua.includes('duckduckbot') ||
+    ua.includes('yandex') ||
+    ua.includes('facebookexternalhit') ||
+    ua.includes('twitterbot')
+  );
+}
+
+const noopSocket = {
+  connected: false,
+  on: () => noopSocket,
+  off: () => noopSocket,
+  emit: () => noopSocket,
+  close: () => noopSocket,
+} as unknown as Socket;
+
+const defaultConnect: Connect = () => {
+  if (isSearchCrawler()) {
+    return noopSocket;
+  }
+  return io({
     transports: ['websocket', 'polling'],
     tryAllTransports: true,
     reconnection: true,
@@ -26,6 +51,7 @@ const defaultConnect: Connect = () =>
     reconnectionAttempts: Infinity,
     timeout: 10_000,
   });
+};
 
 /** How long the socket outlives its last holder, to cover a navigation. */
 const GRACE_MS = 3_000;
@@ -98,7 +124,7 @@ export function acquireSiteSocket(connect: Connect = defaultConnect): Socket {
 
     shared = socket;
   }
-  return shared;
+  return shared!;
 }
 
 export function releaseSiteSocket(): void {
