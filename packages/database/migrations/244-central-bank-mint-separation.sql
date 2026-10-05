@@ -121,4 +121,6 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL PRIVILEGES ON FUNCTION public.verify_economy_supply_invariant() FROM PUBLIC;
+
 COMMIT;
