@@ -150,7 +150,10 @@ export default async function HomePage() {
 
         <div className="grid gap-6 pt-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
           <div className="min-w-0 max-w-full">
-            <p id="hero-balance-heading" className="text-xs sm:text-sm font-semibold text-muted-foreground">
+            <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+              <T korean="월덕 머니버스" english="Woldeok Moneyverse" japanese="ウォルドクマネーバース" chinese="沃尔德克金融元宇宙" />
+            </h1>
+            <p id="hero-balance-heading" className="mt-3 text-xs sm:text-sm font-semibold text-muted-foreground">
               <T korean="내 가상 자산 총액" english="Total Virtual Net Worth" japanese="私の仮想資産総額" chinese="我的虚拟总资产" />
             </p>
             <div className="mt-2 font-mono tabular-nums text-[clamp(1.5rem,5vw,3.5rem)] font-black tracking-tight text-foreground flex items-baseline gap-2 min-w-0 max-w-full overflow-hidden">

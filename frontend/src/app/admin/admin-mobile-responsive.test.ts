@@ -13,6 +13,9 @@ const workForms = readFileSync('src/app/admin/work/admin-work-forms.tsx', 'utf8'
 const shopView = readFileSync('src/app/admin/shop/admin-shop-view.tsx', 'utf8');
 const treasuryView = readFileSync('src/app/admin/treasury/treasury-view.tsx', 'utf8');
 const bankPage = readFileSync('src/app/admin/bank/page.tsx', 'utf8');
+const seoClient = readFileSync('src/app/admin/seo/seo-client-view.tsx', 'utf8');
+const adminTouchTargets = readFileSync('src/app/admin/admin-touch-targets.css', 'utf8');
+const globalFloatingLayer = readFileSync('src/components/global-floating-layer.tsx', 'utf8');
 
 describe('administrator mobile responsive guards', () => {
   it('uses stacked AI agent cards below the small breakpoint and keeps the desktop table', () => {
@@ -58,5 +61,25 @@ describe('administrator mobile responsive guards', () => {
     expect(treasuryView).toContain('className="hidden md:block overflow-x-auto"');
     expect(bankPage).toContain('className="grid gap-3 p-4 md:hidden divide-y divide-border/40"');
     expect(bankPage).toContain('className="hidden md:block overflow-x-auto"');
+  });
+
+  it('stacks the SEO control-tower actions on narrow screens instead of clipping long labels', () => {
+    expect(seoClient).toContain('flex w-full min-w-0 flex-wrap items-stretch gap-2');
+    expect(seoClient).toContain('basis-full flex-1');
+    expect(seoClient).toContain('min-h-11');
+    expect(seoClient).toContain('whitespace-normal');
+  });
+
+  it('enforces administrator mobile/coarse-pointer minimum target sizing', () => {
+    expect(adminTouchTargets).toContain('[data-admin-layout] button');
+    expect(adminTouchTargets).toContain("[data-admin-layout] [data-slot='button']");
+    expect(adminTouchTargets).toContain('min-width: 44px');
+    expect(adminTouchTargets).toContain('min-height: 44px');
+  });
+
+  it('removes consumer floating widgets from administrator surfaces', () => {
+    expect(globalFloatingLayer).toContain("pathname === '/admin'");
+    expect(globalFloatingLayer).toContain("pathname.startsWith('/admin/')");
+    expect(globalFloatingLayer).toContain('if (isAdministratorSurface) return null');
   });
 });

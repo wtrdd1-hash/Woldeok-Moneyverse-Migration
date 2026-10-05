@@ -77,6 +77,17 @@ describe('SeoClientView', () => {
     expect(screen.getByText('42')).toBeTruthy();
   });
 
+  it('keeps the top action group responsive and touch-safe on narrow screens', () => {
+    renderKo(<SeoClientView initialData={mockInitialData} />);
+
+    const refreshButton = screen.getByRole('button', { name: /새로고침/i });
+    const actionGroup = refreshButton.parentElement;
+
+    expect(actionGroup?.className).toContain('flex-wrap');
+    expect(actionGroup?.className).toContain('w-full');
+    expect(refreshButton.className).toContain('min-h-11');
+  });
+
   it('renders target URL cards with health badges and names', () => {
     renderKo(<SeoClientView initialData={mockInitialData} />);
 

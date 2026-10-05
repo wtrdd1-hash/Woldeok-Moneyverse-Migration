@@ -27,7 +27,7 @@ describe('mobile touch targets', () => {
 
   it('keeps primary header controls at the 44px mobile target floor', () => {
     expect(brand).toContain('min-h-11');
-    expect(header).toContain('min-[400px]:size-11 rounded-[10px] lg:hidden shrink-0');
-    expect(header).toContain('h-10 sm:h-11 rounded-[10px] sm:rounded-[12px]');
+    expect(header).toContain('size-11 rounded-[10px] lg:hidden shrink-0');
+    expect(header).toContain('h-11 rounded-[10px] sm:rounded-[12px]');
   });
 });

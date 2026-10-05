@@ -2,12 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
 > **최초 기준:** 2026-08-26  
-> **현재 통합 버전:** v2026.10.05.530
-> **구현·증거 동기화:** 2026-10-05 (긴급 UI 점검 기준 exact main SHA: `921b467e`; v530은 점검/기획 전용)
+> **현재 통합 버전:** v2026.10.05.531
+> **구현·증거 동기화:** 2026-10-05 (v531 구현 기준 exact main SHA: `9ae2a9e8`; exact-SHA Test 검증 대기)
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
 > **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
 ---
+
+## 긴급 UI 수정 구현 — v2026.10.05.531
+
+- **현재 상태:** **IMPLEMENTED — Test 검증 대기. Production 차단 유지.** 소스 구현만으로 v530 점검 gate를 해제하지 않는다.
+- **exact 구현 기준:** 승인된 v530 PR #792 이후 `origin/main=9ae2a9e8e0f7d5e403de80c7d30510916e0ed880`; 중간 필수 refetch에서 drift 없음.
+- **P0 수정:** `/admin/seo` 긴 액션은 좁은 화면에서 stack/wrap, shrink-safe 텍스트, >=44px action height. 관리자 mobile/coarse-pointer button target은 44×44 바닥값 적용.
+- **공용 layer 수정:** 소비자 온보딩/고객지원 overlay를 하나의 pathname-aware floating layer로 통합해 `/admin/**`에서 숨기고, 모바일 주요 header 제어를 44px target floor로 상향.
+- **runtime 오류 수정:** linked-identity read contract는 기존 `local_email` provider를 허용하되 OAuth 연결은 Google/Discord-only로 유지하여 관측된 account identities 500의 source/data mismatch를 해결.
+- **시맨틱 수정:** home hero에 실제 보이는 localized H1 추가.
+- **Test 전 증거:** 표적 UI/backend regression, frontend/backend typecheck, backend 전체 non-DB suite pass. exact Test와 인증 관리자/전체 route 5회 runtime 증거는 Production 전 계속 필수.
+- **상세 구현 기록:** [v531 기획 delta](deltas/v2026.10.05.531.ko.md), [v531 작업기록](../worklog/2026-10-05-emergency-ui-remediation-v2026.10.05.531.ko.md).
 
 ## 긴급 전체 UI 재점검 및 수정 게이트 — v2026.10.05.530
 

@@ -1,3 +1,12 @@
+## v2026.10.05.531 — Emergency UI Remediation Candidate
+
+- **State:** **IMPLEMENTED — TEST VERIFICATION PENDING; Production blocked.**
+- Fixed `/admin/seo` narrow-screen action clipping, added administrator 44×44 mobile/coarse-pointer target floor, suppressed consumer floating overlays on admin routes, and raised primary global header targets.
+- Added visible localized home H1.
+- Fixed account linked-identity provider mismatch: `local_email` is valid for reads while OAuth linking remains Google/Discord-only.
+- Targeted UI/backend regressions and frontend/backend typecheck PASS; backend full non-DB suite PASS; clean candidate build uses contract -> backend -> frontend.
+- Exact-SHA Test deployment and five-pass authenticated administrator/full-route QA remain required before Production.
+
 ## v2026.10.05.530 — Emergency Full UI Re-audit / Urgent Remediation Gate
 
 - **Status:** **BLOCKED — URGENT UI REMEDIATION REQUIRED**.

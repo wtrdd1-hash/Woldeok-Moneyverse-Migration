@@ -5,9 +5,15 @@ import {
   normalizeVerifiedDisplayName,
   requireAccountUuid,
   requireIdentityProvider,
+  requireLinkedIdentityProvider,
   requireVerifiedSubject,
 } from './account.repository';
-import type { AccountRepository, IdentityProvider, LinkedIdentityRow } from './account.repository';
+import type {
+  AccountRepository,
+  IdentityProvider,
+  LinkedIdentityProvider,
+  LinkedIdentityRow,
+} from './account.repository';
 
 export class AccountUnavailableError extends Error {
   constructor() {
@@ -32,7 +38,7 @@ export class AccountLastIdentityError extends Error {
 
 export interface LinkedIdentitySummary {
   readonly identityId: string;
-  readonly provider: IdentityProvider;
+  readonly provider: LinkedIdentityProvider;
   readonly displayName: string;
   readonly linkedAt: string;
 }
@@ -85,7 +91,7 @@ function nonNegativeSafeInteger(value: unknown, field: string): number {
 }
 
 function linkedIdentity(row: LinkedIdentityRow): LinkedIdentitySummary {
-  const provider = requireIdentityProvider(row.provider);
+  const provider = requireLinkedIdentityProvider(row.provider);
   return {
     identityId: requireAccountUuid(row.identity_id, 'database identity id'),
     provider,

@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.05.530
-> Implementation/evidence sync: 2026-10-05 (emergency UI audit baseline exact main SHA: `921b467e`; v530 is audit/planning only)
+> Current integrated version: v2026.10.05.531
+> Implementation/evidence sync: 2026-10-05 (v531 implementation baseline exact main SHA: `9ae2a9e8`; exact-SHA Test verification pending)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Emergency UI remediation implementation — v2026.10.05.531 (2026-10-05)
+
+- **Current state:** **IMPLEMENTED — TEST VERIFICATION PENDING. Production remains blocked.** The v530 audit gate is not waived by source implementation.
+- **Exact implementation baseline:** `origin/main=9ae2a9e8e0f7d5e403de80c7d30510916e0ed880` after approved v530 PR #792; mandatory mid-work refetch showed no drift.
+- **P0 repair:** `/admin/seo` long actions now stack/wrap on narrow screens with shrink-safe text and >=44px action height; administrator mobile/coarse-pointer button targets have a 44×44 floor.
+- **Shared-layer repair:** consumer onboarding/support overlays are routed through one pathname-aware floating layer and are suppressed on `/admin/**`; primary mobile header controls are raised to the 44px target floor.
+- **Runtime error repair:** the linked-identity read contract now accepts the already-existing `local_email` provider while OAuth linking remains Google/Discord-only, resolving the source/data mismatch behind the observed account identities 500.
+- **Semantic repair:** the home hero now exposes a visible localized H1.
+- **Pre-Test evidence:** targeted UI/backend regressions and frontend/backend typecheck pass; full backend non-DB suite passes; exact Test and five-pass authenticated admin/full-route runtime evidence remain mandatory before Production.
+- **Detailed implementation record:** [v531 planning delta](deltas/v2026.10.05.531.md) and [v531 worklog](../worklog/2026-10-05-emergency-ui-remediation-v2026.10.05.531.md).
 
 ## Emergency full UI re-audit and remediation gate — v2026.10.05.530 (2026-10-05)
 

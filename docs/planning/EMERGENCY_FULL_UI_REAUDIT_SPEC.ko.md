@@ -96,3 +96,16 @@ UI 영향 release candidate마다 발견된 전체 route inventory를 최소 5�
 
 ## 7. 릴리스 게이트
 v530 문서는 런타임 수정, Test 검증, Production 완료를 주장하지 않는다. 코드 변경은 별도 구현 브랜치, exact-SHA Test 배포, backend/API health 검증, 프로젝트 무중단 승격 절차를 필수로 한다.
+
+## 8. v531 구현 응답 — 2026-10-05
+
+승인된 v530 계획은 PR #792로 merge되었고 v531은 exact baseline `9ae2a9e8e0f7d5e403de80c7d30510916e0ed880`에서 첫 blocker 수정을 구현한다.
+
+- UI530-01 소스 수정 구현: `/admin/seo` 액션은 좁은 폭에서 stack/wrap, shrink-safe label, >=44px action height.
+- UI530-02 1차 시스템 수정 구현: 관리자 mobile/coarse-pointer button에 44×44 minimum target 계약. route-level runtime 분류는 Test 수용에서 계속 확인.
+- UI530-03 소스 수정 구현: 온보딩/고객지원 소비자 overlay 통합 후 `/admin/**`에서 숨김.
+- UI530-04 소스 수정 구현: linked identity read는 `local_email` 허용, OAuth 연결은 Google/Discord-only 유지.
+- UI530-06 root semantic 수정 구현: home에 실제 보이는 localized H1 추가.
+- UI530-07은 exact v531 candidate가 요구된 Test pass를 완료할 때까지 증거 gate로 유지.
+
+소스 구현 후 상태: **IMPLEMENTED — Test 검증 대기**. 이 절은 Test 또는 Production gate를 닫지 않는다.

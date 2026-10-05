@@ -7,9 +7,15 @@ const DISCORD_SNOWFLAKE = /^\d{16,22}$/;
 
 /** The two OAuth identity providers this application supports linking. */
 export type IdentityProvider = 'discord' | 'google';
+/** Every sign-in method that can be returned by the account read model. */
+export type LinkedIdentityProvider = IdentityProvider | 'local_email';
 
 function isIdentityProvider(value: string): value is IdentityProvider {
   return value === 'discord' || value === 'google';
+}
+
+function isLinkedIdentityProvider(value: string): value is LinkedIdentityProvider {
+  return isIdentityProvider(value) || value === 'local_email';
 }
 
 export class AccountInputError extends Error {
@@ -29,6 +35,13 @@ export function requireAccountUuid(value: unknown, field: string): string {
 export function requireIdentityProvider(value: unknown): IdentityProvider {
   if (typeof value !== 'string' || !isIdentityProvider(value)) {
     throw new AccountInputError('OAuth provider must be discord or google');
+  }
+  return value;
+}
+
+export function requireLinkedIdentityProvider(value: unknown): LinkedIdentityProvider {
+  if (typeof value !== 'string' || !isLinkedIdentityProvider(value)) {
+    throw new AccountInputError('sign-in provider must be discord, google or local_email');
   }
   return value;
 }

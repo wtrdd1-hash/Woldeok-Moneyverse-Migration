@@ -1,0 +1,8 @@
+@media (max-width: 767px), (pointer: coarse) {
+  [data-admin-layout] button,
+  [data-admin-layout] [role='button'],
+  [data-admin-layout] [data-slot='button'] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

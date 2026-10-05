@@ -96,3 +96,16 @@ Every `/admin/**` route must be checked in each full-site pass. Test evidence mu
 
 ## 7. Release gate
 No v530 document asserts runtime remediation, Test verification or Production completion. A code change requires a separate implementation branch, exact-SHA Test deployment, backend/API health validation and the project's zero-downtime promotion procedure.
+
+## 8. v531 implementation response — 2026-10-05
+
+The approved v530 plan was merged by PR #792 and v531 implements the first blocker repairs on exact baseline `9ae2a9e8e0f7d5e403de80c7d30510916e0ed880`.
+
+- UI530-01 source repair implemented: `/admin/seo` actions now stack/wrap at narrow widths with shrink-safe labels and >=44px action height.
+- UI530-02 first systemic repair implemented: administrator mobile/coarse-pointer buttons receive a 44×44 minimum target contract. Route-level runtime classification still belongs to Test acceptance.
+- UI530-03 source repair implemented: onboarding/support consumer overlays are unified and suppressed on `/admin/**`.
+- UI530-04 source repair implemented: linked identity reads accept `local_email`, while OAuth linking remains Google/Discord-only.
+- UI530-06 root semantic repair implemented: home receives a visible localized H1.
+- UI530-07 remains an evidence gate until the exact v531 candidate completes the required Test passes.
+
+Status after source implementation: **IMPLEMENTED — TEST VERIFICATION PENDING**. This section does not close the Test or Production gate.

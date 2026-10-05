@@ -1,4 +1,5 @@
 import { AdminSubNav } from '@/components/admin-sub-nav';
+import './admin-touch-targets.css';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

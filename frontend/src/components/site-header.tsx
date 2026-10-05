@@ -121,7 +121,7 @@ export function SiteHeader() {
               <Button
                 variant="outline"
                 size="icon"
-                className="size-10 min-[400px]:size-11 rounded-[10px] lg:hidden shrink-0"
+                className="size-11 rounded-[10px] lg:hidden shrink-0"
                 aria-label={localeLabel(locale, '메뉴 열기', 'Open menu', 'メニューを開く', '打开菜单')}
               >
                 <Menu className="size-4.5 sm:size-5" />
@@ -467,11 +467,11 @@ function Group({
 
 function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; readonly locale: Locale }) {
   const realtimeWallet = useRealtimeWallet();
-  if (!viewer) return <Skeleton className="h-10 sm:h-11 w-16 sm:w-24 rounded-[10px] sm:rounded-[12px]" />;
+  if (!viewer) return <Skeleton className="h-11 w-16 sm:w-24 rounded-[10px] sm:rounded-[12px]" />;
 
   if (!viewer.signedIn) {
     return (
-      <Button asChild className="h-10 sm:h-11 rounded-[10px] sm:rounded-[12px] px-2.5 sm:px-5 text-xs sm:text-sm font-extrabold shadow-plate shrink-0">
+      <Button asChild className="h-11 rounded-[10px] sm:rounded-[12px] px-2.5 sm:px-5 text-xs sm:text-sm font-extrabold shadow-plate shrink-0">
         <Link href="/login">{localeLabel(locale, '로그인', 'Sign in', 'ログイン', '登录')}</Link>
       </Button>
     );
@@ -489,7 +489,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
       <Button
         asChild
         size="sm"
-        className="hidden min-[480px]:inline-flex h-10 sm:h-11 rounded-xl px-2.5 sm:px-3 2xl:px-4 text-xs sm:text-sm font-extrabold shadow-plate shrink-0 border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+        className="hidden min-[480px]:inline-flex h-11 rounded-xl px-2.5 sm:px-3 2xl:px-4 text-xs sm:text-sm font-extrabold shadow-plate shrink-0 border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
       >
         <Link href="/wallet" className="flex items-center gap-1.5 font-mono">
           <Wallet className="size-4 text-primary" />
@@ -507,7 +507,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex h-10 sm:h-11 items-center gap-1.5 rounded-xl px-1.5 min-[400px]:px-2 sm:px-2.5 2xl:px-3 text-xs sm:text-sm font-bold text-foreground hover:bg-secondary shrink-0 outline-none"
+            className="flex h-11 items-center gap-1.5 rounded-xl px-1.5 min-[400px]:px-2 sm:px-2.5 2xl:px-3 text-xs sm:text-sm font-bold text-foreground hover:bg-secondary shrink-0 outline-none"
             aria-label={localeLabel(locale, '내 계정 메뉴', 'Account menu', 'アカウントメニュー', '账户菜单')}
           >
             <span className="flex size-7 sm:size-8 items-center justify-center rounded-full bg-primary/20 ring-1 ring-primary/40 text-xs font-black text-primary shadow-xs">
@@ -538,32 +538,32 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
           </div>
           <Separator className="my-1 opacity-60" />
           <DropdownMenuItem asChild>
-            <Link href="/profile" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors text-primary">
+            <Link href="/profile" className="flex min-h-11 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors text-primary">
               <User className="size-4 text-primary" />
               <span>{localeLabel(locale, '내 프로필', 'My profile', 'マイプロフィール', '个人主页')}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/account" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
+            <Link href="/account" className="flex min-h-11 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
               <ShieldCheck className="size-4 text-muted-foreground" />
               <span>{localeLabel(locale, '내 계정', 'My account', 'マイアカウント', '我的账户')}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/wallet" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
+            <Link href="/wallet" className="flex min-h-11 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
               <Wallet className="size-4 text-muted-foreground" />
               <span>{localeLabel(locale, '내 지갑', 'My wallet', 'マイウォレット', '我的钱包')}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/account/security" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
+            <Link href="/account/security" className="flex min-h-11 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
               <ShieldCheck className="size-4 text-muted-foreground" />
               <span>{localeLabel(locale, '계정 보안', 'Account security', 'セキュリティ', '账户安全')}</span>
             </Link>
           </DropdownMenuItem>
           {isAdmin && (
             <DropdownMenuItem asChild>
-              <Link href="/admin" className="flex min-h-10 items-center gap-2.5 font-bold text-primary cursor-pointer rounded-xl px-2.5 hover:bg-primary/10 transition-colors">
+              <Link href="/admin" className="flex min-h-11 items-center gap-2.5 font-bold text-primary cursor-pointer rounded-xl px-2.5 hover:bg-primary/10 transition-colors">
                 <Sliders className="size-4" />
                 <span>{localeLabel(locale, '운영 콘솔', 'Admin console', '運営コンソール', '管理控制台')}</span>
               </Link>
@@ -573,7 +573,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
           <form action={logout} className="w-full">
             <button
               type="submit"
-              className="flex min-h-10 w-full items-center gap-2.5 rounded-xl px-2.5 text-sm font-bold text-destructive hover:bg-destructive/10 transition-colors text-left cursor-pointer"
+              className="flex min-h-11 w-full items-center gap-2.5 rounded-xl px-2.5 text-sm font-bold text-destructive hover:bg-destructive/10 transition-colors text-left cursor-pointer"
             >
               <LogOut className="size-4" />
               <span>{localeLabel(locale, '로그아웃', 'Sign out', 'ログアウト', '退出登录')}</span>

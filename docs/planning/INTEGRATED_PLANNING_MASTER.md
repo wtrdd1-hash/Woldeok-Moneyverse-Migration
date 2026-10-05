@@ -1,11 +1,19 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.05.530
+> Current ledger version: v2026.10.05.531
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.05.531 — 2026-10-05 — Emergency UI remediation implementation
+- Approved v530 PR #792 merged as `9ae2a9e8e0f7d5e403de80c7d30510916e0ed880`; v531 isolated implementation branch starts from that exact SHA. Mid-work `origin/main` remained unchanged.
+- Implemented the reproduced `/admin/seo` mobile containment repair, administrator 44×44 mobile/coarse-pointer target floor, route-aware suppression of consumer floating overlays on admin pages, global primary header touch-floor repair and visible localized home H1.
+- Production identity data inspection found `local_email` rows while backend linked-identity validation accepted only Google/Discord. The read-model provider contract now admits `local_email`; the OAuth-link contract remains Google/Discord-only.
+- Added regression coverage for the provider contract, SEO responsive action group, administrator target floor and admin floating-layer suppression.
+- Pre-Test targeted regressions, frontend/backend typecheck and backend non-DB full suite pass. Clean candidate build order is contract -> backend -> frontend.
+- Current state is **IMPLEMENTED — TEST VERIFICATION PENDING**; exact-SHA Test, five complete authenticated admin/full-route passes, backend/API health and zero-downtime Production gates remain required.
 
 ## v2026.10.05.530 — 2026-10-05 — Emergency full UI re-audit
 - Initial check saw `origin/main=ca354411d88b461215a81557f686765cfedf00f0`; the mandatory pre-branch fetch detected drift to `921b467eac21645a51ba362b24cac7eaab89c081`, and the isolated v530 branch was created from that latest SHA. Mid-work refetch remained `921b467e...`.

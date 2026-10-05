@@ -1,11 +1,19 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.10.05.530
+> 현재 원장 버전: v2026.10.05.531
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.10.05.531 — 2026-10-05 — 긴급 UI 수정 구현
+- 승인된 v530 PR #792 merge SHA는 `9ae2a9e8e0f7d5e403de80c7d30510916e0ed880`; v531 격리 구현 브랜치는 해당 exact SHA에서 시작했고 중간 `origin/main`도 동일했다.
+- 재현된 `/admin/seo` 모바일 containment, 관리자 44×44 mobile/coarse-pointer target floor, 관리자 page에서 소비자 floating overlay 억제, 전역 주요 header touch floor, home localized visible H1을 구현했다.
+- Production identity 데이터에는 `local_email` row가 있으나 backend linked-identity validation은 Google/Discord만 허용했다. read-model provider contract는 `local_email`을 허용하고 OAuth-link contract는 Google/Discord-only를 유지한다.
+- provider contract, SEO responsive action group, 관리자 target floor, admin floating-layer suppression 회귀 테스트를 추가했다.
+- Test 전 표적 regression, frontend/backend typecheck, backend non-DB 전체 suite PASS. clean candidate build 순서는 contract -> backend -> frontend다.
+- 현재 상태는 **IMPLEMENTED — Test 검증 대기**이며 exact-SHA Test, 인증 관리자/전체 route 5회 완주, backend/API health, 무중단 Production gate가 계속 필수다.
 
 ## v2026.10.05.530 — 2026-10-05 — 긴급 전체 UI 재점검
 - 최초 확인은 `origin/main=ca354411d88b461215a81557f686765cfedf00f0`; 브랜치 생성 전 필수 fetch에서 `921b467eac21645a51ba362b24cac7eaab89c081` 드리프트를 감지해 최신 SHA에서 v530 격리 브랜치를 만들었다. 중간 refetch도 `921b467e...`로 동일했다.

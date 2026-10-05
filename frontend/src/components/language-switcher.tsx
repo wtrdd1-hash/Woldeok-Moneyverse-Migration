@@ -81,7 +81,7 @@ export function LanguageSwitcher({
         <Button
           variant="outline"
           size="sm"
-          className={`h-10 sm:h-11 min-h-[40px] items-center gap-1 sm:gap-1.5 rounded-xl px-2 sm:px-3 text-xs font-black text-foreground border-border/70 hover:bg-secondary/80 transition-all active:scale-[0.98] shrink-0 outline-none ${className}`}
+          className={`h-11 min-h-11 items-center gap-1 sm:gap-1.5 rounded-xl px-2 sm:px-3 text-xs font-black text-foreground border-border/70 hover:bg-secondary/80 transition-all active:scale-[0.98] shrink-0 outline-none ${className}`}
           aria-label={ariaMap[locale] || 'Change language and currency'}
         >
           <Globe2 className="size-4 text-amber-500 shrink-0" />

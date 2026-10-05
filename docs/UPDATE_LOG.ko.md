@@ -1,3 +1,12 @@
+## v2026.10.05.531 — 긴급 UI 수정 후보
+
+- **상태:** **IMPLEMENTED — Test 검증 대기; Production 차단 유지.**
+- `/admin/seo` 좁은 화면 액션 잘림, 관리자 44×44 mobile/coarse-pointer target floor, admin route 소비자 floating overlay, 전역 주요 header target을 수정했다.
+- 실제 보이는 localized home H1 추가.
+- account linked-identity provider mismatch 수정: read는 `local_email` 유효, OAuth 연결은 Google/Discord-only 유지.
+- 표적 UI/backend regression, frontend/backend typecheck PASS; backend 전체 non-DB suite PASS; clean candidate build는 contract -> backend -> frontend.
+- Production 전 exact-SHA Test 배포 및 인증 관리자/전체 route 5회 QA 필수.
+
 ## v2026.10.05.530 — 긴급 전체 UI 재점검 / 긴급 수정 게이트
 
 - **상태:** **BLOCKED — 긴급 UI 수정 필요**.
