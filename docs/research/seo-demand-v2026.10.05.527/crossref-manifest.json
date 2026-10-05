@@ -1,0 +1,217 @@
+{
+  "version": "v2026.10.05.527",
+  "source": "Crossref REST API",
+  "date": "2026-10-05",
+  "period": "2010-01-01..2026-10-05",
+  "query_lane_count": 40,
+  "target_per_lane": 5000,
+  "raw_records": 200000,
+  "unique_records": 111313,
+  "dedup_rule": "lowercase DOI first; normalized title fallback",
+  "sha256_unique_jsonl_uncompressed_stream": "1629c7b24a688e84249d77eec2cd1ce2f8b906f91187fcbed413739aef54b523",
+  "errors": [],
+  "lanes": [
+    {
+      "query": "search engine optimization",
+      "raw": 5000,
+      "new_unique": 5000
+    },
+    {
+      "query": "web search information retrieval",
+      "raw": 5000,
+      "new_unique": 4305
+    },
+    {
+      "query": "search query intent",
+      "raw": 5000,
+      "new_unique": 3742
+    },
+    {
+      "query": "keyword research search marketing",
+      "raw": 5000,
+      "new_unique": 4756
+    },
+    {
+      "query": "programmatic SEO web content",
+      "raw": 5000,
+      "new_unique": 4218
+    },
+    {
+      "query": "web crawling indexing",
+      "raw": 5000,
+      "new_unique": 2962
+    },
+    {
+      "query": "canonical URL duplicate content",
+      "raw": 5000,
+      "new_unique": 2800
+    },
+    {
+      "query": "XML sitemap search engine",
+      "raw": 5000,
+      "new_unique": 1059
+    },
+    {
+      "query": "multilingual information retrieval",
+      "raw": 5000,
+      "new_unique": 1072
+    },
+    {
+      "query": "cross lingual information retrieval",
+      "raw": 5000,
+      "new_unique": 1781
+    },
+    {
+      "query": "website localization search",
+      "raw": 5000,
+      "new_unique": 2111
+    },
+    {
+      "query": "machine translation quality web",
+      "raw": 5000,
+      "new_unique": 4416
+    },
+    {
+      "query": "web content quality ranking",
+      "raw": 5000,
+      "new_unique": 86
+    },
+    {
+      "query": "web spam detection search",
+      "raw": 5000,
+      "new_unique": 3406
+    },
+    {
+      "query": "search ranking relevance",
+      "raw": 5000,
+      "new_unique": 1435
+    },
+    {
+      "query": "search click through rate",
+      "raw": 5000,
+      "new_unique": 4075
+    },
+    {
+      "query": "search result snippets metadata",
+      "raw": 5000,
+      "new_unique": 882
+    },
+    {
+      "query": "structured data semantic web search",
+      "raw": 5000,
+      "new_unique": 3395
+    },
+    {
+      "query": "knowledge graph search",
+      "raw": 5000,
+      "new_unique": 2973
+    },
+    {
+      "query": "web performance user experience",
+      "raw": 5000,
+      "new_unique": 3905
+    },
+    {
+      "query": "core web vitals performance",
+      "raw": 5000,
+      "new_unique": 957
+    },
+    {
+      "query": "mobile web search usability",
+      "raw": 5000,
+      "new_unique": 1745
+    },
+    {
+      "query": "web accessibility content",
+      "raw": 5000,
+      "new_unique": 141
+    },
+    {
+      "query": "personal finance education",
+      "raw": 5000,
+      "new_unique": 4273
+    },
+    {
+      "query": "financial literacy digital tools",
+      "raw": 5000,
+      "new_unique": 4092
+    },
+    {
+      "query": "financial calculator consumer",
+      "raw": 5000,
+      "new_unique": 3382
+    },
+    {
+      "query": "retirement planning calculator",
+      "raw": 5000,
+      "new_unique": 4578
+    },
+    {
+      "query": "compound interest financial education",
+      "raw": 5000,
+      "new_unique": 608
+    },
+    {
+      "query": "mortgage loan calculator",
+      "raw": 5000,
+      "new_unique": 4932
+    },
+    {
+      "query": "investment education simulator",
+      "raw": 5000,
+      "new_unique": 1064
+    },
+    {
+      "query": "behavioral economics saving",
+      "raw": 5000,
+      "new_unique": 3925
+    },
+    {
+      "query": "conversion rate optimization web",
+      "raw": 5000,
+      "new_unique": 794
+    },
+    {
+      "query": "digital product user retention",
+      "raw": 5000,
+      "new_unique": 1865
+    },
+    {
+      "query": "online advertising measurement",
+      "raw": 5000,
+      "new_unique": 4145
+    },
+    {
+      "query": "advertising invalid traffic fraud",
+      "raw": 5000,
+      "new_unique": 4612
+    },
+    {
+      "query": "privacy consent digital advertising",
+      "raw": 5000,
+      "new_unique": 2030
+    },
+    {
+      "query": "financial decision support tools",
+      "raw": 5000,
+      "new_unique": 2303
+    },
+    {
+      "query": "budgeting saving household finance",
+      "raw": 5000,
+      "new_unique": 3670
+    },
+    {
+      "query": "international digital marketing localization",
+      "raw": 5000,
+      "new_unique": 3660
+    },
+    {
+      "query": "search analytics web measurement",
+      "raw": 5000,
+      "new_unique": 158
+    }
+  ],
+  "artifact": "/tmp/moneyverse-seo-demand-v527/unique.jsonl.gz",
+  "sample": "/tmp/moneyverse-seo-demand-v527/sample.csv"
+}

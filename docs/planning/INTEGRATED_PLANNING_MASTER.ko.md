@@ -1,37 +1,20 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.10.04.528
+> 현재 원장 버전: v2026.10.05.527
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
 
-## v2026.10.04.528 — 2026-10-04 — 장기 리텐션 제품 운영모델
-- 작업 중 origin/main이 a069e639에서 광고/계산기 런타임 작업 4db90a530dd7a002b39be8d0d7d45e4df0e72330으로 변경됐다. v526/v527 기획권위와 변경경로가 겹치지 않아 최신 main으로 rebase한 뒤 v528 권위편집을 진행했다.
-- 100개 구현지향 항목의 영/한 `LIFE_ECONOMY_RETENTION_OPERATING_MODEL_SPEC`을 추가했다.
-- lifecycle 진입/종료, 홈 IA, Quick/Normal/Deep, 단계적 해금, 시작경로, 목표/기회 추천, 미접속 보호/회복, 직업/사업/시즌/소셜/베테랑, 알림 적격성·빈도, 콘텐츠 피로/쿨다운, LiveOps 캘린더/관리자 preview, 실험레지스트리, DB/API, 수용게이트를 정의했다.
-- No-Ruin을 P0 제품 불변식으로 추가하고 리텐션/개인화 서비스와 금융원장 write를 분리했다.
-- Unity 2026 LiveOps 패턴, Apple 알림 가치/긴급성/동의 지침, autonomy-supportive digital intervention 근거를 갱신했다.
-- 기획/문서 전용이며 런타임/Test/Production 구현 완료를 주장하지 않는다.
-
-## v2026.10.04.527 — 2026-10-04 — 장기 리텐션·경제인생 연속성
-- v526을 첫 세션/D1/D7/D30/D90/베테랑 생애주기까지 다루는 영/한 리텐션 상세권위로 확장했다.
-- 리텐션을 streak/FOMO 압박이 아니라 자율성·유능감·관계성, 다층목표, 세계/서사연속성, 선택형 사회관계, 미접속 보호, 복귀회복, 베테랑 유산 중심으로 재정의했다.
-- 일/주/시즌 루프, 개인목표/기회피드, dormant 복귀, 멘토/공동사업/도시/라이벌, 콘텐츠주기, endgame, softlock 방지, adaptive challenge, FTUE funnel, story archive를 추가했다.
-- contextual notification opt-in, quiet/digest, 빈도상한 및 dark-pattern 하드금지를 정의했다.
-- 이벤트 기반 retention, cohort/lifecycle, 안전한 churn-risk 대응, 실험가드, 관리자 리텐션 대시보드를 정의했다.
-- Self-Determination Theory/PENS, GameAnalytics, Unity, Android/Apple 알림 가이드, FTC dark-pattern 자료를 근거로 연결했다.
-- 기획/문서 전용이며 런타임/Test/Production 구현 완료를 주장하지 않는다.
-
-## v2026.10.04.526 — 2026-10-04 — 생애경제·사용자 경제세계 통합
-- 시작/중간 기준은 `origin/main=a069e639b897acacb9754e5d04c58b3c642bcf28`이며 중간 fetch에서 드리프트가 없었다. 격리 브랜치 `docs/life-economy-v2026.10.04.526`에서 작업했다.
-- PROJECT_PLAN/통합마스터와 통화·재정·AI·경제시뮬레이션·시즌·글로벌성장 권위를 다시 읽고 신규 제품레이어를 정의했다.
-- 사용자가 승인한 18개 기능을 하나의 지속형 경제인생 계약으로 묶은 `LIFE_ECONOMY_USER_WORLD_SPEC` 영/한 쌍을 추가했다.
-- v523 총통화량 권한을 유지하고 초기대출을 사전재원형으로 제한하며, 개인 AI는 자동거래가 아니라 추천→사용자승인으로 설계했다. 데이터/API/KPI/악용방지/접근성/국내·해외/단계출시 계약을 포함한다.
-- CFPB·World Bank 금융역량, BIS·IMF 통화전달, ILO·OECD·World Bank 고용/기업, OECD·World Bank 도시/참여예산, GameAnalytics 리텐션, NIST·OECD·OWASP AI, Google 국제 SEO, 국내 게임/가상자산/전자금융 법령을 설계근거로 연결했다.
-- 공개 계산기/타임머신 SEO는 실제 기능가치와 품질게이트를 통과할 때만 허용하며 개인화 경제화면은 비색인으로 유지한다.
-- 기획/문서 전용이며 런타임·DB·Test·Production 구현 완료를 주장하지 않는다.
+## v2026.10.05.527 — 2026-10-05 — SEO 수요·키워드 포트폴리오 확장
+- 시작/중간 `origin/main=5318213f1eca644c7f36df7d967a53092de0814c`; 기록된 중간 체크포인트에서 drift 없음. 전용 worktree/branch `docs/seo-demand-expansion-v2026.10.05.527`.
+- 문서 거버넌스, PROJECT_PLAN, 통합마스터, 글로벌 SEO/성장 실행, search discovery, SEO intent activation, 현행 pSEO config/route, 아직 미병합 v525 search-to-user 기획을 읽기 전용 동시작업 입력으로 재검토했다.
+- `SEO_DEMAND_KEYWORD_EXPANSION_SPEC.md` / `.ko.md` 추가: evidence state, keyword record, 국내/해외 cluster map, pSEO admission/retirement, 금융 freshness, locale, 내부링크 graph, 검색→사용자 전환, 측정계약.
+- 25개 cluster에서 keyword discovery 후보 10,473개(한국어 6,207 + 영어 4,266)를 생성했다. 모두 실측/provider evidence와 독립 page-value gate 통과 전 HOLD이며 후보수는 발행목표가 아니다.
+- 신규 독립 Crossref 조사: 40 lane, raw 200,000 -> 중복제거 111,313, 수집오류 0, stream SHA-256 `1629c7b24a688e84249d77eec2cd1ce2f8b906f91187fcbed413739aef54b523`. full compressed corpus, manifest, sample을 `docs/research/seo-demand-v2026.10.05.527/`에 버전 보존한다.
+- 최신 Google/Naver/Bing 1차 검색가이드, Core Web Vitals, IndexNow/Schema.org 의미, 공식 금융도구 패턴을 별도 재검증했다. broad corpus 수량은 현재 1차자료 규칙을 대체하지 않는다.
+- 기획/조사/문서 전용. runtime, Test, Production, 색인, 순위, traffic, revenue 완료를 주장하지 않는다.
 
 ## v2026.10.04.523 — 2026-10-04 — 중앙은행·조폐국·중앙국고 기관 분리
 - 시작 `origin/main=c10e1582ccc0c058dff5c5356ad8b1893759f72c`; 중간 재확인에서 국고 영문/아키텍처 문서가 추가된 `origin/main=065ee42204a4238c5010897212c7fc2a6c848f64` 드리프트를 감지했다. 권위문서 편집 전 격리 브랜치를 최신 main으로 rebase해 동시 작업을 보존했다.

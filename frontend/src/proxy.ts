@@ -79,7 +79,12 @@ export function proxy(request: NextRequest) {
 
     if (isLocale(rawLang)) {
       explicitPrefixLocale = rawLang;
-      targetPath = cleanRest;
+      // Physical localized routes (e.g. /[locale]/guide/glossary/...) should not be stripped
+      if (cleanRest.startsWith('/guide/glossary')) {
+        targetPath = pathname;
+      } else {
+        targetPath = cleanRest;
+      }
     } else {
       // User entered an unsupported language prefix (e.g. /fr/stocks, /de/bank)
       // Automatically redirect to English (/en/...)
@@ -91,12 +96,13 @@ export function proxy(request: NextRequest) {
 
   // Prepare response: If targetPath was rewritten from a prefix, perform internal rewrite
   let response: NextResponse;
-  if (explicitPrefixLocale) {
+  if (explicitPrefixLocale && targetPath !== pathname) {
     const rewriteUrl = new URL(`${targetPath}${request.nextUrl.search}`, request.url);
     response = NextResponse.rewrite(rewriteUrl);
   } else {
     response = NextResponse.next();
   }
+
 
   // Determine active locale with 3-tier precedence:
   // Tier 1: Explicit URL prefix or Query param (?lang=ja)

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { canonicalUrl, breadcrumbJsonLd, buildOgImageUrl } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
+import { ToolsGuestConversionBar } from '@/components/tools-guest-conversion-bar';
+import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
 
 export const metadata: Metadata = {
   title: '금융 & 시뮬레이터 웹 도구 허브 | 월덕 머니버스',
@@ -56,7 +58,10 @@ export default function ToolsLayout({ children }: { children: React.ReactNode })
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbs) }}
       />
+      <DesktopStickyAdRails />
       {children}
+      <ToolsGuestConversionBar />
     </>
   );
 }
+

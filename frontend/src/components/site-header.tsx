@@ -90,7 +90,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-[60px] min-[400px]:h-[64px] sm:h-[68px] lg:h-[76px] w-full max-w-[1440px] items-center justify-between gap-1.5 px-2 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-2 xl:gap-3 2xl:gap-4 lg:px-4 xl:px-6 2xl:px-8">
         <Brand />
 
-        <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="hidden lg:flex items-center gap-1 xl:gap-1.5 2xl:gap-3 shrink-0 mx-auto">
+        <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-4 lg:flex shrink-0 mx-auto">
           {items.map((item) =>
             isGroup(item) ? (
               <HeaderGroup key={item.label} group={item} pathname={pathname} locale={locale} />
@@ -109,7 +109,7 @@ export function SiteHeader() {
             <span>{localeLabel(locale, '실전 가이드', 'Quick Guide', '実践ガイド', '快速指南')}</span>
             <Badge className="bg-emerald-500 text-black text-[9px] px-1 py-0 h-4 font-black">HOT</Badge>
           </Link>
-          <ServerClockPill className="hidden 2xl:inline-flex" />
+          <ServerClockPill className="hidden md:inline-flex lg:hidden 2xl:inline-flex" />
           <LanguageSwitcher compact className="flex shrink-0" />
           <div className="hidden sm:block">
             <ThemeMenu />
@@ -325,7 +325,7 @@ function HeaderLink({
       prefetch={!entry.href.startsWith('/admin')}
       aria-current={current ? 'page' : undefined}
       className={cn(
-        'group relative shrink-0 flex min-h-9 2xl:min-h-10 items-center justify-center whitespace-nowrap rounded-xl px-1.5 xl:px-2 2xl:px-3 py-1.5 text-[11px] xl:text-xs 2xl:text-sm font-bold transition-all duration-200 outline-none',
+        'group relative shrink-0 flex min-h-9 2xl:min-h-10 items-center justify-center whitespace-nowrap rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs 2xl:text-sm font-bold transition-all duration-200 outline-none',
         current
           ? 'text-foreground font-black'
           : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60',
@@ -355,7 +355,7 @@ function HeaderGroup({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          'group relative shrink-0 flex min-h-9 2xl:min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-1.5 xl:px-2 2xl:px-3 py-1.5 text-[11px] xl:text-xs 2xl:text-sm font-bold transition-all duration-200 outline-none',
+          'group relative shrink-0 flex min-h-9 2xl:min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs 2xl:text-sm font-bold transition-all duration-200 outline-none',
           current
             ? 'text-foreground font-black'
             : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60',

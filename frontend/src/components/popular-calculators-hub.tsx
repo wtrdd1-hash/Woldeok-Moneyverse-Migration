@@ -114,6 +114,20 @@ const POPULAR_KIMCHI_CALCULATORS: readonly HubLinkItem[] = [
 
 const POPULAR_TAX_CALCULATORS: readonly HubLinkItem[] = [
   {
+    title: '연봉별 실수령액 계산기 (2026 최신 4대보험)',
+    desc: '2,400만~1억5,000만원 50개 구간별 국민연금·건강보험·소득세 공제표',
+    href: '/tools/salary-calculator',
+    tag: '직장인 1위',
+    highlight: true,
+  },
+  {
+    title: '청년도약계좌 만기 5,000만원 & 정부기여금 계산기',
+    desc: '월 70만원 납입 시 5년 만기 정부기여금(월 최대 3.3만원)과 6% 비과세 이자',
+    href: '/tools/youth-leap-calculator',
+    tag: '2030 청년',
+    highlight: true,
+  },
+  {
     title: '엔비디아 500만원 익절 양도세 & 250만 공제',
     desc: '미국주식 250만원 비과세 적용 후 22% 세금 계산 및 손익상계 팁',
     href: '/tools/capital-gains-tax-calculator/nvda-gain-5m',

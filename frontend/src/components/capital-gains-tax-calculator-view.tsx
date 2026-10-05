@@ -11,7 +11,8 @@ import { TaxPreset, CAPITAL_GAINS_TAX_PRESETS } from '@/config/capital-gains-tax
 import { calculateCapitalGainsTax } from '@/lib/capital-gains-tax-calculator';
 import { ViralShareButton } from '@/components/viral-share-button';
 import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
-import { InArticleAdvertisement } from '@/components/public-advertisement';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
+import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
 interface CapitalGainsTaxCalculatorViewProps {
   initialPreset?: TaxPreset | undefined;
@@ -189,14 +190,37 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
         {/* 진단 결과 카드 (5열) */}
         <Card className="lg:col-span-5 bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 shadow-xl flex flex-col justify-between">
           <CardHeader className="p-5 pb-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-semibold text-cyan-400 flex items-center gap-1">
                 <TrendingUp className="w-3.5 h-3.5" />
                 예상 세액 진단
               </span>
-              <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                실효세율 {result.effectiveTaxRate}%
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                  실효세율 {result.effectiveTaxRate}%
+                </span>
+                <CalculatorSaveAction
+                  scenario={{
+                    type: 'stock',
+                    title: `해외주식 양도세 ${(result.totalTaxPayableKrw / 10000).toLocaleString()}만원 (${(realizedGain / 10000).toLocaleString()}만 실현)`,
+                    badge: `실효세율 ${result.effectiveTaxRate}%`,
+                    primaryMetric: {
+                      label: '납부 예상 세액 (22%)',
+                      value: `${result.totalTaxPayableKrw.toLocaleString()}원`,
+                    },
+                    secondaryMetric: {
+                      label: '세후 실수령 순수익',
+                      value: `${result.netProfitAfterTaxKrw.toLocaleString()}원`,
+                    },
+                    details: {
+                      realizedGain,
+                      unrealizedLoss,
+                      taxableBase: result.taxableBaseKrw,
+                      taxSaved: result.taxSavedByLossHarvesting + result.taxSavedByBasicDeduction,
+                    },
+                  }}
+                />
+              </div>
             </div>
             <CardTitle className="text-3xl font-bold font-mono text-white mt-2">
               {result.totalTaxPayableKrw.toLocaleString()}원
@@ -256,6 +280,9 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
 
       {/* 상호 내부 링크 허브 */}
       <PopularCalculatorsHub currentPresetSlug={initialPreset?.slug} />
+
+      {/* 하단 멀티플렉스 추천 광고 */}
+      <MultiplexAdvertisement className="my-8" />
     </div>
   );
 }

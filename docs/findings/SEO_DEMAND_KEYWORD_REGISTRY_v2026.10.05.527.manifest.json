@@ -1,0 +1,11 @@
+{
+  "version": "v2026.10.05.527",
+  "rows": 10473,
+  "ko_rows": 6207,
+  "en_rows": 4266,
+  "clusters_ko": 13,
+  "clusters_en": 12,
+  "status": "DISCOVERY_CANDIDATES_ONLY",
+  "rule": "No row authorizes a page. Require measured demand, independent value, source freshness, cannibalization review, locale quality, and pSEO admission.",
+  "sha256": "4e85672667970b41a33222b7005215ef630900daa935674cb8b7f21fcf901b79"
+}

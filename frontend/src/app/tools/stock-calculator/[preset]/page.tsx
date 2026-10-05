@@ -10,6 +10,7 @@ import { buildCalculatorRichSnippet, jsonLd } from '@/lib/json-ld';
 import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
 import { CalculatorRetentionFunnel } from '@/components/calculator-retention-funnel';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
+import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
 interface PresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
@@ -147,7 +148,26 @@ export default async function StockPresetPage({ params }: PresetPageProps) {
 
           <div className="p-3.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-xs text-muted-foreground leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span>💡 {data.calculatedResult.detailText}</span>
-            <div className="shrink-0">
+            <div className="shrink-0 flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <CalculatorSaveAction
+                scenario={{
+                  type: 'stock',
+                  title: data.title,
+                  badge: data.badge,
+                  primaryMetric: {
+                    label: data.calculatedResult.primaryLabel,
+                    value: data.calculatedResult.primaryValue,
+                  },
+                  secondaryMetric: {
+                    label: data.calculatedResult.secondaryLabel,
+                    value: data.calculatedResult.secondaryValue,
+                  },
+                  details: {
+                    ticker: data.slug,
+                    summary: data.summary,
+                  },
+                }}
+              />
               <ShareDiagnosisCard
                 title={data.title}
                 type="stock"

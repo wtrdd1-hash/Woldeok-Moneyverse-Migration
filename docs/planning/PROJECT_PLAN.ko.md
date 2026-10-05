@@ -2,50 +2,24 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
 > **최초 기준:** 2026-08-26  
-> **현재 통합 버전:** v2026.10.04.528
-> **구현·증거 동기화:** 2026-10-04 (최신 main SHA: `f6e89a31`)  
+> **현재 통합 버전:** v2026.10.05.527
+> **구현·증거 동기화:** 2026-10-05 (기획 기준 exact main SHA: `5318213f`; v527은 문서/조사 전용)
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
 > **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
 ---
 
-## 장기 리텐션 제품 운영모델 — v2026.10.04.528 (2026-10-04)
+## SEO 수요·키워드 포트폴리오 확장 — v2026.10.05.527
 
-- **구현 깊이:** v527 원칙을 100개 운영항목으로 내려 사용자 상태 진입/종료, 화면구조, 단계적 해금, 시작경로, 목표/기회 스키마·점수식, 미접속/회복 상태머신, 콘텐츠 운영, LiveOps 관리자, 데이터/API까지 정의한다.
-- **홈 계약:** 복귀요약 → 오늘 우선순위 최대 3개 → 일/주/시즌/장기 목표스택 → 경제스냅샷 → 세계 → 선택형 사회/공공. Quick/Normal/Deep 세션 모두 정식 모드다.
-- **성장상태:** NEW → ACTIVATED → EXPLORING → ESTABLISHED → 선택형 CONNECTED → INVESTED → VETERAN이며 AT_RISK/DORMANT/RETURNING/REACTIVATED 복귀상태를 둔다. 계정 나이만으로 베테랑 경제권한을 주지 않는다.
-- **추천 계약:** AI 전에 결정론적 적격성을 검증한다. 목표/기회는 관련성·실현성·다양성·신규성·선호·회복가치를 설명가능하게 사용하며 CTR 단독추천과 숨은 조건을 금지한다.
-- **No-Ruin 불변식:** 일반 사용자가 수입경로·감당가능 행동·회복/이사/교육/지원 경로를 모두 잃는 상태를 P0 설계결함으로 본다. 현실 미접속만으로 영구파국이 일어나지 않는다.
-- **LiveOps:** 모든 콘텐츠는 목적·대상·조건·기간·경제효과·번역·악용·접근성·분석·롤백·폐기를 선언하고 게시 전 cohort/locale/화면/경제영향 preview를 거친다.
-- **측정:** lifecycle funnel, anchor-event retention, feature breadth/frequency, 세션모드, fatigue, dormant/reactivation, recovery를 D1/D7/D30과 함께 본다. 전체 retention 상승이 cohort 악화를 숨길 수 없다.
-- **근거 갱신:** Unity 2026은 일일미션·리더보드·업적·정기 콘텐츠·소셜/시즌 등 LiveOps 활용을 보고하며 Apple은 고가치·시의성·동의·중복방지·정확한 긴급성 알림을 권고한다. 이는 설계패턴이지 강제 메커닉이 아니다.
-- **상세 권위:** [장기 리텐션 제품 운영모델 v528](LIFE_ECONOMY_RETENTION_OPERATING_MODEL_SPEC.ko.md).
-- **증거 경계:** 기획/문서 전용이며 런타임·DB·Test·Production 구현 완료를 주장하지 않는다.
-
-## 장기 리텐션·경제인생 연속성 — v2026.10.04.527 (2026-10-04)
-
-- **리텐션 목표:** 접속횟수 자체나 손실회피 압박이 아니라 자발적 재방문·의미있는 성장·사회관계·안전한 복귀를 최적화한다.
-- **생애주기:** 첫 세션 → D1 → D7 → D30 → D90 → 베테랑을 각각 별도 목표·해금·사회/세계 연속성·분석게이트로 설계한다.
-- **동기모델:** 자율성·유능감·관계성을 제품 요구사항으로 둔다. 여러 인생경로가 유효하고 성장 이유가 설명되며 선택형 장기 경제관계를 형성할 수 있어야 한다.
-- **목표 스택:** 지금/오늘·주간·시즌·장기 커리어 목표를 동시에 연결하고 홈은 가장 가까운 다음 행동을 보여준다.
-- **미접속 보호:** 현실 부재만으로 부채파국·사업붕괴·시즌전체손실이 발생하지 않으며 grace/cap/pause/catch-up/회복계획을 제공한다.
-- **복귀:** 요약 → 밀린일 압축 → 회복미션 → 새 기회 → 기존/새 경로 선택 순서로 복귀시키며 수치심·가짜긴급성을 사용하지 않는다.
-- **알림:** 선택형 카테고리는 기능가치 경험 후 opt-in, 사용자제어, quiet hours/digest/빈도상한을 가지며 보안긴급성을 참여유도에 위장하지 않는다.
-- **윤리 하드게이트:** 가짜 카운트다운·허위희소성·영구 streak 파괴·숨은 유지손실·광고강제·수치심·dark pattern 구매를 금지한다.
-- **측정:** 이벤트 기반 retention, cohort, lifecycle, feature breadth/frequency, social edge, dormant/reactivated, softlock/recovery를 측정하며 전체 평균 D1/D7/D30 하나로 판단하지 않는다.
-- **상세 권위:** [장기 리텐션·경제인생 연속성 상세 명세 v527](LIFE_ECONOMY_RETENTION_CONTINUITY_SPEC.ko.md).
-- **증거 경계:** v527은 기획/문서 전용이며 런타임·DB·Test·Production 구현 완료를 주장하지 않는다.
-
-## 생애경제·사용자 경제세계 제품 레이어 — v2026.10.04.526 (2026-10-04)
-
-- **권위 결정:** 직업·급여/생활비·사전재원 신용·경쟁형 가상은행·사용자 사업·도시경제·공공사업 투표·경제뉴스/경기이벤트·시즌·친구 공동사업·공정 라이벌·초단기 세션·오늘의 경제선택·경제 타임머신·개인 AI·opt-in 공개 경제프로필을 하나의 지속형 사용자 경제인생으로 연결한다.
-- **제품 정체성:** 성장은 단일 부자순위가 아니라 순자산·잉여현금흐름·재무회복력·신용건전성·기술자본·사업건전성·경제평판·커리어성장의 균형 벡터로 평가한다.
-- **통화 불변식:** 사용자 경제세계의 일반 흐름은 기존 WLD를 이동한다. 총통화량 변경은 v523 중앙은행 승인 + 조폐국 canonical 실행만 허용하며 예금·사전재원 대출은 돈을 만들지 않는다.
-- **AI 경계:** 개인 AI는 기본적으로 읽기·분석·추천만 수행한다. 송금·대출·투자·이직·사업변경·투표는 사용자 명시승인과 결정론적 검증을 거치며, AI가 신용최종승인·조폐·국고예산·원장우회를 할 수 없다.
-- **국내/해외:** WLD는 비현금성·비환전성을 유지한다. 국내에서는 환전/재매입 경계를 유지하고 은행·대출·신용을 시뮬레이션으로 표시한다. 해외는 locale과 관할을 분리해 단계 출시한다.
-- **SEO/성장:** 공개 타임머신/계산기는 실제 계산가치·투명한 공식·현지화·품질게이트가 있을 때만 색인하며 thin pSEO 대량생성을 금지한다.
-- **상세 권위:** [생애경제·사용자 경제세계 통합 명세 v526](LIFE_ECONOMY_USER_WORLD_SPEC.ko.md).
-- **증거 경계:** v526은 기획/문서 전용이며 런타임·DB·Test·Production 구현 완료를 주장하지 않는다.
+- **권위 결정:** 자연검색 성장은 page-count 프로그램이 아니라 실측 수요 포트폴리오로 관리한다. 후보 키워드는 조사 재고이며 독립 색인 URL은 실측/출처 있는 추정수요, 독립 사용자 가치, 출처 신선도, 현지화 준비도, canonical/카니벌라이제이션 검토, merge/noindex/retire 경로를 통과해야 한다.
+- **국내/해외 분리:** 국내 P0는 급여·근로, 예금·저축, 대출·DSR, 투자·복리, 배당, 연금·FIRE, 부동산, 생활재무다. 영어권 P0는 compound interest/savings, investment/DCA, FIRE/SWR, dividend/DRIP, loan/debt payoff, mortgage, take-home pay, net worth/budget, business break-even이다. 일본 및 DE/FR/ES/pt-BR은 검증된 family와 native intent review 뒤 순차 확장한다.
+- **실제 키워드 후보:** v527은 25개 cluster에서 10,473개 controlled discovery candidate(한국어 6,207 + 영어 4,266)를 생성했다. 모든 행은 `UNVALIDATED_CANDIDATE / HOLD_UNTIL_EVIDENCE`이며 페이지 생성을 승인하지 않는다.
+- **신규 레퍼런스 확장:** 별도 40-lane Crossref 회차에서 raw 200,000건을 수집하고 오류 0건, 중복제거 후보 111,313건을 확보했다. deterministic corpus stream SHA-256은 `1629c7b24a688e84249d77eec2cd1ce2f8b906f91187fcbed413739aef54b523`다. 이는 discovery 폭이지 111,313건을 사람이 모두 검토했다는 뜻이 아니다.
+- **1차자료 게이트:** Google Search Central/Search Console/Keyword Planner, Naver Search Advisor/DataLab, Bing Webmaster, IndexNow, Core Web Vitals, Schema.org glossary 의미, 공식 금융도구 자료를 별도 재검증했다. 금융·세금·대출·연금 페이지는 관할, 출처, 시행일, 계산버전, 가정, stale 동작을 가진다.
+- **대량저가치 방지:** doorway, keyword stuffing, low-value scaled content, keyword-to-URL 자동생성, Google SERP 무단 자동query를 금지한다. 금액/기간/수치 변형은 독립 검색의도·가치가 입증되지 않으면 preset/section이 기본이다.
+- **검색→사용자 목표:** `impression -> useful result -> second useful action -> optional signup -> activation -> D1/D7/D30 -> qualified pageviews/실측 광고경제`를 최적화하며 traffic 자체를 성공으로 보지 않는다.
+- **상세 권위:** [SEO 수요·키워드 포트폴리오 확장 명세 v527](SEO_DEMAND_KEYWORD_EXPANSION_SPEC.ko.md), [v527 조사 검토](../findings/MONEYVERSE_SEO_DEMAND_KEYWORD_RESEARCH_REVIEW_v2026.10.05.527.ko.md).
+- **증거 경계:** v527은 기획/조사/문서 전용이다. runtime, Test, Production, 순위, traffic, 수익 완료를 주장하지 않는다.
 
 ## 중앙은행·조폐국·중앙국고·경제코어 기관 분리 — v2026.10.04.523
 

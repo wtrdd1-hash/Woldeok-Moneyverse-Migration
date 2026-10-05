@@ -10,9 +10,13 @@ import {
   PENSION_TAX_SCENARIOS, 
   ISA_SCENARIOS 
 } from '@/config/pseo-tax-retirement.config';
+import { PSEO_LOAN_PRESETS } from '@/config/pseo-loan.config';
+import { PSEO_DIVIDEND_STOCKS } from '@/config/pseo-dividend.config';
+import { GLOSSARY_TERMS } from '@/config/pseo-glossary.config';
 
 /**
  * 1-Hour ISR Caching for Sitemap.
+
  * Prevents unnecessary re-computation and shields backend from crawler storms.
  */
 export const revalidate = 3600;
@@ -146,7 +150,32 @@ export default function sitemap(): MetadataRoute.Sitemap {
     addEntry(`/tools/isa-calculator/${sc.slug}`, 0.9, 'daily');
   }
 
+  // 2.10. 신규 대출이자 및 배당소득세 계산기 허브 & 롱테일 프리셋
+  addEntry('/tools/loan-interest-calculator', 0.95, 'daily');
+  for (const lp of PSEO_LOAN_PRESETS) {
+    addEntry(`/tools/loan-interest-calculator/${lp.slug}`, 0.9, 'daily');
+  }
+
+  addEntry('/tools/dividend-tax-calculator', 0.95, 'daily');
+  for (const ds of PSEO_DIVIDEND_STOCKS) {
+    addEntry(`/tools/dividend-tax-calculator/${ds.ticker.toLowerCase()}`, 0.9, 'daily');
+  }
+
+  // 2.11. 신규 50대 투자 & 금융 용어사전 pSEO 허브 및 4개 언어 상세 사전 라우트 (총 200개 URL)
+  addEntry('/guide/glossary', 0.95, 'daily');
+  addEntry('/en/guide/glossary', 0.95, 'daily');
+  addEntry('/ja/guide/glossary', 0.95, 'daily');
+  addEntry('/zh/guide/glossary', 0.95, 'daily');
+  for (const term of GLOSSARY_TERMS) {
+    addEntry(`/guide/glossary/${term.slug}`, 0.9, 'daily');
+    addEntry(`/en/guide/glossary/${term.slug}`, 0.9, 'daily');
+    addEntry(`/ja/guide/glossary/${term.slug}`, 0.9, 'daily');
+    addEntry(`/zh/guide/glossary/${term.slug}`, 0.9, 'daily');
+  }
+
+
   // 3. 18 Virtual Stocks Clean Canonical URLs
+
   for (const symbol of STOCK_SYMBOLS) {
     addEntry(`/stocks/${symbol}`, 0.9, 'daily');
   }

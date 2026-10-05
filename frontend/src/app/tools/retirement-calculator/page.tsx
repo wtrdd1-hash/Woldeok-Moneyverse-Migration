@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { RETIREMENT_SCENARIOS } from '@/config/pseo-tax-retirement.config';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
+import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
 export default function RetirementCalculatorPage() {
   const yearsId = useId();
@@ -260,13 +261,38 @@ export default function RetirementCalculatorPage() {
         {/* 결과 패널 */}
         <div className="lg:col-span-7 p-6 rounded-2xl bg-zinc-900/60 border border-emerald-500/30 shadow-2xl space-y-6 flex flex-col justify-between">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
                 예상 퇴직금 실수령액
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400">
-                실효세율 {effectiveTaxRate}%
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400">
+                  실효세율 {effectiveTaxRate}%
+                </span>
+                <CalculatorSaveAction
+                  scenario={{
+                    type: 'retirement',
+                    title: `근속 ${years}년 퇴직금 ${netSeverance.toLocaleString()}원`,
+                    badge: `실효세율 ${effectiveTaxRate}%`,
+                    primaryMetric: {
+                      label: '세후 실수령액',
+                      value: `${netSeverance.toLocaleString()}원`,
+                    },
+                    secondaryMetric: {
+                      label: 'IRP 이전 절세액',
+                      value: `약 ${irpSavedTax.toLocaleString()}원 절세`,
+                    },
+                    details: {
+                      years,
+                      months,
+                      monthlySalary,
+                      annualBonus,
+                      estimatedSeverance,
+                      finalTax,
+                    },
+                  }}
+                />
+              </div>
             </div>
 
             <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800/80 flex items-baseline justify-between">

@@ -1,37 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.04.528
+> Current ledger version: v2026.10.05.527
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
 
-## v2026.10.04.528 — 2026-10-04 — Deep retention product operating model
-- During the cycle, origin/main advanced from a069e639 to 4db90a530dd7a002b39be8d0d7d45e4df0e72330 via monetization/calculator runtime work. Changed paths did not overlap v526/v527 planning authority, so the isolated branch was rebased onto latest main before v528 authority edits.
-- Added EN/KO `LIFE_ECONOMY_RETENTION_OPERATING_MODEL_SPEC` with 100 implementation-oriented sections.
-- Defines lifecycle entry/exit, home IA, quick/normal/deep sessions, progressive unlocks, starter paths, goal/opportunity ranking, absence protection/recovery, job/business/season/social/veteran progression, notification eligibility/frequency, content fatigue/cooldowns, LiveOps calendar/admin preview, experiment registry, DB/API and acceptance gates.
-- Adds No-Ruin as a P0 product invariant and separates financial ledger mutations from retention/personalization services.
-- Research refresh includes Unity 2026 live-ops engagement patterns, Apple notification value/urgency/consent guidance and autonomy-supportive digital intervention evidence.
-- Planning/docs only; no runtime/Test/Production implementation is claimed.
-
-## v2026.10.04.527 — 2026-10-04 — Long-term retention and economic-life continuity
-- Extended v526 with a dedicated EN/KO retention/continuity authority covering first-session, D1, D7, D30, D90 and veteran lifecycle design.
-- Reframed retention around autonomy/competence/relatedness, multi-horizon goals, world/narrative continuity, optional social edges, absence safety, recovery and veteran legacy instead of punitive streak/FOMO patterns.
-- Added daily/weekly/season loops, goal/opportunity feeds, dormant-user recovery, mentorship/co-business/city/rival continuity, content cadence, endgame, softlock prevention, adaptive challenge, FTUE funnel and story archive.
-- Added ethical notification rules, contextual opt-in, quiet/digest controls, frequency caps and explicit dark-pattern prohibitions.
-- Added event-trigger retention, cohort/lifecycle segmentation, churn-risk-safe interventions, experiment guardrails and admin retention dashboards.
-- Reference basis includes Self-Determination Theory/PENS, current GameAnalytics retention/cohort/progression guidance, Unity live-ops/retention patterns, Android/Apple notification guidance and FTC dark-pattern enforcement guidance.
-- Planning/docs only; no runtime/Test/Production implementation is claimed.
-
-## v2026.10.04.526 — 2026-10-04 — Life Economy & User World integration
-- Start and mid-work baseline: `origin/main=a069e639b897acacb9754e5d04c58b3c642bcf28`; mid-work fetch found no drift. Work used isolated branch `docs/life-economy-v2026.10.04.526`.
-- Re-read current PROJECT_PLAN/integrated master and monetary/fiscal/AI/economy simulation/season/global-growth authority before defining the new layer.
-- Added EN/KO `LIFE_ECONOMY_USER_WORLD_SPEC` covering all 18 user-approved features as one persistent life-economy product contract.
-- The design keeps v523 money-supply authority intact, uses fully funded lending initially, makes personal AI recommend/confirm rather than autonomously transact, and adds explicit anti-abuse, data/API, KPI, accessibility, domestic/overseas and phased-release contracts.
-- Reference basis includes CFPB/World Bank financial capability, BIS/IMF monetary transmission, ILO/OECD/World Bank jobs and entrepreneurship, OECD/World Bank cities and participatory budgeting, GameAnalytics retention/progression, NIST/OECD/OWASP AI governance, Google international SEO, and current Korean game/virtual-asset/e-finance statutory boundary sources.
-- Public calculator/Time Machine SEO is quality-gated and functional-value-first; personalized/private economic surfaces remain non-indexable.
-- Planning/docs only. No runtime, DB, Test or Production implementation is claimed.
+## v2026.10.05.527 — 2026-10-05 — SEO demand and keyword portfolio expansion
+- Start/mid-work `origin/main=5318213f1eca644c7f36df7d967a53092de0814c`; no drift at the recorded mid-work checkpoint. Dedicated worktree/branch `docs/seo-demand-expansion-v2026.10.05.527`.
+- Re-read documentation governance, PROJECT_PLAN, integrated master, global SEO/growth execution, search discovery, SEO-intent activation, current pSEO configs/routes, and the unmerged v525 search-to-user planning branch as read-only concurrent input.
+- Added `SEO_DEMAND_KEYWORD_EXPANSION_SPEC.md` / `.ko.md` as the demand/keyword portfolio authority: evidence states, keyword record, domestic/international cluster maps, pSEO admission/retirement, finance freshness, localization, internal-link graph, search-to-user conversion and measurement.
+- Generated 10,473 discovery keyword candidates: 6,207 KO + 4,266 EN across 25 clusters. All are HOLD until measured/provider evidence and page-value gates pass; candidate count is not a publishing target.
+- Fresh independent Crossref research: 40 lanes, 200,000 raw -> 111,313 deduplicated candidates, zero collection errors, stream SHA-256 `1629c7b24a688e84249d77eec2cd1ce2f8b906f91187fcbed413739aef54b523`. Full compressed corpus, manifest and sample are versioned under `docs/research/seo-demand-v2026.10.05.527/`.
+- Revalidated current first-party Google/Naver/Bing search guidance, Core Web Vitals, IndexNow/Schema.org semantics, plus official finance-tool patterns. Broad-corpus quantity never substitutes for current primary-source rules.
+- Planning/research/docs only. No runtime, Test, Production, indexing, ranking, traffic or revenue completion is claimed.
 
 ## v2026.10.04.523 — 2026-10-04 — Central Bank / Mint / Treasury institutional separation
 - Start `origin/main=c10e1582ccc0c058dff5c5356ad8b1893759f72c`; mid-work recheck detected `origin/main=065ee42204a4238c5010897212c7fc2a6c848f64`, which added treasury English/architecture documentation. The isolated branch was rebased onto that latest main before authority edits, preserving concurrent work.

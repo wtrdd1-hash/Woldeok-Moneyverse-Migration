@@ -2,49 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.04.528
-> Implementation/evidence sync: 2026-10-04 (exact main SHA: `f6e89a31`)
+> Current integrated version: v2026.10.05.527
+> Implementation/evidence sync: 2026-10-05 (planning baseline exact main SHA: `5318213f`; v527 is docs/research only)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
-## Deep Retention Product Operating Model — v2026.10.04.528 (2026-10-04)
+## SEO demand and keyword portfolio expansion — v2026.10.05.527 (2026-10-05)
 
-- **Implementation depth:** converts v527 principles into a 100-part operating model with explicit lifecycle entry/exit conditions, page hierarchy, progressive unlocks, starter paths, goal/opportunity schemas and ranking formulas, absence/recovery state machines, content cadence, LiveOps tooling, data and API contracts.
-- **Home contract:** return recap -> maximum-three Today priorities -> daily/weekly/season/long-term goal stack -> economic snapshot -> world -> optional social/public surfaces. Quick, normal and deep session modes are all first-class.
-- **Progression:** NEW -> ACTIVATED -> EXPLORING -> ESTABLISHED -> optional CONNECTED -> INVESTED -> VETERAN, with AT_RISK/DORMANT/RETURNING/REACTIVATED recovery states. Account age alone never grants veteran power.
-- **Recommendation contract:** deterministic eligibility precedes AI. Goals and opportunities use explainable relevance/feasibility/diversity/novelty/preference/recovery factors; CTR-only ranking and hidden eligibility are prohibited.
-- **No-ruin invariant:** no ordinary user state may lack an income path, affordable action and recovery/relocation/education/support route. Real-world absence alone cannot cause irreversible ruin.
-- **LiveOps:** every content item declares objective, audience, prerequisites, duration, economy effect, localization, abuse/accessibility/analytics/rollback/retirement; admin previews cohort, locale, viewport and economic impact before publish.
-- **Measurement:** lifecycle funnel, anchor-event retention, feature breadth/frequency, session-mode health, fatigue, dormant/reactivation and recovery must be measured alongside D1/D7/D30. Aggregate retention lift cannot hide cohort harm.
-- **Reference refresh:** Unity 2026 reports broad use of daily missions, leaderboards, achievements, regular content updates and social/timed events; Apple guidance reinforces timely high-value, consented, non-duplicative notifications with accurate urgency. These are patterns, not mandatory mechanics.
-- **Detailed authority:** [Deep Retention Product Operating Model v528](LIFE_ECONOMY_RETENTION_OPERATING_MODEL_SPEC.md).
-- **Evidence boundary:** planning/docs only; no runtime, DB, Test or Production completion is claimed.
-
-## Long-Term Retention & Economic Life Continuity — v2026.10.04.527 (2026-10-04)
-
-- **Retention objective:** optimize voluntary return, meaningful progress, social continuity and safe re-entry rather than raw session count or punitive loss-aversion.
-- **Lifecycle contract:** first-session -> D1 -> D7 -> D30 -> D90 -> veteran horizons each receive explicit goals, unlocks, social/world continuity and analytics gates.
-- **Motivation model:** autonomy, competence and relatedness are explicit product requirements. Users keep several viable life paths, receive understandable mastery feedback and can form optional durable economic-social relationships.
-- **Goal stack:** every active user should normally have an actionable now/today goal, a weekly goal, a season goal and a long-horizon career/economic goal.
-- **Absence safety:** real-world absence cannot by itself cause irreversible debt spiral, company destruction or total season loss; grace/caps/pause/catch-up and recovery plans are required.
-- **Return/recovery:** dormant users receive recap -> backlog compression -> recovery task -> new opportunity -> old/new path choice, without shame or fake urgency.
-- **Notifications:** optional categories are contextual opt-in, user-controlled, quiet-hour/digest capable and frequency-capped; security urgency may not be imitated for engagement.
-- **Ethical hard gate:** fake countdowns, misleading scarcity, permanent streak destruction, hidden recurring loss, forced ads, manipulative shame and dark-pattern purchasing are prohibited.
-- **Measurement:** event-based retention, cohorts, lifecycle states, feature breadth/frequency, social-edge formation, dormant/reactivated and softlock/recovery metrics are required; blended D1/D7/D30 alone is insufficient.
-- **Detailed authority:** [Long-Term Retention & Economic Life Continuity Specification v527](LIFE_ECONOMY_RETENTION_CONTINUITY_SPEC.md).
-- **Evidence boundary:** v527 is planning/docs only; no runtime, DB, Test or Production implementation is claimed.
-
-## Life Economy & User World product layer — v2026.10.04.526 (2026-10-04)
-
-- **Authority decision:** adopt a persistent user economic-life layer connecting jobs, salary/living costs, funded credit, competitive fictional banks, businesses, cities, public-project voting, economic news/events, seasons, social co-business, fair rival leagues, micro-sessions, daily decisions, counterfactual Time Machine, AI personal advice and opt-in public economic profiles.
-- **Product identity:** Moneyverse progression is a balanced vector of net worth, free cash flow, resilience, credit health, skills, business health, economic reputation and career progress rather than one wealth leaderboard.
-- **Monetary invariant:** all user-world flows move existing WLD unless the existing v523 Central Bank authorization + Mint execution path explicitly changes supply. Deposits and funded loans do not create money.
-- **AI boundary:** personal AI is read/analyze/recommend by default; transfers, borrowing, investing, employment/business mutations and voting require explicit user confirmation and deterministic authorization. AI never approves credit eligibility, Mint, treasury budgets or ledger bypass.
-- **Domestic/overseas boundary:** WLD remains non-cashable/non-redeemable; Korean release keeps exchange/re-purchase blocked and labels bank/loan/credit mechanics as simulation. Overseas rollout is locale/jurisdiction gated and uses separate locale URLs rather than forced GeoIP redirects.
-- **SEO/growth:** public Time Machine/calculator utilities are allowed only when they provide independent functional value, transparent formulas, locale-quality content and indexability gates; mass thin-page generation remains prohibited.
-- **Detailed authority:** [Life Economy & User World Specification v526](LIFE_ECONOMY_USER_WORLD_SPEC.md).
-- **Evidence boundary:** v526 is planning/documentation only; no runtime, DB, Test or Production implementation is claimed.
+- **Authority decision:** organic-search growth is managed as a measured demand portfolio, not a page-count program. Candidate keywords are research inventory; a distinct indexable URL requires measured/explicitly estimated demand, independent user value, source freshness, localization readiness, canonical/cannibalization review, and a merge/noindex/retire path.
+- **Domestic / international split:** Korean P0 centers on salary/work, savings/deposits, loan/DSR, investing/compounding, dividends, retirement/FIRE, real estate and personal finance. English P0 centers on compound interest/savings, investment/DCA, FIRE/SWR, dividends/DRIP, loan/debt payoff, mortgage, take-home pay, net worth/budget and business break-even. Japan and DE/FR/ES/pt-BR follow only after proven family value and native-intent review.
+- **Concrete keyword inventory:** v527 generated 10,473 controlled discovery candidates (6,207 KO + 4,266 EN) across 25 clusters. Every row is `UNVALIDATED_CANDIDATE / HOLD_UNTIL_EVIDENCE`; no row authorizes a page.
+- **Fresh reference expansion:** a new independent 40-lane Crossref cycle collected 200,000 raw records and deduplicated 111,313 candidates with zero collection errors; deterministic corpus-stream SHA-256 `1629c7b24a688e84249d77eec2cd1ce2f8b906f91187fcbed413739aef54b523`. This is discovery breadth, not 111,313 manually reviewed sources.
+- **Primary-source gate:** direct rules were separately revalidated against current Google Search Central/Search Console/Keyword Planner, Naver Search Advisor/DataLab, Bing Webmaster, IndexNow, Core Web Vitals, Schema.org glossary semantics, and first-party finance-tool references. Finance/tax/loan/retirement pages require jurisdiction, source, effective date, calculation version, assumptions and stale-data behavior.
+- **Anti-scaled-content gate:** doorway pages, keyword stuffing, low-value scaled content, automatic keyword-to-URL generation and unauthorized automated Google SERP querying are prohibited. Numeric/amount/period variants default to presets/sections unless distinct search intent and user value are proven.
+- **Search-to-user objective:** optimize `impression -> useful result -> second useful action -> optional signup -> activation -> D1/D7/D30 -> qualified pageviews/observed ad economics`, not traffic alone.
+- **Detailed authority:** [SEO Demand & Keyword Portfolio Expansion Specification v527](SEO_DEMAND_KEYWORD_EXPANSION_SPEC.md) and [v527 research review](../findings/MONEYVERSE_SEO_DEMAND_KEYWORD_RESEARCH_REVIEW_v2026.10.05.527.md).
+- **Evidence boundary:** v527 is planning/research/docs only. It does not claim runtime, Test, Production, ranking, traffic, or revenue completion.
 
 ## Central Bank / Mint / Treasury institutional separation — v2026.10.04.523 (2026-10-04)
 
