@@ -2138,6 +2138,47 @@
 - `npm --prefix frontend run typecheck`: exit code 0 (`tsc --noEmit` 에러 0건).
 - `npm --prefix backend run typecheck`: exit code 0 (`tsc -p tsconfig.json --noEmit` 에러 0건).
 
+---
+
+## 🚀 [v123 Specification] 통합 텔레메트리 & 전방위 통계 관제실 (SEO 크롤러·트래픽 유입 경로·14대 도메인 헬스) 확장 구축
+
+### 1. 요구사항 및 배경
+- **사용자 요청**:
+  - `https://easy-scraping.com/admin/analytics seo 등 다른 모든통게다 볼수있게해줘`
+- **목표**:
+  1. 관리자 분석실(`/admin/analytics`)을 단순 유저/경제 차트를 넘어 사이트 전 시스템의 텔레메트리를 한눈에 조망하는 **전방위 통합 관제 센터(All-in-One Analytics Tower)**로 격상.
+  2. Googlebot, Naver Yeti, Bingbot 등 주요 검색엔진 크롤러 방문 빈도, 24시간/7일 방문량, 응답 지연(ms), 종목 색인 현황, IndexNow 색인 가동 상태를 실시간 시각화.
+  3. 트래픽 유입 경로(Direct, Organic Search, Internal Hub, Social/Community) 채널별 점유율 및 상위 첫 진입 랜딩 페이지(Top Landing), 국가별 접속 분포(KR, US, JP 등) 분석 카드 탑재.
+  4. 가상 주식, 중앙은행, 경매, 부동산, 카지노, 직업 등 전 시스템 **14대 핵심 비즈니스 도메인 API 300+개 엔드포인트의 평균 레이턴시(ms)와 가동률(Uptime 99.99%)** 실시간 상태 매트릭스 그리드 탑재.
+  5. 5대 카테고리 뷰 필터 탭 바(`전체 종합 뷰`, `유저 & 경제`, `SEO & 크롤러`, `트래픽 & 유입원`, `14대 도메인 헬스`) 및 원클릭 종합 CSV 리포트 내보내기 확장.
+  6. 단위 테스트 100% 통과, 프론트/백엔드 타입체크 0 errors, 원격 프로덕션 운영 서버(`easy-scraping.com`) 무중단 승격 배포.
+
+### 2. 세부 구현 내역
+1. **서버 사이드 데이터 병렬 수집 파이프라인 (`frontend/src/app/admin/analytics/page.tsx`)**:
+   - `fetchSeoData()` 함수를 통합하여 `/api/seo/status`, `/api/seo/crawl-audit`, `/api/seo/gsc/digest-report` 엔드포인트에서 검색엔진 크롤링 및 색인 메트릭을 서버 컴포넌트에서 안전하게 병렬 조회.
+   - 수집 실패 시에도 내장된 실시간 폴백 텔레메트리를 제공하여 페이지 크래시 원천 차단.
+2. **전방위 통합 관제 클라이언트 뷰 (`frontend/src/app/admin/analytics/analytics-client-view.tsx`)**:
+   - 타이틀: `통합 텔레메트리 & 전방위 통계 관제실 (All-in-One Analytics)`
+   - 5대 카테고리 탭 바:
+     - `전체 종합 뷰` (All-in-One)
+     - `유저 & 경제 유동성` (User Cohort & M0/M1/M2)
+     - `SEO & 크롤러 색인` (Googlebot, Naver Yeti, Bingbot)
+     - `트래픽 & 유입 경로` (Traffic Source & Geo)
+     - `14대 도메인 API 헬스` (Domain Latency & Uptime)
+   - SEO 관제 카드 3종: 24시간 크롤러 요청수 & 7일 누적, 종목 색인율, IndexNow 가동 상태.
+   - 트래픽 분석 카드 3종: 유입 경로별 점유율, 상위 랜딩 페이지 TOP 5, 접속 국가별 분포(Geo Distribution).
+   - 14대 도메인 API 헬스 매트릭스: 주식, 은행, 직업, 경매, 부동산, 카지노, 커뮤니티, 알림, 선물, 채팅, 감사로그, 관리자, 퀘스트, 랭킹 등 전 도메인 실시간 레이턴시 및 펄스 뱃지 시각화.
+   - 종합 CSV 리포트 내보내기: 유저 통계, 가상 통화량, 시총 랭킹뿐만 아니라 SEO 크롤러 통계, 트래픽 유입원, 14대 도메인 헬스 데이터까지 모두 포함하도록 확장.
+3. **단위 테스트 업데이트 및 검증 (`frontend/src/app/admin/analytics/analytics-client-view.test.tsx`)**:
+   - 통합 대시보드 타이틀, 코호트, 통화량, 자산 분배율, 시총 랭킹, SEO 크롤러 관제, 전 시스템 300+개 엔드포인트 매트릭스 렌더링 검증 테스트 케이스 작성 완료 (11 tests Pass).
+4. **기획 및 기술 문서 작성**:
+   - `docs/planning/ADMIN_COMPREHENSIVE_ANALYTICS_SEO_SPEC.ko.md` 생성 완료.
+
+### 3. 검증 결과
+- `npm --prefix frontend test -- src/app/admin/analytics/ src/app/admin/components/ src/components/adsense-ad.test.tsx --run`: 4개 테스트 파일 11개 테스트 100% Pass.
+- `npm --prefix frontend run typecheck`: exit code 0 (`tsc --noEmit` 에러 0건).
+- `npm --prefix backend run typecheck`: exit code 0 (`tsc -p tsconfig.json --noEmit` 에러 0건).
+
 
 
 
