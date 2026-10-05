@@ -1962,3 +1962,29 @@
   - `✓ Test` (Vitest/Node 전수 테스트 통과)
 - `✓ build`: 프로덕션 배포 아티팩트 빌드 완료.
 
+---
+
+## 🚀 [v118 Specification] 관리자 관제탑 MAU/WAU/DAU 실측 유저 지표 & 자산 분배율 정밀 분석 테이블 풀스택 탑재
+
+### 1. 요구사항 및 배경
+- 사용자 지시: "mau 등 여려 정보 정확히 표가 표시되게 셋팅해 실제정보로 갈끔하게 표시되게 셋팅해줘"
+- 목표:
+  1. 실제 회원 데이터(`allUsers`)의 `last_seen_at`, `last_login_at`, `created_at` 및 총 순자산 현황을 바탕으로 **실시간 MAU (30일), WAU (7일), DAU (24시간), 신규 유입자, 활동 고착도(Stickiness DAU/MAU Ratio %), 상위 10% vs 일반 회원 자산 격차 지니 통계**를 정밀 산출.
+  2. 메인 관리자 관제탑(`/admin`) 상단 4대 KPI 바로 아래에 Linear / Datadog 수준의 **실시간 활성 유저 & 리텐션 지표 테이블(`AdminTelemetryMetricsTable`)** 전진 배치.
+  3. 회원 관리 디렉토리(`/admin/users`) 상단에도 동일한 분석 엔진을 연동하여 코호트 및 계층별 자산 통계를 일관되게 제공.
+  4. 44px 터치 타깃, 고대비 모노스페이스 수치(`font-mono tabular-nums`), 320px 모바일 가로 스크롤 클리핑 방지 및 0-error 린트 준수.
+
+### 2. 세부 구현 내역
+1. `frontend/src/app/admin/components/admin-telemetry-metrics-table.tsx` 신규 컴포넌트:
+   - 실제 회원 배열을 입력받아 시간대별 활동을 실시간 집계.
+   - DAU (24시간 이내 활동), WAU (7일 이내 활동), MAU (30일 이내 활동), 신규 가입자 (30일 이내), 휴면 회원 (30일 이상 미활동) 산출.
+   - DAU/MAU Stickiness(고착도), WAU/MAU 활동율, 상위 10% 자산 집중도 계산.
+   - 정돈된 데이터 그리드 및 상세 분석 표 렌더링.
+2. `frontend/src/app/admin/page.tsx`:
+   - 메인 KPI 카드 하단에 `AdminTelemetryMetricsTable` 마운트.
+3. `frontend/src/app/admin/users/user-directory.tsx`:
+   - 상단 요약 카드와 회원 목록 사이에 MAU/WAU/DAU 활성 리텐션 통계 테이블 연동.
+4. 검증:
+   - `npm run typecheck` 및 `npx eslint` 검사 100% 통과.
+
+

@@ -59,6 +59,7 @@ import { ADMIN_AREAS, adminAreaFor, consoleReturnPath } from './areas';
 import { AdminQuickUserSearch } from './admin-quick-search';
 import { CloseConsole, OpenConsole } from './console-gate';
 import { TelemetryPulse } from './components/telemetry-pulse';
+import { AdminTelemetryMetricsTable } from './components/admin-telemetry-metrics-table';
 import type {
   AdminBusiness,
   AdminConsole,
@@ -374,6 +375,9 @@ export default async function AdminPage({
           </div>
         </Link>
       </div>
+
+      {/* 실시간 MAU / WAU / DAU & 리텐션 자산 통계 테이블 전진 배치 */}
+      <AdminTelemetryMetricsTable users={allUsers} showDetailsLink={true} />
 
       {/* Operator Session Info & Quick Member Search Bar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

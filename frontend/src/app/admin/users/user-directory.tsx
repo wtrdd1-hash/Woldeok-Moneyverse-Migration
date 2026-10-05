@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/table';
 import { compareAmounts, groupDigits } from '@/lib/money';
 import type { AdminUser } from '../types';
+import { AdminTelemetryMetricsTable } from '../components/admin-telemetry-metrics-table';
 
 type StatusFilter = 'all' | 'active' | 'restricted';
 type SortOption = 'wealth' | 'cash' | 'stock' | 'lastSeen' | 'created';
@@ -167,6 +168,9 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
           </CardContent>
         </Card>
       </div>
+
+      {/* MAU / WAU / DAU 및 유저 리텐션 분석 표 연동 */}
+      <AdminTelemetryMetricsTable users={users} showDetailsLink={false} />
 
       {/* 부자 랭킹 및 회원 관리 메인 카드 */}
       <Card className="border-border shadow-xs">
