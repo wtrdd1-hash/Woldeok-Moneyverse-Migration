@@ -374,7 +374,9 @@ export function saveUserSpaces(spaces: readonly UserPersonalSpace[]): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(spaces));
-  } catch {}
+  } catch {
+    // LocalStorage write failure ignored safely
+  }
 }
 
 export function getDefaultSpaces(): readonly UserPersonalSpace[] {

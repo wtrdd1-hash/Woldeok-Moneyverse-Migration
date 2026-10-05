@@ -11,12 +11,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  CardAspect,
   drawViralCardToCanvas,
   downloadViralCardPng,
   copyViralCardToClipboard,
-  ViralCardPayload,
 } from '@/lib/viral-share-card';
+import type { CardAspect, ViralCardPayload } from '@/lib/viral-share-card';
 import { Download, Copy, Share2, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 

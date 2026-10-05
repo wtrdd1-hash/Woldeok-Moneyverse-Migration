@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Share2, Copy, Check, Sparkles, Download, ArrowUpRight, ShieldCheck, Flame, Image as ImageIcon } from 'lucide-react';
 import { ViralShareCardDialog } from '@/components/viral-share-card-dialog';
-import { ViralCardPayload } from '@/lib/viral-share-card';
+import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 interface ShareDiagnosisCardProps {
   readonly title: string;

@@ -1,8 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import {
-  drawViralCardToCanvas,
-  ViralCardPayload,
-} from './viral-share-card';
+import { drawViralCardToCanvas } from './viral-share-card';
+import type { ViralCardPayload } from './viral-share-card';
 
 describe('viral-share-card unit tests', () => {
   it('should safely execute drawViralCardToCanvas on mocked 2D context', () => {
