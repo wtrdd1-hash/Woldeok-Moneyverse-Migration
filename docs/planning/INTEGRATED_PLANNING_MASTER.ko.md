@@ -1,6 +1,15 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.10.05.530
+> 현재 원장 버전: v2026.10.05.531
+
+## v2026.10.05.531 — 2026-10-05 — 광고 수익화 재감사
+- 시작/중간 `origin/main=5c497639a919a5adf1ef648eba07f08bf7cd45a7`; 격리 브랜치 `docs/ad-revenue-reaudit-v2026.10.05.531`.
+- 광고 수익화는 기술적으로 가능하지만 측정 진실성과 배치 안전성 해결 전 `BLOCKED_FOR_SCALE`이다.
+- P0: crawler 포함 `totalHits24h`가 광고 예상수익/목표달성률로 환산되고 있어 NON_AUTHORITATIVE다.
+- P0: exact-main `/casino`, `/stocks/[symbol]`에 민감 route 차단 계약과 충돌하는 광고가 있어 `AUTHORITY_DRIFT`로 등록한다.
+- Production `/ads.txt` HTTP 200 및 설정 publisher 선언을 확인했다. 검토한 저장소 증거에는 provider-backed rolling 30일 확정수익/Page RPM dataset이 없다.
+- 상세 권위: `AD_REVENUE_REAUDIT_v2026.10.05.531.md` / `.ko.md`. 문서 전용이며 runtime/Test/Production 승격 없음.
+
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 

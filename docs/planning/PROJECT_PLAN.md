@@ -2425,3 +2425,10 @@ Required sequence: full AI inventory -> latest-plan/main/user-instruction rechec
 - Existing Production advertising makes business/tax status and advertising/privacy/overseas-transfer evidence a current operating gate, not a future-only task.
 - Real-money digital goods/subscription/ad-removal remain BLOCKED until seller identity/reporting, transaction disclosure, withdrawal/refund/cancellation, minor-contract and provider reconciliation controls pass.
 - User `ageConfirmed` assertion must not be described as verified age. Commercial messaging remains blocked until Korea consent/suppression/nighttime controls exist. WLD/game-result cash redemption remains prohibited pending new legal review.
+
+
+## v2026.10.05.531 — Advertising revenue re-audit
+- Advertising remains viable and the only currently authorized cash monetization channel, but SCALE is blocked until measurement truth and placement safety are repaired.
+- Crawler-inclusive `totalHits24h` must not be treated as AdSense pageviews or used for authoritative revenue/target-achievement reporting.
+- `/casino` and `/stocks/[symbol]` advertising is AUTHORITY_DRIFT against the sensitive-route block contract and requires runtime remediation plus regression tests before ad expansion.
+- Detailed authority: `AD_REVENUE_REAUDIT_v2026.10.05.531.md` / `.ko.md`.

@@ -1,6 +1,15 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.05.530
+> Current ledger version: v2026.10.05.531
+
+## v2026.10.05.531 — 2026-10-05 — Advertising revenue re-audit
+- Start/mid-work `origin/main=5c497639a919a5adf1ef648eba07f08bf7cd45a7`; isolated branch `docs/ad-revenue-reaudit-v2026.10.05.531`.
+- Advertising remains technically viable, but scale is `BLOCKED_FOR_SCALE` pending measurement truth and placement safety.
+- P0: crawler-inclusive `totalHits24h` is converted to estimated ad revenue/goal achievement and is NON_AUTHORITATIVE.
+- P0: exact-main renders ads on `/casino` and `/stocks/[symbol]` despite the sensitive-route block contract; registered as `AUTHORITY_DRIFT`.
+- Production `/ads.txt` returned HTTP 200 with the configured publisher declaration. No provider-backed rolling 30-day finalized-revenue/Page-RPM dataset was found in reviewed repository evidence.
+- Detailed authority: `AD_REVENUE_REAUDIT_v2026.10.05.531.md` / `.ko.md`. Documentation only; no runtime/Test/Production promotion.
+
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
