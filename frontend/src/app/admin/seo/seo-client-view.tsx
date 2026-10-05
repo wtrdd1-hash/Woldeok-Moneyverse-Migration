@@ -273,7 +273,7 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
             className="w-full sm:w-auto min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 active:scale-[0.98]"
           >
             <Send className="size-3.5" />
-            {isSubmitting ? '색인 통보 중...' : '사이트맵 즉시 제출 (Ping)'}
+            {isSubmitting ? '색인 통보 중...' : '전체 사이트맵 즉시 제출 (Ping)'}
           </Button>
         </div>
       </div>
