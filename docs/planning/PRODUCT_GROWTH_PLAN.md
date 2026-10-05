@@ -1,10 +1,20 @@
 # Woldeok Moneyverse — Product Growth & Retention Plan
 
-> Version: v2026.10.02.507
+> Version: v2026.10.05.527
 > Status: Living product-planning companion to `PROJECT_PLAN.md`
 > Date: 2026-10-02
 > Authority adoption: v507 overseas growth decisions adopted into current planning authority by v2026.10.03.509.
 > Korean counterpart: [PRODUCT_GROWTH_PLAN.ko.md](PRODUCT_GROWTH_PLAN.ko.md)
+
+## SEO demand portfolio integration — v527
+
+Moneyverse acquisition now uses the v527 keyword-demand portfolio instead of treating “more SEO pages” as a growth strategy.
+
+- Korea and overseas have separate cluster priorities and market-native validation.
+- The 10,473 candidate-query registry is discovery inventory only; measured demand and independent value decide publication.
+- Search landings must deliver the answer/tool first, then a second useful action, then optional signup where persistence or personalization creates value.
+- Retention is measured by landing family through activation and D1/D7/D30, so traffic that never creates useful product engagement is not a growth win.
+- Detailed authority: [SEO_DEMAND_KEYWORD_EXPANSION_SPEC.md](SEO_DEMAND_KEYWORD_EXPANSION_SPEC.md).
 
 ## 1. Product objective
 
