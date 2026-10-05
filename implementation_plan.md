@@ -1737,6 +1737,66 @@
 - `npm run typecheck` 통과 확인.
 - Git 커밋 & 푸시 후 자동 배포 파이프라인 가동.
 
+---
+
+## 🚀 [v110 Specification] 실시간 검색 자동완성 팝오버, 배당 캘린더 Excel 호환 CSV 내보내기 및 국내 2026 증여세 계산기 롱테일 pSEO 허브 구축
+
+### 1. 요구사항 및 배경
+- 사용자 요청:
+  1. "실시간 검색 자동완성 팝오버: 50대 금융 용어사전 및 580개 주식 계산기 실시간 키워드 추천 드롭다운."
+  2. "배당 캘린더 CSV/엑셀 내보내기: 1~12월 세후 배당 현금흐름 엑셀 다운로드 기능."
+  3. "그리고 국내외 seo 검색어 더 많이찾아줘 래퍼런스 많이찾고 실행해봐 검색률 많이 나오게"
+- 구현 내용:
+  - `frontend/src/components/search-autocomplete-popover.tsx`: 50대 금융 용어사전, 60대 배당주, 580개 주식 물타기 계산기, 대출/연봉 프리셋 통합 인덱싱, 키보드 단축키(위/아래/Enter/ESC) 탐색, 44px 모바일 터치 타깃 준수.
+  - `frontend/src/components/dividend-calendar-widget.tsx`: 1~12월 세후 배당 현금흐름 엑셀 호환 UTF-8 BOM(`\uFEFF`) CSV 내보내기 버튼 및 로직 구현.
+  - `frontend/src/config/pseo-gift-tax.config.ts`: 2026 개정 세법 누진세율 및 13대 고수요 롱테일 프리셋(성인자녀 5천만원, 미성년 2천만원, 배우자 6억원, 혼인·출산 1.5억원 등) 구축.
+  - `frontend/src/app/tools/gift-tax-calculator/page.tsx` & `gift-tax-interactive-client.tsx`: 실시간 세액 계산기 및 `CalculatorSaveAction` 연동.
+  - `frontend/src/app/tools/gift-tax-calculator/[preset]/page.tsx`: 13개 정적 프리렌더링 롱테일 URL 구축.
+  - `frontend/src/app/sitemap.ts` & `frontend/src/config/routes.config.ts`: 사이트맵 및 SSOT 등록 완료.
+
+---
+
+## 🚀 [v111 Specification] 글로벌 영미권 복리 & FIRE 은퇴 계산기 pSEO 허브 구축 및 활성 사용자 안착(Intent-to-Play Activation) 퍼널 풀스택 완결
+
+### 1. 요구사항 및 배경
+- 사용자 요청: "해외 기준 seo 페이지 몇개 더 많은고 단순 검색어만 만ㅇㅎ이하지말고 ㅅ길제 시용자가 될수있게셋팅해줘"
+- 목표: 단순한 키워드 공장이 아닌 실제 검색 유입자가 활성 사용자로 안착되는 글로벌 핀테크 전환 루프(Intent-to-Play Activation) 구축.
+- 글로벌 영미권 P0 핵심 수요인 **복리 & FIRE 은퇴 계산기 (`/[locale]/tools/compound-interest-calculator/[preset]`)**를 영어(EN), 일본어(JA), 중국어(ZH) 3개 국어로 정적 프리렌더링 구축.
+
+### 2. 세부 구현 및 아키텍처
+1. **글로벌 다국어 복리/FIRE 데이터셋 & 계산 엔진 (`frontend/src/config/pseo-compound-global.config.ts`)**:
+   - `CompoundSimulationInput` 및 `CompoundSimulationResult` 인터페이스 정의.
+   - 월복리 복리 공식 유틸리티 `calculateCompoundInterest` 구현:
+     $$A = P(1 + r/12)^{12t} + PMT \times \frac{(1 + r/12)^{12t} - 1}{r/12}$$
+   - 5대 핵심 글로벌 롱테일 프리셋 탑재:
+     - `1000-month-10-years`: $1,000/Month for 10 Years at 8% S&P 500 Index
+     - `fire-early-retirement-1m`: $1,000,000 FIRE Milestones (4% Rule Safe Withdrawal)
+     - `500-month-20-years`: $500 Monthly Dividend & Growth Reinvestment
+     - `100-month-high-yield`: $100/Month High Yield Compounding Snowball
+     - `college-fund-18-years`: 18-Year Child Education & College Fund Simulator
+   - EN, JA, ZH 3개 언어별 현지화 메타데이터, FAQ 3문 3답, 타깃 오디언스, 행동 유도(CTA) 매핑.
+
+2. **인터랙티브 클라이언트 시뮬레이터 (`frontend/src/app/[locale]/tools/compound-interest-calculator/compound-calculator-client.tsx`)**:
+   - 실시간 초기 투자금, 월 적립액, 기대 연수익률, 투자 기간 슬라이더 및 입력 필드.
+   - 금융 수치 고대비 모노스페이스(`font-mono tabular-nums`) 표기 및 최종 자산, 원금, 복리 이자 비중 시각화 바.
+   - `CalculatorSaveAction` 연동: 비로그인 유저의 복리 시뮬레이션 결과를 LocalStorage에 1초 보관 후 로그인 시 원장 자동 승격.
+   - **글로벌 사용자 안착 온보딩 퀘스트 브릿지**:
+     - '🎁 Claim 10,000 WLD Free Starter Grant' 원클릭 회원가입 모달 트리거.
+     - 가입 즉시 가상 중앙은행 10,000 WLD 지급 및 모의투자 포트폴리오로 방금 계산한 ETF/주식 종목 첫 매수 튜토리얼 딥링크 연계.
+
+3. **다국어 정적 라우트 및 롱테일 프리렌더링**:
+   - `frontend/src/app/[locale]/tools/compound-interest-calculator/page.tsx`: EN, JA, ZH 메인 인터랙티브 계산기 허브.
+   - `frontend/src/app/[locale]/tools/compound-interest-calculator/[preset]/page.tsx`: 3개 언어 × 5개 프리셋 = 15개 롱테일 정적 URL 정적 생성 (`generateStaticParams`).
+   - JSON-LD 구조화 데이터 (`FinancialProduct`, `SoftwareApplication`, `FAQPage`) 주입.
+
+4. **프록시 및 사이트맵 SSOT 등록**:
+   - `frontend/src/proxy.ts`: 물리적 파일 라우트 `/[locale]/tools/compound-interest-calculator`를 rewrite 우회하도록 패스스루 처리.
+   - `frontend/src/app/sitemap.ts`: 3개 언어 메인 및 15개 롱테일 프리셋 URL 사이트맵 등록.
+
+### 3. 검증 및 결과
+- `npm run typecheck` 통과 (`tsc --noEmit` exit code 0).
+- Git 커밋 및 푸시 후 실서버 프로덕션 무중단 배포 검증.
+
 
 
 
