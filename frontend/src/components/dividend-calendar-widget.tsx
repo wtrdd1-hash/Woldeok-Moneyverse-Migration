@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Calendar, DollarSign, Plus, Trash2, TrendingUp, Sparkles, AlertCircle, ArrowRight, Check } from 'lucide-react';
+import { Calendar, DollarSign, Plus, Trash2, TrendingUp, Sparkles, AlertCircle, ArrowRight, Check, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -91,7 +91,6 @@ export function DividendCalendarWidget() {
       if (stockInfo.frequency === '월') {
         activeMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
       } else if (stockInfo.frequency === '분기') {
-        // 미국 주식 및 국내 분기배당주 (통상 3, 6, 9, 12월 또는 4, 5, 8, 11월)
         if (stockInfo.exDividendDate.includes('1월') || stockInfo.exDividendDate.includes('4월')) {
           activeMonths = [1, 4, 7, 10];
         } else if (stockInfo.exDividendDate.includes('2월') || stockInfo.exDividendDate.includes('5월')) {
@@ -102,7 +101,6 @@ export function DividendCalendarWidget() {
       } else if (stockInfo.frequency === '반기') {
         activeMonths = [6, 12];
       } else {
-        // 연배당
         activeMonths = [12];
       }
 
@@ -135,6 +133,47 @@ export function DividendCalendarWidget() {
   // 최대 월 수령액 (차트 높이 기준)
   const maxMonthly = Math.max(...monthlyData.map((m) => m.totalKrw), 1);
 
+  // 1초 Excel 호환 CSV 파일 내보내기 (UTF-8 with BOM)
+  const exportToCsv = () => {
+    const headers = ['지급월', '종목명', '티커', '보유주수', '월간세후실수령액(KRW)'];
+    const rows: string[][] = [];
+
+    monthlyData.forEach((m) => {
+      if (m.stocks.length === 0) {
+        rows.push([`${m.month}월`, '지급 종목 없음', '-', '0', '0']);
+      } else {
+        m.stocks.forEach((s) => {
+          const item = portfolio.find((p) => p.ticker === s.ticker);
+          rows.push([
+            `${m.month}월`,
+            `"${s.name.replace(/"/g, '""')}"`,
+            s.ticker,
+            item ? item.shares.toString() : '0',
+            s.amountKrw.toString(),
+          ]);
+        });
+      }
+    });
+
+    // 합계 요약 행 추가
+    rows.push(['']);
+    rows.push(['요약', '연간 총 세후 배당금', '', '', annualTotalNet.toString()]);
+    rows.push(['요약', '월평균 예상 실수령액', '', '', monthlyAverage.toString()]);
+    rows.push(['요약', '적용 세율', '15.4% (배당소득세 14% + 지방소득세 1.4%)', '', '']);
+    rows.push(['요약', '적용 환율(USD)', `${exchangeRate} KRW`, '', '']);
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `월덕머니버스_배당캘린더_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Card className="border-border/80 bg-card/90 shadow-sm overflow-hidden" id="dividend-calendar">
       <CardHeader className="p-5 sm:p-6 pb-3 border-b border-border/50 bg-muted/20">
@@ -150,9 +189,21 @@ export function DividendCalendarWidget() {
               보유 주식 수에 따른 1월~12월 세후 실수령 배당금 타임라인 시뮬레이터 (15.4% 배당세 반영)
             </CardDescription>
           </div>
-          <Badge variant="outline" className="w-fit text-xs font-mono uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 shrink-0">
-            Interactive Widget
-          </Badge>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportToCsv}
+              className="h-8 gap-1.5 text-xs font-semibold hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400 border-border/80 shadow-xs"
+              title="1~12월 배당금 일정을 Excel 호환 CSV 파일로 다운로드합니다"
+            >
+              <Download className="size-3.5" />
+              <span>CSV 내보내기</span>
+            </Button>
+            <Badge variant="outline" className="text-xs font-mono uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+              Interactive
+            </Badge>
+          </div>
         </div>
       </CardHeader>
 

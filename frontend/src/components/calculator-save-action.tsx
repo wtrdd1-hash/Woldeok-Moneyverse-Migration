@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Bookmark, BookmarkCheck, Sparkles, Bell, ArrowRight, ShieldCheck, CheckCircle2, X } from 'lucide-react';
 
 export interface CalculatorScenarioData {
-  type: 'stock' | 'retirement' | 'pension' | 'isa';
+  type: 'stock' | 'retirement' | 'pension' | 'isa' | 'tax';
   title: string;
   badge: string;
   primaryMetric: {

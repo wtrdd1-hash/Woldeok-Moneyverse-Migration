@@ -212,6 +212,16 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
     group: 'public',
   },
   {
+    path: '/tools/gift-tax-calculator',
+    label: { ko: '2026 증여세 계산기 & 면제 한도', en: '2026 Gift Tax Calculator', ja: '2026 贈与税計算機', zh: '2026 赠与税计算器' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.95,
+    changeFrequency: 'daily',
+    group: 'public',
+  },
+  {
     path: '/tools/compound-calculator/10m-3y-5p',
     label: { ko: '1천만원 3년 연 5% 복리 계산기', en: '10M 3Y 5% Compound Calculator', ja: '1000万3年5%複利計算機', zh: '1000万3年5%复利计算器' },
     isPublic: true,

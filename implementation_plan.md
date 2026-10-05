@@ -1675,8 +1675,43 @@
 
 ### 3. 검증 및 배포 계획
 - `npm run typecheck` 통과 확인.
-- Git 커밋 & 푸시 후 원격 프로덕션 서버(`easy-scraping.com`) 무중단 배포.
-- 모바일 및 대화면 라이브 렌더링 검증.
+- Git 커밋 & 푸시 후 자동 배포 파이프라인 가동.
+
+---
+
+## 🚀 [v110 Specification] 실시간 검색 자동완성 팝오버 & 배당 캘린더 CSV 내보내기 & 2026 증여세 계산기 pSEO 대량 확장
+
+### 1. 요구사항 및 배경
+- 사용자의 "실시간 검색 자동완성 팝오버, 배당 캘린더 CSV/엑셀 내보내기, 국내외 SEO 검색어 더 많이 찾아줘 래퍼런스 많이 찾고 실행해봐 검색률 많이 나오게" 요청 완벽 구현:
+  1. **실시간 검색 자동완성 팝오버 (`SearchAutocompletePopover`)**:
+     - 50대 금융 용어사전, 60대 배당주, 580개 주식 계산기, 50대 대출이자, 50대 연봉 실수령액 통합 인덱싱.
+     - 키보드 위/아래 방향키 이동 및 Enter 선택, 5개 카테고리 태그 뱃지, ESC 닫기.
+     - `/guide/glossary` 허브 상단에 실시간 스마트 검색바로 마운트.
+  2. **배당 캘린더 CSV/Excel 1초 내보내기 (`DividendCalendarWidget`)**:
+     - 1월~12월 보유 종목별/월별 세후 실수령액 및 연간 총액, 월평균 수령액, 세율/환율 요약을 담은 Excel 호환 CSV (UTF-8 BOM `\uFEFF`) 다운로드 기능 탑재.
+  3. **국내외 초고수요 2026 증여세 pSEO 허브 & 13개 롱테일 프리셋 (`/tools/gift-tax-calculator`)**:
+     - 2026년 최신 상속세 및 증여세법 개정안 반영: 배우자 6억원, 성인 자녀 5천만원, 혼인·출산 1.5억원 비과세 공제.
+     - 과세표준 구간별 세율(10%~50%) 및 자진신고 3% 공제 반영 실시간 계산기 및 13개 롱테일 정적 프리렌더링 URL 신설.
+     - 고단가 AdSense 인아티클/멀티플렉스 마운트 + 토스형 `CalculatorSaveAction` 1초 저장 연동 + 사이트맵 자동 등록.
+
+### 2. 세부 컴포넌트 구현 명세
+1. `frontend/src/components/search-autocomplete-popover.tsx` (신규):
+   - 통합 검색 인덱스 및 실시간 추천 팝오버 컴포넌트.
+2. `frontend/src/components/dividend-calendar-widget.tsx` (수정):
+   - `exportToCsv` 함수 및 헤더 "CSV 내보내기" 버튼 마운트.
+3. `frontend/src/config/pseo-gift-tax.config.ts` (신규):
+   - 2026 증여세 계산 공식 및 13대 핵심 롱테일 프리셋 데이터셋.
+4. `frontend/src/app/tools/gift-tax-calculator/page.tsx` & `gift-tax-interactive-client.tsx` (신규):
+   - 증여세 메인 인터랙티브 계산기 및 4대 비과세 한도 배너.
+5. `frontend/src/app/tools/gift-tax-calculator/[preset]/page.tsx` (신규):
+   - 13개 프리셋 정적 프리렌더링 페이지.
+6. `frontend/src/app/sitemap.ts` & `routes.config.ts`:
+   - 증여세 메인 및 13개 프리셋 사이트맵 등록.
+
+### 3. 검증 및 배포 계획
+- `npm run typecheck` 통과 확인.
+- Git 커밋 & 푸시 후 원격 자동 배포 파이프라인 가동.
+
 
 ---
 

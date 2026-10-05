@@ -11,6 +11,7 @@ import { getServerLocale } from '@/lib/locale-server';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { GLOSSARY_TERMS, GLOSSARY_CATEGORIES } from '@/config/pseo-glossary.config';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
+import { SearchAutocompletePopover } from '@/components/search-autocomplete-popover';
 
 export const revalidate = 3600;
 
@@ -130,6 +131,18 @@ export default async function GlossaryPage() {
             <span className="text-xs text-muted-foreground font-medium">구글 검색 색인</span>
             <div className="text-xl sm:text-2xl font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">100% 정적 생성</div>
           </div>
+        </div>
+
+        {/* 실시간 금융 용어 & 계산기 자동완성 검색창 */}
+        <div className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+              <Sparkles className="size-4 text-primary" />
+              실시간 스마트 검색 & 바로가기
+            </span>
+            <span className="text-[11px] text-muted-foreground">50대 용어 • 580개 주식 • 배당/대출 계산기 통합</span>
+          </div>
+          <SearchAutocompletePopover placeholder="금융 용어(PER, ROE...), 주식(삼성전자, 애플...), 배당주, 대출이자 검색..." />
         </div>
 
         {/* 최상단 AdSense 광고 */}
