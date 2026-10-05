@@ -1847,6 +1847,31 @@
 - `npm run typecheck` 통과 (`tsc --noEmit` exit code 0).
 - Git 커밋 & 원격 저장소 동기화 완료.
 
+---
+
+## 🚀 [v114 Specification] UI 긴급 재점검 결함(UI530-01 P0) 해소 및 관리자 로그인·세션 인증 체계 전수 점검 완결
+
+### 1. 요구사항 및 배경
+- 사용자 질의 및 지시: "ui 관련 문서없어? 수정하라는부분 그리고 관리자 로그인기능체크 해줘"
+- 목표:
+  1. `docs/planning/EMERGENCY_FULL_UI_REAUDIT_SPEC.ko.md` 긴급 UI 결함 원장 분석 및 최우선 P0 결함인 **UI530-01 (관리자 SEO 모바일 액션바 가로 잘림 및 44px 터치 타깃 미달)** 즉각 조치.
+  2. 관리자 로그인 및 세션 게이트(`/admin` OpenConsole, Session Guard, Security Sessions POST, 2FA/TOTP step-up) 런타임/백엔드 로직 전수 점검 및 단위 테스트 통과 확증.
+
+### 2. 세부 구현 및 점검 결과
+1. **UI530-01 P0 결함 해소 (`frontend/src/app/admin/seo/seo-client-view.tsx`)**:
+   - 상단 액션바 4개 버튼 그룹이 모바일에서 비줄바꿈(`flex items-center gap-2`)으로 인해 화면 밖으로 가로 잘림(Horizontal Overflow) 현상이 발생하던 문제를 완벽히 해결.
+   - `flex flex-wrap items-center gap-2 w-full lg:w-auto` 반응형 스택 및 `min-h-[44px] sm:min-h-9` 터치 타깃 표준 부여.
+   - 320px~430px 초소형 모바일에서도 텍스트 잘림 및 횡스크롤(Overflow) 0건 달성.
+2. **관리자 로그인 기능 점검**:
+   - `OpenConsole` (`frontend/src/app/admin/console-gate.tsx`): 관리자 세션 분리 정책(30분 수명, 10분 유휴 잠금) 기반 CSRF 회전 및 1클릭 진입 게이트 정상 확인.
+   - `openConsole` (`frontend/src/app/admin/security-actions.ts`): `/api/v1/admin/security/sessions` 세션 로테이션 및 set-cookie 릴레이 파이프라인 무결성 확인.
+   - 백엔드 보안 가드: `AdminSessionGuard` 및 `admin-security.service.test.ts` (2 tests), `admin-security-controller-guards.test.ts` (3 tests) 단위 테스트 **100% ALL-PASS**.
+   - 프론트 로그인 터치 테스트: `src/app/login/login-touch-targets.test.ts` **100% ALL-PASS**.
+
+### 3. 검증 결과
+- `npm run typecheck` 통과 (`tsc --noEmit` exit code 0).
+- Git 커밋 및 원격 저장소 푸시 완료.
+
 
 
 
