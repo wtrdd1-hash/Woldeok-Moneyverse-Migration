@@ -109,7 +109,8 @@ describe.skipIf(!DATABASE_URL)('administrator traffic and AI status against a re
           `INSERT INTO public.user_activity_logs
             (user_id, session_id, event_type, path, metadata, created_at)
            VALUES
-            ($1, 'qa-session-a', 'page_view', '/guide', '{"referrer":"https://www.google.com/search?q=moneyverse","country":"KR"}', clock_timestamp()),
+            ($1, 'qa-session-admin', 'page_view', '/admin', '{"referrer":"https://admin.example.invalid/","country":"KR"}', clock_timestamp()),
+            (NULL, 'qa-session-a', 'page_view', '/guide', '{"referrer":"https://www.google.com/search?q=moneyverse","country":"KR"}', clock_timestamp()),
             (NULL, 'qa-session-b', 'page_view', '/', '{"referrer":"https://discord.com/channels/123","country":"US"}', clock_timestamp()),
             (NULL, 'qa-session-b', 'page_view', '/shop', '{}', clock_timestamp())`,
           [admin],
