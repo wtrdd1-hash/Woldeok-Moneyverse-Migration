@@ -1,3 +1,12 @@
+## v2026.10.05.528 — 전체 UI 재검토 (감사 전용 / 릴리스 차단)
+
+- **감사 버전:** `v2026.10.05.528`; 브랜치 `audit/full-ui-recheck-v2026.10.05.528`.
+- 검토 중 main이 `660c5ebb`, 이후 `75584074`로 두 번 전진해 두 동시 UI 변경을 확인하고 최종 main 위로 rebase 후 재검토함.
+- 최신 라우트 인벤토리: 138페이지 / 관리자 25 / 동적 24.
+- exact 후보 증거 부족, 한국어 fallback 권한 이탈, 320px 온보딩 클리핑, 44px 미만 상호작용 타깃, 전역 locale 누수, 내비게이션 권한 충돌을 P0/P1 차단 이슈로 기록함.
+- Production은 `7080738e`(112페이지), Test는 `9bdafd86`(122페이지)이며 둘 다 최신 main UI 후보가 아님.
+- 애플리케이션 코드, Test/Production 릴리스, DB 변경, 운영 승격은 수행하지 않았고 수정 후 exact-SHA 5회 전체 라우트 브라우저 QA 전까지 운영 승격을 차단함.
+
 ## v2026.10.04.524 — Google Search Console 실제 자격 증명 영속 저장 및 Search Analytics 복구
 
 - **구현 버전**: root plan v95; 브랜치 `fix/gsc-service-account-20261004`.

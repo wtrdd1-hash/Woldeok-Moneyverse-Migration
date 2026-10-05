@@ -1,3 +1,12 @@
+## v2026.10.05.528 — Full UI Recheck (Audit Only / Release Blocked)
+
+- **Audit Version:** `v2026.10.05.528`; branch `audit/full-ui-recheck-v2026.10.05.528`.
+- Main advanced twice during review (`660c5ebb`, then `75584074`); inspected both concurrent UI changes and rebased the audit onto final main without overwriting them.
+- Regenerated the current route inventory: 138 pages / 25 administrator / 24 dynamic routes.
+- Recorded P0/P1 blockers for exact-candidate evidence, Korean fallback authority drift, 320px onboarding clipping, sub-44px interaction targets, global locale leakage and navigation-authority conflict.
+- Production is `7080738e` (112 pages); Test is `9bdafd86` (122 pages); neither is the current-main UI candidate.
+- No application code, Test release, Production release, DB change or promotion was performed. Production promotion remains blocked pending remediation and exact-SHA five-pass full-route browser QA.
+
 ## v2026.10.04.524 — Google Search Console Real Credential Persistence & Search Analytics Repair
 
 - **Implementation Version**: root plan v95; branch `fix/gsc-service-account-20261004`.
