@@ -1,5 +1,5 @@
 import React from 'react';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, Landmark, Info, HelpCircle, ShieldCheck } from 'lucide-react';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';

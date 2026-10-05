@@ -1,5 +1,5 @@
 import React from 'react';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Coins, Calendar, PieChart, ShieldCheck, CheckCircle2, AlertTriangle, TrendingUp } from 'lucide-react';

@@ -24,9 +24,8 @@ import {
   getOnboardingState,
   claimOnboardingReward,
   getLocalizedOnboardingStep,
-  OnboardingState,
-  OnboardingActionType,
 } from '@/lib/onboarding-tracker';
+import type { OnboardingState, OnboardingActionType } from '@/lib/onboarding-tracker';
 import { playWinSound, playCoinCollectSound } from '@/lib/audio-effects';
 
 const DISMISS_STORAGE_KEY = 'wdmv_onboarding_dismissed_until';

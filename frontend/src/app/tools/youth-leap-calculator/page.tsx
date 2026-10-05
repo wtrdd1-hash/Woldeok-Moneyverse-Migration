@@ -162,16 +162,18 @@ export default function YouthLeapCalculatorPage() {
                 개인 총급여 소득 구간
               </span>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                {[
-                  { id: 'tier1', label: '2,400만원 이하', sub: '월 최대 3.3만원 매칭' },
-                  { id: 'tier2', label: '3,600만원 이하', sub: '월 최대 2.3만원 매칭' },
-                  { id: 'tier3', label: '4,800만원 이하', sub: '월 최대 2.2만원 매칭' },
-                  { id: 'tier4', label: '6,000만원 이하', sub: '월 최대 2.1만원 매칭' },
-                ].map((tier) => (
+                {(
+                  [
+                    { id: 'tier1', label: '2,400만원 이하', sub: '월 최대 3.3만원 매칭' },
+                    { id: 'tier2', label: '3,600만원 이하', sub: '월 최대 2.3만원 매칭' },
+                    { id: 'tier3', label: '4,800만원 이하', sub: '월 최대 2.2만원 매칭' },
+                    { id: 'tier4', label: '6,000만원 이하', sub: '월 최대 2.1만원 매칭' },
+                  ] as const
+                ).map((tier) => (
                   <button
                     key={tier.id}
                     type="button"
-                    onClick={() => setIncomeTier(tier.id as any)}
+                    onClick={() => setIncomeTier(tier.id)}
                     className={`p-2.5 rounded-xl border text-left transition-all ${
                       incomeTier === tier.id
                         ? 'bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
