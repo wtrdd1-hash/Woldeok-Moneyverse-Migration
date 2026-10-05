@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useViewer } from '@/lib/use-viewer';
+import { isAdministrator } from '@/lib/viewer-state';
 
 declare global {
   interface Window {
@@ -26,11 +28,14 @@ export function AdSenseAd({
   readonly format?: string | undefined;
   readonly fullWidthResponsive?: boolean | undefined;
 }) {
+  const viewer = useViewer();
+  const isAdmin = viewer !== null && isAdministrator(viewer);
   const requested = useRef(false);
   const adRef = useRef<HTMLModElement | null>(null);
   const [status, setStatus] = useState<AdStatus>('pending');
 
   useEffect(() => {
+    if (isAdmin) return;
     const element = adRef.current;
     if (!element || requested.current) return;
 
@@ -86,7 +91,7 @@ export function AdSenseAd({
     };
   }, []);
 
-  if (status === 'unfilled') return null;
+  if (isAdmin || status === 'unfilled') return null;
 
   return (
     <section aria-label="스폰서 광고" className="my-5 border-y border-border/30 py-4 sm:my-6 sm:py-5">

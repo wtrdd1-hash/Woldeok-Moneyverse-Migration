@@ -2,8 +2,15 @@
 
 import React from 'react';
 import { InArticleAdvertisement } from '@/components/public-advertisement';
+import { useViewer } from '@/lib/use-viewer';
+import { isAdministrator } from '@/lib/viewer-state';
 
 export function DesktopStickyAdRails() {
+  const viewer = useViewer();
+  if (viewer !== null && isAdministrator(viewer)) {
+    return null;
+  }
+
   return (
     <>
       {/* 좌측 사이드 레일 배너: 1680px 이상 초광폭 데스크톱 화면에서만 안전하게 표시 (본문 오버랩 원천 차단) */}

@@ -57,10 +57,17 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url), { status: 307 });
   }
 
-  // Historic blog routes: 301 Permanent Redirect to capture search traffic into Moneyverse developer career & tools
+  // Historic blog routes: Return HTTP 410 Gone to cleanly remove obsolete tech-blog URLs from Google/Naver index and avoid Soft 404 penalties
   if (pathname.startsWith('/entry/') || pathname.startsWith('/blog/') || pathname.startsWith('/post/')) {
-    const redirectUrl = new URL('/guide/career-mastery?ref=legacy_tech_blog', request.url);
-    return NextResponse.redirect(redirectUrl, 301);
+    const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"/><title>이전 블로그 콘텐츠 안내 (410 Gone) | 월덕 머니버스</title><meta name="robots" content="noindex, nofollow"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>body{background:#090d16;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;text-align:center}.card{max-width:540px;background:#0f172a;border:1px solid #1e293b;border-radius:24px;padding:40px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5)}h1{font-size:22px;color:#f8fafc;margin:0 0 12px}p{font-size:14px;color:#94a3b8;line-height:1.6;margin:0 0 24px}a{display:inline-block;background:#2563eb;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:12px;text-decoration:none;transition:background 0.2s}a:hover{background:#1d4ed8}</style></head><body><div class="card"><h1>과거 블로그 글 서비스 종료 안내</h1><p>해당 기술 블로그 게시물은 서비스 통합 및 도메인 개편으로 인해 영구 삭제(410 Gone)되었습니다.<br/>월덕 머니버스의 실시간 가상 주식, 복리 예금 및 300+개 금융 계산기 도구를 이용해 보세요.</p><a href="/tools">월덕 머니버스 금융 도구 바로가기 →</a></div></body></html>`;
+    return new NextResponse(html, {
+      status: 410,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+        'X-Robots-Tag': 'noindex, nofollow',
+      },
+    });
   }
 
   // Check for explicit query parameter (?lang=en or ?locale=ja)

@@ -19,6 +19,17 @@ export function AdminComprehensiveTelemetryMatrix({
   controls = [],
 }: AdminComprehensiveTelemetryMatrixProps) {
   const [activeTab, setActiveTab] = useState<MatrixTab>('retention');
+  const [excludeAdmin, setExcludeAdmin] = useState(true);
+
+  // 관리자 계정 필터링 (관리자 역할 보유자 또는 관리자 접속 이력 유저)
+  const effectiveUsers = useMemo(() => {
+    if (!excludeAdmin) return users;
+    return users.filter((u) => !u.is_admin && !u.last_admin_at);
+  }, [users, excludeAdmin]);
+
+  const excludedAdminCount = useMemo(() => {
+    return users.filter((u) => !!u.is_admin || !!u.last_admin_at).length;
+  }, [users]);
 
   // 1. 코호트 & 유저 리텐션 계산 (HAU, DAU, WAU, MAU, 신규가입률, 활동고착도)
   const retentionStats = useMemo(() => {
@@ -36,7 +47,7 @@ export function AdminComprehensiveTelemetryMatrix({
     let newUsersThisWeek = 0;
     let dormant = 0;
 
-    users.forEach((u) => {
+    effectiveUsers.forEach((u) => {
       const lastActiveTime = u.last_seen_at
         ? new Date(u.last_seen_at).getTime()
         : u.last_login_at
@@ -63,7 +74,7 @@ export function AdminComprehensiveTelemetryMatrix({
       }
     });
 
-    const totalUsers = users.length;
+    const totalUsers = effectiveUsers.length;
     const stickiness = mau > 0 ? ((dau / mau) * 100).toFixed(1) : '0.0';
     const dormantRate = totalUsers > 0 ? ((dormant / totalUsers) * 100).toFixed(1) : '0.0';
 
@@ -79,7 +90,7 @@ export function AdminComprehensiveTelemetryMatrix({
       dormant,
       dormantRate,
     };
-  }, [users]);
+  }, [effectiveUsers]);
 
   // 2. 가상 경제 통화량 & 유동성 지표 (M0, M1, M2, 복식부기 건전성, 24h 유동성)
   const monetaryStats = useMemo(() => {
@@ -89,7 +100,7 @@ export function AdminComprehensiveTelemetryMatrix({
     let stockEvalTotal = 0;
     let m2Total = 0;
 
-    users.forEach((u) => {
+    effectiveUsers.forEach((u) => {
       const cash = Number(u.cash_balance) || 0;
       const bank = Number(u.bank_balance) || 0;
       const bond = Number(u.bond_balance) || 0;
@@ -120,7 +131,7 @@ export function AdminComprehensiveTelemetryMatrix({
       ledgerDiff: deltaAmount,
       systemReserve: treasuryBalance,
     };
-  }, [users, health]);
+  }, [effectiveUsers, health]);
 
   // 3. 가상 주식 시장 마켓 심도 & 거래 지표
   const marketStats = useMemo(() => {
@@ -160,9 +171,9 @@ export function AdminComprehensiveTelemetryMatrix({
 
   // 4. 자산 계층별 5분위 분배율 & 경제 집중도 (Quintile Analysis)
   const wealthQuintiles = useMemo(() => {
-    if (users.length === 0) return [];
+    if (effectiveUsers.length === 0) return [];
 
-    const sortedUsers = [...users].sort(
+    const sortedUsers = [...effectiveUsers].sort(
       (a, b) => (Number(b.total_net_worth) || 0) - (Number(a.total_net_worth) || 0)
     );
 
@@ -205,7 +216,7 @@ export function AdminComprehensiveTelemetryMatrix({
     }
 
     return quintiles;
-  }, [users]);
+  }, [effectiveUsers]);
 
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-2xl backdrop-blur-xl">
@@ -222,8 +233,24 @@ export function AdminComprehensiveTelemetryMatrix({
           </p>
         </div>
 
-        {/* 탭 전환 버튼 바 (44px 모바일 터치 타깃 준수) */}
-        <div className="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* 관리자 트래픽 제외 필터 토글 버튼 (44px 터치 타깃) */}
+          <button
+            type="button"
+            onClick={() => setExcludeAdmin((prev) => !prev)}
+            title={excludeAdmin ? '현재 관리자 트래픽이 제외되어 순수 유저 데이터만 표시 중입니다. 클릭 시 관리자 포함' : '현재 관리자 트래픽이 포함되어 있습니다. 클릭 시 관리자 제외'}
+            className={`min-h-[44px] sm:min-h-9 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 ${
+              excludeAdmin
+                ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300 shadow-sm shadow-emerald-950'
+                : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
+            }`}
+          >
+            <span className={`inline-block w-2 h-2 rounded-full ${excludeAdmin ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+            {excludeAdmin ? `관리자 트래픽 제외됨 (${excludedAdminCount}명)` : '관리자 트래픽 포함됨'}
+          </button>
+
+          {/* 탭 전환 버튼 바 (44px 모바일 터치 타깃 준수) */}
+          <div className="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800">
           <button
             type="button"
             onClick={() => setActiveTab('retention')}
@@ -270,6 +297,7 @@ export function AdminComprehensiveTelemetryMatrix({
           </button>
         </div>
       </div>
+    </div>
 
       {/* 탭 1: 유저 코호트 & 리텐션 테이블 */}
       {activeTab === 'retention' && (

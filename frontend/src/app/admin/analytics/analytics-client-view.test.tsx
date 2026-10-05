@@ -93,7 +93,7 @@ describe('AnalyticsClientView', () => {
     },
   ];
 
-  it('renders all four chart cards properly', () => {
+  it('renders all chart cards properly and supports category filtering', () => {
     render(
       <AnalyticsClientView
         users={mockUsers}
@@ -103,11 +103,13 @@ describe('AnalyticsClientView', () => {
       />
     );
 
-    expect(screen.getByText(/실시간 텔레메트리 & 그래프 분석실/)).toBeDefined();
+    expect(screen.getByText(/통합 텔레메트리 & 전방위 통계 관제실/)).toBeDefined();
     expect(screen.getByText(/유저 활성도 & 코호트 텔레메트리 그래프/)).toBeDefined();
     expect(screen.getByText(/M0\/M1\/M2 가상 통화량 유동성 구성 비율/)).toBeDefined();
     expect(screen.getByText(/5분위 자산 계층 분배율 & 양극화 곡선/)).toBeDefined();
     expect(screen.getByText(/상위 상장 종목 시가총액 & 체결 랭킹/)).toBeDefined();
+    expect(screen.getByText(/SEO 검색엔진 크롤러 색인 관제/)).toBeDefined();
+    expect(screen.getByText(/전 시스템 300\+개 엔드포인트 가동 현황 매트릭스/)).toBeDefined();
   });
 
   it('triggers CSV download without error when clicking export button', () => {
@@ -126,5 +128,42 @@ describe('AnalyticsClientView', () => {
 
     expect(createElementSpy).toHaveBeenCalledWith('a');
     createElementSpy.mockRestore();
+  });
+
+  it('filters out administrator accounts by default and updates on toggle', () => {
+    const usersWithAdmin: AdminUser[] = [
+      ...mockUsers,
+      {
+        user_id: 'admin-1',
+        display_name: 'Super Administrator',
+        status: 'active',
+        is_admin: true,
+        last_admin_at: new Date().toISOString(),
+        cash_balance: '999999999',
+        bank_balance: '999999999',
+        total_net_worth: '1999999998',
+        created_at: new Date().toISOString(),
+        restricted_at: null,
+        restriction_reason: null,
+      },
+    ];
+
+    render(
+      <AnalyticsClientView
+        users={usersWithAdmin}
+        stocks={mockStocks}
+        health={mockHealth}
+        controls={mockControls}
+      />
+    );
+
+    // 기본적으로 관리자 제외 뱃지 및 버튼 표시 확인
+    expect(screen.getByText(/관리자 트래픽 제외 적용됨 \(1명\)/)).toBeDefined();
+    const toggleBtn = screen.getByRole('button', { name: /관리자 제외 \(1명\)/ });
+    expect(toggleBtn).toBeDefined();
+
+    // 토글 클릭하여 관리자 포함으로 전환
+    fireEvent.click(toggleBtn);
+    expect(screen.getByRole('button', { name: /관리자 포함/ })).toBeDefined();
   });
 });
