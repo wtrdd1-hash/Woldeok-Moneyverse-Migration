@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import { useViewer } from '@/lib/use-viewer';
+import { isAdministrator } from '@/lib/viewer-state';
 
 interface ActivityEvent {
   readonly eventId: string;
@@ -23,6 +25,8 @@ function eventId(): string {
 }
 
 export function ActivityTracker() {
+  const viewer = useViewer();
+  const isAdmin = viewer !== null && isAdministrator(viewer);
   const pathname = usePathname();
   // Query strings may contain member IDs, IP addresses, or other private filters.
   // Request proxy records the server route; client telemetry records pathname only.
@@ -62,9 +66,21 @@ export function ActivityTracker() {
     }
   }, []);
 
+  // If logged in as administrator, completely exclude all activity and traffic logging
+  useEffect(() => {
+    if (isAdmin) {
+      queueRef.current = [];
+      try {
+        localStorage.removeItem(RETRY_STORAGE_KEY);
+      } catch {
+        // ignore
+      }
+    }
+  }, [isAdmin]);
+
   // Flush queued events
   const flushQueue = useCallback(async (useBeacon = false) => {
-    if (queueRef.current.length === 0 || flushingRef.current) return;
+    if (isAdmin || queueRef.current.length === 0 || flushingRef.current) return;
     const batch = [...queueRef.current];
     const payload = JSON.stringify({ events: batch });
 
@@ -98,6 +114,7 @@ export function ActivityTracker() {
 
   // 1. Track page view and dwell time on route change
   useEffect(() => {
+    if (isAdmin) return;
     const prevPath = activePathRef.current;
     const now = Date.now();
     const dwellMs = Math.max(0, now - pageEnteredAtRef.current);
@@ -136,6 +153,7 @@ export function ActivityTracker() {
 
   // 2. Global click listener for buttons and links
   useEffect(() => {
+    if (isAdmin) return;
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
@@ -187,6 +205,7 @@ export function ActivityTracker() {
 
   // 3. Page unload / visibility change listener for final dwell time flush
   useEffect(() => {
+    if (isAdmin) return;
     const handleUnload = () => {
       const now = Date.now();
       const dwellMs = Math.max(0, now - pageEnteredAtRef.current);

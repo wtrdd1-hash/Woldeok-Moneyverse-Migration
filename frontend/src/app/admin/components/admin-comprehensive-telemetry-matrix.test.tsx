@@ -176,4 +176,39 @@ describe('AdminComprehensiveTelemetryMatrix', () => {
     expect(screen.getByText(/소득\/자산 분위/)).toBeDefined();
     expect(screen.getByText(/5분위 \(상위 20% 최상위층\)/)).toBeDefined();
   });
+
+  it('filters out administrator accounts by default and shows exclusion badge', () => {
+    const usersWithAdmin: AdminUser[] = [
+      ...mockUsers,
+      {
+        user_id: 'admin-99',
+        display_name: 'SysAdmin',
+        status: 'active',
+        is_admin: true,
+        last_admin_at: new Date().toISOString(),
+        cash_balance: '1000000000',
+        bank_balance: '1000000000',
+        total_net_worth: '2000000000',
+        created_at: new Date().toISOString(),
+        restricted_at: null,
+        restriction_reason: null,
+      },
+    ];
+
+    render(
+      <AdminComprehensiveTelemetryMatrix
+        users={usersWithAdmin}
+        stocks={mockStocks}
+        health={mockHealth}
+        controls={mockControls}
+      />
+    );
+
+    const toggleBtn = screen.getByRole('button', { name: /관리자 트래픽 제외됨 \(1명\)/ });
+    expect(toggleBtn).toBeDefined();
+
+    // 토글하여 관리자 포함
+    fireEvent.click(toggleBtn);
+    expect(screen.getByRole('button', { name: /관리자 트래픽 포함됨/ })).toBeDefined();
+  });
 });

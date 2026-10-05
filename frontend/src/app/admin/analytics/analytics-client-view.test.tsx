@@ -127,4 +127,41 @@ describe('AnalyticsClientView', () => {
     expect(createElementSpy).toHaveBeenCalledWith('a');
     createElementSpy.mockRestore();
   });
+
+  it('filters out administrator accounts by default and updates on toggle', () => {
+    const usersWithAdmin: AdminUser[] = [
+      ...mockUsers,
+      {
+        user_id: 'admin-1',
+        display_name: 'Super Administrator',
+        status: 'active',
+        is_admin: true,
+        last_admin_at: new Date().toISOString(),
+        cash_balance: '999999999',
+        bank_balance: '999999999',
+        total_net_worth: '1999999998',
+        created_at: new Date().toISOString(),
+        restricted_at: null,
+        restriction_reason: null,
+      },
+    ];
+
+    render(
+      <AnalyticsClientView
+        users={usersWithAdmin}
+        stocks={mockStocks}
+        health={mockHealth}
+        controls={mockControls}
+      />
+    );
+
+    // 기본적으로 관리자 제외 뱃지 및 버튼 표시 확인
+    expect(screen.getByText(/관리자 트래픽 제외 적용됨 \(1명\)/)).toBeDefined();
+    const toggleBtn = screen.getByRole('button', { name: /관리자 제외 \(1명\)/ });
+    expect(toggleBtn).toBeDefined();
+
+    // 토글 클릭하여 관리자 포함으로 전환
+    fireEvent.click(toggleBtn);
+    expect(screen.getByRole('button', { name: /관리자 포함/ })).toBeDefined();
+  });
 });

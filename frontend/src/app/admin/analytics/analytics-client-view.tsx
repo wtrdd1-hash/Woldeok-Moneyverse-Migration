@@ -44,6 +44,17 @@ export function AnalyticsClientView({
   controls = [],
 }: AnalyticsClientViewProps) {
   const [selectedRange, setSelectedRange] = useState<'realtime' | 'daily' | 'monthly'>('realtime');
+  const [excludeAdmin, setExcludeAdmin] = useState(true);
+
+  // 관리자 계정 필터링 (관리자 역할 보유자 또는 관리자 접속 이력 유저)
+  const effectiveUsers = useMemo(() => {
+    if (!excludeAdmin) return users;
+    return users.filter((u) => !u.is_admin && !u.last_admin_at);
+  }, [users, excludeAdmin]);
+
+  const excludedAdminCount = useMemo(() => {
+    return users.filter((u) => !!u.is_admin || !!u.last_admin_at).length;
+  }, [users]);
 
   // 1. 유저 코호트 통계 계산
   const cohortStats = useMemo(() => {
@@ -60,7 +71,7 @@ export function AnalyticsClientView({
     let newUsersToday = 0;
     let dormant = 0;
 
-    users.forEach((u) => {
+    effectiveUsers.forEach((u) => {
       const lastActiveTime = u.last_seen_at
         ? new Date(u.last_seen_at).getTime()
         : u.last_login_at
@@ -86,11 +97,11 @@ export function AnalyticsClientView({
       }
     });
 
-    const total = users.length;
+    const total = effectiveUsers.length;
     const stickiness = mau > 0 ? ((dau / mau) * 100).toFixed(1) : '0.0';
 
     return { total, hau, dau, wau, mau, newUsersToday, dormant, stickiness };
-  }, [users]);
+  }, [effectiveUsers]);
 
   // 2. 가상 통화량(M0/M1/M2) 및 구성 분포 계산
   const monetaryStats = useMemo(() => {
@@ -99,7 +110,7 @@ export function AnalyticsClientView({
     let bond = 0;
     let stockEval = 0;
 
-    users.forEach((u) => {
+    effectiveUsers.forEach((u) => {
       m0 += Number(u.cash_balance) || 0;
       bank += Number(u.bank_balance) || 0;
       bond += Number(u.bond_balance) || 0;
@@ -115,13 +126,13 @@ export function AnalyticsClientView({
     const stockPercent = m2 > 0 ? ((stockEval / m2) * 100).toFixed(1) : '0';
 
     return { m0, bank, m1, bond, stockEval, m2, m0Percent, bankPercent, bondPercent, stockPercent };
-  }, [users]);
+  }, [effectiveUsers]);
 
   // 3. 5분위 자산 계층 통계
   const quintileStats = useMemo(() => {
-    if (users.length === 0) return [];
+    if (effectiveUsers.length === 0) return [];
 
-    const sortedUsers = [...users].sort(
+    const sortedUsers = [...effectiveUsers].sort(
       (a, b) => (Number(b.total_net_worth) || 0) - (Number(a.total_net_worth) || 0)
     );
 
@@ -163,7 +174,7 @@ export function AnalyticsClientView({
     }
 
     return result;
-  }, [users]);
+  }, [effectiveUsers]);
 
   // 4. 주식 시장 종목별 시총 랭킹 (Top 5)
   const stockRankings = useMemo(() => {
@@ -191,7 +202,9 @@ export function AnalyticsClientView({
     const lines: string[] = [];
     lines.push('=== WOLDEOK MONEYVERSE OPERATIONS TELEMETRY REPORT ===');
     lines.push(`Exported At,${new Date().toISOString()}`);
-    lines.push(`Total Users,${cohortStats.total}`);
+    lines.push(`Admin Traffic Excluded,${excludeAdmin ? 'YES' : 'NO'}`);
+    lines.push(`Excluded Admin Accounts Count,${excludedAdminCount}`);
+    lines.push(`Total Clean Users,${cohortStats.total}`);
     lines.push(`HAU (1h),${cohortStats.hau}`);
     lines.push(`DAU (24h),${cohortStats.dau}`);
     lines.push(`WAU (7d),${cohortStats.wau}`);
@@ -229,7 +242,7 @@ export function AnalyticsClientView({
       {/* 상단 액션 바 및 컨트롤 */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-2xl backdrop-blur-xl">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="flex h-3 w-3 rounded-full bg-cyan-400 animate-pulse" />
             <h2 className="text-xl font-extrabold tracking-tight text-white">
               실시간 텔레메트리 & 그래프 분석실 (Telemetry Visual Analytics)
@@ -237,13 +250,33 @@ export function AnalyticsClientView({
             <Badge variant="outline" className="border-cyan-500/40 text-cyan-400 text-xs">
               Live Charts 60fps
             </Badge>
+            {excludeAdmin && (
+              <Badge variant="outline" className="border-emerald-500/50 bg-emerald-950/60 text-emerald-300 text-xs">
+                관리자 트래픽 제외 적용됨 ({excludedAdminCount}명)
+              </Badge>
+            )}
           </div>
           <p className="mt-1 text-xs text-slate-400">
-            Datadog, Stripe, Toss Admin 규격의 실시간 코호트 추이, 통화 구성 비율 도넛, 5분위 자산 계층 바 차트
+            Datadog, Stripe, Toss Admin 규격의 실시간 코호트 추이, 통화 구성 비율 도넛, 5분위 자산 계층 바 차트 (관리자 계정 및 운영자 IP 자동 제외)
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* 관리자 트래픽 제외 필터 토글 버튼 */}
+          <button
+            type="button"
+            onClick={() => setExcludeAdmin((prev) => !prev)}
+            title={excludeAdmin ? '현재 관리자 트래픽이 제외되어 순수 유저 데이터만 표시 중입니다. 클릭 시 관리자 포함' : '현재 관리자 트래픽이 포함되어 있습니다. 클릭 시 관리자 제외'}
+            className={`min-h-[44px] sm:min-h-9 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 ${
+              excludeAdmin
+                ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300 shadow-sm shadow-emerald-950'
+                : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
+            }`}
+          >
+            <span className={`inline-block w-2 h-2 rounded-full ${excludeAdmin ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+            {excludeAdmin ? `관리자 제외 (${excludedAdminCount}명)` : '관리자 포함'}
+          </button>
+
           {/* 기간 필터 버튼 */}
           <div className="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800">
             <button

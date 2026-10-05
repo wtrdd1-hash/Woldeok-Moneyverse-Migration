@@ -2068,6 +2068,78 @@
 - `npm --prefix frontend test -- src/app/admin/analytics/ src/app/admin/components/ --run`: 3개 테스트 파일 7개 테스트 100% All-Pass.
 - `npm --prefix frontend run typecheck`: exit code 0 (`tsc --noEmit` 에러 0건 무결점 통과).
 
+---
+
+## 🚀 [v121 Specification] 관리자 상단 서브 내비게이션 바 `[그래프 분석]` 탭 등록 및 원격 운영 서버(`easy-scraping.com`) 무중단 승격 배포 (`prod-v524`)
+
+### 1. 요구사항 및 배경
+- **사용자 문의 및 요청**: "통계볼수있그 페이지 어떤거야?", "응" (운영 서버 배포 승인)
+- **목표**:
+  1. 관리자 상단 고정 서브 내비게이션 탭(`ADMIN_TABS`)에 `/admin/analytics` (`그래프 분석`) 정식 등록하여 전 관리자 페이지에서 1클릭 접근 보장.
+  2. 원격 프로덕션 운영 서버(`easy-scraping.com`)에 최신 코드 형상(`5c497639`)을 `prod-v524`로 빌드 및 블루-그린 무중단 승격 배포.
+  3. 실서버 브라우저에서 `/admin/analytics` 및 상단 `[그래프 분석]` 탭의 정상 동작 검증.
+
+### 2. 세부 구현 및 배포 내역
+1. **관리자 서브 내비게이션 바 탭 등록 (`frontend/src/components/admin-sub-nav.tsx`)**:
+   - `ADMIN_TABS` 두 번째 항목으로 `{ href: '/admin/analytics', label: '그래프 분석', icon: BarChart3 }` 추가.
+   - 대시보드 바로 옆에 배치하여 관리자가 언제든 즉시 차트와 코호트를 모니터링 가능하도록 설정.
+2. **단위 테스트 업데이트 및 검증 (`frontend/src/components/admin-sub-nav.test.ts`)**:
+   - `ADMIN_TABS`에 `/admin/analytics` 탭이 올바르게 포함되어 있는지 검증하는 테스트 케이스 추가 (6건 100% Pass).
+3. **CI 파이프라인 검증**:
+   - GitHub Actions CI Run `#37311816831` (`Build Test Candidate`) All-Green 통과 (8m37s).
+4. **원격 운영 서버 무중단 승격 배포 (`prod-v524`)**:
+   - 원격 저장소 최신 `origin/main`(`5c497639`) 동기화.
+   - 새 릴리스 디렉토리 `/srv/moneyverse-data/releases/prod-v524` 생성 및 하드링크 복사.
+   - Next.js 프로덕션 빌드 완료 (559개 라우트 생성, `├ ƒ /admin/analytics` 포함).
+   - 심볼릭 링크 전환: `/srv/moneyverse-data/releases/production-current` -> `prod-v524`.
+   - `moneyverse-frontend.service` 재기동 완료.
+
+### 3. 검증 결과
+- **라이브 헬스체크**:
+  - `https://easy-scraping.com/`: HTTP 200 (정상)
+  - `https://easy-scraping.com/admin`: HTTP 200 (정상, `/admin/analytics` 탭 링크 렌더링 확인)
+  - `https://easy-scraping.com/admin/analytics`: HTTP 200 (정상, `그래프 분석` 타이틀 렌더링 확인)
+- **프론트엔드 전체 테스트**: 189개 파일 1,056개 테스트 100% 통과.
+
+---
+
+## 🚀 [v122 Specification] 관리자 계정·IP 트래픽 및 광고 통계 전면 제외 파이프라인 구축
+
+### 1. 요구사항 및 배경
+- **사용자 요청**: "관리자 계정트래픽는 제외하고 통게내줘 광고도 그렇고 접속도그렇고 ㄱ관리자계정접속앙'ㅣ핀느 통게에서 제오이할것"
+- **목표**:
+  1. 관리자 계정 세션 시 모든 Google AdSense 광고 및 스폰서 사이드 레일 렌더링/스크립트 실행 완전 차단 (부정 클릭 방지 및 광고 통계 왜곡 차단).
+  2. 클라이언트 활동 트래커(`ActivityTracker`) 및 `/api/activity/events` 라우트에서 관리자 활동 이벤트 수집 원천 배제.
+  3. 백엔드 및 데이터베이스 마이그레이션(`248-exclude-admin-traffic-and-ips.sql`)을 통해 `user_roles`의 관리자 계정 ID 및 `audit_logs.client_ip`의 관리자 접속 IP를 트래픽 통계 집계에서 영구 제외.
+  4. 관리자 텔레메트리 매트릭스(`AdminComprehensiveTelemetryMatrix`) 및 그래프 분석실(`AnalyticsClientView`)에서 관리자 계정을 필터링하고 UI 상에 `[관리자 트래픽 제외됨]` 토글 배너 제공.
+  5. 단위 테스트 및 타입 검사 100% 무결점 검증.
+
+### 2. 세부 구현 내역
+1. **광고 컴포넌트 관리자 차단**:
+   - `frontend/src/components/adsense-ad.tsx`: `useViewer()` 및 `isAdministrator` 연동하여 관리자 시 `null` 반환 및 adsbygoogle push 차단.
+   - `frontend/src/components/desktop-sticky-ad-rails.tsx`: 관리자 시 사이드 레일 배너 숨김 처리.
+   - `frontend/src/components/adsense-ad.test.tsx`: 관리자 접속 시 광고 요소 미렌더링 단위 테스트 작성 (2 tests Pass).
+2. **클라이언트 활동 트래커 & 이벤트 API 관리자 배제**:
+   - `frontend/src/components/activity-tracker.tsx`: 관리자 세션 시 큐 및 로컬 스토리지 삭제, 페이지뷰/클릭/체류시간 추적 즉시 스킵.
+   - `frontend/src/app/api/activity/events/route.ts`: 관리자 세션 쿠키 요청 시 백엔드 전달 없이 즉시 `{ recorded: 0, excluded: true }` 반환.
+3. **백엔드 & 데이터베이스 레이어**:
+   - `packages/database/migrations/248-exclude-admin-traffic-and-ips.sql`: `admin_activity_traffic_dashboard` 함수를 개선하여 관리자 계정 ID 및 관리자 감사 로그 접속 IP를 `page_views` 집계에서 완전 제외.
+   - `backend/src/admin/admin.repository.ts`: `AdminUserRow`에 `is_admin` 속성 추가 및 `users()` 메서드에서 관리자 여부 플래그 정식 매핑.
+   - `frontend/src/app/admin/types.ts`: `AdminUser` 인터페이스에 `is_admin?: boolean` 추가.
+4. **시각적 대시보드 및 리포트**:
+   - `frontend/src/app/admin/components/admin-comprehensive-telemetry-matrix.tsx`: `excludeAdmin` 상태 및 `effectiveUsers` 필터링 파이프라인 탑재. 상단 토글 버튼 배치.
+   - `frontend/src/app/admin/analytics/analytics-client-view.tsx`: 4대 차트 및 CSV 리포트 내보내기에 관리자 제외 데이터 적용 및 제외 메타데이터 기록.
+   - `frontend/src/app/admin/analytics/analytics-client-view.test.tsx` 및 `admin-comprehensive-telemetry-matrix.test.tsx`: 관리자 필터 검증 테스트 추가 (전체 통과).
+5. **사양서 문서 작성**:
+   - `docs/planning/ADMIN_TRAFFIC_AND_AD_EXCLUSION_SPEC.ko.md` 생성 완료.
+
+### 3. 검증 결과
+- `npm --prefix frontend test -- src/app/admin/analytics/ src/app/admin/components/ src/components/adsense-ad.test.tsx --run`: 4개 테스트 파일 11개 테스트 100% Pass.
+- `npm --prefix frontend run typecheck`: exit code 0 (`tsc --noEmit` 에러 0건).
+- `npm --prefix backend run typecheck`: exit code 0 (`tsc -p tsconfig.json --noEmit` 에러 0건).
+
+
+
 
 
 
