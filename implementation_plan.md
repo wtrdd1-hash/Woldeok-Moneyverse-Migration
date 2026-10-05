@@ -2028,5 +2028,46 @@
 - `npm --prefix frontend test -- src/app/admin/components/ --run`: 2개 테스트 파일 5개 테스트 100% All-Pass.
 - `npm --prefix frontend run typecheck`: exit code 0 (`tsc --noEmit` 에러 0건 무결점 통과).
 
+---
+
+## 🚀 [v120 Specification] 관리자 전용 실시간 텔레메트리 & 그래프 분석실(`/admin/analytics`) 구축 및 CSV 리포트 내보내기 연동
+
+### 1. 요구사항 및 배경
+- **사용자 지시**: "그 모든 정보 내가 아까준 지시 및 모든 정보 유저 .. 그래프 정보 다 볼수있는 페이지도 관리자페이지 추가해줘"
+- **목표**:
+  1. 관리자 전용 독립 대시보드 화면 `/admin/analytics` (텔레메트리 · 그래프 분석실) 신규 구축.
+  2. 4대 핵심 시각적 SVG 60fps 인터랙티브 그래프 대시보드 탑재:
+     - **유저 활동 & 코호트 텔레메트리 그래프**: HAU(1시간), DAU(24시간), WAU(7일), MAU(30일), 신규 가입자, 휴면 계정 비교 막대 바.
+     - **M0/M1/M2 가상 통화량 유동성 구성 비율 차트**: M2 100% 대비 현금, 은행 예금, 국채, 주식 평가액 복합 스택 바 & 4색 지표 카드.
+     - **5분위 자산 계층 분배율 & 양극화 곡선**: 분위별 인원수, 자산 총합, 인당 평균 자산, 점유율 (%) 시각화 막대 차트.
+     - **상위 상장 종목 시가총액 & 체결 랭킹**: 상위 5대 종목의 자본 규모 및 누적 체결 수 비교 차트.
+  3. **원클릭 CSV 리포트 내보내기 (Export Report)**: 유저 코호트, 통화량, 5분위 분배율 요약을 `.csv` 파일로 브라우저 즉시 다운로드.
+  4. 메인 관제탑(`/admin`) 상단에 그래프 분석실 딥링크 배너 배치 및 `ADMIN_AREAS` 공식 등록.
+  5. 전용 단위 테스트(`analytics-client-view.test.tsx`) 작성 및 Vitest 100% All-Pass 통과.
+  6. TypeScript 컴파일(`npm run typecheck`) 0 errors 통과.
+  7. 사양서(`docs/planning/ADMIN_VISUAL_ANALYTICS_DASHBOARD_SPEC.ko.md`) 및 통합 구현 계획서 누적 업데이트.
+
+### 2. 세부 구현 내역
+1. **신규 라우트 및 페이지 (`frontend/src/app/admin/analytics/page.tsx`)**:
+   - `requireAdminConsole('/admin/analytics')` 보안 세션 가드.
+   - `apiOrNull`을 통해 회원, 주식, 경제 건전성, 피처 스위치 데이터 병렬 수집.
+2. **신규 뷰 컴포넌트 (`frontend/src/app/admin/analytics/analytics-client-view.tsx`)**:
+   - 4대 시각적 실시간 그래프 카드 그리드 렌더링.
+   - 기간 필터(실시간 집계 / 일간 코호트 / 월간 누적) 탭 바(44px 모바일 터치 타깃).
+   - CSV 파일 생성 및 `download` 트리거 핸들러(`handleExportCsv`).
+   - 종합 매트릭스 표(`AdminComprehensiveTelemetryMatrix`) 하단 내장.
+3. **단위 테스트 (`frontend/src/app/admin/analytics/analytics-client-view.test.tsx`)**:
+   - 4대 차트 카드 렌더링 및 CSV 내보내기 버튼 이벤트 동작 2건 테스트 100% Pass.
+4. **관리자 허브 및 네비게이션 연동**:
+   - `frontend/src/app/admin/areas.ts`: `ADMIN_AREAS` 최상단에 `/admin/analytics` 등록.
+   - `frontend/src/app/admin/page.tsx`: 관제탑 상단에 그래프 분석실 열기 배너 및 `BarChart3` 아이콘 등록.
+5. **사양서 및 기획서 문서 작성**:
+   - `docs/planning/ADMIN_VISUAL_ANALYTICS_DASHBOARD_SPEC.ko.md` 생성 완료.
+
+### 3. 검증 결과
+- `npm --prefix frontend test -- src/app/admin/analytics/ src/app/admin/components/ --run`: 3개 테스트 파일 7개 테스트 100% All-Pass.
+- `npm --prefix frontend run typecheck`: exit code 0 (`tsc --noEmit` 에러 0건 무결점 통과).
+
+
 
 

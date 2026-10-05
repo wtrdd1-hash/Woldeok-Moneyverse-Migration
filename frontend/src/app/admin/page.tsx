@@ -107,6 +107,8 @@ const AREA_GROUPS = [
 
 function getAreaIcon(href: string) {
   switch (href) {
+    case '/admin/analytics':
+      return <BarChart3 className="size-4.5 text-cyan-400" />;
     case '/admin/controls':
       return <Sliders className="size-4.5 text-primary" />;
     case '/admin/security':
@@ -374,6 +376,33 @@ export default async function AdminPage({
             <span>종목 관리 및 시장 뉴스</span>
             <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
           </div>
+        </Link>
+      </div>
+
+      {/* 실시간 텔레메트리 & 그래프 분석실 전용 딥링크 배너 */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-xl border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-blue-950/40 p-4 shadow-lg backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-400">
+            <BarChart3 className="size-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-white">실시간 텔레메트리 & 그래프 분석실 (Visual Analytics)</span>
+              <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 text-[10px]">
+                60fps Live Charts
+              </Badge>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              유저 코호트 추이, 통화량 M0/M1/M2 도넛 구성비, 5분위 자산 계층 곡선 및 CSV 리포트 내보내기
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/admin/analytics"
+          className="mt-3 sm:mt-0 inline-flex items-center justify-center min-h-[44px] sm:min-h-9 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-md transition-all gap-1.5"
+        >
+          <span>그래프 분석실 열기</span>
+          <ArrowRight className="size-3.5" />
         </Link>
       </div>
 

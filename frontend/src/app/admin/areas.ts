@@ -22,6 +22,13 @@ export interface AdminArea {
 
 export const ADMIN_AREAS: readonly AdminArea[] = [
   {
+    href: '/admin/analytics',
+    eyebrow: 'VISUAL ANALYTICS & TELEMETRY',
+    title: '텔레메트리 · 그래프 분석실',
+    summary: 'MAU/DAU 유저 코호트, 통화 구성비 도넛, 5분위 자산 계층 곡선, 주식 시총 랭킹 차트 및 CSV 내보내기.',
+    group: 'records',
+  },
+  {
     href: '/admin/api-health',
     eyebrow: 'API TELEMETRY & HEALTH',
     title: '14대 도메인 API 실시간 관제',
