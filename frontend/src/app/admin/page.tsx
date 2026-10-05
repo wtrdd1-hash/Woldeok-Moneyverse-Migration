@@ -60,6 +60,7 @@ import { AdminQuickUserSearch } from './admin-quick-search';
 import { CloseConsole, OpenConsole } from './console-gate';
 import { TelemetryPulse } from './components/telemetry-pulse';
 import { AdminTelemetryMetricsTable } from './components/admin-telemetry-metrics-table';
+import { AdminComprehensiveTelemetryMatrix } from './components/admin-comprehensive-telemetry-matrix';
 import type {
   AdminBusiness,
   AdminConsole,
@@ -375,6 +376,14 @@ export default async function AdminPage({
           </div>
         </Link>
       </div>
+
+      {/* 실시간 종합 운영 텔레메트리 매트릭스 표 (4개 코호트/통화/주식/5분위 탭) */}
+      <AdminComprehensiveTelemetryMatrix
+        users={allUsers}
+        stocks={stocksList}
+        health={health}
+        controls={controls?.featureSwitches ?? []}
+      />
 
       {/* 실시간 MAU / WAU / DAU & 리텐션 자산 통계 테이블 전진 배치 */}
       <AdminTelemetryMetricsTable users={allUsers} showDetailsLink={true} />

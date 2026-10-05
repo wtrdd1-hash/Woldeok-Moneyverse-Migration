@@ -31,6 +31,7 @@ import {
 import { compareAmounts, groupDigits } from '@/lib/money';
 import type { AdminUser } from '../types';
 import { AdminTelemetryMetricsTable } from '../components/admin-telemetry-metrics-table';
+import { AdminComprehensiveTelemetryMatrix } from '../components/admin-comprehensive-telemetry-matrix';
 
 type StatusFilter = 'all' | 'active' | 'restricted';
 type SortOption = 'wealth' | 'cash' | 'stock' | 'lastSeen' | 'created';
@@ -168,6 +169,9 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
           </CardContent>
         </Card>
       </div>
+
+      {/* 종합 운영 텔레메트리 매트릭스 표 (코호트, 통화, 주식, 5분위 분배율) */}
+      <AdminComprehensiveTelemetryMatrix users={[...users]} />
 
       {/* MAU / WAU / DAU 및 유저 리텐션 분석 표 연동 */}
       <AdminTelemetryMetricsTable users={users} showDetailsLink={false} />

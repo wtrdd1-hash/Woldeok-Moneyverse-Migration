@@ -1987,4 +1987,46 @@
 4. 검증:
    - `npm run typecheck` 및 `npx eslint` 검사 100% 통과.
 
+---
+
+## 🚀 [v119 Specification] 관리자 종합 운영 텔레메트리 매트릭스(코호트·통화량·주식심도·5분위분배율 4대 탭) 풀스택 구축 및 연동
+
+### 1. 요구사항 및 배경
+- **사용자 지시**: "정확한표로 정확한수치로 표만들어줘 많은래퍼런스찾아서 해줘 많은 정보 수집해서 관리자페이지테서 볼수있게해줘 실제정보로 실제데이터 가지고 표시되게해줘야ㅐ되 너가알라서해 승인할게 모든 기획 개발다 알라서 진행 승인함 또한 문서에 남겨주 항상작업시통합문서및기획서에"
+- **목표**:
+  1. Datadog, Stripe Dashboard, Toss Admin 수준의 종합 운영 지표 매트릭스 표(`AdminComprehensiveTelemetryMatrix`) 구축.
+  2. 4대 실측 탭 구성:
+     - **유저 코호트**: HAU (1시간), DAU (24시간), WAU (7일), MAU (30일), 활동 고착도 (Stickiness %), 24h 신규 가입자 수, 휴면 계정 수 및 비율.
+     - **통화 유동성 (M0/M1/M2)**: 지갑 현금(M0), 은행 예금 포함(M1), 국채 잔액, 주식 평가액, 광의 통화(M2), 복식부기 원장 건전성(차액 0 검증), 시스템 비축금.
+     - **주식 시장 심도**: 상장 시가총액, 누적 체결 건수, 종목당 평균 체결량, 정상 거래 종목 수, 거래 정지 종목 수.
+     - **5분위 자산 분배율**: 상위 20%(5분위) ~ 하위 20%(1분위) 인원, 분위 자산 합계, 인당 평균 자산, 전체 자산 점유율, 5분위 배율(양극화 지표).
+  3. 관리자 메인 관제탑(`/admin`) 및 회원 관리(`/admin/users`)에 상시 마운트.
+  4. 단위 테스트 4건 작성 및 Vitest 100% All-Pass 검증.
+  5. TypeScript 컴파일(`npm run typecheck`) 0 errors 통과.
+  6. 기획서(`docs/planning/ADMIN_CONTROL_TOWER_TELEMETRY_SPEC.ko.md`) 및 통합 구현 계획서 누적 업데이트.
+
+### 2. 세부 구현 내역
+1. **신규 컴포넌트 (`frontend/src/app/admin/components/admin-comprehensive-telemetry-matrix.tsx`)**:
+   - `AdminUser[]`, `AdminStock[]`, `ReconciliationHealth`, `FeatureSwitch[]` 실측 데이터 바인딩.
+   - 4개 인터랙티브 탭 전환(44px 모바일 터치 타깃 규격 `min-h-[44px] sm:min-h-9`).
+   - 모바일 320px~430px 가로 스크롤 테이블 래퍼(`overflow-x-auto`).
+   - 금융 데이터 전용 고대비 모노스페이스 수치 렌더링(`font-mono tabular-nums`).
+2. **단위 테스트 (`frontend/src/app/admin/components/admin-comprehensive-telemetry-matrix.test.tsx`)**:
+   - 기본 유저 코호트 탭 렌더링 테스트.
+   - 통화 유동성(M0, M1, M2) 탭 전환 및 수치 검증 테스트.
+   - 주식 시장 심도 탭 전환 및 통계 검증 테스트.
+   - 5분위 자산 분배율 탭 전환 및 소득 분위 검증 테스트.
+   - Vitest 결과: 4 passed (100%).
+3. **관리자 메인 관제탑 (`frontend/src/app/admin/page.tsx`)**:
+   - 상단 4대 KPI 카드 바로 아래에 `AdminComprehensiveTelemetryMatrix` 마운트.
+4. **회원 관리 디렉토리 (`frontend/src/app/admin/users/user-directory.tsx`)**:
+   - 부자 랭킹 테이블 상단에 `AdminComprehensiveTelemetryMatrix` 마운트.
+5. **사양서 및 기획서 문서 작성**:
+   - `docs/planning/ADMIN_CONTROL_TOWER_TELEMETRY_SPEC.ko.md` 생성 완료.
+
+### 3. 검증 결과
+- `npm --prefix frontend test -- src/app/admin/components/ --run`: 2개 테스트 파일 5개 테스트 100% All-Pass.
+- `npm --prefix frontend run typecheck`: exit code 0 (`tsc --noEmit` 에러 0건 무결점 통과).
+
+
 
