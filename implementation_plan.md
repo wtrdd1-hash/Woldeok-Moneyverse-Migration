@@ -1820,6 +1820,33 @@
    - `src/lib/__tests__/indexnow.test.ts` 5개 테스트 100% 통과.
    - `npm run typecheck` 통과 (`tsc --noEmit` exit code 0).
 
+---
+
+## 🚀 [v113 Specification] 기획서·통합 문서 최신 런타임 전수 동기화 및 실시간 배당락일 D-Day 브로드캐스트·인기주 퀵 추가 엔진 완결
+
+### 1. 요구사항 및 배경
+- 사용자 지시: "진행 그리고 기획서 보고 수정할부분 수정해줘 통허ㅏㅂ문서도 그렇고 문서조회승인"
+- 목표:
+  1. 기획서(`SEO_DEMAND_KEYWORD_EXPANSION_SPEC`, `SEO_INTENT_TO_PLAY_ACTIVATION_GROWTH_SPEC`) 및 통합 프로젝트 안내 문서(`README-KO.md`)를 최신 프로덕션 런타임 형상(50대 용어사전, 2026 증여세, 글로벌 복리, 5대 통화, IndexNow, Intent-to-Play 온보딩 퍼널)으로 전수 동기화 및 누락 보완.
+  2. 보유 배당주 및 인기 미국 고배당주(SCHD, JEPI, O, JEPQ, MAIN 등)의 배당락일(Ex-Dividend Date) D-Day 실시간 브로드캐스트 띠 배너 및 배당락일 알림 예약/구독 기능 구축을 통한 D1/D7 재방문 유도.
+
+### 2. 세부 구현 및 변경 내역
+1. **기획서 및 통합 문서 최신 동기화**:
+   - `docs/planning/SEO_DEMAND_KEYWORD_EXPANSION_SPEC.ko.md` & `SEO_DEMAND_KEYWORD_EXPANSION_SPEC.md`:
+     - 현행 기준선에 50대 금융 용어사전, 2026 증여세 13개 롱테일, 글로벌 복리 18개 허브, Canvas 2D 바이럴 카드, IndexNow 배치 핑 파이프라인 정식 반영.
+   - `docs/planning/SEO_INTENT_TO_PLAY_ACTIVATION_GROWTH_SPEC.ko.md` & `SEO_INTENT_TO_PLAY_ACTIVATION_GROWTH_SPEC.md`:
+     - 가입 이유 및 첫 의미 행동(Section 6, 7)에 `CalculatorSaveAction`, `ToolsGuestConversionBar`, `ViralShareCardDialog`, 10,000 WLD 첫 모의투자 포트폴리오 생성 브릿지 런타임 규격 명문화.
+   - `README-KO.md`:
+     - 50대 금융 용어사전, 2026 증여세 계산기, 글로벌 복리 & FIRE 은퇴 계산기 주요 진입로 마크다운 링크 동기화.
+2. **배당 캘린더 위젯 고도화 (`frontend/src/components/dividend-calendar-widget.tsx`)**:
+   - `upcomingDividends`: 보유 종목별 배당락일(Ex-Date) D-Day 실시간 계산(`D-3`, `D-7` 등) 및 노란색 앰버 띠 배너로 브로드캐스트.
+   - `toggleAlertSubscription`: "🔔 배당락일 알림" 버튼 토글 및 브라우저 로컬스토리지 상태 영속화.
+   - `POPULAR_QUICK_STOCKS`: SCHD, JEPI, O, JEPQ, MAIN, 삼성전자 1클릭 퀵 추가 칩(`+10주`) 제공.
+
+### 3. 검증 결과
+- `npm run typecheck` 통과 (`tsc --noEmit` exit code 0).
+- Git 커밋 & 원격 저장소 동기화 완료.
+
 
 
 

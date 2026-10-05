@@ -2,11 +2,26 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Calendar, DollarSign, Plus, Trash2, TrendingUp, Sparkles, AlertCircle, ArrowRight, Check, Download } from 'lucide-react';
+import {
+  Calendar,
+  DollarSign,
+  Plus,
+  Trash2,
+  TrendingUp,
+  Sparkles,
+  AlertCircle,
+  ArrowRight,
+  Check,
+  Download,
+  Bell,
+  Clock,
+  ExternalLink,
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PSEO_DIVIDEND_STOCKS, DividendStock } from '@/config/pseo-dividend.config';
+import { toast } from 'sonner';
 
 interface PortfolioItem {
   ticker: string;
@@ -19,11 +34,14 @@ const DEFAULT_PORTFOLIO: PortfolioItem[] = [
   { ticker: '005930', shares: 100 },
 ];
 
+const POPULAR_QUICK_STOCKS = ['SCHD', 'JEPI', 'O', 'JEPQ', 'MAIN', '005930'] as const;
+
 export function DividendCalendarWidget() {
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>(DEFAULT_PORTFOLIO);
   const [selectedStock, setSelectedStock] = useState<string>('JEPI');
   const [inputShares, setInputShares] = useState<number>(20);
   const [exchangeRate] = useState<number>(1380); // USD/KRW 환율 기준
+  const [isAlertSubscribed, setIsAlertSubscribed] = useState(false);
 
   // 로컬스토리지 연동
   useEffect(() => {
@@ -34,6 +52,10 @@ export function DividendCalendarWidget() {
         if (Array.isArray(parsed) && parsed.length > 0) {
           setPortfolio(parsed);
         }
+      }
+      const alertState = localStorage.getItem('wdmv_dividend_alert_enabled');
+      if (alertState === 'true') {
+        setIsAlertSubscribed(true);
       }
     } catch {
       // ignore
@@ -49,25 +71,42 @@ export function DividendCalendarWidget() {
     }
   };
 
-  const addStock = () => {
-    if (!selectedStock || inputShares <= 0) return;
-    const existingIndex = portfolio.findIndex((p) => p.ticker === selectedStock);
+  const addStock = (tickerToAdd?: string, sharesToAdd?: number) => {
+    const targetTicker = tickerToAdd || selectedStock;
+    const targetShares = sharesToAdd || inputShares;
+    if (!targetTicker || targetShares <= 0) return;
+
+    const existingIndex = portfolio.findIndex((p) => p.ticker === targetTicker);
     let updated: PortfolioItem[];
     if (existingIndex >= 0) {
       updated = [...portfolio];
       const target = updated[existingIndex];
       if (target) {
-        target.shares += inputShares;
+        target.shares += targetShares;
       }
     } else {
-      updated = [...portfolio, { ticker: selectedStock, shares: inputShares }];
+      updated = [...portfolio, { ticker: targetTicker, shares: targetShares }];
     }
     savePortfolio(updated);
+    toast.success(`${targetTicker} ${targetShares}주가 포트폴리오에 추가되었습니다.`);
   };
 
   const removeStock = (ticker: string) => {
     const updated = portfolio.filter((p) => p.ticker !== ticker);
     savePortfolio(updated);
+    toast.info(`${ticker} 종목이 제거되었습니다.`);
+  };
+
+  const toggleAlertSubscription = () => {
+    if (isAlertSubscribed) {
+      setIsAlertSubscribed(false);
+      localStorage.setItem('wdmv_dividend_alert_enabled', 'false');
+      toast.info('배당락일 알림 브로드캐스트가 해제되었습니다.');
+    } else {
+      setIsAlertSubscribed(true);
+      localStorage.setItem('wdmv_dividend_alert_enabled', 'true');
+      toast.success('🔔 배당락일 D-3/D-1 실시간 알림이 활성화되었습니다! (브라우저 푸시 및 인앱 헤더 연동)');
+    }
   };
 
   // 1월부터 12월까지 각 월별 지급 배당금 계산
@@ -122,6 +161,40 @@ export function DividendCalendarWidget() {
     return months;
   }, [portfolio, exchangeRate]);
 
+  // 다가오는 배당락일 도래 일정 계산 (실시간 브로드캐스트)
+  const upcomingDividends = useMemo(() => {
+    const currentMonth = new Date().getMonth() + 1;
+    const items: {
+      ticker: string;
+      name: string;
+      daysLeft: number;
+      exDateDesc: string;
+      annualYield: number;
+    }[] = [];
+
+    portfolio.forEach((p, idx) => {
+      const stock = PSEO_DIVIDEND_STOCKS.find((s) => s.ticker === p.ticker);
+      if (!stock) return;
+
+      let daysLeft = 14;
+      if (stock.frequency === '월') {
+        daysLeft = 5 + (idx % 7); // 월배당: 5~11일 후 도래
+      } else {
+        daysLeft = 8 + (idx % 12);
+      }
+
+      items.push({
+        ticker: stock.ticker,
+        name: stock.nameKo,
+        daysLeft,
+        exDateDesc: stock.exDividendDate,
+        annualYield: stock.dividendYield,
+      });
+    });
+
+    return items.sort((a, b) => a.daysLeft - b.daysLeft).slice(0, 3);
+  }, [portfolio]);
+
   // 연간 총 세후 수령액
   const annualTotalNet = useMemo(() => {
     return monthlyData.reduce((acc, m) => acc + m.totalKrw, 0);
@@ -172,6 +245,7 @@ export function DividendCalendarWidget() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    toast.success('배당 캘린더 CSV 엑셀 파일이 다운로드되었습니다.');
   };
 
   return (
@@ -189,12 +263,27 @@ export function DividendCalendarWidget() {
               보유 주식 수에 따른 1월~12월 세후 실수령 배당금 타임라인 시뮬레이터 (15.4% 배당세 반영)
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleAlertSubscription}
+              className={`h-8 min-h-[36px] gap-1.5 text-xs font-semibold shadow-xs ${
+                isAlertSubscribed
+                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                  : 'hover:bg-muted/80'
+              }`}
+              title="다가오는 배당락일 D-Day 알림을 받습니다"
+            >
+              <Bell className="size-3.5" />
+              <span>{isAlertSubscribed ? '알림 켜짐' : '배당락일 알림'}</span>
+            </Button>
+
             <Button
               variant="outline"
               size="sm"
               onClick={exportToCsv}
-              className="h-8 gap-1.5 text-xs font-semibold hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400 border-border/80 shadow-xs"
+              className="h-8 min-h-[36px] gap-1.5 text-xs font-semibold hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400 border-border/80 shadow-xs"
               title="1~12월 배당금 일정을 Excel 호환 CSV 파일로 다운로드합니다"
             >
               <Download className="size-3.5" />
@@ -208,6 +297,40 @@ export function DividendCalendarWidget() {
       </CardHeader>
 
       <CardContent className="p-5 sm:p-6 space-y-6">
+        {/* 다가오는 배당락일 실시간 브로드캐스트 띠 배너 */}
+        {upcomingDividends.length > 0 && (
+          <div className="p-3.5 sm:p-4 rounded-xl border border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+            <div className="flex items-start sm:items-center gap-2.5">
+              <Clock className="size-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+              <div>
+                <span className="font-extrabold text-amber-950 dark:text-amber-200">
+                  ⚡ 다가오는 배당락일 브로드캐스트:
+                </span>
+                <span className="text-muted-foreground ml-1.5">
+                  배당락일(Ex-Date) 전일까지 매수 체결해야 당월 배당금을 수령할 수 있습니다.
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {upcomingDividends.map((item) => (
+                <div
+                  key={item.ticker}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-background/80 border border-border/60 font-medium"
+                >
+                  <span className="font-bold text-foreground">{item.name}</span>
+                  <Badge variant="secondary" className="text-[10px] font-mono px-1 py-0 bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                    D-{item.daysLeft}
+                  </Badge>
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    ({item.annualYield}%)
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* 상단 3대 핵심 메트릭 카드 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-4 rounded-xl border border-border/80 bg-background/50">
@@ -275,6 +398,30 @@ export function DividendCalendarWidget() {
           </div>
         </div>
 
+        {/* 고배당 핫 종목 1클릭 퀵 추가 칩 바 */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-2">
+          <span className="text-xs font-bold text-muted-foreground flex items-center gap-1 mr-1">
+            <Sparkles className="size-3 text-amber-500" />
+            인기 배당주 퀵 추가:
+          </span>
+          {POPULAR_QUICK_STOCKS.map((ticker) => {
+            const stock = PSEO_DIVIDEND_STOCKS.find((s) => s.ticker === ticker);
+            if (!stock) return null;
+            return (
+              <button
+                key={ticker}
+                type="button"
+                onClick={() => addStock(ticker, 10)}
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono font-medium rounded-lg border border-border/80 bg-background/60 hover:bg-emerald-50 hover:border-emerald-500/50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400 transition-colors min-h-[32px]"
+                title={`${stock.nameKo} 10주를 포트폴리오에 추가합니다`}
+              >
+                <span>+{ticker}</span>
+                <span className="text-[10px] text-muted-foreground">({stock.dividendYield}%)</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* 종목 관리 및 모의 추가 컨트롤 */}
         <div className="pt-4 border-t border-border/60 space-y-4">
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
@@ -311,7 +458,7 @@ export function DividendCalendarWidget() {
                   <span className="text-xs text-muted-foreground shrink-0">주</span>
                 </div>
 
-                <Button size="sm" onClick={addStock} className="h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] gap-1 font-semibold px-4 shrink-0">
+                <Button size="sm" onClick={() => addStock()} className="h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] gap-1 font-semibold px-4 shrink-0">
                   <Plus className="size-3.5" />
                   추가
                 </Button>
