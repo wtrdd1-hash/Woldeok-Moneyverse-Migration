@@ -1651,6 +1651,33 @@
 - Git 커밋 & 푸시 후 원격 Debian 프로덕션 서버(`easy-scraping.com`) 무중단 배포.
 - 실측 라이브 curl HTTP 200 OK 확인 및 IndexNow 핑 전송.
 
+---
+
+## 🚀 [v108 Specification] 전역 UI 정밀 재검토 및 멀티 뷰포트 크래프트맨십 최적화
+
+### 1. 요구사항 및 배경
+- 사용자의 "ui 재검토해줘" 지시에 따른 전체 지면 감사(Audit) 및 즉각 보완:
+  1. `anti-ai-frontend-craftsmanship`, `multi-viewport-resilience-shield`, `cross-surface-visual-hierarchy-architect` 3대 스킬 가이드라인에 따른 전수 UI 감사.
+  2. 320px 극소 모바일, 390px 스마트폰, 768px 태블릿, 1100px 랩탑, 1680px+ 초광폭 디스플레이 전 구간 점검.
+  3. 발견된 3대 미세 결함 및 즉시 개선:
+     - **데스크톱 스티키 광고 레일 (`DesktopStickyAdRails`)**: 기존 `hidden 2xl:block (1536px)`에서 본문 최대 너비(1280~1400px)와 광고 레일(160px)의 충돌 가능성을 원천 차단하기 위해 최소 뷰포트를 `min-[1680px]:block`으로 상향 방어.
+     - **배당 캘린더 인터랙티브 위젯 (`DividendCalendarWidget`)**: 320px 모바일에서 타임라인 바 차트 패딩을 `p-1 sm:p-2`, 수치 글자 크기를 `text-[9px] min-[400px]:text-[10px]`로 미세 조정하여 텍스트 클리핑 방지. 신규 종목 추가 폼의 모바일 스택 레이아웃 및 `min-h-[44px]` 터치 타깃 확보.
+     - **용어사전 상세 페이지 (`[term]/page.tsx`, `[locale]/.../[term]/page.tsx`)**: 상단 다국어 뱃지 칩(`🇺🇸 ... 🇯🇵 ... 🇨🇳 ...`)에 `shrink-0` 및 반응형 갭(`gap-1.5 sm:gap-2`)을 적용하여 좁은 모바일 화면에서 줄바꿈 시 레이아웃 붕괴 방지.
+
+### 2. 세부 컴포넌트 변경 명세
+1. `frontend/src/components/desktop-sticky-ad-rails.tsx`:
+   - `hidden 2xl:block` -> `hidden min-[1680px]:block` 교체로 본문 겹침 원천 방지.
+2. `frontend/src/components/dividend-calendar-widget.tsx`:
+   - 모바일 320px 차트 패딩 축소 및 텍스트 클리핑 방지.
+   - 종목 추가 폼의 모바일 스택 및 입력/버튼 `min-h-[44px]` 터치 타깃 확보.
+3. `frontend/src/app/guide/glossary/[term]/page.tsx` & `frontend/src/app/[locale]/guide/glossary/[term]/page.tsx`:
+   - 다국어 뱃지 칩 모바일 반응형 간격 및 `shrink-0` 적용.
+
+### 3. 검증 및 배포 계획
+- `npm run typecheck` 통과 확인.
+- Git 커밋 & 푸시 후 원격 프로덕션 서버(`easy-scraping.com`) 무중단 배포.
+- 모바일 및 대화면 라이브 렌더링 검증.
+
 
 
 

@@ -186,7 +186,7 @@ export function DividendCalendarWidget() {
             <span>최고 수령월: ₩{maxMonthly.toLocaleString()}</span>
           </div>
 
-          <div className="grid grid-cols-6 sm:grid-cols-12 gap-1.5 sm:gap-2">
+          <div className="grid grid-cols-6 sm:grid-cols-12 gap-1 sm:gap-2">
             {monthlyData.map((item) => {
               const heightPercent = Math.max(Math.round((item.totalKrw / maxMonthly) * 100), 12);
               const isCurrentMonth = item.month === new Date().getMonth() + 1;
@@ -194,16 +194,16 @@ export function DividendCalendarWidget() {
               return (
                 <div
                   key={item.month}
-                  className={`flex flex-col items-center justify-end p-2 rounded-xl border transition-all ${
+                  className={`flex flex-col items-center justify-end p-1 sm:p-2 rounded-lg sm:rounded-xl border transition-all ${
                     isCurrentMonth
-                      ? 'border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20'
+                      ? 'border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-xs'
                       : 'border-border/60 bg-muted/10 hover:border-border'
                   }`}
                 >
-                  <div className="w-full flex flex-col items-center justify-end h-28 sm:h-32 mb-2">
+                  <div className="w-full flex flex-col items-center justify-end h-24 sm:h-32 mb-1.5 sm:mb-2">
                     <div
                       style={{ height: `${heightPercent}%` }}
-                      className={`w-full max-w-[28px] rounded-t-md transition-all duration-300 ${
+                      className={`w-full max-w-[24px] sm:max-w-[28px] rounded-t-md transition-all duration-300 ${
                         item.totalKrw > 0
                           ? 'bg-emerald-500/80 hover:bg-emerald-400'
                           : 'bg-zinc-200 dark:bg-zinc-800'
@@ -211,11 +211,11 @@ export function DividendCalendarWidget() {
                     />
                   </div>
 
-                  <span className={`text-[11px] font-mono font-bold ${isCurrentMonth ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground'}`}>
+                  <span className={`text-[10px] min-[400px]:text-[11px] font-mono font-bold ${isCurrentMonth ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground'}`}>
                     {item.month}월
                   </span>
 
-                  <span className="text-[10px] font-mono tabular-nums text-muted-foreground mt-0.5 text-center truncate max-w-full">
+                  <span className="text-[9px] min-[400px]:text-[10px] font-mono tabular-nums text-muted-foreground mt-0.5 text-center truncate max-w-full">
                     {item.totalKrw > 0 ? `${Math.round(item.totalKrw / 10000)}만` : '0'}
                   </span>
                 </div>
@@ -226,18 +226,18 @@ export function DividendCalendarWidget() {
 
         {/* 종목 관리 및 모의 추가 컨트롤 */}
         <div className="pt-4 border-t border-border/60 space-y-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
               <TrendingUp className="size-4 text-primary" />
               보유 배당주 포트폴리오 구성
             </h4>
 
-            {/* 신규 종목 추가 폼 */}
-            <div className="flex flex-wrap items-center gap-2">
+            {/* 신규 종목 추가 폼 (320px 모바일 완벽 대응 스택) */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <select
                 value={selectedStock}
                 onChange={(e) => setSelectedStock(e.target.value)}
-                className="h-9 rounded-lg border border-border bg-background px-2.5 text-xs text-foreground font-medium outline-none"
+                className="h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] rounded-lg border border-border bg-background px-3 text-xs text-foreground font-medium outline-none focus:ring-1 focus:ring-primary w-full sm:w-auto"
               >
                 {PSEO_DIVIDEND_STOCKS.map((s) => (
                   <option key={s.ticker} value={s.ticker}>
@@ -246,23 +246,25 @@ export function DividendCalendarWidget() {
                 ))}
               </select>
 
-              <div className="flex items-center gap-1">
-                <input
-                  type="number"
-                  min="1"
-                  max="100000"
-                  value={inputShares}
-                  onChange={(e) => setInputShares(Math.max(1, parseInt(e.target.value) || 0))}
-                  className="h-9 w-20 rounded-lg border border-border bg-background px-2.5 text-xs font-mono text-foreground text-center outline-none"
-                  placeholder="주수"
-                />
-                <span className="text-xs text-muted-foreground">주</span>
-              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 flex-1 sm:flex-initial">
+                  <input
+                    type="number"
+                    min="1"
+                    max="100000"
+                    value={inputShares}
+                    onChange={(e) => setInputShares(Math.max(1, parseInt(e.target.value) || 0))}
+                    className="h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] w-full sm:w-20 rounded-lg border border-border bg-background px-3 text-xs font-mono text-foreground text-center outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="주수"
+                  />
+                  <span className="text-xs text-muted-foreground shrink-0">주</span>
+                </div>
 
-              <Button size="sm" onClick={addStock} className="h-9 gap-1 font-semibold">
-                <Plus className="size-3.5" />
-                추가
-              </Button>
+                <Button size="sm" onClick={addStock} className="h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] gap-1 font-semibold px-4 shrink-0">
+                  <Plus className="size-3.5" />
+                  추가
+                </Button>
+              </div>
             </div>
           </div>
 

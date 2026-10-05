@@ -194,11 +194,11 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight">
               {localizedTermName}
             </h1>
-            <div className="flex flex-wrap gap-2 pt-1 text-xs text-muted-foreground">
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇰🇷 {item.termKo}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇺🇸 {item.termEn}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇯🇵 {item.termJa}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇨🇳 {item.termZh}</span>
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1 text-xs text-muted-foreground">
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇰🇷 {item.termKo}</span>
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇺🇸 {item.termEn}</span>
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇯🇵 {item.termJa}</span>
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇨🇳 {item.termZh}</span>
             </div>
           </div>
         </div>
