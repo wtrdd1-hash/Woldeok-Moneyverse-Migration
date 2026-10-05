@@ -91,6 +91,9 @@
 - “이 컬렉션 테마를 저장하고 첫 챕터 시작하기”
 - “이 직업 경로를 저장하기”
 - “방금 선택한 학습 replay를 이어가기”
+- “📌 이 시뮬레이션 내 계정에 저장하기” (`CalculatorSaveAction`: 비로그인 LocalStorage 1초 보관 후 로그인 시 원장 승격)
+- “🎁 10,000 WLD 무료 지원금 받고 이 포트폴리오 모의 매수하기” (`ToolsGuestConversionBar` & `CompoundCalculatorClient`)
+- “📊 고해상도 인포그래픽 카드로 공유하기” (`ViralShareCardDialog` Canvas 2D 바이럴 루프)
 
 OAuth 성공 자체는 activation이 아니다.
 
@@ -101,7 +104,8 @@ Activation 후보:
 - starter collection theme 및 첫 목표 선택;
 - profession intention 및 첫 guided task 목표 선택;
 - 교육 replay 완료 후 학습 선택 기록;
-- 시즌 thread 하나 선택하고 다음 행동 설정.
+- 시즌 thread 하나 선택하고 다음 행동 설정;
+- 계산기에서 시뮬레이션한 주식/ETF 종목을 10,000 WLD 정착금으로 첫 모의 매수 완료 (첫 투자 포트폴리오 생성).
 
 Activation이 아닌 것:
 - 로그인 성공;

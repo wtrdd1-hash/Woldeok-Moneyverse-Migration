@@ -26,13 +26,16 @@ The planning cycle started and was rechecked mid-work against `origin/main=53182
 The current repository already contains substantial search surfaces:
 
 - public calculator/tool families for salary, capital-gains tax, pension tax, retirement, ISA, compound growth, loan interest, dividends, real estate, kimchi premium, stocks, tax and goal wealth;
-- 50 financial glossary terms;
+- 50 financial glossary terms across KO/EN/JA/ZH with SearchAutocompletePopover real-time discovery;
+- 13 high-demand 2026 gift tax presets (/tools/gift-tax-calculator/[preset]);
+- 18 localized global compound & FIRE retirement calculator routes (EN/JA/ZH × 5 longtail presets + 5 global currency segment toggle);
+- dividend calendar widget with 1~12 month after-tax cashflow Excel-compatible UTF-8 BOM CSV export;
+- HTML5 Canvas 2D viral infographic share card dialog (ViralShareCardDialog) and Twitter/X Web Intent sharing;
 - 50 generated salary amount bands;
 - 34 explicit loan pSEO presets;
 - 44 dividend ticker records;
 - 11 capital-gains presets, 11 real-estate presets and 11 kimchi-premium presets;
-- localized glossary routes for Korean, English, Japanese and Chinese;
-- recent main commits that added loan/dividend pSEO, glossary pSEO and localized glossary routing.
+- IndexNow protocol (Bing/Naver/Yandex/Seznam) real-time batch ping pipeline covering all tools, gift tax, global compound, and glossary pages.
 
 That means the next growth problem is not “create pSEO.” It is **control, demand validation, differentiated value, source freshness, cannibalization management and conversion quality**.
 

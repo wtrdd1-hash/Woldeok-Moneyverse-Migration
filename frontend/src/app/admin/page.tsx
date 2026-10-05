@@ -59,6 +59,8 @@ import { ADMIN_AREAS, adminAreaFor, consoleReturnPath } from './areas';
 import { AdminQuickUserSearch } from './admin-quick-search';
 import { CloseConsole, OpenConsole } from './console-gate';
 import { TelemetryPulse } from './components/telemetry-pulse';
+import { AdminTelemetryMetricsTable } from './components/admin-telemetry-metrics-table';
+import { AdminComprehensiveTelemetryMatrix } from './components/admin-comprehensive-telemetry-matrix';
 import type {
   AdminBusiness,
   AdminConsole,
@@ -105,6 +107,8 @@ const AREA_GROUPS = [
 
 function getAreaIcon(href: string) {
   switch (href) {
+    case '/admin/analytics':
+      return <BarChart3 className="size-4.5 text-cyan-400" />;
     case '/admin/controls':
       return <Sliders className="size-4.5 text-primary" />;
     case '/admin/security':
@@ -250,14 +254,14 @@ export default async function AdminPage({
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <Link
               href="/admin/economy"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-background/80 px-3 py-1.5 text-xs font-bold text-foreground shadow-xs hover:bg-muted transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-background/80 px-3 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-foreground shadow-xs hover:bg-muted transition-colors"
             >
               <RefreshCw className="size-3.5 text-primary" />
               <span>원장 상태 점검</span>
             </Link>
             <Link
               href="/admin/treasury"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 shadow-xs hover:bg-amber-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-amber-600 dark:text-amber-400 shadow-xs hover:bg-amber-500/20 transition-colors"
             >
               <Banknote className="size-3.5 text-amber-500" />
               <span>국고 관리</span>
@@ -374,6 +378,44 @@ export default async function AdminPage({
           </div>
         </Link>
       </div>
+
+      {/* 실시간 텔레메트리 & 그래프 분석실 전용 딥링크 배너 */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-xl border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-blue-950/40 p-4 shadow-lg backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-400">
+            <BarChart3 className="size-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-white">실시간 텔레메트리 & 그래프 분석실 (Visual Analytics)</span>
+              <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 text-[10px]">
+                60fps Live Charts
+              </Badge>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              유저 코호트 추이, 통화량 M0/M1/M2 도넛 구성비, 5분위 자산 계층 곡선 및 CSV 리포트 내보내기
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/admin/analytics"
+          className="mt-3 sm:mt-0 inline-flex items-center justify-center min-h-[44px] sm:min-h-9 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-md transition-all gap-1.5"
+        >
+          <span>그래프 분석실 열기</span>
+          <ArrowRight className="size-3.5" />
+        </Link>
+      </div>
+
+      {/* 실시간 종합 운영 텔레메트리 매트릭스 표 (4개 코호트/통화/주식/5분위 탭) */}
+      <AdminComprehensiveTelemetryMatrix
+        users={allUsers}
+        stocks={stocksList}
+        health={health}
+        controls={controls?.featureSwitches ?? []}
+      />
+
+      {/* 실시간 MAU / WAU / DAU & 리텐션 자산 통계 테이블 전진 배치 */}
+      <AdminTelemetryMetricsTable users={allUsers} showDetailsLink={true} />
 
       {/* Operator Session Info & Quick Member Search Bar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

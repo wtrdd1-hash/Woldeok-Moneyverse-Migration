@@ -115,7 +115,9 @@ export function saveSavingsPots(pots: readonly SavingsPotRecord[]): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(pots));
-  } catch {}
+  } catch {
+    // LocalStorage write failure ignored safely
+  }
 }
 
 /**

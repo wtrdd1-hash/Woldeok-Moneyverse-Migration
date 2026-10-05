@@ -162,10 +162,10 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight">
               {item.termKo}
             </h1>
-            <div className="flex flex-wrap gap-2 pt-1 text-xs text-muted-foreground">
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇺🇸 {item.termEn}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇯🇵 {item.termJa}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇨🇳 {item.termZh}</span>
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1 text-xs text-muted-foreground">
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇺🇸 {item.termEn}</span>
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇯🇵 {item.termJa}</span>
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇨🇳 {item.termZh}</span>
             </div>
           </div>
         </div>
@@ -208,7 +208,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                 Global English Summary
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed italic">
-                "{item.descriptionEn}"
+                &ldquo;{item.descriptionEn}&rdquo;
               </p>
             </div>
           </CardContent>

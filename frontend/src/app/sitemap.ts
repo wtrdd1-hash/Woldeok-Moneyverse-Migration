@@ -13,6 +13,8 @@ import {
 import { PSEO_LOAN_PRESETS } from '@/config/pseo-loan.config';
 import { PSEO_DIVIDEND_STOCKS } from '@/config/pseo-dividend.config';
 import { GLOSSARY_TERMS } from '@/config/pseo-glossary.config';
+import { GIFT_TAX_PRESETS } from '@/config/pseo-gift-tax.config';
+import { GLOBAL_COMPOUND_PRESETS } from '@/config/pseo-compound-global.config';
 
 /**
  * 1-Hour ISR Caching for Sitemap.
@@ -173,6 +175,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     addEntry(`/zh/guide/glossary/${term.slug}`, 0.9, 'daily');
   }
 
+  // 2.12. 신규 2026 증여세 계산기 및 13개 롱테일 프리셋 URL
+  addEntry('/tools/gift-tax-calculator', 0.95, 'daily');
+  for (const gp of GIFT_TAX_PRESETS) {
+    addEntry(`/tools/gift-tax-calculator/${gp.slug}`, 0.9, 'daily');
+  }
+
+  // 2.13. 신규 글로벌 복리 & FIRE 은퇴 계산기 다국어 라우트 (EN, JA, ZH)
+  addEntry('/en/tools/compound-interest-calculator', 0.95, 'daily');
+  addEntry('/ja/tools/compound-interest-calculator', 0.95, 'daily');
+  addEntry('/zh/tools/compound-interest-calculator', 0.95, 'daily');
+  for (const cp of GLOBAL_COMPOUND_PRESETS) {
+    addEntry(`/en/tools/compound-interest-calculator/${cp.slug}`, 0.9, 'daily');
+    addEntry(`/ja/tools/compound-interest-calculator/${cp.slug}`, 0.9, 'daily');
+    addEntry(`/zh/tools/compound-interest-calculator/${cp.slug}`, 0.9, 'daily');
+  }
 
   // 3. 18 Virtual Stocks Clean Canonical URLs
 

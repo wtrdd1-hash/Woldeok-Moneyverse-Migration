@@ -21,6 +21,7 @@ import {
   Vault,
   Activity,
   Globe,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -32,6 +33,7 @@ interface AdminTabItem {
 
 export const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard },
+  { href: '/admin/analytics', label: '그래프 분석', icon: BarChart3 },
   { href: '/admin/api-health', label: 'API 관제', icon: Activity },
   { href: '/admin/seo', label: 'SEO·색인', icon: Globe },
   { href: '/admin/users', label: '회원 관리', icon: Users },
@@ -103,7 +105,7 @@ export function AdminSubNav() {
                 prefetch={false}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'group flex min-h-10 sm:min-h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all active:scale-[0.98] outline-none',
+                  'group flex min-h-[44px] sm:min-h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all active:scale-[0.98] outline-none',
                   isActive
                     ? 'bg-primary/15 text-primary font-black ring-1 ring-primary/40 shadow-xs'
                     : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground',

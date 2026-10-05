@@ -1,10 +1,11 @@
 import React from 'react';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, Coins, HelpCircle, Info, PieChart, ShieldCheck } from 'lucide-react';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { DividendCalculatorClient } from './dividend-calculator-client';
 import { DividendCalendarWidget } from '@/components/dividend-calendar-widget';
+import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
 
 export const metadata: Metadata = {
 
@@ -58,6 +59,7 @@ export default function DividendTaxCalculatorPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-20">
+      <DesktopStickyAdRails />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

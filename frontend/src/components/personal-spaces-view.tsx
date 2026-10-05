@@ -28,7 +28,6 @@ import {
   PERSONAL_SPACE_SKUS,
   CITY_DISTRICTS,
   SPACE_THEMES,
-  UserPersonalSpace,
   loadUserSpaces,
   saveUserSpaces,
   getSpaceConfig,
@@ -37,6 +36,7 @@ import {
   calculateGalleryWingCost,
   calculateEstimatedYield,
 } from '@/lib/personal-spaces';
+import type { UserPersonalSpace } from '@/lib/personal-spaces';
 import {
   playBetChipSound,
   playCoinCollectSound,

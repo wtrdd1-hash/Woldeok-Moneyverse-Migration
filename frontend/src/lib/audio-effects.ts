@@ -36,7 +36,9 @@ export function setAudioMuted(muted: boolean): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(STORAGE_KEY, muted ? 'true' : 'false');
-  } catch {}
+  } catch {
+    // LocalStorage access failure ignored safely
+  }
 }
 
 export function toggleAudioMute(): boolean {
@@ -69,7 +71,9 @@ export function playBetChipSound(): void {
 
     osc.start();
     osc.stop(ctx.currentTime + 0.06);
-  } catch {}
+  } catch {
+    // Audio play failure ignored safely
+  }
 }
 
 /**
@@ -96,7 +100,9 @@ export function playReelTickSound(): void {
 
     osc.start();
     osc.stop(ctx.currentTime + 0.04);
-  } catch {}
+  } catch {
+    // Audio play failure ignored safely
+  }
 }
 
 /**
@@ -123,7 +129,9 @@ export function playCardFlipSound(): void {
 
     osc.start();
     osc.stop(ctx.currentTime + 0.09);
-  } catch {}
+  } catch {
+    // Audio play failure ignored safely
+  }
 }
 
 /**
@@ -153,7 +161,9 @@ export function playWinSound(): void {
       osc.start(startTime);
       osc.stop(startTime + 0.26);
     });
-  } catch {}
+  } catch {
+    // Audio play failure ignored safely
+  }
 }
 
 /**
@@ -189,7 +199,9 @@ export function playJackpotSound(): void {
       osc.start(startTime);
       osc.stop(startTime + note.dur + 0.02);
     });
-  } catch {}
+  } catch {
+    // Audio play failure ignored safely
+  }
 }
 
 /**
@@ -218,5 +230,7 @@ export function playCoinCollectSound(): void {
       osc.start(startTime);
       osc.stop(startTime + 0.36);
     });
-  } catch {}
+  } catch {
+    // Audio play failure ignored safely
+  }
 }

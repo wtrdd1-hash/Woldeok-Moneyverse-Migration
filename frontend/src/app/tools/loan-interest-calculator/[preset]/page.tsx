@@ -1,5 +1,5 @@
 import React from 'react';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Landmark, Info, HelpCircle, ShieldCheck, CheckCircle2, TrendingDown } from 'lucide-react';

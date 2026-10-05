@@ -94,6 +94,7 @@ interface AdminUserRow {
   last_login_at?: Date | null;
   last_seen_at?: Date | null;
   last_admin_at?: Date | null;
+  is_admin?: boolean;
 }
 
 interface UserAccessSummaryRow {
@@ -173,7 +174,7 @@ export class AdminRepository {
   }): Promise<AdminUserRow[]> {
     assertUuid(actorUserId, 'actor user id');
     assertLimit(limit);
-    const [rows, summaries] = await Promise.all([
+    const [rows, summaries, adminRoles] = await Promise.all([
       queryRows<Record<string, unknown>>(
         this.pool,
         'SELECT user_id::text,status,display_name,created_at,restricted_at,restriction_reason,cash_balance,bank_balance,bond_balance,stock_eval,total_net_worth,wealth_rank FROM public.admin_list_users($1,$2)',
@@ -184,25 +185,37 @@ export class AdminRepository {
         'SELECT user_id::text,last_login_at,last_seen_at,last_admin_at FROM public.activity_user_access_summaries($1)',
         [actorUserId],
       ),
+      queryRows<{ user_id: string }>(
+        this.pool,
+        'SELECT DISTINCT user_id::text FROM public.user_roles',
+        [],
+      ).catch(() => []),
     ]);
     const summariesByUser = new Map(summaries.map((summary) => [summary.user_id, summary]));
-    return rows.map((r) => ({
-      user_id: String(r.user_id),
-      status: String(r.status),
-      display_name: this.encryptionService.decrypt(String(r.display_name)) ?? String(r.display_name),
-      created_at: r.created_at as Date,
-      restricted_at: (r.restricted_at as Date) ?? null,
-      restriction_reason: (r.restriction_reason as string) ?? null,
-      cash_balance: String(r.cash_balance ?? '0'),
-      bank_balance: String(r.bank_balance ?? '0'),
-      bond_balance: String(r.bond_balance ?? '0'),
-      stock_eval: String(r.stock_eval ?? '0'),
-      total_net_worth: String(r.total_net_worth ?? '0'),
-      wealth_rank: Number(r.wealth_rank ?? 0),
-      last_login_at: summariesByUser.get(String(r.user_id))?.last_login_at ?? null,
-      last_seen_at: summariesByUser.get(String(r.user_id))?.last_seen_at ?? null,
-      last_admin_at: summariesByUser.get(String(r.user_id))?.last_admin_at ?? null,
-    }));
+    const adminUserIds = new Set(adminRoles.map((r) => String(r.user_id)));
+    return rows.map((r) => {
+      const uid = String(r.user_id);
+      const summary = summariesByUser.get(uid);
+      const isAdmin = adminUserIds.has(uid) || (summary?.last_admin_at != null);
+      return {
+        user_id: uid,
+        status: String(r.status),
+        display_name: this.encryptionService.decrypt(String(r.display_name)) ?? String(r.display_name),
+        created_at: r.created_at as Date,
+        restricted_at: (r.restricted_at as Date) ?? null,
+        restriction_reason: (r.restriction_reason as string) ?? null,
+        cash_balance: String(r.cash_balance ?? '0'),
+        bank_balance: String(r.bank_balance ?? '0'),
+        bond_balance: String(r.bond_balance ?? '0'),
+        stock_eval: String(r.stock_eval ?? '0'),
+        total_net_worth: String(r.total_net_worth ?? '0'),
+        wealth_rank: Number(r.wealth_rank ?? 0),
+        last_login_at: summary?.last_login_at ?? null,
+        last_seen_at: summary?.last_seen_at ?? null,
+        last_admin_at: summary?.last_admin_at ?? null,
+        is_admin: isAdmin,
+      };
+    });
   }
 
   async userPortfolio({

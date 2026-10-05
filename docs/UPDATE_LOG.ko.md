@@ -1,3 +1,12 @@
+## v2026.10.05.530 — 긴급 전체 UI 재점검 / 긴급 수정 게이트
+
+- **상태:** **BLOCKED — 긴급 UI 수정 필요**.
+- 최신 main `921b467e`에서 웹 page 템플릿 142개, 관리자 25개를 재인벤토리했다.
+- 제공 화면 + 현재 소스 레이아웃으로 모바일 `/admin/seo` 액션 행 잘림을 P0로 재현 등록했다.
+- touch target, floating layer 본문 가림, account identity 500, heading, exact-SHA/관리자 전수 증거 공백을 등록했다.
+- UI 영향 Production 승격 전 전체 route/관리자 5회 Test gate를 다시 필수화했다.
+- **범위:** 점검/기획/문서 전용이며 runtime/Test/Production 완료를 주장하지 않는다.
+
 ## v2026.10.04.524 — Google Search Console 실제 자격 증명 영속 저장 및 Search Analytics 복구
 
 - **구현 버전**: root plan v95; 브랜치 `fix/gsc-service-account-20261004`.

@@ -11,7 +11,7 @@ import { canonicalUrl, buildOgImageUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { GLOSSARY_TERMS, GLOSSARY_CATEGORIES } from '@/config/pseo-glossary.config';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
-import { Locale, isLocale } from '@/lib/locale';
+import { isLocale, type Locale } from '@/lib/locale';
 
 export const revalidate = 86400;
 

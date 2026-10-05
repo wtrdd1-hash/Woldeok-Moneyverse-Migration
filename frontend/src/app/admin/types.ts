@@ -26,6 +26,7 @@ export interface AdminUser {
   readonly last_login_at?: string | null;
   readonly last_seen_at?: string | null;
   readonly last_admin_at?: string | null;
+  readonly is_admin?: boolean;
 }
 
 export interface UserStockPosition {

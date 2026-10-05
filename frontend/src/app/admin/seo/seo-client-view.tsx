@@ -221,26 +221,27 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
   return (
     <div className="space-y-6">
       {/* Top Action Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-sm">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Globe className="size-5" />
           </div>
-          <div>
-            <h2 className="text-base font-bold text-foreground">실시간 검색엔진 색인 & 크롤러 관제</h2>
-            <p className="text-xs text-muted-foreground">
+          <div className="min-w-0">
+            <h2 className="text-base font-bold text-foreground truncate">실시간 검색엔진 색인 & 크롤러 관제</h2>
+            <p className="text-xs text-muted-foreground line-clamp-1 sm:line-clamp-none">
               Google Search Console, Naver Search Advisor(Yeti), Bingbot 및 IndexNow 프로토콜 실시간 연동
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* 4대 액션 버튼 그룹 (모바일 wrap 및 min-h-11 touch target 적용) */}
+        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto min-w-0">
           <Button
             variant="outline"
             size="sm"
             onClick={refreshData}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 text-xs font-semibold"
+            className="flex-1 sm:flex-initial min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 text-xs font-semibold"
           >
             <RefreshCw className={cn('size-3.5', isRefreshing && 'animate-spin')} />
             새로고침
@@ -250,26 +251,26 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
             size="sm"
             onClick={handleCrawlAudit}
             disabled={isAuditing}
-            className="flex items-center gap-1.5 border-primary/40 text-xs font-semibold text-primary hover:bg-primary/10"
+            className="flex-1 sm:flex-initial min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 border-primary/40 text-xs font-semibold text-primary hover:bg-primary/10"
           >
             <ShieldCheck className={cn('size-3.5', isAuditing && 'animate-spin')} />
-            {isAuditing ? '크롤링 감사 중...' : '1-Click 크롤링 무결성 감사'}
+            {isAuditing ? '크롤링 감사 중...' : '1-Click 무결성 감사'}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={handleSendDailyDigest}
             disabled={isSendingDigest}
-            className="flex items-center gap-1.5 border-sky-500/40 text-xs font-semibold text-sky-500 hover:bg-sky-500/10"
+            className="flex-1 sm:flex-initial min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 border-sky-500/40 text-xs font-semibold text-sky-500 hover:bg-sky-500/10"
           >
             <Send className={cn('size-3.5', isSendingDigest && 'animate-spin')} />
-            {isSendingDigest ? '디스코드 전송 중...' : '1-Click 일일 SEO 디스코드 브리핑'}
+            {isSendingDigest ? '전송 중...' : '1-Click 디스코드 브리핑'}
           </Button>
           <Button
             size="sm"
             onClick={handleManualSubmit}
             disabled={isSubmitting}
-            className="flex items-center gap-1.5 bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 active:scale-[0.98]"
+            className="w-full sm:w-auto min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 active:scale-[0.98]"
           >
             <Send className="size-3.5" />
             {isSubmitting ? '색인 통보 중...' : '전체 사이트맵 즉시 제출 (Ping)'}

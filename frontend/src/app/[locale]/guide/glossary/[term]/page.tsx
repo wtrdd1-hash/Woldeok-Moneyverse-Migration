@@ -10,9 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { canonicalUrl, buildOgImageUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
-import { GLOSSARY_TERMS, GlossaryTerm } from '@/config/pseo-glossary.config';
+import type { GlossaryTerm } from '@/config/pseo-glossary.config';
+import { GLOSSARY_TERMS } from '@/config/pseo-glossary.config';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
-import { Locale, isLocale } from '@/lib/locale';
+import { isLocale, type Locale } from '@/lib/locale';
 
 export const revalidate = 86400; // 24시간 정적 캐싱
 
@@ -194,11 +195,11 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight">
               {localizedTermName}
             </h1>
-            <div className="flex flex-wrap gap-2 pt-1 text-xs text-muted-foreground">
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇰🇷 {item.termKo}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇺🇸 {item.termEn}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇯🇵 {item.termJa}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium">🇨🇳 {item.termZh}</span>
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1 text-xs text-muted-foreground">
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇰🇷 {item.termKo}</span>
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇺🇸 {item.termEn}</span>
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇯🇵 {item.termJa}</span>
+              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇨🇳 {item.termZh}</span>
             </div>
           </div>
         </div>
@@ -241,7 +242,7 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
                 {isEn ? 'Original Korean Reference' : 'Global English Summary'}
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed italic">
-                "{isEn ? item.descriptionKo : item.descriptionEn}"
+                &ldquo;{isEn ? item.descriptionKo : item.descriptionEn}&rdquo;
               </p>
             </div>
           </CardContent>

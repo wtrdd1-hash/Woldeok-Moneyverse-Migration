@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Bookmark, BookmarkCheck, Sparkles, Bell, ArrowRight, ShieldCheck, CheckCircle2, X } from 'lucide-react';
 
 export interface CalculatorScenarioData {
-  type: 'stock' | 'retirement' | 'pension' | 'isa';
+  type: 'stock' | 'retirement' | 'pension' | 'isa' | 'tax';
   title: string;
   badge: string;
   primaryMetric: {
@@ -47,7 +47,7 @@ export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSav
         const savedList = JSON.parse(savedListStr);
         if (Array.isArray(savedList)) {
           const exists = savedList.some(
-            (item: any) =>
+            (item: Record<string, unknown>) =>
               item.title === scenario.title ||
               (scenario.type === 'stock' && item.ticker === scenario.details.ticker)
           );
@@ -80,7 +80,7 @@ export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSav
       const existingStr = localStorage.getItem('wdmv_saved_scenarios') || '[]';
       const existing = JSON.parse(existingStr);
       const filtered = Array.isArray(existing)
-        ? existing.filter((item: any) => item.stockName !== scenario.title)
+        ? existing.filter((item: Record<string, unknown>) => item.stockName !== scenario.title)
         : [];
       
       const updated = [stockItem, ...filtered].slice(0, 30); // 최대 30개 시나리오 유지

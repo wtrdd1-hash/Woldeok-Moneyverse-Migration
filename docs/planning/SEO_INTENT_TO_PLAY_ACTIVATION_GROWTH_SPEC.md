@@ -95,6 +95,9 @@ Preferred pattern:
 - “Keep this collection theme and start your first chapter.”
 - “Save this profession path.”
 - “Continue this learning replay from your choice.”
+- “📌 Save this calculation to my account” (`CalculatorSaveAction`: 1-sec LocalStorage draft promoting to persistent ledger upon login)
+- “🎁 Claim 10,000 WLD starter grant and paper trade this portfolio” (`ToolsGuestConversionBar` & `CompoundCalculatorClient`)
+- “📊 Export HD infographic card & share on X” (`ViralShareCardDialog` Canvas 2D viral loop)
 
 Avoid a context-destroying generic “Create account to use Moneyverse” wall unless required by safety/legal boundaries.
 
@@ -107,7 +110,8 @@ Qualifying activation examples:
 - select a starter collection theme and first noncompetitive piece/goal;
 - select a profession intention and first guided task goal;
 - complete an educational replay and record a learning choice;
-- choose one season thread and set a next-step goal.
+- choose one season thread and set a next-step goal;
+- complete first paper-trading order of the simulated asset using the 10,000 WLD starter grant (creates active portfolio ledger).
 
 Non-activation examples:
 - OAuth success;

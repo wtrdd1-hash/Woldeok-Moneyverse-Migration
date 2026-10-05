@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
-import { ViralCardPayload } from '@/lib/viral-share-card';
+import type { ViralCardPayload } from '@/lib/viral-share-card';
 import { ViralShareCardDialog } from '@/components/viral-share-card-dialog';
 
 interface ViralShareButtonProps {

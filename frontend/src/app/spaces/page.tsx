@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { Sparkles, Home, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getServerLocale } from '@/lib/locale-server';
