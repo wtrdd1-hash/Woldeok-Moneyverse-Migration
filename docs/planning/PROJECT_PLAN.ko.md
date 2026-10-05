@@ -2,12 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
 > **최초 기준:** 2026-08-26  
-> **현재 통합 버전:** v2026.10.05.527
-> **구현·증거 동기화:** 2026-10-05 (기획 기준 exact main SHA: `5318213f`; v527은 문서/조사 전용)
+> **현재 통합 버전:** v2026.10.05.530
+> **구현·증거 동기화:** 2026-10-05 (긴급 UI 점검 기준 exact main SHA: `921b467e`; v530은 점검/기획 전용)
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
 > **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
 ---
+
+## 긴급 전체 UI 재점검 및 수정 게이트 — v2026.10.05.530
+
+- **긴급 상태:** **BLOCKED — 긴급 UI 수정 필요.** 관리자 전체 화면을 포함한 웹 UI 전부를 반응형/접근성/인터랙션 수용 대상으로 다시 연다.
+- **exact 소스 인벤토리:** 최신 main `921b467eac21645a51ba362b24cac7eaab89c081`에는 `page.tsx` 142개와 `/admin/**` 25개가 있다. v529 장시간 브라우저 점검 미완료, 관리자 런타임 범위 부족, 이후 main 변경으로 기존 증거는 현재 후보를 인증하지 못한다.
+- **P0 실측 결함:** `/admin/seo` 모바일 증거와 현재 소스 모두 긴 관리자 액션을 화면 밖으로 밀 수 있는 내부 비줄바꿈 액션 행을 확인한다. CTA 잘림/body overflow는 Test/Production 차단 사유다.
+- **추가 차단:** Moneyverse 주요 터치 44px 규칙에 대한 소형 인터랙션 분류/수정, 온보딩/고객지원 fixed layer 공용 collision/safe-area, 현재 리뷰 흐름의 `/app-api/v1/account/identities` HTTP 500을 해결해야 한다.
+- **수용 계약:** 발견된 전체 route inventory를 5회 완주하고 동일 exact Test SHA에서 관리자 25개를 인증 상태로 모두 포함하며 320–430 모바일, landscape/tablet/desktop, zoom/reflow, 상태, backend/API health, 증거 연결을 검증한다.
+- **상세 권위:** [긴급 전체 UI 재점검 및 개선 명세 v530](EMERGENCY_FULL_UI_REAUDIT_SPEC.ko.md), [v530 기획 delta](deltas/v2026.10.05.530.ko.md).
+- **증거 경계:** v530은 점검/기획 문서다. 런타임 수정, exact-SHA Test 수용, Production 승격을 주장하지 않는다.
 
 ## SEO 수요·키워드 포트폴리오 확장 — v2026.10.05.527
 
