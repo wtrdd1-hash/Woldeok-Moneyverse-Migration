@@ -21,6 +21,7 @@ import {
   Vault,
   Activity,
   Globe,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -32,6 +33,7 @@ interface AdminTabItem {
 
 export const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard },
+  { href: '/admin/analytics', label: '그래프 분석', icon: BarChart3 },
   { href: '/admin/api-health', label: 'API 관제', icon: Activity },
   { href: '/admin/seo', label: 'SEO·색인', icon: Globe },
   { href: '/admin/users', label: '회원 관리', icon: Users },
