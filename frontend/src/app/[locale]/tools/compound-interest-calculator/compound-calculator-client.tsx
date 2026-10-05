@@ -19,7 +19,7 @@ import { ViralShareCardDialog } from '@/components/viral-share-card-dialog';
 import {
   calculateGlobalCompound,
   SUPPORTED_COMPOUND_CURRENCIES,
-  CompoundCurrency,
+  type CompoundCurrency,
 } from '@/config/pseo-compound-global.config';
 
 interface Props {

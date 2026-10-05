@@ -208,7 +208,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                 Global English Summary
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed italic">
-                "{item.descriptionEn}"
+                &ldquo;{item.descriptionEn}&rdquo;
               </p>
             </div>
           </CardContent>

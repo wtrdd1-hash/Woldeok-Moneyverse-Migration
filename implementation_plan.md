@@ -1897,6 +1897,31 @@
 
 
 
+---
 
+## 🚀 [v116 Specification] CI ESLint 무결성 복구(7건 린트 결함 전수 해소) 및 전체 시스템·UI 재점검 무결성 검증
 
+### 1. 요구사항 및 배경
+- 사용자 지시: "다 다시 너가 다시 확인하고 분석해뵈"
+- 목표:
+  1. 전체 시스템, UI 검사 보고서(`docs/planning/EMERGENCY_FULL_UI_REAUDIT_SPEC.ko.md`), 관리자 로그인 기능, CI/CD 빌드 결과 전수 재분석.
+  2. GitHub Actions CI의 `Build Test Candidate` 워크플로 중 `Run pnpm lint` 실패를 유발했던 7건의 린트 에러(`@typescript-eslint/consistent-type-imports` 및 `react/no-unescaped-entities`)를 전수 해결하여 CI 통과 상태로 복구.
+  3. 전체 시스템 런타임 및 무결성 재점검 완료 보고.
 
+### 2. 세부 조치 및 수정 내역
+1. **CI 린트 결함 7건 전수 해소**:
+   - `frontend/src/app/spaces/page.tsx`: `import type { Metadata }`로 수정 완료.
+   - `frontend/src/app/guide/glossary/[term]/page.tsx`: 라인 211 unescaped quote를 `&ldquo;{item.descriptionEn}&rdquo;`로 교체 완료.
+   - `frontend/src/app/[locale]/tools/compound-interest-calculator/page.tsx`: `import { isLocale, type Locale }`로 수정 완료.
+   - `frontend/src/app/[locale]/tools/compound-interest-calculator/compound-calculator-client.tsx`: `type CompoundCurrency`로 수정 완료.
+   - `frontend/src/app/[locale]/tools/compound-interest-calculator/[preset]/page.tsx`: `import { isLocale, type Locale }`로 수정 완료.
+   - `frontend/src/app/[locale]/guide/glossary/page.tsx`: `import { isLocale, type Locale }`로 수정 완료.
+   - `frontend/src/app/[locale]/guide/glossary/[term]/page.tsx`: `type GlossaryTerm`, `type Locale` 분리 및 라인 244 unescaped quote를 `&ldquo;` / `&rdquo;`로 교체 완료.
+2. **전체 시스템 및 관리자 로그인 종합 재확인**:
+   - 관리자 로그인 및 세션 관리: 30분 수명, 10분 유휴 잠금, CSRF 토큰 회전, 백엔드 세션 가드 정상 작동 확증 (단위 테스트 6건 100% 통과).
+   - UI 결함 대응 상태: UI530-01 (관리자 SEO 모바일 액션바 가로 잘림) 및 UI530-02 (44px 터치 타깃 보강) 조치 완료 상태 유지.
+
+### 3. 검증 결과
+- `npx eslint` 실행 결과: **0 errors**, 46 warnings로 린트 검사 에러 완전 박멸.
+- `tsc --noEmit` 실행 결과: exit code 0 (`npm run typecheck` 통과).
+- Git 변경 사항 스테이징 및 커밋/푸시 준비 완료.

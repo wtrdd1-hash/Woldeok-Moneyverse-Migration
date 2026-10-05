@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { canonicalUrl, buildOgImageUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
-import { Locale, isLocale } from '@/lib/locale';
+import { isLocale, type Locale } from '@/lib/locale';
 import { GLOBAL_COMPOUND_PRESETS } from '@/config/pseo-compound-global.config';
 import { CompoundCalculatorClient } from './compound-calculator-client';
 

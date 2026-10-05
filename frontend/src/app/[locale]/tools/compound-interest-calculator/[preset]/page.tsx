@@ -11,7 +11,7 @@ import { canonicalUrl, buildOgImageUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
-import { Locale, isLocale } from '@/lib/locale';
+import { isLocale, type Locale } from '@/lib/locale';
 import { GLOBAL_COMPOUND_PRESETS, calculateGlobalCompound } from '@/config/pseo-compound-global.config';
 import { CompoundCalculatorClient } from '../compound-calculator-client';
 
