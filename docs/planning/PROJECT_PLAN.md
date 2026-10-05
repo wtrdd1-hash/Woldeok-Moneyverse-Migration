@@ -2,11 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.05.527
-> Implementation/evidence sync: 2026-10-05 (planning baseline exact main SHA: `5318213f`; v527 is docs/research only)
+> Current integrated version: v2026.10.05.530
+> Implementation/evidence sync: 2026-10-05 (emergency UI audit baseline exact main SHA: `921b467e`; v530 is audit/planning only)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Emergency full UI re-audit and remediation gate — v2026.10.05.530 (2026-10-05)
+
+- **Emergency state:** **BLOCKED — URGENT UI REMEDIATION REQUIRED.** The entire web UI, including all administrator surfaces, is reopened for full responsive/accessibility/interaction acceptance.
+- **Exact source inventory:** latest-main baseline `921b467eac21645a51ba362b24cac7eaab89c081` contains 142 `page.tsx` templates, including 25 `/admin/**` templates. Prior v529 evidence cannot certify this candidate because its long browser crawl did not finish, administrator runtime coverage was incomplete, and main changed afterward.
+- **P0 observed defect:** `/admin/seo` mobile evidence and current source agree on a non-wrapping inner action row that can push long administrator actions off-screen. Any clipped CTA/body overflow remains a Test/Production blocker.
+- **Additional blockers:** sub-44px interaction hotspots require classification/remediation against the Moneyverse primary-touch rule; fixed onboarding/support layers require a shared mobile collision/safe-area contract; current reviewer flow returns HTTP 500 from `/app-api/v1/account/identities`.
+- **Acceptance contract:** five complete passes over the full discovered route inventory, with all 25 administrator templates authenticated on the same exact Test SHA, the existing 320–430 mobile matrix, landscape/tablet/desktop, zoom/reflow, state coverage, backend/API health and evidence linkage.
+- **Detailed authority:** [Emergency Full UI Re-audit & Remediation Specification v530](EMERGENCY_FULL_UI_REAUDIT_SPEC.md) and [v530 planning delta](deltas/v2026.10.05.530.md).
+- **Evidence boundary:** v530 is audit/planning documentation. It does not claim runtime remediation, exact-SHA Test acceptance or Production promotion.
 
 ## SEO demand and keyword portfolio expansion — v2026.10.05.527 (2026-10-05)
 

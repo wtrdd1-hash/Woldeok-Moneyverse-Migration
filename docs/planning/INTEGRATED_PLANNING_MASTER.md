@@ -1,11 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.05.527
+> Current ledger version: v2026.10.05.530
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.05.530 — 2026-10-05 — Emergency full UI re-audit
+- Initial check saw `origin/main=ca354411d88b461215a81557f686765cfedf00f0`; the mandatory pre-branch fetch detected drift to `921b467eac21645a51ba362b24cac7eaab89c081`, and the isolated v530 branch was created from that latest SHA. Mid-work refetch remained `921b467e...`.
+- Re-read documentation governance and the current plan/master/responsive/accessibility/update/runtime authorities; 1,747 tracked Markdown files were also enumerated and read through a SHA-256 scan without changing concurrent dirty-main files.
+- Latest-main UI inventory is 142 web page templates, including 25 administrator templates. Current Production/Test runtime identities differ from latest main, so live observations are not latest-main acceptance evidence.
+- Adopted `EMERGENCY_FULL_UI_REAUDIT_SPEC.md` / `.ko.md`. Current state is **BLOCKED — URGENT UI REMEDIATION REQUIRED**.
+- P0: `/admin/seo` mobile action-row clipping is supported by the supplied mobile evidence and current non-wrapping source layout. P1 gates cover touch-target triage, floating-layer occlusion, account identities HTTP 500 and heading/semantic follow-up.
+- Reasserted the five-complete-pass full-route gate, authenticated all-admin inclusion, exact-SHA Test/backend health and zero-downtime Production promotion sequence.
+- Audit/planning/docs only; no runtime remediation, Test acceptance or Production promotion is claimed.
 
 ## v2026.10.05.527 — 2026-10-05 — SEO demand and keyword portfolio expansion
 - Start/mid-work `origin/main=5318213f1eca644c7f36df7d967a53092de0814c`; no drift at the recorded mid-work checkpoint. Dedicated worktree/branch `docs/seo-demand-expansion-v2026.10.05.527`.
