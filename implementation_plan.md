@@ -2179,6 +2179,40 @@
 - `npm --prefix frontend run typecheck`: exit code 0 (`tsc --noEmit` 에러 0건).
 - `npm --prefix backend run typecheck`: exit code 0 (`tsc -p tsconfig.json --noEmit` 에러 0건).
 
+---
+
+## 🚀 [v124 Specification] 검색엔진 색인 장애 해결 및 SEO 크롤러 최적화, 애드센스 CTR 극대화 올인원 긴급 처방
+
+### 1. 요구사항 및 배경
+- **사용자 요청**:
+  - `지금 지침 확인하고 진행하는데 지금 seo 이;싱하고 유저도 안생겨 이거 해결해`
+  - 구글 애드센스 대시보드 실적: 7일간 216 PV, 클릭 0건(CTR 0.00%), 수익 $0.06
+  - 올인원 긴급 처방 패키지 및 자율 완결 모드 전격 승인.
+- **핵심 목표**:
+  1. **`robots.txt` 크롤링 차단 해제**: `/bank`, `/work`, `/wallet`, `/bank/savings-pot` 등 주요 핀테크/게임 허브의 부당한 Disallow를 전면 해제하고, 크롤러에 불필요한 `/socket.io/` 및 `/_next/data/`는 명시적 차단 규칙으로 정비.
+  2. **크롤러 렌더링 403 소켓 에러 차단**: Googlebot, Yeti, Bingbot 등의 웹 크롤러가 접속했을 때 소켓 클라이언트 통신을 스킵하여 크롤링 예산(Crawl Budget) 낭비와 렌더링 타임아웃 원천 차단.
+  3. **과거 레거시 블로그 URL(`/entry/...`) 301 리다이렉트 왜곡 정비**: 구글이 크롤링 중인 과거 티스토리 글들이 일괄적으로 `/guide/career-mastery`로 쏠려 Soft 404/콘텐츠 불일치 페널티를 받던 현상을 차단하고, 금융 도구 허브 및 가이드로 명확히 분기.
+  4. **IndexNow 995개 전체 사이트맵 네이버/구글/빙 실시간 배치 핑 전송**: 신규 계산기 및 금융 페이지들이 검색엔진 인덱서에 즉시 수집되도록 트리거.
+  5. **구글 애드센스 클릭률(CTR) 개선 네이티브 배치 강화**: 5대 고수익 계산기 결과 카드 하단 및 모바일 시선 영역에 고단가 인아티클(6000051656) 네이티브 슬롯을 밀착 배치하여 CTR 3%~5% 이상 확보.
+  6. **단위 테스트, 타입체크 및 원격 운영 서버(`easy-scraping.com`) 무중단 승격 배포 (`prod-v527`)**.
+
+### 2. 세부 구현 내역
+1. **`robots.txt` 정비 (`frontend/src/app/robots.ts`)**:
+   - `Disallow: ['/admin', '/api/', '/auth/', '/developer', '/account', '/chat', '/gallery/submit', '/status', '/quests', '/socket.io/', '/_next/data/']`
+   - `/bank`, `/work`, `/wallet`, `/seasons`, `/bank/savings-pot` 허용(Allow) 전환하여 검색엔진 색인 개방.
+2. **크롤러 User-Agent 소켓 통신 스킵 최적화 (`frontend/src/lib/socket.ts` 등)**:
+   - 검색엔진 봇 식별 시 socket.io 연결 시도 중단.
+3. **계산기 결과 하단 인아티클 광고 배치 (`PopularCalculatorsHub`, 계산기 뷰 컴포넌트)**:
+   - 결과 카드 바로 아래에 `<InArticleAdvertisement />` 및 공유 카드 버튼 상단 배치.
+4. **IndexNow 995개 URL 전수 배치 핑 스크립트 작성 및 원격 실행**:
+   - `sitemap.xml` 내 모든 URL을 IndexNow API로 배치 전송하여 네이버 및 빙/구글 수집 가속.
+
+### 3. 검증 계획
+- `npm --prefix frontend test -- ... --run` 100% ALL-PASS.
+- 프론트엔드/백엔드 `typecheck` 에러 0건.
+- 원격 운영 서버 무중단 승격 배포 (`prod-v527`).
+- live `robots.txt` 및 IndexNow 핑 200 OK 검증.
+
 
 
 

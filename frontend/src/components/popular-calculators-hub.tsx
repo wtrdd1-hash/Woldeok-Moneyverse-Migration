@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { TrendingUp, Calculator, Sparkles, ChevronRight, Coins, Building2, Flame, Receipt, ArrowRightLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MultiplexAdvertisement } from '@/components/public-advertisement';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 interface HubLinkItem {
   readonly title: string;
@@ -359,6 +359,9 @@ export function PopularCalculatorsHub({
             ))}
           </div>
         </div>
+
+        {/* 고단가 인아티클 네이티브 광고 슬롯 (Slot 6000051656) */}
+        <InArticleAdvertisement className="my-6" />
 
         {/* 4. 신규 롱테일: 주식 양도소득세 & 250만원 절세 시뮬레이터 */}
         <div>
