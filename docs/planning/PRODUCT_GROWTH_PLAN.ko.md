@@ -1,10 +1,20 @@
 # 월덕 머니버스 — 제품 성장·리텐션 기획서
 
-> 버전: v2026.10.02.507
+> 버전: v2026.10.05.527
 > 상태: `PROJECT_PLAN.md`를 보완하는 Living 제품 기획
 > 기준일: 2026-10-02
 > 권위 채택: v507 해외 성장 결정을 v2026.10.03.509에서 현재 기획 권위로 통합.
 > 영문 기준 문서: [PRODUCT_GROWTH_PLAN.md](PRODUCT_GROWTH_PLAN.md)
+
+## SEO 수요 포트폴리오 통합 — v527
+
+Moneyverse 유입은 이제 “SEO 페이지를 많이 만든다”가 아니라 v527 keyword-demand portfolio를 사용한다.
+
+- 국내와 해외를 별도 cluster 우선순위와 market-native validation으로 운영한다.
+- 10,473개 candidate-query registry는 discovery 재고일 뿐이며 실측수요와 독립가치가 실제 게시를 결정한다.
+- 검색 landing은 먼저 답/도구를 제공하고 두 번째 유용 행동을 제시한 뒤 persistence/personalization 가치가 있을 때만 가입을 제안한다.
+- landing family별 activation·D1/D7/D30까지 측정하므로 제품가치를 만들지 못하는 traffic 증가는 성장 성공으로 보지 않는다.
+- 상세 권위: [SEO_DEMAND_KEYWORD_EXPANSION_SPEC.ko.md](SEO_DEMAND_KEYWORD_EXPANSION_SPEC.ko.md).
 
 ## 1. 제품 목표
 

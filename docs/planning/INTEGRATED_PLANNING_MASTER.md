@@ -1,11 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.04.523
+> Current ledger version: v2026.10.05.527
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.05.527 — 2026-10-05 — SEO demand and keyword portfolio expansion
+- Start/mid-work `origin/main=5318213f1eca644c7f36df7d967a53092de0814c`; no drift at the recorded mid-work checkpoint. Dedicated worktree/branch `docs/seo-demand-expansion-v2026.10.05.527`.
+- Re-read documentation governance, PROJECT_PLAN, integrated master, global SEO/growth execution, search discovery, SEO-intent activation, current pSEO configs/routes, and the unmerged v525 search-to-user planning branch as read-only concurrent input.
+- Added `SEO_DEMAND_KEYWORD_EXPANSION_SPEC.md` / `.ko.md` as the demand/keyword portfolio authority: evidence states, keyword record, domestic/international cluster maps, pSEO admission/retirement, finance freshness, localization, internal-link graph, search-to-user conversion and measurement.
+- Generated 10,473 discovery keyword candidates: 6,207 KO + 4,266 EN across 25 clusters. All are HOLD until measured/provider evidence and page-value gates pass; candidate count is not a publishing target.
+- Fresh independent Crossref research: 40 lanes, 200,000 raw -> 111,313 deduplicated candidates, zero collection errors, stream SHA-256 `1629c7b24a688e84249d77eec2cd1ce2f8b906f91187fcbed413739aef54b523`. Full compressed corpus, manifest and sample are versioned under `docs/research/seo-demand-v2026.10.05.527/`.
+- Revalidated current first-party Google/Naver/Bing search guidance, Core Web Vitals, IndexNow/Schema.org semantics, plus official finance-tool patterns. Broad-corpus quantity never substitutes for current primary-source rules.
+- Planning/research/docs only. No runtime, Test, Production, indexing, ranking, traffic or revenue completion is claimed.
 
 ## v2026.10.04.523 — 2026-10-04 — Central Bank / Mint / Treasury institutional separation
 - Start `origin/main=c10e1582ccc0c058dff5c5356ad8b1893759f72c`; mid-work recheck detected `origin/main=065ee42204a4238c5010897212c7fc2a6c848f64`, which added treasury English/architecture documentation. The isolated branch was rebased onto that latest main before authority edits, preserving concurrent work.
