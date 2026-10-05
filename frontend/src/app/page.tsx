@@ -164,6 +164,19 @@ export default async function HomePage() {
                 chinese="职业薪酬、复利利息及股票估值基于PostgreSQL分布式账本实时合并管理。"
               />
             </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild size="sm">
+                <Link href="/register">
+                  <T korean="무료로 시작하기" english="Start Free" japanese="無料で始める" chinese="免费开始" />
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <Button asChild size="sm" variant="outline">
+                <Link href="/tools">
+                  <T korean="가입 없이 금융도구 먼저 사용" english="Try Free Tools First" japanese="登録せず金融ツールを試す" chinese="免注册先用金融工具" />
+                </Link>
+              </Button>
+            </div>
           </div>
 
           {/* 4 Core Quick Actions (44px+ 터치 타깃 & Inset Border 준수) */}

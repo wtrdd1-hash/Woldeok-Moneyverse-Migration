@@ -94,6 +94,12 @@ export function proxy(request: NextRequest) {
     if (!targetPath) targetPath = '/';
   }
 
+  // Make an explicit locale visible to the rewritten server component in
+  // the same request. Response cookies only affect the next navigation.
+  if (explicitPrefixLocale) {
+    request.cookies.set(DETECTED_LOCALE_COOKIE, explicitPrefixLocale);
+  }
+
   // Prepare response: If targetPath was rewritten from a prefix, perform internal rewrite
   let response: NextResponse;
   if (explicitPrefixLocale && targetPath !== pathname) {
@@ -117,6 +123,27 @@ export function proxy(request: NextRequest) {
     request.headers.get('x-country-code');
   const acceptLang = request.headers.get('accept-language');
   const detectedGeoLocale = detectLocale(country, acceptLang);
+
+  // Keep each indexable locale on a stable URL. The root URL is the Korean
+  // canonical; first-time visitors detected as another supported locale move
+  // to that locale's explicit URL instead of receiving different HTML at '/'.
+  const rootLocale = validQueryLocale ?? userSavedLocale ?? detectedGeoLocale;
+  if (pathname === '/' && rootLocale !== 'ko') {
+    const localeUrl = new URL(`/${rootLocale}${request.nextUrl.search}`, request.url);
+    localeUrl.searchParams.delete('lang');
+    localeUrl.searchParams.delete('locale');
+    const redirect = NextResponse.redirect(localeUrl, 307);
+    if (!userSavedLocale && !validQueryLocale) {
+      redirect.cookies.set(DETECTED_LOCALE_COOKIE, rootLocale, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30,
+        sameSite: 'lax',
+        secure: true,
+      });
+    }
+    redirect.headers.set('x-moneyverse-locale', rootLocale);
+    return redirect;
+  }
 
   let finalLocale: Locale;
 
