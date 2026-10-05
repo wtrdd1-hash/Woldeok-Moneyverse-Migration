@@ -103,7 +103,7 @@ export function AdminSubNav() {
                 prefetch={false}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'group flex min-h-10 sm:min-h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all active:scale-[0.98] outline-none',
+                  'group flex min-h-[44px] sm:min-h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all active:scale-[0.98] outline-none',
                   isActive
                     ? 'bg-primary/15 text-primary font-black ring-1 ring-primary/40 shadow-xs'
                     : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground',

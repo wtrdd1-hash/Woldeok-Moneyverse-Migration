@@ -1678,6 +1678,31 @@
 - Git 커밋 & 푸시 후 원격 프로덕션 서버(`easy-scraping.com`) 무중단 배포.
 - 모바일 및 대화면 라이브 렌더링 검증.
 
+---
+
+## 🚀 [v109 Specification] 관리자 콘솔 관제탑 전역 UI 정밀 감사 및 모바일 접근성 강화
+
+### 1. 요구사항 및 배경
+- 사용자의 "관리자페이지 포함해서 ui 검사진행해" 지시에 따라 `/admin` 전체 서피스 전수 감사:
+  1. `admin-control-tower-craft` 스킬 기반 6대 서피스(총괄 관제탑, 회원 관리, 기능 스위치, 감사 로그, 경제 원장, SEO 관제) 검사.
+  2. 모바일/태블릿 반응형 뷰포트에서의 터치 접근성 및 시각적 위계 보존 감사.
+  3. 발견 사항 및 최적화 조치:
+     - **관리자 서브 내비게이션 (`AdminSubNav`)**: 모바일에서 18개 관리자 탭을 스와이프/탭할 때 오터치를 방지하도록 탭 높이를 `min-h-10 (40px)`에서 모바일 접근성 표준인 `min-h-[44px] sm:min-h-9`로 상향 보강.
+     - **관제탑 상단 퀵 액션 링크 (`/admin/page.tsx`)**: '원장 상태 점검' 및 '국고 관리' 헤더 버튼에 `min-h-[44px] sm:min-h-9` 터치 타깃 부여.
+     - **회원 관리 디렉터리 (`UserDirectory`)**: 데스크톱 테이블 뷰와 모바일 카드 뷰 자동 분기(`block divide-y md:table-row-group`) 및 자산 수치 `font-mono tabular-nums` 정합성 확인.
+     - **감사 로그 뷰 (`AuditLogsView`)**: 1클릭 CSV/JSON 내보내기, 스마트 타임라인/고밀도 테이블 토글, 닉네임-UUID 자동 변환 쿼리 정합성 확인.
+
+### 2. 세부 컴포넌트 변경 명세
+1. `frontend/src/components/admin-sub-nav.tsx`:
+   - 18개 서브 탭 모바일 터치 타깃 `min-h-[44px]` 적용.
+2. `frontend/src/app/admin/page.tsx`:
+   - 상단 퀵 링크 버튼 모바일 `min-h-[44px]` 터치 타깃 적용.
+
+### 3. 검증 및 배포 계획
+- `npm run typecheck` 통과 확인.
+- Git 커밋 & 푸시 후 자동 배포 파이프라인 가동.
+
+
 
 
 

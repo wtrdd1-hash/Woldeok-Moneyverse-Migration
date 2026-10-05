@@ -250,14 +250,14 @@ export default async function AdminPage({
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <Link
               href="/admin/economy"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-background/80 px-3 py-1.5 text-xs font-bold text-foreground shadow-xs hover:bg-muted transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-background/80 px-3 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-foreground shadow-xs hover:bg-muted transition-colors"
             >
               <RefreshCw className="size-3.5 text-primary" />
               <span>원장 상태 점검</span>
             </Link>
             <Link
               href="/admin/treasury"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 shadow-xs hover:bg-amber-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-amber-600 dark:text-amber-400 shadow-xs hover:bg-amber-500/20 transition-colors"
             >
               <Banknote className="size-3.5 text-amber-500" />
               <span>국고 관리</span>
