@@ -1872,6 +1872,29 @@
 - `npm run typecheck` 통과 (`tsc --noEmit` exit code 0).
 - Git 커밋 및 원격 저장소 푸시 완료.
 
+---
+
+## 🚀 [v115 Specification] UI530-02 44px 터치 접근성 보강 및 배당소득세 허브 데스크톱 스티키 사이드 레일 배너 마운트 완결
+
+### 1. 요구사항 및 배경
+- `docs/planning/EMERGENCY_FULL_UI_REAUDIT_SPEC.ko.md` UI 결함 원장의 **UI530-02 (44px 미만 터치 타깃 집중 구간 개선)** 후속 조치 및 대화면 광고 수익화 극대화:
+  1. 관리자 퀵 서치 폼 및 감사 로그 툴바(카테고리 필터, CSV/JSON 내보내기, 보기 모드 토글) 모바일 터치 타깃을 `min-h-[44px]`로 상향 보강하여 오터치 원천 차단.
+  2. 배당소득세 계산기 고체류 지면(`/tools/dividend-tax-calculator`)에 1680px 이상 초광폭 데스크톱 전용 스폰서 사이드 레일 배너(`DesktopStickyAdRails`)를 신규 마운트하여 Page RPM 견인.
+
+### 2. 세부 구현 내역
+1. `frontend/src/app/admin/admin-quick-search.tsx`:
+   - 모바일에서 입력창과 버튼이 수직 스택/수평 정렬로 유연하게 반응하도록 개선.
+   - 검색 Input 및 빠른 조회 Button에 `min-h-[44px] sm:min-h-10` 터치 표준 적용.
+2. `frontend/src/app/admin/logs/audit-logs-view.tsx`:
+   - 6개 카테고리 필터 버튼(전체, 오류, 경제, 보안, 콘텐츠, 제재)에 `min-h-[44px] sm:min-h-7` 적용.
+   - CSV / JSON 내보내기 버튼 및 타임라인 / 테이블 뷰 토글 버튼에 `min-h-[44px] sm:min-h-7` 적용.
+3. `frontend/src/app/tools/dividend-tax-calculator/page.tsx`:
+   - `DesktopStickyAdRails` 임포트 및 페이지 컨테이너 최상단 마운트 완료.
+
+### 3. 검증 결과
+- `npm run typecheck` 통과 (`tsc --noEmit` exit code 0).
+- Git 커밋 & 원격 저장소 푸시 완료.
+
 
 
 

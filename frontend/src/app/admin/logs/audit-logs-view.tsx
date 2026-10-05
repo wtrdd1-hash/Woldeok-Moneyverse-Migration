@@ -202,7 +202,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'all' ? 'default' : 'ghost'}
             onClick={() => setCategory('all')}
-            className="h-7 text-xs shrink-0"
+            className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 text-xs shrink-0"
           >
             전체 ({totalCount})
           </Button>
@@ -211,7 +211,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'error' ? 'destructive' : 'ghost'}
             onClick={() => setCategory('error')}
-            className="h-7 text-xs font-semibold shrink-0"
+            className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 text-xs font-semibold shrink-0"
           >
             🚨 오류/실패 ({failureCount})
           </Button>
@@ -220,7 +220,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'economy' ? 'default' : 'ghost'}
             onClick={() => setCategory('economy')}
-            className="h-7 text-xs shrink-0"
+            className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 text-xs shrink-0"
           >
             💰 경제/지급 ({economyCount})
           </Button>
@@ -229,7 +229,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'security' ? 'default' : 'ghost'}
             onClick={() => setCategory('security')}
-            className="h-7 text-xs shrink-0"
+            className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 text-xs shrink-0"
           >
             🔐 보안/인증 ({securityCount})
           </Button>
@@ -238,7 +238,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'content' ? 'default' : 'ghost'}
             onClick={() => setCategory('content')}
-            className="h-7 text-xs shrink-0"
+            className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 text-xs shrink-0"
           >
             📸 콘텐츠
           </Button>
@@ -247,7 +247,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'moderation' ? 'default' : 'ghost'}
             onClick={() => setCategory('moderation')}
-            className="h-7 text-xs shrink-0"
+            className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 text-xs shrink-0"
           >
             👤 제재/관리
           </Button>
@@ -263,7 +263,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
               variant="outline"
               onClick={handleExportCsv}
               disabled={filteredEvents.length === 0}
-              className="h-7 gap-1 px-2 text-xs font-medium"
+              className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 gap-1 px-2.5 text-xs font-medium"
               title="현재 필터링된 감사 로그를 CSV 파일로 내보냅니다."
             >
               <Download className="size-3" />
@@ -275,7 +275,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
               variant="outline"
               onClick={handleExportJson}
               disabled={filteredEvents.length === 0}
-              className="h-7 gap-1 px-2 text-xs font-medium"
+              className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 gap-1 px-2.5 text-xs font-medium"
               title="현재 필터링된 감사 로그를 JSON 파일로 내보냅니다."
             >
               <Download className="size-3" />
@@ -289,7 +289,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
               size="xs"
               variant={viewMode === 'timeline' ? 'secondary' : 'ghost'}
               onClick={() => setViewMode('timeline')}
-              className="h-7 gap-1 px-2.5 text-xs"
+              className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 gap-1 px-2.5 text-xs"
               title="스마트 타임라인 카드 뷰"
             >
               <LayoutGrid className="size-3.5" />
@@ -300,7 +300,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
               size="xs"
               variant={viewMode === 'compact' ? 'secondary' : 'ghost'}
               onClick={() => setViewMode('compact')}
-              className="h-7 gap-1 px-2.5 text-xs"
+              className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 gap-1 px-2.5 text-xs"
               title="고밀도 테이블 뷰"
             >
               <TableIcon className="size-3.5" />
