@@ -2,11 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.04.523
-> Implementation/evidence sync: 2026-10-04 (exact main SHA: `f6e89a31`)
+> Current integrated version: v2026.10.05.527
+> Implementation/evidence sync: 2026-10-05 (planning baseline exact main SHA: `5318213f`; v527 is docs/research only)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## SEO demand and keyword portfolio expansion — v2026.10.05.527 (2026-10-05)
+
+- **Authority decision:** organic-search growth is managed as a measured demand portfolio, not a page-count program. Candidate keywords are research inventory; a distinct indexable URL requires measured/explicitly estimated demand, independent user value, source freshness, localization readiness, canonical/cannibalization review, and a merge/noindex/retire path.
+- **Domestic / international split:** Korean P0 centers on salary/work, savings/deposits, loan/DSR, investing/compounding, dividends, retirement/FIRE, real estate and personal finance. English P0 centers on compound interest/savings, investment/DCA, FIRE/SWR, dividends/DRIP, loan/debt payoff, mortgage, take-home pay, net worth/budget and business break-even. Japan and DE/FR/ES/pt-BR follow only after proven family value and native-intent review.
+- **Concrete keyword inventory:** v527 generated 10,473 controlled discovery candidates (6,207 KO + 4,266 EN) across 25 clusters. Every row is `UNVALIDATED_CANDIDATE / HOLD_UNTIL_EVIDENCE`; no row authorizes a page.
+- **Fresh reference expansion:** a new independent 40-lane Crossref cycle collected 200,000 raw records and deduplicated 111,313 candidates with zero collection errors; deterministic corpus-stream SHA-256 `1629c7b24a688e84249d77eec2cd1ce2f8b906f91187fcbed413739aef54b523`. This is discovery breadth, not 111,313 manually reviewed sources.
+- **Primary-source gate:** direct rules were separately revalidated against current Google Search Central/Search Console/Keyword Planner, Naver Search Advisor/DataLab, Bing Webmaster, IndexNow, Core Web Vitals, Schema.org glossary semantics, and first-party finance-tool references. Finance/tax/loan/retirement pages require jurisdiction, source, effective date, calculation version, assumptions and stale-data behavior.
+- **Anti-scaled-content gate:** doorway pages, keyword stuffing, low-value scaled content, automatic keyword-to-URL generation and unauthorized automated Google SERP querying are prohibited. Numeric/amount/period variants default to presets/sections unless distinct search intent and user value are proven.
+- **Search-to-user objective:** optimize `impression -> useful result -> second useful action -> optional signup -> activation -> D1/D7/D30 -> qualified pageviews/observed ad economics`, not traffic alone.
+- **Detailed authority:** [SEO Demand & Keyword Portfolio Expansion Specification v527](SEO_DEMAND_KEYWORD_EXPANSION_SPEC.md) and [v527 research review](../findings/MONEYVERSE_SEO_DEMAND_KEYWORD_RESEARCH_REVIEW_v2026.10.05.527.md).
+- **Evidence boundary:** v527 is planning/research/docs only. It does not claim runtime, Test, Production, ranking, traffic, or revenue completion.
 
 ## Central Bank / Mint / Treasury institutional separation — v2026.10.04.523 (2026-10-04)
 

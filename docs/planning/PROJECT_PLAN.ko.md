@@ -2,12 +2,24 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
 > **최초 기준:** 2026-08-26  
-> **현재 통합 버전:** v2026.10.04.523  
-> **구현·증거 동기화:** 2026-10-04 (최신 main SHA: `f6e89a31`)  
+> **현재 통합 버전:** v2026.10.05.527
+> **구현·증거 동기화:** 2026-10-05 (기획 기준 exact main SHA: `5318213f`; v527은 문서/조사 전용)
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
 > **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
 ---
+
+## SEO 수요·키워드 포트폴리오 확장 — v2026.10.05.527
+
+- **권위 결정:** 자연검색 성장은 page-count 프로그램이 아니라 실측 수요 포트폴리오로 관리한다. 후보 키워드는 조사 재고이며 독립 색인 URL은 실측/출처 있는 추정수요, 독립 사용자 가치, 출처 신선도, 현지화 준비도, canonical/카니벌라이제이션 검토, merge/noindex/retire 경로를 통과해야 한다.
+- **국내/해외 분리:** 국내 P0는 급여·근로, 예금·저축, 대출·DSR, 투자·복리, 배당, 연금·FIRE, 부동산, 생활재무다. 영어권 P0는 compound interest/savings, investment/DCA, FIRE/SWR, dividend/DRIP, loan/debt payoff, mortgage, take-home pay, net worth/budget, business break-even이다. 일본 및 DE/FR/ES/pt-BR은 검증된 family와 native intent review 뒤 순차 확장한다.
+- **실제 키워드 후보:** v527은 25개 cluster에서 10,473개 controlled discovery candidate(한국어 6,207 + 영어 4,266)를 생성했다. 모든 행은 `UNVALIDATED_CANDIDATE / HOLD_UNTIL_EVIDENCE`이며 페이지 생성을 승인하지 않는다.
+- **신규 레퍼런스 확장:** 별도 40-lane Crossref 회차에서 raw 200,000건을 수집하고 오류 0건, 중복제거 후보 111,313건을 확보했다. deterministic corpus stream SHA-256은 `1629c7b24a688e84249d77eec2cd1ce2f8b906f91187fcbed413739aef54b523`다. 이는 discovery 폭이지 111,313건을 사람이 모두 검토했다는 뜻이 아니다.
+- **1차자료 게이트:** Google Search Central/Search Console/Keyword Planner, Naver Search Advisor/DataLab, Bing Webmaster, IndexNow, Core Web Vitals, Schema.org glossary 의미, 공식 금융도구 자료를 별도 재검증했다. 금융·세금·대출·연금 페이지는 관할, 출처, 시행일, 계산버전, 가정, stale 동작을 가진다.
+- **대량저가치 방지:** doorway, keyword stuffing, low-value scaled content, keyword-to-URL 자동생성, Google SERP 무단 자동query를 금지한다. 금액/기간/수치 변형은 독립 검색의도·가치가 입증되지 않으면 preset/section이 기본이다.
+- **검색→사용자 목표:** `impression -> useful result -> second useful action -> optional signup -> activation -> D1/D7/D30 -> qualified pageviews/실측 광고경제`를 최적화하며 traffic 자체를 성공으로 보지 않는다.
+- **상세 권위:** [SEO 수요·키워드 포트폴리오 확장 명세 v527](SEO_DEMAND_KEYWORD_EXPANSION_SPEC.ko.md), [v527 조사 검토](../findings/MONEYVERSE_SEO_DEMAND_KEYWORD_RESEARCH_REVIEW_v2026.10.05.527.ko.md).
+- **증거 경계:** v527은 기획/조사/문서 전용이다. runtime, Test, Production, 순위, traffic, 수익 완료를 주장하지 않는다.
 
 ## 중앙은행·조폐국·중앙국고·경제코어 기관 분리 — v2026.10.04.523
 
