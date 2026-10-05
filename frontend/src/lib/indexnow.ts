@@ -7,6 +7,9 @@ import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
 import { REAL_ESTATE_PRESETS } from '@/config/real-estate-presets.config';
 import { KIMCHI_PREMIUM_PRESETS } from '@/config/kimchi-premium-presets.config';
 import { CAPITAL_GAINS_TAX_PRESETS } from '@/config/capital-gains-tax-presets.config';
+import { GIFT_TAX_PRESETS } from '@/config/pseo-gift-tax.config';
+import { GLOBAL_COMPOUND_PRESETS } from '@/config/pseo-compound-global.config';
+import { GLOSSARY_TERMS } from '@/config/pseo-glossary.config';
 import { getPublicSitemapRoutes } from '@/config/routes.config';
 
 export const INDEXNOW_HOST = 'easy-scraping.com';
@@ -78,7 +81,27 @@ export function getAllPublicUrlsForIndexNow(): readonly string[] {
     urls.add(`${base}/tools/capital-gains-tax-calculator/${p.slug}`);
   }
 
-  // 7. Virtual Real Estate & Personal Spaces
+  // 7. 신규 2026 증여세 계산기 프리셋 (13개 롱테일)
+  urls.add(`${base}/tools/gift-tax-calculator`);
+  for (const p of GIFT_TAX_PRESETS) {
+    urls.add(`${base}/tools/gift-tax-calculator/${p.slug}`);
+  }
+
+  // 8. 신규 글로벌 복리 & FIRE 은퇴 계산기 (EN, JA, ZH 3개 국어 × 5대 프리셋)
+  for (const loc of ['en', 'ja', 'zh']) {
+    urls.add(`${base}/${loc}/tools/compound-interest-calculator`);
+    for (const p of GLOBAL_COMPOUND_PRESETS) {
+      urls.add(`${base}/${loc}/tools/compound-interest-calculator/${p.slug}`);
+    }
+  }
+
+  // 9. 50대 금융 용어사전 가이드 허브
+  urls.add(`${base}/guide/glossary`);
+  for (const t of GLOSSARY_TERMS) {
+    urls.add(`${base}/guide/glossary/${t.slug}`);
+  }
+
+  // 10. Virtual Real Estate & Personal Spaces
   urls.add(`${base}/spaces`);
   urls.add(`${base}/spaces/real-estate`);
 

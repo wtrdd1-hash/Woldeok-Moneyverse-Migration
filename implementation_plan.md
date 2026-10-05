@@ -1797,6 +1797,29 @@
 - `npm run typecheck` 통과 (`tsc --noEmit` exit code 0).
 - Git 커밋 및 푸시 후 실서버 프로덕션 무중단 배포 검증.
 
+---
+
+## 🚀 [v112 Specification] 글로벌 5대 통화 세그먼트 스위처, 1초 바이럴 인포그래픽 공유 카드 & IndexNow 전 도메인 배치 색인 전송 풀스택 구축
+
+### 1. 요구사항 및 배경
+- 사용자 "진행" 승인 지시에 따라 글로벌 고수요 복리 계산기 고도화 및 검색엔진 수집 파이프라인 완성:
+  1. **다중 글로벌 통화 지원 (USD, EUR, GBP, JPY, KRW)**: 미국 달러 외 유럽(EUR), 영국(GBP), 일본(JPY), 한국(KRW) 현지 통화로 실시간 스케일링 및 통화 기호(`$`, `€`, `£`, `¥`, `₩`) 연동.
+  2. **1초 바이럴 SNS 공유 및 인포그래픽 카드 내보내기**: Canvas 2D 기반 고해상도 인포그래픽 카드 생성(`ViralShareCardDialog`), X(구 트위터) 웹 인텐트 1클릭 공유 연동.
+  3. **IndexNow 대량 색인 핑 전송 확장 (`frontend/src/lib/indexnow.ts`)**: 2026 증여세 13개 롱테일, 글로벌 복리 계산기 18개 URL(EN, JA, ZH), 50대 금융 용어사전 URL을 Bing/Naver/Yandex/Seznam 검색엔진 배치 핑 목록에 전격 편입.
+
+### 2. 세부 구현 내역
+1. `frontend/src/config/pseo-compound-global.config.ts`:
+   - `CompoundCurrency` 인터페이스 및 `SUPPORTED_COMPOUND_CURRENCIES` 환율 배율/스텝 정의.
+2. `frontend/src/app/[locale]/tools/compound-interest-calculator/compound-calculator-client.tsx`:
+   - 상단 5대 통화 세그먼트 토글러 탑재.
+   - `ViralShareCardDialog` 연동을 통한 인포그래픽 PNG 생성/다운로드 및 X 공유 인텐트 버튼 배치.
+   - 10,000 WLD 온보딩 퀘스트 카드 연계.
+3. `frontend/src/lib/indexnow.ts`:
+   - `getAllPublicUrlsForIndexNow()`에 신규 3대 pSEO 허브(증여세 13개, 글로벌 복리 18개, 용어사전 50개) 전수 통합.
+4. 단위 테스트 검증:
+   - `src/lib/__tests__/indexnow.test.ts` 5개 테스트 100% 통과.
+   - `npm run typecheck` 통과 (`tsc --noEmit` exit code 0).
+
 
 
 

@@ -146,3 +146,19 @@ export const GLOBAL_COMPOUND_PRESETS: readonly GlobalCompoundPreset[] = [
     descriptionZh: '基于4%法则（每年安全提现4万美元）测算实现100万美元FIRE提早退休目标所需的月度储蓄策略。',
   },
 ];
+
+export interface CompoundCurrency {
+  readonly code: 'USD' | 'EUR' | 'GBP' | 'JPY' | 'KRW';
+  readonly symbol: string;
+  readonly label: string;
+  readonly rateFromUsd: number; // 1 USD 기준 환율
+  readonly defaultStep: number;
+}
+
+export const SUPPORTED_COMPOUND_CURRENCIES: readonly CompoundCurrency[] = [
+  { code: 'USD', symbol: '$', label: 'USD ($)', rateFromUsd: 1.0, defaultStep: 50 },
+  { code: 'EUR', symbol: '€', label: 'EUR (€)', rateFromUsd: 0.92, defaultStep: 50 },
+  { code: 'GBP', symbol: '£', label: 'GBP (£)', rateFromUsd: 0.78, defaultStep: 50 },
+  { code: 'JPY', symbol: '¥', label: 'JPY (¥)', rateFromUsd: 155.0, defaultStep: 10000 },
+  { code: 'KRW', symbol: '₩', label: 'KRW (₩)', rateFromUsd: 1380.0, defaultStep: 100000 },
+];
