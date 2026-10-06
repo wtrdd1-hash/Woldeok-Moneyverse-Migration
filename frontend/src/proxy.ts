@@ -1,6 +1,35 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { DETECTED_LOCALE_COOKIE, LOCALE_COOKIE, detectLocale, isLocale, type Locale } from '@/lib/locale';
+import { detectCrawlerBot } from '@/lib/bot-detector';
+
+const API_ORIGIN = process.env.API_ORIGIN ?? (process.env.NODE_ENV === 'production' ? 'http://127.0.0.1:3000' : 'http://127.0.0.1:3020');
+
+function recordCrawlerHitAsync(request: NextRequest, botName: string, statusCode: number = 200) {
+  try {
+    const userAgent = request.headers.get('user-agent') || '';
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
+    const path = request.nextUrl.pathname;
+
+    fetch(`${API_ORIGIN}/api/v1/seo/log`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        botName,
+        path,
+        statusCode,
+        durationMs: 30,
+        ipAddress: ip,
+        userAgent,
+      }),
+      cache: 'no-store',
+    }).catch(() => {
+      // Fire-and-forget telemetry, zero impact on proxy latency
+    });
+  } catch {
+    // Graceful swallow
+  }
+}
 
 /**
  * Browser-facing production traffic must stay on HTTPS. TLS terminates at the
@@ -9,6 +38,8 @@ import { DETECTED_LOCALE_COOKIE, LOCALE_COOKIE, detectLocale, isLocale, type Loc
  */
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const userAgent = request.headers.get('user-agent');
+  const botInfo = detectCrawlerBot(userAgent);
 
   // The host Nginx sends ordinary website traffic to the production frontend.
   // On the miniPC, opt-in routing keeps the public Test hostname attached to
@@ -59,6 +90,9 @@ export function proxy(request: NextRequest) {
 
   // Historic blog routes: Return HTTP 410 Gone to cleanly remove obsolete tech-blog URLs from Google/Naver index and avoid Soft 404 penalties
   if (pathname.startsWith('/entry/') || pathname.startsWith('/blog/') || pathname.startsWith('/post/')) {
+    if (botInfo.isBot) {
+      recordCrawlerHitAsync(request, botInfo.botName, 410);
+    }
     const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"/><title>이전 블로그 콘텐츠 안내 (410 Gone) | 월덕 머니버스</title><meta name="robots" content="noindex, nofollow"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>body{background:#090d16;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;text-align:center}.card{max-width:540px;background:#0f172a;border:1px solid #1e293b;border-radius:24px;padding:40px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5)}h1{font-size:22px;color:#f8fafc;margin:0 0 12px}p{font-size:14px;color:#94a3b8;line-height:1.6;margin:0 0 24px}a{display:inline-block;background:#2563eb;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:12px;text-decoration:none;transition:background 0.2s}a:hover{background:#1d4ed8}</style></head><body><div class="card"><h1>과거 블로그 글 서비스 종료 안내</h1><p>해당 기술 블로그 게시물은 서비스 통합 및 도메인 개편으로 인해 영구 삭제(410 Gone)되었습니다.<br/>월덕 머니버스의 실시간 가상 주식, 복리 예금 및 300+개 금융 계산기 도구를 이용해 보세요.</p><a href="/tools">월덕 머니버스 금융 도구 바로가기 →</a></div></body></html>`;
     return new NextResponse(html, {
       status: 410,
@@ -180,6 +214,10 @@ export function proxy(request: NextRequest) {
 
   if (requestHost === 'test.easy-scraping.com' || process.env.SEO_INDEXING_ENABLED === 'false') {
     response.headers.set('x-robots-tag', 'noindex, nofollow');
+  }
+
+  if (botInfo.isBot) {
+    recordCrawlerHitAsync(request, botInfo.botName, 200);
   }
 
   return response;

@@ -372,69 +372,69 @@ export function AnalyticsClientView({
         </div>
       </div>
 
-      {/* 통계 도메인 원클릭 카테고리 전환 탭 바 */}
-      <div className="w-full max-w-full overflow-x-auto no-scrollbar rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-md touch-pan-x overscroll-x-contain" aria-label="분석 범주">
+      {/* 통계 도메인 원클릭 카테고리 전환 탭 바 (모바일 가로 스크롤 및 flex 축소 텍스트 겹침 방지) */}
+      <div className="w-full max-w-full overflow-x-auto no-scrollbar rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-md touch-pan-x overscroll-x-contain scroll-smooth" aria-label="분석 범주">
         <div className="flex w-max min-w-full flex-nowrap gap-2 p-1.5">
-        <button
-          type="button"
-          onClick={() => setActiveCategory('all')}
-          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeCategory === 'all'
-              ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <Activity className="size-3.5" />
-          전체 종합 뷰 (All Analytics)
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategory('user_economy')}
-          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeCategory === 'user_economy'
-              ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <Users className="size-3.5" />
-          유저 & 경제 코호트
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategory('seo_crawlers')}
-          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeCategory === 'seo_crawlers'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <Search className="size-3.5" />
-          SEO & 검색 크롤러 색인
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategory('traffic_sources')}
-          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeCategory === 'traffic_sources'
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <Compass className="size-3.5" />
-          트래픽 유입원 & 국가
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategory('api_health')}
-          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeCategory === 'api_health'
-              ? 'bg-amber-600 text-white shadow-lg shadow-amber-900/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <Zap className="size-3.5" />
-          14대 도메인 API 헬스
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('all')}
+            className={`min-h-[44px] shrink-0 flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeCategory === 'all'
+                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Activity className="size-3.5 shrink-0" />
+            <span>전체 종합 뷰 (All Analytics)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('user_economy')}
+            className={`min-h-[44px] shrink-0 flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeCategory === 'user_economy'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Users className="size-3.5 shrink-0" />
+            <span>유저 & 경제 코호트</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('seo_crawlers')}
+            className={`min-h-[44px] shrink-0 flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeCategory === 'seo_crawlers'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Search className="size-3.5 shrink-0" />
+            <span>SEO & 검색 크롤러 색인</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('traffic_sources')}
+            className={`min-h-[44px] shrink-0 flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeCategory === 'traffic_sources'
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Compass className="size-3.5 shrink-0" />
+            <span>트래픽 유입원 & 국가</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('api_health')}
+            className={`min-h-[44px] shrink-0 flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeCategory === 'api_health'
+                ? 'bg-amber-600 text-white shadow-lg shadow-amber-900/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Zap className="size-3.5 shrink-0" />
+            <span>14대 도메인 API 헬스</span>
+          </button>
         </div>
       </div>
 
@@ -731,16 +731,16 @@ export function AnalyticsClientView({
                   <Bot className="size-4 text-emerald-400" />
                 </CardTitle>
                 <div className="text-2xl font-bold font-mono text-white mt-1">
-                  {seoData?.totalHits24h ?? 124}회
+                  {seoData?.totalHits24h ?? 0}회
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-emerald-400 flex items-center gap-1">
-                  <CheckCircle2 className="size-3.5" /> 7일 누적: {seoData?.totalHits7d ?? 842}회 방문
+                  <CheckCircle2 className="size-3.5" /> 7일 누적: {seoData?.totalHits7d ?? 0}회 방문
                 </p>
                 <div className="mt-3 pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-400">
                   <span>평균 응답 지연</span>
-                  <span className="font-mono text-white">{seoData?.avgDurationMs ?? 42}ms (초고속)</span>
+                  <span className="font-mono text-white">{seoData?.avgDurationMs ?? 0}ms</span>
                 </div>
               </CardContent>
             </Card>
@@ -753,16 +753,16 @@ export function AnalyticsClientView({
                   <Globe className="size-4 text-blue-400" />
                 </CardTitle>
                 <div className="text-2xl font-bold font-mono text-white mt-1">
-                  {seoData?.stockCoverage.indexed ?? 10} / {seoData?.stockCoverage.total ?? 10} (100%)
+                  {seoData?.stockCoverage?.indexed ?? 0} / {seoData?.stockCoverage?.total ?? 10} ({Math.round(((seoData?.stockCoverage?.indexed ?? 0) / Math.max(1, seoData?.stockCoverage?.total ?? 10)) * 100)}%)
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-blue-400 flex items-center gap-1">
-                  <CheckCircle2 className="size-3.5" /> 10대 상장 종목 전수 색인 등록 완료
+                  <CheckCircle2 className="size-3.5" /> {(seoData?.stockCoverage?.indexed ?? 0) > 0 ? `${seoData?.stockCoverage?.indexed}개 종목 색인 확인` : '검색엔진 크롤러 방문 대기 중'}
                 </p>
                 <div className="mt-3 pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-400">
                   <span>가이드 문서 색인율</span>
-                  <span className="font-mono text-white">5 / 5 (100%)</span>
+                  <span className="font-mono text-white">{seoData?.guideCoverage?.indexed ?? 0} / {seoData?.guideCoverage?.total ?? 5} ({Math.round(((seoData?.guideCoverage?.indexed ?? 0) / Math.max(1, seoData?.guideCoverage?.total ?? 5)) * 100)}%)</span>
                 </div>
               </CardContent>
             </Card>
@@ -806,30 +806,30 @@ export function AnalyticsClientView({
                 <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800">
                   <span className="text-[11px] text-slate-400">Googlebot</span>
                   <p className="text-lg font-bold font-mono text-white mt-0.5">
-                    {seoData?.botDistribution?.Googlebot ?? 68}회
+                    {seoData?.botDistribution?.Googlebot ?? 0}회
                   </p>
-                  <p className="text-[10px] text-emerald-400">최대 검색 유입원 (54.8%)</p>
+                  <p className="text-[10px] text-slate-400">구글 검색 색인</p>
                 </div>
                 <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800">
                   <span className="text-[11px] text-slate-400">Naver Yeti</span>
                   <p className="text-lg font-bold font-mono text-white mt-0.5">
-                    {seoData?.botDistribution?.['Naver Yeti'] ?? 34}회
+                    {seoData?.botDistribution?.['Naver Yeti'] ?? 0}회
                   </p>
-                  <p className="text-[10px] text-emerald-400">국내 네이버 검색 (27.4%)</p>
+                  <p className="text-[10px] text-slate-400">네이버 서치어드바이저</p>
                 </div>
                 <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800">
                   <span className="text-[11px] text-slate-400">Bingbot</span>
                   <p className="text-lg font-bold font-mono text-white mt-0.5">
-                    {seoData?.botDistribution?.Bingbot ?? 16}회
+                    {seoData?.botDistribution?.Bingbot ?? 0}회
                   </p>
-                  <p className="text-[10px] text-blue-400">IndexNow 연동 (12.9%)</p>
+                  <p className="text-[10px] text-slate-400">Bing 웹마스터 & IndexNow</p>
                 </div>
                 <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800">
                   <span className="text-[11px] text-slate-400">HTTP 200 정상 응답</span>
                   <p className="text-lg font-bold font-mono text-emerald-400 mt-0.5">
-                    {seoData?.statusDistribution?.['200'] ?? 118}건 (95.2%)
+                    {seoData?.statusDistribution?.['200'] ?? 0}건
                   </p>
-                  <p className="text-[10px] text-slate-400">304 캐시: {seoData?.statusDistribution?.['304'] ?? 4}건</p>
+                  <p className="text-[10px] text-slate-400">304 캐시: {seoData?.statusDistribution?.['304'] ?? 0}건</p>
                 </div>
               </div>
             </CardContent>
@@ -842,11 +842,16 @@ export function AnalyticsClientView({
       {/* ========================================================================= */}
       {(activeCategory === 'all' || activeCategory === 'traffic_sources') && (
         <div className="space-y-6 pt-2">
-          <div className="flex items-center gap-2 px-1">
-            <Compass className="size-5 text-purple-400" />
-            <h3 className="text-lg font-bold text-white tracking-tight">
-              트래픽 유입 경로 & 접속 분포 (Traffic Sources & Geo Analytics)
-            </h3>
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <Compass className="size-5 text-purple-400" />
+              <h3 className="text-lg font-bold text-white tracking-tight">
+                트래픽 유입 경로 & 접속 분포 (Traffic Sources & Geo Analytics)
+              </h3>
+            </div>
+            <Badge variant="outline" className="border-amber-500/40 text-amber-400 text-xs">
+              외부 웹 로그 수집 대기 중 (Pending Web Beacon)
+            </Badge>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -858,26 +863,29 @@ export function AnalyticsClientView({
                   유입 경로 (Traffic Sources)
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
-                  방문자 유입 채널별 기여도
+                  방문자 유입 채널별 기여도 (실시간 로그 수집 대기)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
-                  { name: '직접 방문 (Direct / Bookmark)', ratio: 62.4, color: '#a855f7' },
-                  { name: '검색엔진 (Google / Naver)', ratio: 24.8, color: '#3b82f6' },
-                  { name: '내부 링크 (Internal Links)', ratio: 8.5, color: '#10b981' },
-                  { name: '소셜 & 커뮤니티 (Discord / Board)', ratio: 4.3, color: '#f59e0b' },
+                  { name: '직접 방문 (Direct / Bookmark)', ratio: 0, color: '#a855f7' },
+                  { name: '검색엔진 (Google / Naver)', ratio: 0, color: '#3b82f6' },
+                  { name: '내부 링크 (Internal Links)', ratio: 0, color: '#10b981' },
+                  { name: '소셜 & 커뮤니티 (Discord / Board)', ratio: 0, color: '#f59e0b' },
                 ].map((s) => (
                   <div key={s.name} className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-300 font-medium">{s.name}</span>
-                      <span className="font-mono font-bold text-white">{s.ratio}%</span>
+                      <span className="font-mono font-bold text-slate-400">{s.ratio}%</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-slate-950 overflow-hidden border border-slate-800/80">
                       <div className="h-full rounded-full" style={{ width: `${s.ratio}%`, backgroundColor: s.color }} />
                     </div>
                   </div>
                 ))}
+                <p className="text-[11px] text-slate-500 text-center pt-2">
+                  ※ 외부 유입 트래픽 비콘 또는 Nginx 액세스 로그 파서 가동 대기 중입니다.
+                </p>
               </CardContent>
             </Card>
 
@@ -889,25 +897,28 @@ export function AnalyticsClientView({
                   상위 랜딩 페이지 (Top Landing)
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
-                  최다 첫 페이지 진입 경로 랭킹
+                  최다 첫 페이지 진입 경로 랭킹 (집계 대기)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2.5">
                 {[
-                  { path: '/', title: '메인 포털 허브', views: '4,210', ratio: '42%' },
-                  { path: '/stocks', title: '가상 주식 거래소', views: '2,840', ratio: '28%' },
-                  { path: '/bank', title: '가상 은행 & 복리 예금', views: '1,420', ratio: '14%' },
-                  { path: '/guide/stock-trading', title: '주식 매매 가이드', views: '980', ratio: '10%' },
-                  { path: '/casino', title: '카지노 & 미니게임', views: '610', ratio: '6%' },
+                  { path: '/', title: '메인 포털 허브', views: '0', ratio: '0%' },
+                  { path: '/stocks', title: '가상 주식 거래소', views: '0', ratio: '0%' },
+                  { path: '/bank', title: '가상 은행 & 복리 예금', views: '0', ratio: '0%' },
+                  { path: '/guide/stock-trading', title: '주식 매매 가이드', views: '0', ratio: '0%' },
+                  { path: '/casino', title: '카지노 & 미니게임', views: '0', ratio: '0%' },
                 ].map((p, idx) => (
                   <div key={p.path} className="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/70 text-xs">
                     <div className="flex items-center gap-2 truncate">
-                      <span className="font-bold text-slate-400">{idx + 1}</span>
-                      <span className="font-mono text-cyan-300 truncate">{p.path}</span>
+                      <span className="font-bold text-slate-500">{idx + 1}</span>
+                      <span className="font-mono text-slate-300 truncate">{p.path}</span>
                     </div>
-                    <span className="font-mono font-bold text-slate-200">{p.views} ({p.ratio})</span>
+                    <span className="font-mono text-slate-400">{p.views} ({p.ratio})</span>
                   </div>
                 ))}
+                <p className="text-[11px] text-slate-500 text-center pt-2">
+                  ※ 실제 외부 방문자 세션 랜딩 집계 대기 중입니다.
+                </p>
               </CardContent>
             </Card>
 
@@ -919,26 +930,29 @@ export function AnalyticsClientView({
                   접속 국가 (Geo Distribution)
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
-                  글로벌 접속 국가별 점유율
+                  글로벌 접속 국가별 점유율 (수집 대기)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
-                  { country: '대한민국 (KR)', ratio: 91.8, color: '#10b981' },
-                  { country: '미국 (US)', ratio: 4.6, color: '#3b82f6' },
-                  { country: '일본 (JP)', ratio: 2.1, color: '#f59e0b' },
-                  { country: '기타 국가 (Global Others)', ratio: 1.5, color: '#a855f7' },
+                  { country: '대한민국 (KR)', ratio: 0, color: '#10b981' },
+                  { country: '미국 (US)', ratio: 0, color: '#3b82f6' },
+                  { country: '일본 (JP)', ratio: 0, color: '#f59e0b' },
+                  { country: '기타 국가 (Global Others)', ratio: 0, color: '#a855f7' },
                 ].map((g) => (
                   <div key={g.country} className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-300 font-medium">{g.country}</span>
-                      <span className="font-mono font-bold text-white">{g.ratio}%</span>
+                      <span className="font-mono font-bold text-slate-400">{g.ratio}%</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-slate-950 overflow-hidden border border-slate-800/80">
                       <div className="h-full rounded-full" style={{ width: `${g.ratio}%`, backgroundColor: g.color }} />
                     </div>
                   </div>
                 ))}
+                <p className="text-[11px] text-slate-500 text-center pt-2">
+                  ※ GeoIP 위치 기반 IP 분석기 가동 준비 중입니다.
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -976,7 +990,7 @@ export function AnalyticsClientView({
                 </Badge>
               </div>
               <CardDescription className="text-xs text-slate-400">
-                각 비즈니스 도메인별 평균 지연 시간(ms)과 정상 가동률(100%) 모니터링
+                인하우스 API 게이트웨이 및 내부 라우팅 핑 벤치마크 기준 가동 현황
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -237,7 +237,7 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
           </div>
         </div>
 
-        {/* 4대 액션 버튼 그룹 (모바일 wrap 및 min-h-11 touch target 적용) */}
+        {/* 4대 액션 버튼 그룹 (모바일 1열 스택, 태블릿 2열, 데스크톱 flex 인라인 대응) */}
         <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:flex-wrap lg:items-center min-w-0">
           <Button
             variant="outline"

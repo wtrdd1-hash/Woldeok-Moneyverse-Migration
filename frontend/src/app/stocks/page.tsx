@@ -26,6 +26,8 @@ import type { MarketEvent } from './market-news';
 import { MarketSentimentGauge } from './market-sentiment-gauge';
 import { StockDisclosureTicker } from '@/components/stock-disclosure-ticker';
 import { TradeDiaryDrawer } from '@/components/trade-diary-drawer';
+import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
+import { FinancialKnowledgeHub } from '@/components/financial-knowledge-hub';
 import { StockDetailDialog } from './stock-detail-dialog';
 import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { TradeDialog } from './trade-dialog';
@@ -206,6 +208,9 @@ export default async function StocksPage({
           ? 'A community market where virtual prices fluctuate based on the game economy. Not real stocks or financial products.'
           : '경제 상황에 따라 가격이 바뀌는 10대 종목 전용 가상 시장입니다. 실제 주식·현금·투자 상품이 아닙니다.'}
       </PageHeader>
+
+      {/* 실시간 국내외 거시경제 펄스 티커 (한국은행, Fed, 코스피, S&P500 등) */}
+      <GlobalMacroPulseTicker />
 
       {/* AI 뉴스 및 다요소 가중 시장 감성 지수 & 펄스 게이지 위젯 */}
       <MarketSentimentGauge events={events} marketFactors={marketFactors} isEn={isEn} />
@@ -493,6 +498,9 @@ export default async function StocksPage({
           )}
         </CardContent>
       </Card>
+
+      {/* 실전 금융 & 경제 지식 아카데미 백과사전 및 통화 변환기 */}
+      <FinancialKnowledgeHub />
     </div>
     </MarketPricesProvider>
   );
