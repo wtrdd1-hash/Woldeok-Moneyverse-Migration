@@ -71,6 +71,7 @@ export class SeoController {
   }
 
   @Get('status')
+  @SkipInternalToken()
   @ApiOperation({ summary: 'Get SEO crawler metrics, index health, and recent bot logs' })
   async getStatus() {
     return this.seoService.getSeoMetrics();
