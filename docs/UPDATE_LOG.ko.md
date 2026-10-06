@@ -7,7 +7,7 @@
 - `SEO_INDEXING_ENABLED=false`인 격리 Test에서는 fail-closed 하여 Test 호스트 제출을 차단하고, Production 색인은 명시적으로 활성화된 환경에서만 수행한다.
 - 범용 URL 변경 알림은 호환 검색엔진 대상 IndexNow 기능으로 유지한다. BFF의 backend 장애 시 가짜 성공 fallback을 제거했고 backend mutation에 관리자 세션 + CSRF를 강제했다.
 - TDD 타깃 검증: backend 19/19, frontend 8/8 통과; 저장소 typecheck 통과. 첫 전체 test/lint/build 게이트 통과 후 신규 CVE-2026-96889 운영 의존성 감사가 차단했으며, 루트 override를 `sharp 0.35.5`로 고정한 뒤 운영 의존성 감사는 깨끗하다.
-- **릴리스 상태:** 최종 exact-tree 검증, GitHub candidate CI, 격리 Test, 무중단 Production 승격 증거는 완료되는 순서대로 v541 worklog에 기록한다.
+- **릴리스 상태:** 로컬 소스 검증은 green이고 candidate `58f872c4`가 격리 Test exact-version/backend/status/sitemap/noindex 및 Test GSC mutation fail-closed 검사를 통과했다. GitHub CI와 무중단 Production 승격은 계속 게이트 상태이며 완료 순서대로 v541 worklog에 기록한다.
 
 ## v2026.10.06.537 — 관리자 모바일 분석 화면 긴급 수정
 

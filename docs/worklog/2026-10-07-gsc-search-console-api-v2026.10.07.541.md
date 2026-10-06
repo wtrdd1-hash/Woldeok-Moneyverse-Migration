@@ -56,3 +56,13 @@
 - Frontend full suite: 191 test files / 1,067 tests PASS. Existing jsdom canvas/navigation/act warnings remain non-failing baseline warning debt.
 - Lint reports 0 errors with existing warning debt. Production build completed. Production dependency audit reports no known vulnerabilities after the `sharp 0.35.5` override.
 - This checkpoint verified the runtime-source/build tree. The worklog/update-note append itself is documentation-only; a final diff check is run before the candidate commit.
+
+## Exact-candidate isolated Test acceptance — 2026-10-07
+
+- Candidate commit: `58f872c4c1d35595322ba4aeb4d27ac6e8dc9dba`; isolated Test release: `/srv/moneyverse-data/releases/test-v541-gsc-58f872c4`.
+- First Test startup correctly reported the backend candidate SHA but exposed a release-packaging defect: the frontend had been built without `BUILD_ID`, so Next.js embedded a timestamp into `NEXT_PUBLIC_BUILD_ID`. This was treated as a release blocker, not waived.
+- Rebuilt the same runtime source with `BUILD_ID=58f872c4c1d35595322ba4aeb4d27ac6e8dc9dba`, restaged only the exact frontend artifact and confirmed both backend and frontend identities match the candidate SHA.
+- Public Test acceptance exits 0: root 200, `/status` 200, `/sitemap.xml` 200, backend health OK, Test backend/frontend services active, public `/api/version` exact SHA, and `X-Robots-Tag: noindex, nofollow` retained.
+- The compiled Test `SeoService.submitGscSitemap()` was invoked under the actual Test release policy and failed closed with `Google Search Console 사이트맵 제출은 운영 환경에서만 허용됩니다.`; no Google sitemap mutation was sent from Test.
+- No error-priority journal entries were present for the Test backend/frontend after the candidate restart.
+- Production remained unchanged during this Test acceptance.

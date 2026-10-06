@@ -56,3 +56,13 @@
 - Frontend 전체 스위트: 테스트 파일 191개 / 테스트 1,067개 통과. 기존 jsdom canvas/navigation/act 경고는 실패하지 않는 기준선 warning 부채이다.
 - Lint 오류 0, 기존 warning 부채만 존재. Production build 완료. `sharp 0.35.5` override 반영 후 운영 의존성 audit는 알려진 취약점 0건이다.
 - 이 체크포인트는 런타임 소스/build 트리를 검증했다. 이후 worklog/update-note 추가는 문서 전용 변경이며 candidate commit 전 최종 diff check를 다시 실행한다.
+
+## Exact-candidate 격리 Test 수용 기록 — 2026-10-07
+
+- Candidate commit: `58f872c4c1d35595322ba4aeb4d27ac6e8dc9dba`; 격리 Test release: `/srv/moneyverse-data/releases/test-v541-gsc-58f872c4`.
+- 첫 Test 기동에서 backend candidate SHA는 정확했지만 frontend를 `BUILD_ID` 없이 빌드해 Next.js가 timestamp를 `NEXT_PUBLIC_BUILD_ID`에 내장한 릴리스 패키징 결함을 발견했다. 이를 무시하지 않고 release blocker로 처리했다.
+- 동일 런타임 소스를 `BUILD_ID=58f872c4c1d35595322ba4aeb4d27ac6e8dc9dba`로 다시 빌드해 exact frontend artifact만 재스테이징했고 backend/frontend identity가 모두 candidate SHA와 일치함을 확인했다.
+- 공개 Test 수용 검사 exit 0: root 200, `/status` 200, `/sitemap.xml` 200, backend health 정상, Test backend/frontend 서비스 active, 공개 `/api/version` exact SHA, `X-Robots-Tag: noindex, nofollow` 유지.
+- 실제 Test release 정책에서 컴파일된 `SeoService.submitGscSitemap()`을 호출해 `Google Search Console 사이트맵 제출은 운영 환경에서만 허용됩니다.`로 fail-closed 되는 것을 확인했으며 Test에서 Google 사이트맵 mutation은 발송되지 않았다.
+- candidate 재기동 후 Test backend/frontend의 error priority journal 항목은 0건이었다.
+- 이 Test 수용 중 Production은 변경하지 않았다.

@@ -7,7 +7,7 @@
 - Isolated Test is fail-closed when `SEO_INDEXING_ENABLED=false`, preventing accidental submission of the Test hostname. Production indexing remains explicitly enabled.
 - Generic URL-change notification remains an IndexNow action for compatible engines; its BFF no longer fabricates success when the backend is unavailable, and backend mutation routes now require administrator session + CSRF.
 - TDD focused verification: backend 19/19, frontend 8/8 PASS; repository typecheck PASS. First full test/lint/build gate passed before dependency audit blocked on newly published CVE-2026-96889; root override now pins `sharp 0.35.5` and the production dependency audit is clean.
-- **Release state:** final exact-tree verification, GitHub candidate CI, isolated Test and zero-downtime Production promotion are recorded in the v541 worklog as they complete.
+- **Release state:** local source verification is green and candidate `58f872c4` passed isolated Test exact-version/backend/status/sitemap/noindex plus Test fail-closed GSC mutation checks. GitHub CI and zero-downtime Production promotion remain gated and are recorded in the v541 worklog as they complete.
 
 ## v2026.10.06.537 — Administrator Mobile Analytics Remediation
 
