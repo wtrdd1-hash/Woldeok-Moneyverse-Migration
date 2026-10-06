@@ -1,3 +1,10 @@
+## v2026.10.06.538 — CI 운영 의존성 Audit 차단 수정
+
+- 새로 공개된 운영 transitive 취약점을 root pnpm override로 `proxy-addr` 2.0.8, `source-map-js` 1.2.2에 고정해 해결했다.
+- `pnpm audit --prod --audit-level=high`: critical 1 + high 1 → **No known vulnerabilities found**.
+- 전체 로컬 typecheck/tests/lint/build/diff 게이트를 통과했으며 런타임 소스, DB 스키마, UI 동작은 변경하지 않는다.
+- 통합 전 exact-head GitHub CI + 격리 Test가 남아 있다.
+
 ## v2026.10.05.530 — 긴급 전체 UI 재점검 / 긴급 수정 게이트
 
 - **상태:** **BLOCKED — 긴급 UI 수정 필요**.
