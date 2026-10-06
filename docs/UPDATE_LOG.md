@@ -1,3 +1,15 @@
+## v2026.10.06.537 — Administrator Mobile Analytics Remediation
+
+- Reproduced and corrected the supplied mobile `/admin/seo` action-label collision and `/admin/analytics` category-tab overlap.
+- SEO actions now reflow 1-column → 2-column → desktop flex, while long labels wrap safely.
+- Analytics category tabs keep intrinsic width inside a contained touch scroller; the cohort heading/status row also reflows on narrow screens.
+- Consumer onboarding/support fixed launchers no longer mount on `/admin/**`, removing the observed administrator-content occlusion.
+- First exact-SHA Test confirmed version/backend/noindex and no administrator floating widgets/body overflow, then exposed `/admin/seo` React hydration error #418 and 40px primary action controls.
+- Follow-up hardening makes first render deterministic, switches the four primary SEO actions to the 44px default size, fixes crawler-log timezone formatting, and removes the fabricated pre-submission Indexing API success history.
+- Focused administrator responsive/SEO/analytics regression coverage is 3 files / 20 tests PASS. After QA-only prerequisite PR #796 corrected stale main-test expectations, the rebased v537 candidate passes typecheck, full local repository tests (backend 1,076 pass with DB-backed groups skipped by the local environment; frontend 1,065 pass), production build, and `git diff --check`.
+- GitHub CI subsequently failed closed on two newly published transitive production dependency advisories; patched transitive versions are pinned through the existing root override policy, the lockfile is refreshed, and the complete local typecheck/test/lint/build/audit/diff-check chain now exits 0.
+- **Release state:** pre-rebase exact SHA `b1a49d1f` passed isolated Test backend readiness and authenticated five-pass administrator QA (26 routes × 13 viewport/state combinations = 338/338 checks PASS; SEO primary action 44px; zero overlap/overflow/floating-widget failures). Because main advanced to QA-only merge `103e0aa2`, the branch was rebased and a fresh exact-SHA GitHub/Test gate is required before zero-downtime Production promotion.
+
 ## v2026.10.05.530 — Emergency Full UI Re-audit / Urgent Remediation Gate
 
 - **Status:** **BLOCKED — URGENT UI REMEDIATION REQUIRED**.

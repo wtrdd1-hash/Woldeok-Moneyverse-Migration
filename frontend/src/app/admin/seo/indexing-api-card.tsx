@@ -16,19 +16,7 @@ interface SubmissionHistory {
 export function IndexingApiCard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [history, setHistory] = useState<SubmissionHistory[]>([
-    {
-      id: 'sub-1',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30).toLocaleTimeString('ko-KR', { hour12: false }),
-      count: 100,
-      status: 'success',
-      sampleUrls: [
-        'https://easy-scraping.com/tools/stock-calculator/samsung-minus-10',
-        'https://easy-scraping.com/tools/stock-calculator/nvda-minus-20',
-        'https://easy-scraping.com/tools/stock-calculator/tsla-double-down',
-      ],
-    },
-  ]);
+  const [history, setHistory] = useState<SubmissionHistory[]>([]);
 
   const handleSubmitBatch = async (batchSize = 100) => {
     setIsSubmitting(true);

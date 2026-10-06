@@ -373,11 +373,12 @@ export function AnalyticsClientView({
       </div>
 
       {/* 통계 도메인 원클릭 카테고리 전환 탭 바 */}
-      <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 p-1.5 bg-slate-950/70 border border-slate-800/80 rounded-2xl backdrop-blur-md">
+      <div className="w-full max-w-full overflow-x-auto no-scrollbar rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-md touch-pan-x overscroll-x-contain" aria-label="분석 범주">
+        <div className="flex w-max min-w-full flex-nowrap gap-2 p-1.5">
         <button
           type="button"
           onClick={() => setActiveCategory('all')}
-          className={`min-h-[44px] px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeCategory === 'all'
               ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
@@ -389,7 +390,7 @@ export function AnalyticsClientView({
         <button
           type="button"
           onClick={() => setActiveCategory('user_economy')}
-          className={`min-h-[44px] px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeCategory === 'user_economy'
               ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
@@ -401,7 +402,7 @@ export function AnalyticsClientView({
         <button
           type="button"
           onClick={() => setActiveCategory('seo_crawlers')}
-          className={`min-h-[44px] px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeCategory === 'seo_crawlers'
               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
@@ -413,7 +414,7 @@ export function AnalyticsClientView({
         <button
           type="button"
           onClick={() => setActiveCategory('traffic_sources')}
-          className={`min-h-[44px] px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeCategory === 'traffic_sources'
               ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
@@ -425,7 +426,7 @@ export function AnalyticsClientView({
         <button
           type="button"
           onClick={() => setActiveCategory('api_health')}
-          className={`min-h-[44px] px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeCategory === 'api_health'
               ? 'bg-amber-600 text-white shadow-lg shadow-amber-900/50'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
@@ -434,6 +435,7 @@ export function AnalyticsClientView({
           <Zap className="size-3.5" />
           14대 도메인 API 헬스
         </button>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -452,14 +454,14 @@ export function AnalyticsClientView({
             {/* 차트 1: 코호트 활동 바 차트 */}
             <Card className="border-slate-800 bg-slate-900/80 shadow-xl backdrop-blur-xl">
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Activity className="size-4 text-blue-400" />
-                    <CardTitle className="text-base text-white">
+                <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-2 sm:items-center">
+                    <Activity className="mt-0.5 size-4 shrink-0 text-blue-400 sm:mt-0" />
+                    <CardTitle className="text-base leading-snug text-white">
                       유저 활성도 & 코호트 텔레메트리 그래프
                     </CardTitle>
                   </div>
-                  <Badge variant="outline" className="border-blue-500/40 text-blue-400 text-xs">
+                  <Badge variant="outline" className="shrink-0 border-blue-500/40 text-blue-400 text-xs">
                     Clean Traffic
                   </Badge>
                 </div>
