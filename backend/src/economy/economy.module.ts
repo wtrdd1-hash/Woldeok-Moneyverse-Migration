@@ -11,13 +11,17 @@ import { PostgresEconomyReconciliationRepository } from './reconciliation.reposi
 import { ReconciliationController } from './reconciliation.controller';
 import { EconomyReconciliationService } from './reconciliation.service';
 
+import { MacroPulseController } from './macro-pulse.controller';
+import { MacroPulseService } from './macro-pulse.service';
+
 @Module({
   imports: [AuthModule],
-  controllers: [ReconciliationController, QuantController, MonetaryController],
+  controllers: [ReconciliationController, QuantController, MonetaryController, MacroPulseController],
   providers: [
     CentralBankService,
     MintBureauService,
     AutoMonetaryRegulationService,
+    MacroPulseService,
     {
       provide: EconomyReconciliationService,
       inject: [PG_POOL],
@@ -34,6 +38,7 @@ import { EconomyReconciliationService } from './reconciliation.service';
     CentralBankService,
     MintBureauService,
     AutoMonetaryRegulationService,
+    MacroPulseService,
   ],
 })
 export class EconomyModule {}
