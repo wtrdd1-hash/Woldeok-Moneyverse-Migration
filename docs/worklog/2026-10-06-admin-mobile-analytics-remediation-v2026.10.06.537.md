@@ -71,3 +71,9 @@
 - Mandatory fetch therefore detected main drift from the original `30d1eb2b` baseline. The v537 source commits were cleanly rebased onto `103e0aa2` rather than overwriting concurrent work.
 - Post-rebase local gate is green: focused administrator responsive/SEO/analytics 20/20, repository typecheck PASS, root/contract/database/backend/frontend test command PASS (backend 1,076 passed and 391 DB-backed tests skipped by the local environment; frontend 1,065 passed), lint PASS, production build PASS and `git diff --check` PASS.
 - The prior `b1a49d1f` Test evidence is retained as diagnostic/acceptance history, but it is not release proof for the rebased SHA. The final pushed branch SHA must pass Build Test Candidate and be restaged to isolated Test for exact-version/backend/noindex/five-pass administrator QA before merge or Production action.
+
+## CI dependency-audit gate — 2026-10-06
+- PR #797 CI passed policy, lint, typecheck, build, migrations and tests, then failed closed on the production dependency audit because two transitive packages had newly published high/critical advisories.
+- The audit gate was preserved. The root package overrides and lockfile were updated to patched transitive versions instead of suppressing or lowering the CI check.
+- Local post-fix evidence: production dependency audit reports no known vulnerabilities, and the complete typecheck/test/lint/build/audit/diff-check chain exits 0.
+- This changes candidate identity, so the new branch head must pass GitHub CI and exact-SHA isolated Test again before merge or Production.

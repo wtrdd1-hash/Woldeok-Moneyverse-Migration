@@ -11,3 +11,4 @@
 - 재베이스 전 exact SHA `b1a49d1f`는 격리 Test 백엔드 readiness와 인증 관리자 5회 QA를 통과했다. 26개 라우트 × 13개 viewport/state 조합 = 338/338 검사 통과, SEO 핵심 액션 높이 44px, SEO/분석 겹침 및 관리자 사용자용 플로팅 위젯 실패 0건이다.
 - 런타임 동작을 바꾸지 않는 QA 전용 선행 PR #796을 현재 main `103e0aa2`로 병합해 오래된 기준선 테스트 기대값을 정리했다. v537 브랜치는 해당 main 위로 재베이스했고, 타깃 20/20, typecheck, 전체 로컬 저장소 테스트, lint, Production build, `git diff --check`를 통과했다.
 - 재베이스로 candidate SHA가 바뀌었으므로 Production 승격 전 새 exact-SHA GitHub/Test 검증이 필요하며, 이 변경기록에서는 Production 완료를 주장하지 않는다.
+- CI 후속: 새로 공개된 전이 의존성 보안 권고를 기존 루트 override 정책으로 수정 버전에 고정해 해결하고 lockfile, 운영 의존성 감사, 전체 로컬 검증 체인을 갱신했다. fail-closed 게이트는 약화하지 않았다.

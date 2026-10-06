@@ -71,3 +71,9 @@
 - 필수 fetch에서 원래 `30d1eb2b` 기준선 이후 main 드리프트를 확인했다. 다른 작업을 덮어쓰지 않고 v537 소스 커밋을 `103e0aa2` 위로 정상 재베이스했다.
 - 재베이스 후 로컬 게이트는 모두 정상이다: 관리자 반응형/SEO/분석 타깃 20/20, 저장소 typecheck 통과, root/contract/database/backend/frontend 테스트 명령 통과(backend 1,076 통과, 로컬 환경에서 DB 연동 391개 skip; frontend 1,065 통과), lint 통과, Production build 통과, `git diff --check` 통과.
 - 기존 `b1a49d1f` Test 증거는 진단/수용 이력으로 보존하지만 재베이스 SHA의 릴리스 증거로 대체할 수 없다. 최종 push 브랜치 SHA가 Build Test Candidate와 격리 Test exact-version/backend/noindex/관리자 5회 QA를 다시 통과한 뒤에만 병합 또는 Production 작업을 진행한다.
+
+## CI 의존성 감사 게이트 — 2026-10-06
+- PR #797 CI는 policy, lint, typecheck, build, migration, test를 통과한 뒤 새로 공개된 전이 의존성 보안 권고 2건 때문에 운영 의존성 감사에서 fail-closed 했다.
+- 감사 게이트를 약화하거나 우회하지 않고 루트 package override와 lockfile을 수정 버전으로 갱신했다.
+- 로컬 수정 후 운영 의존성 감사와 전체 typecheck/test/lint/build/diff-check 체인이 모두 exit 0으로 완료됐다.
+- candidate 식별자가 변경되므로 새 브랜치 HEAD는 merge 또는 Production 전에 GitHub CI와 exact-SHA 격리 Test를 다시 통과해야 한다.
