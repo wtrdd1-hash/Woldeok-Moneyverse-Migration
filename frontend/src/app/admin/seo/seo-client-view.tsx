@@ -237,14 +237,14 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
           </div>
         </div>
 
-        {/* 4대 액션 버튼 그룹 (모바일 wrap 및 min-h-11 touch target 적용) */}
-        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:flex-wrap lg:items-center min-w-0">
+        {/* 4대 액션 버튼 그룹 (모바일 2열 그리드 & 데스크톱 flex 인라인 대응) */}
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto min-w-0">
           <Button
             variant="outline"
             size="default"
             onClick={refreshData}
             disabled={isRefreshing}
-            className="w-full min-w-0 min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 whitespace-normal text-center leading-tight text-xs font-semibold lg:w-auto"
+            className="w-full sm:w-auto min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 text-xs font-semibold whitespace-nowrap"
           >
             <RefreshCw className={cn('size-3.5', isRefreshing && 'animate-spin')} />
             새로고침
@@ -254,29 +254,29 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
             size="default"
             onClick={handleCrawlAudit}
             disabled={isAuditing}
-            className="w-full min-w-0 min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 whitespace-normal text-center leading-tight border-primary/40 text-xs font-semibold text-primary hover:bg-primary/10 lg:w-auto"
+            className="w-full sm:w-auto min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 border-primary/40 text-xs font-semibold text-primary hover:bg-primary/10 whitespace-nowrap"
           >
             <ShieldCheck className={cn('size-3.5', isAuditing && 'animate-spin')} />
-            {isAuditing ? '크롤링 감사 중...' : '1-Click 무결성 감사'}
+            {isAuditing ? '감사 중...' : '무결성 감사'}
           </Button>
           <Button
             variant="outline"
             size="default"
             onClick={handleSendDailyDigest}
             disabled={isSendingDigest}
-            className="w-full min-w-0 min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 whitespace-normal text-center leading-tight border-sky-500/40 text-xs font-semibold text-sky-500 hover:bg-sky-500/10 lg:w-auto"
+            className="w-full sm:w-auto min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 border-sky-500/40 text-xs font-semibold text-sky-500 hover:bg-sky-500/10 whitespace-nowrap"
           >
             <Send className={cn('size-3.5', isSendingDigest && 'animate-spin')} />
-            {isSendingDigest ? '전송 중...' : '1-Click 디스코드 브리핑'}
+            {isSendingDigest ? '전송 중...' : '디스코드 브리핑'}
           </Button>
           <Button
             size="default"
             onClick={handleManualSubmit}
             disabled={isSubmitting}
-            className="w-full min-w-0 min-h-[44px] sm:col-span-2 sm:min-h-9 items-center justify-center gap-1.5 whitespace-normal text-center leading-tight bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 active:scale-[0.98] lg:col-auto lg:w-auto"
+            className="col-span-2 sm:col-span-1 w-full sm:w-auto min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 active:scale-[0.98] whitespace-nowrap"
           >
             <Send className="size-3.5" />
-            {isSubmitting ? '색인 통보 중...' : '전체 사이트맵 즉시 제출 (Ping)'}
+            {isSubmitting ? '색인 통보 중...' : '사이트맵 즉시 제출 (Ping)'}
           </Button>
         </div>
       </div>

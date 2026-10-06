@@ -372,69 +372,69 @@ export function AnalyticsClientView({
         </div>
       </div>
 
-      {/* 통계 도메인 원클릭 카테고리 전환 탭 바 */}
-      <div className="w-full max-w-full overflow-x-auto no-scrollbar rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-md touch-pan-x overscroll-x-contain" aria-label="분석 범주">
+      {/* 통계 도메인 원클릭 카테고리 전환 탭 바 (모바일 가로 스크롤 및 flex 축소 텍스트 겹침 방지) */}
+      <div className="w-full max-w-full overflow-x-auto no-scrollbar rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-md touch-pan-x overscroll-x-contain scroll-smooth" aria-label="분석 범주">
         <div className="flex w-max min-w-full flex-nowrap gap-2 p-1.5">
-        <button
-          type="button"
-          onClick={() => setActiveCategory('all')}
-          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeCategory === 'all'
-              ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <Activity className="size-3.5" />
-          전체 종합 뷰 (All Analytics)
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategory('user_economy')}
-          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeCategory === 'user_economy'
-              ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <Users className="size-3.5" />
-          유저 & 경제 코호트
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategory('seo_crawlers')}
-          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeCategory === 'seo_crawlers'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <Search className="size-3.5" />
-          SEO & 검색 크롤러 색인
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategory('traffic_sources')}
-          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeCategory === 'traffic_sources'
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <Compass className="size-3.5" />
-          트래픽 유입원 & 국가
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategory('api_health')}
-          className={`min-h-[44px] flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeCategory === 'api_health'
-              ? 'bg-amber-600 text-white shadow-lg shadow-amber-900/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <Zap className="size-3.5" />
-          14대 도메인 API 헬스
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('all')}
+            className={`min-h-[44px] shrink-0 flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeCategory === 'all'
+                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Activity className="size-3.5 shrink-0" />
+            <span>전체 종합 뷰 (All Analytics)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('user_economy')}
+            className={`min-h-[44px] shrink-0 flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeCategory === 'user_economy'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Users className="size-3.5 shrink-0" />
+            <span>유저 & 경제 코호트</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('seo_crawlers')}
+            className={`min-h-[44px] shrink-0 flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeCategory === 'seo_crawlers'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Search className="size-3.5 shrink-0" />
+            <span>SEO & 검색 크롤러 색인</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('traffic_sources')}
+            className={`min-h-[44px] shrink-0 flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeCategory === 'traffic_sources'
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Compass className="size-3.5 shrink-0" />
+            <span>트래픽 유입원 & 국가</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('api_health')}
+            className={`min-h-[44px] shrink-0 flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeCategory === 'api_health'
+                ? 'bg-amber-600 text-white shadow-lg shadow-amber-900/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Zap className="size-3.5 shrink-0" />
+            <span>14대 도메인 API 헬스</span>
+          </button>
         </div>
       </div>
 

@@ -72,10 +72,10 @@ export default async function AdminAnalyticsPage() {
   await requireAdminConsole(AREA.href);
 
   const [usersRes, stocksRes, healthRes, controlsRes, seoData] = await Promise.all([
-    apiOrNull<{ readonly users: readonly AdminUser[] }>('/api/admin/users'),
-    apiOrNull<{ readonly stocks: readonly AdminStock[] }>('/api/admin/stocks'),
-    apiOrNull<ReconciliationHealth>('/api/admin/economy/reconciliation'),
-    apiOrNull<{ readonly featureSwitches: readonly FeatureSwitch[] }>('/api/admin/controls'),
+    apiOrNull<{ readonly users: readonly AdminUser[] }>('/api/v1/admin/users'),
+    apiOrNull<{ readonly stocks: readonly AdminStock[] }>('/api/v1/admin/stocks'),
+    apiOrNull<ReconciliationHealth>('/api/v1/admin/economy/reconciliation'),
+    apiOrNull<{ readonly featureSwitches: readonly FeatureSwitch[] }>('/api/v1/admin/controls'),
     fetchSeoData(),
   ]);
 
