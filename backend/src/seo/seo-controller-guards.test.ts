@@ -25,7 +25,7 @@ describe('SeoController Google Search Console guards', () => {
     );
   });
 
-  for (const method of ['saveGscCredentials', 'deleteGscCredentials'] as const) {
+  for (const method of ['saveGscCredentials', 'deleteGscCredentials', 'submitGscSitemap', 'submitUrls'] as const) {
     it(`protects ${method} with administrator session and CSRF guards`, () => {
       expect(guardsOn(method)).toEqual(
         expect.arrayContaining([

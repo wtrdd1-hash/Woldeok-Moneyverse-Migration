@@ -3,7 +3,8 @@ import { safeFetch } from '../security/ssrf-defense';
 
 const GOOGLE_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const SEARCH_CONSOLE_API = 'https://www.googleapis.com/webmasters/v3';
-const SEARCH_CONSOLE_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
+const SEARCH_CONSOLE_READ_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
+const SEARCH_CONSOLE_WRITE_SCOPE = 'https://www.googleapis.com/auth/webmasters';
 
 export interface GscServiceAccount {
   readonly type: 'service_account';
@@ -53,6 +54,30 @@ export interface GscAnalyticsSnapshot {
   readonly totalImpressions30d: number;
   readonly avgCtr30d: number;
   readonly avgPosition30d: number;
+}
+
+interface GscSitemapResource {
+  readonly path?: string;
+  readonly lastSubmitted?: string;
+  readonly isPending?: boolean;
+  readonly lastDownloaded?: string;
+  readonly warnings?: number | string;
+  readonly errors?: number | string;
+  readonly contents?: readonly {
+    readonly type?: string;
+    readonly submitted?: number | string;
+  }[];
+}
+
+export interface GscSitemapStatus {
+  readonly propertyUrl: string;
+  readonly sitemapUrl: string;
+  readonly lastSubmitted: string | null;
+  readonly lastDownloaded: string | null;
+  readonly isPending: boolean;
+  readonly warnings: number;
+  readonly errors: number;
+  readonly submittedUrlCount: number;
 }
 
 export type GscFetch = (url: string | URL, init?: RequestInit) => Promise<Response>;
@@ -111,11 +136,12 @@ function base64UrlJson(value: unknown): string {
 export function createServiceAccountAssertion(
   credential: GscServiceAccount,
   nowSeconds = Math.floor(Date.now() / 1000),
+  scope = SEARCH_CONSOLE_READ_SCOPE,
 ): string {
   const header = base64UrlJson({ alg: 'RS256', typ: 'JWT' });
   const payload = base64UrlJson({
     iss: credential.clientEmail,
-    scope: SEARCH_CONSOLE_SCOPE,
+    scope,
     aud: GOOGLE_TOKEN_ENDPOINT,
     iat: nowSeconds,
     exp: nowSeconds + 3600,
@@ -157,8 +183,9 @@ async function responseJson<T>(response: Response, label: string): Promise<T> {
 export async function exchangeServiceAccountToken(
   credential: GscServiceAccount,
   fetcher: GscFetch = safeFetch,
+  scope = SEARCH_CONSOLE_READ_SCOPE,
 ): Promise<string> {
-  const assertion = createServiceAccountAssertion(credential);
+  const assertion = createServiceAccountAssertion(credential, undefined, scope);
   const response = await fetcher(GOOGLE_TOKEN_ENDPOINT, {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -243,6 +270,43 @@ export function chooseGscProperty(
 
   if (usable.length === 1) return usable[0]!;
   throw new Error('multiple Search Console properties are accessible; configure GSC_SITE_URL explicitly');
+}
+
+function numericLong(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && /^\d+$/.test(value)) return Number(value);
+  return 0;
+}
+
+export async function submitGscSitemap(
+  credential: GscServiceAccount,
+  baseUrl: string,
+  configuredProperty?: string | null,
+  sitemapUrl = `${baseUrl.replace(/\/$/, '')}/sitemap.xml`,
+  fetcher: GscFetch = safeFetch,
+): Promise<GscSitemapStatus> {
+  const accessToken = await exchangeServiceAccountToken(credential, fetcher, SEARCH_CONSOLE_WRITE_SCOPE);
+  const sites = await listAccessibleGscSites(accessToken, fetcher);
+  const propertyUrl = chooseGscProperty(sites, baseUrl, configuredProperty);
+  const endpoint = `${SEARCH_CONSOLE_API}/sites/${encodeURIComponent(propertyUrl)}/sitemaps/${encodeURIComponent(sitemapUrl)}`;
+
+  await googleJson<null>(endpoint, accessToken, fetcher, { method: 'PUT' });
+  const resource = await googleJson<GscSitemapResource>(endpoint, accessToken, fetcher);
+  const submittedUrlCount = (resource.contents ?? []).reduce(
+    (total, content) => total + numericLong(content.submitted),
+    0,
+  );
+
+  return {
+    propertyUrl,
+    sitemapUrl: resource.path || sitemapUrl,
+    lastSubmitted: resource.lastSubmitted ?? null,
+    lastDownloaded: resource.lastDownloaded ?? null,
+    isPending: resource.isPending === true,
+    warnings: numericLong(resource.warnings),
+    errors: numericLong(resource.errors),
+    submittedUrlCount,
+  };
 }
 
 function isoDate(date: Date): string {

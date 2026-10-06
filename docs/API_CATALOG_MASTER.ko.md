@@ -2,10 +2,11 @@
 
 [English canonical](API_CATALOG_MASTER.md) | **한국어**
 
-> **버전**: `v2026.09.28.477`  
-> **기본 API 엔드포인트 베이스**: `https://easy-scraping.com/api/v1` (프로덕션) / `http://127.0.0.1:3000/api/v1` (로컬)  
-> **표준 프로토콜**: HTTP/2, TLS 1.3, JSON (UTF-8)  
-> **표준 에러 규격**: RFC 7807 Problem Details for HTTP APIs  
+> **버전**: `v2026.09.28.477`
+> **런타임 추가분**: `v2026.10.07.541` Search Console 관리자 API (전체 카탈로그 재조정 전까지 기본 카탈로그 판본은 v477 유지)
+> **기본 API 엔드포인트 베이스**: `https://easy-scraping.com/api/v1` (프로덕션) / `http://127.0.0.1:3000/api/v1` (로컬)
+> **표준 프로토콜**: HTTP/2, TLS 1.3, JSON (UTF-8)
+> **표준 에러 규격**: RFC 7807 Problem Details for HTTP APIs
 > **다계층 보안 헤더**: `x-session-id`, `x-csrf-token`, `x-internal-token`, `x-totp-code` (관리자 Step-Up 2FA)
 
 ---
@@ -345,6 +346,30 @@
     "reason": "경제 밸런스 점검 긴급 차단"
   }
   ```
+
+### Search Console 관리자 추가분 — v2026.10.07.541
+
+#### `GET /api/v1/seo/gsc/analytics`
+- **요약**: 연결된 Google Search Console property의 실제 30일 Search Analytics 지표와 상위 검색어 조회.
+- **보안**: 인증된 관리자 세션 필수.
+
+#### `POST /api/v1/seo/gsc/credentials`
+- **요약**: Search Console용 Google 서비스 계정 자격 증명 검증 및 암호화 저장.
+- **보안**: 관리자 세션 + CSRF 필수.
+
+#### `POST /api/v1/seo/gsc/credentials/delete`
+- **요약**: 환경변수 관리형이 아닌 영속 Search Console 자격 증명 삭제.
+- **보안**: 관리자 세션 + CSRF 필수.
+
+#### `POST /api/v1/seo/gsc/sitemap`
+- **요약**: Google Search Console Sitemaps API로 Production `/sitemap.xml`을 제출/갱신하고 실제 sitemap 처리 상태 resource를 반환.
+- **OAuth**: 이 mutation에서 `https://www.googleapis.com/auth/webmasters` 사용. Search Analytics는 `webmasters.readonly` 유지.
+- **안전장치**: `SEO_INDEXING_ENABLED=false`에서는 거부하여 격리 Test 호스트 게시를 차단.
+- **보안**: 관리자 세션 + CSRF 필수.
+
+#### `POST /api/v1/seo/submit`
+- **요약**: IndexNow 호환 검색엔진에 URL 변경 알림 전송. Google 일반용 Indexing API 엔드포인트가 아님.
+- **보안**: 관리자 세션 + CSRF 필수.
 
 ---
 

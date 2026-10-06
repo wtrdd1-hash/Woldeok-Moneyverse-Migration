@@ -100,6 +100,14 @@ export class SeoController {
     return this.seoService.deleteGscCredentials();
   }
 
+  @Post('gsc/sitemap')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+  @ApiOperation({ summary: 'Submit or refresh the production sitemap through Google Search Console API' })
+  async submitGscSitemap() {
+    return this.seoService.submitGscSitemap();
+  }
+
   @Get('gsc/digest-report')
   @ApiOperation({ summary: 'Get latest daily SEO digest report result' })
   async getDigestReport() {
@@ -124,7 +132,8 @@ export class SeoController {
 
   @Post('submit')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Submit sitemap and canonical URLs to IndexNow and Google/Naver Pings' })
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+  @ApiOperation({ summary: 'Submit canonical URLs to IndexNow-compatible search engines' })
   async submitUrls(@Body() body: SubmitUrlsDto) {
     return this.seoService.submitUrls(body.urls);
   }

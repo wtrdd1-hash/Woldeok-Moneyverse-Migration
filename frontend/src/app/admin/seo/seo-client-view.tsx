@@ -24,7 +24,6 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
 import { GscAnalyticsCard } from './gsc-analytics-card';
 import { AdMonetizationCard } from './ad-monetization-card';
-import { IndexingApiCard } from './indexing-api-card';
 
 export interface CrawlerLog {
   readonly id: string;
@@ -172,16 +171,16 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
         body: JSON.stringify({}),
       });
       const result = await res.json();
-      if (result.success) {
+      if (res.ok && result.success) {
         setSubmitResult(
-          `전송 완료! 총 ${result.submittedUrls?.length || 18}개 URL이 IndexNow(Naver/Bing) 및 Google Ping으로 즉시 통보되었습니다.`,
+          `전송 완료! 총 ${result.submittedUrls?.length || 0}개 URL 변경 알림을 IndexNow 호환 검색엔진(Naver/Bing 등)에 전송했습니다.`,
         );
         refreshData();
       } else {
-        setSubmitResult('전송 중 일부 오류가 발생했으나 백그라운드 큐에 등록되었습니다.');
+        setSubmitResult(result.message || 'IndexNow URL 변경 통보에 실패했습니다.');
       }
     } catch {
-      setSubmitResult('전송 요청이 완료되었습니다.');
+      setSubmitResult('IndexNow URL 변경 통보 중 통신 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -276,7 +275,7 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
             className="w-full min-w-0 min-h-[44px] sm:col-span-2 sm:min-h-9 items-center justify-center gap-1.5 whitespace-normal text-center leading-tight bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 active:scale-[0.98] lg:col-auto lg:w-auto"
           >
             <Send className="size-3.5" />
-            {isSubmitting ? '색인 통보 중...' : '전체 사이트맵 즉시 제출 (Ping)'}
+            {isSubmitting ? 'URL 변경 통보 중...' : 'IndexNow URL 변경 통보'}
           </Button>
         </div>
       </div>
@@ -370,8 +369,7 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
       {/* Google Search Console Search Analytics 30-Day Trend & Top Queries */}
       <GscAnalyticsCard />
 
-      {/* Google Indexing API 빠른 색인 1클릭 전송 및 관제 */}
-      <IndexingApiCard />
+      {/* Search Console sitemap submission lives in the authenticated GSC card above. */}
 
       {/* Google AdSense 광고 수익화 & 트래픽 관제 타워 */}
       <AdMonetizationCard totalHits24h={initialData.totalHits24h} />
