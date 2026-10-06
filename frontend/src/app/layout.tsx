@@ -9,7 +9,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { Toaster } from '@/components/ui/sonner';
 import { StaleTabNotice } from '@/components/stale-tab-notice';
-import { InteractiveOnboardingTracker } from '@/components/interactive-onboarding-tracker';
+import { RouteAwareFloatingUtilities } from '@/components/route-aware-floating-utilities';
 import { ConsentGuard } from '@/components/consent-guard';
 import { SessionKeepAlive } from '@/components/session-keep-alive';
 import { WatchlistPromotionEngine } from '@/components/watchlist-promotion-engine';
@@ -332,7 +332,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <SiteShell>{children}</SiteShell>
               <Toaster />
               <StaleTabNotice />
-              <InteractiveOnboardingTracker />
+              <RouteAwareFloatingUtilities />
               <SessionKeepAlive />
               <WatchlistPromotionEngine />
               <FirstTradeOnboardingModal />

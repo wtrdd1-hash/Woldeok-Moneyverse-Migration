@@ -43,12 +43,12 @@ describe('public search surface', () => {
       expect(entry.alternates?.languages?.['x-default']).toBe(entry.url);
     }
 
-    // Member-only and private pages must never appear in sitemap
+    // Public finance routes are indexed; member-only and private pages stay out of sitemap
     expect(urls).not.toContain('https://easy-scraping.com/quests');
     expect(urls).not.toContain('https://easy-scraping.com/businesses');
     expect(urls).not.toContain('https://easy-scraping.com/shop/catalog');
     expect(urls).not.toContain('https://easy-scraping.com/wallet');
-    expect(urls).not.toContain('https://easy-scraping.com/bank');
+    expect(urls).toContain('https://easy-scraping.com/bank');
     expect(urls).not.toContain('https://easy-scraping.com/admin');
   });
 
