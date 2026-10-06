@@ -64,8 +64,8 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     expect(sitemapPaths).toContain('/bank');
     expect(sitemapPaths).toContain('/bank/savings-pot');
     expect(sitemapPaths).not.toContain('/wallet');
-    expect(sitemapPaths).not.toContain('/work');
-    expect(sitemapPaths).not.toContain('/seasons');
+    expect(sitemapPaths).toContain('/work');
+    expect(sitemapPaths).toContain('/seasons');
     expect(sitemapPaths).not.toContain('/admin');
   });
 
