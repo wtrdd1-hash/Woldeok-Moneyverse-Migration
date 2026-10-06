@@ -124,6 +124,71 @@ describe('SeoService', () => {
       parseSpy.mockRestore();
     }
   });
+
+  it('refuses Search Console sitemap submission when SEO indexing is disabled for Test', async () => {
+    const previous = process.env.SEO_INDEXING_ENABLED;
+    process.env.SEO_INDEXING_ENABLED = 'false';
+    const submitSpy = vi.spyOn(gscClient, 'submitGscSitemap');
+    const service = new SeoService();
+
+    try {
+      await expect(service.submitGscSitemap()).rejects.toThrow('운영 환경에서만');
+      expect(submitSpy).not.toHaveBeenCalled();
+    } finally {
+      if (previous === undefined) delete process.env.SEO_INDEXING_ENABLED;
+      else process.env.SEO_INDEXING_ENABLED = previous;
+      submitSpy.mockRestore();
+    }
+  });
+
+  it('uses the registered Search Console credential to submit the production sitemap', async () => {
+    const parsed = {
+      type: 'service_account' as const,
+      clientEmail: 'test-sa@moneyverse-gsc.iam.gserviceaccount.com',
+      privateKey: 'test-signing-material',
+      projectId: 'moneyverse-gsc',
+    };
+    const snapshot = {
+      propertyUrl: 'sc-domain:easy-scraping.com',
+      timeSeries: [],
+      topQueries: [],
+      totalClicks30d: 0,
+      totalImpressions30d: 0,
+      avgCtr30d: 0,
+      avgPosition30d: 0,
+    };
+    const sitemapStatus = {
+      propertyUrl: snapshot.propertyUrl,
+      sitemapUrl: 'https://easy-scraping.com/sitemap.xml',
+      lastSubmitted: '2026-10-07T00:05:00.000Z',
+      lastDownloaded: null,
+      isPending: true,
+      warnings: 0,
+      errors: 0,
+      submittedUrlCount: 642,
+    };
+    const parseSpy = vi.spyOn(gscClient, 'parseGscServiceAccount').mockReturnValue(parsed);
+    const analyticsSpy = vi.spyOn(gscClient, 'fetchGscAnalyticsSnapshot').mockResolvedValue(snapshot);
+    const submitSpy = vi.spyOn(gscClient, 'submitGscSitemap').mockResolvedValue(sitemapStatus);
+    const service = new SeoService();
+
+    try {
+      await service.saveGscCredentials('test-service-account-json');
+      const result = await service.submitGscSitemap();
+
+      expect(submitSpy).toHaveBeenCalledWith(
+        parsed,
+        'https://easy-scraping.com',
+        snapshot.propertyUrl,
+        'https://easy-scraping.com/sitemap.xml',
+      );
+      expect(result).toMatchObject({ success: true, ...sitemapStatus });
+    } finally {
+      submitSpy.mockRestore();
+      analyticsSpy.mockRestore();
+      parseSpy.mockRestore();
+    }
+  });
 });
 
 import { SeoCrawlerAuditService } from './seo-crawler-audit.service';

@@ -2,10 +2,11 @@
 
 **English canonical** | [한국어](API_CATALOG_MASTER.ko.md)
 
-> **Version**: `v2026.09.28.477`  
-> **Base URL**: `https://easy-scraping.com/api/v1` (Production) / `http://127.0.0.1:3000/api/v1` (Local)  
-> **Protocols**: HTTP/2, TLS 1.3, JSON (UTF-8)  
-> **Error Standard**: RFC 7807 Problem Details for HTTP APIs  
+> **Version**: `v2026.09.28.477`
+> **Runtime Addendum**: `v2026.10.07.541` Search Console administrator API (base catalog edition remains v477 pending broader catalog reconciliation)
+> **Base URL**: `https://easy-scraping.com/api/v1` (Production) / `http://127.0.0.1:3000/api/v1` (Local)
+> **Protocols**: HTTP/2, TLS 1.3, JSON (UTF-8)
+> **Error Standard**: RFC 7807 Problem Details for HTTP APIs
 > **Multi-Layer Security Headers**: `x-session-id`, `x-csrf-token`, `x-internal-token`, `x-totp-code` (Step-Up 2FA)
 
 ---
@@ -221,6 +222,30 @@
 
 ### `POST /api/v1/admin/switches/toggle`
 - **Summary**: Toggle kill switches & feature flags (**Step-Up 2FA TOTP Required**)
+
+### Search Console administrator addendum — v2026.10.07.541
+
+#### `GET /api/v1/seo/gsc/analytics`
+- **Summary**: Read the connected Google Search Console property's real 30-day Search Analytics metrics and top queries.
+- **Security**: authenticated administrator session required.
+
+#### `POST /api/v1/seo/gsc/credentials`
+- **Summary**: Validate and store an encrypted Google service-account credential for Search Console.
+- **Security**: administrator session + CSRF required.
+
+#### `POST /api/v1/seo/gsc/credentials/delete`
+- **Summary**: Delete the persisted Search Console credential when it is not environment-managed.
+- **Security**: administrator session + CSRF required.
+
+#### `POST /api/v1/seo/gsc/sitemap`
+- **Summary**: Submit or refresh the Production `/sitemap.xml` through the Google Search Console Sitemaps API, then return the real sitemap processing/status resource.
+- **OAuth**: `https://www.googleapis.com/auth/webmasters` for this mutation; Search Analytics remains on `webmasters.readonly`.
+- **Safety**: rejected when `SEO_INDEXING_ENABLED=false`, so isolated Test cannot publish its hostname.
+- **Security**: administrator session + CSRF required.
+
+#### `POST /api/v1/seo/submit`
+- **Summary**: Send URL-change notifications to IndexNow-compatible search engines. This is not a Google general-purpose Indexing API endpoint.
+- **Security**: administrator session + CSRF required.
 
 ---
 

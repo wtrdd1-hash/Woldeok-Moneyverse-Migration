@@ -1,3 +1,14 @@
+## v2026.10.07.541 — Google Search Console 사이트맵 API 1클릭 연동
+
+- Google 공식 API 계약을 재확인해 Moneyverse 일반 금융/계산기 페이지는 제한된 Google Indexing API 대상이 아니며, 지원되는 Google 쓰기 경로는 Search Console Sitemaps API임을 확정했다.
+- 기존 암호화 저장 Search Console 서비스 계정을 재사용하고 실제 `webmasters` OAuth 쓰기 scope를 사용하는 `POST /api/v1/seo/gsc/sitemap` 추가.
+- Search Analytics는 `webmasters.readonly` 유지. 사이트맵 제출 후 실제 Search Console resource를 다시 조회해 제출/다운로드 시각, pending, warnings/errors, 제출 URL 수를 노출한다.
+- `/admin/seo`는 계정 연결 후 “Search Console 사이트맵 등록”을 활성화하며, 일반 페이지용 Google Indexing API로 오해되던 배치 카드는 활성 화면에서 제거했다.
+- `SEO_INDEXING_ENABLED=false`인 격리 Test에서는 fail-closed 하여 Test 호스트 제출을 차단하고, Production 색인은 명시적으로 활성화된 환경에서만 수행한다.
+- 범용 URL 변경 알림은 호환 검색엔진 대상 IndexNow 기능으로 유지한다. BFF의 backend 장애 시 가짜 성공 fallback을 제거했고 backend mutation에 관리자 세션 + CSRF를 강제했다.
+- TDD 타깃 검증: backend 19/19, frontend 8/8 통과; 저장소 typecheck 통과. 첫 전체 test/lint/build 게이트 통과 후 신규 CVE-2026-96889 운영 의존성 감사가 차단했으며, 루트 override를 `sharp 0.35.5`로 고정한 뒤 운영 의존성 감사는 깨끗하다.
+- **릴리스 상태:** 로컬 소스 검증은 green이고 candidate `58f872c4`가 격리 Test exact-version/backend/status/sitemap/noindex 및 Test GSC mutation fail-closed 검사를 통과했다. GitHub CI와 무중단 Production 승격은 계속 게이트 상태이며 완료 순서대로 v541 worklog에 기록한다.
+
 ## v2026.10.06.537 — 관리자 모바일 분석 화면 긴급 수정
 
 - 제공된 모바일 `/admin/seo` 액션 라벨 충돌과 `/admin/analytics` 카테고리 탭 겹침을 재현하고 수정했다.

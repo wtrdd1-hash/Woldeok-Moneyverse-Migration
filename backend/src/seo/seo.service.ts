@@ -1,10 +1,14 @@
-import { BadRequestException, Inject, Injectable, Logger, Optional } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import type { Pool } from 'pg';
 import { PG_POOL } from '../core/pool.provider';
 import { EncryptionService } from '../security/encryption.service';
 import { safeFetch } from '../security/ssrf-defense';
-import { fetchGscAnalyticsSnapshot, parseGscServiceAccount } from './gsc-client';
-import type { GscAnalyticsSnapshot, GscServiceAccount } from './gsc-client';
+import {
+  fetchGscAnalyticsSnapshot,
+  parseGscServiceAccount,
+  submitGscSitemap as submitGscSitemapApi,
+} from './gsc-client';
+import type { GscAnalyticsSnapshot, GscServiceAccount, GscSitemapStatus } from './gsc-client';
 
 export interface CrawlerLogEntry {
   readonly id: string;
@@ -626,6 +630,40 @@ export class SeoService {
       propertyUrl: snapshot.propertyUrl,
       message: `Google Search Console 서비스 계정(${credential.clientEmail}) 연결을 검증하고 저장했습니다.`,
     };
+  }
+
+  async submitGscSitemap(): Promise<GscSitemapStatus & { readonly success: true; readonly message: string }> {
+    if (process.env.SEO_INDEXING_ENABLED === 'false') {
+      throw new BadRequestException('Google Search Console 사이트맵 제출은 운영 환경에서만 허용됩니다.');
+    }
+
+    const stored = await this.loadGscCredentials();
+    if (!stored) {
+      throw new BadRequestException('Google Search Console 서비스 계정을 먼저 등록해 주세요.');
+    }
+
+    const credential = parseGscServiceAccount(stored.keyJson);
+    const sitemapUrl = `${this.baseUrl}/sitemap.xml`;
+    try {
+      const status = await submitGscSitemapApi(
+        credential,
+        this.baseUrl,
+        stored.propertyUrl || process.env.GSC_SITE_URL?.trim() || null,
+        sitemapUrl,
+      );
+      if (stored.propertyUrl !== status.propertyUrl) {
+        stored.propertyUrl = status.propertyUrl;
+      }
+      return {
+        success: true,
+        ...status,
+        message: 'Google Search Console에 운영 사이트맵을 등록/갱신했습니다.',
+      };
+    } catch (error) {
+      throw new BadGatewayException(
+        `Google Search Console 사이트맵 제출 실패: ${this.safeGscError(error)}`,
+      );
+    }
   }
 
   async deleteGscCredentials(): Promise<{ success: boolean; message: string }> {
