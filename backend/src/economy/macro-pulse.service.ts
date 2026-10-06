@@ -217,7 +217,7 @@ export class MacroPulseService {
     ];
 
     const isRiskOn = nasdaqWave >= 0;
-    const sentiment = isRiskOn ? 'RISK_ON' : 'RISK_OFF';
+    const sentiment: 'RISK_ON' | 'NEUTRAL' | 'RISK_OFF' = isRiskOn ? 'RISK_ON' : 'RISK_OFF';
 
     const marketSummary = {
       sentiment,
