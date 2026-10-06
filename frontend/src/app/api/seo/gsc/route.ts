@@ -44,6 +44,17 @@ export async function POST(req: Request) {
       });
     }
 
+    if (body.action === 'submit-sitemap') {
+      const result = await mutate('/api/v1/seo/gsc/sitemap', {
+        method: 'POST',
+        body: {},
+        timeoutMs: 20_000,
+      });
+      return NextResponse.json(result, {
+        headers: { 'cache-control': 'private, no-store' },
+      });
+    }
+
     if (typeof body.keyJson !== 'string' || !body.keyJson.trim()) {
       return NextResponse.json(
         { success: false, message: '서비스 계정 JSON 키를 입력해 주세요.' },

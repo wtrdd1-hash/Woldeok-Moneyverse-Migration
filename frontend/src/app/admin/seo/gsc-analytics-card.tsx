@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   ShieldCheck,
   AlertCircle,
+  Send,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -49,6 +50,19 @@ export interface GscAnalyticsData {
   readonly topQueries: readonly GscTopQueryEntry[];
 }
 
+interface GscSitemapSubmission {
+  readonly success: boolean;
+  readonly message?: string;
+  readonly propertyUrl: string;
+  readonly sitemapUrl: string;
+  readonly lastSubmitted: string | null;
+  readonly lastDownloaded: string | null;
+  readonly isPending: boolean;
+  readonly warnings: number;
+  readonly errors: number;
+  readonly submittedUrlCount: number;
+}
+
 const DEFAULT_GSC_DATA: GscAnalyticsData = {
   hasCredentials: false,
   clientEmail: null,
@@ -72,6 +86,9 @@ export function GscAnalyticsCard() {
   const [modalFeedback, setModalFeedback] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeMetric, setActiveMetric] = useState<'clicks' | 'impressions'>('clicks');
+  const [isSubmittingSitemap, setIsSubmittingSitemap] = useState(false);
+  const [sitemapSubmission, setSitemapSubmission] = useState<GscSitemapSubmission | null>(null);
+  const [sitemapSubmitError, setSitemapSubmitError] = useState<string | null>(null);
 
   const fetchGscData = async () => {
     setIsLoading(true);
@@ -147,6 +164,29 @@ export function GscAnalyticsCard() {
     }
   };
 
+  const handleSubmitSitemap = async () => {
+    setIsSubmittingSitemap(true);
+    setSitemapSubmission(null);
+    setSitemapSubmitError(null);
+    try {
+      const res = await fetch('/api/seo/gsc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'submit-sitemap' }),
+      });
+      const result = await res.json().catch(() => null);
+      if (!res.ok || !result?.success) {
+        setSitemapSubmitError(result?.message || 'Search Console 사이트맵 등록에 실패했습니다.');
+        return;
+      }
+      setSitemapSubmission(result as GscSitemapSubmission);
+    } catch {
+      setSitemapSubmitError('Search Console 사이트맵 등록 중 통신 오류가 발생했습니다.');
+    } finally {
+      setIsSubmittingSitemap(false);
+    }
+  };
+
   // SVG Chart Calculation
   const series = data?.timeSeries || [];
   const maxClicks = useMemo(() => Math.max(...series.map((s) => s.clicks), 100), [series]);
@@ -208,6 +248,17 @@ export function GscAnalyticsCard() {
 
             <Button
               variant="outline"
+              size="default"
+              onClick={handleSubmitSitemap}
+              disabled={!data.hasCredentials || isSubmittingSitemap}
+              className="flex min-h-11 items-center gap-1.5 text-xs font-semibold"
+            >
+              <Send className="size-3.5" />
+              {isSubmittingSitemap ? '사이트맵 등록 중...' : 'Search Console 사이트맵 등록'}
+            </Button>
+
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-1 text-xs font-semibold"
@@ -220,6 +271,37 @@ export function GscAnalyticsCard() {
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {sitemapSubmission && (
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-700 dark:text-emerald-300">
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+              <div className="space-y-1">
+                <p className="font-bold">사이트맵 등록 완료</p>
+                <p>
+                  Google Search Console에 {sitemapSubmission.submittedUrlCount.toLocaleString()}개 URL이 포함된 사이트맵을 등록/갱신했습니다.
+                </p>
+                <p className="break-all text-[11px] opacity-90">{sitemapSubmission.sitemapUrl}</p>
+                <p className="text-[11px] opacity-90">
+                  상태: {sitemapSubmission.isPending ? '처리 대기' : '접수됨'} · 오류 {sitemapSubmission.errors} · 경고 {sitemapSubmission.warnings}
+                  {sitemapSubmission.lastDownloaded
+                    ? ` · Google 마지막 다운로드 ${new Date(sitemapSubmission.lastDownloaded).toLocaleString('ko-KR')}`
+                    : ''}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {sitemapSubmitError && (
+          <div className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-700 dark:text-red-300">
+            <AlertCircle className="mt-0.5 size-4 shrink-0" />
+            <div>
+              <p className="font-bold">사이트맵 등록 실패</p>
+              <p className="mt-1 break-words">{sitemapSubmitError}</p>
+            </div>
+          </div>
+        )}
+
         {(loadError || data.syncError) && (
           <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-300">
             <AlertCircle className="mt-0.5 size-4 shrink-0" />
