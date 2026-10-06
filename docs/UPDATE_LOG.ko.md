@@ -7,7 +7,7 @@
 - 첫 exact-SHA Test에서 version/backend/noindex와 관리자 플로팅 위젯/본문 overflow 제거는 확인했지만 `/admin/seo` React hydration error #418과 핵심 액션 40px 문제를 추가 발견했다.
 - 후속 수정으로 첫 렌더를 결정적으로 만들고 핵심 SEO 액션 4개를 44px default 크기로 변경했으며, 크롤러 로그 시간대를 고정하고 실제 제출 전 표시되던 가짜 Indexing API 성공 이력을 제거했다.
 - 관리자 반응형/SEO/분석 타깃 회귀는 현재 3개 파일 / 20개 테스트 통과, typecheck 통과, 타깃 lint 오류 0개다. 전체 저장소 테스트는 변경하지 않은 파일의 기존 `/bank` SEO 정책 assertion 4개 때문에만 실패한다.
-- **릴리스 상태:** 갱신된 candidate는 exact-SHA 격리 Test, 인증 관리자 5회 반응형 QA, 백엔드 readiness, 무중단 Production 승격 증거 전에는 완료를 주장하지 않는다.
+- **릴리스 상태:** 후속 exact SHA `b1a49d1f`는 격리 Test 백엔드 readiness와 인증 관리자 5회 QA(26개 라우트 × 13개 viewport/state 조합 = 338/338 검사 통과, SEO 핵심 액션 44px, 겹침/overflow/플로팅 위젯 실패 0건)를 통과했다. 무중단 Production 승격은 아직 대기 중이며 완료를 주장하지 않는다.
 
 ## v2026.10.05.530 — 긴급 전체 UI 재점검 / 긴급 수정 게이트
 

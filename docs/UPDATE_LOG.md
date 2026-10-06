@@ -7,7 +7,7 @@
 - First exact-SHA Test confirmed version/backend/noindex and no administrator floating widgets/body overflow, then exposed `/admin/seo` React hydration error #418 and 40px primary action controls.
 - Follow-up hardening makes first render deterministic, switches the four primary SEO actions to the 44px default size, fixes crawler-log timezone formatting, and removes the fabricated pre-submission Indexing API success history.
 - Focused administrator responsive/SEO/analytics regression coverage is now 3 files / 20 tests PASS; typecheck PASS; targeted lint 0 errors. Full repository test remains blocked only by four pre-existing `/bank` SEO-policy assertions in unchanged files.
-- **Release state:** the updated candidate requires fresh exact-SHA isolated Test, authenticated five-pass responsive QA, backend readiness and zero-downtime Production promotion before completion is claimed.
+- **Release state:** follow-up exact SHA `b1a49d1f` passed isolated Test backend readiness and authenticated five-pass administrator QA (26 routes × 13 viewport/state combinations = 338/338 checks PASS; SEO primary action 44px; zero overlap/overflow/floating-widget failures). Zero-downtime Production promotion remains pending and is not yet claimed.
 
 ## v2026.10.05.530 — Emergency Full UI Re-audit / Urgent Remediation Gate
 

@@ -55,3 +55,22 @@
 - Follow-up TDD: RED 10 passed / 1 failed before implementation; GREEN 3 files / 20 tests PASS. Repository typecheck PASS; targeted ESLint 0 errors with pre-existing warnings only; `git diff --check` PASS.
 - Mandatory refetch after the Test discovery still reports `origin/main=30d1eb2b50ec49e57273e699e6db7b54859bb200`; no upstream drift occurred.
 - The first candidate remains Test evidence only. The follow-up commit must be rebuilt and restaged as a new exact SHA before Test or Production acceptance.
+
+
+## Final exact-SHA Test acceptance — 2026-10-06
+- Follow-up candidate: `b1a49d1fe379ce550c6f7602e8f3d5e2250fa2e7`.
+- Isolated Test release: `/srv/moneyverse-data/releases/test-v537-admin-mobile-b1a49d1f`; current Test symlink points to this release and backend health returns `{"status":"ok"}`.
+- Authenticated five-pass administrator QA completed: 26 routes, 5 pass groups, 13 viewport/state combinations, **338/338 checks PASS**.
+- Failure counters: non-200 0, wrong path 0, page/body horizontal overflow 0, administrator consumer-floating widgets 0, blank main 0, page error 0.
+- Changed-surface checks: 26/26 PASS; SEO primary-action minimum height measured 44px; SEO action overlap 0, analytics tab overlap 0, analytics heading/status overlap 0.
+- `origin/main` remains `30d1eb2b50ec49e57273e699e6db7b54859bb200`; no mid-work upstream drift occurred.
+- Production remains intentionally unchanged until GitHub integration/release gates are satisfied; the current Production version is not claimed to include v537.
+
+## Final exact-SHA Test acceptance — 2026-10-06
+- Follow-up candidate: `b1a49d1fe379ce550c6f7602e8f3d5e2250fa2e7`.
+- Isolated Test release: `/srv/moneyverse-data/releases/test-v537-admin-mobile-b1a49d1f`; current Test symlink points to this release and backend health returns `{"status":"ok"}`.
+- Authenticated five-pass administrator QA completed: 26 routes, 5 pass groups, 13 viewport/state combinations, **338/338 checks PASS**.
+- Failure counters: non-200 0, wrong path 0, page/body horizontal overflow 0, administrator consumer-floating widgets 0, blank main 0, page error 0.
+- Changed-surface checks: 26/26 PASS; SEO primary-action minimum height measured 44px; SEO action overlap 0, analytics tab overlap 0, analytics heading/status overlap 0.
+- `origin/main` remains `30d1eb2b50ec49e57273e699e6db7b54859bb200`; no mid-work upstream drift occurred.
+- Production remains intentionally unchanged until GitHub integration/release gates are satisfied; the current Production version is not claimed to include v537.

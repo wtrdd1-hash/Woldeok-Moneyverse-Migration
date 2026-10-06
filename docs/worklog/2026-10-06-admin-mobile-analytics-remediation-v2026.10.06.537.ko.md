@@ -55,3 +55,13 @@
 - 후속 TDD: 구현 전 RED 10개 통과 / 1개 실패, 구현 후 GREEN 3개 파일 / 20개 테스트 통과. 저장소 typecheck 통과, 타깃 ESLint 오류 0개(기존 warning만 존재), `git diff --check` 통과.
 - Test 발견 후 필수 refetch에서도 `origin/main=30d1eb2b50ec49e57273e699e6db7b54859bb200`이며 upstream 드리프트가 없다.
 - 첫 candidate는 Test 증거로만 유지한다. 후속 commit은 새로운 exact SHA로 다시 build/stage해야 Test 또는 Production 수용이 가능하다.
+
+
+## 최종 exact-SHA Test 승인 증거 — 2026-10-06
+- 후속 candidate: `b1a49d1fe379ce550c6f7602e8f3d5e2250fa2e7`.
+- 격리 Test 릴리스: `/srv/moneyverse-data/releases/test-v537-admin-mobile-b1a49d1f`; 현재 Test 심볼릭 링크가 이 릴리스를 가리키며 백엔드 health는 `{"status":"ok"}`를 반환한다.
+- 인증 관리자 5회 반응형 QA 완료: 26개 라우트, 5개 pass group, 13개 viewport/state 조합으로 **338/338 검사 통과**.
+- 실패 카운터: non-200 0, 잘못된 경로 0, page/body 가로 overflow 0, 관리자 화면 사용자용 플로팅 위젯 0, blank main 0, page error 0.
+- 변경 화면 검사: 26/26 통과; SEO 핵심 액션 최소 높이 실측 44px, SEO 액션 겹침 0, 분석 탭 겹침 0, 분석 제목/상태 겹침 0.
+- `origin/main`은 `30d1eb2b50ec49e57273e699e6db7b54859bb200`으로 유지되며 작업 중 upstream drift가 없었다.
+- GitHub 통합/릴리스 게이트 충족 전까지 운영은 의도적으로 변경하지 않는다. 현재 Production에 v537이 포함됐다고 주장하지 않는다.
