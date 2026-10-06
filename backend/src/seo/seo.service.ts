@@ -222,12 +222,20 @@ export class SeoService {
       logs = [...this.memoryLogs];
     }
 
+    // 실제 외부 검색엔진 봇만 엄격히 필터링 (내부 테스트/센티널 봇 배제)
+    const externalLogs = logs.filter((l) => {
+      const name = (l.botName || '').toLowerCase();
+      const ua = (l.userAgent || '').toLowerCase();
+      const isInternal = name.includes('sentinel') || name.includes('internal') || ua.includes('sentinel');
+      return !isInternal;
+    });
+
     const now = Date.now();
     const oneDayAgo = now - 24 * 60 * 60 * 1000;
     const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
 
-    const logs24h = logs.filter((l) => new Date(l.createdAt).getTime() >= oneDayAgo);
-    const logs7d = logs.filter((l) => new Date(l.createdAt).getTime() >= sevenDaysAgo);
+    const logs24h = externalLogs.filter((l) => new Date(l.createdAt).getTime() >= oneDayAgo);
+    const logs7d = externalLogs.filter((l) => new Date(l.createdAt).getTime() >= sevenDaysAgo);
 
     const botDistribution: Record<string, number> = {};
     const statusDistribution: Record<string, number> = {};
@@ -240,11 +248,11 @@ export class SeoService {
       totalDuration += log.durationMs;
     }
 
-    const avgDurationMs = logs24h.length > 0 ? Math.round(totalDuration / logs24h.length) : 48;
+    const avgDurationMs = logs24h.length > 0 ? Math.round(totalDuration / logs24h.length) : 0;
 
-    // Calculate Target URL Health
+    // Calculate Target URL Health (외부 검색엔진 봇 방문 기록 기준)
     const targetUrls: TargetUrlHealth[] = MONITORED_TARGET_URLS.map((target) => {
-      const targetLogs = logs.filter((l) => l.path === target.path || l.path.startsWith(`${target.path}?`));
+      const targetLogs = externalLogs.filter((l) => l.path === target.path || l.path.startsWith(`${target.path}?`));
       if (targetLogs.length === 0) {
         return {
           path: target.path,
