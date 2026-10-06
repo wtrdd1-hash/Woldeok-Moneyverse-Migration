@@ -6,8 +6,8 @@
 - Consumer onboarding/support fixed launchers no longer mount on `/admin/**`, removing the observed administrator-content occlusion.
 - First exact-SHA Test confirmed version/backend/noindex and no administrator floating widgets/body overflow, then exposed `/admin/seo` React hydration error #418 and 40px primary action controls.
 - Follow-up hardening makes first render deterministic, switches the four primary SEO actions to the 44px default size, fixes crawler-log timezone formatting, and removes the fabricated pre-submission Indexing API success history.
-- Focused administrator responsive/SEO/analytics regression coverage is now 3 files / 20 tests PASS; typecheck PASS; targeted lint 0 errors. Full repository test remains blocked only by four pre-existing `/bank` SEO-policy assertions in unchanged files.
-- **Release state:** follow-up exact SHA `b1a49d1f` passed isolated Test backend readiness and authenticated five-pass administrator QA (26 routes × 13 viewport/state combinations = 338/338 checks PASS; SEO primary action 44px; zero overlap/overflow/floating-widget failures). Zero-downtime Production promotion remains pending and is not yet claimed.
+- Focused administrator responsive/SEO/analytics regression coverage is 3 files / 20 tests PASS. After QA-only prerequisite PR #796 corrected stale main-test expectations, the rebased v537 candidate passes typecheck, full local repository tests (backend 1,076 pass with DB-backed groups skipped by the local environment; frontend 1,065 pass), production build, and `git diff --check`.
+- **Release state:** pre-rebase exact SHA `b1a49d1f` passed isolated Test backend readiness and authenticated five-pass administrator QA (26 routes × 13 viewport/state combinations = 338/338 checks PASS; SEO primary action 44px; zero overlap/overflow/floating-widget failures). Because main advanced to QA-only merge `103e0aa2`, the branch was rebased and a fresh exact-SHA GitHub/Test gate is required before zero-downtime Production promotion.
 
 ## v2026.10.05.530 — Emergency Full UI Re-audit / Urgent Remediation Gate
 

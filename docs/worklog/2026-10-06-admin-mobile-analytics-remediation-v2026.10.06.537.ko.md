@@ -65,3 +65,9 @@
 - 변경 화면 검사: 26/26 통과; SEO 핵심 액션 최소 높이 실측 44px, SEO 액션 겹침 0, 분석 탭 겹침 0, 분석 제목/상태 겹침 0.
 - `origin/main`은 `30d1eb2b50ec49e57273e699e6db7b54859bb200`으로 유지되며 작업 중 upstream drift가 없었다.
 - GitHub 통합/릴리스 게이트 충족 전까지 운영은 의도적으로 변경하지 않는다. 현재 Production에 v537이 포함됐다고 주장하지 않는다.
+
+## main 드리프트 조정 및 최종 PR 전 검증 — 2026-10-06
+- 동시작업 QA 전용 수정 브랜치가 `871539a7cba45e25a9aef87753f74d8d6ad20f2a`에서 Build Test Candidate를 통과했고, PR #796으로 main `103e0aa2a134eb533a2cf5cbd17cbb1e95b7dfeb`에 병합됐다. 변경은 테스트 파일 3개뿐이며 애플리케이션 런타임 동작은 바꾸지 않는다.
+- 필수 fetch에서 원래 `30d1eb2b` 기준선 이후 main 드리프트를 확인했다. 다른 작업을 덮어쓰지 않고 v537 소스 커밋을 `103e0aa2` 위로 정상 재베이스했다.
+- 재베이스 후 로컬 게이트는 모두 정상이다: 관리자 반응형/SEO/분석 타깃 20/20, 저장소 typecheck 통과, root/contract/database/backend/frontend 테스트 명령 통과(backend 1,076 통과, 로컬 환경에서 DB 연동 391개 skip; frontend 1,065 통과), lint 통과, Production build 통과, `git diff --check` 통과.
+- 기존 `b1a49d1f` Test 증거는 진단/수용 이력으로 보존하지만 재베이스 SHA의 릴리스 증거로 대체할 수 없다. 최종 push 브랜치 SHA가 Build Test Candidate와 격리 Test exact-version/backend/noindex/관리자 5회 QA를 다시 통과한 뒤에만 병합 또는 Production 작업을 진행한다.

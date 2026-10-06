@@ -8,5 +8,6 @@
 - 첫 exact-SHA Test에서 `/admin/seo`의 추가 결함 2개를 확인했다. `size="sm"` 때문에 핵심 액션이 실제 40px로 계산됐고, 비결정적 최초 렌더 타임스탬프 때문에 React hydration error #418이 발생했다.
 - 후속 수정으로 핵심 액션 4개를 44px default 버튼 크기로 변경하고, 서버 기준 시각을 직렬화해 클라이언트 첫 렌더와 공유하며, 크롤러 로그 시간대를 고정하고, 실제 제출 전부터 성공으로 보이던 가짜 Indexing API 초기 성공 이력을 제거했다.
 - 후속 로컬 검증: 타깃 3개 파일 / 20개 테스트 통과, 저장소 typecheck 통과, 타깃 lint 오류 0개(기존 warning 유지).
-- 후속 exact SHA `b1a49d1f`는 격리 Test 백엔드 readiness와 인증 관리자 5회 QA를 통과했다. 26개 라우트 × 13개 viewport/state 조합 = 338/338 검사 통과, SEO 핵심 액션 높이 44px, SEO/분석 겹침 및 관리자 사용자용 플로팅 위젯 실패 0건이다.
-- Production 승격은 별도 릴리스 게이트이며 이 변경기록에서는 완료를 주장하지 않는다.
+- 재베이스 전 exact SHA `b1a49d1f`는 격리 Test 백엔드 readiness와 인증 관리자 5회 QA를 통과했다. 26개 라우트 × 13개 viewport/state 조합 = 338/338 검사 통과, SEO 핵심 액션 높이 44px, SEO/분석 겹침 및 관리자 사용자용 플로팅 위젯 실패 0건이다.
+- 런타임 동작을 바꾸지 않는 QA 전용 선행 PR #796을 현재 main `103e0aa2`로 병합해 오래된 기준선 테스트 기대값을 정리했다. v537 브랜치는 해당 main 위로 재베이스했고, 타깃 20/20, typecheck, 전체 로컬 저장소 테스트, lint, Production build, `git diff --check`를 통과했다.
+- 재베이스로 candidate SHA가 바뀌었으므로 Production 승격 전 새 exact-SHA GitHub/Test 검증이 필요하며, 이 변경기록에서는 Production 완료를 주장하지 않는다.

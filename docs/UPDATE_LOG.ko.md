@@ -6,8 +6,8 @@
 - 사용자 온보딩/고객지원 fixed 런처를 `/admin/**`에서 마운트하지 않아 관리자 콘텐츠를 가리던 현상을 제거했다.
 - 첫 exact-SHA Test에서 version/backend/noindex와 관리자 플로팅 위젯/본문 overflow 제거는 확인했지만 `/admin/seo` React hydration error #418과 핵심 액션 40px 문제를 추가 발견했다.
 - 후속 수정으로 첫 렌더를 결정적으로 만들고 핵심 SEO 액션 4개를 44px default 크기로 변경했으며, 크롤러 로그 시간대를 고정하고 실제 제출 전 표시되던 가짜 Indexing API 성공 이력을 제거했다.
-- 관리자 반응형/SEO/분석 타깃 회귀는 현재 3개 파일 / 20개 테스트 통과, typecheck 통과, 타깃 lint 오류 0개다. 전체 저장소 테스트는 변경하지 않은 파일의 기존 `/bank` SEO 정책 assertion 4개 때문에만 실패한다.
-- **릴리스 상태:** 후속 exact SHA `b1a49d1f`는 격리 Test 백엔드 readiness와 인증 관리자 5회 QA(26개 라우트 × 13개 viewport/state 조합 = 338/338 검사 통과, SEO 핵심 액션 44px, 겹침/overflow/플로팅 위젯 실패 0건)를 통과했다. 무중단 Production 승격은 아직 대기 중이며 완료를 주장하지 않는다.
+- 관리자 반응형/SEO/분석 타깃 회귀는 3개 파일 / 20개 테스트를 통과했다. QA 전용 선행 PR #796이 오래된 main 테스트 기대값을 정리한 뒤 재베이스한 v537 candidate는 typecheck, 전체 로컬 저장소 테스트(backend 1,076 통과, 로컬 환경에서 DB 연동 그룹은 skip; frontend 1,065 통과), Production build, `git diff --check`를 통과했다.
+- **릴리스 상태:** 재베이스 전 exact SHA `b1a49d1f`는 격리 Test 백엔드 readiness와 인증 관리자 5회 QA(26개 라우트 × 13개 viewport/state 조합 = 338/338 검사 통과, SEO 핵심 액션 44px, 겹침/overflow/플로팅 위젯 실패 0건)를 통과했다. main이 QA 전용 merge `103e0aa2`로 전진했으므로 브랜치를 재베이스했으며, 무중단 Production 승격 전 새 exact-SHA GitHub/Test 게이트를 다시 통과해야 한다.
 
 ## v2026.10.05.530 — 긴급 전체 UI 재점검 / 긴급 수정 게이트
 
