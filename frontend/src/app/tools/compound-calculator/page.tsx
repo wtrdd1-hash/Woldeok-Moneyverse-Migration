@@ -12,6 +12,8 @@ import { InArticleAdvertisement } from '@/components/public-advertisement';
 import { ViralShareCardDialog } from '@/components/viral-share-card-dialog';
 import { CalculatorRetentionFunnel } from '@/components/calculator-retention-funnel';
 import { UserConversionLockInWidget } from '@/components/user-conversion-lockin-widget';
+import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
+import { FinancialKnowledgeHub } from '@/components/financial-knowledge-hub';
 import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 export default function CompoundCalculatorPage() {
@@ -174,6 +176,11 @@ export default function CompoundCalculatorPage() {
           >
             1억원 10년 15%
           </Link>
+        </div>
+
+        {/* 국내외 실시간 거시경제 펄스 티커 (국내/해외 금리, 주가, 통화 10분 자동 업데이트) */}
+        <div className="pt-2">
+          <GlobalMacroPulseTicker />
         </div>
       </div>
 
@@ -397,6 +404,11 @@ export default function CompoundCalculatorPage() {
               summaryValue={`${calculation.totalFinal.toLocaleString()} WLD`}
               toolCategory="compound"
             />
+          </div>
+
+          {/* 국내외 실전 금융 지식 백과사전 & 다통화 환율 변환기 */}
+          <div className="mt-8">
+            <FinancialKnowledgeHub />
           </div>
         </div>
       </div>

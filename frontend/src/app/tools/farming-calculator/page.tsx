@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Calculator, ArrowLeft, RotateCcw, Sparkles, Briefcase, Award, Coins, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
+import { FinancialKnowledgeHub } from '@/components/financial-knowledge-hub';
 
 const PROFESSIONS = [
   { id: 'developer', name: '개발자 (Developer)', baseReward: 1200, icon: '💻', desc: '코드 커밋 및 버그 해결 업무' },
@@ -130,6 +132,11 @@ export default function FarmingCalculatorPage() {
           >
             하루 10만 WLD 4시간 파밍 루트
           </Link>
+        </div>
+
+        {/* 국내외 실시간 거시경제 펄스 티커 */}
+        <div className="pt-2">
+          <GlobalMacroPulseTicker />
         </div>
       </div>
 
@@ -267,6 +274,11 @@ export default function FarmingCalculatorPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* 국내외 실전 금융 지식 백과사전 & 다통화 환율 변환기 */}
+      <div className="pt-4">
+        <FinancialKnowledgeHub />
       </div>
     </div>
   );

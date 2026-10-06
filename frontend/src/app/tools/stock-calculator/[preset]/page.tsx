@@ -11,6 +11,7 @@ import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
 import { CalculatorRetentionFunnel } from '@/components/calculator-retention-funnel';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
+import { CalculatorConversionBanner } from '@/components/calculator-conversion-banner';
 
 interface PresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
@@ -236,6 +237,15 @@ export default async function StockPresetPage({ params }: PresetPageProps) {
 
         {/* 고단가 멀티플렉스 추천 광고 단위 (콘텐츠 종료 후 전환/이탈 방지 지면) */}
         <MultiplexAdvertisement className="my-8" />
+
+        {/* 실전 모의투자 전환 & 10,000 WLD 지원금 락인 배너 */}
+        <div className="pt-2">
+          <CalculatorConversionBanner
+            title={`${data.title} 시뮬레이션 완료! 실전 모의투자로 테스트`}
+            description="계산된 평단가 전략을 실제 10-Depth 실시간 호가창에서 테스트해보세요. 가입 즉시 10,000 WLD 지원금이 100% 무료 지급됩니다."
+            targetSymbol="CHIPS"
+          />
+        </div>
 
         {/* 바이럴 리퍼럴 배너 */}
         <div className="border-t border-border pt-6">

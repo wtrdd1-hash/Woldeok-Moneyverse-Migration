@@ -9,6 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { InArticleAdvertisement } from '@/components/public-advertisement';
 import { ViralShareCardDialog } from '@/components/viral-share-card-dialog';
+import { CalculatorConversionBanner } from '@/components/calculator-conversion-banner';
+import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
+import { FinancialKnowledgeHub } from '@/components/financial-knowledge-hub';
 import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 const POPULAR_STOCKS = [
@@ -110,6 +113,9 @@ export default function StockCalculatorPage() {
           <span>실전 주식 평단가 계산기</span>
         </div>
       </div>
+
+      {/* 실시간 국내외 거시경제 지표 펄스 티커 */}
+      <GlobalMacroPulseTicker />
 
       <div className="space-y-2">
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
@@ -324,6 +330,18 @@ export default function StockCalculatorPage() {
 
           {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
           <InArticleAdvertisement className="my-6" />
+
+          {/* 실전 모의투자 전환 & 10,000 WLD 지원금 락인 배너 */}
+          <CalculatorConversionBanner
+            title="물타기 시뮬레이션 완료! 실제 모의투자로 검증해보세요"
+            description="계산된 평단가 전략을 실제 10-Depth 실시간 호가창에서 테스트해보세요. 가입 즉시 10,000 WLD 지원금이 100% 무료 지급됩니다."
+            targetSymbol="CHIPS"
+          />
+
+          {/* 국내외 실전 금융 지식 백과사전 & 글로벌 통화 변환기 */}
+          <div className="pt-6">
+            <FinancialKnowledgeHub />
+          </div>
         </div>
       </div>
 
