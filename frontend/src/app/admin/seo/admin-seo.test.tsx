@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { LocaleProvider } from '@/components/locale-provider';
 import { SeoClientView, type SeoInitialData } from './seo-client-view';
 
@@ -108,7 +108,7 @@ describe('SeoClientView', () => {
 
     renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
 
-    const submitBtn = screen.getByRole('button', { name: /전체 사이트맵 즉시 제출/i });
+    const submitBtn = screen.getByRole('button', { name: /IndexNow URL 변경 통보/i });
     fireEvent.click(submitBtn);
 
     const feedback = await screen.findByText(/전송 완료!/i);
@@ -122,6 +122,51 @@ describe('SeoClientView', () => {
     expect(screen.getByText('30일간 검색 트렌드 추이')).toBeTruthy();
     expect(screen.getByText('상위 10대 유입 검색어 (Top Search Queries)')).toBeTruthy();
     expect(screen.getByRole('button', { name: /서비스 계정 키 설정/i })).toBeTruthy();
+  });
+
+  it('lets a registered Search Console account submit the production sitemap with one click', async () => {
+    global.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === '/api/seo/gsc' && (!init?.method || init.method === 'GET')) {
+        return {
+          ok: true,
+          json: async () => ({
+            hasCredentials: true,
+            clientEmail: 'seo-sa@moneyverse-gsc.iam.gserviceaccount.com',
+            propertyUrl: 'sc-domain:easy-scraping.com',
+            source: 'search-console',
+            syncError: null,
+          }),
+        } as Response;
+      }
+      if (url === '/api/seo/gsc' && init?.method === 'POST') {
+        expect(JSON.parse(String(init.body))).toEqual({ action: 'submit-sitemap' });
+        return {
+          ok: true,
+          json: async () => ({
+            success: true,
+            sitemapUrl: 'https://easy-scraping.com/sitemap.xml',
+            propertyUrl: 'sc-domain:easy-scraping.com',
+            lastSubmitted: '2026-10-07T00:05:00.000Z',
+            lastDownloaded: '2026-10-07T00:06:00.000Z',
+            isPending: false,
+            warnings: 0,
+            errors: 0,
+            submittedUrlCount: 642,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ({}) } as Response;
+    }) as typeof fetch;
+
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
+
+    const submitButton = await screen.findByRole('button', { name: /Search Console 사이트맵 등록/i });
+    await waitFor(() => expect((submitButton as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(submitButton);
+
+    expect(await screen.findByText(/사이트맵 등록 완료/i)).toBeTruthy();
+    expect(screen.getByText(/642개 URL/i)).toBeTruthy();
   });
 
   it('does not fabricate a successful indexing batch before an administrator submits one', () => {

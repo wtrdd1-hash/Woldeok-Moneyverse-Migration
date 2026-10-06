@@ -1,3 +1,14 @@
+## v2026.10.07.541 — Google Search Console Sitemap API One-Click Integration
+
+- Confirmed against Google first-party API contracts that ordinary Moneyverse finance/calculator pages are not eligible for the restricted Google Indexing API; the supported Google write path is the Search Console Sitemaps API.
+- Added `POST /api/v1/seo/gsc/sitemap` using the already-registered encrypted Search Console service-account credential and real `webmasters` OAuth write scope.
+- Search Analytics remains on `webmasters.readonly`; sitemap submission reads back the real Search Console resource and exposes submitted/downloaded time, pending state, warnings/errors and submitted URL count.
+- `/admin/seo` now enables “Search Console 사이트맵 등록” after credentials are connected and no longer renders the misleading ordinary-page Google Indexing API batch card.
+- Isolated Test is fail-closed when `SEO_INDEXING_ENABLED=false`, preventing accidental submission of the Test hostname. Production indexing remains explicitly enabled.
+- Generic URL-change notification remains an IndexNow action for compatible engines; its BFF no longer fabricates success when the backend is unavailable, and backend mutation routes now require administrator session + CSRF.
+- TDD focused verification: backend 19/19, frontend 8/8 PASS; repository typecheck PASS. First full test/lint/build gate passed before dependency audit blocked on newly published CVE-2026-96889; root override now pins `sharp 0.35.5` and the production dependency audit is clean.
+- **Release state:** local source verification is green and candidate `58f872c4` passed isolated Test exact-version/backend/status/sitemap/noindex plus Test fail-closed GSC mutation checks. GitHub CI and zero-downtime Production promotion remain gated and are recorded in the v541 worklog as they complete.
+
 ## v2026.10.06.537 — Administrator Mobile Analytics Remediation
 
 - Reproduced and corrected the supplied mobile `/admin/seo` action-label collision and `/admin/analytics` category-tab overlap.
