@@ -74,6 +74,7 @@ export default async function AdminSeoPage() {
   await requireAdminConsole();
   const locale = await getServerLocale();
   const initialData = await fetchSeoData();
+  const initialNowMs = Date.now();
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
@@ -97,7 +98,7 @@ export default async function AdminSeoPage() {
         </p>
       </PageHeader>
 
-      <SeoClientView initialData={initialData} />
+      <SeoClientView initialData={initialData} initialNowMs={initialNowMs} />
     </div>
   );
 }

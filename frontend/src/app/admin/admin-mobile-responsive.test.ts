@@ -18,6 +18,7 @@ const analyticsView = readFileSync('src/app/admin/analytics/analytics-client-vie
 const floatingUtilities = readFileSync('src/components/route-aware-floating-utilities.tsx', 'utf8');
 const siteShell = readFileSync('src/components/site-shell.tsx', 'utf8');
 const rootLayout = readFileSync('src/app/layout.tsx', 'utf8');
+const indexingApiCard = readFileSync('src/app/admin/seo/indexing-api-card.tsx', 'utf8');
 
 describe('administrator mobile responsive guards', () => {
   it('uses stacked AI agent cards below the small breakpoint and keeps the desktop table', () => {
@@ -83,5 +84,13 @@ describe('administrator mobile responsive guards', () => {
     expect(siteShell).not.toContain('<FloatingSupportChatWidget />');
     expect(rootLayout).not.toContain('<InteractiveOnboardingTracker />');
     expect(rootLayout).toContain('<RouteAwareFloatingUtilities />');
+  });
+
+  it('keeps the SEO first render deterministic and its primary actions at a 44px button size', () => {
+    expect(seoView).toContain('formatRelativeTime(dateString: string | null, referenceNowMs: number)');
+    expect(seoView).toContain('const [relativeTimeNowMs, setRelativeTimeNowMs] = useState(initialNowMs);');
+    expect((seoView.match(/size="default"/g) ?? []).length).toBeGreaterThanOrEqual(4);
+    expect(indexingApiCard).toContain('useState<SubmissionHistory[]>([])');
+    expect(indexingApiCard).not.toContain("id: 'sub-1'");
   });
 });

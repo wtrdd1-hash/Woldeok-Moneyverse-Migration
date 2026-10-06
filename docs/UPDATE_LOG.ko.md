@@ -4,9 +4,10 @@
 - SEO 액션은 1열 → 2열 → 데스크톱 flex로 재배치되며 긴 라벨은 안전하게 줄바꿈한다.
 - 분석 카테고리 탭은 제한된 터치 스크롤 안에서 고유 폭을 유지하고, 코호트 제목/상태 행도 좁은 화면에서 재배치된다.
 - 사용자 온보딩/고객지원 fixed 런처를 `/admin/**`에서 마운트하지 않아 관리자 콘텐츠를 가리던 현상을 제거했다.
-- 관리자 반응형 타깃 회귀 가드 추가, 타깃 3개 파일 / 18개 테스트 통과, typecheck 통과, production build 통과, lint 오류 0개.
-- 전체 저장소 테스트는 변경하지 않은 파일의 기존 `/bank` SEO 정책 assertion 4개 때문에만 실패하며, 이 기준선 불일치는 v537 회귀로 취급하지 않고 별도 기록했다.
-- **릴리스 상태:** exact-SHA 격리 Test, 인증 관리자 5회 반응형 QA, 백엔드 readiness, 무중단 Production 승격 증거 전에는 완료를 주장하지 않는다.
+- 첫 exact-SHA Test에서 version/backend/noindex와 관리자 플로팅 위젯/본문 overflow 제거는 확인했지만 `/admin/seo` React hydration error #418과 핵심 액션 40px 문제를 추가 발견했다.
+- 후속 수정으로 첫 렌더를 결정적으로 만들고 핵심 SEO 액션 4개를 44px default 크기로 변경했으며, 크롤러 로그 시간대를 고정하고 실제 제출 전 표시되던 가짜 Indexing API 성공 이력을 제거했다.
+- 관리자 반응형/SEO/분석 타깃 회귀는 현재 3개 파일 / 20개 테스트 통과, typecheck 통과, 타깃 lint 오류 0개다. 전체 저장소 테스트는 변경하지 않은 파일의 기존 `/bank` SEO 정책 assertion 4개 때문에만 실패한다.
+- **릴리스 상태:** 갱신된 candidate는 exact-SHA 격리 Test, 인증 관리자 5회 반응형 QA, 백엔드 readiness, 무중단 Production 승격 증거 전에는 완료를 주장하지 않는다.
 
 ## v2026.10.05.530 — 긴급 전체 UI 재점검 / 긴급 수정 게이트
 

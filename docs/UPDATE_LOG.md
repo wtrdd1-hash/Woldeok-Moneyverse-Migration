@@ -4,9 +4,10 @@
 - SEO actions now reflow 1-column → 2-column → desktop flex, while long labels wrap safely.
 - Analytics category tabs keep intrinsic width inside a contained touch scroller; the cohort heading/status row also reflows on narrow screens.
 - Consumer onboarding/support fixed launchers no longer mount on `/admin/**`, removing the observed administrator-content occlusion.
-- Added focused administrator responsive regression guards; targeted 3 files / 18 tests PASS, typecheck PASS, production build PASS, lint 0 errors.
-- Full repository test remains blocked only by four pre-existing `/bank` SEO-policy assertions in unchanged files; this baseline mismatch is recorded separately and is not attributed to v537.
-- **Release state:** exact-SHA isolated Test, authenticated five-pass responsive QA, backend readiness and zero-downtime Production promotion are still required before completion is claimed.
+- First exact-SHA Test confirmed version/backend/noindex and no administrator floating widgets/body overflow, then exposed `/admin/seo` React hydration error #418 and 40px primary action controls.
+- Follow-up hardening makes first render deterministic, switches the four primary SEO actions to the 44px default size, fixes crawler-log timezone formatting, and removes the fabricated pre-submission Indexing API success history.
+- Focused administrator responsive/SEO/analytics regression coverage is now 3 files / 20 tests PASS; typecheck PASS; targeted lint 0 errors. Full repository test remains blocked only by four pre-existing `/bank` SEO-policy assertions in unchanged files.
+- **Release state:** the updated candidate requires fresh exact-SHA isolated Test, authenticated five-pass responsive QA, backend readiness and zero-downtime Production promotion before completion is claimed.
 
 ## v2026.10.05.530 — Emergency Full UI Re-audit / Urgent Remediation Gate
 

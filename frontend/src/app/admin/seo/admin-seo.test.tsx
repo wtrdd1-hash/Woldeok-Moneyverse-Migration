@@ -4,6 +4,7 @@ import { LocaleProvider } from '@/components/locale-provider';
 import { SeoClientView, type SeoInitialData } from './seo-client-view';
 
 const renderKo = (ui: React.ReactElement) => render(<LocaleProvider initialLocale="ko">{ui}</LocaleProvider>);
+const initialNowMs = Date.parse('2026-10-06T00:00:00.000Z');
 
 const mockInitialData: SeoInitialData = {
   totalHits24h: 124,
@@ -65,7 +66,7 @@ describe('SeoClientView', () => {
   });
 
   it('renders all 4 hero KPI widgets and metrics correctly', () => {
-    renderKo(<SeoClientView initialData={mockInitialData} />);
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
 
     expect(screen.getByText('24시간 봇 크롤링')).toBeTruthy();
     expect(screen.getAllByText('124')[0]).toBeTruthy();
@@ -78,7 +79,7 @@ describe('SeoClientView', () => {
   });
 
   it('renders target URL cards with health badges and names', () => {
-    renderKo(<SeoClientView initialData={mockInitialData} />);
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
 
     expect(screen.getByText('침팬지 반도체 (CHIPS)')).toBeTruthy();
     expect(screen.getAllByText('/stocks/CHIPS')[0]).toBeTruthy();
@@ -87,7 +88,7 @@ describe('SeoClientView', () => {
   });
 
   it('filters target cards by category button click', () => {
-    renderKo(<SeoClientView initialData={mockInitialData} />);
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
 
     const stockFilterBtn = screen.getByRole('button', { name: /가상 주식/i });
     fireEvent.click(stockFilterBtn);
@@ -105,7 +106,7 @@ describe('SeoClientView', () => {
       }),
     });
 
-    renderKo(<SeoClientView initialData={mockInitialData} />);
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
 
     const submitBtn = screen.getByRole('button', { name: /전체 사이트맵 즉시 제출/i });
     fireEvent.click(submitBtn);
@@ -115,12 +116,18 @@ describe('SeoClientView', () => {
   });
 
   it('renders Google Search Console Search Analytics card with metrics', () => {
-    renderKo(<SeoClientView initialData={mockInitialData} />);
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
 
     expect(screen.getByText(/Google Search Console 검색 성과 분석/i)).toBeTruthy();
     expect(screen.getByText('30일간 검색 트렌드 추이')).toBeTruthy();
     expect(screen.getByText('상위 10대 유입 검색어 (Top Search Queries)')).toBeTruthy();
     expect(screen.getByRole('button', { name: /서비스 계정 키 설정/i })).toBeTruthy();
+  });
+
+  it('does not fabricate a successful indexing batch before an administrator submits one', () => {
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
+
+    expect(screen.queryByText('100개 URL 색인 요청 완료')).toBeNull();
   });
 });
 

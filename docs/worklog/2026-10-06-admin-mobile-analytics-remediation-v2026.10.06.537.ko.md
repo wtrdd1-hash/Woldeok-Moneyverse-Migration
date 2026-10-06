@@ -44,3 +44,14 @@
 - `git diff --check`: 통과.
 - 전체 저장소 테스트는 1,059개 통과 / 프론트 assertion 4개 실패이며, 모두 수정하지 않은 `/bank` sitemap/robots/indexability 기대값에 한정된다. 같은 불일치는 v537 최종 구현 전에도 확인됐고 실패 파일은 이번 패치에서 변경하지 않았다. 따라서 현재 main 기준선 불일치로 기록하며 v537 회귀로 오인하지 않는다.
 - 다음 게이트: exact candidate를 commit/push하고 격리 Test에 배포한 뒤 Test 백엔드/version을 확인하고, 운영 작업 전에 인증 관리자 5회 viewport QA를 수행한다.
+
+## exact-SHA Test 발견 및 후속 수정 — 2026-10-06
+- 첫 candidate commit/push: `8f33ba92cb45ae7bc88e9b5ee7a1e0c36250f687`.
+- 격리 Test를 `/srv/moneyverse-data/releases/test-v537-admin-mobile-8f33ba92`에 구성했고, public Test version이 exact SHA와 일치했으며 backend `:3100/health`는 `status=ok`, public `/status`는 200, Test는 `X-Robots-Tag: noindex, nofollow`를 유지했다.
+- 최초 인증 브라우저 sweep은 관리자 25개 route × 대표 viewport 5회 = 125개 검사로, non-200 0, wrong-path 0, document overflow 0, 관리자 사용자용 floating widget 0, blank main 0이었다.
+- 같은 sweep에서 `/admin/seo` candidate blocker 2개를 발견했다. 430px/landscape pass에서 React minified error #418이 발생했고 변경한 핵심 액션 4개의 실제 높이가 필수 44px가 아니라 40px였다.
+- 원인 분석 결과 첫 렌더 시간 텍스트가 `Date.now()`와 locale 기반 가짜 초기 Indexing API 성공 이력에 의존했고, `Button size="sm"`은 높이를 40px로 고정하며 뒤쪽 `.moneyverse-button` 규칙 때문에 시도한 utility min-height가 cascade에서 이기지 못했다.
+- 후속 구현은 하나의 서버 기준 시각을 `SeoClientView`로 직렬화해 상대시간 첫 렌더에 사용하고, 크롤러 로그 표시 시간대를 Asia/Seoul로 고정하며, 가짜 초기 색인 성공 행을 제거하고, SEO 핵심 액션 4개를 44px default 버튼 크기로 변경했다.
+- 후속 TDD: 구현 전 RED 10개 통과 / 1개 실패, 구현 후 GREEN 3개 파일 / 20개 테스트 통과. 저장소 typecheck 통과, 타깃 ESLint 오류 0개(기존 warning만 존재), `git diff --check` 통과.
+- Test 발견 후 필수 refetch에서도 `origin/main=30d1eb2b50ec49e57273e699e6db7b54859bb200`이며 upstream 드리프트가 없다.
+- 첫 candidate는 Test 증거로만 유지한다. 후속 commit은 새로운 exact SHA로 다시 build/stage해야 Test 또는 Production 수용이 가능하다.

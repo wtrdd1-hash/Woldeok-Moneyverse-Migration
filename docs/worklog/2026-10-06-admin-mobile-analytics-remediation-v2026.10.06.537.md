@@ -44,3 +44,14 @@
 - `git diff --check`: PASS.
 - Full repository test completed with 1,059 passing and 4 failing frontend assertions, all confined to unchanged `/bank` sitemap/robots/indexability expectations. The same mismatch was observed before the final v537 implementation and no failing file is modified by this patch. This is recorded as a current-main baseline inconsistency, not a v537 regression.
 - Next gate: commit/push exact candidate, deploy it to isolated Test, verify Test backend/version, then run authenticated five-pass administrator viewport QA before any Production action.
+
+## Exact-SHA Test discovery and follow-up — 2026-10-06
+- First candidate commit/push: `8f33ba92cb45ae7bc88e9b5ee7a1e0c36250f687`.
+- Isolated Test staged at `/srv/moneyverse-data/releases/test-v537-admin-mobile-8f33ba92`; public Test version matched the exact SHA, backend `:3100/health` returned `status=ok`, public `/status` returned 200, and Test retained `X-Robots-Tag: noindex, nofollow`.
+- Initial authenticated browser sweep: 25 administrator routes × 5 representative viewport passes = 125 checks; non-200 0, wrong-path 0, document overflow 0, administrator consumer-floating widgets 0, blank main 0.
+- The same sweep exposed two candidate blockers on `/admin/seo`: React minified error #418 at the 430px and landscape passes, and the four changed primary actions measured 40px tall rather than the required 44px.
+- Root cause analysis found first-render time text depended on `Date.now()` and a locale-formatted fabricated initial Indexing API success history; additionally `Button size="sm"` fixes height at 40px while the later `.moneyverse-button` rule prevents the attempted utility min-height from winning the cascade.
+- Follow-up implementation serializes one server reference time into `SeoClientView`, uses it for relative-time first render, pins crawler log display to Asia/Seoul, removes the fabricated initial indexing-success row, and uses the 44px default button size for the four primary SEO actions.
+- Follow-up TDD: RED 10 passed / 1 failed before implementation; GREEN 3 files / 20 tests PASS. Repository typecheck PASS; targeted ESLint 0 errors with pre-existing warnings only; `git diff --check` PASS.
+- Mandatory refetch after the Test discovery still reports `origin/main=30d1eb2b50ec49e57273e699e6db7b54859bb200`; no upstream drift occurred.
+- The first candidate remains Test evidence only. The follow-up commit must be rebuilt and restaged as a new exact SHA before Test or Production acceptance.
