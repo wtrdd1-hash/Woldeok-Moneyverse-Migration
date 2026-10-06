@@ -227,21 +227,21 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
             <Globe className="size-5" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-base font-bold text-foreground truncate">실시간 검색엔진 색인 & 크롤러 관제</h2>
-            <p className="text-xs text-muted-foreground line-clamp-1 sm:line-clamp-none">
+            <h2 className="text-base font-bold leading-snug text-foreground">실시간 검색엔진 색인 & 크롤러 관제</h2>
+            <p className="text-xs leading-relaxed text-muted-foreground">
               Google Search Console, Naver Search Advisor(Yeti), Bingbot 및 IndexNow 프로토콜 실시간 연동
             </p>
           </div>
         </div>
 
         {/* 4대 액션 버튼 그룹 (모바일 wrap 및 min-h-11 touch target 적용) */}
-        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto min-w-0">
+        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:flex-wrap lg:items-center min-w-0">
           <Button
             variant="outline"
             size="sm"
             onClick={refreshData}
             disabled={isRefreshing}
-            className="flex-1 sm:flex-initial min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 text-xs font-semibold"
+            className="w-full min-w-0 min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 whitespace-normal text-center leading-tight text-xs font-semibold lg:w-auto"
           >
             <RefreshCw className={cn('size-3.5', isRefreshing && 'animate-spin')} />
             새로고침
@@ -251,7 +251,7 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
             size="sm"
             onClick={handleCrawlAudit}
             disabled={isAuditing}
-            className="flex-1 sm:flex-initial min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 border-primary/40 text-xs font-semibold text-primary hover:bg-primary/10"
+            className="w-full min-w-0 min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 whitespace-normal text-center leading-tight border-primary/40 text-xs font-semibold text-primary hover:bg-primary/10 lg:w-auto"
           >
             <ShieldCheck className={cn('size-3.5', isAuditing && 'animate-spin')} />
             {isAuditing ? '크롤링 감사 중...' : '1-Click 무결성 감사'}
@@ -261,7 +261,7 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
             size="sm"
             onClick={handleSendDailyDigest}
             disabled={isSendingDigest}
-            className="flex-1 sm:flex-initial min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 border-sky-500/40 text-xs font-semibold text-sky-500 hover:bg-sky-500/10"
+            className="w-full min-w-0 min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 whitespace-normal text-center leading-tight border-sky-500/40 text-xs font-semibold text-sky-500 hover:bg-sky-500/10 lg:w-auto"
           >
             <Send className={cn('size-3.5', isSendingDigest && 'animate-spin')} />
             {isSendingDigest ? '전송 중...' : '1-Click 디스코드 브리핑'}
@@ -270,7 +270,7 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
             size="sm"
             onClick={handleManualSubmit}
             disabled={isSubmitting}
-            className="w-full sm:w-auto min-h-[44px] sm:min-h-9 items-center justify-center gap-1.5 bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 active:scale-[0.98]"
+            className="w-full min-w-0 min-h-[44px] sm:col-span-2 sm:min-h-9 items-center justify-center gap-1.5 whitespace-normal text-center leading-tight bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 active:scale-[0.98] lg:col-auto lg:w-auto"
           >
             <Send className="size-3.5" />
             {isSubmitting ? '색인 통보 중...' : '전체 사이트맵 즉시 제출 (Ping)'}

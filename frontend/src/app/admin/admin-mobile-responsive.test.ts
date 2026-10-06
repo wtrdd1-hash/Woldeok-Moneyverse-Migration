@@ -13,6 +13,11 @@ const workForms = readFileSync('src/app/admin/work/admin-work-forms.tsx', 'utf8'
 const shopView = readFileSync('src/app/admin/shop/admin-shop-view.tsx', 'utf8');
 const treasuryView = readFileSync('src/app/admin/treasury/treasury-view.tsx', 'utf8');
 const bankPage = readFileSync('src/app/admin/bank/page.tsx', 'utf8');
+const seoView = readFileSync('src/app/admin/seo/seo-client-view.tsx', 'utf8');
+const analyticsView = readFileSync('src/app/admin/analytics/analytics-client-view.tsx', 'utf8');
+const floatingUtilities = readFileSync('src/components/route-aware-floating-utilities.tsx', 'utf8');
+const siteShell = readFileSync('src/components/site-shell.tsx', 'utf8');
+const rootLayout = readFileSync('src/app/layout.tsx', 'utf8');
 
 describe('administrator mobile responsive guards', () => {
   it('uses stacked AI agent cards below the small breakpoint and keeps the desktop table', () => {
@@ -58,5 +63,25 @@ describe('administrator mobile responsive guards', () => {
     expect(treasuryView).toContain('className="hidden md:block overflow-x-auto"');
     expect(bankPage).toContain('className="grid gap-3 p-4 md:hidden divide-y divide-border/40"');
     expect(bankPage).toContain('className="hidden md:block overflow-x-auto"');
+  });
+
+  it('stacks long SEO actions on narrow screens instead of shrinking labels into each other', () => {
+    expect(seoView).toContain('grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-auto');
+    expect(seoView).toContain('whitespace-normal text-center leading-tight');
+  });
+
+  it('keeps analytics category tabs intrinsic-width inside a local horizontal scroller', () => {
+    expect(analyticsView).toContain('overflow-x-auto');
+    expect(analyticsView).toContain('flex-none');
+    expect(analyticsView).toContain('w-max min-w-full');
+  });
+
+  it('suppresses user floating utilities on every administrator route', () => {
+    expect(floatingUtilities).toContain("pathname === '/admin' || pathname.startsWith('/admin/')");
+    expect(floatingUtilities).toContain('<InteractiveOnboardingTracker />');
+    expect(floatingUtilities).toContain('<FloatingSupportChatWidget />');
+    expect(siteShell).not.toContain('<FloatingSupportChatWidget />');
+    expect(rootLayout).not.toContain('<InteractiveOnboardingTracker />');
+    expect(rootLayout).toContain('<RouteAwareFloatingUtilities />');
   });
 });
