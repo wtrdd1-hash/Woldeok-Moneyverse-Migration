@@ -3262,3 +3262,33 @@ flowchart TD
 - 로컬 `tsc --noEmit` 100% 통과.
 - Next.js 프로덕션 빌드 통과.
 - 운영 서버 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.
+
+
+---
+## 🎮 [v127 Specification] 실제 유저 계정(치킨) 엔드투엔드 실플레이 & 실거래 전수 QA (+140, -0)
+
+### 1. 개요 및 요구사항
+- **대상 계정**: 실제 프로덕션 DB 계정 `치킨` (`4677cb1d-d7e6-4e36-a612-67df3edf7d87`)
+- **목적**: 목업이나 단순 정적 렌더링 검증이 아닌, 실제 프로덕션 DB 및 백엔드 트랜잭션을 수반하는 실플레이(주식 매수/매도, 상점 구매, 착용, 은행 예금/출금, 도파민 미니게임, 직업 업무 할당) 전 과정을 실제 계정 세션으로 구동하여 복식부기 원장 및 실시간 잔고 변동까지 전수 실측 검증.
+
+### 2. 실거래 및 실플레이 검증 결과 (10/10 ALL-PASS)
+1. **은행 자산 조회 (`GET /api/v1/banking/standing`)**:
+   - HTTP 200 OK. 초기 현금 잔고(164,264 WLD) 및 예금 잔고(0 WLD) 정상 수신.
+2. **은행 복리 예금 1,000 WLD 실제 입금 (`POST /api/v1/banking/deposit`)**:
+   - HTTP 201 Created. 트랜잭션 `83ca516a` 생성, 복식부기 원장 차변/대변 1,000 WLD 완벽 정산.
+3. **은행 복리 예금 500 WLD 실제 출금 (`POST /api/v1/banking/withdraw`)**:
+   - HTTP 201 Created. 트랜잭션 `6015cc84` 생성, 예금 계좌 500 WLD 차감 및 현금 계좌 500 WLD 입금 정산.
+4. **상점 카탈로그 아이템 실제 구매 (`POST /api/v1/shop/catalog/9e6e020d-578a-4b72-982e-45ff55da4689/purchases`)**:
+   - HTTP 201 Created. `오로라 프로필 프레임` (6,500 WLD) 실제 구매 완료. 구매 영수증 `5be2cb5f`, 트랜잭션 `ee7fd499` 정상 기록.
+5. **인벤토리 보유 확인 및 프로필 착용 (`POST /api/v1/shop/holdings/9e6e020d-578a-4b72-982e-45ff55da4689/equip`)**:
+   - HTTP 201 Created. `inventory_equip_item` PostgreSQL 함수 내 `catalog_id` 모호성 버그 발견 및 핫픽스 패치 완료. 슬롯 `frame` 장착 성공 (`is_equipped: true`).
+6. **주식 시장 1주 실제 매수 체결 (`POST /api/v1/stocks/0d4fb8e9-76f7-40ad-88cb-e42a7de85a3f/orders`)**:
+   - HTTP 201 Created. `WDM (Woldeok Mobility)` 1주 매수 체결 (체결가: 10,792 WLD, 체결 ID: `ebff983d`, 트랜잭션: `e802592d`).
+7. **포트폴리오 확인 및 주식 1주 실제 매도 체결 (`POST /api/v1/stocks/0d4fb8e9-76f7-40ad-88cb-e42a7de85a3f/orders`)**:
+   - HTTP 201 Created. 보유 포트폴리오 1주 실시간 확인 후 매도 주문 체결 및 청산 (매도가: 10,792 WLD, 체결 ID: `a491da1f`, 트랜잭션: `658ed424`).
+8. **도파민 미니게임 실플레이 (`POST /api/v1/engagement/dopamine/mini-showdown`, `pet-fortune`)**:
+   - HTTP 200 OK. AI 다이스 쇼다운 승리 정산(배당금 190 WLD 지급) 및 덕이 펫 인터랙션(친밀도 +10, 100 WLD 보상, 어록 출력).
+9. **직업 업무 시스템 연동 및 업무 할당 (`POST /api/v1/work/assignments`)**:
+   - HTTP 200/201 Created. 업무 대시보드(일일 한도 10,000 WLD) 연동 및 `호가창 유동성 심층 분석` 업무 할당 (`assignment_id: be5a1137`).
+10. **복식부기 원장(Ledger) 실시간 대조 검증**:
+    - PostgreSQL `ledger_transactions` 및 `ledger_postings` 조회 결과, 치킨 계정의 주식 매수/매도, 상점 구매, 은행 입/출금 등 최근 10건의 거래 원장이 차변/대변 1원 단위 오차 없이 100% 완벽 대사 통과.
