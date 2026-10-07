@@ -359,7 +359,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
               description="검색어나 필터 조건을 변경하여 다시 조회해 보세요."
             />
           ) : (
-            <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mv-table-wrapper">
+            <div className="w-full max-w-full min-w-0 overflow-x-auto rounded-lg border border-border/50 mv-table-wrapper">
               <table className="w-full min-w-[700px] text-left text-xs">
                 <thead>
                   <tr className="border-b border-border/60 text-muted-foreground">
