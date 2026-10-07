@@ -3318,3 +3318,11 @@ flowchart TD
 - TypeScript 타입체크 (`tsc --noEmit`) 100% 무오류 확인.
 - 원격 저장소(`origin main`) 푸시 및 운영 서버(`prod-v529`) 배포/동기화.
 - 실제 사이트 접속 및 실시간 지표 렌더링 E2E QA 검증.
+
+
+### 4. 라이브 배포 및 실측 QA 결과 (ALL-PASS)
+- **TypeScript 무결성**: `tsc --noEmit` 0건 경고/오류 통과.
+- **프로덕션 빌드**: Next.js 579개 전 라우트 최적화 번들 빌드 완료 (`Generating static pages (579/579) in 1093ms`).
+- **서비스 무중단 승격**: `moneyverse-frontend` 서비스 리로드 및 메모리 상주 정상 가동 확인 (`Active: active (running)`).
+- **라이브 도메인 마크업 실측**: `https://easy-scraping.com/` 접속 실측 결과 `중앙은행 통화량`, `일일 경제 퀘스트`, `M2 통화량`, `골든 보너스` 전수 정상 렌더링 확인 완료.
+- **백엔드 실시간 연동**: `GET /api/v1/economy/macro-pulse` HTTP 200 OK (국내 지표 4건, 글로벌 지표 5건, 환율 4종, 시장 심리 `RISK_ON` 실시간 수신).
