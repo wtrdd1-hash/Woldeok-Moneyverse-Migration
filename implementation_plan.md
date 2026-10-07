@@ -2871,3 +2871,44 @@ flowchart TD
    - `frontend/src/lib/navigation.ts` 네비게이션 등록.
 5. **검증 및 무중단 배포**:
    - 단위 테스트 100% 통과, Next.js 빌드, 운영 DB 마이그레이션 257 적용, 서비스 리로드 및 라이브 검증.
+
+
+---
+
+## 🏛️ [v120 Specification] 국고 자금 안전 보존 및 투자 비율 정밀 제어 거버넌스 (Treasury Capital Governance)
+
+### 1. 배경 및 사용자 의도 분석
+- **사용자 요청**: "투자 다하지마 국가 관련 시스템돈ㄴ느다 국고에써야되니까 적당한비율만 투자하게 시스템 조절해줘 관리자페이지에서 조절가능하게"
+- **핵심 문제점**:
+  1. 기존 `AutoSovereignWealthFundService`에서 국고 잉여금 발생 시 70%(`BigInt(70)`)를 주식/채권에 자동 재투자하도록 하드코딩되어 있어, 국고 금고(VAULT_MAIN) 잔액이 최소 바닥(2,500만 WLD) 부근에만 머물고 대부분의 자금이 외부 자산으로 투자됨.
+  2. 국고 자금의 본질적 목적(비상 환급 유동성 완충 `VAULT_EMERGENCY`, 공공 인프라 구축 `VAULT_INFRA`, 통화 안정 지급준비금 `VAULT_RESERVE`, 복지 배당 `VAULT_WELFARE`)에 사용될 유동성이 부족해질 위험 존재.
+  3. 관리자가 투자 허용 비율을 직관적으로 확인하고 실시간으로 슬라이더/인풋으로 튜닝할 수 있는 제어 패널 부재.
+
+### 2. 해결 및 설계 아키텍처
+1. **국가 재정 헌법적 거버넌스 원칙**:
+   - **국고 안전 유보 우선주의 (Treasury First Principle)**: 국고의 최소 80% 이상은 국가 시스템 금고에 현금으로 온전히 상시 유보.
+   - **적정 투자 비율(Reinvestment Ratio)**: 잉여금 중 투자 비율을 기존 70% 고정에서 **기본 15%**로 하향하고, 관리자가 0%~50% 범위에서 자율 조절.
+   - **국고 총액 대비 최대 투자 상한(Max Investment Cap)**: 국부펀드 총 AUM이 국고 자산 총액의 **최대 20%**를 넘지 못하도록 원천 캡(Cap) 적용.
+   - **투자 즉시 동결(Emergency Freeze)**: 비상 시 클릭 한 번으로 모든 자율 투자를 0%로 동결하고 100% 국고로 환수하는 긴급 킬스위치 제공.
+
+2. **데이터베이스 마이그레이션 (`migration 258`)**:
+   - `treasury_swf_configs` 테이블 확장:
+     - `reinvestment_ratio_pct NUMERIC(5,2) NOT NULL DEFAULT 15.00`: 잉여금 중 투자 비율 (기본 15.00%)
+     - `max_investment_ratio_pct NUMERIC(5,2) NOT NULL DEFAULT 20.00`: 국고 총자산 대비 최대 투자 상한 비율 (기본 20.00%)
+     - `safe_reserve_wld NUMERIC(38,0) NOT NULL DEFAULT 25000000`: 최소 안전 국고 보존액
+
+3. **백엔드 엔진 리팩터링 (`backend/src/admin/treasury/`)**:
+   - `auto-swf.service.ts`:
+     - 하드코딩 70% 제거 ➡️ `config.reinvestment_ratio_pct` 적용.
+     - 국고 총자산 대비 AUM 상한 검증 ➡️ 초과 시 신규 투자 중단 및 국고 현금 유지.
+     - `updateConfig()` 메서드에 신규 거버넌스 필드 전체 반영.
+   - `treasury.controller.ts`:
+     - `PUT /api/admin/treasury/swf/config` DTO 및 검증 로직 강화.
+
+4. **프론트엔드 관리자 콘솔 (`frontend/src/app/admin/treasury/swf-control-panel.tsx`)**:
+   - **[🏛️ 국고 자금 안전 보존 및 투자 비율 거버넌스]** 전용 컨트롤 카드 탑재.
+   - 슬라이더 1: 잉여 세수 투자 허용 비율 (0% ~ 50%, 1% 단위, 기본 15%)
+   - 슬라이더 2: 국고 총자산 대비 최대 투자 상한 (5% ~ 30%, 1% 단위, 기본 20%)
+   - 인풋: 국고 최소 안전 보존 바닥 (Floor Reserve WLD)
+   - 실시간 비중 게이지 (국고 시스템 보존 vs 국부펀드 운용 비율 바)
+   - [설정 저장 및 정책 즉시 반영] 버튼 연동.

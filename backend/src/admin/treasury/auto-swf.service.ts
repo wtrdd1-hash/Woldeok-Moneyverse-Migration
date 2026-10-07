@@ -10,6 +10,8 @@ export interface SwfConfig {
   is_enabled: boolean;
   safe_reserve_wld: string;
   max_single_investment_wld: string;
+  reinvestment_ratio_pct: number;
+  max_investment_ratio_pct: number;
   equity_ratio_pct: number;
   bond_ratio_pct: number;
   dividend_ratio_pct: number;
@@ -84,6 +86,8 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     const rows = await queryRows<SwfConfig>(
       this.pool,
       `SELECT id, is_enabled, safe_reserve_wld::text, max_single_investment_wld::text,
+              COALESCE(reinvestment_ratio_pct, 15.00)::float as reinvestment_ratio_pct,
+              COALESCE(max_investment_ratio_pct, 20.00)::float as max_investment_ratio_pct,
               equity_ratio_pct::float, bond_ratio_pct::float, dividend_ratio_pct::float,
               COALESCE(auto_harvest_enabled, true) as auto_harvest_enabled,
               COALESCE(auto_tax_enabled, true) as auto_tax_enabled,
@@ -100,6 +104,8 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
         is_enabled: true,
         safe_reserve_wld: '25000000',
         max_single_investment_wld: '10000000',
+        reinvestment_ratio_pct: 15.0,
+        max_investment_ratio_pct: 20.0,
         equity_ratio_pct: 60.0,
         bond_ratio_pct: 30.0,
         dividend_ratio_pct: 10.0,
@@ -340,28 +346,51 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
         );
       }
 
-      // 4. [2,500만 WLD 초과 잉여분의 복리 재투자] (Compound Reinvestment)
-      // 2,500만 WLD를 초과하는 현금 중 70%를 다시 우량주 및 안전 자산에 재투자하여 AUM 팽창
+      // 4. [국고 자금 안전 보존 및 적정 비율 자율 재투자] (Treasury Capital Governance Reinvestment)
+      // 국가 필수 시스템(비상 완충, 인프라, 통화안정, 복지)을 위해 국고의 대부분(80% 이상)은 현금으로 영구 보존.
+      // 관리자가 지정한 적정 재투자 비율(config.reinvestment_ratio_pct, 기본 15%)과 최대 투자 한도(config.max_investment_ratio_pct, 기본 20%)를 엄격히 준수.
       let reinvestedWld = BigInt(0);
       let stockAlloc = BigInt(0);
       let bondAlloc = BigInt(0);
       let dividendAlloc = BigInt(0);
 
-      if (currentCash > floorReserve) {
+      // 현재 국부펀드 보유 포트폴리오 평가 총액 사전 조회
+      const preValRes = await client.query<{ sum: string }>(
+        `SELECT COALESCE(SUM(current_valuation_wld::numeric), 0)::text as sum FROM public.treasury_swf_portfolios`,
+      );
+      const portfolioBefore = BigInt(preValRes.rows[0]?.sum || '0');
+      const totalAumBefore = currentCash + portfolioBefore;
+
+      // 최대 투자 허용 상한(예: 국고 총자산의 20%) 산출
+      const maxInvestCapPct = BigInt(Math.max(5, Math.min(50, Math.round(config.max_investment_ratio_pct || 20))));
+      const maxAllowedPortfolioAum = (totalAumBefore * maxInvestCapPct) / BigInt(100);
+
+      if (currentCash > floorReserve && portfolioBefore < maxAllowedPortfolioAum) {
         const surplusCash = currentCash - floorReserve;
-        // 초과분의 70% 재투자, 30%는 국고 현금 버퍼로 보존하여 국고 현금 자체도 우상향
-        reinvestedWld = (surplusCash * BigInt(70)) / BigInt(100);
-        const maxSingle = BigInt(config.max_single_investment_wld || '10000000');
-        if (reinvestedWld > maxSingle) {
-          reinvestedWld = maxSingle;
+        const investRatioPct = BigInt(Math.max(0, Math.min(50, Math.round(config.reinvestment_ratio_pct || 15))));
+
+        // 잉여금 중 관리자 설정 비율(기본 15%)만 투자로 배정, 나머지 85%는 국고 금고 현금으로 상시 보존
+        let targetReinvest = (surplusCash * investRatioPct) / BigInt(100);
+
+        // 최대 허용 포트폴리오 상한 초과 방지 캡 적용
+        const headroom = maxAllowedPortfolioAum - portfolioBefore;
+        if (targetReinvest > headroom) {
+          targetReinvest = headroom;
         }
+
+        const maxSingle = BigInt(config.max_single_investment_wld || '10000000');
+        if (targetReinvest > maxSingle) {
+          targetReinvest = maxSingle;
+        }
+
+        reinvestedWld = targetReinvest;
 
         if (reinvestedWld >= BigInt(50000)) {
           stockAlloc = (reinvestedWld * BigInt(60)) / BigInt(100);
           bondAlloc = (reinvestedWld * BigInt(30)) / BigInt(100);
           dividendAlloc = reinvestedWld - stockAlloc - bondAlloc;
 
-          // 현금 차감
+          // 현금 차감 (국고 금고에서 투자 자금 출금)
           currentCash -= reinvestedWld;
           await client.query(
             `UPDATE public.system_treasury_vaults
@@ -375,7 +404,7 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
                 vault_id, tx_type, amount_wld, reason, balance_before, balance_after, created_at
              ) VALUES (
                 $1, 'MARKET_STIMULUS', $2,
-                '국고 2,500만 WLD 초과 세수 복리 재투자(주식 60%, 국채 30%, 시민배당 10%)',
+                '국고 자금 헌법적 거버넌스 재투자 (투자비율 ' || $5 || '%, 국고 안전보존 ' || $6 || '%): 주식 60%, 국채 30%, 시민배당 10%',
                 $3, $4, clock_timestamp()
              )`,
             [
@@ -383,6 +412,8 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
               reinvestedWld.toString(),
               (currentCash + reinvestedWld).toString(),
               currentCash.toString(),
+              investRatioPct.toString(),
+              (BigInt(100) - investRatioPct).toString(),
             ],
           );
 
@@ -505,10 +536,36 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
        SET is_enabled = COALESCE($1, is_enabled),
            safe_reserve_wld = COALESCE($2, safe_reserve_wld),
            max_single_investment_wld = COALESCE($3, max_single_investment_wld),
+           reinvestment_ratio_pct = COALESCE($4, reinvestment_ratio_pct),
+           max_investment_ratio_pct = COALESCE($5, max_investment_ratio_pct),
            updated_at = clock_timestamp()
        WHERE id = 'current'`,
-      [params.is_enabled, params.safe_reserve_wld, params.max_single_investment_wld],
+      [
+        params.is_enabled,
+        params.safe_reserve_wld,
+        params.max_single_investment_wld,
+        params.reinvestment_ratio_pct,
+        params.max_investment_ratio_pct,
+      ],
     );
+
+    // 변경 감사 이벤트 등록
+    await queryRows(
+      this.pool,
+      `INSERT INTO public.treasury_swf_events (event_type, amount_wld, summary, metadata)
+       VALUES (
+          'GOVERNANCE_CONFIG_UPDATED', 0,
+          '관리자가 국고 자금 거버넌스 정책(투자비율 ' || COALESCE($1, 15) || '%, 투자상한 ' || COALESCE($2, 20) || '%, 안전보존금 ' || COALESCE($3, 25000000) || ' WLD)을 변경하였습니다.',
+          $4
+       )`,
+      [
+        params.reinvestment_ratio_pct,
+        params.max_investment_ratio_pct,
+        params.safe_reserve_wld,
+        JSON.stringify(params),
+      ],
+    ).catch(() => {});
+
     return this.getConfig();
   }
 }
