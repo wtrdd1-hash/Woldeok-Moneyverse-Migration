@@ -13,7 +13,7 @@ export default async function StocksLayout({ children }: { readonly children: Re
   const isEn = locale === 'en';
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 w-full max-w-full min-w-0 overflow-hidden">
       <nav aria-label={isEn ? 'Virtual stock tools' : '가상 주식 도구'} className="flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm"><Link href="/stocks">{isEn ? 'Market' : '거래소'}</Link></Button>
         <Button asChild variant="outline" size="sm"><Link href="/stocks/watchlist">{isEn ? 'Watchlist' : '관심 종목'}</Link></Button>

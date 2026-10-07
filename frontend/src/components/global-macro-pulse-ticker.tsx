@@ -216,7 +216,7 @@ export function GlobalMacroPulseTicker() {
   });
 
   return (
-    <div className="w-full rounded-xl border border-slate-800 bg-slate-950/80 p-3 shadow-md backdrop-blur-md space-y-3">
+    <div className="w-full max-w-full min-w-0 overflow-hidden rounded-xl border border-slate-800 bg-slate-950/80 p-3 shadow-md backdrop-blur-md space-y-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800/80 pb-2">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/30">
@@ -352,7 +352,7 @@ export function GlobalMacroPulseTicker() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+          <div className="flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 pb-1 scrollbar-thin">
             {filteredEvents.map((evt) => {
               const isHigh = evt.importance === 'HIGH';
               const dDayLabel = evt.dDay === 0 ? 'D-Day 오늘' : `D-${evt.dDay}`;
