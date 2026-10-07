@@ -57,6 +57,9 @@ import { EnterpriseService } from './enterprises/enterprise.service';
 import { AdminTreasuryBondController, PublicTreasuryBondController } from './bonds/treasury-bond.controller';
 import { TreasuryBondRepository } from './bonds/treasury-bond.repository';
 import { TreasuryBondService } from './bonds/treasury-bond.service';
+import { AdminNationalPensionController, PublicNationalPensionController } from './pension/national-pension.controller';
+import { NationalPensionRepository } from './pension/national-pension.repository';
+import { NationalPensionService } from './pension/national-pension.service';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 
 @Module({
@@ -68,6 +71,8 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
     PublicEnterpriseController,
     AdminTreasuryBondController,
     PublicTreasuryBondController,
+    AdminNationalPensionController,
+    PublicNationalPensionController,
     AdminShopController,
     AdminController,
     AdminAuditController,
@@ -167,7 +172,25 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
       useFactory: (repo: TreasuryBondRepository | null, discord: DiscordAlertService | null) =>
         repo ? new TreasuryBondService(repo, discord ?? undefined) : null,
     },
+    {
+      provide: NationalPensionRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new NationalPensionRepository(pool as any) : null),
+    },
+    {
+      provide: NationalPensionService,
+      inject: [NationalPensionRepository, DiscordAlertService],
+      useFactory: (repo: NationalPensionRepository | null, discord: DiscordAlertService | null) =>
+        repo ? new NationalPensionService(repo, discord ?? undefined) : null,
+    },
   ],
-  exports: [AdminService, AuditRepository, AutoSovereignWealthFundService, EnterpriseService, TreasuryBondService],
+  exports: [
+    AdminService,
+    AuditRepository,
+    AutoSovereignWealthFundService,
+    EnterpriseService,
+    TreasuryBondService,
+    NationalPensionService,
+  ],
 })
 export class AdminModule {}

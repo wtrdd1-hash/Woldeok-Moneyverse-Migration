@@ -249,6 +249,31 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
             END LOOP;
           END $$;
         `).catch(() => {});
+
+        // [국가 국민연금(NPS) 은퇴자 대상 1시간 주기 공적 기초연금 자동 지급]
+        await client.query(`
+          DO $$
+          DECLARE
+            p RECORD;
+            payout NUMERIC;
+            u_account_id UUID;
+          BEGIN
+            FOR p IN
+              SELECT id, user_id, accumulated_contribution_wld, hourly_payout_rate_bps
+              FROM public.national_pension_accounts
+              WHERE status = 'RETIRED_RECEIVING' AND accumulated_contribution_wld > 0
+            LOOP
+              payout := GREATEST(1, FLOOR(p.accumulated_contribution_wld * p.hourly_payout_rate_bps / 10000));
+              SELECT id INTO u_account_id FROM public.accounts WHERE owner_user_id = p.user_id AND account_type = 'USER_CASH' LIMIT 1;
+              IF payout > 0 AND u_account_id IS NOT NULL THEN
+                UPDATE public.account_balances SET available_amount = available_amount + payout, updated_at = now() WHERE account_id = u_account_id;
+                UPDATE public.national_pension_accounts SET total_payout_received_wld = total_payout_received_wld + payout, last_payout_at = now(), updated_at = now() WHERE id = p.id;
+                INSERT INTO public.national_pension_payout_logs (account_id, user_id, payout_amount_wld, snapshot_accumulated_wld)
+                VALUES (p.id, p.user_id, payout, p.accumulated_contribution_wld);
+              END IF;
+            END LOOP;
+          END $$;
+        `).catch(() => {});
       }
 
       // 3. [국부펀드 자산 평가 이익 및 수익 회수] (Auto Asset Growth & Harvest)

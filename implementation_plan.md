@@ -1,6 +1,8 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v113)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v115)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v115**: [기획재정부 & 보건복지부] 국가 국민연금공단(NPS) 공적 연금 적립 & 평생 기초연금 지급 및 국고 복리 증식 시스템 풀스택 구축 — ① 국민연금공단(NPS) 공적 연금 적립 모델 정립 (자발적/의무적 기여금 납입, 누적 적립액 전액 국고 `VAULT_MAIN` 및 국부펀드 편입 운용) ② 기여도/가입회차별 5단계 연금 등급제(청년적립형~명예원로형) 및 은퇴 시 매시간 확정 기초연금(연 7~10% 수준) 자동 지급 ③ 중도 해지 환급(95% 반환, 5% 복지기금 `VAULT_WELFARE` 귀속) ④ 1시간 주기 자동 복리 엔진(`AutoSwfService`)에 국민연금 자산 운용 및 은퇴자 기초연금 지급 회계 자동화 통합 ⑤ 관리자 총괄 관제 패널(`/admin/pension`) 및 대국민 국민연금 포털(`/pension`) 구축 ⑥ 디스코드 관리자(`886478189520637992`) 1:1 DM 실시간 연금 가입/적립/지급 보고 연동 ⑦ 음성 봇 무변경 상주 유지 (+280, -0)
+- **v114**: 기획재정부 국채(KTB) 발행·유통 거래소 & 80% LTV 레포 대출 & 자동 롤오버 및 계좌 잔액 완벽 연동 — ① 대한민국 국채법 및 미국 TreasuryDirect 표준 KTB 3종(1년 단기, 3년 벤치마크, 5년 인프라) 국채 발행 및 1시간 주기 확정 쿠폰이자/만기 100% 원금 상환 ② 국채 담보 저리 레포 대출(Repo Financing 80% LTV, 연 2.5% 초저리) 및 담보 락 메커니즘 구축 ③ 만기 시 자동 롤오버 재투자(Auto-Rollover) 옵션 및 정규 계좌(`accounts` USER_CASH + `account_balances`) 정합성 보장 ④ 관리자 관제 타워(`/admin/bonds`) 및 대국민 국채 포털(`/bonds`) 3대 탭 연동 ⑤ 디스코드 관리자(`886478189520637992`) DM 연동 ⑥ 단위 테스트 5종 및 Next.js 572개 라우트 빌드 통과, 운영 서버 무중단 승격 (+310, -0)
 - **v113**: 국가 공기업(WSHC) & 대국민 알리오(ALIO) 공시 포털 및 배당 국고 즉시 수취 파이프라인 무중단 운영 배포 & 실시간 라이브 검증 완료 — ① `frontend/src/lib/navigation.ts` 전역 네비게이션 드롭다운 및 모바일 사이드바에 공기업 알리오(`/enterprises`) 링크 및 4개 국어(KO, EN, JA, ZH) 완벽 등록 ② 백엔드 `PublicEnterpriseController`에 `@SkipInternalToken()` 데코레이터를 적용하여 대국민 알리오 경영공시 포털 무인증 실시간 조회 지원 ③ `EnterpriseRepository.distributeSoeDividends` 내 비-UUID 식별자 입력 시 PostgreSQL `22P02` 예외 방어 가드(`validActorUuid`) 신설 ④ 실제 운영 DB에서 공기업 3사(W-Power, W-Net, WDB) 법정 이익배당 108,000 WLD 국고 수취 즉시 집행, `VAULT_MAIN` 국고 잔액 25,183,332 WLD ➡️ 25,291,332 WLD 실시간 증가 및 국고 회계 원장(`system_treasury_ledger`) 전산 기록 ⑤ 디스코드 관리자(`886478189520637992`) DM 실시간 배당 완료 알림 전송 검증 완료 ⑥ 봇 상주 데몬(`bot/index.js`) 음성방 이탈 방지 무변경 안정 유지 (+130, -0)
 - **v112**: 싱가포르 테마섹 + 노르웨이 GPFG 하이브리드 국가지주회사(WSHC) & 3대 기간 공기업(W-Power, W-Net, WDB) 및 민간 벤처 IPO 기업 생태계 풀스택 구축 — ① 월덱 국가투자공사(WSHC) 설립 및 3대 기간 공기업(W-Power, W-Net, WDB) 지배구조 정립 ② 공기업 당기순이익 30% 법정 배당 국고(`VAULT_MAIN`) 자동 납입 및 원장 기록 ③ 한국 공운법 표준 S~E 6단계 경영평가제 연동 ④ 민간 스타트업 자율 스케일업 & WDX 거래소 IPO 상장, 15% 법인세 납부 파이프라인 구축 ⑤ `/admin/enterprises` 총괄 관제 패널 + 킬스위치 및 대국민 `/enterprises` 알리오(ALIO) 공시 포털 개발 ⑥ Vitest 단위 테스트 및 Next.js 566개 전 라우트 빌드 통과 (+220, -0)
 - **v111**: 국고 회계 감사 원장(`Authoritative Audit Ledger`) 0건 노출 오류 원인 규명 및 정상 복구 — `/admin/treasury` 화면에서 원장 트랜잭션이 '전체 (0)'으로 조회되지 않던 원인이 백엔드 `TreasuryRepository.listTransactions`, `exportLedgerCsv`, `getWealthTaxAssessments` 쿼리 내 존재하지 않는 컬럼(`users.username`) 참조로 인한 PostgreSQL DB 쿼리 실패였음을 밝혀내고, 정규 프로필 테이블인 `member_profiles.display_name`으로 교체하여 원장 목록 22건 및 실시간 세수/투자 내역 정상 렌더링 복구 (+120, -0)
@@ -2595,13 +2597,66 @@
 5. **음성 봇 무변경 안정 유지**:
    - `moneyverse-discord-bot.service` (PID 407933) 정상 상주 확인, 음성방 이탈 방지 코드 무변경 보존.
 
+---
+## 🚀 [v114 Specification] 기획재정부 국채(KTB) 발행·유통 & 80% LTV 레포 대출 & 자동 롤오버 완결
+### 1. 주요 구현 사양 및 성과
+1. **국채 3종 표준 발행 및 확정 쿠폰이자 체계**:
+   - `KTB-01Y`: 24시간 만기 초단기 국채 (연 4.5%, 액면 10,000 WLD)
+   - `KTB-03Y`: 72시간 만기 표준 벤치마크 국채 (연 5.2%, 액면 50,000 WLD)
+   - `KTB-05Y`: 120시간 만기 장기 인프라 국채 (연 6.5%, 액면 100,000 WLD)
+2. **국채 담보 저리 레포 대출 (Repo Financing)**:
+   - 보유 채권 액면가의 80% LTV까지 연 2.5% 초저리로 대출 실행.
+   - 담보 잠금(`collateral_locked = true`)으로 대출 중 이중 매도 및 원금 인출 원천 차단.
+3. **만기 자동 롤오버 (Auto-Rollover)**:
+   - 만기 도래 시 자동으로 다음 회차 국채로 복리 재투자되어 이자 연속성 보장.
+4. **계좌 스키마 표준 정합성**:
+   - 정규 지갑 잔액인 `public.accounts` (USER_CASH) 및 `public.account_balances` 연동 및 부재 시 안전 생성 가드 탑재.
+5. **관리자(`/admin/bonds`) 및 대국민 포털(`/bonds`) 4개 국어 구축 완료**:
+   - 3대 탭(국채 청약, 내 보유 채권 & 롤오버, 80% LTV 레포 대출 센터) 완비 및 빌드 100% 통과.
 
+---
+## 🚀 [v115 Specification] 국가 국민연금공단(NPS) 공적 연금 적립 & 평생 기초연금 지급 및 국고 복리 증식 시스템
+### 1. 시스템 개요 및 목적
+- **목적**: 
+  - 국민(유저)의 자발적/의무적 기여금(국민연금 보험료) 납입을 통해 **중앙 국고(`VAULT_MAIN`)로 자금을 유치**하고, 국가 국부펀드(ASWF)의 복리 운용 레버리지를 극대화하여 국고가 영구적으로 우상향하도록 구축.
+  - 가입 국민에게는 기여 기간과 누적 납입액에 비례하여 평생 매시간 확정 기초 노령연금(연 7~10% 수준)을 정기 지급하여 실제 복지 국가의 경제 선순환 달성.
 
+### 2. 핵심 아키텍처 및 세부 기능
+```mermaid
+graph TD
+    User["국민(유저)"] -->|연금 기여금 납입| PensionPot["국민연금 적립 기금 (NPS Fund)"]
+    PensionPot -->|전액 편입| VaultMain["중앙 국고 (VAULT_MAIN)"]
+    VaultMain -->|대규모 복리 운용| ASWF["국가 국부펀드 (ASWF / SWF 포트폴리오)"]
+    ASWF -->|운용 수익 창출| VaultMain
+    VaultMain -->|매시간 평생 기초연금 지급| UserCash["유저 정규 지갑 계좌 (accounts / USER_CASH)"]
+    Admin["관리자 (/admin/pension)"] -->|총괄 관제 & 기금 운용률 제어| PensionPot
+    DiscordBot["디스코드 봇 (886478189520637992)"] -->|실시간 연금 기여/지급 현황 1:1 DM| AdminDM["관리자 DM"]
+```
 
+1. **DB 테이블 설계 (Migration 254)**:
+   - `public.national_pension_configs`: 기금 운용 기준 요율, 연금 수령 최소 기여액, 시간당 지급률, 비상 유보율.
+   - `public.national_pension_accounts`: 유저별 연금 계좌 (`user_id`, `accumulated_contribution_wld`, `total_contributions_count`, `tier`, `status: ACCUMULATING | RETIRED_RECEIVING | WITHDRAWN`, `pension_rate_bps`, `total_payout_received_wld`, `retired_at`).
+   - `public.national_pension_contributions`: 기여금 납입 이력 (`amount_wld`, `payment_method`, `created_at`).
+   - `public.national_pension_payout_logs`: 시간당 기초연금 지급 이력 (`payout_amount_wld`, `accumulated_balance_snapshot`, `created_at`).
 
+2. **5단계 연금 가입 티어 (Tiers)**:
+   - Tier 1 (청년적립형): 누적 납입 < 100,000 WLD (연 7.0% 환산, 시간당 0.08%)
+   - Tier 2 (표준국민형): 누적 납입 100,000 ~ 500,000 WLD (연 7.8% 환산, 시간당 0.09%)
+   - Tier 3 (골드은퇴형): 누적 납입 500,000 ~ 2,000,000 WLD (연 8.5% 환산, 시간당 0.10%)
+   - Tier 4 (플래티넘안정형): 누적 납입 2,000,000 ~ 10,000,000 WLD (연 9.2% 환산, 시간당 0.11%)
+   - Tier 5 (명예원로형): 누적 납입 10,000,000 WLD 이상 (연 10.0% 환산, 시간당 0.12% + 국가 공로 훈장 뱃지)
 
+3. **연금 3대 핵심 라이프사이클**:
+   - **납입 (Contribution)**: 유저 지갑(`USER_CASH`) ➡️ 국고(`VAULT_MAIN`) 입금, 적립 원장에 즉시 가산.
+   - **은퇴 및 연금 수령 개시 (Retire & Payout)**: 언제든 '은퇴 기초연금 수령 개시'로 전환 가능. 매시간 `AutoSwfService`에서 정기 연금 자동 지급.
+   - **중도 해지 (Emergency Liquidation)**: 언제든 95% 원금 즉시 환급 청구 가능 (5%는 사회복지기금 `VAULT_WELFARE`로 자동 적립).
 
+4. **1시간 자동 복리 엔진 (`AutoSwfService`) 통합**:
+   - 매시간 국고 운용 사이클마다 은퇴 연금 수령 대상자에게 국고(`VAULT_MAIN`)로부터 기초연금 자동 송금 및 원장 기록.
 
+5. **관리자 총괄 관제 패널 (`/admin/pension`) & 대국민 국민연금 포털 (`/pension`)**:
+   - 관리자: 총 운용자산(AUM), 총 가입자 수, 지급된 연금 총액, 시간당 연금 지급 일괄 수동 집행 버튼.
+   - 대국민: 내 국민연금 증서, 납입하기(1만/5만/10만/전액), 은퇴 수령 개시/적립 모드 전환 토글, 예상 월 연금 수령액 시뮬레이터.
 
-
-
+6. **디스코드 관리자 1:1 DM 알림 연동**:
+   - 신규 연금 계좌 개설, 대규모 납입(10만 WLD 이상), 정기 연금 지급 보고 시 관리자(`886478189520637992`)에게 실시간 DM 발송.

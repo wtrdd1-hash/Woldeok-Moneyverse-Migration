@@ -127,6 +127,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'economy',
   },
   {
+    href: '/admin/pension',
+    eyebrow: 'NATIONAL PENSION SERVICE (NPS)',
+    title: '국민연금 · 공적 연금 기금',
+    summary: '국민 기여금 적립 총액(AUM), 연금 수령자 관리, 시간당 평생 기초연금 일괄 지급 및 기금 운용을 총괄 관제합니다.',
+    group: 'economy',
+  },
+  {
     href: '/admin/shop',
     eyebrow: 'SHOP OPERATIONS',
     title: '상점 관리',
