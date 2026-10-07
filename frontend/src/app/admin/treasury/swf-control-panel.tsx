@@ -53,6 +53,7 @@ export function SwfControlPanel({
   const [portfolios, setPortfolios] = useState<SwfPortfolioItem[]>(initialPortfolios);
   const [events, setEvents] = useState<SwfEvent[]>(initialEvents);
   const [rebalancing, setRebalancing] = useState(false);
+  const [liquidating, setLiquidating] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
 
   // 국고 자금 안전 보존 및 투자 거버넌스 튜닝 상태
@@ -130,6 +131,39 @@ export function SwfControlPanel({
       toast.error('성장 엔진 집행 요청 중 오류가 발생했습니다.');
     } finally {
       setRebalancing(false);
+    }
+  }
+
+  async function handleLiquidateToTreasury() {
+    if (!window.confirm('과도하게 투자된 주식 자금을 매도 회수하여 국고 금고 현금으로 환원(현금 85% : 주식 15% 목표)하시겠습니까?')) {
+      return;
+    }
+    setLiquidating(true);
+    try {
+      const res = await fetch('/api/admin/treasury/swf/liquidate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ targetPortfolioAumWld: '20000000' }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.success) {
+        toast.success('국고 자금 정상화 회수가 성공적으로 집행되었습니다!', {
+          description: `회수된 현금: +${Number(data.liquidatedWld || 0).toLocaleString()} WLD | 확보된 국고 현금: ${Number(data.vaultCashAfter || 0).toLocaleString()} WLD | 잔여 포트폴리오: ${Number(data.portfolioAfter || 0).toLocaleString()} WLD`,
+        });
+        const refreshRes = await fetch('/api/admin/treasury/swf');
+        if (refreshRes.ok) {
+          const refreshed = await refreshRes.json();
+          if (refreshed.portfolios) setPortfolios(refreshed.portfolios);
+          if (refreshed.events) setEvents(refreshed.events);
+        }
+      } else {
+        toast.error(data.error || '자금 회수 중 오류가 발생했습니다.');
+      }
+    } catch {
+      toast.error('네트워크 통신 중 오류가 발생했습니다.');
+    } finally {
+      setLiquidating(false);
     }
   }
 
@@ -341,14 +375,24 @@ export function SwfControlPanel({
                 국고 안전 바닥을 보존하며 가상 우량 기업 법인세 자동 징수 및 분산 투자 복리 성장으로 총자산(AUM)을 증식합니다.
               </CardDescription>
             </div>
-            <Button
-              size="sm"
-              onClick={handleTriggerRebalance}
-              disabled={rebalancing}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-md active:scale-95 transition-all"
-            >
-              {rebalancing ? '성장 평가 및 집행 중...' : '⚡ 즉시 복리 성장 트리거'}
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                onClick={handleLiquidateToTreasury}
+                disabled={liquidating}
+                className="bg-emerald-700 hover:bg-emerald-600 text-white font-semibold shadow-md active:scale-95 transition-all flex items-center gap-1.5"
+              >
+                {liquidating ? '회수 환원 진행 중...' : '🏦 주식 자금 즉시 회수 (현금 85% 정상화)'}
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleTriggerRebalance}
+                disabled={rebalancing}
+                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-md active:scale-95 transition-all"
+              >
+                {rebalancing ? '성장 평가 및 집행 중...' : '⚡ 즉시 복리 성장 트리거'}
+              </Button>
+            </div>
           </div>
         </CardHeader>
 
@@ -356,13 +400,19 @@ export function SwfControlPanel({
           {/* 주요 지표 3개 카드 */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
-              <div className="text-xs text-slate-400 font-medium">국부펀드 투자 자산 (AUM)</div>
+              <div className="text-xs text-slate-400 font-medium flex items-center justify-between">
+                <span>국부펀드 투자 자산 (AUM)</span>
+                {totalAum > 25000000 && (
+                  <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30">
+                    투자 비중 과다 경고
+                  </Badge>
+                )}
+              </div>
               <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
                 {totalAum.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
-              <div className="text-xs text-emerald-400/90 mt-1.5 flex items-center gap-1.5 font-sans leading-normal pb-0.5 min-w-0">
-                <span className="shrink-0 font-mono text-[11px] text-emerald-400">▲</span>
-                <span className="truncate">시간당 1.2% 자율 복리 증식 중</span>
+              <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                <span>목표 적정선: 약 2,000만 WLD (총자산의 ~16%)</span>
               </div>
             </div>
 
@@ -372,7 +422,7 @@ export function SwfControlPanel({
                 {floorReserve.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
               <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
-                설정 원금 이하 절대 안전 보존
+                설정 원금 이하 절대 안전 보존 (국가 시스템 우선)
               </div>
             </div>
 

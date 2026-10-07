@@ -295,6 +295,15 @@ export class AdminTreasuryController {
     return this.swfService.evaluateAndRebalance();
   }
 
+  @Post('swf/liquidate')
+  @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
+  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') targetPortfolioAumWld?: string) {
+    if (!this.swfService) {
+      return { success: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
+    }
+    return this.swfService.liquidateToTreasuryVault(targetPortfolioAumWld);
+  }
+
   @Put('swf/config')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 안전 준비금 및 투자 한도 튜닝' })
   async updateSwfConfig(@Body() body: Record<string, unknown>) {
