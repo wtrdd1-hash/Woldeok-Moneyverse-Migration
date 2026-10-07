@@ -18,9 +18,13 @@ import {
   MessageSquare,
   AlertCircle,
   ExternalLink,
+  Paperclip,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ChatMessageRenderer } from '@/components/chat-message-renderer';
 import { synthSound } from '@/lib/audio/synth-sound';
 import { cn } from '@/lib/cn';
 import { toast } from 'sonner';
@@ -125,6 +129,69 @@ export function AdminSupportView({
   const [autoPoll, setAutoPoll] = useState(true);
   const [copied, setCopied] = useState(false);
 
+  // 관리자 이미지 첨부 상태
+  const [attachedImg, setAttachedImg] = useState<{ url: string; name: string } | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadImageFile = async (file: File) => {
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error('이미지 파일 크기는 최대 8MB까지 가능합니다.');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    const toastId = toast.loading('안티바이러스 검사 및 이미지 업로드 중…');
+
+    try {
+      const sessionRes = await fetch('/app-api/v1/auth/session');
+      const sessionData = await sessionRes.json();
+      const csrfToken = sessionData.csrfToken ?? '';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/app-api/v1/content/chat/upload', {
+        method: 'POST',
+        headers: {
+          'x-csrf-token': csrfToken,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success('보안 검사를 통과하여 이미지가 첨부되었습니다.', { id: toastId });
+        setAttachedImg({ url: data.url, name: file.name });
+      } else {
+        const errorMsg = data.detail || data.message || '업로드에 실패했습니다.';
+        toast.error(errorMsg, { id: toastId });
+      }
+    } catch {
+      toast.error('이미지 업로드 중 네트워크 오류가 발생했습니다.', { id: toastId });
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handlePasteEvent = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) {
+          e.preventDefault();
+          handleUploadImageFile(file);
+          break;
+        }
+      }
+    }
+  };
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const selectedThread = threads.find((t) => t.thread_id === selectedThreadId);
 
@@ -203,20 +270,26 @@ export function AdminSupportView({
   // 답장 제출 핸들러
   const handleReplySubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!replyText.trim() || !selectedThreadId || isSending) return;
+    if ((!replyText.trim() && !attachedImg) || !selectedThreadId || isSending) return;
 
-    const textToSend = replyText.trim();
+    let finalBody = replyText.trim();
+    if (attachedImg) {
+      finalBody = finalBody ? `${finalBody}\n${attachedImg.url}` : attachedImg.url;
+    }
+    if (!finalBody) return;
+
     setIsSending(true);
 
     try {
       const formData = new FormData();
       formData.set('threadId', selectedThreadId);
-      formData.set('body', textToSend);
+      formData.set('body', finalBody);
 
       await adminSupportReply(formData);
       synthSound.playMessageSent();
       toast.success('관리자 답장이 회원에게 전송되었습니다.');
       setReplyText('');
+      setAttachedImg(null);
       await fetchMessagesForThread(selectedThreadId);
       await fetchAllThreads(false);
       router.refresh();
@@ -491,9 +564,9 @@ export function AdminSupportView({
                           {new Date(m.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <p className="whitespace-pre-wrap break-words text-xs leading-relaxed sm:text-sm">
-                        {m.body}
-                      </p>
+                      <div className="text-xs sm:text-sm leading-relaxed">
+                        <ChatMessageRenderer body={m.body} isMine={isAdmin} />
+                      </div>
                     </div>
                   );
                 })}
@@ -518,6 +591,22 @@ export function AdminSupportView({
                 ))}
               </div>
 
+              {/* 첨부된 이미지 칩 */}
+              {attachedImg && (
+                <div className="mt-2 flex items-center gap-2 p-2 rounded-xl bg-muted/60 border border-border/80 text-xs w-fit">
+                  <ImageIcon className="size-3.5 text-primary shrink-0" />
+                  <span className="truncate max-w-[200px] font-medium">{attachedImg.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setAttachedImg(null)}
+                    className="p-1 hover:bg-muted rounded-full transition-colors"
+                    aria-label="첨부 이미지 삭제"
+                  >
+                    <X className="size-3 text-muted-foreground hover:text-foreground" />
+                  </button>
+                </div>
+              )}
+
               {/* 관리자 답장 입력 폼 */}
               <form
                 action={adminSupportReply}
@@ -525,25 +614,48 @@ export function AdminSupportView({
                 className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
               >
                 <input type="hidden" name="threadId" value={selectedThreadId} />
-                <textarea
-                  name="body"
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !e.nativeEvent.isComposing) {
-                      e.preventDefault();
-                      handleReplySubmit();
-                    }
-                  }}
-                  maxLength={2000}
-                  required
-                  aria-label="관리자 답장"
-                  className="min-h-24 sm:min-h-16 w-full rounded-xl border bg-background p-3 text-xs sm:text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-                  placeholder="관리자 답장을 입력하세요... (Ctrl+Enter로 즉시 전송)"
-                />
+                <div className="relative flex-1">
+                  <textarea
+                    name="body"
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    onPaste={handlePasteEvent}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !e.nativeEvent.isComposing) {
+                        e.preventDefault();
+                        handleReplySubmit();
+                      }
+                    }}
+                    maxLength={2000}
+                    aria-label="관리자 답장"
+                    className="min-h-24 sm:min-h-16 w-full rounded-xl border bg-background p-3 pr-10 text-xs sm:text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    placeholder="관리자 답장을 입력하세요... (이미지 붙여넣기 Ctrl+V 또는 클립 아이콘)"
+                  />
+                  <div className="absolute right-2.5 bottom-2.5">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadImageFile(file);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={isUploadingImage}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+                      title="이미지 파일 첨부 (최대 8MB, 보안 스캔)"
+                    >
+                      <Paperclip className="size-4" />
+                    </button>
+                  </div>
+                </div>
                 <button
                   type="submit"
-                  disabled={isSending || !replyText.trim()}
+                  disabled={isSending || isUploadingImage || (!replyText.trim() && !attachedImg)}
                   className="min-h-11 w-full rounded-xl bg-primary px-5 font-bold text-primary-foreground sm:w-auto transition-opacity disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-xs"
                 >
                   <Send className="size-4" />

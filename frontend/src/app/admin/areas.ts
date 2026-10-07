@@ -203,13 +203,6 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     summary: '비회원 긴급 콘텐츠 삭제 요청 및 미성년자 안전 모더레이션을 심사합니다.',
     group: 'safety',
   },
-  {
-    href: '/admin/fx',
-    eyebrow: 'FOREIGN EXCHANGE & RESERVES',
-    title: '한국은행 외환보유액 · 서울외환시장 관제',
-    summary: '중앙은행 외환보유액(USD), 실시간 환율 궤적, 스무딩 오퍼레이션(시장개입) 및 외환 킬스위치를 총괄 제어합니다.',
-    group: 'economy',
-  },
 ];
 
 export function adminArea(href: string): AdminArea {

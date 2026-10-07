@@ -22,6 +22,11 @@ import {
   Activity,
   Globe,
   BarChart3,
+  Building,
+  ScrollText,
+  HeartHandshake,
+  Shield,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -41,6 +46,11 @@ export const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin/support', label: '문의 채팅', icon: MessageCircle },
   { href: '/admin/economy', label: '경제·원장', icon: Coins },
   { href: '/admin/treasury', label: '국고·비축', icon: Vault },
+  { href: '/admin/enterprises', label: '공기업·지배구조', icon: Building },
+  { href: '/admin/bonds', label: '국채 거래소', icon: ScrollText },
+  { href: '/admin/pension', label: '국민연금', icon: HeartHandshake },
+  { href: '/admin/kdic', label: '예금보험공사', icon: Shield },
+  { href: '/admin/fx', label: '서울외환시장', icon: ArrowLeftRight },
   { href: '/admin/catalog', label: '사업·시즌', icon: Building2 },
   { href: '/admin/work', label: '작업·직업', icon: BriefcaseBusiness },
   { href: '/admin/shop', label: '상점 관리', icon: ShoppingBag },

@@ -14,11 +14,15 @@ import {
   Bell,
   Flag,
   AlertCircle,
+  Paperclip,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { ChatMessageRenderer } from '@/components/chat-message-renderer';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,6 +77,103 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 이미지 첨부 상태
+  const [attachedImg, setAttachedImg] = useState<{ url: string; name: string } | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadImageFile = async (file: File) => {
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error(
+        localeLabel(
+          locale,
+          '이미지 파일 크기는 최대 8MB까지 가능합니다.',
+          'Image size must be within 8MB.',
+          '画像サイズは最大8MBまでです。',
+          '图片大小不得超过8MB。'
+        )
+      );
+      return;
+    }
+
+    setIsUploadingImage(true);
+    const toastId = toast.loading(
+      localeLabel(
+        locale,
+        '안티바이러스 검사 및 이미지 업로드 중…',
+        'Scanning for viruses and uploading image…',
+        'ウイルス検査および画像アップロード中…',
+        '正在进行防病毒安全检测并上传…'
+      )
+    );
+
+    try {
+      const sessionRes = await fetch('/app-api/v1/auth/session');
+      const sessionData = await sessionRes.json();
+      const csrfToken = sessionData.csrfToken ?? '';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/app-api/v1/content/chat/upload', {
+        method: 'POST',
+        headers: {
+          'x-csrf-token': csrfToken,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(
+          localeLabel(
+            locale,
+            '보안 검사를 통과하여 이미지가 첨부되었습니다.',
+            'Image verified clean and attached.',
+            'セキュリティ検査を通過し画像が添付されました。',
+            '已通过安全检查并成功附加图片。'
+          ),
+          { id: toastId }
+        );
+        setAttachedImg({ url: data.url, name: file.name });
+      } else {
+        const errorMsg = data.detail || data.message || '업로드에 실패했습니다.';
+        toast.error(errorMsg, { id: toastId });
+      }
+    } catch {
+      toast.error(
+        localeLabel(
+          locale,
+          '이미지 업로드 중 네트워크 오류가 발생했습니다.',
+          'Network error during image upload.',
+          '画像アップロード中にエラーが発生しました。',
+          '图片上传过程中发生网络错误。'
+        ),
+        { id: toastId }
+      );
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handlePasteEvent = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) {
+          e.preventDefault();
+          handleUploadImageFile(file);
+          break;
+        }
+      }
+    }
+  };
 
   const [hasMore, setHasMore] = useState(initialMessages.length >= 50);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -195,7 +296,12 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
 
   const handleSend = () => {
     const trimmed = inputBody.trim();
-    if (!trimmed || isPending || isBlocked) return;
+    if ((!trimmed && !attachedImg) || isPending || isBlocked) return;
+
+    const finalBody = attachedImg
+      ? `${trimmed ? `${trimmed}\n\n` : ''}${attachedImg.url}`
+      : trimmed;
+    const capturedImg = attachedImg;
 
     // Optimistic message append
     const tempId = `temp-${Date.now()}`;
@@ -204,25 +310,27 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
       conversation_id: conversation.conversation_id,
       sender_id: 'me',
       sequence: (Number.parseInt(conversation.latest_sequence, 10) + 1).toString(),
-      body: trimmed,
+      body: finalBody,
       created_at: new Date().toISOString(),
       is_mine: true,
     };
 
     setMessages((prev) => [...prev, optimisticMessage]);
     setInputBody('');
+    setAttachedImg(null);
     setTimeout(scrollToBottom, 50);
 
     startTransition(async () => {
       const formData = new FormData();
       formData.set('conversationId', conversation.conversation_id);
-      formData.set('body', trimmed);
+      formData.set('body', finalBody);
       const res = await sendMessageAction({ status: 'idle' }, formData);
 
       if (res.status === 'error') {
         toast.error(res.message || '메시지 전송에 실패했어요.');
         // Revert optimistic message
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
+        setAttachedImg(capturedImg);
       } else {
         onMessageSent?.();
       }
@@ -474,13 +582,13 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
                 className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}
               >
                 <div
-                  className={`max-w-[78%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm break-words whitespace-pre-wrap leading-relaxed shadow-sm ${
+                  className={`max-w-[78%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm break-words shadow-sm ${
                     isMine
                       ? 'bg-primary text-primary-foreground rounded-tr-none'
                       : 'bg-muted/70 text-foreground border rounded-tl-none'
                   }`}
                 >
-                  {m.body}
+                  <ChatMessageRenderer body={m.body} isMine={isMine} />
                 </div>
                 <div className="flex items-center gap-1 mt-1 text-[11px] text-muted-foreground px-1 font-mono">
                   <span>{timeStr}</span>
@@ -495,7 +603,20 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
       </div>
 
       {/* Message Input Box (44px Touch Target) */}
-      <div className="p-3 border-t bg-background">
+      <div className="p-3 border-t bg-background space-y-2">
+        {attachedImg && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/30 text-xs font-bold text-primary w-fit max-w-[320px]">
+            <ImageIcon className="size-4 shrink-0" />
+            <span className="truncate text-xs">{attachedImg.name}</span>
+            <button
+              type="button"
+              onClick={() => setAttachedImg(null)}
+              className="p-0.5 rounded-full hover:bg-primary/20 text-muted-foreground hover:text-foreground ml-1"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -503,16 +624,26 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
           }}
           className="flex items-end gap-2"
         >
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploadingImage || isPending || isBlocked}
+            className="h-[44px] w-[44px] min-w-[44px] rounded-xl border border-border/80 bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center shrink-0 transition-colors shadow-2xs disabled:opacity-50"
+            title={localeLabel(locale, '이미지 첨부', 'Attach Image', '画像添付', '添加图片')}
+          >
+            <Paperclip className="h-4 w-4 text-primary" />
+          </button>
           <Textarea
             ref={textareaRef}
             value={inputBody}
             onChange={(e) => setInputBody(e.target.value)}
+            onPaste={handlePasteEvent}
             onKeyDown={handleKeyDown}
             disabled={isBlocked || isPending}
             placeholder={
               isBlocked
                 ? localeLabel(locale, '차단된 회원에게는 메시지를 보낼 수 없습니다.', 'Cannot message a blocked user.', 'ブロック中のユーザーには送信できません。', '无法向已屏蔽用户发送消息。')
-                : localeLabel(locale, '쪽지를 입력하세요... (Enter: 전송, Shift+Enter: 줄바꿈)', 'Type a message… (Enter to send, Shift+Enter for new line)', 'メッセージを入力… (Enter: 送信, Shift+Enter: 改行)', '输入私信内容… (Enter发送，Shift+Enter换行)')
+                : localeLabel(locale, '쪽지를 입력하세요... (Ctrl+V 이미지 붙여넣기 지원)', 'Type a message… (Ctrl+V image paste supported)', 'メッセージを入力… (Ctrl+V画像貼付対応)', '输入私信内容… (支持Ctrl+V粘贴截图)')
             }
             maxLength={2000}
             rows={1}
@@ -521,12 +652,24 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
           <Button
             type="submit"
             size="icon"
-            disabled={!inputBody.trim() || isPending || isBlocked}
+            disabled={(!inputBody.trim() && !attachedImg) || isPending || isBlocked}
             className="h-[44px] w-[44px] min-w-[44px] rounded-xl shrink-0 active:scale-[0.98] transition-transform"
           >
             <Send className="h-4 w-4" />
           </Button>
         </form>
+
+        {/* 숨겨진 전용 이미지 파일 인풋 */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) handleUploadImageFile(f);
+          }}
+        />
       </div>
 
       {/* 1. Block Confirmation Dialog */}

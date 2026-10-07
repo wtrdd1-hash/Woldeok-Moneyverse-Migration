@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { DiscordAlertModule } from '../discord/discord-alert.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { AppContentController } from './app-content.controller';
@@ -11,17 +12,23 @@ import { PhotoUploadController } from './photo-upload.controller';
 import { PrivateImageStorage } from './private-image-storage';
 import { PostgresContentRepository } from './content.repository';
 import { ContentService } from './content.service';
+import { AntivirusScannerService } from './antivirus-scanner.service';
+import { ChatImageStorage } from './chat-image-storage';
+import { ChatUploadController } from './chat-upload.controller';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, DiscordAlertModule],
   controllers: [
     ContentController,
     AppContentController,
     MediaController,
     MemberPhotoController,
     PhotoUploadController,
+    ChatUploadController,
   ],
   providers: [
+    AntivirusScannerService,
+    ChatImageStorage,
     {
       provide: PrivateImageStorage,
       useFactory: () =>
@@ -39,6 +46,12 @@ import { ContentService } from './content.service';
         pool ? new ContentService(new PostgresContentRepository(pool)) : null,
     },
   ],
-  exports: [ContentService, MemberPhotoRepository, PrivateImageStorage],
+  exports: [
+    ContentService,
+    MemberPhotoRepository,
+    PrivateImageStorage,
+    AntivirusScannerService,
+    ChatImageStorage,
+  ],
 })
 export class ContentModule {}

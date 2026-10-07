@@ -2912,3 +2912,66 @@ flowchart TD
    - 인풋: 국고 최소 안전 보존 바닥 (Floor Reserve WLD)
    - 실시간 비중 게이지 (국고 시스템 보존 vs 국부펀드 운용 비율 바)
    - [설정 저장 및 정책 즉시 반영] 버튼 연동.
+
+---
+
+## 🏛️ [v121 Specification] 문의 및 1:1 채팅 이미지 첨부 & 다계층 안티바이러스 차단 엔진 (Chat Image Attachment & Antivirus Shield)
+
+### 1. 배경 및 사용자 의도 분석
+- **사용자 요청**: "문의 채팅및 1대1 채팅에도 이미지 파일 첨부 가능하게하고 바이러스 는 차단기능넣어줘"
+- **핵심 목표**:
+  1. 고객센터 1:1 문의(Support Thread) 및 유저 간 1:1 개인 쪽지(Direct Message)에 이미지 첨부 기능 지원.
+  2. 파일 업로드 시 악성코드, 바이러스, 웹쉘, 실행 바이너리 및 Polyglot 스크립트 변조를 원천 차단하는 다계층 안티바이러스 검사 엔진 구축.
+  3. 클립보드(Ctrl+V) 붙여넣기, 드래그앤드롭, 첨부 썸네일 미리보기 & X 버튼, 전체화면 라이트박스 확대 뷰어 등 인간 중심 크래프트맨십 UI/UX 완성.
+  4. 관리자 고객센터(/admin/support) 화면에서도 유저 첨부 이미지 완벽 확인 및 관리자 이미지 답변 지원.
+  5. 악성 바이러스 탐지 시 즉시 전송 거부, 보안 감사 로그 기록 및 관리자 디스코드(886478189520637992) DM 실시간 보안 경보 전송.
+
+### 2. 안티바이러스 다계층 방어 아키텍처
+`mermaid
+flowchart TD
+    User["클라이언트 (웹/모바일)"] -->|이미지 업로드 요청 multipart/form-data| Guard["SessionGuard & CsrfGuard"]
+    Guard --> UploadCtrl["ChatUploadController"]
+    UploadCtrl --> AVScanner["AntivirusScannerService"]
+    
+    subgraph AntivirusEngine ["다계층 안티바이러스 검사 엔진"]
+        M1["1단계: 파일 크기 및 포맷 검증 (최대 8MB, PNG/JPEG/WEBP/GIF)"]
+        M2["2단계: 매직넘버 일치성 검사 & Polyglot 차단"]
+        M3["3단계: 위험 실행 파일 헤더 차단 (MZ, ELF, Mach-O, Shebang, ZIP/RAR 백도어)"]
+        M4["4단계: 악성 스크립트/웹쉘 탐지 (php, script, eval, base64, powershell, cmd)"]
+        M5["5단계: EICAR 표준 안티바이러스 시그니처 및 악성 패턴 매칭"]
+        M6["6단계: 이미지 디멘션(IHDR/SOF0) 파싱 & Decompression Bomb 차단"]
+        M1 --> M2 --> M3 --> M4 --> M5 --> M6
+    end
+    
+    AVScanner --> AntivirusEngine
+    AntivirusEngine -->|위협 감지됨| Alert["보안 감사 로그 기록 & 관리자 디스코드 DM 경보 전송 & 400 거부"]
+    AntivirusEngine -->|검사 통과 (Clean)| Storage["안전 UUID 변환 & 격리 볼륨(/srv/moneyverse-data/uploads/chat) 저장"]
+    Storage --> SafeUrl["안전 이미지 서빙 URL 발급 (/uploads/chat/:id)"]
+    SafeUrl --> ChatBubble["채팅 메시지 마운트 & 라이트박스 뷰어 렌더링"]
+`
+
+### 3. 세부 파일별 변경 계획
+1. **백엔드 안티바이러스 검사 서비스 (ackend/src/content/antivirus-scanner.service.ts)**:
+   - EICAR 시그니처 검사
+   - DOS/PE(MZ), ELF(\x7fELF), Mach-O, Script Shebang(#!/) 바이너리 차단
+   - 웹쉘 / PHP / JS injection 패턴(<script>, <?php, eval(, system(, ase64_decode) 정밀 스캔
+   - ClamAV 호환 규격 및 위협 식별 코드 반환
+2. **백엔드 채팅 업로드 컨트롤러 (ackend/src/content/chat-upload.controller.ts)**:
+   - POST /api/v1/content/chat-upload
+   - 세션 가드 + CSRF 가드 적용
+   - 멀터 메모리 버퍼 8MB 제한
+   - 업로드 성공 시 /uploads/chat/. 반환
+   - 위협 감지 시 DiscordNotificationService 관리자 DM 긴급 발송 및 SecurityAudit 로그 기록
+3. **프론트엔드 고객지원 위젯 (rontend/src/components/floating-support-chat-widget.tsx)**:
+   - 클립보드 이미지 붙여넣기(Paste) 이벤트 리스너 탑재
+   - 파일 첨부 버튼 (클립/카메라 아이콘)
+   - 첨부 중 로딩 인디케이터 및 전송 전 미리보기 바
+   - 메시지 버블 내 이미지 마크다운/URL 자동 인식 및 둥근 카드 렌더링
+   - 클릭 시 풀스크린 라이트박스 뷰어 모달
+4. **프론트엔드 전용 채팅룸 (rontend/src/app/chat/chat-room.tsx)**:
+   - 1:1 채팅방에도 동일한 이미지 첨부 및 뷰어 기능 탑재
+5. **프론트엔드 관리자 고객센터 (rontend/src/app/admin/support/admin-support-view.tsx)**:
+   - 유저 첨부 이미지 클릭 확대 지원 및 관리자 답변 시 이미지 첨부 지원
+6. **검증 및 무중단 배포**:
+   - 안티바이러스 단위 테스트 (정상 이미지 통과, EICAR 차단, PHP 웹쉘 차단, 이중 확장자 차단) 작성
+   - 프로덕션 빌드 및 원격 서버 동기화, 무중단 리로드

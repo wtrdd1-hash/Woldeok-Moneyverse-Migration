@@ -25,9 +25,13 @@ import {
   User,
   BellOff,
   Search,
+  Paperclip,
+  Image as ImageIcon,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ChatMessageRenderer } from '@/components/chat-message-renderer';
 import { useViewer } from '@/lib/use-viewer';
 import { useLocale } from '@/components/locale-provider';
 import type { Locale } from '@/lib/locale';
@@ -256,8 +260,118 @@ export function FloatingSupportChatWidget() {
   const [copied, setCopied] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
+  // 이미지 첨부 상태 및 안티바이러스 스캔 업로드
+  const [inquiryAttachedImg, setInquiryAttachedImg] = useState<{ url: string; name: string } | null>(null);
+  const [supportReplyAttachedImg, setSupportReplyAttachedImg] = useState<{ url: string; name: string } | null>(null);
+  const [directReplyAttachedImg, setDirectReplyAttachedImg] = useState<{ url: string; name: string } | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadTarget, setUploadTarget] = useState<'inquiry' | 'support_reply' | 'direct_reply'>('support_reply');
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const popupRef = useRef<HTMLDivElement | null>(null);
+
+  // 이미지 파일 업로드 & 안티바이러스 검사 처리기
+  const handleUploadImageFile = async (file: File, target: 'inquiry' | 'support_reply' | 'direct_reply') => {
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error(
+        localeLabel(
+          locale,
+          '이미지 파일 크기는 최대 8MB까지 가능합니다.',
+          'Image size must be within 8MB.',
+          '画像サイズは最大8MBまでです。',
+          '图片大小不得超过8MB。'
+        )
+      );
+      return;
+    }
+
+    setIsUploadingImage(true);
+    const toastId = toast.loading(
+      localeLabel(
+        locale,
+        '안티바이러스 검사 및 이미지 업로드 중…',
+        'Scanning for viruses and uploading image…',
+        'ウイルス検査および画像アップロード中…',
+        '正在进行防病毒安全检测并上传…'
+      )
+    );
+
+    try {
+      const sessionRes = await fetch('/app-api/v1/auth/session');
+      const sessionData = await sessionRes.json();
+      const csrfToken = sessionData.csrfToken ?? '';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/app-api/v1/content/chat/upload', {
+        method: 'POST',
+        headers: {
+          'x-csrf-token': csrfToken,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(
+          localeLabel(
+            locale,
+            '보안 검사를 통과하여 이미지가 첨부되었습니다.',
+            'Image verified clean and attached.',
+            'セキュリティ検査を通過し画像が添付されました。',
+            '已通过安全检查并成功附加图片。'
+          ),
+          { id: toastId }
+        );
+        if (target === 'inquiry') {
+          setInquiryAttachedImg({ url: data.url, name: file.name });
+        } else if (target === 'support_reply') {
+          setSupportReplyAttachedImg({ url: data.url, name: file.name });
+        } else if (target === 'direct_reply') {
+          setDirectReplyAttachedImg({ url: data.url, name: file.name });
+        }
+      } else {
+        const errorMsg = data.detail || data.message || '업로드에 실패했습니다.';
+        toast.error(errorMsg, { id: toastId });
+      }
+    } catch {
+      toast.error(
+        localeLabel(
+          locale,
+          '이미지 업로드 중 네트워크 오류가 발생했습니다.',
+          'Network error during image upload.',
+          '画像アップロード中にエラーが発生しました。',
+          '图片上传过程中发生网络错误。'
+        ),
+        { id: toastId }
+      );
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handlePasteEvent = useCallback(
+    (e: React.ClipboardEvent, target: 'inquiry' | 'support_reply' | 'direct_reply') => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item && item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) {
+            e.preventDefault();
+            handleUploadImageFile(file, target);
+            break;
+          }
+        }
+      }
+    },
+    [locale]
+  );
 
   // 알림 감지 레퍼런스
   const prevWaitingCount = useRef<number>(0);
@@ -513,9 +627,13 @@ export function FloatingSupportChatWidget() {
 
   const handleCreateInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSubject.trim() || !newBody.trim() || isSending) return;
+    if ((!newSubject.trim() || (!newBody.trim() && !inquiryAttachedImg)) || isSending) return;
 
     setIsSending(true);
+    const finalBody = inquiryAttachedImg
+      ? `${newBody.trim() ? `${newBody.trim()}\n\n` : ''}${inquiryAttachedImg.url}`
+      : newBody.trim();
+
     try {
       const sessionRes = await fetch('/app-api/v1/auth/session');
       const sessionData = await sessionRes.json();
@@ -530,7 +648,7 @@ export function FloatingSupportChatWidget() {
         },
         body: JSON.stringify({
           subject: newSubject.trim().slice(0, 120),
-          body: newBody.trim().slice(0, 2000),
+          body: finalBody.slice(0, 2000),
           idempotencyKey,
         }),
       });
@@ -543,6 +661,7 @@ export function FloatingSupportChatWidget() {
         );
         setNewSubject('');
         setNewBody('');
+        setInquiryAttachedImg(null);
         await fetchThreads();
         if (data.thread) {
           handleSelectSupportThread(data.thread);
@@ -571,10 +690,16 @@ export function FloatingSupportChatWidget() {
 
   const handleSendSupportReply = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!supportReplyText.trim() || !selectedThread || isSending) return;
+    if ((!supportReplyText.trim() && !supportReplyAttachedImg) || !selectedThread || isSending) return;
 
     const textToSend = supportReplyText.trim();
+    const capturedImg = supportReplyAttachedImg;
+    const finalBody = capturedImg
+      ? `${textToSend ? `${textToSend}\n\n` : ''}${capturedImg.url}`
+      : textToSend;
+
     setSupportReplyText('');
+    setSupportReplyAttachedImg(null);
     setIsSending(true);
 
     try {
@@ -590,7 +715,7 @@ export function FloatingSupportChatWidget() {
           'x-csrf-token': csrfToken,
         },
         body: JSON.stringify({
-          body: textToSend.slice(0, 2000),
+          body: finalBody.slice(0, 2000),
           idempotencyKey,
         }),
       });
@@ -601,10 +726,12 @@ export function FloatingSupportChatWidget() {
       } else {
         toast.error(localeLabel(locale, '메시지 전송에 실패했습니다.', 'Failed to send message.', '送信に失敗しました。', '消息发送失败。'));
         setSupportReplyText(textToSend);
+        setSupportReplyAttachedImg(capturedImg);
       }
     } catch {
       toast.error(localeLabel(locale, '네트워크 오류가 발생했습니다.', 'Network error occurred.', 'ネットワークエラーが発生しました。', '网络错误。'));
       setSupportReplyText(textToSend);
+      setSupportReplyAttachedImg(capturedImg);
     } finally {
       setIsSending(false);
     }
@@ -649,10 +776,16 @@ export function FloatingSupportChatWidget() {
 
   const handleSendDirectReply = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!directReplyText.trim() || !selectedConversation || isSending) return;
+    if ((!directReplyText.trim() && !directReplyAttachedImg) || !selectedConversation || isSending) return;
 
     const textToSend = directReplyText.trim();
+    const capturedImg = directReplyAttachedImg;
+    const finalBody = capturedImg
+      ? `${textToSend ? `${textToSend}\n\n` : ''}${capturedImg.url}`
+      : textToSend;
+
     setDirectReplyText('');
+    setDirectReplyAttachedImg(null);
     setIsSending(true);
 
     try {
@@ -668,7 +801,7 @@ export function FloatingSupportChatWidget() {
           'x-csrf-token': csrfToken,
         },
         body: JSON.stringify({
-          body: textToSend.slice(0, 2000),
+          body: finalBody.slice(0, 2000),
           idempotencyKey,
         }),
       });
@@ -680,10 +813,12 @@ export function FloatingSupportChatWidget() {
       } else {
         toast.error(localeLabel(locale, '쪽지 전송에 실패했습니다.', 'Failed to send direct message.', 'メッセージ送信に失敗しました。', '私信发送失败。'));
         setDirectReplyText(textToSend);
+        setDirectReplyAttachedImg(capturedImg);
       }
     } catch {
       toast.error(localeLabel(locale, '네트워크 오류가 발생했습니다.', 'Network error occurred.', 'ネットワークエラーが発生しました。', '网络错误。'));
       setDirectReplyText(textToSend);
+      setDirectReplyAttachedImg(capturedImg);
     } finally {
       setIsSending(false);
     }
@@ -1137,13 +1272,13 @@ export function FloatingSupportChatWidget() {
                             </span>
                             <div
                               className={cn(
-                                'p-3 rounded-2xl leading-relaxed whitespace-pre-wrap break-words shadow-xs',
+                                'p-3 rounded-2xl leading-relaxed shadow-xs',
                                 isAdminMsg
                                   ? 'bg-primary/15 border border-primary/30 text-foreground rounded-tl-xs'
                                   : 'bg-secondary text-foreground border border-border/60 rounded-tr-xs'
                               )}
                             >
-                              {m.body}
+                              <ChatMessageRenderer body={m.body} isMine={!isAdminMsg} />
                             </div>
                             <span className="text-[9px] text-muted-foreground font-mono px-1">{formatTimeAgo(m.created_at, locale)}</span>
                           </div>
@@ -1209,32 +1344,67 @@ export function FloatingSupportChatWidget() {
                     </div>
 
                     <div className="space-y-1">
-                      <label htmlFor="inquiry-body" className="text-xs font-bold text-foreground">
-                        {localeLabel(locale, '상세 내용', 'Description', '詳細内容', '详细描述')}
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="inquiry-body" className="text-xs font-bold text-foreground">
+                          {localeLabel(locale, '상세 내용', 'Description', '詳細内容', '详细描述')}
+                        </label>
+                        <span className="text-[10px] text-muted-foreground">
+                          {localeLabel(locale, '클립보드(Ctrl+V) 이미지 붙여넣기 지원', 'Ctrl+V paste supported', 'Ctrl+V画像貼付対応', '支持Ctrl+V粘贴截图')}
+                        </span>
+                      </div>
                       <textarea
                         id="inquiry-body"
                         maxLength={2000}
-                        required
-                        rows={5}
+                        rows={4}
                         value={newBody}
                         onChange={(e) => setNewBody(e.target.value)}
+                        onPaste={(e) => handlePasteEvent(e, 'inquiry')}
                         placeholder={localeLabel(
                           locale,
-                          '문의 내용이나 발생한 현상을 구체적으로 적어주세요.',
-                          'Please describe your inquiry in detail.',
-                          'お問い合わせ内容や発生した現象を詳しく入力してください。',
-                          '请详细描述您的问题或反馈。'
+                          '문의 내용이나 발생한 현상을 구체적으로 적어주세요. 스크린샷 이미지도 첨부할 수 있습니다.',
+                          'Please describe your inquiry in detail. Screenshots can also be attached.',
+                          'お問い合わせ内容や発生した現象を詳しく入力してください。スクショも添付可能です。',
+                          '请详细描述您的问题，支持附加屏幕截图。'
                         )}
                         className="w-full p-3 rounded-xl border border-border/80 bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner resize-none"
                       />
+                    </div>
+
+                    {/* 이미지 첨부 미리보기 및 첨부 버튼 */}
+                    <div className="flex items-center justify-between gap-2 pt-0.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUploadTarget('inquiry');
+                          fileInputRef.current?.click();
+                        }}
+                        disabled={isUploadingImage}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border/80 bg-card hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-bold transition-all shadow-2xs disabled:opacity-50"
+                      >
+                        <Paperclip className="size-3.5 text-primary" />
+                        <span>{localeLabel(locale, '이미지 첨부', 'Attach Image', '画像添付', '添加图片')}</span>
+                      </button>
+
+                      {inquiryAttachedImg && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/30 text-xs font-bold text-primary truncate max-w-[200px]">
+                          <ImageIcon className="size-3.5 shrink-0" />
+                          <span className="truncate text-[11px]">{inquiryAttachedImg.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => setInquiryAttachedImg(null)}
+                            className="p-0.5 rounded-full hover:bg-primary/20 text-muted-foreground hover:text-foreground ml-1"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   <div className="pt-2">
                     <Button
                       type="submit"
-                      disabled={isSending || !newSubject.trim() || !newBody.trim()}
+                      disabled={isSending || !newSubject.trim() || (!newBody.trim() && !inquiryAttachedImg)}
                       className="w-full h-10 font-bold text-xs gap-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-md disabled:opacity-50"
                     >
                       {isSending ? (
@@ -1396,13 +1566,13 @@ export function FloatingSupportChatWidget() {
                           </span>
                           <div
                             className={cn(
-                              'p-3 rounded-2xl leading-relaxed whitespace-pre-wrap break-words shadow-xs',
+                              'p-3 rounded-2xl leading-relaxed shadow-xs',
                               m.is_mine
                                 ? 'bg-primary text-primary-foreground rounded-tr-xs'
                                 : 'bg-secondary text-foreground border border-border/60 rounded-tl-xs'
                             )}
                           >
-                            {m.body}
+                            <ChatMessageRenderer body={m.body} isMine={m.is_mine} />
                           </div>
                           <span className="text-[9px] text-muted-foreground font-mono px-1">{formatTimeAgo(m.created_at, locale)}</span>
                         </div>
@@ -1419,13 +1589,39 @@ export function FloatingSupportChatWidget() {
           {isSignedIn && (
             <>
               {activeTab === 'support' && supportView === 'chat' && selectedThread && (
-                <div className="p-2.5 border-t border-border/70 bg-muted/30 shrink-0">
+                <div className="p-2.5 border-t border-border/70 bg-muted/30 shrink-0 space-y-1.5">
+                  {supportReplyAttachedImg && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/30 text-xs font-bold text-primary w-fit max-w-[280px]">
+                      <ImageIcon className="size-3.5 shrink-0" />
+                      <span className="truncate text-[11px]">{supportReplyAttachedImg.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setSupportReplyAttachedImg(null)}
+                        className="p-0.5 rounded-full hover:bg-primary/20 text-muted-foreground hover:text-foreground ml-1"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </div>
+                  )}
                   <form onSubmit={handleSendSupportReply} className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUploadTarget('support_reply');
+                        fileInputRef.current?.click();
+                      }}
+                      disabled={isUploadingImage || isSending}
+                      className="size-9 rounded-xl border border-border/80 bg-background hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center shrink-0 transition-colors shadow-2xs disabled:opacity-50"
+                      title={localeLabel(locale, '이미지 첨부', 'Attach Image', '画像添付', '添加图片')}
+                    >
+                      <Paperclip className="size-4 text-primary" />
+                    </button>
                     <input
                       type="text"
                       maxLength={2000}
                       value={supportReplyText}
                       onChange={(e) => setSupportReplyText(e.target.value)}
+                      onPaste={(e) => handlePasteEvent(e, 'support_reply')}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           if ((e.nativeEvent as unknown as { isComposing?: boolean })?.isComposing) return;
@@ -1435,10 +1631,10 @@ export function FloatingSupportChatWidget() {
                       }}
                       placeholder={localeLabel(
                         locale,
-                        '답변 입력… (Enter 전송)',
-                        'Type reply… (Enter to send)',
-                        '返信を入力… (Enterで送信)',
-                        '输入回复… (按Enter发送)'
+                        '답변 입력… (Ctrl+V 이미지 붙여넣기 지원)',
+                        'Type reply… (Ctrl+V paste image)',
+                        '返信を入力… (Ctrl+V画像貼付対応)',
+                        '输入回复… (支持Ctrl+V粘贴截图)'
                       )}
                       className="flex-1 h-9 px-3 rounded-xl border border-border/80 bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
                       disabled={isSending}
@@ -1446,7 +1642,7 @@ export function FloatingSupportChatWidget() {
                     <Button
                       type="submit"
                       size="icon"
-                      disabled={isSending || !supportReplyText.trim()}
+                      disabled={isSending || (!supportReplyText.trim() && !supportReplyAttachedImg)}
                       className="size-9 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shrink-0"
                       aria-label={localeLabel(locale, '메시지 전송', 'Send message', 'メッセージ送信', '发送消息')}
                     >
@@ -1457,13 +1653,39 @@ export function FloatingSupportChatWidget() {
               )}
 
               {activeTab === 'direct' && directView === 'chat' && selectedConversation && (
-                <div className="p-2.5 border-t border-border/70 bg-muted/30 shrink-0">
+                <div className="p-2.5 border-t border-border/70 bg-muted/30 shrink-0 space-y-1.5">
+                  {directReplyAttachedImg && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/30 text-xs font-bold text-primary w-fit max-w-[280px]">
+                      <ImageIcon className="size-3.5 shrink-0" />
+                      <span className="truncate text-[11px]">{directReplyAttachedImg.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setDirectReplyAttachedImg(null)}
+                        className="p-0.5 rounded-full hover:bg-primary/20 text-muted-foreground hover:text-foreground ml-1"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </div>
+                  )}
                   <form onSubmit={handleSendDirectReply} className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUploadTarget('direct_reply');
+                        fileInputRef.current?.click();
+                      }}
+                      disabled={isUploadingImage || isSending || Boolean(selectedConversation.is_peer_blocked)}
+                      className="size-9 rounded-xl border border-border/80 bg-background hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center shrink-0 transition-colors shadow-2xs disabled:opacity-50"
+                      title={localeLabel(locale, '이미지 첨부', 'Attach Image', '画像添付', '添加图片')}
+                    >
+                      <Paperclip className="size-4 text-primary" />
+                    </button>
                     <input
                       type="text"
                       maxLength={2000}
                       value={directReplyText}
                       onChange={(e) => setDirectReplyText(e.target.value)}
+                      onPaste={(e) => handlePasteEvent(e, 'direct_reply')}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           if ((e.nativeEvent as unknown as { isComposing?: boolean })?.isComposing) return;
@@ -1476,7 +1698,7 @@ export function FloatingSupportChatWidget() {
                         '쪽지 내용 입력… (Enter 전송)',
                         'Type message… (Enter to send)',
                         'メッセージを入力… (Enterで送信)',
-                        '输入私信… (按Enter发送)'
+                        '输入私信… (Enter 发送)'
                       )}
                       className="flex-1 h-9 px-3 rounded-xl border border-border/80 bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
                       disabled={isSending || Boolean(selectedConversation.is_peer_blocked)}
@@ -1484,7 +1706,7 @@ export function FloatingSupportChatWidget() {
                     <Button
                       type="submit"
                       size="icon"
-                      disabled={isSending || !directReplyText.trim() || Boolean(selectedConversation.is_peer_blocked)}
+                      disabled={isSending || (!directReplyText.trim() && !directReplyAttachedImg) || Boolean(selectedConversation.is_peer_blocked)}
                       className="size-9 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shrink-0"
                       aria-label={localeLabel(locale, '쪽지 전송', 'Send message', 'メッセージ送信', '发送私信')}
                     >
@@ -1495,6 +1717,18 @@ export function FloatingSupportChatWidget() {
               )}
             </>
           )}
+
+          {/* 숨겨진 전용 이미지 파일 인풋 */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleUploadImageFile(f, uploadTarget);
+            }}
+          />
         </div>
       )}
     </>
