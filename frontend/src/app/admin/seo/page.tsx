@@ -24,13 +24,28 @@ async function fetchSeoData(): Promise<SeoInitialData> {
     });
 
     if (res.ok) {
-      return await res.json();
+      const data = await res.json();
+      return {
+        ...data,
+        provenance: {
+          source: 'seo-status-api',
+          observedAt: new Date().toISOString(),
+          freshness: 'fresh',
+          status: 'operational',
+        },
+      };
     }
   } catch {
     // Graceful fallback
   }
 
   return {
+    provenance: {
+      source: 'fallback',
+      observedAt: null,
+      freshness: 'unknown',
+      status: 'unavailable',
+    },
     totalHits24h: 0,
     totalHits7d: 0,
     avgDurationMs: 0,
