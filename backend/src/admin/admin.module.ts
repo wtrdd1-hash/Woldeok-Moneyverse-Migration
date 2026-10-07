@@ -51,12 +51,17 @@ import { TreasuryRepository } from './treasury/treasury.repository';
 import { TreasuryService } from './treasury/treasury.service';
 import { AutoSovereignWealthFundService } from './treasury/auto-swf.service';
 import { ApiHealthController } from './api-health.controller';
+import { AdminEnterpriseController, PublicEnterpriseController } from './enterprises/enterprise.controller';
+import { EnterpriseRepository } from './enterprises/enterprise.repository';
+import { EnterpriseService } from './enterprises/enterprise.service';
 
 @Module({
   imports: [AuthModule, StockModule],
   controllers: [
     ApiHealthController,
     AdminTreasuryController,
+    AdminEnterpriseController,
+    PublicEnterpriseController,
     AdminShopController,
     AdminController,
     AdminAuditController,
@@ -135,7 +140,17 @@ import { ApiHealthController } from './api-health.controller';
       useFactory: (repo: TreasuryRepository | null) => (repo ? new TreasuryService(repo) : null),
     },
     AutoSovereignWealthFundService,
+    {
+      provide: EnterpriseRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new EnterpriseRepository(pool) : null),
+    },
+    {
+      provide: EnterpriseService,
+      inject: [EnterpriseRepository],
+      useFactory: (repo: EnterpriseRepository | null) => (repo ? new EnterpriseService(repo) : null),
+    },
   ],
-  exports: [AdminService, AuditRepository, AutoSovereignWealthFundService],
+  exports: [AdminService, AuditRepository, AutoSovereignWealthFundService, EnterpriseService],
 })
 export class AdminModule {}

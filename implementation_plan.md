@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v111)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v112)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v112**: 싱가포르 테마섹 + 노르웨이 GPFG 하이브리드 국가지주회사(WSHC) & 3대 기간 공기업(W-Power, W-Net, WDB) 및 민간 벤처 IPO 기업 생태계 풀스택 구축 — ① 월덱 국가투자공사(WSHC) 설립 및 3대 기간 공기업(W-Power, W-Net, WDB) 지배구조 정립 ② 공기업 당기순이익 30% 법정 배당 국고(`VAULT_MAIN`) 자동 납입 및 원장 기록 ③ 한국 공운법 표준 S~E 6단계 경영평가제 연동 ④ 민간 스타트업 자율 스케일업 & WDX 거래소 IPO 상장, 15% 법인세 납부 파이프라인 구축 ⑤ `/admin/enterprises` 총괄 관제 패널 + 킬스위치 및 대국민 `/enterprises` 알리오(ALIO) 공시 포털 개발 ⑥ Vitest 단위 테스트 및 Next.js 566개 전 라우트 빌드 통과 (+220, -0)
 - **v111**: 국고 회계 감사 원장(`Authoritative Audit Ledger`) 0건 노출 오류 원인 규명 및 정상 복구 — `/admin/treasury` 화면에서 원장 트랜잭션이 '전체 (0)'으로 조회되지 않던 원인이 백엔드 `TreasuryRepository.listTransactions`, `exportLedgerCsv`, `getWealthTaxAssessments` 쿼리 내 존재하지 않는 컬럼(`users.username`) 참조로 인한 PostgreSQL DB 쿼리 실패였음을 밝혀내고, 정규 프로필 테이블인 `member_profiles.display_name`으로 교체하여 원장 목록 22건 및 실시간 세수/투자 내역 정상 렌더링 복구 (+120, -0)
 - **v110**: 국고 2,500만 WLD 최소 안전 원금 보존(Floor Reserve) & 가상 기업 법인세 자동 징수 + 국부펀드 평가익 복리 재투자(Net Compounding Growth) 엔진 풀스택 구축 — ① 방치되어 있던 수십 개 구버전 원격 브랜치(auto/hourly-*, audit/*, docs/*, feat/*, fix/*, plan/* 등) 전수 통합 및 안전 일괄 삭제/정리 완료 ② 국고 중앙 금고(`VAULT_MAIN`) 25,000,000 WLD 마지노선 영구 보존 및 비상 금고로부터 시드 보강 ③ 유저 부재 시에도 4대 우량 상장 기업(WDX)에서 시간당 가상 영업 이익 법인세 및 시장 거래세 국고 자동 징수 ④ 국부펀드 투자 자산 가치 상승분(시간당 1.2%) 수익 실현(Harvest) 및 초과분 우량주/국채 복리 재투자(Compound Reinvest)로 국고 총자산(AUM) 지속 우상향 ⑤ 디스코드 관리자(`886478189520637992`) DM 실시간 보고 ⑥ 음성방 자동 재접속 데몬 100% 무변경 보존 (+180, -0)
 - **v109**: 국고 잉여 세수 자율 투자 및 시장 재순환 국부펀드(ASWF) 엔진 풀스택 구축 — 노르웨이 GPFG / 싱가포르 테마섹 벤치마킹, 5,000만 WLD 안전 준비금 초과 잉여금 1시간 주기 자동 감지, WDX 우량주(50%)·국채(30%)·시민기본소득배당(20%) 100% 재정 이전 집행, DB 마이그레이션(249), 관리자 관제 패널(`/admin/treasury`) 탑재, 디스코드 관리자(`886478189520637992`) DM 재순환 알림 연동, 음성방 자동 재접속 100% 보존 (+190, -0)
@@ -2535,6 +2536,43 @@
 - Git 커밋 및 GitHub `origin/main` 푸시.
 - 원격 운영 서버(`easy-scraping.com`) 무중단 배포 적용 (`moneyverse-backend` 빌드 및 서비스 리로드).
 - `/admin/treasury` 화면에서 `전체 (22)`건의 국고 회계 감사 원장 목록이 즉시 정상 노출됨을 검증.
+
+---
+
+## 🏛️ [v112 Specification] 싱가포르 테마섹 + 노르웨이 GPFG 하이브리드 국가지주회사(WSHC) & 3대 기간 공기업 및 민간 기업 생태계 풀스택 구축
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "국가 회사 공기업 등도 기획해줘 기획 개발 무중단 배포 승인할게 래퍼런스 찾고 관련 기준으로 할것"
+- **글로벌 벤치마크 및 지배구조 설계**:
+  - **싱가포르 테마섹(Temasek) 지주회사 모델**: 정부 100% 지분의 국가투자지주회사(`WSHC`, Woldeok State Holding Corporation)가 공기업을 정치적 개입 없이 전문 독립 경영.
+  - **노르웨이 국부펀드(GPFG) 투명성**: 산티아고 원칙 및 트루먼 스코어보드를 준용하여 실시간 재무 및 배당 이력 대국민 투명 공개.
+  - **한국 공운법(공공기관의 운영에 관한 법률)**: 1시간 주기 자체수입비율/공공기여도 평가 기반 S~E 6단계 경영평가 등급제.
+  - **3대 핵심 기간 공기업**:
+    1. `SOE_POWER` (월덱 에너지공사, W-Power): 전력/에너지 인프라, 가상 채굴 및 서버 데이터센터 에너지 안정화.
+    2. `SOE_NET` (월덱 네트워크교통공사, W-Net & Transit): 결제망, 장터 고속 데이터 통신망 및 상거래 트래픽 인프라.
+    3. `SOE_BANK` (월덱 국책투자은행, WDB): 벤처 저금리 팩토링, 국채 인수 및 시장 안정판.
+  - **민간 기업 생태계**: AI 및 유저 창업가가 설립한 벤처 스타트업(NextMind, FinPay, CelliVerse 등)이 Seed -> Series A/B를 거쳐 WDX 거래소에 자동 IPO 상장, 분기 실적 공시 및 법인세(15%) 납부.
+  - **국가 재정 선순환**: 공기업 당기순이익 30% 배당 + 민간 법인세 15% 국고(`VAULT_MAIN`) 귀속 -> 2,500만 바닥 안전망 유지 하에 초과분의 70%는 우량주/국채 복리 재투자, 30%는 시민 보편 기본소득 배당 환원.
+
+### 2. 세부 변경 파일
+1. `docs/STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.ko.md` & `.md`: 국가 지주회사, 3대 공기업, 민간 기업 생태계 종합 기획서.
+2. `packages/database/migrations/251-state-enterprises-and-corporate-governance.sql`: `state_enterprises`, `state_enterprise_dividend_logs`, `private_enterprises` 테이블 및 3대 공기업/5대 벤처 시드 데이터.
+3. `backend/src/admin/enterprises/enterprise.repository.ts`: 공기업, 지주회사, 민간 기업 쿼리 및 배당 자동 납입/원장 기록 엔진.
+4. `backend/src/admin/enterprises/enterprise.service.ts`: 비즈니스 로직 및 디스코드 관리자(`886478189520637992`) DM 알림 연계.
+5. `backend/src/admin/enterprises/enterprise.service.test.ts`: 단위 테스트 (100% ALL-PASS).
+6. `backend/src/admin/enterprises/enterprise.controller.ts`: 관리자 관제 API 및 대국민 알리오(ALIO) 공시 API.
+7. `backend/src/admin/admin.module.ts`: Enterprise 모듈 프로바이더 및 컨트롤러 등록.
+8. `backend/src/admin/treasury/auto-swf.service.ts`: 1시간 주기 복리 성장 엔진과 공기업 배당(30%) + 법인세 자동 징수 파이프라인 통합.
+9. `frontend/src/app/admin/areas.ts`: `/admin/enterprises` 영역 등록.
+10. `frontend/src/app/api/admin/enterprises/harvest/route.ts` & `status/route.ts`: BFF 프록시 라우트.
+11. `frontend/src/app/admin/enterprises/enterprise-control-tower.tsx` & `page.tsx`: 지주회사 및 3대 공기업 총괄 관제 패널, 킬스위치, 배당 즉시 수취 UI.
+12. `frontend/src/app/enterprises/page.tsx`: 대국민 알리오(ALIO) 공기업 경영정보 공개 공시 포털.
+
+### 3. 검증 결과
+- 백엔드 Vitest 단위 테스트 통과: `enterprise.service.test.ts` 2 passed, `auto-swf.service.test.ts` 1 passed.
+- 백엔드 NestJS 프로덕션 빌드 100% 정상 통과.
+- 프론트엔드 Next.js 566개 전 라우트 빌드 통과.
+- 데이터베이스 251 마이그레이션 정상 적용 확인.
 
 
 

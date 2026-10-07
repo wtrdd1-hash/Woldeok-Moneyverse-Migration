@@ -174,11 +174,12 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
       let currentCash = BigInt(vaultRes.rows[0].balance_wld);
       const floorReserve = BigInt(config.safe_reserve_wld || '25000000');
 
-      // 2. [가상 상장 기업 영업 이익 및 법인세 자동 징수] (Autonomous Corporate Tax Stream)
-      // WDX 4대 대기업에서 시간당 발생하는 가상 영업 매출 중 법인세 징수 (총 80,000 WLD)
+      // 2. [공기업 법정 배당 및 민간 상장 기업 법인세 자동 징수] (Autonomous Corporate & SOE Dividend Stream)
+      // WSHC 산하 3대 공기업(W-Power, W-Net, WDB) 법정 이익배당(30%) + WDX 기업 법인세 자동 징수
       let taxCollected = BigInt(0);
       if (config.auto_tax_enabled) {
-        taxCollected = BigInt(80000);
+        // 공기업 3사 배당 (W-Power 36,000 + W-Net 27,000 + WDB 45,000 = 108,000 WLD) + 민간 기업 법인세 (16,000 WLD) = 124,000 WLD
+        taxCollected = BigInt(124000);
         currentCash += taxCollected;
 
         await client.query(
@@ -192,8 +193,8 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
           `INSERT INTO public.system_treasury_ledger (
               vault_id, tx_type, amount_wld, reason, balance_before, balance_after, created_at
            ) VALUES (
-              $1, 'STOCK_SPECULATION_TAX', $2,
-              '가상 우량 상장 기업(WDX) 영업 이익 법인세 및 시장 거래세 국고 자동 징수',
+              $1, 'FEE_RECIRCULATION', $2,
+              '국가 3대 기간 공기업(W-Power, W-Net, WDB) 법정 이익배당 및 민간 기업 법인세 국고 자동 징수',
               $3, $4, clock_timestamp()
            )`,
           [
@@ -203,6 +204,14 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
             currentCash.toString(),
           ],
         );
+
+        // state_enterprise_dividend_logs에 기록 업데이트
+        await client.query(`
+          INSERT INTO public.state_enterprise_dividend_logs (enterprise_id, dividend_amount_wld, revenue_wld, net_profit_wld, eval_grade)
+          SELECT id, (net_profit_hourly_wld * dividend_rate_bps / 10000), operating_revenue_hourly_wld, net_profit_hourly_wld, eval_grade
+          FROM public.state_enterprises
+          WHERE status = 'ACTIVE'
+        `).catch(() => {});
       }
 
       // 3. [국부펀드 자산 평가 이익 및 수익 회수] (Auto Asset Growth & Harvest)

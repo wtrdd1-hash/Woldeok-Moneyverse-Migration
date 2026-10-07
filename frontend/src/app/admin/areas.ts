@@ -113,6 +113,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'economy',
   },
   {
+    href: '/admin/enterprises',
+    eyebrow: 'STATE & CORPORATE GOVERNANCE',
+    title: '공기업 · 기업 지배구조',
+    summary: '월덱 국가투자공사(WSHC) 산하 3대 공기업과 민간 스타트업 생태계, 배당 및 법인세를 총괄 관제합니다.',
+    group: 'economy',
+  },
+  {
     href: '/admin/shop',
     eyebrow: 'SHOP OPERATIONS',
     title: '상점 관리',
