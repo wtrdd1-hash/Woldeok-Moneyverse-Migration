@@ -483,55 +483,59 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
         <h3 className="text-base font-bold text-white flex items-center gap-2">
           <span>🛡️</span> 대국민 & 기업 선물환(Forward) 환헤지 체결 원장 및 정산 관리
         </h3>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-xl border border-slate-800/80">
           <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-800/60 text-slate-400 uppercase font-mono text-[11px]">
+            <thead className="bg-slate-800/80 text-slate-300 text-xs font-semibold border-b border-slate-700/70">
               <tr>
-                <th className="p-3">체결시간</th>
-                <th className="p-3">고객</th>
-                <th className="p-3">포지션/만기</th>
-                <th className="p-3">계약금액</th>
-                <th className="p-3">약정선물환율</th>
-                <th className="p-3">예치증거금</th>
-                <th className="p-3">상태</th>
-                <th className="p-3">관리</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">체결시간</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">고객</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">포지션/만기</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">계약금액</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">약정선물환율</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">예치증거금</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">상태</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">관리</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
               {forwardContracts.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-4 text-center text-slate-500">
-                    현재 체결된 선물환 환헤지 계약이 없습니다.
+                  <td colSpan={8} className="py-12 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2 text-slate-400">
+                      <span className="text-2xl opacity-60">📑</span>
+                      <p className="text-sm font-medium">현재 체결된 선물환 환헤지 계약이 없습니다.</p>
+                      <p className="text-xs text-slate-500">기업 및 유저의 신규 1/3/6개월 환헤지 신청 시 실시간으로 기록됩니다.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 forwardContracts.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-800/30">
-                    <td className="p-3 font-mono text-slate-400">{new Date(c.createdAt).toLocaleDateString()}</td>
-                    <td className="p-3 font-medium text-white">{c.displayName || c.userId.substring(0, 8)}</td>
-                    <td className="p-3">
+                  <tr key={c.id} className="hover:bg-slate-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-slate-400">{new Date(c.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 font-medium text-white">{c.displayName || c.userId.substring(0, 8)}</td>
+                    <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         c.position === 'BUY_USD' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-emerald-500/20 text-emerald-300'
                       }`}>
                         {c.position === 'BUY_USD' ? '달러 매수 헤지' : '달러 매도 헤지'} ({c.tenor})
                       </span>
                     </td>
-                    <td className="p-3 font-mono font-bold">${c.contractAmountUsd.toLocaleString()} USD</td>
-                    <td className="p-3 font-mono text-cyan-400">{c.contractRate.toFixed(2)} WLD</td>
-                    <td className="p-3 font-mono text-amber-400">{c.marginWld.toLocaleString()} WLD</td>
-                    <td className="p-3">
+                    <td className="px-4 py-3 font-mono font-bold">${c.contractAmountUsd.toLocaleString()} USD</td>
+                    <td className="px-4 py-3 font-mono text-cyan-400">{c.contractRate.toFixed(2)} WLD</td>
+                    <td className="px-4 py-3 font-mono text-amber-400">{c.marginWld.toLocaleString()} WLD</td>
+                    <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         c.status === 'ACTIVE' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-700 text-slate-400'
                       }`}>
                         {c.status}
                       </span>
                     </td>
-                    <td className="p-3">
+                    <td className="px-4 py-3">
                       {c.status === 'ACTIVE' ? (
                         <button
                           onClick={() => handleSettleForward(c.id)}
                           disabled={isProcessing}
-                          className="px-2.5 py-1 rounded bg-slate-700 hover:bg-slate-600 text-white text-[11px]"
+                          className="px-2.5 py-1 rounded bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-medium transition-colors"
                         >
                           즉시정산
                         </button>
@@ -548,36 +552,40 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
       </div>
 
       {/* 7. 최근 외환 환전 실시간 원장 테이블 */}
-      <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-        <h3 className="text-base font-bold text-white mb-3">
-          📋 서울외환시장 최근 실시간 환전 체결 원장
+      <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <h3 className="text-base font-bold text-white flex items-center gap-2">
+          <span>📋</span> 서울외환시장 최근 실시간 환전 체결 원장
         </h3>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-xl border border-slate-800/80">
           <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-800/60 text-slate-400 uppercase font-mono text-[11px]">
+            <thead className="bg-slate-800/80 text-slate-300 text-xs font-semibold border-b border-slate-700/70">
               <tr>
-                <th className="p-3">시간</th>
-                <th className="p-3">유형</th>
-                <th className="p-3">투자자</th>
-                <th className="p-3">환전 거래</th>
-                <th className="p-3">적용 환율</th>
-                <th className="p-3">국고 세수</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">시간</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">유형</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">투자자</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">환전 거래</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">적용 환율</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">국고 세수</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
               {txs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-4 text-center text-slate-500">
-                    최근 외환 거래 내역이 없습니다.
+                  <td colSpan={6} className="py-12 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2 text-slate-400">
+                      <span className="text-2xl opacity-60">💱</span>
+                      <p className="text-sm font-medium">최근 외환 거래 내역이 없습니다.</p>
+                      <p className="text-xs text-slate-500">외환 시장 참여자의 실시간 환전 체결 내역이 즉시 동기화됩니다.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 txs.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-slate-800/30">
-                    <td className="p-3 font-mono text-slate-400">
+                  <tr key={tx.id} className="hover:bg-slate-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-slate-400">
                       {new Date(tx.createdAt).toLocaleTimeString()}
                     </td>
-                    <td className="p-3">
+                    <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         tx.transactionType === 'BUY_USD'
                           ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
@@ -586,12 +594,12 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
                         {tx.transactionType === 'BUY_USD' ? 'WLD ➡️ USD' : 'USD ➡️ WLD'}
                       </span>
                     </td>
-                    <td className="p-3 font-medium text-white">{tx.displayName || tx.userId.substring(0, 8)}</td>
-                    <td className="p-3 font-mono">
+                    <td className="px-4 py-3 font-medium text-white">{tx.displayName || tx.userId.substring(0, 8)}</td>
+                    <td className="px-4 py-3 font-mono">
                       {tx.fromAmount.toLocaleString()} {tx.fromCurrency} ➡️ {tx.toAmount.toLocaleString()} {tx.toCurrency}
                     </td>
-                    <td className="p-3 font-mono text-cyan-400">{tx.appliedRate.toFixed(2)} WLD</td>
-                    <td className="p-3 font-mono text-indigo-400">+{tx.feeWld.toLocaleString()} WLD</td>
+                    <td className="px-4 py-3 font-mono text-cyan-400">{tx.appliedRate.toFixed(2)} WLD</td>
+                    <td className="px-4 py-3 font-mono text-indigo-400">+{tx.feeWld.toLocaleString()} WLD</td>
                   </tr>
                 ))
               )}
