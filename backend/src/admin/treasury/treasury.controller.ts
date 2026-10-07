@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -16,6 +17,7 @@ import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryService } from './treasury.service';
+import { AutoSovereignWealthFundService } from './auto-swf.service';
 
 export class TreasuryOperationDto {
   @ApiProperty({ example: 'VAULT_MAIN', description: '금고 코드' })
@@ -110,7 +112,10 @@ export class TreasuryBuybackBurnDto {
 @Controller('admin/treasury')
 @UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard)
 export class AdminTreasuryController {
-  constructor(private readonly service: TreasuryService) {}
+  constructor(
+    private readonly service: TreasuryService,
+    private readonly swfService?: AutoSovereignWealthFundService,
+  ) {}
 
   @Get('overview')
   @ApiOperation({ summary: '중앙 국고 및 비축금 현황 대시보드 조회' })
@@ -266,4 +271,37 @@ export class AdminTreasuryController {
     const adminId = requireUserId(request);
     return this.service.createBackupSnapshot(adminId, provider);
   }
+
+  @Get('swf')
+  @ApiOperation({ summary: '자율 국부펀드(ASWF) 포트폴리오 및 잉여 세수 재순환 현황 조회' })
+  async getSwfStatus() {
+    if (!this.swfService) {
+      return { config: null, portfolios: [], events: [] };
+    }
+    const [config, portfolios, events] = await Promise.all([
+      this.swfService.getConfig(),
+      this.swfService.getPortfolios(),
+      this.swfService.getRecentEvents(20),
+    ]);
+    return { config, portfolios, events };
+  }
+
+  @Post('swf/rebalance')
+  @ApiOperation({ summary: '자율 국부펀드(ASWF) 잉여 세수 시장 재순환 즉시 집행' })
+  async triggerSwfRebalance() {
+    if (!this.swfService) {
+      return { executed: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
+    }
+    return this.swfService.evaluateAndRebalance();
+  }
+
+  @Put('swf/config')
+  @ApiOperation({ summary: '자율 국부펀드(ASWF) 안전 준비금 및 투자 한도 튜닝' })
+  async updateSwfConfig(@Body() body: Record<string, unknown>) {
+    if (!this.swfService) {
+      return { success: false };
+    }
+    return this.swfService.updateConfig(body);
+  }
 }
+

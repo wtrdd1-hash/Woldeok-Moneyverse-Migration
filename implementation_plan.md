@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v108)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v109)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v109**: 국고 잉여 세수 자율 투자 및 시장 재순환 국부펀드(ASWF) 엔진 풀스택 구축 — 노르웨이 GPFG / 싱가포르 테마섹 벤치마킹, 5,000만 WLD 안전 준비금 초과 잉여금 1시간 주기 자동 감지, WDX 우량주(50%)·국채(30%)·시민기본소득배당(20%) 100% 재정 이전 집행, DB 마이그레이션(249), 관리자 관제 패널(`/admin/treasury`) 탑재, 디스코드 관리자(`886478189520637992`) DM 재순환 알림 연동, 음성방 자동 재접속 100% 보존 (+190, -0)
 - **v108**: 전체 코드베이스 전수 재분석 & 이상 코드 교정 & 디스코드 봇 관리자(`886478189520637992`) 중요 정보 1:1 DM 전송 풀스택 구축 — ① 디스코드 REST API v10 기반 관리자 1:1 Direct Message(DM) 파이프라인 신설 (원장 대사 결함, 음수 잔액, 감사 로그 체인 변조, 시스템 경보 등 중요 알림 실시간 개인 DM 전송) ② 봇 상주 데몬(`bot/index.js`) 관리자 DM 연동 ③ 관리자 콘솔(`/admin/discord`) DM 관제 위젯 및 원클릭 테스트 DM 발송 엔드포인트 탑재 ④ 채널 ID 유연화 및 예외 처리 견고화 (+150, -0)
 - **v107**: OWASP Top 10:2026 및 핀테크 보안 레퍼런스 심층 감사 기반 3대 핵심 보안 패치 구축 — ① BFF sitemapUrl 도메인/경로 화이트리스트 검증 & IP당 Rate Limiting 가드 적용 (악의적 외부 URL 주입 및 DDoS 차단) ② 백엔드 `safeFetch` 수동 리디렉션 추적(Manual 3xx Redirect Inspection) 다계층 SSRF 방어 구현 (클라우드 IMDS 169.254 / 로컬 루프백 127.0.0.1 우회 원천 차단) ③ Search Console API 예외 발생 시 내부 스택/토큰/자격증명 마스킹 및 정제된 에러 반환(OWASP A10 대응) (+130, -0)
 - **v106**: 글로벌 핀테크 레퍼런스(Investing.com·TradingView·GSC 2026 표준) 심층 점검 기반 3대 보완 고도화 풀스택 구축 — ① 경제 캘린더 예측치/직전치 3열 비교표 & 구글 캘린더(Google Calendar) 1초 등록/ICS 내보내기 & High-Impact/국가 필터 탑재 ② Google Search Console 5개 개별 사이트맵(sitemap-stocks, static, board, announcements 등) 일괄/선택 제출 셀렉터 & 네이버 서치어드바이저 웹마스터 도구 원클릭 딥링크 탑재 ③ 저평가 우량주 모의 매수 완료 즉시 10,000 WLD 퀘스트 보상 자동 청구 & 내 포트폴리오(/stocks/portfolio) 원클릭 이동 버튼 완결 (+140, -0)
@@ -2416,6 +2417,53 @@
 - 프론트엔드 TypeScript 정적 타입 검증 및 빌드 100% 통과.
 - 로컬 커밋 및 GitHub 원격 저장소(`main`) 푸시.
 - 운영 서버(`easy-scraping.com`) 무중단 배포 및 실제 `886478189520637992` 대상 디스코드 DM 실시간 전송 라이브 검증.
+
+---
+
+## 🏛️ [v109 Specification] 국고 잉여 세수 자율 투자 및 시장 재순환 국부펀드 (ASWF) 시스템 구축
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "국고가 늘어나지 줄지않아 자동으로 뮈가 투자하고 그런 시스템넣어서 좀해줘 실제 경제시스템 처럼되게 기획하고 개발하고 무중단배포까지 승인함 몰론 기획서에 상세 기획하고 관련래퍼런스 많이찾고 기획 개발 배포할것 지시함"
+  - "음성방 이탈시 자동접속 는 건들면안되 브래치통합 및 브래치 정리 작업시마다 진행해줘 오류는 항상해결하고 필요없으면 지우고 등 적절한조차할것"
+- **핵심 목표**:
+  1. **현실 경제 모델 벤치마킹 (Sovereign Wealth Fund)**:
+     - 노르웨이 국부펀드(GPFG / NBIM) & 싱가포르 테마섹(Temasek) 벤치마킹.
+     - 국고로 유입되는 거래 수수료/양도세/부유세 등 잉여금을 안전하게 우량 자산에 투자하여 시장 유동성을 공급하고 증시 급락을 방어.
+  2. **자율 국부펀드(ASWF) 엔진 (`backend/src/admin/treasury/auto-swf.service.ts`)**:
+     - 1시간 주기 자동 스케줄러: 메인 국고(`VAULT_MAIN`)의 5,000만 WLD 안전 지급준비금 초과 잉여금 감지.
+     - 포트폴리오 자산 배분:
+       - 📊 **WDX 우량주 분산 매수 (50%)**: `WDX-TEC`, `WDX-FIN`, `WDX-BIO`, `WDX-RET` 균등 분산 매수로 증시 안전판 역할 수행.
+       - 🏦 **중앙은행 복리 채권 예치 (30%)**: 안정적 무위험 이자 수익 확보.
+       - 🎁 **활성 시민 기본소득 자동 배당 (20%)**: 최근 7일 내 활동한 유저들에게 자동 분배하여 시중 소비 유동성 촉진 및 유저 리텐션 극대화.
+     - 100% 재정 이전(Fiscal Transfer, $\Delta M_{\text{total}} = 0$) 원칙 준수.
+     - 중요 재순환 집행 시 관리자 디스코드 개인 DM(`886478189520637992`)으로 즉시 브로드캐스팅.
+  3. **데이터베이스 마이그레이션 (`249-treasury-autonomous-sovereign-wealth-fund.sql`)**:
+     - `treasury_swf_configs`: 펀드 설정 및 한도 관리.
+     - `treasury_swf_portfolios`: 보유 주식 및 평가손익 영속 관리.
+     - `treasury_swf_events`: 불변 재순환 감사 로그.
+  4. **관리자 관제 서피스 (`/admin/treasury`)**:
+     - `SwfControlPanel`: 펀드 총 운용자산(AUM), 목표 배분 규격, WDX 보유 포트폴리오 카드 그리드, "지금 즉시 리밸런싱 집행" 원클릭 버튼 탑재.
+  5. **원칙 준수 확증**:
+     - 디스코드 봇 음성방 이탈 시 자동 재접속(Auto-rejoin) 로직 100% 손상 없이 완벽 보존.
+     - 브랜치 동기화 및 GitHub `main` 통합.
+
+### 2. 세부 변경 파일
+1. `docs/TREASURY_AUTONOMOUS_SWF_SPEC.ko.md` & `docs/TREASURY_AUTONOMOUS_SWF_SPEC.md`: 국부펀드 상세 기획서.
+2. `packages/database/migrations/249-treasury-autonomous-sovereign-wealth-fund.sql`: DB 스키마.
+3. `backend/src/admin/treasury/auto-swf.service.ts`: 국부펀드 자율 투자 & 시장 재순환 서비스.
+4. `backend/src/admin/treasury/auto-swf.service.test.ts`: 단위 테스트 (100% 통과).
+5. `backend/src/admin/treasury/treasury.controller.ts`: SWF 제어 API (`GET /swf`, `POST /swf/rebalance`, `PUT /swf/config`).
+6. `backend/src/admin/admin.module.ts`: 프로바이더 등록.
+7. `frontend/src/app/api/admin/treasury/swf/route.ts`: BFF 프록시 라우트.
+8. `frontend/src/app/admin/treasury/swf-control-panel.tsx`: 관리자 관제 패널 UI 컴포넌트.
+9. `frontend/src/app/admin/treasury/page.tsx`: 관제 패널 마운트.
+
+### 3. 검증 계획
+- 백엔드 Vitest 단위 테스트 100% 통과.
+- 프론트엔드 TypeScript 정적 검증 및 Turbopack 564개 라우트 빌드 성공.
+- GitHub `main` 브랜치 푸시 및 원격 운영 서버(`easy-scraping.com`) 무중단 배포.
+- 실제 국부펀드 리밸런싱 집행 및 디스코드 DM 실시간 전송 라이브 검증.
+
 
 
 

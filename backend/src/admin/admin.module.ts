@@ -49,6 +49,7 @@ function devicePepper(config: AppConfig): string {
 import { AdminTreasuryController } from './treasury/treasury.controller';
 import { TreasuryRepository } from './treasury/treasury.repository';
 import { TreasuryService } from './treasury/treasury.service';
+import { AutoSovereignWealthFundService } from './treasury/auto-swf.service';
 import { ApiHealthController } from './api-health.controller';
 
 @Module({
@@ -133,7 +134,8 @@ import { ApiHealthController } from './api-health.controller';
       inject: [TreasuryRepository],
       useFactory: (repo: TreasuryRepository | null) => (repo ? new TreasuryService(repo) : null),
     },
+    AutoSovereignWealthFundService,
   ],
-  exports: [AdminService, AuditRepository],
+  exports: [AdminService, AuditRepository, AutoSovereignWealthFundService],
 })
 export class AdminModule {}

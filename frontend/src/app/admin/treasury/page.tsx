@@ -12,6 +12,7 @@ import type {
   AdminTreasuryRevenueSource,
 } from '../types';
 import { TreasuryView } from './treasury-view';
+import { SwfControlPanel, type SwfPortfolioItem, type SwfEvent } from './swf-control-panel';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
 export default async function AdminTreasuryPage() {
   await requireAdminConsole(AREA.href);
 
-  const [overview, transactionsRes, revenueRes, expenditureRes] = await Promise.all([
+  const [overview, transactionsRes, revenueRes, expenditureRes, swfRes] = await Promise.all([
     apiOrNull<AdminTreasuryOverview>('/api/v1/admin/treasury/overview'),
     apiOrNull<{ items: AdminTreasuryLedger[]; next_cursor: string | null }>('/api/v1/admin/treasury/transactions'),
     apiOrNull<{
@@ -40,6 +41,11 @@ export default async function AdminTreasuryPage() {
       total_7d_wld: string;
       total_30d_wld: string;
     }>('/api/v1/admin/treasury/expenditure'),
+    apiOrNull<{
+      config: any;
+      portfolios: SwfPortfolioItem[];
+      events: SwfEvent[];
+    }>('/api/v1/admin/treasury/swf'),
   ]);
 
   return (
@@ -55,12 +61,19 @@ export default async function AdminTreasuryPage() {
           description="중앙 국고 및 비축금 데이터베이스 연결을 확인해 주세요."
         />
       ) : (
-        <TreasuryView
-          overview={overview}
-          ledger={transactionsRes?.items ?? []}
-          revenue={revenueRes}
-          expenditure={expenditureRes}
-        />
+        <>
+          <SwfControlPanel
+            initialConfig={swfRes?.config}
+            initialPortfolios={swfRes?.portfolios ?? []}
+            initialEvents={swfRes?.events ?? []}
+          />
+          <TreasuryView
+            overview={overview}
+            ledger={transactionsRes?.items ?? []}
+            revenue={revenueRes}
+            expenditure={expenditureRes}
+          />
+        </>
       )}
     </div>
   );
