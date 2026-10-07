@@ -1,3 +1,20 @@
+## v118 (prod-v529) — SEO 소셜 바이럴 공유 바, X(트위터) 자동 백링크 봇 및 국고 85% 현금 정상화
+
+- **적용 릴리스**: `prod-v529` (운영 배포 완료)
+- **PostgreSQL 활성 세션**: **1,433+ 세션 100% 무손실 보존 완료**
+- **주요 기능 업데이트**:
+  1. **원클릭 소셜 바이럴 공유 툴바 (`SocialShareToolbar`)**:
+     - 12종 금융 계산기 350+ 롱테일 프리셋, 가상 주식 종목 상세, 뉴스 기사, 진단 결과 카드에 카카오톡, X(Twitter), Facebook, 클립보드 원클릭 공유 바 탑재.
+     - 모바일 하단 플로팅 및 데스크톱 반응형 완벽 대응, 공유 클릭 시 즉각적인 토스트 피드백 제공.
+  2. **X(Twitter) 자동 트윗 백링크 봇 (`TwitterPublisherService`)**:
+     - Twitter API v2 (OAuth 1.0a HMAC-SHA1) 기반 일일 개장/마감 가상 시황 및 금융 팁 자동 포스팅 데몬 구축.
+     - 관리자 SEO 콘솔(`/admin/seo`) 내 실시간 트윗 발송 테스트 및 수동 발행 제어 카드 탑재.
+  3. **국고(VAULT_MAIN) 85% 현금 건전성 정상화**:
+     - ASWF 국부펀드 편중 주식 7,877만 WLD를 실시간 시장가 매도 회수하여 현금 1억 1,080만 WLD (84.7%) : 주식 2,000만 WLD (15.3%) 안전 비율로 전격 정상화.
+     - 관리자 국고 관제 화면(`/admin/treasury`)에 즉시 매도 회수 버튼 및 안전 비축금 경고 배지 배포.
+  4. **Google Search Console 실시간 연동 (v541)**:
+     - 서비스 계정 키 기반 사이트맵 자동 제출, 인덱싱 현황 실시간 검사 및 관리자 UI 구축.
+
 ## v2026.10.07.541 — Google Search Console 사이트맵 API 1클릭 연동
 
 - Google 공식 API 계약을 재확인해 Moneyverse 일반 금융/계산기 페이지는 제한된 Google Indexing API 대상이 아니며, 지원되는 Google 쓰기 경로는 Search Console Sitemaps API임을 확정했다.

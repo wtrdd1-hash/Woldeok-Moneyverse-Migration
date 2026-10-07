@@ -13,9 +13,22 @@
 
 ---
 
-## 🌟 Production Release Overview (v462 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v462`
-- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v462`
+## 🌟 Production Release Overview (v118 / prod-v529 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v529`
+- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v529`
+- **Release Date**: 2026-10-07 KST
+- **Active PostgreSQL Sessions**: **1,433+ Active Sessions Preserved (Zero Loss)**
+- **Key Deliverables**:
+  1. **국고(VAULT_MAIN) 85% 현금 정상화**: 주식 7,877만 WLD 매도 회수하여 현금 1억 1,080만 WLD (84.7%) : 주식 2,000만 WLD (15.3%) 안전 비율 복원 및 관리자 즉시 회수 버튼 구축 (`/admin/treasury`).
+  2. **원클릭 소셜 바이럴 공유 툴바 (`SocialShareToolbar`)**: 12종 계산기 350+ 롱테일 프리셋, 뉴스, 주식 상세, 진단서 전면에 카카오톡/X/페이스북/링크복사 바 탑재.
+  3. **X(Twitter) 자동 트윗 백링크 봇 (`TwitterPublisherService`)**: Twitter API v2 (OAuth 1.0a HMAC-SHA1) 기반 일일 개장/마감 시황 자동 포스팅 데몬 구축 및 관리자 수동 발송 테스트 API (`/admin/seo`).
+  4. **Google Search Console 실시간 연동 (v541)**: 서비스 계정 키 기반 사이트맵 자동 제출, 인덱싱 현황 실시간 검사 및 관리자 UI 구축.
+
+---
+
+## 🌟 Previous Production Release Overview (v462)
+- **Production Symlink**: `/srv/moneyverse-data/releases/prod-v462`
+- **Test Symlink**: `/srv/moneyverse-data/releases/test-v462`
 - **Git Commit HEAD**: `b8a5f9d8` (`main`)
 - **Active PostgreSQL Sessions**: **1,433 Active Sessions Preserved (Zero Loss)**
 - **Frontend Test Suite**: **139 test files / 868 tests passed (100% PASS)**

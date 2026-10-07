@@ -35,6 +35,9 @@ The responsive header does not destructively remove the brand/navigation nodes. 
 | Area | Purpose | Detailed document |
 | --- | --- | --- |
 | 🏛️ Macro Sovereign Economy | Central Bank monetary policy, 25M Treasury Anchor, state enterprises, NPS & KTB exchange | [Macro Sovereign Economic Master](../docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.md) |
+| ⚖️ Treasury 85% Cash Normalization | Statutory 85% cash liquidity enforcement, ASWF rebalancing, and live emergency asset recall | [Treasury Normalization & Worklog](../docs/worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.md) |
+| 🌐 Social Share & X (Twitter) Bot | One-click viral share toolbar across 12 calculators & Twitter API v2 automated market broadcasts | [Social Viral & Twitter Spec](../docs/worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.md) |
+| 🔍 Google Search Console Integration | Service account automated live indexing, inspection, and real-time sitemap sync | [GSC Integration Spec](../docs/worklog/2026-10-07-gsc-search-console-api-v2026.10.07.541.md) |
 | 🏦 National Pension Service (NPS) | 5-tier public pension accumulation, 100% treasury matching, lifetime basic hourly annuity | [National Pension Service Spec](../docs/NATIONAL_PENSION_SERVICE_SPEC.md) |
 | 📈 Treasury Bonds (KTB) & Repo | 3Y/5Y/10Y sovereign bonds real-time orderbook, 24h Repo liquidity, and coupon engine | [Treasury Bonds Exchange Spec](../docs/TREASURY_BONDS_EXCHANGE_SPEC.md) |
 | 🏢 State Enterprises & ALIO | Energy, Infrastructure, and Financial SOE public disclosures and 30% dividend remittance | [State Enterprises & ALIO Spec](../docs/STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.md) |

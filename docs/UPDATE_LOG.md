@@ -1,3 +1,20 @@
+## v118 (prod-v529) — SEO Social Viral Share Toolbar, X (Twitter) Bot & Treasury 85% Cash Normalization
+
+- **Production Release**: `prod-v529` (Promoted to Production)
+- **PostgreSQL Active Sessions**: **1,433+ Active Sessions Preserved (Zero Loss)**
+- **Key Deliverables**:
+  1. **One-Click Social Viral Sharing Toolbar (`SocialShareToolbar`)**:
+     - Embedded KakaoTalk, X (Twitter), Facebook, and clipboard copy interfaces across 12 financial calculators, 350+ long-tail presets, virtual stock tickers, and news articles.
+     - Responsive mobile floating bottom bar and desktop inline actions with instant toast feedback.
+  2. **X (Twitter) Automated Tweet Backlink Bot (`TwitterPublisherService`)**:
+     - Background daemon built on Twitter API v2 (OAuth 1.0a HMAC-SHA1) publishing morning opening briefs and evening market closing recaps.
+     - Interactive test and manual broadcast card in the Admin SEO Console (`/admin/seo`).
+  3. **Treasury (`VAULT_MAIN`) 85% Cash Normalization**:
+     - Rebalanced ASWF portfolio by selling off 78.77M WLD of stock, restoring 110.8M WLD (84.7%) cash and 20.0M WLD (15.3%) equities.
+     - Integrated live rebalance controls and statutory reserve warning badges in `/admin/treasury`.
+  4. **Google Search Console Integration (v541)**:
+     - Automated service account sitemap submission, real-time indexing status inspection, and admin UI.
+
 ## v2026.10.07.541 — Google Search Console Sitemap API One-Click Integration
 
 - Confirmed against Google first-party API contracts that ordinary Moneyverse finance/calculator pages are not eligible for the restricted Google Indexing API; the supported Google write path is the Search Console Sitemaps API.

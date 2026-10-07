@@ -10,6 +10,9 @@
 
 - [거시 경제 6대 기둥 총괄 기획서 (실제 실물 경제 레퍼런스)](../docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md)
 - [국고 2,500만 앵커 & 자율 투자 회수 사이클 기획서](../docs/TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.ko.md)
+- [국고 자금 85% 현금 정상화 회수 & 재정 안전 거버넌스 사양서 (v118)](../docs/worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.ko.md)
+- [소셜 바이럴 공유 바 & X(트위터) 자동 트윗 백링크 봇 사양서 (v118)](../docs/worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.ko.md)
+- [Google Search Console 실시간 연동 및 색인 엔진 (v541)](../docs/worklog/2026-10-07-gsc-search-console-api-v2026.10.07.541.ko.md)
 - [대한민국 국채(KTB) 3종 & 레포 대출 거래소 사양서](../docs/TREASURY_BONDS_EXCHANGE_SPEC.ko.md)
 - [국민연금공단(NPS) 공적 연금 적립 & 평생 기초연금 사양서](../docs/NATIONAL_PENSION_SERVICE_SPEC.ko.md)
 - [국가투자공사(WSHC) 산하 공기업 & 경영공시 알리오(ALIO) 사양서](../docs/STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.ko.md)

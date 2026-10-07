@@ -30,26 +30,29 @@
 ### 03. 🌐 Growth & Programmatic SEO (pSEO) Engine
 1. **[Global Growth Execution Specification v510](planning/GLOBAL_GROWTH_EXECUTION_SPEC.md)** — implementation-ready locale/translation/SEO/pSEO/overseas-feature/market/ad/QA contract and exact-main gap register
 2. **[Global Growth, International SEO & Advertising Revenue — v507 design / v509 authority](planning/GLOBAL_GROWTH_SEO_REVENUE_SPEC.md)** — Korean-default global locale design, overseas utility/retention features, search-demand provenance, quality-gated pSEO and ad economics
-3. **[Product Growth & Retention Plan](planning/PRODUCT_GROWTH_PLAN.md)**
-4. **[Search Discovery Operations](planning/SEARCH_DISCOVERY_OPERATIONS_SPEC.md)**
-5. **[Single Source of Truth Route Registry](../frontend/src/config/routes.config.ts)**
-6. **[Advertising-Only Revenue Specification — v507 design / v509 authority](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md)** — advertising-only cash authority, international Page-RPM/session economics, invalid-traffic and experiment gates
+3. **[Social Share Toolbar & X (Twitter) Automated Tweet Bot Spec (v118)](worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.md)**: One-click viral toolbar across 12 calculators & Twitter API v2 daily automated market tweets
+4. **[Google Search Console Live Integration & Indexing Engine (v541)](worklog/2026-10-07-gsc-search-console-api-v2026.10.07.541.md)**: Service account automated sitemap submission and real-time inspection
+5. **[Product Growth & Retention Plan](planning/PRODUCT_GROWTH_PLAN.md)**
+6. **[Search Discovery Operations](planning/SEARCH_DISCOVERY_OPERATIONS_SPEC.md)**
+7. **[Single Source of Truth Route Registry](../frontend/src/config/routes.config.ts)**
+8. **[Advertising-Only Revenue Specification — v507 design / v509 authority](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md)** — advertising-only cash authority, international Page-RPM/session economics, invalid-traffic and experiment gates
 
 ### 04. 📈 Virtual Stock Exchange & Market Dynamics
 1. **[Stock Portfolio & Real-time Orderbook Spec](2026-09-22-stocks-portfolio-and-trade-presets-v2026.09.22.356.md)**
 2. **[Stock Trading Halt & Cost-Basis Settlement Governance](2026-09-22-stocks-halt-cost-basis-settlement-visibility-v2026.09.22.357.md)**
 
 ### 05. 🏦 Virtual Banking, Treasury & Fiscal Recirculation
-1. **[Treasury Bonds (KTB) & Repo Exchange Specification](TREASURY_BONDS_EXCHANGE_SPEC.md)**: 3Y/5Y/10Y sovereign bonds real-time orderbook, 24h repurchase agreement (Repo) credit line, and treasury coupon engine
-2. **[National Pension Service (NPS) Public Accumulation & Lifetime Basic Pension Spec](NATIONAL_PENSION_SERVICE_SPEC.md)**: 5 contribution tiers (50K~1M WLD), 100% treasury matching grant, hourly lifetime basic annuity, and sovereign wealth fund allocation
-3. **[Bank of Korea FX Reserves & Seoul Foreign Exchange Market Spec](FOREIGN_EXCHANGE_RESERVES_AND_MARKET_SPEC.md)**: 1,000,000 USD foreign exchange vault, floating exchange rate (1,350 WLD anchor), central bank smoothing operations, and 4.5% USD savings
-4. **[Global FX Safety Net, Currency Swaps, and Forward Hedging Spec](GLOBAL_FX_SAFETY_NET_AND_FORWARD_HEDGE_SPEC.md)**: IMF SDR basket & physical gold diversification, US-Korea & Japan-Korea swap lines, 1M/3M/6M CIP forward hedging, and 4-tier EWS stress index
-5. **[KDIC Depositor Protection Act & Financial Stability Fund Spec](DEPOSIT_INSURANCE_AND_FINANCIAL_STABILITY_SPEC.md)**: Statutory 500K WLD coverage, 0.08% bank premium assessment, 10M WLD fund vault, and bank run insurance payouts
-6. **[Treasury Automated Social Recirculation Spec](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Invariant
-4. **[Treasury & Fiscal Recirculation Architecture](architecture/TREASURY_AND_FISCAL_RECIRCULATION_ARCHITECTURE.md)**: Mermaid system diagram and ledger specifications
-5. **[Economic Balance & 6-Profitability Audit Report (v473)](ECONOMIC_PROFITABILITY_AUDIT.md)**
-6. **[Virtual Compound Interest & Saving Pockets](features/README.md)**
-7. **[Virtual Treasury Bond Simulator](features/README.md)**
+1. **[Treasury 85% Cash Normalization & Liquidity Governance Spec (v118)](worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.md)**: Rebalanced ASWF portfolio by selling 78.77M WLD of stock, restoring 84.7% Cash (110.8M WLD) to 15.3% Equities (20.0M WLD)
+2. **[Treasury Bonds (KTB) & Repo Exchange Specification](TREASURY_BONDS_EXCHANGE_SPEC.md)**: 3Y/5Y/10Y sovereign bonds real-time orderbook, 24h repurchase agreement (Repo) credit line, and treasury coupon engine
+3. **[National Pension Service (NPS) Public Accumulation & Lifetime Basic Pension Spec](NATIONAL_PENSION_SERVICE_SPEC.md)**: 5 contribution tiers (50K~1M WLD), 100% treasury matching grant, hourly lifetime basic annuity, and sovereign wealth fund allocation
+4. **[Bank of Korea FX Reserves & Seoul Foreign Exchange Market Spec](FOREIGN_EXCHANGE_RESERVES_AND_MARKET_SPEC.md)**: 1,000,000 USD foreign exchange vault, floating exchange rate (1,350 WLD anchor), central bank smoothing operations, and 4.5% USD savings
+5. **[Global FX Safety Net, Currency Swaps, and Forward Hedging Spec](GLOBAL_FX_SAFETY_NET_AND_FORWARD_HEDGE_SPEC.md)**: IMF SDR basket & physical gold diversification, US-Korea & Japan-Korea swap lines, 1M/3M/6M CIP forward hedging, and 4-tier EWS stress index
+6. **[KDIC Depositor Protection Act & Financial Stability Fund Spec](DEPOSIT_INSURANCE_AND_FINANCIAL_STABILITY_SPEC.md)**: Statutory 500K WLD coverage, 0.08% bank premium assessment, 10M WLD fund vault, and bank run insurance payouts
+7. **[Treasury Automated Social Recirculation Spec](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Invariant
+8. **[Treasury & Fiscal Recirculation Architecture](architecture/TREASURY_AND_FISCAL_RECIRCULATION_ARCHITECTURE.md)**: Mermaid system diagram and ledger specifications
+9. **[Economic Balance & 6-Profitability Audit Report (v473)](ECONOMIC_PROFITABILITY_AUDIT.md)**
+10. **[Virtual Compound Interest & Saving Pockets](features/README.md)**
+11. **[Virtual Treasury Bond Simulator](features/README.md)**
 
 ### 06. 💼 Jobs, Businesses & Economy Governance
 1. **[State-Owned Enterprises (WSHC) & ALIO Public Disclosure Portal Spec](STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.md)**: Energy, Infrastructure, and Financial SOE financial ledgers, 30% treasury dividend remittance, and public ALIO portal
@@ -70,8 +73,10 @@
 2. **[Mobile API Specification](mobile-api-complete-spec.md)**
 
 ### 10. 📜 Release Logs & Worklogs
-1. **[Official Release Changelog](UPDATE_LOG.md)**: Full release history v469 ~ v474
-2. **[Worklog Directory](worklog/README.md)**: Daily architecture records
+1. **[SEO Social Share Toolbar, X Twitter Bot & Treasury Normalization Worklog (v118)](worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.md)**: Latest v118 production deployment and live verification
+2. **[Google Search Console Service Account Live Integration Worklog (v541)](worklog/2026-10-07-gsc-search-console-api-v2026.10.07.541.md)**: Real-time GSC API site inspection
+3. **[Official Release Changelog](UPDATE_LOG.md)**: Full release history v469 ~ v474
+4. **[Worklog Directory](worklog/README.md)**: Daily architecture records
 
 ### 11. 🏢 Virtual Real Estate & Metaverse Land
 1. **[Virtual Real Estate & Land Leasing Spec](APP_SPEC_AND_USER_GUIDE.md#38-virtual-real-estate--metaverse-land-leasing-spacesreal-estate)**: 10 premier land parcels, commercial building construction, and 15% passive WLD fee distribution
