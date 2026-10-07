@@ -1,4 +1,7 @@
-﻿# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v118)
+﻿# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v119)
+
+## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v119**: [관리자 관제 전수 QA & 주소 연결] 관리자 31개 라우트 전수 점검, 주소-UI 누락(숨은 주소) 연결, 테스트 계정 프로비저닝 및 테스트서버(`test.easy-scraping.com`) 우선 검증 파이프라인 수립 (+280, -0)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
 - **v118**: [SEO & 바이럴 백링크 가속화] 원클릭 소셜 공유 바(카카오톡, X/트위터, 페이스북, 링크복사) & 백엔드 X(Twitter) 자동 트윗 백링크 봇 풀스택 구축 (+250, -0)
@@ -2989,3 +2992,63 @@ flowchart TD
 - rontend/src/components/social-share-toolbar.tsx: 카카오톡, X(Twitter), 페이스북, 링크 복사, Web Share API 원클릭 툴바.
 - ackend/src/seo/twitter-publisher.service.ts: Twitter API v2 OAuth 1.0a 트윗 발행 엔진.
 - 관리자 SEO 콘솔(/admin/seo) 연동 및 수동 테스트 발송 엔드포인트 제공.
+
+---
+
+## 🚀 [v119 Specification] 관리자 관제 전수 QA 점검, 주소-UI 누락 연결 및 테스트 환경 파이프라인
+
+### 1. 요구사항 재정의 및 목적 (Overview & Goals)
+- **무엇을**:
+  1. 관리자 전용 31개 라우트 전수 UI/기능 점검 및 상위-하위 주소 연결성(Orphan URL 제로화) 확보.
+  2. 사이드바/서브탭에 노출되지 않던 숨은 관리자 주소(예: `/admin/seo-audit` 등)를 상위 탭 내비게이션에 완전 연결.
+  3. QA 및 기능 검증 전용 테스트 계정(일반 유저 및 관리자 권한) 프로비저닝.
+  4. 운영 서버 승격 전 테스트 서버(`test.easy-scraping.com`)에서 전수 선행 테스트 후 무중단 배포하는 표준 파이프라인 확립.
+- **왜**:
+  - 관리자가 URL을 직접 입력하지 않고도 모든 31개 관리자 기능에 직관적으로 접근할 수 있도록 UI 접근성을 100% 확보하고, 운영 장애를 원천 차단하기 위함.
+- **어디를**:
+  - 프론트엔드: `frontend/src/components/admin-sub-nav.tsx`, `frontend/src/app/admin/**`
+  - 백엔드: 테스트 계정 시드 스크립트 및 관리자 API 무결성 검증
+
+### 2. 관리자 31개 라우트 전수 인벤토리 및 연결 상태 매트릭스
+| 번호 | 라우트 경로 | 주요 기능 | 상위/서브 내비게이션 연결 상태 |
+| :--- | :--- | :--- | :--- |
+| 1 | `/admin` | 관리자 총괄 관제 대시보드 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 2 | `/admin/analytics` | 그래프 및 코호트 분석 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 3 | `/admin/api-health` | 14대 도메인 실시간 API 관제 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 4 | `/admin/bank` | 가상 은행 지준율 & 대출 위험 관제 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 5 | `/admin/bonds` | 국채(KTB) 3종 & 레포 대출 거래소 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 6 | `/admin/catalog` | 가상 비즈니스 및 시즌 패스 관리 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 7 | `/admin/content` | 공지사항, 갤러리 및 모더레이션 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 8 | `/admin/controls` | 시스템 킬스위치 & 피처 플래그 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 9 | `/admin/discord` | 디스코드 봇 & 음성 데몬 관제 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 10 | `/admin/economy` | 중앙은행·조폐국·통화량 원장 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 11 | `/admin/economy/scenario-lab` | 거시경제 시나리오 랩 & AI 위원회 | `/admin/economy` 내 링크 존재 (정상) |
+| 12 | `/admin/enterprises` | 국가 공기업(WSHC) & 알리오 공시 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 13 | `/admin/fx` | 서울외환시장 & 스무딩 오퍼레이션 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 14 | `/admin/kdic` | 예금보험공사 & 금융안정기금 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 15 | `/admin/logs` | 전역 감사 로그 (불변 원장) | `ADMIN_TABS` 최상위 등록 (정상) |
+| 16 | `/admin/logs/activity` | 접속/체류/클릭 실시간 로그 | `LogsSubNav` 서브탭 완벽 연동 (정상) |
+| 17 | `/admin/logs/delivery` | 디스코드 알림 발송 원장 | `LogsSubNav` 서브탭 완벽 연동 (정상) |
+| 18 | `/admin/logs/integrity` | SHA-256 해시체인 무결성 검증 | `LogsSubNav` 서브탭 완벽 연동 (정상) |
+| 19 | `/admin/market` | 가상 주식 시장 역학 & 오더북 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 20 | `/admin/market/ai-news` | AI 시장 속보 & 기업 공시 발행 | `/admin/market` 내 링크 존재 (정상) |
+| 21 | `/admin/pension` | 국민연금공단(NPS) 적립 & 기초연금 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 22 | `/admin/safety` | 미성년자 보호 & TAKE IT DOWN | `ADMIN_TABS` 최상위 등록 (정상) |
+| 23 | `/admin/security` | 악의적 IP/세션 차단 & 2FA 모달 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 24 | `/admin/seo` | 실시간 크롤링 봇 & 색인 현황 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 25 | `/admin/seo-audit` | 크롤러 수집 감사 관제 타워 | `/admin/seo` 상단 탭 연동 확인 (정상) |
+| 26 | `/admin/shop` | 가상 상점 아이템 & 재고 관리 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 27 | `/admin/support` | 1:1 고객 문의 실시간 채팅 모더레이션 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 28 | `/admin/treasury` | 국고 2,500만 앵커 & 85% 현금 정상화 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 29 | `/admin/users` | 회원 목록, 잔고 조정 & 권한 관리 | `ADMIN_TABS` 최상위 등록 (정상) |
+| 30 | `/admin/users/[id]` | 개별 회원 상세 프로필 & 거래 이력 | 회원 목록 테이블 행 클릭 시 이동 (정상) |
+| 31 | `/admin/work` | 8대 전문직 파밍 & 에너지 소모율 | `ADMIN_TABS` 최상위 등록 (정상) |
+
+### 3. 세부 실행 계획
+1. **관리자 라우트 전수 자동 QA 검증 스크립트 구축**:
+   - 31개 전체 라우트를 로컬 및 서버 백엔드 API와 통신하며 순회(Status Code 200, 런타임 에러 제로 확인).
+2. **테스트 전용 계정 프로비저닝**:
+   - 슈퍼 관리자 테스트 계정 (Superadmin QA)
+   - 일반 회원 테스트 계정 (Regular Member QA)
+3. **테스트 서버(	est.easy-scraping.com) 선행 검증 & 무중단 승격**:
+   - 테스트 서버 브랜치 배포 -> 상태 및 세션 검증 -> 운영 서버 블루-그린 무중단 승격.

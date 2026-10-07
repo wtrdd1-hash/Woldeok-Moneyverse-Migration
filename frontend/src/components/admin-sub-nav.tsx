@@ -29,6 +29,7 @@ import {
   ArrowLeftRight,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { AdminQuickJumperModal } from './admin-quick-jumper-modal';
 
 interface AdminTabItem {
   readonly href: string;
@@ -104,6 +105,9 @@ export function AdminSubNav() {
       className="-mx-3 mb-4 overflow-x-auto border-y border-border/60 bg-card/60 backdrop-blur-xl p-1.5 shadow-sm scrollbar-none touch-pan-x overscroll-x-contain sm:mx-0 sm:rounded-2xl sm:border select-none [&::-webkit-scrollbar]:hidden"
     >
       <ul className="flex w-max items-center gap-1 px-2 sm:w-auto sm:flex-wrap sm:px-0">
+        <li className="shrink-0 pr-1 border-r border-border/60 mr-1">
+          <AdminQuickJumperModal />
+        </li>
         {ADMIN_TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = tab.href === active;
