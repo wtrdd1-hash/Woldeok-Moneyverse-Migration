@@ -12,6 +12,7 @@ import { CalculatorRetentionFunnel } from '@/components/calculator-retention-fun
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 import { CalculatorConversionBanner } from '@/components/calculator-conversion-banner';
+import { SocialShareBar } from '@/components/social-share-bar';
 
 interface PresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
@@ -182,6 +183,11 @@ export default async function StockPresetPage({ params }: PresetPageProps) {
                 }}
                 badge={data.badge}
                 summary={data.summary}
+              />
+              <SocialShareBar
+                title={`${data.title} - 머니버스 물타기 계산기`}
+                description={`목표 평단가 ${data.calculatedResult.primaryValue} 달성을 위한 최적 매수 시나리오를 확인해보세요.`}
+                hashtags={['머니버스', '물타기계산기', '주식모의투자', '재테크']}
               />
             </div>
           </div>

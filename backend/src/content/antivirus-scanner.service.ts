@@ -263,12 +263,20 @@ export class AntivirusScannerService {
   private async tryClamAvScan(
     buffer: Buffer,
   ): Promise<{ readonly isClean: boolean; readonly virusName?: string } | null> {
+    const fs = await import('node:fs');
+    const socketPath = process.env.CLAMAV_SOCKET || '/run/clamav/clamd.ctl';
+    const hasUnixSocket = fs.existsSync(socketPath);
+
     const clamHost = process.env.CLAMAV_HOST;
     const clamPort = Number.parseInt(process.env.CLAMAV_PORT || '3310', 10);
-    if (!clamHost) return null;
+    if (!hasUnixSocket && !clamHost) return null;
 
     return new Promise((resolve) => {
-      const socket = net.createConnection({ host: clamHost, port: clamPort }, () => {
+      const socket = hasUnixSocket
+        ? net.createConnection({ path: socketPath }, onConnected)
+        : net.createConnection({ host: clamHost!, port: clamPort }, onConnected);
+
+      function onConnected() {
         socket.write('zINSTREAM\0');
         const chunkSize = 2048;
         for (let i = 0; i < buffer.length; i += chunkSize) {
@@ -281,7 +289,7 @@ export class AntivirusScannerService {
         const zero = Buffer.alloc(4);
         zero.writeUInt32BE(0, 0);
         socket.write(zero);
-      });
+      }
 
       socket.setTimeout(2500);
       let response = '';

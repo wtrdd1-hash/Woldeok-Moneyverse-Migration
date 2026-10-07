@@ -1,4 +1,4 @@
-﻿# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v119)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v119)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
 - **v119**: [관리자 관제 전수 QA & 주소 연결] 관리자 31개 라우트 전수 점검, 주소-UI 누락(숨은 주소) 연결, 테스트 계정 프로비저닝 및 테스트서버(`test.easy-scraping.com`) 우선 검증 파이프라인 수립 (+280, -0)
@@ -3052,3 +3052,33 @@ flowchart TD
    - 일반 회원 테스트 계정 (Regular Member QA)
 3. **테스트 서버(	est.easy-scraping.com) 선행 검증 & 무중단 승격**:
    - 테스트 서버 브랜치 배포 -> 상태 및 세션 검증 -> 운영 서버 블루-그린 무중단 승격.
+
+
+---
+## 🚀 [v120 Specification] 1:1 쪽지 시스템 완결, 소셜 바이럴 공유 바 & ClamAV 데몬 연동 및 무중단 승격 (+240, -0)
+
+### 1. 요구사항 재정의 및 목적 (Overview & Goals)
+- **무엇을**:
+  1. **1:1 쪽지(Direct Message) 시스템 엔드투엔드 완결**:
+     - 사용자 검색(`search-users`), 대화방 생성(`openConversation`), 메시지 송수신(`sendMessage`, `listMessages`), 읽음 처리(`markAsRead`) 파이프라인 검증 완료.
+     - 프론트엔드 쪽지함(`/chat`)의 실시간 델타 동기화(`syncMessages`) 최적화 및 닉네임 클릭 시 [쪽지 보내기] 바로가기 연결.
+     - 헤더 알림 영역과 쪽지함 간 안 읽은 메시지 실시간 카운트 동기화.
+  2. **외부 백링크 가속화 소셜 바이럴 공유 바 구축**:
+     - 복리 계산기, 물타기 계산기, 랭킹, 주식 종목, 카지노 지면에 원클릭 소셜 공유 바(`SocialShareBar`) 탑재.
+     - X(Twitter) 인텐트 공유(`https://twitter.com/intent/tweet?text=...&url=...`), 카카오톡 공유 링크, 클립보드 원클릭 복사(Toast 피드백).
+  3. **ClamAV 백그라운드 소켓 연동 승격**:
+     - `antivirus-scanner.service.ts`의 `/run/clamav/clamd.ctl` UNIX 소켓 자동 연결 코드 운영 승격.
+  4. **운영 서버 무중단 승격 및 실측 라이브 QA**:
+     - 로컬 타입체크 및 테스트 통과 후 Git 푸시, 운영 서버 무중단 리로드, HTTP 200 실측 검증.
+
+### 2. 컴포넌트 및 파일 변경 계획 (Proposed Changes)
+- **백엔드**:
+  - `backend/src/content/antivirus-scanner.service.ts`: UNIX 소켓 `/run/clamav/clamd.ctl` 감지 및 1초 미만 고속 스캔 연동.
+- **프론트엔드**:
+  - `frontend/src/components/social-share-bar.tsx`: X(Twitter), 카카오톡, 링크 복사를 지원하는 일관된 소셜 공유 바 신설.
+  - `frontend/src/app/tools/stock-calculator/[preset]/page.tsx` 및 `frontend/src/app/tools/retirement-calculator/page.tsx`: 공유 바 배치.
+  - `frontend/src/app/chat/chat-room.tsx`: 주기적 델타 싱크 인터벌 및 읽음 상태 실시간 갱신 최적화.
+
+### 3. 검증 계획 (Verification Plan)
+- 로컬 `tsc --noEmit` 타입체크 100% 통과.
+- 운영 서버 백엔드 및 프론트엔드 무중단 배포 후 실제 HTTP 요청 및 라이브 응답 확인.

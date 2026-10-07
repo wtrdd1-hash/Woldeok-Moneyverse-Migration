@@ -544,6 +544,12 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
+            <Link href="/chat" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
+              <MessageSquare className="size-4 text-muted-foreground" />
+              <span>{localeLabel(locale, '쪽지함', 'Direct Messages', 'メッセージ', '私信箱')}</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <Link href="/account" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
               <ShieldCheck className="size-4 text-muted-foreground" />
               <span>{localeLabel(locale, '내 계정', 'My account', 'マイアカウント', '我的账户')}</span>
