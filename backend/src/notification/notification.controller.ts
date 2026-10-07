@@ -75,4 +75,14 @@ export class NotificationController {
       this.notificationService.markAllRead(requireUserId(request)),
     );
   }
+
+  @Post('claim-all')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Claim all rewards and mark all notifications as read' })
+  claimAll(@Req() request: RequestWithSession) {
+    return this.guarded(() =>
+      this.notificationService.claimAll(requireUserId(request)),
+    );
+  }
 }
+

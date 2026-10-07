@@ -371,4 +371,62 @@ export class PostgresWalletRepository {
     if (row?.success !== true) throw new Error('database did not record treasury budget vote');
     return { success: true, quarter, choice };
   }
+
+  async searchRecipients(query: string, currentUserId: string): Promise<{ userId: string; displayName: string }[]> {
+    const q = (query || '').trim();
+    if (!q) return [];
+    return queryRows<{ userId: string; displayName: string }>(
+      this.pool,
+      `SELECT profile.user_id::text AS "userId", profile.display_name AS "displayName"
+       FROM public.member_profiles AS profile
+       JOIN public.users AS u ON u.id = profile.user_id
+       WHERE profile.display_name ILIKE $1
+         AND profile.user_id != $2::uuid
+         AND u.status = 'active'::public.user_status
+       LIMIT 10`,
+      [`%${q}%`, currentUserId],
+    );
+  }
+
+  async recordP2PTransfer(data: {
+    senderId: string;
+    receiverId: string;
+    receiverName: string;
+    amount: string;
+    message?: string;
+    sticker?: string;
+  }): Promise<void> {
+    await queryOne(
+      this.pool,
+      `INSERT INTO public.p2p_wire_transfers (sender_id, receiver_id, receiver_name, amount_wld, message, sticker)
+       VALUES ($1::uuid, $2::uuid, $3, $4::numeric, $5, $6)`,
+      [
+        data.senderId,
+        data.receiverId,
+        data.receiverName,
+        data.amount,
+        data.message ?? null,
+        data.sticker ?? null,
+      ],
+    );
+
+    const sender = await queryOne<{ display_name: string }>(
+      this.pool,
+      `SELECT display_name FROM public.member_profiles WHERE user_id = $1::uuid`,
+      [data.senderId],
+    );
+    const senderName = sender?.display_name ?? '익명의 머니버스 시민';
+
+    await queryOne(
+      this.pool,
+      `INSERT INTO public.in_app_notifications (user_id, category, title, body, link)
+       VALUES ($1::uuid, 'TRANSACTIONAL', $2, $3, '/wallet')`,
+      [
+        data.receiverId,
+        `💸 [P2P 송금] ${senderName}님으로부터 ${data.amount} WLD가 입금되었습니다!`,
+        `${data.message ? `메모: "${data.message}"` : '안전하게 송금되었습니다.'} ${data.sticker ? `(스티커: ${data.sticker})` : ''}`,
+      ],
+    );
+  }
 }
+

@@ -92,7 +92,18 @@ export interface WalletRepositoryLike {
   repay(input: WalletRepayInput): Promise<WalletRepayRow>;
   getCitizenTaxReceipt?(userId: string): Promise<Record<string, unknown>>;
   voteCitizenBudget?(userId: string, quarter: string, choice: string): Promise<{ success: boolean; quarter: string; choice: string }>;
+  searchRecipients?(query: string, currentUserId: string): Promise<{ userId: string; displayName: string }[]>;
+  recordP2PTransfer?(data: {
+    senderId: string;
+    receiverId: string;
+    receiverName: string;
+    amount: string;
+    message?: string | undefined;
+    sticker?: string | undefined;
+  }): Promise<void>;
 }
+
+
 
 export interface WalletBalanceView {
   readonly availableAmount: WldAmount;
@@ -547,4 +558,62 @@ export class WalletService {
     }
     return { success: true, quarter, choice };
   }
+
+  async searchRecipients(
+    authenticatedUserId: string,
+    query: string,
+  ): Promise<{ userId: string; displayName: string }[]> {
+    const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
+    if (typeof this.repository.searchRecipients === 'function') {
+      return this.repository.searchRecipients(query, actorUserId);
+    }
+    return [];
+  }
+
+  async p2pTransfer(
+    authenticatedUserId: string,
+    {
+      recipientUserId,
+      amount,
+      idempotencyKey,
+      message,
+      sticker,
+    }: {
+      recipientUserId?: unknown;
+      amount?: unknown;
+      idempotencyKey?: unknown;
+      message?: string;
+      sticker?: string;
+    } = {},
+  ): Promise<WalletTransferReceipt & { message?: string; sticker?: string }> {
+    const receipt = await this.transfer(authenticatedUserId, {
+      recipientUserId,
+      amount,
+      idempotencyKey,
+    });
+
+    const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
+    const recipient = requireUuid(recipientUserId, 'recipient user id');
+    const transferAmount = requirePositiveWld(amount, 'amount');
+
+    if (typeof this.repository.recordP2PTransfer === 'function') {
+      const activeRecipient = await this.repository.activeRecipientById(recipient);
+      await this.repository.recordP2PTransfer({
+        senderId: actorUserId,
+        receiverId: recipient,
+        receiverName: activeRecipient?.userId ?? recipient,
+        amount: transferAmount,
+        message: message ? String(message).slice(0, 50) : undefined,
+        sticker: sticker ? String(sticker).slice(0, 20) : undefined,
+      });
+    }
+
+    return {
+      ...receipt,
+      ...(message !== undefined ? { message } : {}),
+      ...(sticker !== undefined ? { sticker } : {}),
+    };
+  }
 }
+
+

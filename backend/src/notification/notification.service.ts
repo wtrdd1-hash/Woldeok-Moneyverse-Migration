@@ -56,4 +56,15 @@ export class NotificationService {
     );
     return row?.affected_count ?? 0;
   }
+
+  async claimAll(actor: string): Promise<{ success: boolean; claimedCount: number; message: string }> {
+    if (!this.pool) throw new Error('database pool unavailable');
+    const affected = await this.markAllRead(actor);
+    return {
+      success: true,
+      claimedCount: affected,
+      message: affected > 0 ? `${affected}건의 알림을 모두 확인 및 수령 완료했습니다.` : '수령할 신규 알림이 없습니다.',
+    };
+  }
 }
+

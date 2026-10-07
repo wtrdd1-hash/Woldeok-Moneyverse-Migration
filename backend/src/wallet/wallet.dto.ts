@@ -82,3 +82,24 @@ export class ClaimDto {
   @IsUUID()
   readonly idempotencyKey!: string;
 }
+
+export class P2PTransferDto {
+  @ApiProperty({ format: 'uuid', description: 'Recipient user id' })
+  @IsUUID()
+  readonly recipientUserId!: string;
+
+  @ApiProperty({ oneOf: [{ type: 'string', pattern: '^[1-9][0-9]*$' }, { type: 'integer', minimum: 1 }], example: '100' })
+  @IsWldRequestAmount()
+  readonly amount!: WldRequestAmount;
+
+  @ApiProperty({ format: 'uuid', description: 'Client-generated idempotency key' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+
+  @ApiProperty({ required: false, description: 'Optional thank-you or cheer note (up to 30 chars)' })
+  readonly message?: string;
+
+  @ApiProperty({ required: false, description: 'Optional reaction sticker' })
+  readonly sticker?: string;
+}
+

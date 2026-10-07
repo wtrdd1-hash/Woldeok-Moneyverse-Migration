@@ -23,7 +23,7 @@ import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
-import { BankMovementDto, BorrowDto, ClaimDto, RepayDto, TransferDto } from './wallet.dto';
+import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
 import { WalletInputError } from './wallet.repository';
 import { WalletRecipientError, WalletService } from './wallet.service';
 
@@ -91,6 +91,12 @@ export class WalletController {
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
   }
 
+  @Get('wallet/recipients/search')
+  @ApiOperation({ summary: 'Search active member recipients by display name for wire transfer' })
+  searchRecipients(@Req() request: RequestWithSession, @Query('query') query?: string) {
+    return this.service().searchRecipients(requireUserId(request), query || '');
+  }
+
   @Get('rewards/availability')
   @ApiOperation({ summary: 'Next eligible times for the caller reward controls' })
   rewardAvailability(@Req() request: RequestWithSession) {
@@ -111,6 +117,16 @@ export class WalletController {
       'this wallet action cannot be completed now',
     );
   }
+
+  @Post('wallet/transfers/p2p')
+  @ApiOperation({ summary: 'Send WLD to another member with custom thank-you note and sticker' })
+  p2pTransfer(@Req() request: RequestWithSession, @Body() body: P2PTransferDto) {
+    return this.guarded(
+      () => this.service().p2pTransfer(requireUserId(request), { ...body }),
+      'this wallet action cannot be completed now',
+    );
+  }
+
 
   @Post('bank/movements')
   @ApiOperation({ summary: 'Move balance between cash and bank' })

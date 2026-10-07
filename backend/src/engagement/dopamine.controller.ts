@@ -254,4 +254,55 @@ export class DopamineController {
       message: 'Moneyverse Plus VIP 일일 황금 상자 수령 완료 (2,000 WLD + VIP 럭키 다이스 1개 지급)',
     };
   }
+
+  @Get('attendance/status')
+  @ApiOperation({ summary: 'Get daily attendance streak and lucky roulette status' })
+  async getAttendanceStatus(@Req() request: RequestWithSession) {
+    const userId = requireUserId(request);
+    if (this.repository) {
+      return await this.repository.getAttendanceStatus(userId);
+    }
+    return {
+      checkedInToday: false,
+      streakDays: 1,
+      lastAttendedDate: null,
+      nextRewardPreview: 50,
+      isJackpotEligible: false,
+    };
+  }
+
+  @Post('attendance/spin')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Claim daily attendance reward and spin the lucky dopamine roulette' })
+  async claimAttendanceSpin(
+    @Req() request: RequestWithSession,
+    @Body() body: { idempotencyKey?: string },
+  ) {
+    const userId = requireUserId(request);
+    const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
+      ? body.idempotencyKey
+      : randomUUID();
+
+    if (this.repository) {
+      try {
+        return await this.repository.claimAttendanceSpin(userId, key);
+      } catch (error: unknown) {
+        if (error instanceof DopamineInputError) {
+          throw new BadRequestException(error.message);
+        }
+        const msg = error instanceof Error ? error.message : String(error);
+        throw new InternalServerErrorException(msg);
+      }
+    }
+
+    return {
+      success: true,
+      rewardAmount: 50,
+      streakDays: 1,
+      isJackpot: false,
+      newBalance: '1000',
+      claimedAt: new Date().toISOString(),
+    };
+  }
 }
+

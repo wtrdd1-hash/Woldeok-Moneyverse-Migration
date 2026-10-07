@@ -3630,3 +3630,50 @@ flowchart TD
 - Git 커밋 및 원격 저장소(`origin/main`) 푸시.
 - 운영 서버(`prod-v529`) 실시간 무중단 블루-그린 배포.
 - 실 브라우저 헤드리스 스크린샷 검증 (모바일 390px, PC 1280px 오버플로우 0건 실측).
+
+
+---
+## 🚀 [v136 Specification] 3대 핵심 금융 & 리텐션 패키지 구축 (출석 스트릭 룰렛 + P2P 스마트 송금 + 실시간 통합 알림함) (+280, -0)
+
+### 1. 기능 기획 및 개요 (Feature Planning & Overview)
+- **배경 및 목적**:
+  - 머니버스 플랫폼의 유저 잔존율(DAU/리텐션), 자금 순환, 유저 간 인터랙션 경험을 비약적으로 끌어올리기 위해 3대 핵심 시스템을 원스톱으로 구축합니다.
+  1. **7일 연속 출석 스트릭 & 도파민 럭키 룰렛 (Daily Attendance & Streak Jackpot)**:
+     - 매일 00:00(KST) 기준 1회 출석 체크 및 기본 보상(10~50 WLD) 지급.
+     - 연속 출석일수(Streak)에 따른 누적 배수 보상 및 7일 연속 출석 시 잭팟 보너스(최대 1,000 WLD) 자동 지급.
+     - Canvas/SVG 기반의 시각적 룰렛 회전 및 당첨 연출.
+  2. **1:1 P2P 스마트 안심 송금 & 감사 메모 (P2P Wire Transfer & Note)**:
+     - 유저 간 즉시 송금, 수취인 닉네임 유효성 실시간 프리뷰.
+     - 30자 이내의 감사/축하 메모 및 귀여운 감정 스티커 동봉 기능.
+     - PostgreSQL 원장 트랜잭션 기반 0수수료 멱등성 송금 처리 및 송금 즉시 수취인에게 실시간 알림 발송.
+  3. **실시간 통합 알림 센터 & 원클릭 보상 수령함 (Inbox & Claim Center)**:
+     - 주식 배당금, 직업 정산, P2P 송금 수취, 핫타임 버프 알림 수신.
+     - 헤더 상단 알림 종(Bell) 아이콘 및 미확인 알림 뱃지 카운트.
+     - 미수령 보상을 버튼 1번으로 일괄 정산하는 '원클릭 모두 수령(Claim All)' 기능.
+
+### 2. 세부 데이터베이스 설계 (Database Schema)
+1. `daily_attendance_logs`:
+   - `id` UUID PK, `user_id` UUID, `attended_date` DATE, `streak_count` INT, `reward_wld` NUMERIC, `is_jackpot` BOOLEAN, `created_at` TIMESTAMPTZ.
+2. `p2p_wire_transfers`:
+   - `id` UUID PK, `sender_id` UUID, `receiver_id` UUID, `receiver_username` TEXT, `amount_wld` NUMERIC, `message` TEXT, `sticker` TEXT, `status` TEXT, `created_at` TIMESTAMPTZ.
+3. `user_notifications`:
+   - `id` UUID PK, `user_id` UUID, `title` TEXT, `message` TEXT, `category` TEXT (`transfer`, `dividend`, `system`, `event`), `reward_wld` NUMERIC DEFAULT 0, `is_claimed` BOOLEAN DEFAULT false, `is_read` BOOLEAN DEFAULT false, `created_at` TIMESTAMPTZ.
+
+### 3. 세부 파일 구현 명세 (Proposed Changes)
+- **API 엔드포인트**:
+  - `frontend/src/app/api/attendance/check-in/route.ts` & `status/route.ts`
+  - `frontend/src/app/api/transfers/p2p/route.ts`
+  - `frontend/src/app/api/notifications/route.ts` & `claim-all/route.ts`
+- **UI 컴포넌트**:
+  - `frontend/src/components/daily-attendance-roulette.tsx` (완전 연동형으로 승격)
+  - `frontend/src/components/p2p-transfer-modal.tsx` (송금 & 메모 모달)
+  - `frontend/src/components/notification-center-modal.tsx` (알림 센터 & 원클릭 수령함)
+  - `frontend/src/components/site-header.tsx` (알림 종 아이콘 및 모달 트리거 탑재)
+- **화면 연동**:
+  - `frontend/src/app/page.tsx` (홈 화면에 출석 룰렛 및 P2P 송금 바로가기 탑재)
+
+### 4. 검증 계획 (Verification Plan)
+- TypeScript 컴파일 및 린트 검증.
+- 프로덕션 빌드 무결성 확인.
+- Git 커밋 및 운영 서버 무중단 블루-그린 배포.
+- 모바일(390px) 및 PC(1280px) 전 구간 횡스크롤 0건 및 정상 동작 실측.

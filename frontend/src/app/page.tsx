@@ -36,6 +36,8 @@ import { DailyEconomicQuestStation } from '@/components/daily-economic-quest-sta
 import { MacroLiquidityDashboard } from '@/components/macro-liquidity-dashboard';
 import { DiscordBanner } from '@/components/discord-banner';
 import { LiveHotTimeBanner } from '@/components/live-hot-time-banner';
+import { DailyAttendanceRoulette } from '@/components/daily-attendance-roulette';
+import { P2PTransferModal } from '@/components/p2p-transfer-modal';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -177,25 +179,13 @@ export default async function HomePage() {
 
           {/* 4 Core Quick Actions (44px+ 터치 타깃 & Inset Border 준수) */}
           <div className="grid grid-cols-1 min-[340px]:grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-3">
-            <Link
-              href="/wallet"
-              className="flex items-center gap-2.5 min-[400px]:gap-3 p-2.5 min-[400px]:p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-amber-500/40 transition-all active:scale-[0.98] group min-h-[52px] sm:min-h-[56px] shadow-xs min-w-0"
-            >
-              <div className="grid size-8.5 min-[400px]:size-10 shrink-0 place-items-center rounded-lg bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-primary-foreground transition-colors">
-                <Send className="size-4.5 min-[400px]:size-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="block text-xs sm:text-sm font-bold text-foreground truncate">
-                  <T korean="돈 보내기" english="Transfer" japanese="送金" chinese="转账" />
-                </span>
-                <span className="block text-[10px] text-muted-foreground truncate">
-                  <T korean="무수수료 멱등 송금" english="Zero Fee" japanese="手数料無料の冪等送金" chinese="零手续费幂等转账" />
-                </span>
-              </div>
-            </Link>
+            <div className="flex flex-col justify-center">
+              <P2PTransferModal triggerText="1:1 P2P 안심 송금" />
+            </div>
 
             <Link
               href="/work"
+
               className="flex items-center gap-2.5 min-[400px]:gap-3 p-2.5 min-[400px]:p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-blue-500/40 transition-all active:scale-[0.98] group min-h-[52px] sm:min-h-[56px] shadow-xs min-w-0"
             >
               <div className="grid size-8.5 min-[400px]:size-10 shrink-0 place-items-center rounded-lg bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-primary-foreground transition-colors">
@@ -251,6 +241,11 @@ export default async function HomePage() {
       {/* 1.35 LIVE HOT-TIME BUFF & ECONOMIC BOOSTER BANNER */}
       <div className="w-full max-w-full min-w-0">
         <LiveHotTimeBanner />
+      </div>
+
+      {/* 1.36 7-DAY ATTENDANCE & DOPAMINE LUCKY ROULETTE */}
+      <div className="w-full max-w-full min-w-0">
+        <DailyAttendanceRoulette />
       </div>
 
       {/* 1.4 LIVE HALL OF FAME & REAL-TIME ACTIVITY TICKER */}
