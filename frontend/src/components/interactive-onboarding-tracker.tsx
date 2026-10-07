@@ -150,7 +150,7 @@ export function InteractiveOnboardingTracker() {
       {/* 펼쳐진 상태 (Expanded Modal Card) */}
       {isOpen ? (
         <div ref={cardRef}>
-          <Card className="w-[340px] sm:w-[390px] bg-zinc-950/95 backdrop-blur-md border-zinc-700 shadow-2xl rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 ring-1 ring-white/10">
+          <Card className="w-[calc(100vw-1.75rem)] max-w-[390px] bg-zinc-950/95 backdrop-blur-md border-zinc-700 shadow-2xl rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 ring-1 ring-white/10">
             <CardHeader className="p-4 bg-gradient-to-r from-zinc-900 via-zinc-900/95 to-zinc-950 border-b border-zinc-800 flex flex-row items-center justify-between">
               <div className="space-y-0.5 pr-2">
                 <div className="flex items-center gap-1.5">
