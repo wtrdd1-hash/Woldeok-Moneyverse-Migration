@@ -16,7 +16,8 @@
 4. **[National Pension Service (NPS) Public Accumulation & Lifetime Basic Pension Spec](NATIONAL_PENSION_SERVICE_SPEC.md)**: 5 contribution tiers (50K~1M WLD), 100% treasury matching grant, hourly lifetime basic annuity, and sovereign wealth fund allocation
 5. **[Bank of Korea FX Reserves & Seoul Foreign Exchange Market Spec](FOREIGN_EXCHANGE_RESERVES_AND_MARKET_SPEC.md)**: 1,000,000 USD foreign exchange vault, floating exchange rate (1,350 WLD anchor), central bank smoothing operations, and 4.5% USD savings
 6. **[Global FX Safety Net, Currency Swaps, and Forward Hedging Spec](GLOBAL_FX_SAFETY_NET_AND_FORWARD_HEDGE_SPEC.md)**: IMF SDR basket & gold reserves diversification, Fed & BOJ bilateral swap lines, 1M/3M/6M CIP forward hedging center, and 4-tier EWS crisis index
-7. **[State-Owned Enterprises (WSHC) & ALIO Public Disclosure Portal Spec](STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.md)**: Energy, Infrastructure, and Financial SOE financial ledgers, 30% treasury dividend remittance, and public ALIO portal
+7. **[KDIC Depositor Protection Act & Financial Stability Fund Spec](DEPOSIT_INSURANCE_AND_FINANCIAL_STABILITY_SPEC.md)**: 500K WLD coverage, 0.08% premium, 10M WLD fund vault, and bank run emergency payouts
+8. **[State-Owned Enterprises (WSHC) & ALIO Public Disclosure Portal Spec](STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.md)**: Energy, Infrastructure, and Financial SOE financial ledgers, 30% treasury dividend remittance, and public ALIO portal
 6. **[Treasury Automated Social Recirculation Specification](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Floor
 7. **[Integrated Planning Master](planning/INTEGRATED_PLANNING_MASTER.md)**: v2026.10 Latest Production Release & 15-Domain Authority Planning
 8. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**

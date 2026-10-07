@@ -44,7 +44,8 @@
 2. **[National Pension Service (NPS) Public Accumulation & Lifetime Basic Pension Spec](NATIONAL_PENSION_SERVICE_SPEC.md)**: 5 contribution tiers (50K~1M WLD), 100% treasury matching grant, hourly lifetime basic annuity, and sovereign wealth fund allocation
 3. **[Bank of Korea FX Reserves & Seoul Foreign Exchange Market Spec](FOREIGN_EXCHANGE_RESERVES_AND_MARKET_SPEC.md)**: 1,000,000 USD foreign exchange vault, floating exchange rate (1,350 WLD anchor), central bank smoothing operations, and 4.5% USD savings
 4. **[Global FX Safety Net, Currency Swaps, and Forward Hedging Spec](GLOBAL_FX_SAFETY_NET_AND_FORWARD_HEDGE_SPEC.md)**: IMF SDR basket & physical gold diversification, US-Korea & Japan-Korea swap lines, 1M/3M/6M CIP forward hedging, and 4-tier EWS stress index
-5. **[Treasury Automated Social Recirculation Spec](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Invariant
+5. **[KDIC Depositor Protection Act & Financial Stability Fund Spec](DEPOSIT_INSURANCE_AND_FINANCIAL_STABILITY_SPEC.md)**: Statutory 500K WLD coverage, 0.08% bank premium assessment, 10M WLD fund vault, and bank run insurance payouts
+6. **[Treasury Automated Social Recirculation Spec](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Invariant
 4. **[Treasury & Fiscal Recirculation Architecture](architecture/TREASURY_AND_FISCAL_RECIRCULATION_ARCHITECTURE.md)**: Mermaid system diagram and ledger specifications
 5. **[Economic Balance & 6-Profitability Audit Report (v473)](ECONOMIC_PROFITABILITY_AUDIT.md)**
 6. **[Virtual Compound Interest & Saving Pockets](features/README.md)**

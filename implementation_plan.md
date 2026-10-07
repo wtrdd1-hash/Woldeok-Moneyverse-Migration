@@ -2806,3 +2806,68 @@ flowchart TD
 3. 운영 서버 데이터베이스 마이그레이션 256 슈퍼유저 적용 및 시드 검증.
 4. 운영 서버 무중단 배포 및 실제 라이브 curl 200 OK 검증.
 5. 디스코드 관리자 1:1 DM 및 음성 봇 상주 데몬 100% 무변경 보존 확인.
+
+
+---
+
+## 🚀 [v119 Specification] 예금보험공사(KDIC) 5천만원 예금자보호법 & 금융안정기금 및 뱅크런 대위변제 풀스택 구축
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 확정 의사결정**:
+  - 실제 대한민국 예금자보호법 및 금융안정기금 래퍼런스를 100% 반영하여, 국가 금융 안정망의 핵심 기둥인 '예금보험공사(KDIC) 5천만원 예금자보호법 & 금융안정기금' 시스템을 풀스택으로 일괄 구축 및 전자동 무중단 배포.
+  - ① **예금자보호법 표준 1인당 최고 5,000만원 (가상 500,000 WLD) 보장**: 시중은행 일반 예금, 정기적금, 복리 포켓 전액 원리금 합산 50만 WLD 한도 내 법정 지급 보증.
+  - ② **예금보험기금(KDIC Vault) & 금융기관 예보료 징수**: 부보 금융기관(시중은행, 증권사) 수신 잔액의 연 0.08% 분기별 예보료 자동 징수 및 예보기금 편입 운용 (초기 시드 10,000,000 WLD).
+  - ③ **뱅크런(Bank Run) 방어 & 긴급 유동성 대여(Liquidity Loan)**: 금융기관 지급준비율 급감 및 대규모 예금 인출 시 예보기금에서 긴급 유동성 수혈, 파산 시 유저 계좌로 50만 WLD 즉각 대위변제(Insurance Payout).
+  - ④ **대국민 예금자보호 포털 (/kdic) & 공식 보호 마크**: 전 은행 계좌 및 포털에 '정부 예금보험공사 5천만원 보호 금융상품' 공식 인증 뱃지 탑재, 내 보호 대상 예금 실시간 조회.
+  - ⑤ **관리자 금융안정 관제탑 (/admin/kdic)**: 금융기관별 BIS 비율, 예보기금 적립 현황, 부실 위험 조기경보 및 긴급 대여/대위변제 콘솔.
+  - ⑥ **디스코드 관리자(886478189520637992) 1:1 DM 긴급 경보**: BIS 비율 8% 미만 또는 뱅크런 징후 포착 시 실시간 비상 DM 보고.
+
+### 2. 금융 아키텍처 및 3대 안전망 다이어그램
+```mermaid
+flowchart TD
+    subgraph Regulatory ["국가 금융안정망 거버넌스"]
+        KDIC["예금보험공사 (KDIC)<br/>- 1인당 50만 WLD 법정 보호<br/>- 예보기금 1,000만 WLD 비축"]
+        BankReg["금융기관 건전성 감독<br/>- BIS 비율 실시간 모니터링<br/>- 분기별 0.08% 예보료 징수"]
+    end
+
+    subgraph Operations ["금융기관 & 위기 대응 엔진"]
+        CommercialBank["머니버스 시중은행 / 증권사<br/>(예적금 수신 잔액 운용)"]
+        LiquiditySupport["긴급 유동성 대여 (Bailout)<br/>뱅크런 발생 시 긴급 수혈"]
+        PayoutEngine["예금 대위변제 (Insurance Payout)<br/>파산 시 50만 WLD 즉시 환급"]
+    end
+
+    subgraph Interfaces ["유저 & 관리자 서피스"]
+        PublicKDIC["/kdic (대국민 예금자보호 포털)<br/>- 내 보호예금 실시간 조회<br/>- 예금자보호 공식 인증 뱃지"]
+        AdminKDIC["/admin/kdic (금융안정 관제탑)<br/>- BIS 비율 & 부실 위험 감시<br/>- 예보기금 운용 & 대위변제 집행"]
+        DiscordDM["디스코드 1:1 긴급 DM<br/>(886478189520637992 비상 속보)"]
+    end
+
+    CommercialBank --> BankReg
+    BankReg --> KDIC
+    KDIC --> LiquiditySupport
+    LiquiditySupport --> CommercialBank
+    KDIC --> PayoutEngine
+    PayoutEngine --> PublicKDIC
+    KDIC --> AdminKDIC
+    KDIC --> DiscordDM
+```
+
+### 3. 세부 파일별 변경 계획
+1. **마스터 기획서 및 카탈로그 등록**:
+   - `docs/DEPOSIT_INSURANCE_AND_FINANCIAL_STABILITY_SPEC.ko.md` 및 `.md` 작성.
+   - `docs/INDEX.ko.md`, `INDEX.md`, `DOCUMENT_CATALOG.ko.md`, `DOCUMENT_CATALOG.md` 등록.
+2. **데이터베이스 마이그레이션**:
+   - `packages/database/migrations/257-deposit-insurance-and-financial-stability.sql`
+   - `deposit_insurance_funds`: 예보기금 총액, 적립률, 부보예금 총액, 누적 예보료.
+   - `insured_institutions`: 부보 금융기관(시중은행, 증권사) BIS 비율, 건전성 등급(1~5등급), 수신잔액.
+   - `deposit_insurance_premiums`: 분기별 예보료 납부 이력.
+   - `deposit_insurance_payouts`: 뱅크런/부실 발생 시 예금 대위변제 집행 이력.
+3. **백엔드 KDIC 모듈 (`backend/src/admin/kdic/`)**:
+   - `kdic.repository.ts`, `kdic.service.ts`, `kdic.controller.ts`, `kdic.service.test.ts`
+   - `admin.module.ts` 등록.
+4. **프론트엔드 UI**:
+   - `frontend/src/app/admin/areas.ts`에 `/admin/kdic` 등록.
+   - `frontend/src/app/admin/kdic/page.tsx` 및 `kdic-control-tower.tsx` 작성.
+   - `frontend/src/app/kdic/page.tsx` 대국민 예금자보호 포털 작성.
+   - `frontend/src/lib/navigation.ts` 네비게이션 등록.
+5. **검증 및 무중단 배포**:
+   - 단위 테스트 100% 통과, Next.js 빌드, 운영 DB 마이그레이션 257 적용, 서비스 리로드 및 라이브 검증.

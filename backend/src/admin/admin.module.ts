@@ -63,6 +63,9 @@ import { NationalPensionService } from './pension/national-pension.service';
 import { AdminFxController, PublicFxController } from './fx/fx.controller';
 import { FxRepository } from './fx/fx.repository';
 import { FxService } from './fx/fx.service';
+import { AdminKdicController, PublicKdicController } from './kdic/kdic.controller';
+import { KdicRepository } from './kdic/kdic.repository';
+import { KdicService } from './kdic/kdic.service';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 
 @Module({
@@ -78,6 +81,8 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
     PublicNationalPensionController,
     AdminFxController,
     PublicFxController,
+    AdminKdicController,
+    PublicKdicController,
     AdminShopController,
     AdminController,
     AdminAuditController,
@@ -199,6 +204,17 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
       useFactory: (repo: FxRepository | null, discord: DiscordAlertService | null) =>
         repo ? new FxService(repo, discord ?? undefined) : null,
     },
+    {
+      provide: KdicRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new KdicRepository(pool as any) : null),
+    },
+    {
+      provide: KdicService,
+      inject: [KdicRepository, DiscordAlertService],
+      useFactory: (repo: KdicRepository | null, discord: DiscordAlertService | null) =>
+        repo ? new KdicService(repo, discord ?? undefined) : null,
+    },
   ],
   exports: [
     AdminService,
@@ -208,6 +224,7 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
     TreasuryBondService,
     NationalPensionService,
     FxService,
+    KdicService,
   ],
 })
 export class AdminModule {}

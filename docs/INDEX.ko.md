@@ -44,7 +44,8 @@
 2. **[국민연금공단(NPS) 공적 연금 적립 & 평생 기초연금 사양서](NATIONAL_PENSION_SERVICE_SPEC.ko.md)**: 5단계 적립(5만~100만 WLD), 국고 100% 매칭, 시간당 평생 기초연금 지급 및 3대 국부펀드 운용
 3. **[한국은행 외환보유액 & 서울외환시장(FX) 환율 시스템 사양서](FOREIGN_EXCHANGE_RESERVES_AND_MARKET_SPEC.ko.md)**: 100만 USD 외환보유액, 변동환율제(1,350 WLD 앵커), 외환당국 스무딩 오퍼레이션(달러 매도/매수 개입) 및 연 4.5% 달러 외화예금
 4. **[글로벌 외환안정망 & SDR·금보유고, 통화스왑 비상협정 및 대국민 선물환(Forward) 환헤지 사양서](GLOBAL_FX_SAFETY_NET_AND_FORWARD_HEDGE_SPEC.ko.md)**: IMF 공식 가중치 SDR 바스켓(5대 통화) 및 실물 금 104.4t 다변화, 한미($600억)/한일($100억) 통화스왑 협정, CIP 내외금리차 기반 1M/3M/6M 대국민 선물환 환헤지 센터 및 4단계 EWS 외환위기 조기경보
-5. **[국고 세수 자동 사회 환원 및 재정 선순환 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 5대 금고, 4대 사회 환원 파이프라인, 10대 법정 세율, 30% 안전 비축금 원장
+5. **[예금보험공사(KDIC) 5천만원 예금자보호법 & 금융안정기금 및 뱅크런 대위변제 사양서](DEPOSIT_INSURANCE_AND_FINANCIAL_STABILITY_SPEC.ko.md)**: 1인당 50만 WLD(5천만원) 법정보호, 시중은행 예보료(연 0.08%) 징수, 1,000만 WLD 예보기금, BIS 8% 미만 조기경보 및 1초 즉시 대위변제 풀스택
+6. **[국고 세수 자동 사회 환원 및 재정 선순환 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 5대 금고, 4대 사회 환원 파이프라인, 10대 법정 세율, 30% 안전 비축금 원장
 4. **[국고 및 재정 선순환 아키텍처 공식 문서](architecture/TREASURY_AND_FISCAL_RECIRCULATION_ARCHITECTURE.md)**: Mermaid 시스템 아키텍처 다이어그램 및 원장 설계
 5. **[경제 밸런스 & 6대 수익성 전수 실측 감사 보고서 (v473)](ECONOMIC_PROFITABILITY_AUDIT.ko.md)**: 6대 수익원(출석/직업/주식/복리/국채/리퍼럴) 및 소각처 밸런스 원장
 6. **[가상 복리 예적금 및 세이빙 포켓](features/README.ko.md)**: 월복리/일복리 계산 엔진 및 긴급 출금 금고

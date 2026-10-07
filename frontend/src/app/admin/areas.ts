@@ -134,6 +134,20 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'economy',
   },
   {
+    href: '/admin/kdic',
+    eyebrow: 'KOREA DEPOSIT INSURANCE (KDIC)',
+    title: '예금보험공사 · 금융안정기금',
+    summary: '1인당 50만 WLD 예금자보호, 부보 금융기관 BIS 비율 및 예보료 징수, 뱅크런 긴급 대여 및 대위변제를 총괄 관제합니다.',
+    group: 'economy',
+  },
+  {
+    href: '/admin/fx',
+    eyebrow: 'FOREIGN EXCHANGE & RESERVES',
+    title: '서울외환시장 · 외환보유액',
+    summary: '외환보유액 운용, SDR 바스켓·금보유고 다변화, 통화스왑 비상 라인, 내외금리차 CIP 선물환 및 스무딩 오퍼레이션을 총괄 관제합니다.',
+    group: 'economy',
+  },
+  {
     href: '/admin/shop',
     eyebrow: 'SHOP OPERATIONS',
     title: '상점 관리',
