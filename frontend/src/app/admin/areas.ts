@@ -120,6 +120,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'economy',
   },
   {
+    href: '/admin/bonds',
+    eyebrow: 'TREASURY BONDS (KTB) EXCHANGE',
+    title: '국채 거래소 · 재정 채권',
+    summary: '기획재정국채(KTB) 1/3/5년물 발행, 표면금리 조정, 시간당 쿠폰 이자 일괄 지급 및 조달 자금을 총괄 관제합니다.',
+    group: 'economy',
+  },
+  {
     href: '/admin/shop',
     eyebrow: 'SHOP OPERATIONS',
     title: '상점 관리',

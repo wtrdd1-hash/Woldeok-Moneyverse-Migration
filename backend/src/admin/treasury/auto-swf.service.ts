@@ -212,6 +212,38 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
           FROM public.state_enterprises
           WHERE status = 'ACTIVE'
         `).catch(() => {});
+
+        // [기획재정국채(KTB) 시간당 확정 쿠폰 이자 지급 및 만기 상환 정산]
+        await client.query(`
+          DO $$
+          DECLARE
+            h RECORD;
+            coupon NUMERIC;
+            principal NUMERIC;
+          BEGIN
+            FOR h IN
+              SELECT th.id, th.user_id, th.bond_id, th.units, tb.par_value_wld, tb.hourly_coupon_rate_bps, (th.maturity_at <= now()) AS is_matured
+              FROM public.treasury_bond_holdings th
+              JOIN public.treasury_bonds tb ON tb.id = th.bond_id
+              WHERE th.status = 'HOLDING'
+            LOOP
+              principal := h.units * h.par_value_wld;
+              coupon := FLOOR(principal * h.hourly_coupon_rate_bps / 10000);
+              IF coupon > 0 THEN
+                UPDATE public.wallets SET balance_wld = (balance_wld::numeric + coupon)::text, updated_at = now() WHERE user_id = h.user_id;
+                UPDATE public.treasury_bond_holdings SET accrued_interest_wld = accrued_interest_wld + coupon, updated_at = now() WHERE id = h.id;
+                INSERT INTO public.treasury_bond_coupon_logs (holding_id, user_id, bond_id, event_type, amount_wld)
+                VALUES (h.id, h.user_id, h.bond_id, 'COUPON_INTEREST', coupon);
+              END IF;
+              IF h.is_matured THEN
+                UPDATE public.wallets SET balance_wld = (balance_wld::numeric + principal)::text, updated_at = now() WHERE user_id = h.user_id;
+                UPDATE public.treasury_bond_holdings SET status = 'MATURED', updated_at = now() WHERE id = h.id;
+                INSERT INTO public.treasury_bond_coupon_logs (holding_id, user_id, bond_id, event_type, amount_wld)
+                VALUES (h.id, h.user_id, h.bond_id, 'MATURITY_REDEMPTION', principal);
+              END IF;
+            END LOOP;
+          END $$;
+        `).catch(() => {});
       }
 
       // 3. [국부펀드 자산 평가 이익 및 수익 회수] (Auto Asset Growth & Harvest)

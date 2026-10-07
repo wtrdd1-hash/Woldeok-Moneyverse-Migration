@@ -54,6 +54,10 @@ import { ApiHealthController } from './api-health.controller';
 import { AdminEnterpriseController, PublicEnterpriseController } from './enterprises/enterprise.controller';
 import { EnterpriseRepository } from './enterprises/enterprise.repository';
 import { EnterpriseService } from './enterprises/enterprise.service';
+import { AdminTreasuryBondController, PublicTreasuryBondController } from './bonds/treasury-bond.controller';
+import { TreasuryBondRepository } from './bonds/treasury-bond.repository';
+import { TreasuryBondService } from './bonds/treasury-bond.service';
+import { DiscordAlertService } from '../discord/discord-alert.service';
 
 @Module({
   imports: [AuthModule, StockModule],
@@ -62,6 +66,8 @@ import { EnterpriseService } from './enterprises/enterprise.service';
     AdminTreasuryController,
     AdminEnterpriseController,
     PublicEnterpriseController,
+    AdminTreasuryBondController,
+    PublicTreasuryBondController,
     AdminShopController,
     AdminController,
     AdminAuditController,
@@ -150,7 +156,18 @@ import { EnterpriseService } from './enterprises/enterprise.service';
       inject: [EnterpriseRepository],
       useFactory: (repo: EnterpriseRepository | null) => (repo ? new EnterpriseService(repo) : null),
     },
+    {
+      provide: TreasuryBondRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new TreasuryBondRepository(pool as any) : null),
+    },
+    {
+      provide: TreasuryBondService,
+      inject: [TreasuryBondRepository, DiscordAlertService],
+      useFactory: (repo: TreasuryBondRepository | null, discord: DiscordAlertService | null) =>
+        repo ? new TreasuryBondService(repo, discord ?? undefined) : null,
+    },
   ],
-  exports: [AdminService, AuditRepository, AutoSovereignWealthFundService, EnterpriseService],
+  exports: [AdminService, AuditRepository, AutoSovereignWealthFundService, EnterpriseService, TreasuryBondService],
 })
 export class AdminModule {}
