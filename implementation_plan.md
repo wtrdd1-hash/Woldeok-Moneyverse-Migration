@@ -3198,3 +3198,35 @@ flowchart TD
 - 로컬 `tsc --noEmit` 100% 통과.
 - Next.js 프로덕션 빌드 통과.
 - 운영 서버 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.
+
+
+---
+## 🚀 [v125 Specification] 포트폴리오 1:1 배틀 아레나 & 호가창 퀵 트레이딩 시뮬레이터 구축 (+260, -0)
+
+### 1. 요구사항 재정의 및 목적 (Overview & Goals)
+- **무엇을**:
+  1. **유저 간 가상 포트폴리오 1:1 배틀 아레나 (`PortfolioBattleArena`)**:
+     - Webull Duels / Toss 모의투자 리그 스타일의 1:1 포트폴리오 수익률 및 건전성 맞대결 시스템.
+     - 내 포트폴리오 vs 가상 트레이더(여의도고래, 판교슈퍼개미, 안정거북이 등)의 7일 수익률, 자산 분산도(HHI), 샤프 지수 3중 비교.
+     - 승패 판정(WIN / DRAW / DEFEAT) 및 +500 WLD 승리 보너스 시뮬레이션.
+     - 배틀 승리 결과 즉시 X(Twitter) & 카카오톡 바이럴 공유(`SocialShareBar`) 연동.
+     - 포트폴리오 화면(`/stocks/portfolio`) 및 메인 홈에 마운트.
+  2. **호가창 퀵 트레이딩 시뮬레이터 바 (`QuickOrderbookSimulator`)**:
+     - Robinhood 1-Tap Trade / Webull Quick Order 스타일의 초간편 매수/매도 프리셋.
+     - 10주, 50주, 100주, 최대 매수(All-in) 원터치 수량 계산 및 체결 예상액/수수료 0.1초 실시간 계산.
+     - 종목 상세 화면(`/stocks/[symbol]`)에 마운트.
+  3. **운영 서버 빌드, 무중단 승격 및 라이브 전수 QA**:
+     - TypeScript 타입 무결성 검증.
+     - Next.js 579개 전 라우트 빌드.
+     - 운영 서버 무중단 승격 및 라이브 사이트 실측 QA.
+
+### 2. 세부 변경 계획 (Proposed Changes)
+- `frontend/src/components/portfolio-battle-arena.tsx`: 포트폴리오 1:1 배틀 컴포넌트 신설.
+- `frontend/src/components/quick-orderbook-simulator.tsx`: 퀵 트레이딩 시뮬레이터 바 신설.
+- `frontend/src/app/stocks/portfolio/page.tsx`: 포트폴리오 화면에 `PortfolioBattleArena` 마운트.
+- `frontend/src/app/page.tsx`: 메인 홈 피처 구역에 `PortfolioBattleArena` 마운트.
+
+### 3. 검증 계획 (Verification Plan)
+- 로컬 `tsc --noEmit` 100% 통과.
+- Next.js 프로덕션 빌드 통과.
+- 운영 서버 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.

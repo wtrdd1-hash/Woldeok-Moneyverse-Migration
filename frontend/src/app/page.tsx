@@ -29,6 +29,7 @@ import { CasualDopamineStation } from '@/components/casual-dopamine-station';
 import { DailyLuckyWheel } from '@/components/daily-lucky-wheel';
 import { DailyFinancialQuizStation } from '@/components/daily-financial-quiz';
 import { InvestmentProfileQuiz } from '@/components/investment-profile-quiz';
+import { PortfolioBattleArena } from '@/components/portfolio-battle-arena';
 import { LiveMarketPulseTicker } from '@/components/live-market-pulse-ticker';
 import { DiscordBanner } from '@/components/discord-banner';
 import { TranslatedText as T } from '@/components/translated-text';
@@ -477,6 +478,9 @@ export default async function HomePage() {
 
       {/* 3.9 DAILY FINANCIAL LITERACY QUIZ STATION */}
       <DailyFinancialQuizStation />
+
+      {/* 3.95 PORTFOLIO 1v1 BATTLE ARENA */}
+      <PortfolioBattleArena />
 
       {/* 4. CASUAL DOPAMINE STATION: 일반 유저 무료 도파민 (피버, 덕이 펫, 여론 잭팟, 1:1 결투) */}
       <CasualDopamineStation />

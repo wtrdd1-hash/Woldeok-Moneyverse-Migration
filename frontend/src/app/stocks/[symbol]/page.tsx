@@ -19,6 +19,7 @@ import { StockAlertDeleteButton } from './stock-alert-delete-button';
 import { StockDiscussionSection } from './stock-discussion-section';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockTradingConsole } from './stock-trading-console';
+import { QuickOrderbookSimulator } from '@/components/quick-orderbook-simulator';
 import { StockHaltBanner } from './stock-halt-banner';
 import { SocialShareToolbar } from '@/components/social-share-toolbar';
 import { PublicAdvertisement } from '@/components/public-advertisement';
@@ -274,6 +275,12 @@ export default async function StockHubPage({
         isHalted={isHalted}
         isEn={isEn}
         receipt={stockReceipt}
+      />
+
+      {/* 2.5. 1-TAP 퀵 호가 체결 계산기 & 모의 트레이딩 바 */}
+      <QuickOrderbookSimulator
+        currentPrice={Number.parseInt(stock.current_price, 10) || 1450}
+        symbol={stock.symbol}
       />
 
       {/* 3. 보조 2열 정보 그리드 (좌측: 시장 시세 요약, 우측: 내 보유 현황) */}
