@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { requireAdminConsole } from '@/lib/admin-guard';
+import { requireAdminConsole } from '@/lib/session';
 import { api } from '@/lib/api';
 import {
   BondControlTower,
