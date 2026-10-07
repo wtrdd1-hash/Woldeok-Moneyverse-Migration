@@ -28,6 +28,7 @@ import { HomeAdvertisement } from '@/components/home-advertisement';
 import { CasualDopamineStation } from '@/components/casual-dopamine-station';
 import { DailyLuckyWheel } from '@/components/daily-lucky-wheel';
 import { DailyFinancialQuizStation } from '@/components/daily-financial-quiz';
+import { InvestmentProfileQuiz } from '@/components/investment-profile-quiz';
 import { LiveMarketPulseTicker } from '@/components/live-market-pulse-ticker';
 import { DiscordBanner } from '@/components/discord-banner';
 import { TranslatedText as T } from '@/components/translated-text';
@@ -350,6 +351,9 @@ export default async function HomePage() {
           </div>
         </Link>
       </section>
+
+      {/* 2.5 INTERACTIVE 30-SEC AI INVESTMENT PROFILE & ALLOCATION QUIZ */}
+      <InvestmentProfileQuiz />
 
       {/* 3. 2026 FEATURE STRIP: 3대 금융 계산기 허브 & 일일 리텐션 스테이션 */}
       <div className="grid gap-6 md:grid-cols-3">

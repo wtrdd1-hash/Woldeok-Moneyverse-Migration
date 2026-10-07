@@ -3167,3 +3167,34 @@ flowchart TD
 - `tsc --noEmit` 100% 통과.
 - Next.js 579개 전 라우트 빌드 통과.
 - 운영 서버 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.
+
+
+---
+## 🚀 [v124 Specification] 가상 주식 시즌 투자 리더보드 & 30초 AI 투자 성향 진단기 구축 (+260, -0)
+
+### 1. 요구사항 재정의 및 목적 (Overview & Goals)
+- **무엇을**:
+  1. **가상 주식 시즌 투자 리더보드 & 명예의 전당 (`StockSeasonLeaderboard`)**:
+     - Webull Paper Trading / Toss 증권 리그 스타일의 주간 수익률 랭킹 시스템.
+     - 1위~3위 골드/실버/브론즈 트로피, 수익률(%), 주력 보유 종목, 유저 칭호 표출.
+     - 랭킹 결과 즉시 X(Twitter) & 카카오톡 바이럴 공유(`SocialShareBar`) 연동.
+     - 주식 메인 페이지(`/stocks`)에 결합하여 투자 경쟁 및 거래 활성화 도모.
+  2. **30초 AI 투자 성향 & 자산 배분 진단기 (`InvestmentProfileQuiz`)**:
+     - 뱅크샐러드 / 토스 스타일의 인터랙티브 투자 성향 진단 (5대 페르소나: 공격투자형 불사조, 성장추구형 황소, 밸런스형 사자, 안정추구형 거북이, 가치보존형 다람쥐).
+     - 진단 결과별 최적 머니버스 포트폴리오(가상 주식 %, 복리 예금 %, 부동산 %, 현금 %) 비중 추천.
+     - 진단 결과 카드 바이럴 공유 연동.
+  3. **운영 서버 빌드, 무중단 승격 및 라이브 전수 QA**:
+     - TypeScript 타입 무결성 검증.
+     - Next.js 579개 전 라우트 빌드.
+     - 운영 서버 무중단 승격 및 라이브 사이트 실측 QA.
+
+### 2. 세부 변경 계획 (Proposed Changes)
+- `frontend/src/components/stock-season-leaderboard.tsx`: 가상 주식 시즌 리더보드 컴포넌트 신설.
+- `frontend/src/components/investment-profile-quiz.tsx`: 30초 AI 투자 성향 진단 컴포넌트 신설.
+- `frontend/src/app/stocks/page.tsx`: 주식 메인 화면에 `StockSeasonLeaderboard` 마운트.
+- `frontend/src/app/page.tsx`: 메인 홈 온보딩 구역에 `InvestmentProfileQuiz` 마운트.
+
+### 3. 검증 계획 (Verification Plan)
+- 로컬 `tsc --noEmit` 100% 통과.
+- Next.js 프로덕션 빌드 통과.
+- 운영 서버 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.

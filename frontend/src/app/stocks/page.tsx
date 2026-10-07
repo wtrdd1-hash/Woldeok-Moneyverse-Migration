@@ -28,6 +28,7 @@ import { StockDisclosureTicker } from '@/components/stock-disclosure-ticker';
 import { TradeDiaryDrawer } from '@/components/trade-diary-drawer';
 import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
 import { FinancialKnowledgeHub } from '@/components/financial-knowledge-hub';
+import { StockSeasonLeaderboard } from '@/components/stock-season-leaderboard';
 import { StockDetailDialog } from './stock-detail-dialog';
 import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { TradeDialog } from './trade-dialog';
@@ -223,6 +224,9 @@ export default async function StocksPage({
 
       {/* 투자 거래일지 & 매매 복기 다이어리 (Section 5.7) */}
       <TradeDiaryDrawer />
+
+      {/* 가상 주식 시즌 투자 리더보드 & 주간 랭킹전 (Section 5.8) */}
+      <StockSeasonLeaderboard />
 
       <section aria-labelledby="market-title" className="grid gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
