@@ -8,6 +8,11 @@
 
 ## 📝 기획서
 
+- [거시 경제 6대 기둥 총괄 기획서 (실제 실물 경제 레퍼런스)](../docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md)
+- [국고 2,500만 앵커 & 자율 투자 회수 사이클 기획서](../docs/TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.ko.md)
+- [대한민국 국채(KTB) 3종 & 레포 대출 거래소 사양서](../docs/TREASURY_BONDS_EXCHANGE_SPEC.ko.md)
+- [국민연금공단(NPS) 공적 연금 적립 & 평생 기초연금 사양서](../docs/NATIONAL_PENSION_SERVICE_SPEC.ko.md)
+- [국가투자공사(WSHC) 산하 공기업 & 경영공시 알리오(ALIO) 사양서](../docs/STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.ko.md)
 - [상시 갱신 프로젝트 기획서](../docs/planning/PROJECT_PLAN.ko.md)
 - [제품 성장 및 리텐션 기획서](../docs/planning/PRODUCT_GROWTH_PLAN.ko.md)
 - [상세 제품 설계 명세](../docs/planning/PRODUCT_DESIGN_SPEC.ko.md)

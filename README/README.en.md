@@ -34,6 +34,10 @@ The responsive header does not destructively remove the brand/navigation nodes. 
 
 | Area | Purpose | Detailed document |
 | --- | --- | --- |
+| 🏛️ Macro Sovereign Economy | Central Bank monetary policy, 25M Treasury Anchor, state enterprises, NPS & KTB exchange | [Macro Sovereign Economic Master](../docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.md) |
+| 🏦 National Pension Service (NPS) | 5-tier public pension accumulation, 100% treasury matching, lifetime basic hourly annuity | [National Pension Service Spec](../docs/NATIONAL_PENSION_SERVICE_SPEC.md) |
+| 📈 Treasury Bonds (KTB) & Repo | 3Y/5Y/10Y sovereign bonds real-time orderbook, 24h Repo liquidity, and coupon engine | [Treasury Bonds Exchange Spec](../docs/TREASURY_BONDS_EXCHANGE_SPEC.md) |
+| 🏢 State Enterprises & ALIO | Energy, Infrastructure, and Financial SOE public disclosures and 30% dividend remittance | [State Enterprises & ALIO Spec](../docs/STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.md) |
 | 💼 Jobs & Careers | 8 careers, repeatable tasks, WLD + career EXP | [Jobs & Progression](../docs/features/jobs-and-progression.md) |
 | 📋 Quests | Daily events, early-game goals, progression objectives | [Quests](../docs/features/quests.md) |
 | 💳 Wallet | Exact WLD balances, transfers, ledger history | [System Overview](../docs/architecture/system-overview.md) |

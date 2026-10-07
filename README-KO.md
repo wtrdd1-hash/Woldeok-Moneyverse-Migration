@@ -5,6 +5,11 @@
 ## 한국어 문서 바로가기
 
 - 📚 [한국어 문서 전체 색인](docs/INDEX.ko.md)
+- 🏛️ [거시 경제 6대 기둥 총괄 기획서](docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md)
+- 🏦 [국민연금공단(NPS) 대국민 포털](/pension) · [기획서](docs/NATIONAL_PENSION_SERVICE_SPEC.ko.md)
+- 📈 [대한민국 국채(KTB) & 레포 거래소](/bonds) · [기획서](docs/TREASURY_BONDS_EXCHANGE_SPEC.ko.md)
+- 🏢 [공공기관 경영정보 알리오(ALIO) 포털](/enterprises) · [기획서](docs/STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.ko.md)
+- ⚖️ [국고 2,500만 앵커 자율 순환 엔진](docs/TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.ko.md)
 - 📝 [기획서](docs/planning/PROJECT_PLAN.ko.md)
 - 🧭 [시스템 개요](docs/architecture/system-overview.ko.md)
 - 📊 [50대 금융 용어사전 허브](/guide/glossary)

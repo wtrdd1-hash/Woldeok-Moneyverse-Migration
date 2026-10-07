@@ -3,23 +3,24 @@
 [English canonical](INDEX.md) | **한국어**
 
 > **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
-> **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
-> **현재 기획 권위**: **v2026.10.04.522**
-> **v522 exact-main 프로덕션 기준**: **065ee422 / 국고 재정 선순환 및 4개 국어 번역 무결점 승격 완료**
-> **상태**: **AUTHORITATIVE_PRODUCTION_INTEGRATED** — 국고 세수 자동 사회 환원 파이프라인 및 4개 국어 번역 전면 배포 완결
+> **현재 기획 권위**: **v2026.10 (거시 실물 경제 6대 기둥 & 자율 국고 앵커 마스터)**
+> **최신 프로덕션 기준**: **국가투자공사(WSHC) 공기업 배당, 국민연금공단(NPS), 국채 3종/레포 거래소, 2,500만 국고 앵커 자율 순환 승격 완료**
+> **상태**: **AUTHORITATIVE_PRODUCTION_INTEGRATED** — 한국은행/기재부/국민연금/KRX/알리오 실물 경제 레퍼런스 기준 풀스택 완결
 
 ---
 
 ## 🚀 15대 도메인별 마스터 문서 맵 (Master Directory)
 
 ### 01. 📱 마스터 스펙 & 유저 가이드
-1. **[국고 세수 자동 사회 환원 및 재정 선순환 종합 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 국고 5대 금고, 4대 사회 환원(기본소득/복지/인프라/소각), 10대 법정 세율 및 30% 안전 비축금 원장
-2. **[통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md)**: v522 최신 프로덕션 릴리스 및 전 도메인 권위 통합 기획
-3. **[통합 앱 명세서 및 상세 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 3대 금융 계산기, 30대 프리셋, pSEO 2만+ 엔진, 바이럴 진단서, 출석 룰렛, 주가 예측 배팅 전 도메인 엔드투엔드 가이드
-4. **[기획서 전 기능 추적 매트릭스 & 심화 QA 보고서 (v473)](QA_TRACEABILITY_MATRIX_V473.ko.md)**: 14대 도메인 42개 기획 기능 전수 대조 및 100% 검증 원장
-5. **[현재 런타임 베이스라인](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian 13, PostgreSQL 16, NestJS, Next.js 16 Turbopack 인프라 환경
-6. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT), 버전 관리 및 보존 규칙
-7. **[문서 카탈로그 원장](DOCUMENT_CATALOG.ko.md)**: 전체 문서 인벤토리 및 최신성 검증표
+1. **[실제 실물 경제 레퍼런스 기준 거시경제 총괄 기획서](MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md)**: 한국은행/기재부 기준 중앙은행 통화정책, 2,500만 국고 앵커, 국채 3종/레포, 공기업 3사 30% 배당, 국민연금 5단계, 자본시장/증권거래세 6대 기둥 총괄 사양서
+2. **[국고 2,500만 앵커 & 자율 투자 회수 사이클 기획서](TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.ko.md)**: 무유저/저유저 환경 국고 자동 팽창, 안전 비축금 2,500만 WLD 보존 및 자율 세수/배당/이자 회수 엔진
+3. **[국고 세수 자동 사회 환원 및 재정 선순환 종합 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 국고 5대 금고, 4대 사회 환원(기본소득/복지/인프라/소각), 10대 법정 세율 및 30% 안전 비축금 원장
+4. **[통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md)**: v2026.10 최신 프로덕션 릴리스 및 전 도메인 권위 통합 기획
+5. **[통합 앱 명세서 및 상세 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 3대 금융 계산기, 30대 프리셋, pSEO 2만+ 엔진, 바이럴 진단서, 출석 룰렛, 주가 예측 배팅 전 도메인 엔드투엔드 가이드
+6. **[기획서 전 기능 추적 매트릭스 & 심화 QA 보고서 (v473)](QA_TRACEABILITY_MATRIX_V473.ko.md)**: 14대 도메인 42개 기획 기능 전수 대조 및 100% 검증 원장
+7. **[현재 런타임 베이스라인](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian 13, PostgreSQL 16, NestJS, Next.js 16 Turbopack 인프라 환경
+8. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT), 버전 관리 및 보존 규칙
+9. **[문서 카탈로그 원장](DOCUMENT_CATALOG.ko.md)**: 전체 문서 인벤토리 및 최신성 검증표
 
 ### 02. 🎨 2026 차세대 디자인 시스템 & UI/UX 가이드
 1. **[2026 차세대 핀테크 디자인 시스템 공식 지침서](DESIGN_SYSTEM_GUIDELINES.ko.md)**: Linear/Stripe/Apple 20만+ 래퍼런스 분석 기반 표면 Inset Border, 비대칭 벤토 그리드 2.0, Geist Mono Tabular 규격
@@ -39,15 +40,18 @@
 2. **[주식 거래정지 매수원가 자동정산 거버넌스](2026-09-22-stocks-halt-cost-basis-settlement-visibility-v2026.09.22.357.ko.md)**: 100% 매수원가 환급 원장 보증
 
 ### 05. 🏦 가상 금융 & 은행 & 국채 & 국고 재정
-1. **[국고 세수 자동 사회 환원 및 재정 선순환 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 5대 금고, 4대 사회 환원 파이프라인, 10대 법정 세율, 30% 안전 비축금 원장
-2. **[국고 및 재정 선순환 아키텍처 공식 문서](architecture/TREASURY_AND_FISCAL_RECIRCULATION_ARCHITECTURE.md)**: Mermaid 시스템 아키텍처 다이어그램 및 원장 설계
-3. **[경제 밸런스 & 6대 수익성 전수 실측 감사 보고서 (v473)](ECONOMIC_PROFITABILITY_AUDIT.ko.md)**: 6대 수익원(출석/직업/주식/복리/국채/리퍼럴) 및 소각처 밸런스 원장
-4. **[가상 복리 예적금 및 세이빙 포켓](features/README.ko.md)**: 월복리/일복리 계산 엔진 및 긴급 출금 금고
-5. **[가상 국채 만기 시뮬레이터](features/README.ko.md)**: 기간별 확정 이율 및 인플레이션 헤지 상품
+1. **[국채(KTB) 3종 & 환매조건부채권(Repo) 대출 거래소 사양서](TREASURY_BONDS_EXCHANGE_SPEC.ko.md)**: 3년/5년/10년물 국채 실시간 호가 거래, 24시간 레포 대출 및 국고 이자 지급 엔진
+2. **[국민연금공단(NPS) 공적 연금 적립 & 평생 기초연금 사양서](NATIONAL_PENSION_SERVICE_SPEC.ko.md)**: 5단계 적립(5만~100만 WLD), 국고 100% 매칭, 시간당 평생 기초연금 지급 및 3대 국부펀드 운용
+3. **[국고 세수 자동 사회 환원 및 재정 선순환 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 5대 금고, 4대 사회 환원 파이프라인, 10대 법정 세율, 30% 안전 비축금 원장
+4. **[국고 및 재정 선순환 아키텍처 공식 문서](architecture/TREASURY_AND_FISCAL_RECIRCULATION_ARCHITECTURE.md)**: Mermaid 시스템 아키텍처 다이어그램 및 원장 설계
+5. **[경제 밸런스 & 6대 수익성 전수 실측 감사 보고서 (v473)](ECONOMIC_PROFITABILITY_AUDIT.ko.md)**: 6대 수익원(출석/직업/주식/복리/국채/리퍼럴) 및 소각처 밸런스 원장
+6. **[가상 복리 예적금 및 세이빙 포켓](features/README.ko.md)**: 월복리/일복리 계산 엔진 및 긴급 출금 금고
+7. **[가상 국채 만기 시뮬레이터](features/README.ko.md)**: 기간별 확정 이율 및 인플레이션 헤지 상품
 
 ### 06. 💼 직업 & 사업체 & 경제 거버넌스
-1. **[직업 숙련도 & 일일 파밍 루틴 사양서](planning/JOBS_PROFESSION_MASTERY_SPEC.ko.md)**: 5대 직업, 에너지 효율, 주말 피버 버프
-2. **[통화 유통속도 & 인플레이션 자동 정책](planning/ECONOMY_MONETARY_VELOCITY_SPEC.ko.md)**: AI Council 교차 심의 및 M2 통화량 제어
+1. **[국가투자공사(WSHC) 산하 3대 공기업 및 대국민 경영공시 알리오(ALIO) 사양서](STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.ko.md)**: 에너지·인프라·금융 3대 공기업 재무제표, 30% 국고 배당 납입 및 `/enterprises` 대국민 알리오 포털
+2. **[직업 숙련도 & 일일 파밍 루틴 사양서](planning/JOBS_PROFESSION_MASTERY_SPEC.ko.md)**: 5대 직업, 에너지 효율, 주말 피버 버프
+3. **[통화 유통속도 & 인플레이션 자동 정책](planning/ECONOMY_MONETARY_VELOCITY_SPEC.ko.md)**: AI Council 교차 심의 및 M2 통화량 제어
 
 ### 07. 🛡️ 안전 & 법령 준수 & 아동 보호
 1. **[미성년자 안전 & TAKE IT DOWN 긴급 삭제](planning/SECURITY_ASSURANCE_MASTER_PLAN.ko.md)**: 24시간 비회원 긴급 삭제 접수 큐 및 14세 미만 보호

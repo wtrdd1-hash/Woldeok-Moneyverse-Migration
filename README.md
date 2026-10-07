@@ -66,6 +66,10 @@ See [docs/images/README.md](docs/images/README.md) for screenshot provenance and
 
 | Area | What it does | Detailed document |
 | --- | --- | --- |
+| 🏛️ **Macro Sovereign Economy** | Central Bank monetary policy, 25M Treasury Anchor, state enterprise dividends, NPS and KTB exchange | [Macro Sovereign Economic Master](docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.md) |
+| 🏦 **National Pension Service (NPS)** | 5-tier public pension accumulation, 100% treasury matching, lifetime basic hourly annuity | [National Pension Service Spec](docs/NATIONAL_PENSION_SERVICE_SPEC.md) |
+| 📈 **Treasury Bonds (KTB) & Repo** | 3Y/5Y/10Y sovereign bonds real-time orderbook, 24h Repo loan liquidity, and treasury coupon engine | [Treasury Bonds Exchange Spec](docs/TREASURY_BONDS_EXCHANGE_SPEC.md) |
+| 🏢 **State Enterprises & ALIO** | Energy, Infrastructure, and Financial SOE public disclosures and 30% treasury dividend remittance | [State Enterprises & ALIO Spec](docs/STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.md) |
 | 💼 **Jobs & Progression** | Career switching, repeatable tasks, WLD + EXP, level progression | [Jobs & Progression](docs/features/jobs-and-progression.md) |
 | 📋 **Quests** | Daily events, early-game steps and progression objectives | [Quests](docs/features/quests.md) |
 | 💳 **Wallet / Ledger** | Virtual WLD balances, transfers and transaction history | [System Overview](docs/architecture/system-overview.md) |

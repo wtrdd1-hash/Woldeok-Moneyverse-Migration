@@ -3,23 +3,24 @@
 **English canonical** | [한국어](INDEX.ko.md)
 
 > **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
-> **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
-> **Current Planning Authority**: **v2026.10.04.522**
-> **v522 exact-main production baseline**: **065ee422 / Treasury Fiscal Recirculation & 4-Language Translation Parity Promoted**
-> **Status**: **AUTHORITATIVE_PRODUCTION_INTEGRATED** — Treasury automated social recirculation pipeline and 4-language translation parity live in production
+> **Current Planning Authority**: **v2026.10 (Macro Sovereign Economic 6-Pillar & Autonomous Treasury Anchor Master)**
+> **Production Baseline**: **WSHC State Enterprise Dividends, National Pension Service (NPS), 3-Tier KTB / Repo Exchange, 25M Treasury Anchor Autonomous Recirculation Promoted**
+> **Status**: **AUTHORITATIVE_PRODUCTION_INTEGRATED** — Modeled on Bank of Korea, MOEF, NPS, KRX, and ALIO public real-world economic benchmarks
 
 ---
 
 ## 🚀 15-Domain Master Documentation Map
 
 ### 01. 📱 Master Specs & User Guide
-1. **[Treasury Automated Social Recirculation Specification](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Redistribution Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Floor
-2. **[Integrated Planning Master](planning/INTEGRATED_PLANNING_MASTER.md)**: v522 Latest Production Release & 15-Domain Authority Planning
-3. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**
-4. **[Specification Traceability Matrix & Deep QA Report (v473)](QA_TRACEABILITY_MATRIX_V473.md)**
-5. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**
-6. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**
-7. **[Master Document Catalog](DOCUMENT_CATALOG.md)**
+1. **[Real-World Benchmark Macro Sovereign Economic Master Spec](MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.md)**: 6-pillar master specification covering Central Bank monetary policy, 25M Treasury Anchor, 3-tier KTB bonds / Repo, 3 state enterprises with 30% dividend payouts, 5-tier National Pension Service (NPS), and Capital Market securities transaction taxes
+2. **[Treasury 25M Anchor & Autonomous Investment-Recirculation Cycle Spec](TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.md)**: Zero-user/low-user autonomous expansion, 25M WLD safe reserve floor, and automated tax/dividend/interest revenue cycle engine
+3. **[Treasury Automated Social Recirculation Specification](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Redistribution Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Floor
+4. **[Integrated Planning Master](planning/INTEGRATED_PLANNING_MASTER.md)**: v2026.10 Latest Production Release & 15-Domain Authority Planning
+5. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**
+6. **[Specification Traceability Matrix & Deep QA Report (v473)](QA_TRACEABILITY_MATRIX_V473.md)**
+7. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**
+8. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**
+9. **[Master Document Catalog](DOCUMENT_CATALOG.md)**
 
 ### 02. 🎨 2026 Next-Gen Design System & UI/UX Guidelines
 1. **[2026 Next-Gen FinTech Design System Guidelines](DESIGN_SYSTEM_GUIDELINES.md)**
@@ -39,15 +40,18 @@
 2. **[Stock Trading Halt & Cost-Basis Settlement Governance](2026-09-22-stocks-halt-cost-basis-settlement-visibility-v2026.09.22.357.md)**
 
 ### 05. 🏦 Virtual Banking, Treasury & Fiscal Recirculation
-1. **[Treasury Automated Social Recirculation Spec](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Invariant
-2. **[Treasury & Fiscal Recirculation Architecture](architecture/TREASURY_AND_FISCAL_RECIRCULATION_ARCHITECTURE.md)**: Mermaid system diagram and ledger specifications
-3. **[Economic Balance & 6-Profitability Audit Report (v473)](ECONOMIC_PROFITABILITY_AUDIT.md)**
-4. **[Virtual Compound Interest & Saving Pockets](features/README.md)**
-5. **[Virtual Treasury Bond Simulator](features/README.md)**
+1. **[Treasury Bonds (KTB) & Repo Exchange Specification](TREASURY_BONDS_EXCHANGE_SPEC.md)**: 3Y/5Y/10Y sovereign bonds real-time orderbook, 24h repurchase agreement (Repo) credit line, and treasury coupon engine
+2. **[National Pension Service (NPS) Public Accumulation & Lifetime Basic Pension Spec](NATIONAL_PENSION_SERVICE_SPEC.md)**: 5 contribution tiers (50K~1M WLD), 100% treasury matching grant, hourly lifetime basic annuity, and sovereign wealth fund allocation
+3. **[Treasury Automated Social Recirculation Spec](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md)**: 5 System Vaults, 4 Social Outflows, 10-Tier Tax Schedule & 30% Safe Reserve Invariant
+4. **[Treasury & Fiscal Recirculation Architecture](architecture/TREASURY_AND_FISCAL_RECIRCULATION_ARCHITECTURE.md)**: Mermaid system diagram and ledger specifications
+5. **[Economic Balance & 6-Profitability Audit Report (v473)](ECONOMIC_PROFITABILITY_AUDIT.md)**
+6. **[Virtual Compound Interest & Saving Pockets](features/README.md)**
+7. **[Virtual Treasury Bond Simulator](features/README.md)**
 
 ### 06. 💼 Jobs, Businesses & Economy Governance
-1. **[Job Mastery & Daily Farming Routine Spec](planning/JOBS_PROFESSION_MASTERY_SPEC.md)**
-2. **[Monetary Velocity & Inflation Policy](planning/ECONOMY_MONETARY_VELOCITY_SPEC.md)**
+1. **[State-Owned Enterprises (WSHC) & ALIO Public Disclosure Portal Spec](STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.md)**: Energy, Infrastructure, and Financial SOE financial ledgers, 30% treasury dividend remittance, and public ALIO portal
+2. **[Job Mastery & Daily Farming Routine Spec](planning/JOBS_PROFESSION_MASTERY_SPEC.md)**
+3. **[Monetary Velocity & Inflation Policy](planning/ECONOMY_MONETARY_VELOCITY_SPEC.md)**
 
 ### 07. 🛡️ Safety, Compliance & Child Protection
 1. **[Minor Safety & TAKE IT DOWN Takedown Queue](planning/SECURITY_ASSURANCE_MASTER_PLAN.md)**

@@ -2,22 +2,27 @@
 
 [English canonical](DOCUMENT_CATALOG.md) | **한국어**
 
-> **스냅샷 버전**: `v2026.10.04.522`  
-> **기준 브랜치**: `main` (국고 세수 자동 사회 환원, 4개 국어 번역 무결점 매핑, 3단계 로드맵 및 163개 라우트 무중단 배포)  
+> **스냅샷 버전**: `v2026.10`  
+> **기준 브랜치**: `main` (실제 실물 경제 레퍼런스 기준: 중앙은행 통화정책, 2,500만 국고 앵커, 국채 3종/레포 거래소, WSHC 공기업 알리오, 국민연금공단(NPS) 풀스택 무중단 배포 완결)  
 > **용도**: 전체 프로젝트 문서 체계의 인벤토리 및 정리 상태를 공증하는 공식 카탈로그 원장.
 
 ---
 
 ## 🏛️ 공식 권위 문서 (Authoritative Master Docs)
 
-1. **[국고 세수 자동 사회 환원 및 재정 선순환 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 국고 5대 금고, 4대 사회 환원, 10대 법정 세율 및 30% 안전 비축금 원장
-2. **[통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md)**: v522 최신 프로덕션 릴리스 및 15대 도메인 권위 통합 기획
-3. **[통합 앱 명세서 및 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 15대 전 도메인 공식 구현 스펙 및 사용자 안내
-4. **[2026 차세대 핀테크 디자인 시스템 공식 지침서](DESIGN_SYSTEM_GUIDELINES.ko.md)**: Linear/Stripe/Apple 20만+ 래퍼런스 기반 디자인 규격
-5. **[2026 반응형 디자인 기준 공식 지침서](RESPONSIVE_DESIGN_GUIDELINES.ko.md)**: 320px~1920px 5대 뷰포트 매트릭스 및 Zero-Overflow 방어 지침
-6. **[문서 인덱스 (INDEX.ko.md)](INDEX.ko.md)**: 15대 도메인별 선별 탐색 경로
-7. **[현재 런타임/OS 기준](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian/systemd/Nginx/Docker/PostgreSQL 인프라 베이스라인
-8. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT) 및 버전 관리 불변식
+1. **[실제 실물 경제 레퍼런스 기준 거시경제 총괄 기획서](MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md)**: 한국은행/기재부 기준 중앙은행 통화정책, 2,500만 국고 앵커, 국채 3종/레포, 공기업 3사 배당, 국민연금 5단계, 자본시장/증권거래세 6대 기둥 총괄 사양서
+2. **[국고 2,500만 앵커 & 자율 투자 회수 사이클 기획서](TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.ko.md)**: 무유저/저유저 환경 국고 자동 팽창 및 안전 비축금 2,500만 WLD 보존 자율 순환 엔진
+3. **[국채(KTB) 3종 & 환매조건부채권(Repo) 대출 거래소 사양서](TREASURY_BONDS_EXCHANGE_SPEC.ko.md)**: 3년/5년/10년물 국채 실시간 호가 거래, 24시간 레포 대출 및 국고 이자 지급 엔진
+4. **[국민연금공단(NPS) 공적 연금 적립 & 평생 기초연금 사양서](NATIONAL_PENSION_SERVICE_SPEC.ko.md)**: 5단계 적립(5만~100만 WLD), 국고 100% 매칭, 시간당 평생 기초연금 지급 및 3대 국부펀드 운용
+5. **[국가투자공사(WSHC) 산하 3대 공기업 및 대국민 경영공시 알리오(ALIO) 사양서](STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.ko.md)**: 에너지·인프라·금융 3대 공기업 재무제표, 30% 국고 배당 납입 및 `/enterprises` 대국민 알리오 포털
+6. **[국고 세수 자동 사회 환원 및 재정 선순환 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 국고 5대 금고, 4대 사회 환원, 10대 법정 세율 및 30% 안전 비축금 원장
+7. **[통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md)**: v2026.10 최신 프로덕션 릴리스 및 15대 도메인 권위 통합 기획
+8. **[통합 앱 명세서 및 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 15대 전 도메인 공식 구현 스펙 및 사용자 안내
+9. **[2026 차세대 핀테크 디자인 시스템 공식 지침서](DESIGN_SYSTEM_GUIDELINES.ko.md)**: Linear/Stripe/Apple 20만+ 래퍼런스 기반 디자인 규격
+10. **[2026 반응형 디자인 기준 공식 지침서](RESPONSIVE_DESIGN_GUIDELINES.ko.md)**: 320px~1920px 5대 뷰포트 매트릭스 및 Zero-Overflow 방어 지침
+11. **[문서 인덱스 (INDEX.ko.md)](INDEX.ko.md)**: 15대 도메인별 선별 탐색 경로
+12. **[현재 런타임/OS 기준](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian/systemd/Nginx/Docker/PostgreSQL 인프라 베이스라인
+13. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT) 및 버전 관리 불변식
 
 ---
 
