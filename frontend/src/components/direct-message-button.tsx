@@ -41,7 +41,6 @@ export function DirectMessageButton({
       return;
     }
     if (typeof window !== 'undefined') {
-      e.preventDefault();
       window.dispatchEvent(
         new CustomEvent('moneyverse:open-dm', {
           detail: {

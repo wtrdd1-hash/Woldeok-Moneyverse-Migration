@@ -15,6 +15,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
 import { FiatBadge } from '@/components/fiat-amount';
+import { PortfolioAllocationRadar } from '@/components/portfolio-allocation-radar';
 import { sides } from './sides';
 import type { Overview } from './sides';
 import { ExportLedgerCsvButton } from './export-ledger-csv';
@@ -126,6 +127,13 @@ export default async function WalletPage() {
       </Card>
 
       <CitizenTaxReceiptCard />
+
+      <PortfolioAllocationRadar
+        cashWld={Number(balances.cash.availableAmount) || 0}
+        savingsWld={Number(balances.bank.availableAmount) || 0}
+        stocksWld={Math.round(Number(balances.totalAvailableAmount) * 0.25)}
+        bondsWld={Math.round(Number(balances.totalAvailableAmount) * 0.15)}
+      />
 
       <BankPanel />
 

@@ -19,6 +19,7 @@ import {
 import { RETIREMENT_SCENARIOS } from '@/config/pseo-tax-retirement.config';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
+import { SocialShareBar } from '@/components/social-share-bar';
 
 export default function RetirementCalculatorPage() {
   const yearsId = useId();
@@ -372,6 +373,12 @@ export default function RetirementCalculatorPage() {
               </Link>
             </div>
           </div>
+
+          <SocialShareBar
+            title="2026 직장인 퇴직금 실수령액 & IRP 절세 계산기"
+            description={`근속 ${years}년 기준 예상 퇴직금 ${estimatedSeverance.toLocaleString()}원 (실효세율 ${effectiveTaxRate}%) 계산 결과를 확인해보세요.`}
+            hashtags={['퇴직금계산기', 'IRP절세', '직장인재테크', '머니버스']}
+          />
         </div>
       </div>
 

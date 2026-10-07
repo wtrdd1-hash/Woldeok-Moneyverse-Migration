@@ -7,6 +7,7 @@ import { ShareDiagnosisCard } from '@/components/viral/share-diagnosis-card';
 import { ReferralSystem } from '@/components/viral/referral-system';
 import { buildCalculatorRichSnippet, jsonLd } from '@/lib/json-ld';
 import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
+import { SocialShareBar } from '@/components/social-share-bar';
 
 interface PresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
@@ -159,6 +160,12 @@ export default async function CompoundPresetPage({ params }: PresetPageProps) {
               />
             </div>
           </div>
+
+          <SocialShareBar
+            title={`${data.title} - 머니버스 복리 계산기`}
+            description={`원금 및 적립 시뮬레이션 결과 만기 수령액: ${data.calculatedResult.primaryValue} (${data.calculatedResult.secondaryValue})`}
+            hashtags={['머니버스', '복리계산기', '적금계산기', '재테크']}
+          />
         </div>
 
         {/* 단계별 HowTo 가이드 */}

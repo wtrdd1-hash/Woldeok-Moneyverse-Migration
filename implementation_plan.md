@@ -3082,3 +3082,32 @@ flowchart TD
 ### 3. 검증 계획 (Verification Plan)
 - 로컬 `tsc --noEmit` 타입체크 100% 통과.
 - 운영 서버 백엔드 및 프론트엔드 무중단 배포 후 실제 HTTP 요청 및 라이브 응답 확인.
+
+
+---
+## 🚀 [v121 Specification] 게시판 1:1 쪽지 연동, 3대 금융도구 소셜 공유 바 전면 확장 & 포트폴리오 자산 배분 레이더 구축 (+260, -0)
+
+### 1. 요구사항 재정의 및 목적 (Overview & Goals)
+- **무엇을**:
+  1. **커뮤니티 연계 1:1 쪽지 보내기 딥링크**:
+     - 게시판(`/board/[postId]`)의 글/댓글 작성자 클릭 시 1:1 쪽지 보내기(`/chat?peer=...`) 바로가기 제공.
+  2. **3대 주요 금융 계산기 지면 소셜 바이럴 공유 바 확대**:
+     - 복리이자 계산기(`/tools/compound-calculator/[preset]`), 연봉 계산기(`/tools/salary-calculator/[preset]`), 퇴직금 계산기(`/tools/retirement-calculator/[slug]`)에 `SocialShareBar` 탑재.
+  3. **실시간 포트폴리오 자산 배분 도넛 차트 & AI 리밸런싱 레이더 (`PortfolioAllocationRadar`)**:
+     - 지갑(`/wallet`) 지면에 현금, 주식, 국채, 예적금 자산군 비중을 시각화하는 인터랙티브 SVG 도넛 차트 신설.
+     - 올웨더(All-Weather) & 워렌 버핏 90:10 벤치마크 기반 리밸런싱 조언 카드 제공.
+  4. **운영 서버 빌드, 무중단 승격 및 실제 라이브 전수 QA**:
+     - 빌드 검증 후 무중단 리로드 및 실측 라이브 확인.
+
+### 2. 세부 변경 계획 (Proposed Changes)
+- `frontend/src/app/board/post-viewer.tsx` 및 관련 댓글 컴포넌트: 작성자 쪽지 보내기 버튼 연동.
+- `frontend/src/app/tools/compound-calculator/[preset]/page.tsx`: SocialShareBar 배치.
+- `frontend/src/app/tools/salary-calculator/[preset]/page.tsx`: SocialShareBar 배치.
+- `frontend/src/app/tools/retirement-calculator/[slug]/page.tsx`: SocialShareBar 배치.
+- `frontend/src/components/portfolio-allocation-radar.tsx`: 신규 자산 배분 도넛 차트 및 리밸런싱 컴포넌트 신설.
+- `frontend/src/app/wallet/page.tsx`: PortfolioAllocationRadar 마운트.
+
+### 3. 검증 계획 (Verification Plan)
+- TypeScript 정적 타입 검증 (`tsc --noEmit`) 100% 통과.
+- Next.js 프로덕션 빌드 통과.
+- 운영 서버 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.

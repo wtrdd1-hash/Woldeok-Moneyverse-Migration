@@ -18,6 +18,7 @@ import {
 } from '@/config/pseo-salary.config';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
+import { SocialShareBar } from '@/components/social-share-bar';
 
 interface SalaryPresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
@@ -228,6 +229,12 @@ export default async function SalaryPresetPage({ params }: SalaryPresetPageProps
             {data.annualNet.toLocaleString()} 원
           </span>
         </div>
+
+        <SocialShareBar
+          title={`${data.displayTitle} - 2026 연봉 실수령액 계산기`}
+          description={`연봉 ${inManWon}만원의 4대보험 공제 후 월 실수령액은 ${data.monthlyNet.toLocaleString()}원(공제율 ${data.effectiveTaxRate}%)입니다.`}
+          hashtags={['연봉실수령액', '월급계산기', '4대보험', '머니버스']}
+        />
       </div>
 
       {/* 고단가 금융 인아티클 광고 */}
