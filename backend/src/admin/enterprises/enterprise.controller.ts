@@ -17,6 +17,7 @@ import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { EnterpriseService } from './enterprise.service';
+import { SkipInternalToken } from '../../auth/guards/skip-internal-token.decorator';
 
 @ApiTags('State Enterprises & Corporate Governance')
 @Controller('admin/enterprises')
@@ -71,6 +72,7 @@ export class AdminEnterpriseController {
 }
 
 @ApiTags('Public Enterprises')
+@SkipInternalToken()
 @Controller('enterprises')
 export class PublicEnterpriseController {
   constructor(private readonly service: EnterpriseService) {}
