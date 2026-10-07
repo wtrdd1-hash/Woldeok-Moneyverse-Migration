@@ -50,6 +50,20 @@ describe('InteractiveOnboardingTracker Component', () => {
     fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
   });
 
+  it('keeps the expanded card inside a 320px mobile viewport', () => {
+    render(
+      <LocaleProvider initialLocale="en">
+        <InteractiveOnboardingTracker />
+      </LocaleProvider>
+    );
+    fireEvent.click(screen.getByText(/Onboarding Quests/));
+
+    const heading = screen.getByText('Onboarding Quests & Bonus');
+    const card = heading.closest('[class*="max-w-[390px]"]');
+    expect(card).not.toBeNull();
+    expect(card?.className).toContain('w-[calc(100vw-1.75rem)]');
+  });
+
   it('supports dismissing for today and undismissing', () => {
     render(
       <LocaleProvider initialLocale="ko">
