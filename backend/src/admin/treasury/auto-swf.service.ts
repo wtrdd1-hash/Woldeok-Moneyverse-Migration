@@ -683,7 +683,7 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
         `INSERT INTO public.system_treasury_ledger (
             vault_id, tx_type, amount_wld, reason, balance_before, balance_after, created_at
          ) VALUES (
-            $1, 'REBALANCE_LIQUIDATE_TO_TREASURY', $2,
+            $1, 'ABSORPTION_SINK', $2,
             '국고 자금 정상화: 과도하게 투자된 주식 자금을 매도 회수하여 중앙 국고 금고로 전액 환원 (현금 85% : 투자 15% 목표)',
             $3, $4, clock_timestamp()
          )`,
