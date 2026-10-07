@@ -20,6 +20,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { WeeklyWorldBrief, type WeeklyBriefData } from './weekly-world-brief';
+import { SocialShareToolbar } from '@/components/social-share-toolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -319,7 +320,7 @@ export function NewspaperView({
             </p>
           </div>
 
-          <div className="flex items-center justify-center sm:justify-start gap-2 shrink-0">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 shrink-0">
             <Button asChild variant="outline" size="sm" className="h-9 gap-1.5 text-xs font-semibold">
               <Link href="/stocks">
                 <TrendingUp className="size-3.5 text-emerald-500" />
@@ -332,6 +333,12 @@ export function NewspaperView({
                 {localeLabel(locale, '중앙 은행', 'Virtual Bank', '銀行', '中央银行')}
               </Link>
             </Button>
+            <SocialShareToolbar
+              compact
+              title="월덕 머니버스 주간 경제 브리프 & 실시간 AI 시황"
+              description="실시간 AI 경제 사건 및 가상 시장 펄스 분석 보고서"
+              url="/newspaper"
+            />
           </div>
         </div>
 
@@ -719,6 +726,14 @@ export function NewspaperView({
 
       {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}
       <MultiplexAdvertisement className="my-6" />
+
+      {/* 원클릭 소셜 공유 바 */}
+      <SocialShareToolbar
+        title="월덕 머니버스 주간 경제 브리프 & 실시간 AI 시황"
+        description="가상 시장 펄스, 이번 주 세계가 주목하는 핵심 금융 사건 및 AI 시나리오 분석"
+        url="/newspaper"
+        hashtags={['월덕머니버스', 'AI시황뉴스', '가상경제', '주식브리프']}
+      />
 
       {/* 6. Action Dock */}
       <footer className="rounded-2xl border border-border/80 bg-muted/30 p-6 text-center space-y-4">

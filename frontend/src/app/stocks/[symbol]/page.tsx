@@ -20,6 +20,7 @@ import { StockDiscussionSection } from './stock-discussion-section';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockTradingConsole } from './stock-trading-console';
 import { StockHaltBanner } from './stock-halt-banner';
+import { SocialShareToolbar } from '@/components/social-share-toolbar';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import {
   findHoldingForStock,
@@ -238,7 +239,16 @@ export default async function StockHubPage({
                 ? 'A game-only virtual stock. Not a real stock or financial product.'
                 : '게임 안에서만 거래되는 가상 종목입니다. 실제 주식·금융상품이 아닙니다.')}
           </p>
-          <WatchlistToggle stockId={stock.id} watching={watching} />
+          <div className="flex items-center gap-2">
+            <SocialShareToolbar
+              compact
+              title={`${stock.symbol} ${stock.name} 실시간 시세 및 호가`}
+              description={`현재 체결가: ${groupDigits(stock.current_price)} WLD - 월덕 머니버스 가상 주식 거래소`}
+              url={`/stocks/${stock.symbol}`}
+              hashtags={['월덕머니버스', '가상주식', stock.symbol, '모의투자']}
+            />
+            <WatchlistToggle stockId={stock.id} watching={watching} />
+          </div>
         </div>
       </PageHeader>
 

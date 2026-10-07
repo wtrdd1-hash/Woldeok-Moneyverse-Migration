@@ -1,5 +1,6 @@
 import { Injectable, Logger, Optional, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { DiscordAlertService } from '../discord/discord-alert.service';
+import { TwitterPublisherService } from './twitter-publisher.service';
 import { SeoService } from './seo.service';
 
 export interface DailyDigestResult {
@@ -10,6 +11,7 @@ export interface DailyDigestResult {
   readonly avgPosition30d: number;
   readonly topQueriesCount: number;
   readonly discordNotified: boolean;
+  readonly twitterPublished?: boolean;
   readonly message: string;
 }
 
@@ -24,6 +26,7 @@ export class SeoDailyDigestService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly seoService: SeoService,
     @Optional() private readonly discordAlertService?: DiscordAlertService,
+    @Optional() private readonly twitterPublisher?: TwitterPublisherService,
   ) {}
 
   onModuleInit() {
@@ -125,6 +128,18 @@ export class SeoDailyDigestService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
+    let twitterPublished = false;
+    if (this.twitterPublisher && this.twitterPublisher.isConfigured()) {
+      try {
+        const topQueryStr = top5Queries.length > 0 ? top5Queries.map((q) => `#${q.query.replace(/\s+/g, '')}`).slice(0, 3).join(' ') : '#월덕머니버스';
+        const tweetText = `📰 [월덕 머니버스 실전 경제 시황]\n가상 경제 시장 펄스 및 일일 경제 리포트가 업데이트되었습니다.\n\n👉 브리프 읽기: https://easy-scraping.com/newspaper\n👉 1초 금융 계산기: https://easy-scraping.com/tools\n\n${topQueryStr} #가상주식 #재테크`;
+        const tweetRes = await this.twitterPublisher.publishTweet(tweetText);
+        twitterPublished = tweetRes.success;
+      } catch (err) {
+        this.logger.warn(`Failed to publish daily tweet: ${(err as Error).message}`);
+      }
+    }
+
     const result: DailyDigestResult = {
       timestamp: new Date().toISOString(),
       totalClicks30d: analytics.totalClicks30d,
@@ -133,13 +148,14 @@ export class SeoDailyDigestService implements OnModuleInit, OnModuleDestroy {
       avgPosition30d: analytics.avgPosition30d,
       topQueriesCount: top5Queries.length,
       discordNotified,
+      twitterPublished,
       message: discordNotified
         ? 'Google Search Console 일일 SEO 요약 리포트가 Discord로 성공적으로 전송되었습니다.'
         : 'Google Search Console 일일 SEO 요약 리포트가 생성되었습니다 (Discord 웹훅 미설정).',
     };
 
     this.lastDigestResult = result;
-    this.logger.log(`Daily SEO digest generated (discordNotified: ${discordNotified})`);
+    this.logger.log(`Daily SEO digest generated (discordNotified: ${discordNotified}, twitterPublished: ${twitterPublished})`);
     return result;
   }
 }

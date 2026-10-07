@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
 import { GscAnalyticsCard } from './gsc-analytics-card';
 import { AdMonetizationCard } from './ad-monetization-card';
+import { TwitterPublisherCard } from './twitter-publisher-card';
 
 export interface CrawlerLog {
   readonly id: string;
@@ -368,6 +369,9 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
 
       {/* Google Search Console Search Analytics 30-Day Trend & Top Queries */}
       <GscAnalyticsCard />
+
+      {/* X(Twitter) 자동 백링크 봇 & 발행 관제 타워 */}
+      <TwitterPublisherCard />
 
       {/* Search Console sitemap submission lives in the authenticated GSC card above. */}
 

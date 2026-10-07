@@ -5,11 +5,12 @@ import { SeoService } from './seo.service';
 import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
 import { SeoDailyDigestService } from './seo-daily-digest.service';
 import { SeoCronPingService } from './seo-cron-ping.service';
+import { TwitterPublisherService } from './twitter-publisher.service';
 
 @Module({
   imports: [AuthModule],
   controllers: [SeoController, IndexNowKeyController],
-  providers: [SeoService, SeoCrawlerAuditService, SeoDailyDigestService, SeoCronPingService],
-  exports: [SeoService, SeoCrawlerAuditService, SeoDailyDigestService, SeoCronPingService],
+  providers: [SeoService, SeoCrawlerAuditService, SeoDailyDigestService, SeoCronPingService, TwitterPublisherService],
+  exports: [SeoService, SeoCrawlerAuditService, SeoDailyDigestService, SeoCronPingService, TwitterPublisherService],
 })
 export class SeoModule {}

@@ -18,6 +18,7 @@ import {
 import type { CardAspect, ViralCardPayload } from '@/lib/viral-share-card';
 import { Download, Copy, Share2, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { SocialShareToolbar } from '@/components/social-share-toolbar';
 
 interface ViralShareCardDialogProps {
   open: boolean;
@@ -154,6 +155,15 @@ export function ViralShareCardDialog({
             {isLinkCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
             {isLinkCopied ? '링크 복사됨!' : '오픈채팅 공유'}
           </Button>
+        </div>
+
+        {/* 원클릭 소셜 공유 바 */}
+        <div className="pt-2 border-t border-zinc-800/80">
+          <SocialShareToolbar
+            title={payload.title}
+            description={`${payload.keyMetricLabel}: ${payload.keyMetricValue}${payload.recommendationNote ? ` - ${payload.recommendationNote}` : payload.badgeText ? ` - ${payload.badgeText}` : ''}`}
+            url={payload.shareUrl}
+          />
         </div>
       </DialogContent>
     </Dialog>

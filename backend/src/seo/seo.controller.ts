@@ -22,6 +22,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
 import { SeoDailyDigestService } from './seo-daily-digest.service';
+import { TwitterPublisherService } from './twitter-publisher.service';
 import { SeoService } from './seo.service';
 
 export interface CrawlerLogDto {
@@ -41,6 +42,10 @@ export interface SaveGscCredentialsDto {
   readonly keyJson: string;
 }
 
+export interface TestTweetDto {
+  readonly text?: string;
+}
+
 @ApiTags('seo')
 @Controller('seo')
 export class SeoController {
@@ -48,6 +53,7 @@ export class SeoController {
     private readonly seoService: SeoService,
     private readonly auditService: SeoCrawlerAuditService,
     private readonly digestService: SeoDailyDigestService,
+    private readonly twitterPublisher: TwitterPublisherService,
   ) {}
 
   @Get('crawl-audit')
@@ -174,6 +180,22 @@ export class SeoController {
       keyLocation: `${base}/${key}.txt`,
       wellKnownLocation: `${base}/.well-known/indexnow.key`,
     };
+  }
+
+  @Get('twitter/status')
+  @SkipInternalToken()
+  @ApiOperation({ summary: 'Get X(Twitter) automated publisher configuration and quota status' })
+  getTwitterStatus() {
+    return this.twitterPublisher.getStatus();
+  }
+
+  @Post('twitter/test-tweet')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
+  @ApiOperation({ summary: 'Publish a manual test tweet for SEO and social backlink' })
+  async sendTestTweet(@Body() body: TestTweetDto) {
+    const text = body.text || `📰 [월덕 머니버스] 실시간 가상 주식 및 금융 시뮬레이터 안내\nhttps://easy-scraping.com/newspaper\n#월덕머니버스 #모의투자 #금융계산기`;
+    return this.twitterPublisher.publishTweet(text);
   }
 }
 
