@@ -39,6 +39,7 @@ interface AdminTabItem {
 
 export const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard },
+  { href: '/admin/money-flow', label: '유저 자금 흐름', icon: ArrowLeftRight },
   { href: '/admin/analytics', label: '그래프 분석', icon: BarChart3 },
   { href: '/admin/api-health', label: 'API 관제', icon: Activity },
   { href: '/admin/seo', label: 'SEO·색인', icon: Globe },

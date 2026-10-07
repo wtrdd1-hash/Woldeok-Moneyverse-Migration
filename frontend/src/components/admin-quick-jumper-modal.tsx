@@ -56,6 +56,7 @@ export const ALL_ADMIN_ROUTES: readonly AdminRouteMeta[] = [
 
   // 2. 거시 경제 & 국고
   { href: '/admin/economy', label: '경제·원장', description: '중앙은행(MCB) 통화정책 명령서, 조폐국 발행/소각 인증서', category: '거시 경제 & 국고', icon: Coins },
+  { href: '/admin/money-flow', label: '유저 자금 흐름 관제', description: '전체 유저 입출금, 주식, 상점, 급여, 카지노 실시간 원장 추적', category: '거시 경제 & 국고', icon: ArrowLeftRight },
   { href: '/admin/economy/scenario-lab', label: '경제 시나리오 랩', description: 'M2 통화량 시뮬레이션 및 다중 AI Council 심의 평가', category: '거시 경제 & 국고', icon: FileSpreadsheet },
   { href: '/admin/treasury', label: '국고·비축금', description: '2,500만 WLD 앵커, 85% 현금 정상화 및 자율 세수 회수', category: '거시 경제 & 국고', icon: Vault },
   { href: '/admin/enterprises', label: '공기업·지배구조', description: 'WSHC 산하 에너지/인프라/금융 3사 30% 배당 및 알리오 공시', category: '거시 경제 & 국고', icon: Building },
