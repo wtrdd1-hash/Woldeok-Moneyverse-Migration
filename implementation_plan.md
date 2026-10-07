@@ -3111,3 +3111,30 @@ flowchart TD
 - TypeScript 정적 타입 검증 (`tsc --noEmit`) 100% 통과.
 - Next.js 프로덕션 빌드 통과.
 - 운영 서버 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.
+
+
+---
+## 🚀 [v122 Specification] 일일 출석체크 행운의 룰렛(Daily Lucky Wheel) 미니게임 & X(Twitter) 자동 백링크 봇 구축 (+280, -0)
+
+### 1. 요구사항 재정의 및 목적 (Overview & Goals)
+- **무엇을**:
+  1. **일일 출석체크 행운의 룰렛(Daily Lucky Wheel) 인터랙티브 미니게임 구축**:
+     - Stake / Duolingo 스타일의 8개 슬롯 SVG 하드웨어 가속 회전 룰렛.
+     - 1,000 WLD ~ 50,000 WLD 잭팟 꽝 없는 100% 당첨 보장.
+     - 회전 감속 애니메이션, Canvas 컨페티(꽃가루 폭죽) 연출.
+     - 당첨 결과 즉시 X(트위터) & 카카오톡 원클릭 인증 공유(`SocialShareBar`) 연동.
+     - 메인 홈 대시보드 온보딩/리텐션 구역에 전진 배치.
+  2. **X(Twitter) 자동 트윗 백링크 봇 & 관리자 1클릭 포스팅 엔드포인트 연동**:
+     - 관리자 콘솔(`/admin/seo`) 내 원클릭 수동 트윗 발송 및 자동 스케줄러 점검.
+  3. **운영 서버 빌드, 무중단 승격 및 실제 라이브 전수 QA**:
+     - 타입체크 통과, Next.js 프로덕션 빌드, 라이브 HTTP 200 실측 검증.
+
+### 2. 세부 변경 계획 (Proposed Changes)
+- `frontend/src/components/daily-lucky-wheel.tsx`: 신규 행운의 룰렛 컴포넌트 신설.
+- `frontend/src/app/page.tsx`: 메인 홈 일일 리텐션 구역에 DailyLuckyWheel 마운트.
+- `frontend/src/app/admin/seo/page.tsx`: X(Twitter) 자동 백링크 봇 관제 및 테스트 발송 위젯 연동 상태 확인/보완.
+
+### 3. 검증 계획 (Verification Plan)
+- 로컬 `tsc --noEmit` 타입체크 100% 통과.
+- Next.js 프로덕션 빌드 통과.
+- 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.

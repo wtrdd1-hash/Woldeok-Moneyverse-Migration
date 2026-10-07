@@ -26,6 +26,7 @@ import { WalletGlance } from '@/components/wallet-glance';
 import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
 import { CasualDopamineStation } from '@/components/casual-dopamine-station';
+import { DailyLuckyWheel } from '@/components/daily-lucky-wheel';
 import { DiscordBanner } from '@/components/discord-banner';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -459,6 +460,11 @@ export default async function HomePage() {
 
       {/* 3.5. DISCORD BOT DEEPLINK & WEB ATTENDANCE BONUS BANNER */}
       <DiscordBanner />
+
+      {/* 3.8 DAILY LUCKY WHEEL (일일 행운의 룰렛 & 바이럴 공유 스테이션) */}
+      <div id="attendance" className="scroll-mt-20">
+        <DailyLuckyWheel />
+      </div>
 
       {/* 4. CASUAL DOPAMINE STATION: 일반 유저 무료 도파민 (피버, 덕이 펫, 여론 잭팟, 1:1 결투) */}
       <CasualDopamineStation />
