@@ -340,7 +340,7 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
                 await client.query(
                   `UPDATE public.account_balances
                    SET available_amount = available_amount + $1, updated_at = clock_timestamp()
-                   WHERE account_id = (SELECT id FROM public.accounts WHERE owner_user_id = $2 AND account_type = 'CHECKING' LIMIT 1)`,
+                   WHERE account_id = (SELECT id FROM public.accounts WHERE owner_user_id = $2 AND account_type = 'USER_CASH' LIMIT 1)`,
                   [perUser.toString(), u.id],
                 );
               }
