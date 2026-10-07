@@ -29,6 +29,7 @@ export interface BoardPostRow {
   readonly title: string;
   readonly body: string;
   readonly author_name: string;
+  readonly author_user_id: string;
   readonly created_at: Date;
   readonly updated_at: Date | null;
   readonly mine: boolean;
@@ -40,6 +41,7 @@ export interface BoardCommentRow {
   readonly comment_id: string;
   readonly body: string;
   readonly author_name: string;
+  readonly author_user_id: string;
   readonly created_at: Date;
   readonly mine: boolean;
 }
@@ -51,8 +53,8 @@ interface DeletedRow {
 const SUMMARY_COLUMNS =
   'post_id::text,title,author_name,created_at,updated_at,comment_count,mine,image_storage_key,image_alt_text';
 const POST_COLUMNS =
-  'post_id::text,title,body,author_name,created_at,updated_at,mine,image_storage_key,image_alt_text';
-const COMMENT_COLUMNS = 'comment_id::text,body,author_name,created_at,mine';
+  'post_id::text,title,body,author_name,author_user_id::text,created_at,updated_at,mine,image_storage_key,image_alt_text';
+const COMMENT_COLUMNS = 'comment_id::text,body,author_name,author_user_id::text,created_at,mine';
 
 export class PostgresBoardRepository implements BoardRepository {
   readonly pool: Queryable;

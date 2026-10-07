@@ -205,4 +205,12 @@ export class ChatService {
   async totalUnreadCount(actorUserId: string): Promise<number> {
     return this.repo.totalUnreadCount(actorUserId);
   }
+
+  async searchActiveUsers(
+    actorUserId: string,
+    query: string,
+    limit = 10,
+  ): Promise<readonly { user_id: string; display_name: string }[]> {
+    return this.repo.searchActiveUsers(actorUserId, query, limit);
+  }
 }

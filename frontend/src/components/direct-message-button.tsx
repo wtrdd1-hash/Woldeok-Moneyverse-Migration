@@ -34,9 +34,27 @@ export function DirectMessageButton({
 
   const isSmall = size === 'sm';
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      e.preventDefault();
+      window.dispatchEvent(
+        new CustomEvent('moneyverse:open-dm', {
+          detail: {
+            peerUserId: targetUserId || null,
+            peerDisplayName: authorName,
+          },
+        })
+      );
+    }
+  };
+
   return (
     <Link
       href={href}
+      onClick={handleClick}
       title={`${authorName}님에게 쪽지 보내기`}
       aria-label={`${authorName}님에게 1:1 쪽지 보내기`}
       data-testid="dm-button"

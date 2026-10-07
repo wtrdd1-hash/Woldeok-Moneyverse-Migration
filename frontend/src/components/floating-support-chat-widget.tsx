@@ -23,6 +23,7 @@ import {
   Volume2,
   VolumeX,
   User,
+  UserPlus,
   BellOff,
   Search,
   Paperclip,
@@ -253,6 +254,9 @@ export function FloatingSupportChatWidget() {
   const [directMessages, setDirectMessages] = useState<readonly DirectChatMessage[]>([]);
   const [directReplyText, setDirectReplyText] = useState('');
   const [directSearch, setDirectSearch] = useState('');
+  const [searchedUsers, setSearchedUsers] = useState<readonly { user_id: string; display_name: string }[]>([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const directSearchInputRef = useRef<HTMLInputElement | null>(null);
 
   // 공통 UI 상태
   const [isLoading, setIsLoading] = useState(false);
@@ -823,6 +827,124 @@ export function FloatingSupportChatWidget() {
       setIsSending(false);
     }
   };
+
+  const openConversationByPeer = useCallback(
+    async (peerUserId: string, peerDisplayName: string) => {
+      if (!isSignedIn || !peerUserId) return;
+      setIsLoading(true);
+      try {
+        // 기존에 열려있는 대화방 중 해당 피어가 있는지 확인
+        const existing = conversations.find((c) => c.peer_user_id === peerUserId);
+        if (existing) {
+          await handleSelectDirectConversation(existing);
+          return;
+        }
+
+        const sessionRes = await fetch('/app-api/v1/auth/session');
+        const sessionData = await sessionRes.json();
+        const csrfToken = sessionData.csrfToken ?? '';
+
+        const res = await fetch('/app-api/v1/chat/conversations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-csrf-token': csrfToken,
+          },
+          body: JSON.stringify({ peerUserId }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const newConv: DirectConversation = {
+            conversation_id: data.conversation_id,
+            peer_user_id: peerUserId,
+            peer_display_name: peerDisplayName,
+            peer_avatar_key: null,
+            latest_sequence: data.latest_sequence ?? '0',
+            last_read_sequence: '0',
+            unread_count: '0',
+            last_message_at: null,
+            last_message_body: null,
+            state: data.state ?? 'active',
+            created_at: new Date().toISOString(),
+            muted: false,
+            archived: false,
+          };
+          setSelectedConversation(newConv);
+          setDirectView('chat');
+          await fetchDirectMessages(newConv.conversation_id);
+          await fetchConversations();
+        } else {
+          toast.error(
+            localeLabel(
+              locale,
+              '대화방을 시작할 수 없습니다.',
+              'Failed to start conversation.',
+              '会話を開始できませんでした。',
+              '创建对话失败。'
+            )
+          );
+        }
+      } catch {
+        toast.error(
+          localeLabel(
+            locale,
+            '대화방 연결 중 네트워크 오류가 발생했습니다.',
+            'Network error starting conversation.',
+            '会話接続中にエラーが発生しました。',
+            '网络错误。'
+          )
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isSignedIn, conversations, locale, fetchDirectMessages, fetchConversations]
+  );
+
+  // 1:1 쪽지 열기 이벤트(moneyverse:open-dm) 수신
+  useEffect(() => {
+    const handleOpenDmEvent = (e: Event) => {
+      const custom = e as CustomEvent<{ peerUserId?: string | null; peerDisplayName?: string }>;
+      const { peerUserId, peerDisplayName } = custom.detail || {};
+      setIsOpen(true);
+      setActiveTab('direct');
+      if (peerUserId) {
+        openConversationByPeer(peerUserId, peerDisplayName || '사용자');
+      } else if (peerDisplayName) {
+        setDirectView('list');
+        setDirectSearch(peerDisplayName);
+      }
+    };
+    window.addEventListener('moneyverse:open-dm', handleOpenDmEvent);
+    return () => window.removeEventListener('moneyverse:open-dm', handleOpenDmEvent);
+  }, [openConversationByPeer]);
+
+  // 회원 검색 디바운스 로직
+  useEffect(() => {
+    const query = directSearch.trim();
+    if (!query || query.length < 1 || !isSignedIn) {
+      setSearchedUsers([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingUsers(true);
+      try {
+        const res = await fetch(`/app-api/v1/chat/search-users?query=${encodeURIComponent(query)}&limit=8`);
+        if (res.ok) {
+          const data = await res.json();
+          setSearchedUsers(data.users ?? []);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setIsSearchingUsers(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [directSearch, isSignedIn]);
 
   const handleCopyChat = (kind: 'support' | 'direct') => {
     let text = '';
@@ -1426,52 +1548,198 @@ export function FloatingSupportChatWidget() {
               /* 3. [1:1 쪽지 탭] */
               directView === 'list' ? (
                 <div className="space-y-3 flex-1 flex flex-col min-h-0">
-                  {/* 검색창 */}
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={directSearch}
-                      onChange={(e) => setDirectSearch(e.target.value)}
-                      placeholder={localeLabel(
-                        locale,
-                        '대화 상대 또는 메시지 검색',
-                        'Search conversation or user',
-                        '相手またはメッセージ検索',
-                        '搜索联系人或消息'
-                      )}
-                      className="w-full h-8 pl-8 pr-3 rounded-xl border border-border/70 bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
-                    />
+                  {/* 상단 검색 및 새 쪽지 액션 */}
+                  <div className="space-y-2 shrink-0">
+                    <div className="flex items-center gap-1.5">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                        <input
+                          ref={directSearchInputRef}
+                          type="text"
+                          value={directSearch}
+                          onChange={(e) => setDirectSearch(e.target.value)}
+                          placeholder={localeLabel(
+                            locale,
+                            '대화 상대 또는 메시지 검색',
+                            'Search conversation or user',
+                            '相手またはメッセージ検索',
+                            '搜索联系人或消息'
+                          )}
+                          className="w-full h-8 pl-8 pr-7 rounded-xl border border-border/70 bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
+                        />
+                        {directSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setDirectSearch('')}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          directSearchInputRef.current?.focus();
+                        }}
+                        className="h-8 px-2.5 rounded-xl border-primary/30 text-primary hover:bg-primary/10 text-xs font-bold shrink-0 gap-1"
+                      >
+                        <UserPlus className="size-3.5" />
+                        <span>{localeLabel(locale, '새 쪽지', 'New DM', '新規', '新私信')}</span>
+                      </Button>
+                    </div>
                   </div>
 
-                  {/* 대화방 목록 */}
-                  <div className="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
+                  {/* 대화방 및 검색 결과 목록 스트림 */}
+                  <div className="flex-1 overflow-y-auto space-y-2 pr-0.5">
                     {isLoading && conversations.length === 0 ? (
                       <div className="py-12 text-center text-xs text-muted-foreground space-y-2">
                         <RotateCw className="size-5 animate-spin mx-auto text-primary" />
                         <p>{localeLabel(locale, '쪽지 대화 목록을 불러오는 중…', 'Loading direct messages…', 'メッセージ一覧を読込中…', '正在加载私信…')}</p>
                       </div>
-                    ) : filteredConversations.length === 0 ? (
-                      <div className="py-12 text-center space-y-2">
-                        <div className="flex size-10 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground mx-auto">
-                          <MessageSquare className="size-5" />
+                    ) : directSearch.trim() ? (
+                      /* 검색 모드 (기존 대화방 + 신규 회원 검색 결과) */
+                      <div className="space-y-3">
+                        {/* 1) 회원 검색 결과 (새 대화 시작) */}
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between text-[11px] font-bold text-muted-foreground px-1">
+                            <span className="flex items-center gap-1 text-primary">
+                              <UserPlus className="size-3" />
+                              {localeLabel(locale, '회원 검색 결과 (새 대화 시작)', 'Members found', '会員検索結果', '会员搜索结果')}
+                            </span>
+                            {isSearchingUsers && <RotateCw className="size-3 animate-spin text-muted-foreground" />}
+                          </div>
+
+                          {searchedUsers.length > 0 ? (
+                            searchedUsers.map((u) => (
+                              <button
+                                key={u.user_id}
+                                type="button"
+                                onClick={() => openConversationByPeer(u.user_id, u.display_name)}
+                                className="w-full p-2.5 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/15 transition-all text-left flex items-center justify-between gap-2 shadow-2xs group"
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <div className="size-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-black text-xs shrink-0">
+                                    {u.display_name.slice(0, 1).toUpperCase()}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="font-bold text-xs text-foreground group-hover:text-primary transition-colors truncate">
+                                      {u.display_name}
+                                    </p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {localeLabel(locale, '클릭하여 1:1 쪽지 시작하기', 'Click to start 1:1 chat', 'クリックしてチャット開始', '点击发起1:1私信')}
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary text-primary-foreground shrink-0 shadow-xs">
+                                  {localeLabel(locale, '대화하기', 'Chat', 'チャット', '对话')}
+                                </span>
+                              </button>
+                            ))
+                          ) : !isSearchingUsers ? (
+                            <p className="text-[11px] text-muted-foreground px-1 py-1 italic">
+                              {localeLabel(locale, '일치하는 신규 회원이 없습니다.', 'No matching members.', '一致する会員がいません。', '无匹配会员。')}
+                            </p>
+                          ) : null}
                         </div>
-                        <p className="text-xs font-bold text-foreground">
-                          {directSearch.trim()
-                            ? localeLabel(locale, '검색 결과가 없습니다', 'No results found', '検索結果がありません', '未找到搜索结果')
-                            : localeLabel(locale, '주고받은 1:1 쪽지가 없습니다', 'No direct messages yet', 'メッセージがありません', '暂无私信记录')}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground [word-break:keep-all]">
-                          {localeLabel(
-                            locale,
-                            '게시판이나 프로필에서 [쪽지 보내기]로 대화를 시작해 보세요.',
-                            'Start a conversation from any member profile.',
-                            '掲示板やプロフィールからメッセージを開始できます。',
-                            '可通过论坛或会员主页发送私信开启对话。'
-                          )}
-                        </p>
+
+                        {/* 2) 기존 대화방 검색 결과 */}
+                        {filteredConversations.length > 0 && (
+                          <div className="space-y-1.5 pt-1">
+                            <p className="text-[11px] font-bold text-muted-foreground px-1 flex items-center gap-1">
+                              <MessageSquare className="size-3" />
+                              {localeLabel(locale, '참여 중인 쪽지 대화방', 'Existing chats', '進行中の会話', '现有对话')}
+                            </p>
+                            {filteredConversations.map((conv) => {
+                              const unread = Number.parseInt(conv.unread_count, 10) || 0;
+                              return (
+                                <button
+                                  key={conv.conversation_id}
+                                  type="button"
+                                  onClick={() => handleSelectDirectConversation(conv)}
+                                  className="w-full p-2.5 rounded-xl border border-border/70 bg-card hover:bg-secondary/40 hover:border-primary/40 transition-all text-left flex items-start gap-2.5 shadow-xs group"
+                                >
+                                  <div className="size-8 rounded-full bg-primary/15 text-primary flex items-center justify-center font-black text-xs shrink-0">
+                                    {conv.peer_display_name.slice(0, 1).toUpperCase()}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-1">
+                                      <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors truncate">
+                                        {conv.peer_display_name}
+                                      </span>
+                                      {conv.last_message_at && (
+                                        <span className="text-[10px] text-muted-foreground font-mono shrink-0">
+                                          {formatTimeAgo(conv.last_message_at, locale)}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                                      {conv.last_message_body ||
+                                        localeLabel(locale, '대화 내용이 없습니다', 'No messages yet', '会話内容がありません', '暂无对话内容')}
+                                    </p>
+                                  </div>
+                                  {unread > 0 && (
+                                    <span className="size-4 rounded-full bg-primary text-primary-foreground font-mono text-[9px] font-black flex items-center justify-center shrink-0 self-center">
+                                      {unread}
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {filteredConversations.length === 0 && searchedUsers.length === 0 && !isSearchingUsers && (
+                          <div className="py-8 text-center space-y-1">
+                            <p className="text-xs font-bold text-foreground">
+                              {localeLabel(locale, '검색 결과가 없습니다', 'No results found', '検索結果がありません', '未找到搜索结果')}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {localeLabel(
+                                locale,
+                                `'${directSearch}' 닉네임을 가진 회원을 찾을 수 없습니다.`,
+                                `No member matches '${directSearch}'.`,
+                                `「${directSearch}」に一致する相手が見つかりません。`,
+                                `未找到与'${directSearch}'匹配的会员。`
+                              )}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : filteredConversations.length === 0 ? (
+                      /* 대화방 없음 (Empty State) */
+                      <div className="py-10 text-center space-y-3 px-2">
+                        <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto shadow-inner">
+                          <MessageSquare className="size-6" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-black text-foreground">
+                            {localeLabel(locale, '주고받은 1:1 쪽지가 없습니다', 'No direct messages yet', 'メッセージがありません', '暂无私信记录')}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground [word-break:keep-all] leading-relaxed">
+                            {localeLabel(
+                              locale,
+                              '게시판이나 회원 프로필에서 [쪽지]를 누르거나, 상단 검색창에 닉네임을 입력해 대화를 시작해 보세요.',
+                              'Start by clicking [Direct Message] on posts or searching a member name above.',
+                              '掲示板の[メッセージ]ボタンまたは上の検索バーから会話を開始できます。',
+                              '可通过论坛帖子中的[私信]按钮或在上方搜索会员开启对话。'
+                            )}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => directSearchInputRef.current?.focus()}
+                          className="h-8.5 px-4 font-bold text-xs gap-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+                        >
+                          <UserPlus className="size-3.5" />
+                          <span>{localeLabel(locale, '대화 상대 검색하기', 'Search Member', '相手を検索', '搜索联系人')}</span>
+                        </Button>
                       </div>
                     ) : (
+                      /* 기존 대화방 목록 */
                       filteredConversations.map((conv) => {
                         const unread = Number.parseInt(conv.unread_count, 10) || 0;
                         return (

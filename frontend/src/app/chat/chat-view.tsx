@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MessageSquare, Archive, Search, ArrowLeft, Clock, CheckCheck, User, BellOff } from 'lucide-react';
+import { MessageSquare, Archive, Search, ArrowLeft, Clock, CheckCheck, User, UserPlus, BellOff, RotateCw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,33 @@ export function ChatView({
   const [conversations] = useState<ChatConversation[]>([...initialConversations]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'active' | 'archived'>('active');
+  const [searchedUsers, setSearchedUsers] = useState<readonly { user_id: string; display_name: string }[]>([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  // 신규 회원 검색 디바운스
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (!query) {
+      setSearchedUsers([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsSearchingUsers(true);
+      try {
+        const res = await fetch(`/app-api/v1/chat/search-users?query=${encodeURIComponent(query)}&limit=6`);
+        if (res.ok) {
+          const data = await res.json();
+          setSearchedUsers(data.users ?? []);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setIsSearchingUsers(false);
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Filter conversations
   const filteredList = conversations.filter((c) => {
@@ -69,18 +96,28 @@ export function ChatView({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               type="text"
               placeholder={localeLabel(
                 locale,
-                '대화 상대 또는 메시지 검색',
-                'Search contacts or messages…',
-                '相手やメッセージを検索…',
-                '搜索联系人或消息…',
+                '회원 닉네임 또는 메시지 검색…',
+                'Search members or messages…',
+                '会員名やメッセージを検索…',
+                '搜索会员昵称或消息…',
               )}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 text-sm"
+              className="pl-9 pr-8 h-9 text-sm"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-3.5" />
+              </button>
+            )}
           </div>
           <div className="flex gap-1.5 pt-1">
             <Button
@@ -102,6 +139,49 @@ export function ChatView({
             </Button>
           </div>
         </div>
+
+        {/* 신규 회원 검색 결과 섹션 (검색어가 있을 때 표시) */}
+        {searchQuery.trim() && (
+          <div className="p-2 border-b bg-primary/5 space-y-1.5">
+            <div className="flex items-center justify-between px-1 text-[11px] font-bold text-muted-foreground">
+              <span className="flex items-center gap-1 text-primary">
+                <UserPlus className="size-3.5" />
+                {localeLabel(locale, '회원 검색 결과 (새 쪽지 시작)', 'Members found', '会員検索結果', '会员搜索结果')}
+              </span>
+              {isSearchingUsers && <RotateCw className="size-3 animate-spin text-muted-foreground" />}
+            </div>
+            {searchedUsers.length > 0 ? (
+              <div className="space-y-1 max-h-[140px] overflow-y-auto">
+                {searchedUsers.map((u) => (
+                  <button
+                    key={u.user_id}
+                    type="button"
+                    onClick={() => {
+                      router.push(`/chat?peer=${encodeURIComponent(u.user_id)}`);
+                    }}
+                    className="w-full p-2 rounded-lg border border-primary/20 bg-card hover:bg-primary/10 transition-all text-left flex items-center justify-between gap-2 shadow-2xs group"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="size-7 rounded-full bg-primary/20 text-primary flex items-center justify-center font-black text-xs shrink-0">
+                        {u.display_name.slice(0, 1).toUpperCase()}
+                      </div>
+                      <span className="font-bold text-xs truncate group-hover:text-primary transition-colors">
+                        {u.display_name}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-primary text-primary-foreground shrink-0 shadow-xs">
+                      {localeLabel(locale, '쪽지 보내기', 'Message', '送信', '发私信')}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : !isSearchingUsers ? (
+              <p className="text-[11px] text-muted-foreground px-1 py-0.5 italic">
+                {localeLabel(locale, '일치하는 회원이 없습니다.', 'No members found.', '一致する会員がいません。', '无匹配会员。')}
+              </p>
+            ) : null}
+          </div>
+        )}
 
         {/* Conversation Items List */}
         <div className="flex-1 overflow-y-auto divide-y divide-border/60">

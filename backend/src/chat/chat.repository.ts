@@ -300,4 +300,20 @@ export class PostgresChatRepository {
     );
     return Number.parseInt(row?.total_unread ?? '0', 10) || 0;
   }
+
+  async searchActiveUsers(
+    actorUserId: string,
+    query: string,
+    limit = 10,
+  ): Promise<readonly { user_id: string; display_name: string }[]> {
+    if (!UUID_REGEX.test(actorUserId)) return [];
+    const trimmed = query.trim().slice(0, 50);
+    if (!trimmed) return [];
+    return queryRows<{ user_id: string; display_name: string }>(
+      this.client,
+      `SELECT user_id::text, display_name
+       FROM public.chat_search_active_users($1::uuid, $2::text, $3::integer);`,
+      [actorUserId, trimmed, Math.min(Math.max(1, limit), 20)],
+    );
+  }
 }

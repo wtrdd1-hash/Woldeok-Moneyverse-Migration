@@ -108,6 +108,19 @@ export class ChatController {
     return { totalUnread };
   }
 
+  @ApiOperation({ summary: '1:1 쪽지 상대방 회원 닉네임 검색' })
+  @Get('search-users')
+  async searchUsers(
+    @Req() req: RequestWithSession,
+    @Query('query') query?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const actorUserId = requireUserId(req);
+    const parsedLimit = limit ? Number.parseInt(limit, 10) : 10;
+    const users = await this.chat.searchActiveUsers(actorUserId, query ?? '', parsedLimit);
+    return { users };
+  }
+
   @ApiOperation({ summary: '대화방 메시지 이력 조회' })
   @Get('conversations/:id/messages')
   async listMessages(
