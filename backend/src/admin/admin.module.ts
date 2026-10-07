@@ -60,6 +60,9 @@ import { TreasuryBondService } from './bonds/treasury-bond.service';
 import { AdminNationalPensionController, PublicNationalPensionController } from './pension/national-pension.controller';
 import { NationalPensionRepository } from './pension/national-pension.repository';
 import { NationalPensionService } from './pension/national-pension.service';
+import { AdminFxController, PublicFxController } from './fx/fx.controller';
+import { FxRepository } from './fx/fx.repository';
+import { FxService } from './fx/fx.service';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 
 @Module({
@@ -73,6 +76,8 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
     PublicTreasuryBondController,
     AdminNationalPensionController,
     PublicNationalPensionController,
+    AdminFxController,
+    PublicFxController,
     AdminShopController,
     AdminController,
     AdminAuditController,
@@ -183,6 +188,17 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
       useFactory: (repo: NationalPensionRepository | null, discord: DiscordAlertService | null) =>
         repo ? new NationalPensionService(repo, discord ?? undefined) : null,
     },
+    {
+      provide: FxRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new FxRepository(pool as any) : null),
+    },
+    {
+      provide: FxService,
+      inject: [FxRepository, DiscordAlertService],
+      useFactory: (repo: FxRepository | null, discord: DiscordAlertService | null) =>
+        repo ? new FxService(repo, discord ?? undefined) : null,
+    },
   ],
   exports: [
     AdminService,
@@ -191,6 +207,7 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
     EnterpriseService,
     TreasuryBondService,
     NationalPensionService,
+    FxService,
   ],
 })
 export class AdminModule {}

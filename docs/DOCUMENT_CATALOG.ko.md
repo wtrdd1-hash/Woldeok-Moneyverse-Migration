@@ -14,7 +14,8 @@
 2. **[국고 2,500만 앵커 & 자율 투자 회수 사이클 기획서](TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.ko.md)**: 무유저/저유저 환경 국고 자동 팽창 및 안전 비축금 2,500만 WLD 보존 자율 순환 엔진
 3. **[국채(KTB) 3종 & 환매조건부채권(Repo) 대출 거래소 사양서](TREASURY_BONDS_EXCHANGE_SPEC.ko.md)**: 3년/5년/10년물 국채 실시간 호가 거래, 24시간 레포 대출 및 국고 이자 지급 엔진
 4. **[국민연금공단(NPS) 공적 연금 적립 & 평생 기초연금 사양서](NATIONAL_PENSION_SERVICE_SPEC.ko.md)**: 5단계 적립(5만~100만 WLD), 국고 100% 매칭, 시간당 평생 기초연금 지급 및 3대 국부펀드 운용
-5. **[국가투자공사(WSHC) 산하 3대 공기업 및 대국민 경영공시 알리오(ALIO) 사양서](STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.ko.md)**: 에너지·인프라·금융 3대 공기업 재무제표, 30% 국고 배당 납입 및 `/enterprises` 대국민 알리오 포털
+5. **[한국은행 외환보유액 & 서울외환시장(FX) 환율 시스템 사양서](FOREIGN_EXCHANGE_RESERVES_AND_MARKET_SPEC.ko.md)**: 100만 USD 외환보유액, 변동환율제, 외환당국 스무딩 오퍼레이션 및 연 4.5% 달러 외화예금
+6. **[국가투자공사(WSHC) 산하 3대 공기업 및 대국민 경영공시 알리오(ALIO) 사양서](STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.ko.md)**: 에너지·인프라·금융 3대 공기업 재무제표, 30% 국고 배당 납입 및 `/enterprises` 대국민 알리오 포털
 6. **[국고 세수 자동 사회 환원 및 재정 선순환 기획서](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md)**: 국고 5대 금고, 4대 사회 환원, 10대 법정 세율 및 30% 안전 비축금 원장
 7. **[통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md)**: v2026.10 최신 프로덕션 릴리스 및 15대 도메인 권위 통합 기획
 8. **[통합 앱 명세서 및 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 15대 전 도메인 공식 구현 스펙 및 사용자 안내

@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v116)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v117)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v117**: [한국은행 & 기획재정부 외환당국] 한국은행 외환보유액 운용 & 서울외환시장(FX) 실시간 환율 및 중앙은행 스무딩 오퍼레이션(시장개입) 풀스택 구축 — ① 한국은행 외환보유액(FX Reserves, 초기 시드 100만 USD) 및 기재부 외국환평형기금(외평기금) 벤치마킹 ② 실시간 변동환율제(1 USD = 1,300~1,450 WLD) 및 가상 무역수지·금리차 기반 환율 동적 펄스 엔진 ③ 환율 이상 급변(1,420 초과 급등 또는 1,280 미만 급락) 시 중앙은행 외환당국 스무딩 오퍼레이션(구두개입, 달러 매도/매수 시장개입) ④ 유저 WLD ↔ USD 실시간 1초 즉시 환전 및 연 4.5% 가상 달러 외화 예금 지갑 ⑤ 관리자 외환 관제 타워(/admin/fx) 및 대국민 서울외환시장 포털(/fx) 4개 국어 구축 ⑥ 디스코드 관리자(886478189520637992) DM 외환시장 이상 급변 알림 연동 ⑦ 음성 봇 무변경 상주 유지 (+260, -0)
 - **v115**: [기획재정부 & 보건복지부] 국가 국민연금공단(NPS) 공적 연금 적립 & 평생 기초연금 지급 및 국고 복리 증식 시스템 풀스택 구축 — ① 국민연금공단(NPS) 공적 연금 적립 모델 정립 (자발적/의무적 기여금 납입, 누적 적립액 전액 국고 `VAULT_MAIN` 및 국부펀드 편입 운용) ② 기여도/가입회차별 5단계 연금 등급제(청년적립형~명예원로형) 및 은퇴 시 매시간 확정 기초연금(연 7~10% 수준) 자동 지급 ③ 중도 해지 환급(95% 반환, 5% 복지기금 `VAULT_WELFARE` 귀속) ④ 1시간 주기 자동 복리 엔진(`AutoSwfService`)에 국민연금 자산 운용 및 은퇴자 기초연금 지급 회계 자동화 통합 ⑤ 관리자 총괄 관제 패널(`/admin/pension`) 및 대국민 국민연금 포털(`/pension`) 구축 ⑥ 디스코드 관리자(`886478189520637992`) 1:1 DM 실시간 연금 가입/적립/지급 보고 연동 ⑦ 음성 봇 무변경 상주 유지 (+280, -0)
 - **v114**: 기획재정부 국채(KTB) 발행·유통 거래소 & 80% LTV 레포 대출 & 자동 롤오버 및 계좌 잔액 완벽 연동 — ① 대한민국 국채법 및 미국 TreasuryDirect 표준 KTB 3종(1년 단기, 3년 벤치마크, 5년 인프라) 국채 발행 및 1시간 주기 확정 쿠폰이자/만기 100% 원금 상환 ② 국채 담보 저리 레포 대출(Repo Financing 80% LTV, 연 2.5% 초저리) 및 담보 락 메커니즘 구축 ③ 만기 시 자동 롤오버 재투자(Auto-Rollover) 옵션 및 정규 계좌(`accounts` USER_CASH + `account_balances`) 정합성 보장 ④ 관리자 관제 타워(`/admin/bonds`) 및 대국민 국채 포털(`/bonds`) 3대 탭 연동 ⑤ 디스코드 관리자(`886478189520637992`) DM 연동 ⑥ 단위 테스트 5종 및 Next.js 572개 라우트 빌드 통과, 운영 서버 무중단 승격 (+310, -0)
 - **v113**: 국가 공기업(WSHC) & 대국민 알리오(ALIO) 공시 포털 및 배당 국고 즉시 수취 파이프라인 무중단 운영 배포 & 실시간 라이브 검증 완료 — ① `frontend/src/lib/navigation.ts` 전역 네비게이션 드롭다운 및 모바일 사이드바에 공기업 알리오(`/enterprises`) 링크 및 4개 국어(KO, EN, JA, ZH) 완벽 등록 ② 백엔드 `PublicEnterpriseController`에 `@SkipInternalToken()` 데코레이터를 적용하여 대국민 알리오 경영공시 포털 무인증 실시간 조회 지원 ③ `EnterpriseRepository.distributeSoeDividends` 내 비-UUID 식별자 입력 시 PostgreSQL `22P02` 예외 방어 가드(`validActorUuid`) 신설 ④ 실제 운영 DB에서 공기업 3사(W-Power, W-Net, WDB) 법정 이익배당 108,000 WLD 국고 수취 즉시 집행, `VAULT_MAIN` 국고 잔액 25,183,332 WLD ➡️ 25,291,332 WLD 실시간 증가 및 국고 회계 원장(`system_treasury_ledger`) 전산 기록 ⑤ 디스코드 관리자(`886478189520637992`) DM 실시간 배당 완료 알림 전송 검증 완료 ⑥ 봇 상주 데몬(`bot/index.js`) 음성방 이탈 방지 무변경 안정 유지 (+130, -0)
@@ -2679,3 +2680,46 @@ graph TD
    - `docs/TREASURY_BONDS_EXCHANGE_SPEC.ko.md`
 3. **디스코드 관리자(`886478189520637992`) 1:1 감사 연동 규격 확립**:
    - 국채 청약, 연금 기여, 시간당 쿠폰/연금 분배, 공기업 배당 입금 등 주요 재정 이벤트 실시간 DM 보고.
+
+---
+
+## 🚀 [v117 Specification] 한국은행 외환보유액 운용 & 서울외환시장(FX) 실시간 환율 및 중앙은행 스무딩 오퍼레이션(시장개입) 풀스택 구축
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - '다른기능추가할것없어?' 질의 후, 실물 경제 레퍼런스 기준 최우선 금융 인프라 패키지로 '🏛️ 한국은행 외환보유액 운용 & 서울외환시장(FX) 환율 시스템' 및 '변동환율제 + 스무딩 오퍼레이션' 전격 채택.
+- **실물 경제 레퍼런스 및 법률적 벤치마크**:
+  - **한국은행 외국환평형기금(외평기금) & 외환보유액 (Foreign Exchange Reserves)**: 외국환거래법 및 한국은행법 제64조에 의거, 대외 지급 준비금으로 중앙은행 외환보유액(FX Vault: 초기 시드 1,000,000 USD)을 비축·운용.
+  - **서울외환시장(Seoul Foreign Exchange Market)**: 원화(WLD) ↔ 미국 달러(USD) 실시간 변동환율제 적용. 기본 앵커 환율 1 USD = 1,350.00 WLD.
+  - **중앙은행 외환당국 스무딩 오퍼레이션 (Smoothing Operation / Market Intervention)**:
+    - 환율이 과도하게 급등(WLD 가치 급락, 1,420 WLD 초과)하여 수입 물가 인플레이션 우려 시: 외환당국이 외환보유액에서 달러를 매도(SELL_USD_INTERVENTION)하여 WLD 가치 방어.
+    - 환율이 과도하게 급락(WLD 가치 급등, 1,280 WLD 미만)하여 수출 기업 채산성 악화 우려 시: 외환당국이 WLD를 공급하고 달러를 매수(BUY_USD_INTERVENTION)하여 외환보유액 확충.
+    - 외환당국 구두개입(Verbal Intervention): 환율 급변 시 외환시장 안정화 긴급 공식 성명 발표.
+  - **유저 외환 포털 (/fx)**:
+    - 실시간 틱 환율 차트 및 스프레드(0.2% 외환거래 수수료, 수수료는 국고 VAULT_MAIN 귀속).
+    - 1초 즉시 환전(WLD ➡️ USD, USD ➡️ WLD).
+    - 가상 달러 외화 예금(연 4.5% 시간당 달러 이자 지급).
+  - **관리자 외환 관제 타워 (/admin/fx)**:
+    - 외환보유액(USD) 실시간 잔고, 외환 킬스위치(FX_HALT), 원클릭 시장개입 집행, 구두개입 성명서 발표 큐.
+  - **디스코드 관리자(886478189520637992) 1:1 DM 알림**:
+    - 환율 1,420 WLD 돌파(비상 외환 경보) 및 5만 USD 이상 대규모 환전 발생 시 실시간 DM 전송.
+
+### 2. 세부 변경 파일
+1. docs/FOREIGN_EXCHANGE_RESERVES_AND_MARKET_SPEC.ko.md & .md: 한국은행/외평기금 벤치마크 외환 시스템 마스터 기획서.
+2. packages/database/migrations/255-foreign-exchange-reserves-and-market.sql: foreign_exchange_reserves, foreign_exchange_rates, foreign_exchange_wallets, foreign_exchange_transactions 테이블 및 시드 데이터.
+3. backend/src/admin/fx/fx.repository.ts: 외환보유액, 환율 틱 기록, 외화 지갑 쿼리 및 시장개입/환전 ACID 트랜잭션.
+4. backend/src/admin/fx/fx.service.ts: 비즈니스 로직, 환율 변동 펄스(무역수지/금리차), 스무딩 오퍼레이션 및 디스코드 DM 연동.
+5. backend/src/admin/fx/fx.controller.ts: 관리자 관제 API 및 대국민 외환 포털 API (/api/v1/fx/...).
+6. backend/src/admin/fx/fx.service.test.ts: 단위 테스트 (환전 정합성, 외환보유액 변동, 스무딩 개입 검증).
+7. backend/src/admin/admin.module.ts: FX 모듈 등록.
+8. frontend/src/app/admin/areas.ts: /admin/fx 영역 등록.
+9. frontend/src/app/admin/fx/fx-control-tower.tsx & page.tsx: 관리자 외환 관제 타워.
+10. frontend/src/app/fx/page.tsx: 대국민 서울외환시장 포털 (실시간 환율 차트, 1초 환전, 외화예금).
+11. frontend/src/lib/navigation.ts: 전역 네비게이션 드롭다운 및 모바일 사이드바 4개 국어 등록.
+
+### 3. 검증 계획 (Verification Plan)
+- 백엔드 Vitest 단위 테스트 100% 통과.
+- 프론트엔드 Next.js Turbopack 580+개 라우트 빌드 통과.
+- 데이터베이스 255 마이그레이션 운영 DB 적용.
+- 환율 변동 및 실시간 환전 테스트 집행, 외환보유액 증감 및 국고 수수료 입금 검증.
+- 디스코드 관리자 1:1 DM 알림 전송 검증.
+- 봇 상주 데몬(bot/index.js) 100% 무변경 보존 확인.
