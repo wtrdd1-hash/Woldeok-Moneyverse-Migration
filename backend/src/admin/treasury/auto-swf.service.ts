@@ -235,8 +235,8 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
 
         await client.query(
           `UPDATE public.treasury_swf_portfolios
-           SET current_valuation_wld = $1,
-               unrealized_pnl_wld = $2,
+           SET current_valuation_wld = $1::numeric,
+               unrealized_pnl_wld = $2::numeric,
                updated_at = clock_timestamp()
            WHERE id = $3`,
           [finalVal.toString(), unrealizedPnl.toString(), row.id],
@@ -321,8 +321,8 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
           for (const sym of symbols) {
             await client.query(
               `UPDATE public.treasury_swf_portfolios
-               SET total_invested_wld = (total_invested_wld::numeric + $1)::text,
-                   current_valuation_wld = (current_valuation_wld::numeric + $1)::text,
+               SET total_invested_wld = total_invested_wld + $1::numeric,
+                   current_valuation_wld = current_valuation_wld + $1::numeric,
                    updated_at = clock_timestamp()
                WHERE asset_symbol = $2`,
               [perStock.toString(), sym],
