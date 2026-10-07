@@ -331,7 +331,7 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
 
           // 활성 시민 배당
           const activeUsers = await client.query<{ id: string }>(
-            `SELECT id FROM public.users WHERE status = 'ACTIVE' ORDER BY updated_at DESC LIMIT 50`,
+            `SELECT id FROM public.users WHERE status = 'active' ORDER BY updated_at DESC LIMIT 50`,
           );
           if (activeUsers.rows.length > 0 && dividendAlloc > BigInt(0)) {
             const perUser = dividendAlloc / BigInt(activeUsers.rows.length);
