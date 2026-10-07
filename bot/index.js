@@ -22,6 +22,7 @@ dotenv.config({ path: path.resolve(__dirname, '../backend/.env') });
 
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const LOG_CHANNEL_ID = process.env.DISCORD_LOG_CHANNEL_ID || '1542465347364589609';
+const ADMIN_USER_ID = process.env.DISCORD_ADMIN_ALERT_USER_ID || '886478189520637992';
 const VOICE_GUILD_ID = process.env.DISCORD_VOICE_GUILD_ID || '1104015535592701984';
 const VOICE_CHANNEL_ID = process.env.DISCORD_VOICE_CHANNEL_ID || '1536572442422550538';
 const MUSIC_MAX_TRACK_SECONDS = process.env.DISCORD_MUSIC_MAX_TRACK_SECONDS
@@ -71,6 +72,29 @@ async function sendLog(payload) {
     }
   } catch (err) {
     console.error('[Log] Failed to send log to Discord channel:', err.message);
+  }
+}
+
+/**
+ * 관리자(886478189520637992)에게 1:1 Direct Message(DM) 전송
+ */
+async function sendAdminDM(payload) {
+  try {
+    const user = await client.users.fetch(ADMIN_USER_ID).catch(() => null);
+    if (!user) {
+      console.warn(`[DM] Admin user ${ADMIN_USER_ID} not found or inaccessible.`);
+      return false;
+    }
+    if (typeof payload === 'string') {
+      await user.send({ content: payload });
+    } else {
+      await user.send(payload);
+    }
+    console.log(`[DM] Direct message delivered to admin user ${ADMIN_USER_ID}`);
+    return true;
+  } catch (err) {
+    console.error(`[DM] Failed to send direct message to admin user ${ADMIN_USER_ID}:`, err.message);
+    return false;
   }
 }
 
@@ -203,6 +227,7 @@ client.once(Events.ClientReady, async (c) => {
     .setTimestamp();
 
   await sendLog({ embeds: [embed] });
+  await sendAdminDM({ embeds: [embed] });
 
   const guild = await c.guilds.fetch(VOICE_GUILD_ID).catch(() => null);
   if (guild) {
@@ -251,6 +276,10 @@ client.once(Events.ClientReady, async (c) => {
       .setTimestamp();
 
     await sendLog({ embeds: [reportEmbed] });
+    // 백엔드 상태가 정상이 아닐 경우 관리자 DM으로 즉시 긴급 전송
+    if (backendStatus !== 'OK') {
+      await sendAdminDM({ embeds: [reportEmbed] });
+    }
   }, 30 * 60 * 1000);
 });
 
@@ -283,6 +312,7 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
       .setTimestamp();
 
     await sendLog({ embeds: [warnEmbed] });
+    await sendAdminDM({ embeds: [warnEmbed] });
 
     setTimeout(() => {
       ensureVoiceConnection('VoiceStateUpdate Rejoin');

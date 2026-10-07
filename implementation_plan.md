@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v107)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v108)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v108**: 전체 코드베이스 전수 재분석 & 이상 코드 교정 & 디스코드 봇 관리자(`886478189520637992`) 중요 정보 1:1 DM 전송 풀스택 구축 — ① 디스코드 REST API v10 기반 관리자 1:1 Direct Message(DM) 파이프라인 신설 (원장 대사 결함, 음수 잔액, 감사 로그 체인 변조, 시스템 경보 등 중요 알림 실시간 개인 DM 전송) ② 봇 상주 데몬(`bot/index.js`) 관리자 DM 연동 ③ 관리자 콘솔(`/admin/discord`) DM 관제 위젯 및 원클릭 테스트 DM 발송 엔드포인트 탑재 ④ 채널 ID 유연화 및 예외 처리 견고화 (+150, -0)
 - **v107**: OWASP Top 10:2026 및 핀테크 보안 레퍼런스 심층 감사 기반 3대 핵심 보안 패치 구축 — ① BFF sitemapUrl 도메인/경로 화이트리스트 검증 & IP당 Rate Limiting 가드 적용 (악의적 외부 URL 주입 및 DDoS 차단) ② 백엔드 `safeFetch` 수동 리디렉션 추적(Manual 3xx Redirect Inspection) 다계층 SSRF 방어 구현 (클라우드 IMDS 169.254 / 로컬 루프백 127.0.0.1 우회 원천 차단) ③ Search Console API 예외 발생 시 내부 스택/토큰/자격증명 마스킹 및 정제된 에러 반환(OWASP A10 대응) (+130, -0)
 - **v106**: 글로벌 핀테크 레퍼런스(Investing.com·TradingView·GSC 2026 표준) 심층 점검 기반 3대 보완 고도화 풀스택 구축 — ① 경제 캘린더 예측치/직전치 3열 비교표 & 구글 캘린더(Google Calendar) 1초 등록/ICS 내보내기 & High-Impact/국가 필터 탑재 ② Google Search Console 5개 개별 사이트맵(sitemap-stocks, static, board, announcements 등) 일괄/선택 제출 셀렉터 & 네이버 서치어드바이저 웹마스터 도구 원클릭 딥링크 탑재 ③ 저평가 우량주 모의 매수 완료 즉시 10,000 WLD 퀘스트 보상 자동 청구 & 내 포트폴리오(/stocks/portfolio) 원클릭 이동 버튼 완결 (+140, -0)
 - **v105**: 국내외 경제 캘린더 D-Day 연동 & 원클릭 Google Search Console 사이트맵 정식 등록 파이프라인 & 저평가 우량주 모의 매수 퀘스트 풀스택 구축 — FOMC·금통위·CPI·NFP D-Day 뱃지 및 심층 분석 모달 연동, 구글 Sitemaps API(`PUT /sitemaps/{feedpath}`) 서버 사이드 정식 제출 및 관리자/도구 화면 원클릭 등록 버튼·히스토리 테이블 구축, PER/PBR 백과사전 연계 10,000 WLD 모의 매수 온보딩 퀘스트 완결 (+180, -0)
@@ -2376,6 +2377,46 @@
 - Vitest 백엔드 `src/security` 및 프론트엔드 테스트 100% ALL-PASS.
 - Next.js Turbopack 정적 페이지 빌드 100% 성공 검증.
 - Git main 푸시 및 원격 운영 서버(`easy-scraping.com`) 무중단 배포 및 보안 헤더/엔드포인트 라이브 검증.
+
+---
+
+## 🚀 [v108 Specification] 전체 코드베이스 전수 재분석 & 이상 코드 교정 & 디스코드 봇 관리자(886478189520637992) 중요 정보 1:1 DM 전송 풀스택 구축
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "전체코드 재분석해 처음부터 모든코드을 처음부터끝까지 전체 파일다 재분석해봐"
+  - "886478189520637992 디엠으로 중요한정보는 전송되게해줘 디스코드 봇하고 연동 할것"
+  - "그리고 재분석하고 코드 이상코드등 있는 재분석해봐"
+- **핵심 목표**:
+  1. **디스코드 REST API v10 기반 관리자 1:1 Direct Message(DM) 전송 파이프라인 탑재 (`backend/src/discord/discord-alert.service.ts`)**:
+     - 대상 사용자: `886478189520637992` (환경 변수 `DISCORD_ADMIN_ALERT_USER_ID` 기본값 매핑).
+     - 동작 메커니즘:
+       - 1단계: DM 채널 개설/조회 (`POST https://discord.com/api/v10/users/@me/channels` with payload `{"recipient_id": "886478189520637992"}`).
+       - 2단계: DM 채널로 임베드 발송 (`POST https://discord.com/api/v10/channels/{dmChannelId}/messages` with payload `{"embeds": [...]}`).
+       - Rate limit 방지 및 빠른 응답을 위한 DM 채널 ID 인메모리 캐싱.
+     - 시스템의 중요 정보 발생 시 (원장 대사 불일치, 비허용 음수 잔액, 감사 체인 변조, 긴급 관리자 경보, 시스템 이상 상태) 로그 채널뿐만 아니라 **관리자 디스코드 개인 DM으로 직접 실시간 전송**.
+  2. **디스코드 봇 상주 데몬(`bot/index.js`) 관리자 DM 연동**:
+     - `sendAdminDM(embed)` 함수 구현: `client.users.fetch(ADMIN_USER_ID)`를 통해 봇 기동 시점, 음성 채널 이탈/재진입 경보, 백엔드 헬스체크 장애 감지 시 관리자 DM으로 다이렉트 통보.
+  3. **관리자 콘솔(`/admin/discord`) DM 관제 위젯 & 원클릭 테스트 DM 발송 API 구축**:
+     - 백엔드 관리자 엔드포인트: `POST /api/v1/admin/discord/test-dm` (관리자 세션 검증 후 관리자 DM으로 즉각 테스트 임베드 발송 및 전송 결과 반환).
+     - 프론트엔드 BFF: `POST /api/admin/discord/test-dm` 프록시 라우트 신설.
+     - 관리자 디스코드 페이지(`/admin/discord`): 현재 연동된 관리자 디스코드 ID(`886478189520637992`) 배지 표시 및 "중요 정보 테스트 DM 전송" 액션 버튼 탑재.
+  4. **전체 코드베이스 이상 코드 전수 감사 및 교정**:
+     - `DiscordAlertService`의 채널 ID 하드코딩을 환경변수 우선 참조(`DISCORD_ALERT_CHANNEL_ID` || `DISCORD_LOG_CHANNEL_ID` || 기본값)로 유연화.
+     - 봇 데몬의 헬스체크 포트 및 에러 핸들링 보강.
+
+### 2. 세부 변경 파일
+1. `backend/src/discord/discord-alert.service.ts`: 관리자 1:1 DM 전송 기능(`sendAdminDirectMessage`), 중요 경보 DM 동시 발송 연동, 채널 ID 환경변수 유연화.
+2. `backend/src/admin/operations.controller.ts`: 관리자 DM 테스트 발송 엔드포인트(`POST /api/v1/admin/discord/test-dm`) 추가.
+3. `bot/index.js`: `sendAdminDM` 함수 추가 및 봇 부팅/이상 시 관리자 DM 전송.
+4. `frontend/src/app/api/admin/discord/test-dm/route.ts`: 관리자 DM 테스트 발송 BFF API 라우트.
+5. `frontend/src/app/admin/discord/page.tsx` 및 하위 컴포넌트: 관리자 DM 연동 정보 카드 및 테스트 발송 버튼 탑재.
+
+### 3. 검증 계획
+- 백엔드 Vitest 단위 테스트 100% 통과.
+- 프론트엔드 TypeScript 정적 타입 검증 및 빌드 100% 통과.
+- 로컬 커밋 및 GitHub 원격 저장소(`main`) 푸시.
+- 운영 서버(`easy-scraping.com`) 무중단 배포 및 실제 `886478189520637992` 대상 디스코드 DM 실시간 전송 라이브 검증.
+
 
 
 

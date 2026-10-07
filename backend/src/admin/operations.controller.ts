@@ -27,6 +27,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure, isMalformedInput, isRoleRefusal } from '../core/pg-error';
+import { DiscordAlertService } from '../discord/discord-alert.service';
 import { OperationsRepository } from './operations.repository';
 
 export class UpdateWorkPolicyDto {
@@ -238,6 +239,7 @@ export class AdminBankOperationsController {
 export class AdminDiscordOperationsController {
   constructor(
     @Inject(OperationsRepository) private readonly operations: OperationsRepository | null,
+    @Inject(DiscordAlertService) private readonly discordAlert: DiscordAlertService | null,
   ) {}
 
   @Get()
@@ -249,6 +251,33 @@ export class AdminDiscordOperationsController {
       () => Promise.all([repository.outboxHealth(actor), repository.discordRoutes(actor)]),
       'the delivery console could not be read',
     );
-    return { outbox, routes };
+    const adminAlertInfo = {
+      adminUserId: this.discordAlert ? this.discordAlert.getAdminUserId() : '886478189520637992',
+      configured: !!process.env.DISCORD_BOT_TOKEN,
+    };
+    return { outbox, routes, adminAlertInfo };
+  }
+
+  @Post('test-dm')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Send test direct message to configured admin user' })
+  async testDm(@Req() request: RequestWithSession) {
+    const actor = requireUserId(request);
+    if (!this.discordAlert) {
+      throw new ServiceUnavailableException('Discord alert service is not available');
+    }
+    const adminUserId = this.discordAlert.getAdminUserId();
+    const result = await this.discordAlert.sendAdminDirectMessage({
+      title: '🔔 [관리자 DM 연동 확인] 월덕 머니버스 중요 정보 다이렉트 알림',
+      description: '디스코드 봇을 통한 중요 정보(원장 불일치, 음수 잔액, 감사 체인 변조 등) 1:1 전송 파이프라인이 정상 연동되었습니다.',
+      color: 0x10b981,
+      fields: [
+        { name: '수신 관리자 ID', value: `\`${adminUserId}\``, inline: true },
+        { name: '테스트 요청자', value: `\`${actor.slice(0, 8)}...\``, inline: true },
+        { name: '감시 항목', value: '원장 대사 무결성, 계좌 잔액 안전성, 감사 체인 변조, 긴급 관리자 경보', inline: false },
+      ],
+    });
+    return { ...result, targetUserId: adminUserId };
   }
 }
+

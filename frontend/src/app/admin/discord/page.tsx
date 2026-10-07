@@ -19,6 +19,8 @@ import { adminArea } from '../areas';
 import { Figure } from '../economy/economy-parts';
 import type { AdminDiscordRoute, AdminOutboxHealth } from '../types';
 
+import { AdminDiscordDmTestButton } from './admin-discord-dm-test-button';
+
 export const dynamic = 'force-dynamic';
 
 const AREA = adminArea('/admin/discord');
@@ -28,29 +30,20 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/**
- * Why a message did not arrive.
- *
- * The audit page already prints the last thirty outbox rows, which answers
- * "what went out recently" and not "what is stuck": thirty delivered rows
- * look the same whether or not four hundred are parked behind them. And the
- * question an operator actually starts from -- is this event type even routed
- * -- had no answer at all, because `discord_outbox_routes` (061) decides that
- * and no function had ever read it back.
- *
- * The table below is a FULL JOIN for that reason. A type with no route row is
- * listed first, with 경로 없음 against it: `outbox_claim_pending` will never
- * claim it, so its events accumulate silently and it is exactly the row that
- * a list built from the route table alone would have left out.
- */
 export default async function AdminDiscordPage() {
   await requireAdminConsole(AREA.href);
   const console_ = await apiOrNull<{
     readonly outbox: AdminOutboxHealth;
     readonly routes: readonly AdminDiscordRoute[];
+    readonly adminAlertInfo?: {
+      readonly adminUserId: string;
+      readonly configured: boolean;
+    };
   }>('/api/v1/admin/discord');
 
   const stuck = console_ === null ? 0 : Number(console_.outbox.stuck_count);
+  const adminUserId = console_?.adminAlertInfo?.adminUserId || '886478189520637992';
+  const isConfigured = console_?.adminAlertInfo?.configured ?? true;
 
   return (
     <div data-page="admin-discord" className="mv-page mv-page--admin grid gap-5">
@@ -66,6 +59,42 @@ export default async function AdminDiscordPage() {
         />
       ) : (
         <>
+          <Card className="border-indigo-500/30 bg-gradient-to-r from-indigo-950/20 via-background to-background">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="border-indigo-500 text-indigo-400">
+                    관리자 다이렉트 알림 (DM)
+                  </Badge>
+                  <Badge variant="secondary" className="bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
+                    {isConfigured ? '봇 연동 활성 (ACTIVE)' : '토큰 미설정'}
+                  </Badge>
+                </div>
+                <CardTitle className="text-base mt-2">중요 정보 1:1 디스코드 DM 실시간 전송</CardTitle>
+                <CardDescription>
+                  경제 원장 불일치, 비허용 음수 잔액, 감사 체인 변조, 긴급 관리자 경보 등 시스템 치명적 이벤트 발생 시 관리자 디스코드 ID로 다이렉트 DM이 실시간 발송됩니다.
+                </CardDescription>
+              </div>
+              <div className="shrink-0">
+                <AdminDiscordDmTestButton adminUserId={adminUserId} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-2 sm:grid-cols-2 text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border">
+                <div>
+                  <span className="font-semibold text-foreground">수신 관리자 Discord ID:</span>{' '}
+                  <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono text-indigo-300">
+                    {adminUserId}
+                  </code>
+                </div>
+                <div>
+                  <span className="font-semibold text-foreground">자동 발송 대상:</span>{' '}
+                  <span>원장 대사 불일치, 비허용 음수 잔액, 감사 변조, 긴급 경보</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-base">전달 상태</CardTitle>

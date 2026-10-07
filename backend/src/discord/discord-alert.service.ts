@@ -4,7 +4,8 @@ import { PG_POOL } from '../core/pool.provider';
 import { queryRows } from '../core/db';
 import { safeFetch } from '../security/ssrf-defense';
 
-const CHANNEL_ID = '1542465347364589609';
+const DEFAULT_CHANNEL_ID = '1542465347364589609';
+const DEFAULT_ADMIN_USER_ID = '886478189520637992';
 const CHECK_INTERVAL_MS = 5 * 60_000; // 5분 주기
 const DEBOUNCE_WINDOW_MS = 60 * 60_000; // 동일 장애 1시간 디바운싱
 const DISCORD_API_ORIGIN = 'https://discord.com';
@@ -29,6 +30,7 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DiscordAlertService.name);
   private timer: NodeJS.Timeout | null = null;
   private readonly sentAlerts = new Map<string, number>();
+  private adminDmChannelId: string | null = null;
 
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
@@ -55,6 +57,25 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * 알림 채널 ID 획득 (환경 변수 우선, 기본값 폴백)
+   */
+  private getChannelId(): string {
+    return (
+      process.env.DISCORD_ALERT_CHANNEL_ID ||
+      process.env.DISCORD_LOG_CHANNEL_ID ||
+      process.env.DISCORD_OUTBOX_CHANNEL_ID ||
+      DEFAULT_CHANNEL_ID
+    );
+  }
+
+  /**
+   * 관리자 디스코드 ID 획득
+   */
+  getAdminUserId(): string {
+    return process.env.DISCORD_ADMIN_ALERT_USER_ID || DEFAULT_ADMIN_USER_ID;
+  }
+
+  /**
    * PII 및 계좌 식별자 마스킹 (앞 4자리, 뒤 4자리만 보존)
    */
   private maskIdentifier(id: string): string {
@@ -63,11 +84,97 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * 디스코드 메시지 전송 (웹훅 URL 우선 + 봇 토큰 폴백)
+   * 특정 관리자/유저에게 1:1 Direct Message(DM) 전송 (REST API v10)
    */
-  async sendDiscordEmbed(embed: DiscordEmbed): Promise<boolean> {
+  async sendAdminDirectMessage(
+    embed: DiscordEmbed,
+    targetUserId?: string,
+  ): Promise<{ success: boolean; channelId?: string; error?: string }> {
+    const botToken = process.env.DISCORD_BOT_TOKEN;
+    if (!botToken) {
+      this.logger.warn('Cannot send Discord DM: DISCORD_BOT_TOKEN is not configured');
+      return { success: false, error: 'DISCORD_BOT_TOKEN_NOT_CONFIGURED' };
+    }
+
+    const userId = targetUserId || this.getAdminUserId();
+
+    try {
+      // 1. 유저와의 1:1 DM 채널 조회/생성 (캐시 활용)
+      let dmChannelId = this.adminDmChannelId;
+      if (!dmChannelId) {
+        const createDmRes = await safeFetch(`${DISCORD_API_ORIGIN}/api/v10/users/@me/channels`, {
+          method: 'POST',
+          headers: {
+            authorization: `Bot ${botToken}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({ recipient_id: userId }),
+        });
+
+        if (!createDmRes.ok) {
+          const errText = await createDmRes.text().catch(() => '');
+          this.logger.warn(
+            `Failed to open DM channel with user ${userId}: status ${createDmRes.status} ${errText}`,
+          );
+          return { success: false, error: `OPEN_DM_FAILED_${createDmRes.status}` };
+        }
+
+        const dmChannelData = (await createDmRes.json()) as { id?: string };
+        if (!dmChannelData.id) {
+          return { success: false, error: 'NO_DM_CHANNEL_ID_RETURNED' };
+        }
+        dmChannelId = dmChannelData.id;
+        this.adminDmChannelId = dmChannelId;
+      }
+
+      // 2. DM 채널로 메시지 발송
+      const payload = {
+        embeds: [
+          {
+            ...embed,
+            footer: embed.footer ?? { text: 'Woldeok Moneyverse Admin Direct Sentinel' },
+            timestamp: embed.timestamp ?? new Date().toISOString(),
+          },
+        ],
+      };
+
+      const sendMsgRes = await safeFetch(
+        `${DISCORD_API_ORIGIN}/api/v10/channels/${dmChannelId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            authorization: `Bot ${botToken}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (sendMsgRes.ok) {
+        this.logger.log(`Direct message successfully sent to admin user ${userId} (DM Channel: ${dmChannelId})`);
+        return { success: true, channelId: dmChannelId };
+      }
+
+      // 만약 채널이 만료되었거나 에러가 났다면 캐시 무효화 후 1회 재시도
+      if (sendMsgRes.status === 404 || sendMsgRes.status === 403) {
+        this.adminDmChannelId = null;
+      }
+      const errText = await sendMsgRes.text().catch(() => '');
+      this.logger.warn(`Failed to send message to DM channel ${dmChannelId}: ${sendMsgRes.status} ${errText}`);
+      return { success: false, error: `SEND_DM_FAILED_${sendMsgRes.status}` };
+    } catch (error) {
+      this.logger.error(`Error delivering Discord direct message to user ${userId}`, error);
+      return { success: false, error: error instanceof Error ? error.message : 'UNKNOWN_ERROR' };
+    }
+  }
+
+  /**
+   * 디스코드 메시지 전송 (웹훅 URL 우선 + 봇 토큰 폴백 + 중요 알림 관리자 DM 동시 발송)
+   */
+  async sendDiscordEmbed(embed: DiscordEmbed, isCritical = false): Promise<boolean> {
     const webhookUrl = process.env.DISCORD_ALERT_WEBHOOK_URL;
     const botToken = process.env.DISCORD_BOT_TOKEN;
+    const channelId = this.getChannelId();
 
     const payload = {
       embeds: [
@@ -79,6 +186,8 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       ],
     };
 
+    let delivered = false;
+
     // 1. 웹훅 URL 발송
     if (webhookUrl && webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
       try {
@@ -88,20 +197,21 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
           body: JSON.stringify(payload),
         });
         if (res.ok) {
-          this.logger.log(`Discord alert delivered via webhook to channel ${CHANNEL_ID}`);
-          return true;
+          this.logger.log(`Discord alert delivered via webhook to channel ${channelId}`);
+          delivered = true;
+        } else {
+          this.logger.warn(`Discord webhook returned status ${res.status}`);
         }
-        this.logger.warn(`Discord webhook returned status ${res.status}`);
       } catch (error) {
         this.logger.warn('Failed to post to Discord webhook', error);
       }
     }
 
     // 2. 봇 토큰 채널 메시지 발송 폴백
-    if (botToken) {
+    if (!delivered && botToken) {
       try {
         const res = await safeFetch(
-          `${DISCORD_API_ORIGIN}/api/v10/channels/${CHANNEL_ID}/messages`,
+          `${DISCORD_API_ORIGIN}/api/v10/channels/${channelId}/messages`,
           {
             method: 'POST',
             headers: {
@@ -112,16 +222,24 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
           },
         );
         if (res.ok) {
-          this.logger.log(`Discord alert delivered via bot API to channel ${CHANNEL_ID}`);
-          return true;
+          this.logger.log(`Discord alert delivered via bot API to channel ${channelId}`);
+          delivered = true;
+        } else {
+          this.logger.warn(`Discord bot message API returned status ${res.status}`);
         }
-        this.logger.warn(`Discord bot message API returned status ${res.status}`);
       } catch (error) {
         this.logger.warn('Failed to post to Discord bot channel message API', error);
       }
     }
 
-    return false;
+    // 3. 중요 경보(Critical) 발생 시 관리자 개인 DM으로도 실시간 직접 전송!
+    if (isCritical) {
+      this.sendAdminDirectMessage(embed).catch((err) => {
+        this.logger.warn('Failed to deliver critical direct message to admin', err);
+      });
+    }
+
+    return delivered;
   }
 
   /**
@@ -197,19 +315,22 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       const alertKey = `reconciliation_failed:${latest.id}`;
       if (!this.shouldSend(alertKey)) return;
 
-      await this.sendDiscordEmbed({
-        title: '🚨 [긴급] 경제 코어 원장 대사 불일치 감지 (Reconciliation Failure)',
-        description: '최신 원장 대사 스냅샷에서 불일치 또는 무결성 결함이 감지되었습니다.',
-        color: 0xef4444, // Red
-        fields: [
-          { name: '스냅샷 ID', value: this.maskIdentifier(latest.id), inline: true },
-          { name: '무결성 판정', value: latest.integrity_ok ? 'PASS' : 'FAIL', inline: true },
-          { name: '불일치 계좌 수', value: `${latest.balance_mismatch_account_count}개`, inline: true },
-          { name: '불균형 분개 수', value: `${latest.ledger_unbalanced_transaction_count}개`, inline: true },
-          { name: '비허용 음수 계좌', value: `${latest.disallowed_negative_balance_account_count}개`, inline: true },
-          { name: '잔액 불일치 총액', value: `${latest.balance_total_delta_amount} WLD`, inline: true },
-        ],
-      });
+      await this.sendDiscordEmbed(
+        {
+          title: '🚨 [긴급] 경제 코어 원장 대사 불일치 감지 (Reconciliation Failure)',
+          description: '최신 원장 대사 스냅샷에서 불일치 또는 무결성 결함이 감지되었습니다.',
+          color: 0xef4444, // Red
+          fields: [
+            { name: '스냅샷 ID', value: this.maskIdentifier(latest.id), inline: true },
+            { name: '무결성 판정', value: latest.integrity_ok ? 'PASS' : 'FAIL', inline: true },
+            { name: '불일치 계좌 수', value: `${latest.balance_mismatch_account_count}개`, inline: true },
+            { name: '불균형 분개 수', value: `${latest.ledger_unbalanced_transaction_count}개`, inline: true },
+            { name: '비허용 음수 계좌', value: `${latest.disallowed_negative_balance_account_count}개`, inline: true },
+            { name: '잔액 불일치 총액', value: `${latest.balance_total_delta_amount} WLD`, inline: true },
+          ],
+        },
+        true, // 중요 경보 -> 관리자 DM 동시 발송
+      );
     }
   }
 
@@ -236,16 +357,19 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       const alertKey = `negative_balances:${rows.map((r) => r.account_id).join(',')}`;
       if (!this.shouldSend(alertKey)) return;
 
-      await this.sendDiscordEmbed({
-        title: '🚨 [경보] 비허용 계좌 음수 잔액 발생 (Disallowed Negative Balance)',
-        description: '음수 잔액이 허용되지 않은 계좌에서 비정상 마이너스 잔액이 발생했습니다.',
-        color: 0xf59e0b, // Amber
-        fields: rows.map((r, i) => ({
-          name: `계좌 #${i + 1} (${r.account_type})`,
-          value: `ID: \`${this.maskIdentifier(r.account_id)}\`\n잔액: **${r.available_amount} WLD**`,
-          inline: true,
-        })),
-      });
+      await this.sendDiscordEmbed(
+        {
+          title: '🚨 [경보] 비허용 계좌 음수 잔액 발생 (Disallowed Negative Balance)',
+          description: '음수 잔액이 허용되지 않은 계좌에서 비정상 마이너스 잔액이 발생했습니다.',
+          color: 0xf59e0b, // Amber
+          fields: rows.map((r, i) => ({
+            name: `계좌 #${i + 1} (${r.account_type})`,
+            value: `ID: \`${this.maskIdentifier(r.account_id)}\`\n잔액: **${r.available_amount} WLD**`,
+            inline: true,
+          })),
+        },
+        true, // 중요 경보 -> 관리자 DM 동시 발송
+      );
     }
   }
 
@@ -268,15 +392,18 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       const alertKey = `audit_corrupted:${latest.checked_at.toISOString()}`;
       if (!this.shouldSend(alertKey)) return;
 
-      await this.sendDiscordEmbed({
-        title: '🔴 [치명적 위험] 감사 로그 체인 변조 감지 (Audit Trail Corrupted)',
-        description: '불변 감사 로그(audit_logs) 해시 체인 검증에서 불일치 결함이 발견되었습니다.',
-        color: 0xdc2626, // Crimson Red
-        fields: [
-          { name: '검증 시각', value: new Date(latest.checked_at).toLocaleString('ko-KR'), inline: true },
-          { name: '실패 사유', value: latest.failure_reason ?? '알 수 없는 해시 불일치', inline: false },
-        ],
-      });
+      await this.sendDiscordEmbed(
+        {
+          title: '🔴 [치명적 위험] 감사 로그 체인 변조 감지 (Audit Trail Corrupted)',
+          description: '불변 감사 로그(audit_logs) 해시 체인 검증에서 불일치 결함이 발견되었습니다.',
+          color: 0xdc2626, // Crimson Red
+          fields: [
+            { name: '검증 시각', value: new Date(latest.checked_at).toLocaleString('ko-KR'), inline: true },
+            { name: '실패 사유', value: latest.failure_reason ?? '알 수 없는 해시 불일치', inline: false },
+          ],
+        },
+        true, // 중요 경보 -> 관리자 DM 동시 발송
+      );
     }
   }
 
@@ -300,6 +427,7 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       const alertKey = `admin_alert:${alert.id}`;
       if (!this.shouldSend(alertKey)) continue;
 
+      const isCritical = alert.severity === 'critical';
       const color =
         alert.severity === 'critical'
           ? 0xef4444
@@ -307,15 +435,18 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
             ? 0xf59e0b
             : 0x3b82f6;
 
-      await this.sendDiscordEmbed({
-        title: `⚠️ [관리자 경보] ${alert.kind} (${alert.severity.toUpperCase()})`,
-        description: alert.summary,
-        color,
-        fields: [
-          { name: '경보 ID', value: this.maskIdentifier(alert.id), inline: true },
-          { name: '발생 시각', value: new Date(alert.raised_at).toLocaleString('ko-KR'), inline: true },
-        ],
-      });
+      await this.sendDiscordEmbed(
+        {
+          title: `⚠️ [관리자 경보] ${alert.kind} (${alert.severity.toUpperCase()})`,
+          description: alert.summary,
+          color,
+          fields: [
+            { name: '경보 ID', value: this.maskIdentifier(alert.id), inline: true },
+            { name: '발생 시각', value: new Date(alert.raised_at).toLocaleString('ko-KR'), inline: true },
+          ],
+        },
+        isCritical, // 심각 경보는 관리자 DM 동시 발송
+      );
     }
   }
 
