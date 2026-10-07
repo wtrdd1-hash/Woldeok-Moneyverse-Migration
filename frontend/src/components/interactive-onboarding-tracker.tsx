@@ -316,7 +316,7 @@ export function InteractiveOnboardingTracker() {
                   <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-amber-400 animate-ping" />
                 )}
               </div>
-              <span className="tracking-tight text-[11px] sm:text-xs">
+              <span className="tracking-tight text-[11px] sm:text-xs hidden min-[440px]:inline">
                 {t('온보딩 퀘스트', 'Onboarding Quests', 'オンボーディングクエスト', '新手任务')}
               </span>
               <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] px-1.5 py-0 h-4 font-mono font-bold">
