@@ -118,6 +118,9 @@ export function proxy(request: NextRequest) {
     const restPath = localePrefixMatch[2] ?? '';
     const cleanRest = restPath.startsWith('/') ? restPath : (restPath ? `/${restPath}` : '/');
 
+    // Reserved two-letter application routes that are NOT language codes
+    const RESERVED_APP_ROUTES = new Set(['fx']);
+
     if (isLocale(rawLang)) {
       explicitPrefixLocale = rawLang;
       // Physical localized routes (e.g. /[locale]/guide/glossary/..., /[locale]/tools/compound-interest-calculator/...) should not be stripped
@@ -126,8 +129,8 @@ export function proxy(request: NextRequest) {
       } else {
         targetPath = cleanRest;
       }
-    } else {
-      // User entered an unsupported language prefix (e.g. /fr/stocks, /de/bank)
+    } else if (!RESERVED_APP_ROUTES.has(rawLang) && ['fr', 'de', 'es', 'it', 'pt', 'ru', 'vi', 'th', 'id', 'ms', 'ar', 'hi'].includes(rawLang)) {
+      // User entered a known unsupported language prefix (e.g. /fr/stocks, /de/bank)
       // Automatically redirect to English (/en/...)
       const fallbackUrl = new URL(`/en${cleanRest === '/' ? '' : cleanRest}${request.nextUrl.search}`, request.url);
       return NextResponse.redirect(fallbackUrl, 307);
