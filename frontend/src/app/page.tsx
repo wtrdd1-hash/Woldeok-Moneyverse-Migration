@@ -31,6 +31,7 @@ import { DailyFinancialQuizStation } from '@/components/daily-financial-quiz';
 import { InvestmentProfileQuiz } from '@/components/investment-profile-quiz';
 import { PortfolioBattleArena } from '@/components/portfolio-battle-arena';
 import { LiveMarketPulseTicker } from '@/components/live-market-pulse-ticker';
+import { LiveHallOfFameTicker } from '@/components/live-hall-of-fame-ticker';
 import { DiscordBanner } from '@/components/discord-banner';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -243,6 +244,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 1.4 LIVE HALL OF FAME & REAL-TIME ACTIVITY TICKER */}
+      <LiveHallOfFameTicker />
 
       {/* 1.5 REAL-TIME MARKET PULSE TICKER */}
       <LiveMarketPulseTicker />

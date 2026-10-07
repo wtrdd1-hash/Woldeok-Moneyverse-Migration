@@ -20,6 +20,7 @@ import { StockDiscussionSection } from './stock-discussion-section';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockTradingConsole } from './stock-trading-console';
 import { QuickOrderbookSimulator } from '@/components/quick-orderbook-simulator';
+import { StockSentimentPoll } from '@/components/stock-sentiment-poll';
 import { StockHaltBanner } from './stock-halt-banner';
 import { SocialShareToolbar } from '@/components/social-share-toolbar';
 import { PublicAdvertisement } from '@/components/public-advertisement';
@@ -281,6 +282,12 @@ export default async function StockHubPage({
       <QuickOrderbookSimulator
         currentPrice={Number.parseInt(stock.current_price, 10) || 1450}
         symbol={stock.symbol}
+      />
+
+      {/* 2.6. 실시간 커뮤니티 롱/숏 심리 투표 위젯 */}
+      <StockSentimentPoll
+        symbol={stock.symbol}
+        name={stock.name}
       />
 
       {/* 3. 보조 2열 정보 그리드 (좌측: 시장 시세 요약, 우측: 내 보유 현황) */}

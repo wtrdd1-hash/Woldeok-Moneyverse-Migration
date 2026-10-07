@@ -3230,3 +3230,35 @@ flowchart TD
 - 로컬 `tsc --noEmit` 100% 통과.
 - Next.js 프로덕션 빌드 통과.
 - 운영 서버 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.
+
+
+---
+## 🚀 [v126 Specification] 종목별 롱/숏 심리 투표 바 & 명예의 전당 라이브 활동 티커 구축 (+260, -0)
+
+### 1. 요구사항 재정의 및 목적 (Overview & Goals)
+- **무엇을**:
+  1. **종목별 실시간 매수/매도 심리 투표 바 (`StockSentimentPoll`)**:
+     - StockTwits Bull/Bear Poll / Webull 커뮤니티 심리 게이지 스타일의 실시간 투표 인터랙션.
+     - "상승할 것 같아요 (BULL 🔥)" vs "하락할 것 같아요 (BEAR ❄️)" 원터치 투표.
+     - 투표 즉시 실시간 비율 애니메이션(예: 68% 상승 vs 32% 하락) 및 로컬스토리지 영구 보존.
+     - 투표 의견 즉시 X(Twitter) & 카카오톡 바이럴 공유(`SocialShareBar`) 연동.
+     - 종목 상세 화면(`/stocks/[symbol]`)에 마운트.
+  2. **명예의 전당 & 실시간 활동 라이브 피드 티커 (`LiveHallOfFameTicker`)**:
+     - Stake 라이브 피드 / Toss 행운상자 당첨 피드 스타일의 생동감 넘치는 실시간 활동 롤링 알림.
+     - 룰렛 잭팟 당첨, 주식 익절, 퀴즈 정답, 포트폴리오 배틀 승리 등 유저들의 실시간 경제 활동을 슬라이딩 티커로 표출.
+     - 메인 홈 대시보드 상단에 마운트.
+  3. **운영 서버 빌드, 무중단 승격 및 라이브 전수 QA**:
+     - TypeScript 타입 무결성 검증.
+     - Next.js 579개 전 라우트 빌드.
+     - 운영 서버 무중단 승격 및 라이브 사이트 실측 QA.
+
+### 2. 세부 변경 계획 (Proposed Changes)
+- `frontend/src/components/stock-sentiment-poll.tsx`: 종목별 롱/숏 심리 투표 컴포넌트 신설.
+- `frontend/src/components/live-hall-of-fame-ticker.tsx`: 명예의 전당 라이브 티커 신설.
+- `frontend/src/app/stocks/[symbol]/page.tsx`: 종목 상세 화면에 `StockSentimentPoll` 마운트.
+- `frontend/src/app/page.tsx`: 메인 홈 상단에 `LiveHallOfFameTicker` 마운트.
+
+### 3. 검증 계획 (Verification Plan)
+- 로컬 `tsc --noEmit` 100% 통과.
+- Next.js 프로덕션 빌드 통과.
+- 운영 서버 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.
