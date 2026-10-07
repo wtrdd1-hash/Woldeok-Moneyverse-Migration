@@ -370,7 +370,9 @@ export function FinancialKnowledgeHub() {
                     localStorage.setItem('wdmv_mock_amount', '10000');
                     localStorage.setItem('wdmv_mock_time', new Date().toISOString());
                     localStorage.setItem('wdmv_quest_stock_mock', 'completed');
-                  } catch {}
+                  } catch {
+                    // localStorage may be unavailable in restricted browser contexts.
+                  }
                   setPurchaseSuccess(true);
                 }}
                 className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
