@@ -241,16 +241,21 @@ export class NationalPensionRepository {
 
       // 6. 국고 회계 원장 기록
       if (vaultRes.rows[0]?.id) {
+        const balanceBefore = (BigInt(newVaultBalance) - BigInt(amountWld)).toString();
+        const validActorId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)
+          ? userId
+          : null;
         await client.query(
           `INSERT INTO public.system_treasury_ledger (
-             vault_id, transaction_type, amount_wld, balance_after_wld, reference_id, reference_type, description
-           ) VALUES ($1, 'TAX_COLLECTION', $2, $3, $4, 'NPS_CONTRIBUTION', $5)`,
+             vault_id, tx_type, amount_wld, actor_id, reason, balance_before, balance_after
+           ) VALUES ($1, 'FEE_RECIRCULATION', $2, $3, $4, $5, $6)`,
           [
             vaultRes.rows[0].id,
             amountWld.toString(),
+            validActorId,
+            '[국민연금] 국민 공적 연금 기여금 납입 및 국고 편입',
+            balanceBefore,
             newVaultBalance,
-            account.id,
-            `[국민연금] 국민 기여금 납입 (사용자: ${userId})`,
           ],
         );
       }
