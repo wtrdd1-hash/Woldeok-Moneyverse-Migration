@@ -830,7 +830,7 @@ export class TreasuryRepository {
         l.tx_type,
         l.amount_wld,
         l.actor_id,
-        coalesce(mp.display_name, u.username, 'SYSTEM') AS actor_name,
+        coalesce(mp.display_name, 'SYSTEM') AS actor_name,
         l.reason,
         l.balance_before,
         l.balance_after,
@@ -838,7 +838,6 @@ export class TreasuryRepository {
       FROM public.system_treasury_ledger l
       JOIN public.system_treasury_vaults v ON v.id = l.vault_id
       LEFT JOIN public.member_profiles mp ON mp.user_id = l.actor_id
-      LEFT JOIN public.users u ON u.id = l.actor_id
     `;
     const params: unknown[] = [];
 
@@ -981,12 +980,12 @@ export class TreasuryRepository {
         v.code AS vault_code,
         l.tx_type,
         l.amount_wld,
-        coalesce(u.username, 'SYSTEM') AS actor_name,
+        coalesce(mp.display_name, 'SYSTEM') AS actor_name,
         l.reason,
         l.balance_after
       FROM public.system_treasury_ledger l
       JOIN public.system_treasury_vaults v ON v.id = l.vault_id
-      LEFT JOIN public.users u ON u.id = l.actor_id
+      LEFT JOIN public.member_profiles mp ON mp.user_id = l.actor_id
       ORDER BY l.created_at DESC
       LIMIT 1000
     `);
@@ -1018,7 +1017,7 @@ export class TreasuryRepository {
       SELECT 
         a.id,
         a.user_id,
-        coalesce(u.username, left(a.user_id::text, 8)) AS username,
+        coalesce(mp.display_name, left(a.user_id::text, 8)) AS username,
         a.assessed_date,
         a.total_wealth_wld,
         a.taxable_excess_wld,
@@ -1027,7 +1026,7 @@ export class TreasuryRepository {
         a.reason,
         a.created_at
       FROM public.treasury_wealth_tax_assessments a
-      LEFT JOIN public.users u ON u.id = a.user_id
+      LEFT JOIN public.member_profiles mp ON mp.user_id = a.user_id
       ORDER BY a.created_at DESC
       LIMIT 100
     `);

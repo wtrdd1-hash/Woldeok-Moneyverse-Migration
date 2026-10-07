@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v109)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v111)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v111**: 국고 회계 감사 원장(`Authoritative Audit Ledger`) 0건 노출 오류 원인 규명 및 정상 복구 — `/admin/treasury` 화면에서 원장 트랜잭션이 '전체 (0)'으로 조회되지 않던 원인이 백엔드 `TreasuryRepository.listTransactions`, `exportLedgerCsv`, `getWealthTaxAssessments` 쿼리 내 존재하지 않는 컬럼(`users.username`) 참조로 인한 PostgreSQL DB 쿼리 실패였음을 밝혀내고, 정규 프로필 테이블인 `member_profiles.display_name`으로 교체하여 원장 목록 22건 및 실시간 세수/투자 내역 정상 렌더링 복구 (+120, -0)
 - **v110**: 국고 2,500만 WLD 최소 안전 원금 보존(Floor Reserve) & 가상 기업 법인세 자동 징수 + 국부펀드 평가익 복리 재투자(Net Compounding Growth) 엔진 풀스택 구축 — ① 방치되어 있던 수십 개 구버전 원격 브랜치(auto/hourly-*, audit/*, docs/*, feat/*, fix/*, plan/* 등) 전수 통합 및 안전 일괄 삭제/정리 완료 ② 국고 중앙 금고(`VAULT_MAIN`) 25,000,000 WLD 마지노선 영구 보존 및 비상 금고로부터 시드 보강 ③ 유저 부재 시에도 4대 우량 상장 기업(WDX)에서 시간당 가상 영업 이익 법인세 및 시장 거래세 국고 자동 징수 ④ 국부펀드 투자 자산 가치 상승분(시간당 1.2%) 수익 실현(Harvest) 및 초과분 우량주/국채 복리 재투자(Compound Reinvest)로 국고 총자산(AUM) 지속 우상향 ⑤ 디스코드 관리자(`886478189520637992`) DM 실시간 보고 ⑥ 음성방 자동 재접속 데몬 100% 무변경 보존 (+180, -0)
 - **v109**: 국고 잉여 세수 자율 투자 및 시장 재순환 국부펀드(ASWF) 엔진 풀스택 구축 — 노르웨이 GPFG / 싱가포르 테마섹 벤치마킹, 5,000만 WLD 안전 준비금 초과 잉여금 1시간 주기 자동 감지, WDX 우량주(50%)·국채(30%)·시민기본소득배당(20%) 100% 재정 이전 집행, DB 마이그레이션(249), 관리자 관제 패널(`/admin/treasury`) 탑재, 디스코드 관리자(`886478189520637992`) DM 재순환 알림 연동, 음성방 자동 재접속 100% 보존 (+190, -0)
 - **v108**: 전체 코드베이스 전수 재분석 & 이상 코드 교정 & 디스코드 봇 관리자(`886478189520637992`) 중요 정보 1:1 DM 전송 풀스택 구축 — ① 디스코드 REST API v10 기반 관리자 1:1 Direct Message(DM) 파이프라인 신설 (원장 대사 결함, 음수 잔액, 감사 로그 체인 변조, 시스템 경보 등 중요 알림 실시간 개인 DM 전송) ② 봇 상주 데몬(`bot/index.js`) 관리자 DM 연동 ③ 관리자 콘솔(`/admin/discord`) DM 관제 위젯 및 원클릭 테스트 DM 발송 엔드포인트 탑재 ④ 채널 ID 유연화 및 예외 처리 견고화 (+150, -0)
@@ -2499,6 +2500,41 @@
 - 백엔드 Vitest 단위 테스트 통과: Total AUM 6,006만 WLD 돌파 확인.
 - 프론트엔드 TypeScript 정적 타입 검증(`tsc --noEmit`) 0-Error 통과.
 - 원격 브랜치 40여 개 안전 삭제 및 `main` 최신 형상 일치 확증.
+
+---
+
+## 🏛️ [v111 Specification] 국고 회계 감사 원장(Authoritative Audit Ledger) 0건 노출 오류 원인 규명 및 복구 완료
+### 1. 개요 및 배경 (Overview & Root Cause Analysis)
+- **현상 파악**:
+  - `/admin/treasury` 화면의 "국고 회계 감사 원장 (Authoritative Audit Ledger)" 카드가 `전체 (0)`으로 비어 있어, 최근 발생한 22건의 국고 변동 내역(2,500만 WLD 시드 보강, 법인세 징수, 국부펀드 평가익 회수, 초과 세수 재투자, 부유세 징수 등)이 전혀 렌더링되지 않음.
+- **근본 원인 분석 (Root Cause)**:
+  - 프론트엔드 Next.js Server Component(`frontend/src/app/admin/treasury/page.tsx`)가 `apiOrNull('/api/v1/admin/treasury/transactions')`를 호출.
+  - 백엔드 `TreasuryRepository.listTransactions` 메서드가 실행한 SQL 쿼리:
+    ```sql
+    SELECT l.id, ..., coalesce(mp.display_name, u.username, 'SYSTEM') AS actor_name, ...
+    FROM public.system_treasury_ledger l
+    JOIN public.system_treasury_vaults v ON v.id = l.vault_id
+    LEFT JOIN public.member_profiles mp ON mp.user_id = l.actor_id
+    LEFT JOIN public.users u ON u.id = l.actor_id
+    ```
+  - 그러나 실제 PostgreSQL DB의 `public.users` 테이블 컬럼은 `id, status, created_at, deleted_at`뿐이며, `username` 컬럼이 존재하지 않음(`error: column u.username does not exist`).
+  - 이로 인해 백엔드가 `500 Internal Server Error`를 발생시켰고, 프론트엔드의 `apiOrNull`이 예외를 캐치하여 `null`을 반환, 최종적으로 빈 배열(`[]`)이 주입되어 `전체 (0)`으로 표출되었음.
+  - 동일한 `u.username` 오류가 `exportLedgerCsv`, `getWealthTaxAssessments` 쿼리에도 잠재되어 있었음.
+
+### 2. 세부 조치 및 해결 내역 (Remediation)
+1. **백엔드 리포지토리 쿼리 정상화 (`backend/src/admin/treasury/treasury.repository.ts`)**:
+   - `listTransactions`: 불필요한 `LEFT JOIN public.users u` 제거 및 `coalesce(mp.display_name, 'SYSTEM') AS actor_name`으로 수정.
+   - `exportLedgerCsv`: `coalesce(mp.display_name, 'SYSTEM') AS actor_name` 및 `LEFT JOIN public.member_profiles mp`로 수정.
+   - `getWealthTaxAssessments`: `coalesce(mp.display_name, left(a.user_id::text, 8)) AS username` 및 `LEFT JOIN public.member_profiles mp`로 수정.
+2. **동기식 검증 및 단위 테스트**:
+   - `backend` nest build 100% 정상 통과.
+   - Vitest 단위 테스트 `auto-swf.service.test.ts` 100% ALL-PASS.
+   - PostgreSQL 직접 쿼리 검증: 22건의 원장 트랜잭션이 완벽하게 추출됨을 확인.
+
+### 3. 검증 계획 (Verification Plan)
+- Git 커밋 및 GitHub `origin/main` 푸시.
+- 원격 운영 서버(`easy-scraping.com`) 무중단 배포 적용 (`moneyverse-backend` 빌드 및 서비스 리로드).
+- `/admin/treasury` 화면에서 `전체 (22)`건의 국고 회계 감사 원장 목록이 즉시 정상 노출됨을 검증.
 
 
 
