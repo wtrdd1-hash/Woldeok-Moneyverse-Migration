@@ -83,4 +83,47 @@ describe('SSRF Defense Engine', () => {
       expect(cloudflare.hostname).toBe('1.1.1.1');
     });
   });
+
+  describe('safeFetch Multi-hop Redirect Inspection', () => {
+    it('blocks redirect that points to internal/private addresses', async () => {
+      const { safeFetch } = await import('./ssrf-defense');
+      // Mock fetch to simulate a 302 redirect to metadata IP
+      const mockFetch = vi.fn().mockResolvedValueOnce(
+        new Response(null, {
+          status: 302,
+          headers: { location: 'http://169.254.169.254/latest/meta-data/' },
+        }),
+      );
+      vi.stubGlobal('fetch', mockFetch);
+
+      try {
+        await expect(safeFetch('https://www.google.com/redirect-to-metadata')).rejects.toThrow(
+          SsrffSecurityError,
+        );
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('blocks infinite redirect loops exceeding MAX_REDIRECTS', async () => {
+      const { safeFetch } = await import('./ssrf-defense');
+      const mockFetch = vi.fn().mockImplementation(() =>
+        Promise.resolve(
+          new Response(null, {
+            status: 302,
+            headers: { location: 'https://www.google.com/loop' },
+          }),
+        ),
+      );
+      vi.stubGlobal('fetch', mockFetch);
+
+      try {
+        await expect(safeFetch('https://www.google.com/loop')).rejects.toThrow(
+          /Maximum redirect limit/,
+        );
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+  });
 });

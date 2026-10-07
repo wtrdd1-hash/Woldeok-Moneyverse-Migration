@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v106)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v107)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v107**: OWASP Top 10:2026 및 핀테크 보안 레퍼런스 심층 감사 기반 3대 핵심 보안 패치 구축 — ① BFF sitemapUrl 도메인/경로 화이트리스트 검증 & IP당 Rate Limiting 가드 적용 (악의적 외부 URL 주입 및 DDoS 차단) ② 백엔드 `safeFetch` 수동 리디렉션 추적(Manual 3xx Redirect Inspection) 다계층 SSRF 방어 구현 (클라우드 IMDS 169.254 / 로컬 루프백 127.0.0.1 우회 원천 차단) ③ Search Console API 예외 발생 시 내부 스택/토큰/자격증명 마스킹 및 정제된 에러 반환(OWASP A10 대응) (+130, -0)
 - **v106**: 글로벌 핀테크 레퍼런스(Investing.com·TradingView·GSC 2026 표준) 심층 점검 기반 3대 보완 고도화 풀스택 구축 — ① 경제 캘린더 예측치/직전치 3열 비교표 & 구글 캘린더(Google Calendar) 1초 등록/ICS 내보내기 & High-Impact/국가 필터 탑재 ② Google Search Console 5개 개별 사이트맵(sitemap-stocks, static, board, announcements 등) 일괄/선택 제출 셀렉터 & 네이버 서치어드바이저 웹마스터 도구 원클릭 딥링크 탑재 ③ 저평가 우량주 모의 매수 완료 즉시 10,000 WLD 퀘스트 보상 자동 청구 & 내 포트폴리오(/stocks/portfolio) 원클릭 이동 버튼 완결 (+140, -0)
 - **v105**: 국내외 경제 캘린더 D-Day 연동 & 원클릭 Google Search Console 사이트맵 정식 등록 파이프라인 & 저평가 우량주 모의 매수 퀘스트 풀스택 구축 — FOMC·금통위·CPI·NFP D-Day 뱃지 및 심층 분석 모달 연동, 구글 Sitemaps API(`PUT /sitemaps/{feedpath}`) 서버 사이드 정식 제출 및 관리자/도구 화면 원클릭 등록 버튼·히스토리 테이블 구축, PER/PBR 백과사전 연계 10,000 WLD 모의 매수 온보딩 퀘스트 완결 (+180, -0)
 - **v104**: 국내외 거시경제 펄스(Macro Pulse) 엔진 & 실전 경제 지식 백과사전 & 다통화 환율 변환기 풀스택 구축 및 전 금융 도구 전면 배치 — 한은 기준금리·코스피·환율·CPI 등 국내 4대 지표 + 미 연준 기준금리·나스닥·S&P500·달러인덱스(DXY)·미국채 10년물 등 글로벌 5대 지표를 10분 주기 시뮬레이션 및 자동 업데이트하는 백엔드 엔진(`macro-pulse.service.ts`) 신설, 1 WLD 기준 KRW/USD/JPY/EUR 실시간 변환기 및 6대 실전 투자 용어(PER, PBR, ROE, 72의 법칙, DCA, MDD) 백과사전 위젯(`financial-knowledge-hub.tsx`) 개발, 주식 물타기/복리/파밍/주식 메인 허브 전 지면 배치 완료, 단위 테스트 1,065개 100% 통과 및 라이브 운영 서버 무중단 배포 (+160, -0)
@@ -2350,6 +2351,32 @@
 - Vitest 프론트엔드 및 백엔드 테스트 100% ALL-PASS.
 - Next.js Turbopack 정적 페이지 빌드 100% 성공 검증.
 - Git main 푸시 및 원격 운영 서버(`easy-scraping.com`) 무중단 배포 및 엔드포인트 라이브 검증.
+
+---
+
+## 🛡️ [v107 Specification] OWASP Top 10:2026 및 핀테크 보안 레퍼런스 심층 감사 기반 3대 핵심 보안 패치
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "보안점검해봐 래퍼럿ㄴ스 부터 찾고 점검해봐" -> OWASP Top 10:2025/2026 및 핀테크 보안 표준 조사 후 사용자 조율 완료된 3대 핵심 보안 취약점 보완 패치 개발.
+- **핵심 목표**:
+  1. **BFF sitemapUrl 도메인/경로 화이트리스트 검증 & Rate Limiting (`frontend/src/app/api/admin/seo/gsc-sitemap-submit/route.ts`)**:
+     - 공격자가 임의의 악의적 외부 URL(`http://malicious.com/...`)을 전송해 검색엔진 핑 남용이나 내부 자원 소모를 일으키는 것을 원천 차단하기 위해, 제출 대상 URL이 현재 운영 도메인(`easy-scraping.com` 또는 승인된 도메인) 및 `/sitemap*.xml` 경로 형식인지 정규식/호스트 검증(`assertAllowedSitemapUrl`) 강제.
+     - 클라이언트 IP당 1분당 최대 10회 요청 제한(Rate Limiting) 메모리 버킷 탑재로 DDoS 및 DoS 공격 방어.
+  2. **백엔드 safeFetch 3xx 리다이렉트 SSRF 우회 방어 (`backend/src/security/ssrf-defense.ts`)**:
+     - 초기 공인 IP 접속 후 302 리디렉션으로 클라우드 메타데이터(169.254.169.254)나 로컬 루프백(127.0.0.1)으로 전환하는 DNS Rebinding / HTTP Redirect SSRF 기법 방어.
+     - `redirect: 'manual'` 설정 및 최대 3회 리다이렉트 추적 시 매 홉마다 `assertSafeOutboundUrl(location)`을 필수 검증하도록 다계층 방어(Defense-in-Depth) 구축.
+  3. **Search Console 에러 정보 누출 차단 (OWASP A10 대응, `backend/src/seo/seo.service.ts` 및 BFF)**:
+     - 내부 Google Cloud 서비스 계정 정보, OAuth 비공개 키, 내부 스택 트레이스 및 API 에러 문자열이 클라이언트에 노출되지 않도록 `safeGscError`를 거쳐 안전한 메시지만 반환하도록 보장.
+
+### 2. 세부 변경 파일
+- `frontend/src/app/api/admin/seo/gsc-sitemap-submit/route.ts`: sitemapUrl 화이트리스트 검증 및 IP Rate Limiting 추가.
+- `backend/src/security/ssrf-defense.ts`: 3xx 리디렉션 수동 추적 및 전 홉 Anti-SSRF 검증 로직 추가.
+- `backend/src/security/ssrf-defense.test.ts`: 리디렉션 SSRF 방어 단위 테스트 추가.
+
+### 3. 검증 계획
+- Vitest 백엔드 `src/security` 및 프론트엔드 테스트 100% ALL-PASS.
+- Next.js Turbopack 정적 페이지 빌드 100% 성공 검증.
+- Git main 푸시 및 원격 운영 서버(`easy-scraping.com`) 무중단 배포 및 보안 헤더/엔드포인트 라이브 검증.
+
 
 
 

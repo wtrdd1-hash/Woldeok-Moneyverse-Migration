@@ -157,20 +157,47 @@ export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL
   return parsed;
 }
 
+const MAX_REDIRECTS = 3;
+
 /**
  * Drop-in safe fetch wrapper with strict SSRF validation and default 10s timeout.
+ * Inspects all 3xx redirect locations to prevent DNS rebinding or redirect-based SSRF bypass.
  */
 export async function safeFetch(urlInput: string | URL, init?: RequestInit): Promise<Response> {
-  const safeUrl = await assertSafeOutboundUrl(urlInput);
+  let currentUrl = await assertSafeOutboundUrl(urlInput);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10_000);
 
   try {
-    const response = await fetch(safeUrl.toString(), {
-      ...init,
-      signal: init?.signal ?? controller.signal,
-    });
-    return response;
+    let redirectsFollowed = 0;
+    while (true) {
+      const response = await fetch(currentUrl.toString(), {
+        ...init,
+        redirect: 'manual',
+        signal: init?.signal ?? controller.signal,
+      });
+
+      // 3xx Redirect 감지 시 수동 추적 및 전 홉 검증
+      if ([301, 302, 303, 307, 308].includes(response.status)) {
+        redirectsFollowed += 1;
+        if (redirectsFollowed > MAX_REDIRECTS) {
+          throw new SsrffSecurityError(`Maximum redirect limit (${MAX_REDIRECTS}) exceeded during outbound request`);
+        }
+
+        const location = response.headers.get('location');
+        if (!location) {
+          return response; // Location 헤더가 없으면 그대로 반환
+        }
+
+        // 상대 경로 및 절대 경로 모두 처리
+        const nextUrl = new URL(location, currentUrl);
+        // 리다이렉트 대상 URL에 대해 즉각적인 Anti-SSRF(사설 IP/메타데이터) 재검증
+        currentUrl = await assertSafeOutboundUrl(nextUrl);
+        continue;
+      }
+
+      return response;
+    }
   } finally {
     clearTimeout(timeoutId);
   }
