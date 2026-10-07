@@ -48,8 +48,8 @@ export function SiteFooter() {
   ];
 
   return (
-    <footer className="moneyverse-site-footer mt-16 text-muted-foreground sm:mt-24 pb-24 lg:pb-8 border-t border-border/60 bg-muted/10">
-      <div className="mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8">
+    <footer className="moneyverse-site-footer mt-16 text-muted-foreground sm:mt-24 pb-24 lg:pb-8 border-t border-border/60 bg-muted/10 w-full max-w-full overflow-hidden">
+      <div className="mx-auto w-full max-w-[1320px] min-w-0 px-4 sm:px-6 lg:px-8">
         {/* 모바일 & 데스크톱 4개 국어 퀵 선택 바 */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-6 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2 text-xs font-bold text-foreground">
@@ -104,15 +104,15 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="flex flex-col justify-between items-start sm:items-center gap-3 py-5 pb-7 text-[10px] sm:flex-row">
-          <div className="flex items-center gap-2">
-            <p>{disclaimer}</p>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-semibold">
+        <div className="flex flex-col justify-between items-start sm:items-center gap-3 py-5 pb-7 text-[10px] sm:flex-row w-full min-w-0">
+          <div className="flex flex-wrap items-center gap-2 max-w-full min-w-0">
+            <p className="break-words">{disclaimer}</p>
+            <span className="inline-flex shrink-0 items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-semibold">
               <ShieldCheck className="w-3 h-3" />
               IndexNow 100% Active
             </span>
           </div>
-          <p>© 2026 Woldeok Moneyverse</p>
+          <p className="shrink-0">© 2026 Woldeok Moneyverse</p>
         </div>
       </div>
     </footer>

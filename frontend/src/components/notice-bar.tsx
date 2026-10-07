@@ -7,9 +7,9 @@ import { dismissNotice } from '@/lib/notice-preference';
 
 export function NoticeBar() {
   return (
-    <div data-notice-bar className="border-b border-border/40 bg-zinc-950/90 text-zinc-300 dark:bg-zinc-950/90 dark:text-zinc-300 text-xs backdrop-blur-md select-none">
-      <div className="mx-auto flex h-8 min-h-8 w-full max-w-[1440px] items-center justify-between gap-3 px-2.5 min-[400px]:px-3 min-[480px]:px-4 sm:px-6 lg:px-5 xl:px-8">
-        <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+    <div data-notice-bar className="border-b border-border/40 bg-zinc-950/90 text-zinc-300 dark:bg-zinc-950/90 dark:text-zinc-300 text-xs backdrop-blur-md select-none w-full max-w-full min-w-0 overflow-hidden">
+      <div className="mx-auto flex h-8 min-h-8 w-full max-w-[1440px] min-w-0 items-center justify-between gap-2 px-2.5 min-[400px]:px-3 min-[480px]:px-4 sm:px-6 lg:px-5 xl:px-8">
+        <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
           <span className="hidden shrink-0 rounded-full bg-amber-400/15 border border-amber-400/30 px-2 py-0.5 text-[10px] font-extrabold tracking-tight text-amber-400 sm:inline-block">
             <T
               korean="가상경제 플랫폼"

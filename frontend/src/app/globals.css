@@ -706,3 +706,46 @@ body {
     transform: none;
   }
 }
+
+
+/* ========================================================
+ * 🛡️ ULTRA-STRICT MULTI-VIEWPORT RESILIENCE SHIELD (v133)
+ * Absolute zero horizontal overflow across 320px ~ 1920px+
+ * ======================================================== */
+html,
+body {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: clip !important;
+  position: relative !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  -webkit-text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box !important;
+}
+
+main,
+#__next,
+[data-admin-layout],
+.moneyverse-main,
+.mv-page,
+header,
+footer,
+nav {
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100% !important;
+  height: auto;
+}

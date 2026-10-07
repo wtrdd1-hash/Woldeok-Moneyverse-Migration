@@ -27,7 +27,7 @@ const MARKET_PULSE_STOCKS: readonly StockPulse[] = [
 
 export function LiveMarketPulseTicker() {
   return (
-    <div className="w-full rounded-2xl border border-zinc-800/80 bg-card/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-3 sm:p-4 backdrop-blur-md">
+    <div className="w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-zinc-800/80 bg-card/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-3 sm:p-4 backdrop-blur-md">
       <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-border/50">
         <div className="flex items-center gap-2">
           <span className="flex size-2 rounded-full bg-emerald-500 animate-ping" />
@@ -45,7 +45,7 @@ export function LiveMarketPulseTicker() {
         </Link>
       </div>
 
-      <div className="pt-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-1">
+      <div className="pt-2.5 flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 no-scrollbar scroll-smooth py-1">
         {MARKET_PULSE_STOCKS.map((stk) => {
           const isUp = stk.changePercent >= 0;
           return (

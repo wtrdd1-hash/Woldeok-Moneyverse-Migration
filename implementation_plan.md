@@ -3434,3 +3434,33 @@ flowchart TD
 - 원격 저장소(`origin main`) 커밋 및 푸시 후 운영 서버(`prod-v529`) 실시간 동기화.
 - 운영 서버 프론트엔드 빌드 및 서비스 리로드.
 - `https://easy-scraping.com/admin` 및 `https://easy-scraping.com/admin/money-flow` 실측 점검.
+
+---
+## 🚀 [v132 Specification] 관리자 전역 공통 서브 내비게이션 바 및 퀵 점퍼 모달 `[유저 자금 흐름]` 영구 등록 및 라이브 화면 실측 검증 (+95, -0)
+
+### 1. 개요 및 사용자 피드백 완벽 해소
+- **사용자 요청 사항**:
+  - "유저 돈 기록 볼 수 있는 기능 제대로 확인하고 UI도 잘 확인해봐. 관리자 페이지에서 가기 힘드네."
+  - 관리자 서브 페이지(회원 관리, 경제·원장, 국고, 공기업, SEO 등 30여 개 서피스) 어디서든 상단 탭 바에서 즉시 유저 자금 흐름으로 1클릭 이동할 수 있도록 동선 완전 통합.
+  - 실제 PostgreSQL DB 내 `ledger_transactions`, `ledger_postings`, `accounts`, `member_profiles` 원장 기록의 실시간 조회 정합성 및 화면 렌더링 무결성 실측 검증.
+
+### 2. 세부 구현 내역 (Proposed Changes)
+1. **관리자 전역 공통 서브 내비게이션 바 영구 등록 (`frontend/src/components/admin-sub-nav.tsx`)**:
+   - `ADMIN_TABS` 대시보드 바로 다음 2번째 항목으로 `{ href: '/admin/money-flow', label: '유저 자금 흐름', icon: ArrowLeftRight }` 영구 등록.
+   - 모든 관리자 30여 개 화면 상단 고정 탭 바에서 항상 1순위로 노출되어 단 1클릭으로 유저 자금 흐름 관제 타워로 즉시 점프 가능.
+2. **관리자 전체 메뉴 퀵 점퍼 모달 검색 등록 (`frontend/src/components/admin-quick-jumper-modal.tsx`)**:
+   - `ALL_ADMIN_ROUTES`의 '거시 경제 & 국고' 카테고리에 `{ href: '/admin/money-flow', label: '유저 자금 흐름 관제', description: '전체 유저 입출금, 주식, 상점, 급여, 카지노 실시간 원장 추적', category: '거시 경제 & 국고', icon: ArrowLeftRight }` 등록.
+   - `[전체 메뉴 (31)]` 모달 검색 및 단축키 탐색 시 즉시 검색/이동 가능.
+3. **실제 데이터베이스 원장 조회 정합성 검증**:
+   - PostgreSQL `ledger_transactions` 및 `ledger_postings`, `accounts`, `member_profiles` 실측 데이터 확인:
+     - 유저 `치킨`의 주식 매수/매도, 상점 구매, 은행 출금 등 실제 거래 내역이 정확한 차변/대변 방향과 금액으로 원장에 100% 정상 기록됨을 확인.
+     - 24시간 실시간 집계(총 거래량, 거래 건수, 활성 거래 유저 수, 총 유입/유출액) 쿼리 정합성 검증 완료.
+
+### 3. 검증 결과 (Verification Results)
+- **TypeScript 타입 체크**: `npm run typecheck` (`tsc --noEmit`) 0 errors 통과.
+- **Git 형상 동기화**: 커밋 `df9318cb` 생성 및 `origin/main` 푸시 완료.
+- **운영 서버 무중단 배포**:
+  - `/srv/moneyverse-data/releases/prod-v529` 동기화 및 Next.js Turbopack 빌드 100% 완료.
+  - `systemctl restart moneyverse-frontend` 정상 리로드 (`active (running)`).
+- **실측 화면 스크린샷 검증**:
+  - `screenshots/admin_home_v132.png` 캡처 완료: 상단 서브 내비게이션 바 2번째 위치에 `[유저 자금 흐름]` 탭이 정확히 렌더링됨을 시각적으로 실측 확인.

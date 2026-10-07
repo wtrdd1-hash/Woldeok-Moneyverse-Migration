@@ -103,7 +103,7 @@ export function AdminSubNav() {
     <nav
       ref={navRef}
       aria-label="관리자 세부 내비게이션"
-      className="-mx-3 mb-4 overflow-x-auto border-y border-border/60 bg-card/60 backdrop-blur-xl p-1.5 shadow-sm scrollbar-none touch-pan-x overscroll-x-contain sm:mx-0 sm:rounded-2xl sm:border select-none [&::-webkit-scrollbar]:hidden"
+      className="w-full max-w-full min-w-0 mb-4 overflow-x-auto rounded-xl sm:rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-1.5 shadow-sm scrollbar-none touch-pan-x overscroll-x-contain select-none [&::-webkit-scrollbar]:hidden"
     >
       <ul className="flex w-max items-center gap-1 px-2 sm:w-auto sm:flex-wrap sm:px-0">
         <li className="shrink-0 pr-1 border-r border-border/60 mr-1">
