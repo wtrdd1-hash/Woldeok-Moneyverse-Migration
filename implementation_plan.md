@@ -2723,3 +2723,86 @@ graph TD
 - 환율 변동 및 실시간 환전 테스트 집행, 외환보유액 증감 및 국고 수수료 입금 검증.
 - 디스코드 관리자 1:1 DM 알림 전송 검증.
 - 봇 상주 데몬(bot/index.js) 100% 무변경 보존 확인.
+
+
+---
+
+## 🚀 [v118 Specification] 글로벌 외환안정망 & SDR/금보유고 다변화, 통화스왑(한미/한일) 비상협정 및 대국민 선물환(Forward) 환헤지 풀스택 구축
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 확정 의사결정**:
+  - 실제 현실 경제 레퍼런스를 반영한 3대 외환 고도화 시스템을 유기적으로 통합하여 '글로벌 외환안정망 & 환헤지 종합 풀스택'으로 일괄 구축.
+  - ① **외환보유액 다변화(SDR 바스켓 & 한국은행 실물 금 보유고)**: IMF 공식 가중치(USD 43.38%, EUR 29.31%, CNY 12.28%, JPY 7.59%, GBP 7.44%) + 한국은행 기준 실물 금(Gold 104.4톤 상당) 편입 포트폴리오.
+  - ② **원/달러 통화 스왑(Currency Swap) 협정 관리 시스템**: 한미 통화스왑($600억 USD) 및 한일 통화스왑($100억 USD) 상설 라인 개설, 외환위기지수(FSI) 평가 기반 비상 인출 및 시장 공급.
+  - ③ **선물환(Forward) & 환헤지(FX Hedging) 센터**: 대국민 포털(/fx) 내 1M/3M/6M 내외금리차(CIP: Covered Interest Parity) 이론 선물환율 자동산출, 유저 및 기업 대상 만기 차액 자동 정산.
+  - ④ **외환위기 조기경보(EWS) & 디스코드 1:1 DM 긴급 알림**: 4단계 외환위기 지수(정상, 관심, 주의, 심각) 산출 및 관리자(886478189520637992) DM 실시간 보고, 웹 대국민 비상 경보 배너 연동.
+
+### 2. 현실 경제 레퍼런스 및 금융 아키텍처
+```mermaid
+flowchart TD
+    subgraph CentralBank ["중앙은행 & 기획재정부 외환당국"]
+        Reserves["외환보유액 운용국<br/>(USD + SDR 5대 통화 + 금 104.4t)"]
+        SwapFacility["우방국 통화스왑 라인<br/>(한미 $600억 / 한일 $100억)"]
+        EWS["외환위기 조기경보(EWS)<br/>(FSI 지수 산출 & 4단계 경보)"]
+    end
+
+    subgraph Markets ["서울외환시장 (FX Market)"]
+        SpotMarket["현물환 시장 (Spot FX)<br/>WLD ↔ USD 실시간 매매"]
+        ForwardMarket["선물환 시장 (Forward FX)<br/>1M / 3M / 6M CIP 이론가 환헤지"]
+        SmoothingDesk["스무딩 오퍼레이션 데스크<br/>(달러 매도/매수 미세조정)"]
+    end
+
+    subgraph Portals ["서비스 인터페이스"]
+        PublicFX["/fx (대국민 서울외환시장 포털)<br/>- 실시간 환율 & 환전<br/>- 선물환 환헤지 거래소<br/>- 외환위기 대국민 배너"]
+        AdminFX["/admin/fx (관리자 외환 관제 타워)<br/>- 통화스왑 인출/상환 콘솔<br/>- SDR/금 리밸런싱 관제<br/>- EWS 위기지수 모니터링"]
+        DiscordDM["디스코드 관리자 1:1 DM<br/>(886478189520637992 비상 속보)"]
+    end
+
+    Reserves --> SpotMarket
+    SwapFacility --> SmoothingDesk
+    EWS --> DiscordDM
+    EWS --> PublicFX
+    Markets --> PublicFX
+    CentralBank --> AdminFX
+```
+
+### 3. 세부 파일별 변경 계획 (Proposed Changes)
+1. **공식 기획 문서 및 카탈로그 등록**:
+   - `docs/GLOBAL_FX_SAFETY_NET_AND_FORWARD_HEDGE_SPEC.ko.md` 및 `.md` 신규 작성.
+   - `docs/INDEX.ko.md`, `docs/INDEX.md`, `docs/DOCUMENT_CATALOG.ko.md`, `docs/DOCUMENT_CATALOG.md` 등록.
+2. **데이터베이스 마이그레이션**:
+   - `packages/database/migrations/256-fx-safety-net-and-forward-hedging.sql`
+   - 신규 테이블:
+     - `foreign_exchange_asset_allocations`: SDR 통화(USD, EUR, CNY, JPY, GBP) 및 금(Gold) 자산 비축액 및 평가가치.
+     - `currency_swap_agreements`: 한미/한일 통화스왑 협정 명세, 총한도, 기인출액, 잔여한도, 만기일.
+     - `currency_swap_drawdowns`: 스왑 자금 인출/상환 이력, 시장 공급 집행 내역.
+     - `fx_forward_contracts`: 선물환 계약(유저 ID, 포지션 BUY/SELL, 계약환율, 현물환율, 만기일 1M/3M/6M, 계약금액, 증거금, 상태 PENDING/SETTLED/CANCELLED, 실현손익).
+     - `fx_early_warning_logs`: EWS FSI 지수 및 4단계 경보 이력.
+3. **백엔드 고도화 (`backend/src/admin/fx/`)**:
+   - `fx.repository.ts`: SDR/금 자산 조회/업데이트, 통화스왑 인출/상환, 선물환 계약 체결/만기 정산, EWS 지표 산출.
+   - `fx.service.ts`: 내외금리차 기반 이론 선물환율(CIP 공식 `F = S * (1 + r_wld * t) / (1 + r_usd * t)`) 엔진, 통화스왑 비상 인출 파이프라인, EWS 지수 평가 및 디스코드 관리자 1:1 DM 발송.
+   - `fx.controller.ts`:
+     - `GET /api/v1/fx/sdr-reserves`: SDR 바스켓 및 금 보유량 현황 조회.
+     - `GET /api/v1/fx/swaps`: 통화스왑 협정 및 가용 한도 조회.
+     - `POST /api/v1/fx/swaps/drawdown`: 관리자 통화스왑 긴급 인출 및 시장 공급.
+     - `GET /api/v1/fx/forward/rates`: 만기별(1M, 3M, 6M) 이론 선물환율 조회.
+     - `POST /api/v1/fx/forward/contract`: 유저 선물환 계약 체결.
+     - `GET /api/v1/fx/forward/my-contracts`: 유저 본인 선물환 계약 및 손익 조회.
+     - `POST /api/v1/fx/forward/settle`: 선물환 만기 도래 계약 자동/수동 정산.
+4. **프론트엔드 UI/UX 고도화**:
+   - `frontend/src/app/admin/fx/fx-control-tower.tsx`:
+     - SDR 통화 바스켓 & 실물 금 보유량 차트 및 리밸런싱 현황.
+     - 한미($600억)/한일($100억) 통화스왑 비상 라인 관제 및 원클릭 긴급 인출/상환 콘솔.
+     - EWS 외환위기지수(FSI) 계측기 및 조기경보 단계(정상/관심/주의/심각) 표시기.
+   - `frontend/src/app/fx/page.tsx`:
+     - 기존 실시간 환율 & 1초 환전 & 외화예금에 이어 신규 **'선물환(Forward) 환헤지 센터'** 탭 마운트.
+     - 1개월/3개월/6개월 만기별 스왑포인트 및 선물환율 실시간 시뮬레이터.
+     - 10% 증거금(Margin) 기반 선물환 매수(Buy USD)/매도(Sell USD) 계약 체결 및 내 계약 현황/평가손익 모니터링.
+     - EWS 외환위기 경보 배너 연동.
+   - `frontend/src/lib/navigation.ts`: 외환 안정망 서브 라벨 및 다국어 쇄신.
+
+### 4. 검증 계획 (Verification Plan)
+1. 백엔드 Vitest 단위 테스트 신설 및 100% 통과 검증.
+2. Next.js 578+개 전 라우트 빌드 통과.
+3. 운영 서버 데이터베이스 마이그레이션 256 슈퍼유저 적용 및 시드 검증.
+4. 운영 서버 무중단 배포 및 실제 라이브 curl 200 OK 검증.
+5. 디스코드 관리자 1:1 DM 및 음성 봇 상주 데몬 100% 무변경 보존 확인.
