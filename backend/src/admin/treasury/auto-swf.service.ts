@@ -1,5 +1,6 @@
-import { Inject, Injectable, Logger, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
 import type { Pool } from 'pg';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
@@ -12,8 +13,12 @@ export interface SwfConfig {
   equity_ratio_pct: number;
   bond_ratio_pct: number;
   dividend_ratio_pct: number;
+  auto_harvest_enabled: boolean;
+  auto_tax_enabled: boolean;
+  auto_growth_yield_bps: number;
+  target_anchor_wld: string;
   rebalance_interval_hours: number;
-  last_executed_at: Date | null;
+  last_executed_at: string | null;
 }
 
 export interface SwfPortfolioItem {
@@ -26,7 +31,7 @@ export interface SwfPortfolioItem {
   average_price_wld: string;
   current_valuation_wld: string;
   unrealized_pnl_wld: string;
-  updated_at: Date;
+  updated_at: string;
 }
 
 export interface SwfEvent {
@@ -34,11 +39,9 @@ export interface SwfEvent {
   event_type: string;
   amount_wld: string;
   summary: string;
-  metadata: Record<string, unknown>;
-  created_at: Date;
+  metadata: any;
+  created_at: string;
 }
-
-const CHECK_INTERVAL_MS = 60 * 60_000; // 1시간 주기
 
 @Injectable()
 export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDestroy {
@@ -51,20 +54,23 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
   ) {}
 
   onModuleInit() {
-    // 부팅 45초 후 초기 1회 점검, 이후 1시간마다 자동 실행
+    const ONE_HOUR_MS = 60 * 60 * 1000;
+
+    // 서버 기동 30초 후 초기 자율 성장 평가 및 리밸런싱 실행
     setTimeout(() => {
-      this.evaluateAndRebalance().catch((err) => {
-        this.logger.error('Initial SWF rebalance evaluation failed', err);
+      void this.evaluateAndRebalance().catch((err) => {
+        this.logger.error('Failed initial SWF compounding growth evaluation', err);
       });
-    }, 45_000);
+    }, 30_000);
 
+    // 1시간 주기 자율 복리 국고 성장 및 투자 재순환 스케줄러
     this.timer = setInterval(() => {
-      this.evaluateAndRebalance().catch((err) => {
-        this.logger.error('Scheduled SWF rebalance evaluation failed', err);
+      void this.evaluateAndRebalance().catch((err) => {
+        this.logger.error('Failed scheduled SWF compounding growth evaluation', err);
       });
-    }, CHECK_INTERVAL_MS);
+    }, ONE_HOUR_MS);
 
-    this.logger.log('AutoSovereignWealthFundService initialized: 1-hour autonomous fiscal recirculation scheduled.');
+    this.logger.log('AutoSovereignWealthFundService initialized: 1-hour autonomous compounding growth engine scheduled.');
   }
 
   onModuleDestroy() {
@@ -79,6 +85,10 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
       this.pool,
       `SELECT id, is_enabled, safe_reserve_wld::text, max_single_investment_wld::text,
               equity_ratio_pct::float, bond_ratio_pct::float, dividend_ratio_pct::float,
+              COALESCE(auto_harvest_enabled, true) as auto_harvest_enabled,
+              COALESCE(auto_tax_enabled, true) as auto_tax_enabled,
+              COALESCE(auto_growth_yield_bps, 150) as auto_growth_yield_bps,
+              COALESCE(target_anchor_wld, 25000000)::text as target_anchor_wld,
               rebalance_interval_hours, last_executed_at
        FROM public.treasury_swf_configs
        WHERE id = 'current'
@@ -88,11 +98,15 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
       return {
         id: 'current',
         is_enabled: true,
-        safe_reserve_wld: '50000000',
+        safe_reserve_wld: '25000000',
         max_single_investment_wld: '10000000',
-        equity_ratio_pct: 50.0,
+        equity_ratio_pct: 60.0,
         bond_ratio_pct: 30.0,
-        dividend_ratio_pct: 20.0,
+        dividend_ratio_pct: 10.0,
+        auto_harvest_enabled: true,
+        auto_tax_enabled: true,
+        auto_growth_yield_bps: 150,
+        target_anchor_wld: '25000000',
         rebalance_interval_hours: 1,
         last_executed_at: null,
       };
@@ -123,14 +137,19 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
   }
 
   /**
-   * 국고 잉여 세수 자율 투자 및 시장 재순환 실행 엔진
+   * 국고 2,500만 WLD 최소 안전 원금 보존 및 복리 우상향 성장(Net Compounding Growth) 실행 엔진
+   * 1. 가상 상장 우량 기업 자체 영업 이익 및 법인세 자동 징수 (유저가 없어도 국고로 세수 지속 유입)
+   * 2. 국부펀드 보유 포트폴리오 평가 이익 상승 및 수익 실현(Harvest)
+   * 3. 2,500만 WLD 초과 잉여금의 우량주/국채 자율 재투자 (Compound Reinvestment)
+   * 4. 국고 총자산(AUM = 국고 현금 + 주식 + 채권)의 무한 우상향 성장 달성
    */
   async evaluateAndRebalance(): Promise<{
     executed: boolean;
-    investedWld?: string;
-    stockWld?: string;
-    bondWld?: string;
-    dividendWld?: string;
+    totalAumWld?: string;
+    vaultCashWld?: string;
+    taxCollectedWld?: string;
+    harvestedWld?: string;
+    reinvestedWld?: string;
     reason?: string;
   }> {
     const config = await this.getConfig();
@@ -138,123 +157,232 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
       return { executed: false, reason: 'SWF_AUTONOMOUS_INVESTMENT_DISABLED' };
     }
 
-    // 1. 메인 국고 금고(VAULT_MAIN) 잔액 조회
-    const vaultRows = await queryRows<{ balance_wld: string }>(
-      this.pool,
-      `SELECT balance_wld::text FROM public.treasury_vaults WHERE code = 'VAULT_MAIN' LIMIT 1`,
-    );
-    const mainBalance = vaultRows[0] ? BigInt(vaultRows[0].balance_wld) : BigInt(0);
-    const safeReserve = BigInt(config.safe_reserve_wld);
-
-    // 2. 안전 준비금 초과 여부 확인
-    if (mainBalance <= safeReserve) {
-      return {
-        executed: false,
-        reason: `MAIN_VAULT_BELOW_SAFE_RESERVE (${mainBalance} <= ${safeReserve})`,
-      };
-    }
-
-    // 3. 잉여 세수 중 1회 집행 금액 산출 (초과분의 10% 또는 최대 한도 중 작은 값)
-    const surplus = mainBalance - safeReserve;
-    const maxSingle = BigInt(config.max_single_investment_wld);
-    let investmentAmount = surplus / BigInt(10);
-    if (investmentAmount > maxSingle) {
-      investmentAmount = maxSingle;
-    }
-    if (investmentAmount < BigInt(100000)) {
-      return { executed: false, reason: 'SURPLUS_TOO_SMALL_FOR_REBALANCE' };
-    }
-
-    // 4. 자산 배분 계산: 주식(50%), 채권(30%), 시민 배당(20%)
-    const stockAlloc = (investmentAmount * BigInt(50)) / BigInt(100);
-    const bondAlloc = (investmentAmount * BigInt(30)) / BigInt(100);
-    const dividendAlloc = investmentAmount - stockAlloc - bondAlloc;
-
-    // 5. 트랜잭션 내에서 집행
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
 
-      // 5-1. 국고 금고에서 투자액 차감
-      await client.query(
-        `UPDATE public.treasury_vaults
-         SET balance_wld = balance_wld - $1, updated_at = clock_timestamp()
-         WHERE code = 'VAULT_MAIN'`,
-        [investmentAmount.toString()],
+      // 1. 메인 국고 금고(VAULT_MAIN) 잔액 조회
+      const vaultRes = await client.query<{ id: string; balance_wld: string }>(
+        `SELECT id, balance_wld::text FROM public.system_treasury_vaults WHERE code = 'VAULT_MAIN' FOR UPDATE`,
       );
+      if (!vaultRes.rows[0]) {
+        await client.query('ROLLBACK');
+        return { executed: false, reason: 'VAULT_MAIN_NOT_FOUND' };
+      }
 
-      // 5-2. 국고 원장(treasury_ledger)에 투자 지출 기록
-      await client.query(
-        `INSERT INTO public.treasury_ledger (
-            vault_id, vault_code, vault_name, tx_type, amount_wld,
-            actor_id, actor_name, reason, balance_before, balance_after
-         ) VALUES (
-            (SELECT id FROM public.treasury_vaults WHERE code = 'VAULT_MAIN'),
-            'VAULT_MAIN', '중앙 국고 본 금고', 'MARKET_STIMULUS', $1,
-            NULL, 'Autonomous Sovereign Wealth Fund',
-            '국고 잉여 세수 자율 투자 및 시장 재순환(주식 50%, 국채 30%, 시민배당 20%)',
-            $2, ($2::numeric - $1::numeric)
-         )`,
-        [investmentAmount.toString(), mainBalance.toString()],
-      );
+      const vaultId = vaultRes.rows[0].id;
+      let currentCash = BigInt(vaultRes.rows[0].balance_wld);
+      const floorReserve = BigInt(config.safe_reserve_wld || '25000000');
 
-      // 5-3. WDX 4대 우량주 균등 분산 매수 반영
-      const symbols = ['WDX-TEC', 'WDX-FIN', 'WDX-BIO', 'WDX-RET'];
-      const perStockAlloc = stockAlloc / BigInt(symbols.length);
-      for (const symbol of symbols) {
+      // 2. [가상 상장 기업 영업 이익 및 법인세 자동 징수] (Autonomous Corporate Tax Stream)
+      // WDX 4대 대기업에서 시간당 발생하는 가상 영업 매출 중 법인세 징수 (총 80,000 WLD)
+      let taxCollected = BigInt(0);
+      if (config.auto_tax_enabled) {
+        taxCollected = BigInt(80000);
+        currentCash += taxCollected;
+
         await client.query(
-          `UPDATE public.treasury_swf_portfolios
-           SET total_invested_wld = total_invested_wld + $1,
-               current_valuation_wld = current_valuation_wld + $1,
-               updated_at = clock_timestamp()
-           WHERE asset_symbol = $2`,
-          [perStockAlloc.toString(), symbol],
+          `UPDATE public.system_treasury_vaults
+           SET balance_wld = (balance_wld::numeric + $1)::text, updated_at = clock_timestamp()
+           WHERE id = $2`,
+          [taxCollected.toString(), vaultId],
+        );
+
+        await client.query(
+          `INSERT INTO public.system_treasury_ledger (
+              vault_id, tx_type, amount_wld, reason, balance_before, balance_after, created_at
+           ) VALUES (
+              $1, 'STOCK_SPECULATION_TAX', $2,
+              '가상 우량 상장 기업(WDX) 영업 이익 법인세 및 시장 거래세 국고 자동 징수',
+              $3, $4, clock_timestamp()
+           )`,
+          [
+            vaultId,
+            taxCollected.toString(),
+            (currentCash - taxCollected).toString(),
+            currentCash.toString(),
+          ],
         );
       }
 
-      // 5-4. 활성 유저 대상 기본소득 배당 분배
-      const activeUsers = await client.query<{ id: string }>(
-        `SELECT id FROM public.users
-         WHERE status = 'ACTIVE'
-         ORDER BY updated_at DESC
-         LIMIT 100`,
+      // 3. [국부펀드 자산 평가 이익 및 수익 회수] (Auto Asset Growth & Harvest)
+      // 보유 포트폴리오의 자산 가치를 시간당 약 1.2% 상승시키고 평가 이익 중 30%를 국고로 회수 환원
+      let harvestedWld = BigInt(0);
+      const portfolioRows = await client.query<{
+        id: string;
+        asset_symbol: string;
+        current_valuation_wld: string;
+        total_invested_wld: string;
+      }>(
+        `SELECT id, asset_symbol, current_valuation_wld::text, total_invested_wld::text
+         FROM public.treasury_swf_portfolios
+         FOR UPDATE`,
       );
-      if (activeUsers.rows.length > 0) {
-        const perUserDividend = dividendAlloc / BigInt(activeUsers.rows.length);
-        if (perUserDividend > BigInt(0)) {
-          for (const user of activeUsers.rows) {
+
+      for (const row of portfolioRows.rows) {
+        const currentVal = BigInt(row.current_valuation_wld);
+        // 시간당 약 1.2% 자산 가치 증가 (기초 성장)
+        const growth = (currentVal * BigInt(120)) / BigInt(10000);
+        const newVal = currentVal + growth;
+
+        // 수익 중 30%는 국고 현금으로 회수(Harvest), 70%는 자산 가치로 누적
+        const harvestFromAsset = (growth * BigInt(30)) / BigInt(100);
+        harvestedWld += harvestFromAsset;
+
+        const finalVal = newVal - harvestFromAsset;
+        const invested = BigInt(row.total_invested_wld);
+        const unrealizedPnl = finalVal - invested;
+
+        await client.query(
+          `UPDATE public.treasury_swf_portfolios
+           SET current_valuation_wld = $1,
+               unrealized_pnl_wld = $2,
+               updated_at = clock_timestamp()
+           WHERE id = $3`,
+          [finalVal.toString(), unrealizedPnl.toString(), row.id],
+        );
+      }
+
+      if (harvestedWld > BigInt(0) && config.auto_harvest_enabled) {
+        currentCash += harvestedWld;
+        await client.query(
+          `UPDATE public.system_treasury_vaults
+           SET balance_wld = (balance_wld::numeric + $1)::text, updated_at = clock_timestamp()
+           WHERE id = $2`,
+          [harvestedWld.toString(), vaultId],
+        );
+
+        await client.query(
+          `INSERT INTO public.system_treasury_ledger (
+              vault_id, tx_type, amount_wld, reason, balance_before, balance_after, created_at
+           ) VALUES (
+              $1, 'FEE_RECIRCULATION', $2,
+              '국부펀드(ASWF) 투자 자산 운용 수익 실현(Harvest) 국고 현금 흡수',
+              $3, $4, clock_timestamp()
+           )`,
+          [
+            vaultId,
+            harvestedWld.toString(),
+            (currentCash - harvestedWld).toString(),
+            currentCash.toString(),
+          ],
+        );
+      }
+
+      // 4. [2,500만 WLD 초과 잉여분의 복리 재투자] (Compound Reinvestment)
+      // 2,500만 WLD를 초과하는 현금 중 70%를 다시 우량주 및 안전 자산에 재투자하여 AUM 팽창
+      let reinvestedWld = BigInt(0);
+      let stockAlloc = BigInt(0);
+      let bondAlloc = BigInt(0);
+      let dividendAlloc = BigInt(0);
+
+      if (currentCash > floorReserve) {
+        const surplusCash = currentCash - floorReserve;
+        // 초과분의 70% 재투자, 30%는 국고 현금 버퍼로 보존하여 국고 현금 자체도 우상향
+        reinvestedWld = (surplusCash * BigInt(70)) / BigInt(100);
+        const maxSingle = BigInt(config.max_single_investment_wld || '10000000');
+        if (reinvestedWld > maxSingle) {
+          reinvestedWld = maxSingle;
+        }
+
+        if (reinvestedWld >= BigInt(50000)) {
+          stockAlloc = (reinvestedWld * BigInt(60)) / BigInt(100);
+          bondAlloc = (reinvestedWld * BigInt(30)) / BigInt(100);
+          dividendAlloc = reinvestedWld - stockAlloc - bondAlloc;
+
+          // 현금 차감
+          currentCash -= reinvestedWld;
+          await client.query(
+            `UPDATE public.system_treasury_vaults
+             SET balance_wld = (balance_wld::numeric - $1)::text, updated_at = clock_timestamp()
+             WHERE id = $2`,
+            [reinvestedWld.toString(), vaultId],
+          );
+
+          await client.query(
+            `INSERT INTO public.system_treasury_ledger (
+                vault_id, tx_type, amount_wld, reason, balance_before, balance_after, created_at
+             ) VALUES (
+                $1, 'MARKET_STIMULUS', $2,
+                '국고 2,500만 WLD 초과 세수 복리 재투자(주식 60%, 국채 30%, 시민배당 10%)',
+                $3, $4, clock_timestamp()
+             )`,
+            [
+              vaultId,
+              reinvestedWld.toString(),
+              (currentCash + reinvestedWld).toString(),
+              currentCash.toString(),
+            ],
+          );
+
+          // WDX 4대 대표주 균등 매수
+          const symbols = ['WDX-TEC', 'WDX-FIN', 'WDX-BIO', 'WDX-RET'];
+          const perStock = stockAlloc / BigInt(symbols.length);
+          for (const sym of symbols) {
             await client.query(
-              `UPDATE public.account_balances
-               SET available_amount = available_amount + $1, updated_at = clock_timestamp()
-               WHERE account_id = (SELECT id FROM public.accounts WHERE user_id = $2 AND account_type = 'CHECKING' LIMIT 1)`,
-              [perUserDividend.toString(), user.id],
+              `UPDATE public.treasury_swf_portfolios
+               SET total_invested_wld = (total_invested_wld::numeric + $1)::text,
+                   current_valuation_wld = (current_valuation_wld::numeric + $1)::text,
+                   updated_at = clock_timestamp()
+               WHERE asset_symbol = $2`,
+              [perStock.toString(), sym],
             );
+          }
+
+          // 활성 시민 배당
+          const activeUsers = await client.query<{ id: string }>(
+            `SELECT id FROM public.users WHERE status = 'ACTIVE' ORDER BY updated_at DESC LIMIT 50`,
+          );
+          if (activeUsers.rows.length > 0 && dividendAlloc > BigInt(0)) {
+            const perUser = dividendAlloc / BigInt(activeUsers.rows.length);
+            if (perUser > BigInt(0)) {
+              for (const u of activeUsers.rows) {
+                await client.query(
+                  `UPDATE public.account_balances
+                   SET available_amount = available_amount + $1, updated_at = clock_timestamp()
+                   WHERE account_id = (SELECT id FROM public.accounts WHERE user_id = $2 AND account_type = 'CHECKING' LIMIT 1)`,
+                  [perUser.toString(), u.id],
+                );
+              }
+            }
           }
         }
       }
 
-      // 5-5. SWF 이벤트 타임라인 기록
+      // 5. 총 운용 자산(AUM = 국고 현금 + 포트폴리오 가치) 산출
+      const totalValRes = await client.query<{ sum: string }>(
+        `SELECT COALESCE(SUM(current_valuation_wld::numeric), 0)::text as sum FROM public.treasury_swf_portfolios`,
+      );
+      const portfolioTotal = BigInt(totalValRes.rows[0]?.sum || '0');
+      const totalAum = currentCash + portfolioTotal;
+
+      // 6. SWF 이벤트 타임라인 기록
       await client.query(
         `INSERT INTO public.treasury_swf_events (event_type, amount_wld, summary, metadata)
          VALUES (
-            'REBALANCE_AND_DIVIDEND', $1,
-            '국부펀드 자율 리밸런싱 집행: WDX 우량주 매수 ' || $2 || ' WLD, 국채 예치 ' || $3 || ' WLD, 시민 배당 ' || $4 || ' WLD',
-            $5
+            'COMPOUND_GROWTH_CYCLE', $1,
+            '국고 자율 복리 성장 사이클 집행: 세수 유입 +' || $2 || ' WLD, 수익 실현 +' || $3 || ' WLD, 재투자 ' || $4 || ' WLD (총 AUM: ' || $5 || ' WLD)',
+            $6
          )`,
         [
-          investmentAmount.toString(),
-          stockAlloc.toString(),
-          bondAlloc.toString(),
-          dividendAlloc.toString(),
+          reinvestedWld.toString(),
+          taxCollected.toString(),
+          harvestedWld.toString(),
+          reinvestedWld.toString(),
+          totalAum.toString(),
           JSON.stringify({
-            surplus: surplus.toString(),
-            active_beneficiaries: activeUsers.rows.length,
+            vault_cash_wld: currentCash.toString(),
+            portfolio_aum_wld: portfolioTotal.toString(),
+            total_aum_wld: totalAum.toString(),
+            tax_collected: taxCollected.toString(),
+            harvested_wld: harvestedWld.toString(),
+            reinvested_wld: reinvestedWld.toString(),
             timestamp: new Date().toISOString(),
           }),
         ],
       );
 
-      // 5-6. 설정 마지막 실행 시각 갱신
+      // 7. 최종 설정 시간 갱신
       await client.query(
         `UPDATE public.treasury_swf_configs
          SET last_executed_at = clock_timestamp(), updated_at = clock_timestamp()
@@ -263,33 +391,36 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
 
       await client.query('COMMIT');
 
-      // 6. 디스코드 관리자 1:1 DM 및 로그 채널 브로드캐스팅
+      // 8. 디스코드 관리자(`886478189520637992`) 1:1 DM 및 시스템 로그 알림 발송
       const embed = {
-        title: '🏛️ [자율 국부펀드] 국고 잉여 세수 시장 재순환 집행 완료',
-        description: `국고 유휴 잉여 세수 **${Number(investmentAmount).toLocaleString()} WLD**가 자율 국부펀드(ASWF) 엔진을 통해 시장으로 재순환되었습니다.`,
-        color: 0x10b981,
+        title: '📈 [국고 복리 성장 엔진] 2,500만 원 보존 & 자율 성장 사이클 집행',
+        description: `국고 최소 안전 바닥 **25,000,000 WLD**를 완벽 보존하고, 자율 경제 엔진을 통해 총자산이 지속 성장하고 있습니다.`,
+        color: 0x3b82f6,
         fields: [
-          { name: '📊 WDX 우량주 매수', value: `${Number(stockAlloc).toLocaleString()} WLD (증시 부양)`, inline: true },
-          { name: '🏦 국채/채권 예치', value: `${Number(bondAlloc).toLocaleString()} WLD (안정 수익)`, inline: true },
-          { name: '🎁 시민 기본소득 배당', value: `${Number(dividendAlloc).toLocaleString()} WLD (${activeUsers.rows.length}명)`, inline: true },
-          { name: '경제 효과', value: '시중 유동성 경색 해소 · 주가 안전판 확보 · 유저 잔존율 강화', inline: false },
+          { name: '💰 국고 현금 잔액', value: `${Number(currentCash).toLocaleString()} WLD (바닥 2500만 보존)`, inline: true },
+          { name: '📊 포트폴리오 가치', value: `${Number(portfolioTotal).toLocaleString()} WLD`, inline: true },
+          { name: '🏛️ 국고 총자산 (AUM)', value: `**${Number(totalAum).toLocaleString()} WLD** (지속 우상향)`, inline: false },
+          { name: '🏢 가상 기업 법인세 유입', value: `+${Number(taxCollected).toLocaleString()} WLD`, inline: true },
+          { name: '🌾 투자 수익 실현 (Harvest)', value: `+${Number(harvestedWld).toLocaleString()} WLD`, inline: true },
+          { name: '🔄 자율 복리 재투자', value: `${Number(reinvestedWld).toLocaleString()} WLD`, inline: true },
         ],
       };
 
       this.discordAlert.sendAdminDirectMessage(embed).catch(() => {});
       this.discordAlert.sendDiscordEmbed(embed).catch(() => {});
 
-      this.logger.log(`Autonomous SWF rebalance executed: ${investmentAmount} WLD redistributed to markets and citizens.`);
+      this.logger.log(`Autonomous Treasury compounding growth completed. Total AUM: ${totalAum} WLD (Cash: ${currentCash} WLD)`);
       return {
         executed: true,
-        investedWld: investmentAmount.toString(),
-        stockWld: stockAlloc.toString(),
-        bondWld: bondAlloc.toString(),
-        dividendWld: dividendAlloc.toString(),
+        totalAumWld: totalAum.toString(),
+        vaultCashWld: currentCash.toString(),
+        taxCollectedWld: taxCollected.toString(),
+        harvestedWld: harvestedWld.toString(),
+        reinvestedWld: reinvestedWld.toString(),
       };
     } catch (error) {
       await client.query('ROLLBACK');
-      this.logger.error('Failed to execute autonomous SWF rebalance', error);
+      this.logger.error('Failed to evaluate autonomous treasury growth', error);
       throw error;
     } finally {
       client.release();
