@@ -7,18 +7,29 @@ import { Button } from '@/components/ui/button';
 export function PublicSitemapSubmitBox() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
+  const [selectedSitemap, setSelectedSitemap] = useState('sitemap.xml');
+
+  const SITEMAP_OPTIONS = [
+    { value: 'sitemap.xml', label: '전체 통합 사이트맵 (sitemap.xml)' },
+    { value: 'sitemap-stocks.xml', label: '주식 60+개 (sitemap-stocks.xml)' },
+    { value: 'sitemap-static.xml', label: '금융도구·가이드 (sitemap-static.xml)' },
+    { value: 'sitemap-board.xml', label: '커뮤니티 게시판 (sitemap-board.xml)' },
+    { value: 'sitemap-announcements.xml', label: '공지사항 (sitemap-announcements.xml)' },
+  ];
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setResultMessage(null);
     try {
+      const fullUrl = `https://easy-scraping.com/${selectedSitemap}`;
       const res = await fetch('/api/admin/seo/gsc-sitemap-submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sitemapUrl: fullUrl }),
       });
       const data = await res.json();
       if (data.success) {
-        setResultMessage('✅ Google 및 주요 검색엔진에 사이트맵(sitemap.xml) 최신 핑 전송이 완료되었습니다.');
+        setResultMessage(`✅ Google 및 검색엔진에 [${selectedSitemap}] 최신 핑 전송이 완료되었습니다.`);
       } else {
         setResultMessage(`⚠️ ${data.message || '색인 핑 전송 중 문제가 발생했습니다.'}`);
       }
@@ -40,11 +51,26 @@ export function PublicSitemapSubmitBox() {
             <span className="text-xs text-muted-foreground">Google · Naver · Bing 자동 연동</span>
           </div>
           <h3 className="text-base font-bold text-foreground">
-            구글 서치 콘솔(Google Search Console) & 사이트맵 등록
+            구글 서치 콘솔(Google Search Console) & 네이버 서치어드바이저 사이트맵 등록
           </h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
             월덕 머니버스의 580개 이상 금융 계산기 및 가이드는 매일 검색엔진에 최신 사이트맵을 자동 제출합니다.
           </p>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span className="text-xs text-muted-foreground font-semibold">대상:</span>
+            <select
+              value={selectedSitemap}
+              onChange={(e) => setSelectedSitemap(e.target.value)}
+              className="bg-background border border-border text-foreground text-xs rounded-lg px-2 py-1 outline-none"
+            >
+              {SITEMAP_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -55,7 +81,7 @@ export function PublicSitemapSubmitBox() {
             className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
           >
             <Send className="size-3.5 mr-1.5" />
-            {isSubmitting ? '색인 통보 중...' : '검색엔진 최신 사이트맵 즉시 통보'}
+            {isSubmitting ? '색인 통보 중...' : '선택 사이트맵 최신 통보'}
           </Button>
 
           <a
@@ -65,7 +91,17 @@ export function PublicSitemapSubmitBox() {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/80 bg-background hover:bg-muted text-xs font-semibold text-foreground transition-colors"
           >
             <ExternalLink className="size-3 text-muted-foreground" />
-            구글 서치콘솔 공식 센터
+            구글 서치콘솔
+          </a>
+
+          <a
+            href="https://searchadvisor.naver.com/console/board"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-950/30 text-xs font-semibold text-emerald-400 transition-colors"
+          >
+            <ExternalLink className="size-3 text-emerald-400" />
+            네이버 서치어드바이저
           </a>
         </div>
       </div>

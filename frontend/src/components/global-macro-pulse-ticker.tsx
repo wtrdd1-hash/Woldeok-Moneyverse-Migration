@@ -150,10 +150,51 @@ const FALLBACK_PULSE: MacroPulseData = {
   },
 };
 
+function getGoogleCalendarUrl(event: EconomicCalendarEvent): string {
+  const dateStr = event.scheduledDate.replace(/-/g, '');
+  const startTime = `${dateStr}T120000Z`;
+  const endTime = `${dateStr}T130000Z`;
+  const title = encodeURIComponent(`[월덕 머니버스] ${event.title}`);
+  const details = encodeURIComponent(`${event.titleEn}\n\n이벤트 심층 분석: ${event.analysisKo}\n투자 시사점: ${event.marketImpactTipKo}\n\nhttps://easy-scraping.com`);
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startTime}/${endTime}&details=${details}&location=월덕+머니버스`;
+}
+
+function downloadIcsFile(event: EconomicCalendarEvent) {
+  const dateStr = event.scheduledDate.replace(/-/g, '');
+  const now = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Woldeok Moneyverse//Economic Calendar//KO',
+    'BEGIN:VEVENT',
+    `UID:${event.id}-${dateStr}@easy-scraping.com`,
+    `DTSTAMP:${now}`,
+    `DTSTART:${dateStr}T120000Z`,
+    `DTEND:${dateStr}T130000Z`,
+    `SUMMARY:[월덕 머니버스] ${event.title}`,
+    `DESCRIPTION:${event.titleEn} - ${event.analysisKo}`,
+    'STATUS:CONFIRMED',
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n');
+
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${event.id}-schedule.ics`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 export function GlobalMacroPulseTicker() {
   const [data, setData] = useState<MacroPulseData>(FALLBACK_PULSE);
   const [selectedItem, setSelectedItem] = useState<MacroIndicatorData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<EconomicCalendarEvent | null>(null);
+  const [filterCountry, setFilterCountry] = useState<'ALL' | 'US' | 'KR' | 'EU'>('ALL');
+  const [highImpactOnly, setHighImpactOnly] = useState(false);
 
   useEffect(() => {
     fetch('/app-api/v1/economy/macro-pulse')
@@ -168,6 +209,11 @@ export function GlobalMacroPulseTicker() {
 
   const allIndicators = [...data.domestic, ...data.global];
   const calendarEvents = data.economicCalendar || FALLBACK_PULSE.economicCalendar || [];
+  const filteredEvents = calendarEvents.filter((evt) => {
+    if (filterCountry !== 'ALL' && evt.country !== filterCountry) return false;
+    if (highImpactOnly && evt.importance !== 'HIGH') return false;
+    return true;
+  });
 
   return (
     <div className="w-full rounded-xl border border-slate-800 bg-slate-950/80 p-3 shadow-md backdrop-blur-md space-y-3">
@@ -239,17 +285,75 @@ export function GlobalMacroPulseTicker() {
 
       {/* 국내외 경제 캘린더 D-Day 스트립 */}
       {calendarEvents.length > 0 && (
-        <div className="pt-2 border-t border-slate-800/80">
-          <div className="flex items-center justify-between mb-1.5">
+        <div className="pt-2 border-t border-slate-800/80 space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-300">
               <Calendar className="size-3 text-amber-400" />
               <span>주요 거시경제 캘린더 D-Day (FOMC · CPI · 금통위)</span>
             </div>
-            <span className="text-[10px] text-slate-500">일정을 클릭하면 심층 분석이 열립니다</span>
+
+            {/* 필터 바 */}
+            <div className="flex items-center gap-1 text-[10px]">
+              <button
+                type="button"
+                onClick={() => setFilterCountry('ALL')}
+                className={`px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
+                  filterCountry === 'ALL'
+                    ? 'bg-slate-700 text-white font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                전체
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterCountry('US')}
+                className={`px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
+                  filterCountry === 'US'
+                    ? 'bg-blue-600 text-white font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                🇺🇸 미국
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterCountry('KR')}
+                className={`px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
+                  filterCountry === 'KR'
+                    ? 'bg-rose-600 text-white font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                🇰🇷 한국
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterCountry('EU')}
+                className={`px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
+                  filterCountry === 'EU'
+                    ? 'bg-amber-600 text-white font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                🇪🇺 유럽
+              </button>
+              <button
+                type="button"
+                onClick={() => setHighImpactOnly(!highImpactOnly)}
+                className={`ml-1 px-1.5 py-0.5 rounded border cursor-pointer transition-colors ${
+                  highImpactOnly
+                    ? 'border-rose-500 bg-rose-950/40 text-rose-300 font-bold'
+                    : 'border-slate-800 text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                🔥 High만
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-            {calendarEvents.map((evt) => {
+            {filteredEvents.map((evt) => {
               const isHigh = evt.importance === 'HIGH';
               const dDayLabel = evt.dDay === 0 ? 'D-Day 오늘' : `D-${evt.dDay}`;
 
@@ -274,7 +378,7 @@ export function GlobalMacroPulseTicker() {
                       {evt.title.split(' ')[0]} {evt.title.split(' ')[1]}
                     </span>
                     <span className="text-[9px] text-slate-400 font-mono">
-                      {evt.scheduledDate} {evt.scheduledTime}
+                      예측: {evt.forecastValue} · 이전: {evt.previousValue}
                     </span>
                   </div>
                 </button>
@@ -354,19 +458,47 @@ export function GlobalMacroPulseTicker() {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800">
-                  <span className="block text-[10px] text-slate-400 font-semibold">이전 수치 (Previous)</span>
+              {/* 3열 비교 그리드: 이전치 vs 예측치 vs 발표 결과 */}
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800 text-center">
+                  <span className="block text-[10px] text-slate-400 font-semibold">이전치 (Previous)</span>
                   <span className="block text-sm font-bold font-mono text-slate-200 mt-0.5">
                     {selectedEvent.previousValue}
                   </span>
                 </div>
-                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                  <span className="block text-[10px] text-amber-400 font-semibold">시장 예측치 (Forecast)</span>
+                <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-center">
+                  <span className="block text-[10px] text-amber-400 font-semibold">예측치 (Forecast)</span>
                   <span className="block text-sm font-bold font-mono text-amber-300 mt-0.5">
                     {selectedEvent.forecastValue}
                   </span>
                 </div>
+                <div className="p-2.5 rounded-lg bg-blue-500/10 border border-blue-500/30 text-center">
+                  <span className="block text-[10px] text-blue-400 font-semibold">발표 결과 (Actual)</span>
+                  <span className="block text-xs font-mono text-blue-300 font-medium mt-1">
+                    {selectedEvent.dDay === 0 ? '발표 대기' : '집계 대기 중'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 캘린더 등록 액션 바 */}
+              <div className="flex items-center gap-2 pt-1">
+                <a
+                  href={getGoogleCalendarUrl(selectedEvent)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-300 text-xs font-medium transition-colors"
+                >
+                  <Calendar className="size-3.5" />
+                  <span>Google 캘린더 등록</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => downloadIcsFile(selectedEvent)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition-colors cursor-pointer"
+                >
+                  <Clock className="size-3.5" />
+                  <span>iCal (.ics) 다운로드</span>
+                </button>
               </div>
 
               <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4 space-y-2">

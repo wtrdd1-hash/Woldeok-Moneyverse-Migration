@@ -52,19 +52,30 @@ export function IndexingApiCard() {
 
   const [isGscSubmitting, setIsGscSubmitting] = useState(false);
   const [gscConsoleUrl, setGscConsoleUrl] = useState<string | null>(null);
+  const [selectedSitemap, setSelectedSitemap] = useState('sitemap.xml');
 
-  const handleGscSitemapSubmit = async () => {
+  const SITEMAP_OPTIONS = [
+    { value: 'sitemap.xml', label: '통합 사이트맵 (sitemap.xml)' },
+    { value: 'sitemap-stocks.xml', label: '주식 60+개 (sitemap-stocks.xml)' },
+    { value: 'sitemap-static.xml', label: '금융도구·가이드 (sitemap-static.xml)' },
+    { value: 'sitemap-board.xml', label: '커뮤니티 게시판 (sitemap-board.xml)' },
+    { value: 'sitemap-announcements.xml', label: '공지사항 (sitemap-announcements.xml)' },
+  ];
+
+  const handleGscSitemapSubmit = async (sitemapPath = selectedSitemap) => {
     setIsGscSubmitting(true);
     setFeedback(null);
     try {
+      const fullUrl = `https://easy-scraping.com/${sitemapPath}`;
       const res = await fetch('/api/admin/seo/gsc-sitemap-submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sitemapUrl: fullUrl }),
       });
       const data = await res.json();
       if (data.success) {
         setGscConsoleUrl(data.directConsoleUrl);
-        setFeedback(`🌐 ${data.gscMessage} (Google/Bing Sitemap Ping 전송 완료)`);
+        setFeedback(`🌐 [${sitemapPath}] ${data.gscMessage} (Google/Bing Ping 완료)`);
         setHistory((prev) => [
           {
             id: `gsc-${Date.now()}`,
@@ -100,22 +111,48 @@ export function IndexingApiCard() {
               <span className="text-xs text-muted-foreground">580+개 롱테일 pSEO 즉시 색인 유도</span>
             </div>
             <CardTitle className="text-base font-bold text-foreground">
-              신규 계산기 500+개 URL 및 사이트맵(sitemap.xml) 구글 서치 콘솔 1클릭 정식 등록
+              신규 계산기 500+개 URL 및 사이트맵(sitemap.xml) 구글/네이버 1클릭 정식 등록
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground leading-relaxed">
               Googlebot 및 네이버 Yeti가 사이트맵 및 580개 이상의 주식/복리 계산기 페이지를 최우선 순위로 크롤링하도록 Google Search Console Sitemaps API 및 Ping을 동시 발송합니다.
             </CardDescription>
+
+            {/* 개별 사이트맵 셀렉터 & 네이버 바로가기 */}
+            <div className="flex flex-wrap items-center gap-2 pt-1.5">
+              <span className="text-xs text-slate-400 font-semibold">제출 대상:</span>
+              <select
+                value={selectedSitemap}
+                onChange={(e) => setSelectedSitemap(e.target.value)}
+                className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1 outline-none focus:border-blue-500"
+              >
+                {SITEMAP_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+
+              <a
+                href="https://searchadvisor.naver.com/console/board"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/30 transition-colors"
+              >
+                <span>네이버 서치어드바이저 바로가기</span>
+                <ExternalLink className="size-3" />
+              </a>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <Button
               size="sm"
-              onClick={handleGscSitemapSubmit}
+              onClick={() => handleGscSitemapSubmit(selectedSitemap)}
               disabled={isGscSubmitting}
               className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
             >
               <Globe className="size-3.5" />
-              {isGscSubmitting ? '구글 정식 제출 중...' : '🌐 구글 서치콘솔 사이트맵 등록'}
+              {isGscSubmitting ? '구글 정식 제출 중...' : '🌐 선택 사이트맵 구글 등록'}
             </Button>
             <Button
               size="sm"

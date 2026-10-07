@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v105)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v106)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v106**: 글로벌 핀테크 레퍼런스(Investing.com·TradingView·GSC 2026 표준) 심층 점검 기반 3대 보완 고도화 풀스택 구축 — ① 경제 캘린더 예측치/직전치 3열 비교표 & 구글 캘린더(Google Calendar) 1초 등록/ICS 내보내기 & High-Impact/국가 필터 탑재 ② Google Search Console 5개 개별 사이트맵(sitemap-stocks, static, board, announcements 등) 일괄/선택 제출 셀렉터 & 네이버 서치어드바이저 웹마스터 도구 원클릭 딥링크 탑재 ③ 저평가 우량주 모의 매수 완료 즉시 10,000 WLD 퀘스트 보상 자동 청구 & 내 포트폴리오(/stocks/portfolio) 원클릭 이동 버튼 완결 (+140, -0)
 - **v105**: 국내외 경제 캘린더 D-Day 연동 & 원클릭 Google Search Console 사이트맵 정식 등록 파이프라인 & 저평가 우량주 모의 매수 퀘스트 풀스택 구축 — FOMC·금통위·CPI·NFP D-Day 뱃지 및 심층 분석 모달 연동, 구글 Sitemaps API(`PUT /sitemaps/{feedpath}`) 서버 사이드 정식 제출 및 관리자/도구 화면 원클릭 등록 버튼·히스토리 테이블 구축, PER/PBR 백과사전 연계 10,000 WLD 모의 매수 온보딩 퀘스트 완결 (+180, -0)
 - **v104**: 국내외 거시경제 펄스(Macro Pulse) 엔진 & 실전 경제 지식 백과사전 & 다통화 환율 변환기 풀스택 구축 및 전 금융 도구 전면 배치 — 한은 기준금리·코스피·환율·CPI 등 국내 4대 지표 + 미 연준 기준금리·나스닥·S&P500·달러인덱스(DXY)·미국채 10년물 등 글로벌 5대 지표를 10분 주기 시뮬레이션 및 자동 업데이트하는 백엔드 엔진(`macro-pulse.service.ts`) 신설, 1 WLD 기준 KRW/USD/JPY/EUR 실시간 변환기 및 6대 실전 투자 용어(PER, PBR, ROE, 72의 법칙, DCA, MDD) 백과사전 위젯(`financial-knowledge-hub.tsx`) 개발, 주식 물타기/복리/파밍/주식 메인 허브 전 지면 배치 완료, 단위 테스트 1,065개 100% 통과 및 라이브 운영 서버 무중단 배포 (+160, -0)
 - **v103**: 토스식 풀패키지 비로그인 SEO 방문자 ➡️ 활성 회원 전환 엔진(`ToolsGuestConversionBar`) 풀스택 구축 — 580개 주식 계산기 및 6대 세금/금융 계산기 등 `/tools` 전 지면을 대상으로 비로그인 방문자 감지 시 하단 고정 플로팅 스티키 전환 바('🎁 10,000 WLD 무료 지원금 + 방금 계산한 시나리오 계정 자동 저장') 상시 가동, 체류 3초 후 자연스러운 부드러운 전환 토스트 브로드캐스트, 가입 즉시 10,000 WLD 정착금 지급 및 관심 포트폴리오 첫 매수 튜토리얼 자동 연결로 이탈률 80%를 회원 전환으로 역전 (+140, -0)
@@ -2320,6 +2321,36 @@
 - Vitest 프론트엔드 및 백엔드 단위 테스트 100% ALL-PASS.
 - 프로덕션 빌드 무결점 검증.
 - 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 엔드포인트 응답 검증.
+
+---
+
+## 🚀 [v106 Specification] 글로벌 레퍼런스(Investing.com·TradingView·GSC 2026 표준) 심층 점검 기반 3대 보완 고도화
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "보완점검해봐 관련래퍼런스 일단찾고 점검해" -> Investing.com, TradingView, Google Search Console 2026 베스트 프랙티스 심층 조사 후 사용자 조율 완료된 3대 핵심 보완 기능 개발.
+- **핵심 목표**:
+  1. **경제 캘린더 실전 분석성 강화 (`global-macro-pulse-ticker.tsx`, `macro-pulse.service.ts`)**:
+     - 이전치(Previous) vs 컨센서스 예측치(Forecast) vs 발표 결과(Actual) 3열 비교 그리드 시각화.
+     - 사용자 구글 캘린더(Google Calendar) 1초 일정 등록 URL 딥링크 & ICS 일정 파일 다운로드 지원.
+     - 🔴 High-Impact(핵심 지표) 및 🇺🇸 미국 / 🇰🇷 한국 / 🇪🇺 유럽 국가별 원클릭 필터 바 탑재.
+  2. **Google Search Console 5개 개별 사이트맵 분할 제출 & 네이버 서치어드바이저 딥링크 (`indexing-api-card.tsx`, `public-sitemap-submit-box.tsx`, `gsc-sitemap-submit/route.ts`)**:
+     - `sitemap.xml`(통합 인덱스), `sitemap-stocks.xml`(주식 60+개), `sitemap-static.xml`(기본 페이지), `sitemap-board.xml`(게시판), `sitemap-announcements.xml`(공지사항) 5개 사이트맵 선택 셀렉터 지원.
+     - 국내 1위 검색 유입을 위한 '네이버 서치어드바이저(Naver Search Advisor)' 웹마스터 도구 사이트맵/웹페이지 수집 1초 바로가기 딥링크 연동.
+  3. **모의 매수 퀘스트 완결성 강화 (`financial-knowledge-hub.tsx`)**:
+     - 모의 매수 체결 즉시 퀘스트 보상(+10,000 WLD) 자동 청구 및 내 포트폴리오(`/stocks/portfolio`) 즉시 이동 액션 버튼 연동.
+     - 신규 가입자 온보딩 흐름 완결성 극대화.
+
+### 2. 세부 변경 파일
+- `frontend/src/components/global-macro-pulse-ticker.tsx`: 3열 비교표, 구글 캘린더 연동, 국가/중요도 필터 탑재.
+- `frontend/src/components/financial-knowledge-hub.tsx`: 퀘스트 보상 자동 청구 및 내 포트폴리오 이동 버튼 탑재.
+- `frontend/src/app/admin/seo/indexing-api-card.tsx`: 5대 사이트맵 선택 셀렉터 및 네이버 서치어드바이저 딥링크 탑재.
+- `frontend/src/components/public-sitemap-submit-box.tsx`: 5대 사이트맵 선택 셀렉터 및 네이버 딥링크 탑재.
+- `frontend/src/app/api/admin/seo/gsc-sitemap-submit/route.ts`: 선택된 sitemapUrl 대상 동적 제출 지원.
+
+### 3. 검증 계획
+- Vitest 프론트엔드 및 백엔드 테스트 100% ALL-PASS.
+- Next.js Turbopack 정적 페이지 빌드 100% 성공 검증.
+- Git main 푸시 및 원격 운영 서버(`easy-scraping.com`) 무중단 배포 및 엔드포인트 라이브 검증.
+
 
 
 

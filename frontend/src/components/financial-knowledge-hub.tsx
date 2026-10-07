@@ -286,20 +286,37 @@ export function FinancialKnowledgeHub() {
                 <CheckCircle2 className="size-6" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-base font-bold text-white">모의 매수 체결 완료!</h4>
+                <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[11px] font-bold text-amber-300">
+                  <Coins className="size-3" />
+                  <span>🎁 10,000 WLD 온보딩 퀘스트 보상 자동 청구 완료!</span>
+                </div>
+                <h4 className="text-base font-bold text-white mt-1">모의 매수 체결 완료!</h4>
                 <p className="text-xs text-slate-300">
                   <span className="text-amber-400 font-bold">{selectedStock}</span> 종목 10,000 WLD 매수가 완료되어 내 모의 포트폴리오에 등록되었습니다.
                 </p>
               </div>
-              <div className="pt-3">
+              <div className="pt-3 flex items-center gap-2">
                 <Button
                   onClick={() => {
                     setPurchaseSuccess(false);
                     setMockModalOpen(false);
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/stocks/portfolio';
+                    }
                   }}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer shadow-md shadow-emerald-500/20"
                 >
-                  포트폴리오 확인하기
+                  내 포트폴리오 보러 가기
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setPurchaseSuccess(false);
+                    setMockModalOpen(false);
+                  }}
+                  className="px-3 border-slate-700 text-slate-300 text-xs hover:bg-slate-800 cursor-pointer"
+                >
+                  닫기
                 </Button>
               </div>
             </div>
@@ -352,6 +369,7 @@ export function FinancialKnowledgeHub() {
                     localStorage.setItem('wdmv_mock_stock', selectedStock);
                     localStorage.setItem('wdmv_mock_amount', '10000');
                     localStorage.setItem('wdmv_mock_time', new Date().toISOString());
+                    localStorage.setItem('wdmv_quest_stock_mock', 'completed');
                   } catch {}
                   setPurchaseSuccess(true);
                 }}
