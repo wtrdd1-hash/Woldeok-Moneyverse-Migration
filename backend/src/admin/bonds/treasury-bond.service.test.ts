@@ -48,6 +48,14 @@ describe('TreasuryBondService Unit Tests', () => {
       maturedCount: 1,
     }),
     updateBondStatus: vi.fn().mockResolvedValue(true),
+    createRepoLoan: vi.fn().mockResolvedValue({
+      loanId: 'repo-loan-1',
+      loanAmountWld: '40000',
+    }),
+    repayRepoLoan: vi.fn().mockResolvedValue({
+      repaidAmountWld: '40050',
+    }),
+    toggleAutoRollover: vi.fn().mockResolvedValue(true),
   } as unknown as TreasuryBondRepository;
 
   const mockDiscord = {
@@ -85,5 +93,19 @@ describe('TreasuryBondService Unit Tests', () => {
       }),
       '886478189520637992',
     );
+  });
+
+  it('국채 담보 80% LTV 레포 대출 신청 및 상환을 성공적으로 처리한다', async () => {
+    const loanRes = await service.createRepoLoan('test-user-id', 'holding-1');
+    expect(loanRes.loanId).toBe('repo-loan-1');
+    expect(loanRes.loanAmountWld).toBe('40000');
+
+    const repayRes = await service.repayRepoLoan('test-user-id', 'repo-loan-1');
+    expect(repayRes.repaidAmountWld).toBe('40050');
+  });
+
+  it('만기 시 자동 롤오버 재투자 설정을 정상적으로 토글한다', async () => {
+    const toggleRes = await service.toggleAutoRollover('test-user-id', 'holding-1', true);
+    expect(toggleRes).toBe(true);
   });
 });

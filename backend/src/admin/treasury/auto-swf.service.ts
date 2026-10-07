@@ -220,6 +220,7 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
             h RECORD;
             coupon NUMERIC;
             principal NUMERIC;
+            u_account_id UUID;
           BEGIN
             FOR h IN
               SELECT th.id, th.user_id, th.bond_id, th.units, tb.par_value_wld, tb.hourly_coupon_rate_bps, (th.maturity_at <= now()) AS is_matured
@@ -229,14 +230,18 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
             LOOP
               principal := h.units * h.par_value_wld;
               coupon := FLOOR(principal * h.hourly_coupon_rate_bps / 10000);
-              IF coupon > 0 THEN
-                UPDATE public.wallets SET balance_wld = (balance_wld::numeric + coupon)::text, updated_at = now() WHERE user_id = h.user_id;
+
+              SELECT id INTO u_account_id FROM public.accounts WHERE owner_user_id = h.user_id AND account_type = 'USER_CASH' LIMIT 1;
+
+              IF coupon > 0 AND u_account_id IS NOT NULL THEN
+                UPDATE public.account_balances SET available_amount = available_amount + coupon, updated_at = now() WHERE account_id = u_account_id;
                 UPDATE public.treasury_bond_holdings SET accrued_interest_wld = accrued_interest_wld + coupon, updated_at = now() WHERE id = h.id;
                 INSERT INTO public.treasury_bond_coupon_logs (holding_id, user_id, bond_id, event_type, amount_wld)
                 VALUES (h.id, h.user_id, h.bond_id, 'COUPON_INTEREST', coupon);
               END IF;
-              IF h.is_matured THEN
-                UPDATE public.wallets SET balance_wld = (balance_wld::numeric + principal)::text, updated_at = now() WHERE user_id = h.user_id;
+
+              IF h.is_matured AND u_account_id IS NOT NULL THEN
+                UPDATE public.account_balances SET available_amount = available_amount + principal, updated_at = now() WHERE account_id = u_account_id;
                 UPDATE public.treasury_bond_holdings SET status = 'MATURED', updated_at = now() WHERE id = h.id;
                 INSERT INTO public.treasury_bond_coupon_logs (holding_id, user_id, bond_id, event_type, amount_wld)
                 VALUES (h.id, h.user_id, h.bond_id, 'MATURITY_REDEMPTION', principal);

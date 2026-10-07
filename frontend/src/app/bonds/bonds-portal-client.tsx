@@ -12,6 +12,10 @@ import {
   Info,
   Calendar,
   Lock,
+  Unlock,
+  RefreshCw,
+  Landmark,
+  Percent,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,12 +54,28 @@ export interface UserHoldingItem {
   purchased_at: string;
   maturity_at: string;
   status: string;
+  auto_rollover: boolean;
+  collateral_locked: boolean;
   hours_left?: number;
+}
+
+export interface UserRepoLoanItem {
+  id: string;
+  holding_id: string;
+  bond_name: string;
+  bond_symbol: string;
+  principal_wld: string;
+  annual_interest_rate_bps: number;
+  accrued_interest_wld: string;
+  ltv_percent: number;
+  status: string;
+  created_at: string;
 }
 
 interface BondsPortalClientProps {
   initialBonds: PublicBondItem[];
   initialHoldings: UserHoldingItem[];
+  initialRepoLoans?: UserRepoLoanItem[];
   overview: {
     totalBondsActive: number;
     totalFundedWld: string;
@@ -71,14 +91,17 @@ interface BondsPortalClientProps {
 export function BondsPortalClient({
   initialBonds,
   initialHoldings,
+  initialRepoLoans = [],
   overview,
   isLoggedIn,
 }: BondsPortalClientProps) {
   const [bonds, setBonds] = useState<PublicBondItem[]>(initialBonds);
   const [holdings, setHoldings] = useState<UserHoldingItem[]>(initialHoldings);
+  const [repoLoans, setRepoLoans] = useState<UserRepoLoanItem[]>(initialRepoLoans);
   const [selectedBond, setSelectedBond] = useState<PublicBondItem | null>(null);
   const [unitsToSubscribe, setUnitsToSubscribe] = useState<number>(1);
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isProcessingLoan, setIsProcessingLoan] = useState(false);
 
   const handleSubscribe = async () => {
     if (!selectedBond) return;
@@ -109,12 +132,82 @@ export function BondsPortalClient({
       );
       setSelectedBond(null);
       setUnitsToSubscribe(1);
-      // Reload page to refresh holdings
       window.location.reload();
     } catch (err: any) {
       toast.error(err.message || '국채 청약 중 오류가 발생했습니다.');
     } finally {
       setIsSubscribing(false);
+    }
+  };
+
+  const handleBorrowRepo = async (holdingId: string, bondName: string) => {
+    if (!isLoggedIn) {
+      toast.error('로그인이 필요합니다.');
+      return;
+    }
+    setIsProcessingLoan(true);
+    try {
+      const res = await fetch('/api/bonds/repo-loans/borrow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ holdingId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '대출 신청 실패');
+
+      toast.success(
+        `[${bondName}] 담보 대출 완료! 액면가 80% 한도 ${groupDigits(data.loanAmountWld)} WLD가 계좌로 입금되었습니다.`,
+      );
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message || '대출 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsProcessingLoan(false);
+    }
+  };
+
+  const handleRepayRepo = async (loanId: string) => {
+    setIsProcessingLoan(true);
+    try {
+      const res = await fetch('/api/bonds/repo-loans/repay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loanId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '상환 실패');
+
+      toast.success(
+        `대출 원리금 ${groupDigits(data.repaidAmountWld)} WLD 상환 완료! 국채 담보 잠금이 해제되었습니다.`,
+      );
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message || '상환 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsProcessingLoan(false);
+    }
+  };
+
+  const handleToggleRollover = async (holdingId: string, current: boolean) => {
+    try {
+      const res = await fetch('/api/bonds/rollover', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ holdingId, enabled: !current }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '변경 실패');
+
+      setHoldings((prev) =>
+        prev.map((h) => (h.id === holdingId ? { ...h, auto_rollover: !current } : h)),
+      );
+      toast.success(
+        !current
+          ? '만기 시 원금 자동 롤오버 재투자(복리)가 활성화되었습니다.'
+          : '자동 롤오버가 해제되었습니다. 만기 시 원금이 지갑으로 입금됩니다.',
+      );
+    } catch (err: any) {
+      toast.error(err.message || '설정 변경 중 오류가 발생했습니다.');
     }
   };
 
@@ -130,13 +223,16 @@ export function BondsPortalClient({
             <Badge variant="outline" className="border-sky-500/40 text-sky-700 dark:text-sky-300 font-mono text-xs">
               KOREA TREASURY BONDS (KTB)
             </Badge>
+            <Badge variant="outline" className="border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-mono text-xs">
+              REPO FINANCING 80% LTV
+            </Badge>
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
             월덱 기획재정국채 (KTB) 통합 거래소
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             중앙 국고(VAULT_MAIN)가 원리금을 100% 보증하는 국가 공인 무위험 확정 이자 채권입니다. 
-            매시간 확정 쿠폰 이자가 지갑으로 자동 입금되며, 만기 시 원금이 전액 자동 상환됩니다.
+            매시간 확정 쿠폰 이자가 지갑으로 자동 입금되며, 긴급 자금이 필요할 때 보유 국채를 담보로 액면가 80%까지 초저리(연 2.5%) 즉시 대출(Repo)을 이용할 수 있습니다.
           </p>
         </div>
 
@@ -229,7 +325,6 @@ export function BondsPortalClient({
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  {/* Yield & Par Value */}
                   <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-muted/40 border border-border/60">
                     <div>
                       <div className="text-xs text-muted-foreground">확정 표면금리</div>
@@ -249,7 +344,6 @@ export function BondsPortalClient({
                     </div>
                   </div>
 
-                  {/* Quota Progress */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>잔여 한도</span>
@@ -265,7 +359,6 @@ export function BondsPortalClient({
                     </div>
                   </div>
 
-                  {/* Action Button */}
                   <Button
                     onClick={() => setSelectedBond(bond)}
                     className="w-full bg-sky-600 hover:bg-sky-700 text-white font-medium gap-1.5 mt-2"
@@ -343,19 +436,21 @@ export function BondsPortalClient({
         </Card>
       )}
 
-      {/* 3. User Holdings & Information Tabs */}
+      {/* 3. User Holdings, Repo Loans & Information Tabs */}
       <Tabs defaultValue="holdings" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-6">
-          <TabsTrigger value="holdings">내 보유 채권 계좌 ({holdings.length})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 max-w-xl mx-auto mb-6">
+          <TabsTrigger value="holdings">내 보유 채권 ({holdings.length})</TabsTrigger>
+          <TabsTrigger value="repo">국채 담보 대출 (Repo)</TabsTrigger>
           <TabsTrigger value="guide">국채 제도 및 상환 안내</TabsTrigger>
         </TabsList>
 
+        {/* Tab 1: Holdings */}
         <TabsContent value="holdings" className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-foreground">내 보유 국채 현황</h3>
               <p className="text-xs text-muted-foreground">
-                매시간 확정 쿠폰 이자가 자동으로 적립되며, 만기 시 원금이 지갑으로 즉시 상환됩니다.
+                매시간 확정 쿠폰 이자가 자동으로 적립되며, 긴급 유동성 필요 시 80% 담보 대출을 신청할 수 있습니다.
               </p>
             </div>
           </div>
@@ -373,7 +468,7 @@ export function BondsPortalClient({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {holdings.map((h) => (
-                <Card key={h.id} className="border-border/80 shadow-sm">
+                <Card key={h.id} className="border-border/80 shadow-sm flex flex-col justify-between">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -390,6 +485,11 @@ export function BondsPortalClient({
                         >
                           {h.status === 'HOLDING' ? '보유중 (이자수령)' : '만기상환 완료'}
                         </Badge>
+                        {h.collateral_locked && (
+                          <Badge variant="outline" className="border-rose-500/40 text-rose-600 font-mono text-[10px]">
+                            담보 잠금
+                          </Badge>
+                        )}
                       </div>
                       <div className="text-xs font-mono text-muted-foreground">
                         잔여 {h.hours_left ?? 0}시간
@@ -399,7 +499,7 @@ export function BondsPortalClient({
                       {h.bond_name}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
                         <span className="text-muted-foreground">보유 좌수:</span>{' '}
@@ -425,12 +525,30 @@ export function BondsPortalClient({
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[11px] text-muted-foreground">
-                      <span>만기 일시: {new Date(h.maturity_at).toLocaleString('ko-KR')}</span>
-                      <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        원금 국가 100% 보증
-                      </span>
+                    {/* Auto-Rollover Switch & Repo Borrow Action */}
+                    <div className="pt-3 border-t border-border/60 flex flex-wrap items-center justify-between gap-2">
+                      <Button
+                        variant={h.auto_rollover ? 'secondary' : 'outline'}
+                        size="sm"
+                        onClick={() => handleToggleRollover(h.id, h.auto_rollover)}
+                        className="text-xs h-7 gap-1"
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                        자동 재투자: {h.auto_rollover ? 'ON (복리)' : 'OFF'}
+                      </Button>
+
+                      {h.status === 'HOLDING' && !h.collateral_locked && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={isProcessingLoan}
+                          onClick={() => handleBorrowRepo(h.id, h.bond_name)}
+                          className="text-xs h-7 gap-1 border-sky-500/40 text-sky-600 dark:text-sky-400"
+                        >
+                          <Landmark className="h-3 w-3" />
+                          80% 담보대출 신청
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -439,10 +557,101 @@ export function BondsPortalClient({
           )}
         </TabsContent>
 
+        {/* Tab 2: Repo Loans */}
+        <TabsContent value="repo" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-foreground">국채 담보 레포(Repo) 대출 센터</h3>
+              <p className="text-xs text-muted-foreground">
+                보유한 무위험 국채를 담보로 액면가의 80% 한도까지 초저리(연 2.5%)로 대출을 받아 즉시 유동성을 확보할 수 있습니다.
+              </p>
+            </div>
+          </div>
+
+          {repoLoans.length === 0 ? (
+            <Card className="border-border/80">
+              <CardContent className="text-center py-12 text-muted-foreground space-y-2">
+                <Landmark className="h-10 w-10 text-muted-foreground mx-auto opacity-40" />
+                <p className="text-sm font-medium">현재 이용 중인 국채 담보 대출이 없습니다.</p>
+                <p className="text-xs text-muted-foreground">
+                  '내 보유 채권' 탭에서 보유 중인 국채의 '80% 담보대출 신청' 버튼을 눌러 즉시 신청할 수 있습니다.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {repoLoans.map((loan) => (
+                <Card key={loan.id} className="border-border/80 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary" className="font-mono text-xs">
+                        {loan.bond_symbol} 담보
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className={
+                          loan.status === 'ACTIVE'
+                            ? 'border-sky-500/40 text-sky-600 bg-sky-500/10'
+                            : 'border-emerald-500/40 text-emerald-600'
+                        }
+                      >
+                        {loan.status === 'ACTIVE' ? '대출 이용중' : '상환 완료'}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-base font-bold text-foreground mt-1">
+                      {loan.bond_name} 담보 레포 대출
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-muted-foreground">대출 원금:</span>{' '}
+                        <span className="font-mono font-bold text-foreground">
+                          {groupDigits(loan.principal_wld)} WLD
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-muted-foreground">초저리 대출 금리:</span>{' '}
+                        <span className="font-mono text-sky-600 font-semibold">
+                          연 {(loan.annual_interest_rate_bps / 100).toFixed(2)}%
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">담보 인정 비율(LTV):</span>{' '}
+                        <span className="font-mono font-medium">{loan.ltv_percent}%</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-muted-foreground">발생 이자:</span>{' '}
+                        <span className="font-mono text-amber-600 font-medium">
+                          {groupDigits(loan.accrued_interest_wld)} WLD
+                        </span>
+                      </div>
+                    </div>
+
+                    {loan.status === 'ACTIVE' && (
+                      <div className="pt-2 border-t border-border/60 flex justify-end">
+                        <Button
+                          size="sm"
+                          disabled={isProcessingLoan}
+                          onClick={() => handleRepayRepo(loan.id)}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-8"
+                        >
+                          원리금 전액 상환 및 담보 해제
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Tab 3: Guide */}
         <TabsContent value="guide" className="space-y-4">
           <Card className="border-border/80">
             <CardHeader>
-              <CardTitle className="text-base font-bold">월덱 기획재정국채 (KTB) 제도 안내</CardTitle>
+              <CardTitle className="text-base font-bold">월덱 기획재정국채 (KTB) 및 금융 레포 제도 안내</CardTitle>
               <CardDescription className="text-xs">
                 대한민국 국채법 및 글로벌 표준 국가 채권 발행 체계
               </CardDescription>
@@ -460,21 +669,21 @@ export function BondsPortalClient({
 
               <div className="p-3.5 rounded-xl bg-muted/40 border border-border/60 space-y-2">
                 <h4 className="font-semibold text-foreground flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-indigo-500" />
-                  2. 1시간 주기 실시간 확정 쿠폰 이자 정산
+                  <Landmark className="h-4 w-4 text-emerald-500" />
+                  2. 80% LTV 초저리 레포(Repo) 담보 대출
                 </h4>
                 <p>
-                  현실 세계의 반기/연 단위 이자 지급과 달리, 머니버스 생태계의 빠른 속도에 맞추어 매 1시간마다 표면금리에 따른 확정 분할 이자가 유저 덕지갑으로 직접 입금됩니다.
+                  국채를 만기까지 해지하지 않고도, 보유 채권의 80%에 달하는 금액을 연 2.5%의 초저금리로 즉시 대출받아 다른 투자 기회나 사업 자금으로 활용할 수 있습니다.
                 </p>
               </div>
 
               <div className="p-3.5 rounded-xl bg-muted/40 border border-border/60 space-y-2">
                 <h4 className="font-semibold text-foreground flex items-center gap-1.5">
-                  <Coins className="h-4 w-4 text-emerald-500" />
-                  3. 만기 시 자동 원금 상환 (Zero-Default)
+                  <RefreshCw className="h-4 w-4 text-indigo-500" />
+                  3. 자동 롤오버(Auto-Rollover) 복리 재투자
                 </h4>
                 <p>
-                  정해진 만기 시간(24시간, 72시간, 120시간)이 도래하면 별도의 신청 절차 없이 원금 전액이 유저 덕지갑으로 즉시 자동 환급됩니다.
+                  자동 재투자(ON)를 활성화하면 채권 만기 도달 시 원금을 환급받는 대신 동일 만기 신규 국채로 원금이 자동 재투자되어 복리 수익을 극대화합니다.
                 </p>
               </div>
             </CardContent>

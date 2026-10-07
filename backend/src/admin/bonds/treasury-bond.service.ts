@@ -104,4 +104,22 @@ export class TreasuryBondService {
   async updateBondStatus(bondId: string, status: string, annualCouponRateBps?: number) {
     return this.repository.updateBondStatus(bondId, status, annualCouponRateBps);
   }
+
+  async listUserRepoLoans(userId: string) {
+    return this.repository.listUserRepoLoans(userId);
+  }
+
+  async createRepoLoan(userId: string, holdingId: string) {
+    this.logger.log(`User ${userId} taking repo loan against bond holding ${holdingId}`);
+    return this.repository.createRepoLoan(userId, holdingId);
+  }
+
+  async repayRepoLoan(userId: string, loanId: string) {
+    this.logger.log(`User ${userId} repaying repo loan ${loanId}`);
+    return this.repository.repayRepoLoan(userId, loanId);
+  }
+
+  async toggleAutoRollover(userId: string, holdingId: string, enabled: boolean) {
+    return this.repository.toggleAutoRollover(userId, holdingId, enabled);
+  }
 }

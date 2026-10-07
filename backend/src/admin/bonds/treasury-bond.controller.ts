@@ -105,4 +105,50 @@ export class PublicTreasuryBondController {
     const userId = requireUserId(req);
     return this.service.subscribeBond(userId, bondId, Number(units));
   }
+
+  @Get('my-repo-loans')
+  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @ApiOperation({ summary: '내 국채 담보 레포 대출 내역 조회' })
+  async getMyRepoLoans(@Req() req: RequestWithSession) {
+    const userId = requireUserId(req);
+    return this.service.listUserRepoLoans(userId);
+  }
+
+  @Post('repo-loans/borrow')
+  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @ApiOperation({ summary: '국채 담보 저리 레포 대출 신청 (80% LTV, 연 2.5%)' })
+  async borrowRepoLoan(
+    @Req() req: RequestWithSession,
+    @Body('holdingId') holdingId: string,
+  ) {
+    const userId = requireUserId(req);
+    return this.service.createRepoLoan(userId, holdingId);
+  }
+
+  @Post('repo-loans/repay')
+  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @ApiOperation({ summary: '국채 담보 레포 대출 상환 및 담보 잠금 해제' })
+  async repayRepoLoan(
+    @Req() req: RequestWithSession,
+    @Body('loanId') loanId: string,
+  ) {
+    const userId = requireUserId(req);
+    return this.service.repayRepoLoan(userId, loanId);
+  }
+
+  @Put('holdings/:id/rollover')
+  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @ApiOperation({ summary: '만기 시 원금 자동 롤오버 재투자 설정 토글' })
+  async toggleAutoRollover(
+    @Req() req: RequestWithSession,
+    @Param('id') id: string,
+    @Body('enabled') enabled: boolean,
+  ) {
+    const userId = requireUserId(req);
+    return {
+      success: await this.service.toggleAutoRollover(userId, id, Boolean(enabled)),
+      holdingId: id,
+      autoRollover: enabled,
+    };
+  }
 }

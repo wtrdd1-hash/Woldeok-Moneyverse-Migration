@@ -42,15 +42,22 @@ export default async function PublicBondsPage() {
 
   const bonds = marketsData?.bonds ?? [];
 
-  // 로그인 상태인 경우 내 보유 채권 조회 시도
+  // 로그인 상태인 경우 내 보유 채권 및 레포 대출 조회 시도
   let holdings: UserHoldingItem[] = [];
+  let repoLoans: any[] = [];
   let isLoggedIn = false;
 
   try {
-    const userHoldings = await api<UserHoldingItem[]>('/api/v1/bonds/my-holdings');
+    const [userHoldings, userRepoLoans] = await Promise.all([
+      api<UserHoldingItem[]>('/api/v1/bonds/my-holdings'),
+      api<any[]>('/api/v1/bonds/my-repo-loans').catch(() => []),
+    ]);
     if (Array.isArray(userHoldings)) {
       holdings = userHoldings;
       isLoggedIn = true;
+    }
+    if (Array.isArray(userRepoLoans)) {
+      repoLoans = userRepoLoans;
     }
   } catch {
     // 비로그인 방문자
@@ -62,6 +69,7 @@ export default async function PublicBondsPage() {
       <BondsPortalClient
         initialBonds={bonds}
         initialHoldings={holdings}
+        initialRepoLoans={repoLoans}
         overview={overview}
         isLoggedIn={isLoggedIn}
       />
