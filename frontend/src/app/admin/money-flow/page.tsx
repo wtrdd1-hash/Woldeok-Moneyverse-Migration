@@ -12,6 +12,8 @@ import {
   Receipt,
   RotateCcw,
   CheckCircle2,
+  ExternalLink,
+  Filter,
 } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -19,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import { cn } from '@/lib/cn';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
@@ -116,9 +119,47 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
     total_outflow_24h: '0',
   };
 
+  const QUICK_FILTERS = [
+    { label: '전체 거래', value: '' },
+    { label: '주식 매수', value: 'VIRTUAL_STOCK_BUY' },
+    { label: '주식 매도', value: 'VIRTUAL_STOCK_SELL' },
+    { label: '은행 예금', value: 'BANK_DEPOSIT' },
+    { label: '은행 출금', value: 'BANK_WITHDRAW' },
+    { label: '상점 구매', value: 'SHOP_CATALOG_PURCHASE' },
+    { label: '직업 급여', value: 'WORK_REWARD_CLAIM' },
+    { label: '자금 지급', value: 'MINT_TO_USER' },
+    { label: '게임 배당', value: 'CASINO_PAYOUT' },
+  ];
+
   return (
     <div data-page="admin-money-flow" className="mv-page mv-page--admin grid gap-6">
-      <AdminBack />
+      {/* Top Quick Breadcrumb & Domain Switcher */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-3">
+        <AdminBack />
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold">
+            <Link href="/admin">
+              마스터 콘솔
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold">
+            <Link href="/admin/treasury">
+              국고 관리
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold">
+            <Link href="/admin/economy">
+              원장 점검
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold">
+            <Link href="/admin/users">
+              회원 목록
+            </Link>
+          </Button>
+        </div>
+      </div>
+
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
       </PageHeader>
@@ -194,7 +235,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
 
       {/* Filter and Search Bar */}
       <Card className="border-zinc-800 bg-card/90">
-        <CardContent className="pt-5">
+        <CardContent className="pt-5 space-y-4">
           <form method="GET" action="/admin/money-flow" className="grid gap-3 sm:grid-cols-4">
             <div className="sm:col-span-2">
               <label className="text-xs font-semibold text-muted-foreground mb-1 block">
@@ -259,6 +300,35 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
               </Button>
             </div>
           </form>
+
+          {/* 1-Click Quick Filter Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-border/50">
+            <span className="text-[11px] font-bold text-muted-foreground mr-1 flex items-center gap-1">
+              <Filter className="size-3" />
+              유형 필터:
+            </span>
+            {QUICK_FILTERS.map((q) => {
+              const active = type === q.value;
+              return (
+                <Link
+                  key={q.value}
+                  href={`/admin/money-flow?${new URLSearchParams({
+                    ...(search ? { search } : {}),
+                    ...(q.value ? { type: q.value } : {}),
+                    ...(direction ? { direction } : {}),
+                  }).toString()}`}
+                  className={cn(
+                    'px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border',
+                    active
+                      ? 'bg-primary text-primary-foreground border-primary shadow-xs'
+                      : 'bg-muted/40 hover:bg-muted text-muted-foreground border-border/60 hover:text-foreground'
+                  )}
+                >
+                  {q.label}
+                </Link>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
 
@@ -271,6 +341,8 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
               조회된 거래: {items.length}건
+              {search && <span className="ml-1 text-primary font-bold">· ‘{search}’ 검색 결과</span>}
+              {type && <span className="ml-1 text-amber-500 font-bold">· {formatTypeLabel(type).label}</span>}
             </CardDescription>
           </div>
 
@@ -287,7 +359,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
               description="검색어나 필터 조건을 변경하여 다시 조회해 보세요."
             />
           ) : (
-            <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mv-table-wrapper">
               <table className="w-full min-w-[700px] text-left text-xs">
                 <thead>
                   <tr className="border-b border-border/60 text-muted-foreground">
@@ -319,16 +391,32 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
                         </td>
 
                         <td className="py-3 px-3 whitespace-nowrap">
-                          <Badge variant="outline" className={`text-[10px] font-bold ${typeBadge.color}`}>
-                            {typeBadge.label}
-                          </Badge>
+                          <Link
+                            href={`/admin/money-flow?type=${item.type}`}
+                            title="이 유형만 필터링"
+                          >
+                            <Badge variant="outline" className={`text-[10px] font-bold hover:opacity-80 transition-opacity ${typeBadge.color}`}>
+                              {typeBadge.label}
+                            </Badge>
+                          </Link>
                         </td>
 
                         <td className="py-3 px-3">
                           <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="font-bold text-foreground truncate max-w-[120px]">
+                            <Link
+                              href={`/admin/money-flow?search=${encodeURIComponent(item.display_name)}`}
+                              title="이 유저 내역만 조회"
+                              className="font-bold text-foreground hover:text-primary transition-colors truncate max-w-[120px]"
+                            >
                               {item.display_name}
-                            </span>
+                            </Link>
+                            <Link
+                              href={`/admin/users?id=${item.user_id}`}
+                              title="회원 관리 페이지로 이동"
+                              className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                            >
+                              <ExternalLink className="size-2.5" />
+                            </Link>
                             <span className="font-mono text-[10px] text-muted-foreground shrink-0">
                               ({item.user_id.slice(0, 8)})
                             </span>
@@ -341,7 +429,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
                           </Badge>
                         </td>
 
-                        <td className="py-3 px-3 text-right font-mono font-bold whitespace-nowrap">
+                        <td className="py-3 px-3 text-right font-mono font-bold whitespace-nowrap tabular-nums">
                           <span className={`inline-flex items-center gap-0.5 ${isDebit ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {isDebit ? '+' : '-'}
                             {amountNum.toLocaleString()} WLD

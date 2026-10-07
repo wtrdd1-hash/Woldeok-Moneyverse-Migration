@@ -565,6 +565,7 @@ export const MEMBER_NAV: readonly NavEntry[] = [
  */
 export const ADMIN_NAV: readonly NavEntry[] = [
   { href: '/admin', label: '마스터 콘솔' },
+  { href: '/admin/money-flow', label: '유저 자금 흐름' },
   { href: '/admin/users', label: '회원 관리' },
   { href: '/admin/security', label: '보안·차단' },
   { href: '/admin/support', label: '문의 채팅' },
@@ -644,6 +645,7 @@ export const HEADER_ADMIN: readonly NavItem[] = [
     label: '운영',
     entries: [
       { href: '/admin', label: '마스터 콘솔' },
+      { href: '/admin/money-flow', label: '유저 자금 흐름' },
       { href: '/admin/support', label: '문의 채팅' },
       { href: '/admin/economy', label: '경제' },
       { href: '/admin/content', label: '콘텐츠' },

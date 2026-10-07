@@ -129,6 +129,8 @@ function getAreaIcon(href: string) {
       return <Coins className="size-4.5 text-yellow-500" />;
     case '/admin/treasury':
       return <Banknote className="size-4.5 text-primary" />;
+    case '/admin/money-flow':
+      return <Coins className="size-4.5 text-emerald-500" />;
     case '/admin/shop':
       return <ShoppingBag className="size-4.5 text-rose-500" />;
     case '/admin/logs':
@@ -197,6 +199,7 @@ export default async function AdminPage({
       ? `전체 ${totalSwitches}개 · 활성 ${totalSwitches - held}개${held > 0 ? ` · 제어 ${held}개` : ''}`
       : null,
     '/admin/users': users ? `등록 회원 ${allUsers.length}명` : null,
+    '/admin/money-flow': '실시간 유저 입출금·매매·보상 복식부기 원장 100% 대사',
     '/admin/market': stocks
       ? `상장 종목 ${stocksList.length}개${haltedStocks > 0 ? ` · 정지 ${haltedStocks}개` : ' · 전 종목 거래중'}`
       : null,
@@ -253,6 +256,13 @@ export default async function AdminPage({
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <Link
+              href="/admin/money-flow"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-3.5 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-emerald-600 dark:text-emerald-400 shadow-xs hover:bg-emerald-500/25 transition-all ring-1 ring-emerald-500/30"
+            >
+              <Coins className="size-3.5 text-emerald-500" />
+              <span>유저 자금 흐름 관제</span>
+            </Link>
+            <Link
               href="/admin/economy"
               className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-background/80 px-3 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-foreground shadow-xs hover:bg-muted transition-colors"
             >
@@ -271,8 +281,31 @@ export default async function AdminPage({
       </div>
 
       {/* Primary KPI Status Grid (Toss & Stripe Style) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-        {/* KPI 1: Feature Switches & Safety Lock */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-4">
+        {/* KPI 0: User Money Flow & Ledger Audit */}
+        <Link
+          href="/admin/money-flow"
+          className="group relative flex flex-col justify-between rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 to-card p-4 sm:p-5 shadow-plate hover:border-emerald-500/70 hover:shadow-md transition-all"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">유저 자금 흐름</span>
+            <div className="flex size-8 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-500">
+              <Coins className="size-4" />
+            </div>
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-extrabold tracking-tight font-mono text-emerald-500">
+              원장 추적
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              입출금 · 매매 · 상점 전수 대사
+            </p>
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-emerald-500/30 text-xs font-semibold text-emerald-500">
+            <span>자금 흐름 전체 조회</span>
+            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+          </div>
+        </Link>
         <Link
           href="/admin/controls"
           className="group relative flex flex-col justify-between rounded-2xl border bg-card p-4 sm:p-5 shadow-plate hover:border-primary/40 hover:shadow-md transition-all"
@@ -435,6 +468,21 @@ export default async function AdminPage({
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <Coins className="size-4 text-emerald-500 shrink-0" />
+                <span className="text-foreground font-semibold truncate">
+                  전체 유저의 실시간 입출금 · 주식 거래 · 상점 구매 원장 추적
+                </span>
+              </div>
+              <Link
+                href="/admin/money-flow"
+                className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0"
+              >
+                <span>원장 관제 타워 바로가기</span>
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
             <AdminQuickUserSearch />
 
             {/* Quick Top Wealth Snapshot */}
