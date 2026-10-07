@@ -3138,3 +3138,32 @@ flowchart TD
 - 로컬 `tsc --noEmit` 타입체크 100% 통과.
 - Next.js 프로덕션 빌드 통과.
 - 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.
+
+
+---
+## 🚀 [v123 Specification] 일일 금융 상식 퀴즈 스테이션 & 실시간 가상 주식 펄스 티커 바 구축 (+240, -0)
+
+### 1. 요구사항 재정의 및 목적 (Overview & Goals)
+- **무엇을**:
+  1. **일일 금융 상식 & 투자 리터러시 퀴즈 스테이션 (`DailyFinancialQuizStation`)**:
+     - 매일 갱신되는 3지선다 금융 상식 (복리 계산 원리, 분할 매수 DCA, PER/PBR 가치 평가, 인플레이션 헤지, 예금자 보호 등) 퀴즈 풀.
+     - 퀴즈 풀이 시 즉각적인 정답 확인, 전문가 수준의 친절한 해설 제공, +300 WLD 보상 및 일일 스트릭 누적.
+     - 퀴즈 정답 결과 즉시 X(Twitter) & 카카오톡 바이럴 자랑 공유(`SocialShareBar`) 연동.
+     - Google/Naver 크롤러 친화적 Q&A 구조화 마크업 지원.
+  2. **실시간 가상 주식 펄스 티커 바 (`LiveMarketPulseTicker`)**:
+     - 10대 주요 가상 주식(WDG, WDT, CHIMU, SHIN, DUCK 등)의 실시간 시세 변동률(▲/▼), 거래량 및 상태를 보여주는 고대비 모노스페이스 티커.
+     - 원터치 1초 호가창 딥링크(`/stocks/[symbol]`) 이동 지원.
+  3. **운영 서버 빌드, 무중단 승격 및 라이브 전수 QA**:
+     - 로컬 TypeScript 정적 타입 검증.
+     - Next.js 프로덕션 579+개 라우트 컴파일.
+     - 운영 서버 무중단 승격 배포 및 라이브 사이트 실측 QA.
+
+### 2. 세부 변경 계획 (Proposed Changes)
+- `frontend/src/components/daily-financial-quiz.tsx`: 일일 금융 퀴즈 컴포넌트 신설.
+- `frontend/src/components/live-market-pulse-ticker.tsx`: 실시간 주식 펄스 티커 바 컴포넌트 신설.
+- `frontend/src/app/page.tsx`: 메인 홈 화면에 신규 2대 컴포넌트 마운트.
+
+### 3. 검증 계획 (Verification Plan)
+- `tsc --noEmit` 100% 통과.
+- Next.js 579개 전 라우트 빌드 통과.
+- 운영 서버 라이브 도메인(`easy-scraping.com`) HTTP 200 및 신규 마크업 실측 QA.

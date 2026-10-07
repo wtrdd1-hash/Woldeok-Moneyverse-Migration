@@ -27,6 +27,8 @@ import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
 import { CasualDopamineStation } from '@/components/casual-dopamine-station';
 import { DailyLuckyWheel } from '@/components/daily-lucky-wheel';
+import { DailyFinancialQuizStation } from '@/components/daily-financial-quiz';
+import { LiveMarketPulseTicker } from '@/components/live-market-pulse-ticker';
 import { DiscordBanner } from '@/components/discord-banner';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -239,6 +241,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 1.5 REAL-TIME MARKET PULSE TICKER */}
+      <LiveMarketPulseTicker />
 
       {/* 2. ONBOARDING & RETENTION HERO: 3단계 실전 로드맵 & 6대 기능 설명 센터 */}
       <section aria-labelledby="onboarding-guide-heading" className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -465,6 +470,9 @@ export default async function HomePage() {
       <div id="attendance" className="scroll-mt-20">
         <DailyLuckyWheel />
       </div>
+
+      {/* 3.9 DAILY FINANCIAL LITERACY QUIZ STATION */}
+      <DailyFinancialQuizStation />
 
       {/* 4. CASUAL DOPAMINE STATION: 일반 유저 무료 도파민 (피버, 덕이 펫, 여론 잭팟, 1:1 결투) */}
       <CasualDopamineStation />
