@@ -3292,3 +3292,29 @@ flowchart TD
    - HTTP 200/201 Created. 업무 대시보드(일일 한도 10,000 WLD) 연동 및 `호가창 유동성 심층 분석` 업무 할당 (`assignment_id: be5a1137`).
 10. **복식부기 원장(Ledger) 실시간 대조 검증**:
     - PostgreSQL `ledger_transactions` 및 `ledger_postings` 조회 결과, 치킨 계정의 주식 매수/매도, 상점 구매, 은행 입/출금 등 최근 10건의 거래 원장이 차변/대변 1원 단위 오차 없이 100% 완벽 대사 통과.
+
+
+---
+## 🚀 [v128 Specification] 일일 경제 퀘스트 스테이션 & 거시경제 실시간 대시보드 구축 (+150, -0)
+
+### 1. 개요 및 요구사항
+- **일일 경제 퀘스트 & 챌린지 패스 (`DailyEconomicQuestStation`)**:
+  - Duolingo / Toss 스타일의 매일 갱신되는 4대 필수 금융 미션 위젯.
+  - 가상 주식 분석(+500 WLD), 복리 저축 실천(+1,000 WLD), 도파민 룰렛(+500 WLD), 금융 퀴즈(+1,000 WLD).
+  - 4개 올클리어 시 추가 2,000 WLD 골든 보너스 상자 오픈 + 로컬스토리지 영구 동기화 + 스트릭 유지.
+- **중앙은행 통화량 & 거시경제 실시간 대시보드 (`MacroLiquidityDashboard`)**:
+  - FRED / 중앙은행 스타일의 실시간 거시경제 펄스 위젯.
+  - 한국 및 미국 연준 기준금리, CPI 소비자물가지수, 월덱 M2 총 통화량, 3대 글로벌 환율(USD/JPY/EUR), 경제 캘린더 D-Day 카운트다운 연동.
+  - 백엔드 `/api/v1/economy/macro-pulse` 실시간 데이터 바인딩.
+- **메인 홈 대시보드(`frontend/src/app/page.tsx`) 연동 및 무중단 배포**:
+  - 금융 도구 허브 및 도파민 스테이션과 조화롭게 마운트.
+
+### 2. 세부 변경 계획 (Proposed Changes)
+- `frontend/src/components/daily-economic-quest-station.tsx`: 일일 퀘스트 및 챌린지 패스 신설.
+- `frontend/src/components/macro-liquidity-dashboard.tsx`: 거시경제 지표 및 환율 캘린더 대시보드 신설.
+- `frontend/src/app/page.tsx`: 신규 컴포넌트 2종 마운트 및 레이아웃 통합.
+
+### 3. 검증 계획 (Verification Plan)
+- TypeScript 타입체크 (`tsc --noEmit`) 100% 무오류 확인.
+- 원격 저장소(`origin main`) 푸시 및 운영 서버(`prod-v529`) 배포/동기화.
+- 실제 사이트 접속 및 실시간 지표 렌더링 E2E QA 검증.

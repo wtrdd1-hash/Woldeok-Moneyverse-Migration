@@ -32,6 +32,8 @@ import { InvestmentProfileQuiz } from '@/components/investment-profile-quiz';
 import { PortfolioBattleArena } from '@/components/portfolio-battle-arena';
 import { LiveMarketPulseTicker } from '@/components/live-market-pulse-ticker';
 import { LiveHallOfFameTicker } from '@/components/live-hall-of-fame-ticker';
+import { DailyEconomicQuestStation } from '@/components/daily-economic-quest-station';
+import { MacroLiquidityDashboard } from '@/components/macro-liquidity-dashboard';
 import { DiscordBanner } from '@/components/discord-banner';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -360,6 +362,9 @@ export default async function HomePage() {
       {/* 2.5 INTERACTIVE 30-SEC AI INVESTMENT PROFILE & ALLOCATION QUIZ */}
       <InvestmentProfileQuiz />
 
+      {/* 2.8 DAILY ECONOMIC QUEST & CHALLENGE PASS */}
+      <DailyEconomicQuestStation />
+
       {/* 3. 2026 FEATURE STRIP: 3대 금융 계산기 허브 & 일일 리텐션 스테이션 */}
       <div className="grid gap-6 md:grid-cols-3">
         {/* Card 1: 3대 금융 웹 계산기 (pSEO 2만+ 엔진) */}
@@ -485,6 +490,9 @@ export default async function HomePage() {
 
       {/* 3.95 PORTFOLIO 1v1 BATTLE ARENA */}
       <PortfolioBattleArena />
+
+      {/* 3.98 MACRO ECONOMIC & LIQUIDITY DASHBOARD */}
+      <MacroLiquidityDashboard />
 
       {/* 4. CASUAL DOPAMINE STATION: 일반 유저 무료 도파민 (피버, 덕이 펫, 여론 잭팟, 1:1 결투) */}
       <CasualDopamineStation />
