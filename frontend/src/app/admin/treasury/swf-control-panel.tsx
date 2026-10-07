@@ -360,8 +360,9 @@ export function SwfControlPanel({
               <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
                 {totalAum.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
-              <div className="text-xs text-emerald-400/80 mt-1 flex items-center gap-1 font-mono">
-                <span>▲ 시간당 1.2% 자율 복리 증식 중</span>
+              <div className="text-xs text-emerald-400/90 mt-1.5 flex items-center gap-1.5 font-sans leading-normal pb-0.5 min-w-0">
+                <span className="shrink-0 font-mono text-[11px] text-emerald-400">▲</span>
+                <span className="truncate">시간당 1.2% 자율 복리 증식 중</span>
               </div>
             </div>
 
@@ -370,7 +371,7 @@ export function SwfControlPanel({
               <div className="text-2xl font-bold font-mono text-blue-400 mt-1">
                 {floorReserve.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
-              <div className="text-xs text-slate-400 mt-1">
+              <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
                 설정 원금 이하 절대 안전 보존
               </div>
             </div>
@@ -380,7 +381,7 @@ export function SwfControlPanel({
               <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
                 +{totalProfit.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
-              <div className="text-xs text-slate-400 mt-1">
+              <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
                 평가익 30% 국고 회수 환원 · 70% 자산 재투자
               </div>
             </div>

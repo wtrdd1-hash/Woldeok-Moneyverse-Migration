@@ -365,7 +365,7 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
               <T korean="플레이 & 시즌" english="Play" />
             </span>
             <Link href="/casino" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-purple-500">
-              <span><T korean="엔터테인먼트 카지노" english="Casino Minigames" /></span>
+              <span><T korean="아케이드 미니게임" english="Arcade Mini-Games" /></span>
               <ChevronRight className="size-3 text-muted-foreground" />
             </Link>
             <Link href="/quests" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-purple-500">

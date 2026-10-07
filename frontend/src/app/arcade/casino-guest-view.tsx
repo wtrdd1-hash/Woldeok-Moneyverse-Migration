@@ -76,11 +76,22 @@ export function CasinoGuestView() {
   return (
     <div className="grid gap-6">
       <PageHeader
-        eyebrow="WOLDEOK MONEYVERSE · LUCKY ZONE"
-        title="럭키존 (가상 미니게임)"
+        eyebrow="WOLDEOK MONEYVERSE · ARCADE"
+        title="아케이드 (가상 미니게임)"
       >
         모든 게임의 적용 확률과 배당을 확인하고 동전·주사위 기반 서버 게임을 즐겨보세요.
       </PageHeader>
+
+            {/* 법적 고지 배너 (게관위 및 게임산업진흥법 준수) */}
+      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-200">
+        <div className="font-bold flex items-center gap-1.5 text-amber-300 mb-1">
+          <span>⚖️</span>
+          <span>[법적 고지] 게임산업진흥에 관한 법률 준수 및 폐쇄형 가상 포인트 안내</span>
+        </div>
+        <p className="leading-relaxed text-amber-200/90">
+          본 아케이드의 모든 미니게임은 커뮤니티 전용 폐쇄형 포인트(WLD)로만 구동되며, 어떠한 경우에도 현금, 암호화폐, 실물 재화로의 환전·환급·거래가 일체 불가합니다(게임산업진흥에 관한 법률 제28조 및 제32조 엄격 준수).
+        </p>
+      </div>
 
       {/* 🛡️ 대한민국 게임산업진흥법 준수 & 현금 환전 불가 공식 법률 면책 배너 */}
       <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 shadow-lg backdrop-blur-sm">
@@ -160,6 +171,7 @@ export function CasinoGuestView() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-xs text-muted-foreground space-y-1.5 leading-relaxed">
+          <p>• 모든 게임 머니(WLD)는 커뮤니티 활동 보상으로 지급되는 폐쇄형 가상 포인트이며, 현금 환전 및 실물 거래는 100% 원천 차단됩니다.</p>
           <p>• 동전·주사위 결과 생성과 WLD 정산은 서버 데이터베이스 트랜잭션에서 함께 처리됩니다.</p>
           <p>• 과도한 게임 몰입을 방지하기 위해 1일 베팅 한도 및 손실 자가 제한 시스템을 제공합니다.</p>
           <p>• 각 테마 게임 카드에 실제 적용되는 적중 확률과 적중 배당을 공개합니다.</p>

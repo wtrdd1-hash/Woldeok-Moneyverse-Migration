@@ -597,7 +597,17 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
   },
   {
     path: '/casino',
-    label: { ko: '럭키 룰렛 & 엔터테인먼트 허브', en: 'Lucky Roulette & Casino Hub', ja: 'ラッキールーレット＆カジノ', zh: '幸运轮盘与游戏中心' },
+    label: { ko: '아케이드 & 가상 미니게임 라운지', en: 'Arcade & Virtual Mini-Games', ja: 'アーケード＆仮想ミニゲーム', zh: '街机与虚拟微型游戏中心' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.85,
+    changeFrequency: 'daily',
+    group: 'play',
+  },
+  {
+    path: '/arcade',
+    label: { ko: '아케이드 스테이션', en: 'Arcade Station', ja: 'アーケードステーション', zh: '街机娱乐站' },
     isPublic: true,
     authRequired: false,
     indexable: true,

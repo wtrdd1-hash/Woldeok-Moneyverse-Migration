@@ -39,32 +39,32 @@ import { getServerLocale } from '@/lib/locale-server';
 /** One member's stakes and headroom. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
 
-const CASINO_META_BY_LOCALE = {
+const ARCADE_META_BY_LOCALE = {
   en: {
-    title: 'Lucky Zone (Virtual Mini-Games) — Coin, Dice & Slots',
-    description: 'Enjoy server-verified virtual gaming with Coin Flip, Dice, Slots, and Hi-Lo using WLD tokens in Woldeok Moneyverse.',
-    canonical: '/en/casino',
+    title: "Arcade Zone (Virtual Mini-Games) — Coin, Dice & Slots",
+    description: "Enjoy server-verified virtual gaming with Coin Flip, Dice, Slots, and Hi-Lo using WLD tokens in Woldeok Moneyverse.",
+    canonical: "/en/arcade",
   },
   ko: {
-    title: '럭키존 (가상 미니게임) — 동전·주사위·테마 게임',
-    description: '동전·주사위·슬롯·하이로우 등 서버 판정 기반 게임을 WLD로 즐기는 게임 전용 가상 미니게임 공간입니다.',
-    canonical: '/casino',
+    title: "아케이드 (가상 미니게임) — 동전·주사위·테마 게임",
+    description: "동전·주사위·슬롯·하이로우 등 서버 판정 기반 게임을 WLD로 즐기는 게임 전용 가상 미니게임 공간입니다.",
+    canonical: "/arcade",
   },
   ja: {
-    title: 'ラッキーゾーン (仮想ミニゲーム) — コイン・サイコロ・スロット',
-    description: 'コイン、サイコロ、スロット、ハイローなどサーバー判定のゲームをWLDで楽しむ仮想ミニゲーム空間です。',
-    canonical: '/ja/casino',
+    title: "アーケード (仮想ミニゲーム) — コイン・サイコロ・スロット",
+    description: "コイン、サイコロ、スロット、ハイローなどサーバー判定のゲームをWLDで楽しむ仮想ミニゲーム空間です。",
+    canonical: "/ja/arcade",
   },
   zh: {
-    title: '幸运娱乐区 (虚拟小游戏) — 硬币·骰子·老虎机',
-    description: '在沃尔德克金融元宇宙使用WLD体验抛硬币、掷骰子、老虎机和高低牌等服务器验证游戏。',
-    canonical: '/zh/casino',
+    title: "街机小游戏区 (虚拟小游戏) — 硬币·骰子·老虎机",
+    description: "在沃尔德克金融元宇宙使用WLD体验抛硬币、掷骰子、老虎机和高低牌等服务器验证游戏。",
+    canonical: "/zh/arcade",
   },
 };
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale();
-  const meta = CASINO_META_BY_LOCALE[locale] ?? CASINO_META_BY_LOCALE.en;
+  const meta = ARCADE_META_BY_LOCALE[locale] ?? ARCADE_META_BY_LOCALE.en;
 
   return {
     title: meta.title,
@@ -72,11 +72,11 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: canonicalUrl(meta.canonical),
       languages: {
-        'ko-KR': canonicalUrl('/casino'),
-        'en-US': canonicalUrl('/en/casino'),
-        'ja-JP': canonicalUrl('/ja/casino'),
-        'zh-CN': canonicalUrl('/zh/casino'),
-        'x-default': canonicalUrl('/casino'),
+        "ko-KR": canonicalUrl("/arcade"),
+        "en-US": canonicalUrl("/en/arcade"),
+        "ja-JP": canonicalUrl("/ja/arcade"),
+        "zh-CN": canonicalUrl("/zh/arcade"),
+        "x-default": canonicalUrl("/arcade"),
       },
     },
     robots: { index: false, follow: false },
@@ -290,14 +290,14 @@ export default async function CasinoPage() {
     !wheelGame || selfExcluded || belowMinimum(wheelHeadroom, wheelGame.min_stake);
 
   return (
-    <div data-page="casino" className="mv-page mv-page--gameplay grid gap-6 pb-12">
+    <div data-page="arcade" className="mv-page mv-page--gameplay grid gap-6 pb-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <PageHeader
-          eyebrow="LUCKY ZONE"
+          eyebrow="ARCADE ZONE"
           title={
             <TranslatedText
-              korean="럭키존 (가상 미니게임)"
-              english="Lucky Zone (Virtual Mini-games)"
+              korean="아케이드 (가상 미니게임)"
+              english="Arcade Zone (Virtual Mini-games)"
             />
           }
         >
@@ -310,6 +310,23 @@ export default async function CasinoPage() {
           <CasinoAudioControls />
         </div>
       </div>
+
+            {/* 법적 고지 및 사행성 방지 면책 배너 (게임산업진흥에 관한 법률 준수) */}
+      <Alert className="border-amber-500/30 bg-amber-500/10 text-amber-200">
+        <AlertTitle className="text-amber-300 font-semibold flex items-center gap-2">
+          <span>⚖️</span>
+          <TranslatedText
+            korean="[법적 고지] 게임산업진흥에 관한 법률 준수 및 가상 재화 안내"
+            english="[Legal Notice] In-Game Virtual Asset & Anti-Gambling Policy"
+          />
+        </AlertTitle>
+        <AlertDescription className="text-xs leading-relaxed text-amber-200/90 mt-1">
+          <TranslatedText
+            korean="본 공간의 모든 미니게임은 월덕 머니버스 커뮤니티 전용 폐쇄형 가상 포인트(WLD)로만 구동되며, 어떠한 경우에도 현금, 암호화폐, 실물 재화로의 환전·환급·거래가 일체 불가합니다(게임산업진흥에 관한 법률 제28조 및 제32조 엄격 준수). 건전한 커뮤니티 활동을 위해 일일 베팅 및 손실 한도를 자율적으로 설정하실 수 있습니다."
+            english="All games in this lounge operate strictly with in-game closed virtual points (WLD) and can NEVER be exchanged, refunded, or traded for cash, cryptocurrency, or real-world goods under any circumstances (Strict compliance with Game Industry Promotion Act Art. 28 & 32). Players may set self-exclusion and daily loss limits for healthy participation."
+          />
+        </AlertDescription>
+      </Alert>
 
       <CasinoVisualHero />
       <CasinoJackpotTicker data={jackpot} />
