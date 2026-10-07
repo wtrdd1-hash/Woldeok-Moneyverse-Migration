@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v112)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v113)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v113**: 국가 공기업(WSHC) & 대국민 알리오(ALIO) 공시 포털 및 배당 국고 즉시 수취 파이프라인 무중단 운영 배포 & 실시간 라이브 검증 완료 — ① `frontend/src/lib/navigation.ts` 전역 네비게이션 드롭다운 및 모바일 사이드바에 공기업 알리오(`/enterprises`) 링크 및 4개 국어(KO, EN, JA, ZH) 완벽 등록 ② 백엔드 `PublicEnterpriseController`에 `@SkipInternalToken()` 데코레이터를 적용하여 대국민 알리오 경영공시 포털 무인증 실시간 조회 지원 ③ `EnterpriseRepository.distributeSoeDividends` 내 비-UUID 식별자 입력 시 PostgreSQL `22P02` 예외 방어 가드(`validActorUuid`) 신설 ④ 실제 운영 DB에서 공기업 3사(W-Power, W-Net, WDB) 법정 이익배당 108,000 WLD 국고 수취 즉시 집행, `VAULT_MAIN` 국고 잔액 25,183,332 WLD ➡️ 25,291,332 WLD 실시간 증가 및 국고 회계 원장(`system_treasury_ledger`) 전산 기록 ⑤ 디스코드 관리자(`886478189520637992`) DM 실시간 배당 완료 알림 전송 검증 완료 ⑥ 봇 상주 데몬(`bot/index.js`) 음성방 이탈 방지 무변경 안정 유지 (+130, -0)
 - **v112**: 싱가포르 테마섹 + 노르웨이 GPFG 하이브리드 국가지주회사(WSHC) & 3대 기간 공기업(W-Power, W-Net, WDB) 및 민간 벤처 IPO 기업 생태계 풀스택 구축 — ① 월덱 국가투자공사(WSHC) 설립 및 3대 기간 공기업(W-Power, W-Net, WDB) 지배구조 정립 ② 공기업 당기순이익 30% 법정 배당 국고(`VAULT_MAIN`) 자동 납입 및 원장 기록 ③ 한국 공운법 표준 S~E 6단계 경영평가제 연동 ④ 민간 스타트업 자율 스케일업 & WDX 거래소 IPO 상장, 15% 법인세 납부 파이프라인 구축 ⑤ `/admin/enterprises` 총괄 관제 패널 + 킬스위치 및 대국민 `/enterprises` 알리오(ALIO) 공시 포털 개발 ⑥ Vitest 단위 테스트 및 Next.js 566개 전 라우트 빌드 통과 (+220, -0)
 - **v111**: 국고 회계 감사 원장(`Authoritative Audit Ledger`) 0건 노출 오류 원인 규명 및 정상 복구 — `/admin/treasury` 화면에서 원장 트랜잭션이 '전체 (0)'으로 조회되지 않던 원인이 백엔드 `TreasuryRepository.listTransactions`, `exportLedgerCsv`, `getWealthTaxAssessments` 쿼리 내 존재하지 않는 컬럼(`users.username`) 참조로 인한 PostgreSQL DB 쿼리 실패였음을 밝혀내고, 정규 프로필 테이블인 `member_profiles.display_name`으로 교체하여 원장 목록 22건 및 실시간 세수/투자 내역 정상 렌더링 복구 (+120, -0)
 - **v110**: 국고 2,500만 WLD 최소 안전 원금 보존(Floor Reserve) & 가상 기업 법인세 자동 징수 + 국부펀드 평가익 복리 재투자(Net Compounding Growth) 엔진 풀스택 구축 — ① 방치되어 있던 수십 개 구버전 원격 브랜치(auto/hourly-*, audit/*, docs/*, feat/*, fix/*, plan/* 등) 전수 통합 및 안전 일괄 삭제/정리 완료 ② 국고 중앙 금고(`VAULT_MAIN`) 25,000,000 WLD 마지노선 영구 보존 및 비상 금고로부터 시드 보강 ③ 유저 부재 시에도 4대 우량 상장 기업(WDX)에서 시간당 가상 영업 이익 법인세 및 시장 거래세 국고 자동 징수 ④ 국부펀드 투자 자산 가치 상승분(시간당 1.2%) 수익 실현(Harvest) 및 초과분 우량주/국채 복리 재투자(Compound Reinvest)로 국고 총자산(AUM) 지속 우상향 ⑤ 디스코드 관리자(`886478189520637992`) DM 실시간 보고 ⑥ 음성방 자동 재접속 데몬 100% 무변경 보존 (+180, -0)
@@ -2573,6 +2574,26 @@
 - 백엔드 NestJS 프로덕션 빌드 100% 정상 통과.
 - 프론트엔드 Next.js 566개 전 라우트 빌드 통과.
 - 데이터베이스 251 마이그레이션 정상 적용 확인.
+
+---
+
+## 🚀 [v113 Specification] 공기업 알리오 네비게이션 연동 및 실시간 배당 국고 수취 라이브 검증
+### 1. 주요 구현 및 해결 사항
+1. **전역 네비게이션 드롭다운 및 모바일 사이드바 연동 (`frontend/src/lib/navigation.ts`)**:
+   - `CATEGORY_NAV` 경제·활동 카테고리에 '공기업 알리오 (공시)' (`/enterprises`) 링크 마운트.
+   - `PUBLIC_NAV`에 '공기업 알리오' 마운트.
+   - 4개 국어(KO: 공기업 알리오 (공시), EN: State Enterprises (ALIO), JA: 公企業ALIO（公示）, ZH: 公企业ALIO（公示）) 다국어 매핑 완료.
+2. **대국민 알리오 API 공개 접속 지원 (`backend/src/admin/enterprises/enterprise.controller.ts`)**:
+   - `PublicEnterpriseController`에 `@SkipInternalToken()` 데코레이터를 적용하여 무인증 방문자도 알리오 경영공시 포털(`/enterprises`)을 즉시 조회 가능하도록 개선.
+3. **PostgreSQL UUID 타입 불일치 방어 (`backend/src/admin/enterprises/enterprise.repository.ts`)**:
+   - `distributeSoeDividends`에서 `adminId`가 Discord ID(예: `886478189520637992`) 등 비-UUID 문자열일 경우 발생할 수 있는 PostgreSQL `22P02 invalid input syntax for type uuid` 오류 원천 차단 (`validActorUuid` 정규식 가드).
+4. **라이브 배당 수취 집행 및 검증**:
+   - 실제 운영 DB 상에서 3대 공기업(W-Power, W-Net, WDB)으로부터 108,000 WLD 배당 수취 즉시 집행 완료.
+   - 국고 금고(`VAULT_MAIN`) 잔액: 25,183,332 WLD ➡️ **25,291,332 WLD**로 실시간 증가 확인.
+   - 국고 원장(`system_treasury_ledger`) 및 공기업 배당 로그(`state_enterprise_dividend_logs`)에 회계 전산 기록 완료.
+   - 디스코드 관리자(`886478189520637992`) 1:1 DM으로 실시간 배당 완료 알림 정상 발송 확인.
+5. **음성 봇 무변경 안정 유지**:
+   - `moneyverse-discord-bot.service` (PID 407933) 정상 상주 확인, 음성방 이탈 방지 코드 무변경 보존.
 
 
 
