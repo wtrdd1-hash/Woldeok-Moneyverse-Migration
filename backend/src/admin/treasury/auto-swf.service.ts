@@ -494,17 +494,33 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
       await client.query('COMMIT');
 
       // 8. 디스코드 관리자(`886478189520637992`) 1:1 DM 및 시스템 로그 알림 발송
+      const floorReserveFormatted = Number(floorReserve).toLocaleString();
+      const floorReserveTenThousand = (Number(floorReserve) / 10000).toLocaleString();
+      const isUnderFloor = currentCash <= floorReserve;
+
       const embed = {
-        title: '📈 [국고 복리 성장 엔진] 2,500만 원 보존 & 자율 성장 사이클 집행',
-        description: `국고 최소 안전 바닥 **25,000,000 WLD**를 완벽 보존하고, 자율 경제 엔진을 통해 총자산이 지속 성장하고 있습니다.`,
-        color: 0x3b82f6,
+        title: `📈 [국고 복리 성장 엔진] ${floorReserveTenThousand}만 WLD 보존 & 자율 성장 사이클 집행`,
+        description: isUnderFloor
+          ? `국고 현금이 관리자 설정 안전 바닥(**${floorReserveFormatted} WLD**)을 보존 중입니다. 국가 재정 및 안전망 유지를 위해 추가 투자를 원천 차단하고 국고 현금을 100% 철저히 보호하고 있습니다.`
+          : `국고 최소 안전 바닥 **${floorReserveFormatted} WLD**를 완벽 보존하고, 초과 잉여분의 적정 비율(${config.reinvestment_ratio_pct || 15}%)만 자율 분산 투자하여 총자산을 건전하게 증식하고 있습니다.`,
+        color: isUnderFloor ? 0x10b981 : 0x3b82f6,
         fields: [
-          { name: '💰 국고 현금 잔액', value: `${Number(currentCash).toLocaleString()} WLD (바닥 2500만 보존)`, inline: true },
+          {
+            name: '💰 국고 현금 잔액',
+            value: `${Number(currentCash).toLocaleString()} WLD (바닥 ${floorReserveFormatted} WLD 보존)`,
+            inline: true,
+          },
           { name: '📊 포트폴리오 가치', value: `${Number(portfolioTotal).toLocaleString()} WLD`, inline: true },
           { name: '🏛️ 국고 총자산 (AUM)', value: `**${Number(totalAum).toLocaleString()} WLD** (지속 우상향)`, inline: false },
           { name: '🏢 가상 기업 법인세 유입', value: `+${Number(taxCollected).toLocaleString()} WLD`, inline: true },
           { name: '🌾 투자 수익 실현 (Harvest)', value: `+${Number(harvestedWld).toLocaleString()} WLD`, inline: true },
-          { name: '🔄 자율 복리 재투자', value: `${Number(reinvestedWld).toLocaleString()} WLD`, inline: true },
+          {
+            name: '🔄 자율 복리 재투자',
+            value: isUnderFloor
+              ? `0 WLD (안전 바닥 보호로 투자 보류)`
+              : `${Number(reinvestedWld).toLocaleString()} WLD (잉여분 ${config.reinvestment_ratio_pct || 15}% 배정)`,
+            inline: true,
+          },
         ],
       };
 
