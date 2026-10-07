@@ -19,6 +19,7 @@ import {
   SwitchStateBadge,
 } from './controls-forms';
 import { PolicyVersionCard } from './policy-version-card';
+import { HotTimeManagementCard } from './hot-time-management-card';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +75,8 @@ export default async function AdminControlsPage() {
         currentPrivacyVersion={policy?.privacyVersion ?? '2026-09-02'}
         isSuperadmin={true}
       />
+
+      <HotTimeManagementCard />
 
       <Card>
         <CardHeader>

@@ -21,6 +21,7 @@ import { CareerTasksBoard } from './career-tasks-board';
 import { CareerQualificationsCard } from './career-qualifications-card';
 import { CareerMasteryCard } from './career-mastery-card';
 import { WorkQuotaDashboard } from './work-quota-card';
+import { LiveHotTimeBanner } from '@/components/live-hot-time-banner';
 
 import type {
   JobProfileResponse,
@@ -102,6 +103,9 @@ export default async function WorkPage() {
           ? 'Perform tasks across 8 specialized professions to earn WLD and proficiency EXP. Switch between careers anytime with zero fee, and your career proficiency is permanently preserved.'
           : '8대 전문 직업군을 넘나들며 업무를 수행하고 WLD와 숙련도 경험치(EXP)를 획득하세요. 전직 수수료와 대기시간 없이 언제든 원하는 직업으로 전환할 수 있으며, 직업별 경험치는 영구 보존됩니다.'}
       </PageHeader>
+
+      {/* 실시간 직업 핫타임 부스트 배너 */}
+      <LiveHotTimeBanner domainFilter="work" />
 
       {/* 1. 활성 직업 및 숙련도 게이지 섹션 */}
       <section aria-labelledby="active-job-title" className="grid w-full max-w-full min-w-0 gap-3 sm:gap-4 overflow-hidden">

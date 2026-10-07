@@ -3580,3 +3580,53 @@ flowchart TD
 4. **시스템 및 무중단 운영 상태**:
    - 백엔드, 프론트엔드, 데이터베이스 100% 정상 작동 (`active`).
    - 무중단 0-Downtime 적용 완료.
+
+
+---
+## 🚀 [v135 Specification] 실시간 핫타임 버프 & 경제 부스터 관제 엔진 (Live Hot-Time Boost Engine) 구축 및 무중단 승격 (+220, -0)
+
+### 1. 기능 기획 및 개요 (Feature Planning & Overview)
+- **배경 및 목적**:
+  - 머니버스 플랫폼 내 유저 활동성(직업 근무, 주식 거래, 카지노 미니게임, 은행 예치)을 비약적으로 촉진하는 **실시간 핫타임 버프 & 경제 부스터 엔진**을 구축합니다.
+  - 관리자는 실시간으로 핫타임 이벤트(직업 급여 1.5배, 주식 거래세 면제, 카지노 럭키 2배, 국고 특별 지원금 등)를 가동할 수 있으며,
+  - 유저는 메인 홈, 직업 작업장, 주식 거래소 전역에서 실시간 활성 버프와 잔여 시간(카운트다운 타이머), 배율 뱃지를 확인하고 혜택을 누릴 수 있습니다.
+- **핵심 아키텍처**:
+  1. **PostgreSQL 영구 원장 테이블 (`economic_hot_time_events`)**:
+     - `id`: UUID (Primary Key)
+     - `buff_key`: TEXT (고유 버프 코드)
+     - `title`: TEXT (버프 타이틀)
+     - `description`: TEXT (상세 혜택 안내)
+     - `multiplier`: NUMERIC (혜택 배율, 예: 1.5, 2.0)
+     - `target_domain`: TEXT (`work`, `stocks`, `casino`, `bank`, `all`)
+     - `active`: BOOLEAN (활성화 여부)
+     - `starts_at`: TIMESTAMPTZ (시작 일시)
+     - `ends_at`: TIMESTAMPTZ (만료 일시)
+     - `created_at`: TIMESTAMPTZ (생성 일시)
+  2. **실시간 REST API 라우트 (`/api/economy/hot-time/active` & `/api/admin/economy/hot-time`)**:
+     - 클라이언트 및 서버 컴포넌트에서 캐시 없이 실시간 현재 활성 핫타임 버프 목록 및 잔여 시간 조회.
+     - 관리자 권한을 통한 핫타임 버프 즉각 가동/토글 및 기간 연장 지원.
+  3. **반응형 인터랙티브 UI 컴포넌트 (`components/live-hot-time-banner.tsx`)**:
+     - Toss & Stripe 감성의 네온 앰버/에메랄드 그라디언트 카드.
+     - 실시간 남은 시간 초 단위 카운트다운 타이머 (`02:45:18 남음`).
+     - 모바일 320px~430px 전 구간 클리핑 없는 텍스트 자동 줄바꿈 및 flex-wrap 방어.
+  4. **운영자 관제 연동 (`app/admin/controls/page.tsx`)**:
+     - 관리자 콘솔에서 핫타임 버프의 실시간 가동 상태를 한눈에 파악하고 1클릭 토글할 수 있는 관제 카드 마운트.
+
+### 2. 세부 개발 명세 및 파일 목록 (Proposed Changes)
+- **DB 마이그레이션 & 초기 데이터**:
+  - `economic_hot_time_events` 테이블 생성 및 4대 핵심 핫타임 버프 등록.
+- **신규 API 엔드포인트**:
+  - `frontend/src/app/api/economy/hot-time/active/route.ts`
+- **신규 UI 컴포넌트**:
+  - `frontend/src/components/live-hot-time-banner.tsx`
+- **화면 연동**:
+  - `frontend/src/app/page.tsx` (메인 홈 핫타임 배너 탑재)
+  - `frontend/src/app/work/page.tsx` (직업 화면 근무 부스트 배너 탑재)
+  - `frontend/src/app/admin/controls/page.tsx` (관리자 핫타임 스위치 연동)
+
+### 3. 검증 계획 (Verification Plan)
+- TypeScript 타입체크 (`npm run typecheck`) 0 errors 검증.
+- Turbopack 프로덕션 빌드 무결성 확인.
+- Git 커밋 및 원격 저장소(`origin/main`) 푸시.
+- 운영 서버(`prod-v529`) 실시간 무중단 블루-그린 배포.
+- 실 브라우저 헤드리스 스크린샷 검증 (모바일 390px, PC 1280px 오버플로우 0건 실측).

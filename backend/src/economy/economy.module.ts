@@ -13,15 +13,24 @@ import { EconomyReconciliationService } from './reconciliation.service';
 
 import { MacroPulseController } from './macro-pulse.controller';
 import { MacroPulseService } from './macro-pulse.service';
+import { HotTimeController } from './hot-time.controller';
+import { HotTimeService } from './hot-time.service';
 
 @Module({
   imports: [AuthModule],
-  controllers: [ReconciliationController, QuantController, MonetaryController, MacroPulseController],
+  controllers: [
+    ReconciliationController,
+    QuantController,
+    MonetaryController,
+    MacroPulseController,
+    HotTimeController,
+  ],
   providers: [
     CentralBankService,
     MintBureauService,
     AutoMonetaryRegulationService,
     MacroPulseService,
+    HotTimeService,
     {
       provide: EconomyReconciliationService,
       inject: [PG_POOL],

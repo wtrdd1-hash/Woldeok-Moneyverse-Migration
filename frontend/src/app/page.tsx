@@ -35,6 +35,7 @@ import { LiveHallOfFameTicker } from '@/components/live-hall-of-fame-ticker';
 import { DailyEconomicQuestStation } from '@/components/daily-economic-quest-station';
 import { MacroLiquidityDashboard } from '@/components/macro-liquidity-dashboard';
 import { DiscordBanner } from '@/components/discord-banner';
+import { LiveHotTimeBanner } from '@/components/live-hot-time-banner';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -246,6 +247,11 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 1.35 LIVE HOT-TIME BUFF & ECONOMIC BOOSTER BANNER */}
+      <div className="w-full max-w-full min-w-0">
+        <LiveHotTimeBanner />
+      </div>
 
       {/* 1.4 LIVE HALL OF FAME & REAL-TIME ACTIVITY TICKER */}
       <LiveHallOfFameTicker />
