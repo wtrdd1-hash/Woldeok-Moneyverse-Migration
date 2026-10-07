@@ -21,12 +21,30 @@ export interface GlobalCurrencyRate {
   readonly formatted: string;
 }
 
+export interface EconomicCalendarEvent {
+  readonly id: string;
+  readonly title: string;
+  readonly titleEn: string;
+  readonly scheduledDate: string;
+  readonly scheduledTime: string;
+  readonly dDay: number; // 0: D-Day(오늘), >0: D-N
+  readonly importance: 'HIGH' | 'MEDIUM' | 'LOW';
+  readonly country: 'KR' | 'US' | 'EU';
+  readonly previousValue: string;
+  readonly forecastValue: string;
+  readonly analysisKo: string;
+  readonly analysisEn: string;
+  readonly marketImpactTipKo: string;
+  readonly marketImpactTipEn: string;
+}
+
 export interface MacroPulsePayload {
   readonly updatedAt: string;
   readonly nextUpdateAt: string;
   readonly domestic: readonly MacroIndicator[];
   readonly global: readonly MacroIndicator[];
   readonly exchangeRates: readonly GlobalCurrencyRate[];
+  readonly economicCalendar: readonly EconomicCalendarEvent[];
   readonly marketSummary: {
     readonly sentiment: 'RISK_ON' | 'NEUTRAL' | 'RISK_OFF';
     readonly summaryKo: string;
@@ -219,6 +237,94 @@ export class MacroPulseService {
     const isRiskOn = nasdaqWave >= 0;
     const sentiment: 'RISK_ON' | 'NEUTRAL' | 'RISK_OFF' = isRiskOn ? 'RISK_ON' : 'RISK_OFF';
 
+    const formatDateOffset = (days: number): string => {
+      const d = new Date(timestamp + days * 86_400_000);
+      return d.toISOString().slice(0, 10);
+    };
+
+    const economicCalendar: EconomicCalendarEvent[] = [
+      {
+        id: 'us-cpi',
+        title: '미국 9월 소비자물가지수 (CPI) 발표',
+        titleEn: 'US September Consumer Price Index (CPI)',
+        scheduledDate: formatDateOffset(1),
+        scheduledTime: '21:30 KST',
+        dDay: 1,
+        importance: 'HIGH',
+        country: 'US',
+        previousValue: '2.5% YoY',
+        forecastValue: '2.3% YoY',
+        analysisKo: '인플레이션 둔화세가 확인될 경우 미 연준의 연속 금리 인하 기대감이 폭발하여 기술 성장주에 강력한 호재로 작용합니다.',
+        analysisEn: 'Confirmation of disinflation will fuel Fed rate cut bets, serving as a powerful catalyst for tech equities.',
+        marketImpactTipKo: '예측치(2.3%) 하회 시 ➡️ 주식 급등, 달러 약세 / 예측치 상회 시 ➡️ 국채금리 반등, 단기 조정 주의',
+        marketImpactTipEn: 'Below forecast ➡️ Stock rally, weaker USD / Above forecast ➡️ Yield rebound, risk-off pressure',
+      },
+      {
+        id: 'fomc-rate',
+        title: '미국 연준 FOMC 정례회의 기준금리 결정',
+        titleEn: 'Federal Reserve FOMC Interest Rate Decision',
+        scheduledDate: formatDateOffset(3),
+        scheduledTime: '03:00 KST',
+        dDay: 3,
+        importance: 'HIGH',
+        country: 'US',
+        previousValue: '5.00%',
+        forecastValue: '4.75% (-25bp)',
+        analysisKo: '글로벌 유동성의 방향타를 결정짓는 핵심 이벤트입니다. 파월 의장의 기자회견과 점도표(Dot Plot) 코멘트가 관건입니다.',
+        analysisEn: 'The definitive steering event for global liquidity. Focus is on Chair Powell press conference and Dot Plot trajectories.',
+        marketImpactTipKo: '0.25%p 인하 기정사실화 국면. 향후 추가 인하 속도에 대한 가이던스에 따라 환율과 가상주식 변동성이 확대됩니다.',
+        marketImpactTipEn: 'A 25bp cut is largely priced in. Forward guidance on subsequent easing will dictate FX and equity volatility.',
+      },
+      {
+        id: 'us-nfp',
+        title: '미국 비농업 고용보고서 (NFP) 및 실업률',
+        titleEn: 'US Non-Farm Payrolls (NFP) & Unemployment Rate',
+        scheduledDate: formatDateOffset(5),
+        scheduledTime: '21:30 KST',
+        dDay: 5,
+        importance: 'HIGH',
+        country: 'US',
+        previousValue: '142K / 4.2%',
+        forecastValue: '150K / 4.2%',
+        analysisKo: '미국 노동시장의 냉각 속도를 측정하는 바로미터로, 경기 침체(Hard Landing) 우려 여부를 가르는 결정적 지표입니다.',
+        analysisEn: 'The benchmark gauge of US labor cooling, pivotal for assessing soft landing vs recessionary headwinds.',
+        marketImpactTipKo: '고용이 적당히 견조하면서 임금 상승률이 안정될 때 골디락스(Goldilocks) 장세가 연출됩니다.',
+        marketImpactTipEn: 'Moderate job growth paired with contained wage gains creates ideal Goldilocks market conditions.',
+      },
+      {
+        id: 'bok-rate',
+        title: '한국은행 금융통화위원회 기준금리 결정',
+        titleEn: 'Bank of Korea Monetary Policy Committee Decision',
+        scheduledDate: formatDateOffset(7),
+        scheduledTime: '10:00 KST',
+        dDay: 7,
+        importance: 'HIGH',
+        country: 'KR',
+        previousValue: '3.50%',
+        forecastValue: '3.25% (-25bp 피벗)',
+        analysisKo: '국내 가계부채와 부동산 시장 동향, 수도권 집값 안정을 저울질하며 3년여 만의 통화정책 전환(피벗) 가능성이 제기됩니다.',
+        analysisEn: 'Balancing household debt and real estate stability, this marks the potential first monetary policy pivot in over 3 years.',
+        marketImpactTipKo: '한은 금리 인하 시 시중 은행 예적금 금리가 하락하므로, 주식 및 채권 등 고수익 자산으로의 자금 이동이 촉진됩니다.',
+        marketImpactTipEn: 'A BOK rate cut depresses savings deposit yields, accelerating retail capital migration into equities and bonds.',
+      },
+      {
+        id: 'ecb-policy',
+        title: '유럽중앙은행 (ECB) 통화정책 회의',
+        titleEn: 'European Central Bank (ECB) Governing Council Meeting',
+        scheduledDate: formatDateOffset(12),
+        scheduledTime: '21:15 KST',
+        dDay: 12,
+        importance: 'MEDIUM',
+        country: 'EU',
+        previousValue: '3.65%',
+        forecastValue: '3.40%',
+        analysisKo: '유로존 제조업 경기 둔화에 대응하기 위한 완화적 금리 기조로, 유로화 환율 및 글로벌 국채 시장에 파급력을 갖습니다.',
+        analysisEn: 'Easing monetary stance to counter eurozone industrial sluggishness, impacting EUR/USD and global sovereign yields.',
+        marketImpactTipKo: '달러 인덱스(DXY)에서 유로화 비중이 57.6%로 가장 높기 때문에, ECB 금리 결정은 달러 환율에 직결됩니다.',
+        marketImpactTipEn: 'Since EUR accounts for 57.6% of the DXY basket, ECB decisions have immediate feedback on dollar pricing.',
+      },
+    ];
+
     const marketSummary = {
       sentiment,
       summaryKo: isRiskOn
@@ -237,6 +343,7 @@ export class MacroPulseService {
       domestic,
       global,
       exchangeRates,
+      economicCalendar,
       marketSummary,
     };
   }

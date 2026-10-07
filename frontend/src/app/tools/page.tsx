@@ -7,6 +7,7 @@ import { DailyAttendanceRoulette } from '@/components/retention/daily-attendance
 import { DailyPredictionBattle } from '@/components/retention/daily-prediction-battle';
 import { ReferralSystem } from '@/components/viral/referral-system';
 import { PublicAdvertisement } from '@/components/public-advertisement';
+import { PublicSitemapSubmitBox } from '@/components/public-sitemap-submit-box';
 
 import { getServerLocale } from '@/lib/locale-server';
 import { canonicalUrl } from '@/lib/seo';
@@ -310,6 +311,9 @@ export default function ToolsHubPage() {
           </div>
         </div>
       </div>
+
+      {/* 검색엔진 색인 지원 및 구글 서치콘솔 사이트맵 등록 */}
+      <PublicSitemapSubmitBox />
     </div>
   );
 }

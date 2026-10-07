@@ -104,8 +104,16 @@ export class SeoController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Submit or refresh the production sitemap through Google Search Console API' })
-  async submitGscSitemap() {
-    return this.seoService.submitGscSitemap();
+  async submitGscSitemap(@Body() body?: { sitemapUrl?: string }) {
+    return this.seoService.submitGscSitemap(body?.sitemapUrl);
+  }
+
+  @Post('gsc/submit-sitemap')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+  @ApiOperation({ summary: 'Submit sitemap directly to Google Search Console via official Sitemaps API' })
+  async submitGscSitemapAlias(@Body() body?: { sitemapUrl?: string }) {
+    return this.seoService.submitGscSitemap(body?.sitemapUrl);
   }
 
   @Get('gsc/digest-report')

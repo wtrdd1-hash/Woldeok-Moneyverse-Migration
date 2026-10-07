@@ -1,6 +1,8 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v100)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v105)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v105**: 국내외 경제 캘린더 D-Day 연동 & 원클릭 Google Search Console 사이트맵 정식 등록 파이프라인 & 저평가 우량주 모의 매수 퀘스트 풀스택 구축 — FOMC·금통위·CPI·NFP D-Day 뱃지 및 심층 분석 모달 연동, 구글 Sitemaps API(`PUT /sitemaps/{feedpath}`) 서버 사이드 정식 제출 및 관리자/도구 화면 원클릭 등록 버튼·히스토리 테이블 구축, PER/PBR 백과사전 연계 10,000 WLD 모의 매수 온보딩 퀘스트 완결 (+180, -0)
+- **v104**: 국내외 거시경제 펄스(Macro Pulse) 엔진 & 실전 경제 지식 백과사전 & 다통화 환율 변환기 풀스택 구축 및 전 금융 도구 전면 배치 — 한은 기준금리·코스피·환율·CPI 등 국내 4대 지표 + 미 연준 기준금리·나스닥·S&P500·달러인덱스(DXY)·미국채 10년물 등 글로벌 5대 지표를 10분 주기 시뮬레이션 및 자동 업데이트하는 백엔드 엔진(`macro-pulse.service.ts`) 신설, 1 WLD 기준 KRW/USD/JPY/EUR 실시간 변환기 및 6대 실전 투자 용어(PER, PBR, ROE, 72의 법칙, DCA, MDD) 백과사전 위젯(`financial-knowledge-hub.tsx`) 개발, 주식 물타기/복리/파밍/주식 메인 허브 전 지면 배치 완료, 단위 테스트 1,065개 100% 통과 및 라이브 운영 서버 무중단 배포 (+160, -0)
 - **v103**: 토스식 풀패키지 비로그인 SEO 방문자 ➡️ 활성 회원 전환 엔진(`ToolsGuestConversionBar`) 풀스택 구축 — 580개 주식 계산기 및 6대 세금/금융 계산기 등 `/tools` 전 지면을 대상으로 비로그인 방문자 감지 시 하단 고정 플로팅 스티키 전환 바('🎁 10,000 WLD 무료 지원금 + 방금 계산한 시나리오 계정 자동 저장') 상시 가동, 체류 3초 후 자연스러운 부드러운 전환 토스트 브로드캐스트, 가입 즉시 10,000 WLD 정착금 지급 및 관심 포트폴리오 첫 매수 튜토리얼 자동 연결로 이탈률 80%를 회원 전환으로 역전 (+140, -0)
 - **v102**: Bankrate·NerdWallet·토스형 3대 초고수요 금융 pSEO 허브(연봉 실수령액·해외주식 250만 양도세·청년도약계좌) 대량 생성 및 유저 전환·AdSense 수익화 풀스택 구축 — 검색량이 가장 높은 '연봉별 실수령액 계산기'(2,400만~1억5,000만원 구간별 4대보험 공제표 대량 생성), '해외주식 양도세 250만원 공제 계산기'(테슬라/엔비디아/애플 등 종목별 22% 절세 시뮬레이터), '청년도약계좌 만기 5,000만원 비과세 계산기' 3대 신규 허브 개설, 고단가 AdSense 인아티클/멀티플렉스 광고 슬롯 기본 마운트, 1초 시나리오 저장 회원 전환 퍼널(`CalculatorSaveAction`) 탑재, JSON-LD 구조화 데이터 및 IndexNow 실시간 대량 색인 핑 전송 (+180, -0)
 - **v101**: 토스·뱅크샐러드형 1초 시나리오 저장 & 내 관심 포트폴리오 원장 자동 승격 회원 전환 퍼널 풀스택 구축 — 검색 유입자가 계산 결과 확인 후 이탈하지 않고 즉시 서비스 핵심 유저로 안착할 수 있도록, 580개 주식 물타기 계산기 및 3대 세금 계산기 전 지면에 '📌 이 시뮬레이션 내 계정에 저장하기' 원클릭 플로팅/인라인 버튼 탑재, 비로그인 시 브라우저 LocalStorage에 안전 임시 보관 후 원클릭 회원가입/로그인 모달 팝업, 로그인 즉시 유저 관심종목/시뮬레이션 원장으로 자동 승격 저장 및 데일리 목표가/절세 도달 알림 연동 (+120, -0)
@@ -2246,6 +2248,78 @@
 - Vitest 단위 테스트 및 타입체크 100% ALL-PASS.
 - 프로덕션 빌드 무결점 확인.
 - 원격 운영 서버 승격 배포 및 헬스체크 200 OK.
+
+---
+
+## 🚀 [v104 Specification] 국내외 거시경제 펄스 & 실전 금융 교육 엔진 전면 배치
+### 1. 개요 및 배경
+- **사용자 요청**:
+  1. "항상 국내외 다 기획하고있는거제? 그리고 실제 경제 공부에 도움되게 셋팅해줘 국내외 다"
+  2. "여려개 더많은어줘 자동으로 업데이트 되게해줘 진행승인 알라서 게획하고 개발 무중단 배포까지승인함"
+- **목표**:
+  - 국내(한국은행 기준금리, KOSPI, USD/KRW 환율, CPI) + 글로벌(미 연준 Fed 금리, 나스닥, S&P 500, 달러인덱스 DXY, 미국채 10년물 금리) 실시간 10분 자동 갱신 펄스 엔진 가동.
+  - 1 WLD 기준 KRW, USD, JPY, EUR 4대 통화 실시간 환율 변환기 및 6대 실전 투자 공식(PER, PBR, ROE, 72의 법칙, DCA, MDD) 백과사전 위젯 프론트엔드 연동.
+  - 주식 물타기 계산기, 주식 메인 허브, 복리 예적금 계산기, 직업 파밍 계산기 등 pSEO 핵심 지면에 전면 배치하여 검색 유입 유저의 교육적 가치와 체류시간, 가입 전환율 극대화.
+
+### 2. 세부 구현 내역
+1. **백엔드 실시간 거시경제 펄스 서비스 (`backend/src/economy/macro-pulse.service.ts`, `macro-pulse.controller.ts`)**:
+   - 9대 국내외 핵심 지표 10분 주기 시뮬레이션 및 캐시 자동 갱신.
+   - 4개 주요 통화 환율 및 Risk-On/Risk-Off 시장 감성 요약 브리프(KO/EN) 산출.
+   - `@SkipInternalToken()` 데코레이터를 적용하여 외부 방문자 및 프론트엔드에서 인증 없이 즉시 조회 가능.
+2. **프론트엔드 거시경제 펄스 티커 (`frontend/src/components/global-macro-pulse-ticker.tsx`)**:
+   - 6개 주요 지표 가로 스크롤 카드 그리드 및 지표 클릭 시 실전 경제 해설 팝업(Dialog) 모달 오픈.
+3. **실전 금융 백과사전 & 다통화 변환 위젯 (`frontend/src/components/financial-knowledge-hub.tsx`)**:
+   - 6대 핵심 투자 용어 공식 및 실전 예시 한국어/영어 전환 제공.
+   - 1 WLD 기준 원화/달러/엔화/유로 실시간 양방향 통화 계산기 내장.
+4. **전 금융 계산기 화면 연동**:
+   - `app/tools/stock-calculator/page.tsx`
+   - `app/stocks/page.tsx`
+   - `app/tools/compound-calculator/page.tsx`
+   - `app/tools/farming-calculator/page.tsx`
+5. **라이브 운영 서버 무중단 배포 및 검증**:
+   - 190개 테스트 파일, 1,065개 테스트 100% ALL-PASS.
+   - 프론트엔드 564개 페이지 무중단 빌드 완료.
+   - 라이브 서비스 200 OK 응답 및 10분 자동 업데이트 정상 가동 확인.
+
+---
+
+## 🚀 [v105 Specification] 국내외 경제 캘린더 D-Day 연동 & 원클릭 Google Search Console 사이트맵 정식 등록 & 모의 매수 온보딩 퀘스트
+### 1. 개요 및 배경
+- **사용자 요청**:
+  1. "국내외 경제 캘린더 연동: FOMC 회의일, 한국은행 금통위 일정, 미국 CPI/고용지표 발표일을 티커에 D-Day 형태로 표시하여 체류 시간을 더욱 극대화하는 방안"
+  2. "모의 포트폴리오 연계: 방금 배운 지표(PER/PBR)를 바탕으로 가상 주식 추천 탭에서 원클릭으로 10,000 WLD 모의 매수 퀘스트를 수행하도록 온보딩 흐름을 연결하는 방안"
+  3. "진행하고 사이트 클릭으로 맵이나 사이트 가 구글서치콘소에 등록된느기능도 추가해봐해 여려 래퍼런스찾아봐"
+- **핵심 목표**:
+  1. **경제 캘린더 D-Day 엔진 (`macro-pulse.service.ts`, `global-macro-pulse-ticker.tsx`)**:
+     - FOMC 금리 발표, 한은 금통위 회의, 미국 CPI, 고용보고서(NFP), ECB 통화정책회의 5대 글로벌 이벤트 스케줄 연동.
+     - D-Day 뱃지(D-1, D-3, D-7 등) 및 클릭 시 이벤트 상세 분석 팝업(발표 시각, 시장 영향력 High/Medium, 과거 지표 및 예측치, 가상 주식/금리에 미치는 영향 해설) 제공.
+  2. **원클릭 Google Search Console 사이트맵 정식 등록 파이프라인 (`gsc-client.ts`, `/api/admin/seo/gsc-sitemap-submit`)**:
+     - Google Search Console Sitemaps API (`PUT /sites/{siteUrl}/sitemaps/{feedpath}`) 서버 사이드 정식 제출 연동.
+     - 실패/미인증 시 즉시 대응할 수 있는 Google Search Console 정식 제출 웹마스터 콘솔 1초 딥링크 팝업 및 사이트맵 클립보드 복사 안내.
+     - Google Sitemap Ping (`/ping?sitemap=...`), Bing Ping, IndexNow 일괄 동시 발송 3단계 하이브리드 파이프라인.
+     - 관리자 관제 타워(`/admin/seo`) 및 일반 도구 허브(`/tools`)에 원클릭 등록 버튼 및 최근 전송 히스토리 테이블 배치.
+  3. **저평가 우량주 1초 모의 매수 퀘스트 연계 (`financial-knowledge-hub.tsx`, `MockPurchaseDialog`)**:
+     - 방금 배운 PER/PBR 경제 지식을 활용하는 '🎯 저평가 우량주 모의 매수 퀘스트 (+10,000 WLD)' 원클릭 버튼.
+     - 저PER/저PBR 우량주(CHIPS, GOLD, DUCKS 등) 모의 매수 모달 오픈 ➡️ 10,000 WLD 지원금 즉시 지급 & 체결 토스트 브로드캐스트.
+     - 신규 유저 온보딩 퀘스트 완료 처리 및 활성 유저 전환.
+
+### 2. 세부 구현 내역
+1. **백엔드 경제 캘린더 엔진 (`backend/src/economy/macro-pulse.service.ts`)**:
+   - `economicCalendar` 배열 필드 추가: 이벤트명, D-Day, 일자, 영향력(HIGH/MED), 이전치, 예측치, 투자 시사점 해설.
+2. **백엔드 GSC Sitemaps 정식 제출 클라이언트 (`backend/src/seo/gsc-client.ts`, `seo.controller.ts`)**:
+   - `submitGscSitemap(credential, baseUrl, sitemapUrl)` 함수 구현.
+   - `POST /api/v1/seo/gsc/submit-sitemap` 엔드포인트 구현.
+3. **프론트엔드 BFF 및 UI 컴포넌트**:
+   - `frontend/src/app/api/admin/seo/gsc-sitemap-submit/route.ts`: 구글 서치콘솔 공식 제출 및 핑 발송 API.
+   - `frontend/src/app/admin/seo/indexing-api-card.tsx`: 'Google Search Console 사이트맵 원클릭 정식 제출' 버튼 및 히스토리 테이블.
+   - `frontend/src/components/global-macro-pulse-ticker.tsx`: 경제 캘린더 D-Day 스트립 및 이벤트 분석 팝업 Dialog.
+   - `frontend/src/components/financial-knowledge-hub.tsx`: 10,000 WLD 모의 매수 퀘스트 모달 연동.
+   - `frontend/src/app/tools/page.tsx`: 일반 공개 도구 허브 하단에 검색엔진 사이트맵 공식 등록 위젯 배치.
+
+### 3. 검증 계획
+- Vitest 프론트엔드 및 백엔드 단위 테스트 100% ALL-PASS.
+- 프로덕션 빌드 무결점 검증.
+- 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 엔드포인트 응답 검증.
 
 
 

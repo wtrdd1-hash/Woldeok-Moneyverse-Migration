@@ -8,7 +8,12 @@ import {
   parseGscServiceAccount,
   submitGscSitemap as submitGscSitemapApi,
 } from './gsc-client';
-import type { GscAnalyticsSnapshot, GscServiceAccount, GscSitemapStatus } from './gsc-client';
+import type {
+  GscAnalyticsSnapshot,
+  GscServiceAccount,
+  GscSitemapStatus,
+  GscSitemapSubmissionResult,
+} from './gsc-client';
 
 export interface CrawlerLogEntry {
   readonly id: string;
@@ -632,7 +637,9 @@ export class SeoService {
     };
   }
 
-  async submitGscSitemap(): Promise<GscSitemapStatus & { readonly success: true; readonly message: string }> {
+  async submitGscSitemap(
+    customSitemapUrl?: string,
+  ): Promise<GscSitemapStatus & { readonly success: true; readonly message: string; readonly directConsoleUrl: string }> {
     if (process.env.SEO_INDEXING_ENABLED === 'false') {
       throw new BadRequestException('Google Search Console 사이트맵 제출은 운영 환경에서만 허용됩니다.');
     }
@@ -643,7 +650,7 @@ export class SeoService {
     }
 
     const credential = parseGscServiceAccount(stored.keyJson);
-    const sitemapUrl = `${this.baseUrl}/sitemap.xml`;
+    const sitemapUrl = customSitemapUrl?.trim() || `${this.baseUrl}/sitemap.xml`;
     try {
       const status = await submitGscSitemapApi(
         credential,
@@ -654,9 +661,11 @@ export class SeoService {
       if (stored.propertyUrl !== status.propertyUrl) {
         stored.propertyUrl = status.propertyUrl;
       }
+      const directConsoleUrl = `https://search.google.com/search-console/sitemaps?resource_id=${encodeURIComponent(status.propertyUrl)}`;
       return {
         success: true,
         ...status,
+        directConsoleUrl,
         message: 'Google Search Console에 운영 사이트맵을 등록/갱신했습니다.',
       };
     } catch (error) {

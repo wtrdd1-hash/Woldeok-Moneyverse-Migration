@@ -5,6 +5,7 @@ const GOOGLE_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const SEARCH_CONSOLE_API = 'https://www.googleapis.com/webmasters/v3';
 const SEARCH_CONSOLE_READ_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
 const SEARCH_CONSOLE_WRITE_SCOPE = 'https://www.googleapis.com/auth/webmasters';
+export const SEARCH_CONSOLE_RW_SCOPE = SEARCH_CONSOLE_WRITE_SCOPE;
 
 export interface GscServiceAccount {
   readonly type: 'service_account';
@@ -78,7 +79,10 @@ export interface GscSitemapStatus {
   readonly warnings: number;
   readonly errors: number;
   readonly submittedUrlCount: number;
+  readonly directConsoleUrl?: string;
 }
+
+export type GscSitemapSubmissionResult = GscSitemapStatus;
 
 export type GscFetch = (url: string | URL, init?: RequestInit) => Promise<Response>;
 
