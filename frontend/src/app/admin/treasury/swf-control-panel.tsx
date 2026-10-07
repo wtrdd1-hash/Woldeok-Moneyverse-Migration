@@ -86,12 +86,15 @@ export function SwfControlPanel({
         }),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (res.ok) {
         toast.success('국고 자금 투자 비율 및 안전 보존 정책이 저장되었습니다!', {
           description: `투자비율 ${reinvestRatio}% / 최대상한 ${maxInvestCap}% / 국고보존금 ${Number(safeReserve).toLocaleString()} WLD`,
         });
       } else {
-        toast.error('설정 저장 중 오류가 발생했습니다.');
+        const errorMsg = data.error || data.detail || '설정 저장 중 오류가 발생했습니다.';
+        toast.error(errorMsg);
       }
     } catch {
       toast.error('네트워크 통신 중 오류가 발생했습니다.');

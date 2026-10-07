@@ -1,85 +1,44 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { api, ApiError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
-
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join('; ');
-
-    const res = await fetch(`${API_ORIGIN}/api/v1/admin/treasury/swf`, {
-      headers: { cookie: cookieHeader },
-      cache: 'no-store',
-    });
-
-    const data = await res.json().catch(() => ({}));
-    return NextResponse.json(data, { status: res.status });
+    const data = await api('/api/v1/admin/treasury/swf');
+    return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal Server Error' },
-      { status: 500 },
-    );
+    const status = error instanceof ApiError ? error.status : 500;
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    return NextResponse.json({ error: message }, { status });
   }
 }
 
 export async function POST() {
   try {
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join('; ');
-
-    const res = await fetch(`${API_ORIGIN}/api/v1/admin/treasury/swf/rebalance`, {
+    const data = await api('/api/v1/admin/treasury/swf/rebalance', {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        cookie: cookieHeader,
-      },
+      body: {},
     });
-
-    const data = await res.json().catch(() => ({}));
-    return NextResponse.json(data, { status: res.status });
+    return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal Server Error' },
-      { status: 500 },
-    );
+    const status = error instanceof ApiError ? error.status : 500;
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    return NextResponse.json({ error: message }, { status });
   }
 }
 
 export async function PUT(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join('; ');
-
     const body = await request.json().catch(() => ({}));
-
-    const res = await fetch(`${API_ORIGIN}/api/v1/admin/treasury/swf/config`, {
+    const data = await api('/api/v1/admin/treasury/swf/config', {
       method: 'PUT',
-      headers: {
-        'content-type': 'application/json',
-        cookie: cookieHeader,
-      },
-      body: JSON.stringify(body),
+      body,
     });
-
-    const data = await res.json().catch(() => ({}));
-    return NextResponse.json(data, { status: res.status });
+    return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal Server Error' },
-      { status: 500 },
-    );
+    const status = error instanceof ApiError ? error.status : 500;
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    return NextResponse.json({ error: message }, { status });
   }
 }
-
