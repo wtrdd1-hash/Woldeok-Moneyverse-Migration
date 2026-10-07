@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Globe, RefreshCw, CheckCircle2, ShieldAlert, Sparkles, Activity, Clock, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+
 interface CrawlerInfo {
   botName: string;
   searchEngine: string;
@@ -70,7 +73,35 @@ export function AdminSeoAuditView() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto px-4 py-8">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 py-6 sm:px-6">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" asChild className="-ml-2 text-muted-foreground hover:text-foreground">
+          <Link href="/admin" className="flex items-center gap-1.5 text-xs font-semibold">
+            <ArrowLeft className="size-4" />
+            관리자 대시보드로 돌아가기
+          </Link>
+        </Button>
+      </div>
+
+      <div className="flex border-b border-border/60">
+        <div className="flex gap-2">
+          <Link
+            href="/admin/seo"
+            className="flex items-center gap-2 border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Globe className="size-4" />
+            실시간 수집 로그 & 상태
+          </Link>
+          <Link
+            href="/admin/seo-audit"
+            className="flex items-center gap-2 border-b-2 border-primary px-3 py-2 text-sm font-semibold text-primary transition-colors"
+          >
+            <Activity className="size-4" />
+            크롤러 수집 감사 타워
+          </Link>
+        </div>
+      </div>
+
       {/* 타이틀 및 헤더 */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-1">

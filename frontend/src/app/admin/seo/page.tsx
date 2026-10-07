@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Globe } from 'lucide-react';
+import { ArrowLeft, Globe, Activity } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { getServerLocale } from '@/lib/locale-server';
@@ -91,6 +91,25 @@ export default async function AdminSeoPage() {
             : 'Google Search Console, Naver Search Advisor, IndexNow 사이트맵 제출 및 10대 가상 주식, 5대 가이드 실시간 봇 크롤링 현황 관제.'}
         </p>
       </PageHeader>
+
+      <div className="flex border-b border-border/60">
+        <div className="flex gap-2">
+          <Link
+            href="/admin/seo"
+            className="flex items-center gap-2 border-b-2 border-primary px-3 py-2 text-sm font-semibold text-primary transition-colors"
+          >
+            <Globe className="size-4" />
+            실시간 수집 로그 & 상태
+          </Link>
+          <Link
+            href="/admin/seo-audit"
+            className="flex items-center gap-2 border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Activity className="size-4" />
+            크롤러 수집 감사 타워
+          </Link>
+        </div>
+      </div>
 
       <SeoClientView initialData={initialData} initialNowMs={initialNowMs} />
     </div>
