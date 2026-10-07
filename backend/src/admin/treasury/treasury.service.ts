@@ -35,6 +35,16 @@ export class TreasuryService {
     return this.repository.listTransactions(limit, cursor);
   }
 
+  async getUserMoneyFlows(
+    limit?: number,
+    cursor?: string,
+    search?: string,
+    type?: string,
+    direction?: string,
+  ) {
+    return this.repository.getUserMoneyFlows(limit, cursor, search, type, direction);
+  }
+
   async injectFunds(adminId: string, vaultCode: string, amountWld: string, reason: string) {
     this.validateInputs(vaultCode, amountWld, reason);
     try {

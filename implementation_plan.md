@@ -3326,3 +3326,31 @@ flowchart TD
 - **서비스 무중단 승격**: `moneyverse-frontend` 서비스 리로드 및 메모리 상주 정상 가동 확인 (`Active: active (running)`).
 - **라이브 도메인 마크업 실측**: `https://easy-scraping.com/` 접속 실측 결과 `중앙은행 통화량`, `일일 경제 퀘스트`, `M2 통화량`, `골든 보너스` 전수 정상 렌더링 확인 완료.
 - **백엔드 실시간 연동**: `GET /api/v1/economy/macro-pulse` HTTP 200 OK (국내 지표 4건, 글로벌 지표 5건, 환율 4종, 시장 심리 `RISK_ON` 실시간 수신).
+
+
+---
+## 👑 [v129 Specification] 유저 자금 흐름 관제 타워 및 전 서피스 모바일/PC 반응형 깨짐 방지 점검 (+180, -0)
+
+### 1. 개요 및 요구사항
+- **실시간 유저 자금 흐름 & 원장 감사 관제 (`/admin/money-flow`)**:
+  - 관리자가 전체 유저의 입출금, 가상 주식 매수/매도, 상점 구매, 직업 급여 등 복식부기 원장(`ledger_transactions`, `ledger_postings`)에 기록되는 모든 자금 이동을 실시간으로 조회·검색·감사할 수 있는 엔터프라이즈 관제 타워 구축.
+  - 24시간 총 거래량, 트랜잭션 건수, 고유 거래 유저 수, 순자금 유입/유출 실시간 서머리 지표 카드.
+  - 닉네임/UUID 통합 검색, 거래 유형별 필터(주식, 은행, 상점, 급여, 채굴 등), 차변/대변 필터 및 커서 기반 페이지네이션.
+- **백엔드 실시간 원장 쿼리 API (`GET /api/v1/admin/treasury/user-money-flows`)**:
+  - `TreasuryRepository`, `TreasuryService`, `AdminTreasuryController`에 실시간 원장 조인 쿼리 및 24시간 집계 통계 엔드포인트 구현.
+- **전 서피스 모바일 & PC 반응형 UI 깨짐 방지 (Multi-Viewport Shield)**:
+  - 320px 극소 모바일, 390px 스마트폰, 1280px 데스크톱 전 구간에서 횡스크롤 0건(Body Overflow Zero), 텍스트 잘림 방지, 44px 터치 타깃 확보.
+  - 헤드리스 브라우저 엔진을 통한 전수 스크린샷 캡처 및 레이아웃 무결성 검증.
+
+### 2. 세부 변경 계획 (Proposed Changes)
+- `backend/src/admin/treasury/treasury.repository.ts`: `getUserMoneyFlows` 메서드 추가 (복식부기 원장 조인 및 24시간 통계).
+- `backend/src/admin/treasury/treasury.service.ts`: `getUserMoneyFlows` 서비스 연동.
+- `backend/src/admin/treasury/treasury.controller.ts`: `GET /api/v1/admin/treasury/user-money-flows` 엔드포인트 등록.
+- `frontend/src/app/admin/areas.ts`: `/admin/money-flow` 영역 정의 추가.
+- `frontend/src/app/admin/money-flow/page.tsx`: 유저 자금 흐름 및 원장 감사 관리자 페이지 신설.
+
+### 3. 검증 계획 (Verification Plan)
+- 백엔드 및 프론트엔드 `tsc --noEmit` 무오류 통과.
+- 원격 저장소(`origin main`) 커밋 및 푸시 후 운영 서버(`prod-v529`) 백엔드/프론트엔드 무중단 승격.
+- 운영 서버 백엔드 재기동 후 실시간 원장 API 및 관리자 페이지 연동 실측.
+- 헤드리스 크롬을 통한 모바일/PC 전수 스크린샷 캡처 및 레이아웃 무결성 문서화.

@@ -159,6 +159,18 @@ export class AdminTreasuryController {
     return this.service.listTransactions(query.limit, query.cursor);
   }
 
+  @Get('user-money-flows')
+  @ApiOperation({ summary: '전체 유저 자금 흐름(입출금/주식/상점/복식부기 원장) 실시간 조회' })
+  async getUserMoneyFlows(
+    @Query('limit') limit?: number,
+    @Query('cursor') cursor?: string,
+    @Query('search') search?: string,
+    @Query('type') type?: string,
+    @Query('direction') direction?: string,
+  ) {
+    return this.service.getUserMoneyFlows(limit, cursor, search, type, direction);
+  }
+
   @Post('inject')
   @ApiOperation({ summary: '국고 자금 긴급 주입 (Step-Up/Admin)' })
   async injectFunds(

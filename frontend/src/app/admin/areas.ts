@@ -155,6 +155,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'economy',
   },
   {
+    href: '/admin/money-flow',
+    eyebrow: 'USER CASH FLOW & LEDGER AUDIT',
+    title: '유저 자금 흐름 · 원장 관제',
+    summary: '입출금, 주식 매매, 상점 구매, 보상 지급 등 전체 유저의 자금 이동과 복식부기 원장 기록을 실시간 모니터링합니다.',
+    group: 'records',
+  },
+  {
     href: '/admin/logs',
     eyebrow: 'AUDIT TRAIL',
     title: '감사 로그',

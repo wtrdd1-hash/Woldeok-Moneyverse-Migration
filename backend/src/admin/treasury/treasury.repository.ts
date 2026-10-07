@@ -1092,4 +1092,123 @@ export class TreasuryRepository {
       last_verified_at: new Date().toISOString(),
     };
   }
+
+  async getUserMoneyFlows(
+    limit: number = 50,
+    cursor?: string,
+    search?: string,
+    type?: string,
+    direction?: string,
+  ): Promise<{
+    items: readonly {
+      transaction_id: string;
+      type: string;
+      user_id: string;
+      display_name: string;
+      account_type: string;
+      direction: 'debit' | 'credit';
+      amount: string;
+      created_at: string;
+    }[];
+    summary: {
+      total_volume_24h: string;
+      total_transactions_24h: number;
+      active_users_24h: number;
+      total_inflow_24h: string;
+      total_outflow_24h: string;
+    };
+    next_cursor: string | null;
+  }> {
+    const safeLimit = Math.min(Math.max(1, Number(limit) || 50), 200);
+    const conditions: string[] = ['a.owner_user_id IS NOT NULL'];
+    const params: unknown[] = [];
+
+    if (cursor) {
+      params.push(cursor);
+      conditions.push(`t.created_at < $${params.length}`);
+    }
+
+    if (search && search.trim()) {
+      params.push(`%${search.trim()}%`);
+      const searchParamIdx = params.length;
+      conditions.push(`(p.display_name ILIKE $${searchParamIdx} OR a.owner_user_id::text ILIKE $${searchParamIdx})`);
+    }
+
+    if (type && type.trim()) {
+      params.push(type.trim());
+      conditions.push(`t.type = $${params.length}`);
+    }
+
+    if (direction && (direction === 'debit' || direction === 'credit')) {
+      params.push(direction);
+      conditions.push(`post.direction = $${params.length}::public.posting_direction`);
+    }
+
+    params.push(safeLimit + 1);
+    const limitParamIdx = params.length;
+    const whereClause = conditions.join(' AND ');
+
+    const rowsRes = await (this.pool as any).query(
+      `SELECT 
+        t.id::text AS transaction_id,
+        t.type,
+        a.owner_user_id::text AS user_id,
+        COALESCE(p.display_name, '익명 유저') AS display_name,
+        a.account_type::text AS account_type,
+        post.direction::text AS direction,
+        post.amount::text AS amount,
+        t.created_at
+      FROM public.ledger_transactions t
+      JOIN public.ledger_postings post ON post.transaction_id = t.id
+      JOIN public.accounts a ON a.id = post.account_id
+      LEFT JOIN public.member_profiles p ON p.user_id = a.owner_user_id
+      WHERE ${whereClause}
+      ORDER BY t.created_at DESC
+      LIMIT $${limitParamIdx}`,
+      params,
+    );
+
+    const hasMore = rowsRes.rows.length > safeLimit;
+    const items = (hasMore ? rowsRes.rows.slice(0, safeLimit) : rowsRes.rows).map((r: any) => ({
+      transaction_id: r.transaction_id,
+      type: r.type,
+      user_id: r.user_id,
+      display_name: r.display_name,
+      account_type: r.account_type,
+      direction: r.direction as 'debit' | 'credit',
+      amount: r.amount,
+      created_at: new Date(r.created_at).toISOString(),
+    }));
+
+    const next_cursor = hasMore && items.length > 0 ? items[items.length - 1].created_at : null;
+
+    const summaryRes = await (this.pool as any).query(
+      `SELECT 
+        COALESCE(SUM(post.amount), 0)::text AS total_volume_24h,
+        COUNT(DISTINCT t.id)::int AS total_transactions_24h,
+        COUNT(DISTINCT a.owner_user_id)::int AS active_users_24h,
+        COALESCE(SUM(CASE WHEN post.direction = 'debit' THEN post.amount ELSE 0 END), 0)::text AS total_inflow_24h,
+        COALESCE(SUM(CASE WHEN post.direction = 'credit' THEN post.amount ELSE 0 END), 0)::text AS total_outflow_24h
+      FROM public.ledger_transactions t
+      JOIN public.ledger_postings post ON post.transaction_id = t.id
+      JOIN public.accounts a ON a.id = post.account_id
+      WHERE a.owner_user_id IS NOT NULL
+        AND t.created_at >= now() - interval '24 hours'`,
+    );
+
+    const s = summaryRes.rows[0] || {};
+    const summary = {
+      total_volume_24h: s.total_volume_24h ?? '0',
+      total_transactions_24h: Number(s.total_transactions_24h ?? 0),
+      active_users_24h: Number(s.active_users_24h ?? 0),
+      total_inflow_24h: s.total_inflow_24h ?? '0',
+      total_outflow_24h: s.total_outflow_24h ?? '0',
+    };
+
+    return {
+      items,
+      summary,
+      next_cursor,
+    };
+  }
 }
