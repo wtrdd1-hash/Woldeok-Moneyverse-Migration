@@ -138,6 +138,10 @@ export const MONITORED_TARGET_URLS: readonly {
   { path: '/tools/farming-calculator/intern-vs-executive', category: 'guide', name: '인턴 vs 임원 17배 수익 비교' },
   { path: '/tools/farming-calculator/daily-100k-farming-route', category: 'guide', name: '하루 10만 WLD 4시간 파밍 루트' },
   { path: '/newspaper', category: 'hub', name: 'AI 경제 브리프 & 시황 뉴스' },
+  { path: '/bonds', category: 'hub', name: '기획재정국채 (KTB) 거래소' },
+  { path: '/pension', category: 'hub', name: '국민연금 (NPS) 대국민 포털' },
+  { path: '/fx', category: 'hub', name: '서울외환시장 (FX) 실시간 환전' },
+  { path: '/kdic', category: 'hub', name: '예금보험공사 (KDIC) 5천만원 예금자보호 포털' },
   { path: '/marketplace/auction', category: 'hub', name: 'P2P 실시간 경매장' },
 ];
 
