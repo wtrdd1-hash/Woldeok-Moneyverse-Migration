@@ -199,6 +199,12 @@ export class EnterpriseRepository {
       const before = currentBalance;
       currentBalance += dividend;
 
+      const validActorUuid =
+        typeof adminId === 'string' &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adminId)
+          ? adminId
+          : null;
+
       // 1. system_treasury_ledger 기록
       const ledgerRes = await this.pool.query<{ id: string }>(`
         INSERT INTO public.system_treasury_ledger (
@@ -209,7 +215,7 @@ export class EnterpriseRepository {
       `, [
         mainVault.id,
         dividend.toString(),
-        adminId ?? null,
+        validActorUuid,
         `[공기업 배당 국고 귀속] ${soe.name} 30% 법정 이익배당금 납입 (경영평가: ${soe.eval_grade}등급)`,
         before.toString(),
         currentBalance.toString(),
