@@ -33,6 +33,7 @@ export function NotificationCenterModal() {
   const [countUnavailable, setCountUnavailable] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryRequest, setRetryRequest] = useState(0);
   const [claiming, setClaiming] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const retryDelayRef = useRef(BASE_POLL_INTERVAL_MS);
@@ -142,7 +143,7 @@ export function NotificationCenterModal() {
 
     void loadNotifications();
     return () => controller.abort();
-  }, [open, filter]);
+  }, [open, filter, retryRequest]);
 
   const handleMarkAllRead = async () => {
     try {
@@ -299,8 +300,12 @@ export function NotificationCenterModal() {
               <span className="text-xs">알림을 불러오는 중...</span>
             </div>
           ) : loadError ? (
-            <div role="alert" className="flex min-h-48 items-center justify-center rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-center text-sm text-amber-700 dark:text-amber-300">
-              {loadError}
+            <div role="alert" className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-center text-sm text-amber-700 dark:text-amber-300">
+              <p>{loadError}</p>
+              <Button type="button" variant="outline" size="sm" onClick={() => setRetryRequest((value) => value + 1)} disabled={loading} className="min-h-11 gap-2 border-amber-500/50">
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                다시 시도
+              </Button>
             </div>
           ) : notifications.length === 0 ? (
             <div className="h-48 flex flex-col items-center justify-center text-center p-4">
