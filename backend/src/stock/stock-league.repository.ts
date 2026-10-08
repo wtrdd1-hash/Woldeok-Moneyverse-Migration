@@ -188,16 +188,19 @@ export class StockLeagueRepository {
 
       // 유저 잔액 확인 및 참가비 차감
       const accRes = await client.query(
-        `SELECT id, balance FROM public.accounts WHERE user_id = $1 AND account_type = 'USER_CASH' FOR UPDATE`,
+        `SELECT a.id, ab.available_amount as balance
+         FROM public.accounts a
+         JOIN public.account_balances ab ON ab.account_id = a.id
+         WHERE a.owner_user_id = $1 AND a.account_type = 'USER_CASH' FOR UPDATE`,
         [userId]
       );
-      if (accRes.rows.length === 0 || Number(accRes.rows[0].balance) < entryFee) {
+      if (accRes.rows.length === 0 || Number(accRes.rows[0]?.balance) < entryFee) {
         throw new StockLeagueInputError(`리그 참가비(${entryFee.toLocaleString()} WLD)가 부족합니다.`);
       }
-      const accountId = accRes.rows[0].id;
-      const currentCash = Number(accRes.rows[0].balance);
+      const accountId = accRes.rows[0]?.id;
+      const currentCash = Number(accRes.rows[0]?.balance);
 
-      await client.query(`UPDATE public.accounts SET balance = balance - $1 WHERE id = $2`, [entryFee, accountId]);
+      await client.query(`UPDATE public.account_balances SET available_amount = available_amount - $1, updated_at = now() WHERE account_id = $2`, [entryFee, accountId]);
 
       // 참가비 상금 풀 및 국고 귀속 (참가비 전액 리그 상금 풀로 편입)
       await client.query(
@@ -209,10 +212,10 @@ export class StockLeagueRepository {
 
       // 유저 현재 주식 평가액 계산
       const stockRes = await client.query(
-        `SELECT COALESCE(SUM(us.shares * sp.current_price), 0) as stock_val
-         FROM public.user_stocks us
-         JOIN public.stock_prices sp ON sp.symbol = us.symbol
-         WHERE us.user_id = $1`,
+        `SELECT COALESCE(SUM(vsp.quantity * vs.current_price), 0) as stock_val
+         FROM public.virtual_stock_positions vsp
+         JOIN public.virtual_stocks vs ON vs.id = vsp.stock_id
+         WHERE vsp.user_id = $1`,
         [userId]
       );
       const totalStockVal = Number(stockRes.rows[0]?.stock_val ?? 0);
@@ -228,6 +231,9 @@ export class StockLeagueRepository {
       );
 
       const row = partRes.rows[0];
+      if (!row) {
+        throw new StockLeagueInputError('리그 참가 등록 처리에 실패했습니다.');
+      }
       return {
         id: row.id,
         seasonId: row.season_id,
@@ -263,10 +269,13 @@ export class StockLeagueRepository {
     return this.withTransaction(async (client) => {
       // 구독자 잔고 검증
       const accRes = await client.query(
-        `SELECT balance FROM public.accounts WHERE user_id = $1 AND account_type = 'USER_CASH'`,
+        `SELECT ab.available_amount as balance
+         FROM public.accounts a
+         JOIN public.account_balances ab ON ab.account_id = a.id
+         WHERE a.owner_user_id = $1 AND a.account_type = 'USER_CASH'`,
         [followerId]
       );
-      if (accRes.rows.length === 0 || Number(accRes.rows[0].balance) < allocatedBudget) {
+      if (accRes.rows.length === 0 || Number(accRes.rows[0]?.balance) < allocatedBudget) {
         throw new StockLeagueInputError(`카피 트레이딩 할당 잔액(${allocatedBudget.toLocaleString()} WLD)이 부족합니다.`);
       }
 

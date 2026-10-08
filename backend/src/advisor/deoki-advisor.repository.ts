@@ -35,44 +35,66 @@ export class DeokiAdvisorRepository {
 
   async diagnoseUserPortfolio(userId: string): Promise<DeokiDiagnosis> {
     // 1. 현금 잔액 조회
-    const cashRes = await this.db.query(
-      `SELECT balance FROM public.accounts WHERE user_id = $1 AND account_type = 'USER_CASH' LIMIT 1`,
-      [userId]
-    );
-    const firstCash = cashRes.rows[0];
-    const cash = firstCash ? Math.max(0, Number(firstCash.balance)) : 0;
+    let cash = 0;
+    try {
+      const cashRes = await this.db.query(
+        `SELECT ab.available_amount as balance
+         FROM public.accounts a
+         JOIN public.account_balances ab ON ab.account_id = a.id
+         WHERE a.owner_user_id = $1 AND a.account_type = 'USER_CASH'
+         LIMIT 1`,
+        [userId]
+      );
+      const firstCash = cashRes.rows[0];
+      cash = firstCash ? Math.max(0, Number(firstCash.balance)) : 0;
+    } catch {
+      cash = 0;
+    }
 
     // 2. 예금/세이빙스 잔액 조회
-    const savingsRes = await this.db.query(
-      `SELECT balance FROM public.accounts WHERE user_id = $1 AND account_type = 'USER_SAVINGS' LIMIT 1`,
-      [userId]
-    );
-    const firstSavings = savingsRes.rows[0];
-    const savings = firstSavings ? Math.max(0, Number(firstSavings.balance)) : 0;
+    let savings = 0;
+    try {
+      const savingsRes = await this.db.query(
+        `SELECT ab.available_amount as balance
+         FROM public.accounts a
+         JOIN public.account_balances ab ON ab.account_id = a.id
+         WHERE a.owner_user_id = $1 AND a.account_type = 'USER_SAVINGS'
+         LIMIT 1`,
+        [userId]
+      );
+      const firstSavings = savingsRes.rows[0];
+      savings = firstSavings ? Math.max(0, Number(firstSavings.balance)) : 0;
+    } catch {
+      savings = 0;
+    }
 
-    // 3. 보유 주식 평가액 조회
-    const stocksRes = await this.db.query(
-      `SELECT us.symbol, us.shares, COALESCE(sp.current_price, 1000) as current_price,
-              (us.shares * COALESCE(sp.current_price, 1000)) as eval_value
-       FROM public.user_stocks us
-       LEFT JOIN public.stock_prices sp ON sp.symbol = us.symbol
-       WHERE us.user_id = $1 AND us.shares > 0
-       ORDER BY eval_value DESC`,
-      [userId]
-    );
-
+    // 3. 보유 가상 주식 평가액 조회
     let totalStockVal = 0;
     const holdingStocks: Array<{ symbol: string; shares: number; price: number; evalVal: number }> = [];
 
-    for (const row of stocksRes.rows) {
-      const val = Math.max(0, Number(row.eval_value));
-      totalStockVal += val;
-      holdingStocks.push({
-        symbol: row.symbol,
-        shares: Number(row.shares),
-        price: Number(row.current_price),
-        evalVal: val,
-      });
+    try {
+      const stocksRes = await this.db.query(
+        `SELECT vs.symbol, vsp.quantity as shares, vs.current_price,
+                (vsp.quantity * vs.current_price) as eval_value
+         FROM public.virtual_stock_positions vsp
+         JOIN public.virtual_stocks vs ON vs.id = vsp.stock_id
+         WHERE vsp.user_id = $1 AND vsp.quantity > 0
+         ORDER BY eval_value DESC`,
+        [userId]
+      );
+
+      for (const row of stocksRes.rows) {
+        const val = Math.max(0, Number(row.eval_value));
+        totalStockVal += val;
+        holdingStocks.push({
+          symbol: row.symbol,
+          shares: Number(row.shares),
+          price: Number(row.current_price),
+          evalVal: val,
+        });
+      }
+    } catch {
+      totalStockVal = 0;
     }
 
     // 4. 국채 보유액 조회 (테이블 존재 시)
