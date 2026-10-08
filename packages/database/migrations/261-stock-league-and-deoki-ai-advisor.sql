@@ -64,7 +64,7 @@ CREATE INDEX IF NOT EXISTS idx_copy_trading_whale ON public.copy_trading_subscri
 -- 4. AI 전속 금융 비서 덕이 포트폴리오 진단 원장 (AI Financial Diagnoses)
 CREATE TABLE IF NOT EXISTS public.ai_financial_diagnoses (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL REFERENCES public.users(id),
+  user_id uuid REFERENCES public.users(id),
   pr_index integer NOT NULL, -- 0 ~ 100
   risk_level text NOT NULL, -- 'VERY_LOW', 'MODERATE', 'HIGH', 'CRITICAL'
   asset_summary jsonb NOT NULL,

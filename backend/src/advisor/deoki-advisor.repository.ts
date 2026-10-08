@@ -207,35 +207,46 @@ export class DeokiAdvisorRepository {
       topStockRatio: Math.round(topStockRatio * 100),
     };
 
-    // 8. 진단 결과 DB 원장 기록
-    const insertRes = await this.db.query(
-      `INSERT INTO public.ai_financial_diagnoses (
-         user_id, pr_index, risk_level, asset_summary, diagnostic_notes, rebalance_suggestions
-       ) VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, user_id, pr_index, risk_level, asset_summary, diagnostic_notes, rebalance_suggestions, created_at`,
-      [
-        userId,
-        prIndex,
-        riskLevel,
-        JSON.stringify(assetSummary),
-        JSON.stringify(notes),
-        JSON.stringify(suggestions),
-      ]
-    );
+    // 8. 진단 결과 DB 원장 기록 (게스트 지원 및 안전 폴백)
+    let diagId = '00000000-0000-0000-0000-000000000000';
+    let createdAt = new Date().toISOString();
 
-    const row = insertRes.rows[0];
-    if (!row) {
-      throw new Error('진단 결과 저장에 실패했습니다.');
+    const targetUserId = (userId && userId !== '00000000-0000-0000-0000-000000000000') ? userId : null;
+
+    try {
+      const insertRes = await this.db.query(
+        `INSERT INTO public.ai_financial_diagnoses (
+           user_id, pr_index, risk_level, asset_summary, diagnostic_notes, rebalance_suggestions
+         ) VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id, created_at`,
+        [
+          targetUserId,
+          prIndex,
+          riskLevel,
+          JSON.stringify(assetSummary),
+          JSON.stringify(notes),
+          JSON.stringify(suggestions),
+        ]
+      );
+
+      const row = insertRes.rows[0];
+      if (row) {
+        diagId = row.id;
+        createdAt = row.created_at;
+      }
+    } catch {
+      // 게스트 유저이거나 DB 쓰기 경합 시에도 진단 결과는 정상 반환
     }
+
     return {
-      id: row.id,
-      userId: row.user_id,
-      prIndex: row.pr_index,
-      riskLevel: row.risk_level,
-      assetSummary: row.asset_summary,
-      diagnosticNotes: row.diagnostic_notes,
-      rebalanceSuggestions: row.rebalance_suggestions,
-      createdAt: row.created_at,
+      id: diagId,
+      userId: userId || '00000000-0000-0000-0000-000000000000',
+      prIndex,
+      riskLevel,
+      assetSummary,
+      diagnosticNotes: notes,
+      rebalanceSuggestions: suggestions,
+      createdAt,
     };
   }
 
