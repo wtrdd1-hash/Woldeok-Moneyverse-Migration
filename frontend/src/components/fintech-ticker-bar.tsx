@@ -18,7 +18,7 @@ export function FintechTickerBar() {
       icon: TrendingUp,
       label: localeLabel(locale, '최고 상승: 월덕게임즈', 'Top Mover: WDG', '急上昇銘柄: ウォルドクゲームズ', '最大涨幅: 月德游戏'),
       value: '+4.8% ▲',
-      color: 'text-emerald-500 font-bold',
+      color: 'text-[var(--rise)] font-bold',
     },
     {
       icon: Briefcase,
@@ -30,7 +30,7 @@ export function FintechTickerBar() {
       icon: ShieldCheck,
       label: localeLabel(locale, '금융 무결성', 'System Integrity', '金融の完全性', '金融完整性'),
       value: '100.0% Verified',
-      color: 'text-emerald-500',
+      color: 'text-[var(--primary)]',
     },
     {
       icon: Activity,
@@ -45,8 +45,8 @@ export function FintechTickerBar() {
       <div className="mx-auto max-w-[1440px] w-full min-w-0 flex items-center justify-between gap-3 text-[11px] sm:text-xs px-2.5 min-[400px]:px-3 min-[480px]:px-4 sm:px-6 lg:px-5 xl:px-8">
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="relative flex size-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--primary)] opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-[var(--primary)]" />
           </span>
           <span className="font-bold text-muted-foreground uppercase tracking-wider text-[10px]">
             {localeLabel(locale, '실시간 지표', 'LIVE METRICS', 'リアルタイム指標', '实时指标')}

@@ -127,6 +127,112 @@
   --chart-5: var(--ink-soft);
 }
 
+/* ==========================================================================
+   Multi-Region Sovereign Design Tokens (data-locale: ko, en, ja, zh)
+   ========================================================================== */
+
+/* 🇰🇷 한국 (ko) - K-Fintech Toss/Upbit: Emerald Wealth & Korean Rise Red / Fall Blue */
+:root[data-locale="ko"],
+.dark[data-locale="ko"] {
+  --primary: #10b981;
+  --primary-foreground: #022c22;
+  --accent: #059669;
+  --accent-foreground: #ecfdf5;
+  --ring: rgb(16 185 129 / 0.6);
+  --rise: #ef4444; /* 한국 주식 상승 빨강 */
+  --fall: #3b82f6; /* 한국 주식 하락 파랑 */
+}
+
+/* 🇺🇸 미국 & 글로벌 (en) - Silicon Valley & Wall Street: Neon Electric Mint & Global Rise Green / Fall Red */
+:root[data-locale="en"],
+.dark[data-locale="en"] {
+  --primary: #00f0ff;
+  --primary-foreground: #021e24;
+  --accent: #10b981;
+  --accent-foreground: #022c22;
+  --ring: rgb(0 240 255 / 0.6);
+  --rise: #10b981; /* 글로벌 주식 상승 그린 */
+  --fall: #f43f5e; /* 글로벌 주식 하락 레드 */
+}
+
+/* 🇯🇵 일본 (ja) - Tokyo Neo-Fintech: Champagne Luxury Gold & Sapphire Deep Slate */
+:root[data-locale="ja"],
+.dark[data-locale="ja"] {
+  --primary: #fbbf24;
+  --primary-foreground: #291702;
+  --accent: #f59e0b;
+  --accent-foreground: #fef3c7;
+  --ring: rgb(251 191 36 / 0.6);
+  --rise: #ea580c; /* 일본 주식 상승 오렌지 레드 */
+  --fall: #2563eb; /* 일본 주식 하락 블루 */
+}
+
+/* 🇨🇳 중화권 (zh) - Imperial Prosperity Fintech: Prosperity Gold & Crimson Fortune */
+:root[data-locale="zh"],
+.dark[data-locale="zh"] {
+  --primary: #f59e0b;
+  --primary-foreground: #2b1702;
+  --accent: #dc2626;
+  --accent-foreground: #ffffff;
+  --ring: rgb(245 158 11 / 0.6);
+  --rise: #dc2626; /* 중국 시장 상승 붉은색 */
+  --fall: #16a34a; /* 중국 시장 하락 비취 녹색 */
+}
+
+/* ==========================================================================
+   Sovereign Region Typography & Visual Atmosphere Systems
+   ========================================================================== */
+
+/* 🇰🇷 한국 K-Fintech 감성 (토스/업비트 스타일) */
+html[data-locale="ko"] {
+  --font-display: var(--font-noto-kr), Pretendard, 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --font-sans: var(--font-noto-kr), Pretendard, 'Apple SD Gothic Neo', system-ui, sans-serif;
+}
+html[data-locale="ko"] .moneyverse-app-shell::before {
+  background:
+    radial-gradient(ellipse 65% 45% at 50% -15%, rgb(16 185 129 / 0.12), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 95% 15%, rgb(5 150 105 / 0.08), transparent 65%),
+    radial-gradient(ellipse 55% 40% at 5% 85%, rgb(16 185 129 / 0.06), transparent 75%);
+}
+
+/* 🇺🇸 미국 & 글로벌 월스트리트 네온 민트 (스트라이프/로빈후드 스타일) */
+html[data-locale="en"] {
+  --font-display: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+html[data-locale="en"] .moneyverse-app-shell::before {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -10%, rgb(0 240 255 / 0.14), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 95% 15%, rgb(16 185 129 / 0.10), transparent 65%),
+    radial-gradient(ellipse 60% 40% at 5% 85%, rgb(0 240 255 / 0.08), transparent 75%);
+}
+
+/* 🇯🇵 일본 도쿄 네오 핀테크 (SBI/PayPay 샴페인 골드 스타일) */
+html[data-locale="ja"] {
+  --font-display: 'Hiragino Kaku Gothic ProN', 'Meiryo', 'Yu Gothic', sans-serif;
+  --font-sans: 'Hiragino Kaku Gothic ProN', 'Meiryo', 'Yu Gothic', sans-serif;
+}
+html[data-locale="ja"] .moneyverse-app-shell::before {
+  background:
+    radial-gradient(ellipse 65% 45% at 50% -12%, rgb(251 191 36 / 0.12), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 95% 15%, rgb(245 158 11 / 0.09), transparent 65%),
+    radial-gradient(ellipse 55% 40% at 5% 85%, rgb(251 191 36 / 0.06), transparent 75%);
+}
+
+/* 🇨🇳 중화권 번영 & 행운 핀테크 (바이낸스/앤트그룹 스타일) */
+html[data-locale="zh"] {
+  --font-display: 'PingFang SC', 'Microsoft YaHei', 'SimHei', sans-serif;
+  --font-sans: 'PingFang SC', 'Microsoft YaHei', 'SimHei', sans-serif;
+}
+html[data-locale="zh"] .moneyverse-app-shell::before {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -12%, rgb(245 158 11 / 0.14), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 95% 15%, rgb(220 38 38 / 0.10), transparent 65%),
+    radial-gradient(ellipse 60% 40% at 5% 85%, rgb(245 158 11 / 0.07), transparent 75%);
+}
+
+
+
 @supports (color: oklch(from red 0.5 clamp(0.02, c * 0.5, 0.09) h)) {
   :root[data-point] {
     --forest: oklch(from var(--point) 0.34 clamp(0.02, c * 0.55, 0.09) h);

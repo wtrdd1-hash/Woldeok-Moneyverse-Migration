@@ -53,6 +53,7 @@ export function LocaleProvider({
     if (initialLocale) {
       updateLocale(initialLocale);
       document.documentElement.lang = initialLocale;
+      document.documentElement.setAttribute('data-locale', initialLocale);
       return;
     }
 
@@ -66,6 +67,7 @@ export function LocaleProvider({
 
     updateLocale(resolved);
     document.documentElement.lang = resolved;
+    document.documentElement.setAttribute('data-locale', resolved);
   }, [initialLocale]);
 
   const value = useMemo<LocaleContextValue>(() => ({
@@ -73,6 +75,7 @@ export function LocaleProvider({
     setLocale(nextLocale) {
       document.cookie = LOCALE_COOKIE + '=' + nextLocale + '; Path=/; Max-Age=31536000; SameSite=Lax; Secure';
       document.documentElement.lang = nextLocale;
+      document.documentElement.setAttribute('data-locale', nextLocale);
       updateLocale(nextLocale);
       startTransition(() => {
         router?.refresh();

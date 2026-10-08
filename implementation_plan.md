@@ -4940,3 +4940,63 @@ flowchart TD
 2. Next.js 579개 라우트 빌드 통과.
 3. Git 커밋 및 GitHub `origin/main` 푸시.
 4. 원격 운영 서버(`debian13`) `prod-v541` 무중단 승격 배포 및 라이브 헬스체크 200 OK.
+
+---
+
+## 🚀 [v158 Specification] 국가별(한국/미국·글로벌/일본/중화권) 4대 특화 웹디자인 시스템 & data-locale 전역 테마 엔진 사양
+
+### 1. 개요 및 사용자 조율 확정 사양 (Interactive Alignment Results)
+- **사용자 요청**: "국가별로 웹디자인을 다르게 해줘 그리고 여려 뽐아 열십히해봐"
+- **조율 확정 사항 (Interactive Alignment)**:
+  1. **국가별 테마 스위칭 기술 아키텍처**:
+     - HTML 루트 태그의 `data-locale="ko|en|ja|zh"` 속성 바인딩 기반 전역 CSS 테마 스위칭 엔진 구축.
+     - SSR 헤더 주입 및 클라이언트 언어 전환 시 0ms 즉각 반응(No Flash/No Reload).
+  2. **4대 국가별 고유 디자인 테마 명세**:
+     - 🇰🇷 **한국 (KR / `ko`) - K-Fintech Toss/Upbit Style**:
+       - 메인: 에메랄드 머니 그린 (`#10b981`) + 딥 슬레이트 (`#070b12`)
+       - 시세 규격: 상승(빨강 `#ef4444`) / 하락(파랑 `#3b82f6`)
+       - 서체: Pretendard / Noto Sans KR
+       - 감성: 빠르고 직관적인 Bento Grid, 원터치 P2P 송금 & 모바일 최적화
+     - 🇺🇸 **미국 및 글로벌 (US, Global / `en`) - Silicon Valley & Wall Street Minimalist (Stripe / Robinhood)**:
+       - 메인: 일렉트릭 네온 민트 (`#00f0ff`, `#10b981`) + 딥 옵시디언 젯블랙 (`#04070d`)
+       - 시세 규격: 글로벌 표준 상승(초록 `#10b981`) / 하락(빨강 `#f43f5e`)
+       - 서체: Geist Sans / Inter + Geist Mono
+       - 감성: 대형 타이포그래피, 와이드 카드 림라이트, 군더더기 없는 미니멀리즘
+     - 🇯🇵 **일본 (JP / `ja`) - Tokyo Neo-Fintech (SBI証券 / PayPay / Rakuten)**:
+       - 메인: 샴페인 럭셔리 골드 (`#f59e0b`, `#fbbf24`) + 사파이어 딥 슬레이트 (`#091326`)
+       - 시세 규격: 상승(오렌지 레드 `#ea580c`) / 하락(블루 `#2563eb`)
+       - 서체: Noto Sans JP
+       - 감성: 친절하고 정밀한 정보 뱃지, 신뢰도 높은 세부 카드 분할, 라운드 섀도우
+     - 🇨🇳 **중화권 (CN, TW, HK, SG / `zh`) - Imperial Prosperity Fintech (Ant Group / Binance)**:
+       - 메인: 부와 번영의 임페리얼 골드 (`#f59e0b`) & 크림슨 레드 (`#dc2626`)
+       - 시세 규격: 중국 금융 표준 상승(붉은색 `#dc2626`) / 하락(비취 녹색 `#16a34a`)
+       - 서체: Noto Sans SC
+       - 감성: 복(福)과 번영의 앰비언트 골드 하이라이트, 역동적인 거래량 및 잭팟 지표
+
+---
+
+### 2. 세부 컴포넌트 구현 계획 (Implementation Details)
+
+#### ① 전역 CSS 국가별 테마 토큰 매핑 (`globals.css`, `redesign.css`)
+- `:root[data-locale="ko"]` & `.dark[data-locale="ko"]`
+- `:root[data-locale="en"]` & `.dark[data-locale="en"]`
+- `:root[data-locale="ja"]` & `.dark[data-locale="ja"]`
+- `:root[data-locale="zh"]` & `.dark[data-locale="zh"]`
+- 국가별 `--primary`, `--primary-foreground`, `--rise`, `--fall`, `--card`, `--accent`, `--border` 정밀 바인딩.
+
+#### ② 루트 레이아웃 HTML `data-locale` 자동 주입 (`layout.tsx`)
+- `<html lang={locale} data-locale={locale} ...>` 바인딩.
+- `LocaleProvider`에서 언어 변경 시 `document.documentElement.setAttribute('data-locale', newLocale)` 즉시 동기화.
+
+#### ③ 국가별 특화 비주얼 위젯 및 뱃지 적응
+- 실시간 티커 바 (`fintech-ticker-bar.tsx`): 국가별 통화 및 시장 관례 색상 적응.
+- 주식 거래소 (`stocks/page.tsx` & `trade-form.tsx`): 국가별 상승/하락 색상 자동 전환.
+- 모바일 바텀 내비게이션 (`mobile-bottom-nav.tsx`): 국가별 테마 글로우 색상 동적 적응.
+
+---
+
+### 3. 검증 및 배포 계획 (Verification Plan)
+1. 프론트엔드 및 백엔드 정적 타입 검사 (`tsc --noEmit`) 100% ALL-PASS.
+2. Next.js 579개 라우트 빌드 무결점 통과.
+3. Git 커밋 및 GitHub `origin/main` 푸시.
+4. 원격 운영 서버(`debian13`) `prod-v542` 무중단 승격 배포 및 4개국 언어별 실시간 서빙 검증.

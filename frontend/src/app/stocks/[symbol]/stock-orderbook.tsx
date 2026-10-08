@@ -204,7 +204,7 @@ export function StockOrderbook({
       </CardHeader>
 
       <CardContent className="p-2 space-y-1.5 text-xs font-mono select-none">
-        {/* 매도호가 리스트 (Asks, Rose 계열) */}
+        {/* 매도호가 리스트 (Asks, Fall/Ask 계열 동적 테마) */}
         <div className="space-y-0.5">
           {asks.map((ask) => {
             const askNum = Number.parseInt(ask.price, 10);
@@ -214,15 +214,15 @@ export function StockOrderbook({
                 key={`ask-${ask.step}`}
                 type="button"
                 onClick={() => onSelectPrice?.(ask.price, 'buy')}
-                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-rose-500/15 active:scale-[0.99] transition-all text-left touch-manipulation select-none"
+                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-[var(--fall)]/15 active:scale-[0.99] transition-all text-left touch-manipulation select-none"
                 title={isEn ? `Click to buy at ${groupDigits(ask.price)} WLD` : `${groupDigits(ask.price)} WLD에 매수 주문 입력`}
               >
                 {/* 잔량 비례 배경 게이지 바 */}
                 <div
-                  className="absolute inset-y-0 right-0 bg-rose-500/10 rounded-r-md pointer-events-none transition-all duration-300 will-change-[width] transform-gpu"
+                  className="absolute inset-y-0 right-0 bg-[var(--fall)]/10 rounded-r-md pointer-events-none transition-all duration-300 will-change-[width] transform-gpu"
                   style={{ width: `${ask.percent}%` }}
                 />
-                <span className="relative z-10 font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                <span className="relative z-10 font-bold text-[var(--fall)] flex items-center gap-1.5">
                   <span className="text-[10px] opacity-70">+{deltaPct}%</span>
                   <span>{groupDigits(ask.price)}</span>
                 </span>
@@ -238,9 +238,9 @@ export function StockOrderbook({
         {/* 현재 체결가 중앙 바 (순간 플래시 펄스 애니메이션 탑재) */}
         <div className={`flex items-center justify-between px-3 py-2 rounded-lg border font-bold transition-all duration-300 ${
           flash === 'rise'
-            ? 'bg-emerald-500/25 border-emerald-500/50 shadow-xs shadow-emerald-500/20'
+            ? 'bg-[var(--rise)]/25 border-[var(--rise)]/50 shadow-xs'
             : flash === 'fall'
-            ? 'bg-rose-500/25 border-rose-500/50 shadow-xs shadow-rose-500/20'
+            ? 'bg-[var(--fall)]/25 border-[var(--fall)]/50 shadow-xs'
             : 'bg-primary/10 border-primary/30'
         }`}>
           <span className="text-primary flex items-center gap-1.5">
@@ -248,13 +248,13 @@ export function StockOrderbook({
             <span>{isEn ? 'Current Price' : '현재 체결가'}</span>
           </span>
           <span className={`text-sm font-extrabold transition-colors duration-300 ${
-            flash === 'rise' ? 'text-emerald-600 dark:text-emerald-400' : flash === 'fall' ? 'text-rose-600 dark:text-rose-400' : 'text-foreground'
+            flash === 'rise' ? 'text-[var(--rise)]' : flash === 'fall' ? 'text-[var(--fall)]' : 'text-foreground'
           }`}>
             {groupDigits(livePrice)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
           </span>
         </div>
 
-        {/* 매수호가 리스트 (Bids, Emerald 계열) */}
+        {/* 매수호가 리스트 (Bids, Rise/Bid 계열 동적 테마) */}
         <div className="space-y-0.5">
           {bids.map((bid) => {
             const bidNum = Number.parseInt(bid.price, 10);
@@ -264,15 +264,15 @@ export function StockOrderbook({
                 key={`bid-${bid.step}`}
                 type="button"
                 onClick={() => onSelectPrice?.(bid.price, 'sell')}
-                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-emerald-500/15 active:scale-[0.99] transition-all text-left touch-manipulation select-none"
+                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-[var(--rise)]/15 active:scale-[0.99] transition-all text-left touch-manipulation select-none"
                 title={isEn ? `Click to sell at ${groupDigits(bid.price)} WLD` : `${groupDigits(bid.price)} WLD에 매도 주문 입력`}
               >
                 {/* 잔량 비례 배경 게이지 바 */}
                 <div
-                  className="absolute inset-y-0 right-0 bg-emerald-500/10 rounded-r-md pointer-events-none transition-all duration-300 will-change-[width] transform-gpu"
+                  className="absolute inset-y-0 right-0 bg-[var(--rise)]/10 rounded-r-md pointer-events-none transition-all duration-300 will-change-[width] transform-gpu"
                   style={{ width: `${bid.percent}%` }}
                 />
-                <span className="relative z-10 font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                <span className="relative z-10 font-bold text-[var(--rise)] flex items-center gap-1.5">
                   <span className="text-[10px] opacity-70">{deltaPct}%</span>
                   <span>{groupDigits(bid.price)}</span>
                 </span>

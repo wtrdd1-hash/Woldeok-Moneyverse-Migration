@@ -278,6 +278,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang={locale}
+      data-locale={locale}
       // The theme scripts below write to this element before hydration, which
       // is the whole point of them; React is told not to report the
       // difference it will find.
