@@ -59,6 +59,12 @@ export interface SeoInitialData {
   readonly recentLogs: readonly CrawlerLog[];
   readonly indexNowKey: string;
   readonly sitemapUrl: string;
+  readonly provenance: {
+    readonly source: 'seo-status-api' | 'fallback';
+    readonly observedAt: string | null;
+    readonly freshness: 'fresh' | 'unknown';
+    readonly status: 'operational' | 'unavailable';
+  };
 }
 
 interface SeoClientViewProps {
@@ -130,7 +136,17 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
       if (res.ok) {
         const json = await res.json();
         if (json && typeof json === 'object') {
-          setData((prev) => ({ ...prev, ...json }));
+          const observedAt = new Date().toISOString();
+          setData((prev) => ({
+            ...prev,
+            ...json,
+            provenance: {
+              source: 'seo-status-api',
+              observedAt,
+              freshness: 'fresh',
+              status: 'operational',
+            },
+          }));
           setRelativeTimeNowMs(Date.now());
         }
       }
@@ -223,6 +239,34 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
 
   return (
     <div className="space-y-6">
+      <section
+        aria-label="SEO 관측 데이터 상태"
+        role={data.provenance.status === 'unavailable' ? 'alert' : 'status'}
+        className={cn(
+          'rounded-xl border p-3 text-xs',
+          data.provenance.status === 'unavailable'
+            ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300'
+            : 'border-border/70 bg-surface/40 text-muted-foreground',
+        )}
+      >
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <span><strong className="text-foreground">Source:</strong> {data.provenance.source}</span>
+          <span><strong className="text-foreground">Freshness:</strong> {data.provenance.freshness}</span>
+          <span><strong className="text-foreground">Status:</strong> {data.provenance.status}</span>
+          <span>
+            <strong className="text-foreground">Observed:</strong>{' '}
+            {data.provenance.observedAt
+              ? new Date(data.provenance.observedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+              : '관측 시각 없음'}
+          </span>
+        </div>
+        {data.provenance.status === 'unavailable' && (
+          <p className="mt-2 font-semibold">
+            실시간 SEO 상태 API를 사용할 수 없습니다. 아래 값은 fallback이며 실제 운영 관측값으로 해석하면 안 됩니다.
+          </p>
+        )}
+      </section>
+
       {/* Top Action Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-sm">
         <div className="flex items-center gap-3 min-w-0">
