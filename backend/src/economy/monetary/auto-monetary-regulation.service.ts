@@ -131,6 +131,16 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
       return null;
     }
 
+    let resolvedActorId = actorId;
+    if (resolvedActorId === '00000000-0000-0000-0000-000000000000' || !resolvedActorId) {
+      const adminRes = await this.pool.query<{ user_id: string }>(
+        `SELECT user_id FROM public.user_roles WHERE role = 'superadmin' LIMIT 1`
+      ).catch(() => ({ rows: [] }));
+      if (adminRes.rows[0]?.user_id) {
+        resolvedActorId = adminRes.rows[0].user_id;
+      }
+    }
+
     // 1. 최근 24시간 Faucet(발행) 및 Sink(소각) 통계 수집
     const statsRes = await this.pool.query<{
       faucet_24h: string;
@@ -180,7 +190,7 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
     if (ratio >= circuitBreakerThreshold && faucet24h > BigInt(1000000)) {
       actionType = 'CIRCUIT_BREAKER_FREEZE';
       reason = `[서킷브레이커] 24시간 발행/소각 비율이 ${ratio.toFixed(2)}배로 위험 한계치(${circuitBreakerThreshold.toFixed(2)})를 돌파하여 중앙은행 발행을 즉각 비상 동결했습니다.`;
-      await this.centralBank.freezeIssuance(actorId, reason);
+      await this.centralBank.freezeIssuance(resolvedActorId, reason);
     } else if (ratio > target * (1 + tolerance) || avgUserBalance > 30000) {
       // 과열/인플레이션: 테이퍼링 긴축 (유저 평균 잔액 3만 WLD 초과 과열 포함)
       actionType = 'TAPER_CONTRACTION';
@@ -194,14 +204,14 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
 
       // 통화정책 명령서 자동 발의 및 승인
       const order = await this.centralBank.proposePolicyOrder(
-        actorId,
+        resolvedActorId,
         'RETIRE',
         'HARD_SINK_PURGE',
         adjustmentAmountWld.toString(),
         reason,
         24,
       );
-      await this.centralBank.approvePolicyOrder(actorId, order.id);
+      await this.centralBank.approvePolicyOrder(resolvedActorId, order.id);
       policyOrderId = order.id;
     } else if (ratio < target * (1 - tolerance)) {
       // 유통경색/디플레이션: 완화적 양적완화
@@ -213,14 +223,14 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
       reason = `[자동 유동성 완화] 최근 24시간 소각 우세(비율 ${ratio.toFixed(2)})로 통화 수축이 감지되어 ${adjustmentAmountWld.toString()} WLD 규모의 보편 복지/활동 보상 발행 한도 확대 명령을 발의·승인했습니다.`;
 
       const order = await this.centralBank.proposePolicyOrder(
-        actorId,
+        resolvedActorId,
         'MINT',
         'WORK_REWARD',
         adjustmentAmountWld.toString(),
         reason,
         24,
       );
-      await this.centralBank.approvePolicyOrder(actorId, order.id);
+      await this.centralBank.approvePolicyOrder(resolvedActorId, order.id);
       policyOrderId = order.id;
     } else {
       actionType = 'NEUTRAL_BALANCED';
