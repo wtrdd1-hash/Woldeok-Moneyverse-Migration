@@ -27,6 +27,14 @@ describe('global navigation search', () => {
     expect(filterSearchEntries(entries, '/guide').map((entry) => entry.href)).toEqual(['/guide']);
   });
 
+  it('matches routes via Korean synonyms and financial keywords', () => {
+    const stockEntries = [{ href: '/stocks', label: '거래소' }] as const;
+    const entries = searchableEntries(stockEntries, [], [], true, false);
+    expect(filterSearchEntries(entries, '주식').map((entry) => entry.href)).toEqual(['/stocks']);
+    expect(filterSearchEntries(entries, '증권').map((entry) => entry.href)).toEqual(['/stocks']);
+    expect(filterSearchEntries(entries, '호가').map((entry) => entry.href)).toEqual(['/stocks']);
+  });
+
   it('does not return every route for a blank query', () => {
     const entries = searchableEntries(publicEntries, memberEntries, adminEntries, true, true);
     expect(filterSearchEntries(entries, '   ')).toEqual([]);

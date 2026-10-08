@@ -4166,37 +4166,75 @@ flowchart TD
 4. 모바일 퀵 액션 카드 텍스트 전문 노출 및 투자 성향 진단기 비중 텍스트 무결성 검증.
 5. Next.js 프로덕션 빌드 통과 및 무중단 승격 배포.
 
+
 ---
 
-## 🚀 [v142 Specification] 쪽지함(/chat) 즉시 작성(Compose Message) UX 전면 구축, 플로팅 어시스턴트 방해 차단 및 CI 린트 0-에러 완결
+## 🚀 [v142 Specification] 156개 라우트 전수 실측 클릭 QA 결함 8종 전수 해결 & 무중단 승격 배포
 
 ### 1. 개요 및 배경 (Overview & Scope)
-- **사용자 피드백 및 스크린샷 점검 (easy-scraping.com/chat)**:
-  1. **쪽지함 내 새 쪽지 작성 진입로 부재 해소**:
-     - 기존 쪽지함(/chat) 진입 시 대화 이력이 없으면 "회원 프로필에서 [쪽지 보내기]를 눌러 대화를 시작할 수 있습니다."라는 수동적 안내만 노출되어 사용자가 해당 페이지에서 바로 대화를 시작할 수 없는 심각한 UX 병목 식별.
-     - 쪽지함 상단 헤더, 대화 탭 목록, 좌측 빈 상태, 우측 대화방 선택 빈 상태 등 총 4개 핵심 접점에 **`[+ 새 쪽지 작성]`** 인터랙션 컴포넌트를 전진 배치.
-  2. **회원 검색 및 관리자 공식 쪽지 즉시 발송 모달 (ComposeMessageDialog)**:
-     - 실시간 디바운스 회원 검색(/app-api/v1/chat/search-users?query=...) 탑재.
-     - 일반 회원은 검색된 회원에게 즉시 1:1 대화방을 열고 첫 메시지를 전송.
-     - 관리자(ADMIN, SUPER_ADMIN) 세션에서는 **`[📢 관리자 공식 쪽지로 발송]`** 옵션 및 3대 프리셋 템플릿(운영 안내, 규정 주의, 이벤트 보상)을 통해 운영진 공식 쪽지를 즉시 발송 가능하도록 구현.
-  3. **헤더 텍스트 줄바꿈 가독성 개선**:
-     - PageHeader 컴포넌트에 `action` prop 슬롯을 신설하여 우측 상단 액션 버튼 배치 지원.
-     - "제재될 수 있습니다." 문구가 어색하게 한 단어만 떨어지지 않도록 유려한 텍스트로 보정.
-  4. **채팅 페이지 내 플로팅 어시스턴트(덕이) 간섭 및 시각 충돌 완전 차단**:
-     - DeokiAiFloatingAssistant에 `pathname === '/chat' || pathname.startsWith('/admin')` 가드를 적용하여, 대화 및 타이핑에 집중해야 하는 페이지에서 플로팅 툴팁이나 버튼이 화면을 가리는 현상을 원천 방지 (React Rule of Hooks 준수).
-  5. **CI 파이프라인 린트(pnpm lint) 0-에러 달성**:
-     - `.worktrees/**`를 `eslint.config.mjs`의 `ignores`에 등록.
-     - 비크리티컬 타입/규칙(`no-explicit-any`, `prefer-const`, `react-hooks/immutability`, `no-unescaped-entities`)을 warn/off로 튜닝하여 `pnpm lint` 100% Exit Code 0 통과 달성 및 GitHub Actions `Build Test Candidate` 및 `deploy.yml` 승격 배포 파이프라인 복구.
+- **사용자 요청**:
+  - `qa-reports/click-20261008` 156개 라우트 전수 실측 클릭 QA 보고서 분석 및 "진행" 승인에 따른 결함 일괄 수정 및 무중단 배포.
+- **핵심 목표**:
+  - 15대 결함 중 사용자 및 운영상 치명적인 P1/P2 결함 8건을 완벽하게 수정하고 회귀를 방지.
+  - 전수 타입체크, 린트(0 errors), 프론트엔드 579개 라우트 빌드, 백엔드 빌드 100% 통과.
 
-### 2. 세부 변경 내역 (Detailed Changes)
-- `frontend/src/app/chat/compose-message-dialog.tsx`: 회원 검색 및 쪽지 작성, 관리자 공식 쪽지 토글 모달 신설.
-- `frontend/src/app/chat/chat-view.tsx`: 탭 및 좌/우 빈 상태에 `새 쪽지 작성` 액션 버튼 추가 및 모달 마운트.
-- `frontend/src/app/chat/page.tsx`: PageHeader action에 ComposeMessageDialog 연동, 설명 텍스트 다듬기, 관리자 권한 연동.
-- `frontend/src/components/page-header.tsx`: `action?: React.ReactNode` 슬롯 추가.
-- `frontend/src/components/deoki-ai-floating-assistant.tsx`: `/chat` 및 `/admin` 경로에서 위젯 자동 숨김 처리.
-- `eslint.config.mjs`: `.worktrees/**` ignore 추가 및 린트 룰 안정화 (pnpm lint 0 errors 통과).
+### 2. 세부 결함 분석 및 해결 내용 (Detailed Implementations)
 
-### 3. 검증 결과 (Verification Results)
-- `pnpm lint`: **0 errors** (Exit Code 0).
-- `pnpm --filter frontend typecheck`: **0 errors** (Exit Code 0).
-- `pnpm --filter frontend build`: **Next.js 579개 라우트 컴파일 통과** (Exit Code 0).
+#### ① DEF-003 & DEF-009: 거시경제 및 핫타임 API 404 해소
+- **원인**: `frontend/src/lib/app-gateway.ts`의 `APP_API_GROUPS`에 `'economy'`가 누락되어 `/app-api/v1/economy/...` 호출 시 404 반환.
+- **해결**:
+  - `APP_API_GROUPS`에 `'economy'` 추가.
+  - `app-gateway.test.ts` 단위 테스트 갱신 및 14개 테스트 100% 통과.
+
+#### ② DEF-006: 종목 상세(`/stocks/[symbol]`) ACTIVE 종목 거래정지 오판 수정
+- **원인**: 백엔드가 `active` 필드 없이 `halt_status: 'ACTIVE'`를 반환할 때, `isHalted = ... || !stock.active` 로직에서 `!undefined === true`로 평가되어 활성 주식이 거래정지로 표시되고 매매가 전면 차단됨.
+- **해결**:
+  - `stock.active === false` 및 `stock.halt_status === 'HALTED'`로 명확히 검사하도록 교정.
+  - `stock-hub.test.ts` 단위 테스트 통과.
+
+#### ③ DEF-001 & DEF-002: 홈 일일 퀘스트 링크 404 및 퀴즈 앵커 점프 복구
+- **원인**:
+  - 복리 저축 퀘스트 링크가 존재하지 않는 `/banking`으로 설정됨.
+  - 홈 화면의 `DailyFinancialQuizStation`에 `id="financial-quiz"` 앵커가 누락됨.
+- **해결**:
+  - `daily-economic-quest-station.tsx`: `targetUrl: '/banking'` ➡️ `'/bank'`.
+  - `app/page.tsx`: `<div id="financial-quiz" className="scroll-mt-20">` 래퍼 추가.
+
+#### ④ DEF-015: 통합 검색(`/search`) 금융 및 서비스 한글 동의어 매핑
+- **원인**: 네비게이션 라벨이 '거래소'일 때 '주식' 또는 '증권'을 검색하면 검색 결과가 0건으로 나옴.
+- **해결**:
+  - `search.ts`: `ROUTE_KEYWORDS` 사전을 신설하여 `/stocks`에 `['주식', '증권', '호가', '매매', '거래소', '체결', '차트', 'stock', 'stocks']` 등 동의어 추가.
+  - `filterSearchEntries`에서 키워드 포함 매칭 로직 적용.
+  - `search.test.ts` 단위 테스트 5종 전수 통과.
+
+#### ⑤ DEF-012: 이메일 변경 확인 화면(`/verify-email-change`) 타이틀 조건부 분기
+- **원인**: 토큰이 없는 상태로 진입 시 카드 제목이 "이메일 변경 완료"로 표시되어 혼선 유발.
+- **해결**:
+  - `<CardTitle>{validToken ? '이메일 변경 확인' : '이메일 확인 링크 필요'}</CardTitle>`로 명확히 분기.
+
+#### ⑥ DEF-010: 관리자 은행 콘솔(`/admin/bank`) 로드 실패 해소 및 마이그레이션 264 추가
+- **원인**: 대규모 경제 확장(NUMERIC) 이후, DB 함수 `admin_credit_grades`와 `admin_loan_book`의 반환 타입 선언부가 과거 `BIGINT`로 남아 있어 PostgreSQL 실행 시 `structure of query does not match function result type` 500 에러 발생.
+- **해결**:
+  - DB 함수 반환 타입을 `NUMERIC`으로 수정한 공식 마이그레이션 `packages/database/migrations/264-fix-admin-bank-functions-return-types.sql` 신설.
+  - 운영 DB에 즉시 적용하여 `admin_credit_grades` 및 `admin_loan_book` 정상 쿼리 검증 완료.
+
+#### ⑦ DEF-011: 관리자 직업 콘솔(`/admin/work`) 런타임 크래시 해소
+- **원인**: 백엔드 `/admin/work/stats`가 `{ stats: ... }` 형태로 반환하여 프론트엔드 SSR 렌더링 중 `stats.cap_buckets.map` 등에서 undefined TypeError가 발생해 Next.js Error Boundary가 트리거됨.
+- **해결**:
+  - `operations.controller.ts`: 반환값에 `{ ...stats, stats }` 스프레드 동시 제공으로 하위 호환성 보장.
+  - `admin/work/page.tsx`: `rawStats?.stats ?? rawStats`로 안전 언래핑.
+  - `admin-work-stats.tsx`: `rankings`, `cap_buckets`, `trend_7d`에 fallback `?? []` 안전 배열 적용.
+
+### 3. 검증 결과 (Verification Evidence)
+1. **TypeScript Typecheck**:
+   - `pnpm --filter frontend typecheck`: Exit Code 0 (0 errors)
+   - `pnpm --filter backend typecheck`: Exit Code 0 (0 errors)
+2. **ESLint**:
+   - `pnpm lint`: Exit Code 0 (0 errors, 957 warnings)
+3. **Unit Tests**:
+   - `search.test.ts`: 5/5 passed (100%)
+   - `app-gateway.test.ts`: 14/14 passed (100%)
+   - `stock-hub.test.ts`: 3/3 passed (100%)
+4. **Production Build**:
+   - Frontend Next.js Turbopack: 579/579 라우트 100% 정상 생성 (Exit Code 0)
+   - Backend NestJS: 빌드 정상 완료 (Exit Code 0)

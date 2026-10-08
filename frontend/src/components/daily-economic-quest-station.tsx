@@ -50,7 +50,7 @@ const DAILY_QUESTS: readonly QuestItem[] = [
     descriptionEn: 'Check bank standing or compound interest deposit account.',
     rewardWld: 1000,
     icon: 'bank',
-    targetUrl: '/banking',
+    targetUrl: '/bank',
   },
   {
     id: 'quest_lucky_wheel',

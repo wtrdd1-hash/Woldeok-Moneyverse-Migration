@@ -50,14 +50,20 @@ function jobLabel(code: string): string {
 export default async function AdminWorkPage() {
   await requireAdminConsole(AREA.href);
 
-  const [console_, stats] = await Promise.all([
+  const [console_, rawStats] = await Promise.all([
     apiOrNull<{
       readonly catalogue: readonly AdminWorkTask[];
       readonly jobLevels: readonly AdminJobLevel[];
       readonly policy: AdminWorkPolicy;
     }>('/api/v1/admin/work'),
-    apiOrNull<AdminWorkRealtimeStats>('/api/v1/admin/work/stats'),
+    apiOrNull<AdminWorkRealtimeStats & { readonly stats?: AdminWorkRealtimeStats }>(
+      '/api/v1/admin/work/stats',
+    ),
   ]);
+
+  const stats: AdminWorkRealtimeStats | null = rawStats
+    ? (rawStats.stats ?? rawStats)
+    : null;
 
   return (
     <div data-page="admin-work" className="mv-page mv-page--admin grid gap-6">

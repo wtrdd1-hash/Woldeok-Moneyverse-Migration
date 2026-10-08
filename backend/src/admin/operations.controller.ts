@@ -151,7 +151,7 @@ export class AdminWorkOperationsController {
       () => repository.getWorkRealtimeStats(actor),
       'the work statistics could not be calculated',
     );
-    return { stats };
+    return { ...stats, stats };
   }
 
   @Post('auto-tune')

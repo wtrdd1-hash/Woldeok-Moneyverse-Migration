@@ -500,7 +500,9 @@ export default async function HomePage() {
       </div>
 
       {/* 3.9 DAILY FINANCIAL LITERACY QUIZ STATION */}
-      <DailyFinancialQuizStation />
+      <div id="financial-quiz" className="scroll-mt-20">
+        <DailyFinancialQuizStation />
+      </div>
 
       {/* 3.95 PORTFOLIO 1v1 BATTLE ARENA */}
       <PortfolioBattleArena />

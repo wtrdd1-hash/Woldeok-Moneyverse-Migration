@@ -42,12 +42,12 @@ export function WorkStatsDashboard({ stats }: WorkStatsProps) {
 
       {/* 2. 직업별 랭킹 수평 바 차트 & 일일 캡 5단계 게이지 2열 그리드 */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <WorkRankingChart rankings={stats.rankings} totalExecutions={stats.total_completions_24h} />
+        <WorkRankingChart rankings={stats.rankings ?? []} totalExecutions={stats.total_completions_24h ?? 0} />
         <WorkDailyCapGaugeCard stats={stats} />
       </div>
 
       {/* 3. 최근 7일간 직업 수행 트렌드 차트 */}
-      <WorkTrendMiniChart trends={stats.trend_7d} />
+      <WorkTrendMiniChart trends={stats.trend_7d ?? []} />
     </div>
   );
 }
@@ -243,7 +243,7 @@ export function WorkRankingChart({
 }
 
 export function WorkDailyCapGaugeCard({ stats }: WorkStatsProps) {
-  const buckets = stats.cap_buckets;
+  const buckets = stats.cap_buckets ?? [];
 
   const bucketColors = [
     'bg-emerald-500',

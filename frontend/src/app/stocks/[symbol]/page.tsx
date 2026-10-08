@@ -165,8 +165,9 @@ export default async function StockHubPage({
     stock.halt_status === 'HALTED_SETTLED' ||
     stock.halt_status === 'HALTED_SETTLING' ||
     stock.halt_status === 'HALTING' ||
+    stock.halt_status === 'HALTED' ||
     holding?.halt_status === 'HALTED_SETTLED' ||
-    !stock.active;
+    stock.active === false;
 
   const jsonLdData = {
     '@context': 'https://schema.org',
