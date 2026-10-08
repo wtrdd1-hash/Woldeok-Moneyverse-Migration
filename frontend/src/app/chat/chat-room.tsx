@@ -424,7 +424,7 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-14rem)] min-h-[500px] max-h-[750px] bg-card border rounded-2xl overflow-hidden shadow-sm">
+    <div className="flex flex-col h-full min-h-0 w-full max-w-full bg-card overflow-hidden">
       {/* Room Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
         <div className="flex items-center gap-3 min-w-0">

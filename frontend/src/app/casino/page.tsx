@@ -291,7 +291,7 @@ export default async function CasinoPage() {
     !wheelGame || selfExcluded || belowMinimum(wheelHeadroom, wheelGame.min_stake);
 
   return (
-    <div data-page="casino" className="mv-page mv-page--gameplay grid gap-6 pb-12">
+    <div data-page="casino" className="mv-page mv-page--gameplay grid gap-6 pb-12 w-full max-w-full min-w-0 overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <PageHeader
           eyebrow="LUCKY ZONE"

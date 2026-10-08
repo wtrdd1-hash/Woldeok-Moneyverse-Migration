@@ -288,7 +288,7 @@ export function ChatView({
       {/* Right Column: Chat Room or Empty State */}
       <main
         className={cn(
-          'flex flex-col bg-card lg:col-span-8 xl:col-span-8',
+          'flex flex-col bg-card lg:col-span-8 xl:col-span-8 h-full min-h-0 overflow-hidden',
           hasActiveConversation ? 'flex' : 'hidden lg:flex',
         )}
       >

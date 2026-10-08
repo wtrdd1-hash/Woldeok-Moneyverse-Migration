@@ -236,12 +236,30 @@
     min-width: 0;
   }
 
-  html,
-  body {
-    max-width: 100vw;
-    overflow-x: clip;
+  html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+    overflow-y: auto;
     position: relative;
     -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+    position: relative;
+    -webkit-text-size-adjust: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Prevent iOS/Android mobile browser auto-zoom & viewport shift on input focus */
+  @media (max-width: 640px) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
   }
 
   /* Multi-Viewport Resilience Shield: Media & Canvas overflow containment */

@@ -16,6 +16,7 @@ import { WatchlistPromotionEngine } from '@/components/watchlist-promotion-engin
 import { FirstTradeOnboardingModal } from '@/components/first-trade-onboarding-modal';
 import { StockAlertPushEngine } from '@/components/stock-alert-push-engine';
 import { DeokiAiFloatingAssistant } from '@/components/deoki-ai-floating-assistant';
+import { ViewportScrollGuardian } from '@/components/viewport-scroll-guardian';
 
 import { currentViewer } from '@/lib/viewer';
 import { fetchLatestPolicy } from '@/lib/api';
@@ -316,6 +317,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             __html: "window.addEventListener('error',function(e){if(e.target&&(e.target.tagName==='SCRIPT'||e.target.tagName==='LINK')&&(e.target.src||e.target.href)&&(e.target.src||e.target.href).indexOf('/_next/static/')!==-1){var k='wdmv_chunk_err_'+Math.floor(Date.now()/15000);if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');setTimeout(function(){window.location.reload();},250);}}},true);",
           }}
         />
+        {/* Instant horizontal scroll zero-lock to prevent mobile/desktop left-side clipping */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "window.addEventListener('scroll',function(){if(window.scrollX!==0||document.documentElement.scrollLeft!==0||document.body.scrollLeft!==0){window.scrollTo(0,window.scrollY);document.documentElement.scrollLeft=0;document.body.scrollLeft=0;}},{passive:true});",
+          }}
+        />
         {/* A keyboard user should not have to walk the whole rail to reach the
             page. */}
         <a
@@ -330,6 +337,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <ActivityTracker />
             </Suspense>
             <ThemeProvider>
+              <ViewportScrollGuardian />
               <SiteShell>{children}</SiteShell>
               <Toaster />
               <StaleTabNotice />

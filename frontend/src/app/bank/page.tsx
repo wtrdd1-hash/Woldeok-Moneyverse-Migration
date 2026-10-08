@@ -54,7 +54,7 @@ export default async function BankPage() {
 
   if (!standing) {
     return (
-      <div data-page="bank" className="mv-page mv-page--finance grid gap-4">
+      <div data-page="bank" className="mv-page mv-page--finance grid gap-4 w-full max-w-full min-w-0 overflow-hidden">
         <PageHeader title={<T korean="가상 은행 (월덕 파이낸스)" english="Virtual Banking" />} />
         <EmptyState
           title={<T korean="지금은 은행 서비스를 불러올 수 없어요." english="Cannot load banking services right now." />}
@@ -84,7 +84,7 @@ export default async function BankPage() {
     : null;
 
   return (
-    <div className="grid gap-6">
+    <div data-page="bank" className="mv-page mv-page--finance grid gap-6 w-full max-w-full min-w-0 overflow-hidden">
       <LiveRefresh />
 
       <PageHeader title={<T korean="가상 은행 (월덕 파이낸스)" english="Virtual Bank & Finance" />}>

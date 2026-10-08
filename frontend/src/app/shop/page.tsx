@@ -55,7 +55,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const avatarUrl = profileData?.avatarUrl;
 
   return (
-    <div data-page="shop" className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16">
+    <div data-page="shop" className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16 w-full max-w-full overflow-hidden">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
         <PageHeader
           eyebrow="WOLDEOK MARKET · STORE 2.0"

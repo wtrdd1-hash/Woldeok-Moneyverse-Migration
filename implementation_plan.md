@@ -4792,3 +4792,42 @@ flowchart TD
 2. Next.js 579개 전 라우트 빌드 통과
 3. 운영 서버 `prod-v538` 무중단 승격 배포
 4. 320px, 390px, 768px, 1280px 실 브라우저 가로 스크롤 및 텍스트 겹침 0건 검증
+
+---
+
+## 🚀 [v155 Specification] 뷰포트 좌측 쏠림(Horizontal Scroll Clipping) 영구 차단 & 쪽지함 및 14대 핵심 도메인 전수 재점검 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청 및 피드백**:
+  - "기능재점검해" 지시와 함께 실제 모바일/데스크톱 운영 화면 스크린샷 2건 첨부.
+  - **스크린샷 1 이슈 분석**: `/chat` (쪽지함) 화면에서 왼쪽 헤더 "쪽지함"이 "지함"으로, 좌하단 "온보딩 퀘스트"가 "딩 퀘스트"로 좌측이 약 100~150px 잘리는 치명적인 뷰포트 오버플로우/좌측 쏠림 현상 포착.
+  - **근본 원인 (Root Cause)**:
+    1. CSS 상 `max-width: 100vw;` 사용 시 브라우저 수직 스크롤바 너비(약 15~17px)가 포함되어 클라이언트 너비보다 넓어짐.
+    2. 모바일 브라우저의 16px 미만 폰트 인풋 포커스 시 자동 확대(Auto-zoom) 및 가로 스크롤 이동(`window.scrollX > 0`).
+    3. `overflow-x: clip;` 또는 `overflow-x: hidden;`이 적용된 상태에서 `scrollLeft > 0`이 발생하면 수평 스크롤바가 숨겨져 있어 사용자가 좌측으로 화면을 되돌릴 수 없는 현상 발생.
+
+---
+
+### 2. 세부 구현 및 방어벽 명세 (Implementation Details)
+
+#### ① 런타임 수평 스크롤 가디언 엔진 (`frontend/src/components/viewport-scroll-guardian.tsx`)
+- 모바일/데스크톱 런타임 이벤트(`scroll`, `focusin`, `touchend`, `resize`, `orientationchange`) 레벨에서 `window.scrollX > 0` 또는 `scrollLeft > 0` 감지 즉시 `left: 0`으로 강제 복구.
+- 하이드레이션 이전 시점 대응을 위해 `frontend/src/app/layout.tsx` 내 인라인 즉시 락 스크립트 병행 삽입.
+
+#### ② 전역 CSS 뷰포트 오버플로우 규격 쇄신 (`globals.css`, `redesign.css`)
+- `html, body`: `width: 100%; max-width: 100%; overflow-x: hidden !important; position: relative;` 적용 (`100vw` 완전 배제).
+- 모바일 폼 입력 필드 자동 줌 방지: `@media (max-width: 640px) { input, select, textarea { font-size: 16px !important; } }`.
+
+#### ③ 쪽지함(`/chat`) 및 14대 핵심 도메인 전수 재점검 및 레이아웃 무결성 강화
+- `frontend/src/app/chat/page.tsx`: 최상위 컨테이너 `w-full max-w-6xl mx-auto min-w-0 overflow-hidden` 적용.
+- `frontend/src/app/chat/chat-view.tsx`: 우측 컬럼 `h-full min-h-0 overflow-hidden` 스타일 분리 및 레이아웃 누수 원천 차단.
+- `frontend/src/app/chat/chat-room.tsx`: 중복 테두리 제거 및 부모 높이 100% 매칭, 메시지 버블 `max-w-[78%]`, 44px 터치 타깃 완비.
+- `stocks`, `bank`, `casino`, `shop`: 모든 메인 뷰포트 컨테이너에 `w-full max-w-full min-w-0 overflow-hidden` 일괄 보강.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 백엔드 및 프론트엔드 정적 타입 검사 (`tsc --noEmit`) 100% ALL-PASS.
+2. Git 변경점 커밋 및 GitHub `origin/main` 푸시.
+3. 원격 운영 서버(`debian13`) `prod-v539` 무중단 승격 배포.
+4. 모바일 및 데스크톱 환경 실시간 헬스체크 및 좌측 잘림 0건 검증.

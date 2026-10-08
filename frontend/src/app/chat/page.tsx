@@ -82,7 +82,7 @@ export default async function ChatPage({
   }
 
   return (
-    <div data-page="chat" className="mv-page mv-page--member grid gap-4 max-w-6xl mx-auto">
+    <div data-page="chat" className="mv-page mv-page--member grid gap-4 w-full max-w-6xl mx-auto min-w-0 overflow-hidden">
       <PageHeader
         eyebrow={localeLabel(locale, '메시지', 'MESSAGES', 'メッセージ', '私信')}
         title={localeLabel(locale, '쪽지함', 'Direct Messages', 'メッセージ', '私信箱')}
