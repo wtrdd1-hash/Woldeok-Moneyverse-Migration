@@ -34,7 +34,7 @@ interface KdicPortalData {
 }
 
 function isExactWld(value: unknown): value is string {
-  return typeof value === 'string' && /^\\d+$/.test(value);
+  return typeof value === 'string' && /^[0-9]+$/.test(value);
 }
 
 function formatExactWld(value: string): string {
