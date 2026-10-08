@@ -60,5 +60,9 @@ it('notification center pauses hidden-tab polling, backs off failures and announ
   expect(source).toContain('setCountUnavailable(true)');
   expect(source).toContain('role="alert"');
   expect(source).toContain('min-h-11 min-w-11');
+  expect(source).toContain('const [retryRequest, setRetryRequest] = useState(0)');
+  expect(source).toContain('setRetryRequest((value) => value + 1)');
+  expect(source).toContain('[open, filter, retryRequest]');
+  expect(source).toContain('다시 시도');
   expect(source).not.toContain('setInterval(');
 });
