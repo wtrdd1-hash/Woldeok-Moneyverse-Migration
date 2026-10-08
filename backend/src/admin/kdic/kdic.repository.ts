@@ -65,6 +65,16 @@ export class KdicRepository {
 
   constructor(private readonly pool: Pool) {}
 
+  /** Public-only, DB-enforced projection. Never expose member/payout records here. */
+  async getPublicPortalSnapshot(): Promise<Record<string, unknown>> {
+    const result = await this.pool.query<{ snapshot: Record<string, unknown> | null }>(
+      'SELECT public.kdic_public_portal_snapshot() AS snapshot',
+    );
+    const snapshot = result.rows[0]?.snapshot;
+    if (!snapshot) throw new Error('KDIC public portal snapshot is unavailable');
+    return snapshot;
+  }
+
   async getFundStatus(): Promise<KdicFundStatus> {
     const res = await this.pool.query(`
       SELECT 

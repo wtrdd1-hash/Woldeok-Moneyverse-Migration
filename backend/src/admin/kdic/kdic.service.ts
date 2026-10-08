@@ -11,6 +11,11 @@ export class KdicService {
     private readonly discordAlertService?: DiscordAlertService,
   ) {}
 
+  /** No admin/private read path is used for the public portal. */
+  async getPublicPortalData(): Promise<Record<string, unknown>> {
+    return this.repo.getPublicPortalSnapshot();
+  }
+
   async getFundOverview() {
     const [fund, institutions, recentPremiums, recentPayouts] = await Promise.all([
       this.repo.getFundStatus(),
