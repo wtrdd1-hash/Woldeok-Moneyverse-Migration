@@ -983,7 +983,7 @@ export function FloatingSupportChatWidget() {
   return (
     <>
       {/* 1. 플로팅 챗 버블 트리거 버튼 */}
-      <div className="fixed bottom-[74px] right-3.5 sm:bottom-6 sm:right-6 z-40 select-none flex flex-col items-end group/support">
+      <div className="fixed bottom-20 right-3.5 sm:bottom-6 sm:right-6 z-40 select-none flex flex-col items-end group/support">
         {/* 데스크톱 마이크로 툴팁 배너 (호버 시 부드럽게 노출) */}
         {!isOpen && (
           <div className="hidden md:flex items-center gap-1.5 px-3 py-1 mb-2 rounded-full bg-zinc-950/95 border border-zinc-700/80 shadow-xl text-[11px] font-bold text-zinc-100 backdrop-blur-xl opacity-0 group-hover/support:opacity-100 transition-all duration-300 transform translate-y-1 group-hover/support:translate-y-0 pointer-events-none">
@@ -1031,7 +1031,7 @@ export function FloatingSupportChatWidget() {
       {isOpen && (
         <div
           ref={popupRef}
-          className="fixed bottom-[130px] right-3.5 sm:bottom-22 sm:right-6 z-40 w-[calc(100vw-1.75rem)] max-w-[380px] h-[min(550px,calc(100dvh-9.5rem))] flex flex-col rounded-2xl border border-border/80 bg-card/95 backdrop-blur-2xl shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200 text-foreground"
+          className="fixed bottom-20 sm:bottom-22 right-3.5 sm:right-6 z-40 w-[calc(100vw-1.75rem)] max-w-[380px] h-[min(550px,calc(100dvh-9.5rem))] flex flex-col rounded-2xl border border-border/80 bg-card/95 backdrop-blur-2xl shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200 text-foreground"
         >
           {/* A. 팝오버 상단 글로벌 헤더 */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/70 bg-muted/40 shrink-0">

@@ -213,21 +213,21 @@ export function InvestmentProfileQuiz() {
               </h4>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono">
-                <div className="p-2.5 rounded-lg bg-card border border-border/50 text-center">
-                  <span className="text-[10px] text-muted-foreground block">📈 가상 주식</span>
-                  <span className="text-base font-black text-emerald-400">{result.allocation.stocks}%</span>
+                <div className="p-2 sm:p-2.5 rounded-lg bg-card border border-border/50 flex flex-col items-center justify-center min-w-0 shadow-2xs">
+                  <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap truncate max-w-full block">📈 가상 주식</span>
+                  <span className="text-sm sm:text-base font-black text-emerald-400 mt-0.5">{result.allocation.stocks}%</span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-card border border-border/50 text-center">
-                  <span className="text-[10px] text-muted-foreground block">🏦 복리 예금</span>
-                  <span className="text-base font-black text-blue-400">{result.allocation.savings}%</span>
+                <div className="p-2 sm:p-2.5 rounded-lg bg-card border border-border/50 flex flex-col items-center justify-center min-w-0 shadow-2xs">
+                  <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap truncate max-w-full block">🏦 복리 예금</span>
+                  <span className="text-sm sm:text-base font-black text-blue-400 mt-0.5">{result.allocation.savings}%</span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-card border border-border/50 text-center">
-                  <span className="text-[10px] text-muted-foreground block">🏢 부동산 랜드</span>
-                  <span className="text-base font-black text-amber-400">{result.allocation.realEstate}%</span>
+                <div className="p-2 sm:p-2.5 rounded-lg bg-card border border-border/50 flex flex-col items-center justify-center min-w-0 shadow-2xs">
+                  <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap truncate max-w-full block">🏢 부동산 랜드</span>
+                  <span className="text-sm sm:text-base font-black text-amber-400 mt-0.5">{result.allocation.realEstate}%</span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-card border border-border/50 text-center">
-                  <span className="text-[10px] text-muted-foreground block">💵 현금 버퍼</span>
-                  <span className="text-base font-black text-purple-400">{result.allocation.cash}%</span>
+                <div className="p-2 sm:p-2.5 rounded-lg bg-card border border-border/50 flex flex-col items-center justify-center min-w-0 shadow-2xs">
+                  <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap truncate max-w-full block">💵 현금 버퍼</span>
+                  <span className="text-sm sm:text-base font-black text-purple-400 mt-0.5">{result.allocation.cash}%</span>
                 </div>
               </div>
 

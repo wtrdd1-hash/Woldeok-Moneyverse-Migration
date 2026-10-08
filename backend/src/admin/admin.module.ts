@@ -12,6 +12,7 @@ import { CONFIG } from '../core/config';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { StockModule } from '../stock/stock.module';
+import { ChatModule } from '../chat/chat.module';
 import { EncryptionService } from '../security/encryption.service';
 import { AdminController } from './admin.controller';
 import { AdminRepository } from './admin.repository';
@@ -69,7 +70,7 @@ import { KdicService } from './kdic/kdic.service';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 
 @Module({
-  imports: [AuthModule, StockModule],
+  imports: [AuthModule, StockModule, ChatModule],
   controllers: [
     ApiHealthController,
     AdminTreasuryController,

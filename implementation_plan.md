@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v119)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v141)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v141**: [관리자 ➡️ 유저 쪽지/메시지 발송 & 50만+ 디자인 스케일 프론트엔드 UI 겹침·잘림 원천 방지 마스터 아키텍처] 관리자 공식 메시지 발송 API 및 UI 콘솔 다이얼로그 구축 & 우측 하단 4중 위젯 충돌 박멸 및 통합 플로팅 독(Clean Dock) 체계화 & 모바일 퀵 액션 텍스트 잘림 및 AI 투자 진단기 비중 텍스트 겹침 완벽 교정 & UI 겹침 방지 마스터 가이드라인 수립 (+320, -0)
 - **v119**: [관리자 관제 전수 QA & 주소 연결] 관리자 31개 라우트 전수 점검, 주소-UI 누락(숨은 주소) 연결, 테스트 계정 프로비저닝 및 테스트서버(`test.easy-scraping.com`) 우선 검증 파이프라인 수립 (+280, -0)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
@@ -4099,3 +4100,68 @@ flowchart TD
 2. 유저 평균 잔액 집계 및 긴축 모드 발동 시 시민 배당 차단 동작 검증
 3. 주식 리그 및 시즌 랭킹 조회 시 'QA 슈퍼관리자', '월덕', '치킨' 등 관리자 계정 미노출 검증
 4. 프로덕션 빌드 통과 및 운영 서버 무중단 배포 및 라이브 검증
+
+---
+
+## 🚀 [v141 Specification] 관리자 ➡️ 유저 쪽지/메시지 발송 & 50만+ 디자인 스케일 프론트엔드 UI 겹침·잘림 원천 방지 마스터 아키텍처
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청 사항**:
+  1. "채팅 기능 점검후 관리자채팅기능(관리자가 유저한테 메시지 보내는 기능)만들고":
+     - 기존 쪽지 시스템(/chat 및 FloatingSupportChatWidget의 1:1 쪽지함) 점검.
+     - 관리자가 특정 사용자에게 직접 공식 알림/쪽지(Official Admin Direct Message)를 발송할 수 있는 관리자 전용 API 및 관리자 콘솔 UI 다이얼로그(AdminDirectMessageDialog) 구축.
+     - 수신 유저 화면에서 관리자 공식 인증 마크(🛡️ Official Admin) 및 최상단 눈에 띄는 스타일 제공.
+  2. "ui 꺠짐 겹치 방지해줘 제대로 여려 스킬및 50만이상 디자인 및 ui, 프론트엔드 관련래퍼런스 찾아서 강력하게 문서만들고 방지 해줘":
+     - 유저 업로드 스크린샷 5장에서 감지된 4대 치명적 UI 충돌 완벽 교정:
+       - **우측 하단 4중 위젯 충돌 박멸**: 덕이 AI 비서(DeokiAiFloatingAssistant), 고객센터/1:1 쪽지(FloatingSupportChatWidget), 온보딩 퀘스트(InteractiveOnboardingTracker), 모바일 바텀 네비게이션(MobileBottomNav)이 동일 좌표(bottom-6 right-6 및 bottom-20 right-4)에 겹쳐 화면을 뒤덮는 문제 해결 ➡️ 데스크톱 가로 나란히 배치(right-6, right-22), 모바일 세이프티 오프셋 및 덕이 말풍선 4초 자동 닫힘/미노출 처리.
+       - **모바일 퀵 액션 카드 텍스트 말줄임 잘림 방지**: 홈 화면 4대 퀵 액션 버튼(app/page.tsx)이 모바일에서 직업..., 주식..., 10-De... 등으로 잘리는 현상 해결 (패딩 최적화, 텍스트 크기 및 whitespace-nowrap 방어).
+       - **30초 AI 투자 성향 진단기 비중 텍스트 겹침**: investment-profile-quiz.tsx 내 추천 자산 배분 비중(가상 주식, 복리 예금, 부동산 랜드, 현금 버퍼) 박스 텍스트 줄바꿈/클리핑 교정.
+       - **404 및 관리자 페이지 플로팅 위젯 오염 방지**: RouteAwareFloatingUtilities를 통해 불필요한 지면에서 위젯 격리.
+  3. **50만+ 디자인 스케일 UI 무결점 마스터 가이드라인 문서 작성 (docs/frontend-ui-anti-clash-master-spec.md)**:
+     - Linear, Stripe, Toss, Apple HIG 수준의 Z-Index 계층 표준, 5대 뷰포트 무결점 그리드, 플로팅 독(Floating Dock) 아키텍처 공식화.
+
+### 2. 세부 컴포넌트 및 아키텍처 설계 (Detailed Design)
+
+#### ① 관리자 ➡️ 유저 쪽지/메시지 발송 시스템
+- **백엔드 API 엔드포인트**:
+  - POST /api/v1/admin/messages/send:
+    - DTO: recipientUserId (UUID), title (선택, 최대 100자), body (1~2,000자), isOfficial (boolean, 기본 true)
+    - 권한: @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+    - 로직: 관리자 계정과 수신 유저 간의 1:1 대화방을 private_chat_open으로 조회/개설 후 private_chat_send 실행. 관리자 메시지 접두어 [관리자 공식 통지] 및 발신자 뱃지 부여.
+    - 감사 로그: admin_audit_logs에 ADMIN_DIRECT_MESSAGE_SENT 기록.
+- **프론트엔드 관리자 UI**:
+  - AdminDirectMessageDialog (frontend/src/app/admin/admin-forms.tsx):
+    - 유저 상세 페이지(/admin/users/[id]) 및 유저 목록(/admin/users)에 [공식 쪽지 발송] 버튼 추가.
+    - 모달 내 제목, 메시지 본문 입력 폼, 발송 확인 2단계 확인.
+- **유저 쪽지함 UI (FloatingSupportChatWidget 및 /chat)**:
+  - 관리자가 발송한 쪽지에 [운영팀 공식] 뱃지 및 고대비 골드/블루 테두리 스타일 적용.
+
+#### ② 우측 하단 4중 위젯 충돌 박멸 및 통합 플로팅 클린 독 (Clean Floating Dock)
+- **데스크톱 레이아웃 (sm:)**:
+  - FloatingSupportChatWidget: sm:bottom-6 sm:right-6 (기준점)
+  - DeokiAiFloatingAssistant: sm:bottom-6 sm:right-22 (고객지원 왼쪽으로 64px 마진 확보하여 나란히 정렬, 절대 겹치지 않음!)
+  - InteractiveOnboardingTracker: sm:bottom-6 sm:left-6 (화면 좌측 하단으로 이동하여 우측 2대 위젯과 완전 격리!)
+- **모바일 레이아웃 (max-sm:)**:
+  - 모바일 바텀 네비게이션 높이 64px(bottom-0 h-16) 회피:
+  - FloatingSupportChatWidget: bottom-20 right-3.5 (바텀바 16px 상단)
+  - DeokiAiFloatingAssistant: bottom-20 right-17 (고객지원 버튼 바로 좌측에 컴팩트 정렬)
+  - DeokiAiFloatingAssistant 말풍선 툴팁: 모바일에서는 4초 후 자동 닫힘 및 닫기 상태 LocalStorage 저장.
+  - InteractiveOnboardingTracker: 모바일에서는 bottom-34 right-3.5 대신 모바일 좌측 하단 bottom-20 left-3.5 또는 상단 칩으로 배치하여 우측 버튼들과 100% 겹침 차단!
+
+#### ③ 모바일 퀵 액션 카드 및 AI 투자 진단기 글자 잘림 방지
+- frontend/src/app/page.tsx:
+  - 4 Core Quick Actions 버튼의 패딩을 p-2 min-[400px]:p-3로 최적화하고, 내부 타이포그래피에 whitespace-nowrap text-[11px] sm:text-xs 적용하여 모바일 340px~390px에서도 텍스트가 잘리지 않고 온전히 노출.
+- frontend/src/components/investment-profile-quiz.tsx:
+  - 추천 자산 배분 비중 박스 내부를 flex flex-col items-center justify-center p-2 min-w-0으로 리팩터링하여 긴 라벨(🏢 부동산 랜드)도 깔끔하게 렌더링.
+
+#### ④ 50만+ 디자인 스케일 UI 안티 클린 마스터 스펙 (docs/frontend-ui-anti-clash-master-spec.md)
+- Vercel, Linear, Toss, Stripe, Apple HIG 벤치마킹.
+- 레이어 Z-Index 토큰 표 (Dropdown, Sticky, Floating, Modal, Toast).
+- 뷰포트 매트릭스별 횡스크롤/클리핑 방지 수칙 명문화.
+
+### 3. 검증 계획 (Verification Plan)
+1. 백엔드 관리자 쪽지 발송 API 단위 테스트 및 Swagger 등록 확인.
+2. 프론트엔드 관리자 유저 상세에서 쪽지 발송 후 유저 쪽지함 수신 확인.
+3. 320px, 375px, 390px, 768px, 1280px 전 뷰포트에서 플로팅 위젯 겹침 0건 시각 검증.
+4. 모바일 퀵 액션 카드 텍스트 전문 노출 및 투자 성향 진단기 비중 텍스트 무결성 검증.
+5. Next.js 프로덕션 빌드 통과 및 무중단 승격 배포.

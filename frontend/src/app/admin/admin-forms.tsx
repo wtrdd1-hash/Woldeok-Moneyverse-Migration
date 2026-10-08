@@ -3,7 +3,7 @@
 import { Label } from '@/components/ui/label';
 
 import { useActionState, useState } from 'react';
-import { payoutToUser, reverseUserTransaction } from './actions';
+import { payoutToUser, reverseUserTransaction, sendAdminDirectMessage } from './actions';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { AmountInput } from '@/components/amount-input';
 import { Button } from '@/components/ui/button';
@@ -612,3 +612,80 @@ export function AdminAdjustmentDialog({
     </Dialog>
   );
 }
+
+/**
+ * Direct message dialog for administrators to dispatch an official notice or DM to a member.
+ */
+export function AdminDirectMessageDialog({
+  userId,
+  displayName,
+}: {
+  readonly userId: string;
+  readonly displayName: string;
+}) {
+  const [state, action] = useActionState(sendAdminDirectMessage, IDLE);
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="secondary" size="sm" className="min-h-11 gap-1.5 font-bold">
+          <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+          공식 쪽지 발송
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <form
+          action={async (formData) => {
+            await action(formData);
+            if (state.status === 'ok') {
+              setOpen(false);
+            }
+          }}
+          className="grid gap-4"
+        >
+          <input type="hidden" name="recipientUserId" value={userId} />
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span>📢</span> {displayName} 회원에게 공식 쪽지 발송
+            </DialogTitle>
+            <DialogDescription>
+              운영팀 공식 마크(🛡️ Official)가 부여된 1:1 쪽지를 발송합니다. 회원의 쪽지함에 실시간으로 전달됩니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          <Field>
+            <FieldLabel htmlFor={`msg-title-${userId}`}>공지 제목 (선택)</FieldLabel>
+            <Input
+              id={`msg-title-${userId}`}
+              name="title"
+              placeholder="예: [안내] 불공정 거래 소명 요청"
+              maxLength={100}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor={`msg-body-${userId}`}>쪽지 내용 (필수)</FieldLabel>
+            <Textarea
+              id={`msg-body-${userId}`}
+              name="body"
+              rows={4}
+              minLength={1}
+              maxLength={2000}
+              placeholder="회원에게 전달할 안내, 경고, 보상 내역 등을 작성해 주세요."
+              required
+            />
+            <FieldDescription>최대 2000자. 발송 내역은 관리자 감사 로그에 영구 기록됩니다.</FieldDescription>
+          </Field>
+
+          <ActionAlert state={state} />
+
+          <DialogFooter>
+            <SubmitButton>쪽지 발송</SubmitButton>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+

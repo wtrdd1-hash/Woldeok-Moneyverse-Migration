@@ -62,6 +62,14 @@ export function DeokiAiFloatingAssistant() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
+  // 4초 후 말풍선 툴팁 자동 닫힘 (화면 가림 및 UI 겹침 방지)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTooltipVisible(false);
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const fetchDiagnosis = async () => {
     setLoading(true);
     try {
@@ -152,15 +160,16 @@ export function DeokiAiFloatingAssistant() {
 
   return (
     <>
-      {/* 화면 우측 하단 플로팅 버튼 및 말풍선 */}
-      <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end pointer-events-auto">
+      {/* 화면 우측 하단 플로팅 버튼 및 말풍선 (고객지원 버튼 좌측에 나란히 정렬) */}
+      <div className="fixed bottom-20 right-17 sm:bottom-6 sm:right-22 z-40 flex flex-col items-end pointer-events-auto">
         {tooltipVisible && !isOpen && (
-          <div className="mb-2 p-2.5 rounded-xl bg-zinc-900/90 border border-amber-500/30 shadow-xl backdrop-blur-md text-xs text-amber-200 flex items-center gap-2 max-w-[220px] animate-bounce duration-1000">
+          <div className="mb-2 p-2.5 rounded-xl bg-zinc-900/90 border border-amber-500/30 shadow-xl backdrop-blur-md text-xs text-amber-200 flex items-center gap-2 max-w-[210px] animate-bounce duration-1000">
             <span className="text-base">🦆</span>
             <span className="leading-tight text-[11px]">
               <strong>AI 덕이</strong>가 내 자산 PR-Index 진단해 드려요!
             </span>
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setTooltipVisible(false);
@@ -173,20 +182,21 @@ export function DeokiAiFloatingAssistant() {
         )}
 
         <button
+          type="button"
           onClick={() => {
             setIsOpen(true);
             setTooltipVisible(false);
           }}
-          className="group relative w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 shadow-xl shadow-amber-500/25 flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 border-2 border-amber-300/40"
+          className="group relative size-12 sm:size-13 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 shadow-xl shadow-amber-500/25 flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 border-2 border-amber-300/40"
           aria-label="AI 금융 비서 덕이"
         >
           {/* 오리 캐릭터 SVG */}
-          <svg viewBox="0 0 36 36" className="w-9 h-9 fill-current text-zinc-950">
+          <svg viewBox="0 0 36 36" className="size-7 sm:size-8 fill-current text-zinc-950">
             <path d="M18 4C13.58 4 10 7.58 10 12c0 2.22.9 4.22 2.36 5.67C9.78 19.38 8 22.48 8 26c0 3.31 2.69 6 6 6h8c4.42 0 8-3.58 8-8 0-4.08-2.61-7.55-6.28-8.82C24.87 14.15 25.5 13.12 25.5 12c0-4.42-3.58-8-7.5-8zM15 10c.83 0 1.5.67 1.5 1.5S15.83 13 15 13s-1.5-.67-1.5-1.5S14.17 10 15 10zm11.5 3c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
             <path d="M22 13c0 1.1-.9 2-2 2h-4c-1.1 0-2-.9-2-2s.9-2 2-2h4c1.1 0 2 .9 2 2z" className="text-orange-900 fill-orange-700" />
           </svg>
-          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-zinc-950 flex items-center justify-center">
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-950 animate-ping" />
+          <span className="absolute -top-1 -right-1 size-3.5 rounded-full bg-emerald-400 border-2 border-zinc-950 flex items-center justify-center">
+            <span className="size-1 rounded-full bg-zinc-950 animate-ping" />
           </span>
         </button>
       </div>

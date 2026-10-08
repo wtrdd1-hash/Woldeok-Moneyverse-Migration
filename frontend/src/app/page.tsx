@@ -180,25 +180,24 @@ export default async function HomePage() {
             </p>
           </div>
 
-          {/* 4 Core Quick Actions (44px+ 터치 타깃 & Inset Border 준수) */}
-          <div className="grid grid-cols-1 min-[340px]:grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-3">
-            <div className="flex flex-col justify-center">
+          {/* 4 Core Quick Actions (Zero-Clipping Responsive Layout) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-2.5">
+            <div className="flex flex-col justify-center min-w-0">
               <P2PTransferModal triggerText="1:1 P2P 안심 송금" />
             </div>
 
             <Link
               href="/work"
-
-              className="flex items-center gap-2.5 min-[400px]:gap-3 p-2.5 min-[400px]:p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-blue-500/40 transition-all active:scale-[0.98] group min-h-[52px] sm:min-h-[56px] shadow-xs min-w-0"
+              className="flex items-center gap-2 min-[360px]:gap-2.5 min-[400px]:gap-3 p-2 min-[360px]:p-2.5 min-[400px]:p-3 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-blue-500/40 transition-all active:scale-[0.98] group min-h-[50px] sm:min-h-[56px] shadow-xs min-w-0"
             >
-              <div className="grid size-8.5 min-[400px]:size-10 shrink-0 place-items-center rounded-lg bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-primary-foreground transition-colors">
-                <Briefcase className="size-4.5 min-[400px]:size-5" />
+              <div className="grid size-7.5 min-[360px]:size-8.5 min-[400px]:size-9.5 shrink-0 place-items-center rounded-lg bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-primary-foreground transition-colors">
+                <Briefcase className="size-4 min-[400px]:size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="block text-xs sm:text-sm font-bold text-foreground truncate">
+                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground whitespace-nowrap leading-tight">
                   <T korean="직업 출근" english="Careers" japanese="職業出勤" chinese="职业上班" />
                 </span>
-                <span className="block text-[10px] text-muted-foreground truncate">
+                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground whitespace-nowrap leading-tight mt-0.5">
                   <T korean="일일 급여 수령" english="Daily Salary" japanese="日次給与受取" chinese="领取每日薪资" />
                 </span>
               </div>
@@ -206,16 +205,16 @@ export default async function HomePage() {
 
             <Link
               href="/stocks"
-              className="flex items-center gap-2.5 min-[400px]:gap-3 p-2.5 min-[400px]:p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-emerald-500/40 transition-all active:scale-[0.98] group min-h-[52px] sm:min-h-[56px] shadow-xs min-w-0"
+              className="flex items-center gap-2 min-[360px]:gap-2.5 min-[400px]:gap-3 p-2 min-[360px]:p-2.5 min-[400px]:p-3 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-emerald-500/40 transition-all active:scale-[0.98] group min-h-[50px] sm:min-h-[56px] shadow-xs min-w-0"
             >
-              <div className="grid size-8.5 min-[400px]:size-10 shrink-0 place-items-center rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-primary-foreground transition-colors">
-                <TrendingUp className="size-4.5 min-[400px]:size-5" />
+              <div className="grid size-7.5 min-[360px]:size-8.5 min-[400px]:size-9.5 shrink-0 place-items-center rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-primary-foreground transition-colors">
+                <TrendingUp className="size-4 min-[400px]:size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="block text-xs sm:text-sm font-bold text-foreground truncate">
+                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground whitespace-nowrap leading-tight">
                   <T korean="주식 거래" english="Stocks" japanese="株式取引" chinese="股票交易" />
                 </span>
-                <span className="block text-[10px] text-muted-foreground truncate">
+                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground whitespace-nowrap leading-tight mt-0.5">
                   <T korean="10-Depth 호가 매매" english="Orderbook" japanese="10-Depth気配値取引" chinese="10档深度盘口交易" />
                 </span>
               </div>
@@ -223,16 +222,16 @@ export default async function HomePage() {
 
             <Link
               href="/bank"
-              className="flex items-center gap-2.5 min-[400px]:gap-3 p-2.5 min-[400px]:p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-purple-500/40 transition-all active:scale-[0.98] group min-h-[52px] sm:min-h-[56px] shadow-xs min-w-0"
+              className="flex items-center gap-2 min-[360px]:gap-2.5 min-[400px]:gap-3 p-2 min-[360px]:p-2.5 min-[400px]:p-3 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-purple-500/40 transition-all active:scale-[0.98] group min-h-[50px] sm:min-h-[56px] shadow-xs min-w-0"
             >
-              <div className="grid size-8.5 min-[400px]:size-10 shrink-0 place-items-center rounded-lg bg-purple-500/10 text-purple-500 group-hover:bg-purple-500 group-hover:text-primary-foreground transition-colors">
-                <Landmark className="size-4.5 min-[400px]:size-5" />
+              <div className="grid size-7.5 min-[360px]:size-8.5 min-[400px]:size-9.5 shrink-0 place-items-center rounded-lg bg-purple-500/10 text-purple-500 group-hover:bg-purple-500 group-hover:text-primary-foreground transition-colors">
+                <Landmark className="size-4 min-[400px]:size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="block text-xs sm:text-sm font-bold text-foreground truncate">
+                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground whitespace-nowrap leading-tight">
                   <T korean="가상 은행" english="Bank" japanese="仮想銀行" chinese="虚拟银行" />
                 </span>
-                <span className="block text-[10px] text-muted-foreground truncate">
+                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground whitespace-nowrap leading-tight mt-0.5">
                   <T korean="복리 저축·국채" english="Savings & Bonds" japanese="複利貯蓄・国債" chinese="复利储蓄·国债" />
                 </span>
               </div>

@@ -734,3 +734,46 @@ export async function executeWealthTaxAction(
     return failure(error, '부자 과세 집행에 실패했습니다.');
   }
 }
+
+export async function sendAdminDirectMessage(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const recipientUserId = text(formData.get('recipientUserId'));
+  const title = text(formData.get('title'));
+  const body = text(formData.get('body'));
+
+  if (!recipientUserId) {
+    return { status: 'error', message: '수신 대상 회원을 찾을 수 없어요.' };
+  }
+  if (!body || body.length < 1 || body.length > 2000) {
+    return { status: 'error', message: '쪽지 본문은 1자 이상 2000자 이하여야 해요.' };
+  }
+
+  try {
+    const res = await mutate<{
+      success: boolean;
+      conversationId: string;
+      messageId: string;
+      createdAt: string;
+    }>('/api/v1/admin/messages/send', {
+      method: 'POST',
+      body: {
+        recipientUserId,
+        title: title || undefined,
+        body,
+      },
+    });
+
+    revalidatePath('/admin/users');
+    revalidatePath(`/admin/users/${encodeURIComponent(recipientUserId)}`);
+    revalidatePath('/chat');
+    return {
+      status: 'ok',
+      message: '회원에게 관리자 공식 쪽지를 성공적으로 발송했습니다.',
+    };
+  } catch (error) {
+    return failure(error, '관리자 쪽지 발송에 실패했습니다. 세션 상태를 확인해 주세요.');
+  }
+}
+

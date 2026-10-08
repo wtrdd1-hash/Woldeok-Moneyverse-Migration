@@ -14,7 +14,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { IsBoolean, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { randomUUID } from 'node:crypto';
+import { ChatService } from '../chat/chat.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
@@ -46,6 +48,38 @@ export class UserRestrictionDto {
   readonly reason!: string;
 }
 
+export class SendAdminDirectMessageDto {
+  @ApiProperty({ format: 'uuid', description: '수신 대상 회원 UUID' })
+  @IsUUID()
+  readonly recipientUserId!: string;
+
+  @ApiProperty({ description: '공식 쪽지 제목 (선택)', maxLength: 100, required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  readonly title?: string;
+
+  @ApiProperty({ description: '공식 쪽지 본문', minLength: 1, maxLength: 2000 })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(2000)
+  readonly body!: string;
+}
+
+export class BroadcastAdminMessageDto {
+  @ApiProperty({ description: '전체 공지 제목', minLength: 1, maxLength: 100 })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  readonly title!: string;
+
+  @ApiProperty({ description: '전체 공지 본문', minLength: 1, maxLength: 2000 })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(2000)
+  readonly body!: string;
+}
+
 /**
  * Every route here carries the full guard chain, AdminGuard included, and
  * every write carries CsrfGuard on top. There is no read here that a
@@ -74,11 +108,19 @@ export class UserRestrictionDto {
 @Controller('admin')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
 export class AdminController {
-  constructor(@Inject(AdminService) private readonly admin: AdminService | null) {}
+  constructor(
+    @Inject(AdminService) private readonly admin: AdminService | null,
+    @Inject(ChatService) private readonly chat: ChatService | null,
+  ) {}
 
   private service(): AdminService {
     if (!this.admin) throw new ServiceUnavailableException('admin service is unavailable');
     return this.admin;
+  }
+
+  private chatService(): ChatService {
+    if (!this.chat) throw new ServiceUnavailableException('chat service is unavailable');
+    return this.chat;
   }
 
   private async guarded<T>(work: () => Promise<T>, message: string): Promise<T> {
@@ -159,13 +201,94 @@ export class AdminController {
         this.service().setUserRestriction({
           actorUserId: requireUserId(request),
           userId,
-          // The audit row this writes one layer down and the console access
-          // row the trail middleware writes are the same administrator
-          // action seen from two heights; the request id is what says so.
           requestId: contextOf(request)?.requestId ?? null,
           ...body,
         }),
       'invalid restriction request',
     );
+  }
+
+  @Post('messages/send')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
+  @ApiOperation({ summary: '관리자가 특정 회원에게 공식 쪽지 발송' })
+  async sendDirectMessage(
+    @Req() request: RequestWithSession,
+    @Body() dto: SendAdminDirectMessageDto,
+  ) {
+    const actorUserId = requireUserId(request);
+    const prefix = dto.title?.trim()
+      ? `📢 [운영팀 공식 공지: ${dto.title.trim()}]\n\n`
+      : `📢 [운영팀 공식 메시지]\n\n`;
+    const fullBody = `${prefix}${dto.body.trim()}`;
+
+    // 1. 관리자와 대상 유저 간의 1:1 대화방 개설 또는 기존 대화방 조회
+    const conversation = await this.chatService().openConversation(actorUserId, dto.recipientUserId);
+
+    // 2. 메시지 발송
+    const key = randomUUID();
+    const sent = await this.chatService().sendMessage(actorUserId, conversation.conversation_id, key, fullBody);
+
+    // 3. 감사 로그 기록
+    await this.service().recordAudit({
+      actorUserId,
+      action: 'admin_send_direct_message',
+      targetId: dto.recipientUserId,
+      requestId: contextOf(request)?.requestId ?? null,
+      metadata: {
+        conversationId: conversation.conversation_id,
+        messageId: sent.message_id,
+        title: dto.title ?? null,
+      },
+    });
+
+    return {
+      success: true,
+      conversationId: conversation.conversation_id,
+      messageId: sent.message_id,
+      sequence: sent.sequence,
+      createdAt: sent.created_at,
+    };
+  }
+
+  @Post('messages/broadcast')
+  @UseGuards(AdminSessionGuard, CsrfGuard, ReauthGuard)
+  @ApiOperation({ summary: '관리자가 전체 회원에게 공식 공지 쪽지 일괄 발송' })
+  async broadcastMessage(
+    @Req() request: RequestWithSession,
+    @Body() dto: BroadcastAdminMessageDto,
+  ) {
+    const actorUserId = requireUserId(request);
+    const users = (await this.service().users(actorUserId, { limit: 100 })) as Array<{ user_id: string }>;
+
+    const prefix = `📢 [전체 공식 공지: ${dto.title.trim()}]\n\n`;
+    const fullBody = `${prefix}${dto.body.trim()}`;
+
+    let sentCount = 0;
+    for (const target of users) {
+      if (target.user_id === actorUserId) continue;
+      try {
+        const conv = await this.chatService().openConversation(actorUserId, target.user_id);
+        await this.chatService().sendMessage(actorUserId, conv.conversation_id, randomUUID(), fullBody);
+        sentCount++;
+      } catch {
+        // Continue delivering to remaining users even if one fails
+      }
+    }
+
+    await this.service().recordAudit({
+      actorUserId,
+      action: 'admin_broadcast_message',
+      requestId: contextOf(request)?.requestId ?? null,
+      metadata: {
+        title: dto.title,
+        recipientCount: sentCount,
+      },
+    });
+
+    return {
+      success: true,
+      sentCount,
+      totalUsers: users.length - 1,
+    };
   }
 }
