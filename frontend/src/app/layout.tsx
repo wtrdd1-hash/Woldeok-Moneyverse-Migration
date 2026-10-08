@@ -15,6 +15,7 @@ import { SessionKeepAlive } from '@/components/session-keep-alive';
 import { WatchlistPromotionEngine } from '@/components/watchlist-promotion-engine';
 import { FirstTradeOnboardingModal } from '@/components/first-trade-onboarding-modal';
 import { StockAlertPushEngine } from '@/components/stock-alert-push-engine';
+import { DeokiAiFloatingAssistant } from '@/components/deoki-ai-floating-assistant';
 
 import { currentViewer } from '@/lib/viewer';
 import { fetchLatestPolicy } from '@/lib/api';
@@ -337,6 +338,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <WatchlistPromotionEngine />
               <FirstTradeOnboardingModal />
               <StockAlertPushEngine />
+              <DeokiAiFloatingAssistant />
             </ThemeProvider>
 
           </CurrencyProvider>

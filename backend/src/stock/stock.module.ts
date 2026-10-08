@@ -10,10 +10,18 @@ import { StockController } from './stock.controller';
 import { StockService } from './stock.service';
 import { PostgresStockRepository } from './stock.repository';
 import { MarketBroadcast } from './market-broadcast';
+import { StockLeagueController } from './stock-league.controller';
+import { StockLeagueRepository } from './stock-league.repository';
 
 @Module({
   imports: [AuthModule],
-  controllers: [StockController, StockAlertController, NewspaperController, DerivativesController],
+  controllers: [
+    StockController,
+    StockAlertController,
+    NewspaperController,
+    DerivativesController,
+    StockLeagueController,
+  ],
   providers: [
     {
       provide: StockService,
@@ -26,7 +34,12 @@ import { MarketBroadcast } from './market-broadcast';
       inject: [PG_POOL],
       useFactory: (pool: Queryable | null) => (pool ? new StockAlertRepository(pool) : null),
     },
+    {
+      provide: StockLeagueRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new StockLeagueRepository(pool) : null),
+    },
   ],
-  exports: [StockService, StockAlertRepository],
+  exports: [StockService, StockAlertRepository, StockLeagueRepository],
 })
 export class StockModule {}

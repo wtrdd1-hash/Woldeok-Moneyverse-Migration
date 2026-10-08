@@ -44,6 +44,7 @@ import { SpaceModule } from './space/space.module';
 import { ClubModule } from './club/club.module';
 import { CollectionModule } from './collection/collection.module';
 import { SeoModule } from './seo/seo.module';
+import { AdvisorModule } from './advisor/advisor.module';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -61,6 +62,7 @@ const ONE_MINUTE_MS = 60_000;
     MarketplaceModule,
     CasinoModule,
     NotificationModule,
+    AdvisorModule,
     ShopModule,
     StockModule,
     MarketTickerModule,

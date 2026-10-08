@@ -29,6 +29,7 @@ import { TradeDiaryDrawer } from '@/components/trade-diary-drawer';
 import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
 import { FinancialKnowledgeHub } from '@/components/financial-knowledge-hub';
 import { StockSeasonLeaderboard } from '@/components/stock-season-leaderboard';
+import { StockLeagueLaunchCard } from '@/components/stock-league-launch-card';
 import { StockDetailDialog } from './stock-detail-dialog';
 import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { TradeDialog } from './trade-dialog';
@@ -218,6 +219,9 @@ export default async function StocksPage({
 
       {/* WDX 실시간 가상 기업 공시 & 속보 피드 (Section 5.6) */}
       <StockDisclosureTicker />
+
+      {/* 가상 주식 실전 챔피언십 리그 & 상위 1% 고래 카피 트레이딩 배너 */}
+      <StockLeagueLaunchCard />
 
       {/* 시장 소식 & 월드 펄스 뉴스 목록 */}
       <MarketNews events={events} />

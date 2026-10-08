@@ -3938,3 +3938,103 @@ flowchart TD
 3. 1:1 베팅 및 3% 국고 수수료 차감 트랜잭션 단위 테스트 검증
 4. 암시장 입찰 및 안티스나이핑 연장 로직 검증
 5. Next.js 프로덕션 빌드 및 운영 서버 무중단 승격
+
+---
+## 🚀 [v139 Specification] 차세대 5대 기능 2단계(Phase 2) 구현 착수: 가상 주식 실전 챔피언십 리그 & 고래 카피 트레이딩 + AI 전속 금융 비서 덕이 (+420, -0)
+
+### 1. 사용자 조율(Interactive Alignment) 확정 사양
+- **작업 모드**: Phase 2 [가상 주식 실전 챔피언십 리그 & 고래 카피 트레이딩] 및 [AI 전속 금융 비서 덕이] 풀스택 구축 및 운영 서버 무중단 승격.
+- **[가상 주식 실전 챔피언십 리그 & 고래 카피 트레이딩]**:
+  - **시즌 주기**: 14일 주기 자동 롤링 시즌제 (브론즈, 실버, 골드, 플래티넘, 다이아몬드, 마스터, 챌린저 7대 티어).
+  - **상금 및 국고 연동**: 시즌 참가비(기본 10,000 WLD) 풀 조성 + 국고 잉여금에서 매 시즌 1,000,000 WLD 보조금 지원, 상위 10명에게 차등 상금 지급.
+  - **고래 카피 트레이딩**: 상위 1% 랭커 또는 수익률 상위 유저의 포트폴리오 1클릭 복제(Copy Trading).
+  - **고래 10% 인센티브 분배 엔진**: 카피 트레이딩 팔로워가 수익 실현 매도 시 순이익의 10%를 원작자 고래 지갑으로 자동 송금(원작자 수익 창출 동기 부여).
+  - **실시간 주식 매매 체결 동기화**: 백엔드 `StockTradeService` 체결 시 활성 카피 트레이딩 구독자들에게 비례 수량 자동 추종 매수/매도 집행.
+- **[AI 전속 금융 비서 '덕이(Deoki)']**:
+  - **PR-Index (Portfolio Risk Index, 0~100점)**: 유저의 전체 자산(주식, 가상 달러 외화 예금, 국채, 현금) 중 단일 종목 집중도, 변동성, 현금 비중을 종합 진단하여 0(초위험)~100(완벽 분산 안전) 점수 산정.
+  - **맞춤형 리밸런싱 처방전**: 주식 비중 과다 시 안전 국채/외화 분산 제안, 특정 테마주 몰빵 시 우량 지수 분산 권고.
+  - **대시보드 플로팅 덕이 위젯**: 화면 우측 하단에 인터랙티브한 핀테크 덕이 마스코트 버튼 배치, 클릭 시 1초 자산 종합 진단 모달 및 대화형 조언 팝업.
+  - **실시간 리스크 경고**: 계좌 급락(-15% 이상) 또는 몰빵 투자 감지 시 덕이의 직관적인 안전 브레이크 알림.
+
+### 2. 세부 데이터베이스 원장 설계 (Phase 2)
+1. `stock_league_seasons`:
+   - `id`: UUID PRIMARY KEY DEFAULT gen_random_uuid()
+   - `season_number`: INT NOT NULL UNIQUE
+   - `title`: VARCHAR(128) NOT NULL
+   - `starts_at`: TIMESTAMPTZ NOT NULL
+   - `ends_at`: TIMESTAMPTZ NOT NULL
+   - `prize_pool`: NUMERIC NOT NULL DEFAULT 0
+   - `treasury_subsidy`: NUMERIC NOT NULL DEFAULT 1000000
+   - `status`: VARCHAR(32) NOT NULL DEFAULT 'active' ('upcoming', 'active', 'settled')
+   - `winner_user_id`: UUID REFERENCES users(id)
+   - `total_participants`: INT NOT NULL DEFAULT 0
+   - `created_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+2. `stock_league_participants`:
+   - `id`: UUID PRIMARY KEY DEFAULT gen_random_uuid()
+   - `season_id`: UUID NOT NULL REFERENCES stock_league_seasons(id)
+   - `user_id`: UUID NOT NULL REFERENCES users(id)
+   - `initial_asset`: NUMERIC NOT NULL
+   - `current_asset`: NUMERIC NOT NULL
+   - `roi_rate`: NUMERIC NOT NULL DEFAULT 0 -- 수익률 (%)
+   - `rank_position`: INT DEFAULT 0
+   - `tier`: VARCHAR(32) NOT NULL DEFAULT 'Bronze'
+   - `is_whale`: BOOLEAN NOT NULL DEFAULT FALSE
+   - `follower_count`: INT NOT NULL DEFAULT 0
+   - `created_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+   - `updated_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+   - UNIQUE(season_id, user_id)
+
+3. `copy_trading_subscriptions`:
+   - `id`: UUID PRIMARY KEY DEFAULT gen_random_uuid()
+   - `follower_id`: UUID NOT NULL REFERENCES users(id)
+   - `whale_id`: UUID NOT NULL REFERENCES users(id)
+   - `allocated_budget`: NUMERIC NOT NULL -- 복제에 투입할 자본금
+   - `used_budget`: NUMERIC NOT NULL DEFAULT 0
+   - `copy_ratio`: NUMERIC NOT NULL DEFAULT 1.0
+   - `total_profit_shared`: NUMERIC NOT NULL DEFAULT 0 -- 고래에게 지급된 수수료 총합
+   - `status`: VARCHAR(32) NOT NULL DEFAULT 'active' ('active', 'paused', 'cancelled')
+   - `created_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+   - `updated_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+   - UNIQUE(follower_id, whale_id)
+
+4. `ai_financial_diagnoses`:
+   - `id`: UUID PRIMARY KEY DEFAULT gen_random_uuid()
+   - `user_id`: UUID NOT NULL REFERENCES users(id)
+   - `pr_index`: INT NOT NULL -- 0 ~ 100
+   - `risk_level`: VARCHAR(32) NOT NULL ('VERY_LOW', 'MODERATE', 'HIGH', 'CRITICAL')
+   - `asset_summary`: JSONB NOT NULL -- { cash, stocks, bonds, fx, total }
+   - `diagnostic_notes`: JSONB NOT NULL -- 3~5개 핵심 처방 및 리스크 분석 요약
+   - `rebalance_suggestions`: JSONB NOT NULL -- 추천 분산 비중
+   - `created_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+### 3. 파일별 변경 계획 (Proposed Changes)
+- **Database Migrations**:
+  - `packages/database/migrations/261-stock-league-and-deoki-ai-advisor.sql`
+- **Backend API & Service**:
+  - `backend/src/stock/stock-league.repository.ts` & `stock-league.controller.ts`:
+    - `GET /api/v1/stocks/league/current`: 현재 활성 시즌 정보 및 리더보드
+    - `POST /api/v1/stocks/league/join`: 리그 참가 신청
+    - `GET /api/v1/stocks/league/whales`: 카피 트레이딩 가능한 상위 고래 트레이더 목록
+    - `POST /api/v1/stocks/league/copy-trade/subscribe`: 특정 고래 카피 트레이딩 구독
+    - `POST /api/v1/stocks/league/copy-trade/cancel`: 카피 트레이딩 해제
+  - `backend/src/advisor/deoki-advisor.repository.ts` & `deoki-advisor.controller.ts`:
+    - `GET /api/v1/advisor/deoki/diagnose`: 현재 자산 분석 및 1초 PR-Index 진단
+    - `POST /api/v1/advisor/deoki/ask`: 덕이와의 금융 상담 질의응답 (포트폴리오 리밸런싱, 종목 추천, 절세 등)
+  - `backend/src/stock/stock.module.ts` & `backend/src/app.module.ts`: 신규 모듈/컨트롤러 등록
+- **Frontend BFF & UI Components**:
+  - `frontend/src/app/api/stocks/league/route.ts` & `[action]/route.ts`: 리그 및 카피트레이딩 프록시
+  - `frontend/src/app/api/advisor/deoki/route.ts`: 덕이 AI 진단 프록시
+  - `frontend/src/components/stock-league-championship-modal.tsx`: 실전 주식 리그 랭킹보드, 티어 뱃지, 고래 1클릭 복제 모달
+  - `frontend/src/components/deoki-ai-floating-assistant.tsx`: 우측 하단 플로팅 덕이 비서 캐릭터, 실시간 리스크 말풍선, 대화형 진단 팝업
+  - `frontend/src/app/stocks/page.tsx` & `frontend/src/app/page.tsx`: UI 카드 및 배너 마운트
+- **Testing & Verification**:
+  - 백엔드 Vitest 단위 테스트 (`stock-league.test.ts`, `deoki-advisor.test.ts`)
+  - 프론트엔드 및 백엔드 프로덕션 빌드 통과
+
+### 4. 검증 계획 (Verification Plan)
+1. PostgreSQL 261 마이그레이션 적용 및 테이블 무결성 확인
+2. 14일 시즌제 생성 및 시드 데이터 주입 검증
+3. 고래 트레이더 포트폴리오 공개 및 카피 트레이딩 구독/취소 원장 트랜잭션 단위 테스트
+4. AI 덕이 PR-Index 산출 알고리즘 및 리밸런싱 처방 데이터 반환 검증
+5. Next.js 및 NestJS 전체 빌드 통과 후 원격 서버 무중단 배포 및 라이브 엔드포인트 curl 검증
