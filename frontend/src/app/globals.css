@@ -17,9 +17,9 @@
   --paper: #faf8f2;
   --paper-dark: #f2ede1;
   --surface: #ffffff;
-  --forest: #b45309;
-  --forest-deep: #78350f;
-  --forest-soft: #d97706;
+  --forest: #059669;
+  --forest-deep: #064e3b;
+  --forest-soft: #10b981;
   --clay: #f59e0b;
   --clay-soft: #fef3c7;
   --clay-ink: #b45309;
@@ -56,11 +56,11 @@
 
   --border: var(--line);
   --input: #ded7c4;
-  --ring: rgb(245 158 11 / 0.6);
+  --ring: rgb(16 185 129 / 0.6);
 
   /* Korean market convention. */
-  --rise: #c0392b;
-  --fall: #2f5fa8;
+  --rise: #ef4444;
+  --fall: #3b82f6;
 
   --chart-1: var(--forest-soft);
   --chart-2: var(--clay);
@@ -89,13 +89,13 @@
   --ink-soft: #94a3b8;
   --line: #1e293b;
 
-  --forest: #1e293b;
-  --forest-deep: #0a0f1d;
-  --forest-soft: #fbbf24; /* Radiant Moonbeam */
-  --clay: #f59e0b; /* Glowing Gold */
-  --clay-soft: #1e1b13;
-  --clay-ink: #fbbf24;
-  --mint: #111a16;
+  --forest: #064e3b;
+  --forest-deep: #022c22;
+  --forest-soft: #10b981; /* Vibrant Emerald Money Green */
+  --clay: #f59e0b; /* Warm Gold */
+  --clay-soft: #08281b;
+  --clay-ink: #34d399;
+  --mint: #064e3b;
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -116,10 +116,10 @@
   --destructive-foreground: #0b0f17;
   --border: var(--line);
   --input: #1e293b;
-  --ring: rgb(251 191 36 / 0.6);
+  --ring: rgb(16 185 129 / 0.6);
 
-  --rise: #f87171;
-  --fall: #60a5fa;
+  --rise: #ef4444;
+  --fall: #3b82f6;
 
   --chart-1: var(--forest-soft);
   --chart-2: var(--clay);

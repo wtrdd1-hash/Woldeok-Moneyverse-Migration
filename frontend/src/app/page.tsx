@@ -147,7 +147,7 @@ export default async function HomePage() {
       {/* 1. TOP HERO: 2026 Asymmetric Bento Grid 2.0 (2x2 메인 자산 히어로 & 4대 퀵 액션) */}
       <section
         aria-labelledby="hero-balance-heading"
-        className="rounded-2xl sm:rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-md p-5 sm:p-8 hover:border-primary/30 transition-all duration-200 zero-overflow-shield"
+        className="rounded-2xl sm:rounded-3xl border border-emerald-500/30 bg-card/95 shadow-[0_4px_30px_rgba(16,185,129,0.08)] backdrop-blur-xl p-5 sm:p-8 hover:border-emerald-500/50 transition-all duration-200 zero-overflow-shield"
       >
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/60">
           <div className="flex items-center gap-2">

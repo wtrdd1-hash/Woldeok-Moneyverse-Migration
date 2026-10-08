@@ -75,7 +75,7 @@ export function MobileBottomNav() {
               <div className="relative shrink-0">
                 <Icon className={`size-5 transition-transform ${item.isActive ? 'stroke-[2.5px] scale-110' : 'stroke-[1.75px]'}`} />
                 {item.isActive && (
-                  <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+                  <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(16,185,129,0.85)]" />
                 )}
               </div>
               <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-[64px] font-sans">
