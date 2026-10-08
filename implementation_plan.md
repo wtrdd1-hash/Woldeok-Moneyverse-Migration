@@ -3677,3 +3677,177 @@ flowchart TD
 - 프로덕션 빌드 무결성 확인.
 - Git 커밋 및 운영 서버 무중단 블루-그린 배포.
 - 모바일(390px) 및 PC(1280px) 전 구간 횡스크롤 0건 및 정상 동작 실측.
+
+
+### 5. 최종 구현 및 운영 서버 무중단 승격 결과 (Completed Results)
+1. **7일 연속 출석 스트릭 & 도파민 럭키 룰렛 완결**:
+   - PostgreSQL 원장 테이블 `daily_attendance_logs` 구축 및 인덱스 완료.
+   - 백엔드 REST API `GET /api/v1/engagement/dopamine/attendance/status` 및 `POST /api/v1/engagement/dopamine/attendance/spin` 구축.
+   - 프론트엔드 실시간 연동 `DailyAttendanceRoulette` 컴포넌트 마운트 (홈 화면 상단 배치).
+   - 7일차 1,000 WLD 잭팟 및 `in_app_notifications` 축하 알림 자동 발송 연동.
+2. **1:1 P2P 스마트 안심 송금 & 감사 메모 완결**:
+   - PostgreSQL 원장 테이블 `p2p_wire_transfers` 구축.
+   - 백엔드 닉네임 검색 API `GET /api/v1/wallet/recipients/search` 및 `POST /api/v1/wallet/transfers/p2p` 구축.
+   - 프론트엔드 `P2PTransferModal` 컴포넌트 마운트 (30자 감사 메모 + 6종 감정 스티커 동봉 + 즉시 영수증 발급).
+3. **실시간 통합 알림 센터 & 원클릭 보상 수령함 완결**:
+   - `in_app_notifications` 기반 백엔드 API `POST /api/v1/notifications/claim-all` 구축.
+   - 상단 헤더 알림 종(Bell) 아이콘에 실시간 미확인 뱃지 연동 및 클릭 시 `NotificationCenterModal` 오픈.
+   - '원클릭 모두 수령'으로 모든 보상 일괄 수령 및 읽음 처리 지원.
+4. **무중단 배포 및 실측**:
+   - 최신 커밋 `8670bcaa` 운영 서버 풀 및 빌드 완료.
+   - 백엔드(`moneyverse-backend`) 및 프론트엔드(`moneyverse-frontend`) 서비스 100% 정상 가동 (`active`).
+   - 라이브 도메인(`https://easy-scraping.com/`)에서 신규 UI 정상 렌더링 검증 완료.
+
+
+---
+## 🚀 [v137 Specification] 머니버스 5대 엔드게임 & 차세대 소셜 금융 시스템 종합 상세 기획서 (+650, -0)
+
+### 1. 🏛️ [기능 1] 클럽 연합 기업 적대적 M&A & 상장사 경영권 쟁탈전 (Hostile M&A War)
+
+#### 1.1 기획 의도 및 배경
+- **문제 인식**: 개인 단위의 주식 매매와 자산 증식은 일정 수준(1,000만~1억 WLD)에 도달하면 성취감이 정체되는 현상이 발생함.
+- **해결책**: 클럽원들이 WLD 자본금을 공동 출자하여 '클럽 사모펀드(PEF)'를 결성하고, 상장 기업(치무전자, 월덱게임즈 등)의 지분 51%를 장내 매집하여 경영권을 인수하는 초대형 길드 금융 대전 콘텐츠를 구축함.
+
+#### 1.2 핵심 게임 루프 (Core Gameplay Loop)
+```mermaid
+flowchart LR
+    A["클럽원 공동 펀드 출자\n(WLD 예치)"] --> B["타겟 상장 기업 선정\n및 M&A 선전포고"]
+    B --> C["7일간 장내 주식 매집\n& 상대 클럽과의 지분 경쟁"]
+    C --> D{"지분율 51% 확보\n또는 1위 지분 달성"}
+    D -- 성공 --> E["경영권 장악!\n일일 영업이익 10% 독점 배당\n사명/배당정책 변경권 행사"]
+    D -- 실패 --> F["차순위 클럽에 패배\n지분 보유 배당만 수취"]
+```
+
+#### 1.3 데이터베이스 원장 설계
+1. `club_investment_funds`:
+   - `id`: UUID PK
+   - `club_id`: UUID (FK clubs.id)
+   - `total_fund_wld`: NUMERIC NOT NULL DEFAULT 0
+   - `updated_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+2. `club_corporate_takeovers`:
+   - `id`: UUID PK
+   - `club_id`: UUID NOT NULL
+   - `stock_symbol`: TEXT NOT NULL
+   - `shares_held`: NUMERIC NOT NULL DEFAULT 0
+   - `ownership_percentage`: NUMERIC NOT NULL DEFAULT 0
+   - `is_controlling_shareholder`: BOOLEAN NOT NULL DEFAULT false
+   - `daily_dividend_accumulated`: NUMERIC NOT NULL DEFAULT 0
+   - `acquired_at`: TIMESTAMPTZ
+   - `created_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+#### 1.4 API 및 백엔드 명세
+- `POST /api/v1/clubs/:clubId/fund/deposit`: 클럽 펀드 자본금 출자
+- `POST /api/v1/clubs/:clubId/mna/declare`: 특정 상장사 대상 적대적 M&A 선전포고
+- `POST /api/v1/clubs/:clubId/mna/buy`: 클럽 펀드 자금으로 장내 대량 주식 블록 매수
+- `GET /api/v1/market/governance/ownership-board`: 상장사별 클럽 지분율 랭킹 전광판
+
+---
+
+### 2. 🏆 [기능 2] 가상 주식 실전 챔피언십 리그 & 고래 카피 트레이딩 (Copy Trading & League)
+
+#### 2.1 기획 의도 및 배경
+- **문제 인식**: 신규 유저들은 10-Depth 호가창과 복잡한 캔들 차트에 진입 장벽을 느낌.
+- **해결책**: 상위 1% 고래 유저들의 실시간 포트폴리오를 투명하게 열람하고, 1클릭으로 동일 비율로 분할 매수할 수 있는 '소셜 카피 트레이딩' 및 주간 수익률 티어 리그를 도입.
+
+#### 2.2 핵심 게임 루프
+```mermaid
+flowchart TD
+    G["주간 실전 리그 참가\n(초기 자산 스냅샷)"] --> H["1주일간 자유 주식 매매\n수익률 경쟁"]
+    H --> I["티어 승급 심사\n(브론즈 ~ 챌린저)"]
+    I --> J["상위 랭커 등극 시\n'고래 트레이더' 자격 부여"]
+    J --> K["일반 유저들이\n포트폴리오 1클릭 복제(Copy)"]
+    K --> L["고래는 팔로워 수익 2%\n운용 보수(AUM 수수료) 수취"]
+```
+
+#### 2.3 데이터베이스 원장 설계
+1. `stock_league_seasons`:
+   - `season_id`: UUID PK, `season_name`: TEXT, `starts_at`: TIMESTAMPTZ, `ends_at`: TIMESTAMPTZ, `prize_pool_wld`: NUMERIC
+2. `stock_league_participants`:
+   - `user_id`: UUID PK, `season_id`: UUID, `tier`: TEXT (`bronze`, `silver`, `gold`, `diamond`, `challenger`), `starting_equity`: NUMERIC, `current_equity`: NUMERIC, `roi_pct`: NUMERIC, `rank`: INT
+3. `copy_trading_subscriptions`:
+   - `id`: UUID PK, `follower_user_id`: UUID, `leader_user_id`: UUID, `allocated_wld`: NUMERIC, `auto_rebalance`: BOOLEAN, `profit_share_rate`: NUMERIC DEFAULT 0.02, `created_at`: TIMESTAMPTZ
+
+#### 2.4 API 및 백엔드 명세
+- `GET /api/v1/stocks/league/standings`: 실시간 리그 순위표 및 티어 현황
+- `GET /api/v1/stocks/whales/:userId/portfolio`: 고래 유저의 포트폴리오 비중 공개 API
+- `POST /api/v1/stocks/copy-trade/subscribe`: 특정 고래 유저 카피 트레이딩 구독 및 WLD 할당
+- `POST /api/v1/stocks/copy-trade/rebalance`: 고래 매매 발생 시 추종자 지갑 자동 비율 매수/매도
+
+---
+
+### 3. 🎲 [기능 3] 실시간 1:1 라이브 승부존 (Real-Time 1v1 PvP Wager Arena)
+
+#### 3.1 기획 의도 및 배경
+- **문제 인식**: AI 봇 상대의 정적인 게임은 리텐션 한계가 있으며, 디스코드 커뮤니티 채팅방에서의 상호 도발/배틀 니즈가 매우 높음.
+- **해결책**: WebSocket 기반으로 유저 간 0초 딜레이로 WLD 판돈을 걸고 대결하는 실시간 1:1 승부장 개설.
+
+#### 3.2 게임 종목 및 배틀 메카닉
+1. **하이롤러 주사위 쇼다운 (Dice Showdown)**: 각자 주사위 3개를 굴려 합계가 높은 쪽이 승리.
+2. **단판 승부 가위바위보 (RPS 3-Round Duel)**: 3판 2선승제 심리전.
+3. **하이로우 럭키 카드 (Card Hi-Lo Match)**: 1~10 카드 오픈 후 상대보다 높은 카드 뽑기.
+- **수수료 및 국고 귀속**: 승자가 판돈 총액의 97% 수취, 3%는 플랫폼 수수료로 즉시 국고(Treasury) 금고로 귀속 (인플레이션 방어).
+
+#### 3.3 데이터베이스 원장 설계
+1. `pvp_wager_rooms`:
+   - `id`: UUID PK, `creator_user_id`: UUID, `opponent_user_id`: UUID, `game_type`: TEXT (`dice`, `rps`, `hilo`), `stake_amount_wld`: NUMERIC, `status`: TEXT (`waiting`, `in_progress`, `settled`, `cancelled`), `winner_user_id`: UUID, `created_at`: TIMESTAMPTZ
+2. `pvp_battle_rounds`:
+   - `room_id`: UUID, `round_num`: INT, `creator_action`: TEXT, `opponent_action`: TEXT, `round_winner`: UUID
+
+#### 3.4 API & 웹소켓 이벤트 명세
+- WebSocket 네임스페이스: `/ws/arena`
+- 이벤트: `room:create`, `room:join`, `duel:action`, `duel:reveal`, `duel:payout`
+- Discord Webhook 연동: 방 생성 시 지정 채널에 즉시 결투 초대 버튼 임베드 전송.
+
+---
+
+### 4. 🌙 [기능 4] 심야 비밀 암시장 한정판 럭셔리 경매 (Midnight Black Market Secret Auction)
+
+#### 4.1 기획 의도 및 배경
+- **문제 인식**: 고래 유저들의 통화 퇴장(Sink) 경로가 부족하여 시장 내 WLD 과잉 유동성이 누적됨.
+- **해결책**: 매일 심야 23:00~24:00 1시간 동안만 열리는 한정판 버프/외형 아이템 실시간 잉글리시 옥션. 낙찰 대금은 100% 영구 소각!
+
+#### 4.2 출품 아이템 카탈로그
+- `item_chronos_watch`: 30일간 전 직업 업무 쿨타임 50% 단축
+- `item_midas_touch`: 14일간 카지노 전 게임 배당률 +20% 추가 보정
+- `item_zero_tax_card`: 영구 가상 주식 매매 거래세(0.15%) 완전 면제
+- `item_gold_dragon_aura`: 닉네임 및 채팅창 영구 골드 드래곤 애니메이션 효과
+
+#### 4.3 데이터베이스 원장 설계
+1. `black_market_auctions`:
+   - `id`: UUID PK, `item_code`: TEXT, `item_title`: TEXT, `starts_at`: TIMESTAMPTZ, `ends_at`: TIMESTAMPTZ, `starting_bid`: NUMERIC, `current_bid`: NUMERIC, `current_bidder_id`: UUID, `bid_count`: INT, `is_closed`: BOOLEAN
+2. `black_market_bid_logs`:
+   - `id`: UUID PK, `auction_id`: UUID, `bidder_user_id`: UUID, `bid_amount`: NUMERIC, `created_at`: TIMESTAMPTZ
+
+#### 4.4 경매 로직 (Anti-Sniping Invariant)
+- 마감 30초 전 신규 최고 입찰 발생 시 경매 종료 시간이 30초 자동 연장됨 (스나이핑 방지).
+- 낙찰 즉시 대금은 `TREASURY_TO_SINK` 또는 `USER_TO_SINK` 원장 트랜잭션으로 전액 영구 소각 처리.
+
+---
+
+### 5. 🤖 [기능 5] AI 전속 금융 비서 '덕이(Deoki)' 자산 컨설팅 (AI Financial Advisor)
+
+#### 5.1 기획 의도 및 배경
+- **문제 인식**: 유저마다 자산 규모와 보유 포트폴리오가 상이하여 어떤 경제 활동(예금/주식/직업)이 가장 유리한지 판단하기 어려움.
+- **해결책**: 유저의 재무 제표와 시장 변동성을 실시간 분석하여 매일 아침 개인 맞춤형 금융 브리핑과 목표 자산 달성 로드맵을 제시하는 인공지능 자산관리사 탑재.
+
+#### 5.2 핵심 알고리즘 및 엔진
+1. **포트폴리오 리밸런싱 지수 (PR-Index)**:
+   - 현금 비중, 주식 편중도, 정기예금 복리율을 분석하여 0~100점 점수화.
+   - 특정 종목 비중이 70% 초과 시 위험 경보 발령.
+2. **목표 자산 시뮬레이터 (Goal Wealth Path Engine)**:
+   - 목표 금액(예: 5,000만 WLD) 설정 시 직업 일당, 배당금, 복리 이자 합산 기반 D-Day 자동 산출.
+3. **실시간 시장 속보 브리핑 카드**:
+   - 보유 종목에 호재/악재 발생 시 덕이 봇의 1:1 조언 코멘트 ("치무전자 저평가 구간 진입, 분할 매수 적기!").
+
+#### 5.3 데이터베이스 및 캐시 설계
+1. `user_ai_financial_reports`:
+   - `user_id`: UUID PK, `report_date`: DATE, `health_score`: INT, `net_worth_change_24h`: NUMERIC, `recommendations`: JSONB, `created_at`: TIMESTAMPTZ
+2. `user_wealth_goals`:
+   - `user_id`: UUID PK, `target_amount_wld`: NUMERIC, `target_date`: DATE, `strategy`: TEXT, `projected_days`: INT
+
+---
+
+### 6. 구현 우선순위 및 로드맵 제안 (Implementation Phases)
+- **Phase 1 (도파민 & 소셜 배틀)**: 3번 [1:1 라이브 승부존] & 4번 [심야 비밀 암시장 한정 경매]
+- **Phase 2 (투자 & 초보 온보딩)**: 2번 [주식 실전 리그 & 고래 카피 트레이딩] & 5번 [AI 금융 비서 덕이]
+- **Phase 3 (거대 길드 금융 대전)**: 1번 [클럽 적대적 M&A & 상장사 경영권 쟁탈전]
