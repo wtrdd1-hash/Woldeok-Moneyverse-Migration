@@ -10,33 +10,33 @@ export function FintechTickerBar() {
   const items = [
     {
       icon: Coins,
-      label: localeLabel(locale, 'WLD 원장 상태', 'WLD Network Ledger', 'WLD元帳状態', 'WLD账本状态'),
-      value: localeLabel(locale, '정상 가동 (805개 노드)', 'Optimal (805 Active Nodes)', '正常稼働 (805ノード)', '正常运行 (805个节点)'),
-      color: 'text-amber-500',
+      label: localeLabel(locale, 'WLD 원장 상태', 'WLD Ledger', 'WLD元帳', 'WLD账本'),
+      value: localeLabel(locale, '정상 가동 (805개 노드)', 'Optimal (805 Nodes)', '正常稼働 (805ノード)', '正常运行 (805节点)'),
+      color: 'text-zinc-300 font-mono',
     },
     {
       icon: TrendingUp,
-      label: localeLabel(locale, '최고 상승: 월덕게임즈', 'Top Mover: WDG', '急上昇銘柄: ウォルドクゲームズ', '最大涨幅: 月德游戏'),
-      value: '+4.8% ▲',
-      color: 'text-[var(--rise)] font-bold',
+      label: localeLabel(locale, '최고 상승', 'Top Mover', '急上昇', '最大涨幅'),
+      value: 'WDG +4.8% ▲',
+      color: 'text-[var(--rise)] font-mono font-bold',
     },
     {
       icon: Briefcase,
-      label: localeLabel(locale, '일일 직업 보상창', 'Daily Work Window', '日次職業報酬', '每日职业奖励窗口'),
-      value: localeLabel(locale, '진행 중 · 8대 직업 가동', 'Open · 8 Careers Active', '進行中 · 8大職業稼働', '进行中 · 8大职业运行'),
-      color: 'text-blue-500',
+      label: localeLabel(locale, '일일 직업 보상', 'Career Reward', '職業報酬', '职业奖励'),
+      value: localeLabel(locale, '8대 직업 오픈', '8 Careers Open', '8大職業稼働', '8大职业开放'),
+      color: 'text-zinc-300 font-mono',
     },
     {
       icon: ShieldCheck,
-      label: localeLabel(locale, '금융 무결성', 'System Integrity', '金融の完全性', '金融完整性'),
-      value: '100.0% Verified',
-      color: 'text-[var(--primary)]',
+      label: localeLabel(locale, '금융 무결성', 'Integrity', '完全性', '完整性'),
+      value: '100% Verified',
+      color: 'text-emerald-400 font-mono font-semibold',
     },
     {
       icon: Activity,
-      label: localeLabel(locale, '통화 유동성 지수', 'Live Faucet / Sink', '通貨流動性指数', '货币流动性指数'),
-      value: 'Balanced (0.98)',
-      color: 'text-purple-500',
+      label: localeLabel(locale, '통화 유동성 지수', 'Liquidity Index', '流動性指数', '流动性指数'),
+      value: '0.98 Balanced',
+      color: 'text-zinc-300 font-mono',
     },
   ];
 

@@ -342,12 +342,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <SiteShell>{children}</SiteShell>
               <Toaster />
               <StaleTabNotice />
-              <RouteAwareFloatingUtilities />
               <SessionKeepAlive />
               <WatchlistPromotionEngine />
               <FirstTradeOnboardingModal />
               <StockAlertPushEngine />
-              <DeokiAiFloatingAssistant />
             </ThemeProvider>
 
           </CurrencyProvider>
