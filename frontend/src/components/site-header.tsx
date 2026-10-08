@@ -86,11 +86,11 @@ export function SiteHeader() {
   const mobileAdmin = mobileAdminEntries(viewer);
 
   return (
-    <header className="moneyverse-site-header sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur-xl w-full max-w-full overflow-hidden transition-colors">
-      <div className="mx-auto flex h-[60px] min-[400px]:h-[64px] sm:h-[68px] lg:h-[76px] w-full max-w-[1440px] items-center justify-between gap-1.5 px-2 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-2 xl:gap-3 2xl:gap-4 lg:px-4 xl:px-6 2xl:px-8">
+    <header className="moneyverse-site-header sticky top-0 z-30 border-b border-emerald-500/15 bg-background/80 backdrop-blur-xl w-full max-w-full overflow-hidden transition-all shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
+      <div className="mx-auto flex h-14 sm:h-16 w-full max-w-[1440px] items-center justify-between gap-1.5 px-2 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-2 xl:gap-3 2xl:gap-4 lg:px-4 xl:px-6 2xl:px-8">
         <Brand />
 
-        <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-4 lg:flex shrink-0 mx-auto">
+        <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-3.5 lg:flex shrink-0 mx-auto">
           {items.map((item) =>
             isGroup(item) ? (
               <HeaderGroup key={item.label} group={item} pathname={pathname} locale={locale} />

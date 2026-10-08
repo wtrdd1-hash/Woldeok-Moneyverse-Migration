@@ -144,128 +144,155 @@ export default async function HomePage() {
 
   return (
     <div data-page="home" className="mv-page mv-page--community mx-auto w-full max-w-[1440px] space-y-8 sm:space-y-10 pb-20 sm:pb-12">
-      {/* 1. TOP HERO: 2026 Asymmetric Bento Grid 2.0 (2x2 메인 자산 히어로 & 4대 퀵 액션) */}
-      <section
-        aria-labelledby="hero-balance-heading"
-        className="rounded-2xl sm:rounded-3xl border border-emerald-500/30 bg-card/95 shadow-[0_4px_30px_rgba(16,185,129,0.08)] backdrop-blur-xl p-5 sm:p-8 hover:border-emerald-500/50 transition-all duration-200 zero-overflow-shield"
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/60">
-          <div className="flex items-center gap-2">
-            <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              WOLDEOK MONEYVERSE · <T korean="실시간 분산 경제 원장 가동 중" english="Live Distributed Ledger" japanese="リアルタイム分散型経済元帳稼働中" chinese="实时分布式经济账本运行中" />
-            </span>
+      {/* =========================================================================
+          🔥 2026 HIGH-TECH ASYMMETRIC BENTO GRID COCKPIT (Linear & Stripe Style)
+          ========================================================================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start">
+        {/* LEFT / CENTER FINTECH COCKPIT (8 Columns) */}
+        <div className="lg:col-span-8 flex flex-col gap-5 sm:gap-6 min-w-0">
+          {/* Bento 1: Financial Net Worth & Asset Valuation Cockpit */}
+          <section
+            aria-labelledby="hero-balance-heading"
+            className="relative overflow-hidden rounded-3xl border border-emerald-500/25 bg-[#0a1410]/95 backdrop-blur-2xl p-5 sm:p-7 shadow-[0_8px_32px_rgba(0,0,0,0.36)] transition-all duration-300 hover:border-emerald-500/40 zero-overflow-shield"
+          >
+            {/* Ambient FinTech Glow */}
+            <div className="absolute top-0 right-0 -mt-16 -mr-16 size-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+
+            {/* Status Header */}
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-emerald-500/15">
+              <div className="flex items-center gap-2.5">
+                <span className="relative flex size-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
+                </span>
+                <span className="font-mono text-xs font-bold tracking-wider text-emerald-400 uppercase">
+                  WOLDEOK LEDGER · <T korean="실시간 분산 경제 원장" english="LIVE DISTRIBUTED LEDGER" japanese="分散型経済元帳" chinese="实时分布式账本" />
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-300/80 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+                <ShieldCheck className="size-3.5 text-emerald-400 shrink-0" />
+                <span><T korean="100% 무손실 원장 보호" english="100% Lossless Ledger" japanese="100%無損失元帳保護" chinese="100%无损账本保障" /></span>
+              </div>
+            </div>
+
+            {/* Asset Metrics */}
+            <div className="relative z-10 py-5 sm:py-7">
+              <p id="hero-balance-heading" className="text-xs sm:text-sm font-semibold text-zinc-400">
+                <T korean="내 가상 자산 총 순가치" english="Total Virtual Net Worth" japanese="私の仮想資産総額" chinese="我的虚拟总资产" />
+              </p>
+              <div className="mt-2 font-mono tabular-nums text-[clamp(1.75rem,5.5vw,3.75rem)] font-black tracking-tight text-white flex items-baseline gap-2 min-w-0 max-w-full overflow-hidden">
+                <WalletGlance />
+              </div>
+              <p className="mt-2 text-xs sm:text-sm text-zinc-400 leading-relaxed [word-break:keep-all]">
+                <T
+                  korean="직업 급여, 복리 예적금 이자, 가상 주식 실시간 평가액이 PostgreSQL 금융 원장 기준으로 통합 결제·관리됩니다."
+                  english="Your career salary, compound interest, and stock equity are aggregated in real-time."
+                  japanese="職業給与、複利利息、株式評価額がPostgreSQL元帳ベースでリアルタイム統合管理されます。"
+                  chinese="职业薪酬、复利利息及股票估值基于PostgreSQL分布式账本实时合并管理。"
+                />
+              </p>
+            </div>
+
+            {/* 4 Core Quick Command Dock (Linear Style Glass Action Bar) */}
+            <div className="relative z-10 pt-4 border-t border-emerald-500/15 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+              <div className="flex flex-col justify-center min-w-0">
+                <P2PTransferModal triggerText="1:1 P2P 안심 송금" />
+              </div>
+
+              <Link
+                href="/work"
+                className="flex items-center gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-2xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-800/90 hover:border-blue-500/50 transition-all active:scale-[0.98] group min-h-[52px] shadow-xs min-w-0"
+              >
+                <div className="grid size-8 shrink-0 place-items-center rounded-xl bg-blue-500/15 text-blue-400 group-hover:bg-blue-500 group-hover:text-black transition-colors">
+                  <Briefcase className="size-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="block text-xs font-bold text-zinc-100 truncate leading-tight">
+                    <T korean="직업 출근" english="Careers" japanese="職業出勤" chinese="职业上班" />
+                  </span>
+                  <span className="block text-[10px] text-zinc-400 truncate leading-tight mt-0.5">
+                    <T korean="일일 급여 수령" english="Daily Salary" japanese="日次給与受取" chinese="领取每日薪资" />
+                  </span>
+                </div>
+              </Link>
+
+              <Link
+                href="/stocks"
+                className="flex items-center gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-2xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-800/90 hover:border-emerald-500/50 transition-all active:scale-[0.98] group min-h-[52px] shadow-xs min-w-0"
+              >
+                <div className="grid size-8 shrink-0 place-items-center rounded-xl bg-emerald-500/15 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-black transition-colors">
+                  <TrendingUp className="size-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="block text-xs font-bold text-zinc-100 truncate leading-tight">
+                    <T korean="주식 거래" english="Stocks" japanese="株式取引" chinese="股票交易" />
+                  </span>
+                  <span className="block text-[10px] text-zinc-400 truncate leading-tight mt-0.5">
+                    <T korean="10-Depth 호가" english="Orderbook" japanese="10-Depth気配値" chinese="10档深度盘口" />
+                  </span>
+                </div>
+              </Link>
+
+              <Link
+                href="/bank"
+                className="flex items-center gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-2xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-800/90 hover:border-purple-500/50 transition-all active:scale-[0.98] group min-h-[52px] shadow-xs min-w-0"
+              >
+                <div className="grid size-8 shrink-0 place-items-center rounded-xl bg-purple-500/15 text-purple-400 group-hover:bg-purple-500 group-hover:text-black transition-colors">
+                  <Landmark className="size-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="block text-xs font-bold text-zinc-100 truncate leading-tight">
+                    <T korean="가상 은행" english="Bank" japanese="仮想銀行" chinese="虚拟银行" />
+                  </span>
+                  <span className="block text-[10px] text-zinc-400 truncate leading-tight mt-0.5">
+                    <T korean="복리 저축·국채" english="Savings & Bonds" japanese="複利貯蓄・国債" chinese="复利储蓄·国债" />
+                  </span>
+                </div>
+              </Link>
+            </div>
+          </section>
+
+          {/* Bento 2: 1:1 Live PvP Arena & Midnight Black Market */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full min-w-0">
+            <PvpArenaLaunchCard />
+            <BlackMarketLaunchCard />
           </div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-            <ShieldCheck className="size-3.5 text-emerald-500 shrink-0" />
-            <T korean="100% 무손실 원장 보호" english="100% Lossless Ledger" japanese="100%無損失元帳保護" chinese="100%无损账本保障" />
+
+          {/* Bento 3: Live Market Pulse & Hall of Fame Activity Stream */}
+          <div className="flex flex-col gap-3.5 w-full min-w-0">
+            <LiveMarketPulseTicker />
+            <LiveHallOfFameTicker />
+          </div>
+
+          {/* Bento 4: Anti-Inflation WLD Burn Festival */}
+          <div className="w-full min-w-0">
+            <AntiInflationBurnEventCard />
           </div>
         </div>
 
-        <div className="grid gap-6 pt-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-          <div className="min-w-0 max-w-full">
-            <p id="hero-balance-heading" className="text-xs sm:text-sm font-semibold text-muted-foreground">
-              <T korean="내 가상 자산 총액" english="Total Virtual Net Worth" japanese="私の仮想資産総額" chinese="我的虚拟总资产" />
-            </p>
-            <div className="mt-2 font-mono tabular-nums text-[clamp(1.5rem,5vw,3.5rem)] font-black tracking-tight text-foreground flex items-baseline gap-2 min-w-0 max-w-full overflow-hidden">
-              <WalletGlance />
-            </div>
-            <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed [word-break:keep-all]">
-              <T
-                korean="직업 급여, 예적금 이자, 가상 주식 평가액이 PostgreSQL 원장 기준으로 실시간 통합 관리됩니다."
-                english="Your career salary, compound interest, and stock equity are aggregated in real-time."
-                japanese="職業給与、複利利息、株式評価額がPostgreSQL元帳ベースでリアルタイム統合管理されます。"
-                chinese="职业薪酬、复利利息及股票估值基于PostgreSQL分布式账本实时合并管理。"
-              />
-            </p>
+        {/* RIGHT RETENTION & BOOSTER SIDE RAIL (4 Columns) */}
+        <div className="lg:col-span-4 flex flex-col gap-5 sm:gap-6 min-w-0">
+          {/* Rail 1: Live Hot-Time Buff Booster */}
+          <div className="w-full min-w-0">
+            <LiveHotTimeBanner />
           </div>
 
-          {/* 4 Core Quick Actions (Zero-Clipping Responsive Layout) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-2.5">
-            <div className="flex flex-col justify-center min-w-0">
-              <P2PTransferModal triggerText="1:1 P2P 안심 송금" />
-            </div>
+          {/* Rail 2: 7-Day Attendance & Dopamine Lucky Roulette */}
+          <div className="w-full min-w-0">
+            <DailyAttendanceRoulette />
+          </div>
 
-            <Link
-              href="/work"
-              className="flex items-center gap-2 min-[360px]:gap-2.5 min-[400px]:gap-3 p-2 min-[360px]:p-2.5 min-[400px]:p-3 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-blue-500/40 transition-all active:scale-[0.98] group min-h-[50px] sm:min-h-[56px] shadow-xs min-w-0"
-            >
-              <div className="grid size-7.5 min-[360px]:size-8.5 min-[400px]:size-9.5 shrink-0 place-items-center rounded-lg bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-primary-foreground transition-colors">
-                <Briefcase className="size-4 min-[400px]:size-4.5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground truncate leading-tight">
-                  <T korean="직업 출근" english="Careers" japanese="職業出勤" chinese="职业上班" />
-                </span>
-                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
-                  <T korean="일일 급여 수령" english="Daily Salary" japanese="日次給与受取" chinese="领取每日薪资" />
-                </span>
-              </div>
-            </Link>
+          {/* Rail 3: Daily Economic Quest Station */}
+          <div className="w-full min-w-0">
+            <DailyEconomicQuestStation />
+          </div>
 
-            <Link
-              href="/stocks"
-              className="flex items-center gap-2 min-[360px]:gap-2.5 min-[400px]:gap-3 p-2 min-[360px]:p-2.5 min-[400px]:p-3 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-emerald-500/40 transition-all active:scale-[0.98] group min-h-[50px] sm:min-h-[56px] shadow-xs min-w-0"
-            >
-              <div className="grid size-7.5 min-[360px]:size-8.5 min-[400px]:size-9.5 shrink-0 place-items-center rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-primary-foreground transition-colors">
-                <TrendingUp className="size-4 min-[400px]:size-4.5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground truncate leading-tight">
-                  <T korean="주식 거래" english="Stocks" japanese="株式取引" chinese="股票交易" />
-                </span>
-                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
-                  <T korean="10-Depth 호가 매매" english="Orderbook" japanese="10-Depth気配値取引" chinese="10档深度盘口交易" />
-                </span>
-              </div>
-            </Link>
-
-            <Link
-              href="/bank"
-              className="flex items-center gap-2 min-[360px]:gap-2.5 min-[400px]:gap-3 p-2 min-[360px]:p-2.5 min-[400px]:p-3 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-purple-500/40 transition-all active:scale-[0.98] group min-h-[50px] sm:min-h-[56px] shadow-xs min-w-0"
-            >
-              <div className="grid size-7.5 min-[360px]:size-8.5 min-[400px]:size-9.5 shrink-0 place-items-center rounded-lg bg-purple-500/10 text-purple-500 group-hover:bg-purple-500 group-hover:text-primary-foreground transition-colors">
-                <Landmark className="size-4 min-[400px]:size-4.5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground truncate leading-tight">
-                  <T korean="가상 은행" english="Bank" japanese="仮想銀行" chinese="虚拟银行" />
-                </span>
-                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
-                  <T korean="복리 저축·국채" english="Savings & Bonds" japanese="複利貯蓄・国債" chinese="复利储蓄·国债" />
-                </span>
-              </div>
-            </Link>
+          {/* Rail 4: Macro Liquidity Dashboard */}
+          <div className="w-full min-w-0">
+            <MacroLiquidityDashboard />
           </div>
         </div>
-      </section>
-
-      {/* 1.35 LIVE HOT-TIME BUFF & ECONOMIC BOOSTER BANNER */}
-      <div className="w-full max-w-full min-w-0">
-        <LiveHotTimeBanner />
       </div>
-
-      {/* 1.36 7-DAY ATTENDANCE & DOPAMINE LUCKY ROULETTE */}
-      <div className="w-full max-w-full min-w-0">
-        <DailyAttendanceRoulette />
-      </div>
-
-      {/* 1.37 ANTI-INFLATION WLD BURN FESTIVAL & SPECIAL EVENTS */}
-      <div className="w-full max-w-full min-w-0">
-        <AntiInflationBurnEventCard />
-      </div>
-
-      {/* 1.38 1:1 LIVE PVP ARENA & MIDNIGHT BLACK MARKET */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full min-w-0">
-        <PvpArenaLaunchCard />
-        <BlackMarketLaunchCard />
-      </div>
-
-      {/* 1.4 LIVE HALL OF FAME & REAL-TIME ACTIVITY TICKER */}
-      <LiveHallOfFameTicker />
-
-      {/* 1.5 REAL-TIME MARKET PULSE TICKER */}
-      <LiveMarketPulseTicker />
 
       {/* 2. ONBOARDING & RETENTION HERO: 3단계 실전 로드맵 & 6대 기능 설명 센터 */}
       <section aria-labelledby="onboarding-guide-heading" className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -376,13 +403,10 @@ export default async function HomePage() {
       {/* 2.5 INTERACTIVE 30-SEC AI INVESTMENT PROFILE & ALLOCATION QUIZ */}
       <InvestmentProfileQuiz />
 
-      {/* 2.8 DAILY ECONOMIC QUEST & CHALLENGE PASS */}
-      <DailyEconomicQuestStation />
-
       {/* 3. 2026 FEATURE STRIP: 3대 금융 계산기 허브 & 일일 리텐션 스테이션 */}
       <div className="grid gap-6 md:grid-cols-3">
         {/* Card 1: 3대 금융 웹 계산기 (pSEO 2만+ 엔진) */}
-        <div className="rounded-2xl border border-zinc-800/80 bg-card/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 flex flex-col justify-between backdrop-blur-md">
+        <div className="rounded-2xl border border-emerald-500/20 bg-[#0a1410]/90 shadow-[0_4px_24px_rgba(0,0,0,0.3)] p-5 flex flex-col justify-between backdrop-blur-xl">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-border/60">
               <div className="flex items-center gap-2">
@@ -423,7 +447,7 @@ export default async function HomePage() {
         </div>
 
         {/* Card 2: 7일 연속 출석 & 럭키 룰렛 */}
-        <div className="rounded-2xl border border-zinc-800/80 bg-card/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 flex flex-col justify-between backdrop-blur-md">
+        <div className="rounded-2xl border border-emerald-500/20 bg-[#0a1410]/90 shadow-[0_4px_24px_rgba(0,0,0,0.3)] p-5 flex flex-col justify-between backdrop-blur-xl">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-border/60">
               <div className="flex items-center gap-2">
@@ -457,7 +481,7 @@ export default async function HomePage() {
         </div>
 
         {/* Card 3: 일일 주가 UP/DOWN 예측 배팅 */}
-        <div className="rounded-2xl border border-zinc-800/80 bg-card/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 flex flex-col justify-between backdrop-blur-md">
+        <div className="rounded-2xl border border-emerald-500/20 bg-[#0a1410]/90 shadow-[0_4px_24px_rgba(0,0,0,0.3)] p-5 flex flex-col justify-between backdrop-blur-xl">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-border/60">
               <div className="flex items-center gap-2">

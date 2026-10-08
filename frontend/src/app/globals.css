@@ -82,12 +82,12 @@
  * Dark Mode - Deep Slate & Navy Obsidian with Ambient Luminescence
  */
 .dark {
-  --paper: #090d16; /* Deep Obsidian Slate */
-  --paper-dark: #05080f;
-  --surface: #0f172a; /* Deep Navy Slate */
+  --paper: #050b08; /* Deep Obsidian Slate */
+  --paper-dark: #020604;
+  --surface: #0a1410; /* Deep Navy Slate */
   --ink: #f8fafc;
   --ink-soft: #94a3b8;
-  --line: #1e293b;
+  --line: #142a1e;
 
   --forest: #064e3b;
   --forest-deep: #022c22;
@@ -108,14 +108,14 @@
   --primary-foreground: #0b0f17;
   --secondary: var(--clay-soft);
   --secondary-foreground: #fef08a;
-  --muted: #131d2e;
+  --muted: #0c1813;
   --muted-foreground: var(--ink-soft);
   --accent: var(--clay-soft);
   --accent-foreground: #fde047;
   --destructive: #d97256;
   --destructive-foreground: #0b0f17;
   --border: var(--line);
-  --input: #1e293b;
+  --input: #142a1e;
   --ring: rgb(16 185 129 / 0.6);
 
   --rise: #ef4444;
