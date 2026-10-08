@@ -5,7 +5,11 @@ import type { StatusState } from './status';
  * Status snapshots are collected every 30 seconds. Allow one missed interval
  * before refusing to present an old healthy snapshot as current.
  */
-export const STATUS_FRESHNESS_MS = 60_000;
+/**
+ * Status snapshots are collected every 30 seconds. Allow three missed intervals
+ * plus Next.js ISR cache buffer (30s) before refusing to present an old healthy snapshot.
+ */
+export const STATUS_FRESHNESS_MS = 120_000;
 
 export function statusWithFreshness(
   state: string,

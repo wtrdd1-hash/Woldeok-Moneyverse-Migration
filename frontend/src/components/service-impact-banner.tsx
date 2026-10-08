@@ -12,7 +12,7 @@ const MESSAGE = {
 } as const;
 
 export async function ServiceImpactBanner() {
-  const data = await publicApi<{ status: ServiceStatusRow[] }>('/api/v1/status', 30);
+  const data = await publicApi<{ status: ServiceStatusRow[] }>('/api/v1/status', 15);
   if (!data) return null;
   const impact = serviceImpact(data.status ?? [], Date.now());
   if (!impact) return null;
