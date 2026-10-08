@@ -89,28 +89,8 @@ export class PublicKdicController {
   @SkipInternalToken()
   @ApiOperation({ summary: '대국민 예금자보호 제도 및 예보기금 공개 조회' })
   async getPublicPortalData() {
-    const data = await this.kdicService.getFundOverview();
-    return {
-      success: true,
-      data: {
-        fund: {
-          fundName: data.fund.fundName,
-          totalFundWld: data.fund.totalFundWld,
-          protectionLimitPerUser: data.fund.protectionLimitPerUser,
-          totalInsuredDepositsWld: data.fund.totalInsuredDepositsWld,
-          isEmergencyMode: data.fund.isEmergencyMode,
-          updatedAt: data.fund.updatedAt,
-        },
-        institutions: data.institutions.map(i => ({
-          institutionName: i.institutionName,
-          institutionType: i.institutionType,
-          bisRatioPct: i.bisRatioPct,
-          soundnessGrade: i.soundnessGrade,
-          status: i.status,
-        })),
-        summary: data.summary,
-      },
-    };
+    const data = await this.kdicService.getPublicPortalData();
+    return { success: true, data };
   }
 
   @Get('my-coverage')
