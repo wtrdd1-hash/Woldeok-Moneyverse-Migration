@@ -11,6 +11,7 @@ import { AuctionDepthChart } from '@/components/auction-depth-chart';
 import { VipThemeSelector, type VipNeonTheme, VIP_THEME_OPTIONS } from '@/components/vip-theme-selector';
 import { AuctionWinCelebrationModal } from '@/components/auction-win-celebration-modal';
 import { VipAvatarFrame } from '@/components/vip-avatar-frame';
+import { BlackMarketLaunchCard } from '@/components/black-market-launch-card';
 
 export interface AuctionItem {
   id: string;
@@ -255,6 +256,9 @@ export default function AuctionMarketplacePage() {
 
         {/* 60fps Live Bidding Ticker Strip */}
         <AuctionLiveTickerStrip />
+
+        {/* Midnight Black Market Secret Auction */}
+        <BlackMarketLaunchCard userBalance={userBalance} />
 
         {/* Plus VIP 5 Neon Themes Selector */}
         <VipThemeSelector

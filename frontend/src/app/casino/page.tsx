@@ -33,6 +33,7 @@ import { CasinoJackpotTicker } from './casino-jackpot-ticker';
 import type { CasinoJackpotData } from './casino-jackpot-ticker';
 import { CasinoAudioControls } from '@/components/casino-audio-controls';
 import { PublicAdvertisement } from '@/components/public-advertisement';
+import { PvpArenaLaunchCard } from '@/components/pvp-arena-launch-card';
 
 import { getServerLocale } from '@/lib/locale-server';
 
@@ -181,7 +182,7 @@ export default async function CasinoPage() {
   if (!isMember) {
     return <CasinoGuestView />;
   }
-  await requireMember();
+  const member = await requireMember();
 
   const [terms, fairness, games, history, selfLimit, gameClock, jackpot] = await Promise.all([
     loadCasino<CoinTerms>('/api/v1/casino/coin/terms'),
@@ -313,6 +314,7 @@ export default async function CasinoPage() {
 
       <CasinoVisualHero />
       <CasinoJackpotTicker data={jackpot} />
+      <PvpArenaLaunchCard />
 
       {gameClock ? (
         <CasinoClock

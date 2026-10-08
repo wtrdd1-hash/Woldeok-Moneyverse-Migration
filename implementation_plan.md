@@ -3851,3 +3851,90 @@ flowchart TD
 - **Phase 1 (도파민 & 소셜 배틀)**: 3번 [1:1 라이브 승부존] & 4번 [심야 비밀 암시장 한정 경매]
 - **Phase 2 (투자 & 초보 온보딩)**: 2번 [주식 실전 리그 & 고래 카피 트레이딩] & 5번 [AI 금융 비서 덕이]
 - **Phase 3 (거대 길드 금융 대전)**: 1번 [클럽 적대적 M&A & 상장사 경영권 쟁탈전]
+
+---
+## 🚀 [v138 Specification] 차세대 5대 기능 1단계(Phase 1) 구현 착수: 1:1 라이브 승부존 & 심야 암시장 한정 경매 (+360, -0)
+
+### 1. 사용자 조율(Interactive Alignment) 확정 사양
+- **작업 모드**: Phase 1 [1:1 라이브 승부존 + 심야 암시장 한정 경매] 우선 자율 구축 후 단계별 검증·배포.
+- **[1:1 라이브 승부존]**: 
+  - 국고 수수료율: **3% 표준 국고 귀속** (플랫폼 통화 소각 및 국고 기금 편입).
+  - 베팅 금액 제한: 최소 **1,000 WLD** ~ 최대 **50,000,000 WLD** (안전한 원장 보존 및 과도한 독점 방어).
+  - 종목: 3종 즉석 배틀 (주사위 쇼다운, 3판 2선승 가위바위보, 하이로우 럭키 카드).
+  - 대기실 & 실시간 매칭: 유저가 방을 생성하거나 기존 방에 참여하여 즉시 승부.
+- **[심야 비밀 암시장 한정 경매]**:
+  - 오픈 스케줄: **매일 심야 23:00~24:00 (1시간 집중 오픈)**.
+  - 소각 정책: **낙찰 대금 100% 영구 국고 소각(Burn)** (`TREASURY_TO_SINK`).
+  - 출품 아이템: 크로노스 회중시계, 마이더스의 손, 거래세 영구 면제 카드, 골드 드래곤 아우라 등.
+  - 안티 스나이핑: 종료 30초 전 신규 입찰 시 30초 자동 연장.
+
+### 2. 세부 데이터베이스 원장 설계 (Phase 1)
+1. `pvp_wager_rooms`:
+   - `id`: UUID PRIMARY KEY DEFAULT gen_random_uuid()
+   - `creator_user_id`: UUID NOT NULL REFERENCES users(id)
+   - `opponent_user_id`: UUID REFERENCES users(id)
+   - `game_type`: VARCHAR(32) NOT NULL ('dice', 'rps', 'hilo')
+   - `stake_amount`: NUMERIC NOT NULL
+   - `fee_rate`: NUMERIC NOT NULL DEFAULT 0.03
+   - `treasury_fee`: NUMERIC NOT NULL DEFAULT 0
+   - `winner_id`: UUID REFERENCES users(id)
+   - `status`: VARCHAR(32) NOT NULL DEFAULT 'waiting' ('waiting', 'in_progress', 'settled', 'cancelled')
+   - `creator_move`: VARCHAR(32)
+   - `opponent_move`: VARCHAR(32)
+   - `battle_result`: JSONB
+   - `created_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+   - `settled_at`: TIMESTAMPTZ
+
+2. `black_market_auctions`:
+   - `id`: UUID PRIMARY KEY DEFAULT gen_random_uuid()
+   - `item_code`: VARCHAR(64) NOT NULL
+   - `item_title`: VARCHAR(128) NOT NULL
+   - `item_description`: TEXT NOT NULL
+   - `item_icon`: VARCHAR(64) NOT NULL
+   - `item_buff_type`: VARCHAR(64) NOT NULL
+   - `item_buff_value`: NUMERIC NOT NULL
+   - `starts_at`: TIMESTAMPTZ NOT NULL
+   - `ends_at`: TIMESTAMPTZ NOT NULL
+   - `starting_bid`: NUMERIC NOT NULL
+   - `current_bid`: NUMERIC NOT NULL
+   - `highest_bidder_id`: UUID REFERENCES users(id)
+   - `highest_bidder_name`: VARCHAR(64)
+   - `bid_count`: INT NOT NULL DEFAULT 0
+   - `status`: VARCHAR(32) NOT NULL DEFAULT 'scheduled' ('scheduled', 'active', 'ended', 'settled')
+   - `created_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+3. `black_market_bid_logs`:
+   - `id`: UUID PRIMARY KEY DEFAULT gen_random_uuid()
+   - `auction_id`: UUID NOT NULL REFERENCES black_market_auctions(id)
+   - `bidder_user_id`: UUID NOT NULL REFERENCES users(id)
+   - `bidder_name`: VARCHAR(64) NOT NULL
+   - `bid_amount`: NUMERIC NOT NULL
+   - `created_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+### 3. 파일별 변경 계획 (Proposed Changes)
+- **Database**:
+  - `backend/src/database/migrations/251-pvp-arena-and-black-market.sql`
+- **Backend API**:
+  - `backend/src/modules/pvp-arena/` (모듈, 서비스, 컨트롤러)
+    - `POST /api/v1/arena/rooms/create`: 1:1 대결방 생성
+    - `POST /api/v1/arena/rooms/:roomId/join`: 대결방 참가
+    - `POST /api/v1/arena/rooms/:roomId/play`: 액션 제출 및 승패 판정
+    - `GET /api/v1/arena/rooms`: 활성 대결방 목록 조회
+  - `backend/src/modules/black-market/` (모듈, 서비스, 컨트롤러)
+    - `GET /api/v1/market/secret-auction/active`: 현재/예정 비밀 경매 조회
+    - `POST /api/v1/market/secret-auction/:auctionId/bid`: 입찰 및 안티 스나이핑 연장
+    - `GET /api/v1/market/secret-auction/:auctionId/logs`: 입찰 히스토리 로그
+- **Frontend BFF / API**:
+  - `frontend/src/app/api/arena/rooms/route.ts`
+  - `frontend/src/app/api/market/secret-auction/route.ts`
+- **Frontend UI Components**:
+  - `frontend/src/components/pvp-wager-arena-modal.tsx`: 1:1 라이브 승부존 인터랙티브 모달 (SVG 주사위/가위바위보 애니메이션, 퀵 베팅 버튼, 대기실 목록)
+  - `frontend/src/components/black-market-auction-modal.tsx`: 심야 비밀 암시장 한정 경매 모달 (카운트다운 타이머, 호가 입찰, 실시간 호가 로그)
+  - `frontend/src/app/casino/page.tsx` & `frontend/src/app/marketplace/auction/page.tsx` 연동
+
+### 4. 검증 계획 (Verification Plan)
+1. DB 마이그레이션 적용 및 원장 무결성 검증
+2. 백엔드 & 프론트엔드 `typecheck` 0 errors 검증
+3. 1:1 베팅 및 3% 국고 수수료 차감 트랜잭션 단위 테스트 검증
+4. 암시장 입찰 및 안티스나이핑 연장 로직 검증
+5. Next.js 프로덕션 빌드 및 운영 서버 무중단 승격

@@ -38,6 +38,8 @@ import { DiscordBanner } from '@/components/discord-banner';
 import { LiveHotTimeBanner } from '@/components/live-hot-time-banner';
 import { DailyAttendanceRoulette } from '@/components/daily-attendance-roulette';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
+import { PvpArenaLaunchCard } from '@/components/pvp-arena-launch-card';
+import { BlackMarketLaunchCard } from '@/components/black-market-launch-card';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -246,6 +248,12 @@ export default async function HomePage() {
       {/* 1.36 7-DAY ATTENDANCE & DOPAMINE LUCKY ROULETTE */}
       <div className="w-full max-w-full min-w-0">
         <DailyAttendanceRoulette />
+      </div>
+
+      {/* 1.38 1:1 LIVE PVP ARENA & MIDNIGHT BLACK MARKET */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full min-w-0">
+        <PvpArenaLaunchCard />
+        <BlackMarketLaunchCard />
       </div>
 
       {/* 1.4 LIVE HALL OF FAME & REAL-TIME ACTIVITY TICKER */}
