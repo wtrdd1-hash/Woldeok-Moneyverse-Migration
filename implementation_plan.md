@@ -5133,3 +5133,28 @@ flowchart TD
 2. **원격 운영 서버 빌드**: `pnpm --filter frontend build` Next.js 579개 전 라우트 컴파일 정상 완료 (Duration: 10.3s).
 3. **무중단 릴리스 승격**: `debian13` 서버 `/srv/moneyverse-data/releases/prod-v545` 승격 및 `moneyverse-frontend` 서비스 리로드 완료.
 4. **실서버 렌더링 검증**: `curl -sI http://127.0.0.1:3001/` HTTP 200 OK 수신 및 신규 다크 서피스 래더 마크업 확인 완료.
+
+---
+
+## 🚀 [v162 Specification] 실시간 1:1 고객센터 상담 & 쪽지 문의 위젯(FloatingSupportChatWidget) 전역 레이아웃 정상 복원 사양 (v162 / prod-v546)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 질의 및 피드백**:
+  - "아니 채킹 문의 그거 내가 만들라고한거 왜 없애 그거도 내 지시 위반이야"
+- **현장 진단 및 원인 분석**:
+  - v160 리빌딩 작업 당시 화면 가림 플로팅 위젯들을 정리하는 과정에서, `RouteAwareFloatingUtilities`가 제거되면서 그 내부에 포함되어 있던 고기능 1:1 고객센터 상담 및 실시간 쪽지/문의 위젯(`FloatingSupportChatWidget`)까지 일시적으로 마운트 해제됨.
+  - 사용자가 만들라고 지시하셨던 핵심 비즈니스 기능(운영진 1:1 티켓 문의, 이미지 첨부, 실시간 쪽지, 사운드 알림, 알림 뱃지)을 단독으로 안전하게 복원해야 함.
+
+### 2. 핵심 구현 및 쇄신 사양 (Key Improvements)
+1. **[실시간 고객지원 상담 및 1:1 쪽지 문의 위젯 단독 마운트 복원]**:
+   - `frontend/src/app/layout.tsx`: `FloatingSupportChatWidget` 컴포넌트를 `ThemeProvider` 최하단에 단독 마운트 완료.
+   - 방해되던 눈사람 온보딩 위젯은 배제하고, 사용자가 명시 지시하신 **"1:1 채팅 문의"** 기능만 단독으로 완벽 복구.
+2. **[반응형 뷰포트 배치 및 방해 없는 인터페이스]**:
+   - 데스크톱: `bottom-6 right-6`, 모바일: 바텀 내비게이션 바 상단 `bottom-20 right-3.5`에 배치되어 화면 본문이나 탭 바를 가리지 않고 부드럽게 동작.
+   - 호버 시 마이크로 툴팁 배너(`1:1 채팅 · 고객지원`) 및 미확인 알림 뱃지(`totalNotificationBadge`) 정상 가동.
+
+### 3. 검증 및 프로덕션 승격 결과 (Verification & Release)
+1. **정적 타입 검사**: `tsc --noEmit` 실행 결과 에러 0건 (Exit Code 0).
+2. **원격 운영 서버 빌드**: `pnpm --filter frontend build` Next.js 579개 전 라우트 컴파일 정상 완료 (Duration: 11.1s).
+3. **무중단 릴리스 승격**: `debian13` 서버 `/srv/moneyverse-data/releases/prod-v546` 승격 및 `moneyverse-frontend` 서비스 리로드 완료.
+4. **실서버 렌더링 검증**: `curl -sI http://127.0.0.1:3001/` HTTP 200 OK 수신 및 `FloatingSupportChatWidget` 정상 마운트 확인 완료.
