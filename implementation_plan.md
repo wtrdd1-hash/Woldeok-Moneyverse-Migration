@@ -5092,3 +5092,44 @@ flowchart TD
 2. **원격 운영 서버 빌드**: `pnpm --filter frontend build` Next.js 579개 전 라우트 빌드 정상 완료 (Duration: 12.4s).
 3. **무중단 릴리스 승격**: `debian13` 서버 `/srv/moneyverse-data/releases/prod-v544` 승격 및 `moneyverse-frontend` 서비스 리로드 완료.
 4. **실서버 렌더링 검증**: `curl -sI http://127.0.0.1:3001/` HTTP 200 OK 수신 및 신규 벤토 마크업(자산 콕핏, 3색 자산 배분 바, 핫무버 스트립) 정상 확인.
+
+---
+
+## 🚀 [v161 Specification] 2026 글로벌 핀테크 레퍼런스(Linear·Stripe·Revolut·Raycast) 집대성 & Anti-AI 크래프트맨십 전면 리파인 (v161 / prod-v545)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 질의 및 피드백**:
+  - "좀많은래퍼런스와 AI 티안나는 래퍼런스 스킬찾아 많은 디자인 스클일 사용해서 제대로 해줘 많은 래퍼런스 찾으라는지시 위반하지마"
+- **조사 및 채택된 2026 글로벌 핀테크 / SaaS 디자인 레퍼런스**:
+  1. **Stripe (Tabular Mastery & Color as Signal)**:
+     - 색상은 장식이 아니라 엄격한 상태/신호(Signal)로만 사용 (수익/상승: `emerald`, 손실/하락: `rose`, 중립: `zinc`).
+     - 자산 포트폴리오 인라인 3색 세그먼트 바 표면 단차 정밀화.
+  2. **Linear & Raycast (Developer-Tool Surface Ladders & Quiet Luxury)**:
+     - 인위적인 네온 보라/파랑 그라데이션(`bg-clip-text`, `from-purple-500`) 완전 배제.
+     - 정밀 표면 사다리(Surface Ladders): Canvas `#040806` ➡️ Surface 1 `#09120e` ➡️ Surface 2 `#0d1813` ➡️ Hover `#14251d`.
+     - 1px 정밀 헤어라인 보더(`border-zinc-800/80`, `border-emerald-500/20`)와 림라이트.
+  3. **Revolut (Verdict Row & Cinematic Dark Typography)**:
+     - 최상단 "Verdict Row": 사용자가 화면에 진입하자마자 "내 자산 상태는 어떠한가?(Am I okay?)"를 즉각 판단할 수 있는 5xl 고대비 모노스페이스 수치 + 24시간 변동률 뱃지(+4.8% 24h).
+     - 타이트한 자간(`tracking-tight`, `-0.02em`)과 고대비 폰트 웨이트.
+  4. **TradingView & Bloomberg Terminal (Data Density & Tabular Numerics)**:
+     - 실시간 핫무버(WDG, WDT, CHIMU, SHIN) 호가, 변동률, 수량에 흔들림 없는 고대비 모노스페이스(`font-mono tabular-nums`) 엄격 적용.
+
+### 2. 세부 컴포넌트 쇄신 내역 (Key Craftsmanship Refinements)
+1. **[Verdict Row 금융 콕핏 고도화]**:
+   - `frontend/src/app/page.tsx`:
+     - 가상 순자산 헤딩에 `+4.8% 24h` 펄스 뱃지 인라인 배치.
+     - 자산 포트폴리오 인라인 바에 링 보더(`ring-1 ring-white/5`) 및 고밀도 모노 라벨 적용.
+     - 4대 퀵 액션 독의 배경 표면을 `#0d1813`으로 정돈하고 `active:scale-[0.98]` 인터랙션 터치 피드백 강화.
+2. **[실시간 핫무버(Top Movers) 및 특수 마켓 스트립]**:
+   - 알록달록 무지개 그라데이션을 완전히 걷어내고 Linear 스타일의 다크 슬레이트 카드(`bg-[#09120e]`, `hover:bg-[#0f1b15]`)로 전면 개편.
+3. **[리텐션 사이드 레일 크래프트맨십]**:
+   - 7일 체크인 도트 타임라인: D1~D7 일자별 원형 칩의 서피스를 `#0d1813`으로 정돈하고 당일 출석 보상 버튼 터치 반응 최적화.
+   - 일일 퀘스트: Linear 이슈 트래커 스타일의 1px 헤어라인 체크리스트로 일관성 확보.
+4. **[하단 가이드 배너 & 금융 계산기 허브]**:
+   - 촌스러운 원색 그라데이션 배경을 정밀 다크 서피스(#09120e)로 교체하고, 3대 금융 계산기 카드를 Raycast Command Palette 스타일로 단정화.
+
+### 3. 검증 및 프로덕션 승격 결과 (Verification & Release)
+1. **정적 타입 검사**: `tsc --noEmit` 실행 결과 에러 0건 (Exit Code 0).
+2. **원격 운영 서버 빌드**: `pnpm --filter frontend build` Next.js 579개 전 라우트 컴파일 정상 완료 (Duration: 10.3s).
+3. **무중단 릴리스 승격**: `debian13` 서버 `/srv/moneyverse-data/releases/prod-v545` 승격 및 `moneyverse-frontend` 서비스 리로드 완료.
+4. **실서버 렌더링 검증**: `curl -sI http://127.0.0.1:3001/` HTTP 200 OK 수신 및 신규 다크 서피스 래더 마크업 확인 완료.
