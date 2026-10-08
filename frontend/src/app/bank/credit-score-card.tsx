@@ -27,8 +27,23 @@ export interface CreditRatingData {
   readonly simulatedNotice?: string;
 }
 
-export function CreditScoreCard({ initialRating }: { readonly initialRating?: CreditRatingData | undefined }) {
-  const rating = initialRating ?? fallbackRating;
+export function CreditScoreCard({
+  initialRating,
+  standingCreditLimit,
+  standingCreditGrade,
+}: {
+  readonly initialRating?: CreditRatingData | undefined;
+  readonly standingCreditLimit?: string | undefined;
+  readonly standingCreditGrade?: string | undefined;
+}) {
+  const baseRating = initialRating ?? fallbackRating;
+  const effectiveLimit = standingCreditLimit ? Number(standingCreditLimit) : baseRating.creditLimitWld;
+  const rating: CreditRatingData = {
+    ...baseRating,
+    creditLimitWld: effectiveLimit > 0 ? effectiveLimit : baseRating.creditLimitWld,
+    tierNameKo: standingCreditGrade ? `${standingCreditGrade}등급 권위` : baseRating.tierNameKo,
+  };
+
   const [selectedInstallments, setSelectedInstallments] = useState<number>(6);
   const [simulatedLoanAmount, setSimulatedLoanAmount] = useState<number>(
     Math.min(100_000, rating.creditLimitWld > 0 ? rating.creditLimitWld : 50_000),
@@ -60,11 +75,13 @@ export function CreditScoreCard({ initialRating }: { readonly initialRating?: Cr
                 가상 신용 리포트 & 대출 플래너
               </CardTitle>
               <Badge variant="outline" className={`font-mono text-xs ${tierColor}`}>
-                {rating.tier}등급 · {rating.tierNameKo.split(' ')[0]}
+                {standingCreditGrade ? `${standingCreditGrade}등급` : `${rating.tier}등급`} · {rating.tierNameKo.split(' ')[0]}
               </Badge>
             </div>
             <CardDescription className="mt-1 text-xs text-muted-foreground">
-              docs/planning/BANKING_CREDIT_SAFETY_SPEC.ko.md §4 · 게임 활동 성실도 기반 서버 권위 신용 지표
+              {standingCreditLimit
+                ? `현재 은행 창구 공시 한도 ${Number(standingCreditLimit).toLocaleString()} WLD와 100% 동기화된 권위 신용 지표`
+                : '게임 활동 성실도 기반 서버 권위 신용 지표'}
             </CardDescription>
           </div>
           <div className="flex items-center gap-1.5 font-mono text-sm">

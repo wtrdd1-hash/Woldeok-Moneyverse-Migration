@@ -228,7 +228,11 @@ export default async function BankPage() {
       />
 
       {/* 개인 신용 평가 리포트 및 분할 상환 스케줄러 카드 */}
-      <CreditScoreCard initialRating={creditRating ?? undefined} />
+      <CreditScoreCard
+        initialRating={creditRating ?? undefined}
+        standingCreditLimit={creditLimit}
+        standingCreditGrade={standing.credit_grade}
+      />
 
       <Card className={activeLoan ? 'border-amber-500/30 bg-amber-500/5' : 'border-emerald-500/30 bg-emerald-500/5'}>
         <CardContent className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">

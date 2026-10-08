@@ -80,12 +80,13 @@ export function LiveHallOfFameTicker() {
     <div className="w-full rounded-xl border border-zinc-800/80 bg-card/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] px-3 py-2 backdrop-blur-md overflow-hidden">
       <div className="flex items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 shrink-0 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold text-[10px]">
+          <div className="flex items-center gap-1.5 shrink-0 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold text-[10px]" title="가상 금융 시뮬레이션 주요 활동 모의 예시입니다">
             <span className="flex size-1.5 rounded-full bg-amber-400 animate-ping" />
-            <span>LIVE HALL OF FAME</span>
+            <span>LIVE HIGHLIGHTS</span>
+            <span className="text-[9px] text-amber-400/70 font-medium">(모의 예시)</span>
           </div>
 
-          <div className="flex items-center gap-2 min-w-0 truncate key={current.id} animate-in fade-in slide-in-from-bottom-1 duration-300">
+          <div key={current.id} className="flex items-center gap-2 min-w-0 truncate animate-in fade-in slide-in-from-bottom-1 duration-300">
             <span className="shrink-0">{current.icon}</span>
             <span className="font-extrabold text-foreground shrink-0">{current.user}</span>
             <span className="text-muted-foreground truncate">{current.action}</span>

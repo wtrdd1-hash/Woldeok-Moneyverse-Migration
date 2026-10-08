@@ -4319,3 +4319,40 @@ flowchart TD
    - 일일 퀘스트 보상 정산 및 1일 1회 중복 수령 방지 테스트 실행.
 3. **통합 빌드 및 배포 검증**:
    - Next.js Turbopack 및 NestJS 빌드 성공 검증.
+
+---
+
+## 🚀 [v145 Specification] DEF-005 대출 한도-신용 리포트 일원화 및 DEF-014 메인 홈 LIVE 명예의 전당 모의 예시 명확화
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - 결함 해소 및 브랜치 통합 기능 지속 승인.
+  - P2 결함(DEF-005 대출-신용 한도 일원화, DEF-014 LIVE 명예의 전당 예시 명확화) 완결 및 배포.
+- **핵심 목표**:
+  1. **DEF-005 (P2)**: 중앙은행(`/bank`) 대출 창구에서 산정된 유저의 실제 신용 한도(`standing.credit_limit`) 및 신용 등급(`standing.credit_grade`)을 신용 점수 카드(`CreditScoreCard`)에 직접 바인딩하여, 화면 하단 fallback 고정 수치(300,000 WLD)와의 불일치를 원천 해소하고 일원화.
+  2. **DEF-014 (P2)**: 메인 홈(`/`) 상단 티커(`LiveHallOfFameTicker`)의 배지를 `LIVE HALL OF FAME`에서 `LIVE HIGHLIGHTS (모의 예시)`로 정직하게 명시하고, 타이틀 툴팁을 추가하여 실제 유저 장부 원장과의 오인을 완벽히 차단. 동시에 `className` 내 오타로 섞여 있던 `key` 속성을 컨테이너 요소의 정상 속성으로 분리 교정.
+
+---
+
+### 2. 세부 구현 내용 (Detailed Implementations)
+
+#### ① [DEF-005] 대출 한도 및 신용 등급 동기화
+- **파일**: `frontend/src/app/bank/credit-score-card.tsx`
+  - `standingCreditLimit?: number`, `standingCreditGrade?: string` props 신설.
+  - `effectiveLimit = standingCreditLimit ?? (rating.creditLimitWld || 0)` 로직 적용으로 대출 창구의 실제 한도와 100% 동기화.
+- **파일**: `frontend/src/app/bank/page.tsx`
+  - `CreditScoreCard`에 `standingCreditLimit={creditLimit}`, `standingCreditGrade={standing.credit_grade}` 전달 완료.
+
+#### ② [DEF-014] LIVE 명예의 전당 티커 모의 예시 명확화
+- **파일**: `frontend/src/components/live-hall-of-fame-ticker.tsx`
+  - 배지 라벨: `LIVE HIGHLIGHTS` + `(모의 예시)` 서브텍스트 추가.
+  - 타이틀 툴팁: `title="가상 금융 시뮬레이션 주요 활동 모의 예시입니다"` 추가.
+  - 버그 수정: `div` 내부 className에 문자열로 들어가 있던 `key={current.id}`를 React 정규 key prop으로 이동하여 렌더링 애니메이션 정상화.
+
+---
+
+### 3. 검증 결과 (Verification Evidence)
+1. **Frontend Typecheck**:
+   - `pnpm --filter frontend typecheck`: Exit Code 0 (0 errors)
+2. **Git Status**:
+   - 수정된 3개 파일 깨끗하게 스테이징 준비 완료.
