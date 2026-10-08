@@ -239,9 +239,29 @@
   html,
   body {
     max-width: 100vw;
-    overflow-x: hidden;
+    overflow-x: clip;
     position: relative;
     -webkit-text-size-adjust: 100%;
+  }
+
+  /* Multi-Viewport Resilience Shield: Media & Canvas overflow containment */
+  img, svg, video, canvas, iframe {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Zero Horizontal Overflow guarantee container */
+  .zero-overflow-shield {
+    max-width: 100%;
+    overflow-x: clip;
+    contain: paint;
+  }
+
+  /* High-contrast monospace numeric typography */
+  .fintech-mono-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: -0.02em;
   }
 
   body {

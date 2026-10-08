@@ -257,6 +257,13 @@ export default async function AdminPage({
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <Link
+              href="/admin/api-health"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-sky-500/40 bg-sky-500/15 px-3.5 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-sky-600 dark:text-sky-400 shadow-xs hover:bg-sky-500/25 transition-all ring-1 ring-sky-500/30"
+            >
+              <Activity className="size-3.5 text-sky-500 animate-pulse" />
+              <span>14대 API & R2 백업 타워</span>
+            </Link>
+            <Link
               href="/admin/money-flow"
               className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-3.5 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-emerald-600 dark:text-emerald-400 shadow-xs hover:bg-emerald-500/25 transition-all ring-1 ring-emerald-500/30"
             >

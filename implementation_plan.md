@@ -4646,3 +4646,100 @@ flowchart TD
 3. 원격 서버 Crontab에 매일 04:00 자동 백업 등록 (`0 4 * * * debian /srv/moneyverse-data/releases/production-current/scripts/backup/backup-r2-free.sh >> /srv/moneyverse-data/backups/backup.log 2>&1`)
 4. 심볼릭 링크 승격 (`prod-v536` -> `production-current`) 및 서비스 무중단 재기동
 5. 원격 API 헬스체크 및 백업 상태 엔드포인트 라이브 검증
+
+---
+
+## 🚀 [v152 Specification] 프론트엔드 전면 UI 리빌드 & 5대 뷰포트 무결점 겹침·깨짐 방어벽(Multi-Viewport Resilience Shield) 아키텍처 수립
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "그리고 모든 ui 프론트엔드 처음부터 처음부터 다시 만들어줘 관리자 일반유저 화면다 포함해서 근데[ 겹침ㄴㅋ 깨짐 방지는 제대로해"
+- **핵심 목표**:
+  1. **AI 특유의 뻔한 템플릿 느낌(AI Slop) 원천 배제**:
+     - `anti-ai-frontend-craftsmanship` 스킬 가이드라인 준수: Linear, Stripe, Apple HIG, Toss 수준의 정밀한 타이포그래피(Pretendard/Geist Mono), 딥 Slate/Zinc 표면, 고대비 모노스페이스 수치 렌더링.
+  2. **5대 뷰포트 무결점 겹침·깨짐 방어벽 (`multi-viewport-resilience-shield` & `fintech-responsive-layout-engine`)**:
+     - 320px(극소 모바일/폴더블), 390px(스마트폰), 768px(태블릿), 1100px(랩탑 분할화면), 1280px+(와이드) 전 구간에서 **횡스크롤 0건(Body Overflow Zero)**.
+     - Flex 컨테이너 내 텍스트 찌그러짐/부모 탈출 방지: 모든 텍스트 부모에 `min-w-0`, `truncate` 또는 `break-keep` 강제.
+     - 데이터 테이블 및 호가창: 모바일에서 화면을 밀어내지 않도록 `overflow-x-auto` 래퍼 또는 모바일 전용 1열 카드뷰 분기.
+     - 모바일 액션 버튼: `min-h-[44px]` 및 `min-w-[44px]` 터치 타깃 확보 및 `shrink-0` 적용으로 찌그러짐 원천 차단.
+     - 모바일 하단 내비게이션 바: `pb-20 sm:pb-8` 안전 여백 부여로 바텀 바가 콘텐츠를 가리는 현상 제거.
+  3. **관리자 및 일반 유저 전 화면 체계적 개편**:
+     - 일반 유저: 메인 홈, 주식 거래소/10-Depth 호가창, 지갑 및 원장, 중앙은행/채권, 직업 커리어, 상점/도파민, 커뮤니티, 쪽지함.
+     - 관리자 콘솔: 6대 관제 서피스(총괄 관제 타워, 경제 랩, 킬스위치, 유저 디렉토리, 준비금 관제, 감사 로그) 및 실시간 텔레메트리 게이지.
+
+---
+
+### 2. 세부 컴포넌트 아키텍처 및 철벽 방어 패턴
+
+```mermaid
+flowchart TD
+    Shield["전역 무결점 방어벽 (Multi-Viewport Resilience Shield)"]
+    Shield --> A["1. 전역 오버플로우 차단 (globals.css: overflow-x-clip)"]
+    Shield --> B["2. 자식 텍스트 보호 (min-w-0, truncate, break-keep)"]
+    Shield --> C["3. 터치 타깃 보존 (min-h-[44px], shrink-0)"]
+    Shield --> D["4. 데이터 그리드 방어 (모바일 전용 카드뷰 / 가로 스크롤 래퍼)"]
+    Shield --> E["5. 모바일 세이프티 (하단 고정 바텀바 + pb-20 컨테이너 패딩)"]
+```
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 320px, 390px, 768px, 1100px, 1280px 실 브라우저 에뮬레이션 테스트
+2. `document.documentElement.scrollWidth > window.innerWidth` 횡스크롤 0건 검증
+3. 백엔드 및 프론트엔드 타입체크 100% ALL PASS
+4. Next.js 579개 전 라우트 컴파일 통과
+5. 운영 서버 승격 배포
+
+---
+
+## 🚀 [v153 Specification] 프론트엔드 전면 UI 리빌드 & 5계층 철벽 방어벽(Multi-Viewport Shield) 1차 실행 계획
+
+### 1. 개요 및 사용자 조율 확정 사양 (Interactive Alignment Results)
+- **비주얼 테마**: Linear & Toss 감성의 다크 모던 핀테크 (딥 Slate/Zinc 표면 + 웜 앰버/에메랄드 악센트 + 고대비 모노스페이스 수치 표기)
+- **반응형 겹침·깨짐 방어**: 5계층 철벽 방어벽
+  1. 전역 `overflow-x-clip` 및 `max-w-[100vw]` 적용 (횡스크롤 0건 완전 보증)
+  2. Flex 컨테이너 내 자식 요소 `min-w-0` 및 텍스트 `truncate` / `break-keep` 방어
+  3. 모든 액션 버튼 `min-h-[44px]` 및 `min-w-[44px]` 터치 타깃 보존 및 `shrink-0` 적용
+  4. 데이터 테이블 및 10-Depth 호가창의 모바일 가로 스크롤 래퍼 및 반응형 1열 카드 분기
+  5. 모바일 플로팅 바텀 내비게이션 바 탑재 및 본문 `pb-20 md:pb-6` 세이프티 패딩 확보
+- **작업 페이싱**: 일반 유저 핵심 화면(홈, 주식/호가창, 지갑/은행, 직업/상점) 1차 쇄신 후 관리자 관제 타워(2차) 순차 개편
+- **모바일 내비게이션**: 토스/로빈후드 스타일 하단 고정 플로팅 바텀 내비게이션 (홈, 거래소, 지갑, 작업, 전체)
+- **확장 기능**: 관리자 실시간 리소스 게이지 및 Cloudflare R2 원터치 백업 관제 위젯 유지 및 연동
+
+---
+
+### 2. 세부 구현 작업 단계 (Implementation Phases)
+
+#### [Phase 1: 전역 스타일 및 겹침 방지 철벽 방어벽 구축]
+1. `frontend/src/app/globals.css`:
+   - `html, body` 횡스크롤 원천 차단 (`overflow-x-clip`, `max-width: 100vw`, `position: relative`)
+   - 터치 타깃 `min-h-[44px]` 및 핀테크 모노스페이스 수치 폰트 스택 강화
+2. `frontend/src/components/mobile-bottom-nav.tsx`:
+   - 390px 스마트폰 및 320px 극소 모바일 대응 하단 고정 바텀 내비게이션 (홈, 주식, 지갑, 직업, 전체 메뉴)
+   - iOS/Android Safe Area(`pb-[env(safe-area-inset-bottom)]`) 완벽 지원
+3. `frontend/src/app/layout.tsx`:
+   - 모바일 바텀 내비게이션 마운트 및 본문 하단 겹침 방지 여백(`pb-20 md:pb-6`) 적용
+
+#### [Phase 2: 일반 유저 핵심 화면 전면 쇄신]
+1. `frontend/src/app/page.tsx` (메인 홈):
+   - Linear/Toss 스타일 핀테크 대시보드 리빌드
+   - 320px~1440px 전 구간 겹침 없는 Bento Grid 레이아웃
+2. `frontend/src/app/stocks/` (가상 주식 거래소 & 10-Depth 호가창):
+   - 호가창 압축 시 글자 겹침 방지 (`min-w-0 font-mono`)
+   - 모바일 1열 스택 및 캔들 차트 클리핑 방어
+3. `frontend/src/app/wallet/` & `frontend/src/app/bank/` (지갑 & 중앙은행):
+   - 카드 최소 높이 보장(`min-h-[320px]`), 잔액 Geist Mono 렌더링
+4. `frontend/src/app/work/` & `frontend/src/app/shop/` (직업 & 상점):
+   - 44px 터치 액션 버튼 보존, 뱃지 `shrink-0` 적용
+
+#### [Phase 3: 관리자 관제 타워 및 전체 서피스 쇄신]
+1. `/admin/api-health` 및 `/admin` 콘솔 UI 고도화
+2. R2 백업 스냅샷 위젯 및 텔레메트리 게이지 완결
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 320px, 390px, 768px, 1100px, 1280px+ 전 구간 실 브라우저 횡스크롤 검증 (`scrollWidth <= innerWidth`)
+2. 프론트엔드 및 백엔드 타입체크 (`tsc --noEmit`) 100% ALL-PASS
+3. Next.js 579개 라우트 빌드 통과
+4. 운영 서버 `prod-v537` 무중단 승격 배포

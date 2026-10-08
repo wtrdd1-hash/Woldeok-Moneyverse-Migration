@@ -194,10 +194,10 @@ export default async function HomePage() {
                 <Briefcase className="size-4 min-[400px]:size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground whitespace-nowrap leading-tight">
+                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground truncate leading-tight">
                   <T korean="직업 출근" english="Careers" japanese="職業出勤" chinese="职业上班" />
                 </span>
-                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground whitespace-nowrap leading-tight mt-0.5">
+                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
                   <T korean="일일 급여 수령" english="Daily Salary" japanese="日次給与受取" chinese="领取每日薪资" />
                 </span>
               </div>
@@ -211,10 +211,10 @@ export default async function HomePage() {
                 <TrendingUp className="size-4 min-[400px]:size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground whitespace-nowrap leading-tight">
+                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground truncate leading-tight">
                   <T korean="주식 거래" english="Stocks" japanese="株式取引" chinese="股票交易" />
                 </span>
-                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground whitespace-nowrap leading-tight mt-0.5">
+                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
                   <T korean="10-Depth 호가 매매" english="Orderbook" japanese="10-Depth気配値取引" chinese="10档深度盘口交易" />
                 </span>
               </div>
@@ -228,10 +228,10 @@ export default async function HomePage() {
                 <Landmark className="size-4 min-[400px]:size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground whitespace-nowrap leading-tight">
+                <span className="block text-[11px] min-[360px]:text-xs sm:text-sm font-bold text-foreground truncate leading-tight">
                   <T korean="가상 은행" english="Bank" japanese="仮想銀行" chinese="虚拟银行" />
                 </span>
-                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground whitespace-nowrap leading-tight mt-0.5">
+                <span className="block text-[9px] min-[360px]:text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
                   <T korean="복리 저축·국채" english="Savings & Bonds" japanese="複利貯蓄・国債" chinese="复利储蓄·国债" />
                 </span>
               </div>

@@ -268,13 +268,13 @@ function Pocket({
   readonly amount: string;
 }) {
   return (
-    <div className="rounded-lg border p-3">
-      <dt className="text-xs text-muted-foreground">{term}</dt>
-      <dd className="text-xl font-medium flex items-baseline gap-2 flex-wrap">
+    <div className="rounded-xl border border-border/80 bg-card/70 p-3.5 min-w-0 shadow-xs">
+      <dt className="text-xs font-medium text-muted-foreground">{term}</dt>
+      <dd className="text-xl font-bold font-mono flex items-baseline gap-2 flex-wrap min-w-0 my-0.5">
         <Amount value={amount} />
         <FiatBadge amount={amount} />
       </dd>
-      <dd className="text-xs text-muted-foreground">{detail}</dd>
+      <dd className="text-[11px] text-muted-foreground leading-relaxed [word-break:keep-all]">{detail}</dd>
     </div>
   );
 }

@@ -224,7 +224,7 @@ export default async function WorkPage() {
             return (
               <Card
                 key={job.code}
-                className={`transition-all duration-200 hover:shadow-lg relative flex flex-col justify-between w-full min-w-0 overflow-hidden ${
+                className={`h-full min-h-[290px] transition-all duration-200 hover:shadow-lg relative flex flex-col justify-between w-full min-w-0 overflow-hidden ${
                   isActive
                     ? 'border-primary ring-1 ring-primary/50 bg-primary/[0.03]'
                     : 'border-border/60 hover:border-border'
