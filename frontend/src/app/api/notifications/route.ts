@@ -15,9 +15,16 @@ export async function GET(req: Request): Promise<NextResponse> {
   const unreadOnly = searchParams.get('unreadOnly') === 'true';
   const limit = searchParams.get('limit') || '50';
 
-  const items = await apiOrNull<any[]>(`/api/v1/notifications?limit=${limit}${unreadOnly ? '&unreadOnly=true' : ''}`);
+  const items = await apiOrNull<unknown>(`/api/v1/notifications?limit=${limit}${unreadOnly ? '&unreadOnly=true' : ''}`);
 
-  return NextResponse.json({ notifications: items ?? [] });
+  if (!Array.isArray(items)) {
+    return NextResponse.json(
+      { error: 'Notification service unavailable' },
+      { status: 503, headers: { 'cache-control': 'private, no-store' } },
+    );
+  }
+
+  return NextResponse.json({ notifications: items }, { headers: { 'cache-control': 'private, no-store' } });
 }
 
 export async function POST(req: Request): Promise<NextResponse> {

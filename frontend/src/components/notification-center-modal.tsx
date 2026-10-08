@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -23,52 +23,125 @@ interface NotificationItem {
   created_at: string;
 }
 
+const BASE_POLL_INTERVAL_MS = 15000;
+const MAX_POLL_INTERVAL_MS = 60000;
+
 export function NotificationCenterModal() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [countUnavailable, setCountUnavailable] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [claiming, setClaiming] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const retryDelayRef = useRef(BASE_POLL_INTERVAL_MS);
 
-  const fetchUnreadCount = async () => {
-    try {
-      const res = await fetch('/api/notifications/unread-count');
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.unreadCount || 0);
-      }
-    } catch {
-      // ignore
-    }
-  };
-
-  const fetchNotifications = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/notifications?unreadOnly=${filter === 'unread'}`);
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data.notifications || []);
-      }
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 15초마다 미확인 알림 카운트 백그라운드 갱신
+  // Keep the last known count on failure; never turn an outage into a false zero.
   useEffect(() => {
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 15000);
-    return () => clearInterval(interval);
+    let active = true;
+    let generation = 0;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    let currentRequest: AbortController | null = null;
+
+    const clearScheduled = () => {
+      if (timeout !== null) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+    };
+
+    const schedule = (delay: number) => {
+      clearScheduled();
+      if (!active || document.hidden) return;
+      timeout = setTimeout(() => {
+        timeout = null;
+        void poll();
+      }, delay);
+    };
+
+    const poll = async () => {
+      if (!active || document.hidden) return;
+      const pollGeneration = generation;
+      const request = new AbortController();
+      currentRequest = request;
+      try {
+        const response = await fetch('/api/notifications/unread-count', {
+          signal: request.signal,
+          cache: 'no-store',
+        });
+        if (!response.ok) throw new Error('Unread count unavailable');
+        const data = await response.json();
+        if (!active || request.signal.aborted || generation !== pollGeneration) return;
+        const count: unknown = data?.unreadCount;
+        if (typeof count !== 'number' || !Number.isSafeInteger(count) || count < 0) {
+          throw new Error('Invalid unread count');
+        }
+        setUnreadCount(count);
+        setCountUnavailable(false);
+        retryDelayRef.current = BASE_POLL_INTERVAL_MS;
+      } catch {
+        if (active && !request.signal.aborted && generation === pollGeneration) {
+          setCountUnavailable(true);
+          retryDelayRef.current = Math.min(MAX_POLL_INTERVAL_MS, retryDelayRef.current * 2);
+        }
+      } finally {
+        if (currentRequest === request) currentRequest = null;
+        if (active && generation === pollGeneration && !document.hidden) {
+          schedule(retryDelayRef.current);
+        }
+      }
+    };
+
+    const onVisibilityChange = () => {
+      generation += 1;
+      clearScheduled();
+      currentRequest?.abort();
+      if (!document.hidden) {
+        retryDelayRef.current = BASE_POLL_INTERVAL_MS;
+        void poll();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    if (!document.hidden) void poll();
+
+    return () => {
+      active = false;
+      generation += 1;
+      clearScheduled();
+      currentRequest?.abort();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, []);
 
   useEffect(() => {
-    if (open) {
-      fetchNotifications();
-    }
+    if (!open) return;
+    const controller = new AbortController();
+
+    const loadNotifications = async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const response = await fetch('/api/notifications?unreadOnly=' + (filter === 'unread'), {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+        if (!response.ok) throw new Error('Notification service unavailable');
+        const data = await response.json();
+        if (!Array.isArray(data?.notifications)) throw new Error('Invalid notification response');
+        if (!controller.signal.aborted) setNotifications(data.notifications);
+      } catch {
+        if (!controller.signal.aborted) {
+          setLoadError('알림을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    };
+
+    void loadNotifications();
+    return () => controller.abort();
   }, [open, filter]);
 
   const handleMarkAllRead = async () => {
@@ -135,10 +208,13 @@ export function NotificationCenterModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          aria-label="알림 센터 열기"
-          className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-border/50 bg-background/80 hover:bg-muted transition-colors"
+          aria-label={countUnavailable ? "알림 센터 열기 (알림 상태 확인 불가)" : "알림 센터 열기"}
+          className="relative flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border/50 bg-background/80 hover:bg-muted transition-colors"
         >
           <Bell className="h-4 w-4 text-foreground/80" />
+          {countUnavailable && (
+            <span aria-hidden="true" className="absolute -bottom-1 -right-1 size-2.5 rounded-full bg-amber-500 ring-2 ring-background" />
+          )}
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-background animate-pulse">
               {unreadCount > 99 ? '99+' : unreadCount}
@@ -149,8 +225,8 @@ export function NotificationCenterModal() {
 
       <DialogContent className="sm:max-w-lg border-border/60 bg-card/95 backdrop-blur-md rounded-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="p-5 pb-3 border-b border-border/40">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Bell className="h-4 w-4" />
               </div>
@@ -168,7 +244,7 @@ export function NotificationCenterModal() {
                 size="sm"
                 onClick={handleMarkAllRead}
                 disabled={notifications.every((n) => n.is_read)}
-                className="h-8 text-xs px-2.5 rounded-lg border-border/40"
+                className="min-h-11 text-xs px-2.5 rounded-lg border-border/40"
               >
                 <CheckCheck className="h-3.5 w-3.5 mr-1" />
                 모두 읽음
@@ -177,7 +253,7 @@ export function NotificationCenterModal() {
                 size="sm"
                 onClick={handleClaimAll}
                 disabled={claiming || unreadCount === 0}
-                className="h-8 text-xs px-2.5 rounded-lg font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md shadow-amber-500/15"
+                className="min-h-11 text-xs px-2.5 rounded-lg font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md shadow-amber-500/15"
               >
                 <Sparkles className="h-3.5 w-3.5 mr-1" />
                 원클릭 모두 수령
@@ -189,7 +265,7 @@ export function NotificationCenterModal() {
           <div className="flex items-center gap-2 mt-3">
             <button
               onClick={() => setFilter('all')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 filter === 'all'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted'
@@ -199,7 +275,7 @@ export function NotificationCenterModal() {
             </button>
             <button
               onClick={() => setFilter('unread')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+              className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
                 filter === 'unread'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted'
@@ -221,6 +297,10 @@ export function NotificationCenterModal() {
             <div className="h-48 flex flex-col items-center justify-center text-muted-foreground gap-2">
               <RefreshCw className="h-5 w-5 animate-spin text-primary" />
               <span className="text-xs">알림을 불러오는 중...</span>
+            </div>
+          ) : loadError ? (
+            <div role="alert" className="flex min-h-48 items-center justify-center rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-center text-sm text-amber-700 dark:text-amber-300">
+              {loadError}
             </div>
           ) : notifications.length === 0 ? (
             <div className="h-48 flex flex-col items-center justify-center text-center p-4">
