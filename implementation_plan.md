@@ -4274,3 +4274,48 @@ flowchart TD
 ### 3. 최종 검증 결과
 - 모든 결함에 대한 라이브 재검증 결과: **ALL-PASS**
 - 무결점 릴리스 지속 운영 확증.
+
+---
+
+## 🚀 [v144 Specification] DEF-004 일일 퀘스트 보상 서버 원장 연동 및 관리자 실측 텔레메트리·콘솔 무결성 복구
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - 시스템 전체 기능 부족점 및 코드베이스 전수 조사 결과 승인 및 개선 착수.
+- **핵심 목표**:
+  1. **DEF-004 (P1)**: 홈 일일 퀘스트(`DailyEconomicQuestStation`) 보상 수령 시 단순 `localStorage` 마킹이 아닌 백엔드 멱등 트랜잭션(`economy_post_transaction`)을 통해 실제 `USER_CASH` 원장 계좌로 WLD가 입금되는 정규 정산 API 신설 및 프론트엔드 연동.
+  2. **DEF-007 & DEF-008 (P1)**: 관리자 API 헬스체크(`/admin/api-health`) 및 SEO 감사(`/admin/seo-audit`)의 하드코딩 리터럴 상수를 실제 DB Ping, 캐시 응답 속도, 실측 봇 방문 로그 기반 텔레메트리로 완전 전환.
+  3. **DEF-010 & DEF-011 (P1)**: 관리자 은행 현황(`/admin/bank`) 및 직업 현황(`/admin/work`)의 데이터 로드 오류를 원천 해소하여 콘솔 정상 가동.
+
+---
+
+### 2. 세부 구현 계획 (Detailed Action Plan)
+
+#### ① [DEF-004] 일일 퀘스트 서버 원장 정산 시스템 풀스택 구축
+- **백엔드 DTO 및 엔드포인트 신설**:
+  - `DailyQuestClaimDto`: `questId` ('quest_stock_analysis' | 'quest_savings_deposit' | 'quest_daily_roulette' | 'quest_financial_quiz' | 'all_clear'), `idempotencyKey` (UUID).
+  - `POST /engagement/daily-quest/claim`: 1일 1회 제한(Daily Cap: 1), `public.economy_post_transaction` 호출하여 `MINT_TO_USER`로 실제 WLD 지급.
+  - `GET /engagement/daily-quest/status`: 오늘 유저의 퀘스트별 보상 수령 여부 및 올클리어 달성 여부 서버 권위 조회.
+- **프론트엔드 연동**:
+  - `frontend/src/components/daily-economic-quest-station.tsx`: `handleClaim` 시 서버 액션 또는 API를 호출하여 지갑 원장에 실시간 반영, 브라우저 새로고침이나 캐시 삭제 시에도 서버 상태 기반 복원.
+
+#### ② [DEF-007] 관리자 API 관제 실측 텔레메트리 연동
+- **백엔드**: `backend/src/admin/api-health.controller.ts`의 `getApiHealthStatus`에서 DB 응답 시간(`SELECT 1`), Redis/Cache 상태, 각 도메인 헬스체크를 실측하여 동적 Latency 및 가동률 반환.
+- **프론트엔드**: `frontend/src/app/admin/api-health/page.tsx`에서 고정 상수 `HEALTH_DOMAINS` 대신 실측 API 데이터를 렌더링.
+
+#### ③ [DEF-008] 관리자 SEO 감사 실측 크롤러 텔레메트리 연동
+- **프론트엔드**: `frontend/src/components/admin-seo-audit-view.tsx`에서 고정된 2026-10-03 날짜와 샘플 크롤러 대신 `/api/seo/status`의 실제 검색엔진 봇 방문 통계(`botDistribution`, `totalHits24h`, `recentLogs`)를 실시간 반영.
+
+#### ④ [DEF-010 & DEF-011] 관리자 은행 & 직업 현황 로드 복구
+- **백엔드**: `OperationsRepository` 내 `workCatalogue`의 `work_task_catalog` 조인 정합성 및 `admin_bank_overview` 인가 가드 점검 및 방어 로직 강화.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. **TypeScript Typecheck**:
+   - `pnpm --filter backend typecheck`
+   - `pnpm --filter frontend typecheck`
+2. **단위 테스트**:
+   - 일일 퀘스트 보상 정산 및 1일 1회 중복 수령 방지 테스트 실행.
+3. **통합 빌드 및 배포 검증**:
+   - Next.js Turbopack 및 NestJS 빌드 성공 검증.

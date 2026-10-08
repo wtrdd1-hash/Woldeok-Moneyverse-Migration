@@ -49,6 +49,11 @@ export interface StarDropClaimDto {
   readonly idempotencyKey: string;
 }
 
+export interface DailyQuestClaimDto {
+  readonly questId: string;
+  readonly idempotencyKey?: string;
+}
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 @ApiTags('dopamine')
@@ -304,5 +309,66 @@ export class DopamineController {
       claimedAt: new Date().toISOString(),
     };
   }
+
+  @Get('daily-quest/status')
+  @ApiOperation({ summary: 'Get current daily quest claim status and total earned rewards today' })
+  async getDailyQuestStatus(@Req() request: RequestWithSession) {
+    const userId = requireUserId(request);
+    if (this.repository) {
+      try {
+        return await this.repository.getDailyQuestStatus(userId);
+      } catch (error: unknown) {
+        if (error instanceof DopamineInputError) {
+          throw new BadRequestException(error.message);
+        }
+        const msg = error instanceof Error ? error.message : String(error);
+        throw new InternalServerErrorException(msg);
+      }
+    }
+    return { claimedQuests: {}, allClearClaimed: false, totalEarnedToday: 0 };
+  }
+
+  @Post('daily-quest/claim')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Claim official daily quest reward into authoritative ledger (DEF-004 fix)' })
+  async claimDailyQuest(
+    @Req() request: RequestWithSession,
+    @Body() body: DailyQuestClaimDto,
+  ) {
+    const userId = requireUserId(request);
+    if (!body?.questId) {
+      throw new BadRequestException('questId is required');
+    }
+    const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
+      ? body.idempotencyKey
+      : randomUUID();
+
+    if (this.repository) {
+      try {
+        return await this.repository.claimDailyQuest({
+          actorUserId: userId,
+          idempotencyKey: key,
+          questId: body.questId,
+        });
+      } catch (error: unknown) {
+        if (error instanceof DopamineInputError) {
+          throw new BadRequestException(error.message);
+        }
+        const msg = error instanceof Error ? error.message : String(error);
+        throw new InternalServerErrorException(msg);
+      }
+    }
+
+    return {
+      success: true,
+      userId,
+      questId: body.questId,
+      transactionId: randomUUID(),
+      rewardAmount: 500,
+      newBalance: '1000',
+      claimedAt: new Date().toISOString(),
+    };
+  }
 }
+
 

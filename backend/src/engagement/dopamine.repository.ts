@@ -1,8 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
-import { queryOne } from '../core/db';
+import { queryOne, queryRows } from '../core/db';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export const DAILY_QUEST_REWARDS: Record<string, number> = {
+  quest_stock_analysis: 500,
+  quest_savings_deposit: 1000,
+  quest_daily_roulette: 500,
+  quest_financial_quiz: 1000,
+  all_clear: 2000,
+};
+
+export interface DailyQuestClaimInput {
+  readonly actorUserId: string;
+  readonly idempotencyKey: string;
+  readonly questId: string;
+}
+
+export interface DailyQuestClaimRecord {
+  readonly success: boolean;
+  readonly userId: string;
+  readonly questId: string;
+  readonly transactionId: string;
+  readonly rewardAmount: number;
+  readonly newBalance: string;
+  readonly claimedAt: string;
+}
+
+export interface DailyQuestStatusRecord {
+  readonly claimedQuests: Record<string, boolean>;
+  readonly allClearClaimed: boolean;
+  readonly totalEarnedToday: number;
+}
 
 export class DopamineInputError extends Error {
   constructor(message: string) {
@@ -338,5 +368,180 @@ export class DopamineRepository {
       claimedAt: new Date().toISOString(),
     };
   }
+
+  /**
+   * 홈 일일 퀘스트 보상 원장 기록 및 지갑(USER_CASH) 입금 (DEF-004 해결)
+   * 퀘스트당 1일 1회 제한
+   */
+  async claimDailyQuest(input: DailyQuestClaimInput): Promise<DailyQuestClaimRecord> {
+    assertUuid(input.actorUserId, 'actorUserId');
+    assertUuid(input.idempotencyKey, 'idempotencyKey');
+
+    const rewardAmount = DAILY_QUEST_REWARDS[input.questId];
+    if (rewardAmount === undefined) {
+      throw new DopamineInputError(`유효하지 않은 퀘스트입니다: ${input.questId}`);
+    }
+
+    const policyVersion = `quest.daily.${input.questId}`;
+
+    // 0. 1일 1회 중복 수령 방지
+    const todayClaim = await queryOne<{ id: string }>(
+      this.pool,
+      `SELECT id::text
+       FROM public.ledger_transactions
+       WHERE actor_user_id = $1::uuid
+         AND policy_version = $2
+         AND created_at >= CURRENT_DATE
+       LIMIT 1`,
+      [input.actorUserId, policyVersion],
+    );
+
+    if (todayClaim?.id) {
+      throw new DopamineInputError('오늘 이미 보상을 수령한 퀘스트입니다.');
+    }
+
+    // 올클리어 보너스인 경우, 4대 필수 퀘스트 수령 여부 검증
+    if (input.questId === 'all_clear') {
+      const basicClaims = await queryRows<{ policy_version: string }>(
+        this.pool,
+        `SELECT policy_version
+         FROM public.ledger_transactions
+         WHERE actor_user_id = $1::uuid
+           AND policy_version IN (
+             'quest.daily.quest_stock_analysis',
+             'quest.daily.quest_savings_deposit',
+             'quest.daily.quest_daily_roulette',
+             'quest.daily.quest_financial_quiz'
+           )
+           AND created_at >= CURRENT_DATE`,
+        [input.actorUserId],
+      );
+      if (basicClaims.length < 4) {
+        throw new DopamineInputError('모든 일일 퀘스트를 완료해야 올클리어 보너스를 수령할 수 있습니다.');
+      }
+    }
+
+    // 1. 유저 USER_CASH 계좌 조회
+    const userCashRow = await queryOne<{ id: string }>(
+      this.pool,
+      `SELECT account.id::text AS id
+       FROM public.accounts AS account
+       JOIN public.users AS user_row ON user_row.id = account.owner_user_id
+       WHERE account.owner_user_id = $1::uuid
+         AND account.account_type = 'USER_CASH'::public.account_type
+         AND account.status = 'active'::public.account_status
+         AND user_row.status = 'active'::public.user_status`,
+      [input.actorUserId],
+    );
+
+    if (!userCashRow?.id) {
+      throw new DopamineInputError('active cash account not found for user');
+    }
+
+    // 2. MINT 시스템 계좌 조회
+    const mintRow = await queryOne<{ id: string }>(
+      this.pool,
+      `SELECT account.id::text AS id
+       FROM public.accounts AS account
+       WHERE account.system_key = 'mint'
+         AND account.account_type = 'MINT'::public.account_type
+         AND account.status = 'active'::public.account_status`,
+    );
+
+    if (!mintRow?.id) {
+      throw new Error('mint account unavailable');
+    }
+
+    // 3. economy_post_transaction 원장 기록 및 잔액 입금
+    const txRow = await queryOne<{ transaction_id: string }>(
+      this.pool,
+      `SELECT public.economy_post_transaction(
+         $1::uuid,
+         'MINT_TO_USER',
+         $2::uuid,
+         NULL,
+         jsonb_build_array(
+           jsonb_build_object('accountId', $3::uuid, 'amount', $4::numeric, 'direction', 'credit'),
+           jsonb_build_object('accountId', $5::uuid, 'amount', $4::numeric, 'direction', 'debit')
+         ),
+         $6::text,
+         jsonb_build_object(
+           'userId', $2::uuid,
+           'amount', $4::numeric,
+           'questId', $7::text
+         )
+       )::text AS transaction_id`,
+      [
+        input.idempotencyKey,
+        input.actorUserId,
+        mintRow.id,
+        rewardAmount,
+        userCashRow.id,
+        policyVersion,
+        input.questId,
+      ],
+    );
+
+    if (!txRow?.transaction_id) {
+      throw new Error('failed to post ledger transaction for daily quest reward');
+    }
+
+    // 4. 최신 USER_CASH 잔고 조회
+    const balanceRow = await queryOne<{ available_amount: string }>(
+      this.pool,
+      `SELECT balance.available_amount::text AS available_amount
+       FROM public.account_balances AS balance
+       WHERE balance.account_id = $1::uuid`,
+      [userCashRow.id],
+    );
+
+    return {
+      success: true,
+      userId: input.actorUserId,
+      questId: input.questId,
+      transactionId: txRow.transaction_id,
+      rewardAmount,
+      newBalance: balanceRow?.available_amount ?? '0',
+      claimedAt: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * 당일 일일 퀘스트 수령 현황 및 총 획득액 서버 권위 조회
+   */
+  async getDailyQuestStatus(actorUserId: string): Promise<DailyQuestStatusRecord> {
+    assertUuid(actorUserId, 'actorUserId');
+
+    const rows = await queryRows<{ policy_version: string }>(
+      this.pool,
+      `SELECT policy_version
+       FROM public.ledger_transactions
+       WHERE actor_user_id = $1::uuid
+         AND policy_version LIKE 'quest.daily.%'
+         AND created_at >= CURRENT_DATE`,
+      [actorUserId],
+    );
+
+    const claimedQuests: Record<string, boolean> = {};
+    let allClearClaimed = false;
+    let totalEarnedToday = 0;
+
+    for (const row of rows) {
+      const qId = row.policy_version.replace('quest.daily.', '');
+      if (qId === 'all_clear') {
+        allClearClaimed = true;
+      } else {
+        claimedQuests[qId] = true;
+      }
+      totalEarnedToday += DAILY_QUEST_REWARDS[qId] ?? 0;
+    }
+
+    return {
+      claimedQuests,
+      allClearClaimed,
+      totalEarnedToday,
+    };
+  }
 }
+
 

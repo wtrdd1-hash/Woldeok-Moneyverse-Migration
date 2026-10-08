@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getServerLocale } from '@/lib/locale-server';
 import { requireAdminConsole } from '@/lib/session';
+import { apiOrNull } from '@/lib/api';
 
 export const metadata: Metadata = {
   title: '14대 도메인 API 헬스체크 & 실시간 관제 — 관리자',
@@ -19,10 +20,23 @@ interface DomainHealthData {
   readonly name: string;
   readonly nameEn: string;
   readonly endpointCount: number;
-  readonly status: 'OPERATIONAL' | 'DEGRADED';
+  readonly status: 'OPERATIONAL' | 'DEGRADED' | 'MAINTENANCE';
   readonly latencyMs: number;
   readonly successRate: number;
   readonly sampleEndpoints: readonly string[];
+}
+
+interface ApiHealthResponse {
+  readonly status: string;
+  readonly serverTime: string;
+  readonly uptimeSeconds: number;
+  readonly dbLatencyMs?: number;
+  readonly isLiveTelemetry?: boolean;
+  readonly totalDomains: number;
+  readonly totalEndpoints: number;
+  readonly averageLatencyMs: number;
+  readonly globalSuccessRate: number;
+  readonly domains: readonly DomainHealthData[];
 }
 
 const HEALTH_DOMAINS: readonly DomainHealthData[] = [
@@ -173,8 +187,13 @@ export default async function AdminApiHealthPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const totalEndpoints = HEALTH_DOMAINS.reduce((acc, d) => acc + d.endpointCount, 0);
-  const avgLatency = Math.round(HEALTH_DOMAINS.reduce((acc, d) => acc + d.latencyMs, 0) / HEALTH_DOMAINS.length);
+  const liveData = await apiOrNull<ApiHealthResponse>('/api/v1/admin/api-health/status');
+  const domains = liveData?.domains ?? HEALTH_DOMAINS;
+  const totalEndpoints = liveData?.totalEndpoints ?? domains.reduce((acc, d) => acc + d.endpointCount, 0);
+  const avgLatency = liveData?.averageLatencyMs ?? Math.round(domains.reduce((acc, d) => acc + d.latencyMs, 0) / domains.length);
+  const successRate = liveData?.globalSuccessRate ?? 100.0;
+  const isLive = liveData?.isLiveTelemetry ?? false;
+  const dbLatency = liveData?.dbLatencyMs ?? 8;
 
   return (
     <div data-page="admin-api-health" className="mv-page mv-page--admin grid gap-6 max-w-6xl mx-auto">
@@ -186,7 +205,7 @@ export default async function AdminApiHealthPage() {
       </Button>
 
       <PageHeader
-        eyebrow="SYSTEM TELEMETRY"
+        eyebrow={isLive ? 'LIVE SYSTEM TELEMETRY (실측)' : 'SYSTEM TELEMETRY'}
         title={isEn ? '14-Domain API Real-Time Health Tower' : '14대 도메인 API 실시간 관제 타워'}
       >
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
@@ -245,15 +264,17 @@ export default async function AdminApiHealthPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-1">
-            <div className="text-2xl font-bold font-mono text-cyan-500">100.0%</div>
-            <div className="text-[11px] text-cyan-600 dark:text-cyan-400 mt-0.5">Zero Error Rate</div>
+            <div className="text-2xl font-bold font-mono text-cyan-500">{successRate.toFixed(1)}%</div>
+            <div className="text-[11px] text-cyan-600 dark:text-cyan-400 mt-0.5">
+              {isLive ? `DB 핑 ${dbLatency}ms 실측` : 'Zero Error Rate'}
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* 14 Domains Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-        {HEALTH_DOMAINS.map((domain) => (
+        {domains.map((domain) => (
           <Card key={domain.id} className="border-border/80 bg-card/60 shadow-xs">
             <CardHeader className="p-4 pb-2">
               <div className="flex items-center justify-between">

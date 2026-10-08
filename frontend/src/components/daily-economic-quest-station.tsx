@@ -19,6 +19,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { claimDailyQuestAction, fetchDailyQuestStatusAction } from '@/app/actions/daily-quest';
+import { toast } from 'sonner';
 
 interface QuestItem {
   readonly id: string;
@@ -85,24 +87,55 @@ export function DailyEconomicQuestStation() {
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const [totalEarnedToday, setTotalEarnedToday] = useState<number>(0);
 
+  const [isClaimingId, setIsClaimingId] = useState<string | null>(null);
+
   const todayKey = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
+    // 1. 로컬 저장소 우선 복원
+    let localCompleted: Record<string, boolean> = {};
+    let localClaimed: Record<string, boolean> = {};
+    let localAllClear = false;
+    let localEarned = 0;
+
     try {
       const stored = localStorage.getItem(`${STORAGE_KEY_PREFIX}${todayKey}`);
       if (stored) {
         const parsed = JSON.parse(stored);
-        setCompletedQuests(parsed.completed || {});
-        setClaimedQuests(parsed.claimed || {});
-        setAllClearClaimed(parsed.allClearClaimed || false);
-        setTotalEarnedToday(parsed.totalEarned || 0);
+        localCompleted = parsed.completed || {};
+        localClaimed = parsed.claimed || {};
+        localAllClear = parsed.allClearClaimed || false;
+        localEarned = parsed.totalEarned || 0;
+        setCompletedQuests(localCompleted);
+        setClaimedQuests(localClaimed);
+        setAllClearClaimed(localAllClear);
+        setTotalEarnedToday(localEarned);
       } else {
-        // 최초 진입 시 첫 퀘스트 자동 클리어 체험 제공
-        setCompletedQuests({ quest_stock_analysis: true });
+        localCompleted = { quest_stock_analysis: true };
+        setCompletedQuests(localCompleted);
       }
     } catch {
       // Storage error fallback
     }
+
+    // 2. 서버 권위 원장 수령 상태 동기화
+    fetchDailyQuestStatusAction()
+      .then((serverStatus) => {
+        if (serverStatus) {
+          const mergedClaimed = { ...localClaimed, ...serverStatus.claimedQuests };
+          const mergedCompleted = { ...localCompleted, ...serverStatus.claimedQuests };
+          const mergedAllClear = localAllClear || serverStatus.allClearClaimed;
+          const mergedEarned = Math.max(localEarned, serverStatus.totalEarnedToday);
+
+          setClaimedQuests(mergedClaimed);
+          setCompletedQuests(mergedCompleted);
+          setAllClearClaimed(mergedAllClear);
+          setTotalEarnedToday(mergedEarned);
+        }
+      })
+      .catch(() => {
+        // 네트워크 오류 시 로컬 캐시 유지
+      });
   }, [todayKey]);
 
   const saveState = (
@@ -130,20 +163,48 @@ export function DailyEconomicQuestStation() {
     }
   };
 
-  const handleClaim = (quest: QuestItem) => {
-    if (claimedQuests[quest.id]) return;
-    const newCompleted = { ...completedQuests, [quest.id]: true };
-    const newClaimed = { ...claimedQuests, [quest.id]: true };
-    const newEarned = totalEarnedToday + quest.rewardWld;
-    saveState(newCompleted, newClaimed, allClearClaimed, newEarned);
+  const handleClaim = async (quest: QuestItem) => {
+    if (claimedQuests[quest.id] || isClaimingId !== null) return;
+    setIsClaimingId(quest.id);
+
+    try {
+      const res = await claimDailyQuestAction(quest.id);
+      if (res.status === 'ok') {
+        toast.success(res.message);
+        const newCompleted = { ...completedQuests, [quest.id]: true };
+        const newClaimed = { ...claimedQuests, [quest.id]: true };
+        const newEarned = totalEarnedToday + quest.rewardWld;
+        saveState(newCompleted, newClaimed, allClearClaimed, newEarned);
+      } else {
+        toast.error(res.message || '보상 수령에 실패했습니다.');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '보상 수령 요청 중 오류가 발생했습니다.');
+    } finally {
+      setIsClaimingId(null);
+    }
   };
 
-  const handleAllClearClaim = () => {
-    if (allClearClaimed) return;
-    setShowCelebration(true);
-    const newEarned = totalEarnedToday + ALL_CLEAR_BONUS;
-    saveState(completedQuests, claimedQuests, true, newEarned);
-    setTimeout(() => setShowCelebration(false), 5000);
+  const handleAllClearClaim = async () => {
+    if (allClearClaimed || isClaimingId !== null) return;
+    setIsClaimingId('all_clear');
+
+    try {
+      const res = await claimDailyQuestAction('all_clear');
+      if (res.status === 'ok') {
+        toast.success(res.message);
+        setShowCelebration(true);
+        const newEarned = totalEarnedToday + ALL_CLEAR_BONUS;
+        saveState(completedQuests, claimedQuests, true, newEarned);
+        setTimeout(() => setShowCelebration(false), 5000);
+      } else {
+        toast.error(res.message || '올클리어 보너스 수령에 실패했습니다.');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '올클리어 보너스 요청 중 오류가 발생했습니다.');
+    } finally {
+      setIsClaimingId(null);
+    }
   };
 
   const completedCount = DAILY_QUESTS.filter((q) => completedQuests[q.id]).length;
@@ -257,11 +318,12 @@ export function DailyEconomicQuestStation() {
                   ) : isCompleted ? (
                     <Button
                       size="sm"
+                      disabled={isClaimingId !== null}
                       onClick={() => handleClaim(quest)}
                       className="h-7 text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
                     >
                       <Gift className="size-3.5 mr-1" />
-                      보상 받기
+                      {isClaimingId === quest.id ? '수령 처리 중...' : '보상 받기'}
                     </Button>
                   ) : (
                     <Button
@@ -323,10 +385,11 @@ export function DailyEconomicQuestStation() {
             ) : isAllCompleted ? (
               <Button
                 onClick={handleAllClearClaim}
+                disabled={isClaimingId !== null}
                 className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-extrabold text-xs shadow-md"
               >
                 <Gift className="size-4 mr-1.5" />
-                황금 상자 열기 ({ALL_CLEAR_BONUS.toLocaleString()} WLD)
+                {isClaimingId === 'all_clear' ? '보너스 지급 중...' : `황금 상자 열기 (${ALL_CLEAR_BONUS.toLocaleString()} WLD)`}
               </Button>
             ) : (
               <Button disabled variant="outline" size="sm" className="text-xs opacity-60">

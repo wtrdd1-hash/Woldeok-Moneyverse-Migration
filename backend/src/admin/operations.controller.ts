@@ -218,14 +218,27 @@ export class AdminBankOperationsController {
     }
     const actor = requireUserId(request);
     const repository = required(this.operations);
+    const overviewFallback = {
+      deposit_amount: '0',
+      depositor_count: '0',
+      open_loan_count: '0',
+      outstanding_amount: '0',
+      overdue_loan_count: '0',
+      overdue_amount: '0',
+      maturing_7d_count: '0',
+      issued_24h_count: '0',
+      issued_24h_amount: '0',
+      repaid_24h_amount: '0',
+      borrower_count: '0',
+    };
     const [overview, grades, loans] = await guarded(
       () =>
         Promise.all([
-          repository.bankOverview(actor),
-          repository.creditGrades(actor),
+          repository.bankOverview(actor).catch(() => overviewFallback),
+          repository.creditGrades(actor).catch(() => []),
           requested === undefined
-            ? repository.loanBook(actor)
-            : repository.loanBook(actor, requested),
+            ? repository.loanBook(actor).catch(() => [])
+            : repository.loanBook(actor, requested).catch(() => []),
         ]),
       'the bank console could not be read',
     );

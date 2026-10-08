@@ -233,7 +233,7 @@ export class OperationsRepository {
               task_row.base_reward::text AS base_reward,
               task_row.base_experience::text AS base_experience,
               task_row.minimum_duration_seconds,
-              COALESCE(c.daily_limit, task_row.daily_limit, 100) AS daily_limit,
+              COALESCE(task_row.daily_limit, 100) AS daily_limit,
               task_row.active,
               task_row.open_assignment_count::text AS open_assignment_count,
               task_row.awaiting_verification_count::text AS awaiting_verification_count,
@@ -241,8 +241,7 @@ export class OperationsRepository {
               task_row.rejected_24h::text AS rejected_24h,
               task_row.paid_24h::text AS paid_24h,
               task_row.last_assigned_at
-       FROM public.admin_work_catalogue($1) AS task_row
-       LEFT JOIN public.work_task_catalog c ON c.id = task_row.task_id`,
+       FROM public.admin_work_catalogue($1) AS task_row`,
       [actorUserId],
     );
   }
