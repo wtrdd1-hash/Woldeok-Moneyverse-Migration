@@ -619,19 +619,56 @@ export function AdminAdjustmentDialog({
 export function AdminDirectMessageDialog({
   userId,
   displayName,
+  triggerVariant = 'secondary',
+  triggerSize = 'sm',
+  triggerClassName,
+  triggerLabel,
 }: {
   readonly userId: string;
   readonly displayName: string;
+  readonly triggerVariant?: 'default' | 'secondary' | 'outline' | 'ghost';
+  readonly triggerSize?: 'xs' | 'sm' | 'default';
+  readonly triggerClassName?: string;
+  readonly triggerLabel?: string;
 }) {
   const [state, action] = useActionState(sendAdminDirectMessage, IDLE);
   const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+
+  const PRESETS = [
+    {
+      name: '📢 공식 안내',
+      title: '[운영팀 안내] 서비스 이용 가이드 안내',
+      body: '안녕하세요 회원님, 머니버스 운영팀입니다.\n회원님의 보다 원활한 서비스 이용을 위해 주요 안내사항을 전해드립니다.',
+    },
+    {
+      name: '⚠️ 이상 거래 경고',
+      title: '[중요] 비정상 거래 패턴 소명 요청',
+      body: '회원님의 계정에서 비정상적인 거래 패턴이 감지되었습니다. 시스템 안정성을 위해 24시간 이내에 1:1 고객센터 또는 본 쪽지로 소명해 주시기 바랍니다.',
+    },
+    {
+      name: '🎁 특별 보상 지급',
+      title: '[축하] 모범 활동 감사 지원금 지급 안내',
+      body: '회원님의 적극적이고 모범적인 플랫폼 활동에 감사드리며, 운영팀에서 특별 감사 지원금을 지갑으로 지급해 드렸습니다. 앞으로도 많은 성원 부탁드립니다.',
+    },
+    {
+      name: '💬 문의 답변',
+      title: '[답변] 접수해주신 문의사항 관련 안내',
+      body: '회원님께서 접수해 주신 문의사항을 확인하였으며, 이에 대한 검토 및 조치 결과를 안내해 드립니다.',
+    },
+  ];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm" className="min-h-11 gap-1.5 font-bold">
+        <Button
+          variant={triggerVariant}
+          size={triggerSize}
+          className={triggerClassName ?? 'min-h-11 gap-1.5 font-bold'}
+        >
           <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-          공식 쪽지 발송
+          {triggerLabel ?? '공식 쪽지 발송'}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
@@ -640,6 +677,8 @@ export function AdminDirectMessageDialog({
             await action(formData);
             if (state.status === 'ok') {
               setOpen(false);
+              setTitle('');
+              setBody('');
             }
           }}
           className="grid gap-4"
@@ -647,18 +686,40 @@ export function AdminDirectMessageDialog({
           <input type="hidden" name="recipientUserId" value={userId} />
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <span>📢</span> {displayName} 회원에게 공식 쪽지 발송
+              <span>📢</span> {displayName} 회원에게 1:1 공식 쪽지 발송
             </DialogTitle>
             <DialogDescription>
-              운영팀 공식 마크(🛡️ Official)가 부여된 1:1 쪽지를 발송합니다. 회원의 쪽지함에 실시간으로 전달됩니다.
+              운영팀 공식 마크(🛡️ Official)가 부여된 1:1 쪽지를 발송합니다. 회원의 화면 우하단 쪽지함에 실시간 사운드와 함께 즉시 전달됩니다.
             </DialogDescription>
           </DialogHeader>
+
+          {/* 빠른 메시지 템플릿 프리셋 */}
+          <div className="space-y-1.5">
+            <span className="text-[0.72rem] font-semibold text-muted-foreground">빠른 템플릿 불러오기</span>
+            <div className="flex flex-wrap gap-1.5">
+              {PRESETS.map((p) => (
+                <button
+                  key={p.name}
+                  type="button"
+                  onClick={() => {
+                    setTitle(p.title);
+                    setBody(p.body);
+                  }}
+                  className="rounded-md border border-border/70 bg-card px-2 py-1 text-[0.7rem] font-medium text-muted-foreground transition-colors hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-300"
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <Field>
             <FieldLabel htmlFor={`msg-title-${userId}`}>공지 제목 (선택)</FieldLabel>
             <Input
               id={`msg-title-${userId}`}
               name="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="예: [안내] 불공정 거래 소명 요청"
               maxLength={100}
             />
@@ -669,13 +730,18 @@ export function AdminDirectMessageDialog({
             <Textarea
               id={`msg-body-${userId}`}
               name="body"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
               rows={4}
               minLength={1}
               maxLength={2000}
               placeholder="회원에게 전달할 안내, 경고, 보상 내역 등을 작성해 주세요."
               required
             />
-            <FieldDescription>최대 2000자. 발송 내역은 관리자 감사 로그에 영구 기록됩니다.</FieldDescription>
+            <div className="flex items-center justify-between text-[0.68rem] text-muted-foreground">
+              <span>발송 내역은 관리자 감사 로그에 영구 기록됩니다.</span>
+              <span className="font-mono">{body.length} / 2,000자</span>
+            </div>
           </Field>
 
           <ActionAlert state={state} />

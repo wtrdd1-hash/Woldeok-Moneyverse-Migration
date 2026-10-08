@@ -7,6 +7,7 @@ import {
   Coins,
   Crown,
   Landmark,
+  MessageSquare,
   PiggyBank,
   Search,
   ShieldAlert,
@@ -32,6 +33,7 @@ import { compareAmounts, groupDigits } from '@/lib/money';
 import type { AdminUser } from '../types';
 import { AdminTelemetryMetricsTable } from '../components/admin-telemetry-metrics-table';
 import { AdminComprehensiveTelemetryMatrix } from '../components/admin-comprehensive-telemetry-matrix';
+import { AdminDirectMessageDialog } from '../admin-forms';
 
 type StatusFilter = 'all' | 'active' | 'restricted';
 type SortOption = 'wealth' | 'cash' | 'stock' | 'lastSeen' | 'created';
@@ -193,7 +195,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 <Crown className="size-4 text-amber-500" /> 회원 부자 순위(Leaderboard) 및 자산 관리
               </CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
-                회원별 현금(지갑), 예금, 국채, 주식 평가액을 합산한 총 순자산 랭킹과 상세 자산을 확인하고 즉시 관리합니다.
+                회원별 총 순자산 랭킹과 활동 상태를 확인하고, 각 행의 <span className="font-semibold text-emerald-400">[쪽지]</span> 버튼을 통해 1:1 공식 공지 및 알림을 즉시 발송할 수 있습니다.
               </p>
             </div>
 
@@ -408,11 +410,21 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
 
                         {/* 관리 액션 */}
                         <TableCell className="p-0 text-right md:table-cell md:p-2">
-                          <Button asChild variant="outline" size="xs" className="min-h-11 text-xs md:min-h-8">
-                            <Link href={`/admin/users/${encodeURIComponent(user.user_id)}`}>
-                              상세·로그 <ArrowRight className="size-3.5" />
-                            </Link>
-                          </Button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <AdminDirectMessageDialog
+                              userId={user.user_id}
+                              displayName={user.display_name}
+                              triggerVariant="outline"
+                              triggerSize="xs"
+                              triggerClassName="min-h-11 md:min-h-8 text-xs border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 gap-1 font-semibold"
+                              triggerLabel="쪽지"
+                            />
+                            <Button asChild variant="outline" size="xs" className="min-h-11 text-xs md:min-h-8">
+                              <Link href={`/admin/users/${encodeURIComponent(user.user_id)}`}>
+                                상세·로그 <ArrowRight className="size-3.5" />
+                              </Link>
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

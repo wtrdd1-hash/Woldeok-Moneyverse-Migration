@@ -82,9 +82,21 @@ export default async function AdminUserDetailPage({
   const stock = user.stock_eval ?? '0';
   const rank = user.wealth_rank ?? '—';
 
+  const directMessageEvents = events.filter((e) => e.action === 'admin_send_direct_message');
+
   return (
     <div className="grid gap-5">
-      <AdminBack href="/admin/users" label="사용자 관리로" />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <AdminBack href="/admin/users" label="사용자 관리로" />
+        <AdminDirectMessageDialog
+          userId={user.user_id}
+          displayName={user.display_name}
+          triggerVariant="default"
+          triggerSize="sm"
+          triggerClassName="min-h-10 gap-2 font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm"
+          triggerLabel="📢 이 회원에게 1:1 쪽지 발송"
+        />
+      </div>
       <PageHeader eyebrow="USER DETAIL" title={user.display_name}>
         사용자 상태와 자산 현황, 관련 활동 기록을 한곳에서 확인하고 필요한 조치를 실행합니다.
       </PageHeader>
@@ -139,7 +151,14 @@ export default async function AdminUserDetailPage({
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
-            <AdminDirectMessageDialog userId={user.user_id} displayName={user.display_name} />
+            <AdminDirectMessageDialog
+              userId={user.user_id}
+              displayName={user.display_name}
+              triggerVariant="secondary"
+              triggerSize="sm"
+              triggerClassName="min-h-11 gap-1.5 font-bold border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10"
+              triggerLabel="공식 쪽지 발송"
+            />
             <AdminAdjustmentDialog userId={user.user_id} username={user.display_name} />
             <ForceLogoutDialog userId={user.user_id} displayName={user.display_name} />
             <PermanentSuspensionDialog userId={user.user_id} displayName={user.display_name} />
@@ -225,6 +244,59 @@ export default async function AdminUserDetailPage({
               </strong>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* 1:1 공식 쪽지 발송 및 소통 이력 */}
+      <Card className="border-emerald-500/30 bg-emerald-950/10">
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-base font-bold flex items-center gap-2 text-emerald-400">
+                <span>💬</span> 1:1 공식 쪽지 및 알림 발송 센터
+              </CardTitle>
+              <CardDescription className="mt-1">
+                이 회원에게 운영팀 공식 마크(🛡️ Official)로 실시간 쪽지를 발송하고 발송 이력을 모니터링합니다.
+              </CardDescription>
+            </div>
+            <AdminDirectMessageDialog
+              userId={user.user_id}
+              displayName={user.display_name}
+              triggerVariant="default"
+              triggerSize="sm"
+              triggerClassName="min-h-10 gap-2 font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm"
+              triggerLabel="새 공식 쪽지 작성"
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {directMessageEvents.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border/80 p-5 text-center text-xs text-muted-foreground">
+              이 회원에게 발송된 관리자 공식 쪽지 이력이 아직 없습니다. 우측 상단의 <strong className="text-emerald-400">[새 공식 쪽지 작성]</strong> 버튼을 통해 첫 쪽지를 발송해 보세요.
+            </div>
+          ) : (
+            <div className="grid gap-2">
+              {directMessageEvents.map((ev) => (
+                <div
+                  key={ev.audit_id}
+                  className="rounded-xl border border-emerald-500/20 bg-background/60 p-3.5 text-xs transition-colors hover:bg-background/90"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-semibold text-emerald-400 flex items-center gap-1.5">
+                      <span className="size-2 rounded-full bg-emerald-400" />
+                      공식 쪽지 발송 완료
+                    </span>
+                    <time className="text-[0.7rem] text-muted-foreground">
+                      {formatMoment(ev.created_at)}
+                    </time>
+                  </div>
+                  <p className="mt-1.5 text-muted-foreground">
+                    관리자 ID: {shortId(ev.actor_user_id)} · 순번: {ev.sequence}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
