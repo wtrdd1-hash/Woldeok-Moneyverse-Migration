@@ -180,8 +180,18 @@ export default async function HomePage() {
             </p>
           </div>
 
-          {/* 4 Core Quick Actions (Zero-Clipping Responsive Layout) */}
+          {/* Wallet and core quick actions (responsive, touch-friendly) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-2.5">
+            <Link
+              href="/wallet"
+              className="flex min-h-[56px] min-w-0 items-center gap-2 rounded-xl border border-border/70 bg-muted/40 p-3 shadow-xs transition-all hover:border-primary/40 hover:bg-muted active:scale-[0.98]"
+            >
+              <Coins aria-hidden="true" className="size-5 shrink-0 text-primary" />
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-foreground"><T korean="덕지갑" english="Wallet" japanese="ウォレット" chinese="钱包" /></span>
+                <span className="block text-[10px] text-muted-foreground"><T korean="잔액 및 내역" english="Balance & activity" japanese="残高と履歴" chinese="余额与记录" /></span>
+              </span>
+            </Link>
             <div className="flex flex-col justify-center min-w-0">
               <P2PTransferModal triggerText="1:1 P2P 안심 송금" />
             </div>

@@ -37,7 +37,7 @@ function valueExports(text: string): string[] {
   const names: string[] = [];
   for (const match of text.matchAll(/^export (?:const|function|let) ([A-Za-z_$][\w$]*)/gm)) {
     const name = match[1] as string;
-    if (!/^[A-Z][a-z]/.test(name)) names.push(name);
+    if (!/^[A-Z][a-z0-9]/.test(name)) names.push(name);
   }
   return names;
 }

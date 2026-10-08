@@ -38,8 +38,9 @@ describe('administrator mobile responsive guards', () => {
     expect(activity).toContain('className="w-full sm:w-28"');
   });
 
-  it('uses safe negative margin and auto scroll into view for admin sub nav on mobile', () => {
-    expect(subNav).toContain('-mx-3 mb-4 overflow-x-auto');
+  it('keeps admin sub nav inside the mobile viewport and scrolls the active tab into view', () => {
+    expect(subNav).toContain('max-w-full min-w-0 mb-4 overflow-x-auto');
+    expect(subNav).not.toContain('-mx-3');
     expect(subNav).toContain('scrollbar-none touch-pan-x overscroll-x-contain');
     expect(subNav).toContain('scrollIntoView');
   });

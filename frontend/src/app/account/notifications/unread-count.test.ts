@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { GET } from '@/app/api/notifications/unread-count/route';
 
 const notifButtonSource = readFileSync(
-  join(process.cwd(), 'src/components/notification-header-button.tsx'),
+  join(process.cwd(), 'src/components/notification-center-modal.tsx'),
   'utf8',
 );
 const chatButtonSource = readFileSync(
@@ -23,7 +23,7 @@ describe('Notification & Chat unread count polling safety', () => {
     expect(json).toEqual({ unreadCount: 0 });
   });
 
-  it('NotificationHeaderButton incorporates visibilityState guard and exponential backoff', () => {
+  it('NotificationCenterModal incorporates visibilityState guard and exponential backoff', () => {
     expect(notifButtonSource).toContain('document.hidden');
     expect(notifButtonSource).toContain('visibilitychange');
     expect(notifButtonSource).toContain('BASE_POLL_INTERVAL_MS = 15000');

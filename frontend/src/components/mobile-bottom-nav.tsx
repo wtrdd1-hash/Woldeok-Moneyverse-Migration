@@ -61,14 +61,14 @@ export function MobileBottomNav() {
       aria-label="Mobile Navigation"
       className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-background/95 backdrop-blur-md border-t border-border/80 shadow-lg px-2 pb-[env(safe-area-inset-bottom)] zero-overflow-shield"
     >
-      <div className="flex items-center justify-around h-14 max-w-lg mx-auto min-w-0">
+      <div className="grid min-h-[58px] grid-cols-5 items-center max-w-lg mx-auto min-w-0">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center flex-1 h-full min-h-[44px] min-w-[44px] py-1 text-center transition-colors min-w-0 ${
+              className={`flex min-h-[58px] min-w-0 flex-col items-center justify-center py-1 text-center transition-colors ${
                 item.isActive ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
               }`}
             >

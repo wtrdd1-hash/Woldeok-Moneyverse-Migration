@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { serviceImpact } from './service-impact';
+import { STATUS_FRESHNESS_MS } from './status-freshness';
 
 const NOW = Date.parse('2026-09-19T00:00:00.000Z');
 const recent = (state: string) => ({ state, observedAt: new Date(NOW - 10_000).toISOString() });
@@ -17,7 +18,7 @@ describe('serviceImpact', () => {
   });
 
   it('never turns a stale healthy snapshot into a global green state', () => {
-    expect(serviceImpact([{ state: 'operational', observedAt: new Date(NOW - 61_000).toISOString() }], NOW)).toEqual({
+    expect(serviceImpact([{ state: 'operational', observedAt: new Date(NOW - STATUS_FRESHNESS_MS - 1).toISOString() }], NOW)).toEqual({
       state: 'unknown',
       staleCount: 1,
     });
