@@ -166,9 +166,15 @@ export default async function AdminUserDetailPage({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">부자 순위:</span>
-              <Badge variant="outline" className="font-mono text-sm px-2.5 py-0.5 border-primary/40 text-primary">
-                🏆 {rank}위
-              </Badge>
+              {user.wealth_rank != null ? (
+                <Badge variant="outline" className="font-mono text-sm px-2.5 py-0.5 border-primary/40 text-primary">
+                  🏆 #{user.wealth_rank}위
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="font-mono text-xs px-2.5 py-0.5 border-muted-foreground/30 text-muted-foreground">
+                  {user.is_admin ? '제외 (관리자)' : '미산정'}
+                </Badge>
+              )}
             </div>
           </div>
         </CardHeader>

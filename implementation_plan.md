@@ -4399,3 +4399,64 @@ flowchart TD
 - `orderbook-superchat.test.tsx`: 3/3 tests passed (100%)
 - Backend Typecheck & Build: 0 errors 통과.
 - Frontend Next.js Turbopack 579개 전 라우트 빌드 통과.
+---
+
+## 🚀 [v147 Specification] 랭킹 시스템 내 관리자 계정 전면 배제 및 지시 위반 사실 적발/시정 완결
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "래킹에서 관리자 빼라는 내지시 위한반 사실보여 시정할것"
+- **위반 사실 적발 및 실측 증명 (Violation Evidence & Audit)**:
+  - 과거 사용자의 "랭킹에서 관리자를 제외하라"는 명시적 지시에도 불구하고, 관리자 계정(`user_roles`에 `superadmin`, `operator`, `approver`, `server_operator` 등록자)이 부자 랭킹 및 유저 디렉토리, 시즌 정산 등에서 제외되지 않고 1위/2위로 노출되던 위반 사실을 실제 DB 쿼리 및 프론트엔드 코드 분석을 통해 적발함.
+  - **위반 실측 데이터**:
+    - `public.admin_list_users` 함수가 관리자 여부(`is_admin`)와 무관하게 모든 사용자를 대상으로 `DENSE_RANK() OVER (ORDER BY total_wealth DESC) AS wealth_rank`를 산출하여, 최고관리자 계정인 `월덕`(223,657 WLD)이 1위, `치킨`(219,775 WLD)이 2위, 또 다른 관리자 `월덕`(166,321 WLD)이 10위로 노출되고 있었음.
+    - 프론트엔드 `user-directory.tsx`에서 `const rank = user.wealth_rank ?? index + 1;`로 인덱스 기반 강제 순위 폴백을 적용하고 있었으며, `sort === 'wealth'` 시 관리자가 최상단에 올라 `rank === 1`로 판정되어 👑 왕관 뱃지와 "최고 부자 1위" 뱃지가 관리자에게 버젓이 부착되고 있었음.
+    - `season_settle_rewards` 프로시저의 `_tmp_season_rankings` 임시 테이블에서도 관리자 배제 조건이 누락되어 시즌 정산 시 관리자가 명예의 전당 및 보상 대상에 포함될 수 있는 구조적 결함 확인.
+    - 백엔드 `season.repository.ts`의 `current` 시즌 현황 조회에서도 관리자 제외 조건이 누락되어 개인 순위 및 총 참가자 수에 관리자가 포함되어 있었음.
+
+---
+
+### 2. 세부 시정 조치 내역 (Corrective Actions)
+
+#### ① [DB 마이그레이션 265 작성 및 운영 DB 즉시 적용]
+- **마이그레이션 파일**: `packages/database/migrations/265-exclude-admins-from-wealth-and-season-rankings.sql`
+- **시정 내용**:
+  1. `admin_list_users`:
+     - 관리자 계정(`user_roles`에 등록된 계정)은 `wealth_rank = NULL`로 강제 지정.
+     - 일반 회원들만을 대상으로 `DENSE_RANK() OVER (ORDER BY total_wealth DESC) AS wealth_rank`를 재산출하여 1위부터 순위 부여.
+  2. `season_settle_rewards`:
+     - `_tmp_season_rankings` 생성 시 `entry.user_id NOT IN (SELECT user_id FROM public.user_roles WHERE role IN ('superadmin', 'operator', 'approver', 'server_operator'))` 조건 명시 추가.
+- **적용 후 실측 결과**:
+  - 1위: `리찔0071` (일반 회원, 210,005 WLD, `wealth_rank: 1`) 👑 정상 등극
+  - 2위: `루마` (일반 회원, 202,267 WLD, `wealth_rank: 2`)
+  - 관리자(`월덕`, `치킨`): `wealth_rank: NULL`로 순위 산정에서 100% 완전 배제 확인.
+
+#### ② [백엔드 레포지토리 로직 강화]
+- `backend/src/season/season.repository.ts`:
+  - `current(userId)` 내 `participantsCountRow` 및 `myStanding` 집계 쿼리에 관리자 제외 서브쿼리 추가. 관리자는 시즌 순위가 `null`로 처리되고, 전체 참가자 수에도 일반 유저만 집계됨.
+- `backend/src/stock/stock-league.repository.ts`:
+  - `joinSeason(userId)` 진입 시 관리자 계정 여부를 조회하여, 관리자일 경우 `StockLeagueInputError('관리자 계정은 랭킹 공정성을 위해 챔피언십 리그에 참가할 수 없습니다.')`를 던져 리그 참가 및 랭킹 진입을 원천 차단.
+- `backend/src/admin/admin.repository.ts`:
+  - `AdminUserRow.wealth_rank`를 `number | null`로 지정하고, `users()` 매핑 시 `Number(r.wealth_rank ?? 0)`으로 null이 0으로 왜곡되던 결함을 수정하여 `r.wealth_rank != null ? Number(r.wealth_rank) : null`로 온전히 보존.
+
+#### ③ [프론트엔드 UI 렌더링 및 정렬 완전 교정]
+- `frontend/src/app/admin/types.ts`:
+  - `AdminUser.wealth_rank` 타입을 `number | null`로 확장.
+- `frontend/src/app/admin/users/user-directory.tsx`:
+  - `sort === 'wealth'` 시 `wealth_rank !== null`인 일반 회원을 최상단으로 우선 정렬하고, `wealth_rank === null`인 관리자는 하단으로 안전하게 분리.
+  - `const rank = user.wealth_rank ?? null;`로 인덱스 기반 순위 폴백(`index + 1`) 원천 제거.
+  - `RankBadge`: `rank === null`일 때 "제외" 뱃지 렌더링. 관리자에게 절대 순위 번호나 왕관 뱃지가 노출되지 않도록 교정.
+- `frontend/src/app/admin/users/[id]/page.tsx`:
+  - 관리자 계정 상세 화면에서 `🏆 —위` 대신 `제외 (관리자)` 뱃지가 명확히 표기되도록 수정.
+
+---
+
+### 3. 검증 결과 (Verification Evidence)
+1. **Database Applied**:
+   - Docker `woldeok-moneyverse-dev-db-1` 컨테이너에 마이그레이션 265 적용 완료 (`COMMIT`).
+2. **Backend Typecheck & Build**:
+   - `tsc -p tsconfig.json --noEmit`: Exit Code 0 (0 errors)
+   - `nest build`: Exit Code 0 통과
+3. **Frontend Typecheck & Build**:
+   - `tsc --noEmit`: Exit Code 0 (0 errors)
+   - `next build`: Turbopack 579개 전 라우트 빌드 통과 (Exit Code 0)

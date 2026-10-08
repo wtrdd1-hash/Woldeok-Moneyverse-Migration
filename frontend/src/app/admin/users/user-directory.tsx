@@ -84,6 +84,14 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
       })
       .sort((a, b) => {
         if (sort === 'wealth') {
+          const aHasRank = a.wealth_rank !== null && a.wealth_rank !== undefined;
+          const bHasRank = b.wealth_rank !== null && b.wealth_rank !== undefined;
+          if (aHasRank && !bHasRank) return -1;
+          if (!aHasRank && bHasRank) return 1;
+          if (aHasRank && bHasRank) {
+            const rankDiff = (a.wealth_rank ?? 0) - (b.wealth_rank ?? 0);
+            if (rankDiff !== 0) return rankDiff;
+          }
           const order = compareAmounts(b.total_net_worth ?? '0', a.total_net_worth ?? '0');
           if (order !== 0) return order;
           return a.display_name.localeCompare(b.display_name, 'ko-KR');
@@ -307,9 +315,9 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                   </TableRow>
                 </TableHeader>
                 <TableBody className="block divide-y md:table-row-group md:divide-y-0">
-                  {filtered.map((user, index) => {
+                  {filtered.map((user) => {
                     const restricted = user.restricted_at !== null;
-                    const rank = user.wealth_rank ?? index + 1;
+                    const rank = user.wealth_rank ?? null;
                     const netWorth = user.total_net_worth ?? '0';
                     const cash = user.cash_balance ?? '0';
                     const bank = user.bank_balance ?? '0';
@@ -448,7 +456,14 @@ function AccessTimestamp({
   );
 }
 
-function RankBadge({ rank }: { readonly rank: number }) {
+function RankBadge({ rank }: { readonly rank: number | null }) {
+  if (rank === null) {
+    return (
+      <span className="inline-flex items-center justify-center text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">
+        제외
+      </span>
+    );
+  }
   if (rank === 1) {
     return (
       <span className="inline-flex items-center justify-center font-bold text-xs size-7 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/40 shadow-xs">

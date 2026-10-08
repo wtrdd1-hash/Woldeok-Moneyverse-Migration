@@ -186,6 +186,17 @@ export class StockLeagueRepository {
       const season = seasonRes.rows[0];
       const entryFee = Number(season.entry_fee);
 
+      // 관리자 계정 참가 차단 가드 (랭킹 공정성 및 관리자 제외 원칙)
+      const adminRes = await client.query(
+        `SELECT 1 FROM public.user_roles 
+         WHERE user_id = $1 AND role IN ('superadmin', 'operator', 'approver', 'server_operator') 
+         LIMIT 1`,
+        [userId]
+      );
+      if (adminRes.rows.length > 0) {
+        throw new StockLeagueInputError('관리자 계정은 랭킹 공정성을 위해 챔피언십 리그에 참가할 수 없습니다.');
+      }
+
       // 이미 참가 중인지 확인
       const existingRes = await client.query(
         `SELECT id FROM public.stock_league_participants WHERE season_id = $1 AND user_id = $2`,

@@ -90,7 +90,7 @@ interface AdminUserRow {
   bond_balance?: string;
   stock_eval?: string;
   total_net_worth?: string;
-  wealth_rank?: number;
+  wealth_rank?: number | null;
   last_login_at?: Date | null;
   last_seen_at?: Date | null;
   last_admin_at?: Date | null;
@@ -209,7 +209,7 @@ export class AdminRepository {
         bond_balance: String(r.bond_balance ?? '0'),
         stock_eval: String(r.stock_eval ?? '0'),
         total_net_worth: String(r.total_net_worth ?? '0'),
-        wealth_rank: Number(r.wealth_rank ?? 0),
+        wealth_rank: r.wealth_rank != null ? Number(r.wealth_rank) : null,
         last_login_at: summary?.last_login_at ?? null,
         last_seen_at: summary?.last_seen_at ?? null,
         last_admin_at: summary?.last_admin_at ?? null,

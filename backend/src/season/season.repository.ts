@@ -125,7 +125,11 @@ export class PostgresSeasonRepository implements SeasonRepository {
       `SELECT count(DISTINCT entry.user_id)::text AS count
        FROM public.virtual_consumption_event_entries entry
        JOIN public.virtual_consumption_events evt ON evt.id = entry.event_id
-       WHERE evt.season_id = $1::uuid;`,
+       WHERE evt.season_id = $1::uuid
+         AND entry.user_id NOT IN (
+           SELECT user_id FROM public.user_roles 
+           WHERE role IN ('superadmin'::public.admin_role, 'operator'::public.admin_role, 'approver'::public.admin_role, 'server_operator'::public.admin_role)
+         );`,
       [activeSeason.id],
     );
     const totalParticipants = Number(participantsCountRow?.count ?? '0');
@@ -139,6 +143,10 @@ export class PostgresSeasonRepository implements SeasonRepository {
          FROM public.virtual_consumption_event_entries entry
          JOIN public.virtual_consumption_events evt ON evt.id = entry.event_id
          WHERE evt.season_id = $1::uuid
+           AND entry.user_id NOT IN (
+             SELECT user_id FROM public.user_roles 
+             WHERE role IN ('superadmin'::public.admin_role, 'operator'::public.admin_role, 'approver'::public.admin_role, 'server_operator'::public.admin_role)
+           )
          GROUP BY entry.user_id
        ),
        ranked AS (

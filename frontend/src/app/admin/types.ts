@@ -22,7 +22,7 @@ export interface AdminUser {
   readonly bond_balance?: string;
   readonly stock_eval?: string;
   readonly total_net_worth?: string;
-  readonly wealth_rank?: number;
+  readonly wealth_rank?: number | null;
   readonly last_login_at?: string | null;
   readonly last_seen_at?: string | null;
   readonly last_admin_at?: string | null;
