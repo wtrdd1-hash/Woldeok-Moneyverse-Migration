@@ -4356,3 +4356,46 @@ flowchart TD
    - `pnpm --filter frontend typecheck`: Exit Code 0 (0 errors)
 2. **Git Status**:
    - 수정된 3개 파일 깨끗하게 스테이징 준비 완료.
+
+---
+
+## 🚀 [v146 Specification] 1:1 쪽지 및 실시간 채팅 서버 경유 완결 & 백엔드 DB 쿼리 무결성 복구 (DEF-CHAT)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "채팅기능 서버 거쳐서 되게해줘 그리고 채팅 쪽지 기능 다시 여려번 코드 기는확인해"
+- **핵심 원인 분석**:
+  - 백엔드 `PostgresChatRepository.listConversations` 내에서 존재하지 않는 가상 테이블 `LEFT JOIN public.user_profiles p` 및 `users.display_name` 컬럼을 참조하고 있어, 쪽지함(`/chat`) 및 플로팅 위젯의 1:1 대화방 목록 조회 API (`GET /api/v1/chat/conversations`) 호출 시 PostgreSQL 런타임 에러 `relation "public.user_profiles" does not exist`로 500 에러 발생.
+  - 이로 인해 클라이언트에서 대화방 목록을 불러오지 못하고 쪽지/채팅 기능 전반이 단절되는 치명적 병목 현상이 발생하고 있었음.
+- **핵심 목표**:
+  1. **백엔드 DB 쿼리 완전 교정**: `user_profiles` 대신 실제 프로필 테이블인 `public.member_profiles`를 조인하고, `display_name` 및 `image_url`을 정상 추출하도록 수정하여 1:1 대화방 목록 조회를 100% 정상화.
+  2. **채팅/쪽지 전 기능 다각도 전수 검증**:
+     - 1:1 쪽지 대화방 생성 (`POST /api/v1/chat/conversations` ➡️ `private_chat_open`)
+     - 쪽지 메시지 전송 및 원장 보관 (`POST /api/v1/chat/conversations/:id/messages` ➡️ `private_chat_send`)
+     - 메시지 이력 및 델타 동기화 (`GET /api/v1/chat/conversations/:id/messages`, `sync`)
+     - 대화방 읽음 처리 (`POST /api/v1/chat/conversations/:id/read` ➡️ `private_chat_read`)
+     - 안읽은 쪽지 총계 산출 (`GET /api/v1/chat/unread-count`)
+     - 활성 회원 닉네임 검색 (`GET /api/v1/chat/search-users` ➡️ `chat_search_active_users`)
+     - 관리자 공식 쪽지 발송 (`POST /api/v1/admin/messages/send`)
+     - 우측 하단 플로팅 고객센터 지원 채팅 및 1:1 쪽지 허브 위젯 연동
+     - 실시간 커뮤니티 로비 WebSocket 채팅(`attachLobby`, `io.emit('lobby:message')`)
+
+---
+
+### 2. 세부 구현 및 수정 내용 (Detailed Implementations)
+
+#### ① [백엔드] `backend/src/chat/chat.repository.ts` 쿼리 교정
+- 존재하지 않는 `public.user_profiles` 조인을 제거하고 정규 `public.member_profiles mp`로 연결.
+- `u.display_name` ➡️ `COALESCE(mp.display_name, '회원') AS peer_display_name`.
+- `p.avatar_key` ➡️ `mp.image_url AS peer_avatar_key`.
+- 운영 DB 실측 쿼리 테스트 결과 실제 유저의 대화방 2건 및 닉네임('치킨' 등), 안읽음 카운트, 최근 메시지가 즉시 완벽하게 로드됨을 확증.
+
+#### ② [테스트 및 검증 전수 완료]
+- `chat.service.test.ts`: 6/6 tests passed (100%)
+- `chat.repository.test.ts`: 2/2 tests passed (100%)
+- `chat-safety.test.ts`: 4/4 tests passed (100%)
+- `floating-support-chat-widget.test.tsx`: 5/5 tests passed (100%)
+- `direct-message-button.test.tsx`: 4/4 tests passed (100%)
+- `orderbook-superchat.test.tsx`: 3/3 tests passed (100%)
+- Backend Typecheck & Build: 0 errors 통과.
+- Frontend Next.js Turbopack 579개 전 라우트 빌드 통과.
