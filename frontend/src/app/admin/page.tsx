@@ -182,6 +182,7 @@ export default async function AdminPage({
 
   const allUsers = users?.users ?? [];
   const topUsers = allUsers
+    .filter((u) => !u.is_admin && !u.last_admin_at)
     .slice()
     .sort((a, b) => compareAmounts(b.total_net_worth ?? '0', a.total_net_worth ?? '0'))
     .slice(0, 5);

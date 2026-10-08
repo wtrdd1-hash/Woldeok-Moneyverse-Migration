@@ -4038,3 +4038,64 @@ flowchart TD
 3. 고래 트레이더 포트폴리오 공개 및 카피 트레이딩 구독/취소 원장 트랜잭션 단위 테스트
 4. AI 덕이 PR-Index 산출 알고리즘 및 리밸런싱 처방 데이터 반환 검증
 5. Next.js 및 NestJS 전체 빌드 통과 후 원격 서버 무중단 배포 및 라이브 엔드포인트 curl 검증
+
+
+---
+
+## 🚀 [v140 Specification] 출석 룰렛 CSRF 해결 & 국고 통화량 자동 긴축 조절 & 랭킹 관리자 제외 & 소각 이벤트 개설
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청 사항**:
+  1. "해결하고": 7일 연속 출석 & 럭키 룰렛에서 'csrf token required' 빨간 글씨 오류 발생 -> 정상 작동하도록 해결.
+  2. "국고 가 사회 잘되고있는지도 점검해줘 그리고 돈너무 많이 유저한테 주고있어 자동 조절시스템넣고워 지금현제 다 국고떄문에 전체적으로 부자야":
+     - 국고(VAULT_MAIN) 잔액 9,647만 WLD 수준.
+     - 1시간 주기 국부펀드(ASWF) 엔진에서 잉여금의 10%를 상위 50명 유저에게 무차별 시민 배당(`dividendAlloc`)하여 유저들의 잔액이 100만, 20만 WLD 이상으로 과도하게 팽창.
+     - 전체 유저 평균 잔액(M2)을 실시간 모니터링하여 인플레이션 발생 시 배당을 자동 차단하고 보상을 동적으로 감축하는 지능형 통화 조절 시스템(Anti-Inflation Macro Governor) 구축.
+  3. "그리고 순위에서 관리자 계정는제외 시켜줘":
+     - 시즌 이벤트 랭킹, 주식 실전 리그 랭킹, 관리자 TOP 5 랭킹 등 모든 리더보드에서 관리자(superadmin, operator, approver, server_operator, admin) 계정을 100% 필터링하여 순수 유저 랭킹만 표시.
+  4. "여려 이벤트 열고":
+     - 과잉 유동성 흡수 및 소각을 위한 3대 특화 이벤트(국고 방위 특별 국채 청약, 인플레이션 타파 럭키 골든 드로우 소각 축제, 자발적 국고 기부 칭호 이벤트) 개설.
+
+### 2. 세부 컴포넌트 및 아키텍처 설계 (Detailed Design)
+
+#### ① 7일 연속 출석 & 럭키 룰렛 CSRF 해결
+- **원인**: 백엔드 `DopamineController`에 `@UseGuards(..., CsrfGuard)`가 적용되어 있으나, BFF 라우트(`frontend/src/app/api/attendance/spin/route.ts`)에서 백엔드 호출 시 세션의 `csrfToken`을 누락함.
+- **해결**:
+  ```typescript
+  const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
+  const result = await api('/api/v1/engagement/dopamine/attendance/spin', {
+    method: 'POST',
+    csrfToken,
+    body: { idempotencyKey },
+  });
+  ```
+
+#### ② 국고 통화량 자동 조절 시스템 (Anti-Inflation Macro Governor)
+- **알고리즘**:
+  - 활성 일반 유저의 평균 현금 잔액($\bar{B} = \frac{\sum B_i}{N}$)을 실시간 집계.
+  - **4단계 인플레이션 경보 시스템**:
+    1. **안정 (Normal, $\bar{B} \le 10,000$ WLD)**: 배당 정상 집행(100%), Faucet 보상 100%
+    2. **주의 (Caution, $10,000 < \bar{B} \le 30,000$ WLD)**: 배당 50% 축소, Faucet 보상 80%
+    3. **경계 (Warning, $30,000 < \bar{B} \le 50,000$ WLD)**: 배당 80% 축소, Faucet 보상 50%
+    4. **심각 (Critical 긴축 발동, $\bar{B} > 50,000$ WLD)**:
+       - **시민 배당금 100% 전면 중단 (0 WLD)**.
+       - 국고 잉여금은 100% 국고 비상 준비금(`VAULT_EMERGENCY`)으로 자동 흡수 보존.
+       - 출석/활동 보상 90% 슬라이딩 축소 (돈 살포 원천 차단).
+- **연동 서비스**: `backend/src/admin/treasury/auto-swf.service.ts` 및 `backend/src/economy/monetary/auto-monetary-regulation.service.ts`
+
+#### ③ 순위(리더보드)에서 관리자 계정 100% 제외
+- **DB 함수**: `packages/database/migrations/262-exclude-admins-from-rankings.sql`
+  - `season_event_leaderboard` 함수에 `WHERE entry.user_id NOT IN (SELECT user_id FROM public.user_roles WHERE role IN ('superadmin', 'operator', 'approver', 'server_operator', 'admin'))` 적용.
+- **주식 리그**: `StockLeagueRepository.getLeaderboard` & `getWhales`에 동일한 관리자 배제 서브쿼리 주입.
+- **관리자 대시보드**: `frontend/src/app/admin/page.tsx`의 TOP 5 순자산 랭킹에서 관리자 역할 보유 유저 필터링.
+
+#### ④ 통화 긴축 및 소각 연계 3대 이벤트 개설
+- **이벤트 1**: [국고 방위 특별 고금리 국채 청약 (Treasury Defense Bond)] - 유저 WLD 대량 락업
+- **이벤트 2**: [인플레이션 타파 럭키 골든 드로우] - 1회 10,000 WLD 100% 국고 영구 소각 및 한정판 황금 칭호 추첨
+- **이벤트 3**: [국고 자발적 사회 환원 명예의 전당] - WLD 기부 시 '머니버스 박애주의자' 한정 칭호 부여
+
+### 3. 검증 계획 (Verification Plan)
+1. 출석 룰렛 API 호출 시 403 Forbidden 에러 소멸 및 정상 룰렛 스핀 검증
+2. 유저 평균 잔액 집계 및 긴축 모드 발동 시 시민 배당 차단 동작 검증
+3. 주식 리그 및 시즌 랭킹 조회 시 'QA 슈퍼관리자', '월덕', '치킨' 등 관리자 계정 미노출 검증
+4. 프로덕션 빌드 통과 및 운영 서버 무중단 배포 및 라이브 검증

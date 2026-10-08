@@ -13,9 +13,11 @@ export async function POST(): Promise<NextResponse> {
   }
 
   try {
+    const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
     const idempotencyKey = randomUUID();
     const result = await api('/api/v1/engagement/dopamine/attendance/spin', {
       method: 'POST',
+      csrfToken,
       body: { idempotencyKey },
     });
 

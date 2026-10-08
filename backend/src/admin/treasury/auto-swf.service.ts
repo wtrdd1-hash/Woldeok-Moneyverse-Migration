@@ -431,20 +431,102 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
             );
           }
 
-          // 활성 시민 배당
-          const activeUsers = await client.query<{ id: string }>(
-            `SELECT id FROM public.users WHERE status = 'active' ORDER BY created_at DESC LIMIT 50`,
-          );
-          if (activeUsers.rows.length > 0 && dividendAlloc > BigInt(0)) {
-            const perUser = dividendAlloc / BigInt(activeUsers.rows.length);
-            if (perUser > BigInt(0)) {
-              for (const u of activeUsers.rows) {
-                await client.query(
-                  `UPDATE public.account_balances
-                   SET available_amount = available_amount + $1, updated_at = clock_timestamp()
-                   WHERE account_id = (SELECT id FROM public.accounts WHERE owner_user_id = $2 AND account_type = 'USER_CASH' LIMIT 1)`,
-                  [perUser.toString(), u.id],
-                );
+          // 4-1. [지능형 거시경제 인플레이션 자동 긴축 제어 (Anti-Inflation Adaptive Governor)]
+          // 활성 일반 유저(관리자 제외)의 실시간 평균 현금 잔액을 산출하여 과열 여부 판정
+          const wealthStatsRes = await client.query<{
+            avg_balance: string;
+            total_active_citizens: string;
+          }>(`
+            SELECT 
+              COALESCE(AVG(ab.available_amount), 0)::numeric as avg_balance,
+              COUNT(DISTINCT u.id)::text as total_active_citizens
+            FROM public.users u
+            JOIN public.accounts a ON a.owner_user_id = u.id AND a.account_type = 'USER_CASH'
+            JOIN public.account_balances ab ON ab.account_id = a.id
+            WHERE u.status = 'active'
+              AND u.id NOT IN (
+                SELECT user_id FROM public.user_roles 
+                WHERE role IN ('superadmin', 'operator', 'approver', 'server_operator')
+              )
+          `);
+
+          const avgBalance = Number(wealthStatsRes.rows[0]?.avg_balance || '0');
+          this.logger.log(`[MacroGovernor] Real-time active citizen average balance: ${avgBalance.toFixed(0)} WLD`);
+
+          // 4단계 인플레이션 긴축 조절 계수 (Tightening Ratio)
+          // avgBalance > 50,000 WLD: 심각 과열 -> 시민 배당 100% 전면 차단 (긴축 모드), 잉여금은 국고 비상완충금고(VAULT_EMERGENCY)로 회수 보존
+          // avgBalance > 30,000 WLD: 경계 -> 배당 80% 긴축 감축 (20%만 집행)
+          // avgBalance > 10,000 WLD: 주의 -> 배당 50% 감축 (50%만 집행)
+          // avgBalance <= 10,000 WLD: 정상 -> 100% 정상 집행
+          let dividendProratePct = 100;
+          let macroStatusNote = '정상 균형';
+
+          if (avgBalance > 50000) {
+            dividendProratePct = 0; // 전면 동결 차단!
+            macroStatusNote = `심각 과열 (시민 평균잔액 ${avgBalance.toFixed(0)} WLD: 배당 100% 전면 동결 및 비상준비금 안전 흡수)`;
+          } else if (avgBalance > 30000) {
+            dividendProratePct = 20;
+            macroStatusNote = `경계 단계 (시민 평균잔액 ${avgBalance.toFixed(0)} WLD: 배당 80% 긴축 감축)`;
+          } else if (avgBalance > 10000) {
+            dividendProratePct = 50;
+            macroStatusNote = `주의 단계 (시민 평균잔액 ${avgBalance.toFixed(0)} WLD: 배당 50% 감축)`;
+          }
+
+          const adjustedDividendAlloc = (dividendAlloc * BigInt(dividendProratePct)) / BigInt(100);
+          const curtailedSurplus = dividendAlloc - adjustedDividendAlloc;
+
+          // 긴축으로 절감된 잉여 배당금은 비상 환급 및 유동성 완충 금고(VAULT_EMERGENCY)로 안전 이전
+          if (curtailedSurplus > BigInt(0)) {
+            await client.query(
+              `UPDATE public.system_treasury_vaults
+               SET balance_wld = (balance_wld::numeric + $1)::text, updated_at = clock_timestamp()
+               WHERE code = 'VAULT_EMERGENCY'`,
+              [curtailedSurplus.toString()],
+            );
+
+            await client.query(
+              `INSERT INTO public.system_treasury_ledger (
+                  vault_id, tx_type, amount_wld, reason, balance_before, balance_after, created_at
+               ) VALUES (
+                  (SELECT id FROM public.system_treasury_vaults WHERE code = 'VAULT_EMERGENCY' LIMIT 1),
+                  'FEE_RECIRCULATION', $1,
+                  '거시경제 인플레이션 자동 긴축 발동 (' || $2 || '): 잉여 배당 유보금 비상완충금고 안전 흡수',
+                  (SELECT balance_wld FROM public.system_treasury_vaults WHERE code = 'VAULT_EMERGENCY' LIMIT 1),
+                  (SELECT balance_wld FROM public.system_treasury_vaults WHERE code = 'VAULT_EMERGENCY' LIMIT 1),
+                  clock_timestamp()
+               )`,
+              [curtailedSurplus.toString(), macroStatusNote],
+            );
+          }
+
+          // 관리자 제외 & 잔액 50,000 WLD 이하의 저자산/신규 활성 시민에게만 선별적 지원 분배
+          if (adjustedDividendAlloc > BigInt(0)) {
+            const eligibleUsers = await client.query<{ id: string }>(
+              `SELECT u.id 
+               FROM public.users u
+               JOIN public.accounts a ON a.owner_user_id = u.id AND a.account_type = 'USER_CASH'
+               JOIN public.account_balances ab ON ab.account_id = a.id
+               WHERE u.status = 'active'
+                 AND ab.available_amount < 50000
+                 AND u.id NOT IN (
+                   SELECT user_id FROM public.user_roles 
+                   WHERE role IN ('superadmin', 'operator', 'approver', 'server_operator')
+                 )
+               ORDER BY ab.available_amount ASC, u.created_at DESC 
+               LIMIT 50`,
+            );
+
+            if (eligibleUsers.rows.length > 0) {
+              const perUser = adjustedDividendAlloc / BigInt(eligibleUsers.rows.length);
+              if (perUser > BigInt(0)) {
+                for (const u of eligibleUsers.rows) {
+                  await client.query(
+                    `UPDATE public.account_balances
+                     SET available_amount = available_amount + $1, updated_at = clock_timestamp()
+                     WHERE account_id = (SELECT id FROM public.accounts WHERE owner_user_id = $2 AND account_type = 'USER_CASH' LIMIT 1)`,
+                    [perUser.toString(), u.id],
+                  );
+                }
               }
             }
           }

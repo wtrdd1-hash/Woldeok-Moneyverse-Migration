@@ -161,19 +161,36 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
     let policyOrderId: string | null = null;
     let reason = '';
 
+    // 1-1. 유저 실시간 평균 현금 잔액 조회
+    const avgBalRes = await this.pool.query<{ avg_bal: string }>(`
+      SELECT COALESCE(AVG(ab.available_amount), 0)::numeric as avg_bal
+      FROM public.users u
+      JOIN public.accounts a ON a.owner_user_id = u.id AND a.account_type = 'USER_CASH'
+      JOIN public.account_balances ab ON ab.account_id = a.id
+      WHERE u.status = 'active'
+        AND u.id NOT IN (
+          SELECT user_id FROM public.user_roles 
+          WHERE role IN ('superadmin', 'operator', 'approver', 'server_operator')
+        )
+    `).catch(() => ({ rows: [{ avg_bal: '0' }] }));
+
+    const avgUserBalance = Number(avgBalRes.rows[0]?.avg_bal || '0');
+
     // 서킷 브레이커: 급격한 인플레이션 폭증 감지 시 자동 동결
     if (ratio >= circuitBreakerThreshold && faucet24h > BigInt(1000000)) {
       actionType = 'CIRCUIT_BREAKER_FREEZE';
       reason = `[서킷브레이커] 24시간 발행/소각 비율이 ${ratio.toFixed(2)}배로 위험 한계치(${circuitBreakerThreshold.toFixed(2)})를 돌파하여 중앙은행 발행을 즉각 비상 동결했습니다.`;
       await this.centralBank.freezeIssuance(actorId, reason);
-    } else if (ratio > target * (1 + tolerance)) {
-      // 과열/인플레이션: 테이퍼링 긴축
+    } else if (ratio > target * (1 + tolerance) || avgUserBalance > 30000) {
+      // 과열/인플레이션: 테이퍼링 긴축 (유저 평균 잔액 3만 WLD 초과 과열 포함)
       actionType = 'TAPER_CONTRACTION';
       const maxStepFraction = config.max_step_pct / 100;
       adjustmentAmountWld = BigInt(Math.floor(Number(faucet24h) * maxStepFraction));
       if (adjustmentAmountWld < BigInt(10000)) adjustmentAmountWld = BigInt(10000);
 
-      reason = `[자동 테이퍼링 긴축] 최근 24시간 발행비율(${ratio.toFixed(2)})이 목표치(${target.toFixed(2)})를 초과하여 ${adjustmentAmountWld.toString()} WLD 규모의 긴축 한도 조정 및 소각 강화 명령을 발의·승인했습니다.`;
+      reason = avgUserBalance > 30000
+        ? `[자동 테이퍼링 긴축] 활성 시민 평균 잔액이 ${avgUserBalance.toFixed(0)} WLD로 과열 기준치(30,000 WLD)를 초과하여 ${adjustmentAmountWld.toString()} WLD 규모의 통화 긴축 및 소각 강화 명령을 발의·승인했습니다.`
+        : `[자동 테이퍼링 긴축] 최근 24시간 발행비율(${ratio.toFixed(2)})이 목표치(${target.toFixed(2)})를 초과하여 ${adjustmentAmountWld.toString()} WLD 규모의 긴축 한도 조정 및 소각 강화 명령을 발의·승인했습니다.`;
 
       // 통화정책 명령서 자동 발의 및 승인
       const order = await this.centralBank.proposePolicyOrder(

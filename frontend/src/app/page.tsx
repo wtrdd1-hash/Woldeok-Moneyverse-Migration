@@ -37,6 +37,7 @@ import { MacroLiquidityDashboard } from '@/components/macro-liquidity-dashboard'
 import { DiscordBanner } from '@/components/discord-banner';
 import { LiveHotTimeBanner } from '@/components/live-hot-time-banner';
 import { DailyAttendanceRoulette } from '@/components/daily-attendance-roulette';
+import { AntiInflationBurnEventCard } from '@/components/anti-inflation-burn-event-card';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
 import { PvpArenaLaunchCard } from '@/components/pvp-arena-launch-card';
 import { BlackMarketLaunchCard } from '@/components/black-market-launch-card';
@@ -248,6 +249,11 @@ export default async function HomePage() {
       {/* 1.36 7-DAY ATTENDANCE & DOPAMINE LUCKY ROULETTE */}
       <div className="w-full max-w-full min-w-0">
         <DailyAttendanceRoulette />
+      </div>
+
+      {/* 1.37 ANTI-INFLATION WLD BURN FESTIVAL & SPECIAL EVENTS */}
+      <div className="w-full max-w-full min-w-0">
+        <AntiInflationBurnEventCard />
       </div>
 
       {/* 1.38 1:1 LIVE PVP ARENA & MIDNIGHT BLACK MARKET */}

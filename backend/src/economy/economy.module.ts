@@ -15,6 +15,7 @@ import { MacroPulseController } from './macro-pulse.controller';
 import { MacroPulseService } from './macro-pulse.service';
 import { HotTimeController } from './hot-time.controller';
 import { HotTimeService } from './hot-time.service';
+import { BurnEventController } from './burn-event.controller';
 
 @Module({
   imports: [AuthModule],
@@ -24,6 +25,7 @@ import { HotTimeService } from './hot-time.service';
     MonetaryController,
     MacroPulseController,
     HotTimeController,
+    BurnEventController,
   ],
   providers: [
     CentralBankService,

@@ -116,6 +116,10 @@ export class StockLeagueRepository {
               roi_rate, rank_position, tier, is_whale, follower_count, created_at
        FROM public.stock_league_participants
        WHERE season_id = $1
+         AND user_id NOT IN (
+           SELECT user_id FROM public.user_roles 
+           WHERE role IN ('superadmin', 'operator', 'approver', 'server_operator')
+         )
        ORDER BY roi_rate DESC, current_asset DESC
        LIMIT $2`,
       [seasonId, limit]
@@ -143,7 +147,12 @@ export class StockLeagueRepository {
               p.roi_rate, p.rank_position, p.tier, p.is_whale, p.follower_count, p.created_at
        FROM public.stock_league_participants p
        JOIN public.stock_league_seasons s ON s.id = p.season_id
-       WHERE s.status = 'active' AND (p.is_whale = TRUE OR p.roi_rate >= 15.0 OR p.current_asset >= 50000000)
+       WHERE s.status = 'active'
+         AND (p.is_whale = TRUE OR p.roi_rate >= 15.0 OR p.current_asset >= 50000000)
+         AND p.user_id NOT IN (
+           SELECT user_id FROM public.user_roles 
+           WHERE role IN ('superadmin', 'operator', 'approver', 'server_operator')
+         )
        ORDER BY p.roi_rate DESC, p.follower_count DESC
        LIMIT $1`,
       [limit]
