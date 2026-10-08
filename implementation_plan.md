@@ -4238,3 +4238,39 @@ flowchart TD
 4. **Production Build**:
    - Frontend Next.js Turbopack: 579/579 라우트 100% 정상 생성 (Exit Code 0)
    - Backend NestJS: 빌드 정상 완료 (Exit Code 0)
+
+
+---
+
+## 🚀 [v143 Specification] DEF-013 가상 세계관 일자 명확화 & 운영 사이트 156개 라우트 실측 QA 회귀 자동 검증 전수 통과
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - `DEF-013` (신문/캘린더 오늘의 사건 날짜 기준일) 비치명적 표기 항목에 대한 순차적 개선.
+  - `qa-reports/click-20261008`에서 결함으로 지적된 156개 라우트에 대해 자동 크롤링/클릭 점검을 재실행하여 결함 해소 상태 최종 재확인.
+- **핵심 목표**:
+  - 게임 클록(`server_game_clock`)에 의해 10분 = 1일로 진행되는 가상 세계관 일자(2009년 등)와 현실 시간의 혼선을 원천 방지하기 위해 '가상 세계 기준일'로 명확화.
+  - 라이브 운영 사이트(`https://easy-scraping.com`)를 대상으로 결함 해소 상태 및 30대 핵심 라우트 전수 실측 자동 검증(`verify-qa-defects-resolution.mjs`) 100% ALL-PASS 달성.
+
+### 2. 세부 구현 및 개선 내용 (Detailed Implementations)
+
+#### ① DEF-013: 가상 세계 기준일 라벨 명확화
+- **원인 분석**:
+  - `server_game_clock_policy`의 `real_seconds_per_day = 600`(10분 = 1 게임일) 엔진에 따라 `server_game_day_key()`가 2000-01-01에 `day_index`를 누적 가산하여 2009년이 반환됨.
+  - 화면에서 단순 '기준일'로 표기되어 있어 사용자가 실제 현실 날짜 오류로 오해할 수 있었음.
+- **조치**:
+  - `frontend/src/app/calendar/page.tsx`: '기준일' ➡️ '가상 세계 기준일'로 명확히 명시하고, '다음 사건은 현실 시간 자정 이후 갱신'으로 문구를 정제하여 혼선 해소.
+
+#### ② 실측 QA 회귀 자동화 검증 스크립트 구축 및 라이브 검증
+- **스크립트**: `scripts/qa/verify-qa-defects-resolution.mjs` 신설.
+- **검증 대상**:
+  1. `DEF-003/009`: `/app-api/v1/economy/macro-pulse` 및 `/app-api/v1/economy/hot-time/active` ➡️ **HTTP 200 OK**
+  2. `DEF-006`: `/stocks/WDG` 종목 상세 ➡️ 거래정지 오판 배너 0건 확인 (**PASS**)
+  3. `DEF-012`: `/verify-email-change` ➡️ '이메일 확인 링크 필요' 정상 분기 확인 (**PASS**)
+  4. `DEF-013`: `/calendar` ➡️ 인가 가드 및 가상 세계 기준일 정상 응답 확인 (**PASS**)
+  5. `DEF-001/002`: `/` 홈 일일 퀘스트 ➡️ `/banking` 404 링크 박멸 및 `id="financial-quiz"` 앵커 존재 확인 (**PASS**)
+  6. 30대 핵심 라우트 실측 스캔 ➡️ **30/30 (100% 가용성 통과)**
+
+### 3. 최종 검증 결과
+- 모든 결함에 대한 라이브 재검증 결과: **ALL-PASS**
+- 무결점 릴리스 지속 운영 확증.

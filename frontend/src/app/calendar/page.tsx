@@ -93,8 +93,8 @@ export default async function CalendarPage() {
                   </div>
                   <p className="text-sm text-muted-foreground">{today.event_detail}</p>
                   <p className="text-xs text-muted-foreground">
-                    기준일 <time dateTime={today.event_date}>{formatDay(today.event_date)}</time> ·
-                    다음 사건은 한국 시간 자정 이후 갱신
+                    가상 세계 기준일 <time dateTime={today.event_date}>{formatDay(today.event_date)}</time> ·
+                    다음 사건은 현실 시간 자정 이후 갱신
                   </p>
                   <Link href="/quests" className="text-sm text-primary">
                     퀘스트에서 확인하기 →
