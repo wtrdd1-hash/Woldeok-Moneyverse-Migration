@@ -110,7 +110,7 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
   async handleScheduledAutoRegulation(): Promise<void> {
     try {
       this.logger.log('Starting automated monetary regulation evaluation cycle...');
-      const event = await this.evaluateAndExecute('SYSTEM_AUTONOMOUS_ENGINE');
+      const event = await this.evaluateAndExecute('00000000-0000-0000-0000-000000000000');
       if (event) {
         this.logger.log(
           `Automated monetary regulation executed: action=${event.action_type}, ratio=${event.current_ratio}, amount=${event.adjustment_amount_wld}`,
@@ -124,7 +124,7 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
   /**
    * 거시경제 Faucet/Sink 비율 평가 및 자율 집행
    */
-  async evaluateAndExecute(actorId = 'SYSTEM_AUTONOMOUS_ENGINE'): Promise<MonetaryRegulationEvent | null> {
+  async evaluateAndExecute(actorId = '00000000-0000-0000-0000-000000000000'): Promise<MonetaryRegulationEvent | null> {
     const config = await this.getConfig();
     if (!config.is_enabled) {
       this.logger.debug('Automated monetary regulation is disabled.');
