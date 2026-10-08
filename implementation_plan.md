@@ -4743,3 +4743,52 @@ flowchart TD
 2. 프론트엔드 및 백엔드 타입체크 (`tsc --noEmit`) 100% ALL-PASS
 3. Next.js 579개 라우트 빌드 통과
 4. 운영 서버 `prod-v537` 무중단 승격 배포
+
+---
+
+## 🚀 [v154 Specification] 전 화면 전면 리빌드: Linear/Toss 다크 핀테크 디자인 시스템 & 관리자/일반유저 14대 도메인 풀패키지 쇄신
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "너가 알ㄹ라서 결정하고 프로트엔드 및 ui 처음부터 하는데 모든페이지 모든기능 관리자 포함ㄴ해서 진행해줘 에쁘게해줘"
+- **핵심 목표**:
+  1. **AI 특유의 템플릿 느낌(AI Slop) 완전 박멸 & 실무 최상위 크래프트맨십 구현**:
+     - `anti-ai-frontend-craftsmanship` 준수: 인위적인 보라-파랑 그라데이션 제거, 딥 Slate/Zinc 표면 계층 + 앰비언트 마이크로 하이라이트 + 웜 앰버/에메랄드/사파이어 정밀 악센트.
+     - `font-sans`(Pretendard/Inter)와 `font-mono`(Geist Mono)의 엄격한 분리로 금융 수치 가독성 및 자릿수 안정성 100% 확보.
+  2. **5대 뷰포트 철벽 방어 (320px 극소 모바일 ~ 1440px+ 와이드)**:
+     - 모든 카드, 리스트, 호가창, 버튼에서 겹침(Overlapping), 텍스트 잘림(Clipping), 찌그러짐 원천 차단.
+     - 44px 모바일 터치 타깃, 모바일 플로팅 바텀 내비게이션, Safe-area 완전 보호.
+  3. **전체 서피스(일반 유저 14개 도메인 + 관리자 6대 관제 서피스) 동시 쇄신**:
+     - UI 컴포넌트 프리미티브(`card.tsx`, `badge.tsx`, `button.tsx`, `page-header.tsx`) 고도화.
+     - 메인 홈, 주식/호가창, 지갑/은행, 직업/상점, 커뮤니티, 쪽지함.
+     - 관리자 총괄 관제탑(`/admin`), 실시간 API & R2 백업 타워(`/admin/api-health`), 킬스위치(`/admin/controls`), 유저 관리, 원장 대사.
+
+---
+
+### 2. 세부 컴포넌트 구현 계획 (Implementation Details)
+
+#### ① UI 기본 프리미티브 디자인 쇄신 (UI Primitives Overhaul)
+- `frontend/src/components/ui/card.tsx`:
+  - 딥 Slate 표면(`bg-card/90 backdrop-blur-md`), 미세한 인셋 보더(`border-border/80 hover:border-primary/40`), 부드러운 16px 라운딩 및 섀도우.
+- `frontend/src/components/ui/badge.tsx`:
+  - 텍스트 잘림 방지 `shrink-0 inline-flex items-center`, 가독성 높은 패딩 및 고대비 색상.
+- `frontend/src/components/page-header.tsx`:
+  - Linear 스타일의 세련된 아이브로우 뱃지, 타이틀, 설명문 레이아웃.
+
+#### ② 일반 유저 14대 도메인 핵심 화면 고도화
+- 메인 홈 (`frontend/src/app/page.tsx`): 핀테크 대시보드 Bento Grid, 320px 반응형 퀵 액션 카드, 실시간 티커.
+- 주식 거래소 (`frontend/src/app/stocks/`): 10-Depth 호가창, 원터치 퀵 모의 체결기, 시세 차트 반응형 래퍼.
+- 지갑 & 중앙은행 (`frontend/src/app/wallet/`, `/bank/`): 원장 자산 요약, 44px 터치 버튼, 복리 이자 카드.
+- 직업 & 파밍 (`frontend/src/app/work/`): 직업 카드 `min-h` 및 프로그레스 게이지, 작업 제출 버튼.
+
+#### ③ 관리자 6대 관제 서피스 고도화
+- `/admin` (총괄 관제탑): Datadog / Supabase Studio 수준의 고밀도 메트릭스 매트릭스, 킬스위치 상태, 유저 랭킹.
+- `/admin/api-health`: 실시간 CPU/RAM/DB 텔레메트리, 자동 갱신, Cloudflare R2 원터치 백업 카드.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 백엔드 및 프론트엔드 타입체크 (`tsc --noEmit`) 100% ALL PASS
+2. Next.js 579개 전 라우트 빌드 통과
+3. 운영 서버 `prod-v538` 무중단 승격 배포
+4. 320px, 390px, 768px, 1280px 실 브라우저 가로 스크롤 및 텍스트 겹침 0건 검증

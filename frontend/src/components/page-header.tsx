@@ -12,8 +12,13 @@ export function PageHeader({
   return (
     <header className="grid w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] gap-2 sm:gap-3 border-b border-border pb-4 sm:pb-7 overflow-hidden">
       <div className="flex flex-wrap items-start justify-between gap-3 min-w-0">
-        <div className="min-w-0 space-y-1">
-          {eyebrow && <p className="eyebrow truncate">{eyebrow}</p>}
+        <div className="min-w-0 space-y-1.5">
+          {eyebrow && (
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 font-mono text-[10px] font-bold uppercase tracking-wider shrink-0">
+              <span className="size-1 rounded-full bg-primary animate-pulse" />
+              <span className="truncate">{eyebrow}</span>
+            </span>
+          )}
           <h1 className="max-w-full min-w-0 text-[clamp(1.35rem,3.2vw,2.75rem)] font-black leading-[1.15] tracking-[-0.04em] break-words">
             {title}
           </h1>
