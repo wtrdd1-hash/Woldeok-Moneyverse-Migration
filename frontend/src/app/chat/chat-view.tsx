@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MessageSquare, Archive, Search, ArrowLeft, Clock, CheckCheck, User, UserPlus, BellOff, RotateCw, X } from 'lucide-react';
+import { MessageSquare, Archive, Search, ArrowLeft, Clock, CheckCheck, User, UserPlus, BellOff, RotateCw, X, PenSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -13,18 +13,21 @@ import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 import type { ChatConversation, ChatMessage } from './actions';
 import { ChatRoom } from './chat-room';
+import { ComposeMessageDialog } from './compose-message-dialog';
 
 interface ChatViewProps {
   readonly initialConversations: readonly ChatConversation[];
   readonly activeConversation: ChatConversation | null;
   readonly initialMessages: readonly ChatMessage[];
   readonly currentUserId?: string;
+  readonly isAdmin?: boolean;
 }
 
 export function ChatView({
   initialConversations,
   activeConversation,
   initialMessages,
+  isAdmin = false,
 }: ChatViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,6 +35,7 @@ export function ChatView({
   const [conversations] = useState<ChatConversation[]>([...initialConversations]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'active' | 'archived'>('active');
+  const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [searchedUsers, setSearchedUsers] = useState<readonly { user_id: string; display_name: string }[]>([]);
   const [isSearchingUsers, setIsSearchingUsers] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -119,7 +123,7 @@ export function ChatView({
               </button>
             )}
           </div>
-          <div className="flex gap-1.5 pt-1">
+          <div className="flex items-center gap-1.5 pt-1">
             <Button
               size="sm"
               variant={filter === 'active' ? 'secondary' : 'ghost'}
@@ -136,6 +140,16 @@ export function ChatView({
             >
               <Archive className="size-3" />
               {localeLabel(locale, '보관함', 'Archived', 'アーカイブ', '已归档')}
+            </Button>
+            <Button
+              size="sm"
+              variant="default"
+              className="text-xs h-7 px-2.5 font-bold gap-1 shadow-2xs"
+              onClick={() => setIsComposeOpen(true)}
+              title={localeLabel(locale, '새 쪽지 작성', 'Compose Message', '新規作成', '写私信')}
+            >
+              <PenSquare className="size-3" />
+              <span className="hidden sm:inline">{localeLabel(locale, '쪽지 쓰기', 'New', '作成', '写私信')}</span>
             </Button>
           </div>
         </div>
@@ -196,12 +210,21 @@ export function ChatView({
               <p className="text-xs text-muted-foreground/80 mt-1">
                 {localeLabel(
                   locale,
-                  '회원 프로필에서 [쪽지 보내기]를 눌러 대화를 시작할 수 있습니다.',
-                  'Click [Send Message] on a user profile to start chatting.',
-                  '会員プロフィールから[メッセージ送信]を押して会話を開始できます。',
-                  '点击用户资料上的[发送私信]即可开始对话。',
+                  '회원 프로필에서 [쪽지 보내기]를 누르거나, 아래 버튼으로 바로 새 쪽지를 보낼 수 있습니다.',
+                  'Click [Send Message] on a profile or click below to start chatting.',
+                  '会員プロフィールから[メッセージ送信]を押すか、下のボタンから直接送信できます。',
+                  '点击用户主页上的[发送私信]或点击下方按钮直接发私信。',
                 )}
               </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsComposeOpen(true)}
+                className="mt-3 gap-1.5 font-bold text-xs"
+              >
+                <PenSquare className="size-3.5" />
+                <span>{localeLabel(locale, '새 쪽지 쓰기', 'New Message', '新規作成', '写私信')}</span>
+              </Button>
             </div>
           ) : (
             filteredList.map((item) => {
@@ -281,20 +304,33 @@ export function ChatView({
             }}
           />
         ) : (
-          <div className="flex-1 flex items-center justify-center p-6">
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
             <EmptyState
               title={localeLabel(locale, '대화방을 선택해 주세요', 'Select a conversation', 'メッセージを選択してください', '请选择对话房间')}
               description={localeLabel(
                 locale,
-                '좌측 목록에서 대화방을 선택하거나, 회원 프로필에서 [쪽지 보내기]를 눌러 1:1 쪽지를 시작해 보세요.',
-                'Choose a conversation from the list or click [Send Message] on a member profile.',
-                '左側のリストから会話を選択するか、会員プロフィールから[メッセージ送信]を押してください。',
-                '从左侧列表中选择对话，或在会员主页点击[发送私信]开始1对1私信。',
+                '좌측 목록에서 대화방을 선택하거나, [새 쪽지 작성] 버튼을 눌러 회원과 1:1 쪽지를 시작해 보세요.',
+                'Choose a conversation from the list or click [Compose Message] to start chatting with a member.',
+                '左側のリストから会話を選択するか、[新規作成]を押して会話を開始してください。',
+                '从左侧列表中选择对话，或点击[写新私信]开始与会员对话。',
               )}
             />
+            <Button
+              onClick={() => setIsComposeOpen(true)}
+              className="mt-4 gap-2 font-bold shadow-xs"
+            >
+              <PenSquare className="size-4" />
+              <span>{localeLabel(locale, '새 쪽지 작성하기', 'Compose New Message', '新規メッセージ作成', '写新私信')}</span>
+            </Button>
           </div>
         )}
       </main>
+
+      <ComposeMessageDialog
+        isAdmin={isAdmin}
+        open={isComposeOpen}
+        onOpenChange={setIsComposeOpen}
+      />
     </div>
   );
 }

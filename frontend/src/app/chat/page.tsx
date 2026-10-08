@@ -6,8 +6,10 @@ import { mutate } from '@/lib/mutate';
 import { requireMember } from '@/lib/session';
 import { getServerLocale } from '@/lib/locale-server';
 import { localeLabel } from '@/lib/locale';
+import { currentViewer, isAdministrator } from '@/lib/viewer';
 import type { ChatConversation, ChatMessage } from './actions';
 import { ChatView } from './chat-view';
+import { ComposeMessageDialog } from './compose-message-dialog';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,8 +34,12 @@ export default async function ChatPage({
   readonly searchParams: Promise<{ readonly conversationId?: string; readonly peer?: string }>;
 }) {
   await requireMember();
-  const locale = await getServerLocale();
-  const params = await searchParams;
+  const [locale, viewer, params] = await Promise.all([
+    getServerLocale(),
+    currentViewer(),
+    searchParams,
+  ]);
+  const isAdmin = isAdministrator(viewer);
 
   // 1. Fetch conversations list
   const listResult = await apiOrNull<{ conversations: ChatConversation[] }>(
@@ -80,10 +86,11 @@ export default async function ChatPage({
       <PageHeader
         eyebrow={localeLabel(locale, '메시지', 'MESSAGES', 'メッセージ', '私信')}
         title={localeLabel(locale, '쪽지함', 'Direct Messages', 'メッセージ', '私信箱')}
+        action={<ComposeMessageDialog isAdmin={isAdmin} />}
       >
         {localeLabel(
           locale,
-          '회원 간 1:1 비공개 쪽지를 실시간으로 안전하게 주고받을 수 있습니다. 부적절한 언행이나 사기 유도는 운영진에 의해 제재될 수 있습니다.',
+          '회원 간 1:1 비공개 쪽지를 실시간으로 안전하게 주고받을 수 있습니다. 부적절한 언행이나 사기 유도는 운영진에 의해 제재 조치됩니다.',
           'Exchange secure, private 1:1 direct messages with members in real time. Inappropriate conduct or fraud attempts will be penalized by moderators.',
           '会員間で1:1の非公開メッセージを安全にリアルタイムで送受信できます。不適切な発言や詐欺行為は運営により制限される場合があります。',
           '实时安全收发会员间的1对1私密消息。任何不当言论或欺诈行为将受到管理团队的严厉制裁。',
@@ -94,6 +101,7 @@ export default async function ChatPage({
         initialConversations={conversations}
         activeConversation={activeConversation}
         initialMessages={initialMessages}
+        isAdmin={isAdmin}
       />
     </div>
   );

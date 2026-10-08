@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   Sparkles,
   Bot,
@@ -52,12 +53,12 @@ interface ChatMessage {
 }
 
 export function DeokiAiFloatingAssistant() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(true);
   const [loading, setLoading] = useState(false);
   const [asking, setAsking] = useState(false);
   const [inputQuestion, setInputQuestion] = useState('');
-
   const [diagnosis, setDiagnosis] = useState<DeokiDiagnosis | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const chatBottomRef = useRef<HTMLDivElement>(null);
@@ -157,6 +158,11 @@ export function DeokiAiFloatingAssistant() {
         return <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold">위험 몰빵 (CRITICAL)</span>;
     }
   };
+
+  // /chat 또는 /admin 등 전용 콘솔 및 1:1 대화 화면에서는 플로팅 위젯 중복 비활성화
+  if (pathname === '/chat' || pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <>

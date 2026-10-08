@@ -1,18 +1,25 @@
 export function PageHeader({
   eyebrow,
   title,
+  action,
   children,
 }: {
   readonly eyebrow?: string;
   readonly title: React.ReactNode;
+  readonly action?: React.ReactNode;
   readonly children?: React.ReactNode;
 }) {
   return (
     <header className="grid w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] gap-2 sm:gap-3 border-b border-border pb-4 sm:pb-7 overflow-hidden">
-      {eyebrow && <p className="eyebrow truncate">{eyebrow}</p>}
-      <h1 className="max-w-full min-w-0 text-[clamp(1.35rem,3.2vw,2.75rem)] font-black leading-[1.15] tracking-[-0.04em] break-words">
-        {title}
-      </h1>
+      <div className="flex flex-wrap items-start justify-between gap-3 min-w-0">
+        <div className="min-w-0 space-y-1">
+          {eyebrow && <p className="eyebrow truncate">{eyebrow}</p>}
+          <h1 className="max-w-full min-w-0 text-[clamp(1.35rem,3.2vw,2.75rem)] font-black leading-[1.15] tracking-[-0.04em] break-words">
+            {title}
+          </h1>
+        </div>
+        {action && <div className="shrink-0 pt-1">{action}</div>}
+      </div>
       {children && (
         <div className="min-w-0 max-w-3xl text-xs sm:text-sm leading-relaxed sm:leading-7 text-muted-foreground [overflow-wrap:anywhere] [word-break:keep-all]">
           {children}
