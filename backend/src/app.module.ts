@@ -30,6 +30,7 @@ import { WorkModule } from './work/work.module';
 import { BankModule } from './bank/bank.module';
 import { CraftingModule } from './crafting/crafting.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
+import { CasinoModule } from './casino/casino.module';
 import { NotificationModule } from './notification/notification.module';
 import { AUTH_LIMIT, READ_LIMIT, SENSITIVE_LIMIT } from './security/rate-limit';
 import { TieredThrottlerGuard } from './security/tiered-throttler.guard';
@@ -58,6 +59,7 @@ const ONE_MINUTE_MS = 60_000;
     BankModule,
     CraftingModule,
     MarketplaceModule,
+    CasinoModule,
     NotificationModule,
     ShopModule,
     StockModule,
