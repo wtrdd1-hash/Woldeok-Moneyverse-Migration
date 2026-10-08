@@ -32,11 +32,16 @@ export class DeokiAdvisorController {
     // 비로그인 상태이거나 데모 유저일 경우를 위한 폴백 처리
     const userId = req.session?.user_id || '00000000-0000-0000-0000-000000000000';
 
-    const diagnosis = await this.repository.diagnoseUserPortfolio(userId);
-    return {
-      success: true,
-      diagnosis,
-    };
+    try {
+      const diagnosis = await this.repository.diagnoseUserPortfolio(userId);
+      return {
+        success: true,
+        diagnosis,
+      };
+    } catch (err: any) {
+      console.error('[DeokiAdvisorController] Error in getDiagnosis:', err);
+      throw new BadRequestException(err?.message || '진단 생성에 실패했습니다.');
+    }
   }
 
   @Post('ask')
@@ -53,10 +58,15 @@ export class DeokiAdvisorController {
 
     const userId = req.session?.user_id || '00000000-0000-0000-0000-000000000000';
 
-    const advice = await this.repository.askDeoki(userId, question);
-    return {
-      success: true,
-      ...advice,
-    };
+    try {
+      const advice = await this.repository.askDeoki(userId, question);
+      return {
+        success: true,
+        ...advice,
+      };
+    } catch (err: any) {
+      console.error('[DeokiAdvisorController] Error in askDeoki:', err);
+      throw new BadRequestException(err?.message || '상담 처리에 실패했습니다.');
+    }
   }
 }
