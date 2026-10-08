@@ -11,6 +11,7 @@ import type {
   ScenarioProposal,
 } from './ai-news.repository';
 import { AiNewsInputError } from './ai-news.repository';
+import { safeFetch } from '../security/ssrf-defense';
 
 /**
  * Why a generation could not run, in a word the route can turn into a
@@ -392,7 +393,7 @@ async function send(
 ): Promise<{ readonly ok: boolean; readonly status: number; readonly text: string }> {
   let response: Response;
   try {
-    response = await fetch(url, {
+    response = await safeFetch(url, {
       method: init.method,
       headers: {
         accept: 'application/json',

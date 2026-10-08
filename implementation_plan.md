@@ -4460,3 +4460,98 @@ flowchart TD
 3. **Frontend Typecheck & Build**:
    - `tsc --noEmit`: Exit Code 0 (0 errors)
    - `next build`: Turbopack 579개 전 라우트 빌드 통과 (Exit Code 0)
+---
+
+## 🚀 [v148 Specification] 전방위 풀스택 시스템 & 아키텍처 전수 심층 감사 (Full Architecture & Features Audit)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "지금 모든 기능 백엔드 프론트엔 api 는아티캐쳐 을 다 재검토해줘"
+- **조율된 감사 방침 (Interactive Alignment)**:
+  1. **감사 범위**: 백엔드 비즈니스 로직, 프론트엔드 API 연동, DB 원장 무결성, 보안/권한 격리를 포함한 전체 아키텍처 전방위 심층 감사
+  2. **조치 방식**: Mock 데이터 없는 실제 DB 실측 쿼리 및 라이브 테스트를 거쳐 발견된 모든 결함/개선점을 카테고리별 종합 보고서로 먼저 제출하고, 승인 후 일괄 수정
+  3. **고급 연계 검토**: 외부 무료 클라우드 스토리지(Cloudflare R2/AWS S3 등) 무과금 백업 아키텍처 및 관리자 콘솔 실시간 관제 모니터링 시스템 강화
+
+---
+
+### 2. 감사 항목별 세부 실행 계획 (Audit Domains)
+- **Domain A. 백엔드 및 원장(Ledger) 아키텍처 감사**:
+  - `accounts`, `account_balances`, `transactions`, `journal_entries` 복식부기 무결성
+  - 동시성 제어(`FOR UPDATE`, 비관적 락, 멱등성 키)
+  - 가상 주식 거래 체결기(`orderbook`), 국채 발행/이자 분배, 연금 분배 프로시저
+  - 카지노 5종 게임(슬롯, 하이로우, 다이스, 룰렛, 코인플립) 난수 생성 및 승률 공정성
+- **Domain B. 프론트엔드 라우트 & API 연동 일치성 감사**:
+  - Next.js 579개 전체 라우트 및 핵심 156개 라우트의 `/api/v1/*` 엔드포인트 호출 규격 일치 여부
+  - 미구현된 Mock 데이터 잔존 여부, 빈 핸들러(TODO/pass), 타입 불일치 조사
+  - SSR/CSR 하이브리드 데이터 패칭 안정성 및 에러 바운더리 폴백
+- **Domain C. 보안, 권한 격리 및 SSRF 방어 아키텍처 감사**:
+  - 관리자 전용 API(`/api/v1/admin/*`) 권한 가드 및 2FA/TOTP 스텝업 인증 누락 여부
+  - 사용자 간 1:1 송금/쪽지/프로필 수정의 인가(Authorization) 누락(IDOR) 가능성 점검
+  - 외부 Webhook / OpenGraph 스크래핑 시 내부 사설망(10.x, 172.16.x, 192.168.x, AWS IMDSv2) 침투 차단 여부
+- **Domain D. 무료 클라우드 백업 및 실시간 관제 아키텍처 감사**:
+  - PostgreSQL 감사 로그 및 일일 정산 스냅샷 무과금 외부 아카이빙(R2 10GB 무료 티어) 연동성
+  - Datadog/AWS 콘솔 수준의 관리자 실시간 관제 타워(CPU, 메모리, DB 커넥션, 슬로우 쿼리) 구성 상태 점검
+
+---
+
+### 3. 검증 및 보고 절차 (Verification & Reporting Pipeline)
+1. 백엔드 모듈별 소스코드 및 컨트롤러-레포지토리 체인 실측 점검
+2. 프론트엔드 주요 페이지별 API 클라이언트 연동 코드 및 반환 데이터 타입 전수 스캔
+3. 운영 DB 실제 쿼리 실행을 통한 원장 무결성 및 데이터베이스 함수 실측 감사
+4. 종합 감사 보고서(발견된 결함, 잠재적 리스크, 권장 개선안) 제출
+---
+
+## 🚀 [v149 Specification] 엔터프라이즈 보안 강화, 풀스택 성능 최적화, 무료 클라우드 백업 및 실시간 관제 구축
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "관련래퍼런스 30만개이상 찾아 무조건 최적화 보안 등 안전성도 높여줘"
+- **적용 표준 및 레퍼런스 (Industry Standards & References)**:
+  - OWASP Top 10 (2021/2026): A01(Broken Access Control), A03(Injection), A05(Security Misconfiguration), A10(SSRF)
+  - NIST SP 800-53 Rev 5: SC-8 (Transmission Confidentiality), SC-28 (Protection at Rest), CP-9 (Information System Backup)
+  - CIS PostgreSQL Benchmark v1.3: Connection Limiting, Transaction Timeout Hardening, Index Optimization
+  - Next.js 16 Production Best Practices: CSP, HSTS, Dynamic Code-Splitting, Cache-Control Headers
+
+---
+
+### 2. 세부 구현 작업 목록 (Detailed Implementation Tasks)
+
+#### ① [보안 강화 1: SSRF 잔여 fetch 완전 교체]
+- `backend/src/admin/ai-news.service.ts`: 일반 `fetch(url)`을 `ssrf-defense.ts`의 `safeFetch(url)`로 전면 교체하여 악의적 프롬프트 인젝션 또는 내부 사설망 침투 원천 차단.
+- `backend/src/economy/economy-ai-review.ts`: 일반 `fetch(url)`을 `safeFetch(url)`로 교체.
+
+#### ② [보안 강화 2: 보안 헤더 및 강력한 CSP 설정]
+- `frontend/next.config.ts`:
+  - `Content-Security-Policy`: script-src, frame-ancestors 'none', object-src 'none' 등 강화
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: DENY`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy`: camera=(), microphone=(), geolocation=(), payment=()
+  - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+
+#### ③ [DB 성능 최적화: 마이그레이션 266 작성 및 적용]
+- `packages/database/migrations/266-enterprise-security-and-performance-indices.sql`:
+  - `ledger_transactions(created_at DESC, id)` 인덱스 추가 (회계 거래 고속 조회)
+  - `ledger_postings(account_id, created_at DESC)` 복합 인덱스 추가 (잔액 변동 추적 가속)
+  - `virtual_stock_positions(user_id, stock_id)` 고속 커버링 인덱스 추가
+  - `chat_messages(conversation_id, created_at DESC)` 고속 페이징 인덱스 추가
+  - DB 세션 레벨 타임아웃 방어: `statement_timeout = '8s'`, `idle_in_transaction_session_timeout = '15s'` 설정으로 좀비 락 원천 방지
+  - `ANALYZE` 갱신을 통한 PostgreSQL 쿼리 플래너 최적화
+
+#### ④ [재해 복구(DR): Cloudflare R2 무료 클라우드 자동 백업 파이프라인]
+- `scripts/backup-r2-free.sh`:
+  - Cloudflare R2 (S3 호환 API, 월 10GB 무료, Egress 트래픽 $0) 연동 스크립트 작성
+  - PostgreSQL `pg_dump` 압축 파일 생성 -> AES-256 대칭키 암호화 -> R2 버킷 자동 업로드
+  - 최근 7일치 자동 롤링 보관(오래된 백업 자동 정리)
+
+#### ⑤ [관리자 관제 타워: 실시간 텔레메트리 관제 위젯]
+- `frontend/src/app/admin/api-health/api-health-dashboard.tsx`:
+  - CPU 사용률, 가용 메모리, 디스크 여유 공간, DB 커넥션 상태, P95 응답 지연을 시각화하는 실시간 텔레메트리 카드 컴포넌트 추가
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 백엔드 타입체크 및 테스트 통과 확인 (`tsc --noEmit`, Vitest)
+2. 프론트엔드 타입체크 및 Next.js 579개 라우트 빌드 통과 확인
+3. 운영 DB 마이그레이션 266 적용 및 인덱스 동작 실측 확인
+4. 운영 서버 승격 배포 (`prod-v535`) 및 서비스 정상 기동 검증

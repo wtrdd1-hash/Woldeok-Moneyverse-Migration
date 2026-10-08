@@ -1,3 +1,4 @@
+import os from 'node:os';
 import { Controller, Get, Inject, Optional, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
@@ -30,17 +31,35 @@ export class ApiHealthController {
   async getApiHealthStatus() {
     let measuredDbLatency = 8;
     let dbStatus: 'OPERATIONAL' | 'DEGRADED' = 'OPERATIONAL';
+    let activeConnections = 1;
 
     if (this.pool) {
       const start = Date.now();
       try {
         await queryOne(this.pool, 'SELECT 1 AS ping');
         measuredDbLatency = Math.max(1, Date.now() - start);
+
+        const connRow = await queryOne<{ count: string }>(
+          this.pool,
+          'SELECT count(*)::text AS count FROM pg_stat_activity WHERE datname = current_database()',
+        );
+        activeConnections = Number(connRow?.count ?? 1);
       } catch {
         dbStatus = 'DEGRADED';
         measuredDbLatency = Math.max(1, Date.now() - start);
       }
     }
+
+    const memUsage = process.memoryUsage();
+    const systemTelemetry = {
+      cpuLoad1m: os.loadavg()[0] ?? 0,
+      cpuCores: os.cpus().length,
+      totalMemMb: Math.round(os.totalmem() / (1024 * 1024)),
+      freeMemMb: Math.round(os.freemem() / (1024 * 1024)),
+      heapUsedMb: Math.round(memUsage.heapUsed / (1024 * 1024)),
+      rssMb: Math.round(memUsage.rss / (1024 * 1024)),
+      activeDbConnections: activeConnections,
+    };
 
     const domains: DomainHealthSummary[] = [
       {
@@ -196,6 +215,7 @@ export class ApiHealthController {
       uptimeSeconds: Math.floor(process.uptime()),
       dbLatencyMs: measuredDbLatency,
       isLiveTelemetry: true,
+      systemTelemetry,
       totalDomains: domains.length,
       totalEndpoints,
       averageLatencyMs: avgLatency,

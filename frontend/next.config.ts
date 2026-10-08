@@ -138,7 +138,7 @@ const config: NextConfig = {
       { key: 'content-security-policy', value: csp },
       // Browsers ignore HSTS over plain HTTP, so this is inert locally and
       // makes a downgrade fail closed for a year in front of the tunnel.
-      { key: 'strict-transport-security', value: 'max-age=31536000; includeSubDomains' },
+      { key: 'strict-transport-security', value: 'max-age=63072000; includeSubDomains; preload' },
       { key: 'referrer-policy', value: 'strict-origin-when-cross-origin' },
       { key: 'permissions-policy', value: 'camera=(), geolocation=(), microphone=(), payment=(), usb=()' },
       { key: 'x-content-type-options', value: 'nosniff' },
@@ -146,6 +146,8 @@ const config: NextConfig = {
       // only the older header.
       { key: 'x-frame-options', value: 'DENY' },
       { key: 'cross-origin-opener-policy', value: 'same-origin' },
+      { key: 'cross-origin-resource-policy', value: 'same-origin' },
+      { key: 'x-dns-prefetch-control', value: 'on' },
     ];
 
     const indexingAllowed =

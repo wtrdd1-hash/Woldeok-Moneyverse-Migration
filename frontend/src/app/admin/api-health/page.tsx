@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Activity, CheckCircle2, ShieldCheck, Zap, RefreshCw, Layers, Server } from 'lucide-react';
+import { ArrowLeft, Activity, CheckCircle2, ShieldCheck, Zap, RefreshCw, Layers, Server, Cpu, Database, HardDrive } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,12 +26,23 @@ interface DomainHealthData {
   readonly sampleEndpoints: readonly string[];
 }
 
+export interface SystemTelemetry {
+  readonly cpuLoad1m: number;
+  readonly cpuCores: number;
+  readonly totalMemMb: number;
+  readonly freeMemMb: number;
+  readonly heapUsedMb: number;
+  readonly rssMb: number;
+  readonly activeDbConnections: number;
+}
+
 interface ApiHealthResponse {
   readonly status: string;
   readonly serverTime: string;
   readonly uptimeSeconds: number;
   readonly dbLatencyMs?: number;
   readonly isLiveTelemetry?: boolean;
+  readonly systemTelemetry?: SystemTelemetry;
   readonly totalDomains: number;
   readonly totalEndpoints: number;
   readonly averageLatencyMs: number;
@@ -271,6 +282,66 @@ export default async function AdminApiHealthPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Real-time System & Infrastructure Telemetry (Host CPU, RAM, PostgreSQL Session Hardening) */}
+      {liveData?.systemTelemetry && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <Card className="border-border/80 bg-card/60">
+            <CardHeader className="p-4 pb-1">
+              <CardTitle className="text-xs text-muted-foreground font-medium flex items-center justify-between">
+                <span>호스트 CPU 부하 (1분 평균)</span>
+                <Cpu className="size-4 text-emerald-500" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-1">
+              <div className="text-xl font-bold font-mono">
+                {liveData.systemTelemetry.cpuLoad1m.toFixed(2)}
+                <span className="text-xs text-muted-foreground font-normal ml-1.5">
+                  / {liveData.systemTelemetry.cpuCores} Cores
+                </span>
+              </div>
+              <div className="text-[11px] text-emerald-500 font-medium mt-0.5">안정적 저부하 가동 중</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/80 bg-card/60">
+            <CardHeader className="p-4 pb-1">
+              <CardTitle className="text-xs text-muted-foreground font-medium flex items-center justify-between">
+                <span>메모리 실측 (Node 힙 / OS 잔여)</span>
+                <HardDrive className="size-4 text-indigo-500" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-1">
+              <div className="text-xl font-bold font-mono">
+                {liveData.systemTelemetry.heapUsedMb} MB
+                <span className="text-xs text-muted-foreground font-normal ml-1.5">
+                  (여유 {liveData.systemTelemetry.freeMemMb} MB)
+                </span>
+              </div>
+              <div className="text-[11px] text-indigo-500 font-medium mt-0.5">
+                총 {liveData.systemTelemetry.totalMemMb} MB 가용
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/80 bg-card/60">
+            <CardHeader className="p-4 pb-1">
+              <CardTitle className="text-xs text-muted-foreground font-medium flex items-center justify-between">
+                <span>PostgreSQL 활성 세션 & 보호막</span>
+                <Database className="size-4 text-cyan-500" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-1">
+              <div className="text-xl font-bold font-mono text-cyan-500">
+                {liveData.systemTelemetry.activeDbConnections}개 활성
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">
+                타임아웃 15s / 30s 락 보호막 활성화
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* 14 Domains Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5">

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { Queryable } from '../core/db';
 import { queryOne } from '../core/db';
+import { safeFetch } from '../security/ssrf-defense';
 
 export const ECONOMY_AI_PROMPT_VERSION = 'dual-economy-council-v3';
 
@@ -222,7 +223,7 @@ export const callEconomyAiModel: EconomyAiModelCaller = async (config, proposal,
   try {
     let lastError = 'the model rejected every structured-output form';
     for (const format of formats) {
-      const response = await fetch(url, {
+      const response = await safeFetch(url, {
         method: 'POST',
         headers,
         body: JSON.stringify({
