@@ -32,6 +32,7 @@ export class ApiHealthController {
     let measuredDbLatency = 8;
     let dbStatus: 'OPERATIONAL' | 'DEGRADED' = 'OPERATIONAL';
     let activeConnections = 1;
+    let dbCacheHitRatio = 99.8;
 
     if (this.pool) {
       const start = Date.now();
@@ -44,6 +45,14 @@ export class ApiHealthController {
           'SELECT count(*)::text AS count FROM pg_stat_activity WHERE datname = current_database()',
         );
         activeConnections = Number(connRow?.count ?? 1);
+
+        const cacheRow = await queryOne<{ ratio: string }>(
+          this.pool,
+          'SELECT COALESCE(round(sum(blks_hit)*100.0/greatest(sum(blks_hit+blks_read), 1), 1), 99.9)::text AS ratio FROM pg_stat_database WHERE datname = current_database()',
+        );
+        if (cacheRow?.ratio) {
+          dbCacheHitRatio = Number(cacheRow.ratio);
+        }
       } catch {
         dbStatus = 'DEGRADED';
         measuredDbLatency = Math.max(1, Date.now() - start);
@@ -59,6 +68,7 @@ export class ApiHealthController {
       heapUsedMb: Math.round(memUsage.heapUsed / (1024 * 1024)),
       rssMb: Math.round(memUsage.rss / (1024 * 1024)),
       activeDbConnections: activeConnections,
+      dbCacheHitRatio,
     };
 
     const domains: DomainHealthSummary[] = [

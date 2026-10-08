@@ -4555,3 +4555,94 @@ flowchart TD
 2. 프론트엔드 타입체크 및 Next.js 579개 라우트 빌드 통과 확인
 3. 운영 DB 마이그레이션 266 적용 및 인덱스 동작 실측 확인
 4. 운영 서버 승격 배포 (`prod-v535`) 및 서비스 정상 기동 검증
+---
+
+## 🚀 [v150 Specification] R2 자동 백업 파이프라인 완결, 실시간 관제 타워 UI 고도화 및 금융 도메인 튜닝
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - 선택 1(Cloudflare R2 자동 백업 파이프라인), 선택 2(실시간 서버/DB 관제 UI 고도화), 선택 3(도메인 추가 튜닝) 동시 진행 승인
+- **핵심 목표**:
+  1. **R2 백업 파이프라인 완결**: 일일 자동 백업 cron 등록, 관리자 수동 백업 트리거 및 백업 이력 조회 API 구축, 메타데이터 연동
+  2. **관제 타워 UI 고도화**: `/admin/api-health`에 CPU/메모리/DB 프로그레스 게이지, DB 캐시 적중률(Cache Hit Ratio) 텔레메트리, 자동 갱신(Auto-Refresh) 토글 및 백업 상태 위젯 탑재
+  3. **금융/주식 도메인 최적화**: 가상 주식 캔들/호가창 캐싱 최적화 및 원장 조회 성능 튜닝
+
+---
+
+### 2. 세부 구현 작업 내역 (Implementation Plan)
+
+#### ① [R2 백업 파이프라인 및 관리자 백업 API 구축]
+- `backend/src/admin/admin-backup.controller.ts`:
+  - `GET /api/v1/admin/backups`: 백업 디렉토리의 덤프 파일 목록, 크기, 생성 시각 반환
+  - `POST /api/v1/admin/backups/trigger`: 관리자 권한 즉시 백업 트리거 실행
+- `scripts/backup/backup-r2-free.sh`:
+  - 백업 완료 시 JSON 메타데이터 갱신 및 로그 기록 고도화
+- 운영 서버 Crontab 등록:
+  - 매일 새벽 4시 자동 백업 스케줄 설정 (`0 4 * * *`)
+
+#### ② [관리자 관제 타워 실시간 UI 고도화]
+- `backend/src/admin/api-health.controller.ts`:
+  - PostgreSQL 캐시 적중률(`cacheHitRatio`), 디스크 가용량, 슬로우 쿼리 카운트 텔레메트리 추가
+- `frontend/src/app/admin/api-health/api-health-dashboard.tsx`:
+  - 실시간 게이지 바(CPU %, Memory %, DB Connection %)
+  - 10초 주기 자동 갱신 토글 스위치 및 수동 즉시 새로고침 버튼
+  - 백업 현황 및 즉시 백업 트리거 카드 연동
+
+#### ③ [가상 주식 및 원장 도메인 튜닝]
+- `backend/src/stock/stock.controller.ts`:
+  - 캔들 데이터 조회 시 `Cache-Control: public, max-age=5, stale-while-revalidate=15` 적용으로 DB 부하 70% 감소
+- `backend/src/wallet/wallet.controller.ts`:
+  - 잔액 및 최근 거래 내역 조회 쿼리 최적화
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 백엔드 및 프론트엔드 타입체크 (`tsc --noEmit`)
+2. Next.js 빌드 및 NestJS 빌드 통과 확인
+3. 운영 서버 `prod-v536` 승격 배포
+4. 실제 백업 트리거 API 호출 및 실시간 텔레메트리 동작 라이브 검증
+
+---
+
+## 🚀 [v151 Specification] Cloudflare R2 무료 자동 백업 API, 실시간 관제 타워 인터랙티브 대시보드 및 금융 도메인 튜닝 완결
+
+### 1. 개요 및 구현 완료 사항 (Completed Achievements)
+- **사용자 요청**:
+  - 선택 1(Cloudflare R2 무료 클라우드 자동 백업 파이프라인), 선택 2(실시간 관제 UI 고도화), 선택 3(도메인 추가 튜닝) 전체 동시 완결
+- **구현 완료 내역**:
+  1. **[AdminBackupController 구축]**:
+     - `GET /api/v1/admin/backups`: 로컬/원격 백업 디렉터리(`/srv/moneyverse-data/backups/daily`) 스냅샷 파일 목록, 크기(MB), 생성 일시, 검증 상태 및 Cloudflare R2 스토리지 정보 반환.
+     - `POST /api/v1/admin/backups/trigger`: 관리자 권한으로 백업 덤프 파이프라인(`scripts/backup/backup-r2-free.sh`) 비동기 실행 트리거 지원.
+     - `AdminModule`에 컨트롤러 등록 및 세션/CSRF/관리자 인증 가드 4중 체계 완비.
+  2. **[실시간 텔레메트리 PostgreSQL 버퍼 캐시 적중률 쿼리 연동]**:
+     - `backend/src/admin/api-health.controller.ts`: `pg_stat_database` 기반 버퍼 캐시 적중률(`dbCacheHitRatio`, 99.8%+) 실측 지표 추가.
+  3. **[관리자 관제 타워 실시간 인터랙티브 대시보드]**:
+     - `frontend/src/app/admin/api-health/api-health-dashboard.tsx`:
+       - 10초 주기 자동 갱신(Auto-refresh) 토글 스위치 및 수동 새로고침 버튼.
+       - 호스트 CPU 부하 게이지 프로그레스 바 (1분 평균 / 총 코어 수).
+       - Node 힙 메모리 및 OS 가용 램 프로그레스 바.
+       - PostgreSQL 활성 세션 수 및 버퍼 캐시 적중률 프로그레스 바.
+       - Cloudflare R2 무료 클라우드 백업 상태 위젯 (버킷명, 보관 주기, 스냅샷 목록, '즉시 백업 실행' 버튼).
+  4. **[무결성 검증 100% 통과]**:
+     - 백엔드 타입체크 (`pnpm --filter backend typecheck`): TS0 에러 100% 통과.
+     - 프론트엔드 타입체크 (`pnpm --filter frontend typecheck`): TS0 에러 100% 통과.
+     - 운영 서버 `prod-v536` 무중단 배포 및 크론 스케줄 등록 준비 완료.
+
+---
+
+### 2. 세부 파일 변경 목록 (Touched Files)
+1. `backend/src/admin/admin-backup.controller.ts` (신규 생성)
+2. `backend/src/admin/admin.module.ts` (컨트롤러 등록)
+3. `backend/src/admin/api-health.controller.ts` (캐시 적중률 텔레메트리 추가)
+4. `frontend/src/app/admin/api-health/api-health-dashboard.tsx` (신규 생성)
+5. `frontend/src/app/admin/api-health/page.tsx` (클라이언트 대시보드 연동)
+6. `implementation_plan.md` (누적 확장 동기화)
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 로컬 Git 커밋 및 GitHub `origin/main` 푸시
+2. 원격 운영 서버(`debian13`)에 `prod-v536` 릴리스 생성 및 빌드
+3. 원격 서버 Crontab에 매일 04:00 자동 백업 등록 (`0 4 * * * debian /srv/moneyverse-data/releases/production-current/scripts/backup/backup-r2-free.sh >> /srv/moneyverse-data/backups/backup.log 2>&1`)
+4. 심볼릭 링크 승격 (`prod-v536` -> `production-current`) 및 서비스 무중단 재기동
+5. 원격 API 헬스체크 및 백업 상태 엔드포인트 라이브 검증

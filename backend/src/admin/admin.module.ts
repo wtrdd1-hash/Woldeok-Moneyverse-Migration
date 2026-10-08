@@ -1,4 +1,5 @@
 import { AdminShopController } from './admin-shop.controller';
+import { AdminBackupController } from './admin-backup.controller';
 import { AiNewsController } from './ai-news.controller';
 import { AiNewsRepository } from './ai-news.repository';
 import { AiNewsService } from './ai-news.service';
@@ -73,6 +74,7 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
   imports: [AuthModule, StockModule, ChatModule],
   controllers: [
     ApiHealthController,
+    AdminBackupController,
     AdminTreasuryController,
     AdminEnterpriseController,
     PublicEnterpriseController,
