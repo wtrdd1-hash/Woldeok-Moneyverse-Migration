@@ -4,6 +4,20 @@ import KdicPortalPage from './page';
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  it('formats a 21-digit WLD amount without IEEE-754 rounding', async () => {
+    const exact = '900719925474099312345';
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, data: {
+        fund: { totalFundWld: exact }, institutions: [],
+        summary: { totalInsuredInstitutions: 0, averageBisRatioPct: 0 },
+      } }),
+    }));
+    const { container } = render(<KdicPortalPage />);
+    await waitFor(() => {
+      expect(container.textContent).toContain('900,719,925,474,099,312,345 WLD');
+    });
+  });
 });
 
 describe('virtual KDIC portal safety', () => {

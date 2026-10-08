@@ -19,7 +19,7 @@ AS $kdic$
       'updatedAt', f.updated_at
     ),
     'institutions', (
-      SELECT pg_catalog.coalesce(
+      SELECT COALESCE(
         pg_catalog.jsonb_agg(pg_catalog.jsonb_build_object(
           'id', i.id,
           'institutionName', i.institution_name,
@@ -34,10 +34,10 @@ AS $kdic$
     ),
     'summary', pg_catalog.jsonb_build_object(
       'totalInsuredInstitutions', (SELECT count(*)::integer FROM public.insured_institutions),
-      'totalDepositsWld', (SELECT pg_catalog.coalesce(sum(i.total_deposits_wld), 0)::text FROM public.insured_institutions i),
-      'averageBisRatioPct', (SELECT pg_catalog.coalesce(round(avg(i.bis_ratio_pct), 1), 0)::double precision FROM public.insured_institutions i),
+      'totalDepositsWld', (SELECT COALESCE(sum(i.total_deposits_wld), 0)::text FROM public.insured_institutions i),
+      'averageBisRatioPct', (SELECT COALESCE(round(avg(i.bis_ratio_pct), 1), 0)::double precision FROM public.insured_institutions i),
       'reserveCoverageRatioPct', (
-        SELECT pg_catalog.coalesce(
+        SELECT COALESCE(
           round((f.total_fund_wld::numeric / nullif(sum(i.total_deposits_wld), 0)::numeric) * 100, 1),
           0
         )::double precision FROM public.insured_institutions i
