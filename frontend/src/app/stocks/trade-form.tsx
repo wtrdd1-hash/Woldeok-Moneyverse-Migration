@@ -105,7 +105,7 @@ export function TradeForm({
             type="button"
             variant="outline"
             size="sm"
-            className="min-h-9 px-2.5 text-xs font-mono font-medium active:scale-95"
+            className="min-h-10 px-3 text-xs font-mono font-medium rounded-lg active:scale-95"
             onClick={() => setQuantity('1')}
           >
             1{isEn ? 'sh' : '주'}
@@ -114,7 +114,7 @@ export function TradeForm({
             type="button"
             variant="outline"
             size="sm"
-            className="min-h-9 px-2.5 text-xs font-mono font-medium active:scale-95"
+            className="min-h-10 px-3 text-xs font-mono font-medium rounded-lg active:scale-95"
             onClick={() => addQty(5)}
           >
             +5
@@ -123,7 +123,7 @@ export function TradeForm({
             type="button"
             variant="outline"
             size="sm"
-            className="min-h-9 px-2.5 text-xs font-mono font-medium active:scale-95"
+            className="min-h-10 px-3 text-xs font-mono font-medium rounded-lg active:scale-95"
             onClick={() => addQty(10)}
           >
             +10
@@ -132,7 +132,7 @@ export function TradeForm({
             type="button"
             variant="outline"
             size="sm"
-            className="min-h-9 px-2.5 text-xs font-mono font-medium active:scale-95"
+            className="min-h-10 px-3 text-xs font-mono font-medium rounded-lg active:scale-95"
             onClick={() => addQty(50)}
           >
             +50
@@ -145,7 +145,7 @@ export function TradeForm({
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="min-h-9 px-2.5 text-xs font-mono font-semibold active:scale-95"
+                className="min-h-10 px-3 text-xs font-mono font-semibold rounded-lg active:scale-95"
                 onClick={() => applyPercent(25)}
               >
                 25%
@@ -154,7 +154,7 @@ export function TradeForm({
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="min-h-9 px-2.5 text-xs font-mono font-semibold active:scale-95"
+                className="min-h-10 px-3 text-xs font-mono font-semibold rounded-lg active:scale-95"
                 onClick={() => applyPercent(50)}
               >
                 50%
@@ -163,7 +163,7 @@ export function TradeForm({
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="min-h-9 px-3 text-xs font-mono font-bold active:scale-95 text-primary"
+                className="min-h-10 px-3.5 text-xs font-mono font-bold rounded-lg active:scale-95 text-primary"
                 onClick={() => setQuantity(String(maxLimit))}
               >
                 MAX ({groupDigits(String(maxLimit))})

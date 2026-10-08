@@ -68,14 +68,14 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center flex-1 h-full min-h-[44px] min-w-[44px] py-1 text-center transition-colors min-w-0 ${
-                item.isActive ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
+              className={`flex flex-col items-center justify-center flex-1 h-full min-h-[44px] min-w-[44px] py-1 text-center transition-all duration-150 active:scale-90 min-w-0 ${
+                item.isActive ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <div className="relative shrink-0">
-                <Icon className={`size-5 ${item.isActive ? 'stroke-[2.25px]' : 'stroke-[1.75px]'}`} />
+                <Icon className={`size-5 transition-transform ${item.isActive ? 'stroke-[2.5px] scale-110' : 'stroke-[1.75px]'}`} />
                 {item.isActive && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary" />
+                  <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
                 )}
               </div>
               <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-[64px] font-sans">

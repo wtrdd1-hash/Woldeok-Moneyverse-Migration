@@ -63,7 +63,7 @@ export default async function WalletPage() {
   const loans = loanData?.loans ?? [];
 
   return (
-    <div className="grid gap-6">
+    <div data-page="wallet" className="mv-page mv-page--finance grid gap-6 w-full max-w-full min-w-0 overflow-hidden">
       <LiveRefresh />
       <PageHeader title={<T korean="내 지갑" english="My Wallet" />}>
         <T
