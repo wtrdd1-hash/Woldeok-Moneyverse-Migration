@@ -78,6 +78,122 @@ const DEFAULT_GSC_DATA: GscAnalyticsData = {
   topQueries: [],
 };
 
+interface QueryLandingInfo {
+  readonly path: string;
+  readonly label: string;
+  readonly badge: string;
+  readonly badgeColor: string;
+}
+
+function getQueryLanding(rawQuery: string): QueryLandingInfo {
+  const q = rawQuery.toLowerCase().trim();
+
+  // 대출 / 이자 / 30년 상환
+  if (q.includes('대출') || q.includes('상환') || q.includes('이자') || q.includes('loan')) {
+    return {
+      path: '/tools/loan-interest-calculator',
+      label: '대출이자·상환 계산기',
+      badge: '대출/금융',
+      badgeColor: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
+    };
+  }
+
+  // CAGR / 복리 / 적립식 / DCA
+  if (q.includes('cagr') || q.includes('복리') || q.includes('dca') || q.includes('적립') || q.includes('수익률')) {
+    return {
+      path: '/tools/compound-calculator',
+      label: '복리·CAGR 시뮬레이터',
+      badge: '투자/복리',
+      badgeColor: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
+    };
+  }
+
+  // 배당 / dividend / 세금
+  if (q.includes('dividend') || q.includes('배당') || q.includes('분배금')) {
+    return {
+      path: '/tools/dividend-tax-calculator',
+      label: '배당소득세·절세 계산기',
+      badge: '배당/세제',
+      badgeColor: 'border-amber-500/30 bg-amber-500/10 text-amber-500',
+    };
+  }
+
+  // 양도소득세 / 양도세
+  if (q.includes('양도') || q.includes('capital gain')) {
+    return {
+      path: '/tools/capital-gains-tax-calculator',
+      label: '해외주식 양도소득세 계산기',
+      badge: '세금/절세',
+      badgeColor: 'border-orange-500/30 bg-orange-500/10 text-orange-500',
+    };
+  }
+
+  // 연금 / 퇴직 / 은퇴
+  if (q.includes('연금') || q.includes('퇴직') || q.includes('은퇴') || q.includes('pension')) {
+    return {
+      path: '/tools/retirement-calculator',
+      label: '은퇴·연금 세제 계산기',
+      badge: '연금/은퇴',
+      badgeColor: 'border-purple-500/30 bg-purple-500/10 text-purple-500',
+    };
+  }
+
+  // 부동산 / 청약
+  if (q.includes('부동산') || q.includes('청약') || q.includes('주택')) {
+    return {
+      path: '/tools/real-estate-calculator',
+      label: '부동산 취득·보유세 계산기',
+      badge: '부동산',
+      badgeColor: 'border-rose-500/30 bg-rose-500/10 text-rose-500',
+    };
+  }
+
+  // ISA / 청년도약
+  if (q.includes('isa') || q.includes('청년')) {
+    return {
+      path: '/tools/isa-calculator',
+      label: 'ISA 절세 시뮬레이터',
+      badge: '절세계좌',
+      badgeColor: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-500',
+    };
+  }
+
+  // 개발자 / 서버 / nodejs / python / api
+  if (
+    q.includes('node') ||
+    q.includes('python') ||
+    q.includes('서버') ||
+    q.includes('클라우드') ||
+    q.includes('api') ||
+    q.includes('dev')
+  ) {
+    return {
+      path: '/developer',
+      label: '개발자 허브 & Open API',
+      badge: '개발/기술',
+      badgeColor: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-500',
+    };
+  }
+
+  // 주식 / 종목 / 거래
+  if (q.includes('주식') || q.includes('종목') || q.includes('stock') || q.includes('호가')) {
+    return {
+      path: '/stocks',
+      label: '가상 모의주식 마켓',
+      badge: '주식/마켓',
+      badgeColor: 'border-sky-500/30 bg-sky-500/10 text-sky-500',
+    };
+  }
+
+  // 기본값: 금융 도구 포털
+  return {
+    path: '/tools',
+    label: '금융 계산기 허브',
+    badge: '통합도구',
+    badgeColor: 'border-muted-foreground/30 bg-muted/20 text-muted-foreground',
+  };
+}
+
 export function GscAnalyticsCard() {
   const [data, setData] = useState<GscAnalyticsData>(DEFAULT_GSC_DATA);
   const [isLoading, setIsLoading] = useState(false);
@@ -435,46 +551,113 @@ export function GscAnalyticsCard() {
           </div>
         </div>
 
-        {/* Top 10 Search Queries Ranking Table */}
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-foreground">상위 10대 유입 검색어 (Top Search Queries)</h4>
-            <span className="text-[11px] text-muted-foreground">CTR 및 평균 순위 정렬</span>
+        {/* Top 10 Search Queries Ranking Table with Target Landing Integration */}
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <div>
+              <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <span>🎯</span> 상위 10대 유입 검색어 & 타겟 랜딩 연결 분석
+              </h4>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                실제 구글 검색 유입 쿼리별 최적 랜딩 페이지 매핑 및 순위 상승(SEO Boost) 전략
+              </p>
+            </div>
+            <span className="text-[11px] font-mono text-muted-foreground self-start sm:self-auto">
+              CTR 및 평균 순위 실측 정렬
+            </span>
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-border/60">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-border/60 bg-surface/70 font-bold text-muted-foreground">
                 <tr>
-                  <th className="px-3.5 py-2.5">순위</th>
-                  <th className="px-3.5 py-2.5">검색 쿼리 (Query)</th>
-                  <th className="px-3.5 py-2.5 text-right">클릭수</th>
-                  <th className="px-3.5 py-2.5 text-right">노출수</th>
-                  <th className="px-3.5 py-2.5 text-right">클릭률 (CTR)</th>
-                  <th className="px-3.5 py-2.5 text-center">평균 게재순위</th>
+                  <th className="px-3 py-2.5 text-center">순위</th>
+                  <th className="px-3 py-2.5">검색 쿼리 (Google Query)</th>
+                  <th className="px-3 py-2.5">타겟 랜딩 페이지</th>
+                  <th className="px-3 py-2.5 text-center">키워드 분류</th>
+                  <th className="px-3 py-2.5 text-right">클릭수</th>
+                  <th className="px-3 py-2.5 text-right">노출수</th>
+                  <th className="px-3 py-2.5 text-right">클릭률</th>
+                  <th className="px-3 py-2.5 text-center">평균 순위</th>
+                  <th className="px-3 py-2.5 text-center">이동</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40 font-mono">
-                {(data?.topQueries || []).map((q, idx) => (
-                  <tr key={q.query} className="hover:bg-surface/40 transition-colors">
-                    <td className="px-3.5 py-2 text-center font-bold text-muted-foreground">{idx + 1}</td>
-                    <td className="px-3.5 py-2 font-sans font-bold text-foreground">{q.query}</td>
-                    <td className="px-3.5 py-2 text-right font-bold text-emerald-600 dark:text-emerald-400">
-                      {q.clicks.toLocaleString()}
-                    </td>
-                    <td className="px-3.5 py-2 text-right text-muted-foreground">
-                      {q.impressions.toLocaleString()}
-                    </td>
-                    <td className="px-3.5 py-2 text-right font-bold text-foreground">{q.ctr}%</td>
-                    <td className="px-3.5 py-2 text-center">
-                      <span className="rounded bg-primary/10 px-1.5 py-0.5 font-bold text-primary">
-                        {q.position}위
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {(data?.topQueries || []).map((q, idx) => {
+                  const landing = getQueryLanding(q.query);
+                  const isTopTen = q.position <= 10;
+                  return (
+                    <tr key={q.query} className="hover:bg-surface/40 transition-colors">
+                      <td className="px-3 py-2.5 text-center font-bold text-muted-foreground">{idx + 1}</td>
+                      <td className="px-3 py-2.5 font-sans font-bold text-foreground whitespace-nowrap">
+                        {q.query}
+                      </td>
+                      <td className="px-3 py-2.5 font-sans whitespace-nowrap">
+                        <a
+                          href={landing.path}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-medium text-primary hover:underline flex items-center gap-1"
+                        >
+                          <span>{landing.label}</span>
+                          <span className="text-[10px] text-muted-foreground font-mono">({landing.path})</span>
+                        </a>
+                      </td>
+                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                        <span className={cn('text-[10px] px-2 py-0.5 rounded-full border font-sans font-semibold', landing.badgeColor)}>
+                          {landing.badge}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                        {q.clicks.toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2.5 text-right text-muted-foreground">
+                        {q.impressions.toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2.5 text-right font-bold text-foreground">{q.ctr}%</td>
+                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                        <span
+                          className={cn(
+                            'rounded px-2 py-0.5 font-bold text-[11px]',
+                            isTopTen
+                              ? 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30'
+                              : 'bg-primary/10 text-primary border border-primary/20',
+                          )}
+                        >
+                          {q.position}위
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                        <a
+                          href={landing.path}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                          title="해당 랜딩 페이지 새 탭에서 열기"
+                        >
+                          ↗
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
+          </div>
+
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs leading-relaxed text-muted-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-primary text-base">💡</span>
+              <span>
+                <b>SEO 인구 증가 전략:</b> 게재순위 30~80위권의 <b>'2억 대출 30년 상환'</b>, <b>'cagr'</b>, <b>'dividend yield'</b> 등 금융 계산기 검색어는 메타태그와 프리셋 보강 시 1페이지(1~10위) 진입 잠재력이 가장 높습니다.
+              </span>
+            </div>
+            <a
+              href="/tools"
+              className="shrink-0 px-3 py-1 rounded-lg bg-primary text-primary-foreground font-bold text-xs hover:bg-primary/90 transition-colors"
+            >
+              계산기 도구 허브 보기
+            </a>
           </div>
         </div>
       </CardContent>
