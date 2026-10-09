@@ -168,13 +168,21 @@ export function claimDailyInterestFromPot(potId: string): {
   const matchedPlan = SAVINGS_PLANS.find((p) => p.id === pot.planId);
   const plan = matchedPlan || SAVINGS_PLANS[0]!;
 
-  // Calculate elapsed days since last claim
+  // Calculate elapsed days since last claim (requires at least 24 hours)
   const lastClaim = new Date(pot.lastClaimedAt).getTime();
   const now = Date.now();
-  const elapsedDays = Math.max(1, Math.floor((now - lastClaim) / (24 * 60 * 60 * 1000)));
+  const elapsedMs = Math.max(0, now - lastClaim);
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  const elapsedDays = Math.floor(elapsedMs / ONE_DAY_MS);
+  if (elapsedDays < 1) {
+    return { success: false, claimedAmount: 0, updatedPot: pot };
+  }
 
   const dailyYield = calculateDailyInterest(pot.principalWld, plan.baseAprPct);
-  const claimable = Math.max(1, Math.floor(dailyYield * elapsedDays * 10) / 10);
+  const claimable = Math.max(0, Math.floor(dailyYield * elapsedDays * 10) / 10);
+  if (claimable <= 0) {
+    return { success: false, claimedAmount: 0, updatedPot: pot };
+  }
 
   const updated: SavingsPotRecord = {
     id: pot.id,

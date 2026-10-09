@@ -35,12 +35,12 @@ export default function SavingsChallengePotPage() {
       prev.map((m) => (m.isCurrentUser ? { ...m, depositDays: m.depositDays + 1 } : m))
     );
     setTodayDeposited(true);
-    setNotification('🎉 오늘의 챌린지 저축 (14,285 WLD) 입금 완료! 팟 달성률이 상승했습니다.');
+    setNotification('🎉 [체험 모드] 오늘의 챌린지 저축 (14,285 WLD) 입금 시뮬레이션 완료! 팟 달성률이 상승했습니다.');
     setTimeout(() => setNotification(null), 4000);
   };
 
   const handleNudge = (memberName: string) => {
-    setNotification(`🔔 ${memberName}님을 찔렀습니다! 저축 알림이 발송되었습니다.`);
+    setNotification(`🔔 [체험 모드] ${memberName}님 찌르기 시뮬레이션 알림이 표시되었습니다.`);
     setTimeout(() => setNotification(null), 4000);
   };
 
@@ -55,11 +55,14 @@ export default function SavingsChallengePotPage() {
                 <Landmark className="h-6 w-6" />
               </span>
               <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
-                Toss형 4인 공동 저축 챌린지 팟
+                4인 공동 저축 챌린지 팟
               </h1>
+              <span className="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-semibold text-amber-300 border border-amber-500/30">
+                모의 체험 모드
+              </span>
             </div>
             <p className="mt-1 text-xs text-slate-400 sm:text-sm">
-              친구 4명이 모여 7일간 공동 저축 완주 시 +5.0% 보너스 금리 및 황금 상자 잭팟 수령
+              친구 4명이 모여 7일간 공동 저축 완주 시뮬레이션을 체험해 보세요 (실제 계좌 잔액 미차감 인터랙티브 모드).
             </p>
           </div>
 

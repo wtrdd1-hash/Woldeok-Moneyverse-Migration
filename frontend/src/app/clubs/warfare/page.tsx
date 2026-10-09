@@ -82,7 +82,7 @@ export default function WarfarePage() {
     const dividend = calculateGuildTaxDividend(territory.dailyTaxYieldWld, 350, 1000);
     setClaimedDividends((prev) => prev + dividend);
     showFeedback(
-      `${territory.name} 점령 기여도(35%)에 따른 일일 세금 배당 +${groupDigits(dividend)} WLD를 수령하였습니다!`,
+      `[시뮬레이션] ${territory.name} 점령 기여도(35%)에 따른 일일 세금 배당 시뮬레이션 +${groupDigits(dividend)} WLD를 수령하였습니다.`,
       'success',
     );
   };
@@ -115,6 +115,9 @@ export default function WarfarePage() {
         <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-500">
           <Swords className="size-3.5" />
           <span>디스코드 길드 대규모 영지 점령전</span>
+          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-300 font-semibold border border-amber-500/30">
+            인터랙티브 시뮬레이터
+          </span>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -123,7 +126,7 @@ export default function WarfarePage() {
               <span>디스코드 길드 영지 공성전</span>
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-              5대 금융 요충지를 점령하고 길드 금고로 쏟아지는 거래세와 수수료를 장악하세요. 길드원 기여도에 따라 매일 자정 WLD 배당금이 정산됩니다.
+              5대 금융 요충지를 점령하고 길드 금고로 쏟아지는 거래세와 수수료 메커니즘을 체험해 보세요 (시뮬레이션 모드).
             </p>
           </div>
           <div className="p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-sm min-w-[200px] text-right">

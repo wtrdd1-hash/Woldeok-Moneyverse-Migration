@@ -358,7 +358,7 @@ export default function RetirementCalculatorPage() {
             </p>
             <div className="flex items-center gap-2">
               <Link
-                href="/auth/register"
+                href="/register"
                 onClick={() => setIsWldClaimed(true)}
                 className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/40 transition-colors"
               >

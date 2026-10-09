@@ -86,10 +86,12 @@ export function axisTicks(min: bigint, max: bigint, logarithmic: boolean): bigin
 export function CandleChart({
   candles,
   label,
+  unitName,
 }: {
   readonly candles: readonly Candle[];
   /** How to write a bucket's start under the axis. Raw, if not given. */
   readonly label?: (at: string) => string;
+  readonly unitName?: string;
 }) {
   const [showMA5, setShowMA5] = useState(true);
   const [showMA20, setShowMA20] = useState(true);
@@ -229,6 +231,7 @@ export function CandleChart({
           <span className="text-[11px] text-muted-foreground font-semibold mr-1">지표:</span>
           <button
             type="button"
+            aria-pressed={showMA5}
             onClick={() => setShowMA5(!showMA5)}
             className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border transition-all ${
               showMA5
@@ -240,6 +243,7 @@ export function CandleChart({
           </button>
           <button
             type="button"
+            aria-pressed={showMA20}
             onClick={() => setShowMA20(!showMA20)}
             className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border transition-all ${
               showMA20
@@ -251,6 +255,7 @@ export function CandleChart({
           </button>
           <button
             type="button"
+            aria-pressed={showBollinger}
             onClick={() => setShowBollinger(!showBollinger)}
             className={`px-2 py-0.5 rounded text-[11px] font-bold border transition-all ${
               showBollinger
@@ -263,7 +268,7 @@ export function CandleChart({
         </div>
 
         <div className="text-[11px] text-muted-foreground font-mono hidden sm:inline-block">
-          {shown.length}일 봉
+          {shown.length}{unitName ? `개 (${unitName})` : '일 봉'}
         </div>
       </div>
 

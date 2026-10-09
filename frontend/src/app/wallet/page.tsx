@@ -41,10 +41,11 @@ export const metadata: Metadata = {
 export default async function WalletPage() {
   await requireMember();
 
-  const [wallet, loanData, rewardAvailability] = await Promise.all([
+  const [wallet, loanData, rewardAvailability, portfolioData] = await Promise.all([
     apiOrNull<Overview>('/api/v1/wallet?recent=50'),
     apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
     apiOrNull<RewardAvailability>('/api/v1/rewards/availability'),
+    apiOrNull<{ holdings: Array<{ current_price: string; quantity: number }> }>('/api/v1/stocks/portfolio'),
   ]);
 
   if (!wallet) {
@@ -128,12 +129,21 @@ export default async function WalletPage() {
 
       <CitizenTaxReceiptCard />
 
-      <PortfolioAllocationRadar
-        cashWld={Number(balances.cash.availableAmount) || 0}
-        savingsWld={Number(balances.bank.availableAmount) || 0}
-        stocksWld={Math.round(Number(balances.totalAvailableAmount) * 0.25)}
-        bondsWld={Math.round(Number(balances.totalAvailableAmount) * 0.15)}
-      />
+      {(() => {
+        const stockHoldings = portfolioData?.holdings ?? [];
+        const actualStocksValue = stockHoldings.reduce(
+          (sum, h) => sum + Math.round((Number(h.current_price) || 0) * (Number(h.quantity) || 0)),
+          0
+        );
+        return (
+          <PortfolioAllocationRadar
+            cashWld={Number(balances.cash.availableAmount) || 0}
+            savingsWld={Number(balances.bank.availableAmount) || 0}
+            stocksWld={actualStocksValue}
+            bondsWld={0}
+          />
+        );
+      })()}
 
       <BankPanel />
 

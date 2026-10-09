@@ -254,6 +254,11 @@ export function StockDetailDialog({
           <div className="grid gap-4">
             <CandleChart
               candles={series}
+              unitName={
+                isEn
+                  ? (INTERVALS.find((i) => i.seconds === interval)?.enLabel ?? '1d')
+                  : (INTERVALS.find((i) => i.seconds === interval)?.label ?? '1일')
+              }
               label={(at) => {
                 const when = new Date(at);
                 if (Number.isNaN(when.getTime())) return at;

@@ -196,7 +196,7 @@ export function WeeklyFinancialReceipt({
 
       ctx.font = '14px sans-serif';
       ctx.fillStyle = '#94a3b8';
-      ctx.fillText('본 영수증은 가상 금융 원장(PostgreSQL)에 안전하게 기록된 공인 결산서입니다.', 400, 785);
+      ctx.fillText('본 영수증은 가상 주식 포트폴리오 활동을 요약한 시뮬레이션 결산 리포트입니다.', 400, 785);
       ctx.font = '13px monospace';
       ctx.fillStyle = '#64748b';
       ctx.fillText('https://easy-scraping.com/stocks/portfolio', 400, 815);
@@ -298,8 +298,8 @@ export function WeeklyFinancialReceipt({
           </div>
           <p className="text-[10px] text-muted-foreground">
             <T
-              korean="본 영수증은 가상 금융 원장(PostgreSQL)에 안전하게 기록된 공인 결산서입니다."
-              english="Certified ledger digest backed by Woldeok Moneyverse state engine."
+              korean="본 영수증은 가상 주식 포트폴리오 활동을 요약한 시뮬레이션 결산 리포트입니다."
+              english="Simulated portfolio performance digest for Woldeok Moneyverse."
             />
           </p>
         </div>

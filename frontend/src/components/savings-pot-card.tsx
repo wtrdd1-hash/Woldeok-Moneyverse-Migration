@@ -107,16 +107,19 @@ export function SavingsPotCard({ userBalanceWld = 50000 }: { readonly userBalanc
             <div>
               <div className="flex items-center gap-2">
                 <h2 id="savings-pot-heading" className="text-base font-extrabold text-foreground">
-                  <T korean="중앙은행 스마트 복리 포켓 & 정기예금" english="Central Bank Smart Savings Pots" />
+                  <T korean="중앙은행 스마트 복리 포켓 (모의 체험)" english="Central Bank Smart Savings Pots (Simulated)" />
                 </h2>
+                <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-[10px] font-bold">
+                  모의 시뮬레이션
+                </Badge>
                 <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px] font-bold">
                   APR 12.0% MAX
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
                 <T
-                  korean="원금 100% 안전 보장! 매일 자정에 복리 이자가 쌓이고 만기 시 원리금이 자동 정산됩니다."
-                  english="100% Principal Guaranteed. Daily compound interest credited automatically."
+                  korean="가상 목표 저축 시뮬레이터입니다. 브라우저에서 매일 복리 이자 정산 메커니즘을 체험해 볼 수 있습니다 (실제 계좌 잔액 미차감)."
+                  english="Simulated savings goal calculator. Experience compound interest calculation in your browser (no live balance deduction)."
                 />
               </p>
             </div>

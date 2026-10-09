@@ -200,15 +200,19 @@ export function CurationRetentionFlow({
     });
 
     try {
-      await fetch(`/api/v1/collections/${selectedPiece.id}`, {
+      const res = await fetch(`/api/v1/collections/${selectedPiece.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userNote: trimmed }),
       });
-    } catch {
-        /* ignore */
+      if (res.ok) {
+        alert('소장품 큐레이션 메모가 안전하게 저장되었습니다.');
+      } else {
+        alert('서버 저장에 실패하여 브라우저 로컬에만 임시 보관되었습니다.');
       }
-    alert('소장품 큐레이션 메모가 서버에 안전하게 영속 저장되었습니다.');
+    } catch {
+      alert('네트워크 오류로 브라우저 로컬에만 임시 보관되었습니다.');
+    }
   };
 
   const handleTimelineDayChange = async (day: 'D1' | 'D3' | 'D7') => {
