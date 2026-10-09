@@ -540,7 +540,7 @@ const PROFILES: Record<InvestorType, ProfileResult> = {
         ratio: 20,
         color: '#ec4899',
         bgClass: 'bg-pink-500',
-        href: '/casino',
+        href: '/arcade',
         actionLabel: {
           ko: '아케이드 행운 도전',
           en: 'Spin Lucky Roulette',

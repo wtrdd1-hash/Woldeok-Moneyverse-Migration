@@ -36,7 +36,7 @@ export const ROUTE_KEYWORDS: Readonly<Record<string, readonly string[]>> = {
   '/work': ['일자리', '직업', '알바', '노동', '작업', '잡보드', 'work', 'job', 'jobs'],
   '/businesses': ['사업', '비즈니스', '회사', '창업', '가게', '마이비즈', 'business'],
   '/shop': ['상점', '마켓', '아이템', '쇼핑', '구매', '덕마켓', 'shop', 'market'],
-  '/casino': ['카지노', '도박', '미니게임', '룰렛', '하이로우', '주사위', '슬롯', 'casino', 'lucky'],
+  '/arcade': ['아케이드', '엔터테인먼트', '미니게임', '룰렛', '하이로우', '주사위', '슬롯', '동전', 'arcade', 'lucky', 'game'],
   '/newspaper': ['신문', '뉴스', '경제', '브리프', '기사', 'newspaper', 'news'],
   '/ranking': ['랭킹', '순위', '부자', '서열', '리더보드', 'ranking', 'leaderboard'],
   '/attendance': ['출석', '출석체크', '룰렛', '보너스', 'attendance'],

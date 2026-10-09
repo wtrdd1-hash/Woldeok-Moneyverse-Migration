@@ -148,7 +148,7 @@ export function CoinPlayForm({
         <QuickStakeButtons onAdd={handleQuickAdd} onMax={handleMax} />
         <FieldDescription>
           한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
-          베팅 한도는 {groupDigits(remainingStake)} WLD예요.
+          일일 이용 한도는 {groupDigits(remainingStake)} WLD예요.
         </FieldDescription>
       </Field>
 
@@ -197,26 +197,26 @@ export function SelfLimitForm() {
           <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
           <div className="space-y-1 text-muted-foreground leading-relaxed">
             <p className="font-bold text-foreground flex items-center gap-1.5">
-              <span>책임감 있는 게임(RG) 자가 보호 가이드</span>
+              <span>건전한 게임 이용 자가 보호 가이드</span>
               <span className="rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
                 자율 규제 준수
               </span>
             </p>
             <p className="[word-break:keep-all]">
-              하루 동안 사용할 수 있는 최대 베팅액과 손실 한도를 미리 정해두세요. 설정한 한도에 도달하면
-              자정이 지날 때까지 추가 베팅이 시스템에 의해 안전하게 차단됩니다.
+              하루 동안 플레이할 수 있는 최대 이용액과 손실 한도를 미리 정해두세요. 설정한 한도에 도달하면
+              자정이 지날 때까지 추가 게임 플레이가 시스템에 의해 안전하게 차단됩니다.
             </p>
           </div>
         </div>
       </div>
 
       <FieldGroup className="gap-6 sm:grid-cols-2">
-        {/* 1. 하루 베팅 한도 (토스형 슬라이더 + 직접 입력) */}
+        {/* 1. 하루 이용 한도 (토스형 슬라이더 + 직접 입력) */}
         <div className="rounded-2xl border border-border/80 bg-card/60 p-4 sm:p-5 space-y-3">
           <div className="flex items-center justify-between">
             <FieldLabel htmlFor="casino-bet-limit" className="text-sm font-bold flex items-center gap-1.5">
               <Sliders className="size-3.5 text-primary" />
-              <span>하루 베팅 한도</span>
+              <span>하루 이용 한도</span>
             </FieldLabel>
             <span className="font-mono text-xs font-bold text-primary">
               {betLimitNum === 0 ? '무제한 (0 WLD)' : `${groupDigits(betLimitNum.toString())} WLD`}
@@ -243,7 +243,7 @@ export function SelfLimitForm() {
               value={Math.min(2000, isNaN(betLimitNum) ? 0 : betLimitNum)}
               onChange={(e) => setBetLimit(e.target.value)}
               className="w-full h-2 rounded-lg bg-muted accent-primary cursor-pointer"
-              aria-label="하루 베팅 한도 슬라이더"
+              aria-label="하루 이용 한도 슬라이더"
             />
             <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
               <span>0 (무제한)</span>
@@ -369,7 +369,7 @@ export function SelfLimitForm() {
               <span>플레이 잠금 (자가 제외 장치)</span>
             </FieldLabel>
             <FieldDescription className="text-xs text-muted-foreground mt-0.5">
-              잠금을 설정하면 지정 기간 동안 카지노 플레이가 차단되며 한도도 다시 완화할 수 없습니다.
+              잠금을 설정하면 지정 기간 동안 아케이드 게임 플레이가 차단되며 한도도 다시 완화할 수 없습니다.
             </FieldDescription>
           </div>
 
@@ -404,7 +404,7 @@ export function SelfLimitForm() {
             <div>
               <p className="font-bold">24시간 플레이 잠금이 선택되었습니다.</p>
               <p className="mt-0.5 leading-relaxed [word-break:keep-all]">
-                아래 [한도 저장] 버튼을 누르면 즉시 24시간 동안 카지노 입장이 차단되며, 
+                아래 [한도 저장] 버튼을 누르면 즉시 24시간 동안 아케이드 게임 입장이 차단되며, 
                 관리자도 이를 조기 해제할 수 없습니다. 계속 진행하시려면 저장하세요.
               </p>
             </div>
@@ -510,7 +510,7 @@ export function DiceParityForm({
         <QuickStakeButtons onAdd={handleQuickAdd} onMax={handleMax} />
         <FieldDescription>
           한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
-          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께
+          일일 이용 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께
           씁니다.
         </FieldDescription>
       </Field>
@@ -588,7 +588,7 @@ export function DiceNumberForm({
         <QuickStakeButtons onAdd={handleQuickAdd} onMax={handleMax} />
         <FieldDescription>
           한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
-          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께
+          일일 이용 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께
           씁니다.
         </FieldDescription>
       </Field>

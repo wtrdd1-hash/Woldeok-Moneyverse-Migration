@@ -293,7 +293,7 @@ export function LuckySlotsGame({
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
               <ShieldCheck className="size-3.5 text-emerald-500" />
-              정규 베팅 가동 중 · 19+ 청소년 보호 및 공정성 검증 준수
+              아케이드 챌린지 가동 중 · 건전 오락 이용자 보호 및 공정성 검증 완료
             </Badge>
           </div>
         </div>
@@ -316,7 +316,7 @@ export function LuckySlotsGame({
             }`}
           >
             <Coins className="size-4" />
-            <span>WLD 실베팅 모드</span>
+            <span>WLD 챌린지 모드</span>
           </button>
           <button
             type="button"
@@ -328,7 +328,7 @@ export function LuckySlotsGame({
             }`}
           >
             <Play className="size-4" />
-            <span>0 WLD 무료 체험 모드</span>
+            <span>0 WLD 연습 플레이 모드</span>
           </button>
         </div>
 
@@ -360,12 +360,12 @@ export function LuckySlotsGame({
             {playMode === 'real' ? (
               <>
                 <Flame className="size-3.5 text-amber-500" />
-                <span className="text-amber-500 font-semibold">실제 WLD 정규 베팅 모드 가동 중</span>
+                <span className="text-amber-500 font-semibold">WLD 아케이드 챌린지 모드 가동 중</span>
               </>
             ) : (
               <>
                 <ShieldCheck className="size-3.5 text-emerald-500" />
-                <span>데모 스핀 안전 모드 · 실제 잔액 차감 없음 (0 WLD)</span>
+                <span>연습 스핀 안전 모드 · 실제 잔액 차감 없음 (0 WLD)</span>
               </>
             )}
           </div>
@@ -425,10 +425,10 @@ export function LuckySlotsGame({
             <div className="grid gap-2">
               <div className="flex items-center justify-between text-xs">
                 <Label htmlFor="slots-stake" className="font-semibold text-sm">
-                  베팅 금액 (WLD)
+                  도전 금액 (WLD)
                 </Label>
                 <span className="text-muted-foreground">
-                  베팅 가능: {groupDigits(minStake)} ~ {groupDigits(maxPlayable)} WLD
+                  도전 가능: {groupDigits(minStake)} ~ {groupDigits(maxPlayable)} WLD
                 </span>
               </div>
               <div className="relative">
@@ -441,14 +441,14 @@ export function LuckySlotsGame({
                   onChange={(e) => setStake(e.target.value.replace(/[^0-9]/g, ''))}
                   disabled={isBusy || exhausted}
                   className="h-12 font-mono text-base font-bold pr-14"
-                  placeholder="베팅할 WLD 수량"
+                  placeholder="도전할 WLD 수량"
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
                   WLD
                 </span>
               </div>
 
-              {/* 퀵 베팅 프리셋 버튼 그리드 */}
+              {/* 퀵 프리셋 버튼 그리드 */}
               <div className="grid grid-cols-5 gap-1.5 pt-1">
                 {[1000, 5000, 10000, 50000].map((amt) => (
                   <Button
@@ -476,7 +476,7 @@ export function LuckySlotsGame({
               </div>
             </div>
 
-            {/* 실베팅 스핀 가동 버튼 */}
+            {/* 챌린지 스핀 가동 버튼 */}
             <div className="grid gap-3 sm:grid-cols-2">
               <Button
                 type="submit"
@@ -489,11 +489,11 @@ export function LuckySlotsGame({
                     <span>슬롯 릴 회전 중…</span>
                   </>
                 ) : exhausted ? (
-                  <span>오늘 베팅 한도 소진</span>
+                  <span>오늘 이용 한도 소진</span>
                 ) : (
                   <>
                     <Coins className="size-4" />
-                    <span>{groupDigits(stake || '0')} WLD 실베팅 스핀</span>
+                    <span>{groupDigits(stake || '0')} WLD 챌린지 스핀</span>
                   </>
                 )}
               </Button>
@@ -550,7 +550,7 @@ export function LuckySlotsGame({
             <div className="space-y-1">
               <p className="font-bold text-foreground">실시간 분산 원장 연동 · 자가 책임 한도 보호</p>
               <p className="leading-relaxed [word-break:keep-all]">
-                정규 베팅 한도({groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD) 및 잔여 한도({groupDigits(remainingStake)} WLD)가
+                정규 이용 한도({groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD) 및 잔여 한도({groupDigits(remainingStake)} WLD)가
                 실시간 적용되며, 자가 한도 설정 및 일일 손실 한도 규정에 따라 안전하게 보호됩니다.
               </p>
             </div>
@@ -558,16 +558,16 @@ export function LuckySlotsGame({
         </div>
       </CardContent>
 
-      {/* 규제 심의 및 배당률 공시 모달 다이얼로그 */}
+      {/* 규제 심의 및 배율 공시 모달 다이얼로그 */}
       <Dialog open={isAuditDialogOpen} onOpenChange={setIsAuditDialogOpen}>
         <DialogContent className="max-w-md sm:max-w-lg rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg font-bold">
               <Scale className="size-5 text-amber-500" />
-              <span>슬롯머신 배당률 및 RNG 공정성 공시 명세</span>
+              <span>아케이드 슬롯 배율 및 RNG 공정성 공시 명세</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              머니버스 사행성 방지 및 청소년 보호 규격 준수 현황 보고서
+              머니버스 건전 게임 및 이용자 보호 규격 준수 현황 보고서
             </DialogDescription>
           </DialogHeader>
 
@@ -584,15 +584,15 @@ export function LuckySlotsGame({
                 </Badge>
               </div>
               <p className="text-muted-foreground leading-relaxed [word-break:keep-all]">
-                본 게임은 19+ 청소년 보호 규정 및 암호화 RNG 무결성 검증을 통과하여 정규 실베팅 서비스가 가동 중입니다.
+                본 게임은 건전 오락 이용자 보호 및 암호화 RNG 무결성 검증을 완료한 가상 미니게임 서비스입니다.
                 모든 거래는 복식부기 분산 원장에 실시간 기록됩니다.
               </p>
             </div>
 
-            {/* 2. 기호별 배당률 공시 테이블 */}
+            {/* 2. 기호별 배율 공시 테이블 */}
             <div className="space-y-2">
               <div className="font-bold text-foreground flex items-center justify-between">
-                <span>기호별 일치 배당률 공시 (RTP: {winProbability}%)</span>
+                <span>기호별 일치 배율 공시 (RTP: {winProbability}%)</span>
                 <span className="font-mono text-amber-500 font-extrabold">최대 {payoutMultiplier}배</span>
               </div>
               <div className="overflow-hidden rounded-xl border border-border/80">
@@ -601,7 +601,7 @@ export function LuckySlotsGame({
                     <tr>
                       <th className="p-2.5">기호</th>
                       <th className="p-2.5">명칭</th>
-                      <th className="p-2.5 text-right">3개 일치 배당</th>
+                      <th className="p-2.5 text-right">3개 일치 배율</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">
@@ -626,7 +626,7 @@ export function LuckySlotsGame({
                 <span>자가 진단 및 플레이 제한 기능 안내</span>
               </p>
               <p className="leading-relaxed [word-break:keep-all]">
-                카지노 로비 상단의 [자가 한도 설정]에서 일일 베팅/손실 한도 및 24시간 타임락(Time Lock)을 언제든지 설정하여 과몰입을 방지할 수 있습니다.
+                아케이드 로비 상단의 [자가 한도 설정]에서 일일 이용/손실 한도 및 24시간 휴식 타임락(Time Lock)을 언제든지 설정하여 과몰입을 방지할 수 있습니다.
               </p>
             </div>
           </div>

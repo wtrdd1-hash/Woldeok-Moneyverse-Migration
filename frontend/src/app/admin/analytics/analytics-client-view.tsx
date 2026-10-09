@@ -217,7 +217,7 @@ export function AnalyticsClientView({
     { id: 'wallet', name: '지갑 & 자산 원장', latency: 8, rate: '100.0%', status: '정상' },
     { id: 'bank', name: '가상 은행 & 예금', latency: 9, rate: '100.0%', status: '정상' },
     { id: 'stocks', name: '가상 주식 거래소', latency: 14, rate: '100.0%', status: '정상' },
-    { id: 'casino', name: '카지노 & 게임 규제', latency: 16, rate: '100.0%', status: '정상' },
+    { id: 'casino', name: '아케이드 & 엔터테인먼트', latency: 16, rate: '100.0%', status: '정상' },
     { id: 'shop', name: '상점 & 소모품', latency: 11, rate: '100.0%', status: '정상' },
     { id: 'work', name: '직업 & 퀘스트 파밍', latency: 10, rate: '100.0%', status: '정상' },
     { id: 'clubs', name: '클럽 & 커뮤니티', latency: 13, rate: '100.0%', status: '정상' },
@@ -906,7 +906,7 @@ export function AnalyticsClientView({
                   { path: '/stocks', title: '가상 주식 거래소', views: '0', ratio: '0%' },
                   { path: '/bank', title: '가상 은행 & 복리 예금', views: '0', ratio: '0%' },
                   { path: '/guide/stock-trading', title: '주식 매매 가이드', views: '0', ratio: '0%' },
-                  { path: '/casino', title: '카지노 & 미니게임', views: '0', ratio: '0%' },
+                  { path: '/arcade', title: '아케이드 & 미니게임', views: '0', ratio: '0%' },
                 ].map((p, idx) => (
                   <div key={p.path} className="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/70 text-xs">
                     <div className="flex items-center gap-2 truncate">

@@ -46,7 +46,7 @@ export function CasinoClock({
               서버 {Number(dayIndex) + 1}일 · {Number(weekIndex) + 1}주차 {dayOfWeek}일차
             </p>
             <p className="mt-1 text-sm text-white/70">
-              서버 {gameDaysPerWeek}일이 한 주입니다. 작업·상점의 일/주 제한은 이 서버 시간을 기준으로 계산됩니다. 카지노 보호 한도와 자가제외는 현실 시간을 유지합니다.
+              서버 {gameDaysPerWeek}일이 한 주입니다. 작업·상점의 일/주 제한은 이 서버 시간을 기준으로 계산됩니다. 아케이드 보호 한도와 자가 제외는 현실 시간을 유지합니다.
             </p>
           </div>
         </div>

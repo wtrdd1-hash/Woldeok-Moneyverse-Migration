@@ -36,8 +36,8 @@ export default async function AdminApiHealthPage() {
       >
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           {isEn
-            ? 'Authoritative real-time telemetry across all 14 active domains, Cloudflare R2 automated backups, and 300+ REST API endpoints. Casino endpoints completely decommissioned.'
-            : '사행성 카지노 API가 완전 폐기된 14대 핵심 도메인 300여 개 엔드포인트의 실시간 응답 지연(Latency), 시스템 부하 및 Cloudflare R2 무료 자동 백업 재해 복구 관제입니다.'}
+            ? 'Authoritative real-time telemetry across all 14 active domains, Cloudflare R2 automated backups, and 300+ REST API endpoints verified for healthy entertainment standards.'
+            : '건전한 엔터테인먼트 아케이드 및 14대 핵심 도메인 300여 개 엔드포인트의 실시간 응답 지연(Latency), 시스템 부하 및 Cloudflare R2 무료 자동 백업 재해 복구 관제입니다.'}
         </p>
       </PageHeader>
 

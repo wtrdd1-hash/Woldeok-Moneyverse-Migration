@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function CasinoLoading() {
   return (
-    <div className="grid gap-6" aria-busy="true" aria-label="Loading casino / 카지노 불러오는 중">
+    <div className="grid gap-6" aria-busy="true" aria-label="Loading arcade / 아케이드 불러오는 중">
       <div className="grid gap-3">
         <Skeleton className="h-4 w-28" />
         <Skeleton className="h-10 w-full max-w-md" />

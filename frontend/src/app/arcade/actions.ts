@@ -79,6 +79,7 @@ export async function playCoin(
     const receipt = await mutate<PlayReceipt>('/api/v1/casino/coin/plays', {
       body: { choice, stake, idempotencyKey: idempotencyKey() },
     });
+    revalidatePath('/arcade');
     revalidatePath('/casino');
 
     // Every figure in the sentence is the one the database returned. The
@@ -93,14 +94,14 @@ export async function playCoin(
     const result = resultOf(netAmount);
     const outcome =
       result === 'win'
-        ? `${face}이 나왔어요. ${amount} WLD를 얻었어요.`
+        ? `${face}이 나왔어요. ${amount} WLD를 획득했어요.`
         : result === 'loss'
-          ? `${face}이 나왔어요. ${amount} WLD를 잃었어요.`
+          ? `${face}이 나왔어요. ${amount} WLD를 소모했어요.`
           : `${face}이 나왔어요.`;
 
     return {
       status: 'ok',
-      message: receipt.replayed ? `이미 처리된 판이에요. ${outcome}` : outcome,
+      message: receipt.replayed ? `이미 처리된 참여예요. ${outcome}` : outcome,
       tone: resultTone(result),
       result,
       netAmount,
@@ -110,7 +111,7 @@ export async function playCoin(
   } catch (error) {
     return closedOr(
       error,
-      '이번 판은 받아들여지지 않았어요. 잔액과 오늘 남은 한도, 내가 건 잠금을 다시 확인해 주세요.',
+      '이번 도전은 정상 처리되지 않았어요. 보유 잔액과 오늘 남은 일일 이용 한도, 설정된 과열방지 잠금을 확인해 주세요.',
     );
   }
 }
@@ -137,10 +138,10 @@ export async function setSelfLimit(
   const lock = String(formData.get('lock') ?? 'none');
 
   if (dailyBetLimit === null) {
-    return { status: 'error', message: '하루 베팅 한도는 0 이상 정수로 입력해 주세요.' };
+    return { status: 'error', message: '하루 이용 한도는 0 이상 정수로 입력해 주세요.' };
   }
   if (dailyLossLimit === null) {
-    return { status: 'error', message: '하루 손실 한도는 0 이상 정수로 입력해 주세요.' };
+    return { status: 'error', message: '하루 손실 보호 한도는 0 이상 정수로 입력해 주세요.' };
   }
   if (!isLockChoice(lock)) {
     return { status: 'error', message: '잠금 기간을 다시 선택해 주세요.' };
@@ -157,15 +158,16 @@ export async function setSelfLimit(
         ...(lockedUntil === null ? {} : { lockedUntil }),
       },
     });
+    revalidatePath('/arcade');
     revalidatePath('/casino');
 
     const stored =
-      `하루 베팅 한도 ${groupDigits(receipt.daily_bet_limit)} WLD, ` +
-      `하루 손실 한도 ${groupDigits(receipt.daily_loss_limit)} WLD로 저장했어요.`;
+      `하루 이용 한도 ${groupDigits(receipt.daily_bet_limit)} WLD, ` +
+      `하루 손실 보호 한도 ${groupDigits(receipt.daily_loss_limit)} WLD로 저장했어요.`;
     return {
       status: 'ok',
       message: receipt.locked_until
-        ? `${stored} 잠금이 풀릴 때까지 카지노 플레이와 한도 변경이 모두 차단돼요.`
+        ? `${stored} 잠금이 풀릴 때까지 아케이드 플레이와 한도 변경이 모두 차단돼요.`
         : stored,
     };
   } catch (error) {
@@ -173,7 +175,7 @@ export async function setSelfLimit(
     // refuses to loosen a locked limit, which is the entire point of it.
     return closedOr(
       error,
-      '한도를 바꾸지 못했어요. 이미 걸어 둔 잠금이 아직 풀리지 않았을 수 있어요.',
+      '한도를 변경하지 못했어요. 이미 설정한 과열방지 잠금이 아직 유지 중일 수 있어요.',
     );
   }
 }
@@ -207,13 +209,14 @@ async function rollDie(
     return { status: 'error', message: choiceHelp };
   }
   if (stake === null) {
-    return { status: 'error', message: '1 WLD 이상 정수만 걸 수 있어요.' };
+    return { status: 'error', message: '1 WLD 이상 정수 단위로 참여할 수 있어요.' };
   }
 
   try {
     const receipt = await mutate<DiceReceipt>('/api/v1/casino/dice/plays', {
       body: { game, choice, stake, idempotencyKey: idempotencyKey() },
     });
+    revalidatePath('/arcade');
     revalidatePath('/casino');
 
     // Every figure comes from the database's receipt. The stake that was sent
@@ -227,9 +230,9 @@ async function rollDie(
     const result = resultOf(netAmount);
     const outcome =
       result === 'win'
-        ? `주사위는 ${face}이 나왔어요. ${amount} WLD를 얻었어요.`
+        ? `주사위는 ${face}이 나왔어요. ${amount} WLD를 획득했어요.`
         : result === 'loss'
-          ? `주사위는 ${face}이 나왔어요. ${amount} WLD를 잃었어요.`
+          ? `주사위는 ${face}이 나왔어요. ${amount} WLD를 소모했어요.`
           : `주사위는 ${face}이 나왔어요.`;
 
     const outcomeFace =
@@ -240,7 +243,7 @@ async function rollDie(
         : null;
     return {
       status: 'ok',
-      message: receipt.replayed ? `이미 처리된 판이에요. ${outcome}` : outcome,
+      message: receipt.replayed ? `이미 처리된 참여예요. ${outcome}` : outcome,
       tone: resultTone(result),
       result,
       netAmount,
@@ -250,7 +253,7 @@ async function rollDie(
   } catch (error) {
     return closedOr(
       error,
-      '이번 판은 받아들여지지 않았어요. 잔액과 오늘 남은 한도, 내가 건 잠금을 다시 확인해 주세요.',
+      '이번 도전은 정상 처리되지 않았어요. 보유 잔액과 오늘 남은 일일 이용 한도, 설정된 과열방지 잠금을 확인해 주세요.',
     );
   }
 }
@@ -291,13 +294,14 @@ export async function playThemeGame(
     return { status: 'error', message: choiceHelp };
   }
   if (stake === null) {
-    return { status: 'error', message: '1 WLD 이상 정수만 걸 수 있어요.' };
+    return { status: 'error', message: '1 WLD 이상 정수 단위로 참여할 수 있어요.' };
   }
 
   try {
     const receipt = await mutate<ThemeReceipt>('/api/v1/casino/theme/plays', {
       body: { game, choice, stake, idempotencyKey: idempotencyKey() },
     });
+    revalidatePath('/arcade');
     revalidatePath('/casino');
 
     const netAmount = canonicalIntegerString(receipt.net_amount);
@@ -308,14 +312,14 @@ export async function playThemeGame(
     const detail = formatOutcome(receipt.outcome);
     const outcome =
       result === 'win'
-        ? `${detail}. ${amount} WLD를 얻었어요.`
+        ? `${detail}. ${amount} WLD를 획득했어요.`
         : result === 'loss'
-          ? `${detail}. ${amount} WLD를 잃었어요.`
+          ? `${detail}. ${amount} WLD를 소모했어요.`
           : detail;
 
     return {
       status: 'ok',
-      message: receipt.replayed ? `이미 처리된 판이에요. ${outcome}` : outcome,
+      message: receipt.replayed ? `이미 처리된 참여예요. ${outcome}` : outcome,
       tone: resultTone(result),
       result,
       netAmount,
@@ -325,7 +329,7 @@ export async function playThemeGame(
   } catch (error) {
     return closedOr(
       error,
-      '이번 판은 받아들여지지 않았어요. 잔액과 오늘 남은 한도, 내가 건 잠금을 다시 확인해 주세요.',
+      '이번 도전은 정상 처리되지 않았어요. 보유 잔액과 오늘 남은 일일 이용 한도, 설정된 과열방지 잠금을 확인해 주세요.',
     );
   }
 }
@@ -425,13 +429,14 @@ export async function playSlots(
     return { status: 'error', message: '슬롯 잭팟 기호를 선택해 주세요.' };
   }
   if (stake === null) {
-    return { status: 'error', message: '1 WLD 이상 정수만 걸 수 있어요.' };
+    return { status: 'error', message: '1 WLD 이상 정수 단위로 참여할 수 있어요.' };
   }
 
   try {
     const receipt = await mutate<DiceReceipt>('/api/v1/casino/dice/plays', {
       body: { game: 'dice_number', choice, stake, idempotencyKey: idempotencyKey() },
     });
+    revalidatePath('/arcade');
     revalidatePath('/casino');
 
     const outcomeFace =
@@ -453,12 +458,12 @@ export async function playSlots(
       result === 'win'
         ? `슬롯 릴 정지: [${symDesc}] 적중! ${amount} WLD를 획득했어요!`
         : result === 'loss'
-          ? `슬롯 릴 정지: [${symDesc}] 불일치. ${amount} WLD를 잃었어요.`
+          ? `슬롯 릴 정지: [${symDesc}] 불일치. ${amount} WLD를 소모했어요.`
           : `슬롯 릴 정지: [${symDesc}]`;
 
     return {
       status: 'ok',
-      message: receipt.replayed ? `이미 처리된 스핀이에요. ${outcome}` : outcome,
+      message: receipt.replayed ? `이미 처리된 도전이에요. ${outcome}` : outcome,
       tone: resultTone(result),
       result,
       netAmount,
@@ -468,7 +473,7 @@ export async function playSlots(
   } catch (error) {
     return closedOr(
       error,
-      '이번 스핀은 처리되지 않았어요. 잔액과 오늘 남은 한도, 내가 건 잠금을 다시 확인해 주세요.',
+      '이번 챌린지는 처리되지 않았어요. 보유 잔액과 오늘 남은 일일 이용 한도, 설정된 과열방지 잠금을 확인해 주세요.',
     );
   }
 }

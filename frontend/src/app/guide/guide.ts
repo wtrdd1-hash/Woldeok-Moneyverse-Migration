@@ -313,9 +313,9 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     link: { href: '/shop', label: '아이템 상점 가기', labelEn: 'Go to Item Shop' },
   },
   {
-    id: 'casino',
-    badgeKo: '카지노 & 미니게임',
-    badgeEn: 'Casino & Mini-games',
+    id: 'arcade',
+    badgeKo: '아케이드 & 미니게임',
+    badgeEn: 'Arcade & Mini-games',
     titleKo: '가상 미니게임 엔터테인먼트',
     titleEn: 'Virtual Mini-Game Entertainment',
     descKo:
@@ -325,14 +325,14 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     featuresKo: [
       '3개 서버 게임 규칙과 5개 테마형 화면의 확률·배당 공개',
       '서버 트랜잭션으로 결과 생성과 WLD 정산',
-      '사용자가 직접 선택하는 일일 베팅 및 손실 자가 한도',
+      '사용자가 직접 선택하는 일일 참여 및 손실 자가 한도',
     ],
     featuresEn: [
       'Published odds and payouts for three server rules and five themed interfaces',
       'Server-transaction result generation and WLD settlement',
       'Optional member-controlled daily stake and loss limits',
     ],
-    link: { href: '/casino', label: '카지노 게임장 가기', labelEn: 'Visit Casino' },
+    link: { href: '/arcade', label: '아케이드 플레이존 가기', labelEn: 'Visit Arcade' },
   },
 ];
 
@@ -587,13 +587,13 @@ export const GUIDE_FAQS: readonly GuideFaq[] = [
     link: { href: '/terms', label: '이용 기준 확인하기', labelEn: 'Review Terms of Service' },
   },
   {
-    question: '카지노 미니게임의 공정성과 한도는 어떻게 되나요?',
-    questionEn: 'How are casino game fairness and limits ensured?',
+    question: '아케이드 미니게임의 공정성과 한도는 어떻게 되나요?',
+    questionEn: 'How are arcade game fairness and limits ensured?',
     answer:
-      '카지노(/casino)는 동전·주사위 기반 서버 규칙과 여러 테마 화면을 제공합니다. 결과 생성과 WLD 정산은 서버 트랜잭션에서 처리되며, 시스템 일일 상한 대신 사용자가 선택한 자가 한도만 적용됩니다.',
+      '아케이드(/arcade)는 동전·주사위 기반 서버 규칙과 여러 테마 화면을 제공합니다. 결과 생성과 WLD 정산은 서버 트랜잭션에서 처리되며, 시스템 일일 상한 대신 사용자가 선택한 자가 한도만 적용됩니다.',
     answerEn:
-      'The casino provides server-settled coin and dice rules through several themed interfaces. Results and WLD settlement run in server transactions, with only member-selected self-limits and no platform daily cap.',
-    link: { href: '/casino', label: '카지노 둘러보기', labelEn: 'Visit Casino' },
+      'The arcade provides server-settled coin and dice rules through several themed interfaces. Results and WLD settlement run in server transactions, with only member-selected self-limits and no platform daily cap.',
+    link: { href: '/arcade', label: '아케이드 둘러보기', labelEn: 'Visit Arcade' },
   },
   {
     question: '처음 참여하려면 무엇이 필요한가요?',

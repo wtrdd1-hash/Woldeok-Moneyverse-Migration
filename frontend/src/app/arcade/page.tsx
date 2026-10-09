@@ -302,7 +302,7 @@ export default async function CasinoPage() {
           }
         >
           <TranslatedText
-            korean="게임 머니(WLD)로 가볍게 즐기는 미니게임 라운지입니다. 무리한 베팅 없이 가볍게 즐겨보세요."
+            korean="게임 머니(WLD)로 가볍게 즐기는 미니게임 라운지입니다. 무리한 플레이 없이 가볍게 즐겨보세요."
             english="A virtual mini-game lounge using in-game WLD. Enjoy casually and responsibly."
           />
         </PageHeader>
@@ -322,7 +322,7 @@ export default async function CasinoPage() {
         </AlertTitle>
         <AlertDescription className="text-xs leading-relaxed text-amber-200/90 mt-1">
           <TranslatedText
-            korean="본 공간의 모든 미니게임은 월덕 머니버스 커뮤니티 전용 폐쇄형 가상 포인트(WLD)로만 구동되며, 어떠한 경우에도 현금, 암호화폐, 실물 재화로의 환전·환급·거래가 일체 불가합니다(게임산업진흥에 관한 법률 제28조 및 제32조 엄격 준수). 건전한 커뮤니티 활동을 위해 일일 베팅 및 손실 한도를 자율적으로 설정하실 수 있습니다."
+            korean="본 공간의 모든 미니게임은 월덕 머니버스 커뮤니티 전용 폐쇄형 가상 포인트(WLD)로만 구동되며, 어떠한 경우에도 현금, 암호화폐, 실물 재화로의 환전·환급·거래가 일체 불가합니다(게임산업진흥에 관한 법률 제28조 및 제32조 엄격 준수). 건전한 커뮤니티 활동을 위해 일일 이용 및 손실 한도를 자율적으로 설정하실 수 있습니다."
             english="All games in this lounge operate strictly with in-game closed virtual points (WLD) and can NEVER be exchanged, refunded, or traded for cash, cryptocurrency, or real-world goods under any circumstances (Strict compliance with Game Industry Promotion Act Art. 28 & 32). Players may set self-exclusion and daily loss limits for healthy participation."
           />
         </AlertDescription>
@@ -380,7 +380,7 @@ export default async function CasinoPage() {
         </AlertTitle>
         <AlertDescription>
           <TranslatedText
-            korean="플랫폼은 한 판과 하루 이용량에 기본 상한을 두고 있습니다. 원한다면 더 낮은 나만의 베팅·손실 한도를 설정할 수 있으며 모든 결과는 서버에서 정산됩니다."
+            korean="플랫폼은 한 판과 하루 이용량에 기본 상한을 두고 있습니다. 원한다면 더 낮은 나만의 참여·손실 한도를 설정할 수 있으며 모든 결과는 서버에서 정산됩니다."
             english="The platform applies per-play and daily caps. You can opt into stricter personal stake and loss limits; every result is settled by the server."
           />
         </AlertDescription>
@@ -390,7 +390,7 @@ export default async function CasinoPage() {
         <Alert>
           <AlertTitle>자가 제외가 적용 중입니다.</AlertTitle>
           <AlertDescription>
-            {formatMoment(selfLimit.locked_until, '설정한 잠금 시각')}까지 카지노 플레이와 한도 변경이
+            {formatMoment(selfLimit.locked_until, '설정한 잠금 시각')}까지 아케이드 플레이와 한도 변경이
             모두 차단됩니다.
           </AlertDescription>
         </Alert>
@@ -422,13 +422,13 @@ export default async function CasinoPage() {
             </CardHeader>
             <CardContent>
               <dl className="grid gap-2 text-sm sm:grid-cols-3 sm:gap-x-6">
-                <Fact term={<T korean="내 베팅 한도" english="My Stake Limit" />}>
+                <Fact term={<T korean="내 이용 한도" english="My Play Limit" />}>
                   {limitLabel(selfLimit?.daily_bet_limit)}
                 </Fact>
-                <Fact term={<T korean="오늘 건 금액" english="Today Stake Used" />}>
+                <Fact term={<T korean="오늘 이용 금액" english="Today Play Used" />}>
                   {groupDigits(open.daily_stake_used)} WLD
                 </Fact>
-                <Fact term={<T korean="남은 베팅 한도" english="Remaining Stake" />}>
+                <Fact term={<T korean="남은 이용 한도" english="Remaining Play Limit" />}>
                   {remainingLabel(userStakeRemaining)}
                 </Fact>
                 <Fact term={<T korean="내 손실 한도" english="My Loss Limit" />}>
@@ -755,7 +755,7 @@ export default async function CasinoPage() {
                     <TableHead>시각</TableHead>
                     <TableHead>게임</TableHead>
                     <TableHead>선택 → 서버 결과</TableHead>
-                    <TableHead className="text-right">베팅</TableHead>
+                    <TableHead className="text-right">도전</TableHead>
                     <TableHead className="text-right">정산</TableHead>
                   </TableRow>
                 </TableHeader>

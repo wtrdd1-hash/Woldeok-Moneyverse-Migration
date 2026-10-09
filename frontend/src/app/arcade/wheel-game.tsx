@@ -335,10 +335,10 @@ export function WheelGame({
             </div>
           </div>
 
-          {/* 2. 베팅 금액 입력 및 퀵 프리셋 버튼 */}
+          {/* 2. 도전 금액 입력 및 퀵 프리셋 버튼 */}
           <div className="grid gap-2">
             <div className="flex items-center justify-between text-xs font-bold">
-              <Label htmlFor="wheel-stake" className="text-foreground">베팅 WLD 금액</Label>
+              <Label htmlFor="wheel-stake" className="text-foreground">도전 WLD 금액</Label>
               <span className="text-muted-foreground font-mono">
                 잔여 한도: {groupDigits(maxPlayable.toString())} WLD
               </span>

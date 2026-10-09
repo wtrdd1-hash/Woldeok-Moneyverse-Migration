@@ -222,14 +222,14 @@ export function HiLoCardGame({
           </Button>
         </div>
 
-        {/* 베팅 폼 인터페이스 */}
+        {/* 게임 참여 폼 인터페이스 */}
         <form action={formAction} className="grid gap-5">
           <input type="hidden" name="choice" value={choice} />
 
           <div className="grid gap-2">
             <div className="flex items-center justify-between text-xs">
               <Label htmlFor="hilo-stake" className="font-semibold text-sm">
-                베팅할 WLD 수량
+                도전할 WLD 수량
               </Label>
               <span className="text-muted-foreground">
                 한도: {groupDigits(minStake)} ~ {groupDigits(maxPlayable)} WLD
@@ -245,14 +245,14 @@ export function HiLoCardGame({
                 onChange={(e) => setStake(e.target.value.replace(/[^0-9]/g, ''))}
                 disabled={pending || isFlipping || exhausted}
                 className="h-12 font-mono text-base font-bold pr-14"
-                placeholder="베팅할 WLD 수량"
+                placeholder="도전할 WLD 수량"
               />
               <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
                 WLD
               </span>
             </div>
 
-            {/* 퀵 베팅 프리셋 버튼 */}
+            {/* 퀵 프리셋 버튼 */}
             <div className="grid grid-cols-5 gap-1.5 pt-1">
               {[1000, 5000, 10000, 50000].map((amt) => (
                 <Button
@@ -291,12 +291,12 @@ export function HiLoCardGame({
                 <span>카드 오픈 중…</span>
               </>
             ) : exhausted ? (
-              <span>오늘 베팅 한도 소진</span>
+              <span>오늘 이용 한도 소진</span>
             ) : (
               <>
                 <Coins className="size-4" />
                 <span>
-                  {groupDigits(stake || '0')} WLD로 {choice === 'high' ? 'High' : 'Low'} 베팅
+                  {groupDigits(stake || '0')} WLD로 {choice === 'high' ? 'High' : 'Low'} 도전
                 </span>
               </>
             )}

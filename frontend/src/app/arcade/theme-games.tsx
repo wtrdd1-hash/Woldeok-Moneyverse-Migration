@@ -165,7 +165,7 @@ export function ThemeGameCard({
 
           <div className="grid gap-2">
             <Label htmlFor={`${game}-stake`} className="font-semibold text-sm">
-              베팅할 WLD 금액
+              도전할 WLD 금액
             </Label>
             <div className="relative">
               <Input
@@ -193,7 +193,7 @@ export function ThemeGameCard({
             disabled={pending || exhausted}
             className="h-12 w-full text-base font-bold rounded-xl"
           >
-            {pending ? '서버에서 결과 확인 중…' : exhausted ? '현재 한도로 플레이 불가' : `${theme.icon} 베팅 확정`}
+            {pending ? '서버에서 결과 확인 중…' : exhausted ? '현재 한도로 플레이 불가' : `${theme.icon} 게임 참여 확정`}
           </Button>
 
           {resultText && (

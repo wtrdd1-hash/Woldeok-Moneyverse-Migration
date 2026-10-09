@@ -77,11 +77,11 @@ export const TRANSLATIONS: TranslationDictionary = {
   'stocks.discussions': { ko: '종목 실시간 토론방', en: 'Stock Discussions', ja: '銘柄別ディスカッション', zh: '股票实时讨论区' },
   'stocks.price_alert': { ko: '목표가 도달 알림', en: 'Price Target Alert', ja: '目標株価通知', zh: '目标价提醒' },
 
-  // Casino & Responsible Gaming
-  'casino.title': { ko: '엔터테인먼트 카지노 & 책임도박', en: 'Entertainment Casino', ja: 'エンタメカジノ・責任あるプレイ', zh: '娱乐场与理性娱乐' },
+  // Entertainment Arcade & Responsible Fair Play
+  'casino.title': { ko: '엔터테인먼트 아케이드 & 건전 플레이', en: 'Entertainment Arcade & Fair Play', ja: 'エンターテインメント・アーケード＆フェアプレイ', zh: '娱乐街机与健康游戏' },
   'casino.desc': { ko: '암호학적 SHA-256 공정성(Provably Fair)이 보증된 미니게임을 안전한 자가 한도 안에서 즐기세요.', en: 'Enjoy cryptographic Provably Fair (SHA-256) minigames within your responsible self-limits.', ja: '暗号学的SHA-256公正性(Provably Fair)が保証されたミニゲームを自己制限内でお楽しみください。', zh: '在设定的理性限额内体验受密码学SHA-256公正性保证的益智迷你游戏。' },
   'casino.provably_fair': { ko: '공정성 검증 (Provably Fair)', en: 'Verify Provably Fair', ja: '公正性の検証 (Provably Fair)', zh: '公正性验证 (Provably Fair)' },
-  'casino.self_limit': { ko: '책임도박 자가 한도 설정', en: 'Responsible Gaming Limits', ja: '自己制限設定', zh: '理性娱乐限额设定' },
+  'casino.self_limit': { ko: '건전 이용 자가 과열방지 한도', en: 'Responsible Gaming Limits', ja: '自己制限設定', zh: '理性娱乐限额设定' },
 
   // Forum & Media & Spaces & Clubs & Seasons & Progression & Shop & Support & Privacy
   'board.title': { ko: '커뮤니티 광장', en: 'Community Forum', ja: 'コミュニティ広場', zh: '社区广场' },

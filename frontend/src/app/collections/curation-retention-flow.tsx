@@ -60,13 +60,13 @@ const DEFAULT_PIECES: CollectionPiece[] = [
   },
   {
     id: 'piece-3',
-    code: 'NEO_CYBER_CASINO_CHIP',
-    name: '월덕 카지노 리미티드 칩',
-    category: 'CASINO',
+    code: 'NEO_CYBER_ARCADE_TOKEN',
+    name: '월덕 아케이드 리미티드 골든 토큰',
+    category: 'ARCADE',
     rarity: 'RARE',
-    provenance: '카지노 7대 게임 정규 그랜드 오픈 이벤트 참여 한정 소장용 기념 칩',
+    provenance: '아케이드 7대 챌린지 정규 오픈 이벤트 참여 한정 소장용 기념 토큰',
     acquiredAt: '2026-09-05',
-    icon: '🎲',
+    icon: '🪙',
     isFavorite: false,
   },
   {

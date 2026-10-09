@@ -47,7 +47,7 @@ const roleNamesKo: Record<string, string> = {
   STOCK_MOMENTUM_AGENT: '시장 모멘텀 & 변동성',
   MARKET_INTEGRITY_AGENT: '시장 무결성 & 시세조종 감시',
   BUSINESS_AGENT: '기업 운영 & 마진 분석',
-  CASINO_RISK_AGENT: '게임형 카지노 리스크',
+  CASINO_RISK_AGENT: '엔터테인먼트 아케이드 리스크',
   ABUSE_AGENT: '어뷰징 & 다계정 봇 방어',
   CAUSAL_AGENT: '인과관계 & 외생변수 분석',
   RED_TEAM_AGENT: '적대적 레드팀 & 지표왜곡 조사',

@@ -237,7 +237,7 @@ export function AdMonetizationCard({ totalHits24h }: { totalHits24h: number }) {
             </div>
             <div className="flex items-center gap-1.5 p-2 rounded-lg bg-card/60 border border-border/50 text-muted-foreground">
               <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
-              <span>카지노 7대 게임: <strong>차단</strong></span>
+              <span>아케이드 7대 챌린지: <strong>차단</strong></span>
             </div>
             <div className="flex items-center gap-1.5 p-2 rounded-lg bg-card/60 border border-border/50 text-muted-foreground">
               <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />

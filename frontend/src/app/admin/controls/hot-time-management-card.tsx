@@ -79,7 +79,7 @@ export function HotTimeManagementCard() {
             </CardTitle>
           </div>
           <CardDescription className="text-xs text-muted-foreground mt-0.5">
-            플랫폼 전역(홈, 직업, 주식, 카지노, 은행)에 실시간 적용되는 핫타임 버프를 즉각 제어합니다.
+            플랫폼 전역(홈, 직업, 주식, 아케이드, 은행)에 실시간 적용되는 핫타임 버프를 즉각 제어합니다.
           </CardDescription>
         </div>
         <Badge variant="outline" className="font-mono text-xs text-amber-400 border-amber-500/40 bg-amber-500/10">

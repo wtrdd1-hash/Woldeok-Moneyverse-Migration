@@ -279,7 +279,7 @@ const FEATURE_DATA: readonly FeatureSection[] = [
     badge: '엔터테인먼트',
     icon: Sparkles,
     accentColor: 'amber',
-    livePath: '/casino',
+    livePath: '/arcade',
     ctaLabel: '아케이드 스테이션 입장',
     description:
       '3릴 클래식 슬롯머신, 3D 카드 플립 하이로우, 매일 무료로 주어지는 일일 럭키 룰렛을 돌려 최대 100배의 대박 잭팟 보상을 획득하세요.',

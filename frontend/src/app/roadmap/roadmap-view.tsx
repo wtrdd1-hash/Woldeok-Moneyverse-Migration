@@ -230,7 +230,7 @@ export function RoadmapView() {
             </p>
           </div>
           <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-11 px-5 rounded-xl shadow-lg shadow-emerald-950/50">
-            <Link href="/casino">
+            <Link href="/arcade">
               {t('1단계 시작: 무료 룰렛 돌리기', 'Start Stage 1: Spin Free Roulette', '第1段階開始：無料ルーレットを回す', '开始第1阶段：转动免费转盘')}
               <ArrowRight className="ml-1.5 w-4 h-4" />
             </Link>
@@ -259,15 +259,15 @@ export function RoadmapView() {
               </div>
               <p className="text-xs text-zinc-300 leading-relaxed">
                 {t(
-                  '카지노 메뉴에서 매일 24시간마다 1회 주어지는 무료 룰렛을 돌려 즉시 기초 자금을 확보합니다.',
-                  'Spin the daily free roulette in Casino menu once every 24h to instantly secure starting capital.',
-                  'カジノメニューで毎日24時間ごとに1回もらえる無料ルーレットを回して軍資金を獲得します。',
-                  '在游戏菜单中每24小时免费转动一次转盘，即刻到账启动资金。'
+                  '아케이드 메뉴에서 매일 24시간마다 1회 주어지는 무료 룰렛을 돌려 즉시 기초 자금을 확보합니다.',
+                  'Spin the daily free roulette in Arcade menu once every 24h to instantly secure starting capital.',
+                  'アーケードメニューで毎日24時間ごとに1回もらえる無料ルーレットを回して軍資金を獲得します。',
+                  '在街机菜单中每24小时免费转动一次转盘，即刻到账启动资金。'
                 )}
               </p>
             </div>
             <Link
-              href="/casino"
+              href="/arcade"
               className="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center justify-between pt-2 border-t border-zinc-800/60"
             >
               <span>{t('룰렛 돌리러 가기', 'Spin Roulette Now', 'ルーレットへ', '前往转盘')}</span>
@@ -541,7 +541,7 @@ export function RoadmapView() {
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
               <span className="ml-2 text-xs font-mono text-zinc-400 truncate max-w-[200px] sm:max-w-none">
                 easy-scraping.com
-                {stage === 'early' && (actionStep === 0 ? '/casino' : actionStep === 1 ? '/pet' : actionStep === 2 ? '/work' : '/quests')}
+                {stage === 'early' && (actionStep === 0 ? '/arcade' : actionStep === 1 ? '/pet' : actionStep === 2 ? '/work' : '/quests')}
                 {stage === 'mid' && (actionStep === 0 ? '/bank' : actionStep === 1 ? '/stocks/portfolio' : actionStep === 2 ? '/tools' : '/work/promotion')}
                 {stage === 'late' && (actionStep === 0 ? '/spaces/real-estate' : actionStep === 1 ? '/spaces' : actionStep === 2 ? '/progression/prestige' : '/vip')}
               </span>

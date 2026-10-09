@@ -94,7 +94,7 @@ function txTypeBadge(type: string) {
     case 'FEE_RECIRCULATION':
       return <Badge className="bg-blue-600 hover:bg-blue-700 text-white text-[11px]">🔄 수수료 순환</Badge>;
     case 'CASINO_PIGOVIAN_TAX':
-      return <Badge className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px]">🎲 카지노 피구세</Badge>;
+      return <Badge className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px]">🎮 아케이드 공공 기여금</Badge>;
     case 'STOCK_SPECULATION_TAX':
       return <Badge className="bg-amber-700 hover:bg-amber-800 text-white text-[11px]">⚡ 단타 투기세</Badge>;
     case 'WEALTH_TAX_COLLECTION':

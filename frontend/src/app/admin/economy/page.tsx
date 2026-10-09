@@ -402,7 +402,7 @@ export default async function AdminEconomyPage({
                 <CardTitle className="text-base">조정 항목</CardTitle>
                 <CardDescription>
                   엔진이 움직일 수 있는 값과 그 허용 범위입니다. 여기에 없는 값은 어떤 계산으로도
-                  자동으로 바뀌지 않습니다 — 카지노와 대출에는 조정 항목이 없습니다.
+                  자동으로 바뀌지 않습니다 — 아케이드와 대출에는 조정 항목이 없습니다.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">

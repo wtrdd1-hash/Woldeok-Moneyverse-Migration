@@ -381,7 +381,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
               🌊 실시간 유입(Faucet) vs 회수(Sink) 다이내믹 플로우 차트
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              직업/보상/퀘스트 유입량 대비 상점/수수료/카지노/세금의 소모율을 비교합니다.
+              직업/보상/퀘스트 유입량 대비 상점/수수료/아케이드/세금의 소모율을 비교합니다.
             </p>
           </div>
           <div className="text-xs text-foreground/80 font-mono bg-background px-3 py-1.5 rounded-lg border border-border">

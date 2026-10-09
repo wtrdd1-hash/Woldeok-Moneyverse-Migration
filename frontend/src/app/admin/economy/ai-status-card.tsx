@@ -70,7 +70,7 @@ const domainLabel: Record<string, string> = {
   macro: '거시경제',
   welfare: '복지/소비',
   integrity: '데이터 무결성',
-  casino: '카지노',
+  casino: '아케이드',
   bank: '은행',
   market: '시장',
   stock: '주식',

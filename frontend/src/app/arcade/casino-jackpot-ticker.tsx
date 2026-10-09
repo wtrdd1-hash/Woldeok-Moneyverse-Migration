@@ -30,7 +30,7 @@ export function CasinoJackpotTicker({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 truncate">
               <Sparkles className="size-3.5 shrink-0" />
-              <span className="truncate">실시간 카지노 잭팟 풀 (Live Jackpot Pool)</span>
+              <span className="truncate">실시간 아케이드 슈퍼 잭팟 풀 (Live Arcade Jackpot)</span>
             </div>
             <div className="flex items-baseline gap-1.5 mt-0.5 min-w-0">
               <span className="text-xl min-[360px]:text-2xl sm:text-3xl font-black font-mono tracking-tight text-foreground truncate">
@@ -47,7 +47,7 @@ export function CasinoJackpotTicker({
         <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50 text-xs">
           <div>
             <span className="block text-[11px] font-semibold text-muted-foreground">
-              하우스 준비금 (Reserve)
+              아케이드 준비금 (Reserve)
             </span>
             <span className="font-mono font-bold text-foreground">
               {groupDigits(reserve)} WLD
