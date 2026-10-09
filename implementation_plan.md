@@ -5351,3 +5351,54 @@ flowchart TD
    - 25%, 50%, 75%, 100% 잔액 퀵 셀렉터 칩.
 5. **AI 감성 지수 & 실시간 체결 테이프 (Live Tape & Sentiment)**:
    - 시장 공포/탐욕 다요소 복합 지수 및 최근 거래 내역 스트림.
+
+### 3. 광고 시스템 가시성 혁신 및 관리자 가드 (AdSense Fallback & Admin Protection)
+- **일반 방문자 및 회원**:
+  - 구글 애드센스(InArticleAdvertisement, MultiplexAdvertisement)가 광고 미송출(unfilled) 또는 블록되었을 때 빈 공백이 생기거나 레이아웃이 붕괴되는 현상 방지.
+  - Stitch Cyber-Institutional 테마 기반의 고품격 공식 스폰서 배너(WOLDEOK OFFICIAL SPONSOR)를 Fallback 카드로 상시 렌더링하도록 rontend/src/components/adsense-ad.tsx 개선.
+- **관리자 계정(isAdmin)**:
+  - 관리자 업무 시 광고 및 스폰서 배너가 불필요하게 공간을 차지하거나 주의를 분산시키지 않도록 컴포넌트 최상단에서 즉시 
+ull을 반환하여 전면 숨김 처리 및 DOM 옵저버 비활성화.
+- **커밋**: 79500e00 (eat(ads): hide advertisement and sponsor banners for administrators)
+
+### 4. 운영 서버(prod-v552) 무중단 승격 배포 및 빌드 결함 수정
+- globals.css 파일 첫 줄에 유입된 UTF-8 BOM(\uFEFF) 문자로 인한 PostCSS 트랜스폼 에러(Invalid dangling combinator in selector) 원천 제거 (4c28b27).
+- Next.js 16.0.7 579개 전체 정적/동적 라우트 컴파일 통과.
+- 원격 미니PC 데비안 호스트 /srv/moneyverse-data/releases/production-current 심볼릭 링크를 prod-v552로 원자적 승격 및 moneyverse-frontend.service 0-downtime 무중단 가동 완료.
+
+### 5. SEO 전수 점검 통과
+- https://easy-scraping.com/robots.txt: 검색엔진 크롤러 정책 정상 서빙 (HTTP 200).
+- https://easy-scraping.com/sitemap.xml: 15,164개 URL 및 4개 국어 hreflang 정상 서빙 (HTTP 200).
+- Google Search Console 및 Naver Search Advisor 소유권 인증 메타 태그와 구조화 데이터(JSON-LD) 완벽 검증.
+
+### 6. Git 브랜치 전면 정리 완결
+- 원격 저장소에 머지된 채 남아있던 38개 이상의 과거 임시 브랜치(uto/hourly-*) 일괄 삭제 완료 (git push origin --delete).
+- 로컬 및 원격 저장소 모두 main 브랜치 단일 체계로 깔끔하게 정리 완료.
+
+### 7. 대규모 디스크 용량 정리 완결 (총 61GB+ 디스크 회수)
+- **미니PC /srv/moneyverse-data**:
+  - 구버전 릴리스 디렉토리(prod-v526 ~ prod-v550 등) 59GB 일괄 안전 영구 정리.
+  - 디스크 사용량: 101GB(54%) ➡️ **42GB(23%)** 로 획기적 축소 및 146GB 가용 공간 확보.
+- **로컬 개발 환경**:
+  - Next.js 캐시(.next/cache) 1.7GB 정리.
+  - 미사용 워크트리(.worktrees) 604MB 삭제 완료.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan] 최종 통합 구현 명세
+### User Review Required
+- 관리자 로그인 상태에서는 모든 광고 및 스폰서 배너가 완전 숨김 처리됩니다.
+- 미니PC 디스크가 23%로 최적화되었으며, 현재 운영 릴리스는 prod-v552입니다.
+- Git 브랜치는 main 단일 브랜치로 정리되어 충돌 없이 운영됩니다.
+
+### Proposed Changes (파일별 상세 변경점)
+- rontend/src/components/adsense-ad.tsx: 광고 unfilled 시 공식 스폰서 배너 상시 서빙 & 관리자(isAdmin) 접속 시 광고/배너 완전 숨김.
+- rontend/src/app/globals.css: UTF-8 BOM 파싱 에러 제거.
+- qa-reports/2026-10-09-site-qa-resolution.ko.md: QA 8대 결함 및 사용자 요청 해결 종합 보고서 신설.
+
+### Verification Plan (테스트 및 검증 계획)
+- curl -I https://easy-scraping.com/robots.txt ➡️ HTTP 200 OK 확인 완료.
+- curl -I https://easy-scraping.com/sitemap.xml ➡️ HTTP 200 OK 확인 완료.
+- easy-scraping MCP 서버를 통한 원격 서비스 상태(systemctl status moneyverse-frontend) ➡️ Active (running) 확인 완료.
+- 원격 디스크 용량(df -h /srv/moneyverse-data) ➡️ 42GB (23% 사용) 확인 완료.
+- 원격 Git 브랜치(git branch -a) ➡️ main 단일 브랜치 확인 완료.
