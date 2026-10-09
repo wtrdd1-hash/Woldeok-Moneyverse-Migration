@@ -35,6 +35,8 @@ export function NotificationCenterModal() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retryRequest, setRetryRequest] = useState(0);
   const [claiming, setClaiming] = useState(false);
+  const [markingRead, setMarkingRead] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const retryDelayRef = useRef(BASE_POLL_INTERVAL_MS);
 
@@ -147,30 +149,34 @@ export function NotificationCenterModal() {
   }, [open, filter, retryRequest]);
 
   const handleMarkAllRead = async () => {
+    setMarkingRead(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ markAll: true }),
       });
-      if (res.ok) {
-        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-        setUnreadCount(0);
-      }
+      if (!res.ok) throw new Error('Mark all read failed');
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+      setRetryRequest((value) => value + 1);
     } catch {
-      // ignore
+      setActionError('알림을 모두 읽음으로 표시하지 못했습니다. 다시 시도해 주세요.');
+    } finally {
+      setMarkingRead(false);
     }
   };
 
   const handleClaimAll = async () => {
     setClaiming(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/notifications/claim-all', { method: 'POST' });
-      if (res.ok) {
-        await handleMarkAllRead();
-      }
+      if (!res.ok) throw new Error('Claim all failed');
+      await handleMarkAllRead();
     } catch {
-      // ignore
+      setActionError('알림 보상을 수령하지 못했습니다. 다시 시도해 주세요.');
     } finally {
       setClaiming(false);
     }
@@ -249,7 +255,7 @@ export function NotificationCenterModal() {
                 variant="outline"
                 size="sm"
                 onClick={handleMarkAllRead}
-                disabled={notifications.every((n) => n.is_read)}
+                disabled={loading || !!loadError || countUnavailable || markingRead || claiming || notifications.every((n) => n.is_read)}
                 className="min-h-11 text-xs px-2.5 rounded-lg border-border/40"
               >
                 <CheckCheck className="h-3.5 w-3.5 mr-1" />
@@ -258,7 +264,7 @@ export function NotificationCenterModal() {
               <Button
                 size="sm"
                 onClick={handleClaimAll}
-                disabled={claiming || unreadCount === 0}
+                disabled={loading || !!loadError || countUnavailable || markingRead || claiming || unreadCount === 0}
                 className="min-h-11 text-xs px-2.5 rounded-lg font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md shadow-amber-500/15"
               >
                 <Sparkles className="h-3.5 w-3.5 mr-1" />
@@ -266,6 +272,12 @@ export function NotificationCenterModal() {
               </Button>
             </div>
           </div>
+
+          {actionError && (
+            <p role="alert" className="mt-2 rounded-lg border border-rose-500/40 bg-rose-500/10 p-2 text-xs text-rose-700 dark:text-rose-300">
+              {actionError}
+            </p>
+          )}
 
           {/* 필터 탭 */}
           <div className="flex items-center gap-2 mt-3">
