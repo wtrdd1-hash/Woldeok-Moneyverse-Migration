@@ -6,6 +6,7 @@ import type { MacroEconomyV2, MonetaryVelocityTelemetry } from './macro-v2-types
 import { FaucetSinkGauge, type FaucetSinkStats } from './faucet-sink-gauge';
 import { MonetaryVelocityCard } from './monetary-velocity-card';
 import { CasinoEconomyDashboard } from './casino-economy-dashboard';
+import { AdminNationalTreasuryControlCard } from './admin-national-treasury-control-card';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Amount } from '@/components/amount';
@@ -426,6 +427,12 @@ export default async function AdminEconomyPage({
             </Card>
           </>
         )}
+      </section>
+
+      {/* 국고 메가 잭팟 복권 수동 추첨 & 테일러 칙 파라미터 조정 콘솔 (v173) */}
+      <section aria-labelledby="treasury-lottery-taylor-control" className="grid gap-3">
+        <SectionHeader eyebrow="TREASURY POLICY & SINK" title="국고 복권 소각 & 테일러 칙 정책 관제" id="treasury-lottery-taylor-control" />
+        <AdminNationalTreasuryControlCard />
       </section>
 
       <section aria-labelledby="economy-payout" className="grid gap-3">

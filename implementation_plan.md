@@ -5615,3 +5615,35 @@ ull을 반환하여 전면 숨김 처리 및 DOM 옵저버 비활성화.
 - TypeScript 타입체크 (`tsc --noEmit`) 100% 무오류 확인.
 - 원격 운영 서버 VM 100 `prod-v558` 무중단 승격 배포.
 - 핵심 30대 라우트 실서비스 QA 전수 통과 확인.
+
+
+---
+## 🚀 [v173 Specification] GSC 1페이지(TOP 10) 진입 순위 레이더 & 관리자 국고 복권 수동 추첨 및 테일러 칙 파라미터 콘솔 풀스택 구축
+
+### 1. 배경 및 핵심 요구사항 (Overview & Goals)
+1. **상위 유입 검색어 순위 변동 모니터링 (Rank Shift Monitor & Top 10 Radar)**:
+   - 온페이지 SEO 메타태그와 구조화 데이터(JSON-LD)가 보강된 30~80위권 4대 핵심 검색어(`2억 대출 30년 상환`, `cagr`, `dividend yield`, `dca 효과`)의 1페이지(TOP 10) 진입 진행률 및 실시간 게재순위 변동 추적.
+   - 관리자 GSC 화면에서 5대 계산기 URL을 구글/IndexNow에 1초 만에 재색인 요청하는 원클릭 전송 액션 탑재.
+2. **관리자 경제 콘솔(`/admin/economy`) 국고 복권 소각 & 테일러 칙 정책 관제**:
+   - **메가 잭팟 복권 수동 추첨 집행기**: 정기 일요일 자동 추첨 외 비상/이벤트 시 관리자가 수동 추첨을 집행하며, 즉시 당첨 번호(6+1볼) 산출 및 판매/누적액 50% 국고 영구 소각(`VAULT_MAIN` Burn) 집행.
+   - **테일러 칙(Taylor Rule) 파라미터 미세 조정 콘솔**: 중립금리($r^*$), 목표 인플레이션($\pi^*$), 인플레 갭 가중치($\alpha$), 산출 갭 가중치($\beta$)를 동적으로 조정하고 즉시 실시간 기준금리($r$)를 재산출하여 전 금융시스템에 동기화.
+3. **운영 서버 무중단 승격 (`prod-v559`) 및 실서비스 라이브 QA 검증**.
+
+---
+
+### 2. 세부 컴포넌트 사양 (Detailed Component Specs)
+- **`frontend/src/app/admin/seo/gsc-analytics-card.tsx`**:
+  - `1페이지(TOP 10) 진입 레이더 & 순위 변동 추적` 4열 대시보드.
+  - `handleTriggerIndexing`: `/api/admin/seo/indexing-submit` API 원클릭 호출 및 실시간 결과 토스트.
+- **`frontend/src/app/admin/economy/admin-national-treasury-control-card.tsx`**:
+  - `handleManualDraw`: 1~45 중 6개 번호 + 1개 보너스 번호 생성, 50% 국고 소각 트랜잭션 발동.
+  - `handleSaveTaylorParams`: $r = r^* + \pi + \alpha(\pi - \pi^*) + \beta(y - y^*)$ 파라미터 미세 조정.
+- **`frontend/src/app/admin/economy/page.tsx`**:
+  - 관리자 경제 총괄 관제 페이지 내 독립 전용 섹션으로 마운트.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+- TypeScript 타입 검사 (`tsc --noEmit`) 100% 통과 확인.
+- 원격 운영 서버 VM 100 `prod-v559` 무중단 릴리스 승격.
+- 관리자 SEO 및 경제 콘솔 정상 응답 확인 (HTTP 200).

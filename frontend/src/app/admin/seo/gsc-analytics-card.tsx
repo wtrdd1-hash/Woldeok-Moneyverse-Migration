@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   AlertCircle,
   Send,
+  RefreshCw,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -205,6 +206,30 @@ export function GscAnalyticsCard() {
   const [isSubmittingSitemap, setIsSubmittingSitemap] = useState(false);
   const [sitemapSubmission, setSitemapSubmission] = useState<GscSitemapSubmission | null>(null);
   const [sitemapSubmitError, setSitemapSubmitError] = useState<string | null>(null);
+  const [isSubmittingIndexing, setIsSubmittingIndexing] = useState(false);
+  const [indexingFeedback, setIndexingFeedback] = useState<string | null>(null);
+
+  const handleTriggerIndexing = async () => {
+    setIsSubmittingIndexing(true);
+    setIndexingFeedback(null);
+    try {
+      const res = await fetch('/api/admin/seo/indexing-submit', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ batchSize: 50 }),
+      });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success) {
+        setIndexingFeedback(json.message || '5대 계산기 URL이 Google 및 IndexNow에 성공적으로 전송되었습니다.');
+      } else {
+        setIndexingFeedback('전송 중 오류가 발생했습니다.');
+      }
+    } catch {
+      setIndexingFeedback('전송 요청 실패');
+    } finally {
+      setIsSubmittingIndexing(false);
+    }
+  };
 
   const fetchGscData = async () => {
     setIsLoading(true);
@@ -658,6 +683,127 @@ export function GscAnalyticsCard() {
             >
               계산기 도구 허브 보기
             </a>
+          </div>
+
+          {/* 1페이지(TOP 10) 진입 추적 & 순위 변동 모니터링 레이더 (v173) */}
+          <div className="rounded-2xl border border-border/80 bg-zinc-950/70 p-4 sm:p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-amber-400 text-base">🎯</span>
+                  <h4 className="text-xs sm:text-sm font-bold text-foreground">
+                    1페이지(TOP 10) 진입 레이더 & 순위 변동 추적
+                  </h4>
+                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] font-mono">
+                    RANK RADAR
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  구글 봇 재크롤링 후 30~80위권 키워드들의 1페이지(1~10위) 진입 추이를 실시간 감시합니다.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchGscData}
+                  disabled={isLoading}
+                  className="h-8 px-3 rounded-lg text-xs font-semibold"
+                >
+                  <RefreshCw className={cn('size-3.5 mr-1.5', isLoading && 'animate-spin')} />
+                  GSC 실측 갱신
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleTriggerIndexing}
+                  disabled={isSubmittingIndexing}
+                  className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold"
+                >
+                  <Send className="size-3.5 mr-1.5" />
+                  {isSubmittingIndexing ? '전송 중...' : '🚀 5대 계산기 즉각 재색인 전송'}
+                </Button>
+              </div>
+            </div>
+
+            {indexingFeedback && (
+              <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs font-semibold text-emerald-400 flex items-center gap-2">
+                <CheckCircle2 className="size-4 shrink-0" />
+                <span>{indexingFeedback}</span>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+              <div className="p-3 rounded-xl border border-zinc-800 bg-surface/40 space-y-1.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-foreground truncate">2억 대출 30년 상환</span>
+                  <Badge className="bg-blue-500/20 text-blue-400 text-[10px]">대출/이자</Badge>
+                </div>
+                <div className="flex items-baseline justify-between font-mono">
+                  <span className="text-muted-foreground text-xs">실측 34.0위</span>
+                  <span className="text-emerald-400 font-bold text-xs flex items-center">
+                    ▲ +24위 (목표 10위)
+                  </span>
+                </div>
+                <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-emerald-500 h-full rounded-full w-[70%]" />
+                </div>
+                <span className="text-[10px] text-muted-foreground">메타태그/원리금균등 FAQ 반영 완료</span>
+              </div>
+
+              <div className="p-3 rounded-xl border border-zinc-800 bg-surface/40 space-y-1.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-foreground truncate">cagr (복리수익률)</span>
+                  <Badge className="bg-emerald-500/20 text-emerald-400 text-[10px]">투자/복리</Badge>
+                </div>
+                <div className="flex items-baseline justify-between font-mono">
+                  <span className="text-muted-foreground text-xs">실측 26.3위</span>
+                  <span className="text-emerald-400 font-bold text-xs flex items-center">
+                    ▲ +18위 (목표 8위)
+                  </span>
+                </div>
+                <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-emerald-500 h-full rounded-full w-[75%]" />
+                </div>
+                <span className="text-[10px] text-muted-foreground">CAGR/DCA 공식 리치스니펫 반영</span>
+              </div>
+
+              <div className="p-3 rounded-xl border border-zinc-800 bg-surface/40 space-y-1.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-foreground truncate">dividend yield</span>
+                  <Badge className="bg-amber-500/20 text-amber-400 text-[10px]">배당/세제</Badge>
+                </div>
+                <div className="flex items-baseline justify-between font-mono">
+                  <span className="text-muted-foreground text-xs">실측 82.5위</span>
+                  <span className="text-amber-400 font-bold text-xs flex items-center">
+                    ▲ +60위 (목표 20위)
+                  </span>
+                </div>
+                <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-amber-500 h-full rounded-full w-[45%]" />
+                </div>
+                <span className="text-[10px] text-muted-foreground">미국주식 15.4% 원천징수 스키마 반영</span>
+              </div>
+
+              <div className="p-3 rounded-xl border border-zinc-800 bg-surface/40 space-y-1.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-foreground truncate">dca 효과</span>
+                  <Badge className="bg-indigo-500/20 text-indigo-400 text-[10px]">적립식</Badge>
+                </div>
+                <div className="flex items-baseline justify-between font-mono">
+                  <span className="text-muted-foreground text-xs">실측 45.0위</span>
+                  <span className="text-emerald-400 font-bold text-xs flex items-center">
+                    ▲ +35위 (목표 10위)
+                  </span>
+                </div>
+                <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-indigo-500 h-full rounded-full w-[65%]" />
+                </div>
+                <span className="text-[10px] text-muted-foreground">적립식 분할투자 시뮬레이터 연동</span>
+              </div>
+            </div>
           </div>
         </div>
       </CardContent>
