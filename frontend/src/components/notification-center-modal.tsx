@@ -209,7 +209,11 @@ export function NotificationCenterModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          aria-label={countUnavailable ? "알림 센터 열기 (알림 상태 확인 불가)" : "알림 센터 열기"}
+          aria-label={countUnavailable
+            ? `알림 센터 열기 (현재 알림 상태 확인 불가${unreadCount > 0 ? `, 마지막 확인 미확인 알림 ${unreadCount}건` : ""})`
+            : unreadCount > 0
+              ? `알림 센터 열기 (미확인 알림 ${unreadCount}건)`
+              : "알림 센터 열기 (미확인 알림 없음)"}
           className="relative flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border/50 bg-background/80 hover:bg-muted transition-colors"
         >
           <Bell className="h-4 w-4 text-foreground/80" />
@@ -217,7 +221,7 @@ export function NotificationCenterModal() {
             <span aria-hidden="true" className="absolute -bottom-1 -right-1 size-2.5 rounded-full bg-amber-500 ring-2 ring-background" />
           )}
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-background animate-pulse">
+            <span aria-hidden="true" className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-background animate-pulse">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
