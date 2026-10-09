@@ -114,7 +114,8 @@ export function NotificationCenterModal() {
       currentRequest?.abort();
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, []);
+  // A manual retry refreshes both the notification list and its unread badge.
+  }, [retryRequest]);
 
   useEffect(() => {
     if (!open) return;

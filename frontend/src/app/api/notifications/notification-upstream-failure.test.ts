@@ -66,3 +66,11 @@ it('notification center pauses hidden-tab polling, backs off failures and announ
   expect(source).toContain('다시 시도');
   expect(source).not.toContain('setInterval(');
 });
+
+it('notification trigger announces unread count and stale state', () => {
+  const source = readFileSync(join(process.cwd(), 'src/components/notification-center-modal.tsx'), 'utf8');
+  expect(source).toContain('미확인 알림 ${unreadCount}건');
+  expect(source).toContain('마지막 확인 미확인 알림');
+  expect(source).toContain('미확인 알림 없음');
+  expect(source).toContain('aria-hidden="true"');
+});
