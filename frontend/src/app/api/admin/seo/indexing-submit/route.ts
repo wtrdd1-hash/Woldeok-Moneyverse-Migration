@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
 import { ALL_SEO_PRESETS } from '@/config/seo-presets.config';
+import { submitToIndexNow } from '@/lib/indexnow';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,8 +16,15 @@ export async function POST(req: Request) {
     const batchSize = Math.min(body.batchSize || 100, 200);
     const base = (process.env.APP_BASE_URL || 'https://easy-scraping.com').replace(/\/$/, '');
 
-    // 대상 URL 목록 취합
-    const targetUrls: string[] = [];
+    // 대상 URL 목록 취합 - 메타데이터가 쇄신된 5대 핵심 계산기를 0순위로 전진 배치
+    const targetUrls: string[] = [
+      `${base}/tools/loan-interest-calculator`,
+      `${base}/tools/compound-calculator`,
+      `${base}/tools/dividend-tax-calculator`,
+      `${base}/tools/capital-gains-tax-calculator`,
+      `${base}/tools/retirement-calculator`,
+      `${base}/tools`,
+    ];
 
     // 1. pSEO 580개 종목별 물타기 URL
     for (const slug of ALL_PSEO_POPULAR_SLUGS) {
@@ -33,13 +41,16 @@ export async function POST(req: Request) {
     const totalAvailable = targetUrls.length;
     const selectedUrls = targetUrls.slice(0, batchSize);
 
-    // Google Sitemap Ping & IndexNow 발송 시뮬레이션 및 실시간 호출
+    // Google Sitemap Ping, Bing Ping 및 IndexNow(Naver/Bing/Yandex) 실시간 API 동시 전송
     const googlePingUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(`${base}/sitemap.xml`)}`;
     const bingPingUrl = `https://www.bing.com/ping?sitemap=${encodeURIComponent(`${base}/sitemap.xml`)}`;
 
-    const pingResults = await Promise.allSettled([
-      fetch(googlePingUrl, { method: 'GET' }).catch(() => null),
-      fetch(bingPingUrl, { method: 'GET' }).catch(() => null),
+    const [pingResults, indexNowResult] = await Promise.all([
+      Promise.allSettled([
+        fetch(googlePingUrl, { method: 'GET' }).catch(() => null),
+        fetch(bingPingUrl, { method: 'GET' }).catch(() => null),
+      ]),
+      submitToIndexNow(selectedUrls),
     ]);
 
     const googlePingSuccess = pingResults[0].status === 'fulfilled';
@@ -47,12 +58,13 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `성공! Google Indexing API 및 검색엔진에 ${selectedUrls.length}개 URL 배치 통보가 완료되었습니다.`,
+      message: `성공! Google Indexing API 및 IndexNow에 5대 핵심 계산기 포함 ${selectedUrls.length}개 URL 실시간 통보가 완료되었습니다.`,
       batchSize: selectedUrls.length,
       totalUrlsAvailable: totalAvailable,
       googlePingSuccess,
       bingPingSuccess,
-      submittedUrls: selectedUrls.slice(0, 5),
+      indexNowSuccess: indexNowResult.success,
+      submittedUrls: selectedUrls.slice(0, 6),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

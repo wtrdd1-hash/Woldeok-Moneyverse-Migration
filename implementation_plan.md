@@ -5581,3 +5581,37 @@ ull을 반환하여 전면 숨김 처리 및 DOM 옵저버 비활성화.
 1. **타입 검사**: `pnpm --filter frontend typecheck` 통과 확인.
 2. **구조화 데이터 검증**: Schema.org JSON-LD 구문 유효성 검증.
 3. **프로덕션 빌드 및 승격**: 원격 서버 `prod-v557` 무중단 배포 후 `https://easy-scraping.com` 라이브 테스트(HTTP 200).
+
+
+---
+## 🚀 [v172 Specification] Google Indexing API/IndexNow 5대 계산기 실시간 전송 & 메가 잭팟 복권(50% 소각) 및 테일러 칙 마진콜 관제 풀스택 구축
+
+### 1. 배경 및 핵심 요구사항 (Overview & Goals)
+1. **Google Indexing API & IndexNow 실시간 배치 핑 전송**:
+   - 쇄신된 5대 핵심 금융 계산기 URL을 구글 서치콘솔 및 IndexNow(Bing, Naver 등)에 0순위로 즉각 통보하여 검색엔진 크롤러의 조기 재색인을 유도.
+2. **국고 연동 메가 잭팟 복권 추첨 대시보드 (`MegaJackpotLotteryDashboard`)**:
+   - 총 누적 잭팟 상금(145만 WLD) 및 판매액의 정확히 50%가 국고로 전입되어 영구 소각(Sink)되는 디플레이션 지표 시각화.
+   - 1인당 주간 최대 10장 건전 구매 제한 및 역대 회차별 당첨/소각 장부 제공.
+3. **중앙은행 테일러 칙 기준금리 & 담보대출 마진콜 관제 (`TaylorRuleLendingMarginMonitor`)**:
+   - 테일러 칙 공식($r = r^* + \pi + 0.5(\pi - \pi^*) + 0.5(y - y^*)$) 기반 자동 기준금리 산정.
+   - 우량주(WDG) 및 국채(KTB) LTV 70% 담보대출, 담보비율 125% 이하 마진콜(Warning) 및 100% 미달 강제 반대매매 청산(Liquidation) 스트레스 테스트 시뮬레이터 탑재.
+4. **운영 서버 무중단 승격 (`prod-v558`) 및 라이브 QA 전수 검증**.
+
+---
+
+### 2. 세부 컴포넌트 사양 (Detailed Component Specs)
+- **`frontend/src/app/api/admin/seo/indexing-submit/route.ts`**:
+  - 5대 계산기 최상단 전진 배치 및 `submitToIndexNow` 비동기 파이프라인 결합.
+- **`frontend/src/components/economy/mega-jackpot-lottery-dashboard.tsx`**:
+  - 메가 잭팟 롤오버 풀, 누적 국고 영구 소각량(725,000 WLD), 암호학적 HMAC-SHA256 추첨 증명.
+- **`frontend/src/components/economy/taylor-rule-lending-margin-monitor.tsx`**:
+  - 테일러 금리 연 3.75%, 주가 시세 변동 슬라이더, 실시간 마진콜 안전선 게이지.
+- **`frontend/src/app/tools/page.tsx`**:
+  - 5대 금융 계산기 허브 지면에 국고 밸런스 시뮬레이터 + 복권 소각 대시보드 + 마진콜 관제 카드 통합 마운트.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+- TypeScript 타입체크 (`tsc --noEmit`) 100% 무오류 확인.
+- 원격 운영 서버 VM 100 `prod-v558` 무중단 승격 배포.
+- 핵심 30대 라우트 실서비스 QA 전수 통과 확인.

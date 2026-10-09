@@ -9,6 +9,8 @@ import { ReferralSystem } from '@/components/viral/referral-system';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { PublicSitemapSubmitBox } from '@/components/public-sitemap-submit-box';
 import { NationalTreasuryBalanceSimulator } from '@/components/economy/national-treasury-balance-simulator';
+import { MegaJackpotLotteryDashboard } from '@/components/economy/mega-jackpot-lottery-dashboard';
+import { TaylorRuleLendingMarginMonitor } from '@/components/economy/taylor-rule-lending-margin-monitor';
 
 import { getServerLocale } from '@/lib/locale-server';
 import { canonicalUrl } from '@/lib/seo';
@@ -280,6 +282,16 @@ export default function ToolsHubPage() {
       {/* 국고 신규 정착 지원 & 거시경제 밸런스 시뮬레이터 (v171) */}
       <div className="space-y-6">
         <NationalTreasuryBalanceSimulator />
+      </div>
+
+      {/* 국고 연동 메가 잭팟 복권 & 50% 영구 소각 관제 (v172) */}
+      <div className="space-y-6">
+        <MegaJackpotLotteryDashboard />
+      </div>
+
+      {/* 중앙은행 테일러 칙 기준금리 & 담보대출 마진콜 관제 (v172) */}
+      <div className="space-y-6">
+        <TaylorRuleLendingMarginMonitor />
       </div>
 
       {/* Public Advertisement Slot */}
