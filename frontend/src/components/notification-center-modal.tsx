@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -23,79 +23,163 @@ interface NotificationItem {
   created_at: string;
 }
 
+const BASE_POLL_INTERVAL_MS = 15000;
+const MAX_POLL_INTERVAL_MS = 60000;
+
 export function NotificationCenterModal() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [countUnavailable, setCountUnavailable] = useState(false);
+  const [lastCountSyncAt, setLastCountSyncAt] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryRequest, setRetryRequest] = useState(0);
   const [claiming, setClaiming] = useState(false);
+  const [markingRead, setMarkingRead] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const retryDelayRef = useRef(BASE_POLL_INTERVAL_MS);
 
-  const fetchUnreadCount = async () => {
-    try {
-      const res = await fetch('/api/notifications/unread-count');
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.unreadCount || 0);
-      }
-    } catch {
-      // ignore
-    }
-  };
-
-  const fetchNotifications = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/notifications?unreadOnly=${filter === 'unread'}`);
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data.notifications || []);
-      }
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 15초마다 미확인 알림 카운트 백그라운드 갱신
+  // Keep the last known count on failure; never turn an outage into a false zero.
   useEffect(() => {
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 15000);
-    return () => clearInterval(interval);
-  }, []);
+    let active = true;
+    let generation = 0;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    let currentRequest: AbortController | null = null;
+
+    const clearScheduled = () => {
+      if (timeout !== null) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+    };
+
+    const schedule = (delay: number) => {
+      clearScheduled();
+      if (!active || document.hidden) return;
+      timeout = setTimeout(() => {
+        timeout = null;
+        void poll();
+      }, delay);
+    };
+
+    const poll = async () => {
+      if (!active || document.hidden) return;
+      const pollGeneration = generation;
+      const request = new AbortController();
+      currentRequest = request;
+      try {
+        const response = await fetch('/api/notifications/unread-count', {
+          signal: request.signal,
+          cache: 'no-store',
+        });
+        if (!response.ok) throw new Error('Unread count unavailable');
+        const data = await response.json();
+        if (!active || request.signal.aborted || generation !== pollGeneration) return;
+        const count: unknown = data?.unreadCount;
+        if (typeof count !== 'number' || !Number.isSafeInteger(count) || count < 0) {
+          throw new Error('Invalid unread count');
+        }
+        setUnreadCount(count);
+        setCountUnavailable(false);
+        setLastCountSyncAt(Date.now());
+        retryDelayRef.current = BASE_POLL_INTERVAL_MS;
+      } catch {
+        if (active && !request.signal.aborted && generation === pollGeneration) {
+          setCountUnavailable(true);
+          retryDelayRef.current = Math.min(MAX_POLL_INTERVAL_MS, retryDelayRef.current * 2);
+        }
+      } finally {
+        if (currentRequest === request) currentRequest = null;
+        if (active && generation === pollGeneration && !document.hidden) {
+          schedule(retryDelayRef.current);
+        }
+      }
+    };
+
+    const onVisibilityChange = () => {
+      generation += 1;
+      clearScheduled();
+      currentRequest?.abort();
+      if (!document.hidden) {
+        retryDelayRef.current = BASE_POLL_INTERVAL_MS;
+        void poll();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    if (!document.hidden) void poll();
+
+    return () => {
+      active = false;
+      generation += 1;
+      clearScheduled();
+      currentRequest?.abort();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  // A manual retry refreshes both the notification list and its unread badge.
+  }, [retryRequest]);
 
   useEffect(() => {
-    if (open) {
-      fetchNotifications();
-    }
-  }, [open, filter]);
+    if (!open) return;
+    const controller = new AbortController();
+
+    const loadNotifications = async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const response = await fetch('/api/notifications?unreadOnly=' + (filter === 'unread'), {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+        if (!response.ok) throw new Error('Notification service unavailable');
+        const data = await response.json();
+        if (!Array.isArray(data?.notifications)) throw new Error('Invalid notification response');
+        if (!controller.signal.aborted) setNotifications(data.notifications);
+      } catch {
+        if (!controller.signal.aborted) {
+          setLoadError('알림을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    };
+
+    void loadNotifications();
+    return () => controller.abort();
+  }, [open, filter, retryRequest]);
 
   const handleMarkAllRead = async () => {
+    setMarkingRead(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ markAll: true }),
       });
-      if (res.ok) {
-        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-        setUnreadCount(0);
-      }
+      if (!res.ok) throw new Error('Mark all read failed');
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      // Only the authoritative count endpoint can confirm the new unread total.
+      // Preserve the last verified count if the post-action refresh fails.
+      setRetryRequest((value) => value + 1);
     } catch {
-      // ignore
+      setActionError('알림을 모두 읽음으로 표시하지 못했습니다. 다시 시도해 주세요.');
+    } finally {
+      setMarkingRead(false);
     }
   };
 
   const handleClaimAll = async () => {
     setClaiming(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/notifications/claim-all', { method: 'POST' });
-      if (res.ok) {
-        await handleMarkAllRead();
-      }
+      if (!res.ok) throw new Error('Claim all failed');
+      await handleMarkAllRead();
     } catch {
-      // ignore
+      setActionError('알림 보상을 수령하지 못했습니다. 다시 시도해 주세요.');
     } finally {
       setClaiming(false);
     }
@@ -135,12 +219,19 @@ export function NotificationCenterModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          aria-label="알림 센터 열기"
-          className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-border/50 bg-background/80 hover:bg-muted transition-colors"
+          aria-label={countUnavailable
+            ? `알림 센터 열기 (현재 알림 상태 확인 불가${unreadCount > 0 ? `, 마지막 확인 미확인 알림 ${unreadCount}건` : ""})`
+            : unreadCount > 0
+              ? `알림 센터 열기 (미확인 알림 ${unreadCount}건)`
+              : "알림 센터 열기 (미확인 알림 없음)"}
+          className="relative flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border/50 bg-background/80 hover:bg-muted transition-colors"
         >
           <Bell className="h-4 w-4 text-foreground/80" />
+          {countUnavailable && (
+            <span aria-hidden="true" className="absolute -bottom-1 -right-1 size-2.5 rounded-full bg-amber-500 ring-2 ring-background" />
+          )}
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-background animate-pulse">
+            <span aria-hidden="true" className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-background animate-pulse">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
@@ -149,8 +240,8 @@ export function NotificationCenterModal() {
 
       <DialogContent className="sm:max-w-lg border-border/60 bg-card/95 backdrop-blur-md rounded-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="p-5 pb-3 border-b border-border/40">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Bell className="h-4 w-4" />
               </div>
@@ -167,8 +258,8 @@ export function NotificationCenterModal() {
                 variant="outline"
                 size="sm"
                 onClick={handleMarkAllRead}
-                disabled={notifications.every((n) => n.is_read)}
-                className="h-8 text-xs px-2.5 rounded-lg border-border/40"
+                disabled={loading || !!loadError || countUnavailable || markingRead || claiming || notifications.every((n) => n.is_read)}
+                className="min-h-11 text-xs px-2.5 rounded-lg border-border/40"
               >
                 <CheckCheck className="h-3.5 w-3.5 mr-1" />
                 모두 읽음
@@ -176,8 +267,8 @@ export function NotificationCenterModal() {
               <Button
                 size="sm"
                 onClick={handleClaimAll}
-                disabled={claiming || unreadCount === 0}
-                className="h-8 text-xs px-2.5 rounded-lg font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md shadow-amber-500/15"
+                disabled={loading || !!loadError || countUnavailable || markingRead || claiming || unreadCount === 0}
+                className="min-h-11 text-xs px-2.5 rounded-lg font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md shadow-amber-500/15"
               >
                 <Sparkles className="h-3.5 w-3.5 mr-1" />
                 원클릭 모두 수령
@@ -185,11 +276,39 @@ export function NotificationCenterModal() {
             </div>
           </div>
 
+          {actionError && (
+            <p role="alert" className="mt-2 rounded-lg border border-rose-500/40 bg-rose-500/10 p-2 text-xs text-rose-700 dark:text-rose-300">
+              {actionError}
+            </p>
+          )}
+
+          {countUnavailable && (
+            <div role="status" className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-300">
+              <p className="min-w-0 flex-1">
+                알림 개수를 확인할 수 없습니다.
+                {lastCountSyncAt === null
+                  ? ' 아직 정상 확인된 개수가 없습니다.'
+                  : ` 마지막 정상 확인: ${new Date(lastCountSyncAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}.`}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setRetryRequest((value) => value + 1)}
+                disabled={loading || markingRead || claiming}
+                className="min-h-11 gap-2 border-amber-500/50"
+              >
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                알림 개수 다시 확인
+              </Button>
+            </div>
+          )}
           {/* 필터 탭 */}
           <div className="flex items-center gap-2 mt-3">
             <button
               onClick={() => setFilter('all')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              aria-pressed={filter === 'all'}
+              className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 filter === 'all'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted'
@@ -199,7 +318,8 @@ export function NotificationCenterModal() {
             </button>
             <button
               onClick={() => setFilter('unread')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+              aria-pressed={filter === 'unread'}
+              className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
                 filter === 'unread'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted'
@@ -216,11 +336,19 @@ export function NotificationCenterModal() {
         </DialogHeader>
 
         {/* 알림 목록 스크롤 영역 */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2.5 min-h-[280px]">
+        <div aria-busy={loading} className="flex-1 overflow-y-auto p-4 space-y-2.5 min-h-[280px]">
           {loading ? (
             <div className="h-48 flex flex-col items-center justify-center text-muted-foreground gap-2">
               <RefreshCw className="h-5 w-5 animate-spin text-primary" />
               <span className="text-xs">알림을 불러오는 중...</span>
+            </div>
+          ) : loadError ? (
+            <div role="alert" className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-center text-sm text-amber-700 dark:text-amber-300">
+              <p>{loadError}</p>
+              <Button type="button" variant="outline" size="sm" onClick={() => setRetryRequest((value) => value + 1)} disabled={loading} className="min-h-11 gap-2 border-amber-500/50">
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                다시 시도
+              </Button>
             </div>
           ) : notifications.length === 0 ? (
             <div className="h-48 flex flex-col items-center justify-center text-center p-4">

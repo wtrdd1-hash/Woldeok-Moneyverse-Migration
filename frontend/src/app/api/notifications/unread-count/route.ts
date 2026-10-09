@@ -16,8 +16,15 @@ export async function GET(): Promise<NextResponse> {
 
   const result = await apiOrNull<{ unreadCount: number }>('/api/v1/notifications/unread-count');
 
+  if (!result || !Number.isSafeInteger(result.unreadCount) || result.unreadCount < 0) {
+    return NextResponse.json(
+      { error: 'Notification service unavailable' },
+      { status: 503, headers: { 'cache-control': 'private, no-store' } },
+    );
+  }
+
   return NextResponse.json(
-    { unreadCount: result?.unreadCount ?? 0 },
+    { unreadCount: result.unreadCount },
     { headers: { 'cache-control': 'private, no-store' } },
   );
 }
