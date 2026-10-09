@@ -285,7 +285,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
       className={`${myeongjo.variable} ${notoKr.variable} ${plexMono.variable}`}
     >
-      <body>
+      <body className="bg-[#090A0F] text-[#F9FAFB] min-h-screen antialiased selection:bg-[#00F59B]/20 selection:text-[#00F59B]">
         {homeAdSense.enabled && (
           <Script
             id="adsense-global-init"

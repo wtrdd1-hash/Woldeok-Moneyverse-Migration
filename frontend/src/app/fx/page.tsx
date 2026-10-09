@@ -252,42 +252,42 @@ export default function SeoulFxPortalPage() {
       )}
 
       {/* 2. 메인 타이틀 & 환율 브리핑 헤더 */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl backdrop-blur-xl">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 p-6 rounded-3xl bg-[#0E1117] border border-[#222738] shadow-2xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20">
               Seoul Foreign Exchange Market
             </span>
-            <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-[#00F59B]/10 text-[#00F59B] border border-[#00F59B]/20">
               중앙은행 외환보유액 연동
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
             🏛️ 서울외환시장(FX) & 글로벌 외환안정망 포털
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
             원화(WLD) ↔ 달러(USD) 실시간 즉시 환전, 1M/3M/6M 선물환 환헤지 및 외환보유액·통화스왑 안전판을 제공합니다.
           </p>
         </div>
 
         {/* 실시간 환율 전광판 */}
-        <div className="flex items-baseline gap-3 p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80">
-          <span className="text-xs text-slate-400 font-medium">현재 기준환율</span>
-          <div className="text-3xl font-extrabold font-mono text-cyan-400">
+        <div className="flex items-baseline gap-3 p-4 rounded-2xl bg-[#121622] border border-[#222738]">
+          <span className="text-xs text-zinc-400 font-medium">현재 기준환율</span>
+          <div className="text-3xl font-extrabold font-mono text-[#00E5FF]">
             {rate.toFixed(2)}
           </div>
-          <span className="text-xs font-bold text-slate-300">WLD / USD</span>
+          <span className="text-xs font-bold text-zinc-300">WLD / USD</span>
         </div>
       </div>
 
       {/* 3. 상단 4대 네비게이션 탭 */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-[#222738] pb-3 overflow-x-auto">
         <button
           onClick={() => setActiveTab('spot')}
           className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
             activeTab === 'spot'
-              ? 'bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20'
-              : 'text-slate-400 hover:text-white bg-slate-900/60'
+              ? 'bg-[#00E5FF] text-black shadow-lg shadow-[#00E5FF]/20'
+              : 'text-zinc-400 hover:text-white bg-[#121622] border border-[#222738]'
           }`}
         >
           💱 실시간 현물 환전 & 틱 차트
@@ -297,7 +297,7 @@ export default function SeoulFxPortalPage() {
           className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
             activeTab === 'forward'
               ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-              : 'text-slate-400 hover:text-white bg-slate-900/60'
+              : 'text-zinc-400 hover:text-white bg-[#121622] border border-[#222738]'
           }`}
         >
           🛡️ 대국민 & 기업 선물환(Forward) 환헤지
@@ -306,8 +306,8 @@ export default function SeoulFxPortalPage() {
           onClick={() => setActiveTab('savings')}
           className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
             activeTab === 'savings'
-              ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
-              : 'text-slate-400 hover:text-white bg-slate-900/60'
+              ? 'bg-[#00F59B] text-black shadow-lg shadow-[#00F59B]/20'
+              : 'text-zinc-400 hover:text-white bg-[#121622] border border-[#222738]'
           }`}
         >
           🏦 가상 달러 외화 예금 (연 4.5%)
@@ -316,8 +316,8 @@ export default function SeoulFxPortalPage() {
           onClick={() => setActiveTab('safetynet')}
           className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
             activeTab === 'safetynet'
-              ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
-              : 'text-slate-400 hover:text-white bg-slate-900/60'
+              ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+              : 'text-zinc-400 hover:text-white bg-[#121622] border border-[#222738]'
           }`}
         >
           🪙 중앙은행 외환안정망 & SDR·통화스왑 공시

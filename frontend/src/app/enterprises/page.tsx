@@ -130,27 +130,27 @@ export default async function PublicEnterprisesPage() {
         </CardHeader>
         <CardContent className="p-5 pt-0">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-2">
-            <div className="p-3 rounded-lg border bg-muted/20">
-              <span className="text-muted-foreground block text-[11px]">공기업 합산 자산</span>
-              <span className="font-mono font-bold text-base text-foreground mt-1 block">
+            <div className="p-3 rounded-xl border border-[#222738] bg-[#121622]">
+              <span className="text-zinc-400 block text-[11px]">공기업 합산 자산</span>
+              <span className="font-mono font-bold text-base text-zinc-100 mt-1 block">
                 {groupDigits(overview.total_soe_assets_wld)} WLD
               </span>
             </div>
-            <div className="p-3 rounded-lg border bg-muted/20">
-              <span className="text-muted-foreground block text-[11px]">시간당 총 매출</span>
-              <span className="font-mono font-bold text-base text-foreground mt-1 block">
+            <div className="p-3 rounded-xl border border-[#222738] bg-[#121622]">
+              <span className="text-zinc-400 block text-[11px]">시간당 총 매출</span>
+              <span className="font-mono font-bold text-base text-[#00E5FF] mt-1 block">
                 +{groupDigits(overview.hourly_soe_revenue_wld)} WLD
               </span>
             </div>
-            <div className="p-3 rounded-lg border bg-muted/20">
-              <span className="text-muted-foreground block text-[11px]">시간당 순이익</span>
-              <span className="font-mono font-bold text-base text-emerald-600 mt-1 block">
+            <div className="p-3 rounded-xl border border-[#222738] bg-[#121622]">
+              <span className="text-zinc-400 block text-[11px]">시간당 순이익</span>
+              <span className="font-mono font-bold text-base text-[#00F59B] mt-1 block">
                 +{groupDigits(overview.hourly_soe_profit_wld)} WLD
               </span>
             </div>
-            <div className="p-3 rounded-lg border bg-muted/20">
-              <span className="text-muted-foreground block text-[11px]">국고 귀속 배당금 (30%)</span>
-              <span className="font-mono font-bold text-base text-primary mt-1 block">
+            <div className="p-3 rounded-xl border border-[#222738] bg-[#121622]">
+              <span className="text-zinc-400 block text-[11px]">국고 귀속 배당금 (30%)</span>
+              <span className="font-mono font-bold text-base text-emerald-400 mt-1 block">
                 +{groupDigits(overview.hourly_soe_dividends_wld)} WLD
               </span>
             </div>
