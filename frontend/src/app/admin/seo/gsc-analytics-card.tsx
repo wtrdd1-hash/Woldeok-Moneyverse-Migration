@@ -399,33 +399,35 @@ export function GscAnalyticsCard() {
             </div>
           </div>
 
-          {/* SVG Canvas */}
-          <div className="relative mt-3 h-36 w-full">
-            <svg
-              viewBox="0 0 600 140"
-              preserveAspectRatio="none"
-              className="h-full w-full overflow-visible"
-            >
-              {/* Grid Lines */}
-              <line x1="0" y1="20" x2="600" y2="20" stroke="currentColor" strokeOpacity="0.08" />
-              <line x1="0" y1="70" x2="600" y2="70" stroke="currentColor" strokeOpacity="0.08" />
-              <line x1="0" y1="120" x2="600" y2="120" stroke="currentColor" strokeOpacity="0.08" />
+          {/* SVG Canvas & Date Scale */}
+          <div className="mt-3 w-full space-y-2">
+            <div className="relative h-36 w-full">
+              <svg
+                viewBox="0 0 600 140"
+                preserveAspectRatio="none"
+                className="h-full w-full overflow-visible"
+              >
+                {/* Grid Lines */}
+                <line x1="0" y1="20" x2="600" y2="20" stroke="currentColor" strokeOpacity="0.08" />
+                <line x1="0" y1="70" x2="600" y2="70" stroke="currentColor" strokeOpacity="0.08" />
+                <line x1="0" y1="120" x2="600" y2="120" stroke="currentColor" strokeOpacity="0.08" />
 
-              {/* Trend Polyline */}
-              {chartPoints && (
-                <polyline
-                  fill="none"
-                  stroke={activeMetric === 'clicks' ? '#10b981' : '#3b82f6'}
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={chartPoints}
-                />
-              )}
-            </svg>
+                {/* Trend Polyline */}
+                {chartPoints && (
+                  <polyline
+                    fill="none"
+                    stroke={activeMetric === 'clicks' ? '#10b981' : '#3b82f6'}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={chartPoints}
+                  />
+                )}
+              </svg>
+            </div>
 
-            {/* Hover Tooltip display */}
-            <div className="mt-2 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+            {/* Date Scale display */}
+            <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
               <span>{series[0]?.date || '30일 전'}</span>
               <span>15일 전</span>
               <span>{series[series.length - 1]?.date || '오늘'}</span>
