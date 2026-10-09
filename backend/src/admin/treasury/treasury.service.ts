@@ -80,6 +80,54 @@ export class TreasuryService {
     }
   }
 
+  async previewTargetedSubsidy(cutoffWld = '10000', amountPerUserWld = '5000') {
+    return this.repository.previewTargetedSubsidy(cutoffWld, amountPerUserWld);
+  }
+
+  async disburseTargetedSubsidy(
+    adminId: string,
+    amountPerUserWld: string,
+    maxBalanceCutoffWld: string,
+    reason: string,
+  ) {
+    if (!amountPerUserWld || !/^\d+$/.test(amountPerUserWld) || BigInt(amountPerUserWld) <= BigInt(0)) {
+      throw new TreasuryInputError('1인당 지원금은 1 WLD 이상의 정수여야 합니다.');
+    }
+    if (!maxBalanceCutoffWld || !/^\d+$/.test(maxBalanceCutoffWld) || BigInt(maxBalanceCutoffWld) <= BigInt(0)) {
+      throw new TreasuryInputError('보유자산 컷오프는 1 WLD 이상의 정수여야 합니다.');
+    }
+    if (!reason || typeof reason !== 'string' || reason.trim().length < 10) {
+      throw new TreasuryInputError('지출 감사 사유는 최소 10자 이상 입력해야 합니다.');
+    }
+    try {
+      return await this.repository.disburseTargetedSubsidy(
+        adminId,
+        amountPerUserWld,
+        maxBalanceCutoffWld,
+        reason,
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
+  async userDonate(userId: string, amountWld: string, memo: string) {
+    if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
+      throw new TreasuryInputError('기부 금액은 1 WLD 이상의 정수여야 합니다.');
+    }
+    try {
+      return await this.repository.userDonate(userId, amountWld, memo || '국고 자발적 공공 기부');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
+  async getTopDonors(limit = 10) {
+    return this.repository.getTopDonors(limit);
+  }
+
   async disburseGrant(
     adminId: string,
     targetUserId: string | null,

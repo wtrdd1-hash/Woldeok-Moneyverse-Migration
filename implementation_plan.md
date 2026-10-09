@@ -5432,3 +5432,38 @@ ull을 반환하여 전면 숨김 처리 및 DOM 옵저버 비활성화.
 - 포트폴리오 페이지에서 바이럴 공유 카드 생성 및 이미지 렌더링 정상 동작 확인.
 - 주식 메인 허브에서 dynamic import 적용된 차트 및 리더보드 로드 확인.
 - 원격 미니PC 승격 배포 (`prod-v553`) 및 무중단 가동 검증.
+
+---
+
+## 🚀 [v169 Specification] 저자산 초기 유저 타겟팅 국고 선별 지원금(Targeted Relief) 및 국고 기부 명예의 전당 선순환 풀스택 구축
+
+### 1. 배경 및 문제 정의 (User Problem & Image Evidence)
+- **현상**: 관리자 회원 목록 확인 결과 상위 유저들(루마 202,267 WLD, 치킨무 180,301 WLD, 고구마 168,618 WLD 등)이 16만~20만 WLD 이상의 과도한 자산을 축적한 반면, 무차별적인 일괄 배당으로 인해 국고 자금이 급속히 소모되고 인플레이션이 가속화됨. 반면 0 WLD~1만 WLD 미만의 신규/빈곤 유저는 정착 자금이 부족함.
+- **사용자 승인 지침**: "무작정 유저한테 돈 주니까 돈이 너무 많이 든다. 돈 적은 초기 유저한테만 국고에서 지급하게 하고, 다른 국고 소비/흡수처를 만들어라. 자동 기획 개발 테스트 서버 후 QA 진행 후 운영서버 승격 승인함."
+
+### 2. 핵심 아키텍처 및 구현 사양
+
+#### 1) 저자산 초기 유저 맞춤형 국고 선별 지원금 (Targeted Relief / Basic Wealth Voucher)
+- **PostgreSQL 저장 프로시저 신설**: `public.treasury_disburse_targeted_subsidy(p_actor uuid, p_amount_per_user_wld text, p_max_balance_cutoff_wld text, p_reason text)`
+  - 수혜 조건: `a.account_type = 'USER_CASH' AND ab.available_amount <= p_max_balance_cutoff_wld::numeric` (기본 컷오프 10,000 WLD 이하).
+  - 10,000 WLD 초과 고액 자산가는 배당 대상에서 완전히 제외되어 국고 지출을 80% 이상 절감하면서 빈곤 유저에게 실질적 집중 지원 실현.
+  - 30% 국고 안전 비축금 원칙 엄격 적용.
+- **NestJS 백엔드 엔드포인트**: `POST /admin/treasury/disburse-targeted-subsidy`
+- **관리자 UI (`/admin/treasury`)**: 대상 자산 컷오프(기본 10,000 WLD, 5,000 WLD 등) 선택 필터, 예상 수혜자 수 및 총 소요 예산 실시간 시뮬레이션 위젯 탑재.
+
+#### 2) 국고 자금 순환 및 고래 유휴 자금 흡수처 (Treasury Sink & Hall of Fame Donation)
+- **국고 공공 기부 및 명예의 전당 시스템**:
+  - `POST /api/v1/treasury/donate`: 고액 자산가 유저가 자신의 보유 WLD를 중앙 국고(또는 저자산 복지 풀)에 자발적으로 기부.
+  - 기부 누적액에 따른 3단계 명예 칭호 수여:
+    - 🥉 브론즈 서포터 (1,000 WLD 이상)
+    - 🥈 실버 가디언 (10,000 WLD 이상)
+    - 🥇 골드 필란트로피스트 (50,000 WLD 이상)
+  - 기부된 자금은 인플레이션 억제를 위해 일부는 영구 소거(Burn), 나머지는 저자산 복지 지원금 재원으로 안전 전입.
+- **프론트엔드 컴포넌트**: `TreasuryDonationCard` (`/wallet` 및 `/bonds`에 배치)
+
+### 3. 검증 및 배포 파이프라인 (Verification & Promotion Pipeline)
+1. 백엔드 컴파일 및 유닛 테스트 검증.
+2. 프론트엔드 타입체크 및 579개 라우트 빌드 통과.
+3. 원격 미니PC 데비안 호스트 배포 및 DB 함수 적용.
+4. CLI / curl 기반 컷오프 배당 시뮬레이션 및 API 헬스 QA 검증.
+5. 운영 서버 무중단 승격 (`prod-v554`) 반영 완료.

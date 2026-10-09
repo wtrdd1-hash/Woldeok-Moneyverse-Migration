@@ -47,6 +47,35 @@ export class TreasuryDisburseDividendDto {
   reason!: string;
 }
 
+export class TreasuryDisburseTargetedSubsidyDto {
+  @ApiProperty({ example: '5000', description: '1인당 배당금 (정수 WLD)' })
+  @IsString()
+  @Matches(/^\d+$/, { message: 'amountPerUserWld must be an integer string' })
+  amountPerUserWld!: string;
+
+  @ApiProperty({ example: '10000', description: '수혜 대상 최대 자산 컷오프 (정수 WLD)' })
+  @IsString()
+  @Matches(/^\d+$/, { message: 'maxBalanceCutoffWld must be an integer string' })
+  maxBalanceCutoffWld!: string;
+
+  @ApiProperty({ example: '저자산 초기 유저 정착금 및 빈곤 탈출 지원금 선별 집행', description: '감사 사유 (최소 10자)' })
+  @IsString()
+  @MinLength(10, { message: 'reason must be at least 10 characters' })
+  reason!: string;
+}
+
+export class TreasuryUserDonateDto {
+  @ApiProperty({ example: '10000', description: '기부 금액 (정수 WLD)' })
+  @IsString()
+  @Matches(/^\d+$/, { message: 'amountWld must be an integer string' })
+  amountWld!: string;
+
+  @ApiProperty({ required: false, example: '초기 유저 복지 기금 후원', description: '기부 메모' })
+  @IsOptional()
+  @IsString()
+  memo?: string;
+}
+
 export class TreasuryDisburseGrantDto {
   @ApiProperty({ required: false, example: '00000000-0000-0000-0000-000000000000', description: '수혜 대상 유저 ID (선택)' })
   @IsOptional()
@@ -199,6 +228,46 @@ export class AdminTreasuryController {
   ) {
     const adminId = requireUserId(request);
     return this.service.disburseCitizenDividend(adminId, dto.amountPerUserWld, dto.reason);
+  }
+
+  @Get('disburse/targeted-preview')
+  @ApiOperation({ summary: '저자산 시민 선별 지원금 수혜자 수 및 소요 예산 시뮬레이션' })
+  async previewTargetedSubsidy(
+    @Query('cutoff') cutoff?: string,
+    @Query('amount') amount?: string,
+  ) {
+    return this.service.previewTargetedSubsidy(cutoff || '10000', amount || '5000');
+  }
+
+  @Post('disburse/targeted')
+  @ApiOperation({ summary: '저자산 초기 시민 타겟팅 국고 선별 지원금 집행 (Targeted Relief)' })
+  async disburseTargetedSubsidy(
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryDisburseTargetedSubsidyDto,
+  ) {
+    const adminId = requireUserId(request);
+    return this.service.disburseTargetedSubsidy(
+      adminId,
+      dto.amountPerUserWld,
+      dto.maxBalanceCutoffWld,
+      dto.reason,
+    );
+  }
+
+  @Post('donate')
+  @ApiOperation({ summary: '시민 자발적 국고 기부 및 잉여 자금 흡수 (명예 칭호 수여)' })
+  async userDonate(
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryUserDonateDto,
+  ) {
+    const userId = requireUserId(request);
+    return this.service.userDonate(userId, dto.amountWld, dto.memo || '국고 자발적 공공 기부');
+  }
+
+  @Get('donations/top')
+  @ApiOperation({ summary: '국고 기부 명예의 전당 랭킹 조회' })
+  async getTopDonors(@Query('limit') limit?: number) {
+    return this.service.getTopDonors(limit ? Number(limit) : 10);
   }
 
   @Post('disburse/grant')

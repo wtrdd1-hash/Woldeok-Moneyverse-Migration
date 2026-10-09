@@ -27,6 +27,8 @@ interface PublicMarketsResponse {
   guarantor: string;
 }
 
+import { TreasuryDonationCard } from '@/components/treasury-donation-card';
+
 export default async function PublicBondsPage() {
   const marketsData = await publicApi<PublicMarketsResponse>('/api/v1/bonds/markets', 30);
 
@@ -65,7 +67,7 @@ export default async function PublicBondsPage() {
   }
 
   return (
-    <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
       <BondsPortalClient
         initialBonds={bonds}
         initialHoldings={holdings}
@@ -73,6 +75,10 @@ export default async function PublicBondsPage() {
         overview={overview}
         isLoggedIn={isLoggedIn}
       />
+
+      <section aria-label="국고 공공 기부 & 명예의 전당">
+        <TreasuryDonationCard />
+      </section>
     </div>
   );
 }

@@ -789,6 +789,71 @@ export class TreasuryRepository {
     return res.rows[0]?.result as TreasuryCitizenDividendResult;
   }
 
+  async previewTargetedSubsidy(cutoffWld = '10000', amountPerUserWld = '5000'): Promise<{
+    beneficiary_count: number;
+    cutoff_wld: string;
+    amount_per_user_wld: string;
+    estimated_total_wld: string;
+  }> {
+    const res = await this.pool.query<{ count: string }>(
+      `SELECT count(*)::text AS count
+       FROM public.accounts a
+       JOIN public.account_balances ab ON ab.account_id = a.id
+       JOIN public.users u ON u.id = a.owner_user_id
+       WHERE a.account_type = 'USER_CASH'::public.account_type
+         AND a.status = 'active'::public.account_status
+         AND u.status = 'active'::public.user_status
+         AND ab.available_amount <= $1::numeric`,
+      [cutoffWld],
+    );
+    const count = Number.parseInt(res.rows[0]?.count ?? '0', 10);
+    const estimatedTotal = (BigInt(count) * BigInt(amountPerUserWld)).toString();
+    return {
+      beneficiary_count: count,
+      cutoff_wld: cutoffWld,
+      amount_per_user_wld: amountPerUserWld,
+      estimated_total_wld: estimatedTotal,
+    };
+  }
+
+  async disburseTargetedSubsidy(
+    adminId: string,
+    amountPerUserWld: string,
+    maxBalanceCutoffWld: string,
+    reason: string,
+  ): Promise<any> {
+    const res = await this.pool.query<{ result: any }>(
+      `SELECT public.treasury_disburse_targeted_subsidy($1::uuid, $2::text, $3::text, $4::text) AS result`,
+      [adminId, amountPerUserWld, maxBalanceCutoffWld, reason],
+    );
+    return res.rows[0]?.result;
+  }
+
+  async userDonate(userId: string, amountWld: string, memo: string): Promise<any> {
+    const res = await this.pool.query<{ result: any }>(
+      `SELECT public.treasury_user_donate($1::uuid, $2::text, $3::text) AS result`,
+      [userId, amountWld, memo],
+    );
+    return res.rows[0]?.result;
+  }
+
+  async getTopDonors(limit = 10): Promise<any[]> {
+    const res = await this.pool.query(
+      `SELECT u.id AS user_id, u.username, u.nickname,
+              sum(d.amount_wld)::bigint::text AS total_donated_wld,
+              count(*)::integer AS donation_count,
+              max(d.honor_title) AS honor_title,
+              max(d.created_at) AS last_donated_at
+       FROM public.treasury_donations d
+       JOIN public.users u ON u.id = d.user_id
+       GROUP BY u.id, u.username, u.nickname
+       ORDER BY sum(d.amount_wld) DESC
+       LIMIT $1`,
+      [limit],
+    );
+    return res.rows;
+  }
+
   async disburseGrant(
     adminId: string,
     targetUserId: string | null,

@@ -576,6 +576,51 @@ export async function disburseCitizenDividendAction(
   }
 }
 
+export async function disburseTargetedSubsidyAction(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const amountPerUserWld = formData.get('amountPerUserWld');
+  const maxBalanceCutoffWld = formData.get('maxBalanceCutoffWld');
+  const reason = formData.get('reason');
+
+  if (typeof amountPerUserWld !== 'string' || !/^\d+$/.test(amountPerUserWld) || BigInt(amountPerUserWld) <= BigInt(0)) {
+    return { status: 'error', message: '1인당 지원금은 1 WLD 이상의 정수여야 합니다.' };
+  }
+  if (typeof maxBalanceCutoffWld !== 'string' || !/^\d+$/.test(maxBalanceCutoffWld) || BigInt(maxBalanceCutoffWld) <= BigInt(0)) {
+    return { status: 'error', message: '보유 자산 컷오프는 1 WLD 이상의 정수여야 합니다.' };
+  }
+  if (typeof reason !== 'string' || reason.trim().length < 10) {
+    return { status: 'error', message: '감사 사유를 10자 이상 구체적으로 적어 주세요.' };
+  }
+
+  try {
+    const res = await mutate<{
+      success: boolean;
+      beneficiary_count: number;
+      total_amount_wld: string;
+      amount_per_beneficiary_wld: string;
+      max_balance_cutoff_wld: string;
+    }>('/api/v1/admin/treasury/disburse/targeted', {
+      method: 'POST',
+      body: {
+        amountPerUserWld: amountPerUserWld.trim(),
+        maxBalanceCutoffWld: maxBalanceCutoffWld.trim(),
+        reason: reason.trim(),
+      },
+    });
+
+    revalidatePath('/admin/treasury');
+    revalidatePath('/wallet');
+    return {
+      status: 'ok',
+      message: `자산 ${groupDigits(res.max_balance_cutoff_wld)} WLD 이하 초기/저자산 시민 ${groupDigits(res.beneficiary_count)}명에게 총 ${groupDigits(res.total_amount_wld)} WLD (1인당 ${groupDigits(res.amount_per_beneficiary_wld)} WLD) 맞춤 지원금이 성공적으로 지급되었습니다. (고액 자산가 자동 제외 완료)`,
+    };
+  } catch (error) {
+    return failure(error, '저자산 선별 지원금 집행에 실패했습니다. 최소 30% 안전 비축금 한도 및 잔액을 확인해 주세요.');
+  }
+}
+
 export async function disburseGrantAction(
   _previous: ActionState,
   formData: FormData,
