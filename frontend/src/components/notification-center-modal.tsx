@@ -271,6 +271,7 @@ export function NotificationCenterModal() {
           <div className="flex items-center gap-2 mt-3">
             <button
               onClick={() => setFilter('all')}
+              aria-pressed={filter === 'all'}
               className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 filter === 'all'
                   ? 'bg-primary text-primary-foreground shadow-sm'
@@ -281,6 +282,7 @@ export function NotificationCenterModal() {
             </button>
             <button
               onClick={() => setFilter('unread')}
+              aria-pressed={filter === 'unread'}
               className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
                 filter === 'unread'
                   ? 'bg-primary text-primary-foreground shadow-sm'
@@ -298,7 +300,7 @@ export function NotificationCenterModal() {
         </DialogHeader>
 
         {/* 알림 목록 스크롤 영역 */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2.5 min-h-[280px]">
+        <div aria-busy={loading} className="flex-1 overflow-y-auto p-4 space-y-2.5 min-h-[280px]">
           {loading ? (
             <div className="h-48 flex flex-col items-center justify-center text-muted-foreground gap-2">
               <RefreshCw className="h-5 w-5 animate-spin text-primary" />
