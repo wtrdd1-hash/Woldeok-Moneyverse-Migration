@@ -73,4 +73,6 @@ it('notification trigger announces unread count and stale state', () => {
   expect(source).toContain('마지막 확인 미확인 알림');
   expect(source).toContain('미확인 알림 없음');
   expect(source).toContain('aria-hidden="true"');
+  // Manual retry must refresh the unread badge as well as the open notification list.
+  expect(source).toContain('}, [retryRequest]);');
 });
