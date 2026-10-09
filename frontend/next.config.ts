@@ -160,6 +160,21 @@ const config: NextConfig = {
     return [{ source: '/:path*', headers: security }];
   },
 
+  async redirects() {
+    return [
+      {
+        source: '/notices',
+        destination: '/announcements',
+        permanent: true,
+      },
+      {
+        source: '/notices/:path*',
+        destination: '/announcements/:path*',
+        permanent: true,
+      },
+    ];
+  },
+
   async rewrites() {
     return [
       {

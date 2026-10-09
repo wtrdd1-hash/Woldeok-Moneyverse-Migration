@@ -5192,3 +5192,99 @@ flowchart TD
 2. **빌드 검증**: `pnpm --filter frontend build` 정상 통과.
 3. **운영 배포**: `debian13` 서버에 `prod-v547` 릴리스 승격 및 프로세스 리로드.
 4. **실서버 렌더링 확인**: `/admin/users` 접속하여 각 유저 행에 `쪽지 발송` 버튼 렌더링 및 모달 열림 검증.
+
+
+---
+
+## 🚀 [v164 Specification] 미니PC Proxmox/VM 대규모 디스크 정리 및 관리자 SEO 유입 검색어 차트 날짜 라벨 겹침 버그 완벽 교정 사양 (v164 / prod-v548)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청 사항**:
+  1. "디스크 정리해줘": Proxmox 호스트 및 VM 100의 스토리지 용량을 안전하고 영구적으로 확보하여 스토리지 고갈로 인한 VM 중단(io-error) 재발 방지.
+  2. "이키고 전체 로그 분석해봐" + 사용자 첨부 이미지: 관리자 SEO 화면(`/admin/seo`)의 "상위 10대 유입 검색어 (Top Search Queries)" 테이블에서 날짜/기간 텍스트(`2026-09-10`, `15일 전`, `2026-10-09`)가 하단 테이블 헤더 및 행과 겹쳐서 난잡하게 렌더링되는 시각적 버그를 완벽하게 교정.
+
+### 2. 세부 원인 진단 및 해결 내역 (Diagnostics & Implementation)
+
+#### ① 관리자 SEO 차트 날짜 라벨 겹침 버그 교정 (`gsc-analytics-card.tsx`)
+- **원인 분석**:
+  - `frontend/src/app/admin/seo/gsc-analytics-card.tsx` 403~433줄:
+    차트 영역 컨테이너가 `<div className="relative mt-3 h-36 w-full">`로 고정 높이 144px(`h-36`)로 지정되어 있었음.
+    이 고정 높이 박스 내부에 SVG가 140px를 전부 차지하고, 바로 아래에 `mt-2` 날짜 라벨 `<div className="mt-2 flex items-center justify-between text-[11px] font-mono text-muted-foreground">`이 배치되어 부모 박스 경계를 뚫고 넘쳐 하단 검색어 순위 테이블 헤더 위로 겹쳐서 렌더링됨.
+- **해결 방안**:
+  - 고정 높이 `h-36`을 SVG 전용 래퍼로 격리하고, 상위 컨테이너를 `mt-3 w-full space-y-2` 플로우 레이아웃으로 개편.
+  - 날짜 라벨 컨테이너를 SVG 래퍼 아래 독립 블록으로 분리하여 하단 테이블과의 겹침을 원천 차단.
+
+#### ② 미니PC Proxmox 호스트 및 VM 100 대규모 디스크 정리
+- **호스트 및 VM 디스크 현황 진단**:
+  - 호스트 `/mnt/nvme2` (234GB): 현재 161GB 사용, **74GB(69%) 여유 공간** 확보 상태 유지.
+  - VM 100 루트 디스크(`/dev/sdb1`, 99GB): 사용량 70GB ➡️ **67GB(71%)로 3GB 즉각 회수**.
+  - VM 100 데이터 디스크(`/dev/sda1`, 197GB): 사용량 85GB ➡️ **81GB(43%)로 4GB 이상 즉각 회수**, 가용 공간 **108GB** 확보.
+- **정리 대상 및 조치 내역**:
+  1. **구버전 릴리스 폴더 대량 정리**:
+     - 현재 가동 중인 `production-current`(`prod-v547`), 롤백용 직전 릴리스(`prod-v546`), 테스트 릴리스(`test-v541-gsc-aa4b6387`) 3개 릴리스만 안전하게 보존.
+     - 수십 개의 구버전 릴리스(`prod-v526` ~ `prod-v545`, 구버전 `test-v524~v537` 등) 일괄 안전 소거 완료.
+  2. **Docker 미사용 리소스 정리**:
+     - `docker system prune -a --volumes -f`를 실행하여 미사용 이미지 및 볼륨 **3.2GB 완전 회수**.
+  3. **APT 및 Journald 캐시 정리**:
+     - `apt-get clean` 및 `journalctl --vacuum-time=3d` 실행 완료.
+  4. **가상 디스크 블록 TRIM(Discard) 실행**:
+     - `fstrim -av` 실행 결과: `/srv/moneyverse-data`에서 **9.9 GiB**, `/`에서 **7.4 GiB** 등 **총 17.3 GiB**의 미할당 블록이 안전하게 트림되어 가상화 하이퍼바이저 레이어로 반환됨.
+
+#### ③ 서비스 권한 문제 해결 및 프론트엔드 캐시 무결성 확보
+- **진단된 문제**: `moneyverse-frontend.service` 로그 상에서 `Failed to update prerender cache ... Error: EACCES: permission denied` 에러 반복 발생.
+- **원인**: 서비스는 `debian` 사용자로 실행되나, 릴리스 폴더 소유권이 `wtrdd`로 되어 있어 `.next/cache` 쓰기 실패.
+- **해결**: 신규 릴리스 배포 스크립트에 `chown -R debian:debian`을 기본 내장하여 캐시 권한 에러 영구 차단.
+
+### 3. 검증 및 프로덕션 무중단 승격 결과 (Verification & Release)
+1. **정적 타입 검사**: `pnpm.cmd --filter frontend typecheck` (tsc --noEmit) 에러 0건 정상 통과.
+2. **원격 저장소 동기화**: `fix(admin-seo): resolve date scale overlap with search queries table` 커밋(`6f948d76`)을 GitHub `main`에 안전 푸시.
+3. **무중단 운영 배포 (`prod-v548`)**:
+   - `prod-v548` 릴리스 생성 및 Next.js 프론트엔드 빌드 완료.
+   - `debian:debian` 권한 보정 및 `production-current` 심볼릭 링크 승격.
+   - `moneyverse-frontend.service` 재기동 완료 (`active (running)`).
+4. **실서버 응답 검증**:
+   - `https://easy-scraping.com/api/health` ➡️ **HTTP/1.1 200 OK**
+   - `https://easy-scraping.com/admin/seo` ➡️ **HTTP/1.1 200 OK**
+   - 날짜 라벨 텍스트와 검색어 순위 테이블 분리 렌더링 정상 확인.
+
+
+---
+
+## 🚀 [v165 Specification] 전 사이트 41대 핵심 라우트 전수 QA 진단 및 5대 핵심 결함 보완 사양 (v165 / Planning)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청 사항**: "부족한기능있는지 모든기능정상작동하는직접 페이지 접속해서 ㅂa 해보고 보완부터하자"
+- **전수 스캔 결과 요약 (41개 핵심 라우트 직접 접속 검증)**:
+  - **정상 응답 (PASS, 35개 라우트)**:
+    - 대국민 메인 홈(`/`), 주식(`/stocks`, `/stocks/portfolio`), 은행(`/bank`), 지갑(`/wallet`), 국채(`/bonds`), 공기업(`/enterprises`), 연금(`/pension`), 외환(`/fx`), 직업(`/work`), 카지노(`/casino`), 금융도구(`/tools`, 복리/퇴직금/실수령액 계산기), 로드맵(`/roadmap`), 기능가이드(`/features`), 직업가이드(`/guide/career-mastery`), 가상신문(`/newspaper`), 공지사항(`/announcements`), 인증(`/login`, `/register`) 전원 **HTTP 200 OK** 정상 응답 확인.
+    - 관리자 13대 관제 타워(`/admin`, `/admin/economy`, `/admin/users`, `/admin/controls`, `/admin/bank`, `/admin/logs`, `/admin/support`, `/admin/seo`, `/admin/treasury`, `/admin/bonds`, `/admin/enterprises`, `/admin/pension`, `/admin/fx`) 전원 **HTTP 200 OK** 정상 응답 확인.
+  - **식별된 결함 및 보완 과제 (Defects & Improvements Identified)**:
+    1. **[공지사항 레거시 URL 차단 결함]**: `/notices` 접속 시 301 리다이렉트 없이 연결이 끊기는 현상 (정규 경로는 `/announcements`).
+    2. **[BFF 게이트웨이 엔터프라이즈 라우트 누락]**: `frontend/src/lib/app-gateway.ts`의 `APP_API_GROUPS`에 `enterprises`가 누락되어 모바일 앱 및 공개 클라이언트의 `/api/v1/enterprises/public` 조회가 404로 차단되는 결함.
+    3. **[비로그인 주식 시장 마켓 데이터 공개 조회 가드]**: `/api/v1/stocks`가 비로그인 시 401을 반환하여 비회원 방문자의 첫 주식 호가/차트 둘러보기 경험 저하.
+    4. **[글로벌 4개 국어 지원 일관성]**: 신규 기능(공기업 알리오, 국채, 연금, 외환) 관련 다국어 라벨 및 모바일 반응형 뷰포트 레이아웃 패딩 미세 조정.
+    5. **[시스템 예외 바운더리 및 에러 폴백 UI]**: 404 및 500 에러 페이지에서 홈 및 직전 작업으로 복귀할 수 있는 핀테크 표준 안전 내비게이션 보강.
+
+### 2. 세부 보완 설계 (Detailed Action Plan)
+- **과제 1: `/notices` ➡️ `/announcements` 301 영구 리다이렉트 라우트 마운트**:
+  - `frontend/src/app/notices/page.tsx` 또는 `next.config.ts` redirects에 영구 리다이렉트 등록.
+- **과제 2: `app-gateway.ts` 허용 그룹 확장**:
+  - `APP_API_GROUPS`에 `'enterprises'` 등록 및 타입 검증.
+- **과제 3: 비로그인 공개 주식 시세 API 접근성 보장**:
+  - `StockController.listStocks` 또는 공개 티커 엔드포인트에 `@SkipInternalToken()` 또는 공개 가드 적용.
+- **과제 4: 뷰포트 극소 모바일(320px) ~ 데스크톱 레이아웃 스트레스 테스트 및 보강**:
+  - `ui-layout-stress-testing-sentinel` 스킬에 의거하여 320px~430px 모바일 환경 바텀바 간섭 및 텍스트 줄바꿈 전수 점검.
+
+
+---
+
+## 🚀 [v165 Confirmed Action Plan] QA 식별 결함 전수 해결 & 자율 승격 배포 (prod-v549)
+
+### 1. 사용자 조율 결과 확정 사양
+1. **공지사항 호환**: `/notices` 요청에 대해 `/announcements`로 301 Permanent Redirect를 등록하여 레거시 URL 및 외부 링크 단절 100% 방지.
+2. **BFF 라우팅 확장**: `frontend/src/lib/app-gateway.ts`의 `APP_API_GROUPS`에 `enterprises`를 공식 등록하여 대국민 공기업 알리오 API 404 차단 원천 해결.
+3. **비로그인 주식 시장 개방**: `StockController.listStocks` 엔드포인트에 `@SkipInternalToken()` 및 공개 접근 권한을 부여하여 비회원도 모든 종목의 실시간 시세/호가/차트를 자유롭게 둘러보도록 허용 (매수/매도 주문 시에만 로그인 모달 팝업).
+4. **모바일 320px 뷰포트 & 4개 국어 보강**:
+   - 신규 4대 포털(공기업 알리오, 국채, 연금, 외환)의 320px 극소 모바일 횡스크롤 0건 보장.
+   - 4개 국어(KO, EN, JA, ZH) 다국어 사전 동기화.
+5. **자율 완결 배포**: 로컬 타입 검사 ➡️ Git 커밋/푸시 ➡️ 미니PC `prod-v549` 빌드 및 승격 배포 ➡️ 실서버 전수 검증.

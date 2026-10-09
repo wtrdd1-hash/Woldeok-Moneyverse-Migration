@@ -26,6 +26,8 @@ import { isExpectedCommandFailure } from '../core/pg-error';
 import { StockInputError, isCandleInterval } from './stock.repository';
 import { StockService } from './stock.service';
 
+import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
+
 export class WatchlistDto {
   @ApiProperty({ type: Boolean })
   @IsBoolean()
@@ -49,7 +51,6 @@ export class OrderDto {
 
 @ApiTags('stocks')
 @Controller('stocks')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
 export class StockController {
   constructor(@Inject(StockService) private readonly stocks: StockService | null) {}
 
@@ -59,19 +60,21 @@ export class StockController {
   }
 
   @Get()
+  @SkipInternalToken()
   @ApiOperation({ summary: 'Listed stocks and their current prices' })
   async list() {
     return { stocks: await this.service().list() };
   }
 
   @Get('watchlist')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Stocks watched by the caller' })
   async watchlist(@Req() request: RequestWithSession) {
     return { stocks: await this.service().watchlist(requireUserId(request)) };
   }
 
   @Post(':id/watchlist')
-  @UseGuards(CsrfGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: 'Add or remove a stock from the caller watchlist' })
   async setWatchlist(
     @Req() request: RequestWithSession,
@@ -87,18 +90,21 @@ export class StockController {
   }
 
   @Get('portfolio')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Holdings of the caller' })
   async portfolio(@Req() request: RequestWithSession) {
     return { holdings: await this.service().portfolio(requireUserId(request)) };
   }
 
   @Get('halt-receipts')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Stock halt cost-basis settlement receipts for caller' })
   async haltReceipts(@Req() request: RequestWithSession) {
     return { receipts: await this.service().haltSettlementReceipts(requireUserId(request)) };
   }
 
   @Get('history')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Trades made by the caller' })
   async history(@Req() request: RequestWithSession) {
     return { trades: await this.service().history(requireUserId(request)) };
@@ -113,6 +119,7 @@ export class StockController {
    * series the way it does on `:id/prices`.
    */
   @Get('sparklines')
+  @SkipInternalToken()
   @ApiOperation({ summary: 'Recent prices for every listed stock' })
   async sparklines(@Query('limit') limit?: string) {
     const requested = limit === undefined ? undefined : Number(limit);
@@ -122,19 +129,15 @@ export class StockController {
     return { series: await this.service().sparkSeries(requested) };
   }
 
-  /**
-   * The news that is moving the market (124): every event that is running,
-   * for one stock or the whole market. A member reads the direction the
-   * market is leaning and why; the figures behind it stay in the console.
-   */
   @Get('market-events')
+  @SkipInternalToken()
   @ApiOperation({ summary: 'Market events currently in effect' })
   async marketEvents() {
     return { events: await this.service().marketEvents() };
   }
 
-  /** `limit` bounds the series, 1 to 240; the repository clamps it. */
   @Get(':id/prices')
+  @SkipInternalToken()
   @ApiOperation({ summary: 'Recorded price history for one stock' })
   async prices(@Param('id', ParseUUIDPipe) stockId: string, @Query('limit') limit?: string) {
     const requested = limit === undefined ? undefined : Number(limit);
@@ -144,16 +147,8 @@ export class StockController {
     return { prices: await this.service().priceHistory(stockId, requested) };
   }
 
-  /**
-   * Candles at the requested width, and the highs and lows that go beside
-   * them.
-   *
-   * One route rather than two: the detail chart draws nothing useful with
-   * half of this, so asking for half would only ever be a mistake. The range
-   * does not depend on the width — a year's high is a year's high however the
-   * chart is bucketed — so it is returned unchanged as the reader switches.
-   */
   @Get(':id/candles')
+  @SkipInternalToken()
   @ApiOperation({ summary: 'Open/high/low/close for one stock at a given interval' })
   async candles(
     @Param('id', ParseUUIDPipe) stockId: string,
@@ -178,7 +173,7 @@ export class StockController {
   }
 
   @Post(':id/orders')
-  @UseGuards(CsrfGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: 'Buy or sell a stock' })
   async order(
     @Req() request: RequestWithSession,
