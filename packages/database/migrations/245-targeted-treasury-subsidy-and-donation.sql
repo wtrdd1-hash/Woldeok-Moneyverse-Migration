@@ -16,6 +16,10 @@ CREATE TABLE IF NOT EXISTS public.treasury_donations (
 CREATE INDEX IF NOT EXISTS idx_treasury_donations_user_id ON public.treasury_donations(user_id);
 CREATE INDEX IF NOT EXISTS idx_treasury_donations_created_at ON public.treasury_donations(created_at DESC);
 
+-- 1-1. 국고 원장(system_treasury_ledger) tx_type 체크 제약 조건 확장 (기부 및 선별지원 추가)
+ALTER TABLE public.system_treasury_ledger DROP CONSTRAINT IF EXISTS system_treasury_ledger_tx_type_check;
+ALTER TABLE public.system_treasury_ledger ADD CONSTRAINT system_treasury_ledger_tx_type_check CHECK ((tx_type = ANY (ARRAY['INJECTION'::text, 'ABSORPTION_SINK'::text, 'STOCK_HALT_SETTLEMENT'::text, 'FEE_RECIRCULATION'::text, 'CITIZEN_DIVIDEND'::text, 'COMMUNITY_FUNDING'::text, 'WELFARE_SUBSIDY'::text, 'MARKET_STIMULUS'::text, 'PUBLIC_GRANT'::text, 'BUDGET_DISTRIBUTION'::text, 'MARKET_BUYBACK_BURN'::text, 'CASINO_PIGOVIAN_TAX'::text, 'STOCK_SPECULATION_TAX'::text, 'WEALTH_TAX_COLLECTION'::text, 'USER_DONATION'::text, 'TARGETED_SUBSIDY'::text])));
+
 -- 2. 저자산 초기 유저 맞춤형 국고 선별 지원금 프로시저
 CREATE OR REPLACE FUNCTION public.treasury_disburse_targeted_subsidy(
   p_actor uuid,
