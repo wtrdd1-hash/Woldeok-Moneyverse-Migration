@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import React from 'react';
+import type React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { NotificationCenterModal } from './notification-center-modal';
