@@ -86,6 +86,7 @@ export function LoanCalculatorClient() {
   const presetAmounts = [
     { label: '5천만', value: 50000000 },
     { label: '1억', value: 100000000 },
+    { label: '2억', value: 200000000 },
     { label: '3억', value: 300000000 },
     { label: '5억', value: 500000000 },
     { label: '10억', value: 1000000000 },
@@ -102,6 +103,61 @@ export function LoanCalculatorClient() {
 
   return (
     <div className="space-y-6">
+      {/* 1위 검색 유입 추천 시나리오 퀵 프리셋 */}
+      <div className="flex flex-wrap items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+        <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+          <span>🔥</span> 실시간 인기 검색 시나리오:
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setLoanAmount(200000000);
+            setAnnualRate(4.0);
+            setTermYears(30);
+            setRepaymentType('EQUAL_PI');
+          }}
+          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+            loanAmount === 200000000 && termYears === 30 && repaymentType === 'EQUAL_PI'
+              ? 'bg-emerald-500 text-zinc-950 shadow-sm'
+              : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+          }`}
+        >
+          🎯 2억 대출 30년 상환 (월 95.4만)
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setLoanAmount(100000000);
+            setAnnualRate(4.5);
+            setTermYears(10);
+            setRepaymentType('EQUAL_PI');
+          }}
+          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+            loanAmount === 100000000 && termYears === 10 && repaymentType === 'EQUAL_PI'
+              ? 'bg-emerald-500 text-zinc-950 shadow-sm'
+              : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+          }`}
+        >
+          1억 10년 상환
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setLoanAmount(300000000);
+            setAnnualRate(4.2);
+            setTermYears(30);
+            setRepaymentType('EQUAL_PI');
+          }}
+          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+            loanAmount === 300000000 && termYears === 30 && repaymentType === 'EQUAL_PI'
+              ? 'bg-emerald-500 text-zinc-950 shadow-sm'
+              : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+          }`}
+        >
+          3억 30년 주담대
+        </button>
+      </div>
+
       {/* 상환 방식 선택 탭 */}
       <div className="grid grid-cols-3 gap-2 p-1.5 bg-zinc-900 border border-zinc-800 rounded-xl">
         <button

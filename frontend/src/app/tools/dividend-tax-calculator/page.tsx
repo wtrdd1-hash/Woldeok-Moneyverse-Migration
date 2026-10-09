@@ -8,13 +8,22 @@ import { DividendCalendarWidget } from '@/components/dividend-calendar-widget';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
 
 export const metadata: Metadata = {
-
-  title: '배당소득세 계산기 - 국내·미국 주식 15.4% 원천징수 및 2천만원 금융종합과세',
-  description: '국내 및 미국 주식 배당금의 15.4% 세금 원천징수 실수령액과 2,000만원 초과 시 금융소득종합과세 세부담을 실시간으로 계산하고 절세 전략을 확인하세요.',
-  keywords: ['배당소득세 계산기', '배당금 세금', '금융소득종합과세 2000만원', '미국 배당주 세금', '배당 실수령액', 'ISA 계좌 배당 절세'],
+  title: '배당소득세 계산기 - Dividend Yield·국내·미국 배당주 15.4% 원천징수 및 금융종합과세',
+  description: '배당수익률(Dividend Yield) 및 국내·미국 주식 배당금의 15.4% 세금 원천징수 실수령액과 2,000만원 초과 시 금융소득종합과세 세부담을 실시간으로 계산하고 절세 전략을 확인하세요.',
+  keywords: [
+    'dividend yield',
+    'dividend',
+    '배당소득세 계산기',
+    '배당금 세금',
+    '배당수익률 계산',
+    '미국 배당주 세금',
+    '금융소득종합과세 2000만원',
+    '배당 실수령액',
+    'ISA 계좌 배당 절세',
+  ],
   openGraph: {
-    title: '배당소득세 및 금융소득종합과세 2,000만원 시뮬레이터',
-    description: '배당금에 따른 원천징수 세금과 실수령 배당금, 금융종합과세 해당 여부를 즉시 계산합니다.',
+    title: '배당소득세 & Dividend Yield 2,000만원 금융종합과세 시뮬레이터',
+    description: '배당수익률(Dividend Yield)과 원천징수 세금, 실수령 배당금 및 종합과세 해당 여부를 즉시 계산합니다.',
     type: 'website',
   },
 };
@@ -23,8 +32,8 @@ export default function DividendTaxCalculatorPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: '배당소득세 계산기',
-    description: '국내 및 미국 주식 배당금 원천징수 세액 및 2,000만원 금융소득종합과세 계산기',
+    name: '배당소득세 & Dividend Yield 계산기',
+    description: '배당수익률 및 국내/미국 주식 배당금 원천징수 세액, 2,000만원 금융소득종합과세 계산기',
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'All',
     offers: {

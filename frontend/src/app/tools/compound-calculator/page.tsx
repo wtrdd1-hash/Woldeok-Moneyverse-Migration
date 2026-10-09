@@ -137,15 +137,41 @@ export default function CompoundCalculatorPage() {
       <div className="space-y-2">
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
           <Landmark className="size-7 text-amber-500" />
-          <span>복리 예금·적금 이자 계산기</span>
+          <span>복리·CAGR 계산기 (연평균 복리수익률 & DCA 시뮬레이터)</span>
         </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          초기 예치 원금과 매월 적립액, 이자율, 투자 기간을 입력하여 만기 시 수령액과 복리 효과를 정밀 시뮬레이션하세요.
+          초기 예치 원금과 매월 적립액(DCA), 연평균 복리 수익률(CAGR), 투자 기간을 입력하여 만기 시 수령액과 복리 효과를 정밀 시뮬레이션하세요.
         </p>
 
         {/* 롱테일 인기 프리셋 칩 목록 */}
         <div className="pt-2 flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold text-muted-foreground">인기 검색 프리셋:</span>
+          <button
+            type="button"
+            onClick={() => {
+              setPrincipal(10000000);
+              setMonthlyDeposit(0);
+              setAnnualRate(15.0);
+              setYears(3);
+              setCompoundFrequency('annually');
+            }}
+            className="px-2.5 py-1 text-xs rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 transition-colors font-bold"
+          >
+            🎯 CAGR 15% 3년 복리
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPrincipal(1000000);
+              setMonthlyDeposit(500000);
+              setAnnualRate(8.0);
+              setYears(5);
+              setCompoundFrequency('monthly');
+            }}
+            className="px-2.5 py-1 text-xs rounded-full bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 border border-blue-500/30 transition-colors font-bold"
+          >
+            🌱 DCA 월 50만원 적립식
+          </button>
           <Link
             href="/tools/compound-calculator/10m-3y-5p"
             className="px-2.5 py-1 text-xs rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-colors font-medium"
@@ -163,18 +189,6 @@ export default function CompoundCalculatorPage() {
             className="px-2.5 py-1 text-xs rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-colors font-medium"
           >
             월 100만원 5년 1억 모으기
-          </Link>
-          <Link
-            href="/tools/compound-calculator/50m-1y-7p"
-            className="px-2.5 py-1 text-xs rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-colors font-medium"
-          >
-            5천만원 1년 7%
-          </Link>
-          <Link
-            href="/tools/compound-calculator/100m-10y-15p"
-            className="px-2.5 py-1 text-xs rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-colors font-medium"
-          >
-            1억원 10년 15%
           </Link>
         </div>
 

@@ -5525,3 +5525,59 @@ ull을 반환하여 전면 숨김 처리 및 DOM 옵저버 비활성화.
 - TypeScript 타입체크 및 Next.js 579개 전체 라우트 빌드 통과.
 - PostgreSQL 마이그레이션 적용 및 단위 테스트 검증.
 - 미니PC 원격 서버 배포 및 QA 검증 후 무중단 프로덕션 승격.
+
+
+---
+## 🚀 [v171 Specification] 상위 검색어 1페이지 SEO 메타태그 고도화 & 국고 신규 정착 지원금 및 경제 밸런스 시뮬레이터 풀스택 구축
+
+### 1. 배경 및 핵심 요구사항 (Overview & Goals)
+1. **상위 검색어 1페이지(TOP 10) 진입을 위한 SEO 메타태그/구조화 데이터 고도화**:
+   - Google Search Console 실측 30~80위권 검색어(`2억 대출 30년 상환`, `cagr`, `dividend ...`, `dca`)의 순위를 1페이지(TOP 10)로 끌어올리기 위한 검색엔진 친화적 온페이지(On-page) SEO 강화.
+   - 5대 핵심 금융 계산기(`/tools/loan-interest-calculator`, `/tools/compound-calculator`, `/tools/dividend-tax-calculator`, `/tools/capital-gains-tax-calculator`, `/tools/retirement-calculator`)에 풍부한 OpenGraph, Twitter Cards, JSON-LD Schema(`FinancialProduct`, `HowTo`, `FAQPage`, `SoftwareApplication`) 주입.
+   - 구글 검색 결과에 리치 스니펫(별점, FAQ 드롭다운, 상환액 공식, 세액 요약)이 즉각 노출되도록 메타태그 및 본문 키워드 밀도 최적화.
+
+2. **국고 시스템 및 신규 유저 경제 밸런스 조정**:
+   - **무분별한 화폐 살포 방지 & 타겟팅 정착 지원**: 자산이 부족한 초기 진입 유저(총자산 1,000 WLD 미만)에게만 중앙 국고(`VAULT_MAIN`)에서 10,000 WLD의 '시민 정착 보조금(Resettlement Grant)'을 1회 한정 지급하여 초기 안착을 유도.
+   - **국고 세출/세입 거시경제 밸런스 시뮬레이터**: 국고 지출(초기 정착금, 기본소득)과 국고 회수/소각(메가 잭팟 복권 50% 소각, 증권거래세 0.1%, 테일러 칙 대출이자 환수) 간의 상호작용을 사용자가 직관적으로 체험할 수 있는 인터랙티브 시뮬레이션 UI 탑재.
+   - **Toss/Robinhood 스타일의 크래프트맨십**: 고대비 모노스페이스 수치 렌더링, 44px 모바일 터치 타겟, 바텀시트 및 무손실 반응형 레이아웃 준수.
+
+3. **기타 기능 최적화 및 운영 무중단 승격**:
+   - `tsc` 및 Next.js 580개 전 라우트 빌드 무결성 확보.
+   - 원격 운영 서버(`prod-v557`) 무중단 배포 및 실제 라이브 검증(HTTP 200).
+
+---
+
+### 2. 세부 구현 사양 (Detailed Implementation Specs)
+
+#### ① 5대 금융 계산기 고도화 메타데이터 & JSON-LD 리치 스니펫
+- **`loan-interest-calculator`**:
+  - 타겟 키워드: `2억 대출 30년 상환`, `대출이자 계산기`, `원리금균등상환`, `주택담보대출 금리`
+  - JSON-LD: `FinancialProduct` (금리 범위 연 2.5%~6.5%, 30년 상환 스키마) + `FAQPage` ("2억 대출 30년 상환 시 월 납입금은 얼마인가요?", "원리금균등과 원금균등의 차이는 무엇인가요?")
+- **`compound-calculator`**:
+  - 타겟 키워드: `cagr`, `복리 계산기`, `dca 효과`, `연평균 복리수익률`, `72의 법칙`
+  - JSON-LD: `FinancialProduct` + `FAQPage` ("CAGR 계산 공식과 복리 효과", "DCA 적립식 투자의 장점")
+- **`dividend-tax-calculator`**:
+  - 타겟 키워드: `dividend yield`, `배당소득세 계산기`, `미국주식 15.4% 원천징수`, `금융소득종합과세 2천만원`
+  - JSON-LD: `FinancialProduct` + `FAQPage` ("배당금 2,000만원 초과 시 종합과세 기준", "미국 ETF 배당세 환급")
+- **`capital-gains-tax-calculator`**:
+  - 타겟 키워드: `해외주식 250만원 공제`, `양도소득세 22%`, `미국주식 세금 계산기`
+- **`retirement-calculator`**:
+  - 타겟 키워드: `퇴직금 계산기`, `연금저축 IRP 세액공제`, `퇴직소득세 절세`
+
+#### ② 국고 시민 정착 지원금 & 거시경제 밸런스 시뮬레이터 UI
+- **컴포넌트 설계**: `NationalTreasuryBalanceSimulator` (`frontend/src/components/economy/national-treasury-balance-simulator.tsx`)
+- **기능 1 (정착 지원금 청구)**:
+  - 유저 잔액이 1,000 WLD 이하인 경우, "국고 신규 시민 정착금(10,000 WLD) 청구하기" 버튼 활성화.
+  - 클릭 시 국고 지출 트랜잭션 시뮬레이션 및 계좌 즉시 입금, 국고 잔액 차감 반영.
+- **기능 2 (거시경제 입출 밸런스 인터랙티브 컨트롤러)**:
+  - [슬라이더 1] 주간 복권 판매량 (장당 100 WLD, 50% 국고 영구 소각)
+  - [슬라이더 2] 중앙은행 테일러 칙 기준금리 (연 1.5% ~ 8.0%) 및 대출 규모
+  - [슬라이더 3] 신규 유저 유입량 및 정착금 지출액
+  - **실시간 게이지**: 순 유동성 공급/흡수(Net Liquidity Delta), 인플레이션 억제율, 국고 준비금 잔고 실시간 동적 그래프 렌더링.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. **타입 검사**: `pnpm --filter frontend typecheck` 통과 확인.
+2. **구조화 데이터 검증**: Schema.org JSON-LD 구문 유효성 검증.
+3. **프로덕션 빌드 및 승격**: 원격 서버 `prod-v557` 무중단 배포 후 `https://easy-scraping.com` 라이브 테스트(HTTP 200).

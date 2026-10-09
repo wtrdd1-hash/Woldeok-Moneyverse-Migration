@@ -7,12 +7,23 @@ import { CalculatorSaveAction } from '@/components/calculator-save-action';
 import { LoanCalculatorClient } from './loan-calculator-client';
 
 export const metadata: Metadata = {
-  title: '대출이자 계산기 - 원리금균등·원금균등·만기일시 월별 상환액 비교',
-  description: '1억·3억·5억 주택담보대출, 신용대출의 원리금균등, 원금균등, 만기일시 상환방식별 총 이자와 월 상환액을 한눈에 비교하고 절세 전략을 확인하세요.',
-  keywords: ['대출이자 계산기', '원리금균등상환', '원금균등상환', '주택담보대출 이자', '신용대출 이자', '만기일시상환'],
+  title: '대출이자 계산기 - 2억 대출 30년 상환·원리금균등·주택담보대출 월별 상환액 비교',
+  description: '2억 대출 30년 상환 시 월 납입금 약 95만 원 및 총 대출이자 1억 4,374만 원 정밀 산출! 1억·2억·3억·5억 주택담보대출, 신용대출의 원리금균등, 원금균등, 만기일시 상환방식별 총 이자와 월 상환액을 한눈에 비교하고 절세 전략을 확인하세요.',
+  keywords: [
+    '2억 대출 30년 상환',
+    '대출이자 계산기',
+    '원리금균등상환',
+    '원금균등상환',
+    '주택담보대출 이자',
+    '신용대출 이자',
+    '30년 상환 대출이자',
+    '만기일시상환',
+    '주담대 2억 이자',
+    '대출상환 계산기',
+  ],
   openGraph: {
-    title: '대출이자 계산기 - 원리금균등 vs 원금균등 총 이자 비교',
-    description: '대출 금액과 금리, 기간에 따른 총 대출이자와 월별 상환 스케줄을 실시간으로 확인하세요.',
+    title: '대출이자 계산기 - 2억 대출 30년 상환 월 납입금 & 원리금균등 비교',
+    description: '2억 대출 30년 상환(연 4.0% 기준 월 95만원) 및 대출 금액·금리·기간별 총 대출이자와 월별 상환 스케줄을 실시간으로 확인하세요.',
     type: 'website',
   },
 };
@@ -21,8 +32,8 @@ export default function LoanInterestCalculatorPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: '대출이자 계산기',
-    description: '원리금균등, 원금균등, 만기일시 상환 방식별 대출 이자 및 월 상환액 계산 시뮬레이터',
+    name: '대출이자 계산기 - 2억 대출 30년 상환 시뮬레이터',
+    description: '2억 대출 30년 상환 및 원리금균등, 원금균등, 만기일시 상환 방식별 대출 이자 및 월 상환액 계산 시뮬레이터',
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'All',
     offers: {
@@ -36,6 +47,14 @@ export default function LoanInterestCalculatorPage() {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     mainEntity: [
+      {
+        '@type': 'Question',
+        name: '2억 대출 30년 상환 시 월 납입금과 총 이자는 얼마인가요?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: '연 4.0% 금리 기준 2억 원을 30년(360개월) 원리금균등상환할 경우 매월 상환하는 원리금은 약 954,830원이며 30년간 총 대출이자는 약 1억 4,374만 원입니다. 동일 조건으로 원금균등상환 시 첫 달 상환액은 약 1,222,222원으로 높지만 총 이자는 약 1억 2,033만 원으로 약 2,341만 원의 이자를 절약할 수 있습니다.',
+        },
+      },
       {
         '@type': 'Question',
         name: '원리금균등상환과 원금균등상환 중 어느 것이 더 유리한가요?',

@@ -9,11 +9,16 @@ import {
 import { jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '복리 예금·적금 이자 계산기 — 일/월/연 복리 및 만기 수령액 시뮬레이터 | 월덕 머니버스',
+  title: '복리·CAGR 계산기 — 연평균 복리수익률 & DCA 적립식 월복리 시뮬레이터 | 월덕 머니버스',
   description:
-    '초기 예치 원금, 매월 적립액, 연 이자율, 투자 기간을 입력하여 만기 수령액과 단리 대비 복리 초과 수익을 실시간으로 정밀 계산하세요.',
+    'CAGR(연평균 복리 수익률)과 DCA(적립식 분할투자) 효과를 실시간 시뮬레이션! 초기 예치 원금, 매월 적립액, 연 이자율, 투자 기간별 만기 수령액과 단리 대비 복리 초과 수익을 정밀 계산하세요.',
   keywords: [
+    'cagr',
+    'cagr 계산기',
     '복리 계산기',
+    '연평균 복리수익률',
+    'dca 효과',
+    '적립식 복리 계산기',
     '예금 이자 계산기',
     '적금 이자 계산기',
     '복리 수익률 계산',
@@ -26,31 +31,41 @@ export const metadata: Metadata = {
     canonical: '/tools/compound-calculator',
   },
   openGraph: {
-    title: '복리 예금·적금 이자 계산기 | 월덕 머니버스',
-    description: '초기 원금과 매월 적립액, 연 이자율로 만기 수령액과 복리 초과 수익을 실시간 시뮬레이션하세요.',
+    title: '복리·CAGR 계산기 — 연평균 복리수익률 & DCA 적립식 시뮬레이터 | 월덕 머니버스',
+    description: 'CAGR 공식과 DCA 적립식 분할투자 효과, 일/월/연 복리 만기 수령액을 실시간 정밀 시뮬레이션하세요.',
     url: canonicalUrl('/tools/compound-calculator'),
     images: [
       {
         url: buildOgImageUrl({
-          title: '복리 예금·적금 이자 계산기',
-          description: '일/월/연 복리 만기 수령액 · 단리 대비 초과 수익 시뮬레이터',
-          badge: 'Compound Calculator',
+          title: '복리·CAGR 계산기',
+          description: '연평균 복리수익률(CAGR) · DCA 적립식 월복리 만기 시뮬레이터',
+          badge: 'CAGR & Compound',
           type: 'default',
         }),
         width: 1200,
         height: 630,
-        alt: '복리 예금·적금 이자 계산기',
+        alt: '복리·CAGR 계산기',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '복리 예금·적금 이자 계산기 | 월덕 머니버스',
-    description: '초기 원금과 매월 적립액, 연 이자율로 만기 수령액과 복리 초과 수익을 실시간 시뮬레이션하세요.',
+    title: '복리·CAGR 계산기 — 연평균 복리수익률 & DCA 적립식 시뮬레이터 | 월덕 머니버스',
+    description: 'CAGR 공식과 DCA 적립식 분할투자 효과, 일/월/연 복리 만기 수령액을 실시간 정밀 시뮬레이션하세요.',
   },
 };
 
 const FAQS = [
+  {
+    question: 'CAGR(연평균 복리 수익률)이란 무엇이며 어떻게 계산하나요?',
+    answer:
+      'CAGR(Compound Annual Growth Rate)은 여러 해 동안의 투자 수익률을 매년 일정한 복리로 성장했다고 가정한 연평균 성장률입니다. 공식은 [(최종 가치 / 초기 원금) ^ (1 / 기간)] - 1 이며, 변동성이 큰 주식·펀드·부동산 투자의 장기 실질 성과를 측정하는 글로벌 표준 지표입니다.',
+  },
+  {
+    question: 'DCA(달러 코스트 애버리징) 적립식 투자의 복리 효과는 무엇인가요?',
+    answer:
+      'DCA(Dollar-Cost Averaging)는 시장 가격의 고점·저점에 연연하지 않고 정기적으로 일정 금액을 분할 매수하는 적립식 투자 기법입니다. 매월 적립된 원금에 복리 이자가 누적되면서 장기적으로 평균 매수 단가는 낮아지고 복리 수익률은 극대화됩니다.',
+  },
   {
     question: '복리와 단리의 차이점은 무엇인가요?',
     answer:

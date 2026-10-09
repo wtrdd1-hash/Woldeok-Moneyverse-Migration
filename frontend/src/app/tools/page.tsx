@@ -8,6 +8,7 @@ import { DailyPredictionBattle } from '@/components/retention/daily-prediction-b
 import { ReferralSystem } from '@/components/viral/referral-system';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { PublicSitemapSubmitBox } from '@/components/public-sitemap-submit-box';
+import { NationalTreasuryBalanceSimulator } from '@/components/economy/national-treasury-balance-simulator';
 
 import { getServerLocale } from '@/lib/locale-server';
 import { canonicalUrl } from '@/lib/seo';
@@ -274,6 +275,11 @@ export default function ToolsHubPage() {
             </Card>
           );
         })}
+      </div>
+
+      {/* 국고 신규 정착 지원 & 거시경제 밸런스 시뮬레이터 (v171) */}
+      <div className="space-y-6">
+        <NationalTreasuryBalanceSimulator />
       </div>
 
       {/* Public Advertisement Slot */}
