@@ -96,10 +96,10 @@ SELECT 0.0350, 0.0200, 0.0220, 0.0050, 0.0385, 0.0375
 WHERE NOT EXISTS (SELECT 1 FROM public.central_bank_monetary_policy);
 
 -- 7. 테이블 권한 부여
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.central_bank_monetary_policy TO app_user;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.citizen_lending_contracts TO app_user;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.stock_advanced_orders TO app_user;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.national_treasury_lottery_rounds TO app_user;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.national_treasury_lottery_tickets TO app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.central_bank_monetary_policy TO moneyverse_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.citizen_lending_contracts TO moneyverse_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.stock_advanced_orders TO moneyverse_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.national_treasury_lottery_rounds TO moneyverse_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.national_treasury_lottery_tickets TO moneyverse_app;
 
 COMMIT;
