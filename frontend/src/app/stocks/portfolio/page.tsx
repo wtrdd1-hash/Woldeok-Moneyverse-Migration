@@ -12,11 +12,18 @@ import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
+import dynamicImport from 'next/dynamic';
 import { analyzePortfolio, type PortfolioHoldingInput } from './analysis';
 import { PortfolioDonutChart } from './portfolio-donut-chart';
 import { SectorDiversificationCard } from '@/components/sector-diversification-card';
-import { WeeklyFinancialReceipt } from '@/components/weekly-financial-receipt';
-import { TradeDialog } from '../trade-dialog';
+import { PortfolioShareTrigger } from '@/components/portfolio-share-trigger';
+
+const WeeklyFinancialReceipt = dynamicImport(
+  () => import('@/components/weekly-financial-receipt').then((mod) => mod.WeeklyFinancialReceipt),
+);
+const TradeDialog = dynamicImport(
+  () => import('../trade-dialog').then((mod) => mod.TradeDialog),
+);
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -81,11 +88,22 @@ export default async function PortfolioAnalysisPage() {
                 ? 'Review valuation, allocation and unrealized gain/loss for your game-only virtual-stock holdings.'
                 : '게임 전용 가상 주식 10개 종목의 보유량, 자산 구성 비중과 실시간 미실현 손익을 정밀 분석합니다.'}
             </p>
-            <Button asChild variant="outline" size="sm" className="min-h-9 text-xs font-semibold">
-              <Link href="/stocks">
-                {isEn ? 'Browse market' : '거래소 종목 목록'}
-              </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              {analysis && analysis.holdings.length > 0 && (
+                <PortfolioShareTrigger
+                  totalAssetValue={Number(analysis.total_market_value) || 0}
+                  totalProfitAmount={Number(analysis.total_unrealized_gain_loss) || 0}
+                  profitRatePct={(Number(analysis.total_gain_loss_bps) || 0) / 100}
+                  topStockSymbol={analysis.holdings[0]?.symbol ?? 'WDG'}
+                  holdingCount={analysis.holdings.length}
+                />
+              )}
+              <Button asChild variant="outline" size="sm" className="min-h-9 text-xs font-semibold">
+                <Link href="/stocks">
+                  {isEn ? 'Browse market' : '거래소 종목 목록'}
+                </Link>
+              </Button>
+            </div>
           </div>
         </PageHeader>
 

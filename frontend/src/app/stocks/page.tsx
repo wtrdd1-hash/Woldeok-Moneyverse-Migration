@@ -16,26 +16,35 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { apiOrNull } from '@/lib/api';
+import { getCachedStockData } from '@/lib/stock-market-cache';
 import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import { isLoggedInMember } from '@/lib/session';
 import { LiveBadge, LiveHoldingValue, LiveQuote, LiveSparkline } from './live';
+import dynamicImport from 'next/dynamic';
 import { MarketNews } from './market-news';
 import type { MarketEvent } from './market-news';
 import { MarketSentimentGauge } from './market-sentiment-gauge';
 import { StockDisclosureTicker } from '@/components/stock-disclosure-ticker';
-import { TradeDiaryDrawer } from '@/components/trade-diary-drawer';
 import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
 import { FinancialKnowledgeHub } from '@/components/financial-knowledge-hub';
 import { StockSeasonLeaderboard } from '@/components/stock-season-leaderboard';
 import { StockLeagueLaunchCard } from '@/components/stock-league-launch-card';
-import { StockDetailDialog } from './stock-detail-dialog';
 import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
-import { TradeDialog } from './trade-dialog';
 import { WatchlistToggle } from './watchlist-toggle';
 import { filterStocks, normalizeStockQuery } from './stock-search';
 import { canonicalUrl } from '@/lib/seo';
+
+const StockDetailDialog = dynamicImport(
+  () => import('./stock-detail-dialog').then((mod) => mod.StockDetailDialog),
+);
+const TradeDialog = dynamicImport(
+  () => import('./trade-dialog').then((mod) => mod.TradeDialog),
+);
+const TradeDiaryDrawer = dynamicImport(
+  () => import('@/components/trade-diary-drawer').then((mod) => mod.TradeDiaryDrawer),
+);
 
 export const dynamic = 'force-dynamic';
 
@@ -163,9 +172,9 @@ export default async function StocksPage({
   const sort = normalizeStockSort(Array.isArray(rawSort) ? rawSort[0] : rawSort);
 
   const [market, sparks, news, portfolio, history, watchlist] = await Promise.all([
-    apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'),
-    apiOrNull<{ series: SparkSeries[] }>(`/api/v1/stocks/sparklines?limit=${SPARK_POINTS}`),
-    apiOrNull<{ events: MarketEvent[] }>('/api/v1/stocks/market-events'),
+    getCachedStockData('stocks:market:all', () => apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'), 1000),
+    getCachedStockData(`stocks:sparks:${SPARK_POINTS}`, () => apiOrNull<{ series: SparkSeries[] }>(`/api/v1/stocks/sparklines?limit=${SPARK_POINTS}`), 1000),
+    getCachedStockData('stocks:news:events', () => apiOrNull<{ events: MarketEvent[] }>('/api/v1/stocks/market-events'), 3000),
     isLoggedIn ? apiOrNull<{ holdings: HoldingRow[] }>('/api/v1/stocks/portfolio') : Promise.resolve(null),
     isLoggedIn ? apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history') : Promise.resolve(null),
     isLoggedIn ? apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist') : Promise.resolve(null),

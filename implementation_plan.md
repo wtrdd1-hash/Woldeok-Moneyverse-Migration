@@ -5402,3 +5402,33 @@ ull을 반환하여 전면 숨김 처리 및 DOM 옵저버 비활성화.
 - easy-scraping MCP 서버를 통한 원격 서비스 상태(systemctl status moneyverse-frontend) ➡️ Active (running) 확인 완료.
 - 원격 디스크 용량(df -h /srv/moneyverse-data) ➡️ 42GB (23% 사용) 확인 완료.
 - 원격 Git 브랜치(git branch -a) ➡️ main 단일 브랜치 확인 완료.
+---
+
+## 🚀 [v168 Specification] 실시간 모의 투자 리더보드 원장 연동, 바이럴 PnL 공유 카드 생성기 및 프론트·백엔드 풀스택 최적화
+
+### 1. 사용자 요구사항 및 확정 사양
+- **[기능 구현 1순위]**: 실시간 모의 투자 리더보드 & 주간 챔피언십 실제 원장 연동 (실제 거래 DB 기반 주간 수익률 자동 랭킹 + 상위 1~3위 가상 상금 안내).
+- **[혁신 UI/UX 기능]**: 1초 포트폴리오 수익률 진단서 SVG/Canvas 바이럴 공유 카드 생성기 (카카오톡/SNS 공유용 브랜디드 카드 다운로드 및 클립보드 복사).
+- **[프론트엔드 성능 최적화]**: 캔들 차트, 오더북, 영수증 등 무거운 시각화 컴포넌트 next/dynamic 코드 스플리팅 & SSR 최적화 (초기 JS 번들 40% 이상 경량화 및 TBT 단축).
+- **[백엔드/BFF 성능 최적화]**: 10대 가상 종목 실시간 호가/시세 인메모리 1초 캐싱 레이어 구축 (DB 부하 90% 절감 및 API 지연 시간 10ms 이하 단축).
+- **[진행 페이스]**: [자율 실행 모드] 계획 수립부터 구현, 빌드, 무중단 배포까지 원스톱 완료.
+
+### 2. 컴포넌트 및 아키텍처 상세 설계
+1. **백엔드/BFF 인메모리 시세 캐시 레이어 (`market-cache.ts` / `/api/v1/stocks/market-summary`)**:
+   - 10대 종목 틱 데이터에 대해 1,000ms TTL 인메모리 슬라이딩 윈도우 캐시 적용.
+   - DB 풀 연결 고갈 방지 및 다중 동시 접속 시 일관된 틱 스트리밍 제공.
+2. **실시간 모의 투자 리더보드 연동 (`stock-season-leaderboard.tsx`)**:
+   - `frontend/src/app/api/v1/stocks/leaderboard/route.ts` BFF 엔드포인트를 통해 실제 회원 거래 원장 수익률 순위 서빙.
+   - 데이터 로딩 중 스켈레톤 UI 제공 및 상위 3인 골드/실버/브론즈 뱃지 시각화.
+3. **1초 포트폴리오 PnL 바이럴 공유 카드 모달 (`portfolio-share-card-modal.tsx`)**:
+   - `anti-ai-frontend-craftsmanship` 가이드라인을 준수하는 딥 옵시디언(#090A0F) 기반 정밀 핀테크 진단서.
+   - 사용자 닉네임, 총 평가자산, 주간 실현손익, 보유 1위 종목, 분산투자 등급(Grade A~C) 및 QR/워터마크를 고해상도 Canvas로 렌더링.
+   - 1클릭 "이미지 다운로드(PNG)" 및 "클립보드 이미지 복사" 기능 탑재.
+4. **`next/dynamic` 지연 로딩 적용 (`stocks/page.tsx`, `stocks/portfolio/page.tsx`)**:
+   - `CandleChart`, `OrderbookDepthLadder`, `WeeklyFinancialReceipt`를 `dynamic(() => import(...), { ssr: false, loading: () => <Skeleton /> })`로 전환하여 LCP 및 TBT 극대화.
+
+### 3. 검증 계획 (Verification Plan)
+- Next.js 579개 전체 라우트 빌드 (`pnpm build`) 0 에러 통과.
+- 포트폴리오 페이지에서 바이럴 공유 카드 생성 및 이미지 렌더링 정상 동작 확인.
+- 주식 메인 허브에서 dynamic import 적용된 차트 및 리더보드 로드 확인.
+- 원격 미니PC 승격 배포 (`prod-v553`) 및 무중단 가동 검증.

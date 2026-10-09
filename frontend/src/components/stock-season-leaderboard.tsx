@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Trophy, Medal, TrendingUp, Sparkles, Flame, Users, ArrowUpRight } from 'lucide-react';
+import { Trophy, TrendingUp, Sparkles, Users, RefreshCw } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ interface LeaderboardUser {
   readonly totalYieldAmount: string;
 }
 
-const TOP_TRADERS: readonly LeaderboardUser[] = [
+const FALLBACK_TRADERS: readonly LeaderboardUser[] = [
   {
     rank: 1,
     username: '여의도고래',
@@ -63,6 +63,51 @@ const TOP_TRADERS: readonly LeaderboardUser[] = [
 
 export function StockSeasonLeaderboard() {
   const [activeTab, setActiveTab] = useState<'weekly' | 'season'>('weekly');
+  const [traders, setTraders] = useState<readonly LeaderboardUser[]>(FALLBACK_TRADERS);
+  const [seasonTitle, setSeasonTitle] = useState('SEASON 2026');
+  const [prizePool, setPrizePool] = useState('1,000만 WLD');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchLeague() {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/stocks/league');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!isMounted) return;
+
+        if (data?.season) {
+          setSeasonTitle(data.season.title ?? 'SEASON 2026');
+          if (data.season.prize_pool) {
+            setPrizePool(`${Number(data.season.prize_pool).toLocaleString('ko-KR')} WLD`);
+          }
+        }
+
+        if (Array.isArray(data?.leaderboard) && data.leaderboard.length > 0) {
+          const mapped: LeaderboardUser[] = data.leaderboard.map((item: any, idx: number) => ({
+            rank: idx + 1,
+            username: item.username ?? item.nickname ?? `트레이더 #${idx + 1}`,
+            title: item.title ?? (idx === 0 ? '수익률 1위' : idx < 3 ? '톱 티어 트레이더' : '챌린저'),
+            returnRate: Number(item.return_rate ?? item.yield_pct ?? 0),
+            mainStock: item.favorite_stock_symbol ?? 'WDG',
+            totalYieldAmount: `${item.profit_amount ? (Number(item.profit_amount) > 0 ? '+' : '') + Number(item.profit_amount).toLocaleString('ko-KR') : '+0'} WLD`,
+          }));
+          setTraders(mapped);
+        }
+      } catch {
+        // Fallback to initial display
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    fetchLeague();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <Card className="rounded-2xl sm:rounded-3xl border border-zinc-800/80 bg-card/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md overflow-hidden">
@@ -77,12 +122,17 @@ export function StockSeasonLeaderboard() {
                 <CardTitle className="text-base sm:text-lg font-bold text-foreground">
                   <T korean="가상 주식 시즌 투자 리더보드" english="Stock League Season Leaderboard" japanese="仮想株式シーズン投資リーダーボード" chinese="虚拟股票赛季投资排行榜" />
                 </CardTitle>
-                <Badge className="bg-amber-500 text-black text-[10px] font-black">
-                  SEASON 2026
+                <Badge className="bg-amber-500 text-black text-[10px] font-black tracking-wider">
+                  {seasonTitle}
                 </Badge>
               </div>
               <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                <T korean="매주 일요일 자정 정산! 상위 랭커에게 총 1,000만 WLD 상금 풀 균등 배당" english="Weekly reset every Sunday! 10M WLD dividend prize pool for top traders." japanese="毎週日曜深夜リセット！上位ランカーに総額1,000万WLD賞金を配当" chinese="每周日午夜结算！前排交易员平分千万WLD奖金池。" />
+                <T
+                  korean={`매주 일요일 자정 정산! 상위 랭커에게 총 ${prizePool} 상금 풀 균등 배당`}
+                  english={`Weekly reset every Sunday! ${prizePool} dividend prize pool for top traders.`}
+                  japanese={`毎週日曜深夜リセット！上位ランカーに総額${prizePool}賞金を配当`}
+                  chinese={`每周日午夜结算！前排交易员平分${prizePool}奖金池。`}
+                />
               </CardDescription>
             </div>
           </div>
@@ -111,7 +161,7 @@ export function StockSeasonLeaderboard() {
       <CardContent className="pt-4 space-y-4">
         {/* 상위 3인 포디엄 요약 배너 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-          {TOP_TRADERS.slice(0, 3).map((trader) => {
+          {traders.slice(0, 3).map((trader) => {
             const isFirst = trader.rank === 1;
             const isSecond = trader.rank === 2;
             const badgeBg = isFirst
@@ -154,7 +204,7 @@ export function StockSeasonLeaderboard() {
 
         {/* 랭킹 테이블 리스트 */}
         <div className="rounded-xl border border-border/60 overflow-hidden divide-y divide-border/40">
-          {TOP_TRADERS.map((trader) => (
+          {traders.map((trader) => (
             <div
               key={trader.rank}
               className="p-3 sm:px-4 flex items-center justify-between hover:bg-muted/20 transition-colors gap-2"
@@ -194,7 +244,7 @@ export function StockSeasonLeaderboard() {
         {/* 하단 바이럴 공유 바 */}
         <div className="pt-2 border-t border-border/50">
           <SocialShareBar
-            title="[월덕 머니버스] 가상 주식 시즌 리그 랭킹전 진행 중! 1,000만 WLD 상금 풀에 도전하세요."
+            title={`[월덕 머니버스] 가상 주식 시즌 리그 랭킹전 진행 중! ${prizePool} 상금 풀에 도전하세요.`}
             url="https://easy-scraping.com/stocks"
             description="실시간 호가 거래소와 가상 주식 모의투자 대회에서 당신의 투자 실력을 증명하세요."
           />
