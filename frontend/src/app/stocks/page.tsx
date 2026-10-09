@@ -19,7 +19,7 @@ import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
-import { requireMember } from '@/lib/session';
+import { isLoggedInMember } from '@/lib/session';
 import { LiveBadge, LiveHoldingValue, LiveQuote, LiveSparkline } from './live';
 import { MarketNews } from './market-news';
 import type { MarketEvent } from './market-news';
@@ -155,20 +155,20 @@ export default async function StocksPage({
 }: {
   readonly searchParams: Promise<{ readonly q?: string | string[]; readonly sort?: string | string[] }>;
 }) {
-  await requireMember();
+  const isLoggedIn = await isLoggedInMember();
   const locale = await getServerLocale();
   const isEn = locale === 'en';
   const { q: rawQuery, sort: rawSort } = await searchParams;
   const query = normalizeStockQuery(rawQuery);
   const sort = normalizeStockSort(Array.isArray(rawSort) ? rawSort[0] : rawSort);
 
-  const [market, portfolio, history, sparks, news, watchlist] = await Promise.all([
+  const [market, sparks, news, portfolio, history, watchlist] = await Promise.all([
     apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'),
-    apiOrNull<{ holdings: HoldingRow[] }>('/api/v1/stocks/portfolio'),
-    apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history'),
     apiOrNull<{ series: SparkSeries[] }>(`/api/v1/stocks/sparklines?limit=${SPARK_POINTS}`),
     apiOrNull<{ events: MarketEvent[] }>('/api/v1/stocks/market-events'),
-    apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist'),
+    isLoggedIn ? apiOrNull<{ holdings: HoldingRow[] }>('/api/v1/stocks/portfolio') : Promise.resolve(null),
+    isLoggedIn ? apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history') : Promise.resolve(null),
+    isLoggedIn ? apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist') : Promise.resolve(null),
   ]);
 
   const allStocks = market?.stocks ?? [];
@@ -409,7 +409,12 @@ export default async function StocksPage({
           <CardTitle>{isEn ? 'My Holdings' : '내 보유 종목'}</CardTitle>
         </CardHeader>
         <CardContent>
-          {portfolio === null ? (
+          {!isLoggedIn ? (
+            <EmptyState
+              title={isEn ? 'Sign in to view your holdings.' : '로그인하시면 내 보유 종목을 확인할 수 있어요.'}
+              description={isEn ? 'Log in or sign up to trade virtual stocks and track your portfolio.' : '로그인 후 가상 주식을 매수하고 나만의 포트폴리오를 실시간으로 확인해 보세요.'}
+            />
+          ) : portfolio === null ? (
             <EmptyState title={isEn ? 'Failed to load holdings.' : '보유 종목을 불러오지 못했어요.'} />
           ) : portfolio.holdings.length === 0 ? (
             <EmptyState title={isEn ? 'You do not own any virtual stocks.' : '보유한 가상 주식이 없습니다.'} />
@@ -462,7 +467,12 @@ export default async function StocksPage({
           <Button asChild size="sm" variant="outline"><Link href="/stocks/history">{isEn ? 'Search history' : '거래 내역 찾기'}</Link></Button>
         </CardHeader>
         <CardContent>
-          {history === null ? (
+          {!isLoggedIn ? (
+            <EmptyState
+              title={isEn ? 'Sign in to view your trade history.' : '로그인하시면 내 거래 내역을 확인할 수 있어요.'}
+              description={isEn ? 'Every buy and sell order is tracked transparently once you sign in.' : '로그인 후 체결된 매수 및 매도 내역이 실시간으로 투명하게 기록됩니다.'}
+            />
+          ) : history === null ? (
             <EmptyState title={isEn ? 'Failed to load trade history.' : '거래 내역을 불러오지 못했어요.'} />
           ) : history.trades.length === 0 ? (
             <EmptyState title={isEn ? 'No trade history yet.' : '아직 거래 내역이 없습니다.'} />
