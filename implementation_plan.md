@@ -5322,3 +5322,32 @@ flowchart TD
    - `pnpm --filter frontend build` Next.js 579개 정적/동적 라우트 컴파일 통과.
    - `/srv/moneyverse-data/releases/production-current` 심볼릭 링크를 `prod-v550`으로 원자적 승격.
    - `moneyverse-frontend.service` 재기동 및 0-downtime 무중단 반영 완료.
+
+
+---
+
+## 🚀 [v167 Specification] Google Stitch 기반 월덕 머니버스 차세대 핀테크 UI 전면 재구성 (Cyber-Institutional Precision)
+
+### 1. Google Stitch MCP 프로젝트 및 디자인 시스템 추출 완료
+- **Stitch 프로젝트**: `projects/13380078739550540203` (`Woldeok Moneyverse Next-Gen Fintech Universe`)
+- **디자인 철학 (Aesthetic Movement)**: **Cyber-Institutional Precision**
+  - 블룸버그 터미널(Bloomberg Terminal)의 극한 정보 밀도와 로빈후드(Robinhood)/스트라이프(Stripe)의 정밀 크래프트맨십의 조화.
+  - 불필요한 AI식 보라-파랑 네온 슬롭을 전면 배제하고, 딥 옵시디언(#090A0F) 베이스와 정밀 1px 헤어라인 보더(#222738), 캘리브레이션된 네온 에메랄드(#00F59B) & 크림슨(#FF2E5B) 듀얼 컬러 채택.
+- **삼각 타이포그래피 계층 (Tri-Font Hierarchy)**:
+  1. `Space Grotesk`: 헤더, 뷰포트 모듈, 티커 심볼 (-0.02em 타이트한 자간).
+  2. `Inter`: 본문 설명문, 모달 안내, 다국어 툴팁.
+  3. `JetBrains Mono`: 10대 종목 실시간 호가, 캔들 체결가, 체결량, 환율, 원장 해시 (`tabular-nums` 자릿수 고정).
+
+### 2. Stitch 생성 핵심 UI 구성 모듈
+1. **상단 거시경제 펄스 텔레메트리 바 (Macro Telemetry Strip)**:
+   - 한국은행 기준금리(3.25%), KOSPI, USD/KRW, CPI YoY, 미 연준(4.75%), 나스닥, S&P500 1열 콤팩트 스트립.
+2. **좌측 10대 가상 주식 퀵 셀렉터 & 스파크라인 (Stock Market Matrix)**:
+   - 10대 가상 종목(WDG, CHIMU314, DUCK, MYUY, SPACE, WDB, WDM, WDT, WFIN, CHIPS) 실시간 스파크라인, 변동폭 뱃지, 체결가 실시간 갱신.
+3. **중앙 캔들 차트 & 10-Depth 인터랙티브 오더북 (Orderbook Depth Ladder)**:
+   - 1D/1W/1M/1Y 시간축 캔들스틱 + 거래량(Volume) 바 + 이동평균선.
+   - 10단계 호가창 잔량 바(Horizontal Depth Bar) 및 스프레드 실시간 렌더링.
+4. **하단 퀀트 주문 콘솔 & 빠른 시뮬레이터 (Quant Order Ticket)**:
+   - 지정가/시장가 매수(BUY / LONG), 매도(SELL / SHORT) 즉시 체결 콘솔.
+   - 25%, 50%, 75%, 100% 잔액 퀵 셀렉터 칩.
+5. **AI 감성 지수 & 실시간 체결 테이프 (Live Tape & Sentiment)**:
+   - 시장 공포/탐욕 다요소 복합 지수 및 최근 거래 내역 스트림.
