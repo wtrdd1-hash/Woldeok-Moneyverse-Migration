@@ -38,6 +38,7 @@ export function AdSenseAd({
   const [status, setStatus] = useState<AdStatus>('pending');
 
   useEffect(() => {
+    if (isAdmin) return;
     const element = adRef.current;
     if (!element || requested.current) return;
 
@@ -91,7 +92,10 @@ export function AdSenseAd({
       if (sizeObserver) sizeObserver.disconnect();
       if (statusObserver) statusObserver.disconnect();
     };
-  }, []);
+  }, [isAdmin]);
+
+  // 관리자는 광고 영역 완전 숨김
+  if (isAdmin) return null;
 
   // 구글 애드센스 미송출(unfilled) 또는 광고 차단 환경일 때 표시되는 공식 스폰서 배너
   if (status === 'unfilled') {
@@ -128,7 +132,7 @@ export function AdSenseAd({
     <section aria-label="스폰서 광고" className="my-5 border-y border-border/30 py-4 sm:my-6 sm:py-5">
       <div className="mx-auto w-full max-w-[970px] text-center">
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/80">
-          SPONSORED ADVERTISEMENT {isAdmin && <span className="text-emerald-400 font-mono">(ADMIN PREVIEW)</span>}
+          SPONSORED ADVERTISEMENT
         </p>
         <ins
           ref={adRef}
