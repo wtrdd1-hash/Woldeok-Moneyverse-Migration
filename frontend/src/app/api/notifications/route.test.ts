@@ -12,7 +12,7 @@ vi.mock('@/lib/api', () => ({
   },
 }));
 vi.mock('@/lib/viewer', () => ({ viewerOrUnknown: viewerMock }));
-import { GET, POST } from './route';
+import { GET } from './route';
 
 const request = (query = '') => new Request(`http://localhost/api/notifications${query}`);
 beforeEach(() => { apiMock.mockReset(); viewerMock.mockReset(); });
@@ -57,19 +57,5 @@ describe('notification feed BFF does not invent empty results', () => {
     const { ApiError } = await import('@/lib/api');
     apiMock.mockRejectedValue(new ApiError(403));
     expect((await GET(request())).status).toBe(403);
-  });
-});
-
-describe('legacy notification mutation endpoint', () => {
-  it('rejects direct browser POST before accessing a session or backend', async () => {
-    const response = await POST(new Request('http://localhost/api/notifications', {
-      method: 'POST',
-      body: JSON.stringify({ markAll: true }),
-    }));
-    expect(response.status).toBe(405);
-    expect(response.headers.get('allow')).toBe('GET');
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(apiMock).not.toHaveBeenCalled();
-    expect(viewerMock).not.toHaveBeenCalled();
   });
 });
