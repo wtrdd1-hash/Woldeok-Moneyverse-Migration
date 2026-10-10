@@ -29,6 +29,12 @@ Moneyverse is a closed-loop *virtual* WLD economy. Taxes, transfers, treasury sp
 | E542-11 P0 gate | v511 claims backup restore/session/CI accepted; older plan records unresolved gates; current Debian access denied | Latest independent restore drill, rollback/migration checksum, auth/session/ledger reconciliation, published Test/Production exact SHA are mandatory. Do not carry historical green forward | EVIDENCE BLOCKED |
 | E542-12 P1 | Real WLD tickets/monetary rewards and “guaranteed return” copy may conflict with non-gambling and consumer safety | Legal/age/country release approval, no-cashout and ad exclusion must precede runtime enablement; misleading guaranteed financial benefit language must be removed from live UX | BLOCKED |
 
+### E542-13 — P0 release blocker: isolated CI database identity vs immutable migration 266
+
+GitHub CI run `38044593310` passed classification, policy, lint, typecheck and build but failed its migration phase at `266-enterprise-security-and-performance-indices.sql:23`: `ALTER DATABASE woldeok_moneyverse_dev` requires a database whose exact name did not exist in the disposable PostgreSQL service (`woldeok_moneyverse_ci`). Editing checksum-bound historical migration 266 would violate migration immutability. This branch instead configures **only the ephemeral, isolated CI Postgres service** and its test connection strings to the original migration's database name, with an explicit safety comment. This does not modify production DB identity, privileged roles, or the migration's content.
+
+**Acceptance:** new exact-head CI must rebuild a blank PostgreSQL 17 database, apply every immutable migration through 267, then pass unit/integration checks. Longer-term, a separate reviewed migration/bootstrap design must eliminate hardcoded database naming for environments with different database names. **Status: CI mitigation implemented on branch; rerun pending; portable bootstrap remains BLOCKED.**
+
 ## 3. Safe treasury and finance math
 
 1. **Supply:** `delta(M_total) = certified_mint - certified_retirement`. Treasury receipts/distributions change owners only. A burn pool or transfer to `VAULT_MAIN` does not burn supply.
