@@ -33,6 +33,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatDay } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { DeleteAccountForm, LinkButton, ReauthButton, UnlinkButton } from './account-forms';
+import { getIdentitySecuritySummary } from './identity-availability';
 
 export const dynamic = 'force-dynamic';
 
@@ -101,11 +102,12 @@ export default async function AccountPage({
     apiOrNull<OwnProfileResponse>('/api/v1/profile'),
   ]);
 
+  const identityStatus = getIdentitySecuritySummary(identityData?.identities ?? null);
   const identities = identityData?.identities ?? [];
   const linkedProviders = new Set(identities.map((identity) => identity.provider));
   const available = (providerData?.providers ?? []).filter((provider) => provider.enabled);
   const oauthIdentity = identities.find((identity) => identity.provider !== 'local_email');
-  const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
+  const hasLocalIdentity = identityStatus.hasLocalIdentity === true;
 
   // 다계층 실제 회원 프로필 닉네임 및 세부 데이터 감지 (Hybrid Resolution)
   const profileObj = profileData?.profile ?? profileData;
@@ -124,13 +126,8 @@ export default async function AccountPage({
     (userEmail ? userEmail.split('@')[0] : null) ||
     '월덕 회원';
 
-  // 계정 보안 종합 점수 (100점 만점 기준)
-  const isSocialLinked = identities.some((i) => i.provider !== 'local_email');
-  const hasMultipleIdentities = identities.length >= 2;
-  const securityScore = Math.min(
-    100,
-    (isSocialLinked ? 35 : 20) + (hasMultipleIdentities ? 35 : 20) + 30,
-  );
+  // Unavailable identity data must not be represented as a measured security score.
+  const securityScore = identityStatus.score;
 
   return (
     <div data-page="account" className="mx-auto w-full max-w-6xl space-y-6 pb-20 pt-2 sm:space-y-8 sm:pt-4">
@@ -142,7 +139,7 @@ export default async function AccountPage({
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
               <ShieldCheck className="size-3.5 shrink-0" />
-              보안 인증 계정
+              로그인된 계정
             </span>
             {userTitle && (
               <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-500">
@@ -208,7 +205,7 @@ export default async function AccountPage({
                   className="size-20 shadow-md ring-2 ring-border/80"
                 />
                 <div
-                  title="보안 인증 완료"
+                  title="로그인 상태"
                   className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md ring-2 ring-background"
                 >
                   <ShieldCheck className="size-3.5 shrink-0" />
@@ -233,7 +230,7 @@ export default async function AccountPage({
               {/* Badges & Connected Status */}
               <div className="mt-4 flex w-full flex-wrap items-center justify-center gap-2">
                 <Badge variant="secondary" className="rounded-lg text-[11px] font-semibold">
-                  연결 수단 {identities.length}개
+                  {identityStatus.count === null ? '연결 수단 확인 불가' : `연결 수단 ${identityStatus.count}개`}
                 </Badge>
                 {joinedDate && (
                   <Badge variant="outline" className="rounded-lg text-[11px] font-medium border-border/80 text-muted-foreground">
@@ -246,13 +243,15 @@ export default async function AccountPage({
               <div className="mt-5 w-full rounded-xl border border-border/60 bg-muted/20 p-3 text-left">
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <span className="text-muted-foreground">계정 보안 완성도</span>
-                  <span className="font-mono tabular-nums font-bold text-primary">{securityScore}%</span>
+                  <span className="font-mono tabular-nums font-bold text-primary">{securityScore === null ? '확인 불가' : `${securityScore}%`}</span>
                 </div>
-                <Progress value={securityScore} className="mt-2 h-1.5 bg-muted" />
+                {securityScore !== null && <Progress value={securityScore} className="mt-2 h-1.5 bg-muted" />}
                 <p className="mt-1.5 text-[10px] text-muted-foreground">
-                  {securityScore >= 90
-                    ? '🛡️ 최고 등급 보안 보호 상태입니다.'
-                    : '💡 추가 로그인 수단을 연동하면 계정 보호가 강화됩니다.'}
+                  {securityScore === null
+                    ? '로그인 수단을 확인할 수 없어 보안 상태를 평가하지 않았습니다.'
+                    : securityScore >= 90
+                      ? '🛡️ 최고 등급 보안 보호 상태입니다.'
+                      : '💡 추가 로그인 수단을 연동하면 계정 보호가 강화됩니다.'}
                 </p>
               </div>
             </div>
@@ -345,12 +344,12 @@ export default async function AccountPage({
                   </CardDescription>
                 </div>
                 <Badge variant="secondary" className="text-xs font-bold px-2.5 py-0.5 rounded-lg shrink-0">
-                  {identities.length}개 활성
+                  {identityStatus.count === null ? '확인 불가' : `${identityStatus.count}개 활성`}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
-              {identityData === null ? (
+              {identityStatus.count === null ? (
                 <EmptyState
                   title="연결된 로그인 수단을 불러올 수 없어요."
                   description="페이지를 새로고침하거나 잠시 후 다시 시도해 주세요."
@@ -427,7 +426,7 @@ export default async function AccountPage({
           )}
 
           {/* Section 3: Add Other Identities */}
-          {available.length > 0 && (
+          {identityStatus.count !== null && available.length > 0 && (
             <Card className="rounded-2xl border-zinc-800/80 bg-card/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
