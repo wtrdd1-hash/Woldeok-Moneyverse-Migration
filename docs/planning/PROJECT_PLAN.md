@@ -17,6 +17,10 @@ This is the current implementation-facing contract. Historical details remain re
 - **P1 quality, Android, SEO and operations (E542-06/07/09/10/11/12):** older v511 `ACCEPTED`/v473 full QA, v530 `BLOCKED`, later v537 patches and Android historical snapshots are scoped evidence, not current all-route acceptance. All pages including authenticated admin require five exact-SHA passes and backend/session/DB checks. SEO candidate keywords are HOLD until demand/quality evidence; GSC submission is not indexing proof. Ads remain reviewed-public-only; non-cashable virtual rewards require separate age/jurisdiction safety.
 - **Release/evidence boundary:** GitHub-only code/docs fix plus a new UI regression test. Exact branch CI, isolated Test, backend/database/session checks, latest-main reconciliation and zero-downtime Production promotion are **NOT VERIFIED** and must not be stated complete. No database schema or real balances modified.
 
+### E542-13 P0 — Fresh CI migration-name consistency
+
+The CI migration test failed at immutable migration 266 (`ALTER DATABASE woldeok_moneyverse_dev`) because its ephemeral database was named `woldeok_moneyverse_ci`. Preserve the applied migration checksum; the isolated disposable CI service now uses the legacy migration's expected DB name. No production connection or migration changed. This branch CI must pass the exact head before any Test or Production consideration. Portability to arbitrary DB names remains separate blocked architecture work.
+
 ## Emergency full UI re-audit and remediation gate — v2026.10.05.530 (2026-10-05)
 
 - **Emergency state:** **BLOCKED — URGENT UI REMEDIATION REQUIRED.** The entire web UI, including all administrator surfaces, is reopened for full responsive/accessibility/interaction acceptance.
