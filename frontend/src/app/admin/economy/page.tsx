@@ -180,10 +180,10 @@ export default async function AdminEconomyPage({
     report === null ? null : problem(report, '지급 보고서를 불러오지 못했어요.');
   const reportItems = report !== null && report.ok ? report.data.items : null;
 
-  // Annotated rather than inferred: `{}` on its own is a type with no
-  // `adjustments` on it, and every field of a proposal is optional because
-  // the API answers an empty document when the function returned no row.
-  const proposal: AutoPolicyProposal = engine?.preview ?? {};
+  // Support both dual auto policy preview ({ classical, aiReview }) and direct proposal.
+  const rawPreview = engine?.preview;
+  const proposal: AutoPolicyProposal = rawPreview?.classical ?? rawPreview ?? {};
+  const aiReview = rawPreview?.aiReview;
   const adjustments = new Map<string, PolicyAdjustment>(
     (proposal.adjustments ?? []).map((adjustment) => [adjustment.knob, adjustment] as const),
   );
@@ -390,7 +390,7 @@ export default async function AdminEconomyPage({
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
-                <ProposalPanel proposal={proposal} />
+                <ProposalPanel proposal={proposal} aiReview={aiReview} />
                 <RunAutoPolicyDialog
                   adjustmentCount={(proposal.adjustments ?? []).length}
                   blocked={engineState === 'blocked'}

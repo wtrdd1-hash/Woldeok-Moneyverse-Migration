@@ -51,7 +51,7 @@ export function StockOrderPanel({
   receipt,
 }: StockOrderPanelProps) {
   const [internalSide, setInternalSide] = useState<'buy' | 'sell'>('buy');
-  const [orderType, setOrderType] = useState<'market' | 'limit'>('limit');
+  const [orderType, setOrderType] = useState<'market' | 'limit'>('market');
   const [quantity, setQuantity] = useState<string>('1');
   const [limitPrice, setLimitPrice] = useState<string>(currentPrice);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -78,7 +78,8 @@ export function StockOrderPanel({
     ? Number.parseInt(limitPrice.replaceAll(',', '') || currentPrice.replaceAll(',', '') || '1000', 10)
     : currentPriceNum;
   const qtyNum = Number.parseInt(quantity.replaceAll(',', '') || '1', 10);
-  const totalAmount = Math.max(0, effectivePriceNum * qtyNum);
+  // 서버 원장 계약(placeOrder): 거래 체결은 현재 최우선 시장가를 기준으로 원자적으로 실행됨
+  const totalAmount = Math.max(0, currentPriceNum * qtyNum);
 
   const maxBuyShares = availableShares ? Number.parseInt(availableShares.replaceAll(',', ''), 10) : 1000;
   const maxSellShares = holdingQuantity ? Number.parseInt(holdingQuantity.replaceAll(',', ''), 10) : 0;
@@ -406,23 +407,34 @@ export function StockOrderPanel({
 
             <div className="rounded-xl border p-4 space-y-2.5 bg-muted/10 text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">종목명:</span>
+                <span className="text-muted-foreground">{isEn ? 'Stock:' : '종목명:'}</span>
                 <span className="font-bold text-foreground">{name} ({symbol})</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">주문 유형:</span>
-                <span className="font-semibold text-foreground">{orderType === 'limit' ? '지정가 주문' : '시장가 주문'}</span>
+                <span className="text-muted-foreground">{isEn ? 'Order Type:' : '주문 유형:'}</span>
+                <span className="font-semibold text-foreground">
+                  {orderType === 'limit'
+                    ? (isEn ? 'Market (Referenced Limit)' : '시장가 (호가 참조 즉시 체결)')
+                    : (isEn ? 'Market (Instant Execution)' : '시장가 (원자적 즉시 체결)')}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">주문 수량:</span>
+                <span className="text-muted-foreground">{isEn ? 'Order Quantity:' : '주문 수량:'}</span>
                 <span className="font-mono font-bold text-primary">{groupDigits(quantity)}주</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">적용 단가:</span>
-                <span className="font-mono font-bold text-foreground">{groupDigits(effectivePriceNum.toString())} WLD</span>
+                <span className="text-muted-foreground">{isEn ? 'Execution Unit Price:' : '체결 기준 단가:'}</span>
+                <span className="font-mono font-bold text-foreground">
+                  {groupDigits(currentPrice)} WLD
+                  {orderType === 'limit' && limitPrice !== currentPrice && (
+                    <span className="text-[10px] text-muted-foreground font-normal ml-1">
+                      (희망 호가: {groupDigits(limitPrice)} WLD)
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="border-t pt-2 flex justify-between font-bold text-sm">
-                <span>총 주문 금액:</span>
+                <span>{isEn ? 'Total Order Amount:' : '총 체결 예상액:'}</span>
                 <span className="font-mono text-primary">{groupDigits(totalAmount.toString())} WLD</span>
               </div>
             </div>

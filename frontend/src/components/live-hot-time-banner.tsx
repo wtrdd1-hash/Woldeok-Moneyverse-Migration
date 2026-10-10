@@ -52,7 +52,8 @@ const DEFAULT_BUFFS: HotTimeBuffItem[] = [
 
 export function LiveHotTimeBanner({ domainFilter }: { readonly domainFilter?: string }) {
   const { locale } = useLocale();
-  const [buffs, setBuffs] = useState<HotTimeBuffItem[]>(DEFAULT_BUFFS);
+  const [buffs, setBuffs] = useState<HotTimeBuffItem[]>([]);
+  const [loaded, setLoaded] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
     hours: 72,
     minutes: 0,
@@ -66,12 +67,23 @@ export function LiveHotTimeBanner({ domainFilter }: { readonly domainFilter?: st
         const res = await fetch('/app-api/v1/economy/hot-time/active', { cache: 'no-store' });
         if (res.ok) {
           const data = (await res.json()) as HotTimePayload;
-          if (isMounted && data.activeBuffs && data.activeBuffs.length > 0) {
-            setBuffs(data.activeBuffs as HotTimeBuffItem[]);
+          if (isMounted) {
+            if (data.hasActiveHotTime && Array.isArray(data.activeBuffs) && data.activeBuffs.length > 0) {
+              setBuffs(data.activeBuffs.filter((b) => b.active) as HotTimeBuffItem[]);
+            } else {
+              setBuffs([]);
+            }
+            setLoaded(true);
           }
+        } else if (isMounted) {
+          setBuffs([]);
+          setLoaded(true);
         }
       } catch {
-        // Fallback to default active buffs
+        if (isMounted) {
+          setBuffs([]);
+          setLoaded(true);
+        }
       }
     }
     fetchBuffs();
@@ -99,11 +111,14 @@ export function LiveHotTimeBanner({ domainFilter }: { readonly domainFilter?: st
   }, [buffs]);
 
   const filteredBuffs = domainFilter
-    ? buffs.filter((b) => b.targetDomain === domainFilter || b.targetDomain === 'all')
-    : buffs;
+    ? buffs.filter((b) => (b.targetDomain === domainFilter || b.targetDomain === 'all') && b.active)
+    : buffs.filter((b) => b.active);
 
-  const fallbackBuff: HotTimeBuffItem = DEFAULT_BUFFS[0]!;
-  const current: HotTimeBuffItem = filteredBuffs[0] ?? fallbackBuff;
+  if (!loaded || filteredBuffs.length === 0) {
+    return null;
+  }
+
+  const current: HotTimeBuffItem = filteredBuffs[0]!;
   const pad = (n: number) => n.toString().padStart(2, '0');
 
   return (

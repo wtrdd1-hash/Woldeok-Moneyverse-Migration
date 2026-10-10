@@ -31,17 +31,27 @@ export function CreditScoreCard({
   initialRating,
   standingCreditLimit,
   standingCreditGrade,
+  standingLoanInterestBps,
+  standingLoanTermDays,
 }: {
   readonly initialRating?: CreditRatingData | undefined;
   readonly standingCreditLimit?: string | undefined;
   readonly standingCreditGrade?: string | undefined;
+  readonly standingLoanInterestBps?: string | number | undefined;
+  readonly standingLoanTermDays?: number | undefined;
 }) {
   const baseRating = initialRating ?? fallbackRating;
   const effectiveLimit = standingCreditLimit ? Number(standingCreditLimit) : baseRating.creditLimitWld;
+  const effectiveInterestBps =
+    standingLoanInterestBps !== undefined && Number(standingLoanInterestBps) > 0
+      ? Number(standingLoanInterestBps)
+      : baseRating.interestRateBps;
+
   const rating: CreditRatingData = {
     ...baseRating,
     creditLimitWld: effectiveLimit > 0 ? effectiveLimit : baseRating.creditLimitWld,
     tierNameKo: standingCreditGrade ? `${standingCreditGrade}등급 권위` : baseRating.tierNameKo,
+    interestRateBps: effectiveInterestBps,
   };
 
   const [selectedInstallments, setSelectedInstallments] = useState<number>(6);

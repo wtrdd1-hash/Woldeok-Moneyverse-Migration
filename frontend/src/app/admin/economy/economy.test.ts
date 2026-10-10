@@ -278,6 +278,39 @@ describe('proposalState', () => {
       }),
     ).toBe('ready');
   });
+
+  it('reads classical lane from dual-lane preview when present', () => {
+    expect(
+      proposalState({
+        classical: {
+          eligible: false,
+          blockedBy: ['at least one day had too few active members to read'],
+          adjustments: [],
+        },
+        aiReview: { active: true, status: 'ai_missing_classical_fallback', blocked: false },
+      }),
+    ).toBe('blocked');
+
+    expect(
+      proposalState({
+        classical: {
+          eligible: true,
+          blockedBy: [],
+          adjustments: [
+            {
+              knob: 'work.daily_cap',
+              title: '',
+              unit: 'WLD',
+              from: 1000,
+              to: 1200,
+              rules: [],
+            },
+          ],
+        },
+        aiReview: { active: true, status: 'approved', blocked: false },
+      }),
+    ).toBe('ready');
+  });
 });
 
 describe('unpayableCount', () => {

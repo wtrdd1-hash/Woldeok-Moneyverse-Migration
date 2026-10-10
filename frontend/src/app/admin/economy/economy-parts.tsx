@@ -29,6 +29,7 @@ import {
   unpayableCount,
 } from './economy';
 import type {
+  AiPolicyReview,
   AutoPolicyProposal,
   BulkPayoutItem,
   BulkPayoutPreview,
@@ -311,13 +312,38 @@ export function AdjustmentLine({ adjustment }: { readonly adjustment: PolicyAdju
  * ready to be written. Folding the middle two together is how an operator
  * spends an afternoon looking for a switch that was never off.
  */
-export function ProposalPanel({ proposal }: { readonly proposal: AutoPolicyProposal }) {
+export function ProposalPanel({
+  proposal,
+  aiReview,
+}: {
+  readonly proposal: AutoPolicyProposal;
+  readonly aiReview?: AiPolicyReview | undefined;
+}) {
   const state = proposalState(proposal);
   const blockers = proposal.blockedBy ?? [];
   const observations = proposal.observations ?? [];
 
   return (
     <div className="grid gap-4">
+      {aiReview && (
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-md border border-border/50">
+          <Badge
+            variant={aiReview.blocked ? 'destructive' : aiReview.active ? 'secondary' : 'outline'}
+            className="text-[10px] px-1.5 py-0"
+          >
+            {aiReview.active ? 'AI 검토 연동' : 'AI 검토 대기'}
+          </Badge>
+          <span>
+            상태: <code className="font-mono text-foreground">{aiReview.status ?? '정상'}</code>
+          </span>
+          {aiReview.proposalHash && (
+            <span className="font-mono text-[10px] text-muted-foreground opacity-80">
+              해시: {String(aiReview.proposalHash).slice(0, 12)}
+            </span>
+          )}
+        </div>
+      )}
+
       {state === 'unreadable' && (
         <EmptyState
           title="엔진 제안을 읽지 못했어요."

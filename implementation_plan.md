@@ -1,6 +1,11 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v180)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v185)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v185**: [QA 결함 보고서 정밀 추적 해결 (은행 대출 시뮬레이터 금리/한도/기간 서버 권위 지표 동기화(QA-F008) 및 공동 저축 챌린지 팟 모의 체험 모드 정합성 쇄신(QA-F003))] (+60, -0)
+- **v184**: [QA 결함 보고서 정밀 추적 해결 (포트폴리오 주간 결산서 실시간 보유 데이터 100% 연동(QA-F004), 캔들차트 봉단위 라벨·접근성 지표 토글·모달 닫기 버튼 한국어화(QA-F007))] (+80, -0)
+- **v183**: [QA 결함 보고서 정밀 추적 해결 (경제 관리 콘솔(/admin/economy)의 자동 정책 엔진 제안 언래핑 및 듀얼 레인(Classical + AI Review) 검토 상태 시각화 완전 해결(QA-F006))] (+75, -0)
+- **v182**: [QA 결함 보고서 정밀 추적 해결 (주식 주문 패널 시장가 즉시 체결 및 확인 모달 계약 불일치 완전 해결(QA-F001), 직업 숙련도 목표 EXP 동기화 및 가짜 핫타임 버프 배너 렌더링 원천 차단(QA-F009))] (+65, -0)
+- **v181**: [QA 보고서 결함 전수 분석 및 잔여 이슈 5대 영역 완전 해결 (AI 뉴스 프롬프트·한자/영문 오타 후처리 자동 정제 엔진 장착, 텔레메트리 난수 제거 및 실측 RTT 핑 엔진 장착, 거버넌스 분기 동적 계산 및 감사 원장 명확화, 고착도·물타기 번역 개선)] (+55, -0)
 - **v180**: [가상 주식 10종목·핵심 가이드 5종 IndexNow 검색 로봇 즉시 색인 요청 핑 전송(HTTP 200) & 검색 로봇(Googlebot 96회, Yeti 57회 등 일일 191회) 크롤링 실측 분석 완료] (+42, -0)
 - **v179**: [은행 대출 리스크 0건 시 빈 상태 안내 분기 & 텔레메트리 지니계수/순자산 점유율 용어 일치 & 신규 회원 정착금 플랫폼 공식 정책(10,000 WLD + 복권 1장) 전역 통일] (+48, -0)
 - **v178**: [글로벌 다국어(ko/en/ja/zh) 계산기 저장·바이럴 공유 모달 100% 현지화 & 경제 캘린더 실시간 동적 D-Day(발표완료/오늘) 구현 & 푸터 중국어 다듬기] (+39, -0)
@@ -227,3 +232,200 @@
 1. IndexNow API HTTP 200 수신 완료 (`x-msedge-ref: Ref A: 1A153D991D6D4E128D156B702B1EE43C`)
 2. Naver Yeti의 `/tools/stock-calculator/lly-minus-20` 실시간 JS 번들 풀 렌더링 수집 확인
 3. Googlebot의 모바일/데스크톱 크롤러 활동 정상 확인
+
+---
+
+## 🚀 [v181 Specification] QA 보고서 잔여 결함 전수 쇄신 및 실측 핑/정제 엔진 구축 사양
+
+### 1. 현황 및 개선 필요 사항 (QA 잔여 항목 전수 분석)
+1. **[COPY-04~09 · P2] AI 뉴스 본문 한자 오타/영문 혼입/기업명 불일치**:
+   - `ai-news.service.ts` 프롬프트 및 LLM 출력물에 한자(`지속적成장`), 기업명 오타(`월deck`), 영어 어색한 직역(`influence됩니다`, `likewise benefiting...`), 쉼표 공백 누락(`수수료 급증,배당`) 등이 잔존.
+   - 프롬프트 가이드라인 강화 및 생성/렌더링 양방향 자동 텍스트 정제(`cleanseAiNewsText`) 엔진 구축 필요.
+2. **[COPY-11 · P3] 관리자 텔레메트리 용어 개선**:
+   - `admin-comprehensive-telemetry-matrix.tsx`: `Stickiness (활동 고착도)`를 사용자 중심 용어인 `사용자 참여도 (DAU/MAU 리텐션)`로 명확화.
+3. **[COPY-19 · P1] 텔레메트리 펄스 가짜 난수(Math.random) 지연시간 제거**:
+   - `telemetry-pulse.tsx`: 15~22ms의 `Math.random()` 가짜 지연시간 대신, `/app-api/v1/game-clock`을 실측 왕복하는 실제 RTT(ms) 레이턴시 측정 및 네트워크 상태 감지 엔진 장착.
+4. **[COPY-35 · P2] 납세 영수증 분기 고정 하드코딩 및 블록체인 용어 혼선 해결**:
+   - `citizen-tax-receipt-card.tsx`: 고정된 `2026-Q4` 대신 `new Date()` 기반 동적 분기(`currentQuarter`) 계산 및 '블록체인 원장' -> '국고 회계 감사 원장'으로 정확한 용어 변경.
+5. **[COPY-31 · P3] 푸터 중국어 물타기 계산기 링크 표현 개선**:
+   - `site-footer.tsx`: `股票补仓平摊计算器`를 `股票加仓成本计算器`로 개선.
+
+### 2. 세부 개발 명세
+1. **AI 뉴스 한자/영문 오타 후처리 자동 정제 엔진 구축 (`cleanseAiNewsText`)**:
+   - 프론트엔드 `sentences.ts` 및 백엔드 `ai-news.service.ts`에 정제 정규식 탑재:
+     - `월deck/월dek` -> `월덱`
+     - `지속적成장` -> `지속적인 성장`
+     - `가볍게성 향상` -> `경량화 및 성능 향상`
+     - `influence됩니다` -> `영향을 받습니다`
+     - `WDT와 WFIN이 likewise benefiting...` -> `WDT와 WFIN도 디지털 금융 인프라 확장의 수혜를 입을 것으로 분석됩니다.`
+     - `수수료 급증,배당` -> `수수료 급증, 배당`
+   - `ScenarioCard` 렌더링 및 편집 폼 기본값에 100% 자동 적용.
+   - 백엔드 `SYSTEM_PROMPT` 7번 규칙에 한국어 표준어 가이드라인 및 10대 가상 상장사 공식 국문명 명시.
+2. **실측 HTTP 왕복 지연시간(RTT) 핑 엔진 장착 (`telemetry-pulse.tsx`)**:
+   - `performance.now()` 기반 `/app-api/v1/game-clock` 핑 측정으로 실제 ms 단위 지연시간 계산.
+   - 뱃지 `3s 갱신` -> `10s 실측 핑`으로 투명한 관제 정보 표기.
+3. **텔레메트리 매트릭스 지표 명확화 (`admin-comprehensive-telemetry-matrix.tsx`)**:
+   - `Stickiness (활동 고착도)` -> `사용자 참여도 (DAU/MAU 리텐션)` 변경 및 단위 테스트 동기화.
+4. **시민 거버넌스 투표 분기 동적화 (`citizen-tax-receipt-card.tsx`)**:
+   - `currentQuarter` 실시간 산출 및 '국고 회계 감사 원장에 기록되었습니다'로 정정.
+5. **푸터 중국어 정돈 (`site-footer.tsx`)**:
+   - `简体中文 股票加仓成本计算器`로 정비.
+
+### 3. 검증 계획
+1. TypeScript 프론트엔드 정적 타입 검증 (`pnpm run typecheck`) 0 Errors (통과 완료)
+2. TypeScript 백엔드 정적 타입 검증 (`pnpm run typecheck`) 0 Errors (통과 완료)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v566`) 무중단 승격 빌드 및 배포
+5. 실제 프로덕션 `/admin/market/ai-news`, `/admin/analytics`, `/wallet` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v182 Specification] QA 결함 보고서 정밀 추적 해결 (주식 주문 계약 일치 및 직업 EXP/핫타임 동기화)
+
+### 1. 현황 및 개선 필요 사항 (QA-F001, QA-F009 결함 정밀 분석)
+1. **[QA-F001 · P1] 지정가 주문 확인값과 서버 전송 계약 불일치**:
+   - `stock-order-panel.tsx`: 기본 탭이 지정가(limit)로 설정되어 사용자가 희망 단가를 입력할 수 있었으나, 백엔드 `placeOrder` 트랜잭션은 현재 최우선 시장가로만 즉시 체결됨.
+   - 주문 확인 다이얼로그(`Dialog`)에서 '적용 단가: 100 WLD', '총 주문 금액: 200 WLD'로 표시되지만, 실제 제출 시 서버 현재가(예: 494 WLD)로 988 WLD가 차감되어 사용자에게 혼란과 금전적 불일치 유발.
+   - 조치: 기본 주문 모드를 '시장가 (원자적 즉시 체결)'로 설정하고, 총 주문 금액 계산식(`totalAmount`)과 확인 모달 라벨을 실제 서버 체결 기준가(`currentPrice`)로 100% 일치시킴.
+2. **[QA-F009 · P2] 직업 화면의 숙련도 목표치 및 핫타임 안내 불일치**:
+   - `page.tsx` 상단 활성 직업 카드는 `mastery.next_level_exp`(Lv.4 기준 1,600 EXP)를 표시하는 반면, `CareerMasteryCard`는 로컬 수학 공식 `round(250 * level^1.35)`(Lv.4 기준 1,625 EXP)를 사용하여 잔여 EXP 안내가 589 vs 614로 불일치함.
+   - `live-hot-time-banner.tsx`: 서버에 활성 핫타임이 없거나 비활성화된 경우에도 `DEFAULT_BUFFS`를 유지하여 상시 '주말 골든 핫타임: 급여 1.5배 부스트'를 깜빡이며 표시하나, 실제 업무 카드는 1.0x를 지급하여 사용자 기만 요소 존재.
+   - 조치:
+     - `CareerMasteryCard`에 `requiredXp` prop을 연동하여 상단 활성 직업 카드의 권위 `nextExp`와 완벽 동기화.
+     - `live-hot-time-banner.tsx`: 서버의 실제 활성 핫타임 배열(`activeBuffs`)이 존재할 때만 렌더링하고, 미적용 시 `null`을 반환하여 유령 버프 노출 차단.
+
+### 2. 세부 개발 명세
+1. **주식 주문 패널 원자적 체결 계약 일치 (`stock-order-panel.tsx`)**:
+   - `orderType` 기본값: `'market'` (시장가 즉시 체결)
+   - 총 주문 금액: `Math.max(0, currentPriceNum * qtyNum)`로 서버 원장 결제액과 100% 동기화.
+   - 확인 다이얼로그 라벨:
+     - '주문 유형': `시장가 (원자적 즉시 체결)` / 호가 선택 시 `시장가 (호가 참조 즉시 체결)`
+     - '체결 기준 단가': `{currentPrice} WLD` (호가 선택 시 희망 호가 병기)
+     - '총 체결 예상액': `{totalAmount} WLD`
+2. **직업 숙련도 목표치 동기화 (`career-mastery-card.tsx`, `work/page.tsx`)**:
+   - `CareerMasteryCard`: `requiredXp?: number` prop 추가, `reqXp = (level === currentLevel && typeof requiredXp === 'number') ? requiredXp : getRequiredXpForLevel(level)`
+   - `work/page.tsx`: `<CareerMasteryCard ... requiredXp={nextExp} />` 바인딩.
+3. **핫타임 배너 실시간 서버 동기화 (`live-hot-time-banner.tsx`)**:
+   - 초기 버프 배열 빈 배열(`[]`)로 시작, API 로드 완료 플래그(`loaded`) 관리.
+   - 활성 버프 없을 시 `return null;`로 불일치 방지.
+
+### 3. 검증 계획
+1. TypeScript 프론트엔드 정적 타입 검증 (`pnpm run typecheck`): 0 Errors (통과 완료)
+2. `career-mastery.test.tsx` 단위 테스트: 3/3 통과 완료
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v567`) 무중단 승격 빌드 및 배포
+5. 실제 `/stocks/WDG` 및 `/work` 화면 실측 확인
+
+
+---
+
+## 🚀 [v183 Specification] QA 결함 보고서 정밀 추적 해결 (경제 관리 콘솔(/admin/economy) 엔진 제안 조회 실패 해결 및 듀얼 레인 연동)
+
+### 1. 현황 및 개선 필요 사항 (QA-F006 결함 정밀 분석)
+1. **[QA-F006 · P2] 경제 관리 콘솔(/admin/economy)의 자동 정책 엔진 제안 읽기 실패**:
+   - 증상: 운영자가 경제 관리 콘솔(`/admin/economy`)에 접속했을 때 '이번 주 제안' 카드 영역에 `엔진 제안을 읽지 못했어요. 지표 창을 계산하지 못했습니다. 잠시 후 다시 확인해 주세요.`라는 빈 상태(EmptyState) 에러 메시지가 출력됨.
+   - 근본 원인 분석:
+     - 백엔드 `GET /api/v1/admin/controls/auto-policy` 라우트는 DB의 `SELECT public.admin_preview_dual_auto_policy($1, 7) AS preview`를 호출함.
+     - 이 함수는 최신 듀얼 레인 엔진 사양에 따라 `{ preview: { classical: { eligible: false, blockedBy: [...], adjustments: [...], ... }, aiReview: { active: true, status: "...", ... } } }` 구조로 반환함.
+     - 그러나 프론트엔드 `page.tsx`는 `const proposal: AutoPolicyProposal = engine?.preview ?? {};`로 직접 참조함.
+     - 이에 따라 `proposal.eligible`과 `proposal.adjustments`가 `undefined`로 평가되어 `proposalState(proposal)` 판정 함수가 `'unreadable'`을 반환하고 에러 UI를 띄움.
+   - 조치:
+     - `economy.ts`에 `AiPolicyReview` 및 `DualAutoPolicyPreview` 인터페이스를 선언하고, `proposalState`가 `(rawProposal as DualAutoPolicyPreview)?.classical ?? rawProposal`로 중첩 객체를 자동 정규화하도록 확장.
+     - `page.tsx`에서 `rawPreview?.classical ?? rawPreview ?? {}`로 `proposal`을 정상 바인딩하고, 듀얼 레인 검토 정보인 `aiReview`를 추출하여 `ProposalPanel`에 전달.
+     - `ProposalPanel` 컴포넌트에 `aiReview` prop을 추가하여 고전 통계 룰(차단 사유, 조정값 등)과 함께 최신 AI 검토 레인의 활성 여부/상태/해시를 운영자에게 투명하게 시각화.
+
+### 2. 세부 개발 명세
+1. **타입 정의 및 듀얼 레인 확장 (`economy.ts`)**:
+   - `AiPolicyReview`: `active`, `status`, `blocked`, `proposalHash`, `reason` 등 포함.
+   - `DualAutoPolicyPreview`: `AutoPolicyProposal` 확장 및 `classical?`, `aiReview?` 포함.
+   - `AutoPolicyBoard`: `preview: DualAutoPolicyPreview`로 업데이트.
+   - `proposalState`: `(rawProposal as DualAutoPolicyPreview)?.classical ?? rawProposal` 안전 추출 지원.
+2. **콘솔 페이지 정규화 바인딩 (`admin/economy/page.tsx`)**:
+   - `rawPreview = engine?.preview;`
+   - `proposal = rawPreview?.classical ?? rawPreview ?? {};`
+   - `aiReview = rawPreview?.aiReview;`
+   - `<ProposalPanel proposal={proposal} aiReview={aiReview} />`
+3. **제안 패널 UI 듀얼 검토 상태 표기 (`economy-parts.tsx`)**:
+   - `ProposalPanel`: `aiReview` 뱃지 및 상태/해시 렌더링 카드 추가.
+4. **회귀 방지 테스트 (`economy.test.ts`)**:
+   - `reads classical lane from dual-lane preview when present`: 차단 상태 및 준비 상태 언래핑 검증 케이스 추가.
+
+### 3. 검증 계획
+1. TypeScript 프론트엔드 정적 타입 검증 (`pnpm run typecheck`): 0 Errors (통과 완료)
+2. `src/app/admin/economy` 단위 테스트 (`vitest run`): 4개 파일, 77개 테스트 100% 통과 (통과 완료)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v568`) 무중단 승격 빌드 및 배포
+5. 실제 운영 환경 `/admin/economy` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v184 Specification] QA 결함 보고서 정밀 추적 해결 (포트폴리오 주간 결산서 실시간 연동 및 캔들차트/모달 접근성 쇄신)
+
+### 1. 현황 및 개선 필요 사항 (QA-F004, QA-F007 결함 정밀 분석)
+1. **[QA-F004 · P1] 포트폴리오 주간 결산서의 데이터 불일치 및 가짜 주장**:
+   - 증상: `/stocks/portfolio` 화면에서 사용자의 실제 주식 보유 현황과 무관하게 하드코딩된 '제40주차 주간 금융 영수증 (실현손익 +3,820 WLD, 체결 14회, WDG 효자종목)'이 표시되며, 하단에 'PostgreSQL에 기록된 공인 결산서'라고 표시되어 실제 데이터 경로와의 계약 불일치 및 신뢰 왜곡 발생.
+   - 조치:
+     - `WeeklyFinancialReceipt`: `isSample = !data` 플래그를 두어 기본 예시 호출 시에는 `(예시 시뮬레이션)` 뱃지와 '가상 주식 활동 예시를 요약한 시뮬레이션 결산 리포트' 안내를 명시.
+     - `stocks/portfolio/page.tsx`: 사용자의 실제 포트폴리오 분석 데이터(`analysis.total_market_value`, `total_unrealized_gain_loss`, `total_gain_loss_bps`, `holdings`)를 기반으로 동적 `WeeklyFinancialSummary`를 산출하여 주입.
+     - 실제 보유 주식이 있는 사용자는 `(보유 연동)` 뱃지와 함께 본인의 실제 총 평가액, 미실현 손익, 최고 비중 종목, 분산 건전성 점수가 반영된 정합성 100% 영수증을 확인 및 PNG/텍스트로 다운로드/복사 가능.
+2. **[QA-F007 · P2] 캔들차트 봉 단위 라벨 결함, 지표 접근성 누락 및 모달 닫기 영문 노출**:
+   - 증상:
+     - 1시간봉 선택 시 `120일 봉`으로 표시되는 라벨 오류.
+     - MA5/MA20/볼린저 밴드 토글 버튼의 스크린리더 설명 및 툴팁 부재.
+     - 한국어 모달 팝업의 우상단 닫기 버튼 접근성 텍스트가 `Close`로 노출됨.
+   - 조치:
+     - `candle-chart.tsx`: `{shown.length}개 {unitName ? (unitName.endsWith('봉') ? unitName : `${unitName}봉`) : '일봉'}`으로 단위 라벨 자연스럽게 통합 정비.
+     - MA5/MA20/볼린저 밴드 버튼에 `aria-label` 및 `title`을 추가하여 웹 접근성 가이드라인 준수.
+     - `dialog.tsx`: `DialogContent`의 닫기 버튼 접근성 텍스트를 기본 한국어 `닫기`로 전면 교체.
+
+### 2. 세부 개발 명세
+1. **주간 결산 영수증 실시간 보유 데이터 연동 (`weekly-financial-receipt.tsx`, `stocks/portfolio/page.tsx`)**:
+   - `isSample` 분기: `(예시 시뮬레이션)` vs `(보유 연동)` 뱃지 및 안내문 분기.
+   - 포트폴리오 분석 결과 연동: 실시간 평가액, 수익률, 최고 종목, 소각 기여액 자동 산출.
+2. **캔들차트 보조지표 및 라벨 접근성 강화 (`candle-chart.tsx`)**:
+   - `aria-label="5구간 이동평균선(MA5) 토글"`, `aria-label="20구간 이동평균선(MA20) 토글"`, `aria-label="볼린저 밴드(20, 2) 지표 토글"`
+   - 툴팁 `title` 동시 지원.
+   - 봉 수량 및 단위 표기 개선: `120개 1시간봉`, `17개 1일봉` 등.
+3. **모달 닫기 버튼 한국어화 (`components/ui/dialog.tsx`)**:
+   - `<span className="sr-only">닫기</span>`
+4. **회귀 방지 테스트 (`weekly-financial-receipt.test.tsx`)**:
+   - 기본 예시 호출 시 시뮬레이션 예시 뱃지 렌더링 검증.
+   - 보유 데이터 주입 시 보유 연동 뱃지 및 주입된 데이터 렌더링 검증 (2/2 Passed).
+
+### 3. 검증 계획
+1. TypeScript 프론트엔드 정적 타입 검증 (`pnpm run typecheck`): 0 Errors (통과 완료)
+2. `candle-chart.test.tsx` (19/19 Passed) 및 `weekly-financial-receipt.test.tsx` (2/2 Passed)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v569`) 무중단 승격 빌드 및 배포
+5. 실제 운영 환경 `/stocks/portfolio` 및 `/stocks/WDG` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v185 Specification] QA 결함 보고서 정밀 추적 해결 (은행 대출 시뮬레이터 금리/한도 동기화 및 공동 저축 정합성 쇄신)
+
+### 1. 현황 및 개선 필요 사항 (QA-F008, QA-F003 결함 정밀 분석)
+1. **[QA-F008 · P2] 은행 대출 시뮬레이터와 실제 신청 창구의 계약 불일치**:
+   - 증상: 동일한 `/bank` 화면에서 상환 시뮬레이터(`CreditScoreCard`)는 fallback APR 4.50%(450bps)를 기준으로 상환액을 산출하는 반면, 바로 아래의 실제 대출 신청 창구(`SmartLoanCard`)는 사용자의 서버 신용등급 기준 금리(`standing.loan_interest_bps`, 예: C등급 8.00% / 800bps) 및 만기일(`standing.loan_term_days`)을 안내하여 동일 화면 내 금리·상환 총액의 계약 불일치 발생.
+   - 조치:
+     - `CreditScoreCard`: `standingLoanInterestBps?: string | number | undefined`, `standingLoanTermDays?: number | undefined` prop을 추가.
+     - `effectiveInterestBps = standingLoanInterestBps !== undefined && Number(standingLoanInterestBps) > 0 ? Number(standingLoanInterestBps) : baseRating.interestRateBps` 동기화 로직을 구현하여 실제 은행 창구 공시 금리(8.00% 등)를 시뮬레이터에 100% 반영.
+     - `frontend/src/app/bank/page.tsx`: `<CreditScoreCard ... standingLoanInterestBps={standing.loan_interest_bps} standingLoanTermDays={standing.loan_term_days} />` 바인딩 완료.
+2. **[QA-F003 · P1] 공동 저축 챌린지 팟 모의 체험 모드 및 정합성 쇄신**:
+   - 증상: `/bank/savings-pot` 페이지가 실제 계좌 원장 입금 없이 프론트엔드 상태로만 동작함에도 실제 처리인 것처럼 오인될 소지가 있었음.
+   - 조치:
+     - `모의 체험 모드` 안내 및 `[체험 모드] 오늘의 챌린지 저축 입금 시뮬레이션 완료!`, `[체험 모드] 찌르기 시뮬레이션 알림` 문구를 명확히 명시하고 단위 테스트(`savings-pot.test.tsx`) 동기화 완료 (3/3 Passed).
+
+### 2. 세부 개발 명세
+1. **대출 시뮬레이터 서버 권위 금리 바인딩 (`credit-score-card.tsx`, `bank/page.tsx`)**:
+   - `CreditScoreCard`: `standingLoanInterestBps` 및 `standingLoanTermDays` prop 추가.
+   - 금리 표기 및 시뮬레이션 이자 계산식에 서버 권위 금리 100% 동기화.
+2. **회귀 방지 테스트 (`credit-score-card.test.tsx`)**:
+   - `standingLoanInterestBps="800"` 주입 시 8.00% 및 50,000 WLD 한도 동기화 검증 (2/2 Passed).
+   - `savings-pot.test.tsx`: 4인 공동 저축 챌린지 팟 모의 체험 모드 검증 (3/3 Passed).
+
+### 3. 검증 계획
+1. TypeScript 프론트엔드 정적 타입 검증 (`pnpm run typecheck`): 0 Errors (통과 완료)
+2. `src/app/bank` 전체 단위 테스트 (`vitest run`): 7개 파일, 15개 테스트 100% 통과 (통과 완료)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v570`) 무중단 승격 빌드 및 배포
+5. 실제 운영 환경 `/bank` 및 `/bank/savings-pot` 화면 HTTP 200 실측 검증

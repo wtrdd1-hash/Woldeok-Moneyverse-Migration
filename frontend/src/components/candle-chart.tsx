@@ -232,6 +232,8 @@ export function CandleChart({
           <button
             type="button"
             aria-pressed={showMA5}
+            aria-label="5구간 이동평균선(MA5) 토글"
+            title="5구간 이동평균선 (MA5)"
             onClick={() => setShowMA5(!showMA5)}
             className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border transition-all ${
               showMA5
@@ -244,6 +246,8 @@ export function CandleChart({
           <button
             type="button"
             aria-pressed={showMA20}
+            aria-label="20구간 이동평균선(MA20) 토글"
+            title="20구간 이동평균선 (MA20)"
             onClick={() => setShowMA20(!showMA20)}
             className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border transition-all ${
               showMA20
@@ -256,6 +260,8 @@ export function CandleChart({
           <button
             type="button"
             aria-pressed={showBollinger}
+            aria-label="볼린저 밴드(20, 2) 지표 토글"
+            title="볼린저 밴드 (20, 2)"
             onClick={() => setShowBollinger(!showBollinger)}
             className={`px-2 py-0.5 rounded text-[11px] font-bold border transition-all ${
               showBollinger
@@ -268,7 +274,7 @@ export function CandleChart({
         </div>
 
         <div className="text-[11px] text-muted-foreground font-mono hidden sm:inline-block">
-          {shown.length}{unitName ? `개 (${unitName})` : '일 봉'}
+          {shown.length}개 {unitName ? (unitName.endsWith('봉') ? unitName : `${unitName}봉`) : '일봉'}
         </div>
       </div>
 
