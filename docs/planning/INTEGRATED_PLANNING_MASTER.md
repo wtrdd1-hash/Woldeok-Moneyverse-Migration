@@ -1,11 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.05.530
+> Current ledger version: v2026.10.10.542
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.10.542 — 2026-10-10 — Economy operator truth, treasury math and authority reconciliation
+
+- Start/main checkpoint `545e8231f8b90b543ed9de0722adf98d63587820`, first mid-work recheck unchanged; isolated branch `fix/planning-economy-truth-v2026.10.10.542`. Debian remote monthly quota and Moneyverse MCP authentication block server checks.
+- Re-read documentation policy, catalog, implementation-facing PROJECT_PLAN, v523 institutional authority, v522 recirculation, v530 emergency UI, v537 repair, v541 GSC, finance/lottery/bond/macro specs, Android governance and post-v530 source.
+- Adopted `ECONOMY_INTEGRITY_AND_DOCUMENTATION_RECONCILIATION_SPEC.md` / `.ko.md` into the implementation plan, with E542-01..12 findings and exact evidence/acceptance boundaries.
+- The admin lottery/Taylor UI now fails closed: no browser `Math.random` draw or pretend permanent burn/interest update; disabled operational controls and a clearly labelled illustrative rate preview. Added regression tests. **Branch implementation only.**
+- Superseded unconditional 25M treasury anchoring, ambiguous hourly APR and additively misread allocation wording; supply remains governed by canonical Mint/retire authorization. WLD lotteries, rate writes, and claims of “zero default/guaranteed return” remain blocked pending economy, age/jurisdiction, funding, and Test evidence.
+- v511 green status and post-v530 source revisions do not prove current runtime. Full-route five-pass UI, backend/API/DB, protected sessions, security/QA, CI and Production promotion are **NOT VERIFIED**. No Production mutation or release claimed.
 
 ## v2026.10.05.530 — 2026-10-05 — Emergency full UI re-audit
 - Initial check saw `origin/main=ca354411d88b461215a81557f686765cfedf00f0`; the mandatory pre-branch fetch detected drift to `921b467eac21645a51ba362b24cac7eaab89c081`, and the isolated v530 branch was created from that latest SHA. Mid-work refetch remained `921b467e...`.
