@@ -2,12 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
 > **최초 기준:** 2026-08-26  
-> **현재 통합 버전:** v2026.10.05.530
-> **구현·증거 동기화:** 2026-10-05 (긴급 UI 점검 기준 exact main SHA: `921b467e`; v530은 점검/기획 전용)
+> **현재 통합 버전:** v2026.10.10.543
+> **구현·증거 동기화:** 2026-10-10 (v543 시작 `545e8231`, 중간 최신 main `9e170955`; v543 소스 격리 구현, exact-SHA Test/Production 미검증)
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
 > **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
 ---
+
+## 긴급 경제 격리 및 불변 호스트 릴리스 게이트 — v2026.10.10.543
+
+- **P0 권위 결정:** v523 Economy Core 불변식을 다시 우선 적용한다. 기존 자율 SWF의 원천 없는 국고 증가·합성 성장·직접 잔액 증가는 `AUTHORITY_DRIFT`이며 v544 구조수정 전 기본 실행을 차단한다.
+- **런타임 격리:** `MONEYVERSE_SWF_EXECUTION_ENABLED=true`가 아니면 SWF 변동은 실행되지 않는다. 스케줄러도 `MONEYVERSE_SWF_SCHEDULER_ENABLED=true`를 별도로 요구하며, 백엔드 시작 30초 후 자동 실행은 제거했다.
+- **중복 실행 방지:** 명시 활성화된 사이클도 PostgreSQL transaction advisory lock과 `last_executed_at`/`rebalance_interval_hours` 최소간격을 통과해야 한다.
+- **배포 provenance:** `/srv/moneyverse-data/releases/*`의 live release를 Git working copy처럼 `pull/reset/checkout`하는 행위를 금지한다. clean exact-SHA worktree에서 새 SHA-qualified release directory를 만들고 Git metadata를 제거하며 `.moneyverse-release.json`을 기록한다.
+- **승격 게이트:** GitHub CI와 동일 exact-SHA isolated Test의 backend/database/version 증거가 없으면 Production으로 이동하지 않는다. v530 전체 UI BLOCKED 게이트도 그대로 유지한다.
+- **v544 이관:** FX 비정규 계좌 SQL, migration 253 broad grant, 연금·국채·Repo·FX 자금보존, direct balance update, source-free SWF 수식은 forward migration + SECURITY DEFINER/Economy Core 정산으로 교체한다.
+- **상세 권위:** [v543 planning delta](deltas/v2026.10.10.543.ko.md).
+- **증거 경계:** 현재 브랜치는 소스 구현 단계다. exact-SHA Test 또는 Production 완료는 아직 주장하지 않는다.
 
 ## 긴급 전체 UI 재점검 및 수정 게이트 — v2026.10.05.530
 
