@@ -16,13 +16,20 @@ export async function POST(req: Request) {
     const batchSize = Math.min(body.batchSize || 100, 200);
     const base = (process.env.APP_BASE_URL || 'https://easy-scraping.com').replace(/\/$/, '');
 
-    // 대상 URL 목록 취합 - 메타데이터가 쇄신된 5대 핵심 계산기를 0순위로 전진 배치
+    // 대상 URL 목록 취합 - 메타데이터 및 캐노니컬이 쇄신된 7대 핵심 계산기를 0순위로 전진 배치
     const targetUrls: string[] = [
       `${base}/tools/loan-interest-calculator`,
       `${base}/tools/compound-calculator`,
       `${base}/tools/dividend-tax-calculator`,
       `${base}/tools/capital-gains-tax-calculator`,
       `${base}/tools/retirement-calculator`,
+      `${base}/tools/salary-calculator`,
+      `${base}/tools/isa-calculator`,
+      `${base}/tools/pension-tax-calculator`,
+      `${base}/tools/youth-leap-calculator`,
+      `${base}/tools/gift-tax-calculator`,
+      `${base}/tools/real-estate-calculator`,
+      `${base}/tools/kimchi-premium-calculator`,
       `${base}/tools`,
     ];
 
