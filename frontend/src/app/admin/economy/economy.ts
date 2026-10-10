@@ -159,6 +159,27 @@ export interface AutoPolicyProposal {
   readonly observations?: readonly string[];
 }
 
+/**
+ * AI review report attached by dual auto policy engine.
+ */
+export interface AiPolicyReview {
+  readonly active?: boolean;
+  readonly status?: string;
+  readonly blocked?: boolean;
+  readonly proposalHash?: string;
+  readonly reason?: string;
+  readonly [key: string]: unknown;
+}
+
+/**
+ * Dual auto policy preview returned by admin_preview_dual_auto_policy.
+ * Supports both classical and aiReview lanes as well as flat proposal fallback.
+ */
+export interface DualAutoPolicyPreview extends AutoPolicyProposal {
+  readonly classical?: AutoPolicyProposal | undefined;
+  readonly aiReview?: AiPolicyReview | undefined;
+}
+
 /** What `admin_run_auto_policy_now` answers. */
 export interface AutoPolicyRun {
   readonly applied?: boolean;
@@ -171,7 +192,7 @@ export interface AutoPolicyRun {
 /** `GET /api/v1/admin/controls/auto-policy`, both halves in one call. */
 export interface AutoPolicyBoard {
   readonly knobs: readonly PolicyKnob[];
-  readonly preview: AutoPolicyProposal;
+  readonly preview: DualAutoPolicyPreview;
 }
 
 const DECIMAL = /^[+-]?\d+(\.\d+)?$/;
@@ -452,7 +473,11 @@ export function blockedLabel(reason: string): string {
  */
 export type ProposalState = 'unreadable' | 'blocked' | 'nothing_to_do' | 'ready';
 
-export function proposalState(proposal: AutoPolicyProposal): ProposalState {
+export function proposalState(
+  rawProposal: AutoPolicyProposal | DualAutoPolicyPreview,
+): ProposalState {
+  const proposal: AutoPolicyProposal =
+    (rawProposal as DualAutoPolicyPreview)?.classical ?? rawProposal;
   if (proposal.eligible === undefined && proposal.adjustments === undefined) {
     return 'unreadable';
   }

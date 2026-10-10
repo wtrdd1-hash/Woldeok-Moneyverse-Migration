@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v182)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v183)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v183**: [QA 결함 보고서 정밀 추적 해결 (경제 관리 콘솔(/admin/economy)의 자동 정책 엔진 제안 언래핑 및 듀얼 레인(Classical + AI Review) 검토 상태 시각화 완전 해결(QA-F006))] (+75, -0)
 - **v182**: [QA 결함 보고서 정밀 추적 해결 (주식 주문 패널 시장가 즉시 체결 및 확인 모달 계약 불일치 완전 해결(QA-F001), 직업 숙련도 목표 EXP 동기화 및 가짜 핫타임 버프 배너 렌더링 원천 차단(QA-F009))] (+65, -0)
 - **v181**: [QA 보고서 결함 전수 분석 및 잔여 이슈 5대 영역 완전 해결 (AI 뉴스 프롬프트·한자/영문 오타 후처리 자동 정제 엔진 장착, 텔레메트리 난수 제거 및 실측 RTT 핑 엔진 장착, 거버넌스 분기 동적 계산 및 감사 원장 명확화, 고착도·물타기 번역 개선)] (+55, -0)
 - **v180**: [가상 주식 10종목·핵심 가이드 5종 IndexNow 검색 로봇 즉시 색인 요청 핑 전송(HTTP 200) & 검색 로봇(Googlebot 96회, Yeti 57회 등 일일 191회) 크롤링 실측 분석 완료] (+42, -0)
@@ -313,3 +314,43 @@
 4. 원격 운영 서버(`prod-v567`) 무중단 승격 빌드 및 배포
 5. 실제 `/stocks/WDG` 및 `/work` 화면 실측 확인
 
+
+---
+
+## 🚀 [v183 Specification] QA 결함 보고서 정밀 추적 해결 (경제 관리 콘솔(/admin/economy) 엔진 제안 조회 실패 해결 및 듀얼 레인 연동)
+
+### 1. 현황 및 개선 필요 사항 (QA-F006 결함 정밀 분석)
+1. **[QA-F006 · P2] 경제 관리 콘솔(/admin/economy)의 자동 정책 엔진 제안 읽기 실패**:
+   - 증상: 운영자가 경제 관리 콘솔(`/admin/economy`)에 접속했을 때 '이번 주 제안' 카드 영역에 `엔진 제안을 읽지 못했어요. 지표 창을 계산하지 못했습니다. 잠시 후 다시 확인해 주세요.`라는 빈 상태(EmptyState) 에러 메시지가 출력됨.
+   - 근본 원인 분석:
+     - 백엔드 `GET /api/v1/admin/controls/auto-policy` 라우트는 DB의 `SELECT public.admin_preview_dual_auto_policy($1, 7) AS preview`를 호출함.
+     - 이 함수는 최신 듀얼 레인 엔진 사양에 따라 `{ preview: { classical: { eligible: false, blockedBy: [...], adjustments: [...], ... }, aiReview: { active: true, status: "...", ... } } }` 구조로 반환함.
+     - 그러나 프론트엔드 `page.tsx`는 `const proposal: AutoPolicyProposal = engine?.preview ?? {};`로 직접 참조함.
+     - 이에 따라 `proposal.eligible`과 `proposal.adjustments`가 `undefined`로 평가되어 `proposalState(proposal)` 판정 함수가 `'unreadable'`을 반환하고 에러 UI를 띄움.
+   - 조치:
+     - `economy.ts`에 `AiPolicyReview` 및 `DualAutoPolicyPreview` 인터페이스를 선언하고, `proposalState`가 `(rawProposal as DualAutoPolicyPreview)?.classical ?? rawProposal`로 중첩 객체를 자동 정규화하도록 확장.
+     - `page.tsx`에서 `rawPreview?.classical ?? rawPreview ?? {}`로 `proposal`을 정상 바인딩하고, 듀얼 레인 검토 정보인 `aiReview`를 추출하여 `ProposalPanel`에 전달.
+     - `ProposalPanel` 컴포넌트에 `aiReview` prop을 추가하여 고전 통계 룰(차단 사유, 조정값 등)과 함께 최신 AI 검토 레인의 활성 여부/상태/해시를 운영자에게 투명하게 시각화.
+
+### 2. 세부 개발 명세
+1. **타입 정의 및 듀얼 레인 확장 (`economy.ts`)**:
+   - `AiPolicyReview`: `active`, `status`, `blocked`, `proposalHash`, `reason` 등 포함.
+   - `DualAutoPolicyPreview`: `AutoPolicyProposal` 확장 및 `classical?`, `aiReview?` 포함.
+   - `AutoPolicyBoard`: `preview: DualAutoPolicyPreview`로 업데이트.
+   - `proposalState`: `(rawProposal as DualAutoPolicyPreview)?.classical ?? rawProposal` 안전 추출 지원.
+2. **콘솔 페이지 정규화 바인딩 (`admin/economy/page.tsx`)**:
+   - `rawPreview = engine?.preview;`
+   - `proposal = rawPreview?.classical ?? rawPreview ?? {};`
+   - `aiReview = rawPreview?.aiReview;`
+   - `<ProposalPanel proposal={proposal} aiReview={aiReview} />`
+3. **제안 패널 UI 듀얼 검토 상태 표기 (`economy-parts.tsx`)**:
+   - `ProposalPanel`: `aiReview` 뱃지 및 상태/해시 렌더링 카드 추가.
+4. **회귀 방지 테스트 (`economy.test.ts`)**:
+   - `reads classical lane from dual-lane preview when present`: 차단 상태 및 준비 상태 언래핑 검증 케이스 추가.
+
+### 3. 검증 계획
+1. TypeScript 프론트엔드 정적 타입 검증 (`pnpm run typecheck`): 0 Errors (통과 완료)
+2. `src/app/admin/economy` 단위 테스트 (`vitest run`): 4개 파일, 77개 테스트 100% 통과 (통과 완료)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v568`) 무중단 승격 빌드 및 배포
+5. 실제 운영 환경 `/admin/economy` 화면 HTTP 200 실측 검증
