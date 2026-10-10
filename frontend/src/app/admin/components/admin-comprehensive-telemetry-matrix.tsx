@@ -361,12 +361,12 @@ export function AdminComprehensiveTelemetryMatrix({
                 <td className="py-2.5 px-3 text-slate-400">최근 30일 이내 플랫폼 방문 및 활동 회원</td>
               </tr>
               <tr className="hover:bg-slate-800/30 transition-colors bg-blue-950/20">
-                <td className="py-2.5 px-3 font-medium text-blue-300">Stickiness (활동 고착도)</td>
+                <td className="py-2.5 px-3 font-medium text-blue-300">사용자 참여도 (DAU/MAU 리텐션)</td>
                 <td className="py-2.5 px-3 text-right font-mono tabular-nums text-amber-300 font-bold">
                   {retentionStats.stickiness}%
                 </td>
                 <td className="py-2.5 px-3 text-right text-xs text-amber-400 font-medium">
-                  {Number(retentionStats.stickiness) >= 20 ? '건전한 활성도' : '보통 고착도'}
+                  {Number(retentionStats.stickiness) >= 20 ? '건전한 활성도' : '보통 활성도'}
                 </td>
                 <td className="py-2.5 px-3 text-slate-400">DAU / MAU 비율 (글로벌 핀테크 표준 20% 이상 우수)</td>
               </tr>

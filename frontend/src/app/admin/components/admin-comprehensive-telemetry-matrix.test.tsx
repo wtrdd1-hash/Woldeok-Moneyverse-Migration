@@ -120,7 +120,7 @@ describe('AdminComprehensiveTelemetryMatrix', () => {
 
     expect(screen.getByText(/실시간 종합 운영 텔레메트리 매트릭스/)).toBeDefined();
     expect(screen.getByText(/HAU \(1시간 활성 사용자\)/)).toBeDefined();
-    expect(screen.getByText(/Stickiness \(활동 고착도\)/)).toBeDefined();
+    expect(screen.getByText(/사용자 참여도 \(DAU\/MAU 리텐션\)/)).toBeDefined();
   });
 
   it('switches to monetary tab and displays correct M0, M1, M2 values', () => {

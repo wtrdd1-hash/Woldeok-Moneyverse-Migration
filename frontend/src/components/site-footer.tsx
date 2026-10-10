@@ -266,7 +266,7 @@ export function SiteFooter() {
               </li>
               <li>
                 <Link href="/zh/tools/stock-calculator" className="hover:text-violet-400 transition-colors">
-                  简体中文 股票补仓平摊计算器
+                  简体中文 股票加仓成本计算器
                 </Link>
               </li>
               <li>

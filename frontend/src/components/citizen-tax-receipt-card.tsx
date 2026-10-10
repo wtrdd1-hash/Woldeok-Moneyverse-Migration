@@ -33,6 +33,9 @@ export function CitizenTaxReceiptCard() {
   const [voteMessage, setVoteMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const now = new Date();
+  const currentQuarter = `${now.getFullYear()}-Q${Math.floor(now.getMonth() / 3) + 1}`;
+
   useEffect(() => {
     let mounted = true;
     fetch('/api/v1/wallet/tax-receipt')
@@ -61,14 +64,14 @@ export function CitizenTaxReceiptCard() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            quarter: '2026-Q4',
+            quarter: currentQuarter,
             choice: selectedChoice,
           }),
         });
         const json = await res.json();
         if (res.ok && json.success) {
           setVoteSubmitted(true);
-          setVoteMessage('2026-Q4 분기 예산 지출 우선순위 투표가 성공적으로 블록체인 원장에 반영되었습니다!');
+          setVoteMessage(`${currentQuarter} 분기 예산 지출 우선순위 투표가 성공적으로 국고 회계 감사 원장에 기록되었습니다!`);
         } else {
           setVoteMessage(json.message || '투표 처리에 실패했습니다.');
         }
@@ -212,7 +215,7 @@ export function CitizenTaxReceiptCard() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
             <div className="flex items-center gap-1.5">
               <Vote className="h-4 w-4 text-primary" />
-              <span className="text-xs font-semibold text-foreground">2026-Q4 분기 예산 집행 우선순위 시민 거버넌스 투표</span>
+              <span className="text-xs font-semibold text-foreground">{currentQuarter} 분기 예산 집행 우선순위 시민 거버넌스 투표</span>
             </div>
             <span className="text-[11px] text-muted-foreground font-mono">1인 1표 직접 민주제</span>
           </div>

@@ -22,7 +22,7 @@ import type {
 } from '../../types';
 import { STRENGTHS, strengthLabel } from '../strengths';
 import { autoGenerateAiNews, decideAiNewsScenario, generateAiNews, saveAiNewsSettings } from './actions';
-import { aiNewsSentence } from './sentences';
+import { aiNewsSentence, cleanseAiNewsText } from './sentences';
 
 /** Why the model field has no list beside it, in a sentence an operator can act on. */
 const NO_LIST: Readonly<Record<string, string>> = {
@@ -354,9 +354,9 @@ export function ScenarioCard({ scenario }: { readonly scenario: AiNewsScenario }
           </span>
           {scenario.decided_at && <span className="text-muted-foreground">{formatMoment(scenario.decided_at)}</span>}
         </div>
-        <CardTitle className="text-base">{scenario.headline}</CardTitle>
+        <CardTitle className="text-base">{cleanseAiNewsText(scenario.headline)}</CardTitle>
         {scenario.rationale && (
-          <CardDescription className="[word-break:keep-all]">왜 지금: {scenario.rationale}</CardDescription>
+          <CardDescription className="[word-break:keep-all]">왜 지금: {cleanseAiNewsText(scenario.rationale)}</CardDescription>
         )}
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -366,7 +366,7 @@ export function ScenarioCard({ scenario }: { readonly scenario: AiNewsScenario }
           ))}
         </div>
 
-        {scenario.body && <p className="text-sm text-muted-foreground [word-break:keep-all]">{scenario.body}</p>}
+        {scenario.body && <p className="text-sm text-muted-foreground [word-break:keep-all]">{cleanseAiNewsText(scenario.body)}</p>}
 
         {open && !chosen && (
           <div className="flex flex-wrap items-center gap-2">
@@ -419,7 +419,7 @@ export function ScenarioCard({ scenario }: { readonly scenario: AiNewsScenario }
             <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
               <Field>
                 <FieldLabel htmlFor={`headline-${id}`}>제목</FieldLabel>
-                <Input id={`headline-${id}`} name="headline" defaultValue={scenario.headline} minLength={2} maxLength={120} required />
+                <Input id={`headline-${id}`} name="headline" defaultValue={cleanseAiNewsText(scenario.headline)} minLength={2} maxLength={120} required />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`hours-${id}`}>기간 (시간)</FieldLabel>
@@ -429,7 +429,7 @@ export function ScenarioCard({ scenario }: { readonly scenario: AiNewsScenario }
             </div>
             <Field>
               <FieldLabel htmlFor={`body-${id}`}>본문</FieldLabel>
-              <Textarea id={`body-${id}`} name="body" defaultValue={scenario.body} rows={4} maxLength={2000} />
+              <Textarea id={`body-${id}`} name="body" defaultValue={cleanseAiNewsText(scenario.body)} rows={4} maxLength={2000} />
             </Field>
 
             <div className="flex flex-wrap items-center gap-2">

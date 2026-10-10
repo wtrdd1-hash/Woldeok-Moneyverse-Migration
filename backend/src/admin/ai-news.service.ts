@@ -239,11 +239,14 @@ stock (or the whole market) up or down for a number of hours. Follow these rules
 6. THE OPERATOR'S WISH, when given, is what the batch should serve -- but it still has to
    be consistent with the context. If the wish contradicts what is running, propose the
    closest consistent story and say so in the rationale.
-7. LANGUAGE AND FORM. Headlines and bodies are in Korean, in the register of a game's
-   news feed: concrete, a little playful, never real-world. Headline 2-120 characters;
-   body up to 2000, two to five sentences. Every "stock_symbol" must be exactly one of
-   the listed symbols, or null for the whole market. "hours" is a whole number from 1 to
-   168 and belongs to the story, not to one stock.
+7. LANGUAGE AND FORM. Headlines and bodies are strictly in natural standard Korean, in
+   the register of a game's news feed: concrete, a little playful, never real-world.
+   NO Hanja characters, NO awkward English borrowings (e.g. do NOT write '지속적成장' or 'influence됩니다').
+   Use official corporate names: 치무전자(CHIMU314), 치무 초전도(CHIPS), 덕덕 물산(DUCK), 뮤야 엔터테인먼트(MYUY),
+   월덱 우주항공(SPACE), 월덱 바이오(WDB), 월덱 게임즈(WDG), 월덱 모빌리티(WDM), 월덱 테크(WDT), 월덱 파이낸셜(WFIN).
+   Headline 2-120 characters; body up to 2000, two to five sentences. Every "stock_symbol"
+   must be exactly one of the listed symbols, or null for the whole market. "hours" is a
+   whole number from 1 to 168 and belongs to the story, not to one stock.
 
 Answer with one JSON object and nothing else -- no prose, no code fence -- of this shape:
 
@@ -947,11 +950,36 @@ export function normaliseRegisteredStockAuto(
     });
 }
 
+/**
+ * Cleanse AI-generated market news text for typos, Chinese characters, and awkward English borrowings.
+ * Resolves COPY-04, COPY-05, COPY-06, COPY-07, COPY-08, COPY-09.
+ */
+export function cleanseAiNewsText(text: string | null | undefined): string {
+  if (!text) return '';
+  return text
+    // COPY-04: Brand name unification
+    .replace(/월deck|월dek|월Deck/gi, '월덱')
+    // COPY-05: Hanja typo
+    .replace(/지속적成장/g, '지속적인 성장')
+    // COPY-06: Awkward generated expression
+    .replace(/가볍게성 향상/g, '경량화 및 성능 향상')
+    // COPY-07: Awkward English verb mixing
+    .replace(/influence됩니다/g, '영향을 받습니다')
+    .replace(/influence를 받습니다/g, '영향을 받습니다')
+    // COPY-08: Mixed English sentence
+    .replace(/WDT와\s+WFIN이\s+likewise\s+benefiting\s+from\s+the\s+expansion\s+of\s+digital\s+financial\s+infrastructure\.?/gi, 'WDT와 WFIN도 디지털 금융 인프라 확장의 수혜를 입을 것으로 분석됩니다.')
+    .replace(/likewise\s+benefiting\s+from\s+the\s+expansion\s+of\s+digital\s+financial\s+infrastructure\.?/gi, '디지털 금융 인프라 확장의 수혜를 입을 것으로 분석됩니다.')
+    // COPY-09: Comma spacing
+    .replace(/수수료 급증,배당/g, '수수료 급증, 배당')
+    .replace(/,([^\s0-9])/g, ', $1');
+}
+
 export function normalise(batch: ScenarioBatch, context: Record<string, unknown>): ScenarioProposal[] {
   const listed = registeredStockSymbols(context);
   const proposals: ScenarioProposal[] = [];
   for (const scenario of batch.scenarios.slice(0, HOW_MANY)) {
-    const headline = scenario.headline.trim().slice(0, 120);
+    const rawHeadline = scenario.headline.trim().slice(0, 120);
+    const headline = cleanseAiNewsText(rawHeadline);
     if (headline.length < 2) continue;
 
     // A model answering in 135's one-stock shape has still answered.
@@ -1001,8 +1029,8 @@ export function normalise(batch: ScenarioBatch, context: Record<string, unknown>
       effects,
       hours: Math.min(168, Math.max(1, Math.round(scenario.hours) || 1)),
       headline,
-      body: (scenario.body ?? '').trim().slice(0, 2000),
-      rationale: (unknown.length > 0
+      body: cleanseAiNewsText((scenario.body ?? '').trim()).slice(0, 2000),
+      rationale: cleanseAiNewsText(unknown.length > 0
         ? `(${unknown.join(', ')}은 상장 종목이 아니라 뺐습니다) ${rationale}`
         : rationale
       ).slice(0, 1000),

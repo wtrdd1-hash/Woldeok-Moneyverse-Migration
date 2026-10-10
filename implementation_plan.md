@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v180)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v181)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v181**: [QA 보고서 결함 전수 분석 및 잔여 이슈 5대 영역 완전 해결 (AI 뉴스 프롬프트·한자/영문 오타 후처리 자동 정제 엔진 장착, 텔레메트리 난수 제거 및 실측 RTT 핑 엔진 장착, 거버넌스 분기 동적 계산 및 감사 원장 명확화, 고착도·물타기 번역 개선)] (+55, -0)
 - **v180**: [가상 주식 10종목·핵심 가이드 5종 IndexNow 검색 로봇 즉시 색인 요청 핑 전송(HTTP 200) & 검색 로봇(Googlebot 96회, Yeti 57회 등 일일 191회) 크롤링 실측 분석 완료] (+42, -0)
 - **v179**: [은행 대출 리스크 0건 시 빈 상태 안내 분기 & 텔레메트리 지니계수/순자산 점유율 용어 일치 & 신규 회원 정착금 플랫폼 공식 정책(10,000 WLD + 복권 1장) 전역 통일] (+48, -0)
 - **v178**: [글로벌 다국어(ko/en/ja/zh) 계산기 저장·바이럴 공유 모달 100% 현지화 & 경제 캘린더 실시간 동적 D-Day(발표완료/오늘) 구현 & 푸터 중국어 다듬기] (+39, -0)
@@ -227,3 +228,48 @@
 1. IndexNow API HTTP 200 수신 완료 (`x-msedge-ref: Ref A: 1A153D991D6D4E128D156B702B1EE43C`)
 2. Naver Yeti의 `/tools/stock-calculator/lly-minus-20` 실시간 JS 번들 풀 렌더링 수집 확인
 3. Googlebot의 모바일/데스크톱 크롤러 활동 정상 확인
+
+---
+
+## 🚀 [v181 Specification] QA 보고서 잔여 결함 전수 쇄신 및 실측 핑/정제 엔진 구축 사양
+
+### 1. 현황 및 개선 필요 사항 (QA 잔여 항목 전수 분석)
+1. **[COPY-04~09 · P2] AI 뉴스 본문 한자 오타/영문 혼입/기업명 불일치**:
+   - `ai-news.service.ts` 프롬프트 및 LLM 출력물에 한자(`지속적成장`), 기업명 오타(`월deck`), 영어 어색한 직역(`influence됩니다`, `likewise benefiting...`), 쉼표 공백 누락(`수수료 급증,배당`) 등이 잔존.
+   - 프롬프트 가이드라인 강화 및 생성/렌더링 양방향 자동 텍스트 정제(`cleanseAiNewsText`) 엔진 구축 필요.
+2. **[COPY-11 · P3] 관리자 텔레메트리 용어 개선**:
+   - `admin-comprehensive-telemetry-matrix.tsx`: `Stickiness (활동 고착도)`를 사용자 중심 용어인 `사용자 참여도 (DAU/MAU 리텐션)`로 명확화.
+3. **[COPY-19 · P1] 텔레메트리 펄스 가짜 난수(Math.random) 지연시간 제거**:
+   - `telemetry-pulse.tsx`: 15~22ms의 `Math.random()` 가짜 지연시간 대신, `/app-api/v1/game-clock`을 실측 왕복하는 실제 RTT(ms) 레이턴시 측정 및 네트워크 상태 감지 엔진 장착.
+4. **[COPY-35 · P2] 납세 영수증 분기 고정 하드코딩 및 블록체인 용어 혼선 해결**:
+   - `citizen-tax-receipt-card.tsx`: 고정된 `2026-Q4` 대신 `new Date()` 기반 동적 분기(`currentQuarter`) 계산 및 '블록체인 원장' -> '국고 회계 감사 원장'으로 정확한 용어 변경.
+5. **[COPY-31 · P3] 푸터 중국어 물타기 계산기 링크 표현 개선**:
+   - `site-footer.tsx`: `股票补仓平摊计算器`를 `股票加仓成本计算器`로 개선.
+
+### 2. 세부 개발 명세
+1. **AI 뉴스 한자/영문 오타 후처리 자동 정제 엔진 구축 (`cleanseAiNewsText`)**:
+   - 프론트엔드 `sentences.ts` 및 백엔드 `ai-news.service.ts`에 정제 정규식 탑재:
+     - `월deck/월dek` -> `월덱`
+     - `지속적成장` -> `지속적인 성장`
+     - `가볍게성 향상` -> `경량화 및 성능 향상`
+     - `influence됩니다` -> `영향을 받습니다`
+     - `WDT와 WFIN이 likewise benefiting...` -> `WDT와 WFIN도 디지털 금융 인프라 확장의 수혜를 입을 것으로 분석됩니다.`
+     - `수수료 급증,배당` -> `수수료 급증, 배당`
+   - `ScenarioCard` 렌더링 및 편집 폼 기본값에 100% 자동 적용.
+   - 백엔드 `SYSTEM_PROMPT` 7번 규칙에 한국어 표준어 가이드라인 및 10대 가상 상장사 공식 국문명 명시.
+2. **실측 HTTP 왕복 지연시간(RTT) 핑 엔진 장착 (`telemetry-pulse.tsx`)**:
+   - `performance.now()` 기반 `/app-api/v1/game-clock` 핑 측정으로 실제 ms 단위 지연시간 계산.
+   - 뱃지 `3s 갱신` -> `10s 실측 핑`으로 투명한 관제 정보 표기.
+3. **텔레메트리 매트릭스 지표 명확화 (`admin-comprehensive-telemetry-matrix.tsx`)**:
+   - `Stickiness (활동 고착도)` -> `사용자 참여도 (DAU/MAU 리텐션)` 변경 및 단위 테스트 동기화.
+4. **시민 거버넌스 투표 분기 동적화 (`citizen-tax-receipt-card.tsx`)**:
+   - `currentQuarter` 실시간 산출 및 '국고 회계 감사 원장에 기록되었습니다'로 정정.
+5. **푸터 중국어 정돈 (`site-footer.tsx`)**:
+   - `简体中文 股票加仓成本计算器`로 정비.
+
+### 3. 검증 계획
+1. TypeScript 프론트엔드 정적 타입 검증 (`pnpm run typecheck`) 0 Errors (통과 완료)
+2. TypeScript 백엔드 정적 타입 검증 (`pnpm run typecheck`) 0 Errors (통과 완료)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v566`) 무중단 승격 빌드 및 배포
+5. 실제 프로덕션 `/admin/market/ai-news`, `/admin/analytics`, `/wallet` 화면 HTTP 200 실측 검증

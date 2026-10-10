@@ -242,7 +242,7 @@ export function AdminTelemetryMetricsTable({
               <span className="text-xs text-muted-foreground">명</span>
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">
-              고착도(Stickiness) <strong className="text-rose-600 dark:text-rose-400 font-bold">{metrics.dauToMauPercent}%</strong>
+              참여도(DAU/MAU) <strong className="text-rose-600 dark:text-rose-400 font-bold">{metrics.dauToMauPercent}%</strong>
             </div>
           </div>
 

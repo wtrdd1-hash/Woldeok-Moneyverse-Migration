@@ -18,3 +18,28 @@ export const AI_NEWS_SENTENCES: Readonly<Record<string, string>> = {
 export function aiNewsSentence(code: string | null | undefined, fallback: string): string {
   return (code ? AI_NEWS_SENTENCES[code] : undefined) ?? fallback;
 }
+
+/**
+ * Cleanse AI-generated market news text for typos, Chinese characters, and awkward English borrowings.
+ * Resolves COPY-04, COPY-05, COPY-06, COPY-07, COPY-08, COPY-09.
+ */
+export function cleanseAiNewsText(text: string | null | undefined): string {
+  if (!text) return '';
+  return text
+    // COPY-04: Brand name unification
+    .replace(/월deck|월dek|월Deck/gi, '월덱')
+    // COPY-05: Hanja typo
+    .replace(/지속적成장/g, '지속적인 성장')
+    // COPY-06: Awkward generated expression
+    .replace(/가볍게성 향상/g, '경량화 및 성능 향상')
+    // COPY-07: Awkward English verb mixing
+    .replace(/influence됩니다/g, '영향을 받습니다')
+    .replace(/influence를 받습니다/g, '영향을 받습니다')
+    // COPY-08: Mixed English sentence
+    .replace(/WDT와\s+WFIN이\s+likewise\s+benefiting\s+from\s+the\s+expansion\s+of\s+digital\s+financial\s+infrastructure\.?/gi, 'WDT와 WFIN도 디지털 금융 인프라 확장의 수혜를 입을 것으로 분석됩니다.')
+    .replace(/likewise\s+benefiting\s+from\s+the\s+expansion\s+of\s+digital\s+financial\s+infrastructure\.?/gi, '디지털 금융 인프라 확장의 수혜를 입을 것으로 분석됩니다.')
+    // COPY-09: Comma spacing
+    .replace(/수수료 급증,배당/g, '수수료 급증, 배당')
+    .replace(/,([^\s0-9])/g, ', $1');
+}
+

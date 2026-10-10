@@ -18,21 +18,49 @@ export function TelemetryPulse() {
     systemHealth: '100% HEALTHY',
     latencyMs: 18,
   });
+  const [isLive, setIsLive] = useState(true);
   const [pulsing, setPulsing] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    let mounted = true;
+
+    const measurePing = async () => {
       setPulsing(true);
-      setTimeout(() => setPulsing(false), 800);
+      setTimeout(() => {
+        if (mounted) setPulsing(false);
+      }, 800);
 
-      // 3초 주기 가상 텔레메트리 갱신 및 핑
-      setData((prev) => ({
-        ...prev,
-        latencyMs: Math.floor(15 + Math.random() * 8),
-      }));
-    }, 3000);
+      try {
+        const start = performance.now();
+        const res = await fetch('/app-api/v1/game-clock', { cache: 'no-store' });
+        const latency = Math.max(1, Math.round(performance.now() - start));
+        if (mounted) {
+          setIsLive(res.ok);
+          setData((prev) => ({
+            ...prev,
+            latencyMs: latency,
+            systemHealth: res.ok ? '100% HEALTHY' : 'DEGRADED',
+          }));
+        }
+      } catch {
+        if (mounted) {
+          setIsLive(false);
+          setData((prev) => ({
+            ...prev,
+            systemHealth: 'NETWORK_OFFLINE',
+          }));
+        }
+      }
+    };
 
-    return () => clearInterval(interval);
+    // 초기 1회 실측 후 10초 주기 실측 핑 전송
+    measurePing();
+    const interval = setInterval(measurePing, 10000);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   return (
@@ -51,7 +79,7 @@ export function TelemetryPulse() {
             <Radio className="size-3.5 text-primary" /> 실시간 텔레메트리 펄스 (Live Telemetry)
           </strong>
           <Badge variant="outline" className="font-mono text-[10px] px-1.5 py-0 border-emerald-500/40 text-emerald-600 dark:text-emerald-400">
-            3s 갱신
+            10s 실측 핑
           </Badge>
         </div>
 
