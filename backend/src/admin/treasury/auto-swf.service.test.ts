@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AutoSovereignWealthFundService } from './auto-swf.service';
 import type { Pool } from 'pg';
 import type { DiscordAlertService } from '../../discord/discord-alert.service';
@@ -9,6 +9,9 @@ describe('AutoSovereignWealthFundService', () => {
   let mockDiscordAlert: any;
 
   beforeEach(() => {
+    process.env.MONEYVERSE_SWF_EXECUTION_ENABLED = 'true';
+    delete process.env.MONEYVERSE_SWF_SCHEDULER_ENABLED;
+
     mockDiscordAlert = {
       sendAdminDirectMessage: vi.fn().mockResolvedValue({ success: true }),
       sendDiscordEmbed: vi.fn().mockResolvedValue(true),
@@ -25,9 +28,47 @@ describe('AutoSovereignWealthFundService', () => {
     );
   });
 
+  afterEach(() => {
+    service.onModuleDestroy();
+    vi.useRealTimers();
+    delete process.env.MONEYVERSE_SWF_EXECUTION_ENABLED;
+    delete process.env.MONEYVERSE_SWF_SCHEDULER_ENABLED;
+  });
+
+  it('fails closed when runtime execution is not explicitly enabled', async () => {
+    delete process.env.MONEYVERSE_SWF_EXECUTION_ENABLED;
+
+    const result = await service.evaluateAndRebalance();
+
+    expect(result).toEqual({
+      executed: false,
+      reason: 'SWF_RUNTIME_EXECUTION_DISABLED',
+    });
+    expect(mockPool.connect).not.toHaveBeenCalled();
+  });
+
+  it('never executes a SWF cycle merely because the backend restarted', async () => {
+    vi.useFakeTimers();
+    process.env.MONEYVERSE_SWF_SCHEDULER_ENABLED = 'true';
+    const evaluateSpy = vi.spyOn(service, 'evaluateAndRebalance').mockResolvedValue({
+      executed: false,
+      reason: 'TEST',
+    });
+
+    service.onModuleInit();
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(evaluateSpy).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(60 * 60 * 1000 - 30_000);
+    expect(evaluateSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('preserves 25M floor and executes autonomous compounding growth', async () => {
     const mockClient = {
       query: vi.fn().mockImplementation((queryText: string) => {
+        if (queryText.includes('pg_try_advisory_xact_lock')) {
+          return Promise.resolve({ rows: [{ acquired: true }] });
+        }
         if (queryText.includes('system_treasury_vaults WHERE code = \'VAULT_MAIN\'')) {
           return Promise.resolve({
             rows: [{ id: 'vault-uuid-main', balance_wld: '25000000' }],
@@ -90,6 +131,9 @@ describe('AutoSovereignWealthFundService', () => {
   it('respects governance max_investment_ratio_pct and halts investment when cap is reached', async () => {
     const mockClient = {
       query: vi.fn().mockImplementation((queryText: string) => {
+        if (queryText.includes('pg_try_advisory_xact_lock')) {
+          return Promise.resolve({ rows: [{ acquired: true }] });
+        }
         if (queryText.includes('system_treasury_vaults WHERE code = \'VAULT_MAIN\'')) {
           return Promise.resolve({
             rows: [{ id: 'vault-uuid-main', balance_wld: '30000000' }], // 3,000만 현금 (바닥 초과)
