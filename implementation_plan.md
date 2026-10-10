@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v179)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v180)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v180**: [가상 주식 10종목·핵심 가이드 5종 IndexNow 검색 로봇 즉시 색인 요청 핑 전송(HTTP 200) & 검색 로봇(Googlebot 96회, Yeti 57회 등 일일 191회) 크롤링 실측 분석 완료] (+42, -0)
 - **v179**: [은행 대출 리스크 0건 시 빈 상태 안내 분기 & 텔레메트리 지니계수/순자산 점유율 용어 일치 & 신규 회원 정착금 플랫폼 공식 정책(10,000 WLD + 복권 1장) 전역 통일] (+48, -0)
 - **v178**: [글로벌 다국어(ko/en/ja/zh) 계산기 저장·바이럴 공유 모달 100% 현지화 & 경제 캘린더 실시간 동적 D-Day(발표완료/오늘) 구현 & 푸터 중국어 다듬기] (+39, -0)
 - **v177**: [QA 보고서 전수 분석 및 P1/P2 핵심 결함 쇄신 (가상 주식 10종목 마스터 동기화 404 해결, 복리 물타기 문구 분기, 용어사전 50개 동기화, 납세 영수증 안전 기본값, 대출 무이자 지원 및 최저이자 동적 판정, 오타/비문 쇄신)] (+54, -0)
@@ -198,3 +199,31 @@
 2. Git 커밋 및 origin/main 푸시
 3. 원격 운영 서버(`prod-v565`) 무중단 승격 빌드 및 배포
 4. 실제 프로덕션 `/admin/bank`, `/admin/users` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v180 Specification] 가상 주식 10종목 및 가이드 5종 IndexNow 핑 전송 & 검색 봇 크롤링 실측 사양
+
+### 1. 현황 및 개선 필요 사항
+1. **신규 가상 주식 및 가이드 검색 로봇 즉시 발견 촉진**:
+   - 가상 주식 10개 종목(`CHIMU314`, `CHIPS`, `DUCK`, `MYUY`, `SPACE`, `WDB`, `WDG`, `WDM`, `WDT`, `WFIN`)과 핵심 가이드 5종(`stock-trading`, `virtual-banking`, `career-mastery`, `glossary`, `dopamine-system`)을 검색엔진에 즉시 알려 빠른 인덱싱 유도 필요.
+2. **크롤링 봇 유입 실측 분석**:
+   - 내부 링크 보강 이후 Googlebot, Yeti, Bingbot 등의 실제 수집 활동 현황 및 페이지 방문 통계 검증.
+
+### 2. 세부 실행 명세
+1. **IndexNow 15개 URL 배치 핑 전송 (`https://api.indexnow.org/IndexNow`)**:
+   - 10대 가상 주식 종목 상세 URL + 5대 핵심 가이드 URL 일괄 전송.
+   - HTTP 200 OK 수신 완료.
+2. **Nginx 액세스 로그 기반 봇 수집 통계 실측**:
+   - Googlebot: 96건
+   - Naver Yeti: 57건
+   - Bingbot: 19건
+   - YandexBot: 11건
+   - Applebot: 7건
+   - Baiduspider: 1건
+   - 일일 총 191건 수집 확인 완료.
+
+### 3. 검증 결과
+1. IndexNow API HTTP 200 수신 완료 (`x-msedge-ref: Ref A: 1A153D991D6D4E128D156B702B1EE43C`)
+2. Naver Yeti의 `/tools/stock-calculator/lly-minus-20` 실시간 JS 번들 풀 렌더링 수집 확인
+3. Googlebot의 모바일/데스크톱 크롤러 활동 정상 확인
