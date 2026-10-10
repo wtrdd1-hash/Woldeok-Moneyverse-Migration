@@ -24,29 +24,10 @@ export async function GET(req: Request): Promise<NextResponse> {
   }
 }
 
-export async function POST(req: Request): Promise<NextResponse> {
-  const viewer = await viewerOrUnknown();
-
-  if (!viewer || !viewer.signedIn) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    const body = await req.json().catch(() => ({}));
-    const { notificationId, markAll } = body;
-
-    if (markAll) {
-      const result = await api('/api/v1/notifications/read-all', { method: 'POST' });
-      return NextResponse.json(result);
-    }
-
-    if (notificationId) {
-      const result = await api(`/api/v1/notifications/${encodeURIComponent(notificationId)}/read`, { method: 'POST' });
-      return NextResponse.json(result);
-    }
-
-    return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to update notification' }, { status: 500 });
-  }
+/** Legacy browser POST is retired: writes require a CSRF-protected server action. */
+export async function POST(): Promise<NextResponse> {
+  return NextResponse.json(
+    { error: 'Use the authenticated notification action' },
+    { status: 405, headers: { allow: 'GET', 'cache-control': 'private, no-store' } },
+  );
 }

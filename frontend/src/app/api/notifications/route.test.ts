@@ -12,7 +12,7 @@ vi.mock('@/lib/api', () => ({
   },
 }));
 vi.mock('@/lib/viewer', () => ({ viewerOrUnknown: viewerMock }));
-import { GET } from './route';
+import { GET, POST } from './route';
 
 const request = (query = '') => new Request(`http://localhost/api/notifications${query}`);
 beforeEach(() => { apiMock.mockReset(); viewerMock.mockReset(); });
@@ -57,5 +57,16 @@ describe('notification feed BFF does not invent empty results', () => {
     const { ApiError } = await import('@/lib/api');
     apiMock.mockRejectedValue(new ApiError(403));
     expect((await GET(request())).status).toBe(403);
+  });
+});
+
+describe('notification writes require the CSRF-protected server action', () => {
+  it('does not forward browser POST mutations to the internal API', async () => {
+    viewerMock.mockResolvedValue({ signedIn: true });
+    const response = await POST();
+    expect(response.status).toBe(405);
+    expect(response.headers.get('allow')).toBe('GET');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(apiMock).not.toHaveBeenCalled();
   });
 });
