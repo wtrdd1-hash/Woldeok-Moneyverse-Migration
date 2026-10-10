@@ -54,4 +54,9 @@ GRANT INSERT, UPDATE ON TABLE public.space_property_tax_payments TO moneyverse_a
 GRANT INSERT, UPDATE ON TABLE public.season_hall_of_fame TO moneyverse_app;
 GRANT INSERT, UPDATE ON TABLE public.season_reward_claims TO moneyverse_app;
 
+-- Migration 264 dropped/recreated these SECURITY DEFINER read models after
+-- migration 106 had granted them, so restore only their explicit app EXECUTE.
+GRANT EXECUTE ON FUNCTION public.admin_credit_grades(uuid) TO moneyverse_app;
+GRANT EXECUTE ON FUNCTION public.admin_loan_book(uuid, integer) TO moneyverse_app;
+
 COMMIT;
