@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, CheckCheck, Gift, Send, ShieldAlert, Sparkles, RefreshCw } from 'lucide-react';
+import { Bell, CheckCheck, Gift, Send, ShieldAlert, RefreshCw } from 'lucide-react';
+import { markAccountNotificationRead } from '@/app/account/notifications/actions';
 
 interface NotificationItem {
   id: string;
@@ -28,7 +29,8 @@ export function NotificationCenterModal() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [claiming, setClaiming] = useState(false);
+  const [feedError, setFeedError] = useState(false);
+  const [lastChecked, setLastChecked] = useState<Date | null>(null);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
   const fetchUnreadCount = async () => {
@@ -46,13 +48,23 @@ export function NotificationCenterModal() {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/notifications?unreadOnly=${filter === 'unread'}`);
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data.notifications || []);
-      }
+      const res = await fetch(`/api/notifications?unreadOnly=${filter === 'unread'}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error('Notification API unavailable');
+      const payload: unknown = await res.json();
+      if (!payload || typeof payload !== 'object' || !('notifications' in payload)
+        || !Array.isArray(payload.notifications)
+        || !payload.notifications.every((item: unknown) => {
+          if (!item || typeof item !== 'object') return false;
+          const record = item as Record<string, unknown>;
+          return typeof record.id === 'string' && typeof record.title === 'string'
+            && typeof record.body === 'string' && typeof record.category === 'string'
+            && typeof record.is_read === 'boolean' && typeof record.created_at === 'string';
+        })) throw new Error('Invalid notification response');
+      setNotifications(payload.notifications);
+      setLastChecked(new Date());
+      setFeedError(false);
     } catch {
-      // ignore
+      setFeedError(true);
     } finally {
       setLoading(false);
     }
@@ -72,32 +84,16 @@ export function NotificationCenterModal() {
   }, [open, filter]);
 
   const handleMarkAllRead = async () => {
+    if (loading || feedError || !lastChecked) return;
     try {
-      const res = await fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ markAll: true }),
-      });
-      if (res.ok) {
-        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-        setUnreadCount(0);
-      }
+      const result = await markAccountNotificationRead(null);
+      if (!result.ok) throw new Error('Read update rejected');
+      setNotifications((previous) => previous.map((item) => ({ ...item, is_read: true })));
+      setUnreadCount(0);
+      await fetchNotifications();
+      await fetchUnreadCount();
     } catch {
-      // ignore
-    }
-  };
-
-  const handleClaimAll = async () => {
-    setClaiming(true);
-    try {
-      const res = await fetch('/api/notifications/claim-all', { method: 'POST' });
-      if (res.ok) {
-        await handleMarkAllRead();
-      }
-    } catch {
-      // ignore
-    } finally {
-      setClaiming(false);
+      setFeedError(true);
     }
   };
 
@@ -167,27 +163,21 @@ export function NotificationCenterModal() {
                 variant="outline"
                 size="sm"
                 onClick={handleMarkAllRead}
-                disabled={notifications.every((n) => n.is_read)}
+                disabled={loading || feedError || !lastChecked || notifications.every((n) => n.is_read)}
                 className="h-8 text-xs px-2.5 rounded-lg border-border/40"
               >
                 <CheckCheck className="h-3.5 w-3.5 mr-1" />
                 모두 읽음
               </Button>
-              <Button
-                size="sm"
-                onClick={handleClaimAll}
-                disabled={claiming || unreadCount === 0}
-                className="h-8 text-xs px-2.5 rounded-lg font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md shadow-amber-500/15"
-              >
-                <Sparkles className="h-3.5 w-3.5 mr-1" />
-                원클릭 모두 수령
-              </Button>
+
             </div>
           </div>
 
           {/* 필터 탭 */}
           <div className="flex items-center gap-2 mt-3">
             <button
+              type="button"
+              aria-pressed={filter === 'all'}
               onClick={() => setFilter('all')}
               className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 filter === 'all'
@@ -198,6 +188,8 @@ export function NotificationCenterModal() {
               전체 알림
             </button>
             <button
+              type="button"
+              aria-pressed={filter === 'unread'}
               onClick={() => setFilter('unread')}
               className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
                 filter === 'unread'
@@ -215,6 +207,8 @@ export function NotificationCenterModal() {
           </div>
         </DialogHeader>
 
+        {lastChecked && <p role="status" className="px-5 pt-2 text-xs text-muted-foreground">마지막 서버 확인: {lastChecked.toLocaleTimeString('ko-KR')}</p>}
+        {feedError && <p role="alert" className="mx-4 mt-2 rounded-lg border border-destructive p-3 text-sm">알림을 확인하거나 변경하지 못했습니다. 이전 목록이 표시될 수 있습니다. 다시 열어 새로고침해 주세요.</p>}
         {/* 알림 목록 스크롤 영역 */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2.5 min-h-[280px]">
           {loading ? (
@@ -222,7 +216,7 @@ export function NotificationCenterModal() {
               <RefreshCw className="h-5 w-5 animate-spin text-primary" />
               <span className="text-xs">알림을 불러오는 중...</span>
             </div>
-          ) : notifications.length === 0 ? (
+          ) : notifications.length === 0 && !feedError ? (
             <div className="h-48 flex flex-col items-center justify-center text-center p-4">
               <Bell className="h-8 w-8 text-muted-foreground/40 mb-2" />
               <p className="text-sm font-semibold text-foreground">새로운 알림이 없습니다.</p>
