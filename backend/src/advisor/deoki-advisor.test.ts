@@ -33,8 +33,8 @@ describe('DeokiAdvisorRepository Unit Tests', () => {
         {
           id: 'diag-1',
           user_id: 'user-1',
-          pr_index: 85,
-          risk_level: 'VERY_LOW',
+          pr_index: 55,
+          risk_level: 'HIGH',
           asset_summary: {
             cash: 300000,
             savings: 200000,
@@ -56,8 +56,8 @@ describe('DeokiAdvisorRepository Unit Tests', () => {
     const diagnosis = await repo.diagnoseUserPortfolio('user-1');
 
     expect(diagnosis).not.toBeNull();
-    expect(diagnosis.prIndex).toBe(85);
-    expect(diagnosis.riskLevel).toBe('VERY_LOW');
+    expect(diagnosis.prIndex).toBe(55);
+    expect(diagnosis.riskLevel).toBe('HIGH');
     expect(diagnosis.assetSummary.total).toBe(1000000);
   });
 

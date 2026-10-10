@@ -1,4 +1,4 @@
--- 245-targeted-treasury-subsidy-and-donation.sql
+-- 268-targeted-treasury-subsidy-and-donation.sql
 -- 저자산 초기 유저 타겟팅 국고 선별 지원금 및 고액 자산가 국고 기부(명예의 전당) 시스템
 
 BEGIN;

@@ -382,7 +382,7 @@ describe('AiNewsService.saveSettings', () => {
 // ---------------------------------------------------------------------------
 
 const CALL = {
-  apiBaseUrl: 'https://api.example/v1',
+  apiBaseUrl: 'https://1.1.1.1/v1',
   apiKey: 'sk-test-key-1234',
   model: 'gpt-4o-mini',
   system: 'the brief',
@@ -416,9 +416,9 @@ afterEach(() => {
 
 describe('endpoint', () => {
   it('hangs both paths off the address, however the operator wrote it', () => {
-    expect(endpoint('https://api.example/v1', 'chat/completions')).toBe('https://api.example/v1/chat/completions');
-    expect(endpoint('https://api.example/v1/', 'models')).toBe('https://api.example/v1/models');
-    expect(endpoint('https://api.example/v1/chat/completions', 'models')).toBe('https://api.example/v1/models');
+    expect(endpoint('https://1.1.1.1/v1', 'chat/completions')).toBe('https://1.1.1.1/v1/chat/completions');
+    expect(endpoint('https://1.1.1.1/v1/', 'models')).toBe('https://1.1.1.1/v1/models');
+    expect(endpoint('https://1.1.1.1/v1/chat/completions', 'models')).toBe('https://1.1.1.1/v1/models');
   });
 });
 
@@ -430,7 +430,7 @@ describe('openAiCaller', () => {
     const batch = await openAiCaller(CALL);
 
     expect(batch.scenarios).toHaveLength(1);
-    expect(fetcher.mock.calls[0]?.[0]).toBe('https://api.example/v1/chat/completions');
+    expect(fetcher.mock.calls[0]?.[0]).toBe('https://1.1.1.1/v1/chat/completions');
     const init = fetcher.mock.calls[0]?.[1] as { method: string; headers: Record<string, string> };
     expect(init.method).toBe('POST');
     expect(init.headers.authorization).toBe('Bearer sk-test-key-1234');
@@ -573,15 +573,15 @@ describe('openAiLister', () => {
     const fetcher = server(new Response(JSON.stringify({ data: [{ id: 'gpt-4o' }, { id: 'gpt-4o-mini' }, { id: 'gpt-4o' }] }), { status: 200 }));
     vi.stubGlobal('fetch', fetcher);
 
-    await expect(openAiLister({ apiBaseUrl: 'https://api.example/v1', apiKey: 'sk-test-key-1234' }))
+    await expect(openAiLister({ apiBaseUrl: 'https://1.1.1.1/v1', apiKey: 'sk-test-key-1234' }))
       .resolves.toEqual(['gpt-4o', 'gpt-4o-mini']);
-    expect(fetcher.mock.calls[0]?.[0]).toBe('https://api.example/v1/models');
+    expect(fetcher.mock.calls[0]?.[0]).toBe('https://1.1.1.1/v1/models');
     expect((fetcher.mock.calls[0]?.[1] as { method: string }).method).toBe('GET');
   });
 
   it('says so when the address will not list its models', async () => {
     vi.stubGlobal('fetch', server(new Response('not found', { status: 404 })));
-    await expect(openAiLister({ apiBaseUrl: 'https://api.example/v1', apiKey: 'k' }))
+    await expect(openAiLister({ apiBaseUrl: 'https://1.1.1.1/v1', apiKey: 'k' }))
       .rejects.toMatchObject({ code: 'ai_news_model_unusable' });
   });
 });

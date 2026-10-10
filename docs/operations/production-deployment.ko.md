@@ -16,6 +16,16 @@ GitOps는 복구/목표 아키텍처의 target/provenance 상태로 유지하지
 host mirror는 동일 승인 SHA를 사용하고 이전 unit 설정을 롤백용으로 보존해야 하며, 릴리스 완료 보고 전에 같은 catalog/status/SEO probe를 통과해야 합니다.
 
 
+### 불변 Debian 호스트 릴리스 소유권 — v2026.10.10.543
+
+Debian 호스트의 `/srv/moneyverse-data/releases/*` 릴리스 디렉터리는 **불변 산출물**입니다. 이미 Test 또는 Production pointer가 가리키는 릴리스 안에서 `git pull`, `git fetch`, `git reset`, `git checkout` 또는 기타 Git 기반 내용을 변경하면 안 됩니다. 이런 변경은 exact-SHA provenance를 무효화하고 Test를 거치지 않은 코드가 같은 릴리스 이름 아래 운영될 수 있게 합니다.
+
+호스트 staging은 `bash ops/release/stage-host-release.sh <test|prod> <version> <exact-sha> <clean-source-dir> [release-root]`를 사용합니다. 도구는 승인 SHA와 source `HEAD` 일치, clean worktree, backend/frontend 빌드 산출물, 신규 SHA-qualified 목적지, Git metadata 제거 및 `.moneyverse-release.json`을 강제합니다. 기존 목적지가 존재하면 fail-closed 합니다.
+
+Test/Production symlink 또는 systemd release pointer는 새 불변 디렉터리로만 원자적으로 전환합니다. 전환 뒤 public `/api/version`, frontend identity, release manifest의 `applicationSourceSha`가 동일해야 합니다. 하나라도 다르면 release identity mismatch이며 승격/완료 주장을 중단하고 이전 pointer로 롤백합니다.
+
+v543 SWF 격리 기간에는 Test/Production stable environment에서 `MONEYVERSE_SWF_EXECUTION_ENABLED`와 `MONEYVERSE_SWF_SCHEDULER_ENABLED`를 미설정/false로 유지합니다. 두 값을 `true`로 켜는 것은 v544 경제코어 수정 및 exact-SHA Test 대사 승인 후 별도 변경으로만 허용합니다.
+
 ### Stable Test 환경 소유권 — v2026.09.19.263
 
 영구 Test service는 release 디렉터리의 `backend/.env` 또는 `frontend/.env.local`을 직접 로드하지 않습니다. systemd `EnvironmentFile=` 값이 후보의 `PORT`/`BUILD_ID`를 덮으면 잘못된 listener에 바인딩하거나 잘못된 release identity를 보고할 수 있습니다.

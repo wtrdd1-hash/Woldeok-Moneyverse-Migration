@@ -1,11 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.05.530
+> Current ledger version: v2026.10.10.543
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.10.543 — 2026-10-10 — Emergency economy containment and immutable release provenance
+- Started from `origin/main=545e8231f8b90b543ed9de0722adf98d63587820`; the mandatory mid-work recheck detected one concurrent commit at `origin/main=9e17095586c46e43ec1a68214658e512e457148a`. No SWF/release/authority paths overlapped, but the v543 branch was rebuilt on that exact main before continuing.
+- Reconciled v523 money-supply/treasury conservation authority against current SWF source and classified startup/hourly mutation, source-free treasury inflows, synthetic growth/harvest and direct balance settlement as `AUTHORITY_DRIFT`.
+- SWF execution is fail-closed behind `MONEYVERSE_SWF_EXECUTION_ENABLED=true`; the scheduler separately requires `MONEYVERSE_SWF_SCHEDULER_ENABLED=true`. Process startup no longer mutates the economy, and explicitly enabled cycles require an advisory lock plus minimum interval.
+- Added `ops/release/stage-host-release.sh` to require a clean exact-SHA worktree, built artifacts, a new SHA-qualified destination, stripped Git metadata and `.moneyverse-release.json`; existing release paths cannot be overwritten.
+- v543 is containment. Unsafe SWF formulas, non-canonical FX account SQL, migration-253 broad grants, pension/bond/repo/FX conservation and direct-table settlement remain v544 forward-migration/Economy Core remediation.
+- The independent v530 full-UI BLOCKED gate remains active. No Production completion is claimed before GitHub CI and exact-SHA isolated Test both pass.
+- Detail: `deltas/v2026.10.10.543.md`; worklog: `../worklog/2026-10-10-v543-emergency-containment.md`.
 
 ## v2026.10.05.530 — 2026-10-05 — Emergency full UI re-audit
 - Initial check saw `origin/main=ca354411d88b461215a81557f686765cfedf00f0`; the mandatory pre-branch fetch detected drift to `921b467eac21645a51ba362b24cac7eaab89c081`, and the isolated v530 branch was created from that latest SHA. Mid-work refetch remained `921b467e...`.

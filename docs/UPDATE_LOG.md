@@ -1,3 +1,14 @@
+## v2026.10.10.543 — Emergency Economy Containment & Immutable Host Release Provenance
+
+- **State:** source implementation complete on isolated branch; exact-SHA Test and Production are not yet verified.
+- Fail-closed SWF mutation behind `MONEYVERSE_SWF_EXECUTION_ENABLED=true`; scheduler separately requires `MONEYVERSE_SWF_SCHEDULER_ENABLED=true`.
+- Removed backend-start +30-second SWF mutation; explicitly enabled scheduling starts after a full hour.
+- Added transaction advisory-lock and durable minimum-interval rejection before any SWF economic writes.
+- Added regression tests for default-off execution, restart safety, lock contention and interval gating.
+- Added `ops/release/stage-host-release.sh` and release-layout tests so Debian host releases are clean exact-SHA, SHA-qualified, never overwritten, stripped of Git metadata and identified by `.moneyverse-release.json`.
+- Integrated v543 into `PROJECT_PLAN` and `INTEGRATED_PLANNING_MASTER`; v530 UI BLOCKED remains independently active.
+- **Deferred v544:** Economy Core/SECURITY DEFINER settlement replacement, FX canonical-schema repair, migration-253 privilege repair and pension/bond/repo/FX conservation remediation.
+
 ## v118 (prod-v529) — SEO Social Viral Share Toolbar, X (Twitter) Bot & Treasury 85% Cash Normalization
 
 - **Production Release**: `prod-v529` (Promoted to Production)
