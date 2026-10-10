@@ -55,7 +55,7 @@ export function NotificationLiveFeed() {
   const refresh = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/notifications?limit=100', { cache: 'no-store', signal });
+      const response = await fetch('/api/notifications?limit=100', { cache: 'no-store', ...(signal ? { signal } : {}) });
       if (!response.ok) throw new Error('Notification API unavailable');
       const payload: unknown = await response.json();
       if (!payload || typeof payload !== 'object' || !('notifications' in payload) || !Array.isArray(payload.notifications)
