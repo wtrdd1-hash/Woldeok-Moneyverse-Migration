@@ -19,9 +19,6 @@ export const metadata: Metadata = {
     '가상경제 시뮬레이터',
     '앱테크 파밍 계산기',
   ],
-  alternates: {
-    canonical: '/tools',
-  },
   openGraph: {
     title: '금융 & 시뮬레이터 웹 도구 허브 | 월덕 머니버스',
     description: '설치 없이 브라우저에서 바로 사용하는 3대 금융 계산기 및 가상경제 시뮬레이터 툴킷',

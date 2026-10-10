@@ -5647,3 +5647,49 @@ ull을 반환하여 전면 숨김 처리 및 DOM 옵저버 비활성화.
 - TypeScript 타입 검사 (`tsc --noEmit`) 100% 통과 확인.
 - 원격 운영 서버 VM 100 `prod-v559` 무중단 릴리스 승격.
 - 관리자 SEO 및 경제 콘솔 정상 응답 확인 (HTTP 200).
+
+---
+## 🚀 [v174 Specification] 전 도구 지면 캐노니컬 오염(Canonical Pollution) 결함 전수 해소 및 고검색량 7대 금융 계산기 전용 SEO 메타데이터·JSON-LD 레이아웃 완결
+
+### 1. 배경 및 핵심 요구사항 (Overview & Goals)
+1. **캐노니컬 누수 및 검색 순위 억제 결함 해소**:
+   - `frontend/src/app/tools/layout.tsx`에 선언되어 있던 `alternates: { canonical: '/tools' }`가 하위 상세 계산기 페이지로 상속되어, 구글봇이 `/tools/loan-interest-calculator`(2억 대출 30년 상환) 등 고검색량 상세 페이지를 단순 `/tools` 중복 페이지로 인식하여 1페이지 진입을 가로막던 문제를 근본적으로 해결.
+2. **7대 핵심 금융 계산기 고유 캐노니컬 및 전용 레이아웃 신설**:
+   - `loan-interest-calculator/page.tsx`: 고유 canonical (`https://easy-scraping.com/tools/loan-interest-calculator`), 다국어 hreflang, OpenGraph URL 주입.
+   - `dividend-tax-calculator/page.tsx`: 고유 canonical (`https://easy-scraping.com/tools/dividend-tax-calculator`), 다국어 hreflang, OpenGraph URL 주입.
+   - `isa-calculator/layout.tsx` (신규): 전용 메타데이터, 고유 canonical, breadcrumbJsonLd, softwareApplicationJsonLd, faqPageJsonLd 탑재.
+   - `pension-tax-calculator/layout.tsx` (신규): 전용 메타데이터, 고유 canonical, breadcrumbJsonLd, softwareApplicationJsonLd, faqPageJsonLd 탑재.
+   - `retirement-calculator/layout.tsx` (신규): 전용 메타데이터, 고유 canonical, breadcrumbJsonLd, softwareApplicationJsonLd, faqPageJsonLd 탑재.
+   - `salary-calculator/layout.tsx` (신규): 전용 메타데이터, 고유 canonical, breadcrumbJsonLd, softwareApplicationJsonLd, faqPageJsonLd 탑재.
+   - `youth-leap-calculator/layout.tsx` (신규): 전용 메타데이터, 고유 canonical, breadcrumbJsonLd, softwareApplicationJsonLd, faqPageJsonLd 탑재.
+3. **프로덕션 무중단 승격 (`prod-v560`) 및 라이브 캐노니컬 실측 검증**:
+   - Next.js Turbopack 정적 프리렌더링 빌드.
+   - systemd 서비스 오버라이드 및 심링크 승격.
+   - 라이브 페이지에서 개별 canonical URL 정상 렌더링 확인.
+
+---
+
+### 2. 세부 컴포넌트 사양 (Detailed Component Specs)
+- **`frontend/src/app/tools/layout.tsx`**:
+  - `alternates` 블록 제거로 하위 경로 캐노니컬 누수 원천 차단.
+- **`frontend/src/app/tools/loan-interest-calculator/page.tsx`**:
+  - `canonicalUrl('/tools/loan-interest-calculator')` 및 4대 언어 hreflang alternate 명시.
+- **`frontend/src/app/tools/dividend-tax-calculator/page.tsx`**:
+  - `canonicalUrl('/tools/dividend-tax-calculator')` 및 4대 언어 hreflang alternate 명시.
+- **`frontend/src/app/tools/isa-calculator/layout.tsx`**:
+  - 일반형/서민형 비과세 및 9.9% 분리과세 키워드 메타데이터 및 FAQ 구조화 데이터 탑재.
+- **`frontend/src/app/tools/pension-tax-calculator/layout.tsx`**:
+  - 3.3%~5.5% 연금소득세 및 1,500만원 분리과세 키워드 메타데이터 및 FAQ 구조화 데이터 탑재.
+- **`frontend/src/app/tools/retirement-calculator/layout.tsx`**:
+  - 국민연금 예상액 및 4% 룰 FIRE 은퇴자금 키워드 메타데이터 및 FAQ 구조화 데이터 탑재.
+- **`frontend/src/app/tools/salary-calculator/layout.tsx`**:
+  - 2026 4대보험 및 근로소득세 실수령 월급 키워드 메타데이터 및 FAQ 구조화 데이터 탑재.
+- **`frontend/src/app/tools/youth-leap-calculator/layout.tsx`**:
+  - 5,000만원 정부기여금 및 비과세 혜택 키워드 메타데이터 및 FAQ 구조화 데이터 탑재.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+- TypeScript 타입체크 (`tsc --noEmit`) 100% 무오류 확인.
+- 원격 운영 서버 VM 100 `prod-v560` 무중단 승격 배포.
+- 실서버 라이브 curl로 7대 계산기 고유 캐노니컬 태그 정상 출력 확인.
