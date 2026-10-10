@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.05.530
-> Implementation/evidence sync: 2026-10-05 (emergency UI audit baseline exact main SHA: `921b467e`; v530 is audit/planning only)
+> Current integrated version: v2026.10.10.543
+> Implementation/evidence sync: 2026-10-10 (v543 start `545e8231`, mid-work latest main `9e170955`; v543 source containment implemented, exact-SHA Test/Production not yet verified)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Emergency economy containment and immutable host-release gate — v2026.10.10.543 (2026-10-10)
+
+- **P0 authority decision:** the v523 Economy Core supply/conservation invariant is controlling. Existing source-free treasury credit, synthetic SWF growth and direct balance mutation are `AUTHORITY_DRIFT` and are blocked by default until v544 structural remediation.
+- **Runtime containment:** SWF mutation now requires explicit `MONEYVERSE_SWF_EXECUTION_ENABLED=true`; scheduling separately requires `MONEYVERSE_SWF_SCHEDULER_ENABLED=true`. The backend-start +30-second economic cycle is removed.
+- **Duplicate-cycle guard:** an explicitly enabled cycle must acquire a PostgreSQL transaction advisory lock and satisfy the durable `last_executed_at` / `rebalance_interval_hours` minimum interval.
+- **Release provenance:** live directories under `/srv/moneyverse-data/releases/*` must never be mutated with Git pull/reset/checkout. A clean exact-SHA worktree is staged into a new SHA-qualified release directory, Git metadata is removed, and `.moneyverse-release.json` records identity.
+- **Promotion gate:** Production requires GitHub CI plus the same exact-SHA isolated Test backend/database/version evidence. The independent v530 full-UI BLOCKED gate remains in force.
+- **v544 handoff:** non-canonical FX SQL, migration-253 broad grants, pension/bond/repo/FX conservation defects, direct balance writes and source-free SWF formulas move to forward-migration + SECURITY DEFINER/Economy Core settlement remediation.
+- **Detailed authority:** [v543 planning delta](deltas/v2026.10.10.543.md).
+- **Evidence boundary:** source containment is implemented on the v543 branch; exact-SHA Test and Production completion are not yet claimed.
 
 ## Emergency full UI re-audit and remediation gate — v2026.10.05.530 (2026-10-05)
 
