@@ -275,6 +275,14 @@ describe('AutoSovereignWealthFundService', () => {
     expect(result.reinvestedWld).toBe('0');
   });
 
+  it('fails closed when the SWF policy row is missing', async () => {
+    mockPool.query = vi.fn().mockResolvedValue({ rows: [] });
+
+    const config = await service.getConfig();
+
+    expect(config.is_enabled).toBe(false);
+  });
+
   it('updates governance configuration correctly', async () => {
     mockPool.query = vi.fn().mockResolvedValue({ rows: [] });
     const getConfigSpy = vi.spyOn(service, 'getConfig').mockResolvedValue({
