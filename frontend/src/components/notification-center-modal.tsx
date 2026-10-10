@@ -28,6 +28,7 @@ export function NotificationCenterModal() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [countStale, setCountStale] = useState(false);
   const [loading, setLoading] = useState(false);
   const [feedError, setFeedError] = useState(false);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
@@ -35,13 +36,16 @@ export function NotificationCenterModal() {
 
   const fetchUnreadCount = async () => {
     try {
-      const res = await fetch('/api/notifications/unread-count');
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.unreadCount || 0);
-      }
+      const response = await fetch('/api/notifications/unread-count', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Unread count unavailable');
+      const data: unknown = await response.json();
+      if (!data || typeof data !== 'object' || !('unreadCount' in data)
+        || typeof data.unreadCount !== 'number' || !Number.isSafeInteger(data.unreadCount)
+        || data.unreadCount < 0) throw new Error('Invalid unread count');
+      setUnreadCount(data.unreadCount);
+      setCountStale(false);
     } catch {
-      // ignore
+      setCountStale(true);
     }
   };
 
@@ -135,7 +139,7 @@ export function NotificationCenterModal() {
           className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-border/50 bg-background/80 hover:bg-muted transition-colors"
         >
           <Bell className="h-4 w-4 text-foreground/80" />
-          {unreadCount > 0 && (
+          {countStale ? <span aria-label="미확인 알림 수 확인 불가" className="absolute -right-1 -top-1 rounded-full bg-muted px-1 text-[10px]">?</span> : unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-background animate-pulse">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
@@ -164,7 +168,7 @@ export function NotificationCenterModal() {
                 size="sm"
                 onClick={handleMarkAllRead}
                 disabled={loading || feedError || !lastChecked || notifications.every((n) => n.is_read)}
-                className="h-8 text-xs px-2.5 rounded-lg border-border/40"
+                className="min-h-11 text-xs px-2.5 rounded-lg border-border/40"
               >
                 <CheckCheck className="h-3.5 w-3.5 mr-1" />
                 모두 읽음
@@ -179,7 +183,7 @@ export function NotificationCenterModal() {
               type="button"
               aria-pressed={filter === 'all'}
               onClick={() => setFilter('all')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 filter === 'all'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted'
@@ -191,7 +195,7 @@ export function NotificationCenterModal() {
               type="button"
               aria-pressed={filter === 'unread'}
               onClick={() => setFilter('unread')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+              className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
                 filter === 'unread'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted'
@@ -208,7 +212,7 @@ export function NotificationCenterModal() {
         </DialogHeader>
 
         {lastChecked && <p role="status" className="px-5 pt-2 text-xs text-muted-foreground">마지막 서버 확인: {lastChecked.toLocaleTimeString('ko-KR')}</p>}
-        {feedError && <p role="alert" className="mx-4 mt-2 rounded-lg border border-destructive p-3 text-sm">알림을 확인하거나 변경하지 못했습니다. 이전 목록이 표시될 수 있습니다. 다시 열어 새로고침해 주세요.</p>}
+        {feedError && <div role="alert" className="mx-4 mt-2 flex flex-wrap items-center gap-3 rounded-lg border border-destructive p-3 text-sm">알림을 확인하거나 변경하지 못했습니다. 이전 목록이 표시될 수 있습니다.<Button type="button" variant="outline" onClick={() => void fetchNotifications()} disabled={loading} className="min-h-11">다시 시도</Button></div>}
         {/* 알림 목록 스크롤 영역 */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2.5 min-h-[280px]">
           {loading ? (
