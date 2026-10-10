@@ -1,3 +1,14 @@
+## v2026.10.10.543 — 긴급 경제 격리 및 불변 호스트 릴리스 출처 복구
+
+- **상태:** 격리 브랜치 소스 구현 완료. exact-SHA Test와 Production은 아직 미검증.
+- `MONEYVERSE_SWF_EXECUTION_ENABLED=true`일 때만 SWF 변동을 허용하고 스케줄러는 별도 `MONEYVERSE_SWF_SCHEDULER_ENABLED=true`를 요구하도록 fail-closed.
+- 백엔드 시작 +30초 SWF 자동변동을 제거하고 명시 활성화된 주기 실행도 한 시간 전체 후에만 시작.
+- 모든 SWF 경제 쓰기 전에 transaction advisory lock과 영속 최소 실행간격 검사를 추가.
+- 기본 비활성, 재시작 안전, lock 충돌, 최소간격 차단 회귀 테스트 추가.
+- `ops/release/stage-host-release.sh` 및 릴리스 레이아웃 테스트를 추가해 Debian host release를 clean exact-SHA, SHA-qualified, 덮어쓰기 금지, Git metadata 제거, `.moneyverse-release.json` 식별 구조로 강제.
+- `PROJECT_PLAN`과 `INTEGRATED_PLANNING_MASTER`에 v543을 통합. v530 UI BLOCKED 게이트는 별도로 계속 유지.
+- **v544 이관:** Economy Core/SECURITY DEFINER 정산 교체, FX canonical schema 수정, migration 253 권한 회수, 연금/국채/Repo/FX 자금보존 수정.
+
 ## v118 (prod-v529) — SEO 소셜 바이럴 공유 바, X(트위터) 자동 백링크 봇 및 국고 85% 현금 정상화
 
 - **적용 릴리스**: `prod-v529` (운영 배포 완료)
