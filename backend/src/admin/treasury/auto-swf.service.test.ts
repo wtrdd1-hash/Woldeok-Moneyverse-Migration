@@ -63,6 +63,99 @@ describe('AutoSovereignWealthFundService', () => {
     expect(evaluateSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('rejects an overlapping SWF cycle when the advisory lock is busy', async () => {
+    const mockClient = {
+      query: vi.fn().mockImplementation((queryText: string) => {
+        if (queryText.includes('pg_try_advisory_xact_lock')) {
+          return Promise.resolve({ rows: [{ acquired: false }] });
+        }
+        return Promise.resolve({ rows: [] });
+      }),
+      release: vi.fn(),
+    };
+    mockPool.connect = vi.fn().mockResolvedValue(mockClient);
+    mockPool.query = vi.fn().mockResolvedValue({
+      rows: [
+        {
+          id: 'current',
+          is_enabled: true,
+          safe_reserve_wld: '25000000',
+          max_single_investment_wld: '10000000',
+          reinvestment_ratio_pct: 15,
+          max_investment_ratio_pct: 20,
+          equity_ratio_pct: 60,
+          bond_ratio_pct: 30,
+          dividend_ratio_pct: 10,
+          auto_harvest_enabled: true,
+          auto_tax_enabled: true,
+          auto_growth_yield_bps: 150,
+          target_anchor_wld: '25000000',
+          rebalance_interval_hours: 1,
+          last_executed_at: null,
+        },
+      ],
+    });
+
+    const result = await service.evaluateAndRebalance();
+
+    expect(result).toEqual({ executed: false, reason: 'SWF_CYCLE_LOCK_BUSY' });
+    expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+  });
+
+  it('rejects a second SWF cycle before the configured minimum interval elapses', async () => {
+    const lastExecutedAt = new Date().toISOString();
+    const mockClient = {
+      query: vi.fn().mockImplementation((queryText: string) => {
+        if (queryText.includes('pg_try_advisory_xact_lock')) {
+          return Promise.resolve({ rows: [{ acquired: true }] });
+        }
+        if (queryText.includes('FROM public.treasury_swf_configs')) {
+          return Promise.resolve({
+            rows: [
+              {
+                is_enabled: true,
+                rebalance_interval_hours: 1,
+                last_executed_at: lastExecutedAt,
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ rows: [] });
+      }),
+      release: vi.fn(),
+    };
+    mockPool.connect = vi.fn().mockResolvedValue(mockClient);
+    mockPool.query = vi.fn().mockResolvedValue({
+      rows: [
+        {
+          id: 'current',
+          is_enabled: true,
+          safe_reserve_wld: '25000000',
+          max_single_investment_wld: '10000000',
+          reinvestment_ratio_pct: 15,
+          max_investment_ratio_pct: 20,
+          equity_ratio_pct: 60,
+          bond_ratio_pct: 30,
+          dividend_ratio_pct: 10,
+          auto_harvest_enabled: true,
+          auto_tax_enabled: true,
+          auto_growth_yield_bps: 150,
+          target_anchor_wld: '25000000',
+          rebalance_interval_hours: 1,
+          last_executed_at: lastExecutedAt,
+        },
+      ],
+    });
+
+    const result = await service.evaluateAndRebalance();
+
+    expect(result).toEqual({
+      executed: false,
+      reason: 'SWF_REBALANCE_INTERVAL_NOT_ELAPSED',
+    });
+    expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+  });
+
   it('preserves 25M floor and executes autonomous compounding growth', async () => {
     const mockClient = {
       query: vi.fn().mockImplementation((queryText: string) => {
