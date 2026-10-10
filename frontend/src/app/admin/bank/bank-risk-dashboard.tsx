@@ -26,14 +26,21 @@ export function BankRiskDashboard({ overview, grades, loans }: Props) {
     0n,
   );
 
-  const getRiskStatus = (ratio: number) => {
+  const getRiskStatus = (ratio: number, totalCount: number) => {
+    if (totalCount === 0) {
+      return {
+        label: '평가 대상 없음',
+        variant: 'secondary' as const,
+        desc: '현재 실행된 대출이 없어 연체율 및 부실 위험도 평가 대상이 없습니다.',
+      };
+    }
     if (ratio >= 30) return { label: '심각 (High Risk)', variant: 'destructive' as const, desc: '연체율이 30%를 초과하여 대손 충당금 확충 및 긴급 회수 조치가 시급합니다.' };
     if (ratio >= 15) return { label: '경고 (Warning)', variant: 'outline' as const, desc: '연체율이 15% 이상입니다. 신규 여신 승인 한도 축소를 권고합니다.' };
     if (ratio >= 5) return { label: '주의 (Caution)', variant: 'secondary' as const, desc: '일부 연체 대출이 식별되었습니다. 모니터링 주기를 단축하세요.' };
     return { label: '건전 (Healthy)', variant: 'default' as const, desc: '전체 연체율이 5% 미만으로 은행 여신 건전성이 우수하게 유지되고 있습니다.' };
   };
 
-  const riskStatus = getRiskStatus(overdueRatioPercent);
+  const riskStatus = getRiskStatus(overdueRatioPercent, loans.length);
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
@@ -111,7 +118,7 @@ export function BankRiskDashboard({ overview, grades, loans }: Props) {
             </span>
           </CardTitle>
           <CardDescription className="text-xs">
-            신용등급(1~5)별 대출 잔액 비중과 이자율, 대출 건수 현황입니다.
+            신용 등급별 대출 잔액 비중과 이자율, 대출 건수 현황입니다.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">

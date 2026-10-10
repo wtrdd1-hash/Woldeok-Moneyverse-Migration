@@ -41,7 +41,7 @@ export function UserConversionLockInWidget({
             </CardTitle>
           </div>
           <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-400 text-[11px] font-bold">
-            신규 혜택 +100,000 WLD
+            신규 혜택 +10,000 WLD
           </Badge>
         </div>
         <CardDescription className="text-xs text-muted-foreground">
@@ -125,7 +125,7 @@ export function UserConversionLockInWidget({
                   className="flex-1 min-h-[40px] font-bold text-xs bg-amber-500 hover:bg-amber-600 text-black gap-1.5"
                 >
                   <Link href="/register">
-                    3초 간편가입 후 결과 저장 & 알림 받기 <ArrowRight className="size-3.5" />
+                    간편가입 후 결과 저장 & 알림 받기 <ArrowRight className="size-3.5" />
                   </Link>
                 </Button>
                 <Button
@@ -141,15 +141,15 @@ export function UserConversionLockInWidget({
           </div>
         )}
 
-        {/* 탭 2: 10만 WLD 시드머니 웰컴 리워드 */}
+        {/* 탭 2: 1만 WLD 시드머니 웰컴 리워드 */}
         {activeTab === 'welcome_bonus' && (
           <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3.5 space-y-3">
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-amber-300">신규 회원 전용 무상 지원금</span>
-              <span className="font-mono font-black text-amber-400 text-sm">+100,000 WLD</span>
+              <span className="font-mono font-black text-amber-400 text-sm">+10,000 WLD</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              방금 확인하신 <span className="text-foreground font-semibold">{summaryValue}</span> 목표를 달성할 수 있도록, 가상 주식 거래소 및 중앙은행에서 자유롭게 굴릴 수 있는 종잣돈 10만 WLD를 즉시 충전해 드립니다.
+              방금 확인하신 <span className="text-foreground font-semibold">{summaryValue}</span> 목표를 달성할 수 있도록, 가상 주식 거래소 및 중앙은행에서 자유롭게 굴릴 수 있는 정착 지원금 1만 WLD와 복권 1장을 즉시 지급해 드립니다.
             </p>
             <Button
               size="sm"
@@ -158,7 +158,7 @@ export function UserConversionLockInWidget({
             >
               <Link href={viewer ? '/bank' : '/register'}>
                 <Sparkles className="size-4" />
-                {viewer ? '중앙은행 스마트 복리 포켓 바로가기' : '10만 WLD 지원금 받고 모의투자 시작하기'}
+                {viewer ? '중앙은행 스마트 복리 포켓 바로가기' : '1만 WLD 지원금 받고 모의투자 시작하기'}
               </Link>
             </Button>
           </div>
@@ -172,7 +172,7 @@ export function UserConversionLockInWidget({
               <span className="font-mono font-bold text-cyan-400">Verified Calculator Report</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              본 진단 결과를 깔끔한 핀테크 영수증 카드 형태로 캡처하여 오픈채팅방이나 SNS에 친구들과 1초 만에 공유할 수 있습니다.
+              본 진단 결과를 깔끔한 핀테크 영수증 카드 형태로 캡처하여 오픈채팅방이나 SNS에 친구들과 간편하게 공유할 수 있습니다.
             </p>
             <Button
               size="sm"

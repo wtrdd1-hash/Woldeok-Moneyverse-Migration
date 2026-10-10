@@ -368,7 +368,7 @@ export function AdminTelemetryMetricsTable({
                   {metrics.top10SharePercent}%
                 </TableCell>
                 <TableCell className="text-right font-mono text-muted-foreground">
-                  지니 분배율
+                  순자산 점유율
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px]">
