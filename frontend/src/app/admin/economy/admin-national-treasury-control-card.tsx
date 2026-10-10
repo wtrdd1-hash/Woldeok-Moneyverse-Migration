@@ -12,28 +12,30 @@ import { Label } from '@/components/ui/label';
 // card. Preserve only a clearly labelled client-side illustration until a reviewed,
 // audited server-authoritative implementation is available.
 export function AdminNationalTreasuryControlCard() {
-  const [neutralRate, setNeutralRate] = useState(2);
-  const [targetInflation, setTargetInflation] = useState(2);
-  const [alphaWeight, setAlphaWeight] = useState(0.5);
-  const [betaWeight, setBetaWeight] = useState(0.5);
+  const [neutralRate, setNeutralRate] = useState('2');
+  const [targetInflation, setTargetInflation] = useState('2');
+  const [alphaWeight, setAlphaWeight] = useState('0.5');
+  const [betaWeight, setBetaWeight] = useState('0.5');
 
   // Fixed EXAMPLE inputs, not observed inflation, output gap or an applied policy.
   const illustrativeInflation = 3.2;
   const illustrativeOutputGap = 0.8;
+  const neutral = Number(neutralRate);
+  const target = Number(targetInflation);
+  const alpha = Number(alphaWeight);
+  const beta = Number(betaWeight);
   const inputsValid =
-    Number.isFinite(neutralRate) &&
-    Number.isFinite(targetInflation) &&
-    Number.isFinite(alphaWeight) &&
-    Number.isFinite(betaWeight) &&
-    neutralRate >= 0.5 && neutralRate <= 5 &&
-    targetInflation >= 1 && targetInflation <= 4 &&
-    alphaWeight >= 0.1 && alphaWeight <= 1.5 &&
-    betaWeight >= 0.1 && betaWeight <= 1.5;
+    [neutralRate, targetInflation, alphaWeight, betaWeight].every((value) => value.trim() !== '') &&
+    [neutral, target, alpha, beta].every(Number.isFinite) &&
+    neutral >= 0.5 && neutral <= 5 &&
+    target >= 1 && target <= 4 &&
+    alpha >= 0.1 && alpha <= 1.5 &&
+    beta >= 0.1 && beta <= 1.5;
   const illustration = inputsValid
-    ? neutralRate +
+    ? neutral +
       illustrativeInflation +
-      alphaWeight * (illustrativeInflation - targetInflation) +
-      betaWeight * illustrativeOutputGap
+      alpha * (illustrativeInflation - target) +
+      beta * illustrativeOutputGap
     : null;
 
   return (
@@ -87,25 +89,25 @@ export function AdminNationalTreasuryControlCard() {
             <div className="space-y-1.5">
               <Label htmlFor="taylor-neutral" className="text-xs">중립금리 r* (%)</Label>
               <Input id="taylor-neutral" type="number" min="0.5" max="5" step="0.1" value={neutralRate}
-                onChange={(e) => setNeutralRate(e.target.value === '' ? Number.NaN : Number(e.target.value))}
+                onChange={(e) => setNeutralRate(e.target.value)}
                 className="min-h-[44px] bg-zinc-900 font-mono" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="taylor-target" className="text-xs">목표 물가상승률 π* (%)</Label>
               <Input id="taylor-target" type="number" min="1" max="4" step="0.1" value={targetInflation}
-                onChange={(e) => setTargetInflation(e.target.value === '' ? Number.NaN : Number(e.target.value))}
+                onChange={(e) => setTargetInflation(e.target.value)}
                 className="min-h-[44px] bg-zinc-900 font-mono" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="taylor-alpha" className="text-xs">물가 갭 가중치 α</Label>
               <Input id="taylor-alpha" type="number" min="0.1" max="1.5" step="0.05" value={alphaWeight}
-                onChange={(e) => setAlphaWeight(e.target.value === '' ? Number.NaN : Number(e.target.value))}
+                onChange={(e) => setAlphaWeight(e.target.value)}
                 className="min-h-[44px] bg-zinc-900 font-mono" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="taylor-beta" className="text-xs">산출 갭 가중치 β</Label>
               <Input id="taylor-beta" type="number" min="0.1" max="1.5" step="0.05" value={betaWeight}
-                onChange={(e) => setBetaWeight(e.target.value === '' ? Number.NaN : Number(e.target.value))}
+                onChange={(e) => setBetaWeight(e.target.value)}
                 className="min-h-[44px] bg-zinc-900 font-mono" />
             </div>
           </div>
