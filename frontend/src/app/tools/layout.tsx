@@ -4,6 +4,7 @@ import { jsonLd } from '@/lib/json-ld';
 import { ToolsGuestConversionBar } from '@/components/tools-guest-conversion-bar';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
 import { SocialShareToolbar } from '@/components/social-share-toolbar';
+import { ToolsEcosystemLinks } from '@/components/tools-ecosystem-links';
 
 export const metadata: Metadata = {
   title: '금융 & 시뮬레이터 웹 도구 허브 | 월덕 머니버스',
@@ -59,6 +60,7 @@ export default function ToolsLayout({ children }: { children: React.ReactNode })
       <DesktopStickyAdRails />
       {children}
       <div className="max-w-4xl mx-auto px-4 pb-12">
+        <ToolsEcosystemLinks />
         <SocialShareToolbar
           title="월덕 머니버스 실전 금융 계산기 & 시뮬레이터"
           description="복리이자 계산기 · 주식 물타기 평단가 · 대출이자 · 세금 계산기 무료 진단"

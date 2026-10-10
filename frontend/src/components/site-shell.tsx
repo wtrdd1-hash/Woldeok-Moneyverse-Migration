@@ -1,4 +1,5 @@
 import { NoticeBar } from '@/components/notice-bar';
+import { WelcomeOnboardingBanner } from '@/components/welcome-onboarding-banner';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { MobileBottomNav } from '@/components/mobile-bottom-nav';
@@ -9,6 +10,7 @@ export function SiteShell({ children }: { readonly children: React.ReactNode }) 
   return (
     <div className="moneyverse-app-shell flex min-h-dvh flex-col w-full max-w-full overflow-x-hidden">
       <NoticeBar />
+      <WelcomeOnboardingBanner />
       <ServiceImpactBanner />
       <SiteHeader />
       <FintechTickerBar />

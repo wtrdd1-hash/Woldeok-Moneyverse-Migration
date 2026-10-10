@@ -75,6 +75,229 @@ export function SiteFooter() {
           </div>
         </div>
 
+        {/* SEO 크롤링 버짓 극대화 및 사용자 탐색용 대규모 에코시스템 내부 링크 그리드 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-8 border-b border-border/50 text-xs">
+          {/* 컬럼 1: 실전 금융 계산기 */}
+          <div className="flex flex-col gap-2">
+            <h3 className="font-bold text-foreground text-sm tracking-tight flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-emerald-500 shrink-0" />
+              {localeLabel(locale, '실전 금융 계산기', 'Financial Calculators', '実践金融計算機', '实用金融计算器')}
+            </h3>
+            <ul className="flex flex-col gap-1.5 pt-1">
+              <li>
+                <Link href="/tools/loan-interest-calculator" className="hover:text-emerald-400 transition-colors">
+                  {localeLabel(locale, '대출이자 & 상환 계산기', 'Loan Interest Calculator', 'ローン利息計算機', '贷款利息计算器')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/dividend-tax-calculator" className="hover:text-emerald-400 transition-colors">
+                  {localeLabel(locale, '배당소득세 & 15.4% 계산기', 'Dividend Tax Calculator', '配当所得税計算機', '股息所得税计算器')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/isa-calculator" className="hover:text-emerald-400 transition-colors">
+                  {localeLabel(locale, 'ISA 계좌 비과세 계산기', 'ISA Tax-Free Calculator', 'ISA非課税計算機', 'ISA免税计算器')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/pension-tax-calculator" className="hover:text-emerald-400 transition-colors">
+                  {localeLabel(locale, '연금저축 & IRP 세액공제', 'Pension & IRP Tax Credit', '年金貯蓄・IRP税額控除', '养老储蓄IRP税额扣除')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/retirement-calculator" className="hover:text-emerald-400 transition-colors">
+                  {localeLabel(locale, '은퇴 & 퇴직소득세 계산기', 'Retirement & Severance Tax', '退職所得税計算機', '退休所得税计算器')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/salary-calculator" className="hover:text-emerald-400 transition-colors">
+                  {localeLabel(locale, '연봉 실수령액 계산기', 'Salary Take-Home Pay', '年収手取り計算機', '年薪实到手计算器')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/youth-leap-calculator" className="hover:text-emerald-400 transition-colors">
+                  {localeLabel(locale, '청년도약계좌 5천만원 비과세', 'Youth Leap Account Calculator', '青年跳躍口座計算機', '青年跃升账户计算器')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/compound-calculator" className="hover:text-emerald-400 transition-colors">
+                  {localeLabel(locale, '복리 예금·적금 계산기', 'Compound Interest Calculator', '複利預金・積立計算機', '复利储蓄计算器')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/stock-calculator" className="hover:text-emerald-400 transition-colors">
+                  {localeLabel(locale, '주식 물타기·평단가 계산기', 'Stock DCA Calculator', '株式ナンピン平均単価計算機', '股票加仓平摊成本计算器')}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* 컬럼 2: 가상 주식 거래소 10대 상장 종목 */}
+          <div className="flex flex-col gap-2">
+            <h3 className="font-bold text-foreground text-sm tracking-tight flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-amber-500 shrink-0" />
+              {localeLabel(locale, '가상 주식 거래소 (10대 종목)', 'Virtual Stock Exchange', '仮想株式取引所 (10銘柄)', '虚拟股票交易所 (10大股票)')}
+            </h3>
+            <ul className="flex flex-col gap-1.5 pt-1">
+              <li>
+                <Link href="/stocks/CHIPS" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '침팬지 반도체 (CHIPS)', 'Chimpanzee Chips (CHIPS)', 'チンパンジー半導体 (CHIPS)', '黑猩猩半导体 (CHIPS)')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/stocks/DUCKS" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '월덕 인더스트리 (DUCKS)', 'Woldeok Industries (DUCKS)', 'ウォルドック産業 (DUCKS)', '月德实业 (DUCKS)')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/stocks/COIN" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '도지 밈 파이낸스 (COIN)', 'Doge Meme Finance (COIN)', 'ドージミーム金融 (COIN)', '狗狗迷因金融 (COIN)')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/stocks/SPACE" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '덕스페이스 로켓 (SPACE)', 'DuckSpace Rocket (SPACE)', 'ダックスペース (SPACE)', '鸭子航天 (SPACE)')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/stocks/CYBER" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '네오사이버 시큐리티 (CYBER)', 'NeoCyber Security (CYBER)', 'ネオサイバー (CYBER)', '新赛博网络安全 (CYBER)')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/stocks/ROBOT" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '휴머노이드 다이내믹스 (ROBOT)', 'Humanoid Dynamics (ROBOT)', 'ヒューマノイド (ROBOT)', '人形动力 (ROBOT)')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/stocks/GOLD" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '골든덕 홀딩스 (GOLD)', 'Golden Duck Holdings (GOLD)', 'ゴールデンダック (GOLD)', '金鸭控股 (GOLD)')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/stocks/ENERGY" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '쿼크 에너지 코퍼레이션 (ENERGY)', 'Quark Energy (ENERGY)', 'クォークエネルギー (ENERGY)', '夸克能源 (ENERGY)')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/stocks/BIO" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '바이오덕 테라퓨틱스 (BIO)', 'BioDuck Therapeutics (BIO)', 'バイオダック (BIO)', '生化鸭药业 (BIO)')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/stocks/GAME" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '도파민 게임즈 (GAME)', 'Dopamine Games (GAME)', 'ドーパミンゲームズ (GAME)', '多巴胺游戏 (GAME)')}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* 컬럼 3: 가상 경제 & 실전 가이드 */}
+          <div className="flex flex-col gap-2">
+            <h3 className="font-bold text-foreground text-sm tracking-tight flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-blue-500 shrink-0" />
+              {localeLabel(locale, '가상 경제 & 실전 가이드', 'Guides & Economy', '仮想経済・実践ガイド', '虚拟经济与实战指南')}
+            </h3>
+            <ul className="flex flex-col gap-1.5 pt-1">
+              <li>
+                <Link href="/guide/stock-trading" className="hover:text-blue-400 transition-colors">
+                  {localeLabel(locale, '가상 주식 실전 매매 가이드', 'Stock Trading Guide', '株式取引実践ガイド', '股票实战交易指南')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/guide/virtual-banking" className="hover:text-blue-400 transition-colors">
+                  {localeLabel(locale, '가상 금융 & 복리 예금 가이드', 'Virtual Banking Guide', '仮想金融・複利預金ガイド', '虚拟金融与复利储蓄指南')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/guide/career-mastery" className="hover:text-blue-400 transition-colors">
+                  {localeLabel(locale, '직업 & 일일 파밍 루틴 가이드', 'Career Mastery Guide', '職業・ファーミングガイド', '职业与每日搬砖指南')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/guide/glossary" className="hover:text-blue-400 transition-colors">
+                  {localeLabel(locale, '핀테크 & 가상경제 용어사전', 'Fintech Glossary', '金融・仮想経済用語辞典', '金融科技与经济词典')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/guide/dopamine-system" className="hover:text-blue-400 transition-colors">
+                  {localeLabel(locale, '도파민 보상 & 확률 가이드', 'Dopamine Reward Guide', '報酬・確率ガイド', '多巴胺奖励与概率指南')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/roadmap" className="hover:text-blue-400 transition-colors">
+                  {localeLabel(locale, '성장 로드맵 & 마일스톤', 'Growth Roadmap', '成長ロードマップ', '成长路线图与里程碑')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/newspaper" className="hover:text-blue-400 transition-colors">
+                  {localeLabel(locale, 'AI 경제 브리프 & 시황 뉴스', 'Economy Newspaper', 'AI経済新聞', 'AI经济简报与行情新闻')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/enterprises" className="hover:text-blue-400 transition-colors">
+                  {localeLabel(locale, '국가 공기업 알리오(ALIO) 공시', 'Public Enterprises ALIO', '公企業ALIO情報公開', '国家公立企业信息公示')}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* 컬럼 4: 글로벌 다국어 허브 & 커뮤니티 */}
+          <div className="flex flex-col gap-2">
+            <h3 className="font-bold text-foreground text-sm tracking-tight flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-violet-500 shrink-0" />
+              {localeLabel(locale, '글로벌 포털 & 허브', 'Global Portals', 'グローバルポータル', '全球门户与中心')}
+            </h3>
+            <ul className="flex flex-col gap-1.5 pt-1">
+              <li>
+                <Link href="/en/tools" className="hover:text-violet-400 transition-colors">
+                  English Tools Hub (/en/tools)
+                </Link>
+              </li>
+              <li>
+                <Link href="/en/tools/stock-calculator" className="hover:text-violet-400 transition-colors">
+                  English DCA Stock Calculator
+                </Link>
+              </li>
+              <li>
+                <Link href="/zh/tools" className="hover:text-violet-400 transition-colors">
+                  简体中文 金融工具中心 (/zh/tools)
+                </Link>
+              </li>
+              <li>
+                <Link href="/zh/tools/stock-calculator" className="hover:text-violet-400 transition-colors">
+                  简体中文 股票补仓平摊计算器
+                </Link>
+              </li>
+              <li>
+                <Link href="/ja/tools" className="hover:text-violet-400 transition-colors">
+                  日本語 ツールハブ (/ja/tools)
+                </Link>
+              </li>
+              <li>
+                <Link href="/ja/tools/compound-calculator" className="hover:text-violet-400 transition-colors">
+                  日本語 複利計算シミュレーター
+                </Link>
+              </li>
+              <li>
+                <Link href="/bonds" className="hover:text-violet-400 transition-colors">
+                  {localeLabel(locale, '기획재정국채 (KTB) 거래소', 'Gov Treasury Bonds (KTB)', '企画財政国債取引所', '企划财政国债交易所')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/fx" className="hover:text-violet-400 transition-colors">
+                  {localeLabel(locale, '서울외환시장 (FX) 실시간 환전', 'FX Currency Exchange', 'ソウル外国為替市場', '首尔外汇市场实时兑换')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/marketplace/auction" className="hover:text-violet-400 transition-colors">
+                  {localeLabel(locale, 'P2P 실시간 경매장', 'P2P Auction Market', 'P2Pリアルタイム競売場', 'P2P实时拍卖行')}
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <div className="flex flex-col items-start justify-between gap-5 border-b border-border/70 py-6 sm:flex-row sm:items-center w-full min-w-0">
           <Brand />
           <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
