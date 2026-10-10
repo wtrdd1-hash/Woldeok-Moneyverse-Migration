@@ -30,3 +30,20 @@
 ## Explicitly deferred to v544
 
 The unsafe economic formulas and direct-table settlement paths will remain unreachable by default after v543, but their structural replacement with SECURITY DEFINER / Economy Core settlement functions, conservation-correct pension/bond/repo/FX flows and forward migration privilege repair belongs to v544.
+
+
+## Mid-work checkpoint
+
+- Mid-work `main` recheck detected `origin/main=9e17095586c46e43ec1a68214658e512e457148a`, one commit ahead of the start SHA.
+- The concurrent commit did not touch SWF, treasury, release, deployment or authority-document paths. The v543 branch was nevertheless rebuilt on that exact latest `main` before continuing.
+- Implemented SWF runtime containment:
+  - `MONEYVERSE_SWF_EXECUTION_ENABLED` is fail-closed unless exactly `true`.
+  - `MONEYVERSE_SWF_SCHEDULER_ENABLED` is separately fail-closed.
+  - backend startup no longer triggers a 30-second economic mutation.
+  - explicitly enabled scheduled execution starts only after a full one-hour interval.
+  - every execution attempts a transaction-scoped PostgreSQL advisory lock.
+  - `treasury_swf_configs.last_executed_at` and `rebalance_interval_hours` enforce a durable minimum interval.
+- Added regression coverage for default-disabled execution, restart behavior, overlapping-cycle rejection and minimum-interval rejection.
+- Added `ops/release/stage-host-release.sh`: it accepts only a clean worktree at the approved 40-character SHA, requires built backend/frontend artifacts, creates a unique never-overwritten release directory, strips Git metadata and writes `.moneyverse-release.json`.
+- Added release-layout tests that prove exact-SHA staging and overwrite/mismatched-SHA rejection.
+- No Test or Production deployment has been claimed. GitHub CI and exact-SHA isolated Test remain mandatory.
