@@ -3,12 +3,19 @@
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
 > **Snapshot Version**: `v2026.10`  
-> **Target Branch**: `main` (Real-World Economic Benchmarks: Central Bank monetary policy, 25M Treasury Anchor, 3-Tier KTB / Repo Exchange, WSHC State Enterprises, and National Pension Service (NPS) Full-Stack Zero-Downtime Release)  
+> **Target Branch**: `main` (Real-World Economic Benchmarks: Central Bank monetary policy, 25M Treasury Anchor, 3-Tier KTB / Repo Exchange, WSHC State Enterprises, and National Pension Service (NPS) historical domain inventory)  
 > **Purpose**: Official master inventory certifying documentation organization status.
 
 ---
 
-## 🏛️ Authoritative Master Documents
+## Current canonical authority (supersedes the legacy list below)
+
+1. [Documentation Governance Policy](DOCUMENTATION_POLICY.md) defines precedence; [Living PROJECT_PLAN](planning/PROJECT_PLAN.md) **v2026.10.10.542** is the authoritative implementation-facing product/engineering contract.
+2. [Integrated Planning Master](planning/INTEGRATED_PLANNING_MASTER.md) is the cycle/decision/authority-drift ledger, followed by detailed specs explicitly adopted by those two documents.
+3. [Economy Integrity & Documentation Reconciliation v542](planning/ECONOMY_INTEGRITY_AND_DOCUMENTATION_RECONCILIATION_SPEC.md) and [Central Bank/Mint/Treasury/Economy Core v523](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md) govern treasury/monetary boundaries; root sovereign, bond, fund, pension and FX documents below are **domain references with conditional/incomplete runtime evidence**, not independent superior product authorities.
+4. Source history, v511 completion matrix and v473 QA are historical, not verified evidence for latest `main`. No Test/Production approval follows from a documentation version update.
+
+## Historical domain-reference inventory (not the current authority order)
 
 1. **[Real-World Benchmark Macro Sovereign Economic Master Spec](MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.md)**: 6-pillar master specification covering Central Bank monetary policy, 25M Treasury Anchor, 3-tier KTB bonds / Repo, 3 state enterprises with 30% dividend payouts, 5-tier National Pension Service (NPS), and Capital Market securities transaction taxes
 2. **[Treasury 25M Anchor & Autonomous Investment-Recirculation Cycle Spec](TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.md)**: Zero-user/low-user autonomous expansion, 25M WLD safe reserve floor, and automated tax/dividend/interest revenue cycle engine
