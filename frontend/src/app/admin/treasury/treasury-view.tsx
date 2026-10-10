@@ -693,14 +693,16 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
               const outflow = isTreasuryOutflow(entry);
               return (
                 <div key={entry.id} className="pt-3 first:pt-0 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">{formatMoment(entry.created_at)}</span>
-                    {txTypeBadge(entry.tx_type)}
+                  <div className="flex items-center justify-between gap-2 min-w-0">
+                    <span className="text-xs text-muted-foreground font-mono shrink-0">{formatMoment(entry.created_at)}</span>
+                    <div className="shrink-0">{txTypeBadge(entry.tx_type)}</div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-foreground">{entry.reason || '국고 원장 거래'}</span>
+                  <div className="flex items-baseline justify-between gap-3 min-w-0">
+                    <span className="text-xs font-medium text-foreground leading-snug break-keep min-w-0 flex-1">
+                      {entry.reason || '국고 원장 거래'}
+                    </span>
                     <span
-                      className={`text-sm font-bold font-mono tracking-tight ${
+                      className={`text-sm font-bold font-mono tracking-tight shrink-0 whitespace-nowrap tabular-nums text-right ${
                         outflow ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
                       }`}
                     >
@@ -708,14 +710,14 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
                       {groupDigits(entry.amount_wld)} WLD
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span>
+                  <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground min-w-0">
+                    <span className="truncate min-w-0">
                       변동 후 잔액:{' '}
-                      <span className="font-mono font-semibold text-foreground">
+                      <span className="font-mono font-semibold text-foreground tabular-nums whitespace-nowrap">
                         {groupDigits(entry.balance_after)} WLD
                       </span>
                     </span>
-                    <span>{entry.actor_name || '시스템'}</span>
+                    <span className="shrink-0 text-muted-foreground/80">{entry.actor_name || '시스템'}</span>
                   </div>
                 </div>
               );

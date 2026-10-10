@@ -48,28 +48,54 @@ export function ChatMessageRenderer({ body, isMine }: ChatMessageRendererProps) 
 
       {/* 첨부 이미지 썸네일 그리드 */}
       {imageUrls.length > 0 && (
-        <div className="flex flex-wrap gap-2 pt-1">
+        <div className="flex flex-col gap-2 pt-1 w-full max-w-[340px]">
           {imageUrls.map((url, idx) => (
             <div
               key={`${url}-${idx}`}
-              onClick={() => setSelectedImg(url)}
               className={cn(
-                'group relative overflow-hidden rounded-xl border cursor-pointer transition-all duration-200 hover:scale-[1.02] shadow-xs max-w-[260px] sm:max-w-[320px]',
-                isMine ? 'border-primary-foreground/30 bg-black/20' : 'border-border/80 bg-background/80'
+                'group flex flex-col overflow-hidden rounded-xl border transition-all duration-200 shadow-sm',
+                isMine ? 'border-primary-foreground/30 bg-black/20' : 'border-border/80 bg-background/90'
               )}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={url}
-                alt="채팅 첨부 이미지"
-                loading="lazy"
-                className="max-h-56 w-auto object-cover rounded-xl transition-transform duration-300 group-hover:brightness-95"
-              />
-              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span className="p-2 rounded-full bg-black/60 text-white backdrop-blur-xs flex items-center gap-1 text-[10px] font-bold">
+              {/* 이미지 썸네일 (object-contain으로 원본 서류 글자 잘림 방지) */}
+              <div
+                onClick={() => setSelectedImg(url)}
+                className="relative overflow-hidden cursor-pointer bg-zinc-950/40 p-1 flex items-center justify-center min-h-[140px] max-h-[260px]"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt="첨부 서류 및 이미지"
+                  loading="lazy"
+                  className="max-h-[250px] w-auto max-w-full object-contain rounded-lg transition-transform duration-300 group-hover:scale-[1.02]"
+                />
+                <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span className="p-2 rounded-full bg-black/70 text-white backdrop-blur-xs flex items-center gap-1.5 text-xs font-bold shadow-lg">
+                    <ZoomIn className="size-4" />
+                    <span>클릭하여 서류 크게 읽기</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* 하단 모바일/데스크톱 상시 노출 조작 툴바 (글자 읽기 보장) */}
+              <div className="flex items-center justify-between px-2.5 py-1.5 bg-muted/60 border-t border-border/50 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setSelectedImg(url)}
+                  className="flex items-center gap-1 font-semibold text-primary hover:underline text-left"
+                >
                   <ZoomIn className="size-3.5" />
-                  <span>확대</span>
-                </span>
+                  <span>🔍 원본 확대 및 돋보기 읽기</span>
+                </button>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground text-[10px] underline ml-2 shrink-0 font-mono"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  새창 열기 ↗
+                </a>
               </div>
             </div>
           ))}
@@ -79,9 +105,10 @@ export function ChatMessageRenderer({ body, isMine }: ChatMessageRendererProps) 
       {/* 라이트박스 팝업 */}
       <ImageLightboxModal
         src={selectedImg}
-        alt="첨부 이미지 확대"
+        alt="첨부 서류 및 이미지 확대 뷰어"
         onClose={() => setSelectedImg(null)}
       />
     </div>
   );
 }
+

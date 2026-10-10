@@ -176,18 +176,20 @@ export function SwfControlPanel({
       <Card className="border border-blue-500/30 bg-slate-900/95 text-white shadow-xl relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500" />
         <CardHeader className="pb-4 border-b border-slate-800">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl">⚖️</span>
-                <CardTitle className="text-lg font-bold tracking-tight text-white">
-                  국고 자금 안전 보존 & 투자 비율 정밀 거버넌스 (Treasury Capital Governance)
-                </CardTitle>
-                <Badge className="bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div className="space-y-1.5 min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xl shrink-0">⚖️</span>
+                  <CardTitle className="text-base sm:text-lg font-bold tracking-tight text-white break-keep leading-snug">
+                    국고 자금 안전 보존 & 투자 비율 정밀 거버넌스
+                  </CardTitle>
+                </div>
+                <Badge className="bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs shrink-0 whitespace-nowrap">
                   국고 시스템 우선 보호
                 </Badge>
               </div>
-              <CardDescription className="text-slate-400 mt-1 text-xs leading-relaxed">
+              <CardDescription className="text-slate-400 text-xs leading-relaxed break-keep">
                 비상 완충(VAULT_EMERGENCY), 공공 인프라(VAULT_INFRA), 통화안정 지준금(VAULT_RESERVE) 등 국가 필수 시스템에 국고 대부분을 상시 유보하고, 적정 비율만 안전하게 투자하도록 통제합니다.
               </CardDescription>
             </div>
@@ -195,7 +197,7 @@ export function SwfControlPanel({
               size="sm"
               onClick={handleSaveGovernanceConfig}
               disabled={savingConfig}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md active:scale-95 transition-all"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md active:scale-95 transition-all shrink-0 w-full sm:w-auto"
             >
               {savingConfig ? '저장 중...' : '💾 정책 설정 저장'}
             </Button>
@@ -360,27 +362,29 @@ export function SwfControlPanel({
       {/* 2. 기존 국부펀드 자산 및 포트폴리오 관제 패널 */}
       <Card className="border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-slate-900/90 via-slate-900 to-slate-950 text-white shadow-xl">
         <CardHeader className="pb-4 border-b border-slate-800">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl">📈</span>
-                <CardTitle className="text-lg font-bold tracking-tight text-white">
-                  국고 복리 성장 국부펀드 (ASWF) 포트폴리오
-                </CardTitle>
-                <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div className="space-y-1.5 min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xl shrink-0">📈</span>
+                  <CardTitle className="text-base sm:text-lg font-bold tracking-tight text-white break-keep leading-snug">
+                    국고 복리 성장 국부펀드 (ASWF) 포트폴리오
+                  </CardTitle>
+                </div>
+                <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs shrink-0 whitespace-nowrap">
                   {isEnabled ? '자율 구동 중 (1시간 주기)' : '투자 일시 동결됨'}
                 </Badge>
               </div>
-              <CardDescription className="text-slate-400 mt-1 text-xs">
+              <CardDescription className="text-slate-400 text-xs leading-relaxed break-keep">
                 국고 안전 바닥을 보존하며 가상 우량 기업 법인세 자동 징수 및 분산 투자 복리 성장으로 총자산(AUM)을 증식합니다.
               </CardDescription>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
               <Button
                 size="sm"
                 onClick={handleLiquidateToTreasury}
                 disabled={liquidating}
-                className="bg-emerald-700 hover:bg-emerald-600 text-white font-semibold shadow-md active:scale-95 transition-all flex items-center gap-1.5"
+                className="bg-emerald-700 hover:bg-emerald-600 text-white font-semibold shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto"
               >
                 {liquidating ? '회수 환원 진행 중...' : '🏦 주식 자금 즉시 회수 (현금 85% 정상화)'}
               </Button>
@@ -388,7 +392,7 @@ export function SwfControlPanel({
                 size="sm"
                 onClick={handleTriggerRebalance}
                 disabled={rebalancing}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-md active:scale-95 transition-all"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-md active:scale-95 transition-all w-full sm:w-auto"
               >
                 {rebalancing ? '성장 평가 및 집행 중...' : '⚡ 즉시 복리 성장 트리거'}
               </Button>
@@ -400,15 +404,15 @@ export function SwfControlPanel({
           {/* 주요 지표 3개 카드 */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
-              <div className="text-xs text-slate-400 font-medium flex items-center justify-between">
-                <span>국부펀드 투자 자산 (AUM)</span>
+              <div className="text-xs text-slate-400 font-medium flex flex-wrap items-center justify-between gap-1.5">
+                <span className="shrink-0">국부펀드 투자 자산 (AUM)</span>
                 {totalAum > 25000000 && (
-                  <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30">
+                  <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30 shrink-0 whitespace-nowrap">
                     투자 비중 과다 경고
                   </Badge>
                 )}
               </div>
-              <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
+              <div className="text-2xl font-bold font-mono text-emerald-400 mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
                 {totalAum.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
               <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">

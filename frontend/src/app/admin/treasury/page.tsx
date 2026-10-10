@@ -49,7 +49,7 @@ export default async function AdminTreasuryPage() {
   ]);
 
   return (
-    <div data-page="admin-treasury" className="mv-page mv-page--admin grid gap-6">
+    <div data-page="admin-treasury" className="mv-page mv-page--admin grid gap-6 pb-32 sm:pb-12">
       <AdminBack />
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}

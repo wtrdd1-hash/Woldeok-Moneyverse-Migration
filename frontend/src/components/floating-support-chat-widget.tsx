@@ -1338,11 +1338,13 @@ export function FloatingSupportChatWidget() {
                 </div>
               ) : supportView === 'chat' && selectedThread ? (
                 <div className="flex-1 flex flex-col min-h-0 space-y-3">
-                  {/* 대화방 서브 헤더 */}
-                  <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-muted/40 border border-border/60 text-[11px]">
-                    <div className="flex items-center gap-1.5 font-bold">
-                      <span className="truncate max-w-[200px]">{selectedThread.subject}</span>
-                      <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 font-mono">
+                  {/* 대화방 서브 헤더 (모바일 오버랩 방지) */}
+                  <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-muted/40 border border-border/60 text-[11px] min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 overflow-hidden font-bold">
+                      <span className="truncate text-xs font-semibold text-foreground shrink min-w-0" title={selectedThread.subject}>
+                        {selectedThread.subject}
+                      </span>
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 font-mono shrink-0 whitespace-nowrap">
                         {STATUS_MAP[selectedThread.status]
                           ? localeLabel(
                               locale,
@@ -1357,7 +1359,7 @@ export function FloatingSupportChatWidget() {
                     <button
                       type="button"
                       onClick={() => handleCopyChat('support')}
-                      className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                      className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors shrink-0 whitespace-nowrap pl-1"
                     >
                       {copied ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
                       <span>
@@ -1385,7 +1387,7 @@ export function FloatingSupportChatWidget() {
                         return (
                           <div
                             key={m.message_id}
-                            className={cn('flex flex-col space-y-1 max-w-[88%] text-xs', isAdminMsg ? 'mr-auto' : 'ml-auto items-end')}
+                            className={cn('flex flex-col space-y-1 max-w-[94%] sm:max-w-[85%] text-xs', isAdminMsg ? 'mr-auto' : 'ml-auto items-end')}
                           >
                             <span className="text-[10px] font-bold text-muted-foreground px-1">
                               {isAdminMsg
@@ -1394,7 +1396,7 @@ export function FloatingSupportChatWidget() {
                             </span>
                             <div
                               className={cn(
-                                'p-3 rounded-2xl leading-relaxed shadow-xs',
+                                'p-3 rounded-2xl leading-relaxed shadow-xs w-full',
                                 isAdminMsg
                                   ? 'bg-primary/15 border border-primary/30 text-foreground rounded-tl-xs'
                                   : 'bg-secondary text-foreground border border-border/60 rounded-tr-xs'
