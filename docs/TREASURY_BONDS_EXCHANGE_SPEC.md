@@ -1,5 +1,7 @@
 # Woldeok Treasury Bonds (KTB) Exchange & Coupon Yields System Specification (v1.0)
 
+> **BLOCKED YIELD/TIME CONTRACT — v542:** “1Y=24h” is a game-time label, not a real annualization contract. The stated hourly percentage (e.g. 4.5% APR vs 0.051%/h) is inconsistent for a 365-day real year. All yield/coupon/principal guarantees and automatic hourly payouts require an approved virtual-time mapping, formula, rounding/precision, funding and real-ledger/Test evidence. Purchases/coupons are fiscal transfers of existing WLD; shortages cannot mint silently.
+
 ## 1. Background & Objectives
 - Establish an authoritative sovereign debt issuance and trading platform based on South Korea's KTB (Korea Treasury Bonds) and US TreasuryDirect standards.
 - Sovereign issuance of short-term (1Y), medium-term (3Y), and long-term (5Y) treasury bonds backed by the central treasury (`VAULT_MAIN`).
