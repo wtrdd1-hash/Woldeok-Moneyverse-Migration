@@ -117,9 +117,10 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
        LIMIT 1`,
     );
     if (!rows[0]) {
+      // Missing runtime policy must never silently enable autonomous economy mutation.
       return {
         id: 'current',
-        is_enabled: true,
+        is_enabled: false,
         safe_reserve_wld: '25000000',
         max_single_investment_wld: '10000000',
         reinvestment_ratio_pct: 15.0,
