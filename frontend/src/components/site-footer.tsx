@@ -111,7 +111,7 @@ export function SiteFooter() {
               </li>
               <li>
                 <Link href="/tools/salary-calculator" className="hover:text-emerald-400 transition-colors">
-                  {localeLabel(locale, '연봉 실수령액 계산기', 'Salary Take-Home Pay', '年収手取り計算機', '年薪实到手计算器')}
+                  {localeLabel(locale, '연봉 실수령액 계산기', 'Salary Take-Home Pay', '年収手取り計算機', '年薪税后收入计算器')}
                 </Link>
               </li>
               <li>

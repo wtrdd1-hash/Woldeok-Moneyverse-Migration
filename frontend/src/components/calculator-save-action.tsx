@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Bookmark, BookmarkCheck, Sparkles, Bell, ArrowRight, ShieldCheck, CheckCircle2, X } from 'lucide-react';
 
 export interface CalculatorScenarioData {
@@ -25,10 +26,76 @@ interface CalculatorSaveActionProps {
   className?: string;
 }
 
+const I18N = {
+  ko: {
+    savedBadge: '보관중',
+    savedText: '시뮬레이션 저장됨',
+    saveText: '이 시뮬레이션 내 계정에 저장하기',
+    quickSaveBadge: '간편 보관',
+    modalTempSaved: '브라우저 임시 저장 완료',
+    modalTitle: '방금 계산한 시뮬레이션을\n내 관심 포트폴리오로 영구 저장할까요?',
+    modalDesc: '지금 가입 또는 로그인하시면 캐시 삭제 후에도 사라지지 않고, 목표 달성 및 절세 한도 도달 알림과 무료 10,000 WLD 모의투자 지원금을 함께 지급해 드립니다.',
+    modalHighlight: '목표 달성 및 절세 한도 도달 알림',
+    modalCta: '내 계정으로 동기화 & 간편 가입하기',
+    modalClose: '현재 브라우저에만 임시 보관하기 (창 닫기)',
+    modalTrust: '개인정보 불필요 · 100% 무료 가상 시뮬레이션 서비스',
+  },
+  en: {
+    savedBadge: 'Saved',
+    savedText: 'Simulation Saved',
+    saveText: 'Save simulation to my account',
+    quickSaveBadge: 'Quick Save',
+    modalTempSaved: 'Cached in browser',
+    modalTitle: 'Save your simulation permanently\nto your portfolio?',
+    modalDesc: 'Sign up or log in now to keep your simulations permanently. Receive goal reach alerts and a free 10,000 WLD paper trading bonus.',
+    modalHighlight: 'goal reach & tax optimization alerts',
+    modalCta: 'Sync to My Account & Sign Up',
+    modalClose: 'Keep in browser only (Close)',
+    modalTrust: 'No personal data required · 100% Free simulation service',
+  },
+  ja: {
+    savedBadge: '保存中',
+    savedText: 'シミュレーション保存済み',
+    saveText: 'このシミュレーションをアカウントに保存',
+    quickSaveBadge: 'クイック保存',
+    modalTempSaved: 'ブラウザに一時保存完了',
+    modalTitle: '計算結果をマイポートフォリオに\n永久保存しますか？',
+    modalDesc: '今すぐ新規登録またはログインすると、キャッシュ削除後も保持され、目標達成通知と10,000 WLDの無料模擬投資ボーナスを獲得できます。',
+    modalHighlight: '目標達成および節税限度通知',
+    modalCta: 'アカウントと同期して簡単登録',
+    modalClose: 'ブラウザのみに一時保存（閉じる）',
+    modalTrust: '個人情報不要 · 100%無料シミュレーションサービス',
+  },
+  zh: {
+    savedBadge: '已保存',
+    savedText: '模拟已保存',
+    saveText: '保存此模拟至我的账户',
+    quickSaveBadge: '一键保存',
+    modalTempSaved: '浏览器临时缓存完毕',
+    modalTitle: '是否将计算模拟结果\n永久保存至您的自选组合？',
+    modalDesc: '立即登录或注册，即使清除浏览器缓存也不会丢失，还可获得目标达成提醒及10,000 WLD免费模拟交易金。',
+    modalHighlight: '目标达成及节税额度提醒',
+    modalCta: '同步至我的账户并快速注册',
+    modalClose: '仅保留在当前浏览器（关闭）',
+    modalTrust: '无需个人隐私信息 · 100%免费模拟测算服务',
+  },
+} as const;
+
 export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSaveActionProps) {
   const [isSaved, setIsSaved] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const pathname = usePathname() || '';
+
+  const locale: 'ko' | 'en' | 'ja' | 'zh' =
+    pathname.startsWith('/en')
+      ? 'en'
+      : pathname.startsWith('/ja')
+      ? 'ja'
+      : pathname.startsWith('/zh')
+      ? 'zh'
+      : 'ko';
+  const t = I18N[locale];
 
   useEffect(() => {
     try {
@@ -101,7 +168,7 @@ export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSav
           }),
         }).catch(() => null);
       } else {
-        // 비로그인 상태일 때는 0.3초 후 토스/뱅크샐러드형 1초 회원가입 모달 팝업
+        // 비로그인 상태일 때는 0.3초 후 토스/뱅크샐러드형 회원가입 모달 팝업
         setTimeout(() => {
           setShowAuthModal(true);
         }, 300);
@@ -122,23 +189,23 @@ export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSav
               ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
               : 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200'
           }`}
-          aria-label={isSaved ? '저장 완료된 시뮬레이션' : '이 시뮬레이션 내 계정에 저장하기'}
+          aria-label={isSaved ? t.savedText : t.saveText}
         >
           {isSaved ? (
             <>
               <BookmarkCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>시뮬레이션 저장됨</span>
+              <span>{t.savedText}</span>
               <span className="hidden sm:inline-block text-[11px] font-mono px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 ml-1">
-                보관중
+                {t.savedBadge}
               </span>
             </>
           ) : (
             <>
               <Bookmark className="w-4 h-4 shrink-0 transition-transform group-hover:-translate-y-0.5" />
-              <span>이 시뮬레이션 내 계정에 저장하기</span>
+              <span>{t.saveText}</span>
               <span className="hidden sm:inline-flex items-center gap-0.5 text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 dark:text-amber-700 ml-1">
                 <Sparkles className="w-3 h-3 text-amber-400" />
-                1초 보관
+                {t.quickSaveBadge}
               </span>
             </>
           )}
@@ -168,21 +235,16 @@ export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSav
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                브라우저 임시 저장 완료
+                {t.modalTempSaved}
               </span>
             </div>
             
-            <h3 id="save-modal-title" className="text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
-              방금 계산한 시뮬레이션을<br />
-              내 관심 포트폴리오로 영구 저장할까요?
+            <h3 id="save-modal-title" className="text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight whitespace-pre-line">
+              {t.modalTitle}
             </h3>
             
             <p className="mt-2 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              지금 가입 또는 로그인하시면 캐시 삭제 후에도 사라지지 않고,{' '}
-              <strong className="text-zinc-800 dark:text-zinc-200 font-semibold">
-                목표 달성 및 절세 한도 도달 알림
-              </strong>
-              과 무료 10,000 WLD 모의투자 지원금을 함께 지급해 드립니다.
+              {t.modalDesc}
             </p>
 
             {/* 요약 카드 미리보기 */}
@@ -222,7 +284,7 @@ export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSav
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-all duration-150 active:scale-[0.99] shadow-md shadow-emerald-600/20"
                 onClick={() => setShowAuthModal(false)}
               >
-                <span>내 계정으로 동기화 & 간편 가입하기</span>
+                <span>{t.modalCta}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
@@ -231,14 +293,14 @@ export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSav
                 onClick={() => setShowAuthModal(false)}
                 className="w-full py-2.5 text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
               >
-                현재 브라우저에만 임시 보관하기 (창 닫기)
+                {t.modalClose}
               </button>
             </div>
 
             {/* 신뢰 마크 */}
             <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-center gap-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-              <span>개인정보 불필요 · 100% 무료 가상 시뮬레이션 서비스</span>
+              <span>{t.modalTrust}</span>
             </div>
           </div>
         </div>

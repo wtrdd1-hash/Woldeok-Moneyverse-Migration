@@ -355,7 +355,29 @@ export function GlobalMacroPulseTicker() {
           <div className="flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 pb-1 scrollbar-thin">
             {filteredEvents.map((evt) => {
               const isHigh = evt.importance === 'HIGH';
-              const dDayLabel = evt.dDay === 0 ? 'D-Day 오늘' : `D-${evt.dDay}`;
+              
+              // 실제 일정 날짜(scheduledDate)와 현재 날짜 차이를 동적으로 계산
+              let dDayLabel = evt.dDay === 0 ? 'D-Day 오늘' : `D-${evt.dDay}`;
+              let isPast = false;
+              let isToday = false;
+              try {
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+                const target = new Date(evt.scheduledDate);
+                target.setHours(0, 0, 0, 0);
+                const diffDays = Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                if (diffDays < 0) {
+                  dDayLabel = '발표완료';
+                  isPast = true;
+                } else if (diffDays === 0) {
+                  dDayLabel = 'D-Day 오늘';
+                  isToday = true;
+                } else {
+                  dDayLabel = `D-${diffDays}`;
+                }
+              } catch {
+                // ignore
+              }
 
               return (
                 <button
@@ -366,7 +388,11 @@ export function GlobalMacroPulseTicker() {
                 >
                   <span
                     className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-black ${
-                      isHigh
+                      isPast
+                        ? 'bg-slate-800 text-slate-400 border border-slate-700'
+                        : isToday
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse'
+                        : isHigh
                         ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
                         : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                     }`}

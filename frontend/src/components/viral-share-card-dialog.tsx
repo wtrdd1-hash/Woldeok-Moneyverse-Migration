@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,61 @@ import { Download, Copy, Share2, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { SocialShareToolbar } from '@/components/social-share-toolbar';
 
+const DIALOG_I18N = {
+  ko: {
+    title: '진단 결과 바이럴 카드',
+    desc: '오픈채팅, 카카오톡, 인스타그램, 디스코드에 공유하여 실시간 투자/자산 진단 결과를 공유해 보세요.',
+    tabSquare: '인스타/카톡 (1:1 정사각)',
+    tabWide: '오픈채팅/디스코드 (16:9 와이드)',
+    copyImage: '이미지 복사',
+    copiedImage: '이미지 복사됨!',
+    downloadPng: 'PNG 다운로드',
+    shareLink: '오픈채팅 공유',
+    copiedLink: '링크 복사됨!',
+    toastDownloaded: '진단 카드 이미지가 다운로드되었습니다.',
+    toastCopied: '카드 이미지가 클립보드에 복사되었습니다.',
+  },
+  en: {
+    title: 'Diagnostic Infographic Card',
+    desc: 'Share your real-time investment and financial simulation results on social media.',
+    tabSquare: 'Social (1:1 Square)',
+    tabWide: 'Chat & Discord (16:9 Wide)',
+    copyImage: 'Copy Image',
+    copiedImage: 'Image Copied!',
+    downloadPng: 'Download PNG',
+    shareLink: 'Share Link',
+    copiedLink: 'Link Copied!',
+    toastDownloaded: 'Card image downloaded successfully.',
+    toastCopied: 'Card image copied to clipboard.',
+  },
+  ja: {
+    title: 'シミュレーション診断カード',
+    desc: 'SNSやチャットでリアルタイム投資・資産シミュレーション結果を共有しましょう。',
+    tabSquare: 'スクエア (1:1 正方形)',
+    tabWide: 'ワイド (16:9 横版)',
+    copyImage: '画像をコピー',
+    copiedImage: 'コピー完了!',
+    downloadPng: 'PNGダウンロード',
+    shareLink: 'リンクを共有',
+    copiedLink: 'リンクコピー済!',
+    toastDownloaded: 'カード画像をダウンロードしました。',
+    toastCopied: 'カード画像をクリップボードにコピーしました。',
+  },
+  zh: {
+    title: '测算诊断图文卡片',
+    desc: '一键分享您的实时资产与投资模拟结果至社交平台或群聊。',
+    tabSquare: '正方形 (1:1)',
+    tabWide: '宽屏横版 (16:9)',
+    copyImage: '复制图片',
+    copiedImage: '已复制图片!',
+    downloadPng: '下载PNG',
+    shareLink: '分享链接',
+    copiedLink: '已复制链接!',
+    toastDownloaded: '图文卡片下载完毕。',
+    toastCopied: '卡片已成功复制到剪贴板。',
+  },
+} as const;
+
 interface ViralShareCardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -35,6 +91,17 @@ export function ViralShareCardDialog({
   const [aspect, setAspect] = useState<CardAspect>('square');
   const [isCopied, setIsCopied] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
+  const pathname = usePathname() || '';
+
+  const locale: 'ko' | 'en' | 'ja' | 'zh' =
+    pathname.startsWith('/en')
+      ? 'en'
+      : pathname.startsWith('/ja')
+      ? 'ja'
+      : pathname.startsWith('/zh')
+      ? 'zh'
+      : 'ko';
+  const t = DIALOG_I18N[locale];
 
   useEffect(() => {
     if (open && canvasRef.current) {
@@ -46,7 +113,7 @@ export function ViralShareCardDialog({
     if (!canvasRef.current) return;
     const safeTitle = payload.title.replace(/[^a-zA-Z0-9가-힣]/g, '_').slice(0, 20);
     await downloadViralCardPng(canvasRef.current, `moneyverse_${safeTitle}_card.png`);
-    toast.success('진단 카드 이미지가 다운로드되었습니다.');
+    toast.success(t.toastDownloaded);
   };
 
   const handleCopyImage = async () => {
@@ -54,7 +121,7 @@ export function ViralShareCardDialog({
     const ok = await copyViralCardToClipboard(canvasRef.current);
     if (ok) {
       setIsCopied(true);
-      toast.success('카드 이미지가 클립보드에 복사되었습니다. 카카오톡/디스코드에 붙여넣기(Ctrl+V)하세요!');
+      toast.success(t.toastCopied);
       setTimeout(() => setIsCopied(false), 2500);
     } else {
       // 대체 다운로드 안내
@@ -95,10 +162,10 @@ export function ViralShareCardDialog({
             <span className="p-1 rounded bg-emerald-500/20 text-emerald-400">
               <Sparkles className="w-4 h-4" />
             </span>
-            <DialogTitle className="text-lg font-bold">1초 진단 결과 바이럴 카드</DialogTitle>
+            <DialogTitle className="text-lg font-bold">{t.title}</DialogTitle>
           </div>
           <DialogDescription className="text-xs text-zinc-400">
-            오픈채팅, 카카오톡, 인스타그램, 디스코드에 공유하여 실시간 투자/자산 진단 결과를 자랑해 보세요.
+            {t.desc}
           </DialogDescription>
         </DialogHeader>
 
@@ -111,10 +178,10 @@ export function ViralShareCardDialog({
           >
             <TabsList className="grid grid-cols-2 bg-zinc-900 border border-zinc-800 h-9 p-1">
               <TabsTrigger value="square" className="text-xs font-semibold data-[state=active]:bg-zinc-800 data-[state=active]:text-emerald-400">
-                인스타/카톡 (1:1 정사각)
+                {t.tabSquare}
               </TabsTrigger>
               <TabsTrigger value="wide" className="text-xs font-semibold data-[state=active]:bg-zinc-800 data-[state=active]:text-emerald-400">
-                오픈채팅/디스코드 (16:9 와이드)
+                {t.tabWide}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -136,7 +203,7 @@ export function ViralShareCardDialog({
             className="h-10 text-xs font-semibold bg-zinc-900 border-zinc-700 hover:bg-zinc-800 text-zinc-100 flex items-center justify-center gap-1.5"
           >
             {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-            {isCopied ? '이미지 복사됨!' : '이미지 복사'}
+            {isCopied ? t.copiedImage : t.copyImage}
           </Button>
 
           <Button
@@ -145,7 +212,7 @@ export function ViralShareCardDialog({
             className="h-10 text-xs font-semibold bg-zinc-900 border-zinc-700 hover:bg-zinc-800 text-zinc-100 flex items-center justify-center gap-1.5"
           >
             <Download className="w-3.5 h-3.5" />
-            PNG 다운로드
+            {t.downloadPng}
           </Button>
 
           <Button
@@ -153,7 +220,7 @@ export function ViralShareCardDialog({
             className="col-span-2 sm:col-span-1 h-10 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-1.5 shadow-sm"
           >
             {isLinkCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-            {isLinkCopied ? '링크 복사됨!' : '오픈채팅 공유'}
+            {isLinkCopied ? t.copiedLink : t.shareLink}
           </Button>
         </div>
 

@@ -292,7 +292,7 @@ export function CompoundCalculatorClient({
           </div>
         </div>
 
-        {/* 1초 바이럴 SNS 공유 및 이미지 다운로드 액션 바 */}
+        {/* 바이럴 SNS 공유 및 이미지 다운로드 액션 바 */}
         <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl border border-border/70 bg-muted/15">
           <div className="space-y-0.5">
             <h4 className="text-xs font-bold text-foreground">
@@ -301,6 +301,10 @@ export function CompoundCalculatorClient({
             <p className="text-[11px] text-muted-foreground">
               {isEn
                 ? 'Export an HD infographic card or share on Twitter/X with one click.'
+                : isJa
+                ? '高解像度カード画像のダウンロードおよびSNS即時共有'
+                : isZh
+                ? '下载高清图文卡片并一键分享至社交平台'
                 : '고해상도 카드 이미지 다운로드 및 SNS 즉시 공유'}
             </p>
           </div>
@@ -325,23 +329,25 @@ export function CompoundCalculatorClient({
               className="min-h-[44px] sm:min-h-9 text-xs font-semibold gap-1.5"
             >
               <Sparkles className="size-3.5 text-amber-500" />
-              <span>{isEn ? 'Export Image Card' : '카드 이미지 생성'}</span>
+              <span>
+                {isEn ? 'Export Image Card' : isJa ? 'カード画像を作成' : isZh ? '生成图文卡片' : '카드 이미지 생성'}
+              </span>
             </Button>
           </div>
         </div>
 
-        {/* 토스식 1초 시나리오 저장 & 10,000 WLD 무료 정착금 가입 브릿지 */}
+        {/* 시나리오 저장 & 10,000 WLD 무료 정착금 가입 브릿지 */}
         <CalculatorSaveAction
           scenario={{
             type: 'stock',
             title: `Compound Plan: ${symbol}${monthlyContribution}/mo @ ${annualRate}% (${years}y)`,
             badge: 'FIRE PLAN',
             primaryMetric: {
-              label: isEn ? 'Future Value' : '예상 자산',
+              label: isEn ? 'Future Value' : isJa ? '予想資産' : isZh ? '预期资产' : '예상 자산',
               value: `${symbol}${result.totalFutureValue.toLocaleString()}`,
             },
             secondaryMetric: {
-              label: isEn ? 'Interest Profit' : '복리 수익',
+              label: isEn ? 'Interest Profit' : isJa ? '利息収益' : isZh ? '复利收益' : '복리 수익',
               value: `+${symbol}${result.totalInterestEarned.toLocaleString()}`,
             },
             details: {
