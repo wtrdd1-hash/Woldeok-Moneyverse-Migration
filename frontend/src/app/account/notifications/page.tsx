@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { saveGoalNotifications } from './actions';
-import { NotificationTabsBar } from './notification-tabs-bar';
+import { NotificationLiveFeed } from './notification-live-feed';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '알림 설정', robots: { index: false, follow: false } };
@@ -24,7 +24,7 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
     {params.error ? <Alert variant="destructive"><AlertDescription>알림 설정을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.</AlertDescription></Alert> : null}
 
     {/* 7대 카테고리 알림 탭 바 & 전체 읽음 처리 */}
-    <NotificationTabsBar />
+    <NotificationLiveFeed />
 
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <Card className="overflow-hidden">
