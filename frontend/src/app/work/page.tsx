@@ -175,6 +175,7 @@ export default async function WorkPage() {
         jobTitle={activeMeta?.name ?? (isEn ? 'Professional Career' : '전문 직업')}
         currentLevel={activeLevel}
         currentXp={currentExp}
+        requiredXp={nextExp}
       />
 
       {summary ? (

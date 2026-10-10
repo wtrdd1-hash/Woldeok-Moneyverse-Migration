@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v181)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v182)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v182**: [QA 결함 보고서 정밀 추적 해결 (주식 주문 패널 시장가 즉시 체결 및 확인 모달 계약 불일치 완전 해결(QA-F001), 직업 숙련도 목표 EXP 동기화 및 가짜 핫타임 버프 배너 렌더링 원천 차단(QA-F009))] (+65, -0)
 - **v181**: [QA 보고서 결함 전수 분석 및 잔여 이슈 5대 영역 완전 해결 (AI 뉴스 프롬프트·한자/영문 오타 후처리 자동 정제 엔진 장착, 텔레메트리 난수 제거 및 실측 RTT 핑 엔진 장착, 거버넌스 분기 동적 계산 및 감사 원장 명확화, 고착도·물타기 번역 개선)] (+55, -0)
 - **v180**: [가상 주식 10종목·핵심 가이드 5종 IndexNow 검색 로봇 즉시 색인 요청 핑 전송(HTTP 200) & 검색 로봇(Googlebot 96회, Yeti 57회 등 일일 191회) 크롤링 실측 분석 완료] (+42, -0)
 - **v179**: [은행 대출 리스크 0건 시 빈 상태 안내 분기 & 텔레메트리 지니계수/순자산 점유율 용어 일치 & 신규 회원 정착금 플랫폼 공식 정책(10,000 WLD + 복권 1장) 전역 통일] (+48, -0)
@@ -273,3 +274,42 @@
 3. Git 커밋 및 origin/main 푸시
 4. 원격 운영 서버(`prod-v566`) 무중단 승격 빌드 및 배포
 5. 실제 프로덕션 `/admin/market/ai-news`, `/admin/analytics`, `/wallet` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v182 Specification] QA 결함 보고서 정밀 추적 해결 (주식 주문 계약 일치 및 직업 EXP/핫타임 동기화)
+
+### 1. 현황 및 개선 필요 사항 (QA-F001, QA-F009 결함 정밀 분석)
+1. **[QA-F001 · P1] 지정가 주문 확인값과 서버 전송 계약 불일치**:
+   - `stock-order-panel.tsx`: 기본 탭이 지정가(limit)로 설정되어 사용자가 희망 단가를 입력할 수 있었으나, 백엔드 `placeOrder` 트랜잭션은 현재 최우선 시장가로만 즉시 체결됨.
+   - 주문 확인 다이얼로그(`Dialog`)에서 '적용 단가: 100 WLD', '총 주문 금액: 200 WLD'로 표시되지만, 실제 제출 시 서버 현재가(예: 494 WLD)로 988 WLD가 차감되어 사용자에게 혼란과 금전적 불일치 유발.
+   - 조치: 기본 주문 모드를 '시장가 (원자적 즉시 체결)'로 설정하고, 총 주문 금액 계산식(`totalAmount`)과 확인 모달 라벨을 실제 서버 체결 기준가(`currentPrice`)로 100% 일치시킴.
+2. **[QA-F009 · P2] 직업 화면의 숙련도 목표치 및 핫타임 안내 불일치**:
+   - `page.tsx` 상단 활성 직업 카드는 `mastery.next_level_exp`(Lv.4 기준 1,600 EXP)를 표시하는 반면, `CareerMasteryCard`는 로컬 수학 공식 `round(250 * level^1.35)`(Lv.4 기준 1,625 EXP)를 사용하여 잔여 EXP 안내가 589 vs 614로 불일치함.
+   - `live-hot-time-banner.tsx`: 서버에 활성 핫타임이 없거나 비활성화된 경우에도 `DEFAULT_BUFFS`를 유지하여 상시 '주말 골든 핫타임: 급여 1.5배 부스트'를 깜빡이며 표시하나, 실제 업무 카드는 1.0x를 지급하여 사용자 기만 요소 존재.
+   - 조치:
+     - `CareerMasteryCard`에 `requiredXp` prop을 연동하여 상단 활성 직업 카드의 권위 `nextExp`와 완벽 동기화.
+     - `live-hot-time-banner.tsx`: 서버의 실제 활성 핫타임 배열(`activeBuffs`)이 존재할 때만 렌더링하고, 미적용 시 `null`을 반환하여 유령 버프 노출 차단.
+
+### 2. 세부 개발 명세
+1. **주식 주문 패널 원자적 체결 계약 일치 (`stock-order-panel.tsx`)**:
+   - `orderType` 기본값: `'market'` (시장가 즉시 체결)
+   - 총 주문 금액: `Math.max(0, currentPriceNum * qtyNum)`로 서버 원장 결제액과 100% 동기화.
+   - 확인 다이얼로그 라벨:
+     - '주문 유형': `시장가 (원자적 즉시 체결)` / 호가 선택 시 `시장가 (호가 참조 즉시 체결)`
+     - '체결 기준 단가': `{currentPrice} WLD` (호가 선택 시 희망 호가 병기)
+     - '총 체결 예상액': `{totalAmount} WLD`
+2. **직업 숙련도 목표치 동기화 (`career-mastery-card.tsx`, `work/page.tsx`)**:
+   - `CareerMasteryCard`: `requiredXp?: number` prop 추가, `reqXp = (level === currentLevel && typeof requiredXp === 'number') ? requiredXp : getRequiredXpForLevel(level)`
+   - `work/page.tsx`: `<CareerMasteryCard ... requiredXp={nextExp} />` 바인딩.
+3. **핫타임 배너 실시간 서버 동기화 (`live-hot-time-banner.tsx`)**:
+   - 초기 버프 배열 빈 배열(`[]`)로 시작, API 로드 완료 플래그(`loaded`) 관리.
+   - 활성 버프 없을 시 `return null;`로 불일치 방지.
+
+### 3. 검증 계획
+1. TypeScript 프론트엔드 정적 타입 검증 (`pnpm run typecheck`): 0 Errors (통과 완료)
+2. `career-mastery.test.tsx` 단위 테스트: 3/3 통과 완료
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v567`) 무중단 승격 빌드 및 배포
+5. 실제 `/stocks/WDG` 및 `/work` 화면 실측 확인
+

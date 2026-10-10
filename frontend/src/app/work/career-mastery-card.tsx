@@ -113,10 +113,12 @@ export function CareerMasteryCard({
   jobTitle = '소매 운영원 (Retail Manager)',
   currentLevel = 12,
   currentXp = 3800,
+  requiredXp,
 }: {
   readonly jobTitle?: string;
   readonly currentLevel?: number;
   readonly currentXp?: number;
+  readonly requiredXp?: number;
 }) {
   const [level, setLevel] = useState<number>(currentLevel);
   const [xp, setXp] = useState<number>(currentXp);
@@ -127,7 +129,9 @@ export function CareerMasteryCard({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const currentRank = getMasteryRank(level);
-  const reqXp = getRequiredXpForLevel(level);
+  const reqXp = (level === currentLevel && typeof requiredXp === 'number')
+    ? requiredXp
+    : getRequiredXpForLevel(level);
   const progressPercent = Math.min(100, Math.floor((xp / reqXp) * 100));
 
   const handleSelectAnswer = (qId: number, optionIdx: number) => {
