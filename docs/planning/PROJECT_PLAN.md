@@ -2,11 +2,20 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.05.530
+> Current integrated version: v2026.10.10.542
 > Implementation/evidence sync: 2026-10-05 (emergency UI audit baseline exact main SHA: `921b467e`; v530 is audit/planning only)
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Economy integrity and authority-evidence reconciliation — v2026.10.10.542 (2026-10-10)
+
+- **Current decision:** adopt [Economy Integrity & Documentation Reconciliation Specification](ECONOMY_INTEGRITY_AND_DOCUMENTATION_RECONCILIATION_SPEC.md) as a correction to stale macro/fiscal/lottery/QA claims. Start and mid-work `origin/main=545e8231f8b90b543ed9de0722adf98d63587820`; branch `fix/planning-economy-truth-v2026.10.10.542`. The patch is not an observed Production release.
+- **P0 operator truth (E542-01):** `AdminNationalTreasuryControlCard` previously produced client-generated lottery outcomes/burn claims and bank-wide Taylor-rate success without any server mutation. This cycle removes fake success and disables actual lottery/rate actions; Taylor values are explicitly **local illustrative inputs**, not observed policy. An approved server execution API and audit/ledger receipt are prerequisites to re-enable.
+- **P0 monetary and fiscal boundary (E542-02/03/04):** v523 money-supply authority wins: treasury payouts/bonds move pre-existing WLD; true retirement requires canonical Mint certificate. The 25M WLD reserve is a **conditional fiscal liquidity target**, not an automatically maintained exact supply guarantee. Bond hourly APR percentages and virtual year conversion are BLOCKED pending authoritative formula/time-scale tests. WLD-ticket lottery and any burn/award remain gated for age/jurisdiction, randomness, anti-replay, funding and atomic settlement evidence.
+- **P1 allocation and current-source drift (E542-05/08):** 40/30/20/10 means a single surplus-envelope allocation; nested program shares are not additive. New v170 lending/lottery, v175/176 SEO/UI and later app/admin/source commits do not silently amend product authorization or prove release readiness. Runtime/source history is `AUTHORITY_DRIFT` until each feature row is reconciled and accepted.
+- **P1 quality, Android, SEO and operations (E542-06/07/09/10/11/12):** older v511 `ACCEPTED`/v473 full QA, v530 `BLOCKED`, later v537 patches and Android historical snapshots are scoped evidence, not current all-route acceptance. All pages including authenticated admin require five exact-SHA passes and backend/session/DB checks. SEO candidate keywords are HOLD until demand/quality evidence; GSC submission is not indexing proof. Ads remain reviewed-public-only; non-cashable virtual rewards require separate age/jurisdiction safety.
+- **Release/evidence boundary:** GitHub-only code/docs fix plus a new UI regression test. Exact branch CI, isolated Test, backend/database/session checks, latest-main reconciliation and zero-downtime Production promotion are **NOT VERIFIED** and must not be stated complete. No database schema or real balances modified.
 
 ## Emergency full UI re-audit and remediation gate — v2026.10.05.530 (2026-10-05)
 
