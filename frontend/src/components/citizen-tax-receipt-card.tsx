@@ -92,9 +92,9 @@ export function CitizenTaxReceiptCard() {
     );
   }
 
-  const totalPaid = data?.total_tax_paid_wld ?? '2500';
-  const breakdown = data?.breakdown ?? { market_tax_wld: '1500', stock_tax_wld: '1000', transfer_tax_wld: '0' };
-  const alloc = data?.allocated_usage ?? { welfare_40pct_wld: '1000', infra_30pct_wld: '750', emergency_20pct_wld: '500', burn_10pct_wld: '250' };
+  const totalPaid = data?.total_tax_paid_wld ?? '0';
+  const breakdown = data?.breakdown ?? { market_tax_wld: '0', stock_tax_wld: '0', transfer_tax_wld: '0' };
+  const alloc = data?.allocated_usage ?? { welfare_40pct_wld: '0', infra_30pct_wld: '0', emergency_20pct_wld: '0', burn_10pct_wld: '0' };
   const dividend = data?.total_community_dividend_wld ?? '0';
 
   return (
@@ -143,7 +143,9 @@ export function CitizenTaxReceiptCard() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-foreground">내 납세액의 4분할 자동 귀속 명세</span>
-            <span className="text-[11px] text-muted-foreground">100% 원자적 분할 적립 완료</span>
+            <span className="text-[11px] text-muted-foreground">
+              {Number(totalPaid) > 0 ? '100% 원자적 분할 적립 완료' : '납세 이력 발생 시 자동 4분할 적립'}
+            </span>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">

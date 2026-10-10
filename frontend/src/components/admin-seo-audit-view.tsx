@@ -46,20 +46,25 @@ export function AdminSeoAuditView() {
       .then((data: SeoStatusResponse) => {
         setSeoData(data);
         if (data.recentLogs && data.recentLogs.length > 0 && data.recentLogs[0]) {
-          const latest = data.recentLogs[0];
-          setLastPingTime(new Date(latest.timestamp).toLocaleTimeString());
+          const latest = data.recentLogs[0] as unknown as { timestamp?: string; createdAt?: string };
+          const rawTime = latest.createdAt || latest.timestamp;
+          if (rawTime && !isNaN(new Date(rawTime).getTime())) {
+            setLastPingTime(new Date(rawTime).toLocaleTimeString('ko-KR'));
+          } else {
+            setLastPingTime('최근 24시간 봇 방문 대기 중');
+          }
         } else {
           setLastPingTime('최근 24시간 봇 방문 대기 중');
         }
       })
       .catch(() => {
-        // Fallback
+        setLastPingTime('최근 24시간 봇 방문 대기 중');
       });
   }, []);
 
-  const googleHits = seoData?.botDistribution?.['Googlebot'] ?? 0;
-  const naverHits = seoData?.botDistribution?.['Yeti'] ?? 0;
-  const bingHits = seoData?.botDistribution?.['bingbot'] ?? 0;
+  const googleHits = (seoData?.botDistribution?.['Googlebot'] ?? 0) + (seoData?.botDistribution?.['Googlebot-Mobile'] ?? 0);
+  const naverHits = (seoData?.botDistribution?.['Yeti'] ?? 0) + (seoData?.botDistribution?.['Naver Yeti'] ?? 0) + (seoData?.botDistribution?.['naver'] ?? 0);
+  const bingHits = (seoData?.botDistribution?.['bingbot'] ?? 0) + (seoData?.botDistribution?.['Bingbot'] ?? 0);
   const avgMs = seoData?.avgDurationMs ?? 0;
 
   const crawlers: CrawlerInfo[] = [
@@ -78,7 +83,7 @@ export function AdminSeoAuditView() {
       status: naverHits > 0 ? 'HEALTHY' : 'STANDBY',
       lastCrawlTime: naverHits > 0 ? `24시간 내 ${naverHits}회 방문` : '방문 대기 중 (0건)',
       averageResponseTimeMs: avgMs > 0 ? avgMs : 38,
-      crawlBudgetScore: naverHits > 0 ? 100 : 95,
+      crawlBudgetScore: naverHits > 0 ? 100 : 90,
       indexedPercentage: naverHits > 0 ? '100.0%' : '관제 중',
     },
     {

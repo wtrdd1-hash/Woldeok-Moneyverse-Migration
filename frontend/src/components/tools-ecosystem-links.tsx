@@ -81,19 +81,19 @@ export function ToolsEcosystemLinks() {
           <div className="grid grid-cols-2 gap-2 text-xs">
             <Link href="/stocks/CHIPS" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
               <span className="font-bold text-foreground">CHIPS</span>
-              <span className="text-[11px] text-muted-foreground">침팬지 반도체</span>
+              <span className="text-[11px] text-muted-foreground">치무 초전도</span>
             </Link>
-            <Link href="/stocks/DUCKS" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
-              <span className="font-bold text-foreground">DUCKS</span>
-              <span className="text-[11px] text-muted-foreground">월덕 인더스트리</span>
-            </Link>
-            <Link href="/stocks/COIN" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
-              <span className="font-bold text-foreground">COIN</span>
-              <span className="text-[11px] text-muted-foreground">도지 밈 파이낸스</span>
+            <Link href="/stocks/DUCK" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
+              <span className="font-bold text-foreground">DUCK</span>
+              <span className="text-[11px] text-muted-foreground">덕덕 물산</span>
             </Link>
             <Link href="/stocks/SPACE" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
               <span className="font-bold text-foreground">SPACE</span>
-              <span className="text-[11px] text-muted-foreground">덕스페이스 로켓</span>
+              <span className="text-[11px] text-muted-foreground">월덱 우주항공</span>
+            </Link>
+            <Link href="/stocks/WFIN" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
+              <span className="font-bold text-foreground">WFIN</span>
+              <span className="text-[11px] text-muted-foreground">월덱 파이낸셜</span>
             </Link>
           </div>
         </div>

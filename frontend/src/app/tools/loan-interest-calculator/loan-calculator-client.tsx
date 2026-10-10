@@ -18,12 +18,24 @@ export function LoanCalculatorClient() {
     const n = termYears * 12;
     const r = annualRate / 100 / 12;
 
-    if (P <= 0 || n <= 0 || r <= 0) {
+    if (P <= 0 || n <= 0 || r < 0) {
       return {
         totalInterest: 0,
         totalRepayment: P,
         monthlyFirst: 0,
         monthlyLast: 0,
+        comparison: { equalPi: 0, equalP: 0, bullet: 0 },
+      };
+    }
+
+    // 0% 무이자 대출 특수 케이스 처리
+    if (r === 0) {
+      const monthlySplit = Math.round(P / n);
+      return {
+        totalInterest: 0,
+        totalRepayment: P,
+        monthlyFirst: repaymentType === 'BULLET' ? 0 : monthlySplit,
+        monthlyLast: repaymentType === 'BULLET' ? P : monthlySplit,
         comparison: { equalPi: 0, equalP: 0, bullet: 0 },
       };
     }
@@ -239,17 +251,17 @@ export function LoanCalculatorClient() {
               <input
                 type="number"
                 step="0.1"
-                min="0.1"
+                min="0"
                 max="30"
                 value={annualRate}
-                onChange={(e) => setAnnualRate(Math.max(0.1, Number(e.target.value)))}
+                onChange={(e) => setAnnualRate(Math.max(0, Number(e.target.value)))}
                 className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm font-mono text-zinc-100 focus:outline-none focus:border-emerald-500 transition-colors"
               />
               <span className="absolute right-4 top-2.5 text-xs text-zinc-500">%</span>
             </div>
             <input
               type="range"
-              min="1.0"
+              min="0"
               max="15.0"
               step="0.1"
               value={annualRate}
@@ -322,18 +334,35 @@ export function LoanCalculatorClient() {
           {/* 상환방식 3종 총 이자 실시간 비교 박스 */}
           <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-xl p-3.5 space-y-2 text-xs">
             <span className="text-zinc-400 font-semibold block text-[11px]">상환 방식별 총이자 비교:</span>
-            <div className="flex justify-between items-center text-[11px]">
-              <span className="text-zinc-400">원금균등 (최저이자):</span>
-              <span className="font-mono text-emerald-400 font-bold">{calculation.comparison.equalP.toLocaleString()}원</span>
-            </div>
-            <div className="flex justify-between items-center text-[11px]">
-              <span className="text-zinc-400">원리금균등:</span>
-              <span className="font-mono text-zinc-300">{calculation.comparison.equalPi.toLocaleString()}원</span>
-            </div>
-            <div className="flex justify-between items-center text-[11px]">
-              <span className="text-zinc-400">만기일시:</span>
-              <span className="font-mono text-rose-400">{calculation.comparison.bullet.toLocaleString()}원</span>
-            </div>
+            {(() => {
+              const comp = calculation.comparison;
+              const isAllZero = comp.equalP === 0 && comp.equalPi === 0 && comp.bullet === 0;
+              const minVal = Math.min(comp.equalP, comp.equalPi, comp.bullet);
+              return (
+                <>
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-zinc-400">
+                      원금균등 {!isAllZero && comp.equalP === minVal && <span className="text-emerald-400 font-semibold">(최저이자)</span>}:
+                    </span>
+                    <span className={`font-mono font-bold ${!isAllZero && comp.equalP === minVal ? 'text-emerald-400' : 'text-zinc-300'}`}>
+                      {comp.equalP.toLocaleString()}원
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-zinc-400">
+                      원리금균등 {!isAllZero && comp.equalPi === minVal && comp.equalPi < comp.equalP && <span className="text-emerald-400 font-semibold">(최저이자)</span>}:
+                    </span>
+                    <span className="font-mono text-zinc-300">{comp.equalPi.toLocaleString()}원</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-zinc-400">
+                      만기일시 {!isAllZero && comp.bullet === minVal && comp.bullet < comp.equalP && <span className="text-emerald-400 font-semibold">(최저이자)</span>}:
+                    </span>
+                    <span className="font-mono text-rose-400">{comp.bullet.toLocaleString()}원</span>
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           {/* 1초 저장 및 관심등록 연동 */}

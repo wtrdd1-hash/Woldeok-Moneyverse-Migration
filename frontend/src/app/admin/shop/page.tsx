@@ -25,7 +25,7 @@ export default async function AdminShopPage() {
         eyebrow="OPERATIONS · STORE 2.0"
         title={
           <>
-            <T korean="상점 카탈로그 및," english="Shop Catalog &," />
+            <T korean="상점 카탈로그 및 " english="Shop Catalog & " />
             <br />
             <Accent>
               <T korean="상품 가격·재고 통제" english="Price & Stock Controls" />

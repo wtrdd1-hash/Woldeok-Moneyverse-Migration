@@ -168,7 +168,7 @@ export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSav
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                브라우저 1초 임시 저장 완료
+                브라우저 임시 저장 완료
               </span>
             </div>
             
@@ -180,7 +180,7 @@ export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSav
             <p className="mt-2 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
               지금 가입 또는 로그인하시면 캐시 삭제 후에도 사라지지 않고,{' '}
               <strong className="text-zinc-800 dark:text-zinc-200 font-semibold">
-                목표 탈출가/절세 한도 도달 알림
+                목표 달성 및 절세 한도 도달 알림
               </strong>
               과 무료 10,000 WLD 모의투자 지원금을 함께 지급해 드립니다.
             </p>
@@ -222,7 +222,7 @@ export function CalculatorSaveAction({ scenario, className = '' }: CalculatorSav
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-all duration-150 active:scale-[0.99] shadow-md shadow-emerald-600/20"
                 onClick={() => setShowAuthModal(false)}
               >
-                <span>내 계정으로 1초 동기화 & 가입하기</span>
+                <span>내 계정으로 동기화 & 간편 가입하기</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 

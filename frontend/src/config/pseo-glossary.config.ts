@@ -949,6 +949,25 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     relatedCalculatorUrl: '/tools/cagr-calculator',
     relatedCalculatorLabelKo: '자산 배분 샤프 지수 계산기',
     relatedTickers: ['SPY', 'QQQ']
+  },
+  {
+    slug: 'cagr-compound-annual-growth-rate',
+    termKo: 'CAGR (연평균 복합 성장률)',
+    termEn: 'CAGR (Compound Annual Growth Rate)',
+    termJa: '年平均成長率 (CAGR)',
+    termZh: '复合年均增长率 (CAGR)',
+    category: 'profitability',
+    formula: 'CAGR = (최종 자산 / 초기 투자금)^(1 / 투자 기간 연수) - 1',
+    formulaDescriptionKo: '여러 해 동안의 자산 증식이나 기업 매출 성장을 매년 일정한 비율로 복리 성장했다고 가정한 기하평균 연환산 수익률입니다.',
+    descriptionKo: 'CAGR(연평균 복합 성장률)은 투자 기간 동안 자산의 가치가 매년 일정한 복리 이율로 성장했다고 가정했을 때의 기하평균 성장률을 의미합니다. 단기 등락이 심한 주식 시장에서 단순 산술평균 수익률은 왜곡이 심하지만(예: +50% 후 -50%는 원금 손실인데 산술평균은 0%), CAGR은 실제 최종 자산 가치를 기준으로 정확한 복리 성과를 측정해 줍니다.',
+    descriptionEn: 'Compound Annual Growth Rate (CAGR) measures the geometric mean annualized return of an investment over a multi-year period.',
+    descriptionJa: '年平均成長率（CAGR）は、複数年にわたる投資や売上の成長を、毎年均等な複利で成長したと仮定した幾何平均利回りです。',
+    descriptionZh: '复合年均增长率（CAGR）是衡量某项资产在特定多年度周期内按复利计算的几何平均年化回报率，有效消除短期波动偏差。',
+    keyTakeawayKo: '장기 투자의 진정한 성과는 단순 누적 수익률이 아닌 CAGR과 MDD의 비율로 측정해야 합니다.',
+    keyTakeawayEn: 'True long-term performance is governed by CAGR normalized against drawdown risks.',
+    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorLabelKo: 'CAGR 연평균 복리 계산기 바로가기',
+    relatedTickers: ['SPY', 'QQQ', 'VOO']
   }
 ];
 

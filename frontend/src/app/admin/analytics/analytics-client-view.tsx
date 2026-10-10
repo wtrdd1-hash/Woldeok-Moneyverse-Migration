@@ -525,7 +525,7 @@ export function AnalyticsClientView({
                 {/* 하단 요약 지표 */}
                 <div className="grid grid-cols-3 gap-2 pt-1 text-center">
                   <div className="rounded-lg bg-slate-950/60 p-2 border border-slate-800">
-                    <p className="text-[10px] text-slate-400">총 청정 유저</p>
+                    <p className="text-[10px] text-slate-400">일반 회원 수 (관리자 제외)</p>
                     <p className="text-sm font-bold font-mono text-white">{cohortStats.total}명</p>
                   </div>
                   <div className="rounded-lg bg-slate-950/60 p-2 border border-slate-800">

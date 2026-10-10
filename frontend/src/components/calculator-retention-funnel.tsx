@@ -97,6 +97,8 @@ export function CalculatorRetentionFunnel({
     triggerToast(`🎉 10,000 WLD 모의투자 체험 지원금이 예약되었습니다! 가입 즉시 지갑으로 입금됩니다.`);
   };
 
+  const isCompound = category === 'compound';
+
   return (
     <div className="w-full space-y-6 pt-6 border-t border-border/80">
       {/* 토스트 피드백 */}
@@ -107,7 +109,7 @@ export function CalculatorRetentionFunnel({
         </div>
       )}
 
-      {/* 1. 전환 훅 A: 계산 결과 1초 저장 & 목표 평단가 도달 알림 */}
+      {/* 1. 전환 훅 A: 계산 결과 1초 저장 & 목표 평단가/만기 알림 */}
       <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-emerald-950/30 via-zinc-900/40 to-zinc-900/20 border border-emerald-500/30 shadow-lg space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
@@ -118,7 +120,15 @@ export function CalculatorRetentionFunnel({
               <span className="text-xs text-zinc-400">계산만 하고 창 닫으면 날아가는 수치, 저장해두세요</span>
             </div>
             <h3 className="text-base sm:text-lg font-bold text-zinc-100">
-              {stockName} 목표 탈출가 <span className="text-emerald-400 font-mono">{targetPrice}</span> 알림 설정
+              {isCompound ? (
+                <>
+                  {stockName} 만기 예상 자산 <span className="text-emerald-400 font-mono">{targetPrice}</span> 시뮬레이션 저장
+                </>
+              ) : (
+                <>
+                  {stockName} 목표 탈출가 <span className="text-emerald-400 font-mono">{targetPrice}</span> 알림 설정
+                </>
+              )}
             </h3>
           </div>
 
@@ -133,7 +143,7 @@ export function CalculatorRetentionFunnel({
               }`}
             >
               {isSaved ? <CheckCircle className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
-              {isSaved ? '저장 완료' : '내 포트폴리오에 저장'}
+              {isSaved ? '저장 완료' : isCompound ? '내 저축 플랜에 저장' : '내 포트폴리오에 저장'}
             </button>
 
             <button
@@ -146,14 +156,15 @@ export function CalculatorRetentionFunnel({
               }`}
             >
               {hasAlert ? <CheckCircle className="w-3.5 h-3.5" /> : <Bell className="w-3.5 h-3.5" />}
-              {hasAlert ? '알림 켜짐' : '목표가 알림 받기'}
+              {hasAlert ? '알림 켜짐' : isCompound ? '만기 목표 알림 받기' : '목표가 알림 받기'}
             </button>
           </div>
         </div>
 
         <p className="text-xs text-zinc-400 leading-relaxed">
-          💡 가상 거래소 실시간 시세가 목표 반등가({reboundRate})에 도달하거나 경제 공시가 발생하면 즉시 알려드립니다. 
-          로그인 시 다른 기기에서도 저장된 평단가 포트폴리오가 자동 동기화됩니다.
+          {isCompound
+            ? `💡 복리 이자 수익률(${reboundRate})에 따른 만기 자산 플랜을 안전하게 보존합니다. 로그인 시 다른 기기에서도 시뮬레이션 내역이 자동 동기화됩니다.`
+            : `💡 가상 거래소 실시간 시세가 목표 반등가(${reboundRate})에 도달하거나 경제 공시가 발생하면 즉시 알려드립니다. 로그인 시 다른 기기에서도 저장된 평단가 포트폴리오가 자동 동기화됩니다.`}
         </p>
       </div>
 
@@ -168,11 +179,20 @@ export function CalculatorRetentionFunnel({
               <span className="text-xs text-amber-400/80 font-medium">무자본 0원으로 시작</span>
             </div>
             <h3 className="text-base sm:text-lg font-black text-zinc-100">
-              계산한 평단가로 실제 모의투자 해보실래요? <span className="text-amber-400">10,000 WLD 지원</span>
+              {isCompound ? (
+                <>
+                  계산 결과를 저장하고 가상 경제를 체험해 보실래요? <span className="text-amber-400">10,000 WLD 지원</span>
+                </>
+              ) : (
+                <>
+                  계산한 평단가로 실제 모의투자 해보실래요? <span className="text-amber-400">10,000 WLD 지원</span>
+                </>
+              )}
             </h3>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-              지금 가입하면 즉시 10,000 WLD 지원금을 드립니다. 내 실제 돈 0원으로 {stockName} 등 18개 가상 주식 및 코인을 
-              실시간 호가창에서 직접 매수·매도하며 물타기 실전 감각을 익혀보세요!
+              {isCompound
+                ? '지금 가입하면 즉시 10,000 WLD 정착 지원금을 드립니다. 내 실제 돈 0원으로 가상 중앙은행 고금리 정기예금과 10대 가상 주식에 분산 투자하며 자산을 굴려보세요!'
+                : `지금 가입하면 즉시 10,000 WLD 지원금을 드립니다. 내 실제 돈 0원으로 ${stockName} 등 10대 가상 주식을 실시간 호가창에서 직접 매수·매도하며 실전 감각을 익혀보세요!`}
             </p>
           </div>
 

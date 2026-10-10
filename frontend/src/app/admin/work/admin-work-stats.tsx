@@ -321,7 +321,7 @@ export function WorkDailyCapGaugeCard({ stats }: WorkStatsProps) {
             </span>
           </div>
           <p className="text-[11px] text-muted-foreground mt-1">
-            한도에 도달한 유저는 내일 자정(00:00 UTC) 전까지 추가 직업 보상 획득이 제한됩니다.
+            한도에 도달한 유저는 매일 00:00 UTC(한국 시간 09:00) 초기화 전까지 추가 직업 보상 획득이 제한됩니다.
           </p>
         </div>
       </CardContent>

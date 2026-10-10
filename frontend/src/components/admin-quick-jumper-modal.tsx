@@ -151,7 +151,7 @@ export function AdminQuickJumperModal() {
                 </span>
                 <div>
                   <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                    관리자 전 관제 타워 네비게이터
+                    관리자 전체 관제 타워 네비게이터
                     <Badge variant="secondary" className="text-[10px] font-mono">
                       31개 전 라우트
                     </Badge>

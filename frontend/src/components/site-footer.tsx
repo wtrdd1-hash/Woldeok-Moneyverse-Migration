@@ -140,53 +140,53 @@ export function SiteFooter() {
             </h3>
             <ul className="flex flex-col gap-1.5 pt-1">
               <li>
+                <Link href="/stocks/CHIMU314" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '치무전자 (CHIMU314)', 'Chimu Electronics (CHIMU314)', 'チム電子 (CHIMU314)', '奇武电子 (CHIMU314)')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/stocks/CHIPS" className="hover:text-amber-400 transition-colors">
-                  {localeLabel(locale, '침팬지 반도체 (CHIPS)', 'Chimpanzee Chips (CHIPS)', 'チンパンジー半導体 (CHIPS)', '黑猩猩半导体 (CHIPS)')}
+                  {localeLabel(locale, '치무 초전도 (CHIPS)', 'Chimu Superconductor (CHIPS)', 'チム超伝導 (CHIPS)', '奇武超导 (CHIPS)')}
                 </Link>
               </li>
               <li>
-                <Link href="/stocks/DUCKS" className="hover:text-amber-400 transition-colors">
-                  {localeLabel(locale, '월덕 인더스트리 (DUCKS)', 'Woldeok Industries (DUCKS)', 'ウォルドック産業 (DUCKS)', '月德实业 (DUCKS)')}
+                <Link href="/stocks/DUCK" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '덕덕 물산 (DUCK)', 'Duck Duck Corp (DUCK)', 'ダックダック物産 (DUCK)', '鸭鸭物产 (DUCK)')}
                 </Link>
               </li>
               <li>
-                <Link href="/stocks/COIN" className="hover:text-amber-400 transition-colors">
-                  {localeLabel(locale, '도지 밈 파이낸스 (COIN)', 'Doge Meme Finance (COIN)', 'ドージミーム金融 (COIN)', '狗狗迷因金融 (COIN)')}
+                <Link href="/stocks/MYUY" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '뮤야 엔터테인먼트 (MYUY)', 'Myuya Entertainment (MYUY)', 'ミュヤエンターテインメント (MYUY)', '缪亚娱乐 (MYUY)')}
                 </Link>
               </li>
               <li>
                 <Link href="/stocks/SPACE" className="hover:text-amber-400 transition-colors">
-                  {localeLabel(locale, '덕스페이스 로켓 (SPACE)', 'DuckSpace Rocket (SPACE)', 'ダックスペース (SPACE)', '鸭子航天 (SPACE)')}
+                  {localeLabel(locale, '월덱 우주항공 (SPACE)', 'Woldeok Aerospace (SPACE)', 'ウォルドック航空宇宙 (SPACE)', '月德航天航空 (SPACE)')}
                 </Link>
               </li>
               <li>
-                <Link href="/stocks/CYBER" className="hover:text-amber-400 transition-colors">
-                  {localeLabel(locale, '네오사이버 시큐리티 (CYBER)', 'NeoCyber Security (CYBER)', 'ネオサイバー (CYBER)', '新赛博网络安全 (CYBER)')}
+                <Link href="/stocks/WDB" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '월덱 바이오 (WDB)', 'Woldeok Bio (WDB)', 'ウォルドックバイオ (WDB)', '月德生物 (WDB)')}
                 </Link>
               </li>
               <li>
-                <Link href="/stocks/ROBOT" className="hover:text-amber-400 transition-colors">
-                  {localeLabel(locale, '휴머노이드 다이내믹스 (ROBOT)', 'Humanoid Dynamics (ROBOT)', 'ヒューマノイド (ROBOT)', '人形动力 (ROBOT)')}
+                <Link href="/stocks/WDG" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '월덱 게임즈 (WDG)', 'Woldeok Games (WDG)', 'ウォルドックゲームズ (WDG)', '月德游戏 (WDG)')}
                 </Link>
               </li>
               <li>
-                <Link href="/stocks/GOLD" className="hover:text-amber-400 transition-colors">
-                  {localeLabel(locale, '골든덕 홀딩스 (GOLD)', 'Golden Duck Holdings (GOLD)', 'ゴールデンダック (GOLD)', '金鸭控股 (GOLD)')}
+                <Link href="/stocks/WDM" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '월덱 모빌리티 (WDM)', 'Woldeok Mobility (WDM)', 'ウォルドックモビリティ (WDM)', '月德出行 (WDM)')}
                 </Link>
               </li>
               <li>
-                <Link href="/stocks/ENERGY" className="hover:text-amber-400 transition-colors">
-                  {localeLabel(locale, '쿼크 에너지 코퍼레이션 (ENERGY)', 'Quark Energy (ENERGY)', 'クォークエネルギー (ENERGY)', '夸克能源 (ENERGY)')}
+                <Link href="/stocks/WDT" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '월덱 테크 (WDT)', 'Woldeok Tech (WDT)', 'ウォルドックテック (WDT)', '月德科技 (WDT)')}
                 </Link>
               </li>
               <li>
-                <Link href="/stocks/BIO" className="hover:text-amber-400 transition-colors">
-                  {localeLabel(locale, '바이오덕 테라퓨틱스 (BIO)', 'BioDuck Therapeutics (BIO)', 'バイオダック (BIO)', '生化鸭药业 (BIO)')}
-                </Link>
-              </li>
-              <li>
-                <Link href="/stocks/GAME" className="hover:text-amber-400 transition-colors">
-                  {localeLabel(locale, '도파민 게임즈 (GAME)', 'Dopamine Games (GAME)', 'ドーパミンゲームズ (GAME)', '多巴胺游戏 (GAME)')}
+                <Link href="/stocks/WFIN" className="hover:text-amber-400 transition-colors">
+                  {localeLabel(locale, '월덱 파이낸셜 (WFIN)', 'Woldeok Financial (WFIN)', 'ウォルドックフィナンシャル (WFIN)', '月德金融 (WFIN)')}
                 </Link>
               </li>
             </ul>

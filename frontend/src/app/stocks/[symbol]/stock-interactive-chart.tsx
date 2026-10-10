@@ -155,21 +155,32 @@ export function StockInteractiveChart({
           </div>
 
           {/* 타임프레임 탭 버튼 (1D, 1W, 1M, 1Y) */}
-          <div className="inline-flex rounded-xl border border-border/80 bg-muted/40 p-1 self-start sm:self-auto shadow-inner">
-            {(['1D', '1W', '1M', '1Y'] as const).map((tf) => (
-              <button
-                key={tf}
-                type="button"
-                onClick={() => setTimeframe(tf)}
-                className={`rounded-lg px-3 py-1 text-xs font-bold transition-all ${
-                  timeframe === tf
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {tf}
-              </button>
-            ))}
+          <div className="inline-flex rounded-xl border border-border/80 bg-muted/40 p-1 self-start sm:self-auto shadow-inner" role="group" aria-label={isEn ? 'Chart Timeframe' : '차트 조회 기간'}>
+            {(['1D', '1W', '1M', '1Y'] as const).map((tf) => {
+              const labelMap: Record<string, string> = {
+                '1D': isEn ? '1 Day' : '1일',
+                '1W': isEn ? '1 Week' : '1주',
+                '1M': isEn ? '1 Month' : '1개월',
+                '1Y': isEn ? '1 Year' : '1년',
+              };
+              const isSelected = timeframe === tf;
+              return (
+                <button
+                  key={tf}
+                  type="button"
+                  onClick={() => setTimeframe(tf)}
+                  aria-pressed={isSelected}
+                  aria-label={`${labelMap[tf]} ${isEn ? 'chart' : '차트 보기'}`}
+                  className={`rounded-lg px-3 py-1 text-xs font-bold transition-all ${
+                    isSelected
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {tf}
+                </button>
+              );
+            })}
           </div>
         </div>
       </CardHeader>

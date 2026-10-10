@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v176)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v177)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v177**: [QA 보고서 전수 분석 및 P1/P2 핵심 결함 쇄신 (가상 주식 10종목 마스터 동기화 404 해결, 복리 물타기 문구 분기, 용어사전 50개 동기화, 납세 영수증 안전 기본값, 대출 무이자 지원 및 최저이자 동적 판정, 오타/비문 쇄신)] (+54, -0)
 - **v176**: [320px 극소 모바일 전 구간 UI 깨짐 원천 방지 & 고객센터 서류/이미지 고해상도 줌/팬 뷰어 탑재 & 국고 관제 헤더·금액 텍스트 쪼개짐 무결점 해결] (+95, -0)
 - **v175**: [신규 방문자 온보딩 웰컴 혜택 UI(1만 WLD+복권) 강화 & 다국어/미수집 26개 페이지 전역 내부 링크(Internal Linking) 구축 & 글로벌 SEO 수집 실측] (+240, -0)
 - **v174**: [SEO 7대 핵심 금융 계산기 Canonical 오염 결함 원천 해결 & Google/IndexNow 실시간 대량 재색인 핑 전송 & prod-v560 무중단 승격] (+110, -0)
@@ -82,3 +83,53 @@
 2. Git 커밋 및 origin/main 푸시
 3. 원격 운영 서버(`prod-v562`) 무중단 승격 빌드 및 배포
 4. 실제 Chrome 브라우저 320px 모바일 뷰포트에서 `admin/treasury` 및 고객센터 캡처 실측 검증
+
+---
+
+## 🚀 [v177 Specification] QA 보고서(2026-10-10) 전수 분석 및 P1/P2 핵심 결함 쇄신 사양
+
+### 1. 현황 및 문제점 분석 (QA Reports 정밀 분석 결과)
+1. **[QA10-06 · P1 / COPY-32] 가상 주식 10개 종목 링크 404 발생**:
+   - `site-footer.tsx` 및 `tools-ecosystem-links.tsx`에 `DUCKS`, `COIN`, `CYBER`, `ROBOT`, `GOLD`, `ENERGY`, `BIO`, `GAME` 등 실존하지 않는 가짜 티커 심볼이 하드코딩되어 8개 링크가 404 에러 발생.
+   - 실제 PostgreSQL DB(`virtual_stocks` 테이블) 마스터: `CHIMU314`(치무전자), `CHIPS`(치무 초전도), `DUCK`(덕덕 물산), `MYUY`(뮤야 엔터테인먼트), `SPACE`(월덱 우주항공), `WDB`(월덱 바이오), `WDG`(월덱 게임즈), `WDM`(월덱 모빌리티), `WDT`(월덱 테크), `WFIN`(월덱 파이낸셜).
+2. **[QA10-03 · P1 / COPY-21] SEO 감사 화면 날짜 오류 및 네이버 봇 집계**:
+   - 백엔드 `seo.service.ts`의 `recentLogs`는 `createdAt`을 반환하는데 프론트엔드 `admin-seo-audit-view.tsx`는 `latest.timestamp`를 참조하여 `Invalid Date` 출력.
+   - 네이버 검색로봇(Yeti / Naver Yeti)이 개별 분기되어 정상 합산되지 않음.
+3. **[QA10-10 · P2 / COPY-15] 복리 계산기 결과 카드에 물타기(목표 탈출가) 문구 노출**:
+   - `calculator-retention-funnel.tsx`에서 주식 계산기용 문구(목표 탈출가, 평단가)가 복리 계산기에 공통 노출되어 사용자 혼란 유발.
+4. **[QA10-12 · P2 / COPY-23] 용어사전 50개 불일치**:
+   - 화면 제목은 "50대 투자 & 금융 용어사전"이나 실제 등록된 용어는 49개였음.
+5. **[QA10-07 · P1 / COPY-27/34] 지갑 납세 영수증 하드코딩 샘플 노출**:
+   - 에러 시 `2500 WLD` 하드코딩 샘플값 및 '100% 원자적 분할 적립 완료' 표시로 납세 사실이 없는 유저에게 오해 유발.
+6. **[QA10-14 · P2 / COPY-38/39] 대출 계산기 0% 무이자 지원 및 최저이자 동적 판정**:
+   - 0% 입력 시 0.1% 강제 보정, 부동소수점 오차(66원/60원), 원금균등에 고정된 `(최저이자)` 하드코딩.
+7. **[COPY-01, 02, 03, 12, 18, 40] UI 오타, 비문 및 접근성 결함**:
+   - 상점 카탈로그 쉼표 오타, 관리자 전체 메뉴 비문, 총 청정 유저 모호성, UTC 자정 시간대 혼동, 1초 과장 수식, 주식 차트 기간 버튼 aria-pressed 누락.
+
+### 2. 세부 개발 명세
+1. **가상 주식 10종목 DB 마스터 동기화 (`site-footer.tsx`, `tools-ecosystem-links.tsx`)**:
+   - DB에 실제 존재하는 10종목(`CHIMU314`, `CHIPS`, `DUCK`, `MYUY`, `SPACE`, `WDB`, `WDG`, `WDM`, `WDT`, `WFIN`)으로 푸터 및 허브 링크 전면 교체.
+2. **SEO 감사 뷰 날짜 안전 파싱 & 네이버 봇 통합 (`admin-seo-audit-view.tsx`)**:
+   - `latest.createdAt || latest.timestamp` 안전 파싱, 네이버 검색로봇(Yeti + Naver Yeti + naver) 통합 집계.
+3. **복리 계산기 전용 시뮬레이션 전환 (`calculator-retention-funnel.tsx`)**:
+   - `isCompound` 분기 도입, "만기 예상 자산", "저축 플랜 시뮬레이션" 문맥 적용.
+4. **용어사전 50번째 용어 CAGR 추가 (`pseo-glossary.config.ts`)**:
+   - `cagr-compound-annual-growth-rate` 용어 객체 추가로 50개 완벽 일치.
+5. **납세 영수증 안전 기본값 적용 (`citizen-tax-receipt-card.tsx`)**:
+   - fallback 값을 '0'으로 변경하고 납세 이력 유무에 따른 조건부 완료 문구 적용.
+6. **대출 계산기 0% 무이자 지원 & 동적 최저이자 판정 (`loan-calculator-client.tsx`)**:
+   - min="0", 0% 무이자 대출 분기 추가, 3가지 상환방식 중 실제 최소값에만 `(최저이자)` 동적 라벨 부여.
+7. **오타/비문 쇄신 및 차트 접근성 강화**:
+   - `admin/shop`: 상점 카탈로그 쉼표 정리
+   - `admin-quick-jumper-modal`: 관리자 전체 관제 타워 네비게이터로 수정
+   - `analytics-client-view`: '일반 회원 수 (관리자 제외)'로 명확화
+   - `admin-work-stats`: '매일 00:00 UTC(한국 시간 09:00)'로 정확한 초기화 시각 명시
+   - `calculator-save-action`: '1초' 과장 표현 제거 및 표준 문구화
+   - `stock-interactive-chart`: 1D/1W/1M/1Y 버튼에 `role="group"`, `aria-pressed`, `aria-label` 적용
+
+### 3. 검증 계획
+1. 로컬 TypeScript 정적 타입 검증 (`tsc --noEmit`) 0 Errors (통과 완료)
+2. Git 커밋 및 origin/main 푸시
+3. 원격 운영 서버(`prod-v563`) 무중단 승격 빌드 및 배포
+4. 실제 프로덕션 HTTP 상태 코드 실측 (`/stocks/DUCK`, `/stocks/SPACE` 등 10종목 200 OK 확인)
+5. 종합 결과 및 해결 현황 보고
