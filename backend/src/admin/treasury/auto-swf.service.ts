@@ -55,24 +55,42 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     private readonly discordAlert: DiscordAlertService,
   ) {}
 
+  private isRuntimeExecutionEnabled(): boolean {
+    return process.env.MONEYVERSE_SWF_EXECUTION_ENABLED === 'true';
+  }
+
+  private isRuntimeSchedulerEnabled(): boolean {
+    return process.env.MONEYVERSE_SWF_SCHEDULER_ENABLED === 'true';
+  }
+
   onModuleInit() {
+    if (!this.isRuntimeSchedulerEnabled()) {
+      this.logger.warn(
+        'AutoSovereignWealthFundService scheduler is fail-closed. Set MONEYVERSE_SWF_SCHEDULER_ENABLED=true only after economy reconciliation and Test approval.',
+      );
+      return;
+    }
+
+    if (!this.isRuntimeExecutionEnabled()) {
+      this.logger.warn(
+        'SWF scheduler requested but runtime execution is disabled. No autonomous economy mutation will be scheduled.',
+      );
+      return;
+    }
+
     const ONE_HOUR_MS = 60 * 60 * 1000;
 
-    // 서버 기동 30초 후 초기 자율 성장 평가 및 리밸런싱 실행
-    setTimeout(() => {
-      void this.evaluateAndRebalance().catch((err) => {
-        this.logger.error('Failed initial SWF compounding growth evaluation', err);
-      });
-    }, 30_000);
-
-    // 1시간 주기 자율 복리 국고 성장 및 투자 재순환 스케줄러
+    // Never mutate the economy merely because the backend process restarted.
+    // The first eligible cycle is one full interval after process startup.
     this.timer = setInterval(() => {
       void this.evaluateAndRebalance().catch((err) => {
         this.logger.error('Failed scheduled SWF compounding growth evaluation', err);
       });
     }, ONE_HOUR_MS);
 
-    this.logger.log('AutoSovereignWealthFundService initialized: 1-hour autonomous compounding growth engine scheduled.');
+    this.logger.log(
+      'AutoSovereignWealthFundService scheduler explicitly enabled: first cycle is eligible after one full hour.',
+    );
   }
 
   onModuleDestroy() {
@@ -158,6 +176,10 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     reinvestedWld?: string;
     reason?: string;
   }> {
+    if (!this.isRuntimeExecutionEnabled()) {
+      return { executed: false, reason: 'SWF_RUNTIME_EXECUTION_DISABLED' };
+    }
+
     const config = await this.getConfig();
     if (!config.is_enabled) {
       return { executed: false, reason: 'SWF_AUTONOMOUS_INVESTMENT_DISABLED' };
@@ -166,6 +188,44 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+
+      const lockResult = await client.query<{ acquired: boolean }>(
+        'SELECT pg_try_advisory_xact_lock($1) AS acquired',
+        [5432026],
+      );
+      if (!lockResult.rows[0]?.acquired) {
+        await client.query('ROLLBACK');
+        return { executed: false, reason: 'SWF_CYCLE_LOCK_BUSY' };
+      }
+
+      const lockedConfigResult = await client.query<{
+        is_enabled: boolean;
+        rebalance_interval_hours: number;
+        last_executed_at: string | null;
+      }>(
+        `SELECT is_enabled, rebalance_interval_hours, last_executed_at
+         FROM public.treasury_swf_configs
+         WHERE id = 'current'
+         FOR UPDATE`,
+      );
+      const lockedConfig = lockedConfigResult.rows[0] ?? config;
+      if (!lockedConfig.is_enabled) {
+        await client.query('ROLLBACK');
+        return { executed: false, reason: 'SWF_AUTONOMOUS_INVESTMENT_DISABLED' };
+      }
+
+      const intervalHours = Math.max(
+        1,
+        Number(lockedConfig.rebalance_interval_hours ?? config.rebalance_interval_hours ?? 1),
+      );
+      if (lockedConfig.last_executed_at) {
+        const lastExecutedMs = Date.parse(lockedConfig.last_executed_at);
+        const minimumIntervalMs = intervalHours * 60 * 60 * 1000;
+        if (Number.isFinite(lastExecutedMs) && Date.now() - lastExecutedMs < minimumIntervalMs) {
+          await client.query('ROLLBACK');
+          return { executed: false, reason: 'SWF_REBALANCE_INTERVAL_NOT_ELAPSED' };
+        }
+      }
 
       // 1. 메인 국고 금고(VAULT_MAIN) 잔액 조회
       const vaultRes = await client.query<{ id: string; balance_wld: string }>(
