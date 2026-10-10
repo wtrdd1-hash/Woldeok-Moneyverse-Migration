@@ -3,12 +3,19 @@
 [English canonical](DOCUMENT_CATALOG.md) | **한국어**
 
 > **스냅샷 버전**: `v2026.10`  
-> **기준 브랜치**: `main` (실제 실물 경제 레퍼런스 기준: 중앙은행 통화정책, 2,500만 국고 앵커, 국채 3종/레포 거래소, WSHC 공기업 알리오, 국민연금공단(NPS) 풀스택 무중단 배포 완결)  
+> **기준 브랜치**: `main` (실제 실물 경제 레퍼런스 기준: 중앙은행 통화정책, 2,500만 국고 앵커, 국채 3종/레포 거래소, WSHC 공기업 알리오, 국민연금공단(NPS) 역사적 도메인 기준)  
 > **용도**: 전체 프로젝트 문서 체계의 인벤토리 및 정리 상태를 공증하는 공식 카탈로그 원장.
 
 ---
 
-## 🏛️ 공식 권위 문서 (Authoritative Master Docs)
+## 최신 공식 권위 (아래 구버전 목록보다 우선)
+
+1. [문서관리 정책](DOCUMENTATION_POLICY.ko.md)에 따른 [최상위 구현기획 PROJECT_PLAN](planning/PROJECT_PLAN.ko.md) **v2026.10.10.542**가 제품·엔지니어링 권위다.
+2. [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md)는 회차·결정·권위 차이 원장이다. 두 문서가 명시 채택한 세부명세만 현행 권위다.
+3. [v542 경제 무결성·문서 정합화](planning/ECONOMY_INTEGRITY_AND_DOCUMENTATION_RECONCILIATION_SPEC.ko.md)와 [v523 중앙은행·조폐국·국고·경제코어](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md)가 우선한다. 아래 경제·국채·연금·FX 문서는 **조건부/검증대기 도메인 참고자료**로 최상위 제품 권위가 아니다.
+4. v511 완료 원장과 v473 QA는 당시 이력이며 현재 `main` Test/Production 합격 증거가 아니다.
+
+## 역사적 도메인 참고 문서 목록 (현재 권위순서 아님)
 
 1. **[실제 실물 경제 레퍼런스 기준 거시경제 총괄 기획서](MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md)**: 한국은행/기재부 기준 중앙은행 통화정책, 2,500만 국고 앵커, 국채 3종/레포, 공기업 3사 배당, 국민연금 5단계, 자본시장/증권거래세 6대 기둥 총괄 사양서
 2. **[국고 2,500만 앵커 & 자율 투자 회수 사이클 기획서](TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.ko.md)**: 무유저/저유저 환경 국고 자동 팽창 및 안전 비축금 2,500만 WLD 보존 자율 순환 엔진
