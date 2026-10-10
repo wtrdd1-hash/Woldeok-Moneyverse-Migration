@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v184)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v185)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v185**: [QA 결함 보고서 정밀 추적 해결 (은행 대출 시뮬레이터 금리/한도/기간 서버 권위 지표 동기화(QA-F008) 및 공동 저축 챌린지 팟 모의 체험 모드 정합성 쇄신(QA-F003))] (+60, -0)
 - **v184**: [QA 결함 보고서 정밀 추적 해결 (포트폴리오 주간 결산서 실시간 보유 데이터 100% 연동(QA-F004), 캔들차트 봉단위 라벨·접근성 지표 토글·모달 닫기 버튼 한국어화(QA-F007))] (+80, -0)
 - **v183**: [QA 결함 보고서 정밀 추적 해결 (경제 관리 콘솔(/admin/economy)의 자동 정책 엔진 제안 언래핑 및 듀얼 레인(Classical + AI Review) 검토 상태 시각화 완전 해결(QA-F006))] (+75, -0)
 - **v182**: [QA 결함 보고서 정밀 추적 해결 (주식 주문 패널 시장가 즉시 체결 및 확인 모달 계약 불일치 완전 해결(QA-F001), 직업 숙련도 목표 EXP 동기화 및 가짜 핫타임 버프 배너 렌더링 원천 차단(QA-F009))] (+65, -0)
@@ -397,3 +398,34 @@
 3. Git 커밋 및 origin/main 푸시
 4. 원격 운영 서버(`prod-v569`) 무중단 승격 빌드 및 배포
 5. 실제 운영 환경 `/stocks/portfolio` 및 `/stocks/WDG` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v185 Specification] QA 결함 보고서 정밀 추적 해결 (은행 대출 시뮬레이터 금리/한도 동기화 및 공동 저축 정합성 쇄신)
+
+### 1. 현황 및 개선 필요 사항 (QA-F008, QA-F003 결함 정밀 분석)
+1. **[QA-F008 · P2] 은행 대출 시뮬레이터와 실제 신청 창구의 계약 불일치**:
+   - 증상: 동일한 `/bank` 화면에서 상환 시뮬레이터(`CreditScoreCard`)는 fallback APR 4.50%(450bps)를 기준으로 상환액을 산출하는 반면, 바로 아래의 실제 대출 신청 창구(`SmartLoanCard`)는 사용자의 서버 신용등급 기준 금리(`standing.loan_interest_bps`, 예: C등급 8.00% / 800bps) 및 만기일(`standing.loan_term_days`)을 안내하여 동일 화면 내 금리·상환 총액의 계약 불일치 발생.
+   - 조치:
+     - `CreditScoreCard`: `standingLoanInterestBps?: string | number | undefined`, `standingLoanTermDays?: number | undefined` prop을 추가.
+     - `effectiveInterestBps = standingLoanInterestBps !== undefined && Number(standingLoanInterestBps) > 0 ? Number(standingLoanInterestBps) : baseRating.interestRateBps` 동기화 로직을 구현하여 실제 은행 창구 공시 금리(8.00% 등)를 시뮬레이터에 100% 반영.
+     - `frontend/src/app/bank/page.tsx`: `<CreditScoreCard ... standingLoanInterestBps={standing.loan_interest_bps} standingLoanTermDays={standing.loan_term_days} />` 바인딩 완료.
+2. **[QA-F003 · P1] 공동 저축 챌린지 팟 모의 체험 모드 및 정합성 쇄신**:
+   - 증상: `/bank/savings-pot` 페이지가 실제 계좌 원장 입금 없이 프론트엔드 상태로만 동작함에도 실제 처리인 것처럼 오인될 소지가 있었음.
+   - 조치:
+     - `모의 체험 모드` 안내 및 `[체험 모드] 오늘의 챌린지 저축 입금 시뮬레이션 완료!`, `[체험 모드] 찌르기 시뮬레이션 알림` 문구를 명확히 명시하고 단위 테스트(`savings-pot.test.tsx`) 동기화 완료 (3/3 Passed).
+
+### 2. 세부 개발 명세
+1. **대출 시뮬레이터 서버 권위 금리 바인딩 (`credit-score-card.tsx`, `bank/page.tsx`)**:
+   - `CreditScoreCard`: `standingLoanInterestBps` 및 `standingLoanTermDays` prop 추가.
+   - 금리 표기 및 시뮬레이션 이자 계산식에 서버 권위 금리 100% 동기화.
+2. **회귀 방지 테스트 (`credit-score-card.test.tsx`)**:
+   - `standingLoanInterestBps="800"` 주입 시 8.00% 및 50,000 WLD 한도 동기화 검증 (2/2 Passed).
+   - `savings-pot.test.tsx`: 4인 공동 저축 챌린지 팟 모의 체험 모드 검증 (3/3 Passed).
+
+### 3. 검증 계획
+1. TypeScript 프론트엔드 정적 타입 검증 (`pnpm run typecheck`): 0 Errors (통과 완료)
+2. `src/app/bank` 전체 단위 테스트 (`vitest run`): 7개 파일, 15개 테스트 100% 통과 (통과 완료)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v570`) 무중단 승격 빌드 및 배포
+5. 실제 운영 환경 `/bank` 및 `/bank/savings-pot` 화면 HTTP 200 실측 검증

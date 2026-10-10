@@ -232,6 +232,8 @@ export default async function BankPage() {
         initialRating={creditRating ?? undefined}
         standingCreditLimit={creditLimit}
         standingCreditGrade={standing.credit_grade}
+        standingLoanInterestBps={standing.loan_interest_bps}
+        standingLoanTermDays={standing.loan_term_days}
       />
 
       <Card className={activeLoan ? 'border-amber-500/30 bg-amber-500/5' : 'border-emerald-500/30 bg-emerald-500/5'}>
