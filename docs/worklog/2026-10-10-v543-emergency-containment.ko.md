@@ -30,3 +30,20 @@
 ## v544로 명시적 이관
 
 v543 이후 위험한 경제 계산과 직접 테이블 정산 경로는 기본적으로 실행 불가 상태가 되지만, SECURITY DEFINER / Economy Core 정산 함수로의 구조 교체, 연금·국채·Repo·FX 자금보존 수정, 권한 회수 forward migration은 v544에서 수행한다.
+
+
+## 작업 중간 기록
+
+- 중간 `main` 재확인에서 시작 SHA보다 1커밋 전진한 `origin/main=9e17095586c46e43ec1a68214658e512e457148a`를 감지했다.
+- 동시 커밋은 SWF·국고·릴리스·배포·권위문서 경로와 겹치지 않았지만, 계속 작업하기 전에 v543 브랜치를 해당 최신 `main` 기준으로 다시 구성했다.
+- SWF 런타임 긴급 격리를 구현했다.
+  - `MONEYVERSE_SWF_EXECUTION_ENABLED`가 정확히 `true`가 아니면 실행을 fail-closed 한다.
+  - `MONEYVERSE_SWF_SCHEDULER_ENABLED`도 별도 fail-closed 한다.
+  - 백엔드 시작 30초 후 경제변동 실행을 제거했다.
+  - 명시적으로 허용된 스케줄도 한 시간 전체가 지난 뒤 첫 실행이 가능하다.
+  - 모든 실행은 PostgreSQL transaction advisory lock을 획득해야 한다.
+  - `treasury_swf_configs.last_executed_at`와 `rebalance_interval_hours`로 최소 실행간격을 강제한다.
+- 기본 비활성, 재시작 무변동, 중복 사이클 차단, 최소간격 차단 회귀 테스트를 추가했다.
+- `ops/release/stage-host-release.sh`를 추가했다. 승인된 40자리 SHA의 clean worktree와 빌드된 backend/frontend 산출물만 허용하고, 기존 경로를 절대 덮어쓰지 않는 새 release directory를 생성하며 Git metadata를 제거하고 `.moneyverse-release.json`을 기록한다.
+- exact-SHA staging, 기존 경로 재사용 거부, 잘못된 SHA 거부를 검증하는 릴리스 레이아웃 테스트를 추가했다.
+- 아직 Test/Production 배포 완료를 주장하지 않는다. GitHub CI와 exact-SHA 격리 Test가 필수다.
