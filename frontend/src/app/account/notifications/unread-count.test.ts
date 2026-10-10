@@ -1,7 +1,8 @@
 // @vitest-environment node
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+vi.mock('@/lib/viewer', () => ({ viewerOrUnknown: vi.fn(async () => null) }));
 import { GET } from '@/app/api/notifications/unread-count/route';
 
 const notifButtonSource = readFileSync(
@@ -14,13 +15,13 @@ const chatButtonSource = readFileSync(
 );
 
 describe('Notification & Chat unread count polling safety', () => {
-  it('BFF unread-count route returns status 200 with unreadCount: 0 and private no-store', async () => {
+  it('BFF unread-count route returns status 503 when session is unknown', async () => {
     const response = await GET();
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(503);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
 
     const json = await response.json();
-    expect(json).toEqual({ unreadCount: 0 });
+    expect(json).toEqual({ error: 'Session unavailable' });
   });
 
   it('NotificationHeaderButton incorporates visibilityState guard and exponential backoff', () => {

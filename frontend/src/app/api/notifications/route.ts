@@ -1,23 +1,27 @@
 import { NextResponse } from 'next/server';
-import { api, apiOrNull } from '@/lib/api';
+import { ApiError, api } from '@/lib/api';
 import { viewerOrUnknown } from '@/lib/viewer';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request): Promise<NextResponse> {
+  const privateHeaders = { 'cache-control': 'private, no-store' };
   const viewer = await viewerOrUnknown();
+  if (!viewer) return NextResponse.json({ error: 'Session unavailable' }, { status: 503, headers: privateHeaders });
+  if (!viewer.signedIn) return NextResponse.json({ error: 'Authentication required' }, { status: 401, headers: privateHeaders });
 
-  if (!viewer || !viewer.signedIn) {
-    return NextResponse.json({ notifications: [] }, { status: 200 });
-  }
-
-  const { searchParams } = new URL(req.url);
+  const searchParams = new URL(req.url).searchParams;
+  const requested = Number(searchParams.get('limit') ?? '50');
+  const limit = Number.isSafeInteger(requested) ? Math.max(1, Math.min(100, requested)) : 50;
   const unreadOnly = searchParams.get('unreadOnly') === 'true';
-  const limit = searchParams.get('limit') || '50';
-
-  const items = await apiOrNull<any[]>(`/api/v1/notifications?limit=${limit}${unreadOnly ? '&unreadOnly=true' : ''}`);
-
-  return NextResponse.json({ notifications: items ?? [] });
+  try {
+    const notifications = await api<unknown>(`/api/v1/notifications?limit=${limit}${unreadOnly ? '&unreadOnly=true' : ''}`);
+    if (!Array.isArray(notifications)) throw new Error('Invalid notification payload');
+    return NextResponse.json({ notifications }, { headers: privateHeaders });
+  } catch (error) {
+    const status = error instanceof ApiError && [401, 403, 429].includes(error.status) ? error.status : 503;
+    return NextResponse.json({ error: 'Notification service unavailable' }, { status, headers: privateHeaders });
+  }
 }
 
 export async function POST(req: Request): Promise<NextResponse> {
