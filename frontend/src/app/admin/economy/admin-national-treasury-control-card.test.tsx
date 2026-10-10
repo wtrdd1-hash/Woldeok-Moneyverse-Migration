@@ -33,5 +33,10 @@ describe('AdminNationalTreasuryControlCard fail-closed policy controls', () => {
       target: { value: '3' },
     });
     expect(screen.getByTestId('taylor-illustrative-rate').textContent).toBe('입력 범위 확인 필요');
+    
+    fireEvent.change(screen.getByRole('spinbutton', { name: '물가 갭 가중치 α' }), {
+      target: { value: '' },
+    });
+    expect(screen.getByTestId('taylor-illustrative-rate').textContent).toBe('입력 범위 확인 필요');
   });
 });
