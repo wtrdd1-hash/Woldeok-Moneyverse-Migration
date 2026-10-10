@@ -1,11 +1,20 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.10.05.530
+> 현재 원장 버전: v2026.10.10.543
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.10.10.543 — 2026-10-10 — 긴급 경제 격리·불변 릴리스 출처 복구
+- 시작 `origin/main=545e8231f8b90b543ed9de0722adf98d63587820`; 중간 재확인에서 `origin/main=9e17095586c46e43ec1a68214658e512e457148a`로 1커밋 전진한 것을 감지했다. 겹치는 SWF/릴리스/권위문서 변경은 없었지만 최신 main 기준으로 브랜치를 다시 구성한 뒤 계속했다.
+- v523의 통화량/국고 자금보존 불변식과 최신 SWF 구현을 다시 대조해 기존 부팅 30초 후/시간주기 자율변동, 원천 없는 국고 유입, 합성 성장/수익실현, 직접 잔액 정산을 `AUTHORITY_DRIFT`로 확정했다.
+- SWF 실행은 `MONEYVERSE_SWF_EXECUTION_ENABLED=true`, 스케줄러는 별도 `MONEYVERSE_SWF_SCHEDULER_ENABLED=true`일 때만 허용하도록 fail-closed 했다. 프로세스 시작 자체의 경제변동은 제거했고 명시 활성화된 실행도 advisory lock + 최소 실행간격을 요구한다.
+- `ops/release/stage-host-release.sh`를 추가해 clean exact-SHA worktree, 빌드 산출물, 새 SHA-qualified 목적지, Git metadata 제거, `.moneyverse-release.json`을 강제하고 기존 release path 덮어쓰기를 거부한다.
+- v543은 격리 회차다. 위험한 SWF 수식, FX 비정규 계좌 SQL, migration 253 broad grant, 연금/국채/Repo/FX 자금보존과 direct-table 정산은 v544 forward migration/Economy Core 복구 대상으로 남긴다.
+- v530 전체 UI BLOCKED 게이트는 독립적으로 계속 유효하다. GitHub CI와 exact-SHA isolated Test가 모두 통과하기 전 Production 완료를 주장하지 않는다.
+- 상세: `deltas/v2026.10.10.543.ko.md`, 작업기록: `../worklog/2026-10-10-v543-emergency-containment.ko.md`.
 
 ## v2026.10.05.530 — 2026-10-05 — 긴급 전체 UI 재점검
 - 최초 확인은 `origin/main=ca354411d88b461215a81557f686765cfedf00f0`; 브랜치 생성 전 필수 fetch에서 `921b467eac21645a51ba362b24cac7eaab89c081` 드리프트를 감지해 최신 SHA에서 v530 격리 브랜치를 만들었다. 중간 refetch도 `921b467e...`로 동일했다.
