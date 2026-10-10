@@ -1,5 +1,7 @@
 # Autonomous Treasury 25M Anchor & Self-Balancing Economic Cycle Specification (v1.0)
 
+> **SUPERSEDED ASSUMPTION — v542:** An exact 25,000,000 WLD balance at all times is **not financially guaranteed**. Treat 25M as a conditional fiscal liquidity target, not a ledger invariant or permission to mint. A deficit triggers bounded spending/asset realization and, when unfunded, a disclosed fiscal stress/pause state. All treasury moves must reconcile with v523; no new currency creation.
+
 ## 1. Overview
 The Autonomous Sovereign Wealth Fund (ASWF) and Macroeconomic Anchoring Engine maintain the central treasury vault (`VAULT_MAIN`) at exactly **25,000,000 WLD** at all times. 
 
