@@ -36,9 +36,11 @@ export function WeeklyFinancialReceipt({
   const [isCopied, setIsCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const isSample = !data;
+
   const summary: WeeklyFinancialSummary = data ?? {
-    weekNumber: 40,
-    periodLabel: '2026.09.28 ~ 2026.10.03',
+    weekNumber: 41,
+    periodLabel: '2026.10.04 ~ 2026.10.10',
     totalTurnoverWld: '48,500',
     realizedGainWld: '+3,820',
     returnRatePct: '+8.4%',
@@ -53,7 +55,7 @@ export function WeeklyFinancialReceipt({
   const handleCopyText = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(
-        `[월덕 머니버스] 주간 금융 영수증 (W${summary.weekNumber})\n기간: ${summary.periodLabel}\n총 거래량: ${summary.totalTurnoverWld} WLD\n실현 손익: ${summary.realizedGainWld} WLD (${summary.returnRatePct})\n최고 효자 종목: ${summary.topStockSymbol} (${summary.topStockReturnPct})\n체결 횟수: ${summary.tradeCount}회\n재화 소각: ${summary.feeBurnContributionWld} WLD\n투자 페르소나: ${summary.traderPersona}\nhttps://easy-scraping.com/stocks/portfolio`,
+        `[월덕 머니버스] 주간 금융 영수증 (${isSample ? '시뮬레이션 예시' : '보유 연동'} W${summary.weekNumber})\n기간: ${summary.periodLabel}\n총 거래량: ${summary.totalTurnoverWld} WLD\n실현 손익: ${summary.realizedGainWld} WLD (${summary.returnRatePct})\n최고 효자 종목: ${summary.topStockSymbol} (${summary.topStockReturnPct})\n체결 횟수: ${summary.tradeCount}회\n재화 소각: ${summary.feeBurnContributionWld} WLD\n투자 페르소나: ${summary.traderPersona}\nhttps://easy-scraping.com/stocks/portfolio`,
       );
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
@@ -196,7 +198,13 @@ export function WeeklyFinancialReceipt({
 
       ctx.font = '14px sans-serif';
       ctx.fillStyle = '#94a3b8';
-      ctx.fillText('본 영수증은 가상 주식 포트폴리오 활동을 요약한 시뮬레이션 결산 리포트입니다.', 400, 785);
+      ctx.fillText(
+        isSample
+          ? '본 영수증은 가상 주식 포트폴리오 활동 예시를 요약한 시뮬레이션 결산 리포트입니다.'
+          : '본 영수증은 회원님의 실제 보유 주식 및 평가 현황을 기반으로 산출된 요약 영수증입니다.',
+        400,
+        785,
+      );
       ctx.font = '13px monospace';
       ctx.fillStyle = '#64748b';
       ctx.fillText('https://easy-scraping.com/stocks/portfolio', 400, 815);
@@ -219,7 +227,18 @@ export function WeeklyFinancialReceipt({
         <div className="text-center space-y-1.5 pb-4 border-b border-dashed border-border/80 relative">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold">
             <Receipt className="size-3.5" />
-            <T korean={`제 ${summary.weekNumber}주차 주간 금융 영수증`} english={`Week ${summary.weekNumber} Financial Digest`} />
+            <T
+              korean={
+                isSample
+                  ? `제 ${summary.weekNumber}주차 주간 금융 영수증 (예시 시뮬레이션)`
+                  : `제 ${summary.weekNumber}주차 주간 금융 영수증 (보유 연동)`
+              }
+              english={
+                isSample
+                  ? `Week ${summary.weekNumber} Financial Digest (Sample Simulation)`
+                  : `Week ${summary.weekNumber} Financial Digest (Holdings Synced)`
+              }
+            />
           </div>
           <h2 id="weekly-receipt-heading" className="text-xl font-extrabold text-foreground tracking-tight">
             WOLDEOK MONEYVERSE
@@ -298,8 +317,16 @@ export function WeeklyFinancialReceipt({
           </div>
           <p className="text-[10px] text-muted-foreground">
             <T
-              korean="본 영수증은 가상 주식 포트폴리오 활동을 요약한 시뮬레이션 결산 리포트입니다."
-              english="Simulated portfolio performance digest for Woldeok Moneyverse."
+              korean={
+                isSample
+                  ? '본 영수증은 가상 주식 포트폴리오 활동 예시를 요약한 시뮬레이션 결산 리포트입니다.'
+                  : '본 영수증은 회원님의 실제 보유 주식 및 평가 현황을 기반으로 산출된 요약 영수증입니다.'
+              }
+              english={
+                isSample
+                  ? 'Simulated sample portfolio performance digest for Woldeok Moneyverse.'
+                  : 'Authoritative portfolio performance digest synced with your active holdings.'
+              }
             />
           </p>
         </div>

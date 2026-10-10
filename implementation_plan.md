@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v183)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v184)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v184**: [QA 결함 보고서 정밀 추적 해결 (포트폴리오 주간 결산서 실시간 보유 데이터 100% 연동(QA-F004), 캔들차트 봉단위 라벨·접근성 지표 토글·모달 닫기 버튼 한국어화(QA-F007))] (+80, -0)
 - **v183**: [QA 결함 보고서 정밀 추적 해결 (경제 관리 콘솔(/admin/economy)의 자동 정책 엔진 제안 언래핑 및 듀얼 레인(Classical + AI Review) 검토 상태 시각화 완전 해결(QA-F006))] (+75, -0)
 - **v182**: [QA 결함 보고서 정밀 추적 해결 (주식 주문 패널 시장가 즉시 체결 및 확인 모달 계약 불일치 완전 해결(QA-F001), 직업 숙련도 목표 EXP 동기화 및 가짜 핫타임 버프 배너 렌더링 원천 차단(QA-F009))] (+65, -0)
 - **v181**: [QA 보고서 결함 전수 분석 및 잔여 이슈 5대 영역 완전 해결 (AI 뉴스 프롬프트·한자/영문 오타 후처리 자동 정제 엔진 장착, 텔레메트리 난수 제거 및 실측 RTT 핑 엔진 장착, 거버넌스 분기 동적 계산 및 감사 원장 명확화, 고착도·물타기 번역 개선)] (+55, -0)
@@ -354,3 +355,45 @@
 3. Git 커밋 및 origin/main 푸시
 4. 원격 운영 서버(`prod-v568`) 무중단 승격 빌드 및 배포
 5. 실제 운영 환경 `/admin/economy` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v184 Specification] QA 결함 보고서 정밀 추적 해결 (포트폴리오 주간 결산서 실시간 연동 및 캔들차트/모달 접근성 쇄신)
+
+### 1. 현황 및 개선 필요 사항 (QA-F004, QA-F007 결함 정밀 분석)
+1. **[QA-F004 · P1] 포트폴리오 주간 결산서의 데이터 불일치 및 가짜 주장**:
+   - 증상: `/stocks/portfolio` 화면에서 사용자의 실제 주식 보유 현황과 무관하게 하드코딩된 '제40주차 주간 금융 영수증 (실현손익 +3,820 WLD, 체결 14회, WDG 효자종목)'이 표시되며, 하단에 'PostgreSQL에 기록된 공인 결산서'라고 표시되어 실제 데이터 경로와의 계약 불일치 및 신뢰 왜곡 발생.
+   - 조치:
+     - `WeeklyFinancialReceipt`: `isSample = !data` 플래그를 두어 기본 예시 호출 시에는 `(예시 시뮬레이션)` 뱃지와 '가상 주식 활동 예시를 요약한 시뮬레이션 결산 리포트' 안내를 명시.
+     - `stocks/portfolio/page.tsx`: 사용자의 실제 포트폴리오 분석 데이터(`analysis.total_market_value`, `total_unrealized_gain_loss`, `total_gain_loss_bps`, `holdings`)를 기반으로 동적 `WeeklyFinancialSummary`를 산출하여 주입.
+     - 실제 보유 주식이 있는 사용자는 `(보유 연동)` 뱃지와 함께 본인의 실제 총 평가액, 미실현 손익, 최고 비중 종목, 분산 건전성 점수가 반영된 정합성 100% 영수증을 확인 및 PNG/텍스트로 다운로드/복사 가능.
+2. **[QA-F007 · P2] 캔들차트 봉 단위 라벨 결함, 지표 접근성 누락 및 모달 닫기 영문 노출**:
+   - 증상:
+     - 1시간봉 선택 시 `120일 봉`으로 표시되는 라벨 오류.
+     - MA5/MA20/볼린저 밴드 토글 버튼의 스크린리더 설명 및 툴팁 부재.
+     - 한국어 모달 팝업의 우상단 닫기 버튼 접근성 텍스트가 `Close`로 노출됨.
+   - 조치:
+     - `candle-chart.tsx`: `{shown.length}개 {unitName ? (unitName.endsWith('봉') ? unitName : `${unitName}봉`) : '일봉'}`으로 단위 라벨 자연스럽게 통합 정비.
+     - MA5/MA20/볼린저 밴드 버튼에 `aria-label` 및 `title`을 추가하여 웹 접근성 가이드라인 준수.
+     - `dialog.tsx`: `DialogContent`의 닫기 버튼 접근성 텍스트를 기본 한국어 `닫기`로 전면 교체.
+
+### 2. 세부 개발 명세
+1. **주간 결산 영수증 실시간 보유 데이터 연동 (`weekly-financial-receipt.tsx`, `stocks/portfolio/page.tsx`)**:
+   - `isSample` 분기: `(예시 시뮬레이션)` vs `(보유 연동)` 뱃지 및 안내문 분기.
+   - 포트폴리오 분석 결과 연동: 실시간 평가액, 수익률, 최고 종목, 소각 기여액 자동 산출.
+2. **캔들차트 보조지표 및 라벨 접근성 강화 (`candle-chart.tsx`)**:
+   - `aria-label="5구간 이동평균선(MA5) 토글"`, `aria-label="20구간 이동평균선(MA20) 토글"`, `aria-label="볼린저 밴드(20, 2) 지표 토글"`
+   - 툴팁 `title` 동시 지원.
+   - 봉 수량 및 단위 표기 개선: `120개 1시간봉`, `17개 1일봉` 등.
+3. **모달 닫기 버튼 한국어화 (`components/ui/dialog.tsx`)**:
+   - `<span className="sr-only">닫기</span>`
+4. **회귀 방지 테스트 (`weekly-financial-receipt.test.tsx`)**:
+   - 기본 예시 호출 시 시뮬레이션 예시 뱃지 렌더링 검증.
+   - 보유 데이터 주입 시 보유 연동 뱃지 및 주입된 데이터 렌더링 검증 (2/2 Passed).
+
+### 3. 검증 계획
+1. TypeScript 프론트엔드 정적 타입 검증 (`pnpm run typecheck`): 0 Errors (통과 완료)
+2. `candle-chart.test.tsx` (19/19 Passed) 및 `weekly-financial-receipt.test.tsx` (2/2 Passed)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v569`) 무중단 승격 빌드 및 배포
+5. 실제 운영 환경 `/stocks/portfolio` 및 `/stocks/WDG` 화면 HTTP 200 실측 검증
