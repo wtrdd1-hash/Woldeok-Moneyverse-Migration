@@ -13,3 +13,6 @@ Status: **CANDIDATE / NOT MERGED / NOT DEPLOYED**. Runtime changes must not be p
 - Branch reconciliation: complete latest-main unique-commit/CI/conflict review of all 130 branches remains incomplete due GitHub call budget. No branch deleted, and PRs #801/#802 preserved; all unverified branches retained pending dependency/CI review.
 - Required gates: build, lint, typecheck, unit/integration, real PostgreSQL, security, accessibility, SEO, app-api, E2E, exact-SHA isolated Test and Production smoke are **NOT YET PASS**.
 - Merge/deployment/rollback: none. Next: inspect exact HEAD CI, repair environment-specific DB blocker through an additive/non-destructive route, run full gates, isolated Test, then consider integration.
+
+## Follow-up account safety review
+- Existing account UI offered `UnlinkButton` for any provider whenever two identities existed, including `local_email`. The database unlink routine can remove such a row; the new UI helper now offers unlink only for OAuth identities while retaining the last-method safeguard. No DB unlink semantics changed; direct API misuse requires separate DB-policy review before any production claim.

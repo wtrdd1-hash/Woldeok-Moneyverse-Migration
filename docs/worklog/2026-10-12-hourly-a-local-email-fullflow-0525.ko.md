@@ -13,3 +13,6 @@
 - 브랜치 정리: 130개 전체의 최신 고유 변경/CI/충돌 전수 판정은 GitHub 호출 한도로 미완료. 브랜치 삭제 0개, PR #801/#802 보존.
 - 필수 게이트: build/lint/typecheck/unit/integration/실 PostgreSQL/security/accessibility/SEO/app-api/E2E/exact-SHA 격리 Test/Production smoke **아직 PASS 아님**.
 - 병합·배포·롤백: 없음. 다음 조치: HEAD CI 확인, 비파괴적 CI DB 환경 장애 복구, 전체 게이트·격리 Test 검증 후 통합 판단.
+
+## 계정 안전성 추가 검토
+- 기존 계정 화면은 인증 수단이 2개 이상이면 `local_email`에도 연결 해제 버튼을 표시할 수 있었음. DB의 해제 함수는 해당 행을 삭제할 수 있어, 새 UI 헬퍼는 OAuth 인증 수단에만 연결 해제를 노출하고 마지막 수단 보호를 유지함. DB 해제 정책은 변경하지 않았으며 직접 API 호출 방어는 별도 DB 정책 검토가 필요함.
