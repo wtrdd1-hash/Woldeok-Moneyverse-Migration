@@ -31,6 +31,8 @@ describe('I18N_DICTIONARY Master Coverage & Integrity (v60)', () => {
     expect(t('casino.dice', 'zh')).toBe('骰子大作战 (Dice)');
     expect(t('marketplace.tax_note', 'ko')).toContain('거래세 2%');
     expect(t('newspaper.brief', 'en')).toBe('Weekly Macroeconomic Brief');
+    expect(t('bank.savings_pot_title', 'ja')).toBe('中央銀行スマート複利ポケット (模擬体験)');
+    expect(t('stocks.league.live', 'zh')).toBe('实时联赛排行');
   });
 
   it('provides safe fallbacks and reverse string translation for missing translation keys', () => {

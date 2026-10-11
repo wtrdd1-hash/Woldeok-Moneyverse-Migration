@@ -461,3 +461,34 @@
 3. Git 커밋 및 origin/main 푸시
 4. 원격 운영 서버(`prod-v571`) 무중단 승격 빌드 및 배포
 5. 실제 운영 환경 `/bank`, `/stocks` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v187 Specification] QA 결함 보고서 정밀 추적 해결 (운영 DB 마이그레이션 시퀀스 동기화 및 다국어 코퍼스 쇄신)
+
+### 1. 현황 및 개선 필요 사항 (QA P0 마이그레이션 불일치 및 다국어 완성도 정밀 분석)
+1. **[P0 보안/인프라] 운영 DB 267/268 마이그레이션 적용 기록 누락 및 번호 충돌 해소**:
+   - 증상:
+     - `245-automated-monetary-regulation.sql`과 `245-targeted-treasury-subsidy-and-donation.sql`이 동일한 245번을 공유하여, 총 파일 수는 268개인데 마지막 파일 번호가 267로 끝나며 `migration-parity.test.ts`에서 중복 및 번호 불일치 오류가 발생함.
+     - 또한 실제 운영 DB에는 240~267 테이블 및 스키마(중앙은행 테일러 칙, 대출 담보, 복권 등)가 이미 생성되어 있었으나 `schema_migrations` 테이블 기록이 239번에 머물러 있어 CI 및 QA 감사에서 차단 상태로 판정됨.
+   - 조치:
+     - `245-targeted-treasury-subsidy-and-donation.sql`을 `268-targeted-treasury-subsidy-and-donation.sql`로 시퀀싱 변경하여 002부터 268까지 단 하나의 gap이나 중복 없는 완벽한 단조 증가 시퀀스를 복원.
+     - `packages/database/test/migration-parity.test.ts` 전체 테스트 통과 (7/7 Passed).
+     - 운영 DB `schema_migrations` 테이블에 240부터 268까지의 파일명 및 SHA256 체크섬을 안전하게 동기화 등록 완료.
+2. **[언어 QA] 중앙은행 스마트 복리 포켓 및 주식 시즌 리그 4개 국어 마스터 딕셔너리 확장**:
+   - `frontend/src/lib/i18n-dictionary.ts`: 신규 금융 용어(`bank.savings_pot_title`, `bank.savings_pot_sim`, `bank.savings_pot_desc`, `bank.savings_pot_claim`, `stocks.top_mover`, `stocks.league.live`, `stocks.league.simulated`)를 한국어/영어/일본어/중국어 4개 국어로 추가 등록.
+   - `frontend/src/lib/i18n-dictionary.test.ts`: 4개 국어 번역 무결성 및 단정문 추가 (3/3 Passed).
+
+### 2. 세부 변경 파일
+- `packages/database/migrations/268-targeted-treasury-subsidy-and-donation.sql`: 파일명 리넘버링(245 -> 268) 및 헤더 주석 갱신.
+- `frontend/src/lib/i18n-dictionary.ts`: 7개 신규 금융/주식 키에 대한 4개 국어 정밀 번역 항목 추가.
+- `frontend/src/lib/i18n-dictionary.test.ts`: 신규 번역 키 검증 단정문 추가.
+
+### 3. 검증 계획
+1. Database 단위 테스트 (`@moneyverse/database`): 7/7 Tests Passed (통과 완료)
+2. Frontend 정적 타입 검증 (`@moneyverse/frontend typecheck`): 0 Errors (통과 완료)
+3. Frontend i18n 단위 테스트 (`i18n-dictionary.test.ts`): 3/3 Tests Passed (통과 완료)
+4. 원격 프로덕션 DB `schema_migrations` 조회: 268번까지 100% 동기화 확인 (통과 완료)
+5. Git 커밋 및 origin/main 푸시
+6. 원격 운영 서버(`prod-v572`) 무중단 승격 빌드 및 배포
+7. 실제 운영 환경 HTTP 200 실측 검증
