@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v190)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v191)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v191**: [전역 무손실 DB 스냅샷 백업(post-v575) 생성 & 원격 프로덕션 디스크 81GB 대규모 클린업(루트 +22GB 확보, /srv +59GB 확보) 완료] (+65, -0)
 - **v190**: [예금보험공사(KDIC) 포털 실측 검증 및 관리자 관제탑(/admin/kdic) 원장 분개 상태·원예금고 비교 시각화 쇄신 및 prod-v575 무중단 승격] (+60, -0)
 - **v189**: [QA-P0-03 결함 정밀 해결 (예금보험공사(KDIC) 대위변제 원장 무결성 확립, economy_post_transaction 복식부기 분개 연동, 중복 지급 방지 가드 및 prod-v574 무중단 승격)] (+75, -0)
 - **v188**: [직업 숙련도·자격증·일일할당 및 카지노 하이로우 UI 다국어(i18n) 정밀 현지화 및 운영 무중단 승격(prod-v573)] (+85, -0)
@@ -602,3 +603,39 @@
 3. Git 커밋 및 origin/main 푸시
 4. 원격 프로덕션 Debian 13 VM 100 (`prod-v575`) 무중단 승격 배포
 5. 실제 운영 환경 `/admin/kdic`, `/kdic` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v191 Specification] 전역 무손실 DB 스냅샷 백업 & 원격 프로덕션 디스크 81GB 대규모 클린업 명세
+
+### 1. 현황 및 개선 필요 사항
+1. **[원격 서버 디스크 고갈 위험 조기 해소]**:
+   - 루트 파일시스템(`/dev/sdb1`, 99GB): 사용량 71GB (76%, 잔여 24GB)로 위험 수위 도달.
+   - 데이터 볼륨(`/srv/moneyverse-data`, 197GB): 사용량 97GB (52%, 잔여 91GB).
+   - 원인:
+     - `/home/debian`: 과거 자동화 워크트리, 레거시 테스트 디렉터리, 빌드 로그 총 40GB 방치.
+     - `/srv/moneyverse-data/releases`: 구버전 릴리스(prod-v553 ~ prod-v570) 18개 총 65GB 점유.
+2. **[사전 안전 조치 및 무손실 DB 백업]**:
+   - 디스크 정리 작업 전, 최신 릴리스(`prod-v575`) 및 마이그레이션 268번, KDIC 원장 무결성 구조가 반영된 PostgreSQL 전체 데이터베이스를 `moneyverse_migrator` 슈퍼유저 롤을 통해 덤프 파일(`post-v575-kdic-20261011-2233.dump`, 68MB) 및 SHA256 체크섬으로 안전 생성·보관 완료.
+
+### 2. 세부 디스크 정리 및 회수 명세
+1. **`/home/debian` 레거시 워크트리 및 캐시 전수 정리**:
+   - 정리 대상: `.worktrees-moneyverse`(4.1GB), `worktrees`(1.2GB), `qa-20261007*`(1.5GB), `wdmv-*`(약 6GB), `mv-b-*`(약 1GB), `.cache` 전체 정리.
+   - **결과: 71GB(76%) → 49GB(53%)로 대폭 감소, +22GB 순수 확보.**
+2. **`/srv/moneyverse-data/releases` 구버전 릴리스 18개 정리**:
+   - 정리 대상: `prod-v553` ~ `prod-v570` 18개 디렉터리 안전 삭제.
+   - 엄격 보존: 활성 릴리스 `prod-v575`, 롤백용 최근 5개(`prod-v571` ~ `prod-v574`), 테스트용 `test-v541-gsc-aa4b6387`.
+   - **결과: 97GB(52%) → 38GB(21%)로 대폭 감소, +59GB 순수 확보.**
+3. **총 디스크 회수량**:
+   - **전체 81GB (22GB + 59GB) 순수 용량 회수 완료.**
+
+### 3. 검증 결과
+1. 최종 디스크 상태 실측:
+   - `/dev/sdb1` (루트): 49GB / 99GB (53% Used, 46GB Free)
+   - `/dev/sda1` (`/srv/moneyverse-data`): 38GB / 197GB (21% Used, 150GB Free)
+2. 백엔드 및 프론트엔드 서비스 상태:
+   - `moneyverse-backend.service`: Active running (PID 1209181)
+   - `moneyverse-frontend.service`: Active running (PID 1260881)
+3. HTTP 200 엔드포인트 실측:
+   - `https://easy-scraping.com`: 200 OK
+   - `http://localhost:3001/kdic`: 200 OK
