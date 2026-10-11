@@ -13,7 +13,30 @@
 
 ---
 
-## 🌟 Production Release Overview (v118 / prod-v529 - Latest)
+## 🌟 Production Release Overview (prod-v576 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v576`
+- **Release Date**: 2026-10-11 23:30 KST
+- **Git Commit HEAD**: `5cc4017e` (`main`)
+- **Key Deliverables**:
+  1. **전체 SEO 재분석 및 검색엔진 최적화 전면 개발**:
+     - `sitemap.xml`, `sitemap-static.xml`, `sitemap-stocks.xml`의 `<lastmod>` 날짜를 `2026-10-11T23:00:00.000Z`로 최신화.
+     - `sitemap-stocks.xml`에 누락되었던 18개 가상 주식 종목 전수 등록 및 4개 국어 다국어 hreflang alternates 완비.
+     - `/bank`를 회원 전용 화면으로 올바르게 정정하여 크롤러 307 리다이렉트 색인 페널티 원천 차단.
+     - `/kdic` 포털에 `FAQPage`, `WebApplication`, `BreadcrumbList` JSON-LD 탑재.
+     - `/bank/savings-pot` (4인 공동 저축 팟) 전용 레이아웃 및 `WebApplication`, `BreadcrumbList` JSON-LD 신규 구축.
+     - `robots.txt`에 `sitemap.xml` 및 `sitemap-index.xml` 동시 등록.
+     - 배포 직후 `SeoCronPingService`를 통해 39개 핵심 타겟 URL을 Bing/IndexNow 및 Google에 자동 색인 제출 완료.
+  2. **KDIC 예금보험공사 대위변제 원장 무결성 확립 (QA P0-03 해결, prod-v574)**:
+     - `kdic.repository.ts`의 직접 잔액 쓰기를 MINT 원천 복식부기 원장 분개(`economy_post_transaction`) 및 중복 지급 방지 가드로 전면 개정.
+  3. **관리자 관제탑 UI 쇄신 (prod-v575)**:
+     - 대위변제 원장 복식부기 분개 상태(`✓ 원장체결`), 원래 예탁금 대비 분석 컬럼, 분기별 예보료 법정부담금 뱃지 추가.
+  4. **무손실 DB 백업 & 원격 디스크 81GB 대규모 정리 (v191)**:
+     - PostgreSQL 전체 스냅샷(`post-v575-kdic-20261011-2233.dump`, 68MB) 안전 보관.
+     - 루트 파일시스템 +22GB, 데이터 볼륨 +59GB 회수 완료 (총 81GB 확보).
+
+---
+
+## 🌟 Previous Production Release Overview (v118 / prod-v529)
 - **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v529`
 - **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v529`
 - **Release Date**: 2026-10-07 KST
