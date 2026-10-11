@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v188)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v189)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v189**: [QA-P0-03 결함 정밀 해결 (예금보험공사(KDIC) 대위변제 원장 무결성 확립, economy_post_transaction 복식부기 분개 연동, 중복 지급 방지 가드 및 prod-v574 무중단 승격)] (+75, -0)
 - **v188**: [직업 숙련도·자격증·일일할당 및 카지노 하이로우 UI 다국어(i18n) 정밀 현지화 및 운영 무중단 승격(prod-v573)] (+85, -0)
 - **v187**: [운영 DB 마이그레이션 시퀀스 동기화(268번) 및 다국어 코퍼스 쇄신(prod-v572)] (+60, -0)
 - **v186**: [스마트 정기예금 계정별 격리, 티커 바 실시간 시세 연동 및 시즌 리더보드 투명성 쇄신(prod-v571)] (+60, -0)
@@ -547,3 +548,29 @@
 3. Remote origin/main push
 4. 원격 VM 100 무중단 빌드 및 `prod-v573` 승격
 5. HTTP 200 헬스체크
+
+---
+
+## 🚀 [v189 Specification] QA-P0-03 결함 정밀 해결 (예금보험공사(KDIC) 대위변제 원장 무결성 확립 및 복식부기 분개 연동, prod-v574)
+
+### 1. 현황 및 개선 필요 사항 (QA P0-03 결함 정밀 분석)
+1. **[P0-03 · CRITICAL] 예금보험공사(KDIC) 직접 잔액 쓰기 및 원장 불일치 취약점**:
+   - 증상: `backend/src/admin/kdic/kdic.repository.ts`의 `executeDepositPayout` 메서드가 복식부기 원장 분개(`ledger_transactions`, `ledger_postings`) 없이 `public.account_balances` 테이블을 직접 `UPDATE`하고 있었음.
+   - 또한, 쿼리에서 존재하지 않는 컬럼명(`ab.available_balance`, `ab.locked_balance`, `a.user_id`)을 참조하여 런타임 실행 시 PostgreSQL 에러가 발생할 위험이 있었고, 유저 예금 잔액 조회가 트랜잭션 외부에서 수행되어 동시성 경쟁 상태(Race Condition) 및 중복 대위변제(Repeated Payouts) 차단 가드가 부재했음.
+2. **조치 및 개선**:
+   - **올바른 스키마 정합성 확립**: `a.owner_user_id = $1`, `ab.available_amount`, `a.account_type IN ('USER_CASH', 'USER_BANK', 'ESCROW')` 및 `deposit_insurance_funds.protection_limit_per_user` 동적 조회 반영.
+   - **중복 지급 방지 가드(Idempotency Guard)**: `deposit_insurance_payouts` 테이블에서 동일 금융기관 및 유저에 대해 이미 `COMPLETED`된 이력이 있는지 사전 검증하여 중복 지급 원천 차단.
+   - **원자적 복식부기 원장 분개 연동**: 중앙은행 MINT 원천 계좌(`system_key = 'mint'`)로부터 유저 현금 계좌(`USER_CASH`)로 `economy_post_transaction` 프로시저를 호출하여 원장(`ledger_transactions`, `ledger_postings`), 잔액(`account_balances`), 아웃박스 이벤트(`outbox_events`)를 단일 원자적 트랜잭션으로 체결.
+   - **전용 단위 테스트 확립**: `kdic.repository.test.ts`를 신규 작성하여 스키마 정합성, 중복 지급 차단, `economy_post_transaction` 분개 호출을 엄격히 검증 (3/3 Passed, 총 8/8 Passed).
+
+### 2. 세부 변경 파일
+- `backend/src/admin/kdic/kdic.repository.ts`: 스키마 정정, `economy_post_transaction` 복식부기 연동, 중복 지급 가드, `resolveActorUuid` 탑재.
+- `backend/src/admin/kdic/kdic.repository.test.ts`: 스키마 쿼리 무결성, 중복 방지 예외, 복식부기 분개 호출 단위 테스트 신규 작성.
+- `implementation_plan.md`: v189 누적 명세 동기화.
+
+### 3. 검증 계획
+1. Backend 정적 빌드 및 타입 검증 (`pnpm --filter @moneyverse/backend run build`): 통과 완료
+2. Backend KDIC 단위 테스트 (`vitest run kdic.service.test.ts kdic.repository.test.ts`): 8/8 Passed 통과 완료
+3. Git 커밋 및 origin/main 푸시
+4. 원격 프로덕션 Debian 13 VM 100 (`prod-v574`) 무중단 승격 배포
+5. 백엔드 서비스 재시작 및 HTTP 200 실측 검증
