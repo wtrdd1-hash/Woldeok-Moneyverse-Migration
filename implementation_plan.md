@@ -639,3 +639,56 @@
 3. HTTP 200 엔드포인트 실측:
    - `https://easy-scraping.com`: 200 OK
    - `http://localhost:3001/kdic`: 200 OK
+
+
+---
+
+## 🚀 [v192 Specification] 전체 SEO 및 사이트 재분석 기반 검색엔진 최적화 전면 개발 및 무중단 배포 (prod-v576)
+
+### 1. 현황 및 결함 재분석 (SEO Audit Findings)
+1. **[사이트맵 `<lastmod>` 노후화 현상]**:
+   - `frontend/src/app/sitemap.ts`의 `RELEASE_TIMESTAMP`가 `2026-09-29`로 하드코딩되어 있고, `sitemap-static.xml` 및 `sitemap-stocks.xml`은 `2026-09-26`으로 고정되어 있어 주요 검색엔진 크롤러에게 신선한 페이지 갱신 신호가 지연됨.
+2. **[치명적 사이트맵 누락: 18개 가상 주식 개별 거래소 URL]**:
+   - `sitemap-stocks.xml/route.ts`가 과거 "게스트 비공개"라는 잘못된 주석과 함께 `/stocks` 1개만 등록되어 있었음.
+   - 실제로는 게스트에게도 완전 개방되어 실시간 호가/차트/토론을 제공하는 18개 가상 주식(`WDG`, `CHIMU314`, `WDM`, `WDB`, `WDT`, `MYUY`, `CHIPS`, `DUCK`, `WFIN`, `SPACE`, `WDX-TEC` 등)이 `sitemap-stocks.xml`에서 누락되어 있었음.
+3. **[크롤링 라우트 정합성 결함: `/bank` 보호 화면 노출 방지]**:
+   - `routes.config.ts`에서 `/bank`가 `isPublic: true, indexable: true`로 지정되어 있었으나, 실제 `bank/page.tsx`는 `requireMember()`로 보호되어 있어 크롤러 접근 시 307 리다이렉트 발생 및 `noindex` 충돌 위험이 존재함.
+   - 반면 `/bank/savings-pot`는 게스트도 체험 가능한 4인 공동 저축 챌린지 팟이므로 `isPublic: true, indexable: true`로 유지하되 전용 레이아웃 및 메타데이터/JSON-LD가 부재했음.
+4. **[구조화 데이터(JSON-LD) 및 리치 스니펫 보강 필요]**:
+   - `/kdic` (예금보험공사 5천만원 예금자보호 포털): FAQ 탭에 부합하는 `FAQPage`, `WebApplication`, `BreadcrumbList` 구조화 데이터 누락.
+   - `/bank/savings-pot` (4인 공동 저축 챌린지 팟): 전용 `layout.tsx` 부재로 소셜 메타태그 및 `WebApplication` JSON-LD 누락.
+5. **[`robots.ts` 사이트맵 인덱스 명시 확장]**:
+   - 단일 `sitemap.xml`뿐만 아니라 `sitemap-index.xml`도 함께 크롤러가 인식하도록 명시.
+
+---
+
+### 2. 세부 개발 및 최적화 내역
+1. **`frontend/src/app/sitemap.ts`**:
+   - `RELEASE_TIMESTAMP`를 최신 일자(`2026-10-11T23:00:00.000Z`)로 갱신.
+2. **`frontend/src/app/sitemap-static.xml/route.ts`**:
+   - `RELEASE_TIMESTAMP`를 최신 일자(`2026-10-11T23:00:00.000Z`)로 갱신.
+3. **`frontend/src/app/sitemap-stocks.xml/route.ts`**:
+   - 18개 가상 주식 종목(`STOCK_SYMBOLS`) 전수 엔트리 등록.
+   - 다국어 `alternates` (`ko-KR`, `en-US`, `ja-JP`, `zh-CN`, `x-default`) 포함 및 최신 타임스탬프 부여.
+4. **`frontend/src/config/routes.config.ts`**:
+   - `/bank`를 `isPublic: false, authRequired: true, indexable: false`로 정정하여 크롤러 307 페널티 원천 차단.
+   - `getDisallowedCrawlerRoutes()`에 `/bank` 추가.
+   - `/bank/savings-pot`는 공개 체험 페이지로 등록 유지.
+5. **`frontend/src/app/kdic/layout.tsx`**:
+   - `FAQPage` (5천만원 보호 한도, 예금자보호법 제31조, 보호대상 예금 등) 및 `WebApplication`, `BreadcrumbList` JSON-LD 탑재.
+6. **`frontend/src/app/bank/savings-pot/layout.tsx`** (신규 생성):
+   - 4인 공동 저축 챌린지 팟 전용 메타데이터(OpenGraph, Twitter, Canonical, hreflang) 및 `WebApplication` JSON-LD 탑재.
+7. **`frontend/src/app/robots.ts`**:
+   - `sitemap` 속성에 `sitemap.xml` 및 `sitemap-index.xml` 동시 등록.
+8. **`backend/src/seo/seo.service.ts`**:
+   - `MONITORED_TARGET_URLS`에 `/bank/savings-pot` 추가하여 관리자 관제탑 실시간 크롤러 모니터링 연동.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. Frontend 타입 검증: `pnpm --filter @moneyverse/frontend run typecheck` (0 Errors)
+2. Frontend 정적 빌드: `pnpm --filter @moneyverse/frontend run build`
+3. Git 커밋 및 origin/main 푸시
+4. 원격 프로덕션 Debian 13 VM 100 (`prod-v576`) 무중단 승격 배포
+5. 배포 후 `sitemap.xml`, `sitemap-stocks.xml`, `robots.txt`, `/kdic`, `/bank/savings-pot` 실측 HTTP 200 및 메타 태그/JSON-LD 검증
+6. IndexNow 및 백엔드 SEO 핑 수동 트리거 후 응답 검증

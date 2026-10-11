@@ -3,7 +3,7 @@ import { getPublicSitemapRoutes } from '@/config/routes.config';
 
 export const revalidate = 3600;
 
-const RELEASE_TIMESTAMP = new Date('2026-09-26T21:00:00.000Z').toISOString();
+const RELEASE_TIMESTAMP = new Date('2026-10-11T23:00:00.000Z').toISOString();
 
 export async function GET() {
   if (process.env.SEO_INDEXING_ENABLED === 'false') {
