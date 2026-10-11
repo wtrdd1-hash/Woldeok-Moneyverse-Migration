@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v189)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v190)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v190**: [예금보험공사(KDIC) 포털 실측 검증 및 관리자 관제탑(/admin/kdic) 원장 분개 상태·원예금고 비교 시각화 쇄신 및 prod-v575 무중단 승격] (+60, -0)
 - **v189**: [QA-P0-03 결함 정밀 해결 (예금보험공사(KDIC) 대위변제 원장 무결성 확립, economy_post_transaction 복식부기 분개 연동, 중복 지급 방지 가드 및 prod-v574 무중단 승격)] (+75, -0)
 - **v188**: [직업 숙련도·자격증·일일할당 및 카지노 하이로우 UI 다국어(i18n) 정밀 현지화 및 운영 무중단 승격(prod-v573)] (+85, -0)
 - **v187**: [운영 DB 마이그레이션 시퀀스 동기화(268번) 및 다국어 코퍼스 쇄신(prod-v572)] (+60, -0)
@@ -574,3 +575,30 @@
 3. Git 커밋 및 origin/main 푸시
 4. 원격 프로덕션 Debian 13 VM 100 (`prod-v574`) 무중단 승격 배포
 5. 백엔드 서비스 재시작 및 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v190 Specification] 예금보험공사(KDIC) 포털 실측 검증 및 관리자 관제탑(/admin/kdic) 원장 분개 상태·원예금고 비교 시각화 쇄신 (prod-v575)
+
+### 1. 현황 및 개선 필요 사항
+1. **[KDIC 대위변제 원장 추적성 결여]**:
+   - 관리자 관제탑(`/admin/kdic`)의 '피해 예금자 대위변제 집행 원장' 테이블에서 대위변제금 수치만 표시되고, 피해 예금자의 원래 예탁 잔액(`originalDepositWld`)과 대비 분석 및 복식부기 원장 분개 체결 상태(`MINT → USER_CASH`, `✓ 원장체결`) 표시가 누락되어 감사 추적 시 불편함 존재.
+2. **[대위변제 집행 가이드라인 투명화]**:
+   - 대위변제 집행 폼 설명에 "중앙은행 MINT 원천 계좌로부터 유저 현금 계좌(USER_CASH)로 복식부기 원장 분개(Double-entry Ledger)가 원자적으로 체결됩니다" 안내를 명시하여 운영자의 이해도 증진.
+3. **[공개 포털 연동 실측 검증]**:
+   - 일반 유저 포털(`/kdic`)의 Next.js BFF 프록시(`/api/v1/kdic/portal` → NestJS `/api/v1/kdic/portal`) 정상 연동 및 HTTP 200 실측 검증 완료.
+
+### 2. 세부 변경 파일
+- `frontend/src/app/admin/kdic/kdic-control-tower.tsx`:
+  - 원예금고(`originalDepositWld`) 대비 대위변제금(`payoutAmountWld`) 비교 컬럼 추가.
+  - 복식부기 `✓ 원장체결` 뱃지 렌더링.
+  - 분기별 예보료 법정부담금 뱃지(`연 0.08% 법정부담금`) 추가.
+  - 대위변제 폼 설명에 MINT 원천 복식부기 원자적 분개 안내 명시.
+- `implementation_plan.md`: v190 누적 명세 동기화.
+
+### 3. 검증 계획
+1. Frontend 타입 검증 (`pnpm --filter @moneyverse/frontend run typecheck`): 0 Errors (통과 완료)
+2. Frontend 빌드 검증 (`pnpm --filter @moneyverse/frontend run build`): 584/584 정적 페이지 빌드 100% 통과 (통과 완료)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 프로덕션 Debian 13 VM 100 (`prod-v575`) 무중단 승격 배포
+5. 실제 운영 환경 `/admin/kdic`, `/kdic` 화면 HTTP 200 실측 검증
