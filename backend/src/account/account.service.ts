@@ -32,7 +32,7 @@ export class AccountLastIdentityError extends Error {
 
 export interface LinkedIdentitySummary {
   readonly identityId: string;
-  readonly provider: IdentityProvider;
+  readonly provider: IdentityProvider | 'local_email';
   readonly displayName: string;
   readonly linkedAt: string;
 }
@@ -85,7 +85,9 @@ function nonNegativeSafeInteger(value: unknown, field: string): number {
 }
 
 function linkedIdentity(row: LinkedIdentityRow): LinkedIdentitySummary {
-  const provider = requireIdentityProvider(row.provider);
+  // Local email is a valid first-party sign-in method for read-only identity listing.
+  // OAuth link/unlink inputs remain restricted by requireIdentityProvider.
+  const provider = row.provider === 'local_email' ? 'local_email' : requireIdentityProvider(row.provider);
   return {
     identityId: requireAccountUuid(row.identity_id, 'database identity id'),
     provider,

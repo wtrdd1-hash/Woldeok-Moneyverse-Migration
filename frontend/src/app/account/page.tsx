@@ -33,6 +33,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatDay } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { DeleteAccountForm, LinkButton, ReauthButton, UnlinkButton } from './account-forms';
+import { isLinkableOAuthProvider } from './identity-provider';
 
 export const dynamic = 'force-dynamic';
 
@@ -103,7 +104,7 @@ export default async function AccountPage({
 
   const identities = identityData?.identities ?? [];
   const linkedProviders = new Set(identities.map((identity) => identity.provider));
-  const available = (providerData?.providers ?? []).filter((provider) => provider.enabled);
+  const available = (providerData?.providers ?? []).filter(isLinkableOAuthProvider);
   const oauthIdentity = identities.find((identity) => identity.provider !== 'local_email');
   const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
 
