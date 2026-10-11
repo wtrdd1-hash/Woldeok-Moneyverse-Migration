@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/dialog';
 import { groupDigits } from '@/lib/money';
 import { cn } from '@/lib/cn';
+import { TranslatedText as T } from '@/components/translated-text';
 
 // 7대 직급 단계 정의 (기획서 §6)
 export interface MasteryRank {
@@ -201,10 +202,20 @@ export function CareerMasteryCard({
                 </Badge>
               </div>
               <CardTitle className="text-xl font-black text-foreground">
-                {jobTitle} 숙련도 & 커리어 마스터리
+                <T
+                  korean={`${jobTitle} 숙련도 & 커리어 마스터리`}
+                  english={`${jobTitle} Mastery & Career Progression`}
+                  japanese={`${jobTitle} 熟練度＆キャリアマスタリー`}
+                  chinese={`${jobTitle} 熟练度与职业精通`}
+                />
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                장기적인 업무 수행과 전문 자격시험 통과를 통해 상위 직급과 공인 자격증을 획득합니다.
+                <T
+                  korean="장기적인 업무 수행과 전문 자격시험 통과를 통해 상위 직급과 공인 자격증을 획득합니다."
+                  english="Achieve higher job ranks and certified credentials by completing tasks and passing specialized exams."
+                  japanese="長期的な業務遂行と専門資格試験の合格を通じて上位職級と公認資格を獲得します。"
+                  chinese="通过长期业务实践与专业资格考核，晋升更高职级并获取官方认证证书。"
+                />
               </CardDescription>
             </div>
 
@@ -218,7 +229,13 @@ export function CareerMasteryCard({
                 className="h-10 px-4 rounded-xl font-bold text-xs bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-xs flex items-center gap-2"
               >
                 <FileCheck2 className="size-4" />
-                <span>{hasCert ? '상위 전문 자격 재응시' : '전문 자격증 시험 응시 (750 WLD)'}</span>
+                <span>
+                  {hasCert ? (
+                    <T korean="상위 전문 자격 재응시" english="Retake Higher Exam" japanese="上位資格の再受験" chinese="重考高级资格" />
+                  ) : (
+                    <T korean="전문 자격증 시험 응시 (750 WLD)" english="Take Certification Exam (750 WLD)" japanese="専門資格試験を受験 (750 WLD)" chinese="参加专业资格考核 (750 WLD)" />
+                  )}
+                </span>
               </Button>
             </div>
           </div>
@@ -233,7 +250,7 @@ export function CareerMasteryCard({
                 <span className="text-foreground">{currentRank.title}</span>
                 {hasCert && (
                   <Badge className="bg-emerald-500/20 text-emerald-500 border-emerald-500/30 text-[10px]">
-                    공인 자격 보유
+                    <T korean="공인 자격 보유" english="Certified" japanese="資格保有" chinese="已认证" />
                   </Badge>
                 )}
               </div>
@@ -243,8 +260,12 @@ export function CareerMasteryCard({
             </div>
             <Progress value={progressPercent} className="h-2.5 rounded-full" />
             <div className="flex justify-between text-[11px] text-muted-foreground font-mono">
-              <span>현재 직급 혜택: 업무 기본 숙련도 100% 반영</span>
-              <span>다음 레벨까지: {groupDigits(Math.max(0, reqXp - xp))} XP 필요</span>
+              <span>
+                <T korean="현재 직급 혜택: 업무 기본 숙련도 100% 반영" english="Current Benefit: 100% Base Work XP Rate" japanese="現在の特典: 基本業務熟練度100%反映" chinese="当前权益: 基础工作熟练度100%计入" />
+              </span>
+              <span>
+                <T korean="다음 레벨까지" english="To Next Level" japanese="次のレベルまで" chinese="距离下一级" />: {groupDigits(Math.max(0, reqXp - xp))} XP
+              </span>
             </div>
           </div>
 
@@ -252,7 +273,9 @@ export function CareerMasteryCard({
           <div className="space-y-2">
             <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
               <Award className="size-3.5 text-primary" />
-              <span>7대 직급 커리어 단계</span>
+              <span>
+                <T korean="7대 직급 커리어 단계" english="7-Tier Career Mastery Roadmap" japanese="7大職級キャリアロードマップ" chinese="7大职级职业进阶路线图" />
+              </span>
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
               {MASTERY_RANKS.map((r) => {
@@ -286,10 +309,17 @@ export function CareerMasteryCard({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base font-bold">
               <GraduationCap className="size-5 text-primary" />
-              <span>전문 직업 자격시험 (자격증 검정)</span>
+              <span>
+                <T korean="전문 직업 자격시험 (자격증 검정)" english="Professional Career Certification Exam" japanese="専門職業資格試験 (資格検定)" chinese="专业职业认证资格考核" />
+              </span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              총 3문항 중 <strong className="text-foreground">2문항 이상 정답</strong> 시 합격 처리되며 자격증 획득 및 3단계 레벨 보너스가 지급됩니다.
+              <T
+                korean="총 3문항 중 2문항 이상 정답 시 합격 처리되며 자격증 획득 및 3단계 레벨 보너스가 지급됩니다."
+                english="Answer 2 or more correctly out of 3 to pass, earning your certification and a +3 Level bonus."
+                japanese="全3問中2問以上正解で合格となり、資格取得および3レベルのボーナスが付与されます。"
+                chinese="全部3道题中答对2道及以上即可合格，获取认证资格并享受+3等级晋升奖励。"
+              />
             </DialogDescription>
           </DialogHeader>
 

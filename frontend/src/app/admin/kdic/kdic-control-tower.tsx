@@ -310,6 +310,7 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
           </h3>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             파산 또는 영업정지된 금융기관의 예금자에 대해 1인당 최고 50만 WLD 한도 내에서 즉각 대위변제금을 지급합니다.
+            중앙은행 MINT 원천 계좌로부터 유저 현금 계좌(USER_CASH)로 복식부기 원장 분개(Double-entry Ledger)가 원자적으로 체결됩니다.
           </p>
         </div>
 
@@ -352,7 +353,12 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 예보료 징수 원장 */}
         <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-          <h3 className="text-sm font-bold text-white mb-3">📋 분기별 예금보험료 징수 원장</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-white">📋 분기별 예금보험료 징수 원장</h3>
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              연 0.08% 법정부담금
+            </span>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-300">
               <thead className="bg-slate-800/60 text-slate-400 uppercase font-mono text-[10px]">
@@ -385,7 +391,12 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
 
         {/* 대위변제 원장 */}
         <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-          <h3 className="text-sm font-bold text-white mb-3">🛡️ 피해 예금자 대위변제 집행 원장</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-white">🛡️ 피해 예금자 대위변제 집행 원장</h3>
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              원자적 복식부기 (MINT → CASH)
+            </span>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-300">
               <thead className="bg-slate-800/60 text-slate-400 uppercase font-mono text-[10px]">
@@ -393,21 +404,29 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
                   <th className="p-2">시간</th>
                   <th className="p-2">부실기관</th>
                   <th className="p-2">예금자</th>
+                  <th className="p-2">원예금고</th>
                   <th className="p-2">대위변제금</th>
+                  <th className="p-2">원장상태</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {recentPayouts.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-4 text-center text-slate-500">대위변제 이력이 없습니다.</td>
+                    <td colSpan={6} className="p-4 text-center text-slate-500">대위변제 이력이 없습니다.</td>
                   </tr>
                 ) : (
                   recentPayouts.map(py => (
-                    <tr key={py.id}>
+                    <tr key={py.id} className="hover:bg-slate-800/30 transition-colors">
                       <td className="p-2 font-mono text-slate-400">{new Date(py.createdAt).toLocaleDateString()}</td>
                       <td className="p-2 font-medium">{py.institutionName}</td>
-                      <td className="p-2">{py.displayName || py.userId.substring(0, 8)}</td>
-                      <td className="p-2 font-mono font-bold text-cyan-400">{py.payoutAmountWld.toLocaleString()} WLD</td>
+                      <td className="p-2 font-mono text-slate-300" title={py.userId}>{py.displayName || py.userId.substring(0, 8)}</td>
+                      <td className="p-2 font-mono text-slate-400">{Number(py.originalDepositWld).toLocaleString()} WLD</td>
+                      <td className="p-2 font-mono font-bold text-cyan-400">+{Number(py.payoutAmountWld).toLocaleString()} WLD</td>
+                      <td className="p-2">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          ✓ 원장체결
+                        </span>
+                      </td>
                     </tr>
                   ))
                 )}

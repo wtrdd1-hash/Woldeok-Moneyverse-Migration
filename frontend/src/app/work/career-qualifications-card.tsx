@@ -34,11 +34,13 @@ function CertifyButton({
   code,
   disabled,
   fee,
+  isEn,
 }: {
   readonly jobType: string;
   readonly code: string;
   readonly disabled: boolean;
   readonly fee: string;
+  readonly isEn?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState(
     certifyQualificationAction,
@@ -58,12 +60,12 @@ function CertifyButton({
         {isPending ? (
           <span className="flex items-center gap-1.5">
             <span className="inline-block size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            심사 진행 중...
+            {isEn ? 'Evaluating...' : '심사 진행 중...'}
           </span>
         ) : (
           <span className="flex items-center gap-1.5">
             <Sparkles className="size-3.5" />
-            자격심사 응시 ({groupDigits(fee)} WLD)
+            {isEn ? `Apply for Exam (${groupDigits(fee)} WLD)` : `자격심사 응시 (${groupDigits(fee)} WLD)`}
           </span>
         )}
       </Button>
@@ -173,15 +175,15 @@ export function CareerQualificationsCard({
               <CardContent className="p-4 sm:p-5 pt-0">
                 <div className="rounded-lg border bg-background/80 p-2.5 my-2 text-xs grid gap-1">
                   <div className="flex items-center justify-between text-muted-foreground text-[11px]">
-                    <span>국고 심사 수수료:</span>
+                    <span>{isEn ? 'Examination Fee:' : '국고 심사 수수료:'}</span>
                     <span className="font-mono font-semibold text-foreground">
                       {groupDigits(spec.fee_wld)} WLD
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-muted-foreground text-[11px]">
-                    <span>필요 레벨:</span>
+                    <span>{isEn ? 'Required Level:' : '필요 레벨:'}</span>
                     <span className={`font-mono font-semibold ${isEligible ? 'text-emerald-600' : 'text-amber-600'}`}>
-                      Lv.{spec.min_level} (현재 Lv.{currentLevel})
+                      Lv.{spec.min_level} {isEn ? `(Current Lv.${currentLevel})` : `(현재 Lv.${currentLevel})`}
                     </span>
                   </div>
                 </div>
@@ -191,7 +193,7 @@ export function CareerQualificationsCard({
                 {isAcquired ? (
                   <div className="w-full text-center py-2 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold text-xs flex items-center justify-center gap-1.5 border border-emerald-500/20">
                     <CheckCircle2 className="size-3.5" />
-                    자격 취득 완료 ({new Date(acquiredItem!.acquired_at).toLocaleDateString('ko-KR')})
+                    {isEn ? 'Certified' : '자격 취득 완료'} ({new Date(acquiredItem!.acquired_at).toLocaleDateString(isEn ? 'en-US' : 'ko-KR')})
                   </div>
                 ) : isEligible ? (
                   <CertifyButton
@@ -199,6 +201,7 @@ export function CareerQualificationsCard({
                     code={spec.code}
                     disabled={false}
                     fee={spec.fee_wld}
+                    isEn={isEn}
                   />
                 ) : (
                   <Button
@@ -207,7 +210,7 @@ export function CareerQualificationsCard({
                     variant="outline"
                     className="w-full text-xs text-muted-foreground h-9"
                   >
-                    Lv.{spec.min_level} 달성 시 응시 가능
+                    {isEn ? `Available at Lv.${spec.min_level}` : `Lv.${spec.min_level} 달성 시 응시 가능`}
                   </Button>
                 )}
               </CardFooter>

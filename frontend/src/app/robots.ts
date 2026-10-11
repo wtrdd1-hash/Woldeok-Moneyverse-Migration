@@ -20,7 +20,10 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: disallowList,
     },
-    sitemap: `${base}/sitemap.xml`,
+    sitemap: [
+      `${base}/sitemap.xml`,
+      `${base}/sitemap-index.xml`,
+    ],
     host: base,
   };
 }

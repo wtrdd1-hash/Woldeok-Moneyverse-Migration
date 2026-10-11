@@ -1587,6 +1587,51 @@ export const I18N_DICTIONARY: TranslationDictionary = {
     ja: 'すべて見る',
     zh: '查看全部',
   },
+  // ==========================================
+  // 17. Central Bank Savings Pots & League System
+  // ==========================================
+  'bank.savings_pot_title': {
+    ko: '중앙은행 스마트 복리 포켓 (모의 체험)',
+    en: 'Central Bank Smart Savings Pots (Simulated)',
+    ja: '中央銀行スマート複利ポケット (模擬体験)',
+    zh: '中央银行智能复利口袋 (模拟体验)',
+  },
+  'bank.savings_pot_sim': {
+    ko: '모의 시뮬레이션',
+    en: 'Simulation',
+    ja: '模擬シミュレーション',
+    zh: '模拟演练',
+  },
+  'bank.savings_pot_desc': {
+    ko: '가상 목표 저축 시뮬레이터입니다. 브라우저에서 매일 복리 이자 정산 메커니즘을 체험해 볼 수 있습니다 (실제 계좌 잔액 미차감).',
+    en: 'Simulated savings goal calculator. Experience compound interest calculation in your browser (no live balance deduction).',
+    ja: '仮想目標貯蓄シミュレーターです。ブラウザ上で毎日の複利計算メカニズムを体験できます（実際の口座残高は変動しません）。',
+    zh: '虚拟储蓄目标测算器。可在浏览器中体验每日复利结算机制（不扣除实际账户余额）。',
+  },
+  'bank.savings_pot_claim': {
+    ko: '일일 이자 받기',
+    en: 'Claim Daily Yield',
+    ja: '日次利息を受け取る',
+    zh: '领取每日利息',
+  },
+  'stocks.top_mover': {
+    ko: '최고 상승',
+    en: 'Top Mover',
+    ja: '急上昇',
+    zh: '最大涨幅',
+  },
+  'stocks.league.live': {
+    ko: '실시간 리그 랭킹',
+    en: 'Live League',
+    ja: 'リアルタイムリーグ順位',
+    zh: '实时联赛排行',
+  },
+  'stocks.league.simulated': {
+    ko: '시즌 개막 준비 중 (모의 예시)',
+    en: 'Pre-season (Simulated)',
+    ja: 'シーズン開幕準備中 (模擬例)',
+    zh: '赛季开幕筹备中 (模拟示例)',
+  },
 };
 
 /**

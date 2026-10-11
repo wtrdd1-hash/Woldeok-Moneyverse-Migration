@@ -24,7 +24,10 @@ describe('search crawler routes', () => {
     process.env.APP_BASE_URL = 'https://easy-scraping.com';
 
     const robotRules = robots();
-    expect(robotRules.sitemap).toBe('https://easy-scraping.com/sitemap.xml');
+    expect(robotRules.sitemap).toEqual([
+      'https://easy-scraping.com/sitemap.xml',
+      'https://easy-scraping.com/sitemap-index.xml',
+    ]);
     expect(robotRules.rules).toEqual(
       expect.objectContaining({
         userAgent: '*',
@@ -38,7 +41,10 @@ describe('search crawler routes', () => {
     expect(urls).toContain('https://easy-scraping.com/board');
     expect(urls).toContain('https://easy-scraping.com/account-deletion');
     expect(urls).toContain('https://easy-scraping.com/data-deletion');
+    expect(urls).toContain('https://easy-scraping.com/bank/savings-pot');
+    expect(urls).toContain('https://easy-scraping.com/kdic');
     expect(urls).not.toContain('https://easy-scraping.com/admin');
     expect(urls).not.toContain('https://easy-scraping.com/wallet');
+    expect(urls).not.toContain('https://easy-scraping.com/bank');
   });
 });

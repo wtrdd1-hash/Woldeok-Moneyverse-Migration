@@ -142,6 +142,7 @@ export const MONITORED_TARGET_URLS: readonly {
   { path: '/pension', category: 'hub', name: '국민연금 (NPS) 대국민 포털' },
   { path: '/fx', category: 'hub', name: '서울외환시장 (FX) 실시간 환전' },
   { path: '/kdic', category: 'hub', name: '예금보험공사 (KDIC) 5천만원 예금자보호 포털' },
+  { path: '/bank/savings-pot', category: 'hub', name: '4인 공동 저축 챌린지 팟' },
   { path: '/marketplace/auction', category: 'hub', name: 'P2P 실시간 경매장' },
 ];
 

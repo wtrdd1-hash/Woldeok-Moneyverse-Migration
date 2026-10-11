@@ -650,11 +650,9 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
   {
     path: '/bank',
     label: { ko: '가상 중앙은행 & 스마트 복리 포켓', en: 'Virtual Bank & Compound Savings', ja: '仮想中央銀行＆複合貯蓄', zh: '虚拟中央银行与复利储蓄' },
-    isPublic: true,
-    authRequired: false,
-    indexable: true,
-    sitemapPriority: 0.85,
-    changeFrequency: 'daily',
+    isPublic: false,
+    authRequired: true,
+    indexable: false,
     group: 'finance',
   },
   {

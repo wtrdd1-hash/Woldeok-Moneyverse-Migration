@@ -1,6 +1,12 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v185)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v191)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v191**: [전역 무손실 DB 스냅샷 백업(post-v575) 생성 & 원격 프로덕션 디스크 81GB 대규모 클린업(루트 +22GB 확보, /srv +59GB 확보) 완료] (+65, -0)
+- **v190**: [예금보험공사(KDIC) 포털 실측 검증 및 관리자 관제탑(/admin/kdic) 원장 분개 상태·원예금고 비교 시각화 쇄신 및 prod-v575 무중단 승격] (+60, -0)
+- **v189**: [QA-P0-03 결함 정밀 해결 (예금보험공사(KDIC) 대위변제 원장 무결성 확립, economy_post_transaction 복식부기 분개 연동, 중복 지급 방지 가드 및 prod-v574 무중단 승격)] (+75, -0)
+- **v188**: [직업 숙련도·자격증·일일할당 및 카지노 하이로우 UI 다국어(i18n) 정밀 현지화 및 운영 무중단 승격(prod-v573)] (+85, -0)
+- **v187**: [운영 DB 마이그레이션 시퀀스 동기화(268번) 및 다국어 코퍼스 쇄신(prod-v572)] (+60, -0)
+- **v186**: [스마트 정기예금 계정별 격리, 티커 바 실시간 시세 연동 및 시즌 리더보드 투명성 쇄신(prod-v571)] (+60, -0)
 - **v185**: [QA 결함 보고서 정밀 추적 해결 (은행 대출 시뮬레이터 금리/한도/기간 서버 권위 지표 동기화(QA-F008) 및 공동 저축 챌린지 팟 모의 체험 모드 정합성 쇄신(QA-F003))] (+60, -0)
 - **v184**: [QA 결함 보고서 정밀 추적 해결 (포트폴리오 주간 결산서 실시간 보유 데이터 100% 연동(QA-F004), 캔들차트 봉단위 라벨·접근성 지표 토글·모달 닫기 버튼 한국어화(QA-F007))] (+80, -0)
 - **v183**: [QA 결함 보고서 정밀 추적 해결 (경제 관리 콘솔(/admin/economy)의 자동 정책 엔진 제안 언래핑 및 듀얼 레인(Classical + AI Review) 검토 상태 시각화 완전 해결(QA-F006))] (+75, -0)
@@ -461,3 +467,228 @@
 3. Git 커밋 및 origin/main 푸시
 4. 원격 운영 서버(`prod-v571`) 무중단 승격 빌드 및 배포
 5. 실제 운영 환경 `/bank`, `/stocks` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v187 Specification] QA 결함 보고서 정밀 추적 해결 (운영 DB 마이그레이션 시퀀스 동기화 및 다국어 코퍼스 쇄신)
+
+### 1. 현황 및 개선 필요 사항 (QA P0 마이그레이션 불일치 및 다국어 완성도 정밀 분석)
+1. **[P0 보안/인프라] 운영 DB 267/268 마이그레이션 적용 기록 누락 및 번호 충돌 해소**:
+   - 증상:
+     - `245-automated-monetary-regulation.sql`과 `245-targeted-treasury-subsidy-and-donation.sql`이 동일한 245번을 공유하여, 총 파일 수는 268개인데 마지막 파일 번호가 267로 끝나며 `migration-parity.test.ts`에서 중복 및 번호 불일치 오류가 발생함.
+     - 또한 실제 운영 DB에는 240~267 테이블 및 스키마(중앙은행 테일러 칙, 대출 담보, 복권 등)가 이미 생성되어 있었으나 `schema_migrations` 테이블 기록이 239번에 머물러 있어 CI 및 QA 감사에서 차단 상태로 판정됨.
+   - 조치:
+     - `245-targeted-treasury-subsidy-and-donation.sql`을 `268-targeted-treasury-subsidy-and-donation.sql`로 시퀀싱 변경하여 002부터 268까지 단 하나의 gap이나 중복 없는 완벽한 단조 증가 시퀀스를 복원.
+     - `packages/database/test/migration-parity.test.ts` 전체 테스트 통과 (7/7 Passed).
+     - 운영 DB `schema_migrations` 테이블에 240부터 268까지의 파일명 및 SHA256 체크섬을 안전하게 동기화 등록 완료.
+2. **[언어 QA] 중앙은행 스마트 복리 포켓 및 주식 시즌 리그 4개 국어 마스터 딕셔너리 확장**:
+   - `frontend/src/lib/i18n-dictionary.ts`: 신규 금융 용어(`bank.savings_pot_title`, `bank.savings_pot_sim`, `bank.savings_pot_desc`, `bank.savings_pot_claim`, `stocks.top_mover`, `stocks.league.live`, `stocks.league.simulated`)를 한국어/영어/일본어/중국어 4개 국어로 추가 등록.
+   - `frontend/src/lib/i18n-dictionary.test.ts`: 4개 국어 번역 무결성 및 단정문 추가 (3/3 Passed).
+
+### 2. 세부 변경 파일
+- `packages/database/migrations/268-targeted-treasury-subsidy-and-donation.sql`: 파일명 리넘버링(245 -> 268) 및 헤더 주석 갱신.
+- `frontend/src/lib/i18n-dictionary.ts`: 7개 신규 금융/주식 키에 대한 4개 국어 정밀 번역 항목 추가.
+- `frontend/src/lib/i18n-dictionary.test.ts`: 신규 번역 키 검증 단정문 추가.
+
+### 3. 검증 계획
+1. Database 단위 테스트 (`@moneyverse/database`): 7/7 Tests Passed (통과 완료)
+2. Frontend 정적 타입 검증 (`@moneyverse/frontend typecheck`): 0 Errors (통과 완료)
+3. Frontend i18n 단위 테스트 (`i18n-dictionary.test.ts`): 3/3 Tests Passed (통과 완료)
+4. 원격 프로덕션 DB `schema_migrations` 조회: 268번까지 100% 동기화 확인 (통과 완료)
+5. Git 커밋 및 origin/main 푸시
+6. 원격 운영 서버(`prod-v572`) 무중단 승격 빌드 및 배포
+7. 실제 운영 환경 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v188 Specification] 직업 숙련도·자격증·일일할당 및 카지노 하이로우 UI 다국어(i18n) 정밀 현지화 및 운영 릴리스 (prod-v573)
+
+### 1. 현황 및 개선 필요 사항 (QA 다국어 심화 분석)
+1. **[직업 UI 다국어 결함] 직업 숙련도, 자격증 심사 및 일일 작업 할당 한도 하드코딩 텍스트**:
+   - `frontend/src/app/work/career-mastery-card.tsx`: '숙련도 성장', '현재 등급에서 더 많은 경험치를 쌓아 상위 티어로 진입하세요', 자격증 심사 요건, 로드맵 안내 텍스트가 한국어로 고정되어 영어/일본어/중국어 로케일에서 국문 노출.
+   - `frontend/src/app/work/career-qualifications-card.tsx`: 자격증 응시 버튼('심사 중...', '자격증 응시하기'), 수수료, 레벨 안내, 취득 상태 뱃지 텍스트가 영문 로케일에서 한글로 잔존.
+   - `frontend/src/app/work/work-quota-card.tsx`: 일일 및 주간 작업 할당 한도 사용률 표시가 `${dailyPercent}% 사용`으로 한국어로 고정되어 영어권 사용자의 시각적 통일성 저해.
+2. **[카지노 UI 다국어 결함] 하이로우 20(Hi-Lo) 게임 화면 텍스트 전면 현지화**:
+   - `frontend/src/app/casino/hilo-game.tsx`: '하이로우 20', '승자독식 20배 도전', '암호학적 공정성 검증됨', '현재 연승', '다음 카드가 더 높을지 낮을지 예측하세요', '카드 오픈 대기 중', '베팅 금액 (WLD)' 라벨 등이 한국어로 하드코딩되어 글로벌 플레이어 환경에서 어색함 유발.
+
+### 2. 세부 개발 명세
+1. **직업 숙련도 카드 다국어 렌더링 (`career-mastery-card.tsx`)**:
+   - `useI18n()` 훅과 `<TranslatedText as T>` 패턴을 활용하여 헤더, 진행도 설명, 자격증 뱃지, 숙련도 로드맵 텍스트를 4개 국어(ko/en/ja/zh)로 지원.
+   - 단위 테스트(`career-mastery.test.tsx`)에서 로케일 독립적 정규식(`/디지털 기술자.*(숙련도|Mastery)/`)을 적용하여 다국어 환경 테스트 회귀 원천 차단 (3/3 Passed).
+2. **자격증 심사 카드 및 작업 쿼터 다국어화 (`career-qualifications-card.tsx`, `work-quota-card.tsx`)**:
+   - `locale === 'en'` 및 4개 국어 분기를 지원하여 'Reviewing...', 'Apply Exam', 'Passed', 'Fee', 'Level Required' 등 영문 정밀 매핑.
+   - 쿼터 카드 사용률 표기(`${isEn ? 'Used' : '사용'}`) 영문화 완료.
+3. **카지노 하이로우 20 다국어 완전 현지화 (`hilo-game.tsx`)**:
+   - 제목, 게임 룰 안내, 공정성 뱃지, 연승 지표, 카드 오픈 대기 상태, 베팅 금액 입력 필드 라벨을 4개 국어 자동 대응형으로 치환.
+   - `casino-parts.test.tsx` 단위 테스트 통과 (7/7 Passed).
+
+### 3. 검증 계획
+1. Frontend 정적 타입 검증 (`@moneyverse/frontend typecheck`): 0 Errors (통과 완료)
+2. 직업 컴포넌트 단위 테스트 (`career-mastery.test.tsx`): 3/3 Passed (통과 완료)
+3. 카지노 컴포넌트 단위 테스트 (`casino-parts.test.tsx`): 7/7 Passed (통과 완료)
+4. Git 커밋 및 origin/main 푸시
+5. 원격 프로덕션 Debian 13 VM 100 (`prod-v573`) 무중단 승격 배포
+6. 실제 운영 환경 `/work`, `/casino`, `/` 화면 HTTP 200 실측 검증
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan] 최종 통합 구현 명세
+### User Review Required
+- 프로덕션 릴리스 `prod-v573` 승격 진행 및 원격 배포 자동 파이프라인 가동.
+
+### Proposed Changes
+- `frontend/src/app/work/career-mastery-card.tsx`: 다국어 `<TranslatedText as T>` 4개 국어 지원
+- `frontend/src/app/work/career-mastery.test.tsx`: 다국어 대응 정규식 테스트 쇄신
+- `frontend/src/app/work/career-qualifications-card.tsx`: 자격증 응시/심사/수수료 영문화
+- `frontend/src/app/work/work-quota-card.tsx`: 작업 한도 사용률 영문화
+- `frontend/src/app/casino/hilo-game.tsx`: 하이로우 20 타이틀, 룰, 상태 라벨 다국어화
+- `implementation_plan.md`: v188 누적 명세 동기화
+
+### Verification Plan
+1. `pnpm --filter @moneyverse/frontend run typecheck`: 0 Errors 확인
+2. Git status 및 diff 검토
+3. Remote origin/main push
+4. 원격 VM 100 무중단 빌드 및 `prod-v573` 승격
+5. HTTP 200 헬스체크
+
+---
+
+## 🚀 [v189 Specification] QA-P0-03 결함 정밀 해결 (예금보험공사(KDIC) 대위변제 원장 무결성 확립 및 복식부기 분개 연동, prod-v574)
+
+### 1. 현황 및 개선 필요 사항 (QA P0-03 결함 정밀 분석)
+1. **[P0-03 · CRITICAL] 예금보험공사(KDIC) 직접 잔액 쓰기 및 원장 불일치 취약점**:
+   - 증상: `backend/src/admin/kdic/kdic.repository.ts`의 `executeDepositPayout` 메서드가 복식부기 원장 분개(`ledger_transactions`, `ledger_postings`) 없이 `public.account_balances` 테이블을 직접 `UPDATE`하고 있었음.
+   - 또한, 쿼리에서 존재하지 않는 컬럼명(`ab.available_balance`, `ab.locked_balance`, `a.user_id`)을 참조하여 런타임 실행 시 PostgreSQL 에러가 발생할 위험이 있었고, 유저 예금 잔액 조회가 트랜잭션 외부에서 수행되어 동시성 경쟁 상태(Race Condition) 및 중복 대위변제(Repeated Payouts) 차단 가드가 부재했음.
+2. **조치 및 개선**:
+   - **올바른 스키마 정합성 확립**: `a.owner_user_id = $1`, `ab.available_amount`, `a.account_type IN ('USER_CASH', 'USER_BANK', 'ESCROW')` 및 `deposit_insurance_funds.protection_limit_per_user` 동적 조회 반영.
+   - **중복 지급 방지 가드(Idempotency Guard)**: `deposit_insurance_payouts` 테이블에서 동일 금융기관 및 유저에 대해 이미 `COMPLETED`된 이력이 있는지 사전 검증하여 중복 지급 원천 차단.
+   - **원자적 복식부기 원장 분개 연동**: 중앙은행 MINT 원천 계좌(`system_key = 'mint'`)로부터 유저 현금 계좌(`USER_CASH`)로 `economy_post_transaction` 프로시저를 호출하여 원장(`ledger_transactions`, `ledger_postings`), 잔액(`account_balances`), 아웃박스 이벤트(`outbox_events`)를 단일 원자적 트랜잭션으로 체결.
+   - **전용 단위 테스트 확립**: `kdic.repository.test.ts`를 신규 작성하여 스키마 정합성, 중복 지급 차단, `economy_post_transaction` 분개 호출을 엄격히 검증 (3/3 Passed, 총 8/8 Passed).
+
+### 2. 세부 변경 파일
+- `backend/src/admin/kdic/kdic.repository.ts`: 스키마 정정, `economy_post_transaction` 복식부기 연동, 중복 지급 가드, `resolveActorUuid` 탑재.
+- `backend/src/admin/kdic/kdic.repository.test.ts`: 스키마 쿼리 무결성, 중복 방지 예외, 복식부기 분개 호출 단위 테스트 신규 작성.
+- `implementation_plan.md`: v189 누적 명세 동기화.
+
+### 3. 검증 계획
+1. Backend 정적 빌드 및 타입 검증 (`pnpm --filter @moneyverse/backend run build`): 통과 완료
+2. Backend KDIC 단위 테스트 (`vitest run kdic.service.test.ts kdic.repository.test.ts`): 8/8 Passed 통과 완료
+3. Git 커밋 및 origin/main 푸시
+4. 원격 프로덕션 Debian 13 VM 100 (`prod-v574`) 무중단 승격 배포
+5. 백엔드 서비스 재시작 및 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v190 Specification] 예금보험공사(KDIC) 포털 실측 검증 및 관리자 관제탑(/admin/kdic) 원장 분개 상태·원예금고 비교 시각화 쇄신 (prod-v575)
+
+### 1. 현황 및 개선 필요 사항
+1. **[KDIC 대위변제 원장 추적성 결여]**:
+   - 관리자 관제탑(`/admin/kdic`)의 '피해 예금자 대위변제 집행 원장' 테이블에서 대위변제금 수치만 표시되고, 피해 예금자의 원래 예탁 잔액(`originalDepositWld`)과 대비 분석 및 복식부기 원장 분개 체결 상태(`MINT → USER_CASH`, `✓ 원장체결`) 표시가 누락되어 감사 추적 시 불편함 존재.
+2. **[대위변제 집행 가이드라인 투명화]**:
+   - 대위변제 집행 폼 설명에 "중앙은행 MINT 원천 계좌로부터 유저 현금 계좌(USER_CASH)로 복식부기 원장 분개(Double-entry Ledger)가 원자적으로 체결됩니다" 안내를 명시하여 운영자의 이해도 증진.
+3. **[공개 포털 연동 실측 검증]**:
+   - 일반 유저 포털(`/kdic`)의 Next.js BFF 프록시(`/api/v1/kdic/portal` → NestJS `/api/v1/kdic/portal`) 정상 연동 및 HTTP 200 실측 검증 완료.
+
+### 2. 세부 변경 파일
+- `frontend/src/app/admin/kdic/kdic-control-tower.tsx`:
+  - 원예금고(`originalDepositWld`) 대비 대위변제금(`payoutAmountWld`) 비교 컬럼 추가.
+  - 복식부기 `✓ 원장체결` 뱃지 렌더링.
+  - 분기별 예보료 법정부담금 뱃지(`연 0.08% 법정부담금`) 추가.
+  - 대위변제 폼 설명에 MINT 원천 복식부기 원자적 분개 안내 명시.
+- `implementation_plan.md`: v190 누적 명세 동기화.
+
+### 3. 검증 계획
+1. Frontend 타입 검증 (`pnpm --filter @moneyverse/frontend run typecheck`): 0 Errors (통과 완료)
+2. Frontend 빌드 검증 (`pnpm --filter @moneyverse/frontend run build`): 584/584 정적 페이지 빌드 100% 통과 (통과 완료)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 프로덕션 Debian 13 VM 100 (`prod-v575`) 무중단 승격 배포
+5. 실제 운영 환경 `/admin/kdic`, `/kdic` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v191 Specification] 전역 무손실 DB 스냅샷 백업 & 원격 프로덕션 디스크 81GB 대규모 클린업 명세
+
+### 1. 현황 및 개선 필요 사항
+1. **[원격 서버 디스크 고갈 위험 조기 해소]**:
+   - 루트 파일시스템(`/dev/sdb1`, 99GB): 사용량 71GB (76%, 잔여 24GB)로 위험 수위 도달.
+   - 데이터 볼륨(`/srv/moneyverse-data`, 197GB): 사용량 97GB (52%, 잔여 91GB).
+   - 원인:
+     - `/home/debian`: 과거 자동화 워크트리, 레거시 테스트 디렉터리, 빌드 로그 총 40GB 방치.
+     - `/srv/moneyverse-data/releases`: 구버전 릴리스(prod-v553 ~ prod-v570) 18개 총 65GB 점유.
+2. **[사전 안전 조치 및 무손실 DB 백업]**:
+   - 디스크 정리 작업 전, 최신 릴리스(`prod-v575`) 및 마이그레이션 268번, KDIC 원장 무결성 구조가 반영된 PostgreSQL 전체 데이터베이스를 `moneyverse_migrator` 슈퍼유저 롤을 통해 덤프 파일(`post-v575-kdic-20261011-2233.dump`, 68MB) 및 SHA256 체크섬으로 안전 생성·보관 완료.
+
+### 2. 세부 디스크 정리 및 회수 명세
+1. **`/home/debian` 레거시 워크트리 및 캐시 전수 정리**:
+   - 정리 대상: `.worktrees-moneyverse`(4.1GB), `worktrees`(1.2GB), `qa-20261007*`(1.5GB), `wdmv-*`(약 6GB), `mv-b-*`(약 1GB), `.cache` 전체 정리.
+   - **결과: 71GB(76%) → 49GB(53%)로 대폭 감소, +22GB 순수 확보.**
+2. **`/srv/moneyverse-data/releases` 구버전 릴리스 18개 정리**:
+   - 정리 대상: `prod-v553` ~ `prod-v570` 18개 디렉터리 안전 삭제.
+   - 엄격 보존: 활성 릴리스 `prod-v575`, 롤백용 최근 5개(`prod-v571` ~ `prod-v574`), 테스트용 `test-v541-gsc-aa4b6387`.
+   - **결과: 97GB(52%) → 38GB(21%)로 대폭 감소, +59GB 순수 확보.**
+3. **총 디스크 회수량**:
+   - **전체 81GB (22GB + 59GB) 순수 용량 회수 완료.**
+
+### 3. 검증 결과
+1. 최종 디스크 상태 실측:
+   - `/dev/sdb1` (루트): 49GB / 99GB (53% Used, 46GB Free)
+   - `/dev/sda1` (`/srv/moneyverse-data`): 38GB / 197GB (21% Used, 150GB Free)
+2. 백엔드 및 프론트엔드 서비스 상태:
+   - `moneyverse-backend.service`: Active running (PID 1209181)
+   - `moneyverse-frontend.service`: Active running (PID 1260881)
+3. HTTP 200 엔드포인트 실측:
+   - `https://easy-scraping.com`: 200 OK
+   - `http://localhost:3001/kdic`: 200 OK
+
+
+---
+
+## 🚀 [v192 Specification] 전체 SEO 및 사이트 재분석 기반 검색엔진 최적화 전면 개발 및 무중단 배포 (prod-v576)
+
+### 1. 현황 및 결함 재분석 (SEO Audit Findings)
+1. **[사이트맵 `<lastmod>` 노후화 현상]**:
+   - `frontend/src/app/sitemap.ts`의 `RELEASE_TIMESTAMP`가 `2026-09-29`로 하드코딩되어 있고, `sitemap-static.xml` 및 `sitemap-stocks.xml`은 `2026-09-26`으로 고정되어 있어 주요 검색엔진 크롤러에게 신선한 페이지 갱신 신호가 지연됨.
+2. **[치명적 사이트맵 누락: 18개 가상 주식 개별 거래소 URL]**:
+   - `sitemap-stocks.xml/route.ts`가 과거 "게스트 비공개"라는 잘못된 주석과 함께 `/stocks` 1개만 등록되어 있었음.
+   - 실제로는 게스트에게도 완전 개방되어 실시간 호가/차트/토론을 제공하는 18개 가상 주식(`WDG`, `CHIMU314`, `WDM`, `WDB`, `WDT`, `MYUY`, `CHIPS`, `DUCK`, `WFIN`, `SPACE`, `WDX-TEC` 등)이 `sitemap-stocks.xml`에서 누락되어 있었음.
+3. **[크롤링 라우트 정합성 결함: `/bank` 보호 화면 노출 방지]**:
+   - `routes.config.ts`에서 `/bank`가 `isPublic: true, indexable: true`로 지정되어 있었으나, 실제 `bank/page.tsx`는 `requireMember()`로 보호되어 있어 크롤러 접근 시 307 리다이렉트 발생 및 `noindex` 충돌 위험이 존재함.
+   - 반면 `/bank/savings-pot`는 게스트도 체험 가능한 4인 공동 저축 챌린지 팟이므로 `isPublic: true, indexable: true`로 유지하되 전용 레이아웃 및 메타데이터/JSON-LD가 부재했음.
+4. **[구조화 데이터(JSON-LD) 및 리치 스니펫 보강 필요]**:
+   - `/kdic` (예금보험공사 5천만원 예금자보호 포털): FAQ 탭에 부합하는 `FAQPage`, `WebApplication`, `BreadcrumbList` 구조화 데이터 누락.
+   - `/bank/savings-pot` (4인 공동 저축 챌린지 팟): 전용 `layout.tsx` 부재로 소셜 메타태그 및 `WebApplication` JSON-LD 누락.
+5. **[`robots.ts` 사이트맵 인덱스 명시 확장]**:
+   - 단일 `sitemap.xml`뿐만 아니라 `sitemap-index.xml`도 함께 크롤러가 인식하도록 명시.
+
+---
+
+### 2. 세부 개발 및 최적화 내역
+1. **`frontend/src/app/sitemap.ts`**:
+   - `RELEASE_TIMESTAMP`를 최신 일자(`2026-10-11T23:00:00.000Z`)로 갱신.
+2. **`frontend/src/app/sitemap-static.xml/route.ts`**:
+   - `RELEASE_TIMESTAMP`를 최신 일자(`2026-10-11T23:00:00.000Z`)로 갱신.
+3. **`frontend/src/app/sitemap-stocks.xml/route.ts`**:
+   - 18개 가상 주식 종목(`STOCK_SYMBOLS`) 전수 엔트리 등록.
+   - 다국어 `alternates` (`ko-KR`, `en-US`, `ja-JP`, `zh-CN`, `x-default`) 포함 및 최신 타임스탬프 부여.
+4. **`frontend/src/config/routes.config.ts`**:
+   - `/bank`를 `isPublic: false, authRequired: true, indexable: false`로 정정하여 크롤러 307 페널티 원천 차단.
+   - `getDisallowedCrawlerRoutes()`에 `/bank` 추가.
+   - `/bank/savings-pot`는 공개 체험 페이지로 등록 유지.
+5. **`frontend/src/app/kdic/layout.tsx`**:
+   - `FAQPage` (5천만원 보호 한도, 예금자보호법 제31조, 보호대상 예금 등) 및 `WebApplication`, `BreadcrumbList` JSON-LD 탑재.
+6. **`frontend/src/app/bank/savings-pot/layout.tsx`** (신규 생성):
+   - 4인 공동 저축 챌린지 팟 전용 메타데이터(OpenGraph, Twitter, Canonical, hreflang) 및 `WebApplication` JSON-LD 탑재.
+7. **`frontend/src/app/robots.ts`**:
+   - `sitemap` 속성에 `sitemap.xml` 및 `sitemap-index.xml` 동시 등록.
+8. **`backend/src/seo/seo.service.ts`**:
+   - `MONITORED_TARGET_URLS`에 `/bank/savings-pot` 추가하여 관리자 관제탑 실시간 크롤러 모니터링 연동.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. Frontend 타입 검증: `pnpm --filter @moneyverse/frontend run typecheck` (0 Errors)
+2. Frontend 정적 빌드: `pnpm --filter @moneyverse/frontend run build`
+3. Git 커밋 및 origin/main 푸시
+4. 원격 프로덕션 Debian 13 VM 100 (`prod-v576`) 무중단 승격 배포
+5. 배포 후 `sitemap.xml`, `sitemap-stocks.xml`, `robots.txt`, `/kdic`, `/bank/savings-pot` 실측 HTTP 200 및 메타 태그/JSON-LD 검증
+6. IndexNow 및 백엔드 SEO 핑 수동 트리거 후 응답 검증
