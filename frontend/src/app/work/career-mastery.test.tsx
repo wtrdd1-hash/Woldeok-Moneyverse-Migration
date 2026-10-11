@@ -36,9 +36,9 @@ describe('CareerMasteryCard Component & Logic', () => {
       />
     );
 
-    expect(screen.getByText('디지털 기술자 숙련도 & 커리어 마스터리')).toBeDefined();
+    expect(screen.getByText(/디지털 기술자.*(숙련도|Mastery)/i)).toBeDefined();
     expect(screen.getByText('Lv.12')).toBeDefined();
     expect(screen.getAllByText('공인 주니어').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText(/전문 자격증 시험 응시/)).toBeDefined();
+    expect(screen.getByText(/Certification Exam|전문 자격증/i)).toBeDefined();
   });
 });

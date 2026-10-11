@@ -69,7 +69,7 @@ export function WorkQuotaDashboard({ summary, isEn }: WorkQuotaDashboardProps) {
                 GAME DAY RESET
               </CardDescription>
               <Badge variant={isDailyCapped ? 'destructive' : 'secondary'} className="text-[10px] px-2">
-                {isDailyCapped ? (isEn ? '100% Capped' : '100% 한도 소모') : `${dailyPercent}% 소모`}
+                {isDailyCapped ? (isEn ? '100% Capped' : '100% 한도 소모') : (isEn ? `${dailyPercent}% Used` : `${dailyPercent}% 소모`)}
               </Badge>
             </div>
             <CardTitle className="text-base sm:text-lg">{isEn ? 'Daily work reward' : '일간 직업 보상'}</CardTitle>
@@ -105,7 +105,7 @@ export function WorkQuotaDashboard({ summary, isEn }: WorkQuotaDashboardProps) {
                 GAME WEEK RESET
               </CardDescription>
               <Badge variant={isWeeklyCapped ? 'destructive' : 'secondary'} className="text-[10px] px-2">
-                {isWeeklyCapped ? (isEn ? 'Weekly Capped' : '주간 한도 도달') : `${weeklyPercent}% 소모`}
+                {isWeeklyCapped ? (isEn ? 'Weekly Capped' : '주간 한도 도달') : (isEn ? `${weeklyPercent}% Used` : `${weeklyPercent}% 소모`)}
               </Badge>
             </div>
             <CardTitle className="text-base sm:text-lg">{isEn ? 'Weekly work reward' : '주간 직업 보상'}</CardTitle>

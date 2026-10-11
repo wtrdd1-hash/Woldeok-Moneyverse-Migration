@@ -1,6 +1,9 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v185)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v188)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v188**: [직업 숙련도·자격증·일일할당 및 카지노 하이로우 UI 다국어(i18n) 정밀 현지화 및 운영 무중단 승격(prod-v573)] (+85, -0)
+- **v187**: [운영 DB 마이그레이션 시퀀스 동기화(268번) 및 다국어 코퍼스 쇄신(prod-v572)] (+60, -0)
+- **v186**: [스마트 정기예금 계정별 격리, 티커 바 실시간 시세 연동 및 시즌 리더보드 투명성 쇄신(prod-v571)] (+60, -0)
 - **v185**: [QA 결함 보고서 정밀 추적 해결 (은행 대출 시뮬레이터 금리/한도/기간 서버 권위 지표 동기화(QA-F008) 및 공동 저축 챌린지 팟 모의 체험 모드 정합성 쇄신(QA-F003))] (+60, -0)
 - **v184**: [QA 결함 보고서 정밀 추적 해결 (포트폴리오 주간 결산서 실시간 보유 데이터 100% 연동(QA-F004), 캔들차트 봉단위 라벨·접근성 지표 토글·모달 닫기 버튼 한국어화(QA-F007))] (+80, -0)
 - **v183**: [QA 결함 보고서 정밀 추적 해결 (경제 관리 콘솔(/admin/economy)의 자동 정책 엔진 제안 언래핑 및 듀얼 레인(Classical + AI Review) 검토 상태 시각화 완전 해결(QA-F006))] (+75, -0)
@@ -492,3 +495,55 @@
 5. Git 커밋 및 origin/main 푸시
 6. 원격 운영 서버(`prod-v572`) 무중단 승격 빌드 및 배포
 7. 실제 운영 환경 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v188 Specification] 직업 숙련도·자격증·일일할당 및 카지노 하이로우 UI 다국어(i18n) 정밀 현지화 및 운영 릴리스 (prod-v573)
+
+### 1. 현황 및 개선 필요 사항 (QA 다국어 심화 분석)
+1. **[직업 UI 다국어 결함] 직업 숙련도, 자격증 심사 및 일일 작업 할당 한도 하드코딩 텍스트**:
+   - `frontend/src/app/work/career-mastery-card.tsx`: '숙련도 성장', '현재 등급에서 더 많은 경험치를 쌓아 상위 티어로 진입하세요', 자격증 심사 요건, 로드맵 안내 텍스트가 한국어로 고정되어 영어/일본어/중국어 로케일에서 국문 노출.
+   - `frontend/src/app/work/career-qualifications-card.tsx`: 자격증 응시 버튼('심사 중...', '자격증 응시하기'), 수수료, 레벨 안내, 취득 상태 뱃지 텍스트가 영문 로케일에서 한글로 잔존.
+   - `frontend/src/app/work/work-quota-card.tsx`: 일일 및 주간 작업 할당 한도 사용률 표시가 `${dailyPercent}% 사용`으로 한국어로 고정되어 영어권 사용자의 시각적 통일성 저해.
+2. **[카지노 UI 다국어 결함] 하이로우 20(Hi-Lo) 게임 화면 텍스트 전면 현지화**:
+   - `frontend/src/app/casino/hilo-game.tsx`: '하이로우 20', '승자독식 20배 도전', '암호학적 공정성 검증됨', '현재 연승', '다음 카드가 더 높을지 낮을지 예측하세요', '카드 오픈 대기 중', '베팅 금액 (WLD)' 라벨 등이 한국어로 하드코딩되어 글로벌 플레이어 환경에서 어색함 유발.
+
+### 2. 세부 개발 명세
+1. **직업 숙련도 카드 다국어 렌더링 (`career-mastery-card.tsx`)**:
+   - `useI18n()` 훅과 `<TranslatedText as T>` 패턴을 활용하여 헤더, 진행도 설명, 자격증 뱃지, 숙련도 로드맵 텍스트를 4개 국어(ko/en/ja/zh)로 지원.
+   - 단위 테스트(`career-mastery.test.tsx`)에서 로케일 독립적 정규식(`/디지털 기술자.*(숙련도|Mastery)/`)을 적용하여 다국어 환경 테스트 회귀 원천 차단 (3/3 Passed).
+2. **자격증 심사 카드 및 작업 쿼터 다국어화 (`career-qualifications-card.tsx`, `work-quota-card.tsx`)**:
+   - `locale === 'en'` 및 4개 국어 분기를 지원하여 'Reviewing...', 'Apply Exam', 'Passed', 'Fee', 'Level Required' 등 영문 정밀 매핑.
+   - 쿼터 카드 사용률 표기(`${isEn ? 'Used' : '사용'}`) 영문화 완료.
+3. **카지노 하이로우 20 다국어 완전 현지화 (`hilo-game.tsx`)**:
+   - 제목, 게임 룰 안내, 공정성 뱃지, 연승 지표, 카드 오픈 대기 상태, 베팅 금액 입력 필드 라벨을 4개 국어 자동 대응형으로 치환.
+   - `casino-parts.test.tsx` 단위 테스트 통과 (7/7 Passed).
+
+### 3. 검증 계획
+1. Frontend 정적 타입 검증 (`@moneyverse/frontend typecheck`): 0 Errors (통과 완료)
+2. 직업 컴포넌트 단위 테스트 (`career-mastery.test.tsx`): 3/3 Passed (통과 완료)
+3. 카지노 컴포넌트 단위 테스트 (`casino-parts.test.tsx`): 7/7 Passed (통과 완료)
+4. Git 커밋 및 origin/main 푸시
+5. 원격 프로덕션 Debian 13 VM 100 (`prod-v573`) 무중단 승격 배포
+6. 실제 운영 환경 `/work`, `/casino`, `/` 화면 HTTP 200 실측 검증
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan] 최종 통합 구현 명세
+### User Review Required
+- 프로덕션 릴리스 `prod-v573` 승격 진행 및 원격 배포 자동 파이프라인 가동.
+
+### Proposed Changes
+- `frontend/src/app/work/career-mastery-card.tsx`: 다국어 `<TranslatedText as T>` 4개 국어 지원
+- `frontend/src/app/work/career-mastery.test.tsx`: 다국어 대응 정규식 테스트 쇄신
+- `frontend/src/app/work/career-qualifications-card.tsx`: 자격증 응시/심사/수수료 영문화
+- `frontend/src/app/work/work-quota-card.tsx`: 작업 한도 사용률 영문화
+- `frontend/src/app/casino/hilo-game.tsx`: 하이로우 20 타이틀, 룰, 상태 라벨 다국어화
+- `implementation_plan.md`: v188 누적 명세 동기화
+
+### Verification Plan
+1. `pnpm --filter @moneyverse/frontend run typecheck`: 0 Errors 확인
+2. Git status 및 diff 검토
+3. Remote origin/main push
+4. 원격 VM 100 무중단 빌드 및 `prod-v573` 승격
+5. HTTP 200 헬스체크

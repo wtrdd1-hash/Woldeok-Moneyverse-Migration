@@ -26,6 +26,7 @@ import {
   playWinSound,
 } from '@/lib/audio-effects';
 import { synthSound } from '@/lib/audio/synth-sound';
+import { TranslatedText as T } from '@/components/translated-text';
 
 function minAmount(...values: readonly string[]): string {
   return values.reduce((lowest, value) => (BigInt(value) < BigInt(lowest) ? value : lowest));
@@ -121,26 +122,30 @@ export function HiLoCardGame({
     <Card className="border-indigo-500/20 bg-gradient-to-b from-card to-indigo-500/5 shadow-md">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-xl font-bold text-indigo-500">
-            <Sparkles className="size-5 text-indigo-500" />
-            <span>하이 / 로우 20 (High / Low 20)</span>
+          <CardTitle className="flex items-center gap-2 text-xl font-bold text-foreground">
+            <Sparkles className="size-5 text-primary" />
+            <span><T korean="하이 / 로우 20 (High / Low 20)" english="High / Low 20 Card Game" japanese="ハイ＆ロー20 カードゲーム" chinese="高低20 (High / Low 20) 扑克游戏" /></span>
           </CardTitle>
           <div className="flex items-center gap-2">
             {streakCount > 0 && (
               <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-xs font-bold text-amber-500 flex items-center gap-1 animate-pulse">
                 <Flame className="size-3.5 text-amber-500" />
-                {streakCount}연승 달성!
+                <span>{streakCount}<T korean="연승 달성!" english=" Wins Streak!" japanese="連勝達成!" chinese="连胜达成！" /></span>
               </Badge>
             )}
             <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
               <ShieldCheck className="size-3.5 text-emerald-500" />
-              19+ 공정성 검증 준수
+              <span><T korean="19+ 공정성 검증 준수" english="19+ Provably Fair" japanese="19+ 公平性検証準拠" chinese="19+ 公平性验证合规" /></span>
             </Badge>
           </div>
         </div>
         <CardDescription className="text-xs sm:text-sm leading-relaxed [word-break:keep-all]">
-          서버가 1부터 20까지의 균등 난수를 암호화 추첨합니다. High는 11~20, Low는 1~10이며 적중 시{' '}
-          <strong className="text-indigo-500 font-bold">{payoutMultiplier}배</strong> 배당으로 실시간 원자적 정산됩니다.
+          <T
+            korean={`서버가 1부터 20까지의 균등 난수를 암호화 추첨합니다. High는 11~20, Low는 1~10이며 적중 시 ${payoutMultiplier}배 배당으로 실시간 원자적 정산됩니다.`}
+            english={`The server generates cryptographic random numbers from 1 to 20. High is 11–20, Low is 1–10, paying out at ${payoutMultiplier}x multiplier on win.`}
+            japanese={`サーバーが1から20まで均等な暗号化乱数を抽選します。Highは11〜20、Lowは1〜10で、的中時は${payoutMultiplier}倍の配当でリアルタイム精算されます。`}
+            chinese={`服务器密码学生成1至20的均等随机数。High为11~20，Low为1~10，命中时以${payoutMultiplier}倍赔率实时清算。`}
+          />
         </CardDescription>
       </CardHeader>
 
@@ -177,7 +182,11 @@ export function HiLoCardGame({
                 <>
                   <span className="text-3xl sm:text-4xl font-bold opacity-80">?</span>
                   <span className="mt-1 text-[11px] font-semibold text-muted-foreground">
-                    {pending || isFlipping ? '카드 오픈 중…' : '선택 대기'}
+                    {pending || isFlipping ? (
+                      <T korean="카드 오픈 중…" english="Flipping Card…" japanese="カードをオープン中…" chinese="正在翻牌…" />
+                    ) : (
+                      <T korean="선택 대기" english="Waiting for Choice" japanese="選択待機中" chinese="等待选择" />
+                    )}
                   </span>
                 </>
               )}
@@ -186,7 +195,9 @@ export function HiLoCardGame({
 
           <div className="mt-4 flex items-center justify-center gap-2 text-xs font-mono text-muted-foreground">
             <Coins className="size-3.5 text-indigo-400" />
-            <span>선택: {choice === 'high' ? 'High (11~20)' : 'Low (1~10)'} · 배당률: {payoutMultiplier}배</span>
+            <span>
+              <T korean="선택" english="Choice" japanese="選択" chinese="选择" />: {choice === 'high' ? 'High (11~20)' : 'Low (1~10)'} · <T korean="배당률" english="Multiplier" japanese="倍率" chinese="赔率" />: {payoutMultiplier}배
+            </span>
           </div>
         </div>
 
@@ -229,10 +240,10 @@ export function HiLoCardGame({
           <div className="grid gap-2">
             <div className="flex items-center justify-between text-xs">
               <Label htmlFor="hilo-stake" className="font-semibold text-sm">
-                베팅할 WLD 수량
+                <T korean="베팅할 WLD 수량" english="WLD Bet Amount" japanese="ベットするWLD数量" chinese="下注WLD数量" />
               </Label>
-              <span className="text-muted-foreground">
-                한도: {groupDigits(minStake)} ~ {groupDigits(maxPlayable)} WLD
+              <span className="text-muted-foreground font-mono text-[11px]">
+                <T korean="한도" english="Limit" japanese="限度" chinese="限额" />: {groupDigits(minStake)} ~ {groupDigits(maxPlayable)} WLD
               </span>
             </div>
             <div className="relative">
@@ -245,7 +256,7 @@ export function HiLoCardGame({
                 onChange={(e) => setStake(e.target.value.replace(/[^0-9]/g, ''))}
                 disabled={pending || isFlipping || exhausted}
                 className="h-12 font-mono text-base font-bold pr-14"
-                placeholder="베팅할 WLD 수량"
+                placeholder="1000"
               />
               <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
                 WLD
@@ -262,7 +273,7 @@ export function HiLoCardGame({
                   size="sm"
                   disabled={pending || isFlipping || exhausted}
                   onClick={() => handleQuickStake(amt)}
-                  className="text-[11px] font-bold h-8 border-border/80 hover:bg-indigo-500/10 hover:text-indigo-500"
+                  className="text-[11px] font-bold h-8 border-border/80 hover:bg-primary/10 hover:text-primary"
                 >
                   +{amt >= 10000 ? `${amt / 10000}만` : `${amt / 1000}천`}
                 </Button>
@@ -273,7 +284,7 @@ export function HiLoCardGame({
                 size="sm"
                 disabled={pending || isFlipping || exhausted}
                 onClick={handleMaxStake}
-                className="text-[11px] font-bold h-8 border-indigo-500/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10"
+                className="text-[11px] font-bold h-8 border-primary/40 text-primary hover:bg-primary/10"
               >
                 MAX
               </Button>
@@ -283,20 +294,20 @@ export function HiLoCardGame({
           <Button
             type="submit"
             disabled={pending || isFlipping || exhausted}
-            className="h-12 w-full gap-2 rounded-xl text-base font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md disabled:opacity-50"
+            className="h-12 w-full gap-2 rounded-xl text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md disabled:opacity-50"
           >
             {pending || isFlipping ? (
               <>
                 <RotateCcw className="size-4 animate-spin" />
-                <span>카드 오픈 중…</span>
+                <span><T korean="카드 오픈 중…" english="Flipping Card…" japanese="カードをオープン中…" chinese="正在翻牌…" /></span>
               </>
             ) : exhausted ? (
-              <span>오늘 베팅 한도 소진</span>
+              <span><T korean="오늘 베팅 한도 소진" english="Daily Stake Cap Reached" japanese="本日のベット限度額超過" chinese="今日下注额度已达上限" /></span>
             ) : (
               <>
                 <Coins className="size-4" />
                 <span>
-                  {groupDigits(stake || '0')} WLD로 {choice === 'high' ? 'High' : 'Low'} 베팅
+                  {groupDigits(stake || '0')} WLD · {choice === 'high' ? 'High (11~20)' : 'Low (1~10)'} <T korean="베팅하기" english="Bet" japanese="ベットする" chinese="确认下注" />
                 </span>
               </>
             )}
