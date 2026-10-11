@@ -39,15 +39,21 @@ import { formatWld } from '@/lib/money';
 import { toast } from 'sonner';
 import { TranslatedText as T } from '@/components/translated-text';
 
-export function SavingsPotCard({ userBalanceWld = 50000 }: { readonly userBalanceWld?: number }) {
+export function SavingsPotCard({
+  userBalanceWld = 50000,
+  userId,
+}: {
+  readonly userBalanceWld?: number;
+  readonly userId?: string;
+}) {
   const [pots, setPots] = useState<SavingsPotRecord[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<SavingsPlan | null>(null);
   const [depositAmount, setDepositAmount] = useState<string>('1000');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    setPots(getStoredSavingsPots());
-  }, []);
+    setPots(getStoredSavingsPots(userId));
+  }, [userId]);
 
   const handleOpenPlan = (plan: SavingsPlan) => {
     setSelectedPlan(plan);
@@ -68,21 +74,21 @@ export function SavingsPotCard({ userBalanceWld = 50000 }: { readonly userBalanc
       return;
     }
 
-    const created = openSavingsPot(selectedPlan.id, amount);
-    setPots(getStoredSavingsPots());
+    const created = openSavingsPot(selectedPlan.id, amount, userId);
+    setPots(getStoredSavingsPots(userId));
     setIsDialogOpen(false);
     playCoinCollectSound();
     toast.success(`${selectedPlan.name}에 ${formatWld(amount)} WLD 예치가 완료되었습니다!`);
   };
 
   const handleClaimInterest = (potId: string) => {
-    const res = claimDailyInterestFromPot(potId);
+    const res = claimDailyInterestFromPot(potId, userId);
     if (res.success) {
-      setPots(getStoredSavingsPots());
+      setPots(getStoredSavingsPots(userId));
       playCoinCollectSound();
       toast.success(`일일 복리 이자 +${res.claimedAmount} WLD를 수령했습니다!`);
     } else {
-      toast.error('수령 가능한 이자가 없습니다.');
+      toast.error('수령 가능한 이자가 없습니다. (최소 24시간 간격 필요)');
     }
   };
 

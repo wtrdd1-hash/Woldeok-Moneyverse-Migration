@@ -66,6 +66,7 @@ export function StockSeasonLeaderboard() {
   const [traders, setTraders] = useState<readonly LeaderboardUser[]>(FALLBACK_TRADERS);
   const [seasonTitle, setSeasonTitle] = useState('SEASON 2026');
   const [prizePool, setPrizePool] = useState('1,000만 WLD');
+  const [isLiveLeague, setIsLiveLeague] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -95,6 +96,7 @@ export function StockSeasonLeaderboard() {
             totalYieldAmount: `${item.profit_amount ? (Number(item.profit_amount) > 0 ? '+' : '') + Number(item.profit_amount).toLocaleString('ko-KR') : '+0'} WLD`,
           }));
           setTraders(mapped);
+          setIsLiveLeague(true);
         }
       } catch {
         // Fallback to initial display
@@ -118,13 +120,22 @@ export function StockSeasonLeaderboard() {
               <Trophy className="size-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <CardTitle className="text-base sm:text-lg font-bold text-foreground">
                   <T korean="가상 주식 시즌 투자 리더보드" english="Stock League Season Leaderboard" japanese="仮想株式シーズン投資リーダーボード" chinese="虚拟股票赛季投资排行榜" />
                 </CardTitle>
                 <Badge className="bg-amber-500 text-black text-[10px] font-black tracking-wider">
                   {seasonTitle}
                 </Badge>
+                {isLiveLeague ? (
+                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-[10px] font-bold">
+                    <T korean="실시간 리그 랭킹" english="Live League" japanese="リアルタイム" chinese="实时排行" />
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-[10px] font-bold">
+                    <T korean="시즌 개막 준비 중 (모의 예시)" english="Pre-season (Simulated)" japanese="開幕準備中 (模擬)" chinese="季前准备 (模拟示例)" />
+                  </Badge>
+                )}
               </div>
               <CardDescription className="text-xs text-muted-foreground mt-0.5">
                 <T

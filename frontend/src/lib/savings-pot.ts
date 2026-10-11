@@ -64,7 +64,14 @@ export interface SavingsPotRecord {
   readonly lastClaimedAt: string;
 }
 
-const STORAGE_KEY = 'wdmv_savings_pots_v1';
+const DEFAULT_STORAGE_KEY = 'wdmv_savings_pots_v1';
+
+function resolveStorageKey(userId?: string): string {
+  if (!userId || userId.trim() === '') {
+    return 'wdmv_savings_pots_guest';
+  }
+  return `wdmv_savings_pots_${userId.trim()}`;
+}
 
 /**
  * Calculates daily compound interest earned.
@@ -96,25 +103,39 @@ export function calculateExpectedMaturityYield(
 
 /**
  * Loads all active and historic savings pots from storage.
+ * Supports per-account isolation with fallback migration.
  */
-export function getStoredSavingsPots(): SavingsPotRecord[] {
+export function getStoredSavingsPots(userId?: string): SavingsPotRecord[] {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw);
+    const key = resolveStorageKey(userId);
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      return JSON.parse(raw);
+    }
+    // Fallback migration from legacy storage key if exists and userId not explicitly isolated
+    const legacyRaw = localStorage.getItem(DEFAULT_STORAGE_KEY);
+    if (legacyRaw) {
+      const parsed = JSON.parse(legacyRaw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        localStorage.setItem(key, legacyRaw);
+        return parsed;
+      }
+    }
+    return [];
   } catch {
     return [];
   }
 }
 
 /**
- * Saves savings pots to storage.
+ * Saves savings pots to storage per user.
  */
-export function saveSavingsPots(pots: readonly SavingsPotRecord[]): void {
+export function saveSavingsPots(pots: readonly SavingsPotRecord[], userId?: string): void {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(pots));
+    const key = resolveStorageKey(userId);
+    localStorage.setItem(key, JSON.stringify(pots));
   } catch {
     // LocalStorage write failure ignored safely
   }
@@ -125,7 +146,8 @@ export function saveSavingsPots(pots: readonly SavingsPotRecord[]): void {
  */
 export function openSavingsPot(
   planId: '7d_flex' | '30d_growth' | '90d_wealth',
-  principalWld: number
+  principalWld: number,
+  userId?: string
 ): SavingsPotRecord {
   const matchedPlan = SAVINGS_PLANS.find((p) => p.id === planId);
   const plan = matchedPlan || SAVINGS_PLANS[0]!;
@@ -145,20 +167,20 @@ export function openSavingsPot(
     lastClaimedAt: now.toISOString(),
   };
 
-  const current = getStoredSavingsPots();
-  saveSavingsPots([newPot, ...current]);
+  const current = getStoredSavingsPots(userId);
+  saveSavingsPots([newPot, ...current], userId);
   return newPot;
 }
 
 /**
  * Claims accrued daily interest from an active pot.
  */
-export function claimDailyInterestFromPot(potId: string): {
+export function claimDailyInterestFromPot(potId: string, userId?: string): {
   readonly success: boolean;
   readonly claimedAmount: number;
   readonly updatedPot: SavingsPotRecord | null;
 } {
-  const pots = getStoredSavingsPots();
+  const pots = getStoredSavingsPots(userId);
   const index = pots.findIndex((p) => p.id === potId);
   if (index === -1) return { success: false, claimedAmount: 0, updatedPot: null };
 
@@ -199,7 +221,7 @@ export function claimDailyInterestFromPot(potId: string): {
 
   const updatedList = [...pots];
   updatedList[index] = updated;
-  saveSavingsPots(updatedList);
+  saveSavingsPots(updatedList, userId);
 
   return { success: true, claimedAmount: claimable, updatedPot: updated };
 }

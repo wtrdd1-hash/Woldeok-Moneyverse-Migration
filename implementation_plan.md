@@ -429,3 +429,35 @@
 3. Git 커밋 및 origin/main 푸시
 4. 원격 운영 서버(`prod-v570`) 무중단 승격 빌드 및 배포
 5. 실제 운영 환경 `/bank` 및 `/bank/savings-pot` 화면 HTTP 200 실측 검증
+
+---
+
+## 🚀 [v186 Specification] QA 결함 보고서 정밀 추적 해결 (스마트 정기예금 계정별 격리, 티커 바 실시간 시세 연동 및 시즌 리더보드 투명성 쇄신)
+
+### 1. 현황 및 개선 필요 사항 (QA-F001/F-02, QA-F05/F-06 결함 정밀 분석)
+1. **[F-01/F-02] 스마트 정기예금 복리 정산 및 계정별 스토리지 격리**:
+   - 증상: 중앙은행 스마트 복리 포켓(`savings-pot.ts`, `savings-pot-card.tsx`)이 브라우저 로컬 단일 키(`wdmv_savings_pots_v1`)를 사용하여 사용자 계정 전환 시에도 데이터가 섞이는 문제점 존재.
+   - 조치:
+     - `getStoredSavingsPots(userId?: string)`, `saveSavingsPots(pots, userId?: string)`, `openSavingsPot(..., userId?: string)`, `claimDailyInterestFromPot(..., userId?: string)` 형태로 계정별 격리 스토리지(`wdmv_savings_pots_${userId || 'guest'}`)를 지원.
+     - 기존 단일 키 데이터 존재 시 guest/초기 유저 키로 부드럽게 마이그레이션 호환 처리.
+     - 이자 수령 시 24시간 가드(`elapsedDays < 1` 시 수령 불가) 및 수령 후 `lastClaimedAt` 타임스탬프 갱신 엄격화.
+     - `SavingsPotCard`에 `userId?: string` prop을 추가하여 계정별 저장소 연동 지원.
+2. **[F-05/F-06] 핀테크 티커 바 및 주식 시즌 리더보드 실데이터 연동**:
+   - 증상: 티커 바의 '최고 상승' 종목이 `WDG +4.8% ▲`로 하드코딩되어 실제 시장 현황과 불일치했으며, 시즌 리더보드는 실제 리그 데이터인지 모의 예시인지 구분이 불명확했음.
+   - 조치:
+     - `fintech-ticker-bar.tsx`: `/api/v1/stocks` 엔드포인트에서 주식 목록을 주기적으로 조회하여 실제 최고 상승률 종목(Top Mover)을 산출하여 동적 반영.
+     - `stock-season-leaderboard.tsx`: `/api/stocks/league`의 데이터가 정상적으로 수신되면 `실시간 리그 랭킹` 뱃지를 표시하고, fallback 데이터일 경우 `시즌 개막 준비 중 (모의 예시)` 뱃지를 띄워 데이터 투명성을 확보.
+
+### 2. 세부 변경 파일
+- `frontend/src/lib/savings-pot.ts`: `userId` 매개변수 추가, 계정별 키 분리 및 레거시 키 마이그레이션 지원.
+- `frontend/src/components/savings-pot-card.tsx`: `userId` prop 추가 및 토스트 안내 구체화.
+- `frontend/src/components/fintech-ticker-bar.tsx`: 실시간 주식 시세 fetch 및 최고 상승 종목 동적 산출 바인딩.
+- `frontend/src/components/stock-season-leaderboard.tsx`: 실시간 리그 vs 모의 예시 뱃지 렌더링.
+- `frontend/src/lib/savings-pot.test.ts`: 계정 격리, 24시간 미만 수령 차단, 24시간 후 수령 정상화 단위 테스트 (4/4 Passed).
+
+### 3. 검증 계획
+1. TypeScript 정적 타입 검증 (`pnpm run typecheck`): 0 Errors (통과)
+2. 단위 테스트 실행 (`src/lib/savings-pot.test.ts`): 4/4 Passed (통과)
+3. Git 커밋 및 origin/main 푸시
+4. 원격 운영 서버(`prod-v571`) 무중단 승격 빌드 및 배포
+5. 실제 운영 환경 `/bank`, `/stocks` 화면 HTTP 200 실측 검증

@@ -1,11 +1,59 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 import { TrendingUp, Coins, Briefcase, Activity, ShieldCheck } from 'lucide-react';
 
+interface SimpleStock {
+  symbol: string;
+  current_price: string;
+  day_open_price: string;
+}
+
 export function FintechTickerBar() {
   const { locale } = useLocale();
+  const [topMover, setTopMover] = useState<{ symbol: string; changePct: number }>({
+    symbol: 'WDG',
+    changePct: 4.8,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchTopMover() {
+      try {
+        const res = await fetch('/api/v1/stocks');
+        if (!res.ok) return;
+        const data = await res.json();
+        const stocks: SimpleStock[] = data?.stocks ?? [];
+        if (!Array.isArray(stocks) || stocks.length === 0) return;
+
+        let best = { symbol: 'WDG', changePct: 0 };
+        for (const s of stocks) {
+          const cur = Number(s.current_price) || 0;
+          const open = Number(s.day_open_price) || cur || 1;
+          const pct = Math.round(((cur - open) / open) * 1000) / 10;
+          if (pct > best.changePct) {
+            best = { symbol: s.symbol, changePct: pct };
+          }
+        }
+        if (isMounted && best.changePct !== 0) {
+          setTopMover(best);
+        }
+      } catch {
+        // Fallback to initial display
+      }
+    }
+
+    fetchTopMover();
+    const interval = setInterval(fetchTopMover, 15000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  const moverLabel = `${topMover.symbol} ${topMover.changePct >= 0 ? `+${topMover.changePct}% ▲` : `${topMover.changePct}% ▼`}`;
 
   const items = [
     {
@@ -17,7 +65,7 @@ export function FintechTickerBar() {
     {
       icon: TrendingUp,
       label: localeLabel(locale, '최고 상승', 'Top Mover', '急上昇', '最大涨幅'),
-      value: 'WDG +4.8% ▲',
+      value: moverLabel,
       color: 'text-[var(--rise)] font-mono font-bold',
     },
     {
