@@ -20,6 +20,7 @@ import { FiatBadge } from '@/components/fiat-amount';
 import { placeOrder } from '../actions';
 import { StockHaltReceiptDialog, type StockHaltReceiptData } from './stock-halt-receipt-dialog';
 import { snapToKrxTick, getKrxTickSize, stepKrxTick } from '../tick-size';
+import { playStockTradeSuccessSound, playStockTickSound } from '@/lib/audio-effects';
 
 interface StockOrderPanelProps {
   readonly stockId: string;
@@ -70,6 +71,7 @@ export function StockOrderPanel({
     if (selectedPrice) {
       setLimitPrice(selectedPrice);
       setOrderType('limit');
+      playStockTickSound();
     }
   }, [selectedPrice]);
 
@@ -85,17 +87,19 @@ export function StockOrderPanel({
   const maxSellShares = holdingQuantity ? Number.parseInt(holdingQuantity.replaceAll(',', ''), 10) : 0;
   const maxLimit = side === 'buy' ? Math.max(1, maxBuyShares) : Math.max(1, maxSellShares);
 
-  // 체결 성공 시 확인 창 닫기 및 수량 초기화
+  // 체결 성공 시 확인 창 닫기, 수량 초기화 및 축하 효과음 재생
   useEffect(() => {
     if (state.status === 'ok') {
       setIsConfirmOpen(false);
       setQuantity('1');
+      playStockTradeSuccessSound();
     }
   }, [state.status]);
 
   const handlePercent = (percent: number) => {
     const next = Math.max(1, Math.floor((maxLimit * percent) / 100));
     setQuantity(next.toString());
+    playStockTickSound();
   };
 
   return (

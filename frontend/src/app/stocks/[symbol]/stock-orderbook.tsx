@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
 import { useQuote } from '@/lib/use-market-prices';
 import { generateKrxLadder, getKrxTickSize } from '../tick-size';
+import { playStockTickSound } from '@/lib/audio-effects';
 
 interface StockOrderbookProps {
   readonly stockId?: string | undefined;
@@ -130,6 +131,27 @@ export function StockOrderbook({
   onSelectPrice,
 }: StockOrderbookProps) {
   const [depth, setDepth] = useState<5 | 10>(5);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('wdmv_orderbook_depth_v1');
+      if (saved === '10' || saved === '5') {
+        setDepth(Number.parseInt(saved, 10) as 5 | 10);
+      }
+    } catch {
+      // Ignore localStorage access failures
+    }
+  }, []);
+
+  const handleDepthChange = (nextDepth: 5 | 10) => {
+    setDepth(nextDepth);
+    playStockTickSound();
+    try {
+      localStorage.setItem('wdmv_orderbook_depth_v1', nextDepth.toString());
+    } catch {
+      // Ignore localStorage access failures
+    }
+  };
   
   // 웹소켓 실시간 틱 구독 (stockId가 있을 경우 실시간 반영, 없을 경우 fallback)
   const initialOpen = dayOpenPrice || currentPrice;
@@ -248,7 +270,7 @@ export function StockOrderbook({
             <div className="inline-flex rounded-lg border border-border/70 bg-muted/50 p-0.5 text-[11px] font-semibold">
               <button
                 type="button"
-                onClick={() => setDepth(5)}
+                onClick={() => handleDepthChange(5)}
                 className={`rounded px-2 py-0.5 transition-all ${
                   depth === 5 ? 'bg-primary text-primary-foreground font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground'
                 }`}
@@ -257,7 +279,7 @@ export function StockOrderbook({
               </button>
               <button
                 type="button"
-                onClick={() => setDepth(10)}
+                onClick={() => handleDepthChange(10)}
                 className={`rounded px-2 py-0.5 transition-all ${
                   depth === 10 ? 'bg-primary text-primary-foreground font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground'
                 }`}
@@ -279,7 +301,10 @@ export function StockOrderbook({
               <button
                 key={`ask-${ask.step}`}
                 type="button"
-                onClick={() => onSelectPrice?.(ask.price, 'buy')}
+                onClick={() => {
+                  onSelectPrice?.(ask.price, 'buy');
+                  playStockTickSound();
+                }}
                 className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-[var(--fall)]/15 active:scale-[0.99] transition-all text-left touch-manipulation select-none"
                 title={isEn ? `Click to buy at ${groupDigits(ask.price)} WLD` : `${groupDigits(ask.price)} WLD에 매수 주문 입력`}
               >
@@ -329,7 +354,10 @@ export function StockOrderbook({
               <button
                 key={`bid-${bid.step}`}
                 type="button"
-                onClick={() => onSelectPrice?.(bid.price, 'sell')}
+                onClick={() => {
+                  onSelectPrice?.(bid.price, 'sell');
+                  playStockTickSound();
+                }}
                 className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-[var(--rise)]/15 active:scale-[0.99] transition-all text-left touch-manipulation select-none"
                 title={isEn ? `Click to sell at ${groupDigits(bid.price)} WLD` : `${groupDigits(bid.price)} WLD에 매도 주문 입력`}
               >

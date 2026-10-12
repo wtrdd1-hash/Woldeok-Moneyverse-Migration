@@ -1,6 +1,9 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v191)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v194)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v194**: [가상 주식 거래 시스템 고도화 (RSI 상대강도지수 서브패널, 볼린저 밴드 오버레이, 주문 콘솔 10%/25%/50%/100% 잔고 비율 바인딩, Web Audio 체결 사운드 및 localStorage 영구 동기화)] (+120, -0)
+- **v193**: [가상 주식 호가창 & 인터랙티브 차트 TradingView급 전면 쇄신 (캔들스틱/라인 듀얼 모드, MA 5/20, 볼륨 히스토그램, 크로스헤어 OHLC, 체결강도 게이지, 최근 체결 틱 스트림, prod-v577)] (+110, -0)
+- **v192**: [전체 SEO 및 사이트 재분석 기반 검색엔진 최적화 전면 개발 및 무중단 배포 (prod-v576)] (+130, -0)
 - **v191**: [전역 무손실 DB 스냅샷 백업(post-v575) 생성 & 원격 프로덕션 디스크 81GB 대규모 클린업(루트 +22GB 확보, /srv +59GB 확보) 완료] (+65, -0)
 - **v190**: [예금보험공사(KDIC) 포털 실측 검증 및 관리자 관제탑(/admin/kdic) 원장 분개 상태·원예금고 비교 시각화 쇄신 및 prod-v575 무중단 승격] (+60, -0)
 - **v189**: [QA-P0-03 결함 정밀 해결 (예금보험공사(KDIC) 대위변제 원장 무결성 확립, economy_post_transaction 복식부기 분개 연동, 중복 지급 방지 가드 및 prod-v574 무중단 승격)] (+75, -0)
@@ -746,3 +749,53 @@
 4. Git 커밋 및 origin/main 푸시
 5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v577`)
 6. 실제 엔드포인트(`https://easy-scraping.com/stocks/WDG`) 접속 후 실시간 차트 듀얼 토글, 캔들스틱, MA5/MA20, 거래량 바, 체결강도 및 체결 틱 스트림 동작 검증
+
+
+---
+
+## 🚀 [v194 Specification] 가상 주식 거래 시스템 고도화 (RSI/볼린저 밴드 보조지표, 주문 콘솔 단축키/비율 바인딩 및 Web Audio 피드백)
+
+### 1. 현황 및 개선 필요 사항
+1. **[보조지표 확장: RSI 14 & 볼린저 밴드(20, 2) 탑재]**:
+   - `stock-interactive-chart.tsx`: 프로 트레이더의 기술적 분석을 위해 단순 이평선(MA5, MA20)을 넘어 볼린저 밴드(상단/중심선/하단) 영역 렌더링 및 하단 RSI 14(과매수 70 / 과매도 30 점선 가이드) 서브패널 추가 필요.
+   - 각 보조지표의 독립 On/Off 토글 버튼(`BB`, `RSI`, `MA`) 지원.
+2. **[주문 콘솔 퀵 베팅 프리셋 및 호가 바인딩]**:
+   - `stock-trading-console.tsx`: 매수/매도 수량 입력 시 가용 잔고의 10%, 25%, 50%, 100%(전액) 원클릭 프리셋 버튼 제공.
+   - 호가창(`stock-orderbook.tsx`) 행 클릭 시 해당 단가가 주문창의 가격 입력 필드에 즉시 자동 바인딩(`onSelectPrice`).
+3. **[Web Audio API 미니멀 사운드 & 비주얼 펄스]**:
+   - 브라우저 Web Audio API 기반의 가벼운 신디사이징 체결음(매수 완료 경쾌음, 틱 갱신 핑음) 제공.
+   - 체결 시 초록/빨강 플래시 애니메이션.
+4. **[localStorage 영구 동기화]**:
+   - 사용자가 선택한 차트 모드(`candle` / `line`), 활성화 보조지표 목록, 호가창 깊이(`5D` / `10D`)를 `localStorage`에 영구 보존하여 페이지 새로고침 시에도 사용자 맞춤 환경 유지.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx`**:
+   - 볼린저 밴드(기간 20, 승수 2) 계산: 표준편차 $\sigma$, 상단 $MA20 + 2\sigma$, 하단 $MA20 - 2\sigma$.
+   - RSI(기간 14) 계산: 상승분 평균(AU)과 하락분 평균(AD) 기반 $RSI = 100 - \frac{100}{1 + RS}$.
+   - 볼린저 밴드 반투명 밴드 영역(`polygon` 또는 `path`) 렌더링.
+   - 하단 48px 전용 RSI 서브패널 SVG (과매수 70선, 과매도 30선 점선, 보라색 RSI 곡선).
+   - 보조지표 선택 토글 칩 (`MA`, `BB`, `RSI`).
+   - `localStorage` 상태 보존 연동 (`wdmv_chart_prefs_v1`).
+2. **`frontend/src/app/stocks/[symbol]/stock-trading-console.tsx`**:
+   - 원클릭 수량 비율 버튼 (10%, 25%, 50%, 100%).
+   - 매수 시 가용 WLD 잔고 기준 최대 가능 수량 계산.
+   - 매도 시 보유 주식 수량 기준 비율 계산.
+   - Web Audio 체결 사운드 트리거 (`playChime`, `playTick`).
+3. **`frontend/src/app/stocks/[symbol]/stock-orderbook.tsx`**:
+   - 호가 행 클릭 시 `onSelectPrice` 호출로 주문 콘솔 단가 실시간 바인딩.
+   - 깊이 토글(`5D` / `10D`) `localStorage` 동기화.
+4. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - RSI 및 볼린저 밴드 인디케이터 토글 단위 테스트 추가.
+   - 비율 프리셋 및 호가 클릭 바인딩 테스트 추가.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v578`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
