@@ -1,6 +1,7 @@
 # [월덕 머니버스] 통합 구현 계획서 (현재: v196)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v200**: [문서 깃허브 최신화 및 체계적 도메인 통합 허브(DOCS_INDEX.md) 구축 & 원격/로컬 대규모 디스크 정리(구버전 릴리스 v571~v580 소거, 수십 GB 회수, Git GC)] (+150, -0)
 - **v199**: [웹 서비스 헬스체크 4ms 정상화(지연 배너 영구 소거) & 유저 자금 흐름 관제(/admin/money-flow) 복식부기 원장 무결성 및 누적 지표 고도화] (+120, -0)
 - **v198**: [가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 실시간 자동 감시 조건부 주문 시스템 탑재] (+140, -0)
 - **v197**: [가상 주식 전 종목 퀵 티커 스위처 바 구축 & 차트 정통 MACD(12, 26, 9) 서브패널 및 서브차트 탭 전환기 탑재] (+135, -0)
@@ -1019,3 +1020,45 @@
 
 
 
+
+
+---
+
+## 🚀 [v200 Specification] 문서 깃허브 최신화 및 체계적 도메인 통합 허브(DOCS_INDEX.md) 구축 & 원격/로컬 대규모 디스크 정리
+
+### 1. 현황 및 목표 분석
+1. **[문서 파편화 해소 및 단일 진실 통합 허브 구축]**:
+   - `docs/` 디렉터리 내에 2026-09-22 등 일자별/기능별로 분산된 20여 개 이상의 설계·기능 마크다운 문서 및 API 카탈로그가 혼재되어 탐색 비용 발생.
+   - 이를 4대 핵심 도메인(`[1. 금융 및 복식부기 원장 (Treasury & Ledger)]`, `[2. 가상 주식 및 트레이딩 (Stocks & Exchange)]`, `[3. 인증·보안 및 동의 정책 (Auth, Security & Consent)]`, `[4. 관리자 관제 및 모더레이션 (Admin, Moderation & Health)]`)으로 체계적 분류.
+   - 단일 통합 마스터 인덱스 문서 `docs/DOCS_INDEX.md`를 신설하고, `README.md` 및 `README-KO.md` 문서 링크를 최신화하여 단일 진실 공급원(Single Source of Truth) 확립.
+2. **[원격 프로덕션 서버 디스크 대규모 정리 (수십 GB 확보)]**:
+   - 원격 프로덕션 서버(`/srv/moneyverse-data/releases/`)에 과거 릴리스(`prod-v571` ~ `prod-v580`) 10개 버전이 누적되어 디스크 수십 GB 점유.
+   - 긴급 롤백 안정성을 위해 최근 3개 릴리스(`prod-v581`, `prod-v582`, `prod-v583`)는 100% 보존하고, 구버전 릴리스(v571~v580)를 안전하게 삭제.
+   - `/tmp` 디렉터리 내 임시 빌드 스크립트 및 아티팩트 정리.
+3. **[로컬 캐시 및 Git 최적화]**:
+   - 로컬 프론트엔드 `.next/cache` 및 임시 빌드 산출물 가비지 정리.
+   - `git fetch --prune`, `git gc --prune=now`를 통한 불필요한 브랜치 참조 및 가비지 오브젝트 압축 정비.
+
+---
+
+### 2. 세부 작업 명세
+1. **`docs/DOCS_INDEX.md` (신규)**:
+   - 전 도메인 문서 매핑 인덱스, 문서별 요약 설명, 대상 독자, 핵심 API 엔드포인트 연계 가이드.
+2. **`README.md` & `README-KO.md`**:
+   - 문서 허브 진입 링크를 `docs/DOCS_INDEX.md`로 연결 최신화.
+3. **원격 프로덕션 디스크 정리 스크립트 실행 (`system_exec_command`)**:
+   - 대상: `/srv/moneyverse-data/releases/prod-v571` ~ `prod-v580`
+   - 보존: `/srv/moneyverse-data/releases/prod-v581`, `prod-v582`, `prod-v583`, `production-current`
+   - 작업 전/후 `df -h` 실측 비교.
+4. **로컬 Git 최적화**:
+   - `git gc --prune=now` 실행.
+5. **결과 보고서 마크다운 생성 (`docs/CLEANUP_AND_DOCS_REPORT.md`)**:
+   - Mermaid 구조도 및 디스크 정리 실측 표, 문서 인덱스 현황 정리.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. `docs/DOCS_INDEX.md` 생성 및 마크다운 링크 유효성 확인.
+2. 원격 서버 `df -h` 및 `ls -la /srv/moneyverse-data/releases/`를 통한 디스크 용량 회수 및 활성 릴리스 보존 상태 실측.
+3. 현재 활성 서비스(`moneyverse-backend.service`, `moneyverse-frontend.service`) 무중단 및 HTTP 200 정상 확인.
+4. `PROJECT_MEMORY.md` 및 `implementation_plan.md` 동기화 및 Git 커밋/푸시.
