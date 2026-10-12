@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { groupDigits } from '@/lib/money';
-import { OrderbookRow } from './stock-orderbook';
+import type { OrderbookRow } from './stock-orderbook';
 import { Activity, ShieldAlert, BarChart3 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
