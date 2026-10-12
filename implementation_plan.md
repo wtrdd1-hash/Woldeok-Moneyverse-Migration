@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v194)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v195)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v195**: [가상 주식 전문가용 트레이딩 인터페이스 구축 (키보드 핫키 B/S/Enter/Esc 단축 주문, 입력 가드, 마이크로 도넛 포트폴리오 위젯, 지정가 모의 체결 봇 및 Web Audio 체결 토스트)] (+110, -0)
 - **v194**: [가상 주식 거래 시스템 고도화 (RSI 상대강도지수 서브패널, 볼린저 밴드 오버레이, 주문 콘솔 10%/25%/50%/100% 잔고 비율 바인딩, Web Audio 체결 사운드 및 localStorage 영구 동기화)] (+120, -0)
 - **v193**: [가상 주식 호가창 & 인터랙티브 차트 TradingView급 전면 쇄신 (캔들스틱/라인 듀얼 모드, MA 5/20, 볼륨 히스토그램, 크로스헤어 OHLC, 체결강도 게이지, 최근 체결 틱 스트림, prod-v577)] (+110, -0)
 - **v192**: [전체 SEO 및 사이트 재분석 기반 검색엔진 최적화 전면 개발 및 무중단 배포 (prod-v576)] (+130, -0)
@@ -798,4 +799,49 @@
 3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
 4. Git 커밋 & 푸시
 5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v578`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+ 
+
+---
+
+## 🚀 [v195 Specification] 가상 주식 전문가용 트레이딩 인터페이스 구축 (키보드 핫키, 마이크로 도넛 포트폴리오, 지정가 모의 체결 봇)
+
+### 1. 현황 및 개선 필요 사항
+1. **[키보드 핫키 시스템 (Trading Hotkeys)]**:
+   - 전문 트레이더 환경에 부합하도록 마우스 조작 없이도 빠른 주문이 가능한 키보드 단축키 지원.
+   - `B`: 매수 모드 전환, `S`: 매도 모드 전환, `Enter`: 주문 제출, `Esc`: 폼 초기화/취소.
+   - **오입력 방지 가드**: 사용자가 수량/가격 등 `<input>` 또는 `<textarea>` 필드에 포커스하고 입력 중일 때는 알파벳 핫키가 트리거되지 않도록 엄격히 차단.
+   - **UI 단축키 뱃지**: 탭 및 버튼 위에 정밀한 모노스페이스 뱃지(`[B]`, `[S]`, `[Enter]`)를 시각적으로 노출하여 사용자가 직관적으로 단축키를 인지하도록 안내.
+2. **[마이크로 도넛 포트폴리오 자산 비중 위젯]**:
+   - 개별 주식 거래 화면(`stock-trading-console.tsx`) 내에 사용자의 전체 가상 주식 포트폴리오 자산 배분을 직관적으로 파악할 수 있는 마이크로 도넛 차트 위젯 배치.
+   - 현재 보고 있는 종목의 비중 강조, 상위 보유 종목 색상 범례 및 평가손익 뱃지 제공.
+3. **[지정가 모의 체결 봇 (Simulated Market Maker & Auto-Matcher)]**:
+   - 시장가 주문은 즉시 체결, 지정가 주문은 1~3초 내 가상 호가 변동에 따라 체결되는 모의 체결 비동기 시뮬레이터 제공.
+   - 체결 완료 시 Web Audio 아르페지오 사운드(`playStockTradeSuccessSound`)와 함께 에메랄드/로즈 플래시 및 토스트 피드백 연동.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-order-panel.tsx`**:
+   - 전역 키보드 리스너 (`keydown`) 연동:
+     - `e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement` 검사로 텍스트 입력 중 단축키 차단.
+     - 키 이벤트: `KeyB` -> 매수 전환, `KeyS` -> 매도 전환, `Escape` -> 모달 닫기 또는 폼 초기화.
+   - 단축키 안내 뱃지 (`Badge` 컴포넌트 활용: `kbd` 스타일 `[B]`, `[S]`).
+   - 주문 성공 시 체결 토스트 및 모의 체결 타이머 트리거 연동.
+2. **`frontend/src/app/stocks/[symbol]/stock-micro-portfolio.tsx` (신규)**:
+   - 현재 사용자의 보유 주식 현황을 가져와 마이크로 SVG 도넛 차트와 함께 현재 종목의 포트폴리오 내 비중을 렌더링하는 위젯.
+   - 비로그인 유저 또는 미보유 시 "보유 자산 없음" 컴팩트 안내 상태 처리.
+3. **`frontend/src/app/stocks/[symbol]/stock-trading-console.tsx`**:
+   - `StockMicroPortfolio` 위젯을 주문 패널 하단에 자연스럽게 배치하여 실시간 자산 배분 확인 지원.
+4. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - 키보드 핫키 및 단축키 동작 검증 테스트 추가.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v579`)
 6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)

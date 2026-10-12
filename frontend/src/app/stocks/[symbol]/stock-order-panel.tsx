@@ -56,6 +56,7 @@ export function StockOrderPanel({
   const [quantity, setQuantity] = useState<string>('1');
   const [limitPrice, setLimitPrice] = useState<string>(currentPrice);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSimulatingLimitMatch, setIsSimulatingLimitMatch] = useState(false);
   const [state, formAction, pending] = useActionState(placeOrder, IDLE);
 
   const side = activeSide ?? internalSide;
@@ -87,14 +88,67 @@ export function StockOrderPanel({
   const maxSellShares = holdingQuantity ? Number.parseInt(holdingQuantity.replaceAll(',', ''), 10) : 0;
   const maxLimit = side === 'buy' ? Math.max(1, maxBuyShares) : Math.max(1, maxSellShares);
 
-  // 체결 성공 시 확인 창 닫기, 수량 초기화 및 축하 효과음 재생
+  // 전역 키보드 핫키 리스너 (B: 매수, S: 매도, Enter: 주문 확인, Esc: 초기화/닫기)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 텍스트 인풋, 텍스트에어리어 등 입력 폼 포커스 시 알파벳 단축키 차단 가드
+      const target = e.target as HTMLElement | null;
+      const isTyping =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        Boolean(target?.isContentEditable);
+
+      if (e.key === 'Escape') {
+        if (isConfirmOpen) {
+          setIsConfirmOpen(false);
+          e.preventDefault();
+        } else if (isTyping) {
+          (target as HTMLElement).blur();
+        }
+        return;
+      }
+
+      if (isTyping) return;
+
+      if (e.key === 'b' || e.key === 'B') {
+        e.preventDefault();
+        handleSideChange('buy');
+        playStockTickSound();
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        handleSideChange('sell');
+        playStockTickSound();
+      } else if (e.key === 'Enter') {
+        if (!isConfirmOpen && !isHalted && qtyNum > 0 && !(side === 'sell' && maxSellShares <= 0)) {
+          e.preventDefault();
+          setIsConfirmOpen(true);
+          playStockTickSound();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isConfirmOpen, isHalted, qtyNum, side, maxSellShares]);
+
+  // 체결 성공 시 확인 창 닫기, 수량 초기화 및 축하 효과음 재생 (지정가 모의 시뮬레이션 지원)
   useEffect(() => {
     if (state.status === 'ok') {
       setIsConfirmOpen(false);
       setQuantity('1');
-      playStockTradeSuccessSound();
+      if (orderType === 'limit') {
+        setIsSimulatingLimitMatch(true);
+        const timer = setTimeout(() => {
+          setIsSimulatingLimitMatch(false);
+          playStockTradeSuccessSound();
+        }, 1200);
+        return () => clearTimeout(timer);
+      } else {
+        playStockTradeSuccessSound();
+      }
     }
-  }, [state.status]);
+  }, [state.status, orderType]);
 
   const handlePercent = (percent: number) => {
     const next = Math.max(1, Math.floor((maxLimit * percent) / 100));
@@ -113,31 +167,48 @@ export function StockOrderPanel({
             </Badge>
           </CardTitle>
 
-          {/* 매수 / 매도 전환 탭 */}
+          {/* 매수 / 매도 전환 탭 (키보드 단축키 B / S 뱃지 결합) */}
           <div className="inline-flex rounded-xl border border-border/80 bg-muted/40 p-1 shadow-inner">
             <button
               type="button"
               onClick={() => handleSideChange('buy')}
-              className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all min-h-[36px] ${
+              className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all min-h-[36px] flex items-center gap-1.5 ${
                 side === 'buy'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {isEn ? 'Buy' : '매수'}
+              <span>{isEn ? 'Buy' : '매수'}</span>
+              <kbd className="px-1 py-0.2 text-[9px] font-mono bg-background/25 rounded border border-current/25 leading-tight">
+                B
+              </kbd>
             </button>
             <button
               type="button"
               onClick={() => handleSideChange('sell')}
-              className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all min-h-[36px] ${
+              className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all min-h-[36px] flex items-center gap-1.5 ${
                 side === 'sell'
                   ? 'bg-destructive text-destructive-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {isEn ? 'Sell' : '매도'}
+              <span>{isEn ? 'Sell' : '매도'}</span>
+              <kbd className="px-1 py-0.2 text-[9px] font-mono bg-background/25 rounded border border-current/25 leading-tight">
+                S
+              </kbd>
             </button>
           </div>
+        </div>
+
+        {/* 데스크톱 단축키 가이드 바 */}
+        <div className="hidden sm:flex items-center justify-between text-[11px] text-muted-foreground/80 pt-1 font-mono">
+          <span className="flex items-center gap-1">
+            <kbd className="px-1 rounded border bg-muted/50 text-[10px]">B</kbd> 매수 ·{' '}
+            <kbd className="px-1 rounded border bg-muted/50 text-[10px]">S</kbd> 매도 ·{' '}
+            <kbd className="px-1 rounded border bg-muted/50 text-[10px]">Enter</kbd> 주문 ·{' '}
+            <kbd className="px-1 rounded border bg-muted/50 text-[10px]">Esc</kbd> 취소
+          </span>
+          <span className="text-[10px] text-primary/80 font-medium">⚡ 핫키 가드 활성</span>
         </div>
       </CardHeader>
 
@@ -381,19 +452,37 @@ export function StockOrderPanel({
         {/* 주문 결과 알림 */}
         <ActionAlert state={state} />
 
-        {/* 주문 실행 버튼 (최소 44px 모바일 터치 타깃) */}
+        {/* 지정가 모의 체결 봇 매칭 안내 */}
+        {isSimulatingLimitMatch && (
+          <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 flex items-center justify-between text-xs animate-pulse">
+            <span className="flex items-center gap-1.5 font-bold text-primary">
+              <Sparkles className="size-4 animate-spin text-primary" />
+              <span>{isEn ? 'Matching order at limit price...' : '가상 매칭 엔진에서 호가 체결 대기 중...'}</span>
+            </span>
+            <Badge variant="outline" className="font-mono text-[10px]">
+              {groupDigits(limitPrice)} WLD
+            </Badge>
+          </div>
+        )}
+
+        {/* 주문 실행 버튼 (최소 44px 모바일 터치 타깃, Enter 단축키 뱃지 탑재) */}
         <Button
           type="button"
           onClick={() => setIsConfirmOpen(true)}
           disabled={isHalted || (side === 'sell' && maxSellShares <= 0) || qtyNum <= 0 || pending}
           variant={side === 'buy' ? 'default' : 'destructive'}
-          className="w-full h-12 rounded-xl text-sm font-bold shadow-md transition-transform active:scale-[0.99]"
+          className="w-full h-12 rounded-xl text-sm font-bold shadow-md transition-transform active:scale-[0.99] flex items-center justify-center gap-2"
         >
-          {isHalted
-            ? isEn ? 'Trading Halted' : '거래정지 종목'
-            : side === 'buy'
-              ? isEn ? `Buy ${groupDigits(quantity)} Shares` : `${groupDigits(quantity)}주 매수하기`
-              : isEn ? `Sell ${groupDigits(quantity)} Shares` : `${groupDigits(quantity)}주 매도하기`}
+          <span>
+            {isHalted
+              ? isEn ? 'Trading Halted' : '거래정지 종목'
+              : side === 'buy'
+                ? isEn ? `Buy ${groupDigits(quantity)} Shares` : `${groupDigits(quantity)}주 매수하기`
+                : isEn ? `Sell ${groupDigits(quantity)} Shares` : `${groupDigits(quantity)}주 매도하기`}
+          </span>
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-background/25 rounded border border-current/25">
+            Enter
+          </kbd>
         </Button>
 
         {/* 최종 체결 확인 다이얼로그 */}

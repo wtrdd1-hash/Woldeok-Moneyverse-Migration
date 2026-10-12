@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { StockOrderbook } from './stock-orderbook';
 import { StockOrderPanel } from './stock-order-panel';
+import { StockMicroPortfolio } from './stock-micro-portfolio';
 import type { StockHaltReceiptData } from './stock-halt-receipt-dialog';
 import { groupDigits } from '@/lib/money';
 
@@ -70,7 +71,7 @@ export function StockTradingConsole({
         </div>
 
         {/* 우측 주문 패널 (데스크톱에서는 상시 표시) */}
-        <div className="hidden lg:block">
+        <div className="hidden lg:flex flex-col gap-4">
           <StockOrderPanel
             stockId={stockId}
             symbol={symbol}
@@ -85,10 +86,16 @@ export function StockTradingConsole({
             onSideChange={setSide}
             receipt={receipt}
           />
+          <StockMicroPortfolio
+            currentSymbol={symbol}
+            currentPrice={currentPrice}
+            holdingQuantity={holdingQuantity}
+            isEn={isEn}
+          />
         </div>
 
         {/* 모바일 화면에서는 일반 스크롤 영역에도 주문 패널을 노출 (하단 바와 함께) */}
-        <div className="block lg:hidden">
+        <div className="flex flex-col gap-4 lg:hidden">
           <StockOrderPanel
             stockId={stockId}
             symbol={symbol}
@@ -102,6 +109,12 @@ export function StockTradingConsole({
             activeSide={side}
             onSideChange={setSide}
             receipt={receipt}
+          />
+          <StockMicroPortfolio
+            currentSymbol={symbol}
+            currentPrice={currentPrice}
+            holdingQuantity={holdingQuantity}
+            isEn={isEn}
           />
         </div>
       </div>

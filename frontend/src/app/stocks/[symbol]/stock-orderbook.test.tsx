@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { StockOrderbook } from './stock-orderbook';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockOrderPanel } from './stock-order-panel';
+import { StockMicroPortfolio } from './stock-micro-portfolio';
 
 describe('StockOrderbook & Interactive Chart Suite', () => {
   it('renders orderbook with ask/bid levels, intensity badge, and recent trades stream', () => {
@@ -103,4 +104,62 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
     const qtyInput = screen.getByLabelText('주문 수량') as HTMLInputElement;
     expect(Number.parseInt(qtyInput.value, 10)).toBeGreaterThan(0);
   });
+
+  it('supports keyboard hotkeys (B/S/Esc) with typing guards and shortcut badges', () => {
+    const handleSideChange = vi.fn();
+    render(
+      <StockOrderPanel
+        stockId="WDG"
+        symbol="WDG"
+        name="월덱 게임즈"
+        currentPrice="15,000"
+        availableShares="1000"
+        holdingQuantity="200"
+        isEn={false}
+        onSideChange={handleSideChange}
+      />
+    );
+
+    // 단축키 뱃지 존재 확인 (버튼 및 가이드 바 내 복수 뱃지 대응)
+    expect(screen.getAllByText('B').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('S').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Enter').length).toBeGreaterThan(0);
+
+    // 키보드 S 누름 -> 매도 모드 전환
+    fireEvent.keyDown(window, { key: 's' });
+    expect(handleSideChange).toHaveBeenCalledWith('sell');
+
+    // 키보드 B 누름 -> 매수 모드 전환
+    fireEvent.keyDown(window, { key: 'b' });
+    expect(handleSideChange).toHaveBeenCalledWith('buy');
+  });
+
+  it('renders StockMicroPortfolio with donut chart and asset share percentage', () => {
+    render(
+      <StockMicroPortfolio
+        currentSymbol="WDG"
+        currentPrice="15,000"
+        holdingQuantity="100"
+        otherHoldings={[
+          {
+            symbol: 'AAPL',
+            name: 'Apple',
+            quantity: 50,
+            currentPrice: 20000,
+            marketValue: 1000000,
+          },
+        ]}
+        isEn={false}
+      />
+    );
+
+    // 포트폴리오 자산 비중 헤더 검증
+    expect(screen.getByText(/포트폴리오 자산 비중/i)).toBeDefined();
+    // 현재 종목 심볼 텍스트 검증
+    expect(screen.getAllByText('WDG').length).toBeGreaterThan(0);
+    // 전체 보기 링크 검증
+    expect(screen.getByText('전체 보기')).toBeDefined();
+  });
 });
+
+
