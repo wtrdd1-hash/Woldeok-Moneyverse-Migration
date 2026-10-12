@@ -13,8 +13,29 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v582 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v582`
+## 🌟 Production Release Overview (prod-v583 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v583`
+- **Release Date**: 2026-10-12 22:05 KST
+- **Git Commit HEAD**: `96bcb372` (`main`)
+- **Key Deliverables**:
+  1. **시스템 헬스 웹 프로브 최적화 및 상단 지연 경고 배너 영구 소거 (v199 / prod-v583)**:
+     - 백엔드 `status-collector.module.ts`의 `webProbe` 타깃 URL인 `WEB_HEALTH_URL`을 Next.js 무거운 SSR 루트(`/`)에서 가벼운 헬스 엔드포인트(`http://127.0.0.1:3001/api/health`)로 교정.
+     - 웹 프로브 응답 시간을 2,624ms ~ 9,150ms에서 **1.4ms ~ 4ms**로 99.9% 획기적 단축, 전 서비스 `operational` 정상 판정 복구.
+     - 메인 및 전 화면 상단에 노출되던 `"일부 서비스의 응답이 느려지고 있습니다"` 노란색 경고 배너 영구 소거 완료.
+  2. **관리자 자금 흐름 관제(`/admin/money-flow`) 복식부기 원장 무결성 스트립 & 누적 지표 고도화**:
+     - 24시간 거래 미발생 시에도 시스템 정상 여부를 즉시 확인할 수 있도록 `[복식부기 원장 무결성 100% 검증]` 상태 뱃지 스트립 신설.
+     - 백엔드 `treasury.repository.ts`에서 전체 누적 트랜잭션 건수(`all_time_transactions`: 831건), 누적 거래 유저 수(`all_time_users`: 13명), 최근 원장 체결 시각(`last_transaction_at`) 집계 쿼리 추가.
+     - 24시간 동안 신규 체결이 없을 때 관리자가 오해하지 않도록 안내 인포 배너(`최근 24시간 동안 신규 체결된 거래가 없습니다. 아래 실시간 원장 내역 테이블에서 이전 전체 트랜잭션을 정상적으로 열람 가능`) 추가.
+     - 4대 통계 카드 서브 캡션에 전체 누적 보존 수치 병기.
+  3. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 백엔드 빌드 (`nest build`) 및 프론트엔드 프로덕션 빌드 (`next build`) 584개 페이지 생성 100% PASS.
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/admin/money-flow` HTTP 200 실측 확인, 원장 무결성 지표 및 상단 배너 소멸 검증 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v582)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v582`
 - **Release Date**: 2026-10-12 21:38 KST
 - **Git Commit HEAD**: `e84102e5` (`main`)
 - **Key Deliverables**:
