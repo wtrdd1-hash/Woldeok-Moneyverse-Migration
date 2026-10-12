@@ -13,6 +13,7 @@ interface StockInteractiveChartProps {
   readonly dayHighPrice?: string | undefined;
   readonly dayLowPrice?: string | undefined;
   readonly symbol: string;
+  readonly stockId?: string | undefined;
   readonly isEn?: boolean | undefined;
 }
 
@@ -39,6 +40,15 @@ interface ChartIndicators {
   ma: boolean;
   bb: boolean;
   rsi: boolean;
+  sr: boolean;
+}
+
+interface ApiCandleItem {
+  readonly bucket_at: string;
+  readonly open_price: string;
+  readonly high_price: string;
+  readonly low_price: string;
+  readonly close_price: string;
 }
 
 const STORAGE_KEY = 'wdmv_stock_chart_prefs_v1';
@@ -49,6 +59,7 @@ export function StockInteractiveChart({
   dayHighPrice,
   dayLowPrice,
   symbol,
+  stockId,
   isEn = false,
 }: StockInteractiveChartProps) {
   const [timeframe, setTimeframe] = useState<Timeframe>('1D');
@@ -57,8 +68,10 @@ export function StockInteractiveChart({
     ma: true,
     bb: true,
     rsi: true,
+    sr: true,
   });
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [realCandles, setRealCandles] = useState<CandlePoint[] | null>(null);
 
   // localStorage 환경설정 영구 복원
   useEffect(() => {
@@ -127,92 +140,157 @@ export function StockInteractiveChart({
   const isUp = diff >= 0;
   const changeRate = openNum > 0 ? ((diff / openNum) * 100).toFixed(2) : '0.00';
 
-  // 1. 종목 심볼과 타임프레임 기반 OHLC + Volume 데이터 시계열 생성 (결정론적 브라운 브리지)
-  const candleSeries = useMemo<CandlePoint[]>(() => {
-    const count = timeframe === '1D' ? 24 : timeframe === '1W' ? 28 : timeframe === '1M' ? 30 : 36;
-    const base = openNum;
-    const target = priceNum;
-    const diffSpread = Math.max(base * 0.04, Math.abs(target - base) * 0.45);
-
-    // 결정론적 시드 PRNG
-    let seed = 2166136261 >>> 0;
-    const seedInput = `${symbol}:${timeframe}:${base}:${target}:v2`;
-    for (let c = 0; c < seedInput.length; c++) {
-      seed = Math.imul(seed ^ seedInput.charCodeAt(c), 16777619);
+  // 타임프레임별 백엔드 인터벌 초 매핑 (1D: 15분, 1W: 1시간, 1M: 1일, 1Y: 1주)
+  const intervalSeconds = useMemo(() => {
+    switch (timeframe) {
+      case '1D': return 900;
+      case '1W': return 3600;
+      case '1M': return 86400;
+      case '1Y': return 604800;
+      default: return 900;
     }
-    const rng = () => {
-      seed += 0x6d2b79f5;
-      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
+  }, [timeframe]);
 
-    // 브라운 브리지 난수 궤적
-    let currentWalk = 0;
-    const rawWalks: number[] = [0];
-    for (let i = 1; i < count - 1; i++) {
-      const shock = (rng() + rng() + rng() - 1.5) * 0.8;
-      currentWalk += shock * diffSpread * 0.4;
-      rawWalks.push(currentWalk);
-    }
-    rawWalks.push(0);
+  // 백엔드 실데이터 캔들 API 비동기 조회 (장애/비로그인 시 자동 Fallback)
+  useEffect(() => {
+    if (!stockId) return;
+    let isCancelled = false;
 
-    // 종가 시계열 계산
-    const closes: number[] = [];
-    for (let i = 0; i < count; i++) {
-      const bridge = rawWalks[i] ?? 0;
-      const trend = base + ((target - base) * i) / (count - 1);
-      const val = Math.max(1, Math.round(trend + bridge));
-      closes.push(val);
-    }
-    if (closes.length > 0) {
-      closes[closes.length - 1] = target;
-    }
-
-    // 캔들스틱 OHLC 및 Volume 생성
-    const points: CandlePoint[] = [];
-    let prevClose = base;
-
-    for (let i = 0; i < count; i++) {
-      const open = i === 0 ? base : prevClose;
-      const finalClose = closes[i] ?? base;
-      const isCandleUp = finalClose >= open;
-
-      const noiseH = (rng() * 0.4 + 0.1) * diffSpread;
-      const noiseL = (rng() * 0.4 + 0.1) * diffSpread;
-
-      const high = Math.round(Math.max(open, finalClose) + noiseH);
-      const low = Math.max(1, Math.round(Math.min(open, finalClose) - noiseL));
-
-      const volFactor = 100 + Math.round(rng() * 400);
-      const spreadAbs = Math.abs(finalClose - open) + 1;
-      const volume = Math.round(volFactor * spreadAbs * (1 + rng() * 0.5));
-
-      let label = '';
-      if (timeframe === '1D') {
-        const hour = (9 + Math.floor((i * 6.5) / count)).toString().padStart(2, '0');
-        const min = Math.floor((i % 4) * 15).toString().padStart(2, '0');
-        label = `${hour}:${min}`;
-      } else if (timeframe === '1W') {
-        label = `${count - i}일 전`;
-      } else if (timeframe === '1M') {
-        label = `${Math.floor(i * 1.1) + 1}일`;
-      } else {
-        label = `${Math.floor(i / 3) + 1}월`;
-      }
-
-      points.push({
-        index: i,
-        open,
-        high,
-        low,
-        close: finalClose,
-        volume,
-        label,
-        isUp: isCandleUp,
+    fetch(`/api/stocks/${encodeURIComponent(stockId)}/candles?interval=${intervalSeconds}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { candles?: ApiCandleItem[] } | null) => {
+        if (isCancelled || !data?.candles || data.candles.length === 0) return;
+        const mapped: CandlePoint[] = data.candles.map((c, i) => {
+          const o = Number.parseInt(c.open_price, 10) || priceNum;
+          const h = Number.parseInt(c.high_price, 10) || priceNum;
+          const l = Number.parseInt(c.low_price, 10) || priceNum;
+          const cl = Number.parseInt(c.close_price, 10) || priceNum;
+          const d = new Date(c.bucket_at);
+          let label = '';
+          if (timeframe === '1D') {
+            label = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+          } else if (timeframe === '1W') {
+            label = `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}시`;
+          } else if (timeframe === '1M') {
+            label = `${d.getMonth() + 1}/${d.getDate()}`;
+          } else {
+            label = `${d.getFullYear().toString().slice(2)}/${d.getMonth() + 1}`;
+          }
+          return {
+            index: i,
+            open: o,
+            high: h,
+            low: l,
+            close: cl,
+            volume: 200 + (i % 5) * 60,
+            label,
+            isUp: cl >= o,
+          };
+        });
+        if (mapped.length >= 5) {
+          setRealCandles(mapped);
+        }
+      })
+      .catch(() => {
+        // Fallback 유지
       });
 
-      prevClose = finalClose;
+    return () => {
+      isCancelled = true;
+    };
+  }, [stockId, intervalSeconds, priceNum, timeframe]);
+
+  // 1. 종목 심볼과 타임프레임 기반 OHLC + Volume 데이터 시계열 생성 (실데이터 우선 + Fallback 브라운 브리지)
+  const candleSeries = useMemo<CandlePoint[]>(() => {
+    let points: CandlePoint[] = [];
+    let closes: number[] = [];
+
+    if (realCandles && realCandles.length >= 5) {
+      points = realCandles;
+      closes = realCandles.map((c) => c.close);
+    } else {
+      const count = timeframe === '1D' ? 24 : timeframe === '1W' ? 28 : timeframe === '1M' ? 30 : 36;
+      const base = openNum;
+      const target = priceNum;
+      const diffSpread = Math.max(base * 0.04, Math.abs(target - base) * 0.45);
+
+      // 결정론적 시드 PRNG
+      let seed = 2166136261 >>> 0;
+      const seedInput = `${symbol}:${timeframe}:${base}:${target}:v2`;
+      for (let c = 0; c < seedInput.length; c++) {
+        seed = Math.imul(seed ^ seedInput.charCodeAt(c), 16777619);
+      }
+      const rng = () => {
+        seed += 0x6d2b79f5;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+
+      // 브라운 브리지 난수 궤적
+      let currentWalk = 0;
+      const rawWalks: number[] = [0];
+      for (let i = 1; i < count - 1; i++) {
+        const shock = (rng() + rng() + rng() - 1.5) * 0.8;
+        currentWalk += shock * diffSpread * 0.4;
+        rawWalks.push(currentWalk);
+      }
+      rawWalks.push(0);
+
+      // 종가 시계열 계산
+      for (let i = 0; i < count; i++) {
+        const bridge = rawWalks[i] ?? 0;
+        const trend = base + ((target - base) * i) / (count - 1);
+        const val = Math.max(1, Math.round(trend + bridge));
+        closes.push(val);
+      }
+      if (closes.length > 0) {
+        closes[closes.length - 1] = target;
+      }
+
+      // 캔들스틱 OHLC 및 Volume 생성
+      let prevClose = base;
+      for (let i = 0; i < count; i++) {
+        const open = i === 0 ? base : prevClose;
+        const finalClose = closes[i] ?? base;
+        const isCandleUp = finalClose >= open;
+
+        const noiseH = (rng() * 0.4 + 0.1) * diffSpread;
+        const noiseL = (rng() * 0.4 + 0.1) * diffSpread;
+
+        const high = Math.round(Math.max(open, finalClose) + noiseH);
+        const low = Math.max(1, Math.round(Math.min(open, finalClose) - noiseL));
+
+        const volFactor = 100 + Math.round(rng() * 400);
+        const spreadAbs = Math.abs(finalClose - open) + 1;
+        const volume = Math.round(volFactor * spreadAbs * (1 + rng() * 0.5));
+
+        let label = '';
+        if (timeframe === '1D') {
+          const hour = (9 + Math.floor((i * 6.5) / count)).toString().padStart(2, '0');
+          const min = Math.floor((i % 4) * 15).toString().padStart(2, '0');
+          label = `${hour}:${min}`;
+        } else if (timeframe === '1W') {
+          label = `${count - i}일 전`;
+        } else if (timeframe === '1M') {
+          label = `${Math.floor(i * 1.1) + 1}일`;
+        } else {
+          label = `${Math.floor(i / 3) + 1}월`;
+        }
+
+        points.push({
+          index: i,
+          open,
+          high,
+          low,
+          close: finalClose,
+          volume,
+          label,
+          isUp: isCandleUp,
+        });
+
+        prevClose = finalClose;
+      }
     }
 
     // 이동평균선(MA5, MA20), 볼린저 밴드(20, 2), RSI(14) 산출
@@ -257,7 +335,7 @@ export function StockInteractiveChart({
       }
       return { ...pt, ma5, ma20, bbUpper, bbLower, rsi };
     });
-  }, [timeframe, openNum, priceNum, symbol]);
+  }, [timeframe, openNum, priceNum, symbol, realCandles]);
 
   // 2. SVG 렌더링 좌표계 계산
   const width = 640;
@@ -295,6 +373,20 @@ export function StockInteractiveChart({
     const ratio = (val - minPrice) / priceRange;
     return paddingTop + chartHeight * (1 - ratio);
   };
+
+  // 지지선(Support)과 저항선(Resistance) 가격 및 Y 좌표 계산
+  const resistancePrice = useMemo(() => {
+    const raw = Number.parseInt(dayHighPrice?.replaceAll(',', '') || '', 10);
+    return !isNaN(raw) && raw > 0 ? raw : maxPrice;
+  }, [dayHighPrice, maxPrice]);
+
+  const supportPrice = useMemo(() => {
+    const raw = Number.parseInt(dayLowPrice?.replaceAll(',', '') || '', 10);
+    return !isNaN(raw) && raw > 0 ? raw : minPrice;
+  }, [dayLowPrice, minPrice]);
+
+  const resistanceY = getY(resistancePrice);
+  const supportY = getY(supportPrice);
 
   const getVolY = (vol: number) => {
     const ratio = vol / maxVolume;
@@ -511,6 +603,18 @@ export function StockInteractiveChart({
                   title="상대강도지수 (RSI 14) 서브패널 토글"
                 >
                   RSI
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleToggleIndicator('sr')}
+                  className={`rounded px-1.5 py-0.5 transition-all ${
+                    indicators.sr
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                      : 'text-muted-foreground/60 hover:text-muted-foreground'
+                  }`}
+                  title="지지선/저항선 (Support & Resistance) 가이드라인 토글"
+                >
+                  SR
                 </button>
               </div>
             </div>
@@ -745,6 +849,57 @@ export function StockInteractiveChart({
                 opacity="0.8"
                 pointerEvents="none"
               />
+            )}
+
+            {/* 보조지표: 지지선 (Support) & 저항선 (Resistance) 수평 가이드라인 */}
+            {indicators.sr && (
+              <g pointerEvents="none">
+                {/* 저항선 (레드 점선) */}
+                <line
+                  x1={paddingX}
+                  y1={resistanceY}
+                  x2={width - paddingX}
+                  y2={resistanceY}
+                  stroke="#f43f5e"
+                  strokeWidth="1.25"
+                  strokeDasharray="4 3"
+                  opacity="0.85"
+                />
+                <text
+                  x={width - paddingX - 4}
+                  y={Math.max(paddingTop + 10, resistanceY - 4)}
+                  textAnchor="end"
+                  fill="#f43f5e"
+                  fontSize="9"
+                  fontFamily="monospace"
+                  fontWeight="bold"
+                >
+                  저항 {groupDigits(resistancePrice.toString())}
+                </text>
+
+                {/* 지지선 (그린 점선) */}
+                <line
+                  x1={paddingX}
+                  y1={supportY}
+                  x2={width - paddingX}
+                  y2={supportY}
+                  stroke="#10b981"
+                  strokeWidth="1.25"
+                  strokeDasharray="4 3"
+                  opacity="0.85"
+                />
+                <text
+                  x={width - paddingX - 4}
+                  y={Math.min(paddingTop + chartHeight - 4, supportY + 11)}
+                  textAnchor="end"
+                  fill="#10b981"
+                  fontSize="9"
+                  fontFamily="monospace"
+                  fontWeight="bold"
+                >
+                  지지 {groupDigits(supportPrice.toString())}
+                </text>
+              </g>
             )}
 
             {/* 인터랙티브 호버 감지 투명 박스 슬롯 */}

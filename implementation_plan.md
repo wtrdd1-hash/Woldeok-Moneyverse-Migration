@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v195)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v196)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v196**: [가상 주식 실데이터 캔들 API 하이브리드 바인딩 & 지지/저항선 수평 분석 칩 및 실시간 체결 플로팅 토스트 구축] (+130, -0)
 - **v195**: [가상 주식 전문가용 트레이딩 인터페이스 구축 (키보드 핫키 B/S/Enter/Esc 단축 주문, 입력 가드, 마이크로 도넛 포트폴리오 위젯, 지정가 모의 체결 봇 및 Web Audio 체결 토스트)] (+110, -0)
 - **v194**: [가상 주식 거래 시스템 고도화 (RSI 상대강도지수 서브패널, 볼린저 밴드 오버레이, 주문 콘솔 10%/25%/50%/100% 잔고 비율 바인딩, Web Audio 체결 사운드 및 localStorage 영구 동기화)] (+120, -0)
 - **v193**: [가상 주식 호가창 & 인터랙티브 차트 TradingView급 전면 쇄신 (캔들스틱/라인 듀얼 모드, MA 5/20, 볼륨 히스토그램, 크로스헤어 OHLC, 체결강도 게이지, 최근 체결 틱 스트림, prod-v577)] (+110, -0)
@@ -844,4 +845,52 @@
 3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
 4. Git 커밋 & 푸시
 5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v579`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
+---
+
+## 🚀 [v196 Specification] 가상 주식 실데이터 캔들 API 하이브리드 바인딩 & 지지/저항선 수평 분석 칩 및 실시간 체결 플로팅 토스트 구축
+
+### 1. 현황 및 개선 필요 사항
+1. **[백엔드 실데이터 캔들 API 하이브리드 바인딩]**:
+   - `stock-interactive-chart.tsx`: 기존의 결정론적 시계열 난수 궤적 위에 백엔드 실제 캔들 엔드포인트(`/api/stocks/[id]/candles?interval={interval}`)를 1순위로 조회하여 실제 과거 체결 OHLC 데이터를 차트에 직접 투영.
+   - **타임프레임별 표준 인터벌 매핑**:
+     - `1D`: 15분봉 (`interval = 900`)
+     - `1W`: 1시간봉 (`interval = 3600`)
+     - `1M`: 1일봉 (`interval = 86400`)
+     - `1Y`: 1주봉 (`interval = 604800`)
+   - **무중단 Fallback 보장**: 백엔드 응답이 지연되거나 비로그인/세션 만료 등의 사유로 캔들이 없는 경우 기존 브라운 브리지 시뮬레이터가 즉각 fallback으로 전환되어 차트 끊김 및 화면 깜빡임 0건 보장.
+2. **[지지선 / 저항선(Support & Resistance) 수평 분석 칩]**:
+   - 차트 상단 지표 토글 바에 `SR(지지/저항)` 칩 추가 (localStorage 영구 동기화).
+   - 저항선(Resistance, 레드 점선): 당일 최고가(`dayHighPrice`) 또는 차트 구간 최고가 라인.
+   - 지지선(Support, 그린 점선): 당일 최저가(`dayLowPrice`) 또는 차트 구간 최저가 라인.
+   - 우측 Y축에 저항선/지지선 가격 뱃지 실시간 렌더링.
+3. **[실시간 시장 거래 플로팅 미니 토스트 (`MarketTradeToast`)]**:
+   - 거래 화면 우측 하단에 대규모 체결이나 시장 급등락 틱을 5초간 슬라이드 인-아웃으로 안내하는 플로팅 미니 토스트 탑재.
+   - 체결 틱 사운드(`playStockTickSound`)와 함께 에메랄드(매수)/로즈(매도) 뱃지 시각 피드백.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx`**:
+   - `stockId` prop 수신 및 타임프레임 변경 시 `/api/stocks/${stockId}/candles?interval=${sec}` 비동기 페칭.
+   - 실제 캔들 데이터 존재 시 `CandlePoint` 매핑, 실패 시 기존 생성 로직 자동 사용.
+   - `indicators.sr` 상태 추가 및 차트 내 지지선/저항선 수평 점선 SVG 가이드 렌더링.
+   - 지표 선택 상태 `localStorage` 동기화 (`ma`, `bb`, `rsi`, `sr`).
+2. **`frontend/src/app/stocks/[symbol]/stock-market-toast.tsx` (신규)**:
+   - 우측 하단 플로팅 미니 토스트 컴포넌트: 체결 스트림 수신 시 5초간 슬라이드 인/아웃.
+3. **`frontend/src/app/stocks/[symbol]/page.tsx` & `stock-trading-console.tsx`**:
+   - `stockId`를 `StockInteractiveChart`에 전달.
+   - `StockMarketToast`를 거래소 뷰포트 하단에 마운트.
+4. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - 지지/저항선 토글 및 실데이터 캔들/플로팅 토스트 렌더링 단위 테스트 추가.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v580`)
 6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)

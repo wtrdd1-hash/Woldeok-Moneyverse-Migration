@@ -19,6 +19,7 @@ import { StockAlertDeleteButton } from './stock-alert-delete-button';
 import { StockDiscussionSection } from './stock-discussion-section';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockTradingConsole } from './stock-trading-console';
+import { StockMarketToast } from './stock-market-toast';
 import { QuickOrderbookSimulator } from '@/components/quick-orderbook-simulator';
 import { StockSentimentPoll } from '@/components/stock-sentiment-poll';
 import { StockHaltBanner } from './stock-halt-banner';
@@ -262,6 +263,14 @@ export default async function StockHubPage({
         dayHighPrice={stock.day_high_price}
         dayLowPrice={stock.day_low_price}
         symbol={stock.symbol}
+        stockId={stock.id}
+        isEn={isEn}
+      />
+
+      {/* 1.5. 실시간 시장 체결 플로팅 미니 토스트 */}
+      <StockMarketToast
+        symbol={stock.symbol}
+        currentPrice={stock.current_price}
         isEn={isEn}
       />
 

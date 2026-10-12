@@ -4,6 +4,7 @@ import { StockOrderbook } from './stock-orderbook';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockOrderPanel } from './stock-order-panel';
 import { StockMicroPortfolio } from './stock-micro-portfolio';
+import { StockMarketToast } from './stock-market-toast';
 
 describe('StockOrderbook & Interactive Chart Suite', () => {
   it('renders orderbook with ask/bid levels, intensity badge, and recent trades stream', () => {
@@ -63,9 +64,10 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
     expect(screen.getAllByText('MA5').length).toBeGreaterThan(0);
     expect(screen.getAllByText('MA20').length).toBeGreaterThan(0);
 
-    // 볼린저 밴드(BB) 및 RSI 지표 칩 검증
+    // 볼린저 밴드(BB), RSI, 지지/저항선(SR) 지표 칩 검증
     expect(screen.getByTitle('볼린저 밴드 (20, 2) 토글')).toBeDefined();
     expect(screen.getByTitle('상대강도지수 (RSI 14) 서브패널 토글')).toBeDefined();
+    expect(screen.getByTitle('지지선/저항선 (Support & Resistance) 가이드라인 토글')).toBeDefined();
 
     // RSI 서브패널 텍스트 검증
     expect(screen.getAllByText(/RSI \(14\)/i).length).toBeGreaterThan(0);
@@ -160,6 +162,18 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
     // 전체 보기 링크 검증
     expect(screen.getByText('전체 보기')).toBeDefined();
   });
+
+  it('renders StockMarketToast without crashing', () => {
+    const { container } = render(
+      <StockMarketToast
+        symbol="WDG"
+        currentPrice="15,000"
+        isEn={false}
+      />
+    );
+    expect(container).toBeDefined();
+  });
 });
+
 
 
