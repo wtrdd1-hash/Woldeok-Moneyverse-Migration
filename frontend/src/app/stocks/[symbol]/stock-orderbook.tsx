@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Scale, Zap, Activity } from 'lucide-react';
+import { Scale, Zap, Activity, AreaChart, ListOrdered } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
 import { useQuote } from '@/lib/use-market-prices';
 import { generateKrxLadder, getKrxTickSize } from '../tick-size';
 import { playStockTickSound } from '@/lib/audio-effects';
+import { StockDepthChart } from './stock-depth-chart';
 
 interface StockOrderbookProps {
   readonly stockId?: string | undefined;
@@ -17,6 +18,8 @@ interface StockOrderbookProps {
   readonly isEn?: boolean | undefined;
   readonly onSelectPrice?: ((price: string, side: 'buy' | 'sell') => void) | undefined;
 }
+
+export type OrderbookViewMode = 'ladder' | 'depth';
 
 export interface OrderbookRow {
   readonly step: number;
@@ -131,12 +134,17 @@ export function StockOrderbook({
   onSelectPrice,
 }: StockOrderbookProps) {
   const [depth, setDepth] = useState<5 | 10>(5);
+  const [viewMode, setViewMode] = useState<OrderbookViewMode>('ladder');
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem('wdmv_orderbook_depth_v1');
       if (saved === '10' || saved === '5') {
         setDepth(Number.parseInt(saved, 10) as 5 | 10);
+      }
+      const savedView = localStorage.getItem('wdmv_orderbook_view_mode_v1');
+      if (savedView === 'ladder' || savedView === 'depth') {
+        setViewMode(savedView as OrderbookViewMode);
       }
     } catch {
       // Ignore localStorage access failures
@@ -148,6 +156,16 @@ export function StockOrderbook({
     playStockTickSound();
     try {
       localStorage.setItem('wdmv_orderbook_depth_v1', nextDepth.toString());
+    } catch {
+      // Ignore localStorage access failures
+    }
+  };
+
+  const handleViewModeChange = (nextMode: OrderbookViewMode) => {
+    setViewMode(nextMode);
+    playStockTickSound();
+    try {
+      localStorage.setItem('wdmv_orderbook_view_mode_v1', nextMode);
     } catch {
       // Ignore localStorage access failures
     }
@@ -232,7 +250,11 @@ export function StockOrderbook({
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-bold flex items-center gap-1.5">
             <Scale className="size-4 text-primary" />
-            <span>{isEn ? `Orderbook (${depth}-Depth)` : `${depth}단계 실시간 호가`}</span>
+            <span>
+              {viewMode === 'depth'
+                ? (isEn ? 'Market Depth Chart' : '실시간 호가 심도 (Depth)')
+                : (isEn ? `Orderbook (${depth}-Depth)` : `${depth}단계 실시간 호가`)}
+            </span>
             {flash && (
               <span className="flex size-2 relative ml-1">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
@@ -245,6 +267,36 @@ export function StockOrderbook({
             )}
           </CardTitle>
           <div className="flex items-center gap-2">
+            {/* 호가 ↔ 심도 뷰 세그먼트 스위처 */}
+            <div className="inline-flex rounded-lg border border-border/70 bg-muted/50 p-0.5 text-[11px] font-semibold">
+              <button
+                type="button"
+                onClick={() => handleViewModeChange('ladder')}
+                className={`rounded px-2 py-0.5 transition-all flex items-center gap-1 ${
+                  viewMode === 'ladder'
+                    ? 'bg-primary text-primary-foreground font-bold shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title={isEn ? '10-Depth Orderbook Ladder' : '10단 가격 호가창'}
+              >
+                <ListOrdered className="size-3" />
+                <span>{isEn ? 'Ladder' : '호가'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewModeChange('depth')}
+                className={`rounded px-2 py-0.5 transition-all flex items-center gap-1 ${
+                  viewMode === 'depth'
+                    ? 'bg-primary text-primary-foreground font-bold shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title={isEn ? 'Cumulative Market Depth Chart' : '실시간 누적 심도 차트'}
+              >
+                <AreaChart className="size-3" />
+                <span>{isEn ? 'Depth' : '심도'}</span>
+              </button>
+            </div>
+
             {/* 체결강도 뱃지 */}
             <Badge
               variant="outline"
@@ -266,33 +318,44 @@ export function StockOrderbook({
               {isEn ? `Spread ${spread} WLD (${spreadBps}%)` : `스프레드 ${groupDigits(spread.toString())} WLD (${spreadBps}%)`}
             </Badge>
 
-            {/* 5 / 10 Depth 토글 버튼 */}
-            <div className="inline-flex rounded-lg border border-border/70 bg-muted/50 p-0.5 text-[11px] font-semibold">
-              <button
-                type="button"
-                onClick={() => handleDepthChange(5)}
-                className={`rounded px-2 py-0.5 transition-all ${
-                  depth === 5 ? 'bg-primary text-primary-foreground font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                5D
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDepthChange(10)}
-                className={`rounded px-2 py-0.5 transition-all ${
-                  depth === 10 ? 'bg-primary text-primary-foreground font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                10D
-              </button>
-            </div>
+            {/* 5 / 10 Depth 토글 버튼 (호가창 모드일 때만 표시) */}
+            {viewMode === 'ladder' && (
+              <div className="inline-flex rounded-lg border border-border/70 bg-muted/50 p-0.5 text-[11px] font-semibold">
+                <button
+                  type="button"
+                  onClick={() => handleDepthChange(5)}
+                  className={`rounded px-2 py-0.5 transition-all ${
+                    depth === 5 ? 'bg-primary text-primary-foreground font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  5D
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDepthChange(10)}
+                  className={`rounded px-2 py-0.5 transition-all ${
+                    depth === 10 ? 'bg-primary text-primary-foreground font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  10D
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-2 space-y-1.5 text-xs font-mono tabular-nums tracking-tight select-none">
-        {/* 매도호가 리스트 (Asks, Fall/Ask 계열 동적 테마) */}
+        {viewMode === 'depth' ? (
+          <StockDepthChart
+            bids={bids}
+            asks={asks}
+            livePrice={livePrice}
+            isEn={isEn}
+            onSelectPrice={onSelectPrice}
+          />
+        ) : (
+          <>
         <div className="space-y-0.5">
           {asks.map((ask) => {
             const askNum = Number.parseInt(ask.price, 10);
@@ -428,6 +491,8 @@ export function StockOrderbook({
               })}
             </div>
           </div>
+        )}
+        </>
         )}
       </CardContent>
     </Card>

@@ -20,6 +20,7 @@ import {
 } from './controls-forms';
 import { PolicyVersionCard } from './policy-version-card';
 import { HotTimeManagementCard } from './hot-time-management-card';
+import { EmergencyKillSwitchCard } from './emergency-kill-switch-card';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +70,8 @@ export default async function AdminControlsPage() {
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
       </PageHeader>
+
+      <EmergencyKillSwitchCard />
 
       <PolicyVersionCard
         currentTermsVersion={policy?.termsVersion ?? '2026-09-02'}

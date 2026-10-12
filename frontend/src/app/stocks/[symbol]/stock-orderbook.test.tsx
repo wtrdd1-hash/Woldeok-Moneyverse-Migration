@@ -274,6 +274,36 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
     // 감시 등록 버튼 검증
     expect(screen.getByText(/익절 감시 주문 등록/i)).toBeDefined();
   });
+
+  it('renders orderbook depth chart and toggles between ladder and depth views', () => {
+    const handleSelect = vi.fn();
+    render(
+      <StockOrderbook
+        stockId="WDG"
+        symbol="WDG"
+        currentPrice="15,000"
+        isEn={false}
+        onSelectPrice={handleSelect}
+      />
+    );
+
+    // 호가, 심도 탭 버튼 확인
+    const ladderBtn = screen.getByText('호가');
+    const depthBtn = screen.getByText('심도');
+    expect(ladderBtn).toBeDefined();
+    expect(depthBtn).toBeDefined();
+
+    // 심도 탭 클릭 -> 심도 차트 모드로 전환
+    fireEvent.click(depthBtn);
+    expect(screen.getByText(/실시간 호가 심도 \(Depth\)/i)).toBeDefined();
+    expect(screen.getByText(/실시간 매수\/매도 매물대 심도/i)).toBeDefined();
+    expect(screen.getByText(/매수 누적/i)).toBeDefined();
+    expect(screen.getByText(/매도 누적/i)).toBeDefined();
+
+    // 다시 호가 탭 클릭 -> 호가 테이블로 복귀
+    fireEvent.click(ladderBtn);
+    expect(screen.getByText(/(5|10)단계 실시간 호가/i)).toBeDefined();
+  });
 });
 
 

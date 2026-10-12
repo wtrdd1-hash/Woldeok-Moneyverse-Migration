@@ -1095,3 +1095,41 @@
 1. 문서 마크다운 렌더링 무결성 및 링크 유효성 확인.
 2. 프로젝트 루트 `implementation_plan.md`와 아티팩트 동기화.
 3. Git 커밋 및 origin main 푸시.
+
+
+---
+
+## 🚀 [v202 Specification] 가상 주식 실시간 호가 심도 누적 차트(DOM Depth Chart) & 관리자 비상 관제 킬스위치 그리드 구축
+
+### 1. 현황 및 목표 분석
+1. **[호가 심도 누적 차트 (Depth Visualizer) 부재]**:
+   - 현재 호가창(`StockOrderbook`)은 10단 가격 리스트 형태로만 제공되어, 매수 매물대와 매도 매물대의 전체 누적 압력(Market Depth Pressure) 및 대형 호가벽(Order Wall)을 한눈에 파악하기 어려움.
+   - 바이낸스, 토스증권 등 현대 핀테크 표준에 맞춰 실시간 매수(에메랄드 `#10b981`) 누적 영역과 매도(로즈 `#f43f5e`) 누적 영역이 중앙 현재가를 기준으로 양방향 교차하는 반응형 SVG 심도 차트(`StockDepthChart`)를 신설.
+   - 호가창 상단에 `[10단 호가]` vs `[호가 심도 (Depth)]` 뷰 전환 세그먼트 스위처 연동 (`localStorage` 영구 보존).
+2. **[관리자 비상 관제 킬스위치 그리드 (`/admin/controls`)]**:
+   - `admin-control-tower-craft` 스킬 규격에 따라, 비상사태(시세 교란, 취약점 발견, 점검 등) 발생 시 신속히 시스템을 방어할 수 있는 4대 긴급 킬스위치(거래소 매매 정지, 국고 출금 동결, 신규 회원가입 차단, 카지노/미니게임 정지) 토글 그리드 및 안전 확인 가드 구축.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-depth-chart.tsx` (신규)**:
+   - 10단 매수(Bids) 및 매도(Asks) 호가로부터 가격대별 누적 수량(Cumulative Volume) 계산 엔진.
+   - SVG 패스(`path d="M..."`) 기반 부드러운 에어리어 차트 렌더링 (매수: 에메랄드 그라디언트, 매도: 로즈 그라디언트).
+   - 중앙 체결가 가이드라인, 최대 호가벽(Max Order Wall) 뱃지, 마우스 호버 시 툴팁(가격, 누적 수량, 누적 금액).
+2. **`frontend/src/app/stocks/[symbol]/stock-orderbook.tsx`**:
+   - 상단 헤더에 `[호가]` vs `[심도]` 탭 세그먼트 스위처 연동.
+   - `orderbookView` 상태에 따라 10단 호가 테이블 또는 `StockDepthChart` 조건부 렌더링.
+3. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - 심도 차트 렌더링 및 탭 전환 상호작용 단위 테스트 확장.
+4. **`frontend/src/app/admin/controls/page.tsx` (신규/고도화)**:
+   - 4대 킬스위치 제어 패널 UI 구축.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v584`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
