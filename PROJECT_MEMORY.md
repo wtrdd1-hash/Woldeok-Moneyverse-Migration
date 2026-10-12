@@ -13,8 +13,28 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v581 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v581`
+## 🌟 Production Release Overview (prod-v582 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v582`
+- **Release Date**: 2026-10-12 21:38 KST
+- **Git Commit HEAD**: `e84102e5` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 자동 감시 조건부 주문 시스템 (`StockConditionalOrders`, v198 / prod-v582)**:
+     - 손절 감시(Stop-Loss) vs 익절 감시(Take-Profit) 듀얼 모드 조건부 주문 시스템 구축.
+     - 빠른 단가 프리셋 (-3%, -5%, -10% / +5%, +10%, +20%) 및 수량 잔고 비율(25%, 50%, 전량) 원터치 바인딩.
+     - 실시간 시세 변화 감지 및 목표 발동 단가 도달 시 자동 시장가 매도 실행 클라이언트 시뮬레이션 감시 봇 엔진.
+     - 활성 감시 목록 테이블 (상태 배지, 잔여 괴리율 시각화, 감시 취소/삭제, localStorage 영구 저장).
+  2. **트레이딩 콘솔 모드 전환 탭 스위처 (`StockTradingConsole`)**:
+     - 데스크톱 주문 콘솔 및 모바일 바텀시트 모달 상단에 `[호가 주문]` vs `[자동 감시 (스탑로스/익절)]` 세그먼트 스위처 연동.
+  3. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (8/8) 100% PASS (스탑로스/익절 프리셋 및 등록 테스트 포함).
+     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, '자동 감시 (스탑로스/익절)' 정상 서빙).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v581)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v581`
 - **Release Date**: 2026-10-12 21:20 KST
 - **Git Commit HEAD**: `9bed0441` (`main`)
 - **Key Deliverables**:
