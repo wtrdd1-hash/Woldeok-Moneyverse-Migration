@@ -1062,3 +1062,36 @@
 2. 원격 서버 `df -h` 및 `ls -la /srv/moneyverse-data/releases/`를 통한 디스크 용량 회수 및 활성 릴리스 보존 상태 실측.
 3. 현재 활성 서비스(`moneyverse-backend.service`, `moneyverse-frontend.service`) 무중단 및 HTTP 200 정상 확인.
 4. `PROJECT_MEMORY.md` 및 `implementation_plan.md` 동기화 및 Git 커밋/푸시.
+
+
+---
+
+## 🚀 [v201 Specification] 통합 개발 진행상황 종합 및 글로벌 공인 엔지니어링/금융 표준 마스터 레퍼런스 총서 구축
+
+### 1. 현황 및 목표 분석
+1. **[누적 개발 진행상황(v1~v200) 종합 집대성]**:
+   - `PROJECT_MEMORY.md`, `UPDATE_LOG.ko.md`, `implementation_plan.md` 등 파편화된 개발 마일스톤과 릴리스 이력을 단일 문서에서 전체 조망할 수 있도록 로드맵 및 도메인별 개발 완료 내역을 한 번에 정리.
+2. **[글로벌 최신 공인 엔지니어링 & 금융 표준 레퍼런스 확립]**:
+   - 시스템에 내장된 고난도 아키텍처(복식부기 원장, 기술적 지표 수식, Next.js/NestJS 헬스체크, 예금자보호법 컴플라이언스, 테일러 칙)의 이론적/기술적 권위를 뒷받침하는 공인 학술·산업 레퍼런스를 완결 수록.
+
+---
+
+### 2. 세부 개발 명세 및 결과물
+1. **`docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md` (신규)**:
+   - v1 ~ v200 누적 마일스톤 타임라인 Mermaid 다이어그램.
+   - 6대 핵심 도메인별 누적 완료 기능 종합 명세.
+   - 5대 최신 공인 엔지니어링 표준 레퍼런스 수록:
+     - 복식부기 회계 & 원장 무결성 (Martin Fowler Accounting Patterns, Plain Text Accounting, PostgreSQL SERIALIZABLE)
+     - 금융 기술적 분석 & 차트 알고리즘 (Wilder's RSI, Appel's MACD, Bollinger Bands, TradingView Standards)
+     - 모던 풀스택 프레임워크 (Next.js 16 Route Handlers, NestJS 11 Terminus, Vercel Geist)
+     - 거시 통화정책 & 국부펀드 거버넌스 (Taylor Rule 1993, IFSWF Santiago Principles)
+     - 전자금융 보안 & 예금자보호 규제 (예금자보호법 시행령 제18조, 전자금융감독규정, 가상자산이용자보호법)
+2. **문서 허브 연결 (`docs/DOCS_INDEX.md` & `README-KO.md`)**:
+   - 최상단 추천 문서 딥링크 마운트.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 문서 마크다운 렌더링 무결성 및 링크 유효성 확인.
+2. 프로젝트 루트 `implementation_plan.md`와 아티팩트 동기화.
+3. Git 커밋 및 origin main 푸시.
