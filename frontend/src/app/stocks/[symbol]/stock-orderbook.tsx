@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Scale, Zap } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Scale, Zap, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
@@ -10,6 +10,7 @@ import { generateKrxLadder, getKrxTickSize } from '../tick-size';
 
 interface StockOrderbookProps {
   readonly stockId?: string | undefined;
+  readonly symbol?: string | undefined;
   readonly currentPrice: string;
   readonly dayOpenPrice?: string | undefined;
   readonly isEn?: boolean | undefined;
@@ -24,6 +25,14 @@ export interface OrderbookRow {
   readonly cumulativeVolume: number;
 }
 
+export interface RecentTradeItem {
+  readonly id: string;
+  readonly time: string;
+  readonly price: string;
+  readonly volume: number;
+  readonly side: 'buy' | 'sell';
+}
+
 export interface OrderbookData {
   readonly asks: OrderbookRow[];
   readonly bids: OrderbookRow[];
@@ -35,6 +44,7 @@ export interface OrderbookData {
   readonly bestBid: number;
   readonly spread: number;
   readonly spreadBps: string;
+  readonly intensityPct: number; // 체결강도 (Bid Vol / Ask Vol * 100)
 }
 
 export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): OrderbookData {
@@ -48,7 +58,6 @@ export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): Or
   let cumAsk = 0;
   const rawAsks = askSteps.map((step, idx) => {
     const askPrice = askPrices[idx] ?? Math.max(1, priceNum + step);
-    // 비패턴적 호가 잔량 모델: 현재가와 단계 해시 기반 현실적 유동성 분포
     const hash = ((priceNum * 31 + step * 97) ^ (step * 13)) % 100;
     const baseVol = 40 + step * 25;
     const irregularNoise = Math.floor((hash / 100) * 45) - 20;
@@ -68,7 +77,6 @@ export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): Or
   let cumBid = 0;
   const rawBids = bidSteps.map((step, idx) => {
     const bidPrice = bidPrices[idx] ?? Math.max(1, priceNum - step);
-    // 비패턴적 호가 잔량 모델: 현재가와 단계 해시 기반 현실적 유동성 분포
     const hash = ((priceNum * 47 + step * 83) ^ (step * 29)) % 100;
     const baseVol = 45 + step * 22;
     const irregularNoise = Math.floor((hash / 100) * 40) - 18;
@@ -96,6 +104,9 @@ export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): Or
   const spread = Math.abs(bestAsk - bestBid);
   const spreadBps = priceNum > 0 ? ((spread / priceNum) * 100).toFixed(2) : '0.00';
 
+  // 체결강도 산출 (기본 매수 잔량 대비 매도 잔량 비율, 100% 기준)
+  const intensityPct = totalAskVolume > 0 ? Math.round((totalBidVolume / totalAskVolume) * 1000) / 10 : 100.0;
+
   return {
     asks,
     bids,
@@ -107,6 +118,7 @@ export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): Or
     bestBid,
     spread,
     spreadBps,
+    intensityPct,
   };
 }
 
@@ -128,16 +140,53 @@ export function StockOrderbook({
   const [flash, setFlash] = useState<'rise' | 'fall' | null>(null);
   const prevPriceRef = useRef<string>(livePrice);
 
+  // 최근 체결 틱 스트림 상태 (최신 5개)
+  const [recentTrades, setRecentTrades] = useState<RecentTradeItem[]>([]);
+
+  useEffect(() => {
+    // 초기 틱 스트림 세팅 (현재가 기반 5건)
+    const baseNum = Number.parseInt(livePrice.replaceAll(',', '') || '1000', 10);
+    const now = new Date();
+    const initialTrades: RecentTradeItem[] = Array.from({ length: 5 }).map((_, i) => {
+      const d = new Date(now.getTime() - (5 - i) * 3500);
+      const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+      const side: 'buy' | 'sell' = i % 2 === 0 ? 'buy' : 'sell';
+      const offset = (i - 2) * 5;
+      return {
+        id: `t-init-${i}`,
+        time: timeStr,
+        price: Math.max(1, baseNum + offset).toString(),
+        volume: 10 + (i * 17) % 50,
+        side,
+      };
+    });
+    setRecentTrades(initialTrades);
+  }, []);
+
   useEffect(() => {
     if (prevPriceRef.current && prevPriceRef.current !== livePrice) {
       const prevNum = Number.parseInt(prevPriceRef.current.replaceAll(',', ''), 10);
       const currNum = Number.parseInt(livePrice.replaceAll(',', ''), 10);
 
+      const side: 'buy' | 'sell' = currNum >= prevNum ? 'buy' : 'sell';
       if (currNum > prevNum) {
         setFlash('rise');
       } else if (currNum < prevNum) {
         setFlash('fall');
       }
+
+      // 새 체결 틱 스트림에 추가
+      const d = new Date();
+      const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+      const newTrade: RecentTradeItem = {
+        id: `t-${Date.now()}`,
+        time: timeStr,
+        price: livePrice,
+        volume: Math.floor(10 + Math.random() * 45),
+        side,
+      };
+
+      setRecentTrades((prev) => [newTrade, ...prev.slice(0, 4)]);
 
       const timer = setTimeout(() => {
         setFlash(null);
@@ -151,10 +200,12 @@ export function StockOrderbook({
 
   const livePriceNum = Number.parseInt(livePrice.replaceAll(',', '') || '1000', 10);
   const currentTick = getKrxTickSize(livePriceNum);
-  const { asks, bids, spread, spreadBps, totalAskVolume, totalBidVolume, bidRatio, askRatio } = computeOrderbook(livePrice, depth);
+  const { asks, bids, spread, spreadBps, totalAskVolume, totalBidVolume, bidRatio, askRatio, intensityPct } = computeOrderbook(livePrice, depth);
+
+  const isBuyDominant = intensityPct >= 100;
 
   return (
-    <Card className="border-border/80 bg-card/60 shadow-sm overflow-hidden">
+    <Card className="border-border/80 bg-card/60 shadow-sm overflow-hidden select-none">
       <CardHeader className="p-3.5 sm:p-4 pb-2 border-b border-border/60 bg-muted/20">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-bold flex items-center gap-1.5">
@@ -172,12 +223,27 @@ export function StockOrderbook({
             )}
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="font-mono text-[10px] text-primary/80 hidden sm:inline-flex border-primary/30 bg-primary/5">
+            {/* 체결강도 뱃지 */}
+            <Badge
+              variant="outline"
+              className={`font-mono tabular-nums text-[10px] hidden sm:inline-flex border transition-colors ${
+                isBuyDominant
+                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-500 font-bold'
+                  : 'border-rose-500/40 bg-rose-500/10 text-rose-500 font-bold'
+              }`}
+              title={isEn ? 'Buy-Sell Volume Intensity' : '체결강도 (매수잔량/매도잔량)'}
+            >
+              <Activity className="size-3 mr-1" />
+              <span>{isEn ? 'Intensity' : '체결강도'} {intensityPct}%</span>
+            </Badge>
+
+            <Badge variant="outline" className="font-mono tabular-nums text-[10px] text-primary/80 hidden sm:inline-flex border-primary/30 bg-primary/5">
               {isEn ? `1 Tick = ${groupDigits(currentTick.toString())} WLD` : `1틱 = ${groupDigits(currentTick.toString())} WLD`}
             </Badge>
-            <Badge variant="outline" className="font-mono text-[10px] text-muted-foreground hidden sm:inline-flex">
+            <Badge variant="outline" className="font-mono tabular-nums text-[10px] text-muted-foreground hidden sm:inline-flex">
               {isEn ? `Spread ${spread} WLD (${spreadBps}%)` : `스프레드 ${groupDigits(spread.toString())} WLD (${spreadBps}%)`}
             </Badge>
+
             {/* 5 / 10 Depth 토글 버튼 */}
             <div className="inline-flex rounded-lg border border-border/70 bg-muted/50 p-0.5 text-[11px] font-semibold">
               <button
@@ -203,7 +269,7 @@ export function StockOrderbook({
         </div>
       </CardHeader>
 
-      <CardContent className="p-2 space-y-1.5 text-xs font-mono select-none">
+      <CardContent className="p-2 space-y-1.5 text-xs font-mono tabular-nums tracking-tight select-none">
         {/* 매도호가 리스트 (Asks, Fall/Ask 계열 동적 테마) */}
         <div className="space-y-0.5">
           {asks.map((ask) => {
@@ -287,7 +353,7 @@ export function StockOrderbook({
 
         {/* 호가 잔량 매수/매도 압력 비율 바 (Order Pressure Ratio) */}
         <div className="pt-2 px-1 space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
             <span className="text-rose-600 dark:text-rose-400 font-semibold">
               {isEn ? 'Ask' : '매도'} {askRatio}% ({groupDigits(totalAskVolume.toString())})
             </span>
@@ -306,6 +372,35 @@ export function StockOrderbook({
             />
           </div>
         </div>
+
+        {/* 최근 체결 틱 5건 미니 스트림 (Recent Trades Stream) */}
+        {recentTrades.length > 0 && (
+          <div className="pt-2.5 mt-2 border-t border-border/60 px-1 space-y-1">
+            <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              <span>{isEn ? 'Recent Trades' : '최근 체결 틱'}</span>
+              <span className="text-[9px] font-normal opacity-70">{isEn ? 'Time / Price / Qty' : '시간 · 체결가 · 수량'}</span>
+            </div>
+            <div className="space-y-1">
+              {recentTrades.map((t) => {
+                const isTradeBuy = t.side === 'buy';
+                return (
+                  <div
+                    key={t.id}
+                    className="flex items-center justify-between text-[11px] px-2 py-1 rounded bg-muted/20 border border-border/40 animate-in fade-in"
+                  >
+                    <span className="text-muted-foreground/80 text-[10px]">{t.time}</span>
+                    <span className={`font-bold ${isTradeBuy ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {groupDigits(t.price)}
+                    </span>
+                    <span className="text-muted-foreground font-medium text-[10px]">
+                      {groupDigits(t.volume.toString())}{isEn ? 'sh' : '주'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

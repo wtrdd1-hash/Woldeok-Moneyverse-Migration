@@ -13,10 +13,33 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v576 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v576`
+## 🌟 Production Release Overview (prod-v577 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v577`
+- **Release Date**: 2026-10-12 17:55 KST
+- **Git Commit HEAD**: `2dabf2b7` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 호가창 & 인터랙티브 차트 TradingView급 전면 쇄신 (v193 / prod-v577)**:
+     - `StockInteractiveChart`: 라인 에어리어 vs 캔들스틱 봉차트 듀얼 모드 토글 스위치 구축 (`봉` / `선`).
+     - 골드 앰버 이동평균선 MA 5 및 퍼플 인디고 이동평균선 MA 20 오버레이 및 상단 OHLC 인디케이터 바.
+     - 하단 볼륨 히스토그램 막대 그래프 동적 높이 스케일링 (상승/하락 색상 자동 매핑).
+     - 마우스 및 터치 크로스헤어(십자선) 인터랙션 가이드 및 OHLC 실시간 툴팁.
+     - `tabular-nums` 모노스페이스 전면 적용으로 시세 변동 시 글리프 흔들림(Jittering) 0건 달성.
+  2. **10단 호가창 체결강도 & 최근 체결 틱 스트림 고도화**:
+     - `StockOrderbook`: 체결강도(`Intensity`) 게이지 배지 (매수우세 에메랄드 / 매도우세 로즈).
+     - 5D / 10D 깊이 원클릭 토글 버튼.
+     - 최신 체결 5건 실시간 미니 스트림 (`시간 · 체결가 · 수량`).
+     - 320px 모바일 뷰포트 방어 및 단축키/호가 원터치 연동 보존.
+  3. **검증 및 배포 완결**:
+     - 로컬 및 프로덕션 Next.js 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - 신규 단위 테스트 `stock-orderbook.test.tsx` 통과.
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v576)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v576`
 - **Release Date**: 2026-10-11 23:30 KST
-- **Git Commit HEAD**: `5cc4017e` (`main`)
+- **Git Commit HEAD**: `35245119` (`main`)
 - **Key Deliverables**:
   1. **전체 SEO 재분석 및 검색엔진 최적화 전면 개발**:
      - `sitemap.xml`, `sitemap-static.xml`, `sitemap-stocks.xml`의 `<lastmod>` 날짜를 `2026-10-11T23:00:00.000Z`로 최신화.
