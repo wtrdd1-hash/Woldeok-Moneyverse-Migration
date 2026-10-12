@@ -13,8 +13,150 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v577 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v577`
+## 🌟 Production Release Overview (prod-v584 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v584`
+- **Release Date**: 2026-10-13 01:24 KST
+- **Git Commit HEAD**: `5cd1e4a8` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 실시간 호가 심도 누적 차트 (`StockDepthChart`, v202 / prod-v584)**:
+     - 10단 매수(Bids) vs 매도(Asks) 호가로부터 가격대별 누적 잔량을 산출하여 매수(에메랄드 `#10b981`) 및 매도(로즈 `#f43f5e`) 듀얼 그라디언트 에어리어 SVG 차트 렌더링.
+     - 중앙 체결가 기준선, 호버 시 단일/누적 수량 툴팁, 최대 호가벽(Order Wall) 뱃지 및 클릭 시 즉시 주문 바인딩.
+     - 호가창 헤더에 `[호가]` vs `[심도]` 뷰 세그먼트 스위처 연동 (`localStorage` 영구 동기화).
+  2. **관리자 비상 관제 긴급 킬스위치 제어탑 (`EmergencyKillSwitchCard`, `/admin/controls`)**:
+     - `admin-control-tower-craft` 스킬 기반: 4대 긴급 비상 킬스위치(거래소 전 종목 매매 동결 서킷브레이커, 국고 출금 동결, 신규 가입 차단, 외부 웹훅 격리) 구축.
+     - 오조작 방지를 위한 2단계 보안 확인(Step-Up Field) 모달 다이얼로그 ("CONFIRM FREEZE" 문구 검증) 및 세션 감사 로그 스트립 탑재.
+  3. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (9/9) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG`, `/admin/controls` HTTP 200 실측 확인).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v583)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v583`
+- **Release Date**: 2026-10-12 22:05 KST
+- **Git Commit HEAD**: `96bcb372` (`main`)
+- **Key Deliverables**:
+  1. **시스템 헬스 웹 프로브 최적화 및 상단 지연 경고 배너 영구 소거 (v199 / prod-v583)**:
+     - 백엔드 `status-collector.module.ts`의 `webProbe` 타깃 URL인 `WEB_HEALTH_URL`을 Next.js 무거운 SSR 루트(`/`)에서 가벼운 헬스 엔드포인트(`http://127.0.0.1:3001/api/health`)로 교정.
+     - 웹 프로브 응답 시간을 2,624ms ~ 9,150ms에서 **1.4ms ~ 4ms**로 99.9% 획기적 단축, 전 서비스 `operational` 정상 판정 복구.
+     - 메인 및 전 화면 상단에 노출되던 `"일부 서비스의 응답이 느려지고 있습니다"` 노란색 경고 배너 영구 소거 완료.
+  2. **관리자 자금 흐름 관제(`/admin/money-flow`) 복식부기 원장 무결성 스트립 & 누적 지표 고도화**:
+     - 24시간 거래 미발생 시에도 시스템 정상 여부를 즉시 확인할 수 있도록 `[복식부기 원장 무결성 100% 검증]` 상태 뱃지 스트립 신설.
+     - 백엔드 `treasury.repository.ts`에서 전체 누적 트랜잭션 건수(`all_time_transactions`: 831건), 누적 거래 유저 수(`all_time_users`: 13명), 최근 원장 체결 시각(`last_transaction_at`) 집계 쿼리 추가.
+     - 24시간 동안 신규 체결이 없을 때 관리자가 오해하지 않도록 안내 인포 배너(`최근 24시간 동안 신규 체결된 거래가 없습니다. 아래 실시간 원장 내역 테이블에서 이전 전체 트랜잭션을 정상적으로 열람 가능`) 추가.
+     - 4대 통계 카드 서브 캡션에 전체 누적 보존 수치 병기.
+  3. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 백엔드 빌드 (`nest build`) 및 프론트엔드 프로덕션 빌드 (`next build`) 584개 페이지 생성 100% PASS.
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/admin/money-flow` HTTP 200 실측 확인, 원장 무결성 지표 및 상단 배너 소멸 검증 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v582)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v582`
+- **Release Date**: 2026-10-12 21:38 KST
+- **Git Commit HEAD**: `e84102e5` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 자동 감시 조건부 주문 시스템 (`StockConditionalOrders`, v198 / prod-v582)**:
+     - 손절 감시(Stop-Loss) vs 익절 감시(Take-Profit) 듀얼 모드 조건부 주문 시스템 구축.
+     - 빠른 단가 프리셋 (-3%, -5%, -10% / +5%, +10%, +20%) 및 수량 잔고 비율(25%, 50%, 전량) 원터치 바인딩.
+     - 실시간 시세 변화 감지 및 목표 발동 단가 도달 시 자동 시장가 매도 실행 클라이언트 시뮬레이션 감시 봇 엔진.
+     - 활성 감시 목록 테이블 (상태 배지, 잔여 괴리율 시각화, 감시 취소/삭제, localStorage 영구 저장).
+  2. **트레이딩 콘솔 모드 전환 탭 스위처 (`StockTradingConsole`)**:
+     - 데스크톱 주문 콘솔 및 모바일 바텀시트 모달 상단에 `[호가 주문]` vs `[자동 감시 (스탑로스/익절)]` 세그먼트 스위처 연동.
+  3. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (8/8) 100% PASS (스탑로스/익절 프리셋 및 등록 테스트 포함).
+     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, '자동 감시 (스탑로스/익절)' 정상 서빙).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v581)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v581`
+- **Release Date**: 2026-10-12 21:20 KST
+- **Git Commit HEAD**: `9bed0441` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 전 종목 퀵 티커 스위처 바 (`StockTickerSwitcher`, v197 / prod-v581)**:
+     - 거래소 상단에 시장 18개 전 종목을 가로 스크롤로 한눈에 탐색할 수 있는 반응형 티커 캐러셀 탑재.
+     - 종목 심볼, 한글 명칭, 실시간 현재가(콤마 안전 포맷팅), 당일 등락률(%) 뱃지 및 현재 선택 종목 액티브 링 제공.
+     - 모바일 터치 스크롤(`no-scrollbar`, `scroll-smooth`) 및 데스크톱 호버 피드백 지원.
+  2. **정통 MACD(12, 26, 9) 모멘텀 서브패널 탑재**:
+     - 단기 EMA(12)와 장기 EMA(26)의 수렴·확산 곡선(스카이블루 `#38bdf8`) 산출.
+     - MACD의 9기간 시그널 지수이동평균 곡선(오렌지 `#fb923c`) 산출.
+     - 모멘텀 오실레이터 히스토그램 막대(상승 에메랄드 `#10b981` / 하락 로즈 `#f43f5e`) 3중 SVG 렌더링.
+  3. **서브패널 탭 전환기 (RSI ↔ MACD)**:
+     - 뷰포트 높이 절약을 위해 차트 하단 서브패널을 원클릭으로 `[RSI (14)]`와 `[MACD (12, 26, 9)]` 간 토글할 수 있는 탭 스위처 연동 (`localStorage` 영구 보존).
+     - 상단 지표 칩 그룹에 `MACD` 토글 버튼 연동.
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (7/7) 100% PASS (MACD 및 티커 스위처 테스트 포함).
+     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, '가상 주식 퀵 티커 바' 정상 서빙).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v580)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v580`
+- **Release Date**: 2026-10-12 20:34 KST
+- **Git Commit HEAD**: `96b99eea` (`main`)
+- **Key Deliverables**:
+  1. **백엔드 실데이터 캔들 API 하이브리드 바인딩 (v196 / prod-v580)**:
+     - `StockInteractiveChart`: `/api/stocks/[id]/candles?interval={sec}` 엔드포인트 비동기 조회.
+     - 타임프레임 표준 매핑: `1D`(15분봉), `1W`(1시간봉), `1M`(1일봉), `1Y`(1주봉).
+     - 장애/비로그인 시 브라운 브리지 난수 궤적으로 원활히 전환되는 무중단 Fallback 보장.
+  2. **지지선 / 저항선(Support & Resistance) 수평 분석 칩**:
+     - 상단 지표 칩 바에 `SR` 온/오프 토글 추가 (`localStorage` 영구 동기화).
+     - 당일 최고가(또는 차트 고가) 기준 로즈 붉은색 저항 점선 가이드라인 렌더링 (`저항 {price}`).
+     - 당일 최저가(또는 차트 저가) 기준 에메랄드 지지 점선 가이드라인 렌더링 (`지지 {price}`).
+  3. **실시간 시장 체결 플로팅 미니 토스트 (`StockMarketToast`)**:
+     - 화면 우측 하단에 대규모 체결 및 급등락 틱을 5초간 슬라이드 인/아웃으로 노출.
+     - 체결 틱 사운드(`playStockTickSound`) 및 에메랄드(매수)/로즈(매도) 뱃지 시각 피드백 연동.
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (6/6) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, 'SR', '지지선/저항선' 정상 서빙).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v579)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v579`
+- **Release Date**: 2026-10-12 19:54 KST
+- **Git Commit HEAD**: `620a7340` (`main`)
+- **Key Deliverables**:
+  1. **전문가용 키보드 핫키 트레이딩 시스템 (v195 / prod-v579)**:
+     - `StockOrderPanel`: `B`(매수 탭), `S`(매도 탭), `Enter`(주문 확인 및 제출), `Esc`(모달 닫기/폼 포커스 해제).
+     - **오입력 방지 가드**: 수량/가격 등 텍스트 인풋 필드에 포커스되어 있을 때 알파벳 단축키 트리거를 원천 차단하여 오입력 방지.
+     - **UI 단축키 뱃지**: 탭 버튼 및 주문 실행 버튼에 정밀 모노스페이스 뱃지(`[B]`, `[S]`, `[Enter]`) 및 데스크톱 단축키 가이드 바 노출.
+  2. **실시간 마이크로 도넛 포트폴리오 자산 비중 위젯 (`StockMicroPortfolio`)**:
+     - 개별 주식 거래 화면 우측 주문 패널 하단에 SVG 마이크로 도넛 차트 위젯 배치.
+     - 현재 종목의 포트폴리오 점유 비중(%) 중앙 시각화, 보유 평가액 및 상위 3개 보유 종목 컬러 배지 스트립 제공.
+  3. **지정가 모의 체결 봇 & 피드백 (Simulated Limit Order Matcher)**:
+     - 지정가 주문 시 가상 매칭 엔진 호가 대기 펄스 애니메이션 및 1.2초 후 체결 완료 축하 사운드(`playStockTradeSuccessSound`) 연동.
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v578`
+- **Release Date**: 2026-10-12 19:18 KST
+- **Git Commit HEAD**: `dbcefc68` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 차트 고급 보조지표 탑재 (v194 / prod-v578)**:
+     - `StockInteractiveChart`: 볼린저 밴드(20, 2) 상/중/하단 밴드 및 투명 음영 영역 렌더링.
+     - RSI(14) 실시간 서브패널(과매수 70 / 과매도 30 점선 기준선) 추가.
+     - 지표 칩 토글 스위치 (`MA 5/20`, `BB(20,2)`, `RSI(14)`) 독립 온/오프 제어.
+     - 차트 모드(`봉`/`선`) 및 활성 지표 목록 `localStorage` 영구 동기화 (`mw_stock_chart_mode`, `mw_stock_chart_indicators`).
+  2. **10단 호가창 & 주문 콘솔 퀵 바인딩 및 프리셋**:
+     - `StockOrderbook`: 호가 깊이(5D/10D) `localStorage` 영구 동기화 (`mw_stock_orderbook_depth`).
+     - 호가 행 클릭 시 즉시 주문 가격 인풋 바인딩 및 체결 틱 사운드 재생.
+     - `StockOrderPanel`: 10%, 25%, 50%, 100% 잔액 비율 원터치 프리셋 버튼 탑재.
+  3. **Web Audio API 오디오 인터랙션 구축**:
+     - `audio-effects.ts`: `playStockTradeSuccessSound()` (체결 완료 D5->A5 아르페지오 신디사이징).
+     - `audio-effects.ts`: `playStockTickSound()` (1600Hz 미니멀 틱 핑).
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 및 Next.js 프로덕션 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - 단위 테스트 `stock-orderbook.test.tsx` (3/3) 100% PASS.
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인).
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v577`
 - **Release Date**: 2026-10-12 17:55 KST
 - **Git Commit HEAD**: `2dabf2b7` (`main`)
 - **Key Deliverables**:
@@ -29,14 +171,6 @@
      - 5D / 10D 깊이 원클릭 토글 버튼.
      - 최신 체결 5건 실시간 미니 스트림 (`시간 · 체결가 · 수량`).
      - 320px 모바일 뷰포트 방어 및 단축키/호가 원터치 연동 보존.
-  3. **검증 및 배포 완결**:
-     - 로컬 및 프로덕션 Next.js 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
-     - 신규 단위 테스트 `stock-orderbook.test.tsx` 통과.
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v576)
 - **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v576`
 - **Release Date**: 2026-10-11 23:30 KST
 - **Git Commit HEAD**: `35245119` (`main`)

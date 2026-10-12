@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { StockOrderbook } from './stock-orderbook';
 import { StockOrderPanel } from './stock-order-panel';
+import { StockMicroPortfolio } from './stock-micro-portfolio';
+import { StockConditionalOrders } from './stock-conditional-orders';
 import type { StockHaltReceiptData } from './stock-halt-receipt-dialog';
 import { groupDigits } from '@/lib/money';
 
@@ -41,6 +43,7 @@ export function StockTradingConsole({
 }: StockTradingConsoleProps) {
   const [selectedPrice, setSelectedPrice] = useState<string>(currentPrice);
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
+  const [tradingTab, setTradingTab] = useState<'order' | 'conditional'>('order');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   // 호가창에서 특정 호가 클릭 시 단가 및 매수/매도 탭 자동 연동
@@ -53,6 +56,33 @@ export function StockTradingConsole({
     setSide(orderSide);
     setIsMobileDrawerOpen(true);
   };
+
+  const renderTradingSwitcher = () => (
+    <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/40 border border-border/70 text-xs font-bold">
+      <button
+        type="button"
+        onClick={() => setTradingTab('order')}
+        className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
+          tradingTab === 'order'
+            ? 'bg-card text-foreground shadow-xs border border-border/80'
+            : 'text-muted-foreground hover:text-foreground'
+        }`}
+      >
+        {isEn ? 'Manual Order' : '호가 주문'}
+      </button>
+      <button
+        type="button"
+        onClick={() => setTradingTab('conditional')}
+        className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
+          tradingTab === 'conditional'
+            ? 'bg-card text-foreground shadow-xs border border-border/80'
+            : 'text-muted-foreground hover:text-foreground'
+        }`}
+      >
+        {isEn ? 'Conditional (SL/TP)' : '자동 감시 (스탑로스/익절)'}
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -70,38 +100,80 @@ export function StockTradingConsole({
         </div>
 
         {/* 우측 주문 패널 (데스크톱에서는 상시 표시) */}
-        <div className="hidden lg:block">
-          <StockOrderPanel
-            stockId={stockId}
-            symbol={symbol}
-            name={name}
+        <div className="hidden lg:flex flex-col gap-4">
+          {renderTradingSwitcher()}
+
+          {tradingTab === 'order' ? (
+            <StockOrderPanel
+              stockId={stockId}
+              symbol={symbol}
+              name={name}
+              currentPrice={currentPrice}
+              availableShares={availableShares}
+              holdingQuantity={holdingQuantity}
+              isHalted={isHalted}
+              isEn={isEn}
+              selectedPrice={selectedPrice}
+              activeSide={side}
+              onSideChange={setSide}
+              receipt={receipt}
+            />
+          ) : (
+            <StockConditionalOrders
+              stockId={stockId}
+              symbol={symbol}
+              name={name}
+              currentPrice={currentPrice}
+              holdingQuantity={holdingQuantity}
+              isHalted={isHalted}
+              isEn={isEn}
+            />
+          )}
+
+          <StockMicroPortfolio
+            currentSymbol={symbol}
             currentPrice={currentPrice}
-            availableShares={availableShares}
             holdingQuantity={holdingQuantity}
-            isHalted={isHalted}
             isEn={isEn}
-            selectedPrice={selectedPrice}
-            activeSide={side}
-            onSideChange={setSide}
-            receipt={receipt}
           />
         </div>
 
         {/* 모바일 화면에서는 일반 스크롤 영역에도 주문 패널을 노출 (하단 바와 함께) */}
-        <div className="block lg:hidden">
-          <StockOrderPanel
-            stockId={stockId}
-            symbol={symbol}
-            name={name}
+        <div className="flex flex-col gap-4 lg:hidden">
+          {renderTradingSwitcher()}
+
+          {tradingTab === 'order' ? (
+            <StockOrderPanel
+              stockId={stockId}
+              symbol={symbol}
+              name={name}
+              currentPrice={currentPrice}
+              availableShares={availableShares}
+              holdingQuantity={holdingQuantity}
+              isHalted={isHalted}
+              isEn={isEn}
+              selectedPrice={selectedPrice}
+              activeSide={side}
+              onSideChange={setSide}
+              receipt={receipt}
+            />
+          ) : (
+            <StockConditionalOrders
+              stockId={stockId}
+              symbol={symbol}
+              name={name}
+              currentPrice={currentPrice}
+              holdingQuantity={holdingQuantity}
+              isHalted={isHalted}
+              isEn={isEn}
+            />
+          )}
+
+          <StockMicroPortfolio
+            currentSymbol={symbol}
             currentPrice={currentPrice}
-            availableShares={availableShares}
             holdingQuantity={holdingQuantity}
-            isHalted={isHalted}
             isEn={isEn}
-            selectedPrice={selectedPrice}
-            activeSide={side}
-            onSideChange={setSide}
-            receipt={receipt}
           />
         </div>
       </div>
@@ -147,20 +219,36 @@ export function StockTradingConsole({
             </DialogTitle>
           </DialogHeader>
 
-          <StockOrderPanel
-            stockId={stockId}
-            symbol={symbol}
-            name={name}
-            currentPrice={currentPrice}
-            availableShares={availableShares}
-            holdingQuantity={holdingQuantity}
-            isHalted={isHalted}
-            isEn={isEn}
-            selectedPrice={selectedPrice}
-            activeSide={side}
-            onSideChange={setSide}
-            receipt={receipt}
-          />
+          <div className="space-y-4">
+            {renderTradingSwitcher()}
+
+            {tradingTab === 'order' ? (
+              <StockOrderPanel
+                stockId={stockId}
+                symbol={symbol}
+                name={name}
+                currentPrice={currentPrice}
+                availableShares={availableShares}
+                holdingQuantity={holdingQuantity}
+                isHalted={isHalted}
+                isEn={isEn}
+                selectedPrice={selectedPrice}
+                activeSide={side}
+                onSideChange={setSide}
+                receipt={receipt}
+              />
+            ) : (
+              <StockConditionalOrders
+                stockId={stockId}
+                symbol={symbol}
+                name={name}
+                currentPrice={currentPrice}
+                holdingQuantity={holdingQuantity}
+                isHalted={isHalted}
+                isEn={isEn}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

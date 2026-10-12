@@ -234,3 +234,64 @@ export function playCoinCollectSound(): void {
     // Audio play failure ignored safely
   }
 }
+
+/**
+ * 8. Stock Trade Execution Success Sound (Clean Chime: 587.33Hz D5 -> 880Hz A5)
+ */
+export function playStockTradeSuccessSound(): void {
+  if (isAudioMuted()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  try {
+    const notes = [587.33, 880]; // D5 -> A5
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const startTime = ctx.currentTime + idx * 0.08;
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(0.2, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.28);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.3);
+    });
+  } catch {
+    // Audio play failure ignored safely
+  }
+}
+
+/**
+ * 9. Stock Price Tick Pin Sound (1600Hz high precision subtle ping)
+ */
+export function playStockTickSound(): void {
+  if (isAudioMuted()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1600, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.04);
+
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.05);
+  } catch {
+    // Audio play failure ignored safely
+  }
+}

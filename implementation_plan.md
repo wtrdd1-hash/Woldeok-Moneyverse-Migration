@@ -1,6 +1,15 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v191)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v196)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v200**: [문서 깃허브 최신화 및 체계적 도메인 통합 허브(DOCS_INDEX.md) 구축 & 원격/로컬 대규모 디스크 정리(구버전 릴리스 v571~v580 소거, 수십 GB 회수, Git GC)] (+150, -0)
+- **v199**: [웹 서비스 헬스체크 4ms 정상화(지연 배너 영구 소거) & 유저 자금 흐름 관제(/admin/money-flow) 복식부기 원장 무결성 및 누적 지표 고도화] (+120, -0)
+- **v198**: [가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 실시간 자동 감시 조건부 주문 시스템 탑재] (+140, -0)
+- **v197**: [가상 주식 전 종목 퀵 티커 스위처 바 구축 & 차트 정통 MACD(12, 26, 9) 서브패널 및 서브차트 탭 전환기 탑재] (+135, -0)
+- **v196**: [가상 주식 실데이터 캔들 API 하이브리드 바인딩 & 지지/저항선 수평 분석 칩 및 실시간 체결 플로팅 토스트 구축] (+130, -0)
+- **v195**: [가상 주식 전문가용 트레이딩 인터페이스 구축 (키보드 핫키 B/S/Enter/Esc 단축 주문, 입력 가드, 마이크로 도넛 포트폴리오 위젯, 지정가 모의 체결 봇 및 Web Audio 체결 토스트)] (+110, -0)
+- **v194**: [가상 주식 거래 시스템 고도화 (RSI 상대강도지수 서브패널, 볼린저 밴드 오버레이, 주문 콘솔 10%/25%/50%/100% 잔고 비율 바인딩, Web Audio 체결 사운드 및 localStorage 영구 동기화)] (+120, -0)
+- **v193**: [가상 주식 호가창 & 인터랙티브 차트 TradingView급 전면 쇄신 (캔들스틱/라인 듀얼 모드, MA 5/20, 볼륨 히스토그램, 크로스헤어 OHLC, 체결강도 게이지, 최근 체결 틱 스트림, prod-v577)] (+110, -0)
+- **v192**: [전체 SEO 및 사이트 재분석 기반 검색엔진 최적화 전면 개발 및 무중단 배포 (prod-v576)] (+130, -0)
 - **v191**: [전역 무손실 DB 스냅샷 백업(post-v575) 생성 & 원격 프로덕션 디스크 81GB 대규모 클린업(루트 +22GB 확보, /srv +59GB 확보) 완료] (+65, -0)
 - **v190**: [예금보험공사(KDIC) 포털 실측 검증 및 관리자 관제탑(/admin/kdic) 원장 분개 상태·원예금고 비교 시각화 쇄신 및 prod-v575 무중단 승격] (+60, -0)
 - **v189**: [QA-P0-03 결함 정밀 해결 (예금보험공사(KDIC) 대위변제 원장 무결성 확립, economy_post_transaction 복식부기 분개 연동, 중복 지급 방지 가드 및 prod-v574 무중단 승격)] (+75, -0)
@@ -746,3 +755,381 @@
 4. Git 커밋 및 origin/main 푸시
 5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v577`)
 6. 실제 엔드포인트(`https://easy-scraping.com/stocks/WDG`) 접속 후 실시간 차트 듀얼 토글, 캔들스틱, MA5/MA20, 거래량 바, 체결강도 및 체결 틱 스트림 동작 검증
+
+
+---
+
+## 🚀 [v194 Specification] 가상 주식 거래 시스템 고도화 (RSI/볼린저 밴드 보조지표, 주문 콘솔 단축키/비율 바인딩 및 Web Audio 피드백)
+
+### 1. 현황 및 개선 필요 사항
+1. **[보조지표 확장: RSI 14 & 볼린저 밴드(20, 2) 탑재]**:
+   - `stock-interactive-chart.tsx`: 프로 트레이더의 기술적 분석을 위해 단순 이평선(MA5, MA20)을 넘어 볼린저 밴드(상단/중심선/하단) 영역 렌더링 및 하단 RSI 14(과매수 70 / 과매도 30 점선 가이드) 서브패널 추가 필요.
+   - 각 보조지표의 독립 On/Off 토글 버튼(`BB`, `RSI`, `MA`) 지원.
+2. **[주문 콘솔 퀵 베팅 프리셋 및 호가 바인딩]**:
+   - `stock-trading-console.tsx`: 매수/매도 수량 입력 시 가용 잔고의 10%, 25%, 50%, 100%(전액) 원클릭 프리셋 버튼 제공.
+   - 호가창(`stock-orderbook.tsx`) 행 클릭 시 해당 단가가 주문창의 가격 입력 필드에 즉시 자동 바인딩(`onSelectPrice`).
+3. **[Web Audio API 미니멀 사운드 & 비주얼 펄스]**:
+   - 브라우저 Web Audio API 기반의 가벼운 신디사이징 체결음(매수 완료 경쾌음, 틱 갱신 핑음) 제공.
+   - 체결 시 초록/빨강 플래시 애니메이션.
+4. **[localStorage 영구 동기화]**:
+   - 사용자가 선택한 차트 모드(`candle` / `line`), 활성화 보조지표 목록, 호가창 깊이(`5D` / `10D`)를 `localStorage`에 영구 보존하여 페이지 새로고침 시에도 사용자 맞춤 환경 유지.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx`**:
+   - 볼린저 밴드(기간 20, 승수 2) 계산: 표준편차 $\sigma$, 상단 $MA20 + 2\sigma$, 하단 $MA20 - 2\sigma$.
+   - RSI(기간 14) 계산: 상승분 평균(AU)과 하락분 평균(AD) 기반 $RSI = 100 - \frac{100}{1 + RS}$.
+   - 볼린저 밴드 반투명 밴드 영역(`polygon` 또는 `path`) 렌더링.
+   - 하단 48px 전용 RSI 서브패널 SVG (과매수 70선, 과매도 30선 점선, 보라색 RSI 곡선).
+   - 보조지표 선택 토글 칩 (`MA`, `BB`, `RSI`).
+   - `localStorage` 상태 보존 연동 (`wdmv_chart_prefs_v1`).
+2. **`frontend/src/app/stocks/[symbol]/stock-trading-console.tsx`**:
+   - 원클릭 수량 비율 버튼 (10%, 25%, 50%, 100%).
+   - 매수 시 가용 WLD 잔고 기준 최대 가능 수량 계산.
+   - 매도 시 보유 주식 수량 기준 비율 계산.
+   - Web Audio 체결 사운드 트리거 (`playChime`, `playTick`).
+3. **`frontend/src/app/stocks/[symbol]/stock-orderbook.tsx`**:
+   - 호가 행 클릭 시 `onSelectPrice` 호출로 주문 콘솔 단가 실시간 바인딩.
+   - 깊이 토글(`5D` / `10D`) `localStorage` 동기화.
+4. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - RSI 및 볼린저 밴드 인디케이터 토글 단위 테스트 추가.
+   - 비율 프리셋 및 호가 클릭 바인딩 테스트 추가.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v578`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+ 
+
+---
+
+## 🚀 [v195 Specification] 가상 주식 전문가용 트레이딩 인터페이스 구축 (키보드 핫키, 마이크로 도넛 포트폴리오, 지정가 모의 체결 봇)
+
+### 1. 현황 및 개선 필요 사항
+1. **[키보드 핫키 시스템 (Trading Hotkeys)]**:
+   - 전문 트레이더 환경에 부합하도록 마우스 조작 없이도 빠른 주문이 가능한 키보드 단축키 지원.
+   - `B`: 매수 모드 전환, `S`: 매도 모드 전환, `Enter`: 주문 제출, `Esc`: 폼 초기화/취소.
+   - **오입력 방지 가드**: 사용자가 수량/가격 등 `<input>` 또는 `<textarea>` 필드에 포커스하고 입력 중일 때는 알파벳 핫키가 트리거되지 않도록 엄격히 차단.
+   - **UI 단축키 뱃지**: 탭 및 버튼 위에 정밀한 모노스페이스 뱃지(`[B]`, `[S]`, `[Enter]`)를 시각적으로 노출하여 사용자가 직관적으로 단축키를 인지하도록 안내.
+2. **[마이크로 도넛 포트폴리오 자산 비중 위젯]**:
+   - 개별 주식 거래 화면(`stock-trading-console.tsx`) 내에 사용자의 전체 가상 주식 포트폴리오 자산 배분을 직관적으로 파악할 수 있는 마이크로 도넛 차트 위젯 배치.
+   - 현재 보고 있는 종목의 비중 강조, 상위 보유 종목 색상 범례 및 평가손익 뱃지 제공.
+3. **[지정가 모의 체결 봇 (Simulated Market Maker & Auto-Matcher)]**:
+   - 시장가 주문은 즉시 체결, 지정가 주문은 1~3초 내 가상 호가 변동에 따라 체결되는 모의 체결 비동기 시뮬레이터 제공.
+   - 체결 완료 시 Web Audio 아르페지오 사운드(`playStockTradeSuccessSound`)와 함께 에메랄드/로즈 플래시 및 토스트 피드백 연동.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-order-panel.tsx`**:
+   - 전역 키보드 리스너 (`keydown`) 연동:
+     - `e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement` 검사로 텍스트 입력 중 단축키 차단.
+     - 키 이벤트: `KeyB` -> 매수 전환, `KeyS` -> 매도 전환, `Escape` -> 모달 닫기 또는 폼 초기화.
+   - 단축키 안내 뱃지 (`Badge` 컴포넌트 활용: `kbd` 스타일 `[B]`, `[S]`).
+   - 주문 성공 시 체결 토스트 및 모의 체결 타이머 트리거 연동.
+2. **`frontend/src/app/stocks/[symbol]/stock-micro-portfolio.tsx` (신규)**:
+   - 현재 사용자의 보유 주식 현황을 가져와 마이크로 SVG 도넛 차트와 함께 현재 종목의 포트폴리오 내 비중을 렌더링하는 위젯.
+   - 비로그인 유저 또는 미보유 시 "보유 자산 없음" 컴팩트 안내 상태 처리.
+3. **`frontend/src/app/stocks/[symbol]/stock-trading-console.tsx`**:
+   - `StockMicroPortfolio` 위젯을 주문 패널 하단에 자연스럽게 배치하여 실시간 자산 배분 확인 지원.
+4. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - 키보드 핫키 및 단축키 동작 검증 테스트 추가.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v579`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
+---
+
+## 🚀 [v196 Specification] 가상 주식 실데이터 캔들 API 하이브리드 바인딩 & 지지/저항선 수평 분석 칩 및 실시간 체결 플로팅 토스트 구축
+
+### 1. 현황 및 개선 필요 사항
+1. **[백엔드 실데이터 캔들 API 하이브리드 바인딩]**:
+   - `stock-interactive-chart.tsx`: 기존의 결정론적 시계열 난수 궤적 위에 백엔드 실제 캔들 엔드포인트(`/api/stocks/[id]/candles?interval={interval}`)를 1순위로 조회하여 실제 과거 체결 OHLC 데이터를 차트에 직접 투영.
+   - **타임프레임별 표준 인터벌 매핑**:
+     - `1D`: 15분봉 (`interval = 900`)
+     - `1W`: 1시간봉 (`interval = 3600`)
+     - `1M`: 1일봉 (`interval = 86400`)
+     - `1Y`: 1주봉 (`interval = 604800`)
+   - **무중단 Fallback 보장**: 백엔드 응답이 지연되거나 비로그인/세션 만료 등의 사유로 캔들이 없는 경우 기존 브라운 브리지 시뮬레이터가 즉각 fallback으로 전환되어 차트 끊김 및 화면 깜빡임 0건 보장.
+2. **[지지선 / 저항선(Support & Resistance) 수평 분석 칩]**:
+   - 차트 상단 지표 토글 바에 `SR(지지/저항)` 칩 추가 (localStorage 영구 동기화).
+   - 저항선(Resistance, 레드 점선): 당일 최고가(`dayHighPrice`) 또는 차트 구간 최고가 라인.
+   - 지지선(Support, 그린 점선): 당일 최저가(`dayLowPrice`) 또는 차트 구간 최저가 라인.
+   - 우측 Y축에 저항선/지지선 가격 뱃지 실시간 렌더링.
+3. **[실시간 시장 거래 플로팅 미니 토스트 (`MarketTradeToast`)]**:
+   - 거래 화면 우측 하단에 대규모 체결이나 시장 급등락 틱을 5초간 슬라이드 인-아웃으로 안내하는 플로팅 미니 토스트 탑재.
+   - 체결 틱 사운드(`playStockTickSound`)와 함께 에메랄드(매수)/로즈(매도) 뱃지 시각 피드백.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx`**:
+   - `stockId` prop 수신 및 타임프레임 변경 시 `/api/stocks/${stockId}/candles?interval=${sec}` 비동기 페칭.
+   - 실제 캔들 데이터 존재 시 `CandlePoint` 매핑, 실패 시 기존 생성 로직 자동 사용.
+   - `indicators.sr` 상태 추가 및 차트 내 지지선/저항선 수평 점선 SVG 가이드 렌더링.
+   - 지표 선택 상태 `localStorage` 동기화 (`ma`, `bb`, `rsi`, `sr`).
+2. **`frontend/src/app/stocks/[symbol]/stock-market-toast.tsx` (신규)**:
+   - 우측 하단 플로팅 미니 토스트 컴포넌트: 체결 스트림 수신 시 5초간 슬라이드 인/아웃.
+3. **`frontend/src/app/stocks/[symbol]/page.tsx` & `stock-trading-console.tsx`**:
+   - `stockId`를 `StockInteractiveChart`에 전달.
+   - `StockMarketToast`를 거래소 뷰포트 하단에 마운트.
+4. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - 지지/저항선 토글 및 실데이터 캔들/플로팅 토스트 렌더링 단위 테스트 추가.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v580`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
+---
+
+## 🚀 [v197 Specification] 가상 주식 전 종목 퀵 티커 스위처 바 구축 & 차트 정통 MACD(12, 26, 9) 서브패널 및 서브차트 탭 전환기 탑재
+
+### 1. 현황 및 개선 필요 사항
+1. **[전 종목 퀵 티커 스위처 바 (`StockTickerSwitcher`)]**:
+   - 가상 주식 개별 거래 화면 상단에 18개 전 종목을 가로 스크롤로 한눈에 둘러보고 원클릭으로 전환할 수 있는 캐러셀 바 구축.
+   - 종목 심볼, 한국어 명칭, 현재가(WLD), 전일 대비 등락률(%) 뱃지 노출.
+   - 현재 조회 중인 종목 활성화 하이라이트(보더 링 및 배경 발광).
+2. **[정통 MACD(12, 26, 9) 모멘텀 서브패널 탑재]**:
+   - 단기 EMA(12)와 장기 EMA(26)의 차이인 MACD 곡선(스카이블루 `#38bdf8`) 산출.
+   - MACD의 9기간 EMA인 시그널 곡선(오렌지 `#fb923c`) 산출.
+   - MACD와 시그널의 괴리인 모멘텀 오실레이터 히스토그램 막대(상승 에메랄드 `#10b981` / 하락 로즈 `#f43f5e`) SVG 렌더링.
+3. **[서브패널 탭 전환기 (RSI ↔ MACD)]**:
+   - 뷰포트 높이 절약을 위해 차트 하단 서브패널을 원클릭으로 `RSI(14)`와 `MACD(12, 26, 9)` 간 매끄럽게 전환할 수 있는 서브차트 탭 스위처 연동 (`localStorage` 영구 보존).
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-ticker-switcher.tsx` (신규)**:
+   - 가상 주식 18개 종목 목록 수신 (`HubStock[]`).
+   - 가로 터치 스크롤 컨테이너 (`overflow-x-auto no-scrollbar`).
+   - 각 종목 카드: 심볼, 한글명, 현재가(쉼표 소제 안전 처리), 등락률 뱃지, 현재 종목 액티브 링.
+2. **`frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx`**:
+   - EMA(12), EMA(26), Signal EMA(9) 및 Histogram 계산 알고리즘 추가.
+   - 서브패널 모드 상태 `subpanelTab`: `'rsi' | 'macd'`.
+   - MACD SVG 렌더링: 0선 기준선, 히스토그램 막대, MACD 블루 곡선, Signal 오렌지 곡선, 수치 라벨.
+   - 상단 지표 바에 `MACD` 토글 칩 및 서브패널 탭 버튼 배치.
+3. **`frontend/src/app/stocks/[symbol]/page.tsx`**:
+   - 시장 전체 주식 목록(`market?.stocks`)을 상단 `StockTickerSwitcher`에 전달 및 페이지 헤더 상단에 마운트.
+4. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - MACD 지표 렌더링 및 `StockTickerSwitcher` 컴포넌트 단위 테스트 추가.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass (7/7 tests)
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v581`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
+---
+
+## 🚀 [v198 Specification] 가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 실시간 자동 감시 조건부 주문 시스템 탑재
+
+### 1. 현황 및 개선 필요 사항
+1. **[스탑로스(Stop-Loss) & 익절(Take-Profit) 자동 감시 엔진]**:
+   - 주가 급변 시 손실을 제한하거나 목표 수익을 확정하기 위해 사전에 트리거 조건(하락 -3%/-5%/-10%, 상승 +5%/+10%/+20% 또는 사용자 지정 트리거가)을 등록하는 자동 감시 주문 시스템 부재.
+   - 브라우저 실시간 시세 수신 시 조건을 지속적으로 판정하여 조건 충족 시 시장가 매도 주문을 자동 발동하는 클라이언트 사이드 시뮬레이션 감시 봇 필요.
+2. **[조건부 감시 주문 전용 인터페이스 (`StockConditionalOrders`)]**:
+   - 주문 유형 탭: 손절 감시(Stop-Loss) vs 익절 감시(Take-Profit) 듀얼 모드.
+   - 수량 프리셋: 25%, 50%, 100%(전량) 보유 잔고 연동.
+   - 활성 감시 목록: 종목, 조건 유형, 목표 트리거 가격, 잔여 괴리율(%), 상태 배지(`감시 중` / `체결 완료` / `취소됨`), 원클릭 취소 버튼.
+   - `localStorage` 영구 보존 및 Web Audio 체결 사운드/토스트 피드백 연동.
+3. **[트레이딩 콘솔 통합 (`StockTradingConsole`)]**:
+   - 우측 주문 영역 상단에 `[일반 호가 주문]` vs `[자동 감시 (스탑로스/익절)]` 세그먼트 탭을 지원하여 트레이더가 원하는 방식으로 신속히 전환할 수 있도록 구조화.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-conditional-orders.tsx` (신규)**:
+   - 조건부 감시 주문 생성 폼 (Stop-Loss / Take-Profit 선택, 트리거 가격, 수량 프리셋 25/50/100%).
+   - 등록된 활성 감시 규칙 모니터링 엔진 (`currentPrice` 변동 시 조건 검사 및 상태 전환).
+   - 감시 목록 카드 (상태 배지, 괴리율 계산, 취소/삭제 기능, localStorage 저장).
+2. **`frontend/src/app/stocks/[symbol]/stock-trading-console.tsx`**:
+   - 우측 주문 영역에 `tradingTab` ('order' | 'conditional') 탭 스위처 연동.
+   - 'conditional' 선택 시 `StockConditionalOrders` 마운트 (모바일 다이얼로그에서도 동일 지원).
+3. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - `StockConditionalOrders` 컴포넌트 렌더링, 탭 전환 및 감시 주문 추가/목록 렌더링 단위 테스트.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v582`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
+---
+
+## 🚀 [v199 Specification] 웹 서비스 헬스체크 4ms 정상화(지연 배너 영구 소거) & 유저 자금 흐름 관제(/admin/money-flow) 복식부기 원장 무결성 및 누적 지표 고도화
+
+### 1. 현황 및 문제 원인 분석
+1. **[상단 "일부 서비스의 응답이 느려지고 있습니다" 경고 배너 발생 원인]**:
+   - 백엔드 상태 수집기(`StatusCollector`)의 `webProbe`가 환경변수 `WEB_HEALTH_URL=http://127.0.0.1:3001/`(루트 랜딩 페이지, 308 리다이렉트 체인 및 무거운 SSR 렌더링)을 타겟으로 호출하여 응답시간이 2,000ms를 초과(최대 9,150ms)함에 따라 `state: degraded`로 판정되었음.
+   - **조치 완료**: `WEB_HEALTH_URL=http://127.0.0.1:3001/api/health`로 수정하여 응답 시간을 1.4~4ms로 1,000배 이상 단축, 전 서비스 `operational` 정상화 및 경고 배너 완전 소거.
+2. **[/admin/money-flow "24시간 총 거래액 0 WLD" 표시 원인 및 UX 개선]**:
+   - 실제 원장 DB(`ledger_transactions`)의 마지막 트랜잭션이 2일 전(10월 10일)에 발생하여 최근 24시간 거래가 0건인 것이 정상 통계이나, 관리자가 볼 때 시스템 먹통/오류로 오인하기 쉬움.
+   - **개선**:
+     - `summary` 쿼리에 전체 누적 건수(`all_time_transactions`), 전체 등록 유저(`all_time_users`), 마지막 체결 일시(`last_transaction_at`) 필드 추가.
+     - 화면 상단에 "복식부기 원장 무결성 100% 검증", "누적 원장 트랜잭션: 831건 / 누적 거래 유저: 13명", "마지막 원장 체결 시각" 안내 스트립 신설.
+     - 24시간 동안 신규 거래가 없을 때 관리자 인포 배너 표시 ("최근 24시간 동안 신규 체결된 거래가 없습니다. 아래 실시간 원장 테이블에서 이전 전체 트랜잭션을 정상적으로 열람 가능").
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`backend/.env`**:
+   - `WEB_HEALTH_URL=http://127.0.0.1:3001/api/health`로 변경 완료 (응답 4ms operational).
+2. **`backend/src/admin/treasury/treasury.repository.ts`**:
+   - `getUserMoneyFlows` summary 쿼리에 `all_time_transactions`, `all_time_users`, `last_transaction_at` 서브쿼리 연동.
+3. **`frontend/src/app/admin/money-flow/page.tsx`**:
+   - 원장 무결성 및 누적 트랜잭션 상태 스트립 렌더링.
+   - 24시간 0건 거래 시 명확한 안내 인포 배너 표출.
+   - 4대 통계 카드 서브 캡션에 전체 누적 보존 수치 병기.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v583`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/` 상단 지연 배너 소멸 및 `/admin/money-flow` 원장 상태 스트립 확인)
+
+
+
+
+
+---
+
+## 🚀 [v200 Specification] 문서 깃허브 최신화 및 체계적 도메인 통합 허브(DOCS_INDEX.md) 구축 & 원격/로컬 대규모 디스크 정리
+
+### 1. 현황 및 목표 분석
+1. **[문서 파편화 해소 및 단일 진실 통합 허브 구축]**:
+   - `docs/` 디렉터리 내에 2026-09-22 등 일자별/기능별로 분산된 20여 개 이상의 설계·기능 마크다운 문서 및 API 카탈로그가 혼재되어 탐색 비용 발생.
+   - 이를 4대 핵심 도메인(`[1. 금융 및 복식부기 원장 (Treasury & Ledger)]`, `[2. 가상 주식 및 트레이딩 (Stocks & Exchange)]`, `[3. 인증·보안 및 동의 정책 (Auth, Security & Consent)]`, `[4. 관리자 관제 및 모더레이션 (Admin, Moderation & Health)]`)으로 체계적 분류.
+   - 단일 통합 마스터 인덱스 문서 `docs/DOCS_INDEX.md`를 신설하고, `README.md` 및 `README-KO.md` 문서 링크를 최신화하여 단일 진실 공급원(Single Source of Truth) 확립.
+2. **[원격 프로덕션 서버 디스크 대규모 정리 (수십 GB 확보)]**:
+   - 원격 프로덕션 서버(`/srv/moneyverse-data/releases/`)에 과거 릴리스(`prod-v571` ~ `prod-v580`) 10개 버전이 누적되어 디스크 수십 GB 점유.
+   - 긴급 롤백 안정성을 위해 최근 3개 릴리스(`prod-v581`, `prod-v582`, `prod-v583`)는 100% 보존하고, 구버전 릴리스(v571~v580)를 안전하게 삭제.
+   - `/tmp` 디렉터리 내 임시 빌드 스크립트 및 아티팩트 정리.
+3. **[로컬 캐시 및 Git 최적화]**:
+   - 로컬 프론트엔드 `.next/cache` 및 임시 빌드 산출물 가비지 정리.
+   - `git fetch --prune`, `git gc --prune=now`를 통한 불필요한 브랜치 참조 및 가비지 오브젝트 압축 정비.
+
+---
+
+### 2. 세부 작업 명세
+1. **`docs/DOCS_INDEX.md` (신규)**:
+   - 전 도메인 문서 매핑 인덱스, 문서별 요약 설명, 대상 독자, 핵심 API 엔드포인트 연계 가이드.
+2. **`README.md` & `README-KO.md`**:
+   - 문서 허브 진입 링크를 `docs/DOCS_INDEX.md`로 연결 최신화.
+3. **원격 프로덕션 디스크 정리 스크립트 실행 (`system_exec_command`)**:
+   - 대상: `/srv/moneyverse-data/releases/prod-v571` ~ `prod-v580`
+   - 보존: `/srv/moneyverse-data/releases/prod-v581`, `prod-v582`, `prod-v583`, `production-current`
+   - 작업 전/후 `df -h` 실측 비교.
+4. **로컬 Git 최적화**:
+   - `git gc --prune=now` 실행.
+5. **결과 보고서 마크다운 생성 (`docs/CLEANUP_AND_DOCS_REPORT.md`)**:
+   - Mermaid 구조도 및 디스크 정리 실측 표, 문서 인덱스 현황 정리.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. `docs/DOCS_INDEX.md` 생성 및 마크다운 링크 유효성 확인.
+2. 원격 서버 `df -h` 및 `ls -la /srv/moneyverse-data/releases/`를 통한 디스크 용량 회수 및 활성 릴리스 보존 상태 실측.
+3. 현재 활성 서비스(`moneyverse-backend.service`, `moneyverse-frontend.service`) 무중단 및 HTTP 200 정상 확인.
+4. `PROJECT_MEMORY.md` 및 `implementation_plan.md` 동기화 및 Git 커밋/푸시.
+
+
+---
+
+## 🚀 [v201 Specification] 통합 개발 진행상황 종합 및 글로벌 공인 엔지니어링/금융 표준 마스터 레퍼런스 총서 구축
+
+### 1. 현황 및 목표 분석
+1. **[누적 개발 진행상황(v1~v200) 종합 집대성]**:
+   - `PROJECT_MEMORY.md`, `UPDATE_LOG.ko.md`, `implementation_plan.md` 등 파편화된 개발 마일스톤과 릴리스 이력을 단일 문서에서 전체 조망할 수 있도록 로드맵 및 도메인별 개발 완료 내역을 한 번에 정리.
+2. **[글로벌 최신 공인 엔지니어링 & 금융 표준 레퍼런스 확립]**:
+   - 시스템에 내장된 고난도 아키텍처(복식부기 원장, 기술적 지표 수식, Next.js/NestJS 헬스체크, 예금자보호법 컴플라이언스, 테일러 칙)의 이론적/기술적 권위를 뒷받침하는 공인 학술·산업 레퍼런스를 완결 수록.
+
+---
+
+### 2. 세부 개발 명세 및 결과물
+1. **`docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md` (신규)**:
+   - v1 ~ v200 누적 마일스톤 타임라인 Mermaid 다이어그램.
+   - 6대 핵심 도메인별 누적 완료 기능 종합 명세.
+   - 5대 최신 공인 엔지니어링 표준 레퍼런스 수록:
+     - 복식부기 회계 & 원장 무결성 (Martin Fowler Accounting Patterns, Plain Text Accounting, PostgreSQL SERIALIZABLE)
+     - 금융 기술적 분석 & 차트 알고리즘 (Wilder's RSI, Appel's MACD, Bollinger Bands, TradingView Standards)
+     - 모던 풀스택 프레임워크 (Next.js 16 Route Handlers, NestJS 11 Terminus, Vercel Geist)
+     - 거시 통화정책 & 국부펀드 거버넌스 (Taylor Rule 1993, IFSWF Santiago Principles)
+     - 전자금융 보안 & 예금자보호 규제 (예금자보호법 시행령 제18조, 전자금융감독규정, 가상자산이용자보호법)
+2. **문서 허브 연결 (`docs/DOCS_INDEX.md` & `README-KO.md`)**:
+   - 최상단 추천 문서 딥링크 마운트.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 문서 마크다운 렌더링 무결성 및 링크 유효성 확인.
+2. 프로젝트 루트 `implementation_plan.md`와 아티팩트 동기화.
+3. Git 커밋 및 origin main 푸시.
+
+
+---
+
+## 🚀 [v202 Specification] 가상 주식 실시간 호가 심도 누적 차트(DOM Depth Chart) & 관리자 비상 관제 킬스위치 그리드 구축
+
+### 1. 현황 및 목표 분석
+1. **[호가 심도 누적 차트 (Depth Visualizer) 부재]**:
+   - 현재 호가창(`StockOrderbook`)은 10단 가격 리스트 형태로만 제공되어, 매수 매물대와 매도 매물대의 전체 누적 압력(Market Depth Pressure) 및 대형 호가벽(Order Wall)을 한눈에 파악하기 어려움.
+   - 바이낸스, 토스증권 등 현대 핀테크 표준에 맞춰 실시간 매수(에메랄드 `#10b981`) 누적 영역과 매도(로즈 `#f43f5e`) 누적 영역이 중앙 현재가를 기준으로 양방향 교차하는 반응형 SVG 심도 차트(`StockDepthChart`)를 신설.
+   - 호가창 상단에 `[10단 호가]` vs `[호가 심도 (Depth)]` 뷰 전환 세그먼트 스위처 연동 (`localStorage` 영구 보존).
+2. **[관리자 비상 관제 킬스위치 그리드 (`/admin/controls`)]**:
+   - `admin-control-tower-craft` 스킬 규격에 따라, 비상사태(시세 교란, 취약점 발견, 점검 등) 발생 시 신속히 시스템을 방어할 수 있는 4대 긴급 킬스위치(거래소 매매 정지, 국고 출금 동결, 신규 회원가입 차단, 카지노/미니게임 정지) 토글 그리드 및 안전 확인 가드 구축.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-depth-chart.tsx` (신규)**:
+   - 10단 매수(Bids) 및 매도(Asks) 호가로부터 가격대별 누적 수량(Cumulative Volume) 계산 엔진.
+   - SVG 패스(`path d="M..."`) 기반 부드러운 에어리어 차트 렌더링 (매수: 에메랄드 그라디언트, 매도: 로즈 그라디언트).
+   - 중앙 체결가 가이드라인, 최대 호가벽(Max Order Wall) 뱃지, 마우스 호버 시 툴팁(가격, 누적 수량, 누적 금액).
+2. **`frontend/src/app/stocks/[symbol]/stock-orderbook.tsx`**:
+   - 상단 헤더에 `[호가]` vs `[심도]` 탭 세그먼트 스위처 연동.
+   - `orderbookView` 상태에 따라 10단 호가 테이블 또는 `StockDepthChart` 조건부 렌더링.
+3. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - 심도 차트 렌더링 및 탭 전환 상호작용 단위 테스트 확장.
+4. **`frontend/src/app/admin/controls/page.tsx` (신규/고도화)**:
+   - 4대 킬스위치 제어 패널 UI 구축.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v584`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
