@@ -13,8 +13,32 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v579 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v579`
+## 🌟 Production Release Overview (prod-v580 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v580`
+- **Release Date**: 2026-10-12 20:34 KST
+- **Git Commit HEAD**: `96b99eea` (`main`)
+- **Key Deliverables**:
+  1. **백엔드 실데이터 캔들 API 하이브리드 바인딩 (v196 / prod-v580)**:
+     - `StockInteractiveChart`: `/api/stocks/[id]/candles?interval={sec}` 엔드포인트 비동기 조회.
+     - 타임프레임 표준 매핑: `1D`(15분봉), `1W`(1시간봉), `1M`(1일봉), `1Y`(1주봉).
+     - 장애/비로그인 시 브라운 브리지 난수 궤적으로 원활히 전환되는 무중단 Fallback 보장.
+  2. **지지선 / 저항선(Support & Resistance) 수평 분석 칩**:
+     - 상단 지표 칩 바에 `SR` 온/오프 토글 추가 (`localStorage` 영구 동기화).
+     - 당일 최고가(또는 차트 고가) 기준 로즈 붉은색 저항 점선 가이드라인 렌더링 (`저항 {price}`).
+     - 당일 최저가(또는 차트 저가) 기준 에메랄드 지지 점선 가이드라인 렌더링 (`지지 {price}`).
+  3. **실시간 시장 체결 플로팅 미니 토스트 (`StockMarketToast`)**:
+     - 화면 우측 하단에 대규모 체결 및 급등락 틱을 5초간 슬라이드 인/아웃으로 노출.
+     - 체결 틱 사운드(`playStockTickSound`) 및 에메랄드(매수)/로즈(매도) 뱃지 시각 피드백 연동.
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (6/6) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, 'SR', '지지선/저항선' 정상 서빙).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v579)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v579`
 - **Release Date**: 2026-10-12 19:54 KST
 - **Git Commit HEAD**: `620a7340` (`main`)
 - **Key Deliverables**:
@@ -27,15 +51,6 @@
      - 현재 종목의 포트폴리오 점유 비중(%) 중앙 시각화, 보유 평가액 및 상위 3개 보유 종목 컬러 배지 스트립 제공.
   3. **지정가 모의 체결 봇 & 피드백 (Simulated Limit Order Matcher)**:
      - 지정가 주문 시 가상 매칭 엔진 호가 대기 펄스 애니메이션 및 1.2초 후 체결 완료 축하 사운드(`playStockTradeSuccessSound`) 연동.
-  4. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 단위 테스트 `stock-orderbook.test.tsx` (5/5) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, '핫키 가드' 및 '포트폴리오 자산 비중' 정상 서빙).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v578)
 - **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v578`
 - **Release Date**: 2026-10-12 19:18 KST
 - **Git Commit HEAD**: `dbcefc68` (`main`)
