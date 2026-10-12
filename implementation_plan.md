@@ -1,6 +1,7 @@
 # [월덕 머니버스] 통합 구현 계획서 (현재: v196)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v199**: [웹 서비스 헬스체크 4ms 정상화(지연 배너 영구 소거) & 유저 자금 흐름 관제(/admin/money-flow) 복식부기 원장 무결성 및 누적 지표 고도화] (+120, -0)
 - **v198**: [가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 실시간 자동 감시 조건부 주문 시스템 탑재] (+140, -0)
 - **v197**: [가상 주식 전 종목 퀵 티커 스위처 바 구축 & 차트 정통 MACD(12, 26, 9) 서브패널 및 서브차트 탭 전환기 탑재] (+135, -0)
 - **v196**: [가상 주식 실데이터 캔들 API 하이브리드 바인딩 & 지지/저항선 수평 분석 칩 및 실시간 체결 플로팅 토스트 구축] (+130, -0)
@@ -978,5 +979,43 @@
 4. Git 커밋 & 푸시
 5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v582`)
 6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
+---
+
+## 🚀 [v199 Specification] 웹 서비스 헬스체크 4ms 정상화(지연 배너 영구 소거) & 유저 자금 흐름 관제(/admin/money-flow) 복식부기 원장 무결성 및 누적 지표 고도화
+
+### 1. 현황 및 문제 원인 분석
+1. **[상단 "일부 서비스의 응답이 느려지고 있습니다" 경고 배너 발생 원인]**:
+   - 백엔드 상태 수집기(`StatusCollector`)의 `webProbe`가 환경변수 `WEB_HEALTH_URL=http://127.0.0.1:3001/`(루트 랜딩 페이지, 308 리다이렉트 체인 및 무거운 SSR 렌더링)을 타겟으로 호출하여 응답시간이 2,000ms를 초과(최대 9,150ms)함에 따라 `state: degraded`로 판정되었음.
+   - **조치 완료**: `WEB_HEALTH_URL=http://127.0.0.1:3001/api/health`로 수정하여 응답 시간을 1.4~4ms로 1,000배 이상 단축, 전 서비스 `operational` 정상화 및 경고 배너 완전 소거.
+2. **[/admin/money-flow "24시간 총 거래액 0 WLD" 표시 원인 및 UX 개선]**:
+   - 실제 원장 DB(`ledger_transactions`)의 마지막 트랜잭션이 2일 전(10월 10일)에 발생하여 최근 24시간 거래가 0건인 것이 정상 통계이나, 관리자가 볼 때 시스템 먹통/오류로 오인하기 쉬움.
+   - **개선**:
+     - `summary` 쿼리에 전체 누적 건수(`all_time_transactions`), 전체 등록 유저(`all_time_users`), 마지막 체결 일시(`last_transaction_at`) 필드 추가.
+     - 화면 상단에 "복식부기 원장 무결성 100% 검증", "누적 원장 트랜잭션: 831건 / 누적 거래 유저: 13명", "마지막 원장 체결 시각" 안내 스트립 신설.
+     - 24시간 동안 신규 거래가 없을 때 관리자 인포 배너 표시 ("최근 24시간 동안 신규 체결된 거래가 없습니다. 아래 실시간 원장 테이블에서 이전 전체 트랜잭션을 정상적으로 열람 가능").
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`backend/.env`**:
+   - `WEB_HEALTH_URL=http://127.0.0.1:3001/api/health`로 변경 완료 (응답 4ms operational).
+2. **`backend/src/admin/treasury/treasury.repository.ts`**:
+   - `getUserMoneyFlows` summary 쿼리에 `all_time_transactions`, `all_time_users`, `last_transaction_at` 서브쿼리 연동.
+3. **`frontend/src/app/admin/money-flow/page.tsx`**:
+   - 원장 무결성 및 누적 트랜잭션 상태 스트립 렌더링.
+   - 24시간 0건 거래 시 명확한 안내 인포 배너 표출.
+   - 4대 통계 카드 서브 캡션에 전체 누적 보존 수치 병기.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v583`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/` 상단 지연 배너 소멸 및 `/admin/money-flow` 원장 상태 스트립 확인)
+
 
 

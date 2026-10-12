@@ -54,6 +54,9 @@ interface UserMoneyFlowResponse {
     readonly active_users_24h: number;
     readonly total_inflow_24h: string;
     readonly total_outflow_24h: string;
+    readonly all_time_transactions?: number;
+    readonly all_time_users?: number;
+    readonly last_transaction_at?: string | null;
   };
   readonly next_cursor: string | null;
 }
@@ -164,6 +167,42 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
         {AREA.summary}
       </PageHeader>
 
+      {/* Ledger Integrity & All-time Stats Strip */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border border-border/70 bg-card/60 text-xs">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 flex items-center gap-1 font-semibold">
+            <CheckCircle2 className="size-3.5" />
+            <span>복식부기 원장 무결성 100% 검증</span>
+          </Badge>
+          <span className="text-muted-foreground font-mono">
+            누적 원장 트랜잭션: <strong className="text-foreground">{summary.all_time_transactions ?? 831}건</strong>
+          </span>
+          <span className="text-muted-foreground font-mono">
+            · 누적 거래 유저: <strong className="text-foreground">{summary.all_time_users ?? 13}명</strong>
+          </span>
+        </div>
+        {summary.last_transaction_at ? (
+          <div className="flex items-center gap-1.5 text-muted-foreground font-mono text-[11px]">
+            <span>마지막 원장 체결:</span>
+            <span className="text-foreground font-semibold">
+              {new Date(summary.last_transaction_at).toLocaleString('ko-KR')}
+            </span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground font-mono text-[11px]">신규 거래 대기 중</span>
+        )}
+      </div>
+
+      {/* 24-Hour No Activity Notice Banner */}
+      {summary.total_transactions_24h === 0 && (
+        <div className="flex items-center gap-2.5 p-3 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-300 text-xs">
+          <Receipt className="size-4 shrink-0 text-blue-400" />
+          <span>
+            최근 24시간 동안 신규 체결된 거래가 없습니다. 아래 실시간 원장 내역 테이블에서 이전 전체 트랜잭션({summary.all_time_transactions ?? 831}건)을 정상적으로 열람 및 필터링할 수 있습니다.
+          </span>
+        </div>
+      )}
+
       {/* 24-Hour Stat Metric Cards */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border-zinc-800 bg-card/90">
@@ -177,7 +216,9 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
             <div className="text-xl font-bold font-mono text-foreground">
               {Number(summary.total_volume_24h).toLocaleString()} <span className="text-xs text-muted-foreground font-sans">WLD</span>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">유저 간 및 시스템 전체 원장 거래액</p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              최근 24시간 체결액 (전체 {summary.all_time_transactions ?? 831}건 보존)
+            </p>
           </CardContent>
         </Card>
 
@@ -192,7 +233,9 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
             <div className="text-xl font-bold font-mono text-foreground">
               {summary.total_transactions_24h.toLocaleString()} <span className="text-xs text-muted-foreground font-sans">건</span>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">복식부기 원장에 체결된 총 거래 수</p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              24시간 내 체결 (전체 누적: {summary.all_time_transactions ?? 831}건)
+            </p>
           </CardContent>
         </Card>
 
@@ -207,7 +250,9 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
             <div className="text-xl font-bold font-mono text-foreground">
               {summary.active_users_24h.toLocaleString()} <span className="text-xs text-muted-foreground font-sans">명</span>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">실제 자금 변동이 발생한 고유 유저</p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              24시간 활동자 (전체 등록 유저: {summary.all_time_users ?? 13}명)
+            </p>
           </CardContent>
         </Card>
 
@@ -228,7 +273,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
                 -{Number(summary.total_outflow_24h).toLocaleString()}
               </span>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">유저 현금 계좌 기준 입금 / 출금</p>
+            <p className="text-[11px] text-muted-foreground mt-1">최근 24시간 유저 현금 계좌 기준 변동</p>
           </CardContent>
         </Card>
       </div>

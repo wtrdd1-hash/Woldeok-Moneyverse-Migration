@@ -1181,6 +1181,9 @@ export class TreasuryRepository {
       active_users_24h: number;
       total_inflow_24h: string;
       total_outflow_24h: string;
+      all_time_transactions?: number;
+      all_time_users?: number;
+      last_transaction_at?: string | null;
     };
     next_cursor: string | null;
   }> {
@@ -1253,7 +1256,10 @@ export class TreasuryRepository {
         COUNT(DISTINCT t.id)::int AS total_transactions_24h,
         COUNT(DISTINCT a.owner_user_id)::int AS active_users_24h,
         COALESCE(SUM(CASE WHEN post.direction = 'debit' THEN post.amount ELSE 0 END), 0)::text AS total_inflow_24h,
-        COALESCE(SUM(CASE WHEN post.direction = 'credit' THEN post.amount ELSE 0 END), 0)::text AS total_outflow_24h
+        COALESCE(SUM(CASE WHEN post.direction = 'credit' THEN post.amount ELSE 0 END), 0)::text AS total_outflow_24h,
+        (SELECT COUNT(DISTINCT t2.id)::int FROM public.ledger_transactions t2 JOIN public.ledger_postings p2 ON p2.transaction_id = t2.id JOIN public.accounts a2 ON a2.id = p2.account_id WHERE a2.owner_user_id IS NOT NULL) AS all_time_transactions,
+        (SELECT COUNT(DISTINCT a3.owner_user_id)::int FROM public.accounts a3 WHERE a3.owner_user_id IS NOT NULL) AS all_time_users,
+        (SELECT MAX(t4.created_at) FROM public.ledger_transactions t4 JOIN public.ledger_postings p4 ON p4.transaction_id = t4.id JOIN public.accounts a4 ON a4.id = p4.account_id WHERE a4.owner_user_id IS NOT NULL) AS last_transaction_at
       FROM public.ledger_transactions t
       JOIN public.ledger_postings post ON post.transaction_id = t.id
       JOIN public.accounts a ON a.id = post.account_id
@@ -1268,6 +1274,9 @@ export class TreasuryRepository {
       active_users_24h: Number(s.active_users_24h ?? 0),
       total_inflow_24h: s.total_inflow_24h ?? '0',
       total_outflow_24h: s.total_outflow_24h ?? '0',
+      all_time_transactions: Number(s.all_time_transactions ?? 0),
+      all_time_users: Number(s.all_time_users ?? 0),
+      last_transaction_at: s.last_transaction_at ? new Date(s.last_transaction_at).toISOString() : null,
     };
 
     return {
