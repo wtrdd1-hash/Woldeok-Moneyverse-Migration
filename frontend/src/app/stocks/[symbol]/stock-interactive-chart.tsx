@@ -34,12 +34,16 @@ export interface CandlePoint {
   readonly bbUpper?: number | undefined;
   readonly bbLower?: number | undefined;
   readonly rsi?: number | undefined;
+  readonly macd?: number | undefined;
+  readonly signal?: number | undefined;
+  readonly hist?: number | undefined;
 }
 
 interface ChartIndicators {
   ma: boolean;
   bb: boolean;
   rsi: boolean;
+  macd: boolean;
   sr: boolean;
 }
 
@@ -64,10 +68,12 @@ export function StockInteractiveChart({
 }: StockInteractiveChartProps) {
   const [timeframe, setTimeframe] = useState<Timeframe>('1D');
   const [chartType, setChartType] = useState<ChartType>('candle');
+  const [subpanelTab, setSubpanelTab] = useState<'rsi' | 'macd'>('rsi');
   const [indicators, setIndicators] = useState<ChartIndicators>({
     ma: true,
     bb: true,
     rsi: true,
+    macd: true,
     sr: true,
   });
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
@@ -85,8 +91,11 @@ export function StockInteractiveChart({
         if (parsed.timeframe) {
           setTimeframe(parsed.timeframe);
         }
+        if (parsed.subpanelTab === 'rsi' || parsed.subpanelTab === 'macd') {
+          setSubpanelTab(parsed.subpanelTab);
+        }
         if (parsed.indicators) {
-          setIndicators(parsed.indicators);
+          setIndicators((prev) => ({ ...prev, ...parsed.indicators }));
         }
       }
     } catch {
@@ -97,7 +106,8 @@ export function StockInteractiveChart({
   const savePrefs = (
     nextType: ChartType,
     nextTf: Timeframe,
-    nextInd: ChartIndicators
+    nextInd: ChartIndicators,
+    nextTab: 'rsi' | 'macd' = subpanelTab
   ) => {
     try {
       localStorage.setItem(
@@ -106,6 +116,7 @@ export function StockInteractiveChart({
           chartType: nextType,
           timeframe: nextTf,
           indicators: nextInd,
+          subpanelTab: nextTab,
         })
       );
     } catch {
@@ -293,7 +304,42 @@ export function StockInteractiveChart({
       }
     }
 
-    // 이동평균선(MA5, MA20), 볼린저 밴드(20, 2), RSI(14) 산출
+    // MACD(12, 26, 9) 지수이동평균(EMA) 시계열 산출
+    const k12 = 2 / (12 + 1);
+    const k26 = 2 / (26 + 1);
+    const k9 = 2 / (9 + 1);
+
+    const ema12Arr: number[] = [];
+    const ema26Arr: number[] = [];
+    const macdLineArr: number[] = [];
+
+    for (let j = 0; j < closes.length; j++) {
+      const c = closes[j] ?? 0;
+      if (j === 0) {
+        ema12Arr.push(c);
+        ema26Arr.push(c);
+      } else {
+        const prev12 = ema12Arr[j - 1] ?? c;
+        const prev26 = ema26Arr[j - 1] ?? c;
+        ema12Arr.push(c * k12 + prev12 * (1 - k12));
+        ema26Arr.push(c * k26 + prev26 * (1 - k26));
+      }
+      const m = (ema12Arr[j] ?? 0) - (ema26Arr[j] ?? 0);
+      macdLineArr.push(m);
+    }
+
+    const signalLineArr: number[] = [];
+    for (let j = 0; j < macdLineArr.length; j++) {
+      const m = macdLineArr[j] ?? 0;
+      if (j === 0) {
+        signalLineArr.push(m);
+      } else {
+        const prevSig = signalLineArr[j - 1] ?? m;
+        signalLineArr.push(m * k9 + prevSig * (1 - k9));
+      }
+    }
+
+    // 이동평균선(MA5, MA20), 볼린저 밴드(20, 2), RSI(14), MACD(12, 26, 9) 산출
     return points.map((pt, i) => {
       // MA 5
       let ma5: number | undefined;
@@ -333,7 +379,12 @@ export function StockInteractiveChart({
           rsi = Math.round(100 - (100 / (1 + rs)));
         }
       }
-      return { ...pt, ma5, ma20, bbUpper, bbLower, rsi };
+
+      const macd = Math.round(macdLineArr[i] ?? 0);
+      const signal = Math.round(signalLineArr[i] ?? 0);
+      const hist = Math.round(macd - signal);
+
+      return { ...pt, ma5, ma20, bbUpper, bbLower, rsi, macd, signal, hist };
     });
   }, [timeframe, openNum, priceNum, symbol, realCandles]);
 
@@ -517,6 +568,47 @@ export function StockInteractiveChart({
       .join(' ');
   }, [svgCandles, rsiPlotH]);
 
+  // MACD 12, 26, 9 서브패널 패스 및 히스토그램
+  const macdWidth = width;
+  const macdHeight = 44;
+  const macdPadTop = 6;
+  const macdPadBottom = 6;
+  const macdPlotH = macdHeight - macdPadTop - macdPadBottom;
+  const macdCenterY = macdPadTop + macdPlotH / 2;
+
+  const maxMacdVal = useMemo(() => {
+    let m = 1;
+    candleSeries.forEach((c) => {
+      if (c.macd !== undefined) m = Math.max(m, Math.abs(c.macd));
+      if (c.signal !== undefined) m = Math.max(m, Math.abs(c.signal));
+      if (c.hist !== undefined) m = Math.max(m, Math.abs(c.hist));
+    });
+    return Math.max(1, Math.ceil(m * 1.15));
+  }, [candleSeries]);
+
+  const macdPaths = useMemo(() => {
+    const valid = svgCandles.filter((c) => c.macd !== undefined && c.signal !== undefined);
+    if (valid.length < 2) return null;
+
+    const macdLineD = valid
+      .map((c, i) => {
+        const ratio = (c.macd ?? 0) / maxMacdVal;
+        const y = macdCenterY - ratio * (macdPlotH / 2);
+        return `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(' ');
+
+    const signalLineD = valid
+      .map((c, i) => {
+        const ratio = (c.signal ?? 0) / maxMacdVal;
+        const y = macdCenterY - ratio * (macdPlotH / 2);
+        return `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(' ');
+
+    return { macdLineD, signalLineD };
+  }, [svgCandles, maxMacdVal, macdCenterY, macdPlotH]);
+
   const activeCandle = hoveredIdx !== null && svgCandles[hoveredIdx]
     ? svgCandles[hoveredIdx]
     : svgCandles[svgCandles.length - 1];
@@ -603,6 +695,21 @@ export function StockInteractiveChart({
                   title="상대강도지수 (RSI 14) 서브패널 토글"
                 >
                   RSI
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleToggleIndicator('macd');
+                    if (!indicators.macd) setSubpanelTab('macd');
+                  }}
+                  className={`rounded px-1.5 py-0.5 transition-all ${
+                    indicators.macd
+                      ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40'
+                      : 'text-muted-foreground/60 hover:text-muted-foreground'
+                  }`}
+                  title="이동평균수렴확산 (MACD 12, 26, 9) 서브패널 토글"
+                >
+                  MACD
                 </button>
                 <button
                   type="button"
@@ -957,90 +1064,207 @@ export function StockInteractiveChart({
           </svg>
         </div>
 
-        {/* RSI 14 서브패널 (선택 시 하단에 독립 렌더링) */}
-        {indicators.rsi && (
+        {/* 보조지표 서브패널 (RSI vs MACD 탭 전환기 탑재) */}
+        {(indicators.rsi || indicators.macd) && (
           <div className="pt-1 border-t border-border/40">
+            {/* 서브패널 탭 스위처 헤더 */}
             <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground px-1 pb-1">
-              <span className="flex items-center gap-1.5 font-bold text-purple-400">
-                <span className="size-2 rounded-full bg-purple-500" />
-                <span>RSI (14)</span>
-                {activeCandle?.rsi !== undefined && (
-                  <span className={`px-1.5 py-0.2 rounded font-mono text-[9px] ${
-                    activeCandle.rsi >= 70
-                      ? 'bg-rose-500/20 text-rose-400 font-bold'
-                      : activeCandle.rsi <= 30
-                      ? 'bg-emerald-500/20 text-emerald-400 font-bold'
-                      : 'bg-muted text-muted-foreground'
-                  }`}>
-                    {activeCandle.rsi} ({activeCandle.rsi >= 70 ? '과매수' : activeCandle.rsi <= 30 ? '과매도' : '중립'})
-                  </span>
+              <div className="flex items-center gap-1.5">
+                {indicators.rsi && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSubpanelTab('rsi');
+                      savePrefs(chartType, timeframe, indicators, 'rsi');
+                    }}
+                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded font-bold transition-all ${
+                      subpanelTab === 'rsi'
+                        ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40'
+                        : 'text-muted-foreground/60 hover:text-muted-foreground'
+                    }`}
+                  >
+                    <span className="size-1.5 rounded-full bg-purple-500" />
+                    <span>RSI (14)</span>
+                    {activeCandle?.rsi !== undefined && (
+                      <span className="font-mono text-[9px] ml-0.5">({activeCandle.rsi})</span>
+                    )}
+                  </button>
                 )}
-              </span>
-              <span className="opacity-70">Overbought 70 / Oversold 30</span>
+                {indicators.macd && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSubpanelTab('macd');
+                      savePrefs(chartType, timeframe, indicators, 'macd');
+                    }}
+                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded font-bold transition-all ${
+                      subpanelTab === 'macd'
+                        ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40'
+                        : 'text-muted-foreground/60 hover:text-muted-foreground'
+                    }`}
+                  >
+                    <span className="size-1.5 rounded-full bg-sky-500" />
+                    <span>MACD (12, 26, 9)</span>
+                    {activeCandle?.macd !== undefined && (
+                      <span className="font-mono text-[9px] ml-0.5">({activeCandle.macd})</span>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {subpanelTab === 'rsi' ? (
+                <span className="opacity-70 text-[9px] hidden sm:inline">Overbought 70 / Oversold 30</span>
+              ) : (
+                <span className="flex items-center gap-2 text-[9px]">
+                  <span className="text-sky-400">● MACD</span>
+                  <span className="text-orange-400">● Sig</span>
+                  <span className="text-emerald-400">■ Hist</span>
+                </span>
+              )}
             </div>
-            <div className="relative w-full h-[44px]">
-              <svg
-                viewBox={`0 0 ${rsiWidth} ${rsiHeight}`}
-                className="w-full h-full overflow-visible touch-none"
-                preserveAspectRatio="none"
-              >
-                {/* 과매수 70선 */}
-                <line
-                  x1={paddingX}
-                  y1={rsiPadTop + rsiPlotH * 0.3}
-                  x2={rsiWidth - paddingX}
-                  y2={rsiPadTop + rsiPlotH * 0.3}
-                  stroke="#f59e0b"
-                  strokeDasharray="2 2"
-                  strokeWidth="1"
-                  opacity="0.5"
-                />
-                {/* 중심 50선 */}
-                <line
-                  x1={paddingX}
-                  y1={rsiPadTop + rsiPlotH * 0.5}
-                  x2={rsiWidth - paddingX}
-                  y2={rsiPadTop + rsiPlotH * 0.5}
-                  stroke="currentColor"
-                  strokeDasharray="2 2"
-                  strokeWidth="0.75"
-                  opacity="0.2"
-                />
-                {/* 과매도 30선 */}
-                <line
-                  x1={paddingX}
-                  y1={rsiPadTop + rsiPlotH * 0.7}
-                  x2={rsiWidth - paddingX}
-                  y2={rsiPadTop + rsiPlotH * 0.7}
-                  stroke="#10b981"
-                  strokeDasharray="2 2"
-                  strokeWidth="1"
-                  opacity="0.5"
-                />
-                {/* RSI 곡선 */}
-                {rsiPathD && (
-                  <path
-                    d={rsiPathD}
-                    fill="none"
-                    stroke="#a855f7"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+
+            {/* 탭 1: RSI 서브패널 */}
+            {subpanelTab === 'rsi' && indicators.rsi && (
+              <div className="relative w-full h-[44px]">
+                <svg
+                  viewBox={`0 0 ${rsiWidth} ${rsiHeight}`}
+                  className="w-full h-full overflow-visible touch-none"
+                  preserveAspectRatio="none"
+                >
+                  {/* 과매수 70선 */}
+                  <line
+                    x1={paddingX}
+                    y1={rsiPadTop + rsiPlotH * 0.3}
+                    x2={rsiWidth - paddingX}
+                    y2={rsiPadTop + rsiPlotH * 0.3}
+                    stroke="#f59e0b"
+                    strokeDasharray="2 2"
+                    strokeWidth="1"
+                    opacity="0.5"
                   />
-                )}
-                {/* 호버 포인트 핀 */}
-                {hoveredIdx !== null && svgCandles[hoveredIdx]?.rsi !== undefined && (
-                  <circle
-                    cx={svgCandles[hoveredIdx].x}
-                    cy={rsiPadTop + rsiPlotH * (1 - svgCandles[hoveredIdx].rsi! / 100)}
-                    r="3"
-                    fill="#a855f7"
-                    stroke="#fff"
-                    strokeWidth="1.5"
+                  {/* 중심 50선 */}
+                  <line
+                    x1={paddingX}
+                    y1={rsiPadTop + rsiPlotH * 0.5}
+                    x2={rsiWidth - paddingX}
+                    y2={rsiPadTop + rsiPlotH * 0.5}
+                    stroke="currentColor"
+                    strokeDasharray="2 2"
+                    strokeWidth="0.75"
+                    opacity="0.2"
                   />
-                )}
-              </svg>
-            </div>
+                  {/* 과매도 30선 */}
+                  <line
+                    x1={paddingX}
+                    y1={rsiPadTop + rsiPlotH * 0.7}
+                    x2={rsiWidth - paddingX}
+                    y2={rsiPadTop + rsiPlotH * 0.7}
+                    stroke="#10b981"
+                    strokeDasharray="2 2"
+                    strokeWidth="1"
+                    opacity="0.5"
+                  />
+                  {/* RSI 곡선 */}
+                  {rsiPathD && (
+                    <path
+                      d={rsiPathD}
+                      fill="none"
+                      stroke="#a855f7"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
+                  {/* 호버 포인트 핀 */}
+                  {hoveredIdx !== null && svgCandles[hoveredIdx]?.rsi !== undefined && (
+                    <circle
+                      cx={svgCandles[hoveredIdx].x}
+                      cy={rsiPadTop + rsiPlotH * (1 - svgCandles[hoveredIdx].rsi! / 100)}
+                      r="3"
+                      fill="#a855f7"
+                      stroke="#fff"
+                      strokeWidth="1.5"
+                    />
+                  )}
+                </svg>
+              </div>
+            )}
+
+            {/* 탭 2: MACD 서브패널 */}
+            {subpanelTab === 'macd' && indicators.macd && (
+              <div className="relative w-full h-[44px]">
+                <svg
+                  viewBox={`0 0 ${macdWidth} ${macdHeight}`}
+                  className="w-full h-full overflow-visible touch-none"
+                  preserveAspectRatio="none"
+                >
+                  {/* 0선 중심 기준선 */}
+                  <line
+                    x1={paddingX}
+                    y1={macdCenterY}
+                    x2={macdWidth - paddingX}
+                    y2={macdCenterY}
+                    stroke="currentColor"
+                    strokeDasharray="2 2"
+                    strokeWidth="0.75"
+                    opacity="0.25"
+                  />
+                  {/* 히스토그램 막대 */}
+                  {svgCandles.map((c) => {
+                    if (c.hist === undefined) return null;
+                    const h = Math.abs(c.hist / maxMacdVal) * (macdPlotH / 2);
+                    const y = c.hist >= 0 ? macdCenterY - h : macdCenterY;
+                    const fill = c.hist >= 0 ? '#10b981' : '#f43f5e';
+                    const barW = Math.max(2, candleWidth * 0.75);
+                    return (
+                      <rect
+                        key={`macd-hist-${c.index}`}
+                        x={c.x - barW / 2}
+                        y={y}
+                        width={barW}
+                        height={Math.max(1, h)}
+                        fill={fill}
+                        opacity="0.65"
+                        rx="0.5"
+                      />
+                    );
+                  })}
+                  {/* MACD 곡선 (스카이블루) */}
+                  {macdPaths?.macdLineD && (
+                    <path
+                      d={macdPaths.macdLineD}
+                      fill="none"
+                      stroke="#38bdf8"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
+                  {/* Signal 곡선 (오렌지) */}
+                  {macdPaths?.signalLineD && (
+                    <path
+                      d={macdPaths.signalLineD}
+                      fill="none"
+                      stroke="#fb923c"
+                      strokeWidth="1.25"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
+                  {/* 호버 포인트 핀 */}
+                  {hoveredIdx !== null && svgCandles[hoveredIdx]?.macd !== undefined && (
+                    <circle
+                      cx={svgCandles[hoveredIdx].x}
+                      cy={macdCenterY - ((svgCandles[hoveredIdx].macd ?? 0) / maxMacdVal) * (macdPlotH / 2)}
+                      r="3"
+                      fill="#38bdf8"
+                      stroke="#fff"
+                      strokeWidth="1.5"
+                    />
+                  )}
+                </svg>
+              </div>
+            )}
           </div>
         )}
 

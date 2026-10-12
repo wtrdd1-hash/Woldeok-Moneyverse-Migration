@@ -5,6 +5,8 @@ import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockOrderPanel } from './stock-order-panel';
 import { StockMicroPortfolio } from './stock-micro-portfolio';
 import { StockMarketToast } from './stock-market-toast';
+import { StockTickerSwitcher } from './stock-ticker-switcher';
+import type { HubStock } from '../stock-hub';
 
 describe('StockOrderbook & Interactive Chart Suite', () => {
   it('renders orderbook with ask/bid levels, intensity badge, and recent trades stream', () => {
@@ -64,13 +66,21 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
     expect(screen.getAllByText('MA5').length).toBeGreaterThan(0);
     expect(screen.getAllByText('MA20').length).toBeGreaterThan(0);
 
-    // 볼린저 밴드(BB), RSI, 지지/저항선(SR) 지표 칩 검증
+    // 볼린저 밴드(BB), RSI, MACD, 지지/저항선(SR) 지표 칩 검증
     expect(screen.getByTitle('볼린저 밴드 (20, 2) 토글')).toBeDefined();
     expect(screen.getByTitle('상대강도지수 (RSI 14) 서브패널 토글')).toBeDefined();
+    expect(screen.getByTitle(/MACD.*서브패널 토글/i)).toBeDefined();
     expect(screen.getByTitle('지지선/저항선 (Support & Resistance) 가이드라인 토글')).toBeDefined();
 
     // RSI 서브패널 텍스트 검증
     expect(screen.getAllByText(/RSI \(14\)/i).length).toBeGreaterThan(0);
+
+    // MACD 서브패널 탭 클릭 및 전환 검증
+    const macdTabBtn = screen.getByRole('button', { name: /MACD \(12, 26, 9\)/i });
+    expect(macdTabBtn).toBeDefined();
+    fireEvent.click(macdTabBtn);
+    expect(screen.getByText(/● MACD/i)).toBeDefined();
+    expect(screen.getByText(/● Sig/i)).toBeDefined();
 
     // 라인 차트 모드로 전환 클릭
     fireEvent.click(lineBtn);
@@ -172,6 +182,52 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
       />
     );
     expect(container).toBeDefined();
+  });
+
+  it('renders StockTickerSwitcher with stock items and active state', () => {
+    const mockStocks: HubStock[] = [
+      {
+        id: '1',
+        symbol: 'WDG',
+        name: '월덱 게임즈',
+        current_price: '15,000',
+        day_open_price: '14,800',
+        day_high_price: '15,500',
+        day_low_price: '14,500',
+        shares_outstanding: '1,000,000',
+        shares_available: '500,000',
+        description: '설명',
+        active: true,
+      },
+      {
+        id: '2',
+        symbol: 'NVD',
+        name: '엔비디',
+        current_price: '28,000',
+        day_open_price: '29,000',
+        day_high_price: '29,500',
+        day_low_price: '27,500',
+        shares_outstanding: '1,000,000',
+        shares_available: '500,000',
+        description: '설명',
+        active: true,
+      },
+    ];
+
+    render(
+      <StockTickerSwitcher
+        stocks={mockStocks}
+        currentSymbol="WDG"
+        isEn={false}
+      />
+    );
+
+    // 심볼 노출 검증
+    expect(screen.getByText('WDG')).toBeDefined();
+    expect(screen.getByText('NVD')).toBeDefined();
+    // 가격 노출 검증
+    expect(screen.getByText(/15,000/)).toBeDefined();
+    expect(screen.getByText(/28,000/)).toBeDefined();
   });
 });
 

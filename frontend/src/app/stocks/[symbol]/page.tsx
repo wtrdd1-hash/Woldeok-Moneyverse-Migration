@@ -23,6 +23,7 @@ import { StockMarketToast } from './stock-market-toast';
 import { QuickOrderbookSimulator } from '@/components/quick-orderbook-simulator';
 import { StockSentimentPoll } from '@/components/stock-sentiment-poll';
 import { StockHaltBanner } from './stock-halt-banner';
+import { StockTickerSwitcher } from './stock-ticker-switcher';
 import { SocialShareToolbar } from '@/components/social-share-toolbar';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import {
@@ -224,6 +225,12 @@ export default async function StockHubPage({
           {isEn ? 'Back to market' : '시장으로 돌아가기'}
         </Link>
       </Button>
+
+      <StockTickerSwitcher
+        stocks={market?.stocks ?? []}
+        currentSymbol={stock.symbol}
+        isEn={isEn}
+      />
 
       {isHalted && (
         <StockHaltBanner

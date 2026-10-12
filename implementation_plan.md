@@ -1,6 +1,7 @@
 # [월덕 머니버스] 통합 구현 계획서 (현재: v196)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v197**: [가상 주식 전 종목 퀵 티커 스위처 바 구축 & 차트 정통 MACD(12, 26, 9) 서브패널 및 서브차트 탭 전환기 탑재] (+135, -0)
 - **v196**: [가상 주식 실데이터 캔들 API 하이브리드 바인딩 & 지지/저항선 수평 분석 칩 및 실시간 체결 플로팅 토스트 구축] (+130, -0)
 - **v195**: [가상 주식 전문가용 트레이딩 인터페이스 구축 (키보드 핫키 B/S/Enter/Esc 단축 주문, 입력 가드, 마이크로 도넛 포트폴리오 위젯, 지정가 모의 체결 봇 및 Web Audio 체결 토스트)] (+110, -0)
 - **v194**: [가상 주식 거래 시스템 고도화 (RSI 상대강도지수 서브패널, 볼린저 밴드 오버레이, 주문 콘솔 10%/25%/50%/100% 잔고 비율 바인딩, Web Audio 체결 사운드 및 localStorage 영구 동기화)] (+120, -0)
@@ -894,3 +895,47 @@
 4. Git 커밋 & 푸시
 5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v580`)
 6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
+---
+
+## 🚀 [v197 Specification] 가상 주식 전 종목 퀵 티커 스위처 바 구축 & 차트 정통 MACD(12, 26, 9) 서브패널 및 서브차트 탭 전환기 탑재
+
+### 1. 현황 및 개선 필요 사항
+1. **[전 종목 퀵 티커 스위처 바 (`StockTickerSwitcher`)]**:
+   - 가상 주식 개별 거래 화면 상단에 18개 전 종목을 가로 스크롤로 한눈에 둘러보고 원클릭으로 전환할 수 있는 캐러셀 바 구축.
+   - 종목 심볼, 한국어 명칭, 현재가(WLD), 전일 대비 등락률(%) 뱃지 노출.
+   - 현재 조회 중인 종목 활성화 하이라이트(보더 링 및 배경 발광).
+2. **[정통 MACD(12, 26, 9) 모멘텀 서브패널 탑재]**:
+   - 단기 EMA(12)와 장기 EMA(26)의 차이인 MACD 곡선(스카이블루 `#38bdf8`) 산출.
+   - MACD의 9기간 EMA인 시그널 곡선(오렌지 `#fb923c`) 산출.
+   - MACD와 시그널의 괴리인 모멘텀 오실레이터 히스토그램 막대(상승 에메랄드 `#10b981` / 하락 로즈 `#f43f5e`) SVG 렌더링.
+3. **[서브패널 탭 전환기 (RSI ↔ MACD)]**:
+   - 뷰포트 높이 절약을 위해 차트 하단 서브패널을 원클릭으로 `RSI(14)`와 `MACD(12, 26, 9)` 간 매끄럽게 전환할 수 있는 서브차트 탭 스위처 연동 (`localStorage` 영구 보존).
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-ticker-switcher.tsx` (신규)**:
+   - 가상 주식 18개 종목 목록 수신 (`HubStock[]`).
+   - 가로 터치 스크롤 컨테이너 (`overflow-x-auto no-scrollbar`).
+   - 각 종목 카드: 심볼, 한글명, 현재가(쉼표 소제 안전 처리), 등락률 뱃지, 현재 종목 액티브 링.
+2. **`frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx`**:
+   - EMA(12), EMA(26), Signal EMA(9) 및 Histogram 계산 알고리즘 추가.
+   - 서브패널 모드 상태 `subpanelTab`: `'rsi' | 'macd'`.
+   - MACD SVG 렌더링: 0선 기준선, 히스토그램 막대, MACD 블루 곡선, Signal 오렌지 곡선, 수치 라벨.
+   - 상단 지표 바에 `MACD` 토글 칩 및 서브패널 탭 버튼 배치.
+3. **`frontend/src/app/stocks/[symbol]/page.tsx`**:
+   - 시장 전체 주식 목록(`market?.stocks`)을 상단 `StockTickerSwitcher`에 전달 및 페이지 헤더 상단에 마운트.
+4. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - MACD 지표 렌더링 및 `StockTickerSwitcher` 컴포넌트 단위 테스트 추가.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass (7/7 tests)
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v581`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
