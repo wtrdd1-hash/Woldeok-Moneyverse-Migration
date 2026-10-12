@@ -13,8 +13,28 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v583 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v583`
+## 🌟 Production Release Overview (prod-v584 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v584`
+- **Release Date**: 2026-10-13 01:24 KST
+- **Git Commit HEAD**: `5cd1e4a8` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 실시간 호가 심도 누적 차트 (`StockDepthChart`, v202 / prod-v584)**:
+     - 10단 매수(Bids) vs 매도(Asks) 호가로부터 가격대별 누적 잔량을 산출하여 매수(에메랄드 `#10b981`) 및 매도(로즈 `#f43f5e`) 듀얼 그라디언트 에어리어 SVG 차트 렌더링.
+     - 중앙 체결가 기준선, 호버 시 단일/누적 수량 툴팁, 최대 호가벽(Order Wall) 뱃지 및 클릭 시 즉시 주문 바인딩.
+     - 호가창 헤더에 `[호가]` vs `[심도]` 뷰 세그먼트 스위처 연동 (`localStorage` 영구 동기화).
+  2. **관리자 비상 관제 긴급 킬스위치 제어탑 (`EmergencyKillSwitchCard`, `/admin/controls`)**:
+     - `admin-control-tower-craft` 스킬 기반: 4대 긴급 비상 킬스위치(거래소 전 종목 매매 동결 서킷브레이커, 국고 출금 동결, 신규 가입 차단, 외부 웹훅 격리) 구축.
+     - 오조작 방지를 위한 2단계 보안 확인(Step-Up Field) 모달 다이얼로그 ("CONFIRM FREEZE" 문구 검증) 및 세션 감사 로그 스트립 탑재.
+  3. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (9/9) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG`, `/admin/controls` HTTP 200 실측 확인).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v583)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v583`
 - **Release Date**: 2026-10-12 22:05 KST
 - **Git Commit HEAD**: `96bcb372` (`main`)
 - **Key Deliverables**:
