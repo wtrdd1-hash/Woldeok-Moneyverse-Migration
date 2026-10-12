@@ -1,6 +1,7 @@
 # [월덕 머니버스] 통합 구현 계획서 (현재: v196)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v198**: [가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 실시간 자동 감시 조건부 주문 시스템 탑재] (+140, -0)
 - **v197**: [가상 주식 전 종목 퀵 티커 스위처 바 구축 & 차트 정통 MACD(12, 26, 9) 서브패널 및 서브차트 탭 전환기 탑재] (+135, -0)
 - **v196**: [가상 주식 실데이터 캔들 API 하이브리드 바인딩 & 지지/저항선 수평 분석 칩 및 실시간 체결 플로팅 토스트 구축] (+130, -0)
 - **v195**: [가상 주식 전문가용 트레이딩 인터페이스 구축 (키보드 핫키 B/S/Enter/Esc 단축 주문, 입력 가드, 마이크로 도넛 포트폴리오 위젯, 지정가 모의 체결 봇 및 Web Audio 체결 토스트)] (+110, -0)
@@ -938,4 +939,44 @@
 4. Git 커밋 & 푸시
 5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v581`)
 6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
+---
+
+## 🚀 [v198 Specification] 가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 실시간 자동 감시 조건부 주문 시스템 탑재
+
+### 1. 현황 및 개선 필요 사항
+1. **[스탑로스(Stop-Loss) & 익절(Take-Profit) 자동 감시 엔진]**:
+   - 주가 급변 시 손실을 제한하거나 목표 수익을 확정하기 위해 사전에 트리거 조건(하락 -3%/-5%/-10%, 상승 +5%/+10%/+20% 또는 사용자 지정 트리거가)을 등록하는 자동 감시 주문 시스템 부재.
+   - 브라우저 실시간 시세 수신 시 조건을 지속적으로 판정하여 조건 충족 시 시장가 매도 주문을 자동 발동하는 클라이언트 사이드 시뮬레이션 감시 봇 필요.
+2. **[조건부 감시 주문 전용 인터페이스 (`StockConditionalOrders`)]**:
+   - 주문 유형 탭: 손절 감시(Stop-Loss) vs 익절 감시(Take-Profit) 듀얼 모드.
+   - 수량 프리셋: 25%, 50%, 100%(전량) 보유 잔고 연동.
+   - 활성 감시 목록: 종목, 조건 유형, 목표 트리거 가격, 잔여 괴리율(%), 상태 배지(`감시 중` / `체결 완료` / `취소됨`), 원클릭 취소 버튼.
+   - `localStorage` 영구 보존 및 Web Audio 체결 사운드/토스트 피드백 연동.
+3. **[트레이딩 콘솔 통합 (`StockTradingConsole`)]**:
+   - 우측 주문 영역 상단에 `[일반 호가 주문]` vs `[자동 감시 (스탑로스/익절)]` 세그먼트 탭을 지원하여 트레이더가 원하는 방식으로 신속히 전환할 수 있도록 구조화.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-conditional-orders.tsx` (신규)**:
+   - 조건부 감시 주문 생성 폼 (Stop-Loss / Take-Profit 선택, 트리거 가격, 수량 프리셋 25/50/100%).
+   - 등록된 활성 감시 규칙 모니터링 엔진 (`currentPrice` 변동 시 조건 검사 및 상태 전환).
+   - 감시 목록 카드 (상태 배지, 괴리율 계산, 취소/삭제 기능, localStorage 저장).
+2. **`frontend/src/app/stocks/[symbol]/stock-trading-console.tsx`**:
+   - 우측 주문 영역에 `tradingTab` ('order' | 'conditional') 탭 스위처 연동.
+   - 'conditional' 선택 시 `StockConditionalOrders` 마운트 (모바일 다이얼로그에서도 동일 지원).
+3. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - `StockConditionalOrders` 컴포넌트 렌더링, 탭 전환 및 감시 주문 추가/목록 렌더링 단위 테스트.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. 로컬 프론트엔드 정적 빌드 (`pnpm.cmd --filter @moneyverse/frontend run build`): 584개 페이지 생성 100% 확인
+4. Git 커밋 & 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v582`)
+6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
 
