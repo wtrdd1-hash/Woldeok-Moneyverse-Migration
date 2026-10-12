@@ -13,8 +13,32 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v577 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v577`
+## 🌟 Production Release Overview (prod-v578 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v578`
+- **Release Date**: 2026-10-12 19:18 KST
+- **Git Commit HEAD**: `dbcefc68` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 차트 고급 보조지표 탑재 (v194 / prod-v578)**:
+     - `StockInteractiveChart`: 볼린저 밴드(20, 2) 상/중/하단 밴드 및 투명 음영 영역 렌더링.
+     - RSI(14) 실시간 서브패널(과매수 70 / 과매도 30 점선 기준선) 추가.
+     - 지표 칩 토글 스위치 (`MA 5/20`, `BB(20,2)`, `RSI(14)`) 독립 온/오프 제어.
+     - 차트 모드(`봉`/`선`) 및 활성 지표 목록 `localStorage` 영구 동기화 (`mw_stock_chart_mode`, `mw_stock_chart_indicators`).
+  2. **10단 호가창 & 주문 콘솔 퀵 바인딩 및 프리셋**:
+     - `StockOrderbook`: 호가 깊이(5D/10D) `localStorage` 영구 동기화 (`mw_stock_orderbook_depth`).
+     - 호가 행 클릭 시 즉시 주문 가격 인풋 바인딩 및 체결 틱 사운드 재생.
+     - `StockOrderPanel`: 10%, 25%, 50%, 100% 잔액 비율 원터치 프리셋 버튼 탑재.
+  3. **Web Audio API 오디오 인터랙션 구축**:
+     - `audio-effects.ts`: `playStockTradeSuccessSound()` (체결 완료 D5->A5 아르페지오 신디사이징).
+     - `audio-effects.ts`: `playStockTickSound()` (1600Hz 미니멀 틱 핑).
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 및 Next.js 프로덕션 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - 단위 테스트 `stock-orderbook.test.tsx` (3/3) 100% PASS.
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v577)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v577`
 - **Release Date**: 2026-10-12 17:55 KST
 - **Git Commit HEAD**: `2dabf2b7` (`main`)
 - **Key Deliverables**:
@@ -29,14 +53,6 @@
      - 5D / 10D 깊이 원클릭 토글 버튼.
      - 최신 체결 5건 실시간 미니 스트림 (`시간 · 체결가 · 수량`).
      - 320px 모바일 뷰포트 방어 및 단축키/호가 원터치 연동 보존.
-  3. **검증 및 배포 완결**:
-     - 로컬 및 프로덕션 Next.js 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
-     - 신규 단위 테스트 `stock-orderbook.test.tsx` 통과.
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v576)
 - **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v576`
 - **Release Date**: 2026-10-11 23:30 KST
 - **Git Commit HEAD**: `35245119` (`main`)
