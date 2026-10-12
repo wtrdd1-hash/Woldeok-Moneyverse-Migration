@@ -13,8 +13,32 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v580 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v580`
+## 🌟 Production Release Overview (prod-v581 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v581`
+- **Release Date**: 2026-10-12 21:20 KST
+- **Git Commit HEAD**: `9bed0441` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 전 종목 퀵 티커 스위처 바 (`StockTickerSwitcher`, v197 / prod-v581)**:
+     - 거래소 상단에 시장 18개 전 종목을 가로 스크롤로 한눈에 탐색할 수 있는 반응형 티커 캐러셀 탑재.
+     - 종목 심볼, 한글 명칭, 실시간 현재가(콤마 안전 포맷팅), 당일 등락률(%) 뱃지 및 현재 선택 종목 액티브 링 제공.
+     - 모바일 터치 스크롤(`no-scrollbar`, `scroll-smooth`) 및 데스크톱 호버 피드백 지원.
+  2. **정통 MACD(12, 26, 9) 모멘텀 서브패널 탑재**:
+     - 단기 EMA(12)와 장기 EMA(26)의 수렴·확산 곡선(스카이블루 `#38bdf8`) 산출.
+     - MACD의 9기간 시그널 지수이동평균 곡선(오렌지 `#fb923c`) 산출.
+     - 모멘텀 오실레이터 히스토그램 막대(상승 에메랄드 `#10b981` / 하락 로즈 `#f43f5e`) 3중 SVG 렌더링.
+  3. **서브패널 탭 전환기 (RSI ↔ MACD)**:
+     - 뷰포트 높이 절약을 위해 차트 하단 서브패널을 원클릭으로 `[RSI (14)]`와 `[MACD (12, 26, 9)]` 간 토글할 수 있는 탭 스위처 연동 (`localStorage` 영구 보존).
+     - 상단 지표 칩 그룹에 `MACD` 토글 버튼 연동.
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (7/7) 100% PASS (MACD 및 티커 스위처 테스트 포함).
+     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, '가상 주식 퀵 티커 바' 정상 서빙).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v580)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v580`
 - **Release Date**: 2026-10-12 20:34 KST
 - **Git Commit HEAD**: `96b99eea` (`main`)
 - **Key Deliverables**:
