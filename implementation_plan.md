@@ -692,3 +692,57 @@
 4. 원격 프로덕션 Debian 13 VM 100 (`prod-v576`) 무중단 승격 배포
 5. 배포 후 `sitemap.xml`, `sitemap-stocks.xml`, `robots.txt`, `/kdic`, `/bank/savings-pot` 실측 HTTP 200 및 메타 태그/JSON-LD 검증
 6. IndexNow 및 백엔드 SEO 핑 수동 트리거 후 응답 검증
+
+
+---
+
+## 🚀 [v193 Specification] 가상 주식 호가창 & 인터랙티브 차트 TradingView급 전면 쇄신 (prod-v577)
+
+### 1. 현황 분석 및 사용자 확정 요구사항
+1. **[인터랙티브 차트 TradingView급 고도화]**:
+   - 기존 라인 에어리어 단일 차트에서 프로 트레이더 및 초보자 모두를 만족하는 **듀얼 모드(Line Area vs Candlestick 봉차트)** 토글 스위치 탑재.
+   - **이동평균선(Moving Average) 보조지표 오버레이**:
+     - `MA 5` (단기 5구간 이동평균선): 앰버 골드 라인 (`#f59e0b`)
+     - `MA 20` (중기 20구간 이동평균선): 인디고 퍼플 라인 (`#6366f1`)
+   - **거래량(Volume) 하단 히스토그램 막대그래프**:
+     - 주가 상승 봉은 에메랄드 그린(`rgba(16, 185, 129, 0.4)`), 하락 봉은 로즈 레드(`rgba(244, 63, 94, 0.4)`) 거래량 바 렌더링.
+   - **OHLC(시가/고가/저가/종가) 실시간 헤더 바 & SVG 동적 십자선(Crosshair)**:
+     - 마우스 호버 및 터치 시 정확한 시간대 십자선 가이드 및 가격 뱃지 툴팁 실시간 연동.
+   - **글리프 떨림 방지**: 금융 수치 전역에 `font-mono tabular-nums tracking-tight` 적용 (`cross-surface-visual-hierarchy-architect` 준수).
+
+2. **[실시간 호가창(Orderbook) 쇄신]**:
+   - **실시간 체결강도(Order Volume Intensity / Imbalance Ratio)** 게이지 바 및 수치(%) 표기:
+     - 100% 이상 시 매수 우세(에메랄드), 100% 미만 시 매도 우세(로즈) 직관적 시각화.
+   - **최근 체결 틱 5건 미니 스트림 (Recent Trade Stream)**:
+     - 체결 시각, 체결가, 체결 수량(주), 매수/매도 구분 뱃지를 실시간으로 흐르듯 표시하여 실제 금융 거래소 수준의 현장감 제공.
+   - **호가 10-Depth 수량/가격 그리드 모노스페이스 최적화**:
+     - `tabular-nums` 전면 적용으로 가격 틱 갱신 시 칼럼 흔들림 0건(Zero Jittering) 보장.
+     - 320px 모바일 화면에서도 `min-w-0` 및 flex-shrink 방어.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx`**:
+   - 듀얼 모드 토글 상태 (`chartType: 'line' | 'candle'`)
+   - 캔들스틱 계산 (시가 Open, 고가 High, 저가 Low, 종가 Close, 거래량 Volume)
+   - MA 5, MA 20 이동평균선 배열 산출 및 SVG 패스 렌더링
+   - 하단 20% 영역에 거래량 히스토그램 SVG 막대 렌더링
+   - 크로스헤어(십자선) 및 상단 OHLC 인디케이터 (Open, High, Low, Close, Vol)
+   - `tabular-nums` 전면 적용
+2. **`frontend/src/app/stocks/[symbol]/stock-orderbook.tsx`**:
+   - 체결강도(Buy/Sell Intensity Ratio) 산출 및 비주얼 게이지 배지 추가
+   - 최근 체결 틱 5건(Recent Trades) 롤링 스트림 컴포넌트 추가
+   - 모든 호가 행 및 누적 수량에 `tabular-nums` 적용
+3. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx` (신규 또는 갱신)**:
+   - 체결강도 계산 및 최근 체결 틱 렌더링 단위 테스트 검증
+4. **`implementation_plan.md`**: v193 사양 누적 관리 및 루트/아티팩트 실시간 동기화.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 타입 검사 (`pnpm --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 관련 컴포넌트 단위 테스트 (`vitest run ...`): 100% 통과
+3. 프론트엔드 정적 빌드 (`pnpm --filter @moneyverse/frontend run build`): 584/584 정적 페이지 100% 성공
+4. Git 커밋 및 origin/main 푸시
+5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v577`)
+6. 실제 엔드포인트(`https://easy-scraping.com/stocks/WDG`) 접속 후 실시간 차트 듀얼 토글, 캔들스틱, MA5/MA20, 거래량 바, 체결강도 및 체결 틱 스트림 동작 검증
