@@ -13,8 +13,30 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v578 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v578`
+## 🌟 Production Release Overview (prod-v579 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v579`
+- **Release Date**: 2026-10-12 19:54 KST
+- **Git Commit HEAD**: `620a7340` (`main`)
+- **Key Deliverables**:
+  1. **전문가용 키보드 핫키 트레이딩 시스템 (v195 / prod-v579)**:
+     - `StockOrderPanel`: `B`(매수 탭), `S`(매도 탭), `Enter`(주문 확인 및 제출), `Esc`(모달 닫기/폼 포커스 해제).
+     - **오입력 방지 가드**: 수량/가격 등 텍스트 인풋 필드에 포커스되어 있을 때 알파벳 단축키 트리거를 원천 차단하여 오입력 방지.
+     - **UI 단축키 뱃지**: 탭 버튼 및 주문 실행 버튼에 정밀 모노스페이스 뱃지(`[B]`, `[S]`, `[Enter]`) 및 데스크톱 단축키 가이드 바 노출.
+  2. **실시간 마이크로 도넛 포트폴리오 자산 비중 위젯 (`StockMicroPortfolio`)**:
+     - 개별 주식 거래 화면 우측 주문 패널 하단에 SVG 마이크로 도넛 차트 위젯 배치.
+     - 현재 종목의 포트폴리오 점유 비중(%) 중앙 시각화, 보유 평가액 및 상위 3개 보유 종목 컬러 배지 스트립 제공.
+  3. **지정가 모의 체결 봇 & 피드백 (Simulated Limit Order Matcher)**:
+     - 지정가 주문 시 가상 매칭 엔진 호가 대기 펄스 애니메이션 및 1.2초 후 체결 완료 축하 사운드(`playStockTradeSuccessSound`) 연동.
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (5/5) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, '핫키 가드' 및 '포트폴리오 자산 비중' 정상 서빙).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v578)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v578`
 - **Release Date**: 2026-10-12 19:18 KST
 - **Git Commit HEAD**: `dbcefc68` (`main`)
 - **Key Deliverables**:
@@ -34,10 +56,6 @@
      - 프론트엔드 타입 검사 및 Next.js 프로덕션 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
      - 단위 테스트 `stock-orderbook.test.tsx` (3/3) 100% PASS.
      - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v577)
 - **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v577`
 - **Release Date**: 2026-10-12 17:55 KST
 - **Git Commit HEAD**: `2dabf2b7` (`main`)
