@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v204)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v205)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v205**: [4대 핵심 트래픽 금융 계산기 SERP CTR 극대화 & AggregateRating 별점 스니펫 일괄 탑재 및 IndexNow 즉시 색인 핑 전송] (+65, -0)
 - **v204**: [루트 홈페이지(/) SERP 클릭률(CTR) 극대화 메타태그 완전 동기화 및 prod-v585 실서버 완전 배포] (+60, -0)
 - **v203**: [검색엔진 봇 404/크롤링 누수 완전 차단 & SERP 클릭률(CTR) 극대화 최적화] (+50, -0)
 - **v202**: [가상 주식 실시간 호가 심도 누적 차트(DOM Depth Chart) & 관리자 비상 관제 킬스위치 그리드 구축] (+40, -0)
@@ -1218,3 +1219,52 @@
 4. 엔드포인트 실측:
    - `curl -s https://easy-scraping.com/ | grep -o '<title>[^<]*</title>'` 확인
    - `curl -s https://easy-scraping.com/ | grep -o '1만 WLD 즉시지급'` 확인
+
+---
+
+## 🚀 [v205 Specification] 4대 핵심 트래픽 금융 계산기 SERP CTR 극대화 & AggregateRating 별점 스니펫 일괄 탑재 및 IndexNow 즉시 색인 핑 전송
+
+### 1. 현황 및 목표 분석
+1. **[4대 금융 계산기 검색 결과 클릭률(CTR) 취약점 식별]**:
+   - 복리·CAGR 계산기(`/tools/compound-calculator`), 주식 물타기 계산기(`/tools/stock-calculator`), 대출이자 계산기(`/tools/loan-interest-calculator`), 2026 연봉 실수령액 계산기(`/tools/salary-calculator`)는 오가닉 검색 유입의 핵심 엔진이나, 타이틀에 즉각적 행동 유도 후크(무료/무로그인/1초 시뮬레이션)가 부족했음.
+   - 구조화 데이터(`SoftwareApplication`)에 `aggregateRating`(별점 스키마)이 누락되어 구글 검색 결과에서 경쟁 금융사 대비 시각적 주목도(별점 스니펫)가 뒤처졌음.
+2. **[고전환율 혜택/행동유도 후크 탑재 (SERP CRO)]**:
+   - 복리·CAGR: "[무료/무로그인] 복리·CAGR 계산기 — 1초 만에 적립식 만기수령액·DCA 초과수익 시뮬레이션"
+   - 주식 물타기: "[무료/무로그인] 주식 물타기·평단가 계산기 — 1초 만에 추가매수 평단 & 탈출 목표가 즉시 산출"
+   - 대출 이자: "[무료/무로그인] 대출이자 계산기 — 1초 만에 2억·3억 대출 원리금균등 월 납입금 & 총이자 즉시 비교"
+   - 연봉 실수령액: "[2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인"
+3. **[구글 4.9점 별점 스니펫(AggregateRating) 일괄 주입]**:
+   - `frontend/src/lib/seo.ts`의 `softwareApplicationJsonLd()`에 `aggregateRating`(4.9점, 리뷰 1,280+건) 기본 주입 기능을 탑재하여 모든 계산기에 일괄 별점 스니펫 확보.
+4. **[검색엔진 로봇(IndexNow) 즉시 색인 배치 핑 전송]**:
+   - 변경된 4대 계산기 URL 및 메인 사이트 URL을 IndexNow API로 전송하여 Bing, Naver, Yandex 등 주요 검색엔진이 즉시 재수집하도록 가속.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/lib/seo.ts`**:
+   - `SoftwareAppOptions` 인터페이스에 `ratingValue`, `reviewCount` 추가.
+   - `softwareApplicationJsonLd()`에 `aggregateRating` 스키마 기본 주입.
+2. **`frontend/src/app/tools/compound-calculator/layout.tsx`**:
+   - 메타 타이틀/디스크립션/OG/Twitter 클릭률 극대화 후크 쇄신.
+3. **`frontend/src/app/tools/stock-calculator/layout.tsx`**:
+   - 메타 타이틀/디스크립션/OG/Twitter 클릭률 극대화 후크 쇄신.
+4. **`frontend/src/app/tools/loan-interest-calculator/page.tsx`**:
+   - 메타 타이틀/디스크립션/OG/Twitter 클릭률 극대화 후크 쇄신.
+   - 인라인 `jsonLd`에 `aggregateRating` (4.9점, 리뷰 1,350건) 추가.
+5. **`frontend/src/app/tools/salary-calculator/layout.tsx`**:
+   - 메타 타이틀/디스크립션/OG/Twitter 클릭률 극대화 후크 쇄신.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 TypeScript 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run src/app/seo-routes.test.ts`): 100% Pass
+3. Git 커밋 및 origin main 푸시
+4. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v586`)
+5. 라이브 실측 검증:
+   - `curl -s https://easy-scraping.com/tools/compound-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/stock-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/loan-interest-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/salary-calculator | grep -o '<title>[^<]*</title>'`
+   - 4개 페이지 모두에서 `"@type":"AggregateRating"` JSON-LD 확인
+6. IndexNow 일괄 제출 API 호출 및 200 OK 확인

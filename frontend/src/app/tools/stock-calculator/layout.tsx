@@ -9,9 +9,9 @@ import {
 import { jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '주식 물타기·평단가 & 수익률 계산기 — 추가 매수 평단 및 목표 매도가 산출 | 월덕 머니버스',
+  title: '[무료/무로그인] 주식 물타기·평단가 계산기 — 1초 만에 추가매수 평단 & 탈출 목표가 즉시 산출 | 월덕 머니버스',
   description:
-    '기존 보유 단가와 수량, 추가 매수가를 입력하여 실시간 평단가 변동을 계산하고 손익분기점 탈출 및 목표 수익률 달성을 위한 매도가를 정밀 산출하세요.',
+    '[로그인 없이 1초 산출] 추가 매수 시 변화하는 내 주식 평단가와 원금 회복 손익분기점, 목표 수익률 매도가를 실시간으로 즉시 계산하세요! 수수료·제세금 포함 실질 탈출 단가 및 물타기 시뮬레이션 제공.',
   keywords: [
     '주식 물타기 계산기',
     '주식 평단가 계산기',
@@ -26,15 +26,15 @@ export const metadata: Metadata = {
     canonical: '/tools/stock-calculator',
   },
   openGraph: {
-    title: '주식 물타기·평단가 & 수익률 계산기 | 월덕 머니버스',
-    description: '추가 매수 시 변동 평단가와 목표 수익률 도달 매도가를 실시간으로 정밀 계산하세요.',
+    title: '[무료/무로그인] 주식 물타기·평단가 & 수익률 계산기 | 월덕 머니버스',
+    description: '[로그인 없이 1초 산출] 추가 매수 시 변동 평단가와 목표 수익률 도달 매도가를 실시간으로 정밀 계산하세요.',
     url: canonicalUrl('/tools/stock-calculator'),
     images: [
       {
         url: buildOgImageUrl({
           title: '주식 물타기·평단가 & 수익률 계산기',
           description: '추가 매수 평단가 · 손익분기점 · 목표 수익률 매도가 산출',
-          badge: 'Stock Calculator',
+          badge: '무료/무로그인 1초 시뮬레이터',
           type: 'default',
         }),
         width: 1200,
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '주식 물타기·평단가 & 수익률 계산기 | 월덕 머니버스',
-    description: '추가 매수 시 변동 평단가와 목표 수익률 도달 매도가를 실시간으로 정밀 계산하세요.',
+    title: '[무료/무로그인] 주식 물타기·평단가 & 수익률 계산기 | 월덕 머니버스',
+    description: '[로그인 없이 1초 산출] 추가 매수 시 변동 평단가와 목표 수익률 도달 매도가를 실시간으로 정밀 계산하세요.',
   },
 };
 

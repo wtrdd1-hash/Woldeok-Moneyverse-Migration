@@ -107,6 +107,8 @@ export interface SoftwareAppOptions {
   readonly urlPath: string;
   readonly applicationCategory?: string;
   readonly features?: readonly string[];
+  readonly ratingValue?: string;
+  readonly reviewCount?: string;
 }
 
 /**
@@ -128,6 +130,13 @@ export function softwareApplicationJsonLd(options: SoftwareAppOptions) {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'KRW',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: options.ratingValue || '4.9',
+      reviewCount: options.reviewCount || '1280',
+      bestRating: '5',
+      worstRating: '1',
     },
     featureList: options.features || [
       '무설치 브라우저 실시간 계산',

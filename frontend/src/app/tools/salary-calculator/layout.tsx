@@ -9,9 +9,9 @@ import {
 import { jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '2026 연봉 실수령액 계산기 — 4대보험·근로소득세·부양가족 공제 실수령 월급 | 월덕 머니버스',
+  title: '[2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인 | 월덕 머니버스',
   description:
-    '2026년 최신 국민연금, 건강보험, 장기요양, 고용보험 요율과 간이세액표 근로소득세를 적용한 연봉별(3천만~1억) 세후 실수령액과 공제 총액을 실시간으로 확인하세요.',
+    '[2026년 최신 요율 100% 반영] 연봉 3천만~1억 원 구간별 실수령 월급과 국민연금, 건강보험, 장기요양, 고용보험, 근로소득세 공제 총액을 로그인 없이 1초 만에 즉시 확인하세요! 부양가족별 세후 월급 비교 표 제공.',
   keywords: [
     '연봉 실수령액 계산기',
     '2026 연봉 계산기',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: '2026 연봉 실수령액 계산기 — 4대보험 및 세후 월급 정밀 계산 | 월덕 머니버스',
+    title: '[2026 최신] 연봉 실수령액 계산기 — 4대보험 및 세후 월급 1초 산출 | 월덕 머니버스',
     description: '2026년 요율 반영 4대보험 공제액 및 근로소득세 차감 후 실수령 월급 실시간 산출',
     url: canonicalUrl('/tools/salary-calculator'),
     type: 'website',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
         url: buildOgImageUrl({
           title: '2026 연봉 실수령액 계산기',
           description: '4대보험 요율 · 근로소득세 공제 후 실수령 월급 정밀 비교',
-          badge: 'Salary Calculator',
+          badge: '무료/무로그인 1초 시뮬레이터',
           type: 'default',
         }),
         width: 1200,
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '2026 연봉 실수령액 계산기 — 4대보험 및 세후 월급 정밀 계산 | 월덕 머니버스',
+    title: '[2026 최신] 연봉 실수령액 계산기 — 4대보험 및 세후 월급 1초 산출 | 월덕 머니버스',
     description: '2026년 요율 반영 4대보험 공제액 및 근로소득세 차감 후 실수령 월급 실시간 산출',
   },
 };

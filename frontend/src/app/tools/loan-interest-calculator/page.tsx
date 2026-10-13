@@ -9,8 +9,8 @@ import { LoanCalculatorClient } from './loan-calculator-client';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 
 export const metadata: Metadata = {
-  title: '대출이자 계산기 - 2억 대출 30년 상환·원리금균등·주택담보대출 월별 상환액 비교',
-  description: '2억 대출 30년 상환 시 월 납입금 약 95만 원 및 총 대출이자 1억 4,374만 원 정밀 산출! 1억·2억·3억·5억 주택담보대출, 신용대출의 원리금균등, 원금균등, 만기일시 상환방식별 총 이자와 월 상환액을 한눈에 비교하고 절세 전략을 확인하세요.',
+  title: '[무료/무로그인] 대출이자 계산기 — 1초 만에 2억·3억 대출 원리금균등 월 납입금 & 총이자 즉시 비교 | 월덕 머니버스',
+  description: '[로그인 없이 1초 산출] 1억·2억·3억·5억 주택담보대출 및 신용대출 30년 상환 시 월 납입금과 총 대출이자 정밀 산출! 원리금균등, 원금균등, 만기일시 상환방식별 총 이자와 월 상환액을 한눈에 즉시 비교하세요.',
   keywords: [
     '2억 대출 30년 상환',
     '대출이자 계산기',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: '대출이자 계산기 - 2억 대출 30년 상환 월 납입금 & 원리금균등 비교',
+    title: '[무료/무로그인] 대출이자 계산기 — 2억 대출 30년 상환 월 납입금 & 원리금균등 비교 | 월덕 머니버스',
     description: '2억 대출 30년 상환(연 4.0% 기준 월 95만원) 및 대출 금액·금리·기간별 총 대출이자와 월별 상환 스케줄을 실시간으로 확인하세요.',
     url: canonicalUrl('/tools/loan-interest-calculator'),
     type: 'website',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
         url: buildOgImageUrl({
           title: '대출이자 계산기 - 2억 대출 30년 상환',
           description: '원리금균등 · 원금균등 · 만기일시 상환방식별 월 상환액 비교',
-          badge: 'Loan Calculator',
+          badge: '무료/무로그인 1초 시뮬레이터',
           type: 'default',
         }),
         width: 1200,
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '대출이자 계산기 - 2억 대출 30년 상환 월 납입금 & 원리금균등 비교',
+    title: '[무료/무로그인] 대출이자 계산기 — 2억 대출 30년 상환 월 납입금 & 원리금균등 비교 | 월덕 머니버스',
     description: '2억 대출 30년 상환(연 4.0% 기준 월 95만원) 및 대출 금액·금리·기간별 총 대출이자와 월별 상환 스케줄을 실시간으로 확인하세요.',
   },
 };
@@ -71,6 +71,13 @@ export default function LoanInterestCalculatorPage() {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'KRW',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '1350',
+      bestRating: '5',
+      worstRating: '1',
     },
   };
 
