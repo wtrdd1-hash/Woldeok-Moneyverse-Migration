@@ -82,6 +82,7 @@ graph TD
 | **[부동산 임대수익률 계산기](/tools/real-estate-calculator)** | 오피스텔·상가 순 임대수익률(Cap Rate), 대출 레버리지 ROE | 취득세, 중개보수, 대출금리 반영 투자분석 |
 | **[연금소득세 계산기](/tools/pension-tax-calculator)** | IRP/연금저축 수령액, 1,500만원 초과 종합/분리과세 선택 | 3.3%~5.5% 연령별 저율과세 즉시 산출 |
 | **[청년도약계좌 계산기](/tools/youth-leap-calculator)** | 월 최대 70만원 납입 시 정부기여금 & 은행 비과세 이자 | 5년 만기 시 최대 5,000만원 목돈 시뮬레이션 |
+| **[AI 금융 블로그](/blog)** | 5대 롱테일 키워드 기반 일일 1편 자동 생성 및 2,500자 금융 칼럼 | BlogPosting JSON-LD, IndexNow 실시간 핑, sitemap-blog.xml |
 
 ---
 

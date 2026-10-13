@@ -13,8 +13,26 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v594 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v594`
+## 🌟 Production Release Overview (prod-v595 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v595`
+- **Release Date**: 2026-10-14 08:55 KST
+- **Git Commit HEAD**: `main`
+- **Key Deliverables**:
+  1. **검색엔진(SEO) 노출 극대화용 내부 AI 일일 자동 블로그 시스템 (`/blog`, v214 / prod-v595)**:
+     - **독립 전문 금융 블로그 허브 (`/blog`, `/blog/[slug]`)**: 5대 카테고리(복리·저축, 절세·세제혜택, 가상 주식, 자산 배분, 거시 경제) 탭, 실시간 검색, `schema.org/BlogPosting` JSON-LD 완비.
+     - **내부 AI 자동 글 생성 엔진 (`blog-data.ts`)**: 5대 고수익 롱테일 키워드 풀에서 주제를 자동 선택하여 2,500자 이상의 고품질 금융 분석 아티클(원리, 시뮬레이션 표, 실전 가이드) 자동 집필.
+     - **검색엔진 실시간 크롤링 연동 (`IndexNow` & `sitemap-blog.xml`)**: 신규 아티클 생성 즉시 IndexNow API로 Naver, Bing, Google에 색인 핑 전송 및 전용 XML 사이트맵 피드 동적 갱신.
+     - **관리자 1클릭 즉시 발행 콘솔 (`/admin/blog`)**: 관리자가 주기와 무관하게 언제든 "⚡ AI 블로그 아티클 1편 즉시 생성" 버튼을 눌러 테스트 및 발행 가능.
+     - **디스코드 커뮤니티 자동 브로드캐스트**: 신규 블로그 발행 시 디스코드 채널로 리치 임베드 자동 전파.
+     - **스마트 내부 링킹(Internal Linking)**: 본문 내 관련 금융 계산기(복리, ISA, 배당세 등) 및 가상 주식 종목 딥링크 카드 자동 탑재.
+  2. **검증 및 무중단 배포**:
+     - 프론트엔드 및 백엔드 타입체크 0 Errors & 단위 테스트 100% 통과 (blog.test.tsx 5/5).
+     - 프로덕션 무중단 승격 배포.
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v594)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v594`
 - **Release Date**: 2026-10-14 08:45 KST
 - **Git Commit HEAD**: `main`
 - **Key Deliverables**:

@@ -1630,3 +1630,56 @@
 3. Git 커밋 및 origin main 푸시 (`prod-v594`)
 4. Debian 13 VM 100 프로덕션 무중단 승격 배포
 5. 라이브 실측: `/admin/discord`, `/advisor`, `/treasury` 및 관련 API 정상 응답 확인
+
+
+---
+
+## 🚀 [v214 Specification] 검색엔진(SEO) 노출 극대화용 내부 AI 일일 자동 블로그 시스템 구축
+
+### 1. 현황 및 목표 분석
+1. **[독립 전문 금융 블로그 허브 (/blog & /blog/[slug])]**:
+   - 검색엔진(Google, Naver, Bing 등)의 블로그 탭 및 전문 금융 웹문서 영역 상위 노출을 위해 독립된 블로그 시스템 신설.
+   - `schema.org/BlogPosting` JSON-LD 구조화 데이터, 고유 Canonical URL, OpenGraph/Twitter 카드 메타태그 완비.
+   - 본문 내 관련 금융 계산기(복리, ISA, 배당세 등) 및 가상 주식 종목으로의 스마트 내부 링킹(Internal Linking) 자동 삽입.
+2. **[내부 AI 기반 일일 1회 자동 생성 엔진 (Daily Auto-Writer)]**:
+   - 매일 오전 09:00 KST(주식 시장 개장 및 출근 시간대)에 5대 고수익 롱테일 키워드 풀에서 주제를 자동 선택하여 2,500자 이상의 고품질 금융 아티클을 자동 집필 및 발행.
+   - AI 에디터 프로필: '월덕 금융연구소 수석 애널리스트 덕이(Deoki)'.
+3. **[검색 로봇 즉각 색인 및 커뮤니티 전파 파이프라인]**:
+   - 글이 발행되는 즉시 `IndexNow` 프로토콜을 통해 Naver, Bing, Yandex 검색엔진 로봇에 실시간 크롤링 핑 자동 발송.
+   - `sitemap-blog.xml` 사이트맵 동적 피드 자동 동기화.
+   - 디스코드 공지 채널로 신규 블로그 발행 브로드캐스트 자동 전파.
+4. **[관리자 즉시 발행 제어 패널 (/admin/blog)]**:
+   - 관리자가 발행 주기와 무관하게 언제든 "⚡ AI 블로그 아티클 1편 즉시 생성" 버튼을 눌러 테스트하고 신규 글을 수동 발행할 수 있는 콘솔 제공.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **frontend/src/app/blog/blog.types.ts (신규)**:
+   - 블로그 포스트 인터페이스(`BlogPost`, `BlogCategory`, `BlogAuthor`).
+2. **frontend/src/app/blog/blog-data.ts (신규)**:
+   - 블로그 포스트 저장소, 시드 아티클 3편 및 AI 자동 글 생성 템플릿/키워드 풀 엔진.
+3. **frontend/src/app/api/blog/route.ts & /api/blog/[slug]/route.ts (신규)**:
+   - 블로그 목록 조회, 상세 조회 및 AI 자동 포스트 발행 API (`POST /api/blog/generate`).
+4. **frontend/src/app/blog/page.tsx & blog-hub-client.tsx (신규)**:
+   - 블로그 메인 허브 (카테고리 필터, 검색창, 최신/인기 아티클 카드, 뉴스레터 구독 CTA).
+5. **frontend/src/app/blog/[slug]/page.tsx & blog-post-client.tsx (신규)**:
+   - 블로그 상세 아티클 뷰 (목차, 완독 시간, JSON-LD 스키마, 내부 링크 배너, 공유 버튼).
+6. **frontend/src/app/sitemap-blog.xml/route.ts (신규)**:
+   - 블로그 전용 동적 사이트맵 엔드포인트.
+7. **frontend/src/app/admin/blog/page.tsx & admin-blog-client.tsx (신규)**:
+   - 관리자용 블로그 관제 및 즉시 1클릭 AI 글 생성 콘솔.
+8. **backend/src/seo/seo-cron-ping.service.ts (확장)**:
+   - 매일 오전 09:00 KST 블로그 자동 생성 엔드포인트 트리거 및 IndexNow 핑 동기화.
+9. **frontend/src/lib/navigation.ts (수정)**:
+   - 글로벌 메가 네비게이션에 `금융 블로그 (/blog)` 등록.
+10. **단위 테스트**:
+    - `frontend/src/app/blog/blog.test.tsx` 작성.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest`): 100% Pass
+3. Git 커밋 및 origin main 푸시 (`prod-v595`)
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포
+5. 라이브 실측: `/blog`, `/blog/[slug]`, `/sitemap-blog.xml`, `/api/blog` HTTP 200 OK 확인

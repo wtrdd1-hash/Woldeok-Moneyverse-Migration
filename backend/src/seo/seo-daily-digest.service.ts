@@ -2,6 +2,7 @@ import { Injectable, Logger, Optional, type OnModuleDestroy, type OnModuleInit }
 import { DiscordAlertService } from '../discord/discord-alert.service';
 import { TwitterPublisherService } from './twitter-publisher.service';
 import { SeoService } from './seo.service';
+import { safeFetch } from '../security/ssrf-defense';
 
 export interface DailyDigestResult {
   readonly timestamp: string;
@@ -138,6 +139,18 @@ export class SeoDailyDigestService implements OnModuleInit, OnModuleDestroy {
       } catch (err) {
         this.logger.warn(`Failed to publish daily tweet: ${(err as Error).message}`);
       }
+    }
+
+    // 일일 09:00 KST 신규 AI 금융 블로그 글 1편 자동 생성 및 IndexNow 색인 트리거
+    try {
+      const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://127.0.0.1:3001';
+      await safeFetch(`${frontendOrigin}/api/blog/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      this.logger.log('Daily AI blog article generated and IndexNow ping triggered');
+    } catch (err) {
+      this.logger.warn(`Failed to trigger daily AI blog generation: ${(err as Error).message}`);
     }
 
     const result: DailyDigestResult = {
