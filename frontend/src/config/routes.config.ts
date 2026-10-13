@@ -785,6 +785,8 @@ export function getDisallowedCrawlerRoutes(): string[] {
     '/admin',
     '/admin/',
     '/api/',
+    '/app-api/',
+    '/app-api',
     '/auth/',
     '/developer',
     '/account',

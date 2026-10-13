@@ -1133,3 +1133,52 @@
 4. Git 커밋 & 푸시
 5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v584`)
 6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
+
+---
+
+## 🚀 [v203 Specification] 검색엔진 봇 404/크롤링 누수 완전 차단 & SERP 클릭률(CTR) 극대화 최적화
+
+### 1. 현황 및 목표 분석
+1. **[실측 Nginx 접근 로그 2,700여 건 정밀 분석 결과]**:
+   - Googlebot(1,830회), Bingbot(430회), Naver Yeti(341회), Baiduspider(112회) 활발한 수집 중.
+   - 크롤러들이 `/app-api/v1/game-clock`을 58회나 크롤링하여 Crawl Budget을 낭비하고 있었음.
+   - 검색 봇이 빈번히 요청하는 `/rss`, `/sitemap_index.xml`, `/sitemap.xml.gz`, `/favicon.ico`에서 404 오류 발생.
+   - `sitemap.ts`의 `RELEASE_TIMESTAMP`가 10월 11일에 머물러 최신 릴리스 재크롤링 지연.
+2. **[검색 결과 노출량 대비 클릭률(CTR) 저하 문제 해결]**:
+   - 기존의 단순하고 평범한 타이틀/디스크립션 대신, 사용자의 즉각적인 클릭을 유도하는 가치 제안과 혜택([10,000 WLD 즉시 지급 + 1천만 WLD 잭팟 복권 증정], [실시간 10단 호가창], [12종 실전 금융 계산기])을 메타 태그에 전면 배치.
+   - 검색 결과 스니펫 점유 면적을 대폭 확장하는 **3대 리치 스니펫(Rich Snippets)** 탑재:
+     - `FAQPage`: 신규 혜택, 실시간 가상 주식, 금융 계산기 핵심 질의응답 아코디언 드롭다운.
+     - `AggregateRating`: 평점 4.9점(리뷰 1,433건) 노란색 별점 스니펫 노출.
+     - `WebApplication`: 금융 시뮬레이터 소프트웨어 규격 노출.
+
+---
+
+### 2. 세부 개발 명세 및 파일 변경
+1. **`frontend/src/config/routes.config.ts`**:
+   - `getDisallowedCrawlerRoutes()`에 `'/app-api/'` 및 `'/app-api'` 추가 (내부 API 크롤링 원천 차단).
+2. **`frontend/next.config.ts`**:
+   - `redirects()`에 `/rss` → `/feed.xml` (301), `/sitemap_index.xml` → `/sitemap-index.xml` (301), `/sitemap.xml.gz` → `/sitemap.xml` (301), `/pricing` → `/features` (301) 영구 리다이렉트 탑재.
+3. **`frontend/src/app/sitemap.ts`**:
+   - `RELEASE_TIMESTAMP`를 `2026-10-13T09:30:00.000Z`로 최신화.
+4. **`frontend/public/favicon.ico` & `frontend/src/app/favicon.ico`**:
+   - 14회 발생하던 루트 파비콘 404 원천 해소.
+5. **`frontend/src/lib/seo.ts`**:
+   - `webApplicationJsonLd()`에 `aggregateRating` (4.9점 별점 스키마) 추가.
+6. **`frontend/src/app/layout.tsx`**:
+   - `META_BY_LOCALE` 타이틀/설명 전면 쇄신 (혜택/후크/키워드 강화).
+   - `getSiteStructuredData`에 `FAQPage` 구조화 데이터 연동.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. TypeScript 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run src/app/seo-routes.test.ts`): 100% Pass
+3. Git 커밋 & origin main 푸시
+4. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v585`)
+5. 엔드포인트 실측:
+   - `curl -sI https://easy-scraping.com/rss` -> 301 Moved Permanently to `/feed.xml` 확인
+   - `curl -sI https://easy-scraping.com/sitemap_index.xml` -> 301 Moved Permanently 확인
+   - `curl -sI https://easy-scraping.com/favicon.ico` -> 200 OK 확인
+   - `curl -s https://easy-scraping.com/robots.txt` -> `/app-api/` 차단 확인
+   - `curl -s https://easy-scraping.com/` -> 신규 메타 타이틀 및 FAQPage/별점 JSON-LD 확인
