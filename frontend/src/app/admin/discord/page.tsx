@@ -20,6 +20,7 @@ import { Figure } from '../economy/economy-parts';
 import type { AdminDiscordRoute, AdminOutboxHealth } from '../types';
 
 import { AdminDiscordDmTestButton } from './admin-discord-dm-test-button';
+import { AdminDiscordBroadcastTestButton } from './admin-discord-broadcast-test-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,6 +95,8 @@ export default async function AdminDiscordPage() {
               </div>
             </CardContent>
           </Card>
+
+          <AdminDiscordBroadcastTestButton />
 
           <Card>
             <CardHeader>

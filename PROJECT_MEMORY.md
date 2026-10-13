@@ -13,10 +13,30 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v591 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v591`
-- **Release Date**: 2026-10-13 21:35 KST
+## 🌟 Production Release Overview (prod-v592 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v592`
+- **Release Date**: 2026-10-13 21:45 KST
 - **Git Commit HEAD**: `main`
+- **Key Deliverables**:
+  1. **디스코드 봇 실시간 거버넌스 & 금융 이벤트 브로드캐스트 엔진 (`Discord Realtime Broadcast Engine`, v211 / prod-v592)**:
+     - **로컬 HTTP 웹훅 수신 데몬 (`bot/index.js`)**: 포트 3099 로컬 웹훅 리스너 (`POST /broadcast`) 신설로 플랫폼 금융 이벤트를 즉각 수신하여 Discord 공지/로그 채널(`LOG_CHANNEL_ID`)로 고품질 컬러 리치 임베드 자동 송출.
+     - **통합 브로드캐스트 API 파이프라인 (`/api/discord/broadcast`)**: 프론트/백엔드 단일 인터페이스 구축, 봇 미기동 환경에서도 웹 서비스가 블로킹되지 않도록 2초 타임아웃 및 Graceful Fallback 보장.
+     - **주요 금융 이벤트 실시간 자동 송출 트리거 연동**:
+       - 랜드마크 경매 최고가 입찰 시 (`/api/spaces/real-estate/auction`): 신규 최고 입찰가, 배당 수익률 실시간 알림.
+       - 주민참여예산 신규 제안 발의 시 (`/api/treasury/proposals`): 공공사업 제목, 요청 예산, 목표 득표수 실시간 투표 독려 알림.
+     - **관리자 디스코드 관제 대시보드 (`/admin/discord`)**: 원클릭 실시간 브로드캐스트 테스트 전송 카드(`AdminDiscordBroadcastTestButton`) 탑재.
+  2. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 신규 단위 테스트 `discord-broadcast.test.tsx` (4/4) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (589/589 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/admin/discord`, `/api/discord/broadcast` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v591)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v591`
+- **Release Date**: 2026-10-13 21:35 KST
+- **Git Commit HEAD**: `0bbe411a` (`main`)
 - **Key Deliverables**:
   1. **가상 주식 실시간 카피 트레이딩 리그 & 고래 리더보드 (`/stocks/league`, v210 / prod-v591)**:
      - **고래 리더보드 랭킹 뷰 (`stocks-league-client.tsx`)**: 상위 1위 수익률 +184.2% 고래 트레이더들의 승률(85.7%), 운용 자산(285만 WLD), 주력 종목 및 실시간 체결 내역 투명 공개.

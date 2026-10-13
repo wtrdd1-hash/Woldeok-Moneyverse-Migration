@@ -137,6 +137,27 @@ export async function POST(req: Request) {
     auction.leaderNickname = '내 지갑 (본인)';
     auction.userBid = Number(bidAmount);
 
+    // 디스코드 실시간 브로드캐스트 연동 (Fire & Forget)
+    try {
+      fetch('http://127.0.0.1:3000/api/discord/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'LANDMARK_AUCTION',
+          title: `🏛️ [메가시티 랜드마크] ${auction.name} 최고가 경신!`,
+          description: `새로운 입찰자가 **${Number(bidAmount).toLocaleString()} WLD**로 선두를 탈환했습니다.`,
+          fields: [
+            { name: '랜드마크', value: auction.name, inline: true },
+            { name: '최고 입찰가', value: `${Number(bidAmount).toLocaleString()} WLD`, inline: true },
+            { name: '연간 기대 배당률', value: `연 ${auction.annualYieldRate}%`, inline: true },
+          ],
+          color: 0x6366f1, // Indigo
+        }),
+      }).catch(() => {});
+    } catch {
+      // non-blocking
+    }
+
     return NextResponse.json({
       ok: true,
       message: `${auction.name}에 ${Number(bidAmount).toLocaleString()} WLD로 최고가 입찰되었습니다!`,

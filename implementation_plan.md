@@ -1498,3 +1498,44 @@
 3. Git 커밋 및 origin main 푸시 (`prod-v591`)
 4. Debian 13 VM 100 프로덕션 무중단 승격 배포
 5. 라이브 실측: `/stocks/league` 및 `/spaces/real-estate` HTTP 200 OK 확인
+
+
+---
+
+## 🚀 [v211 Specification] 디스코드 봇 실시간 거버넌스 & 금융 이벤트 브로드캐스트 엔진 구축
+
+### 1. 현황 및 목표 분석
+1. **[디스코드 봇 실시간 브로드캐스트 수신 엔진 (Local Webhook Listener)]**:
+   - 디스코드 봇 프로세스(`bot/index.js`) 내부에 안전한 로컬 HTTP 리스너(포트 3099, `POST /broadcast`)를 신설하여 웹 플랫폼에서 발생한 주요 금융 이벤트를 즉각 수신.
+   - 주민참여예산 1,000표 달성/제안 등록, 랜드마크 경매 최고가 경신, 고래 대형 카피 체결 발생 시 디스코드 채널로 실시간 컬러 리치 임베드(Embed) 브로드캐스트.
+2. **[플랫폼 실시간 이벤트 발송 파이프라인 (/api/discord/broadcast)]**:
+   - 프론트엔드 및 백엔드에서 단일 인터페이스로 디스코드 알림을 발송할 수 있는 안전한 API 라우트 구축.
+   - 가상 부동산 랜드마크 경매(`auction/route.ts`) 및 주민참여예산(`proposals/route.ts`) API와 연동하여 실시간 자동 발송.
+3. **[관리자 디스코드 관제 대시보드 (/admin/discord) 연동]**:
+   - 관리자가 이벤트 유형별(국고 거버넌스, 랜드마크 경매, 대형 체결) 브로드캐스트 발송을 원클릭으로 검증할 수 있는 테스트 콘솔 버튼 마운트.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **bot/index.js (수정)**:
+   - 포트 3099 로컬 HTTP 서버 기동 및 `POST /broadcast` 라우트 처리.
+   - EmbedBuilder를 사용한 포맷팅된 임베드 전송 및 오류 격리.
+2. **frontend/src/app/api/discord/broadcast/route.ts (신규)**:
+   - 브로드캐스트 발송 프록시 API (타입, 제목, 설명, 필드 파라미터 유효성 검증).
+3. **frontend/src/app/admin/discord/admin-discord-broadcast-test-button.tsx (신규)**:
+   - 관리자 콘솔용 원클릭 브로드캐스트 발송 테스트 컴포넌트.
+4. **frontend/src/app/admin/discord/page.tsx (수정)**:
+   - 브로드캐스트 테스트 버튼 및 텔레메트리 스트립 마운트.
+5. **frontend/src/app/api/spaces/real-estate/auction/route.ts & treasury/proposals/route.ts (수정)**:
+   - 신규 입찰 및 신규 제안 등록 시 디스코드 브로드캐스트 자동 연동.
+6. **단위 테스트**:
+   - `frontend/src/app/admin/discord/discord-broadcast.test.tsx` 작성.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest`): 100% Pass
+3. Git 커밋 및 origin main 푸시 (`prod-v592`)
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포
+5. 라이브 실측: `/admin/discord` 및 `/api/discord/broadcast` HTTP 200 OK 확인
