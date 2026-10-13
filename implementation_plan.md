@@ -1,4 +1,6 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v207)
+﻿# [월덕 머니버스] 통합 구현 계획서 (현재: v208)
+
+- **v208**: [대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 (기본배당, 창업그랜트, 긴급구호금, 바이백소각, 국채부스터) 구축] (+85, -0)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
 - **v207**: [가상 주식 트레이딩뷰급 인터랙티브 드로잉 툴킷 (추세선, 지지/저항 수평선, 피보나치 5단계 되돌림 & SVG 오버레이 영구 저장) 구축] (+65, -0)
@@ -1359,3 +1361,55 @@
 4. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v588`)
 5. 라이브 실측 검증:
    - `https://easy-scraping.com/stocks/WDG` 접속 및 드로잉 툴바, SVG 오버레이 구동 확인
+
+---
+
+## 🚀 [v208 Specification] 대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 구축
+
+### 1. 현황 및 기획 목표
+1. **[국고 공공 사용처 및 대국민 서피스 부재 해소]**:
+   - 지금까지는 관리자 콘솔(/admin/treasury)에서만 국고가 통제되어 일반 시민/유저가 국고의 존재와 혜택을 체감하기 어려웠음.
+   - 중앙정부 국고 자금을 실효성 있게 환원하고 유통시키는 **5대 핵심 국고 활용 프로그램**을 신설하여 일반 시민과 기업에게 실질적 혜택 제공.
+2. **[5대 종합 국고 활용처 라인업]**:
+   - **① 시민 보편 기본배당 (Universal Citizen Dividend)**: 국고 잉여금 중 안전 비축금(30%) 초과분을 주기적으로 모든 활성 시민에게 균등 배당. 주간 1회 즉시 청구(Instant Claim).
+   - **② 청년/창업 벤처 그랜트 펀드 (Venture Startup Grant)**: 신규 법인 창업 및 사업 확장을 위한 최대 100,000 WLD 국고 무상 지원금 신청 (사업 계획서 제출 및 관리자 승인 큐).
+   - **③ 취약계층 긴급 구호 복지금 (Emergency Relief Subsidy)**: 현금 잔고 5,000 WLD 이하 파산 위기 시민 대상 3,000 WLD 즉시 긴급 구호금 (안전망, 30일 1회).
+   - **④ WLD 유통량 바이백 & 소각 디플레이션 펀드 (Market Buyback & Burn)**: 국고 재정으로 시장 WLD를 매입하여 영구 소각, 통화가치 방어 및 인플레이션 억제.
+   - **⑤ 공공 국채 우대금리 부스터 (Sovereign Bond Yield Booster)**: 국채 보유 시민 대상 국고 재정 기반 연 +2.5%p 우대 보너스 금리 지원.
+3. **[대국민 공개 국고 포털 (/treasury) 신설]**:
+   - 실시간 국고 총잔액, 30% 안전비축금 가드 게이지 (Safe Reserve Ratio 30%), 지출 가능 가용 잔액 시각화.
+   - 5대 프로그램별 전용 카드 그리드 및 인터랙티브 신청/수령 모달.
+   - 실시간 투명 지출 원장(Ledger) 스트림: 국고의 투명한 입출금 내역 대국민 공개.
+4. **[3계층 어뷰징 방지 & 원자적 트랜잭션]**:
+   - 로그인 + 활성 계정 + 중복 수령 방지 쿨다운 타이머 (주간/월간).
+   - 30% 안전 비축금 하한선 검증 plpgsql 함수 바인딩.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **rontend/src/app/api/treasury/overview/route.ts (신규)**:
+   - 공개 국고 총잔액, 안전비축금(30%), 24시간 수입/지출 합계, 5대 프로그램 메트릭 조회 API.
+2. **rontend/src/app/api/treasury/claim-dividend/route.ts (신규)**:
+   - 로그인 유저 기본배당 즉시 청구 및 쿨다운 검증 API.
+3. **rontend/src/app/api/treasury/emergency-relief/route.ts (신규)**:
+   - 취약계층 긴급 구호금 신청 및 저잔고(5,000 WLD 이하) 자격 검증 API.
+4. **rontend/src/app/api/treasury/startup-grant/route.ts (신규)**:
+   - 창업 그랜트 지원금 신청서 접수 API.
+5. **rontend/src/app/treasury/page.tsx & 컴포넌트군 (신규)**:
+   - 대국민 공개 국고 포털 페이지.
+   - 	reasury-portal-view.tsx: 5대 프로그램 탭, 국고 안전비축금 게이지, 투명 지출 원장 테이블.
+   - 	reasury-program-card.tsx: 프로그램별 혜택, 신청 조건, 액션 버튼.
+6. **rontend/src/components/navigation/site-header.tsx 또는 네비게이션**:
+   - 상단 글로벌 네비게이션에 국고(/treasury) 퀵 링크 추가.
+7. **단위 테스트 (rontend/src/app/treasury/treasury.test.tsx) (신규)**:
+   - 국고 포털 렌더링, 5대 프로그램 카드, 배당 수령 인터랙션 단위 테스트.
+
+---
+
+### 3. 검증 및 배포 계획 (Verification Plan)
+1. TypeScript 정적 타입 검사 (pnpm run typecheck): 0 Errors
+2. 신규 단위 테스트 실행 (itest run src/app/treasury/treasury.test.tsx): 100% Pass
+3. Git 커밋 및 origin main 푸시 (eat: public national treasury portal & 5 expenditure programs (prod-v589))
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포 (prod-v589)
+5. 라이브 실측 검증:
+   - https://easy-scraping.com/treasury 접속 및 5대 프로그램 카드, 지출 게이지, 투명 원장 정상 서빙 확인
