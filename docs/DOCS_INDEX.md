@@ -34,6 +34,7 @@ graph TD
 | 문서명 / 기능 경로 | 언어 | 핵심 내용 요약 |
 | :--- | :--- | :--- |
 | **[대국민 국고 포털](/treasury)** | KO | 중앙정부 국고 30% 안전비축금 게이지, 기본배당 즉시 청구, 긴급구호금, 실시간 집행 원장 |
+| **[AI 금융 어드바이저 '덕이'](/advisor)** | KO | 4분면 자산 배분 진단, 샤프 지수(1.84) 산출, 리밸런싱 가이드 및 1:1 대화형 상담 챗봇 |
 | **[주민참여예산 투표제](/treasury)** | KO | 시민 누구나 국고 공공사업 제안, 찬성 추천 투표(1,000표 달성 시 예산 자동 집행) |
 | **[창업 그랜트 심사 대시보드](/admin/treasury/grants)** | KO | 관리자 전용 벤처 그랜트 신청 심사, 승인 시 국고 금고 원자적 시드머니 지급 및 세션 감사 |
 | [MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md](./MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md) | KO | 거시 경제 주권 시스템 마스터 아키텍처 명세 |
@@ -55,6 +56,7 @@ graph TD
 | 문서명 / 기능 경로 | 언어 | 핵심 내용 요약 |
 | :--- | :--- | :--- |
 | **[가상 주식 거래소](/stocks)** | KO | 10대 가상 상장사 실시간 10단 호가창, 매수/매도, 스탑로스/익절 조건부 주문 |
+| **[고래 카피트레이딩 리그](/stocks/league)** | KO | 상위 수익률 +184% 고래 리더보드, 원클릭 1:1 자동 추종 카피 트레이딩 및 수수료 분배 |
 | **[차트 작도 도구 툴킷](/stocks/WDG)** | KO | 추세선(Trendline), 수평선(Horizontal Line), 피보나치 되돌림(Fibonacci 5단계) 로컬 영구저장 |
 | **[호가 심도 차트](/stocks/WDG)** | KO | 매수(Bids) vs 매도(Asks) 누적 잔량 에어리어 SVG 렌더링 및 최대 호가벽(Wall) 가시화 |
 | [2026-09-22-stocks-interactive-trading-console.ko.md](./2026-09-22-stocks-interactive-trading-console-v2026.09.22.355.ko.md) | KO | 실시간 주식 호가 주문 콘솔 및 체결 엔진 v355 사양 |
@@ -104,6 +106,7 @@ graph TD
 | 문서명 / 기능 경로 | 언어 | 핵심 내용 요약 |
 | :--- | :--- | :--- |
 | **[관리자 긴급 킬스위치 제어탑](/admin/controls)** | KO | 전 종목 서킷브레이커, 국고 출금 동결, 신규 가입 차단, 웹훅 격리 4대 킬스위치 |
+| **[관리자 디스코드 관제 대시보드](/admin/discord)** | KO | 긴급 1:1 DM 및 금융 이벤트(경매·거버넌스·카피체결) 실시간 브로드캐스트 제어탑 |
 | **[창업 그랜트 심사 대시보드](/admin/treasury/grants)** | KO | 접수된 벤처 그랜트 신청서 검토, 원자적 시드머니 지급 및 세션 감사 로그 스트립 |
 | [2026-09-22-admin-policy-version-management.ko.md](./2026-09-22-admin-policy-version-management-and-release-lineage-v2026.09.22.350.ko.md) | KO | 관리자 정책 버전 관리 및 배포 계보(Lineage) 사양 |
 | [2026-09-22-admin-private-chat-moderation.ko.md](./2026-09-22-admin-private-chat-moderation-queue-and-evidence-v2026.09.22.352.ko.md) | KO | 1:1 프라이빗 채팅 모더레이션 큐 및 증적 보존 명세 |

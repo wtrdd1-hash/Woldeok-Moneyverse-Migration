@@ -118,6 +118,27 @@ export async function POST(request: Request) {
       hasVoted: true,
     };
 
+    // 디스코드 실시간 브로드캐스트 연동 (Fire & Forget)
+    try {
+      fetch('http://127.0.0.1:3000/api/discord/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'TREASURY_PROPOSAL',
+          title: `🗳️ [주민참여예산] 신규 공공사업 제안 발의!`,
+          description: `**"${newProposal.title}"**\n${desc}`,
+          fields: [
+            { name: '요청 예산', value: `${budget.toLocaleString()} WLD`, inline: true },
+            { name: '분류', value: newProposal.categoryLabel, inline: true },
+            { name: '목표 투표수', value: '1,000표', inline: true },
+          ],
+          color: 0x10b981, // Emerald
+        }),
+      }).catch(() => {});
+    } catch {
+      // non-blocking
+    }
+
     return NextResponse.json({
       ok: true,
       message: '주민참여예산 공공사업이 성공적으로 발의되었습니다! 찬성 투표가 개시되었습니다.',

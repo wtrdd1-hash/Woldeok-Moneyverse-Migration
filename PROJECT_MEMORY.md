@@ -13,10 +13,75 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v590 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v590`
-- **Release Date**: 2026-10-13 14:35 KST
+## 🌟 Production Release Overview (prod-v593 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v593`
+- **Release Date**: 2026-10-13 22:10 KST
 - **Git Commit HEAD**: `main`
+- **Key Deliverables**:
+  1. **AI 금융 어드바이저 '덕이' 포트폴리오 진단 & 대화형 챗봇 (`/advisor`, v212 / prod-v593)**:
+     - **4분면 자산 배분 비중 분석 (`advisor-client.tsx`)**: 가상 주식(42%), 부동산 지분(28%), 대한민국 국채(18%), 현금 예금(12%) 다분할 바 차트 및 AUM(1,245만 WLD) 실시간 집계.
+     - **포트폴리오 건전성 스코어 & 샤프 지수 엔진**: 건전성 스코어 88점(Balanced Growth), 샤프 지수 1.84(상위 15%), 연간 예상 배당률 연 14.2%, 최대 낙폭(MDD -8.2%) 정밀 산출.
+     - **원클릭 리밸런싱 가이드라인**: 자산 편중도 분석을 통한 구체적 종목/자산군 비중 조절 조언 제시.
+     - **1:1 대화형 AI 상담실**: 4대 퀵 질문 칩(위험도, 추천 리밸런싱, 부동산 월세 배당 극대화, 국채 황금비율) 및 실시간 자연어 금융 질의응답 챗봇.
+     - **지능형 백엔드 장애 격리 (`/api/advisor/deoki/*`)**: 백엔드 연결 지연 시에도 금융 룰베이스 및 포트폴리오 알고리즘 자체 구동으로 100% 가용성 보장.
+  2. **글로벌 메가 네비게이션 연동**:
+     - 상단 금융·투자 메뉴에 `AI 금융비서 '덕이'` (AI 배지) 등록.
+  3. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 신규 단위 테스트 `advisor.test.tsx` (4/4) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (590/590 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/advisor`, `/api/advisor/deoki/diagnose` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v592)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v592`
+- **Release Date**: 2026-10-13 21:45 KST
+- **Git Commit HEAD**: `29fc2148` (`main`)
+- **Key Deliverables**:
+  1. **디스코드 봇 실시간 거버넌스 & 금융 이벤트 브로드캐스트 엔진 (`Discord Realtime Broadcast Engine`, v211 / prod-v592)**:
+     - **로컬 HTTP 웹훅 수신 데몬 (`bot/index.js`)**: 포트 3099 로컬 웹훅 리스너 (`POST /broadcast`) 신설로 플랫폼 금융 이벤트를 즉각 수신하여 Discord 공지/로그 채널(`LOG_CHANNEL_ID`)로 고품질 컬러 리치 임베드 자동 송출.
+     - **통합 브로드캐스트 API 파이프라인 (`/api/discord/broadcast`)**: 프론트/백엔드 단일 인터페이스 구축, 봇 미기동 환경에서도 웹 서비스가 블로킹되지 않도록 2초 타임아웃 및 Graceful Fallback 보장.
+     - **주요 금융 이벤트 실시간 자동 송출 트리거 연동**:
+       - 랜드마크 경매 최고가 입찰 시 (`/api/spaces/real-estate/auction`): 신규 최고 입찰가, 배당 수익률 실시간 알림.
+       - 주민참여예산 신규 제안 발의 시 (`/api/treasury/proposals`): 공공사업 제목, 요청 예산, 목표 득표수 실시간 투표 독려 알림.
+     - **관리자 디스코드 관제 대시보드 (`/admin/discord`)**: 원클릭 실시간 브로드캐스트 테스트 전송 카드(`AdminDiscordBroadcastTestButton`) 탑재.
+  2. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 신규 단위 테스트 `discord-broadcast.test.tsx` (4/4) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (589/589 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/admin/discord`, `/api/discord/broadcast` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v591)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v591`
+- **Release Date**: 2026-10-13 21:35 KST
+- **Git Commit HEAD**: `0bbe411a` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 실시간 카피 트레이딩 리그 & 고래 리더보드 (`/stocks/league`, v210 / prod-v591)**:
+     - **고래 리더보드 랭킹 뷰 (`stocks-league-client.tsx`)**: 상위 1위 수익률 +184.2% 고래 트레이더들의 승률(85.7%), 운용 자산(285만 WLD), 주력 종목 및 실시간 체결 내역 투명 공개.
+     - **원클릭 카피 트레이딩 구독 엔진**: 할당 자본금(1,000 ~ 50,000 WLD 프리셋) 및 비례 비율(50%, 100%, 150%) 설정 기반 1:1 실시간 자동 주문 추종.
+     - **트레이더 기여금 분배**: 실현 이익 발생 시 1.0%의 성공 보수가 고래 트레이더에게 기여금으로 자동 분배되는 소셜 금융 보상 루프 완성.
+     - **내 카피 트레이딩 대시보드**: 실시간 추종 현황, 복사 체결 건수, 누적 실현 손익 및 추종 해제 액션 제공.
+  2. **가상 부동산 메가시티 랜드마크 경매 & 월세 배당 시스템 (`/spaces/real-estate`)**:
+     - **4대 프라임 랜드마크 경매 (`real-estate-auction-client.tsx`)**: 강남 머니버스 프라임 타워, 여의도 IFC, 판교 테크밸리 메가코어, 한남 더힐 펜트하우스 실시간 호가 경매.
+     - **원클릭 최고가 입찰 모달**: 최소 입찰 단위 검증, 빠른 호가 프리셋(+1만, +5만, +10만), 실시간 잔여 시간 카운트다운.
+     - **원자적 일일 임대료(월세) 일괄 배당 수령 (`/api/spaces/real-estate/claim-rent`)**: 지분율과 도시 상권 거래량에 비례하여 적립된 미수령 월세 배당금 원클릭 즉시 지갑 지급.
+  3. **글로벌 메가 네비게이션 연동**:
+     - 상단 금융·투자 메뉴에 `고래 카피트레이딩 리그` (HOT 배지) 및 플레이·시즌 메뉴에 `메가시티 랜드마크 경매` (NEW 배지) 등록.
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 신규 단위 테스트 `stocks-league.test.tsx` 및 `real-estate.test.tsx` (9/9) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (587/587 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/league`, `/spaces/real-estate` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v590)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v590`
+- **Release Date**: 2026-10-13 14:35 KST
+- **Git Commit HEAD**: `3f59f9a2` (`main`)
 - **Key Deliverables**:
   1. **시민 참여형 주민참여예산 투표제 (Citizens DAO Budget Voting, v209 / prod-v590)**:
      - **주민참여예산 제안 및 투표 (`/treasury` - DAO 거버넌스 탭)**: 시민 누구나 국고 공공사업(수수료 전액 면제 주간, 길드 협동 펀딩 부스트 등)을 직접 제안하고 시민 찬성 추천 투표(Upvote) 참여.

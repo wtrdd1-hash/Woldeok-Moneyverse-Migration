@@ -446,6 +446,8 @@ export const CATEGORY_NAV: readonly NavCategory[] = [
     description: '가상 주식 매매, 덕지갑 자산 관리, 가상 은행 금융 상품, 주간 경제 브리프',
     entries: [
       { href: '/stocks', label: '월덕거래소', description: '실시간 가상 주식 매매 및 차트 호가', badge: '인기' },
+      { href: '/stocks/league', label: '고래 카피트레이딩 리그', description: '상위 수익률 고래 트레이더 실시간 1:1 자동 추종', badge: 'HOT' },
+      { href: '/advisor', label: "AI 금융비서 '덕이'", description: '포트폴리오 실시간 진단, 샤프지수 산출 및 1:1 리밸런싱 상담', badge: 'AI' },
       { href: '/treasury', label: '대국민 국고 포털', description: '중앙정부 국고 5대 핵심 시민 환원 혜택 및 투명 재정 공시', badge: 'NEW' },
       { href: '/bonds', label: '국채 거래소 (KTB)', description: '기획재정부 국가 국채 청약, 매시간 확정 쿠폰이자 및 원금 100% 보증', badge: 'NEW' },
       { href: '/pension', label: '국민연금 (NPS)', description: '공적 연금 적립 기금, 은퇴 후 평생 시간당 기초연금 확정 수령', badge: 'NEW' },
@@ -482,6 +484,7 @@ export const CATEGORY_NAV: readonly NavCategory[] = [
       { href: '/clubs', label: '클럽·협동조합', description: '유저 길드 창설, 가입 및 협동 펀딩' },
       { href: '/collections', label: '컬렉션 전시관', description: '소장품 전시관 및 D1~D7 리텐션 큐레이션', badge: 'NEW' },
       { href: '/spaces', label: '개인 공간 & 도시', description: '가상 도시 부지 및 개인 룸 공간' },
+      { href: '/spaces/real-estate', label: '메가시티 랜드마크 경매', description: '4대 프라임 랜드마크 지분 경매 및 일일 월세 배당', badge: 'NEW' },
     ],
   },
   {

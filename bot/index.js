@@ -320,9 +320,61 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
   }
 });
 
+// 실시간 금융 이벤트 브로드캐스트 로컬 HTTP 웹훅 서버 (포트 3099)
+const BROADCAST_PORT = Number(process.env.DISCORD_BROADCAST_PORT) || 3099;
+let webhookServer = null;
+
+try {
+  webhookServer = http.createServer((req, res) => {
+    if (req.method === 'POST' && req.url === '/broadcast') {
+      let body = '';
+      req.on('data', (chunk) => { body += chunk; });
+      req.on('end', async () => {
+        try {
+          const payload = JSON.parse(body);
+          const { title, description, fields = [], color = 0x10b981 } = payload;
+
+          const embed = new EmbedBuilder()
+            .setTitle(title || '📢 [월덕 머니버스] 실시간 금융 브로드캐스트')
+            .setDescription(description || '')
+            .setColor(color)
+            .setTimestamp();
+
+          if (Array.isArray(fields)) {
+            for (const f of fields) {
+              if (f.name && f.value) {
+                embed.addFields({ name: f.name, value: f.value, inline: f.inline ?? true });
+              }
+            }
+          }
+
+          await sendLog({ embeds: [embed] });
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: true, status: 'Broadcast sent to Discord' }));
+        } catch (e) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: false, error: e.message }));
+        }
+      });
+    } else {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'Not found' }));
+    }
+  });
+
+  webhookServer.listen(BROADCAST_PORT, '127.0.0.1', () => {
+    console.log(`[Bot] Realtime broadcast webhook listener running on http://127.0.0.1:${BROADCAST_PORT}/broadcast`);
+  });
+} catch (err) {
+  console.warn('[Bot] Failed to bind broadcast webhook server:', err.message);
+}
+
 // 프로세스 종료 시 정리
 function cleanup() {
   console.log('[Bot] Cleaning up before exit...');
+  if (webhookServer) {
+    try { webhookServer.close(); } catch { /* ignore */ }
+  }
   if (watchdogInterval) clearInterval(watchdogInterval);
   if (healthCheckInterval) clearInterval(healthCheckInterval);
   music.dispose();

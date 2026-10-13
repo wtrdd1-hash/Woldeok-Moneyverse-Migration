@@ -1,4 +1,4 @@
-﻿# [월덕 머니버스] 통합 구현 계획서 (현재: v209)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v209)
 
 - **v209**: [주민참여예산 투표제(DAO Budget Voting), 관리자 창업 그랜트 심사 대시보드(/admin/treasury/grants), 전역 국고 축하 브로드캐스트 토스트 & 전 문서 총괄 정돈] (+95, -0)
 
@@ -1453,3 +1453,127 @@
 3. Git 커밋 및 origin main 푸시 (prod-v590)
 4. Debian 13 VM 100 프로덕션 무중단 승격 배포
 5. 라이브 실측: /treasury 및 /admin/treasury/grants HTTP 200 OK 확인
+
+
+---
+
+## 🚀 [v210 Specification] 가상 주식 실시간 카피 트레이딩 리그 & 메가시티 랜드마크 경매·월세 배당 시스템 구축
+
+### 1. 현황 및 목표 분석
+1. **[가상 주식 실시간 카피 트레이딩 & 고래 리더보드 (/stocks/league)]**:
+   - 가상 주식 시장 상위 10대 고래 투자자들의 누적 수익률, 승률, 포트폴리오 비중, 최근 실시간 매매 내역을 투명하게 공개하는 리더보드 구축.
+   - 초보 투자자가 고래 랭커를 선택하여 원클릭으로 주문을 1:1 비율 자동 추종(Copy-Trading)할 수 있는 구독 엔진 및 관리 대시보드 신설.
+   - 고래 랭커는 추종자들의 수익 중 1%를 성공 보수로 수수료 정산받는 소셜 인센티브 생태계 구현.
+2. **[가상 부동산 메가시티 랜드마크 경매 & 월세 배당 시스템 (/spaces/real-estate)]**:
+   - 4대 프라임 랜드마크(강남 머니버스 타워, 여의도 금융센터, 판교 테크밸리 메가코어, 한남 더힐 프라이빗 펜트)에 대한 지분 경매(Auction) 시스템 구축.
+   - 도시 구역별 주식/카지노 거래량과 연동된 일일 임대료(월세) 수익률을 지분 보유자에게 실시간 배당하고 원클릭 수령(Claim)하는 엔진 탑재.
+   - WLD 대규모 잉여 유동성을 흡수하고 장기 락업 효과를 창출하여 거시 경제 안정성 강화.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **frontend/src/app/stocks/league/page.tsx & stocks-league-client.tsx (신규)**:
+   - 고래 리더보드 랭킹 뷰 (수익률, 승률, 뱃지, 최근 체결 내역).
+   - 카피 트레이딩 원클릭 구독 다이얼로그 (배분 자금, 슬리피지 한도 설정).
+   - 내 활성 구독 목록 및 복사 주문 실현 손익 트래킹 뷰.
+2. **frontend/src/app/spaces/real-estate/real-estate-auction-client.tsx (신규)**:
+   - 4대 프라임 랜드마크 경매 카드 그리드 (실시간 최고 입찰가, 마감 타이머, 연간 기대 배당률).
+   - 원클릭 입찰(Bid) 모달 다이얼로그 및 지분율 표시.
+   - 누적 미수령 월세 배당금 실시간 게이지 및 원클릭 일괄 수령(Claim) 버튼.
+3. **frontend/src/app/spaces/real-estate/page.tsx (개선)**:
+   - 기존 단순 뷰에서 랜드마크 경매 및 월세 배당 인터랙티브 클라이언트를 결합한 복합 허브로 격상.
+4. **frontend/src/app/api/spaces/real-estate/auction/route.ts (신규)**:
+   - 랜드마크 경매 목록 조회(GET) 및 실시간 입찰(POST) API.
+5. **frontend/src/app/api/spaces/real-estate/claim-rent/route.ts (신규)**:
+   - 부동산 지분 보유자의 미수령 월세 배당금 정산 및 지갑 즉시 지급(POST) API.
+6. **단위 테스트 및 통합 검증**:
+   - `frontend/src/app/stocks/league/stocks-league.test.tsx` 단위 테스트 작성.
+   - `frontend/src/app/spaces/real-estate/real-estate.test.tsx` 검증 강화.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest`): 100% Pass
+3. Git 커밋 및 origin main 푸시 (`prod-v591`)
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포
+5. 라이브 실측: `/stocks/league` 및 `/spaces/real-estate` HTTP 200 OK 확인
+
+
+---
+
+## 🚀 [v211 Specification] 디스코드 봇 실시간 거버넌스 & 금융 이벤트 브로드캐스트 엔진 구축
+
+### 1. 현황 및 목표 분석
+1. **[디스코드 봇 실시간 브로드캐스트 수신 엔진 (Local Webhook Listener)]**:
+   - 디스코드 봇 프로세스(`bot/index.js`) 내부에 안전한 로컬 HTTP 리스너(포트 3099, `POST /broadcast`)를 신설하여 웹 플랫폼에서 발생한 주요 금융 이벤트를 즉각 수신.
+   - 주민참여예산 1,000표 달성/제안 등록, 랜드마크 경매 최고가 경신, 고래 대형 카피 체결 발생 시 디스코드 채널로 실시간 컬러 리치 임베드(Embed) 브로드캐스트.
+2. **[플랫폼 실시간 이벤트 발송 파이프라인 (/api/discord/broadcast)]**:
+   - 프론트엔드 및 백엔드에서 단일 인터페이스로 디스코드 알림을 발송할 수 있는 안전한 API 라우트 구축.
+   - 가상 부동산 랜드마크 경매(`auction/route.ts`) 및 주민참여예산(`proposals/route.ts`) API와 연동하여 실시간 자동 발송.
+3. **[관리자 디스코드 관제 대시보드 (/admin/discord) 연동]**:
+   - 관리자가 이벤트 유형별(국고 거버넌스, 랜드마크 경매, 대형 체결) 브로드캐스트 발송을 원클릭으로 검증할 수 있는 테스트 콘솔 버튼 마운트.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **bot/index.js (수정)**:
+   - 포트 3099 로컬 HTTP 서버 기동 및 `POST /broadcast` 라우트 처리.
+   - EmbedBuilder를 사용한 포맷팅된 임베드 전송 및 오류 격리.
+2. **frontend/src/app/api/discord/broadcast/route.ts (신규)**:
+   - 브로드캐스트 발송 프록시 API (타입, 제목, 설명, 필드 파라미터 유효성 검증).
+3. **frontend/src/app/admin/discord/admin-discord-broadcast-test-button.tsx (신규)**:
+   - 관리자 콘솔용 원클릭 브로드캐스트 발송 테스트 컴포넌트.
+4. **frontend/src/app/admin/discord/page.tsx (수정)**:
+   - 브로드캐스트 테스트 버튼 및 텔레메트리 스트립 마운트.
+5. **frontend/src/app/api/spaces/real-estate/auction/route.ts & treasury/proposals/route.ts (수정)**:
+   - 신규 입찰 및 신규 제안 등록 시 디스코드 브로드캐스트 자동 연동.
+6. **단위 테스트**:
+   - `frontend/src/app/admin/discord/discord-broadcast.test.tsx` 작성.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest`): 100% Pass
+3. Git 커밋 및 origin main 푸시 (`prod-v592`)
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포
+5. 라이브 실측: `/admin/discord` 및 `/api/discord/broadcast` HTTP 200 OK 확인
+
+
+---
+
+## 🚀 [v212 Specification] AI 금융 어드바이저 '덕이(Deoki)' 포트폴리오 종합 진단 & 대화형 리밸런싱 챗봇 구축
+
+### 1. 현황 및 목표 분석
+1. **[AI 금융 어드바이저 '덕이' 포트폴리오 종합 진단 허브 (/advisor)]**:
+   - 유저의 전체 보유 자산(가상 주식, 부동산 지분, 국채, 예금 잔고)을 4분면 벤토 그리드로 시각화하고, 포트폴리오 건전성 스코어(0~100점), 샤프 지수(Sharpe Ratio), 최대 낙폭(MDD)을 정밀 산출.
+   - 자산 편중도 분석을 통해 구체적이고 실현 가능한 리밸런싱(Rebalancing) 포트폴리오 가이드라인 제시.
+2. **[실시간 대화형 금융 상담 챗봇 인터페이스]**:
+   - 핀테크 전문 금융 비서 "덕이"와의 1:1 실시간 질의응답 대화창 제공.
+   - 추천 퀵 프롬프트 칩(위험도 진단, 이번 주 리밸런싱 추천, 부동산 월세 배당 극대화 전략, 국채 황금비율) 원클릭 바인딩.
+3. **[백엔드 API 장애 격리 및 지능형 폴백 연동 (/api/advisor/deoki/*)]**:
+   - 백엔드 오프라인 시에도 사전 훈련된 금융 룰베이스 및 포트폴리오 알고리즘을 통해 중단 없이 진단 및 자연어 상담을 제공하는 자립형 엔진 내장.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **frontend/src/app/advisor/page.tsx & advisor-client.tsx (신규)**:
+   - 4분면 자산 배분 비중 바 차트 및 핵심 투자 지표 메트릭스.
+   - 건전성 진단 리포트 (강점, 리스크 요인, 최적 리밸런싱 전략).
+   - 대화형 챗봇 인터페이스 (메시지 히스토리, 추천 칩, 마이크로 인터랙션).
+2. **frontend/src/app/api/advisor/deoki/diagnose/route.ts & ask/route.ts (보강)**:
+   - 지능형 포트폴리오 진단 알고리즘 및 질의응답 폴백 엔진 탑재.
+3. **frontend/src/lib/navigation.ts (수정)**:
+   - 상단 금융·투자 메뉴에 `AI 금융비서 '덕이'` 등록.
+4. **단위 테스트**:
+   - `frontend/src/app/advisor/advisor.test.tsx` 작성.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest`): 100% Pass
+3. Git 커밋 및 origin main 푸시 (`prod-v593`)
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포
+5. 라이브 실측: `/advisor` 및 `/api/advisor/deoki/diagnose` HTTP 200 OK 확인
