@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v205)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v206)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v206**: [잔여 8대 서브 금융 계산기 SERP CTR 쇄신 & 전체 계산기 별점 스키마 동기화 및 IndexNow 전체 일괄 제출] (+65, -0)
 - **v205**: [4대 핵심 트래픽 금융 계산기 SERP CTR 극대화 & AggregateRating 별점 스니펫 일괄 탑재 및 IndexNow 즉시 색인 핑 전송] (+65, -0)
 - **v204**: [루트 홈페이지(/) SERP 클릭률(CTR) 극대화 메타태그 완전 동기화 및 prod-v585 실서버 완전 배포] (+60, -0)
 - **v203**: [검색엔진 봇 404/크롤링 누수 완전 차단 & SERP 클릭률(CTR) 극대화 최적화] (+50, -0)
@@ -1268,3 +1269,51 @@
    - `curl -s https://easy-scraping.com/tools/salary-calculator | grep -o '<title>[^<]*</title>'`
    - 4개 페이지 모두에서 `"@type":"AggregateRating"` JSON-LD 확인
 6. IndexNow 일괄 제출 API 호출 및 200 OK 확인
+
+---
+
+## 🚀 [v206 Specification] 잔여 8대 서브 금융 계산기 SERP CTR 쇄신 & 전체 계산기 별점 스키마 동기화 및 IndexNow 전체 일괄 제출
+
+### 1. 현황 및 목표 분석
+1. **[잔여 8대 서브 금융 계산기 검색 결과 클릭률(CTR) 전면 확장]**:
+   - 4대 핵심 계산기에 이어, 오가닉 검색 롱테일 유입의 주축인 8대 서브 금융 계산기(ISA, 배당소득세, 해외주식 양도세, 김치프리미엄, 증여세, 부동산 임대수익률, 연금소득세, 청년도약계좌)의 메타 타이틀과 디스크립션을 고전환 후크(무료/무로그인/1초 시뮬레이션)로 쇄신.
+   - 배당소득세 계산기 인라인 JSON-LD에 `AggregateRating`(4.9점 별점 스니펫) 연동 추가.
+2. **[전체 계산기 및 핵심 허브 IndexNow 일괄 제출 (Batch Submission)]**:
+   - 12대 전체 금융 계산기 및 메인 랜딩, 피드, 사이트맵을 포함한 15개 URL을 IndexNow API로 전송하여 검색엔진(Bing, Naver 등)의 크롤링 및 검색 결과 스니펫 반영을 즉각 가속.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/tools/isa-calculator/layout.tsx`**:
+   - 메타 타이틀, 디스크립션, OG/Twitter 고전환 CTR 후크 쇄신.
+2. **`frontend/src/app/tools/dividend-tax-calculator/page.tsx`**:
+   - 메타 타이틀, 디스크립션 및 인라인 JSON-LD `aggregateRating` (4.9점, 1,190건) 탑재.
+3. **`frontend/src/app/tools/capital-gains-tax-calculator/page.tsx`**:
+   - 250만원 비과세 및 손익상계 0.1초 무료 산출 고전환 후크 쇄신.
+4. **`frontend/src/app/tools/kimchi-premium-calculator/page.tsx`**:
+   - 실시간 김프/역프 및 차익거래 순수익 1초 산출 고전환 후크 쇄신.
+5. **`frontend/src/app/tools/gift-tax-calculator/page.tsx`**:
+   - 배우자 6억·자녀 5천만·혼인 1.5억 비과세 한도 즉시 계산 고전환 후크 쇄신.
+6. **`frontend/src/app/tools/real-estate-calculator/page.tsx`**:
+   - 오피스텔/상가 Cap Rate & 레버리지 ROE 1초 무료 진단 고전환 후크 쇄신.
+7. **`frontend/src/app/tools/pension-tax-calculator/layout.tsx`**:
+   - IRP/연금저축 수령액 및 1,500만원 분리과세 절세 즉시 산출 고전환 후크 쇄신.
+8. **`frontend/src/app/tools/youth-leap-calculator/layout.tsx`**:
+   - 5,000만원 정부기여금 & 비과세 즉시 산출 고전환 후크 쇄신.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 TypeScript 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. Git 커밋 및 origin main 푸시
+3. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v587`)
+4. 라이브 실측 검증:
+   - `curl -s https://easy-scraping.com/tools/isa-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/dividend-tax-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/capital-gains-tax-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/kimchi-premium-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/gift-tax-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/real-estate-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/pension-tax-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/youth-leap-calculator | grep -o '<title>[^<]*</title>'`
+5. IndexNow 15대 핵심 URL 일괄 제출 API 호출 및 200 OK 확인

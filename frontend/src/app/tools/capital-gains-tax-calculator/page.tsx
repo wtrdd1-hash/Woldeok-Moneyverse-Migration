@@ -5,8 +5,8 @@ import { CAPITAL_GAINS_TAX_PRESETS } from '@/config/capital-gains-tax-presets.co
 import { buildCalculatorRichSnippet, jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '2026 무료 해외주식 양도소득세 계산기 | 미국주식 250만원 비과세 & 손익상계 절세 시뮬레이터',
-  description: '미국주식 및 해외주식 22% 양도소득세, 연간 250만원 기본공제, 연말 손실 종목 상계 매도(Tax-loss harvesting) 및 분할 매도 절세 효과를 0.1초 만에 무료 계산합니다.',
+  title: '[2026 최신] 해외주식 양도소득세 계산기 — [무료/1초] 미국주식 250만원 비과세 & 손익상계 절세 즉시 산출 | 월덕 머니버스',
+  description: '[로그인 없이 1초 산출] 미국주식 및 해외주식 22% 양도소득세, 연간 250만원 기본공제, 연말 손실 종목 상계 매도(Tax-loss harvesting) 및 분할 매도 절세 효과를 0.1초 만에 무료 계산하세요!',
   keywords: [
     '해외주식 양도소득세 계산기',
     '미국주식 250만원 비과세',

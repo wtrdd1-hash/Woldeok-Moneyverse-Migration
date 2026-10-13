@@ -17,8 +17,8 @@ export const revalidate = 86400;
 
 export async function generateMetadata(): Promise<Metadata> {
   const url = canonicalUrl('/tools/gift-tax-calculator');
-  const title = '2026 증여세 계산기 & 면제 한도 총정리 — 월덕 머니버스';
-  const description = '부모-자녀 5,000만원, 배우자 6억원, 혼인·출산 1.5억원 증여재산공제 한도 및 과세표준 구간별 세율(10%~50%) 0초 실시간 증여세 모의계산기.';
+  const title = '[2026 최신] 증여세 계산기 — [무료/1초] 배우자 6억·자녀 5천만·혼인 1.5억 비과세 한도 & 세율 즉시 계산 | 월덕 머니버스';
+  const description = '[로그인 없이 1초 산출] 부모-자녀 5천만원, 배우자 6억원, 혼인·출산 1.5억원 증여재산공제 한도 및 과세표준 구간별 세율(10%~50%)을 반영한 예상 증여세를 실시간으로 즉시 확인하세요!';
 
   const ogImageUrl = buildOgImageUrl({
     title: '2026 증여세 계산기 & 비과세 한도',

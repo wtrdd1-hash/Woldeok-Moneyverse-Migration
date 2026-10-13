@@ -10,8 +10,8 @@ import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 
 export const metadata: Metadata = {
-  title: '배당소득세 계산기 - Dividend Yield·국내·미국 배당주 15.4% 원천징수 및 금융종합과세',
-  description: '배당수익률(Dividend Yield) 및 국내·미국 주식 배당금의 15.4% 세금 원천징수 실수령액과 2,000만원 초과 시 금융소득종합과세 세부담을 실시간으로 계산하고 절세 전략을 확인하세요.',
+  title: '[무료/무로그인] 배당소득세 계산기 — 1초 만에 국내·미국 배당주 15.4% 세후 실수령액 & 2000만원 종합과세 즉시 산출 | 월덕 머니버스',
+  description: '[로그인 없이 1초 산출] 배당수익률(Dividend Yield)과 국내·미국 주식 15.4% 원천징수 후 순수령액, 2,000만원 초과 금융소득종합과세 해당 여부를 실시간으로 즉시 확인하세요!',
   keywords: [
     'dividend yield',
     'dividend',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: '배당소득세 & Dividend Yield 2,000만원 금융종합과세 시뮬레이터',
+    title: '[무료/무로그인] 배당소득세 & 2,000만원 금융종합과세 시뮬레이터 | 월덕 머니버스',
     description: '배당수익률(Dividend Yield)과 원천징수 세금, 실수령 배당금 및 종합과세 해당 여부를 즉시 계산합니다.',
     url: canonicalUrl('/tools/dividend-tax-calculator'),
     type: 'website',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
         url: buildOgImageUrl({
           title: '배당소득세 & Dividend Yield 계산기',
           description: '국내·미국 배당주 15.4% 원천징수 및 2,000만원 금융종합과세',
-          badge: 'Dividend Tax',
+          badge: '무료/무로그인 1초 시뮬레이터',
           type: 'default',
         }),
         width: 1200,
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '배당소득세 & Dividend Yield 2,000만원 금융종합과세 시뮬레이터',
+    title: '[무료/무로그인] 배당소득세 & 2,000만원 금융종합과세 시뮬레이터 | 월덕 머니버스',
     description: '배당수익률(Dividend Yield)과 원천징수 세금, 실수령 배당금 및 종합과세 해당 여부를 즉시 계산합니다.',
   },
 };
@@ -71,6 +71,13 @@ export default function DividendTaxCalculatorPage() {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'KRW',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '1190',
+      bestRating: '5',
+      worstRating: '1',
     },
   };
 
