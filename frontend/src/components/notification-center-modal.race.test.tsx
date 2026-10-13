@@ -97,4 +97,57 @@ describe('notification response ordering', () => {
     expect(screen.getByText('Pending notification')).toBeDefined();
     expect(screen.queryByText('알림을 불러오는 중...')).toBeNull();
   });
+
+  it('does not report a successful read when the API returns a malformed receipt', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
+      const url = String(input);
+      if (url.includes('unread-count')) return Promise.resolve(response({ unreadCount: 1 }));
+      if (url.includes('unreadOnly=')) return Promise.resolve(response({ notifications: [notification('55555555-5555-4555-8555-555555555555', 'Unread receipt')] }));
+      if (url.endsWith('/api/notifications') && init?.method === 'POST') {
+        return Promise.resolve(response({ success: true }));
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+    render(<NotificationCenterModal />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open test dialog' }));
+    await screen.findByText('Unread receipt');
+    await waitFor(() => expect(screen.getByText(/미확인 1건/)).toBeDefined());
+    fireEvent.click(screen.getByRole('button', { name: '모두 읽음' }));
+    expect(await screen.findByRole('alert')).toHaveProperty('textContent', expect.stringContaining('읽음 처리에 실패'));
+    expect(screen.getByText(/미확인 1건/)).toBeDefined();
+    expect(screen.getByRole('button', { name: '모두 읽음' }).hasAttribute('disabled')).toBe(false);
+  });
+
+  it('ignores a pre-mutation unread-feed response after mark-all succeeds', async () => {
+    let finishMutation: ((value: Response) => void) | undefined;
+    let finishOldFeed: ((value: Response) => void) | undefined;
+    let count = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
+      const url = String(input);
+      if (url.includes('unread-count')) {
+        count += 1;
+        return Promise.resolve(response({ unreadCount: count === 1 ? 1 : 0 }));
+      }
+      if (url.includes('unreadOnly=false')) return Promise.resolve(response({ notifications: [notification('66666666-6666-4666-8666-666666666666', 'Before mutation')] }));
+      if (url.includes('unreadOnly=true')) return new Promise((resolve) => { finishOldFeed = resolve; });
+      if (url.endsWith('/api/notifications') && init?.method === 'POST') {
+        return new Promise((resolve) => { finishMutation = resolve; });
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+    render(<NotificationCenterModal />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open test dialog' }));
+    await screen.findByText('Before mutation');
+    fireEvent.click(screen.getByRole('button', { name: '모두 읽음' }));
+    await waitFor(() => expect(finishMutation).toBeDefined());
+    expect(screen.getByRole('button', { name: '모두 읽음' }).hasAttribute('disabled')).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: /^미확인 알림/ }));
+    await waitFor(() => expect(finishOldFeed).toBeDefined());
+    await act(async () => finishMutation!(response({ updatedCount: 1 })));
+    await waitFor(() => expect(screen.getByText(/미확인 0건/)).toBeDefined());
+    await act(async () => finishOldFeed!(response({ notifications: [notification('77777777-7777-4777-8777-777777777777', 'Stale unread')] })));
+    expect(screen.queryByText('Stale unread')).toBeNull();
+    expect(screen.queryByText('알림을 불러오는 중...')).toBeNull();
+    expect(screen.getByRole('button', { name: '모두 읽음' }).className).toContain('min-h-11');
+  });
 });
