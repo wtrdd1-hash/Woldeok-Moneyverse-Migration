@@ -89,7 +89,7 @@ export function proxy(request: NextRequest) {
   }
 
   // Historic blog routes: Return HTTP 410 Gone to cleanly remove obsolete tech-blog URLs from Google/Naver index and avoid Soft 404 penalties
-  if (pathname.startsWith('/entry/') || pathname.startsWith('/blog/') || pathname.startsWith('/post/')) {
+  if (pathname.startsWith('/entry/') || pathname.startsWith('/post/')) {
     if (botInfo.isBot) {
       recordCrawlerHitAsync(request, botInfo.botName, 410);
     }
