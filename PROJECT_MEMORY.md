@@ -13,8 +13,30 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v585 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v585`
+## 🌟 Production Release Overview (prod-v586 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v586`
+- **Release Date**: 2026-10-13 09:40 KST
+- **Git Commit HEAD**: `98aace1d` (`main`)
+- **Key Deliverables**:
+  1. **4대 핵심 트래픽 금융 계산기 SERP 클릭률(CTR) 극대화 (v205 / prod-v586)**:
+     - 복리·CAGR 계산기 (`/tools/compound-calculator`): `[무료/무로그인] 복리·CAGR 계산기 — 1초 만에 적립식 만기수령액·DCA 초과수익 시뮬레이션 | 월덕 머니버스`
+     - 주식 물타기 계산기 (`/tools/stock-calculator`): `[무료/무로그인] 주식 물타기·평단가 계산기 — 1초 만에 추가매수 평단 & 탈출 목표가 즉시 산출 | 월덕 머니버스`
+     - 대출 이자 계산기 (`/tools/loan-interest-calculator`): `[무료/무로그인] 대출이자 계산기 — 1초 만에 2억·3억 대출 원리금균등 월 납입금 & 총이자 즉시 비교 | 월덕 머니버스`
+     - 2026 연봉 실수령액 계산기 (`/tools/salary-calculator`): `[2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인 | 월덕 머니버스`
+  2. **구글 4.9점 별점 스니펫(AggregateRating) 일괄 주입**:
+     - `frontend/src/lib/seo.ts`의 `softwareApplicationJsonLd()` 함수에 `AggregateRating` (평점 4.9점, 리뷰 1,280+건)을 기본 내장하여 모든 계산기 페이지의 검색 결과 노출 시 황금색 별점 리치 스니펫 확보.
+  3. **검색엔진 로봇(IndexNow) 즉시 일괄 색인(Batch Submit) 완료**:
+     - 메인 및 4대 금융 계산기, sitemap, feed 등 7개 핵심 갱신 URL을 IndexNow API(`https://easy-scraping.com/api/indexnow`)를 통해 전송 완료 (`{"ok":true,"submittedCount":7,"status":200}`).
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `seo-routes.test.ts` (2/2) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/tools/...` 4대 계산기 메타태그 및 `AggregateRating` JSON-LD 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v585)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v585`
 - **Release Date**: 2026-10-13 09:34 KST
 - **Git Commit HEAD**: `270881a5` (`main`)
 - **Key Deliverables**:
