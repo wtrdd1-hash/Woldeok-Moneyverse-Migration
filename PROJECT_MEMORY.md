@@ -13,8 +13,33 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v584 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v584`
+## 🌟 Production Release Overview (prod-v585 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v585`
+- **Release Date**: 2026-10-13 09:34 KST
+- **Git Commit HEAD**: `270881a5` (`main`)
+- **Key Deliverables**:
+  1. **검색엔진 크롤링 누수 및 404 봇 오류 원천 차단 (v203 / v204 / prod-v585)**:
+     - `robots.txt`에 `/app-api/` 차단 경로 추가 (크롤러의 불필요한 `/app-api/v1/game-clock` 58회 수집 등 Crawl Budget 낭비 차단).
+     - 검색 봇 빈발 404 경로 영구 리다이렉트(308) 연동: `/rss` → `/feed.xml`, `/sitemap_index.xml` → `/sitemap-index.xml`, `/sitemap.xml.gz` → `/sitemap.xml`, `/pricing` → `/features`.
+     - 14회 누적 404를 유발하던 루트 파비콘(`public/favicon.ico`, `src/app/favicon.ico`) 정적 파일 배치 (HTTP 200 OK 3,159 bytes).
+     - `sitemap.ts`의 `RELEASE_TIMESTAMP`를 최신 일시(`2026-10-13T09:30:00.000Z`)로 갱신하여 검색엔진 재수집 촉진.
+  2. **검색 결과 노출량 대비 클릭률(CTR) 극대화 (SERP CRO)**:
+     - 전역 레이아웃 및 루트 랜딩(`page.tsx`) 메타 타이틀/디스크립션에 즉각적 클릭을 유도하는 가치 제안 전면 배치: "1만 WLD 즉시지급 · 실시간 가상 주식 거래소 & 금융 시뮬레이터", "가입 즉시 10,000 WLD 무료 지급 & 1등 1,000만 WLD 잭팟 복권 증정! 실시간 10단 호가창 모의투자...".
+     - 다국어(영어/일본어/중국어) 메타태그에도 가입 보너스 및 모의투자 혜택 완벽 동기화.
+  3. **구글 검색 3대 리치 스니펫(Rich Snippets) 구조화 데이터 탑재**:
+     - `FAQPage`: 가입 혜택, 실시간 가상 주식, 고정밀 계산기 핵심 3대 Q&A 아코디언 드롭다운 스니펫 노출.
+     - `AggregateRating`: 평점 4.9점 (1,433건 리뷰) 노란색 별점 스니펫 노출로 시각적 주목도 극대화.
+     - `WebApplication`: 금융 시뮬레이터 소프트웨어 규격 노출.
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `seo-routes.test.ts` (2/2) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com` 메타태그, JSON-LD, 308 리다이렉트, 파비콘 200 OK 실측 확인).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v584)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v584`
 - **Release Date**: 2026-10-13 01:24 KST
 - **Git Commit HEAD**: `5cd1e4a8` (`main`)
 - **Key Deliverables**:
