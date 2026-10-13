@@ -1,4 +1,4 @@
-﻿# [월덕 머니버스] 통합 구현 계획서 (현재: v209)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v209)
 
 - **v209**: [주민참여예산 투표제(DAO Budget Voting), 관리자 창업 그랜트 심사 대시보드(/admin/treasury/grants), 전역 국고 축하 브로드캐스트 토스트 & 전 문서 총괄 정돈] (+95, -0)
 
@@ -1453,3 +1453,48 @@
 3. Git 커밋 및 origin main 푸시 (prod-v590)
 4. Debian 13 VM 100 프로덕션 무중단 승격 배포
 5. 라이브 실측: /treasury 및 /admin/treasury/grants HTTP 200 OK 확인
+
+
+---
+
+## 🚀 [v210 Specification] 가상 주식 실시간 카피 트레이딩 리그 & 메가시티 랜드마크 경매·월세 배당 시스템 구축
+
+### 1. 현황 및 목표 분석
+1. **[가상 주식 실시간 카피 트레이딩 & 고래 리더보드 (/stocks/league)]**:
+   - 가상 주식 시장 상위 10대 고래 투자자들의 누적 수익률, 승률, 포트폴리오 비중, 최근 실시간 매매 내역을 투명하게 공개하는 리더보드 구축.
+   - 초보 투자자가 고래 랭커를 선택하여 원클릭으로 주문을 1:1 비율 자동 추종(Copy-Trading)할 수 있는 구독 엔진 및 관리 대시보드 신설.
+   - 고래 랭커는 추종자들의 수익 중 1%를 성공 보수로 수수료 정산받는 소셜 인센티브 생태계 구현.
+2. **[가상 부동산 메가시티 랜드마크 경매 & 월세 배당 시스템 (/spaces/real-estate)]**:
+   - 4대 프라임 랜드마크(강남 머니버스 타워, 여의도 금융센터, 판교 테크밸리 메가코어, 한남 더힐 프라이빗 펜트)에 대한 지분 경매(Auction) 시스템 구축.
+   - 도시 구역별 주식/카지노 거래량과 연동된 일일 임대료(월세) 수익률을 지분 보유자에게 실시간 배당하고 원클릭 수령(Claim)하는 엔진 탑재.
+   - WLD 대규모 잉여 유동성을 흡수하고 장기 락업 효과를 창출하여 거시 경제 안정성 강화.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **frontend/src/app/stocks/league/page.tsx & stocks-league-client.tsx (신규)**:
+   - 고래 리더보드 랭킹 뷰 (수익률, 승률, 뱃지, 최근 체결 내역).
+   - 카피 트레이딩 원클릭 구독 다이얼로그 (배분 자금, 슬리피지 한도 설정).
+   - 내 활성 구독 목록 및 복사 주문 실현 손익 트래킹 뷰.
+2. **frontend/src/app/spaces/real-estate/real-estate-auction-client.tsx (신규)**:
+   - 4대 프라임 랜드마크 경매 카드 그리드 (실시간 최고 입찰가, 마감 타이머, 연간 기대 배당률).
+   - 원클릭 입찰(Bid) 모달 다이얼로그 및 지분율 표시.
+   - 누적 미수령 월세 배당금 실시간 게이지 및 원클릭 일괄 수령(Claim) 버튼.
+3. **frontend/src/app/spaces/real-estate/page.tsx (개선)**:
+   - 기존 단순 뷰에서 랜드마크 경매 및 월세 배당 인터랙티브 클라이언트를 결합한 복합 허브로 격상.
+4. **frontend/src/app/api/spaces/real-estate/auction/route.ts (신규)**:
+   - 랜드마크 경매 목록 조회(GET) 및 실시간 입찰(POST) API.
+5. **frontend/src/app/api/spaces/real-estate/claim-rent/route.ts (신규)**:
+   - 부동산 지분 보유자의 미수령 월세 배당금 정산 및 지갑 즉시 지급(POST) API.
+6. **단위 테스트 및 통합 검증**:
+   - `frontend/src/app/stocks/league/stocks-league.test.tsx` 단위 테스트 작성.
+   - `frontend/src/app/spaces/real-estate/real-estate.test.tsx` 검증 강화.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest`): 100% Pass
+3. Git 커밋 및 origin main 푸시 (`prod-v591`)
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포
+5. 라이브 실측: `/stocks/league` 및 `/spaces/real-estate` HTTP 200 OK 확인

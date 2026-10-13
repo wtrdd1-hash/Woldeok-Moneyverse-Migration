@@ -33,5 +33,10 @@ describe('Virtual Real Estate & Land Leasing System (/spaces/real-estate)', () =
     expect(combinedSource).toContain('handleExpandRoom');
     expect(combinedSource).toContain('부동산 임대료');
   });
+
+  it('mounts RealEstateAuctionClient with landmark auctions and rent yield claim', () => {
+    expect(pageSource).toContain('RealEstateAuctionClient');
+    expect(pageSource).toContain('가상 부동산 메가시티 랜드마크 경매 & 월세 배당 거래소');
+  });
 });
 

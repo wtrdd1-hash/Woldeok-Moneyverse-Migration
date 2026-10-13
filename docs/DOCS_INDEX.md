@@ -55,6 +55,7 @@ graph TD
 | 문서명 / 기능 경로 | 언어 | 핵심 내용 요약 |
 | :--- | :--- | :--- |
 | **[가상 주식 거래소](/stocks)** | KO | 10대 가상 상장사 실시간 10단 호가창, 매수/매도, 스탑로스/익절 조건부 주문 |
+| **[고래 카피트레이딩 리그](/stocks/league)** | KO | 상위 수익률 +184% 고래 리더보드, 원클릭 1:1 자동 추종 카피 트레이딩 및 수수료 분배 |
 | **[차트 작도 도구 툴킷](/stocks/WDG)** | KO | 추세선(Trendline), 수평선(Horizontal Line), 피보나치 되돌림(Fibonacci 5단계) 로컬 영구저장 |
 | **[호가 심도 차트](/stocks/WDG)** | KO | 매수(Bids) vs 매도(Asks) 누적 잔량 에어리어 SVG 렌더링 및 최대 호가벽(Wall) 가시화 |
 | [2026-09-22-stocks-interactive-trading-console.ko.md](./2026-09-22-stocks-interactive-trading-console-v2026.09.22.355.ko.md) | KO | 실시간 주식 호가 주문 콘솔 및 체결 엔진 v355 사양 |

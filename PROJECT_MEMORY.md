@@ -13,10 +13,34 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v590 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v590`
-- **Release Date**: 2026-10-13 14:35 KST
+## 🌟 Production Release Overview (prod-v591 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v591`
+- **Release Date**: 2026-10-13 21:35 KST
 - **Git Commit HEAD**: `main`
+- **Key Deliverables**:
+  1. **가상 주식 실시간 카피 트레이딩 리그 & 고래 리더보드 (`/stocks/league`, v210 / prod-v591)**:
+     - **고래 리더보드 랭킹 뷰 (`stocks-league-client.tsx`)**: 상위 1위 수익률 +184.2% 고래 트레이더들의 승률(85.7%), 운용 자산(285만 WLD), 주력 종목 및 실시간 체결 내역 투명 공개.
+     - **원클릭 카피 트레이딩 구독 엔진**: 할당 자본금(1,000 ~ 50,000 WLD 프리셋) 및 비례 비율(50%, 100%, 150%) 설정 기반 1:1 실시간 자동 주문 추종.
+     - **트레이더 기여금 분배**: 실현 이익 발생 시 1.0%의 성공 보수가 고래 트레이더에게 기여금으로 자동 분배되는 소셜 금융 보상 루프 완성.
+     - **내 카피 트레이딩 대시보드**: 실시간 추종 현황, 복사 체결 건수, 누적 실현 손익 및 추종 해제 액션 제공.
+  2. **가상 부동산 메가시티 랜드마크 경매 & 월세 배당 시스템 (`/spaces/real-estate`)**:
+     - **4대 프라임 랜드마크 경매 (`real-estate-auction-client.tsx`)**: 강남 머니버스 프라임 타워, 여의도 IFC, 판교 테크밸리 메가코어, 한남 더힐 펜트하우스 실시간 호가 경매.
+     - **원클릭 최고가 입찰 모달**: 최소 입찰 단위 검증, 빠른 호가 프리셋(+1만, +5만, +10만), 실시간 잔여 시간 카운트다운.
+     - **원자적 일일 임대료(월세) 일괄 배당 수령 (`/api/spaces/real-estate/claim-rent`)**: 지분율과 도시 상권 거래량에 비례하여 적립된 미수령 월세 배당금 원클릭 즉시 지갑 지급.
+  3. **글로벌 메가 네비게이션 연동**:
+     - 상단 금융·투자 메뉴에 `고래 카피트레이딩 리그` (HOT 배지) 및 플레이·시즌 메뉴에 `메가시티 랜드마크 경매` (NEW 배지) 등록.
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 신규 단위 테스트 `stocks-league.test.tsx` 및 `real-estate.test.tsx` (9/9) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (587/587 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/league`, `/spaces/real-estate` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v590)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v590`
+- **Release Date**: 2026-10-13 14:35 KST
+- **Git Commit HEAD**: `3f59f9a2` (`main`)
 - **Key Deliverables**:
   1. **시민 참여형 주민참여예산 투표제 (Citizens DAO Budget Voting, v209 / prod-v590)**:
      - **주민참여예산 제안 및 투표 (`/treasury` - DAO 거버넌스 탭)**: 시민 누구나 국고 공공사업(수수료 전액 면제 주간, 길드 협동 펀딩 부스트 등)을 직접 제안하고 시민 찬성 추천 투표(Upvote) 참여.
