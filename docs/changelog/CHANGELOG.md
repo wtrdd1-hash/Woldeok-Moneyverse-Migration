@@ -1,3 +1,8 @@
+## Unreleased — 2026-10-13 Development A: outbound redirect credential isolation (Draft PR #817)
+- Added five regression scenarios and runtime safeguards against forwarding Authorization/cookies/API keys or request bodies to a different origin during outbound redirects; URL userinfo is rejected.
+- Restored stock-depth type-only import and disposable CI database-name parity without editing any applied migration.
+- **Not released:** exact-SHA CI, isolated Test, Production and rollback gates remain unverified. Source branch `auto/hourly-a-ssrf-redirect-credentials-20261013-1825` remains Draft; no release version increment.
+
 ## v2026.09.23.390 — QA branch lifecycle cleanup hardening
 
 - Branch: `fix/qa-branch-cleanup-v2026.09.23.390`.
