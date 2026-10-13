@@ -177,6 +177,26 @@ const config: NextConfig = {
         destination: '/announcements/:path*',
         permanent: true,
       },
+      {
+        source: '/rss',
+        destination: '/feed.xml',
+        permanent: true,
+      },
+      {
+        source: '/sitemap_index.xml',
+        destination: '/sitemap-index.xml',
+        permanent: true,
+      },
+      {
+        source: '/sitemap.xml.gz',
+        destination: '/sitemap.xml',
+        permanent: true,
+      },
+      {
+        source: '/pricing',
+        destination: '/features',
+        permanent: true,
+      },
     ];
   },
 

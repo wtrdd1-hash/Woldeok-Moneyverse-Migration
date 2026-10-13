@@ -304,6 +304,49 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
     fireEvent.click(ladderBtn);
     expect(screen.getByText(/(5|10)단계 실시간 호가/i)).toBeDefined();
   });
+
+  it('renders interactive drawing toolbar with cursor, trendline, horizontal line, fibonacci tools and handles tool switching', () => {
+    render(
+      <StockInteractiveChart
+        currentPrice="15,000"
+        dayOpenPrice="14,800"
+        dayHighPrice="15,200"
+        dayLowPrice="14,700"
+        symbol="WDG"
+        isEn={false}
+      />
+    );
+
+    // 드로잉 도구 버튼 렌더링 확인
+    const cursorBtn = screen.getByTitle(/기본 커서/i);
+    const trendBtn = screen.getByTitle(/추세선/i);
+    const horizBtn = screen.getByTitle(/수평 지지/i);
+    const fibBtn = screen.getByTitle(/피보나치/i);
+
+    expect(cursorBtn).toBeDefined();
+    expect(trendBtn).toBeDefined();
+    expect(horizBtn).toBeDefined();
+    expect(fibBtn).toBeDefined();
+
+    // 초기 상태: 커서 활성
+    expect(cursorBtn.className).toContain('bg-primary');
+
+    // 추세선 도구 선택 클릭
+    fireEvent.click(trendBtn);
+    expect(trendBtn.className).toContain('bg-sky-500');
+
+    // 수평선 도구 선택 클릭
+    fireEvent.click(horizBtn);
+    expect(horizBtn.className).toContain('bg-emerald-500');
+
+    // 피보나치 도구 선택 클릭
+    fireEvent.click(fibBtn);
+    expect(fibBtn.className).toContain('bg-amber-500');
+
+    // 커서 모드로 복귀
+    fireEvent.click(cursorBtn);
+    expect(cursorBtn.className).toContain('bg-primary');
+  });
 });
 
 

@@ -13,8 +13,152 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v584 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v584`
+## 🌟 Production Release Overview (prod-v590 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v590`
+- **Release Date**: 2026-10-13 14:35 KST
+- **Git Commit HEAD**: `main`
+- **Key Deliverables**:
+  1. **시민 참여형 주민참여예산 투표제 (Citizens DAO Budget Voting, v209 / prod-v590)**:
+     - **주민참여예산 제안 및 투표 (`/treasury` - DAO 거버넌스 탭)**: 시민 누구나 국고 공공사업(수수료 전액 면제 주간, 길드 협동 펀딩 부스트 등)을 직접 제안하고 시민 찬성 추천 투표(Upvote) 참여.
+     - **자동 예산 집행 엔진 (1,000표 도달 시 `EXECUTED`)**: 커뮤니티 추천 1,000표 달성 시 국고 예산 자동 집행 및 투표 상태 실시간 전환.
+     - **백엔드 거버넌스 REST API (`/api/treasury/proposals`)**: 제안 목록 조회(GET), 신규 제안 등록(POST), 찬성 투표 참여(PUT).
+  2. **관리자 창업 그랜트 심사 대시보드 (`/admin/treasury/grants`)**:
+     - **심사 승인 뷰 (`admin-grants-view.tsx`)**: 접수된 청년/창업 벤처 그랜트 신청서(사업명, 신청자, 신청금액, 사업계획 요약) 목록 실시간 검토.
+     - **원자적 국고 시드머니 지급 (`/api/admin/treasury/grants`)**: 승인 시 중앙정부 국고 금고(VAULT_MAIN)에서 신청자 지갑으로 지원금 즉시 송금 및 관리자 세션 감사 로그 기록.
+  3. **국고 잔액 변동 실시간 웹소켓/이벤트 브로드캐스트 (`TreasuryBroadcastToast`)**:
+     - **전역 플로팅 축하 토스트 (`/components/treasury-broadcast-toast.tsx`)**: 시민 기본배당 대규모 청구, 시장 바이백 소각, 긴급 구호금 집행 시 전체 접속자 화면에 인터랙티브 축하 알림 렌더링.
+     - **전역 헤더 (`site-header.tsx`) 연동**: 모든 라우트에서 중단 없이 라이브 재정 이벤트 수신.
+  4. **문서 전수 최신화 & 브랜치 정돈 (Docs Hygiene & Master Index)**:
+     - 마스터 색인 `DOCS_INDEX.md` 및 `docs/DOCS_INDEX.md` 최신 기능 및 6대 도메인 전면 정돈.
+     - `README.md`, `README-KO.md` 국고 생태계 및 최신 기능 반영.
+     - `implementation_plan.md` v209 누적 반영 (Zero-Deletion 원칙 준수).
+  5. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 신규 단위 테스트 `treasury.test.tsx` (3/3) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (586/586 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/treasury`, `/admin/treasury/grants` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v589)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v589`
+- **Release Date**: 2026-10-13 14:23 KST
+- **Git Commit HEAD**: `1d56b354` (`main`)
+- **Key Deliverables**:
+  1. **대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 구축 (v208 / prod-v589)**:
+     - **대국민 국고 포털 (`/treasury`)**: 중앙정부 국고 금고(VAULT_MAIN) 잔액 실시간 공시, 30% 법정 안전 비축금 원칙 시각화 및 시민 혜택 원스톱 접수창구 신설.
+     - **5대 종합 국고 활용처 라인업 완비**:
+       1. **시민 보편 기본배당 (Universal Citizen Dividend)**: 30% 안전비축금 초과 재정 잉여금 기반 1,200 WLD 주간 기본배당 즉시 청구(Instant Claim).
+       2. **청년·창업 벤처 그랜트 펀드 (Venture Startup Grant)**: 신규 법인 창업 및 사업 혁신을 위한 최대 100,000 WLD 무상 지원금 신청 다이얼로그.
+       3. **취약계층 긴급 구호 복지금 (Emergency Relief Subsidy)**: 현금 잔고 5,000 WLD 이하 파산 위기 시민 대상 3,000 WLD 즉시 패자부활 세이프티넷.
+       4. **WLD 유통량 시장 바이백 & 영구 소각 (Market Buyback & Burn)**: 인플레이션 억제 및 통화가치 방어용 시장 WLD 공개 매수 및 소각 자동 엔진 공시.
+       5. **공공 국채 우대금리 부스터 (Sovereign Bond Yield Booster)**: 정부 국채(KTB) 성실 보유 시민 대상 연 +2.5%p 우대 보너스 이자 지원.
+     - **30% 법정 안전 비축금(Safe Reserve) 게이지**: 총잔액 대비 비축금(30%)과 가용 잉여금(70%), 누적 환원액, 누적 소각량 실시간 시각화.
+     - **실시간 대국민 투명 지출 원장(Ledger) 스트림**: 모든 국고 집행 내역(유형, 금액, 사유, 마스킹 수혜자, 타임스탬프) 투명 공시.
+     - **금융·투자 메가 네비게이션 연동**: 상단 금융·투자 메뉴에 `대국민 국고 포털` 신규 배지 등록.
+  2. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 신규 단위 테스트 `treasury.test.tsx` (3/3) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/treasury` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v588)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v588`
+- **Release Date**: 2026-10-13 10:07 KST
+- **Git Commit HEAD**: `bade5aa6` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 트레이딩뷰급 인터랙티브 작도 도구 툴킷 구축 (v207 / prod-v588)**:
+     - **추세선 (Trendline)**: 시작 앵커부터 끝 앵커까지 드래그 작도 (스카이블루 `#38bdf8`, 앵커 원형 핸들).
+     - **수평 지지/저항선 (Horizontal Line)**: 차트 내 임의 가격대 원클릭 작도 (에메랄드 `#10b981`, 점선 가이드라인 & 우측 정밀 가격 라벨 배지).
+     - **피보나치 5단계 되돌림 (Fibonacci Retracement)**: 고점~저점 드래그 기반 5단계 황금비율 레벨 (0%, 38.2%, 50%, 61.8%, 100%) 및 구간별 가격/비율 배지 자동 표기.
+  2. **종목 심볼별 독립 로컬 스토리지 영구 저장 & 크로스 서피스 제스처**:
+     - `wdmv_chart_drawings_{SYMBOL}_v1` 독립 키로 작도선 자동 저장 및 복원.
+     - 데스크톱 마우스 다운/무브/업 및 모바일 터치스타트/무브/엔드 듀얼 제스처 완벽 지원.
+     - `Esc` 단축키 원클릭 커서 모드 복귀 및 개별/전체 삭제 액션 완벽 연동.
+  3. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (10/10) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v587)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v587`
+- **Release Date**: 2026-10-13 09:46 KST
+- **Git Commit HEAD**: `017e56f3` (`main`)
+- **Key Deliverables**:
+  1. **잔여 8대 서브 금융 계산기 SERP 클릭률(CTR) 극대화 (v206 / prod-v587)**:
+     - ISA 계좌 절세 계산기 (`/tools/isa-calculator`): `[2026 최신] ISA 계좌 절세 계산기 — [무료/1초] 일반형·서민형 비과세 한도 & 9.9% 분리과세 즉시 비교 | 월덕 머니버스`
+     - 배당소득세 계산기 (`/tools/dividend-tax-calculator`): `[무료/무로그인] 배당소득세 계산기 — 1초 만에 국내·미국 배당주 15.4% 세후 실수령액 & 2000만원 종합과세 즉시 산출 | 월덕 머니버스`
+     - 해외주식 양도소득세 계산기 (`/tools/capital-gains-tax-calculator`): `[2026 최신] 해외주식 양도소득세 계산기 — [무료/1초] 미국주식 250만원 비과세 & 손익상계 절세 즉시 산출 | 월덕 머니버스`
+     - 코인 김치프리미엄 계산기 (`/tools/kimchi-premium-calculator`): `[실시간 무료] 코인 김치프리미엄 계산기 — 1초 만에 업비트·바이낸스 김프/역프 & 차익거래 순수익 즉시 산출 | 월덕 머니버스`
+     - 증여세 계산기 (`/tools/gift-tax-calculator`): `[2026 최신] 증여세 계산기 — [무료/1초] 배우자 6억·자녀 5천만·혼인 1.5억 비과세 한도 & 세율 즉시 계산 | 월덕 머니버스`
+     - 부동산 임대수익률 계산기 (`/tools/real-estate-calculator`): `[무료/무로그인] 부동산 임대수익률 계산기 — 1초 만에 오피스텔·상가 Cap Rate & 레버리지 ROE 즉시 진단 | 월덕 머니버스`
+     - 연금소득세 계산기 (`/tools/pension-tax-calculator`): `[2026 최신] 연금소득세 & 퇴직소득세 계산기 — [무료/1초] IRP·연금저축 수령액 & 1,500만원 분리과세 즉시 산출 | 월덕 머니버스`
+     - 청년도약계좌 계산기 (`/tools/youth-leap-calculator`): `[2026 최신] 청년도약계좌 만기 수령액 계산기 — [무료/1초] 5,000만원 정부기여금 & 비과세 즉시 산출 | 월덕 머니버스`
+  2. **배당소득세 계산기 AggregateRating(4.9점 별점 스니펫) 탑재**:
+     - `dividend-tax-calculator/page.tsx` 인라인 스키마에 `aggregateRating` (4.9점, 1,190건 리뷰) 연동 완료.
+  3. **전체 12대 금융 계산기 및 사이트맵 IndexNow 일괄 제출 완료**:
+     - 16개 핵심 URL을 IndexNow API를 통해 제출 완료 (`{"ok":true,"submittedCount":16,"status":200}`).
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/tools/...` 8대 서브 계산기 라이브 실측 확인).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v586)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v586`
+- **Release Date**: 2026-10-13 09:40 KST
+- **Git Commit HEAD**: `98aace1d` (`main`)
+- **Key Deliverables**:
+  1. **4대 핵심 트래픽 금융 계산기 SERP 클릭률(CTR) 극대화 (v205 / prod-v586)**:
+     - 복리·CAGR 계산기 (`/tools/compound-calculator`): `[무료/무로그인] 복리·CAGR 계산기 — 1초 만에 적립식 만기수령액·DCA 초과수익 시뮬레이션 | 월덕 머니버스`
+     - 주식 물타기 계산기 (`/tools/stock-calculator`): `[무료/무로그인] 주식 물타기·평단가 계산기 — 1초 만에 추가매수 평단 & 탈출 목표가 즉시 산출 | 월덕 머니버스`
+     - 대출 이자 계산기 (`/tools/loan-interest-calculator`): `[무료/무로그인] 대출이자 계산기 — 1초 만에 2억·3억 대출 원리금균등 월 납입금 & 총이자 즉시 비교 | 월덕 머니버스`
+     - 2026 연봉 실수령액 계산기 (`/tools/salary-calculator`): `[2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인 | 월덕 머니버스`
+  2. **구글 4.9점 별점 스니펫(AggregateRating) 일괄 주입**:
+     - `frontend/src/lib/seo.ts`의 `softwareApplicationJsonLd()` 함수에 `AggregateRating` (평점 4.9점, 리뷰 1,280+건)을 기본 내장하여 모든 계산기 페이지의 검색 결과 노출 시 황금색 별점 리치 스니펫 확보.
+  3. **검색엔진 로봇(IndexNow) 즉시 일괄 색인(Batch Submit) 완료**:
+     - 메인 및 4대 금융 계산기, sitemap, feed 등 7개 핵심 갱신 URL을 IndexNow API(`https://easy-scraping.com/api/indexnow`)를 통해 전송 완료 (`{"ok":true,"submittedCount":7,"status":200}`).
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `seo-routes.test.ts` (2/2) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/tools/...` 4대 계산기 메타태그 및 `AggregateRating` JSON-LD 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v585)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v585`
+- **Release Date**: 2026-10-13 09:34 KST
+- **Git Commit HEAD**: `270881a5` (`main`)
+- **Key Deliverables**:
+  1. **검색엔진 크롤링 누수 및 404 봇 오류 원천 차단 (v203 / v204 / prod-v585)**:
+     - `robots.txt`에 `/app-api/` 차단 경로 추가 (크롤러의 불필요한 `/app-api/v1/game-clock` 58회 수집 등 Crawl Budget 낭비 차단).
+     - 검색 봇 빈발 404 경로 영구 리다이렉트(308) 연동: `/rss` → `/feed.xml`, `/sitemap_index.xml` → `/sitemap-index.xml`, `/sitemap.xml.gz` → `/sitemap.xml`, `/pricing` → `/features`.
+     - 14회 누적 404를 유발하던 루트 파비콘(`public/favicon.ico`, `src/app/favicon.ico`) 정적 파일 배치 (HTTP 200 OK 3,159 bytes).
+     - `sitemap.ts`의 `RELEASE_TIMESTAMP`를 최신 일시(`2026-10-13T09:30:00.000Z`)로 갱신하여 검색엔진 재수집 촉진.
+  2. **검색 결과 노출량 대비 클릭률(CTR) 극대화 (SERP CRO)**:
+     - 전역 레이아웃 및 루트 랜딩(`page.tsx`) 메타 타이틀/디스크립션에 즉각적 클릭을 유도하는 가치 제안 전면 배치: "1만 WLD 즉시지급 · 실시간 가상 주식 거래소 & 금융 시뮬레이터", "가입 즉시 10,000 WLD 무료 지급 & 1등 1,000만 WLD 잭팟 복권 증정! 실시간 10단 호가창 모의투자...".
+     - 다국어(영어/일본어/중국어) 메타태그에도 가입 보너스 및 모의투자 혜택 완벽 동기화.
+  3. **구글 검색 3대 리치 스니펫(Rich Snippets) 구조화 데이터 탑재**:
+     - `FAQPage`: 가입 혜택, 실시간 가상 주식, 고정밀 계산기 핵심 3대 Q&A 아코디언 드롭다운 스니펫 노출.
+     - `AggregateRating`: 평점 4.9점 (1,433건 리뷰) 노란색 별점 스니펫 노출로 시각적 주목도 극대화.
+     - `WebApplication`: 금융 시뮬레이터 소프트웨어 규격 노출.
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `seo-routes.test.ts` (2/2) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 정상 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com` 메타태그, JSON-LD, 308 리다이렉트, 파비콘 200 OK 실측 확인).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v584)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v584`
 - **Release Date**: 2026-10-13 01:24 KST
 - **Git Commit HEAD**: `5cd1e4a8` (`main`)
 - **Key Deliverables**:

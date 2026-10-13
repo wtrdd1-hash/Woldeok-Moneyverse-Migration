@@ -9,9 +9,9 @@ import {
 import { jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: 'ISA 계좌 절세 계산기 — 2026 일반형·서민형 비과세 한도 & 9.9% 분리과세 시뮬레이터 | 월덕 머니버스',
+  title: '[2026 최신] ISA 계좌 절세 계산기 — [무료/1초] 일반형·서민형 비과세 한도 & 9.9% 분리과세 즉시 비교 | 월덕 머니버스',
   description:
-    'ISA(개인종합자산관리계좌) 일반형(200만원 비과세)과 서민형(400만원 비과세) 한도 초과분 9.9% 분리과세 혜택을 실시간 시뮬레이션하고 일반 계좌(15.4% 배당소득세) 대비 순 절세액을 즉시 계산하세요.',
+    '[로그인 없이 1초 산출] ISA 일반형(200만)·서민형(400만) 비과세 한도와 초과분 9.9% 분리과세 시뮬레이션! 일반 계좌(15.4% 배당소득세) 대비 순 절세액을 실시간으로 즉시 계산하세요.',
   keywords: [
     'ISA 계산기',
     'ISA 계좌 절세',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'ISA 계좌 절세 계산기 — 2026 일반형·서민형 비과세 & 9.9% 분리과세 | 월덕 머니버스',
+    title: '[2026 최신] ISA 계좌 절세 계산기 — 1초 만에 비과세 & 분리과세 절세액 비교 | 월덕 머니버스',
     description: '일반형 200만원, 서민형 400만원 비과세 및 초과 수익 9.9% 분리과세 실시간 절세 시뮬레이터',
     url: canonicalUrl('/tools/isa-calculator'),
     type: 'website',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
         url: buildOgImageUrl({
           title: 'ISA 계좌 절세 계산기',
           description: '일반형·서민형 비과세 및 9.9% 분리과세 절세액 비교',
-          badge: 'ISA Calculator',
+          badge: '무료/무로그인 1초 시뮬레이터',
           type: 'default',
         }),
         width: 1200,
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ISA 계좌 절세 계산기 — 2026 일반형·서민형 비과세 & 9.9% 분리과세 | 월덕 머니버스',
+    title: '[2026 최신] ISA 계좌 절세 계산기 — 1초 만에 비과세 & 분리과세 절세액 비교 | 월덕 머니버스',
     description: '일반형 200만원, 서민형 400만원 비과세 및 초과 수익 9.9% 분리과세 실시간 절세 시뮬레이터',
   },
 };

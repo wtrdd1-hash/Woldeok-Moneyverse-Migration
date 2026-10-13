@@ -88,46 +88,49 @@ export const viewport: Viewport = {
 
 const META_BY_LOCALE = {
   en: {
-    titleDefault: 'Woldeok Moneyverse',
-    titleTemplate: '%s · Woldeok Moneyverse',
+    titleDefault: 'Woldeok Moneyverse - Virtual Stock Exchange & Financial Simulator (+10k WLD Free)',
+    titleTemplate: '%s · Woldeok Moneyverse (+10k WLD Free)',
     description:
-      'Woldeok Moneyverse is a virtual economy and community gaming platform linked to Discord. Explore activity logs, WLD rewards, virtual stock exchange, central bank, quests, and seasonal events.',
+      '[Instant 10,000 WLD Starter Bonus + 10M WLD Mega Lottery Ticket Free] Experience real-time orderbook virtual trading, stop-loss/take-profit, compound calculators, and sovereign wealth economy.',
     applicationName: 'Woldeok Moneyverse',
-    category: 'Community Gaming & Virtual Economy',
+    category: 'Finance & Community Virtual Economy',
     keywords: [
       'Woldeok Moneyverse',
+      'Virtual Stock Exchange',
+      'Orderbook Trading',
+      'Stop Loss Take Profit',
+      'Compound Interest Calculator',
       'Virtual Economy',
       'Discord Bot',
-      'Community Game',
       'WLD',
-      'Virtual Stock Exchange',
-      'Virtual Central Bank',
-      'Seasonal Events',
+      'Sovereign Wealth Fund',
     ],
     ogLocale: 'en_US',
-    ogTitle: 'Woldeok Moneyverse — Discord Virtual Economy & Game',
+    ogTitle: 'Woldeok Moneyverse — Virtual Stock Exchange & 10,000 WLD Free Gift',
   },
   ko: {
-    titleDefault: '월덕 머니버스',
-    titleTemplate: '%s · 월덕 머니버스',
+    titleDefault: '월덕 머니버스 - 1만 WLD 즉시지급 가상 주식 거래소 & 실전 금융 계산기',
+    titleTemplate: '%s · 월덕 머니버스 (+10,000 WLD 무료)',
     description:
-      '월덕 머니버스는 Discord 커뮤니티와 연결된 가상경제·커뮤니티 게임 서비스입니다. 활동 기록과 WLD 게임 보상, 가상 주식 거래소, 중앙은행, 퀘스트, 시즌 이벤트를 한곳에서 경험하세요.',
+      '[가입 즉시 10,000 WLD 정착금 + 1등 1,000만 WLD 잭팟 복권 100% 무료 증정] 실시간 10단 호가창 가상 주식 거래, 스탑로스/익절 자동 감시, 12종 실전 금융 계산기(복리·대출·배당)를 지금 무료로 체험하세요!',
     applicationName: '월덕 머니버스',
-    category: '커뮤니티 게임',
+    category: '가상 주식 거래소 & 핀테크 시뮬레이터',
     keywords: [
       '월덕 머니버스',
-      '가상경제',
-      '디스코드 봇',
-      '커뮤니티 게임',
-      'WLD',
-      '덕',
-      'Discord Economy',
-      'Woldeok Moneyverse',
-      '게임 경제',
       '가상 주식',
+      '가상 주식 거래소',
+      '주식 모의투자',
+      '호가창',
+      '스탑로스',
+      '복리 계산기',
+      '대출이자 계산기',
+      '배당소득세 계산기',
+      '가상경제',
+      'WLD',
+      '디스코드 봇',
     ],
     ogLocale: 'ko_KR',
-    ogTitle: '월덕 머니버스 — Discord 커뮤니티 가상경제',
+    ogTitle: '월덕 머니버스 — 10,000 WLD 즉시 지급 가상 주식 & 금융 포털',
   },
   ja: {
     titleDefault: 'ウォルドク・マネーバース',
@@ -261,6 +264,36 @@ function getSiteStructuredData(locale: Locale) {
         url: siteUrl,
       },
       webApplicationJsonLd(),
+      {
+        '@type': 'FAQPage',
+        '@id': `${siteUrl}/#faq`,
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: '월덕 머니버스 신규 회원가입 혜택은 무엇인가요?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: '가입 즉시 10,000 WLD 정착 지원금과 1등 당첨금 1,000만 WLD 메가 잭팟 복권 1장이 100% 무료로 지급됩니다.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: '가상 주식 거래소는 실시간으로 운영되나요?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: '네, 18개 상장사의 실시간 10단 호가창, TradingView급 인터랙티브 캔들 차트, MACD/RSI/볼린저 보조지표, 스탑로스 및 익절 자동 감시 주문을 수수료 없이 무료로 제공합니다.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: '어떤 금융 계산기 도구를 무료로 이용할 수 있나요?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: '복리 예금·적금(CAGR/DCA), 대출이자 상환, 배당소득세, 청년도약계좌, ISA 비과세, 부동산 취득세 등 12종 실전 계산기를 즉시 무료로 이용할 수 있습니다.',
+            },
+          },
+        ],
+      },
     ],
   };
 }

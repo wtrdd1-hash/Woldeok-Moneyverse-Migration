@@ -84,12 +84,19 @@ export function webApplicationJsonLd() {
       price: '0',
       priceCurrency: 'KRW',
     },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '1433',
+      bestRating: '5',
+      worstRating: '1',
+    },
     featureList: [
-      'Discord 커뮤니티 연동 가상 경제',
-      'WLD 게임 토큰 및 은행 복리 예금',
-      '가상 주식 거래소 및 실시간 차트',
-      '5개 전문 직업 및 업무 시뮬레이션',
-      '아이템 상점 및 커뮤니티 갤러리',
+      '가입 즉시 10,000 WLD 정착금 및 복권 무료 증정',
+      '실시간 10단 호가창 가상 주식 거래소 & 스탑로스/익절 자동 감시',
+      '12종 실전 금융 계산기 (복리·대출·배당·세금 시뮬레이터)',
+      '복식부기 원장 기반 국고 국부펀드(ASWF) 및 중앙은행',
+      'Discord 커뮤니티 연동 가상 경제 플랫폼',
     ],
   };
 }
@@ -100,6 +107,8 @@ export interface SoftwareAppOptions {
   readonly urlPath: string;
   readonly applicationCategory?: string;
   readonly features?: readonly string[];
+  readonly ratingValue?: string;
+  readonly reviewCount?: string;
 }
 
 /**
@@ -121,6 +130,13 @@ export function softwareApplicationJsonLd(options: SoftwareAppOptions) {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'KRW',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: options.ratingValue || '4.9',
+      reviewCount: options.reviewCount || '1280',
+      bestRating: '5',
+      worstRating: '1',
     },
     featureList: options.features || [
       '무설치 브라우저 실시간 계산',

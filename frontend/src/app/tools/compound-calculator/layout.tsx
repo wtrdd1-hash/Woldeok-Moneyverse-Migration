@@ -9,9 +9,9 @@ import {
 import { jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '복리·CAGR 계산기 — 연평균 복리수익률 & DCA 적립식 월복리 시뮬레이터 | 월덕 머니버스',
+  title: '[무료/무로그인] 복리·CAGR 계산기 — 1초 만에 적립식 만기수령액·DCA 초과수익 시뮬레이션 | 월덕 머니버스',
   description:
-    'CAGR(연평균 복리 수익률)과 DCA(적립식 분할투자) 효과를 실시간 시뮬레이션! 초기 예치 원금, 매월 적립액, 연 이자율, 투자 기간별 만기 수령액과 단리 대비 복리 초과 수익을 정밀 계산하세요.',
+    '[로그인 없이 즉시 계산] 초기 원금, 매월 적립액, 연 이자율만 입력하면 1초 만에 일/월/연 복리 만기 수령액과 단리 대비 복리 초과 수익을 차트로 확인하세요! 연평균 복리수익률(CAGR) 및 적립식 DCA 분할투자 효과 실시간 정밀 시뮬레이터.',
   keywords: [
     'cagr',
     'cagr 계산기',
@@ -31,15 +31,15 @@ export const metadata: Metadata = {
     canonical: '/tools/compound-calculator',
   },
   openGraph: {
-    title: '복리·CAGR 계산기 — 연평균 복리수익률 & DCA 적립식 시뮬레이터 | 월덕 머니버스',
-    description: 'CAGR 공식과 DCA 적립식 분할투자 효과, 일/월/연 복리 만기 수령액을 실시간 정밀 시뮬레이션하세요.',
+    title: '[무료/무로그인] 복리·CAGR 계산기 — 적립식 만기수령액 & DCA 초과수익 시뮬레이터 | 월덕 머니버스',
+    description: '[로그인 없이 즉시 계산] 일/월/연 복리 만기 수령액과 단리 대비 초과 수익을 실시간 정밀 시뮬레이션하세요.',
     url: canonicalUrl('/tools/compound-calculator'),
     images: [
       {
         url: buildOgImageUrl({
           title: '복리·CAGR 계산기',
           description: '연평균 복리수익률(CAGR) · DCA 적립식 월복리 만기 시뮬레이터',
-          badge: 'CAGR & Compound',
+          badge: '무료/무로그인 1초 시뮬레이터',
           type: 'default',
         }),
         width: 1200,
@@ -50,8 +50,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '복리·CAGR 계산기 — 연평균 복리수익률 & DCA 적립식 시뮬레이터 | 월덕 머니버스',
-    description: 'CAGR 공식과 DCA 적립식 분할투자 효과, 일/월/연 복리 만기 수령액을 실시간 정밀 시뮬레이션하세요.',
+    title: '[무료/무로그인] 복리·CAGR 계산기 — 적립식 만기수령액 & DCA 초과수익 시뮬레이터 | 월덕 머니버스',
+    description: '[로그인 없이 즉시 계산] 일/월/연 복리 만기 수령액과 단리 대비 초과 수익을 실시간 정밀 시뮬레이션하세요.',
   },
 };
 

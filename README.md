@@ -66,6 +66,7 @@ See [docs/images/README.md](docs/images/README.md) for screenshot provenance and
 
 | Area | What it does | Detailed document |
 | --- | --- | --- |
+| 🏛️ **Public Treasury Portal & DAO** | 30% safe reserve gauge, universal dividend claim, startup grants, and Citizens DAO budget voting | [Master Docs Hub](docs/DOCS_INDEX.md) |
 | 🏛️ **Macro Sovereign Economy** | Central Bank monetary policy, 25M Treasury Anchor, state enterprise dividends, NPS and KTB exchange | [Macro Sovereign Economic Master](docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.md) |
 | ⚖️ **Treasury 85% Cash Normalization** | Statutory 85% cash liquidity enforcement, ASWF rebalancing, and live emergency asset recall | [Treasury Normalization & Worklog](docs/worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.md) |
 | 🌐 **Social Share & X (Twitter) Bot** | One-click viral share toolbar across 12 calculators & Twitter API v2 automated market broadcasts | [Social Viral & Twitter Spec](docs/worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.md) |

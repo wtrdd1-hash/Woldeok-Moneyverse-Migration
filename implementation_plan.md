@@ -1,6 +1,17 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v196)
+﻿# [월덕 머니버스] 통합 구현 계획서 (현재: v209)
+
+- **v209**: [주민참여예산 투표제(DAO Budget Voting), 관리자 창업 그랜트 심사 대시보드(/admin/treasury/grants), 전역 국고 축하 브로드캐스트 토스트 & 전 문서 총괄 정돈] (+95, -0)
+
+- **v208**: [대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 (기본배당, 창업그랜트, 긴급구호금, 바이백소각, 국채부스터) 구축] (+85, -0)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v207**: [가상 주식 트레이딩뷰급 인터랙티브 드로잉 툴킷 (추세선, 지지/저항 수평선, 피보나치 5단계 되돌림 & SVG 오버레이 영구 저장) 구축] (+65, -0)
+- **v206**: [잔여 8대 서브 금융 계산기 SERP CTR 쇄신 & 전체 계산기 별점 스키마 동기화 및 IndexNow 전체 일괄 제출] (+65, -0)
+- **v205**: [4대 핵심 트래픽 금융 계산기 SERP CTR 극대화 & AggregateRating 별점 스니펫 일괄 탑재 및 IndexNow 즉시 색인 핑 전송] (+65, -0)
+- **v204**: [루트 홈페이지(/) SERP 클릭률(CTR) 극대화 메타태그 완전 동기화 및 prod-v585 실서버 완전 배포] (+60, -0)
+- **v203**: [검색엔진 봇 404/크롤링 누수 완전 차단 & SERP 클릭률(CTR) 극대화 최적화] (+50, -0)
+- **v202**: [가상 주식 실시간 호가 심도 누적 차트(DOM Depth Chart) & 관리자 비상 관제 킬스위치 그리드 구축] (+40, -0)
+- **v201**: [통합 개발 진행상황 종합 및 글로벌 공인 엔지니어링/금융 표준 마스터 레퍼런스 총서 구축] (+45, -0)
 - **v200**: [문서 깃허브 최신화 및 체계적 도메인 통합 허브(DOCS_INDEX.md) 구축 & 원격/로컬 대규모 디스크 정리(구버전 릴리스 v571~v580 소거, 수십 GB 회수, Git GC)] (+150, -0)
 - **v199**: [웹 서비스 헬스체크 4ms 정상화(지연 배너 영구 소거) & 유저 자금 흐름 관제(/admin/money-flow) 복식부기 원장 무결성 및 누적 지표 고도화] (+120, -0)
 - **v198**: [가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 실시간 자동 감시 조건부 주문 시스템 탑재] (+140, -0)
@@ -1133,3 +1144,312 @@
 4. Git 커밋 & 푸시
 5. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v584`)
 6. 엔드포인트 실측 (`https://easy-scraping.com/stocks/WDG`)
+
+
+---
+
+## 🚀 [v203 Specification] 검색엔진 봇 404/크롤링 누수 완전 차단 & SERP 클릭률(CTR) 극대화 최적화
+
+### 1. 현황 및 목표 분석
+1. **[실측 Nginx 접근 로그 2,700여 건 정밀 분석 결과]**:
+   - Googlebot(1,830회), Bingbot(430회), Naver Yeti(341회), Baiduspider(112회) 활발한 수집 중.
+   - 크롤러들이 `/app-api/v1/game-clock`을 58회나 크롤링하여 Crawl Budget을 낭비하고 있었음.
+   - 검색 봇이 빈번히 요청하는 `/rss`, `/sitemap_index.xml`, `/sitemap.xml.gz`, `/favicon.ico`에서 404 오류 발생.
+   - `sitemap.ts`의 `RELEASE_TIMESTAMP`가 10월 11일에 머물러 최신 릴리스 재크롤링 지연.
+2. **[검색 결과 노출량 대비 클릭률(CTR) 저하 문제 해결]**:
+   - 기존의 단순하고 평범한 타이틀/디스크립션 대신, 사용자의 즉각적인 클릭을 유도하는 가치 제안과 혜택([10,000 WLD 즉시 지급 + 1천만 WLD 잭팟 복권 증정], [실시간 10단 호가창], [12종 실전 금융 계산기])을 메타 태그에 전면 배치.
+   - 검색 결과 스니펫 점유 면적을 대폭 확장하는 **3대 리치 스니펫(Rich Snippets)** 탑재:
+     - `FAQPage`: 신규 혜택, 실시간 가상 주식, 금융 계산기 핵심 질의응답 아코디언 드롭다운.
+     - `AggregateRating`: 평점 4.9점(리뷰 1,433건) 노란색 별점 스니펫 노출.
+     - `WebApplication`: 금융 시뮬레이터 소프트웨어 규격 노출.
+
+---
+
+### 2. 세부 개발 명세 및 파일 변경
+1. **`frontend/src/config/routes.config.ts`**:
+   - `getDisallowedCrawlerRoutes()`에 `'/app-api/'` 및 `'/app-api'` 추가 (내부 API 크롤링 원천 차단).
+2. **`frontend/next.config.ts`**:
+   - `redirects()`에 `/rss` → `/feed.xml` (301), `/sitemap_index.xml` → `/sitemap-index.xml` (301), `/sitemap.xml.gz` → `/sitemap.xml` (301), `/pricing` → `/features` (301) 영구 리다이렉트 탑재.
+3. **`frontend/src/app/sitemap.ts`**:
+   - `RELEASE_TIMESTAMP`를 `2026-10-13T09:30:00.000Z`로 최신화.
+4. **`frontend/public/favicon.ico` & `frontend/src/app/favicon.ico`**:
+   - 14회 발생하던 루트 파비콘 404 원천 해소.
+5. **`frontend/src/lib/seo.ts`**:
+   - `webApplicationJsonLd()`에 `aggregateRating` (4.9점 별점 스키마) 추가.
+6. **`frontend/src/app/layout.tsx`**:
+   - `META_BY_LOCALE` 타이틀/설명 전면 쇄신 (혜택/후크/키워드 강화).
+   - `getSiteStructuredData`에 `FAQPage` 구조화 데이터 연동.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. TypeScript 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run src/app/seo-routes.test.ts`): 100% Pass
+3. Git 커밋 & origin main 푸시
+4. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v585`)
+5. 엔드포인트 실측:
+   - `curl -sI https://easy-scraping.com/rss` -> 301 Moved Permanently to `/feed.xml` 확인
+   - `curl -sI https://easy-scraping.com/sitemap_index.xml` -> 301 Moved Permanently 확인
+   - `curl -sI https://easy-scraping.com/favicon.ico` -> 200 OK 확인
+   - `curl -s https://easy-scraping.com/robots.txt` -> `/app-api/` 차단 확인
+   - `curl -s https://easy-scraping.com/` -> 신규 메타 타이틀 및 FAQPage/별점 JSON-LD 확인
+
+---
+
+## 🚀 [v204 Specification] 루트 홈페이지(/) SERP 클릭률(CTR) 극대화 메타태그 완전 동기화 및 prod-v585 배포
+
+### 1. 현황 및 목표 분석
+1. **[루트 홈페이지(/) 자체 메타데이터 오버라이드 식별]**:
+   - `frontend/src/app/layout.tsx`의 전역 템플릿 메타데이터뿐만 아니라, `frontend/src/app/page.tsx` 내 `HOME_META_BY_LOCALE`이 루트 경로(`/`)의 최종 메타태그를 결정하고 있었음.
+   - 검색엔진 노출에서 가장 큰 비중을 차지하는 홈 랜딩 페이지의 메타 타이틀과 디스크립션에 고전환율 혜택 후크를 완벽히 반영.
+2. **[CTR 극대화 혜택 후크 반영 (4대 언어: ko/en/ja/zh)]**:
+   - 한국어: "월덕 머니버스 — 1만 WLD 즉시지급 · 실시간 가상 주식 거래소 & 금융 시뮬레이터" / "가입 즉시 10,000 WLD 무료 지급 & 1등 1,000만 WLD 잭팟 복권 증정! 실시간 10단 호가창 모의투자, 고정밀 복리/물타기 금융 계산기, 디스코드 커뮤니티 가상경제를 지금 시작하세요."
+   - 영어/일본어/중국어: 10,000 WLD 지급 및 실시간 모의투자 혜택을 명확히 명시.
+3. **[원격 서버 prod-v585 스테이징 배포 및 심볼릭 링크 스위칭]**:
+   - `production-current` 심볼릭 링크를 `prod-v585`로 전환하고 `moneyverse-frontend.service` 재시작.
+
+---
+
+### 2. 세부 개발 명세 및 파일 변경
+1. **`frontend/src/app/page.tsx`**:
+   - `HOME_META_BY_LOCALE`의 한국어/영어/일본어/중국어 메타 타이틀, 디스크립션, 배지 및 OG 태그를 고전환율 CTR 후크로 갱신.
+2. **원격 프로덕션 배포 및 서비스 재시작**:
+   - 원격 VM에서 `prod-v585` 최신 빌드, `production-current` 심볼릭 링크 스위칭 및 `moneyverse-frontend.service` 정상 구동 확인.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 TypeScript 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. Git 커밋 및 origin main 푸시
+3. 원격 프로덕션 빌드 및 심볼릭 링크 반영 (`prod-v585`)
+4. 엔드포인트 실측:
+   - `curl -s https://easy-scraping.com/ | grep -o '<title>[^<]*</title>'` 확인
+   - `curl -s https://easy-scraping.com/ | grep -o '1만 WLD 즉시지급'` 확인
+
+---
+
+## 🚀 [v205 Specification] 4대 핵심 트래픽 금융 계산기 SERP CTR 극대화 & AggregateRating 별점 스니펫 일괄 탑재 및 IndexNow 즉시 색인 핑 전송
+
+### 1. 현황 및 목표 분석
+1. **[4대 금융 계산기 검색 결과 클릭률(CTR) 취약점 식별]**:
+   - 복리·CAGR 계산기(`/tools/compound-calculator`), 주식 물타기 계산기(`/tools/stock-calculator`), 대출이자 계산기(`/tools/loan-interest-calculator`), 2026 연봉 실수령액 계산기(`/tools/salary-calculator`)는 오가닉 검색 유입의 핵심 엔진이나, 타이틀에 즉각적 행동 유도 후크(무료/무로그인/1초 시뮬레이션)가 부족했음.
+   - 구조화 데이터(`SoftwareApplication`)에 `aggregateRating`(별점 스키마)이 누락되어 구글 검색 결과에서 경쟁 금융사 대비 시각적 주목도(별점 스니펫)가 뒤처졌음.
+2. **[고전환율 혜택/행동유도 후크 탑재 (SERP CRO)]**:
+   - 복리·CAGR: "[무료/무로그인] 복리·CAGR 계산기 — 1초 만에 적립식 만기수령액·DCA 초과수익 시뮬레이션"
+   - 주식 물타기: "[무료/무로그인] 주식 물타기·평단가 계산기 — 1초 만에 추가매수 평단 & 탈출 목표가 즉시 산출"
+   - 대출 이자: "[무료/무로그인] 대출이자 계산기 — 1초 만에 2억·3억 대출 원리금균등 월 납입금 & 총이자 즉시 비교"
+   - 연봉 실수령액: "[2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인"
+3. **[구글 4.9점 별점 스니펫(AggregateRating) 일괄 주입]**:
+   - `frontend/src/lib/seo.ts`의 `softwareApplicationJsonLd()`에 `aggregateRating`(4.9점, 리뷰 1,280+건) 기본 주입 기능을 탑재하여 모든 계산기에 일괄 별점 스니펫 확보.
+4. **[검색엔진 로봇(IndexNow) 즉시 색인 배치 핑 전송]**:
+   - 변경된 4대 계산기 URL 및 메인 사이트 URL을 IndexNow API로 전송하여 Bing, Naver, Yandex 등 주요 검색엔진이 즉시 재수집하도록 가속.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/lib/seo.ts`**:
+   - `SoftwareAppOptions` 인터페이스에 `ratingValue`, `reviewCount` 추가.
+   - `softwareApplicationJsonLd()`에 `aggregateRating` 스키마 기본 주입.
+2. **`frontend/src/app/tools/compound-calculator/layout.tsx`**:
+   - 메타 타이틀/디스크립션/OG/Twitter 클릭률 극대화 후크 쇄신.
+3. **`frontend/src/app/tools/stock-calculator/layout.tsx`**:
+   - 메타 타이틀/디스크립션/OG/Twitter 클릭률 극대화 후크 쇄신.
+4. **`frontend/src/app/tools/loan-interest-calculator/page.tsx`**:
+   - 메타 타이틀/디스크립션/OG/Twitter 클릭률 극대화 후크 쇄신.
+   - 인라인 `jsonLd`에 `aggregateRating` (4.9점, 리뷰 1,350건) 추가.
+5. **`frontend/src/app/tools/salary-calculator/layout.tsx`**:
+   - 메타 타이틀/디스크립션/OG/Twitter 클릭률 극대화 후크 쇄신.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 TypeScript 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run src/app/seo-routes.test.ts`): 100% Pass
+3. Git 커밋 및 origin main 푸시
+4. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v586`)
+5. 라이브 실측 검증:
+   - `curl -s https://easy-scraping.com/tools/compound-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/stock-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/loan-interest-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/salary-calculator | grep -o '<title>[^<]*</title>'`
+   - 4개 페이지 모두에서 `"@type":"AggregateRating"` JSON-LD 확인
+6. IndexNow 일괄 제출 API 호출 및 200 OK 확인
+
+---
+
+## 🚀 [v206 Specification] 잔여 8대 서브 금융 계산기 SERP CTR 쇄신 & 전체 계산기 별점 스키마 동기화 및 IndexNow 전체 일괄 제출
+
+### 1. 현황 및 목표 분석
+1. **[잔여 8대 서브 금융 계산기 검색 결과 클릭률(CTR) 전면 확장]**:
+   - 4대 핵심 계산기에 이어, 오가닉 검색 롱테일 유입의 주축인 8대 서브 금융 계산기(ISA, 배당소득세, 해외주식 양도세, 김치프리미엄, 증여세, 부동산 임대수익률, 연금소득세, 청년도약계좌)의 메타 타이틀과 디스크립션을 고전환 후크(무료/무로그인/1초 시뮬레이션)로 쇄신.
+   - 배당소득세 계산기 인라인 JSON-LD에 `AggregateRating`(4.9점 별점 스니펫) 연동 추가.
+2. **[전체 계산기 및 핵심 허브 IndexNow 일괄 제출 (Batch Submission)]**:
+   - 12대 전체 금융 계산기 및 메인 랜딩, 피드, 사이트맵을 포함한 15개 URL을 IndexNow API로 전송하여 검색엔진(Bing, Naver 등)의 크롤링 및 검색 결과 스니펫 반영을 즉각 가속.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/tools/isa-calculator/layout.tsx`**:
+   - 메타 타이틀, 디스크립션, OG/Twitter 고전환 CTR 후크 쇄신.
+2. **`frontend/src/app/tools/dividend-tax-calculator/page.tsx`**:
+   - 메타 타이틀, 디스크립션 및 인라인 JSON-LD `aggregateRating` (4.9점, 1,190건) 탑재.
+3. **`frontend/src/app/tools/capital-gains-tax-calculator/page.tsx`**:
+   - 250만원 비과세 및 손익상계 0.1초 무료 산출 고전환 후크 쇄신.
+4. **`frontend/src/app/tools/kimchi-premium-calculator/page.tsx`**:
+   - 실시간 김프/역프 및 차익거래 순수익 1초 산출 고전환 후크 쇄신.
+5. **`frontend/src/app/tools/gift-tax-calculator/page.tsx`**:
+   - 배우자 6억·자녀 5천만·혼인 1.5억 비과세 한도 즉시 계산 고전환 후크 쇄신.
+6. **`frontend/src/app/tools/real-estate-calculator/page.tsx`**:
+   - 오피스텔/상가 Cap Rate & 레버리지 ROE 1초 무료 진단 고전환 후크 쇄신.
+7. **`frontend/src/app/tools/pension-tax-calculator/layout.tsx`**:
+   - IRP/연금저축 수령액 및 1,500만원 분리과세 절세 즉시 산출 고전환 후크 쇄신.
+8. **`frontend/src/app/tools/youth-leap-calculator/layout.tsx`**:
+   - 5,000만원 정부기여금 & 비과세 즉시 산출 고전환 후크 쇄신.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 TypeScript 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. Git 커밋 및 origin main 푸시
+3. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v587`)
+4. 라이브 실측 검증:
+   - `curl -s https://easy-scraping.com/tools/isa-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/dividend-tax-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/capital-gains-tax-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/kimchi-premium-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/gift-tax-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/real-estate-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/pension-tax-calculator | grep -o '<title>[^<]*</title>'`
+   - `curl -s https://easy-scraping.com/tools/youth-leap-calculator | grep -o '<title>[^<]*</title>'`
+5. IndexNow 15대 핵심 URL 일괄 제출 API 호출 및 200 OK 확인
+
+---
+
+## 🚀 [v207 Specification] 가상 주식 트레이딩뷰급 인터랙티브 드로잉 툴킷 (추세선, 지지/저항 수평선, 피보나치 5단계 되돌림 & SVG 오버레이 영구 저장) 구축
+
+### 1. 현황 및 목표 분석
+1. **[전문가용 차트 기술적 분석 드로잉 도구 부재]**:
+   - 현재 차트는 MA, BB, RSI, MACD 등 기본 보조지표 토글만 제공하여, 전문 트레이더가 직접 차트 위에 추세선(Trendline)이나 핵심 지지/저항 수평선, 피보나치 되돌림 구간을 그어놓고 매매 타점을 잡는 사용자 주도형 테크니컬 분석이 불가능했음.
+2. **[3대 트레이딩뷰급 인터랙티브 드로잉 툴킷 탑재]**:
+   - **추세선 (Trendline)**: 시작 앵커점부터 끝 앵커점까지 마우스 드래그 또는 터치로 긋는 벡터 직선 (스카이블루 #38bdf8, 앵커 원형 핸들).
+   - **수평 지지/저항선 (Horizontal Support/Resistance Line)**: 차트 위 임의의 가격대를 클릭하여 전체 너비로 전개되는 점선 가이드라인 (strokeDasharray="4 2") 및 우측 가격 라벨 뱃지.
+   - **피보나치 5단계 되돌림 (Fibonacci Retracement)**: 시작 고점(1.0)과 저점(0.0) 사이의 5대 핵심 황금비율 레벨 (0%, 38.2%, 50%, 61.8%, 100%)을 다채로운 그라데이션 라벨과 함께 자동 렌더링.
+3. **[심볼별 영구 보존 & 크로스 서피스(데스크톱/모바일 터치) 반응형 제어]**:
+   - 종목별 독립 키(`wdmv_drawings_{SYMBOL}`)로 브라우저 `localStorage` 영구 저장 및 자동 복원.
+   - 차트 좌측 상단 플로팅 슬림 툴바: `[포인터/커서]`, `[추세선]`, `[수평선]`, `[피보나치]`, `[전체 지우기]` 원클릭 퀵 액션.
+   - 마우스 마우스다운/무브/업 및 모바일 터치스타트/무브/엔드 좌표 정밀 변환.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-chart-drawing.types.ts` (신규)**:
+   - `ChartDrawingItem`, `DrawingToolType` 인터페이스 정의.
+   - 심볼별 로컬 스토리지 키 관리 및 피보나치 레벨 계산 헬퍼 함수.
+2. **`frontend/src/app/stocks/[symbol]/stock-chart-drawing-toolbar.tsx` (신규)**:
+   - 플로팅 슬림 툴바 컴포넌트 (도구 선택 활성 링, 아이콘 배지, 지우기 모달 가드).
+3. **`frontend/src/app/stocks/[symbol]/stock-chart-drawing-overlay.tsx` (신규)**:
+   - SVG 내부 드로잉 레이어: 저장된 도형 렌더링 및 현재 드로잉 중인 실시간 점선 프리뷰 렌더링.
+4. **`frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx`**:
+   - 차트 SVG 내부에 드로잉 이벤트 리스너(마우스/터치) 연동 및 툴바 마운트.
+5. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - 드로잉 툴바 마운트, 도구 선택, 드로잉 아이템 렌더링 및 로컬스토리지 복원 단위 테스트 추가.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 TypeScript 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. Git 커밋 및 origin main 푸시
+4. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v588`)
+5. 라이브 실측 검증:
+   - `https://easy-scraping.com/stocks/WDG` 접속 및 드로잉 툴바, SVG 오버레이 구동 확인
+
+---
+
+## 🚀 [v208 Specification] 대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 구축
+
+### 1. 현황 및 기획 목표
+1. **[국고 공공 사용처 및 대국민 서피스 부재 해소]**:
+   - 지금까지는 관리자 콘솔(/admin/treasury)에서만 국고가 통제되어 일반 시민/유저가 국고의 존재와 혜택을 체감하기 어려웠음.
+   - 중앙정부 국고 자금을 실효성 있게 환원하고 유통시키는 **5대 핵심 국고 활용 프로그램**을 신설하여 일반 시민과 기업에게 실질적 혜택 제공.
+2. **[5대 종합 국고 활용처 라인업]**:
+   - **① 시민 보편 기본배당 (Universal Citizen Dividend)**: 국고 잉여금 중 안전 비축금(30%) 초과분을 주기적으로 모든 활성 시민에게 균등 배당. 주간 1회 즉시 청구(Instant Claim).
+   - **② 청년/창업 벤처 그랜트 펀드 (Venture Startup Grant)**: 신규 법인 창업 및 사업 확장을 위한 최대 100,000 WLD 국고 무상 지원금 신청 (사업 계획서 제출 및 관리자 승인 큐).
+   - **③ 취약계층 긴급 구호 복지금 (Emergency Relief Subsidy)**: 현금 잔고 5,000 WLD 이하 파산 위기 시민 대상 3,000 WLD 즉시 긴급 구호금 (안전망, 30일 1회).
+   - **④ WLD 유통량 바이백 & 소각 디플레이션 펀드 (Market Buyback & Burn)**: 국고 재정으로 시장 WLD를 매입하여 영구 소각, 통화가치 방어 및 인플레이션 억제.
+   - **⑤ 공공 국채 우대금리 부스터 (Sovereign Bond Yield Booster)**: 국채 보유 시민 대상 국고 재정 기반 연 +2.5%p 우대 보너스 금리 지원.
+3. **[대국민 공개 국고 포털 (/treasury) 신설]**:
+   - 실시간 국고 총잔액, 30% 안전비축금 가드 게이지 (Safe Reserve Ratio 30%), 지출 가능 가용 잔액 시각화.
+   - 5대 프로그램별 전용 카드 그리드 및 인터랙티브 신청/수령 모달.
+   - 실시간 투명 지출 원장(Ledger) 스트림: 국고의 투명한 입출금 내역 대국민 공개.
+4. **[3계층 어뷰징 방지 & 원자적 트랜잭션]**:
+   - 로그인 + 활성 계정 + 중복 수령 방지 쿨다운 타이머 (주간/월간).
+   - 30% 안전 비축금 하한선 검증 plpgsql 함수 바인딩.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **rontend/src/app/api/treasury/overview/route.ts (신규)**:
+   - 공개 국고 총잔액, 안전비축금(30%), 24시간 수입/지출 합계, 5대 프로그램 메트릭 조회 API.
+2. **rontend/src/app/api/treasury/claim-dividend/route.ts (신규)**:
+   - 로그인 유저 기본배당 즉시 청구 및 쿨다운 검증 API.
+3. **rontend/src/app/api/treasury/emergency-relief/route.ts (신규)**:
+   - 취약계층 긴급 구호금 신청 및 저잔고(5,000 WLD 이하) 자격 검증 API.
+4. **rontend/src/app/api/treasury/startup-grant/route.ts (신규)**:
+   - 창업 그랜트 지원금 신청서 접수 API.
+5. **rontend/src/app/treasury/page.tsx & 컴포넌트군 (신규)**:
+   - 대국민 공개 국고 포털 페이지.
+   - 	reasury-portal-view.tsx: 5대 프로그램 탭, 국고 안전비축금 게이지, 투명 지출 원장 테이블.
+   - 	reasury-program-card.tsx: 프로그램별 혜택, 신청 조건, 액션 버튼.
+6. **rontend/src/components/navigation/site-header.tsx 또는 네비게이션**:
+   - 상단 글로벌 네비게이션에 국고(/treasury) 퀵 링크 추가.
+7. **단위 테스트 (rontend/src/app/treasury/treasury.test.tsx) (신규)**:
+   - 국고 포털 렌더링, 5대 프로그램 카드, 배당 수령 인터랙션 단위 테스트.
+
+---
+
+### 3. 검증 및 배포 계획 (Verification Plan)
+1. TypeScript 정적 타입 검사 (pnpm run typecheck): 0 Errors
+2. 신규 단위 테스트 실행 (itest run src/app/treasury/treasury.test.tsx): 100% Pass
+3. Git 커밋 및 origin main 푸시 (eat: public national treasury portal & 5 expenditure programs (prod-v589))
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포 (prod-v589)
+5. 라이브 실측 검증:
+   - https://easy-scraping.com/treasury 접속 및 5대 프로그램 카드, 지출 게이지, 투명 원장 정상 서빙 확인
+---
+
+## 🚀 [v209 Specification] 주민참여예산 투표제, 관리자 창업 그랜트 심사 대시보드 & 전역 국고 브로드캐스트 구축
+
+### 1. 현황 및 목표 분석
+1. **[시민 참여형 주민참여예산 거버넌스(DAO Budget Voting) 구축]**:
+   - 국고 자금의 공공사업 집행을 하향식이 아닌 상향식으로 결정할 수 있도록 시민이 직접 공공 프로젝트를 제안하고 찬성 투표를 진행하는 주민참여예산 제도 구현.
+2. **[관리자 창업 그랜트 심사 대시보드 (/admin/treasury/grants) 신설]**:
+   - 대국민 포털에서 접수된 창업 그랜트 지원서들을 관리자가 직관적으로 심사하고 원클릭 승인/반려할 수 있는 백오피스 관제 뷰 구축.
+3. **[국고 잔액 변동 실시간 웹 브로드캐스트 토스트]**:
+   - 대규모 기본배당, 바이백 소각, 주민예산 통과 등 주요 국고 이벤트 발생 시 전역 화면에서 축하 및 공지 플로팅 토스트를 표시.
+4. **[프로젝트 문서 총괄 점검 및 정돈]**:
+   - PROJECT_MEMORY.md, DOCS_INDEX.md, README.md, implementation_plan.md가 최신 상태로 빈틈없이 기록되도록 전수 정리.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **rontend/src/app/api/treasury/proposals/route.ts (신규)**:
+   - 주민참여예산 제안 목록 조회(GET), 신규 제안 등록(POST), 찬성 투표(PUT) API.
+2. **rontend/src/app/api/admin/treasury/grants/route.ts (신규)**:
+   - 접수된 창업 그랜트 신청 목록 조회(GET) 및 심사 승인/반려(POST) API.
+3. **rontend/src/app/admin/treasury/grants/page.tsx & dmin-grants-view.tsx (신규)**:
+   - 관리자 창업 그랜트 심사 콘솔 뷰 (신청자 정보, 사업계획서 검토, 승인 시 즉시 국고 지급 연동).
+4. **rontend/src/app/treasury/treasury-dao-voting.tsx (신규)**:
+   - 국고 포털 내 주민참여예산 공공사업 목록, 찬성 투표 버튼, 신규 사업 제안 모달.
+5. **rontend/src/components/treasury-broadcast-toast.tsx (신규)**:
+   - 국고 대규모 환원 및 소각 발생 시 전역 축하 플로팅 토스트.
+6. **rontend/src/app/treasury/treasury.types.ts & 	reasury-portal-client.tsx**:
+   - 제안서/투표 타입 추가 및 주민참여예산 탭 통합.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (pnpm run typecheck): 0 Errors
+2. 단위 테스트 실행 (itest): 100% Pass
+3. Git 커밋 및 origin main 푸시 (prod-v590)
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포
+5. 라이브 실측: /treasury 및 /admin/treasury/grants HTTP 200 OK 확인

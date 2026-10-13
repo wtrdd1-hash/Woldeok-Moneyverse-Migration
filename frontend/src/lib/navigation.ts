@@ -446,6 +446,7 @@ export const CATEGORY_NAV: readonly NavCategory[] = [
     description: '가상 주식 매매, 덕지갑 자산 관리, 가상 은행 금융 상품, 주간 경제 브리프',
     entries: [
       { href: '/stocks', label: '월덕거래소', description: '실시간 가상 주식 매매 및 차트 호가', badge: '인기' },
+      { href: '/treasury', label: '대국민 국고 포털', description: '중앙정부 국고 5대 핵심 시민 환원 혜택 및 투명 재정 공시', badge: 'NEW' },
       { href: '/bonds', label: '국채 거래소 (KTB)', description: '기획재정부 국가 국채 청약, 매시간 확정 쿠폰이자 및 원금 100% 보증', badge: 'NEW' },
       { href: '/pension', label: '국민연금 (NPS)', description: '공적 연금 적립 기금, 은퇴 후 평생 시간당 기초연금 확정 수령', badge: 'NEW' },
       { href: '/fx', label: '서울외환시장 (FX)', description: '기축통화(USD) ↔ 원화(WLD) 1초 즉시 환전 및 연 4.5% 외화예금', badge: 'NEW' },

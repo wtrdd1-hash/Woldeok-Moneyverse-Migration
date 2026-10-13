@@ -5,8 +5,8 @@ import { REAL_ESTATE_PRESETS } from '@/config/real-estate-presets.config';
 import { buildCalculatorRichSnippet, jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '2026 무료 부동산 월세/임대 수익률 계산기 | 오피스 상가 Cap Rate & ROE 시뮬레이터',
-  description: '매매가, 보증금, 월세, 대출금리 입력 시 0.1초 만에 연간 순수익률(Cap Rate), 레버리지 ROE, 월 순현금흐름을 무료 진단합니다. 강남 오피스·판교 스튜디오 10대 프리셋 지원.',
+  title: '[무료/무로그인] 부동산 임대수익률 계산기 — 1초 만에 오피스텔·상가 Cap Rate & 레버리지 ROE 즉시 진단 | 월덕 머니버스',
+  description: '[로그인 없이 1초 산출] 매매가, 보증금, 월세, 대출금리 입력 시 연간 순수익률(Cap Rate), 레버리지 ROE, 월 순현금흐름을 실시간으로 무료 진단하세요! 10대 부동산 프리셋 제공.',
   keywords: [
     '부동산 임대수익률 계산기',
     '오피스텔 월세 수익률',

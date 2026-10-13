@@ -5,8 +5,8 @@ import { KIMCHI_PREMIUM_PRESETS } from '@/config/kimchi-premium-presets.config';
 import { buildCalculatorRichSnippet, jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '2026 무료 코인 김치프리미엄 계산기 | 업비트 바이낸스 실시간 시세 격차 & 차익거래 시뮬레이터',
-  description: '비트코인, 이더리움, 리플, 솔라나 등 10대 코인의 국내외 실시간 김치프리미엄(김프/역프)과 환율, 전송 수수료 차감 후 순차익을 0.1초 만에 무료 계산합니다.',
+  title: '[실시간 무료] 코인 김치프리미엄 계산기 — 1초 만에 업비트·바이낸스 김프/역프 & 차익거래 순수익 즉시 산출 | 월덕 머니버스',
+  description: '[실시간 환율·시세 자동 반영] 비트코인, 이더리움, 리플, 솔라나 등 10대 코인의 국내외 실시간 김치프리미엄(김프/역프)과 환율, 전송 수수료 차감 후 순차익을 로그인 없이 1초 만에 무료 계산하세요!',
   keywords: [
     '김치프리미엄 계산기',
     '코인 김프 계산기',

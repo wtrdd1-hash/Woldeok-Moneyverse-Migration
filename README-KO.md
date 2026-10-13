@@ -7,10 +7,14 @@
 - 🏆 **[통합 개발 진행상황 및 마스터 레퍼런스 총서 (v1~v200 완결판)](docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md)**
 - 🌟 **[공식 마스터 통합 문서 허브 (5대 도메인 총괄 색인)](docs/DOCS_INDEX.md)**
 - 📚 [한국어 문서 전체 색인](docs/INDEX.ko.md)
+- 🏛️ [대국민 국고 포털 & 5대 프로그램](/treasury)
+- 🗳️ [시민 참여형 주민참여예산 투표제(DAO)](/treasury)
+- 💼 [관리자 청년·창업 그랜트 심사 대시보드](/admin/treasury/grants)
 - 🏛️ [거시 경제 6대 기둥 총괄 기획서](docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md)
 - 🏦 [국민연금공단(NPS) 대국민 포털](/pension) · [기획서](docs/NATIONAL_PENSION_SERVICE_SPEC.ko.md)
 - 📈 [대한민국 국채(KTB) & 레포 거래소](/bonds) · [기획서](docs/TREASURY_BONDS_EXCHANGE_SPEC.ko.md)
 - 🏢 [공공기관 경영정보 알리오(ALIO) 포털](/enterprises) · [기획서](docs/STATE_ENTERPRISES_AND_CORPORATE_GOVERNANCE_SPEC.ko.md)
+- 📈 [가상 주식 실시간 거래소 & 트레이딩뷰급 작도 도구](/stocks)
 - ⚖️ [국고 2,500만 앵커 자율 순환 & 85% 현금 정상화](docs/worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.ko.md)
 - 🌐 [소셜 바이럴 공유 툴바 & X(트위터) 자동 트윗 봇 (v118)](docs/worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.ko.md)
 - 🔍 [Google Search Console 실시간 연동 엔진 (v541)](docs/worklog/2026-10-07-gsc-search-console-api-v2026.10.07.541.ko.md)
