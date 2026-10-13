@@ -13,8 +13,32 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v588 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v588`
+## 🌟 Production Release Overview (prod-v589 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v589`
+- **Release Date**: 2026-10-13 14:23 KST
+- **Git Commit HEAD**: `1d56b354` (`main`)
+- **Key Deliverables**:
+  1. **대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 구축 (v208 / prod-v589)**:
+     - **대국민 국고 포털 (`/treasury`)**: 중앙정부 국고 금고(VAULT_MAIN) 잔액 실시간 공시, 30% 법정 안전 비축금 원칙 시각화 및 시민 혜택 원스톱 접수창구 신설.
+     - **5대 종합 국고 활용처 라인업 완비**:
+       1. **시민 보편 기본배당 (Universal Citizen Dividend)**: 30% 안전비축금 초과 재정 잉여금 기반 1,200 WLD 주간 기본배당 즉시 청구(Instant Claim).
+       2. **청년·창업 벤처 그랜트 펀드 (Venture Startup Grant)**: 신규 법인 창업 및 사업 혁신을 위한 최대 100,000 WLD 무상 지원금 신청 다이얼로그.
+       3. **취약계층 긴급 구호 복지금 (Emergency Relief Subsidy)**: 현금 잔고 5,000 WLD 이하 파산 위기 시민 대상 3,000 WLD 즉시 패자부활 세이프티넷.
+       4. **WLD 유통량 시장 바이백 & 영구 소각 (Market Buyback & Burn)**: 인플레이션 억제 및 통화가치 방어용 시장 WLD 공개 매수 및 소각 자동 엔진 공시.
+       5. **공공 국채 우대금리 부스터 (Sovereign Bond Yield Booster)**: 정부 국채(KTB) 성실 보유 시민 대상 연 +2.5%p 우대 보너스 이자 지원.
+     - **30% 법정 안전 비축금(Safe Reserve) 게이지**: 총잔액 대비 비축금(30%)과 가용 잉여금(70%), 누적 환원액, 누적 소각량 실시간 시각화.
+     - **실시간 대국민 투명 지출 원장(Ledger) 스트림**: 모든 국고 집행 내역(유형, 금액, 사유, 마스킹 수혜자, 타임스탬프) 투명 공시.
+     - **금융·투자 메가 네비게이션 연동**: 상단 금융·투자 메뉴에 `대국민 국고 포털` 신규 배지 등록.
+  2. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 신규 단위 테스트 `treasury.test.tsx` (3/3) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/treasury` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v588)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v588`
 - **Release Date**: 2026-10-13 10:07 KST
 - **Git Commit HEAD**: `bade5aa6` (`main`)
 - **Key Deliverables**:
