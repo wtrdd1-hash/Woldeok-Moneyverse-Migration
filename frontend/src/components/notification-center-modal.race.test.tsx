@@ -79,4 +79,22 @@ describe('notification response ordering', () => {
     await act(async () => resolveOldCount!(response({ unreadCount: 1 })));
     expect(screen.getByText(/미확인 0건/)).toBeDefined();
   });
+
+  it('does not cancel a pending feed request when the selected filter is clicked again', async () => {
+    let resolveAll: ((response: Response) => void) | undefined;
+    vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
+      const url = String(input);
+      if (url.includes('unread-count')) return Promise.resolve(response({ unreadCount: 1 }));
+      if (url.includes('unreadOnly=false')) return new Promise((resolve) => { resolveAll = resolve; });
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+
+    render(<NotificationCenterModal />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open test dialog' }));
+    await waitFor(() => expect(resolveAll).toBeDefined());
+    fireEvent.click(screen.getByRole('button', { name: '전체 알림' }));
+    await act(async () => resolveAll!(response({ notifications: [notification('44444444-4444-4444-8444-444444444444', 'Pending notification')] })));
+    expect(screen.getByText('Pending notification')).toBeDefined();
+    expect(screen.queryByText('알림을 불러오는 중...')).toBeNull();
+  });
 });

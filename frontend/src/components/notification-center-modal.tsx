@@ -181,7 +181,7 @@ export function NotificationCenterModal() {
           {/* 필터 탭 */}
           <div className="flex items-center gap-2 mt-3">
             <button
-              onClick={() => { feedRequestId.current += 1; setFilter('all'); }}
+              onClick={() => { if (filter !== 'all') { feedRequestId.current += 1; setFilter('all'); } }}
               aria-pressed={filter === 'all'}
               className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 filter === 'all'
@@ -192,7 +192,7 @@ export function NotificationCenterModal() {
               전체 알림
             </button>
             <button
-              onClick={() => { feedRequestId.current += 1; setFilter('unread'); }}
+              onClick={() => { if (filter !== 'unread') { feedRequestId.current += 1; setFilter('unread'); } }}
               aria-pressed={filter === 'unread'}
               className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
                 filter === 'unread'
