@@ -13,10 +13,31 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v592 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v592`
-- **Release Date**: 2026-10-13 21:45 KST
+## 🌟 Production Release Overview (prod-v593 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v593`
+- **Release Date**: 2026-10-13 22:10 KST
 - **Git Commit HEAD**: `main`
+- **Key Deliverables**:
+  1. **AI 금융 어드바이저 '덕이' 포트폴리오 진단 & 대화형 챗봇 (`/advisor`, v212 / prod-v593)**:
+     - **4분면 자산 배분 비중 분석 (`advisor-client.tsx`)**: 가상 주식(42%), 부동산 지분(28%), 대한민국 국채(18%), 현금 예금(12%) 다분할 바 차트 및 AUM(1,245만 WLD) 실시간 집계.
+     - **포트폴리오 건전성 스코어 & 샤프 지수 엔진**: 건전성 스코어 88점(Balanced Growth), 샤프 지수 1.84(상위 15%), 연간 예상 배당률 연 14.2%, 최대 낙폭(MDD -8.2%) 정밀 산출.
+     - **원클릭 리밸런싱 가이드라인**: 자산 편중도 분석을 통한 구체적 종목/자산군 비중 조절 조언 제시.
+     - **1:1 대화형 AI 상담실**: 4대 퀵 질문 칩(위험도, 추천 리밸런싱, 부동산 월세 배당 극대화, 국채 황금비율) 및 실시간 자연어 금융 질의응답 챗봇.
+     - **지능형 백엔드 장애 격리 (`/api/advisor/deoki/*`)**: 백엔드 연결 지연 시에도 금융 룰베이스 및 포트폴리오 알고리즘 자체 구동으로 100% 가용성 보장.
+  2. **글로벌 메가 네비게이션 연동**:
+     - 상단 금융·투자 메뉴에 `AI 금융비서 '덕이'` (AI 배지) 등록.
+  3. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 신규 단위 테스트 `advisor.test.tsx` (4/4) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (590/590 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/advisor`, `/api/advisor/deoki/diagnose` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v592)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v592`
+- **Release Date**: 2026-10-13 21:45 KST
+- **Git Commit HEAD**: `29fc2148` (`main`)
 - **Key Deliverables**:
   1. **디스코드 봇 실시간 거버넌스 & 금융 이벤트 브로드캐스트 엔진 (`Discord Realtime Broadcast Engine`, v211 / prod-v592)**:
      - **로컬 HTTP 웹훅 수신 데몬 (`bot/index.js`)**: 포트 3099 로컬 웹훅 리스너 (`POST /broadcast`) 신설로 플랫폼 금융 이벤트를 즉각 수신하여 Discord 공지/로그 채널(`LOG_CHANNEL_ID`)로 고품질 컬러 리치 임베드 자동 송출.

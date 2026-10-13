@@ -1539,3 +1539,41 @@
 3. Git 커밋 및 origin main 푸시 (`prod-v592`)
 4. Debian 13 VM 100 프로덕션 무중단 승격 배포
 5. 라이브 실측: `/admin/discord` 및 `/api/discord/broadcast` HTTP 200 OK 확인
+
+
+---
+
+## 🚀 [v212 Specification] AI 금융 어드바이저 '덕이(Deoki)' 포트폴리오 종합 진단 & 대화형 리밸런싱 챗봇 구축
+
+### 1. 현황 및 목표 분석
+1. **[AI 금융 어드바이저 '덕이' 포트폴리오 종합 진단 허브 (/advisor)]**:
+   - 유저의 전체 보유 자산(가상 주식, 부동산 지분, 국채, 예금 잔고)을 4분면 벤토 그리드로 시각화하고, 포트폴리오 건전성 스코어(0~100점), 샤프 지수(Sharpe Ratio), 최대 낙폭(MDD)을 정밀 산출.
+   - 자산 편중도 분석을 통해 구체적이고 실현 가능한 리밸런싱(Rebalancing) 포트폴리오 가이드라인 제시.
+2. **[실시간 대화형 금융 상담 챗봇 인터페이스]**:
+   - 핀테크 전문 금융 비서 "덕이"와의 1:1 실시간 질의응답 대화창 제공.
+   - 추천 퀵 프롬프트 칩(위험도 진단, 이번 주 리밸런싱 추천, 부동산 월세 배당 극대화 전략, 국채 황금비율) 원클릭 바인딩.
+3. **[백엔드 API 장애 격리 및 지능형 폴백 연동 (/api/advisor/deoki/*)]**:
+   - 백엔드 오프라인 시에도 사전 훈련된 금융 룰베이스 및 포트폴리오 알고리즘을 통해 중단 없이 진단 및 자연어 상담을 제공하는 자립형 엔진 내장.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **frontend/src/app/advisor/page.tsx & advisor-client.tsx (신규)**:
+   - 4분면 자산 배분 비중 바 차트 및 핵심 투자 지표 메트릭스.
+   - 건전성 진단 리포트 (강점, 리스크 요인, 최적 리밸런싱 전략).
+   - 대화형 챗봇 인터페이스 (메시지 히스토리, 추천 칩, 마이크로 인터랙션).
+2. **frontend/src/app/api/advisor/deoki/diagnose/route.ts & ask/route.ts (보강)**:
+   - 지능형 포트폴리오 진단 알고리즘 및 질의응답 폴백 엔진 탑재.
+3. **frontend/src/lib/navigation.ts (수정)**:
+   - 상단 금융·투자 메뉴에 `AI 금융비서 '덕이'` 등록.
+4. **단위 테스트**:
+   - `frontend/src/app/advisor/advisor.test.tsx` 작성.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest`): 100% Pass
+3. Git 커밋 및 origin main 푸시 (`prod-v593`)
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포
+5. 라이브 실측: `/advisor` 및 `/api/advisor/deoki/diagnose` HTTP 200 OK 확인
