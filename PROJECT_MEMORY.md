@@ -13,8 +13,35 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v589 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v589`
+## 🌟 Production Release Overview (prod-v590 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v590`
+- **Release Date**: 2026-10-13 14:35 KST
+- **Git Commit HEAD**: `main`
+- **Key Deliverables**:
+  1. **시민 참여형 주민참여예산 투표제 (Citizens DAO Budget Voting, v209 / prod-v590)**:
+     - **주민참여예산 제안 및 투표 (`/treasury` - DAO 거버넌스 탭)**: 시민 누구나 국고 공공사업(수수료 전액 면제 주간, 길드 협동 펀딩 부스트 등)을 직접 제안하고 시민 찬성 추천 투표(Upvote) 참여.
+     - **자동 예산 집행 엔진 (1,000표 도달 시 `EXECUTED`)**: 커뮤니티 추천 1,000표 달성 시 국고 예산 자동 집행 및 투표 상태 실시간 전환.
+     - **백엔드 거버넌스 REST API (`/api/treasury/proposals`)**: 제안 목록 조회(GET), 신규 제안 등록(POST), 찬성 투표 참여(PUT).
+  2. **관리자 창업 그랜트 심사 대시보드 (`/admin/treasury/grants`)**:
+     - **심사 승인 뷰 (`admin-grants-view.tsx`)**: 접수된 청년/창업 벤처 그랜트 신청서(사업명, 신청자, 신청금액, 사업계획 요약) 목록 실시간 검토.
+     - **원자적 국고 시드머니 지급 (`/api/admin/treasury/grants`)**: 승인 시 중앙정부 국고 금고(VAULT_MAIN)에서 신청자 지갑으로 지원금 즉시 송금 및 관리자 세션 감사 로그 기록.
+  3. **국고 잔액 변동 실시간 웹소켓/이벤트 브로드캐스트 (`TreasuryBroadcastToast`)**:
+     - **전역 플로팅 축하 토스트 (`/components/treasury-broadcast-toast.tsx`)**: 시민 기본배당 대규모 청구, 시장 바이백 소각, 긴급 구호금 집행 시 전체 접속자 화면에 인터랙티브 축하 알림 렌더링.
+     - **전역 헤더 (`site-header.tsx`) 연동**: 모든 라우트에서 중단 없이 라이브 재정 이벤트 수신.
+  4. **문서 전수 최신화 & 브랜치 정돈 (Docs Hygiene & Master Index)**:
+     - 마스터 색인 `DOCS_INDEX.md` 및 `docs/DOCS_INDEX.md` 최신 기능 및 6대 도메인 전면 정돈.
+     - `README.md`, `README-KO.md` 국고 생태계 및 최신 기능 반영.
+     - `implementation_plan.md` v209 누적 반영 (Zero-Deletion 원칙 준수).
+  5. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 신규 단위 테스트 `treasury.test.tsx` (3/3) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (586/586 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/treasury`, `/admin/treasury/grants` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v589)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v589`
 - **Release Date**: 2026-10-13 14:23 KST
 - **Git Commit HEAD**: `1d56b354` (`main`)
 - **Key Deliverables**:

@@ -1,11 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
 > **단일 진실 공급원 (Single Source of Truth)**  
-> 본 문서는 월덕 머니버스(Woldeok Moneyverse) 플랫폼의 금융 아키텍처, 가상 주식 거래소, API 계약, 관리자 관제, 모바일 규격, 인프라 운영 가이드를 총망라하는 통합 문서 색인 허브입니다.
+> 본 문서는 월덕 머니버스(Woldeok Moneyverse) 플랫폼의 금융 아키텍처, 대국민 국고 생태계, 가상 주식 거래소, API 계약, 관리자 관제, 모바일 규격, 인프라 운영 가이드를 총망라하는 통합 문서 색인 허브입니다.
 
 > [!TIP]
-> 🌟 **[통합 개발 진행상황 및 마스터 레퍼런스 총서 (v1~v200 완결판)](./DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md)**  
-> 프로젝트 전체 개발 로드맵, 누적 릴리스(prod-v583) 성과 지표, 그리고 시스템에 적용된 최신 글로벌 공인 엔지니어링 표준(복식부기 원장, 기술적 분석 수식, Next.js/NestJS 아키텍처, 예금자보호 규제)을 한 번에 확인하실 수 있습니다.
+> 🌟 **[통합 개발 진행상황 및 마스터 레퍼런스 총서 (v1~v209 최신판)](./DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md)**  
+> 프로젝트 전체 개발 로드맵, 최신 누적 릴리스(prod-v590) 성과 지표, 그리고 시스템에 적용된 최신 글로벌 공인 엔지니어링 표준(복식부기 원장, 대국민 국고 DAO 예산 투표제, 기술적 분석 작도 수식, Next.js/NestJS 아키텍처, 예금자보호 규제)을 한 번에 확인하실 수 있습니다.
 
 ---
 
@@ -13,25 +13,29 @@
 
 ```mermaid
 graph TD
-    Root["📚 Master Docs Hub<br/>(docs/DOCS_INDEX.md)"] --> D1["1. 거시 금융 & 국고 원장<br/>(Treasury & Macro Economy)"]
-    Root --> D2["2. 가상 주식 거래소<br/>(Stocks & Trading)"]
-    Root --> D3["3. 통합 API & 모바일 규격<br/>(API & Contracts)"]
-    Root --> D4["4. 관리자 관제 & 보안 규정<br/>(Admin & Governance)"]
-    Root --> D5["5. 인프라 & UI/UX 아키텍처<br/>(Infra & Design System)"]
+    Root["📚 Master Docs Hub<br/>(docs/DOCS_INDEX.md)"] --> D1["1. 거시 금융 & 대국민 국고<br/>(Treasury & Macro Economy)"]
+    Root --> D2["2. 가상 주식 거래소 & 작도<br/>(Stocks & Trading Tools)"]
+    Root --> D3["3. 12대 금융 계산기 & SERP<br/>(Calculators & SEO Engine)"]
+    Root --> D4["4. 통합 API & 모바일 규격<br/>(API Master & Contracts)"]
+    Root --> D5["5. 관리자 관제 & 보안 규정<br/>(Admin & Governance)"]
+    Root --> D6["6. 인프라 & UI/UX 아키텍처<br/>(Infra & Design System)"]
 
     classDef rootStyle fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff;
     classDef dStyle fill:#0f172a,stroke:#10b981,stroke-width:1.5px,color:#e2e8f0;
     class Root rootStyle;
-    class D1,D2,D3,D4,D5 dStyle;
+    class D1,D2,D3,D4,D5,D6 dStyle;
 ```
 
 ---
 
-### 1. 🏛️ 거시 금융 & 국고 복식부기 원장 (Macro Economy & Sovereign Treasury)
-가상 중앙은행, 국고 국부펀드(ASWF), 외환보유액, 예금보험공사(KDIC), 국채 및 연금 시스템 규격입니다.
+### 1. 🏛️ 거시 금융 & 대국민 국고 (Macro Economy & Sovereign Treasury)
+중앙정부 국고 금고(VAULT_MAIN), 30% 법정 안전 비축금, 시민 보편 기본배당, 창업 벤처 그랜트, 시민 참여형 주민참여예산 투표제(DAO), 예금보험공사(KDIC), 국채 및 연금 시스템 규격입니다.
 
-| 문서명 | 언어 | 핵심 내용 요약 |
+| 문서명 / 기능 경로 | 언어 | 핵심 내용 요약 |
 | :--- | :--- | :--- |
+| **[대국민 국고 포털](/treasury)** | KO | 중앙정부 국고 30% 안전비축금 게이지, 기본배당 즉시 청구, 긴급구호금, 실시간 집행 원장 |
+| **[주민참여예산 투표제](/treasury)** | KO | 시민 누구나 국고 공공사업 제안, 찬성 추천 투표(1,000표 달성 시 예산 자동 집행) |
+| **[창업 그랜트 심사 대시보드](/admin/treasury/grants)** | KO | 관리자 전용 벤처 그랜트 신청 심사, 승인 시 국고 금고 원자적 시드머니 지급 및 세션 감사 |
 | [MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md](./MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md) | KO | 거시 경제 주권 시스템 마스터 아키텍처 명세 |
 | [TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.ko.md](./TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.ko.md) | KO | 2,500만 WLD 앵커 국고 자율 순환 경제 엔진 규격 |
 | [TREASURY_AUTONOMOUS_SWF_SPEC.ko.md](./TREASURY_AUTONOMOUS_SWF_SPEC.ko.md) | KO | 국부펀드(ASWF) 복리 재투자 및 자산 배분 알고리즘 |
@@ -45,23 +49,46 @@ graph TD
 
 ---
 
-### 2. 📈 가상 주식 거래소 & 트레이딩 (Virtual Stock Exchange & Trading)
-10대 상장사 호가창, 실시간 체결, 스탑로스/익절 조건부 주문 및 기술적 지표(MACD, RSI, 볼린저밴드) 설계 문서입니다.
+### 2. 📈 가상 주식 거래소 & 작도 도구 (Virtual Stock Exchange & Trading Tools)
+10대 상장사 호가창, 실시간 체결, 트레이딩뷰급 작도 도구(추세선, 수평 지지/저항선, 피보나치 되돌림 5단계) 및 호가 심도 누적 차트(Depth Chart) 설계 문서입니다.
 
-| 문서명 | 언어 | 핵심 내용 요약 |
+| 문서명 / 기능 경로 | 언어 | 핵심 내용 요약 |
 | :--- | :--- | :--- |
+| **[가상 주식 거래소](/stocks)** | KO | 10대 가상 상장사 실시간 10단 호가창, 매수/매도, 스탑로스/익절 조건부 주문 |
+| **[차트 작도 도구 툴킷](/stocks/WDG)** | KO | 추세선(Trendline), 수평선(Horizontal Line), 피보나치 되돌림(Fibonacci 5단계) 로컬 영구저장 |
+| **[호가 심도 차트](/stocks/WDG)** | KO | 매수(Bids) vs 매도(Asks) 누적 잔량 에어리어 SVG 렌더링 및 최대 호가벽(Wall) 가시화 |
 | [2026-09-22-stocks-interactive-trading-console.ko.md](./2026-09-22-stocks-interactive-trading-console-v2026.09.22.355.ko.md) | KO | 실시간 주식 호가 주문 콘솔 및 체결 엔진 v355 사양 |
 | [2026-09-22-stocks-portfolio-and-trade-presets.ko.md](./2026-09-22-stocks-portfolio-and-trade-presets-v2026.09.22.356.ko.md) | KO | 포트폴리오 자산 배분 및 거래 수량/비율 프리셋 사양 |
 | [2026-09-22-stocks-halt-cost-basis-settlement.ko.md](./2026-09-22-stocks-halt-cost-basis-settlement-visibility-v2026.09.22.357.ko.md) | KO | 매매 정지(Halt), 평균 매입단가 및 결제 가시성 사양 |
 
 ---
 
-### 3. 🔌 통합 API 카탈로그 & 모바일 규격 (API Master Catalog & Mobile Contracts)
-백엔드 14개 도메인 REST/WebSocket API 및 고성능 모바일 애플리케이션 DTO 스키마 명세입니다.
+### 3. 🧮 12대 금융 계산기 & 검색엔진 최적화 (Financial Calculators & SERP CRO)
+구글 4.9점 별점 스니펫(AggregateRating), FAQPage 구조화 데이터, IndexNow 실시간 색인 엔진 및 12대 금융 계산기 규격입니다.
+
+| 계산기 허브 경로 | 주요 기능 및 타겟 키워드 | SEO/스니펫 사양 |
+| :--- | :--- | :--- |
+| **[복리·CAGR 계산기](/tools/compound-calculator)** | 적립식 만기수령액, 거치식 복리, CAGR 연평균 수익률 | 구글 4.9점 별점, FAQPage, 1초 즉시 산출 |
+| **[주식 물타기 계산기](/tools/stock-calculator)** | 추가 매수 평단가, 물타기 희석, 탈출 목표가 역산 | 구글 4.9점 별점, FAQPage, 원클릭 초기화 |
+| **[대출 이자 계산기](/tools/loan-interest-calculator)** | 원리금균등, 원금균등, 만기일시 상환방식별 총이자 비교 | 구글 4.9점 별점, 상환 일정표 테이블 제공 |
+| **[2026 연봉 실수령액 계산기](/tools/salary-calculator)** | 2026년 4대보험 요율 반영 세후 월급 실수령액 산출 | 구글 4.9점 별점, 구간별 공제액 투명 공시 |
+| **[배당소득세 계산기](/tools/dividend-tax-calculator)** | 15.4% 원천징수 세후 배당금, 2천만원 금융소득종합과세 | 구글 4.9점 별점, 국내/해외 배당주 분리 |
+| **[ISA 절세 계산기](/tools/isa-calculator)** | 일반형(200만)/서민형(400만) 비과세 한도 & 9.9% 분리과세 | 2026 개정 세법 반영 비과세 초과분 자동 계산 |
+| **[해외주식 양도소득세 계산기](/tools/capital-gains-tax-calculator)** | 미국주식 연간 250만원 기본공제, 22% 양도세 손익상계 | 연간 누적 손익 합산 과세표준 즉시 산출 |
+| **[코인 김치프리미엄 계산기](/tools/kimchi-premium-calculator)** | 국내(업비트) vs 해외(바이낸스) 실시간 김프/역프 차익거래 | 실시간 환율 및 송금 수수료 차감 순수익 |
+| **[증여세 계산기](/tools/gift-tax-calculator)** | 배우자(6억), 자녀(5천만), 혼인/출산(1.5억) 비과세 공제 | 10년 합산 누진세율표 적용 산출세액 계산 |
+| **[부동산 임대수익률 계산기](/tools/real-estate-calculator)** | 오피스텔·상가 순 임대수익률(Cap Rate), 대출 레버리지 ROE | 취득세, 중개보수, 대출금리 반영 투자분석 |
+| **[연금소득세 계산기](/tools/pension-tax-calculator)** | IRP/연금저축 수령액, 1,500만원 초과 종합/분리과세 선택 | 3.3%~5.5% 연령별 저율과세 즉시 산출 |
+| **[청년도약계좌 계산기](/tools/youth-leap-calculator)** | 월 최대 70만원 납입 시 정부기여금 & 은행 비과세 이자 | 5년 만기 시 최대 5,000만원 목돈 시뮬레이션 |
+
+---
+
+### 4. 🔌 통합 API 카탈로그 & 모바일 규격 (API Master Catalog & Mobile Contracts)
+백엔드 15개 도메인 REST/WebSocket API 및 고성능 모바일 애플리케이션 DTO 스키마 명세입니다.
 
 | 문서명 | 언어 | 파일 크기 | 핵심 내용 요약 |
 | :--- | :--- | :--- | :--- |
-| [API_CATALOG_MASTER.ko.md](./API_CATALOG_MASTER.ko.md) | KO | 17 KB | **14개 핵심 도메인 마스터 API 카탈로그 (공식 표준)** |
+| [API_CATALOG_MASTER.ko.md](./API_CATALOG_MASTER.ko.md) | KO | 17 KB | **15개 핵심 도메인 마스터 API 카탈로그 (공식 표준)** |
 | [app-auth-api-guide.ko.md](./app-auth-api-guide.ko.md) | KO | 9 KB | 웹/앱 통합 세션 인증, 토큰 갱신 및 보안 헤더 가이드 |
 | [mobile-api-complete-spec.ko.md](./mobile-api-complete-spec.ko.md) | KO | 102 KB | 모바일 클라이언트 풀스펙 엔드포인트 명세서 |
 | [mobile-api-schema-reference.ko.md](./mobile-api-schema-reference.ko.md) | KO | 184 KB | 모바일 요청/응답 TypeScript & DTO 데이터 스키마 레퍼런스 |
@@ -71,11 +98,13 @@ graph TD
 
 ---
 
-### 4. 🛡️ 관리자 관제탑 & 보안 거버넌스 (Admin Control Tower & Governance)
-실시간 텔레메트리 관제탑, 정책 버전 계보, 1:1 비밀 대화 모더레이션 및 동의 정책(Consent) 명세입니다.
+### 5. 🛡️ 관리자 관제탑 & 보안 거버넌스 (Admin Control Tower & Governance)
+실시간 긴급 킬스위치 제어탑, 창업 그랜트 심사 대시보드, 감사 로그 및 보안 정책 명세입니다.
 
-| 문서명 | 언어 | 핵심 내용 요약 |
+| 문서명 / 기능 경로 | 언어 | 핵심 내용 요약 |
 | :--- | :--- | :--- |
+| **[관리자 긴급 킬스위치 제어탑](/admin/controls)** | KO | 전 종목 서킷브레이커, 국고 출금 동결, 신규 가입 차단, 웹훅 격리 4대 킬스위치 |
+| **[창업 그랜트 심사 대시보드](/admin/treasury/grants)** | KO | 접수된 벤처 그랜트 신청서 검토, 원자적 시드머니 지급 및 세션 감사 로그 스트립 |
 | [2026-09-22-admin-policy-version-management.ko.md](./2026-09-22-admin-policy-version-management-and-release-lineage-v2026.09.22.350.ko.md) | KO | 관리자 정책 버전 관리 및 배포 계보(Lineage) 사양 |
 | [2026-09-22-admin-private-chat-moderation.ko.md](./2026-09-22-admin-private-chat-moderation-queue-and-evidence-v2026.09.22.352.ko.md) | KO | 1:1 프라이빗 채팅 모더레이션 큐 및 증적 보존 명세 |
 | [2026-09-22-consent-blackout-fix-home-fintech.ko.md](./2026-09-22-consent-blackout-fix-home-fintech-portal-v2026.09.22.351.ko.md) | KO | 금융 포털 필수 약관 동의 암전(Blackout) 방지 사양 |
@@ -85,7 +114,7 @@ graph TD
 
 ---
 
-### 5. ⚙️ 인프라, 디자인 시스템 & 릴리스 운영 (Infra, Design System & Ops)
+### 6. ⚙️ 인프라, 디자인 시스템 & 릴리스 운영 (Infra, Design System & Ops)
 Debian 13 가상화 인프라, 백업/복구, 반응형 디자인 시스템 및 배포 절차서입니다.
 
 | 문서명 | 언어 | 핵심 내용 요약 |
@@ -106,6 +135,6 @@ Debian 13 가상화 인프라, 백업/복구, 반응형 디자인 시스템 및 
 
 ## 📌 상위 프로젝트 공통 마스터 문서
 - **[README.md](../README.md)** / **[README-KO.md](../README-KO.md)**: 리포지토리 전체 개요 및 빠른 시작 가이드
-- **[PROJECT_MEMORY.md](../PROJECT_MEMORY.md)**: 프로덕션 릴리스 트래커 및 마스터 메모리
-- **[implementation_plan.md](../implementation_plan.md)**: 누적 무삭제 통합 구현 계획서 (v1 ~ v200)
+- **[PROJECT_MEMORY.md](../PROJECT_MEMORY.md)**: 프로덕션 릴리스 트래커 및 마스터 메모리 (prod-v590 최신)
+- **[implementation_plan.md](../implementation_plan.md)**: 누적 무삭제 통합 구현 계획서 (v1 ~ v209)
 - **[AGENTS.md](../AGENTS.md)**: 에이전트 개발 협업 및 빌드/테스트 규칙

@@ -52,6 +52,36 @@ export interface UserEligibilityStatus {
   readonly activeGrantApplied: boolean;
 }
 
+/** 시민 참여형 주민참여예산(DAO Budget Voting) 제안서 */
+export interface TreasuryDaoProposal {
+  readonly id: string;
+  readonly title: string;
+  readonly category: 'FEE_CUT' | 'COMMUNITY_FUND' | 'MARKET_MAKING' | 'PUBLIC_EVENT';
+  readonly categoryLabel: string;
+  readonly requestedBudgetWld: number;
+  readonly proposerMasked: string;
+  readonly description: string;
+  readonly votesCount: number;
+  readonly targetVotes: number;
+  readonly status: 'VOTING' | 'PASSED' | 'EXECUTED';
+  readonly createdAt: string;
+  readonly hasVoted?: boolean;
+}
+
+/** 관리자 창업 그랜트 심사 신청건 */
+export interface TreasuryGrantApplication {
+  readonly id: string;
+  readonly businessName: string;
+  readonly applicantId: string;
+  readonly applicantMasked: string;
+  readonly requestedAmountWld: number;
+  readonly businessPlan: string;
+  readonly status: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
+  readonly submittedAt: string;
+  readonly reviewedAt?: string;
+  readonly reviewNote?: string;
+}
+
 export const TREASURY_PROGRAMS: readonly TreasuryProgramMeta[] = [
   {
     id: 'CITIZEN_DIVIDEND',

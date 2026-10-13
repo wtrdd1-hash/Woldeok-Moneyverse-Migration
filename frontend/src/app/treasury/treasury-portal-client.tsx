@@ -31,6 +31,7 @@ import {
 } from './treasury.types';
 import { TreasuryReserveGauge } from './treasury-reserve-gauge';
 import { TreasuryProgramCard } from './treasury-program-card';
+import { TreasuryDaoVoting } from './treasury-dao-voting';
 
 interface TreasuryPortalClientProps {
   readonly initialOverview: TreasuryOverviewData;
@@ -248,7 +249,10 @@ export function TreasuryPortalClient({
         </div>
       </div>
 
-      {/* 3. 실시간 투명 대국민 지출 원장(Ledger) 스트림 테이블 */}
+      {/* 3. 시민 참여형 주민참여예산(DAO Budget Voting) 거버넌스 섹션 */}
+      <TreasuryDaoVoting isLoggedIn={eligibility.isLoggedIn} isEn={isEn} />
+
+      {/* 4. 실시간 투명 대국민 지출 원장(Ledger) 스트림 테이블 */}
       <Card className="moneyverse-card border-border/80 bg-card/75 shadow-sm overflow-hidden backdrop-blur-md">
         <CardHeader className="p-4 sm:p-5 pb-3 border-b border-border/50 bg-muted/20">
           <div className="flex items-center justify-between">

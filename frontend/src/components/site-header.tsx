@@ -53,6 +53,7 @@ import type { Viewer } from '@/lib/viewer-state';
 import { isAdministrator } from '@/lib/viewer-state';
 import { useRealtimeWallet } from '@/lib/use-wallet-realtime';
 import { groupDigits } from '@/lib/money';
+import { TreasuryBroadcastToast } from '@/components/treasury-broadcast-toast';
 
 /**
  * The sticky masthead, in the shape the product has always had: wordmark on
@@ -212,6 +213,7 @@ export function SiteHeader() {
           </Sheet>
         </div>
       </div>
+      <TreasuryBroadcastToast />
     </header>
   );
 }

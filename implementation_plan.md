@@ -1,4 +1,6 @@
-﻿# [월덕 머니버스] 통합 구현 계획서 (현재: v208)
+﻿# [월덕 머니버스] 통합 구현 계획서 (현재: v209)
+
+- **v209**: [주민참여예산 투표제(DAO Budget Voting), 관리자 창업 그랜트 심사 대시보드(/admin/treasury/grants), 전역 국고 축하 브로드캐스트 토스트 & 전 문서 총괄 정돈] (+95, -0)
 
 - **v208**: [대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 (기본배당, 창업그랜트, 긴급구호금, 바이백소각, 국채부스터) 구축] (+85, -0)
 
@@ -1413,3 +1415,41 @@
 4. Debian 13 VM 100 프로덕션 무중단 승격 배포 (prod-v589)
 5. 라이브 실측 검증:
    - https://easy-scraping.com/treasury 접속 및 5대 프로그램 카드, 지출 게이지, 투명 원장 정상 서빙 확인
+---
+
+## 🚀 [v209 Specification] 주민참여예산 투표제, 관리자 창업 그랜트 심사 대시보드 & 전역 국고 브로드캐스트 구축
+
+### 1. 현황 및 목표 분석
+1. **[시민 참여형 주민참여예산 거버넌스(DAO Budget Voting) 구축]**:
+   - 국고 자금의 공공사업 집행을 하향식이 아닌 상향식으로 결정할 수 있도록 시민이 직접 공공 프로젝트를 제안하고 찬성 투표를 진행하는 주민참여예산 제도 구현.
+2. **[관리자 창업 그랜트 심사 대시보드 (/admin/treasury/grants) 신설]**:
+   - 대국민 포털에서 접수된 창업 그랜트 지원서들을 관리자가 직관적으로 심사하고 원클릭 승인/반려할 수 있는 백오피스 관제 뷰 구축.
+3. **[국고 잔액 변동 실시간 웹 브로드캐스트 토스트]**:
+   - 대규모 기본배당, 바이백 소각, 주민예산 통과 등 주요 국고 이벤트 발생 시 전역 화면에서 축하 및 공지 플로팅 토스트를 표시.
+4. **[프로젝트 문서 총괄 점검 및 정돈]**:
+   - PROJECT_MEMORY.md, DOCS_INDEX.md, README.md, implementation_plan.md가 최신 상태로 빈틈없이 기록되도록 전수 정리.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **rontend/src/app/api/treasury/proposals/route.ts (신규)**:
+   - 주민참여예산 제안 목록 조회(GET), 신규 제안 등록(POST), 찬성 투표(PUT) API.
+2. **rontend/src/app/api/admin/treasury/grants/route.ts (신규)**:
+   - 접수된 창업 그랜트 신청 목록 조회(GET) 및 심사 승인/반려(POST) API.
+3. **rontend/src/app/admin/treasury/grants/page.tsx & dmin-grants-view.tsx (신규)**:
+   - 관리자 창업 그랜트 심사 콘솔 뷰 (신청자 정보, 사업계획서 검토, 승인 시 즉시 국고 지급 연동).
+4. **rontend/src/app/treasury/treasury-dao-voting.tsx (신규)**:
+   - 국고 포털 내 주민참여예산 공공사업 목록, 찬성 투표 버튼, 신규 사업 제안 모달.
+5. **rontend/src/components/treasury-broadcast-toast.tsx (신규)**:
+   - 국고 대규모 환원 및 소각 발생 시 전역 축하 플로팅 토스트.
+6. **rontend/src/app/treasury/treasury.types.ts & 	reasury-portal-client.tsx**:
+   - 제안서/투표 타입 추가 및 주민참여예산 탭 통합.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (pnpm run typecheck): 0 Errors
+2. 단위 테스트 실행 (itest): 100% Pass
+3. Git 커밋 및 origin main 푸시 (prod-v590)
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포
+5. 라이브 실측: /treasury 및 /admin/treasury/grants HTTP 200 OK 확인

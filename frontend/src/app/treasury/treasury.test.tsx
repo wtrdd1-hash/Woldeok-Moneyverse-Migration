@@ -129,5 +129,9 @@ describe('National Treasury Portal & 5 Core Expenditure Programs Suite', () => {
     fireEvent.click(openGrantBtn);
     expect(screen.getByText('청년·창업 벤처 그랜트 신청서')).toBeDefined();
     expect(screen.getByPlaceholderText(/예: 델타 트레이딩 랩스/i)).toBeDefined();
+
+    // 주민참여예산 거버넌스 섹션 검증
+    expect(screen.getByText('시민 참여형 주민참여예산 투표제')).toBeDefined();
+    expect(screen.getByText(/월덕거래소 주식 매매 수수료 전액 국고 대납 지원/i)).toBeDefined();
   });
 });
