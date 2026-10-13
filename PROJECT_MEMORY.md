@@ -13,8 +13,33 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v586 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v586`
+## 🌟 Production Release Overview (prod-v587 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v587`
+- **Release Date**: 2026-10-13 09:46 KST
+- **Git Commit HEAD**: `017e56f3` (`main`)
+- **Key Deliverables**:
+  1. **잔여 8대 서브 금융 계산기 SERP 클릭률(CTR) 극대화 (v206 / prod-v587)**:
+     - ISA 계좌 절세 계산기 (`/tools/isa-calculator`): `[2026 최신] ISA 계좌 절세 계산기 — [무료/1초] 일반형·서민형 비과세 한도 & 9.9% 분리과세 즉시 비교 | 월덕 머니버스`
+     - 배당소득세 계산기 (`/tools/dividend-tax-calculator`): `[무료/무로그인] 배당소득세 계산기 — 1초 만에 국내·미국 배당주 15.4% 세후 실수령액 & 2000만원 종합과세 즉시 산출 | 월덕 머니버스`
+     - 해외주식 양도소득세 계산기 (`/tools/capital-gains-tax-calculator`): `[2026 최신] 해외주식 양도소득세 계산기 — [무료/1초] 미국주식 250만원 비과세 & 손익상계 절세 즉시 산출 | 월덕 머니버스`
+     - 코인 김치프리미엄 계산기 (`/tools/kimchi-premium-calculator`): `[실시간 무료] 코인 김치프리미엄 계산기 — 1초 만에 업비트·바이낸스 김프/역프 & 차익거래 순수익 즉시 산출 | 월덕 머니버스`
+     - 증여세 계산기 (`/tools/gift-tax-calculator`): `[2026 최신] 증여세 계산기 — [무료/1초] 배우자 6억·자녀 5천만·혼인 1.5억 비과세 한도 & 세율 즉시 계산 | 월덕 머니버스`
+     - 부동산 임대수익률 계산기 (`/tools/real-estate-calculator`): `[무료/무로그인] 부동산 임대수익률 계산기 — 1초 만에 오피스텔·상가 Cap Rate & 레버리지 ROE 즉시 진단 | 월덕 머니버스`
+     - 연금소득세 계산기 (`/tools/pension-tax-calculator`): `[2026 최신] 연금소득세 & 퇴직소득세 계산기 — [무료/1초] IRP·연금저축 수령액 & 1,500만원 분리과세 즉시 산출 | 월덕 머니버스`
+     - 청년도약계좌 계산기 (`/tools/youth-leap-calculator`): `[2026 최신] 청년도약계좌 만기 수령액 계산기 — [무료/1초] 5,000만원 정부기여금 & 비과세 즉시 산출 | 월덕 머니버스`
+  2. **배당소득세 계산기 AggregateRating(4.9점 별점 스니펫) 탑재**:
+     - `dividend-tax-calculator/page.tsx` 인라인 스키마에 `aggregateRating` (4.9점, 1,190건 리뷰) 연동 완료.
+  3. **전체 12대 금융 계산기 및 사이트맵 IndexNow 일괄 제출 완료**:
+     - 16개 핵심 URL을 IndexNow API를 통해 제출 완료 (`{"ok":true,"submittedCount":16,"status":200}`).
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/tools/...` 8대 서브 계산기 라이브 실측 확인).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v586)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v586`
 - **Release Date**: 2026-10-13 09:40 KST
 - **Git Commit HEAD**: `98aace1d` (`main`)
 - **Key Deliverables**:
