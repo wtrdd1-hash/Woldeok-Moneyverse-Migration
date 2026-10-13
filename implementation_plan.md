@@ -1,6 +1,7 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v206)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v207)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v207**: [가상 주식 트레이딩뷰급 인터랙티브 드로잉 툴킷 (추세선, 지지/저항 수평선, 피보나치 5단계 되돌림 & SVG 오버레이 영구 저장) 구축] (+65, -0)
 - **v206**: [잔여 8대 서브 금융 계산기 SERP CTR 쇄신 & 전체 계산기 별점 스키마 동기화 및 IndexNow 전체 일괄 제출] (+65, -0)
 - **v205**: [4대 핵심 트래픽 금융 계산기 SERP CTR 극대화 & AggregateRating 별점 스니펫 일괄 탑재 및 IndexNow 즉시 색인 핑 전송] (+65, -0)
 - **v204**: [루트 홈페이지(/) SERP 클릭률(CTR) 극대화 메타태그 완전 동기화 및 prod-v585 실서버 완전 배포] (+60, -0)
@@ -1317,3 +1318,44 @@
    - `curl -s https://easy-scraping.com/tools/pension-tax-calculator | grep -o '<title>[^<]*</title>'`
    - `curl -s https://easy-scraping.com/tools/youth-leap-calculator | grep -o '<title>[^<]*</title>'`
 5. IndexNow 15대 핵심 URL 일괄 제출 API 호출 및 200 OK 확인
+
+---
+
+## 🚀 [v207 Specification] 가상 주식 트레이딩뷰급 인터랙티브 드로잉 툴킷 (추세선, 지지/저항 수평선, 피보나치 5단계 되돌림 & SVG 오버레이 영구 저장) 구축
+
+### 1. 현황 및 목표 분석
+1. **[전문가용 차트 기술적 분석 드로잉 도구 부재]**:
+   - 현재 차트는 MA, BB, RSI, MACD 등 기본 보조지표 토글만 제공하여, 전문 트레이더가 직접 차트 위에 추세선(Trendline)이나 핵심 지지/저항 수평선, 피보나치 되돌림 구간을 그어놓고 매매 타점을 잡는 사용자 주도형 테크니컬 분석이 불가능했음.
+2. **[3대 트레이딩뷰급 인터랙티브 드로잉 툴킷 탑재]**:
+   - **추세선 (Trendline)**: 시작 앵커점부터 끝 앵커점까지 마우스 드래그 또는 터치로 긋는 벡터 직선 (스카이블루 #38bdf8, 앵커 원형 핸들).
+   - **수평 지지/저항선 (Horizontal Support/Resistance Line)**: 차트 위 임의의 가격대를 클릭하여 전체 너비로 전개되는 점선 가이드라인 (strokeDasharray="4 2") 및 우측 가격 라벨 뱃지.
+   - **피보나치 5단계 되돌림 (Fibonacci Retracement)**: 시작 고점(1.0)과 저점(0.0) 사이의 5대 핵심 황금비율 레벨 (0%, 38.2%, 50%, 61.8%, 100%)을 다채로운 그라데이션 라벨과 함께 자동 렌더링.
+3. **[심볼별 영구 보존 & 크로스 서피스(데스크톱/모바일 터치) 반응형 제어]**:
+   - 종목별 독립 키(`wdmv_drawings_{SYMBOL}`)로 브라우저 `localStorage` 영구 저장 및 자동 복원.
+   - 차트 좌측 상단 플로팅 슬림 툴바: `[포인터/커서]`, `[추세선]`, `[수평선]`, `[피보나치]`, `[전체 지우기]` 원클릭 퀵 액션.
+   - 마우스 마우스다운/무브/업 및 모바일 터치스타트/무브/엔드 좌표 정밀 변환.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **`frontend/src/app/stocks/[symbol]/stock-chart-drawing.types.ts` (신규)**:
+   - `ChartDrawingItem`, `DrawingToolType` 인터페이스 정의.
+   - 심볼별 로컬 스토리지 키 관리 및 피보나치 레벨 계산 헬퍼 함수.
+2. **`frontend/src/app/stocks/[symbol]/stock-chart-drawing-toolbar.tsx` (신규)**:
+   - 플로팅 슬림 툴바 컴포넌트 (도구 선택 활성 링, 아이콘 배지, 지우기 모달 가드).
+3. **`frontend/src/app/stocks/[symbol]/stock-chart-drawing-overlay.tsx` (신규)**:
+   - SVG 내부 드로잉 레이어: 저장된 도형 렌더링 및 현재 드로잉 중인 실시간 점선 프리뷰 렌더링.
+4. **`frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx`**:
+   - 차트 SVG 내부에 드로잉 이벤트 리스너(마우스/터치) 연동 및 툴바 마운트.
+5. **`frontend/src/app/stocks/[symbol]/stock-orderbook.test.tsx`**:
+   - 드로잉 툴바 마운트, 도구 선택, 드로잉 아이템 렌더링 및 로컬스토리지 복원 단위 테스트 추가.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 TypeScript 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. 단위 테스트 실행 (`vitest run stock-orderbook.test.tsx`): 100% Pass
+3. Git 커밋 및 origin main 푸시
+4. 원격 Debian 13 VM 100 프로덕션 무중단 승격 배포 (`prod-v588`)
+5. 라이브 실측 검증:
+   - `https://easy-scraping.com/stocks/WDG` 접속 및 드로잉 툴바, SVG 오버레이 구동 확인

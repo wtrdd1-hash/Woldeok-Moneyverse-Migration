@@ -1,11 +1,18 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { TrendingUp, TrendingDown, Clock, BarChart2, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
 import { playStockTickSound } from '@/lib/audio-effects';
+import { StockChartDrawingToolbar } from './stock-chart-drawing-toolbar';
+import { StockChartDrawingOverlay } from './stock-chart-drawing-overlay';
+import {
+  type DrawingToolType,
+  type ChartDrawingItem,
+  getDrawingStorageKey,
+} from './stock-chart-drawing.types';
 
 interface StockInteractiveChartProps {
   readonly currentPrice: string;
@@ -78,6 +85,43 @@ export function StockInteractiveChart({
   });
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [realCandles, setRealCandles] = useState<CandlePoint[] | null>(null);
+
+  // 트레이딩뷰 스타일 인터랙티브 드로잉 툴킷 상태
+  const [drawingTool, setDrawingTool] = useState<DrawingToolType>('cursor');
+  const [drawings, setDrawings] = useState<ChartDrawingItem[]>([]);
+  const [activeDrawing, setActiveDrawing] = useState<ChartDrawingItem | null>(null);
+  const isDrawingRef = useRef(false);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+
+  // 심볼별 작도 데이터 영구 보존 및 복원
+  useEffect(() => {
+    try {
+      const key = getDrawingStorageKey(symbol);
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        setDrawings(JSON.parse(saved));
+      } else {
+        setDrawings([]);
+      }
+    } catch {
+      // Ignore localStorage access failures
+    }
+  }, [symbol]);
+
+  const persistDrawings = (nextItems: ChartDrawingItem[]) => {
+    setDrawings(nextItems);
+    try {
+      localStorage.setItem(getDrawingStorageKey(symbol), JSON.stringify(nextItems));
+    } catch {
+      // Ignore localStorage access failures
+    }
+  };
+
+  const handleClearDrawings = () => {
+    persistDrawings([]);
+    setActiveDrawing(null);
+    playStockTickSound();
+  };
 
   // localStorage 환경설정 영구 복원
   useEffect(() => {
@@ -609,6 +653,129 @@ export function StockInteractiveChart({
     return { macdLineD, signalLineD };
   }, [svgCandles, maxMacdVal, macdCenterY, macdPlotH]);
 
+  // 화면 마우스/터치 좌표를 SVG 뷰박스 (0~width, 0~height) 좌표로 정밀 변환
+  const getSvgCoords = (clientX: number, clientY: number) => {
+    if (!svgRef.current) return null;
+    const rect = svgRef.current.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    const x = ((clientX - rect.left) / rect.width) * width;
+    const y = ((clientY - rect.top) / rect.height) * height;
+    return {
+      x: Math.max(0, Math.min(width, Math.round(x))),
+      y: Math.max(0, Math.min(height, Math.round(y))),
+    };
+  };
+
+  const handleSvgPointerDown = (x: number, y: number) => {
+    if (drawingTool === 'cursor') return;
+
+    if (drawingTool === 'horizontal') {
+      const price = Math.round(maxPrice - ((y - paddingTop) / chartHeight) * (maxPrice - minPrice));
+      const newItem: ChartDrawingItem = {
+        id: `hl_${Date.now()}`,
+        type: 'horizontal',
+        x1: 0,
+        y1: y,
+        x2: width,
+        y2: y,
+        price1: Math.max(0, price),
+        createdAt: Date.now(),
+      };
+      persistDrawings([...drawings, newItem]);
+      playStockTickSound();
+      return;
+    }
+
+    if (drawingTool === 'trendline' || drawingTool === 'fibonacci') {
+      isDrawingRef.current = true;
+      setActiveDrawing({
+        id: `draw_${Date.now()}`,
+        type: drawingTool,
+        x1: x,
+        y1: y,
+        x2: x,
+        y2: y,
+        createdAt: Date.now(),
+      });
+    }
+  };
+
+  const handleSvgPointerMove = (x: number, y: number) => {
+    if (isDrawingRef.current && activeDrawing) {
+      setActiveDrawing((prev) => (prev ? { ...prev, x2: x, y2: y } : null));
+    }
+  };
+
+  const handleSvgPointerUp = (x: number, y: number) => {
+    if (isDrawingRef.current && activeDrawing) {
+      const dx = Math.abs((activeDrawing.x2 ?? x) - activeDrawing.x1);
+      const dy = Math.abs((activeDrawing.y2 ?? y) - activeDrawing.y1);
+      if (dx > 4 || dy > 4) {
+        persistDrawings([...drawings, { ...activeDrawing, x2: x, y2: y }]);
+        playStockTickSound();
+      }
+      setActiveDrawing(null);
+      isDrawingRef.current = false;
+    }
+  };
+
+  const handleRemoveDrawing = (id: string) => {
+    persistDrawings(drawings.filter((d) => d.id !== id));
+    playStockTickSound();
+  };
+
+  const onPointerDown = (e: React.MouseEvent<SVGSVGElement> | React.TouchEvent<SVGSVGElement>) => {
+    if (drawingTool === 'cursor') return;
+    const touch = 'touches' in e && e.touches.length > 0 ? e.touches[0] : undefined;
+    const clientX = touch ? touch.clientX : (e as React.MouseEvent<SVGSVGElement>).clientX;
+    const clientY = touch ? touch.clientY : (e as React.MouseEvent<SVGSVGElement>).clientY;
+    const coords = getSvgCoords(clientX, clientY);
+    if (coords) {
+      handleSvgPointerDown(coords.x, coords.y);
+    }
+  };
+
+  const onPointerMove = (e: React.MouseEvent<SVGSVGElement> | React.TouchEvent<SVGSVGElement>) => {
+    if (drawingTool === 'cursor') return;
+    const touch = 'touches' in e && e.touches.length > 0 ? e.touches[0] : undefined;
+    const clientX = touch ? touch.clientX : (e as React.MouseEvent<SVGSVGElement>).clientX;
+    const clientY = touch ? touch.clientY : (e as React.MouseEvent<SVGSVGElement>).clientY;
+    const coords = getSvgCoords(clientX, clientY);
+    if (coords) {
+      handleSvgPointerMove(coords.x, coords.y);
+    }
+  };
+
+  const onPointerUp = (e: React.MouseEvent<SVGSVGElement> | React.TouchEvent<SVGSVGElement>) => {
+    if (drawingTool === 'cursor') return;
+    let clientX = (e as React.MouseEvent<SVGSVGElement>).clientX;
+    let clientY = (e as React.MouseEvent<SVGSVGElement>).clientY;
+    if ('changedTouches' in e && e.changedTouches.length > 0 && e.changedTouches[0]) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    } else if ('touches' in e && e.touches.length > 0 && e.touches[0]) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    }
+    const coords = getSvgCoords(clientX, clientY);
+    if (coords) {
+      handleSvgPointerUp(coords.x, coords.y);
+    }
+  };
+
+  // Esc 키를 누르면 드로잉 취소 및 커서 모드로 복귀
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setDrawingTool('cursor');
+        setActiveDrawing(null);
+        isDrawingRef.current = false;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const activeCandle = hoveredIdx !== null && svgCandles[hoveredIdx]
     ? svgCandles[hoveredIdx]
     : svgCandles[svgCandles.length - 1];
@@ -724,6 +891,18 @@ export function StockInteractiveChart({
                   SR
                 </button>
               </div>
+
+              {/* 트레이딩뷰 스타일 인터랙티브 작도 도구 툴바 */}
+              <StockChartDrawingToolbar
+                activeTool={drawingTool}
+                drawingCount={drawings.length}
+                onSelectTool={(tool) => {
+                  setDrawingTool(tool);
+                  setActiveDrawing(null);
+                  isDrawingRef.current = false;
+                }}
+                onClearAll={handleClearDrawings}
+              />
             </div>
 
             {/* 현재가 대형 표기 */}
@@ -826,10 +1005,19 @@ export function StockInteractiveChart({
         {/* SVG 인터랙티브 메인 차트 캔버스 */}
         <div className="relative w-full h-[200px] sm:h-[240px]">
           <svg
+            ref={svgRef}
             viewBox={`0 0 ${width} ${height}`}
-            className="w-full h-full overflow-visible touch-none cursor-crosshair"
+            className="w-full h-full overflow-visible touch-none cursor-crosshair select-none"
             preserveAspectRatio="none"
-            onMouseLeave={() => setHoveredIdx(null)}
+            onMouseDown={onPointerDown}
+            onMouseMove={onPointerMove}
+            onMouseUp={onPointerUp}
+            onTouchStart={onPointerDown}
+            onTouchMove={onPointerMove}
+            onTouchEnd={onPointerUp}
+            onMouseLeave={() => {
+              if (drawingTool === 'cursor') setHoveredIdx(null);
+            }}
           >
             <defs>
               <linearGradient id="tv-chart-gradient-rise" x1="0" y1="0" x2="0" y2="1">
@@ -1020,6 +1208,7 @@ export function StockInteractiveChart({
                   width={slotW}
                   height={height}
                   fill="transparent"
+                  pointerEvents={drawingTool === 'cursor' ? 'auto' : 'none'}
                   className="cursor-crosshair"
                   onMouseEnter={() => setHoveredIdx(idx)}
                   onTouchStart={() => setHoveredIdx(idx)}
@@ -1061,6 +1250,19 @@ export function StockInteractiveChart({
                 />
               </g>
             )}
+
+            {/* 사용자 인터랙티브 드로잉 벡터 오버레이 (추세선, 수평 지지/저항선, 피보나치) */}
+            <StockChartDrawingOverlay
+              drawings={drawings}
+              activeDrawing={activeDrawing}
+              width={width}
+              height={height}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              chartHeight={chartHeight}
+              paddingTop={paddingTop}
+              onDeleteItem={handleRemoveDrawing}
+            />
           </svg>
         </div>
 
