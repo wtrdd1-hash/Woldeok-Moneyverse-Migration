@@ -7,14 +7,14 @@ const BOT_BROADCAST_URL = process.env.DISCORD_BOT_BROADCAST_URL || 'http://127.0
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { title, description, fields, color, type } = body;
+    const { title, description, fields, color, type, notifyAdminDm } = body;
 
     // 디스코드 봇 로컬 웹훅 서버로 전달
     try {
       const botRes = await fetch(BOT_BROADCAST_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, fields, color, type }),
+        body: JSON.stringify({ title, description, fields, color, type, notifyAdminDm }),
         signal: AbortSignal.timeout(2000), // 2s timeout
       });
 

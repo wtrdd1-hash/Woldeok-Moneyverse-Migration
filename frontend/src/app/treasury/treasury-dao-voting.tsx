@@ -82,11 +82,16 @@ export function TreasuryDaoVoting({ isLoggedIn, isEn = false }: TreasuryDaoVotin
       return;
     }
 
+    const targetProp = proposals.find((p) => p.id === proposalId);
     try {
       const res = await fetch('/api/treasury/proposals', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ proposalId }),
+        body: JSON.stringify({
+          proposalId,
+          title: targetProp?.title,
+          currentVotes: targetProp?.votesCount,
+        }),
       });
       const data = await res.json();
 

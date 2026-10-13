@@ -154,6 +154,24 @@ export function TreasuryDisburseDialog({ vaults }: Props) {
       const res = await disburseCitizenDividendAction({ status: 'idle' }, formData);
       if (res.status === 'ok') {
         setMessage({ status: 'ok', text: res.message ?? '시민 배당이 성공적으로 집행되었습니다.' });
+
+        // 디스코드 채널 및 관리자 DM 브로드캐스트 자동 전파
+        fetch('/api/discord/broadcast', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: '🏛️ [국고 기본배당] 전 시민 국고 잉여금 기본배당 공식 집행!',
+            description: `국고 세수 잉여금 환원 정책에 따라 시민 1인당 **${Number(perUserAmount).toLocaleString()} WLD** 기본배당이 국고 금고에서 즉시 일괄 분배되었습니다.`,
+            color: 0x10b981,
+            type: 'treasury_basic_dividend',
+            notifyAdminDm: true,
+            fields: [
+              { name: '1인당 지급액', value: `**+${Number(perUserAmount).toLocaleString()} WLD**`, inline: true },
+              { name: '지급 대상', value: '전체 시민 계좌 일괄 원자적 지급', inline: true },
+              { name: '집행 사유', value: dividendReason.trim(), inline: false },
+            ],
+          }),
+        }).catch(() => {});
       } else {
         setMessage({ status: 'error', text: res.message ?? '배당 집행에 실패했습니다.' });
       }

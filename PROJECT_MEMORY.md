@@ -13,8 +13,29 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v593 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v593`
+## 🌟 Production Release Overview (prod-v594 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v594`
+- **Release Date**: 2026-10-14 08:45 KST
+- **Git Commit HEAD**: `main`
+- **Key Deliverables**:
+  1. **디스코드 관제 고도화 (카지노 1억 잭팟/국고배당 브로드캐스트 + 관리자 5대 DM 직보, v213 / prod-v594)**:
+     - **카지노 대형 잭팟 브로드캐스트 (`slots-game.tsx`)**: 1억 WLD(100,000,000 WLD) 이상 잭팟 또는 777 당첨 시 디스코드 웹훅/봇 채널로 축하 리치 임베드 및 관리자 DM 동시 발송.
+     - **국고 기본배당/지원금 브로드캐스트 (`treasury-disburse-dialog.tsx`)**: 전 시민 기본배당 집행 시 1인당 지급액과 집행 사유를 디스코드 채널 및 관리자에게 실시간 전파.
+     - **관리자 5대 확장 DM 직보 엔진 (`DiscordAlertService`)**: 고래 대규모 자금 이동(5천만 WLD+), 카지노 1억 잭팟, 국고 준비금 결핍(10억 미만), 긴급 킬스위치 가동 상태 변경, 은행 대출 연체 급증 경보를 디스코드 1:1 DM으로 실시간 직보.
+     - **관리자 6종 DM 프리셋 발송 콘솔 (`AdminDiscordDmTestButton`)**: 관리자가 6개 알림 프리셋을 원클릭으로 선택·시뮬레이션 발송할 수 있는 직관적 테스트 인터페이스 탑재.
+  2. **시민 참여형 주민참여예산(DAO) 투표제 연동 (`treasury-dao-voting.tsx`, `/api/treasury/proposals`)**:
+     - 시민 1인 1표 찬성 투표 실시간 반영, 1,000표 돌파 시 공식 가결(PASSED) 상태 전환 및 디스코드 채널 가결 축하 브로드캐스트 자동 발송.
+  3. **덕이 AI 어드바이저 1클릭 포트폴리오 자동 리밸런싱 주문 체결 (`/advisor`, `/api/advisor/deoki/rebalance/execute`)**:
+     - 목표 비중(주식 55%, 국채 20%, 현금 25%)에 맞춘 WDX 주식 및 KTB 국채 시장가 즉시 분할 매매 체결 엔진.
+     - 포트폴리오 안전 지수(PR-Index 40점 -> 88점 상향) 개선 영수증 및 50% 우대 수수료 할인 영수증 다이얼로그 모달 완비.
+  4. **검증 및 무중단 배포**:
+     - 프론트엔드 및 백엔드 타입체크 0 Errors & 단위 테스트 100% 통과 (12/12).
+     - 프로덕션 무중단 승격 배포.
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v593)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v593`
 - **Release Date**: 2026-10-13 22:10 KST
 - **Git Commit HEAD**: `main`
 - **Key Deliverables**:

@@ -273,24 +273,77 @@ export class AdminDiscordOperationsController {
 
   @Post('test-dm')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Send test direct message to configured admin user' })
-  async testDm(@Req() request: RequestWithSession) {
+  @ApiOperation({ summary: 'Send test direct message to configured admin user with preset support' })
+  async testDm(
+    @Req() request: RequestWithSession,
+    @Body() body?: { preset?: string },
+  ) {
     const actor = requireUserId(request);
     if (!this.discordAlert) {
       throw new ServiceUnavailableException('Discord alert service is not available');
     }
     const adminUserId = this.discordAlert.getAdminUserId();
-    const result = await this.discordAlert.sendAdminDirectMessage({
-      title: '🔔 [관리자 DM 연동 확인] 월덕 머니버스 중요 정보 다이렉트 알림',
-      description: '디스코드 봇을 통한 중요 정보(원장 불일치, 음수 잔액, 감사 체인 변조 등) 1:1 전송 파이프라인이 정상 연동되었습니다.',
-      color: 0x10b981,
-      fields: [
-        { name: '수신 관리자 ID', value: `\`${adminUserId}\``, inline: true },
-        { name: '테스트 요청자', value: `\`${actor.slice(0, 8)}...\``, inline: true },
-        { name: '감시 항목', value: '원장 대사 무결성, 계좌 잔액 안전성, 감사 체인 변조, 긴급 관리자 경보', inline: false },
-      ],
-    });
-    return { ...result, targetUserId: adminUserId };
+    const preset = body?.preset ?? 'default';
+
+    let result: { success: boolean; channelId?: string; error?: string };
+
+    switch (preset) {
+      case 'whale':
+        result = await this.discordAlert.alertWhaleMovement({
+          txId: `tx-whale-${Date.now().toString(36)}`,
+          sender: 'acc-whale-kr-0089',
+          receiver: 'acc-exchange-cold-vault',
+          amount: '85000000',
+          asset: 'WLD',
+        });
+        break;
+      case 'jackpot':
+        result = await this.discordAlert.alertCasinoMegaJackpot({
+          game: '메가 드래곤 777 슬롯머신',
+          userId: actor,
+          betAmount: '500000',
+          winAmount: '120000000',
+          multiplier: 240,
+        });
+        break;
+      case 'treasury':
+        result = await this.discordAlert.alertTreasuryReserveLow({
+          currentBalance: '840000000',
+          threshold: '1000000000',
+          reserveRatio: '14.2%',
+        });
+        break;
+      case 'killswitch':
+        result = await this.discordAlert.alertKillSwitchActivated({
+          controlName: '가상 주식 거래소 체결 엔진',
+          activatedBy: actor,
+          reason: '긴급 시스템 이상 감지 및 시장 안정화 조치',
+          action: 'HALTED',
+        });
+        break;
+      case 'bank_delinquency':
+        result = await this.discordAlert.alertBankDelinquencySpike({
+          delinquentRatio: '8.7% (경보 구간)',
+          defaultedCount: 14,
+          affectedAmount: '42,500,000',
+        });
+        break;
+      case 'default':
+      default:
+        result = await this.discordAlert.sendAdminDirectMessage({
+          title: '🔔 [관리자 DM 연동 확인] 월덕 머니버스 중요 정보 다이렉트 알림',
+          description: '디스코드 봇을 통한 중요 정보(원장 불일치, 음수 잔액, 감사 체인 변조 등) 1:1 전송 파이프라인이 정상 연동되었습니다.',
+          color: 0x10b981,
+          fields: [
+            { name: '수신 관리자 ID', value: `\`${adminUserId}\``, inline: true },
+            { name: '테스트 요청자', value: `\`${actor.slice(0, 8)}...\``, inline: true },
+            { name: '감시 항목', value: '원장 대사 무결성, 계좌 잔액 안전성, 감사 체인 변조, 긴급 관리자 경보', inline: false },
+          ],
+        });
+        break;
+    }
+
+    return { ...result, targetUserId: adminUserId, preset };
   }
 }
 

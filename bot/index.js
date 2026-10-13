@@ -349,6 +349,9 @@ try {
           }
 
           await sendLog({ embeds: [embed] });
+          if (payload.notifyAdminDm) {
+            await sendAdminDM({ embeds: [embed] });
+          }
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ ok: true, status: 'Broadcast sent to Discord' }));
         } catch (e) {

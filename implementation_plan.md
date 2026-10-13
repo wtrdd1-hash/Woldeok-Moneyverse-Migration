@@ -1577,3 +1577,56 @@
 3. Git 커밋 및 origin main 푸시 (`prod-v593`)
 4. Debian 13 VM 100 프로덕션 무중단 승격 배포
 5. 라이브 실측: `/advisor` 및 `/api/advisor/deoki/diagnose` HTTP 200 OK 확인
+
+
+---
+
+## 🚀 [v213 Specification] 디스코드 관제 고도화(카지노 잭팟/국고배당 브로드캐스트 + 관리자 5대 DM 직보), DAO 예산 투표제 및 덕이 1클릭 리밸런싱 주문 체결
+
+### 1. 현황 및 개발 목표
+1. **[카지노 대형 잭팟 & 국고 기본배당 디스코드 자동 브로드캐스트]**:
+   - 슬롯머신·룰렛 등 카지노 미니게임에서 1억 WLD(100,000,000 WLD) 이상 초대형 잭팟 당첨 시 디스코드 웹훅/봇 채널로 축하 임베드 자동 발송.
+   - 국고 기본배당(Basic Dividend) 및 바이백(Buyback) 소각 집행 시 채널 브로드캐스트 자동 발송.
+2. **[시민 참여형 주민참여예산(DAO) 투표제 연동]**:
+   - 국고 지원금 사용처(거래 수수료 0% 주간, 길드 스타트업 펀딩 부스트, 복리 예금 특별 가산 등)를 유저가 1인 1표로 직접 추천/찬반 투표하는 거버넌스 투표함 구현.
+   - 1,000표 도달 시 자동 통과 상태 전환 및 관리자 국고 집행 승인 연계.
+3. **[덕이 AI 어드바이저 1클릭 포트폴리오 자동 리밸런싱 주문 체결]**:
+   - `/advisor` 페이지의 진단 결과(목표 비중: 현금 25%, 주식 55%, 국채 20% 등)에 맞춰, WDX 주식 및 KTB 국채를 시장가로 즉시 일괄 분할 매수/매도하는 원클릭 주문 실행 API(`/api/advisor/deoki/rebalance/execute`) 연동.
+   - 체결 영수증(매수/매도 수량, 체결 금액, 수수료, 잔여 현금) 모달 제공.
+4. **[관리자 다이렉트 메시지(DM) 5대 확장 관제 직보 탑재]**:
+   - 기존 원장 대사/음수 잔액/감사 로그 외에 다음 5개 핵심 이상 징후/이벤트 발생 시 관리자 디스코드 개인 DM 실시간 직보:
+     ① 고래 대규모 자금 이동 (5,000만 WLD 이상 단일 이체)
+     ② 카지노 1억 WLD 메가 잭팟 긴급 직보
+     ③ 국고 지급준비금 결핍 경보 (10억 WLD 미만 하락)
+     ④ 비상 킬스위치 및 거래소 가동 상태 변경
+     ⑤ 은행 대출 연체 급증 및 뱅크런 조기 경보
+   - 관리자 콘솔(`/admin/discord`)에 각 프리셋을 즉시 시뮬레이션 발송해볼 수 있는 6종 DM 테스트 패널 탑재.
+
+---
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **backend/src/discord/discord-alert.service.ts (확장)**:
+   - `alertWhaleMovement`, `alertCasinoMegaJackpot`, `alertTreasuryReserveLow`, `alertKillSwitchActivated`, `alertBankDelinquencySpike` 메서드 추가.
+2. **backend/src/admin/operations.controller.ts (수정)**:
+   - `POST /api/v1/admin/discord/test-dm` 엔드포인트에 `preset` 파라미터(`whale`, `jackpot`, `treasury`, `killswitch`, `bank_delinquency`, `default`) 지원 추가.
+3. **frontend/src/app/api/discord/broadcast/route.ts (확장)**:
+   - 카지노 잭팟(`casino_jackpot`), 국고 기본배당(`treasury_basic_dividend`), 바이백(`treasury_buyback`) 이벤트 페이로드 처리 지원.
+4. **frontend/src/app/api/advisor/deoki/rebalance/execute/route.ts (신규)**:
+   - 원클릭 포트폴리오 리밸런싱 시장가 자동 분할 매매 실행 API.
+5. **frontend/src/app/advisor/advisor-client.tsx (수정)**:
+   - 리밸런싱 주문 버튼 클릭 시 실행 확인 및 체결 영수증 모달 연동.
+6. **frontend/src/app/treasury/treasury-dao-voting.tsx (보강)**:
+   - 주민참여예산 실시간 투표 인터랙션 및 상태 동기화.
+7. **frontend/src/app/admin/discord/admin-discord-dm-test-button.tsx (수정)**:
+   - 6개 관리자 DM 알림 프리셋 드롭다운/버튼 그리드 탑재.
+8. **단위 테스트**:
+   - 디스코드 DM 프리셋 및 어드바이저 리밸런싱 주문 테스트 작성.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 정적 타입 검사 (`pnpm run typecheck`): 0 Errors
+2. 백엔드 빌드 및 단위 테스트 검증
+3. Git 커밋 및 origin main 푸시 (`prod-v594`)
+4. Debian 13 VM 100 프로덕션 무중단 승격 배포
+5. 라이브 실측: `/admin/discord`, `/advisor`, `/treasury` 및 관련 API 정상 응답 확인

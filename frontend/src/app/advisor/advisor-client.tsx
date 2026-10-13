@@ -17,11 +17,46 @@ import {
   Landmark,
   Wallet,
   MessageSquare,
+  Zap,
+  Check,
+  Receipt,
+  X,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { toast } from 'sonner';
+
+interface RebalanceTradeItem {
+  readonly asset: string;
+  readonly code: string;
+  readonly action: 'BUY' | 'SELL' | 'HOLD';
+  readonly amountWld: number;
+  readonly quantity: number;
+  readonly unitPriceWld: number;
+  readonly feeWld: number;
+  readonly status: 'FILLED' | 'ALLOCATED';
+}
+
+interface RebalanceExecutionReceipt {
+  readonly executionId: string;
+  readonly executedAt: string;
+  readonly totalRebalancedWld: number;
+  readonly feeDiscountWld: number;
+  readonly netCashBalanceWld: number;
+  readonly prIndexBefore: number;
+  readonly prIndexAfter: number;
+  readonly trades: readonly RebalanceTradeItem[];
+  readonly adviceSummary: string;
+}
 
 interface AllocationItem {
   category: string;
@@ -66,7 +101,42 @@ export function AdvisorClient() {
   ]);
   const [inputQuestion, setInputQuestion] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isRebalancing, setIsRebalancing] = useState(false);
+  const [receiptModalOpen, setReceiptModalOpen] = useState(false);
+  const [rebalanceReceipt, setRebalanceReceipt] = useState<RebalanceExecutionReceipt | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  const handleExecuteRebalance = async () => {
+    setIsRebalancing(true);
+    try {
+      const res = await fetch('/api/advisor/deoki/rebalance/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetStocksRatio: 55,
+          targetBondsRatio: 20,
+          targetCashRatio: 25,
+        }),
+      });
+      const resData = await res.json();
+      if (res.ok && resData.success && resData.receipt) {
+        setRebalanceReceipt(resData.receipt);
+        setReceiptModalOpen(true);
+        toast.success('포트폴리오 리밸런싱 주문이 시장가로 즉시 체결되었습니다!', {
+          description: `체결 번호: ${resData.receipt.executionId}`,
+        });
+        fetchDiagnosis();
+      } else {
+        toast.error('리밸런싱 주문 실패', {
+          description: resData.error || '주문 처리 중 문제가 발생했습니다.',
+        });
+      }
+    } catch {
+      toast.error('네트워크 통신 오류가 발생했습니다.');
+    } finally {
+      setIsRebalancing(false);
+    }
+  };
 
   const fetchDiagnosis = async () => {
     try {
@@ -289,15 +359,37 @@ export function AdvisorClient() {
             </div>
 
             {/* Rebalancing Suggestion Box */}
-            <div className="p-3.5 rounded-lg border border-indigo-500/30 bg-indigo-950/20 space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-400">
-                <RefreshCw className="size-3.5" />
-                <span>덕이의 원클릭 리밸런싱 권장안</span>
+            <div className="p-3.5 rounded-lg border border-indigo-500/30 bg-indigo-950/20 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-400">
+                  <RefreshCw className="size-3.5" />
+                  <span>덕이의 원클릭 리밸런싱 권장안</span>
+                </div>
+                <Badge variant="outline" className="text-[10px] bg-indigo-500/10 text-indigo-300 border-indigo-500/30 font-mono">
+                  수수료 50% 우대
+                </Badge>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 {data?.rebalancingAction ??
                   '테크 성장주 비중 8%를 차익 실현한 후, 연 14.8% 배당의 강남 프라임 타워 지분 또는 5년물 국채로 리밸런싱을 권장합니다.'}
               </p>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleExecuteRebalance}
+                disabled={isRebalancing}
+                className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-semibold text-xs h-8 shadow-sm cursor-pointer"
+              >
+                {isRebalancing ? (
+                  <span className="flex items-center gap-1.5">
+                    <RefreshCw className="size-3 animate-spin" /> 시장가 분할 주문 체결 중...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5">
+                    <Zap className="size-3.5" /> ⚡ 1클릭 시장가 자동 리밸런싱 주문 체결
+                  </span>
+                )}
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -463,6 +555,109 @@ export function AdvisorClient() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Rebalance Execution Receipt Dialog */}
+      <Dialog open={receiptModalOpen} onOpenChange={setReceiptModalOpen}>
+        <DialogContent className="max-w-md sm:max-w-lg border-border/80 bg-background/95 backdrop-blur-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
+              <Receipt className="size-5 text-indigo-500" />
+              <span>덕이 AI 포트폴리오 리밸런싱 체결 영수증</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground font-mono">
+              주문 체결 번호: {rebalanceReceipt?.executionId}
+            </DialogDescription>
+          </DialogHeader>
+
+          {rebalanceReceipt && (
+            <div className="space-y-4 pt-2">
+              {/* Score Shift Banner */}
+              <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-950/20 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] text-muted-foreground">포트폴리오 안전 지수(PR-Index) 개선</div>
+                  <div className="text-base font-extrabold text-emerald-400 font-mono flex items-center gap-1.5">
+                    <span>{rebalanceReceipt.prIndexBefore}점</span>
+                    <ArrowRight className="size-3.5 text-muted-foreground" />
+                    <span>{rebalanceReceipt.prIndexAfter}점 (+{rebalanceReceipt.prIndexAfter - rebalanceReceipt.prIndexBefore}점 상향)</span>
+                  </div>
+                </div>
+                <Badge variant="default" className="bg-emerald-600 text-white font-bold text-xs">
+                  위험 완화 완료
+                </Badge>
+              </div>
+
+              {/* Trade execution list */}
+              <div className="space-y-1.5">
+                <span className="text-xs font-semibold text-foreground">시장가 분할 주문 체결 내역</span>
+                <div className="divide-y divide-border/60 rounded-md border border-border/60 overflow-hidden bg-muted/20">
+                  {rebalanceReceipt.trades.map((item, idx) => (
+                    <div key={idx} className="p-2.5 flex items-center justify-between text-xs">
+                      <div>
+                        <div className="font-semibold text-foreground flex items-center gap-1.5">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] px-1.5 py-0 h-4 font-bold ${
+                              item.action === 'BUY'
+                                ? 'border-rose-500/40 text-rose-400 bg-rose-500/10'
+                                : item.action === 'SELL'
+                                ? 'border-sky-500/40 text-sky-400 bg-sky-500/10'
+                                : 'border-zinc-500/40 text-zinc-400 bg-zinc-500/10'
+                            }`}
+                          >
+                            {item.action === 'BUY' ? '매수' : item.action === 'SELL' ? '매도' : '유지'}
+                          </Badge>
+                          <span>{item.asset}</span>
+                        </div>
+                        <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
+                          {item.quantity.toLocaleString()}주 @ {item.unitPriceWld.toLocaleString()} WLD
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono font-bold text-foreground">
+                          {item.amountWld.toLocaleString()} WLD
+                        </div>
+                        <div className="text-[10px] text-emerald-400 font-mono">
+                          체결 완료 (수수료 {item.feeWld} WLD)
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Summary Stats */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="p-2.5 rounded-lg border border-border/60 bg-muted/30">
+                  <span className="text-muted-foreground block text-[11px]">총 리밸런싱 실행액</span>
+                  <span className="font-mono font-extrabold text-foreground text-sm">
+                    {rebalanceReceipt.totalRebalancedWld.toLocaleString()} WLD
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-lg border border-border/60 bg-muted/30">
+                  <span className="text-muted-foreground block text-[11px]">우대 수수료 절감액</span>
+                  <span className="font-mono font-extrabold text-indigo-400 text-sm">
+                    +{rebalanceReceipt.feeDiscountWld.toLocaleString()} WLD
+                  </span>
+                </div>
+              </div>
+
+              {/* Advice */}
+              <p className="text-xs text-muted-foreground leading-relaxed border-t border-border/60 pt-2">
+                💡 {rebalanceReceipt.adviceSummary}
+              </p>
+
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setReceiptModalOpen(false)}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs h-9"
+              >
+                확인 및 닫기
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

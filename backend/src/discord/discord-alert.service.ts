@@ -479,4 +479,124 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       ],
     });
   }
+
+  /**
+   * 5. [관리자 DM 직보] 고래 대규모 자금 이동 감지 (5,000만 WLD 이상)
+   */
+  async alertWhaleMovement(input: {
+    txId: string;
+    sender: string;
+    receiver: string;
+    amount: number | string;
+    asset?: string;
+  }): Promise<{ success: boolean; channelId?: string; error?: string }> {
+    const formattedAmount = Number(input.amount).toLocaleString('ko-KR');
+    return this.sendAdminDirectMessage({
+      title: '🐋 [긴급 직보] 고래 대규모 자금 이동 감지 (Whale Movement Alert)',
+      description: `단일 트랜잭션에서 **${formattedAmount} ${input.asset ?? 'WLD'}**의 대규모 자금 이동이 발생했습니다.`,
+      color: 0x8b5cf6, // Purple
+      fields: [
+        { name: '트랜잭션 ID', value: `\`${this.maskIdentifier(input.txId)}\``, inline: true },
+        { name: '이체 금액', value: `**${formattedAmount} ${input.asset ?? 'WLD'}**`, inline: true },
+        { name: '송신자', value: `\`${this.maskIdentifier(input.sender)}\``, inline: true },
+        { name: '수신자', value: `\`${this.maskIdentifier(input.receiver)}\``, inline: true },
+        { name: '보안 등급', value: '초고액 관제 모니터링 대상', inline: false },
+      ],
+    });
+  }
+
+  /**
+   * 6. [관리자 DM 직보] 카지노 1억 WLD 초대형 잭팟 발생
+   */
+  async alertCasinoMegaJackpot(input: {
+    game: string;
+    userId: string;
+    betAmount: number | string;
+    winAmount: number | string;
+    multiplier?: number;
+  }): Promise<{ success: boolean; channelId?: string; error?: string }> {
+    const formattedWin = Number(input.winAmount).toLocaleString('ko-KR');
+    const formattedBet = Number(input.betAmount).toLocaleString('ko-KR');
+    return this.sendAdminDirectMessage({
+      title: '🎰 [잭팟 직보] 카지노 1억 WLD 초대형 잭팟 터짐 (Mega Jackpot Hit)',
+      description: `카지노 **${input.game}**에서 초대형 잭팟(**${formattedWin} WLD**)이 당첨되었습니다!`,
+      color: 0xf59e0b, // Amber Gold
+      fields: [
+        { name: '게임 종목', value: input.game, inline: true },
+        { name: '당첨자', value: `\`${this.maskIdentifier(input.userId)}\``, inline: true },
+        { name: '배팅 금액', value: `${formattedBet} WLD`, inline: true },
+        { name: '총 당첨금', value: `**${formattedWin} WLD**`, inline: true },
+        ...(input.multiplier ? [{ name: '배당 배율', value: `**x${input.multiplier}배**`, inline: true }] : []),
+        { name: '국고 세금 징수', value: '배당소득세(10%) 국고 자동 원천징수 완료', inline: false },
+      ],
+    });
+  }
+
+  /**
+   * 7. [관리자 DM 직보] 국고 지급준비금 결핍 위험 경보 (10억 WLD 미만)
+   */
+  async alertTreasuryReserveLow(input: {
+    currentBalance: number | string;
+    threshold: number | string;
+    reserveRatio?: string;
+  }): Promise<{ success: boolean; channelId?: string; error?: string }> {
+    const formattedCur = Number(input.currentBalance).toLocaleString('ko-KR');
+    const formattedThresh = Number(input.threshold).toLocaleString('ko-KR');
+    return this.sendAdminDirectMessage({
+      title: '⚠️ [재정 경보] 국고 지급준비금 안전선 하회 (Treasury Reserve Underflow)',
+      description: `중앙 국고 금고 잔액이 안전 운영 임계치(**${formattedThresh} WLD**) 이하로 떨어졌습니다.`,
+      color: 0xef4444, // Red
+      fields: [
+        { name: '현재 국고 잔액', value: `**${formattedCur} WLD**`, inline: true },
+        { name: '위험 임계 기준', value: `${formattedThresh} WLD`, inline: true },
+        ...(input.reserveRatio ? [{ name: '지급준비율', value: `**${input.reserveRatio}**`, inline: true }] : []),
+        { name: '권장 조치', value: '공공 지출 일시 제한 또는 국부펀드(ASWF) 환매 검토 필요', inline: false },
+      ],
+    });
+  }
+
+  /**
+   * 8. [관리자 DM 직보] 긴급 킬스위치 가동 상태 변경
+   */
+  async alertKillSwitchActivated(input: {
+    controlName: string;
+    activatedBy: string;
+    reason?: string;
+    action: 'HALTED' | 'RESUMED';
+  }): Promise<{ success: boolean; channelId?: string; error?: string }> {
+    const isHalted = input.action === 'HALTED';
+    return this.sendAdminDirectMessage({
+      title: isHalted
+        ? '🛑 [비상 관제] 긴급 킬스위치 발동 - 시스템 일시 중단'
+        : '🟢 [비상 관제] 긴급 킬스위치 해제 - 시스템 정상 재개',
+      description: `관리자에 의해 **${input.controlName}** 제어 스위치가 [${isHalted ? '중단(HALTED)' : '정상화(RESUMED)'}] 상태로 전환되었습니다.`,
+      color: isHalted ? 0xdc2626 : 0x10b981,
+      fields: [
+        { name: '제어 대상', value: input.controlName, inline: true },
+        { name: '조작자', value: `\`${this.maskIdentifier(input.activatedBy)}\``, inline: true },
+        { name: '실행 사유', value: input.reason || '관리자 수동 비상 관제 조치', inline: false },
+      ],
+    });
+  }
+
+  /**
+   * 9. [관리자 DM 직보] 은행 대출 부실화 및 연체 급증 경보
+   */
+  async alertBankDelinquencySpike(input: {
+    delinquentRatio: string;
+    defaultedCount: number;
+    affectedAmount: string;
+  }): Promise<{ success: boolean; channelId?: string; error?: string }> {
+    return this.sendAdminDirectMessage({
+      title: '📉 [금융 리스크] 은행 대출 연체율 급증 및 뱅크런 조기 경보',
+      description: '중앙 은행의 대출 연체율이 위험 구간을 돌파하여 건전성에 적신호가 켜졌습니다.',
+      color: 0xf97316, // Orange
+      fields: [
+        { name: '현재 연체율', value: `**${input.delinquentRatio}**`, inline: true },
+        { name: '부실 대출 건수', value: `${input.defaultedCount}건`, inline: true },
+        { name: '위험 노출 총액', value: `**${input.affectedAmount} WLD**`, inline: true },
+        { name: '대응 매뉴얼', value: '예금보험공사(KDIC) 대위변제 준비금 상태 및 대출 이자율 조정 검토', inline: false },
+      ],
+    });
+  }
 }

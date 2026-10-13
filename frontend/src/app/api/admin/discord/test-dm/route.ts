@@ -5,8 +5,9 @@ export const dynamic = 'force-dynamic';
 
 const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
+    const body = await req.json().catch(() => ({}));
     const cookieStore = await cookies();
     const cookieHeader = cookieStore
       .getAll()
@@ -19,6 +20,7 @@ export async function POST() {
         'content-type': 'application/json',
         cookie: cookieHeader,
       },
+      body: JSON.stringify(body),
     });
 
     const data = await res.json().catch(() => ({}));

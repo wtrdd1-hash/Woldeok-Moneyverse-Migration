@@ -177,6 +177,33 @@ export function LuckySlotsGame({
         } else {
           synthSound.playLoss();
         }
+
+        // 1억 WLD 이상 대형 잭팟 또는 777 당첨 시 디스코드 웹훅/봇 브로드캐스트 자동 전파
+        if (isWon && state.netAmount) {
+          try {
+            const wonAmount = BigInt(state.netAmount);
+            if (wonAmount >= BigInt(100_000_000) || targetFace === 6) {
+              fetch('/api/discord/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  title: '🎰 [카지노 잭팟] 777 슬롯머신 초대형 잭팟 터짐!',
+                  description: `행운의 주인공이 탄생했습니다! 슬롯머신에서 **${wonAmount.toLocaleString()} WLD** 대형 잭팟이 당첨되었습니다.`,
+                  color: 0xf59e0b,
+                  type: 'casino_jackpot',
+                  notifyAdminDm: true,
+                  fields: [
+                    { name: '게임 종목', value: '777 럭키 슬롯', inline: true },
+                    { name: '순당첨금', value: `**+${wonAmount.toLocaleString()} WLD**`, inline: true },
+                    { name: '당첨 기호', value: targetReels[0]?.name || '777 잭팟', inline: true },
+                  ],
+                }),
+              }).catch(() => {});
+            }
+          } catch {
+            // 무시
+          }
+        }
       }, 1000);
     } else if (state.status === 'error') {
       setIsSpinning(false);

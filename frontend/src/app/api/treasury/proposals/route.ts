@@ -120,7 +120,8 @@ export async function POST(request: Request) {
 
     // 디스코드 실시간 브로드캐스트 연동 (Fire & Forget)
     try {
-      fetch('http://127.0.0.1:3000/api/discord/broadcast', {
+      const botUrl = process.env.DISCORD_BOT_BROADCAST_URL || 'http://127.0.0.1:3099/broadcast';
+      fetch(botUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -133,6 +134,7 @@ export async function POST(request: Request) {
             { name: '목표 투표수', value: '1,000표', inline: true },
           ],
           color: 0x10b981, // Emerald
+          notifyAdminDm: true,
         }),
       }).catch(() => {});
     } catch {
@@ -162,6 +164,8 @@ export async function PUT(request: Request) {
 
     const body = (await request.json().catch(() => ({}))) as {
       proposalId?: string;
+      title?: string;
+      currentVotes?: number;
     };
 
     if (!body.proposalId) {
@@ -171,10 +175,40 @@ export async function PUT(request: Request) {
       );
     }
 
+    const nextVotes = (body.currentVotes ?? 0) + 1;
+    const isPassed = nextVotes >= 1000;
+
+    if (isPassed && body.title) {
+      try {
+        const botUrl = process.env.DISCORD_BOT_BROADCAST_URL || 'http://127.0.0.1:3099/broadcast';
+        fetch(botUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'DAO_VOTING_PASSED',
+            title: `🎉 [주민참여예산] 1,000표 달성! 사업안 가결`,
+            description: `시민 투표 1,000표를 돌파하여 **"${body.title}"** 공공사업이 공식 가결(PASSED)되었습니다. 관리자 승인 후 국고 집행이 개시됩니다.`,
+            fields: [
+              { name: '달성 투표수', value: `${nextVotes.toLocaleString()}표`, inline: true },
+              { name: '상태', value: '가결 (집행 대기)', inline: true },
+            ],
+            color: 0x3b82f6, // Blue
+            notifyAdminDm: true,
+          }),
+        }).catch(() => {});
+      } catch {
+        // non-blocking
+      }
+    }
+
     return NextResponse.json({
       ok: true,
-      message: '국고 공공사업 찬성 투표가 정상 반영되었습니다 (+1표).',
+      message: isPassed
+        ? '축하합니다! 1,000표 달성으로 공공사업이 가결(PASSED)되었습니다!'
+        : '국고 공공사업 찬성 투표가 정상 반영되었습니다 (+1표).',
       proposalId: body.proposalId,
+      votesCount: nextVotes,
+      status: isPassed ? 'PASSED' : 'VOTING',
       votedAt: new Date().toISOString(),
     });
   } catch (error) {
