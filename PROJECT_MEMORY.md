@@ -13,8 +13,29 @@
 
 ---
 
-## 🌟 Production Release Overview (prod-v587 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v587`
+## 🌟 Production Release Overview (prod-v588 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v588`
+- **Release Date**: 2026-10-13 10:07 KST
+- **Git Commit HEAD**: `bade5aa6` (`main`)
+- **Key Deliverables**:
+  1. **가상 주식 트레이딩뷰급 인터랙티브 작도 도구 툴킷 구축 (v207 / prod-v588)**:
+     - **추세선 (Trendline)**: 시작 앵커부터 끝 앵커까지 드래그 작도 (스카이블루 `#38bdf8`, 앵커 원형 핸들).
+     - **수평 지지/저항선 (Horizontal Line)**: 차트 내 임의 가격대 원클릭 작도 (에메랄드 `#10b981`, 점선 가이드라인 & 우측 정밀 가격 라벨 배지).
+     - **피보나치 5단계 되돌림 (Fibonacci Retracement)**: 고점~저점 드래그 기반 5단계 황금비율 레벨 (0%, 38.2%, 50%, 61.8%, 100%) 및 구간별 가격/비율 배지 자동 표기.
+  2. **종목 심볼별 독립 로컬 스토리지 영구 저장 & 크로스 서피스 제스처**:
+     - `wdmv_chart_drawings_{SYMBOL}_v1` 독립 키로 작도선 자동 저장 및 복원.
+     - 데스크톱 마우스 다운/무브/업 및 모바일 터치스타트/무브/엔드 듀얼 제스처 완벽 지원.
+     - `Esc` 단축키 원클릭 커서 모드 복귀 및 개별/전체 삭제 액션 완벽 연동.
+  3. **검증 및 무중단 배포**:
+     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
+     - 단위 테스트 `stock-orderbook.test.tsx` (10/10) 100% PASS.
+     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
+     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 OK 라이브 실측 완료).
+
+---
+
+## 🌟 Previous Production Release Overview (prod-v587)
+- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v587`
 - **Release Date**: 2026-10-13 09:46 KST
 - **Git Commit HEAD**: `017e56f3` (`main`)
 - **Key Deliverables**:
