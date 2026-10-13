@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -57,14 +57,13 @@ export class NotificationService {
     return row?.affected_count ?? 0;
   }
 
-  async claimAll(actor: string): Promise<{ success: boolean; claimedCount: number; message: string }> {
-    if (!this.pool) throw new Error('database pool unavailable');
-    const affected = await this.markAllRead(actor);
-    return {
-      success: true,
-      claimedCount: affected,
-      message: affected > 0 ? `${affected}건의 알림을 모두 확인 및 수령 완료했습니다.` : '수령할 신규 알림이 없습니다.',
-    };
+  /**
+   * A notification is not a reward ledger entry. Until an atomic, auditable
+   * reward-settlement operation exists, claiming must never mark notifications
+   * as read or report that funds were credited.
+   */
+  async claimAll(_actor: string): Promise<never> {
+    throw new ConflictException('Reward claiming is unavailable; no rewards or notifications were changed.');
   }
 }
 
