@@ -1,6 +1,10 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v196)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v204)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v204**: [루트 홈페이지(/) SERP 클릭률(CTR) 극대화 메타태그 완전 동기화 및 prod-v585 실서버 완전 배포] (+60, -0)
+- **v203**: [검색엔진 봇 404/크롤링 누수 완전 차단 & SERP 클릭률(CTR) 극대화 최적화] (+50, -0)
+- **v202**: [가상 주식 실시간 호가 심도 누적 차트(DOM Depth Chart) & 관리자 비상 관제 킬스위치 그리드 구축] (+40, -0)
+- **v201**: [통합 개발 진행상황 종합 및 글로벌 공인 엔지니어링/금융 표준 마스터 레퍼런스 총서 구축] (+45, -0)
 - **v200**: [문서 깃허브 최신화 및 체계적 도메인 통합 허브(DOCS_INDEX.md) 구축 & 원격/로컬 대규모 디스크 정리(구버전 릴리스 v571~v580 소거, 수십 GB 회수, Git GC)] (+150, -0)
 - **v199**: [웹 서비스 헬스체크 4ms 정상화(지연 배너 영구 소거) & 유저 자금 흐름 관제(/admin/money-flow) 복식부기 원장 무결성 및 누적 지표 고도화] (+120, -0)
 - **v198**: [가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 실시간 자동 감시 조건부 주문 시스템 탑재] (+140, -0)
@@ -1182,3 +1186,35 @@
    - `curl -sI https://easy-scraping.com/favicon.ico` -> 200 OK 확인
    - `curl -s https://easy-scraping.com/robots.txt` -> `/app-api/` 차단 확인
    - `curl -s https://easy-scraping.com/` -> 신규 메타 타이틀 및 FAQPage/별점 JSON-LD 확인
+
+---
+
+## 🚀 [v204 Specification] 루트 홈페이지(/) SERP 클릭률(CTR) 극대화 메타태그 완전 동기화 및 prod-v585 배포
+
+### 1. 현황 및 목표 분석
+1. **[루트 홈페이지(/) 자체 메타데이터 오버라이드 식별]**:
+   - `frontend/src/app/layout.tsx`의 전역 템플릿 메타데이터뿐만 아니라, `frontend/src/app/page.tsx` 내 `HOME_META_BY_LOCALE`이 루트 경로(`/`)의 최종 메타태그를 결정하고 있었음.
+   - 검색엔진 노출에서 가장 큰 비중을 차지하는 홈 랜딩 페이지의 메타 타이틀과 디스크립션에 고전환율 혜택 후크를 완벽히 반영.
+2. **[CTR 극대화 혜택 후크 반영 (4대 언어: ko/en/ja/zh)]**:
+   - 한국어: "월덕 머니버스 — 1만 WLD 즉시지급 · 실시간 가상 주식 거래소 & 금융 시뮬레이터" / "가입 즉시 10,000 WLD 무료 지급 & 1등 1,000만 WLD 잭팟 복권 증정! 실시간 10단 호가창 모의투자, 고정밀 복리/물타기 금융 계산기, 디스코드 커뮤니티 가상경제를 지금 시작하세요."
+   - 영어/일본어/중국어: 10,000 WLD 지급 및 실시간 모의투자 혜택을 명확히 명시.
+3. **[원격 서버 prod-v585 스테이징 배포 및 심볼릭 링크 스위칭]**:
+   - `production-current` 심볼릭 링크를 `prod-v585`로 전환하고 `moneyverse-frontend.service` 재시작.
+
+---
+
+### 2. 세부 개발 명세 및 파일 변경
+1. **`frontend/src/app/page.tsx`**:
+   - `HOME_META_BY_LOCALE`의 한국어/영어/일본어/중국어 메타 타이틀, 디스크립션, 배지 및 OG 태그를 고전환율 CTR 후크로 갱신.
+2. **원격 프로덕션 배포 및 서비스 재시작**:
+   - 원격 VM에서 `prod-v585` 최신 빌드, `production-current` 심볼릭 링크 스위칭 및 `moneyverse-frontend.service` 정상 구동 확인.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. 프론트엔드 TypeScript 정적 타입 검사 (`pnpm.cmd --filter @moneyverse/frontend run typecheck`): 0 Errors
+2. Git 커밋 및 origin main 푸시
+3. 원격 프로덕션 빌드 및 심볼릭 링크 반영 (`prod-v585`)
+4. 엔드포인트 실측:
+   - `curl -s https://easy-scraping.com/ | grep -o '<title>[^<]*</title>'` 확인
+   - `curl -s https://easy-scraping.com/ | grep -o '1만 WLD 즉시지급'` 확인
