@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -23,35 +23,43 @@ export function NotificationCenterModal() {
   const [actionError, setActionError] = useState(false);
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const feedRequestId = useRef(0);
+  const countRequestId = useRef(0);
 
   const fetchUnreadCount = async () => {
+    const requestId = ++countRequestId.current;
     try {
       const res = await fetch('/api/notifications/unread-count', { cache: 'no-store' });
       if (!res.ok) throw new Error('Count unavailable');
       const data: unknown = await res.json();
       const value = data && typeof data === 'object' && 'unreadCount' in data ? data.unreadCount : null;
       if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) throw new Error('Invalid count');
-      setUnreadCount(value);
+      if (requestId === countRequestId.current) setUnreadCount(value);
     } catch {
-      setUnreadCount(null);
+      if (requestId === countRequestId.current) setUnreadCount(null);
     }
   };
 
   const fetchNotifications = async () => {
+    const requestId = ++feedRequestId.current;
     setLoading(true);
     setFeedError(false);
     try {
       const res = await fetch('/api/notifications?unreadOnly=' + (filter === 'unread'), { cache: 'no-store' });
       if (!res.ok) throw new Error('Feed unavailable');
       const parsed = parseNotificationFeed(await res.json());
-      setNotifications(parsed);
-      setCheckedAt(new Date().toISOString());
+      if (requestId === feedRequestId.current) {
+        setNotifications(parsed);
+        setCheckedAt(new Date().toISOString());
+      }
     } catch {
-      setNotifications([]);
-      setCheckedAt(null);
-      setFeedError(true);
+      if (requestId === feedRequestId.current) {
+        setNotifications([]);
+        setCheckedAt(null);
+        setFeedError(true);
+      }
     } finally {
-      setLoading(false);
+      if (requestId === feedRequestId.current) setLoading(false);
     }
   };
 
@@ -59,13 +67,15 @@ export function NotificationCenterModal() {
   useEffect(() => {
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 15000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      countRequestId.current += 1;
+    };
   }, []);
 
   useEffect(() => {
-    if (open) {
-      fetchNotifications();
-    }
+    if (open) fetchNotifications();
+    return () => { feedRequestId.current += 1; };
   }, [open, filter]);
 
   const handleMarkAllRead = async () => {
@@ -78,6 +88,7 @@ export function NotificationCenterModal() {
       });
       if (!res.ok) throw new Error('Mark read failed');
       setNotifications((prev) => filter === 'unread' ? [] : prev.map((n) => ({ ...n, is_read: true })));
+      countRequestId.current += 1;
       setUnreadCount(0);
     } catch {
       setActionError(true);
@@ -170,8 +181,9 @@ export function NotificationCenterModal() {
           {/* 필터 탭 */}
           <div className="flex items-center gap-2 mt-3">
             <button
-              onClick={() => setFilter('all')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              onClick={() => { feedRequestId.current += 1; setFilter('all'); }}
+              aria-pressed={filter === 'all'}
+              className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 filter === 'all'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted'
@@ -180,8 +192,9 @@ export function NotificationCenterModal() {
               전체 알림
             </button>
             <button
-              onClick={() => setFilter('unread')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+              onClick={() => { feedRequestId.current += 1; setFilter('unread'); }}
+              aria-pressed={filter === 'unread'}
+              className={`min-h-11 px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
                 filter === 'unread'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted'
