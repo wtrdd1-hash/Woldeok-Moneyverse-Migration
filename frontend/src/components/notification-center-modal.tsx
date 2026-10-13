@@ -11,48 +11,45 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, CheckCheck, Gift, Send, ShieldAlert, Sparkles, RefreshCw } from 'lucide-react';
-
-interface NotificationItem {
-  id: string;
-  category: string;
-  title: string;
-  body: string;
-  link?: string;
-  is_read: boolean;
-  created_at: string;
-}
+import { Bell, CheckCheck, Gift, Send, ShieldAlert, RefreshCw } from 'lucide-react';
+import { parseNotificationFeed, type NotificationItem } from './notification-feed';
 
 export function NotificationCenterModal() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const [claiming, setClaiming] = useState(false);
+  const [feedError, setFeedError] = useState(false);
+  const [actionError, setActionError] = useState(false);
+  const [checkedAt, setCheckedAt] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
   const fetchUnreadCount = async () => {
     try {
-      const res = await fetch('/api/notifications/unread-count');
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.unreadCount || 0);
-      }
+      const res = await fetch('/api/notifications/unread-count', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Count unavailable');
+      const data: unknown = await res.json();
+      const value = data && typeof data === 'object' && 'unreadCount' in data ? data.unreadCount : null;
+      if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) throw new Error('Invalid count');
+      setUnreadCount(value);
     } catch {
-      // ignore
+      setUnreadCount(null);
     }
   };
 
   const fetchNotifications = async () => {
     setLoading(true);
+    setFeedError(false);
     try {
-      const res = await fetch(`/api/notifications?unreadOnly=${filter === 'unread'}`);
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data.notifications || []);
-      }
+      const res = await fetch('/api/notifications?unreadOnly=' + (filter === 'unread'), { cache: 'no-store' });
+      if (!res.ok) throw new Error('Feed unavailable');
+      const parsed = parseNotificationFeed(await res.json());
+      setNotifications(parsed);
+      setCheckedAt(new Date().toISOString());
     } catch {
-      // ignore
+      setNotifications([]);
+      setCheckedAt(null);
+      setFeedError(true);
     } finally {
       setLoading(false);
     }
@@ -72,32 +69,18 @@ export function NotificationCenterModal() {
   }, [open, filter]);
 
   const handleMarkAllRead = async () => {
+    setActionError(false);
     try {
       const res = await fetch('/api/notifications', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Moneyverse-Notification-Action': '1' },
         body: JSON.stringify({ markAll: true }),
       });
-      if (res.ok) {
-        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-        setUnreadCount(0);
-      }
+      if (!res.ok) throw new Error('Mark read failed');
+      setNotifications((prev) => filter === 'unread' ? [] : prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
     } catch {
-      // ignore
-    }
-  };
-
-  const handleClaimAll = async () => {
-    setClaiming(true);
-    try {
-      const res = await fetch('/api/notifications/claim-all', { method: 'POST' });
-      if (res.ok) {
-        await handleMarkAllRead();
-      }
-    } catch {
-      // ignore
-    } finally {
-      setClaiming(false);
+      setActionError(true);
     }
   };
 
@@ -135,8 +118,8 @@ export function NotificationCenterModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          aria-label="알림 센터 열기"
-          className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-border/50 bg-background/80 hover:bg-muted transition-colors"
+          aria-label={unreadCount === null ? "알림 센터 열기 (개수 확인 불가)" : "알림 센터 열기 (미확인 " + unreadCount + "건)"}
+          className="relative flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border/50 bg-background/80 hover:bg-muted transition-colors"
         >
           <Bell className="h-4 w-4 text-foreground/80" />
           {unreadCount > 0 && (
@@ -149,7 +132,7 @@ export function NotificationCenterModal() {
 
       <DialogContent className="sm:max-w-lg border-border/60 bg-card/95 backdrop-blur-md rounded-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="p-5 pb-3 border-b border-border/40">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Bell className="h-4 w-4" />
@@ -157,34 +140,33 @@ export function NotificationCenterModal() {
               <div>
                 <DialogTitle className="text-base sm:text-lg font-bold">실시간 알림 센터</DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                  송금 수취, 배당금 입금, 핫타임 버프 등 중요 소식을 확인하세요.
+                  송금 수취, 배당금 입금 등 중요 소식을 확인하세요. 알림 읽음은 보상 수령이 아닙니다.
                 </DialogDescription>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleMarkAllRead}
-                disabled={notifications.every((n) => n.is_read)}
+                disabled={loading || feedError || notifications.every((n) => n.is_read)}
                 className="h-8 text-xs px-2.5 rounded-lg border-border/40"
               >
                 <CheckCheck className="h-3.5 w-3.5 mr-1" />
                 모두 읽음
               </Button>
-              <Button
-                size="sm"
-                onClick={handleClaimAll}
-                disabled={claiming || unreadCount === 0}
-                className="h-8 text-xs px-2.5 rounded-lg font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md shadow-amber-500/15"
-              >
-                <Sparkles className="h-3.5 w-3.5 mr-1" />
-                원클릭 모두 수령
-              </Button>
+              <p role="status" className="max-w-48 text-xs text-muted-foreground">
+                보상 일괄 수령은 정산 기능이 준비될 때까지 지원되지 않습니다.
+              </p>
             </div>
           </div>
 
+          <p role="status" aria-live="polite" className="mt-2 text-xs text-muted-foreground">
+            {unreadCount === null ? '미확인 알림 개수를 확인할 수 없습니다.' : '미확인 ' + unreadCount + '건'}
+            {checkedAt ? ' · 목록 확인 ' + new Date(checkedAt).toLocaleTimeString('ko-KR') : ''}
+          </p>
+          {actionError && <p role="alert" className="mt-2 text-xs text-destructive">읽음 처리에 실패했습니다. 다시 시도해 주세요.</p>}
           {/* 필터 탭 */}
           <div className="flex items-center gap-2 mt-3">
             <button
@@ -221,6 +203,11 @@ export function NotificationCenterModal() {
             <div className="h-48 flex flex-col items-center justify-center text-muted-foreground gap-2">
               <RefreshCw className="h-5 w-5 animate-spin text-primary" />
               <span className="text-xs">알림을 불러오는 중...</span>
+            </div>
+          ) : feedError ? (
+            <div role="alert" className="h-48 flex flex-col items-center justify-center text-center gap-3 p-4">
+              <p className="text-sm">알림을 불러오지 못했습니다. 알림이 없다는 의미는 아닙니다.</p>
+              <Button type="button" variant="outline" className="min-h-11" onClick={() => void fetchNotifications()}>다시 시도</Button>
             </div>
           ) : notifications.length === 0 ? (
             <div className="h-48 flex flex-col items-center justify-center text-center p-4">
