@@ -9,7 +9,7 @@ import { ToolsEcosystemLinks } from '@/components/tools-ecosystem-links';
 export const metadata: Metadata = {
   title: '금융 & 시뮬레이터 웹 도구 허브 | 월덕 머니버스',
   description:
-    '설치 없이 브라우저에서 바로 사용하는 3대 금융 계산기: 복리 예금·적금 이자 계산기, 주식 물타기·평단가 및 수익률 계산기, 직업별 일일 파밍 루틴 시뮬레이터를 무료로 이용하세요.',
+    '복리·주식 평단가·연봉·은퇴·대출 등 금융 계산기와 게임 내 WLD 경제 시뮬레이션을 한곳에서 확인하세요.',
   keywords: [
     '금융 계산기',
     '복리 계산기',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: '금융 & 시뮬레이터 웹 도구 허브 | 월덕 머니버스',
-    description: '설치 없이 브라우저에서 바로 사용하는 3대 금융 계산기 및 가상경제 시뮬레이터 툴킷',
+    description: '금융 계산기와 가상경제 시뮬레이션 도구 모음',
     url: canonicalUrl('/tools'),
     images: [
       {
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: '금융 & 시뮬레이터 웹 도구 허브 | 월덕 머니버스',
-    description: '설치 없이 브라우저에서 바로 사용하는 3대 금융 계산기 및 가상경제 시뮬레이터 툴킷',
+    description: '금융 계산기와 가상경제 시뮬레이션 도구 모음',
   },
 };
 

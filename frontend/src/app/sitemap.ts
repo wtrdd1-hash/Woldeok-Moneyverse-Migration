@@ -72,6 +72,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     if (registeredUrls.has(canonicalUrl)) return;
     registeredUrls.add(canonicalUrl);
 
+    // Localized routes already include their locale prefix. Never construct
+    // /en/en/... alternates or assert translations for those URLs.
+    const isLocalizedRoute = /^\/(en|ja|zh)(\/|$)/.test(cleanPath);
     const enUrl = `${base}/en${cleanPath === '/' ? '' : cleanPath}`;
     const jaUrl = `${base}/ja${cleanPath === '/' ? '' : cleanPath}`;
     const zhUrl = `${base}/zh${cleanPath === '/' ? '' : cleanPath}`;
@@ -82,7 +85,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: RELEASE_TIMESTAMP,
       changeFrequency: changeFrequency || 'daily',
       priority,
-      alternates: {
+      ...(isLocalizedRoute ? {} : { alternates: {
         languages: {
           ko: koUrl,
           'ko-KR': koUrl,
@@ -94,7 +97,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
           'zh-CN': zhUrl,
           'x-default': canonicalUrl,
         },
-      },
+      } }),
     });
   };
 

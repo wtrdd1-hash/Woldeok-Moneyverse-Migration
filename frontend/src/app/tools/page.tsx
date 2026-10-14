@@ -17,23 +17,23 @@ import { canonicalUrl } from '@/lib/seo';
 
 const TOOLS_META_BY_LOCALE = {
   en: {
-    title: 'Financial & Simulator Web Tools Hub (5 Calculators) | Woldeok Moneyverse',
-    description: 'Free browser-based financial calculators: Compound interest, Stock dollar-cost averaging, FIRE retirement goal, and Virtual economy calculators.',
+    title: 'Financial Calculators & Simulation Tools | Woldeok Moneyverse',
+    description: 'Explore free financial calculators and virtual-economy simulations, including compound interest, stock averaging, retirement planning, salary and tax estimates.',
     canonical: '/en/tools',
   },
   ko: {
-    title: '금융 & 시뮬레이터 웹 도구 허브 (5대 계산기) | 월덕 머니버스',
-    description: '설치 없이 브라우저에서 바로 사용하는 5대 금융 계산기: 복리 예금·적금 이자, 주식 물타기·평단가, 목표 자산·FIRE 은퇴 시뮬레이터, 2026 가상자산 세금 계산기를 100% 무료로 이용하세요.',
+    title: '금융 계산기·경제 시뮬레이터 도구 모음 | 월덕 머니버스',
+    description: '복리·주식 평단가·연봉 실수령액·대출·은퇴·세금 추정과 가상경제 시뮬레이션을 브라우저에서 이용하세요. 실제 금융 정보와 게임 내 WLD 예시를 구분해 확인할 수 있습니다.',
     canonical: '/tools',
   },
   ja: {
-    title: '金融＆シミュレーター Webツールハブ (5大計算機) | ウォルドクマネーバース',
-    description: 'ブラウザで直接使える5大金融計算機：複利利息、株式ナンピン・平均単価、FIRE目標資産シミュレーターを完全無料で利用できます。',
+    title: '金融計算・経済シミュレーションツール | ウォルドクマネーバース',
+    description: '複利、株式平均取得単価、退職資金などの金融計算と仮想経済シミュレーションを確認できます。',
     canonical: '/ja/tools',
   },
   zh: {
-    title: '金融与模拟器 Web 工具中心 (五大计算器) | 沃尔德克金融元宇宙',
-    description: '浏览器即开即用的五大金融计算器：复利定存、股票补仓摊平成本、FIRE退休目标资产模拟器，100%免费体验。',
+    title: '金融计算与经济模拟工具 | 沃尔德克金融元宇宙',
+    description: '提供复利、股票平均成本、退休目标等金融计算和虚拟经济模拟工具。',
     canonical: '/zh/tools',
   },
 };
@@ -198,17 +198,25 @@ const TOOLS = [
   },
 ];
 
-export default function ToolsHubPage() {
+export default async function ToolsHubPage() {
+  const locale = await getServerLocale();
+  const isKorean = locale === 'ko';
+  const copy = {
+    en: { badge: 'Financial calculators and virtual economy', heading: 'Financial Calculators & Simulation Tools', description: 'Explore compound interest, stock averaging, retirement planning, salary, loans and tax estimates alongside virtual WLD economy simulations. Results depend on assumptions and applicable rules.' },
+    ko: { badge: '금융 계산기 · 가상경제 시뮬레이터', heading: '금융 & 시뮬레이터 웹 도구 허브', description: '복리·주식 평단가·은퇴 목표·급여·대출·세금 추정 및 게임 내 WLD 시뮬레이션을 확인하세요. 금융 계산 결과는 입력 조건과 적용 규정에 따라 달라질 수 있습니다.' },
+    ja: { badge: '金融計算と仮想経済シミュレーション', heading: '金融計算・シミュレーションツール', description: '複利、株式の平均取得単価、退職資金、給与、ローン、税金の試算と仮想WLD経済のシミュレーションを利用できます。計算結果は前提条件によって異なります。' },
+    zh: { badge: '金融计算与虚拟经济模拟', heading: '金融计算与模拟工具', description: '使用复利、股票平均成本、退休、薪资、贷款和税费估算工具，并体验虚拟WLD经济模拟。结果取决于输入假设与适用规则。' },
+  }[locale];
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: '월덕 머니버스 금융 & 시뮬레이터 5대 도구 허브',
-    description: '설치 없이 바로 사용하는 5대 금융 웹 계산기 및 가상경제 시뮬레이터 모음',
+    name: copy.heading,
+    description: copy.description,
     url: 'https://easy-scraping.com/tools',
     hasPart: TOOLS.map((t) => ({
       '@type': 'WebApplication',
-      name: t.title,
-      description: t.description,
+      name: isKorean ? t.title : t.id.replace(/-/g, ' '),
+      description: isKorean ? t.description : copy.description,
       url: `https://easy-scraping.com${t.href}`,
       applicationCategory: 'FinanceApplication',
       operatingSystem: 'All',
@@ -227,17 +235,17 @@ export default function ToolsHubPage() {
       <div className="space-y-3 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-500">
           <Sparkles className="size-3.5" />
-          <span>100% 무료 · 무설치 5대 금융 웹 툴킷</span>
+          <span>{copy.badge}</span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-          금융 & 시뮬레이터 웹 도구 허브
+          {copy.heading}
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-          복리 예금, 주식 평단가, 은퇴 FIRE 목표 자산, 가상자산 22% 세금, 직업 파밍 기대 수익까지 — 복잡한 금융 수식을 브라우저에서 몇 번의 입력만으로 실시간 시각화하세요.
+          {copy.description}
         </p>
       </div>
 
-      {/* Tool Cards Grid (5-Tools Layout) */}
+      {/* Tool Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {TOOLS.map((tool) => {
           const Icon = tool.icon;
@@ -249,12 +257,12 @@ export default function ToolsHubPage() {
                     <Icon className="size-5" />
                   </div>
                   <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${tool.badgeColor}`}>
-                    {tool.badge}
+                    {isKorean ? tool.badge : copy.badge}
                   </span>
                 </div>
-                <CardTitle className="text-base sm:text-lg font-bold">{tool.title}</CardTitle>
+                <CardTitle className="text-base sm:text-lg font-bold">{isKorean ? tool.title : tool.id.replace(/-/g, ' ')}</CardTitle>
                 <CardDescription className="text-xs leading-relaxed text-muted-foreground">
-                  {tool.description}
+                  {isKorean ? tool.description : copy.description}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pt-0">
