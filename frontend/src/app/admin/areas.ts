@@ -56,6 +56,7 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     summary: '기존 신청 기록 확인 전용. DB·원장 연결 및 관리자 감사 검증 전 심사·지급 불가.',
     group: 'economy',
   },
+  {
     href: '/admin/controls',
     eyebrow: 'FEATURE CONTROL',
     title: '기능 스위치 · 정책 버전',
