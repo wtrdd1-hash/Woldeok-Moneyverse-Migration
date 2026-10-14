@@ -64,7 +64,7 @@ _요청 본문 없음._
 | identities[] | true | object[] |  |
 | identities[] | true | object |  |
 | identities[].identityId | true | string |  |
-| identities[].provider | true | string="discord" \| string="google" |  |
+| identities[].provider | true | string="discord" \| string="google" \| string="local_email" |  |
 | identities[].displayName | true | string |  |
 | identities[].linkedAt | true | string |  |
 
