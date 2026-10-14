@@ -17,23 +17,23 @@ import { canonicalUrl } from '@/lib/seo';
 
 const TOOLS_META_BY_LOCALE = {
   en: {
-    title: 'Financial & Simulator Web Tools Hub (5 Calculators) | Woldeok Moneyverse',
-    description: 'Free browser-based financial calculators: Compound interest, Stock dollar-cost averaging, FIRE retirement goal, and Virtual economy calculators.',
+    title: 'Financial Calculators & Simulation Tools | Woldeok Moneyverse',
+    description: 'Explore free financial calculators and virtual-economy simulations, including compound interest, stock averaging, retirement planning, salary and tax estimates.',
     canonical: '/en/tools',
   },
   ko: {
-    title: '금융 & 시뮬레이터 웹 도구 허브 (5대 계산기) | 월덕 머니버스',
-    description: '설치 없이 브라우저에서 바로 사용하는 5대 금융 계산기: 복리 예금·적금 이자, 주식 물타기·평단가, 목표 자산·FIRE 은퇴 시뮬레이터, 2026 가상자산 세금 계산기를 100% 무료로 이용하세요.',
+    title: '금융 계산기·경제 시뮬레이터 도구 모음 | 월덕 머니버스',
+    description: '복리·주식 평단가·연봉 실수령액·대출·은퇴·세금 추정과 가상경제 시뮬레이션을 브라우저에서 이용하세요. 실제 금융 정보와 게임 내 WLD 예시를 구분해 확인할 수 있습니다.',
     canonical: '/tools',
   },
   ja: {
-    title: '金融＆シミュレーター Webツールハブ (5大計算機) | ウォルドクマネーバース',
-    description: 'ブラウザで直接使える5大金融計算機：複利利息、株式ナンピン・平均単価、FIRE目標資産シミュレーターを完全無料で利用できます。',
+    title: '金融計算・経済シミュレーションツール | ウォルドクマネーバース',
+    description: '複利、株式平均取得単価、退職資金などの金融計算と仮想経済シミュレーションを確認できます。',
     canonical: '/ja/tools',
   },
   zh: {
-    title: '金融与模拟器 Web 工具中心 (五大计算器) | 沃尔德克金融元宇宙',
-    description: '浏览器即开即用的五大金融计算器：复利定存、股票补仓摊平成本、FIRE退休目标资产模拟器，100%免费体验。',
+    title: '金融计算与经济模拟工具 | 沃尔德克金融元宇宙',
+    description: '提供复利、股票平均成本、退休目标等金融计算和虚拟经济模拟工具。',
     canonical: '/zh/tools',
   },
 };
