@@ -1919,3 +1919,23 @@
 2. 단위 테스트 검증
 3. Git 브랜치 통합 및 브랜치 삭제 규칙 영구 준수
 4. 봇 무중단 상주 상태 확인
+
+
+---
+
+## 🚀 [v221 Specification] CI Release Policy Test 수정: Migration 266 Dynamic Current Database 호환성 복구
+
+### 1. 현황 및 목표 분석
+- `Build Test Candidate` 워크플로우 내의 정책 검증(`verify / policy`) 단계에서 `scripts/release/ci-migration-266-database-parity.test.mjs`의 `CI database identity matches the immutable migration 266 target` 테스트가 실패함.
+- **원인**: 커밋 `c1271d2f`에서 migration 266이 환경 간 이식성(database-portability) 확보를 위해 정적 DB명 대신 PostgreSQL 내장 `current_database()`와 `\gexec`를 사용하도록 개선되었으나, 릴리즈 정책 검사 테스트는 과거의 하드코딩된 `ALTER DATABASE <db_name>` 정규식을 고수하여 단정문 에러가 발생함.
+- **수정 목표**:
+  - `migration 266`이 `current_database()`와 `\gexec`를 통해 동적으로 타겟 데이터베이스에 `statement_timeout` 및 `idle_in_transaction_session_timeout`을 주입하는 아키텍처를 정상 승인하도록 테스트 스키마를 업데이트.
+  - CI 워크플로우의 PostgreSQL DB 설정 일관성 검증을 완벽하게 유지.
+
+### 2. 세부 파일 변경점
+- `scripts/release/ci-migration-266-database-parity.test.mjs`:
+  - `current_database()` 및 `\gexec` 사용 여부 감지 및 dynamic GUC 설정 무결성 검증 로직 추가.
+
+### 3. 검증 계획
+1. `node --test scripts/release/ci-migration-266-database-parity.test.mjs` 로컬 실행 및 100% 통과 확인.
+2. 브랜치 통합 및 삭제 규칙 준수 후 원격 푸시 및 GitHub Actions CI 합격 확인.
