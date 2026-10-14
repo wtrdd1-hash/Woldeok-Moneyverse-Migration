@@ -17,6 +17,16 @@ GitOps remains target/provenance state for the recovery architecture, but the **
 The host mirror must use the same approved SHA, preserve the previous unit configuration for rollback, and pass the same catalog/status/SEO probes before a release is reported complete.
 
 
+### Immutable Debian host release ownership — v2026.10.10.543
+
+Release directories under `/srv/moneyverse-data/releases/*` are **immutable artifacts**. Never run `git pull`, `git fetch`, `git reset`, `git checkout` or otherwise mutate repository content inside a release that Test or Production may serve. Doing so invalidates exact-SHA provenance and can put untested code behind an unchanged release name.
+
+Stage a host release with `bash ops/release/stage-host-release.sh <test|prod> <version> <exact-sha> <clean-source-dir> [release-root]`. The helper requires source `HEAD` to equal the approved SHA, a clean worktree, built backend/frontend artifacts, a fresh SHA-qualified destination, stripped Git metadata and `.moneyverse-release.json`. An existing destination fails closed.
+
+Test/Production symlinks or systemd release pointers move atomically only to that new immutable directory. After switching, public `/api/version`, frontend identity and the release manifest `applicationSourceSha` must agree. Any mismatch is a release-identity failure: stop promotion/completion claims and roll the pointer back.
+
+During v543 SWF containment, stable Test/Production environments keep `MONEYVERSE_SWF_EXECUTION_ENABLED` and `MONEYVERSE_SWF_SCHEDULER_ENABLED` unset/false. Enabling either in Production is a separate post-v544 change requiring economy-core remediation and exact-SHA Test reconciliation evidence.
+
 ### Stable Test environment ownership — v2026.09.19.263
 
 Persistent Test services must not load `backend/.env` or `frontend/.env.local` from a release directory. systemd loads `EnvironmentFile=` values late enough that a stale release-local `PORT` or `BUILD_ID` can override a candidate value and silently bind the wrong listener or report the wrong release identity.

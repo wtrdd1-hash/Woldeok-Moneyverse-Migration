@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AutoSovereignWealthFundService } from './auto-swf.service';
 import type { Pool } from 'pg';
 import type { DiscordAlertService } from '../../discord/discord-alert.service';
@@ -9,6 +9,9 @@ describe('AutoSovereignWealthFundService', () => {
   let mockDiscordAlert: any;
 
   beforeEach(() => {
+    process.env.MONEYVERSE_SWF_EXECUTION_ENABLED = 'true';
+    delete process.env.MONEYVERSE_SWF_SCHEDULER_ENABLED;
+
     mockDiscordAlert = {
       sendAdminDirectMessage: vi.fn().mockResolvedValue({ success: true }),
       sendDiscordEmbed: vi.fn().mockResolvedValue(true),
@@ -25,9 +28,140 @@ describe('AutoSovereignWealthFundService', () => {
     );
   });
 
+  afterEach(() => {
+    service.onModuleDestroy();
+    vi.useRealTimers();
+    delete process.env.MONEYVERSE_SWF_EXECUTION_ENABLED;
+    delete process.env.MONEYVERSE_SWF_SCHEDULER_ENABLED;
+  });
+
+  it('fails closed when runtime execution is not explicitly enabled', async () => {
+    delete process.env.MONEYVERSE_SWF_EXECUTION_ENABLED;
+
+    const result = await service.evaluateAndRebalance();
+
+    expect(result).toEqual({
+      executed: false,
+      reason: 'SWF_RUNTIME_EXECUTION_DISABLED',
+    });
+    expect(mockPool.connect).not.toHaveBeenCalled();
+  });
+
+  it('never executes a SWF cycle merely because the backend restarted', async () => {
+    vi.useFakeTimers();
+    process.env.MONEYVERSE_SWF_SCHEDULER_ENABLED = 'true';
+    const evaluateSpy = vi.spyOn(service, 'evaluateAndRebalance').mockResolvedValue({
+      executed: false,
+      reason: 'TEST',
+    });
+
+    service.onModuleInit();
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(evaluateSpy).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(60 * 60 * 1000 - 30_000);
+    expect(evaluateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects an overlapping SWF cycle when the advisory lock is busy', async () => {
+    const mockClient = {
+      query: vi.fn().mockImplementation((queryText: string) => {
+        if (queryText.includes('pg_try_advisory_xact_lock')) {
+          return Promise.resolve({ rows: [{ acquired: false }] });
+        }
+        return Promise.resolve({ rows: [] });
+      }),
+      release: vi.fn(),
+    };
+    mockPool.connect = vi.fn().mockResolvedValue(mockClient);
+    mockPool.query = vi.fn().mockResolvedValue({
+      rows: [
+        {
+          id: 'current',
+          is_enabled: true,
+          safe_reserve_wld: '25000000',
+          max_single_investment_wld: '10000000',
+          reinvestment_ratio_pct: 15,
+          max_investment_ratio_pct: 20,
+          equity_ratio_pct: 60,
+          bond_ratio_pct: 30,
+          dividend_ratio_pct: 10,
+          auto_harvest_enabled: true,
+          auto_tax_enabled: true,
+          auto_growth_yield_bps: 150,
+          target_anchor_wld: '25000000',
+          rebalance_interval_hours: 1,
+          last_executed_at: null,
+        },
+      ],
+    });
+
+    const result = await service.evaluateAndRebalance();
+
+    expect(result).toEqual({ executed: false, reason: 'SWF_CYCLE_LOCK_BUSY' });
+    expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+  });
+
+  it('rejects a second SWF cycle before the configured minimum interval elapses', async () => {
+    const lastExecutedAt = new Date().toISOString();
+    const mockClient = {
+      query: vi.fn().mockImplementation((queryText: string) => {
+        if (queryText.includes('pg_try_advisory_xact_lock')) {
+          return Promise.resolve({ rows: [{ acquired: true }] });
+        }
+        if (queryText.includes('FROM public.treasury_swf_configs')) {
+          return Promise.resolve({
+            rows: [
+              {
+                is_enabled: true,
+                rebalance_interval_hours: 1,
+                last_executed_at: lastExecutedAt,
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ rows: [] });
+      }),
+      release: vi.fn(),
+    };
+    mockPool.connect = vi.fn().mockResolvedValue(mockClient);
+    mockPool.query = vi.fn().mockResolvedValue({
+      rows: [
+        {
+          id: 'current',
+          is_enabled: true,
+          safe_reserve_wld: '25000000',
+          max_single_investment_wld: '10000000',
+          reinvestment_ratio_pct: 15,
+          max_investment_ratio_pct: 20,
+          equity_ratio_pct: 60,
+          bond_ratio_pct: 30,
+          dividend_ratio_pct: 10,
+          auto_harvest_enabled: true,
+          auto_tax_enabled: true,
+          auto_growth_yield_bps: 150,
+          target_anchor_wld: '25000000',
+          rebalance_interval_hours: 1,
+          last_executed_at: lastExecutedAt,
+        },
+      ],
+    });
+
+    const result = await service.evaluateAndRebalance();
+
+    expect(result).toEqual({
+      executed: false,
+      reason: 'SWF_REBALANCE_INTERVAL_NOT_ELAPSED',
+    });
+    expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+  });
+
   it('preserves 25M floor and executes autonomous compounding growth', async () => {
     const mockClient = {
       query: vi.fn().mockImplementation((queryText: string) => {
+        if (queryText.includes('pg_try_advisory_xact_lock')) {
+          return Promise.resolve({ rows: [{ acquired: true }] });
+        }
         if (queryText.includes('system_treasury_vaults WHERE code = \'VAULT_MAIN\'')) {
           return Promise.resolve({
             rows: [{ id: 'vault-uuid-main', balance_wld: '25000000' }],
@@ -90,6 +224,9 @@ describe('AutoSovereignWealthFundService', () => {
   it('respects governance max_investment_ratio_pct and halts investment when cap is reached', async () => {
     const mockClient = {
       query: vi.fn().mockImplementation((queryText: string) => {
+        if (queryText.includes('pg_try_advisory_xact_lock')) {
+          return Promise.resolve({ rows: [{ acquired: true }] });
+        }
         if (queryText.includes('system_treasury_vaults WHERE code = \'VAULT_MAIN\'')) {
           return Promise.resolve({
             rows: [{ id: 'vault-uuid-main', balance_wld: '30000000' }], // 3,000만 현금 (바닥 초과)
@@ -136,6 +273,14 @@ describe('AutoSovereignWealthFundService', () => {
     expect(result.executed).toBe(true);
     // 상한선 도달로 신규 재투자는 0 WLD로 억제되고 국고에 안전 보존됨
     expect(result.reinvestedWld).toBe('0');
+  });
+
+  it('fails closed when the SWF policy row is missing', async () => {
+    mockPool.query = vi.fn().mockResolvedValue({ rows: [] });
+
+    const config = await service.getConfig();
+
+    expect(config.is_enabled).toBe(false);
   });
 
   it('updates governance configuration correctly', async () => {
