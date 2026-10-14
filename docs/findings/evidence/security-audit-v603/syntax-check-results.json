@@ -1,0 +1,30 @@
+{
+  "web": {
+    "tracked": 3890,
+    "checks": {
+      "json": 25,
+      ".js": 5,
+      ".mjs": 31,
+      ".sh": 1,
+      ".cjs": 1,
+      "sql_migration_files": 268,
+      "migration_numbers_max": 269,
+      "migration_duplicate_numbers": [],
+      "migration_gaps_from_002": []
+    },
+    "failures": [
+      {
+        "path": "bot/scripts/qa_ads_sponsorblock_verification.mjs",
+        "test": ".mjs",
+        "error": "/srv/moneyverse-tasks/security-code-audit-20261014-v590/app/bot/scripts/qa_ads_sponsorblock_verification.mjs:7\nconsole.log('==================================================="
+      }
+    ]
+  },
+  "android": {
+    "tracked": 186,
+    "checks": {
+      "xml": 23
+    },
+    "failures": []
+  }
+}
