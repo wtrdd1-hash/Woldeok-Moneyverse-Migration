@@ -2147,3 +2147,22 @@
 2. `git branch -a`: `* main` 단일 브랜치 및 `remotes/origin/main` 클린 동기화 확인.
 3. `curl -s https://test.easy-scraping.com/api/version`: `66bbe9e2ed881c65c32f4878451994750e4b5b08` 반환 확인.
 4. 프로덕션 매니페스트 `production-release-manifest.json` 아티팩트 검증 완료.
+
+
+---
+
+## 🚀 [v228 Specification] 원격 저장소 잔여 브랜치 25종 전수 삭제 및 완전한 단일 main 브랜치 체제 확립 (PR 0건, 잔여 브랜치 0건)
+
+### 1. 현황 및 조치 내역
+1. **[Dependabot 잔여 PR 12종 및 원격 브랜치 12종 전수 종료·삭제]**:
+   - `gh pr close 804..815 --delete-branch` 명령을 통해 열려 있던 모든 의존성 PR 12종을 공식 닫음 처리하고 연결된 `dependabot/*` 원격 브랜치 12종을 전수 삭제 완료.
+2. **[자동화 및 크론 잔여 브랜치 13종 전수 영구 삭제]**:
+   - 원격에 남아 있던 `origin/auto/hourly-*` 브랜치 13종(`hourly-a-*`, `hourly-c-*` 등)을 `git push origin --delete`로 전수 삭제 완료.
+3. **[원격 및 로컬 저장소 완전한 100% 단일 main 브랜치 달성]**:
+   - `git branch -a` 조회 결과 오직 `* main` 및 `remotes/origin/main`만 존재하는 완벽한 클린 상태 확립.
+   - `gh pr list` 조회 결과 열려 있는 PR 0건(Empty) 확인.
+
+### 2. 검증 증적
+- `git branch -a`: `* main`, `remotes/origin/HEAD -> origin/main`, `remotes/origin/main` 만 잔존 (총 브랜치 수: 1개)
+- `gh pr list`: 열려 있는 PR 0건
+- Git 워킹 트리: `working tree clean`
