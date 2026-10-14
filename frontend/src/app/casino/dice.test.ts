@@ -72,7 +72,7 @@ describe('the dice vocabulary', () => {
  * `route-map.test.ts` reads the controllers.
  */
 describe('every game the screen declares is reachable on it', () => {
-  const page = readFileSync(join(__dirname, 'page.tsx'), 'utf8');
+  const page = readFileSync(join(__dirname, '../arcade/page.tsx'), 'utf8');
 
   it('renders a form for each dice game', () => {
     expect(page).toContain('DiceParityForm');
@@ -103,7 +103,7 @@ describe('every game the screen declares is reachable on it', () => {
       expect(page).toContain(`<OddsRow name="${game}"`);
     }
 
-    const themeGames = readFileSync(join(__dirname, 'theme-games.tsx'), 'utf8');
+    const themeGames = readFileSync(join(__dirname, '../arcade/theme-games.tsx'), 'utf8');
     expect(themeGames).toContain('적중 확률 {winProbability}%');
     expect(themeGames).toContain('적중 시 {payoutMultiplier}배 배당');
   });

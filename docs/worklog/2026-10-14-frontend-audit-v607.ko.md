@@ -60,3 +60,12 @@
 - Full frontend suite: 1163 passed, 15 failed of 1178; 210/215 files passed. Remaining: 3 homepage E2E contract, 3 notification races, 7 casino game rules, 2 unread-count tests.
 - Typecheck PASS, Next production build PASS. Browser visual, backend/Test exact-SHA, authenticated session continuity and production canary not verified.
 - No main merge or production promotion; blocking gates remain.
+
+## v615 all frontend regression failures resolved (isolated branch)
+- origin/main c56af867 checked before and during changes. No changes to production.
+- Casino tests now verify actual /arcade/page.tsx and /arcade theme implementations rather than old /casino redirect page; casino game rules not weakened.
+- Notification mark-all mutation validates authoritative numeric updatedCount receipt; rejects malformed success, invalidates stale feed requests, clears pending loading, disables repeat submission, enforces 44px button. Race test uses deferred old count instead of fragile global timer monkeypatch and checks accessible badge.
+- Unread count BFF remains fail-closed HTTP 503 without authentication; tests no longer demand unsafe 200 with fabricated zero. Header delegates polling to NotificationCenterModal.
+- Homepage source contract tests updated to current real routes/hero and 48px touch target. These source checks are not browser E2E evidence.
+- Full frontend NODE_ENV=test: 215/215 files and 1178/1178 tests PASS. Typecheck and production Next build PASS.
+- Exact-SHA isolated Test backend+DB, browser 5-pass visual, pre-existing login session continuity, security/ledger CI and zero-downtime canary still NOT verified. Production release BLOCKED by master v530/v543, not by frontend tests.

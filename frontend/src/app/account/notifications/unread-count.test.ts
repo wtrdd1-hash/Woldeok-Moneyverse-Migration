@@ -14,21 +14,21 @@ const chatButtonSource = readFileSync(
 );
 
 describe('Notification & Chat unread count polling safety', () => {
-  it('BFF unread-count route returns status 200 with unreadCount: 0 and private no-store', async () => {
+  it('BFF unread-count fails closed when authentication is unavailable', async () => {
     const response = await GET();
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(503);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
 
     const json = await response.json();
-    expect(json).toEqual({ unreadCount: 0 });
+    expect(json).toEqual({ error: 'Authentication unavailable' });
   });
 
-  it('NotificationHeaderButton incorporates visibilityState guard and exponential backoff', () => {
-    expect(notifButtonSource).toContain('document.hidden');
-    expect(notifButtonSource).toContain('visibilitychange');
-    expect(notifButtonSource).toContain('BASE_POLL_INTERVAL_MS = 15000');
-    expect(notifButtonSource).toContain('MAX_POLL_INTERVAL_MS = 60000');
-    expect(notifButtonSource).toContain('Math.min(MAX_POLL_INTERVAL_MS, retryDelayRef.current * 2)');
+  it('NotificationHeaderButton restricts the modal to signed-in viewers', () => {
+    expect(notifButtonSource).toContain('useViewer()');
+    expect(notifButtonSource).toContain('if (!viewer?.signedIn) return null');
+    const modalSource = readFileSync(join(process.cwd(), 'src/components/notification-center-modal.tsx'), 'utf8');
+    expect(modalSource).toContain('setInterval(fetchUnreadCount, 15000)');
+    expect(modalSource).toContain('countRequestId.current');
   });
 
   it('ChatHeaderButton incorporates totalUnread parsing, visibilityState guard, and exponential backoff', () => {
