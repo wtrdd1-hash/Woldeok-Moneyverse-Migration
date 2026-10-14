@@ -1683,3 +1683,47 @@
 3. Git 커밋 및 origin main 푸시 (`prod-v595`)
 4. Debian 13 VM 100 프로덕션 무중단 승격 배포
 5. 라이브 실측: `/blog`, `/blog/[slug]`, `/sitemap-blog.xml`, `/api/blog` HTTP 200 OK 확인
+
+
+---
+
+## 🚀 [v215 Specification] 블로그 410 Gone 프록시 간섭 차단 및 영속 파일 저장소(Multi-Worker/Restart-Proof) 완비 (prod-v596, prod-v597)
+
+### 1. 현황 및 개선 필요 사항
+1. **[구버전 블로그 410 Gone 룰의 신규 블로그 가로채기 해결]**:
+   - `frontend/src/proxy.ts`에 기존 티스토리 블로그 정리용으로 남아있던 `pathname.startsWith('/blog/')` 룰이 신규 AI 금융 블로그(`/blog/[slug]`)를 410 Gone으로 가로채는 문제 식별.
+   - 해결: `/blog/` 룰을 제거하고 `/entry/` 및 `/post/`만 410 Gone으로 유지하여 신규 블로그가 Next.js 렌더러로 정상 전달되도록 수정 (`prod-v596`).
+2. **[멀티 워커/재시작 환경 인메모리 휘발 방지 및 파일 영속화]**:
+   - Next.js 프로덕션 환경의 워커 격리로 인해 인메모리 변수(`blogPostsStore`)가 API 라우트와 SSR 렌더러 간에 공유되지 않아 신규 생성 글이 간헐적으로 404가 되는 현상 방지.
+   - 해결: `frontend/src/app/blog/blog-data.ts`에 파일 시스템 기반 영속 저장소(`loadPostsFromDisk`, `savePostsToDisk`)를 구축하고 공유 디렉터리(`/srv/moneyverse-data/shared/data/blog-posts.json`)와 심링크 연동하여 영구 보존 (`prod-v597`).
+3. **[클라이언트/서버 번들 분리 최적화]**:
+   - `BLOG_CATEGORIES` 상수를 `blog.types.ts`로 분리하여 클라이언트 컴포넌트(`blog-hub-client.tsx`)에서 브라우저 번들링 시 Node.js `node:fs` 의존성 침투를 원천 차단.
+
+### 2. 세부 개발 및 배포 명세
+1. **frontend/src/proxy.ts (수정)**:
+   - 410 Gone 검사 조건에서 `/blog/` 제거 완료.
+2. **frontend/src/app/blog/blog.types.ts (수정)**:
+   - `BLOG_CATEGORIES` 상수 정의 및 export.
+3. **frontend/src/app/blog/blog-hub-client.tsx (수정)**:
+   - `BLOG_CATEGORIES`를 `./blog.types`에서 import하도록 변경.
+4. **frontend/src/app/blog/blog-data.ts (수정)**:
+   - `loadPostsFromDisk`, `savePostsToDisk`를 통한 JSON 파일 영속 저장소 구현.
+   - `/srv/moneyverse-data/shared/data/blog-posts.json` 우선 참조 및 로컬 fallback 지원.
+5. **.gitignore (수정)**:
+   - `frontend/data/` 런타임 저장 디렉터리 추가.
+6. **서버 인프라 설정**:
+   - `/srv/moneyverse-data/shared/data/blog-posts.json` 심링크 바인딩 완료.
+
+### 3. 최종 검증 결과 (Verification Results)
+1. **정적 타입 검사 (`pnpm run typecheck`)**: 0 Errors PASS
+2. **단위 테스트 (`vitest`)**: 5/5 (100%) PASS
+3. **Git 커밋 및 배포**:
+   - `prod-v596` (`213a50f7`): 프록시 410 간섭 제거
+   - `prod-v597` (`76c70eed`): 파일 영속 저장소 및 클라이언트 번들 최적화
+4. **라이브 실측 (easy-scraping.com)**:
+   - `GET /blog`: **HTTP/2 200 OK**
+   - `GET /blog/2026-10-14-compound-interest-wealth-secret`: **HTTP/2 200 OK**
+   - `GET /blog/2026-10-14-compound-mv7cm26o` (신규 AI 생성 글): **HTTP/2 200 OK**
+   - `GET /sitemap-blog.xml`: **HTTP/2 200 OK** (신규 생성 글 실시간 포함 확인)
+   - `POST /api/blog/generate`: **HTTP 200 OK** (IndexNow 실시간 색인 핑 전송 성공)
+   - 영속 파일: `/srv/moneyverse-data/shared/data/blog-posts.json` (총 4개 아티클 영구 보존 확인)
