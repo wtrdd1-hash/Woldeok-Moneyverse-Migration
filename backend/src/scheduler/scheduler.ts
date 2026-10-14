@@ -23,6 +23,9 @@ export interface SchedulerJob {
   readonly notBefore: number;
   readonly connection: 'app' | 'reconciler';
   readonly statement?: string;
+  /** Short transactions keep retention sweeps from monopolizing DB writes. */
+  readonly batchLimit?: number;
+  readonly maxBatches?: number;
 }
 
 export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
@@ -142,13 +145,16 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
       "WITH deleted AS (DELETE FROM public.virtual_stock_price_ticks WHERE recorded_at < now() - interval '24 hours' RETURNING 1) SELECT count(*)::text AS pruned_ticks FROM deleted",
   },
   {
-    // Cleans up delivered outbox events older than 7 days, maintaining lightweight delivery queue indexes.
+    // Expired deliveries are disposable, but the financial outbox write path is not.
+    // Retention deletes use the v270 index and short, bounded transactions.
     job: 'system.outbox_sweep',
     cadence: 'daily',
     notBefore: 5,
     connection: 'app',
+    batchLimit: 2000,
+    maxBatches: 25,
     statement:
-      "WITH deleted AS (DELETE FROM public.outbox_events WHERE delivered_at IS NOT NULL AND delivered_at < now() - interval '7 days' RETURNING 1) SELECT count(*)::text AS pruned_events FROM deleted",
+      "WITH expired AS MATERIALIZED (SELECT id FROM public.outbox_events WHERE delivered_at IS NOT NULL AND delivered_at < now() - interval '7 days' ORDER BY delivered_at, id LIMIT $1), removed AS (DELETE FROM public.outbox_events AS event USING expired WHERE event.id = expired.id RETURNING 1) SELECT count(*)::text AS deleted FROM removed",
   },
   {
     job: 'economy.reconciliation',
@@ -239,10 +245,13 @@ export class Scheduler {
 
     try {
       const handler = this.options.handlers?.[job.job];
-      if (!handler && !job.statement) throw new Error(`no scheduler handler or statement for ${job.job}`);
+      if (!handler && !job.statement)
+        throw new Error(`no scheduler handler or statement for ${job.job}`);
       const result = handler
         ? await handler()
-        : await queryOne<Record<string, unknown>>(connection, job.statement as string, []);
+        : job.batchLimit !== undefined
+          ? await this.runBatchedRetention(connection, job)
+          : await queryOne<Record<string, unknown>>(connection, job.statement as string, []);
       await this.finish(job, claim.period_key, 'succeeded', result ?? {});
       this.options.logger.log(`${job.job} ${claim.period_key}: done`);
     } catch (error: unknown) {
@@ -256,6 +265,41 @@ export class Scheduler {
     }
   }
 
+  private async runBatchedRetention(
+    connection: Queryable,
+    job: SchedulerJob,
+  ): Promise<{ deleted: number; batches: number; limitReached: boolean }> {
+    const limit = job.batchLimit;
+    const cap = job.maxBatches;
+    if (
+      !job.statement ||
+      !Number.isSafeInteger(limit) ||
+      limit === undefined ||
+      limit <= 0 ||
+      !Number.isSafeInteger(cap) ||
+      cap === undefined ||
+      cap <= 0
+    ) {
+      throw new Error(`invalid batched retention configuration for ${job.job}`);
+    }
+
+    let deleted = 0;
+    let batches = 0;
+    let lastBatch = 0;
+    do {
+      const row = await queryOne<{ deleted: string }>(connection, job.statement, [limit]);
+      const count = Number(row?.deleted);
+      if (!Number.isSafeInteger(count) || count < 0 || count > limit) {
+        throw new Error(`${job.job}: invalid batch count`);
+      }
+      deleted += count;
+      lastBatch = count;
+      batches += 1;
+    } while (lastBatch === limit && batches < cap);
+
+    return { deleted, batches, limitReached: lastBatch === limit && batches === cap };
+  }
+
   private async finish(
     job: SchedulerJob,
     periodKey: string,
@@ -263,10 +307,12 @@ export class Scheduler {
     detail: unknown,
   ): Promise<void> {
     try {
-      await this.options.app.query(
-        'SELECT public.schedule_finish_run($1, $2, $3, $4::jsonb)',
-        [job.job, periodKey, status, JSON.stringify(detail ?? {})],
-      );
+      await this.options.app.query('SELECT public.schedule_finish_run($1, $2, $3, $4::jsonb)', [
+        job.job,
+        periodKey,
+        status,
+        JSON.stringify(detail ?? {}),
+      ]);
     } catch (error: unknown) {
       this.options.logger.error(`${job.job}: could not record the outcome`, String(error));
     }

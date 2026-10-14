@@ -112,7 +112,9 @@ describe('the scheduler', () => {
       reconciler: null,
       intervalMs: 1000,
       logger: silent,
-      jobs: [{ job: 'economy.ai_policy_review', cadence: 'weekly', notBefore: 20, connection: 'app' }],
+      jobs: [
+        { job: 'economy.ai_policy_review', cadence: 'weekly', notBefore: 20, connection: 'app' },
+      ],
       handlers: {
         'economy.ai_policy_review': async () => {
           handled += 1;
@@ -142,5 +144,74 @@ describe('the scheduler', () => {
 
     expect(reconciler.calls.map((call) => call.sql)).toStrictEqual(['SELECT 1']);
     expect(app.calls.some((call) => call.sql.includes('schedule_finish_run'))).toBe(true);
+  });
+});
+
+describe('bounded outbox retention cleanup', () => {
+  const sweep = SCHEDULER_JOBS.find((candidate) => candidate.job === 'system.outbox_sweep');
+
+  it('uses parameterized, ordered deletion batches instead of a whole-table delete', () => {
+    expect(sweep).toMatchObject({
+      cadence: 'daily',
+      connection: 'app',
+      batchLimit: 2000,
+      maxBatches: 25,
+    });
+    expect(sweep?.statement).toContain('LIMIT $1');
+    expect(sweep?.statement).toContain('ORDER BY delivered_at, id');
+    expect(sweep?.statement).toContain('RETURNING 1');
+  });
+
+  it('commits short batches, stops when a batch is partial, and records totals', async () => {
+    const batchCounts = ['2000', '2000', '17'];
+    const app = connection((sql) => {
+      if (sql.includes('schedule_claim_run')) return [{ claimed: true, period_key: '2026-10-14' }];
+      if (sql.includes('WITH expired AS MATERIALIZED')) return [{ deleted: batchCounts.shift() }];
+      return [];
+    });
+    await new Scheduler({
+      app: app as never,
+      reconciler: null,
+      intervalMs: 1000,
+      logger: silent,
+      jobs: sweep ? [sweep] : [],
+    }).tick();
+
+    const deletes = app.calls.filter((call) => call.sql.includes('WITH expired AS MATERIALIZED'));
+    expect(deletes).toHaveLength(3);
+    expect(deletes.map((call) => call.values)).toStrictEqual([[2000], [2000], [2000]]);
+    const finish = app.calls.find((call) => call.sql.includes('schedule_finish_run'));
+    expect(finish?.values[2]).toBe('succeeded');
+    expect(JSON.parse(String(finish?.values[3]))).toMatchObject({
+      deleted: 4017,
+      batches: 3,
+      limitReached: false,
+    });
+  });
+
+  it('caps the number of batches even when the queue has more expired records', async () => {
+    const app = connection((sql) => {
+      if (sql.includes('schedule_claim_run')) return [{ claimed: true, period_key: '2026-10-14' }];
+      if (sql.includes('WITH expired AS MATERIALIZED')) return [{ deleted: '2000' }];
+      return [];
+    });
+    await new Scheduler({
+      app: app as never,
+      reconciler: null,
+      intervalMs: 1000,
+      logger: silent,
+      jobs: sweep ? [sweep] : [],
+    }).tick();
+
+    expect(
+      app.calls.filter((call) => call.sql.includes('WITH expired AS MATERIALIZED')),
+    ).toHaveLength(25);
+    const finish = app.calls.find((call) => call.sql.includes('schedule_finish_run'));
+    expect(finish?.values[2]).toBe('succeeded');
+    expect(JSON.parse(String(finish?.values[3]))).toMatchObject({
+      deleted: 50000,
+      batches: 25,
+      limitReached: true,
+    });
   });
 });

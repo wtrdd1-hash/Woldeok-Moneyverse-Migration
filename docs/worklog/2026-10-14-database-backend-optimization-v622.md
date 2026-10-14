@@ -15,11 +15,20 @@
 
 - [x] Confirm host, DB connection, version, disk pressure and table/index statistics.
 - [x] Check new `origin/main` and isolate a task branch/worktree.
-- [ ] Identify a measured, non-destructive optimization and add failing tests.
-- [ ] Implement minimum backend and/or forward-only database fix.
+- [x] Identify a measured, non-destructive optimization and add failing tests.
+- [x] Implement bounded outbox cleanup, forward-only migration 270 and test it on isolated synthetic PostgreSQL.
 - [ ] Run tests, security/parity/DB validation, Test readiness and main drift check.
 - [ ] Prepare both English and Korean documentation, internal/GitHub updates, and PR.
 
+## Mid-work checkpoint — 2026-10-14 KST
+
+- Actual DEV expired-outbox read EXPLAIN: parallel sequential scan, 36.158ms and 25,883 top-level shared buffers; no delivered_at index. This SELECT did not modify the DEV database.
+- RED: 3 expected regression failures confirmed. GREEN: scheduler tests 10/10, database parity 7/7, contract/backend/database typechecks and backend build pass.
+- Whole backend suite: 1,165 passed, 391 skipped; database tests skipped due to absent scoped DB credentials, not accepted as DB passes.
+- Isolated Test PostgreSQL 17.11 database moneyverse_opt_v622 with 260,000 generated rows: migration 270 applied, pg_index valid/ready, autovacuum settings verified, 2,000-row selection 25.606ms / 1,701 buffers before vs 0.400ms / 13 after. Real DELETE of 2,000 executed inside BEGIN/ROLLBACK; it did not persist.
+- Mid-work origin/main drift: c56af867 -> 77e27063, unrelated v619 disk-cleanup documentation; re-merge latest main before final verification.
+- No Test service pointer, production data, financial data or schema_migrations of shared environments changed. Synthetic benchmark is not Production acceptance.
+
 ## Finished
 
-Pending fresh test results. **No development schema migration or Production release has been executed.**
+Pending exact-SHA Test acceptance and safe rollout. **No shared development schema migration or Production release has been executed.**
