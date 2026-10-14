@@ -44,7 +44,7 @@ export const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin/analytics', label: '그래프 분석', icon: BarChart3 },
   { href: '/admin/api-health', label: 'API 관제', icon: Activity },
   { href: '/admin/seo', label: 'SEO·색인', icon: Globe },
-  { href: '/admin/blog', label: '블로그 관리', icon: BookOpen },
+  { href: '/admin/blog', label: '블로그 관리', icon: ScrollText },
   { href: '/admin/treasury/grants', label: '창업 지원금 심사 (점검중)', icon: Vault },
   { href: '/admin/users', label: '회원 관리', icon: Users },
   { href: '/admin/security', label: '보안·차단', icon: ShieldAlert },
