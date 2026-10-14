@@ -19,3 +19,8 @@
 
 ## S4 release boundary
 - **No Next/Nest source modifications, no Test/Production promotion, no database or feature switch changes.** Remediation requires isolated PR, tests, exact-SHA Test backend/database checks, then approved zero-downtime deployment.
+
+## S5 Publication evidence
+- origin/main remained d4f9cc1978bea6ee1a0e904005fa418cd159b4cd through final refresh.
+- Published commit 5993ae9e5236e8146b2aee0fc07f97efb4b56a29 and draft PR #832: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/832 .
+- All eight changed files are documentation, with clean git diff checks; code, DB, Test, Production and feature switches were not modified.

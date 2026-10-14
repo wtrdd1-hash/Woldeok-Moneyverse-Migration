@@ -18,3 +18,8 @@
 
 ## S4 완료 경계
 - 문서 감사 작업이며 **소스수정·테스트배포·운영승격·DB 변경 없음**. 수정 후에는 동일 SHA 격리 Test·백엔드·DB·권한·UI E2E와 무중단 승격 증거가 별도 필요.
+
+## S5 GitHub 게시 확정
+- 마지막 main 재확인: d4f9cc1978bea6ee1a0e904005fa418cd159b4cd (변화 없음).
+- 게시 커밋: 5993ae9e5236e8146b2aee0fc07f97efb4b56a29, 문서 전용 초안 PR #832: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/832 .
+- 영문/한글 보고서와 작업로그, 내부용/GitHub 변경내역만 변경. 앱 소스·DB·테스트/운영 배포·기능 스위치 변경 없음.
