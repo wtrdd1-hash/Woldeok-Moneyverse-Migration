@@ -23,6 +23,12 @@ export function canonicalIntegerString(value: unknown): string | null {
   return negative ? `-${digits}` : digits;
 }
 
+
+/** UI request guard: money stays a canonical integer string, not a double. */
+export function isPositiveWldInput(value: unknown): value is string {
+  return typeof value === 'string' && /^[1-9][0-9]*$/.test(value);
+}
+
 /** Groups thousands and renders a leading minus as a true minus sign (U+2212). */
 export function groupDigits(amount: unknown): string {
   const canonical = canonicalIntegerString(amount);

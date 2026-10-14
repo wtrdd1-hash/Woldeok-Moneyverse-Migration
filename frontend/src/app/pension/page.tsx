@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { publicApi, api } from '@/lib/api';
+import { canonicalIntegerString } from '@/lib/money';
 import {
   PensionPortalClient,
   type NationalPensionOverview,
@@ -30,7 +31,7 @@ export default async function PublicPensionPage() {
   let myAccount: MyPensionAccount | null = null;
   let contributions: ContributionLog[] = [];
   let payouts: PayoutLog[] = [];
-  let userCashBalance = 0;
+  let userCashBalance = '0';
   let isLoggedIn = false;
 
   try {
@@ -38,7 +39,7 @@ export default async function PublicPensionPage() {
       api<MyPensionAccount>('/api/v1/pension/my-account'),
       api<ContributionLog[]>('/api/v1/pension/my-contributions').catch(() => []),
       api<PayoutLog[]>('/api/v1/pension/my-payouts').catch(() => []),
-      api<{ cashBalance?: number; balance?: number }>('/api/v1/wallet/summary').catch(() => null),
+      api<{ cashBalance?: string | number; balance?: string | number }>('/api/v1/wallet/summary').catch(() => null),
     ]);
 
     if (acc && acc.id) {
@@ -51,8 +52,8 @@ export default async function PublicPensionPage() {
     if (Array.isArray(payLogs)) {
       payouts = payLogs;
     }
-    const walletData = wallet as { cashBalance?: number; balance?: number } | null;
-    userCashBalance = Number(walletData?.cashBalance ?? walletData?.balance ?? 0);
+    const walletData = wallet as { cashBalance?: string | number; balance?: string | number } | null;
+    userCashBalance = canonicalIntegerString(walletData?.cashBalance ?? walletData?.balance ?? '0') ?? '0';
   } catch {
     isLoggedIn = false;
   }

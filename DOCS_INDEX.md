@@ -1,5 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## 2026-10-14 WLD monetary overflow protection (v2026.10.14.625)
+
+- [English primary report](docs/findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md) · [한국어 상세 보고서](docs/findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md)
+- [Worklog EN](docs/worklog/2026-10-14-wld-overflow-precision-v625.md) · [작업 기록 KO](docs/worklog/2026-10-14-wld-overflow-precision-v625.ko.md) · [Internal update](docs/updates/v2026.10.14.625-internal.md) · [GitHub update](docs/updates/v2026.10.14.625-github.md)
+- **Candidate only:** exact WLD handling in wallet, fiat, P2P, burn and pension; unresolved P0 ledger conservation, remaining legacy Number paths, frontend full-suite and live DB gates. No Test or Production promotion.
+
 ## 2026-10-14 PostgreSQL Outbox optimization candidate — v2026.10.14.622
 
 - [English database/backend investigation](docs/findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.md) · [한국어 진단 보고서](docs/findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.ko.md).

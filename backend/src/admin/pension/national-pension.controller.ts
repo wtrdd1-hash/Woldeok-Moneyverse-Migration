@@ -68,11 +68,11 @@ export class PublicNationalPensionController {
   @ApiOperation({ summary: '국민연금 기여금 납입 (지갑 차감 -> 국고 편입)' })
   async contribute(
     @Req() req: RequestWithSession,
-    @Body('amountWld') amountWld: number,
+    @Body('amountWld') amountWld: string | number,
     @Body('note') note?: string,
   ) {
     const userId = requireUserId(req);
-    return this.service.contribute(userId, Number(amountWld), note);
+    return this.service.contribute(userId, amountWld, note);
   }
 
   @Post('toggle-retire')

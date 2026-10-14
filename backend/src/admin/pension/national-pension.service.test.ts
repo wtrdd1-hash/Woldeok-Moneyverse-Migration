@@ -42,7 +42,7 @@ describe('NationalPensionService', () => {
 
     expect(result.contributedAmountWld).toBe(10000);
     expect(result.account.accumulated_contribution_wld).toBe('10000');
-    expect(mockRepo.contribute).toHaveBeenCalledWith('user-1', 10000, undefined);
+    expect(mockRepo.contribute).toHaveBeenCalledWith('user-1', '10000', undefined);
   });
 
   it('should toggle retirement mode', async () => {

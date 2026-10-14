@@ -2,7 +2,7 @@
 
 import { useCurrency } from './currency-context';
 import { useLocale } from './locale-provider';
-import { convertWldToFiat, formatFiat } from '@/lib/currency';
+import { formatFiatFromWld } from '@/lib/currency';
 import { groupDigits } from '@/lib/money';
 
 interface FiatAmountProps {
@@ -26,8 +26,7 @@ export function FiatAmount({
   const { locale } = useLocale();
 
   const wldFormatted = groupDigits(amount);
-  const fiatValue = convertWldToFiat(amount, currency);
-  const fiatFormatted = formatFiat(fiatValue, currency, locale);
+  const fiatFormatted = formatFiatFromWld(amount, currency, locale);
 
   return (
     <span className={`inline-flex items-baseline gap-1.5 flex-wrap ${className}`}>
@@ -36,7 +35,7 @@ export function FiatAmount({
           {wldFormatted} <span className="text-xs font-semibold text-amber-500">WLD</span>
         </span>
       )}
-      {currency !== 'KRW' && (
+      {currency !== 'KRW' && fiatFormatted !== '—' && (
         <span className={fiatClassName}>
           (≈ {fiatFormatted})
         </span>
@@ -60,8 +59,9 @@ export function FiatBadge({
 
   if (currency === 'KRW') return null;
 
-  const fiatValue = convertWldToFiat(amount, currency);
-  const fiatFormatted = formatFiat(fiatValue, currency, locale);
+  const fiatFormatted = formatFiatFromWld(amount, currency, locale);
+
+  if (fiatFormatted === '—') return null;
 
   return (
     <span

@@ -394,7 +394,7 @@ export class WalletService {
         this.broadcast.publishUserNotification(recipient, {
           id: `notif_recv_${Date.now()}`,
           title: 'WLD 송금 도착',
-          message: `${Number(transferAmount).toLocaleString()} WLD가 도착했습니다.`,
+          message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD가 도착했습니다.`,
           type: 'success',
           href: '/wallet',
         });
@@ -402,7 +402,7 @@ export class WalletService {
         this.broadcast.publishUserNotification(actorUserId, {
           id: `notif_send_${Date.now()}`,
           title: 'WLD 송금 완료',
-          message: `${Number(transferAmount).toLocaleString()} WLD 송금이 완료되었습니다.`,
+          message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD 송금이 완료되었습니다.`,
           type: 'info',
           href: '/wallet',
         });

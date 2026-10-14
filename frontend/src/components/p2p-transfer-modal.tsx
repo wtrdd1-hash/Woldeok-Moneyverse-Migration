@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { groupDigits, isPositiveWldInput } from '@/lib/money';
 import { Send, Search, CheckCircle2, User, Heart, Sparkles, AlertCircle } from 'lucide-react';
 
 interface Recipient {
@@ -74,7 +75,7 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
   }, [searchQuery, selectedRecipient]);
 
   const handleTransfer = async () => {
-    if (!selectedRecipient || !amount || Number(amount) <= 0) {
+    if (!selectedRecipient || !isPositiveWldInput(amount)) {
       setErrorMsg('수취인과 송금 금액(1 WLD 이상)을 입력해주세요.');
       return;
     }
@@ -331,10 +332,10 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
             {/* 송금 버튼 */}
             <Button
               onClick={handleTransfer}
-              disabled={isSubmitting || !selectedRecipient || !amount}
+              disabled={isSubmitting || !selectedRecipient || !isPositiveWldInput(amount)}
               className="w-full h-11 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white mt-2 shadow-lg shadow-blue-500/20"
             >
-              {isSubmitting ? '안심 송금 처리 중...' : `${amount ? Number(amount).toLocaleString() : 0} WLD 즉시 송금하기`}
+              {isSubmitting ? '안심 송금 처리 중...' : `${amount ? groupDigits(amount) : 0} WLD 즉시 송금하기`}
             </Button>
           </div>
         )}

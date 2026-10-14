@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
+import { requirePositiveWld } from '../../wallet/wallet.repository';
 
 export interface NationalPensionOverview {
   totalAumWld: string;
@@ -44,20 +45,38 @@ export interface NationalPensionPayoutLogRow {
   created_at: string;
 }
 
+/** Exact minor-unit pension math; avoid converting ledger money to Number. */
+export function pensionRefundSplit(principalWld: string): { refundAmountWld: string; welfareContributionWld: string } {
+  const principal = BigInt(requirePositiveWld(principalWld, 'principalWld'));
+  const refund = principal * 95n / 100n;
+  return {
+    refundAmountWld: refund.toString(),
+    welfareContributionWld: (principal - refund).toString(),
+  };
+}
+
+export function pensionHourlyPayout(principalWld: string, rateBps: number): string {
+  if (!Number.isSafeInteger(rateBps) || rateBps < 1) throw new RangeError('invalid pension rate');
+  const principal = BigInt(principalWld);
+  if (principal < 0n) throw new RangeError('invalid pension principal');
+  const due = principal * BigInt(rateBps) / 10000n;
+  return (due > 0n ? due : 1n).toString();
+}
+
 @Injectable()
 export class NationalPensionRepository {
   private readonly logger = new Logger(NationalPensionRepository.name);
 
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
-  private calculateTierAndRate(accumulated: number): { tier: string; hourlyRateBps: number } {
-    if (accumulated >= 10000000) {
+  private calculateTierAndRate(accumulated: bigint): { tier: string; hourlyRateBps: number } {
+    if (accumulated >= 10000000n) {
       return { tier: 'TIER_5_HONOR', hourlyRateBps: 12 };
-    } else if (accumulated >= 2000000) {
+    } else if (accumulated >= 2000000n) {
       return { tier: 'TIER_4_PLATINUM', hourlyRateBps: 11 };
-    } else if (accumulated >= 500000) {
+    } else if (accumulated >= 500000n) {
       return { tier: 'TIER_3_GOLD', hourlyRateBps: 10 };
-    } else if (accumulated >= 100000) {
+    } else if (accumulated >= 100000n) {
       return { tier: 'TIER_2_CITIZEN', hourlyRateBps: 9 };
     }
     return { tier: 'TIER_1_YOUTH', hourlyRateBps: 8 };
@@ -156,10 +175,8 @@ export class NationalPensionRepository {
     return acc;
   }
 
-  async contribute(userId: string, amountWld: number, note = '국민연금 기여금 납입') {
-    if (amountWld <= 0) {
-      throw new Error('기여금 납입액은 0보다 커야 합니다.');
-    }
+  async contribute(userId: string, amountWld: string, note = '국민연금 기여금 납입') {
+    amountWld = requirePositiveWld(amountWld, 'amountWld');
 
     const client = await this.pool.connect();
     try {
@@ -171,10 +188,10 @@ export class NationalPensionRepository {
         `SELECT available_amount FROM public.account_balances WHERE account_id = $1 FOR UPDATE`,
         [userAccountId],
       );
-      const currentBalance = Number(balRes.rows[0]?.available_amount || 0);
-      if (currentBalance < amountWld) {
+      const currentBalance = BigInt(balRes.rows[0]?.available_amount || '0');
+      if (currentBalance < BigInt(amountWld)) {
         throw new Error(
-          `지갑 잔액이 부족합니다. (보유: ${currentBalance.toLocaleString('ko-KR')} WLD, 필요: ${amountWld.toLocaleString('ko-KR')} WLD)`,
+          `지갑 잔액이 부족합니다. (보유: ${currentBalance.toLocaleString('ko-KR')} WLD, 필요: ${BigInt(amountWld).toLocaleString('ko-KR')} WLD)`,
         );
       }
 
@@ -213,8 +230,8 @@ export class NationalPensionRepository {
         account = accRes.rows[0];
       }
 
-      const newAccumulated = Number(account.accumulated_contribution_wld) + amountWld;
-      const { tier, hourlyRateBps } = this.calculateTierAndRate(newAccumulated);
+      const newAccumulated = (BigInt(account.accumulated_contribution_wld) + BigInt(amountWld)).toString();
+      const { tier, hourlyRateBps } = this.calculateTierAndRate(BigInt(newAccumulated));
 
       // 4. 연금 계좌 업데이트
       const updatedAccRes = await client.query<NationalPensionAccountRow>(
@@ -280,7 +297,7 @@ export class NationalPensionRepository {
     if (acc.status === 'LIQUIDATED') {
       throw new Error('해지된 계좌입니다. 새로 기여금을 납입하여 연금을 재개하십시오.');
     }
-    if (Number(acc.accumulated_contribution_wld) < 1000) {
+    if (BigInt(acc.accumulated_contribution_wld) < 1000n) {
       throw new Error('은퇴 연금 수령 개시를 위해서는 최소 1,000 WLD 이상의 적립금이 필요합니다.');
     }
 
@@ -314,14 +331,14 @@ export class NationalPensionRepository {
         throw new Error('해지 가능한 유효한 연금 계좌가 없습니다.');
       }
       const account: NationalPensionAccountRow = acc;
-      const principal = Number(account.accumulated_contribution_wld);
-      if (principal <= 0) {
+      const principal = BigInt(account.accumulated_contribution_wld);
+      if (principal <= 0n) {
         throw new Error('적립된 연금 원금이 없습니다.');
       }
 
       // 95% 환급, 5% 복지기금 귀속
-      const refundAmount = Math.floor(principal * 0.95);
-      const welfarePenalty = principal - refundAmount;
+      const { refundAmountWld: refundAmount, welfareContributionWld: welfarePenalty } =
+        pensionRefundSplit(principal.toString());
 
       // 국고 차감
       await client.query(
@@ -391,16 +408,16 @@ export class NationalPensionRepository {
       if (pensionersRes.rows.length === 0) {
         await client.query('COMMIT');
         return {
-          totalPayoutAmount: 0,
+          totalPayoutAmount: '0',
           pensionersCount: 0,
         };
       }
 
-      let totalPaid = 0;
+      let totalPaid = 0n;
       for (const p of pensionersRes.rows) {
-        const accumulated = Number(p.accumulated_contribution_wld);
-        const bps = Number(p.hourly_payout_rate_bps || 8);
-        const hourlyPayout = Math.max(1, Math.floor((accumulated * bps) / 10000));
+        const accumulated = p.accumulated_contribution_wld;
+        const bps = p.hourly_payout_rate_bps || 8;
+        const hourlyPayout = pensionHourlyPayout(accumulated, bps);
 
         // 유저 지갑으로 지급
         const userAccountId = await this.ensureUserCashAccount(client, p.user_id);
@@ -426,23 +443,23 @@ export class NationalPensionRepository {
           [p.id, p.user_id, hourlyPayout, accumulated],
         );
 
-        totalPaid += hourlyPayout;
+        totalPaid += BigInt(hourlyPayout);
       }
 
       // 국고(VAULT_MAIN)에서 총 연금 지급액 차감
-      if (totalPaid > 0) {
+      if (totalPaid > 0n) {
         await client.query(
           `UPDATE public.system_treasury_vaults 
            SET balance_wld = GREATEST(0, (balance_wld::numeric - $1))::text, updated_at = NOW() 
            WHERE code = 'VAULT_MAIN'`,
-          [totalPaid],
+          [totalPaid.toString()],
         );
       }
 
       await client.query('COMMIT');
 
       return {
-        totalPayoutAmount: totalPaid,
+        totalPayoutAmount: totalPaid.toString(),
         pensionersCount: pensionersRes.rows.length,
       };
     } catch (err) {

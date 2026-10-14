@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { requirePositiveWld } from '../../wallet/wallet.repository';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
 import {
   NationalPensionAccountRow,
@@ -25,21 +26,22 @@ export class NationalPensionService {
     return this.repository.getOrCreateAccount(userId);
   }
 
-  async contribute(userId: string, amountWld: number, note?: string) {
-    this.logger.log(`User ${userId} contributing ${amountWld} WLD to National Pension...`);
-    const res = await this.repository.contribute(userId, amountWld, note);
+  async contribute(userId: string, amountWld: string | number, note?: string) {
+    const exactAmount = requirePositiveWld(amountWld, 'amountWld');
+    this.logger.log(`User ${userId} contributing ${exactAmount} WLD to National Pension...`);
+    const res = await this.repository.contribute(userId, exactAmount, note);
 
     // 대규모 기여금 또는 관리자 DM 알림
-    if (this.discordAlertService && amountWld >= 10000 && res.account) {
+    if (this.discordAlertService && BigInt(exactAmount) >= 10000n && res.account) {
       try {
         const title = '🏛️ [국민연금] 대규모 공적 연금 기여금 국고 납입';
         const description =
           `국민(유저)의 연금 기여금이 접수되어 중앙 국고(VAULT_MAIN)로 입금되었습니다.\n\n` +
           `• **기여 납입자**: ${userId}\n` +
-          `• **납입 금액**: ${amountWld.toLocaleString('ko-KR')} WLD\n` +
-          `• **적립 후 총 기여금**: ${Number(res.account.accumulated_contribution_wld).toLocaleString('ko-KR')} WLD\n` +
+          `• **납입 금액**: ${BigInt(exactAmount).toLocaleString('ko-KR')} WLD\n` +
+          `• **적립 후 총 기여금**: ${BigInt(res.account.accumulated_contribution_wld).toLocaleString('ko-KR')} WLD\n` +
           `• **가입 등급**: ${res.account.tier}\n` +
-          `• **국고 잔액**: ${Number(res.newVaultBalanceWld).toLocaleString('ko-KR')} WLD`;
+          `• **국고 잔액**: ${BigInt(res.newVaultBalanceWld).toLocaleString('ko-KR')} WLD`;
 
         await this.discordAlertService.sendAdminDirectMessage(
           {
@@ -81,7 +83,7 @@ export class NationalPensionService {
         const description =
           `은퇴 수령 중인 국민들에게 중앙 국고(VAULT_MAIN)로부터 시간당 기초연금이 정상 지급되었습니다.\n\n` +
           `• **연금 수령 대상자**: ${result.pensionersCount}명\n` +
-          `• **총 지급 연금액**: ${result.totalPayoutAmount.toLocaleString('ko-KR')} WLD\n` +
+          `• **총 지급 연금액**: ${BigInt(result.totalPayoutAmount).toLocaleString('ko-KR')} WLD\n` +
           `• **지급 주기**: 1시간 (정기 복리 운용 연계)`;
 
         await this.discordAlertService.sendAdminDirectMessage(

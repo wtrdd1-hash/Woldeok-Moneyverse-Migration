@@ -85,7 +85,7 @@ export function PensionControlTower({
       if (!res.ok) throw new Error(data.error || '연금 지급 실패');
 
       toast.success(
-        `기초연금 지급 집행 완료: 총 ${Number(data.totalPayoutAmount || 0).toLocaleString()} WLD (수령자: ${data.pensionersCount || 0}명)`,
+        `기초연금 지급 집행 완료: 총 ${groupDigits(data.totalPayoutAmount ?? '0')} WLD (수령자: ${data.pensionersCount || 0}명)`,
       );
       await refreshData();
     } catch (err: any) {

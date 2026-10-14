@@ -54,7 +54,7 @@ export class BurnEventController {
       recentWinners: recentRes.rows.map((r) => ({
         displayName: r.display_name,
         rewardTitle: r.reward_title,
-        burnAmount: Number(r.burn_amount),
+        burnAmount: r.burn_amount,
         createdAt: r.created_at,
       })),
     };
@@ -62,13 +62,26 @@ export class BurnEventController {
 
   @Post('participate')
   @ApiOperation({ summary: '10,000 WLD 국고 영구 소각 및 한정판 칭호 드로우 참여' })
-  async participateBurnDraw(@Req() req: RequestWithSession, @Body() body: { burnAmount?: number }) {
+  async participateBurnDraw(@Req() req: RequestWithSession, @Body() body: { burnAmount?: string | number }) {
     const userId = req.session?.user_id;
     if (!userId) {
       throw new BadRequestException('로그인이 필요한 서비스입니다.');
     }
 
-    const burnAmount = body.burnAmount && body.burnAmount >= 10000 ? body.burnAmount : 10000;
+    // Exact WLD across JSON, Node, and PostgreSQL. Unsafe JSON numbers have
+    // already lost information and must be rejected rather than rounded.
+    const rawAmount = body?.burnAmount;
+    let requested: string;
+    if (rawAmount === undefined || rawAmount === null || rawAmount === 0) {
+      requested = '10000';
+    } else if (typeof rawAmount === 'string' && /^[1-9][0-9]*$/.test(rawAmount)) {
+      requested = rawAmount;
+    } else if (typeof rawAmount === 'number' && Number.isSafeInteger(rawAmount) && rawAmount > 0) {
+      requested = String(rawAmount);
+    } else {
+      throw new BadRequestException('금액은 정확한 양의 WLD 정수 문자열이어야 합니다.');
+    }
+    const burnAmount = BigInt(requested) >= 10000n ? requested : '10000';
 
     try {
       const res = await this.pool.query<{ participate_anti_inflation_burn_draw: any }>(

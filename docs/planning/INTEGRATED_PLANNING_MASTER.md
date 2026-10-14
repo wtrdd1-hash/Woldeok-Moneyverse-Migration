@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.14.625 — WLD amount overflow protection (implementation candidate)
+
+- Canonical integer WLD strings and BigInt arithmetic protect wallet notifications, configured fiat display, P2P/donation, burn receipts, and pension contribution/refund/payout. No holdings cap is introduced. See [English risk register](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md) and [Korean report](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md).
+- **P0 WLD-625-01:** direct pension/account/treasury UPDATE and treasury floor/clamping still require ledger-conservation redesign and independent database proofs. Further stock-league, auctions and other bigint/Number boundaries remain P1.
+- Candidate branch only; full frontend regression and DB/security acceptance remain blocked. This does **not** supersede planning authority v530 or certify Test/Production. Worklog and internal/GitHub changelogs retain evidence.
+
 ## PostgreSQL Outbox retention optimization — v2026.10.14.622 (isolated candidate)
 
 - Derived from the adopted v486 database architecture, not a replacement for v530 planning authority. PostgreSQL 17.11 DEV diagnosis: 957 MB DB, 213 MB Outbox, ~46,941 dead rows; expiry lookup scanned ~25,883 buffers in 36.158 ms.
