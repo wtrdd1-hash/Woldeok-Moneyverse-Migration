@@ -1,0 +1,4042 @@
+{
+  "root_commit": "6be447193f006069ec8257bb50c8c675fe24bc52",
+  "tracked_files": 3890,
+  "source_config_files": 1916,
+  "next_route_files": 63,
+  "candidate_counts": {
+    "hardcoded_auth_secret": 3,
+    "unsafe_eval": 4,
+    "child_process": 18,
+    "sql_string_interpolation": 26,
+    "filesystem_write": 28,
+    "dangerous_html": 116,
+    "random_in_code": 101,
+    "unsafe_network": 0,
+    "database_grant_public": 1,
+    "security_definer": 695
+  },
+  "candidate_routes": [
+    "frontend/src/app/api/activity/events/route.ts",
+    "frontend/src/app/api/admin/bonds/distribute-coupons/route.ts",
+    "frontend/src/app/api/admin/enterprises/harvest/route.ts",
+    "frontend/src/app/api/admin/enterprises/status/route.ts",
+    "frontend/src/app/api/admin/pension/distribute/route.ts",
+    "frontend/src/app/api/admin/seo-audit/route.ts",
+    "frontend/src/app/api/admin/seo/gsc-sitemap-submit/route.ts",
+    "frontend/src/app/api/admin/seo/indexing-submit/route.ts",
+    "frontend/src/app/api/admin/treasury/swf/liquidate/route.ts",
+    "frontend/src/app/api/admin/treasury/swf/route.ts",
+    "frontend/src/app/api/advisor/deoki/ask/route.ts",
+    "frontend/src/app/api/arena/rooms/[id]/cancel/route.ts",
+    "frontend/src/app/api/arena/rooms/[id]/join/route.ts",
+    "frontend/src/app/api/arena/rooms/route.ts",
+    "frontend/src/app/api/bonds/repo-loans/borrow/route.ts",
+    "frontend/src/app/api/bonds/repo-loans/repay/route.ts",
+    "frontend/src/app/api/bonds/rollover/route.ts",
+    "frontend/src/app/api/bonds/subscribe/route.ts",
+    "frontend/src/app/api/events/burn-draw/route.ts",
+    "frontend/src/app/api/indexnow/route.ts",
+    "frontend/src/app/api/market/secret-auction/[id]/bid/route.ts",
+    "frontend/src/app/api/pension/contribute/route.ts",
+    "frontend/src/app/api/pension/liquidate/route.ts",
+    "frontend/src/app/api/pension/toggle-retire/route.ts",
+    "frontend/src/app/api/seo/crawl-audit/route.ts",
+    "frontend/src/app/api/seo/gsc/digest-report/route.ts",
+    "frontend/src/app/api/spaces/real-estate/auction/route.ts",
+    "frontend/src/app/api/spaces/real-estate/claim-rent/route.ts",
+    "frontend/src/app/api/stocks/league/copy-trade/cancel/route.ts",
+    "frontend/src/app/api/stocks/league/copy-trade/subscribe/route.ts",
+    "frontend/src/app/api/stocks/league/join/route.ts",
+    "frontend/src/app/api/transfers/p2p/route.ts"
+  ],
+  "read_errors": [],
+  "candidates": {
+    "hardcoded_auth_secret": [
+      {
+        "file": "backend/src/seo/seo-daily-digest.service.ts",
+        "line": 147
+      },
+      {
+        "file": "frontend/src/app/api/blog/generate/route.ts",
+        "line": 10
+      },
+      {
+        "file": "frontend/src/app/api/discord/broadcast/route.ts",
+        "line": 7
+      }
+    ],
+    "unsafe_eval": [
+      {
+        "file": "frontend/src/components/theme-controls.test.tsx",
+        "line": 114
+      },
+      {
+        "file": "frontend/src/lib/theme.test.ts",
+        "line": 92
+      },
+      {
+        "file": "frontend/src/lib/theme.test.ts",
+        "line": 103
+      },
+      {
+        "file": "frontend/src/lib/theme.test.ts",
+        "line": 116
+      }
+    ],
+    "child_process": [
+      {
+        "file": "backend/src/admin/admin-backup.controller.ts",
+        "line": 3
+      },
+      {
+        "file": "bot/music.js",
+        "line": 2
+      },
+      {
+        "file": "bot/scripts/qa_ads_sponsorblock_verification.mjs",
+        "line": 2
+      },
+      {
+        "file": "packages/database/ci-apply.mjs",
+        "line": 5
+      },
+      {
+        "file": "packages/database/ci-apply.mjs",
+        "line": 38
+      },
+      {
+        "file": "scripts/audit-backend-api-completeness.mjs",
+        "line": 4
+      },
+      {
+        "file": "scripts/audit-backend-api-completeness.mjs",
+        "line": 169
+      },
+      {
+        "file": "scripts/backup/verify-backup-evidence.mjs",
+        "line": 4
+      },
+      {
+        "file": "scripts/backup/verify-backup-evidence.mjs",
+        "line": 70
+      },
+      {
+        "file": "scripts/check-mobile-api-contract.mjs",
+        "line": 2
+      },
+      {
+        "file": "scripts/release/classify-release.mjs",
+        "line": 4
+      },
+      {
+        "file": "scripts/security/check-control-bytes.mjs",
+        "line": 1
+      },
+      {
+        "file": "scripts/security/check-repository-security.mjs",
+        "line": 1
+      },
+      {
+        "file": "scripts/security/reject-prisma-migrate.mjs",
+        "line": 1
+      },
+      {
+        "file": "skills/brainstorming/scripts/server.cjs",
+        "line": 537
+      },
+      {
+        "file": "skills/brainstorming/scripts/server.cjs",
+        "line": 543
+      },
+      {
+        "file": "skills/brainstorming/scripts/server.cjs",
+        "line": 547
+      },
+      {
+        "file": "skills/writing-skills/render-graphs.js",
+        "line": 18
+      }
+    ],
+    "sql_string_interpolation": [
+      {
+        "file": "backend/src/admin/ai-news.db.test.ts",
+        "line": 34
+      },
+      {
+        "file": "backend/src/admin/audit-trail.db.test.ts",
+        "line": 79
+      },
+      {
+        "file": "backend/src/admin/control-center-v2.db.test.ts",
+        "line": 38
+      },
+      {
+        "file": "backend/src/admin/economy-console.db.test.ts",
+        "line": 66
+      },
+      {
+        "file": "backend/src/admin/operations-read-models.db.test.ts",
+        "line": 46
+      },
+      {
+        "file": "backend/src/admin/operations-read-models.db.test.ts",
+        "line": 81
+      },
+      {
+        "file": "backend/src/casino-dice.db.test.ts",
+        "line": 730
+      },
+      {
+        "file": "backend/src/casino.db.test.ts",
+        "line": 464
+      },
+      {
+        "file": "backend/src/early-game.db.test.ts",
+        "line": 76
+      },
+      {
+        "file": "backend/src/early-game.db.test.ts",
+        "line": 88
+      },
+      {
+        "file": "backend/src/early-game/early-events.db.test.ts",
+        "line": 42
+      },
+      {
+        "file": "backend/src/early-game/early-events.db.test.ts",
+        "line": 377
+      },
+      {
+        "file": "backend/src/early-game/early-events.db.test.ts",
+        "line": 379
+      },
+      {
+        "file": "backend/src/early-game/early-events.db.test.ts",
+        "line": 381
+      },
+      {
+        "file": "backend/src/economy-auto-policy.db.test.ts",
+        "line": 40
+      },
+      {
+        "file": "backend/src/engagement.db.test.ts",
+        "line": 44
+      },
+      {
+        "file": "backend/src/game.db.test.ts",
+        "line": 93
+      },
+      {
+        "file": "backend/src/ledger-corrections.db.test.ts",
+        "line": 35
+      },
+      {
+        "file": "backend/src/member-profile.db.test.ts",
+        "line": 36
+      },
+      {
+        "file": "backend/src/profile/profile.repository.db.test.ts",
+        "line": 109
+      },
+      {
+        "file": "backend/src/progression.db.test.ts",
+        "line": 36
+      },
+      {
+        "file": "backend/src/scheduler/scheduler.db.test.ts",
+        "line": 35
+      },
+      {
+        "file": "backend/src/shop/shop-catalog.db.test.ts",
+        "line": 43
+      },
+      {
+        "file": "backend/src/stock/market-dynamics.db.test.ts",
+        "line": 45
+      },
+      {
+        "file": "backend/src/work/work-board.db.test.ts",
+        "line": 41
+      },
+      {
+        "file": "backend/src/work/work.db.test.ts",
+        "line": 44
+      }
+    ],
+    "filesystem_write": [
+      {
+        "file": "backend/src/content/chat-image-storage.ts",
+        "line": 48
+      },
+      {
+        "file": "backend/src/content/private-image-storage.ts",
+        "line": 44
+      },
+      {
+        "file": "frontend/src/app/api/treasury/apply-grant/route.ts",
+        "line": 55
+      },
+      {
+        "file": "frontend/src/app/api/treasury/proposals/route.ts",
+        "line": 104
+      },
+      {
+        "file": "frontend/src/app/blog/blog-data.ts",
+        "line": 215
+      },
+      {
+        "file": "ops/cloudflare-publish.mjs",
+        "line": 44
+      },
+      {
+        "file": "ops/cloudflare-unpublish.mjs",
+        "line": 49
+      },
+      {
+        "file": "packages/database/ci-apply.test.mjs",
+        "line": 11
+      },
+      {
+        "file": "packages/database/ci-apply.test.mjs",
+        "line": 12
+      },
+      {
+        "file": "packages/database/ci-apply.test.mjs",
+        "line": 13
+      },
+      {
+        "file": "packages/database/ci-apply.test.mjs",
+        "line": 24
+      },
+      {
+        "file": "scripts/backup/verify-backup-evidence.test.mjs",
+        "line": 71
+      },
+      {
+        "file": "scripts/enrich-mobile-api-contract.mjs",
+        "line": 120
+      },
+      {
+        "file": "scripts/generate-complete-api-docs.js",
+        "line": 403
+      },
+      {
+        "file": "scripts/generate-complete-api-docs.js",
+        "line": 483
+      },
+      {
+        "file": "scripts/generate-mobile-api-schema-reference.mjs",
+        "line": 154
+      },
+      {
+        "file": "scripts/generate-mobile-api-schema-reference.mjs",
+        "line": 155
+      },
+      {
+        "file": "scripts/qa/generate-full-route-inventory.mjs",
+        "line": 85
+      },
+      {
+        "file": "scripts/release/classify-release.mjs",
+        "line": 186
+      },
+      {
+        "file": "scripts/release/classify-release.mjs",
+        "line": 202
+      },
+      {
+        "file": "skills/brainstorming/scripts/server.cjs",
+        "line": 515
+      },
+      {
+        "file": "skills/brainstorming/scripts/server.cjs",
+        "line": 620
+      },
+      {
+        "file": "skills/brainstorming/scripts/server.cjs",
+        "line": 673
+      },
+      {
+        "file": "skills/brainstorming/scripts/server.cjs",
+        "line": 676
+      },
+      {
+        "file": "skills/brainstorming/scripts/server.cjs",
+        "line": 688
+      },
+      {
+        "file": "skills/writing-skills/render-graphs.js",
+        "line": 142
+      },
+      {
+        "file": "skills/writing-skills/render-graphs.js",
+        "line": 147
+      },
+      {
+        "file": "skills/writing-skills/render-graphs.js",
+        "line": 158
+      }
+    ],
+    "dangerous_html": [
+      {
+        "file": "frontend/next.config.ts",
+        "line": 87
+      },
+      {
+        "file": "frontend/src/app/[locale]/guide/glossary/[term]/page.tsx",
+        "line": 164
+      },
+      {
+        "file": "frontend/src/app/[locale]/guide/glossary/[term]/page.tsx",
+        "line": 168
+      },
+      {
+        "file": "frontend/src/app/[locale]/guide/glossary/page.tsx",
+        "line": 122
+      },
+      {
+        "file": "frontend/src/app/[locale]/guide/glossary/page.tsx",
+        "line": 126
+      },
+      {
+        "file": "frontend/src/app/[locale]/tools/compound-interest-calculator/[preset]/page.tsx",
+        "line": 142
+      },
+      {
+        "file": "frontend/src/app/[locale]/tools/compound-interest-calculator/page.tsx",
+        "line": 113
+      },
+      {
+        "file": "frontend/src/app/announcements/[announcementId]/page.tsx",
+        "line": 111
+      },
+      {
+        "file": "frontend/src/app/announcements/[announcementId]/page.tsx",
+        "line": 115
+      },
+      {
+        "file": "frontend/src/app/announcements/page.tsx",
+        "line": 43
+      },
+      {
+        "file": "frontend/src/app/announcements/page.tsx",
+        "line": 62
+      },
+      {
+        "file": "frontend/src/app/bank/savings-pot/layout.tsx",
+        "line": 64
+      },
+      {
+        "file": "frontend/src/app/bank/savings-pot/layout.tsx",
+        "line": 68
+      },
+      {
+        "file": "frontend/src/app/blog/[slug]/page.tsx",
+        "line": 90
+      },
+      {
+        "file": "frontend/src/app/blog/page.tsx",
+        "line": 62
+      },
+      {
+        "file": "frontend/src/app/board/[postId]/page.tsx",
+        "line": 135
+      },
+      {
+        "file": "frontend/src/app/board/[postId]/page.tsx",
+        "line": 139
+      },
+      {
+        "file": "frontend/src/app/board/page.tsx",
+        "line": 73
+      },
+      {
+        "file": "frontend/src/app/businesses/ventures/layout.tsx",
+        "line": 71
+      },
+      {
+        "file": "frontend/src/app/businesses/ventures/layout.tsx",
+        "line": 75
+      },
+      {
+        "file": "frontend/src/app/clubs/warfare/layout.tsx",
+        "line": 94
+      },
+      {
+        "file": "frontend/src/app/clubs/warfare/layout.tsx",
+        "line": 98
+      },
+      {
+        "file": "frontend/src/app/clubs/warfare/layout.tsx",
+        "line": 102
+      },
+      {
+        "file": "frontend/src/app/features/page.tsx",
+        "line": 81
+      },
+      {
+        "file": "frontend/src/app/guide/career-mastery/page.tsx",
+        "line": 103
+      },
+      {
+        "file": "frontend/src/app/guide/dopamine-system/page.tsx",
+        "line": 38
+      },
+      {
+        "file": "frontend/src/app/guide/glossary/[term]/page.tsx",
+        "line": 131
+      },
+      {
+        "file": "frontend/src/app/guide/glossary/[term]/page.tsx",
+        "line": 135
+      },
+      {
+        "file": "frontend/src/app/guide/glossary/page.tsx",
+        "line": 90
+      },
+      {
+        "file": "frontend/src/app/guide/glossary/page.tsx",
+        "line": 94
+      },
+      {
+        "file": "frontend/src/app/guide/page.tsx",
+        "line": 76
+      },
+      {
+        "file": "frontend/src/app/guide/page.tsx",
+        "line": 80
+      },
+      {
+        "file": "frontend/src/app/guide/stock-trading/page.tsx",
+        "line": 81
+      },
+      {
+        "file": "frontend/src/app/guide/virtual-banking/page.tsx",
+        "line": 81
+      },
+      {
+        "file": "frontend/src/app/kdic/layout.tsx",
+        "line": 81
+      },
+      {
+        "file": "frontend/src/app/kdic/layout.tsx",
+        "line": 85
+      },
+      {
+        "file": "frontend/src/app/kdic/layout.tsx",
+        "line": 89
+      },
+      {
+        "file": "frontend/src/app/layout.tsx",
+        "line": 339
+      },
+      {
+        "file": "frontend/src/app/layout.tsx",
+        "line": 344
+      },
+      {
+        "file": "frontend/src/app/layout.tsx",
+        "line": 347
+      },
+      {
+        "file": "frontend/src/app/layout.tsx",
+        "line": 350
+      },
+      {
+        "file": "frontend/src/app/layout.tsx",
+        "line": 356
+      },
+      {
+        "file": "frontend/src/app/roadmap/page.tsx",
+        "line": 69
+      },
+      {
+        "file": "frontend/src/app/spaces/real-estate/layout.tsx",
+        "line": 71
+      },
+      {
+        "file": "frontend/src/app/spaces/real-estate/layout.tsx",
+        "line": 75
+      },
+      {
+        "file": "frontend/src/app/stocks/[symbol]/page.tsx",
+        "line": 216
+      },
+      {
+        "file": "frontend/src/app/stocks/[symbol]/page.tsx",
+        "line": 220
+      },
+      {
+        "file": "frontend/src/app/stocks/derivatives/layout.tsx",
+        "line": 72
+      },
+      {
+        "file": "frontend/src/app/stocks/derivatives/layout.tsx",
+        "line": 76
+      },
+      {
+        "file": "frontend/src/app/tools/capital-gains-tax-calculator/[preset]/page.tsx",
+        "line": 85
+      },
+      {
+        "file": "frontend/src/app/tools/capital-gains-tax-calculator/page.tsx",
+        "line": 58
+      },
+      {
+        "file": "frontend/src/app/tools/compound-calculator/[preset]/page.tsx",
+        "line": 74
+      },
+      {
+        "file": "frontend/src/app/tools/compound-calculator/layout.tsx",
+        "line": 110
+      },
+      {
+        "file": "frontend/src/app/tools/compound-calculator/layout.tsx",
+        "line": 114
+      },
+      {
+        "file": "frontend/src/app/tools/compound-calculator/layout.tsx",
+        "line": 118
+      },
+      {
+        "file": "frontend/src/app/tools/compound-calculator/page.tsx",
+        "line": 119
+      },
+      {
+        "file": "frontend/src/app/tools/dividend-tax-calculator/[ticker]/page.tsx",
+        "line": 99
+      },
+      {
+        "file": "frontend/src/app/tools/dividend-tax-calculator/page.tsx",
+        "line": 112
+      },
+      {
+        "file": "frontend/src/app/tools/dividend-tax-calculator/page.tsx",
+        "line": 116
+      },
+      {
+        "file": "frontend/src/app/tools/farming-calculator/[preset]/page.tsx",
+        "line": 69
+      },
+      {
+        "file": "frontend/src/app/tools/farming-calculator/layout.tsx",
+        "line": 94
+      },
+      {
+        "file": "frontend/src/app/tools/farming-calculator/layout.tsx",
+        "line": 98
+      },
+      {
+        "file": "frontend/src/app/tools/farming-calculator/layout.tsx",
+        "line": 102
+      },
+      {
+        "file": "frontend/src/app/tools/farming-calculator/page.tsx",
+        "line": 93
+      },
+      {
+        "file": "frontend/src/app/tools/gift-tax-calculator/[preset]/page.tsx",
+        "line": 100
+      },
+      {
+        "file": "frontend/src/app/tools/gift-tax-calculator/page.tsx",
+        "line": 72
+      },
+      {
+        "file": "frontend/src/app/tools/goal-wealth-calculator/layout.tsx",
+        "line": 96
+      },
+      {
+        "file": "frontend/src/app/tools/goal-wealth-calculator/layout.tsx",
+        "line": 100
+      },
+      {
+        "file": "frontend/src/app/tools/goal-wealth-calculator/layout.tsx",
+        "line": 104
+      },
+      {
+        "file": "frontend/src/app/tools/isa-calculator/layout.tsx",
+        "line": 103
+      },
+      {
+        "file": "frontend/src/app/tools/isa-calculator/layout.tsx",
+        "line": 107
+      },
+      {
+        "file": "frontend/src/app/tools/isa-calculator/layout.tsx",
+        "line": 111
+      },
+      {
+        "file": "frontend/src/app/tools/isa-calculator/page.tsx",
+        "line": 86
+      },
+      {
+        "file": "frontend/src/app/tools/isa-calculator/page.tsx",
+        "line": 90
+      },
+      {
+        "file": "frontend/src/app/tools/kimchi-premium-calculator/[preset]/page.tsx",
+        "line": 85
+      },
+      {
+        "file": "frontend/src/app/tools/kimchi-premium-calculator/page.tsx",
+        "line": 58
+      },
+      {
+        "file": "frontend/src/app/tools/layout.tsx",
+        "line": 58
+      },
+      {
+        "file": "frontend/src/app/tools/loan-interest-calculator/[preset]/page.tsx",
+        "line": 110
+      },
+      {
+        "file": "frontend/src/app/tools/loan-interest-calculator/page.tsx",
+        "line": 119
+      },
+      {
+        "file": "frontend/src/app/tools/loan-interest-calculator/page.tsx",
+        "line": 123
+      },
+      {
+        "file": "frontend/src/app/tools/page.tsx",
+        "line": 223
+      },
+      {
+        "file": "frontend/src/app/tools/pension-tax-calculator/layout.tsx",
+        "line": 103
+      },
+      {
+        "file": "frontend/src/app/tools/pension-tax-calculator/layout.tsx",
+        "line": 107
+      },
+      {
+        "file": "frontend/src/app/tools/pension-tax-calculator/layout.tsx",
+        "line": 111
+      },
+      {
+        "file": "frontend/src/app/tools/pension-tax-calculator/page.tsx",
+        "line": 94
+      },
+      {
+        "file": "frontend/src/app/tools/pension-tax-calculator/page.tsx",
+        "line": 98
+      },
+      {
+        "file": "frontend/src/app/tools/quant-studio/layout.tsx",
+        "line": 95
+      },
+      {
+        "file": "frontend/src/app/tools/quant-studio/layout.tsx",
+        "line": 99
+      },
+      {
+        "file": "frontend/src/app/tools/quant-studio/layout.tsx",
+        "line": 103
+      },
+      {
+        "file": "frontend/src/app/tools/real-estate-calculator/[preset]/page.tsx",
+        "line": 82
+      },
+      {
+        "file": "frontend/src/app/tools/real-estate-calculator/page.tsx",
+        "line": 58
+      },
+      {
+        "file": "frontend/src/app/tools/retirement-calculator/layout.tsx",
+        "line": 103
+      },
+      {
+        "file": "frontend/src/app/tools/retirement-calculator/layout.tsx",
+        "line": 107
+      },
+      {
+        "file": "frontend/src/app/tools/retirement-calculator/layout.tsx",
+        "line": 111
+      },
+      {
+        "file": "frontend/src/app/tools/retirement-calculator/page.tsx",
+        "line": 154
+      },
+      {
+        "file": "frontend/src/app/tools/retirement-calculator/page.tsx",
+        "line": 158
+      },
+      {
+        "file": "frontend/src/app/tools/salary-calculator/[preset]/page.tsx",
+        "line": 100
+      },
+      {
+        "file": "frontend/src/app/tools/salary-calculator/[preset]/page.tsx",
+        "line": 104
+      },
+      {
+        "file": "frontend/src/app/tools/salary-calculator/layout.tsx",
+        "line": 103
+      },
+      {
+        "file": "frontend/src/app/tools/salary-calculator/layout.tsx",
+        "line": 107
+      },
+      {
+        "file": "frontend/src/app/tools/salary-calculator/layout.tsx",
+        "line": 111
+      },
+      {
+        "file": "frontend/src/app/tools/salary-calculator/page.tsx",
+        "line": 75
+      },
+      {
+        "file": "frontend/src/app/tools/salary-calculator/page.tsx",
+        "line": 79
+      },
+      {
+        "file": "frontend/src/app/tools/stock-calculator/[preset]/page.tsx",
+        "line": 81
+      },
+      {
+        "file": "frontend/src/app/tools/stock-calculator/layout.tsx",
+        "line": 95
+      },
+      {
+        "file": "frontend/src/app/tools/stock-calculator/layout.tsx",
+        "line": 99
+      },
+      {
+        "file": "frontend/src/app/tools/stock-calculator/layout.tsx",
+        "line": 103
+      },
+      {
+        "file": "frontend/src/app/tools/stock-calculator/page.tsx",
+        "line": 99
+      },
+      {
+        "file": "frontend/src/app/tools/tax-calculator/layout.tsx",
+        "line": 96
+      },
+      {
+        "file": "frontend/src/app/tools/tax-calculator/layout.tsx",
+        "line": 100
+      },
+      {
+        "file": "frontend/src/app/tools/tax-calculator/layout.tsx",
+        "line": 104
+      },
+      {
+        "file": "frontend/src/app/tools/youth-leap-calculator/layout.tsx",
+        "line": 103
+      },
+      {
+        "file": "frontend/src/app/tools/youth-leap-calculator/layout.tsx",
+        "line": 107
+      },
+      {
+        "file": "frontend/src/app/tools/youth-leap-calculator/layout.tsx",
+        "line": 111
+      },
+      {
+        "file": "frontend/src/app/tools/youth-leap-calculator/page.tsx",
+        "line": 107
+      },
+      {
+        "file": "frontend/src/app/tools/youth-leap-calculator/page.tsx",
+        "line": 111
+      }
+    ],
+    "random_in_code": [
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 258
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 259
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 260
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 264
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 265
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 266
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 276
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 277
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 295
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 310
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 311
+      },
+      {
+        "file": "backend/src/casino/pvp-arena.repository.ts",
+        "line": 317
+      },
+      {
+        "file": "backend/src/discord/discord.db.test.ts",
+        "line": 14
+      },
+      {
+        "file": "backend/src/engagement/dopamine.controller.ts",
+        "line": 127
+      },
+      {
+        "file": "backend/src/engagement/dopamine.controller.ts",
+        "line": 128
+      },
+      {
+        "file": "backend/src/engagement/dopamine.repository.ts",
+        "line": 269
+      },
+      {
+        "file": "backend/src/marketplace/marketplace.service.ts",
+        "line": 467
+      },
+      {
+        "file": "backend/src/marketplace/marketplace.service.ts",
+        "line": 469
+      },
+      {
+        "file": "backend/src/seo/seo.service.ts",
+        "line": 177
+      },
+      {
+        "file": "backend/src/stock/market-dynamics.db.test.ts",
+        "line": 147
+      },
+      {
+        "file": "frontend/src/app/admin/economy/admin-national-treasury-control-card.tsx",
+        "line": 48
+      },
+      {
+        "file": "frontend/src/app/admin/economy/admin-national-treasury-control-card.tsx",
+        "line": 51
+      },
+      {
+        "file": "frontend/src/app/admin/economy/admin-national-treasury-control-card.tsx",
+        "line": 53
+      },
+      {
+        "file": "frontend/src/app/admin/treasury/treasury-operations-dialog.tsx",
+        "line": 65
+      },
+      {
+        "file": "frontend/src/app/admin/treasury/treasury-operations-dialog.tsx",
+        "line": 108
+      },
+      {
+        "file": "frontend/src/app/api/advisor/deoki/rebalance/execute/route.ts",
+        "line": 44
+      },
+      {
+        "file": "frontend/src/app/api/treasury/apply-grant/route.ts",
+        "line": 102
+      },
+      {
+        "file": "frontend/src/app/api/treasury/proposals/route.ts",
+        "line": 170
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 146
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 147
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 148
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 211
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 212
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 213
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 217
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 236
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 237
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 239
+      },
+      {
+        "file": "frontend/src/app/arcade/slots-game.tsx",
+        "line": 241
+      },
+      {
+        "file": "frontend/src/app/blog/blog-data.ts",
+        "line": 461
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 146
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 147
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 148
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 238
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 239
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 240
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 244
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 263
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 264
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 266
+      },
+      {
+        "file": "frontend/src/app/casino/slots-game.tsx",
+        "line": 268
+      },
+      {
+        "file": "frontend/src/app/marketplace/appraisal-view.tsx",
+        "line": 120
+      },
+      {
+        "file": "frontend/src/app/marketplace/appraisal-view.tsx",
+        "line": 130
+      },
+      {
+        "file": "frontend/src/app/marketplace/marketplace-tabs.tsx",
+        "line": 83
+      },
+      {
+        "file": "frontend/src/app/pension/pension-portal-client.tsx",
+        "line": 153
+      },
+      {
+        "file": "frontend/src/app/stocks/[symbol]/stock-conditional-orders.tsx",
+        "line": 153
+      },
+      {
+        "file": "frontend/src/app/stocks/[symbol]/stock-market-toast.tsx",
+        "line": 38
+      },
+      {
+        "file": "frontend/src/app/stocks/[symbol]/stock-market-toast.tsx",
+        "line": 39
+      },
+      {
+        "file": "frontend/src/app/stocks/[symbol]/stock-market-toast.tsx",
+        "line": 41
+      },
+      {
+        "file": "frontend/src/app/stocks/[symbol]/stock-market-toast.tsx",
+        "line": 46
+      },
+      {
+        "file": "frontend/src/app/stocks/[symbol]/stock-orderbook.tsx",
+        "line": 225
+      },
+      {
+        "file": "frontend/src/app/stocks/derivatives/page.tsx",
+        "line": 107
+      },
+      {
+        "file": "frontend/src/components/activity-tracker.tsx",
+        "line": 53
+      },
+      {
+        "file": "frontend/src/components/auction-live-toast-stream.tsx",
+        "line": 117
+      },
+      {
+        "file": "frontend/src/components/auction-live-toast-stream.tsx",
+        "line": 123
+      },
+      {
+        "file": "frontend/src/components/auction-live-toast-stream.tsx",
+        "line": 124
+      },
+      {
+        "file": "frontend/src/components/auction-live-toast-stream.tsx",
+        "line": 125
+      },
+      {
+        "file": "frontend/src/components/auction-live-toast-stream.tsx",
+        "line": 128
+      },
+      {
+        "file": "frontend/src/components/auction-win-celebration-modal.tsx",
+        "line": 77
+      },
+      {
+        "file": "frontend/src/components/auction-win-celebration-modal.tsx",
+        "line": 78
+      },
+      {
+        "file": "frontend/src/components/auction-win-celebration-modal.tsx",
+        "line": 79
+      },
+      {
+        "file": "frontend/src/components/auction-win-celebration-modal.tsx",
+        "line": 80
+      },
+      {
+        "file": "frontend/src/components/auction-win-celebration-modal.tsx",
+        "line": 81
+      },
+      {
+        "file": "frontend/src/components/auction-win-celebration-modal.tsx",
+        "line": 82
+      },
+      {
+        "file": "frontend/src/components/auction-win-celebration-modal.tsx",
+        "line": 84
+      },
+      {
+        "file": "frontend/src/components/auction-win-celebration-modal.tsx",
+        "line": 85
+      },
+      {
+        "file": "frontend/src/components/daily-lucky-wheel.tsx",
+        "line": 94
+      },
+      {
+        "file": "frontend/src/components/daily-lucky-wheel.tsx",
+        "line": 95
+      },
+      {
+        "file": "frontend/src/components/daily-lucky-wheel.tsx",
+        "line": 96
+      },
+      {
+        "file": "frontend/src/components/daily-lucky-wheel.tsx",
+        "line": 97
+      },
+      {
+        "file": "frontend/src/components/daily-lucky-wheel.tsx",
+        "line": 139
+      },
+      {
+        "file": "frontend/src/components/deoki-pet-station.tsx",
+        "line": 52
+      },
+      {
+        "file": "frontend/src/components/deoki-pet-station.tsx",
+        "line": 59
+      },
+      {
+        "file": "frontend/src/components/deoki-pet-station.tsx",
+        "line": 69
+      },
+      {
+        "file": "frontend/src/components/deoki-pet-station.tsx",
+        "line": 70
+      },
+      {
+        "file": "frontend/src/components/golden-duck-fever.tsx",
+        "line": 94
+      },
+      {
+        "file": "frontend/src/components/golden-duck-fever.tsx",
+        "line": 95
+      },
+      {
+        "file": "frontend/src/components/golden-duck-fever.tsx",
+        "line": 139
+      },
+      {
+        "file": "frontend/src/components/mini-showdown-modal.tsx",
+        "line": 40
+      },
+      {
+        "file": "frontend/src/components/mini-showdown-modal.tsx",
+        "line": 41
+      },
+      {
+        "file": "frontend/src/components/p2p-transfer-modal.tsx",
+        "line": 110
+      },
+      {
+        "file": "frontend/src/components/retention/daily-attendance-roulette.tsx",
+        "line": 50
+      },
+      {
+        "file": "frontend/src/components/star-drop-modal.tsx",
+        "line": 93
+      },
+      {
+        "file": "frontend/src/components/treasury-broadcast-toast.tsx",
+        "line": 59
+      },
+      {
+        "file": "frontend/src/lib/dopamine-api.ts",
+        "line": 92
+      },
+      {
+        "file": "frontend/src/lib/dopamine-api.ts",
+        "line": 102
+      },
+      {
+        "file": "frontend/src/lib/dopamine-api.ts",
+        "line": 139
+      },
+      {
+        "file": "frontend/src/lib/savings-pot.ts",
+        "line": 158
+      },
+      {
+        "file": "frontend/src/lib/trade-diary.ts",
+        "line": 52
+      },
+      {
+        "file": "packages/contract/src/warfare.ts",
+        "line": 115
+      },
+      {
+        "file": "skills/brainstorming/scripts/server.cjs",
+        "line": 86
+      }
+    ],
+    "unsafe_network": [],
+    "database_grant_public": [
+      {
+        "file": "packages/database/migrations/114-economy-faucet-sink-and-shop-2.sql",
+        "line": 155
+      }
+    ],
+    "security_definer": [
+      {
+        "file": "backend/src/account/account.repository.ts",
+        "line": 128
+      },
+      {
+        "file": "backend/src/admin/controls.repository.ts",
+        "line": 9
+      },
+      {
+        "file": "backend/src/admin/economy.repository.ts",
+        "line": 8
+      },
+      {
+        "file": "backend/src/casino/casino.repository.ts",
+        "line": 313
+      },
+      {
+        "file": "backend/src/content/content.repository.ts",
+        "line": 213
+      },
+      {
+        "file": "backend/src/discord/command-audit.repository.ts",
+        "line": 18
+      },
+      {
+        "file": "backend/src/early-game/early-game.repository.ts",
+        "line": 225
+      },
+      {
+        "file": "backend/src/engagement/engagement.repository.ts",
+        "line": 158
+      },
+      {
+        "file": "backend/src/main.ts",
+        "line": 91
+      },
+      {
+        "file": "backend/src/member-name.db.test.ts",
+        "line": 146
+      },
+      {
+        "file": "backend/src/privacy/privacy.repository.ts",
+        "line": 145
+      },
+      {
+        "file": "backend/src/profile/profile.repository.ts",
+        "line": 234
+      },
+      {
+        "file": "backend/src/security/database-boundary.db.test.ts",
+        "line": 23
+      },
+      {
+        "file": "backend/src/wallet/wallet.repository.ts",
+        "line": 150
+      },
+      {
+        "file": "frontend/src/app/admin/economy/economy.ts",
+        "line": 6
+      },
+      {
+        "file": "frontend/src/app/progression/stages.ts",
+        "line": 9
+      },
+      {
+        "file": "packages/database/init/001-economy-core.sql",
+        "line": 25
+      },
+      {
+        "file": "packages/database/migrations/005-economy-hardening.sql",
+        "line": 1
+      },
+      {
+        "file": "packages/database/migrations/005-economy-hardening.sql",
+        "line": 156
+      },
+      {
+        "file": "packages/database/migrations/005-economy-hardening.sql",
+        "line": 357
+      },
+      {
+        "file": "packages/database/migrations/005-economy-hardening.sql",
+        "line": 418
+      },
+      {
+        "file": "packages/database/migrations/006-auth-hardening.sql",
+        "line": 32
+      },
+      {
+        "file": "packages/database/migrations/007-admin-hardening.sql",
+        "line": 2
+      },
+      {
+        "file": "packages/database/migrations/007-admin-hardening.sql",
+        "line": 72
+      },
+      {
+        "file": "packages/database/migrations/007-admin-hardening.sql",
+        "line": 103
+      },
+      {
+        "file": "packages/database/migrations/007-admin-hardening.sql",
+        "line": 189
+      },
+      {
+        "file": "packages/database/migrations/007-admin-hardening.sql",
+        "line": 230
+      },
+      {
+        "file": "packages/database/migrations/007-admin-hardening.sql",
+        "line": 378
+      },
+      {
+        "file": "packages/database/migrations/008-admin-read-models.sql",
+        "line": 30
+      },
+      {
+        "file": "packages/database/migrations/008-admin-read-models.sql",
+        "line": 92
+      },
+      {
+        "file": "packages/database/migrations/009-shop-hardening.sql",
+        "line": 55
+      },
+      {
+        "file": "packages/database/migrations/009-shop-hardening.sql",
+        "line": 71
+      },
+      {
+        "file": "packages/database/migrations/009-shop-hardening.sql",
+        "line": 111
+      },
+      {
+        "file": "packages/database/migrations/009-shop-hardening.sql",
+        "line": 153
+      },
+      {
+        "file": "packages/database/migrations/009-shop-hardening.sql",
+        "line": 260
+      },
+      {
+        "file": "packages/database/migrations/010-account-lifecycle.sql",
+        "line": 43
+      },
+      {
+        "file": "packages/database/migrations/010-account-lifecycle.sql",
+        "line": 55
+      },
+      {
+        "file": "packages/database/migrations/010-account-lifecycle.sql",
+        "line": 97
+      },
+      {
+        "file": "packages/database/migrations/010-account-lifecycle.sql",
+        "line": 138
+      },
+      {
+        "file": "packages/database/migrations/010-account-lifecycle.sql",
+        "line": 171
+      },
+      {
+        "file": "packages/database/migrations/010-account-lifecycle.sql",
+        "line": 210
+      },
+      {
+        "file": "packages/database/migrations/010-account-lifecycle.sql",
+        "line": 296
+      },
+      {
+        "file": "packages/database/migrations/010-account-lifecycle.sql",
+        "line": 353
+      },
+      {
+        "file": "packages/database/migrations/011-account-soft-delete-fix.sql",
+        "line": 15
+      },
+      {
+        "file": "packages/database/migrations/012-account-link-display-name-fix.sql",
+        "line": 19
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 181
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 206
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 241
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 266
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 288
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 332
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 359
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 454
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 546
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 652
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 753
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 775
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 814
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 855
+      },
+      {
+        "file": "packages/database/migrations/013-content-and-status.sql",
+        "line": 921
+      },
+      {
+        "file": "packages/database/migrations/014-minecraft-approved-operations.sql",
+        "line": 184
+      },
+      {
+        "file": "packages/database/migrations/014-minecraft-approved-operations.sql",
+        "line": 217
+      },
+      {
+        "file": "packages/database/migrations/014-minecraft-approved-operations.sql",
+        "line": 352
+      },
+      {
+        "file": "packages/database/migrations/014-minecraft-approved-operations.sql",
+        "line": 549
+      },
+      {
+        "file": "packages/database/migrations/014-minecraft-approved-operations.sql",
+        "line": 590
+      },
+      {
+        "file": "packages/database/migrations/014-minecraft-approved-operations.sql",
+        "line": 711
+      },
+      {
+        "file": "packages/database/migrations/015-privacy-data-subject-requests.sql",
+        "line": 43
+      },
+      {
+        "file": "packages/database/migrations/015-privacy-data-subject-requests.sql",
+        "line": 103
+      },
+      {
+        "file": "packages/database/migrations/015-privacy-data-subject-requests.sql",
+        "line": 236
+      },
+      {
+        "file": "packages/database/migrations/016-content-and-status-reconciliation.sql",
+        "line": 3
+      },
+      {
+        "file": "packages/database/migrations/016-content-and-status-reconciliation.sql",
+        "line": 32
+      },
+      {
+        "file": "packages/database/migrations/016-content-and-status-reconciliation.sql",
+        "line": 127
+      },
+      {
+        "file": "packages/database/migrations/016-content-and-status-reconciliation.sql",
+        "line": 219
+      },
+      {
+        "file": "packages/database/migrations/016-content-and-status-reconciliation.sql",
+        "line": 325
+      },
+      {
+        "file": "packages/database/migrations/018-economy-reconciliation-health.sql",
+        "line": 83
+      },
+      {
+        "file": "packages/database/migrations/018-economy-reconciliation-health.sql",
+        "line": 117
+      },
+      {
+        "file": "packages/database/migrations/018-economy-reconciliation-health.sql",
+        "line": 618
+      },
+      {
+        "file": "packages/database/migrations/020-minecraft-executor-privilege-reconciliation.sql",
+        "line": 124
+      },
+      {
+        "file": "packages/database/migrations/021-work-reward.sql",
+        "line": 27
+      },
+      {
+        "file": "packages/database/migrations/022-bootstrap-discord-administrators.sql",
+        "line": 7
+      },
+      {
+        "file": "packages/database/migrations/024-virtual-stock-commands.sql",
+        "line": 2
+      },
+      {
+        "file": "packages/database/migrations/024-virtual-stock-commands.sql",
+        "line": 13
+      },
+      {
+        "file": "packages/database/migrations/025-virtual-stock-operations.sql",
+        "line": 2
+      },
+      {
+        "file": "packages/database/migrations/025-virtual-stock-operations.sql",
+        "line": 12
+      },
+      {
+        "file": "packages/database/migrations/026-admin-user-restrictions.sql",
+        "line": 14
+      },
+      {
+        "file": "packages/database/migrations/026-admin-user-restrictions.sql",
+        "line": 35
+      },
+      {
+        "file": "packages/database/migrations/027-discord-outbox-worker.sql",
+        "line": 2
+      },
+      {
+        "file": "packages/database/migrations/027-discord-outbox-worker.sql",
+        "line": 9
+      },
+      {
+        "file": "packages/database/migrations/028-public-photo-media.sql",
+        "line": 2
+      },
+      {
+        "file": "packages/database/migrations/030-discord-outbox-delivery-lease.sql",
+        "line": 14
+      },
+      {
+        "file": "packages/database/migrations/030-discord-outbox-delivery-lease.sql",
+        "line": 37
+      },
+      {
+        "file": "packages/database/migrations/030-discord-outbox-delivery-lease.sql",
+        "line": 46
+      },
+      {
+        "file": "packages/database/migrations/031-step-up-reauthentication.sql",
+        "line": 25
+      },
+      {
+        "file": "packages/database/migrations/031-step-up-reauthentication.sql",
+        "line": 48
+      },
+      {
+        "file": "packages/database/migrations/032-virtual-stock-net-worth-tax.sql",
+        "line": 13
+      },
+      {
+        "file": "packages/database/migrations/033-virtual-stock-tax-function-fix.sql",
+        "line": 7
+      },
+      {
+        "file": "packages/database/migrations/034-virtual-stock-price-history.sql",
+        "line": 12
+      },
+      {
+        "file": "packages/database/migrations/034-virtual-stock-price-history.sql",
+        "line": 39
+      },
+      {
+        "file": "packages/database/migrations/035-virtual-bank-loans.sql",
+        "line": 29
+      },
+      {
+        "file": "packages/database/migrations/035-virtual-bank-loans.sql",
+        "line": 59
+      },
+      {
+        "file": "packages/database/migrations/035-virtual-bank-loans.sql",
+        "line": 93
+      },
+      {
+        "file": "packages/database/migrations/035-virtual-bank-loans.sql",
+        "line": 126
+      },
+      {
+        "file": "packages/database/migrations/036-virtual-business-game.sql",
+        "line": 48
+      },
+      {
+        "file": "packages/database/migrations/036-virtual-business-game.sql",
+        "line": 55
+      },
+      {
+        "file": "packages/database/migrations/036-virtual-business-game.sql",
+        "line": 64
+      },
+      {
+        "file": "packages/database/migrations/036-virtual-business-game.sql",
+        "line": 91
+      },
+      {
+        "file": "packages/database/migrations/037-season-consumption-events.sql",
+        "line": 44
+      },
+      {
+        "file": "packages/database/migrations/037-season-consumption-events.sql",
+        "line": 51
+      },
+      {
+        "file": "packages/database/migrations/037-season-consumption-events.sql",
+        "line": 57
+      },
+      {
+        "file": "packages/database/migrations/038-admin-game-catalogs.sql",
+        "line": 3
+      },
+      {
+        "file": "packages/database/migrations/038-admin-game-catalogs.sql",
+        "line": 4
+      },
+      {
+        "file": "packages/database/migrations/038-admin-game-catalogs.sql",
+        "line": 5
+      },
+      {
+        "file": "packages/database/migrations/038-admin-game-catalogs.sql",
+        "line": 6
+      },
+      {
+        "file": "packages/database/migrations/038-admin-game-catalogs.sql",
+        "line": 7
+      },
+      {
+        "file": "packages/database/migrations/038-admin-game-catalogs.sql",
+        "line": 8
+      },
+      {
+        "file": "packages/database/migrations/039-admin-discord-outbox-read.sql",
+        "line": 16
+      },
+      {
+        "file": "packages/database/migrations/040-virtual-stock-corporate-actions.sql",
+        "line": 24
+      },
+      {
+        "file": "packages/database/migrations/041-virtual-bank-auto-interest.sql",
+        "line": 18
+      },
+      {
+        "file": "packages/database/migrations/041-virtual-bank-auto-interest.sql",
+        "line": 33
+      },
+      {
+        "file": "packages/database/migrations/042-virtual-casino-coin-game.sql",
+        "line": 18
+      },
+      {
+        "file": "packages/database/migrations/043-bootstrap-discord-server-operators.sql",
+        "line": 11
+      },
+      {
+        "file": "packages/database/migrations/044-member-board.sql",
+        "line": 10
+      },
+      {
+        "file": "packages/database/migrations/044-member-board.sql",
+        "line": 15
+      },
+      {
+        "file": "packages/database/migrations/044-member-board.sql",
+        "line": 20
+      },
+      {
+        "file": "packages/database/migrations/045-idempotency-replay-hardening.sql",
+        "line": 2
+      },
+      {
+        "file": "packages/database/migrations/045-idempotency-replay-hardening.sql",
+        "line": 52
+      },
+      {
+        "file": "packages/database/migrations/045-idempotency-replay-hardening.sql",
+        "line": 175
+      },
+      {
+        "file": "packages/database/migrations/045-idempotency-replay-hardening.sql",
+        "line": 213
+      },
+      {
+        "file": "packages/database/migrations/045-idempotency-replay-hardening.sql",
+        "line": 257
+      },
+      {
+        "file": "packages/database/migrations/045-idempotency-replay-hardening.sql",
+        "line": 294
+      },
+      {
+        "file": "packages/database/migrations/046-deleted-member-display.sql",
+        "line": 16
+      },
+      {
+        "file": "packages/database/migrations/046-deleted-member-display.sql",
+        "line": 50
+      },
+      {
+        "file": "packages/database/migrations/046-deleted-member-display.sql",
+        "line": 102
+      },
+      {
+        "file": "packages/database/migrations/047-virtual-stock-read-functions.sql",
+        "line": 37
+      },
+      {
+        "file": "packages/database/migrations/047-virtual-stock-read-functions.sql",
+        "line": 63
+      },
+      {
+        "file": "packages/database/migrations/047-virtual-stock-read-functions.sql",
+        "line": 88
+      },
+      {
+        "file": "packages/database/migrations/047-virtual-stock-read-functions.sql",
+        "line": 121
+      },
+      {
+        "file": "packages/database/migrations/048-member-board-threads.sql",
+        "line": 51
+      },
+      {
+        "file": "packages/database/migrations/048-member-board-threads.sql",
+        "line": 57
+      },
+      {
+        "file": "packages/database/migrations/048-member-board-threads.sql",
+        "line": 83
+      },
+      {
+        "file": "packages/database/migrations/048-member-board-threads.sql",
+        "line": 124
+      },
+      {
+        "file": "packages/database/migrations/048-member-board-threads.sql",
+        "line": 171
+      },
+      {
+        "file": "packages/database/migrations/048-member-board-threads.sql",
+        "line": 216
+      },
+      {
+        "file": "packages/database/migrations/048-member-board-threads.sql",
+        "line": 254
+      },
+      {
+        "file": "packages/database/migrations/048-member-board-threads.sql",
+        "line": 301
+      },
+      {
+        "file": "packages/database/migrations/051-configurable-bootstrap-operators.sql",
+        "line": 46
+      },
+      {
+        "file": "packages/database/migrations/051-configurable-bootstrap-operators.sql",
+        "line": 75
+      },
+      {
+        "file": "packages/database/migrations/052-virtual-stock-live-market.sql",
+        "line": 73
+      },
+      {
+        "file": "packages/database/migrations/052-virtual-stock-live-market.sql",
+        "line": 181
+      },
+      {
+        "file": "packages/database/migrations/052-virtual-stock-live-market.sql",
+        "line": 213
+      },
+      {
+        "file": "packages/database/migrations/052-virtual-stock-live-market.sql",
+        "line": 242
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 72
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 191
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 285
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 315
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 359
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 395
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 437
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 468
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 616
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 748
+      },
+      {
+        "file": "packages/database/migrations/053-virtual-stock-float-and-intervals.sql",
+        "line": 813
+      },
+      {
+        "file": "packages/database/migrations/054-unqualify-greatest-and-least.sql",
+        "line": 29
+      },
+      {
+        "file": "packages/database/migrations/054-unqualify-greatest-and-least.sql",
+        "line": 54
+      },
+      {
+        "file": "packages/database/migrations/055-stock-spark-series.sql",
+        "line": 15
+      },
+      {
+        "file": "packages/database/migrations/055-stock-spark-series.sql",
+        "line": 21
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 117
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 133
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 154
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 177
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 195
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 224
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 346
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 420
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 467
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 541
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 593
+      },
+      {
+        "file": "packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql",
+        "line": 621
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 116
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 194
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 257
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 288
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 346
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 389
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 419
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 484
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 518
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 585
+      },
+      {
+        "file": "packages/database/migrations/058-admin-second-factor.sql",
+        "line": 624
+      },
+      {
+        "file": "packages/database/migrations/059-feature-switches-and-economy-policies.sql",
+        "line": 104
+      },
+      {
+        "file": "packages/database/migrations/059-feature-switches-and-economy-policies.sql",
+        "line": 136
+      },
+      {
+        "file": "packages/database/migrations/059-feature-switches-and-economy-policies.sql",
+        "line": 165
+      },
+      {
+        "file": "packages/database/migrations/059-feature-switches-and-economy-policies.sql",
+        "line": 282
+      },
+      {
+        "file": "packages/database/migrations/059-feature-switches-and-economy-policies.sql",
+        "line": 391
+      },
+      {
+        "file": "packages/database/migrations/059-feature-switches-and-economy-policies.sql",
+        "line": 457
+      },
+      {
+        "file": "packages/database/migrations/059-feature-switches-and-economy-policies.sql",
+        "line": 550
+      },
+      {
+        "file": "packages/database/migrations/059-feature-switches-and-economy-policies.sql",
+        "line": 577
+      },
+      {
+        "file": "packages/database/migrations/060-casino-coin-fairness.sql",
+        "line": 78
+      },
+      {
+        "file": "packages/database/migrations/060-casino-coin-fairness.sql",
+        "line": 104
+      },
+      {
+        "file": "packages/database/migrations/060-casino-coin-fairness.sql",
+        "line": 200
+      },
+      {
+        "file": "packages/database/migrations/060-casino-coin-fairness.sql",
+        "line": 263
+      },
+      {
+        "file": "packages/database/migrations/060-casino-coin-fairness.sql",
+        "line": 392
+      },
+      {
+        "file": "packages/database/migrations/060-casino-coin-fairness.sql",
+        "line": 440
+      },
+      {
+        "file": "packages/database/migrations/060-casino-coin-fairness.sql",
+        "line": 527
+      },
+      {
+        "file": "packages/database/migrations/060-casino-coin-fairness.sql",
+        "line": 619
+      },
+      {
+        "file": "packages/database/migrations/061-discord-bot-revival.sql",
+        "line": 63
+      },
+      {
+        "file": "packages/database/migrations/061-discord-bot-revival.sql",
+        "line": 191
+      },
+      {
+        "file": "packages/database/migrations/061-discord-bot-revival.sql",
+        "line": 259
+      },
+      {
+        "file": "packages/database/migrations/061-discord-bot-revival.sql",
+        "line": 315
+      },
+      {
+        "file": "packages/database/migrations/061-discord-bot-revival.sql",
+        "line": 344
+      },
+      {
+        "file": "packages/database/migrations/061-discord-bot-revival.sql",
+        "line": 417
+      },
+      {
+        "file": "packages/database/migrations/062-audit-chain-integrity.sql",
+        "line": 200
+      },
+      {
+        "file": "packages/database/migrations/062-audit-chain-integrity.sql",
+        "line": 285
+      },
+      {
+        "file": "packages/database/migrations/063-audit-event-context.sql",
+        "line": 238
+      },
+      {
+        "file": "packages/database/migrations/063-audit-event-context.sql",
+        "line": 434
+      },
+      {
+        "file": "packages/database/migrations/063-audit-event-context.sql",
+        "line": 459
+      },
+      {
+        "file": "packages/database/migrations/063-audit-event-context.sql",
+        "line": 509
+      },
+      {
+        "file": "packages/database/migrations/064-audit-search-and-verification.sql",
+        "line": 91
+      },
+      {
+        "file": "packages/database/migrations/064-audit-search-and-verification.sql",
+        "line": 249
+      },
+      {
+        "file": "packages/database/migrations/064-audit-search-and-verification.sql",
+        "line": 340
+      },
+      {
+        "file": "packages/database/migrations/064-audit-search-and-verification.sql",
+        "line": 417
+      },
+      {
+        "file": "packages/database/migrations/064-audit-search-and-verification.sql",
+        "line": 615
+      },
+      {
+        "file": "packages/database/migrations/065-audit-retention-and-destruction.sql",
+        "line": 74
+      },
+      {
+        "file": "packages/database/migrations/065-audit-retention-and-destruction.sql",
+        "line": 206
+      },
+      {
+        "file": "packages/database/migrations/065-audit-retention-and-destruction.sql",
+        "line": 330
+      },
+      {
+        "file": "packages/database/migrations/065-audit-retention-and-destruction.sql",
+        "line": 415
+      },
+      {
+        "file": "packages/database/migrations/065-audit-retention-and-destruction.sql",
+        "line": 572
+      },
+      {
+        "file": "packages/database/migrations/067-work-assignment-functions.sql",
+        "line": 27
+      },
+      {
+        "file": "packages/database/migrations/067-work-assignment-functions.sql",
+        "line": 117
+      },
+      {
+        "file": "packages/database/migrations/068-work-verification-and-rewards.sql",
+        "line": 27
+      },
+      {
+        "file": "packages/database/migrations/069-work-read-models.sql",
+        "line": 12
+      },
+      {
+        "file": "packages/database/migrations/069-work-read-models.sql",
+        "line": 66
+      },
+      {
+        "file": "packages/database/migrations/072-shop-purchase-function.sql",
+        "line": 27
+      },
+      {
+        "file": "packages/database/migrations/072-shop-purchase-function.sql",
+        "line": 78
+      },
+      {
+        "file": "packages/database/migrations/074-shop-item-effects.sql",
+        "line": 23
+      },
+      {
+        "file": "packages/database/migrations/075-shop-read-models-and-maintenance.sql",
+        "line": 86
+      },
+      {
+        "file": "packages/database/migrations/075-shop-read-models-and-maintenance.sql",
+        "line": 98
+      },
+      {
+        "file": "packages/database/migrations/077-progression-and-loan-functions.sql",
+        "line": 24
+      },
+      {
+        "file": "packages/database/migrations/077-progression-and-loan-functions.sql",
+        "line": 108
+      },
+      {
+        "file": "packages/database/migrations/077-progression-and-loan-functions.sql",
+        "line": 145
+      },
+      {
+        "file": "packages/database/migrations/077-progression-and-loan-functions.sql",
+        "line": 263
+      },
+      {
+        "file": "packages/database/migrations/078-loan-maturity-and-read-models.sql",
+        "line": 4
+      },
+      {
+        "file": "packages/database/migrations/078-loan-maturity-and-read-models.sql",
+        "line": 18
+      },
+      {
+        "file": "packages/database/migrations/080-member-profile-functions.sql",
+        "line": 63
+      },
+      {
+        "file": "packages/database/migrations/080-member-profile-functions.sql",
+        "line": 132
+      },
+      {
+        "file": "packages/database/migrations/080-member-profile-functions.sql",
+        "line": 219
+      },
+      {
+        "file": "packages/database/migrations/080-member-profile-functions.sql",
+        "line": 267
+      },
+      {
+        "file": "packages/database/migrations/082-engagement-loop-functions.sql",
+        "line": 42
+      },
+      {
+        "file": "packages/database/migrations/082-engagement-loop-functions.sql",
+        "line": 162
+      },
+      {
+        "file": "packages/database/migrations/082-engagement-loop-functions.sql",
+        "line": 221
+      },
+      {
+        "file": "packages/database/migrations/082-engagement-loop-functions.sql",
+        "line": 247
+      },
+      {
+        "file": "packages/database/migrations/082-engagement-loop-functions.sql",
+        "line": 264
+      },
+      {
+        "file": "packages/database/migrations/082-engagement-loop-functions.sql",
+        "line": 303
+      },
+      {
+        "file": "packages/database/migrations/082-engagement-loop-functions.sql",
+        "line": 358
+      },
+      {
+        "file": "packages/database/migrations/083-ledger-corrections.sql",
+        "line": 58
+      },
+      {
+        "file": "packages/database/migrations/083-ledger-corrections.sql",
+        "line": 105
+      },
+      {
+        "file": "packages/database/migrations/083-ledger-corrections.sql",
+        "line": 250
+      },
+      {
+        "file": "packages/database/migrations/083-ledger-corrections.sql",
+        "line": 376
+      },
+      {
+        "file": "packages/database/migrations/084-bulk-payouts.sql",
+        "line": 57
+      },
+      {
+        "file": "packages/database/migrations/084-bulk-payouts.sql",
+        "line": 127
+      },
+      {
+        "file": "packages/database/migrations/084-bulk-payouts.sql",
+        "line": 170
+      },
+      {
+        "file": "packages/database/migrations/084-bulk-payouts.sql",
+        "line": 322
+      },
+      {
+        "file": "packages/database/migrations/085-account-closure-and-045-gaps.sql",
+        "line": 19
+      },
+      {
+        "file": "packages/database/migrations/085-account-closure-and-045-gaps.sql",
+        "line": 50
+      },
+      {
+        "file": "packages/database/migrations/085-account-closure-and-045-gaps.sql",
+        "line": 70
+      },
+      {
+        "file": "packages/database/migrations/085-account-closure-and-045-gaps.sql",
+        "line": 150
+      },
+      {
+        "file": "packages/database/migrations/085-account-closure-and-045-gaps.sql",
+        "line": 223
+      },
+      {
+        "file": "packages/database/migrations/085-account-closure-and-045-gaps.sql",
+        "line": 337
+      },
+      {
+        "file": "packages/database/migrations/085-account-closure-and-045-gaps.sql",
+        "line": 451
+      },
+      {
+        "file": "packages/database/migrations/086-scheduled-jobs-and-safe-mode.sql",
+        "line": 80
+      },
+      {
+        "file": "packages/database/migrations/086-scheduled-jobs-and-safe-mode.sql",
+        "line": 143
+      },
+      {
+        "file": "packages/database/migrations/086-scheduled-jobs-and-safe-mode.sql",
+        "line": 184
+      },
+      {
+        "file": "packages/database/migrations/086-scheduled-jobs-and-safe-mode.sql",
+        "line": 219
+      },
+      {
+        "file": "packages/database/migrations/086-scheduled-jobs-and-safe-mode.sql",
+        "line": 274
+      },
+      {
+        "file": "packages/database/migrations/087-admin-metrics-and-alerts.sql",
+        "line": 46
+      },
+      {
+        "file": "packages/database/migrations/087-admin-metrics-and-alerts.sql",
+        "line": 75
+      },
+      {
+        "file": "packages/database/migrations/087-admin-metrics-and-alerts.sql",
+        "line": 119
+      },
+      {
+        "file": "packages/database/migrations/087-admin-metrics-and-alerts.sql",
+        "line": 167
+      },
+      {
+        "file": "packages/database/migrations/088-scheduled-job-bodies.sql",
+        "line": 9
+      },
+      {
+        "file": "packages/database/migrations/088-scheduled-job-bodies.sql",
+        "line": 44
+      },
+      {
+        "file": "packages/database/migrations/088-scheduled-job-bodies.sql",
+        "line": 232
+      },
+      {
+        "file": "packages/database/migrations/088-scheduled-job-bodies.sql",
+        "line": 253
+      },
+      {
+        "file": "packages/database/migrations/088-scheduled-job-bodies.sql",
+        "line": 264
+      },
+      {
+        "file": "packages/database/migrations/088-scheduled-job-bodies.sql",
+        "line": 313
+      },
+      {
+        "file": "packages/database/migrations/088-scheduled-job-bodies.sql",
+        "line": 391
+      },
+      {
+        "file": "packages/database/migrations/089-economy-policy-knobs.sql",
+        "line": 198
+      },
+      {
+        "file": "packages/database/migrations/089-economy-policy-knobs.sql",
+        "line": 215
+      },
+      {
+        "file": "packages/database/migrations/090-economy-metric-snapshots.sql",
+        "line": 82
+      },
+      {
+        "file": "packages/database/migrations/090-economy-metric-snapshots.sql",
+        "line": 307
+      },
+      {
+        "file": "packages/database/migrations/091-economy-policy-proposals.sql",
+        "line": 48
+      },
+      {
+        "file": "packages/database/migrations/091-economy-policy-proposals.sql",
+        "line": 98
+      },
+      {
+        "file": "packages/database/migrations/091-economy-policy-proposals.sql",
+        "line": 212
+      },
+      {
+        "file": "packages/database/migrations/092-economy-auto-policy-engine.sql",
+        "line": 34
+      },
+      {
+        "file": "packages/database/migrations/092-economy-auto-policy-engine.sql",
+        "line": 147
+      },
+      {
+        "file": "packages/database/migrations/092-economy-auto-policy-engine.sql",
+        "line": 175
+      },
+      {
+        "file": "packages/database/migrations/092-economy-auto-policy-engine.sql",
+        "line": 285
+      },
+      {
+        "file": "packages/database/migrations/092-economy-auto-policy-engine.sql",
+        "line": 387
+      },
+      {
+        "file": "packages/database/migrations/092-economy-auto-policy-engine.sql",
+        "line": 441
+      },
+      {
+        "file": "packages/database/migrations/092-economy-auto-policy-engine.sql",
+        "line": 463
+      },
+      {
+        "file": "packages/database/migrations/093-progression-sweep-and-profile-settings.sql",
+        "line": 41
+      },
+      {
+        "file": "packages/database/migrations/093-progression-sweep-and-profile-settings.sql",
+        "line": 45
+      },
+      {
+        "file": "packages/database/migrations/093-progression-sweep-and-profile-settings.sql",
+        "line": 84
+      },
+      {
+        "file": "packages/database/migrations/094-profile-image-uploads.sql",
+        "line": 54
+      },
+      {
+        "file": "packages/database/migrations/094-profile-image-uploads.sql",
+        "line": 99
+      },
+      {
+        "file": "packages/database/migrations/094-profile-image-uploads.sql",
+        "line": 139
+      },
+      {
+        "file": "packages/database/migrations/094-profile-image-uploads.sql",
+        "line": 176
+      },
+      {
+        "file": "packages/database/migrations/095-work-task-board.sql",
+        "line": 37
+      },
+      {
+        "file": "packages/database/migrations/095-work-task-board.sql",
+        "line": 133
+      },
+      {
+        "file": "packages/database/migrations/095-work-task-board.sql",
+        "line": 224
+      },
+      {
+        "file": "packages/database/migrations/096-credit-ceiling-and-small-businesses.sql",
+        "line": 63
+      },
+      {
+        "file": "packages/database/migrations/096-credit-ceiling-and-small-businesses.sql",
+        "line": 95
+      },
+      {
+        "file": "packages/database/migrations/096-credit-ceiling-and-small-businesses.sql",
+        "line": 236
+      },
+      {
+        "file": "packages/database/migrations/097-member-chosen-name.sql",
+        "line": 50
+      },
+      {
+        "file": "packages/database/migrations/097-member-chosen-name.sql",
+        "line": 74
+      },
+      {
+        "file": "packages/database/migrations/097-member-chosen-name.sql",
+        "line": 84
+      },
+      {
+        "file": "packages/database/migrations/097-member-chosen-name.sql",
+        "line": 107
+      },
+      {
+        "file": "packages/database/migrations/098-member-photo-submissions.sql",
+        "line": 61
+      },
+      {
+        "file": "packages/database/migrations/098-member-photo-submissions.sql",
+        "line": 90
+      },
+      {
+        "file": "packages/database/migrations/098-member-photo-submissions.sql",
+        "line": 186
+      },
+      {
+        "file": "packages/database/migrations/098-member-photo-submissions.sql",
+        "line": 209
+      },
+      {
+        "file": "packages/database/migrations/099-casino-payout-and-limits.sql",
+        "line": 111
+      },
+      {
+        "file": "packages/database/migrations/099-casino-payout-and-limits.sql",
+        "line": 179
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 76
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 102
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 140
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 178
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 251
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 283
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 399
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 427
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 466
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 539
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 684
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 801
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 870
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 1043
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 1078
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 1113
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 1184
+      },
+      {
+        "file": "packages/database/migrations/100-casino-dice-games.sql",
+        "line": 1269
+      },
+      {
+        "file": "packages/database/migrations/101-early-game-progress.sql",
+        "line": 262
+      },
+      {
+        "file": "packages/database/migrations/101-early-game-progress.sql",
+        "line": 274
+      },
+      {
+        "file": "packages/database/migrations/101-early-game-progress.sql",
+        "line": 338
+      },
+      {
+        "file": "packages/database/migrations/101-early-game-progress.sql",
+        "line": 453
+      },
+      {
+        "file": "packages/database/migrations/101-early-game-progress.sql",
+        "line": 591
+      },
+      {
+        "file": "packages/database/migrations/101-early-game-progress.sql",
+        "line": 658
+      },
+      {
+        "file": "packages/database/migrations/101-early-game-progress.sql",
+        "line": 702
+      },
+      {
+        "file": "packages/database/migrations/101-early-game-progress.sql",
+        "line": 819
+      },
+      {
+        "file": "packages/database/migrations/102-connection-limit-and-profile-image-audit.sql",
+        "line": 39
+      },
+      {
+        "file": "packages/database/migrations/102-connection-limit-and-profile-image-audit.sql",
+        "line": 96
+      },
+      {
+        "file": "packages/database/migrations/103-early-game-events.sql",
+        "line": 259
+      },
+      {
+        "file": "packages/database/migrations/103-early-game-events.sql",
+        "line": 267
+      },
+      {
+        "file": "packages/database/migrations/103-early-game-events.sql",
+        "line": 315
+      },
+      {
+        "file": "packages/database/migrations/103-early-game-events.sql",
+        "line": 433
+      },
+      {
+        "file": "packages/database/migrations/103-early-game-events.sql",
+        "line": 654
+      },
+      {
+        "file": "packages/database/migrations/103-early-game-events.sql",
+        "line": 783
+      },
+      {
+        "file": "packages/database/migrations/104-item-lifecycle.sql",
+        "line": 130
+      },
+      {
+        "file": "packages/database/migrations/104-item-lifecycle.sql",
+        "line": 205
+      },
+      {
+        "file": "packages/database/migrations/104-item-lifecycle.sql",
+        "line": 335
+      },
+      {
+        "file": "packages/database/migrations/104-item-lifecycle.sql",
+        "line": 503
+      },
+      {
+        "file": "packages/database/migrations/104-item-lifecycle.sql",
+        "line": 631
+      },
+      {
+        "file": "packages/database/migrations/105-business-equity-requirement.sql",
+        "line": 100
+      },
+      {
+        "file": "packages/database/migrations/105-business-equity-requirement.sql",
+        "line": 138
+      },
+      {
+        "file": "packages/database/migrations/106-admin-operations-read-models.sql",
+        "line": 89
+      },
+      {
+        "file": "packages/database/migrations/106-admin-operations-read-models.sql",
+        "line": 156
+      },
+      {
+        "file": "packages/database/migrations/106-admin-operations-read-models.sql",
+        "line": 212
+      },
+      {
+        "file": "packages/database/migrations/106-admin-operations-read-models.sql",
+        "line": 296
+      },
+      {
+        "file": "packages/database/migrations/106-admin-operations-read-models.sql",
+        "line": 375
+      },
+      {
+        "file": "packages/database/migrations/106-admin-operations-read-models.sql",
+        "line": 441
+      },
+      {
+        "file": "packages/database/migrations/106-admin-operations-read-models.sql",
+        "line": 525
+      },
+      {
+        "file": "packages/database/migrations/106-admin-operations-read-models.sql",
+        "line": 600
+      },
+      {
+        "file": "packages/database/migrations/107-upkeep-price-and-equity-floor.sql",
+        "line": 54
+      },
+      {
+        "file": "packages/database/migrations/107-upkeep-price-and-equity-floor.sql",
+        "line": 87
+      },
+      {
+        "file": "packages/database/migrations/108-reward-availability-read-model.sql",
+        "line": 14
+      },
+      {
+        "file": "packages/database/migrations/109-operational-policy-version.sql",
+        "line": 18
+      },
+      {
+        "file": "packages/database/migrations/110-admin-recovery-codes.sql",
+        "line": 35
+      },
+      {
+        "file": "packages/database/migrations/110-admin-recovery-codes.sql",
+        "line": 92
+      },
+      {
+        "file": "packages/database/migrations/111-oauth-before-consent.sql",
+        "line": 15
+      },
+      {
+        "file": "packages/database/migrations/112-announcement-images.sql",
+        "line": 31
+      },
+      {
+        "file": "packages/database/migrations/112-announcement-images.sql",
+        "line": 113
+      },
+      {
+        "file": "packages/database/migrations/112-announcement-images.sql",
+        "line": 137
+      },
+      {
+        "file": "packages/database/migrations/114-economy-faucet-sink-and-shop-2.sql",
+        "line": 59
+      },
+      {
+        "file": "packages/database/migrations/114-economy-faucet-sink-and-shop-2.sql",
+        "line": 119
+      },
+      {
+        "file": "packages/database/migrations/115-jobs-and-businesses-2.sql",
+        "line": 110
+      },
+      {
+        "file": "packages/database/migrations/115-jobs-and-businesses-2.sql",
+        "line": 149
+      },
+      {
+        "file": "packages/database/migrations/115-jobs-and-businesses-2.sql",
+        "line": 218
+      },
+      {
+        "file": "packages/database/migrations/115-jobs-and-businesses-2.sql",
+        "line": 329
+      },
+      {
+        "file": "packages/database/migrations/115-jobs-and-businesses-2.sql",
+        "line": 400
+      },
+      {
+        "file": "packages/database/migrations/115-jobs-and-businesses-2.sql",
+        "line": 477
+      },
+      {
+        "file": "packages/database/migrations/115-jobs-and-businesses-2.sql",
+        "line": 593
+      },
+      {
+        "file": "packages/database/migrations/116-virtual-banking-2.sql",
+        "line": 45
+      },
+      {
+        "file": "packages/database/migrations/116-virtual-banking-2.sql",
+        "line": 79
+      },
+      {
+        "file": "packages/database/migrations/116-virtual-banking-2.sql",
+        "line": 173
+      },
+      {
+        "file": "packages/database/migrations/116-virtual-banking-2.sql",
+        "line": 257
+      },
+      {
+        "file": "packages/database/migrations/116-virtual-banking-2.sql",
+        "line": 345
+      },
+      {
+        "file": "packages/database/migrations/116-virtual-banking-2.sql",
+        "line": 420
+      },
+      {
+        "file": "packages/database/migrations/117-admin-control-center-2.sql",
+        "line": 36
+      },
+      {
+        "file": "packages/database/migrations/117-admin-control-center-2.sql",
+        "line": 167
+      },
+      {
+        "file": "packages/database/migrations/117-admin-control-center-2.sql",
+        "line": 226
+      },
+      {
+        "file": "packages/database/migrations/117-admin-control-center-2.sql",
+        "line": 257
+      },
+      {
+        "file": "packages/database/migrations/117-admin-control-center-2.sql",
+        "line": 362
+      },
+      {
+        "file": "packages/database/migrations/118-extend-session-lifetime.sql",
+        "line": 15
+      },
+      {
+        "file": "packages/database/migrations/119-fix-active-job-switch.sql",
+        "line": 19
+      },
+      {
+        "file": "packages/database/migrations/120-fix-direct-work-completion.sql",
+        "line": 16
+      },
+      {
+        "file": "packages/database/migrations/121-multi-superadmin-and-bootstrap.sql",
+        "line": 16
+      },
+      {
+        "file": "packages/database/migrations/121-multi-superadmin-and-bootstrap.sql",
+        "line": 146
+      },
+      {
+        "file": "packages/database/migrations/121-multi-superadmin-and-bootstrap.sql",
+        "line": 173
+      },
+      {
+        "file": "packages/database/migrations/121-multi-superadmin-and-bootstrap.sql",
+        "line": 209
+      },
+      {
+        "file": "packages/database/migrations/121-multi-superadmin-and-bootstrap.sql",
+        "line": 241
+      },
+      {
+        "file": "packages/database/migrations/121-multi-superadmin-and-bootstrap.sql",
+        "line": 281
+      },
+      {
+        "file": "packages/database/migrations/122-admin-photo-review-queue.sql",
+        "line": 8
+      },
+      {
+        "file": "packages/database/migrations/122-admin-photo-review-queue.sql",
+        "line": 47
+      },
+      {
+        "file": "packages/database/migrations/122-admin-photo-review-queue.sql",
+        "line": 91
+      },
+      {
+        "file": "packages/database/migrations/123-store-read-models-v2.sql",
+        "line": 46
+      },
+      {
+        "file": "packages/database/migrations/123-store-read-models-v2.sql",
+        "line": 107
+      },
+      {
+        "file": "packages/database/migrations/124-market-dynamics.sql",
+        "line": 162
+      },
+      {
+        "file": "packages/database/migrations/124-market-dynamics.sql",
+        "line": 182
+      },
+      {
+        "file": "packages/database/migrations/124-market-dynamics.sql",
+        "line": 398
+      },
+      {
+        "file": "packages/database/migrations/124-market-dynamics.sql",
+        "line": 579
+      },
+      {
+        "file": "packages/database/migrations/124-market-dynamics.sql",
+        "line": 659
+      },
+      {
+        "file": "packages/database/migrations/124-market-dynamics.sql",
+        "line": 702
+      },
+      {
+        "file": "packages/database/migrations/124-market-dynamics.sql",
+        "line": 736
+      },
+      {
+        "file": "packages/database/migrations/124-market-dynamics.sql",
+        "line": 767
+      },
+      {
+        "file": "packages/database/migrations/125-control-center-role-checks.sql",
+        "line": 38
+      },
+      {
+        "file": "packages/database/migrations/125-control-center-role-checks.sql",
+        "line": 92
+      },
+      {
+        "file": "packages/database/migrations/125-control-center-role-checks.sql",
+        "line": 143
+      },
+      {
+        "file": "packages/database/migrations/125-control-center-role-checks.sql",
+        "line": 250
+      },
+      {
+        "file": "packages/database/migrations/125-control-center-role-checks.sql",
+        "line": 412
+      },
+      {
+        "file": "packages/database/migrations/126-stock-trade-fills-at-moved-price.sql",
+        "line": 38
+      },
+      {
+        "file": "packages/database/migrations/127-fix-member-photo-approval.sql",
+        "line": 17
+      },
+      {
+        "file": "packages/database/migrations/128-admin-users-wealth-and-rich-list.sql",
+        "line": 29
+      },
+      {
+        "file": "packages/database/migrations/128-admin-users-wealth-and-rich-list.sql",
+        "line": 114
+      },
+      {
+        "file": "packages/database/migrations/129-encrypted-identities-and-whitelist-hardening.sql",
+        "line": 6
+      },
+      {
+        "file": "packages/database/migrations/130-remove-work-reward-caps.sql",
+        "line": 19
+      },
+      {
+        "file": "packages/database/migrations/130-remove-work-reward-caps.sql",
+        "line": 190
+      },
+      {
+        "file": "packages/database/migrations/132-content-announcement-management.sql",
+        "line": 10
+      },
+      {
+        "file": "packages/database/migrations/132-content-announcement-management.sql",
+        "line": 46
+      },
+      {
+        "file": "packages/database/migrations/133-work-overtime-and-active-job-priority.sql",
+        "line": 19
+      },
+      {
+        "file": "packages/database/migrations/133-work-overtime-and-active-job-priority.sql",
+        "line": 287
+      },
+      {
+        "file": "packages/database/migrations/134-repair-app-boundaries-and-ledger-cache.sql",
+        "line": 14
+      },
+      {
+        "file": "packages/database/migrations/135-ai-news-scenarios.sql",
+        "line": 108
+      },
+      {
+        "file": "packages/database/migrations/135-ai-news-scenarios.sql",
+        "line": 126
+      },
+      {
+        "file": "packages/database/migrations/135-ai-news-scenarios.sql",
+        "line": 154
+      },
+      {
+        "file": "packages/database/migrations/135-ai-news-scenarios.sql",
+        "line": 207
+      },
+      {
+        "file": "packages/database/migrations/135-ai-news-scenarios.sql",
+        "line": 341
+      },
+      {
+        "file": "packages/database/migrations/135-ai-news-scenarios.sql",
+        "line": 425
+      },
+      {
+        "file": "packages/database/migrations/135-ai-news-scenarios.sql",
+        "line": 471
+      },
+      {
+        "file": "packages/database/migrations/135-ai-news-scenarios.sql",
+        "line": 541
+      },
+      {
+        "file": "packages/database/migrations/136-spark-series-minute-window.sql",
+        "line": 30
+      },
+      {
+        "file": "packages/database/migrations/137-admin-console-oauth-entry.sql",
+        "line": 14
+      },
+      {
+        "file": "packages/database/migrations/138-announcement-edit-pin-and-discord-alerts.sql",
+        "line": 32
+      },
+      {
+        "file": "packages/database/migrations/138-announcement-edit-pin-and-discord-alerts.sql",
+        "line": 113
+      },
+      {
+        "file": "packages/database/migrations/138-announcement-edit-pin-and-discord-alerts.sql",
+        "line": 154
+      },
+      {
+        "file": "packages/database/migrations/139-user-activity-and-telemetry.sql",
+        "line": 32
+      },
+      {
+        "file": "packages/database/migrations/139-user-activity-and-telemetry.sql",
+        "line": 107
+      },
+      {
+        "file": "packages/database/migrations/142-complete-user-request-activity.sql",
+        "line": 13
+      },
+      {
+        "file": "packages/database/migrations/142-complete-user-request-activity.sql",
+        "line": 68
+      },
+      {
+        "file": "packages/database/migrations/142-complete-user-request-activity.sql",
+        "line": 109
+      },
+      {
+        "file": "packages/database/migrations/142-complete-user-request-activity.sql",
+        "line": 158
+      },
+      {
+        "file": "packages/database/migrations/144-preserve-database-name-on-login.sql",
+        "line": 18
+      },
+      {
+        "file": "packages/database/migrations/145-route-activity-events-to-discord.sql",
+        "line": 24
+      },
+      {
+        "file": "packages/database/migrations/145-route-activity-events-to-discord.sql",
+        "line": 78
+      },
+      {
+        "file": "packages/database/migrations/148-discord-reconciliation-health-read.sql",
+        "line": 18
+      },
+      {
+        "file": "packages/database/migrations/149-ai-news-generation-runs.sql",
+        "line": 48
+      },
+      {
+        "file": "packages/database/migrations/149-ai-news-generation-runs.sql",
+        "line": 108
+      },
+      {
+        "file": "packages/database/migrations/149-ai-news-generation-runs.sql",
+        "line": 142
+      },
+      {
+        "file": "packages/database/migrations/150-discord-audit-health-read.sql",
+        "line": 13
+      },
+      {
+        "file": "packages/database/migrations/151-discord-all-events-and-alert-read.sql",
+        "line": 11
+      },
+      {
+        "file": "packages/database/migrations/151-discord-all-events-and-alert-read.sql",
+        "line": 73
+      },
+      {
+        "file": "packages/database/migrations/152-news-that-lands.sql",
+        "line": 50
+      },
+      {
+        "file": "packages/database/migrations/152-news-that-lands.sql",
+        "line": 141
+      },
+      {
+        "file": "packages/database/migrations/153-scenarios-that-name-their-stocks.sql",
+        "line": 60
+      },
+      {
+        "file": "packages/database/migrations/153-scenarios-that-name-their-stocks.sql",
+        "line": 207
+      },
+      {
+        "file": "packages/database/migrations/153-scenarios-that-name-their-stocks.sql",
+        "line": 272
+      },
+      {
+        "file": "packages/database/migrations/154-actionable-discord-request-logs.sql",
+        "line": 10
+      },
+      {
+        "file": "packages/database/migrations/154-actionable-discord-request-logs.sql",
+        "line": 62
+      },
+      {
+        "file": "packages/database/migrations/154-actionable-discord-request-logs.sql",
+        "line": 128
+      },
+      {
+        "file": "packages/database/migrations/155-private-discord-request-context.sql",
+        "line": 10
+      },
+      {
+        "file": "packages/database/migrations/155-private-discord-request-context.sql",
+        "line": 72
+      },
+      {
+        "file": "packages/database/migrations/156-reliable-activity-delivery.sql",
+        "line": 15
+      },
+      {
+        "file": "packages/database/migrations/157-unlimited-full-work-rewards.sql",
+        "line": 61
+      },
+      {
+        "file": "packages/database/migrations/159-remove-legacy-work-assignment-limits.sql",
+        "line": 20
+      },
+      {
+        "file": "packages/database/migrations/159-remove-legacy-work-assignment-limits.sql",
+        "line": 91
+      },
+      {
+        "file": "packages/database/migrations/161-admin-photo-lifecycle.sql",
+        "line": 20
+      },
+      {
+        "file": "packages/database/migrations/161-admin-photo-lifecycle.sql",
+        "line": 51
+      },
+      {
+        "file": "packages/database/migrations/162-identity-that-survives-a-key-change.sql",
+        "line": 65
+      },
+      {
+        "file": "packages/database/migrations/163-merge-forked-member-accounts.sql",
+        "line": 29
+      },
+      {
+        "file": "packages/database/migrations/163-merge-forked-member-accounts.sql",
+        "line": 55
+      },
+      {
+        "file": "packages/database/migrations/164-user-owned-casino-limits.sql",
+        "line": 19
+      },
+      {
+        "file": "packages/database/migrations/164-user-owned-casino-limits.sql",
+        "line": 62
+      },
+      {
+        "file": "packages/database/migrations/165-market-sale-starter-discount.sql",
+        "line": 51
+      },
+      {
+        "file": "packages/database/migrations/165-market-sale-starter-discount.sql",
+        "line": 106
+      },
+      {
+        "file": "packages/database/migrations/165-market-sale-starter-discount.sql",
+        "line": 166
+      },
+      {
+        "file": "packages/database/migrations/166-work-system-integrity.sql",
+        "line": 74
+      },
+      {
+        "file": "packages/database/migrations/166-work-system-integrity.sql",
+        "line": 136
+      },
+      {
+        "file": "packages/database/migrations/166-work-system-integrity.sql",
+        "line": 167
+      },
+      {
+        "file": "packages/database/migrations/166-work-system-integrity.sql",
+        "line": 198
+      },
+      {
+        "file": "packages/database/migrations/166-work-system-integrity.sql",
+        "line": 280
+      },
+      {
+        "file": "packages/database/migrations/166-work-system-integrity.sql",
+        "line": 347
+      },
+      {
+        "file": "packages/database/migrations/166-work-system-integrity.sql",
+        "line": 590
+      },
+      {
+        "file": "packages/database/migrations/168-admin-shop-boundary.sql",
+        "line": 5
+      },
+      {
+        "file": "packages/database/migrations/168-admin-shop-boundary.sql",
+        "line": 26
+      },
+      {
+        "file": "packages/database/migrations/168-admin-shop-boundary.sql",
+        "line": 89
+      },
+      {
+        "file": "packages/database/migrations/169-admin-control-center-money-contract.sql",
+        "line": 10
+      },
+      {
+        "file": "packages/database/migrations/169-admin-control-center-money-contract.sql",
+        "line": 150
+      },
+      {
+        "file": "packages/database/migrations/170-gameplay-read-model-and-event-truth.sql",
+        "line": 6
+      },
+      {
+        "file": "packages/database/migrations/170-gameplay-read-model-and-event-truth.sql",
+        "line": 29
+      },
+      {
+        "file": "packages/database/migrations/172-banking-gameplay-contract.sql",
+        "line": 3
+      },
+      {
+        "file": "packages/database/migrations/172-banking-gameplay-contract.sql",
+        "line": 22
+      },
+      {
+        "file": "packages/database/migrations/172-banking-gameplay-contract.sql",
+        "line": 104
+      },
+      {
+        "file": "packages/database/migrations/172-banking-gameplay-contract.sql",
+        "line": 235
+      },
+      {
+        "file": "packages/database/migrations/173-member-board-images.sql",
+        "line": 31
+      },
+      {
+        "file": "packages/database/migrations/173-member-board-images.sql",
+        "line": 57
+      },
+      {
+        "file": "packages/database/migrations/173-member-board-images.sql",
+        "line": 82
+      },
+      {
+        "file": "packages/database/migrations/173-member-board-images.sql",
+        "line": 122
+      },
+      {
+        "file": "packages/database/migrations/173-member-board-images.sql",
+        "line": 146
+      },
+      {
+        "file": "packages/database/migrations/174-audit-member-target-search.sql",
+        "line": 48
+      },
+      {
+        "file": "packages/database/migrations/175-member-board-public-read.sql",
+        "line": 3
+      },
+      {
+        "file": "packages/database/migrations/175-member-board-public-read.sql",
+        "line": 20
+      },
+      {
+        "file": "packages/database/migrations/175-member-board-public-read.sql",
+        "line": 62
+      },
+      {
+        "file": "packages/database/migrations/175-member-board-public-read.sql",
+        "line": 96
+      },
+      {
+        "file": "packages/database/migrations/175-member-board-public-read.sql",
+        "line": 124
+      },
+      {
+        "file": "packages/database/migrations/176-member-board-image-ownership.sql",
+        "line": 16
+      },
+      {
+        "file": "packages/database/migrations/176-member-board-image-ownership.sql",
+        "line": 52
+      },
+      {
+        "file": "packages/database/migrations/177-member-stock-watchlist.sql",
+        "line": 24
+      },
+      {
+        "file": "packages/database/migrations/177-member-stock-watchlist.sql",
+        "line": 44
+      },
+      {
+        "file": "packages/database/migrations/178-business-settlement-v2-idempotency.sql",
+        "line": 34
+      },
+      {
+        "file": "packages/database/migrations/179-business-settlement-v2-boost-runtime-fix.sql",
+        "line": 34
+      },
+      {
+        "file": "packages/database/migrations/180-local-email-auth.sql",
+        "line": 3
+      },
+      {
+        "file": "packages/database/migrations/180-local-email-auth.sql",
+        "line": 70
+      },
+      {
+        "file": "packages/database/migrations/180-local-email-auth.sql",
+        "line": 132
+      },
+      {
+        "file": "packages/database/migrations/180-local-email-auth.sql",
+        "line": 228
+      },
+      {
+        "file": "packages/database/migrations/180-local-email-auth.sql",
+        "line": 249
+      },
+      {
+        "file": "packages/database/migrations/181-stock-tagged-community.sql",
+        "line": 29
+      },
+      {
+        "file": "packages/database/migrations/181-stock-tagged-community.sql",
+        "line": 86
+      },
+      {
+        "file": "packages/database/migrations/182-conditional-stock-alerts.sql",
+        "line": 57
+      },
+      {
+        "file": "packages/database/migrations/182-conditional-stock-alerts.sql",
+        "line": 97
+      },
+      {
+        "file": "packages/database/migrations/182-conditional-stock-alerts.sql",
+        "line": 119
+      },
+      {
+        "file": "packages/database/migrations/182-conditional-stock-alerts.sql",
+        "line": 155
+      },
+      {
+        "file": "packages/database/migrations/182-conditional-stock-alerts.sql",
+        "line": 178
+      },
+      {
+        "file": "packages/database/migrations/183-local-email-auth-registration-conflict-fix.sql",
+        "line": 21
+      },
+      {
+        "file": "packages/database/migrations/183-local-email-auth-registration-conflict-fix.sql",
+        "line": 117
+      },
+      {
+        "file": "packages/database/migrations/183-local-email-auth-registration-conflict-fix.sql",
+        "line": 138
+      },
+      {
+        "file": "packages/database/migrations/184-mobile-oauth-handoff.sql",
+        "line": 29
+      },
+      {
+        "file": "packages/database/migrations/184-mobile-oauth-handoff.sql",
+        "line": 57
+      },
+      {
+        "file": "packages/database/migrations/185-mobile-profile-account-read.sql",
+        "line": 11
+      },
+      {
+        "file": "packages/database/migrations/186-local-email-token-verification.sql",
+        "line": 14
+      },
+      {
+        "file": "packages/database/migrations/188-work-feature-switch-enforcement.sql",
+        "line": 20
+      },
+      {
+        "file": "packages/database/migrations/189-work-daily-quota-contract.sql",
+        "line": 21
+      },
+      {
+        "file": "packages/database/migrations/190-server-game-clock.sql",
+        "line": 30
+      },
+      {
+        "file": "packages/database/migrations/190-server-game-clock.sql",
+        "line": 67
+      },
+      {
+        "file": "packages/database/migrations/190-server-game-clock.sql",
+        "line": 77
+      },
+      {
+        "file": "packages/database/migrations/190-server-game-clock.sql",
+        "line": 87
+      },
+      {
+        "file": "packages/database/migrations/190-server-game-clock.sql",
+        "line": 94
+      },
+      {
+        "file": "packages/database/migrations/190-server-game-clock.sql",
+        "line": 117
+      },
+      {
+        "file": "packages/database/migrations/190-server-game-clock.sql",
+        "line": 168
+      },
+      {
+        "file": "packages/database/migrations/191-admin-abuse-enforcement.sql",
+        "line": 11
+      },
+      {
+        "file": "packages/database/migrations/191-admin-abuse-enforcement.sql",
+        "line": 96
+      },
+      {
+        "file": "packages/database/migrations/192-detailed-api-request-context.sql",
+        "line": 16
+      },
+      {
+        "file": "packages/database/migrations/194-wide-wld-numeric-storage.sql",
+        "line": 36
+      },
+      {
+        "file": "packages/database/migrations/194-wide-wld-numeric-storage.sql",
+        "line": 237
+      },
+      {
+        "file": "packages/database/migrations/194-wide-wld-numeric-storage.sql",
+        "line": 299
+      },
+      {
+        "file": "packages/database/migrations/194-wide-wld-numeric-storage.sql",
+        "line": 377
+      },
+      {
+        "file": "packages/database/migrations/194-wide-wld-numeric-storage.sql",
+        "line": 514
+      },
+      {
+        "file": "packages/database/migrations/194-wide-wld-numeric-storage.sql",
+        "line": 617
+      },
+      {
+        "file": "packages/database/migrations/194-wide-wld-numeric-storage.sql",
+        "line": 749
+      },
+      {
+        "file": "packages/database/migrations/194-wide-wld-numeric-storage.sql",
+        "line": 764
+      },
+      {
+        "file": "packages/database/migrations/195-casino-scoped-negative-balance.sql",
+        "line": 10
+      },
+      {
+        "file": "packages/database/migrations/196-user-admin-support-chat.sql",
+        "line": 41
+      },
+      {
+        "file": "packages/database/migrations/196-user-admin-support-chat.sql",
+        "line": 78
+      },
+      {
+        "file": "packages/database/migrations/196-user-admin-support-chat.sql",
+        "line": 88
+      },
+      {
+        "file": "packages/database/migrations/196-user-admin-support-chat.sql",
+        "line": 102
+      },
+      {
+        "file": "packages/database/migrations/196-user-admin-support-chat.sql",
+        "line": 127
+      },
+      {
+        "file": "packages/database/migrations/196-user-admin-support-chat.sql",
+        "line": 149
+      },
+      {
+        "file": "packages/database/migrations/196-user-admin-support-chat.sql",
+        "line": 162
+      },
+      {
+        "file": "packages/database/migrations/196-user-admin-support-chat.sql",
+        "line": 192
+      },
+      {
+        "file": "packages/database/migrations/197-retire-admin-second-factor.sql",
+        "line": 11
+      },
+      {
+        "file": "packages/database/migrations/197-retire-admin-second-factor.sql",
+        "line": 42
+      },
+      {
+        "file": "packages/database/migrations/199-game-day-reset-convergence.sql",
+        "line": 99
+      },
+      {
+        "file": "packages/database/migrations/200-dual-economy-ai-review.sql",
+        "line": 82
+      },
+      {
+        "file": "packages/database/migrations/200-dual-economy-ai-review.sql",
+        "line": 127
+      },
+      {
+        "file": "packages/database/migrations/200-dual-economy-ai-review.sql",
+        "line": 183
+      },
+      {
+        "file": "packages/database/migrations/200-dual-economy-ai-review.sql",
+        "line": 218
+      },
+      {
+        "file": "packages/database/migrations/200-dual-economy-ai-review.sql",
+        "line": 242
+      },
+      {
+        "file": "packages/database/migrations/202-admin-traffic-and-ai-status.sql",
+        "line": 10
+      },
+      {
+        "file": "packages/database/migrations/202-admin-traffic-and-ai-status.sql",
+        "line": 37
+      },
+      {
+        "file": "packages/database/migrations/202-admin-traffic-and-ai-status.sql",
+        "line": 67
+      },
+      {
+        "file": "packages/database/migrations/202-admin-traffic-and-ai-status.sql",
+        "line": 146
+      },
+      {
+        "file": "packages/database/migrations/203-work-reset-convergence.sql",
+        "line": 11
+      },
+      {
+        "file": "packages/database/migrations/203-work-reset-convergence.sql",
+        "line": 89
+      },
+      {
+        "file": "packages/database/migrations/203-work-reset-convergence.sql",
+        "line": 165
+      },
+      {
+        "file": "packages/database/migrations/204-adaptive-profession-limits.sql",
+        "line": 53
+      },
+      {
+        "file": "packages/database/migrations/204-adaptive-profession-limits.sql",
+        "line": 103
+      },
+      {
+        "file": "packages/database/migrations/204-adaptive-profession-limits.sql",
+        "line": 209
+      },
+      {
+        "file": "packages/database/migrations/205-ai-shadow-health-and-job-limit-safety.sql",
+        "line": 77
+      },
+      {
+        "file": "packages/database/migrations/205-ai-shadow-health-and-job-limit-safety.sql",
+        "line": 152
+      },
+      {
+        "file": "packages/database/migrations/205-ai-shadow-health-and-job-limit-safety.sql",
+        "line": 223
+      },
+      {
+        "file": "packages/database/migrations/205-ai-shadow-health-and-job-limit-safety.sql",
+        "line": 262
+      },
+      {
+        "file": "packages/database/migrations/206-economic-command-envelope.sql",
+        "line": 36
+      },
+      {
+        "file": "packages/database/migrations/207-economic-command-api.sql",
+        "line": 18
+      },
+      {
+        "file": "packages/database/migrations/207-economic-command-api.sql",
+        "line": 80
+      },
+      {
+        "file": "packages/database/migrations/209-local-password-reset.sql",
+        "line": 20
+      },
+      {
+        "file": "packages/database/migrations/209-local-password-reset.sql",
+        "line": 43
+      },
+      {
+        "file": "packages/database/migrations/210-work-economic-command-envelope.sql",
+        "line": 29
+      },
+      {
+        "file": "packages/database/migrations/211-bank-loan-economic-command-envelope.sql",
+        "line": 18
+      },
+      {
+        "file": "packages/database/migrations/211-bank-loan-economic-command-envelope.sql",
+        "line": 72
+      },
+      {
+        "file": "packages/database/migrations/212-local-password-change.sql",
+        "line": 4
+      },
+      {
+        "file": "packages/database/migrations/213-account-session-details.sql",
+        "line": 13
+      },
+      {
+        "file": "packages/database/migrations/214-account-security-events.sql",
+        "line": 4
+      },
+      {
+        "file": "packages/database/migrations/215-local-email-change.sql",
+        "line": 12
+      },
+      {
+        "file": "packages/database/migrations/215-local-email-change.sql",
+        "line": 25
+      },
+      {
+        "file": "packages/database/migrations/217-member-earned-titles.sql",
+        "line": 10
+      },
+      {
+        "file": "packages/database/migrations/218-shop-economic-command-envelope.sql",
+        "line": 22
+      },
+      {
+        "file": "packages/database/migrations/219-admin-work-operations-tuning.sql",
+        "line": 24
+      },
+      {
+        "file": "packages/database/migrations/219-admin-work-operations-tuning.sql",
+        "line": 67
+      },
+      {
+        "file": "packages/database/migrations/220-private-chat-core.sql",
+        "line": 4
+      },
+      {
+        "file": "packages/database/migrations/220-private-chat-core.sql",
+        "line": 51
+      },
+      {
+        "file": "packages/database/migrations/220-private-chat-core.sql",
+        "line": 68
+      },
+      {
+        "file": "packages/database/migrations/220-private-chat-core.sql",
+        "line": 87
+      },
+      {
+        "file": "packages/database/migrations/221-stock-halt-cost-basis-settlement.sql",
+        "line": 48
+      },
+      {
+        "file": "packages/database/migrations/221-stock-halt-cost-basis-settlement.sql",
+        "line": 207
+      },
+      {
+        "file": "packages/database/migrations/221-stock-halt-cost-basis-settlement.sql",
+        "line": 258
+      },
+      {
+        "file": "packages/database/migrations/222-clubs-cooperative-economy.sql",
+        "line": 95
+      },
+      {
+        "file": "packages/database/migrations/222-clubs-cooperative-economy.sql",
+        "line": 194
+      },
+      {
+        "file": "packages/database/migrations/223-personal-spaces-city-projects.sql",
+        "line": 70
+      },
+      {
+        "file": "packages/database/migrations/223-personal-spaces-city-projects.sql",
+        "line": 148
+      },
+      {
+        "file": "packages/database/migrations/224-admin-treasury-management.sql",
+        "line": 65
+      },
+      {
+        "file": "packages/database/migrations/224-admin-treasury-management.sql",
+        "line": 126
+      },
+      {
+        "file": "packages/database/migrations/224-admin-treasury-management.sql",
+        "line": 189
+      },
+      {
+        "file": "packages/database/migrations/225-fix-admin-work-reward-policy-ambiguity.sql",
+        "line": 24
+      },
+      {
+        "file": "packages/database/migrations/226-minor-safety-emergency-takedown.sql",
+        "line": 49
+      },
+      {
+        "file": "packages/database/migrations/226-minor-safety-emergency-takedown.sql",
+        "line": 104
+      },
+      {
+        "file": "packages/database/migrations/226-minor-safety-emergency-takedown.sql",
+        "line": 146
+      },
+      {
+        "file": "packages/database/migrations/226-minor-safety-emergency-takedown.sql",
+        "line": 188
+      },
+      {
+        "file": "packages/database/migrations/227-private-chat-safety-controls.sql",
+        "line": 4
+      },
+      {
+        "file": "packages/database/migrations/227-private-chat-safety-controls.sql",
+        "line": 41
+      },
+      {
+        "file": "packages/database/migrations/227-private-chat-safety-controls.sql",
+        "line": 55
+      },
+      {
+        "file": "packages/database/migrations/227-private-chat-safety-controls.sql",
+        "line": 82
+      },
+      {
+        "file": "packages/database/migrations/227-private-chat-safety-controls.sql",
+        "line": 107
+      },
+      {
+        "file": "packages/database/migrations/227-private-chat-safety-controls.sql",
+        "line": 129
+      },
+      {
+        "file": "packages/database/migrations/227-private-chat-safety-controls.sql",
+        "line": 182
+      },
+      {
+        "file": "packages/database/migrations/228-private-chat-moderation-admin.sql",
+        "line": 4
+      },
+      {
+        "file": "packages/database/migrations/228-private-chat-moderation-admin.sql",
+        "line": 35
+      },
+      {
+        "file": "packages/database/migrations/228-private-chat-moderation-admin.sql",
+        "line": 100
+      },
+      {
+        "file": "packages/database/migrations/228-private-chat-moderation-admin.sql",
+        "line": 182
+      },
+      {
+        "file": "packages/database/migrations/229-stock-market-overview-halt-visibility.sql",
+        "line": 25
+      },
+      {
+        "file": "packages/database/migrations/231-space-property-tax-and-season-settlement.sql",
+        "line": 42
+      },
+      {
+        "file": "packages/database/migrations/231-space-property-tax-and-season-settlement.sql",
+        "line": 191
+      },
+      {
+        "file": "packages/database/migrations/231-space-property-tax-and-season-settlement.sql",
+        "line": 329
+      },
+      {
+        "file": "packages/database/migrations/232-marketplace-auctions-trades-appraisals-club-canvas-collections.sql",
+        "line": 162
+      },
+      {
+        "file": "packages/database/migrations/232-marketplace-auctions-trades-appraisals-club-canvas-collections.sql",
+        "line": 229
+      },
+      {
+        "file": "packages/database/migrations/232-marketplace-auctions-trades-appraisals-club-canvas-collections.sql",
+        "line": 321
+      },
+      {
+        "file": "packages/database/migrations/232-marketplace-auctions-trades-appraisals-club-canvas-collections.sql",
+        "line": 358
+      },
+      {
+        "file": "packages/database/migrations/233-revoke-public-function-execute.sql",
+        "line": 2
+      },
+      {
+        "file": "packages/database/migrations/234-user-job-qualifications.sql",
+        "line": 30
+      },
+      {
+        "file": "packages/database/migrations/240-treasury-expenditure-and-redistribution.sql",
+        "line": 59
+      },
+      {
+        "file": "packages/database/migrations/240-treasury-expenditure-and-redistribution.sql",
+        "line": 201
+      },
+      {
+        "file": "packages/database/migrations/241-treasury-fiscal-policy-and-buyback.sql",
+        "line": 59
+      },
+      {
+        "file": "packages/database/migrations/241-treasury-fiscal-policy-and-buyback.sql",
+        "line": 184
+      },
+      {
+        "file": "packages/database/migrations/241-treasury-fiscal-policy-and-buyback.sql",
+        "line": 294
+      },
+      {
+        "file": "packages/database/migrations/242-progressive-wealth-tax.sql",
+        "line": 106
+      },
+      {
+        "file": "packages/database/migrations/243-treasury-security-boundary-repair.sql",
+        "line": 4
+      },
+      {
+        "file": "packages/database/migrations/243-treasury-security-boundary-repair.sql",
+        "line": 6
+      },
+      {
+        "file": "packages/database/migrations/243-treasury-security-boundary-repair.sql",
+        "line": 46
+      },
+      {
+        "file": "packages/database/migrations/244-central-bank-mint-separation.sql",
+        "line": 83
+      },
+      {
+        "file": "packages/database/migrations/246-persistent-session-keep-alive.sql",
+        "line": 14
+      },
+      {
+        "file": "packages/database/migrations/246-persistent-session-keep-alive.sql",
+        "line": 84
+      },
+      {
+        "file": "packages/database/migrations/246-persistent-session-keep-alive.sql",
+        "line": 159
+      },
+      {
+        "file": "packages/database/migrations/247-gsc-service-account-credentials.sql",
+        "line": 5
+      },
+      {
+        "file": "packages/database/migrations/247-gsc-service-account-credentials.sql",
+        "line": 34
+      },
+      {
+        "file": "packages/database/migrations/247-gsc-service-account-credentials.sql",
+        "line": 52
+      },
+      {
+        "file": "packages/database/migrations/247-gsc-service-account-credentials.sql",
+        "line": 89
+      },
+      {
+        "file": "packages/database/migrations/248-exclude-admin-traffic-and-ips.sql",
+        "line": 11
+      },
+      {
+        "file": "packages/database/migrations/259-board-author-user-id-and-chat-search.sql",
+        "line": 11
+      },
+      {
+        "file": "packages/database/migrations/259-board-author-user-id-and-chat-search.sql",
+        "line": 35
+      },
+      {
+        "file": "packages/database/migrations/259-board-author-user-id-and-chat-search.sql",
+        "line": 67
+      },
+      {
+        "file": "packages/database/migrations/259-board-author-user-id-and-chat-search.sql",
+        "line": 99
+      },
+      {
+        "file": "packages/database/migrations/259-board-author-user-id-and-chat-search.sql",
+        "line": 135
+      },
+      {
+        "file": "packages/database/migrations/259-board-author-user-id-and-chat-search.sql",
+        "line": 176
+      },
+      {
+        "file": "packages/database/migrations/259-board-author-user-id-and-chat-search.sql",
+        "line": 203
+      },
+      {
+        "file": "packages/database/migrations/262-exclude-admins-from-rankings.sql",
+        "line": 7
+      },
+      {
+        "file": "packages/database/migrations/263-anti-inflation-burn-events.sql",
+        "line": 21
+      },
+      {
+        "file": "packages/database/migrations/264-fix-admin-bank-functions-return-types.sql",
+        "line": 22
+      },
+      {
+        "file": "packages/database/migrations/264-fix-admin-bank-functions-return-types.sql",
+        "line": 74
+      },
+      {
+        "file": "packages/database/migrations/265-exclude-admins-from-wealth-and-season-rankings.sql",
+        "line": 26
+      },
+      {
+        "file": "packages/database/migrations/265-exclude-admins-from-wealth-and-season-rankings.sql",
+        "line": 125
+      },
+      {
+        "file": "packages/database/migrations/268-targeted-treasury-subsidy-and-donation.sql",
+        "line": 32
+      },
+      {
+        "file": "packages/database/migrations/268-targeted-treasury-subsidy-and-donation.sql",
+        "line": 183
+      },
+      {
+        "file": "packages/database/migrations/269-fix-qa-treasury-ledger-and-app-grants.sql",
+        "line": 26
+      },
+      {
+        "file": "packages/database/migrations/269-fix-qa-treasury-ledger-and-app-grants.sql",
+        "line": 194
+      },
+      {
+        "file": "packages/database/test/migration-parity.test.ts",
+        "line": 89
+      },
+      {
+        "file": "packages/database/test/migration-parity.test.ts",
+        "line": 92
+      },
+      {
+        "file": "packages/database/test/migration-parity.test.ts",
+        "line": 98
+      },
+      {
+        "file": "scripts/audit-backend-api-completeness.mjs",
+        "line": 147
+      },
+      {
+        "file": "scripts/audit-backend-api-completeness.mjs",
+        "line": 149
+      }
+    ]
+  }
+}

@@ -1,5 +1,14 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+
+## 2026-10-14 전체 소스·보안 감사 (v2026.10.14.603)
+
+- [영문 정본 — 전체 코드·보안 감사](docs/findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.md)
+- [한국어 보고서 — 취약점·버그·해결 우선순위](docs/findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.ko.md)
+- [작업·검증 로그](docs/worklog/2026-10-14-full-code-security-audit-v603.ko.md) · [내부 변경내역](docs/updates/v2026.10.14.603-internal.ko.md) · [GitHub 변경내역](docs/updates/v2026.10.14.603-github.ko.md)
+
+이 문서는 진단/검토용이며 취약점 수정·운영 배포 완료를 의미하지 않는다.
+
 > **단일 진실 공급원 (Single Source of Truth)**  
 > 본 문서는 월덕 머니버스(Woldeok Moneyverse) 플랫폼의 금융 아키텍처, 대국민 국고 생태계, 가상 주식 거래소, API 계약, 관리자 관제, 모바일 규격, 인프라 운영 가이드를 총망라하는 통합 문서 색인 허브입니다.
 

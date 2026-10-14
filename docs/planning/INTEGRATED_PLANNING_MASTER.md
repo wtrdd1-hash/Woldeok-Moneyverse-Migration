@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## Full-code security and correctness audit — v2026.10.14.603 (evidence only)
+
+- Source-only risk register SEC-603-01–14: shared fallback authorization value (conditional P0), missing admin backup role enforcement, repeatable DAO voting, unauthenticated IndexNow, non-atomic JSON stores, fabricated treasury payment success, mock indexing telemetry and Android credential hint. Full [English audit](../findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.md) and [Korean audit](../findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.ko.md).
+- Review main advanced from 062db65b to 6be44719 during the run and was isolated/fast-forwarded. These findings are NOT adopted feature specifications, do not supersede planning v530, and do NOT certify live exploitability, Test or Production. Resolution requires named owner, negative tests, independent exact-SHA Test acceptance and separately approved zero-downtime promotion.
+
+
 ## Runtime / planning authority reconciliation — v2026.10.14.600 (documentation only)
 
 > Status: AUTHORITY_DRIFT. Planning authority remains v2026.10.05.530 until an explicit decision and its acceptance evidence supersede it. This record does **not** certify feature, Test, or Production acceptance.
