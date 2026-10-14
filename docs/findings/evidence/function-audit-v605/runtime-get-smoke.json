@@ -1,0 +1,395 @@
+{
+  "base": "https://easy-scraping.com",
+  "timestamp": "2026-10-14T14:03:44+0900",
+  "sample_count": 63,
+  "sitemap": {
+    "parsed": true,
+    "loc_count": 1012,
+    "extra_sample_count": 14
+  },
+  "counts": {
+    "200": 61,
+    "404": 1,
+    "0": 1
+  },
+  "results": [
+    {
+      "path": "/",
+      "code": 200,
+      "latency_ms": 869,
+      "final": "/"
+    },
+    {
+      "path": "/api/health",
+      "code": 200,
+      "latency_ms": 774,
+      "final": "/api/health"
+    },
+    {
+      "path": "/robots.txt",
+      "code": 200,
+      "latency_ms": 792,
+      "final": "/robots.txt"
+    },
+    {
+      "path": "/sitemap.xml",
+      "code": 200,
+      "latency_ms": 751,
+      "final": "/sitemap.xml"
+    },
+    {
+      "path": "/sitemap-blog.xml",
+      "code": 200,
+      "latency_ms": 807,
+      "final": "/sitemap-blog.xml"
+    },
+    {
+      "path": "/sitemap-stocks.xml",
+      "code": 200,
+      "latency_ms": 836,
+      "final": "/sitemap-stocks.xml"
+    },
+    {
+      "path": "/status",
+      "code": 200,
+      "latency_ms": 1177,
+      "final": "/status"
+    },
+    {
+      "path": "/tools",
+      "code": 200,
+      "latency_ms": 777,
+      "final": "/tools"
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "code": 200,
+      "latency_ms": 1154,
+      "final": "/tools/compound-calculator"
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "code": 200,
+      "latency_ms": 1141,
+      "final": "/tools/stock-calculator"
+    },
+    {
+      "path": "/tools/loan-interest-calculator",
+      "code": 200,
+      "latency_ms": 846,
+      "final": "/tools/loan-interest-calculator"
+    },
+    {
+      "path": "/tools/salary-calculator",
+      "code": 200,
+      "latency_ms": 780,
+      "final": "/tools/salary-calculator"
+    },
+    {
+      "path": "/tools/goal-wealth-calculator",
+      "code": 200,
+      "latency_ms": 821,
+      "final": "/tools/goal-wealth-calculator"
+    },
+    {
+      "path": "/tools/isa-calculator",
+      "code": 200,
+      "latency_ms": 794,
+      "final": "/tools/isa-calculator"
+    },
+    {
+      "path": "/tools/dividend-tax-calculator",
+      "code": 200,
+      "latency_ms": 781,
+      "final": "/tools/dividend-tax-calculator"
+    },
+    {
+      "path": "/tools/retirement-calculator",
+      "code": 200,
+      "latency_ms": 785,
+      "final": "/tools/retirement-calculator"
+    },
+    {
+      "path": "/guide",
+      "code": 200,
+      "latency_ms": 811,
+      "final": "/guide"
+    },
+    {
+      "path": "/guide/glossary",
+      "code": 200,
+      "latency_ms": 766,
+      "final": "/guide/glossary"
+    },
+    {
+      "path": "/roadmap",
+      "code": 200,
+      "latency_ms": 799,
+      "final": "/roadmap"
+    },
+    {
+      "path": "/features",
+      "code": 200,
+      "latency_ms": 816,
+      "final": "/features"
+    },
+    {
+      "path": "/privacy",
+      "code": 200,
+      "latency_ms": 788,
+      "final": "/privacy"
+    },
+    {
+      "path": "/terms",
+      "code": 200,
+      "latency_ms": 771,
+      "final": "/terms"
+    },
+    {
+      "path": "/blog",
+      "code": 200,
+      "latency_ms": 810,
+      "final": "/blog"
+    },
+    {
+      "path": "/announcements",
+      "code": 200,
+      "latency_ms": 788,
+      "final": "/announcements"
+    },
+    {
+      "path": "/shop",
+      "code": 200,
+      "latency_ms": 830,
+      "final": "/shop"
+    },
+    {
+      "path": "/stocks",
+      "code": 200,
+      "latency_ms": 789,
+      "final": "/stocks"
+    },
+    {
+      "path": "/stocks/portfolio",
+      "code": 200,
+      "latency_ms": 1136,
+      "final": "/stocks/portfolio"
+    },
+    {
+      "path": "/stocks/league",
+      "code": 200,
+      "latency_ms": 792,
+      "final": "/stocks/league"
+    },
+    {
+      "path": "/stocks/community",
+      "code": 200,
+      "latency_ms": 818,
+      "final": "/stocks/community"
+    },
+    {
+      "path": "/bank",
+      "code": 200,
+      "latency_ms": 1632,
+      "final": "/login"
+    },
+    {
+      "path": "/bonds",
+      "code": 200,
+      "latency_ms": 790,
+      "final": "/bonds"
+    },
+    {
+      "path": "/fx",
+      "code": 200,
+      "latency_ms": 791,
+      "final": "/fx"
+    },
+    {
+      "path": "/wallet",
+      "code": 200,
+      "latency_ms": 782,
+      "final": "/wallet"
+    },
+    {
+      "path": "/work",
+      "code": 200,
+      "latency_ms": 765,
+      "final": "/work"
+    },
+    {
+      "path": "/treasury",
+      "code": 200,
+      "latency_ms": 773,
+      "final": "/treasury"
+    },
+    {
+      "path": "/pension",
+      "code": 200,
+      "latency_ms": 774,
+      "final": "/pension"
+    },
+    {
+      "path": "/business",
+      "code": 404,
+      "latency_ms": 780,
+      "final": "/business"
+    },
+    {
+      "path": "/casino",
+      "code": 200,
+      "latency_ms": 799,
+      "final": "/casino"
+    },
+    {
+      "path": "/spaces",
+      "code": 200,
+      "latency_ms": 780,
+      "final": "/spaces"
+    },
+    {
+      "path": "/advisor",
+      "code": 200,
+      "latency_ms": 800,
+      "final": "/advisor"
+    },
+    {
+      "path": "/login",
+      "code": 200,
+      "latency_ms": 800,
+      "final": "/login"
+    },
+    {
+      "path": "/admin",
+      "code": 200,
+      "latency_ms": 783,
+      "final": "/admin"
+    },
+    {
+      "path": "/admin/seo",
+      "code": 200,
+      "latency_ms": 795,
+      "final": "/admin/seo"
+    },
+    {
+      "path": "/support",
+      "code": 200,
+      "latency_ms": 1536,
+      "final": "/login"
+    },
+    {
+      "path": "/en",
+      "code": 200,
+      "latency_ms": 784,
+      "final": "/en"
+    },
+    {
+      "path": "/ja",
+      "code": 200,
+      "latency_ms": 794,
+      "final": "/ja"
+    },
+    {
+      "path": "/zh",
+      "code": 200,
+      "latency_ms": 768,
+      "final": "/zh"
+    },
+    {
+      "path": "/en/tools/compound-interest-calculator",
+      "code": 200,
+      "latency_ms": 792,
+      "final": "/en/tools/compound-interest-calculator"
+    },
+    {
+      "path": "/ja/tools/compound-interest-calculator",
+      "code": 200,
+      "latency_ms": 789,
+      "final": "/ja/tools/compound-interest-calculator"
+    },
+    {
+      "path": "/kdic",
+      "code": 200,
+      "latency_ms": 793,
+      "final": "/kdic"
+    },
+    {
+      "path": "/guide/dopamine-system",
+      "code": 200,
+      "latency_ms": 805,
+      "final": "/guide/dopamine-system"
+    },
+    {
+      "path": "/guide/stock-trading",
+      "code": 200,
+      "latency_ms": 776,
+      "final": "/guide/stock-trading"
+    },
+    {
+      "path": "/guide/virtual-banking",
+      "code": 200,
+      "latency_ms": 782,
+      "final": "/guide/virtual-banking"
+    },
+    {
+      "path": "/guide/career-mastery",
+      "code": 200,
+      "latency_ms": 808,
+      "final": "/guide/career-mastery"
+    },
+    {
+      "path": "/gallery",
+      "code": 200,
+      "latency_ms": 799,
+      "final": "/gallery"
+    },
+    {
+      "path": "/spaces/real-estate",
+      "code": 200,
+      "latency_ms": 788,
+      "final": "/spaces/real-estate"
+    },
+    {
+      "path": "/tools/gift-tax-calculator",
+      "code": 200,
+      "latency_ms": 1042,
+      "final": "/tools/gift-tax-calculator"
+    },
+    {
+      "path": "/tools/compound-calculator/10m-3y-5p",
+      "code": 200,
+      "latency_ms": 774,
+      "final": "/tools/compound-calculator/10m-3y-5p"
+    },
+    {
+      "path": "/tools/compound-calculator/10m-5y-10p",
+      "code": 200,
+      "latency_ms": 784,
+      "final": "/tools/compound-calculator/10m-5y-10p"
+    },
+    {
+      "path": "/tools/compound-calculator/monthly-1m-5y",
+      "code": 200,
+      "latency_ms": 795,
+      "final": "/tools/compound-calculator/monthly-1m-5y"
+    },
+    {
+      "path": "/tools/compound-calculator/50m-1y-7p",
+      "code": 200,
+      "latency_ms": 784,
+      "final": "/tools/compound-calculator/50m-1y-7p"
+    },
+    {
+      "path": "/tools/compound-calculator/100m-10y-15p",
+      "code": 200,
+      "latency_ms": 791,
+      "final": "/tools/compound-calculator/100m-10y-15p"
+    },
+    {
+      "path": "/tools/stock-calculator/chips-minus-20",
+      "code": 0,
+      "latency_ms": 521,
+      "error": "ConnectionResetError"
+    }
+  ]
+}

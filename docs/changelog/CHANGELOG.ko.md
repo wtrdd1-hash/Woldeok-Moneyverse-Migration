@@ -1,4 +1,8 @@
 ## v2026.10.14.604 — 원격 브랜치 전면 통합·정리 및 디스코드 봇 무중단 방지 시스템 구축
+
+## v2026.10.14.605 — 전체 기능 수용검증 (문서 전용)
+- GitHub main c56af867 기준 타입/빌드 통과, 백엔드 1,162 통과·29 스킵, 프론트 1,134 통과·35 실패, API 계약 3파일 drift, 개발 DB 마이그레이션 237·269 불일치, 운영 GET 표본 63개 기록. **전체 기능 수용 BLOCKED**. [보고서](../findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.ko.md), [작업기록](../worklog/2026-10-14-full-function-acceptance-v605.ko.md). 운영 변경 없음.
+
 - 원격 및 서버 로컬의 70여 개 잔여 브랜치/작업트리 전수 통합 및 안전 삭제 완료 (`main` 단일 원천 정합).
 - 디스코드 봇(`moneyverse-discord-bot`) 무중단 생존 아키텍처 구현: `uncaughtException`/`unhandledRejection` 크래시 방지 가드, Shard 자동 재연결, 30초 음성 상주 워치독, systemd 2초 자동 재기동 정책 강화.
 - 웹/백엔드 배포 파이프라인에서 봇 강제 재시작 차단 정책(Keep-Alive Invariant) 명문화.
