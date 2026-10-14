@@ -43,6 +43,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'records',
   },
   {
+    href: '/admin/blog',
+    eyebrow: 'AI FINANCIAL BLOG OPERATIONS',
+    title: '블로그 관리 · AI 금융 칼럼',
+    summary: 'AI 금융 블로그 글 목록, 수동 발행 및 검색엔진 색인 자동화 상태를 관리합니다.',
+    group: 'records',
+  },
+  {
     href: '/admin/controls',
     eyebrow: 'FEATURE CONTROL',
     title: '기능 스위치 · 정책 버전',
