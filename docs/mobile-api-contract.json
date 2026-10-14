@@ -145,6 +145,10 @@
                     {
                       "type": "string",
                       "const": "google"
+                    },
+                    {
+                      "type": "string",
+                      "const": "local_email"
                     }
                   ]
                 },
@@ -7536,15 +7540,15 @@
               "oneOf": [
                 {
                   "type": "string",
+                  "const": "coin"
+                },
+                {
+                  "type": "string",
                   "const": "dice_parity"
                 },
                 {
                   "type": "string",
                   "const": "dice_number"
-                },
-                {
-                  "type": "string",
-                  "const": "coin"
                 },
                 {
                   "type": "string",
