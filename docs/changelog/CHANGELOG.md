@@ -1,3 +1,6 @@
+## v2026.10.14.618 — Integrated release candidate (verification only)
+- Combined v606 fullstack, v606 SEO tools, v604 growth plan and two v605 audits; preserved conflicting historical update records. Regenerated 179-endpoint mobile API contract and fixed sitemap hreflang regression assertion. Local lint/typecheck/build, frontend 1,178 tests, backend non-DB 1,162 tests PASS (29 skipped). CI/PostgreSQL/Test and Production acceptance are still required. [Worklog](../worklog/2026-10-14-fullstack-branch-integration-v618.md).
+
 ## v2026.10.14.604 — Repository branch reconciliation, worktree pruning & discord bot keep-alive system
 
 ## v2026.10.14.605 — Comprehensive functional verification (docs only)

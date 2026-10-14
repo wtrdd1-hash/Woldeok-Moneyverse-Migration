@@ -25,3 +25,9 @@
 
 ## Regression finding — 14:55 KST
 - Typecheck and full production build passed. Frontend suite: 1,177 pass / 1 fail. SEO sitemap v606 deliberately omits alternates on already-localized routes; old test incorrectly assumed every route has alternatives. Updated test to enforce base-locale alternate presence and prohibit duplicate locale prefixes on localized paths. No runtime code was changed for this assertion repair.
+
+## Local validation — 2026-10-14 14:58 KST
+- Mobile API contract parity PASS on committed HEAD `0f1e1b45` before sitemap assertion repair.
+- Sitemap targeted regression 3/3 PASS after correcting outdated expectation (previous full candidate had 1,177/1,178 frontend PASS).
+- Final local candidate: `pnpm lint` PASS; `pnpm typecheck` PASS; `pnpm build` PASS; `NODE_ENV=test pnpm --dir frontend exec vitest run` **1,178/1,178 PASS across 215 files**; backend `vitest run --exclude '**/*.db.test.ts'` **1,162 PASS, 29 skipped**. Test logs: `/tmp/mv-v618-{lint,typecheck,build,front-tests2,backend-unit}.log` on Debian miniPC.
+- CI-backed disposable PostgreSQL suite, exact-SHA Test runtime, authenticated session continuity and overall functional acceptance are still separate open gates. A passing build does not waive them.
