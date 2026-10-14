@@ -5,6 +5,7 @@ import {
   Inject,
   Param,
   Post,
+  ServiceUnavailableException,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -189,25 +190,7 @@ export class VenturesController {
     @Req() req: RequestWithSession,
     @Body() dto: InvestVentureDto,
   ) {
-    const actorUserId = requireUserId(req);
-    const pitch = this.mockPitches.find((p) => p.id === dto.pitchId) ?? this.mockPitches[0]!;
-    const equityPct = Number(((dto.amountWld / pitch.targetFundingWld) * pitch.equitySharePercent).toFixed(4));
-
-    const receipt = {
-      investmentId: `inv-${dto.idempotencyKey.slice(0, 8)}`,
-      userId: actorUserId,
-      pitchId: dto.pitchId,
-      startupName: pitch.name,
-      investedAmountWld: dto.amountWld,
-      acquiredEquityPercent: equityPct,
-      investedAt: new Date().toISOString(),
-    };
-
-    return {
-      success: true,
-      receipt,
-      message: `${pitch.name}에 ${dto.amountWld.toLocaleString()} WLD 엔젤투자가 성공적으로 집행되었습니다.`,
-    };
+    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 
   @ApiOperation({ summary: '스타트업 분기 배당금 즉시 수령 (지갑 입금)' })
@@ -216,14 +199,7 @@ export class VenturesController {
     @Req() req: RequestWithSession,
     @Body() dto: ClaimDividendDto,
   ) {
-    const actorUserId = requireUserId(req);
-    return {
-      success: true,
-      claimedAmountWld: 48500,
-      investmentId: dto.investmentId,
-      transferredToUserId: actorUserId,
-      message: '분기 스타트업 배당금 48,500 WLD가 지갑에 안전하게 입금되었습니다.',
-    };
+    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 
   @ApiOperation({ summary: '창업자 스타트업 펀딩 피치 신규 등록 신청' })
@@ -232,26 +208,6 @@ export class VenturesController {
     @Req() req: RequestWithSession,
     @Body() dto: ApplyVentureFounderDto,
   ) {
-    const actorUserId = requireUserId(req);
-    const newPitch: VenturePitch = {
-      id: `pitch-${dto.idempotencyKey.slice(0, 8)}`,
-      name: dto.startupName,
-      sector: dto.sector,
-      stage: 'SEED',
-      founderName: `Founder_${actorUserId.slice(0, 6)}`,
-      targetFundingWld: dto.targetFundingWld,
-      currentFundingWld: 0,
-      investorCount: 0,
-      equitySharePercent: dto.equitySharePercent,
-      expectedAnnualYieldPercent: 20.0,
-      daysRemaining: 30,
-      description: dto.description,
-    };
-
-    return {
-      success: true,
-      pitch: newPitch,
-      message: `${dto.startupName} 크라우드펀딩 피치가 성공적으로 등록되어 심사 중입니다.`,
-    };
+    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 }

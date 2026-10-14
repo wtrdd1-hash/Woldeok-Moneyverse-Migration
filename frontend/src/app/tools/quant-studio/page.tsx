@@ -66,26 +66,12 @@ export default function QuantStudioPage() {
 
   // 신규 봇 활성화 등록
   const handleDeployBot = () => {
-    const newBot: QuantBotConfig = {
-      id: `bot-${Date.now()}`,
-      name: `${symbol} ${strategyType} 자동화 봇`,
-      symbol,
-      strategyType,
-      initialCapitalWld: capital,
-      intervalMinutes: 60,
-      takeProfitPct: takeProfit,
-      stopLossPct: stopLoss,
-      isActive: true,
-    };
-    setBots((prev) => [newBot, ...prev]);
-    setCreatedBotMsg(`'${newBot.name}'이(가) 활성화되어 백그라운드 자동 매매 풀에 등록되었습니다!`);
-    setTimeout(() => {
-      setCreatedBotMsg(null);
-    }, 4000);
+    setCreatedBotMsg('시뮬레이션 전용: 퀀트 봇은 실제 자동매매 시스템에 등록되거나 주문을 실행하지 않습니다.');
   };
 
   return (
     <div className="container max-w-6xl py-8 space-y-8">
+      <p role="status" className="mb-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">시뮬레이션 · 미리보기: 전략, 백테스팅 수익률, 봇 목록은 가상 예시이며 실제 WLD 자동매매는 지원하지 않습니다.</p>
       {/* Alert Notification */}
       {createdBotMsg && (
         <div className="p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 flex items-center gap-3 text-sm font-semibold">
@@ -232,7 +218,7 @@ export default function QuantStudioPage() {
                 onClick={handleDeployBot}
               >
                 <Sparkles className="size-4 mr-1.5" />
-                <span>실전 자동매매 투입</span>
+                <span>자동매매 미리보기</span>
               </Button>
             </div>
           </CardContent>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { render, fireEvent, cleanup } from '@testing-library/react';
 import AuctionMarketplacePage from './page';
 
@@ -28,7 +28,7 @@ describe('AuctionMarketplacePage Component', () => {
     expect(container.textContent).not.toContain('황금 호가창 네온 테마 (1기 한정)');
   });
 
-  it('opens bid modal, places a bid, updates highest bidder and fee burn', () => {
+  it('opens bid modal but confirms preview without changing real account', () => {
     const { container, getAllByRole, getByRole } = render(<AuctionMarketplacePage />);
 
     // Click first item bid button
@@ -45,6 +45,7 @@ describe('AuctionMarketplacePage Component', () => {
     fireEvent.click(confirmBidBtn);
 
     // Notification appears
-    expect(container.textContent).toContain('입찰 성공!');
+    expect(container.textContent).toContain('경매 미리보기 화면입니다.');
+    expect(container.textContent).not.toContain('입찰 성공!');
   });
 });

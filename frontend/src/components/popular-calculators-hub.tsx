@@ -85,6 +85,12 @@ const POPULAR_REAL_ESTATE_CALCULATORS: readonly HubLinkItem[] = [
 
 const POPULAR_KIMCHI_CALCULATORS: readonly HubLinkItem[] = [
   {
+    title: '김치프리미엄 계산기 전체 도구',
+    desc: 'BTC·ETH·XRP·SOL별 환율과 수수료를 비교하는 기본 계산기',
+    href: '/tools/kimchi-premium-calculator',
+    tag: '계산기 허브',
+  },
+  {
     title: '비트코인 (BTC) 실시간 김치프리미엄 계산기',
     desc: '업비트 vs 바이낸스 실시간 시세 격차 및 재정거래 마진',
     href: '/tools/kimchi-premium-calculator/btc',

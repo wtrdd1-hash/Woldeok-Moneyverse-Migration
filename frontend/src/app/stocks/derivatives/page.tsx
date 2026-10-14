@@ -54,7 +54,7 @@ export default function DerivativesPage() {
   const [slPriceInput, setSlPriceInput] = useState<string>('');
   
   // 유저 자산 및 포지션 상태
-  const [userWldBalance, setUserWldBalance] = useState<number>(50000000); // 5천만 WLD 가상 시드
+  const [userWldBalance] = useState<number>(50000000); // 5천만 WLD 가상 시드
   const [positions, setPositions] = useState<DerivativesPosition[]>([
     {
       id: 'pos-1',
@@ -150,64 +150,12 @@ export default function DerivativesPage() {
 
   // 롱/숏 포지션 오픈 핸들러
   const handleOpenPosition = () => {
-    if (marginNumber <= 0) {
-      setActionMessage('증거금(Margin)을 1 WLD 이상 입력해주세요.');
-      setTimeout(() => setActionMessage(null), 3000);
-      return;
-    }
-    if (marginNumber > userWldBalance) {
-      setActionMessage('지갑의 WLD 잔고가 부족합니다.');
-      setTimeout(() => setActionMessage(null), 3000);
-      return;
-    }
-
-    const positionValue = marginNumber * leverage;
-    const quantity = Number((positionValue / selectedSymbol.currentPrice).toFixed(2));
-    const liqPrice = estimatedLiquidationPrice;
-    const tp = enableTpSl && tpPriceInput ? parseInt(tpPriceInput.replace(/,/g, ''), 10) : undefined;
-    const sl = enableTpSl && slPriceInput ? parseInt(slPriceInput.replace(/,/g, ''), 10) : undefined;
-
-    const newPosition: DerivativesPosition = {
-      id: `pos-${Date.now()}`,
-      symbol: selectedSymbol.symbol,
-      name: selectedSymbol.name,
-      side,
-      marginMode: 'ISOLATED',
-      leverage,
-      entryPrice: selectedSymbol.currentPrice,
-      currentPrice: selectedSymbol.currentPrice,
-      margin: marginNumber,
-      positionValue,
-      quantity,
-      liquidationPrice: liqPrice,
-      takeProfitPrice: tp,
-      stopLossPrice: sl,
-      pnl: 0,
-      roi: 0,
-      createdAt: new Date().toLocaleTimeString('ko-KR', { hour12: false }),
-    };
-
-    setUserWldBalance((prev) => prev - marginNumber);
-    setPositions((prev) => [newPosition, ...prev]);
-    setActionMessage(`${selectedSymbol.name} ${leverage}x ${side === 'LONG' ? '롱' : '숏'} 격리 포지션이 체결되었습니다!`);
-    setTimeout(() => setActionMessage(null), 4000);
+    setActionMessage('시뮬레이션 · 미리보기: 실제 포지션이나 증거금 거래는 실행하지 않았습니다.');
   };
 
   // 포지션 시장가 종료(정산) 핸들러
-  const handleClosePosition = (pos: DerivativesPosition) => {
-    const returnAmount = pos.margin + pos.pnl;
-    const isLiquidated = pos.pnl <= -pos.margin;
-
-    if (isLiquidated) {
-      const settlement = calculateLiquidationSettlement(pos.margin);
-      setActionMessage(`[청산 집행] 증거금 ${groupDigits(pos.margin)} WLD 중 50%(${groupDigits(settlement.insuranceFundDeposit)} WLD)는 보험펀드에 적립되고 50%(${groupDigits(settlement.hardBurnWld)} WLD)는 영구 소각(Hard Sink)되었습니다.`);
-    } else {
-      setUserWldBalance((prev) => Math.max(0, prev + returnAmount));
-      setActionMessage(`${pos.name} ${pos.leverage}x 포지션이 정산 종료되었습니다. (손익: ${pos.pnl >= 0 ? '+' : ''}${groupDigits(pos.pnl)} WLD, 원리금 반환: ${groupDigits(Math.max(0, returnAmount))} WLD)`);
-    }
-
-    setPositions((prev) => prev.filter((p) => p.id !== pos.id));
-    setTimeout(() => setActionMessage(null), 5000);
+  const handleClosePosition = (_pos: DerivativesPosition) => {
+    setActionMessage('시뮬레이션 · 미리보기: 실제 청산·원리금 반환·소각은 수행되지 않았습니다.');
   };
 
   // PnL 카드 클립보드 복사
@@ -220,6 +168,7 @@ export default function DerivativesPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1440px] space-y-8 px-3 sm:px-6 py-6 sm:py-8 overflow-x-hidden">
+      <p role="status" className="mb-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">시뮬레이션 · 미리보기: 선물 잔액·포지션·손익은 예시이며 실제 WLD 증거금, 체결, 청산은 지원하지 않습니다.</p>
       {/* 1. HERO BENTO GRID HEADER */}
       <section className="rounded-2xl sm:rounded-3xl border border-zinc-800/80 bg-card/95 p-5 sm:p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/60">
@@ -350,7 +299,7 @@ export default function DerivativesPage() {
             </div>
 
             <Button
-              onClick={() => setUserWldBalance((prev) => prev + 10000000)}
+              disabled
               variant="outline"
               size="sm"
               className="w-full text-xs font-bold border-zinc-700 bg-background/80 hover:bg-muted"

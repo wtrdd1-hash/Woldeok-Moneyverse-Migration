@@ -5,6 +5,7 @@ import {
   Inject,
   Param,
   Post,
+  ServiceUnavailableException,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -148,15 +149,7 @@ export class WarfareController {
     @Req() req: RequestWithSession,
     @Body() dto: DeclareWarDto,
   ) {
-    const actorUserId = requireUserId(req);
-    const stronghold = this.mockStrongholds.find((s) => s.id === dto.strongholdId) ?? this.mockStrongholds[0]!;
-
-    return {
-      success: true,
-      strongholdId: dto.strongholdId,
-      clubId: dto.clubId,
-      message: `${stronghold.name}에 대한 선전포고가 선포되었습니다. 2시간 동안 공성전이 활성화됩니다!`,
-    };
+    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 
   @ApiOperation({ summary: '공성전 실시간 타격 및 방어벽 공략 (전투력 투입)' })
@@ -166,15 +159,7 @@ export class WarfareController {
     @Param('id') strongholdId: string,
     @Body() dto: AttackStrongholdDto,
   ) {
-    const actorUserId = requireUserId(req);
-    return {
-      success: true,
-      strongholdId,
-      damageDealt: dto.attackPowerWld * 1.5,
-      remainingDefenseScore: 765000,
-      contributionPointsEarned: Math.round(dto.attackPowerWld / 100),
-      message: `성공적으로 ${strongholdId} 방어벽을 타격하여 길드 공헌도를 획득했습니다.`,
-    };
+    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 
   @ApiOperation({ summary: '점령 요새 누적 통행세/거래세 배당금 수령' })
@@ -183,13 +168,6 @@ export class WarfareController {
     @Req() req: RequestWithSession,
     @Body() dto: ClaimStrongholdTaxDto,
   ) {
-    const actorUserId = requireUserId(req);
-    return {
-      success: true,
-      claimedTaxWld: 1250000,
-      strongholdId: dto.strongholdId,
-      transferredToUserId: actorUserId,
-      message: '점령 요새 일일 거래세 배당금 1,250,000 WLD가 길드 금고/지갑에 입금되었습니다.',
-    };
+    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 }

@@ -5,6 +5,7 @@ import {
   Inject,
   Param,
   Post,
+  ServiceUnavailableException,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -133,26 +134,7 @@ export class QuantController {
     @Req() req: RequestWithSession,
     @Body() dto: SaveQuantStrategyDto,
   ) {
-    const actorUserId = requireUserId(req);
-    const newStrategy: QuantStrategy = {
-      id: `strat-${dto.idempotencyKey.slice(0, 8)}`,
-      userId: actorUserId,
-      name: dto.name,
-      targetTicker: dto.targetTicker,
-      targetTickerName: dto.targetTicker === 'KRX_005930' ? '삼성전자' : '월덕 인덱스 100',
-      isActive: true,
-      orderAmountWld: dto.orderAmountWld,
-      totalPnlWld: 0,
-      winRatePercent: 0,
-      totalTrades: 0,
-      createdAt: new Date().toISOString(),
-    };
-
-    return {
-      success: true,
-      strategy: newStrategy,
-      message: `퀀트 자동매매 전략 '${dto.name}'이(가) 정상 등록되어 실시간 감시가 시작되었습니다.`,
-    };
+    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 
   @ApiOperation({ summary: '과거 시장 틱 데이터 기반 퀀트 백테스팅 실행' })
@@ -187,13 +169,7 @@ export class QuantController {
     @Req() req: RequestWithSession,
     @Param('id') strategyId: string,
   ) {
-    const actorUserId = requireUserId(req);
-    return {
-      success: true,
-      strategyId,
-      isActive: true,
-      message: '퀀트 봇의 실시간 자동 주문 체결 상태가 변경되었습니다.',
-    };
+    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 
   @ApiOperation({ summary: '퀀트 봇 실시간 자동 주문 체결 로그 조회' })
