@@ -541,6 +541,7 @@ function loadPostsFromDisk(): BlogPost[] {
                 excerpt: init.excerpt,
                 content: init.content,
                 tags: init.tags,
+                heroImage: init.heroImage,
                 infographicType: init.infographicType,
                 translations: init.translations,
               };
