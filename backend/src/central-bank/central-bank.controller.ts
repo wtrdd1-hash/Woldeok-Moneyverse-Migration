@@ -25,12 +25,12 @@ import { CentralBankService } from './central-bank.service';
 
 @ApiTags('central-bank')
 @Controller('central-bank')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
 export class CentralBankController {
   constructor(private readonly centralBankService: CentralBankService) {}
 
   @Post('mint-batches/:id/accept')
-  @UseGuards(CsrfGuard)
+  @UseGuards(AdminGuard, CsrfGuard)
   @ApiOperation({ summary: '조폐국 주조 화폐 인수 및 국고/시중 유통 승인 (중앙은행 2단계 견제)' })
   async acceptMintBatch(
     @Param('id') batchId: string,
@@ -54,7 +54,7 @@ export class CentralBankController {
   }
 
   @Put('base-rate')
-  @UseGuards(CsrfGuard)
+  @UseGuards(AdminGuard, CsrfGuard)
   @ApiOperation({ summary: '국가 기준금리(Base Rate) 결정 및 공시 (금융통화위원회)' })
   async updateBaseRate(
     @Body() dto: UpdateBaseRateDto,
@@ -71,7 +71,7 @@ export class CentralBankController {
   }
 
   @Put('reserve-requirement')
-  @UseGuards(CsrfGuard)
+  @UseGuards(AdminGuard, CsrfGuard)
   @ApiOperation({ summary: '시중 상업은행 법정 지급준비율 갱신 및 공시' })
   async updateReserveRequirement(
     @Body() dto: UpdateReserveRequirementDto,

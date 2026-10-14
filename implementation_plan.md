@@ -2166,3 +2166,32 @@
 - `git branch -a`: `* main`, `remotes/origin/HEAD -> origin/main`, `remotes/origin/main` 만 잔존 (총 브랜치 수: 1개)
 - `gh pr list`: 열려 있는 PR 0건
 - Git 워킹 트리: `working tree clean`
+
+
+---
+
+## 🚀 [v229 Specification] 국가중앙은행 기준금리-상업은행 예대금리 동적 연동 고도화, 블로그 인포그래픽 에셋 바인딩 및 프로덕션 무중단 승격 준비
+
+### 1. 현황 및 구현 내역
+1. **[국가중앙은행 기준금리-상업은행 예대금리 동적 연동 알고리즘 고도화]**:
+   - `backend/src/central-bank/central-bank.service.ts`: 기준금리 변경에 따른 만기별 정기적금 수신 금리 곡선(`termStructure`: 수시입출금 0.4x, 3개월 0.85x, 6개월 1.0x, 12개월 1.25x) 및 신용 등급별 차등 여신 대출 금리(`borrowerTiers`: 1등급 Prime base, 2등급 Standard +1.5%p, 3등급 Subprime +4.0%p) 연산 엔진 탑재.
+   - `backend/src/central-bank/central-bank.controller.ts`: 중앙은행 금리 조회 엔드포인트는 공개 인가하되, 기준금리 및 지급준비율 갱신 API는 관리자 전용 Guard(`AdminGuard`, `CsrfGuard`)로 엄격 격리.
+2. **[블로그 72의 법칙 고해상도 인포그래픽 에셋 제작 및 렌더링 파이프라인 연계]**:
+   - `frontend/public/images/blog/compound-interest-72-rule.svg`: 1200x630 규격의 반응형 복리 vs 단리 곡선, 72의 법칙 공식($t \approx 72/R$), 청년도약계좌 5,042만 원 마일스톤 및 DRIP 재투자 스노우볼 효과 벡터 그래픽 에셋 신규 제작.
+   - `frontend/src/app/blog/blog-data.ts`: 복리 칼럼에 `heroImage: '/images/blog/compound-interest-72-rule.svg'` 메타데이터 바인딩.
+   - `frontend/src/app/blog/[slug]/blog-post-client.tsx` & `blog-hub-client.tsx`: 상세 페이지 및 허브 추천 배너에 고해상도 SVG 히어로 이미지 반응형 렌더링 구현.
+3. **[모바일 API 계약 및 스키마 레퍼런스 최신화]**:
+   - `docs/mobile-api-contract.json`, `docs/mobile-api-schema-reference.md`, `docs/mobile-api-schema-reference.ko.md` 동기화 완료 (`api:contract:check` 100% 일치).
+4. **[풀스택 유닛 테스트 및 빌드 무결성 100% 통과]**:
+   - 백엔드 빌드: `nest build` 성공 (0 Errors)
+   - 프론트엔드 정적 타입 검사: `tsc --noEmit` 성공 (0 Errors)
+   - 중앙은행 및 조폐국 단위 테스트: 8/8 통과
+   - 블로그 및 레이아웃 경계 단위 테스트: 11/11 통과
+
+### 2. 검증 증적
+- `pnpm --filter @moneyverse/backend run build`: exit code 0
+- `pnpm --filter @moneyverse/frontend run typecheck`: exit code 0
+- `vitest run "central-bank" "mint"`: 2 files passed, 8 tests passed
+- `vitest run "blog" "shell-boundary" "macro-market-data"`: 3 files passed, 11 tests passed
+- `pnpm run api:contract:check`: API contract artifacts match after internal TypeScript symbol normalization
+- `git branch -a`: `* main` 단일 브랜치 유지

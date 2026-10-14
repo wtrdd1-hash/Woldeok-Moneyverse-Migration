@@ -215,16 +215,32 @@ export class CentralBankService {
       statutoryReserveRatio,
     });
 
+    const baseBorrowRate = kinked.borrowRateBps / 100;
+    const baseSupplyRate = kinked.supplyRateBps / 100;
+
     return {
       centralBankBaseRatePercent: this.currentBaseRate.ratePercent,
       centralBankReserveRatioPercent: this.currentReserveRequirement.ratioPercent,
-      commercialBorrowRatePercent: (kinked.borrowRateBps / 100).toFixed(2),
-      commercialSupplyRatePercent: (kinked.supplyRateBps / 100).toFixed(2),
+      commercialBorrowRatePercent: baseBorrowRate.toFixed(2),
+      commercialSupplyRatePercent: baseSupplyRate.toFixed(2),
       netInterestMarginBps: kinked.borrowRateBps - kinked.supplyRateBps,
       statutoryReserveAmountWld: kinked.statutoryReserveAmount.toString(),
       availableBorrowCapacityWld: kinked.availableBorrowCapacity.toString(),
       utilizationRatePercent: (kinked.utilizationRate * 100).toFixed(2),
       isKinkExceeded: kinked.isKinkExceeded,
+      // 기준금리 연동 만기별 정기 적금 수신 금리 곡선 (Term Structure of Savings)
+      termStructure: {
+        demandDepositRatePercent: (baseSupplyRate * 0.4).toFixed(2), // 수시입출금 (0.4배)
+        fixedSavings3MonthPercent: (baseSupplyRate * 0.85).toFixed(2), // 3개월 정기적금
+        fixedSavings6MonthPercent: (baseSupplyRate * 1.0).toFixed(2), // 6개월 정기적금 (기준)
+        fixedSavings12MonthPercent: (baseSupplyRate * 1.25).toFixed(2), // 12개월 우대적금 (1.25배)
+      },
+      // 기준금리 + 신용 스프레드 연동 차등 여신 대출 금리 (Credit Tier Spreads)
+      borrowerTiers: {
+        tier1PrimeBorrowRatePercent: baseBorrowRate.toFixed(2), // 1등급 우량 담보대출 (스프레드 0%)
+        tier2StandardBorrowRatePercent: (baseBorrowRate + 1.5).toFixed(2), // 2등급 일반 신용대출 (+1.50%p)
+        tier3SubprimeBorrowRatePercent: (baseBorrowRate + 4.0).toFixed(2), // 3등급 중저신용 대출 (+4.00%p)
+      },
     };
   }
 }

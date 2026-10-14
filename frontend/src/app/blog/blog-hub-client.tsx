@@ -115,6 +115,19 @@ export function BlogHubClient({ initialPosts }: Props) {
               {featuredPost.excerpt}
             </CardDescription>
           </CardHeader>
+          {featuredPost.heroImage && (
+            <div className="px-6 pb-4 relative z-10">
+              <Link href={`/blog/${featuredPost.slug}`} className="block overflow-hidden rounded-xl border border-border/60 group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={featuredPost.heroImage}
+                  alt={featuredPost.title}
+                  className="w-full h-auto aspect-[21/9] object-cover group-hover:scale-[1.01] transition-transform duration-200"
+                  loading="lazy"
+                />
+              </Link>
+            </div>
+          )}
           <CardContent className="pt-0 relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="font-semibold text-foreground">{featuredPost.author.name}</span>

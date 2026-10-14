@@ -192,6 +192,23 @@ export function BlogPostClient({ post }: Props) {
         </div>
       </div>
 
+      {/* 🖼️ 대표 고해상도 인포그래픽 히어로 이미지 (Hero Graphic Asset) */}
+      {post.heroImage && (
+        <div className="rounded-2xl overflow-hidden border border-border/70 shadow-lg bg-card/60 backdrop-blur-xs">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={post.heroImage}
+            alt={activeTitle}
+            className="w-full h-auto aspect-[1200/630] object-cover"
+            loading="eager"
+          />
+          <div className="px-4 py-2 bg-muted/40 border-t border-border/40 text-[11px] text-muted-foreground font-mono flex items-center justify-between">
+            <span>📊 {activeTitle} — 공인 금융공학 텔레메트리 다이어그램</span>
+            <span className="text-emerald-400 font-bold">100% Verified Telemetry</span>
+          </div>
+        </div>
+      )}
+
       {/* 📊 수학적 금융 인포그래픽 시각화 배너 (선형 원금 대비 복리 기하급수 성장 곡선) */}
       <BlogInfographicCard type={post.infographicType ?? 'COMPOUND_CURVE'} currentLocale={locale} />
 
