@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { SiteShell } from '@/components/site-shell';
 import { BlogPostClient } from './blog-post-client';
-import { getBlogPostBySlug, getAllBlogPosts } from '../blog-data';
+import { getBlogPostBySlug } from '../blog-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,7 +83,7 @@ export default async function BlogPostPage({ params }: Props) {
   };
 
   return (
-    <SiteShell>
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -92,6 +91,6 @@ export default async function BlogPostPage({ params }: Props) {
       <div className="container max-w-5xl mx-auto px-4 py-8">
         <BlogPostClient post={post} />
       </div>
-    </SiteShell>
+    </>
   );
 }

@@ -19,6 +19,11 @@ describe('Blog layout boundaries', () => {
     }
   });
 
+  it('requires admin authorization before exposing blog operations', () => {
+    expect(source('app/admin/blog/page.tsx')).toContain("await requireAdminConsole('/admin/blog')");
+    expect(source('app/admin/blog/page.tsx')).toContain('robots: { index: false, follow: false }');
+  });
+
   it('makes the blog operations page accessible from the administrator navigation', () => {
     expect(source('components/admin-sub-nav.tsx')).toMatch(/href:\s*'\/admin\/blog',\s*label:\s*'[^']+'/);
   });
