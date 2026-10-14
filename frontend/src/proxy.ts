@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { DETECTED_LOCALE_COOKIE, LOCALE_COOKIE, detectLocale, isLocale, type Locale } from '@/lib/locale';
+import { DEFAULT_LOCALE, DETECTED_LOCALE_COOKIE, LOCALE_COOKIE, detectLocale, isLocale, type Locale } from '@/lib/locale';
 import { detectCrawlerBot } from '@/lib/bot-detector';
 
 const API_ORIGIN = process.env.API_ORIGIN ?? (process.env.NODE_ENV === 'production' ? 'http://127.0.0.1:3000' : 'http://127.0.0.1:3020');
@@ -138,16 +138,6 @@ export function proxy(request: NextRequest) {
     if (!targetPath) targetPath = '/';
   }
 
-  // Prepare response: If targetPath was rewritten from a prefix, perform internal rewrite
-  let response: NextResponse;
-  if (explicitPrefixLocale && targetPath !== pathname) {
-    const rewriteUrl = new URL(`${targetPath}${request.nextUrl.search}`, request.url);
-    response = NextResponse.rewrite(rewriteUrl);
-  } else {
-    response = NextResponse.next();
-  }
-
-
   // Determine active locale with 3-tier precedence:
   // Tier 1: Explicit URL prefix or Query param (?lang=ja)
   // Tier 2: User's saved Cookie (wdmv_locale) - preserved 100% if manually chosen
@@ -160,29 +150,36 @@ export function proxy(request: NextRequest) {
     request.headers.get('x-vercel-ip-country') ??
     request.headers.get('x-country-code');
   const acceptLang = request.headers.get('accept-language');
-  const detectedGeoLocale = detectLocale(country, acceptLang);
+  const detectedGeoLocale = botInfo.isBot ? DEFAULT_LOCALE : detectLocale(country, acceptLang);
 
   let finalLocale: Locale;
 
   if (explicitPrefixLocale || validQueryLocale) {
     finalLocale = (explicitPrefixLocale || validQueryLocale)!;
-    response.cookies.set(LOCALE_COOKIE, finalLocale, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 365,
-      sameSite: 'lax',
-      secure: true,
-    });
   } else if (userSavedLocale) {
     finalLocale = userSavedLocale;
   } else {
-    // Brand new visitor: pass detected GeoIP locale via header & detected cookie only,
-    // without polluting LOCALE_COOKIE (which is strictly reserved for explicit user preference)
     finalLocale = detectedGeoLocale;
+  }
+
+  // Request headers, not response headers, are what first-request Server Components read.
+  // Always replace the inbound value: clients must not choose the SSR locale by spoofing this header.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-moneyverse-locale', finalLocale);
+  const response = explicitPrefixLocale && targetPath !== pathname
+    ? NextResponse.rewrite(new URL(`${targetPath}${request.nextUrl.search}`, request.url), {
+        request: { headers: requestHeaders },
+      })
+    : NextResponse.next({ request: { headers: requestHeaders } });
+
+  if (explicitPrefixLocale || validQueryLocale) {
+    response.cookies.set(LOCALE_COOKIE, finalLocale, {
+      path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: 'lax', secure: true,
+    });
+  } else if (!userSavedLocale && !botInfo.isBot) {
+    // GeoIP must not create a permanent *user preference*. Only explicit choices do.
     response.cookies.set(DETECTED_LOCALE_COOKIE, finalLocale, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 30,
-      sameSite: 'lax',
-      secure: true,
+      path: '/', maxAge: 60 * 60 * 24 * 30, sameSite: 'lax', secure: true,
     });
   }
 

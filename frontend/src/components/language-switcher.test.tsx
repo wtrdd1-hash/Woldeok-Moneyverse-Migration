@@ -51,4 +51,17 @@ describe('LanguageSwitcher', () => {
     expect(trigger).toBeTruthy();
     expect(trigger.textContent).toContain('KO');
   });
+
+  it('resets a legacy saved language to automatic country detection', async () => {
+    document.cookie = 'wdmv_locale=ja; Path=/;';
+    render(
+      <LocaleProvider initialLocale="ko">
+        <CurrencyProvider><LanguageSwitcher /></CurrencyProvider>
+      </LocaleProvider>,
+    );
+    fireEvent.keyDown(screen.getByRole('button', { name: /language|언어/i }), { key: 'ArrowDown' });
+    fireEvent.click(await screen.findByText('자동 감지 (접속 국가·브라우저)'));
+    expect(document.cookie).not.toContain('wdmv_locale=');
+  });
+
 });

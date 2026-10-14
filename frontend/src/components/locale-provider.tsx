@@ -16,11 +16,13 @@ export type { Locale };
 interface LocaleContextValue {
   readonly locale: Locale;
   readonly setLocale: (locale: Locale) => void;
+  readonly resetLocaleToAuto: () => void;
 }
 
 const LocaleContext = createContext<LocaleContextValue>({
   locale: DEFAULT_LOCALE,
   setLocale: () => undefined,
+  resetLocaleToAuto: () => undefined,
 });
 
 function readCookie(name: string): string | null {
@@ -72,6 +74,13 @@ export function LocaleProvider({
 
   const value = useMemo<LocaleContextValue>(() => ({
     locale,
+    resetLocaleToAuto() {
+      // Earlier automatic selections may have persisted as a manual preference.
+      // An explicit user reset removes that ambiguity without overriding real choices.
+      document.cookie = LOCALE_COOKIE + '=; Path=/; Max-Age=0; SameSite=Lax; Secure';
+      document.cookie = DETECTED_LOCALE_COOKIE + '=; Path=/; Max-Age=0; SameSite=Lax; Secure';
+      startTransition(() => { router?.refresh(); });
+    },
     setLocale(nextLocale) {
       document.cookie = LOCALE_COOKIE + '=' + nextLocale + '; Path=/; Max-Age=31536000; SameSite=Lax; Secure';
       document.documentElement.lang = nextLocale;

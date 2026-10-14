@@ -1,6 +1,6 @@
 export type Locale = 'ko' | 'en' | 'ja' | 'zh';
 
-export const DEFAULT_LOCALE: Locale = 'en';
+export const DEFAULT_LOCALE: Locale = 'ko';
 export const SUPPORTED_LOCALES: readonly Locale[] = ['ko', 'en', 'ja', 'zh'] as const;
 export const LOCALE_COOKIE = 'wdmv_locale';
 export const DETECTED_LOCALE_COOKIE = 'wdmv_detected_locale';
@@ -52,21 +52,21 @@ export function parseAcceptLanguage(header: string | null | undefined): Locale |
     if (lang.startsWith('en')) return 'en';
   }
 
-  // If client sends unsupported languages (e.g. fr, de, es, vi, ru, th), fall back to English
-  return 'en';
+  // Unsupported browser languages do not override the Korean product fallback.
+  return null;
 }
 
 /**
  * Precise hybrid locale detection:
  * 1. GeoIP country code (Cloudflare `cf-ipcountry` / Vercel `x-vercel-ip-country` / `x-country-code`)
  * 2. Accept-Language header quality-weighted preferences
- * 3. Default fallback to English ('en') for all unsupported countries & languages.
+ * 3. Korean fallback when country and browser preferences are unavailable.
  */
 export function detectLocale(country: string | null | undefined, acceptLanguage: string | null | undefined): Locale {
   const normalisedCountry = country?.trim().toUpperCase();
 
   // 1. Explicit GeoIP country matching
-  if (normalisedCountry) {
+  if (normalisedCountry && !['XX', 'T1', 'A1', 'A2', 'EU', 'UN'].includes(normalisedCountry)) {
     if (KOREAN_COUNTRIES.has(normalisedCountry)) return 'ko';
     if (JAPANESE_COUNTRIES.has(normalisedCountry)) return 'ja';
     if (CHINESE_COUNTRIES.has(normalisedCountry)) return 'zh';

@@ -1,5 +1,6 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+<<<<<<< HEAD
 ## 2026-10-14 WLD monetary overflow protection (v2026.10.14.625)
 
 - [English primary report](docs/findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md) · [한국어 상세 보고서](docs/findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md)
@@ -33,6 +34,12 @@
 - [영문 정본 — UI·백엔드 시정](docs/findings/MONEYVERSE_UI_BACKEND_REMEDIATION_v2026.10.14.629.md) · [한국어 결과](docs/findings/MONEYVERSE_UI_BACKEND_REMEDIATION_v2026.10.14.629.ko.md)
 - [한글 작업 기록](docs/worklog/2026-10-14-ui-backend-remediation-v629.ko.md) · [내부 업데이트](docs/updates/v2026.10.14.629-internal.ko.md) · [GitHub 공개 업데이트](docs/updates/v2026.10.14.629-github.ko.md)
 - 그랜트·국고·모의 자금 기능의 허위 성공을 차단하고 일부 메뉴 접근 경로를 보완했다. **실제 경제 기능 실구현, 전체 회귀 검사, 분리 Test 수용, 운영 배포는 완료되지 않았다.** 현행 통합기획 권위 v530/AUTHORITY_DRIFT 유지.
+
+## v2026.10.14.631 — GeoIP initial locale repair candidate
+
+- [Worklog (EN)](docs/worklog/2026-10-14-geo-locale-first-render-v631.md) · [작업기록 (KO)](docs/worklog/2026-10-14-geo-locale-first-render-v631.ko.md)
+- [GitHub update (EN)](docs/updates/v2026.10.14.631-github.md) · [GitHub 업데이트 (KO)](docs/updates/v2026.10.14.631-github.ko.md) · [Internal (EN)](docs/updates/v2026.10.14.631-internal.md) · [내부 (KO)](docs/updates/v2026.10.14.631-internal.ko.md)
+- Status: standalone candidate tested; not yet a Production deployment.
 
 ## 2026-10-14 블로그 화면 중복·관리자 메뉴 수정 (v2026.10.14.634, 후보)
 
