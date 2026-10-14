@@ -25,3 +25,7 @@
 1. Commit the API contract artifact regeneration and test reconciliation. Run GitHub CI on the new exact commit, not the old v629 SHA.
 2. Stage a new immutable exact-SHA Test candidate and verify isolated backend, frontend and database state, with permission/CSRF, fail-closed settlement, and responsive E2E coverage including v530 blocker.
 3. Do **not** promote a candidate while v530's independent full-UI acceptance is BLOCKED, or without successful same-SHA Test/CI and a rollback plan; maintain zero-downtime production.
+
+## Contract generator dependency completeness (late finding)
+
+First local regeneration used the shared backend dependency links that were broken in this isolated worktree; this erroneously degraded WLD-branded financial return types to `any`. A repeated comparison against committed HEAD caught the loss. Replaced only the isolated worktree's dependency symlink with a complete read-only backend dependency tree, then regenerated twice with identical SHA-256 outputs. The corrected contract retains branded WLD response structure and must be the committed release artifact. Missing TS dependencies are not an acceptable shortcut for contract generation.
