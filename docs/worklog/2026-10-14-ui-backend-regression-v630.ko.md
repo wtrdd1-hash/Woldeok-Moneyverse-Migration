@@ -17,3 +17,8 @@
 ## S4 CI 백엔드 보안 후속
 - GitHub 백엔드 CI 7건 실패: v629 모의 거래 4건은 503 테스트로 수정·집중 9/9 통과, 3건은 260~269 과도한 권한 마이그레이션으로 추적.
 - 기존 SQL 불변 유지한 신규 270번 전진 마이그레이션 작성. CI 격리 Postgres 및 Test 백엔드 실제 동작 검증 전 수용 불가. 기존 직접 쓰기 API는 안전하게 실패할 수 있다.
+
+## S5 불변 Test 후보·백엔드 기본 기동·DB 게이트
+- exact SHA `8cc33a12fc797833a4f838658d1c3fb1d4d60f63` clean worktree에서 공통 계약→백엔드→standalone 프론트 빌드 후 기존 릴리스를 건드리지 않는 신규 Test 후보 디렉터리 생성. Test/Production symlink 미변경.
+- DB 미연결/임시 내부 토큰/루프백 테스트에서 백엔드 GET `/health`, `/api/version` 모두 HTTP 200. DB·로그인·실제 금융 거래 수용이 아닌 **기본 기동 증거만** 확인. Nginx 프록시 경로인 프론트 /health는 일반 next start 404로, standalone 별도 확인 필요.
+- 270번 CI 1차 후 백엔드 보안 실패 2건을 Repo 대출 직접 쓰기 권한 회수와 비인가 관리자 SQLSTATE 42501 우선 테스트로 추가 개선. 재생성 SHA CI·DB 통합 수용은 미완료.

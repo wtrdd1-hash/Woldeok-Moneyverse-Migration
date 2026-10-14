@@ -45,7 +45,8 @@ REVOKE INSERT, UPDATE, DELETE ON
   public.citizen_lending_contracts,
   public.stock_advanced_orders,
   public.national_treasury_lottery_rounds,
-  public.national_treasury_lottery_tickets
+  public.national_treasury_lottery_tickets,
+  public.treasury_bond_repo_loans
 FROM moneyverse_app;
 
 -- Public treasury donation may be read, but direct INSERT is not a transfer

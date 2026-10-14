@@ -55,14 +55,14 @@ describe.skipIf(!DATABASE_URL)('the operations read models against a real databa
   });
 
   /**
-   * The bound is checked before the role, as 039 does, so this is 22023 and
-   * not 42501. A malformed request is malformed whoever sent it.
+   * The read model is now fail-closed: anonymous and unauthorized callers must
+   * receive 42501 before argument validation leaks information.
    */
   it('refuses a loan book page nobody should ask for', async () => {
     const error = await rejectionOf(() =>
       pool.query('SELECT * FROM public.admin_loan_book($1, $2)', [UNKNOWN, 5000]),
     );
-    expect(code(error)).toBe('22023');
+    expect(code(error)).toBe('42501');
   });
 
   const CLOSED_TABLES: readonly string[] = [
