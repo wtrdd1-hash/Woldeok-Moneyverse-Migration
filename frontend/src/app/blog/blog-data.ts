@@ -1,18 +1,13 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import type { BlogPost, BlogCategory } from './blog.types';
+export { BLOG_CATEGORIES } from './blog.types';
 
 export const BLOG_AUTHOR_DEOKI = {
   name: '덕이 (Deoki)',
   role: '월덕 금융연구소 수석 AI 애널리스트',
   badge: 'AI Analyst',
 } as const;
-
-export const BLOG_CATEGORIES: ReadonlyArray<{ id: BlogCategory; label: string }> = [
-  { id: 'COMPOUND', label: '복리 & 저축' },
-  { id: 'TAX', label: '절세 & 세제혜택' },
-  { id: 'STOCKS', label: '가상 주식 투자' },
-  { id: 'WEALTH', label: '자산 배분 & 포트폴리오' },
-  { id: 'MACRO', label: '거시 경제 & 국고' },
-];
 
 const INITIAL_POSTS: BlogPost[] = [
   {
@@ -170,21 +165,75 @@ const INITIAL_POSTS: BlogPost[] = [
   },
 ];
 
-// 메모리 저장소 (서버 런타임 간 유지)
-let blogPostsStore: BlogPost[] = [...INITIAL_POSTS];
+// 파일 시스템 영속 저장소 경로 결정 (/srv/moneyverse-data/shared/blog-posts.json 우선)
+function getBlogStoreFilePath(): string {
+  const sharedDir = '/srv/moneyverse-data/shared';
+  if (fs.existsSync(sharedDir)) {
+    return path.join(sharedDir, 'blog-posts.json');
+  }
+  const dataDir = path.join(process.cwd(), 'data');
+  if (!fs.existsSync(dataDir)) {
+    try {
+      fs.mkdirSync(dataDir, { recursive: true });
+    } catch {
+      // ignore
+    }
+  }
+  return path.join(dataDir, 'blog-posts.json');
+}
+
+function loadPostsFromDisk(): BlogPost[] {
+  try {
+    const filePath = getBlogStoreFilePath();
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const parsed = JSON.parse(raw) as BlogPost[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const existingSlugs = new Set(parsed.map((p) => p.slug));
+        const combined = [...parsed];
+        for (const init of INITIAL_POSTS) {
+          if (!existingSlugs.has(init.slug)) {
+            combined.push(init);
+          }
+        }
+        return combined;
+      }
+    }
+  } catch (err) {
+    console.error('[BlogStore] Failed to read blog posts from disk:', err);
+  }
+  return [...INITIAL_POSTS];
+}
+
+function savePostsToDisk(posts: BlogPost[]): void {
+  try {
+    const filePath = getBlogStoreFilePath();
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(filePath, JSON.stringify(posts, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[BlogStore] Failed to write blog posts to disk:', err);
+  }
+}
 
 export function getAllBlogPosts(): readonly BlogPost[] {
-  return [...blogPostsStore].sort(
+  const posts = loadPostsFromDisk();
+  return posts.sort(
     (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
 }
 
 export function getBlogPostBySlug(slug: string): BlogPost | undefined {
-  return blogPostsStore.find((p) => p.slug === slug);
+  const posts = loadPostsFromDisk();
+  return posts.find((p) => p.slug === slug);
 }
 
 export function addBlogPost(post: BlogPost): void {
-  blogPostsStore = [post, ...blogPostsStore.filter((p) => p.slug !== post.slug)];
+  const current = loadPostsFromDisk();
+  const updated = [post, ...current.filter((p) => p.slug !== post.slug)];
+  savePostsToDisk(updated);
 }
 
 // 5대 고수익 롱테일 키워드 템플릿 풀

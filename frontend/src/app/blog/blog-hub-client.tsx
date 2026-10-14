@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import type { BlogPost, BlogCategory } from './blog.types';
-import { BLOG_CATEGORIES } from './blog-data';
+import { BLOG_CATEGORIES } from './blog.types';
 
 interface Props {
   readonly initialPosts: readonly BlogPost[];

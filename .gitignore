@@ -35,6 +35,7 @@ test-results/
 
 # Backend runtime data — code/schema stay in Git, real data never does
 backend/data/
+frontend/data/
 backend/storage/
 backend/uploads/
 backend/backups/

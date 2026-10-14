@@ -1,5 +1,13 @@
 export type BlogCategory = 'WEALTH' | 'COMPOUND' | 'STOCKS' | 'TAX' | 'MACRO';
 
+export const BLOG_CATEGORIES: ReadonlyArray<{ id: BlogCategory; label: string }> = [
+  { id: 'COMPOUND', label: '복리 & 저축' },
+  { id: 'TAX', label: '절세 & 세제혜택' },
+  { id: 'STOCKS', label: '가상 주식 투자' },
+  { id: 'WEALTH', label: '자산 배분 & 포트폴리오' },
+  { id: 'MACRO', label: '거시 경제 & 국고' },
+];
+
 export interface BlogAuthor {
   readonly name: string;
   readonly role: string;
