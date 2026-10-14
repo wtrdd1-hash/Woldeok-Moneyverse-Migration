@@ -15,3 +15,9 @@
 ## S3 documentation and release hold
 - Paired English/Korean findings, worklogs, internal and public GitHub updates. New functionality is deliberately suspended until transactional backend and reproducible Test evidence.
 - CI, complete E2E, DB invariants, v530 mobile/account gates remain BLOCKED. No Test or Production staging/promotion.
+
+## S4 Final publication and release hold
+- Last main refresh: d4f9cc1978bea6ee1a0e904005fa418cd159b4cd.
+- Isolated implementation commit: 8c08be0e1408df79541e6611e9e7f16a1cd82f41.
+- Draft review PR #833: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/833 .
+- Focused 10+7+4 tests and both TypeScript checks passed; overall frontend suite still not green; no exact-SHA Test or Production release.

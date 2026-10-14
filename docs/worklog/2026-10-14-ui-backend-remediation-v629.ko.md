@@ -15,3 +15,8 @@
 ## S3 문서·승격 보류
 - 영문 기준+한국어 2차 언어 보고서, 내부/GitHub 기록 갱신. 실제 경제 기능 재개와 운영 성공 선언은 보류.
 - 정식 CI, 전체 E2E, 원장·DB 수용, v530 모바일·계정 API 결함 미완료. Test/Production 배포하지 않음.
+
+## S4 GitHub 게시 및 릴리스 보류
+- 마지막 main SHA: d4f9cc1978bea6ee1a0e904005fa418cd159b4cd.
+- 격리 구현 커밋 8c08be0e1408df79541e6611e9e7f16a1cd82f41, GitHub 검토용 초안 PR #833: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/833 .
+- 집중 검사 10+7+4 및 프론트/백엔드 타입 검사 통과, 전체 프론트 회귀 미통과. 같은 SHA 테스트 서버·운영승격 증거 없음. 운영 DB/잔고/기능 스위치 미변경.
