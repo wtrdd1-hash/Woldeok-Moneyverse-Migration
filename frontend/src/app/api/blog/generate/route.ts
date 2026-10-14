@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { generateDailyAiBlogPost } from '@/app/blog/blog-data';
+import { getLiveMacroMarketSnapshot } from '@/app/blog/macro-market-data';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
 
 export const dynamic = 'force-dynamic';
@@ -35,7 +36,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const post = generateDailyAiBlogPost();
+    const macroSnapshot = await getLiveMacroMarketSnapshot();
+    const post = generateDailyAiBlogPost(macroSnapshot);
     const postUrl = `https://${SITE_HOST}/blog/${post.slug}`;
 
     // 1. IndexNow 검색엔진 실시간 크롤링 핑 전송

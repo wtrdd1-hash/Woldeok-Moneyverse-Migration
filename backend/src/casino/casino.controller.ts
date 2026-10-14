@@ -12,6 +12,7 @@ import {
   Req,
   ServiceUnavailableException,
   UseGuards,
+  Optional,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
@@ -28,6 +29,7 @@ import {
   CasinoThemePlayDto,
 } from './casino.dto';
 import { CASINO_OPEN, CasinoInputError, CasinoRepository } from './casino.repository';
+import { DiscordAlertService } from '../discord/discord-alert.service';
 
 /**
  * What a member is told when the casino's switch is not 'enabled'.
@@ -92,7 +94,10 @@ interface Refusal {
 @Controller('casino')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class CasinoController {
-  constructor(@Inject(CasinoRepository) private readonly casino: CasinoRepository | null) {}
+  constructor(
+    @Inject(CasinoRepository) private readonly casino: CasinoRepository | null,
+    @Optional() private readonly discordAlert?: DiscordAlertService,
+  ) {}
 
   private repository(): CasinoRepository {
     if (!this.casino) throw new ServiceUnavailableException('casino is unavailable');
@@ -204,12 +209,26 @@ export class CasinoController {
   async play(@Req() request: RequestWithSession, @Body() body: CasinoPlayDto) {
     const repository = this.repository();
     try {
-      return await repository.play(
+      const res = await repository.play(
         body.idempotencyKey,
         requireUserId(request),
         body.choice,
         body.stake,
       );
+
+      if (this.discordAlert && Number(res.net_amount) >= 1_000_000) {
+        const uId = request.session?.user_id;
+        const displayName = uId ? `유저(${uId.slice(0, 8)})` : '익명의 승부사';
+        this.discordAlert.broadcastCasinoJackpot({
+          game: '동전 던지기 (Coin Flip)',
+          userName: displayName,
+          betAmount: body.stake,
+          winAmount: res.net_amount,
+          multiplier: 2,
+        }).catch(() => {});
+      }
+
+      return res;
     } catch (error: unknown) {
       if (isExpectedCommandFailure(error)) {
         const state = await repository.switchState();
@@ -261,13 +280,28 @@ export class CasinoController {
   async playDice(@Req() request: RequestWithSession, @Body() body: CasinoDicePlayDto) {
     const repository = this.repository();
     try {
-      return await repository.playDice(
+      const res = await repository.playDice(
         body.idempotencyKey,
         requireUserId(request),
         body.game,
         body.choice,
         body.stake,
       );
+
+      if (this.discordAlert && Number(res.net_amount) >= 1_000_000) {
+        const mult = Number(res.payout_multiplier_ppm) / 1_000_000;
+        const uId = request.session?.user_id;
+        const displayName = uId ? `유저(${uId.slice(0, 8)})` : '익명의 주사위 마스터';
+        this.discordAlert.broadcastCasinoJackpot({
+          game: `주사위 (${body.game})`,
+          userName: displayName,
+          betAmount: body.stake,
+          winAmount: res.net_amount,
+          multiplier: mult,
+        }).catch(() => {});
+      }
+
+      return res;
     } catch (error: unknown) {
       if (isExpectedCommandFailure(error)) {
         const state = await repository.switchState();
@@ -290,13 +324,28 @@ export class CasinoController {
   async playTheme(@Req() request: RequestWithSession, @Body() body: CasinoThemePlayDto) {
     const repository = this.repository();
     try {
-      return await repository.playTheme(
+      const res = await repository.playTheme(
         body.idempotencyKey,
         requireUserId(request),
         body.game,
         body.choice,
         body.stake,
       );
+
+      if (this.discordAlert && Number(res.net_amount) >= 1_000_000) {
+        const mult = Number(res.payout_multiplier_ppm) / 1_000_000;
+        const uId = request.session?.user_id;
+        const displayName = uId ? `유저(${uId.slice(0, 8)})` : '익명의 럭키 플레이어';
+        this.discordAlert.broadcastCasinoJackpot({
+          game: `테마 카지노 (${body.game})`,
+          userName: displayName,
+          betAmount: body.stake,
+          winAmount: res.net_amount,
+          multiplier: mult,
+        }).catch(() => {});
+      }
+
+      return res;
     } catch (error: unknown) {
       if (isExpectedCommandFailure(error)) {
         const state = await repository.switchState();

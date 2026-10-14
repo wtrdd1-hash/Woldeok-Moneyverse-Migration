@@ -1847,3 +1847,44 @@
 4. Git 커밋 및 origin main 푸시 (`prod-v600`)
 5. Debian 13 VM 100 프로덕션 무중단 승격 배포
 6. 라이브 실측 검증: 보안 가드 거절(401/403) 및 정상 인가 요청(200), 저장소 보존 확인
+
+
+---
+
+## 🚀 [v219 Specification] 실시간 금융 API 연동 AI 블로그 고도화, 디스코드 봇 잭팟/시황 실시간 웹훅 연동, 토스형 모의투자 소셜 피드 신설
+
+### 1. 현황 및 목표 분석
+- 사용자 승인 및 요구사항:
+  1. **실시간 금융 API 연동 AI 블로그 고도화**:
+     - Alpha Vantage, Yahoo Finance, FRED 실시간 거시경제 지표(환율, 금리, 코스피/나스닥, S&P500 등)를 결합하여 매일 발행되는 SEO 블로그를 최상위권 전문 리포트 수준으로 격상.
+     - `frontend/src/app/blog/macro-market-data.ts` 신설 및 `generateDailyAiBlogPost` 연동.
+  2. **디스코드 봇 잭팟/시황 실시간 웹훅 연동**:
+     - 카지노 대형 잭팟 발생 시(100배 이상 고배당 또는 메가 잭팟) 및 주식 시장 급변동(상한가/하한가/VI 발동 등) 시 디스코드 채널로 실시간 리치 임베드를 쏴서 유저 유입 유도.
+     - `backend/src/discord/discord-alert.service.ts`에 `broadcastCasinoJackpot`, `broadcastStockMarketMover` 신설 및 카지노/주식 엔진 연동.
+  3. **토스형 모의투자 소셜 피드 기능 구현**:
+     - 유저들이 본인의 모의투자 수익률 뱃지(+38.5% 익절, -14.2% 존버 등)와 매매 전략, 보유 현황을 자랑하고 댓글/좋아요를 남길 수 있는 커뮤니티 기능 신설.
+     - `frontend/src/app/stocks/community` 또는 `frontend/src/app/board` 확장 컴포넌트(`toss-style-social-feed.tsx`, 수익률 인증 뱃지, 필터).
+
+### 2. 세부 개발 파일 및 구현 명세
+1. **[AI 블로그 실시간 거시경제 API 연동]**:
+   - `frontend/src/app/blog/macro-market-data.ts`:
+     - FRED 기준금리/국채수익률/CPI, Yahoo Finance 환율 USD/KRW, S&P500, KOSPI/나스닥, Alpha Vantage 주가 API 연동 인터페이스 구현.
+     - SSRF 방어 및 외부 장애 시 안전한 최신 공인 실측치 Fallback 보장.
+   - `frontend/src/app/blog/blog-data.ts`:
+     - `generateDailyAiBlogPost`가 실시간 거시경제 지표 및 시장 요약을 동적으로 주입하여 최신 날짜 기준 최상위 전문 리포트 생성.
+2. **[디스코드 봇 잭팟 및 주식 급변동 웹훅 연동]**:
+   - `backend/src/discord/discord-alert.service.ts`:
+     - `broadcastCasinoJackpot`: 대형 잭팟(100배 이상 고배당 또는 1,000만 WLD 이상) 발생 시 공개 채널로 리치 임베드 발송 및 카지노 링크 삽입.
+     - `broadcastStockMarketMover`: 주식 상한가(+30%) 또는 급변동 시 시황 경보 발송 및 호가창 링크 삽입.
+   - `backend/src/casino/casino.controller.ts` & `backend/src/stock/stock-price-formation.engine.ts`:
+     - 잭팟 및 급변동 발생 지점에 브로드캐스트 트리거 연동.
+3. **[토스형 모의투자 소셜 피드]**:
+   - `frontend/src/app/stocks/community/page.tsx` & `toss-style-social-feed.tsx`:
+     - 토스증권 스타일의 유저 수익률 인증 뱃지(`+38.5% 익절`, `-12.4% 존버` 등), 보유 평단가 인증 뱃지, 포지션(롱/숏), 매매 전략 코멘트, 소셜 반응(🔥/🚀/💧) 지원.
+   - `frontend/src/app/stocks/[symbol]/page.tsx`에 '주주 커뮤니티 & 소셜 피드' 탭 연결.
+
+### 3. 검증 계획
+1. TypeScript 정적 타입 검증 (`pnpm run typecheck` 백엔드 & 프론트엔드)
+2. 단위 테스트 검증
+3. Git 브랜치 통합 및 브랜치 삭제 규칙 영구 준수
+4. 봇 무중단 상주 상태 확인

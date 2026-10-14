@@ -599,4 +599,77 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       ],
     });
   }
+
+  /**
+   * 10. [커뮤니티 브로드캐스트] 카지노 대형 잭팟 터짐 실시간 축하 임베드
+   */
+  async broadcastCasinoJackpot(input: {
+    game: string;
+    userName: string;
+    betAmount: number | string;
+    winAmount: number | string;
+    multiplier?: number;
+  }): Promise<boolean> {
+    const formattedWin = Number(input.winAmount).toLocaleString('ko-KR');
+    const formattedBet = Number(input.betAmount).toLocaleString('ko-KR');
+    return this.sendDiscordEmbed({
+      title: '🎰 [대형 잭팟 폭발] 카지노 잭팟 당첨을 축하합니다! 🎉',
+      description: `**${input.userName}** 님이 카지노 **${input.game}**에서 무려 **${formattedWin} WLD** 당첨의 주인공이 되셨습니다!`,
+      color: 0xf59e0b, // Gold
+      fields: [
+        { name: '게임 종목', value: input.game, inline: true },
+        { name: '행운의 주인공', value: `\`${input.userName}\``, inline: true },
+        { name: '배팅 금액', value: `${formattedBet} WLD`, inline: true },
+        { name: '총 당첨금', value: `🏆 **${formattedWin} WLD**`, inline: true },
+        ...(input.multiplier ? [{ name: '당첨 배율', value: `⚡ **x${input.multiplier}배**`, inline: true }] : []),
+        { name: '국고 환수 기여', value: '배당소득세(10%)가 복지 국고로 기여되었습니다.', inline: true },
+        {
+          name: '👉 나도 잭팟 도전하기',
+          value: '[월덕 머니버스 카지노 바로가기](https://easy-scraping.com/casino)',
+          inline: false,
+        },
+      ],
+      footer: { text: 'Woldeok Moneyverse Casino Jackpots' },
+    });
+  }
+
+  /**
+   * 11. [커뮤니티 브로드캐스트] 주식 상한가 / 급변동 경보 임베드
+   */
+  async broadcastStockMarketMover(input: {
+    symbol: string;
+    name: string;
+    currentPrice: number | string;
+    changeRatePercent: number;
+    volume?: number | string;
+    reason?: string;
+  }): Promise<boolean> {
+    const isSurge = input.changeRatePercent > 0;
+    const sign = isSurge ? '+' : '';
+    const formattedPrice = Number(input.currentPrice).toLocaleString('ko-KR');
+    const alertKey = `stock_mover:${input.symbol}:${Math.floor(Date.now() / (30 * 60_000))}`; // 30분 디바운싱
+    if (!this.shouldSend(alertKey)) return false;
+
+    return this.sendDiscordEmbed({
+      title: isSurge
+        ? `📈 [주식 급등 경보] ${input.name} (${input.symbol}) ${sign}${input.changeRatePercent.toFixed(1)}% 급등! 🚀`
+        : `📉 [주식 급락 경보] ${input.name} (${input.symbol}) ${input.changeRatePercent.toFixed(1)}% 급락 변동성 주의! ⚠️`,
+      description: `가상 주식 거래소의 **${input.name}** 종목이 강한 매매 유입으로 전일 대비 **${sign}${input.changeRatePercent.toFixed(1)}%** 급변동하고 있습니다.`,
+      color: isSurge ? 0xef4444 : 0x3b82f6, // 한국 주식: 빨강 상승, 파랑 하락
+      fields: [
+        { name: '종목명', value: `${input.name} (\`${input.symbol}\`)`, inline: true },
+        { name: '현재가', value: `**${formattedPrice} WLD**`, inline: true },
+        { name: '등락률', value: `**${sign}${input.changeRatePercent.toFixed(1)}%**`, inline: true },
+        ...(input.volume ? [{ name: '거래량', value: `${Number(input.volume).toLocaleString('ko-KR')}주`, inline: true }] : []),
+        { name: '변동 사유', value: input.reason || '호가창 매수/매도 수급 쏠림 현상', inline: false },
+        {
+          name: '👉 실시간 호가창 확인하기',
+          value: `[${input.name} 실시간 차트 및 호가 확인](https://easy-scraping.com/stocks/${input.symbol})`,
+          inline: false,
+        },
+      ],
+      footer: { text: 'Woldeok Moneyverse Stock Market Telemetry' },
+    });
+  }
 }
+

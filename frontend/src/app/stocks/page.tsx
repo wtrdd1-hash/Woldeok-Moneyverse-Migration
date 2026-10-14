@@ -232,6 +232,32 @@ export default async function StocksPage({
       {/* 가상 주식 실전 챔피언십 리그 & 상위 1% 고래 카피 트레이딩 배너 */}
       <StockLeagueLaunchCard />
 
+      {/* 토스형 주주 라운지 & 실시간 모의투자 소셜 피드 배너 */}
+      <div className="bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-900 border border-indigo-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 text-lg">
+            💬
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                NEW 토스형 주주 인증 피드
+              </span>
+              <span className="text-xs text-slate-400">실시간 수익률 뱃지 & 매매 일지</span>
+            </div>
+            <h3 className="text-sm font-semibold text-white mt-0.5">
+              주주 라운지에서 실전 투자자들의 수익률과 매매 전략을 확인하세요
+            </h3>
+          </div>
+        </div>
+        <Link
+          href="/stocks/community"
+          className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-medium text-xs transition shadow-md shrink-0 min-h-[40px]"
+        >
+          주주 피드 바로가기 →
+        </Link>
+      </div>
+
       {/* 시장 소식 & 월드 펄스 뉴스 목록 */}
       <MarketNews events={events} />
 

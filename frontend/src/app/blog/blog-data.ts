@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { BlogPost, BlogCategory } from './blog.types';
+import { type MacroMarketSnapshot, DEFAULT_MACRO_SNAPSHOT } from './macro-market-data';
 export { BLOG_CATEGORIES } from './blog.types';
 
 export const BLOG_AUTHOR_DEOKI = {
@@ -378,12 +379,13 @@ const TOPIC_TEMPLATES: TopicTemplateDef[] = [
 ];
 
 /**
- * 일일 AI 자동 블로그 포스트 생성 엔진 (학술 레퍼런스 및 공인 출처 포함 고품질 칼럼)
+ * 일일 AI 자동 블로그 포스트 생성 엔진 (학술 레퍼런스 및 Alpha Vantage/Yahoo/FRED 실시간 공인 출처 포함 고품질 칼럼)
  */
-export function generateDailyAiBlogPost(): BlogPost {
+export function generateDailyAiBlogPost(macroSnapshot?: MacroMarketSnapshot): BlogPost {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10);
   const timeStr = now.getTime().toString(36);
+  const macro = macroSnapshot || DEFAULT_MACRO_SNAPSHOT;
 
   // 날짜 기반 순환 템플릿 선택
   const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
@@ -392,10 +394,22 @@ export function generateDailyAiBlogPost(): BlogPost {
   const slug = `${dateStr}-${template.category.toLowerCase()}-${timeStr}`;
   const title = `[AI 금융칼럼] ${template.titleSuffix}`;
 
-  const generatedContent = `## 1. 2026년 변화하는 글로벌 금융 환경과 자산 증식 패러다임
+  const liveMacroTable = `| 실시간 시장 지표 | 최신 실측 수치 | 벤치마크 및 통화정책 기준 | 데이터 출처 |
+| :--- | :---: | :---: | :--- |
+| **원/달러 환율 (USD/KRW)** | **${macro.usdKrwRate.toLocaleString()}원** | 1,350원 기준선 대비 변동성 | Yahoo Finance / Alpha Vantage |
+| **코스피 (KOSPI) 지수** | **${macro.kospiIndex.toLocaleString()} pt** | 2,650 pt 지지선 테스트 | KRX / Yahoo Finance |
+| **미국 S&P 500 지수** | **${macro.sp500Index.toLocaleString()} pt** | 사상 최고치권 밸류에이션 | S&P Dow Jones / Yahoo |
+| **미국 기준금리 (Fed Funds)** | **${macro.fedFundsRate.toFixed(2)}%** | 연준 중립금리 목표치 (3.00%) | FRED (Federal Reserve Bank) |
+| **한국은행 기준금리** | **${macro.bokBaseRate.toFixed(2)}%** | 한미 금리 역전차 (${(macro.fedFundsRate - macro.bokBaseRate).toFixed(2)}%p) | 한국은행 (ECOS) |
+| **미국 10년물 국채 수익률** | **${macro.us10yYield.toFixed(2)}%** | 장기 경기 펀더멘털 반영 | U.S. Treasury / FRED |`;
+
+  const generatedContent = `## 1. 2026년 변화하는 글로벌 금융 환경과 실시간 시장 펄스
 
 최근 전 세계적인 고금리 장기화와 유동성 재편, 그리고 인공지능 기반 금융 자동화 시대가 도래하면서 단순한 근로소득의 저축만으로는 가파른 실질 인플레이션을 방어하기 불가능해졌습니다.
 오늘 **월덕 금융연구소 수석 AI 애널리스트 덕이(Deoki)**가 정밀 데이터와 학술적 근거로 분석할 주제는 바로 **"${template.titleSuffix}"**입니다.
+
+### 🌐 실시간 거시경제 펄스 스냅샷 (기준: ${new Date(macro.updatedAt).toLocaleDateString('ko-KR')} ${macro.dataSource === 'LIVE_API' ? '실시간 라이브 API' : '공인 최신 실측치'})
+${liveMacroTable}
 
 성공적인 재테크와 안정적 자산 증식의 본질은 시장 소음에 휘둘리는 감정적 매매가 아니라, **검증된 금융 공학과 조세 제도의 합법적 혜택을 100% 내 편으로 만드는 구조화된 시스템**에 있습니다.
 
@@ -438,9 +452,12 @@ ${template.tableData}
 
 ---
 
-## 참고문헌 및 공인 학술 레퍼런스 (References)
+## 참고문헌 및 공인 학술·실시간 금융 레퍼런스 (References)
 
-${template.references.map((ref, i) => `[${i + 1}] ${ref}`).join('\n')}`;
+${template.references.map((ref, i) => `[${i + 1}] ${ref}`).join('\n')}
+[${template.references.length + 1}] Federal Reserve Bank of St. Louis (FRED, 2026). "Economic Data Time Series (FEDFUNDS, DGS10, CPIAUCSL)."
+[${template.references.length + 2}] Yahoo Finance & Alpha Vantage Real-time Market Telemetry (2026). "Global Foreign Exchange and Equity Indexes."
+[${template.references.length + 3}] 한국은행 경제통계시스템 (BOK ECOS, 2026). "한국은행 기준금리 및 통화금융 통계."`;
 
   const newPost: BlogPost = {
     slug,
