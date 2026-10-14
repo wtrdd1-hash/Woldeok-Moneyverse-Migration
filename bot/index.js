@@ -372,9 +372,34 @@ try {
   console.warn('[Bot] Failed to bind broadcast webhook server:', err.message);
 }
 
-// 프로세스 종료 시 정리
+// 크래시 방지 및 무중단 생존 시스템 (Bot Zero-Downtime & Keep-Alive Protection)
+process.on('uncaughtException', (err) => {
+  console.error('[Bot Guard] Uncaught Exception intercepted (Process Preserved):', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Bot Guard] Unhandled Rejection intercepted (Process Preserved):', reason);
+});
+
+client.on(Events.Error, (error) => {
+  console.error('[Bot Gateway] Discord Client Error:', error.message);
+});
+
+client.on(Events.ShardDisconnect, (event, id) => {
+  console.warn(`[Bot Gateway] Shard ${id} disconnected (code: ${event?.code}). Auto-reconnecting...`);
+});
+
+client.on(Events.ShardReconnecting, (id) => {
+  console.log(`[Bot Gateway] Shard ${id} reconnecting to Discord...`);
+});
+
+client.on(Events.ShardResume, (id, replayedEvents) => {
+  console.log(`[Bot Gateway] Shard ${id} resumed connection (${replayedEvents} events replayed).`);
+});
+
+// 프로세스 정상 종료 시그널 수신 시만 우아한 정리
 function cleanup() {
-  console.log('[Bot] Cleaning up before exit...');
+  console.log('[Bot] Graceful shutdown requested. Cleaning up...');
   if (webhookServer) {
     try { webhookServer.close(); } catch { /* ignore */ }
   }
@@ -392,8 +417,17 @@ function cleanup() {
 process.on('SIGINT', cleanup);
 process.on('SIGTERM', cleanup);
 
-// 클라이언트 로그인 실행
-client.login(BOT_TOKEN).catch((err) => {
-  console.error('[CRITICAL] Discord bot login failed:', err.message);
-  process.exit(1);
-});
+// 지수 백오프 자동 재연결 로그인 루프 (절대 프로세스 비정상 종료 없음)
+async function startBotWithRetry(retries = 0) {
+  try {
+    await client.login(BOT_TOKEN);
+  } catch (err) {
+    console.error(`[CRITICAL] Discord bot login failed (Attempt ${retries + 1}):`, err.message);
+    const delay = Math.min(30000, 2000 * Math.pow(1.5, retries));
+    console.log(`[Bot Guard] Retrying login in ${Math.round(delay / 1000)}s...`);
+    setTimeout(() => startBotWithRetry(retries + 1), delay);
+  }
+}
+
+startBotWithRetry();
+
