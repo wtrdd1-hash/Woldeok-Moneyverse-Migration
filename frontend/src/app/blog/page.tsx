@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { SiteShell } from '@/components/site-shell';
 import { BlogHubClient } from './blog-hub-client';
 import { getAllBlogPosts } from './blog-data';
 
@@ -56,7 +55,7 @@ export default function BlogHubPage() {
   };
 
   return (
-    <SiteShell>
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -79,6 +78,6 @@ export default function BlogHubPage() {
         {/* Client Interactive Filter & Grid */}
         <BlogHubClient initialPosts={posts} />
       </div>
-    </SiteShell>
+    </>
   );
 }
