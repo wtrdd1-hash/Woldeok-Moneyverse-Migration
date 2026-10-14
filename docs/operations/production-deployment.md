@@ -53,6 +53,17 @@ All runtime-affecting frontend/backend promotions use a zero-downtime handoff: s
 
 Cache invalidation must make the new application shell effective without user action. Version-sensitive HTML/bootstrap responses must revalidate instead of being served indefinitely from browser/proxy cache, while content-hashed immutable assets may keep long cache TTLs. Promotion verification must confirm the public version/SHA and fetch a fresh document that is not the prior release shell. Cache cleanup must not touch PostgreSQL member sessions.
 
+## Discord Bot Zero-Downtime & Deployment Isolation — v2026.10.14.604
+
+- **Independent Daemon Isolation:** The Discord bot (`moneyverse-discord-bot.service`) runs as an independent persistent daemon under `/home/debian/Woldeok-Moneyverse-Migration/bot`, decoupled from application release directories.
+- **Bot Restart Prohibition on App Deploys (Keep-Alive Invariant):** Unconditional restarting of `moneyverse-discord-bot` during web/backend deployments (`deploy_prod_v*.sh`, `stage-host-release.sh`) is prohibited. The bot must only be restarted when changes within the `bot/` directory itself are verified. Normal frontend/backend releases preserve active bot gateway, socket, and voice presence uninterrupted.
+- **Crash Prevention and Multi-Tier Recovery:**
+  1. **Process Level:** `uncaughtException` and `unhandledRejection` interceptors prevent unexpected process crashes, logging diagnostics while preserving execution state.
+  2. **Gateway Level:** Handlers for `ShardDisconnect`, `ShardReconnecting`, and `ShardResume` ensure automated reconnection to the Discord Gateway, alongside exponential backoff for login retries.
+  3. **Voice Presence Watchdog:** A 30-second watchdog periodically checks voice channel status and connection readiness, automatically executing `ensureVoiceConnection` upon detecting an exit.
+  4. **Systemd Level:** Hardened unit configuration with `Restart=always`, `RestartSec=2s`, `KillMode=process`, and `StartLimitBurst=10` ensures near-instant recovery within 2 seconds under fatal anomalies.
+
+
 ## Expected order
 
 1. Merge validated application code to `main`.

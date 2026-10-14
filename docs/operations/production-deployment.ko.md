@@ -52,6 +52,17 @@ Production 백엔드 승격으로 회원 로그인이 풀리면 안 됩니다. �
 
 캐시 초기화는 사용자 조작 없이 새 application shell이 적용되도록 해야 합니다. 버전에 민감한 HTML/bootstrap 응답은 browser/proxy에서 무기한 재사용하지 않고 재검증하며, content-hash가 붙은 immutable asset만 장기 TTL을 유지할 수 있습니다. 승격 검증에서는 공개 version/SHA를 확인하고 새 요청이 이전 릴리스 shell이 아닌지 확인합니다. 캐시 정리를 위해 PostgreSQL 회원 세션을 건드리면 안 됩니다.
 
+## 디스코드 봇 무중단 상주 및 배포 분리 — v2026.10.14.604
+
+- **독립 데몬 격리:** 디스코드 봇(`moneyverse-discord-bot.service`)은 웹/백엔드 릴리스 디렉터리와 분리된 `/home/debian/Woldeok-Moneyverse-Migration/bot`에서 영구 상주 데몬으로 구동됩니다.
+- **배포 시 봇 강제 재시작 금지 (Keep-Alive Invariant):** 일상적인 웹/백엔드 배포(`deploy_prod_v*.sh`, `stage-host-release.sh`) 시 `sudo systemctl restart moneyverse-discord-bot`을 무조건 함께 실행하는 것을 금지합니다. `bot/` 디렉터리 내 코드의 실질적 변경이 검증된 경우에만 봇을 선택적으로 재시작하고, 웹/백엔드 변경 배포 중에는 봇의 프로세스·소켓·음성 상주 채널 세션을 무중단으로 유지합니다.
+- **크래시 방지 및 자동 복구 계층:**
+  1. **프로세스 레벨:** `uncaughtException` 및 `unhandledRejection` 인터셉터를 배치하여 비정상 예외 발생 시 프로세스가 즉시 종료되지 않고 에러 로깅 후 실행 상태를 보존합니다.
+  2. **게이트웨이 레벨:** Discord Shard 끊김(`ShardDisconnect`), 재연결(`ShardReconnecting`), 재개(`ShardResume`) 이벤트를 감지하여 자동 복구하며, 로그인 실패 시 지수 백오프로 재시도합니다.
+  3. **음성 채널 24/7 워치독:** 30초 주기 워치독이 음성 채널 상주 여부 및 보이스 커넥션 상태를 점검하여 이탈 시 즉시 자동 재진입(`ensureVoiceConnection`)을 수행합니다.
+  4. **systemd 레벨:** `Restart=always`, `RestartSec=2s`, `KillMode=process`, `StartLimitBurst=10`을 설정하여 치명적 장애 발생 시에도 2초 내 즉시 재기동을 보장합니다.
+
+
 ## 예상 순서
 1. 검증된 애플리케이션 코드를 `main`에 병합합니다.
 2. CI가 정확한 SHA의 `-test` 이미지를 자동 빌드합니다.
