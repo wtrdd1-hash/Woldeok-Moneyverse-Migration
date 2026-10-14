@@ -43,8 +43,29 @@ describe('GeoIP locale first-request propagation', () => {
   });
 
   it('reads forwarded server locale on a first visit with no cookies', async () => {
-    vi.mocked(cookies).mockResolvedValueOnce({ get: () => undefined } as never);
     vi.mocked(headers).mockResolvedValueOnce(new Headers({ 'x-moneyverse-locale': 'ja' }) as never);
     expect(await getServerLocale()).toBe('ja');
   });
+
+  it('keeps an explicit URL language over an older manual cookie at SSR', async () => {
+    vi.mocked(headers).mockResolvedValueOnce(new Headers({ 'x-moneyverse-locale': 'en' }) as never);
+    vi.mocked(cookies).mockResolvedValueOnce({ get: () => ({ value: 'ko' }) } as never);
+    expect(await getServerLocale()).toBe('en');
+  });
+
+  it('ignores a forged incoming locale request header', () => {
+    const response = proxy(new NextRequest('https://easy-scraping.com/', {
+      headers: { 'cf-ipcountry': 'KR', 'x-moneyverse-locale': 'ja' },
+    }));
+    expect(response.headers.get('x-middleware-request-x-moneyverse-locale')).toBe('ko');
+  });
+
+  it('does not change public crawler locale based on IP', () => {
+    const response = proxy(new NextRequest('https://easy-scraping.com/', {
+      headers: { 'cf-ipcountry': 'JP', 'user-agent': 'Googlebot/2.1' },
+    }));
+    expect(response.headers.get('x-middleware-request-x-moneyverse-locale')).toBe('ko');
+    expect(response.cookies.get('wdmv_detected_locale')).toBeUndefined();
+  });
+
 });

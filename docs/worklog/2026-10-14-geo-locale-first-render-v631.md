@@ -20,7 +20,7 @@
 5. The proxy stabilizes unprefixed crawler locale to `ko` rather than location-specific rendering. Localized explicit URLs remain routable.
 
 ## Verification evidence
-- New regression test was RED on original source: **7 failures**. After repair: **20/20 targeted tests passed**, including automatic-reset UI.
+- New regression test was RED on original source: **7 failures**. After repair: **23/23 targeted tests passed**, including automatic-reset UI.
 - `pnpm --dir packages/contract build` and `pnpm --dir frontend typecheck`: PASS.
 - `pnpm --dir frontend build`: PASS on initial candidate.
 - Independent canary `127.0.0.1:3251` with `SEO_INDEXING_ENABLED=false`, API target `127.0.0.1:3100`: `KR=ko`, `JP=ja`, `CN=zh`, `US=en` on first HTML request. Isolated Test backend `/health`: HTTP 200.
@@ -35,7 +35,11 @@ Dedicated branch `fix/geo-locale-first-render-v2026.10.14.631`; concurrent agent
 - The existing `prod-v600` instance returned first HTML `ko/ja/zh/en` for manually supplied `CF-IPCountry: KR/JP/CN/US`. **Country recognition is not globally removed; real-client cookie/header behavior remains a separate diagnostic concern.**
 - Added request-scoped locale propagation and `LocaleProvider initialLocale` for SSR/client consistency; retained the manual cookie as authoritative.
 - Added manual `Automatic (country & browser)` reset so legacy persisted locale does not permanently block automatic country detection.
-- Original 7 first-request checks failed before patch. After patch, 20 targeted locale and language-menu tests pass with `NODE_ENV=test`.
+- Original 7 first-request checks failed before patch. After patch, 23 targeted locale and language-menu tests pass with `NODE_ENV=test`.
 - Contract build, frontend typecheck and isolated Next build PASS. Independent frontend on port 3251 served first HTML `KR=ko`, `JP=ja`, `CN=zh`, `US=en`; isolated Test backend port 3100 returned HTTP 200 `/health`.
 - Legacy SEO route assumptions on `/bank` are unrelated failing assertions; do not misreport as this patch's regression.
 - No evidence of authenticated Test session continuity, merge-main exact SHA or Production rollout. Keep promotion blocked until required gates.
+
+## Mid-work correctness review
+- Explicit URL must outrank a previously saved manual cookie in BOTH proxy and SSR. Fixed SSR resolver precedence: validated proxy request header first, then cookies only as a fallback.
+- Added spoofed header, explicit URL-over-cookie and crawler stability regression tests; targeted checks now **23/23 passing**.
