@@ -1,0 +1,12 @@
+{
+  "date_observed_kst": "2026-10-14",
+  "url": "https://easy-scraping.com/sitemap.xml",
+  "sha256_xml": "1d5a94f474f4aecb1d8673a79079b0d75fdb8f1144c61cb6b5f233448f0139b7",
+  "raw_bytes": 1282085,
+  "loc_count": 1012,
+  "unique_loc_count": 1012,
+  "alternate_href_count": 9108,
+  "double_locale_prefix_href_count": 1026,
+  "alternate_entries_not_in_loc_set": 5766,
+  "note": "Alternate entries missing from the primary loc set are not necessarily broken pages; duplicate hreflang labels and direct HTTP 200 can occur. Indexing metrics not inferred."
+}

@@ -1,0 +1,367 @@
+{
+  "observed_at_utc": "2026-10-14T00:51:05.474384+00:00",
+  "method": "read_only_curl_GET_representative_sample",
+  "count": 36,
+  "results": [
+    {
+      "url": "/tools/compound-calculator",
+      "status": 200,
+      "canon": "/tools/compound-calculator",
+      "lang": "ko",
+      "title": "[무료/무로그인] 복리·CAGR 계산기 — 1초 만에 적립식 만기수령액·DCA 초과수익 시뮬레이션 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 193164,
+      "error": ""
+    },
+    {
+      "url": "/en/tools/compound-calculator",
+      "status": 200,
+      "canon": "/tools/compound-calculator",
+      "lang": "en",
+      "title": "[무료/무로그인] 복리·CAGR 계산기 — 1초 만에 적립식 만기수령액·DCA 초과수익 시뮬레이션 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 191980,
+      "error": ""
+    },
+    {
+      "url": "/ja/tools/compound-calculator",
+      "status": 200,
+      "canon": "/tools/compound-calculator",
+      "lang": "ja",
+      "title": "[무료/무로그인] 복리·CAGR 계산기 — 1초 만에 적립식 만기수령액·DCA 초과수익 시뮬레이션 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 191429,
+      "error": ""
+    },
+    {
+      "url": "/zh/tools/compound-calculator",
+      "status": 200,
+      "canon": "/tools/compound-calculator",
+      "lang": "zh",
+      "title": "[무료/무로그인] 복리·CAGR 계산기 — 1초 만에 적립식 만기수령액·DCA 초과수익 시뮬레이션 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 191393,
+      "error": ""
+    },
+    {
+      "url": "/tools/salary-calculator",
+      "status": 200,
+      "canon": "/tools/salary-calculator",
+      "lang": "ko",
+      "title": "[2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 165659,
+      "error": ""
+    },
+    {
+      "url": "/en/tools/salary-calculator",
+      "status": 200,
+      "canon": "/tools/salary-calculator",
+      "lang": "en",
+      "title": "[2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 166030,
+      "error": ""
+    },
+    {
+      "url": "/ja/tools/salary-calculator",
+      "status": 200,
+      "canon": "/tools/salary-calculator",
+      "lang": "ja",
+      "title": "[2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 165442,
+      "error": ""
+    },
+    {
+      "url": "/zh/tools/salary-calculator",
+      "status": 200,
+      "canon": "/tools/salary-calculator",
+      "lang": "zh",
+      "title": "[2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 165386,
+      "error": ""
+    },
+    {
+      "url": "/tools/stock-calculator/chips-minus-20",
+      "status": 200,
+      "canon": "/tools/stock-calculator/chips-minus-20",
+      "lang": "ko",
+      "title": "침팬지 반도체(CHIPS) -20% 물타기 계산기 | 평단가 희석 및 탈출가 역산 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 263599,
+      "error": ""
+    },
+    {
+      "url": "/en/tools/stock-calculator/chips-minus-20",
+      "status": 200,
+      "canon": "/tools/stock-calculator/chips-minus-20",
+      "lang": "en",
+      "title": "침팬지 반도체(CHIPS) -20% 물타기 계산기 | 평단가 희석 및 탈출가 역산 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 263957,
+      "error": ""
+    },
+    {
+      "url": "/ja/tools/stock-calculator/chips-minus-20",
+      "status": 200,
+      "canon": "/tools/stock-calculator/chips-minus-20",
+      "lang": "ja",
+      "title": "침팬지 반도체(CHIPS) -20% 물타기 계산기 | 평단가 희석 및 탈출가 역산 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 263382,
+      "error": ""
+    },
+    {
+      "url": "/zh/tools/stock-calculator/chips-minus-20",
+      "status": 200,
+      "canon": "/tools/stock-calculator/chips-minus-20",
+      "lang": "zh",
+      "title": "침팬지 반도체(CHIPS) -20% 물타기 계산기 | 평단가 희석 및 탈출가 역산 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 263326,
+      "error": ""
+    },
+    {
+      "url": "/tools/compound-calculator/10m-3y-5p",
+      "status": 200,
+      "canon": "/tools/compound-calculator/10m-3y-5p",
+      "lang": "ko",
+      "title": "1천만원 3년 연 5% 복리 이자 계산기 | 세후 만기 수령액 시뮬레이션 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 248109,
+      "error": ""
+    },
+    {
+      "url": "/en/tools/compound-calculator/10m-3y-5p",
+      "status": 200,
+      "canon": "/tools/compound-calculator/10m-3y-5p",
+      "lang": "en",
+      "title": "1천만원 3년 연 5% 복리 이자 계산기 | 세후 만기 수령액 시뮬레이션 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 248440,
+      "error": ""
+    },
+    {
+      "url": "/ja/tools/compound-calculator/10m-3y-5p",
+      "status": 200,
+      "canon": "/tools/compound-calculator/10m-3y-5p",
+      "lang": "ja",
+      "title": "1천만원 3년 연 5% 복리 이자 계산기 | 세후 만기 수령액 시뮬레이션 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 247889,
+      "error": ""
+    },
+    {
+      "url": "/zh/tools/compound-calculator/10m-3y-5p",
+      "status": 200,
+      "canon": "/tools/compound-calculator/10m-3y-5p",
+      "lang": "zh",
+      "title": "1천만원 3년 연 5% 복리 이자 계산기 | 세후 만기 수령액 시뮬레이션 | 월덕 머니버스",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 247853,
+      "error": ""
+    },
+    {
+      "url": "/guide/glossary/per",
+      "status": 200,
+      "canon": "/guide/glossary/per",
+      "lang": "ko",
+      "title": "PER (주가수익비율) 완벽 해설 &amp; 실전 투자 공식 | 금융 용어사전 · 월덕 머니버스 (+10,000 WLD 무료)",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 144105,
+      "error": ""
+    },
+    {
+      "url": "/en/guide/glossary/per",
+      "status": 200,
+      "canon": "/en/guide/glossary/per",
+      "lang": "en",
+      "title": "PER (Price to Earnings Ratio) Definition, Formula &amp; Guide | Finance Glossary · Woldeok Moneyvers",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 146073,
+      "error": ""
+    },
+    {
+      "url": "/ja/guide/glossary/per",
+      "status": 200,
+      "canon": "/ja/guide/glossary/per",
+      "lang": "ja",
+      "title": "PER (株価収益率)とは？ 計算式と実戦投資ガイド | 金融用語辞典 · ウォルドク・マネーバース",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 144490,
+      "error": ""
+    },
+    {
+      "url": "/zh/guide/glossary/per",
+      "status": 200,
+      "canon": "/zh/guide/glossary/per",
+      "lang": "zh",
+      "title": "PER (市盈率) 是什么意思？计算公式与实战指南 | 金融词典 · 月德 Moneyverse",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 144095,
+      "error": ""
+    },
+    {
+      "url": "/en/en/guide/glossary/per",
+      "status": 200,
+      "canon": "/en/guide/glossary/per",
+      "lang": "en",
+      "title": "PER (Price to Earnings Ratio) Definition, Formula &amp; Guide | Finance Glossary · Woldeok Moneyvers",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 146080,
+      "error": ""
+    },
+    {
+      "url": "/ja/en/guide/glossary/per",
+      "status": 200,
+      "canon": "/en/guide/glossary/per",
+      "lang": "ja",
+      "title": "PER (Price to Earnings Ratio) Definition, Formula &amp; Guide | Finance Glossary · ウォルドク・マネーバース",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 145461,
+      "error": ""
+    },
+    {
+      "url": "/zh/en/guide/glossary/per",
+      "status": 200,
+      "canon": "/en/guide/glossary/per",
+      "lang": "zh",
+      "title": "PER (Price to Earnings Ratio) Definition, Formula &amp; Guide | Finance Glossary · 月德 Moneyverse",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 145407,
+      "error": ""
+    },
+    {
+      "url": "/en/ja/guide/glossary/per",
+      "status": 200,
+      "canon": "/ja/guide/glossary/per",
+      "lang": "en",
+      "title": "PER (株価収益率)とは？ 計算式と実戦投資ガイド | 金融用語辞典 · Woldeok Moneyverse (+10k WLD Free)",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 145116,
+      "error": ""
+    },
+    {
+      "url": "/ja/ja/guide/glossary/per",
+      "status": 200,
+      "canon": "/ja/guide/glossary/per",
+      "lang": "ja",
+      "title": "PER (株価収益率)とは？ 計算式と実戦投資ガイド | 金融用語辞典 · ウォルドク・マネーバース",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 144497,
+      "error": ""
+    },
+    {
+      "url": "/zh/ja/guide/glossary/per",
+      "status": 200,
+      "canon": "/ja/guide/glossary/per",
+      "lang": "zh",
+      "title": "PER (株価収益率)とは？ 計算式と実戦投資ガイド | 金融用語辞典 · 月德 Moneyverse",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 144443,
+      "error": ""
+    },
+    {
+      "url": "/en/zh/guide/glossary/per",
+      "status": 200,
+      "canon": "/zh/guide/glossary/per",
+      "lang": "en",
+      "title": "PER (市盈率) 是什么意思？计算公式与实战指南 | 金融词典 · Woldeok Moneyverse (+10k WLD Free)",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 144788,
+      "error": ""
+    },
+    {
+      "url": "/ja/zh/guide/glossary/per",
+      "status": 200,
+      "canon": "/zh/guide/glossary/per",
+      "lang": "ja",
+      "title": "PER (市盈率) 是什么意思？计算公式与实战指南 | 金融词典 · ウォルドク・マネーバース",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 144156,
+      "error": ""
+    },
+    {
+      "url": "/zh/zh/guide/glossary/per",
+      "status": 200,
+      "canon": "/zh/guide/glossary/per",
+      "lang": "zh",
+      "title": "PER (市盈率) 是什么意思？计算公式与实战指南 | 金融词典 · 月德 Moneyverse",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 144102,
+      "error": ""
+    },
+    {
+      "url": "/tools/loan-interest-calculator/30m-credit-3y-5pct",
+      "status": 200,
+      "canon": "/tools/loan-interest-calculator/30m-credit-3y-5pct",
+      "lang": "ko",
+      "title": "3,000만원 신용대출 3년 이자 (연 5.0%) - 월 상환액 및 총 이자 계산기",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 154824,
+      "error": ""
+    },
+    {
+      "url": "/en/tools/loan-interest-calculator/30m-credit-3y-5pct",
+      "status": 200,
+      "canon": "/tools/loan-interest-calculator/30m-credit-3y-5pct",
+      "lang": "en",
+      "title": "3,000만원 신용대출 3년 이자 (연 5.0%) - 월 상환액 및 총 이자 계산기",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 155182,
+      "error": ""
+    },
+    {
+      "url": "/ja/tools/loan-interest-calculator/30m-credit-3y-5pct",
+      "status": 200,
+      "canon": "/tools/loan-interest-calculator/30m-credit-3y-5pct",
+      "lang": "ja",
+      "title": "3,000만원 신용대출 3년 이자 (연 5.0%) - 월 상환액 및 총 이자 계산기",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 154607,
+      "error": ""
+    },
+    {
+      "url": "/zh/tools/loan-interest-calculator/30m-credit-3y-5pct",
+      "status": 200,
+      "canon": "/tools/loan-interest-calculator/30m-credit-3y-5pct",
+      "lang": "zh",
+      "title": "3,000만원 신용대출 3년 이자 (연 5.0%) - 월 상환액 및 총 이자 계산기",
+      "robots": "<meta name=\"robots\" content=\"index, follow\"/>",
+      "bytes": 154551,
+      "error": ""
+    },
+    {
+      "url": "/stocks/derivatives",
+      "status": 200,
+      "canon": "/stocks/derivatives",
+      "lang": "ko",
+      "title": "10X 레버리지 가상 파생상품/선물 거래소 — 실시간 격리 마진 롱/숏 주문 &amp; 청산 히트맵 | 월덕 머니버스 · 월덕 머니버스 (+10,000 WLD 무료)",
+      "robots": "<meta name=\"robots\" content=\"noindex, nofollow\"/>",
+      "bytes": 152847,
+      "error": ""
+    },
+    {
+      "url": "/en/stocks/derivatives",
+      "status": 200,
+      "canon": "/stocks/derivatives",
+      "lang": "en",
+      "title": "10X 레버리지 가상 파생상품/선물 거래소 — 실시간 격리 마진 롱/숏 주문 &amp; 청산 히트맵 | 월덕 머니버스 · Woldeok Moneyverse (+10k WLD Fre",
+      "robots": "<meta name=\"robots\" content=\"noindex, nofollow\"/>",
+      "bytes": 152949,
+      "error": ""
+    },
+    {
+      "url": "/ja/stocks/derivatives",
+      "status": 200,
+      "canon": "/stocks/derivatives",
+      "lang": "ja",
+      "title": "10X 레버리지 가상 파생상품/선물 거래소 — 실시간 격리 마진 롱/숏 주문 &amp; 청산 히트맵 | 월덕 머니버스 · ウォルドク・マネーバース",
+      "robots": "<meta name=\"robots\" content=\"noindex, nofollow\"/>",
+      "bytes": 152288,
+      "error": ""
+    }
+  ]
+}
