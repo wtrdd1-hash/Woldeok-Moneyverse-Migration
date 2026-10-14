@@ -27,3 +27,5 @@ Status: **PRODUCTION_VERIFIED (public content only)**. Date: 2026-10-14 (KST).
 Only the published editorial notice and its rendering were verified. This does not certify unrelated site stability, every route, exact-SHA acceptance tests, or a runtime promotion.
 
 Final external check: public HTTPS detail returned HTTP 200 and rendered the new notice title. Mid-work origin/main remained c56af867ad8f7556e53f895b0bb294c4bfc8a02d.
+
+Final source checkpoint: origin/main advanced mid-work from c56af867 to 77e27063 (independent disk-cleanup docs, #826); checked paths, no overlap; branch rebased before PR.
