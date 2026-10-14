@@ -11,7 +11,7 @@ import { groupDigits } from '@/lib/money';
 interface WinnerLog {
   displayName: string;
   rewardTitle: string;
-  burnAmount: number;
+  burnAmount: string;
   createdAt: string;
 }
 

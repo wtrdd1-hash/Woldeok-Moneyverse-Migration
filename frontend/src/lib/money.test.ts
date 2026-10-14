@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { changeAmount, changePercent, groupDigits } from './money';
+import { changeAmount, changePercent, groupDigits, isPositiveWldInput } from './money';
 
 /**
  * Money crosses this application as a canonical integer string and never as a
@@ -66,5 +66,19 @@ describe('money formatting runtime boundary', () => {
   it('refuses to pretend an unsafe JavaScript number is an exact WLD amount', async () => {
     const { groupDigits } = await import('./money');
     expect(groupDigits(Number.MAX_SAFE_INTEGER + 2)).toBe('—');
+  });
+});
+
+
+describe('large WLD transfer/donation input protection', () => {
+  it('accepts positive canonical integer strings without Number conversion', () => {
+    expect(isPositiveWldInput('9'.repeat(100))).toBe(true);
+    expect(isPositiveWldInput('1')).toBe(true);
+    expect(isPositiveWldInput('0')).toBe(false);
+    expect(isPositiveWldInput('-5')).toBe(false);
+    expect(isPositiveWldInput('01')).toBe(false);
+    expect(isPositiveWldInput('1.5')).toBe(false);
+    expect(isPositiveWldInput('Infinity')).toBe(false);
+    expect(isPositiveWldInput(Number.MAX_SAFE_INTEGER + 2)).toBe(false);
   });
 });

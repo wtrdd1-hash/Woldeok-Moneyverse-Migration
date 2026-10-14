@@ -31,7 +31,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { groupDigits } from '@/lib/money';
+import { canonicalIntegerString, groupDigits, isPositiveWldInput } from '@/lib/money';
+import { calculatePensionForecast } from '@/lib/pension-money';
 
 export interface NationalPensionOverview {
   totalAumWld: string;
@@ -76,7 +77,7 @@ interface PensionPortalClientProps {
   myAccount: MyPensionAccount | null;
   contributions: ContributionLog[];
   payouts: PayoutLog[];
-  userCashBalance: number;
+  userCashBalance: string;
   isLoggedIn: boolean;
 }
 
@@ -91,7 +92,7 @@ export function PensionPortalClient({
   const [account, setAccount] = useState<MyPensionAccount | null>(initialAccount);
   const [contributions, setContributions] = useState<ContributionLog[]>(initialContributions);
   const [payouts, setPayouts] = useState<PayoutLog[]>(initialPayouts);
-  const [cashBalance, setCashBalance] = useState<number>(initialCashBalance);
+  const [cashBalance, setCashBalance] = useState<string>(initialCashBalance);
 
   // 기여금 납입 폼
   const [contributeAmount, setContributeAmount] = useState<string>('10000');
@@ -123,13 +124,13 @@ export function PensionPortalClient({
       toast.error('로그인이 필요한 서비스입니다.');
       return;
     }
-    const amount = Number(contributeAmount);
-    if (isNaN(amount) || amount < 1000) {
+    const amount = contributeAmount.trim();
+    if (!isPositiveWldInput(amount) || BigInt(amount) < 1000n) {
       toast.error('최소 1,000 WLD 이상부터 납입할 수 있습니다.');
       return;
     }
-    if (amount > cashBalance) {
-      toast.error(`지갑 잔액이 부족합니다. (현재: ${cashBalance.toLocaleString()} WLD)`);
+    if (BigInt(amount) > BigInt(cashBalance)) {
+      toast.error(`지갑 잔액이 부족합니다. (현재: ${groupDigits(cashBalance)} WLD)`);
       return;
     }
 
@@ -144,14 +145,14 @@ export function PensionPortalClient({
       if (!res.ok) throw new Error(data.error || '납입 실패');
 
       toast.success(
-        `국민연금 기여금 ${amount.toLocaleString()} WLD 납입이 완료되어 국고로 편입되었습니다!`,
+        `국민연금 기여금 ${groupDigits(amount)} WLD 납입이 완료되어 국고로 편입되었습니다!`,
       );
       setAccount(data.account);
-      setCashBalance((prev) => Math.max(0, prev - amount));
+      setCashBalance((prev) => (BigInt(prev) - BigInt(amount)).toString());
       setContributions((prev) => [
         {
           id: Math.random().toString(),
-          amount_wld: amount.toString(),
+          amount_wld: amount,
           note: '국민연금 기여금 납입',
           created_at: new Date().toISOString(),
         },
@@ -194,13 +195,11 @@ export function PensionPortalClient({
 
   const handleLiquidate = async () => {
     if (!account) return;
-    const principal = Number(account.accumulated_contribution_wld);
-    const refund = Math.floor(principal * 0.95);
-    const welfare = principal - refund;
+    const { refund, welfare } = calculatePensionForecast(account.accumulated_contribution_wld, account.hourly_payout_rate_bps || 8);
 
     if (
       !confirm(
-        `[중도 해지 경고]\n적립된 연금 원금의 95%인 ${refund.toLocaleString()} WLD가 지갑으로 즉시 환급되며, 5%(${welfare.toLocaleString()} WLD)는 국가 사회복지기금(VAULT_WELFARE)으로 귀속됩니다.\n\n정말 해지하시겠습니까?`,
+        `[중도 해지 경고]\n적립된 연금 원금의 95%인 ${groupDigits(refund)} WLD가 지갑으로 즉시 환급되며, 5%(${groupDigits(welfare)} WLD)는 국가 사회복지기금(VAULT_WELFARE)으로 귀속됩니다.\n\n정말 해지하시겠습니까?`,
       )
     ) {
       return;
@@ -212,9 +211,11 @@ export function PensionPortalClient({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '해지 실패');
 
-      toast.success(`중도 해지 완료: ${Number(data.refundAmountWld).toLocaleString()} WLD가 지갑으로 환급되었습니다.`);
+      const refundAmount = canonicalIntegerString(data.refundAmountWld);
+      if (refundAmount === null || refundAmount.startsWith('-')) throw new Error('서버가 올바른 환급 금액을 반환하지 않았습니다.');
+      toast.success(`중도 해지 완료: ${groupDigits(refundAmount)} WLD가 지갑으로 환급되었습니다.`);
       setAccount(data.account);
-      setCashBalance((prev) => prev + Number(data.refundAmountWld));
+      setCashBalance((prev) => (BigInt(prev) + BigInt(refundAmount)).toString());
     } catch (err: any) {
       toast.error(err.message || '해지 처리 중 오류가 발생했습니다.');
     } finally {
@@ -223,10 +224,11 @@ export function PensionPortalClient({
   };
 
   const currentTier = getTierInfo(account?.tier || 'TIER_1_YOUTH');
-  const accumulated = Number(account?.accumulated_contribution_wld || 0);
-  const hourlyPayout = Math.max(1, Math.floor((accumulated * (account?.hourly_payout_rate_bps || 8)) / 10000));
-  const dailyPayout = hourlyPayout * 24;
-  const monthlyPayout = dailyPayout * 30;
+  const accumulated = canonicalIntegerString(account?.accumulated_contribution_wld ?? '0') ?? '0';
+  const forecast = calculatePensionForecast(accumulated, account?.hourly_payout_rate_bps || 8);
+  const hourlyPayout = forecast.hourly;
+  const dailyPayout = forecast.daily;
+  const monthlyPayout = forecast.monthly;
 
   // 시뮬레이터 계산
   const simHourly = Math.max(1, Math.floor((simAmount * 9) / 10000));
@@ -344,7 +346,7 @@ export function PensionPortalClient({
                 <div>
                   <div className="text-xs text-muted-foreground">시간당 예상 연금</div>
                   <div className="text-lg font-bold text-emerald-400 mt-0.5">
-                    +{hourlyPayout.toLocaleString()}{' '}
+                    +{groupDigits(hourlyPayout)}{' '}
                     <span className="text-xs font-normal text-muted-foreground">WLD/h</span>
                   </div>
                 </div>
@@ -364,8 +366,8 @@ export function PensionPortalClient({
                   은퇴 수령 시 환산 연금액:
                 </span>
                 <span className="font-semibold text-foreground">
-                  하루 약 <span className="text-emerald-400">+{dailyPayout.toLocaleString()} WLD</span> · 
-                  한 달 약 <span className="text-emerald-400">+{monthlyPayout.toLocaleString()} WLD</span>
+                  하루 약 <span className="text-emerald-400">+{groupDigits(dailyPayout)} WLD</span> ·
+                  한 달 약 <span className="text-emerald-400">+{groupDigits(monthlyPayout)} WLD</span>
                 </span>
               </div>
 
@@ -373,7 +375,7 @@ export function PensionPortalClient({
               <div className="flex flex-wrap items-center gap-2.5 pt-2">
                 <Button
                   onClick={handleToggleRetirement}
-                  disabled={actionLoading || accumulated < 1000}
+                  disabled={actionLoading || BigInt(accumulated) < 1000n}
                   className={`flex-1 font-semibold ${
                     account?.status === 'RETIRED_RECEIVING'
                       ? 'bg-amber-600 hover:bg-amber-700 text-white'
@@ -393,7 +395,7 @@ export function PensionPortalClient({
                   )}
                 </Button>
 
-                {accumulated > 0 && (
+                {BigInt(accumulated) > 0n && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -426,7 +428,7 @@ export function PensionPortalClient({
               <div className="text-xs text-muted-foreground flex justify-between">
                 <span>내 지갑 가용 잔액:</span>
                 <span className="font-mono font-semibold text-foreground">
-                  {cashBalance.toLocaleString()} WLD
+                  {groupDigits(cashBalance)} WLD
                 </span>
               </div>
 
@@ -616,7 +618,7 @@ export function PensionPortalClient({
                           {new Date(c.created_at).toLocaleString('ko-KR')}
                         </TableCell>
                         <TableCell className="font-semibold text-emerald-400">
-                          +{Number(c.amount_wld).toLocaleString()} WLD
+                          +{groupDigits(c.amount_wld)} WLD
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           {c.note}
@@ -654,10 +656,10 @@ export function PensionPortalClient({
                           {new Date(p.created_at).toLocaleString('ko-KR')}
                         </TableCell>
                         <TableCell className="font-semibold text-emerald-400">
-                          +{Number(p.payout_amount_wld).toLocaleString()} WLD
+                          +{groupDigits(p.payout_amount_wld)} WLD
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
-                          {Number(p.snapshot_accumulated_wld).toLocaleString()} WLD
+                          {groupDigits(p.snapshot_accumulated_wld)} WLD
                         </TableCell>
                       </TableRow>
                     ))}

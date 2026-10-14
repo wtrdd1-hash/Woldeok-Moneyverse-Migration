@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { groupDigits, isPositiveWldInput } from '@/lib/money';
 import { HeartHandshake, Trophy, Award, Sparkles, Send, ShieldCheck, Flame } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,7 +51,7 @@ export function TreasuryDonationCard() {
 
   const handleDonate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || Number.parseInt(amount, 10) <= 0) {
+    if (!isPositiveWldInput(amount.trim())) {
       toast.error('기부할 금액을 올바르게 입력해 주세요.');
       return;
     }
@@ -72,7 +73,7 @@ export function TreasuryDonationCard() {
       }
 
       toast.success(
-        `국고에 ${Number(amount).toLocaleString('ko-KR')} WLD 기부가 완료되었습니다! 명예 칭호: [${data.honor_title || '기부자'}] 획득`,
+        `국고에 ${groupDigits(amount.trim())} WLD 기부가 완료되었습니다! 명예 칭호: [${data.honor_title || '기부자'}] 획득`,
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : '기부 처리 중 오류가 발생했습니다.';
@@ -159,14 +160,14 @@ export function TreasuryDonationCard() {
 
           <Button
             type="submit"
-            disabled={submitting || !amount || Number.parseInt(amount, 10) <= 0}
+            disabled={submitting || !isPositiveWldInput(amount.trim())}
             className="w-full h-10 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-extrabold gap-2 transition-all active:scale-[0.98]"
           >
             <Send className="size-4" />
             <span>
               {submitting
                 ? '기부 처리 중...'
-                : `${Number(amount || 0).toLocaleString('ko-KR')} WLD 국고 기부 및 칭호 획득`}
+                : `${groupDigits(amount.trim())} WLD 국고 기부 및 칭호 획득`}
             </span>
           </Button>
         </form>
@@ -197,7 +198,7 @@ export function TreasuryDonationCard() {
                     </Badge>
                   </div>
                   <span className="font-mono font-bold text-zinc-300 shrink-0">
-                    {Number(d.total_donated_wld).toLocaleString('ko-KR')} WLD
+                    {groupDigits(d.total_donated_wld)} WLD
                   </span>
                 </div>
               ))
