@@ -45,8 +45,8 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
   {
     href: '/admin/blog',
     eyebrow: 'AI BLOG / CONTENT AUDIT',
-    title: '블로그 자동화 관제',
-    summary: '콘텐츠 생성 방법 및 색인 제출 결과를 검토하는 관리자 화면.',
+    title: '블로그 관리 · AI 금융 칼럼',
+    summary: 'AI 금융 블로그 글 목록, 수동 발행 및 검색엔진 색인 자동화 상태를 관리합니다.',
     group: 'records',
   },
   {
@@ -56,7 +56,6 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     summary: '기존 신청 기록 확인 전용. DB·원장 연결 및 관리자 감사 검증 전 심사·지급 불가.',
     group: 'economy',
   },
-  {
     href: '/admin/controls',
     eyebrow: 'FEATURE CONTROL',
     title: '기능 스위치 · 정책 버전',

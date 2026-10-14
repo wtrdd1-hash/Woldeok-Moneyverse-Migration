@@ -11,6 +11,7 @@ import {
   BarChart3,
   Activity,
   Globe,
+  BookOpen,
   Users,
   ShieldAlert,
   MessageCircle,
@@ -76,6 +77,7 @@ export const ALL_ADMIN_ROUTES: readonly AdminRouteMeta[] = [
   // 4. 트래픽 & SEO
   { href: '/admin/seo', label: 'SEO·색인 관제', description: '실시간 검색 봇(Googlebot, Yeti) 크롤링 로그 & GSC/IndexNow', category: '트래픽 & SEO', icon: Globe },
   { href: '/admin/seo-audit', label: '크롤러 수집 감사', description: '구조화 데이터 무결성 검증 및 일괄 색인 핑 전송', category: '트래픽 & SEO', icon: Activity },
+  { href: '/admin/blog', label: '블로그 관리', description: 'AI 금융 블로그 발행 목록 및 수동 생성·SEO 자동화 관제', category: '트래픽 & SEO', icon: BookOpen },
 
   // 5. 회원 & 모더레이션
   { href: '/admin/users', label: '회원 관리', description: '전체 유저 디렉토리, WLD 잔고 조정, 권한 부여 및 제재', category: '회원 & 모더레이션', icon: Users },
@@ -126,10 +128,10 @@ export function AdminQuickJumperModal() {
         size="sm"
         onClick={() => setIsOpen(true)}
         className="group flex min-h-[44px] sm:min-h-9 shrink-0 items-center gap-1.5 rounded-xl border-dashed border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-black text-primary hover:border-primary hover:bg-primary/10 transition-all shadow-xs"
-        aria-label="31개 관리자 전체 메뉴 열기"
+        aria-label={`${ALL_ADMIN_ROUTES.length}개 관리자 전체 메뉴 열기`}
       >
         <Compass className="size-3.5 transition-transform group-hover:rotate-45 text-primary" />
-        <span>전체 메뉴 (31)</span>
+        <span>전체 메뉴 ({ALL_ADMIN_ROUTES.length})</span>
       </Button>
 
       {isOpen && (
@@ -153,7 +155,7 @@ export function AdminQuickJumperModal() {
                   <h2 className="text-base font-bold text-foreground flex items-center gap-2">
                     관리자 전체 관제 타워 네비게이터
                     <Badge variant="secondary" className="text-[10px] font-mono">
-                      31개 전 라우트
+                      {ALL_ADMIN_ROUTES.length}개 전 라우트
                     </Badge>
                   </h2>
                   <p className="text-xs text-muted-foreground">
