@@ -1,5 +1,10 @@
 # 📚 Document Catalog
 
+## Current verification evidence (v2026.10.14.605; documentation only)
+
+- [Full function acceptance audit — English](findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.md) / [Korean](findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.ko.md); [worklog](worklog/2026-10-14-full-function-acceptance-v605.md). This is **BLOCKED**, not a new authoritative feature specification or Production acceptance.
+
+
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
 > **Snapshot Version**: `v2026.10`  
