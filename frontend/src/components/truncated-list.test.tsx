@@ -131,7 +131,7 @@ describe('TruncatedList dialog', () => {
     const trigger = screen.getByRole('button', { name: /더보기/ });
     openTheRest();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
 
     expect(screen.queryByRole('dialog')).toBeNull();
     await waitFor(() => expect(document.activeElement).toBe(trigger));
