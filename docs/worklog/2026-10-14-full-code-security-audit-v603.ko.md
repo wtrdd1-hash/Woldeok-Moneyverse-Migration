@@ -20,3 +20,7 @@
 ## S4 종료 검증
 - 문서 전용 PR을 통한 검토를 기본으로 한다. 코드 수정·Test/Production 승격 없음.
 - 테스트 통과 수치는 변경 전 exact-SHA 기준이며 새 main 전체 검증의 대용품이 아니다. GitHub 실제 게시/PR 링크는 성공 확인 뒤 기록한다.
+
+## GitHub 게시 확정
+- Commit `33f83e576032c5fd98a9cb5c88c09057ad7542bb`; [draft PR #821](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/821). Current status: documented only, not implemented/deployed.
+- Final refreshed SHA 6be44719 Node smoke tests were rerun and passed 12/12; web syntax still has one MJS failure.

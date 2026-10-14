@@ -20,3 +20,7 @@
 ## Publication — S4
 - GitHub branch is for review only. Do not merge automatically; every high-risk code remedy needs its own branch, exact-SHA test backend validation, and separately authorized zero-downtime promotion.
 - Final link, commit and PR should be recorded only after GitHub confirms them. Current test results are **not** full certification of final main SHA.
+
+## GitHub publication confirmed
+- Commit `33f83e576032c5fd98a9cb5c88c09057ad7542bb`; [draft PR #821](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/821). Current status: documented only, not implemented/deployed.
+- Final refreshed SHA 6be44719 Node smoke tests were rerun and passed 12/12; web syntax still has one MJS failure.
