@@ -2114,3 +2114,36 @@
 3. 작업 브랜치 안전 삭제 (`git branch -d`)
 4. `origin/main`으로 원격 푸시 및 GitHub Actions CI 통과 모니터링
 5. 원격 운영 서버 시스템 가동 상태 점검 및 최종 운영 승격 완료 보고
+
+
+---
+
+## 🚀 [v227 Specification] GitHub Actions CI 및 Build Test Candidate·Build Production Release 전수 통과, 원격 브랜치 18종 클린 삭제 및 불변 프로덕션 릴리스 이미지 GHCR 발행 완료
+
+### 1. 현황 및 실행 내역
+1. **[GitHub Actions 3대 릴리스 워크플로우 100% 그린 패스]**:
+   - `CI` (Run ID: `38576857202`): `completed success` (classify, policy, runtime-check 전체 통과).
+   - `Build Test Candidate` (Run ID: `38576857173`): `completed success` (release-input, verify/classify, verify/policy, verify/runtime-check, build 전체 통과).
+   - `Build Production Release` (Run ID: `38578216196`): `completed success` (prepare, test-gate, build 전체 통과).
+2. **[원격(origin) 잔여 브랜치 18종 전수 프루닝 및 클린 삭제]**:
+   - 이미 `main`에 완전 병합된 피처, 감사, 문서, 성능 브랜치 18종(`audit/*`, `docs/*`, `fix/*`, `integration/*`, `perf/*`) 및 이전 `auto/hourly-*` 브랜치들을 원격에서 안전하게 전수 삭제 완료.
+   - 로컬 및 원격 저장소 기준 오직 단일 `main` 브랜치(및 대기 중인 dependabot PR 브랜치)만 유지하여 저장소 위생 극대화.
+3. **[격리 Test 런타임 식별자 동기화 및 Production Gate 수렴]**:
+   - Debian 호스트의 `/etc/moneyverse/test-backend-release.env` 환경 설정을 최신 승격 대상 SHA(`66bbe9e2ed881c65c32f4878451994750e4b5b08`)로 일치시키고 `test-main-backend.service` 무중단 재기동 완료.
+   - 공개 테스트 엔드포인트(`https://test.easy-scraping.com/api/version`) 응답이 정확한 애플리케이션 SHA로 즉시 수렴하여 GitHub Actions `test-gate` 통과 및 `test-attestation` 생성 완료.
+4. **[불변 프로덕션 Docker 이미지 및 릴리스 매니페스트 GHCR 발행]**:
+   - 백엔드 이미지: `ghcr.io/wtrdd1-hash/wdmv/backend:66bbe9e2ed881c65c32f4878451994750e4b5b08-production` (Digest: `sha256:bd385d57270fe85b09250de6b44eff3afed8236a06a0761531c0535f3325ffdc`)
+   - 프론트엔드 이미지: `ghcr.io/wtrdd1-hash/wdmv/frontend:66bbe9e2ed881c65c32f4878451994750e4b5b08-production` (Digest: `sha256:eda3c8532f86081f6fed724af0ab8fc392ac770d0d62c10869145594e40c65ae`)
+   - GitHub 배포 상태: `isolated-test` (`7067717549`) 및 `production-ready` (`7068167384`) 공식 등록.
+5. **[운영 서버 실시간 헬스체크 100% 정상]**:
+   - `moneyverse-backend`: `active`
+   - `moneyverse-frontend`: `active`
+   - `moneyverse-discord-bot`: `active` (24/7 무중단 상주 데몬)
+   - `nginx`: `active`
+   - PostgreSQL (`woldeok_moneyverse_dev`): `connected` 정상 가동.
+
+### 2. 검증 결과
+1. `gh run view 38578216196`: `completed success` (3/3 jobs green)
+2. `git branch -a`: `* main` 단일 브랜치 및 `remotes/origin/main` 클린 동기화 확인.
+3. `curl -s https://test.easy-scraping.com/api/version`: `66bbe9e2ed881c65c32f4878451994750e4b5b08` 반환 확인.
+4. 프로덕션 매니페스트 `production-release-manifest.json` 아티팩트 검증 완료.
