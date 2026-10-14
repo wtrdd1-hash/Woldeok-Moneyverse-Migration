@@ -69,3 +69,10 @@
 - Homepage source contract tests updated to current real routes/hero and 48px touch target. These source checks are not browser E2E evidence.
 - Full frontend NODE_ENV=test: 215/215 files and 1178/1178 tests PASS. Typecheck and production Next build PASS.
 - Exact-SHA isolated Test backend+DB, browser 5-pass visual, pre-existing login session continuity, security/ledger CI and zero-downtime canary still NOT verified. Production release BLOCKED by master v530/v543, not by frontend tests.
+
+## v616 Production promotion request / hard gate review
+- User expressly requests immediate Production promotion. Checked origin/main c56af867, branch 1c5a7715, clean worktree at start.
+- Runtime observed: Debian systemd test-main-backend/frontend active, production backend/frontend active; production-current -> prod-v600, test-current -> test-v541-gsc-aa4b6387. Candidate is not running in Test.
+- Exact branch frontend suite 1178/1178 passed, frontend typecheck and Next production build passed. Backend nest build passed. Backend suite 1162 passed, **391 skipped across 53 files**, so required real-DB/security/session gate cannot be counted as passed.
+- Read docs/RELEASING.md and docs/operations/production-deployment.md: Test exact-SHA, authoritative DB, existing authenticated session persistence, canary and zero-downtime handoff are mandatory. Current Test is v541, not candidate v615.
+- Promotion not performed: switching immutable Production pointer to untested candidate would violate release identity and continuity; no existing signed-in session test credential was established. No live service or data changed.
