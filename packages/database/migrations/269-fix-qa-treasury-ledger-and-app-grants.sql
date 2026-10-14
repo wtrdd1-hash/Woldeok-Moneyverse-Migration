@@ -7,52 +7,12 @@
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'moneyverse_app') THEN
-    REVOKE EXECUTE ON FUNCTION public.economy_post_transaction(uuid, text, text, text, jsonb, boolean) FROM moneyverse_app;
+    REVOKE EXECUTE ON FUNCTION public.economy_post_transaction(uuid, text, uuid, text, jsonb, text, jsonb) FROM moneyverse_app;
   END IF;
 END $$;
 
 -- 2. [R02] Ensure system treasury operational cash account exists in public.accounts
-DO $$
-DECLARE
-  v_treasury_system_user_id uuid;
-  v_treasury_account_id uuid;
-BEGIN
-  -- Get or create system treasury owner user
-  SELECT id INTO v_treasury_system_user_id
-  FROM public.users
-  WHERE role = 'SYSTEM'
-  LIMIT 1;
-
-  IF v_treasury_system_user_id IS NOT NULL THEN
-    -- Ensure treasury cash account exists
-    IF NOT EXISTS (
-      SELECT 1 FROM public.accounts
-      WHERE account_type = 'SYSTEM_TREASURY'::public.account_type
-         OR (account_type = 'SYSTEM_SETTLEMENT'::public.account_type AND owner_user_id = v_treasury_system_user_id)
-    ) THEN
-      INSERT INTO public.accounts (
-        id, owner_user_id, account_type, status, currency, created_at, updated_at
-      ) VALUES (
-        gen_random_uuid(),
-        v_treasury_system_user_id,
-        'SYSTEM_SETTLEMENT'::public.account_type,
-        'active'::public.account_status,
-        'WLD',
-        pg_catalog.clock_timestamp(),
-        pg_catalog.clock_timestamp()
-      ) RETURNING id INTO v_treasury_account_id;
-
-      INSERT INTO public.account_balances (
-        account_id, available_amount, hold_amount, updated_at
-      ) VALUES (
-        v_treasury_account_id,
-        1000000000,
-        0,
-        pg_catalog.clock_timestamp()
-      ) ON CONFLICT (account_id) DO NOTHING;
-    END IF;
-  END IF;
-END $$;
+-- TREASURY account is native to moneyverse accounts enum ('TREASURY')
 
 -- 3. [R02] Refactor treasury_deposit_donation to record double-entry ledger transactions
 CREATE OR REPLACE FUNCTION public.treasury_deposit_donation(
@@ -101,12 +61,11 @@ BEGIN
     RAISE EXCEPTION '보유 잔액(% WLD)이 기부 요청액(% WLD)보다 부족합니다', v_user_bal, v_amount;
   END IF;
 
-  -- 국고 결제 계정 조회
+  -- 국고 결제 계정 조회 (TREASURY enum)
   SELECT id INTO v_treasury_account_id
   FROM public.accounts
-  WHERE account_type IN ('SYSTEM_TREASURY'::public.account_type, 'SYSTEM_SETTLEMENT'::public.account_type)
+  WHERE account_type = 'TREASURY'::public.account_type
     AND status = 'active'::public.account_status
-  ORDER BY created_at ASC
   LIMIT 1;
 
   -- 유저 잔액 차감
