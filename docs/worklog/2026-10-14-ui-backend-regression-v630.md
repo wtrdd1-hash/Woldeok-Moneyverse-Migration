@@ -13,3 +13,7 @@
 
 ## S3 release evidence
 - Commit, publication, CI and Test/Production status are recorded in the host log and PR. Until exactly reproducible CI and dedicated Test frontend/backend/DB acceptance, release gate is BLOCKED.
+
+## S4 backend security verification
+- GitHub CI flagged seven backend failures: corrected four stale v629 synthetic-execution expectations (9/9 focused green), isolated three genuine Postgres ACL mismatches to migration 260–269 grants.
+- Forward-only migration 270 authored, no backediting applied migrations. The migration cannot be considered accepted until CI's disposable DB tests and independent Test flows pass; runtime may fail closed for newer unaudited direct-write endpoints.
