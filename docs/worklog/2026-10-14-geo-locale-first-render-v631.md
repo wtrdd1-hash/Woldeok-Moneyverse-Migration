@@ -43,3 +43,10 @@ Dedicated branch `fix/geo-locale-first-render-v2026.10.14.631`; concurrent agent
 ## Mid-work correctness review
 - Explicit URL must outrank a previously saved manual cookie in BOTH proxy and SSR. Fixed SSR resolver precedence: validated proxy request header first, then cookies only as a fallback.
 - Added spoofed header, explicit URL-over-cookie and crawler stability regression tests; targeted checks now **23/23 passing**.
+
+## End-of-cycle handoff (2026-10-14 KST)
+- GitHub Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/839 ; candidate commit `bdd84deb`.
+- Exact-candidate Next build PASS, 23 targeted tests PASS, contract build/typecheck PASS, ESLint 0 errors (1 pre-existing unused-import warning).
+- Final isolated frontend 3251 + Test backend 3100: first HTML KR=ko, JP=ja, CN=zh, US=en; manual `wdmv_locale=ko` over JP stayed `ko`; explicit `/en/features` over old `ko` cookie rendered `en`; backend health 200.
+- Refetched newer `origin/main=2465fcf7` (v225) and compared changed files: no overlap with locale/runtime source or planning index paths in this change. PR remains unmerged for release review.
+- **Final disposition:** GitHub candidate delivered; Production remains unchanged. Real visitor edge-country header and pre-existing signed-in session continuity are still required for promotion; do not claim rollout.
