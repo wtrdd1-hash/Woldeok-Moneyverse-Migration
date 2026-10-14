@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ADMIN_AREAS } from '../app/admin/areas';
 import { ADMIN_TABS, activeAdminTab } from './admin-sub-nav';
+import { ALL_ADMIN_ROUTES } from './admin-quick-jumper-modal';
 
 describe('activeAdminTab', () => {
   it('lights the overview only on its own path', () => {
@@ -36,5 +37,23 @@ describe('admin navigation inventory', () => {
     const topLevelAreas = ADMIN_AREAS.filter((area) => area.href.split('/').length === 3);
 
     expect(topLevelAreas.map((area) => area.href).filter((href) => !tabHrefs.has(href))).toEqual([]);
+  });
+});
+
+
+describe('blog administrator entry point', () => {
+  it('exposes the existing /admin/blog page in all three navigation inventories', () => {
+    expect(ADMIN_TABS.find((tab) => tab.href === '/admin/blog')?.label).toBe('블로그 관리');
+    expect(ALL_ADMIN_ROUTES.find((route) => route.href === '/admin/blog')?.label).toBe('블로그 관리');
+    expect(ADMIN_AREAS.find((area) => area.href === '/admin/blog')?.title).toContain('블로그 관리');
+    expect(activeAdminTab('/admin/blog')).toBe('/admin/blog');
+  });
+
+  it('keeps quick-jumper entries unique and includes each top-level admin tab', () => {
+    const jumpHrefs = ALL_ADMIN_ROUTES.map((route) => route.href);
+    expect(new Set(jumpHrefs).size).toBe(jumpHrefs.length);
+    for (const tab of ADMIN_TABS) {
+      expect(jumpHrefs).toContain(tab.href);
+    }
   });
 });
