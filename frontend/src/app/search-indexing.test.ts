@@ -33,14 +33,24 @@ describe('public search surface', () => {
     expect(urls).toContain('https://easy-scraping.com/stocks/CHIPS');
     expect(urls.length).toBeGreaterThanOrEqual(35);
 
-    // Check multilingual alternates (hreflang)
+    // Base Korean routes declare locale alternatives. Already localized URLs
+    // must not declare bogus /en/en/, /ja/ja/ or /zh/zh/ paths.
     for (const entry of entries) {
-      expect(entry.alternates?.languages).toBeDefined();
-      expect(entry.alternates?.languages?.ko).toBeDefined();
-      expect(entry.alternates?.languages?.en).toBeDefined();
-      expect(entry.alternates?.languages?.ja).toBeDefined();
-      expect(entry.alternates?.languages?.zh).toBeDefined();
-      expect(entry.alternates?.languages?.['x-default']).toBe(entry.url);
+      const relativePath = entry.url.slice('https://easy-scraping.com'.length);
+      if (/^\/(en|ja|zh)(\/|$)/.test(relativePath)) {
+        expect(entry.alternates).toBeUndefined();
+        continue;
+      }
+      const languages = entry.alternates?.languages;
+      expect(languages).toBeDefined();
+      expect(languages?.ko).toBeDefined();
+      expect(languages?.en).toBeDefined();
+      expect(languages?.ja).toBeDefined();
+      expect(languages?.zh).toBeDefined();
+      expect(languages?.['x-default']).toBe(entry.url);
+      for (const alternate of Object.values(languages || {})) {
+        expect(alternate).not.toMatch(/\/(en|ja|zh)\/\1(?:\/|$)/);
+      }
     }
 
     // Public finance routes are indexed; member-only and private pages stay out of sitemap

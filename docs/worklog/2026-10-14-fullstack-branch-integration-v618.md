@@ -22,3 +22,6 @@
 - Verify exact SHA in isolated Test for both backend and frontend, DB connectivity, preexisting session continuity, noindex and runtime logs before any Production handoff.
 - Production zero-downtime canary and DB/ledger proof are mandatory. Preserve rollback and Discord bot. Do not claim or force promotion when a required gate is BLOCKED.
 - Do not delete non-merged or independently active branches. Capture Test, Production and cleanup results in a closing checkpoint.
+
+## Regression finding — 14:55 KST
+- Typecheck and full production build passed. Frontend suite: 1,177 pass / 1 fail. SEO sitemap v606 deliberately omits alternates on already-localized routes; old test incorrectly assumed every route has alternatives. Updated test to enforce base-locale alternate presence and prohibit duplicate locale prefixes on localized paths. No runtime code was changed for this assertion repair.
