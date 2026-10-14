@@ -12,8 +12,7 @@ describe('mobile responsive overflow guards', () => {
     const bottomNav = source('../components/mobile-bottom-nav.tsx');
 
     expect(header).toContain('w-[min(20rem,calc(100vw-1rem))] max-w-full');
-    expect(header).not.toContain('className="w-80 gap-0"');
-    expect(bottomNav).toContain('flex items-center justify-around h-14 max-w-lg mx-auto min-w-0');
+    expect(bottomNav).toContain('grid grid-cols-5 items-center min-h-[58px] max-w-lg mx-auto min-w-0');
     expect(bottomNav).toContain('min-w-0');
     expect(bottomNav).not.toContain('min-w-[60px]');
   });

@@ -61,6 +61,7 @@ export const ALL_ADMIN_ROUTES: readonly AdminRouteMeta[] = [
   { href: '/admin/money-flow', label: '유저 자금 흐름 관제', description: '전체 유저 입출금, 주식, 상점, 급여, 카지노 실시간 원장 추적', category: '거시 경제 & 국고', icon: ArrowLeftRight },
   { href: '/admin/economy/scenario-lab', label: '경제 시나리오 랩', description: 'M2 통화량 시뮬레이션 및 다중 AI Council 심의 평가', category: '거시 경제 & 국고', icon: FileSpreadsheet },
   { href: '/admin/treasury', label: '국고·비축금', description: '2,500만 WLD 앵커, 85% 현금 정상화 및 자율 세수 회수', category: '거시 경제 & 국고', icon: Vault },
+  { href: '/admin/treasury/grants', label: '창업 지원금 심사', description: '창업 지원금 신청 기록 조회 및 관리 (지급 일시중단)', category: '거시 경제 & 국고', icon: Vault },
   { href: '/admin/enterprises', label: '공기업·지배구조', description: 'WSHC 산하 에너지/인프라/금융 3사 30% 배당 및 알리오 공시', category: '거시 경제 & 국고', icon: Building },
   { href: '/admin/bonds', label: '국채 거래소', description: '대한민국 국채(KTB) 3종 발행, 24시간 레포 대출 및 이자 지급', category: '거시 경제 & 국고', icon: ScrollText },
   { href: '/admin/pension', label: '국민연금 (NPS)', description: '5단계 공적 연금 적립, 국고 100% 매칭 및 평생 기초연금', category: '거시 경제 & 국고', icon: HeartHandshake },
