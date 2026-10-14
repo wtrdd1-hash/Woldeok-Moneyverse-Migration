@@ -2079,3 +2079,38 @@
 2. `cmd.exe /c "pnpm --filter backend typecheck"` 및 `pnpm --filter frontend typecheck"` 0 에러 통과.
 3. `node --check` 봇 구문 검증 및 무중단 상주 시스템 유지 확인.
 4. Git 커밋, `main` 브랜치 fast-forward 통합, 작업 브랜치 삭제, `origin main` 원격 푸시 완료.
+
+
+---
+
+## 🚀 [v226 Specification] 전사 열린 PR 12종 전수 통합, 모바일 API 계약 정합성 복구, 마이그레이션 충돌 해소 및 main 운영 승격 검증
+
+### 1. 현황 및 통합 목표
+1. **[열린 PR 12종 전수 통합 및 브랜치 정리]**:
+   - 기존 서브에이전트 및 자동화 태스크에 의해 분기되었던 주요 PR 12종(#825, #827, #829, #830, #831, #832, #834, #835, #836, #837, #838, #839)의 핵심 변경점 전수 검토 및 충돌 해결 통합.
+   - #825 (Fullstack Release v618 통합)
+   - #827 (유지보수 공지 문서 v620 통합)
+   - #829 (PostgreSQL 아웃박스 보존 및 VACUUM 튜닝 v622 통합)
+   - #830 (서비스 UI 리뷰 v624 감사 통합)
+   - #831 (WLD 오버플로 및 정밀도 방어 v625 통합)
+   - #832 (UI-백엔드 접근성 감사 v628 통합)
+   - #834 (UI 백엔드 회귀 복구 및 프론트엔드 테스트 1173/1173 통과 v630 통합)
+   - #835 (관리자 블로그 메뉴 v620 통합)
+   - #836 (관리자 퀵 점퍼 모달 클리핑 방지 v626 통합)
+   - #837 (전사 시스템 실시간 재분석 감사 v633 통합)
+   - #838 (블로그 화면 중첩 SiteShell 제거 및 관리자 메뉴 정비 v634 통합)
+   - #839 (GeoIP 초기 국가별 언어 자동 선택 및 SSR/클라이언트 일관성 복구 v631 통합)
+2. **[모바일 API 컨트랙트 및 스키마 레퍼런스 무결성 복구]**:
+   - 중앙은행(`central-bank`) 엔드포인트 신설로 인한 `docs/mobile-api-contract.json`, `docs/mobile-api-schema-reference.md`, `docs/mobile-api-schema-reference.ko.md` 드리프트 해소 (`api:contract:generate && api:contract:check` 100% 일치 확인).
+3. **[DB 마이그레이션 번호 충돌 해소]**:
+   - PR #829의 `270-outbox-retention-and-vacuum.sql`과 PR #834의 보안 경계 마이그레이션 간 번호 중복을 `271-reconcile-post-233-security-boundaries.sql`로 재정렬하여 단조 증가 시퀀스 보장.
+4. **[빌드 및 타입체크 100% 무결성 검증]**:
+   - 백엔드 `nest build` 성공 (0 Errors)
+   - 프론트엔드 `tsc --noEmit` 정적 타입 검사 성공 (0 Errors)
+
+### 2. 검증 계획
+1. Git 커밋 내역 및 클린 워킹 트리 확인
+2. `feat/integrate-all-prs-v226` 브랜치를 `main`으로 fast-forward 통합
+3. 작업 브랜치 안전 삭제 (`git branch -d`)
+4. `origin/main`으로 원격 푸시 및 GitHub Actions CI 통과 모니터링
+5. 원격 운영 서버 시스템 가동 상태 점검 및 최종 운영 승격 완료 보고
