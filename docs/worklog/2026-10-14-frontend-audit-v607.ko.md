@@ -25,3 +25,11 @@
 - 전체 프론트엔드 테스트: 215파일 중 197 통과/18 실패, 1178개 중 1144 통과/34 실패 (NODE_ENV=test). 모바일 반응형, 관리자 반응형, SEO, 알림, 카지노, 계산기 등 미해결.
 - 프론트엔드 typecheck 통과. 실브라우저 모바일 전수 테스트는 여전히 미완료.
 - 테스트 실행은 명시적 NODE_ENV=test로 수행했으며 시스템/운영 환경변수 변경 없음. 운영 승격 금지.
+
+## v610 모바일·관리자 UI 결함 수정
+- 시작/중간 origin/main c56af867, 통합 브랜치 격리 유지.
+- 루트 layout.tsx에서 관리자에서도 렌더되던 FloatingSupportChatWidget을 RouteAwareFloatingUtilities로 교체; 관리자에서 온보딩/고객지원 플로팅 요소를 렌더하지 않도록 경로 차단.
+- MobileBottomNav를 grid-cols-5, min-h-[58px] 및 min-h-[44px] 터치 영역으로 변경; 중복된 min-w 규칙 제거.
+- 관리자 하위 메뉴의 가로 스크롤 가드는 실제 min-w-0 코드에 맞춰 테스트 기대값 갱신.
+- NODE_ENV=test 모바일/관리자 반응형 17/17 통과, 전체 프론트엔드 1178 중 1148 통과/30 실패(이전 34 실패), typecheck 통과, production Next build 통과.
+- 실브라우저 화면 캡처 및 인증 E2E/백엔드 테스트 미실행. Test/Production 승격 없음. 전체 UI 승인 BLOCKED.
