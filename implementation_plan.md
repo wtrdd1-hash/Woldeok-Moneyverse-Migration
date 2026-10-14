@@ -1996,3 +1996,53 @@
 ### 3. 검증 계획
 1. 마크다운 파일 무결성 및 링크 유효성 검증
 2. Git 브랜치 상태 점검 (`main` 병합, 작업 브랜치 삭제, 원격 푸시)
+
+
+---
+
+## 🚀 [v224 Specification] 국가조폐국(National Mint)과 국가중앙은행(Central Bank)의 제도적·아키텍처적 완전 분리
+
+### 1. 현황 및 기획 배경
+- **현상 문제점**: 기존 시스템은 국고(Treasury), 화폐 발행(주조), 은행 여수신(예대마진)이 단일 국고 및 상업은행 모듈에 혼재되어 현실 국가 금융 체계(조폐국-중앙은행-시중은행의 3자 분립)의 상호 견제 및 투명성이 부족했음.
+- **분리 목표 (3자 분립 거버넌스)**:
+  1. **국가조폐국 (National Mint Bureau)**:
+     - 본원통화(M0)의 물리적/기술적 주조(Minting) 배치 관리
+     - 화폐 주조차익(Seigniorage) 전용 원장 계산 및 공시
+     - 통화 영구 소각(Destroy/Sinks) 공인 인증서 발급
+     - *절대 은행업(여수신) 및 금리 결정 불가*
+  2. **국가중앙은행 (Central Bank)**:
+     - 조폐국 주조 M0 화폐의 인수 및 국고 방출 승인(2단계 견제, 2FA 결재)
+     - 거시경제 통화량 지표(M0 본원통화, M1 협의통화, M2 광의통화) 실시간 산출
+     - 기준금리(Base Interest Rate) 공시 및 테일러 룰(Taylor Rule) 산출
+     - 시중 상업은행(Commercial Bank) 지급준비율(Reserve Requirement Ratio) 규제 집행
+  3. **시중 상업은행 (Commercial Banks / 유저 여수신)**:
+     - 일반 유저 대상 예금, 적금, 신용 대출(중앙은행 기준금리 + 가산금리 스프레드) 수행
+
+### 2. 세부 개발 파일 및 명세
+1. **[국가조폐국 모듈 (`backend/src/mint/`)]**:
+   - `mint.controller.ts`:
+     - `POST /api/v1/mint/batches`: 본원통화 M0 주조 요청 생성
+     - `GET /api/v1/mint/batches`: 주조 배치 목록 및 중앙은행 인수 상태 조회
+     - `GET /api/v1/mint/seigniorage`: 주조차익 원장 및 통계 조회
+     - `POST /api/v1/mint/burn`: 영구 소각(Sinks) 증적 발급 및 소각 원장 기록
+     - `GET /api/v1/mint/audit-certificates`: 소각/주조 공인 감사 인증서 조회
+   - `mint.service.ts`: 주조 배치 발행, 시뇨리지 계산, 위변조 방지 해시 서명
+   - `mint.module.ts`: NestJS 모듈 등록
+2. **[국가중앙은행 모듈 (`backend/src/central-bank/`)]**:
+   - `central-bank.controller.ts`:
+     - `POST /api/v1/central-bank/mint-batches/:id/accept`: 조폐국 화폐 인수 및 국고 유통 승인
+     - `GET /api/v1/central-bank/monetary-aggregates`: M0, M1, M2 실시간 통화량 지표
+     - `GET /api/v1/central-bank/base-rate`: 기준금리 및 인플레이션 테일러 룰 조회
+     - `PUT /api/v1/central-bank/base-rate`: 기준금리 결정 공시 (운영진)
+     - `GET /api/v1/central-bank/reserve-requirement`: 시중은행 지급준비율 조회 및 설정
+   - `central-bank.service.ts`: 통화량 집계, 기준금리 및 지준율 관리
+   - `central-bank.module.ts`: NestJS 모듈 등록
+3. **[앱 모듈 바인딩 (`backend/src/app.module.ts`)]**:
+   - `MintModule`, `CentralBankModule` 정규 임포트
+4. **[Cloudflare R2 스냅샷 백업 연동 (`scripts/backup/r2-monetary-snapshot.sh`)]**:
+   - 일일 M0/M1/M2 및 주조차익 스냅샷 R2 아카이빙 스크립트 구축
+
+### 3. 검증 계획
+1. 백엔드 및 모듈 단위 테스트 작성 (`mint.service.test.ts`, `central-bank.service.test.ts`)
+2. `tsc --noEmit` 정적 타입 검사 100% 통과
+3. Git 브랜치 통합 및 삭제 규칙 준수 후 원격 푸시

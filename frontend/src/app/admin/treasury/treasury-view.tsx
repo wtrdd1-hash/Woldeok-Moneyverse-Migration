@@ -25,6 +25,8 @@ import { TreasuryBuybackDialog } from './treasury-buyback-dialog';
 import { TreasuryDisburseDialog } from './treasury-disburse-dialog';
 import { TreasuryOperationsDialog } from './treasury-operations-dialog';
 import { TreasuryWealthTaxDialog } from './treasury-wealth-tax-dialog';
+import { NationalMintPanel } from '@/components/admin/national-mint-panel';
+import { CentralBankPanel } from '@/components/admin/central-bank-panel';
 
 interface Props {
   readonly overview: AdminTreasuryOverview;
@@ -121,6 +123,7 @@ type LedgerFilterType = 'ALL' | 'OUTFLOW' | 'INFLOW' | 'BURN' | 'STOCK';
 
 export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) {
   const [filterType, setFilterType] = useState<LedgerFilterType>('ALL');
+  const [institutionalTab, setInstitutionalTab] = useState<'TREASURY' | 'MINT' | 'CENTRAL_BANK'>('TREASURY');
 
   const filteredLedger = ledger.filter((entry) => {
     if (filterType === 'ALL') return true;
@@ -151,7 +154,39 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
 
   return (
     <div className="grid gap-6">
-      {/* 1. 국고 총 잔액 및 비축률 지표 */}
+      {/* 국가 금융 3대 기관 분리 탭 네비게이션 */}
+      <div className="flex flex-wrap items-center gap-2 p-1.5 bg-muted/60 rounded-lg border shadow-xs">
+        <Button
+          variant={institutionalTab === 'TREASURY' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setInstitutionalTab('TREASURY')}
+          className="text-xs font-semibold"
+        >
+          🏛️ 국고 원장 (National Treasury)
+        </Button>
+        <Button
+          variant={institutionalTab === 'MINT' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setInstitutionalTab('MINT')}
+          className="text-xs font-semibold"
+        >
+          🪙 국가조폐국 (National Mint Bureau)
+        </Button>
+        <Button
+          variant={institutionalTab === 'CENTRAL_BANK' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setInstitutionalTab('CENTRAL_BANK')}
+          className="text-xs font-semibold"
+        >
+          🏦 국가중앙은행 (Central Bank)
+        </Button>
+      </div>
+
+      {institutionalTab === 'MINT' && <NationalMintPanel />}
+      {institutionalTab === 'CENTRAL_BANK' && <CentralBankPanel />}
+      {institutionalTab === 'TREASURY' && (
+        <>
+          {/* 1. 국고 총 잔액 및 비축률 지표 */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border shadow-sm">
           <CardHeader className="p-4 pb-2">
@@ -791,6 +826,8 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }

@@ -45,6 +45,8 @@ import { ClubModule } from './club/club.module';
 import { CollectionModule } from './collection/collection.module';
 import { SeoModule } from './seo/seo.module';
 import { AdvisorModule } from './advisor/advisor.module';
+import { MintModule } from './mint/mint.module';
+import { CentralBankModule } from './central-bank/central-bank.module';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -91,6 +93,8 @@ const ONE_MINUTE_MS = 60_000;
     DiscordAlertModule,
     ActivityModule,
     SchedulerModule,
+    MintModule,
+    CentralBankModule,
     // Process-local, exactly as in the original application. That is correct
     // for the single-instance deployment and becomes N times weaker on any
     // scale-out: a known limitation, tracked rather than overlooked. A shared
