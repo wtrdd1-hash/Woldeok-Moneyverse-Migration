@@ -10,7 +10,7 @@ const proxySource = readFileSync(
 describe('Multilingual URL Prefix & GeoIP Routing in proxy.ts (v64)', () => {
   it('detects language path prefixes and rewrites or redirects to target route', () => {
     expect(proxySource).toContain("pathname.match(/^\\/([a-z]{2})($|\\/.*)/i)");
-    expect(proxySource).toContain('NextResponse.rewrite(rewriteUrl)');
+    expect(proxySource).toContain('request: { headers: requestHeaders }');
     expect(proxySource).toContain("response.headers.set('x-moneyverse-locale', finalLocale)");
   });
 

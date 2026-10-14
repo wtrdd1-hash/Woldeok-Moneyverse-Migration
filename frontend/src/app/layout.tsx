@@ -25,13 +25,8 @@ import { POINT_PREFERENCE_SCRIPT } from '@/lib/theme';
 import { jsonLd } from '@/lib/json-ld';
 import { homeAdSense } from '@/lib/adsense';
 import { cookies } from 'next/headers';
-import {
-  DEFAULT_LOCALE,
-  DETECTED_LOCALE_COOKIE,
-  LOCALE_COOKIE,
-  type Locale,
-  isLocale,
-} from '@/lib/locale';
+import { getServerLocale } from '@/lib/locale-server';
+import type { Locale } from '@/lib/locale';
 import { CURRENCY_COOKIE, type Currency, isCurrency } from '@/lib/currency';
 import { canonicalUrl as _canonicalUrl, webApplicationJsonLd } from '@/lib/seo';
 // Keep the downloaded Bootstrap distribution quarantined in styles/vendor.
@@ -175,11 +170,7 @@ const META_BY_LOCALE = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const cookieStore = await cookies();
-  const rawLocale =
-    cookieStore.get(LOCALE_COOKIE)?.value ||
-    cookieStore.get(DETECTED_LOCALE_COOKIE)?.value;
-  const locale = isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
+  const locale = await getServerLocale();
   const meta = META_BY_LOCALE[locale];
 
   return {
@@ -300,9 +291,7 @@ function getSiteStructuredData(locale: Locale) {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
-  const explicit = cookieStore.get(LOCALE_COOKIE)?.value;
-  const detected = cookieStore.get(DETECTED_LOCALE_COOKIE)?.value;
-  const locale = isLocale(explicit) ? explicit : isLocale(detected) ? detected : DEFAULT_LOCALE;
+  const locale = await getServerLocale();
   const rawCurrency = cookieStore.get(CURRENCY_COOKIE)?.value;
   const initialCurrency: Currency | undefined = isCurrency(rawCurrency) ? rawCurrency : undefined;
   const [viewer, policy] = await Promise.all([currentViewer(), fetchLatestPolicy()]);
@@ -365,7 +354,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           본문으로 건너뛰기
         </a>
-        <LocaleProvider>
+        <LocaleProvider initialLocale={locale}>
           <CurrencyProvider initialCurrency={initialCurrency}>
             <Suspense fallback={null}>
               <ActivityTracker />

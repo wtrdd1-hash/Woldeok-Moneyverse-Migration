@@ -1,5 +1,12 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.14.631 — GeoIP initial locale repair candidate
+
+- [Worklog (EN)](docs/worklog/2026-10-14-geo-locale-first-render-v631.md) · [작업기록 (KO)](docs/worklog/2026-10-14-geo-locale-first-render-v631.ko.md)
+- [GitHub update (EN)](docs/updates/v2026.10.14.631-github.md) · [GitHub 업데이트 (KO)](docs/updates/v2026.10.14.631-github.ko.md) · [Internal (EN)](docs/updates/v2026.10.14.631-internal.md) · [내부 (KO)](docs/updates/v2026.10.14.631-internal.ko.md)
+- Status: standalone candidate tested; not yet a Production deployment.
+
+
 
 ## 2026-10-14 전체 소스·보안 감사 (v2026.10.14.603)
 

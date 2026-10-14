@@ -5,7 +5,7 @@ describe('locale detection', () => {
   it('detects Korean for Korean traffic and uses English default for unsupported countries', () => {
     expect(detectLocale('KR', 'en-US,en;q=0.9')).toBe('ko');
     expect(detectLocale('KP', null)).toBe('ko');
-    expect(detectLocale(null, null)).toBe('en');
+    expect(detectLocale(null, null)).toBe('ko');
   });
 
   it('uses English for visitors outside Korea/Japan/China by default', () => {

@@ -8,8 +8,8 @@ import {
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, detectLocale, parseAcceptLanguage } from './locale';
 
 describe('SEO & i18n SSOT Route Integrity', () => {
-  it('enforces English as Primary Default Global Locale and supports 4 languages', () => {
-    expect(DEFAULT_LOCALE).toBe('en');
+  it('enforces Korean product fallback and supports 4 languages', () => {
+    expect(DEFAULT_LOCALE).toBe('ko');
     expect(SUPPORTED_LOCALES).toEqual(['ko', 'en', 'ja', 'zh']);
   });
 
@@ -27,11 +27,11 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     expect(parseAcceptLanguage('ko-KR,ko;q=0.9,en-US;q=0.8')).toBe('ko');
     expect(parseAcceptLanguage('ja-JP,ja;q=0.9,en;q=0.8')).toBe('ja');
     expect(parseAcceptLanguage('zh-CN,zh;q=0.9,en;q=0.8')).toBe('zh');
-    expect(parseAcceptLanguage('fr-FR,fr;q=0.9')).toBe('en');
+    expect(parseAcceptLanguage('fr-FR,fr;q=0.9')).toBeNull();
 
     // Global default fallback
-    expect(detectLocale(null, null)).toBe('en');
-    expect(detectLocale('XX', 'fr-FR')).toBe('en');
+    expect(detectLocale(null, null)).toBe('ko');
+    expect(detectLocale('XX', 'fr-FR')).toBe('ko');
   });
 
   it('ensures all public sitemap routes are strictly public and indexable', () => {

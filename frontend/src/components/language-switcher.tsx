@@ -36,7 +36,7 @@ export function LanguageSwitcher({
   readonly className?: string;
   readonly compact?: boolean;
 }) {
-  const { locale, setLocale } = useLocale();
+  const { locale, setLocale, resetLocaleToAuto } = useLocale();
   const { currency, setCurrency } = useCurrency();
 
   const handleLanguageChange = (newLocale: Locale) => {
@@ -59,6 +59,13 @@ export function LanguageSwitcher({
     en: 'Language',
     ja: '言語 (Language)',
     zh: '语言 (Language)',
+  };
+
+  const automaticLabel: Record<Locale, string> = {
+    ko: '자동 감지 (접속 국가·브라우저)',
+    en: 'Automatic (country & browser)',
+    ja: '自動判定 (国・ブラウザー)',
+    zh: '自动识别 (国家及浏览器)',
   };
 
   const currencyLabelMap: Record<Locale, string> = {
@@ -108,6 +115,13 @@ export function LanguageSwitcher({
         <div className="px-3 py-1 text-[11px] font-semibold text-muted-foreground">
           {langLabelMap[locale] || 'Language'}
         </div>
+        <DropdownMenuItem
+          onSelect={resetLocaleToAuto}
+          className="min-h-11 rounded-xl px-3 font-medium transition-colors cursor-pointer"
+        >
+          <Globe2 className="size-4 text-amber-500" />
+          <span className="ml-2 text-xs font-semibold">{automaticLabel[locale]}</span>
+        </DropdownMenuItem>
         {LANGUAGE_OPTIONS.map((option) => (
           <DropdownMenuItem
             key={option.value}
