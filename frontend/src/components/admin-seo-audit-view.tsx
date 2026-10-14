@@ -46,7 +46,7 @@ export function AdminSeoAuditView() {
     setError(null);
     try {
       const response = await fetch('/api/admin/seo-audit', {
-        credentials: 'same-origin', cache: 'no-store', signal,
+        credentials: 'same-origin', cache: 'no-store', ...(signal ? { signal } : {}),
       });
       if (!response.ok) throw new Error(response.status === 401 || response.status === 403
         ? '관리자 콘솔 인증이 필요합니다.' : '수집 감사 정보를 가져오지 못했습니다.');
