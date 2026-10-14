@@ -115,13 +115,61 @@ export function TossStyleSocialFeed() {
   const [userReactions, setUserReactions] = useState<Record<string, Record<string, boolean>>>({});
   const [isWriteOpen, setIsWriteOpen] = useState(false);
 
+  // 실제 사용자 포트폴리오 보유 종목 DB 상태
+  const [userHoldings, setUserHoldings] = useState<Record<string, { quantity: number; avgCostPrice: number; returnPct: number }>>({});
+  const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(false);
+
   // 작성 폼 상태
   const [newSymbol, setNewSymbol] = useState('CHIPS');
   const [newContent, setNewContent] = useState('');
   const [newStance, setNewStance] = useState<'bullish' | 'bearish' | 'neutral'>('bullish');
   const [newCategory, setNewCategory] = useState<'전략' | '일지' | '질문' | '잡담'>('전략');
 
+  // 포트폴리오 DB 실시간 자동 조회
+  React.useEffect(() => {
+    let mounted = true;
+    async function loadPortfolio() {
+      setIsLoadingPortfolio(true);
+      try {
+        const res = await fetch('/api/v1/stocks/portfolio', { credentials: 'include' });
+        if (res.ok) {
+          const data = (await res.json()) as {
+            holdings?: Array<{
+              symbol?: string;
+              quantity?: string | number;
+              avg_cost_price?: string | number;
+              return_pct?: string | number;
+            }>;
+          };
+          if (mounted && Array.isArray(data.holdings)) {
+            const map: Record<string, { quantity: number; avgCostPrice: number; returnPct: number }> = {};
+            for (const h of data.holdings) {
+              if (h.symbol) {
+                map[h.symbol.toUpperCase()] = {
+                  quantity: Number(h.quantity ?? 0),
+                  avgCostPrice: Number(h.avg_cost_price ?? 0),
+                  returnPct: Number(h.return_pct ?? 0),
+                };
+              }
+            }
+            setUserHoldings(map);
+          }
+        }
+      } catch {
+        // non-blocking for unauthenticated or guests
+      } finally {
+        if (mounted) setIsLoadingPortfolio(false);
+      }
+    }
+    loadPortfolio();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const symbols = ['ALL', 'CHIPS', 'WDG', 'SPACE', 'WFIN', 'MYUY', 'DUCK'];
+
+  const currentHolding = userHoldings[newSymbol.toUpperCase()];
 
   const filteredPosts = posts.filter((p) => {
     if (selectedSymbol !== 'ALL' && p.stockSymbol !== selectedSymbol) return false;
@@ -159,12 +207,18 @@ export function TossStyleSocialFeed() {
     e.preventDefault();
     if (!newContent.trim()) return;
 
+    const isHolder = Boolean(currentHolding && currentHolding.quantity > 0);
+    const returnRate = isHolder
+      ? currentHolding!.returnPct
+      : newStance === 'bullish' ? 0.0 : newStance === 'bearish' ? -0.0 : 0.0;
+    const entryPrice = isHolder ? currentHolding!.avgCostPrice : 0;
+
     const newPost: FeedPost = {
       id: `feed-${Date.now()}`,
-      authorName: '나 (Investor)',
-      authorBadge: '실전 투자자',
-      returnRatePercent: newStance === 'bullish' ? 15.4 : newStance === 'bearish' ? -8.2 : 0.0,
-      isVerifiedHolder: true,
+      authorName: '나 (실전 투자자)',
+      authorBadge: isHolder ? '인증 주주' : '시장 관망자',
+      returnRatePercent: returnRate,
+      isVerifiedHolder: isHolder,
       stockSymbol: newSymbol,
       stockName:
         newSymbol === 'CHIPS'
@@ -176,18 +230,36 @@ export function TossStyleSocialFeed() {
               : newSymbol === 'WFIN'
                 ? '월덱 파이낸셜'
                 : '가상 우량주',
-      entryPrice: 3500,
+      entryPrice,
       stance: newStance,
       category: newCategory,
       content: newContent.trim(),
       createdAt: '방금 전',
-      reactions: { flame: 1, rocket: 2, droplet: 0 },
+      reactions: { flame: 1, rocket: 1, droplet: 0 },
       commentsCount: 0,
     };
 
     setPosts([newPost, ...posts]);
     setNewContent('');
     setIsWriteOpen(false);
+
+    // 백엔드 게시판 동기화 백그라운드 호출
+    try {
+      fetch('/api/v1/board/stock-posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `[${newSymbol} 주주 피드] ${newContent.slice(0, 30)}...`,
+          body: newContent,
+          stockSymbol: newSymbol,
+          category: newCategory === '전략' ? 'analysis' : 'journal',
+          stance: newStance,
+          positionDisclosure: isHolder ? 'holder' : 'no_position',
+        }),
+      }).catch(() => {});
+    } catch {
+      // non-blocking
+    }
   };
 
   return (
@@ -276,6 +348,21 @@ export function TossStyleSocialFeed() {
                 <option value="잡담">주주 수다</option>
               </select>
             </div>
+          </div>
+
+          {/* DB 실시간 인증 상태 안내 */}
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs">
+            <span className="text-slate-400">포트폴리오 DB 연동 상태:</span>
+            {currentHolding && currentHolding.quantity > 0 ? (
+              <span className="text-emerald-400 font-semibold flex items-center gap-1.5 font-mono">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                실제 주주 인증 ({currentHolding.quantity.toLocaleString()}주 | 평단 {currentHolding.avgCostPrice.toLocaleString()} WLD | {currentHolding.returnPct > 0 ? '+' : ''}{currentHolding.returnPct.toFixed(1)}%)
+              </span>
+            ) : (
+              <span className="text-slate-400 font-medium">
+                미보유 종목 (시장 관망 포지션으로 자동 등록)
+              </span>
+            )}
           </div>
 
           <div>

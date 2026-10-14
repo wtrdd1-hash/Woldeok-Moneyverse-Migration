@@ -15,7 +15,8 @@ import {
   entersState,
 } from '@discordjs/voice';
 import http from 'node:http';
-import { MusicManager } from './music.js';
+import { MusicManager, MUSIC_COMMANDS } from './music.js';
+import { STOCK_SLASH_COMMANDS, handleStockInteraction } from './stock-commands.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../backend/.env') });
@@ -232,13 +233,15 @@ client.once(Events.ClientReady, async (c) => {
   const guild = await c.guilds.fetch(VOICE_GUILD_ID).catch(() => null);
   if (guild) {
     try {
-      await music.registerCommands(guild);
+      const allCommands = [...MUSIC_COMMANDS, ...STOCK_SLASH_COMMANDS];
+      await guild.commands.set(allCommands);
+      console.log(`[Commands] Registered ${allCommands.length} guild slash commands (Music: ${MUSIC_COMMANDS.length}, Stock: ${STOCK_SLASH_COMMANDS.length})`);
     } catch (error) {
-      console.error('[Music] Failed to register slash commands:', error.message);
-      await sendLog(`⚠️ 음악 명령어 등록 실패: ${error.message}`);
+      console.error('[Commands] Failed to register slash commands:', error.message);
+      await sendLog(`⚠️ 명령어 등록 실패: ${error.message}`);
     }
   } else {
-    console.warn(`[Music] Guild ${VOICE_GUILD_ID} unavailable; slash commands were not registered.`);
+    console.warn(`[Commands] Guild ${VOICE_GUILD_ID} unavailable; slash commands were not registered.`);
   }
 
   // 음성 채널 즉시 진입
@@ -285,10 +288,12 @@ client.once(Events.ClientReady, async (c) => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   try {
+    const handledStock = await handleStockInteraction(interaction);
+    if (handledStock) return;
     await music.handleInteraction(interaction);
   } catch (error) {
-    console.error('[Music] Interaction handling failed:', error.message);
-    const payload = { content: '음악 명령 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.' };
+    console.error('[Interaction] Interaction handling failed:', error.message);
+    const payload = { content: '명령 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.' };
     if (interaction.deferred || interaction.replied) {
       await interaction.editReply(payload).catch(() => {});
     } else {
