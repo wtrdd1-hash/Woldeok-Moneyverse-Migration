@@ -17,8 +17,8 @@
 - [x] Check new `origin/main` and isolate a task branch/worktree.
 - [x] Identify a measured, non-destructive optimization and add failing tests.
 - [x] Implement bounded outbox cleanup, forward-only migration 270 and test it on isolated synthetic PostgreSQL.
-- [ ] Run tests, security/parity/DB validation, Test readiness and main drift check.
-- [ ] Prepare both English and Korean documentation, internal/GitHub updates, and PR.
+- [x] Run unit/type/build/parity and synthetic DB SQL checks; exact Test and security integration are documented blockers.
+- [x] Prepare bilingual report and internal/GitHub updates; create pull request after last documentation commit.
 
 ## Mid-work checkpoint — 2026-10-14 KST
 
@@ -31,4 +31,4 @@
 
 ## Finished
 
-Pending exact-SHA Test acceptance and safe rollout. **No shared development schema migration or Production release has been executed.**
+Candidate implementation documented. **Full Test acceptance and Production release BLOCKED**: exact-v622-SHA backend health, live DB integration/security suites, full migration replay, backup/restore and session continuity are outstanding. Current Test pointer is test-v618; it was not changed. **No shared DEV schema migration or Production release has been executed.**

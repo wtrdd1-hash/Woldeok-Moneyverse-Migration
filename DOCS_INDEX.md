@@ -1,5 +1,12 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## 2026-10-14 PostgreSQL Outbox optimization candidate — v2026.10.14.622
+
+- [English database/backend investigation](docs/findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.md) · [한국어 진단 보고서](docs/findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.ko.md).
+- [Work detail](docs/worklog/2026-10-14-database-backend-optimization-v622.md) · [Internal update](docs/updates/v2026.10.14.622-internal.md) · [GitHub update](docs/updates/v2026.10.14.622-github.md).
+- **Isolated Test candidate only**. Migration 270 and backend cleanup need exact-SHA Test, DB security, backup, health and release gates before Production.
+
+
 
 ## 2026-10-14 전체 소스·보안 감사 (v2026.10.14.603)
 

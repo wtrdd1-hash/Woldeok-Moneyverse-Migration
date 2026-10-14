@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## PostgreSQL Outbox retention optimization — v2026.10.14.622 (isolated candidate)
+
+- Derived from the adopted v486 database architecture, not a replacement for v530 planning authority. PostgreSQL 17.11 DEV diagnosis: 957 MB DB, 213 MB Outbox, ~46,941 dead rows; expiry lookup scanned ~25,883 buffers in 36.158 ms.
+- Forward-only migration 270 adds a concurrently built partial index (delivered_at, id) and per-table 5% autovacuum thresholds. Backend scheduler performs parameterized 2,000-row batches, up to 25 daily, retaining all undelivered records and the 7-day delivery retention rule.
+- Isolated 260k-row synthetic Postgres Test passed SQL/index checks; backend build/typecheck and 1,165 non-DB tests passed; 391 DB-related tests skipped. This **does not** certify exact-SHA Test, Production readiness or release.
+- Details: [English report](../findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.md) / [Korean](../findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.ko.md), [worklog](../worklog/2026-10-14-database-backend-optimization-v622.md).
+
+
 ## Full-code security and correctness audit — v2026.10.14.603 (evidence only)
 
 - Source-only risk register SEC-603-01–14: shared fallback authorization value (conditional P0), missing admin backup role enforcement, repeatable DAO voting, unauthenticated IndexNow, non-atomic JSON stores, fabricated treasury payment success, mock indexing telemetry and Android credential hint. Full [English audit](../findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.md) and [Korean audit](../findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.ko.md).

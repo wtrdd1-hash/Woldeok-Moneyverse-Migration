@@ -1,5 +1,13 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## PostgreSQL Outbox 보존·성능 최적화 — v2026.10.14.622 (격리 구현 후보)
+
+- 기존 v486 데이터베이스 명세에 근거한 구현 후보이며 v530 통합 기획 권위를 대체하지 않는다. 개발 DB PostgreSQL 17.11, 957MB, Outbox 213MB, dead tuples 추정 약 46,941행 및 만료 조회 36.158ms/25,883버퍼를 확인했다.
+- 순차 마이그레이션 270은 배송 시각 부분 인덱스를 동시 생성하고 해당 테이블의 autovacuum을 5% 기준으로 튜닝한다. 백엔드는 2,000행씩 최대 25배치로 정리하며 미배송과 기존 7일 정책을 보호한다.
+- 분리된 합성 PostgreSQL Test에서 SQL·인덱스 검증, 백엔드 빌드·타입 검사 및 1,165개 테스트 통과. DB 관련 391개 건너뜀. **실제 Test 또는 운영 승격 승인 증거가 아니다.**
+- 근거: [한국어 상세 보고서](../findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.ko.md), [영문 정본](../findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.md), [작업 기록](../worklog/2026-10-14-database-backend-optimization-v622.md).
+
+
 ## 전체 코드·보안 위험 재감사 — v2026.10.14.603 (근거 기록 / 문서 전용)
 
 - SEC-603-01~14: 조건부 인증 고정 기본값(P0 후보), 관리자 백업 권한 검사 공백, 주민투표 반복, IndexNow 미인증, JSON 파일 동시성, 국고 지급 허위 성공, 관리자 SEO 가짜 수치, Android 테스트 계정 노출 등. [한국어 상세 보고서](../findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.ko.md) 및 [영문 정본](../findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.md).

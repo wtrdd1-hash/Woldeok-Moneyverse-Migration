@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## DB retention implementation candidate — v2026.10.14.622
+
+- Isolated candidate only: PostgreSQL 17 migration 270 provides a concurrent partial Outbox delivery-time index and per-table vacuum tuning; Nest scheduler bounds expiry deletion to 2,000 records x 25 daily transactions without touching undelivered events.
+- The existing database architecture and economy/ledger invariants remain authoritative. Isolated synthetic DB migration passed; 391 live DB tests skipped. Exact-SHA full Test and zero-downtime production release remain blocked pending verification.
+- [Research and acceptance record](../findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.md).
+
+
 ## Runtime / planning authority reconciliation — v2026.10.14.600 (documentation only)
 
 > Status: AUTHORITY_DRIFT. Planning authority remains v2026.10.05.530 until an explicit decision and its acceptance evidence supersede it. This record does **not** certify feature, Test, or Production acceptance.
