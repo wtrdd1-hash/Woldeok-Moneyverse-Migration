@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.14.625 — WLD precision implementation and residual acceptance gates
+
+- Adopt existing exact-money policy via string/BigInt boundaries across wallet, fiat, P2P/donation, burn draw and national pension; preserve integer-only requests, 95/5 pension allocation, fixed presentation FX rates and no arbitrary new wallet cap. See [technical findings](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md).
+- **Pending P0:** pension and other direct balance/vault mutations must be reconciled with canonical ledger and treasury availability/atomicity. **Pending P1:** stock league, market/auction, whale alerts, fixed-size SQL columns and legacy numeric JSON consumers need exact amount safety.
+- Branch test success is not production acceptance: full frontend tests fail, DB/security integration tests remain skipped, and exact-SHA isolated Test/session/rollback/financial reconciliation are outstanding. v530 planning authority is not superseded by this candidate.
+
+
 ## Runtime / planning authority reconciliation — v2026.10.14.600 (documentation only)
 
 > Status: AUTHORITY_DRIFT. Planning authority remains v2026.10.05.530 until an explicit decision and its acceptance evidence supersede it. This record does **not** certify feature, Test, or Production acceptance.

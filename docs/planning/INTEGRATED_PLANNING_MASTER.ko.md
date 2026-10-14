@@ -1,5 +1,12 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.14.625 — WLD 초대형 금액 오버플로 차단 (구현 후보)
+
+- 지갑 알림·참고 외화 표시·P2P/기부·소각·연금 납입/환급/지급에서 금액 문자열과 BigInt로 정밀도 손실을 차단. 보유 한도 추가 없음. [영문 정본](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md) / [국문 보고서](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md).
+- **P0 WLD-625-01:** 연금·계좌·국고 직접 UPDATE와 부족액 0 보정은 원장 보존 구조 수정 및 독립 DB 수용 시험 필요. 주식 리그·경매·bigint/Number 경로는 P1 잔여 과제.
+- 격리 브랜치 후보에 한정. 프론트 전체 회귀 및 DB/보안 수용 게이트 미충족. v530 기획 권위 유지, Test/운영 배포 미인증.
+
+
 ## 전체 코드·보안 위험 재감사 — v2026.10.14.603 (근거 기록 / 문서 전용)
 
 - SEC-603-01~14: 조건부 인증 고정 기본값(P0 후보), 관리자 백업 권한 검사 공백, 주민투표 반복, IndexNow 미인증, JSON 파일 동시성, 국고 지급 허위 성공, 관리자 SEO 가짜 수치, Android 테스트 계정 노출 등. [한국어 상세 보고서](../findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.ko.md) 및 [영문 정본](../findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.md).
