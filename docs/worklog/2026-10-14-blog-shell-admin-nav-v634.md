@@ -40,3 +40,11 @@
 - [ ] Integrate branch into fresh main, run exact-merged-SHA isolated Test, then perform zero-downtime Production promotion under `docs/RELEASING.md`.
 
 **Deployment state:** candidate branch only; no Test or Production promotion, no database writes, no Production symlink or active service changes. Unverified security and Test gates block Production promotion.
+
+## Concurrent-main reconciliation and CI follow-up — 2026-10-14 22:37–22:40 KST
+
+- Mid-work `origin/main` advanced from `28bd1e85e6c85094c00197f65bfd18fd2f44f7a5` to `2465fcf710c06c07ef9de2e0d1f7bb0fc1061f3e` (v225 macro/monetary blog update). The changes touched blog client/data but not this task's page/layout/nav paths. Rebasing the three task commits succeeded without conflicts. All subsequent checks are against the rebased tree.
+- First PR verification run failed at `pnpm api:contract:check` due already-stale generated API schema artifacts. Regenerated `docs/mobile-api-contract.json` and the EN/KO schema references (adds `local_email` identity provider and stable dice enumeration ordering) in a separate commit. Exact-tree `pnpm api:contract:check` now passes.
+- Rebased check: new regression tests 3/3 passed, TypeScript passed and optimized Next.js build passed.
+- An isolated Test-configured frontend process was launched transiently on loopback with existing Test environment files, without changing the `test-main-*` services. Guest `/blog/[slug]` returned HTTP 200, and the anonymous `/admin/blog` render emitted a Next redirect meta tag to `/login?error=login_required`. No administrative body was intentionally accessed; a real authenticated/open-console acceptance is still pending.
+- PR #838 remains draft while GitHub CI, account-based authorization checks, and exact-main Test acceptance are outstanding. Production promotion is blocked.
