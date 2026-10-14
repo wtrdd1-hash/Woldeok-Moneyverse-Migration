@@ -5,6 +5,10 @@
 - Distinguish observed Production v599, Test v541 and planning authority v530; record unresolved casino/treasury/API drift.
 - Add bilingual authority notes, documentation catalog clarification, worklog, internal/GitHub update records. No release.
 
+## 2026-10-13 Development A: outbound redirect credential isolation (PR #817 integrated)
+- Added five regression scenarios and runtime safeguards against forwarding Authorization/cookies/API keys or request bodies to a different origin during outbound redirects; URL userinfo is rejected.
+- Restored stock-depth type-only import and disposable CI database-name parity without editing any applied migration.
+
 ## v2026.09.23.390 — QA branch lifecycle cleanup hardening
 
 - Branch: `fix/qa-branch-cleanup-v2026.09.23.390`.

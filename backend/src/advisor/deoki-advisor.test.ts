@@ -33,8 +33,8 @@ describe('DeokiAdvisorRepository Unit Tests', () => {
         {
           id: 'diag-1',
           user_id: 'user-1',
-          pr_index: 85,
-          risk_level: 'VERY_LOW',
+          pr_index: 55,
+          risk_level: 'HIGH',
           asset_summary: {
             cash: 300000,
             savings: 200000,

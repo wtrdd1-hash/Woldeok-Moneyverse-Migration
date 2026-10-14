@@ -115,6 +115,12 @@ export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL
     throw new SsrffSecurityError('Malformed or invalid URL provided for outbound request');
   }
 
+  // URL userinfo is implicitly interpreted as authentication by HTTP clients.
+  // Never allow credentials to travel inside a URL or its redirect target.
+  if (parsed.username || parsed.password) {
+    throw new SsrffSecurityError('Outbound URL must not contain embedded credentials');
+  }
+
   // 1. Enforce strict protocol whitelist
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     throw new SsrffSecurityError(`Forbidden outbound protocol: ${parsed.protocol}. Only http: and https: are allowed.`);
@@ -159,6 +165,21 @@ export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL
 
 const MAX_REDIRECTS = 3;
 
+// A redirected request must not disclose an API key, session, or request body
+// to an origin that the caller did not authorize. Headers accepts all Fetch
+// HeadersInit shapes and compares names case-insensitively.
+const SENSITIVE_REDIRECT_HEADERS = [
+  'authorization', 'proxy-authorization', 'cookie', 'x-api-key',
+  'api-key', 'x-auth-token', 'x-access-token', 'x-api-token', 'x-client-secret',
+] as const;
+
+function carriesSensitiveOutboundState(init?: RequestInit): boolean {
+  const headers = new Headers(init?.headers);
+  return SENSITIVE_REDIRECT_HEADERS.some((name) => headers.has(name))
+    || init?.body != null
+    || (init?.credentials !== undefined && init.credentials !== 'omit');
+}
+
 /**
  * Drop-in safe fetch wrapper with strict SSRF validation and default 10s timeout.
  * Inspects all 3xx redirect locations to prevent DNS rebinding or redirect-based SSRF bypass.
@@ -191,7 +212,14 @@ export async function safeFetch(urlInput: string | URL, init?: RequestInit): Pro
 
         // 상대 경로 및 절대 경로 모두 처리
         const nextUrl = new URL(location, currentUrl);
-        // 리다이렉트 대상 URL에 대해 즉각적인 Anti-SSRF(사설 IP/메타데이터) 재검증
+        // Never forward bearer keys, cookies, or request bodies to a new origin.
+        // Public, credential-free GET redirects remain supported.
+        if (nextUrl.origin !== currentUrl.origin && carriesSensitiveOutboundState(init)) {
+          throw new SsrffSecurityError(
+            'Cross-origin redirect refused for credentialed or body-bearing outbound request',
+          );
+        }
+        // Revalidate the destination of every redirect, including URL userinfo.
         currentUrl = await assertSafeOutboundUrl(nextUrl);
         continue;
       }

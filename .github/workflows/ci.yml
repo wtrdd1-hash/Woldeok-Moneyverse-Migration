@@ -160,9 +160,11 @@ jobs:
         env:
           POSTGRES_USER: moneyverse_migrator
           POSTGRES_PASSWORD: ci_migrator_password
-          POSTGRES_DB: woldeok_moneyverse_ci
+          # Immutable migration 266 includes ALTER DATABASE woldeok_moneyverse_dev.
+          # This PostgreSQL service is an isolated disposable CI container, never a real host DB.
+          POSTGRES_DB: woldeok_moneyverse_dev
         options: >-
-          --health-cmd "pg_isready -U moneyverse_migrator -d woldeok_moneyverse_ci"
+          --health-cmd "pg_isready -U moneyverse_migrator -d woldeok_moneyverse_dev"
           --health-interval 5s --health-timeout 5s --health-retries 20
         ports:
           - 5432:5432
@@ -190,14 +192,14 @@ jobs:
           PGPORT: 5432
           PGUSER: moneyverse_migrator
           PGPASSWORD: ci_migrator_password
-          PGDATABASE: woldeok_moneyverse_ci
+          PGDATABASE: woldeok_moneyverse_dev
           APP_DB_PASSWORD: ci_app_password
         run: node packages/database/ci-apply.mjs
 
       - name: Test
         env:
-          DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_ci
-          MIGRATOR_DATABASE_URL: postgresql://moneyverse_migrator:ci_migrator_password@localhost:5432/woldeok_moneyverse_ci
+          DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_dev
+          MIGRATOR_DATABASE_URL: postgresql://moneyverse_migrator:ci_migrator_password@localhost:5432/woldeok_moneyverse_dev
         run: pnpm test
 
       - name: Reject Prisma schema mutation
