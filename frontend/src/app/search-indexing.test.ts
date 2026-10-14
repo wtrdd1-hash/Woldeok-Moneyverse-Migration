@@ -48,7 +48,7 @@ describe('public search surface', () => {
     expect(urls).not.toContain('https://easy-scraping.com/businesses');
     expect(urls).not.toContain('https://easy-scraping.com/shop/catalog');
     expect(urls).not.toContain('https://easy-scraping.com/wallet');
-    expect(urls).toContain('https://easy-scraping.com/bank');
+    expect(urls).not.toContain('https://easy-scraping.com/bank');
     expect(urls).not.toContain('https://easy-scraping.com/admin');
   });
 
@@ -65,6 +65,7 @@ describe('public search surface', () => {
     process.env.APP_BASE_URL = 'https://easy-scraping.com';
     const sitemapUrl = robots().sitemap;
 
-    expect(sitemapUrl).toBe('https://easy-scraping.com/sitemap.xml');
+    expect(sitemapUrl).toContain('https://easy-scraping.com/sitemap.xml');
+    expect(sitemapUrl).toContain('https://easy-scraping.com/sitemap-index.xml');
   });
 });

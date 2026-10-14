@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NotificationCenterModal } from './notification-center-modal';
 
@@ -19,7 +19,7 @@ const notification = (id: string, title: string) => ({
 });
 const response = (payload: unknown) => ({ ok: true, json: async () => payload }) as Response;
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe('notification response ordering', () => {
   it('does not let an older all-feed response overwrite the selected unread feed', async () => {
@@ -48,36 +48,22 @@ describe('notification response ordering', () => {
   });
 
   it('does not restore an old unread count after a successful mark-all-read mutation', async () => {
-    let refreshCount: (() => void) | undefined;
-    let resolveOldCount: ((response: Response) => void) | undefined;
-    let countCalls = 0;
-    vi.spyOn(globalThis, 'setInterval').mockImplementation((callback) => {
-      refreshCount = callback as () => void;
-      return 1 as unknown as ReturnType<typeof setInterval>;
-    });
-    vi.spyOn(globalThis, 'clearInterval').mockImplementation(() => {});
+    let resolveOldCount: ((value: Response) => void) | undefined;
     vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
       const url = String(input);
-      if (url.includes('unread-count')) {
-        countCalls += 1;
-        if (countCalls === 1) return Promise.resolve(response({ unreadCount: 1 }));
-        return new Promise((resolve) => { resolveOldCount = resolve; });
-      }
+      if (url.includes('unread-count')) return new Promise((resolve) => { resolveOldCount = resolve; });
       if (url.includes('unreadOnly=')) return Promise.resolve(response({ notifications: [notification('33333333-3333-4333-8333-333333333333', 'Live notification')] }));
-      if (url.endsWith('/api/notifications') && init?.method === 'POST') return Promise.resolve(response({ success: true }));
+      if (url.endsWith('/api/notifications') && init?.method === 'POST') return Promise.resolve(response({ updatedCount: 1 }));
       throw new Error(`Unexpected URL: ${url}`);
     });
-
     render(<NotificationCenterModal />);
     fireEvent.click(screen.getByRole('button', { name: 'Open test dialog' }));
     await screen.findByText('Live notification');
-    await waitFor(() => expect(refreshCount).toBeDefined());
-    act(() => refreshCount!());
     await waitFor(() => expect(resolveOldCount).toBeDefined());
     fireEvent.click(screen.getByRole('button', { name: '모두 읽음' }));
-    await waitFor(() => expect(screen.getByText(/미확인 0건/)).toBeDefined());
+    await waitFor(() => expect(screen.getByLabelText('알림 센터 열기 (미확인 0건)')).toBeDefined());
     await act(async () => resolveOldCount!(response({ unreadCount: 1 })));
-    expect(screen.getByText(/미확인 0건/)).toBeDefined();
+    expect(screen.getByLabelText('알림 센터 열기 (미확인 0건)')).toBeDefined();
   });
 
   it('does not cancel a pending feed request when the selected filter is clicked again', async () => {
@@ -144,7 +130,7 @@ describe('notification response ordering', () => {
     fireEvent.click(screen.getByRole('button', { name: /^미확인 알림/ }));
     await waitFor(() => expect(finishOldFeed).toBeDefined());
     await act(async () => finishMutation!(response({ updatedCount: 1 })));
-    await waitFor(() => expect(screen.getByText(/미확인 0건/)).toBeDefined());
+    await waitFor(() => expect(screen.getByLabelText('알림 센터 열기 (미확인 0건)')).toBeDefined());
     await act(async () => finishOldFeed!(response({ notifications: [notification('77777777-7777-4777-8777-777777777777', 'Stale unread')] })));
     expect(screen.queryByText('Stale unread')).toBeNull();
     expect(screen.queryByText('알림을 불러오는 중...')).toBeNull();

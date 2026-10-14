@@ -797,6 +797,7 @@ export function getDisallowedCrawlerRoutes(): string[] {
     '/quests',
     '/businesses',
     '/wallet',
+    '/bank$', // Exact protected bank landing; preserve public /bank/savings-pot SEO.
     '/socket.io/',
     '/_next/data/',
   ];

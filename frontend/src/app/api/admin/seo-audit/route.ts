@@ -1,74 +1,60 @@
 import { NextResponse } from 'next/server';
+import { ApiError, api } from '@/lib/api';
 import { getAllPublicUrlsForIndexNow, submitToIndexNow } from '@/lib/indexnow';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  const allUrls = getAllPublicUrlsForIndexNow();
+const reply = (body: unknown, status = 200) =>
+  NextResponse.json(body, { status, headers: { 'Cache-Control': 'private, no-store' } });
 
-  // 모의 및 실시간 수집 감사 메트릭스
-  const auditData = {
-    timestamp: new Date().toISOString(),
-    totalIndexedUrls: allUrls.length,
-    indexNowStatus: {
-      status: 'ACTIVE',
-      lastBatchPing: '2026-10-03T10:04:00Z',
-      submittedCount: allUrls.length,
-      successRate: '100%',
-    },
-    crawlers: [
-      {
-        botName: 'Googlebot (Desktop/Smartphone)',
-        searchEngine: 'Google Search Console',
-        status: 'HEALTHY',
-        lastCrawlTime: '2026-10-03T09:45:12Z',
-        averageResponseTimeMs: 42,
-        crawlBudgetScore: 98,
-        indexedPercentage: '99.4%',
-      },
-      {
-        botName: 'Yeti (Naver Search Advisor)',
-        searchEngine: 'Naver',
-        status: 'HEALTHY',
-        lastCrawlTime: '2026-10-03T09:52:30Z',
-        averageResponseTimeMs: 38,
-        crawlBudgetScore: 99,
-        indexedPercentage: '99.8%',
-      },
-      {
-        botName: 'bingbot (IndexNow Protocol)',
-        searchEngine: 'Bing / Yandex / Seznam',
-        status: 'HEALTHY',
-        lastCrawlTime: '2026-10-03T10:02:18Z',
-        averageResponseTimeMs: 45,
-        crawlBudgetScore: 100,
-        indexedPercentage: '100.0%',
-      },
-    ],
-    richSnippetAudits: [
-      { schemaType: 'WebApplication', count: allUrls.length, status: 'VALID' },
-      { schemaType: 'AggregateRating (4.9/5.0)', count: allUrls.length, status: 'VALID' },
-      { schemaType: 'FAQPage', count: allUrls.length, status: 'VALID' },
-      { schemaType: 'HowTo', count: allUrls.length, status: 'VALID' },
-      { schemaType: 'BreadcrumbList', count: allUrls.length, status: 'VALID' },
-    ],
-    recommendations: [
-      '모든 430+개 롱테일 페이지에 별점 4.9/5.0 및 FAQ 구조화 데이터가 정상 주입되어 있습니다.',
-      'IndexNow를 통한 네이버/Bing 실시간 배치 색인 핑 전송이 100% 정상 작동 중입니다.',
-      'Googlebot과 Yeti의 응답 시간이 평균 40ms대로 크롤링 버짓(Crawl Budget) 낭비가 전혀 없습니다.',
-    ],
-  };
-
-  return NextResponse.json(auditData);
+async function authorize(): Promise<NextResponse | null> {
+  try {
+    const security = await api<{ consoleSession: { state: string } }>('/api/v1/admin/security');
+    if (security.consoleSession?.state !== 'open') return reply({ error: 'console_locked' }, 403);
+    return null;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return reply({ error: 'login_required' }, 401);
+    if (error instanceof ApiError && [403, 428].includes(error.status)) return reply({ error: 'forbidden' }, 403);
+    return reply({ error: 'authority_unavailable' }, 503);
+  }
 }
 
-export async function POST() {
-  // 실시간 재색인 핑 발송
-  const result = await submitToIndexNow();
-  return NextResponse.json({
-    ok: result.success,
-    submittedCount: result.submittedCount,
-    status: result.status,
+export async function GET() {
+  const denied = await authorize();
+  if (denied) return denied;
+  let telemetry: unknown = null;
+  try { telemetry = await api('/api/v1/seo/status'); } catch { /* unknown, not healthy */ }
+  return reply({
     timestamp: new Date().toISOString(),
+    candidateUrlCount: getAllPublicUrlsForIndexNow().length,
+    telemetry,
+    telemetryStatus: telemetry ? 'observed' : 'unavailable',
+    indexingStatus: 'not_measured',
+    schemaValidationStatus: 'not_measured',
   });
+}
+
+export async function POST(request: Request) {
+  const origin = request.headers.get('origin');
+  const site = request.headers.get('sec-fetch-site');
+  if (!origin || origin !== new URL(request.url).origin || (site && site !== 'same-origin')) {
+    return reply({ ok: false, error: 'cross_origin_forbidden' }, 403);
+  }
+  const denied = await authorize();
+  if (denied) return denied;
+  try {
+    const result = await submitToIndexNow();
+    if (!result.success) return reply({
+      ok: false, error: 'indexnow_submission_failed',
+      submittedCount: result.submittedCount,
+      upstreamStatus: result.status,
+      indexingConfirmed: false,
+    }, 502);
+    return reply({
+      ok: true, submittedCount: result.submittedCount, status: result.status,
+      indexingConfirmed: false, timestamp: new Date().toISOString(),
+    }, result.status === 202 ? 202 : 200);
+  } catch {
+    return reply({ ok: false, error: 'indexnow_unavailable', indexingConfirmed: false }, 502);
+  }
 }

@@ -36,6 +36,7 @@ const ROUTES = new Set([
   '/stocks',
   '/businesses',
   '/casino',
+  '/arcade',
   '/marketplace',
   '/chat',
   '/newspaper',
