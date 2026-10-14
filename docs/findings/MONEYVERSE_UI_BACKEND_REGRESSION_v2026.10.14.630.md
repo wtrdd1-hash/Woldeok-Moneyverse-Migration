@@ -14,7 +14,7 @@
 
 ## Verification evidence
 
-- **Frontend full suite:** `NODE_ENV=test API_ORIGIN=http://127.0.0.1:9 DATABASE_URL=postgresql://invalid:invalid@127.0.0.1:1/invalid node node_modules/vitest/vitest.mjs run`: **214 test files / 1173 tests passed**, no network calls or real DB required. Log: host `/srv/moneyverse-tasks/ui-api-remediation-v630/frontend-full-final.log`.
+- **Frontend full suite:** `NODE_ENV=test API_ORIGIN=http://127.0.0.1:9 DATABASE_URL=UNREACHABLE_TEST_DB node node_modules/vitest/vitest.mjs run`: **214 test files / 1173 tests passed**, no network calls or real DB required. Log: host `/srv/moneyverse-tasks/ui-api-remediation-v630/frontend-full-final.log`.
 - Frontend and backend TypeScript `tsc --noEmit`: both passed, after v630 implementation; old v629 source contract checks: 10 passed, backend fake-financial command checks: 4 passed. Changed-file lint: 0 errors / 4 warnings (unused imports and hook dependency) at intermediate check.
 - Exact regeneration of 179-mobile-API reference outputs has been run; `api:contract:check` compares generated files to *committed HEAD*, so it requires a commit and CI re-run for a true passing claim.
 - **Not verified:** fresh commit CI, full backend database migrations/SQL transaction invariants, authorized web E2E of admin & financial workflows, a separate same-SHA Test backend and Postgres, production promotion and rollback.
