@@ -9,3 +9,11 @@
 - v530 기존 위험: /admin/seo 모바일 overflow, 터치 타깃, 레이어 가림, identities API 500, 관리자 인증 E2E 미검증. 최신 화면 재현 전에는 해결/재발 여부 미확정.
 - 브라우저 320/375/390/768/1024/1440 화면 캡처, 스크롤 폭, 콘솔 오류, 관리자 로그인별 테스트 및 백엔드 연동은 미실행.
 - Test 및 Production 배포 없음. 전체 UI 승인 BLOCKED.
+
+## 승인 후 추가 점검 (v608)
+- origin/main 재조회 c56af867 유지; 작업 브랜치 6b358caf에서 시작.
+- 관리자 화면 page.tsx 34개 확인. /admin/seo 액션 영역은 grid 1열→2열→flex-wrap, 버튼 min-height 44px 등 모바일 완화 코드가 존재하나 실브라우저 재현 검증은 아직 불가.
+- SEO GSC 테이블은 overflow-x-auto 스크롤 컨테이너 사용; 모바일 잘림 여부 실측 미확인.
+- SEO 테스트 세트에서 React.act is not a function 반복 재현. React 테스트 setup.ts가 act를 수동 대체하려는 코드가 있어 원인 조사 필요.
+- 원격 미니PC Chromium/Playwright 실행 가능 환경 미확보; 실브라우저 시각 검증 미완료.
+- 운영 변경 없음, 전체 UI 승인 BLOCKED.
