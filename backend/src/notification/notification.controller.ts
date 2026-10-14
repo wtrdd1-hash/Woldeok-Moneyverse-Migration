@@ -78,7 +78,7 @@ export class NotificationController {
 
   @Post('claim-all')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Claim all rewards and mark all notifications as read' })
+  @ApiOperation({ summary: 'Reward claim unavailable until atomic ledger-backed settlement is implemented' })
   claimAll(@Req() request: RequestWithSession) {
     return this.guarded(() =>
       this.notificationService.claimAll(requireUserId(request)),
