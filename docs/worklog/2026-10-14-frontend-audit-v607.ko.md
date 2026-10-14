@@ -50,3 +50,13 @@
 - Full frontend suite NODE_ENV=test: 1153 passed, 25 failed of 1178 (12 failing files). Typecheck passed.
 - Outstanding failing tests cover SEO, casino, notifications, routing, app gateway, developer/guide, calculator, homepage etc. Exact-head backend integration, live test deployment, real browser screenshots, session continuity and production cutover not performed.
 - Release gate FAILED. No main merge, no Production switch or service restart.
+
+## v613–v614 all-failures remediation continued / release gate
+- Start and mid-work origin/main c56af867; isolated integration worktree, no parallel main edits.
+- Search protection: authenticated /bank landing remains noindex; robots.txt adds /bank$ exact match so public /bank/savings-pot remains crawlable. Sitemap tests updated for two legitimate sitemap endpoints.
+- Status freshness regression aligned to 120s published contract (121s stale test), calculator title aligned to actual rendered title.
+- Gateway group contract updated for existing enterprises domain; guide test route inventory updated for actual /arcade/page.tsx; developer navigation assertion no longer requires outdated exact formatting.
+- Focused 4 files 15/15, then 3 files 31/31 pass.
+- Full frontend suite: 1163 passed, 15 failed of 1178; 210/215 files passed. Remaining: 3 homepage E2E contract, 3 notification races, 7 casino game rules, 2 unread-count tests.
+- Typecheck PASS, Next production build PASS. Browser visual, backend/Test exact-SHA, authenticated session continuity and production canary not verified.
+- No main merge or production promotion; blocking gates remain.

@@ -17,7 +17,7 @@ describe('serviceImpact', () => {
   });
 
   it('never turns a stale healthy snapshot into a global green state', () => {
-    expect(serviceImpact([{ state: 'operational', observedAt: new Date(NOW - 61_000).toISOString() }], NOW)).toEqual({
+    expect(serviceImpact([{ state: 'operational', observedAt: new Date(NOW - 121_000).toISOString() }], NOW)).toEqual({
       state: 'unknown',
       staleCount: 1,
     });
