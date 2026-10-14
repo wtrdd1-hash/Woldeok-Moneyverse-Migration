@@ -2,15 +2,18 @@ import type { Metadata } from 'next';
 import { SiteShell } from '@/components/site-shell';
 import { AdminBlogClient } from './admin-blog-client';
 import { getAllBlogPosts } from '@/app/blog/blog-data';
+import { requireAdminConsole } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'AI 블로그 일일 자동화 관제 | 관리자 콘솔',
   description: '내부 AI 금융 블로그 자동 생성 및 IndexNow 실시간 크롤링 핑 관제 패널',
+  robots: { index: false, follow: false },
 };
 
-export default function AdminBlogPage() {
+export default async function AdminBlogPage() {
+  await requireAdminConsole('/admin/blog');
   const posts = getAllBlogPosts();
 
   return (
