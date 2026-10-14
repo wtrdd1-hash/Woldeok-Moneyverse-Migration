@@ -9,7 +9,7 @@ describe('CompoundCalculatorPage', () => {
   it('renders title and calculation controls properly', () => {
     render(<CompoundCalculatorPage />);
 
-    expect(screen.getByText('복리 예금·적금 이자 계산기')).toBeDefined();
+    expect(screen.getByText(/복리·CAGR 계산기/)).toBeDefined();
     expect(screen.getByText('예상 만기 최종 수령액')).toBeDefined();
     expect(screen.getByText('연도별 자산 성장 타임라인')).toBeDefined();
   });

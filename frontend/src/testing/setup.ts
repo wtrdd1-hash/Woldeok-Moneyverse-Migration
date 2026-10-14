@@ -1,5 +1,3 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import { afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
@@ -10,37 +8,8 @@ afterEach(() => {
   cleanup();
 });
 
-const actFn = (callback?: () => unknown) => {
-  const rDom = ReactDOM as unknown as { flushSync?: (fn: () => void) => void };
-  if (rDom && typeof rDom.flushSync === 'function') {
-    let result: unknown;
-    try {
-      rDom.flushSync(() => {
-        if (callback) result = callback();
-      });
-      return result;
-    } catch {
-      return callback ? callback() : undefined;
-    }
-  }
-  return callback ? callback() : undefined;
-};
-
-try {
-  (React as unknown as Record<string, unknown>).act = actFn;
-} catch {
-  /* ignore */
-}
-try {
-  (ReactDOM as unknown as Record<string, unknown>).act = actFn;
-} catch {
-  /* ignore */
-}
-try {
-  globalRecord.act = actFn;
-} catch {
-  /* ignore */
-}
+// Use React 19's native async act implementation in NODE_ENV=test.
+// Replacing it with flushSync suppresses promised updates and breaks race tests.
 
 if (typeof window !== 'undefined') {
   const win = window as unknown as Record<string, unknown>;

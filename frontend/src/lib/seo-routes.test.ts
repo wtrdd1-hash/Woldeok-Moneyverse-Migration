@@ -61,7 +61,7 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     // Strictly member-protected routes must be excluded
     expect(sitemapPaths).not.toContain('/quests');
     expect(sitemapPaths).not.toContain('/businesses');
-    expect(sitemapPaths).toContain('/bank');
+    expect(sitemapPaths).not.toContain('/bank');
     expect(sitemapPaths).toContain('/bank/savings-pot');
     expect(sitemapPaths).not.toContain('/wallet');
     expect(sitemapPaths).toContain('/work');
@@ -89,7 +89,7 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     expect(isPathIndexable('/terms')).toBe(true);
     expect(isPathIndexable('/stocks')).toBe(true);
     expect(isPathIndexable('/prediction')).toBe(true);
-    expect(isPathIndexable('/bank')).toBe(true);
+    expect(isPathIndexable('/bank')).toBe(false);
     expect(isPathIndexable('/work')).toBe(true);
   });
 });

@@ -1,6 +1,12 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
 
+## 2026-10-14 프론트 전체 회귀 복구 (v2026.10.14.630, Test/운영 검증 대기)
+
+- [영문 기술 보고서](docs/findings/MONEYVERSE_UI_BACKEND_REGRESSION_v2026.10.14.630.md) · [한국어 시정 결과](docs/findings/MONEYVERSE_UI_BACKEND_REGRESSION_v2026.10.14.630.ko.md)
+- [작업기록](docs/worklog/2026-10-14-ui-backend-regression-v630.ko.md) · [내부 변경내역](docs/updates/v2026.10.14.630-internal.ko.md) · [GitHub 변경내역](docs/updates/v2026.10.14.630-github.ko.md)
+- 기존 38건의 프론트 테스트 결함 기준선을 검토하여 로컬 **1,173/1,173** 전체 통과. 알림 동시성·관리자 UI·색상 대비 등 실제 시정과 모바일 API 계약 파일 3종 재생성. **CI/Test/운영 승격 증거는 별도로 요구**한다.
+
 ## 2026-10-14 UI·백엔드 연결 시정 (v2026.10.14.629, 일부 구현 / 릴리스 차단)
 
 - [영문 정본 — UI·백엔드 시정](docs/findings/MONEYVERSE_UI_BACKEND_REMEDIATION_v2026.10.14.629.md) · [한국어 결과](docs/findings/MONEYVERSE_UI_BACKEND_REMEDIATION_v2026.10.14.629.ko.md)

@@ -21,7 +21,7 @@ describe('casino themed games stay faithful to the server result', () => {
   });
 
   it('prices every themed interface from server terms rather than hard-coded multipliers', () => {
-    const page = readFileSync(join(__dirname, 'page.tsx'), 'utf8');
+    const page = readFileSync(join(__dirname, '../arcade/page.tsx'), 'utf8');
     const slots = readFileSync(join(__dirname, 'slots-game.tsx'), 'utf8');
     const hilo = readFileSync(join(__dirname, 'hilo-game.tsx'), 'utf8');
 
@@ -47,7 +47,7 @@ describe('casino themed games stay faithful to the server result', () => {
   });
 
   it('uses a dedicated casino history endpoint rather than filtering the wallet feed', () => {
-    const page = readFileSync(join(__dirname, 'page.tsx'), 'utf8');
+    const page = readFileSync(join(__dirname, '../arcade/page.tsx'), 'utf8');
     expect(page).toContain("/api/v1/casino/history");
     expect(page).not.toContain('/api/v1/wallet?recent=');
     expect(page).not.toContain('CASINO_TRANSACTION_TYPES');

@@ -36,7 +36,7 @@ describe('same-origin media relays', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(fetch).toHaveBeenCalledWith(
-      `http://127.0.0.1:3020/media/${KEY}`,
+      `${process.env.API_ORIGIN ?? 'http://127.0.0.1:3020'}/media/${KEY}`,
       expect.objectContaining({
         cache: 'no-store',
         headers: expect.objectContaining({ cookie: 'moneyverse_session=owner' }),
@@ -61,7 +61,7 @@ describe('same-origin media relays', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('public, max-age=300');
     expect(fetch).toHaveBeenCalledWith(
-      `http://127.0.0.1:3020/api/v1/board/public/images/${KEY}`,
+      `${process.env.API_ORIGIN ?? 'http://127.0.0.1:3020'}/api/v1/board/public/images/${KEY}`,
       expect.objectContaining({
         cache: 'no-store',
         headers: { 'x-internal-token': 'x'.repeat(32) },
@@ -92,7 +92,7 @@ describe('same-origin media relays', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, max-age=300');
     expect(fetch).toHaveBeenCalledWith(
-      `http://127.0.0.1:3020/media/profile/${KEY}`,
+      `${process.env.API_ORIGIN ?? 'http://127.0.0.1:3020'}/media/profile/${KEY}`,
       expect.objectContaining({
         cache: 'no-store',
         headers: expect.objectContaining({ cookie: 'moneyverse_session=viewer' }),
