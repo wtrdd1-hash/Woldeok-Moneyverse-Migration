@@ -1,10 +1,16 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## PostgreSQL Outbox retention optimization — v2026.10.14.622 (isolated candidate)
+
+- Derived from the adopted v486 database architecture, not a replacement for v530 planning authority. PostgreSQL 17.11 DEV diagnosis: 957 MB DB, 213 MB Outbox, ~46,941 dead rows; expiry lookup scanned ~25,883 buffers in 36.158 ms.
+- Forward-only migration 270 adds a concurrently built partial index (delivered_at, id) and per-table 5% autovacuum thresholds. Backend scheduler performs parameterized 2,000-row batches, up to 25 daily, retaining all undelivered records and the 7-day delivery retention rule.
+- Isolated 260k-row synthetic Postgres Test passed SQL/index checks; backend build/typecheck and 1,165 non-DB tests passed; 391 DB-related tests skipped. This **does not** certify exact-SHA Test, Production readiness or release.
+- Details: [English report](../findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.md) / [Korean](../findings/MONEYVERSE_DB_OPTIMIZATION_v2026.10.14.622.ko.md), [worklog](../worklog/2026-10-14-database-backend-optimization-v622.md).
+
 ## v2026.10.14.618 — Fullstack branch integration candidate (not authority adoption)
 
 - Start/mid-work `origin/main=c56af867ad8f7556e53f895b0bb294c4bfc8a02d`. Isolated integration v618 contains the existing frontend fix and the distinct current SEO tools, planning, live SEO and functional acceptance audit branches. No concurrent worktrees overwritten.
 - API contract drift from PR #824 CI corrected by regenerating mobile contract/EN-KO references. Release, authenticated runtime and Production claims remain gated by exact-SHA CI/Test, DB and session evidence. Details: [worklog](../worklog/2026-10-14-fullstack-branch-integration-v618.md).
-
 
 ## v2026.10.14.605 — Full-function verification evidence (no adoption or deployment)
 
