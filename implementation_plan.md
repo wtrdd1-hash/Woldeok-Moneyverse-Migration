@@ -1939,3 +1939,31 @@
 ### 3. 검증 계획
 1. `node --test scripts/release/ci-migration-266-database-parity.test.mjs` 로컬 실행 및 100% 통과 확인.
 2. 브랜치 통합 및 삭제 규칙 준수 후 원격 푸시 및 GitHub Actions CI 합격 확인.
+
+
+---
+
+## 🚀 [v222 Specification] 전사 브랜치 통합·삭제 및 파편화 문서 대통합 (QA 마스터 리포트 집대성 & 엔터프라이즈 기획 총괄 수립)
+
+### 1. 현황 및 사용자 요구 분석
+- **요구사항**: "브래치 통합 및 브래치 삭제 진행 및 문서 통합및 전체 문서 겹치는 통합등 조치해줘 문서 수로 줄이고 통합문서 기획문서등 위주로 강화시켜"
+- **조치 1: 브랜치 통합 및 삭제 (불변 규칙)**:
+  - `woldeok-moneyverse-app`: 잔여 브랜치 `feat/admin-stock-halt-limits-v2026.09.21.315`를 `main`으로 전환 및 삭제 완료. 최신 `main` 커밋 풀 완료.
+  - `Woldeok-Moneyverse-Migration`: 원격 브랜치 프루닝(`git fetch --prune`) 및 최신 `origin/main` 패스트포워드 완료. 작업 브랜치(`docs/20261014-consolidate-qa-and-enterprise-planning-v222`)에서 작업 완료 후 `main` 병합 및 브랜치 즉시 삭제.
+- **조치 2: QA 파편 문서 대통합 및 문서 수 압축**:
+  - `qa-reports/` 내 34개 이상의 날짜별 파편 문서(`2026-10-*.md`, `*.csv`, `*.tsv`, `*.py`, `*.cjs`)를 총괄하는 단 하나의 공식 마스터 보고서 **`qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md`**를 신설 집대성.
+  - 개별 원시 파일들을 `qa-reports/archive/`로 안전하게 격리 이동하여 최상위 문서 수를 34개 -> 1개로 대폭 압축.
+- **조치 3: 엔터프라이즈 통합 기획 및 시스템 사양 총괄 수립**:
+  - `docs/planning/ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md` (및 루트 동기화)를 신설하여 전체 시스템 아키텍처, 10대 테마 주식 거래소, 토스형 소셜 피드, 카지노 확률 엔진, 2FA 금융 관제 타워, 디스코드 24/7 상주 봇, 실시간 SEO 자동 발행 및 2026-2027 로드맵을 하나의 압도적인 기획서로 통합 강화.
+
+### 2. 세부 파일 목록
+- `qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md`: 전사 통합 QA 마스터 리포트 (신규 생성)
+- `qa-reports/archive/`: 파편화 보고서 및 원시 증적 보관소 (분류/이동 완료)
+- `docs/planning/ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md`: 엔터프라이즈 통합 기획 총괄 (신규 생성)
+- `ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md`: 루트 동기화 (신규 생성)
+- `implementation_plan.md`: v222 누적 업데이트 (+추가, -0 삭제)
+
+### 3. 검증 계획
+1. Git 상태 점검 (`git status`, `git branch -a`)
+2. `qa-reports/` 및 프로젝트 루트 디렉토리 문서 수 압축 상태 검증
+3. Git 브랜치 통합(`main`), 작업 브랜치 삭제, 원격 푸시 완료
