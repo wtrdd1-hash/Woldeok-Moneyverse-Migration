@@ -202,8 +202,8 @@ export default function ToolsHubPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: '월덕 머니버스 금융 & 시뮬레이터 5대 도구 허브',
-    description: '설치 없이 바로 사용하는 5대 금융 웹 계산기 및 가상경제 시뮬레이터 모음',
+    name: '월덕 머니버스 금융 계산기 및 경제 시뮬레이터 도구 모음',
+    description: '복리·주식 평단가·은퇴·급여·대출 등 금융 계산기와 가상경제 시뮬레이터 모음',
     url: 'https://easy-scraping.com/tools',
     hasPart: TOOLS.map((t) => ({
       '@type': 'WebApplication',
@@ -227,17 +227,17 @@ export default function ToolsHubPage() {
       <div className="space-y-3 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-500">
           <Sparkles className="size-3.5" />
-          <span>100% 무료 · 무설치 5대 금융 웹 툴킷</span>
+          <span>금융 계산기 · 가상경제 시뮬레이터</span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
           금융 & 시뮬레이터 웹 도구 허브
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-          복리 예금, 주식 평단가, 은퇴 FIRE 목표 자산, 가상자산 22% 세금, 직업 파밍 기대 수익까지 — 복잡한 금융 수식을 브라우저에서 몇 번의 입력만으로 실시간 시각화하세요.
+          복리·주식 평단가·은퇴 목표·급여·대출·세금 추정 및 게임 내 WLD 시뮬레이션을 확인하세요. 금융 계산 결과는 입력 조건과 적용 규정에 따라 달라질 수 있습니다.
         </p>
       </div>
 
-      {/* Tool Cards Grid (5-Tools Layout) */}
+      {/* Tool Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {TOOLS.map((tool) => {
           const Icon = tool.icon;
