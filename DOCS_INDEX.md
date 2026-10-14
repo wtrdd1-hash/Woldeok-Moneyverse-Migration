@@ -166,3 +166,12 @@ Debian 13 가상화 인프라, 백업/복구, 반응형 디자인 시스템 및 
 - **[PROJECT_MEMORY.md](PROJECT_MEMORY.md)**: 프로덕션 릴리스 트래커 및 마스터 메모리 (prod-v590 최신)
 - **[implementation_plan.md](implementation_plan.md)**: 누적 무삭제 통합 구현 계획서 (v1 ~ v209)
 - **[AGENTS.md](AGENTS.md)**: 에이전트 개발 협업 및 빌드/테스트 규칙
+
+---
+
+## 2026-10-14 Service / UI Audit (v2026.10.14.624)
+
+- [English canonical audit](docs/findings/MONEYVERSE_SERVICE_UI_AUDIT_v2026.10.14.624.md) · [한국어 서비스·UI 감사](docs/findings/MONEYVERSE_SERVICE_UI_AUDIT_v2026.10.14.624.ko.md)
+- [Worklog / 작업 기록](docs/worklog/2026-10-14-service-ui-audit-v624.ko.md) · [Internal update](docs/updates/v2026.10.14.624-internal.ko.md) · [GitHub update](docs/updates/v2026.10.14.624-github.ko.md)
+
+Read-only findings; not a full browser acceptance, Test deployment, or Production release.
