@@ -1,4 +1,6 @@
 # Woldeok Moneyverse Treasury Automated Social Recirculation Specification
+
+> **v542 fiscal evidence correction:** v522 Production statements are historical snapshots, not exact-current-main verification. The four-way 40/30/20/10 split applies once to a defined available surplus; program allocations (citizen dividend, welfare, infrastructure, trading-halt) are sub-budgets, not extra percentages of that same base. Protected reserves are fiscal only. A treasury transfer or VAULT_MAIN receipt never equals canonical currency retirement. [v542 correction](ECONOMY_INTEGRITY_AND_DOCUMENTATION_RECONCILIATION_SPEC.md) and v523 monetary authority govern.
 (TREASURY AUTOMATED SOCIAL RECIRCULATION SPEC)
 
 > **Version**: v2026.10.04.522  

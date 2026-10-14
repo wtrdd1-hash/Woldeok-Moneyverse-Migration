@@ -1,5 +1,7 @@
 # Woldeok Moneyverse Sovereign Macroeconomic & Financial System Master Specification (v2026.10)
 
+> **HISTORICAL / CONDITIONAL DOMAIN REFERENCE (v542 notice):** This is not independent current product authority. The v523 Central Bank/Mint/Treasury separation and v542 economy integrity plan supersede any simplified money-supply identity, unconditional 25M floor, guaranteed yield, automatic top-up or unchecked tax-rate assertion below. Require exact-SHA Test and real ledger evidence.
+
 > This document establishes the authoritative master architecture of the entire monetary, fiscal, sovereign wealth, public pension, and corporate governance systems in Woldeok Moneyverse, benchmarked against real-world economic standards: Bank of Korea (BOK), Federal Reserve (Fed), State Finance Act, National Bond Act, State-Owned Enterprises Governance Act, National Pension Act, and Capital Markets Act.
 
 ---

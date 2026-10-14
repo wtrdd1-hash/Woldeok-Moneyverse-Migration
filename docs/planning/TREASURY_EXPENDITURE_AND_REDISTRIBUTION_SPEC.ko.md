@@ -1,5 +1,7 @@
 # 국고 세금 재순환 및 공공 재정 지출·환원 상세 기획서 (TREASURY REDISTRIBUTION SPEC)
 
+> **v542 권위 보정 / CONDITIONAL FISCAL DESIGN:** 재정지출은 기존 WLD 이전만 가능하며 총통화량을 늘리지 않는다. 30% 보호준비금과 25M 유동성 목표는 합의된 재정 정책/재원 제약으로만 적용한다. 복지·기반시설·비상·소각 예산과 각 프로그램 지출비중을 중복 합산하지 않는다. 소각은 국고 입금/죽은 주소 이동이 아닌 canonical Mint 폐기증서가 필요하다. 최근 구현/운영 완료 상태는 원장·Test 검증 전 미확인. [v542 명세](ECONOMY_INTEGRITY_AND_DOCUMENTATION_RECONCILIATION_SPEC.ko.md) 우선.
+
 > 버전: v2026.10.03.511  
 > 상태: 프로덕션 구현 및 운영 적용 명세 (AUTHORITATIVE)  
 > 기준일: 2026-10-03  

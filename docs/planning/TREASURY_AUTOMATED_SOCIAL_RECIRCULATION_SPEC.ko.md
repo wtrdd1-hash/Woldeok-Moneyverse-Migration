@@ -1,4 +1,6 @@
 # 월덕 머니버스 국고 세수 자동 사회 환원 및 국가 재정 선순환 종합 기획서
+
+> **v542 재정 근거 정정:** v522 프로덕션 완료 선언은 당시 스냅샷이며 최신 main 근거가 아니다. 40/30/20/10은 정의된 가용 잉여금의 1회 금고 배분, 시민배당·취약복지·인프라·거래정지 지급은 하위 예산이다. 준비금은 재정 유동성이고 국고 입금 자체는 영구 소각이 아니다. [v542 정합화](ECONOMY_INTEGRITY_AND_DOCUMENTATION_RECONCILIATION_SPEC.ko.md)와 v523 통화 권위가 우선.
 (TREASURY AUTOMATED SOCIAL RECIRCULATION SPEC)
 
 > **버전**: v2026.10.04.522  

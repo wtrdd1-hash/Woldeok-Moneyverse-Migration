@@ -1,5 +1,7 @@
 # Woldeok National Pension Service (NPS) & Social Security Fund Specification (v1.0)
 
+> **CONDITIONAL DESIGN / NO UNFUNDED GUARANTEE — v542:** Lifetime payments and principal protection are proposed virtual-game rules only, not a verified sovereign guarantee. Require a funded-liability model, solvency/stress and reserve priority tests; do not mint for fiscal shortfalls. Older real-world benchmark descriptions do not imply legal equivalence or active Production performance.
+
 > **Real-World Economic Standards**: Republic of Korea National Pension Act, Ministry of Health and Welfare, Singapore Central Provident Fund (CPF LIFE), US Social Security Administration (SSA).
 
 ---

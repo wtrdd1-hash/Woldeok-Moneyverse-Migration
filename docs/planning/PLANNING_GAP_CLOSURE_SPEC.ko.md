@@ -1,5 +1,7 @@
 # 월덕 머니버스 — 기획 공백 해소 및 수용증거 명세 (PLANNING GAP CLOSURE SPEC)
 
+> **v542 상위 권위 정정 / HISTORICAL ACCEPTANCE SNAPSHOT:** 본 문서의 v511 `ACCEPTED`와 `SSOT` 표기는 당시 수용 선언의 이력이며 현재 `PROJECT_PLAN.ko.md` / `INTEGRATED_PLANNING_MASTER.ko.md`보다 상위가 아니다. v530 이후 최신 main의 UI/백엔드/복구/보안 완료 여부는 별도 exact-SHA 증거가 필요하다. 상세: [v542 정합화](ECONOMY_INTEGRITY_AND_DOCUMENTATION_RECONCILIATION_SPEC.ko.md).
+
 > 최신 버전: **v2026.10.03.511**  
 > 상태: **프로덕션 완료도 단일 진실 공급원 (SSOT - SINGLE SOURCE OF TRUTH)**  
 > 최신 SHA: `fc9af624`  
