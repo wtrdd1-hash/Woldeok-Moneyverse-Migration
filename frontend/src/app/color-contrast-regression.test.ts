@@ -62,11 +62,12 @@ describe('frontend rebuild contrast contract', () => {
     expect(redesign).not.toContain('background: #e9e5db !important;');
   });
 
-  it('keeps white hero text on an explicitly dark card rather than a light surface', () => {
+  it('keeps the home status panel on semantic theme colors', () => {
     const source = fs.readFileSync(path.join(APP, 'page.tsx'), 'utf8');
-    expect(source).toContain('bg-[#0E1117]');
-    expect(source).toContain('bg-[#121622]');
+    expect(source).not.toContain('text-white');
     expect(source).not.toContain('bg-white/[0.06]');
+    // Homepage uses fixed dark surface cards; muted text is zinc-400 rather than the light-theme token.
+    expect(source).toContain('text-zinc-400');
   });
 
   it('does not use known low-contrast light-theme shop label shades', () => {

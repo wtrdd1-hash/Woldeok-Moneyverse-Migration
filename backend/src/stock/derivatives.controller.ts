@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  ServiceUnavailableException,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -166,36 +167,7 @@ export class DerivativesController {
     @Req() req: RequestWithSession,
     @Body() dto: OpenDerivativePositionDto,
   ) {
-    const actorUserId = requireUserId(req);
-    const market = this.mockMarkets.find((m) => m.ticker === dto.ticker) ?? this.mockMarkets[0]!;
-    const markPrice = market.currentPrice;
-    const positionSize = dto.collateralWld * dto.leverage;
-    const liqPrice =
-      dto.side === 'LONG'
-        ? Math.round(markPrice * (1 - 1 / dto.leverage * 0.9))
-        : Math.round(markPrice * (1 + 1 / dto.leverage * 0.9));
-
-    const newPosition: DerivativePosition = {
-      id: `pos-${dto.idempotencyKey.slice(0, 8)}`,
-      userId: actorUserId,
-      ticker: dto.ticker,
-      side: dto.side,
-      entryPrice: markPrice,
-      markPrice,
-      leverage: dto.leverage,
-      collateralWld: dto.collateralWld,
-      positionSizeWld: positionSize,
-      liquidationPrice: liqPrice,
-      unrealizedPnlWld: 0,
-      roiPercent: 0,
-      createdAt: new Date().toISOString(),
-    };
-
-    return {
-      success: true,
-      position: newPosition,
-      message: `${market.name} ${dto.leverage}x ${dto.side} 포지션이 성공적으로 체결되었습니다.`,
-    };
+    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 
   @ApiOperation({ summary: '가상 레버리지 선물 포지션 시장가 청산' })
@@ -205,15 +177,7 @@ export class DerivativesController {
     @Param('id') positionId: string,
     @Body() dto: CloseDerivativePositionDto,
   ) {
-    const actorUserId = requireUserId(req);
-    return {
-      success: true,
-      positionId,
-      settledPnlWld: 82236,
-      returnedCollateralWld: 500000,
-      totalPayoutWld: 582236,
-      message: '포지션이 시장가로 안전하게 청산 및 정산되었습니다.',
-    };
+    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 
   @ApiOperation({ summary: '과거 선물 청산/정산 이력 조회' })

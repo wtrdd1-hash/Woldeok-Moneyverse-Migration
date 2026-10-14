@@ -191,7 +191,7 @@ export default async function HomePage() {
                     +4.8% 24h
                   </span>
                 </div>
-                <div className="mt-1.5 font-mono tabular-nums text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white flex items-baseline gap-2 min-w-0 max-w-full overflow-hidden">
+                <div className="mt-1.5 font-mono tabular-nums text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-zinc-50 flex items-baseline gap-2 min-w-0 max-w-full overflow-hidden">
                   <WalletGlance />
                 </div>
                 <p className="mt-1.5 font-mono text-xs text-zinc-400">
@@ -308,7 +308,7 @@ export default async function HomePage() {
                     <div className="text-xs font-bold text-zinc-200 group-hover:text-[#00F59B] transition-colors truncate">
                       {item.name} ({item.symbol})
                     </div>
-                    <div className="mt-1 font-mono text-sm font-black text-white tabular-nums">
+                    <div className="mt-1 font-mono text-sm font-black text-zinc-50 tabular-nums">
                       {item.cur.toLocaleString()} <span className="text-[10px] font-normal text-zinc-400">WLD</span>
                     </div>
                     <div className={`font-mono text-xs font-bold mt-0.5 tabular-nums ${isPositive ? 'text-[#00F59B]' : 'text-[#FF2E5B]'}`}>

@@ -31,7 +31,7 @@ import { Button } from '@/components/ui/button';
 import { groupDigits } from '@/lib/money';
 
 export default function WarfarePage() {
-  const [territories, setTerritories] = useState<readonly TerritoryZone[]>(INITIAL_TERRITORIES);
+  const [territories] = useState<readonly TerritoryZone[]>(INITIAL_TERRITORIES);
   const [selectedTerritory, setSelectedTerritory] = useState<TerritoryZone>(INITIAL_TERRITORIES[0]!);
   const [claimedDividends, setClaimedDividends] = useState<number>(0);
   const [actionMessage, setActionMessage] = useState<{ text: string; type: 'success' | 'warn' } | null>(null);
@@ -44,37 +44,13 @@ export default function WarfarePage() {
   };
 
   // 공성전 선포
-  const handleDeclareSiege = (territoryId: string) => {
-    setTerritories((prev) =>
-      prev.map((t) => {
-        if (t.id === territoryId) {
-          return {
-            ...t,
-            status: 'SIEGE_DECLARED',
-          };
-        }
-        return t;
-      }),
-    );
-    const target = territories.find((t) => t.id === territoryId);
-    showFeedback(`${target?.name || '영지'}에 공성전이 정식 선포되었습니다! 24시간 내 영지 점령전이 시작됩니다.`, 'warn');
+  const handleDeclareSiege = (_territoryId: string) => {
+    showFeedback('시뮬레이션 · 미리보기: 실제 공성전 선포 또는 보증금 결제가 진행되지 않았습니다.', 'warn');
   };
 
   // 실드 수리 및 강화
-  const handleRepairShield = (territoryId: string) => {
-    setTerritories((prev) =>
-      prev.map((t) => {
-        if (t.id === territoryId) {
-          const newHp = t.maxShieldHp;
-          return {
-            ...t,
-            currentShieldHp: newHp,
-          };
-        }
-        return t;
-      }),
-    );
-    showFeedback(`길드 방어 실드를 100% 완전 수리 및 강화하였습니다.`);
+  const handleRepairShield = (_territoryId: string) => {
+    showFeedback('시뮬레이션 · 미리보기: 서버의 실드 상태는 변경되지 않았습니다.', 'warn');
   };
 
   // 길드 일일 배당금 수령
@@ -92,6 +68,7 @@ export default function WarfarePage() {
 
   return (
     <div className="container max-w-6xl py-8 space-y-8">
+      <p role="status" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">시뮬레이션 · 미리보기: 공성전, 실드 및 세금 배당은 실제 클럽 상태나 WLD 원장과 연결되지 않습니다.</p>
       {/* Action Notification Banner */}
       {actionMessage && (
         <div

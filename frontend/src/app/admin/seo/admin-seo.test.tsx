@@ -120,7 +120,7 @@ describe('SeoClientView', () => {
 
     expect(screen.getByText(/Google Search Console 검색 성과 분석/i)).toBeTruthy();
     expect(screen.getByText('30일간 검색 트렌드 추이')).toBeTruthy();
-    expect(screen.getByText(/상위 10대 유입 검색어.*타겟 랜딩 연결 분석/)).toBeTruthy();
+    expect(screen.getByText(/서비스 계정 키를 등록하면 Google Search Console의 실제 데이터만 표시됩니다/)).toBeTruthy();
     expect(screen.getByRole('button', { name: /서비스 계정 키 설정/i })).toBeTruthy();
   });
 

@@ -79,10 +79,10 @@ const INITIAL_AUCTIONS: AuctionItem[] = [
 ];
 
 export default function AuctionMarketplacePage() {
-  const [items, setItems] = useState<AuctionItem[]>(INITIAL_AUCTIONS);
+  const [items] = useState<AuctionItem[]>(INITIAL_AUCTIONS);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [userBalance, setUserBalance] = useState<number>(250000);
-  const [totalBurnedWld, setTotalBurnedWld] = useState<number>(842500);
+  const [userBalance] = useState<number>(250000);
+  const [totalBurnedWld] = useState<number>(842500);
   const [bidModalItem, setBidModalItem] = useState<AuctionItem | null>(null);
   const [bidAmountInput, setBidAmountInput] = useState<number>(0);
   const [isProxyEnabled, setIsProxyEnabled] = useState<boolean>(false);
@@ -119,74 +119,8 @@ export default function AuctionMarketplacePage() {
   };
 
   const handlePlaceBid = () => {
-    if (!bidModalItem) return;
-    if (bidAmountInput <= bidModalItem.currentBid) {
-      alert('현재 입찰가보다 높은 금액을 입력해야 합니다.');
-      return;
-    }
-    if (isProxyEnabled && maxProxyBidInput < bidAmountInput) {
-      alert('최대 프록시 한도는 입찰 희망 금액보다 커야 합니다.');
-      return;
-    }
-    if (bidAmountInput > userBalance) {
-      alert('보유 WLD 잔액이 부족합니다.');
-      return;
-    }
-
-    const isPlusUser = true; // Moneyverse Plus subscriber status
-    const feeRate = isPlusUser ? 0.025 : 0.05;
-    const burnAmount = Math.floor(bidAmountInput * feeRate);
-
-    // Anti-Sniping Check: If remaining < 60s, extend by 120s (2 minutes)
-    const isAntiSnipingTriggered = bidModalItem.endsInSeconds < 60;
-    const addedSeconds = isAntiSnipingTriggered ? 120 : 0;
-
-    setItems((prev) =>
-      prev.map((it) =>
-        it.id === bidModalItem.id
-          ? {
-              ...it,
-              currentBid: bidAmountInput,
-              highestBidder: isProxyEnabled ? '나 (You) 🤖 PROXY' : '나 (You) 👑 VIP',
-              endsInSeconds: it.endsInSeconds + addedSeconds,
-            }
-          : it
-      )
-    );
-
-    setUserBalance((prev) => prev - (bidAmountInput - bidModalItem.currentBid));
-    setTotalBurnedWld((prev) => prev + burnAmount);
-
-    // Dispatch global toast event
-    const liveEvent: LiveBidEvent = {
-      id: `bid-me-${Date.now()}`,
-      auctionId: bidModalItem.id,
-      itemTitle: bidModalItem.title,
-      itemRarity: bidModalItem.rarity,
-      bidAmount: bidAmountInput,
-      bidderName: '나 (You)',
-      isPlusUser: true,
-      burnFeePercent: isPlusUser ? 2.5 : 5.0,
-      timestamp: '방금 전',
-    };
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('auction:bid-placed', { detail: liveEvent }));
-      if (isAntiSnipingTriggered) {
-        window.dispatchEvent(
-          new CustomEvent('auction:anti-sniping-extended', {
-            detail: { auctionId: bidModalItem.id, itemTitle: bidModalItem.title, extendedMinutes: 2 },
-          }),
-        );
-      }
-    }
-
-    setNotification(
-      isAntiSnipingTriggered
-        ? `🎉 입찰 성공! (VIP 2.5% ${burnAmount.toLocaleString()} WLD 소각) ⚡ 마감 1분 전 최고가 갱신으로 마감 시간이 2분 연장되었습니다!`
-        : `🎉 입찰 성공! ${bidAmountInput.toLocaleString()} WLD 입찰 완료${isProxyEnabled ? ` (최대 한도 ${maxProxyBidInput.toLocaleString()} WLD 자동 예약)` : ''} (Plus VIP 2.5% ${burnAmount.toLocaleString()} WLD 소각 예정)`
-    );
     setBidModalItem(null);
-    setTimeout(() => setNotification(null), 5000);
+    setNotification('경매 미리보기 화면입니다. 실제 입찰·구매·WLD 차감은 처리되지 않았습니다. 정식 거래는 플레이어 마켓에서 진행하세요.');
   };
 
   const getRarityBadge = (rarity: AuctionItem['rarity']) => {
@@ -210,6 +144,7 @@ export default function AuctionMarketplacePage() {
 
   return (
     <div className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100 sm:px-6 lg:px-8">
+      <div role="status" className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">시뮬레이션 · 미리보기: 경매 아이템, 잔액, 낙찰 효과는 예시입니다. 여기서 실제 WLD 입찰이나 구매는 이루어지지 않습니다. <a className="underline font-semibold" href="/marketplace">실제 플레이어 마켓으로 이동</a></div>
       {/* Global WebSocket Live Toast Stream */}
       <AuctionLiveToastStream />
 
@@ -377,24 +312,7 @@ export default function AuctionMarketplacePage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (item.buyoutPrice > userBalance) {
-                        alert('보유 WLD 잔액이 부족합니다.');
-                        return;
-                      }
-                      const fee = Math.floor(item.buyoutPrice * 0.025);
-                      const saved = Math.floor(item.buyoutPrice * 0.025);
-                      setUserBalance((prev) => prev - item.buyoutPrice);
-                      setTotalBurnedWld((prev) => prev + fee);
-                      setItems((prev) => prev.filter((it) => it.id !== item.id));
-                      setWinningCelebration({
-                        itemTitle: item.title,
-                        itemRarity: item.rarity,
-                        finalBidWld: item.buyoutPrice,
-                        burnFeeWld: fee,
-                        vipSavedWld: saved,
-                      });
-                    }}
+                    onClick={() => setNotification('미리보기 전용: 실제 구매나 WLD 지출은 발생하지 않았습니다.')}
                     className="flex-1 rounded-xl border border-slate-700 bg-slate-800 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
                   >
                     즉시 구매 ({item.buyoutPrice.toLocaleString()} WLD)

@@ -22,10 +22,11 @@ export function NotificationCenterModal() {
   const [feedError, setFeedError] = useState(false);
   const [actionError, setActionError] = useState(false);
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
+  const [mutatingRead, setMutatingRead] = useState(false);
+  const mutationPendingRef = useRef(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const feedRequestId = useRef(0);
   const countRequestId = useRef(0);
-  const [markingRead, setMarkingRead] = useState(false);
 
   const fetchUnreadCount = async () => {
     const requestId = ++countRequestId.current;
@@ -80,8 +81,9 @@ export function NotificationCenterModal() {
   }, [open, filter]);
 
   const handleMarkAllRead = async () => {
-    if (markingRead) return;
-    setMarkingRead(true);
+    if (mutationPendingRef.current) return;
+    mutationPendingRef.current = true;
+    setMutatingRead(true);
     setActionError(false);
     try {
       const res = await fetch('/api/notifications', {
@@ -90,20 +92,24 @@ export function NotificationCenterModal() {
         body: JSON.stringify({ markAll: true }),
       });
       if (!res.ok) throw new Error('Mark read failed');
+      // A successful HTTP response is not evidence that a read mutation was committed.
       const receipt: unknown = await res.json();
-      if (!receipt || typeof receipt !== 'object' || !('updatedCount' in receipt) ||
-          !Number.isSafeInteger(receipt.updatedCount) || (receipt.updatedCount as number) < 0) {
-        throw new Error('Invalid mark-read receipt');
+      const updatedCount = receipt && typeof receipt === 'object' && 'updatedCount' in receipt
+        ? receipt.updatedCount : null;
+      if (typeof updatedCount !== 'number' || !Number.isSafeInteger(updatedCount) || updatedCount < 0) {
+        throw new Error('Invalid mark-all receipt');
       }
+      // Ignore feed/count requests started before this confirmed mutation.
       feedRequestId.current += 1;
+      countRequestId.current += 1;
       setLoading(false);
       setNotifications((prev) => filter === 'unread' ? [] : prev.map((n) => ({ ...n, is_read: true })));
-      countRequestId.current += 1;
       setUnreadCount(0);
     } catch {
       setActionError(true);
     } finally {
-      setMarkingRead(false);
+      mutationPendingRef.current = false;
+      setMutatingRead(false);
     }
   };
 
@@ -173,8 +179,8 @@ export function NotificationCenterModal() {
                 variant="outline"
                 size="sm"
                 onClick={handleMarkAllRead}
-                disabled={markingRead || loading || feedError || notifications.every((n) => n.is_read)}
-                className="min-h-11 text-xs px-2.5 rounded-lg border-border/40"
+                disabled={mutatingRead || loading || feedError || notifications.every((n) => n.is_read)}
+                className="min-h-11 h-11 text-xs px-2.5 rounded-lg border-border/40"
               >
                 <CheckCheck className="h-3.5 w-3.5 mr-1" />
                 모두 읽음

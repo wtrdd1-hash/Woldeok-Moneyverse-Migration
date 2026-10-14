@@ -47,23 +47,32 @@ describe('notification response ordering', () => {
     expect(screen.getByRole('button', { name: /^미확인 알림/ }).className).toContain('min-h-11');
   });
 
-  it('does not restore an old unread count after a successful mark-all-read mutation', async () => {
+  it('does not restore an unread count fetched before a confirmed mark-all-read mutation', async () => {
     let resolveOldCount: ((value: Response) => void) | undefined;
     vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
       const url = String(input);
-      if (url.includes('unread-count')) return new Promise((resolve) => { resolveOldCount = resolve; });
-      if (url.includes('unreadOnly=')) return Promise.resolve(response({ notifications: [notification('33333333-3333-4333-8333-333333333333', 'Live notification')] }));
-      if (url.endsWith('/api/notifications') && init?.method === 'POST') return Promise.resolve(response({ updatedCount: 1 }));
+      // Hold the INITIAL count response across the read-all command.
+      if (url.includes('unread-count')) {
+        return new Promise((resolve) => { resolveOldCount = resolve; });
+      }
+      if (url.includes('unreadOnly=')) {
+        return Promise.resolve(response({ notifications: [notification('33333333-3333-4333-8333-333333333333', 'Live notification')] }));
+      }
+      if (url.endsWith('/api/notifications') && init?.method === 'POST') {
+        return Promise.resolve(response({ updatedCount: 1 }));
+      }
       throw new Error(`Unexpected URL: ${url}`);
     });
+
     render(<NotificationCenterModal />);
     fireEvent.click(screen.getByRole('button', { name: 'Open test dialog' }));
     await screen.findByText('Live notification');
     await waitFor(() => expect(resolveOldCount).toBeDefined());
+    await waitFor(() => expect(screen.getByRole<HTMLButtonElement>('button', { name: '모두 읽음' }).disabled).toBe(false));
     fireEvent.click(screen.getByRole('button', { name: '모두 읽음' }));
-    await waitFor(() => expect(screen.getByLabelText('알림 센터 열기 (미확인 0건)')).toBeDefined());
-    await act(async () => resolveOldCount!(response({ unreadCount: 1 })));
-    expect(screen.getByLabelText('알림 센터 열기 (미확인 0건)')).toBeDefined();
+    await waitFor(() => expect(screen.getByText(/미확인 0건/)).toBeDefined());
+    await act(async () => { resolveOldCount!(response({ unreadCount: 1 })); });
+    expect(screen.getByText(/미확인 0건/)).toBeDefined();
   });
 
   it('does not cancel a pending feed request when the selected filter is clicked again', async () => {
@@ -130,7 +139,7 @@ describe('notification response ordering', () => {
     fireEvent.click(screen.getByRole('button', { name: /^미확인 알림/ }));
     await waitFor(() => expect(finishOldFeed).toBeDefined());
     await act(async () => finishMutation!(response({ updatedCount: 1 })));
-    await waitFor(() => expect(screen.getByLabelText('알림 센터 열기 (미확인 0건)')).toBeDefined());
+    await waitFor(() => expect(screen.getByText(/미확인 0건/)).toBeDefined());
     await act(async () => finishOldFeed!(response({ notifications: [notification('77777777-7777-4777-8777-777777777777', 'Stale unread')] })));
     expect(screen.queryByText('Stale unread')).toBeNull();
     expect(screen.queryByText('알림을 불러오는 중...')).toBeNull();

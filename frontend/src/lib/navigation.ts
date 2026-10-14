@@ -579,6 +579,8 @@ export const ADMIN_NAV: readonly NavEntry[] = [
   { href: '/admin/support', label: '문의 채팅' },
   { href: '/admin/economy', label: '경제·원장' },
   { href: '/admin/treasury', label: '국고·비축' },
+  { href: '/admin/treasury/grants', label: '창업 그랜트 (심사 중단)' },
+  { href: '/admin/blog', label: '블로그 관제' },
   { href: '/admin/catalog', label: '사업·시즌' },
   { href: '/admin/work', label: '작업·직업' },
   { href: '/admin/shop', label: '상점 관리' },

@@ -124,6 +124,7 @@ export function AdminGrantsView({
 
   return (
     <div className="space-y-6">
+      <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">심사·지급은 현재 비활성화되어 있습니다. 화면의 과거 신청 기록은 지급 증명이 아닙니다.</p>
       {statusMsg && (
         <div className="p-3.5 rounded-xl border border-primary/40 bg-primary/10 text-primary font-mono text-xs flex items-center gap-2">
           <CheckCircle2 className="size-4 shrink-0" />
@@ -267,7 +268,7 @@ export function AdminGrantsView({
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       <Button
                         size="sm"
-                        disabled={isProcessing}
+                        disabled={true}
                         onClick={() => handleReviewAction('REJECT')}
                         variant="outline"
                         className="text-xs font-bold border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
@@ -277,7 +278,7 @@ export function AdminGrantsView({
                       </Button>
                       <Button
                         size="sm"
-                        disabled={isProcessing}
+                        disabled={true}
                         onClick={() => handleReviewAction('APPROVE')}
                         className="text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs"
                       >

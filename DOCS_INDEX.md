@@ -22,6 +22,18 @@
 
 
 
+## 2026-10-14 프론트 전체 회귀 복구 (v2026.10.14.630, Test/운영 검증 대기)
+
+- [영문 기술 보고서](docs/findings/MONEYVERSE_UI_BACKEND_REGRESSION_v2026.10.14.630.md) · [한국어 시정 결과](docs/findings/MONEYVERSE_UI_BACKEND_REGRESSION_v2026.10.14.630.ko.md)
+- [작업기록](docs/worklog/2026-10-14-ui-backend-regression-v630.ko.md) · [내부 변경내역](docs/updates/v2026.10.14.630-internal.ko.md) · [GitHub 변경내역](docs/updates/v2026.10.14.630-github.ko.md)
+- 기존 38건의 프론트 테스트 결함 기준선을 검토하여 로컬 **1,173/1,173** 전체 통과. 알림 동시성·관리자 UI·색상 대비 등 실제 시정과 모바일 API 계약 파일 3종 재생성. **CI/Test/운영 승격 증거는 별도로 요구**한다.
+
+## 2026-10-14 UI·백엔드 연결 시정 (v2026.10.14.629, 일부 구현 / 릴리스 차단)
+
+- [영문 정본 — UI·백엔드 시정](docs/findings/MONEYVERSE_UI_BACKEND_REMEDIATION_v2026.10.14.629.md) · [한국어 결과](docs/findings/MONEYVERSE_UI_BACKEND_REMEDIATION_v2026.10.14.629.ko.md)
+- [한글 작업 기록](docs/worklog/2026-10-14-ui-backend-remediation-v629.ko.md) · [내부 업데이트](docs/updates/v2026.10.14.629-internal.ko.md) · [GitHub 공개 업데이트](docs/updates/v2026.10.14.629-github.ko.md)
+- 그랜트·국고·모의 자금 기능의 허위 성공을 차단하고 일부 메뉴 접근 경로를 보완했다. **실제 경제 기능 실구현, 전체 회귀 검사, 분리 Test 수용, 운영 배포는 완료되지 않았다.** 현행 통합기획 권위 v530/AUTHORITY_DRIFT 유지.
+
 ## 2026-10-14 전체 소스·보안 감사 (v2026.10.14.603)
 
 - [영문 정본 — 전체 코드·보안 감사](docs/findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.md)

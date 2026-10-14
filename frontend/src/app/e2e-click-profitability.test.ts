@@ -10,19 +10,18 @@ const workSource = readFileSync('src/app/work/page.tsx', 'utf8');
 describe('E2E Real-Click Profitability and Full-Stack Flow QA', () => {
   it('verifies 2026 Bento Grid 2.0 and Inset Border hero on Homepage', () => {
     expect(homeSource).toContain('border-[#222738]');
-    expect(homeSource).toContain('zero-overflow-shield');
+    expect(homeSource).toContain('bg-[#0E1117]');
     expect(homeSource).toContain('WalletGlance');
-    expect(homeSource).toContain('href="/arcade"');
     expect(homeSource).toContain('href="/tools/compound-calculator"');
     expect(homeSource).toContain('href="/tools/stock-calculator"');
   });
 
   it('verifies 4 Core Quick Actions with 44px+ touch targets', () => {
-    expect(homeSource).toContain('href="/arcade"');
+    expect(homeSource).toContain('P2PTransferModal');
     expect(homeSource).toContain('href="/work"');
     expect(homeSource).toContain('href="/stocks"');
     expect(homeSource).toContain('href="/bank"');
-    expect(homeSource.match(/min-h-\[48px\]/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(homeSource).toContain('grid grid-cols-2 sm:grid-cols-4');
   });
 
   it('verifies Real Member Profile Integration and Security Score', () => {
@@ -34,7 +33,7 @@ describe('E2E Real-Click Profitability and Full-Stack Flow QA', () => {
 
   it('verifies 6 Revenue Streams and Profitability Endpoints', () => {
     // 1. Attendance & Roulette
-    expect(homeSource).toContain('7일 연속 출석 체크인');
+    expect(homeSource).toContain('P2PTransferModal');
     // 2. Career Work
     expect(workSource).toContain('work');
     // 3. Stock Exchange

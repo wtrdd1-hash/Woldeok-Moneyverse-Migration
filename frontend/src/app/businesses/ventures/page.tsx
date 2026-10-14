@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   Rocket,
@@ -49,12 +49,12 @@ import { groupDigits } from '@/lib/money';
 
 export default function VenturesPage() {
   const [selectedSector, setSelectedSector] = useState<VentureSector | 'ALL'>('ALL');
-  const [companies, setCompanies] = useState<StartupCompany[]>(INITIAL_VENTURE_COMPANIES);
-  const [ipoCampaigns, setIpoCampaigns] = useState<IpoCampaign[]>(INITIAL_IPO_CAMPAIGNS);
+  const [companies] = useState<StartupCompany[]>(INITIAL_VENTURE_COMPANIES);
+  const [ipoCampaigns] = useState<IpoCampaign[]>(INITIAL_IPO_CAMPAIGNS);
   
   // 유저 자산 및 보유 지분 상태
-  const [userWldBalance, setUserWldBalance] = useState<number>(60000000); // 6천만 WLD
-  const [holdings, setHoldings] = useState<ShareholderHolding[]>([
+  const [userWldBalance] = useState<number>(60000000); // 6천만 WLD
+  const [holdings] = useState<ShareholderHolding[]>([
     {
       id: 'hold-1',
       companyId: 'vc-1',
@@ -108,263 +108,28 @@ export default function VenturesPage() {
   // 피드백 메시지
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
-  // 실시간 매출 & 미수령 배당금 누적 시뮬레이터 (5초마다)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setHoldings((prev) =>
-        prev.map((h) => {
-          const comp = companies.find((c) => c.id === h.companyId);
-          if (!comp) return h;
-          // 5초 단위 미세 배당 누적
-          const tickDividend = Math.max(
-            100,
-            Math.floor(
-              calculateShareholderDividend(comp.dailyRevenue, comp.dividendPayoutRatio, h.shareRatioPct) * 0.005
-            )
-          );
-          return {
-            ...h,
-            unclaimedDividend: h.unclaimedDividend + tickDividend,
-          };
-        })
-      );
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [companies]);
-
   // 1. 배당금 일괄 수령 (Claim All)
   const handleClaimAllDividends = () => {
-    const totalUnclaimed = holdings.reduce((acc, h) => acc + h.unclaimedDividend, 0);
-    if (totalUnclaimed <= 0) {
-      setActionMessage('현재 수령 가능한 미수령 배당금이 없습니다.');
-      setTimeout(() => setActionMessage(null), 3000);
-      return;
-    }
-
-    setUserWldBalance((prev) => prev + totalUnclaimed);
-    setHoldings((prev) =>
-      prev.map((h) => ({
-        ...h,
-        totalClaimedDividend: h.totalClaimedDividend + h.unclaimedDividend,
-        unclaimedDividend: 0,
-        lastClaimedAt: new Date().toLocaleDateString('ko-KR'),
-      }))
-    );
-
-    setActionMessage(
-      `보유 스타트업 배당금 총 +${groupDigits(totalUnclaimed)} WLD가 지갑으로 즉시 입고되었습니다! (법인세 3% 자동 소각 완결)`
-    );
-    setTimeout(() => setActionMessage(null), 4500);
+    setActionMessage('미리보기 전용: 실제 지갑으로 배당금을 송금하지 않았습니다.');
   };
 
   // 2. 신규 스타트업 설립(창업) 핸들러
   const handleCreateStartup = (e: React.FormEvent) => {
     e.preventDefault();
-    const capitalNum = parseInt(newCapital.replace(/,/g, ''), 10) || 0;
-
-    if (!newName.trim() || !newSymbol.trim()) {
-      setActionMessage('사명과 종목 심볼을 올바르게 입력해주세요.');
-      setTimeout(() => setActionMessage(null), 3000);
-      return;
-    }
-    if (capitalNum < MIN_STARTUP_CAPITAL) {
-      setActionMessage(`최소 창업 자본금은 ${groupDigits(MIN_STARTUP_CAPITAL)} WLD 이상이어야 합니다.`);
-      setTimeout(() => setActionMessage(null), 3000);
-      return;
-    }
-    if (capitalNum > userWldBalance) {
-      setActionMessage('지갑의 WLD 잔고가 부족합니다.');
-      setTimeout(() => setActionMessage(null), 3000);
-      return;
-    }
-
-    const totalShares = 1000000;
-    const founderShares = totalShares * (1 - IPO_PUBLIC_SHARE_RATIO);
-    const publicShares = totalShares * IPO_PUBLIC_SHARE_RATIO;
-    const sharePrice = Math.round(capitalNum / totalShares);
-    const valuation = calculateCompanyValuation(capitalNum, capitalNum * 0.2);
-
-    const newCompany: StartupCompany = {
-      id: `vc-${Date.now()}`,
-      name: newName.trim(),
-      symbol: newSymbol.trim().toUpperCase(),
-      sector: newSector,
-      founderId: 'me',
-      founderName: '나 (창업자)',
-      foundedAt: new Date().toISOString().split('T')[0]!,
-      capital: capitalNum,
-      valuation,
-      totalShares,
-      founderShares,
-      publicShares,
-      sharePrice,
-      dailyRevenue: Math.round(capitalNum * 0.3),
-      dividendPayoutRatio: newPayoutRatio / 100,
-      dailyDividendPerShare: Number(((capitalNum * 0.3 * (newPayoutRatio / 100)) / totalShares).toFixed(2)),
-      description: newDescription.trim() || `${VENTURE_SECTOR_INFO[newSector].label} 분야 혁신 가상 스타트업`,
-      ipoStatus: 'ACTIVE',
-    };
-
-    const newIpo: IpoCampaign = {
-      id: `ipo-${Date.now()}`,
-      companyId: newCompany.id,
-      companyName: newCompany.name,
-      symbol: newCompany.symbol,
-      sector: newCompany.sector,
-      targetAmount: publicShares * sharePrice,
-      offeredShares: publicShares,
-      sharePrice,
-      currentSubscribedAmount: 0,
-      subscriptionRate: 0,
-      minSubscriptionShares: 100,
-      endsAt: '2026-10-05 23:59:59',
-      status: 'ACTIVE',
-    };
-
-    const myFounderHolding: ShareholderHolding = {
-      id: `hold-${Date.now()}`,
-      companyId: newCompany.id,
-      companyName: newCompany.name,
-      symbol: newCompany.symbol,
-      sector: newCompany.sector,
-      shares: founderShares,
-      shareRatioPct: 70.0,
-      isAngelInvestor: true,
-      totalClaimedDividend: 0,
-      unclaimedDividend: 0,
-    };
-
-    setUserWldBalance((prev) => prev - capitalNum);
-    setCompanies((prev) => [newCompany, ...prev]);
-    setIpoCampaigns((prev) => [newIpo, ...prev]);
-    setHoldings((prev) => [myFounderHolding, ...prev]);
+    setActionMessage('미리보기 전용: 실제 창업 자금 납입이나 법인 등록은 진행되지 않았습니다.');
     setIsCreateModalOpen(false);
-
-    // 폼 리셋
-    setNewName('');
-    setNewSymbol('');
-    setNewDescription('');
-
-    setActionMessage(
-      `스타트업 [${newCompany.name}] 설립 완료! 자본금 ${groupDigits(capitalNum)} WLD 납입 및 30% IPO 공모주 청약이 개시되었습니다.`
-    );
-    setTimeout(() => setActionMessage(null), 5000);
   };
 
   // 3. 공모주 청약 신청 핸들러
-  const handleSubscribeIpo = (campaign: IpoCampaign) => {
-    const sharesNum = parseInt(subscriptionSharesInput.replace(/,/g, ''), 10) || 0;
-    if (sharesNum < campaign.minSubscriptionShares) {
-      setActionMessage(`최소 청약 단위는 ${campaign.minSubscriptionShares}주 이상입니다.`);
-      setTimeout(() => setActionMessage(null), 3000);
-      return;
-    }
-
-    const requiredWld = sharesNum * campaign.sharePrice;
-    if (requiredWld > userWldBalance) {
-      setActionMessage('지갑의 WLD 잔고가 부족합니다.');
-      setTimeout(() => setActionMessage(null), 3000);
-      return;
-    }
-
-    const target = campaign.targetAmount;
-    const nextSubscribed = campaign.currentSubscribedAmount + requiredWld;
-    const allocation = calculateIpoAllocation(
-      requiredWld,
-      target,
-      nextSubscribed,
-      campaign.offeredShares,
-      campaign.sharePrice
-    );
-
-    setUserWldBalance((prev) => prev - allocation.spentAmount);
-
-    // 청약 캠페인 갱신
-    setIpoCampaigns((prev) =>
-      prev.map((c) =>
-        c.id === campaign.id
-          ? {
-              ...c,
-              currentSubscribedAmount: nextSubscribed,
-              subscriptionRate: Number(((nextSubscribed / c.targetAmount) * 100).toFixed(1)),
-            }
-          : c
-      )
-    );
-
-    // 보유 지분 추가/합산
-    const shareRatio = Number(((allocation.allocatedShares / 1000000) * 100).toFixed(2));
-    const isAngel = shareRatio >= ANGEL_INVESTOR_THRESHOLD_PCT;
-
-    setHoldings((prev) => {
-      const existing = prev.find((h) => h.companyId === campaign.companyId);
-      if (existing) {
-        const nextShares = existing.shares + allocation.allocatedShares;
-        const nextRatio = Number(((nextShares / 1000000) * 100).toFixed(2));
-        return prev.map((h) =>
-          h.companyId === campaign.companyId
-            ? {
-                ...h,
-                shares: nextShares,
-                shareRatioPct: nextRatio,
-                isAngelInvestor: nextRatio >= ANGEL_INVESTOR_THRESHOLD_PCT,
-              }
-            : h
-        );
-      } else {
-        return [
-          ...prev,
-          {
-            id: `hold-${Date.now()}`,
-            companyId: campaign.companyId,
-            companyName: campaign.companyName,
-            symbol: campaign.symbol,
-            sector: campaign.sector,
-            shares: allocation.allocatedShares,
-            shareRatioPct: shareRatio,
-            isAngelInvestor: isAngel,
-            totalClaimedDividend: 0,
-            unclaimedDividend: 0,
-          },
-        ];
-      }
-    });
-
+  const handleSubscribeIpo = (_campaign: IpoCampaign) => {
+    setActionMessage('미리보기 전용: 실제 공모주 주문·배정·잔액 차감은 진행되지 않았습니다.');
     setSelectedIpoForSubscribe(null);
-    setActionMessage(
-      `[${campaign.companyName}] 공모주 ${groupDigits(allocation.allocatedShares)}주 배정 완료! (청약 집행: ${groupDigits(allocation.spentAmount)} WLD, 환불: ${groupDigits(allocation.refundAmount)} WLD)`
-    );
-    setTimeout(() => setActionMessage(null), 5000);
   };
 
   // 4. 엔젤 거버넌스 투표 핸들러
-  const handleVoteProposal = (type: 'YES' | 'NO') => {
-    if (!selectedProposalForVote) return;
-    const { company, proposal } = selectedProposalForVote;
-
-    setCompanies((prev) =>
-      prev.map((c) => {
-        if (c.id === company.id && c.proposals) {
-          return {
-            ...c,
-            proposals: c.proposals.map((p) =>
-              p.id === proposal.id
-                ? {
-                    ...p,
-                    votesYes: type === 'YES' ? p.votesYes + 5000 : p.votesYes,
-                    votesNo: type === 'NO' ? p.votesNo + 5000 : p.votesNo,
-                  }
-                : p
-            ),
-          };
-        }
-        return c;
-      })
-    );
-
+  const handleVoteProposal = (_type: 'YES' | 'NO') => {
+    setActionMessage('미리보기 전용: 실제 주주 투표는 기록되지 않았습니다.');
     setSelectedProposalForVote(null);
-    setActionMessage(`[${company.name}] 주주 안건에 ${type === 'YES' ? '찬성' : '반대'} 5,000표를 성공적으로 행사하였습니다!`);
-    setTimeout(() => setActionMessage(null), 4000);
   };
 
   const filteredCompanies =
@@ -376,6 +141,7 @@ export default function VenturesPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1440px] space-y-8 px-3 sm:px-6 py-6 sm:py-8 overflow-x-hidden">
+      <p role="status" className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-200">시뮬레이션 · 미리보기: 아래의 지갑, 투자, 배당, 창업 및 주주 투표 데이터는 예시입니다. 실제 WLD 자산과 연결되어 있지 않으며 버튼으로 실제 거래가 실행되지 않습니다.</p>
       {/* 1. HERO BENTO GRID HEADER */}
       <section className="rounded-2xl sm:rounded-3xl border border-zinc-800/80 bg-card/95 p-5 sm:p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/60">

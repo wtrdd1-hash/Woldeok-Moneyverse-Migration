@@ -18,7 +18,7 @@ describe('SiteHeader Responsive Clipping Invariant', () => {
   });
 
   it('applies compact padding and gaps on lg and xl viewports for navigation items', () => {
-    // lg 및 xl 뷰포트에서 nav gap이 gap-1.5 xl:gap-2.5 2xl:gap-3.5 lg:flex로 유지되면서 패딩이 콤팩트하게 적용되는지 검증
+    // lg 및 xl 뷰포트에서 nav gap이 gap-1.5 xl:gap-2.5 2xl:gap-4 lg:flex로 유지되면서 패딩이 콤팩트하게 적용되는지 검증
     expect(source).toContain('hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-3.5 lg:flex');
     expect(source).toContain('px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs 2xl:text-sm');
   });

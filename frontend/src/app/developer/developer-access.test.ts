@@ -17,7 +17,9 @@ describe('developer portal administrator access guard', () => {
   it('excludes /developer from public and member navigations while keeping it in admin navigation', () => {
     expect(navSource).not.toContain("PUBLIC_NAV: readonly NavEntry[] = [\n  { href: '/developer'");
     expect(navSource).not.toContain("HEADER_PUBLIC: readonly NavItem[] = [\n      { href: '/developer'");
-    expect(navSource).toContain('export const HEADER_ADMIN: readonly NavItem[] = [');
-    expect(navSource).toContain("{ href: '/developer', label: '개발자 포털' }");
+    const adminHeader = navSource.split('export const HEADER_ADMIN: readonly NavItem[] = [')[1];
+    expect(adminHeader).toBeDefined();
+    expect(adminHeader).toContain("{ href: '/developer', label: '개발자 포털' }");
+    expect(navSource.split('export const HEADER_PUBLIC: readonly NavItem[] = [')[1]?.split('export const HEADER_ADMIN: readonly NavItem[] = [')[0]).not.toContain("{ href: '/developer',");
   });
 });

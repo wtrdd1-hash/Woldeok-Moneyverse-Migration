@@ -43,6 +43,20 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'records',
   },
   {
+    href: '/admin/blog',
+    eyebrow: 'AI BLOG / CONTENT AUDIT',
+    title: '블로그 자동화 관제',
+    summary: '콘텐츠 생성 방법 및 색인 제출 결과를 검토하는 관리자 화면.',
+    group: 'records',
+  },
+  {
+    href: '/admin/treasury/grants',
+    eyebrow: 'TREASURY GRANTS / SUSPENDED',
+    title: '창업 지원금 신청 기록 (지급 일시중단)',
+    summary: '기존 신청 기록 확인 전용. DB·원장 연결 및 관리자 감사 검증 전 심사·지급 불가.',
+    group: 'economy',
+  },
+  {
     href: '/admin/controls',
     eyebrow: 'FEATURE CONTROL',
     title: '기능 스위치 · 정책 버전',
