@@ -1,11 +1,15 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
-> **단일 진실 공급원 (Single Source of Truth)**  
+> **단일 진실 공급원 (Single Source of Truth)**
 > 본 문서는 월덕 머니버스(Woldeok Moneyverse) 플랫폼의 금융 아키텍처, 대국민 국고 생태계, 가상 주식 거래소, API 계약, 관리자 관제, 모바일 규격, 인프라 운영 가이드를 총망라하는 통합 문서 색인 허브입니다.
 
 > [!TIP]
-> 🌟 **[통합 개발 진행상황 및 마스터 레퍼런스 총서 (v1~v209 최신판)](docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md)**  
-> 프로젝트 전체 개발 로드맵, 최신 누적 릴리스(prod-v590) 성과 지표, 그리고 시스템에 적용된 최신 글로벌 공인 엔지니어링 표준(복식부기 원장, 대국민 국고 DAO 예산 투표제, 기술적 분석 작도 수식, Next.js/NestJS 아키텍처, 예금자보호 규제)을 한 번에 확인하실 수 있습니다.
+> 🌟 **[통합 개발 진행상황 및 마스터 레퍼런스 총서 (v1~v209 기록본)](DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md)**
+> 프로젝트 전체 개발 로드맵, 과거 누적 릴리스(prod-v590) 스냅샷 성과 지표, 그리고 시스템에 적용된 최신 글로벌 공인 엔지니어링 표준(복식부기 원장, 대국민 국고 DAO 예산 투표제, 기술적 분석 작도 수식, Next.js/NestJS 아키텍처, 예금자보호 규제)을 한 번에 확인하실 수 있습니다.
+
+
+> [!IMPORTANT]
+> **권위 기준:** [통합기획서](planning/PROJECT_PLAN.md) → [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.md). 2026-10-14 $pc 실측 배포 연결은 `prod-v599`, 테스트 연결은 `test-v541-gsc-aa4b6387`이며, 계획 버전 `v2026.10.05.530`과 구분한다. 본 허브의 v590 및 개별 하위 문서 버전은 과거 스냅샷이다. [v600 조정 기록](worklog/2026-10-14-authority-runtime-reconciliation-v600.md) 참조. 카지노 스위치 `enabled`와 API 제거 기록의 충돌은 `AUTHORITY_DRIFT`; 30% 비축 기준과 85% 현금 유동성 서술은 적용 범위 확인 전까지 서로 대체하지 않는다. API 카탈로그의 15개 항목은 구현 완료 증거가 아니다.
 
 ---
 

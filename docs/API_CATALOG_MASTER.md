@@ -2,6 +2,8 @@
 
 **English canonical** | [한국어](API_CATALOG_MASTER.ko.md)
 
+> **Inventory note (v600):** This base catalog names **15 documented domains**. Earlier references to 14 are historical; actual route availability and generated-contract parity remain unverified. See [authority reconciliation](planning/INTEGRATED_PLANNING_MASTER.md).
+
 > **Version**: `v2026.09.28.477`
 > **Runtime Addendum**: `v2026.10.07.541` Search Console administrator API (base catalog edition remains v477 pending broader catalog reconciliation)
 > **Base URL**: `https://easy-scraping.com/api/v1` (Production) / `http://127.0.0.1:3000/api/v1` (Local)

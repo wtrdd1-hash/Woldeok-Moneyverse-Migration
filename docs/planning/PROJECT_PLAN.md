@@ -1,5 +1,19 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## Runtime / planning authority reconciliation — v2026.10.14.600 (documentation only)
+
+> Status: AUTHORITY_DRIFT. Planning authority remains v2026.10.05.530 until an explicit decision and its acceptance evidence supersede it. This record does **not** certify feature, Test, or Production acceptance.
+
+- **Observed 2026-10-14 09:26 KST (Debian 13, $pc, read-only):** `production-current` points to `prod-v599`; `test-current` points to `test-v541-gsc-aa4b6387`. The running-system status reports frontend/backend/nginx active and development DB connectivity. This is **not** proof of exact-SHA Test promotion, user-facing feature health, or production database correctness.
+- **Authority separation:** v599 is an observed deployment label, *not* the current planning version; master-document snapshots referring to v583/v590 are historical, not current deployment evidence.
+- **Casino:** feature switch is observed `enabled` (last switch reason: reopened following inspection on 2026-09-11). The older development summary says casino APIs were removed. These are conflicting assertions: **no casino policy/availability is certified** until the current plan, route/controller existence, effective switch and legal/safety acceptance are reconciled. Do not enable, disable or advertise casino based on documentation alone.
+- **Treasury:** the 30% protected reserve floor in v522 and the later 85% cash-liquidity *reported operational normalization* require a common denominator, scope, precedence and DB evidence. Neither authorizes an automatic rule change or WLD issuance.
+- **API domains:** the published base API catalog enumerates 15 headings; an older integrated summary says 14. Use the catalog's **15 documented headings** as an inventory label, not as proof that 15 domains are implemented or healthy. Catalog v477 plus later addenda require generated-contract reconciliation.
+- **Open gates:** revalidate `/admin/seo` overflow, `/app-api/v1/account/identities` prior HTTP 500, all-admin E2E coverage, TEST exact SHA and backend health, and an evidence-backed zero-downtime promotion. A status command is not acceptance.
+- **Conflict/concurrency:** no runtime, migration, feature-switch, or Production/Test changes in this documentation cycle; re-fetch `origin/main` and reconcile concurrently authored changes before merge.
+- **Evidence reference:** [v600 worklog](../worklog/2026-10-14-authority-runtime-reconciliation-v600.md) and [GitHub update](../updates/v2026.10.14.600-github.md).
+
+
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
 > Current integrated version: v2026.10.05.530
