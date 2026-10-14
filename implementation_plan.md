@@ -1967,3 +1967,32 @@
 1. Git 상태 점검 (`git status`, `git branch -a`)
 2. `qa-reports/` 및 프로젝트 루트 디렉토리 문서 수 압축 상태 검증
 3. Git 브랜치 통합(`main`), 작업 브랜치 삭제, 원격 푸시 완료
+
+
+---
+
+## 🚀 [v223 Specification] 전사 모든 문서 전수 재분석 및 불일치·누락 전면 수정 (API, 메모리, 워크스루, 마스터 인덱스 구축)
+
+### 1. 현황 및 목표 분석
+- **사용자 요구**: "모든문서 재분석하고 수정부분 수정 실행할것"
+- **분석 결과**:
+  1. `API_DOCUMENTATION.md`: 9월 23일 작성본으로, 최근 개발된 가상 주식 포트폴리오 조회(`/api/v1/stocks/portfolio`), 토스형 주주 라운지 피드 등록/조회(`/api/v1/board/stock-posts`), 포트 3099 로컬 브로드캐스트 웹훅(`/broadcast`), 실시간 거시경제 SEO 리포트 API가 누락되어 있었음.
+  2. `PROJECT_MEMORY.md`: 최근의 브랜치 통합 및 즉시 삭제 불변 규칙, 디스코드 봇 24/7 무중단 상주 규칙, 마스터 SSOT 문서 체계가 미반영되어 있었음.
+  3. `walkthrough.md`: 9월 26일 v456 시점에서 멈춰 있어 최신 v600~v625 실서비스 승격 실측 데이터 및 배포 내역이 누락되어 있었음.
+  4. 루트 `README.md`: 프로젝트 최상위 진입점에서 5대 마스터 문서 체계를 한눈에 탐색할 수 있는 공식 마스터 인덱스 부재.
+- **수정 목표**:
+  - 누락된 최신 API 5종 및 보안 가드 스택을 `API_DOCUMENTATION.md`에 완벽 반영.
+  - `PROJECT_MEMORY.md`에 최신 불변 규칙, 봇 상주 방어 시스템, SSOT 체계를 정식 명문화.
+  - `walkthrough.md`에 v625 배포 실측 지표 및 토스형 피드/봇 실서비스 내역을 최신화.
+  - 최상위 루트에 5대 마스터 문서를 포괄하는 공식 `README.md` 허브 신설.
+
+### 2. 세부 변경 및 동기화 파일
+- `c:\Users\sds\Desktop\tset\API_DOCUMENTATION.md` 및 `Woldeok-Moneyverse-Migration/docs/api/API_DOCUMENTATION.md`: 최신 API 5종 추가 반영
+- `c:\Users\sds\Desktop\tset\PROJECT_MEMORY.md` 및 `Woldeok-Moneyverse-Migration/PROJECT_MEMORY.md`: 최신 불변 규칙 및 릴리즈 내역 갱신
+- `c:\Users\sds\Desktop\tset\walkthrough.md` 및 `Woldeok-Moneyverse-Migration/walkthrough.md`: v625 실서비스 지표 반영
+- `c:\Users\sds\Desktop\tset\README.md`: 전사 공식 마스터 문서 허브 신설
+- `implementation_plan.md`: v223 누적 업데이트 (+추가, -0 삭제)
+
+### 3. 검증 계획
+1. 마크다운 파일 무결성 및 링크 유효성 검증
+2. Git 브랜치 상태 점검 (`main` 병합, 작업 브랜치 삭제, 원격 푸시)

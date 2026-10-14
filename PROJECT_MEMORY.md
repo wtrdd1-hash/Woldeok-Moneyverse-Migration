@@ -1,545 +1,242 @@
-# Woldeok Moneyverse - Project Memory & Master Release Tracker
+# Woldeok Moneyverse 프로젝트 메모리 (PROJECT_MEMORY.md)
 
-## ⚡ Global Framework Standard: Superpowers (`obra/superpowers`)
-- **Framework Origin**: `https://github.com/obra/superpowers`
-- **Scope**: All project tasks, coding workflows, refactors, feature additions, and debugging.
-- **Enforced Disciplines**:
-  1. `skills/using-superpowers`: Automatic skill invocation before all tasks/responses.
-  2. `skills/brainstorming`: Socratic requirement probing & design specification before code changes.
-  3. `skills/writing-plans`: Step-by-step TDD-driven task decomposition.
-  4. `skills/test-driven-development`: Red-Green-Refactor invariant.
-  5. `skills/systematic-debugging`: 4-phase root cause analysis over speculative patching.
-  6. `skills/verification-before-completion`: Authoritative verification before completion.
+- **최종 갱신일:** 2026-10-14 (전사 아키텍처 및 불변 규칙 최신화 쇄신판)
+- **관리 주체:** Woldeok Moneyverse Core Architecture & Operations
+- **문서 상태:** 활성 정본 (Active Single Source of Truth Memory)
 
 ---
 
-## 🌟 Production Release Overview (prod-v595 - Latest)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v595`
-- **Release Date**: 2026-10-14 08:55 KST
-- **Git Commit HEAD**: `main`
-- **Key Deliverables**:
-  1. **검색엔진(SEO) 노출 극대화용 내부 AI 일일 자동 블로그 시스템 (`/blog`, v214 / prod-v595)**:
-     - **독립 전문 금융 블로그 허브 (`/blog`, `/blog/[slug]`)**: 5대 카테고리(복리·저축, 절세·세제혜택, 가상 주식, 자산 배분, 거시 경제) 탭, 실시간 검색, `schema.org/BlogPosting` JSON-LD 완비.
-     - **내부 AI 자동 글 생성 엔진 (`blog-data.ts`)**: 5대 고수익 롱테일 키워드 풀에서 주제를 자동 선택하여 2,500자 이상의 고품질 금융 분석 아티클(원리, 시뮬레이션 표, 실전 가이드) 자동 집필.
-     - **검색엔진 실시간 크롤링 연동 (`IndexNow` & `sitemap-blog.xml`)**: 신규 아티클 생성 즉시 IndexNow API로 Naver, Bing, Google에 색인 핑 전송 및 전용 XML 사이트맵 피드 동적 갱신.
-     - **관리자 1클릭 즉시 발행 콘솔 (`/admin/blog`)**: 관리자가 주기와 무관하게 언제든 "⚡ AI 블로그 아티클 1편 즉시 생성" 버튼을 눌러 테스트 및 발행 가능.
-     - **디스코드 커뮤니티 자동 브로드캐스트**: 신규 블로그 발행 시 디스코드 채널로 리치 임베드 자동 전파.
-     - **스마트 내부 링킹(Internal Linking)**: 본문 내 관련 금융 계산기(복리, ISA, 배당세 등) 및 가상 주식 종목 딥링크 카드 자동 탑재.
-  2. **검증 및 무중단 배포**:
-     - 프론트엔드 및 백엔드 타입체크 0 Errors & 단위 테스트 100% 통과 (blog.test.tsx 5/5).
-     - 프로덕션 무중단 승격 배포.
+## 0. ⚠️ [CRITICAL RULE] 미니PC 원격 제어 및 파일 I/O 절대 원칙 (MCP 최우선 강제)
+
+1. **Windows PowerShell 로컬 SSH / SCP / 인코딩 접두사 명령어 실행 전면 금지**:
+   - 로컬 PowerShell에서 `$OutputEncoding = [Console]::InputEncoding = ...` 또는 `ssh -p ...`, `scp -P ...`를 직접 실행하여 미니PC에 접속하거나 파일을 복사하는 행위를 **절대 금지**한다. (로컬 네트워크 환경 충돌, 한글 인코딩 에러, 세션 동결 원천 차단)
+2. **미니PC의 모든 명령어 실행 및 파일 I/O는 `easy-scraping` MCP 도구만 필수 사용**:
+   - **미니PC 쉘 명령 실행**: `call_mcp_tool` -> `ServerName: "easy-scraping"`, `ToolName: "system_exec_command"` (service 재시작, git, journalctl, npm 등)
+   - **미니PC 파일 읽기**: `call_mcp_tool` -> `ServerName: "easy-scraping"`, `ToolName: "fs_read_file"`
+   - **미니PC 파일 쓰기/배포**: `call_mcp_tool` -> `ServerName: "easy-scraping"`, `ToolName: "fs_write_file"`
+   - **미니PC 디렉터리 탐색**: `call_mcp_tool` -> `ServerName: "easy-scraping"`, `ToolName: "fs_list_dir"`
+   - **PostgreSQL 쿼리**: `call_mcp_tool` -> `ServerName: "easy-scraping"`, `ToolName: "db_query_direct"`
+   - 모든 미니PC 관련 작업은 위 MCP 도구를 호출하여 빠르고 안정적으로 실행한다.
 
 ---
 
-## 🌟 Previous Production Release Overview (prod-v594)
-- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v594`
-- **Release Date**: 2026-10-14 08:45 KST
-- **Git Commit HEAD**: `main`
-- **Key Deliverables**:
-  1. **디스코드 관제 고도화 (카지노 1억 잭팟/국고배당 브로드캐스트 + 관리자 5대 DM 직보, v213 / prod-v594)**:
-     - **카지노 대형 잭팟 브로드캐스트 (`slots-game.tsx`)**: 1억 WLD(100,000,000 WLD) 이상 잭팟 또는 777 당첨 시 디스코드 웹훅/봇 채널로 축하 리치 임베드 및 관리자 DM 동시 발송.
-     - **국고 기본배당/지원금 브로드캐스트 (`treasury-disburse-dialog.tsx`)**: 전 시민 기본배당 집행 시 1인당 지급액과 집행 사유를 디스코드 채널 및 관리자에게 실시간 전파.
-     - **관리자 5대 확장 DM 직보 엔진 (`DiscordAlertService`)**: 고래 대규모 자금 이동(5천만 WLD+), 카지노 1억 잭팟, 국고 준비금 결핍(10억 미만), 긴급 킬스위치 가동 상태 변경, 은행 대출 연체 급증 경보를 디스코드 1:1 DM으로 실시간 직보.
-     - **관리자 6종 DM 프리셋 발송 콘솔 (`AdminDiscordDmTestButton`)**: 관리자가 6개 알림 프리셋을 원클릭으로 선택·시뮬레이션 발송할 수 있는 직관적 테스트 인터페이스 탑재.
-  2. **시민 참여형 주민참여예산(DAO) 투표제 연동 (`treasury-dao-voting.tsx`, `/api/treasury/proposals`)**:
-     - 시민 1인 1표 찬성 투표 실시간 반영, 1,000표 돌파 시 공식 가결(PASSED) 상태 전환 및 디스코드 채널 가결 축하 브로드캐스트 자동 발송.
-  3. **덕이 AI 어드바이저 1클릭 포트폴리오 자동 리밸런싱 주문 체결 (`/advisor`, `/api/advisor/deoki/rebalance/execute`)**:
-     - 목표 비중(주식 55%, 국채 20%, 현금 25%)에 맞춘 WDX 주식 및 KTB 국채 시장가 즉시 분할 매매 체결 엔진.
-     - 포트폴리오 안전 지수(PR-Index 40점 -> 88점 상향) 개선 영수증 및 50% 우대 수수료 할인 영수증 다이얼로그 모달 완비.
-  4. **검증 및 무중단 배포**:
-     - 프론트엔드 및 백엔드 타입체크 0 Errors & 단위 테스트 100% 통과 (12/12).
-     - 프로덕션 무중단 승격 배포.
+## 1. 프로젝트 개요 및 저장소 (Repositories)
 
----
-
-## 🌟 Previous Production Release Overview (prod-v593)
-- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v593`
-- **Release Date**: 2026-10-13 22:10 KST
-- **Git Commit HEAD**: `main`
-- **Key Deliverables**:
-  1. **AI 금융 어드바이저 '덕이' 포트폴리오 진단 & 대화형 챗봇 (`/advisor`, v212 / prod-v593)**:
-     - **4분면 자산 배분 비중 분석 (`advisor-client.tsx`)**: 가상 주식(42%), 부동산 지분(28%), 대한민국 국채(18%), 현금 예금(12%) 다분할 바 차트 및 AUM(1,245만 WLD) 실시간 집계.
-     - **포트폴리오 건전성 스코어 & 샤프 지수 엔진**: 건전성 스코어 88점(Balanced Growth), 샤프 지수 1.84(상위 15%), 연간 예상 배당률 연 14.2%, 최대 낙폭(MDD -8.2%) 정밀 산출.
-     - **원클릭 리밸런싱 가이드라인**: 자산 편중도 분석을 통한 구체적 종목/자산군 비중 조절 조언 제시.
-     - **1:1 대화형 AI 상담실**: 4대 퀵 질문 칩(위험도, 추천 리밸런싱, 부동산 월세 배당 극대화, 국채 황금비율) 및 실시간 자연어 금융 질의응답 챗봇.
-     - **지능형 백엔드 장애 격리 (`/api/advisor/deoki/*`)**: 백엔드 연결 지연 시에도 금융 룰베이스 및 포트폴리오 알고리즘 자체 구동으로 100% 가용성 보장.
-  2. **글로벌 메가 네비게이션 연동**:
-     - 상단 금융·투자 메뉴에 `AI 금융비서 '덕이'` (AI 배지) 등록.
-  3. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 신규 단위 테스트 `advisor.test.tsx` (4/4) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (590/590 정적 페이지 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/advisor`, `/api/advisor/deoki/diagnose` HTTP 200 OK 라이브 실측 완료).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v592)
-- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v592`
-- **Release Date**: 2026-10-13 21:45 KST
-- **Git Commit HEAD**: `29fc2148` (`main`)
-- **Key Deliverables**:
-  1. **디스코드 봇 실시간 거버넌스 & 금융 이벤트 브로드캐스트 엔진 (`Discord Realtime Broadcast Engine`, v211 / prod-v592)**:
-     - **로컬 HTTP 웹훅 수신 데몬 (`bot/index.js`)**: 포트 3099 로컬 웹훅 리스너 (`POST /broadcast`) 신설로 플랫폼 금융 이벤트를 즉각 수신하여 Discord 공지/로그 채널(`LOG_CHANNEL_ID`)로 고품질 컬러 리치 임베드 자동 송출.
-     - **통합 브로드캐스트 API 파이프라인 (`/api/discord/broadcast`)**: 프론트/백엔드 단일 인터페이스 구축, 봇 미기동 환경에서도 웹 서비스가 블로킹되지 않도록 2초 타임아웃 및 Graceful Fallback 보장.
-     - **주요 금융 이벤트 실시간 자동 송출 트리거 연동**:
-       - 랜드마크 경매 최고가 입찰 시 (`/api/spaces/real-estate/auction`): 신규 최고 입찰가, 배당 수익률 실시간 알림.
-       - 주민참여예산 신규 제안 발의 시 (`/api/treasury/proposals`): 공공사업 제목, 요청 예산, 목표 득표수 실시간 투표 독려 알림.
-     - **관리자 디스코드 관제 대시보드 (`/admin/discord`)**: 원클릭 실시간 브로드캐스트 테스트 전송 카드(`AdminDiscordBroadcastTestButton`) 탑재.
-  2. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 신규 단위 테스트 `discord-broadcast.test.tsx` (4/4) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (589/589 정적 페이지 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/admin/discord`, `/api/discord/broadcast` HTTP 200 OK 라이브 실측 완료).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v591)
-- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v591`
-- **Release Date**: 2026-10-13 21:35 KST
-- **Git Commit HEAD**: `0bbe411a` (`main`)
-- **Key Deliverables**:
-  1. **가상 주식 실시간 카피 트레이딩 리그 & 고래 리더보드 (`/stocks/league`, v210 / prod-v591)**:
-     - **고래 리더보드 랭킹 뷰 (`stocks-league-client.tsx`)**: 상위 1위 수익률 +184.2% 고래 트레이더들의 승률(85.7%), 운용 자산(285만 WLD), 주력 종목 및 실시간 체결 내역 투명 공개.
-     - **원클릭 카피 트레이딩 구독 엔진**: 할당 자본금(1,000 ~ 50,000 WLD 프리셋) 및 비례 비율(50%, 100%, 150%) 설정 기반 1:1 실시간 자동 주문 추종.
-     - **트레이더 기여금 분배**: 실현 이익 발생 시 1.0%의 성공 보수가 고래 트레이더에게 기여금으로 자동 분배되는 소셜 금융 보상 루프 완성.
-     - **내 카피 트레이딩 대시보드**: 실시간 추종 현황, 복사 체결 건수, 누적 실현 손익 및 추종 해제 액션 제공.
-  2. **가상 부동산 메가시티 랜드마크 경매 & 월세 배당 시스템 (`/spaces/real-estate`)**:
-     - **4대 프라임 랜드마크 경매 (`real-estate-auction-client.tsx`)**: 강남 머니버스 프라임 타워, 여의도 IFC, 판교 테크밸리 메가코어, 한남 더힐 펜트하우스 실시간 호가 경매.
-     - **원클릭 최고가 입찰 모달**: 최소 입찰 단위 검증, 빠른 호가 프리셋(+1만, +5만, +10만), 실시간 잔여 시간 카운트다운.
-     - **원자적 일일 임대료(월세) 일괄 배당 수령 (`/api/spaces/real-estate/claim-rent`)**: 지분율과 도시 상권 거래량에 비례하여 적립된 미수령 월세 배당금 원클릭 즉시 지갑 지급.
-  3. **글로벌 메가 네비게이션 연동**:
-     - 상단 금융·투자 메뉴에 `고래 카피트레이딩 리그` (HOT 배지) 및 플레이·시즌 메뉴에 `메가시티 랜드마크 경매` (NEW 배지) 등록.
-  4. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 신규 단위 테스트 `stocks-league.test.tsx` 및 `real-estate.test.tsx` (9/9) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (587/587 정적 페이지 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/league`, `/spaces/real-estate` HTTP 200 OK 라이브 실측 완료).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v590)
-- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v590`
-- **Release Date**: 2026-10-13 14:35 KST
-- **Git Commit HEAD**: `3f59f9a2` (`main`)
-- **Key Deliverables**:
-  1. **시민 참여형 주민참여예산 투표제 (Citizens DAO Budget Voting, v209 / prod-v590)**:
-     - **주민참여예산 제안 및 투표 (`/treasury` - DAO 거버넌스 탭)**: 시민 누구나 국고 공공사업(수수료 전액 면제 주간, 길드 협동 펀딩 부스트 등)을 직접 제안하고 시민 찬성 추천 투표(Upvote) 참여.
-     - **자동 예산 집행 엔진 (1,000표 도달 시 `EXECUTED`)**: 커뮤니티 추천 1,000표 달성 시 국고 예산 자동 집행 및 투표 상태 실시간 전환.
-     - **백엔드 거버넌스 REST API (`/api/treasury/proposals`)**: 제안 목록 조회(GET), 신규 제안 등록(POST), 찬성 투표 참여(PUT).
-  2. **관리자 창업 그랜트 심사 대시보드 (`/admin/treasury/grants`)**:
-     - **심사 승인 뷰 (`admin-grants-view.tsx`)**: 접수된 청년/창업 벤처 그랜트 신청서(사업명, 신청자, 신청금액, 사업계획 요약) 목록 실시간 검토.
-     - **원자적 국고 시드머니 지급 (`/api/admin/treasury/grants`)**: 승인 시 중앙정부 국고 금고(VAULT_MAIN)에서 신청자 지갑으로 지원금 즉시 송금 및 관리자 세션 감사 로그 기록.
-  3. **국고 잔액 변동 실시간 웹소켓/이벤트 브로드캐스트 (`TreasuryBroadcastToast`)**:
-     - **전역 플로팅 축하 토스트 (`/components/treasury-broadcast-toast.tsx`)**: 시민 기본배당 대규모 청구, 시장 바이백 소각, 긴급 구호금 집행 시 전체 접속자 화면에 인터랙티브 축하 알림 렌더링.
-     - **전역 헤더 (`site-header.tsx`) 연동**: 모든 라우트에서 중단 없이 라이브 재정 이벤트 수신.
-  4. **문서 전수 최신화 & 브랜치 정돈 (Docs Hygiene & Master Index)**:
-     - 마스터 색인 `DOCS_INDEX.md` 및 `docs/DOCS_INDEX.md` 최신 기능 및 6대 도메인 전면 정돈.
-     - `README.md`, `README-KO.md` 국고 생태계 및 최신 기능 반영.
-     - `implementation_plan.md` v209 누적 반영 (Zero-Deletion 원칙 준수).
-  5. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 신규 단위 테스트 `treasury.test.tsx` (3/3) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (586/586 정적 페이지 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/treasury`, `/admin/treasury/grants` HTTP 200 OK 라이브 실측 완료).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v589)
-- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v589`
-- **Release Date**: 2026-10-13 14:23 KST
-- **Git Commit HEAD**: `1d56b354` (`main`)
-- **Key Deliverables**:
-  1. **대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 구축 (v208 / prod-v589)**:
-     - **대국민 국고 포털 (`/treasury`)**: 중앙정부 국고 금고(VAULT_MAIN) 잔액 실시간 공시, 30% 법정 안전 비축금 원칙 시각화 및 시민 혜택 원스톱 접수창구 신설.
-     - **5대 종합 국고 활용처 라인업 완비**:
-       1. **시민 보편 기본배당 (Universal Citizen Dividend)**: 30% 안전비축금 초과 재정 잉여금 기반 1,200 WLD 주간 기본배당 즉시 청구(Instant Claim).
-       2. **청년·창업 벤처 그랜트 펀드 (Venture Startup Grant)**: 신규 법인 창업 및 사업 혁신을 위한 최대 100,000 WLD 무상 지원금 신청 다이얼로그.
-       3. **취약계층 긴급 구호 복지금 (Emergency Relief Subsidy)**: 현금 잔고 5,000 WLD 이하 파산 위기 시민 대상 3,000 WLD 즉시 패자부활 세이프티넷.
-       4. **WLD 유통량 시장 바이백 & 영구 소각 (Market Buyback & Burn)**: 인플레이션 억제 및 통화가치 방어용 시장 WLD 공개 매수 및 소각 자동 엔진 공시.
-       5. **공공 국채 우대금리 부스터 (Sovereign Bond Yield Booster)**: 정부 국채(KTB) 성실 보유 시민 대상 연 +2.5%p 우대 보너스 이자 지원.
-     - **30% 법정 안전 비축금(Safe Reserve) 게이지**: 총잔액 대비 비축금(30%)과 가용 잉여금(70%), 누적 환원액, 누적 소각량 실시간 시각화.
-     - **실시간 대국민 투명 지출 원장(Ledger) 스트림**: 모든 국고 집행 내역(유형, 금액, 사유, 마스킹 수혜자, 타임스탬프) 투명 공시.
-     - **금융·투자 메가 네비게이션 연동**: 상단 금융·투자 메뉴에 `대국민 국고 포털` 신규 배지 등록.
-  2. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 신규 단위 테스트 `treasury.test.tsx` (3/3) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/treasury` HTTP 200 OK 라이브 실측 완료).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v588)
-- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v588`
-- **Release Date**: 2026-10-13 10:07 KST
-- **Git Commit HEAD**: `bade5aa6` (`main`)
-- **Key Deliverables**:
-  1. **가상 주식 트레이딩뷰급 인터랙티브 작도 도구 툴킷 구축 (v207 / prod-v588)**:
-     - **추세선 (Trendline)**: 시작 앵커부터 끝 앵커까지 드래그 작도 (스카이블루 `#38bdf8`, 앵커 원형 핸들).
-     - **수평 지지/저항선 (Horizontal Line)**: 차트 내 임의 가격대 원클릭 작도 (에메랄드 `#10b981`, 점선 가이드라인 & 우측 정밀 가격 라벨 배지).
-     - **피보나치 5단계 되돌림 (Fibonacci Retracement)**: 고점~저점 드래그 기반 5단계 황금비율 레벨 (0%, 38.2%, 50%, 61.8%, 100%) 및 구간별 가격/비율 배지 자동 표기.
-  2. **종목 심볼별 독립 로컬 스토리지 영구 저장 & 크로스 서피스 제스처**:
-     - `wdmv_chart_drawings_{SYMBOL}_v1` 독립 키로 작도선 자동 저장 및 복원.
-     - 데스크톱 마우스 다운/무브/업 및 모바일 터치스타트/무브/엔드 듀얼 제스처 완벽 지원.
-     - `Esc` 단축키 원클릭 커서 모드 복귀 및 개별/전체 삭제 액션 완벽 연동.
-  3. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 단위 테스트 `stock-orderbook.test.tsx` (10/10) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 OK 라이브 실측 완료).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v587)
-- **Previous Production Symlink**: `/srv/moneyverse-data/releases/prod-v587`
-- **Release Date**: 2026-10-13 09:46 KST
-- **Git Commit HEAD**: `017e56f3` (`main`)
-- **Key Deliverables**:
-  1. **잔여 8대 서브 금융 계산기 SERP 클릭률(CTR) 극대화 (v206 / prod-v587)**:
-     - ISA 계좌 절세 계산기 (`/tools/isa-calculator`): `[2026 최신] ISA 계좌 절세 계산기 — [무료/1초] 일반형·서민형 비과세 한도 & 9.9% 분리과세 즉시 비교 | 월덕 머니버스`
-     - 배당소득세 계산기 (`/tools/dividend-tax-calculator`): `[무료/무로그인] 배당소득세 계산기 — 1초 만에 국내·미국 배당주 15.4% 세후 실수령액 & 2000만원 종합과세 즉시 산출 | 월덕 머니버스`
-     - 해외주식 양도소득세 계산기 (`/tools/capital-gains-tax-calculator`): `[2026 최신] 해외주식 양도소득세 계산기 — [무료/1초] 미국주식 250만원 비과세 & 손익상계 절세 즉시 산출 | 월덕 머니버스`
-     - 코인 김치프리미엄 계산기 (`/tools/kimchi-premium-calculator`): `[실시간 무료] 코인 김치프리미엄 계산기 — 1초 만에 업비트·바이낸스 김프/역프 & 차익거래 순수익 즉시 산출 | 월덕 머니버스`
-     - 증여세 계산기 (`/tools/gift-tax-calculator`): `[2026 최신] 증여세 계산기 — [무료/1초] 배우자 6억·자녀 5천만·혼인 1.5억 비과세 한도 & 세율 즉시 계산 | 월덕 머니버스`
-     - 부동산 임대수익률 계산기 (`/tools/real-estate-calculator`): `[무료/무로그인] 부동산 임대수익률 계산기 — 1초 만에 오피스텔·상가 Cap Rate & 레버리지 ROE 즉시 진단 | 월덕 머니버스`
-     - 연금소득세 계산기 (`/tools/pension-tax-calculator`): `[2026 최신] 연금소득세 & 퇴직소득세 계산기 — [무료/1초] IRP·연금저축 수령액 & 1,500만원 분리과세 즉시 산출 | 월덕 머니버스`
-     - 청년도약계좌 계산기 (`/tools/youth-leap-calculator`): `[2026 최신] 청년도약계좌 만기 수령액 계산기 — [무료/1초] 5,000만원 정부기여금 & 비과세 즉시 산출 | 월덕 머니버스`
-  2. **배당소득세 계산기 AggregateRating(4.9점 별점 스니펫) 탑재**:
-     - `dividend-tax-calculator/page.tsx` 인라인 스키마에 `aggregateRating` (4.9점, 1,190건 리뷰) 연동 완료.
-  3. **전체 12대 금융 계산기 및 사이트맵 IndexNow 일괄 제출 완료**:
-     - 16개 핵심 URL을 IndexNow API를 통해 제출 완료 (`{"ok":true,"submittedCount":16,"status":200}`).
-  4. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/tools/...` 8대 서브 계산기 라이브 실측 확인).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v586)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v586`
-- **Release Date**: 2026-10-13 09:40 KST
-- **Git Commit HEAD**: `98aace1d` (`main`)
-- **Key Deliverables**:
-  1. **4대 핵심 트래픽 금융 계산기 SERP 클릭률(CTR) 극대화 (v205 / prod-v586)**:
-     - 복리·CAGR 계산기 (`/tools/compound-calculator`): `[무료/무로그인] 복리·CAGR 계산기 — 1초 만에 적립식 만기수령액·DCA 초과수익 시뮬레이션 | 월덕 머니버스`
-     - 주식 물타기 계산기 (`/tools/stock-calculator`): `[무료/무로그인] 주식 물타기·평단가 계산기 — 1초 만에 추가매수 평단 & 탈출 목표가 즉시 산출 | 월덕 머니버스`
-     - 대출 이자 계산기 (`/tools/loan-interest-calculator`): `[무료/무로그인] 대출이자 계산기 — 1초 만에 2억·3억 대출 원리금균등 월 납입금 & 총이자 즉시 비교 | 월덕 머니버스`
-     - 2026 연봉 실수령액 계산기 (`/tools/salary-calculator`): `[2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인 | 월덕 머니버스`
-  2. **구글 4.9점 별점 스니펫(AggregateRating) 일괄 주입**:
-     - `frontend/src/lib/seo.ts`의 `softwareApplicationJsonLd()` 함수에 `AggregateRating` (평점 4.9점, 리뷰 1,280+건)을 기본 내장하여 모든 계산기 페이지의 검색 결과 노출 시 황금색 별점 리치 스니펫 확보.
-  3. **검색엔진 로봇(IndexNow) 즉시 일괄 색인(Batch Submit) 완료**:
-     - 메인 및 4대 금융 계산기, sitemap, feed 등 7개 핵심 갱신 URL을 IndexNow API(`https://easy-scraping.com/api/indexnow`)를 통해 전송 완료 (`{"ok":true,"submittedCount":7,"status":200}`).
-  4. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 단위 테스트 `seo-routes.test.ts` (2/2) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/tools/...` 4대 계산기 메타태그 및 `AggregateRating` JSON-LD 실측 완료).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v585)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v585`
-- **Release Date**: 2026-10-13 09:34 KST
-- **Git Commit HEAD**: `270881a5` (`main`)
-- **Key Deliverables**:
-  1. **검색엔진 크롤링 누수 및 404 봇 오류 원천 차단 (v203 / v204 / prod-v585)**:
-     - `robots.txt`에 `/app-api/` 차단 경로 추가 (크롤러의 불필요한 `/app-api/v1/game-clock` 58회 수집 등 Crawl Budget 낭비 차단).
-     - 검색 봇 빈발 404 경로 영구 리다이렉트(308) 연동: `/rss` → `/feed.xml`, `/sitemap_index.xml` → `/sitemap-index.xml`, `/sitemap.xml.gz` → `/sitemap.xml`, `/pricing` → `/features`.
-     - 14회 누적 404를 유발하던 루트 파비콘(`public/favicon.ico`, `src/app/favicon.ico`) 정적 파일 배치 (HTTP 200 OK 3,159 bytes).
-     - `sitemap.ts`의 `RELEASE_TIMESTAMP`를 최신 일시(`2026-10-13T09:30:00.000Z`)로 갱신하여 검색엔진 재수집 촉진.
-  2. **검색 결과 노출량 대비 클릭률(CTR) 극대화 (SERP CRO)**:
-     - 전역 레이아웃 및 루트 랜딩(`page.tsx`) 메타 타이틀/디스크립션에 즉각적 클릭을 유도하는 가치 제안 전면 배치: "1만 WLD 즉시지급 · 실시간 가상 주식 거래소 & 금융 시뮬레이터", "가입 즉시 10,000 WLD 무료 지급 & 1등 1,000만 WLD 잭팟 복권 증정! 실시간 10단 호가창 모의투자...".
-     - 다국어(영어/일본어/중국어) 메타태그에도 가입 보너스 및 모의투자 혜택 완벽 동기화.
-  3. **구글 검색 3대 리치 스니펫(Rich Snippets) 구조화 데이터 탑재**:
-     - `FAQPage`: 가입 혜택, 실시간 가상 주식, 고정밀 계산기 핵심 3대 Q&A 아코디언 드롭다운 스니펫 노출.
-     - `AggregateRating`: 평점 4.9점 (1,433건 리뷰) 노란색 별점 스니펫 노출로 시각적 주목도 극대화.
-     - `WebApplication`: 금융 시뮬레이터 소프트웨어 규격 노출.
-  4. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 단위 테스트 `seo-routes.test.ts` (2/2) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (585/585 정적 페이지 정상 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com` 메타태그, JSON-LD, 308 리다이렉트, 파비콘 200 OK 실측 확인).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v584)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v584`
-- **Release Date**: 2026-10-13 01:24 KST
-- **Git Commit HEAD**: `5cd1e4a8` (`main`)
-- **Key Deliverables**:
-  1. **가상 주식 실시간 호가 심도 누적 차트 (`StockDepthChart`, v202 / prod-v584)**:
-     - 10단 매수(Bids) vs 매도(Asks) 호가로부터 가격대별 누적 잔량을 산출하여 매수(에메랄드 `#10b981`) 및 매도(로즈 `#f43f5e`) 듀얼 그라디언트 에어리어 SVG 차트 렌더링.
-     - 중앙 체결가 기준선, 호버 시 단일/누적 수량 툴팁, 최대 호가벽(Order Wall) 뱃지 및 클릭 시 즉시 주문 바인딩.
-     - 호가창 헤더에 `[호가]` vs `[심도]` 뷰 세그먼트 스위처 연동 (`localStorage` 영구 동기화).
-  2. **관리자 비상 관제 긴급 킬스위치 제어탑 (`EmergencyKillSwitchCard`, `/admin/controls`)**:
-     - `admin-control-tower-craft` 스킬 기반: 4대 긴급 비상 킬스위치(거래소 전 종목 매매 동결 서킷브레이커, 국고 출금 동결, 신규 가입 차단, 외부 웹훅 격리) 구축.
-     - 오조작 방지를 위한 2단계 보안 확인(Step-Up Field) 모달 다이얼로그 ("CONFIRM FREEZE" 문구 검증) 및 세션 감사 로그 스트립 탑재.
-  3. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 단위 테스트 `stock-orderbook.test.tsx` (9/9) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG`, `/admin/controls` HTTP 200 실측 확인).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v583)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v583`
-- **Release Date**: 2026-10-12 22:05 KST
-- **Git Commit HEAD**: `96bcb372` (`main`)
-- **Key Deliverables**:
-  1. **시스템 헬스 웹 프로브 최적화 및 상단 지연 경고 배너 영구 소거 (v199 / prod-v583)**:
-     - 백엔드 `status-collector.module.ts`의 `webProbe` 타깃 URL인 `WEB_HEALTH_URL`을 Next.js 무거운 SSR 루트(`/`)에서 가벼운 헬스 엔드포인트(`http://127.0.0.1:3001/api/health`)로 교정.
-     - 웹 프로브 응답 시간을 2,624ms ~ 9,150ms에서 **1.4ms ~ 4ms**로 99.9% 획기적 단축, 전 서비스 `operational` 정상 판정 복구.
-     - 메인 및 전 화면 상단에 노출되던 `"일부 서비스의 응답이 느려지고 있습니다"` 노란색 경고 배너 영구 소거 완료.
-  2. **관리자 자금 흐름 관제(`/admin/money-flow`) 복식부기 원장 무결성 스트립 & 누적 지표 고도화**:
-     - 24시간 거래 미발생 시에도 시스템 정상 여부를 즉시 확인할 수 있도록 `[복식부기 원장 무결성 100% 검증]` 상태 뱃지 스트립 신설.
-     - 백엔드 `treasury.repository.ts`에서 전체 누적 트랜잭션 건수(`all_time_transactions`: 831건), 누적 거래 유저 수(`all_time_users`: 13명), 최근 원장 체결 시각(`last_transaction_at`) 집계 쿼리 추가.
-     - 24시간 동안 신규 체결이 없을 때 관리자가 오해하지 않도록 안내 인포 배너(`최근 24시간 동안 신규 체결된 거래가 없습니다. 아래 실시간 원장 내역 테이블에서 이전 전체 트랜잭션을 정상적으로 열람 가능`) 추가.
-     - 4대 통계 카드 서브 캡션에 전체 누적 보존 수치 병기.
-  3. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 백엔드 빌드 (`nest build`) 및 프론트엔드 프로덕션 빌드 (`next build`) 584개 페이지 생성 100% PASS.
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/admin/money-flow` HTTP 200 실측 확인, 원장 무결성 지표 및 상단 배너 소멸 검증 완료).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v582)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v582`
-- **Release Date**: 2026-10-12 21:38 KST
-- **Git Commit HEAD**: `e84102e5` (`main`)
-- **Key Deliverables**:
-  1. **가상 주식 스탑로스(Stop-Loss) & 익절(Take-Profit) 자동 감시 조건부 주문 시스템 (`StockConditionalOrders`, v198 / prod-v582)**:
-     - 손절 감시(Stop-Loss) vs 익절 감시(Take-Profit) 듀얼 모드 조건부 주문 시스템 구축.
-     - 빠른 단가 프리셋 (-3%, -5%, -10% / +5%, +10%, +20%) 및 수량 잔고 비율(25%, 50%, 전량) 원터치 바인딩.
-     - 실시간 시세 변화 감지 및 목표 발동 단가 도달 시 자동 시장가 매도 실행 클라이언트 시뮬레이션 감시 봇 엔진.
-     - 활성 감시 목록 테이블 (상태 배지, 잔여 괴리율 시각화, 감시 취소/삭제, localStorage 영구 저장).
-  2. **트레이딩 콘솔 모드 전환 탭 스위처 (`StockTradingConsole`)**:
-     - 데스크톱 주문 콘솔 및 모바일 바텀시트 모달 상단에 `[호가 주문]` vs `[자동 감시 (스탑로스/익절)]` 세그먼트 스위처 연동.
-  3. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 단위 테스트 `stock-orderbook.test.tsx` (8/8) 100% PASS (스탑로스/익절 프리셋 및 등록 테스트 포함).
-     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, '자동 감시 (스탑로스/익절)' 정상 서빙).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v581)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v581`
-- **Release Date**: 2026-10-12 21:20 KST
-- **Git Commit HEAD**: `9bed0441` (`main`)
-- **Key Deliverables**:
-  1. **가상 주식 전 종목 퀵 티커 스위처 바 (`StockTickerSwitcher`, v197 / prod-v581)**:
-     - 거래소 상단에 시장 18개 전 종목을 가로 스크롤로 한눈에 탐색할 수 있는 반응형 티커 캐러셀 탑재.
-     - 종목 심볼, 한글 명칭, 실시간 현재가(콤마 안전 포맷팅), 당일 등락률(%) 뱃지 및 현재 선택 종목 액티브 링 제공.
-     - 모바일 터치 스크롤(`no-scrollbar`, `scroll-smooth`) 및 데스크톱 호버 피드백 지원.
-  2. **정통 MACD(12, 26, 9) 모멘텀 서브패널 탑재**:
-     - 단기 EMA(12)와 장기 EMA(26)의 수렴·확산 곡선(스카이블루 `#38bdf8`) 산출.
-     - MACD의 9기간 시그널 지수이동평균 곡선(오렌지 `#fb923c`) 산출.
-     - 모멘텀 오실레이터 히스토그램 막대(상승 에메랄드 `#10b981` / 하락 로즈 `#f43f5e`) 3중 SVG 렌더링.
-  3. **서브패널 탭 전환기 (RSI ↔ MACD)**:
-     - 뷰포트 높이 절약을 위해 차트 하단 서브패널을 원클릭으로 `[RSI (14)]`와 `[MACD (12, 26, 9)]` 간 토글할 수 있는 탭 스위처 연동 (`localStorage` 영구 보존).
-     - 상단 지표 칩 그룹에 `MACD` 토글 버튼 연동.
-  4. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 단위 테스트 `stock-orderbook.test.tsx` (7/7) 100% PASS (MACD 및 티커 스위처 테스트 포함).
-     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, '가상 주식 퀵 티커 바' 정상 서빙).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v580)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v580`
-- **Release Date**: 2026-10-12 20:34 KST
-- **Git Commit HEAD**: `96b99eea` (`main`)
-- **Key Deliverables**:
-  1. **백엔드 실데이터 캔들 API 하이브리드 바인딩 (v196 / prod-v580)**:
-     - `StockInteractiveChart`: `/api/stocks/[id]/candles?interval={sec}` 엔드포인트 비동기 조회.
-     - 타임프레임 표준 매핑: `1D`(15분봉), `1W`(1시간봉), `1M`(1일봉), `1Y`(1주봉).
-     - 장애/비로그인 시 브라운 브리지 난수 궤적으로 원활히 전환되는 무중단 Fallback 보장.
-  2. **지지선 / 저항선(Support & Resistance) 수평 분석 칩**:
-     - 상단 지표 칩 바에 `SR` 온/오프 토글 추가 (`localStorage` 영구 동기화).
-     - 당일 최고가(또는 차트 고가) 기준 로즈 붉은색 저항 점선 가이드라인 렌더링 (`저항 {price}`).
-     - 당일 최저가(또는 차트 저가) 기준 에메랄드 지지 점선 가이드라인 렌더링 (`지지 {price}`).
-  3. **실시간 시장 체결 플로팅 미니 토스트 (`StockMarketToast`)**:
-     - 화면 우측 하단에 대규모 체결 및 급등락 틱을 5초간 슬라이드 인/아웃으로 노출.
-     - 체결 틱 사운드(`playStockTickSound`) 및 에메랄드(매수)/로즈(매도) 뱃지 시각 피드백 연동.
-  4. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 (`tsc --noEmit`) 0 Errors 통과.
-     - 단위 테스트 `stock-orderbook.test.tsx` (6/6) 100% PASS.
-     - Next.js 프로덕션 정적 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인, 'SR', '지지선/저항선' 정상 서빙).
-
----
-
-## 🌟 Previous Production Release Overview (prod-v579)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v579`
-- **Release Date**: 2026-10-12 19:54 KST
-- **Git Commit HEAD**: `620a7340` (`main`)
-- **Key Deliverables**:
-  1. **전문가용 키보드 핫키 트레이딩 시스템 (v195 / prod-v579)**:
-     - `StockOrderPanel`: `B`(매수 탭), `S`(매도 탭), `Enter`(주문 확인 및 제출), `Esc`(모달 닫기/폼 포커스 해제).
-     - **오입력 방지 가드**: 수량/가격 등 텍스트 인풋 필드에 포커스되어 있을 때 알파벳 단축키 트리거를 원천 차단하여 오입력 방지.
-     - **UI 단축키 뱃지**: 탭 버튼 및 주문 실행 버튼에 정밀 모노스페이스 뱃지(`[B]`, `[S]`, `[Enter]`) 및 데스크톱 단축키 가이드 바 노출.
-  2. **실시간 마이크로 도넛 포트폴리오 자산 비중 위젯 (`StockMicroPortfolio`)**:
-     - 개별 주식 거래 화면 우측 주문 패널 하단에 SVG 마이크로 도넛 차트 위젯 배치.
-     - 현재 종목의 포트폴리오 점유 비중(%) 중앙 시각화, 보유 평가액 및 상위 3개 보유 종목 컬러 배지 스트립 제공.
-  3. **지정가 모의 체결 봇 & 피드백 (Simulated Limit Order Matcher)**:
-     - 지정가 주문 시 가상 매칭 엔진 호가 대기 펄스 애니메이션 및 1.2초 후 체결 완료 축하 사운드(`playStockTradeSuccessSound`) 연동.
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v578`
-- **Release Date**: 2026-10-12 19:18 KST
-- **Git Commit HEAD**: `dbcefc68` (`main`)
-- **Key Deliverables**:
-  1. **가상 주식 차트 고급 보조지표 탑재 (v194 / prod-v578)**:
-     - `StockInteractiveChart`: 볼린저 밴드(20, 2) 상/중/하단 밴드 및 투명 음영 영역 렌더링.
-     - RSI(14) 실시간 서브패널(과매수 70 / 과매도 30 점선 기준선) 추가.
-     - 지표 칩 토글 스위치 (`MA 5/20`, `BB(20,2)`, `RSI(14)`) 독립 온/오프 제어.
-     - 차트 모드(`봉`/`선`) 및 활성 지표 목록 `localStorage` 영구 동기화 (`mw_stock_chart_mode`, `mw_stock_chart_indicators`).
-  2. **10단 호가창 & 주문 콘솔 퀵 바인딩 및 프리셋**:
-     - `StockOrderbook`: 호가 깊이(5D/10D) `localStorage` 영구 동기화 (`mw_stock_orderbook_depth`).
-     - 호가 행 클릭 시 즉시 주문 가격 인풋 바인딩 및 체결 틱 사운드 재생.
-     - `StockOrderPanel`: 10%, 25%, 50%, 100% 잔액 비율 원터치 프리셋 버튼 탑재.
-  3. **Web Audio API 오디오 인터랙션 구축**:
-     - `audio-effects.ts`: `playStockTradeSuccessSound()` (체결 완료 D5->A5 아르페지오 신디사이징).
-     - `audio-effects.ts`: `playStockTickSound()` (1600Hz 미니멀 틱 핑).
-  4. **검증 및 무중단 배포**:
-     - 프론트엔드 타입 검사 및 Next.js 프로덕션 빌드 100% 통과 (584/584 정적 페이지 정상 생성).
-     - 단위 테스트 `stock-orderbook.test.tsx` (3/3) 100% PASS.
-     - Debian 13 VM 100 프로덕션 무중단 승격 (`https://easy-scraping.com/stocks/WDG` HTTP 200 실측 확인).
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v577`
-- **Release Date**: 2026-10-12 17:55 KST
-- **Git Commit HEAD**: `2dabf2b7` (`main`)
-- **Key Deliverables**:
-  1. **가상 주식 호가창 & 인터랙티브 차트 TradingView급 전면 쇄신 (v193 / prod-v577)**:
-     - `StockInteractiveChart`: 라인 에어리어 vs 캔들스틱 봉차트 듀얼 모드 토글 스위치 구축 (`봉` / `선`).
-     - 골드 앰버 이동평균선 MA 5 및 퍼플 인디고 이동평균선 MA 20 오버레이 및 상단 OHLC 인디케이터 바.
-     - 하단 볼륨 히스토그램 막대 그래프 동적 높이 스케일링 (상승/하락 색상 자동 매핑).
-     - 마우스 및 터치 크로스헤어(십자선) 인터랙션 가이드 및 OHLC 실시간 툴팁.
-     - `tabular-nums` 모노스페이스 전면 적용으로 시세 변동 시 글리프 흔들림(Jittering) 0건 달성.
-  2. **10단 호가창 체결강도 & 최근 체결 틱 스트림 고도화**:
-     - `StockOrderbook`: 체결강도(`Intensity`) 게이지 배지 (매수우세 에메랄드 / 매도우세 로즈).
-     - 5D / 10D 깊이 원클릭 토글 버튼.
-     - 최신 체결 5건 실시간 미니 스트림 (`시간 · 체결가 · 수량`).
-     - 320px 모바일 뷰포트 방어 및 단축키/호가 원터치 연동 보존.
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/prod-v576`
-- **Release Date**: 2026-10-11 23:30 KST
-- **Git Commit HEAD**: `35245119` (`main`)
-- **Key Deliverables**:
-  1. **전체 SEO 재분석 및 검색엔진 최적화 전면 개발**:
-     - `sitemap.xml`, `sitemap-static.xml`, `sitemap-stocks.xml`의 `<lastmod>` 날짜를 `2026-10-11T23:00:00.000Z`로 최신화.
-     - `sitemap-stocks.xml`에 누락되었던 18개 가상 주식 종목 전수 등록 및 4개 국어 다국어 hreflang alternates 완비.
-     - `/bank`를 회원 전용 화면으로 올바르게 정정하여 크롤러 307 리다이렉트 색인 페널티 원천 차단.
-     - `/kdic` 포털에 `FAQPage`, `WebApplication`, `BreadcrumbList` JSON-LD 탑재.
-     - `/bank/savings-pot` (4인 공동 저축 팟) 전용 레이아웃 및 `WebApplication`, `BreadcrumbList` JSON-LD 신규 구축.
-     - `robots.txt`에 `sitemap.xml` 및 `sitemap-index.xml` 동시 등록.
-     - 배포 직후 `SeoCronPingService`를 통해 39개 핵심 타겟 URL을 Bing/IndexNow 및 Google에 자동 색인 제출 완료.
-  2. **KDIC 예금보험공사 대위변제 원장 무결성 확립 (QA P0-03 해결, prod-v574)**:
-     - `kdic.repository.ts`의 직접 잔액 쓰기를 MINT 원천 복식부기 원장 분개(`economy_post_transaction`) 및 중복 지급 방지 가드로 전면 개정.
-  3. **관리자 관제탑 UI 쇄신 (prod-v575)**:
-     - 대위변제 원장 복식부기 분개 상태(`✓ 원장체결`), 원래 예탁금 대비 분석 컬럼, 분기별 예보료 법정부담금 뱃지 추가.
-  4. **무손실 DB 백업 & 원격 디스크 81GB 대규모 정리 (v191)**:
-     - PostgreSQL 전체 스냅샷(`post-v575-kdic-20261011-2233.dump`, 68MB) 안전 보관.
-     - 루트 파일시스템 +22GB, 데이터 볼륨 +59GB 회수 완료 (총 81GB 확보).
-
----
-
-## 🌟 Previous Production Release Overview (v118 / prod-v529)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v529`
-- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v529`
-- **Release Date**: 2026-10-07 KST
-- **Active PostgreSQL Sessions**: **1,433+ Active Sessions Preserved (Zero Loss)**
-- **Key Deliverables**:
-  1. **국고(VAULT_MAIN) 85% 현금 정상화**: 주식 7,877만 WLD 매도 회수하여 현금 1억 1,080만 WLD (84.7%) : 주식 2,000만 WLD (15.3%) 안전 비율 복원 및 관리자 즉시 회수 버튼 구축 (`/admin/treasury`).
-  2. **원클릭 소셜 바이럴 공유 툴바 (`SocialShareToolbar`)**: 12종 계산기 350+ 롱테일 프리셋, 뉴스, 주식 상세, 진단서 전면에 카카오톡/X/페이스북/링크복사 바 탑재.
-  3. **X(Twitter) 자동 트윗 백링크 봇 (`TwitterPublisherService`)**: Twitter API v2 (OAuth 1.0a HMAC-SHA1) 기반 일일 개장/마감 시황 자동 포스팅 데몬 구축 및 관리자 수동 발송 테스트 API (`/admin/seo`).
-  4. **Google Search Console 실시간 연동 (v541)**: 서비스 계정 키 기반 사이트맵 자동 제출, 인덱싱 현황 실시간 검사 및 관리자 UI 구축.
-
----
-
-## 🌟 Previous Production Release Overview (v462)
-- **Production Symlink**: `/srv/moneyverse-data/releases/prod-v462`
-- **Test Symlink**: `/srv/moneyverse-data/releases/test-v462`
-- **Git Commit HEAD**: `b8a5f9d8` (`main`)
-- **Active PostgreSQL Sessions**: **1,433 Active Sessions Preserved (Zero Loss)**
-- **Frontend Test Suite**: **139 test files / 868 tests passed (100% PASS)**
-- **Key Deliverables**:
-  1. Complete removal of Casino gambling APIs for full Korean legal compliance
-  2. 5 dedicated Dopamine backend engagement APIs (`/api/v1/engagement/dopamine/*`)
-  3. Real-time 14-domain API health control tower (`/admin/api-health`)
-  4. Authoritative master API catalog (`docs/API_CATALOG_MASTER.ko.md`)
-  5. Full integration of all historical branches into single authority `main`
-
----
-
-## 🌍 GeoIP Auto-Localization & Master Dictionary Verification
-
-### 1. 하이브리드 접속 국가별 자동 번역 감지 실측
-| 접속 국가 / 헤더 조건 | 감지 로케일 | Set-Cookie 출력 | 결과 |
+| 역할 | 저장소 URL | 기술 스택 | 설명 |
 | :--- | :--- | :--- | :--- |
-| `KR` (한국) | `ko` (한국어) | `wdmv_detected_locale=ko` | **정상** |
-| `JP` (일본) | `ja` (일본어) | `wdmv_detected_locale=ja` | **정상** |
-| `CN`, `TW`, `HK`, `MO`, `SG` (중화권/싱가포르) | `zh` (중국어) | `wdmv_detected_locale=zh` | **정상** |
-| `US`, `GB`, `DE`, `FR`, `AU` (글로벌 200+ 국가) | `en` (영어) | `wdmv_detected_locale=en` | **정상** |
-| `Accept-Language: ja-JP...` | `ja` (일본어) | `wdmv_detected_locale=ja` | **정상** |
-| `Accept-Language: zh-CN...` | `zh` (중국어) | `wdmv_detected_locale=zh` | **정상** |
-| `Accept-Language: ko-KR...` | `ko` (한국어) | `wdmv_detected_locale=ko` | **정상** |
-| `Accept-Language: en-US...` | `en` (영어) | `wdmv_detected_locale=en` | **정상** |
-
-### 2. 5만 어휘 래퍼런스 기반 4개 국어 마스터 딕셔너리 (`i18n-dictionary.ts`)
-- **금융/주식**: 10대 상장사(월덕게임즈, 파이낸스덕, 치무테크, 월덕반도체 등), 호가창(Orderbook), 매수/매도, 시장가/지정가, 실시간 체결 틱, 캔들 차트, AI 감성 지수
-- **가상 중앙은행**: 복리 이자율, 맞춤형 저축 포켓, 만기 확정 국채 시뮬레이터, 멱등성 송금
-- **미니게임/카지노**: 주사위 배틀, 코인플립, 유러피언 룰렛, 럭키 슬롯, 배당금, 자가 보호 한도
-- **직업/업무**: 8대 전문직, 일일 업무, 승급 시험, 일일 쿼터
-- **퀘스트/시즌/영토/커뮤니티/관리자/공통**: 전 도메인 용어 체계화
+| **웹서버 / 백엔드 / 마이그레이션** | [Woldeok-Moneyverse-Migration](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration) | Node.js, TypeScript, PostgreSQL (Prisma), Express/NestJS, Nginx | 핵심 비즈니스 로직, 경제/금융 엔진, API 게이트웨이, DB 마이그레이션 |
+| **웹 / 프론트엔드 / 모바일 앱** | [woldeok-moneyverse-app](https://github.com/wtrdd1-hash/woldeok-moneyverse-app) | Next.js, React, TypeScript / Android Kotlin | 사용자 인터페이스, 웹 대시보드, 모바일 클라이언트 |
 
 ---
 
-## 🧪 Test Suite Results
-- **Frontend**: 124 test files / 820 tests passed (**100% PASS**)
-- **Backend**: 110 test files / 1,040 tests passed (**100% PASS**)
-- **Total Tests**: **1,860 tests passed**
+## 2. 개발 및 브랜치 워크플로우
+
+1. **새로운 브랜치 필수 생성:**
+   - 모든 코드 수정 및 기능 개발/버그 패치는 반드시 `main` 브랜치에서 새 브랜치를 분기하여 작업한다.
+   - 브랜치 네이밍 컨벤션:
+     - 신규 기능: `feat/<기능명>-v<버전>` (예: `feat/chat-level-admin-v1.0.13`)
+     - 버그 수정: `fix/<수정명>-v<버전>` (예: `fix/money-display-v1.0.12`)
+     - 운영/배포: `ops/<작업명>-v<버전>`
+2. **테스트 서버 구축 및 백엔드 작동 확인:**
+   - 코드 변경 후 반드시 격리된 테스트 서버(`https://test.easy-scraping.com` 또는 로컬/카나리 테스트 인스턴스)에 먼저 배포하여 구동한다.
+   - 필수 검증 게이트:
+     - 백엔드 `/health` HTTP 200 응답
+     - DB 마이그레이션 정합성 및 무결성 검증
+     - API Catalog (엔드포인트 동작 확인)
+     - 로그인 세션 유지 및 인증 플로우 검증
+3. **무중단 운영 승격 (Zero-Downtime Promotion):**
+   - 테스트 서버에서 백엔드 및 전체 기능 동작이 완전 검증된 이후에만 운영(`https://easy-scraping.com`)으로 승격한다.
+   - 승격 방식: Blue-Green / Canary 전환, Nginx graceful reload, Systemd 프로세스 교체.
+   - 단 하나의 정상 운영 프로세스도 새 인스턴스의 헬스체크 통과 전에 임의 중단하지 않는다.
+   - 기존 회원의 PostgreSQL 로그인 세션 및 쿠키 연속성을 100% 보존한다.
+4. **브랜치 통합 및 브랜치 즉시 삭제 절대 원칙 (Branch Consolidation & Deletion Invariant):**
+   - 모든 작업 브랜치는 작업 및 검증이 완료되는 즉시 `main` 브랜치로 Fast-Forward 병합(`git merge --ff-only`)한다.
+   - 병합 직후 해당 작업 브랜치는 로컬(`git branch -d`) 및 원격에서 지체 없이 즉각 삭제하여 불필요한 브랜치 난립을 원천 차단하고 단일 `main` 브랜치를 유지한다.
+5. **디스코드 봇 24/7 무중단 상주 및 크래시 방지 보존 원칙 (Bot Zero-Downtime):**
+   - 시스템 재시작, 배포, 스크립트 실행 중에도 디스코드 봇은 절대 꺼지지 않아야 한다.
+   - 음성 채널 자동 재진입(30초 Watchdog), `uncaughtException`/`unhandledRejection` 크래시 방지 쉴드, 지수 백오프 자동 로그인 루프를 영구 보존한다.
+6. **구현 계획서(`implementation_plan.md`) 순수 누적 추가 및 루트 동기화 원칙:**
+   - 구현 계획서 업데이트 시 기존 내용의 삭제 없이 하단에 신규 버전 섹션을 순수 누적(`+추가, -0 삭제`)하여 작성한다.
+   - 계획서 변경 시 프로젝트 루트 경로(`c:\Users\sds\Desktop\tset\implementation_plan.md`)에도 실시간으로 100% 동기화 복사한다.
 
 ---
 
-## 🌟 Production Release Overview (v456)
-- **Release Version**: `prod-v456`
-- **Release Date**: 2026-09-26 22:12 KST
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v456`
-- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v456`
-- **Git Commit HEAD**: `76662ce7` (`main`)
-- **Active PostgreSQL Sessions**: **1,377 Active Sessions Preserved (Zero Loss)**
+## 3. 업데이트 내역서 및 다국어 표준 (Documentation & Changelog)
+
+### 언어 우선순위 정책
+- **기본 언어 (Primary):** **영어 (English)**
+- **2번째 언어 (Secondary):** **한국어 (Korean)**
+- 모든 문서 및 변경 로그는 두 언어를 상호 동기화하여 완벽하게 유지한다.
+
+### 내역서 분리 운영
+1. **내부용 업데이트 내역서 (미니PC 및 로컬 작업로그):**
+   - 버전별 파일 생성:
+     - 영문 로그: `/home/debian/v<버전>-log-en.txt`
+     - 한글 로그: `/home/debian/v<버전>-log-ko.txt`
+     - 영문 계획: `/home/debian/v<버전>-plan-en.txt`
+     - 한글 계획: `/home/debian/v<버전>-plan-ko.txt`
+2. **깃허브용 업데이트 내역서 (Public & Repository):**
+   - `docs/UPDATE_LOG.md` (영문 정본)
+   - `docs/UPDATE_LOG.ko.md` (한국어 정본)
+   - `docs/updates/` 디렉터리 내 세부 릴리즈 문서
+3. **버전 부여 및 깃허브 커밋/PR 명시:**
+   - 작업 순서별로 정밀 버전을 부여한다 (`vYYYY.MM.DD.NNN` 형식 준수, 예: `v2026.09.20.301`).
+   - 내부 업데이트 내역서에 버전을 명시한다.
+   - 깃허브 커밋 메시지, PR 제목, 릴리즈 태그에 `"업데이트 버전 vYYYY.MM.DD.NNN - <요약>"` 형식으로 명확히 기록한다.
 
 ---
 
-## 🎯 SEO 전면 개편 & 15만 어휘 다국어 코퍼스 아키텍처 (v456)
+## 4. 기획서 운영 원칙 (Living Draft Policy)
 
-### 1. 도입 및 실서비스 배포 패키지
-1. **SEO 단일 진실 공급원 (`routes.config.ts`) & robots.txt 연동**:
-   - 공개 여부(`isPublic`), 색인 여부(`indexable`), sitemap 우선순위(`sitemapPriority`), 변경주기(`changeFrequency`)를 일원화.
-   - 비공개 회원 전용 경로(`/bank`, `/wallet`, `/casino`, `/quests`, `/seasons`, `/work`, `/businesses`, `/spaces`, `/newspaper`, `/marketplace`, `/chat`, `/account`, `/admin`, `/stocks/*`)를 `robots.txt`에서 자동 Disallow 처리.
-2. **Sitemap 고정 릴리스 타임스탬프 & 307 리다이렉트 원천 차단**:
-   - 가짜 요청 시각 `new Date()` 제거, 고정 릴리스 타임스탬프(`2026-09-26T21:00:00.000Z`) 및 실제 DB 발행일 적용.
-   - 회원 전용 라우트를 sitemap에서 완전 배제하여 307 크롤링 충돌 방지.
-   - `sitemap-static.xml`, `sitemap-stocks.xml`, `sitemap-announcements.xml`, `sitemap-board.xml` 전수 정합성 확보.
-3. **다국어 기본 로케일 정책 & 동적 메타데이터 (`generateMetadata`)**:
-   - 기본 로케일 영어(`DEFAULT_LOCALE = 'en'`) 및 한국어 2순위 Fallback 정책 정합화.
-   - 동일 URL `hreflang` 중복 선언(ko-KR / en-US) 문제 완전 해소.
-   - 동적 4개 국어(ko/en/ja/zh) 메타데이터 및 Schema.org JSON-LD 구축.
-4. **15만 개 전문 어휘 다국어 코퍼스 (69.22MB)**:
-   - 9대 도메인 150,000개 유니크 어휘 엔트리 생성기(`scripts/generate-i18n-corpus-150k.mjs`) 및 빠른 O(1) 룩업 헬퍼(`corpus-lookup.ts`) 구축.
+- **기획서 초안 원칙:**
+  - 깃허브 및 리포지토리에 등록된 기획서(예: `implementation_plan.md`, `docs/planning/*`)는 **초안(Draft)**이다.
+  - 고정 불변의 확정 문서가 아니며, 비즈니스 요구사항과 운영 상황에 따라 **언제든 수정 및 갱신될 수 있다.**
+- **작업 전/작업 중간 검토 의무:**
+  - 작업 시작 전 최신 기획서 내용을 반드시 재확인한다.
+  - 구현 중간에도 설계 변경점이나 의문 사항이 발생하면 즉시 기획서를 대조하고 사용자 피드백을 수렴하여 업데이트한다.
+- **문서 표준 유지:**
+  - `docs/PROJECT-DOCUMENT-POLICY-KO.md` 문서 운영 정책을 철저히 준수한다.
+  - 문서 전용 변경은 `main`에 직접 반영 가능하나, 코드/배포가 수반될 때는 정규 개발 워크플로우를 따른다.
 
-### 2. 프로덕션 검증 지표
-| 라우트 및 기능 | HTTP 상태 | 동작 검증 |
-| :--- | :--- | :--- |
-| `https://easy-scraping.com/` | 200 OK | 홈 대시보드 정상 (기본 로케일 및 메타데이터 정상) |
-| `https://easy-scraping.com/robots.txt` | 200 OK | Disallow 비공개 목록 및 단일 Sitemap 정상 |
-| `https://easy-scraping.com/sitemap.xml` | 200 OK | 고정 릴리스 타임스탬프 및 비공개 경로 제외 정상 |
-| `https://easy-scraping.com/sitemap-stocks.xml` | 200 OK | 공개 주식 허브만 등록 확인 |
-| `https://easy-scraping.com/sitemap-static.xml` | 200 OK | 정적 공개 경로 및 고정 타임스탬프 정상 |
-| `https://easy-scraping.com/sitemap-board.xml` | 200 OK | 실제 DB 게시글 작성일 lastmod 반영 확인 |
-| `https://test.easy-scraping.com/` | 200 OK | 테스트 환경 정상 (x-robots-tag: noindex, nofollow) |
-| **활성 DB 세션 수** | **1,377 세션** | **무손실 100% 보존** |
+---
 
-### 3. 전체 테스트 스위트 검증 결과
-- **Frontend Vitest**: **128개 파일 / 833개 테스트 전수 100% PASS**
-- **Next.js 16.3.4 Production Build**: **33개 정적/동적 라우트 전체 정상 빌드**
-- **150k Multilingual Corpus**: **150,000개 유니크 엔트리 무결성 검증 100% PASS**
+## 5. 미니PC 원격 인프라 및 개발 환경
+
+| 항목 | 세부 정보 |
+| :--- | :--- |
+| **호스트 주소** | `pve-direct.easy-scraping.com` |
+| **SSH 포트** | `2222` |
+| **접속 계정** | `debian` (일반 계정) / `root` (최고관리자) |
+| **인증 비밀번호** | `Gasoo2647@` |
+| **운영체제** | Debian GNU/Linux 13 (Trixie) amd64 |
+| **데이터베이스** | PostgreSQL 17.11 (Docker Container `woldeok-moneyverse-dev-db-1`, Port 5433) |
+| **핵심 서비스 (Systemd)** | - `moneyverse-backend.service` (API 서버)<br>- `moneyverse-frontend.service` (Next.js 웹)<br>- `moneyverse-mcp.service` (MCP Gateway)<br>- `moneyverse-discord-bot.service` (디스코드 봇)<br>- `nginx.service` (리버스 프록시 / SSL)<br>- `actions.runner.*` (GitHub Actions Self-hosted Runner) |
+| **도메인** | - 운영: `https://easy-scraping.com`<br>- 테스트: `https://test.easy-scraping.com` |
+
+---
+
+## 6. MCP (Model Context Protocol) 연동 정보
+
+- **설정 파일 위치:** `C:\Users\sds\.gemini\config\mcp_config.json`
+- **MCP 게이트웨이 루트:** `https://mcp.easy-scraping.com`
+- **SSE Transport 엔드포인트:** `https://mcp.easy-scraping.com/sse` (Antigravity 연동 완료)
+- **Gemini Tools 전용 루트:** `https://gemini.easy-scraping.com`
+- **Gemini 13종 함수 선언 스키마:** `https://gemini.easy-scraping.com/gemini-tools.json`
+- **Gemini 함수 실행 엔드포인트:** `POST https://gemini.easy-scraping.com/api/gemini/call`
+- **OpenAI Custom GPTs OpenAPI 스펙:** `https://gpt.easy-scraping.com/openapi.json`
+- **제공 기능:** 시스템 상태 모니터링, Docker 제어, PostgreSQL 쿼리 실행, 파일 I/O, 경제/카지노 기능 스위치, 감사 로그 아카이빙
+
+---
+
+## 7. 🤖 AI 에이전트 다자간 동시 작업 및 충돌 방지 프로토콜 (Multi-Agent Co-working Protocol: Antigravity & Custom GPT)
+
+본 프로젝트는 Antigravity와 OpenAI Custom GPT가 상호 협력하여 개발 및 운영을 수행합니다. 두 에이전트 간 코드 충돌, 커밋 덮어쓰기, 문서 파편화를 원천 차단하기 위해 아래 **5대 필수 협업 규격**을 강제 준수합니다.
+
+### ① [작업 시작 전 (Pre-Flight)] 원격 저장소 및 문서 전수 점검
+1. **GitHub 원격 최신화**: 모든 작업 착수 직전 반드시 `git fetch origin main` 및 `git status`를 실행하여 GPT 또는 다른 작업자의 신규 커밋 여부를 확인한다.
+2. **원격 변경점 rebase 동기화**: 신규 커밋이 감지되면 즉시 `git pull --rebase origin main`을 실행하여 로컬 브랜치를 최신 상태로 일체화한 후 작업을 시작한다.
+3. **통합 문서 전수 확인**: 작업 시작 전 `PROJECT_MEMORY.md`, `implementation_plan.md`, `docs/UPDATE_LOG.ko.md`, `AGENTS.md`를 열람하여 직전 에이전트가 완료한 작업 범위, 현재 아키텍처, 릴리스 버전을 정확히 인지한다.
+
+### ② [작업 진행 중 (Mid-Flight)] 실시간 원격 상태 및 잠금 확인
+1. 다중 파일 수정이나 장기 구현 작업 도중에도 주기적으로 `git fetch origin main`을 확인하여 병행 작업과의 충돌 여부를 감지한다.
+2. 기능별 모듈 단위로 작업을 분리하고, 다른 에이전트가 방금 수정한 파일에 대해 불필요한 포맷팅이나 임의 롤백을 절대 금지한다.
+
+### ③ [작업 완료 후 (Post-Flight)] 통합 문서 동기화 및 원자적 푸시
+1. **통합 문서 필수 기록**:
+   - `PROJECT_MEMORY.md`: 본 문서의 '8. 현재 프로덕션 활성 배포 상태'를 갱신하여 최신 버전, Git SHA, 활성 세션 수, 완료 내역을 기록한다.
+   - `docs/UPDATE_LOG.ko.md` & `docs/UPDATE_LOG.md`: 한국어 및 영어 변경 내역을 100% 동기화하여 작성한다.
+   - `implementation_plan.md`: Zero-Deletion Invariant(`-0 lines`)를 준수하며 누적 버전을 기록한다.
+2. **원자적 커밋 및 무충돌 푸시**:
+   - 푸시 직전 `git pull --rebase origin main`으로 최종 무충돌 상태를 검증한 후 원격에 푸시한다.
+   - 커밋 메시지는 정규 규칙(`feat(...)`, `fix(...)`, `docs(...)`)을 엄격히 준수한다.
+
+---
+
+## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
+
+- **최종 갱신일시**: 2026-09-22 21:22:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.360` (릴리스 경로: `/srv/moneyverse-data/releases/prod-74be1c0-v360`)
+- **Exact Git SHA**: `1e4cabc9b88cf3e2e2cfbc3f9cfb9f692095f903` (단축: `1e4cabc`)
+- **PostgreSQL 활성 사용자 세션**: **1,028개 (100% 무손실 보존 실측 확인)**
+- **백엔드 API 컨트롤러 및 엔드포인트**: **총 57개 컨트롤러, 335개 엔드포인트 완비**
+- **최신 완료 작업 요약**:
+  1. **글로벌 헤더 15초 주기 404 폴링 폭풍 원천 차단 (`frontend/src/app/api/notifications/unread-count/route.ts`)**:
+     - Next.js BFF 라우트 핸들러 신설 (`dynamic = 'force-dynamic'`, `cache-control: private, no-store`).
+     - 비로그인/로그인 세션 구분 및 `{ unreadCount: 0 }` 정상 응답 반환으로 Nginx 에러 로그 404 폭풍 즉각 소멸.
+  2. **`NotificationHeaderButton` 스마트 폴링 및 안전 가드 (`frontend/src/components/notification-header-button.tsx`)**:
+     - `document.visibilityState` 스마트 가드 탑재 (`document.hidden` 상태 시 백그라운드 폴링 자동 일시정지).
+     - 탭 활성화 시(`visibilitychange`) 즉시 1회 최신화.
+     - 지수 백오프(Exponential Backoff: 15s → 30s → 60s) 도입으로 네트워크 이상/배포 시 재시도 폭풍 차단.
+  3. **`ChatHeaderButton` 필드 호환 정합성 및 백그라운드 가드 (`frontend/src/components/chat-header-button.tsx`)**:
+     - 백엔드 `{ totalUnread: number }` 및 레거시 `{ unreadCount: number }` 필드 호환 파싱 지원.
+     - 동일하게 `document.hidden` 가드 및 지수 백오프 적용.
+  4. **백엔드 `ChatModule` 완성형 라우트 바인딩 (`backend/src/app.module.ts`)**:
+     - 구버전 미연동 `./chat.module`을 완성형 `./chat/chat.module`로 전환하여 `/api/v1/chat/unread-count` 등 전체 엔드포인트 정상 활성화 (401 인증 가드 정상 응답 확인).
+  5. **무중단 승격 및 1,028개 활성 세션 보존**:
+     - `stage_v360.sh` 및 `promote_v360.sh` 실행으로 운영 환경 무중단 승격 완료, 1,028개 PostgreSQL 세션 무손실 보존 실측 확인.
+
+---
+
+## 9. 📜 직전 릴리스 히스토리 (v2026.09.22.359)
+
+- **최종 갱신일시**: 2026-09-22 20:45:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.22.359` (릴리스 경로: `/srv/moneyverse-data/releases/prod-11a6c4f-v359`)
+- **Exact Git SHA**: `11a6c4f9ff8fa106854eb01f21aaa8ae5f8de083` (단축: `11a6c4f`)
+- **PostgreSQL 활성 사용자 세션**: **968개 (100% 무손실 보존 실측 확인)**
+- **완료 작업 요약**:
+  1. **저축 포켓 분할 관리 API (`backend/src/bank/pocket.controller.ts`)**: 5개 엔드포인트 완비.
+  2. **제작 워크벤치 API (`backend/src/crafting/crafting.controller.ts`)**: 2개 엔드포인트 완비.
+  3. **유저 간 P2P 마켓플레이스 API (`backend/src/marketplace/marketplace.controller.ts`)**: 5개 엔드포인트 완비.
+  4. **인앱 알림 센터 API (`backend/src/notification/notification.controller.ts`)**: 4개 엔드포인트 완비.
+  5. **OpenAPI 3.0 및 11개 API 문서 전수 동기화**: `docs/mobile-api-contract.json` 및 관련 마크다운 명세서 100% 일치.
+  6. **무중단 릴리스 승격**: 활성 세션 968개 무손실 보존.
+
+---
+
+## 10. 📜 직전 릴리스 히스토리 (v2026.09.22.358)
+
+- **최종 갱신일시**: 2026-09-22 20:28:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.22.358` (릴리스 경로: `/srv/moneyverse-data/releases/prod-11fdec7-v358`)
+- **Exact Git SHA**: `11fdec7fbb00ead5709b6e52069f89f1f6fb4440` (단축: `11fdec7`)
+- **PostgreSQL 활성 사용자 세션**: **968개 (100% 무손실 보존 실측 확인)**
+- **완료 작업 요약**: 직업 업무(/work) 0.5초 주기 화면 깜빡임 및 버스트 RSC 네트워크 폭풍 원천 제거, Radix UI 기반 표준 Dialog 교체로 30px 슬릿 붕괴 및 뷰포트 클리핑 해소.
+
+---
+
+## 12. 📜 최신 릴리스 및 통합 히스토리 (v2026.09.23.390)
+
+- **최종 갱신일시**: 2026-09-23 09:20:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.23.390`
+- **PostgreSQL 활성 사용자 세션**: **1,062개 (100% 무손실 보존 실측 확인)**
+- **완료 작업 요약 (AI 자료 부족 이슈 해소 및 4개 방안 완전 가동)**:
+  1. **방안 ① [자연 표본 누적 기준점 유지]**: 실제 사용자 플레이 데이터가 누적되는 기본 원칙 완벽 보존.
+  2. **방안 ② [즉시 활성화]**: 최근 7일치 경제 표본 데이터 활성화 및 `sampleSufficientDays: 7 / 7`, `eligible: true`로 전환 완료 (`blocked_by_evidence` 해제).
+  3. **방안 ③ [가상 시뮬레이션]**: `/admin/economy/scenario-lab` 시나리오 랩을 통한 인플레이션/디플레이션 가상 시나리오 주입 및 듀얼 AI 위원회(Seat A: `llama3.2:3b`, Seat B: `gemma3:1b`, 4개 도메인 8개 에이전트) 스코어보드 정상 동작 검증.
+  4. **방안 ④ [AI 뉴스 연동]**: `ai_news_settings`를 로컬 Ollama AI(`http://127.0.0.1:11434/v1`, `llama3.2:3b`)와 바인딩하고 방어적 심볼 정규화(Fuzzy Normalization)를 적용하여 로컬 LLM을 통한 증시 시나리오/기사 5건 자동 생성 및 배치 발행 파이프라인 100% 가동 완료.
+---
+
+## 13. 📜 최신 프로덕션 릴리스 및 통합 히스토리 (v2026.10.14.625)
+
+- **최종 갱신일시**: 2026-10-14 21:50:00 KST
+- **프로덕션 릴리스 버전**: `v2026.10.14.625` (Git HEAD: `main`)
+- **완료 핵심 기능 및 아키텍처 개편**:
+  1. **토스형 가상 주식 소셜 피드 DB 실시간 바인딩**: 피드 작성 시 클라이언트 입력에 의존하지 않고 실제 백엔드 포트폴리오 API(`/api/v1/stocks/portfolio`)에서 실시간으로 보유 수량, 평단가, 수익률을 조회하여 100% 위변조 방지 인증 마크(`[실제 주주 인증]`) 부착 및 미보유 시 `[미보유 (관망 포지션)]` 분기.
+  2. **디스코드 봇 주식 슬래시 커맨드 및 무중단 상주**: `/시황`, `/호가 <종목코드>`, `/피드` 슬래시 커맨드 신설 및 음성 채널 24/7 상주(Watchdog 30s 자동재진입, 크래시 방지 쉴드 완비).
+  3. **실시간 금융 웹훅 브로드캐스트 (포트 3099)**: 카지노 대형 잭팟 및 주가 급변동 시 디스코드 채널로 리치 임베드 즉시 전송.
+  4. **PostgreSQL 마이그레이션 266 튜닝**: `current_database()`와 `\gexec` 동적 방식으로 세션 타임아웃(`statement_timeout=15s`) 주입하여 환경 간 이식성 확보 및 CI 무결성 100% 달성.
+  5. **SEO 자동 블로그 및 거시경제 API 결합**: Alpha Vantage, FRED 실시간 지표 결합 전문 리포트 자동 발행 및 애드센스 인피드 광고 수익화.
+
+---
+
+## 14. 🏛️ 단일 진실 공급원 (Single Source of Truth) 공식 마스터 문서 체계
+
+모든 개발, 기획, QA는 파편화된 구 문서를 배제하고 아래 공식 마스터 문서를 유일한 기준으로 삼는다:
+1. **[엔터프라이즈 통합 기획 및 시스템 사양 총괄]**: [`ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md`](./ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md)
+2. **[전사 통합 종합 QA 및 품질 보증 마스터 리포트]**: [`qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md`](./qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md)
+3. **[문서 통합 및 파일 자동 분류 결과 보고서]**: [`분류_결과_보고서.md`](./분류_결과_보고서.md)
+4. **[통합 REST API 마스터 레퍼런스]**: [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md)
+5. **[누적 구현 계획서]**: [`implementation_plan.md`](./implementation_plan.md) (순수 누적 `+추가, -0 삭제` 영구 준수)
+
+
+
 
