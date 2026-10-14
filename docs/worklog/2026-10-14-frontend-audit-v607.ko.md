@@ -40,3 +40,13 @@
 - TruncatedList 닫기 버튼 접근성 테스트 기대값을 실제 한국어 접근성 레이블 닫기와 일치시킴. UI 코드는 수정하지 않음.
 - 집중 3파일 23/23 통과, 전체 215파일 중 202 통과/13 실패, 1178개 중 1151 통과/27 실패; 타입 검사 통과.
 - 이 3건은 테스트 계약 불일치 수정이며 실제 UI 깨짐 해결이라고 주장하지 않음. 운영 미배포.
+
+## v612 Production promotion gate — BLOCKED
+- User authorized resolving all remaining failures and promoting to Production; authority does not waive mandatory release gates.
+- Read AGENTS.md, docs/RELEASING.md, integrated master and runtime authority notes. Production holds real member balances; immutable release and zero-downtime validation required.
+- Source identity: integration/fullstack-branch-consolidation-20261014-v606, origin/main c56af867 confirmed before/after.
+- Fixed actual WCAG AA light-theme accent contrast: --mv-accent #059669 -> #047857; prior contrast 3.60:1 on light background.
+- Updated contrast test to correctly scope white-on-dark homepage hero cards instead of rejecting all text-white. Contrast suite 5/5 passed.
+- Full frontend suite NODE_ENV=test: 1153 passed, 25 failed of 1178 (12 failing files). Typecheck passed.
+- Outstanding failing tests cover SEO, casino, notifications, routing, app gateway, developer/guide, calculator, homepage etc. Exact-head backend integration, live test deployment, real browser screenshots, session continuity and production cutover not performed.
+- Release gate FAILED. No main merge, no Production switch or service restart.
