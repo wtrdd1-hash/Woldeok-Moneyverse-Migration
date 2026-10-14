@@ -198,17 +198,25 @@ const TOOLS = [
   },
 ];
 
-export default function ToolsHubPage() {
+export default async function ToolsHubPage() {
+  const locale = await getServerLocale();
+  const isKorean = locale === 'ko';
+  const copy = {
+    en: { badge: 'Financial calculators and virtual economy', heading: 'Financial Calculators & Simulation Tools', description: 'Explore compound interest, stock averaging, retirement planning, salary, loans and tax estimates alongside virtual WLD economy simulations. Results depend on assumptions and applicable rules.' },
+    ko: { badge: '금융 계산기 · 가상경제 시뮬레이터', heading: '금융 & 시뮬레이터 웹 도구 허브', description: '복리·주식 평단가·은퇴 목표·급여·대출·세금 추정 및 게임 내 WLD 시뮬레이션을 확인하세요. 금융 계산 결과는 입력 조건과 적용 규정에 따라 달라질 수 있습니다.' },
+    ja: { badge: '金融計算と仮想経済シミュレーション', heading: '金融計算・シミュレーションツール', description: '複利、株式の平均取得単価、退職資金、給与、ローン、税金の試算と仮想WLD経済のシミュレーションを利用できます。計算結果は前提条件によって異なります。' },
+    zh: { badge: '金融计算与虚拟经济模拟', heading: '金融计算与模拟工具', description: '使用复利、股票平均成本、退休、薪资、贷款和税费估算工具，并体验虚拟WLD经济模拟。结果取决于输入假设与适用规则。' },
+  }[locale];
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: '월덕 머니버스 금융 계산기 및 경제 시뮬레이터 도구 모음',
-    description: '복리·주식 평단가·은퇴·급여·대출 등 금융 계산기와 가상경제 시뮬레이터 모음',
+    name: copy.heading,
+    description: copy.description,
     url: 'https://easy-scraping.com/tools',
     hasPart: TOOLS.map((t) => ({
       '@type': 'WebApplication',
-      name: t.title,
-      description: t.description,
+      name: isKorean ? t.title : t.id.replace(/-/g, ' '),
+      description: isKorean ? t.description : copy.description,
       url: `https://easy-scraping.com${t.href}`,
       applicationCategory: 'FinanceApplication',
       operatingSystem: 'All',
@@ -227,13 +235,13 @@ export default function ToolsHubPage() {
       <div className="space-y-3 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-500">
           <Sparkles className="size-3.5" />
-          <span>금융 계산기 · 가상경제 시뮬레이터</span>
+          <span>{copy.badge}</span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-          금융 & 시뮬레이터 웹 도구 허브
+          {copy.heading}
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-          복리·주식 평단가·은퇴 목표·급여·대출·세금 추정 및 게임 내 WLD 시뮬레이션을 확인하세요. 금융 계산 결과는 입력 조건과 적용 규정에 따라 달라질 수 있습니다.
+          {copy.description}
         </p>
       </div>
 
@@ -249,12 +257,12 @@ export default function ToolsHubPage() {
                     <Icon className="size-5" />
                   </div>
                   <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${tool.badgeColor}`}>
-                    {tool.badge}
+                    {isKorean ? tool.badge : copy.badge}
                   </span>
                 </div>
-                <CardTitle className="text-base sm:text-lg font-bold">{tool.title}</CardTitle>
+                <CardTitle className="text-base sm:text-lg font-bold">{isKorean ? tool.title : tool.id.replace(/-/g, ' ')}</CardTitle>
                 <CardDescription className="text-xs leading-relaxed text-muted-foreground">
-                  {tool.description}
+                  {isKorean ? tool.description : copy.description}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pt-0">
