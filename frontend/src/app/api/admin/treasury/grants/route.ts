@@ -39,10 +39,17 @@ const INITIAL_APPLICATIONS: TreasuryGrantApplication[] = [
   },
 ];
 
+import { loadGrants, saveGrants } from '@/app/api/treasury/apply-grant/route';
+
 export async function GET() {
+  let applications = loadGrants();
+  if (applications.length === 0) {
+    applications = INITIAL_APPLICATIONS;
+    saveGrants(applications);
+  }
   return NextResponse.json({
     ok: true,
-    applications: INITIAL_APPLICATIONS,
+    applications,
   });
 }
 
@@ -72,6 +79,45 @@ export async function POST(request: Request) {
     const isApprove = body.action === 'APPROVE';
     const status = isApprove ? 'APPROVED' : 'REJECTED';
     const note = body.reviewNote || (isApprove ? '관리자 심사 통과: 국고 시드머니 원자적 출금 완료' : '사업 계획 보완 필요로 반려 처리');
+    const reviewedAt = new Date().toISOString();
+
+    // R07 해결: 영속 파일의 신청서 상태를 업데이트하고 보존
+    let applications = loadGrants();
+    if (applications.length === 0) {
+      applications = [...INITIAL_APPLICATIONS];
+    }
+
+    let found = false;
+    applications = applications.map((app) => {
+      if (app.id === body.applicationId) {
+        found = true;
+        return {
+          ...app,
+          status,
+          reviewNote: note,
+          reviewedAt,
+        };
+      }
+      return app;
+    });
+
+    if (!found) {
+      // 신규 신청서가 초기 배열에만 있거나 동기화 전인 경우 새로 추가
+      applications.unshift({
+        id: body.applicationId,
+        businessName: '알 수 없는 신청서',
+        applicantId: 'usr-unknown',
+        applicantMasked: 'unknown***applicant',
+        requestedAmountWld: 0,
+        businessPlan: '직접 심사 등록된 신청서',
+        status,
+        submittedAt: reviewedAt,
+        reviewedAt,
+        reviewNote: note,
+      });
+    }
+
+    saveGrants(applications);
 
     return NextResponse.json({
       ok: true,
@@ -79,7 +125,7 @@ export async function POST(request: Request) {
       applicationId: body.applicationId,
       status,
       reviewNote: note,
-      reviewedAt: new Date().toISOString(),
+      reviewedAt,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

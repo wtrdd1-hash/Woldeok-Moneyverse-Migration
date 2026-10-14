@@ -2,9 +2,8 @@
 
 import React, { useMemo, useState } from 'react';
 import { groupDigits } from '@/lib/money';
-import { OrderbookRow } from './stock-orderbook';
-import { Activity, ShieldAlert, BarChart3 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import type { OrderbookRow } from './stock-orderbook';
+import { BarChart3 } from 'lucide-react';
 
 interface StockDepthChartProps {
   readonly bids: OrderbookRow[];
@@ -34,7 +33,7 @@ export function StockDepthChart({
     askPoints,
     bidPath,
     askPath,
-    maxCumVolume,
+    maxCumVolume: _maxCumVolume,
     minPrice,
     maxPrice,
     totalBidVolume,
@@ -71,7 +70,6 @@ export function StockDepthChart({
 
     // SVG 캔버스 규격 (Width: 500, Height: 200, Margin Top: 20, Bottom: 30)
     const W = 500;
-    const H = 190;
     const chartBottom = 165;
     const chartTop = 15;
     const chartHeight = chartBottom - chartTop;

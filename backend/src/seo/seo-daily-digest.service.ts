@@ -141,14 +141,22 @@ export class SeoDailyDigestService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    // 일일 09:00 KST 신규 AI 금융 블로그 글 1편 자동 생성 및 IndexNow 색인 트리거
+    // 일일 09:00 KST 신규 AI 금융 블로그 글 1편 자동 생성 및 IndexNow 색인 트리거 (R19)
     try {
       const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://127.0.0.1:3001';
-      await safeFetch(`${frontendOrigin}/api/blog/generate`, {
+      const cronSecret = process.env.INTERNAL_API_SECRET || process.env.CRON_SECRET || 'mv-internal-secure-key-2026';
+      const response = await fetch(`${frontendOrigin}/api/blog/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cron-secret': cronSecret,
+        },
       });
-      this.logger.log('Daily AI blog article generated and IndexNow ping triggered');
+      if (response.ok) {
+        this.logger.log('Daily AI blog article generated and IndexNow ping triggered');
+      } else {
+        this.logger.warn(`Daily AI blog generation responded with status ${response.status}`);
+      }
     } catch (err) {
       this.logger.warn(`Failed to trigger daily AI blog generation: ${(err as Error).message}`);
     }

@@ -18,8 +18,17 @@ export function forbiddenTrackedPath(path) {
 }
 
 export function secretFindings(text) {
-  if (ALLOWED.test(text)) return [];
-  return SECRET_PATTERNS.filter(([, pattern]) => pattern.test(text)).map(([name]) => name);
+  const lines = text.split('\n');
+  const findings = new Set();
+  for (const line of lines) {
+    if (ALLOWED.test(line)) continue;
+    for (const [name, pattern] of SECRET_PATTERNS) {
+      if (pattern.test(line)) {
+        findings.add(name);
+      }
+    }
+  }
+  return Array.from(findings);
 }
 
 function run() {

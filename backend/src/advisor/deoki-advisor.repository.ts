@@ -51,20 +51,21 @@ export class DeokiAdvisorRepository {
       cash = 0;
     }
 
-    // 2. 예금/세이빙스 잔액 조회
+    // 2. 예금/뱅킹 잔액 조회 (R11: 실제 DB enum인 USER_BANK 사용)
     let savings = 0;
     try {
       const savingsRes = await this.db.query(
         `SELECT ab.available_amount as balance
          FROM public.accounts a
          JOIN public.account_balances ab ON ab.account_id = a.id
-         WHERE a.owner_user_id = $1 AND a.account_type = 'USER_SAVINGS'
+         WHERE a.owner_user_id = $1 AND a.account_type = 'USER_BANK'
          LIMIT 1`,
         [userId]
       );
       const firstSavings = savingsRes.rows[0];
       savings = firstSavings ? Math.max(0, Number(firstSavings.balance)) : 0;
-    } catch {
+    } catch (err) {
+      console.warn('[DeokiAdvisor] Failed to query USER_BANK balance:', err);
       savings = 0;
     }
 
@@ -93,24 +94,26 @@ export class DeokiAdvisorRepository {
           evalVal: val,
         });
       }
-    } catch {
+    } catch (err) {
+      console.warn('[DeokiAdvisor] Failed to query stock positions:', err);
       totalStockVal = 0;
     }
 
-    // 4. 국채 보유액 조회 (테이블 존재 시)
+    // 4. 국채 보유액 조회 (R11: 실제 국채 보유 테이블 treasury_bond_holdings 연동)
     let bondsVal = 0;
     try {
       const bondsRes = await this.db.query(
-        `SELECT COALESCE(SUM(amount), 0) as total_bonds
-         FROM public.government_bonds
-         WHERE user_id = $1 AND status = 'active'`,
+        `SELECT COALESCE(SUM(purchase_price_total_wld + accrued_interest_wld), 0) as total_bonds
+         FROM public.treasury_bond_holdings
+         WHERE user_id = $1 AND status = 'HOLDING'`,
         [userId]
       );
       const firstBond = bondsRes.rows[0];
       if (firstBond) {
         bondsVal = Number(firstBond.total_bonds);
       }
-    } catch {
+    } catch (err) {
+      console.warn('[DeokiAdvisor] Failed to query treasury bonds:', err);
       bondsVal = 0;
     }
 

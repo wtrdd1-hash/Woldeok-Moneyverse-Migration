@@ -10,11 +10,14 @@ export async function GET(): Promise<NextResponse> {
     });
     return NextResponse.json(result);
   } catch {
-    // 백엔드 미응답 시 고정밀 포트폴리오 진단 데이터 자체 산출
+    // 백엔드 미응답 시 예시 모의 포트폴리오 진단 데이터 산출 (R11: 허위 성공 방지 및 데모 플래그 정직화)
     return NextResponse.json({
       ok: true,
+      isDemo: true,
+      isSimulated: true,
+      warning: '백엔드 서비스 일시 지연으로 인해 예시 모의 포트폴리오 진단 결과가 표시됩니다.',
       score: 88,
-      statusLabel: '우수 (Balanced Growth)',
+      statusLabel: '우수 (Balanced Growth - 예시)',
       totalAssetWld: 12450000,
       sharpeRatio: 1.84,
       maxDrawdownRate: -8.2,

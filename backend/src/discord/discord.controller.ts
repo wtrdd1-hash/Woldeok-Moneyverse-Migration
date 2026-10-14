@@ -1,13 +1,13 @@
 import {
   Controller,
-  HttpCode,
   Inject,
   Post,
   Req,
+  Res,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { createDiscordInteractionHandler } from './interactions';
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 
@@ -38,18 +38,22 @@ export class DiscordController {
   ) {}
 
   @Post('interactions')
-  @HttpCode(200)
   @ApiOperation({ summary: 'Discord interaction webhook' })
-  async interactions(@Req() request: Request) {
+  async interactions(@Req() request: Request, @Res() response: Response) {
     if (!this.handler) throw new ServiceUnavailableException('discord interactions are disabled');
     // Headers are passed whole: the handler reads the signature and timestamp
     // itself and rebuilds the signed payload as timestamp || body, so
     // extracting them here would only create a second place for that
     // reconstruction to drift.
+    const rawBody =
+      (request as any).rawBody ||
+      (Buffer.isBuffer(request.body) ? request.body : Buffer.from(''));
+
     const result = await this.handler.handle({
       headers: request.headers,
-      rawBody: Buffer.isBuffer(request.body) ? request.body : Buffer.from(''),
+      rawBody,
     });
-    return result;
+
+    return response.status(result.status).json(result.body);
   }
 }

@@ -65,8 +65,26 @@ async function bootstrap(): Promise<void> {
     allowedHeaders: [...cors.allowedHeaders],
   });
 
+  // Raw bytes for paths whose bodies require strict byte-level signature verification or binary processing.
+  // Discord signs the exact request bytes; raw parser MUST run before generic express.json().
+  app.use('/api/v1/integrations/discord/interactions', raw({ type: '*/*', limit: '32kb' }));
+  app.use('/api/v1/admin/photos', raw({ type: '*/*', limit: '8mb' }));
+  app.use('/api/v1/photos/uploads', raw({ type: '*/*', limit: '4mb' }));
+  app.use('/api/v1/board/images/uploads', raw({ type: '*/*', limit: '4mb' }));
+  app.use('/api/v1/profile/image', raw({ type: '*/*', limit: '4mb' }));
+
   // Global 1MB payload ceiling to prevent memory-exhaustion & ReDoS attacks
-  app.use(json({ limit: '1mb' }));
+  // Preserves rawBody buffer in request for cryptographic signature verification
+  app.use(
+    json({
+      limit: '1mb',
+      verify: (req: any, _res, buf) => {
+        if (buf && buf.length) {
+          req.rawBody = buf;
+        }
+      },
+    }),
+  );
   app.use(urlencoded({ extended: true, limit: '1mb' }));
 
   // Correlation first, so every audit row written while serving a request --
@@ -106,22 +124,6 @@ async function bootstrap(): Promise<void> {
       onFailure: (error) => auditTrailLog.error('console access was not recorded', error),
     }),
   );
-
-  // Raw bytes for the two paths whose bodies are not JSON to us. Discord
-  // signs the exact request bytes, and a JSON round trip re-serialises key
-  // order and whitespace, after which the Ed25519 check can never pass. The
-  // photo upload is image data and PrivateImageStorage sniffs it itself.
-  app.use('/api/v1/integrations/discord/interactions', raw({ type: '*/*', limit: '32kb' }));
-  app.use('/api/v1/admin/photos', raw({ type: '*/*', limit: '8mb' }));
-  // A member's gallery submission. Smaller than the operator's, because this
-  // one is reachable by anybody signed in.
-  app.use('/api/v1/photos/uploads', raw({ type: '*/*', limit: '4mb' }));
-  app.use('/api/v1/board/images/uploads', raw({ type: '*/*', limit: '4mb' }));
-  // A member's own picture, on the same terms as an operator's gallery
-  // upload: the bytes arrive raw and `validateImageUpload` decides whether
-  // they are an image. The cap is the smaller one because this is one avatar
-  // per member and the store is not the place to discover that it was not.
-  app.use('/api/v1/profile/image', raw({ type: '*/*', limit: '4mb' }));
 
   app.useGlobalPipes(
     new ValidationPipe({

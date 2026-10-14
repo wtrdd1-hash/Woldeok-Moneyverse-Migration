@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   getAllBlogPosts,
   getBlogPostBySlug,
@@ -9,6 +9,14 @@ import { GET as getBlogList } from '../api/blog/route';
 import { POST as generateBlog } from '../api/blog/generate/route';
 
 describe('AI Daily Blog System', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }))));
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('loads seed blog posts correctly', () => {
     const posts = getAllBlogPosts();
     expect(posts.length).toBeGreaterThanOrEqual(3);
@@ -53,7 +61,13 @@ describe('AI Daily Blog System', () => {
   });
 
   it('verifies POST /api/blog/generate creates and indexes post', async () => {
-    const res = await generateBlog();
+    const req = new Request('http://localhost:3000/api/blog/generate', {
+      method: 'POST',
+      headers: {
+        'x-cron-secret': 'mv-internal-secure-key-2026',
+      },
+    });
+    const res = await generateBlog(req);
     expect(res.status).toBe(200);
 
     const json = await res.json();

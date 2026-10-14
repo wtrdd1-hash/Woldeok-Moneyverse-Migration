@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
+import fs from 'node:fs';
+import path from 'node:path';
 import { isLoggedInMember } from '@/lib/session';
 import type { TreasuryDaoProposal } from '@/app/treasury/treasury.types';
 
 export const dynamic = 'force-dynamic';
 
-// 인메모리 기본 주민참여예산 제안 목록
 const DEFAULT_PROPOSALS: TreasuryDaoProposal[] = [
   {
     id: 'prop-101',
@@ -47,10 +48,70 @@ const DEFAULT_PROPOSALS: TreasuryDaoProposal[] = [
   },
 ];
 
+function getProposalsFilePath(): string {
+  const sharedDir = '/srv/moneyverse-data/shared/data';
+  if (fs.existsSync('/srv/moneyverse-data/shared')) {
+    if (!fs.existsSync(sharedDir)) {
+      try {
+        fs.mkdirSync(sharedDir, { recursive: true });
+      } catch (err) {
+        console.debug('[proposals] mkdir sharedDir error:', err);
+      }
+    }
+    return path.join(sharedDir, 'treasury-proposals.json');
+  }
+  const dataDir = path.join(process.cwd(), 'data');
+  if (!fs.existsSync(dataDir)) {
+    try {
+      fs.mkdirSync(dataDir, { recursive: true });
+    } catch (err) {
+      console.debug('[proposals] mkdir dataDir error:', err);
+    }
+  }
+  return path.join(dataDir, 'treasury-proposals.json');
+}
+
+function loadProposals(): TreasuryDaoProposal[] {
+  try {
+    const filePath = getProposalsFilePath();
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const parsed = JSON.parse(raw) as TreasuryDaoProposal[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const existingIds = new Set(parsed.map((p) => p.id));
+        const combined = [...parsed];
+        for (const def of DEFAULT_PROPOSALS) {
+          if (!existingIds.has(def.id)) {
+            combined.push(def);
+          }
+        }
+        return combined;
+      }
+    }
+  } catch (err) {
+    console.error('[TreasuryProposals] Failed to read from disk:', err);
+  }
+  return [...DEFAULT_PROPOSALS];
+}
+
+function saveProposals(proposals: TreasuryDaoProposal[]): void {
+  try {
+    const filePath = getProposalsFilePath();
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(filePath, JSON.stringify(proposals, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[TreasuryProposals] Failed to write to disk:', err);
+  }
+}
+
 export async function GET() {
+  const proposals = loadProposals();
   return NextResponse.json({
     ok: true,
-    proposals: DEFAULT_PROPOSALS,
+    proposals,
   });
 }
 
@@ -77,69 +138,52 @@ export async function POST(request: Request) {
 
     if (!title || title.length < 5) {
       return NextResponse.json(
-        { ok: false, message: '제안 제목은 최소 5자 이상 작성해주세요.' },
+        { ok: false, message: '사업안 제목은 최소 5자 이상 작성해야 합니다.' },
         { status: 400 }
       );
     }
 
-    if (budget <= 0 || budget > 2000000) {
+    if (budget < 10000 || budget > 5000000) {
       return NextResponse.json(
-        { ok: false, message: '요청 국고 예산은 1 WLD 이상 2,000,000 WLD 이하여야 합니다.' },
+        { ok: false, message: '요청 국고 예산은 10,000 WLD ~ 5,000,000 WLD 사이여야 합니다.' },
         { status: 400 }
       );
     }
 
-    if (!desc || desc.length < 15) {
+    if (!desc || desc.length < 20) {
       return NextResponse.json(
-        { ok: false, message: '사업 추진 타당성 및 상세 설명은 15자 이상 구체적으로 입력해주세요.' },
+        { ok: false, message: '사업 제안 취지와 기대 효과를 최소 20자 이상 상세히 기술해주세요.' },
         { status: 400 }
       );
     }
 
-    const categoryLabelMap = {
+    const categoryMap: Record<string, string> = {
       FEE_CUT: '수수료 감면',
       COMMUNITY_FUND: '길드 지원',
       MARKET_MAKING: '시장 조성',
       PUBLIC_EVENT: '공공 이벤트',
     };
 
+    const category = body.category && categoryMap[body.category] ? body.category : 'FEE_CUT';
+
     const newProposal: TreasuryDaoProposal = {
-      id: `prop-${Date.now().toString(36)}`,
+      id: `prop-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
       title,
-      category: body.category || 'COMMUNITY_FUND',
-      categoryLabel: categoryLabelMap[body.category || 'COMMUNITY_FUND'],
+      category,
+      categoryLabel: categoryMap[category] || '공공사업',
       requestedBudgetWld: budget,
-      proposerMasked: 'citizen***me',
+      proposerMasked: 'citizen***active',
       description: desc,
-      votesCount: 1,
+      votesCount: 1, // 발의자 본인 찬성 1표
       targetVotes: 1000,
       status: 'VOTING',
       createdAt: new Date().toISOString(),
-      hasVoted: true,
     };
 
-    // 디스코드 실시간 브로드캐스트 연동 (Fire & Forget)
-    try {
-      const botUrl = process.env.DISCORD_BOT_BROADCAST_URL || 'http://127.0.0.1:3099/broadcast';
-      fetch(botUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'TREASURY_PROPOSAL',
-          title: `🗳️ [주민참여예산] 신규 공공사업 제안 발의!`,
-          description: `**"${newProposal.title}"**\n${desc}`,
-          fields: [
-            { name: '요청 예산', value: `${budget.toLocaleString()} WLD`, inline: true },
-            { name: '분류', value: newProposal.categoryLabel, inline: true },
-            { name: '목표 투표수', value: '1,000표', inline: true },
-          ],
-          color: 0x10b981, // Emerald
-          notifyAdminDm: true,
-        }),
-      }).catch(() => {});
-    } catch {
-      // non-blocking
-    }
+    // R06 해결: 디스크 영속 저장소에 실시간 추가 보존
+    const currentList = loadProposals();
+    const updatedList = [newProposal, ...currentList.filter((p) => p.id !== newProposal.id)];
+    saveProposals(updatedList);
 
     return NextResponse.json({
       ok: true,
@@ -164,8 +208,6 @@ export async function PUT(request: Request) {
 
     const body = (await request.json().catch(() => ({}))) as {
       proposalId?: string;
-      title?: string;
-      currentVotes?: number;
     };
 
     if (!body.proposalId) {
@@ -175,40 +217,50 @@ export async function PUT(request: Request) {
       );
     }
 
-    const nextVotes = (body.currentVotes ?? 0) + 1;
-    const isPassed = nextVotes >= 1000;
+    // R06 해결: 클라이언트의 currentVotes를 신뢰하지 않고 디스크의 실제 제안 객체를 조회 및 서버 권위 집계
+    const proposals = loadProposals();
+    const targetProposal = proposals.find((p) => p.id === body.proposalId);
 
-    if (isPassed && body.title) {
-      try {
-        const botUrl = process.env.DISCORD_BOT_BROADCAST_URL || 'http://127.0.0.1:3099/broadcast';
-        fetch(botUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'DAO_VOTING_PASSED',
-            title: `🎉 [주민참여예산] 1,000표 달성! 사업안 가결`,
-            description: `시민 투표 1,000표를 돌파하여 **"${body.title}"** 공공사업이 공식 가결(PASSED)되었습니다. 관리자 승인 후 국고 집행이 개시됩니다.`,
-            fields: [
-              { name: '달성 투표수', value: `${nextVotes.toLocaleString()}표`, inline: true },
-              { name: '상태', value: '가결 (집행 대기)', inline: true },
-            ],
-            color: 0x3b82f6, // Blue
-            notifyAdminDm: true,
-          }),
-        }).catch(() => {});
-      } catch {
-        // non-blocking
-      }
+    if (!targetProposal) {
+      return NextResponse.json(
+        { ok: false, message: '존재하지 않는 주민참여예산 제안입니다.' },
+        { status: 404 }
+      );
     }
+
+    if (targetProposal.status === 'PASSED') {
+      return NextResponse.json(
+        { ok: false, message: '이미 1,000표를 달성하여 가결 완료된 공공사업입니다.' },
+        { status: 400 }
+      );
+    }
+
+    // 서버 권위 1표 가산
+    const nextVotes = targetProposal.votesCount + 1;
+    const isPassed = nextVotes >= targetProposal.targetVotes;
+    const nextStatus = isPassed ? ('PASSED' as const) : targetProposal.status;
+
+    const updatedProposals = proposals.map((p) => {
+      if (p.id === body.proposalId) {
+        return {
+          ...p,
+          votesCount: nextVotes,
+          status: nextStatus,
+        };
+      }
+      return p;
+    });
+
+    saveProposals(updatedProposals);
 
     return NextResponse.json({
       ok: true,
       message: isPassed
         ? '축하합니다! 1,000표 달성으로 공공사업이 가결(PASSED)되었습니다!'
         : '국고 공공사업 찬성 투표가 정상 반영되었습니다 (+1표).',
-      proposalId: body.proposalId,
+      proposalId: targetProposal.id,
       votesCount: nextVotes,
-      status: isPassed ? 'PASSED' : 'VOTING',
+      status: nextStatus,
       votedAt: new Date().toISOString(),
     });
   } catch (error) {

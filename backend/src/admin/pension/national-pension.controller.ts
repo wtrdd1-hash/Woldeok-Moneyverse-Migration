@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -19,7 +20,7 @@ import { NationalPensionService } from './national-pension.service';
 
 @ApiTags('National Pension Service (NPS) & Social Fund')
 @Controller('admin/pension')
-@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard)
+@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard, AdminSessionGuard)
 export class AdminNationalPensionController {
   constructor(private readonly service: NationalPensionService) {}
 

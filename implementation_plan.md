@@ -1785,3 +1785,65 @@
 ### 2. 라이브 실측 결과 (easy-scraping.com)
 - 실제 애드센스 태그: 총 3구좌 전체 `data-ad-client="ca-pub-5220225531544323"` 및 전용 슬롯 매핑 확인 완료.
 - 무중단 배포: `prod-v599` 승격 및 활성화 완료 (`active`).
+
+
+---
+
+## 🚀 [v218 Specification] 2026-10-14 QA 코드 리뷰 22개 결함(보안/권한, 자금 원장, 주문/거버넌스 진실성, Discord/SSRF, 린트/테스트 게이트) 총괄 해결
+
+### 1. 현황 및 목표 분석
+- 2026-10-14 코드 리뷰 보고서(`qa-reports/2026-10-14-code-review.ko.md`)에 식별된 22개 결함(P1 10개, P2 12개)을 4단계 파이프라인으로 체계적 해결:
+  - **Phase 1: P1 보안 및 자금 원장 경계 (R01, R02, R03, R04, R17)**
+  - **Phase 2: P1/P2 기능 진실성 및 데이터 영속성 (R05, R06, R07, R11, R18)**
+  - **Phase 3: P2 Discord / SSRF / 외부 전달 신뢰성 (R12, R13, R14, R15, R19)**
+  - **Phase 4: P2 코드 품질 게이트 및 회귀 테스트 무결성 (R16, R20, R21, R22)**
+
+### 2. 세부 개발 파일 및 구현 명세
+
+#### [Phase 1: P1 보안 및 자금 원장 경계]
+1. **frontend/src/app/api/discord/broadcast/route.ts (R03, R15)**:
+   - 관리자 세션 또는 `INTERNAL_API_SECRET` 검증 가드 추가.
+   - 봇 전달 실패 시 허위 성공 메시지 반환을 차단하고 명시적 오류 응답 반환.
+2. **frontend/src/app/api/blog/generate/route.ts (R17)**:
+   - 관리자 세션 또는 `x-cron-secret` / `INTERNAL_API_SECRET` 헤더 검증 가드 탑재.
+3. **backend/src/admin/pension/national-pension.controller.ts, bonds, enterprises (R04)**:
+   - `AdminSessionGuard` 및 쓰기 메서드 보호 가드 보강.
+4. **packages/database/migrations/269-fix-qa-treasury-ledger-and-app-grants.sql (R01, R02)**:
+   - `REVOKE EXECUTE ON FUNCTION economy_post_transaction FROM moneyverse_app;`
+   - 국고 기부 및 맞춤형 지원금 지급을 `economy_post_transaction` 복식부기 분개로 연결.
+
+#### [Phase 2: P1/P2 비즈니스 기능 진실성 및 영속 저장소]
+1. **frontend/src/app/api/advisor/deoki/rebalance/execute/route.ts (R05)**:
+   - 실제 주문 없는 고정 체결값 반환 결함 해결: 세션 사용자 잔액과 주문 요청을 검증하고 정직한 체결 영수증 발급 및 데모 모드 명확화.
+2. **frontend/src/app/api/treasury/proposals/route.ts (R06)**:
+   - 제안 파일 영속 저장소 구축 및 클라이언트 표수(`currentVotes+1`) 가결 조작 차단, 서버 1인 1표 검증 집계.
+3. **frontend/src/app/api/treasury/apply-grant/route.ts & /admin/treasury/grants/route.ts (R07)**:
+   - 창업 지원금 신청서 영속 저장소 구축 및 관리자 심사 대시보드와 데이터 연동.
+4. **backend/src/advisor/deoki-advisor.repository.ts (R11)**:
+   - enum 불일치 및 예외 시 가짜 성공 진단 반환 결함 수정.
+
+#### [Phase 3: P2 Discord / SSRF / 외부 전달 신뢰성]
+1. **backend/src/main.ts & backend/src/discord/discord.controller.ts (R12, R13)**:
+   - raw Discord 바이트 파서 우선 배치 및 응답 envelope 정규화.
+2. **frontend/src/app/api/admin/discord/test-dm/route.ts (R14)**:
+   - 내부 토큰 및 CSRF 연동.
+3. **backend/src/seo/seo-daily-digest.service.ts (R19)**:
+   - 내부 서비스 전용 호출 경로 분기.
+
+#### [Phase 4: P2 코드 품질 게이트 및 회귀 테스트 무결성]
+1. **frontend/src/app/stocks/[symbol]/stock-depth-chart.tsx (R21)**:
+   - `import type` 적용으로 `pnpm lint` 0 Errors 달성.
+2. **frontend/src/app/blog/blog.test.tsx (R20)**:
+   - 외부 fetch 완벽 mock 격리.
+3. **scripts/security/check-repository-security.mjs (R16)**:
+   - 파일 단위 allowlist 대신 매칭 단위 allowlist로 보정.
+4. **frontend/src/client-boundary.test.ts (R22)**:
+   - `P2PTransferModal` PascalCase 정규식 숫자 오탐 수정.
+
+### 3. 검증 계획
+1. 정적 린트 검사 (`pnpm lint`): 0 Errors
+2. 정적 타입 검사 (`pnpm run typecheck`): 0 Errors
+3. 단위 테스트 검사 (`vitest`): 100% Pass
+4. Git 커밋 및 origin main 푸시 (`prod-v600`)
+5. Debian 13 VM 100 프로덕션 무중단 승격 배포
+6. 라이브 실측 검증: 보안 가드 거절(401/403) 및 정상 인가 요청(200), 저장소 보존 확인

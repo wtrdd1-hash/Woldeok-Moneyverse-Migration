@@ -56,8 +56,9 @@ describe('DeokiAdvisorRepository Unit Tests', () => {
     const diagnosis = await repo.diagnoseUserPortfolio('user-1');
 
     expect(diagnosis).not.toBeNull();
-    expect(diagnosis.prIndex).toBe(85);
-    expect(diagnosis.riskLevel).toBe('VERY_LOW');
+    // 단일 종목(TECH) 100% 집중으로 인한 리스크 감점 반영 (50 + 15 - 25 + 15 = 55)
+    expect(diagnosis.prIndex).toBe(55);
+    expect(diagnosis.riskLevel).toBe('HIGH');
     expect(diagnosis.assetSummary.total).toBe(1000000);
   });
 
