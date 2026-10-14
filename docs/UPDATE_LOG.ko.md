@@ -1,3 +1,9 @@
+## v2026.10.14.626 — 관리자 전체 메뉴 잘림 수정 (소스만 구현)
+
+- 관리자 전체 메뉴 모달의 스크롤/블러 내비게이션 하위 fixed 레이어를 body 포털로 분리하여 잘림 원인을 해결함. 관련 회귀 테스트 2/2, ESLint, 타입 검사, Next.js 빌드 통과.
+- 프론트엔드 전수 테스트 35건 실패/1,136건 통과로 RELEASE_BLOCKED; 수정 SHA Test 인증 UI/백엔드 검증 및 Production 승격 미진행.
+- 내부/깃허브 변경기록: `docs/updates/v2026.10.14.626-internal.ko.md`, `docs/updates/v2026.10.14.626-github.ko.md`.
+
 ## v2026.10.10.543 — 긴급 경제 격리 및 불변 호스트 릴리스 출처 복구
 
 - **상태:** 격리 브랜치 소스 구현 완료. exact-SHA Test와 Production은 아직 미검증.

@@ -1,3 +1,9 @@
+## v2026.10.14.626 — Admin navigation modal clipping (source only)
+
+- Moved the admin navigator modal from a clipped scrolling/backdrop-filtered ancestor to a document-body portal. Targeted regression 2/2, ESLint, TypeScript and Next.js build passed.
+- Full frontend test suite has 35 failed / 1,136 passed; release BLOCKED pending exact-SHA authenticated Test/browser/backend acceptance. No Production promotion.
+- Records: `docs/updates/v2026.10.14.626-internal.md` and `docs/updates/v2026.10.14.626-github.md`.
+
 ## v2026.10.10.543 — Emergency Economy Containment & Immutable Host Release Provenance
 
 - **State:** source implementation complete on isolated branch; exact-SHA Test and Production are not yet verified.
