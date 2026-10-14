@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-14 KST",
+  "audited_sha": "c56af867ad8f7556e53f895b0bb294c4bfc8a02d",
+  "android_sha": "e24a2f8c9390092b0ae7aeaa3286ca8d799d91b3",
+  "production_alias": "prod-v600",
+  "test_alias": "test-v541-gsc-aa4b6387",
+  "source_inventory": {
+    "git_tracked_files": 3938,
+    "pages": 164,
+    "controllers": 80,
+    "next_handlers": 63
+  },
+  "gates": {
+    "install": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "backend_non_db": {
+      "pass": 1162,
+      "skip": 29,
+      "fail": 0
+    },
+    "frontend_corrected_environment": {
+      "pass": 1134,
+      "fail": 35,
+      "test_files_failed": 19
+    },
+    "database_package": {
+      "pass": 7,
+      "fail": 0
+    },
+    "bot_unit": {
+      "pass": 4,
+      "fail": 0
+    },
+    "release_qa": {
+      "pass": 12,
+      "fail": 0
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 1057
+    },
+    "mobile_contract": "FAIL; three files drift",
+    "android": "BLOCKED; Android SDK unavailable",
+    "bot_extra_qa_syntax": "FAIL"
+  },
+  "runtime": {
+    "anonymous_https_get_sample": 63,
+    "initial_200": 61,
+    "404": [
+      "/business"
+    ],
+    "initial_transient_reset": [
+      "/tools/stock-calculator/chips-minus-20"
+    ],
+    "retry_fixed": [
+      "/tools/stock-calculator/chips-minus-20"
+    ]
+  },
+  "dev_db_read_only": {
+    "db": "woldeok_moneyverse_dev",
+    "public_tables": 241,
+    "public_functions": 549,
+    "security_definer_functions": 485,
+    "ledger_transactions": 831,
+    "postings": 1692,
+    "debits": 846,
+    "credits": 846,
+    "unbalanced_transactions": 0,
+    "tx_without_postings": 0,
+    "applied_migration_rows": 266,
+    "source_migration_files": 268,
+    "source_numbers_missing_from_dev": [
+      237,
+      269
+    ]
+  },
+  "evidence_limits": [
+    "Production is not tested SHA",
+    "Not all authenticated functionality exercised",
+    "DB-backed test suite excluded",
+    "No exact-SHA full-stack E2E",
+    "No production mutation"
+  ]
+}

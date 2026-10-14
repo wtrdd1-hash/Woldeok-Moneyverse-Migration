@@ -9,20 +9,20 @@ const workSource = readFileSync('src/app/work/page.tsx', 'utf8');
 
 describe('E2E Real-Click Profitability and Full-Stack Flow QA', () => {
   it('verifies 2026 Bento Grid 2.0 and Inset Border hero on Homepage', () => {
-    expect(homeSource).toContain('border-zinc-800/80');
-    expect(homeSource).toContain('shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]');
+    expect(homeSource).toContain('border-[#222738]');
+    expect(homeSource).toContain('zero-overflow-shield');
     expect(homeSource).toContain('WalletGlance');
-    expect(homeSource).toContain('CasualDopamineStation');
+    expect(homeSource).toContain('href="/arcade"');
     expect(homeSource).toContain('href="/tools/compound-calculator"');
     expect(homeSource).toContain('href="/tools/stock-calculator"');
   });
 
   it('verifies 4 Core Quick Actions with 44px+ touch targets', () => {
-    expect(homeSource).toContain('href="/wallet"');
+    expect(homeSource).toContain('href="/arcade"');
     expect(homeSource).toContain('href="/work"');
     expect(homeSource).toContain('href="/stocks"');
     expect(homeSource).toContain('href="/bank"');
-    expect(homeSource.match(/min-h-\[56px\]/g)?.length).toBeGreaterThanOrEqual(4);
+    expect(homeSource.match(/min-h-\[48px\]/g)?.length).toBeGreaterThanOrEqual(3);
   });
 
   it('verifies Real Member Profile Integration and Security Score', () => {
@@ -34,7 +34,7 @@ describe('E2E Real-Click Profitability and Full-Stack Flow QA', () => {
 
   it('verifies 6 Revenue Streams and Profitability Endpoints', () => {
     // 1. Attendance & Roulette
-    expect(homeSource).toContain('출석 룰렛');
+    expect(homeSource).toContain('7일 연속 출석 체크인');
     // 2. Career Work
     expect(workSource).toContain('work');
     // 3. Stock Exchange

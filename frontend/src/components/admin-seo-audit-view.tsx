@@ -1,281 +1,149 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Globe, RefreshCw, CheckCircle2, ShieldAlert, Sparkles, Activity, Clock, Zap } from 'lucide-react';
-import { toast } from 'sonner';
-
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface CrawlerInfo {
-  botName: string;
-  searchEngine: string;
-  status: string;
-  lastCrawlTime: string;
-  averageResponseTimeMs: number;
-  crawlBudgetScore: number;
-  indexedPercentage: string;
-}
-
-interface SeoStatusResponse {
+type Telemetry = {
   totalHits24h: number;
   totalHits7d: number;
   avgDurationMs: number;
   botDistribution: Record<string, number>;
-  recentLogs: Array<{
-    id: string;
-    botName: string;
-    path: string;
-    statusCode: number;
-    timestamp: string;
-    durationMs: number;
-  }>;
-}
+  recentLogs: unknown[];
+};
+
+type Audit = {
+  timestamp: string;
+  candidateUrlCount: number;
+  telemetry: Telemetry | null;
+  telemetryStatus: 'observed' | 'unavailable';
+  indexingStatus: 'not_measured';
+  schemaValidationStatus: 'not_measured';
+};
+
+type Submission = {
+  ok: boolean;
+  submittedCount?: number;
+  status?: number;
+  indexingConfirmed?: boolean;
+};
+
+const formatNumber = (value: number | undefined) =>
+  value === undefined || !Number.isFinite(value) ? '확인 불가' : value.toLocaleString('ko-KR');
 
 export function AdminSeoAuditView() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [lastPingTime, setLastPingTime] = useState<string>('실시간 관제 대기 중');
-  const [seoData, setSeoData] = useState<SeoStatusResponse | null>(null);
+  const [audit, setAudit] = useState<Audit | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submission, setSubmission] = useState<Submission | null>(null);
 
-  useEffect(() => {
-    fetch('/api/seo/status')
-      .then((res) => res.json())
-      .then((data: SeoStatusResponse) => {
-        setSeoData(data);
-        if (data.recentLogs && data.recentLogs.length > 0 && data.recentLogs[0]) {
-          const latest = data.recentLogs[0] as unknown as { timestamp?: string; createdAt?: string };
-          const rawTime = latest.createdAt || latest.timestamp;
-          if (rawTime && !isNaN(new Date(rawTime).getTime())) {
-            setLastPingTime(new Date(rawTime).toLocaleTimeString('ko-KR'));
-          } else {
-            setLastPingTime('최근 24시간 봇 방문 대기 중');
-          }
-        } else {
-          setLastPingTime('최근 24시간 봇 방문 대기 중');
-        }
-      })
-      .catch(() => {
-        setLastPingTime('최근 24시간 봇 방문 대기 중');
+  const load = useCallback(async (signal?: AbortSignal) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/admin/seo-audit', {
+        credentials: 'same-origin', cache: 'no-store', ...(signal ? { signal } : {}),
       });
+      if (!response.ok) throw new Error(response.status === 401 || response.status === 403
+        ? '관리자 콘솔 인증이 필요합니다.' : '수집 감사 정보를 가져오지 못했습니다.');
+      const data = (await response.json()) as Audit;
+      if (!signal?.aborted) setAudit(data);
+    } catch (cause) {
+      if (!signal?.aborted) {
+        setAudit(null);
+        setError(cause instanceof Error ? cause.message : '조회 실패');
+      }
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
   }, []);
 
-  const googleHits = (seoData?.botDistribution?.['Googlebot'] ?? 0) + (seoData?.botDistribution?.['Googlebot-Mobile'] ?? 0);
-  const naverHits = (seoData?.botDistribution?.['Yeti'] ?? 0) + (seoData?.botDistribution?.['Naver Yeti'] ?? 0) + (seoData?.botDistribution?.['naver'] ?? 0);
-  const bingHits = (seoData?.botDistribution?.['bingbot'] ?? 0) + (seoData?.botDistribution?.['Bingbot'] ?? 0);
-  const avgMs = seoData?.avgDurationMs ?? 0;
+  useEffect(() => {
+    const controller = new AbortController();
+    void load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
-  const crawlers: CrawlerInfo[] = [
-    {
-      botName: 'Googlebot (Smartphone/Desktop)',
-      searchEngine: 'Google Search Console',
-      status: googleHits > 0 ? 'HEALTHY' : 'STANDBY',
-      lastCrawlTime: googleHits > 0 ? `24시간 내 ${googleHits}회 방문` : '방문 대기 중 (0건)',
-      averageResponseTimeMs: avgMs > 0 ? avgMs : 42,
-      crawlBudgetScore: googleHits > 0 ? 100 : 95,
-      indexedPercentage: googleHits > 0 ? '100.0%' : '관제 중',
-    },
-    {
-      botName: 'Yeti (Naver Search Advisor)',
-      searchEngine: 'Naver Search Advisor',
-      status: naverHits > 0 ? 'HEALTHY' : 'STANDBY',
-      lastCrawlTime: naverHits > 0 ? `24시간 내 ${naverHits}회 방문` : '방문 대기 중 (0건)',
-      averageResponseTimeMs: avgMs > 0 ? avgMs : 38,
-      crawlBudgetScore: naverHits > 0 ? 100 : 90,
-      indexedPercentage: naverHits > 0 ? '100.0%' : '관제 중',
-    },
-    {
-      botName: 'bingbot (IndexNow Protocol)',
-      searchEngine: 'Bing / Yandex / Seznam',
-      status: bingHits > 0 ? 'HEALTHY' : 'STANDBY',
-      lastCrawlTime: bingHits > 0 ? `24시간 내 ${bingHits}회 방문` : '방문 대기 중 (0건)',
-      averageResponseTimeMs: avgMs > 0 ? avgMs : 45,
-      crawlBudgetScore: 100,
-      indexedPercentage: '100.0%',
-    },
-  ];
-
-  const handleTriggerIndexNow = async () => {
-    setIsSubmitting(true);
+  const submit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    setSubmission(null);
     try {
-      const res = await fetch('/api/admin/seo-audit', { method: 'POST' });
-      const data = await res.json();
-      if (data.ok) {
-        setLastPingTime(new Date().toLocaleTimeString());
-        toast.success(`전체 ${data.submittedCount}개 URL의 IndexNow 색인 핑 전송이 완료되었습니다 (상태코드 ${data.status}).`);
-      } else {
-        toast.error('색인 핑 전송 중 문제가 발생했습니다.');
-      }
-    } catch {
-      toast.error('네트워크 오류가 발생했습니다.');
+      const response = await fetch('/api/admin/seo-audit', {
+        method: 'POST', credentials: 'same-origin', cache: 'no-store',
+      });
+      const result = (await response.json()) as Submission;
+      if (!response.ok || !result.ok) throw new Error('IndexNow 요청이 승인되지 않았습니다.');
+      setSubmission(result);
+      toast.success(`${formatNumber(result.submittedCount)}개 URL의 IndexNow 요청이 접수되었습니다. 색인 완료는 별도 확인이 필요합니다.`);
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : '전송 실패');
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
+  const telemetry = audit?.telemetry;
+  const distribution = telemetry?.botDistribution ?? {};
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 py-6 sm:px-6">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" asChild className="-ml-2 text-muted-foreground hover:text-foreground">
-          <Link href="/admin" className="flex items-center gap-1.5 text-xs font-semibold">
-            <ArrowLeft className="size-4" />
-            관리자 대시보드로 돌아가기
-          </Link>
+    <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+      <Link href="/admin" className="inline-flex min-h-11 items-center gap-2 text-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2">
+        <ArrowLeft aria-hidden="true" className="size-4" /> 관리자 대시보드로 돌아가기
+      </Link>
+      <nav aria-label="관리자 SEO 메뉴" className="flex flex-wrap gap-2 border-b pb-3">
+        <Link href="/admin/seo" className="inline-flex min-h-11 items-center rounded px-3 py-2 text-sm hover:underline focus-visible:outline-2">실시간 수집 로그 및 상태</Link>
+        <Link href="/admin/seo-audit" aria-current="page" className="inline-flex min-h-11 items-center rounded border px-3 py-2 text-sm font-semibold focus-visible:outline-2">크롤러 수집 감사</Link>
+      </nav>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 space-y-2">
+          <h1 className="text-2xl font-bold">검색엔진 수집 감사</h1>
+          <p className="max-w-2xl text-sm text-muted-foreground">수집 로그는 서버 관측치입니다. 실제 검색 색인과 구조화 데이터 유효성은 별도 검증이 필요합니다.</p>
+        </div>
+        <Button type="button" onClick={() => void submit()} disabled={submitting || loading || !audit} className="min-h-11 max-w-full whitespace-normal text-left">
+          <RefreshCw aria-hidden="true" className={submitting ? 'mr-2 size-4 animate-spin' : 'mr-2 size-4'} />
+          {submitting ? 'IndexNow 전송 중' : 'IndexNow URL 제출'}
         </Button>
       </div>
-
-      <div className="flex border-b border-border/60">
-        <div className="flex gap-2">
-          <Link
-            href="/admin/seo"
-            className="flex items-center gap-2 border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Globe className="size-4" />
-            실시간 수집 로그 & 상태
-          </Link>
-          <Link
-            href="/admin/seo-audit"
-            className="flex items-center gap-2 border-b-2 border-primary px-3 py-2 text-sm font-semibold text-primary transition-colors"
-          >
-            <Activity className="size-4" />
-            크롤러 수집 감사 타워
-          </Link>
+      <div role="status" aria-live="polite" className="text-sm text-muted-foreground">
+        {loading ? '감사 정보 불러오는 중…' : error ?? (audit ? `관측 기준: ${new Date(audit.timestamp).toLocaleString('ko-KR')}` : '정보 없음')}
+      </div>
+      {error && <Button type="button" variant="outline" onClick={() => void load()} className="min-h-11">다시 시도</Button>}
+      {audit && <>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Metric title="IndexNow 제출 후보 URL" value={`${formatNumber(audit.candidateUrlCount)}개`} detail="실제 색인 URL 수가 아닙니다." />
+          <Metric title="최근 24시간 크롤러 요청" value={formatNumber(telemetry?.totalHits24h)} detail={telemetry ? '서버 로그 관측' : '텔레메트리 이용 불가'} />
+          <Metric title="평균 요청 처리 시간" value={telemetry && Number.isFinite(telemetry.avgDurationMs) ? `${telemetry.avgDurationMs}ms` : '확인 불가'} detail="서버에서 관측한 요청의 평균" />
+          <Metric title="검색엔진 색인·스키마 검증" value="미측정" detail="IndexNow 수락은 색인 확인이 아닙니다." />
         </div>
-      </div>
-
-      {/* 타이틀 및 헤더 */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <Globe className="w-5 h-5" />
-            </span>
-            <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">
-              Google & 네이버 검색엔진 수집 감사 관제
-            </h1>
-          </div>
-          <p className="text-xs text-zinc-400">
-            주요 검색엔진 크롤링 봇(Googlebot, Yeti, bingbot) 방문 로그, 5중 구조화 데이터 무결성 및 IndexNow 실시간 색인 상태를 모니터링합니다.
-          </p>
-        </div>
-
-        <Button
-          onClick={handleTriggerIndexNow}
-          disabled={isSubmitting}
-          className="h-10 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-2 shadow-sm"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isSubmitting ? 'animate-spin' : ''}`} />
-          전체 438개 URL 실시간 재색인 핑 전송
-        </Button>
-      </div>
-
-      {/* 4대 핵심 메트릭 카드 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="bg-zinc-900/80 border-zinc-800">
-          <CardContent className="p-4 space-y-1">
-            <div className="text-[11px] font-semibold text-zinc-400 flex items-center justify-between">
-              <span>총 색인 대상 URL</span>
-              <Activity className="w-3.5 h-3.5 text-emerald-400" />
-            </div>
-            <div className="text-2xl font-bold font-mono text-zinc-100">438개</div>
-            <div className="text-[10px] text-emerald-400">300+ 계산기 & 프리셋 전수 포함</div>
+        <Card>
+          <CardHeader><CardTitle className="text-base">크롤러별 서버 관측 요청</CardTitle></CardHeader>
+          <CardContent>
+            {!telemetry ? <p className="text-sm" role="status">서버 수집 데이터에 접근할 수 없습니다.</p> :
+              Object.keys(distribution).length === 0 ? <p className="text-sm">관측된 크롤러 요청이 없습니다.</p> :
+              <ul className="divide-y" aria-label="크롤러별 관측 횟수">
+                {Object.entries(distribution).map(([name, count]) => <li key={name} className="flex flex-wrap justify-between gap-2 py-3 text-sm">
+                  <span className="break-all">{name}</span><span>{formatNumber(count)}건</span>
+                </li>)}
+              </ul>}
           </CardContent>
         </Card>
-
-        <Card className="bg-zinc-900/80 border-zinc-800">
-          <CardContent className="p-4 space-y-1">
-            <div className="text-[11px] font-semibold text-zinc-400 flex items-center justify-between">
-              <span>검색엔진 평균 응답 속도</span>
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-            </div>
-            <div className="text-2xl font-bold font-mono text-emerald-400">41.6ms</div>
-            <div className="text-[10px] text-zinc-400">크롤링 버짓 낭비 0건</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-zinc-900/80 border-zinc-800">
-          <CardContent className="p-4 space-y-1">
-            <div className="text-[11px] font-semibold text-zinc-400 flex items-center justify-between">
-              <span>IndexNow 프로토콜</span>
-              <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
-            </div>
-            <div className="text-2xl font-bold font-mono text-cyan-400">100% 정상</div>
-            <div className="text-[10px] text-zinc-400">최근 전송: {lastPingTime}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-zinc-900/80 border-zinc-800">
-          <CardContent className="p-4 space-y-1">
-            <div className="text-[11px] font-semibold text-zinc-400 flex items-center justify-between">
-              <span>5중 Rich Snippet</span>
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            </div>
-            <div className="text-2xl font-bold font-mono text-amber-400">4.9 / 5.0</div>
-            <div className="text-[10px] text-zinc-400">별점 & FAQ 스키마 주입 완료</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* 검색엔진별 크롤러 상태 테이블 */}
-      <Card className="bg-zinc-900/90 border-zinc-800">
-        <CardHeader className="p-5 pb-3">
-          <CardTitle className="text-sm font-bold text-zinc-100">
-            🤖 검색엔진 봇 크롤링 헬스체크 현황
-          </CardTitle>
-          <CardDescription className="text-xs text-zinc-400">
-            Nginx 액세스 로그 및 실시간 수집 주기를 감지한 결과입니다.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-5 pt-0">
-          <div className="divide-y divide-zinc-800">
-            {crawlers.map((c, i) => (
-              <div key={i} className="py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="space-y-0.5">
-                  <div className="font-bold text-zinc-100 flex items-center gap-2">
-                    <span>{c.botName}</span>
-                    <Badge variant="outline" className="text-[10px] bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
-                      {c.status}
-                    </Badge>
-                  </div>
-                  <div className="text-zinc-400 text-[11px]">{c.searchEngine}</div>
-                </div>
-
-                <div className="flex items-center gap-6 font-mono">
-                  <div className="text-right">
-                    <div className="text-[10px] text-zinc-500">최근 방문</div>
-                    <div className="text-zinc-300 font-semibold">{c.lastCrawlTime}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[10px] text-zinc-500">응답 속도</div>
-                    <div className="text-emerald-400 font-bold">{c.averageResponseTimeMs}ms</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[10px] text-zinc-500">색인율</div>
-                    <div className="text-zinc-100 font-bold">{c.indexedPercentage}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 진단 권고사항 */}
-      <Card className="bg-emerald-950/20 border-emerald-500/30">
-        <CardHeader className="p-4 pb-2">
-          <CardTitle className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4" />
-            SEO 수집 무결성 감사 총평
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 pt-0 text-xs text-zinc-300 space-y-1.5 leading-relaxed">
-          <p>• 구글과 네이버 검색엔진의 최신 크롤러가 전체 438개 롱테일 페이지를 매일 정기적으로 수집 중입니다.</p>
-          <p>• JSON-LD 5중 구조화 데이터(별점 4.9/5.0, FAQPage, HowTo, BreadcrumbList)가 정상 검증되어 SERP 노출 면적이 최대화되어 있습니다.</p>
-          <p>• IndexNow 프로토콜을 통해 콘텐츠 수정 및 신규 프리셋 등록 시 0.1초 내에 실시간 통보됩니다.</p>
-        </CardContent>
-      </Card>
-    </div>
+        {submission?.ok && <p role="status" aria-live="polite" className="rounded border p-3 text-sm">
+          IndexNow에 {formatNumber(submission.submittedCount)}개 URL 제출 요청이 접수되었습니다 (HTTP {submission.status}). 검색 결과 색인 여부는 확인되지 않았습니다.
+        </p>}
+      </>}
+    </main>
   );
+}
+
+function Metric({ title, value, detail }: { title: string; value: string; detail: string }) {
+  return <Card><CardContent className="space-y-2 p-4">
+    <h2 className="text-xs font-semibold text-muted-foreground">{title}</h2>
+    <p className="break-words text-xl font-bold">{value}</p>
+    <p className="text-xs text-muted-foreground">{detail}</p>
+  </CardContent></Card>;
 }

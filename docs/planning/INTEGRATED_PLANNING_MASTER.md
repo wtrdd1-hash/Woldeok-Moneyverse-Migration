@@ -1,5 +1,17 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.14.618 — Fullstack branch integration candidate (not authority adoption)
+
+- Start/mid-work `origin/main=c56af867ad8f7556e53f895b0bb294c4bfc8a02d`. Isolated integration v618 contains the existing frontend fix and the distinct current SEO tools, planning, live SEO and functional acceptance audit branches. No concurrent worktrees overwritten.
+- API contract drift from PR #824 CI corrected by regenerating mobile contract/EN-KO references. Release, authenticated runtime and Production claims remain gated by exact-SHA CI/Test, DB and session evidence. Details: [worklog](../worklog/2026-10-14-fullstack-branch-integration-v618.md).
+
+
+## v2026.10.14.605 — Full-function verification evidence (no adoption or deployment)
+
+- Exact source c56af867: typecheck/build passed; non-DB backend 1,162 pass/29 skipped; frontend corrected test env 1,134 pass/35 fail; static database 7 pass, bot 4 pass, QA 12 pass, lint 1,057 warnings; mobile API contract drift 3 files and Android SDK gate blocked. Anonymous Production GET 63 routes (61 initial 200, one 404, one transient disconnect), development DB ledger 831 transactions/0 unbalanced but missing migrations 237/269. [Full report](../findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.md).
+- **BLOCKED**: no actual authenticated full-route E2E, exact-sha isolated Test or approved Production promotion. Existing security / economic integrity gaps remain open. This is an evidence ledger pointer; it does not override canonical product authority.
+
+
 ## Full-code security and correctness audit — v2026.10.14.603 (evidence only)
 
 - Source-only risk register SEC-603-01–14: shared fallback authorization value (conditional P0), missing admin backup role enforcement, repeatable DAO voting, unauthenticated IndexNow, non-atomic JSON stores, fabricated treasury payment success, mock indexing telemetry and Android credential hint. Full [English audit](../findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.md) and [Korean audit](../findings/MONEYVERSE_FULL_CODE_SECURITY_AUDIT_v2026.10.14.603.ko.md).

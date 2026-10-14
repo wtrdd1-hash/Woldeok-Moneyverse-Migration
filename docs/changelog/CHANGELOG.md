@@ -1,4 +1,11 @@
+## v2026.10.14.618 — Integrated release candidate (verification only)
+- Combined v606 fullstack, v606 SEO tools, v604 growth plan and two v605 audits; preserved conflicting historical update records. Regenerated 179-endpoint mobile API contract and fixed sitemap hreflang regression assertion. Local lint/typecheck/build, frontend 1,178 tests, backend non-DB 1,162 tests PASS (29 skipped). CI/PostgreSQL/Test and Production acceptance are still required. [Worklog](../worklog/2026-10-14-fullstack-branch-integration-v618.md).
+
 ## v2026.10.14.604 — Repository branch reconciliation, worktree pruning & discord bot keep-alive system
+
+## v2026.10.14.605 — Comprehensive functional verification (docs only)
+- Audited exact main c56af867; build/typecheck PASS, backend 1,162 pass/29 skipped, frontend 1,134 pass/35 failed, contract drift 3 files, dev migration gap 237/269, read-only GET 63. All-functional acceptance remains **BLOCKED**. [Full report](../findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.md), [worklog](../worklog/2026-10-14-full-function-acceptance-v605.md). No Production changes.
+
 - Fully reconciled and deleted 70+ stale remote/local branches and worktrees across GitHub and production host.
 - Built persistent Discord bot keep-alive architecture: uncaughtException/unhandledRejection crash guards, gateway shard auto-reconnect, 30s voice-state watchdog, and hardened 2s systemd restart policy.
 - Enforced deployment Keep-Alive invariant preventing bot restart during frontend/backend promotions.

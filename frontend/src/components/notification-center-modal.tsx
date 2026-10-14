@@ -25,6 +25,7 @@ export function NotificationCenterModal() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const feedRequestId = useRef(0);
   const countRequestId = useRef(0);
+  const [markingRead, setMarkingRead] = useState(false);
 
   const fetchUnreadCount = async () => {
     const requestId = ++countRequestId.current;
@@ -79,6 +80,8 @@ export function NotificationCenterModal() {
   }, [open, filter]);
 
   const handleMarkAllRead = async () => {
+    if (markingRead) return;
+    setMarkingRead(true);
     setActionError(false);
     try {
       const res = await fetch('/api/notifications', {
@@ -87,11 +90,20 @@ export function NotificationCenterModal() {
         body: JSON.stringify({ markAll: true }),
       });
       if (!res.ok) throw new Error('Mark read failed');
+      const receipt: unknown = await res.json();
+      if (!receipt || typeof receipt !== 'object' || !('updatedCount' in receipt) ||
+          !Number.isSafeInteger(receipt.updatedCount) || (receipt.updatedCount as number) < 0) {
+        throw new Error('Invalid mark-read receipt');
+      }
+      feedRequestId.current += 1;
+      setLoading(false);
       setNotifications((prev) => filter === 'unread' ? [] : prev.map((n) => ({ ...n, is_read: true })));
       countRequestId.current += 1;
       setUnreadCount(0);
     } catch {
       setActionError(true);
+    } finally {
+      setMarkingRead(false);
     }
   };
 
@@ -161,8 +173,8 @@ export function NotificationCenterModal() {
                 variant="outline"
                 size="sm"
                 onClick={handleMarkAllRead}
-                disabled={loading || feedError || notifications.every((n) => n.is_read)}
-                className="h-8 text-xs px-2.5 rounded-lg border-border/40"
+                disabled={markingRead || loading || feedError || notifications.every((n) => n.is_read)}
+                className="min-h-11 text-xs px-2.5 rounded-lg border-border/40"
               >
                 <CheckCheck className="h-3.5 w-3.5 mr-1" />
                 모두 읽음

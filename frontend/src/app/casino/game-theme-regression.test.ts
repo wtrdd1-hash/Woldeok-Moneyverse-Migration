@@ -21,9 +21,9 @@ describe('casino themed games stay faithful to the server result', () => {
   });
 
   it('prices every themed interface from server terms rather than hard-coded multipliers', () => {
-    const page = readFileSync(join(__dirname, 'page.tsx'), 'utf8');
-    const slots = readFileSync(join(__dirname, 'slots-game.tsx'), 'utf8');
-    const hilo = readFileSync(join(__dirname, 'hilo-game.tsx'), 'utf8');
+    const page = readFileSync(join(__dirname, '../arcade/page.tsx'), 'utf8');
+    const slots = readFileSync(join(__dirname, '../arcade/slots-game.tsx'), 'utf8');
+    const hilo = readFileSync(join(__dirname, '../arcade/hilo-game.tsx'), 'utf8');
 
     expect(page).toContain('payoutMultiplier={multiplierFromPpm(numberGame.payout_multiplier_ppm)}');
     expect(page).toContain('payoutMultiplier={multiplierFromPpm(parityGame.payout_multiplier_ppm)}');
@@ -34,9 +34,9 @@ describe('casino themed games stay faithful to the server result', () => {
   });
 
   it('submits themed choices using the server action contract field name', () => {
-    const slots = readFileSync(join(__dirname, 'slots-game.tsx'), 'utf8');
-    const themes = readFileSync(join(__dirname, 'theme-games.tsx'), 'utf8');
-    const hilo = readFileSync(join(__dirname, 'hilo-game.tsx'), 'utf8');
+    const slots = readFileSync(join(__dirname, '../arcade/slots-game.tsx'), 'utf8');
+    const themes = readFileSync(join(__dirname, '../arcade/theme-games.tsx'), 'utf8');
+    const hilo = readFileSync(join(__dirname, '../arcade/hilo-game.tsx'), 'utf8');
 
     expect(slots).toContain('name="choice" value="6"');
     expect(slots).not.toContain('name="number"');
@@ -47,7 +47,7 @@ describe('casino themed games stay faithful to the server result', () => {
   });
 
   it('uses a dedicated casino history endpoint rather than filtering the wallet feed', () => {
-    const page = readFileSync(join(__dirname, 'page.tsx'), 'utf8');
+    const page = readFileSync(join(__dirname, '../arcade/page.tsx'), 'utf8');
     expect(page).toContain("/api/v1/casino/history");
     expect(page).not.toContain('/api/v1/wallet?recent=');
     expect(page).not.toContain('CASINO_TRANSACTION_TYPES');

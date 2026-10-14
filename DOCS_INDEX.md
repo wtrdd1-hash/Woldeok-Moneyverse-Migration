@@ -1,5 +1,14 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## 2026-10-14 전체 기능 수용 검사 (v2026.10.14.605) — BLOCKED
+
+- [영문 정본: 전 기능 검사·도메인별 수용 증거](docs/findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.md)
+- [한국어: 전 기능 현황·오류·미검증 범위](docs/findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.ko.md)
+- [검증 작업 단계별 기록](docs/worklog/2026-10-14-full-function-acceptance-v605.ko.md) · [내부 업데이트](docs/updates/v2026.10.14.605-internal.ko.md) · [GitHub 업데이트](docs/updates/v2026.10.14.605-function-audit-github.ko.md)
+
+타입/빌드 통과와 전체 기능 정상은 다르다. 프론트 테스트 35건·모바일 API 계약 불일치 등 차단 이슈가 있다.
+
+
 
 ## 2026-10-14 전체 소스·보안 감사 (v2026.10.14.603)
 
