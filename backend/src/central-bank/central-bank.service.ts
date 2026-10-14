@@ -1,5 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Optional } from '@nestjs/common';
 import { MintService } from '../mint/mint.service';
+import { DiscordAlertService } from '../discord/discord-alert.service';
+import { calculateKinkedInterestRate } from '../bank/kinked-interest';
 import {
   AcceptMintBatchDto,
   UpdateBaseRateDto,
@@ -24,7 +26,10 @@ export interface ReserveRequirementRecord {
 
 @Injectable()
 export class CentralBankService {
-  constructor(private readonly mintService: MintService) {}
+  constructor(
+    private readonly mintService: MintService,
+    @Optional() private readonly discordAlertService?: DiscordAlertService,
+  ) {}
 
   private currentBaseRate: BaseRateDecision = {
     ratePercent: '3.25',
@@ -54,6 +59,22 @@ export class CentralBankService {
 
     const centralBankTxId = `CB-ACCEPT-${Date.now()}`;
     const updatedBatch = await this.mintService.markBatchAccepted(batchId, centralBankTxId);
+
+    // 디스코드 관제 웹훅 알림 발송 (비동기 논블로킹)
+    this.discordAlertService?.sendDiscordEmbed({
+      title: '🏦 [국가중앙은행] 조폐국 M0 주조 화폐 공식 인수 및 국고 방출 승인',
+      description: `국가중앙은행 총재 결재를 통해 조폐국 주조 본원통화의 국고 배정 및 시중 유통이 최종 승인되었습니다.`,
+      color: 0x10b981, // Emerald
+      fields: [
+        { name: '승인 트랜잭션 ID', value: `\`${centralBankTxId}\``, inline: true },
+        { name: '승인 배치 ID', value: `\`${batchId}\``, inline: true },
+        { name: '인수 승인액', value: `**+${Number(updatedBatch.amountWld).toLocaleString()} WLD**`, inline: true },
+        { name: '배정 금고', value: dto.targetVaultAllocation || 'TREASURY_MAIN', inline: true },
+        { name: '인수 결재 사유', value: dto.acceptanceReason, inline: false },
+        { name: '승인 책임자', value: acceptedBy, inline: true },
+      ],
+      footer: { text: 'Woldeok Central Bank Monetary Policy Bureau' },
+    }).catch(() => {});
 
     return {
       message: '국가조폐국 주조 화폐가 국가중앙은행에 의해 공식 인수 및 유통 승인되었습니다.',
@@ -125,6 +146,21 @@ export class CentralBankService {
       decidedAt: new Date().toISOString(),
     };
 
+    // 디스코드 금융통화위원회 기준금리 고시 웹훅 발송 (비동기 논블로킹)
+    this.discordAlertService?.sendDiscordEmbed({
+      title: '📢 [국가중앙은행] 금융통화위원회 기준금리(Base Rate) 결정 공시',
+      description: `월덕 머니버스 중앙은행 금통위에서 기준금리를 **${dto.baseRatePercent}%**로 결정 및 고시하였습니다.`,
+      color: 0x3b82f6, // Blue
+      fields: [
+        { name: '고시 기준금리', value: `**${dto.baseRatePercent}%**`, inline: true },
+        { name: '물가안정 목표치', value: `${this.currentBaseRate.targetInflationPercent}%`, inline: true },
+        { name: '테일러 준칙 추정치', value: `${this.currentBaseRate.taylorRuleEstimatedRate}%`, inline: true },
+        { name: '통화정책 결정 사유', value: dto.rateDecisionRationale, inline: false },
+        { name: '시중은행 연동', value: 'Aave/Compound Kinked 점프 이자율 모델 실시간 자동 연동', inline: false },
+      ],
+      footer: { text: 'Woldeok Monetary Policy Committee' },
+    }).catch(() => {});
+
     return this.currentBaseRate;
   }
 
@@ -151,6 +187,44 @@ export class CentralBankService {
       enforcedAt: new Date().toISOString(),
     };
 
+    // 디스코드 법정 지급준비율 규제 고시 웹훅 발송
+    this.discordAlertService?.sendDiscordEmbed({
+      title: '🛡️ [국가중앙은행] 상업은행 법정 지급준비율(Reserve Requirement) 규제 고시',
+      description: `금융감독위원회 의결에 따라 시중 상업은행의 법정 지급준비율이 **${dto.reserveRatioPercent}%**로 조정되었습니다.`,
+      color: 0x8b5cf6, // Purple
+      fields: [
+        { name: '조정 지급준비율', value: `**${dto.reserveRatioPercent}%**`, inline: true },
+        { name: '규제 목적', value: dto.regulationRationale, inline: false },
+        { name: '감독 책임자', value: decidedBy, inline: true },
+      ],
+      footer: { text: 'Woldeok Bank Supervisory Board' },
+    }).catch(() => {});
+
     return this.currentReserveRequirement;
+  }
+
+  /**
+   * 중앙은행 기준금리 및 지급준비율 기반 시중 상업은행 예대금리 동적 산출 (Kinked Model 바인딩)
+   */
+  getCommercialBankRates(sampleDeposits = 100_000_000n, sampleBorrows = 40_000_000n) {
+    const baseRateBps = Math.round(Number(this.currentBaseRate.ratePercent) * 100);
+    const statutoryReserveRatio = Number(this.currentReserveRequirement.ratioPercent) / 100;
+
+    const kinked = calculateKinkedInterestRate(sampleDeposits, sampleBorrows, {
+      baseRateBps,
+      statutoryReserveRatio,
+    });
+
+    return {
+      centralBankBaseRatePercent: this.currentBaseRate.ratePercent,
+      centralBankReserveRatioPercent: this.currentReserveRequirement.ratioPercent,
+      commercialBorrowRatePercent: (kinked.borrowRateBps / 100).toFixed(2),
+      commercialSupplyRatePercent: (kinked.supplyRateBps / 100).toFixed(2),
+      netInterestMarginBps: kinked.borrowRateBps - kinked.supplyRateBps,
+      statutoryReserveAmountWld: kinked.statutoryReserveAmount.toString(),
+      availableBorrowCapacityWld: kinked.availableBorrowCapacity.toString(),
+      utilizationRatePercent: (kinked.utilizationRate * 100).toFixed(2),
+      isKinkExceeded: kinked.isKinkExceeded,
+    };
   }
 }

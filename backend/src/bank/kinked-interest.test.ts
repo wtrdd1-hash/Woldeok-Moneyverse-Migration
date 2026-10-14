@@ -61,4 +61,26 @@ describe('Aave 스타일 Kinked 점프 이자율 & 바젤 III 20% 법정 준비�
     expect(result.statutoryReserveAmount).toBe(expectedReserve);
     expect(result.statutoryReserveAmount).toBe(10_000_000n);
   });
+
+  it('중앙은행 기준금리 및 법정 지급준비율이 동적으로 주입될 때 정상 연동되어야 한다', () => {
+    // 중앙은행 기준금리 3.50% (350 bps), 법정 지준율 7% (0.07) 주입
+    const totalDeposits = 10_000_000n;
+    const totalBorrows = 4_000_000n; // U = 40%
+    const result = calculateKinkedInterestRate(totalDeposits, totalBorrows, {
+      baseRateBps: 350,
+      statutoryReserveRatio: 0.07,
+    });
+
+    expect(result.utilizationRate).toBe(0.4);
+    // 3.5% + (0.4 / 0.8) * 5% = 3.5% + 2.5% = 6.00% (600 bps)
+    expect(result.borrowRateBps).toBe(600);
+    expect(result.reserveBufferBps).toBe(700);
+    // 7% 법정 준비금: 70만 WLD
+    expect(result.statutoryReserveAmount).toBe(700_000n);
+    // 추가 대출 가능 한도: 930만 - 400만 = 530만 WLD
+    expect(result.availableBorrowCapacity).toBe(5_300_000n);
+    // 예금 금리 = 600 * 0.4 * (1 - 0.07) = 240 * 0.93 = 223.2 -> 223 bps
+    expect(result.supplyRateBps).toBe(223);
+  });
 });
+

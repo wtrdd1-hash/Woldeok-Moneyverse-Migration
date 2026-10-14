@@ -80,4 +80,10 @@ export class CentralBankController {
     const adminId = requireUserId(req);
     return this.centralBankService.updateReserveRequirement(dto, adminId);
   }
+
+  @Get('commercial-rates')
+  @ApiOperation({ summary: '기준금리 및 지급준비율 연동 시중 상업은행 예대금리(대출/적금) 시뮬레이션 조회' })
+  async getCommercialRates() {
+    return this.centralBankService.getCommercialBankRates();
+  }
 }

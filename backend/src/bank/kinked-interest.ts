@@ -26,29 +26,40 @@ export const SLOPE_2_BPS = 4000; // U > 80% 구간 급경사 점프 기울기 (+
 export const STATUTORY_RESERVE_RATIO = 0.20; // 바젤 III 20% 법정 준비율
 export const STATUTORY_RESERVE_BPS = 2000; // 2000bps
 
+export interface KinkedRateOptions {
+  readonly baseRateBps?: number;
+  readonly statutoryReserveRatio?: number;
+}
+
 export function calculateKinkedInterestRate(
   totalDeposits: bigint | string | number,
   totalBorrows: bigint | string | number,
+  options?: KinkedRateOptions,
 ): KinkedRateResult {
   const deposits = BigInt(totalDeposits.toString());
   const borrows = BigInt(totalBorrows.toString());
+
+  const baseBorrowRateBps = options?.baseRateBps ?? BASE_BORROW_RATE_BPS;
+  const reserveRatio = options?.statutoryReserveRatio ?? STATUTORY_RESERVE_RATIO;
+  const reserveBufferBps = Math.round(reserveRatio * 10000);
 
   // 예금이 0이거나 음수이면 기본 금리 반환
   if (deposits <= 0n) {
     return {
       utilizationRate: 0,
-      borrowRateBps: BASE_BORROW_RATE_BPS,
+      borrowRateBps: baseBorrowRateBps,
       supplyRateBps: 0,
-      reserveBufferBps: STATUTORY_RESERVE_BPS,
+      reserveBufferBps,
       isKinkExceeded: false,
       availableBorrowCapacity: 0n,
       statutoryReserveAmount: 0n,
     };
   }
 
-  // 바젤 III 20% 법정 준비금 계산
-  const statutoryReserveAmount = (deposits * 20n) / 100n;
-  // 최대 대출 가능 총액 (총 예금의 80%)
+  // 법정 준비금 계산 (예: 20% or 7%)
+  const statutoryReservePercent = BigInt(Math.max(1, Math.round(reserveRatio * 100)));
+  const statutoryReserveAmount = (deposits * statutoryReservePercent) / 100n;
+  // 최대 대출 가능 총액 (총 예금 - 법정 준비금)
   const maxBorrowLimit = deposits - statutoryReserveAmount;
   const availableBorrowCapacity = borrows < maxBorrowLimit ? maxBorrowLimit - borrows : 0n;
 
@@ -58,22 +69,22 @@ export function calculateKinkedInterestRate(
 
   let borrowRateBps: number;
   if (!isKinkExceeded) {
-    // U <= 0.80: Borrow Rate = 3% + (U / 0.8) * 5%
-    borrowRateBps = Math.round(BASE_BORROW_RATE_BPS + ((utilization / OPTIMAL_UTILIZATION) * SLOPE_1_BPS));
+    // U <= 0.80: Borrow Rate = Base Rate + (U / 0.8) * 5%
+    borrowRateBps = Math.round(baseBorrowRateBps + ((utilization / OPTIMAL_UTILIZATION) * SLOPE_1_BPS));
   } else {
-    // U > 0.80: Borrow Rate = 8% + ((U - 0.8) / 0.2) * 40%
+    // U > 0.80: Borrow Rate = (Base Rate + 5%) + ((U - 0.8) / 0.2) * 40%
     const excessU = (utilization - OPTIMAL_UTILIZATION) / (1.0 - OPTIMAL_UTILIZATION);
-    borrowRateBps = Math.round((BASE_BORROW_RATE_BPS + SLOPE_1_BPS) + (excessU * SLOPE_2_BPS));
+    borrowRateBps = Math.round((baseBorrowRateBps + SLOPE_1_BPS) + (excessU * SLOPE_2_BPS));
   }
 
   // 예금 이자율 (Supply Rate = Borrow Rate * U * (1 - Reserve Ratio))
-  const supplyRateBps = Math.round(borrowRateBps * utilization * (1 - STATUTORY_RESERVE_RATIO));
+  const supplyRateBps = Math.round(borrowRateBps * utilization * (1 - reserveRatio));
 
   return {
     utilizationRate: utilization,
     borrowRateBps,
     supplyRateBps,
-    reserveBufferBps: STATUTORY_RESERVE_BPS,
+    reserveBufferBps,
     isKinkExceeded,
     availableBorrowCapacity,
     statutoryReserveAmount,

@@ -14,6 +14,13 @@ export interface BlogAuthor {
   readonly badge: string;
 }
 
+export interface BlogTranslation {
+  readonly title: string;
+  readonly excerpt: string;
+  readonly content: string;
+  readonly tags: readonly string[];
+}
+
 export interface BlogPost {
   readonly slug: string;
   readonly title: string;
@@ -28,7 +35,14 @@ export interface BlogPost {
   readonly tags: readonly string[];
   readonly relatedCalculatorHref: string;
   readonly relatedCalculatorName: string;
-  readonly relatedStockTicker?: string;
+  readonly relatedStockTicker?: string | undefined;
   readonly isAiGenerated: boolean;
   readonly views: number;
+  readonly heroImage?: string | undefined;
+  readonly infographicType?: 'COMPOUND_CURVE' | 'MACRO_RADAR' | 'TAX_WATERFALL' | 'DCA_BENCHMARK' | undefined;
+  readonly translations?: {
+    readonly en?: BlogTranslation | undefined;
+    readonly ja?: BlogTranslation | undefined;
+    readonly zh?: BlogTranslation | undefined;
+  } | undefined;
 }

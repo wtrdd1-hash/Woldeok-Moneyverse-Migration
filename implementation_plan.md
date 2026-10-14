@@ -2046,3 +2046,36 @@
 1. 백엔드 및 모듈 단위 테스트 작성 (`mint.service.test.ts`, `central-bank.service.test.ts`)
 2. `tsc --noEmit` 정적 타입 검사 100% 통과
 3. Git 브랜치 통합 및 삭제 규칙 준수 후 원격 푸시
+
+---
+
+## 🚀 [v225 Specification] 금융 고도화: 기준금리-예대금리 동적 연동, 조폐/소각 디스코드 웹훅 관제, 실시간 거시경제 자동 리포트 파이프라인 및 복리 블로그 다국어 번역/인포그래픽 시스템 구축
+
+### 1. 현황 및 고도화 목표
+1. **[중앙은행 기준금리 ↔ 시중 상업은행 예대금리 동적 연동 엔진 고도화]**:
+   - 중앙은행 기준금리(`baseRateBps`) 및 법정 지급준비율(`statutoryReserveBps`) 변동 시, 시중 상업은행의 Kinked Interest Rate Model(`calculateKinkedInterestRate`)에 즉시 주입되어 대출 기본금리(`BASE_BORROW_RATE_BPS`), 예금 금리(`supplyRateBps`), 법정 준비금 동결액이 상호 견제 및 실시간 탄력 반영되도록 연동.
+2. **[조폐국 주조 배치 및 소각 내역 디스코드 실시간 관제 채널 웹훅 알림 연동]**:
+   - `MintService`에서 신규 본원통화(M0) 주조 배치 생성(`createBatch`) 및 과잉 통화 영구 소각(`burnCurrency`) 집행 시, `CentralBankService`에서 화폐 인수 승인(`acceptBatch`) 시 디스코드 웹훅 및 감사 채널(`DiscordAlertService`)로 실시간 리치 임베드 알림 전송.
+3. **[Alpha Vantage / Yahoo Finance / FRED 실시간 금융 API 결합 일일 거시경제 리포트 파이프라인]**:
+   - Yahoo Finance(환율, S&P500, KOSPI, 나스닥), FRED(미국 기준금리, 10년물 국채금리), Alpha Vantage(실시간 통화쌍) 데이터를 병렬 취합하여 최상위권 전문 리포트 템플릿 완성 및 일일 자동 생성 엔드포인트 연계.
+4. **[복리 블로그(2026-10-14-compound-mv83xp86) 다국어 번역 뷰어, 심층 내용 확충 및 인포그래픽 이미지 시각화]**:
+   - `https://easy-scraping.com/blog/2026-10-14-compound-mv83xp86` 글에 대한 다국어(한국어, 영어, 일본어, 중국어) 즉각 번역 토글 컴포넌트 탑재.
+   - 72의 법칙 자연로그 수학적 증명, 몬테카를로 자산 증식 곡선, 청년도약계좌 실전 5,000만 원 완성 가이드라인 등 대폭 확충된 심층 전문 리포트 본문 강화.
+   - 복리 눈덩이 성장 곡선 및 자산 배분 인포그래픽 SVG 시각화 배너를 상단에 탑재하여 시각적 완성도 극대화.
+
+### 2. 세부 개발 명세
+1. **`backend/src/bank/kinked-interest.ts` & `backend/src/central-bank/central-bank.service.ts`**:
+   - `calculateKinkedInterestRate`에 동적 기준금리(`baseRateBps`) 및 지준율(`reserveRatio`) 옵션 주입 지원.
+   - `CentralBankService`에 `getCommercialBankInterestRates()` 메서드 구현: 중앙은행 기준금리 변동 시 상업은행 예상 대출/예금 금리 즉각 산출.
+2. **`backend/src/mint/mint.service.ts` & `backend/src/mint/mint.module.ts`**:
+   - `DiscordAlertService` 연동으로 주조(MINT_BATCH_CREATED), 소각(CURRENCY_BURNED), 인수(MINT_BATCH_ACCEPTED) 시 실시간 디스코드 리치 임베드 발송.
+3. **`frontend/src/app/blog/blog.types.ts`, `frontend/src/app/blog/blog-data.ts` & `frontend/src/app/blog/[slug]/blog-post-client.tsx`**:
+   - `BlogPost` 인터페이스에 `infographicSvg` 및 다국어 번역 사전(`translations: { [locale]: { title, excerpt, content, tags } }`) 지원 필드 신설.
+   - `BlogPostClient`에 원클릭 다국어 번역 토글(`KO / EN / JA / ZH`) 바 및 인포그래픽 비주얼 차트 카드 렌더러 탑재.
+   - 복리 블로그 아티클 및 일일 생성 템플릿의 본문을 10대 소주제, 수식, 시뮬레이션 표, 공인 출처로 대폭 확장.
+
+### 3. 검증 계획
+1. 백엔드 `vitest run src/mint/ src/central-bank/ src/bank/` 단위 테스트 전수 통과 확인.
+2. `cmd.exe /c "pnpm --filter backend typecheck"` 및 `pnpm --filter frontend typecheck"` 0 에러 통과.
+3. `node --check` 봇 구문 검증 및 무중단 상주 시스템 유지 확인.
+4. Git 커밋, `main` 브랜치 fast-forward 통합, 작업 브랜치 삭제, `origin main` 원격 푸시 완료.

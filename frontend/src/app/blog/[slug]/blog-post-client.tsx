@@ -11,6 +11,8 @@ import {
   Check,
   Tag,
   Bot,
+  Globe,
+  Languages,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,6 +22,7 @@ import { BlogAdBanner } from '@/components/blog/blog-ad-banner';
 import { BlogInlineCalculator } from '@/components/blog/blog-inline-calculator';
 import { BlogRelatedEcosystem } from '@/components/blog/blog-related-ecosystem';
 import { BlogConversionBanner } from '@/components/blog/blog-conversion-banner';
+import { BlogInfographicCard } from '@/components/blog/blog-infographic-card';
 
 interface Props {
   readonly post: BlogPost;
@@ -27,13 +30,22 @@ interface Props {
 
 export function BlogPostClient({ post }: Props) {
   const [copied, setCopied] = useState(false);
+  const [locale, setLocale] = useState<'ko' | 'en' | 'ja' | 'zh'>('ko');
 
   const handleShare = async () => {
     try {
       if (typeof window !== 'undefined') {
         await navigator.clipboard.writeText(window.location.href);
         setCopied(true);
-        toast.success('칼럼 URL 주소가 클립보드에 복사되었습니다!');
+        toast.success(
+          locale === 'en'
+            ? 'Article URL copied to clipboard!'
+            : locale === 'ja'
+            ? '記事のURLがクリップボードにコピーされました！'
+            : locale === 'zh'
+            ? '文章链接已复制到剪贴板！'
+            : '칼럼 URL 주소가 클립보드에 복사되었습니다!'
+        );
         setTimeout(() => setCopied(false), 2000);
       }
     } catch {
@@ -41,7 +53,12 @@ export function BlogPostClient({ post }: Props) {
     }
   };
 
-  const paragraphs = post.content.split('\n\n');
+  const activeTitle = (locale !== 'ko' && post.translations?.[locale]?.title) || post.title;
+  const activeExcerpt = (locale !== 'ko' && post.translations?.[locale]?.excerpt) || post.excerpt;
+  const activeContent = (locale !== 'ko' && post.translations?.[locale]?.content) || post.content;
+  const activeTags = (locale !== 'ko' && post.translations?.[locale]?.tags) || post.tags;
+
+  const paragraphs = activeContent.split('\n\n');
 
   return (
     <article className="max-w-4xl mx-auto space-y-8">
@@ -72,6 +89,60 @@ export function BlogPostClient({ post }: Props) {
         </Button>
       </div>
 
+      {/* 🌐 다국어 실시간 번역 툴바 (Multi-language Translation Bar) */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5 p-2.5 rounded-xl bg-card border border-border/80 shadow-xs">
+        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+          <Languages className="size-4 text-emerald-400" />
+          <span>칼럼 다국어 번역 (Select Language):</span>
+        </div>
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setLocale('ko')}
+            className={`px-2.5 py-1 text-xs rounded-lg font-bold transition-all ${
+              locale === 'ko'
+                ? 'bg-emerald-500 text-black shadow-xs font-black'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
+            }`}
+          >
+            🇰🇷 한국어
+          </button>
+          <button
+            type="button"
+            onClick={() => setLocale('en')}
+            className={`px-2.5 py-1 text-xs rounded-lg font-bold transition-all ${
+              locale === 'en'
+                ? 'bg-emerald-500 text-black shadow-xs font-black'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
+            }`}
+          >
+            🇺🇸 English
+          </button>
+          <button
+            type="button"
+            onClick={() => setLocale('ja')}
+            className={`px-2.5 py-1 text-xs rounded-lg font-bold transition-all ${
+              locale === 'ja'
+                ? 'bg-emerald-500 text-black shadow-xs font-black'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
+            }`}
+          >
+            🇯🇵 日本語
+          </button>
+          <button
+            type="button"
+            onClick={() => setLocale('zh')}
+            className={`px-2.5 py-1 text-xs rounded-lg font-bold transition-all ${
+              locale === 'zh'
+                ? 'bg-emerald-500 text-black shadow-xs font-black'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
+            }`}
+          >
+            🇨🇳 中文
+          </button>
+        </div>
+      </div>
+
       {/* 1. 상단 리더보드 수익화 광고 슬롯 */}
       <BlogAdBanner position="top" />
 
@@ -95,11 +166,11 @@ export function BlogPostClient({ post }: Props) {
         </div>
 
         <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight leading-tight">
-          {post.title}
+          {activeTitle}
         </h1>
 
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-          {post.excerpt}
+          {activeExcerpt}
         </p>
 
         {/* Author Badge */}
@@ -120,6 +191,9 @@ export function BlogPostClient({ post }: Props) {
           </div>
         </div>
       </div>
+
+      {/* 📊 수학적 금융 인포그래픽 시각화 배너 (선형 원금 대비 복리 기하급수 성장 곡선) */}
+      <BlogInfographicCard type={post.infographicType ?? 'COMPOUND_CURVE'} currentLocale={locale} />
 
       {/* Article Body (Markdown Rendering with Injected Interactive Widgets & Ads) */}
       <div className="prose prose-invert max-w-none space-y-6 text-foreground/90 text-sm sm:text-base leading-relaxed">
@@ -210,7 +284,7 @@ export function BlogPostClient({ post }: Props) {
           <Tag className="size-3.5" /> 관련 검색 키워드
         </span>
         <div className="flex flex-wrap gap-1.5">
-          {post.tags.map((tag, idx) => (
+          {activeTags.map((tag, idx) => (
             <Badge key={idx} variant="secondary" className="text-xs px-2.5 py-1 bg-muted/60 text-muted-foreground font-mono">
               #{tag}
             </Badge>

@@ -36,6 +36,15 @@ describe('AI Daily Blog System', () => {
     expect(post?.category).toBe('COMPOUND');
   });
 
+  it('retrieves compound-mv83xp86 post with multi-language translations and infographicType', () => {
+    const post = getBlogPostBySlug('2026-10-14-compound-mv83xp86');
+    expect(post).toBeDefined();
+    expect(post?.infographicType).toBe('COMPOUND_CURVE');
+    expect(post?.translations?.en?.title).toContain("Einstein's Rule of 72");
+    expect(post?.translations?.ja?.title).toContain('72の法則');
+    expect(post?.translations?.zh?.title).toContain('72法则');
+  });
+
   it('generates new daily AI blog post with high-converting keywords', () => {
     const initialCount = getAllBlogPosts().length;
     const newPost = generateDailyAiBlogPost();

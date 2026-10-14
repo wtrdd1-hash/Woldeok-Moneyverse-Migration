@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import crypto from 'node:crypto';
 import { BurnCurrencyDto, CreateMintBatchDto } from './mint.dto';
+import { DiscordAlertService } from '../discord/discord-alert.service';
 
 export interface MintBatch {
   id: string;
@@ -32,6 +33,8 @@ export interface BurnCertificate {
 
 @Injectable()
 export class MintService {
+  constructor(@Optional() private readonly discordAlertService?: DiscordAlertService) {}
+
   private batches: MintBatch[] = [
     {
       id: 'mint-batch-001',
@@ -99,6 +102,23 @@ export class MintService {
     };
 
     this.batches.unshift(newBatch);
+
+    // 디스코드 관제 웹훅 알림 전송 (비동기 논블로킹)
+    this.discordAlertService?.sendDiscordEmbed({
+      title: '🪙 [국가조폐국] 신규 본원통화(M0) 주조 배치 발행',
+      description: `새로운 본원통화 주조 배치가 생성되어 중앙은행 인수 결재 대기열에 등록되었습니다.`,
+      color: 0xf59e0b, // Amber
+      fields: [
+        { name: '배치 번호', value: `\`${newBatch.batchNumber}\``, inline: true },
+        { name: '발행 액면가', value: `**${Number(newBatch.amountWld).toLocaleString()} WLD**`, inline: true },
+        { name: '주조차익 (Seigniorage)', value: `${Number(newBatch.seigniorageWld).toLocaleString()} WLD`, inline: true },
+        { name: '보안 무결성 서명 (SHA-256)', value: `\`${newBatch.verificationHash.slice(0, 24)}...\``, inline: false },
+        { name: '주조 승인 상태', value: '⏳ **중앙은행 2단계 결재 대기**', inline: true },
+        { name: '발행 책임자', value: requestedBy, inline: true },
+      ],
+      footer: { text: 'Woldeok National Mint Bureau' },
+    }).catch(() => {});
+
     return newBatch;
   }
 
@@ -153,6 +173,23 @@ export class MintService {
     };
 
     this.burnCertificates.unshift(certificate);
+
+    // 디스코드 관제 웹훅 알림 전송 (비동기 논블로킹)
+    this.discordAlertService?.sendDiscordEmbed({
+      title: '🔥 [국가조폐국] 시장 과잉 통화 영구 소각(Sink) 공인 집행',
+      description: `시중 초과 유동성 흡수 및 디플레이션 안정을 위한 불가역적 영구 소각이 완료되었습니다.`,
+      color: 0xef4444, // Red
+      fields: [
+        { name: '공인 소각 증적 번호', value: `\`${certificate.certificateNumber}\``, inline: true },
+        { name: '소각 집행액', value: `**-${Number(certificate.amountWld).toLocaleString()} WLD**`, inline: true },
+        { name: '소각 카테고리', value: certificate.sinkCategory, inline: true },
+        { name: '소각 원인', value: certificate.burnReason, inline: false },
+        { name: '소각 후 통화 정합성', value: '100% 영구 감액 국고 반영', inline: true },
+        { name: '소각 집행관', value: burnedBy, inline: true },
+      ],
+      footer: { text: 'Woldeok National Mint Audit Certification' },
+    }).catch(() => {});
+
     return certificate;
   }
 

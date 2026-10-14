@@ -74,4 +74,26 @@ describe('CentralBankService - 국가중앙은행 통화 신용 정책 및 인�
 
     expect(updated.ratioPercent).toBe('8.0');
   });
+
+  it('기준금리 변동 시 시중 상업은행 예대금리(대출/적금)가 Kinked 모형에 연동되어 자동 재산출되어야 한다', async () => {
+    const mintService = new MintService();
+    const centralBankService = new CentralBankService(mintService);
+
+    // 기준금리를 4.00%로 인상
+    await centralBankService.updateBaseRate(
+      {
+        baseRatePercent: '4.00',
+        rateDecisionRationale: '인플레이션 억제',
+        targetInflationPercent: '2.0',
+      },
+      'MPC',
+    );
+
+    const rates = centralBankService.getCommercialBankRates();
+    expect(rates.centralBankBaseRatePercent).toBe('4.00');
+    // 대출금리는 기준금리 4.00% 기반으로 가산되어 4.00% 이상이어야 함
+    expect(Number(rates.commercialBorrowRatePercent) >= 4.0).toBe(true);
+    // 예대마진(NIM)은 양수여야 함
+    expect(rates.netInterestMarginBps > 0).toBe(true);
+  });
 });
