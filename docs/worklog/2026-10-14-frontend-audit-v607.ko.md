@@ -17,3 +17,11 @@
 - SEO 테스트 세트에서 React.act is not a function 반복 재현. React 테스트 setup.ts가 act를 수동 대체하려는 코드가 있어 원인 조사 필요.
 - 원격 미니PC Chromium/Playwright 실행 가능 환경 미확보; 실브라우저 시각 검증 미완료.
 - 운영 변경 없음, 전체 UI 승인 BLOCKED.
+
+## v609 승인 후 실제 테스트 재검증
+- 시작 및 중간 origin/main c56af867 유지.
+- 원격 환경 NODE_ENV=production 때문에 React 19 production export에 act가 없음을 확인; NODE_ENV=test로 재실행하여 원래 테스트 실패를 분리.
+- 관리자 SEO 테스트의 과거 라벨 기대값을 현재 화면 텍스트와 일치하도록 갱신. 집중 테스트 3파일/16개 통과.
+- 전체 프론트엔드 테스트: 215파일 중 197 통과/18 실패, 1178개 중 1144 통과/34 실패 (NODE_ENV=test). 모바일 반응형, 관리자 반응형, SEO, 알림, 카지노, 계산기 등 미해결.
+- 프론트엔드 typecheck 통과. 실브라우저 모바일 전수 테스트는 여전히 미완료.
+- 테스트 실행은 명시적 NODE_ENV=test로 수행했으며 시스템/운영 환경변수 변경 없음. 운영 승격 금지.
