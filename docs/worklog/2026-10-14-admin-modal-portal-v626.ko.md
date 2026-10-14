@@ -15,3 +15,6 @@
 ## 종료기록
 - 소스 변경 및 영/한 작업·내부·깃허브 기록 완료. 배포 판단: 전체 테스트 실패 및 Test에서 실제 수정 SHA의 브라우저·백엔드 수용 검증 부재로 RELEASE_BLOCKED. 운영 데이터·시스템·원장 미변경.
 - 독립 브랜치 PR 게시 및 CI 결과 확인 대기.
+
+## GitHub 게시
+- Draft PR #836: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/836 (소스 SHA 772dd1d3). Test/운영 배포 없음.

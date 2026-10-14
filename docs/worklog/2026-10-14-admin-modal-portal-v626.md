@@ -15,3 +15,6 @@
 ## Final
 - Source patch, regression test, and paired EN/KO worklog/internal/GitHub notes authored. RELEASE_BLOCKED by non-green full suite and missing exact-SHA Test/browser/backend evidence; production, database, and economic ledger left untouched.
 - Pending isolated branch PR and CI review.
+
+## GitHub publication
+- Draft PR #836: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/836 (source SHA 772dd1d3); no Test or Production deployment.
