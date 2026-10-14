@@ -1,5 +1,7 @@
 # 🔌 월덕 머니버스(Woldeok Moneyverse) 공식 마스터 REST API 카탈로그 (v2026.09.28.477)
 
+> **v600 목록 주의:** 기본 API 카탈로그에 **문서상 15개 도메인**이 나열된다. 이전의 14개 표기는 과거 자료이며, 실제 라우트 구현·동작과 생성 계약 일치는 아직 별도 검증 대상이다. [통합 기획](planning/INTEGRATED_PLANNING_MASTER.ko.md) 참조.
+
 [English canonical](API_CATALOG_MASTER.md) | **한국어**
 
 > **버전**: `v2026.09.28.477`

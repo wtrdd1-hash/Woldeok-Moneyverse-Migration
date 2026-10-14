@@ -1,3 +1,7 @@
+## v2026.10.14.600 — Reconcile planning/runtime authority (docs only)
+- Distinguish observed Production v599, Test v541 and planning authority v530; record unresolved casino/treasury/API drift.
+- Add bilingual authority notes, documentation catalog clarification, worklog, internal/GitHub update records. No release.
+
 ## v2026.09.23.390 — QA branch lifecycle cleanup hardening
 
 - Branch: `fix/qa-branch-cleanup-v2026.09.23.390`.
