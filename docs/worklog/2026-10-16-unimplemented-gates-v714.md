@@ -1,4 +1,4 @@
-# v2026.10.16.713 — Unimplemented / broken function remediation — worklog
+# v2026.10.16.714 — Unimplemented / broken function remediation — worklog
 
 ## START — 2026-10-16 KST
 
@@ -15,10 +15,11 @@
 - [ ] Merge only when GitHub CI/PR and Test/Production guard conditions pass; promote to Production only when evidence supports it, and record actual status.
 
 ## MID-WORK — 2026-10-16 KST
+- Main concurrently advanced to v712 Production evidence with a separate v713 worklog. Allocated **v714** for this QA fix to avoid version reuse; the original historical GitHub branch name still ends in v713.
 - Current audit A711-06 selected: bot QA script had multiple invalid string literals, host-specific yt-dlp path, false universal bypass/volume claims and success without actual playback evidence. Confirmed from current checked-out source.
 - Wrote RED regression tests: original QA failed `node --test` (exit 1). Repaired source with standalone bounded read-only online provider and daemon checks, offline SKIP mode and explicit live-audio NOT VERIFIED. Normal bot playback unchanged.
 - GREEN: `node --check` passes; new regression suite 4/4 and standard `cd bot && npm test` 8/8. Repository documentation paired EN/KO, release/changelog/internal/GitHub notices written.
 - Rechecked latest remote main before integration. Remaining P0 financial gates block blanket Production approval. No Test/Production changes yet.
 
 ## END
-- Pending. Production deployment and branch merge are **NOT YET DONE**.
+- Pending final CI/integration result; Production remains v712 and was not changed by this QA candidate.

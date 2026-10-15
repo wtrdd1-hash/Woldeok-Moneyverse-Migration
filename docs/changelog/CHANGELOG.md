@@ -1,5 +1,5 @@
-## v2026.10.16.713 — Discord music QA evidence reliability (source candidate, not Production)
-- Repaired invalid Node.js QA tool, removed unproven ad-bypass claims, added bounded provider/daemon verification and 4 regression tests. Standard bot tests 8/8 PASS; Test/Production release gates remain pending. [Release](../releases/v2026.10.16.713.md).
+## v2026.10.16.714 — Discord music QA evidence reliability (source candidate, not Production)
+- Repaired invalid Node.js QA tool, removed unproven ad-bypass claims, added bounded provider/daemon verification and 4 regression tests. Standard bot tests 8/8 PASS; Test/Production release gates remain pending. [Release](../releases/v2026.10.16.714.md).
 
 ## v2026.10.16.701 — Host capacity and PUBLIC definer containment
 - Owned merged worktree cache cleanup recovered 2.44GiB without touching live releases. Production-schema shadow verified narrowly scoped PUBLIC SECURITY DEFINER EXECUTE removal and rollback; app explicit grants retained. Direct financial DML remains open. [Release](../releases/v2026.10.16.701.md).
