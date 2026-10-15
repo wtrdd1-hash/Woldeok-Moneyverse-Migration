@@ -1,3 +1,6 @@
+## v2026.10.15.696 — Public Test exact-SHA acceptance, Production HOLD
+- Public Test v695 verified including authenticated session restart. v696 emergency monetary/auction containment candidate passed local tests and builds; Production ACL, migration, finance, release provenance remain blocked. [Release](../releases/v2026.10.15.696.md).
+
 ## v2026.10.15.695 — Isolated integration candidate (no production)
 - #850 and #852 combined with limited v678 Treasury route build fix; local tests and Next build passed. Test identity, finance, session and release gates remain blocked. [Release](../releases/v2026.10.15.695.md).
 

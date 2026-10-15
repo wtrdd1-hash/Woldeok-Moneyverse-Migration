@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.696 — Actual Test promotion with financial release hold
+- Public Test frontend/backend exact v695 SHA verified; authenticated QA session survived backend restart. v653 monetary/market fail-closed candidate was integrated in a new v696 branch without monetary migration. Production ACL and financial ledger correction remain absolute gates. [Release](../releases/v2026.10.15.696.md).
+
 ## v2026.10.15.695 — Integration candidate, release gates BLOCKED
 - Isolated #850/#852 and v678 grant route build fix. No financial schema/money/deploy. [Release](../releases/v2026.10.15.695.md); exact-SHA Test, finance and session gates still blocked.
 

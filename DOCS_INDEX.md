@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.15.696 — Public Test promoted; Production HOLD
+- [Release EN](docs/releases/v2026.10.15.696.md) / [KO](docs/releases/v2026.10.15.696.ko.md), [worklog](docs/worklog/2026-10-15-production-release-remediation-v696.md). Public Test v695 exact SHA and actual authenticated restart continuity passed. New v696 finance-containment branch tests/build passed, but Production grants, migration parity and rollback gates BLOCK promotion.
+
 ## v2026.10.15.695 — Isolated branch integration (Production BLOCKED)
 - [Release EN](docs/releases/v2026.10.15.695.md) / [KO](docs/releases/v2026.10.15.695.ko.md); [Worklog](docs/worklog/2026-10-15-offline-branch-integration-v695.md). Local unit/build PASS; Test/finance/session/Production pending.
 
