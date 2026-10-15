@@ -1,0 +1,178 @@
+{
+  "mainSha": "bf55b0571193b4470c9a305ea8b5937bacd2d501",
+  "trackedFiles": 4132,
+  "codeAndConfigFiles": 1976,
+  "trackedMarkdownFiles": 2105,
+  "codeLineCounts": {
+    ".yml": 2243,
+    ".json": 26366,
+    ".ts": 130546,
+    ".js": 2051,
+    ".mjs": 3046,
+    ".py": 321,
+    ".tsx": 148082,
+    ".css": 1447,
+    ".sh": 154,
+    ".sql": 55115,
+    ".yaml": 10525,
+    ".html": 214,
+    ".cjs": 724
+  },
+  "topDirectories": {
+    ".editorconfig": 1,
+    ".github": 12,
+    ".gitignore": 1,
+    ".npmrc": 1,
+    ".nvmrc": 1,
+    ".prettierrc.json": 1,
+    "AGENTS.md": 1,
+    "DOCS_INDEX.md": 1,
+    "LICENSE": 1,
+    "PROJECT_MEMORY.md": 1,
+    "README-KO.md": 1,
+    "README.md": 1,
+    "README": 14,
+    "backend": 514,
+    "bot": 10,
+    "docs": 2050,
+    "eslint.config.mjs": 1,
+    "frontend": 1097,
+    "implementation_plan.md": 1,
+    "ops": 16,
+    "package.json": 1,
+    "packages": 299,
+    "pnpm-lock.yaml": 1,
+    "pnpm-workspace.yaml": 1,
+    "scripts": 30,
+    "skills": 71,
+    "tsconfig.base.json": 1,
+    "walkthrough.md": 1,
+    "분류_결과_보고서.md": 1
+  },
+  "extensions": {
+    "": 13,
+    ".yml": 13,
+    ".json": 30,
+    ".md": 2105,
+    ".ts": 899,
+    ".js": 6,
+    ".mjs": 34,
+    ".py": 4,
+    ".csv": 11,
+    ".png": 10,
+    ".gz": 1,
+    ".txt": 2,
+    ".ico": 2,
+    ".svg": 2,
+    ".tsx": 708,
+    ".css": 4,
+    ".sh": 2,
+    ".example": 5,
+    ".service": 3,
+    ".timer": 1,
+    ".sql": 272,
+    ".yaml": 2,
+    ".html": 1,
+    ".cjs": 1,
+    ".dot": 1
+  },
+  "nextPages": 164,
+  "adminPages": 34,
+  "nextRouteHandlers": 78,
+  "backendControllers": 82,
+  "backendRepositories": 55,
+  "sqlMigrations": 270,
+  "suspiciousPatternOccurrences": {
+    "db_superuser": 716,
+    "unsafe_command": 23,
+    "unknown_error_swallow": 8,
+    "float_currency": 211,
+    "hardcoded_urls": 72,
+    "fake_success": 53,
+    "direct_balance_sql": 62,
+    "auth_fallback": 14,
+    "insecure_rng": 97,
+    "unauth_post_candidate": 21,
+    "fake_seo_reviews": 20
+  },
+  "unresolvedStaticLinkOccurrences": 15,
+  "unresolvedStaticLinkSamples": [
+    [
+      "frontend/src/app/developer/developer-portal-view.tsx",
+      365,
+      "/app-api/v1/meta/contract"
+    ],
+    [
+      "frontend/src/app/roadmap/roadmap-view.tsx",
+      308,
+      "/pet"
+    ],
+    [
+      "frontend/src/app/tools/isa-calculator/page.tsx",
+      254,
+      "/auth/register"
+    ],
+    [
+      "frontend/src/app/tools/pension-tax-calculator/page.tsx",
+      273,
+      "/auth/register"
+    ],
+    [
+      "frontend/src/app/tools/salary-calculator/page.tsx",
+      259,
+      "/auth/register"
+    ],
+    [
+      "frontend/src/app/tools/youth-leap-calculator/page.tsx",
+      310,
+      "/auth/register"
+    ],
+    [
+      "frontend/src/components/calculator-retention-funnel.tsx",
+      246,
+      "/career-guide"
+    ],
+    [
+      "frontend/src/components/discord-banner.tsx",
+      77,
+      "/attendance"
+    ],
+    [
+      "frontend/src/components/floating-support-chat-widget.tsx",
+      1233,
+      "/guide/getting-started"
+    ],
+    [
+      "frontend/src/components/site-footer.tsx",
+      253,
+      "/en/tools"
+    ],
+    [
+      "frontend/src/components/site-footer.tsx",
+      258,
+      "/en/tools/stock-calculator"
+    ],
+    [
+      "frontend/src/components/site-footer.tsx",
+      263,
+      "/zh/tools"
+    ],
+    [
+      "frontend/src/components/site-footer.tsx",
+      268,
+      "/zh/tools/stock-calculator"
+    ],
+    [
+      "frontend/src/components/site-footer.tsx",
+      273,
+      "/ja/tools"
+    ],
+    [
+      "frontend/src/components/site-footer.tsx",
+      278,
+      "/ja/tools/compound-calculator"
+    ]
+  ],
+  "controllerWithoutLocalGuardCount": 13,
+  "multiSqlMigrationPrefixes": {}
+}

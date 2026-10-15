@@ -1,5 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.15.652 — Entire Code / Runtime / Monetary Policy Reanalysis (AUDIT; P0 live, BLOCKED)
+
+- [English report](docs/findings/MONEYVERSE_COMPLETE_REANALYSIS_v2026.10.15.652.md) · [한국어 전체 재분석](docs/findings/MONEYVERSE_COMPLETE_REANALYSIS_v2026.10.15.652.ko.md) · [Source inventory evidence](docs/findings/MONEYVERSE_COMPLETE_REANALYSIS_v2026.10.15.652.source-inventory.json)
+- [Worklog EN](docs/worklog/2026-10-15-complete-reanalysis-v652.md) · [작업 기록 KO](docs/worklog/2026-10-15-complete-reanalysis-v652.ko.md) · [GitHub update](docs/updates/v2026.10.15.652-github.md) · [내부 기록](docs/updates/v2026.10.15.652-internal.ko.md)
+- **New verified live P0:** missing ledger_entries table caused fabricated 500000/480000 automatic monetary telemetry in 318 recorded evaluations, associated with 169 APPROVED policy orders. Actual balance effects still require reconciliation. **New GET-auction financial side effects**; DB app grants and direct ledger bypass persist. Audit-only; no live config/source/financial changes, no Test/Production promotion.
+
 ## v2026.10.15.650 — Audited CI/PR integration (documentation-only)
 
 - [Release record (EN)](docs/releases/v2026.10.15.650.md) · [릴리스 기록 (KO)](docs/releases/v2026.10.15.650.ko.md)
