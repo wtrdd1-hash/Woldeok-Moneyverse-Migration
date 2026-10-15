@@ -9,10 +9,14 @@
 - Do not touch active Nginx, systemd, Test/Production pointers, production DB, balances, sessions, or concurrent worktrees.
 
 ## In progress
-- [ ] Write negative tests for release manifest / config / public version / process cwd mismatch and missing evidence.
-- [ ] Implement pure validator and live read-only CLI for the documented Debian systemd host.
-- [ ] Run isolated tests and fail-closed probe against current Test and record evidence.
-- [ ] Re-fetch latest main, open PR, synchronize EN/KO worklog and internal/GitHub versioned updates.
+- [x] Added eight focused regression tests on manifest, environment, build, public API and live process cwd identity.
+- [x] Implemented a read-only fail-closed CLI with explicit Test/Production service and HTTPS endpoint mapping.
+- [x] Fixed one malformed quoted BUILD_ID fixture. Exact branch suite rerun on the Debian host: **8 pass, 0 fail**.
+- [x] Ran the CLI read-only against current Test with expected SHA `7fa3f245bbc3b308ae3e26ff3bfb0fbc70ba4642`. It exited **1** as required: `backend_env_sha_mismatch`, `public_version_sha_mismatch`. Backend/public report `888311cc9240e8c5bb69ef51b92f8b738c6ad3be`. Frontend env and build and manifest all match the expected v618 source.
+- [x] Added EN/KO release runbook, release notes, changelog, internal/GitHub records and index. Draft PR #853 opened.
+- [ ] Verify final exact-head GitHub CI after documentation sync and re-check main before any merge.
 
-## Finished
-- Pending.
+## Finished (scope-limited)
+- Host identity protection and negative Test evidence are implemented. No Test or Production switch made.
+- **Production remains blocked**: existing Test source mismatch, real DB least-privilege/ledger, authenticated full-route five-pass QA, session/rollback and zero-downtime backend acceptance require independent verification.
+- No application DB, member balances, services or concurrent worktrees modified.
