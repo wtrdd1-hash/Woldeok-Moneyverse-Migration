@@ -5,6 +5,7 @@
 ## Authority, concurrency and exact revision
 - Official document hierarchy: AGENTS.md; DOCS_INDEX.md; planning/INTEGRATED_PLANNING_MASTER.md and Korean companion; PROJECT_PLAN; docs/RELEASING.md; API_CATALOG_MASTER; prior v603/v605/v675 acceptance and v683 Treasury investigations. Planning authority v530 (UI) and v523/v542/v543 (money invariants) remain binding until explicit adoption; later plans are not releases.
 - Started from GitHub main `69bc8c14`; while running this audit main advanced to `69463989` via SEO fix #867. Changed SEO code/planning was reviewed and merged **into this isolated task branch only**, merge `60b164c8`. No shared main, another agent's worktree or production release was edited.
+- Before closing, main advanced again to `44d0b465` (docs-only first-session plan v686, PR #869). Integrated both the v686 authority text and v687 findings into the task branch; no claim of a full-suite rerun at this later combined SHA.
 - v687 task branch: `audit/full-function-runtime-v2026.10.15.687`. The full baseline suites and initial build below were run on `69bc8c14`; post-merge targeted SEO tests and TypeScript typecheck were run on `60b164c8`. Do not relabel baseline tests as if rerun at latest SHA.
 
 ## Observed code and service scope
