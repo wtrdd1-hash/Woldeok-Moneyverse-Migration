@@ -1,5 +1,8 @@
 # Current Runtime Baseline
 
+## 2026-10-15 v697 observed Production update
+- Live host backend/front: moneyverse-release-v697-backend.service port 3213; moneyverse-release-v697-frontend.service port 3214, Nginx routes publicly, exact application SHA a5a1e9da6fc55ac71c44c4cf6ee138e9442f4e73. production-current -> prod-v2026.10.15.697-a5a1e9da6fc5. Fallback prior backend :3000 and v635 frontend :3203 remain. Preexisting finance role grants remain unsafe; see [release](releases/v2026.10.15.697.md).
+
 **English canonical** | [한국어](CURRENT_RUNTIME_BASELINE.ko.md)
 
 > Version: v2026.09.23.404
