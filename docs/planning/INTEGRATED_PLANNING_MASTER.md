@@ -1,9 +1,10 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-## v2026.10.15.682 — Treasury containment and release correctness gate
+## v2026.10.15.681 — F675-04 useful calculator-to-learning journey (docs only)
 
-- [v681 finance and release gate](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.md) / [Korean](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.ko.md): emergency SWF OFF after verified encrypted backup, not a full accounting repair; independent restored Production schema data and isolated 269–271 trial exposed runtime donation SQLSTATE 42703 and 271 app-role read failures for v678 direct query.
-- Only read-only diagnostics/isolated Test mutations after operational SWF flag change. **Do not promote** code/migrations, open settlements, fabricate balancing funds or merge draft v678/681 until real authenticated Test full role/session/ledger/zero-downtime gates are met.
+- Start/middle `origin/main=8356146e157080704e157b3203e38599baec68ff`; isolated worktree `docs/calculator-learning-funnel-v2026.10.15.681`; final source in [worklog](../worklog/2026-10-15-f67504-calculator-learning-v681.md). No concurrent agent worktree overwritten.
+- [Adopt EN/KO detailed calculator plan](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) for v675 F675-04: current source C681-01..09 misleading local-only “alert active,” 10k WLD credit and cloud-save claims; existing real/fictional calculators, formula/source/jurisdiction and duplicate preset SEO. Eight research hypotheses, ten paired microcopy, 14 references, D0–D7 implementation/Test plan.
+- Reuse /tools and /guide. Full guest answer and evidence before optional learning/share/game. No unsourced law or fictitious bonus as conversion. v397/v530 and v523/542/543/economy P0/actual Test blocked. **PLANNING** without runtime mutation.
 
 
 ## v2026.10.15.680 — F675-03 exact-money user receipts (planning only)

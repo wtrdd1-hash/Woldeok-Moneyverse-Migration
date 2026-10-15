@@ -1,10 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
 
-## v2026.10.15.682 — Treasury emergency containment and blocked release evidence
+## v2026.10.15.681 — F675-04 public calculators → learning → optional game (PLANNING)
 
-- Emergency Production SWF synthetic automatic cycle was switched OFF at 2026-10-15 14:51 KST **after verified encrypted backup**; existing Treasury/member balances and Production services unchanged. Switch confirmed OFF at 15:18/15:27 KST; next hourly-cycle verification pending.
-- Restored independent Test database with 266 historical migrations; 269–271 DDL succeeded there, but migration 269's actual donation function failed (nonexistent ledger_transactions.tx_type). Under 271 the app role also cannot directly SELECT vault/treasury journal tables, so v678 reconciliation needs a purpose-scoped role-checked read function before Test/Production.
-- [v681 English release blockers](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.md) / [Korean](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.ko.md). **Production code release BLOCKED**, no migration or app promotion in Production.
+- **Adopt** [F675-04 EN calculator/learning user trust specification](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) / [한국어](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) as the next v675 detailed feature plan. Reuse existing /tools, calculator, /guide/glossary, localized variants; give every guest the full correct answer before suggesting optional fictional WLD learning/game actions.
+- **Source facts C681-01..09:** existing frontend retention component declares goal alerts enabled and a 10,000 WLD bonus reserved using client state only; conversion banner advertises guaranteed enrollment reward/loss-free outcome; save action confuses localStorage with verified server success and infers auth from cookies/local data; sample fictional prices, Number-based formulas, year-coded tax claims and duplicate preset/locale SEO exist. These are reviewed-source risks, not current Production acceptance.
+- **Safety & growth:** truthfully separate local/server save, real registered alerts, confirmed WLD receipts and opt-in game state; tax year/jurisdiction/formula/source review; ten EN/KO UX states, eight untested user tasks, 14 external references, D0–D7 TDD/quality gates; people-first canonical/hreflang and no thin-scale SEO pages, no guaranteed WLD reward.
+- v523/542/543 economy, v530 full UI, v397 real API/CTA and exact-SHA Test/rollback/Production gates stay **BLOCKED**. No code, WLD, DB, Test or runtime changes in this documentation cycle. [Worklog](../worklog/2026-10-15-f67504-calculator-learning-v681.md).
 
 
 ## v2026.10.15.680 — F675-03 WLD activity reasons and private receipts (PLANNING)

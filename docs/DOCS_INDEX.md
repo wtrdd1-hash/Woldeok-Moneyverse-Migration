@@ -1,5 +1,10 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## Calculator → learning → optional game detailed planning — v2026.10.15.681
+
+- [F675-04 user-centered calculator design (EN)](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) · [한국어](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) · [v681 worklog](worklog/2026-10-15-f67504-calculator-learning-v681.md). Planning only, no source implementation or Production release.
+
+
 ## Detailed wallet UX planning — v2026.10.15.680
 
 - [F675-03 WLD activity explanation and ledger receipts](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md) · [한국어](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) · [worklog](worklog/2026-10-15-f67503-wld-receipts-v680.md). Not a runtime feature release.
