@@ -1,3 +1,6 @@
+## v2026.10.15.670 — 호스트 승격 소스 버전 일치 검사 후보
+- manifest, 백엔드/프론트 환경·빌드, systemd 실행 경로와 외부 버전의 단일 승인 SHA 검증기/회귀 테스트 추가. 한영 릴리스 절차 보강. 실 Test/운영 변경 및 금융 데이터 수정 없음. [기록](../releases/v2026.10.15.670.ko.md).
+
 ## v2026.10.15.652 — 운영 승격 게이트 점검 (BLOCKED)
 - 실제 Debian 운영/Test 버전과 DB 권한 검사. Test 백엔드 SHA와 프론트/manifest 불일치, 운영 버전 unknown, 앱 역할 public 237개 테이블 쓰기 가능·PUBLIC SECURITY DEFINER 11개. 금융/UI/세션/롤백 수용 미완료로 **운영 배포 미실행**. [검증 보고서](../releases/v2026.10.15.652.ko.md).
 
