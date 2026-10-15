@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.15.697 — Live Production blue-green release
+- [Release EN](docs/releases/v2026.10.15.697.md) / [KO](docs/releases/v2026.10.15.697.ko.md); [Worklog EN](docs/worklog/2026-10-15-production-bluegreen-v697.md) / [KO](docs/worklog/2026-10-15-production-bluegreen-v697.ko.md). GitHub main PR #874 merged; active public host v697 source a5a1e9da (both backend/frontend), permanent systemd 3213/3214, no Production database migration. Financial app-role DML risk still open.
+
 ## v2026.10.15.696 — Public Test promoted; Production HOLD
 - [Release EN](docs/releases/v2026.10.15.696.md) / [KO](docs/releases/v2026.10.15.696.ko.md), [worklog](docs/worklog/2026-10-15-production-release-remediation-v696.md). Public Test v695 exact SHA and actual authenticated restart continuity passed. New v696 finance-containment branch tests/build passed, but Production grants, migration parity and rollback gates BLOCK promotion.
 

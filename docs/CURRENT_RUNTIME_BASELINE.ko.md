@@ -1,5 +1,8 @@
 # 현재 런타임 기준선
 
+## 2026-10-15 v697 실제 운영 환경 변경
+- 운영 백엔드 moneyverse-release-v697-backend.service :3213, 프론트 moneyverse-release-v697-frontend.service :3214. Nginx 공개 라우팅, 정확한 코드 SHA a5a1e9da6fc55ac71c44c4cf6ee138e9442f4e73, production-current v697. 구 백엔드 :3000 및 v635 프론트 :3203 롤백 보존. 남은 금전 DB 권한 문제는 [릴리스](releases/v2026.10.15.697.ko.md) 참조.
+
 [English canonical](CURRENT_RUNTIME_BASELINE.md) | **한국어**
 
 > 버전: v2026.09.23.404

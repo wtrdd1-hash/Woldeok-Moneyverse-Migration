@@ -1,3 +1,6 @@
+## v2026.10.15.697 — Live Production blue-green promotion
+- GitHub #874 merged to main; public backend/frontend exact source SHA a5a1e9da with persistent systemd and Nginx. Five public smoke passes, Production DB backup and isolated restore succeeded; no Production SQL migration. Remaining direct financial DML and missing full authenticated Production E2E remain tracked. [Release](../releases/v2026.10.15.697.md).
+
 ## v2026.10.15.696 — Public Test exact-SHA acceptance, Production HOLD
 - Public Test v695 verified including authenticated session restart. v696 emergency monetary/auction containment candidate passed local tests and builds; Production ACL, migration, finance, release provenance remain blocked. [Release](../releases/v2026.10.15.696.md).
 

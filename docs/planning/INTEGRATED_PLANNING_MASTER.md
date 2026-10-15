@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.697 — Observed Production rollout and remaining finance risks
+- Manual live Production blue-green release via Nginx and persistent systemd; canonical source tag prod-v2026.10.15.697, GitHub main PR #874 identical tree. [Release](../releases/v2026.10.15.697.md) / [KO](../releases/v2026.10.15.697.ko.md). No Production DB migration, finance least-privilege and full authenticated Production E2E remain open.
+
 ## v2026.10.15.696 — Actual Test promotion with financial release hold
 - Public Test frontend/backend exact v695 SHA verified; authenticated QA session survived backend restart. v653 monetary/market fail-closed candidate was integrated in a new v696 branch without monetary migration. Production ACL and financial ledger correction remain absolute gates. [Release](../releases/v2026.10.15.696.md).
 
