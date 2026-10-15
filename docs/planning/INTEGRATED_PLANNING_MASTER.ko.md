@@ -1,5 +1,12 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.15.680 — F675-03 실제 WLD 이동 사유·영수증 (문서 전용)
+
+- 시작·중간 원격 메인 `a37b733837cf82c3f45adb88242bd1b4f6df2cb9`, 독립 `docs/wld-activity-receipts-v2026.10.15.680`, 최종 기록은 [작업기록](../worklog/2026-10-15-f67503-wld-receipts-v680.ko.md). 국고·원장 등 다른 작업자 워크트리 변경 없음.
+- [F675-03 한글 상세 계획](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) / [영문](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md) 채택: W680-01~08 소스 현황, 8개 사용자 검증 가설, 은행내부이동 순변화 0과 포켓별 변화, 본인 한정 조회/불변정정/큰 정수/정확한 과거·CSV 범위, D0~D7, 외부 13개 출처.
+- 경제 코어 v523/542/543와 전체 UI v530 및 동일 SHA Test 차단 유지. **실제 코드·DB·잔액·사용자·Test·운영 변경 없음.**
+
+
 ## v2026.10.15.679 — F675-02 AI 가상뉴스 신뢰·복구 기능 상세기획 (문서 전용)
 
 - 시작·중간 메인 `origin/main=b70cedbce34ad43bffe593ffbd1ac8374edb5ffa`; 최종 SHA는 [v679 기록](../worklog/2026-10-15-f67502-ai-news-user-trust-v679.ko.md). 동시 기획자 v678 사용 중이라 v679 독립 브랜치·워크트리 사용. 다른 작업자 코드·운영 포인터 변경 없음.

@@ -1,5 +1,10 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.15.680 — F675-03 WLD 거래 이유·영수증 (PLANNING)
+
+- [WLD 거래 상세·사유·안전한 영수증(한국어)](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) / [영문](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md). 최근 50건/내부 은행 이동 합계 0, 개인권한/원장 불변, 사용자 가설 8개/자료 13개/D0~D7. 문서만 변경.
+
+
 ## v2026.10.15.679 — F675-02 주식 AI 뉴스 사용자 신뢰 (PLANNING)
 
 - [AI 뉴스 신선도·신뢰·장애복구(한국어)](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md) / [영문](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md)을 통합기획과 v325에 연동. 소스 확인 문제·외부 자료 13개·사용자 7개 과제·생성/검수/발행/시장영향 구분. 문서만 수정; 과거 v660 사고와 미병합 v661 후보를 운영 해결로 판단하지 않음.

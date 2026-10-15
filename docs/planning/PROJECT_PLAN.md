@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.680 — F675-03 WLD activity reasons and private receipts (PLANNING)
+
+- Adopt [F675-03 detailed wallet receipt / ledger explanation](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md) / [Korean](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md), extending—not replacing—the existing authenticated wallet and 50-entry activity read. v675 P1 proposal becomes the detailed **planning contract**, not an implemented capability.
+- Source-observed W680-01..08: /wallet displays latest 5; /wallet/activity reads up to 50 and lacks detail/pagination; repository nets USER_CASH+USER_BANK transaction legs, so internal bank movement may show zero; generic 'economic activity' labels, bounded client-side CSV, strict integer strings and owner-scoped existing session APIs. These are source observations, not measured Production failures.
+- UX: member-specific readable reason, exact signed cash/bank/total deltas, immutable transaction reference and corrections, truthful partial-history bounds and uncertain-outcome recovery. Eight user-job hypotheses are not interviews. 13 linked references include financial receipt/error laws as **design analogies only**, not applicable real-banking law to fictional WLD.
+- Prerequisite: reconcile v523/v542/v543 ledger conservation, direct-write/DB privilege gaps, exact-SHA Test and v530 authenticated full-route UI. No broadened DB SELECT, balance mutation, unauthorized read or runtime/Test/Production release. [Worklog](../worklog/2026-10-15-f67503-wld-receipts-v680.md).
+
+
 ## v2026.10.15.679 — F675-02 fictional AI stock-news trust and recovery (PLANNING)
 
 - **Detailed adoption:** [F675-02 News Freshness, Recovery & Editorial Safety](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md) / [한국어](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md), extending existing v325 AI scenario newspaper instead of building a competing pipeline. Generation, moderation, durable publication and deterministic virtual-stock event are four different states; a scheduler success/skip or model answer is not publication.
