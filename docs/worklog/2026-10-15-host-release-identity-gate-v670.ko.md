@@ -9,7 +9,7 @@
 - 실제 실행 파일과 manifest, 백엔드/프론트 릴리스 환경 `BUILD_ID`, 프론트 빌드 ID, 공개 버전 API 및 systemd 프로세스 경로를 동일 SHA로 비교하는 읽기 전용 검사기 작성.
 - 잘못된 인용 환경변수 fixture 1개를 수정하고 회귀 테스트 **8건 통과, 실패 0**을 Debian 호스트에서 확인.
 - 실제 Test에서 `--channel test` 실행 결과 실패 종료 코드 1, `backend_env_sha_mismatch`, `public_version_sha_mismatch` 정확히 검출. 프론트·manifest는 `7fa3f245...`로 동일.
-- 한영 릴리스 절차 및 내부/GitHub 변경내역 동기화. PR #853 생성, CI 확인 필요.
+- 한영 릴리스 절차 및 내부/GitHub 변경내역 동기화. PR #853 `classify`·`policy` CI 통과, 런타임 검사는 제어 스크립트 전용 변경으로 정상 스킵. 최신 main 재확인 후 병합 완료: `ae7da3992fddc8cccb9e5437268f509fe47b808d`.
 
 ## 종료/배포 판정
 - 새 검사기와 실 Test 불일치 탐지는 완료. GitHub CI와 전체 Test 수용 판정은 별개.
