@@ -71,6 +71,16 @@ describe('TreasuryRepository authoritative reconciliation v678', () => {
 
   it('withholds overview spendable/coverage when evidence is unverified', async () => {
     const query = vi.fn().mockImplementation((sql: string) => {
+      if (sql.includes('treasury_admin_overview_snapshot')) {
+        return Promise.resolve({ rows: [{ result: {
+          vaults: [{ id: 'vault-main', code: 'VAULT_MAIN', name: 'Main', balance_wld: '1000000',
+            description: '', created_at: new Date(), updated_at: new Date() }],
+          total_treasury_wld: '1000000', reserve_wld: '0',
+          funding_status: 'UNVERIFIED',
+          stats_24h: { injected_wld: '0', absorbed_wld: '0',
+            stock_halt_funded_wld: '0', recirculated_wld: '0' },
+        } }] });
+      }
       if (sql.includes('FROM public.system_treasury_vaults') && sql.includes('ORDER BY code')) {
         return Promise.resolve({ rows: [{
           id: 'vault-main', code: 'VAULT_MAIN', name: 'Main', balance_wld: '1000000',
@@ -93,5 +103,7 @@ describe('TreasuryRepository authoritative reconciliation v678', () => {
     expect(overview.reconciliation.status).toBe('UNVERIFIED');
     expect(overview.available_wld).toBe('0');
     expect(overview.coverage_days).toBe(0);
+    expect(query.mock.calls[0]?.[0]).toContain('public.treasury_admin_overview_snapshot');
+    expect(query.mock.calls[0]?.[1]).toEqual([VERIFIED_OPERATOR]);
   });
 });

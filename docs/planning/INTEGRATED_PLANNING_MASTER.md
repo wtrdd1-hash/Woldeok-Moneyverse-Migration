@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.690 — Treasury finance hold and least-privilege read proof
+- [Source and rollback verification](TREASURY_SAFE_ADMIN_GATES_v2026.10.15.690.md) / [Korean](TREASURY_SAFE_ADMIN_GATES_v2026.10.15.690.ko.md). Purpose-scoped DB operator overview and 11 route-level 503 holds; no raw table grants, no financial funding bridge. Production promotion requires Core conservation, policy, exact-SHA Test auth/session and rollback.
+
+
 ## v2026.10.15.686 — F675-05 first-session task truth (documentation only)
 
 - Start/mid `origin/main=6946398986edba0ad84bc601e6d1076e442f6d05`, isolated branch `docs/first-session-truth-v2026.10.15.686`; v687 concurrent runtime audit kept separate. [EN worklog](../worklog/2026-10-15-f67505-first-session-v686.md).

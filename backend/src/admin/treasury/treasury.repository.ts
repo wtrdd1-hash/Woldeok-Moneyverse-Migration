@@ -403,130 +403,38 @@ export class TreasuryRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable) {}
 
   async getOverview(adminId: string): Promise<TreasuryOverview> {
-    // 1. Vaults
-    const vaultsRes = await this.pool.query<TreasuryVaultRow>(`
-      SELECT id, code, name, balance_wld, description, created_at, updated_at
-      FROM public.system_treasury_vaults
-      ORDER BY code ASC
-    `);
-    const vaults = vaultsRes.rows;
-
-    let totalTreasury = BigInt(0);
-    for (const v of vaults) {
-      totalTreasury += BigInt(v.balance_wld);
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adminId)) {
+      throw new Error('Treasury operator identity required');
     }
-
-    // 2. Circulating user currency M0 (sum of all user balances)
-    let totalCirculating = BigInt(0);
-    try {
-      const circRes = await this.pool.query<{ total: string }>(`
-        SELECT coalesce(sum(available_amount), 0)::bigint::text AS total FROM public.account_balances
-      `);
-      if (circRes.rows[0]?.total && BigInt(circRes.rows[0].total) > BigInt(0)) {
-        totalCirculating = BigInt(circRes.rows[0].total);
-      } else {
-        const uRes = await this.pool.query<{ total: string }>(`
-          SELECT coalesce(sum(balance), 0)::bigint::text AS total FROM public.users
-        `);
-        if (uRes.rows[0]?.total) {
-          totalCirculating = BigInt(uRes.rows[0].total);
-        }
-      }
-    } catch {
-      // fallback
+    // No raw Treasury table SELECT: migration 271 removed them deliberately.
+    // The DB scope function enforces the operator role even if an API path is bypassed.
+    const snapshot = await this.pool.query<{ result: {
+      vaults: TreasuryVaultRow[];
+      total_treasury_wld: string;
+      reserve_wld: string;
+      stats_24h: TreasuryOverview['stats_24h'];
+      funding_status: 'UNVERIFIED';
+    } }>(
+      'SELECT public.treasury_admin_overview_snapshot($1::uuid) AS result',
+      [adminId],
+    );
+    const row = snapshot.rows[0]?.result;
+    if (!row || row.funding_status !== 'UNVERIFIED') {
+      throw new Error('Unverified Treasury overview must not be marked available');
     }
-
-    const reserveRatio =
-      totalCirculating > BigInt(0)
-        ? Number((totalTreasury * BigInt(10000)) / totalCirculating) / 100
-        : 100;
-
-    // 3. 24h Stats from ledger
-    const statsRes = await this.pool.query<{
-      tx_type: string;
-      total_amount: string;
-    }>(`
-      SELECT tx_type, coalesce(sum(amount_wld::numeric), 0)::bigint::text AS total_amount
-      FROM public.system_treasury_ledger
-      WHERE created_at >= NOW() - INTERVAL '24 hours'
-      GROUP BY tx_type
-    `);
-
-    let injected = '0';
-    let absorbed = '0';
-    let stockHaltFunded = '0';
-    let recirculated = '0';
-
-    for (const row of statsRes.rows) {
-      if (row.tx_type === 'INJECTION') injected = row.total_amount;
-      else if (row.tx_type === 'ABSORPTION_SINK') absorbed = row.total_amount;
-      else if (row.tx_type === 'STOCK_HALT_SETTLEMENT') stockHaltFunded = row.total_amount;
-      else if (row.tx_type === 'FEE_RECIRCULATION') recirculated = row.total_amount;
-      else if (
-        row.tx_type === 'CITIZEN_DIVIDEND' ||
-        row.tx_type === 'COMMUNITY_FUNDING' ||
-        row.tx_type === 'WELFARE_SUBSIDY' ||
-        row.tx_type === 'MARKET_STIMULUS' ||
-        row.tx_type === 'PUBLIC_GRANT' ||
-        row.tx_type === 'MARKET_BUYBACK_BURN'
-      ) {
-        absorbed = (BigInt(absorbed) + BigInt(row.total_amount)).toString();
-      }
-    }
-
-    // 4. Reserve & Available calculation (ADMIN_TREASURY_MANAGEMENT_SPEC §5)
-    let reserveVaultWld = BigInt(0);
-    const emergencyVault = vaults.find((v) => v.code === 'VAULT_EMERGENCY');
-    if (emergencyVault) {
-      reserveVaultWld = BigInt(emergencyVault.balance_wld);
-    }
-    const committedWld = BigInt(0);
-    const availableWld =
-      totalTreasury > reserveVaultWld + committedWld
-        ? totalTreasury - (reserveVaultWld + committedWld)
-        : BigInt(0);
-
-    // 5. 30-day average daily outflow / expense for coverage calculation
-    let dailyOutflow30d = BigInt(10000);
-    try {
-      const outflowRes = await this.pool.query<{ daily_avg: string }>(`
-        SELECT coalesce(sum(amount_wld::numeric) / 30, 10000)::bigint::text AS daily_avg
-        FROM public.system_treasury_ledger
-        WHERE created_at >= NOW() - INTERVAL '30 days'
-          AND tx_type IN ('INJECTION', 'STOCK_HALT_SETTLEMENT', 'EMERGENCY_RESERVE_TRANSFER', 'CITIZEN_DIVIDEND', 'COMMUNITY_FUNDING', 'WELFARE_SUBSIDY', 'MARKET_STIMULUS', 'PUBLIC_GRANT', 'MARKET_BUYBACK_BURN')
-      `);
-      if (outflowRes.rows[0]?.daily_avg && BigInt(outflowRes.rows[0].daily_avg) > BigInt(0)) {
-        dailyOutflow30d = BigInt(outflowRes.rows[0].daily_avg);
-      }
-    } catch {
-      // fallback safe value
-    }
-
-    const coverageDays = Number(availableWld / dailyOutflow30d);
-
-    // Never assert a financially spendable balance when the subsidiary ledger
-    // has not been joined to the authoritative Economy Core transaction chain.
     const reconciliation = await this.getReconciliation(adminId);
-
-    const liveBudgets = await this.calculateLiveBudgets();
-
     return {
-      vaults,
-      total_treasury_wld: totalTreasury.toString(),
-      total_circulating_wld: totalCirculating.toString(),
-      reserve_ratio_pct: reserveRatio,
-      available_wld: reconciliation.status === 'RECONCILED' ? availableWld.toString() : '0',
-      reserve_wld: reserveVaultWld.toString(),
-      coverage_days: reconciliation.status === 'RECONCILED' ? coverageDays : 0,
+      vaults: row.vaults,
+      total_treasury_wld: row.total_treasury_wld,
+      total_circulating_wld: '0', // Unknown Core backing is not zero-money certification.
+      reserve_ratio_pct: 0,
+      available_wld: '0',
+      reserve_wld: row.reserve_wld,
+      coverage_days: 0,
       tax_rates: AUTHORITATIVE_TAX_RATES,
-      budgets: liveBudgets,
+      budgets: [], // Static budget allocations are not verified disbursement authority.
       reconciliation,
-      stats_24h: {
-        injected_wld: injected,
-        absorbed_wld: absorbed,
-        stock_halt_funded_wld: stockHaltFunded,
-        recirculated_wld: recirculated,
-      },
+      stats_24h: row.stats_24h,
     };
   }
 

@@ -1,3 +1,6 @@
+## v2026.10.15.690 — Treasury scoped read and payment safety (NOT PROMOTED)
+- Read-only operator SQL 274, 11 legacy payout route holds, isolated Test role/invariant tests and backend 1217 / frontend 1218 PASS. Still no verified funding or deployment. [Release](../releases/v2026.10.15.690.md).
+
 ## v2026.10.15.684 — Core Treasury donation settlement in isolated Test (NOT PROMOTED)
 - Added forward-only 273, idempotent WLD account-to-account donation receipt, guarded member API default OFF and wallet donation label. Real restored Test rollback successful; no approved finance policy, other P0 hold. [Release](../releases/v2026.10.15.684.md).
 

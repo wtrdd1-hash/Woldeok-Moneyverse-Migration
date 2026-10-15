@@ -17,6 +17,7 @@ import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryService } from './treasury.service';
+import { TreasurySettlementHoldGuard } from './treasury-settlement-hold.guard';
 import { AutoSovereignWealthFundService } from './auto-swf.service';
 
 export class TreasuryOperationDto {
@@ -201,6 +202,7 @@ export class AdminTreasuryController {
   }
 
   @Post('inject')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '국고 자금 긴급 주입 (Step-Up/Admin)' })
   async injectFunds(
     @Req() request: RequestWithSession,
@@ -211,6 +213,7 @@ export class AdminTreasuryController {
   }
 
   @Post('drain')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '국고 잉여 자금 영구 소각 (Step-Up/Admin)' })
   async absorbFunds(
     @Req() request: RequestWithSession,
@@ -221,6 +224,7 @@ export class AdminTreasuryController {
   }
 
   @Post('disburse/dividend')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '시민 보편 배당 및 기본소득 환원금 일괄 집행 (Safe Reserve 30% Guard)' })
   async disburseDividend(
     @Req() request: RequestWithSession,
@@ -240,6 +244,7 @@ export class AdminTreasuryController {
   }
 
   @Post('disburse/targeted')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '저자산 초기 시민 타겟팅 국고 선별 지원금 집행 (Targeted Relief)' })
   async disburseTargetedSubsidy(
     @Req() request: RequestWithSession,
@@ -271,6 +276,7 @@ export class AdminTreasuryController {
   }
 
   @Post('disburse/grant')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '공공 프로젝트 펀딩 및 복지 보조금 지출 집행 (Safe Reserve 30% Guard)' })
   async disburseGrant(
     @Req() request: RequestWithSession,
@@ -287,6 +293,7 @@ export class AdminTreasuryController {
   }
 
   @Post('budget/distribute')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '헌법적 4분할 목적별 예산 배정 집행 (복지40/인프라30/비상20/소각10)' })
   async distributeBudget(
     @Req() request: RequestWithSession,
@@ -297,6 +304,7 @@ export class AdminTreasuryController {
   }
 
   @Post('buyback/burn')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '룬스케이프형 역매수 영구소각 집행 (장터 덤핑 매물 국고 매입/소각)' })
   async buybackBurn(
     @Req() request: RequestWithSession,
@@ -322,6 +330,7 @@ export class AdminTreasuryController {
   }
 
   @Post('tax/wealth')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '초고액 자산가 누진적 부유세 과세 일괄 집행 (복지기금 전액 적립)' })
   async executeWealthTax(
     @Req() request: RequestWithSession,
@@ -368,6 +377,7 @@ export class AdminTreasuryController {
   }
 
   @Post('swf/rebalance')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 잉여 세수 시장 재순환 즉시 집행' })
   async triggerSwfRebalance() {
     if (!this.swfService) {
@@ -377,6 +387,7 @@ export class AdminTreasuryController {
   }
 
   @Post('swf/liquidate')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
   async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') targetPortfolioAumWld?: string) {
     if (!this.swfService) {
@@ -386,6 +397,7 @@ export class AdminTreasuryController {
   }
 
   @Put('swf/config')
+  @UseGuards(TreasurySettlementHoldGuard)
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 안전 준비금 및 투자 한도 튜닝' })
   async updateSwfConfig(@Body() body: Record<string, unknown>) {
     if (!this.swfService) {

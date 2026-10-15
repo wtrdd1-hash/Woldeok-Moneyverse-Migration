@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.690 — Treasury scoped admin read and payment safety gate
+- [EN detail](TREASURY_SAFE_ADMIN_GATES_v2026.10.15.690.md) / [KO](TREASURY_SAFE_ADMIN_GATES_v2026.10.15.690.ko.md). Isolated DB operator-only overview, eleven unsafe financial mutation HTTP routes held; still no Economy Core funding. Backend 1217 pass/391 DB skipped, frontend 1218 pass. Test/Production release STOP until financial safety and session acceptance.
+
+
 ## v2026.10.15.686 — F675-05 user-truthful first-session next actions (PLANNING)
 
 - **Adopt** [F675-05 First-session Next-Action Trust Spec](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) / [한국어](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) as detailed v675 F675-05, reconciling v76 closure and v82 progressive-first-week. The on-screen selector shows **at most three** user-choosable actions, after real actor, switch, eligibility, cooldown and backend evidence; “not now” and honest fallback learning always available.
