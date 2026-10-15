@@ -83,7 +83,7 @@ test('rejects malformed channel, source SHA and manifest metadata', () => {
 test('reads one exact BUILD_ID but refuses missing and duplicated release identity keys', () => {
   assert.equal(parseBuildId('PORT=3100\nBUILD_ID=' + sha + '\n'), sha);
   assert.equal(parseBuildId('BUILD_ID="' + sha + '"\n'), sha);
-  assert.equal(parseBuildId('BUILD_ID=\' ' + sha + '\'\n').includes(' '), true);
+  assert.equal(parseBuildId("BUILD_ID='" + sha + "'\\n"), sha);
   assert.equal(parseBuildId('PORT=3100\n'), null);
   assert.equal(parseBuildId('BUILD_ID=' + sha + '\nBUILD_ID=' + sha + '\n'), null);
 });
