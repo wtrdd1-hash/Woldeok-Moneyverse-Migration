@@ -7,3 +7,5 @@ S1 — TDD: Backend repository scoped-query tests RED (direct table query); SQL 
 S2 — Verification: Backend all tests 1191 PASS/391 SKIPPED; frontend 1211 PASS. Backend Nest/typecheck, Next frontend typecheck and Webpack production build pass. Signed real Test finance acceptance remains incomplete because most financial SQL routines have direct projection updates and admin overview still raw-queries revoked tables under 271. No authenticated full Test rollforward, no Production code promotion, no Production DB migration/balances updates.
 
 S3 — Closure: Commit scoped implementation, release report, internal/public changelogs in independent branch and publish Draft PR. Recheck moving main and avoid collision with prior PR #862/#865. Do not merge or deploy before missing gates pass.
+
+S3 final GitHub registration: [Draft PR #866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/866) pushed as candidate SHA 259b3bb9. GitHub CI 38701452488 was IN PROGRESS when last checked; no CI pass or Production promotion asserted. Previous PRs #862/#865 must not be separately merged to duplicate this branch.
