@@ -9,13 +9,16 @@
 - Audit v711 confirms blocking P0 direct financial database DML and unverified ledger conservation. **No finance migration or production-money action is authorized by generic release request without exact-SHA financial acceptance.**
 
 ## Planned checkpoints
-- [ ] Select concrete non-financial unimplemented/broken functions from current source and write regression tests before repairs.
-- [ ] Implement narrow source fixes and verify tests, types, CI, and proper EN/KO internal/public changelogs.
+- [x] Select concrete non-financial unimplemented/broken functions from current source and write regression tests before repairs.
+- [x] Implement narrow source fixes and verify bot tests and EN/KO internal/public changelogs. Platform CI/build pending.
 - [ ] Re-fetch `origin/main` mid-work; reconcile concurrent changes; verify release candidate exact SHA in isolated Test with backend runtime and rollback evidence.
 - [ ] Merge only when GitHub CI/PR and Test/Production guard conditions pass; promote to Production only when evidence supports it, and record actual status.
 
-## MID-WORK
-- Pending.
+## MID-WORK — 2026-10-16 KST
+- Current audit A711-06 selected: bot QA script had multiple invalid string literals, host-specific yt-dlp path, false universal bypass/volume claims and success without actual playback evidence. Confirmed from current checked-out source.
+- Wrote RED regression tests: original QA failed `node --test` (exit 1). Repaired source with standalone bounded read-only online provider and daemon checks, offline SKIP mode and explicit live-audio NOT VERIFIED. Normal bot playback unchanged.
+- GREEN: `node --check` passes; new regression suite 4/4 and standard `cd bot && npm test` 8/8. Repository documentation paired EN/KO, release/changelog/internal/GitHub notices written.
+- Rechecked latest remote main before integration. Remaining P0 financial gates block blanket Production approval. No Test/Production changes yet.
 
 ## END
 - Pending. Production deployment and branch merge are **NOT YET DONE**.
