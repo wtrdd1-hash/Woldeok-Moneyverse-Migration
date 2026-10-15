@@ -354,10 +354,12 @@ export const AUTHORITATIVE_BUDGET_ENVELOPES: readonly TreasuryBudgetEnvelope[] =
 ];
 
 export interface TreasuryReconciliation {
-  readonly status: 'RECONCILED' | 'DISCREPANCY';
+  // RECONCILED requires independently proven Economy Core backing, not merely a matching fiscal subledger.
+  readonly status: 'RECONCILED' | 'DISCREPANCY' | 'UNVERIFIED';
   readonly total_vaults_balance_wld: string;
   readonly total_ledger_net_flow_wld: string;
   readonly discrepancy_amount_wld: string;
+  readonly journal_integrity_issues: number;
   readonly last_reconciled_at: string;
 }
 
@@ -400,7 +402,7 @@ export interface TreasuryOverview {
 export class TreasuryRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable) {}
 
-  async getOverview(): Promise<TreasuryOverview> {
+  async getOverview(adminId: string): Promise<TreasuryOverview> {
     // 1. Vaults
     const vaultsRes = await this.pool.query<TreasuryVaultRow>(`
       SELECT id, code, name, balance_wld, description, created_at, updated_at
@@ -502,13 +504,9 @@ export class TreasuryRepository {
 
     const coverageDays = Number(availableWld / dailyOutflow30d);
 
-    const reconciliation: TreasuryReconciliation = {
-      status: 'RECONCILED',
-      total_vaults_balance_wld: totalTreasury.toString(),
-      total_ledger_net_flow_wld: totalTreasury.toString(),
-      discrepancy_amount_wld: '0',
-      last_reconciled_at: new Date().toISOString(),
-    };
+    // Never assert a financially spendable balance when the subsidiary ledger
+    // has not been joined to the authoritative Economy Core transaction chain.
+    const reconciliation = await this.getReconciliation(adminId);
 
     const liveBudgets = await this.calculateLiveBudgets();
 
@@ -517,9 +515,9 @@ export class TreasuryRepository {
       total_treasury_wld: totalTreasury.toString(),
       total_circulating_wld: totalCirculating.toString(),
       reserve_ratio_pct: reserveRatio,
-      available_wld: availableWld.toString(),
+      available_wld: reconciliation.status === 'RECONCILED' ? availableWld.toString() : '0',
       reserve_wld: reserveVaultWld.toString(),
-      coverage_days: coverageDays,
+      coverage_days: reconciliation.status === 'RECONCILED' ? coverageDays : 0,
       tax_rates: AUTHORITATIVE_TAX_RATES,
       budgets: liveBudgets,
       reconciliation,
@@ -829,6 +827,23 @@ export class TreasuryRepository {
     return res.rows[0]?.result;
   }
 
+  async donateVerified(
+    actorUserId: string,
+    idempotencyKey: string,
+    amountWld: string,
+    memo: string,
+  ): Promise<Record<string, unknown>> {
+    // The old 3-argument routine remains paused. Never build a key per retry.
+    const result = await this.pool.query<{ receipt: Record<string, unknown> }>(
+      'SELECT public.treasury_donate_v2($1::uuid, $2::uuid, $3::text, $4::text) AS receipt',
+      [idempotencyKey, actorUserId, amountWld, memo],
+    );
+    if (!result.rows[0]?.receipt?.success) {
+      throw new Error('Treasury donation transaction not committed');
+    }
+    return result.rows[0].receipt;
+  }
+
   async userDonate(userId: string, amountWld: string, memo: string): Promise<any> {
     const res = await this.pool.query<{ result: any }>(
       `SELECT public.treasury_user_donate($1::uuid, $2::text, $3::text) AS result`,
@@ -868,18 +883,45 @@ export class TreasuryRepository {
     return res.rows[0]?.result as TreasuryGrantResult;
   }
 
-  async getReconciliation(): Promise<TreasuryReconciliation> {
-    const vaultsRes = await this.pool.query<{ total: string }>(`
-      SELECT coalesce(sum(balance_wld::numeric), 0)::bigint::text AS total
-      FROM public.system_treasury_vaults
-    `);
-    const totalVaults = vaultsRes.rows[0]?.total ?? '0';
+  async getReconciliation(adminId: string): Promise<TreasuryReconciliation> {
+    // The application role has no raw financial-table SELECT privileges.
+    // The scoped PostgreSQL function independently checks the session actor role
+    // and only releases aggregate (unverified) fiscal-subledger evidence.
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adminId)) {
+      throw new Error('Treasury operator identity required');
+    }
+    const evidence = await this.pool.query<{
+      total_vaults_balance_wld: string;
+      total_ledger_net_flow_wld: string;
+      discrepancy_amount_wld: string;
+      journal_integrity_issues: number;
+    }>(
+      'SELECT * FROM public.treasury_admin_reconciliation($1::uuid)',
+      [adminId],
+    );
+
+    const row = evidence.rows[0];
+    if (!row) {
+      throw new Error('Treasury reconciliation evidence unavailable');
+    }
+
+    const vaultAmount = BigInt(row.total_vaults_balance_wld);
+    const fiscalNet = BigInt(row.total_ledger_net_flow_wld);
+    const discrepancy = BigInt(row.discrepancy_amount_wld);
+    const integrityIssues = Number(row.journal_integrity_issues);
+    if (vaultAmount < 0n || discrepancy < 0n ||
+        !Number.isSafeInteger(integrityIssues) || integrityIssues < 0) {
+      throw new Error('Treasury reconciliation evidence invalid');
+    }
 
     return {
-      status: 'RECONCILED',
-      total_vaults_balance_wld: totalVaults,
-      total_ledger_net_flow_wld: totalVaults,
-      discrepancy_amount_wld: '0',
+      // Even a perfect fiscal subledger remains UNVERIFIED until its
+      // Economy Core funding counterpart and liabilities are reconciled.
+      status: discrepancy > 0n || integrityIssues > 0 ? 'DISCREPANCY' : 'UNVERIFIED',
+      total_vaults_balance_wld: vaultAmount.toString(),
+      total_ledger_net_flow_wld: fiscalNet.toString(),
+      discrepancy_amount_wld: discrepancy.toString(),
+      journal_integrity_issues: integrityIssues,
       last_reconciled_at: new Date().toISOString(),
     };
   }
@@ -1109,8 +1151,8 @@ export class TreasuryRepository {
     created_at: string;
   }> {
     const crypto = await import('crypto');
-    const overview = await this.getOverview();
-    const reconciliation = await this.getReconciliation();
+    const overview = await this.getOverview(adminId);
+    const reconciliation = await this.getReconciliation(adminId);
 
     const snapshotPayload = {
       snapshot_version: 'v54-immutable-ledger',

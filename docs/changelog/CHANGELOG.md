@@ -1,3 +1,12 @@
+## v2026.10.15.684 — Core Treasury donation settlement in isolated Test (NOT PROMOTED)
+- Added forward-only 273, idempotent WLD account-to-account donation receipt, guarded member API default OFF and wallet donation label. Real restored Test rollback successful; no approved finance policy, other P0 hold. [Release](../releases/v2026.10.15.684.md).
+
+## v2026.10.15.683 — Scoped Treasury ledger proof and no fake public payouts (NOT PROMOTED)
+- Forward-only migration 272 on isolated Test, operator-only reconciliation, two unsafe donation routines paused, 503 truthful public finance. Backend 1191/front 1211 pass; 391 DB tests skipped. Production code/schema untouched. [Release](../releases/v2026.10.15.683.md).
+
+## v2026.10.15.682 — Treasury SWF emergency containment; Production code promotion BLOCKED
+- Verified encrypted backup and disabled Production synthetic SWF via policy setting, no balances/schema altered; restored isolated DB exposed broken migration 269 donation and migration 271 read-ACL incompatibility. No code merge/Production promotion. [Release gate report](../releases/v2026.10.15.682.md).
+
 ## v2026.10.15.674 — Branch audit integration closure (no Production promotion)
 - Docs PRs #846/#847/#849/#855 merged and their source branches deleted after exact SHA ancestry proof; CI/document gates passed. Test/finance/session/zero-downtime gates remain BLOCKED. [Detail](../worklog/2026-10-15-branch-ci-release-close-v674.md).
 

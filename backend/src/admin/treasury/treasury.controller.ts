@@ -148,8 +148,8 @@ export class AdminTreasuryController {
 
   @Get('overview')
   @ApiOperation({ summary: '중앙 국고 및 비축금 현황 대시보드 조회' })
-  async getOverview() {
-    return this.service.getOverview();
+  async getOverview(@Req() request: RequestWithSession) {
+    return this.service.getOverview(requireUserId(request));
   }
 
   @Get('tax-rates')
@@ -178,8 +178,8 @@ export class AdminTreasuryController {
 
   @Get('reconciliation')
   @ApiOperation({ summary: '국고 금고 잔액 및 원장 대사 무결성 상태 조회' })
-  async getReconciliation() {
-    return this.service.getReconciliation();
+  async getReconciliation(@Req() request: RequestWithSession) {
+    return this.service.getReconciliation(requireUserId(request));
   }
 
   @Get('transactions')

@@ -33,6 +33,12 @@
 - **Release:** P0 v530 whole-site UI, v523/542/543 DB/money conservation, exact-SHA isolated Test/rollback requirements still BLOCK Production. v679 changes documentation only, no model inference, database, Test or Production deployment. [Worklog](../worklog/2026-10-15-f67502-ai-news-user-trust-v679.md).
 
 
+## v2026.10.15.678 — Treasury ledger truth and staged finance redevelopment (IMPLEMENTATION CANDIDATE)
+
+- The [Treasury rebuild program](TREASURY_REBUILD_PROGRAM_v2026.10.15.678.md) and [Korean peer](TREASURY_REBUILD_PROGRAM_v2026.10.15.678.ko.md) set staged G0 SWF controls, G1 verified fiscal subsidiary journal, G2 Economy Core funding and ACL mapping, G3 conserved disbursement domain repairs, G4 public/DAO/grant truth, and G5 exact-SHA verified release. This preserves v523/542 finance invariants and the standing v530 UI hold.
+- **G1 code candidate:** per-vault signed journal balance movement and chain integrity replace fabricated RECONCILED/0 responses; the separate Economy Core funding bridge remains UNVERIFIED. There is no certified spendable funding, no payment enablement and no Production/Test promotion. [Implementation spec](../superpowers/specs/2026-10-15-treasury-finance-evidence-v678.md).
+- **Read-only live observations:** subsidiary-journal per-vault unsigned gaps MAIN 45 WLD, EMERGENCY 15,139,250 WLD, plus one chain anomaly. Never auto-correct or credit money from these values. v678 is separate from v677 product-truth and v679 newsroom plans.
+
 ## v2026.10.15.677 — F675-01 real user feature availability and safe transaction confirmation (planning)
 
 - Explicitly **adopt as the detailed F675-01 design** the EN/KO [Feature Reality, User Trust and Recovery Specification](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md) / [Korean](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md), extending v675. Treat six user-journey hypotheses as tests to run, not actual user-study results.

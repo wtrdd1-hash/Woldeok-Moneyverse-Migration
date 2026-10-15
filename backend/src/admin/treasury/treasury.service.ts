@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { TreasuryOverview, TreasuryRepository } from './treasury.repository';
 
 export class TreasuryInputError extends BadRequestException {}
@@ -7,8 +7,8 @@ export class TreasuryInputError extends BadRequestException {}
 export class TreasuryService {
   constructor(private readonly repository: TreasuryRepository) {}
 
-  async getOverview(): Promise<TreasuryOverview> {
-    return this.repository.getOverview();
+  async getOverview(adminId: string): Promise<TreasuryOverview> {
+    return this.repository.getOverview(adminId);
   }
 
   getTaxRates() {
@@ -27,8 +27,8 @@ export class TreasuryService {
     return this.repository.getExpenditure();
   }
 
-  getReconciliation() {
-    return this.repository.getReconciliation();
+  getReconciliation(adminId: string) {
+    return this.repository.getReconciliation(adminId);
   }
 
   async listTransactions(limit = 30, cursor?: string) {
@@ -112,16 +112,31 @@ export class TreasuryService {
     }
   }
 
-  async userDonate(userId: string, amountWld: string, memo: string) {
-    if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
-      throw new TreasuryInputError('기부 금액은 1 WLD 이상의 정수여야 합니다.');
+  async donateVerified(
+    actorUserId: string,
+    idempotencyKey: string,
+    amountWld: string,
+    memo: string,
+  ): Promise<Record<string, unknown>> {
+    // Finance rollout must first pass exact-SHA Test auth, DB concurrency,
+    // balance conservation and rolling-deployment approval. Disabled by default.
+    if (process.env.TREASURY_DONATIONS_V2_ENABLED !== 'true') {
+      throw new ServiceUnavailableException('국고 기부 정산은 금융 검증이 완료될 때까지 보류됩니다.');
     }
-    try {
-      return await this.repository.userDonate(userId, amountWld, memo || '국고 자발적 공공 기부');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new TreasuryInputError(msg);
+    if (!/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(idempotencyKey)
+      || !/^[1-9][0-9]*$/.test(amountWld)
+      || typeof memo !== 'string' || memo.length > 500) {
+      throw new TreasuryInputError('요청 ID, 기부금액 또는 메모가 올바르지 않습니다.');
     }
+    return this.repository.donateVerified(actorUserId, idempotencyKey, amountWld, memo);
+  }
+
+  async userDonate(_userId: string, _amountWld: string, _memo: string) {
+    // Until a fully idempotent, authenticated Economy Core settlement replaces
+    // historical direct balance updates, never acknowledge payment.
+    throw new ServiceUnavailableException(
+      '국고 기부는 복식원장·중복방지 정산 검증 전까지 일시 중단되었습니다.',
+    );
   }
 
   async getTopDonors(limit = 10) {

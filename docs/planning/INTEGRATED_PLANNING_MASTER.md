@@ -34,6 +34,12 @@
 - Existing v261/v325 bounded automatic impact authority and v530 UI / v523/542/543 ledger safety remain. The v660 incident is **historical**; v661 fix branch is concurrent **candidate only**; no current Production or complete model+market test accepted. No code/DB/Test/Production mutation.
 
 
+## v2026.10.15.678 — Treasury evidence-first recovery and staged development
+
+- [English Treasury execution plan](TREASURY_REBUILD_PROGRAM_v2026.10.15.678.md) / [Korean](TREASURY_REBUILD_PROGRAM_v2026.10.15.678.ko.md) record the G0–G5 phased implementation matrix for SWF, five vaults, taxes, liabilities, dividends, grants, DAO and financial authority. Existing v523/542/543 monetary conservation and v530 UI release hold remain authoritative.
+- **G1 implementation candidate, not deployed:** independent read-only per-vault fiscal subsidiary journal delta and chain continuity; DISCREPANCY vs UNVERIFIED without an Economy Core funding bridge. Core spending routines remain unsafe/unchanged; no monetary/DB/Production/Test state mutation.
+- At read-only inspection, MAIN 45 WLD and EMERGENCY 15,139,250 WLD subsidiary journal discrepancies (absolute total 15,139,295 WLD); unproven funding is not spendable. [Specification](../superpowers/specs/2026-10-15-treasury-finance-evidence-v678.md).
+
 ## v2026.10.15.677 — F675-01 detailed user trust and reality contract (documentation only)
 
 - Starting and mid-work `origin/main=a24a8ae9e0d14dbd63738f5bb7e4e857ca412c13`; final drift in [worklog](../worklog/2026-10-15-feature-truth-ux-v677.md). Dedicated v677 worktree avoids concurrent v675/v676 treasury worker conflicts.

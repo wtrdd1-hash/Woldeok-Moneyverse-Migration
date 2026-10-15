@@ -49,6 +49,7 @@ function devicePepper(config: AppConfig): string {
 }
 
 import { AdminTreasuryController } from './treasury/treasury.controller';
+import { TreasuryDonationController } from './treasury/treasury-donation.controller';
 import { TreasuryRepository } from './treasury/treasury.repository';
 import { TreasuryService } from './treasury/treasury.service';
 import { AutoSovereignWealthFundService } from './treasury/auto-swf.service';
@@ -76,6 +77,7 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
     ApiHealthController,
     AdminBackupController,
     AdminTreasuryController,
+    TreasuryDonationController,
     AdminEnterpriseController,
     PublicEnterpriseController,
     AdminTreasuryBondController,
