@@ -1,3 +1,6 @@
+## v2026.10.15.674 — Branch audit integration closure (no Production promotion)
+- Docs PRs #846/#847/#849/#855 merged and their source branches deleted after exact SHA ancestry proof; CI/document gates passed. Test/finance/session/zero-downtime gates remain BLOCKED. [Detail](../worklog/2026-10-15-branch-ci-release-close-v674.md).
+
 ## v2026.10.15.673 — PR audit integration (docs only, BLOCKED)
 - Merge #849 audit docs; preserve #846/#847 records in an isolated integration candidate, resolve v652 filename collisions. Test/finance/Production promotion remain blocked. [Notes](../releases/v2026.10.15.673.md).
 

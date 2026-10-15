@@ -46,3 +46,11 @@
 - 현재 브랜치의 릴리스 분류 `DOCS_ONLY`; `git diff --check` 통과, 감사 PR #846/#847의 원래 HEAD 커밋 모두 이력상 조상으로 포함됨.
 - 별도 진행 중인 재무 P0 수정 작업 브랜치는 건드리거나 자동 통합하지 않음.
 - v673 구 버전 SHA의 GitHub Test Candidate workflow 성공은 확인했으나 새 커밋의 CI는 별도 확인 필요. CI 빌드 ≠ 실제 Test 서버 수용.
+
+## 종료 재검증 (v2026.10.15.674)
+- GitHub 통합 PR #855는 정확한 HEAD `51801a386489fce738f346b37ba121fa6aa120cd`에서 문서 전용 CI 성공, main 병합 SHA `87fcfcd8e33391ca0729b9b99193047ceefad652`.
+- #846/#847의 원본 감사 커밋을 main 역사에 반영하여 GitHub도 두 PR을 정상 MERGED로 처리. #849도 MERGED.
+- #846/#847/#849 원격 브랜치 자동 삭제 확인, #855는 병합·원본 SHA 포함 확인 후 정확한 SHA lease 조건으로 삭제. 해당 로컬 작업트리까지 정리, 다른 작업자 작업 공간 미변경.
+- 운영/Test 백엔드 헬스 HTTP 200, 그러나 운영 버전 `unknown`; Test 공개·백엔드 `888311cc...`와 manifest·프론트 `7fa3f245...` 불일치. 동일 SHA 검증 `ok:false`. 네 프론트/백엔드 systemd 서비스는 활성.
+- **종료 판정: 감사문서 통합 완료, 새 기능 빌드/금융/Test 운영 승인 미충족, 운영 승격 없음.** #844/#850/#851/#852/#854 및 Android #23/#24/#25는 활성 후보로 보존.
+- [v674 종료 기록](2026-10-15-branch-ci-release-close-v674.ko.md) · [내부 내역](../updates/v2026.10.15.674-internal.ko.md) · [GitHub 내역](../updates/v2026.10.15.674-github.ko.md).

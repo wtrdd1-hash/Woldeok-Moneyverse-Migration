@@ -47,3 +47,11 @@ Pending actual evidence.
 - Actual isolated integration HEAD vs latest main: `DOCS_ONLY`; `git diff --check` passed; **both** original audit head commits are ancestors of the new branch.
 - Concurrent P0 financial repair is separately underway on another work branch; not intercepted or auto-merged.
 - Test-candidate workflow had a completed successful run for an **earlier** v673 branch SHA; any subsequent commit needs its own green result. CI is not Test runtime acceptance.
+
+## Final cross-check (v2026.10.15.674 closure)
+- GitHub PR #855 at exact head `51801a386489fce738f346b37ba121fa6aa120cd`: CI **success** with DOCS_ONLY classification; GitHub merger `87fcfcd8e33391ca0729b9b99193047ceefad652`.
+- GitHub marked original audit PRs **#846 and #847 MERGED** through preserved commit ancestry, rather than falsely closing them as unmerged superseded changes. #849 also MERGED.
+- Remote source refs for #846, #847 and #849 verified deleted after merge. The #855 source ref also deleted using exact-SHA `--force-with-lease` only after verifying its head is reachable from `origin/main` and the PR is MERGED; local owned worktree cleaned, other collaborators' worktrees untouched.
+- Latest observed public health: Production backend `/health` HTTP 200, Test backend `/health` HTTP 200; Production `/api/version` = `unknown`; Test `/api/version` = `888311cc...`, while Test manifest/frontend = `7fa3f245...`. Identity verifier with manifest SHA returned `ok:false` (`backend_env_sha_mismatch`, `public_version_sha_mismatch`). Four backend/frontend systemd services active.
+- **Final outcome: documentation integration COMPLETE; runtime CI/financial gates NOT ACCEPTED; no Production release performed.** Other unmerged runtime PRs #844/#850/#851/#852/#854 and mobile #23/#24/#25 are retained.
+- Dedicated closure version: [v674 worklog](2026-10-15-branch-ci-release-close-v674.md); [internal record](../updates/v2026.10.15.674-internal.md); [GitHub record](../updates/v2026.10.15.674-github.md).
