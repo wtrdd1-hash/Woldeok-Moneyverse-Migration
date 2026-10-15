@@ -1,6 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
 
+## v2026.10.15.673 — CI/PR audit integration & release gates (docs-only, BLOCKED)
+
+- [Worklog EN](docs/worklog/2026-10-15-branch-ci-release-v673.md) · [작업기록 KO](docs/worklog/2026-10-15-branch-ci-release-v673.ko.md) · [Release EN](docs/releases/v2026.10.15.673.md) · [릴리스 KO](docs/releases/v2026.10.15.673.ko.md)
+- Main merged #849; independently preserved audit PR #846/#847 commits and colliding v652 updates. PR #852 CI cancellation is not an application failure. Exact-SHA Test/finance/session/zero-downtime gates remain blocked; no Production deployment.
+
 ## v2026.10.15.670 — Host release source identity guard (candidate, no Production promotion)
 
 - [Release notes EN](docs/releases/v2026.10.15.670.md) · [한국어](docs/releases/v2026.10.15.670.ko.md)

@@ -1,3 +1,6 @@
+## v2026.10.15.673 — PR audit integration (docs only, BLOCKED)
+- Merge #849 audit docs; preserve #846/#847 records in an isolated integration candidate, resolve v652 filename collisions. Test/finance/Production promotion remain blocked. [Notes](../releases/v2026.10.15.673.md).
+
 ## v2026.10.15.670 — Host release source-identity guard (candidate)
 - Read-only systemd/Test preflight verifies release manifest, backend/frontend BUILD_IDs, compiled frontend build, running directories and public version against one approved SHA. Regression tests and bilingual runbook added. No Test/Production runtime, DB or member-money change. [Notes](../releases/v2026.10.15.670.md).
 
