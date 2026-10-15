@@ -6,6 +6,13 @@
 - 최초 소스 계약31·DB정적7·백엔드1185(실DB 391 스킵)·프론트1206·타입/빌드/모바일 API179 통과, 최신 SEO 병합 후 34건 표적 테스트 통과. 운영 v600/Test v618/최신 main 불일치; 인증·금융 기능 수용 미실시.
 - **P0 차단:** 개발 DB 역할 DML 237/241, PUBLIC EXECUTE 보안정의함수 11, 국고 RECONCILED/0 고정, PvP 직접 잔액 갱신·임의 난수, 운영 출처·동일 SHA 검증 미충족. **P1:** 봇 QA 구문 오류, 가짜 신용점수 입력. v530 UI 및 v523/542/543 원장 보존 기획을 승계하거나 무효화하지 않는다. 운영/DB/잔액/스위치 변경 없음.
 
+## v2026.10.15.686 — F675-05 첫 활동·실제 완료 증명 (문서 전용)
+
+- 시작·중간 원격 `origin/main=6946398986edba0ad84bc601e6d1076e442f6d05`; 독립 `docs/first-session-truth-v2026.10.15.686`; v687 등 동시 작업 불변. [국문 작업기록](../worklog/2026-10-15-f67505-first-session-v686.ko.md).
+- [F675-05 한영 상세기획](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) / [영문](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) 채택: O686-01~10 허위 로컬 WLD 입금/실패한 첫 주식매수 완료·고정 광고 위험, 서버확인된 최대 3개 행동·선택과 원장 분리, v76/v82 자발적 다음 방문 목적, 사용자 과제 9개·한영 메시지 12개·레퍼런스 12개·D0~D7.
+- v397·v530 및 v523/542/543 경제, 실제 Test/롤백/운영승격 제한 불변. 코드/DB/지급/거래/Test/운영 변경 없는 기획만.
+
+
 ## v2026.10.15.685 — SEO 응답 사실성·관리자 접근 (코드 수정 후보, 미배포)
 
 - 작업 전·중 GitHub `origin/main=69bc8c14df236f57898b1b44ddc596be5144c30a`. 독립 `fix/indexnow-auth-plan-parity-v2026.10.15.685` 사용, 국고 v683·기획 v684 작업과 충돌 회피. [한국어 진단](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) / [영문](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) / [작업기록](../worklog/2026-10-15-seo-integrity-v685.md).

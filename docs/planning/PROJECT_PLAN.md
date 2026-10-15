@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.686 — F675-05 user-truthful first-session next actions (PLANNING)
+
+- **Adopt** [F675-05 First-session Next-Action Trust Spec](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) / [한국어](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) as detailed v675 F675-05, reconciling v76 closure and v82 progressive-first-week. The on-screen selector shows **at most three** user-choosable actions, after real actor, switch, eligibility, cooldown and backend evidence; “not now” and honest fallback learning always available.
+- **Source-observed O686-01..10:** `onboarding-tracker.ts` localStorage reward-claim advertised by `interactive-onboarding-tracker` as wallet deposit with no ledger proof; `first-trade-onboarding-modal` can mark order/holding successful after failed POST and uses real-security Samsung/005930 fallback; static 10k WLD + jackpot guest/SEO promises, manually toggled guide checks and overlapping welcome/tracker/trade/support surfaces. Code observations, not Production acceptance evidence.
+- **Design/safety:** distinct activity intent, server action result, WLD ledger receipt and stock order fill; no invented success, guaranteed bonus or forced streak. Nine untested user tasks, 12 bilingual microcopy states, 12 external research citations, D0–D7 TDD/QA plan, opt-in D1/D7 return thread with real current status and safe close/erase controls.
+- v397, v530 full-route UI five passes, v523/542/543 economics/DB, exact-SHA isolated Test and zero-downtime release gates remain **BLOCKED**. Documentation-only; no code, WLD, orders, DB, switches, Test/Production changes. [Worklog](../worklog/2026-10-15-f67505-first-session-v686.md).
+
+
 ## v2026.10.15.681 — F675-04 public calculators → learning → optional game (PLANNING)
 
 - **Adopt** [F675-04 EN calculator/learning user trust specification](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) / [한국어](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) as the next v675 detailed feature plan. Reuse existing /tools, calculator, /guide/glossary, localized variants; give every guest the full correct answer before suggesting optional fictional WLD learning/game actions.
