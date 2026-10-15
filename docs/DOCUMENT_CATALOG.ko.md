@@ -1,5 +1,10 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.15.675 — 통합 기획 재검토 추가 (PLANNING)
+
+- [제품·기능 통합 재검토](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md) / [영문](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md)은 14개 영역의 갭, F675-01~09 후보, 공식 레퍼런스 13개를 담은 **검토/증거 중심 보완 문서**이다. `PROJECT_PLAN`과 `INTEGRATED_PLANNING_MASTER`, 기존 경제/전체 UI 차단 권한보다 우선하지 않으며 운영승격 승인이 아니다.
+
+
 ## 현재 기능 수용 근거 (v2026.10.14.605; 문서 전용)
 
 - [전체 기능 검증 영문 정본](findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.md) / [한국어 보고서](findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.ko.md), [작업 기록](worklog/2026-10-14-full-function-acceptance-v605.ko.md). 현재 **BLOCKED**이며 새 기획 권위나 운영 수용 승격이 아니다.

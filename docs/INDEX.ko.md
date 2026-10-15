@@ -1,5 +1,10 @@
 # 📚 월덕 머니버스(Woldeok Moneyverse) 공식 마스터 문서 인덱스
 
+## 통합 기획 재검토 — v2026.10.15.675
+
+- [제품·기능 재검토(한국어)](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md) · [영문](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md) · [작업 기록](worklog/2026-10-15-integrated-planning-review-v675.ko.md). P0 차단을 유지하는 기획 전용 문서이며 운영승격 검증이 아니다.
+
+
 [English canonical](INDEX.md) | **한국어**
 
 > **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)

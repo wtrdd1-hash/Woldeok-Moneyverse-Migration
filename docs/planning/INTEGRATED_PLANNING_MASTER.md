@@ -1,5 +1,14 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.675 — Integrated full-scope planning review (planning only)
+
+- Start and mid-work main identity: `f2bf939e53482721ee8bbf1074bd7ebf1922b13e`; final checkpoint and any drift in [v675 worklog](../worklog/2026-10-15-integrated-planning-review-v675.md). Isolated docs branch; no concurrent worktree overwritten.
+- Added EN/KO [full product/feature re-review](INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md), covering identity, UI/admin, WLD, jobs, stocks, banking/treasury, business/shop, community, newsroom/AI, public tools, SEO/l10n, ads, security/infrastructure and Android; 13 primary vendor/standard references.
+- P0 G675-01..06 retain financial/authorization conservation, exact-SHA Test and authenticated UI, AI-news stale/failure safety, real action→API parity, truthful SEO and legally eligible advertising. F675-01..09 are **PLANNING enhancement candidates**, not verified implementations.
+- `AUTHORITY_DRIFT` remains explicit: latest source/worklog/release does not supersede v530 UI acceptance or v523/542/543 economic invariants. This review adopts a prioritization/evidence contract **without declaring a new full-runtime acceptance baseline**.
+- No code, runtime, DB, Test or Production modification; no claimed rankings, users or revenue lift. [Internal/GitHub updates](../updates/v2026.10.15.675-github.md).
+
+
 ## v2026.10.14.625 — WLD amount overflow protection (implementation candidate)
 
 - Canonical integer WLD strings and BigInt arithmetic protect wallet notifications, configured fiat display, P2P/donation, burn receipts, and pension contribution/refund/payout. No holdings cap is introduced. See [English risk register](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md) and [Korean report](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md).
