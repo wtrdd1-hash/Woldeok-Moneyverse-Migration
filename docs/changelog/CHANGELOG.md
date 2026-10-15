@@ -1,3 +1,6 @@
+## v2026.10.15.683 — Scoped Treasury ledger proof and no fake public payouts (NOT PROMOTED)
+- Forward-only migration 272 on isolated Test, operator-only reconciliation, two unsafe donation routines paused, 503 truthful public finance. Backend 1191/front 1211 pass; 391 DB tests skipped. Production code/schema untouched. [Release](../releases/v2026.10.15.683.md).
+
 ## v2026.10.15.682 — Treasury SWF emergency containment; Production code promotion BLOCKED
 - Verified encrypted backup and disabled Production synthetic SWF via policy setting, no balances/schema altered; restored isolated DB exposed broken migration 269 donation and migration 271 read-ACL incompatibility. No code merge/Production promotion. [Release gate report](../releases/v2026.10.15.682.md).
 

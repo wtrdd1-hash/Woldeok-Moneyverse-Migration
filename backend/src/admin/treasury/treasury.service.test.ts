@@ -14,6 +14,7 @@ describe('TreasuryService', () => {
     getRevenue: vi.fn(),
     getExpenditure: vi.fn(),
     getReconciliation: vi.fn(),
+    userDonate: vi.fn(),
     listTransactions: vi.fn(),
     injectFunds: vi.fn(),
     absorbFunds: vi.fn(),
@@ -28,6 +29,12 @@ describe('TreasuryService', () => {
   } as unknown as TreasuryRepository;
 
   const service = new TreasuryService(mockRepo);
+
+  it('returns a real 503 and never invokes legacy unbalanced Treasury donation', async () => {
+    await expect(service.userDonate('00000000-0000-4000-8000-000000000002', '10', 'test'))
+      .rejects.toMatchObject({ status: 503 });
+    expect(vi.mocked(mockRepo.userDonate)).not.toHaveBeenCalled();
+  });
 
   it('delegates getTaxRates to repository', () => {
     const mockRates = AUTHORITATIVE_TAX_RATES.slice(0, 1);
@@ -75,7 +82,7 @@ describe('TreasuryService', () => {
     };
     vi.mocked(mockRepo.getReconciliation).mockResolvedValueOnce(mockRecon);
 
-    const res = await service.getReconciliation();
+    const res = await service.getReconciliation('00000000-0000-4000-8000-000000000001');
     expect(res).toEqual(mockRecon);
     expect(mockRepo.getReconciliation).toHaveBeenCalled();
   });
@@ -107,7 +114,7 @@ describe('TreasuryService', () => {
     };
     vi.mocked(mockRepo.getOverview).mockResolvedValueOnce(mockOverview);
 
-    const result = await service.getOverview();
+    const result = await service.getOverview('00000000-0000-4000-8000-000000000001');
     expect(result).toEqual(mockOverview);
     expect(result.coverage_days).toBe(80);
     expect(result.available_wld).toBe('800000');

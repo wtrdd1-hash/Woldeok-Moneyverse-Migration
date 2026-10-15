@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.683 — Treasury secure read, fail-closed donations, public truth
+- [EN detailed candidate](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.md) / [Korean](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.ko.md): verified read-only role-scoped fiscal reconciler, 269 incompatible donation routes paused pending idempotent Economy Core settlement, fabricated public Treasury totals/receipts removed. This is G1/G2 bounded work, not completed money settlement.
+- Exact-SHA finance Test plus other admin read endpoints, bond/pension/SWF payouts, reconciliation of 15.1M WLD fiscal journal discrepancy, session continuity and rollback must PASS before merging/promoting.
+
+
 ## v2026.10.15.682 — Treasury containment and release correctness gate
 
 - [v681 finance and release gate](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.md) / [Korean](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.ko.md): emergency SWF OFF after verified encrypted backup, not a full accounting repair; independent restored Production schema data and isolated 269–271 trial exposed runtime donation SQLSTATE 42703 and 271 app-role read failures for v678 direct query.

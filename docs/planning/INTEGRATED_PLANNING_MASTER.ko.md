@@ -1,5 +1,10 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.15.683 — 국고 전용 조회·기부 안전차단·대국민 정보 정정
+- [국고 수정 설계](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.ko.md) / [영문](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.md): 관리자 전용 원장 대사 SQL, 구형 기부 차단, 가상 국고 지급 실적 제거. 실제 복식지급 완료가 아닌 G1/G2 일부 구현이다.
+- 다른 국고 관리자 조회·지급 SQL·15.1M WLD 장부차액·동일 SHA Test 인증/세션·롤백 및 운영승격 차단 유지.
+
+
 ## v2026.10.15.682 — 국고 SWF 긴급 통제 및 실제 운영승격 검증 조건
 
 - [v681 국고 안전 상세](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.ko.md) / [영어](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.md): 백업 검증 후 SWF 자동 실행 OFF, DB 전체 회계 복구 완료는 아님. 복원 격리 DB의 269~271 시범 적용에서 기부 실호출 SQLSTATE 42703, 앱의 v678 직접 원장조회 권한 실패 확인.

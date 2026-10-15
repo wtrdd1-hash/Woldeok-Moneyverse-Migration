@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.683 — Treasury role-gated reconciliation and public-truth patch (source only)
+- [EN Treasury safety implementation](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.md) / [KO](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.ko.md): migration 272 operator-only reconciliation SQL, authenticated backend actor, legacy donation pause, truthful public Treasury under finance audit.
+- Isolated restored DB 269–272 verification passes; backend 1,191 tests pass (391 DB skipped), frontend 1,211 pass and full builds pass. Financial settlement and Production promotion remain BLOCKED.
+
+
 ## v2026.10.15.682 — Treasury emergency containment and blocked release evidence
 
 - Emergency Production SWF synthetic automatic cycle was switched OFF at 2026-10-15 14:51 KST **after verified encrypted backup**; existing Treasury/member balances and Production services unchanged. Switch confirmed OFF at 15:18/15:27 KST; next hourly-cycle verification pending.

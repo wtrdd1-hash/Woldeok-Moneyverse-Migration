@@ -402,7 +402,7 @@ export interface TreasuryOverview {
 export class TreasuryRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable) {}
 
-  async getOverview(): Promise<TreasuryOverview> {
+  async getOverview(adminId: string): Promise<TreasuryOverview> {
     // 1. Vaults
     const vaultsRes = await this.pool.query<TreasuryVaultRow>(`
       SELECT id, code, name, balance_wld, description, created_at, updated_at
@@ -506,7 +506,7 @@ export class TreasuryRepository {
 
     // Never assert a financially spendable balance when the subsidiary ledger
     // has not been joined to the authoritative Economy Core transaction chain.
-    const reconciliation = await this.getReconciliation();
+    const reconciliation = await this.getReconciliation(adminId);
 
     const liveBudgets = await this.calculateLiveBudgets();
 
@@ -866,52 +866,22 @@ export class TreasuryRepository {
     return res.rows[0]?.result as TreasuryGrantResult;
   }
 
-  async getReconciliation(): Promise<TreasuryReconciliation> {
-    // Fiscal vault rows and fiscal journals form a subsidiary accounting book.
-    // They do NOT, on their own, prove spendable balance in the Economy Core.
-    // One statement gives a single PostgreSQL MVCC snapshot for these figures.
+  async getReconciliation(adminId: string): Promise<TreasuryReconciliation> {
+    // The application role has no raw financial-table SELECT privileges.
+    // The scoped PostgreSQL function independently checks the session actor role
+    // and only releases aggregate (unverified) fiscal-subledger evidence.
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adminId)) {
+      throw new Error('Treasury operator identity required');
+    }
     const evidence = await this.pool.query<{
       total_vaults_balance_wld: string;
       total_ledger_net_flow_wld: string;
       discrepancy_amount_wld: string;
       journal_integrity_issues: number;
-    }>(`
-      WITH ordered_journal AS (
-        SELECT
-          vault_id,
-          amount_wld::numeric AS recorded_amount,
-          balance_before::numeric AS balance_before,
-          balance_after::numeric AS balance_after,
-          LAG(balance_after::numeric) OVER (
-            PARTITION BY vault_id ORDER BY created_at, id
-          ) AS previous_balance_after
-        FROM public.system_treasury_ledger
-      ),
-      per_vault_journal AS (
-        SELECT
-          vault_id,
-          COUNT(*) AS entry_count,
-          COALESCE(SUM(balance_after - balance_before), 0) AS net_flow,
-          COUNT(*) FILTER (
-            WHERE (previous_balance_after IS NOT NULL
-                   AND previous_balance_after <> balance_before)
-               OR ABS(balance_after - balance_before) <> recorded_amount
-          ) AS integrity_issues
-        FROM ordered_journal
-        GROUP BY vault_id
-      )
-      SELECT
-        COALESCE(SUM(v.balance_wld::numeric), 0)::text AS total_vaults_balance_wld,
-        COALESCE(SUM(COALESCE(j.net_flow, 0)), 0)::text AS total_ledger_net_flow_wld,
-        COALESCE(SUM(ABS(v.balance_wld::numeric - COALESCE(j.net_flow, 0))), 0)::text
-          AS discrepancy_amount_wld,
-        COALESCE(SUM(
-          COALESCE(j.integrity_issues, 0)
-          + CASE WHEN j.entry_count IS NULL AND v.balance_wld::numeric <> 0 THEN 1 ELSE 0 END
-        ), 0)::integer AS journal_integrity_issues
-      FROM public.system_treasury_vaults v
-      LEFT JOIN per_vault_journal j ON j.vault_id = v.id
-    `);
+    }>(
+      'SELECT * FROM public.treasury_admin_reconciliation($1::uuid)',
+      [adminId],
+    );
 
     const row = evidence.rows[0];
     if (!row) {
@@ -1164,8 +1134,8 @@ export class TreasuryRepository {
     created_at: string;
   }> {
     const crypto = await import('crypto');
-    const overview = await this.getOverview();
-    const reconciliation = await this.getReconciliation();
+    const overview = await this.getOverview(adminId);
+    const reconciliation = await this.getReconciliation(adminId);
 
     const snapshotPayload = {
       snapshot_version: 'v54-immutable-ledger',
