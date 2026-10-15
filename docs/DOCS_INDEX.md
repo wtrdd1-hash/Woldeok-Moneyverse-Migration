@@ -1,5 +1,20 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## Detailed AI news feature plan — v2026.10.15.679
+
+- [F675-02 AI news trust, freshness and recovery](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md) · [한국어](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md) · [execution log](worklog/2026-10-15-f67502-ai-news-user-trust-v679.md). Documentation-only; existing security/financial/full-UI Test gates remain.
+
+
+## Detailed feature review — v2026.10.15.677
+
+- [F675-01 Feature Reality, User Trust and Recovery — English](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md) · [한국어](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md) · [execution record](worklog/2026-10-15-feature-truth-ux-v677.md). Planning only; existing P0 release gates remain.
+
+
+## Planning refresh — v2026.10.15.675
+
+- [EN integrated product/feature review](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md) · [한국어](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md) · [execution log](worklog/2026-10-15-integrated-planning-review-v675.md). Documentary review and P0 blockers; no runtime acceptance.
+
+
 ## v2026.10.15.651 — Web stability assessment / 웹 안정성 진단 (documentation only)
 
 - [Canonical English findings](findings/MONEYVERSE_WEB_FULL_CODE_STABILITY_AUDIT_v2026.10.15.651.md) · [한국어 보고서](findings/MONEYVERSE_WEB_FULL_CODE_STABILITY_AUDIT_v2026.10.15.651.ko.md)

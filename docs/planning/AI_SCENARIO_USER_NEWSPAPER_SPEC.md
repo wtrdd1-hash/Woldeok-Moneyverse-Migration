@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — AI Scenario User Newspaper Specification
 
+## v2026.10.15.679 — Trust/freshness and incident recovery addendum (adopted planning)
+
+- The existing v325 consumer newspaper remains authoritative; see [F675-02 detailed user/operational design](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md) / [Korean](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md) for observed source gaps, secure recovery, publication truth, durable archive, five timestamps, editing trace, user research hypotheses and D0–D7 verification.
+- `GET /newspaper/pulse` sample sentiment/active event counts and mixed weekly figures must not be labeled real-time measurements; `lastPublishedAt` cannot advance on page read/model skip; history and active market events must remain independent. A correction/retraction never becomes an unauthorized price event.
+- Inherited automatic impact limits (no strength-3 or whole market, max 2 stocks and 24h, authorized actor) and security/ledger Test gates prevail. This is a **planning addendum only**.
+
+
 > Version: v2026.09.21.325
 > Status: Living implementation-facing specification
 > Baseline date: 2026-09-21

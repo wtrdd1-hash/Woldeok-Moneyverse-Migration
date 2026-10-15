@@ -1,5 +1,20 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.15.679 — F675-02 주식 AI 뉴스 사용자 신뢰 (PLANNING)
+
+- [AI 뉴스 신선도·신뢰·장애복구(한국어)](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md) / [영문](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md)을 통합기획과 v325에 연동. 소스 확인 문제·외부 자료 13개·사용자 7개 과제·생성/검수/발행/시장영향 구분. 문서만 수정; 과거 v660 사고와 미병합 v661 후보를 운영 해결로 판단하지 않음.
+
+
+## v2026.10.15.677 — 첫 기능 심층 기획 (PLANNING)
+
+- [F675-01 기능 실재성·사용자 신뢰·안전 복구(한국어)](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md) · [영문](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md). v675의 첫 기능을 사용자 과제 6종, 실제/정적 측정값 구별, 결과불명 중복거래 방지, 13개 레퍼런스 및 구현 게이트까지 상세 설계. 실제 앱 구현·운영 증거가 아니다.
+
+
+## v2026.10.15.675 — 통합 기획 재검토 추가 (PLANNING)
+
+- [제품·기능 통합 재검토](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md) / [영문](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md)은 14개 영역의 갭, F675-01~09 후보, 공식 레퍼런스 13개를 담은 **검토/증거 중심 보완 문서**이다. `PROJECT_PLAN`과 `INTEGRATED_PLANNING_MASTER`, 기존 경제/전체 UI 차단 권한보다 우선하지 않으며 운영승격 승인이 아니다.
+
+
 ## 현재 기능 수용 근거 (v2026.10.14.605; 문서 전용)
 
 - [전체 기능 검증 영문 정본](findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.md) / [한국어 보고서](findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.ko.md), [작업 기록](worklog/2026-10-14-full-function-acceptance-v605.ko.md). 현재 **BLOCKED**이며 새 기획 권위나 운영 수용 승격이 아니다.

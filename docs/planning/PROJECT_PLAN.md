@@ -1,10 +1,29 @@
 # Woldeok Moneyverse — Living Project Plan
 
-## v2026.10.15.651 — Emergency takedown access and functionality truth (candidate, NOT accepted)
+## v2026.10.15.679 — F675-02 fictional AI stock-news trust and recovery (PLANNING)
 
-- The emergency takedown admin **action** requires logged-in administrator role, an open console session and CSRF, but not an additional recent-reauthentication prompt. Other financial and security step-up policies are unchanged.
-- The current SQL action changes only the takedown CASE STATUS; it does **not** remove referenced content or write a financial ledger receipt. Moderator UX must disclose this explicitly; actual verified content removal, DB privilege hardening and authenticated full-route acceptance remain P0.
-- Candidate only. No Test/Production/DB/session acceptance is implied. See [v651 audit](../findings/MONEYVERSE_ADMIN_TAKEDOWN_CODE_AUDIT_v2026.10.15.651.md). v530 full UI gate remains active.
+- **Detailed adoption:** [F675-02 News Freshness, Recovery & Editorial Safety](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md) / [한국어](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md), extending existing v325 AI scenario newspaper instead of building a competing pipeline. Generation, moderation, durable publication and deterministic virtual-stock event are four different states; a scheduler success/skip or model answer is not publication.
+- **Evidence-bound findings N679-01..08:** historic v660 local model SSRF failure, current source fabricated `pulse` live timestamps/68 sentiment/4 events, mixed real+sample weekly brief, volatile in-memory poll, and active-event-only newspaper versus durable archive. v661 fix remains a separate candidate, not proven Production. Exact source `b70cedbc` inspected; no current Production equivalence claimed.
+- **User trust:** fictional-market + AI disclosures above first story, visible actual publication/correction/event expiry, archive still accessible during generator outage, mobile/accessible status and eight bilingual messages. Consent-based seven user-task hypotheses are not observed interview findings.
+- **Engineering/safety contract:** fixed authorized internal-model transport with general SSRF still strict; bounded retries/lease/Outbox/idempotent publication, immutable editorial/retraction trace and exact bigint economic invariants. Keep pre-existing no-strength-3/no-market-wide automatic shock, max 2 stocks/24h auto, authority/step-up and legal boundaries.
+- **Release:** P0 v530 whole-site UI, v523/542/543 DB/money conservation, exact-SHA isolated Test/rollback requirements still BLOCK Production. v679 changes documentation only, no model inference, database, Test or Production deployment. [Worklog](../worklog/2026-10-15-f67502-ai-news-user-trust-v679.md).
+
+
+## v2026.10.15.677 — F675-01 real user feature availability and safe transaction confirmation (planning)
+
+- Explicitly **adopt as the detailed F675-01 design** the EN/KO [Feature Reality, User Trust and Recovery Specification](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md) / [Korean](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md), extending v675. Treat six user-journey hypotheses as tests to run, not actual user-study results.
+- **Source-observed P0 T677-01..03:** optimistic static API-health domain rates/durations mislabeled live, dashboard polling retaining stale values on failure and action-state too coarse for unknown financial commits. Preserve distinction between implementation lifecycle, time-scoped measured availability, viewer eligibility and server/ledger-confirmed individual outcomes.
+- User UX: contextual availability, clear prerequisites, input/return-path preservation where actually supported, never encourage blind repeat of WLD/order operations after ambiguous response. Admin registry links visible actions → BFF → API → DB/worker → tests and exact candidate SHA; extend current /admin/api-health, not a competing stack.
+- API/telemetry design follows RFC 9457, OpenAPI 3.2, WCAG 2.2, OpenTelemetry, GOV.UK/NNg/Statuspage/Stripe SRE patterns; 13 references, negative auth/idempotency/accessibility and exact-SHA all-route QA gates. **No code/DB/Test/Production acceptance** and no change to v530/v523/v542/v543 blockers.
+
+
+## v2026.10.15.675 — Full product/feature review and evidence-led candidate roadmap (PLANNING)
+
+- **Integrated reference adopted as a review/priority contract:** [2026-10-15 integrated product/feature review](INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md); Korean peer [here](INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md). Reconciles 14 domain groups, six P0 gates, nine candidate enhancement IDs F675-01..09, release sequencing, acceptance metrics and 13 official reference links.
+- **P0 remains a release blocker:** DB/ledger authority, precision and money conservation; authenticated all-route responsive QA; exact-SHA Test/Production identity with preserved sessions; AI stock-news stale/failed jobs; actual feature API/UX parity; SEO publisher truth and legal/ad exclusion. Existing v523/v542/v543 economy and v530 UI authorities prevail. Historical v638/v651/v652/v660 audit findings are scoped evidence, not blanket current Production facts.
+- **Next products to evaluate:** feature reality registry, newsroom freshness and corrections, user-scoped wallet ledger receipt, existing calculator-to-learning route, three-action first-session UX, Search Console canonical evidence center, explicit language switching, transparent policy timeline, and editorial review. These are **PLANNING**, not deployed features or automatic implementation authorizations.
+- **Growth guardrails:** useful educational pages over scaled SEO inventory; GSC submission ≠ index success; separate locale URLs and user-chosen language without IP redirect trapping; ad-only cash revenue; fictional market/news disclosures. Track qualified clicks → second action → opt-in activation/D1/D7 and measured Page RPM, never fabricated forecasts.
+- **Version meaning:** v675 is a planning/research review amendment only; it does **not** supersede the standing v530 UI HOLD or authorize any Test/Production/DB/feature-switch change. [Worklog](../worklog/2026-10-15-integrated-planning-review-v675.md).
 
 
 ## v2026.10.14.625 — WLD precision implementation and residual acceptance gates
