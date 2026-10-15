@@ -340,16 +340,40 @@ export class SeoService {
   }
 
   async submitUrls(customUrls?: readonly string[]): Promise<SubmitUrlsResult> {
-    const urlsToSubmit =
-      customUrls && customUrls.length > 0
-        ? customUrls.map((u) => (u.startsWith('http') ? u : `${this.baseUrl}${u}`))
-        : MONITORED_TARGET_URLS.map((t) => `${this.baseUrl}${t.path}`);
+    const base = new URL(this.baseUrl);
+    const requestedUrls = customUrls && customUrls.length > 0
+      ? customUrls
+      : MONITORED_TARGET_URLS.map((target) => target.path);
 
-    const host = new URL(this.baseUrl).hostname;
+    if (requestedUrls.length > 100) {
+      throw new BadRequestException('IndexNow accepts a maximum of 100 URLs per admin action');
+    }
+
+    // IndexNow proves ownership for this host only; foreign URLs must never reach the transport.
+    const urlsToSubmit = [...new Set(requestedUrls.map((input) => {
+      if (typeof input !== 'string' || !input.trim()) {
+        throw new BadRequestException('IndexNow URLs must be non-empty strings');
+      }
+      let url: URL;
+      try {
+        if (!input.startsWith('/') && !/^https?:\/\//i.test(input)) {
+          throw new Error('Expected an absolute URL or root-relative path');
+        }
+        url = new URL(input, base);
+      } catch {
+        throw new BadRequestException('Invalid IndexNow URL');
+      }
+      if (url.origin !== base.origin || url.username || url.password || url.hash) {
+        throw new BadRequestException('IndexNow URLs must be public paths on the configured site origin');
+      }
+      return url.toString();
+    }))];
+
+    const host = base.hostname;
     const indexNowPayload = {
       host,
       key: this.indexNowKey,
-      keyLocation: `${this.baseUrl}/${this.indexNowKey}.txt`,
+      keyLocation: `${this.baseUrl}/.well-known/indexnow.key`,
       urlList: urlsToSubmit,
     };
 
@@ -370,7 +394,11 @@ export class SeoService {
           return {
             endpoint,
             status: res.status,
-            message: res.ok ? 'Submitted successfully (200 OK / 202 Accepted)' : `HTTP Error ${res.status}`,
+            message: res.status === 200
+              ? 'Notification received; indexing not guaranteed'
+              : res.status === 202
+                ? 'Notification received; key verification pending'
+                : `HTTP Error ${res.status}`,
           };
         } catch (err) {
           return {
@@ -386,7 +414,7 @@ export class SeoService {
     const googlePingStatus = 410; // 410 Gone (officially retired by Google)
 
     return {
-      success: true,
+      success: indexNowResponses.some(({ status }) => status === 200 || status === 202),
       submittedUrls: urlsToSubmit,
       indexNowResponses,
       googlePingStatus,

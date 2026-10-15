@@ -53,7 +53,7 @@ describe('SeoService', () => {
     const service = new SeoService();
     const result = await service.submitUrls(['/stocks/DUCKS', '/guide/dopamine-system']);
 
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(result.indexNowResponses.some(({ status }) => status === 200 || status === 202));
     expect(result.submittedUrls.length).toBe(2);
     expect(result.indexNowResponses.length).toBe(3);
     expect(result.googlePingStatus).toBeDefined();
