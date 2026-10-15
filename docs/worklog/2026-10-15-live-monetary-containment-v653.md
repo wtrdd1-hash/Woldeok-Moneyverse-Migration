@@ -1,0 +1,11 @@
+# Worklog v2026.10.15.653 — Live monetary containment and source changes
+
+**BEFORE:** 2026-10-15 ~11:05 KST; checked latest origin/main `57b37a3899964d805219f98f355c70bf1e052c05`, AGENTS, authoritative PROJECT_PLAN / integrated master / documentation governance, v652 audit, PR #844 and concurrency worktrees. Wrote host `/srv/moneyverse-tasks/remediate-20261015-v653/00-before.md`.
+
+**LIVE containment:** 11:06:30 KST, conditional one-row DB switch update true→false for auto monetary policy id 1, verified false via fresh SELECT and backend health 200. Pre-change historical 318 identical synthetic event pairs, 169 approved linked policies, 0 recorded executed WLD; 145 expired/24 not. ~11:12 KST conditional policy status update exactly 169 linked approved/unexecuted orders → CANCELLED (keeping records), post-verified all 169 cancelled and executed=0. No ledger/account/user writes, no service restart, no release alias changes. **No automatic reversal while old source is active.**
+
+**SOURCE/TDD:** Dedicated branch `fix/live-monetary-auction-containment-v2026.10.15.653` from latest main. Wrote failing tests for monetary scheduling and fake data, black-market GET financial side effects, cancelled-policy retirement. Repaired and GREEN. Reused targeted previously PG-tested PvP+black-market single client atomic operations from #844 and added GET read-only & expiring filter. Added linked retirement policy conditional same-statement consumption/certificate. Separate `wdmv_fix_v653` scratch DB from Test Docker; real PG finance 4 PASS plus real PG retirement cancellation/amount limit 1 PASS; transaction-local synthetic fixtures. No production schema/test data copied.
+
+**MID:** Retrieved unchanged origin/main and checked concurrent branches independently. Frontend 1,206 PASS, backend nonDB 1,196 PASS/29 skipped, contract 179 PASS, typecheck & build PASS. Full exact-SHA production-equivalent Test/backend authentication and financial role-negative/live rollback not accepted; production promotion BLOCKED.
+
+**FINISH:** paired EN/KO detailed report, internal/GitHub update, changelog, this worklog, DOCS_INDEX. Review code as Draft PR; no main merge/Test/Production deployment. Production policy control is the *only* live change.
