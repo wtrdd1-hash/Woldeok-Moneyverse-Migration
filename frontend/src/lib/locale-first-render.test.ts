@@ -26,10 +26,22 @@ describe('GeoIP locale first-request propagation', () => {
       const res = firstVisit(country);
       expect(res.headers.get('x-moneyverse-locale')).toBe(expected);
       expect(res.headers.get('x-middleware-request-x-moneyverse-locale')).toBe(expected);
-      expect(res.cookies.get('wdmv_detected_locale')?.value).toBe(expected);
+      expect(res.cookies.get('wdmv_detected_locale')).toBeUndefined();
       expect(res.cookies.get('wdmv_locale')).toBeUndefined();
     },
   );
+
+  it('does not persist auto-detection as a cookie on each public request', () => {
+    const res = firstVisit('US');
+    expect(res.headers.get('set-cookie')).toBeNull();
+    expect(res.headers.get('x-middleware-request-x-moneyverse-locale')).toBe('en');
+  });
+
+  it('ignores a stale previously auto-detected cookie when location changes', () => {
+    const res = firstVisit('JP', 'wdmv_detected_locale=en');
+    expect(res.headers.get('x-middleware-request-x-moneyverse-locale')).toBe('ja');
+    expect(res.headers.get('set-cookie')).toBeNull();
+  });
 
   it('preserves manually selected language over IP inference', () => {
     const res = firstVisit('JP', 'wdmv_locale=ko');
