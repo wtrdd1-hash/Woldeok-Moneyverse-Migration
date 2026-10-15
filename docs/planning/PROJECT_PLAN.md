@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.688 — F675-06 real Search Console evidence and canonical action center (PLANNING)
+
+- **Adopt** [F675-06 Search Evidence & Canonical Action Center EN](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) as detailed v675 F675-06 design, **extending existing /admin/seo/GSC backend**, preserving v685 SEO transport/audit fixes rather than creating a competing SEO dashboard.
+- **Source-observed S688-01..10:** current Google Search Analytics server UTC dates vs API PT, preliminary `dataState=all`, unreported daily rows forced to 0, only top 10 queries and no query/page/country/device breakdown, credential `updatedAt` confused with fetch freshness, crawler visits mislabeled `indexed`, legacy GSC sitemap route success on backend failure, stale legacy ping/Google Indexing API claims, hardcoded 564 count and separate BFF admin authorization/CSRF requiring full-chain audit.
+- **Decision:** separate technical URL source, provider submission receipts, Google indexed-version URL Inspection and actual GSC impressions/clicks; honor quotas, property/OAuth, canonical/hreflang/noindex and role-private analytics. 8 operator-job hypotheses (not interviews), 12 EN/KO messages, 16 primary standards/references and D0–D7 release gates. No promise of instant indexing, ranking or search traffic.
+- Existing v397 API, v530 five-pass authenticated full UI, v523/542/543 economy/DB and exact-SHA isolated Test/rollback conditions remain **BLOCKED**. v688 edits documents only: no actual GSC credential/property read, code, DB, WLD, Test or Production action. [Worklog](../worklog/2026-10-15-f67506-search-evidence-v688.md).
+
+
 ## v2026.10.15.686 — F675-05 user-truthful first-session next actions (PLANNING)
 
 - **Adopt** [F675-05 First-session Next-Action Trust Spec](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) / [한국어](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) as detailed v675 F675-05, reconciling v76 closure and v82 progressive-first-week. The on-screen selector shows **at most three** user-choosable actions, after real actor, switch, eligibility, cooldown and backend evidence; “not now” and honest fallback learning always available.

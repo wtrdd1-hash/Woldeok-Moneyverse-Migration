@@ -1,5 +1,10 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.15.688 — F675-06 Search Console 근거 센터 (PLANNING)
+
+- [F675-06 한국어 GSC 색인·검색 실제 근거](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영어](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md). S688-01~10 코드 사실, 제출/크롤링/색인/노출 분리, 실운영자 가설·외부 16개/D0~D7. 문서 전용, 실제 서버/GSC 미조회.
+
+
 ## v2026.10.15.686 — F675-05 신규 이용자 실제 가능한 행동 (PLANNING)
 
 - [F675-05 한국어 상세명세](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) / [영문](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md). O686-01~10 로컬 보상/주식 허위 성공 위험, 사용자 9종·한영 안내 12개·참고자료 12개, 최대 3개 선택형 상태·D0~D7. 기획만 변경, 실서버 검증 아님.

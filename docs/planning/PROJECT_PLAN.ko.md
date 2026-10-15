@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.15.688 — F675-06 실제 Search Console 검색·색인 증거 상세기획
+
+- [F675-06 한국어 상세명세](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 공식 개별 기획으로 채택. 기존 관리자 /admin/seo·GSC·v685 수정 재사용, 별도 SEO 플랫폼 중복 금지.
+- **S688-01~10 소스:** Google PT vs 서버 UTC/미확정 최근 데이터, 누락행 0 처리, 상위 검색어 10건·페이지/국가/기기 부재, 서비스 계정 수정시간 혼동, 봇방문=색인 표기, 제출 백엔드 실패에도 성공, 일반 URL을 Google Indexing API/구형 ping으로 성공처럼 홍보, 고정 564 URL, 관리자 BFF 인증·CSRF 체인 점검 필요.
+- 기술 URL 상태/공급자 제출/Google 색인본 URL Inspection/실제 클릭·노출을 독립 증거로 관리. 속성·OAuth/쿼터/canonical/hreflang/noindex·실제 담당자 조치, 관리자 사용자 가설 8개/국영문 문구 12개/구글 등 공식 16개/D0~D7. 즉시 색인·순위·유입 보장 금지.
+- v397·v530 전체 UI 5회·v523/542/543 경제/DB·정확한 SHA Test/롤백은 **BLOCKED**. 이번 v688은 문서만 변경, 실제 GSC 속성/키·코드/DB/WLD/Test/운영 미변경. [작업기록](../worklog/2026-10-15-f67506-search-evidence-v688.ko.md).
+
+
 ## v2026.10.15.686 — F675-05 신규 이용자 첫 행동·보상 신뢰성 (상세 기획)
 
 - [F675-05 상세 국문](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) / [영문](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md)을 v675의 다섯 번째 개별 상세기획으로 채택하고 v76 첫 방문 마무리·v82 첫 주 점진적 적응과 조율. 화면의 선택 행동은 **최대 3개**, 본인 로그인·기능스위치·쿨다운/자격·API/DB 실재 확인 후만 제안. 종료/나중에/공개 가이드 선택 필수.

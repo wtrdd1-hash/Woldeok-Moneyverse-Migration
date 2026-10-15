@@ -1,5 +1,12 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.15.688 — F675-06 GSC 검색/색인 진실성 통합 상세기획 (문서)
+
+- 시작/중간 `origin/main=44d0b46583a9a2836e0f2b41655b245cf6f1c262`, 독립 `docs/gsc-evidence-center-v2026.10.15.688`, 타 v687/국고 브랜치 불변. [작업기록](../worklog/2026-10-15-f67506-search-evidence-v688.ko.md).
+- [F675-06 한국어 상세](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) 채택: S688-01~10 코드 위험, v685 수정 유지, 실제 GSC PT 검색어/페이지/국가/기기와 색인본 URL Inspection, 크롤러·제출·크롤링·색인·검색클릭 분리, 운영자 한영 12개 상태·공식자료 16개·D0~D7.
+- 실제 앱·Google 비공개 데이터/키·색인요청·DB/Test/운영 무변경. v397/v530 및 v523/542/543 동일 SHA 출시 게이트 불변.
+
+
 ## v2026.10.15.686 — F675-05 첫 활동·실제 완료 증명 (문서 전용)
 
 - 시작·중간 원격 `origin/main=6946398986edba0ad84bc601e6d1076e442f6d05`; 독립 `docs/first-session-truth-v2026.10.15.686`; v687 등 동시 작업 불변. [국문 작업기록](../worklog/2026-10-15-f67505-first-session-v686.ko.md).

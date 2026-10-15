@@ -1,5 +1,10 @@
 # 📚 Document Catalog
 
+## v2026.10.15.688 — F675-06 GSC evidence center (PLANNING)
+
+- [F675-06 Google Search Evidence, Indexing Truth & Canonical Action Center EN](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [KO](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md); source gaps S688-01..10, operator user hypotheses, separate index/submission/traffic truth, 16 official references, D0–D7. No runtime code/GSC access or deployment.
+
+
 ## v2026.10.15.686 — F675-05 safe first action (PLANNING)
 
 - [F675-05 First-session Verified Next-Action EN](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) / [한국어](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md). O686-01..10 source gaps, 9 user needs hypotheses, 12 bilingual copy states, 12 references, max-3 safe choices and D0–D7; no Test/Production implementation.

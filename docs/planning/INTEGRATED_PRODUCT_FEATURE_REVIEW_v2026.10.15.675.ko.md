@@ -1,5 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## F675-06 개별 상세기획 채택 — v2026.10.15.688
+
+- [GSC 실제 검색성과·색인 증거 센터 상세기획](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 정식 상세기획으로 채택. 기존 /admin/seo·v685 재사용, GSC 날짜/상위 10개·무행0·크롤러 색인 오인·레거시 제출 성공/Google Indexing API 안내 오류 기록, 기술·제출·Google 색인본·검색 노출 실제 증거 분리, 구글/WCAG 16개 자료·D0~D7. 실제 SEO/GSC 운영 검증이나 코드 배포 아님.
+
+
 ## F675-05 개별 상세기획 채택 — v2026.10.15.686
 
 - [첫 사용자 실제 행동·보상 안전 안내](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) / [English](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md)을 F675-05 정식 상세기획으로 채택. 기존 가이드·트래커/v76/v82 재사용, 로컬 WLD 허위입금·실패 주식 주문의 성공표시 근거 등록, 서버가 허용한 최대 3가지 사용자 선택/재방문 흐름, 한영 12개 문구·실측 전 조사·D0~D7. **기획 전용, 신규 기능 구현/배포 아님.**
