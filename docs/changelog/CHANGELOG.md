@@ -1,3 +1,6 @@
+## v2026.10.15.682 — Treasury SWF emergency containment; Production code promotion BLOCKED
+- Verified encrypted backup and disabled Production synthetic SWF via policy setting, no balances/schema altered; restored isolated DB exposed broken migration 269 donation and migration 271 read-ACL incompatibility. No code merge/Production promotion. [Release gate report](../releases/v2026.10.15.682.md).
+
 ## v2026.10.15.674 — Branch audit integration closure (no Production promotion)
 - Docs PRs #846/#847/#849/#855 merged and their source branches deleted after exact SHA ancestry proof; CI/document gates passed. Test/finance/session/zero-downtime gates remain BLOCKED. [Detail](../worklog/2026-10-15-branch-ci-release-close-v674.md).
 

@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.15.682 — 국고 자동 합성수입 긴급 중지 및 운영승격 차단 증거
+
+- 2026-10-15 14:51 KST 암호화 백업 확인 후 운영 SWF 자동 실행 OFF. 기존 국고·회원 잔액 및 운영 서비스 불변. 15:18·15:27 설정 OFF, 다음 1시간 주기 검증 필요.
+- 운영 DB를 독립 Test DB로 복원하여 기존 migration 266건 + 269~271의 SQL 적용 확인. 그러나 269 기부 실호출은 ledger_transactions.tx_type 부재로 실패, 271은 앱 역할의 금고/보조원장 직접 SELECT 차단. v678 대사·전체 관리자 조회를 최소권한 전용 함수로 보수하기 전 배포 불가.
+- [v681 상세 한글 판단](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.ko.md) / [영문](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.md). **운영 코드 승격 BLOCKED**, 금융 마이그레이션 운영 미적용.
+
+
 ## v2026.10.15.680 — F675-03 WLD 잔액 변동 이유·영수증 (상세 기획)
 
 - [F675-03 WLD 거래내역·영수증 상세기획](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) / [영문](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md)을 v675의 P1 세부 계약으로 채택. 이미 존재하는 로그인 지갑·최근 거래 50건을 보완하며 아직 구현/운영 검증이 아니다.

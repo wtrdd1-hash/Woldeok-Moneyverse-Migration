@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.682 — Treasury containment and release correctness gate
+
+- [v681 finance and release gate](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.md) / [Korean](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.ko.md): emergency SWF OFF after verified encrypted backup, not a full accounting repair; independent restored Production schema data and isolated 269–271 trial exposed runtime donation SQLSTATE 42703 and 271 app-role read failures for v678 direct query.
+- Only read-only diagnostics/isolated Test mutations after operational SWF flag change. **Do not promote** code/migrations, open settlements, fabricate balancing funds or merge draft v678/681 until real authenticated Test full role/session/ledger/zero-downtime gates are met.
+
+
 ## v2026.10.15.680 — F675-03 exact-money user receipts (planning only)
 
 - Start/mid remote main `a37b733837cf82c3f45adb88242bd1b4f6df2cb9`; isolated worktree `docs/wld-activity-receipts-v2026.10.15.680`, final checkpoint in [worklog](../worklog/2026-10-15-f67503-wld-receipts-v680.md). Other contributors' treasury/ledger worktrees untouched.
