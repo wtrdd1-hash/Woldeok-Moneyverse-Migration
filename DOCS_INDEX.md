@@ -1,6 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
 
+## v2026.10.15.674 — Branch audit merge completion, runtime release still BLOCKED
+
+- [Final worklog EN](docs/worklog/2026-10-15-branch-ci-release-close-v674.md) · [작업종료 KO](docs/worklog/2026-10-15-branch-ci-release-close-v674.ko.md) · [Internal EN](docs/updates/v2026.10.15.674-internal.md) · [GitHub EN](docs/updates/v2026.10.15.674-github.md)
+- Docs #846/#847/#849/#855 merged and source branches removed; exact-SHA doc CI passed. Test/Production source identity and finance/session/security acceptance remain blocked, so Production was not changed.
+
 ## v2026.10.15.673 — CI/PR audit integration & release gates (docs-only, BLOCKED)
 
 - [Worklog EN](docs/worklog/2026-10-15-branch-ci-release-v673.md) · [작업기록 KO](docs/worklog/2026-10-15-branch-ci-release-v673.ko.md) · [Release EN](docs/releases/v2026.10.15.673.md) · [릴리스 KO](docs/releases/v2026.10.15.673.ko.md)
