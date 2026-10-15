@@ -1,5 +1,16 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.696 — Actual Test promotion with financial release hold
+- Public Test frontend/backend exact v695 SHA verified; authenticated QA session survived backend restart. v653 monetary/market fail-closed candidate was integrated in a new v696 branch without monetary migration. Production ACL and financial ledger correction remain absolute gates. [Release](../releases/v2026.10.15.696.md).
+
+## v2026.10.15.695 — Integration candidate, release gates BLOCKED
+- Isolated #850/#852 and v678 grant route build fix. No financial schema/money/deploy. [Release](../releases/v2026.10.15.695.md); exact-SHA Test, finance and session gates still blocked.
+
+## v2026.10.15.695 — Branch reconciliation, Test/Production gates
+- Candidate combines #850/#852 with only v678's Next.js grant route build remedy, without monetary operations/migrations. [Release](../releases/v2026.10.15.695.md) / [KO](../releases/v2026.10.15.695.ko.md).
+- Local suites, typechecks and backend/Next production builds PASS. Exact-SHA Test/authoritative DB, Finance Core/ledger ACL, authentication continuity and public release identity still BLOCK Production. Other agents' 23 dirty worktree modifications remain isolated.
+
+
 ## v2026.10.15.688 — F675-06 Google search evidence/product governance (docs only)
 
 - Start/mid `origin/main=44d0b46583a9a2836e0f2b41655b245cf6f1c262`, isolated `docs/gsc-evidence-center-v2026.10.15.688`, other agents' v687/treasury unaffected. [Worklog](../worklog/2026-10-15-f67506-search-evidence-v688.md).

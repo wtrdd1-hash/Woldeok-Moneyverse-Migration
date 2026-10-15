@@ -157,6 +157,8 @@ export interface ModelCall {
   readonly model: string;
   readonly system: string;
   readonly user: string;
+  /** Granted only by the unattended deployment-owned runtime, never by the admin console. */
+  readonly deploymentLocalModel?: boolean;
 }
 
 export type ModelCaller = (call: ModelCall) => Promise<ScenarioBatch>;
@@ -389,15 +391,37 @@ function statusError(status: number, detail: string): AiNewsUnavailableError {
   return new AiNewsUnavailableError('ai_news_model_unreachable', `the model API answered ${status}`);
 }
 
+/** This narrowly scoped transport is NOT a generic SSRF bypass. A deployment-owned
+ * localhost Ollama listener on this single port/path is the sole exception.
+ * Operator-configured or redirected URLs still use the generic safeFetch policy.
+ */
+export function approvedDeploymentModelEndpoint(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' && parsed.hostname === '127.0.0.1'
+      && parsed.port === '11434' && parsed.pathname === '/v1/chat/completions'
+      && parsed.search === '' && parsed.hash === '' && parsed.username === '' && parsed.password === '';
+  } catch {
+    return false;
+  }
+}
+
 async function send(
   url: string,
   apiKey: string,
   init: { readonly method: 'GET' | 'POST'; readonly body?: string; readonly timeoutMs: number },
+  deploymentLocalModel = false,
 ): Promise<{ readonly ok: boolean; readonly status: number; readonly text: string }> {
+  if (deploymentLocalModel && (init.method !== 'POST' || !approvedDeploymentModelEndpoint(url))) {
+    throw new AiNewsUnavailableError('ai_news_model_unreachable', 'unapproved deployment model endpoint');
+  }
+
   let response: Response;
   try {
-    response = await safeFetch(url, {
+    const transport = deploymentLocalModel ? fetch : safeFetch;
+    response = await transport(url, {
       method: init.method,
+      ...(deploymentLocalModel ? { redirect: 'manual' as const } : {}),
       headers: {
         accept: 'application/json',
         authorization: `Bearer ${apiKey}`,
@@ -610,7 +634,7 @@ export const openAiCaller: ModelCaller = async (call) => {
       method: 'POST',
       body: JSON.stringify({ model: call.model, messages, ...options }),
       timeoutMs: CALL_TIMEOUT_MS,
-    });
+    }, call.deploymentLocalModel === true);
     if (response.ok) return readBatch(response.text);
     if (response.status === 400 || response.status === 422) {
       // How a compatible server says it does not know one of these options.
@@ -817,6 +841,8 @@ export class AiNewsService {
       apiBaseUrl: credential.apiBaseUrl,
       apiKey: credential.apiKey,
       model: credential.model,
+      deploymentLocalModel: runtimeCredential !== undefined
+        && credential.apiBaseUrl === 'http://127.0.0.1:11434/v1',
       system: SYSTEM_PROMPT,
       user: userPrompt(
         context,

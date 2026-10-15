@@ -1,5 +1,16 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.15.696 — Public Test promoted; Production HOLD
+- [Release EN](docs/releases/v2026.10.15.696.md) / [KO](docs/releases/v2026.10.15.696.ko.md), [worklog](docs/worklog/2026-10-15-production-release-remediation-v696.md). Public Test v695 exact SHA and actual authenticated restart continuity passed. New v696 finance-containment branch tests/build passed, but Production grants, migration parity and rollback gates BLOCK promotion.
+
+## v2026.10.15.695 — Isolated branch integration (Production BLOCKED)
+- [Release EN](docs/releases/v2026.10.15.695.md) / [KO](docs/releases/v2026.10.15.695.ko.md); [Worklog](docs/worklog/2026-10-15-offline-branch-integration-v695.md). Local unit/build PASS; Test/finance/session/Production pending.
+
+## v2026.10.15.695 — Branch and offline candidate, Production BLOCKED
+- [Release EN](docs/releases/v2026.10.15.695.md) · [KO](docs/releases/v2026.10.15.695.ko.md) · [Worklog EN](docs/worklog/2026-10-15-offline-branch-integration-v695.md) · [KO](docs/worklog/2026-10-15-offline-branch-integration-v695.ko.md).
+- Selected #850/#852 changes and v678 grant route build fix on isolated branch only; local unit, type and Next Webpack PASS; exact-SHA Test, finance, session, Production promotion BLOCKED. Dirty concurrent worktrees preserved.
+
+
 ## v2026.10.15.685 — Integrated source/SEO plan parity candidate
 
 - [Source gap review EN](docs/findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) · [한국어 진단](docs/findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) · [Worklog](docs/worklog/2026-10-15-seo-integrity-v685.md)

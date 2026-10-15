@@ -45,9 +45,9 @@ export function TakedownActionDialog({ item }: { readonly item: TakedownItem }) 
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex flex-wrap items-start gap-2 pr-8 text-left">
             <span>긴급 콘텐츠 삭제 조치 심사</span>
-            <Badge variant="outline" className="font-mono text-xs">
+            <Badge variant="outline" className="max-w-full break-all whitespace-normal font-mono text-xs">
               {item.case_id}
             </Badge>
           </DialogTitle>
@@ -82,6 +82,10 @@ export function TakedownActionDialog({ item }: { readonly item: TakedownItem }) 
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="caseId" value={item.case_id} />
           <ActionAlert state={state} />
+          <p role="note" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-foreground">
+            이 메뉴는 신고 건의 심사 상태만 기록합니다. 실제 게시물을 자동 삭제하거나 차단하지 않습니다.
+            삭제 또는 접근 제한은 별도로 시행하고 결과를 확인한 다음 처리 상태를 기록하세요.
+          </p>
 
           <div className="space-y-2">
             <label htmlFor="newStatus" className="block text-xs font-medium">
@@ -94,8 +98,8 @@ export function TakedownActionDialog({ item }: { readonly item: TakedownItem }) 
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs focus:ring-1 focus:ring-ring"
             >
-              <option value="ACTIONED_REMOVED">긴급 삭제 승인 (ACTIONED_REMOVED - 콘텐츠 완전 소거)</option>
-              <option value="ACTIONED_RESTRICTED">접근 제한 조치 (ACTIONED_RESTRICTED - 비공개/블라인드)</option>
+              <option value="ACTIONED_REMOVED">삭제 조치 기록 (ACTIONED_REMOVED - 실제 처리 확인 필요)</option>
+              <option value="ACTIONED_RESTRICTED">접근 제한 기록 (ACTIONED_RESTRICTED - 실제 처리 확인 필요)</option>
               <option value="TRIAGED">심사 진행 중 (TRIAGED - 추가 증거 확인)</option>
               <option value="REJECTED">반려 (REJECTED - 요건 미충족/허위 신고)</option>
             </select>
@@ -109,7 +113,7 @@ export function TakedownActionDialog({ item }: { readonly item: TakedownItem }) 
               id="adminNotes"
               name="adminNotes"
               rows={3}
-              placeholder="예: 아동/청소년 보호 및 TAKE IT DOWN 기준에 부합하여 대상 게시물을 즉시 격리 삭제 조치함."
+              placeholder="예: 대상 게시물 삭제를 별도 시행한 뒤 접근 불가를 확인한 시각과 근거."
               defaultValue={item.admin_notes ?? ''}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs focus:ring-1 focus:ring-ring"
             />
@@ -120,7 +124,7 @@ export function TakedownActionDialog({ item }: { readonly item: TakedownItem }) 
               취소
             </Button>
             <SubmitButton variant={selectedStatus === 'ACTIONED_REMOVED' ? 'destructive' : 'default'}>
-              조치 확정 및 원장 기록
+              심사 상태 기록
             </SubmitButton>
           </DialogFooter>
         </form>

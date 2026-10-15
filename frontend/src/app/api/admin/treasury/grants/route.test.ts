@@ -10,7 +10,7 @@ vi.mock('@/lib/api', () => {
   }
   return { api, ApiError };
 });
-vi.mock('@/app/api/treasury/apply-grant/route', () => ({ loadGrants }));
+vi.mock('@/lib/treasury-grants-legacy', () => ({ loadGrants }));
 
 import { ApiError } from '@/lib/api';
 import { GET, POST } from './route';

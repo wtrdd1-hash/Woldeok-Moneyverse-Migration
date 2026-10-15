@@ -100,6 +100,33 @@ export class MintBureauService {
       throw new BadRequestException('멱등성 키는 필수입니다.');
     }
 
+    if (policyOrderId !== null) {
+      // A linked retirement must have an unexpired approved RETIRE order.
+      // The conditional update and certificate insert execute atomically.
+      const guarded = await this.pool.query<RetirementCertificate>(
+        `WITH authorized AS (
+          UPDATE public.monetary_policy_orders
+             SET executed_amount_wld = (executed_amount_wld::numeric + $2::numeric)::text,
+                 status = CASE WHEN executed_amount_wld::numeric + $2::numeric = max_amount_wld::numeric
+                               THEN 'EXECUTED' ELSE 'APPROVED' END,
+                 updated_at = clock_timestamp()
+           WHERE id = $1::uuid AND order_type = 'RETIRE' AND status = 'APPROVED'
+             AND expires_at > clock_timestamp()
+             AND executed_amount_wld::numeric + $2::numeric <= max_amount_wld::numeric
+           RETURNING id
+        )
+        INSERT INTO public.retirement_certificates
+          (policy_order_id, amount_wld, source_type, actor_id, reason, idempotency_key)
+        SELECT id, $2, $3, $4, $5, $6 FROM authorized
+        RETURNING *`,
+        [policyOrderId, amountWld, sourceType, actorId, reason, idempotencyKey],
+      );
+      if (!guarded.rows[0]) {
+        throw new ForbiddenException('Retirement policy is cancelled, expired, or out of funds');
+      }
+      return guarded.rows[0];
+    }
+
     const certRes = await this.pool.query<RetirementCertificate>(
       `
       INSERT INTO public.retirement_certificates (

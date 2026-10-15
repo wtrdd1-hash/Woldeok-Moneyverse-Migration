@@ -19,6 +19,12 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
   ) {}
 
   onModuleInit() {
+    // Never start automatic monetary issuance/retirement in Test or by default.
+    // Production requires both this runtime opt-in and its per-cycle DB switch.
+    if (process.env.NODE_ENV === 'test' || process.env.MONEYVERSE_MONETARY_AUTOREGULATION_ENABLED !== 'true') {
+      this.logger.warn('automatic monetary policy scheduler disabled (fail closed)');
+      return;
+    }
     const ONE_HOUR_MS = 60 * 60 * 1000;
 
     // 서버 기동 45초 후 초기 지표 평가
@@ -151,9 +157,7 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
         coalesce(sum(case when amount > 0 and destination_account_id is null then amount else 0 end), 0)::text as sink_24h
       FROM public.ledger_entries
       WHERE created_at >= now() - interval '24 hours'
-    `).catch(async () => {
-      return { rows: [{ faucet_24h: '500000', sink_24h: '480000' }] };
-    });
+    `);
 
     let faucet24h = BigInt(statsRes.rows[0]?.faucet_24h || '0');
     let sink24h = BigInt(statsRes.rows[0]?.sink_24h || '0');
