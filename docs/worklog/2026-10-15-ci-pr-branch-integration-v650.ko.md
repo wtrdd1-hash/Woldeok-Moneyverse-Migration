@@ -16,6 +16,6 @@
 - 남은 `DOCS_INDEX.md` 충돌 표식 시정 및 릴리스 문서 EN/KO 기록.
 
 ## 종료(검증 상태)
-- 통합된 웹 PR 3건·Android PR 1건. 문서용 추가 수정은 독립 PR CI 후 병합 여부 확정.
+- 웹 감사 PR 3건·Android 보안 PR 1건 병합 완료. 문서 오류 수정 및 최종기록 PR #845도 `classify`·`policy` CI 성공 (`runtime-check` 문서 전용으로 스킵) 후 웹 main `3634dcf0b07f34a493910e7485a1b508bd35fe48`로 병합 완료.
 - 차단: 웹 #844 금융 P0 및 Test 전체 수용, Android #23~25 충돌/실단말 검증.
 - Test/Production/데이터베이스/잔액/서비스/기능 스위치 변경하지 않음.
