@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.16.701 — Server capacity and narrow PUBLIC privilege hardening
+- Staged isolated, fail-closed privilege script (PUBLIC executable security-definer functions only) with clone RED/GREEN/rollback acceptance, without changing application-owned 11 EXECUTE grants. Owned completed build caches reclaimed 2.44GiB while preserving required rollback releases. [Release](../releases/v2026.10.16.701.md) / [KO](../releases/v2026.10.16.701.ko.md). Treasury/bonds/FX/pension direct balance DML remains a separate mandatory ledger-first remediation.
+
 ## v2026.10.15.697 — Observed Production rollout and remaining finance risks
 - Manual live Production blue-green release via Nginx and persistent systemd; canonical source tag prod-v2026.10.15.697, GitHub main PR #874 identical tree. [Release](../releases/v2026.10.15.697.md) / [KO](../releases/v2026.10.15.697.ko.md). No Production DB migration, finance least-privilege and full authenticated Production E2E remain open.
 

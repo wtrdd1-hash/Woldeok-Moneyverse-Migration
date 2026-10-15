@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.16.701 — Server capacity and SECURITY DEFINER ACL remediation
+- [Release EN](docs/releases/v2026.10.16.701.md) / [KO](docs/releases/v2026.10.16.701.ko.md) · [Worklog](docs/worklog/2026-10-16-server-hygiene-v701.md). Owned merged build artifacts only: ~2.44GiB reclaimed, usage 81%→78%; isolated Production-schema shadow verified PUBLIC SECURITY DEFINER 11→0 and app EXECUTE retained, rollback tested. No member balance migration; residual direct finance DML remains P0.
+
 ## v2026.10.15.697 — Live Production blue-green release
 - [Release EN](docs/releases/v2026.10.15.697.md) / [KO](docs/releases/v2026.10.15.697.ko.md); [Worklog EN](docs/worklog/2026-10-15-production-bluegreen-v697.md) / [KO](docs/worklog/2026-10-15-production-bluegreen-v697.ko.md). GitHub main PR #874 merged; active public host v697 source a5a1e9da (both backend/frontend), permanent systemd 3213/3214, no Production database migration. Financial app-role DML risk still open.
 
