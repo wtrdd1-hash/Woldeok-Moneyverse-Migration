@@ -1,6 +1,6 @@
 # Treasury Reconciliation Evidence Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans. Steps use checkbox (`- [ ]`) for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans. Steps use checkbox (`- [x]`) for tracking.
 
 **Goal:** Replace fabricated Treasury 'RECONCILED/0' indicators with demonstrable fiscal journal evidence and an explicit unverified state, without moving money.
 
@@ -25,20 +25,22 @@
 
 ## Task 1: Backend repository authoritative read
 **Files:** `backend/src/admin/treasury/treasury.repository.ts`, `backend/src/admin/treasury/treasury.repository.test.ts`.
-- [ ] Write red tests with typed fake Queryable: matching journal cannot return RECONCILED; mismatched vault, broken chain, and opposite vault errors; query is SELECT-only.
-- [ ] Run the targeted tests and capture expected failure.
-- [ ] Implement one read-only query returning per-vault aggregate journal movement/continuity and missing-cash movement checks; type `UNVERIFIED`, integrity issues count.
-- [ ] Update overview to reuse reconciliation and never assert spendable funds until verified.
-- [ ] Targeted tests green and backend typecheck.
+- [x] Write red tests with typed fake Queryable: matching journal cannot return RECONCILED; mismatched vault, broken chain, and opposite vault errors; query is SELECT-only.
+- [x] Run the targeted tests and capture expected failure.
+- [x] Implement one read-only query returning per-vault aggregate journal movement/continuity and missing-cash movement checks; type `UNVERIFIED`, integrity issues count.
+- [x] Update overview to reuse reconciliation and never assert spendable funds until verified.
+- [x] Targeted tests green and backend typecheck.
 
 ## Task 2: UI and cross-contract
 **Files:** `frontend/src/app/admin/types.ts`, `frontend/src/app/admin/treasury/treasury-view.tsx`, `frontend/src/app/admin/treasury/treasury-view.test.tsx`.
-- [ ] Write red UI cases for unverified and observed discrepancy without green normal label.
-- [ ] Add distinct Korean warning badges/labels and non-green difference when unverified.
-- [ ] Frontend focused Vitest, typecheck if supported.
+- [x] Write red UI cases for unverified and observed discrepancy without green normal label.
+- [x] Add distinct Korean warning badges/labels and non-green difference when unverified.
+- [x] Frontend focused Vitest, typecheck if supported.
 
 ## Task 3: Release evidence
 **Files:** `docs/worklog/2026-10-15-treasury-reconciliation-v678.{md,ko.md}`, `docs/updates/v2026.10.15.678-{internal,github}.{md,ko.md}`.
-- [ ] Record start/intermediate/main recheck plus exact test results, limitations, no money movement.
-- [ ] Verify staged diff, run backend build and change-impact tests and docs classifier.
+- [x] Record start/intermediate/main recheck plus exact test results, limitations, no money movement.
+- [x] Verify staged diff, run backend build and change-impact tests and docs classifier.
 - [ ] Push named branch and open draft PR; do not merge or Production promote without same exact-SHA Test DB/API, auth/session and rollback gates.
+
+**Verification boundary:** source/isolated unit tests and Webpack build passed. Actual Test PostgreSQL, security negatives and Production zero-downtime gates were not executed and remain STOP conditions.

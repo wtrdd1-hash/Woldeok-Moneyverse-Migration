@@ -14,3 +14,9 @@
 
 ## S2 final and release status
 - Planned after exact-main refresh, full suite and PR evidence. Production remains BLOCKED while live hourly SWF simulation and direct SQL financial mutations persist.
+
+## S2 final verification (v678 exact candidate source)
+- After incorporating origin/main a37b733837cf82c3f45adb88242bd1b4f6df2cb9 (v679 AI newsroom planning), source commit 1b7b32bb7c1715e2f9840fd6f35ecf66fab296f5 was clean. Integrated master/plan received additive Treasury v678 sections while preserving main's v679 and v677 content.
+- Fresh full isolated-node suites on 2026-10-15 KST: backend Vitest 1,190 passed / **391 database-dependent skipped** (144 suites passed, 53 skipped); frontend Vitest 1,210 passed (221 suites). Release classifier 13/13 passed. Early v678 contract build, backend typecheck/build, frontend typecheck and Next.js production Webpack build all exited 0. Latest commits after these source checks modify documentation only.
+- Live Postgres SELECT replay revealed MAIN journal predecessor 25,230,420 vs successor opening 25,230,375 WLD (45 mismatch). Fiscal EMERGENCY gap 15,139,250 WLD remains uncorrected. No Prod/Test switch, DB DML, actual grant, automatic SWF containment, or backend Test environment deployment occurred.
+- G1 read-only UI candidate is completed at source/test level. G0 SWF running Production containment and G2–G5 financial acceptance remain BLOCKED. Do not claim a valid Production financial release.
