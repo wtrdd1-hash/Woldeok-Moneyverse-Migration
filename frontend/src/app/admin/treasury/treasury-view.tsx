@@ -250,12 +250,20 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2">
                 <CardTitle className="text-sm font-semibold">국고 회계 대사 무결성 상태 (Authoritative Reconciliation)</CardTitle>
-                <Badge className={overview.reconciliation.status === 'RECONCILED' ? 'bg-emerald-600 text-white text-[11px]' : 'bg-destructive text-white text-[11px]'}>
-                  {overview.reconciliation.status === 'RECONCILED' ? '대사 완료 (일치)' : '불일치 감지 (주의)'}
+                <Badge className={overview.reconciliation.status === 'RECONCILED'
+                  ? 'bg-emerald-600 text-white text-[11px]'
+                  : overview.reconciliation.status === 'DISCREPANCY'
+                    ? 'bg-destructive text-white text-[11px]'
+                    : 'bg-amber-600 text-white text-[11px]'}>
+                  {overview.reconciliation.status === 'RECONCILED'
+                    ? '대사 완료 (일치)'
+                    : overview.reconciliation.status === 'DISCREPANCY'
+                      ? '국고 장부 불일치 (지급 중단 필요)'
+                      : '대사 미검증 (지급 보류 권고)'}
                 </Badge>
               </div>
               <span className="text-[11px] text-muted-foreground font-mono">
-                최종 대사: {new Date(overview.reconciliation.last_reconciled_at).toLocaleTimeString('ko-KR')}
+                보조원장 검사: {new Date(overview.reconciliation.last_reconciled_at).toLocaleTimeString('ko-KR')}
               </span>
             </div>
           </CardHeader>
@@ -266,14 +274,25 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
                 <span className="font-bold text-foreground font-mono text-sm">{groupDigits(overview.reconciliation.total_vaults_balance_wld)} WLD</span>
               </div>
               <div className="rounded border bg-background p-2.5">
-                <span className="text-muted-foreground block text-[11px]">원장 누적 순흐름</span>
+                <span className="text-muted-foreground block text-[11px]">국고 보조원장 누적 순흐름</span>
                 <span className="font-bold text-foreground font-mono text-sm">{groupDigits(overview.reconciliation.total_ledger_net_flow_wld)} WLD</span>
               </div>
               <div className="rounded border bg-background p-2.5">
                 <span className="text-muted-foreground block text-[11px]">회계 대사 오차 (Discrepancy)</span>
-                <span className="font-bold text-emerald-600 font-mono text-sm">{groupDigits(overview.reconciliation.discrepancy_amount_wld)} WLD (정상 0)</span>
+                <span className={`font-bold font-mono text-sm ${overview.reconciliation.status === 'RECONCILED' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {groupDigits(overview.reconciliation.discrepancy_amount_wld)} WLD
+                  {overview.reconciliation.status !== 'RECONCILED' && ' (실지급 가능 여부 미검증)'}
+                </span>
               </div>
             </div>
+            {overview.reconciliation.status !== 'RECONCILED' && (
+              <p role="status" className="mt-3 text-xs text-amber-700 dark:text-amber-400">
+                국고 보조원장과 경제코어의 재원 및 확정 부채가 검증되지 않았습니다.
+                {overview.reconciliation.journal_integrity_issues
+                  ? ` 장부 연속성·금액 오류 ${overview.reconciliation.journal_integrity_issues}건이 확인되었습니다.`
+                  : ' 표시 잔액은 지출 가능 재원을 증명하지 않습니다.'}
+              </p>
+            )}
           </CardContent>
         </Card>
       )}

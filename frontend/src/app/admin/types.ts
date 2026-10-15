@@ -691,7 +691,8 @@ export interface AdminTreasuryBudgetEnvelope {
 }
 
 export interface AdminTreasuryReconciliation {
-  readonly status: 'RECONCILED' | 'DISCREPANCY';
+  readonly status: 'RECONCILED' | 'DISCREPANCY' | 'UNVERIFIED';
+  readonly journal_integrity_issues?: number;
   readonly total_vaults_balance_wld: string;
   readonly total_ledger_net_flow_wld: string;
   readonly discrepancy_amount_wld: string;

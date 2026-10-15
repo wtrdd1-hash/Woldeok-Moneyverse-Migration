@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { api, ApiError } from '@/lib/api';
 import type { AdminConsole } from '@/app/admin/types';
-import { loadGrants } from '@/app/api/treasury/apply-grant/route';
+import { loadGrants } from '@/lib/treasury-grants-legacy';
 
 export const dynamic = 'force-dynamic';
 

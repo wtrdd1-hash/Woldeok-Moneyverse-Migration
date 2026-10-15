@@ -134,4 +134,42 @@ describe('TreasuryView & isTreasuryOutflow Outflow Accounting Logic', () => {
     expect(screen.queryByText(/-30,000 WLD/i)).toBeNull();
     expect(screen.getAllByText(/\+1,000,000 WLD/i).length).toBeGreaterThan(0);
   });
+
+  it('warns that a matched fiscal journal is still unverified by Economy Core', () => {
+    const overview: AdminTreasuryOverview = {
+      ...mockOverview,
+      reconciliation: {
+        status: 'UNVERIFIED',
+        total_vaults_balance_wld: '10000000',
+        total_ledger_net_flow_wld: '10000000',
+        discrepancy_amount_wld: '0',
+        journal_integrity_issues: 0,
+        last_reconciled_at: new Date().toISOString(),
+      },
+    };
+    render(<TreasuryView overview={overview} ledger={mockLedger} />);
+    expect(screen.getByText('대사 미검증 (지급 보류 권고)')).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toMatch(/경제코어/);
+    expect(screen.queryByText('대사 완료 (일치)')).toBeNull();
+    expect(screen.queryByText('0 WLD (정상 0)')).toBeNull();
+  });
+
+  it('shows subsidiary ledger discrepancy and journal integrity issue count', () => {
+    const overview: AdminTreasuryOverview = {
+      ...mockOverview,
+      reconciliation: {
+        status: 'DISCREPANCY',
+        total_vaults_balance_wld: '185296675',
+        total_ledger_net_flow_wld: '185296720',
+        discrepancy_amount_wld: '45',
+        journal_integrity_issues: 1,
+        last_reconciled_at: new Date().toISOString(),
+      },
+    };
+    render(<TreasuryView overview={overview} ledger={mockLedger} />);
+    expect(screen.getByText('국고 장부 불일치 (지급 중단 필요)')).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toMatch(/1건/);
+    expect(screen.queryByText('대사 완료 (일치)')).toBeNull();
+  });
+
 });
