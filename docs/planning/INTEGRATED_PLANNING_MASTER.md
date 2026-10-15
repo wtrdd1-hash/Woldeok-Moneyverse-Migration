@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.687 — Full function/code/runtime acceptance re-audit (evidence only)
+
+- Separate v687 audit began at `origin/main=69bc8c14` and incorporated newly merged `69463989` (SEO #867) into the isolated audit branch without overwriting parallel Treasury work. Details: [EN findings](../findings/MONEYVERSE_FULL_FUNCTION_RUNTIME_REAUDIT_v2026.10.15.687.md) / [KO findings](../findings/MONEYVERSE_FULL_FUNCTION_RUNTIME_REAUDIT_v2026.10.15.687.ko.md).
+- Source checks passed (contract31, DB static7, backend1185 with **391 DB skipped**, frontend1206, typecheck/build/API contract179; post-main SEO34 targeted pass). Runtime Production v600/Test v618 remain nonidentical to current main; authenticated and financial live acceptance missing.
+- **P0 HOLD:** dev DB app DML 237/241 tables and 11 PUBLIC-executable security-definer functions, unconditional Treasury RECONCILED/zero status, PvP direct balance updates/random settlement, non-verifiable exact Production release identity. **P1:** Discord QA script syntax error and default fabricated bank credit scoring. No Production/DB/money or feature switches changed. This does not supersede v530 UI or v523/v542/v543 economy authority.
+
 ## v2026.10.15.685 — SEO action truth and administrator access (implementation candidate, NOT deployed)
 
 - GitHub `origin/main=69bc8c14df236f57898b1b44ddc596be5144c30a` at start/middle. Isolated `fix/indexnow-auth-plan-parity-v2026.10.15.685`, no overlap with v683 treasury/v684 planning agents. [EN findings](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) / [KO findings](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) and [evidence/worklog](../worklog/2026-10-15-seo-integrity-v685.md).

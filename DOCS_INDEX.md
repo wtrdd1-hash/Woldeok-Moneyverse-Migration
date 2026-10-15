@@ -1,5 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.15.687 — Full code/function/runtime re-audit, release BLOCKED
+
+- [English audit](docs/findings/MONEYVERSE_FULL_FUNCTION_RUNTIME_REAUDIT_v2026.10.15.687.md) · [한국어 상세 재감사](docs/findings/MONEYVERSE_FULL_FUNCTION_RUNTIME_REAUDIT_v2026.10.15.687.ko.md)
+- [Worklog EN](docs/worklog/2026-10-15-full-function-runtime-audit-v687.md) · [작업기록 KO](docs/worklog/2026-10-15-full-function-runtime-audit-v687.ko.md) · [Internal EN](docs/updates/v2026.10.15.687-internal.md) / [KO](docs/updates/v2026.10.15.687-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.15.687-github.md) / [KO](docs/updates/v2026.10.15.687-github.ko.md)
+- Baseline unit/type/build/contract tests green but 391 DB tests skipped; developer DB privilege, Treasury false reconciliation, PvP direct ledger bypass and runtime SHA mismatch block full acceptance. After #867 integration, SEO targeted tests passed. No Test/Production promotion.
+
 ## v2026.10.15.685 — Integrated source/SEO plan parity candidate
 
 - [Source gap review EN](docs/findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) · [한국어 진단](docs/findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) · [Worklog](docs/worklog/2026-10-15-seo-integrity-v685.md)

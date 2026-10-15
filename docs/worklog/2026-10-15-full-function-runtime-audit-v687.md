@@ -17,5 +17,13 @@
 - Read-only DEV DB SELECT: public 241 tables, 266 applied migrations, 831 transactions, 1,692 postings, 0 unbalanced transactions and 0 no-posting transactions by direction/amount aggregate. Effective app DML on 237 public tables each INSERT/UPDATE/DELETE (P0 privilege exposure relative to planned database security boundary); applies to dev DB ONLY, not proof for Production. Never claim the valid sampled posting sums prove full production conservation.
 - Existing draft Treasury PRs #862/#865/#866 report separate production fiscal-vault discrepancies/unsafe code; none is merged as release evidence. No real-money operations or production-schema changes.
 - Next steps: build/contract/CI checks, target code risks, read-only production/runtime provenance, final assessment, bilingual report and PR.
-## Finished
-Pending.
+## In progress — checkpoint 2, 2026-10-15 17:25 KST
+- During the audit upstream main advanced from 69bc8c14 to 69463989 through SEO #867. Reviewed the changed SEO files and newer integrated master; merged the remote main into this audit-only branch (60b164c8), without editing main or Treasury drafts.
+- Latest-merge targeted SEO: backend 20/20, frontend 14/14. Latest tree typecheck passed. Bot dependencies installed offline in isolated worktree; 4/4 bot tests passed, but separate SponsorBlock QA script fails syntax at line 7. pnpm lint exits 0 with 1,089 warnings.
+- Additional static risk confirmed: unqualified RECONCILED/0 Treasury status, PvP wager direct account_balances updates outside a unit-of-work transaction and Math.random/parseFloat, fabricated credit scoring profile/Number balance precision. Dev DB PUBLIC can EXECUTE 11 SECURITY DEFINER functions. No runtime balance movement used to prove this.
+- Findings EN/KO and internal/GitHub updates prepared; release still blocked.
+
+## Finished — 2026-10-15 KST
+- Diagnostic/documentation work completed on dedicated branch. Full code acceptance **NOT completed**: production or authenticated transactional E2E cannot be claimed; 391 database tests skipped; Test not exact main SHA; no complete browser binary/mobile runtime or signed-in continuity proof. High-risk finance issues remain open.
+- Checklist: [x] documentation [x] isolation [x] source/route inventory [x] baseline isolated suites [x] anonymous runtime + DEV SQL read-only [x] upstream recheck and merge [x] post-merge targeted checks [x] defect register & bilingual updates [ ] exact-SHA restored DB/auth/browser/full-function gates [ ] safe Production promotion.
+- No changes to Production/Test deployments, money, databases, feature switches or shared development worktrees. Final branch/PR and push references recorded with final commit.

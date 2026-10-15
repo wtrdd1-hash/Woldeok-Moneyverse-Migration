@@ -1,5 +1,11 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.15.687 — 전체 코드·기능·실행 수용 재감사 (검증 기록 전용)
+
+- 시작 `origin/main=69bc8c14`; 작업 중 병합된 SEO #867 `69463989`을 독립 감사 브랜치에 안전 통합. [한국어 상세 보고서](../findings/MONEYVERSE_FULL_FUNCTION_RUNTIME_REAUDIT_v2026.10.15.687.ko.md) / [영문](../findings/MONEYVERSE_FULL_FUNCTION_RUNTIME_REAUDIT_v2026.10.15.687.md).
+- 최초 소스 계약31·DB정적7·백엔드1185(실DB 391 스킵)·프론트1206·타입/빌드/모바일 API179 통과, 최신 SEO 병합 후 34건 표적 테스트 통과. 운영 v600/Test v618/최신 main 불일치; 인증·금융 기능 수용 미실시.
+- **P0 차단:** 개발 DB 역할 DML 237/241, PUBLIC EXECUTE 보안정의함수 11, 국고 RECONCILED/0 고정, PvP 직접 잔액 갱신·임의 난수, 운영 출처·동일 SHA 검증 미충족. **P1:** 봇 QA 구문 오류, 가짜 신용점수 입력. v530 UI 및 v523/542/543 원장 보존 기획을 승계하거나 무효화하지 않는다. 운영/DB/잔액/스위치 변경 없음.
+
 ## v2026.10.15.685 — SEO 응답 사실성·관리자 접근 (코드 수정 후보, 미배포)
 
 - 작업 전·중 GitHub `origin/main=69bc8c14df236f57898b1b44ddc596be5144c30a`. 독립 `fix/indexnow-auth-plan-parity-v2026.10.15.685` 사용, 국고 v683·기획 v684 작업과 충돌 회피. [한국어 진단](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) / [영문](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) / [작업기록](../worklog/2026-10-15-seo-integrity-v685.md).
