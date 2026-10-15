@@ -11,3 +11,9 @@
 - TDD RED: 8 deliberately failing assertions. Fix preserves SSR selection and manual preference, eliminates auto Set-Cookie on read-only visits and removes eager CJK font preload. GREEN: 14 targeted tests.
 - Verification: contract build PASS, typecheck PASS, 228 frontend test files / 1,224 tests PASS, production frontend build PASS, backend build PASS, lint 0 errors (1,088 existing warnings).
 - Checkpoint: record main drift and exact-SHA Test/CI/Production acceptance after these gates; do not claim rollout from source checks.
+
+## Production integration and outcome
+
+- All PR #880 required checks PASS; squash merge `eb81f9db`, same tree hash as candidate SHA `142e36b5`. GitHub source branch already deleted.
+- Immutable SHA-built Test and separate Production canary authenticated public API protection and first-render locale passed; 5/5 public smoke rounds PASS after guarded Nginx reload, old v697 kept live, no DB/session mutation.
+- Post-deployment evidence: [release](../releases/v2026.10.16.712.md) and [v713](2026-10-16-production-locale-v713.md). Production session cookie E2E and external network/RUM latency remain not independently measured.
