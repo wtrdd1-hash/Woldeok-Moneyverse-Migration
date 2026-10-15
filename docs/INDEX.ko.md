@@ -1,5 +1,10 @@
 # 📚 월덕 머니버스(Woldeok Moneyverse) 공식 마스터 문서 인덱스
 
+## F675-06 GSC 실제 색인·검색 증거 기획 — v2026.10.15.688
+
+- [한국어 상세기획](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) · [영문](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) · [작업기록](worklog/2026-10-15-f67506-search-evidence-v688.ko.md). 문서/기획만, 색인/운영 합격 아님.
+
+
 ## F675-05 첫 활동 신뢰·복귀 동선 — v2026.10.15.686
 
 - [한국어 상세기획](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) · [영문](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) · [작업기록](worklog/2026-10-15-f67505-first-session-v686.ko.md). 기획/문서만, 운영 미승격.

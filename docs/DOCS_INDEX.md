@@ -1,5 +1,10 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## Search Console evidence detailed plan — v2026.10.15.688
+
+- [F675-06 GSC Search Evidence & Canonical Action](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) · [한국어](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) · [v688 worklog](worklog/2026-10-15-f67506-search-evidence-v688.md). Docs only, no indexing/Production claim.
+
+
 ## First-session user trust feature — v2026.10.15.686
 
 - [F675-05 Next-Action Trust Design](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) · [한국어](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) · [worklog](worklog/2026-10-15-f67505-first-session-v686.md). No runtime code change; economic/UX release gates retained.

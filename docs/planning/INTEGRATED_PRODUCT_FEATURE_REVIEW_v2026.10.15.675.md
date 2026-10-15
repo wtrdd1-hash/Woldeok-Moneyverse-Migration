@@ -1,5 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-06 detailed adoption — v2026.10.15.688
+
+- [Google Search Evidence & Canonical Action Center](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) is the next v675 adopted **detailed planning** feature. Reuses /admin/seo and v685; identifies top-10-only GSC data, missing date=0, GSC PT/freshness, crawler-indexed mislabel and legacy index submission success/Google Indexing API misclaims. Separates source/submission/Google indexed-version/performance into independently verifiable evidence, 16 Google/WCAG references and D0–D7 gated implementation. Not a live SEO audit or deployed feature.
+
+
 ## F675-05 detailed adoption — v2026.10.15.686
 
 - [First-session verified next-action design](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) / [한국어](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) is the v675 F675-05 adopted detailed planning contract. Reuses existing guide, tracker and v76/v82 sequencing; identifies source-only fake WLD reward and failed-stock-order success paths and defines max-three server-available choices, user-controlled D1/D7 follow-up, safe 12 bilingual states, research hypotheses and D0–D7 release gates. **Documentation planning, not implemented or deployed.**
