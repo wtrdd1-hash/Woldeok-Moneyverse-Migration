@@ -51,6 +51,7 @@ const myeongjo = Nanum_Myeongjo({
   weight: ['700', '800'],
   variable: '--font-myeongjo',
   display: 'swap',
+  preload: false,
 });
 
 const notoKr = Noto_Sans_KR({
@@ -58,6 +59,7 @@ const notoKr = Noto_Sans_KR({
   weight: ['400', '500', '700', '800'],
   variable: '--font-noto-kr',
   display: 'swap',
+  preload: false,
 });
 
 const plexMono = IBM_Plex_Mono({

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { DEFAULT_LOCALE, DETECTED_LOCALE_COOKIE, LOCALE_COOKIE, detectLocale, isLocale, type Locale } from '@/lib/locale';
+import { DEFAULT_LOCALE, LOCALE_COOKIE, detectLocale, isLocale, type Locale } from '@/lib/locale';
 import { detectCrawlerBot } from '@/lib/bot-detector';
 
 const API_ORIGIN = process.env.API_ORIGIN ?? (process.env.NODE_ENV === 'production' ? 'http://127.0.0.1:3000' : 'http://127.0.0.1:3020');
@@ -175,11 +175,6 @@ export function proxy(request: NextRequest) {
   if (explicitPrefixLocale || validQueryLocale) {
     response.cookies.set(LOCALE_COOKIE, finalLocale, {
       path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: 'lax', secure: true,
-    });
-  } else if (!userSavedLocale && !botInfo.isBot) {
-    // GeoIP must not create a permanent *user preference*. Only explicit choices do.
-    response.cookies.set(DETECTED_LOCALE_COOKIE, finalLocale, {
-      path: '/', maxAge: 60 * 60 * 24 * 30, sameSite: 'lax', secure: true,
     });
   }
 
