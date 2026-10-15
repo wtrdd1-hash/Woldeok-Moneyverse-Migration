@@ -1,6 +1,12 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
 
+## v2026.10.15.670 — Host release source identity guard (candidate, no Production promotion)
+
+- [Release notes EN](docs/releases/v2026.10.15.670.md) · [한국어](docs/releases/v2026.10.15.670.ko.md)
+- [Worklog](docs/worklog/2026-10-15-host-release-identity-gate-v670.md) · [GitHub update](docs/updates/v2026.10.15.670-github.md)
+- Host Test/Production provenance must match one SHA; all finance/UI/session/recovery gates remain open.
+
 ## v2026.10.15.652 — Production promotion gate review (BLOCKED)
 
 - [Release gate record EN](docs/releases/v2026.10.15.652.md) · [한국어 운영 승격 검증](docs/releases/v2026.10.15.652.ko.md)
