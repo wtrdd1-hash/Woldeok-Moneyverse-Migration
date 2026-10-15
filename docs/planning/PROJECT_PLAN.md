@@ -1,5 +1,14 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.675 — Full product/feature review and evidence-led candidate roadmap (PLANNING)
+
+- **Integrated reference adopted as a review/priority contract:** [2026-10-15 integrated product/feature review](INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md); Korean peer [here](INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md). Reconciles 14 domain groups, six P0 gates, nine candidate enhancement IDs F675-01..09, release sequencing, acceptance metrics and 13 official reference links.
+- **P0 remains a release blocker:** DB/ledger authority, precision and money conservation; authenticated all-route responsive QA; exact-SHA Test/Production identity with preserved sessions; AI stock-news stale/failed jobs; actual feature API/UX parity; SEO publisher truth and legal/ad exclusion. Existing v523/v542/v543 economy and v530 UI authorities prevail. Historical v638/v651/v652/v660 audit findings are scoped evidence, not blanket current Production facts.
+- **Next products to evaluate:** feature reality registry, newsroom freshness and corrections, user-scoped wallet ledger receipt, existing calculator-to-learning route, three-action first-session UX, Search Console canonical evidence center, explicit language switching, transparent policy timeline, and editorial review. These are **PLANNING**, not deployed features or automatic implementation authorizations.
+- **Growth guardrails:** useful educational pages over scaled SEO inventory; GSC submission ≠ index success; separate locale URLs and user-chosen language without IP redirect trapping; ad-only cash revenue; fictional market/news disclosures. Track qualified clicks → second action → opt-in activation/D1/D7 and measured Page RPM, never fabricated forecasts.
+- **Version meaning:** v675 is a planning/research review amendment only; it does **not** supersede the standing v530 UI HOLD or authorize any Test/Production/DB/feature-switch change. [Worklog](../worklog/2026-10-15-integrated-planning-review-v675.md).
+
+
 ## v2026.10.14.625 — WLD precision implementation and residual acceptance gates
 
 - Adopt existing exact-money policy via string/BigInt boundaries across wallet, fiat, P2P/donation, burn draw and national pension; preserve integer-only requests, 95/5 pension allocation, fixed presentation FX rates and no arbitrary new wallet cap. See [technical findings](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md).

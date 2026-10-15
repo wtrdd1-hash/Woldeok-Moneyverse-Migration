@@ -1,5 +1,10 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## Planning refresh — v2026.10.15.675
+
+- [EN integrated product/feature review](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md) · [한국어](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md) · [execution log](worklog/2026-10-15-integrated-planning-review-v675.md). Documentary review and P0 blockers; no runtime acceptance.
+
+
 ## v2026.10.15.651 — Web stability assessment / 웹 안정성 진단 (documentation only)
 
 - [Canonical English findings](findings/MONEYVERSE_WEB_FULL_CODE_STABILITY_AUDIT_v2026.10.15.651.md) · [한국어 보고서](findings/MONEYVERSE_WEB_FULL_CODE_STABILITY_AUDIT_v2026.10.15.651.ko.md)

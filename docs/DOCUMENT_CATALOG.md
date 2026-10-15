@@ -1,5 +1,10 @@
 # 📚 Document Catalog
 
+## v2026.10.15.675 — New integrated review (PLANNING)
+
+- [Full product/feature review](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md) / [Korean](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md) is an adopted **review/evidence backlog supplement**, not a superseding runtime/release decision. Canonical authority remains `PROJECT_PLAN`, `INTEGRATED_PLANNING_MASTER` and their explicit economic/UI supersession rules. Contains 14-domain crosswalk, F675-01..09 backlog and 13 official references.
+
+
 ## Current verification evidence (v2026.10.14.605; documentation only)
 
 - [Full function acceptance audit — English](findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.md) / [Korean](findings/MONEYVERSE_FULL_FUNCTION_ACCEPTANCE_AUDIT_v2026.10.14.605.ko.md); [worklog](worklog/2026-10-14-full-function-acceptance-v605.md). This is **BLOCKED**, not a new authoritative feature specification or Production acceptance.
