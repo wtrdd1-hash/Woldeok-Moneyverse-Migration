@@ -17,9 +17,13 @@
 - Cannot certify Production before exact-SHA candidate/Test/CI and release gates.
 
 ## Implementation tasks
-- [ ] RED: add CLI syntax/offline/invalid-input tests in `bot/scripts/qa_ads_sponsorblock_verification.test.mjs`, observe failure on old source.
-- [ ] GREEN: replace broken QA CLI with valid ESM; validated video ID, bounded HTTPS, explicit SKIP/FAIL/PASS and non-zero failure exit.
-- [ ] GREEN: add evidence truth assertions (no absolute yt-dlp path, no bogus 100% bypass, no media download).
-- [ ] Validate syntax/tests, baseline bot tests when dependencies exist, project CI/type/build as practicable.
-- [ ] Re-fetch main; record midwork checks; document EN/KO release/worklog/internal/GitHub updates and verify PR/CI.
-- [ ] Promote only if Test/Production financial/sessions security gates are cleared.
+- [x] RED: add CLI syntax/offline/invalid-input tests in `bot/scripts/qa_ads_sponsorblock_verification.test.mjs`, observe failure on old source.
+- [x] GREEN: replace broken QA CLI with valid ESM; validated video ID, bounded HTTPS, explicit SKIP/FAIL/PASS and non-zero failure exit.
+- [x] GREEN: add evidence truth assertions (no absolute yt-dlp path, no bogus 100% bypass, no media download).
+- [x] Validate syntax/tests, baseline bot tests when dependencies exist, project CI/type/build as practicable.
+- [x] Re-fetch main; record midwork checks; document EN/KO release/worklog/internal/GitHub updates and verify PR/CI.
+- [ ] Promote only if exact-SHA Debian Test, financial/session integrity and Production security gates are cleared. Not performed: P0 HOLD, current Production v712.
+
+## Execution outcome
+- PR #882 merged to main at `899459213aaef61d91f394bbb9a03d760a29ca1d`; GitHub CI and Test Candidate workflows succeeded.
+- Bot read-only local QA and full code tests passed, but v714 has NOT been promoted to Debian Test or Production; v711 finance P0 and v530 authenticated QA prevent release certification.
