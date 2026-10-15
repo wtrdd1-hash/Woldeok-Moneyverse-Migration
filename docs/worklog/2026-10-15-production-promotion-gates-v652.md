@@ -21,3 +21,5 @@
 - **Changes made:** isolated, versioned operational evidence documentation only. No Test or Production pointer switch, Nginx/systemd restart, DB change, migration, member balance, feature switch, user session revocation or Discord bot restart.
 - **Required remediation before retry:** determine a single approved candidate/source SHA; pass code/DB ledger privilege and idempotency negatives; stage and serve that exact SHA from isolated Test with matching backend/frontend manifest+version; prove auth E2E (including admin and five full UI passes), post-restart session retention, DB/migration+ledger reconciliation, rollback readiness and backend/frontend zero-downtime canary; only then perform an atomic Production handoff and post-release smoke.
 - **Verification:** read-only health 200, authoritative Test/Production identity and DB ACL query. These are diagnosis results, NOT production acceptance.
+
+- **Repository record:** Documentation-only PR #848 passed classification/policy checks and merged to main as `54f155a18c7d9c64a6a3f97250e17d7d6f3d935e`. Production stayed on `prod-v600`, public health stayed HTTP 200.
