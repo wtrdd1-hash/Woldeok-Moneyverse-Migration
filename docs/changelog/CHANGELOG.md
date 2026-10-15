@@ -1,3 +1,6 @@
+## v2026.10.15.695 — Isolated integration candidate (no production)
+- #850 and #852 combined with limited v678 Treasury route build fix; local tests and Next build passed. Test identity, finance, session and release gates remain blocked. [Release](../releases/v2026.10.15.695.md).
+
 ## v2026.10.15.674 — Branch audit integration closure (no Production promotion)
 - Docs PRs #846/#847/#849/#855 merged and their source branches deleted after exact SHA ancestry proof; CI/document gates passed. Test/finance/session/zero-downtime gates remain BLOCKED. [Detail](../worklog/2026-10-15-branch-ci-release-close-v674.md).
 
