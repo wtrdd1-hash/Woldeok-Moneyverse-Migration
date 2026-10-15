@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Optional, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Optional, Post, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -135,17 +135,49 @@ export class NewspaperController {
   }
 
   @Get('pulse')
-  @ApiOperation({ summary: '실시간 월드 펄스 및 시장 심리 조회' })
-  getMarketPulse(): { success: boolean; data: NewspaperPulseData } {
+  @ApiOperation({ summary: '진행 중인 가상시장 이벤트에 근거한 현재 시장 심리 조회' })
+  async getMarketPulse(): Promise<{ success: boolean; data: NewspaperPulseData }> {
+    if (!this.pool) throw new ServiceUnavailableException('market data unavailable');
+
+    let events: Array<{
+      headline: string;
+      body: string;
+      direction: 'up' | 'down';
+      strength: number;
+      starts_at: Date;
+    }>;
+    try {
+      // Read only the secure market-event projection, never its restricted base table.
+      const result = await this.pool.query<{
+        headline: string; body: string; direction: 'up' | 'down';
+        strength: number; starts_at: Date;
+      }>(`SELECT headline, body, direction, strength, starts_at
+           FROM public.stock_market_events_active()
+           ORDER BY starts_at DESC LIMIT 100`);
+      events = result.rows;
+    } catch {
+      // Unknown market state must not masquerade as a live bullish market.
+      throw new ServiceUnavailableException('market data unavailable');
+    }
+
+    // This is an event-pressure index, NOT a traded-price indicator or a buy signal.
+    const pressure = events.reduce((sum, event) =>
+      sum + (event.direction === 'up' ? 1 : -1) * Math.min(3, Math.max(1, event.strength)) * 7, 0);
+    const sentimentScore = Math.min(100, Math.max(0, 50 + pressure));
+    const sentimentLabel: NewspaperPulseData['sentimentLabel'] = sentimentScore >= 85
+      ? 'VERY_BULLISH' : sentimentScore >= 65 ? 'BULLISH'
+      : sentimentScore <= 15 ? 'VERY_BEARISH' : sentimentScore <= 35 ? 'BEARISH' : 'NEUTRAL';
+    const lead = events[0];
     return {
       success: true,
       data: {
-        sentimentScore: 68,
-        sentimentLabel: 'BULLISH',
-        activeEventsCount: 4,
-        leadHeadline: '사이버 보안 감사 통과에 따른 테크/핀테크 섹터 반등 랠리',
-        leadSummary: '월드 가상 증시 343회차 정기 결산 및 시스템 정밀 진단 완결에 따라 테크놀로지 및 핀테크 주도주 전반에 유동성이 대거 유입되고 있습니다.',
-        updatedAt: new Date().toISOString(),
+        sentimentScore,
+        sentimentLabel,
+        activeEventsCount: events.length,
+        leadHeadline: lead?.headline ?? '현재 진행 중인 시장 소식이 없습니다',
+        leadSummary: lead?.body ?? '현재 영향 중인 가상시장 이벤트가 없어 중립으로 표시합니다.',
+        updatedAt: lead?.starts_at instanceof Date
+          ? lead.starts_at.toISOString() : new Date().toISOString(),
       },
     };
   }
