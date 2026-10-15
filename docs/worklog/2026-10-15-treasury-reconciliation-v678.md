@@ -20,3 +20,7 @@
 - Fresh full isolated-node suites on 2026-10-15 KST: backend Vitest 1,190 passed / **391 database-dependent skipped** (144 suites passed, 53 skipped); frontend Vitest 1,210 passed (221 suites). Release classifier 13/13 passed. Early v678 contract build, backend typecheck/build, frontend typecheck and Next.js production Webpack build all exited 0. Latest commits after these source checks modify documentation only.
 - Live Postgres SELECT replay revealed MAIN journal predecessor 25,230,420 vs successor opening 25,230,375 WLD (45 mismatch). Fiscal EMERGENCY gap 15,139,250 WLD remains uncorrected. No Prod/Test switch, DB DML, actual grant, automatic SWF containment, or backend Test environment deployment occurred.
 - G1 read-only UI candidate is completed at source/test level. G0 SWF running Production containment and G2–G5 financial acceptance remain BLOCKED. Do not claim a valid Production financial release.
+
+## S3 GitHub draft PR and release boundary
+- Published branch fix/treasury-accounting-read-truth-v2026.10.15.678 with source/docs SHA 808bbc33d952e896c701904c71ac9495988b3d7e, base main a37b7338; [Draft PR #862](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/862) created; initial GitHub CI run 38687929202 was IN PROGRESS when observed, not an acceptance pass.
+- No merge, Test release, Prod promotion, SQL migration or money movement. G0 live SWF freeze and G2–G5 Test/financial/security gates remain open.

@@ -41,6 +41,6 @@
 **Files:** `docs/worklog/2026-10-15-treasury-reconciliation-v678.{md,ko.md}`, `docs/updates/v2026.10.15.678-{internal,github}.{md,ko.md}`.
 - [x] Record start/intermediate/main recheck plus exact test results, limitations, no money movement.
 - [x] Verify staged diff, run backend build and change-impact tests and docs classifier.
-- [ ] Push named branch and open draft PR; do not merge or Production promote without same exact-SHA Test DB/API, auth/session and rollback gates.
+- [x] Push named branch and open draft PR; do not merge or Production promote without same exact-SHA Test DB/API, auth/session and rollback gates.
 
 **Verification boundary:** source/isolated unit tests and Webpack build passed. Actual Test PostgreSQL, security negatives and Production zero-downtime gates were not executed and remain STOP conditions.
