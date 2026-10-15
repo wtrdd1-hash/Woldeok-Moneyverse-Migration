@@ -17,6 +17,12 @@
 - **출시:** v530 전체 UI, v523/542/543 DB·원장 안전, 동일 SHA 격리 Test/롤백 미수용이면 운영 BLOCK. v679은 문서만 변경하며 모델 호출·DB/Test/운영 적용 없음. [작업기록](../worklog/2026-10-15-f67502-ai-news-user-trust-v679.ko.md).
 
 
+## v2026.10.15.678 — 국고 원장 사실성·전체 재정 단계별 재개발 (구현 후보)
+
+- [국고 전체 재구축 프로그램](TREASURY_REBUILD_PROGRAM_v2026.10.15.678.ko.md) / [영문 정본](TREASURY_REBUILD_PROGRAM_v2026.10.15.678.md)에 G0 SWF 운영통제 → G1 보조원장 대사 → G2 실제 재원·DB 권한 → G3 복식부기 지출 → G4 공개 지표·DAO·그랜트 → G5 정확한 SHA Test·운영승격을 정의. v523/542 금융 불변식과 v530 UI 차단을 유지한다.
+- **G1 코드 후보:** 정상/0 고정 대사를 금고별 실제 순흐름·연속성 계산으로 교체하고 Economy Core 미확인은 UNVERIFIED로 표시. 가용지급원금 미입증, 지급 활성화·운영/Test 배포 아님. [구현 명세](../superpowers/specs/2026-10-15-treasury-finance-evidence-v678.ko.md).
+- **실측 SELECT:** MAIN 45 WLD, EMERGENCY 15,139,250 WLD 차이와 연속성 오류 1건. 이 값을 무단으로 보정·지급하지 않는다. 다른 작업자의 v677 기능 신뢰·v679 AI 뉴스 기획 보존.
+
 ## v2026.10.15.677 — F675-01 실제 기능 상태·사용자 오류 복구 상세 설계 (PLANNING)
 
 - v675 F675-01의 정식 상세기획으로 [기능 실재성·사용자 신뢰 상세명세](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md) / [영문](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md)을 채택. 신규/기존/저속망/보조기술 등 6개 이용자 시나리오는 검증할 가설이며 실제 인터뷰 결과가 아님.

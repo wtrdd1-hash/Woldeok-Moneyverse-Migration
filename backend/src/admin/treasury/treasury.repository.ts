@@ -354,10 +354,12 @@ export const AUTHORITATIVE_BUDGET_ENVELOPES: readonly TreasuryBudgetEnvelope[] =
 ];
 
 export interface TreasuryReconciliation {
-  readonly status: 'RECONCILED' | 'DISCREPANCY';
+  // RECONCILED requires independently proven Economy Core backing, not merely a matching fiscal subledger.
+  readonly status: 'RECONCILED' | 'DISCREPANCY' | 'UNVERIFIED';
   readonly total_vaults_balance_wld: string;
   readonly total_ledger_net_flow_wld: string;
   readonly discrepancy_amount_wld: string;
+  readonly journal_integrity_issues: number;
   readonly last_reconciled_at: string;
 }
 
@@ -502,13 +504,9 @@ export class TreasuryRepository {
 
     const coverageDays = Number(availableWld / dailyOutflow30d);
 
-    const reconciliation: TreasuryReconciliation = {
-      status: 'RECONCILED',
-      total_vaults_balance_wld: totalTreasury.toString(),
-      total_ledger_net_flow_wld: totalTreasury.toString(),
-      discrepancy_amount_wld: '0',
-      last_reconciled_at: new Date().toISOString(),
-    };
+    // Never assert a financially spendable balance when the subsidiary ledger
+    // has not been joined to the authoritative Economy Core transaction chain.
+    const reconciliation = await this.getReconciliation();
 
     const liveBudgets = await this.calculateLiveBudgets();
 
@@ -517,9 +515,9 @@ export class TreasuryRepository {
       total_treasury_wld: totalTreasury.toString(),
       total_circulating_wld: totalCirculating.toString(),
       reserve_ratio_pct: reserveRatio,
-      available_wld: availableWld.toString(),
+      available_wld: reconciliation.status === 'RECONCILED' ? availableWld.toString() : '0',
       reserve_wld: reserveVaultWld.toString(),
-      coverage_days: coverageDays,
+      coverage_days: reconciliation.status === 'RECONCILED' ? coverageDays : 0,
       tax_rates: AUTHORITATIVE_TAX_RATES,
       budgets: liveBudgets,
       reconciliation,
@@ -869,17 +867,74 @@ export class TreasuryRepository {
   }
 
   async getReconciliation(): Promise<TreasuryReconciliation> {
-    const vaultsRes = await this.pool.query<{ total: string }>(`
-      SELECT coalesce(sum(balance_wld::numeric), 0)::bigint::text AS total
-      FROM public.system_treasury_vaults
+    // Fiscal vault rows and fiscal journals form a subsidiary accounting book.
+    // They do NOT, on their own, prove spendable balance in the Economy Core.
+    // One statement gives a single PostgreSQL MVCC snapshot for these figures.
+    const evidence = await this.pool.query<{
+      total_vaults_balance_wld: string;
+      total_ledger_net_flow_wld: string;
+      discrepancy_amount_wld: string;
+      journal_integrity_issues: number;
+    }>(`
+      WITH ordered_journal AS (
+        SELECT
+          vault_id,
+          amount_wld::numeric AS recorded_amount,
+          balance_before::numeric AS balance_before,
+          balance_after::numeric AS balance_after,
+          LAG(balance_after::numeric) OVER (
+            PARTITION BY vault_id ORDER BY created_at, id
+          ) AS previous_balance_after
+        FROM public.system_treasury_ledger
+      ),
+      per_vault_journal AS (
+        SELECT
+          vault_id,
+          COUNT(*) AS entry_count,
+          COALESCE(SUM(balance_after - balance_before), 0) AS net_flow,
+          COUNT(*) FILTER (
+            WHERE (previous_balance_after IS NOT NULL
+                   AND previous_balance_after <> balance_before)
+               OR ABS(balance_after - balance_before) <> recorded_amount
+          ) AS integrity_issues
+        FROM ordered_journal
+        GROUP BY vault_id
+      )
+      SELECT
+        COALESCE(SUM(v.balance_wld::numeric), 0)::text AS total_vaults_balance_wld,
+        COALESCE(SUM(COALESCE(j.net_flow, 0)), 0)::text AS total_ledger_net_flow_wld,
+        COALESCE(SUM(ABS(v.balance_wld::numeric - COALESCE(j.net_flow, 0))), 0)::text
+          AS discrepancy_amount_wld,
+        COALESCE(SUM(
+          COALESCE(j.integrity_issues, 0)
+          + CASE WHEN j.entry_count IS NULL AND v.balance_wld::numeric <> 0 THEN 1 ELSE 0 END
+        ), 0)::integer AS journal_integrity_issues
+      FROM public.system_treasury_vaults v
+      LEFT JOIN per_vault_journal j ON j.vault_id = v.id
     `);
-    const totalVaults = vaultsRes.rows[0]?.total ?? '0';
+
+    const row = evidence.rows[0];
+    if (!row) {
+      throw new Error('Treasury reconciliation evidence unavailable');
+    }
+
+    const vaultAmount = BigInt(row.total_vaults_balance_wld);
+    const fiscalNet = BigInt(row.total_ledger_net_flow_wld);
+    const discrepancy = BigInt(row.discrepancy_amount_wld);
+    const integrityIssues = Number(row.journal_integrity_issues);
+    if (vaultAmount < 0n || discrepancy < 0n ||
+        !Number.isSafeInteger(integrityIssues) || integrityIssues < 0) {
+      throw new Error('Treasury reconciliation evidence invalid');
+    }
 
     return {
-      status: 'RECONCILED',
-      total_vaults_balance_wld: totalVaults,
-      total_ledger_net_flow_wld: totalVaults,
-      discrepancy_amount_wld: '0',
+      // Even a perfect fiscal subledger remains UNVERIFIED until its
+      // Economy Core funding counterpart and liabilities are reconciled.
+      status: discrepancy > 0n || integrityIssues > 0 ? 'DISCREPANCY' : 'UNVERIFIED',
+      total_vaults_balance_wld: vaultAmount.toString(),
+      total_ledger_net_flow_wld: fiscalNet.toString(),
+      discrepancy_amount_wld: discrepancy.toString(),
+      journal_integrity_issues: integrityIssues,
       last_reconciled_at: new Date().toISOString(),
     };
   }

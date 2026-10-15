@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
-import { loadGrants } from '@/app/api/treasury/apply-grant/route';
+import { loadGrants } from '@/lib/treasury-grants-legacy';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../../admin-back';
 import type { TreasuryGrantApplication } from '@/app/treasury/treasury.types';
