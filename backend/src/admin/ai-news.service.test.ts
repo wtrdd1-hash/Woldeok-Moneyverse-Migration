@@ -423,6 +423,46 @@ describe('endpoint', () => {
 });
 
 describe('openAiCaller', () => {
+  it('permits only explicit deployment-owned Ollama completions without weakening generic SSRF', async () => {
+    const fetcher = server(completion(JSON.stringify(BATCH)));
+    vi.stubGlobal('fetch', fetcher);
+    await expect(openAiCaller({
+      ...CALL,
+      apiBaseUrl: 'http://127.0.0.1:11434/v1',
+      apiKey: '',
+      deploymentLocalModel: true,
+    })).resolves.toMatchObject({ scenarios: [{ headline: '뮤야얌 전자, 신제품 발표' }] });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(fetcher.mock.calls[0]?.[0]).toBe('http://127.0.0.1:11434/v1/chat/completions');
+    expect((fetcher.mock.calls[0]?.[1] as RequestInit).redirect).toBe('manual');
+  });
+
+  it('blocks arbitrary localhost targets, alternative ports and manual newsroom local URLs', async () => {
+    const fetcher = server(completion(JSON.stringify(BATCH)));
+    vi.stubGlobal('fetch', fetcher);
+    for (const base of [
+      'http://127.0.0.1:11435/v1',
+      'http://localhost:11434/v1',
+      'http://192.168.1.7:11434/v1',
+      'http://127.0.0.1:11434/admin',
+      'http://evil@127.0.0.1:11434/v1',
+    ]) {
+      await expect(openAiCaller({ ...CALL, apiBaseUrl: base, deploymentLocalModel: true }))
+        .rejects.toMatchObject({ code: 'ai_news_model_unreachable' });
+    }
+    await expect(openAiCaller({ ...CALL, apiBaseUrl: 'http://127.0.0.1:11434/v1' }))
+      .rejects.toMatchObject({ code: 'ai_news_model_unreachable' });
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it('does not follow redirects from the approved loopback Ollama endpoint', async () => {
+    const fetcher = server(new Response(null, { status: 302, headers: { location: 'http://169.254.169.254/latest/meta-data/' } }));
+    vi.stubGlobal('fetch', fetcher);
+    await expect(openAiCaller({ ...CALL, apiBaseUrl: 'http://127.0.0.1:11434/v1', deploymentLocalModel: true }))
+      .rejects.toMatchObject({ code: 'ai_news_model_unreachable' });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
   it('posts to {base}/chat/completions with the model, the two turns and a strict schema', async () => {
     const fetcher = server(completion(JSON.stringify(BATCH)));
     vi.stubGlobal('fetch', fetcher);
