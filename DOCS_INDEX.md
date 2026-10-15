@@ -1,6 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
-<<<<<<< HEAD
+## v2026.10.15.650 — Audited CI/PR integration (documentation-only)
+
+- [Release record (EN)](docs/releases/v2026.10.15.650.md) · [릴리스 기록 (KO)](docs/releases/v2026.10.15.650.ko.md)
+- [Worklog (EN)](docs/worklog/2026-10-15-ci-pr-branch-integration-v650.md) · [작업 기록 (KO)](docs/worklog/2026-10-15-ci-pr-branch-integration-v650.ko.md)
+- Web audit PRs #841–843 and Android signing PR #27 merged. Web #844 and Android #23–25 remain blocked; no Test/Production runtime change.
+
 ## 2026-10-14 WLD monetary overflow protection (v2026.10.14.625)
 
 - [English primary report](docs/findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md) · [한국어 상세 보고서](docs/findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md)
