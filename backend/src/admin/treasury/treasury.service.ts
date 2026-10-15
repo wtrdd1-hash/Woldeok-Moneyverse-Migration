@@ -112,6 +112,25 @@ export class TreasuryService {
     }
   }
 
+  async donateVerified(
+    actorUserId: string,
+    idempotencyKey: string,
+    amountWld: string,
+    memo: string,
+  ): Promise<Record<string, unknown>> {
+    // Finance rollout must first pass exact-SHA Test auth, DB concurrency,
+    // balance conservation and rolling-deployment approval. Disabled by default.
+    if (process.env.TREASURY_DONATIONS_V2_ENABLED !== 'true') {
+      throw new ServiceUnavailableException('국고 기부 정산은 금융 검증이 완료될 때까지 보류됩니다.');
+    }
+    if (!/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(idempotencyKey)
+      || !/^[1-9][0-9]*$/.test(amountWld)
+      || typeof memo !== 'string' || memo.length > 500) {
+      throw new TreasuryInputError('요청 ID, 기부금액 또는 메모가 올바르지 않습니다.');
+    }
+    return this.repository.donateVerified(actorUserId, idempotencyKey, amountWld, memo);
+  }
+
   async userDonate(_userId: string, _amountWld: string, _memo: string) {
     // Until a fully idempotent, authenticated Economy Core settlement replaces
     // historical direct balance updates, never acknowledge payment.

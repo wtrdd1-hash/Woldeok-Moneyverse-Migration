@@ -30,6 +30,7 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   MINT_TO_USER: '보상 지급',
   USER_TO_USER: '사용자 송금',
   USER_TO_TREASURY: '운영 수수료',
+  TREASURY_DONATION: '국고 자발적 기부',
   TREASURY_TO_USER: '운영 지급',
   USER_TO_SINK: '소비',
   BANK_DEPOSIT: '은행 입금',

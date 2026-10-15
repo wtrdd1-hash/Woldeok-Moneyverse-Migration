@@ -827,6 +827,23 @@ export class TreasuryRepository {
     return res.rows[0]?.result;
   }
 
+  async donateVerified(
+    actorUserId: string,
+    idempotencyKey: string,
+    amountWld: string,
+    memo: string,
+  ): Promise<Record<string, unknown>> {
+    // The old 3-argument routine remains paused. Never build a key per retry.
+    const result = await this.pool.query<{ receipt: Record<string, unknown> }>(
+      'SELECT public.treasury_donate_v2($1::uuid, $2::uuid, $3::text, $4::text) AS receipt',
+      [idempotencyKey, actorUserId, amountWld, memo],
+    );
+    if (!result.rows[0]?.receipt?.success) {
+      throw new Error('Treasury donation transaction not committed');
+    }
+    return result.rows[0].receipt;
+  }
+
   async userDonate(userId: string, amountWld: string, memo: string): Promise<any> {
     const res = await this.pool.query<{ result: any }>(
       `SELECT public.treasury_user_donate($1::uuid, $2::text, $3::text) AS result`,
