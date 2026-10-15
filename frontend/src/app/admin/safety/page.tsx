@@ -37,9 +37,9 @@ function takedownStatusBadge(status: string) {
     case 'TRIAGED':
       return <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400 text-xs">심사 중</Badge>;
     case 'ACTIONED_REMOVED':
-      return <Badge className="bg-emerald-600 text-white text-xs">삭제 완료</Badge>;
+      return <Badge className="bg-emerald-600 text-white text-xs">삭제 처리 기록</Badge>;
     case 'ACTIONED_RESTRICTED':
-      return <Badge variant="secondary" className="text-xs">접근 제한</Badge>;
+      return <Badge variant="secondary" className="text-xs">접근 제한 기록</Badge>;
     case 'REJECTED':
       return <Badge variant="outline" className="text-muted-foreground text-xs">반려됨</Badge>;
     default:

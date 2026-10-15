@@ -1,6 +1,9 @@
 ## v2026.10.15.652 — 운영 승격 게이트 점검 (BLOCKED)
 - 실제 Debian 운영/Test 버전과 DB 권한 검사. Test 백엔드 SHA와 프론트/manifest 불일치, 운영 버전 unknown, 앱 역할 public 237개 테이블 쓰기 가능·PUBLIC SECURITY DEFINER 11개. 금융/UI/세션/롤백 수용 미완료로 **운영 배포 미실행**. [검증 보고서](../releases/v2026.10.15.652.ko.md).
 
+## v2026.10.15.651 — 관리자 안전 기능 수정 후보
+- docs/findings/MONEYVERSE_ADMIN_TAKEDOWN_CODE_AUDIT_v2026.10.15.651.ko.md 참조. Test/운영 수용 미완료.
+
 ## v2026.10.15.650 — CI/PR 통합 기록 (문서 + 안드로이드 서명 보안)
 - 웹 감사문서 PR #841~843, 안드로이드 서명보안 #27을 CI 검증 후 병합. 최상위 문서 충돌 표식 별도 CI/PR 수정, 웹 #844·앱 #23~25는 수용 미완료로 보류. 서버나 Play/운영 배포 없음. [릴리스 기록](../releases/v2026.10.15.650.ko.md).
 

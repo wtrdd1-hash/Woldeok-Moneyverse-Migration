@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.651 — Emergency takedown reauth / status truth candidate
+
+- Takedown admin action's redundant recent identity challenge removed in isolated source candidate only; administrator session, RBAC and CSRF remain. Physical content deletion is absent from the status-only SQL function, so automatic purge/ledger claims are prohibited.
+- Source re-audit identifies registration route links and test-environment drift; real content deletion, sensitive table-grant hardening and exact-SHA Test/Production evidence remain BLOCKED. v530 UI acceptance remains authoritative. [Findings](../findings/MONEYVERSE_ADMIN_TAKEDOWN_CODE_AUDIT_v2026.10.15.651.md).
+
+
 ## v2026.10.14.625 — WLD amount overflow protection (implementation candidate)
 
 - Canonical integer WLD strings and BigInt arithmetic protect wallet notifications, configured fiat display, P2P/donation, burn receipts, and pension contribution/refund/payout. No holdings cap is introduced. See [English risk register](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md) and [Korean report](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md).

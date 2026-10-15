@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.651 — Emergency takedown access and functionality truth (candidate, NOT accepted)
+
+- The emergency takedown admin **action** requires logged-in administrator role, an open console session and CSRF, but not an additional recent-reauthentication prompt. Other financial and security step-up policies are unchanged.
+- The current SQL action changes only the takedown CASE STATUS; it does **not** remove referenced content or write a financial ledger receipt. Moderator UX must disclose this explicitly; actual verified content removal, DB privilege hardening and authenticated full-route acceptance remain P0.
+- Candidate only. No Test/Production/DB/session acceptance is implied. See [v651 audit](../findings/MONEYVERSE_ADMIN_TAKEDOWN_CODE_AUDIT_v2026.10.15.651.md). v530 full UI gate remains active.
+
+
 ## v2026.10.14.625 — WLD precision implementation and residual acceptance gates
 
 - Adopt existing exact-money policy via string/BigInt boundaries across wallet, fiat, P2P/donation, burn draw and national pension; preserve integer-only requests, 95/5 pension allocation, fixed presentation FX rates and no arbitrary new wallet cap. See [technical findings](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md).

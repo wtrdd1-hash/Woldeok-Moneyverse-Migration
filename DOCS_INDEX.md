@@ -7,6 +7,14 @@
 - [Detailed worklog EN](docs/worklog/2026-10-15-production-promotion-gates-v652.md) · [작업기록 KO](docs/worklog/2026-10-15-production-promotion-gates-v652.ko.md)
 - Exact-SHA Test mismatch, public Production unknown version and 237 writable DB tables / 11 PUBLIC definer routines: **no Production deployment**.
 
+## v2026.10.15.651 — Admin emergency takedown verification / safety audit (candidate)
+
+- [EN audit](docs/findings/MONEYVERSE_ADMIN_TAKEDOWN_CODE_AUDIT_v2026.10.15.651.md) · [KO audit](docs/findings/MONEYVERSE_ADMIN_TAKEDOWN_CODE_AUDIT_v2026.10.15.651.ko.md)
+- [EN worklog](docs/worklog/2026-10-15-admin-takedown-auth-truth-v651.md) · [KO worklog](docs/worklog/2026-10-15-admin-takedown-auth-truth-v651.ko.md)
+- [GitHub update](docs/updates/v2026.10.15.651-github.md) · [Internal update](docs/updates/v2026.10.15.651-internal.md)
+- **Candidate only:** remove redundant safety-action reauth while retaining RBAC/admin session/CSRF; correct misleading case status, mobile layout, four calculator signup links, and React test environment. Actual content deletion, DB privileges, authenticated Test/Production acceptance remain OPEN.
+
+
 ## v2026.10.15.650 — Audited CI/PR integration (documentation-only)
 
 - [Release record (EN)](docs/releases/v2026.10.15.650.md) · [릴리스 기록 (KO)](docs/releases/v2026.10.15.650.ko.md)
