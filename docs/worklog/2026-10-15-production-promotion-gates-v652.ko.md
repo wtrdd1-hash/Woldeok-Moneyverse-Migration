@@ -20,3 +20,5 @@
 - Test/운영 포인터, Nginx/systemd, DB·실잔액·마이그레이션·기능스위치·세션·디스코드 봇은 변경하지 않음.
 - **다음 조치:** 승인된 후보 단일 SHA 확정 → 금융 원장·DB 권한·인증 음성 테스트 → immutable 격리 Test 설치 및 manifest/백엔드/프론트 버전 일치 → 실제 로그인 유지와 관리자 포함 전 경로 UI 5회 → DB 복구·롤백 → 무중단 canary 준비 → 원자적 운영 전환과 외부 smoke 검사.
 - 상세 근거는 [영문 정본](2026-10-15-production-promotion-gates-v652.md).
+
+- **GitHub 종료 기록:** 문서 전용 PR #848 정책 CI 성공 후 `54f155a18c7d9c64a6a3f97250e17d7d6f3d935e`로 main 병합 완료. 운영은 `prod-v600` 유지, 공개 health HTTP 200 유지.
