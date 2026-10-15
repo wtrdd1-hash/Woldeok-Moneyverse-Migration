@@ -19,4 +19,4 @@
 - Web #844: **blocked** (direct balance writes, incomplete canonical ledger/privilege checks, exact-SHA Test not serving candidate, authenticated full UI five-pass coverage and rollback/DB security unverified).
 - Android #23/#24/#25: **unmerged**, conflicts and backend/device testing requirements.
 - Runtime services and DB were inspected read-only; no Test/Production alias, DB schema, account balances, feature switches, production services or traffic changed.
-- Remaining integration-record PR v650: pending exact-head GitHub CI validation/merge outcome; update here when complete.
+- Final record: integration PR #845 exact-head GitHub checks `classify` and `policy` PASS; `runtime-check` SKIPPED by documentation-only classification. PR #845 merged to web main as `3634dcf0b07f34a493910e7485a1b508bd35fe48`. This v650 documentation cycle is complete; no server Test/Production deployment.
