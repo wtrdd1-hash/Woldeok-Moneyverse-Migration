@@ -25,5 +25,9 @@
 - 2026-10-16 01:29 KST: Optimized list payload to summaries (instead of full multilingual article bodies), isolated test data to temp path, updated legacy test to use canonical URL and Node environment. Blog unit suite 14/14 green. Frontend Test/backend Test services active and public Test endpoints respond 200, but exact v710 candidate NOT installed.
 - Full security/editorial status: original daily automatic publishing path remains unreviewed and may make unsourced live quantitative claims. The new static regional guides do not use this path. Real GSC URL Inspection evidence is not available from screenshot; do not claim indexing resolution.
 
-## Finished
-- Awaiting final exact-main CI, PR and Test release gates. No member balances, Production site, shared live blog store or Test release mutated by this work. Development preview process is temporary and must be stopped.
+## Finished — 2026-10-16 01:38 KST
+- GitHub PR **#879** opened as a draft: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/879. No merge, no Production upgrade.
+- Rebasing onto main `be0335f3` completed without conflicts; exact-main candidate rechecked (14/14 blog tests, tsc, ESLint, shared contracts and full Next build all pass). A final polish included locale-matched shared article UI copy and empty-search display; last commit/CI SHA to be updated below.
+- GitHub PR checks after initial creation: classify/policy/release-input green; runtime-check pending at first read. No claim of CI completion until all gates pass.
+- Development preview port 4147 stop signal sent; the Production site, actual Test release, member balances and live persisted blog posts were never modified.
+- Gate remains BLOCKED by pre-existing unreviewed daily publication quality, missing GSC URL Inspection samples, and missing exact-SHA Test/session/DB rehearsal.

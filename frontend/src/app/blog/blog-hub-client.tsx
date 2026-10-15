@@ -52,7 +52,7 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
     return matchCategory && matchSearch;
   });
 
-  const featuredPost = filteredPosts[0] ?? initialPosts[0];
+  const featuredPost = filteredPosts[0];
   const regularPosts = filteredPosts.filter((p) => p.slug !== featuredPost?.slug);
 
   return (
@@ -179,7 +179,7 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
           <span className="text-xs text-muted-foreground font-mono">{labels.count} {filteredPosts.length}</span>
         </div>
 
-        {regularPosts.length === 0 && !featuredPost ? (
+        {!featuredPost ? (
           <div className="p-12 text-center border border-dashed border-border rounded-xl text-muted-foreground text-xs">
             검색 조건에 맞는 블로그 글이 없습니다.
           </div>

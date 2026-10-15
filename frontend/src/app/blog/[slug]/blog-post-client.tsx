@@ -29,7 +29,15 @@ interface Props {
   readonly locale: BlogLocale;
 }
 
+const LABELS = {
+  ko: { back:'블로그 목록으로 돌아가기', share:'글 공유하기', copied:'복사 완료', minutes:'완독 약', unit:'분', views:'조회', viewUnit:'회', tags:'관련 검색 키워드', illustration:'금융 교육용 삽화' },
+  en: { back:'Back to articles', share:'Share article', copied:'Copied', minutes:'Read time', unit:'min', views:'Views', viewUnit:'', tags:'Related topics', illustration:'Educational illustration' },
+  ja: { back:'記事一覧に戻る', share:'記事を共有', copied:'コピー済み', minutes:'読了目安', unit:'分', views:'閲覧', viewUnit:'回', tags:'関連キーワード', illustration:'教育用イラスト' },
+  zh: { back:'返回文章列表', share:'分享文章', copied:'已复制', minutes:'阅读时间', unit:'分钟', views:'浏览', viewUnit:'次', tags:'相关主题', illustration:'教学插图' },
+} as const;
+
 export function BlogPostClient({ post, locale }: Props) {
+  const labels = LABELS[locale];
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
@@ -66,7 +74,7 @@ export function BlogPostClient({ post, locale }: Props) {
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost" size="sm" className="text-xs -ml-2 text-muted-foreground hover:text-foreground">
           <Link href={blogHubUrl(locale).replace("https://easy-scraping.com", "")}>
-            <ArrowLeft className="size-3.5 mr-1.5" /> 블로그 목록으로 돌아가기
+            <ArrowLeft className="size-3.5 mr-1.5" /> {labels.back}
           </Link>
         </Button>
 
@@ -79,11 +87,11 @@ export function BlogPostClient({ post, locale }: Props) {
         >
           {copied ? (
             <span className="flex items-center gap-1 text-emerald-400">
-              <Check className="size-3" /> 복사 완료
+              <Check className="size-3" /> {labels.copied}
             </span>
           ) : (
             <span className="flex items-center gap-1">
-              <Share2 className="size-3" /> 글 공유하기
+              <Share2 className="size-3" /> {labels.share}
             </span>
           )}
         </Button>
@@ -112,15 +120,15 @@ export function BlogPostClient({ post, locale }: Props) {
             {post.categoryLabel}
           </Badge>
           <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-            <Calendar className="size-3" /> {new Date(post.publishedAt).toLocaleDateString('ko-KR')}
+            <Calendar className="size-3" /> {new Date(post.publishedAt).toLocaleDateString(({ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN'})[locale])}
           </span>
           <span className="text-xs text-muted-foreground font-mono">·</span>
           <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-            <Clock className="size-3" /> 완독 약 {post.readTimeMinutes}분
+            <Clock className="size-3" /> {labels.minutes} {post.readTimeMinutes}{labels.unit}
           </span>
           <span className="text-xs text-muted-foreground font-mono">·</span>
           <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-            <Eye className="size-3" /> 조회 {post.views.toLocaleString()}회
+            <Eye className="size-3" /> {labels.views} {post.views.toLocaleString()} {labels.viewUnit}
           </span>
         </div>
 
@@ -162,7 +170,7 @@ export function BlogPostClient({ post, locale }: Props) {
             loading="eager"
           />
           <div className="px-4 py-2 bg-muted/40 border-t border-border/40 text-[11px] text-muted-foreground font-mono flex items-center justify-between">
-            <span>📊 {activeTitle} — 금융 교육용 삽화</span>
+            <span>📊 {activeTitle} — {labels.illustration}</span>
             <span className="text-emerald-400 font-bold">Illustration · not live data</span>
           </div>
         </div>
@@ -257,7 +265,7 @@ export function BlogPostClient({ post, locale }: Props) {
       {/* Tags */}
       <div className="pt-4 border-t border-border/60 space-y-2">
         <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-          <Tag className="size-3.5" /> 관련 검색 키워드
+          <Tag className="size-3.5" /> {labels.tags}
         </span>
         <div className="flex flex-wrap gap-1.5">
           {activeTags.map((tag, idx) => (
