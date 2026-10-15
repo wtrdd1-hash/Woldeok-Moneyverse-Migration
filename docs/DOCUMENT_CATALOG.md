@@ -1,5 +1,13 @@
 # 📚 Document Catalog
 
+## v2026.10.16.713 — Proposed remediation blueprint (NOT adopted or deployed)
+
+- [Integrated full-platform remediation design — EN](planning/PLATFORM_REMEDIATION_MASTER_BLUEPRINT_v2026.10.16.713.md) / [KO](planning/PLATFORM_REMEDIATION_MASTER_BLUEPRINT_v2026.10.16.713.ko.md): P0/P1/P2 problems, source/plan truth, safe release order and external references.
+- [P0 finance, treasury and DB privilege redesign — EN](planning/P0_FINANCIAL_AND_DATABASE_REMEDIATION_DESIGN_v2026.10.16.713.md) / [KO](planning/P0_FINANCIAL_AND_DATABASE_REMEDIATION_DESIGN_v2026.10.16.713.ko.md): independent reconciliations, canonical settlements, strict privileges and forward-only migrations.
+- [26-step implementation proposal — EN](planning/REMEDIATION_IMPLEMENTATION_TASK_MATRIX_v2026.10.16.713.md) / [KO](planning/REMEDIATION_IMPLEMENTATION_TASK_MATRIX_v2026.10.16.713.ko.md): owner/file/test/acceptance matrix.
+- **Status: PLANNING ONLY**, subject to approval and superseding current adopted economic/UI authorities **only if explicitly approved later**. Do not interpret this catalog link as implementation, Test success or Production promotion.
+
+
 ## v2026.10.15.688 — F675-06 GSC evidence center (PLANNING)
 
 - [F675-06 Google Search Evidence, Indexing Truth & Canonical Action Center EN](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [KO](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md); source gaps S688-01..10, operator user hypotheses, separate index/submission/traffic truth, 16 official references, D0–D7. No runtime code/GSC access or deployment.

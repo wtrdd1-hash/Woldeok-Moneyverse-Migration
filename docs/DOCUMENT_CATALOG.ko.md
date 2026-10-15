@@ -1,5 +1,13 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.16.713 — 전체 문제 해결 상세 기획 제안 (정식 채택·배포 아님)
+
+- [영문 전체 마스터 설계](planning/PLATFORM_REMEDIATION_MASTER_BLUEPRINT_v2026.10.16.713.md) / [한국어](planning/PLATFORM_REMEDIATION_MASTER_BLUEPRINT_v2026.10.16.713.ko.md): 모든 P0/P1/P2와 기능·권한·배포 게이트.
+- [영문 금융/DB P0 상세](planning/P0_FINANCIAL_AND_DATABASE_REMEDIATION_DESIGN_v2026.10.16.713.md) / [한국어](planning/P0_FINANCIAL_AND_DATABASE_REMEDIATION_DESIGN_v2026.10.16.713.ko.md): 국고 삼중 대사, 원자적 멱등 원장, 단계적 권한 회수.
+- [영문 26개 작업표](planning/REMEDIATION_IMPLEMENTATION_TASK_MATRIX_v2026.10.16.713.md) / [한국어](planning/REMEDIATION_IMPLEMENTATION_TASK_MATRIX_v2026.10.16.713.ko.md): 담당/수정 대상/RED-GREEN/수용 및 롤백 조건.
+- **상태 PLANNING**: 최신 제품 기획 승인, 구현, Test, 운영승격을 자동으로 의미하지 않음. v523/v542/v543 금융 및 v530 UI 권위는 그대로 유지.
+
+
 ## v2026.10.15.688 — F675-06 Search Console 근거 센터 (PLANNING)
 
 - [F675-06 한국어 GSC 색인·검색 실제 근거](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영어](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md). S688-01~10 코드 사실, 제출/크롤링/색인/노출 분리, 실운영자 가설·외부 16개/D0~D7. 문서 전용, 실제 서버/GSC 미조회.
