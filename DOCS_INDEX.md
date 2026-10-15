@@ -1,6 +1,7 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
 ## v2026.10.16.701 — Server capacity and SECURITY DEFINER ACL remediation
+- **LIVE:** Production privilege patch executed: publicly executable SECURITY DEFINER functions 11→0; explicit app EXECUTE 11 maintained; public endpoint smoke passed, no app release change. [Evidence](docs/releases/v2026.10.16.701.md).
 - [Release EN](docs/releases/v2026.10.16.701.md) / [KO](docs/releases/v2026.10.16.701.ko.md) · [Worklog](docs/worklog/2026-10-16-server-hygiene-v701.md). Owned merged build artifacts only: ~2.44GiB reclaimed, usage 81%→78%; isolated Production-schema shadow verified PUBLIC SECURITY DEFINER 11→0 and app EXECUTE retained, rollback tested. No member balance migration; residual direct finance DML remains P0.
 
 ## v2026.10.15.697 — Live Production blue-green release

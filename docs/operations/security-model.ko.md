@@ -1,3 +1,8 @@
+## v701 LIVE PUBLIC EXECUTE result — 2026-10-16 실제 운영 권한 검사
+- 운영 PostgreSQL 공개 SECURITY DEFINER 함수의 PUBLIC 실행권 **0개**(기존 11개). 앱 계정 명시적 실행권 11개 유지. 제한적 권한 변경 SQL은 `ops/security/v701-revoke-public-definer-execute.sql`, 복제 DB·롤백 및 실제 API 검증 완료.
+- 원장 정합성 보장은 아님. 앱 계정에 잔액 UPDATE 및 원장 INSERT 직접 권한이 남아 있으며 269–271+ 순차 마이그레이션과 국고·채권·연금·환전 이중기장 리팩터링 필요.
+- 긴급 권한 변경은 schema_migrations 기록을 덮어쓰지 않았으며 차기 순차 마이그레이션에서 이력을 조정할 것.
+
 # 보안 모델
 
 [English](security-model.md) | **한국어** | [문서 색인](../INDEX.ko.md)

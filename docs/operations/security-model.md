@@ -1,4 +1,9 @@
 # Security Model
+## v701 LIVE PUBLIC EXECUTE result — 2026-10-16
+- Actual Production PostgreSQL: PUBLIC EXECUTE on public SECURITY DEFINER routines **0** (previously 11), with eleven explicit moneyverse_app EXECUTE privileges preserved. Emergency bounded privilege-only DCL from `ops/security/v701-revoke-public-definer-execute.sql`; clone/rollback and live API smoke verified. Restore script included.
+- This is **not** a ledger integrity fix. moneyverse_app still has direct account_balances UPDATE and ledger_postings INSERT, and 269–271+ migration parity and Treasury/Bonds/FX/Pension ledger-first refactoring remain open.
+- The live privilege-only hotfix was not inserted into the checksummed `schema_migrations` table; reconcile it with a forward-only migration without editing past migrations.
+
 
 This document summarizes the major runtime trust boundaries. It is not a replacement for code review or infrastructure policy.
 
