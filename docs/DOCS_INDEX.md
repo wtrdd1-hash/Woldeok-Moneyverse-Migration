@@ -1,5 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.15.651 — Web stability assessment / 웹 안정성 진단 (documentation only)
+
+- [Canonical English findings](findings/MONEYVERSE_WEB_FULL_CODE_STABILITY_AUDIT_v2026.10.15.651.md) · [한국어 보고서](findings/MONEYVERSE_WEB_FULL_CODE_STABILITY_AUDIT_v2026.10.15.651.ko.md)
+- [Versioned release](releases/v2026.10.15.651.md) · [릴리스 기록](releases/v2026.10.15.651.ko.md). Status: BLOCKED; runtime and balances unchanged.
+
+
 > **단일 진실 공급원 (Single Source of Truth)**
 > 본 문서는 월덕 머니버스(Woldeok Moneyverse) 플랫폼의 금융 아키텍처, 대국민 국고 생태계, 가상 주식 거래소, API 계약, 관리자 관제, 모바일 규격, 인프라 운영 가이드를 총망라하는 통합 문서 색인 허브입니다.
 

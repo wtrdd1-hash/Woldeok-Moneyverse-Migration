@@ -52,6 +52,18 @@ Before Production promotion verify:
 
 If Test does not serve the exact intended application candidate, promotion is BLOCKED.
 
+### Host release identity preflight (v2026.10.15.670)
+
+On the **active Debian host** and after a candidate is actually running in Test, run:
+
+```bash
+node scripts/release/verify-host-runtime-identity.mjs --channel test --sha <exact-40-char-candidate-SHA>
+```
+
+The command reads the immutable release manifest, stable backend/frontend release environment `BUILD_ID` values, built frontend `.next/BUILD_ID`, both live systemd process working directories and the public version API. A missing value, different SHA, unreachable API or inactive process **blocks** promotion. It is read-only; do not edit a manifest or overwrite an environment ID merely to make this check pass. Correct the source/artifact and stage a new immutable generation instead.
+
+Repeat with `--channel prod` and the same SHA **after** an authorized zero-downtime cutover. This identity preflight is only one gate: canonical ledger, DB privileges, migration parity, authenticated full-route QA, session continuity, backup/rollback and canary checks must independently pass before Production traffic changes.
+
 ## 3. Main integration and re-verification
 
 After candidate approval, integrate the validated change to `main` without overwriting concurrent work. Re-read current planning and re-resolve the application source identity.
