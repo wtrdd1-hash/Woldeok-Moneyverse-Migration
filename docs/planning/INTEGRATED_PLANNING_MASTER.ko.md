@@ -1,5 +1,11 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.15.685 — SEO 응답 사실성·관리자 접근 (코드 수정 후보, 미배포)
+
+- 작업 전·중 GitHub `origin/main=69bc8c14df236f57898b1b44ddc596be5144c30a`. 독립 `fix/indexnow-auth-plan-parity-v2026.10.15.685` 사용, 국고 v683·기획 v684 작업과 충돌 회피. [한국어 진단](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) / [영문](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) / [작업기록](../worklog/2026-10-15-seo-integrity-v685.md).
+- v675 G675-05 P0의 실제 사용 흐름: IndexNow 허위 성공과 다른 사이트 URL 제출, 크롤링 감사·일일 리포트/Discord 허위 완료, 누락된 관리자·CSRF 보호를 독립 코드 후보로 시정. 테스트·빌드·운영 검증 여부는 작업기록에서 분리.
+- **기획 권한 변경 아님**: v530, v523/542/543 경제 보존, 크롤링과 색인 실제 증거 분리, 동일 SHA Test·DB·인증 E2E·무중단 운영 승격 차단 유지. DB/잔액/스위치/운영 포인터 무변경.
+
 ## v2026.10.15.681 — F675-04 사용자를 위한 계산·학습 선택 동선 (문서)
 
 - 시작/중간 `origin/main=8356146e157080704e157b3203e38599baec68ff`, 독립 `docs/calculator-learning-funnel-v2026.10.15.681`. [작업기록](../worklog/2026-10-15-f67504-calculator-learning-v681.ko.md)에서 최종 확인; 타 작업자 브랜치 변경 없음.

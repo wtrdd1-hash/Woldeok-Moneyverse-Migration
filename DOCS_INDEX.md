@@ -1,5 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.15.685 — Integrated source/SEO plan parity candidate
+
+- [Source gap review EN](docs/findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) · [한국어 진단](docs/findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) · [Worklog](docs/worklog/2026-10-15-seo-integrity-v685.md)
+- [Internal EN](docs/updates/v2026.10.15.685-internal.md) · [내부 KO](docs/updates/v2026.10.15.685-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.15.685-github.md) · [GitHub KO](docs/updates/v2026.10.15.685-github.ko.md)
+- SEO action/index notification real receipts, origin checks, authenticated crawl/digest BFF and honest errors. **Candidate only:** full authenticated Test, DB and Production acceptance remain blocked; no monetary/runtime pointer changes.
+
 
 ## v2026.10.15.674 — Branch audit merge completion, runtime release still BLOCKED
 

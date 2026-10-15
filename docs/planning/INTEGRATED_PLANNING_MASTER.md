@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.685 — SEO action truth and administrator access (implementation candidate, NOT deployed)
+
+- GitHub `origin/main=69bc8c14df236f57898b1b44ddc596be5144c30a` at start/middle. Isolated `fix/indexnow-auth-plan-parity-v2026.10.15.685`, no overlap with v683 treasury/v684 planning agents. [EN findings](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) / [KO findings](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) and [evidence/worklog](../worklog/2026-10-15-seo-integrity-v685.md).
+- v675 G675-05 SEO truth P0: candidate fixes false IndexNow receipts, foreign URL submission, false crawler-audit and daily digest/Discord success, and missing admin+CSRF guards. Unit tests, workspace checks and exact Test/Production distinctions in worklog.
+- **This is NOT authority supersession**: v530 planning, v523/542/543 monetary integrity, unsolved crawl-versus-index provenance and exact-SHA Test/DB/auth/zero-downtime release gates remain. No balance, DB schema, Test/Production pointer or feature switch changed.
+
 ## v2026.10.15.681 — F675-04 useful calculator-to-learning journey (docs only)
 
 - Start/middle `origin/main=8356146e157080704e157b3203e38599baec68ff`; isolated worktree `docs/calculator-learning-funnel-v2026.10.15.681`; final source in [worklog](../worklog/2026-10-15-f67504-calculator-learning-v681.md). No concurrent agent worktree overwritten.
