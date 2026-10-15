@@ -1,5 +1,10 @@
 # 📚 월덕 머니버스(Woldeok Moneyverse) 공식 마스터 문서 인덱스
 
+## F675-03 지갑 상세 기획 — v2026.10.15.680
+
+- [WLD 잔액변화·영수증 상세기획](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) · [영문](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md) · [작업기록](worklog/2026-10-15-f67503-wld-receipts-v680.ko.md). 문서만 반영, 운영 검증 아님.
+
+
 ## F675-02 AI 주식뉴스 상세 기획 — v2026.10.15.679
 
 - [AI 가상뉴스 신뢰·오류복구(한국어)](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md) · [영문](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md) · [작업기록](worklog/2026-10-15-f67502-ai-news-user-trust-v679.ko.md). 기획·근거만 수정, 운영 검증 아님.

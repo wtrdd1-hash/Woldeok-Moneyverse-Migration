@@ -1,5 +1,10 @@
 # 📚 Document Catalog
 
+## v2026.10.15.680 — F675-03 activity/receipt product design (PLANNING)
+
+- [WLD activity reasons, reconciliation & private receipt details (EN)](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md) / [Korean](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) — source-observed max-50 history, internal bank net-zero risk, exact-money privacy, 8 user hypotheses, 13 references, D0–D7; docs only.
+
+
 ## v2026.10.15.679 — F675-02 AI stock-news user trust (PLANNING)
 
 - [F675-02 AI news, user trust, freshness and recovery (EN)](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md) / [한국어](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md), linked from canonical planning and v325. Scoped source findings, 13 external references, seven user tasks, safe generation/review/publish/market-event states. Documentation only; prior v660 incident and separate v661 candidate are not Production closure.

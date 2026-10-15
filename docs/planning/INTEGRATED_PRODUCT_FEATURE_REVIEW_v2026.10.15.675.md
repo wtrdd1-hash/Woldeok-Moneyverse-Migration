@@ -1,5 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-03 deep-dive — v2026.10.15.680
+
+- [WLD activity explanation & private receipts specification](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md) / [Korean](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) is now the **adopted detailed planning contract** for F675-03. Builds on existing authenticated wallet/activity, does not authorize any new WLD movement. Exact cash/bank net-zero explanation, real ledger reference, bounded privacy-safe reads, 13 references and D0–D7 release gates. Not Production-verified.
+
+
 ## Detailed F675-02 review — v2026.10.15.679
 
 - [F675-02 Trustworthy Fictional-Market AI News Spec](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md) / [한국어](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md) is the adopted detailed follow-up. It reuses v325 newsroom, distinguishes AI model run vs published article vs authorized market event, and specifies actual last-published age, archive/corrections, seven user hypotheses, 13 research references and D0–D7 gates. No current Production incident closure or new implemented feature is claimed.

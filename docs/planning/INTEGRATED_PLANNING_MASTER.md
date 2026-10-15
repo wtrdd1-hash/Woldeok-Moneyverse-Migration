@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.680 — F675-03 exact-money user receipts (planning only)
+
+- Start/mid remote main `a37b733837cf82c3f45adb88242bd1b4f6df2cb9`; isolated worktree `docs/wld-activity-receipts-v2026.10.15.680`, final checkpoint in [worklog](../worklog/2026-10-15-f67503-wld-receipts-v680.md). Other contributors' treasury/ledger worktrees untouched.
+- Adopt [F675-03 detailed plan](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md) / [한국어](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md): W680-01..08 source boundaries, eight user-task hypotheses, signed net-vs-pocket semantics (bank move net 0), owner-scoped API read model, immutable correction/settlement, big integer precision, realistic pagination/export and D0–D7 acceptance; 13 references.
+- Keep v523/v542/v543 supply, DB grants and v530 UI/exact-SHA Test release hold. **Docs only**; no implemented UI, database function, migration, traffic/user evidence, new mint or runtime release.
+
+
 ## v2026.10.15.679 — F675-02 AI fictional-news product trust review (documentation only)
 
 - Start and mid-work `origin/main=b70cedbce34ad43bffe593ffbd1ac8374edb5ffa`; final identity in [v679 worklog](../worklog/2026-10-15-f67502-ai-news-user-trust-v679.md). v678 already allocated to another agent, therefore separate version v679 and isolated worktree. No worker code or deployment pointers overwritten.

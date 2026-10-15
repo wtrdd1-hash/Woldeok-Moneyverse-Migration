@@ -1,5 +1,10 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## Detailed wallet UX planning — v2026.10.15.680
+
+- [F675-03 WLD activity explanation and ledger receipts](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md) · [한국어](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) · [worklog](worklog/2026-10-15-f67503-wld-receipts-v680.md). Not a runtime feature release.
+
+
 ## Detailed AI news feature plan — v2026.10.15.679
 
 - [F675-02 AI news trust, freshness and recovery](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md) · [한국어](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md) · [execution log](worklog/2026-10-15-f67502-ai-news-user-trust-v679.md). Documentation-only; existing security/financial/full-UI Test gates remain.
