@@ -13,6 +13,13 @@
 - [Detailed worklog EN](docs/worklog/2026-10-15-production-promotion-gates-v652.md) · [작업기록 KO](docs/worklog/2026-10-15-production-promotion-gates-v652.ko.md)
 - Exact-SHA Test mismatch, public Production unknown version and 237 writable DB tables / 11 PUBLIC definer routines: **no Production deployment**.
 
+## v2026.10.15.651 — Web code, functional failures and stability audit (docs only)
+
+- [English findings](docs/findings/MONEYVERSE_WEB_FULL_CODE_STABILITY_AUDIT_v2026.10.15.651.md) · [한국어 결과](docs/findings/MONEYVERSE_WEB_FULL_CODE_STABILITY_AUDIT_v2026.10.15.651.ko.md)
+- [Worklog EN](docs/worklog/2026-10-15-web-full-code-stability-v651.md) · [작업기록 KO](docs/worklog/2026-10-15-web-full-code-stability-v651.ko.md) · [Release EN](docs/releases/v2026.10.15.651.md) · [Release KO](docs/releases/v2026.10.15.651.ko.md)
+- Live six route 404s; malformed candle 503; 241/245 DEV DB app-writable tables; 11 PUBLIC SECURITY DEFINER grants; route-ledger check fails without --inventory. No source, Test, Production, monetary or privilege changes. BLOCKED.
+
+
 ## v2026.10.15.650 — Audited CI/PR integration (documentation-only)
 
 - [Release record (EN)](docs/releases/v2026.10.15.650.md) · [릴리스 기록 (KO)](docs/releases/v2026.10.15.650.ko.md)
