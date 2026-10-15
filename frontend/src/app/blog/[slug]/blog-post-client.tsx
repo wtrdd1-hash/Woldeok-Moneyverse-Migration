@@ -11,13 +11,13 @@ import {
   Check,
   Tag,
   Bot,
-  Globe,
   Languages,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import type { BlogPost } from '../blog.types';
+import { blogUrl, blogHubUrl, hasCountryEdition, type BlogLocale } from '../blog-seo';
 import { BlogAdBanner } from '@/components/blog/blog-ad-banner';
 import { BlogInlineCalculator } from '@/components/blog/blog-inline-calculator';
 import { BlogRelatedEcosystem } from '@/components/blog/blog-related-ecosystem';
@@ -26,11 +26,11 @@ import { BlogInfographicCard } from '@/components/blog/blog-infographic-card';
 
 interface Props {
   readonly post: BlogPost;
+  readonly locale: BlogLocale;
 }
 
-export function BlogPostClient({ post }: Props) {
+export function BlogPostClient({ post, locale }: Props) {
   const [copied, setCopied] = useState(false);
-  const [locale, setLocale] = useState<'ko' | 'en' | 'ja' | 'zh'>('ko');
 
   const handleShare = async () => {
     try {
@@ -65,7 +65,7 @@ export function BlogPostClient({ post }: Props) {
       {/* Top Nav */}
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost" size="sm" className="text-xs -ml-2 text-muted-foreground hover:text-foreground">
-          <Link href="/blog">
+          <Link href={blogHubUrl(locale).replace("https://easy-scraping.com", "")}>
             <ArrowLeft className="size-3.5 mr-1.5" /> 블로그 목록으로 돌아가기
           </Link>
         </Button>
@@ -89,59 +89,18 @@ export function BlogPostClient({ post }: Props) {
         </Button>
       </div>
 
-      {/* 🌐 다국어 실시간 번역 툴바 (Multi-language Translation Bar) */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 p-2.5 rounded-xl bg-card border border-border/80 shadow-xs">
-        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-          <Languages className="size-4 text-emerald-400" />
-          <span>칼럼 다국어 번역 (Select Language):</span>
-        </div>
-        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-          <button
-            type="button"
-            onClick={() => setLocale('ko')}
-            className={`px-2.5 py-1 text-xs rounded-lg font-bold transition-all ${
-              locale === 'ko'
-                ? 'bg-emerald-500 text-black shadow-xs font-black'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
-            }`}
-          >
-            🇰🇷 한국어
-          </button>
-          <button
-            type="button"
-            onClick={() => setLocale('en')}
-            className={`px-2.5 py-1 text-xs rounded-lg font-bold transition-all ${
-              locale === 'en'
-                ? 'bg-emerald-500 text-black shadow-xs font-black'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
-            }`}
-          >
-            🇺🇸 English
-          </button>
-          <button
-            type="button"
-            onClick={() => setLocale('ja')}
-            className={`px-2.5 py-1 text-xs rounded-lg font-bold transition-all ${
-              locale === 'ja'
-                ? 'bg-emerald-500 text-black shadow-xs font-black'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
-            }`}
-          >
-            🇯🇵 日本語
-          </button>
-          <button
-            type="button"
-            onClick={() => setLocale('zh')}
-            className={`px-2.5 py-1 text-xs rounded-lg font-bold transition-all ${
-              locale === 'zh'
-                ? 'bg-emerald-500 text-black shadow-xs font-black'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
-            }`}
-          >
-            🇨🇳 中文
-          </button>
-        </div>
-      </div>
+      {/* Locale selection changes the public URL so crawlers receive the same content as readers. */}
+      <nav aria-label="Article language" className="flex flex-wrap items-center gap-2 p-2 rounded-xl border border-border/80">
+        <Languages className="size-4 text-emerald-400" aria-hidden="true" />
+        {(['en', 'ko', 'ja', 'zh'] as const).filter(l => hasCountryEdition(post,l)).map(l => (
+          <Link key={l} href={blogUrl(post.slug,l).replace('https://easy-scraping.com','')}
+            hrefLang={{ en:'en-US',ko:'ko-KR',ja:'ja-JP',zh:'zh-CN' }[l]}
+            aria-current={locale === l ? 'page' : undefined}
+            className={locale === l ? 'px-2.5 py-1 text-xs rounded-lg font-bold bg-emerald-500 text-black' : 'px-2.5 py-1 text-xs rounded-lg text-muted-foreground hover:bg-muted'}>
+            {{ ko:'🇰🇷 한국어',en:'🇺🇸 English',ja:'🇯🇵 日本語',zh:'🇨🇳 中文' }[l]}
+          </Link>
+        ))}
+      </nav>
 
       {/* 1. 상단 리더보드 수익화 광고 슬롯 */}
       <BlogAdBanner position="top" />
@@ -203,14 +162,14 @@ export function BlogPostClient({ post }: Props) {
             loading="eager"
           />
           <div className="px-4 py-2 bg-muted/40 border-t border-border/40 text-[11px] text-muted-foreground font-mono flex items-center justify-between">
-            <span>📊 {activeTitle} — 공인 금융공학 텔레메트리 다이어그램</span>
-            <span className="text-emerald-400 font-bold">100% Verified Telemetry</span>
+            <span>📊 {activeTitle} — 금융 교육용 삽화</span>
+            <span className="text-emerald-400 font-bold">Illustration · not live data</span>
           </div>
         </div>
       )}
 
       {/* 📊 수학적 금융 인포그래픽 시각화 배너 (선형 원금 대비 복리 기하급수 성장 곡선) */}
-      <BlogInfographicCard type={post.infographicType ?? 'COMPOUND_CURVE'} currentLocale={locale} />
+      {post.infographicType && <BlogInfographicCard type={post.infographicType} currentLocale={locale} />}
 
       {/* Article Body (Markdown Rendering with Injected Interactive Widgets & Ads) */}
       <div className="prose prose-invert max-w-none space-y-6 text-foreground/90 text-sm sm:text-base leading-relaxed">

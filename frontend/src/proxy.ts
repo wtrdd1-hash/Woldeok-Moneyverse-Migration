@@ -124,7 +124,7 @@ export function proxy(request: NextRequest) {
     if (isLocale(rawLang)) {
       explicitPrefixLocale = rawLang;
       // Physical localized routes (e.g. /[locale]/guide/glossary/..., /[locale]/tools/compound-interest-calculator/...) should not be stripped
-      if (cleanRest.startsWith('/guide/glossary') || cleanRest.startsWith('/tools/compound-interest-calculator')) {
+      if (cleanRest === '/blog' || cleanRest.startsWith('/blog/') || cleanRest.startsWith('/guide/glossary') || cleanRest.startsWith('/tools/compound-interest-calculator')) {
         targetPath = pathname;
       } else {
         targetPath = cleanRest;

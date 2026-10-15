@@ -9,14 +9,21 @@
 - References: Google Search Central canonical troubleshooting, localized URLs/hreflang, image SEO and people-first content; no indexing/ranking promise.
 
 ## Plan and gates
-- [ ] Write regression tests for country editions, distinct local content, no duplicate slug fallback, SEO alternatives, asset existence and sitemap XML stability.
-- [ ] Implement a conservative locale-specific educational editorial set (no fabricated live prices/tax results), retain Korean source, add US/JP/CN-specific, server-rendered canonical URLs only for complete articles.
-- [ ] Update the generator, article/hub SSR metadata, image fallbacks and sitemap without disrupting persisted posts or existing APIs.
-- [ ] Run lint/tests/typecheck/build, re-fetch origin/main at mid-work, check runtime/Test backend & release rules before any promotion.
-- [ ] Record end state, internal/GitHub update logs, PR/CI and production gate.
+- [x] Add regression tests for unique four-country content, canonical slug, localized alternates, sitemap and summary-only browser payload.
+- [x] Add a six-subject four-country educational editorial set; serve SSR locale URLs only when complete regional content exists.
+- [x] Improve article/hub metadata, image fallbacks, canonical redirects, locale proxy, sitemap and client list serialization without touching live persisted posts.
+- [ ] The legacy daily auto-generator was **audited but not replaced**. Publication integrity (unverified market numbers and five recycled templates) remains a P0 gate; separate reviewed publishing workflow is required before release.
+- [x] Re-fetch origin/main at mid-work (advanced from v697 to v701), run 14 tests, preview HTTP cases, production build, and check Test backend/frontend read-only. Re-run all on updated main before release.
+- [x] Prepare bilingual update notes and record testing/release blockers.
+- [ ] Create PR and check CI, then complete Test full verification and required Production gate.
 
-## In progress
-- Worktree exists and documentation examined. No application code, Test, Production, balances or live blog store has been modified.
+## In progress — checkpoints
+- 2026-10-16 01:06 KST: Branch and initial worklog pushed to GitHub; country-specific tests specified before implementation.
+- 2026-10-16 01:16 KST: Added 24 complete country editorial bodies, server-rendered country pages, reciprocal locale metadata, merged duplicate slug correction, sitemap, image checks. Tests/typecheck/lint initially pass.
+- 2026-10-16 01:23 KST: Next build initially blocked by temporary cross-worktree module symlink; rebuilt dependencies via offline pnpm install and compiled contracts, then successful full frontend production build.
+- 2026-10-16 01:25 KST: Standalone HTTP preview on port 4147: /blog, /en/blog, /ja/blog/country-guide-compound, /zh/blog/country-guide-tax, /sitemap-blog.xml returned 200; non-localized legacy article /en/blog/2026-10-12-virtual-stock-value-investing-guide returned 404; known duplicate alias 308. SSR lang/canonical/hreflang sample inspected. Main moved to 1eb65c68 then be0335f3; no other worktrees touched.
+- 2026-10-16 01:29 KST: Optimized list payload to summaries (instead of full multilingual article bodies), isolated test data to temp path, updated legacy test to use canonical URL and Node environment. Blog unit suite 14/14 green. Frontend Test/backend Test services active and public Test endpoints respond 200, but exact v710 candidate NOT installed.
+- Full security/editorial status: original daily automatic publishing path remains unreviewed and may make unsourced live quantitative claims. The new static regional guides do not use this path. Real GSC URL Inspection evidence is not available from screenshot; do not claim indexing resolution.
 
 ## Finished
-- Pending verification.
+- Awaiting final exact-main CI, PR and Test release gates. No member balances, Production site, shared live blog store or Test release mutated by this work. Development preview process is temporary and must be stopped.

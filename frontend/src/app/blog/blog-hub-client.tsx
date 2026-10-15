@@ -6,29 +6,41 @@ import {
   BookOpen,
   Search,
   Sparkles,
-  TrendingUp,
   Clock,
   ArrowRight,
   Calculator,
-  Calendar,
   Eye,
-  Tag,
   Flame,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import type { BlogPost, BlogCategory } from './blog.types';
+import type { BlogPost } from './blog.types';
 import { BLOG_CATEGORIES } from './blog.types';
+import { blogUrl, type BlogLocale } from './blog-seo';
+
+const BLOG_LABELS: Record<BlogLocale, {
+  all: string; search: string; featured: string; latest: string; count: string;
+  read: string; minutes: string; noResults: string; categories: Record<string, string>;
+}> = {
+  ko: { all:'전체 보기', search:'키워드, 주제, 태그 검색...', featured:'추천 금융 가이드', latest:'최신 금융 아티클 목록', count:'총', read:'읽기', minutes:'완독', noResults:'검색 조건에 맞는 블로그 글이 없습니다.', categories:{COMPOUND:'복리 & 저축',TAX:'세금 & 절세',STOCKS:'ETF & 주식',WEALTH:'자산 배분',MACRO:'물가 & 경제'} },
+  en: { all:'All topics', search:'Search topics or keywords...',featured:'Featured US guide',latest:'Personal finance articles',count:'Total',read:'Read',minutes:'Read time',noResults:'No articles match your search.',categories:{COMPOUND:'Savings',TAX:'US taxes',STOCKS:'Stocks & ETFs',WEALTH:'Planning',MACRO:'Inflation'} },
+  ja: { all:'すべて',search:'キーワードで検索...',featured:'おすすめ記事',latest:'金融教育の記事',count:'合計',read:'読む',minutes:'読了目安',noResults:'一致する記事がありません。',categories:{COMPOUND:'貯蓄・複利',TAX:'税金・制度',STOCKS:'株式・ETF',WEALTH:'資産計画',MACRO:'物価・経済'} },
+  zh: { all:'全部',search:'搜索主题或关键词...',featured:'精选文章',latest:'家庭金融文章',count:'共',read:'阅读',minutes:'阅读时间',noResults:'未找到符合条件的文章。',categories:{COMPOUND:'储蓄与复利',TAX:'税收与制度',STOCKS:'股票与ETF',WEALTH:'家庭规划',MACRO:'物价与经济'} },
+};
+
+export type BlogHubSummary = Pick<BlogPost, 'slug' | 'title' | 'excerpt' | 'category' | 'categoryLabel' | 'publishedAt' | 'readTimeMinutes' | 'tags' | 'views' | 'author' | 'heroImage' | 'relatedCalculatorHref' | 'relatedCalculatorName'>;
 
 interface Props {
-  readonly initialPosts: readonly BlogPost[];
+  readonly initialPosts: readonly BlogHubSummary[];
+  readonly locale?: BlogLocale;
 }
 
-export function BlogHubClient({ initialPosts }: Props) {
+export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const labels = BLOG_LABELS[locale];
 
   const filteredPosts = initialPosts.filter((post) => {
     const matchCategory = selectedCategory === 'ALL' || post.category === selectedCategory;
@@ -58,7 +70,7 @@ export function BlogHubClient({ initialPosts }: Props) {
               selectedCategory === 'ALL' ? 'bg-indigo-600 text-white' : 'text-muted-foreground'
             }`}
           >
-            전체 보기 ({initialPosts.length})
+            {labels.all} ({initialPosts.length})
           </Button>
           {BLOG_CATEGORIES.map((cat) => (
             <Button
@@ -71,7 +83,7 @@ export function BlogHubClient({ initialPosts }: Props) {
                 selectedCategory === cat.id ? 'bg-indigo-600 text-white' : 'text-muted-foreground'
               }`}
             >
-              {cat.label}
+              {labels.categories[cat.id] ?? cat.label}
             </Button>
           ))}
         </div>
@@ -82,7 +94,7 @@ export function BlogHubClient({ initialPosts }: Props) {
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="키워드, 주제, 태그 검색..."
+            placeholder={labels.search}
             className="pl-8 text-xs h-8 bg-background/80"
           />
         </div>
@@ -97,16 +109,16 @@ export function BlogHubClient({ initialPosts }: Props) {
           <CardHeader className="pb-3 relative z-10">
             <div className="flex items-center gap-2 mb-2">
               <Badge className="bg-indigo-600 hover:bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5">
-                <Flame className="size-3 mr-1 fill-white" /> 오늘의 추천 칼럼
+                <Flame className="size-3 mr-1 fill-white" /> {labels.featured}
               </Badge>
               <Badge variant="outline" className="text-[10px] border-border/80 text-muted-foreground">
                 {featuredPost.categoryLabel}
               </Badge>
               <span className="text-[11px] text-muted-foreground font-mono flex items-center gap-1">
-                <Clock className="size-3" /> 완독 {featuredPost.readTimeMinutes}분
+                <Clock className="size-3" /> {labels.minutes} {featuredPost.readTimeMinutes}
               </span>
             </div>
-            <Link href={`/blog/${featuredPost.slug}`} className="group">
+            <Link href={blogUrl(featuredPost.slug,locale).replace("https://easy-scraping.com","")} className="group">
               <CardTitle className="text-xl sm:text-2xl font-black text-foreground group-hover:text-indigo-400 transition-colors leading-snug">
                 {featuredPost.title}
               </CardTitle>
@@ -117,7 +129,7 @@ export function BlogHubClient({ initialPosts }: Props) {
           </CardHeader>
           {featuredPost.heroImage && (
             <div className="px-6 pb-4 relative z-10">
-              <Link href={`/blog/${featuredPost.slug}`} className="block overflow-hidden rounded-xl border border-border/60 group">
+              <Link href={blogUrl(featuredPost.slug,locale).replace("https://easy-scraping.com","")} className="block overflow-hidden rounded-xl border border-border/60 group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={featuredPost.heroImage}
@@ -148,8 +160,8 @@ export function BlogHubClient({ initialPosts }: Props) {
                 <span>{featuredPost.relatedCalculatorName}</span>
               </Link>
               <Button asChild size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-8">
-                <Link href={`/blog/${featuredPost.slug}`}>
-                  칼럼 전문 읽기 <ArrowRight className="size-3.5 ml-1" />
+                <Link href={blogUrl(featuredPost.slug,locale).replace("https://easy-scraping.com","")}>
+                  칼럼 전문 {labels.read} <ArrowRight className="size-3.5 ml-1" />
                 </Link>
               </Button>
             </div>
@@ -164,7 +176,7 @@ export function BlogHubClient({ initialPosts }: Props) {
             <Sparkles className="size-4 text-indigo-400" />
             <span>최신 금융 아티클 목록</span>
           </h2>
-          <span className="text-xs text-muted-foreground font-mono">총 {filteredPosts.length}편</span>
+          <span className="text-xs text-muted-foreground font-mono">{labels.count} {filteredPosts.length}</span>
         </div>
 
         {regularPosts.length === 0 && !featuredPost ? (
@@ -184,10 +196,10 @@ export function BlogHubClient({ initialPosts }: Props) {
                       {post.categoryLabel}
                     </Badge>
                     <span className="text-[10px] text-muted-foreground font-mono">
-                      완독 {post.readTimeMinutes}분
+                      {labels.minutes} {post.readTimeMinutes}
                     </span>
                   </div>
-                  <Link href={`/blog/${post.slug}`} className="group">
+                  <Link href={blogUrl(post.slug,locale).replace("https://easy-scraping.com","")} className="group">
                     <CardTitle className="text-sm font-bold text-foreground group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
                       {post.title}
                     </CardTitle>
@@ -214,7 +226,7 @@ export function BlogHubClient({ initialPosts }: Props) {
                       {new Date(post.publishedAt).toLocaleDateString('ko-KR')}
                     </span>
                     <Link
-                      href={`/blog/${post.slug}`}
+                      href={blogUrl(post.slug,locale).replace("https://easy-scraping.com","")}
                       className="font-semibold text-indigo-400 hover:underline flex items-center gap-1 text-[11px]"
                     >
                       읽기 <ArrowRight className="size-3" />
