@@ -1,5 +1,12 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+
+## v2026.10.15.652 — Production promotion gate review (BLOCKED)
+
+- [Release gate record EN](docs/releases/v2026.10.15.652.md) · [한국어 운영 승격 검증](docs/releases/v2026.10.15.652.ko.md)
+- [Detailed worklog EN](docs/worklog/2026-10-15-production-promotion-gates-v652.md) · [작업기록 KO](docs/worklog/2026-10-15-production-promotion-gates-v652.ko.md)
+- Exact-SHA Test mismatch, public Production unknown version and 237 writable DB tables / 11 PUBLIC definer routines: **no Production deployment**.
+
 ## v2026.10.15.650 — Audited CI/PR integration (documentation-only)
 
 - [Release record (EN)](docs/releases/v2026.10.15.650.md) · [릴리스 기록 (KO)](docs/releases/v2026.10.15.650.ko.md)
