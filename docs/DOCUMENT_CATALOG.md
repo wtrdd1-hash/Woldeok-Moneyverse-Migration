@@ -1,5 +1,10 @@
 # 📚 Document Catalog
 
+## v2026.10.15.679 — F675-02 AI stock-news user trust (PLANNING)
+
+- [F675-02 AI news, user trust, freshness and recovery (EN)](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md) / [한국어](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md), linked from canonical planning and v325. Scoped source findings, 13 external references, seven user tasks, safe generation/review/publish/market-event states. Documentation only; prior v660 incident and separate v661 candidate are not Production closure.
+
+
 ## v2026.10.15.677 — First one-by-one feature deep dive (PLANNING)
 
 - [F675-01 Feature Reality / User Trust / Recovery (EN)](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md) · [한국어](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md) extends v675 with measured-status vs implementation truth, six user tasks, safe uncertain transaction handling, 13 reference sources and staged engineering gates. Source-only design evidence; no runtime implementation claim.

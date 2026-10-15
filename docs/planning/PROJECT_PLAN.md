@@ -1,5 +1,14 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.679 — F675-02 fictional AI stock-news trust and recovery (PLANNING)
+
+- **Detailed adoption:** [F675-02 News Freshness, Recovery & Editorial Safety](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md) / [한국어](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md), extending existing v325 AI scenario newspaper instead of building a competing pipeline. Generation, moderation, durable publication and deterministic virtual-stock event are four different states; a scheduler success/skip or model answer is not publication.
+- **Evidence-bound findings N679-01..08:** historic v660 local model SSRF failure, current source fabricated `pulse` live timestamps/68 sentiment/4 events, mixed real+sample weekly brief, volatile in-memory poll, and active-event-only newspaper versus durable archive. v661 fix remains a separate candidate, not proven Production. Exact source `b70cedbc` inspected; no current Production equivalence claimed.
+- **User trust:** fictional-market + AI disclosures above first story, visible actual publication/correction/event expiry, archive still accessible during generator outage, mobile/accessible status and eight bilingual messages. Consent-based seven user-task hypotheses are not observed interview findings.
+- **Engineering/safety contract:** fixed authorized internal-model transport with general SSRF still strict; bounded retries/lease/Outbox/idempotent publication, immutable editorial/retraction trace and exact bigint economic invariants. Keep pre-existing no-strength-3/no-market-wide automatic shock, max 2 stocks/24h auto, authority/step-up and legal boundaries.
+- **Release:** P0 v530 whole-site UI, v523/542/543 DB/money conservation, exact-SHA isolated Test/rollback requirements still BLOCK Production. v679 changes documentation only, no model inference, database, Test or Production deployment. [Worklog](../worklog/2026-10-15-f67502-ai-news-user-trust-v679.md).
+
+
 ## v2026.10.15.677 — F675-01 real user feature availability and safe transaction confirmation (planning)
 
 - Explicitly **adopt as the detailed F675-01 design** the EN/KO [Feature Reality, User Trust and Recovery Specification](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md) / [Korean](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md), extending v675. Treat six user-journey hypotheses as tests to run, not actual user-study results.

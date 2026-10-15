@@ -1,5 +1,10 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.15.679 — F675-02 주식 AI 뉴스 사용자 신뢰 (PLANNING)
+
+- [AI 뉴스 신선도·신뢰·장애복구(한국어)](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.ko.md) / [영문](planning/F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md)을 통합기획과 v325에 연동. 소스 확인 문제·외부 자료 13개·사용자 7개 과제·생성/검수/발행/시장영향 구분. 문서만 수정; 과거 v660 사고와 미병합 v661 후보를 운영 해결로 판단하지 않음.
+
+
 ## v2026.10.15.677 — 첫 기능 심층 기획 (PLANNING)
 
 - [F675-01 기능 실재성·사용자 신뢰·안전 복구(한국어)](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md) · [영문](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md). v675의 첫 기능을 사용자 과제 6종, 실제/정적 측정값 구별, 결과불명 중복거래 방지, 13개 레퍼런스 및 구현 게이트까지 상세 설계. 실제 앱 구현·운영 증거가 아니다.
