@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v2026.10.16.701 — Server capacity and narrow PUBLIC privilege hardening
+- **Production confirmed:** v701 emergency SQL applied on authoritative DB: SECURITY DEFINER PUBLIC EXECUTE 11→0 while app explicit 11 retained; Production API/sessions data unaffected. Direct balance/ledger DML remains open. [Live report](../releases/v2026.10.16.701.md).
 - Staged isolated, fail-closed privilege script (PUBLIC executable security-definer functions only) with clone RED/GREEN/rollback acceptance, without changing application-owned 11 EXECUTE grants. Owned completed build caches reclaimed 2.44GiB while preserving required rollback releases. [Release](../releases/v2026.10.16.701.md) / [KO](../releases/v2026.10.16.701.ko.md). Treasury/bonds/FX/pension direct balance DML remains a separate mandatory ledger-first remediation.
 
 ## v2026.10.15.697 — Observed Production rollout and remaining finance risks

@@ -11,4 +11,9 @@
 - Root-only current Production DB logical snapshot + TOC verification; restored in Test PostgreSQL as shadow. Red→green public privilege probe 11→0 and app explicit 11; recovery test returned 11 and reapplied to 0. Hardened-shadow v697 API health/stocks/version 200, protected route 401. No Production DB data mutations during QA.
 
 ## End
+### Live follow-up — 2026-10-16 KST
+- PR #876 merged to GitHub main `1eb65c685c7d116d569283c7971ab9efdaf32019`.
+- Guarded Production operator SQL executed: PUBLIC security definer EXECUTE 11→0, explicit app functions 11 retained. Three public API smoke passes, later full site smoke 200; app release SHA unchanged and no critical logs. No money mutations.
+- Shadow DB and test API stopped/deleted; 85,528,300-byte latest Production snapshot relocated root-restricted to security-v701 backups and verified by SHA256 after relocation. Current disk load fluctuates 78–80% as concurrent work continues; cleanup reclaim was measured precisely (+2,623,094,784B) but it is not an assertion that usage cannot grow again.
+
 - Host disk optimized, no protected release or other-agent data deleted. Production privileges follow recorded operator state; known direct balance/ledger DML and owner of legacy background jobs remain tracked risks.

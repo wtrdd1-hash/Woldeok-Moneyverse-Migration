@@ -1,4 +1,9 @@
 # Current Runtime Baseline
+## v701 LIVE PUBLIC EXECUTE result — 2026-10-16 observed
+- Runtime app remains immutable v697 (backend/frontend 3213/3214) and current release source SHA `a5a1e9da6fc55ac71c44c4cf6ee138e9442f4e73`.
+- Privilege-only DB hotfix from `ops/security/v701-revoke-public-definer-execute.sql` applied to Production: publicly executable SECURITY DEFINER routines reduced 11→0; explicit app rights retained 11. Role retains unsafe direct financial table DML grants; no data/schema migration performed.
+- Disk cleanup recovered 2.44GiB, later usage fluctuated around 78–80% due ongoing work; no immutable release roots or database assets pruned.
+
 
 ## 2026-10-15 v697 observed Production update
 - Live host backend/front: moneyverse-release-v697-backend.service port 3213; moneyverse-release-v697-frontend.service port 3214, Nginx routes publicly, exact application SHA a5a1e9da6fc55ac71c44c4cf6ee138e9442f4e73. production-current -> prod-v2026.10.15.697-a5a1e9da6fc5. Fallback prior backend :3000 and v635 frontend :3203 remain. Preexisting finance role grants remain unsafe; see [release](releases/v2026.10.15.697.md).
