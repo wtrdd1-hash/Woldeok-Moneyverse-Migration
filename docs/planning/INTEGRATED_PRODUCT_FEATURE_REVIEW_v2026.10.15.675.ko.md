@@ -1,5 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## F675-01 상세 후속 기획 — v2026.10.15.677
+
+- [기능 실재성·이용자 신뢰 상세명세](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md) / [영문](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md)을 F675-01의 **상세 기획 기준**으로 추가 채택. 실제 서비스 검증이 아닌 설계·사용자 조사 가설 기록이며 F675-02~09는 향후 각각 개별 심층 검토.
+- T677-01~06 코드상의 낙관적 헬스 측정값·오래된 화면갱신 등의 문제 정의. 실제 DB 안전성, v530 전체 화면, 동일 SHA Test 게이트 미충족 상태에서 배포 허가 아님.
+
+
 > 상태: **PLANNING / AUTHORITY_DRIFT / 운영승격 BLOCKED** — 기획·기능 후보 검토이며 구현 완료나 배포 승인이 아님
 > 검토일: 2026-10-15 KST
 > 상위 문서: [프로젝트 기획서](PROJECT_PLAN.ko.md) · [통합기획 마스터](INTEGRATED_PLANNING_MASTER.ko.md) · [문서 정책](../DOCUMENTATION_POLICY.ko.md)

@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.677 — F675-01 real user feature availability and safe transaction confirmation (planning)
+
+- Explicitly **adopt as the detailed F675-01 design** the EN/KO [Feature Reality, User Trust and Recovery Specification](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md) / [Korean](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md), extending v675. Treat six user-journey hypotheses as tests to run, not actual user-study results.
+- **Source-observed P0 T677-01..03:** optimistic static API-health domain rates/durations mislabeled live, dashboard polling retaining stale values on failure and action-state too coarse for unknown financial commits. Preserve distinction between implementation lifecycle, time-scoped measured availability, viewer eligibility and server/ledger-confirmed individual outcomes.
+- User UX: contextual availability, clear prerequisites, input/return-path preservation where actually supported, never encourage blind repeat of WLD/order operations after ambiguous response. Admin registry links visible actions → BFF → API → DB/worker → tests and exact candidate SHA; extend current /admin/api-health, not a competing stack.
+- API/telemetry design follows RFC 9457, OpenAPI 3.2, WCAG 2.2, OpenTelemetry, GOV.UK/NNg/Statuspage/Stripe SRE patterns; 13 references, negative auth/idempotency/accessibility and exact-SHA all-route QA gates. **No code/DB/Test/Production acceptance** and no change to v530/v523/v542/v543 blockers.
+
+
 ## v2026.10.15.675 — Full product/feature review and evidence-led candidate roadmap (PLANNING)
 
 - **Integrated reference adopted as a review/priority contract:** [2026-10-15 integrated product/feature review](INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md); Korean peer [here](INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md). Reconciles 14 domain groups, six P0 gates, nine candidate enhancement IDs F675-01..09, release sequencing, acceptance metrics and 13 official reference links.

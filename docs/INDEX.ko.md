@@ -1,5 +1,10 @@
 # 📚 월덕 머니버스(Woldeok Moneyverse) 공식 마스터 문서 인덱스
 
+## 상세 기능 기획 — v2026.10.15.677
+
+- [F675-01 기능 실재성·사용자 신뢰·안전 복구(한국어)](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md) · [영문](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md) · [작업 기록](worklog/2026-10-15-feature-truth-ux-v677.ko.md). 운영 P0 미해결, 문서 전용.
+
+
 ## 통합 기획 재검토 — v2026.10.15.675
 
 - [제품·기능 재검토(한국어)](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md) · [영문](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md) · [작업 기록](worklog/2026-10-15-integrated-planning-review-v675.ko.md). P0 차단을 유지하는 기획 전용 문서이며 운영승격 검증이 아니다.
