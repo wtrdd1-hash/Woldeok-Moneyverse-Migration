@@ -2,6 +2,11 @@
 - Verified live Debian Test/Production source/version and DB roles after explicit promotion request. Test backend SHA does not match its manifest/frontend; Production version remains unknown; 237 public tables writable by app role and 11 publicly callable SECURITY DEFINER routines. No runtime promotion; full finance/UI/session/rollback acceptance is pending. [Release report](../releases/v2026.10.15.652.md).
 
 ## v2026.10.15.650 — Audited CI/PR integration (docs + Android signing)
+
+## v2026.10.15.654 — Functional remediation candidate (not deployed)
+
+- Ported v639 verified route/API/admin/QA/scheduler/atomicity code to isolated latest-main branch. Added PostgreSQL broken-client pool eviction (two negative RED→GREEN cases), deterministic React production-host test script and guarded v654 synthetic PostgreSQL settlement suite (4 PASS). Independent local Next confirms six redirects and invalid stock 400. Finance canonical ledger, DB least privilege, full authenticated Test and rollback remain BLOCKED; no live or main promotion. [Details](../releases/v2026.10.15.654.md).
+
 - Integrated web audit PRs #841–843 and Android signing-security PR #27 following their successful CI. Fixed root documentation conflict-marker artifact on a separate CI/PR branch, retained #844/Android #23–25 acceptance blockers. No server or Play/Production deployment. [Release notes](../releases/v2026.10.15.650.md).
 
 ## v2026.10.14.618 — Integrated release candidate (verification only)

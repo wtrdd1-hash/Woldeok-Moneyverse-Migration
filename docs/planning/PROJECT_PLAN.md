@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## Implementation evidence — v2026.10.15.654 (does NOT amend v530 product authority)
+
+- Isolated candidate implements legacy route redirects, correct calculator registration path/receipt truth, stock UUID/typed error mapping, admin backup/IndexNow role and CSRF checks, full-route QA inventory/evidence wiring, scheduler opt-in and per-client PvP/auction transaction guards.
+- v654-specific safety: destroy PostgreSQL pooled connections after failed BEGIN/ROLLBACK and make frontend tests insensitive to the Debian host's inherited production NODE_ENV. A synthetic 157-table disposable DB passes four concurrency/rollback tests; local-only Next confirms redirect behavior and malformed stock UUID HTTP 400.
+- **P0 remains:** raw account_balances writes are not canonical double-entry postings; app role has wide writes on 241/245 DEV public tables, and 11 SECURITY DEFINER functions remain PUBLIC-executable. Complete schema Test, authenticated full UI, role-negative, idempotency and rollback release evidence are absent. **No Test/Production/main promotion authority**. [Findings](../findings/MONEYVERSE_WEB_FUNCTIONAL_REMEDIATION_v2026.10.15.654.md).
+
+
 ## v2026.10.14.625 — WLD precision implementation and residual acceptance gates
 
 - Adopt existing exact-money policy via string/BigInt boundaries across wallet, fiat, P2P/donation, burn draw and national pension; preserve integer-only requests, 95/5 pension allocation, fixed presentation FX rates and no arbitrary new wallet cap. See [technical findings](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md).

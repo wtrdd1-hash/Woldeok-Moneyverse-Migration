@@ -1,5 +1,11 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.15.654 — 웹 기능 수정 후보 (기획 권위 변경 없음)
+
+- 기존 v639의 URL·주식 오류·관리자 보안·QA·일부 금융 트랜잭션 시정을 격리 소스에 반영. 신규 Pg BEGIN/ROLLBACK 실패 연결 폐기 및 운영 NODE_ENV 하 React 테스트 수정. 합성 DB 4건, 로컬 Next 리다이렉트 검증.
+- v530 전체 UI 수용 및 v523 원장 금액 보존 규정 유지. 직접 잔액 UPDATE, 앱 역할 241개 테이블 쓰기권한, 공개 실행 SECURITY DEFINER 11개 차단 잔존. 완전 동등 Test/로그인·롤백/무중단 수용과 운영 배포 없음. [근거](../findings/MONEYVERSE_WEB_FUNCTIONAL_REMEDIATION_v2026.10.15.654.ko.md).
+
+
 ## v2026.10.14.625 — WLD 초대형 금액 오버플로 차단 (구현 후보)
 
 - 지갑 알림·참고 외화 표시·P2P/기부·소각·연금 납입/환급/지급에서 금액 문자열과 BigInt로 정밀도 손실을 차단. 보유 한도 추가 없음. [영문 정본](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md) / [국문 보고서](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md).

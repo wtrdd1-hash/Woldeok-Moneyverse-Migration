@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## 구현 증거 — v2026.10.15.654 (v530 정본 기획 권위 변경 아님)
+
+- 격리 수정 후보에서 구 경로 6개 호환 전환, 계산기 가입/영수증 진실성, 주식 캔들 UUID와 오류 코드, 관리자 백업·IndexNow 역할/CSRF, 전체 QA 인벤토리, 스케줄러 및 PvP/암시장 DB 트랜잭션 안전장치 반영.
+- v654 추가: BEGIN/ROLLBACK 실패 연결 폐기, 미니PC NODE_ENV=production의 React 테스트 오염 방지. 합성 157테이블 독립 DB에서 동시성/롤백 4건, 로컬 Next 리다이렉트·비정상 UUID 400 확인.
+- **P0 미해결:** 잔액 직접 UPDATE와 canonical ledger 불일치, 앱 계정 DEV DB 쓰기 241/245 테이블, 공개 실행 가능 SECURITY DEFINER 함수 11개. 전체 동등 Test/관리자 E2E/권한 부정/멱등성/세션/롤백 미확인. **Test·운영·main 승격 승인 아님**. [상세 결과](../findings/MONEYVERSE_WEB_FUNCTIONAL_REMEDIATION_v2026.10.15.654.ko.md).
+
+
 ## v2026.10.14.625 — WLD 정밀도 구현 및 남은 수용 게이트
 
 - 기존 금액 문자열·BigInt 원칙을 지갑, 외화 환산 참고 표시, P2P/기부, 소각 드로우, 국민연금에 적용. 95%/5% 연금 배분 유지, 지갑 보유 한도 신설 없음. [상세 보고서](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md).

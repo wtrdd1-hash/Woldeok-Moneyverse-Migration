@@ -23,7 +23,6 @@ export default function YouthLeapCalculatorPage() {
   const [monthlyDeposit, setMonthlyDeposit] = useState<number>(700000);
   const [incomeTier, setIncomeTier] = useState<'tier1' | 'tier2' | 'tier3' | 'tier4'>('tier1');
   const [interestRate, setInterestRate] = useState<number>(6.0);
-  const [isWldClaimed, setIsWldClaimed] = useState(false);
 
   // 5년 (60개월) 기준
   const totalMonths = 60;
@@ -299,20 +298,19 @@ export default function YouthLeapCalculatorPage() {
                 </span>
               </div>
               <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-400">
-                무료 10,000 WLD
+                무료 회원가입 · 가상 경제 체험
               </span>
             </div>
             <p className="text-xs text-zinc-400">
-              5년 기다릴 필요 없이 매일 복리 이자가 붙는 가상 은행! 지원금 10,000 WLD로 파밍과 이자 불리기를 지금 바로 무료 체험해 보세요.
+              5년 기다릴 필요 없이 매일 복리 이자가 붙는 가상 은행! 가상 은행의 저축과 복리 계산 기능을 무료로 살펴보세요.
             </p>
             <div className="flex items-center gap-2">
               <Link
-                href="/auth/register"
-                onClick={() => setIsWldClaimed(true)}
+                href="/register"
                 className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/40 transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                {isWldClaimed ? '10,000 WLD 지급 예약됨' : '10,000 WLD 받고 복리 포켓 체험'}
+                회원가입하고 복리 포켓 체험하기
               </Link>
               <Link
                 href="/bank"

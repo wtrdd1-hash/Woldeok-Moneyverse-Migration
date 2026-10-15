@@ -1,11 +1,17 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.15.654 — Web functional remediation (candidate; finance release BLOCKED)
+
+- [Findings EN](docs/findings/MONEYVERSE_WEB_FUNCTIONAL_REMEDIATION_v2026.10.15.654.md) · [한국어 시정 결과](docs/findings/MONEYVERSE_WEB_FUNCTIONAL_REMEDIATION_v2026.10.15.654.ko.md)
+- [Release EN](docs/releases/v2026.10.15.654.md) · [Release KO](docs/releases/v2026.10.15.654.ko.md) · [Worklog](docs/worklog/2026-10-15-web-functional-remediation-v654.md).
+- Existing v639 tested fixes isolated with new Pg bad-client containment, deterministic React tests and synthetic-DB 4-pass plus local Next smoke. Canonical ledger/DB least-privilege/complete Test UI and rollback pending; Production prod-v600 unchanged.
 
 ## v2026.10.15.652 — Production promotion gate review (BLOCKED)
 
 - [Release gate record EN](docs/releases/v2026.10.15.652.md) · [한국어 운영 승격 검증](docs/releases/v2026.10.15.652.ko.md)
 - [Detailed worklog EN](docs/worklog/2026-10-15-production-promotion-gates-v652.md) · [작업기록 KO](docs/worklog/2026-10-15-production-promotion-gates-v652.ko.md)
 - Exact-SHA Test mismatch, public Production unknown version and 237 writable DB tables / 11 PUBLIC definer routines: **no Production deployment**.
+
 
 ## v2026.10.15.650 — Audited CI/PR integration (documentation-only)
 

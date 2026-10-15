@@ -1,5 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.15.654 — Web fixes / 웹 기능 시정 (candidate, BLOCKED)
+
+- [English technical evidence](findings/MONEYVERSE_WEB_FUNCTIONAL_REMEDIATION_v2026.10.15.654.md) · [한국어 상세 결과](findings/MONEYVERSE_WEB_FUNCTIONAL_REMEDIATION_v2026.10.15.654.ko.md) · [Release record](releases/v2026.10.15.654.md).
+- Legacy navigation, typed candle errors, admin auth/QA, Pg pool error and React test environment fixes are isolated candidates. Financial ledger/DB grants and all-route authenticated Test/rollback acceptance still BLOCKED; no Production changes.
+
+
 > **단일 진실 공급원 (Single Source of Truth)**
 > 본 문서는 월덕 머니버스(Woldeok Moneyverse) 플랫폼의 금융 아키텍처, 대국민 국고 생태계, 가상 주식 거래소, API 계약, 관리자 관제, 모바일 규격, 인프라 운영 가이드를 총망라하는 통합 문서 색인 허브입니다.
 

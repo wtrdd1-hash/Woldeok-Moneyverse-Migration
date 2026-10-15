@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "NODE_ENV=test vitest run"
   },
   "dependencies": {
     "@moneyverse/contract": "workspace:*",

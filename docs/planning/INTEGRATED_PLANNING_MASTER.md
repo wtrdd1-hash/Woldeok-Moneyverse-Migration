@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.654 — Web functional remediation candidate (no adoption)
+
+- Isolated source candidate ports audited v639 navigation, typed stock candles, admin security, route QA and partial financial transaction guards. New poisoned-Pg-connection drop on BEGIN/ROLLBACK faults and correct React test environment are verified locally; 4 synthetic database settlement tests and local Next HTTP redirect smoke pass.
+- v530 all-route acceptance and v523 ledger conservation remain authoritative. Financial raw account updates, 241 DB role DML grants and 11 PUBLIC SECURITY DEFINER functions block finance safety. No exact full-schema authenticated Test/rollback/no-downtime acceptance, no operational deployment. [Evidence](../findings/MONEYVERSE_WEB_FUNCTIONAL_REMEDIATION_v2026.10.15.654.md).
+
+
 ## v2026.10.14.625 — WLD amount overflow protection (implementation candidate)
 
 - Canonical integer WLD strings and BigInt arithmetic protect wallet notifications, configured fiat display, P2P/donation, burn receipts, and pension contribution/refund/payout. No holdings cap is introduced. See [English risk register](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md) and [Korean report](../findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md).

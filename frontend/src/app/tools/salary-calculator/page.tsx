@@ -22,7 +22,6 @@ import { CalculatorSaveAction } from '@/components/calculator-save-action';
 export default function SalaryCalculatorPage() {
   const salaryInputId = useId();
   const [annualSalary, setAnnualSalary] = useState<number>(50000000);
-  const [isWldClaimed, setIsWldClaimed] = useState(false);
 
   const breakdown = calculateSalaryBreakdown(annualSalary);
 
@@ -248,7 +247,7 @@ export default function SalaryCalculatorPage() {
                 </span>
               </div>
               <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-400">
-                무료 10,000 WLD 지원금
+                무료 회원가입 · 가상 경제 체험
               </span>
             </div>
             <p className="text-xs text-zinc-400">
@@ -256,12 +255,11 @@ export default function SalaryCalculatorPage() {
             </p>
             <div className="flex items-center gap-2">
               <Link
-                href="/auth/register"
-                onClick={() => setIsWldClaimed(true)}
+                href="/register"
                 className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/40 transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                {isWldClaimed ? '10,000 WLD 지급 예약됨' : '10,000 WLD 받고 직업 전직하기'}
+                회원가입하고 직업 시작하기
               </Link>
               <Link
                 href="/guide/career-mastery"

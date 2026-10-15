@@ -305,10 +305,10 @@ export function RoadmapView() {
               </p>
             </div>
             <Link
-              href="/pet"
+              href="/roadmap"
               className="text-xs font-semibold text-pink-400 hover:text-pink-300 flex items-center justify-between pt-2 border-t border-zinc-800/60"
             >
-              <span>{t('덕이 펫 돌보러 가기', 'Care for Deoki', 'ペットのお世話へ', '去照顾小德克')}</span>
+              <span>{t('펫 기능 준비 중 · 로드맵 보기', 'Pet feature planned · View roadmap', 'ペット機能準備中 · ロードマップ', '宠物功能筹备中 · 查看路线图')}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
