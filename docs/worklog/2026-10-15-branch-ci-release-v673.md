@@ -36,3 +36,7 @@ Pending actual evidence.
 - [ ] Final link checks and doc-only CI; review/merge PR for integrated audits.
 - [ ] Confirm GitHub merged branch inclusion before remote source cleanup.
 - [ ] Authoritative exact-SHA Test, finance, auth, full-route and zero-downtime checks for any future runtime release.
+
+## Documentation link regression
+- RED: link validation of the full integrated `DOCS_INDEX.md` found five **pre-existing** invalid versioned links (policy release lineage, private-chat moderation, consent blackout, consent dynamic binding, IME safety).
+- Root cause: index version/file stems drifted from the actual committed Korean documents. Corrected all five to existing matching titles, without inventing artifacts. Re-run GREEN verification before release.

@@ -198,11 +198,11 @@ graph TD
 | **[관리자 긴급 킬스위치 제어탑](/admin/controls)** | KO | 전 종목 서킷브레이커, 국고 출금 동결, 신규 가입 차단, 웹훅 격리 4대 킬스위치 |
 | **[관리자 디스코드 관제 대시보드](/admin/discord)** | KO | 6대 관리자 1:1 직보 DM(고래이동·카지노1억잭팟·국고결핍·킬스위치·대출연체) 및 채널 브로드캐스트 제어탑 |
 | **[창업 그랜트 심사 대시보드](/admin/treasury/grants)** | KO | 접수된 벤처 그랜트 신청서 검토, 원자적 시드머니 지급 및 세션 감사 로그 스트립 |
-| [2026-09-22-admin-policy-version-management.ko.md](docs/2026-09-22-admin-policy-version-management-and-release-lineage-v2026.09.22.350.ko.md) | KO | 관리자 정책 버전 관리 및 배포 계보(Lineage) 사양 |
-| [2026-09-22-admin-private-chat-moderation.ko.md](docs/2026-09-22-admin-private-chat-moderation-queue-and-evidence-v2026.09.22.352.ko.md) | KO | 1:1 프라이빗 채팅 모더레이션 큐 및 증적 보존 명세 |
-| [2026-09-22-consent-blackout-fix-home-fintech.ko.md](docs/2026-09-22-consent-blackout-fix-home-fintech-portal-v2026.09.22.351.ko.md) | KO | 금융 포털 필수 약관 동의 암전(Blackout) 방지 사양 |
-| [2026-09-22-consent-policy-dynamic-binding.ko.md](docs/2026-09-22-consent-policy-dynamic-binding-and-10s-rollback-v2026.09.22.353.ko.md) | KO | 동의 정책 동적 바인딩 및 10초 롤백 가드 사양 |
-| [2026-09-22-private-chat-safety-controls.ko.md](docs/2026-09-22-private-chat-safety-controls-and-ime-protection-v2026.09.22.354.ko.md) | KO | 프라이빗 채팅 안전 제어 및 한글 IME 조합 보호 사양 |
+| [2026-09-22-admin-policy-version-management.ko.md](docs/2026-09-22-admin-policy-version-management-and-release-ledger-v2026.09.22.352.ko.md) | KO | 관리자 정책 버전 관리 및 배포 계보(Lineage) 사양 |
+| [2026-09-22-admin-private-chat-moderation.ko.md](docs/2026-09-22-admin-private-chat-moderation-queue-and-evidence-governance-v2026.09.22.354.ko.md) | KO | 1:1 프라이빗 채팅 모더레이션 큐 및 증적 보존 명세 |
+| [2026-09-22-consent-blackout-fix-home-fintech.ko.md](docs/2026-09-22-consent-blackout-fix-home-fintech-portal-v2026.09.22.347.1.ko.md) | KO | 금융 포털 필수 약관 동의 암전(Blackout) 방지 사양 |
+| [2026-09-22-consent-policy-dynamic-binding.ko.md](docs/2026-09-22-consent-policy-dynamic-binding-and-10s-rollback-v2026.09.22.350.ko.md) | KO | 동의 정책 동적 바인딩 및 10초 롤백 가드 사양 |
+| [2026-09-22-private-chat-safety-controls.ko.md](docs/2026-09-22-private-chat-safety-controls-and-ime-protection-v2026.09.22.353.ko.md) | KO | 프라이빗 채팅 안전 제어 및 한글 IME 조합 보호 사양 |
 | [2026-09-22-work-flicker-modal-layout.ko.md](docs/2026-09-22-work-flicker-modal-layout-remediation-v2026.09.22.358.ko.md) | KO | 일일 업무 모달 깜빡임 방지 및 레이아웃 안정화 사양 |
 
 ---
