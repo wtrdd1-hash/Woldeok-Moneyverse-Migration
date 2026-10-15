@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.679 — F675-02 AI fictional-news product trust review (documentation only)
+
+- Start and mid-work `origin/main=b70cedbce34ad43bffe593ffbd1ac8374edb5ffa`; final identity in [v679 worklog](../worklog/2026-10-15-f67502-ai-news-user-trust-v679.md). v678 already allocated to another agent, therefore separate version v679 and isolated worktree. No worker code or deployment pointers overwritten.
+- [Adopted EN/KO F675-02 detailed design](F675_02_AI_NEWS_USER_TRUST_RECOVERY_SPEC.md): N679-01..08 evidence register, 7 user journey hypotheses, five actual clocks, independent generation/editorial/publication/event lifecycle, reader-visible archive/disclosure/corrections, static `pulse` honesty, secure fixed internal-model SSRF exception boundary, deterministic 8-stage Test plan and 13 source references.
+- Existing v261/v325 bounded automatic impact authority and v530 UI / v523/542/543 ledger safety remain. The v660 incident is **historical**; v661 fix branch is concurrent **candidate only**; no current Production or complete model+market test accepted. No code/DB/Test/Production mutation.
+
+
 ## v2026.10.15.677 — F675-01 detailed user trust and reality contract (documentation only)
 
 - Starting and mid-work `origin/main=a24a8ae9e0d14dbd63738f5bb7e4e857ca412c13`; final drift in [worklog](../worklog/2026-10-15-feature-truth-ux-v677.md). Dedicated v677 worktree avoids concurrent v675/v676 treasury worker conflicts.
