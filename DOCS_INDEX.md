@@ -1,6 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
 
+## v2026.10.15.673 — CI/PR audit integration & release gates (docs-only, BLOCKED)
+
+- [Worklog EN](docs/worklog/2026-10-15-branch-ci-release-v673.md) · [작업기록 KO](docs/worklog/2026-10-15-branch-ci-release-v673.ko.md) · [Release EN](docs/releases/v2026.10.15.673.md) · [릴리스 KO](docs/releases/v2026.10.15.673.ko.md)
+- Main merged #849; independently preserved audit PR #846/#847 commits and colliding v652 updates. PR #852 CI cancellation is not an application failure. Exact-SHA Test/finance/session/zero-downtime gates remain blocked; no Production deployment.
+
 ## v2026.10.15.670 — Host release source identity guard (candidate, no Production promotion)
 
 - [Release notes EN](docs/releases/v2026.10.15.670.md) · [한국어](docs/releases/v2026.10.15.670.ko.md)
@@ -12,6 +17,18 @@
 - [Release gate record EN](docs/releases/v2026.10.15.652.md) · [한국어 운영 승격 검증](docs/releases/v2026.10.15.652.ko.md)
 - [Detailed worklog EN](docs/worklog/2026-10-15-production-promotion-gates-v652.md) · [작업기록 KO](docs/worklog/2026-10-15-production-promotion-gates-v652.ko.md)
 - Exact-SHA Test mismatch, public Production unknown version and 237 writable DB tables / 11 PUBLIC definer routines: **no Production deployment**.
+
+## v2026.10.15.651 — Web code, functional failures and stability audit (docs only)
+
+- [English findings](docs/findings/MONEYVERSE_WEB_FULL_CODE_STABILITY_AUDIT_v2026.10.15.651.md) · [한국어 결과](docs/findings/MONEYVERSE_WEB_FULL_CODE_STABILITY_AUDIT_v2026.10.15.651.ko.md)
+- [Worklog EN](docs/worklog/2026-10-15-web-full-code-stability-v651.md) · [작업기록 KO](docs/worklog/2026-10-15-web-full-code-stability-v651.ko.md) · [Release EN](docs/releases/v2026.10.15.651.md) · [Release KO](docs/releases/v2026.10.15.651.ko.md)
+- Live six route 404s; malformed candle 503; 241/245 DEV DB app-writable tables; 11 PUBLIC SECURITY DEFINER grants; route-ledger check fails without --inventory. No source, Test, Production, monetary or privilege changes. BLOCKED.
+
+## v2026.10.15.652 — Entire Code / Runtime / Monetary Policy Reanalysis (AUDIT; P0 live, BLOCKED)
+
+- [English report](docs/findings/MONEYVERSE_COMPLETE_REANALYSIS_v2026.10.15.652.md) · [한국어 전체 재분석](docs/findings/MONEYVERSE_COMPLETE_REANALYSIS_v2026.10.15.652.ko.md) · [Source inventory evidence](docs/findings/MONEYVERSE_COMPLETE_REANALYSIS_v2026.10.15.652.source-inventory.json)
+- [Worklog EN](docs/worklog/2026-10-15-complete-reanalysis-v652.md) · [작업 기록 KO](docs/worklog/2026-10-15-complete-reanalysis-v652.ko.md) · [GitHub update](docs/updates/v2026.10.15.652-full-reanalysis-github.md) · [내부 기록](docs/updates/v2026.10.15.652-full-reanalysis-internal.ko.md)
+- **New verified live P0:** missing ledger_entries table caused fabricated 500000/480000 automatic monetary telemetry in 318 recorded evaluations, associated with 169 APPROVED policy orders. Actual balance effects still require reconciliation. **New GET-auction financial side effects**; DB app grants and direct ledger bypass persist. Audit-only; no live config/source/financial changes, no Test/Production promotion.
 
 ## v2026.10.15.650 — Audited CI/PR integration (documentation-only)
 
@@ -181,11 +198,11 @@ graph TD
 | **[관리자 긴급 킬스위치 제어탑](/admin/controls)** | KO | 전 종목 서킷브레이커, 국고 출금 동결, 신규 가입 차단, 웹훅 격리 4대 킬스위치 |
 | **[관리자 디스코드 관제 대시보드](/admin/discord)** | KO | 6대 관리자 1:1 직보 DM(고래이동·카지노1억잭팟·국고결핍·킬스위치·대출연체) 및 채널 브로드캐스트 제어탑 |
 | **[창업 그랜트 심사 대시보드](/admin/treasury/grants)** | KO | 접수된 벤처 그랜트 신청서 검토, 원자적 시드머니 지급 및 세션 감사 로그 스트립 |
-| [2026-09-22-admin-policy-version-management.ko.md](docs/2026-09-22-admin-policy-version-management-and-release-lineage-v2026.09.22.350.ko.md) | KO | 관리자 정책 버전 관리 및 배포 계보(Lineage) 사양 |
-| [2026-09-22-admin-private-chat-moderation.ko.md](docs/2026-09-22-admin-private-chat-moderation-queue-and-evidence-v2026.09.22.352.ko.md) | KO | 1:1 프라이빗 채팅 모더레이션 큐 및 증적 보존 명세 |
-| [2026-09-22-consent-blackout-fix-home-fintech.ko.md](docs/2026-09-22-consent-blackout-fix-home-fintech-portal-v2026.09.22.351.ko.md) | KO | 금융 포털 필수 약관 동의 암전(Blackout) 방지 사양 |
-| [2026-09-22-consent-policy-dynamic-binding.ko.md](docs/2026-09-22-consent-policy-dynamic-binding-and-10s-rollback-v2026.09.22.353.ko.md) | KO | 동의 정책 동적 바인딩 및 10초 롤백 가드 사양 |
-| [2026-09-22-private-chat-safety-controls.ko.md](docs/2026-09-22-private-chat-safety-controls-and-ime-protection-v2026.09.22.354.ko.md) | KO | 프라이빗 채팅 안전 제어 및 한글 IME 조합 보호 사양 |
+| [2026-09-22-admin-policy-version-management.ko.md](docs/2026-09-22-admin-policy-version-management-and-release-ledger-v2026.09.22.352.ko.md) | KO | 관리자 정책 버전 관리 및 배포 계보(Lineage) 사양 |
+| [2026-09-22-admin-private-chat-moderation.ko.md](docs/2026-09-22-admin-private-chat-moderation-queue-and-evidence-governance-v2026.09.22.354.ko.md) | KO | 1:1 프라이빗 채팅 모더레이션 큐 및 증적 보존 명세 |
+| [2026-09-22-consent-blackout-fix-home-fintech.ko.md](docs/2026-09-22-consent-blackout-fix-home-fintech-portal-v2026.09.22.347.1.ko.md) | KO | 금융 포털 필수 약관 동의 암전(Blackout) 방지 사양 |
+| [2026-09-22-consent-policy-dynamic-binding.ko.md](docs/2026-09-22-consent-policy-dynamic-binding-and-10s-rollback-v2026.09.22.350.ko.md) | KO | 동의 정책 동적 바인딩 및 10초 롤백 가드 사양 |
+| [2026-09-22-private-chat-safety-controls.ko.md](docs/2026-09-22-private-chat-safety-controls-and-ime-protection-v2026.09.22.353.ko.md) | KO | 프라이빗 채팅 안전 제어 및 한글 IME 조합 보호 사양 |
 | [2026-09-22-work-flicker-modal-layout.ko.md](docs/2026-09-22-work-flicker-modal-layout-remediation-v2026.09.22.358.ko.md) | KO | 일일 업무 모달 깜빡임 방지 및 레이아웃 안정화 사양 |
 
 ---

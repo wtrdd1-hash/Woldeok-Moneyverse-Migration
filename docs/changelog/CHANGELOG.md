@@ -1,8 +1,14 @@
+## v2026.10.15.673 — PR audit integration (docs only, BLOCKED)
+- Merge #849 audit docs; preserve #846/#847 records in an isolated integration candidate, resolve v652 filename collisions. Test/finance/Production promotion remain blocked. [Notes](../releases/v2026.10.15.673.md).
+
 ## v2026.10.15.670 — Host release source-identity guard (candidate)
 - Read-only systemd/Test preflight verifies release manifest, backend/frontend BUILD_IDs, compiled frontend build, running directories and public version against one approved SHA. Regression tests and bilingual runbook added. No Test/Production runtime, DB or member-money change. [Notes](../releases/v2026.10.15.670.md).
 
 ## v2026.10.15.652 — Production promotion gate (BLOCKED)
 - Verified live Debian Test/Production source/version and DB roles after explicit promotion request. Test backend SHA does not match its manifest/frontend; Production version remains unknown; 237 public tables writable by app role and 11 publicly callable SECURITY DEFINER routines. No runtime promotion; full finance/UI/session/rollback acceptance is pending. [Release report](../releases/v2026.10.15.652.md).
+
+## v2026.10.15.651 — Web functional stability audit (docs only)
+- Independently confirmed six Production 404 routes, invalid candle-id 503, overbroad application-role DB privileges (241/245 writable public tables, 11 publicly executable SECURITY DEFINER functions), direct balance updates and an incomplete full-route QA gate. No running-system modifications or deployment. [Release notes](../releases/v2026.10.15.651.md).
 
 ## v2026.10.15.650 — Audited CI/PR integration (docs + Android signing)
 - Integrated web audit PRs #841–843 and Android signing-security PR #27 following their successful CI. Fixed root documentation conflict-marker artifact on a separate CI/PR branch, retained #844/Android #23–25 acceptance blockers. No server or Play/Production deployment. [Release notes](../releases/v2026.10.15.650.md).
