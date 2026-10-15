@@ -1,5 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.15.682 — 국고 자동 합성수입 긴급 중지 및 운영승격 차단 증거
+
+- 2026-10-15 14:51 KST 암호화 백업 확인 후 운영 SWF 자동 실행 OFF. 기존 국고·회원 잔액 및 운영 서비스 불변. 15:18·15:27 설정 OFF, 다음 1시간 주기 검증 필요.
+- 운영 DB를 독립 Test DB로 복원하여 기존 migration 266건 + 269~271의 SQL 적용 확인. 그러나 269 기부 실호출은 ledger_transactions.tx_type 부재로 실패, 271은 앱 역할의 금고/보조원장 직접 SELECT 차단. v678 대사·전체 관리자 조회를 최소권한 전용 함수로 보수하기 전 배포 불가.
+- [v681 상세 한글 판단](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.ko.md) / [영문](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.md). **운영 코드 승격 BLOCKED**, 금융 마이그레이션 운영 미적용.
+
 ## v2026.10.15.681 — F675-04 계산기→학습→선택형 게임 (상세 기획)
 
 - [F675-04 한국어 상세기획](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) / [영문](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md)을 v675 네 번째 기능의 공식 상세기획으로 채택. 기존 /tools/계산기·/guide/용어사전을 재사용, 비회원도 먼저 정확한 계산 결과/가정을 보고, 희망자만 가상 WLD 체험에 접속하게 한다.

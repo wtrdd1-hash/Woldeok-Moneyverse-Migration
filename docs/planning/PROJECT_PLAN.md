@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.682 — Treasury emergency containment and blocked release evidence
+
+- Emergency Production SWF synthetic automatic cycle was switched OFF at 2026-10-15 14:51 KST **after verified encrypted backup**; existing Treasury/member balances and Production services unchanged. Switch confirmed OFF at 15:18/15:27 KST; next hourly-cycle verification pending.
+- Restored independent Test database with 266 historical migrations; 269–271 DDL succeeded there, but migration 269's actual donation function failed (nonexistent ledger_transactions.tx_type). Under 271 the app role also cannot directly SELECT vault/treasury journal tables, so v678 reconciliation needs a purpose-scoped role-checked read function before Test/Production.
+- [v681 English release blockers](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.md) / [Korean](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.ko.md). **Production code release BLOCKED**, no migration or app promotion in Production.
+
 ## v2026.10.15.681 — F675-04 public calculators → learning → optional game (PLANNING)
 
 - **Adopt** [F675-04 EN calculator/learning user trust specification](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) / [한국어](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) as the next v675 detailed feature plan. Reuse existing /tools, calculator, /guide/glossary, localized variants; give every guest the full correct answer before suggesting optional fictional WLD learning/game actions.
