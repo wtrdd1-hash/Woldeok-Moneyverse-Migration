@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.15.681 — F675-04 계산기→학습→선택형 게임 (상세 기획)
+
+- [F675-04 한국어 상세기획](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) / [영문](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md)을 v675 네 번째 기능의 공식 상세기획으로 채택. 기존 /tools/계산기·/guide/용어사전을 재사용, 비회원도 먼저 정확한 계산 결과/가정을 보고, 희망자만 가상 WLD 체험에 접속하게 한다.
+- **C681-01~09 소스 근거:** 기존 알림/10,000 WLD 보너스 예약을 클라이언트 클릭만으로 성공 표시, 보상·무손실 보장 배너, localStorage/서버 저장 및 쿠키 인증추정 혼동, 고정된 게임 예시 시세, Number 수치 및 특정 연도 세금 주장, 얇은 지역별 프리셋 중복. 운영에서의 신규 장애 재현이라고 단정하지 않음.
+- 로컬/서버 저장, 실제 알림·WLD 지급/적격성·선택형 게임 상태 독립, 계산식 버전/법령 적용 국가·연도/근거, 한영 UX 10종·사용자 가설 8건·외부 자료 14개·D0~D7 테스트 설계. 검색엔진용 무가치 대량 페이지/보장성 유입 금지.
+- v523/542/543 경제·v530 전체 UI·v397 API/버튼·동일 SHA Test/롤백/운영승격은 **BLOCKED**. 문서만 수정하며 코드/DB/WLD/Test/운영 미변경. [작업기록](../worklog/2026-10-15-f67504-calculator-learning-v681.ko.md).
+
+
 ## v2026.10.15.680 — F675-03 WLD 잔액 변동 이유·영수증 (상세 기획)
 
 - [F675-03 WLD 거래내역·영수증 상세기획](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) / [영문](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md)을 v675의 P1 세부 계약으로 채택. 이미 존재하는 로그인 지갑·최근 거래 50건을 보완하며 아직 구현/운영 검증이 아니다.

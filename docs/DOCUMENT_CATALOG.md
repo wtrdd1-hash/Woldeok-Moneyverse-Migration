@@ -1,5 +1,10 @@
 # 📚 Document Catalog
 
+## v2026.10.15.681 — F675-04 calculator to learning (PLANNING)
+
+- [F675-04 Public Calculator → Learning → Optional Fictional Game (EN)](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) · [Korean](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md). Existing calculators reused; C681-01..09 truth gaps, 8 user jobs, 14 first-party/practitioner references, D0–D7 exact-SHA release gates. No runtime code or Test/Production acceptance.
+
+
 ## v2026.10.15.680 — F675-03 activity/receipt product design (PLANNING)
 
 - [WLD activity reasons, reconciliation & private receipt details (EN)](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md) / [Korean](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) — source-observed max-50 history, internal bank net-zero risk, exact-money privacy, 8 user hypotheses, 13 references, D0–D7; docs only.
