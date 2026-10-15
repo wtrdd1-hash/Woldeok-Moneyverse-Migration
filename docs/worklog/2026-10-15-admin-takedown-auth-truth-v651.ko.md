@@ -18,3 +18,7 @@
 - GitHub 브랜치 게시 및 [PR #850](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/850) 생성. CI 전부 통과 확인 전까진 완료 주장 금지.
 - 마지막 전체 검증: `pnpm test` 종료코드 0, 백엔드 1,185건 통과/DB 391건 건너뜀, 프론트 1,210건 통과. `pnpm typecheck`, `pnpm lint`, `pnpm build` 종료코드 전부 0 (`safety651-final-gates`).
 - **운영 승격 BLOCKED:** Test 전/백엔드 동일 SHA 증거 부재, 관리자 34페이지 인증 세션·DB 보안·v530 5회 반복 UI 검사 미수용, 실삭제 미구현 및 민감 DB 권한 P0 잔존. Test/운영 버전 링크·서비스·실데이터·스키마 변경 없음.
+
+## PR 생성 후 전체 UI 문자열 재확인 — 11:12 KST
+- 실제 없는 '본인 확인하러 가기' 버튼 안내가 공통 `frontend/src/lib/mutate.ts`에도 남아 있음을 발견. 계정·자산 등 필수 재인증이 유지되는 동작의 안내를 실제 존재하는 '계정 보안 설정'으로 변경. 중요 보안 검증은 제거하지 않음.
+- `frontend/src/lib/reauth-error-copy.test.ts` 신규: 수정 전 RED 1건 실패, 수정 후 GREEN 1건 통과. 전체 테스트·린트·타입 검사 추가 실행 후 PR #850 갱신.

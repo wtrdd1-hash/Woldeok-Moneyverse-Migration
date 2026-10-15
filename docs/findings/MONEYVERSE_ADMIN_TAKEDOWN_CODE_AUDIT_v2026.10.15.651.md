@@ -19,3 +19,6 @@ Static audit identified 36 remaining ReauthGuard endpoint uses; these require ro
 Server `NODE_ENV=production` caused React 19 `act` to be unavailable in the first frontend full test run (353 failed). Explicit `NODE_ENV=test` re-run is required; the first failure is not proof of 353 functional bugs.
 
 Production data, PostgreSQL, feature switches and release symlinks were not modified. Release requires refreshed main, CI, exact-SHA isolated Test frontend/backend/DB, authenticated admin checks, rollback and zero-downtime continuity evidence.
+
+### Follow-up SAFE-651-08 — stale global verification CTA (branch correction)
+- Shared `frontend/src/lib/mutate.ts` retained a non-existent "본인 확인하러 가기" action despite no corresponding button. Replaced with a navigation-independent pointer to real account-security settings **only for genuinely step-up-protected actions**. Added RED/GREEN regression in `frontend/src/lib/reauth-error-copy.test.ts`. This is not blanket step-up removal.

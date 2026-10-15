@@ -18,3 +18,7 @@
 - GitHub branch published, PR [#850](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/850) OPEN and subject to CI; latest observed check set only partially complete, not accepted as CI green.
 - Last full-source gate with candidate code: `pnpm test` exit 0, backend 1,185 passed/391 DB skips, frontend 1,210 passed; `pnpm typecheck`, `pnpm lint` and `pnpm build` all exit 0 (mv-task `safety651-final-gates`).
 - **Release BLOCKED:** isolated Test currently does not attest one consistent application source SHA across backend/frontend; protected full 34-page admin/session and database security verification incomplete, v530 five-pass UI blocked, actual content removal unimplemented, sensitive application-table DB grants unremediated. No Test/Production switch, release, schema mutation, content removal or service restart was executed by this change.
+
+## Post-PR cross-surface recheck — 11:12 KST
+- Full-source user-facing string search found the nonexistent "본인 확인하러 가기" instruction still hardcoded in shared `frontend/src/lib/mutate.ts`. Because other sensitive operations legitimately retain reauthentication, changed its generic response to direct users to the actual account-security settings rather than a phantom button; did **not** remove financial or account security requirements.
+- Added `frontend/src/lib/reauth-error-copy.test.ts`: RED 1 fail before and GREEN 1 pass after correction. Final full-suite and lint/typecheck re-run scheduled; branch PR #850 will receive this follow-up commit.
