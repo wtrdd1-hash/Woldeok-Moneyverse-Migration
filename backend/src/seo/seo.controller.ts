@@ -57,20 +57,23 @@ export class SeoController {
   ) {}
 
   @Get('crawl-audit')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: 'Get latest SEO crawl audit result' })
   async getCrawlAudit() {
     return this.auditService.getLastAuditResult() || {
       timestamp: new Date().toISOString(),
-      totalUrlsChecked: 18,
-      healthyUrls: 18,
+      totalUrlsChecked: 0,
+      healthyUrls: 0,
       errorUrls: 0,
       issues: [],
       discordNotified: false,
+      status: 'not_run',
     };
   }
 
   @Post('crawl-audit')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Trigger immediate on-demand SEO crawl audit and discord alert' })
   async triggerCrawlAudit() {
     return this.auditService.runCrawlAudit();
@@ -123,6 +126,7 @@ export class SeoController {
   }
 
   @Get('gsc/digest-report')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: 'Get latest daily SEO digest report result' })
   async getDigestReport() {
     return this.digestService.getLastDigestResult() || {
@@ -139,6 +143,7 @@ export class SeoController {
 
   @Post('gsc/digest-report')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Trigger immediate daily SEO digest report to Discord' })
   async triggerDigestReport() {
     return this.digestService.sendDailyDigest();
@@ -177,7 +182,7 @@ export class SeoController {
     const base = (process.env.APP_BASE_URL || 'https://easy-scraping.com').replace(/\/$/, '');
     return {
       key,
-      keyLocation: `${base}/${key}.txt`,
+      keyLocation: `${base}/.well-known/indexnow.key`,
       wellKnownLocation: `${base}/.well-known/indexnow.key`,
     };
   }

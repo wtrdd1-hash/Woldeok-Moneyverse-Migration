@@ -112,10 +112,10 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
             : '📈 Google Search Console 일일 SEO 요약 리포트 생성이 완료되었습니다.',
         );
       } else {
-        setSubmitResult('일일 SEO 다이제스트 리포트가 발송 대기열에 등록되었습니다.');
+        setSubmitResult(`일일 SEO 다이제스트 발송에 실패했습니다 (HTTP ${res.status}). 관리자 권한과 서버 상태를 확인해 주세요.`);
       }
     } catch {
-      setSubmitResult('일일 SEO 다이제스트 발송 요청이 완료되었습니다.');
+      setSubmitResult('일일 SEO 다이제스트 발송 요청이 실패했습니다. 실제 발송 여부를 확인해 주세요.');
     } finally {
       setIsSendingDigest(false);
     }
@@ -171,9 +171,11 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
           `크롤링 감사 완료: ${result.healthyUrls}/${result.totalUrlsChecked}개 정상 (${result.errorUrls}개 오류 감지)${result.discordNotified ? ' 📢 디스코드 채널로 실시간 리포트 발송됨' : ''}`,
         );
         refreshData();
+      } else {
+        setSubmitResult(`크롤링 감사 실패: HTTP ${res.status}. 감사 결과가 생성되지 않았습니다.`);
       }
     } catch {
-      setSubmitResult('크롤링 감사 요청이 완료되었습니다.');
+      setSubmitResult('크롤링 감사 요청에 실패했습니다. 백엔드 연결과 권한을 확인해 주세요.');
     } finally {
       setIsAuditing(false);
     }
@@ -191,11 +193,11 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
       const result = await res.json();
       if (res.ok && result.success) {
         setSubmitResult(
-          `전송 완료! 총 ${result.submittedUrls?.length || 0}개 URL 변경 알림을 IndexNow 호환 검색엔진(Naver/Bing 등)에 전송했습니다.`,
+          `URL 변경 알림 접수: ${result.indexNowResponses?.filter((item: { status: number }) => item.status === 200 || item.status === 202).length ?? 0}/${result.indexNowResponses?.length ?? 0}개 검색엔진 엔드포인트. 실제 검색 색인은 보장되지 않습니다.`,
         );
         refreshData();
       } else {
-        setSubmitResult(result.message || 'IndexNow URL 변경 통보에 실패했습니다.');
+        setSubmitResult(result.message || 'IndexNow URL 변경 알림이 접수되지 않았습니다. 검색엔진 응답 상태를 확인해 주세요.');
       }
     } catch {
       setSubmitResult('IndexNow URL 변경 통보 중 통신 오류가 발생했습니다.');

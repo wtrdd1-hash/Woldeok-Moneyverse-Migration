@@ -103,6 +103,10 @@ describe('SeoClientView', () => {
       json: async () => ({
         success: true,
         submittedUrls: ['https://easy-scraping.com/stocks/CHIPS'],
+        indexNowResponses: [
+          { endpoint: 'https://api.indexnow.org/indexnow', status: 200, message: 'Notification received' },
+          { endpoint: 'https://www.bing.com/indexnow', status: 503, message: 'Unavailable' },
+        ],
       }),
     });
 
@@ -111,8 +115,8 @@ describe('SeoClientView', () => {
     const submitBtn = screen.getByRole('button', { name: /IndexNow URL 변경 통보/i });
     fireEvent.click(submitBtn);
 
-    const feedback = await screen.findByText(/전송 완료!/i);
-    expect(feedback).toBeTruthy();
+    const feedback = await screen.findByText(/URL 변경 알림 접수: 1\/2개 검색엔진 엔드포인트/);
+    expect(feedback.textContent).toContain('실제 검색 색인은 보장되지 않습니다.');
   });
 
   it('renders Google Search Console Search Analytics card with metrics', () => {
