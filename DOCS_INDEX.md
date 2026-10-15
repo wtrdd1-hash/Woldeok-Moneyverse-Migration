@@ -1,5 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.15.653 — Live Monetary Policy Emergency Containment (LIVE DB control / Source DRAFT)
+
+- [English verified containment](docs/findings/MONEYVERSE_LIVE_MONETARY_CONTAINMENT_v2026.10.15.653.md) · [한국어 시정 결과](docs/findings/MONEYVERSE_LIVE_MONETARY_CONTAINMENT_v2026.10.15.653.ko.md)
+- [Worklog EN](docs/worklog/2026-10-15-live-monetary-containment-v653.md) · [작업 기록 KO](docs/worklog/2026-10-15-live-monetary-containment-v653.ko.md) · [GitHub update](docs/updates/v2026.10.15.653-github.md) · [내부 업데이트](docs/updates/v2026.10.15.653-internal.ko.md)
+- **Live containment verified:** auto-monetary switch id1 disabled; exactly 169 false-data approved but unexecuted policy orders cancelled; audit records preserved, no actual money/ledger mutation. Independent source candidate removes fabricated statistics, prevents GET-triggered auction settlement and guards policy-linked retirement. **Source Test/Production promotion BLOCKED** until canonical ledger, least-privilege and full v530 acceptance.
+
 
 ## v2026.10.15.670 — Host release source identity guard (candidate, no Production promotion)
 
