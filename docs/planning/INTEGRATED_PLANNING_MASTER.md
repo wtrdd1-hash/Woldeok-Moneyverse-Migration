@@ -1,14 +1,10 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-## v2026.10.15.683 — Treasury secure read, fail-closed donations, public truth
-- [EN detailed candidate](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.md) / [Korean](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.ko.md): verified read-only role-scoped fiscal reconciler, 269 incompatible donation routes paused pending idempotent Economy Core settlement, fabricated public Treasury totals/receipts removed. This is G1/G2 bounded work, not completed money settlement.
-- Exact-SHA finance Test plus other admin read endpoints, bond/pension/SWF payouts, reconciliation of 15.1M WLD fiscal journal discrepancy, session continuity and rollback must PASS before merging/promoting.
+## v2026.10.15.685 — SEO action truth and administrator access (implementation candidate, NOT deployed)
 
-
-## v2026.10.15.682 — Treasury containment and release correctness gate
-
-- [v681 finance and release gate](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.md) / [Korean](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.ko.md): emergency SWF OFF after verified encrypted backup, not a full accounting repair; independent restored Production schema data and isolated 269–271 trial exposed runtime donation SQLSTATE 42703 and 271 app-role read failures for v678 direct query.
-- Only read-only diagnostics/isolated Test mutations after operational SWF flag change. **Do not promote** code/migrations, open settlements, fabricate balancing funds or merge draft v678/681 until real authenticated Test full role/session/ledger/zero-downtime gates are met.
+- GitHub `origin/main=69bc8c14df236f57898b1b44ddc596be5144c30a` at start/middle. Isolated `fix/indexnow-auth-plan-parity-v2026.10.15.685`, no overlap with v683 treasury/v684 planning agents. [EN findings](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) / [KO findings](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) and [evidence/worklog](../worklog/2026-10-15-seo-integrity-v685.md).
+- v675 G675-05 SEO truth P0: candidate fixes false IndexNow receipts, foreign URL submission, false crawler-audit and daily digest/Discord success, and missing admin+CSRF guards. Unit tests, workspace checks and exact Test/Production distinctions in worklog.
+- **This is NOT authority supersession**: v530 planning, v523/542/543 monetary integrity, unsolved crawl-versus-index provenance and exact-SHA Test/DB/auth/zero-downtime release gates remain. No balance, DB schema, Test/Production pointer or feature switch changed.
 
 ## v2026.10.15.681 — F675-04 useful calculator-to-learning journey (docs only)
 

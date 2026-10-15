@@ -1,14 +1,10 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-## v2026.10.15.683 — 국고 전용 조회·기부 안전차단·대국민 정보 정정
-- [국고 수정 설계](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.ko.md) / [영문](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.md): 관리자 전용 원장 대사 SQL, 구형 기부 차단, 가상 국고 지급 실적 제거. 실제 복식지급 완료가 아닌 G1/G2 일부 구현이다.
-- 다른 국고 관리자 조회·지급 SQL·15.1M WLD 장부차액·동일 SHA Test 인증/세션·롤백 및 운영승격 차단 유지.
+## v2026.10.15.685 — SEO 응답 사실성·관리자 접근 (코드 수정 후보, 미배포)
 
-
-## v2026.10.15.682 — 국고 SWF 긴급 통제 및 실제 운영승격 검증 조건
-
-- [v681 국고 안전 상세](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.ko.md) / [영어](TREASURY_SECURITY_RELEASE_GATES_v2026.10.15.682.md): 백업 검증 후 SWF 자동 실행 OFF, DB 전체 회계 복구 완료는 아님. 복원 격리 DB의 269~271 시범 적용에서 기부 실호출 SQLSTATE 42703, 앱의 v678 직접 원장조회 권한 실패 확인.
-- SWF 운영 스위치 외 실제 잔액/스키마/서버 변경 없음. **정식 원장·인증/권한·Test SHA·무중단 검증 전 국고 코드/마이그레이션 승격 금지**, 5대 금고 차액 강제 보정 금지.
+- 작업 전·중 GitHub `origin/main=69bc8c14df236f57898b1b44ddc596be5144c30a`. 독립 `fix/indexnow-auth-plan-parity-v2026.10.15.685` 사용, 국고 v683·기획 v684 작업과 충돌 회피. [한국어 진단](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) / [영문](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) / [작업기록](../worklog/2026-10-15-seo-integrity-v685.md).
+- v675 G675-05 P0의 실제 사용 흐름: IndexNow 허위 성공과 다른 사이트 URL 제출, 크롤링 감사·일일 리포트/Discord 허위 완료, 누락된 관리자·CSRF 보호를 독립 코드 후보로 시정. 테스트·빌드·운영 검증 여부는 작업기록에서 분리.
+- **기획 권한 변경 아님**: v530, v523/542/543 경제 보존, 크롤링과 색인 실제 증거 분리, 동일 SHA Test·DB·인증 E2E·무중단 운영 승격 차단 유지. DB/잔액/스위치/운영 포인터 무변경.
 
 ## v2026.10.15.681 — F675-04 사용자를 위한 계산·학습 선택 동선 (문서)
 
