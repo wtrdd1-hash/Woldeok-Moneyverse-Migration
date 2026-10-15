@@ -19,6 +19,11 @@
 - [Worklog EN](docs/worklog/2026-10-15-web-full-code-stability-v651.md) · [작업기록 KO](docs/worklog/2026-10-15-web-full-code-stability-v651.ko.md) · [Release EN](docs/releases/v2026.10.15.651.md) · [Release KO](docs/releases/v2026.10.15.651.ko.md)
 - Live six route 404s; malformed candle 503; 241/245 DEV DB app-writable tables; 11 PUBLIC SECURITY DEFINER grants; route-ledger check fails without --inventory. No source, Test, Production, monetary or privilege changes. BLOCKED.
 
+## v2026.10.15.652 — Entire Code / Runtime / Monetary Policy Reanalysis (AUDIT; P0 live, BLOCKED)
+
+- [English report](docs/findings/MONEYVERSE_COMPLETE_REANALYSIS_v2026.10.15.652.md) · [한국어 전체 재분석](docs/findings/MONEYVERSE_COMPLETE_REANALYSIS_v2026.10.15.652.ko.md) · [Source inventory evidence](docs/findings/MONEYVERSE_COMPLETE_REANALYSIS_v2026.10.15.652.source-inventory.json)
+- [Worklog EN](docs/worklog/2026-10-15-complete-reanalysis-v652.md) · [작업 기록 KO](docs/worklog/2026-10-15-complete-reanalysis-v652.ko.md) · [GitHub update](docs/updates/v2026.10.15.652-full-reanalysis-github.md) · [내부 기록](docs/updates/v2026.10.15.652-full-reanalysis-internal.ko.md)
+- **New verified live P0:** missing ledger_entries table caused fabricated 500000/480000 automatic monetary telemetry in 318 recorded evaluations, associated with 169 APPROVED policy orders. Actual balance effects still require reconciliation. **New GET-auction financial side effects**; DB app grants and direct ledger bypass persist. Audit-only; no live config/source/financial changes, no Test/Production promotion.
 
 ## v2026.10.15.650 — Audited CI/PR integration (documentation-only)
 
