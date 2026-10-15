@@ -21,7 +21,6 @@ export default function IsaCalculatorPage() {
   const profitId = useId();
   const [isaType, setIsaType] = useState<'general' | 'frugal'>('general');
   const [totalProfit, setTotalProfit] = useState<number>(5000000);
-  const [isWldClaimed, setIsWldClaimed] = useState(false);
 
   // 비과세 한도: 일반형 200만원, 서민형 400만원
   const taxExemptLimit = isaType === 'general' ? 2000000 : 4000000;
@@ -243,20 +242,19 @@ export default function IsaCalculatorPage() {
                 </span>
               </div>
               <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-400">
-                무료 10,000 WLD
+                무료 회원가입 · 가상 경제 체험
               </span>
             </div>
             <p className="text-xs text-zinc-400">
-              세금 0원 비과세 혜택처럼 가볍게! 머니버스 가상 주식 시장에서 지원금 10,000 WLD로 배당주 모의투자를 지금 바로 무료 체험해 보세요.
+              세금 0원 비과세 혜택처럼 가볍게! 머니버스 가상 주식 시장에서 가상 배당주 투자 기능을 둘러보고 회원가입 후 체험해 보세요.
             </p>
             <div className="flex items-center gap-2">
               <Link
-                href="/auth/register"
-                onClick={() => setIsWldClaimed(true)}
+                href="/register"
                 className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/40 transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                {isWldClaimed ? '10,000 WLD 지급 예약됨' : '10,000 WLD 지원금 받고 배당 투자'}
+                회원가입하고 배당 투자 시작하기
               </Link>
               <Link
                 href="/stocks"

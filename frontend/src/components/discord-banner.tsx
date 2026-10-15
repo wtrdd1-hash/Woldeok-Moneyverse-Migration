@@ -74,8 +74,8 @@ export function DiscordBanner() {
               variant="outline"
               className="border-border/80 hover:bg-muted/80 text-foreground font-semibold text-xs rounded-xl px-4 py-2 min-h-[38px]"
             >
-              <Link href="/attendance">
-                <T korean="오늘의 웹 출석 10% 받기" english="Claim +10% Web Check-in" />
+              <Link href="/quests">
+                <T korean="오늘의 퀘스트 확인" english="View Daily Quests" />
               </Link>
             </Button>
           </div>

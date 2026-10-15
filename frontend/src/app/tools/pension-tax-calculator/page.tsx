@@ -24,7 +24,6 @@ export default function PensionTaxCalculatorPage() {
   const [annualSalary, setAnnualSalary] = useState<number>(50000000);
   const [pensionDeposit, setPensionDeposit] = useState<number>(6000000);
   const [irpDeposit, setIrpDeposit] = useState<number>(3000000);
-  const [isWldClaimed, setIsWldClaimed] = useState(false);
 
   // 공제율 판단: 총급여 5,500만원 이하 (종합소득 4,500만원 이하) -> 16.5% (지방소득세 포함)
   // 초과 -> 13.2%
@@ -262,20 +261,19 @@ export default function PensionTaxCalculatorPage() {
                 </span>
               </div>
               <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-400">
-                무료 10,000 WLD
+                무료 회원가입 · 가상 경제 체험
               </span>
             </div>
             <p className="text-xs text-zinc-400">
-              세액공제 환급금처럼 든든한 혜택! 머니버스 가상 은행에서 지원금 10,000 WLD로 일일 복리 이자 파밍을 지금 바로 무료 체험해 보세요.
+              세액공제 환급금처럼 든든한 혜택! 머니버스 가상 은행에서 가상 은행과 복리 저축 기능을 살펴보고 체험해 보세요.
             </p>
             <div className="flex items-center gap-2">
               <Link
-                href="/auth/register"
-                onClick={() => setIsWldClaimed(true)}
+                href="/register"
                 className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/40 transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                {isWldClaimed ? '10,000 WLD 지급 예약됨' : '10,000 WLD 지원금 받고 연금 파밍'}
+                회원가입하고 연금 체험하기
               </Link>
               <Link
                 href="/bank"

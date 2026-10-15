@@ -2,6 +2,7 @@ import { Controller, Get, Header } from '@nestjs/common';
 import { VERSION_NEUTRAL } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
+import { resolveRuntimeBuildId } from './runtime-version';
 
 /**
  * VERSION_NEUTRAL alongside the global prefix exclusion: excluding the
@@ -32,6 +33,6 @@ export class VersionController {
   @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: 'Backend runtime identity' })
   check(): { id: string } {
-    return { id: process.env.BUILD_ID ?? 'unknown' };
+    return { id: resolveRuntimeBuildId() };
   }
 }

@@ -27,20 +27,28 @@ const FIVE_MINUTES = 300_000;
 @Injectable()
 export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShutdown {
   private readonly logger = new Logger('Scheduler');
+  private started = false;
 
   constructor(@Inject(SCHEDULER) private readonly scheduler: Scheduler | null) {}
 
   onApplicationBootstrap(): void {
+    // An isolated Test backend must not run scheduled economy mutations.
+    // Production may also explicitly disable scheduling during blue/green staging.
+    if (process.env.NODE_ENV === 'test' || process.env.MONEYVERSE_SCHEDULER_ENABLED === 'false') {
+      this.logger.log('scheduler disabled for this runtime');
+      return;
+    }
     if (!this.scheduler) {
       this.logger.log('no database; the schedule is not running');
       return;
     }
     this.scheduler.start();
+    this.started = true;
     this.logger.log('schedule started');
   }
 
   onApplicationShutdown(): void {
-    this.scheduler?.stop();
+    if (this.started) this.scheduler?.stop();
   }
 }
 

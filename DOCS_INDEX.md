@@ -1,6 +1,12 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
-<<<<<<< HEAD
+## 2026-10-15 — Sequential Remediation Candidate v2026.10.15.639 (BLOCKED)
+
+- [English implementation/evidence](docs/findings/MONEYVERSE_SEQUENTIAL_REMEDIATION_v2026.10.15.639.md) · [한국어 상세보고서](docs/findings/MONEYVERSE_SEQUENTIAL_REMEDIATION_v2026.10.15.639.ko.md)
+- [Worklog EN](docs/worklog/2026-10-15-sequential-remediation-v639.md) · [작업기록 KO](docs/worklog/2026-10-15-sequential-remediation-v639.ko.md) · [GitHub update](docs/updates/v2026.10.15.639-github.md) · [내부 내역](docs/updates/v2026.10.15.639-internal.ko.md)
+- **Actual changes:** repaired signup/legacy 404 links, status-coded candle proxy, admin security/IndexNow, QA/script/runtime version; atomic PvP/auction transaction and fail-closed monetary scheduler safeguards.
+- **Financial/security release blockers remain:** canonical double-entry posting is absent for direct balance writes, app role can DML 237 tables, full-schema exact-SHA Test/authenticated five-pass and zero-downtime production acceptance not established. **Do not equate isolated tests with an operating release.**
+
 ## 2026-10-14 WLD monetary overflow protection (v2026.10.14.625)
 
 - [English primary report](docs/findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.md) · [한국어 상세 보고서](docs/findings/MONEYVERSE_WLD_OVERFLOW_HARDENING_v2026.10.14.625.ko.md)

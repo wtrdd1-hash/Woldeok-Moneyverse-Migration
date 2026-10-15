@@ -167,6 +167,13 @@ const config: NextConfig = {
 
   async redirects() {
     return [
+      // Previous bookmarks and stale blog CTA URLs should not become dead ends.
+      { source: '/auth/register', destination: '/register', permanent: true },
+      { source: '/business', destination: '/businesses', permanent: true },
+      { source: '/attendance', destination: '/quests', permanent: false },
+      { source: '/career-guide', destination: '/guide/career-mastery', permanent: true },
+      { source: '/guide/getting-started', destination: '/guide', permanent: false },
+      { source: '/pet', destination: '/roadmap', permanent: false },
       {
         source: '/notices',
         destination: '/announcements',
