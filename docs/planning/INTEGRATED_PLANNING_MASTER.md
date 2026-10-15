@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.686 — F675-05 first-session task truth (documentation only)
+
+- Start/mid `origin/main=6946398986edba0ad84bc601e6d1076e442f6d05`, isolated branch `docs/first-session-truth-v2026.10.15.686`; v687 concurrent runtime audit kept separate. [EN worklog](../worklog/2026-10-15-f67505-first-session-v686.md).
+- Adopt [F675-05 EN/KO First Action Truth](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) / [한국어](F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) as detailed v675 contract: O686-01..10 source truth of fake local WLD/trade success and static marketing, at-most-three actual available actions, verified settlement, v76/v82 user-authored optional return promise, nine user hypotheses, twelve bilingual messages, twelve source references, D0–D7 checks.
+- v397/v530 and v523/542/543 economic, exact-SHA Test & rollback restrictions remain. No code/data/Test/Production change; present evidence is source-observed, not runtime-verified.
+
+
 ## v2026.10.15.685 — SEO action truth and administrator access (implementation candidate, NOT deployed)
 
 - GitHub `origin/main=69bc8c14df236f57898b1b44ddc596be5144c30a` at start/middle. Isolated `fix/indexnow-auth-plan-parity-v2026.10.15.685`, no overlap with v683 treasury/v684 planning agents. [EN findings](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) / [KO findings](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) and [evidence/worklog](../worklog/2026-10-15-seo-integrity-v685.md).

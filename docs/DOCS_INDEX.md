@@ -1,5 +1,10 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## First-session user trust feature — v2026.10.15.686
+
+- [F675-05 Next-Action Trust Design](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) · [한국어](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) · [worklog](worklog/2026-10-15-f67505-first-session-v686.md). No runtime code change; economic/UX release gates retained.
+
+
 ## Calculator → learning → optional game detailed planning — v2026.10.15.681
 
 - [F675-04 user-centered calculator design (EN)](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) · [한국어](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) · [v681 worklog](worklog/2026-10-15-f67504-calculator-learning-v681.md). Planning only, no source implementation or Production release.

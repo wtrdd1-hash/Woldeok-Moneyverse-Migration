@@ -1,5 +1,10 @@
 # 📚 Document Catalog
 
+## v2026.10.15.686 — F675-05 safe first action (PLANNING)
+
+- [F675-05 First-session Verified Next-Action EN](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) / [한국어](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md). O686-01..10 source gaps, 9 user needs hypotheses, 12 bilingual copy states, 12 references, max-3 safe choices and D0–D7; no Test/Production implementation.
+
+
 ## v2026.10.15.681 — F675-04 calculator to learning (PLANNING)
 
 - [F675-04 Public Calculator → Learning → Optional Fictional Game (EN)](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) · [Korean](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md). Existing calculators reused; C681-01..09 truth gaps, 8 user jobs, 14 first-party/practitioner references, D0–D7 exact-SHA release gates. No runtime code or Test/Production acceptance.

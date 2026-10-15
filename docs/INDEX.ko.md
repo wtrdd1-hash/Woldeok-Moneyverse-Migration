@@ -1,5 +1,10 @@
 # 📚 월덕 머니버스(Woldeok Moneyverse) 공식 마스터 문서 인덱스
 
+## F675-05 첫 활동 신뢰·복귀 동선 — v2026.10.15.686
+
+- [한국어 상세기획](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) · [영문](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md) · [작업기록](worklog/2026-10-15-f67505-first-session-v686.ko.md). 기획/문서만, 운영 미승격.
+
+
 ## F675-04 계산기·학습·가상체험 상세 기획 — v2026.10.15.681
 
 - [국문 상세명세](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) · [English](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) · [작업기록](worklog/2026-10-15-f67504-calculator-learning-v681.ko.md). 문서 전용, 서비스 배포 아님.

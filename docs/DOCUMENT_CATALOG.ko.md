@@ -1,5 +1,10 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.15.686 — F675-05 신규 이용자 실제 가능한 행동 (PLANNING)
+
+- [F675-05 한국어 상세명세](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.ko.md) / [영문](planning/F675_05_FIRST_SESSION_NEXT_ACTION_TRUST_SPEC.md). O686-01~10 로컬 보상/주식 허위 성공 위험, 사용자 9종·한영 안내 12개·참고자료 12개, 최대 3개 선택형 상태·D0~D7. 기획만 변경, 실서버 검증 아님.
+
+
 ## v2026.10.15.681 — F675-04 계산기→학습→선택형 게임 (기획)
 
 - [한국어 상세 기획](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) · [영문](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md). 기존 계산기 재사용, C681-01~09 서버 미확인 보상/알림/저장 문제, 8개 사용자 과제, 14개 자료, D0~D7 동일 SHA 출시 게이트. 기획만 수정.
