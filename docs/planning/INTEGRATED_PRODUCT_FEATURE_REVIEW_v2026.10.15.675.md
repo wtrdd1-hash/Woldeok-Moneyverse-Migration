@@ -1,5 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## Detailed F675-01 follow-up — v2026.10.15.677
+
+- [Feature Reality, User Trust and Recovery Spec](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md) / [Korean](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md) is now the **adopted detailed planning contract for F675-01**. It is a design and research-hypothesis record, not runtime acceptance. Remaining F675-02..09 require their own one-by-one detailed review.
+- Source-observed findings T677-01..06 include fake measured-health defaults and stale UI updates; remediation is subject to real-DB safety, current v530 full-route gates and exact-SHA Test. No code deployment from this adoption.
+
+
 > Status: **PLANNING / AUTHORITY_DRIFT / release BLOCKED** (documentation decision and feature candidates, not implementation)
 > Date: 2026-10-15 KST
 > Parents: [Project Plan](PROJECT_PLAN.md) · [Integrated Planning Master](INTEGRATED_PLANNING_MASTER.md) · [Documentation Policy](../DOCUMENTATION_POLICY.md)

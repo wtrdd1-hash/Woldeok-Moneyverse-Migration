@@ -1,5 +1,10 @@
 # 📚 Document Catalog
 
+## v2026.10.15.677 — First one-by-one feature deep dive (PLANNING)
+
+- [F675-01 Feature Reality / User Trust / Recovery (EN)](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md) · [한국어](planning/F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md) extends v675 with measured-status vs implementation truth, six user tasks, safe uncertain transaction handling, 13 reference sources and staged engineering gates. Source-only design evidence; no runtime implementation claim.
+
+
 ## v2026.10.15.675 — New integrated review (PLANNING)
 
 - [Full product/feature review](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.md) / [Korean](planning/INTEGRATED_PRODUCT_FEATURE_REVIEW_v2026.10.15.675.ko.md) is an adopted **review/evidence backlog supplement**, not a superseding runtime/release decision. Canonical authority remains `PROJECT_PLAN`, `INTEGRATED_PLANNING_MASTER` and their explicit economic/UI supersession rules. Contains 14-domain crosswalk, F675-01..09 backlog and 13 official references.

@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.677 — F675-01 detailed user trust and reality contract (documentation only)
+
+- Starting and mid-work `origin/main=a24a8ae9e0d14dbd63738f5bb7e4e857ca412c13`; final drift in [worklog](../worklog/2026-10-15-feature-truth-ux-v677.md). Dedicated v677 worktree avoids concurrent v675/v676 treasury worker conflicts.
+- **Detailed design adopted:** [F675-01 feature reality/user trust](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.md) and [Korean](F675_01_FEATURE_REALITY_USER_TRUST_SPEC.ko.md). Four distinct state axes, six user-job hypotheses, sample copy, proposal-only APIs, real measured telemetry, admin /api-health extension, safe monetary unknown-outcome confirmation, seven implementation slices and 13 independently linked references.
+- Observed from current Git source: static optimistic health fields/flagged live, stale refresh UI, and basic idle/ok/error action state. **No claim of live impact** or fabricated metrics; preserve existing v530 UI/ledger/security, exact SHA Test and zero-downtime release blocks. No runtime/DB/feature switch/Test/Production changes.
+
+
 ## v2026.10.15.675 — Integrated full-scope planning review (planning only)
 
 - Start and mid-work main identity: `f2bf939e53482721ee8bbf1074bd7ebf1922b13e`; final checkpoint and any drift in [v675 worklog](../worklog/2026-10-15-integrated-planning-review-v675.md). Isolated docs branch; no concurrent worktree overwritten.
