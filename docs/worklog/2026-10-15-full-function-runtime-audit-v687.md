@@ -8,7 +8,14 @@
 - Known independent blockers: existing unmerged draft treasury PRs #862/#865/#866, and SEO PR #867. Do not merge, promote, change DB/money/feature switches or migrate based on basic health checks.
 - Audit contract: gather route/controller/source inventory; isolated static/unit tests; read-only HTTP and DB contract checks; capture failures and skipped cases; compare source with deployed SHA. Operator/member authenticated flows and financial mutation tests require segregated Test and authorization.
 - Checklist: [x] documentation orientation [x] isolation [ ] inventory [ ] test [ ] runtime evidence [ ] interim upstream check [ ] final report/PR.
-## In progress
-Pending evidence; no function may be called accepted until it is exercised under its intended credentials and deployment version.
+## In progress — checkpoint 1, 2026-10-15 17:13 KST
+- Mid-task refetch: origin/main remained 69bc8c14; task worktree remained clean, no edits to shared main, Test, Production or DB.
+- Inventory from tracked main: 4,245 files, 163 Next page components, 33 admin pages, 82 Nest controllers, 63 Next API handlers, 422 tests/specs, 270 SQL migrations. Counts alone do not establish function coverage.
+- Isolated NODE_ENV=test suites: contract 31/31, DB package 7/7, backend 1,185 passed with 391 DB-dependent skipped; frontend 1,206 passed. pnpm typecheck passed. Frontend test stderr includes jsdom navigation and HTMLCanvasElement getContext unimplemented diagnostics, which are not independently functional pass evidence.
+- Deployed runtime anonymous HTTP smoke (30 paths each, Host and X-Forwarded-Proto set appropriately): prod 3001, Test 3101, other local 3203 each 25x200 / 2x307 / 2x404 / 1x401. /business and /tools/compound-interest 404 (not yet proven to be advertised links); /bank and /support redirect guest to /login; account identities 401 for anonymous (expected authorization). Initial all-308 attempt had incorrect Host/proto; it was discarded and retested correctly.
+- Both backend health endpoints port 3000 and 3100 HTTP 200. Guest stock API 200; guest viewer API 401. Journal error-token search for backend/frontend last 30m returned 0, not proof of no errors or authenticated E2E.
+- Read-only DEV DB SELECT: public 241 tables, 266 applied migrations, 831 transactions, 1,692 postings, 0 unbalanced transactions and 0 no-posting transactions by direction/amount aggregate. Effective app DML on 237 public tables each INSERT/UPDATE/DELETE (P0 privilege exposure relative to planned database security boundary); applies to dev DB ONLY, not proof for Production. Never claim the valid sampled posting sums prove full production conservation.
+- Existing draft Treasury PRs #862/#865/#866 report separate production fiscal-vault discrepancies/unsafe code; none is merged as release evidence. No real-money operations or production-schema changes.
+- Next steps: build/contract/CI checks, target code risks, read-only production/runtime provenance, final assessment, bilingual report and PR.
 ## Finished
 Pending.
