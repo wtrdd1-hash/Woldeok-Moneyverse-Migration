@@ -1,3 +1,6 @@
+## v2026.10.16.701 — Host capacity and PUBLIC definer containment
+- Owned merged worktree cache cleanup recovered 2.44GiB without touching live releases. Production-schema shadow verified narrowly scoped PUBLIC SECURITY DEFINER EXECUTE removal and rollback; app explicit grants retained. Direct financial DML remains open. [Release](../releases/v2026.10.16.701.md).
+
 ## v2026.10.15.697 — Live Production blue-green promotion
 - GitHub #874 merged to main; public backend/frontend exact source SHA a5a1e9da with persistent systemd and Nginx. Five public smoke passes, Production DB backup and isolated restore succeeded; no Production SQL migration. Remaining direct financial DML and missing full authenticated Production E2E remain tracked. [Release](../releases/v2026.10.15.697.md).
 
