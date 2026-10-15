@@ -40,3 +40,10 @@ Pending actual evidence.
 ## Documentation link regression
 - RED: link validation of the full integrated `DOCS_INDEX.md` found five **pre-existing** invalid versioned links (policy release lineage, private-chat moderation, consent blackout, consent dynamic binding, IME safety).
 - Root cause: index version/file stems drifted from the actual committed Korean documents. Corrected all five to existing matching titles, without inventing artifacts. Re-run GREEN verification before release.
+
+## Verification checkpoint — documentation candidate
+- Document/link validator checked 11 targeted pages (including complete root `DOCS_INDEX.md`): **0** broken local links or conflict markers after the RED→GREEN link repairs.
+- Release classifier regression suite: **13 passed, 0 failed**.
+- Actual isolated integration HEAD vs latest main: `DOCS_ONLY`; `git diff --check` passed; **both** original audit head commits are ancestors of the new branch.
+- Concurrent P0 financial repair is separately underway on another work branch; not intercepted or auto-merged.
+- Test-candidate workflow had a completed successful run for an **earlier** v673 branch SHA; any subsequent commit needs its own green result. CI is not Test runtime acceptance.
