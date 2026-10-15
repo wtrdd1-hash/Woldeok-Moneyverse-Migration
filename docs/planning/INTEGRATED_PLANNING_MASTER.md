@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.684 — Treasury Core donation, controlled activation
+- [Design and Test truth](TREASURY_IDEMPOTENT_CORE_DONATION_SPEC_v2026.10.15.684.md) / [Korean](TREASURY_IDEMPOTENT_CORE_DONATION_SPEC_v2026.10.15.684.ko.md): existing-WLD canonical transaction donor credit→Treasury debit, unique caller-idempotency UUID, Core receipt/fiscal matching ledger and session guarded route. No economic policy version is registered: DO NOT enable feature switch or release to users.
+- Backend 1194 pass (391 DB skipped), frontend 1211 pass and real isolated Test ROLLBACK evidence; G2–G5 full payout, admin privileged read, economy reserve/liability and exact-SHA Test/zero-downtime acceptance remain BLOCKED.
+
+
 ## v2026.10.15.685 — SEO action truth and administrator access (implementation candidate, NOT deployed)
 
 - GitHub `origin/main=69bc8c14df236f57898b1b44ddc596be5144c30a` at start/middle. Isolated `fix/indexnow-auth-plan-parity-v2026.10.15.685`, no overlap with v683 treasury/v684 planning agents. [EN findings](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) / [KO findings](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) and [evidence/worklog](../worklog/2026-10-15-seo-integrity-v685.md).

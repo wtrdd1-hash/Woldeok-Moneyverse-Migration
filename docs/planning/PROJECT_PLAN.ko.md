@@ -1,5 +1,10 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.15.684 — 정식 국고 기부 복식원장 후보 (기본 OFF)
+- [국고 멱등 기부 기획](TREASURY_IDEMPOTENT_CORE_DONATION_SPEC_v2026.10.15.684.ko.md) / [영문](TREASURY_IDEMPOTENT_CORE_DONATION_SPEC_v2026.10.15.684.md): UUID 요청멱등, 회원→국고 경제코어 복식분개·불변 영수증·국고보조원장 기록, 세션 인증. 승인 재정정책 부재로 신규 기부 기본 OFF, 구형 기부 차단 유지.
+- 독립 복원 Test 원자 롤백 실증, 지갑 거래유형 표시. 백엔드 1194 통과/DB391 스킵, 프론트 1211 통과. 국고 전체 지급 및 Test/운영 게이트 차단.
+
+
 ## v2026.10.15.683 — 국고 최소권한 대사·공개통계 정정 (소스만)
 - [한국어 국고 안전 구현](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.ko.md) / [영문](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.md): 272 관리자 전용 대사, 서버 인증 사용자 ID, 구형 기부 정산 중지, 국고 가짜 지급통계 제거.
 - 독립 Test 복원 DB 269~272 시험 통과, 백엔드 1,191 통과(DB 391 건너뜀), 프론트 1,211 및 빌드 통과. 복식 정산·운영 승격 차단 유지.

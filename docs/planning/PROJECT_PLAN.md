@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.15.684 — Canonical WLD Treasury donation candidate (OFF)
+- [English Treasury donation specification](TREASURY_IDEMPOTENT_CORE_DONATION_SPEC_v2026.10.15.684.md) / [한국어](TREASURY_IDEMPOTENT_CORE_DONATION_SPEC_v2026.10.15.684.ko.md): explicit UUID idempotency, wallet-to-Treasury balanced Core postings, fiscal mirror with immutable receipt, member session guards. Existing broken donation paths remain blocked; new endpoint default OFF because no registered approved economy policy.
+- Real isolated Test financial rollback proof and wallet-readable transaction labels; backend 1,194 PASS/391 DB SKIP, frontend 1,211 PASS. Financial P0 and Test/Production gate still BLOCKED.
+
+
 ## v2026.10.15.683 — Treasury role-gated reconciliation and public-truth patch (source only)
 - [EN Treasury safety implementation](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.md) / [KO](TREASURY_VERIFIED_READ_AND_PAUSED_PAYOUT_SPEC_v2026.10.15.683.ko.md): migration 272 operator-only reconciliation SQL, authenticated backend actor, legacy donation pause, truthful public Treasury under finance audit.
 - Isolated restored DB 269–272 verification passes; backend 1,191 tests pass (391 DB skipped), frontend 1,211 pass and full builds pass. Financial settlement and Production promotion remain BLOCKED.

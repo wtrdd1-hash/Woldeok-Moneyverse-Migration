@@ -1,3 +1,6 @@
+## v2026.10.15.684 — Core Treasury donation settlement in isolated Test (NOT PROMOTED)
+- Added forward-only 273, idempotent WLD account-to-account donation receipt, guarded member API default OFF and wallet donation label. Real restored Test rollback successful; no approved finance policy, other P0 hold. [Release](../releases/v2026.10.15.684.md).
+
 ## v2026.10.15.683 — Scoped Treasury ledger proof and no fake public payouts (NOT PROMOTED)
 - Forward-only migration 272 on isolated Test, operator-only reconciliation, two unsafe donation routines paused, 503 truthful public finance. Backend 1191/front 1211 pass; 391 DB tests skipped. Production code/schema untouched. [Release](../releases/v2026.10.15.683.md).
 

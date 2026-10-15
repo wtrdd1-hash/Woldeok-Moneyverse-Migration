@@ -1,5 +1,10 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.15.684 — 국고 정식 기부 정산 및 기능 개방 통제
+- [정식 기부 구현 명세](TREASURY_IDEMPOTENT_CORE_DONATION_SPEC_v2026.10.15.684.ko.md) / [영문](TREASURY_IDEMPOTENT_CORE_DONATION_SPEC_v2026.10.15.684.md): 회원 차감/국고 증가 복식분개·멱등 UUID·정식 영수증·국고 보조원장, 세션 인증. 경제정책 승인 버전 미등록이므로 운영 기능 스위치 ON 금지.
+- 백 1194 통과/DB391 스킵, 프 1211 통과, 독립 Test ROLLBACK 실제 검증. 관리자 전체권한 조회·타 지급·부채·동일 SHA Test/운영 무중단 승격은 여전히 차단.
+
+
 ## v2026.10.15.685 — SEO 응답 사실성·관리자 접근 (코드 수정 후보, 미배포)
 
 - 작업 전·중 GitHub `origin/main=69bc8c14df236f57898b1b44ddc596be5144c30a`. 독립 `fix/indexnow-auth-plan-parity-v2026.10.15.685` 사용, 국고 v683·기획 v684 작업과 충돌 회피. [한국어 진단](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.ko.md) / [영문](../findings/MONEYVERSE_PLAN_SOURCE_GAP_REVIEW_v2026.10.15.685.md) / [작업기록](../worklog/2026-10-15-seo-integrity-v685.md).
