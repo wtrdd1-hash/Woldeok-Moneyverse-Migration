@@ -1,5 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## F675-04 상세 채택 — v2026.10.15.681
+
+- [계산기→학습→선택형 가상게임 상세명세](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) / [영문](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md)을 v675 F675-04의 세부기획으로 채택. 기존 /tools/용어사전 활용, 비회원 계산·출처 우선, 가짜 보상/알림/클라우드 성공 금지, 세법/공식/번역·SEO 대조. 유저가설 8종/자료 14개/D0~D7. 실제 구현·Google 색인 성공을 뜻하지 않는다.
+
+
 ## F675-03 개별 심층 기획 — v2026.10.15.680
 
 - [WLD 잔액변동 사유·개인영수증 명세](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) / [영문](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md)을 F675-03 **상세기획 기준**으로 채택. 기존 지갑/거래 목록 확장, 은행 이동 순액 0과 포켓별 증감, 서버 원장 증빙·개인정보·CSV 및 D0~D7, 외부 13개 출처. WLD 이동·코드구현·운영 검증 완료는 아님.

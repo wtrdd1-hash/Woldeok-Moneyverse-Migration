@@ -1,5 +1,10 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.15.681 — F675-04 계산기→학습→선택형 게임 (기획)
+
+- [한국어 상세 기획](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) · [영문](planning/F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md). 기존 계산기 재사용, C681-01~09 서버 미확인 보상/알림/저장 문제, 8개 사용자 과제, 14개 자료, D0~D7 동일 SHA 출시 게이트. 기획만 수정.
+
+
 ## v2026.10.15.680 — F675-03 WLD 거래 이유·영수증 (PLANNING)
 
 - [WLD 거래 상세·사유·안전한 영수증(한국어)](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) / [영문](planning/F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md). 최근 50건/내부 은행 이동 합계 0, 개인권한/원장 불변, 사용자 가설 8개/자료 13개/D0~D7. 문서만 변경.

@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.15.681 — F675-04 useful calculator-to-learning journey (docs only)
+
+- Start/middle `origin/main=8356146e157080704e157b3203e38599baec68ff`; isolated worktree `docs/calculator-learning-funnel-v2026.10.15.681`; final source in [worklog](../worklog/2026-10-15-f67504-calculator-learning-v681.md). No concurrent agent worktree overwritten.
+- [Adopt EN/KO detailed calculator plan](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) for v675 F675-04: current source C681-01..09 misleading local-only “alert active,” 10k WLD credit and cloud-save claims; existing real/fictional calculators, formula/source/jurisdiction and duplicate preset SEO. Eight research hypotheses, ten paired microcopy, 14 references, D0–D7 implementation/Test plan.
+- Reuse /tools and /guide. Full guest answer and evidence before optional learning/share/game. No unsourced law or fictitious bonus as conversion. v397/v530 and v523/542/543/economy P0/actual Test blocked. **PLANNING** without runtime mutation.
+
+
 ## v2026.10.15.680 — F675-03 exact-money user receipts (planning only)
 
 - Start/mid remote main `a37b733837cf82c3f45adb88242bd1b4f6df2cb9`; isolated worktree `docs/wld-activity-receipts-v2026.10.15.680`, final checkpoint in [worklog](../worklog/2026-10-15-f67503-wld-receipts-v680.md). Other contributors' treasury/ledger worktrees untouched.

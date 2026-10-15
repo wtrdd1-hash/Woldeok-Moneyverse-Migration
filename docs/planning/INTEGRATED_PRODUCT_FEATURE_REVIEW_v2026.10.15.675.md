@@ -1,5 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-04 detailed adoption — v2026.10.15.681
+
+- [Useful Public Calculator → Learning → Optional Fictional Game Spec](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.md) / [한국어](F675_04_CALCULATOR_TO_LEARNING_OPTIONAL_GAME_SPEC.ko.md) is adopted as the detailed v675 F675-04 design. Existing /tools and glossary reused. Guest receives useful verified calculation before optional CTA; source truth of rewards, alerts, cloud saves and legally dated tax formulas; eight user hypotheses, 14 official references, D0–D7 gates. This is **PLANNING**, no deployed capability or GSC success claim.
+
+
 ## F675-03 deep-dive — v2026.10.15.680
 
 - [WLD activity explanation & private receipts specification](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.md) / [Korean](F675_03_WLD_ACTIVITY_EXPLANATION_RECEIPTS_SPEC.ko.md) is now the **adopted detailed planning contract** for F675-03. Builds on existing authenticated wallet/activity, does not authorize any new WLD movement. Exact cash/bank net-zero explanation, real ledger reference, bounded privacy-safe reads, 13 references and D0–D7 release gates. Not Production-verified.
