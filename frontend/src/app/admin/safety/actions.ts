@@ -71,7 +71,7 @@ export async function actionTakedown(
     revalidatePath('/admin/safety');
     return {
       status: 'ok',
-      message: `접수 건 [${caseId}]의 상태를 '${newStatus}'(으)로 갱신했습니다.`,
+      message: `접수 건 [${caseId}]의 심사 상태를 '${newStatus}'(으)로 기록했습니다. 실제 게시물 삭제나 차단은 자동 실행되지 않았습니다.`,
     };
   } catch (error) {
     return failure(error, '긴급 콘텐츠 삭제 조치 처리에 실패했습니다.');
