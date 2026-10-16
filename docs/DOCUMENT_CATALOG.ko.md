@@ -1,5 +1,9 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.16.734 — 실제 호스트 릴리스 검증기
+- [릴리스](releases/v2026.10.16.734.ko.md) / [English](releases/v2026.10.16.734.md), [작업기록](worklog/2026-10-16-host-release-identity-v734.ko.md), [GitHub용 내역](updates/v2026.10.16.734-github.ko.md), [내부용 내역](updates/v2026.10.16.734-internal.ko.md).
+
+
 ## v2026.10.16.720 — v719 Test 합격, 운영 보류
 - [한글 릴리스](releases/v2026.10.16.719.ko.md) / [영문](releases/v2026.10.16.719.md) · [작업기록](worklog/2026-10-16-ui-v719-test-production-hold-v720.ko.md) · [GitHub 업데이트](updates/v2026.10.16.720-github.ko.md). Test v719.2 합격, UI·금융 P0로 운영 보류.
 

@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.16.734 — Host release-identity preflight correction (CONTROL_PLANE only)
+- PR #886 verifier merged into an isolated integration branch: manifest-derived current Production systemd generation, ordered service environment build IDs, strict identity fail-closed. Current Production v717 and Test v721.2 both return `ok=true`, `failures=[]`; release unit regressions 29/29 PASS. This does **not** establish runtime deployment, finance P0 acceptance or 166-page × 5 authenticated UI coverage. [Release](../releases/v2026.10.16.734.md).
+
+
 ## v2026.10.16.722 — AI blog editorial-containment release evidence (AUTHORITY_DRIFT)
 - PR #891 v721 integrated `main=10d5dfdb`, exact-SHA Test v721.2 verified, blog-specific 135/135 browser passes, admin publication hold remains fail-closed. [Evidence](../releases/v2026.10.16.721.md) / [한국어](../releases/v2026.10.16.721.ko.md). This records release evidence and does not supersede the product-plan authority.
 - Production v717 had one additional legacy AI article after v717 cutover; owner/write path unproven. Narrow shared-file read-only permission containment applied with backup and matching checksum. No app cutover. Existing v530 five complete all-route authenticated passes and Treasury/Economy Core finance/ledger P0 remain **BLOCKED**. No silent authority or Production acceptance.
