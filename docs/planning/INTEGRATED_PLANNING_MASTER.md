@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.16.742 — Administrator Discord DM operational alert routing (candidate)
+- Curated DiscordAlertService system events now mirror to the authorized admin DM alongside channel messages; credentials, member raw data and logs are not forwarded. [Runbook](../operations/discord-administrator-direct-messages.md). Test/build green; CI/exact-SHA Test/Production and existing finance/UI release gates remain open.
+
 ## v2026.10.16.739 — SEO background submission fail-closed in Test
 - During isolated v738 shadow Test backend startup the existing cron unexpectedly submitted 39 URLs to external indexing services. Shadow stopped, unit removed; official Test/Production unchanged. Fix: Test never schedules, production requires explicit indexing opt-in, destroy cancels startup and periodic timers. 4 targeted tests PASS; PR #899 merged main 38597632, exact-SHA private Test shadow (with external IP denied) passed after 36s with zero scheduled SEO executions. Production release stays BLOCKED by v530 UI and finance P0. [Release](../releases/v2026.10.16.739.md).
 
