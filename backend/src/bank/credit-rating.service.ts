@@ -76,6 +76,19 @@ const TIER_CONFIG: Record<
   10: { nameKo: '회복 지원 대상 (Recovery Required)', minScore: 0, limitWld: 0, rateBps: 0, maxInstallments: 0 },
 };
 
+/** A score component saturates after 75k WLD; never coerce an exact large balance into JS Number. */
+export function toCreditScoreAssets(raw: unknown): number {
+  if (typeof raw === 'number' && (!Number.isSafeInteger(raw) || raw < 0)) {
+    throw new Error('invalid credit score asset amount');
+  }
+  const text = typeof raw === 'number' || typeof raw === 'bigint' ? String(raw) : raw;
+  if (typeof text !== 'string' || !/^[0-9]+(?:\.0+)?$/.test(text)) {
+    throw new Error('invalid credit score asset amount');
+  }
+  const amount = BigInt(text.split('.')[0] ?? '0');
+  return Number(amount > 75_000n ? 75_000n : amount);
+}
+
 /**
  * Calculates deterministic game-only credit score and rating tier.
  */

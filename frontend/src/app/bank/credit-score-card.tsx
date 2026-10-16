@@ -27,21 +27,45 @@ export interface CreditRatingData {
   readonly simulatedNotice?: string;
 }
 
-export function CreditScoreCard({
-  initialRating,
-  standingCreditLimit,
-  standingCreditGrade,
-  standingLoanInterestBps,
-  standingLoanTermDays,
-}: {
+type CreditScoreCardProps = {
   readonly initialRating?: CreditRatingData | undefined;
   readonly standingCreditLimit?: string | undefined;
   readonly standingCreditGrade?: string | undefined;
   readonly standingLoanInterestBps?: string | number | undefined;
   readonly standingLoanTermDays?: number | undefined;
-}) {
-  const baseRating = initialRating ?? fallbackRating;
-  const effectiveLimit = standingCreditLimit ? Number(standingCreditLimit) : baseRating.creditLimitWld;
+};
+
+/** Bank's actual offer and this optional learning score have different authority. */
+export function CreditScoreCard(props: CreditScoreCardProps) {
+  if (!props.initialRating) {
+    return (
+      <Card className="border border-border/80 bg-background/95 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-base">게임 신용 평가 자료를 불러올 수 없습니다.</CardTitle>
+          <CardDescription>확인되지 않은 점수나 한도를 임의로 표시하지 않습니다. 잠시 후 다시 확인해 주세요.</CardDescription>
+        </CardHeader>
+        {props.standingCreditLimit !== undefined && (
+          <CardContent>
+            <p className="text-sm text-muted-foreground">별도 은행 창구 공시 한도: <Amount value={props.standingCreditLimit} /> WLD</p>
+          </CardContent>
+        )}
+      </Card>
+    );
+  }
+  return <CreditScoreReport {...props} initialRating={props.initialRating} />;
+}
+
+function CreditScoreReport({
+  initialRating,
+  standingCreditLimit,
+  standingCreditGrade,
+  standingLoanInterestBps,
+  standingLoanTermDays,
+}: CreditScoreCardProps & { initialRating: CreditRatingData }) {
+  const baseRating = initialRating;
+  const candidateLimit = standingCreditLimit ? Number(standingCreditLimit) : NaN;
+  const effectiveLimit = Number.isSafeInteger(candidateLimit) && candidateLimit >= 0
+    ? candidateLimit : baseRating.creditLimitWld;
   const effectiveInterestBps =
     standingLoanInterestBps !== undefined && Number(standingLoanInterestBps) > 0
       ? Number(standingLoanInterestBps)
@@ -90,8 +114,8 @@ export function CreditScoreCard({
             </div>
             <CardDescription className="mt-1 text-xs text-muted-foreground">
               {standingCreditLimit
-                ? `현재 은행 창구 공시 한도 ${Number(standingCreditLimit).toLocaleString()} WLD와 100% 동기화된 권위 신용 지표`
-                : '게임 활동 성실도 기반 서버 권위 신용 지표'}
+                ? '게임활동 기반 참고용 신용 점수 · 실제 대출 한도는 별도 은행 창구 공시를 따릅니다.'
+                : '게임활동 기반 참고용 신용 점수 · 실제 대출 결정과 구분됩니다.'}
             </CardDescription>
           </div>
           <div className="flex items-center gap-1.5 font-mono text-sm">
@@ -108,13 +132,11 @@ export function CreditScoreCard({
           <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
             <span className="text-[11px] text-muted-foreground">최대 신용 대출 한도</span>
             <p className="mt-1 font-mono text-sm font-bold text-foreground truncate">
-              {rating.creditLimitWld > 0 ? (
-                <>
-                  <Amount value={rating.creditLimitWld.toString()} /> WLD
-                </>
-              ) : (
-                '대출 일시 유예'
-              )}
+              {standingCreditLimit !== undefined ? (
+                <><Amount value={standingCreditLimit} /> WLD</>
+              ) : rating.creditLimitWld > 0 ? (
+                <><Amount value={rating.creditLimitWld.toString()} /> WLD (학습 예시)</>
+              ) : ('평가/한도 확인 필요')}
             </p>
           </div>
 
@@ -205,23 +227,3 @@ export function CreditScoreCard({
     </Card>
   );
 }
-
-const fallbackRating: CreditRatingData = {
-  score: 780,
-  tier: 3,
-  tierNameKo: '우량 2급 (Prime A)',
-  creditLimitWld: 300_000,
-  interestRateBps: 450,
-  maxInstallments: 10,
-  factors: {
-    baseScore: 500,
-    activityBonus: 60,
-    jobBonus: 75,
-    wealthBonus: 70,
-    repaymentBonus: 75,
-    overduePenalty: 0,
-    riskSpendPenalty: 0,
-  },
-  simulatedNotice:
-    '본 신용평가는 머니버스 게임 내 가상 자산(WLD) 전용 학습 시뮬레이션이며, 실제 금융기관의 신용등급이나 대출과 무관합니다.',
-};
