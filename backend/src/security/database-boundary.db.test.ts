@@ -62,6 +62,31 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
       expect(result.rows[0]?.public_execute).toBe(false);
     });
 
+    it('denies direct financial projection, journal and treasury DML after migration 273', async () => {
+      const result = await app.query<{
+        name: string;
+        can_insert: boolean;
+        can_update: boolean;
+        can_delete: boolean;
+        can_select: boolean;
+      }>(
+        `SELECT name,
+                has_table_privilege(current_user, format('public.%I', name), 'INSERT') AS can_insert,
+                has_table_privilege(current_user, format('public.%I', name), 'UPDATE') AS can_update,
+                has_table_privilege(current_user, format('public.%I', name), 'DELETE') AS can_delete,
+                has_table_privilege(current_user, format('public.%I', name), 'SELECT') AS can_select
+         FROM unnest(ARRAY['account_balances','accounts','ledger_transactions',
+                           'ledger_postings','system_treasury_vaults']) AS name`,
+      );
+      expect(result.rows).toHaveLength(5);
+      for (const row of result.rows) {
+        expect(row.can_insert, row.name).toBe(false);
+        expect(row.can_update, row.name).toBe(false);
+        expect(row.can_delete, row.name).toBe(false);
+        expect(row.can_select, row.name).toBe(true);
+      }
+    });
+
     it('denies raw application ledger posting after migration 269', async () => {
       const result = await app.query<{ allowed: boolean }>(
         `SELECT pg_catalog.has_function_privilege(

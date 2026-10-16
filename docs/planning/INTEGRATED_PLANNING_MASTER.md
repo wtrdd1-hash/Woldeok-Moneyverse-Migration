@@ -4,6 +4,9 @@
 - During isolated v738 shadow Test backend startup the existing cron unexpectedly submitted 39 URLs to external indexing services. Shadow stopped, unit removed; official Test/Production unchanged. Fix: Test never schedules, production requires explicit indexing opt-in, destroy cancels startup and periodic timers. 4 targeted tests PASS; main CI/Test/Production release pending. [Release](../releases/v2026.10.16.739.md).
 
 
+## v2026.10.16.738 — Narrow core financial DML revoke candidate (AUTHORITY_DRIFT / BLOCKED)
+- Forward-only 273 removes direct app DML on 5 core balance/account/journal/treasury-vault tables. Fresh **nonpublic** seeded CI-equivalent PG17: 271 migrations 001..272 complete, backend 1,804 pass /34 skip before and after explicit revoke, 273 applies cleanly. Legacy uncovered bond/pension/FX/PvP/market writes and Production's 19 unverified account opening discrepancies remain blockers; never deploy this candidate without proven ledger-first behavior and all v530 release gates. [Worklog](../worklog/2026-10-16-financial-core-acl-v738.md).
+
 ## v2026.10.16.737 — Read-only financial release control (AUTHORITY_DRIFT / BLOCKED)
 - A new zero-mutation repeatable-read ledger/ACL gate detects direct application DML on 5 core tables and uncertified opening/ledger projection discrepancies. Production v717 read-only findings: 40 balances, 19 mismatches, +4,779,188 WLD unexplained opening or drift, 0 per-transaction debit/credit imbalance; **do not invent ledger corrections**. Scope is a release-control improvement only, not finance P0 or v530 release acceptance. [Report](../worklog/2026-10-16-financial-readiness-v737.md).
 
