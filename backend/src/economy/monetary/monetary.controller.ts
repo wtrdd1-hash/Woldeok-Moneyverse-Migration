@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
+import { ReauthGuard } from '../../auth/guards/reauth.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -13,7 +16,7 @@ import type { MonetaryOrderType, MonetaryTargetEnvelope } from './monetary.types
 
 @ApiTags('Admin Monetary & Central Bank')
 @ApiBearerAuth()
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
 @Controller('admin/economy/monetary')
 export class MonetaryController {
   constructor(
@@ -52,6 +55,7 @@ export class MonetaryController {
   }
 
   @Post('auto-regulation/run')
+  @UseGuards(ReauthGuard)
   @ApiOperation({ summary: '화폐량 자동 조절 즉시 1회 수동 평가 및 집행' })
   async runAutoRegulationManually(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
@@ -116,6 +120,7 @@ export class MonetaryController {
   }
 
   @Post('orders/:id/approve')
+  @UseGuards(ReauthGuard)
   @ApiOperation({ summary: '통화정책 명령서 공식 승인 (APPROVED)' })
   async approveOrder(@Req() req: RequestWithSession, @Param('id') orderId: string) {
     const adminId = requireUserId(req);
@@ -130,6 +135,7 @@ export class MonetaryController {
   }
 
   @Post('unfreeze')
+  @UseGuards(ReauthGuard)
   @ApiOperation({ summary: '통화 발행 긴급 동결 해제' })
   async unfreeze(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
@@ -149,6 +155,7 @@ export class MonetaryController {
   }
 
   @Post('execute-mint')
+  @UseGuards(ReauthGuard)
   @ApiOperation({ summary: '승인된 명령에 따른 조폐국 정식 발행 실행' })
   async executeMint(
     @Req() req: RequestWithSession,

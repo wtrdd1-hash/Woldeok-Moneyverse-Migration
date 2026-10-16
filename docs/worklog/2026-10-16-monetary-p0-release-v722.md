@@ -32,3 +32,7 @@
 - At 2026-10-16 ~17:51 KST, the other AI-blog contributor independently moved official Test to immutable `test-v2026.10.16.721.2-10d5dfdbe96d` / public application SHA `10d5dfdbe96d9445adbbce6acb2696e060b772bb`. This v722 branch was **not** staged in that Test release. Production still v717.
 - GitHub PR #892 is deliberately marked **DRAFT**; repository auto-integration workflow skips draft PRs, preventing an incompletely validated financial migration from automatically merging and promoting.
 - Full production-like financial DB integration (221 app-writable tables after proposed 272) and v530 five-pass admin/browser acceptance remain BLOCKED. No Production or official Test financial ACL changes.
+
+## Mid-work security negative discovered and fixed
+- MonetaryController class previously used role-based AdminGuard only, with **no elevated AdminSessionGuard nor CsrfGuard** on high-risk monetary POSTs; policy approval, unfreeze, mint execution and immediate auto-regulation had no per-method recent ReauthGuard.
+- Added class-wide AdminSessionGuard and CsrfGuard (safe GET excluded by guard semantics), plus recent ReauthGuard on mint, approval, unfreeze and manual auto-regulation. Security-metadata regressions **2 RED before fix → 2 GREEN after fix**; 9/9 focused tests PASS. This strengthens HTTP authorization but does not certify direct SQL, ledger or real Test DB.
