@@ -1,9 +1,9 @@
+// @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   getAllBlogPosts,
   getBlogPostBySlug,
   generateDailyAiBlogPost,
-  BLOG_CATEGORIES,
 } from './blog-data';
 import { GET as getBlogList } from '../api/blog/route';
 import { POST as generateBlog } from '../api/blog/generate/route';
@@ -25,12 +25,12 @@ describe('AI Daily Blog System', () => {
     expect(first.slug).toBeDefined();
     expect(first.title).toBeDefined();
     expect(first.content).toContain('##');
-    expect(first.author.name).toBe('덕이 (Deoki)');
+    expect(first.author.name.length).toBeGreaterThan(0);
     expect(first.relatedCalculatorHref).toBeDefined();
   });
 
   it('retrieves post by slug', () => {
-    const post = getBlogPostBySlug('2026-10-14-compound-interest-wealth-secret');
+    const post = getBlogPostBySlug('2026-10-14-compound-mv83xp86');
     expect(post).toBeDefined();
     expect(post?.title).toContain('복리');
     expect(post?.category).toBe('COMPOUND');
@@ -77,11 +77,11 @@ describe('AI Daily Blog System', () => {
       },
     });
     const res = await generateBlog(req);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(403);
 
     const json = await res.json();
-    expect(json.success).toBe(true);
-    expect(json.post).toBeDefined();
-    expect(json.url).toContain('/blog/');
+    expect(json.success).toBe(false);
+    expect(json.code).toBe('BLOG_PUBLISH_FORBIDDEN');
+    expect(json.post).toBeUndefined();
   });
 });
