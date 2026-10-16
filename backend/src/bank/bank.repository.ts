@@ -36,6 +36,43 @@ export class BankRepository {
     return row?.standing ?? null;
   }
 
+  /** Read-only, actor-scoped game credit signals; no synthetic activity or repayments. */
+  async getCreditFacts(actor: unknown): Promise<{
+    accountAgeDays: number;
+    jobLevel: number;
+    historicalRepaymentsCount: number;
+    overdueRepaymentsCount: number;
+  }> {
+    assertUuid(actor, 'actor');
+    const row = await queryOne<{
+      account_age_days: number;
+      job_level: number;
+      repayment_count: number;
+      overdue_count: number;
+    }>(
+      this.pool,
+      `SELECT
+         GREATEST(0, FLOOR(EXTRACT(EPOCH FROM (now() - u.created_at)) / 86400))::integer AS account_age_days,
+         COALESCE((SELECT MAX(j.level) FROM public.user_job_progress j
+                   WHERE j.user_id = u.id AND j.is_active), 0)::integer AS job_level,
+         (SELECT COUNT(*)::integer FROM public.virtual_bank_loan_repayments r
+          JOIN public.virtual_bank_loans l ON l.id = r.loan_id
+          WHERE l.user_id = u.id) AS repayment_count,
+         (SELECT COUNT(*)::integer FROM public.virtual_bank_loans l
+          WHERE l.user_id = u.id AND (l.overdue_at IS NOT NULL OR l.status = 'overdue')) AS overdue_count
+       FROM public.users u
+       WHERE u.id = $1::uuid AND u.status = 'active'::public.user_status`,
+      [actor],
+    );
+    if (!row) throw new Error('credit profile unavailable');
+    return {
+      accountAgeDays: row.account_age_days,
+      jobLevel: row.job_level,
+      historicalRepaymentsCount: row.repayment_count,
+      overdueRepaymentsCount: row.overdue_count,
+    };
+  }
+
   async moveBalance(
     key: unknown,
     actor: unknown,

@@ -177,18 +177,31 @@ export class BankController {
     return this.guarded(
       async () => {
         const userId = requireUserId(request);
-        const standing = (await this.repository().getStanding(userId)) as Record<string, unknown>;
-        const { evaluateUserCreditRating } = await import('./credit-rating.service');
+        const [standingValue, facts] = await Promise.all([
+          this.repository().getStanding(userId),
+          this.repository().getCreditFacts(userId),
+        ]);
+        if (!standingValue || typeof standingValue !== 'object') {
+          throw new ServiceUnavailableException('bank standing unavailable for credit scoring');
+        }
+        const standing = standingValue as Record<string, unknown>;
+        const { evaluateUserCreditRating, toCreditScoreAssets } = await import('./credit-rating.service');
         const profile = {
           userId,
-          accountAgeDays: 30, // Default active play horizon
-          jobLevel: 5,
-          totalCashWld: Number(standing['cash_balance'] ?? standing['cashWld'] ?? 0),
-          depositBalanceWld: Number(standing['bank_balance'] ?? standing['depositBalanceWld'] ?? 0),
-          historicalRepaymentsCount: 3,
-          overdueRepaymentsCount: 0,
+          ...facts,
+          totalCashWld: toCreditScoreAssets(standing['cash_balance'] ?? standing['cashWld']),
+          depositBalanceWld: toCreditScoreAssets(standing['bank_balance'] ?? standing['depositBalanceWld']),
         };
-        return evaluateUserCreditRating(profile);
+        return {
+          ...evaluateUserCreditRating(profile),
+          assessmentStatus: 'SIMULATED_FROM_GAME_HISTORY' as const,
+          evidence: {
+            accountAgeDays: facts.accountAgeDays,
+            jobLevel: facts.jobLevel,
+            repaymentEvents: facts.historicalRepaymentsCount,
+            overdueLoans: facts.overdueRepaymentsCount,
+          },
+        };
       },
       'failed to evaluate credit rating',
     );
