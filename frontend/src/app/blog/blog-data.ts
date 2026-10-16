@@ -1,6 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import type { BlogPost, BlogCategory } from './blog.types';
+import { COUNTRY_EDITION_TOPICS, createCountryBlogPost } from './blog-country-editorial';
+import { canonicalBlogSlug, isCanonicalBlogSlug } from './blog-seo';
 import { type MacroMarketSnapshot, DEFAULT_MACRO_SNAPSHOT } from './macro-market-data';
 export { BLOG_CATEGORIES } from './blog.types';
 
@@ -371,6 +374,7 @@ ln(1 + r) ≈ r  =>  t ≈ 0.693 / r = 69.3 / R
 };
 
 const INITIAL_POSTS: BlogPost[] = [
+  ...COUNTRY_EDITION_TOPICS.map(createCountryBlogPost),
   {
     slug: '2026-10-14-compound-mv83xp86',
     title: '[AI 금융칼럼] 아인슈타인 72의 법칙 수학적 증명과 복리 청년도약계좌 5,000만 원 목돈 만들기 실전',
@@ -503,6 +507,8 @@ const INITIAL_POSTS: BlogPost[] = [
 
 // 파일 시스템 영속 저장소 경로 결정 (/srv/moneyverse-data/shared/blog-posts.json 우선)
 function getBlogStoreFilePath(): string {
+  // Tests may exercise publication but must never mutate the live shared article store.
+  if (process.env.NODE_ENV === 'test') return path.join(os.tmpdir(), `moneyverse-blog-test-${process.pid}.json`);
   const sharedDir = '/srv/moneyverse-data/shared';
   if (fs.existsSync(sharedDir)) {
     return path.join(sharedDir, 'blog-posts.json');
@@ -572,25 +578,15 @@ function savePostsToDisk(posts: BlogPost[]): void {
 
 export function getAllBlogPosts(): readonly BlogPost[] {
   const posts = loadPostsFromDisk();
-  return posts.sort(
+  return posts.filter((post) => isCanonicalBlogSlug(post.slug)).sort(
     (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
 }
 
 export function getBlogPostBySlug(slug: string): BlogPost | undefined {
-  const posts = loadPostsFromDisk();
-  const exact = posts.find((p) => p.slug === slug);
-  if (exact) return exact;
-
-  // mv83xp86 또는 복리 키워드 포함 슬러그 요청 시 전용 복리 칼럼으로 안전 매핑
-  if (slug.includes('compound') || slug.includes('mv83xp86')) {
-    return (
-      posts.find((p) => p.slug === '2026-10-14-compound-mv83xp86') ||
-      posts.find((p) => p.slug === '2026-10-14-compound-interest-wealth-secret')
-    );
-  }
-
-  return undefined;
+  // Avoid serving unrelated slugs with a contradictory article canonical.
+  if (canonicalBlogSlug(slug) !== slug) return undefined;
+  return loadPostsFromDisk().find((post) => post.slug === slug);
 }
 
 export function addBlogPost(post: BlogPost): void {

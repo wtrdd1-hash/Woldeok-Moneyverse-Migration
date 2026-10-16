@@ -1,9 +1,9 @@
+// @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   getAllBlogPosts,
   getBlogPostBySlug,
   generateDailyAiBlogPost,
-  BLOG_CATEGORIES,
 } from './blog-data';
 import { GET as getBlogList } from '../api/blog/route';
 import { POST as generateBlog } from '../api/blog/generate/route';
@@ -30,7 +30,7 @@ describe('AI Daily Blog System', () => {
   });
 
   it('retrieves post by slug', () => {
-    const post = getBlogPostBySlug('2026-10-14-compound-interest-wealth-secret');
+    const post = getBlogPostBySlug('2026-10-14-compound-mv83xp86');
     expect(post).toBeDefined();
     expect(post?.title).toContain('복리');
     expect(post?.category).toBe('COMPOUND');
