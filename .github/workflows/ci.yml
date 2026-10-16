@@ -31,7 +31,7 @@ jobs:
           value="${CALLER_CLASSIFICATION:-}"
           if [[ -n "$value" ]]; then
             case "$value" in
-              DOCS_ONLY|CONTROL_PLANE_ONLY|RUNTIME_RELEVANT|MIXED) ;;
+              DOCS_ONLY|CONTROL_PLANE_ONLY|NO_CHANGES|RUNTIME_RELEVANT|MIXED) ;;
               *) echo "::error::invalid caller release classification: $value"; exit 1 ;;
             esac
           fi
@@ -102,7 +102,7 @@ jobs:
             value="${STANDALONE_CLASSIFICATION:-}"
           fi
           case "$value" in
-            DOCS_ONLY|CONTROL_PLANE_ONLY|RUNTIME_RELEVANT|MIXED) ;;
+            DOCS_ONLY|CONTROL_PLANE_ONLY|NO_CHANGES|RUNTIME_RELEVANT|MIXED) ;;
             *) echo "::error::missing or unknown release classification: $value"; exit 1 ;;
           esac
           echo "classification=$value" >> "$GITHUB_OUTPUT"
@@ -134,7 +134,8 @@ jobs:
       - name: Record non-runtime CI decision
         if: >-
           needs.classify.outputs.classification == 'DOCS_ONLY' ||
-          needs.classify.outputs.classification == 'CONTROL_PLANE_ONLY'
+          needs.classify.outputs.classification == 'CONTROL_PLANE_ONLY' ||
+          needs.classify.outputs.classification == 'NO_CHANGES'
         shell: bash
         run: |
           {

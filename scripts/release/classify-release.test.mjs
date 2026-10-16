@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { CLASSIFIER_VERSION, classifyPaths } from './classify-release.mjs';
+import { CLASSIFIER_VERSION, buildReleaseInput, classifyPaths } from './classify-release.mjs';
 
 test('classifier version is explicit', () => {
   assert.equal(CLASSIFIER_VERSION, 'release-path-v1');
@@ -116,4 +120,46 @@ test('production workflow consumes candidate evidence and polls application iden
   assert.match(workflow, /candidate-manifest/);
   assert.match(workflow, /APPLICATION_SOURCE_SHA/);
   assert.doesNotMatch(workflow, /RELEASE_SHA: \$\{\{ steps\.release\.outputs\.sha \}\}/);
+});
+
+
+test('a branch created at the identical main SHA is an attested no-change event, not a failed release', () => {
+  const repo = mkdtempSync(join(tmpdir(), 'moneyverse-classify-noop-'));
+  try {
+    const git = (...args) => execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' }).trim();
+    git('init', '-q');
+    git('-c', 'user.name=CI', '-c', 'user.email=ci@example.test', 'commit', '-q', '--allow-empty', '-m', 'base');
+    const head = git('rev-parse', 'HEAD');
+    const classified = buildReleaseInput({ repo, base: head, head });
+    assert.equal(classified.classification, 'NO_CHANGES');
+    assert.deepEqual(classified.changedPaths, []);
+    assert.equal(classified.repositoryHeadSha, head);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('no-change inputs never enable release build or Production promotion', async () => {
+  const ci = await readFile(new URL('../../.github/workflows/ci.yml', import.meta.url), 'utf8');
+  const candidate = await readFile(new URL('../../.github/workflows/test-candidate.yml', import.meta.url), 'utf8');
+  assert.match(ci, /NO_CHANGES/);
+  assert.match(candidate, /NO_CHANGES/);
+  const build = candidate.split('\n  build:')[1].split('\n  non-runtime-summary:')[0];
+  assert.doesNotMatch(build, /NO_CHANGES/);
+  const dispatch = candidate.split('\n  dispatch-production-gate:')[1];
+  assert.doesNotMatch(dispatch, /NO_CHANGES/);
+});
+
+
+test('automated integration only enumerates open PR branches, not every branch', async () => {
+  const workflow = await readFile(new URL('../../.github/workflows/auto-integrate-promote.yml', import.meta.url), 'utf8');
+  assert.match(workflow, /pulls\?state=open&base=main&per_page=100/);
+  assert.doesNotMatch(workflow, /branches\?per_page=100/);
+});
+
+test('merged branch cleanup batches PR evidence and uses local ancestry', async () => {
+  const workflow = await readFile(new URL('../../.github/workflows/cleanup-merged-branches.yml', import.meta.url), 'utf8');
+  assert.match(workflow, /git for-each-ref --merged/);
+  assert.match(workflow, /pulls\?state=closed&base=main&per_page=100/);
+  assert.match(workflow, /--force-with-lease/);
 });

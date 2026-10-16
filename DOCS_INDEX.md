@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.16.740 — CI/branch integration repair candidate, Production BLOCKED
+- [EN worklog](docs/worklog/2026-10-16-branch-ci-production-audit-v740.md) / [한국어](docs/worklog/2026-10-16-branch-ci-production-audit-v740.ko.md) · [Internal](docs/updates/v2026.10.16.740-internal.md) · [GitHub](docs/updates/v2026.10.16.740-github.md). Identical-ref `NO_CHANGES` gate, batched PR-based integration/cleanup; local release tests 44/44 PASS. Actual Production finance preflight BLOCKED (5 app-writable finance tables, 19 uncertified account projections). CI/PR merge and Production cutover are separate, not certified by these notes.
+
 ## v2026.10.16.736 — v735 AI blog Test accepted and Production candidate staged
 - [Release EN](docs/releases/v2026.10.16.735.md) / [한국어](docs/releases/v2026.10.16.735.ko.md) · [Worklog](docs/worklog/2026-10-16-ai-blog-production-unblock-v735.md). Exact merged main v735.2 Test passed, Prod artifact staged but NOT switched due to confirmed account_balances/ledger_postings direct DML grants and v530 UI gate. Legacy v600 writer service unexpectedly restarted and remains under investigation.
 

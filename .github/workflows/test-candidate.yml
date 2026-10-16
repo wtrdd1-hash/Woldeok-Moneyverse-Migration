@@ -294,7 +294,8 @@ jobs:
     needs: [release-input, verify]
     if: >-
       needs.release-input.outputs.classification == 'DOCS_ONLY' ||
-      needs.release-input.outputs.classification == 'CONTROL_PLANE_ONLY'
+      needs.release-input.outputs.classification == 'CONTROL_PLANE_ONLY' ||
+      needs.release-input.outputs.classification == 'NO_CHANGES'
     runs-on: ubuntu-latest
     steps:
       - name: Record zero-runtime candidate decision
