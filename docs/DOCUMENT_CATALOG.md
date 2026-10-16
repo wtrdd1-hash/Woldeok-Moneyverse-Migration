@@ -1,5 +1,9 @@
 # 📚 Document Catalog
 
+## v2026.10.16.715 — Audited PR integration and release hold
+- [Release (EN)](releases/v2026.10.16.715.md) / [KO](releases/v2026.10.16.715.ko.md); [worklog (EN)](worklog/2026-10-16-branch-integration-close-v715.md) / [KO](worklog/2026-10-16-branch-integration-close-v715.ko.md); [GitHub update](updates/v2026.10.16.715-github.md) and [internal record](updates/v2026.10.16.715-internal.md). Documentation-only main merge; runtime Production hold.
+
+
 ## v2026.10.16.713 — Proposed remediation blueprint (NOT adopted or deployed)
 
 - [Integrated full-platform remediation design — EN](planning/PLATFORM_REMEDIATION_MASTER_BLUEPRINT_v2026.10.16.713.md) / [KO](planning/PLATFORM_REMEDIATION_MASTER_BLUEPRINT_v2026.10.16.713.ko.md): P0/P1/P2 problems, source/plan truth, safe release order and external references.

@@ -1,5 +1,9 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.16.715 — 검증된 PR 통합·운영 보류
+- [릴리스](releases/v2026.10.16.715.ko.md) / [English](releases/v2026.10.16.715.md), [작업 기록](worklog/2026-10-16-branch-integration-close-v715.ko.md), [GitHub 업데이트](updates/v2026.10.16.715-github.ko.md), [내부 업데이트](updates/v2026.10.16.715-internal.ko.md). 문서만 통합, 운영 런타임 변경 없음.
+
+
 ## v2026.10.16.713 — 전체 문제 해결 상세 기획 제안 (정식 채택·배포 아님)
 
 - [영문 전체 마스터 설계](planning/PLATFORM_REMEDIATION_MASTER_BLUEPRINT_v2026.10.16.713.md) / [한국어](planning/PLATFORM_REMEDIATION_MASTER_BLUEPRINT_v2026.10.16.713.ko.md): 모든 P0/P1/P2와 기능·권한·배포 게이트.

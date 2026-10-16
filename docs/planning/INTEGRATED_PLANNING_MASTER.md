@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.16.715 — Documentation integration and Production hold
+- #878 (v711 platform audit) and #881 (v713 remediation blueprint) merged after fresh required CI, with both merged source branches deleted. [Release/worklog](../releases/v2026.10.16.715.md). This is documentation-only; public Test and Production remain on v712 source SHA 142e36b5. Finance P0, protected authenticated workflows, exact-SHA Test, session continuity and rollback still BLOCK code promotion.
+
+
 ## v2026.10.16.701 — Server capacity and narrow PUBLIC privilege hardening
 - **Production confirmed:** v701 emergency SQL applied on authoritative DB: SECURITY DEFINER PUBLIC EXECUTE 11→0 while app explicit 11 retained; Production API/sessions data unaffected. Direct balance/ledger DML remains open. [Live report](../releases/v2026.10.16.701.md).
 - Staged isolated, fail-closed privilege script (PUBLIC executable security-definer functions only) with clone RED/GREEN/rollback acceptance, without changing application-owned 11 EXECUTE grants. Owned completed build caches reclaimed 2.44GiB while preserving required rollback releases. [Release](../releases/v2026.10.16.701.md) / [KO](../releases/v2026.10.16.701.ko.md). Treasury/bonds/FX/pension direct balance DML remains a separate mandatory ledger-first remediation.

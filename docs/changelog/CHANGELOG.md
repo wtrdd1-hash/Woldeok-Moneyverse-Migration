@@ -1,3 +1,6 @@
+## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
+- Both ready docs PRs refreshed against latest main and passed classify/policy CI before merge. Source branches removed. Test/Production remain v712 SHA 142e36b5; finance/session exact-SHA release gates remain BLOCKED. [Release](../releases/v2026.10.16.715.md).
+
 ## v2026.10.16.714 — Discord music QA evidence reliability (PR #882 merged, Production HOLD)
 - Repaired invalid Node.js QA tool, removed unproven ad-bypass claims, added bounded provider/daemon verification and 4 regression tests. Standard bot tests 8/8 and GitHub CI/candidate build PASS; merged PR #882, but exact-SHA Debian Test and Production acceptance BLOCKED. [Release](../releases/v2026.10.16.714.md).
 
