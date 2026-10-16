@@ -1,5 +1,8 @@
 # 📚 Document Catalog
 
+## v2026.10.16.718 — Full UI & administrator audit (AUDIT/BLOCKED)
+- [EN](findings/MONEYVERSE_FULL_UI_ADMIN_AUDIT_v2026.10.16.718.md) / [KO](findings/MONEYVERSE_FULL_UI_ADMIN_AUDIT_v2026.10.16.718.ko.md) · [Worklog](worklog/2026-10-16-full-ui-admin-audit-v718.md) · [Update](updates/v2026.10.16.718-github.md).
+
 ## v2026.10.16.717 — Regional blog release candidate
 - [Release](releases/v2026.10.16.717.md) · [Korean](releases/v2026.10.16.717.ko.md) · [Worklog](worklog/2026-10-16-blog-gate-v717.md) · [GitHub update](updates/v2026.10.16.717-github.md) · [Internal update](updates/v2026.10.16.717-internal.md).
 
