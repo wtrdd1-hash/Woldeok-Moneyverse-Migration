@@ -50,6 +50,10 @@ interface PvpWagerArenaModalProps {
   readonly onBalanceUpdate?: ((newBalance: number) => void) | undefined;
 }
 
+// Financial P0: no certified canonical-ledger PvP payout command exists yet.
+const PVP_SETTLEMENT_AVAILABLE = false;
+const PVP_HOLD_NOTICE = '대결 정산 원장 검증 중으로 신규 대결 및 참가가 일시 중단되었습니다. 기존 대결방 조회와 취소는 가능합니다.';
+
 const QUICK_PRESETS = [10000, 50000, 100000, 500000, 1000000];
 
 export function PvpWagerArenaModal({
@@ -95,6 +99,10 @@ export function PvpWagerArenaModal({
 
   // 대결방 생성
   const handleCreateRoom = async () => {
+    if (!PVP_SETTLEMENT_AVAILABLE) {
+      setErrorMsg(PVP_HOLD_NOTICE);
+      return;
+    }
     setErrorMsg(null);
     setSuccessMsg(null);
 
@@ -132,6 +140,10 @@ export function PvpWagerArenaModal({
 
   // 대결방 참가 및 즉시 승부
   const handleJoinBattle = async (room: PvpRoom) => {
+    if (!PVP_SETTLEMENT_AVAILABLE) {
+      setErrorMsg(PVP_HOLD_NOTICE);
+      return;
+    }
     setErrorMsg(null);
     setSuccessMsg(null);
 
@@ -215,11 +227,11 @@ export function PvpWagerArenaModal({
                 <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
                   1:1 라이브 승부존
                   <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-rose-500">
-                    <Flame className="h-3 w-3" /> 실시간 매칭
+                    <Flame className="h-3 w-3" /> 정산 점검 중
                   </span>
                 </DialogTitle>
                 <DialogDescription className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  상대 유저와 1:1로 판돈을 걸고 즉석 결투를 펼치세요. 승자 97% 수취, 3% 국고 자동 귀속!
+                  {PVP_HOLD_NOTICE}
                 </DialogDescription>
               </div>
             </div>
@@ -246,6 +258,7 @@ export function PvpWagerArenaModal({
             </button>
             <button
               onClick={() => setActiveTab('create')}
+              disabled={!PVP_SETTLEMENT_AVAILABLE}
               className={cn(
                 'px-4 py-2 text-xs sm:text-sm font-semibold transition-all border-b-2 -mb-[1px]',
                 activeTab === 'create'
@@ -287,6 +300,10 @@ export function PvpWagerArenaModal({
             </div>
           )}
 
+          <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-300">
+            {PVP_HOLD_NOTICE}
+          </p>
+
           {/* TAB 1: 대결 대기실 */}
           {activeTab === 'lobby' && (
             <div className="space-y-6">
@@ -311,10 +328,11 @@ export function PvpWagerArenaModal({
                   </div>
                   <p className="text-sm font-semibold text-foreground">현재 대기 중인 대결방이 없습니다.</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    직접 대결방을 생성하고 다른 시민들의 도전을 기다려보세요!
+                    원장 검증이 완료되기 전까지 새 대결방을 만들 수 없습니다.
                   </p>
                   <button
                     onClick={() => setActiveTab('create')}
+                    disabled={!PVP_SETTLEMENT_AVAILABLE}
                     className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-bold rounded-xl transition-all shadow-md active:scale-95"
                   >
                     새 대결방 만들기
@@ -368,7 +386,7 @@ export function PvpWagerArenaModal({
                           ) : (
                             <button
                               onClick={() => handleJoinBattle(room)}
-                              disabled={isPending}
+                              disabled={isPending || !PVP_SETTLEMENT_AVAILABLE}
                               className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-all shadow-sm active:scale-95"
                             >
                               도전하기 ⚔️
@@ -588,7 +606,7 @@ export function PvpWagerArenaModal({
               <button
                 type="button"
                 onClick={handleCreateRoom}
-                disabled={isPending}
+                disabled={isPending || !PVP_SETTLEMENT_AVAILABLE}
                 className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-sm transition-all shadow-lg active:scale-[0.99] flex items-center justify-center gap-2"
               >
                 <Swords className="h-4 w-4" />
