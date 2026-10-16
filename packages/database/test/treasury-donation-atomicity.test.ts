@@ -6,18 +6,23 @@ import { describe, expect, it } from 'vitest';
 // The fixture creates a synthetic account inside BEGIN/ROLLBACK and uses the
 // actual app role for transfers/replay/permission denial. Never run on Production.
 const migratorUrl = process.env.MIGRATOR_DATABASE_URL;
-if (process.env.CI && !migratorUrl) {
+if (process.env.CI === 'true' && process.env.GITHUB_ACTIONS === 'true' && !migratorUrl) {
   throw new Error('CI treasury donation DB acceptance requires MIGRATOR_DATABASE_URL');
 }
 
 describe('ledger-first treasury donation (disposable CI PostgreSQL)', () => {
-  it.skipIf(!migratorUrl)('conserves two-sided WLD, rejects replay mutations and raw privileges', () => {
+  const isDisposableGithubRunner = process.env.CI === 'true' && process.env.GITHUB_ACTIONS === 'true';
+  it.skipIf(!isDisposableGithubRunner || !migratorUrl)('conserves two-sided WLD, rejects replay mutations and raw privileges', () => {
     const url = new URL(migratorUrl!);
     if (url.protocol !== 'postgresql:' && url.protocol !== 'postgres:') {
       throw new Error('unsupported migrator database protocol');
     }
-    if (process.env.CI && url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
-      throw new Error('CI treasury smoke must run only on the disposable local PostgreSQL service');
+    const isLocalEphemeralDb = (url.hostname === 'localhost' || url.hostname === '127.0.0.1')
+      && (url.port === '' || url.port === '5432')
+      && url.username === 'moneyverse_migrator'
+      && url.pathname === '/woldeok_moneyverse_dev';
+    if (!isLocalEphemeralDb) {
+      throw new Error('CI treasury smoke requires the disposable PostgreSQL 5432 database contract');
     }
     const script = fileURLToPath(new URL('./fixtures/treasury-donation-atomicity-v744.sql', import.meta.url));
     const result = spawnSync('psql', ['-X', '-v', 'ON_ERROR_STOP=1', '-f', script], {
