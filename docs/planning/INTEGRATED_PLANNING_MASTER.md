@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.16.722 — AI blog editorial-containment release evidence (AUTHORITY_DRIFT)
+- PR #891 v721 integrated `main=10d5dfdb`, exact-SHA Test v721.2 verified, blog-specific 135/135 browser passes, admin publication hold remains fail-closed. [Evidence](../releases/v2026.10.16.721.md) / [한국어](../releases/v2026.10.16.721.ko.md). This records release evidence and does not supersede the product-plan authority.
+- Production v717 had one additional legacy AI article after v717 cutover; owner/write path unproven. Narrow shared-file read-only permission containment applied with backup and matching checksum. No app cutover. Existing v530 five complete all-route authenticated passes and Treasury/Economy Core finance/ledger P0 remain **BLOCKED**. No silent authority or Production acceptance.
+
 ## v2026.10.16.720 — v719 UI remediation Test acceptance and Production hold (AUTHORITY_DRIFT)
 - Source PR #889 integrated main `0908c8d0` with identical Git tree to Test-built `bf538d0e` (tree `317d07e9`). [Release evidence](../releases/v2026.10.16.719.md) / [worklog](../worklog/2026-10-16-ui-v719-test-production-hold-v720.md).
 - Exact-SHA v719.2 Test accepted 2026-10-16 16:51 KST, backend/frontend/host identity, health, auth-session restart continuity, protected negative POST 403 and noindex confirmed; synthetic Test session revoked and secret removed.
