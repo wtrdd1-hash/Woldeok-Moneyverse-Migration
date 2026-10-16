@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.17.755 — Stock League Test 500 read boundary correction; Production remains BLOCKED
+- [Worklog EN](docs/worklog/2026-10-17-stock-league-test-private-read-v755.md) / [한국어](docs/worklog/2026-10-17-stock-league-test-private-read-v755.ko.md) · [Internal](docs/updates/v2026.10.17.755-internal.md) · [GitHub](docs/updates/v2026.10.17.755-github.md). Forward SQL 274 replaces inaccessible `user_roles` and virtual portfolio raw SELECTs with scoped app-executable SECURITY DEFINER helpers. Isolated Test DB app-role read-only acceptance and full local tests PASS. Production 19 historic mismatches, core DML and v530 authenticated UI gates remain blocking.
+
 ## v2026.10.17.754 — Stock League finance path fixed in source; Production financial release gate still BLOCKED
 - [Worklog EN](docs/worklog/2026-10-17-stock-league-finance-remediation-v754.md) / [한국어](docs/worklog/2026-10-17-stock-league-finance-remediation-v754.ko.md) · [Internal](docs/updates/v2026.10.17.754-internal.md) · [GitHub](docs/updates/v2026.10.17.754-github.md). Migration 273 replaces Stock League raw cash debit with exact two-sided ledger/idempotent cash→ESCROW. Disposable database and immutable Production-backup restore verified 269–273 + app-role transfer/rollback. Public Test v752 and Production v717 were unchanged by this work. 19 legacy balance mismatches, core app DML, other money writers and v530 authenticated QA still block a Production promotion.
 

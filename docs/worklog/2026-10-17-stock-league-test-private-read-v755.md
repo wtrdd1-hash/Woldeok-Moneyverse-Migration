@@ -1,0 +1,18 @@
+# v2026.10.17.755 — Stock League route 500 / read privileges, Test source repair
+
+**English canonical | [한국어](2026-10-17-stock-league-test-private-read-v755.ko.md)**
+
+**Status:** isolated candidate TEST_VERIFIED (source + Test clone), **public Test and Production NOT DEPLOYED in this code work**.
+
+## START
+Operator repeatedly instructed fix all issues, run CI and exact-main Test, then zero-downtime Production promotion. Read newest main `3e50f77438737a2a4e14d79c3712961a114fccf5`, `AGENTS.md`, `PROJECT_PLAN`, `INTEGRATED_PLANNING_MASTER`, docs policy, `RELEASING` and latest v753/v754 Test/Production evidence. Branch `fix/stock-league-private-read-v2026.10.17.755` and fresh isolated worktree avoid altering Gemini/other agent branches.
+
+## MID — real runtime defect and negative boundary
+- v754 exact-main backend built and executed privately on loopback 3164 against isolated Test copy `wdmv_v754_test_shadow` (60 balances, 96 sessions, migration 273). Health/version SHA PASS, anonymous protected Stock League join 401. However GET `/api/v1/stocks/league/current` returned HTTP 500, identically to public Test v752. SQL privilege inspection confirmed `moneyverse_app` can SELECT league seasons/participants but **cannot** SELECT private `user_roles`, `virtual_stock_positions`, `virtual_stocks`. `StockLeagueRepository.getLeaderboard/getWhales` used raw private `user_roles`; join was also blocked by user roles and stock holdings. Neither exposing all private tables nor blanking member balances is permissible.
+- Forward-only migration `274-stock-league-scoped-reads.sql` defines strictly scoped `SECURITY DEFINER` functions `stock_league_is_admin(uuid)` and `stock_league_portfolio_value(uuid)`; grant EXECUTE only to `moneyverse_app`, revoke PUBLIC, no direct private-role/portfolio SELECT. Null actor denied as administrator. Repository now calls restricted read helpers in leaderboard/whales/join and retains authentic portfolio valuation. No direct financial writes and no changes to migration 273.
+- TDD RED then GREEN 2/2 structural checks; Test-copy PostgreSQL app-role `BEGIN READ ONLY` SQL acceptance validated fail-closed null actor, zero-valued absent holdings, no raw table SELECT/privileged PUBLIC function EXECUTE and scoped function availability. Actual SELECT queries under app role return rows, and fixture rolls back. New integration fixture/runner executes in disposable GitHub Actions PostgreSQL, not in Production.
+- Full local typecheck, backend/frontend build, workspace tests PASS (1,237 backend / 1,255 frontend, existing environment-dependent tests skipped as reported); lint exit 0 with inherited warnings, security/control-byte scans PASS.
+- Private backend ran with scheduler and network egress denied. SeoCrawlerAuditService still attempted a 39-target crawl and failed to send Discord alert under egress deny; stopped transient backend and removed its root-only temporary Test env; official public services were unaffected. This is a separate Test audit scheduling concern and not Production readiness.
+
+## END / release state
+- Candidate SQL 274 and backend behavior address one reproduced Test GET 500 and missing participant read permissions; CI, merged SHA and exact-source public Test acceptance must be independently recorded after verification. Existing Production finance P0 remains: 19/40 account-versus-ledger discrepancies +4,779,188 WLD, five core app DML privileges, unremediated bond/FX/pension/SWF etc raw money writers, and v530 166-page x5 real authenticated member/admin QA/session/rollback gates. No Production monetary or runtime promotion authorized by this source correction.
