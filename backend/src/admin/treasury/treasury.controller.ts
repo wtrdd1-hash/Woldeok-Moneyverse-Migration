@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validator';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
@@ -74,6 +74,10 @@ export class TreasuryUserDonateDto {
   @IsOptional()
   @IsString()
   memo?: string;
+
+  @ApiProperty({ format: 'uuid', description: 'Retry-stable transaction key' })
+  @IsUUID()
+  idempotencyKey!: string;
 }
 
 export class TreasuryDisburseGrantDto {
@@ -261,7 +265,7 @@ export class AdminTreasuryController {
     @Body() dto: TreasuryUserDonateDto,
   ) {
     const userId = requireUserId(request);
-    return this.service.userDonate(userId, dto.amountWld, dto.memo || '국고 자발적 공공 기부');
+    return this.service.userDonate(userId, dto.amountWld, dto.memo || '국고 자발적 공공 기부', dto.idempotencyKey);
   }
 
   @Get('donations/top')

@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.16.744 — Balanced Treasury donation candidate; Production finance gate remains BLOCKED
+- [Worklog EN](docs/worklog/2026-10-16-ledger-first-treasury-donation-v744.md) / [한국어](docs/worklog/2026-10-16-ledger-first-treasury-donation-v744.ko.md) · [Internal](docs/updates/v2026.10.16.744-internal.md) · [GitHub](docs/updates/v2026.10.16.744-github.md). Forward-only migration 272 replaces broken 269 donation path with canonical two-sided ledger/idempotent receipts; unsafe legacy subsidy/burn fail closed. Synthetic offline database Test PASS, local lint/typecheck/build/all-tests PASS. 19 historical Production account discrepancies, app DML roles and v530 full authenticated QA still not accepted; NO production cutover.
+
 ## v2026.10.16.742 — Discord administrator DM operational alerts (candidate)
 - [English runbook](docs/operations/discord-administrator-direct-messages.md) / [한국어](docs/operations/discord-administrator-direct-messages.ko.md) · [Worklog](docs/worklog/2026-10-16-discord-admin-dm-v742.ko.md) · [Internal](docs/updates/v2026.10.16.742-discord-admin-dm-internal.md) · [GitHub](docs/updates/v2026.10.16.742-discord-admin-dm-github.md). Channel alerts mirrored to admin DM with redaction and failure reporting. Isolated candidate; production remains subject to finance and UI release gates.
 

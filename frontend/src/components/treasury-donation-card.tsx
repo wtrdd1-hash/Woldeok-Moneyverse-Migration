@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { groupDigits, isPositiveWldInput } from '@/lib/money';
 import { HeartHandshake, Trophy, Award, Sparkles, Send, ShieldCheck, Flame } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -27,6 +27,8 @@ export function TreasuryDonationCard() {
   const [amount, setAmount] = useState('10000');
   const [memo, setMemo] = useState('초기 시민 정착 및 공공 복지 기금 후원');
   const [submitting, setSubmitting] = useState(false);
+  // Preserve the UUID after a timeout: a retry must never debit WLD twice.
+  const donationKeyRef = useRef<string | null>(null);
   const [donors, setDonors] = useState<readonly Donor[]>([]);
 
   useEffect(() => {
@@ -58,12 +60,15 @@ export function TreasuryDonationCard() {
 
     try {
       setSubmitting(true);
+      const idempotencyKey = donationKeyRef.current ?? crypto.randomUUID();
+      donationKeyRef.current = idempotencyKey;
       const res = await fetch('/api/admin/treasury/donate', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           amountWld: amount.trim(),
           memo: memo.trim() || '국고 자발적 공공 기부',
+          idempotencyKey,
         }),
       });
 
@@ -72,10 +77,12 @@ export function TreasuryDonationCard() {
         throw new Error(data?.message || data?.error || '기부 처리에 실패했습니다.');
       }
 
+      donationKeyRef.current = null;
       toast.success(
         `국고에 ${groupDigits(amount.trim())} WLD 기부가 완료되었습니다! 명예 칭호: [${data.honor_title || '기부자'}] 획득`,
       );
     } catch (err: unknown) {
+      // The request may already have committed. Retry with the same key.
       const msg = err instanceof Error ? err.message : '기부 처리 중 오류가 발생했습니다.';
       toast.error(msg);
     } finally {
@@ -123,7 +130,7 @@ export function TreasuryDonationCard() {
                 type="button"
                 variant={amount === preset.amount ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setAmount(preset.amount)}
+                onClick={() => { donationKeyRef.current = null; setAmount(preset.amount); }}
                 className={`h-auto py-2 flex flex-col items-center justify-center gap-0.5 rounded-xl border-zinc-800 font-mono text-xs ${
                   amount === preset.amount
                     ? 'bg-amber-500 hover:bg-amber-600 text-black font-black'
@@ -141,7 +148,7 @@ export function TreasuryDonationCard() {
             <input
               type="text"
               value={amount}
-              onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ''))}
+              onChange={(e) => { donationKeyRef.current = null; setAmount(e.target.value.replace(/[^0-9]/g, '')); }}
               placeholder="10000"
               className="w-full h-9 rounded-xl border border-zinc-800 bg-zinc-950 px-3 text-sm text-white font-mono focus:outline-none focus:border-amber-500"
             />
@@ -152,7 +159,7 @@ export function TreasuryDonationCard() {
             <input
               type="text"
               value={memo}
-              onChange={(e) => setMemo(e.target.value)}
+              onChange={(e) => { donationKeyRef.current = null; setMemo(e.target.value); }}
               placeholder="초기 유저 정착을 응원합니다!"
               className="w-full h-9 rounded-xl border border-zinc-800 bg-zinc-950 px-3 text-xs text-white focus:outline-none focus:border-amber-500"
             />
