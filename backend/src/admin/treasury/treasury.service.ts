@@ -112,12 +112,12 @@ export class TreasuryService {
     }
   }
 
-  async userDonate(userId: string, amountWld: string, memo: string) {
+  async userDonate(userId: string, amountWld: string, memo: string, idempotencyKey: string) {
     if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
       throw new TreasuryInputError('기부 금액은 1 WLD 이상의 정수여야 합니다.');
     }
     try {
-      return await this.repository.userDonate(userId, amountWld, memo || '국고 자발적 공공 기부');
+      return await this.repository.userDonate(userId, amountWld, memo || '국고 자발적 공공 기부', idempotencyKey);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       throw new TreasuryInputError(msg);

@@ -56,6 +56,7 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   // a roll of the die, not which rule decided it.
   VIRTUAL_DICE_GAME: '주사위 게임',
   EARLY_EVENT_REWARD: '초반 사건 보상',
+  TREASURY_USER_DONATION: '국고 자발적 기부',
   SHOP_MAINTENANCE: '주간 유지비',
   // 024 composes the type as 'VIRTUAL_STOCK_' || upper(side).
   VIRTUAL_STOCK_BUY: '주식 매수',

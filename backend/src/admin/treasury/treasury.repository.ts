@@ -829,10 +829,10 @@ export class TreasuryRepository {
     return res.rows[0]?.result;
   }
 
-  async userDonate(userId: string, amountWld: string, memo: string): Promise<any> {
+  async userDonate(userId: string, amountWld: string, memo: string, idempotencyKey: string): Promise<any> {
     const res = await this.pool.query<{ result: any }>(
-      `SELECT public.treasury_user_donate($1::uuid, $2::text, $3::text) AS result`,
-      [userId, amountWld, memo],
+      `SELECT public.treasury_user_donate($1::uuid, $2::text, $3::text, $4::uuid) AS result`,
+      [userId, amountWld, memo, idempotencyKey],
     );
     return res.rows[0]?.result;
   }
