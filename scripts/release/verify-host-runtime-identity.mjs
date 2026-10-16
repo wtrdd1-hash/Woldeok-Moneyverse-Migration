@@ -15,18 +15,12 @@ const SHA = /^[a-f0-9]{40}$/;
 const CHANNELS = Object.freeze({
   test: {
     releaseRoot: '/srv/moneyverse-data/releases/test-current',
-    backendEnv: '/etc/moneyverse/test-backend-release.env',
-    frontendEnv: '/etc/moneyverse/test-frontend-release.env',
     backendService: 'test-main-backend.service',
     frontendService: 'test-main-frontend.service',
     versionUrl: 'https://test.easy-scraping.com/api/version',
   },
   prod: {
     releaseRoot: '/srv/moneyverse-data/releases/production-current',
-    backendEnv: '/etc/moneyverse/backend-release.env',
-    frontendEnv: '/etc/moneyverse/frontend-release.env',
-    backendService: 'moneyverse-backend.service',
-    frontendService: 'moneyverse-frontend.service',
     versionUrl: 'https://easy-scraping.com/api/version',
   },
 });
@@ -39,6 +33,53 @@ export function parseBuildId(text) {
     return value.slice(1, -1);
   }
   return value;
+}
+
+/** The public version must belong to the immutable manifest's active service generation. */
+export function serviceForRelease(channel, manifest, role) {
+  if (!['backend', 'frontend'].includes(role)) throw new Error('invalid service role');
+  if (channel === 'test') return CHANNELS.test[role + 'Service'];
+  if (channel !== 'prod') throw new Error('invalid release channel');
+  const match = /^v[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.([0-9]{1,4})$/.exec(manifest?.version ?? '');
+  if (!match) throw new Error('production manifest missing a valid immutable release version');
+  return `moneyverse-release-v${match[1]}-${role}.service`;
+}
+
+/** Parses systemctl's effective unit EnvironmentFiles without reading secret values into logs. */
+export function parseEnvironmentFileLocations(raw) {
+  return Array.from(raw.matchAll(/(\/[^\s]+)\s+\(ignore_errors=(yes|no)\)/g), (match) => ({
+    file: match[1], optional: match[2] === 'yes',
+  }));
+}
+
+/** systemd environment files override earlier BUILD_IDs; duplicate keys per file fail closed. */
+export function mergeServiceBuildIds(texts) {
+  let result = null;
+  for (const text of texts) {
+    const count = text.split(/\r?\n/).filter((line) => /^\s*(?:export\s+)?BUILD_ID=/.test(line)).length;
+    if (count > 1) throw new Error('ambiguous duplicate BUILD_ID within environment file');
+    if (count === 1) result = parseBuildId(text);
+  }
+  if (!SHA.test(result ?? '')) throw new Error('missing or invalid effective release BUILD_ID');
+  return result;
+}
+
+function activeServiceBuildId(service) {
+  const raw = execFileSync('systemctl', ['show', service, '--property=EnvironmentFiles', '--value'], {
+    encoding: 'utf8', timeout: 5000,
+  });
+  const files = parseEnvironmentFileLocations(raw);
+  if (!files.length) throw new Error('no environment files for active systemd service: ' + service);
+  const contents = [];
+  for (const entry of files) {
+    try {
+      contents.push(readFileSync(entry.file, 'utf8'));
+    } catch (error) {
+      if (entry.optional && error?.code === 'ENOENT') continue;
+      throw error;
+    }
+  }
+  return mergeServiceBuildIds(contents);
 }
 
 export function verifyHostRuntimeIdentity(snapshot) {
@@ -94,6 +135,8 @@ async function collectSnapshot(channel, expectedSha) {
   const cfg = CHANNELS[channel];
   const releasePath = realpathSync(cfg.releaseRoot);
   const manifest = JSON.parse(readFileSync(path.join(releasePath, '.moneyverse-release.json'), 'utf8'));
+  const backendService = serviceForRelease(channel, manifest, 'backend');
+  const frontendService = serviceForRelease(channel, manifest, 'frontend');
 
   const response = await fetch(cfg.versionUrl, {
     redirect: 'error',
@@ -109,12 +152,12 @@ async function collectSnapshot(channel, expectedSha) {
     expectedSha,
     releasePath,
     manifest,
-    backendReleaseSha: parseBuildId(readFileSync(cfg.backendEnv, 'utf8')),
-    frontendReleaseSha: parseBuildId(readFileSync(cfg.frontendEnv, 'utf8')),
+    backendReleaseSha: activeServiceBuildId(backendService),
+    frontendReleaseSha: activeServiceBuildId(frontendService),
     frontendBuildSha: readFileSync(path.join(releasePath, 'frontend/.next/BUILD_ID'), 'utf8').trim(),
     publicVersionSha: version?.id,
-    backendCwd: systemdProcessDirectory(cfg.backendService),
-    frontendCwd: systemdProcessDirectory(cfg.frontendService),
+    backendCwd: systemdProcessDirectory(backendService),
+    frontendCwd: systemdProcessDirectory(frontendService),
   };
 }
 

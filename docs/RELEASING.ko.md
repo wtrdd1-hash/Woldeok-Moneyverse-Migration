@@ -60,7 +60,7 @@ Test가 exact intended candidate를 제공하지 않으면 승격은 BLOCKED다.
 node scripts/release/verify-host-runtime-identity.mjs --channel test --sha <검증된-40자-후보-SHA>
 ```
 
-이 명령은 immutable 릴리스 manifest, 백엔드·프론트엔드 안정 릴리스 환경변수 `BUILD_ID`, 프론트엔드 실제 `.next/BUILD_ID`, 각 systemd 실행 프로세스의 작업 디렉터리와 외부 공개 버전 API를 비교한다. 항목 하나라도 누락·불일치하면 **승격 차단**이다. 읽기 전용이며 통과시키려고 배포 manifest나 버전 값을 조작해서는 안 된다. 정확한 코드와 빌드를 새 immutable 경로에 재배포해야 한다.
+v717부터 이 명령은 immutable 릴리스 manifest의 버전으로 **실제 운영 중인 release 세대별 systemd 서비스**를 선택한다(Prod `moneyverse-release-vNNN-backend/frontend.service`, Test `test-main-backend/frontend.service`). 선택된 서비스의 **실효 EnvironmentFiles 순서에 따라 적용된** `BUILD_ID`, 프론트엔드 `.next/BUILD_ID`, 실제 프로세스 작업 디렉터리, 공개 버전 API를 대조하며 옛 v600 서비스나 고정된 오래된 env 파일을 대신 검사하지 않는다. 읽기 권한 제한된 `/etc/moneyverse/*-release.env`가 있으면 승인된 운영자만 `sudo -n node scripts/release/verify-host-runtime-identity.mjs --channel test --sha <검증된-40자-후보-SHA>` 형태로 읽기 전용 실행할 수 있다. 환경값 자체나 비밀정보는 출력하지 않는다. 항목 하나라도 누락·불일치하면 **승격 차단**이다. 읽기 전용이며 통과시키려고 배포 manifest나 버전 값을 조작해서는 안 된다. 정확한 코드와 빌드를 새 immutable 경로에 재배포해야 한다.
 
 인증·금융원장·DB 권한·마이그레이션·전체 UI 5회·세션 유지·백업/복구·무중단 canary의 **별도 수용을 모두 통과**한 뒤 운영에 원자적 전환하고, 같은 SHA로 `--channel prod`를 다시 실행한다. 이 버전 확인 자체가 전체 운영 승인을 의미하지 않는다.
 
