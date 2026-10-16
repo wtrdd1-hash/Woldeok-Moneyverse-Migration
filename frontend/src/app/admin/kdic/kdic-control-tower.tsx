@@ -172,9 +172,9 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
               1인당 50만 WLD (5천만원) 법정보호
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
             🏛️ 예금보험공사(KDIC) & 금융안정기금 종합 관제탑
-          </h2>
+          </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
             금융기관 건전성(BIS 비율), 뱅크런 방어 긴급 대여, 부보 금융기관 예보료 징수 및 예금 대위변제를 총괄합니다.
           </p>

@@ -250,9 +250,9 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
               </span>
             )}
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
             🏛️ 글로벌 외환안정망 & 서울외환시장(FX) 종합 관제탑
-          </h2>
+          </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
             SDR 바스켓·금보유고 다변화, 우방국 통화스왑 비상 라인, 내외금리차 CIP 선물환 및 스무딩 오퍼레이션을 지휘합니다.
           </p>

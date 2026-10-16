@@ -28,6 +28,8 @@ export default function StockCommunityFeedPage() {
           </div>
         </div>
 
+        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">가상 주식 주주 라운지</h1>
+
         {/* 토스형 피드 본체 */}
         <TossStyleSocialFeed />
       </div>
