@@ -93,3 +93,26 @@ describe('StockLeagueRepository Unit Tests', () => {
     ).rejects.toThrow(StockLeagueInputError);
   });
 });
+
+describe('stock league entry fee is ledger-first', () => {
+  it('charges into escrow via restricted ledger function and never raw balance UPDATE', async () => {
+    const db = new MockQueryable();
+    db.results.push(
+      { rows: [{ id: '00000000-0000-4000-8000-000000000123', entry_fee: '10000', status:'active' }] },
+      { rows: [] },
+      { rows: [] },
+      { rows: [{ id:'cash', balance:'20000' }] },
+      { rows: [{ transaction_id:'posted' }] },
+      { rows: [] },
+      { rows: [{ stock_val:'0' }] },
+      { rows: [{ id:'participant-1', season_id:'00000000-0000-4000-8000-000000000123', user_id:'user-1',
+        user_name:'회원', initial_asset:'100000', current_asset:'100000', roi_rate:'0',tier:'Bronze' }] },
+    );
+    const repo=new StockLeagueRepository(db as any);
+    const result=await repo.joinSeason('user-1','회원');
+    expect(result.id).toBe('participant-1');
+    const sql=db.queries.map(q=>q.sql).join('\n');
+    expect(sql).toContain('stock_league_settle_entry_fee($1::uuid, $2::uuid)');
+    expect(sql).not.toMatch(/UPDATE public\.account_balances/i);
+  });
+});

@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.17.754 — Stock League finance path fixed in source; Production financial release gate still BLOCKED
+- [Worklog EN](docs/worklog/2026-10-17-stock-league-finance-remediation-v754.md) / [한국어](docs/worklog/2026-10-17-stock-league-finance-remediation-v754.ko.md) · [Internal](docs/updates/v2026.10.17.754-internal.md) · [GitHub](docs/updates/v2026.10.17.754-github.md). Migration 273 replaces Stock League raw cash debit with exact two-sided ledger/idempotent cash→ESCROW. Disposable database and immutable Production-backup restore verified 269–273 + app-role transfer/rollback. Public Test v752 and Production v717 were unchanged by this work. 19 legacy balance mismatches, core app DML, other money writers and v530 authenticated QA still block a Production promotion.
+
 ## v2026.10.16.744 — Balanced Treasury donation candidate; Production finance gate remains BLOCKED
 - [Worklog EN](docs/worklog/2026-10-16-ledger-first-treasury-donation-v744.md) / [한국어](docs/worklog/2026-10-16-ledger-first-treasury-donation-v744.ko.md) · [Internal](docs/updates/v2026.10.16.744-internal.md) · [GitHub](docs/updates/v2026.10.16.744-github.md). Forward-only migration 272 replaces broken 269 donation path with canonical two-sided ledger/idempotent receipts; unsafe legacy subsidy/burn fail closed. Synthetic offline database Test PASS, local lint/typecheck/build/all-tests PASS. 19 historical Production account discrepancies, app DML roles and v530 full authenticated QA still not accepted; NO production cutover.
 
