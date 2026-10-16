@@ -27,3 +27,8 @@
 - Production remains v717; official Test remains exact v719.2. No member funds, schema, session, bot, Nginx or feature flags altered.
 - v530 five full authenticated passes (166 routes including 34 admin, 31 dynamic) not completed.
 - A full ledger-first structural settlement rewrite of pension, FX, bond, vault and other direct account-balance writers, verified in representative real DB, and finance ACL reduction from 221 to an accepted allowlist are mandatory before Production cutover. CI success or isolated schema-only SQL results cannot substitute.
+
+## Mid-work release identity drift, final hold
+- At 2026-10-16 ~17:51 KST, the other AI-blog contributor independently moved official Test to immutable `test-v2026.10.16.721.2-10d5dfdbe96d` / public application SHA `10d5dfdbe96d9445adbbce6acb2696e060b772bb`. This v722 branch was **not** staged in that Test release. Production still v717.
+- GitHub PR #892 is deliberately marked **DRAFT**; repository auto-integration workflow skips draft PRs, preventing an incompletely validated financial migration from automatically merging and promoting.
+- Full production-like financial DB integration (221 app-writable tables after proposed 272) and v530 five-pass admin/browser acceptance remain BLOCKED. No Production or official Test financial ACL changes.
