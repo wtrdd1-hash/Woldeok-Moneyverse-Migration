@@ -185,6 +185,9 @@ export class StockLeagueRepository {
       }
       const season = seasonRes.rows[0];
       const entryFee = Number(season.entry_fee);
+      if (!Number.isSafeInteger(entryFee) || entryFee < 0) {
+        throw new StockLeagueInputError('리그 참가비가 지원 범위를 벗어났습니다.');
+      }
 
       // 관리자 계정 참가 차단 가드 (랭킹 공정성 및 관리자 제외 원칙)
       const adminRes = await client.query(
@@ -217,10 +220,15 @@ export class StockLeagueRepository {
       if (accRes.rows.length === 0 || Number(accRes.rows[0]?.balance) < entryFee) {
         throw new StockLeagueInputError(`리그 참가비(${entryFee.toLocaleString()} WLD)가 부족합니다.`);
       }
-      const accountId = accRes.rows[0]?.id;
       const currentCash = Number(accRes.rows[0]?.balance);
 
-      await client.query(`UPDATE public.account_balances SET available_amount = available_amount - $1, updated_at = now() WHERE account_id = $2`, [entryFee, accountId]);
+      // Canonical, idempotent double-entry settlement into the escrow account.
+      // The same transaction rolls back this transfer if participant insert fails.
+      // Avoid raw balance DML and its unjournaled WLD drift.
+      await client.query(
+        `SELECT public.stock_league_settle_entry_fee($1::uuid, $2::uuid) AS transaction_id`,
+        [userId, season.id],
+      );
 
       // 참가비 상금 풀 및 국고 귀속 (참가비 전액 리그 상금 풀로 편입)
       await client.query(
