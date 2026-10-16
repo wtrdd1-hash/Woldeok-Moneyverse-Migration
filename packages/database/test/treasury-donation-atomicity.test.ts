@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 // Real SQL integration, but only on disposable CI DB after all forward migrations.
@@ -24,7 +24,7 @@ describe('ledger-first treasury donation (disposable CI PostgreSQL)', () => {
     if (!isLocalEphemeralDb) {
       throw new Error('CI treasury smoke requires the disposable PostgreSQL 5432 database contract');
     }
-    const script = fileURLToPath(new URL('./fixtures/treasury-donation-atomicity-v744.sql', import.meta.url));
+    const script = join(__dirname, 'fixtures', 'treasury-donation-atomicity-v744.sql');
     const result = spawnSync('psql', ['-X', '-v', 'ON_ERROR_STOP=1', '-f', script], {
       encoding: 'utf8',
       timeout: 30000,
