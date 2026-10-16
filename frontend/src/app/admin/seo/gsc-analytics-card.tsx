@@ -220,7 +220,7 @@ export function GscAnalyticsCard() {
       });
       const json = await res.json().catch(() => null);
       if (res.ok && json?.success) {
-        setIndexingFeedback(json.message || '5대 계산기 URL이 Google 및 IndexNow에 성공적으로 전송되었습니다.');
+        setIndexingFeedback(json.message || 'IndexNow 변경 통보가 접수되었습니다. 실제 색인은 아직 확인되지 않았습니다.');
       } else {
         setIndexingFeedback('전송 중 오류가 발생했습니다.');
       }

@@ -260,7 +260,7 @@ function MobileLanguageSegment() {
               type="button"
               onClick={() => handleSelect(s.value)}
               className={cn(
-                'min-h-[38px] rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center cursor-pointer select-none',
+                'min-h-[44px] rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center cursor-pointer select-none',
                 active
                   ? 'bg-amber-500 text-amber-950 font-black shadow-sm'
                   : 'bg-background/80 text-foreground/80 hover:bg-background hover:text-foreground border border-border/40',

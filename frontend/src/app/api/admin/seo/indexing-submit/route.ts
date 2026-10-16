@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
 import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
 import { ALL_SEO_PRESETS } from '@/config/seo-presets.config';
 import { submitToIndexNow } from '@/lib/indexnow';
+import { seoResponse, verifySeoOperator, verifySeoWriteOrigin } from '@/lib/admin-seo-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,78 +10,83 @@ interface IndexingRequestPayload {
   readonly targetCategory?: 'pseo' | 'calculators' | 'all';
 }
 
+/** IndexNow notification requires an elevated operator. It does NOT prove Google indexing. */
 export async function POST(req: Request) {
+  const wrongOrigin = verifySeoWriteOrigin(req);
+  if (wrongOrigin) return wrongOrigin;
+  const denied = await verifySeoOperator();
+  if (denied) return denied;
+
   try {
     const body = (await req.json().catch(() => ({}))) as IndexingRequestPayload;
-    const batchSize = Math.min(body.batchSize || 100, 200);
-    const base = (process.env.APP_BASE_URL || 'https://easy-scraping.com').replace(/\/$/, '');
-
-    // 대상 URL 목록 취합 - 메타데이터 및 캐노니컬이 쇄신된 7대 핵심 계산기를 0순위로 전진 배치
-    const targetUrls: string[] = [
-      `${base}/tools/loan-interest-calculator`,
-      `${base}/tools/compound-calculator`,
-      `${base}/tools/dividend-tax-calculator`,
-      `${base}/tools/capital-gains-tax-calculator`,
-      `${base}/tools/retirement-calculator`,
-      `${base}/tools/salary-calculator`,
-      `${base}/tools/isa-calculator`,
-      `${base}/tools/pension-tax-calculator`,
-      `${base}/tools/youth-leap-calculator`,
-      `${base}/tools/gift-tax-calculator`,
-      `${base}/tools/real-estate-calculator`,
-      `${base}/tools/kimchi-premium-calculator`,
-      `${base}/tools`,
-    ];
-
-    // 1. pSEO 580개 종목별 물타기 URL
-    for (const slug of ALL_PSEO_POPULAR_SLUGS) {
-      targetUrls.push(`${base}/tools/stock-calculator/${slug}`);
+    if (
+      body.batchSize !== undefined &&
+      (!Number.isInteger(body.batchSize) || body.batchSize < 1 || body.batchSize > 200)
+    ) {
+      return seoResponse({ success: false, error: 'invalid_batch_size' }, 400);
     }
-
-    // 2. 복리 / 파밍 프리셋
-    for (const preset of ALL_SEO_PRESETS) {
-      if (preset.category === 'compound') {
-        targetUrls.push(`${base}/tools/compound-calculator/${preset.slug}`);
+    const batchSize = body.batchSize ?? 100;
+    const base = (process.env.APP_BASE_URL || 'https://easy-scraping.com').replace(/\/$/, '');
+    const urls: string[] = [
+      'loan-interest-calculator',
+      'compound-calculator',
+      'dividend-tax-calculator',
+      'capital-gains-tax-calculator',
+      'retirement-calculator',
+      'salary-calculator',
+      'isa-calculator',
+      'pension-tax-calculator',
+      'youth-leap-calculator',
+      'gift-tax-calculator',
+      'real-estate-calculator',
+      'kimchi-premium-calculator',
+    ].map((name) => `${base}/tools/${name}`);
+    urls.push(`${base}/tools`);
+    if (body.targetCategory !== 'calculators') {
+      for (const slug of ALL_PSEO_POPULAR_SLUGS)
+        urls.push(`${base}/tools/stock-calculator/${slug}`);
+    }
+    if (body.targetCategory !== 'pseo') {
+      for (const preset of ALL_SEO_PRESETS) {
+        if (preset.category === 'compound')
+          urls.push(`${base}/tools/compound-calculator/${preset.slug}`);
       }
     }
-
-    const totalAvailable = targetUrls.length;
-    const selectedUrls = targetUrls.slice(0, batchSize);
-
-    // Google Sitemap Ping, Bing Ping 및 IndexNow(Naver/Bing/Yandex) 실시간 API 동시 전송
-    const googlePingUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(`${base}/sitemap.xml`)}`;
-    const bingPingUrl = `https://www.bing.com/ping?sitemap=${encodeURIComponent(`${base}/sitemap.xml`)}`;
-
-    const [pingResults, indexNowResult] = await Promise.all([
-      Promise.allSettled([
-        fetch(googlePingUrl, { method: 'GET' }).catch(() => null),
-        fetch(bingPingUrl, { method: 'GET' }).catch(() => null),
-      ]),
-      submitToIndexNow(selectedUrls),
-    ]);
-
-    const googlePingSuccess = pingResults[0].status === 'fulfilled';
-    const bingPingSuccess = pingResults[1].status === 'fulfilled';
-
-    return NextResponse.json({
-      success: true,
-      message: `성공! Google Indexing API 및 IndexNow에 5대 핵심 계산기 포함 ${selectedUrls.length}개 URL 실시간 통보가 완료되었습니다.`,
-      batchSize: selectedUrls.length,
-      totalUrlsAvailable: totalAvailable,
-      googlePingSuccess,
-      bingPingSuccess,
-      indexNowSuccess: indexNowResult.success,
-      submittedUrls: selectedUrls.slice(0, 6),
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    return NextResponse.json(
+    const selectedUrls = [...new Set(urls)].slice(0, batchSize);
+    const result = await submitToIndexNow(selectedUrls);
+    if (!result.success) {
+      return seoResponse(
+        {
+          success: false,
+          error: 'indexnow_submission_failed',
+          indexNowStatus: result.status,
+          submittedCount: 0,
+          attemptedCount: selectedUrls.length,
+          indexingConfirmed: false,
+        },
+        502,
+      );
+    }
+    return seoResponse(
       {
-        success: false,
-        message: 'Google Indexing API 배치 제출 처리 중 오류가 발생했습니다.',
-        error: error instanceof Error ? error.message : String(error),
+        success: true,
+        message: `IndexNow에 URL ${result.submittedCount}개 변경 통보가 접수되었습니다. 실제 검색엔진 색인은 확인되지 않았습니다.`,
+        submittedCount: result.submittedCount,
+        attemptedCount: selectedUrls.length,
+        totalUrlsAvailable: urls.length,
+        batchSize: result.submittedCount,
+        submittedUrls: selectedUrls.slice(0, 6),
+        indexNowSuccess: true,
+        indexNowStatus: result.status,
+        indexingConfirmed: false,
+        timestamp: new Date().toISOString(),
       },
-      { status: 500 },
+      result.status === 202 ? 202 : 200,
+    );
+  } catch {
+    return seoResponse(
+      { success: false, error: 'indexnow_unavailable', indexingConfirmed: false },
+      502,
     );
   }
 }

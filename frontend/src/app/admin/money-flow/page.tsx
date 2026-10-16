@@ -293,7 +293,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
                   name="search"
                   defaultValue={search}
                   placeholder="예: 치킨 또는 유저 UUID..."
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary min-h-[40px]"
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary min-h-[44px]"
                 />
               </div>
             </div>
@@ -305,7 +305,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
               <select
                 name="type"
                 defaultValue={type}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground focus:outline-none focus:ring-1 focus:ring-primary min-h-[40px]"
+                className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground focus:outline-none focus:ring-1 focus:ring-primary min-h-[44px]"
               >
                 <option value="">전체 유형</option>
                 <option value="VIRTUAL_STOCK_BUY">주식 매수 (VIRTUAL_STOCK_BUY)</option>
@@ -327,7 +327,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
                 <select
                   name="direction"
                   defaultValue={direction}
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground focus:outline-none focus:ring-1 focus:ring-primary min-h-[40px]"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground focus:outline-none focus:ring-1 focus:ring-primary min-h-[44px]"
                 >
                   <option value="">전체 방향</option>
                   <option value="debit">차변 (+) 입금</option>
@@ -335,10 +335,10 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
                 </select>
               </div>
 
-              <Button type="submit" size="sm" className="min-h-[40px] px-4 font-bold text-xs">
+              <Button type="submit" size="sm" className="min-h-[44px] px-4 font-bold text-xs">
                 검색
               </Button>
-              <Button asChild variant="outline" size="sm" className="min-h-[40px] px-3">
+              <Button asChild variant="outline" size="sm" className="min-h-[44px] px-3">
                 <Link href="/admin/money-flow">
                   <RotateCcw className="size-3.5" />
                 </Link>

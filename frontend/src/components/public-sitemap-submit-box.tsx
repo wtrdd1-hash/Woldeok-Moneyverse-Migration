@@ -1,132 +1,88 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Globe, Send, CheckCircle2, ExternalLink, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { ExternalLink, Globe } from 'lucide-react';
 
+/** The public tools page is informational. External search-provider mutations are operator-only. */
 export function PublicSitemapSubmitBox() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [resultMessage, setResultMessage] = useState<string | null>(null);
   const [selectedSitemap, setSelectedSitemap] = useState('sitemap.xml');
-
-  const SITEMAP_OPTIONS = [
-    { value: 'sitemap.xml', label: '전체 통합 사이트맵 (sitemap.xml)' },
-    { value: 'sitemap-stocks.xml', label: '주식 60+개 (sitemap-stocks.xml)' },
-    { value: 'sitemap-static.xml', label: '금융도구·가이드 (sitemap-static.xml)' },
-    { value: 'sitemap-board.xml', label: '커뮤니티 게시판 (sitemap-board.xml)' },
-    { value: 'sitemap-announcements.xml', label: '공지사항 (sitemap-announcements.xml)' },
+  const options = [
+    { value: 'sitemap.xml', label: '전체 통합 사이트맵' },
+    { value: 'sitemap-stocks.xml', label: '주식 사이트맵' },
+    { value: 'sitemap-static.xml', label: '금융도구·가이드 사이트맵' },
+    { value: 'sitemap-board.xml', label: '게시판 사이트맵' },
+    { value: 'sitemap-announcements.xml', label: '공지사항 사이트맵' },
   ];
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    setResultMessage(null);
-    try {
-      const fullUrl = `https://easy-scraping.com/${selectedSitemap}`;
-      const res = await fetch('/api/admin/seo/gsc-sitemap-submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sitemapUrl: fullUrl }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setResultMessage(`✅ Google 및 검색엔진에 [${selectedSitemap}] 최신 핑 전송이 완료되었습니다.`);
-      } else {
-        setResultMessage(`⚠️ ${data.message || '색인 핑 전송 중 문제가 발생했습니다.'}`);
-      }
-    } catch {
-      setResultMessage('검색엔진 통보 중 통신 오류가 발생했습니다.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
-    <div className="rounded-2xl border border-border/70 bg-gradient-to-br from-card via-card to-blue-950/20 p-6 sm:p-8 space-y-4 shadow-sm">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              <Globe className="size-3 inline mr-1" /> 검색엔진 공식 색인 지원
-            </span>
-            <span className="text-xs text-muted-foreground">Google · Naver · Bing 자동 연동</span>
-          </div>
-          <h3 className="text-base font-bold text-foreground">
-            구글 서치 콘솔(Google Search Console) & 네이버 서치어드바이저 사이트맵 등록
-          </h3>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            월덕 머니버스의 580개 이상 금융 계산기 및 가이드는 매일 검색엔진에 최신 사이트맵을 자동 제출합니다.
+    <section
+      className="min-w-0 rounded-2xl border border-border/70 bg-card p-4 sm:p-6 space-y-4"
+      aria-labelledby="public-sitemap-heading"
+    >
+      <div className="flex items-start gap-3">
+        <Globe className="mt-1 size-5 shrink-0 text-blue-400" aria-hidden="true" />
+        <div className="min-w-0 space-y-2">
+          <h2 id="public-sitemap-heading" className="text-lg font-bold text-foreground">
+            공개 사이트맵 안내
+          </h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            사이트맵은 공개 문서이며 누구나 확인할 수 있습니다. Google Search Console 등 검색엔진에
+            등록하는 작업은 운영자 전용입니다. 사이트맵 제출은 검색 결과 노출이나 색인을 보장하지
+            않습니다.
           </p>
-
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-xs text-muted-foreground font-semibold">대상:</span>
-            <select
-              value={selectedSitemap}
-              onChange={(e) => setSelectedSitemap(e.target.value)}
-              className="bg-background border border-border text-foreground text-xs rounded-lg px-2 py-1 outline-none"
-            >
-              {SITEMAP_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <Button
-            size="sm"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
-          >
-            <Send className="size-3.5 mr-1.5" />
-            {isSubmitting ? '색인 통보 중...' : '선택 사이트맵 최신 통보'}
-          </Button>
-
-          <a
-            href="https://search.google.com/search-console/about"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/80 bg-background hover:bg-muted text-xs font-semibold text-foreground transition-colors"
-          >
-            <ExternalLink className="size-3 text-muted-foreground" />
-            구글 서치콘솔
-          </a>
-
-          <a
-            href="https://searchadvisor.naver.com/console/board"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-950/30 text-xs font-semibold text-emerald-400 transition-colors"
-          >
-            <ExternalLink className="size-3 text-emerald-400" />
-            네이버 서치어드바이저
-          </a>
         </div>
       </div>
-
-      {resultMessage && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-xs font-semibold text-blue-400">
-          <CheckCircle2 className="size-4 shrink-0 text-blue-400" />
-          <span>{resultMessage}</span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <label htmlFor="public-sitemap-select" className="text-sm font-semibold text-foreground">
+            사이트맵 선택
+          </label>
+          <select
+            id="public-sitemap-select"
+            className="w-full min-h-[44px] rounded-lg border border-border bg-background p-2 text-sm"
+            value={selectedSitemap}
+            onChange={(event) => setSelectedSitemap(event.target.value)}
+          >
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
-
-      <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border/50 text-[11px] text-muted-foreground">
-        <span>공식 파일:</span>
-        <a href="/sitemap.xml" target="_blank" className="hover:text-foreground font-mono underline">
-          /sitemap.xml
-        </a>
-        <span>·</span>
-        <a href="/robots.txt" target="_blank" className="hover:text-foreground font-mono underline">
-          /robots.txt
-        </a>
-        <span>·</span>
-        <a href="/feed.xml" target="_blank" className="hover:text-foreground font-mono underline">
-          /feed.xml (RSS 2.0)
+        <a
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-500"
+          href={`/${selectedSitemap}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          공개 사이트맵 보기 <ExternalLink className="size-4" aria-hidden="true" />
         </a>
       </div>
-    </div>
+      <p className="text-xs text-muted-foreground">
+        운영자 공식 등록: 관리자 SEO 관제에서 인증된 Search Console 계정으로만 제출할 수 있습니다.
+      </p>
+      <div className="flex flex-wrap gap-4 text-sm">
+        <a
+          className="underline underline-offset-2"
+          href="https://search.google.com/search-console/about"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Google Search Console
+        </a>
+        <a
+          className="underline underline-offset-2"
+          href="https://searchadvisor.naver.com/console/board"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Naver Search Advisor
+        </a>
+        <a className="underline underline-offset-2" href="/robots.txt">
+          robots.txt
+        </a>
+      </div>
+    </section>
   );
 }
