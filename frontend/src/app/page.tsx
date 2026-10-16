@@ -27,18 +27,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { publicApi, apiOrNull } from '@/lib/api';
 import { formatDay } from '@/lib/money';
+import { selectTopMovers, type HomeStockQuote } from '@/lib/home-market';
 import { getServerLocale } from '@/lib/locale-server';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 
 export const revalidate = 60;
-
-interface StockItem {
-  readonly id?: string;
-  readonly symbol: string;
-  readonly name: string;
-  readonly current_price: string;
-  readonly day_open_price: string;
-}
 
 const HOME_META_BY_LOCALE = {
   en: {
@@ -125,30 +118,13 @@ interface Announcement {
 export default async function HomePage() {
   const [announcements, marketData] = await Promise.all([
     publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60),
-    apiOrNull<{ stocks: StockItem[] }>('/api/v1/stocks'),
+    apiOrNull<{ stocks: HomeStockQuote[] }>('/api/v1/stocks'),
   ]);
 
   const notices = announcements?.announcements.slice(0, 3) ?? [];
   const rawStocks = marketData?.stocks ?? [];
   
-  // 등락률 계산 및 Top Movers 산출 (데이터 없을 시 기본 4대 종목 fallback)
-  const movers = rawStocks.length > 0
-    ? [...rawStocks]
-        .map((s) => {
-          const cur = Number.parseInt(s.current_price, 10) || 0;
-          const open = Number.parseInt(s.day_open_price, 10) || cur;
-          const diff = cur - open;
-          const pct = open > 0 ? (diff / open) * 100 : 0;
-          return { ...s, cur, open, diff, pct };
-        })
-        .sort((a, b) => Math.abs(b.pct) - Math.abs(a.pct))
-        .slice(0, 4)
-    : [
-        { symbol: 'WDG', name: '월덕게임즈', cur: 1450, pct: 4.8 },
-        { symbol: 'WDT', name: '월덱테크', cur: 1714, pct: 3.2 },
-        { symbol: 'CHIMU', name: '치무테크', cur: 3140, pct: -1.2 },
-        { symbol: 'SHIN', name: '신화바이오', cur: 890, pct: 7.5 },
-      ];
+  const movers = selectTopMovers(rawStocks);
 
   return (
     <div data-page="home" className="mv-page mv-page--community mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8 pb-20 sm:pb-12">
@@ -179,7 +155,7 @@ export default async function HomePage() {
               </div>
               <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-300/90 bg-[#00F59B]/10 border border-[#00F59B]/20 px-2.5 py-0.5 rounded-full">
                 <ShieldCheck className="size-3 text-[#00F59B] shrink-0" />
-                <span><T korean="100% 무손실 원장 보호" english="100% Lossless Ledger" japanese="100%無損失元帳保護" chinese="100%无损账本保障" /></span>
+                <span><T korean="가상 원장 기록 조회" english="Virtual Ledger Records" japanese="仮想台帳の記録" chinese="虚拟账本记录" /></span>
               </div>
             </div>
 
@@ -191,36 +167,35 @@ export default async function HomePage() {
                     <T korean="내 가상 자산 순가치" english="Total Virtual Net Worth" japanese="私の仮想資産総額" chinese="我的虚拟总资产" />
                   </p>
                   <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[#00F59B]/10 text-[#00F59B] border border-[#00F59B]/20 text-[10px] font-mono font-bold">
-                    +4.8% 24h
+                    <T korean="가상자산" english="Virtual Asset" japanese="仮想資産" chinese="虚拟资产" />
                   </span>
                 </div>
                 <div className="mt-1.5 font-mono tabular-nums text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-zinc-50 flex items-baseline gap-2 min-w-0 max-w-full overflow-hidden">
                   <WalletGlance />
                 </div>
                 <p className="mt-1.5 font-mono text-xs text-zinc-400">
-                  <T korean="≈ ₩179,460,000 KRW (실시간 가상환율 1:1,000 연동)" english="≈ ₩179,460,000 KRW (Live 1:1,000 Peg)" japanese="≈ ₩179,460,000 KRW (為替連動)" chinese="≈ ₩179,460,000 KRW (实时锚定)" />
+                  <T korean="WLD는 서비스 내 가상 단위이며 실물 원화 잔액이 아닙니다." english="WLD is an in-app virtual unit, not a real KRW balance." japanese="WLDはアプリ内の仮想単位であり、実際のウォン残高ではありません。" chinese="WLD 是应用内虚拟单位，并非实际韩元余额。" />
                 </p>
               </div>
 
-              {/* In-line Asset Allocation Bar (Stripe Dashboard Surface) */}
-              <div className="p-4 rounded-2xl border border-[#222738] bg-[#121622] space-y-2.5">
-                <div className="flex items-center justify-between text-[11px] font-medium text-zinc-300">
-                  <span className="flex items-center gap-1.5">
-                    <span className="size-1.5 rounded-full bg-[#00F59B]" />
-                    <T korean="자산 포트폴리오 구성" english="Asset Allocation" japanese="資産構成比率" chinese="资产配置比例" />
-                  </span>
-                  <span className="font-mono text-[#00F59B] font-bold">100%</span>
-                </div>
-                {/* 3-Color Asset Allocation Segmented Bar */}
-                <div className="w-full h-2.5 rounded-full bg-[#181E2C] overflow-hidden flex ring-1 ring-white/5">
-                  <div className="h-full bg-[#00F59B] w-[62%] transition-all" title="현금 지갑 (62%)" />
-                  <div className="h-full bg-blue-500 w-[28%] transition-all" title="가상 주식 (28%)" />
-                  <div className="h-full bg-purple-500 w-[10%] transition-all" title="은행 복리 예금 (10%)" />
-                </div>
-                <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 pt-0.5">
-                  <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-[#00F59B]" /> <T korean="현금 62%" english="Cash 62%" japanese="現金 62%" chinese="现金 62%" /></span>
-                  <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-blue-500" /> <T korean="주식 28%" english="Stocks 28%" japanese="株式 28%" chinese="股票 28%" /></span>
-                  <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-purple-500" /> <T korean="예금 10%" english="Bank 10%" japanese="預金 10%" chinese="储蓄 10%" /></span>
+              {/* Asset breakdowns link to their authoritative account screens. */}
+              <div className="p-4 rounded-2xl border border-[#222738] bg-[#121622] space-y-3">
+                <p className="text-xs font-bold text-zinc-100">
+                  <T korean="내 자산별 상세 내역" english="Your Asset Breakdown" japanese="資産の詳細" chinese="资产明细" />
+                </p>
+                <p className="text-xs text-zinc-400">
+                  <T korean="실제 잔액과 보유 현황은 각 화면에서 확인하세요." english="Check your verified balances and holdings on their own pages." japanese="残高と保有状況は各ページでご確認ください。" chinese="请在对应页面查看余额与持仓。" />
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  <Link href="/wallet" className="flex min-h-[44px] items-center justify-center rounded-xl border border-[#222738] px-2 text-xs font-semibold text-zinc-200 hover:border-[#00F59B]/50">
+                    <T korean="지갑" english="Wallet" japanese="財布" chinese="钱包" />
+                  </Link>
+                  <Link href="/stocks/portfolio" className="flex min-h-[44px] items-center justify-center rounded-xl border border-[#222738] px-2 text-xs font-semibold text-zinc-200 hover:border-[#00F59B]/50">
+                    <T korean="주식" english="Stocks" japanese="株式" chinese="股票" />
+                  </Link>
+                  <Link href="/bank" className="flex min-h-[44px] items-center justify-center rounded-xl border border-[#222738] px-2 text-xs font-semibold text-zinc-200 hover:border-[#00F59B]/50">
+                    <T korean="은행" english="Bank" japanese="銀行" chinese="银行" />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -299,8 +274,13 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
-              {movers.map((item) => {
+            {movers.length === 0 ? (
+              <p role="status" className="pt-3 text-sm text-zinc-400">
+                <T korean="현재 확인된 주식 시세가 없습니다. 시세 연결이 복구되면 다시 표시합니다." english="Verified stock quotes are unavailable. Movers will return when live quotes recover." japanese="確認済みの株価は現在ありません。復旧後に再表示します。" chinese="当前没有已确认的股票行情，恢复后将重新显示。" />
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
+                {movers.map((item) => {
                 const isPositive = item.pct >= 0;
                 return (
                   <Link
@@ -319,8 +299,9 @@ export default async function HomePage() {
                     </div>
                   </Link>
                 );
-              })}
-            </div>
+                })}
+              </div>
+            )}
           </section>
 
           {/* Bento 3: 특수 금융 마켓 배너 (Stitch High-Density Surface) */}

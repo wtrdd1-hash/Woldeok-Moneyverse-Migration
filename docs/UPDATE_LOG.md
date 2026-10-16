@@ -1,3 +1,11 @@
+## v2026.10.17.760 — Full Feature/UI Runtime Audit and Home Truth Fix Candidate
+
+- Rechecked canonical planning against v752 main; inventoried 166 pages (34 admin), 82 backend controllers and the separate Android repo.
+- Guest Chromium first-render smoke covered 405 route/viewport pairs with no document-width overflow or page JavaScript exceptions; this is not 5-pass authenticated acceptance.
+- Fixed fabricated home financial/stock quotes and shared 44px touch targets. Latest source frontend 1,262/1,262 tests, typecheck, build and lint (0 errors; 1,075 warnings) PASS.
+- Latest Production still v717, Test v735.2; financial ledger/ACL P0 and exact-SHA Test/authenticated UI gates remain BLOCKED. No production cutover.
+- EN/KO audit report: docs/findings/MONEYVERSE_FULL_FUNCTION_UI_RUNTIME_AUDIT_v2026.10.17.760.md; detailed worklog and v760 internal/GitHub update notes.
+
 ## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
 - Moved the admin navigator modal from a clipped scrolling/backdrop-filtered ancestor to a document-body portal. Targeted regression 2/2, ESLint, TypeScript and Next.js build passed.

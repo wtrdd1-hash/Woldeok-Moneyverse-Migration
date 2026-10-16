@@ -240,3 +240,10 @@
 
 
 
+
+## 15. 2026-10-17 v760 source/UI re-audit checkpoint (CANDIDATE / RELEASE_BLOCKED)
+
+- Current source baseline origin/main c2d4667b, branch audit/full-feature-ui-v2026.10.17.760.
+- Verified selected Production v717, Test v735.2; legacy v600 processes do not identify selected Production.
+- Full evidence under docs/findings/MONEYVERSE_FULL_FUNCTION_UI_RUNTIME_AUDIT_v2026.10.17.760.md; new frontend source fixes are not deployed.
+- Preserve finance v737 P0, emergency v530 UI five-pass gate, exact Test SHA, session and zero-downtime release gates. Do not infer operational promotion from branch/CI.

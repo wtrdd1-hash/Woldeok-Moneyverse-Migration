@@ -2195,3 +2195,12 @@
 - `vitest run "blog" "shell-boundary" "macro-market-data"`: 3 files passed, 11 tests passed
 - `pnpm run api:contract:check`: API contract artifacts match after internal TypeScript symbol normalization
 - `git branch -a`: `* main` 단일 브랜치 유지
+
+## v2026.10.17.760 — Full-feature stability and UI audit execution ledger (non-authoritative delta)
+
+- Baseline: origin/main c2d4667b. Current authoritative design remains docs/planning/PROJECT_PLAN.md and docs/planning/INTEGRATED_PLANNING_MASTER.md.
+- Existing route inventory 166 web routes (34 administrator, 31 dynamic); anonymous browser initial render 405/405 HTTP 200 with no whole-document overflow or uncaught page exceptions.
+- Fix scope: remove fictional fallback price quotes and hard-coded personal home figures; restore 44x44px notice-close and mobile-menu touch targets with TDD.
+- Candidate validation: frontend 1262/1262 tests, build, typecheck and lint (0 errors; warnings remain) pass; real DB and five authenticated all-route Test passes remain BLOCKED.
+- Production remains v717. No DB or member-balance mutation, feature-switch change or production cutover in this audit.
+- Internal/GitHub bilingual v760 change records and full English/Korean audit report are under docs/updates and docs/findings.

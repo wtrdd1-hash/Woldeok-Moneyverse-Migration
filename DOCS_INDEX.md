@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.17.760 — Full UI/source truth audit and safe shared touch-target candidate (Production BLOCKED)
+- [EN findings](docs/findings/MONEYVERSE_FULL_FUNCTION_UI_RUNTIME_AUDIT_v2026.10.17.760.md) / [한국어](docs/findings/MONEYVERSE_FULL_FUNCTION_UI_RUNTIME_AUDIT_v2026.10.17.760.ko.md) · [Worklog EN](docs/worklog/2026-10-17-full-feature-ui-audit-v760.md) / [KO](docs/worklog/2026-10-17-full-feature-ui-audit-v760.ko.md) · [Internal](docs/updates/v2026.10.17.760-internal.md) · [GitHub](docs/updates/v2026.10.17.760-github.md). Main v752: 166 pages/34 admin, anonymous Chromium 405 screens; home fake quote/metric elimination, 44px notice/menu. Local frontend 1262 tests/build/typecheck/lint PASS, Production v717 unchanged. Financial P0 and five-pass authenticated Test UI acceptance BLOCKED.
+
+
 ## v2026.10.16.744 — Balanced Treasury donation candidate; Production finance gate remains BLOCKED
 - [Worklog EN](docs/worklog/2026-10-16-ledger-first-treasury-donation-v744.md) / [한국어](docs/worklog/2026-10-16-ledger-first-treasury-donation-v744.ko.md) · [Internal](docs/updates/v2026.10.16.744-internal.md) · [GitHub](docs/updates/v2026.10.16.744-github.md). Forward-only migration 272 replaces broken 269 donation path with canonical two-sided ledger/idempotent receipts; unsafe legacy subsidy/burn fail closed. Synthetic offline database Test PASS, local lint/typecheck/build/all-tests PASS. 19 historical Production account discrepancies, app DML roles and v530 full authenticated QA still not accepted; NO production cutover.
 

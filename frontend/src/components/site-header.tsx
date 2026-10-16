@@ -122,7 +122,7 @@ export function SiteHeader() {
               <Button
                 variant="outline"
                 size="icon"
-                className="size-10 min-[400px]:size-11 rounded-[10px] lg:hidden shrink-0"
+                className="size-11 rounded-[10px] lg:hidden shrink-0"
                 aria-label={localeLabel(locale, '메뉴 열기', 'Open menu', 'メニューを開く', '打开菜单')}
               >
                 <Menu className="size-4.5 sm:size-5" />
