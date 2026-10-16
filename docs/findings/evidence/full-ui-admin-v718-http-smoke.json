@@ -1,0 +1,1352 @@
+[
+  {
+    "route": "/account/notifications",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/account/notifications",
+    "ms": 1076,
+    "h1": false,
+    "body_size": 84605,
+    "login_marker": false
+  },
+  {
+    "route": "/account",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/account",
+    "ms": 1079,
+    "h1": false,
+    "body_size": 84330,
+    "login_marker": false
+  },
+  {
+    "route": "/account/privacy",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/account/privacy",
+    "ms": 1147,
+    "h1": false,
+    "body_size": 83206,
+    "login_marker": false
+  },
+  {
+    "route": "/account/security",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/account/security",
+    "ms": 1152,
+    "h1": false,
+    "body_size": 83098,
+    "login_marker": true
+  },
+  {
+    "route": "/account-deletion",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/account-deletion",
+    "ms": 1058,
+    "h1": true,
+    "body_size": 84573,
+    "login_marker": true
+  },
+  {
+    "route": "/admin/analytics",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/analytics",
+    "ms": 775,
+    "h1": false,
+    "body_size": 105841,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/api-health",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/api-health",
+    "ms": 1052,
+    "h1": false,
+    "body_size": 105537,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/bank",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/bank",
+    "ms": 824,
+    "h1": false,
+    "body_size": 108477,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/blog",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/blog",
+    "ms": 791,
+    "h1": false,
+    "body_size": 105290,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/bonds",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/bonds",
+    "ms": 795,
+    "h1": false,
+    "body_size": 105563,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/catalog",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/catalog",
+    "ms": 832,
+    "h1": false,
+    "body_size": 108699,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/content",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/content",
+    "ms": 790,
+    "h1": false,
+    "body_size": 108339,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/controls",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/controls",
+    "ms": 1104,
+    "h1": false,
+    "body_size": 109379,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/discord",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/discord",
+    "ms": 807,
+    "h1": false,
+    "body_size": 108271,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/economy",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/economy",
+    "ms": 977,
+    "h1": false,
+    "body_size": 109389,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/economy/scenario-lab",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/economy/scenario-lab",
+    "ms": 792,
+    "h1": false,
+    "body_size": 109545,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/enterprises",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/enterprises",
+    "ms": 774,
+    "h1": false,
+    "body_size": 105620,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/fx",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/fx",
+    "ms": 793,
+    "h1": false,
+    "body_size": 105576,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/kdic",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/kdic",
+    "ms": 798,
+    "h1": false,
+    "body_size": 105580,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/logs/activity",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/logs/activity",
+    "ms": 761,
+    "h1": false,
+    "body_size": 108582,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/logs/delivery",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/logs/delivery",
+    "ms": 833,
+    "h1": false,
+    "body_size": 108775,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/logs/integrity",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/logs/integrity",
+    "ms": 814,
+    "h1": false,
+    "body_size": 108987,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/logs",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/logs",
+    "ms": 845,
+    "h1": false,
+    "body_size": 108249,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/market/ai-news",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/market/ai-news",
+    "ms": 795,
+    "h1": false,
+    "body_size": 108683,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/market",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/market",
+    "ms": 1111,
+    "h1": false,
+    "body_size": 108473,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/money-flow",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/money-flow",
+    "ms": 826,
+    "h1": false,
+    "body_size": 105406,
+    "login_marker": false
+  },
+  {
+    "route": "/admin",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin",
+    "ms": 761,
+    "h1": false,
+    "body_size": 105326,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/pension",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/pension",
+    "ms": 818,
+    "h1": false,
+    "body_size": 105579,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/safety",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/safety",
+    "ms": 831,
+    "h1": false,
+    "body_size": 105618,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/security",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/security",
+    "ms": 804,
+    "h1": false,
+    "body_size": 105614,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/seo",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/seo",
+    "ms": 806,
+    "h1": false,
+    "body_size": 105781,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/seo-audit",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/seo-audit",
+    "ms": 1084,
+    "h1": false,
+    "body_size": 105482,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/shop",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/shop",
+    "ms": 804,
+    "h1": false,
+    "body_size": 105440,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/support",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/support",
+    "ms": 814,
+    "h1": false,
+    "body_size": 105446,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/treasury/grants",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/treasury/grants",
+    "ms": 825,
+    "h1": false,
+    "body_size": 106172,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/treasury",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/treasury",
+    "ms": 798,
+    "h1": false,
+    "body_size": 105829,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/users",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/users",
+    "ms": 757,
+    "h1": false,
+    "body_size": 108675,
+    "login_marker": false
+  },
+  {
+    "route": "/admin/work",
+    "admin": true,
+    "code": 200,
+    "final": "https://easy-scraping.com/admin/work",
+    "ms": 927,
+    "h1": false,
+    "body_size": 108477,
+    "login_marker": false
+  },
+  {
+    "route": "/advisor",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/advisor",
+    "ms": 896,
+    "h1": true,
+    "body_size": 112648,
+    "login_marker": false
+  },
+  {
+    "route": "/announcements",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/announcements",
+    "ms": 786,
+    "h1": true,
+    "body_size": 89379,
+    "login_marker": false
+  },
+  {
+    "route": "/arcade",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/arcade",
+    "ms": 829,
+    "h1": true,
+    "body_size": 136761,
+    "login_marker": true
+  },
+  {
+    "route": "/bank",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1532,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/bank/savings-pot",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/bank/savings-pot",
+    "ms": 800,
+    "h1": true,
+    "body_size": 93025,
+    "login_marker": false
+  },
+  {
+    "route": "/blog",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/blog",
+    "ms": 1344,
+    "h1": true,
+    "body_size": 888385,
+    "login_marker": false
+  },
+  {
+    "route": "/board",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/board",
+    "ms": 766,
+    "h1": true,
+    "body_size": 90898,
+    "login_marker": true
+  },
+  {
+    "route": "/bonds",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/bonds",
+    "ms": 904,
+    "h1": true,
+    "body_size": 118616,
+    "login_marker": false
+  },
+  {
+    "route": "/businesses",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/businesses",
+    "ms": 768,
+    "h1": false,
+    "body_size": 81929,
+    "login_marker": false
+  },
+  {
+    "route": "/businesses/ventures",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/businesses/ventures",
+    "ms": 815,
+    "h1": true,
+    "body_size": 117269,
+    "login_marker": false
+  },
+  {
+    "route": "/calendar",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1470,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/casino",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/casino",
+    "ms": 773,
+    "h1": false,
+    "body_size": 86239,
+    "login_marker": false
+  },
+  {
+    "route": "/chat",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1384,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/clubs/new",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/clubs/new",
+    "ms": 792,
+    "h1": true,
+    "body_size": 85930,
+    "login_marker": false
+  },
+  {
+    "route": "/clubs",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1438,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/clubs/warfare",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/clubs/warfare",
+    "ms": 863,
+    "h1": true,
+    "body_size": 107912,
+    "login_marker": false
+  },
+  {
+    "route": "/collections",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1446,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/dashboard",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1441,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/data-deletion",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/data-deletion",
+    "ms": 807,
+    "h1": true,
+    "body_size": 84587,
+    "login_marker": true
+  },
+  {
+    "route": "/design-preview",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/design-preview",
+    "ms": 836,
+    "h1": true,
+    "body_size": 105499,
+    "login_marker": true
+  },
+  {
+    "route": "/developer",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1470,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/enterprises",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/enterprises",
+    "ms": 897,
+    "h1": true,
+    "body_size": 122041,
+    "login_marker": false
+  },
+  {
+    "route": "/features",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/features",
+    "ms": 952,
+    "h1": true,
+    "body_size": 182209,
+    "login_marker": false
+  },
+  {
+    "route": "/forgot-password",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/forgot-password",
+    "ms": 757,
+    "h1": true,
+    "body_size": 87616,
+    "login_marker": true
+  },
+  {
+    "route": "/fx",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/fx",
+    "ms": 812,
+    "h1": true,
+    "body_size": 84285,
+    "login_marker": false
+  },
+  {
+    "route": "/gallery",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/gallery",
+    "ms": 793,
+    "h1": true,
+    "body_size": 89315,
+    "login_marker": false
+  },
+  {
+    "route": "/gallery/submit",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1436,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/guide/career-mastery",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/guide/career-mastery",
+    "ms": 876,
+    "h1": true,
+    "body_size": 124212,
+    "login_marker": false
+  },
+  {
+    "route": "/guide/dopamine-system",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/guide/dopamine-system",
+    "ms": 796,
+    "h1": true,
+    "body_size": 98986,
+    "login_marker": false
+  },
+  {
+    "route": "/guide/glossary",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/guide/glossary",
+    "ms": 1107,
+    "h1": true,
+    "body_size": 330013,
+    "login_marker": false
+  },
+  {
+    "route": "/guide",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/guide",
+    "ms": 1011,
+    "h1": true,
+    "body_size": 304552,
+    "login_marker": true
+  },
+  {
+    "route": "/guide/stock-trading",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/guide/stock-trading",
+    "ms": 755,
+    "h1": true,
+    "body_size": 108884,
+    "login_marker": true
+  },
+  {
+    "route": "/guide/virtual-banking",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/guide/virtual-banking",
+    "ms": 794,
+    "h1": true,
+    "body_size": 105121,
+    "login_marker": false
+  },
+  {
+    "route": "/inventory",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1458,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/kdic",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/kdic",
+    "ms": 806,
+    "h1": true,
+    "body_size": 89405,
+    "login_marker": false
+  },
+  {
+    "route": "/lobby",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/lobby",
+    "ms": 804,
+    "h1": true,
+    "body_size": 90155,
+    "login_marker": true
+  },
+  {
+    "route": "/login",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login",
+    "ms": 803,
+    "h1": true,
+    "body_size": 96625,
+    "login_marker": true
+  },
+  {
+    "route": "/login/providers",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login/providers",
+    "ms": 793,
+    "h1": true,
+    "body_size": 97713,
+    "login_marker": true
+  },
+  {
+    "route": "/marketplace/auction",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/marketplace/auction",
+    "ms": 934,
+    "h1": true,
+    "body_size": 132516,
+    "login_marker": false
+  },
+  {
+    "route": "/marketplace",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1418,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/newspaper",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/newspaper",
+    "ms": 945,
+    "h1": true,
+    "body_size": 130801,
+    "login_marker": false
+  },
+  {
+    "route": "/",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/",
+    "ms": 931,
+    "h1": false,
+    "body_size": 182986,
+    "login_marker": true
+  },
+  {
+    "route": "/pension",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/pension",
+    "ms": 880,
+    "h1": true,
+    "body_size": 114299,
+    "login_marker": false
+  },
+  {
+    "route": "/prediction",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/prediction",
+    "ms": 769,
+    "h1": true,
+    "body_size": 95964,
+    "login_marker": false
+  },
+  {
+    "route": "/privacy",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/privacy",
+    "ms": 920,
+    "h1": true,
+    "body_size": 106410,
+    "login_marker": true
+  },
+  {
+    "route": "/profile",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/profile",
+    "ms": 766,
+    "h1": false,
+    "body_size": 82412,
+    "login_marker": false
+  },
+  {
+    "route": "/profile/settings",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/profile/settings",
+    "ms": 794,
+    "h1": false,
+    "body_size": 82883,
+    "login_marker": false
+  },
+  {
+    "route": "/progression",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/progression",
+    "ms": 773,
+    "h1": false,
+    "body_size": 82775,
+    "login_marker": false
+  },
+  {
+    "route": "/progression/prestige",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/progression/prestige",
+    "ms": 834,
+    "h1": true,
+    "body_size": 92479,
+    "login_marker": false
+  },
+  {
+    "route": "/quests",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/quests",
+    "ms": 763,
+    "h1": false,
+    "body_size": 83064,
+    "login_marker": false
+  },
+  {
+    "route": "/register",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/register",
+    "ms": 787,
+    "h1": true,
+    "body_size": 96910,
+    "login_marker": true
+  },
+  {
+    "route": "/reset-password",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/reset-password",
+    "ms": 807,
+    "h1": true,
+    "body_size": 83514,
+    "login_marker": true
+  },
+  {
+    "route": "/roadmap",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/roadmap",
+    "ms": 812,
+    "h1": true,
+    "body_size": 132999,
+    "login_marker": false
+  },
+  {
+    "route": "/safety",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/safety",
+    "ms": 807,
+    "h1": true,
+    "body_size": 98326,
+    "login_marker": true
+  },
+  {
+    "route": "/safety/takedown",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/safety/takedown",
+    "ms": 773,
+    "h1": true,
+    "body_size": 90189,
+    "login_marker": true
+  },
+  {
+    "route": "/search",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/search",
+    "ms": 783,
+    "h1": true,
+    "body_size": 87896,
+    "login_marker": false
+  },
+  {
+    "route": "/seasons",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/seasons",
+    "ms": 782,
+    "h1": false,
+    "body_size": 82769,
+    "login_marker": false
+  },
+  {
+    "route": "/shop/catalog",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/shop/catalog",
+    "ms": 781,
+    "h1": false,
+    "body_size": 83457,
+    "login_marker": false
+  },
+  {
+    "route": "/shop",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/shop",
+    "ms": 1216,
+    "h1": true,
+    "body_size": 626533,
+    "login_marker": false
+  },
+  {
+    "route": "/spaces",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/spaces",
+    "ms": 798,
+    "h1": true,
+    "body_size": 89915,
+    "login_marker": false
+  },
+  {
+    "route": "/spaces/real-estate",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/spaces/real-estate",
+    "ms": 805,
+    "h1": true,
+    "body_size": 98897,
+    "login_marker": false
+  },
+  {
+    "route": "/status",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/status",
+    "ms": 789,
+    "h1": true,
+    "body_size": 96437,
+    "login_marker": false
+  },
+  {
+    "route": "/stocks/alerts",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/stocks/alerts",
+    "ms": 806,
+    "h1": false,
+    "body_size": 92407,
+    "login_marker": false
+  },
+  {
+    "route": "/stocks/community",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/stocks/community",
+    "ms": 926,
+    "h1": false,
+    "body_size": 123988,
+    "login_marker": false
+  },
+  {
+    "route": "/stocks/compare",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/stocks/compare",
+    "ms": 790,
+    "h1": false,
+    "body_size": 92435,
+    "login_marker": false
+  },
+  {
+    "route": "/stocks/derivatives",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/stocks/derivatives",
+    "ms": 911,
+    "h1": true,
+    "body_size": 134344,
+    "login_marker": false
+  },
+  {
+    "route": "/stocks/history",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/stocks/history",
+    "ms": 788,
+    "h1": false,
+    "body_size": 92477,
+    "login_marker": false
+  },
+  {
+    "route": "/stocks/league",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/stocks/league",
+    "ms": 870,
+    "h1": true,
+    "body_size": 110950,
+    "login_marker": false
+  },
+  {
+    "route": "/stocks",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/stocks",
+    "ms": 1127,
+    "h1": true,
+    "body_size": 341731,
+    "login_marker": true
+  },
+  {
+    "route": "/stocks/portfolio",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/stocks/portfolio",
+    "ms": 785,
+    "h1": false,
+    "body_size": 92635,
+    "login_marker": false
+  },
+  {
+    "route": "/stocks/watchlist",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/stocks/watchlist",
+    "ms": 827,
+    "h1": false,
+    "body_size": 92714,
+    "login_marker": false
+  },
+  {
+    "route": "/support",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/login?error=login_required",
+    "ms": 1453,
+    "h1": true,
+    "body_size": 97976,
+    "login_marker": true
+  },
+  {
+    "route": "/terms",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/terms",
+    "ms": 804,
+    "h1": true,
+    "body_size": 93971,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/capital-gains-tax-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/capital-gains-tax-calculator",
+    "ms": 947,
+    "h1": true,
+    "body_size": 166432,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/compound-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/compound-calculator",
+    "ms": 947,
+    "h1": true,
+    "body_size": 172306,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/dividend-tax-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/dividend-tax-calculator",
+    "ms": 965,
+    "h1": true,
+    "body_size": 163868,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/farming-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/farming-calculator",
+    "ms": 884,
+    "h1": true,
+    "body_size": 151130,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/gift-tax-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/gift-tax-calculator",
+    "ms": 903,
+    "h1": true,
+    "body_size": 178180,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/goal-wealth-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/goal-wealth-calculator",
+    "ms": 775,
+    "h1": true,
+    "body_size": 140228,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/isa-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/isa-calculator",
+    "ms": 934,
+    "h1": true,
+    "body_size": 125533,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/kimchi-premium-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/kimchi-premium-calculator",
+    "ms": 987,
+    "h1": true,
+    "body_size": 163922,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/loan-interest-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/loan-interest-calculator",
+    "ms": 938,
+    "h1": true,
+    "body_size": 130878,
+    "login_marker": true
+  },
+  {
+    "route": "/tools",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools",
+    "ms": 1013,
+    "h1": true,
+    "body_size": 265230,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/pension-tax-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/pension-tax-calculator",
+    "ms": 909,
+    "h1": true,
+    "body_size": 126931,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/quant-studio",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/quant-studio",
+    "ms": 929,
+    "h1": true,
+    "body_size": 130212,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/real-estate-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/real-estate-calculator",
+    "ms": 908,
+    "h1": true,
+    "body_size": 166216,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/retirement-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/retirement-calculator",
+    "ms": 815,
+    "h1": true,
+    "body_size": 134502,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/salary-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/salary-calculator",
+    "ms": 799,
+    "h1": true,
+    "body_size": 146524,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/stock-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/stock-calculator",
+    "ms": 926,
+    "h1": true,
+    "body_size": 163016,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/tax-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/tax-calculator",
+    "ms": 954,
+    "h1": true,
+    "body_size": 136013,
+    "login_marker": true
+  },
+  {
+    "route": "/tools/youth-leap-calculator",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/tools/youth-leap-calculator",
+    "ms": 785,
+    "h1": true,
+    "body_size": 124521,
+    "login_marker": true
+  },
+  {
+    "route": "/treasury",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/treasury",
+    "ms": 915,
+    "h1": true,
+    "body_size": 143248,
+    "login_marker": true
+  },
+  {
+    "route": "/verify-email",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/verify-email",
+    "ms": 801,
+    "h1": true,
+    "body_size": 85703,
+    "login_marker": true
+  },
+  {
+    "route": "/verify-email-change",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/verify-email-change",
+    "ms": 763,
+    "h1": true,
+    "body_size": 85106,
+    "login_marker": true
+  },
+  {
+    "route": "/wallet/activity",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/wallet/activity",
+    "ms": 773,
+    "h1": false,
+    "body_size": 85823,
+    "login_marker": false
+  },
+  {
+    "route": "/wallet",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/wallet",
+    "ms": 825,
+    "h1": false,
+    "body_size": 83018,
+    "login_marker": false
+  },
+  {
+    "route": "/work",
+    "admin": false,
+    "code": 200,
+    "final": "https://easy-scraping.com/work",
+    "ms": 839,
+    "h1": false,
+    "body_size": 83087,
+    "login_marker": false
+  }
+]

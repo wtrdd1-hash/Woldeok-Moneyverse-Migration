@@ -1,0 +1,2322 @@
+{
+  "summary": {
+    "git_head": "2a06bed92c22d63013672b44c55b621e9be5019f",
+    "created_at_utc": "2026-10-16T06:03:44.786078+00:00",
+    "pages": 166,
+    "admin_pages": 34,
+    "dynamic_pages": 31,
+    "static_pages": 135,
+    "admin_pages_without_local_gate": [
+      "/admin"
+    ],
+    "admin_pages_without_global_nav": [],
+    "admin_api_handlers": 14,
+    "admin_api_without_obvious_role_gate": [
+      {
+        "path": "frontend/src/app/api/admin/bonds/distribute-coupons/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/bonds/overview/route.ts",
+        "methods": [
+          "GET"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/enterprises/harvest/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/enterprises/status/route.ts",
+        "methods": [
+          "PUT"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/pension/distribute/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/pension/overview/route.ts",
+        "methods": [
+          "GET"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/seo/gsc-sitemap-submit/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/seo/indexing-submit/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/seo/twitter/route.ts",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/treasury/swf/liquidate/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/treasury/swf/route.ts",
+        "methods": [
+          "GET",
+          "POST",
+          "PUT"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      }
+    ],
+    "admin_api_mutations_without_literal_csrf": [
+      {
+        "path": "frontend/src/app/api/admin/bonds/distribute-coupons/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/enterprises/harvest/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/enterprises/status/route.ts",
+        "methods": [
+          "PUT"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/pension/distribute/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/seo/gsc-sitemap-submit/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/seo/indexing-submit/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/seo/twitter/route.ts",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/seo-audit/route.ts",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "requires_admin": true,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/treasury/grants/route.ts",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "requires_admin": true,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/treasury/swf/liquidate/route.ts",
+        "methods": [
+          "POST"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      },
+      {
+        "path": "frontend/src/app/api/admin/treasury/swf/route.ts",
+        "methods": [
+          "GET",
+          "POST",
+          "PUT"
+        ],
+        "requires_admin": false,
+        "csrf": false,
+        "is_member_only": false
+      }
+    ],
+    "explicit_small_height_candidates_total": 39,
+    "explicit_small_height_admin": 9,
+    "source_without_literal_h1": 116,
+    "primary_nav_routes": [
+      "/admin",
+      "/admin/analytics",
+      "/admin/api-health",
+      "/admin/bank",
+      "/admin/blog",
+      "/admin/bonds",
+      "/admin/catalog",
+      "/admin/content",
+      "/admin/controls",
+      "/admin/discord",
+      "/admin/economy",
+      "/admin/enterprises",
+      "/admin/fx",
+      "/admin/kdic",
+      "/admin/logs",
+      "/admin/market",
+      "/admin/money-flow",
+      "/admin/pension",
+      "/admin/safety",
+      "/admin/security",
+      "/admin/seo",
+      "/admin/shop",
+      "/admin/support",
+      "/admin/treasury",
+      "/admin/treasury/grants",
+      "/admin/users",
+      "/admin/work"
+    ]
+  },
+  "routes": [
+    {
+      "route": "/[locale]/blog/[slug]",
+      "path": "frontend/src/app/[locale]/blog/[slug]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/[locale]/blog",
+      "path": "frontend/src/app/[locale]/blog/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/[locale]/guide/glossary/[term]",
+      "path": "frontend/src/app/[locale]/guide/glossary/[term]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/[locale]/guide/glossary",
+      "path": "frontend/src/app/[locale]/guide/glossary/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/[locale]/tools/compound-interest-calculator/[preset]",
+      "path": "frontend/src/app/[locale]/tools/compound-interest-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/[locale]/tools/compound-interest-calculator",
+      "path": "frontend/src/app/[locale]/tools/compound-interest-calculator/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/account/notifications",
+      "path": "frontend/src/app/account/notifications/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/account",
+      "path": "frontend/src/app/account/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/account/privacy",
+      "path": "frontend/src/app/account/privacy/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/account/security",
+      "path": "frontend/src/app/account/security/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/account-deletion",
+      "path": "frontend/src/app/account-deletion/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/admin/analytics",
+      "path": "frontend/src/app/admin/analytics/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/api-health",
+      "path": "frontend/src/app/admin/api-health/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/bank",
+      "path": "frontend/src/app/admin/bank/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/blog",
+      "path": "frontend/src/app/admin/blog/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/bonds",
+      "path": "frontend/src/app/admin/bonds/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/catalog",
+      "path": "frontend/src/app/admin/catalog/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/content",
+      "path": "frontend/src/app/admin/content/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/controls",
+      "path": "frontend/src/app/admin/controls/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/discord",
+      "path": "frontend/src/app/admin/discord/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/economy",
+      "path": "frontend/src/app/admin/economy/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/economy/scenario-lab",
+      "path": "frontend/src/app/admin/economy/scenario-lab/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/enterprises",
+      "path": "frontend/src/app/admin/enterprises/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/fx",
+      "path": "frontend/src/app/admin/fx/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/kdic",
+      "path": "frontend/src/app/admin/kdic/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/logs/activity",
+      "path": "frontend/src/app/admin/logs/activity/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/logs/delivery",
+      "path": "frontend/src/app/admin/logs/delivery/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/logs/integrity",
+      "path": "frontend/src/app/admin/logs/integrity/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/logs",
+      "path": "frontend/src/app/admin/logs/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/market/ai-news",
+      "path": "frontend/src/app/admin/market/ai-news/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/market",
+      "path": "frontend/src/app/admin/market/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/money-flow",
+      "path": "frontend/src/app/admin/money-flow/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin",
+      "path": "frontend/src/app/admin/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/pension",
+      "path": "frontend/src/app/admin/pension/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/safety",
+      "path": "frontend/src/app/admin/safety/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/security",
+      "path": "frontend/src/app/admin/security/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/seo",
+      "path": "frontend/src/app/admin/seo/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/seo-audit",
+      "path": "frontend/src/app/admin/seo-audit/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/shop",
+      "path": "frontend/src/app/admin/shop/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/support",
+      "path": "frontend/src/app/admin/support/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/treasury/grants",
+      "path": "frontend/src/app/admin/treasury/grants/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/treasury",
+      "path": "frontend/src/app/admin/treasury/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/users/[id]",
+      "path": "frontend/src/app/admin/users/[id]/page.tsx",
+      "admin": true,
+      "dynamic": true,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/users",
+      "path": "frontend/src/app/admin/users/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/admin/work",
+      "path": "frontend/src/app/admin/work/page.tsx",
+      "admin": true,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false,
+      "in_admin_nav": true
+    },
+    {
+      "route": "/advisor",
+      "path": "frontend/src/app/advisor/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/announcements/[announcementId]",
+      "path": "frontend/src/app/announcements/[announcementId]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/announcements",
+      "path": "frontend/src/app/announcements/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/arcade",
+      "path": "frontend/src/app/arcade/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/bank",
+      "path": "frontend/src/app/bank/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/bank/savings-pot",
+      "path": "frontend/src/app/bank/savings-pot/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/blog/[slug]",
+      "path": "frontend/src/app/blog/[slug]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/blog",
+      "path": "frontend/src/app/blog/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/board/[postId]",
+      "path": "frontend/src/app/board/[postId]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/board",
+      "path": "frontend/src/app/board/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/bonds",
+      "path": "frontend/src/app/bonds/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/businesses",
+      "path": "frontend/src/app/businesses/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/businesses/ventures",
+      "path": "frontend/src/app/businesses/ventures/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/calendar",
+      "path": "frontend/src/app/calendar/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/casino",
+      "path": "frontend/src/app/casino/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/chat",
+      "path": "frontend/src/app/chat/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/clubs/[clubId]/members",
+      "path": "frontend/src/app/clubs/[clubId]/members/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/clubs/[clubId]",
+      "path": "frontend/src/app/clubs/[clubId]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/clubs/new",
+      "path": "frontend/src/app/clubs/new/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/clubs",
+      "path": "frontend/src/app/clubs/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/clubs/warfare",
+      "path": "frontend/src/app/clubs/warfare/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/collections",
+      "path": "frontend/src/app/collections/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/dashboard",
+      "path": "frontend/src/app/dashboard/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/data-deletion",
+      "path": "frontend/src/app/data-deletion/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/design-preview",
+      "path": "frontend/src/app/design-preview/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/developer",
+      "path": "frontend/src/app/developer/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": true,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/enterprises",
+      "path": "frontend/src/app/enterprises/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/features",
+      "path": "frontend/src/app/features/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/forgot-password",
+      "path": "frontend/src/app/forgot-password/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/fx",
+      "path": "frontend/src/app/fx/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/gallery/[photoId]",
+      "path": "frontend/src/app/gallery/[photoId]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/gallery",
+      "path": "frontend/src/app/gallery/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/gallery/submit",
+      "path": "frontend/src/app/gallery/submit/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/guide/career-mastery",
+      "path": "frontend/src/app/guide/career-mastery/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/guide/dopamine-system",
+      "path": "frontend/src/app/guide/dopamine-system/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/guide/glossary/[term]",
+      "path": "frontend/src/app/guide/glossary/[term]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/guide/glossary",
+      "path": "frontend/src/app/guide/glossary/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/guide",
+      "path": "frontend/src/app/guide/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/guide/stock-trading",
+      "path": "frontend/src/app/guide/stock-trading/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/guide/virtual-banking",
+      "path": "frontend/src/app/guide/virtual-banking/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/inventory",
+      "path": "frontend/src/app/inventory/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/invite/[code]",
+      "path": "frontend/src/app/invite/[code]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/kdic",
+      "path": "frontend/src/app/kdic/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/lobby",
+      "path": "frontend/src/app/lobby/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/login",
+      "path": "frontend/src/app/login/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/login/providers",
+      "path": "frontend/src/app/login/providers/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/marketplace/auction",
+      "path": "frontend/src/app/marketplace/auction/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/marketplace",
+      "path": "frontend/src/app/marketplace/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/newspaper",
+      "path": "frontend/src/app/newspaper/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/",
+      "path": "frontend/src/app/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/pension",
+      "path": "frontend/src/app/pension/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/prediction",
+      "path": "frontend/src/app/prediction/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/privacy",
+      "path": "frontend/src/app/privacy/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/profile/[userId]",
+      "path": "frontend/src/app/profile/[userId]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/profile",
+      "path": "frontend/src/app/profile/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/profile/settings",
+      "path": "frontend/src/app/profile/settings/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/progression",
+      "path": "frontend/src/app/progression/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/progression/prestige",
+      "path": "frontend/src/app/progression/prestige/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/quests",
+      "path": "frontend/src/app/quests/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/register",
+      "path": "frontend/src/app/register/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/reset-password",
+      "path": "frontend/src/app/reset-password/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/roadmap",
+      "path": "frontend/src/app/roadmap/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/safety",
+      "path": "frontend/src/app/safety/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/safety/takedown",
+      "path": "frontend/src/app/safety/takedown/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/search",
+      "path": "frontend/src/app/search/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/seasons",
+      "path": "frontend/src/app/seasons/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/shop/catalog",
+      "path": "frontend/src/app/shop/catalog/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/shop",
+      "path": "frontend/src/app/shop/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/spaces",
+      "path": "frontend/src/app/spaces/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/spaces/real-estate",
+      "path": "frontend/src/app/spaces/real-estate/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/status",
+      "path": "frontend/src/app/status/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/stocks/[symbol]",
+      "path": "frontend/src/app/stocks/[symbol]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/stocks/alerts",
+      "path": "frontend/src/app/stocks/alerts/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/stocks/community",
+      "path": "frontend/src/app/stocks/community/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/stocks/compare",
+      "path": "frontend/src/app/stocks/compare/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/stocks/derivatives",
+      "path": "frontend/src/app/stocks/derivatives/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/stocks/history",
+      "path": "frontend/src/app/stocks/history/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/stocks/league",
+      "path": "frontend/src/app/stocks/league/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/stocks",
+      "path": "frontend/src/app/stocks/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/stocks/portfolio",
+      "path": "frontend/src/app/stocks/portfolio/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/stocks/watchlist",
+      "path": "frontend/src/app/stocks/watchlist/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/support",
+      "path": "frontend/src/app/support/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/terms",
+      "path": "frontend/src/app/terms/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator/[preset]",
+      "path": "frontend/src/app/tools/capital-gains-tax-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator",
+      "path": "frontend/src/app/tools/capital-gains-tax-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/compound-calculator/[preset]",
+      "path": "frontend/src/app/tools/compound-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/compound-calculator",
+      "path": "frontend/src/app/tools/compound-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/dividend-tax-calculator/[ticker]",
+      "path": "frontend/src/app/tools/dividend-tax-calculator/[ticker]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/dividend-tax-calculator",
+      "path": "frontend/src/app/tools/dividend-tax-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/farming-calculator/[preset]",
+      "path": "frontend/src/app/tools/farming-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/farming-calculator",
+      "path": "frontend/src/app/tools/farming-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/gift-tax-calculator/[preset]",
+      "path": "frontend/src/app/tools/gift-tax-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/gift-tax-calculator",
+      "path": "frontend/src/app/tools/gift-tax-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/goal-wealth-calculator",
+      "path": "frontend/src/app/tools/goal-wealth-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/isa-calculator/[slug]",
+      "path": "frontend/src/app/tools/isa-calculator/[slug]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/isa-calculator",
+      "path": "frontend/src/app/tools/isa-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator/[preset]",
+      "path": "frontend/src/app/tools/kimchi-premium-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator",
+      "path": "frontend/src/app/tools/kimchi-premium-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/loan-interest-calculator/[preset]",
+      "path": "frontend/src/app/tools/loan-interest-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/loan-interest-calculator",
+      "path": "frontend/src/app/tools/loan-interest-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools",
+      "path": "frontend/src/app/tools/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/pension-tax-calculator/[slug]",
+      "path": "frontend/src/app/tools/pension-tax-calculator/[slug]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/pension-tax-calculator",
+      "path": "frontend/src/app/tools/pension-tax-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/quant-studio",
+      "path": "frontend/src/app/tools/quant-studio/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/real-estate-calculator/[preset]",
+      "path": "frontend/src/app/tools/real-estate-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/real-estate-calculator",
+      "path": "frontend/src/app/tools/real-estate-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/retirement-calculator/[slug]",
+      "path": "frontend/src/app/tools/retirement-calculator/[slug]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/retirement-calculator",
+      "path": "frontend/src/app/tools/retirement-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/salary-calculator/[preset]",
+      "path": "frontend/src/app/tools/salary-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/salary-calculator",
+      "path": "frontend/src/app/tools/salary-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/stock-calculator/[preset]",
+      "path": "frontend/src/app/tools/stock-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/stock-calculator",
+      "path": "frontend/src/app/tools/stock-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/tax-calculator",
+      "path": "frontend/src/app/tools/tax-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/youth-leap-calculator/[preset]",
+      "path": "frontend/src/app/tools/youth-leap-calculator/[preset]/page.tsx",
+      "admin": false,
+      "dynamic": true,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/tools/youth-leap-calculator",
+      "path": "frontend/src/app/tools/youth-leap-calculator/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": true,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/treasury",
+      "path": "frontend/src/app/treasury/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/verify-email",
+      "path": "frontend/src/app/verify-email/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/verify-email-change",
+      "path": "frontend/src/app/verify-email-change/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/wallet/activity",
+      "path": "frontend/src/app/wallet/activity/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": false,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/wallet",
+      "path": "frontend/src/app/wallet/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    },
+    {
+      "route": "/work",
+      "path": "frontend/src/app/work/page.tsx",
+      "admin": false,
+      "dynamic": false,
+      "admin_gate": false,
+      "h1_source": false,
+      "responsive_mentions": true,
+      "role_guard_todo": false
+    }
+  ],
+  "admin_api": [
+    {
+      "path": "frontend/src/app/api/admin/bonds/distribute-coupons/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/bonds/overview/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/discord/test-dm/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "requires_admin": true,
+      "csrf": true,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/enterprises/harvest/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/enterprises/status/route.ts",
+      "methods": [
+        "PUT"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/pension/distribute/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/pension/overview/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/seo/gsc-sitemap-submit/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/seo/indexing-submit/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/seo/twitter/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/seo-audit/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "requires_admin": true,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/treasury/grants/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "requires_admin": true,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/treasury/swf/liquidate/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    },
+    {
+      "path": "frontend/src/app/api/admin/treasury/swf/route.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "requires_admin": false,
+      "csrf": false,
+      "is_member_only": false
+    }
+  ],
+  "small_candidates": [
+    {
+      "path": "frontend/src/app/admin/money-flow/page.tsx",
+      "line": 296,
+      "height": 40,
+      "sample": "className=\"w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground placeholder:text-zinc-500 focus:outline-none focus:r"
+    },
+    {
+      "path": "frontend/src/app/admin/money-flow/page.tsx",
+      "line": 308,
+      "height": 40,
+      "sample": "className=\"w-full px-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground focus:outline-none focus:ring-1 focus:ring-primary min-h-"
+    },
+    {
+      "path": "frontend/src/app/admin/money-flow/page.tsx",
+      "line": 330,
+      "height": 40,
+      "sample": "className=\"w-full px-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground focus:outline-none focus:ring-1 focus:ring-primary min-h-"
+    },
+    {
+      "path": "frontend/src/app/admin/money-flow/page.tsx",
+      "line": 338,
+      "height": 40,
+      "sample": "<Button type=\"submit\" size=\"sm\" className=\"min-h-[40px] px-4 font-bold text-xs\">"
+    },
+    {
+      "path": "frontend/src/app/admin/money-flow/page.tsx",
+      "line": 341,
+      "height": 40,
+      "sample": "<Button asChild variant=\"outline\" size=\"sm\" className=\"min-h-[40px] px-3\">"
+    },
+    {
+      "path": "frontend/src/app/admin/shop/admin-shop-view.tsx",
+      "line": 138,
+      "height": 36,
+      "sample": "'px-3 py-1.5 rounded-xl text-xs font-bold border min-h-[36px] transition-all',"
+    },
+    {
+      "path": "frontend/src/app/admin/shop/admin-shop-view.tsx",
+      "line": 218,
+      "height": 40,
+      "sample": "className=\"flex-1 flex items-center justify-center gap-1.5 h-10 min-h-[40px] rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-sm acti"
+    },
+    {
+      "path": "frontend/src/app/admin/shop/admin-shop-view.tsx",
+      "line": 224,
+      "height": 40,
+      "sample": "className=\"px-4 h-10 min-h-[40px] rounded-xl border border-border/80 text-muted-foreground text-xs font-bold hover:text-foreground active:scale-[0.98] tran"
+    },
+    {
+      "path": "frontend/src/app/admin/shop/admin-shop-view.tsx",
+      "line": 232,
+      "height": 40,
+      "sample": "className=\"w-full flex items-center justify-center gap-1.5 h-10 min-h-[40px] rounded-xl border border-border/80 bg-surface/50 text-xs font-bold text-muted-"
+    },
+    {
+      "path": "frontend/src/components/direct-message-button.tsx",
+      "line": 62,
+      "height": 36,
+      "sample": "className={`inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-[0.98] transition-all rou"
+    },
+    {
+      "path": "frontend/src/components/discord-banner.tsx",
+      "line": 75,
+      "height": 38,
+      "sample": "className=\"border-border/80 hover:bg-muted/80 text-foreground font-semibold text-xs rounded-xl px-4 py-2 min-h-[38px]\""
+    },
+    {
+      "path": "frontend/src/components/dividend-calendar-widget.tsx",
+      "line": 271,
+      "height": 36,
+      "sample": "className={`h-8 min-h-[36px] gap-1.5 text-xs font-semibold shadow-xs ${"
+    },
+    {
+      "path": "frontend/src/components/dividend-calendar-widget.tsx",
+      "line": 286,
+      "height": 36,
+      "sample": "className=\"h-8 min-h-[36px] gap-1.5 text-xs font-semibold hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-4"
+    },
+    {
+      "path": "frontend/src/components/dividend-calendar-widget.tsx",
+      "line": 415,
+      "height": 32,
+      "sample": "className=\"inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono font-medium rounded-lg border border-border/80 bg-background/60 hover:bg-emerald-50"
+    },
+    {
+      "path": "frontend/src/components/dividend-calendar-widget.tsx",
+      "line": 438,
+      "height": 36,
+      "sample": "className=\"h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] rounded-lg border border-border bg-background px-3 text-xs text-foreground font-medium outline-none foc"
+    },
+    {
+      "path": "frontend/src/components/dividend-calendar-widget.tsx",
+      "line": 455,
+      "height": 36,
+      "sample": "className=\"h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] w-full sm:w-20 rounded-lg border border-border bg-background px-3 text-xs font-mono text-foreground tex"
+    },
+    {
+      "path": "frontend/src/components/dividend-calendar-widget.tsx",
+      "line": 461,
+      "height": 36,
+      "sample": "<Button size=\"sm\" onClick={() => addStock()} className=\"h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] gap-1 font-semibold px-4 shrink-0\">"
+    },
+    {
+      "path": "frontend/src/components/economy/mega-jackpot-lottery-dashboard.tsx",
+      "line": 182,
+      "height": 40,
+      "sample": "className=\"h-10 px-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold transition-all min-h-[40px]\""
+    },
+    {
+      "path": "frontend/src/components/economy/mega-jackpot-lottery-dashboard.tsx",
+      "line": 190,
+      "height": 40,
+      "sample": "className=\"h-10 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-black shadow-md transition-all min-h-[40px]\""
+    },
+    {
+      "path": "frontend/src/components/economy/national-treasury-balance-simulator.tsx",
+      "line": 185,
+      "height": 40,
+      "sample": "'shrink-0 h-10 px-4 rounded-xl text-xs font-bold transition-all min-h-[40px]',"
+    },
+    {
+      "path": "frontend/src/components/economy/taylor-rule-lending-margin-monitor.tsx",
+      "line": 156,
+      "height": 40,
+      "sample": "className=\"shrink-0 h-10 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold transition-all min-h-[40px]\""
+    },
+    {
+      "path": "frontend/src/components/language-switcher.tsx",
+      "line": 91,
+      "height": 40,
+      "sample": "className={`h-10 sm:h-11 min-h-[40px] items-center gap-1 sm:gap-1.5 rounded-xl px-2 sm:px-3 text-xs font-black text-foreground border-border/70 hover:bg-se"
+    },
+    {
+      "path": "frontend/src/components/live-hot-time-banner.tsx",
+      "line": 161,
+      "height": 36,
+      "sample": "className=\"inline-flex min-h-[36px] sm:min-h-9 items-center justify-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 px-3.5 py-1.5"
+    },
+    {
+      "path": "frontend/src/components/site-footer.tsx",
+      "line": 66,
+      "height": 32,
+      "sample": "'min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0',"
+    },
+    {
+      "path": "frontend/src/components/site-header.tsx",
+      "line": 263,
+      "height": 38,
+      "sample": "'min-h-[38px] rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center cursor-pointer select-none',"
+    },
+    {
+      "path": "frontend/src/components/stocks/toss-style-social-feed.tsx",
+      "line": 409,
+      "height": 36,
+      "sample": "className={`px-3 py-1.5 rounded-lg text-xs font-medium transition shrink-0 min-h-[36px] ${"
+    },
+    {
+      "path": "frontend/src/components/stocks/toss-style-social-feed.tsx",
+      "line": 558,
+      "height": 36,
+      "sample": "className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition min-h-[36px] ${"
+    },
+    {
+      "path": "frontend/src/components/stocks/toss-style-social-feed.tsx",
+      "line": 571,
+      "height": 36,
+      "sample": "className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition min-h-[36px] ${"
+    },
+    {
+      "path": "frontend/src/components/stocks/toss-style-social-feed.tsx",
+      "line": 584,
+      "height": 36,
+      "sample": "className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition min-h-[36px] ${"
+    },
+    {
+      "path": "frontend/src/components/tools-guest-conversion-bar.tsx",
+      "line": 85,
+      "height": 40,
+      "sample": "className=\"flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emera"
+    },
+    {
+      "path": "frontend/src/components/user-conversion-lockin-widget.tsx",
+      "line": 58,
+      "height": 38,
+      "sample": "className={`flex-1 min-h-[38px] px-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${"
+    },
+    {
+      "path": "frontend/src/components/user-conversion-lockin-widget.tsx",
+      "line": 70,
+      "height": 38,
+      "sample": "className={`flex-1 min-h-[38px] px-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${"
+    },
+    {
+      "path": "frontend/src/components/user-conversion-lockin-widget.tsx",
+      "line": 82,
+      "height": 38,
+      "sample": "className={`flex-1 min-h-[38px] px-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${"
+    },
+    {
+      "path": "frontend/src/components/user-conversion-lockin-widget.tsx",
+      "line": 108,
+      "height": 40,
+      "sample": "className=\"w-full min-h-[40px] font-bold text-xs bg-amber-500 hover:bg-amber-600 text-black gap-1.5\""
+    },
+    {
+      "path": "frontend/src/components/user-conversion-lockin-widget.tsx",
+      "line": 125,
+      "height": 40,
+      "sample": "className=\"flex-1 min-h-[40px] font-bold text-xs bg-amber-500 hover:bg-amber-600 text-black gap-1.5\""
+    },
+    {
+      "path": "frontend/src/components/user-conversion-lockin-widget.tsx",
+      "line": 135,
+      "height": 40,
+      "sample": "className=\"min-h-[40px] font-semibold text-xs border-border\""
+    },
+    {
+      "path": "frontend/src/components/user-conversion-lockin-widget.tsx",
+      "line": 157,
+      "height": 40,
+      "sample": "className=\"w-full min-h-[40px] font-bold text-xs bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black gap-1.5 sh"
+    },
+    {
+      "path": "frontend/src/components/user-conversion-lockin-widget.tsx",
+      "line": 187,
+      "height": 40,
+      "sample": "className=\"w-full min-h-[40px] font-bold text-xs border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 gap-1.5\""
+    },
+    {
+      "path": "frontend/src/components/welcome-onboarding-banner.tsx",
+      "line": 91,
+      "height": 34,
+      "sample": "className=\"inline-flex min-h-[34px] sm:min-h-[30px] items-center gap-1.5 rounded-lg bg-linear-to-r from-amber-500 to-amber-600 px-3.5 py-1 text-xs font-bol"
+    }
+  ]
+}
