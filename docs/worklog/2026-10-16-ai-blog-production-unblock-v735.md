@@ -19,3 +19,9 @@ Pending.
 - Retired non-public legacy v600/v635/v697/v712 frontend processes, disabled 3 persistent starts. Public v717, blog HTTP 200, shared store mode 0444 and immutable rollback artifacts unaffected.
 - Read-only actual app-role SQL: account_balances and ledger_postings retain direct INSERT/UPDATE/DELETE. No financial DB permissions or data altered.
 - TDD RED/GREEN for swallowed blog persistence failures and editorial direct-write prohibition. Full QA: backend 1216 pass (396 DB-skipped), frontend 1251 pass, typecheck/build/lint exit 0 (1075 existing warnings).
+
+## Post-merge Test and Production candidate — 2026-10-16 20:17+ KST
+- PR #895 merged main `9618a249`, matching Test-candidate Git tree; branch CI #38890866500 and main CI #38891728736 and Test candidate build #38891728801 all SUCCESS.
+- Official Test promoted first branch v735.1 and then exact merged main v735.2. Public Test identity exact, backend health and old signed-in session survived restart, six curated blog entries / 28 indexable sitemap URLs / historical noindex/anonymous POST 403 all accepted; temporary QA session revoked. Five-pass browser blog 135/135 PASS.
+- Prepared immutable unused Production artifact `prod-v2026.10.16.735.1-9618a2499328` with exact manifest, deliberately **not switched** because finance DML and full authenticated UI acceptance gates are not met. Public Production still v717. See [release evidence](../releases/v2026.10.16.735.md).
+- Confirmed legacy v600 service restarted despite disabled autostart (external actor unknown); old v635/v697/v712 inactive. Its route is not public Nginx upstream; file `0444` and identical sha256 maintained. The old-writer containment cannot be called complete before the restart cause is eliminated.

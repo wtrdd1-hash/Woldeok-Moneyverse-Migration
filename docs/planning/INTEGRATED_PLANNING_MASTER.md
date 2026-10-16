@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.16.736 — AI blog v735 exact-main Test acceptance, Production release hold (AUTHORITY_DRIFT)
+- PR #895 merged SHA 9618a249; post-merge CI and exact-SHA Test v735.2 accepted. Immutable Production candidate staged but **NOT switched**. Public Production v717. [Release](../releases/v2026.10.16.735.md).
+- Production app-role direct balance/ledger DML and v530 complete authenticated UI five-pass still BLOCK. Legacy v600 frontend restarted externally after stop; backing blog JSON remains read-only. Neither release authority nor financial risk is silently waived.
+
 ## v2026.10.16.735 — AI blog emergency containment and write failure guards (AUTHORITY_DRIFT)
 - Four retired legacy frontend writers; public v717 preserved. New code fails closed on direct runtime blog persistence and propagates disk errors, with TDD. [Worklog](../worklog/2026-10-16-ai-blog-production-unblock-v735.md).
 - Actual Production app role still has direct balance/ledger DML and v530 full authenticated UI five-pass remains blocked. This is NOT Production application acceptance.

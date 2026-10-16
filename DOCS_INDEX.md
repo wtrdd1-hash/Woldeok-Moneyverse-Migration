@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.16.736 — v735 AI blog Test accepted and Production candidate staged
+- [Release EN](docs/releases/v2026.10.16.735.md) / [한국어](docs/releases/v2026.10.16.735.ko.md) · [Worklog](docs/worklog/2026-10-16-ai-blog-production-unblock-v735.md). Exact merged main v735.2 Test passed, Prod artifact staged but NOT switched due to confirmed account_balances/ledger_postings direct DML grants and v530 UI gate. Legacy v600 writer service unexpectedly restarted and remains under investigation.
+
 ## v2026.10.16.735 — AI blog writer fail-closed and unsafe legacy unit retirement
 - [EN worklog](docs/worklog/2026-10-16-ai-blog-production-unblock-v735.md) / [KO](docs/worklog/2026-10-16-ai-blog-production-unblock-v735.ko.md) · [Internal](docs/updates/v2026.10.16.735-ai-blog-internal.md) · [GitHub](docs/updates/v2026.10.16.735-ai-blog-github.md). TDD and full QA verified new publishing failure contracts; four disconnected old frontend writer instances stopped. Real DB grants and v530 full-authenticated UI release gates remain open.
 
