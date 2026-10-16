@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getAllBlogPosts } from '@/app/blog/blog-data';
+import { isBlogDiscoverable } from '@/app/blog/blog-seo';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const posts = getAllBlogPosts();
+    const posts = getAllBlogPosts().filter(isBlogDiscoverable);
     return NextResponse.json({
       success: true,
       count: posts.length,

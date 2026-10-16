@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { createCountryBlogPost, COUNTRY_EDITION_TOPICS } from './blog-country-editorial';
 import { blogAlternateLanguages, blogUrl, getBlogCountryEdition, canonicalBlogSlug } from './blog-seo';
-import { getAllBlogPosts, getBlogPostBySlug } from './blog-data';
-import { summarizeBlogPost } from './blog-page-server';
+import { addBlogPost, getAllBlogPosts, getBlogPostBySlug } from './blog-data';
+import { metadataForArticle, summarizeBlogPost } from './blog-page-server';
+import { isBlogDiscoverable } from './blog-seo';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { GET as getBlogSitemap } from '../sitemap-blog.xml/route';
 
 const origin = 'https://easy-scraping.com';
@@ -52,6 +56,25 @@ describe('country-specific blog and canonical SEO', () => {
     expect(xml).toContain('hreflang="en-US"');
     expect(xml).not.toContain('/blog/2026-10-14-compound-interest-wealth-secret');
     expect(xml).not.toContain('<lastmod>' + new Date().toISOString() + '</lastmod>');
+  });
+
+  it('excludes unrevised legacy AI articles from discovery and makes their URLs noindex without deleting data', async () => {
+    const generated = { ...createCountryBlogPost('compound'), slug: 'audit-unreviewed-ai-article', isAiGenerated: true };
+    expect(isBlogDiscoverable(generated)).toBe(false);
+    expect(isBlogDiscoverable(createCountryBlogPost('compound'))).toBe(true);
+    if (process.env.NODE_ENV !== 'test') throw new Error('blog storage test must never use Production data');
+    const store = path.join(os.tmpdir(), `moneyverse-blog-test-${process.pid}.json`);
+    const old = fs.existsSync(store) ? fs.readFileSync(store, 'utf8') : undefined;
+    try {
+      addBlogPost(generated);
+      expect(getAllBlogPosts()).toEqual(expect.arrayContaining([expect.objectContaining({ slug: generated.slug })]));
+      const xml = await (await getBlogSitemap()).text();
+      expect(xml).not.toContain(generated.slug);
+      expect(metadataForArticle(generated.slug, 'ko').robots).toMatchObject({ index: false });
+    } finally {
+      if (old === undefined) fs.rmSync(store, { force: true });
+      else fs.writeFileSync(store, old);
+    }
   });
 
   it('sends article summaries, not full text or translations, to the client list', () => {
