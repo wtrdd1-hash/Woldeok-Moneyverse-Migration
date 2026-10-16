@@ -61,6 +61,12 @@ Each task must carry an owner, code/route/API/DB contract, tested candidate SHA,
 - Public analytics must distinguish actual GSC performance, SEO submission receipts, source freshness, measured Page RPM and synthetic examples. No fabricated business or user outcome metrics.
 - Keep EN canonical and KO paired for maintained documents; maintain in dedicated branches; do not overwrite the concurrent v744 planning branch.
 
+### Additional measured documentation drift
+
+- `docs/DOCUMENT_CATALOG.ko.md` still calls `PROJECT_PLAN` version v542 the current authority and inventories 1,650 `docs/` files / 280 planning files. At the exact audited `main`, the plan begins at adopted v688 and the Git tree contains 2,424 `docs/` files / 360 `docs/planning/` files. The catalog counters and version are **stale**; these must be regenerated, not used for release approval.
+- The early `AGENTS.md` security description states that the app role has read-only access on key finance tables, while the later v743 actual environment inspection found five directly writable finance tables. This is a **time/scope-sensitive documented contradiction** and should be resolved through exact-schema role tests, not by assuming either assertion is universally true.
+- The v675 review's 14 user/product domain groupings and the API catalog's 15 endpoint-domain headings count different classifications; provide a mapping before comparing totals.
+
 ## 7. Completion boundary
 
 This document is an audit candidate, not a change of `PROJECT_PLAN`, a financial reconciliation, a test execution, a code fix, a feature release, a PR merge or a Production deployment. No financial data, database grants, feature switches, Test or Production services were modified. Separate miniPC start/mid/end records were maintained for v745; a GitHub-facing and internal update note accompany the audit.
