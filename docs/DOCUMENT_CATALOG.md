@@ -1,5 +1,9 @@
 # 📚 Document Catalog
 
+## v2026.10.16.720 — v719 Test-verified, Production hold
+- [Release](releases/v2026.10.16.719.md) / [Korean](releases/v2026.10.16.719.ko.md) · [Worklog](worklog/2026-10-16-ui-v719-test-production-hold-v720.md) · [GitHub update](updates/v2026.10.16.720-github.md). Exact Test v719.2 accepted; UI/finance P0 blocks Production.
+
+
 ## v2026.10.16.719 — Admin SEO safety and responsive UI candidate
 - [EN changelog](changelog/2026-10-16-ui-admin-seo-safety-v2026.10.16.719.md) / [KO](changelog/2026-10-16-ui-admin-seo-safety-v2026.10.16.719.ko.md) · [Worklog](worklog/2026-10-16-full-ui-admin-remediation-v719.md) · [GitHub update](updates/v2026.10.16.719-github.md).
 

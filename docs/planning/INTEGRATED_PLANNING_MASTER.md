@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.16.720 — v719 UI remediation Test acceptance and Production hold (AUTHORITY_DRIFT)
+- Source PR #889 integrated main `0908c8d0` with identical Git tree to Test-built `bf538d0e` (tree `317d07e9`). [Release evidence](../releases/v2026.10.16.719.md) / [worklog](../worklog/2026-10-16-ui-v719-test-production-hold-v720.md).
+- Exact-SHA v719.2 Test accepted 2026-10-16 16:51 KST, backend/frontend/host identity, health, auth-session restart continuity, protected negative POST 403 and noindex confirmed; synthetic Test session revoked and secret removed.
+- This is **not** a v530 all-UI acceptance or a finance permission/ledger fix. Five complete authenticated 166-page/34-admin UI passes and Treasury/Economy Core DB/ledger P0 remain **BLOCKED**. Production remains v717, no runtime cutover authorized by this documentation.
+
+
 ## v2026.10.16.717 — Regional blog SEO and editorial publish hold
 - Isolated #879 country blog integration, 24 region-authored articles, locale canonical/hreflang/sitemap, explicit 503 editorial hold on unsourced automatic publication. No finance/database changes. [Release](../releases/v2026.10.16.717.md). Final GitHub PR/main CI, isolated Test authenticated restart and Production Nginx blue/green 5/5 public smoke checks PASSED (2026-10-16 14:30 KST); exact source SHA 176ca04e. Old v712 retained for rollback; existing Treasury finance/ACL/ledger risk remains unresolved.
 
