@@ -24,3 +24,12 @@
 
 ## 작업 종료
 - 코드 검증 및 GitHub 단계 진행 중. 실제 운영 반영 확인 전에는 '운영 설정 완료'로 표기하지 않는다.
+
+
+## 작업 후 검증 증거 — 2026-10-16 22:13–22:20 KST
+- v742.6 실제 Discord API: 백엔드 후보의 `sendAdminDirectMessage()`가 관리자 DM 성공 응답 확인.
+- 동일 후보의 `sendDiscordEmbed()`: 기존 관리 채널 및 관리자 DM **두 경로 모두 성공 로그**, 반환값 `true`. 메시지에는 합성 테스트 문구만 포함.
+- PR [#901](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/901) 등록; 최초 후보 `deec174e`에 대한 GitHub CI **success**.
+- v742.7 격리 불변 Test 후보 `test-v2026.10.16.742-deec174eef7f` 생성. 관리자 DM은 비활성, `NODE_ENV=test`, `SEO_INDEXING_ENABLED=false`, PG 읽기전용, 외부 IP 차단을 걸어 별도 백엔드 3146 포트 가동. `GET /health` **HTTP 200** 및 로컬 바인딩 확인 뒤 Test 카나리 중지. 기존 공식 Test/운영 포인터와 활성 봇은 불변.
+- 기획서 재조회 중 upstream `main` v741 문서 릴리스가 추가로 전진하여 다시 rebase/최종 CI 재검사 예정.
+- 재무 P0, v530 관리자 포함 166개 인증 UI 5회 게이트는 아직 별도 미해결. **Production 애플리케이션 승격을 실행하지 않음**.
