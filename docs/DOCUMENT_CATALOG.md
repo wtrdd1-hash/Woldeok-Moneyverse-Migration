@@ -1,5 +1,8 @@
 # 📚 Document Catalog
 
+## v2026.10.16.737 — Read-only financial release gate (BLOCKED)
+- [EN](worklog/2026-10-16-financial-readiness-v737.md) / [KO](worklog/2026-10-16-financial-readiness-v737.ko.md) · [GitHub update](updates/v2026.10.16.737-github.md) · [Internal](updates/v2026.10.16.737-internal.md). No live data or runtime changes.
+
 ## v2026.10.16.734 — Actual host generation preflight
 - [Release EN](releases/v2026.10.16.734.md) / [KO](releases/v2026.10.16.734.ko.md), [worklog](worklog/2026-10-16-host-release-identity-v734.md), [GitHub update](updates/v2026.10.16.734-github.md), [internal update](updates/v2026.10.16.734-internal.md).
 

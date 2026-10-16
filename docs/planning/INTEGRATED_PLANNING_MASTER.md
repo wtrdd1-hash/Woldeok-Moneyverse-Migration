@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.16.737 — Read-only financial release control (AUTHORITY_DRIFT / BLOCKED)
+- A new zero-mutation repeatable-read ledger/ACL gate detects direct application DML on 5 core tables and uncertified opening/ledger projection discrepancies. Production v717 read-only findings: 40 balances, 19 mismatches, +4,779,188 WLD unexplained opening or drift, 0 per-transaction debit/credit imbalance; **do not invent ledger corrections**. Scope is a release-control improvement only, not finance P0 or v530 release acceptance. [Report](../worklog/2026-10-16-financial-readiness-v737.md).
+
 ## v2026.10.16.736 — AI blog v735 exact-main Test acceptance, Production release hold (AUTHORITY_DRIFT)
 - PR #895 merged SHA 9618a249; post-merge CI and exact-SHA Test v735.2 accepted. Immutable Production candidate staged but **NOT switched**. Public Production v717. [Release](../releases/v2026.10.16.735.md).
 - Production app-role direct balance/ledger DML and v530 complete authenticated UI five-pass still BLOCK. Legacy v600 frontend restarted externally after stop; backing blog JSON remains read-only. Neither release authority nor financial risk is silently waived.

@@ -1,5 +1,8 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.16.737 — 금융 원장 읽기 전용 운영승격 검사 (BLOCKED)
+- [한글](worklog/2026-10-16-financial-readiness-v737.ko.md) / [EN](worklog/2026-10-16-financial-readiness-v737.md) · [GitHub](updates/v2026.10.16.737-github.ko.md) · [내부](updates/v2026.10.16.737-internal.ko.md). 운영 데이터·서비스 미변경.
+
 ## v2026.10.16.734 — 실제 호스트 릴리스 검증기
 - [릴리스](releases/v2026.10.16.734.ko.md) / [English](releases/v2026.10.16.734.md), [작업기록](worklog/2026-10-16-host-release-identity-v734.ko.md), [GitHub용 내역](updates/v2026.10.16.734-github.ko.md), [내부용 내역](updates/v2026.10.16.734-internal.ko.md).
 
