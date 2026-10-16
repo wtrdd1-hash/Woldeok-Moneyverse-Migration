@@ -31,6 +31,14 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
   constructor(@Inject(SCHEDULER) private readonly scheduler: Scheduler | null) {}
 
   onApplicationBootstrap(): void {
+    // A scheduler is a money/data writer: only the one intentionally designated
+    // production leader may run it. Never run Test/shadow even with a stale flag.
+    // Default-deny also protects a newly started release canary from doing
+    // work before ownership has been transferred explicitly.
+    if (process.env.NODE_ENV === 'test' || process.env.MONEYVERSE_SCHEDULER_ENABLED !== 'true') {
+      this.logger.log('scheduler disabled: not a designated production leader');
+      return;
+    }
     if (!this.scheduler) {
       this.logger.log('no database; the schedule is not running');
       return;
