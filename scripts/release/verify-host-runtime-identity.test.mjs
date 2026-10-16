@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import test from 'node:test';
-import { parseBuildId, verifyHostRuntimeIdentity } from './verify-host-runtime-identity.mjs';
+import { parseBuildId, verifyHostRuntimeIdentity, serviceForRelease, parseEnvironmentFileLocations, mergeServiceBuildIds } from './verify-host-runtime-identity.mjs';
 
 const sha = 'a'.repeat(40);
 const root = '/srv/moneyverse-data/releases/test-v123-aaaaaaaaaaaa';
@@ -86,4 +86,24 @@ test('reads one exact BUILD_ID but refuses missing and duplicated release identi
   assert.equal(parseBuildId("BUILD_ID='" + sha + "'\n"), sha);
   assert.equal(parseBuildId('PORT=3100\n'), null);
   assert.equal(parseBuildId('BUILD_ID=' + sha + '\nBUILD_ID=' + sha + '\n'), null);
+});
+
+
+test('uses manifest version to select the active production generation, not stale fallback v600', () => {
+  const release = { version: 'v2026.10.16.712' };
+  assert.equal(serviceForRelease('prod', release, 'backend'), 'moneyverse-release-v712-backend.service');
+  assert.equal(serviceForRelease('prod', release, 'frontend'), 'moneyverse-release-v712-frontend.service');
+  assert.equal(serviceForRelease('test', release, 'backend'), 'test-main-backend.service');
+  assert.throws(() => serviceForRelease('prod', {version: 'v712;unsafe'}, 'backend'));
+  assert.throws(() => serviceForRelease('prod', {version: 'latest'}, 'frontend'));
+});
+
+test('uses active service EnvironmentFiles and last-wins BUILD_ID but never duplicate or missing keys', () => {
+  const entries = parseEnvironmentFileLocations('/a/base.env (ignore_errors=no) /b/release.env (ignore_errors=no)');
+  assert.deepEqual(entries, [{file:'/a/base.env',optional:false},{file:'/b/release.env',optional:false}]);
+  assert.deepEqual(parseEnvironmentFileLocations('/tmp/test.env (ignore_errors=yes)'),[{file:'/tmp/test.env',optional:true}]);
+  assert.equal(mergeServiceBuildIds(['BUILD_ID=' + 'b'.repeat(40), 'BUILD_ID=' + sha]), sha);
+  assert.equal(mergeServiceBuildIds(['PORT=3100', 'BUILD_ID=' + sha]), sha);
+  assert.throws(() => mergeServiceBuildIds(['BUILD_ID=' + sha + '\nBUILD_ID=' + sha]));
+  assert.throws(() => mergeServiceBuildIds(['PORT=3100']));
 });
