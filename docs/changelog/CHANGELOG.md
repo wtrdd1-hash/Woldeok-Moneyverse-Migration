@@ -1,5 +1,9 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+## v2026.10.16.739 — Background SEO scheduling isolation
+- Test and shadow no longer schedule public IndexNow submissions; production requires explicit indexing opt-in. Startup and periodic timers cleaned up, 4 focused tests PASS; Production verification pending. [Release](../releases/v2026.10.16.739.md).
+
+
 ## v2026.10.16.734 — Active host release identity gate, read-only
 - Reconciles existing PR #886 onto latest main; live v717 Production and v721.2 Test identity 100% matched against active systemd generation. Release tests 29/29 PASS. No runtime rollout, balances or sessions touched. [Release](../releases/v2026.10.16.734.md).
 
