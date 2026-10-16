@@ -1,3 +1,6 @@
+## v2026.10.16.714 — Discord music QA evidence reliability (PR #882 merged, Production HOLD)
+- Repaired invalid Node.js QA tool, removed unproven ad-bypass claims, added bounded provider/daemon verification and 4 regression tests. Standard bot tests 8/8 and GitHub CI/candidate build PASS; merged PR #882, but exact-SHA Debian Test and Production acceptance BLOCKED. [Release](../releases/v2026.10.16.714.md).
+
 ## v2026.10.16.701 — Host capacity and PUBLIC definer containment
 - Owned merged worktree cache cleanup recovered 2.44GiB without touching live releases. Production-schema shadow verified narrowly scoped PUBLIC SECURITY DEFINER EXECUTE removal and rollback; app explicit grants retained. Direct financial DML remains open. [Release](../releases/v2026.10.16.701.md).
 

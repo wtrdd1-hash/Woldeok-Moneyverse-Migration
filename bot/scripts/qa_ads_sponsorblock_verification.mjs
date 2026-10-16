@@ -1,133 +1,67 @@
-import https from 'node:https';
-import { spawn } from 'node:child_process';
-import { createAudioResource, StreamType } from '@discordjs/voice';
+#!/usr/bin/env node
+// Read-only QA; provider metadata cannot prove ad removal or successful voice playback.
+import { spawnSync } from 'node:child_process';
 
-console.log('====================================================');
-console.log('  QA Discord Music Bot Ads & SponsorBlock Audit     ');
-console.log('====================================================
-');
-
-async function fetchSponsorBlockSegments(videoId) {
-  return new Promise((resolve) => {
-    const url = 'https://sponsor.ajay.app/api/skipSegments?videoID=' + videoId + '&categories=[%22sponsor%22,%22music_offtopic%22,%22selfpromo%22,%22intro%22,%22outro%22]';
-    https.get(url, (res) => {
-      let body = '';
-      res.on('data', c => body += c);
-      res.on('end', () => {
-        if (res.statusCode === 200) {
-          try { resolve(JSON.parse(body)); } catch (e) { resolve([]); }
-        } else {
-          resolve([]);
-        }
-      });
-    }).on('error', () => resolve([]));
-  });
-}
-
-async function measureVolume(cmd) {
-  return new Promise((resolve) => {
-    const p = spawn('bash', ['-c', cmd]);
-    let stderr = '';
-    p.stderr.on('data', d => stderr += d);
-    p.on('close', () => {
-      const matchMean = stderr.match(/mean_volume:\s*([-\d.]+)\s*dB/);
-      const matchMax = stderr.match(/max_volume:\s*([-\d.]+)\s*dB/);
-      resolve({
-        mean: matchMean ? parseFloat(matchMean[1]) : null,
-        max: matchMax ? parseFloat(matchMax[1]) : null
-      });
+const categories = ['sponsor', 'music_offtopic', 'selfpromo', 'intro', 'outro'];
+const args = process.argv.slice(2);
+const offline = args.includes('--offline');
+let videoId = '09R8_2nJtjg';
+const optionIndex = args.indexOf('--video-id');
+if (optionIndex !== -1) videoId = args[optionIndex + 1] ?? '';
+const allowedArgs = args.filter((arg, i) => arg === '--offline' || arg === '--video-id' || i === optionIndex + 1);
+if (allowedArgs.length !== args.length || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+  console.error('Invalid video ID or unknown argument. Expected an 11-character video ID.');
+  process.exitCode = 2;
+} else {
+  const checks = [];
+  if (offline) {
+    checks.push({ name: 'SponsorBlock provider', status: 'SKIP', detail: 'offline mode' });
+    checks.push({ name: 'Bot daemon', status: 'SKIP', detail: 'offline mode' });
+  } else {
+    try {
+      const url = new URL('https://sponsor.ajay.app/api/skipSegments');
+      url.searchParams.set('videoID', videoId);
+      url.searchParams.set('categories', JSON.stringify(categories));
+      const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
+      if (res.status === 404) {
+        checks.push({ name: 'SponsorBlock provider', status: 'SKIP', detail: 'no community segment record' });
+      } else if (!res.ok) {
+        throw new Error('HTTP ' + res.status);
+      } else {
+        const bytes = await res.text();
+        if (bytes.length > 262144) throw new Error('provider payload too large');
+        const data = JSON.parse(bytes);
+        if (!Array.isArray(data)) throw new Error('invalid provider response');
+        const accepted = data.filter((entry) =>
+          entry?.actionType === 'skip' &&
+          categories.includes(entry.category) &&
+          Array.isArray(entry.segment) &&
+          entry.segment.length === 2 &&
+          entry.segment.every((num) => typeof num === 'number' && Number.isFinite(num)) &&
+          entry.segment[0] >= 0 &&
+          entry.segment[1] > entry.segment[0]);
+        checks.push({
+          name: 'SponsorBlock provider',
+          status: accepted.length ? 'PASS' : 'SKIP',
+          detail: accepted.length + ' eligible community segment(s); live playback not measured',
+        });
+      }
+    } catch (error) {
+      checks.push({ name: 'SponsorBlock provider', status: 'FAIL', detail: error.message });
+    }
+    const daemon = spawnSync('systemctl', ['is-active', 'moneyverse-discord-bot.service'], {
+      encoding: 'utf8', timeout: 4000, maxBuffer: 4096,
     });
-  });
+    const active = daemon.status === 0 && daemon.stdout.trim() === 'active';
+    checks.push({
+      name: 'Bot daemon', status: active ? 'PASS' : 'FAIL',
+      detail: daemon.error?.message ?? (daemon.stdout?.trim() || 'unknown'),
+    });
+  }
+
+  console.log('Discord Music QA Report');
+  for (const check of checks) console.log('[' + check.status + '] ' + check.name + ': ' + check.detail);
+  console.log('[NOT VERIFIED] Ad removal, actual audio segment slicing and voice playback need an independent live test.');
+  process.exitCode = checks.some((c) => c.status === 'FAIL')
+    ? 1 : checks.some((c) => c.status === 'SKIP') ? 2 : 0;
 }
-
-async function runQA() {
-  const results = [];
-
-  // 1. YouTube Preroll/Midroll Video Ad Bypass
-  console.log('[QA 1] Checking YouTube Preroll/Midroll Video Ad Bypass...');
-  const adCheckProc = spawn('python3', [
-    '/home/debian/Woldeok-Moneyverse-Migration/bot/node_modules/youtube-dl-exec/bin/yt-dlp',
-    '--dump-json',
-    '--no-playlist',
-    'https://www.youtube.com/watch?v=09R8_2nJtjg'
-  ]);
-  let jsonOutput = '';
-  adCheckProc.stdout.on('data', d => jsonOutput += d);
-  await new Promise(r => adCheckProc.on('close', r));
-
-  try {
-    const meta = JSON.parse(jsonOutput);
-    const audioFormats = (meta.formats || []).filter(f => f.acodec !== 'none');
-    console.log('  -> Target Video:', meta.title);
-    console.log('  -> Audio Formats Extracted:', audioFormats.length, 'streams');
-    console.log('  -> Google Preroll/Midroll Ad Injection in Stream: NONE (100% Bypassed)');
-    results.push({ name: 'Standard YouTube Video Ads', status: 'PASS', detail: 'Direct googlevideo stream has 0 preroll/midroll ads' });
-  } catch (e) {
-    console.error('  -> Error parsing metadata:', e.message);
-  }
-
-  // 2. SponsorBlock Community API Real-Time Interception
-  console.log('
-[QA 2] Verifying SponsorBlock Community API Interception...');
-  const testVideos = [
-    { id: '09R8_2nJtjg', title: 'Maroon 5 - Sugar' },
-    { id: 'YQHsXMglC9A', title: 'Adele - Hello' },
-    { id: 'fJ9rUzIMcZQ', title: 'Queen - Bohemian Rhapsody' }
-  ];
-
-  for (const item of testVideos) {
-    const segs = await fetchSponsorBlockSegments(item.id);
-    console.log('  -> [' + item.title + '] Found ' + segs.length + ' SponsorBlock segment(s):');
-    for (const s of segs) {
-      console.log('     * Category: [' + s.category + '] Range: ' + s.segment[0].toFixed(1) + 's ~ ' + s.segment[1].toFixed(1) + 's');
-    }
-    if (segs.length > 0) {
-      results.push({ name: 'SponsorBlock Segments: ' + item.title, status: 'PASS', detail: segs.length + ' segments intercepted' });
-    }
-  }
-
-  // 3. Audio Stream Slicing & Waveform Comparison Test
-  console.log('
-[QA 3] Live Audio Stream Segment Slicing Test (Maroon 5 - Sugar)...');
-  console.log('  -> Measuring 5 seconds of UNCUT stream (0s ~ 5s: Car conversation)...');
-  const uncutVol = await measureVolume(
-    'python3 /home/debian/Woldeok-Moneyverse-Migration/bot/node_modules/youtube-dl-exec/bin/yt-dlp --format "bestaudio[ext=webm][acodec=opus]/bestaudio" --no-playlist --js-runtimes node -o - "https://www.youtube.com/watch?v=09R8_2nJtjg" | ffmpeg -i - -t 5 -af volumedetect -f null /dev/null'
-  );
-  console.log('     Uncut Mean Volume: ' + uncutVol.mean + ' dB (Quiet Speech)');
-
-  console.log('  -> Measuring 5 seconds of CUT stream (Skipping 0s ~ 26.4s intro talking)...');
-  const cutVol = await measureVolume(
-    'python3 /home/debian/Woldeok-Moneyverse-Migration/bot/node_modules/youtube-dl-exec/bin/yt-dlp --format "bestaudio[ext=webm][acodec=opus]/bestaudio" --no-playlist --js-runtimes node -o - "https://www.youtube.com/watch?v=09R8_2nJtjg" | ffmpeg -i - -af "aselect='not(between(t,0,26.444))',asetpts=N/SR/TB" -t 5 -af volumedetect -f null /dev/null'
-  );
-  console.log('     Cut Mean Volume: ' + cutVol.mean + ' dB (Punchy Pop Music Beat)');
-
-  const volumeDiff = (cutVol.mean ?? 0) - (uncutVol.mean ?? 0);
-  console.log('  -> Volume Elevation Difference: +' + volumeDiff.toFixed(1) + ' dB');
-  if (volumeDiff > 10) {
-    console.log('  -> [VERIFIED] Talking intro was 100% sliced out! Music started instantly.');
-    results.push({ name: 'Audio Stream Slicing Precision', status: 'PASS', detail: 'Intro conversation skipped (+' + volumeDiff.toFixed(1) + ' dB audio elevation)' });
-  }
-
-  // 4. Live Bot Daemon Health Check
-  console.log('
-[QA 4] Live Bot Daemon & Voice Channel Inspection...');
-  const systemctl = spawn('systemctl', ['is-active', 'moneyverse-discord-bot.service']);
-  let statusText = '';
-  systemctl.stdout.on('data', d => statusText += d);
-  await new Promise(r => systemctl.on('close', r));
-  statusText = statusText.trim();
-  console.log('  -> Systemd service state:', statusText);
-  results.push({ name: 'Daemon Service State', status: statusText === 'active' ? 'PASS' : 'FAIL', detail: 'moneyverse-discord-bot.service: ' + statusText });
-
-  console.log('
-====================================================');
-  console.log('               QA SUMMARY REPORT                    ');
-  console.log('====================================================');
-  for (const r of results) {
-    console.log(' [' + r.status + '] ' + r.name.padEnd(38) + ': ' + r.detail);
-  }
-  console.log('====================================================
-');
-}
-
-runQA();
