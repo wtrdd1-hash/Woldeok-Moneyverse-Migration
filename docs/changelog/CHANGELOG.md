@@ -1,5 +1,9 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+## v2026.10.16.734 — Active host release identity gate, read-only
+- Reconciles existing PR #886 onto latest main; live v717 Production and v721.2 Test identity 100% matched against active systemd generation. Release tests 29/29 PASS. No runtime rollout, balances or sessions touched. [Release](../releases/v2026.10.16.734.md).
+
+
 ## v2026.10.16.717 — Blog regional SEO and truthful editorial gate (LIVE in Production)
 - 24 country-specific financial education editions with localized canonicals/hreflang and sitemap. Unsafe legacy financial autopublishing 403/503 fail-closed; 4 new negative tests. No schema or money mutation. [Release](../releases/v2026.10.16.717.md).
 

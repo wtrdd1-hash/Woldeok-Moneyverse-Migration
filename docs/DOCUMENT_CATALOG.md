@@ -1,5 +1,9 @@
 # 📚 Document Catalog
 
+## v2026.10.16.734 — Actual host generation preflight
+- [Release EN](releases/v2026.10.16.734.md) / [KO](releases/v2026.10.16.734.ko.md), [worklog](worklog/2026-10-16-host-release-identity-v734.md), [GitHub update](updates/v2026.10.16.734-github.md), [internal update](updates/v2026.10.16.734-internal.md).
+
+
 ## v2026.10.16.720 — v719 Test-verified, Production hold
 - [Release](releases/v2026.10.16.719.md) / [Korean](releases/v2026.10.16.719.ko.md) · [Worklog](worklog/2026-10-16-ui-v719-test-production-hold-v720.md) · [GitHub update](updates/v2026.10.16.720-github.md). Exact Test v719.2 accepted; UI/finance P0 blocks Production.
 
