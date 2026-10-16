@@ -1,6 +1,6 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
-## v2026.10.16.717 — Blog regional SEO and truthful editorial gate (pending Test/Production)
+## v2026.10.16.717 — Blog regional SEO and truthful editorial gate (LIVE in Production)
 - 24 country-specific financial education editions with localized canonicals/hreflang and sitemap. Unsafe legacy financial autopublishing 403/503 fail-closed; 4 new negative tests. No schema or money mutation. [Release](../releases/v2026.10.16.717.md).
 
 - Both ready docs PRs refreshed against latest main and passed classify/policy CI before merge. Source branches removed. Test/Production remain v712 SHA 142e36b5; finance/session exact-SHA release gates remain BLOCKED. [Release](../releases/v2026.10.16.715.md).

@@ -1,7 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v2026.10.16.717 — Regional blog SEO and editorial publish hold
-- Isolated #879 country blog integration, 24 region-authored articles, locale canonical/hreflang/sitemap, explicit 503 editorial hold on unsourced automatic publication. No finance/database changes. [Release](../releases/v2026.10.16.717.md). Final SHA CI/Test/Production checks remain required.
+- Isolated #879 country blog integration, 24 region-authored articles, locale canonical/hreflang/sitemap, explicit 503 editorial hold on unsourced automatic publication. No finance/database changes. [Release](../releases/v2026.10.16.717.md). Final GitHub PR/main CI, isolated Test authenticated restart and Production Nginx blue/green 5/5 public smoke checks PASSED (2026-10-16 14:30 KST); exact source SHA 176ca04e. Old v712 retained for rollback; existing Treasury finance/ACL/ledger risk remains unresolved.
 
 
 ## v2026.10.16.715 — Documentation integration and Production hold
