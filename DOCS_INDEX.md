@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.16.742 — Discord administrator DM operational alerts (candidate)
+- [English runbook](docs/operations/discord-administrator-direct-messages.md) / [한국어](docs/operations/discord-administrator-direct-messages.ko.md) · [Worklog](docs/worklog/2026-10-16-discord-admin-dm-v742.ko.md) · [Internal](docs/updates/v2026.10.16.742-discord-admin-dm-internal.md) · [GitHub](docs/updates/v2026.10.16.742-discord-admin-dm-github.md). Channel alerts mirrored to admin DM with redaction and failure reporting. Isolated candidate; production remains subject to finance and UI release gates.
+
 ## v2026.10.16.743 — Production financial readiness still BLOCKED; improved unposted-balance evidence
 - [Worklog EN](docs/worklog/2026-10-16-prod-financial-promotion-blockers-v743.md) / [한국어](docs/worklog/2026-10-16-prod-financial-promotion-blockers-v743.ko.md) · [Internal](docs/updates/v2026.10.16.743-internal.md) · [GitHub](docs/updates/v2026.10.16.743-github.md). Real Production finance preflight: 5 directly writable core financial tables, 19 uncertified balance/ledger differences (+4,779,188 WLD), including 5 cash accounts with no postings (+2,627,807 WLD). Migration history through 268 only; 269 function/schema incompatibility and unresolved v530 Test/UI gates. Read-only gate regression 45/45 PASS; no Production cutover.
 

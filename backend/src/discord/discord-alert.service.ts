@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  type OnModuleDestroy,
+  type OnModuleInit,
+} from '@nestjs/common';
 import type { Pool } from 'pg';
 import { PG_POOL } from '../core/pool.provider';
 import { queryRows } from '../core/db';
@@ -30,7 +36,7 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DiscordAlertService.name);
   private timer: NodeJS.Timeout | null = null;
   private readonly sentAlerts = new Map<string, number>();
-  private adminDmChannelId: string | null = null;
+  private readonly adminDmChannelIds = new Map<string, string>();
 
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
@@ -84,7 +90,36 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * 특정 관리자/유저에게 1:1 Direct Message(DM) 전송 (REST API v10)
+   * Do not relay credentials or user contact details from upstream event summaries.
+   * Discord mention parsing is also disabled at the API payload level.
+   */
+  private sanitizeEmbed(embed: DiscordEmbed): DiscordEmbed {
+    const scrub = (text: string, maxLength: number): string =>
+      text
+        .replace(/\b(Authorization\s*:\s*)(?:Bearer|Basic)\s+[^\s,;]+/gi, '$1[REDACTED]')
+        .replace(/\b(password|api[_-]?key|secret|token)\s*[:=]\s*[^\s,;]+/gi, '$1=[REDACTED]')
+        .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[EMAIL REDACTED]')
+        .slice(0, maxLength);
+
+    return {
+      ...embed,
+      title: scrub(embed.title, 256),
+      ...(embed.description !== undefined ? { description: scrub(embed.description, 4096) } : {}),
+      ...(embed.fields
+        ? {
+            fields: embed.fields.slice(0, 25).map((field) => ({
+              ...field,
+              name: scrub(field.name, 256),
+              value: scrub(field.value, 1024),
+            })),
+          }
+        : {}),
+      ...(embed.footer ? { footer: { text: scrub(embed.footer.text, 2048) } } : {}),
+    };
+  }
+
+  /**
+   * Send an authorized admin a private DM using Discord REST API v10.
    */
   async sendAdminDirectMessage(
     embed: DiscordEmbed,
@@ -100,7 +135,7 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
 
     try {
       // 1. 유저와의 1:1 DM 채널 조회/생성 (캐시 활용)
-      let dmChannelId = this.adminDmChannelId;
+      let dmChannelId = this.adminDmChannelIds.get(userId);
       if (!dmChannelId) {
         const createDmRes = await safeFetch(`${DISCORD_API_ORIGIN}/api/v10/users/@me/channels`, {
           method: 'POST',
@@ -112,9 +147,8 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
         });
 
         if (!createDmRes.ok) {
-          const errText = await createDmRes.text().catch(() => '');
           this.logger.warn(
-            `Failed to open DM channel with user ${userId}: status ${createDmRes.status} ${errText}`,
+            `Failed to open DM channel with configured user: status ${createDmRes.status}`,
           );
           return { success: false, error: `OPEN_DM_FAILED_${createDmRes.status}` };
         }
@@ -124,14 +158,15 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
           return { success: false, error: 'NO_DM_CHANNEL_ID_RETURNED' };
         }
         dmChannelId = dmChannelData.id;
-        this.adminDmChannelId = dmChannelId;
+        this.adminDmChannelIds.set(userId, dmChannelId);
       }
 
       // 2. DM 채널로 메시지 발송
       const payload = {
+        allowed_mentions: { parse: [] as string[] },
         embeds: [
           {
-            ...embed,
+            ...this.sanitizeEmbed(embed),
             footer: embed.footer ?? { text: 'Woldeok Moneyverse Admin Direct Sentinel' },
             timestamp: embed.timestamp ?? new Date().toISOString(),
           },
@@ -151,16 +186,17 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       );
 
       if (sendMsgRes.ok) {
-        this.logger.log(`Direct message successfully sent to admin user ${userId} (DM Channel: ${dmChannelId})`);
+        this.logger.log(
+          `Direct message successfully sent to admin user ${userId} (DM Channel: ${dmChannelId})`,
+        );
         return { success: true, channelId: dmChannelId };
       }
 
       // 만약 채널이 만료되었거나 에러가 났다면 캐시 무효화 후 1회 재시도
       if (sendMsgRes.status === 404 || sendMsgRes.status === 403) {
-        this.adminDmChannelId = null;
+        this.adminDmChannelIds.delete(userId);
       }
-      const errText = await sendMsgRes.text().catch(() => '');
-      this.logger.warn(`Failed to send message to DM channel ${dmChannelId}: ${sendMsgRes.status} ${errText}`);
+      this.logger.warn(`Failed to send administrator DM: status ${sendMsgRes.status}`);
       return { success: false, error: `SEND_DM_FAILED_${sendMsgRes.status}` };
     } catch (error) {
       this.logger.error(`Error delivering Discord direct message to user ${userId}`, error);
@@ -177,9 +213,10 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
     const channelId = this.getChannelId();
 
     const payload = {
+      allowed_mentions: { parse: [] as string[] },
       embeds: [
         {
-          ...embed,
+          ...this.sanitizeEmbed(embed),
           footer: embed.footer ?? { text: 'Woldeok Moneyverse Economy Sentinel' },
           timestamp: embed.timestamp ?? new Date().toISOString(),
         },
@@ -232,11 +269,19 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    // 3. 중요 경보(Critical) 발생 시 관리자 개인 DM으로도 실시간 직접 전송!
-    if (isCritical) {
-      this.sendAdminDirectMessage(embed).catch((err) => {
-        this.logger.warn('Failed to deliver critical direct message to admin', err);
-      });
+    // In all-mode, forward every curated system event (including notices and
+    // policy/SEO alerts). The critical-only mode is available as an opt-down.
+    // An explicit disable stops DMs without affecting public alert delivery.
+    const dmEnabled = process.env.DISCORD_ADMIN_DM_ENABLED !== 'false';
+    const dmMode = process.env.DISCORD_ADMIN_DM_MODE || 'all';
+    if (dmEnabled && (isCritical || dmMode !== 'critical')) {
+      const dmResult = await this.sendAdminDirectMessage(embed);
+      if (!dmResult.success) {
+        this.logger.warn(
+          `Discord administrator DM delivery failed: ${dmResult.error || 'UNKNOWN'}`,
+        );
+      }
+      delivered = delivered || dmResult.success;
     }
 
     return delivered;
@@ -323,10 +368,26 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
           fields: [
             { name: '스냅샷 ID', value: this.maskIdentifier(latest.id), inline: true },
             { name: '무결성 판정', value: latest.integrity_ok ? 'PASS' : 'FAIL', inline: true },
-            { name: '불일치 계좌 수', value: `${latest.balance_mismatch_account_count}개`, inline: true },
-            { name: '불균형 분개 수', value: `${latest.ledger_unbalanced_transaction_count}개`, inline: true },
-            { name: '비허용 음수 계좌', value: `${latest.disallowed_negative_balance_account_count}개`, inline: true },
-            { name: '잔액 불일치 총액', value: `${latest.balance_total_delta_amount} WLD`, inline: true },
+            {
+              name: '불일치 계좌 수',
+              value: `${latest.balance_mismatch_account_count}개`,
+              inline: true,
+            },
+            {
+              name: '불균형 분개 수',
+              value: `${latest.ledger_unbalanced_transaction_count}개`,
+              inline: true,
+            },
+            {
+              name: '비허용 음수 계좌',
+              value: `${latest.disallowed_negative_balance_account_count}개`,
+              inline: true,
+            },
+            {
+              name: '잔액 불일치 총액',
+              value: `${latest.balance_total_delta_amount} WLD`,
+              inline: true,
+            },
           ],
         },
         true, // 중요 경보 -> 관리자 DM 동시 발송
@@ -395,11 +456,20 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       await this.sendDiscordEmbed(
         {
           title: '🔴 [치명적 위험] 감사 로그 체인 변조 감지 (Audit Trail Corrupted)',
-          description: '불변 감사 로그(audit_logs) 해시 체인 검증에서 불일치 결함이 발견되었습니다.',
+          description:
+            '불변 감사 로그(audit_logs) 해시 체인 검증에서 불일치 결함이 발견되었습니다.',
           color: 0xdc2626, // Crimson Red
           fields: [
-            { name: '검증 시각', value: new Date(latest.checked_at).toLocaleString('ko-KR'), inline: true },
-            { name: '실패 사유', value: latest.failure_reason ?? '알 수 없는 해시 불일치', inline: false },
+            {
+              name: '검증 시각',
+              value: new Date(latest.checked_at).toLocaleString('ko-KR'),
+              inline: true,
+            },
+            {
+              name: '실패 사유',
+              value: latest.failure_reason ?? '알 수 없는 해시 불일치',
+              inline: false,
+            },
           ],
         },
         true, // 중요 경보 -> 관리자 DM 동시 발송
@@ -442,7 +512,11 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
           color,
           fields: [
             { name: '경보 ID', value: this.maskIdentifier(alert.id), inline: true },
-            { name: '발생 시각', value: new Date(alert.raised_at).toLocaleString('ko-KR'), inline: true },
+            {
+              name: '발생 시각',
+              value: new Date(alert.raised_at).toLocaleString('ko-KR'),
+              inline: true,
+            },
           ],
         },
         isCritical, // 심각 경보는 관리자 DM 동시 발송
@@ -467,7 +541,11 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       deleted: { label: '공지 삭제', color: 0xef4444, emoji: '🗑️' },
     };
 
-    const info = actionLabels[input.action] ?? { label: input.action, color: 0x3b82f6, emoji: 'ℹ️' };
+    const info = actionLabels[input.action] ?? {
+      label: input.action,
+      color: 0x3b82f6,
+      emoji: 'ℹ️',
+    };
 
     await this.sendDiscordEmbed({
       title: `${info.emoji} [운영 공지] ${info.label}`,
@@ -475,7 +553,15 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       color: info.color,
       fields: [
         { name: '공지 ID', value: `\`${input.announcementId}\``, inline: true },
-        ...(input.actorUserId ? [{ name: '작업자', value: `\`${this.maskIdentifier(input.actorUserId)}\``, inline: true }] : []),
+        ...(input.actorUserId
+          ? [
+              {
+                name: '작업자',
+                value: `\`${this.maskIdentifier(input.actorUserId)}\``,
+                inline: true,
+              },
+            ]
+          : []),
       ],
     });
   }
@@ -497,7 +583,11 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       color: 0x8b5cf6, // Purple
       fields: [
         { name: '트랜잭션 ID', value: `\`${this.maskIdentifier(input.txId)}\``, inline: true },
-        { name: '이체 금액', value: `**${formattedAmount} ${input.asset ?? 'WLD'}**`, inline: true },
+        {
+          name: '이체 금액',
+          value: `**${formattedAmount} ${input.asset ?? 'WLD'}**`,
+          inline: true,
+        },
         { name: '송신자', value: `\`${this.maskIdentifier(input.sender)}\``, inline: true },
         { name: '수신자', value: `\`${this.maskIdentifier(input.receiver)}\``, inline: true },
         { name: '보안 등급', value: '초고액 관제 모니터링 대상', inline: false },
@@ -526,7 +616,9 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
         { name: '당첨자', value: `\`${this.maskIdentifier(input.userId)}\``, inline: true },
         { name: '배팅 금액', value: `${formattedBet} WLD`, inline: true },
         { name: '총 당첨금', value: `**${formattedWin} WLD**`, inline: true },
-        ...(input.multiplier ? [{ name: '배당 배율', value: `**x${input.multiplier}배**`, inline: true }] : []),
+        ...(input.multiplier
+          ? [{ name: '배당 배율', value: `**x${input.multiplier}배**`, inline: true }]
+          : []),
         { name: '국고 세금 징수', value: '배당소득세(10%) 국고 자동 원천징수 완료', inline: false },
       ],
     });
@@ -549,8 +641,14 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       fields: [
         { name: '현재 국고 잔액', value: `**${formattedCur} WLD**`, inline: true },
         { name: '위험 임계 기준', value: `${formattedThresh} WLD`, inline: true },
-        ...(input.reserveRatio ? [{ name: '지급준비율', value: `**${input.reserveRatio}**`, inline: true }] : []),
-        { name: '권장 조치', value: '공공 지출 일시 제한 또는 국부펀드(ASWF) 환매 검토 필요', inline: false },
+        ...(input.reserveRatio
+          ? [{ name: '지급준비율', value: `**${input.reserveRatio}**`, inline: true }]
+          : []),
+        {
+          name: '권장 조치',
+          value: '공공 지출 일시 제한 또는 국부펀드(ASWF) 환매 검토 필요',
+          inline: false,
+        },
       ],
     });
   }
@@ -595,7 +693,11 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
         { name: '현재 연체율', value: `**${input.delinquentRatio}**`, inline: true },
         { name: '부실 대출 건수', value: `${input.defaultedCount}건`, inline: true },
         { name: '위험 노출 총액', value: `**${input.affectedAmount} WLD**`, inline: true },
-        { name: '대응 매뉴얼', value: '예금보험공사(KDIC) 대위변제 준비금 상태 및 대출 이자율 조정 검토', inline: false },
+        {
+          name: '대응 매뉴얼',
+          value: '예금보험공사(KDIC) 대위변제 준비금 상태 및 대출 이자율 조정 검토',
+          inline: false,
+        },
       ],
     });
   }
@@ -621,8 +723,14 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
         { name: '행운의 주인공', value: `\`${input.userName}\``, inline: true },
         { name: '배팅 금액', value: `${formattedBet} WLD`, inline: true },
         { name: '총 당첨금', value: `🏆 **${formattedWin} WLD**`, inline: true },
-        ...(input.multiplier ? [{ name: '당첨 배율', value: `⚡ **x${input.multiplier}배**`, inline: true }] : []),
-        { name: '국고 환수 기여', value: '배당소득세(10%)가 복지 국고로 기여되었습니다.', inline: true },
+        ...(input.multiplier
+          ? [{ name: '당첨 배율', value: `⚡ **x${input.multiplier}배**`, inline: true }]
+          : []),
+        {
+          name: '국고 환수 기여',
+          value: '배당소득세(10%)가 복지 국고로 기여되었습니다.',
+          inline: true,
+        },
         {
           name: '👉 나도 잭팟 도전하기',
           value: '[월덕 머니버스 카지노 바로가기](https://easy-scraping.com/casino)',
@@ -659,9 +767,25 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
       fields: [
         { name: '종목명', value: `${input.name} (\`${input.symbol}\`)`, inline: true },
         { name: '현재가', value: `**${formattedPrice} WLD**`, inline: true },
-        { name: '등락률', value: `**${sign}${input.changeRatePercent.toFixed(1)}%**`, inline: true },
-        ...(input.volume ? [{ name: '거래량', value: `${Number(input.volume).toLocaleString('ko-KR')}주`, inline: true }] : []),
-        { name: '변동 사유', value: input.reason || '호가창 매수/매도 수급 쏠림 현상', inline: false },
+        {
+          name: '등락률',
+          value: `**${sign}${input.changeRatePercent.toFixed(1)}%**`,
+          inline: true,
+        },
+        ...(input.volume
+          ? [
+              {
+                name: '거래량',
+                value: `${Number(input.volume).toLocaleString('ko-KR')}주`,
+                inline: true,
+              },
+            ]
+          : []),
+        {
+          name: '변동 사유',
+          value: input.reason || '호가창 매수/매도 수급 쏠림 현상',
+          inline: false,
+        },
         {
           name: '👉 실시간 호가창 확인하기',
           value: `[${input.name} 실시간 차트 및 호가 확인](https://easy-scraping.com/stocks/${input.symbol})`,
@@ -672,4 +796,3 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
     });
   }
 }
-
