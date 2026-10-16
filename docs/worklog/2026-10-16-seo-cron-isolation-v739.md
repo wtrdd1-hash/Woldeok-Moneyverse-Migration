@@ -13,3 +13,9 @@
 
 ## END
 - Keep exact Test release, authenticated UI/financial P0 and safe deployment gates separate. Runtime application promotion must not be declared without real public validation.
+
+## END: actual Test shadow and GitHub merge
+- v739 Test shadow backend health 200, exact source SHA, external-network deny in systemd, 36s delay and 0 scheduled execution logs under Test plus explicit SEO opt-in. Stopped and removed unit. Public Test and Production were not switched.
+- PR #899 merged main `385976325b6a5c754261e8a65085d88b56d98386`, identical Git tree. Branch required CI and candidate build succeeded. No Production acceptance claimed; monetary/ledger P0 and v530 full UI remain open.
+
+- Postmerge main CI #38898081088 and Build Test Candidate #38898080840 both SUCCESS. No Production rollout because finance and full authenticated UI safety gates remain unresolved.
