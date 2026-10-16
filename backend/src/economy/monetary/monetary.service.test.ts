@@ -1,21 +1,47 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
-import { describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { Queryable } from '../../core/db';
 import { CentralBankService } from './central-bank.service';
 import { MintBureauService } from './mint-bureau.service';
 
 describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
+  // Legacy positive-path mocks exercise feature-authorized behavior only.
+  const previousMintFlag = process.env.MONEYVERSE_MINT_EXECUTION_ENABLED;
+  const previousLedgerFlag = process.env.MONEYVERSE_MINT_LEDGER_CERTIFIED;
+  beforeAll(() => {
+    process.env.MONEYVERSE_MINT_EXECUTION_ENABLED = 'true';
+    process.env.MONEYVERSE_MINT_LEDGER_CERTIFIED = 'true';
+  });
+  afterAll(() => {
+    if (previousMintFlag === undefined) delete process.env.MONEYVERSE_MINT_EXECUTION_ENABLED;
+    else process.env.MONEYVERSE_MINT_EXECUTION_ENABLED = previousMintFlag;
+    if (previousLedgerFlag === undefined) delete process.env.MONEYVERSE_MINT_LEDGER_CERTIFIED;
+    else process.env.MONEYVERSE_MINT_LEDGER_CERTIFIED = previousLedgerFlag;
+  });
+
   describe('CentralBankService', () => {
     it('rejects policy orders with non-positive or invalid amounts', async () => {
       const mockPool = { query: vi.fn() } as unknown as Queryable;
       const cbService = new CentralBankService(mockPool);
 
       await expect(
-        cbService.proposePolicyOrder('admin-1', 'MINT', 'WORK_REWARD', '0', '작업 보상 재원 한도 승인 요청'),
+        cbService.proposePolicyOrder(
+          'admin-1',
+          'MINT',
+          'WORK_REWARD',
+          '0',
+          '작업 보상 재원 한도 승인 요청',
+        ),
       ).rejects.toThrow(BadRequestException);
 
       await expect(
-        cbService.proposePolicyOrder('admin-1', 'MINT', 'WORK_REWARD', '-500', '작업 보상 재원 한도 승인 요청'),
+        cbService.proposePolicyOrder(
+          'admin-1',
+          'MINT',
+          'WORK_REWARD',
+          '-500',
+          '작업 보상 재원 한도 승인 요청',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -79,7 +105,10 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
       } as unknown as Queryable;
       const cbService = new CentralBankService(mockPool);
 
-      const res = await cbService.freezeIssuance('admin-1', '거시경제 통화량 급변 이상감지에 따른 긴급 발행 동결');
+      const res = await cbService.freezeIssuance(
+        'admin-1',
+        '거시경제 통화량 급변 이상감지에 따른 긴급 발행 동결',
+      );
       expect(res.is_issuance_frozen).toBe(true);
     });
   });
@@ -174,7 +203,13 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
       } as unknown as Queryable;
       const mbService = new MintBureauService(mockPool);
 
-      const res = await mbService.executeAuthorizedMint('admin-1', 'order-1', '3000', 'user-1', 'idemp-key-99');
+      const res = await mbService.executeAuthorizedMint(
+        'admin-1',
+        'order-1',
+        '3000',
+        'user-1',
+        'idemp-key-99',
+      );
       expect(res.id).toBe('cert-uuid-1');
       expect(res.amount_wld).toBe('3000');
       expect(res.idempotency_key).toBe('idemp-key-99');
@@ -260,4 +295,3 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
     });
   });
 });
-

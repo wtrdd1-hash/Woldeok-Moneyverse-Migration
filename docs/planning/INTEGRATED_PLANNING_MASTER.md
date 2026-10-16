@@ -11,6 +11,10 @@
 - PR #895 merged SHA 9618a249; post-merge CI and exact-SHA Test v735.2 accepted. Immutable Production candidate staged but **NOT switched**. Public Production v717. [Release](../releases/v2026.10.16.735.md).
 - Production app-role direct balance/ledger DML and v530 complete authenticated UI five-pass still BLOCK. Legacy v600 frontend restarted externally after stop; backing blog JSON remains read-only. Neither release authority nor financial risk is silently waived.
 
+## v2026.10.16.722 — Monetary ACL P0 containment candidate (AUTHORITY_DRIFT / BLOCKED)
+- Latest-main start b7cf876e, mid-work AI blog integration advanced main 10d5dfdb; worktree rebased. Source-backed live read-only Production query: 241 public tables, 237 have application-role direct DML, including protected balances/ledger. Isolated Production-schema-only clone executed unapplied 269–271 (237→224); proposed additive 272 narrows raw mint/retirement/order DML to 221 remaining; the historical financial P0 **persists**.
+- Default-deny certificate execution, retirement and Central Bank proposal/approval until ledger-certified settlement, preserving emergency freeze. Real Test DB omits three monetary tables and is not a comparable DB-authorization test target. Never call this a Production fix or waive the v530 complete authenticated five-pass UI gate. [EN evidence](../worklog/2026-10-16-monetary-p0-release-v722.md).
+
 ## v2026.10.16.735 — AI blog emergency containment and write failure guards (AUTHORITY_DRIFT)
 - Four retired legacy frontend writers; public v717 preserved. New code fails closed on direct runtime blog persistence and propagates disk errors, with TDD. [Worklog](../worklog/2026-10-16-ai-blog-production-unblock-v735.md).
 - Actual Production app role still has direct balance/ledger DML and v530 full authenticated UI five-pass remains blocked. This is NOT Production application acceptance.

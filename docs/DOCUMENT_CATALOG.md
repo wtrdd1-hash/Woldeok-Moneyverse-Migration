@@ -7,6 +7,9 @@
 ## v2026.10.16.737 — Read-only financial release gate (BLOCKED)
 - [EN](worklog/2026-10-16-financial-readiness-v737.md) / [KO](worklog/2026-10-16-financial-readiness-v737.ko.md) · [GitHub update](updates/v2026.10.16.737-github.md) · [Internal](updates/v2026.10.16.737-internal.md). No live data or runtime changes.
 
+## v2026.10.16.722 — Monetary P0 containment candidate (BLOCKED)
+- [EN worklog](worklog/2026-10-16-monetary-p0-release-v722.md) / [KO](worklog/2026-10-16-monetary-p0-release-v722.ko.md) · [GitHub update](updates/v2026.10.16.722-github.md) · [Internal](updates/v2026.10.16.722-internal.md). Code/SQL candidate only; real Production and official Test unchanged.
+
 ## v2026.10.16.734 — Actual host generation preflight
 - [Release EN](releases/v2026.10.16.734.md) / [KO](releases/v2026.10.16.734.ko.md), [worklog](worklog/2026-10-16-host-release-identity-v734.md), [GitHub update](updates/v2026.10.16.734-github.md), [internal update](updates/v2026.10.16.734-internal.md).
 

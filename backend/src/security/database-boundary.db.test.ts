@@ -73,6 +73,27 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
       expect(result.rows[0]?.allowed).toBe(false);
     });
 
+    it('denies direct monetary certificate/policy writes even when application flags are enabled', async () => {
+      const result = await app.query<{
+        table_name: string;
+        can_insert: boolean;
+        can_update: boolean;
+        can_delete: boolean;
+      }>(
+        `SELECT name AS table_name,
+                has_table_privilege(current_user, format('public.%I',name), 'INSERT') AS can_insert,
+                has_table_privilege(current_user, format('public.%I',name), 'UPDATE') AS can_update,
+                has_table_privilege(current_user, format('public.%I',name), 'DELETE') AS can_delete
+           FROM unnest(ARRAY['monetary_policy_orders','mint_certificates','retirement_certificates']) AS name`,
+      );
+      expect(result.rows).toHaveLength(3);
+      for (const row of result.rows) {
+        expect(row.can_insert, row.table_name).toBe(false);
+        expect(row.can_update, row.table_name).toBe(false);
+        expect(row.can_delete, row.table_name).toBe(false);
+      }
+    });
+
     it('keeps direct writes limited to the session layer and authorized domain tables', async () => {
       const result = await app.query<{ table_name: string; privilege_type: string }>(
         `SELECT grant_row.table_name, grant_row.privilege_type

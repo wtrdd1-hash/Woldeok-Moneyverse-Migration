@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException, Inject, Injectable } from '@ne
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import type { MintCertificate, MonetaryPolicyOrder, RetirementCertificate } from './monetary.types';
+import { requireLedgerCertifiedMintExecution } from './monetary-execution-gate';
 
 @Injectable()
 export class MintBureauService {
@@ -14,6 +15,7 @@ export class MintBureauService {
     recipientUserId: string | null,
     idempotencyKey: string,
   ): Promise<MintCertificate> {
+    requireLedgerCertifiedMintExecution();
     if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
       throw new BadRequestException('발행 수량은 1 WLD 이상의 정수여야 합니다.');
     }
@@ -39,7 +41,9 @@ export class MintBureauService {
       throw new BadRequestException('지정된 통화정책 명령서를 찾을 수 없습니다.');
     }
     if (order.status !== 'APPROVED') {
-      throw new ForbiddenException(`통화정책 명령서가 승인(APPROVED) 상태가 아닙니다 (현재: ${order.status}).`);
+      throw new ForbiddenException(
+        `통화정책 명령서가 승인(APPROVED) 상태가 아닙니다 (현재: ${order.status}).`,
+      );
     }
     if (new Date(order.expires_at).getTime() < Date.now()) {
       throw new ForbiddenException('해당 통화정책 명령서의 유효기간이 만료되었습니다.');
@@ -90,6 +94,7 @@ export class MintBureauService {
     reason: string,
     idempotencyKey: string,
   ): Promise<RetirementCertificate> {
+    requireLedgerCertifiedMintExecution();
     if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
       throw new BadRequestException('소각/폐기 수량은 1 WLD 이상의 정수여야 합니다.');
     }
