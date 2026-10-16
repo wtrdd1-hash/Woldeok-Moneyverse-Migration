@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.16.743 — Production financial readiness still BLOCKED; improved unposted-balance evidence
+- [Worklog EN](docs/worklog/2026-10-16-prod-financial-promotion-blockers-v743.md) / [한국어](docs/worklog/2026-10-16-prod-financial-promotion-blockers-v743.ko.md) · [Internal](docs/updates/v2026.10.16.743-internal.md) · [GitHub](docs/updates/v2026.10.16.743-github.md). Real Production finance preflight: 5 directly writable core financial tables, 19 uncertified balance/ledger differences (+4,779,188 WLD), including 5 cash accounts with no postings (+2,627,807 WLD). Migration history through 268 only; 269 function/schema incompatibility and unresolved v530 Test/UI gates. Read-only gate regression 45/45 PASS; no Production cutover.
+
 ## v2026.10.16.741 — Main CI integration verified, Production BLOCKED
 - [Release EN](docs/releases/v2026.10.16.741.md) / [한국어](docs/releases/v2026.10.16.741.ko.md); [Worklog](docs/worklog/2026-10-16-main-ci-closeout-v741.md); [Internal update](docs/updates/v2026.10.16.741-internal.md); [GitHub update](docs/updates/v2026.10.16.741-github.md). PR #900 merged main `0290bd30`, exact-main CI/branch cleanup PASS, no application Production cutover. Financial readiness remains BLOCKED; 89 remote refs not integrated.
 

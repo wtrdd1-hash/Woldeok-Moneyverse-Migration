@@ -7,6 +7,7 @@ const good = Object.freeze({
   grants:PROTECTED_FINANCIAL_TABLES.map(name=>({name,can_insert:false,can_update:false,can_delete:false})),
   ledger:{
     balance_rows:3,unexplained_account_count:0,unexplained_delta_wld:'0',
+    unexplained_without_postings_count:0,unexplained_without_postings_delta_wld:'0',
     unbalanced_transaction_count:0,transactions_without_postings:0,
     unknown_posting_direction_count:0,
   },
@@ -81,4 +82,15 @@ test('snapshot rolls back on failed financial query',async()=>{
     if(sql.includes('has_table_privilege'))return{rows:good.grants};return{rows:[]}}};
   await assert.rejects(()=>readFinancialSnapshot(c),/query interrupted/);
   assert.equal(calls.at(-1),'ROLLBACK');
+});
+
+
+test('uncertified balances with no postings are detected without exposing account identities',()=>{
+  const ledger={...good.ledger,unexplained_account_count:5,unexplained_delta_wld:'4000000',
+    unexplained_without_postings_count:5,unexplained_without_postings_delta_wld:'4000000'};
+  const result=evaluateFinancialReadiness({...good,ledger});
+  assert(result.blockers.includes('uncertified_balance_without_any_ledger_postings'));
+  assert.equal(result.summary.unexplainedWithoutPostingsAccounts,5);
+  assert.equal(result.summary.unexplainedWithoutPostingsDeltaWld,'4000000');
+  assert(!('accountId' in result.summary));
 });

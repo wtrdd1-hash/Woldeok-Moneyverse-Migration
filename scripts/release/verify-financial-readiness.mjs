@@ -29,6 +29,13 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
     blockers.push('missing_or_empty_balance_projection');
   } else {
     if (ledger.unexplained_account_count > 0) blockers.push('uncertified_account_opening_or_ledger_drift');
+    // No ledger postings means that an opening balance cannot be inferred from the
+    // immutable transaction history. Never guess a missing journal entry.
+    if (!Number.isInteger(ledger.unexplained_without_postings_count)) {
+      blockers.push('unverified_account_posting_coverage');
+    } else if (ledger.unexplained_without_postings_count > 0) {
+      blockers.push('uncertified_balance_without_any_ledger_postings');
+    }
     if (ledger.unbalanced_transaction_count > 0) blockers.push('unbalanced_ledger_transaction');
     if (ledger.transactions_without_postings > 0) blockers.push('ledger_transaction_without_postings');
     if (ledger.unknown_posting_direction_count > 0) blockers.push('unknown_posting_direction');
@@ -43,6 +50,8 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
       balanceRows: ledger?.balance_rows ?? null,
       unexplainedProjectionAccounts: ledger?.unexplained_account_count ?? null,
       unexplainedProjectionDeltaWld: ledger?.unexplained_delta_wld ?? null,
+      unexplainedWithoutPostingsAccounts: ledger?.unexplained_without_postings_count ?? null,
+      unexplainedWithoutPostingsDeltaWld: ledger?.unexplained_without_postings_delta_wld ?? null,
       unbalancedTransactions: ledger?.unbalanced_transaction_count ?? null,
       transactionsWithoutPostings: ledger?.transactions_without_postings ?? null,
       coreTablesWithAppDml: grants.filter(x => x.can_insert || x.can_update || x.can_delete)
@@ -75,7 +84,13 @@ WITH account_net AS (
          COUNT(*) FILTER (WHERE ab.available_amount IS DISTINCT FROM
                           COALESCE(n.net, 0))::int AS unexplained_account_count,
          COALESCE(SUM(ab.available_amount - COALESCE(n.net, 0)),0)::text
-           AS unexplained_delta_wld
+           AS unexplained_delta_wld,
+         COUNT(*) FILTER (WHERE n.account_id IS NULL
+           AND ab.available_amount IS DISTINCT FROM 0)::int
+           AS unexplained_without_postings_count,
+         COALESCE(SUM(ab.available_amount) FILTER (WHERE n.account_id IS NULL
+           AND ab.available_amount IS DISTINCT FROM 0),0)::text
+           AS unexplained_without_postings_delta_wld
   FROM public.account_balances ab LEFT JOIN account_net n ON n.account_id=ab.account_id
 ), transactions AS (
   SELECT COUNT(*)::int AS unbalanced_transaction_count
