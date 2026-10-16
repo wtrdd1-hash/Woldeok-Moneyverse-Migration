@@ -1,0 +1,46 @@
+Before
+Filesystem        1B-blocks         Used   Available Use% Mounted on
+/dev/sdb1      105494675456  92164472832  8695623680  92% /
+/dev/sda1      210778099712 108603191296 92494708736  55% /srv/moneyverse-data
+Retired regenerable .next cache paths
+435	/srv/moneyverse-tasks/audit-20261015/source/frontend/.next
+434	/srv/moneyverse-tasks/ui-api-remediation-v630/test-source/frontend/.next
+434	/srv/moneyverse-tasks/ui-api-remediation-v630/test-source-8cc33a12/frontend/.next
+499	/srv/moneyverse-tasks/branch-consolidation-v606/frontend/.next
+458	/srv/moneyverse-tasks/fullstack-release-v618/frontend/.next
+554	/srv/moneyverse-tasks/fix-blog-shell-admin-nav-v634/frontend/.next
+436	/srv/moneyverse-tasks/full-plan-code-audit-v711/repo/frontend/.next
+Cleanup executing at 2026-10-17T00:48:39+09:00
+Removed build-only /srv/moneyverse-tasks/audit-20261015/source/frontend/.next
+Removed build-only /srv/moneyverse-tasks/ui-api-remediation-v630/test-source/frontend/.next
+Removed build-only /srv/moneyverse-tasks/ui-api-remediation-v630/test-source-8cc33a12/frontend/.next
+Removed build-only /srv/moneyverse-tasks/branch-consolidation-v606/frontend/.next
+Removed build-only /srv/moneyverse-tasks/fullstack-release-v618/frontend/.next
+Removed build-only /srv/moneyverse-tasks/fix-blog-shell-admin-nav-v634/frontend/.next
+Removed build-only /srv/moneyverse-tasks/full-plan-code-audit-v711/repo/frontend/.next
+After
+Filesystem        1B-blocks         Used   Available Use% Mounted on
+/dev/sdb1      105494675456  88760909824 12099186688  89% /
+/dev/sda1      210778099712 108603191296 92494708736  55% /srv/moneyverse-data
+Second verified historic build-cache batch before:
+Filesystem        1B-blocks        Used   Available Use% Mounted on
+/dev/sdb1      105494675456 88760954880 12099141632  89% /
+435	/srv/moneyverse-tasks/audit-20261015-runtime-v638/source/frontend/.next
+458	/srv/moneyverse-tasks/fix-safety-reauth-v651/repo/frontend/.next
+467	/srv/moneyverse-tasks/geo-locale-v631/repo/frontend/.next
+446	/srv/moneyverse-tasks/remediation-v654/source/frontend/.next
+446	/srv/moneyverse-tasks/remediate-20261015-v653/source/frontend/.next
+435	/srv/moneyverse-tasks/reaudit-20261015-v640/source/frontend/.next
+470	/srv/moneyverse-tasks/fix-v639-20261015/source/frontend/.next
+445	/srv/moneyverse-tasks/full-plan-implementation-v685/source/frontend/.next
+Removed regenerable historical Next build: /srv/moneyverse-tasks/audit-20261015-runtime-v638/source/frontend/.next
+Removed regenerable historical Next build: /srv/moneyverse-tasks/fix-safety-reauth-v651/repo/frontend/.next
+Removed regenerable historical Next build: /srv/moneyverse-tasks/geo-locale-v631/repo/frontend/.next
+Removed regenerable historical Next build: /srv/moneyverse-tasks/remediation-v654/source/frontend/.next
+Removed regenerable historical Next build: /srv/moneyverse-tasks/remediate-20261015-v653/source/frontend/.next
+Removed regenerable historical Next build: /srv/moneyverse-tasks/reaudit-20261015-v640/source/frontend/.next
+Removed regenerable historical Next build: /srv/moneyverse-tasks/fix-v639-20261015/source/frontend/.next
+Removed regenerable historical Next build: /srv/moneyverse-tasks/full-plan-implementation-v685/source/frontend/.next
+Second batch after:
+Filesystem        1B-blocks        Used   Available Use% Mounted on
+/dev/sdb1      105494675456 84988256256 15871840256  85% /
