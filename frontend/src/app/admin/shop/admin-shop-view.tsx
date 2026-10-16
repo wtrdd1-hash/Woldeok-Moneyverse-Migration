@@ -135,7 +135,7 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                   <button
                     onClick={() => setEditActive(!editActive)}
                     className={cn(
-                      'px-3 py-1.5 rounded-xl text-xs font-bold border min-h-[36px] transition-all',
+                      'px-3 py-1.5 rounded-xl text-xs font-bold border min-h-[44px] transition-all',
                       editActive
                         ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400'
                         : 'bg-rose-500/10 text-rose-600 border-rose-500/30 dark:text-rose-400',
@@ -215,13 +215,13 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleSave(item.id)}
-                      className="flex-1 flex items-center justify-center gap-1.5 h-10 min-h-[40px] rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-sm active:scale-[0.98] transition-transform"
+                      className="flex-1 flex items-center justify-center gap-1.5 h-10 min-h-[44px] rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-sm active:scale-[0.98] transition-transform"
                     >
                       <Save className="size-4" /> 저장 완료
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
-                      className="px-4 h-10 min-h-[40px] rounded-xl border border-border/80 text-muted-foreground text-xs font-bold hover:text-foreground active:scale-[0.98] transition-transform"
+                      className="px-4 h-10 min-h-[44px] rounded-xl border border-border/80 text-muted-foreground text-xs font-bold hover:text-foreground active:scale-[0.98] transition-transform"
                     >
                       취소
                     </button>
@@ -229,7 +229,7 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                 ) : (
                   <button
                     onClick={() => startEdit(item)}
-                    className="w-full flex items-center justify-center gap-1.5 h-10 min-h-[40px] rounded-xl border border-border/80 bg-surface/50 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-surface active:scale-[0.98] transition-all"
+                    className="w-full flex items-center justify-center gap-1.5 h-10 min-h-[44px] rounded-xl border border-border/80 bg-surface/50 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-surface active:scale-[0.98] transition-all"
                   >
                     아이템 설정 수정
                   </button>

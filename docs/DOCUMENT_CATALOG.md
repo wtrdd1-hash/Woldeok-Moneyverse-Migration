@@ -1,5 +1,8 @@
 # 📚 Document Catalog
 
+## v2026.10.16.719 — Admin SEO safety and responsive UI candidate
+- [EN changelog](changelog/2026-10-16-ui-admin-seo-safety-v2026.10.16.719.md) / [KO](changelog/2026-10-16-ui-admin-seo-safety-v2026.10.16.719.ko.md) · [Worklog](worklog/2026-10-16-full-ui-admin-remediation-v719.md) · [GitHub update](updates/v2026.10.16.719-github.md).
+
 ## v2026.10.16.718 — Full UI & administrator audit (AUDIT/BLOCKED)
 - [EN](findings/MONEYVERSE_FULL_UI_ADMIN_AUDIT_v2026.10.16.718.md) / [KO](findings/MONEYVERSE_FULL_UI_ADMIN_AUDIT_v2026.10.16.718.ko.md) · [Worklog](worklog/2026-10-16-full-ui-admin-audit-v718.md) · [Update](updates/v2026.10.16.718-github.md).
 

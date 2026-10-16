@@ -28,7 +28,7 @@ export function IndexingApiCard() {
         body: JSON.stringify({ batchSize }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         setFeedback(`⚡ ${data.message} (대상 총 ${data.totalUrlsAvailable}개 중 ${data.batchSize}개 우선 통보)`);
         setHistory((prev) => [
           {
@@ -73,14 +73,14 @@ export function IndexingApiCard() {
         body: JSON.stringify({ sitemapUrl: fullUrl }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success && data.isGscSubmitted === true) {
         setGscConsoleUrl(data.directConsoleUrl);
-        setFeedback(`🌐 [${sitemapPath}] ${data.gscMessage} (Google/Bing Ping 완료)`);
+        setFeedback(`🌐 [${sitemapPath}] ${data.gscMessage} (GSC 제출 접수·실제 색인 미확인)`);
         setHistory((prev) => [
           {
             id: `gsc-${Date.now()}`,
             timestamp: new Date().toLocaleTimeString('ko-KR', { hour12: false }),
-            count: 564,
+            count: 1, // one sitemap; not a fabricated 564 URL indexing count
             status: 'success',
             sampleUrls: [data.sitemapUrl],
           },
@@ -114,7 +114,7 @@ export function IndexingApiCard() {
               신규 계산기 500+개 URL 및 사이트맵(sitemap.xml) 구글/네이버 1클릭 정식 등록
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground leading-relaxed">
-              Googlebot 및 네이버 Yeti가 사이트맵 및 580개 이상의 주식/복리 계산기 페이지를 최우선 순위로 크롤링하도록 Google Search Console Sitemaps API 및 Ping을 동시 발송합니다.
+              인증된 관리자만 공식 Search Console API에 사이트맵을 제출할 수 있습니다. 제출은 크롤링 또는 실제 검색 색인을 보장하지 않습니다.
             </CardDescription>
 
             {/* 개별 사이트맵 셀렉터 & 네이버 바로가기 */}

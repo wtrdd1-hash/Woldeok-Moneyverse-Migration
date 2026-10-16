@@ -107,24 +107,24 @@ export default async function AdminSeoPage() {
         </p>
       </PageHeader>
 
-      <div className="flex border-b border-border/60">
-        <div className="flex gap-2">
+      <nav aria-label="SEO administrator sections" className="min-w-0 border-b border-border/60">
+        <div className="grid grid-cols-1 gap-1 sm:flex sm:flex-wrap sm:gap-2">
           <Link
             href="/admin/seo"
-            className="flex items-center gap-2 border-b-2 border-primary px-3 py-2 text-sm font-semibold text-primary transition-colors"
+            className="inline-flex min-h-[44px] min-w-0 items-center gap-2 whitespace-normal break-keep border-b-2 border-primary px-3 py-2 text-sm font-semibold text-primary transition-colors" aria-current="page"
           >
             <Globe className="size-4" />
-            실시간 수집 로그 & 상태
+            {locale === 'en' ? 'Crawler activity & status' : locale === 'ja' ? 'クローラー履歴・状態' : locale === 'zh' ? '抓取日志与状态' : '실시간 수집 로그 & 상태'}
           </Link>
           <Link
             href="/admin/seo-audit"
-            className="flex items-center gap-2 border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex min-h-[44px] min-w-0 items-center gap-2 whitespace-normal break-keep border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             <Activity className="size-4" />
-            크롤러 수집 감사 타워
+            {locale === 'en' ? 'Crawler audit' : locale === 'ja' ? 'クロール監査' : locale === 'zh' ? '抓取审计' : '크롤러 수집 감사 타워'}
           </Link>
         </div>
-      </div>
+      </nav>
 
       <SeoClientView initialData={initialData} initialNowMs={initialNowMs} />
     </div>
