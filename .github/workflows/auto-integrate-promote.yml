@@ -91,7 +91,7 @@ jobs:
           }
 
           mapfile -t branches < <(
-            gh api --paginate "repos/${REPO}/branches?per_page=100" --jq '.[].name' | sort
+            gh api --paginate "repos/${REPO}/pulls?state=open&base=main&per_page=100" --jq '.[] | select(.head.repo.full_name == .base.repo.full_name) | .head.ref' | sort -u
           )
 
           for branch in "${branches[@]}"; do

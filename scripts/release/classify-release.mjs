@@ -140,7 +140,11 @@ export function buildReleaseInput({ repo = process.cwd(), base, head }) {
     repositoryHeadSha,
   ]);
   const changedPaths = changed ? changed.split('\n').filter(Boolean).sort() : [];
-  const classification = classifyPaths(changedPaths);
+  // An unchanged branch ref (base === head) is an intentional no-op, not a release error.
+  // Unrecognised changed paths still fail closed as UNKNOWN.
+  const classification = baseSha === repositoryHeadSha && changedPaths.length === 0
+    ? 'NO_CHANGES'
+    : classifyPaths(changedPaths);
   const applicationSourceSha = latestShaForPaths(root, repositoryHeadSha, RUNTIME_GIT_PATHS);
   const controlPlaneSha = latestShaForPaths(root, repositoryHeadSha, CONTROL_GIT_PATHS);
 

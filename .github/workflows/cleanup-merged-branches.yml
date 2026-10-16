@@ -58,55 +58,45 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')"
+          # Batch GitHub evidence once rather than issuing 3 API calls per branch.
+          # A merged PR alone is not proof that a stacked/squashed head reached main.
+          git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+          main_sha="$(git rev-parse refs/remotes/origin/main)"
+          merged_evidence="$(mktemp)"
+          open_heads="$(mktemp)"
+          trap 'rm -f "$merged_evidence" "$open_heads"' EXIT
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=closed&base=main&per_page=100" \
+            --jq '.[] | select(.merged_at != null and .head.repo.full_name == .base.repo.full_name) | [.head.ref, .head.sha, (.number|tostring)] | @tsv' > "$merged_evidence"
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=open&base=main&per_page=100" \
+            --jq '.[] | select(.head.repo.full_name == .base.repo.full_name) | .head.ref' > "$open_heads"
+
           deleted=0
           closed=0
-
-          gh api --paginate "repos/${GITHUB_REPOSITORY}/branches?per_page=100" --jq '.[].name' |
-          while IFS= read -r branch; do
+          retained=0
+          while read -r branch branch_sha; do
             case "$branch" in
               main|production|staging|develop|release/*|planning/*) continue ;;
             esac
-
-            encoded="$(jq -rn --arg v "$branch" '$v|@uri')"
-            branch_sha="$(gh api "repos/${GITHUB_REPOSITORY}/branches/${encoded}" --jq '.commit.sha' 2>/dev/null || true)"
-            [[ -n "$branch_sha" ]] || continue
-
-            cmp="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${encoded}...${main_sha}" 2>/dev/null || true)"
-            [[ -n "$cmp" ]] || continue
-            behind="$(jq -r '.behind_by // -1' <<<"$cmp")"
-
-            merged_pr_json="$(
-              gh api --method GET "repos/${GITHUB_REPOSITORY}/pulls" \
-                -f state=closed -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=100 \
-                --jq '[.[] | select(.merged_at != null)] | sort_by(.merged_at) | reverse | .[0] // empty'
-            )"
-
-            if [[ -z "$merged_pr_json" ]]; then
-              if [[ "$behind" == "0" ]]; then
-                echo "retain contained branch without merged PR evidence (may still be active work): $branch"
-              fi
+            if grep -Fxq "$branch" "$open_heads"; then
+              echo "retain branch with active PR: $branch"
+              retained=$((retained + 1))
               continue
             fi
-
-            merged_pr="$(jq -r '.number' <<<"$merged_pr_json")"
-            merged_head_sha="$(jq -r '.head.sha // empty' <<<"$merged_pr_json")"
-
-            if [[ "$branch_sha" == "$merged_head_sha" ]]; then
-              echo "deleting source branch whose current head exactly matches merged PR #${merged_pr}: $branch"
-            elif [[ "$behind" == "0" ]]; then
-              echo "deleting branch fully contained in main with merged PR #${merged_pr}: $branch"
-            else
-              echo "retain branch advanced after merged PR #${merged_pr}: $branch (${merged_head_sha} -> ${branch_sha})"
+            # Only an exact merged PR head and an ancestor of current main can
+            # be deleted; work-in-progress branches and stacked missing code stay.
+            merged_pr="$(awk -F '\t' -v b="$branch" -v s="$branch_sha" '$1==b && $2==s {print $3;exit}' "$merged_evidence")"
+            if [[ -z "$merged_pr" ]] || ! git merge-base --is-ancestor "$branch_sha" "$main_sha"; then
+              retained=$((retained + 1))
               continue
             fi
-
+            echo "deleting exact already-integrated merged PR #${merged_pr} branch: $branch"
             if git push --force-with-lease="refs/heads/${branch}:${branch_sha}" origin ":refs/heads/${branch}" >/dev/null 2>&1; then
               deleted=$((deleted + 1))
             else
-              echo "retain branch because its head moved, it is already absent, or deletion is protected: $branch"
+              echo "retain branch: moved, absent or protected: $branch"
+              retained=$((retained + 1))
             fi
-          done
+          done < <(git for-each-ref --merged="$main_sha" --format='%(refname:strip=3) %(objectname)' refs/remotes/origin)
 
           {
             echo '## Contained branch cleanup summary'
