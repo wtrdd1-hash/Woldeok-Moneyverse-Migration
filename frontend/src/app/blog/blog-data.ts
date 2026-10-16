@@ -573,6 +573,7 @@ function savePostsToDisk(posts: BlogPost[]): void {
     fs.writeFileSync(filePath, JSON.stringify(posts, null, 2), 'utf-8');
   } catch (err) {
     console.error('[BlogStore] Failed to write blog posts to disk:', err);
+    throw err;
   }
 }
 
@@ -590,6 +591,9 @@ export function getBlogPostBySlug(slug: string): BlogPost | undefined {
 }
 
 export function addBlogPost(post: BlogPost): void {
+  if (process.env.NODE_ENV !== 'test') {
+    throw new Error('EDITORIAL_REVIEW_REQUIRED: blog publication is disabled until verified editorial approval');
+  }
   const current = loadPostsFromDisk();
   const updated = [post, ...current.filter((p) => p.slug !== post.slug)];
   savePostsToDisk(updated);

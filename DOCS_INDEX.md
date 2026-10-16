@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.16.735 — AI blog writer fail-closed and unsafe legacy unit retirement
+- [EN worklog](docs/worklog/2026-10-16-ai-blog-production-unblock-v735.md) / [KO](docs/worklog/2026-10-16-ai-blog-production-unblock-v735.ko.md) · [Internal](docs/updates/v2026.10.16.735-ai-blog-internal.md) · [GitHub](docs/updates/v2026.10.16.735-ai-blog-github.md). TDD and full QA verified new publishing failure contracts; four disconnected old frontend writer instances stopped. Real DB grants and v530 full-authenticated UI release gates remain open.
+
 ## v2026.10.16.722 — AI blog v721 merged/Test verified, Production app held
 - [Release evidence EN](docs/releases/v2026.10.16.721.md) / [한국어](docs/releases/v2026.10.16.721.ko.md) · [Operator runbook EN](docs/operations/BLOG_LEGACY_EDITORIAL_HOLD_RUNBOOK.md) / [KO](docs/operations/BLOG_LEGACY_EDITORIAL_HOLD_RUNBOOK.ko.md) · [Integration worklog](docs/worklog/2026-10-16-ai-blog-integration-v721.md).
 - PR #891 merged main `10d5dfdb`, branch/main CI PASS, exact-SHA official Test v721.2 and 135/135 blog browser checks PASS. Production still v717 because finance/ledger and v530 full-authenticated UI gates remain open. Production blog shared file permission 0444 was applied as an emergency safety containment after one post was written following v717's hold; data checksum unchanged.

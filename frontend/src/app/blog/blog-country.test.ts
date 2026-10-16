@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createCountryBlogPost, COUNTRY_EDITION_TOPICS } from './blog-country-editorial';
 import { blogAlternateLanguages, blogUrl, getBlogCountryEdition, canonicalBlogSlug } from './blog-seo';
 import { addBlogPost, getAllBlogPosts, getBlogPostBySlug } from './blog-data';
@@ -75,6 +75,18 @@ describe('country-specific blog and canonical SEO', () => {
       if (old === undefined) fs.rmSync(store, { force: true });
       else fs.writeFileSync(store, old);
     }
+  });
+
+  it('fails closed when persistence fails', () => {
+    const write = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => { throw new Error('storage blocked'); });
+    try { expect(() => addBlogPost(createCountryBlogPost('retirement'))).toThrow('storage blocked'); }
+    finally { write.mockRestore(); }
+  });
+
+  it('rejects all runtime publication until editorial review is authorized', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    try { expect(() => addBlogPost(createCountryBlogPost('retirement'))).toThrow('EDITORIAL_REVIEW_REQUIRED'); }
+    finally { vi.unstubAllEnvs(); }
   });
 
   it('sends article summaries, not full text or translations, to the client list', () => {
