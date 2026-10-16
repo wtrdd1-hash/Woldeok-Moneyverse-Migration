@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.16.722 — AI blog v721 merged/Test verified, Production app held
+- [Release evidence EN](docs/releases/v2026.10.16.721.md) / [한국어](docs/releases/v2026.10.16.721.ko.md) · [Operator runbook EN](docs/operations/BLOG_LEGACY_EDITORIAL_HOLD_RUNBOOK.md) / [KO](docs/operations/BLOG_LEGACY_EDITORIAL_HOLD_RUNBOOK.ko.md) · [Integration worklog](docs/worklog/2026-10-16-ai-blog-integration-v721.md).
+- PR #891 merged main `10d5dfdb`, branch/main CI PASS, exact-SHA official Test v721.2 and 135/135 blog browser checks PASS. Production still v717 because finance/ledger and v530 full-authenticated UI gates remain open. Production blog shared file permission 0444 was applied as an emergency safety containment after one post was written following v717's hold; data checksum unchanged.
+
 ## v2026.10.16.721 — AI blog legacy-content safety audit (isolated candidate)
 - [Full audit EN](docs/findings/MONEYVERSE_AI_BLOG_RECHECK_v2026.10.16.719.md) / [한국어](docs/findings/MONEYVERSE_AI_BLOG_RECHECK_v2026.10.16.719.ko.md) · [Worklog](docs/worklog/2026-10-16-ai-blog-recheck-v719.md) · [Internal](docs/updates/v2026.10.16.721-ai-blog-internal.md) · [GitHub](docs/updates/v2026.10.16.721-ai-blog-github.md).
 - Public 177 posts included 171 legacy AI items with only six titles. Candidate preserves old URLs with `noindex` and an archive warning, removes them from hub/sitemap/API discovery and corrects paused administrator/cron behavior. Local suite/build/HTTP pass, **designated Test and Production not yet verified**.
