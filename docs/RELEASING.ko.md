@@ -145,3 +145,11 @@ GitOps/Kubernetes 기록은 provenance와 복구/목표 아키텍처로 유지�
 - [Production 배포](operations/production-deployment.ko.md)
 - [백업·복구](operations/backup-and-recovery.ko.md)
 - [프로젝트 기획](planning/PROJECT_PLAN.ko.md)
+
+### 금융 원장·DB 최소권한 최종 차단 — v737
+
+금융/경제/국고 변경 운영승격 전 실제 운영 백엔드 systemd `EnvironmentFiles`로 DB 식별을 확인하고 읽기 전용 검사를 실행한다.
+
+`sudo -n node scripts/release/verify-financial-readiness.mjs --env-file /home/debian/Woldeok-Moneyverse-Migration/backend/.env`
+
+종료코드 비영(非0)·`BLOCKED` 시 승격 금지. v717 운영 2026-10-16 실측: 핵심 5테이블 앱 직접 DML, 미인증 초기 잔액/원장 차이 19계정. 근거 없는 조폐·원장 보정·예외승인 금지. 검사 통과도 오프닝 출처/공급량/금고/Test DB/v530 인증 UI/롤백 별도 승인 필요. [증거](worklog/2026-10-16-financial-readiness-v737.ko.md).
