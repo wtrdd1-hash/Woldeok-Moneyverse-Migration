@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "b304a1ae363c996e70b7718c1ceb5140d5a2baf1",
+  "environment": "non-public isolated canary:3463/3464",
+  "authFixture": "synthetic Test-only operator with manual open state; NOT real MFA acceptance",
+  "observedUtc": "2026-10-16T11:04:55.900Z",
+  "templates": 166,
+  "passes": 5,
+  "attempts": 830,
+  "adminAttempts": 170,
+  "staticAttempts": 675,
+  "staticHttp200": 674,
+  "dynamicInvalid404": 130,
+  "dynamicValidScenariosProven": 0,
+  "documentOverflowCount": 0,
+  "jsExceptionCount": 0,
+  "adminHttp200": 170,
+  "abortedNavigationCount": 1,
+  "abortedRouteExamples": [
+    "/clubs/new"
+  ],
+  "staticNoH1Routes": [
+    "/casino",
+    "/profile/settings"
+  ],
+  "note": "STATUS BLOCKED: invalid dynamic URL 404 is not success; real TOTP, keyboard/zoom, state assertions and monetary DB parity remain unverified."
+}
