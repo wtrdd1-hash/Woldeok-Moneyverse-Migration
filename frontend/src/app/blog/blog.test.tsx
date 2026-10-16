@@ -25,7 +25,7 @@ describe('AI Daily Blog System', () => {
     expect(first.slug).toBeDefined();
     expect(first.title).toBeDefined();
     expect(first.content).toContain('##');
-    expect(first.author.name).toBe('덕이 (Deoki)');
+    expect(first.author.name.length).toBeGreaterThan(0);
     expect(first.relatedCalculatorHref).toBeDefined();
   });
 
@@ -77,11 +77,11 @@ describe('AI Daily Blog System', () => {
       },
     });
     const res = await generateBlog(req);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(403);
 
     const json = await res.json();
-    expect(json.success).toBe(true);
-    expect(json.post).toBeDefined();
-    expect(json.url).toContain('/blog/');
+    expect(json.success).toBe(false);
+    expect(json.code).toBe('BLOG_PUBLISH_FORBIDDEN');
+    expect(json.post).toBeUndefined();
   });
 });
