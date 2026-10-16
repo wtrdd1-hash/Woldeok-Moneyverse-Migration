@@ -9,3 +9,5 @@
 - Red 11 failing negative/receipt tests before fix; green 11/11 after. 24/24 focused and 1,246/1,246 full frontend tests passed; typecheck, contract and optimized Next frontend build passed after local dependency/contract build corrections.
 - **Not evidence of full v530 5-pass administrator browser acceptance**, finance/DB remediation or Production promotion.
 - [Worklog](../worklog/2026-10-16-full-ui-admin-remediation-v719.md) · [GitHub update](../updates/v2026.10.16.719-github.md).
+
+- Additional v719.1 QA feedback: browser-measured 34/36/40px common CTA targets corrected to 44px; unverified signup grant/jackpot promises replaced with truthful eligibility wording. Exact final SHA must be rebuilt/reverified before release.

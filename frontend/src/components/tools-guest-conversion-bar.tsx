@@ -73,7 +73,7 @@ export function ToolsGuestConversionBar() {
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 line-clamp-1">
-              지금 1초 가입 시 정착금 10,000 WLD 지급 및 매일 목표 탈출가 도달 알림을 드립니다.
+              저장 및 알림 제공 여부는 계정 상태와 실제 기능 지원 여부를 확인해 주세요.
             </p>
           </div>
         </div>
@@ -82,10 +82,10 @@ export function ToolsGuestConversionBar() {
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
           <Link
             href="/login?from=tools_sticky_conversion"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs sm:text-sm shadow-md shadow-emerald-950 transition-all duration-150 active:scale-95 min-h-[40px]"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs sm:text-sm shadow-md shadow-emerald-950 transition-all duration-150 active:scale-95 min-h-[44px]"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>1초 가입하고 저장하기</span>
+            <span>로그인해 저장 기능 확인</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
 

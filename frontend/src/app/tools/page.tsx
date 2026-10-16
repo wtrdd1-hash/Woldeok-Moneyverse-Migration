@@ -276,7 +276,7 @@ export default async function ToolsHubPage() {
                 </ul>
                 <Link
                   href={tool.href}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <span>계산기 바로 시작</span>
                   <ArrowRight className="size-3.5" />

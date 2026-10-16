@@ -27,3 +27,11 @@
 
 ## Internal version notes
 - v719 English/Korean paired worklog, GitHub/internal changelog, implementation delta and evidence.
+
+## Mid-work v719.1 browser evidence and follow-up
+- Isolated Chromium Test frontend/backend canaries bound to v719 source SHA 146e233e, with previous official Test/Production unchanged. Backend /health 200 and frontend/backend version both matched; official exact Test cutover and admin sessions remain pending.
+- Real browser two passes × 6 widths (320/360/390/430/768/1280) × 8 public/gated representative routes: **96/96 HTTP 200**, zero document horizontal overflow, home H1 exactly one each time. **Not a full five-pass 166-route authorization audit**.
+- Detected shared welcome sign-in CTA 34px, /tools action 36px and sticky conversion CTA 40px; adjusted to 44px minimum, and replaced unsupported immediate WLD/ticket guarantees with conditional copy.
+- Two intermittent anonymous /tools third-party JS `TagError: Y` page errors occurred; separate direct recheck did not reproduce. Root cause not yet established, so do not misreport full browser clean.
+- Browser evidence JSON and screenshots: /srv/moneyverse-tasks/ui-remediation-v719/browser-results-v719.json (screenshots anonymous only).
+- First staged v719 Test artifact carried a timestamp build ID: explicitly rejected pre-cutover. Exact-SHA build re-created, v719.1 staging accepted in separate immutable path. Original official Test and Production pointers unchanged.
