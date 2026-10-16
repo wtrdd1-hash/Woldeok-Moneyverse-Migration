@@ -1,7 +1,7 @@
 # 전체 기능·UI·실행환경 점검 — v2026.10.17.760
 
 **상태:** IN_PROGRESS — 사전 기록(2026-10-17 KST).
-**기준:** `origin/main=25a0301a912a17f0f4636583be71a00735ff7972`.
+**기준:** `origin/main=c2d4667b44c0222ed422cea2a59626a0a318face`.
 **범위:** 전체 웹 화면·관리자 UI·백엔드 API 연동·통합 기획서와 실제 코드의 일치성·실행환경·빌드/테스트 및 운영 승격 차단 요인.
 **기준 문서:** `docs/planning/PROJECT_PLAN.md`, `docs/planning/INTEGRATED_PLANNING_MASTER.md`, `docs/planning/FULL_ROUTE_UI_QA_SPEC.md`, `docs/DOCUMENTATION_POLICY.md`, `docs/RELEASING.md`.
 

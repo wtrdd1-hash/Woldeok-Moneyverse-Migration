@@ -1,7 +1,7 @@
 # Full Feature & UI Runtime Audit — v2026.10.17.760
 
 **Status:** IN_PROGRESS — initial record (2026-10-17 KST).
-**Baseline:** `origin/main=25a0301a912a17f0f4636583be71a00735ff7972`.
+**Baseline:** `origin/main=c2d4667b44c0222ed422cea2a59626a0a318face`.
 **Scope:** All discoverable web routes, administrator UI, backend API parity, planning-to-code traceability, runtime health, build/test stability and production-release gates. Never mutate customer money or authenticate through unsafe test credentials.
 **Authority:** `docs/planning/PROJECT_PLAN.md`, `docs/planning/INTEGRATED_PLANNING_MASTER.md`, `docs/planning/FULL_ROUTE_UI_QA_SPEC.md`, `docs/DOCUMENTATION_POLICY.md`, and `docs/RELEASING.md`.
 
