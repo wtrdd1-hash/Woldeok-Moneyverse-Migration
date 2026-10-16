@@ -74,12 +74,12 @@ export function WelcomeOnboardingBanner() {
           </span>
           <p className="truncate text-zinc-200 font-medium leading-snug">
             <strong className="text-amber-300 font-bold">
-              {localeLabel(locale, '신규 정착 지원금 10,000 WLD', 'Starter Grant 10,000 WLD', '新規定着金 10,000 WLD', '新人定居金 10,000 WLD')}
+              {localeLabel(locale, '가상경제 서비스 이용 안내', 'Explore the virtual economy', '仮想経済サービスのご案内', '虚拟经济服务指南')}
             </strong>
             <span className="mx-1.5 text-zinc-500">·</span>
             <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
               <Ticket className="size-3 inline shrink-0" />
-              {localeLabel(locale, '메가 잭팟 복권 1장 무료 증정', '+1 Free Mega Jackpot Ticket', '+1枚無料メガジャックポット宝くじ', '+1张免费巨额大奖彩票')}
+              {localeLabel(locale, '보상은 실제 지급 조건 확인 후 안내', 'Rewards depend on verified eligibility', '特典は実際の条件をご確認ください', '奖励以实际资格条件为准')}
             </span>
           </p>
         </div>
@@ -87,11 +87,11 @@ export function WelcomeOnboardingBanner() {
         {/* Right: CTA & Dismiss */}
         <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
           <Link
-            href="/login?ref=welcome_bonus"
-            className="inline-flex min-h-[34px] sm:min-h-[30px] items-center gap-1.5 rounded-lg bg-linear-to-r from-amber-500 to-amber-600 px-3.5 py-1 text-xs font-bold text-zinc-950 shadow-xs hover:brightness-110 active:scale-95 transition-all shrink-0 cursor-pointer"
+            href="/login"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-linear-to-r from-amber-500 to-amber-600 px-3.5 py-1 text-xs font-bold text-zinc-950 shadow-xs hover:brightness-110 active:scale-95 transition-all shrink-0 cursor-pointer"
           >
             <Coins className="size-3.5" />
-            <span>{localeLabel(locale, '1초 가입하고 지원금 받기', 'Claim Bonus Now', '1秒登録して特典受取', '1秒注册领取福利')}</span>
+            <span>{localeLabel(locale, '로그인하고 이용하기', 'Sign in to explore', 'ログインして利用', '登录后体验')}</span>
             <ChevronRight className="size-3.5" />
           </Link>
 
@@ -99,7 +99,7 @@ export function WelcomeOnboardingBanner() {
             type="button"
             onClick={handleDismissToday}
             title={localeLabel(locale, '24시간 동안 보지 않기', 'Hide for 24 hours', '24時間非表示', '24小时内不再显示')}
-            className="inline-flex size-7 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 active:scale-95 transition-colors cursor-pointer shrink-0"
+            className="inline-flex size-11 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 active:scale-95 transition-colors cursor-pointer shrink-0"
             aria-label="Close welcome banner"
           >
             <X className="size-4" />
