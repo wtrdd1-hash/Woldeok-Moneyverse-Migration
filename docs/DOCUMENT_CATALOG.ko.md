@@ -1,5 +1,9 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.16.720 — v719 Test 합격, 운영 보류
+- [한글 릴리스](releases/v2026.10.16.719.ko.md) / [영문](releases/v2026.10.16.719.md) · [작업기록](worklog/2026-10-16-ui-v719-test-production-hold-v720.ko.md) · [GitHub 업데이트](updates/v2026.10.16.720-github.ko.md). Test v719.2 합격, UI·금융 P0로 운영 보류.
+
+
 ## v2026.10.16.719 — 관리자 SEO 보안·반응형 UI 수정 후보
 - [EN changelog](changelog/2026-10-16-ui-admin-seo-safety-v2026.10.16.719.md) / [KO](changelog/2026-10-16-ui-admin-seo-safety-v2026.10.16.719.ko.md) · [Worklog](worklog/2026-10-16-full-ui-admin-remediation-v719.md) · [GitHub update](updates/v2026.10.16.719-github.md).
 
