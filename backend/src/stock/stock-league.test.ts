@@ -99,7 +99,7 @@ describe('stock league entry fee is ledger-first', () => {
     const db = new MockQueryable();
     db.results.push(
       { rows: [{ id: '00000000-0000-4000-8000-000000000123', entry_fee: '10000', status:'active' }] },
-      { rows: [] },
+      { rows: [{ is_admin: false }] },
       { rows: [] },
       { rows: [{ id:'cash', balance:'20000' }] },
       { rows: [{ transaction_id:'posted' }] },

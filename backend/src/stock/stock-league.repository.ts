@@ -116,10 +116,7 @@ export class StockLeagueRepository {
               roi_rate, rank_position, tier, is_whale, follower_count, created_at
        FROM public.stock_league_participants
        WHERE season_id = $1
-         AND user_id NOT IN (
-           SELECT user_id FROM public.user_roles 
-           WHERE role IN ('superadmin', 'operator', 'approver', 'server_operator')
-         )
+         AND NOT public.stock_league_is_admin(user_id)
        ORDER BY roi_rate DESC, current_asset DESC
        LIMIT $2`,
       [seasonId, limit]
@@ -149,10 +146,7 @@ export class StockLeagueRepository {
        JOIN public.stock_league_seasons s ON s.id = p.season_id
        WHERE s.status = 'active'
          AND (p.is_whale = TRUE OR p.roi_rate >= 15.0 OR p.current_asset >= 50000000)
-         AND p.user_id NOT IN (
-           SELECT user_id FROM public.user_roles 
-           WHERE role IN ('superadmin', 'operator', 'approver', 'server_operator')
-         )
+         AND NOT public.stock_league_is_admin(p.user_id)
        ORDER BY p.roi_rate DESC, p.follower_count DESC
        LIMIT $1`,
       [limit]
@@ -191,12 +185,10 @@ export class StockLeagueRepository {
 
       // 관리자 계정 참가 차단 가드 (랭킹 공정성 및 관리자 제외 원칙)
       const adminRes = await client.query(
-        `SELECT 1 FROM public.user_roles 
-         WHERE user_id = $1 AND role IN ('superadmin', 'operator', 'approver', 'server_operator') 
-         LIMIT 1`,
+        `SELECT public.stock_league_is_admin($1::uuid) AS is_admin`,
         [userId]
       );
-      if (adminRes.rows.length > 0) {
+      if (adminRes.rows[0]?.is_admin !== false) {
         throw new StockLeagueInputError('관리자 계정은 랭킹 공정성을 위해 챔피언십 리그에 참가할 수 없습니다.');
       }
 
@@ -240,10 +232,7 @@ export class StockLeagueRepository {
 
       // 유저 현재 주식 평가액 계산
       const stockRes = await client.query(
-        `SELECT COALESCE(SUM(vsp.quantity * vs.current_price), 0) as stock_val
-         FROM public.virtual_stock_positions vsp
-         JOIN public.virtual_stocks vs ON vs.id = vsp.stock_id
-         WHERE vsp.user_id = $1`,
+        `SELECT public.stock_league_portfolio_value($1::uuid) AS stock_val`,
         [userId]
       );
       const totalStockVal = Number(stockRes.rows[0]?.stock_val ?? 0);
