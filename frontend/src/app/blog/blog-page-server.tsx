@@ -9,7 +9,7 @@ import { BlogHubClient } from './blog-hub-client';
 import { getAllBlogPosts, getBlogPostBySlug } from './blog-data';
 import {
   blogAlternateLanguages, blogHubUrl, blogUrl, canonicalBlogSlug,
-  countryBlogPosts, getBlogCountryEdition, type BlogLocale,
+  countryBlogPosts, getBlogCountryEdition, isBlogDiscoverable, type BlogLocale,
 } from './blog-seo';
 
 const MARKET_NAMES: Record<BlogLocale, string> = {
@@ -58,6 +58,7 @@ export function metadataForArticle(slug: string, locale: BlogLocale): Metadata {
   const hero = safeHeroImage(post.heroImage);
   return {
     title: post.title, description: post.excerpt, keywords: [...post.tags],
+    ...(isBlogDiscoverable(original) ? {} : { robots: { index: false, follow: true } }),
     alternates: { canonical, languages: blogAlternateLanguages(original) },
     openGraph: {
       title: post.title, description: post.excerpt, type: 'article',
@@ -74,7 +75,7 @@ export function summarizeBlogPost(post: BlogPost) {
   return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,author,heroImage:safeHeroImage(heroImage),relatedCalculatorHref,relatedCalculatorName};
 }
 export function renderBlogHub(locale: BlogLocale) {
-  const posts = countryBlogPosts(getAllBlogPosts(), locale);
+  const posts = countryBlogPosts(getAllBlogPosts().filter(isBlogDiscoverable), locale);
   const canonical = blogHubUrl(locale);
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'Blog', name: PAGE_TITLES[locale],
@@ -131,8 +132,15 @@ export function renderBlogArticle(slug: string, locale: BlogLocale) {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g,'\\u003c') }} />
+      {isBlogDiscoverable(original) && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g,'\\u003c') }} />
+      )}
       <div className="container max-w-5xl mx-auto px-4 py-8">
+        {!isBlogDiscoverable(original) && (
+          <p role="alert" className="mb-5 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+            보관된 기존 AI 생성 글입니다. 출처와 수치의 사실 검증 및 편집 승인이 완료되지 않아 신규 독자에게 추천하지 않으며 검색 색인에서 제외하도록 요청 중입니다.
+          </p>
+        )}
         <BlogPostClient post={{ ...post, heroImage: safeHeroImage(post.heroImage) }} locale={locale} />
       </div>
     </>

@@ -1,22 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
 import Link from 'next/link';
-import {
-  Sparkles,
-  RefreshCw,
-  BookOpen,
-  Send,
-  ExternalLink,
-  CheckCircle2,
-  Clock,
-  Eye,
-  Zap,
-} from 'lucide-react';
+import { BookOpen, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import type { BlogPost } from '@/app/blog/blog.types';
 
 interface Props {
@@ -24,73 +12,33 @@ interface Props {
 }
 
 export function AdminBlogClient({ initialPosts }: Props) {
-  const [posts, setPosts] = useState<BlogPost[]>([...initialPosts]);
-  const [generating, setGenerating] = useState(false);
-
-  const handleGenerate = async () => {
-    setGenerating(true);
-    try {
-      const res = await fetch('/api/blog/generate', {
-        method: 'POST',
-      });
-      const data = await res.json();
-
-      if (res.ok && data.success && data.post) {
-        setPosts((prev) => [data.post, ...prev]);
-        toast.success('신규 AI 블로그 글이 발행되었습니다!', {
-          description: `IndexNow 핑 전송 완료 | ${data.post.title}`,
-        });
-      } else {
-        toast.error('AI 블로그 글 생성 실패', {
-          description: data.error || '생성 엔진 상태를 확인해 주세요.',
-        });
-      }
-    } catch {
-      toast.error('네트워크 오류가 발생했습니다.');
-    } finally {
-      setGenerating(false);
-    }
-  };
+  const posts = initialPosts;
 
   return (
     <div className="space-y-6">
       {/* Control Banner */}
-      <Card className="border-indigo-500/40 bg-gradient-to-r from-indigo-950/40 to-background">
+      <Card className="border-amber-500/40 bg-gradient-to-r from-amber-950/30 to-background">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Badge className="bg-indigo-600 text-white text-xs font-bold">
-                  SEO 자동화 엔진
+                  편집 검증 보류
                 </Badge>
                 <span className="text-xs text-muted-foreground font-mono">
-                  매일 09:00 KST 자동 스케줄 가동 중
+                  자동 발행 일시 중단
                 </span>
               </div>
               <CardTitle className="text-lg sm:text-xl font-black text-foreground">
-                내부 AI 일일 금융 블로그 자동 집필 & 실시간 IndexNow 관제
+                AI 블로그 콘텐츠 검토 및 SEO 현황
               </CardTitle>
               <CardDescription className="text-xs">
-                5대 고수익 롱테일 키워드 풀에서 주제를 자동 선별하여 고품질 마크다운 아티클을 생성하고 검색엔진 봇에 색인을 요청합니다.
+                기존 AI 생성 글에 대한 출처·수치·중복 콘텐츠 검토가 완료될 때까지 신규 자동 발행과 해당 글의 IndexNow 요청은 중단되어 있습니다.
               </CardDescription>
             </div>
 
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleGenerate}
-              disabled={generating}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs h-9 shrink-0 shadow-md cursor-pointer"
-            >
-              {generating ? (
-                <span className="flex items-center gap-1.5">
-                  <RefreshCw className="size-3.5 animate-spin" /> AI 글 집필 및 색인 요청 중...
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5">
-                  <Zap className="size-3.5" /> ⚡ AI 블로그 아티클 1편 즉시 생성
-                </span>
-              )}
+            <Button variant="outline" size="sm" disabled className="text-xs h-auto min-h-9 whitespace-normal text-left">
+              검증 및 편집 승인 대기
             </Button>
           </div>
         </CardHeader>
@@ -100,12 +48,12 @@ export function AdminBlogClient({ initialPosts }: Props) {
             <span className="text-base font-extrabold font-mono text-foreground">{posts.length}편</span>
           </div>
           <div className="p-3 rounded-lg border border-border/60 bg-muted/20">
-            <span className="text-[11px] text-muted-foreground block">발행 주기</span>
-            <span className="text-base font-extrabold font-mono text-indigo-400">1일 1편 (09:00 KST)</span>
+            <span className="text-[11px] text-muted-foreground block">자동 발행</span>
+            <span className="text-base font-extrabold font-mono text-indigo-400">검증 완료 전 중단</span>
           </div>
           <div className="p-3 rounded-lg border border-border/60 bg-muted/20">
             <span className="text-[11px] text-muted-foreground block">검색엔진 색인</span>
-            <span className="text-base font-extrabold font-mono text-emerald-400">IndexNow 활성</span>
+            <span className="text-xs sm:text-sm font-semibold text-amber-400">IndexNow 자동 요청 중단</span>
           </div>
           <div className="p-3 rounded-lg border border-border/60 bg-muted/20">
             <span className="text-[11px] text-muted-foreground block">전용 사이트맵</span>
@@ -144,6 +92,7 @@ export function AdminBlogClient({ initialPosts }: Props) {
                   <th className="p-3">카테고리</th>
                   <th className="p-3">연관 계산기</th>
                   <th className="p-3">발행일시</th>
+                  <th className="p-3">검토 상태</th>
                   <th className="p-3 text-right">관리</th>
                 </tr>
               </thead>
@@ -168,6 +117,11 @@ export function AdminBlogClient({ initialPosts }: Props) {
                     </td>
                     <td className="p-3 whitespace-nowrap font-mono text-muted-foreground text-[11px]">
                       {new Date(post.publishedAt).toLocaleString('ko-KR')}
+                    </td>
+                    <td className="p-3 whitespace-nowrap">
+                      <Badge variant="outline" className="text-[10px]">
+                        {post.isAiGenerated ? 'AI 생성 · 사실 검증 필요' : '편집 콘텐츠'}
+                      </Badge>
                     </td>
                     <td className="p-3 whitespace-nowrap text-right">
                       <Button asChild size="sm" variant="ghost" className="h-7 text-xs text-indigo-400 hover:text-indigo-300">
