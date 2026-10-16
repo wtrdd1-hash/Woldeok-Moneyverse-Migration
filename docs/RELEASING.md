@@ -145,3 +145,11 @@ A future cutover to Kubernetes/Flux requires an explicit migration plan and same
 - [Production deployment](operations/production-deployment.md)
 - [Backup and recovery](operations/backup-and-recovery.md)
 - [Project plan](planning/PROJECT_PLAN.md)
+
+### Financial ledger and DB least-privilege hard stop — v737
+
+Before any money/economy/treasury-affecting Production cutover, perform the *read-only* gate on the **actual backend service DB** (not only the name of a container):
+
+`sudo -n node scripts/release/verify-financial-readiness.mjs --env-file /home/debian/Woldeok-Moneyverse-Migration/backend/.env`
+
+Nonzero exit/`BLOCKED` forbids promotion. 2026-10-16 v717 report shows 5 directly app-writable core financial tables and 19 uncertified ledger/account opening differences. No undocumented waiver, synthetic balancing journal or silent DB corrections. Even a green report is only a narrow prerequisite; certify opening balances, supply/vault, Test parity, v530 authenticated UI and rollback separately. The approved runtime environment file must be confirmed by inspecting current systemd `EnvironmentFiles` before running. [Evidence](worklog/2026-10-16-financial-readiness-v737.md).
