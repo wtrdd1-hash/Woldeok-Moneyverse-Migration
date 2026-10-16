@@ -1,6 +1,14 @@
 import type { BlogPost } from './blog.types';
 
 export type BlogLocale = 'ko' | 'en' | 'ja' | 'zh';
+
+// Temporary fail-closed editorial policy: migrated AI posts have no review receipt.
+// Never equate an AI-generated article with a source-verified, approved publication.
+// A future explicit approval schema must replace this gate before reviewed AI drafts publish.
+export function isBlogDiscoverable(post: BlogPost): boolean {
+  return post.isAiGenerated === false;
+}
+
 const ALIASES: Readonly<Record<string, string>> = {
   '2026-10-14-compound-interest-wealth-secret': '2026-10-14-compound-mv83xp86',
 };

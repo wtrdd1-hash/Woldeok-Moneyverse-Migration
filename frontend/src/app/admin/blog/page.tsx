@@ -6,8 +6,8 @@ import { getAllBlogPosts } from '@/app/blog/blog-data';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'AI 블로그 일일 자동화 관제 | 관리자 콘솔',
-  description: '내부 AI 금융 블로그 자동 생성 및 IndexNow 실시간 크롤링 핑 관제 패널',
+  title: 'AI 블로그 콘텐츠 검토 | 관리자 콘솔',
+  description: 'AI 생성 콘텐츠 검토 보류 및 국가별 블로그 SEO 현황',
   robots: { index: false, follow: false },
 };
 
@@ -20,10 +20,10 @@ export default async function AdminBlogPage() {
     <div className="container max-w-6xl mx-auto px-4 py-8 space-y-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-black text-foreground tracking-tight">
-          AI 블로그 일일 자동화 & SEO 관제탑
+          AI 블로그 편집 검토 및 SEO 관제
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          매일 09:00 KST 고수익 롱테일 키워드로 금융 칼럼을 자동 집필하고, Naver/Bing/Google 검색 로봇에 실시간 인덱싱을 요청합니다.
+          검증되지 않은 자동 생성 글의 추가 발행은 중단되어 있습니다. 기존 글의 사실 확인, 국가별 콘텐츠 품질, 사이트맵을 검토하세요.
         </p>
       </div>
 

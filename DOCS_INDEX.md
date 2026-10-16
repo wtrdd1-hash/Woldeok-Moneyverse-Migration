@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.16.721 — AI blog legacy-content safety audit (isolated candidate)
+- [Full audit EN](docs/findings/MONEYVERSE_AI_BLOG_RECHECK_v2026.10.16.719.md) / [한국어](docs/findings/MONEYVERSE_AI_BLOG_RECHECK_v2026.10.16.719.ko.md) · [Worklog](docs/worklog/2026-10-16-ai-blog-recheck-v719.md) · [Internal](docs/updates/v2026.10.16.721-ai-blog-internal.md) · [GitHub](docs/updates/v2026.10.16.721-ai-blog-github.md).
+- Public 177 posts included 171 legacy AI items with only six titles. Candidate preserves old URLs with `noindex` and an archive warning, removes them from hub/sitemap/API discovery and corrects paused administrator/cron behavior. Local suite/build/HTTP pass, **designated Test and Production not yet verified**.
+
 ## v2026.10.16.701 — Server capacity and SECURITY DEFINER ACL remediation
 - **LIVE:** Production privilege patch executed: publicly executable SECURITY DEFINER functions 11→0; explicit app EXECUTE 11 maintained; public endpoint smoke passed, no app release change. [Evidence](docs/releases/v2026.10.16.701.md).
 - [Release EN](docs/releases/v2026.10.16.701.md) / [KO](docs/releases/v2026.10.16.701.ko.md) · [Worklog](docs/worklog/2026-10-16-server-hygiene-v701.md). Owned merged build artifacts only: ~2.44GiB reclaimed, usage 81%→78%; isolated Production-schema shadow verified PUBLIC SECURITY DEFINER 11→0 and app EXECUTE retained, rollback tested. No member balance migration; residual direct finance DML remains P0.
