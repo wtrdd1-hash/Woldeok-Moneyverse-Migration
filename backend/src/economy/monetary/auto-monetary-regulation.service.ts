@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nest
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import { CentralBankService } from './central-bank.service';
+import { requireLedgerCertifiedMintExecution } from './monetary-execution-gate';
 import type {
   MonetaryAutoRegulationConfig,
   MonetaryRegulationActionType,
@@ -70,6 +71,9 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
     maxStepPct?: number,
     circuitBreakerFreezePct?: number,
   ): Promise<MonetaryAutoRegulationConfig> {
+    // Enabling an unverified auto-issuance workflow must never be configurable.
+    // Disable/update-read-only settings are still available to administrators.
+    if (isEnabled === true) requireLedgerCertifiedMintExecution();
     const res = await this.pool.query<MonetaryAutoRegulationConfig>(
       `
       UPDATE public.monetary_auto_regulation_configs

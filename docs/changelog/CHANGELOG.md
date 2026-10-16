@@ -1,5 +1,9 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+## v2026.10.16.738 — Fail-closed monetary route safety, candidate only
+- Direct policy, mint and retirement mutation held without audited ledger; auto-regulation enable blocked. Config flags cannot bypass. No schema or money write; full financial/UI gates remain. [Release](../releases/v2026.10.16.738.md).
+
+
 ## v2026.10.16.734 — Active host release identity gate, read-only
 - Reconciles existing PR #886 onto latest main; live v717 Production and v721.2 Test identity 100% matched against active systemd generation. Release tests 29/29 PASS. No runtime rollout, balances or sessions touched. [Release](../releases/v2026.10.16.734.md).
 

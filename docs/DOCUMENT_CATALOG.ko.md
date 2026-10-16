@@ -1,5 +1,9 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.16.738 — 통화 발행 안전 차단 후보
+- [릴리스](releases/v2026.10.16.738.ko.md), [작업기록](worklog/2026-10-16-monetary-guard-v738.ko.md), [GitHub 업데이트](updates/v2026.10.16.738-github.ko.md), [내부 변경](updates/v2026.10.16.738-internal.ko.md).
+
+
 ## v2026.10.16.734 — 실제 호스트 릴리스 검증기
 - [릴리스](releases/v2026.10.16.734.ko.md) / [English](releases/v2026.10.16.734.md), [작업기록](worklog/2026-10-16-host-release-identity-v734.ko.md), [GitHub용 내역](updates/v2026.10.16.734-github.ko.md), [내부용 내역](updates/v2026.10.16.734-internal.ko.md).
 

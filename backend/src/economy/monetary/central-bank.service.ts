@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
+import { requireLedgerCertifiedMintExecution } from './monetary-execution-gate';
 import { PG_POOL } from '../../core/pool.provider';
 import type {
   MonetaryOrderType,
@@ -32,16 +33,20 @@ export class CentralBankService {
     const mTotal = (treasuryWld + userWld).toString();
 
     // 2. Counts
-    const countsRes = await this.pool.query<{
-      active_orders: string;
-      mints: string;
-      retirements: string;
-    }>(`
+    const countsRes = await this.pool
+      .query<{
+        active_orders: string;
+        mints: string;
+        retirements: string;
+      }>(
+        `
       SELECT
         (SELECT count(*) FROM public.monetary_policy_orders WHERE status = 'APPROVED') AS active_orders,
         (SELECT count(*) FROM public.mint_certificates) AS mints,
         (SELECT count(*) FROM public.retirement_certificates) AS retirements
-    `).catch(() => ({ rows: [{ active_orders: '0', mints: '0', retirements: '0' }] }));
+    `,
+      )
+      .catch(() => ({ rows: [{ active_orders: '0', mints: '0', retirements: '0' }] }));
 
     const counts = countsRes.rows[0];
 
@@ -75,6 +80,7 @@ export class CentralBankService {
       throw new BadRequestException('통화정책 제안 사유는 최소 10자 이상 입력해야 합니다.');
     }
 
+    requireLedgerCertifiedMintExecution();
     const expiresAt = new Date(Date.now() + validDurationHours * 3600 * 1000);
 
     const res = await this.pool.query<MonetaryPolicyOrder>(
@@ -92,6 +98,7 @@ export class CentralBankService {
   }
 
   async approvePolicyOrder(approverId: string, orderId: string): Promise<MonetaryPolicyOrder> {
+    requireLedgerCertifiedMintExecution();
     const orderRes = await this.pool.query<MonetaryPolicyOrder>(
       `SELECT * FROM public.monetary_policy_orders WHERE id = $1`,
       [orderId],
@@ -218,6 +225,7 @@ export class CentralBankService {
   }
 
   async proposeFromAiCouncil(actorId: string): Promise<MonetaryPolicyOrder> {
+    requireLedgerCertifiedMintExecution();
     const rec = await this.generateAiCouncilRecommendation();
     return this.proposePolicyOrder(
       actorId,
@@ -229,4 +237,3 @@ export class CentralBankService {
     );
   }
 }
-
