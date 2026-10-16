@@ -1,5 +1,9 @@
 # 📚 Document Catalog
 
+## v2026.10.16.739 — Safe SEO scheduled-indexing gate
+- [Release EN](releases/v2026.10.16.739.md) / [KO](releases/v2026.10.16.739.ko.md), [worklog](worklog/2026-10-16-seo-cron-isolation-v739.md), [GitHub](updates/v2026.10.16.739-github.md), [internal](updates/v2026.10.16.739-internal.md).
+
+
 ## v2026.10.16.737 — Read-only financial release gate (BLOCKED)
 - [EN](worklog/2026-10-16-financial-readiness-v737.md) / [KO](worklog/2026-10-16-financial-readiness-v737.ko.md) · [GitHub update](updates/v2026.10.16.737-github.md) · [Internal](updates/v2026.10.16.737-internal.md). No live data or runtime changes.
 

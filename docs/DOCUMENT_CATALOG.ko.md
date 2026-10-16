@@ -1,5 +1,9 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.16.739 — SEO 예약 제출 격리
+- [릴리스](releases/v2026.10.16.739.ko.md), [작업기록](worklog/2026-10-16-seo-cron-isolation-v739.ko.md), [GitHub 변경](updates/v2026.10.16.739-github.ko.md), [내부 변경](updates/v2026.10.16.739-internal.ko.md).
+
+
 ## v2026.10.16.737 — 금융 원장 읽기 전용 운영승격 검사 (BLOCKED)
 - [한글](worklog/2026-10-16-financial-readiness-v737.ko.md) / [EN](worklog/2026-10-16-financial-readiness-v737.md) · [GitHub](updates/v2026.10.16.737-github.ko.md) · [내부](updates/v2026.10.16.737-internal.ko.md). 운영 데이터·서비스 미변경.
 

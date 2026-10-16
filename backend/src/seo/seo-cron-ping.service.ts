@@ -1,10 +1,11 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { SeoService } from './seo.service';
 
 @Injectable()
-export class SeoCronPingService implements OnModuleInit {
+export class SeoCronPingService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(SeoCronPingService.name);
   private timer: NodeJS.Timeout | null = null;
+  private initialTimer: NodeJS.Timeout | null = null;
   private lastPingResult: {
     readonly timestamp: string;
     readonly success: boolean;
@@ -14,11 +15,18 @@ export class SeoCronPingService implements OnModuleInit {
   constructor(private readonly seoService: SeoService) {}
 
   onModuleInit() {
+    // A Test/shadow process must never publish public indexing submissions.
+    // Production also requires an explicit opt-in; absent config fails closed.
+    if (process.env.NODE_ENV === 'test' || process.env.SEO_INDEXING_ENABLED !== 'true') {
+      this.logger.warn('scheduled SEO submissions disabled (Test or not explicitly enabled)');
+      return;
+    }
     // 6-hour interval (21,600,000 ms)
     const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 
     // Initial delayed ping after 30 seconds of server boot
-    setTimeout(() => {
+    this.initialTimer = setTimeout(() => {
+      this.initialTimer = null;
       void this.executePeriodicPing();
     }, 30_000);
 
@@ -27,6 +35,13 @@ export class SeoCronPingService implements OnModuleInit {
     }, SIX_HOURS_MS);
 
     this.logger.log('SeoCronPingService initialized: 6-hour automated IndexNow & Sitemap ping scheduled.');
+  }
+
+  onModuleDestroy() {
+    if (this.initialTimer) clearTimeout(this.initialTimer);
+    if (this.timer) clearInterval(this.timer);
+    this.initialTimer = null;
+    this.timer = null;
   }
 
   async executePeriodicPing(): Promise<{
