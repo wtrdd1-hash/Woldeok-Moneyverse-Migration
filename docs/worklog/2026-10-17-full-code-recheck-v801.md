@@ -18,6 +18,8 @@
 - Source-level dashboard telemetry fallback to success 100% and live true on absent evidence noted as truthful-status risk.
 
 ## End and decision
+- Published draft documentation PR [#926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/926); no merge or runtime promotion claimed.
+
 - Full report: [English](../findings/MONEYVERSE_FULL_CODE_RECHECK_v2026.10.17.801.md) / [Korean](../findings/MONEYVERSE_FULL_CODE_RECHECK_v2026.10.17.801.ko.md).
 - Separate docs-only audit branch; no modification to app code, DB schema/data, balances, grants, switches, active services, sessions, main or public release. Production remains v717 at observation.
 - Strict gate: no Production promotion until exact-SHA Test rebuild parity, financial provenance/permissions, real DB integration and authenticated v530 all-route UI acceptance are demonstrated independently.

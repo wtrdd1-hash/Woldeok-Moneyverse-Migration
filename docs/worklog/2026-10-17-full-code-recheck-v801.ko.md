@@ -18,6 +18,8 @@
 - 관리자 API 관제의 데이터 부재 시 100% 성공/실시간 표시 디폴트는 개선 필요.
 
 ## 종료 및 판정
+- 문서 전용 Draft PR [#926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/926) 등록. 메인 병합·운영 승격은 수행하지 않음.
+
 - 상세 결과 [영문](../findings/MONEYVERSE_FULL_CODE_RECHECK_v2026.10.17.801.md) / [한국어](../findings/MONEYVERSE_FULL_CODE_RECHECK_v2026.10.17.801.ko.md).
 - 별도 감사 브랜치의 문서만 갱신. 운영 DB, 금액, 권한, 기능 스위치, 배포 서비스, 세션, 운영 트래픽 미변경.
 - 운영 승격 차단: 테스트 정확 SHA 불일치, 금융 권한/원장 근거 미완료, 인증 166화면 5회 QA와 실 DB 테스트 미인증.
