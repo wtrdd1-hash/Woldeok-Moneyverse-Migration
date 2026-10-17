@@ -1,7 +1,7 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
-## v2026.10.17.791 — Reject mismatched frontend build in immutable staging (candidate)
-- Read-only Test identity gate found Next artifact BUILD_ID drift despite 200/version/manifest agreement. Host staging now rejects an artifact whose Next build ID differs from approved SHA before creating a release. RED/GREEN; 56 release tests PASS. No Test/Production cutover. [Release](../releases/v2026.10.17.791.md).
+## v2026.10.17.791 — Reject mismatched frontend build in immutable staging (main merged)
+- Read-only Test identity gate found Next artifact BUILD_ID drift despite 200/version/manifest agreement. Host staging now rejects an artifact whose Next build ID differs from approved SHA before creating a release. RED/GREEN; 56 release tests PASS. PR #923 merged main `92cb1582`; no Test/Production cutover. [Release](../releases/v2026.10.17.791.md).
 
 
 ## v2026.10.17.790 — Financial release gate rejects incomplete evidence (candidate)

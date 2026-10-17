@@ -11,7 +11,8 @@
 - [x] RED: new negative test FAILED against prior script: artifact `candidate-build` staged successfully (exit 0), confirming release identity gap.
 - [x] GREEN: staging now rejects mismatched artifacts before release-root creation, while exact SHA artifact stages without .git metadata. Test fixture models ignored generated outputs. 3 focused tests PASS.
 - [x] Revisited origin/main `aa7eddb9`, integrated master, release and version policy; release regression suite 56 PASS, 0 FAIL/SKIP; Bash syntax and `git diff --check` clean.
-- [ ] Publish branch, GitHub PR/CI, final status. **No Test or Production cutover**; current Test live artifact identity still invalid, finance and v530 P0 unresolved.
+- [x] GitHub [PR #923](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/923) CI policy/classification passed and MERGED to main `92cb15824bcca1b9474d97caa5b40e388db55d9a`; GitHub Build Test Candidate non-runtime jobs skipped by workflow classification. **No new Test or Production cutover**; current Test live artifact identity still invalid, finance and v530 P0 unresolved.
 
 ## Finished
-- Pending GitHub result; new stage safeguard does not repair already-running Test release. No production/DB change.
+- Source fix completed and merged to main via #923 (v791); local release tests 56 pass/0 fail/0 skip. New stage safeguard does not repair already-running Test release. No Production deployment, DB change, balance mutation, secret change or runtime pointer change.
+- Closing documentation based on refreshed origin/main; original fix source remains immutable.
