@@ -1,5 +1,9 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+## v2026.10.18.804 — Core journal application role privilege narrowing (candidate)
+- Numbered migration 277 removes direct app write/admin privileges on immutable `ledger_transactions` and `ledger_postings`, retaining SELECT and scoped definer commands. Actual Production ACL restored schema-only to disposable Test DB; repeat execution and negative rights checks passed. Other financial release gates remain BLOCKED. [Release](../releases/v2026.10.18.804.md).
+
+
 ## v2026.10.17.802 — Promotion approval: exact-SHA Test artifact staged; Production HOLD
 - Approval execution built/staged an immutable Test SHA `7098f236` artifact with correct Next/manifest identity; not yet activated. Fixed v717 Production missing EnvironmentFile restart hazard without downtime (43 process-matched configuration values, no secrets or PID changes). Release unit checks 56 PASS; read-only finance gate still BLOCKED for 5 app financial DML privileges and 19 uncertified projections +4,779,188 WLD. No Production application promotion. [Release](../releases/v2026.10.17.802.md).
 
