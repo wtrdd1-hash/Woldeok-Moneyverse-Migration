@@ -1,5 +1,7 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+- **v2026.10.17.796 — Marketplace appraisal ledger-first (candidate):** Atomic one-transaction fee and certificate, duplicate/insufficient protection; real disposable Test DB E2E passed. Official Test/Production unchanged; financial/UI gates open. [Release](../releases/v2026.10.17.796.md).
+
 ## v2026.10.17.791 — Reject mismatched frontend build in immutable staging (main merged)
 - Read-only Test identity gate found Next artifact BUILD_ID drift despite 200/version/manifest agreement. Host staging now rejects an artifact whose Next build ID differs from approved SHA before creating a release. RED/GREEN; 56 release tests PASS. PR #923 merged main `92cb1582`; no Test/Production cutover. [Release](../releases/v2026.10.17.791.md).
 
