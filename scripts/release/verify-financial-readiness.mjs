@@ -16,30 +16,63 @@ export const PROTECTED_FINANCIAL_TABLES = Object.freeze([
 
 export function evaluateFinancialReadiness({ grants, ledger, identity }) {
   const blockers = [];
-  const byTable = new Map(grants.map((entry) => [entry.name, entry]));
+  // A truncated or malformed operator query is never evidence of a safe database.
+  // In particular, JavaScript comparisons with undefined/NaN silently evaluate false.
+  const validGrants = Array.isArray(grants) ? grants : [];
+  if (!Array.isArray(grants)) blockers.push('unverified_financial_grants');
+  const byTable = new Map();
+  for (const row of validGrants) {
+    if (!row || typeof row.name !== 'string' || !PROTECTED_FINANCIAL_TABLES.includes(row.name)) {
+      blockers.push('invalid_financial_grant_row');
+      continue;
+    }
+    if (byTable.has(row.name)) blockers.push('duplicate_financial_grant_row:' + row.name);
+    byTable.set(row.name, row);
+  }
   for (const name of PROTECTED_FINANCIAL_TABLES) {
     const row = byTable.get(name);
-    if (!row) blockers.push('missing_core_table:' + name);
-    else if (row.can_insert || row.can_update || row.can_delete) {
+    if (!row) {
+      blockers.push('missing_core_table:' + name);
+    } else if (['can_insert', 'can_update', 'can_delete'].some(key => typeof row[key] !== 'boolean')) {
+      blockers.push('unverified_financial_grant_flags:' + name);
+    } else if (row.can_insert || row.can_update || row.can_delete) {
       blockers.push('direct_application_financial_dml:' + name);
     }
   }
-  if (!identity?.database || !identity?.role) blockers.push('unverified_database_identity');
-  if (!ledger || !Number.isInteger(ledger.balance_rows) || ledger.balance_rows < 1) {
-    blockers.push('missing_or_empty_balance_projection');
-  } else {
-    if (ledger.unexplained_account_count > 0) blockers.push('uncertified_account_opening_or_ledger_drift');
-    // No ledger postings means that an opening balance cannot be inferred from the
-    // immutable transaction history. Never guess a missing journal entry.
-    if (!Number.isInteger(ledger.unexplained_without_postings_count)) {
-      blockers.push('unverified_account_posting_coverage');
-    } else if (ledger.unexplained_without_postings_count > 0) {
-      blockers.push('uncertified_balance_without_any_ledger_postings');
-    }
-    if (ledger.unbalanced_transaction_count > 0) blockers.push('unbalanced_ledger_transaction');
-    if (ledger.transactions_without_postings > 0) blockers.push('ledger_transaction_without_postings');
-    if (ledger.unknown_posting_direction_count > 0) blockers.push('unknown_posting_direction');
+  if (!identity || typeof identity.database !== 'string' || !identity.database.trim() ||
+      typeof identity.role !== 'string' || !identity.role.trim()) {
+    blockers.push('unverified_database_identity');
   }
+  if (!ledger || !Number.isSafeInteger(ledger.balance_rows) || ledger.balance_rows < 1) {
+    blockers.push('missing_or_empty_balance_projection');
+  }
+  const mandatoryCounts = [
+    'unexplained_account_count', 'unexplained_without_postings_count',
+    'unbalanced_transaction_count', 'transactions_without_postings',
+    'unknown_posting_direction_count',
+  ];
+  for (const key of mandatoryCounts) {
+    const value = ledger?.[key];
+    if (!Number.isSafeInteger(value) || value < 0) {
+      blockers.push('invalid_financial_metric:' + key);
+    }
+  }
+  for (const [countKey, amountKey] of [
+    ['unexplained_account_count', 'unexplained_delta_wld'],
+    ['unexplained_without_postings_count', 'unexplained_without_postings_delta_wld'],
+  ]) {
+    const value = ledger?.[amountKey];
+    if (typeof value !== 'string' || !/^-?(?:0|[1-9]\d*)$/.test(value)) {
+      blockers.push('invalid_financial_wld_amount:' + amountKey);
+    } else if (ledger[countKey] === 0 && BigInt(value) !== 0n) {
+      blockers.push('inconsistent_financial_wld_delta:' + amountKey);
+    }
+  }
+  if (ledger?.unexplained_account_count > 0) blockers.push('uncertified_account_opening_or_ledger_drift');
+  if (ledger?.unexplained_without_postings_count > 0) blockers.push('uncertified_balance_without_any_ledger_postings');
+  if (ledger?.unbalanced_transaction_count > 0) blockers.push('unbalanced_ledger_transaction');
+  if (ledger?.transactions_without_postings > 0) blockers.push('ledger_transaction_without_postings');
+  if (ledger?.unknown_posting_direction_count > 0) blockers.push('unknown_posting_direction');
   return {
     ok: blockers.length === 0,
     status: blockers.length === 0 ? 'READY_FOR_OTHER_RELEASE_GATES' : 'BLOCKED',
@@ -54,7 +87,7 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
       unexplainedWithoutPostingsDeltaWld: ledger?.unexplained_without_postings_delta_wld ?? null,
       unbalancedTransactions: ledger?.unbalanced_transaction_count ?? null,
       transactionsWithoutPostings: ledger?.transactions_without_postings ?? null,
-      coreTablesWithAppDml: grants.filter(x => x.can_insert || x.can_update || x.can_delete)
+      coreTablesWithAppDml: validGrants.filter(x => x && (x.can_insert === true || x.can_update === true || x.can_delete === true))
         .map(x => x.name),
     },
     caveat: 'Opening-balance provenance and treasury/money-supply reconciliation are separate mandatory gates. A zero count here is not approval for Production.',

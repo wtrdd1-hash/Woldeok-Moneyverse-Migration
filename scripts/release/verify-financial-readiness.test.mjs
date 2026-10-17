@@ -94,3 +94,32 @@ test('uncertified balances with no postings are detected without exposing accoun
   assert.equal(result.summary.unexplainedWithoutPostingsDeltaWld,'4000000');
   assert(!('accountId' in result.summary));
 });
+
+test('missing or invalid mandatory ledger counts cannot produce a green financial gate',()=>{
+  for (const key of ['unexplained_account_count','unexplained_without_postings_count',
+    'unbalanced_transaction_count','transactions_without_postings','unknown_posting_direction_count']) {
+    const missing={...good.ledger}; delete missing[key];
+    assert.equal(evaluateFinancialReadiness({...good,ledger:missing}).ok,false,`${key} missing must block`);
+    for (const invalid of [null,-1,NaN,'0',1.5]) {
+      const ledger={...good.ledger,[key]:invalid};
+      assert.equal(evaluateFinancialReadiness({...good,ledger}).ok,false,`${key} invalid ${String(invalid)} must block`);
+    }
+  }
+});
+
+test('grant evidence must include uniquely identified protected tables with boolean flags',()=>{
+  assert.equal(evaluateFinancialReadiness({...good,grants:[]}).ok,false);
+  assert.equal(evaluateFinancialReadiness({...good,grants:null}).ok,false);
+  assert.equal(evaluateFinancialReadiness({...good,grants:[...good.grants,good.grants[0]]}).ok,false);
+  assert.equal(evaluateFinancialReadiness({...good,grants:good.grants.map(x=>x.name==='accounts'?{name:x.name}:x)}).ok,false);
+  assert.equal(evaluateFinancialReadiness({...good,grants:good.grants.map(x=>x.name==='accounts'?{...x,can_update:'false'}:x)}).ok,false);
+});
+
+test('invalid or contradictory signed-WLD totals are blocked without lossy Number conversion',()=>{
+  for (const key of ['unexplained_delta_wld','unexplained_without_postings_delta_wld']) {
+    for (const value of [null,undefined,'unknown','1.5']) {
+      assert.equal(evaluateFinancialReadiness({...good,ledger:{...good.ledger,[key]:value}}).ok,false);
+    }
+    assert.equal(evaluateFinancialReadiness({...good,ledger:{...good.ledger,[key]:'9007199254740993'}}).ok,false);
+  }
+});

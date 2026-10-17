@@ -1,5 +1,9 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+## v2026.10.17.790 — Financial release gate rejects incomplete evidence (candidate)
+- Prevent missing/malformed ledger/grant metrics and inconsistent WLD totals from producing false-green financial preflight. RED/GREEN tests; 55 release tests PASS. Read-only live DB remains BLOCKED (five app DML grants; 19 unexplained balance projections). No Test/Production app deployment. [Release](../releases/v2026.10.17.790.md).
+
+
 - **v2026.10.17.786 — SEO background fail-closed (candidate):** Test/shadow outbound crawl and daily digest schedules disabled; explicit Production leader+job opt-in, initial-timer cleanup, 17 targeted tests pass. Production finance and UI release gates remain blocked. [Release](../releases/v2026.10.17.786.md).
 
 ## v2026.10.16.739 — Background SEO scheduling isolation
