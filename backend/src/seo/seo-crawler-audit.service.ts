@@ -23,6 +23,7 @@ const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 export class SeoCrawlerAuditService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(SeoCrawlerAuditService.name);
   private timer: NodeJS.Timeout | null = null;
+  private initialTimer: NodeJS.Timeout | null = null;
   private lastAuditResult: CrawlAuditResult | null = null;
 
   constructor(
@@ -31,25 +32,39 @@ export class SeoCrawlerAuditService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    // Start initial audit 45 seconds after boot, then every 6 hours
-    setTimeout(() => {
-      this.runCrawlAudit().catch((err) => {
+    // Shadow/Test processes may run with NODE_ENV=production for build parity.
+    // Only the authoritative Production scheduler may initiate outbound audits.
+    // Absence of an explicit opt-in must fail closed.
+    const appOrigin = (process.env.APP_BASE_URL ?? '').replace(/\/$/, '');
+    if (
+      process.env.NODE_ENV !== 'production' ||
+      appOrigin !== 'https://easy-scraping.com' ||
+      process.env.MONEYVERSE_SCHEDULER_ENABLED !== 'true' ||
+      process.env.SEO_CRAWL_AUDIT_SCHEDULER_ENABLED !== 'true'
+    ) {
+      this.logger.warn('scheduled SEO crawl audit disabled (not authorized Production scheduler)');
+      return;
+    }
+
+    this.initialTimer = setTimeout(() => {
+      this.initialTimer = null;
+      void this.runCrawlAudit().catch((err) => {
         this.logger.error('Initial SEO crawl audit failed', err);
       });
     }, 45_000);
 
     this.timer = setInterval(() => {
-      this.runCrawlAudit().catch((err) => {
+      void this.runCrawlAudit().catch((err) => {
         this.logger.error('Scheduled SEO crawl audit failed', err);
       });
     }, SIX_HOURS_MS);
   }
 
   onModuleDestroy() {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
+    if (this.initialTimer) clearTimeout(this.initialTimer);
+    if (this.timer) clearInterval(this.timer);
+    this.initialTimer = null;
+    this.timer = null;
   }
 
   getLastAuditResult(): CrawlAuditResult | null {
