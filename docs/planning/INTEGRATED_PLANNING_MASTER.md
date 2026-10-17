@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.17.790 — Financial readiness evidence completeness (candidate; Production HOLD)
+- v737 read-only finance gate now rejects missing/invalid ledger counters, malformed app-grant responses and contradictory WLD totals rather than incorrectly returning READY. [Release](../releases/v2026.10.17.790.md). Read-only live snapshot still shows 5 directly app-writable protected tables and 19 uncertified projection differences; no financial reconciliation approval, v530 UI approval or Test/Production promotion.
+
+
 ## v2026.10.16.742 — Administrator Discord DM operational alert routing (candidate)
 - Curated DiscordAlertService system events now mirror to the authorized admin DM alongside channel messages; credentials, member raw data and logs are not forwarded. [Runbook](../operations/discord-administrator-direct-messages.md). Test/build green; CI/exact-SHA Test/Production and existing finance/UI release gates remain open.
 
