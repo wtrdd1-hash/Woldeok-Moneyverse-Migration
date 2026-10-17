@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.17.796 — Marketplace appraisal fail-closed ledger candidate; Production HOLD
+- Separate implementation branch replaces an invalid parameterized DO block and unjournaled balance writes with a scoped SECURITY DEFINER atomic journal and appraisal certificate. Disposable Test DB E2E and unit tests passed; official Test/Production and authenticated QA not yet accepted. Historic Production 19-account mismatch +4,779,188 WLD, broad app DML rights, and v530 UI/MFA five-pass remain independent release blockers. [Release](../releases/v2026.10.17.796.md).
+
 ## v2026.10.17.791 — Exact SHA of generated frontend artifact (main merged; Production HOLD)
 - Read-only Test probe caught `frontend_artifact_sha_mismatch` on public Test SHA `4997cf2b`: physical Next BUILD_ID is a timestamp. Host stage release now refuses this mismatch before copying. [Release](../releases/v2026.10.17.791.md). PR #923 merged to main `92cb1582` with CI policy checks PASS. This does NOT certify current Test, v530 UI, or finance. New exact-built Test generation and signed-in continuity must precede a Production decision.
 

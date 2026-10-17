@@ -428,74 +428,15 @@ export class MarketplaceService {
     dto: { itemId: string; itemName: string; rarity: string },
   ): Promise<unknown> {
     if (!this.pool) throw new Error('database pool unavailable');
-    const refValue = dto.rarity === 'LEGENDARY' ? 10000 : dto.rarity === 'EPIC' ? 4000 : 1500;
-    const fee = Math.max(250, Math.ceil(refValue * 0.0025));
-
-    // Deduct fee from actor cash balance to sink
-    await queryOne(
-      this.pool,
-      `DO $$
-       DECLARE
-         v_user_account_id uuid;
-         v_sink_account_id uuid;
-       BEGIN
-         SELECT a.id INTO v_user_account_id
-         FROM public.accounts a
-         WHERE a.owner_user_id = $1::uuid AND a.account_type = 'USER_CASH'::public.account_type AND a.status = 'active'::public.account_status
-         LIMIT 1;
-
-         SELECT a.id INTO v_sink_account_id
-         FROM public.accounts a
-         WHERE a.account_type = 'SINK'::public.account_type AND a.status = 'active'::public.account_status
-         LIMIT 1;
-
-         IF v_user_account_id IS NOT NULL THEN
-           UPDATE public.account_balances
-           SET available_amount = GREATEST(0, available_amount::numeric - $2::numeric), updated_at = clock_timestamp()
-           WHERE account_id = v_user_account_id;
-         END IF;
-
-         IF v_sink_account_id IS NOT NULL THEN
-           UPDATE public.account_balances
-           SET available_amount = available_amount::numeric + $2::numeric, updated_at = clock_timestamp()
-           WHERE account_id = v_sink_account_id;
-         END IF;
-       END $$;`,
-      [actor, fee],
-    );
-
-    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const certId = `CERT-2026-${randomSuffix}`;
-    const certHash = `0x${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
-    const fairP25 = Math.round(refValue * 0.9);
-    const fairP75 = Math.round(refValue * 1.15);
-
+    // SECURITY DEFINER function atomically owns journal and certificate.
+    // App role cannot directly mutate core money tables or certificates.
     const row = await queryOne<{ cert: unknown }>(
       this.pool,
-      `INSERT INTO public.marketplace_appraisal_certificates (
-         cert_id, user_id, item_id, item_name, rarity,
-         appraised_value_wld, fair_band_p25, fair_band_p75,
-         provenance_author, cert_hash, fee_paid_wld
-       ) VALUES (
-         $1, $2::uuid, $3, $4, $5, $6::numeric, $7::numeric, $8::numeric,
-         $4 || ' 원작자 (시스템 검증 완료)', $9, $10::numeric
-       ) RETURNING jsonb_build_object(
-         'certId', cert_id,
-         'itemId', item_id,
-         'itemName', item_name,
-         'rarity', rarity,
-         'appraisedValueWld', appraised_value_wld::text,
-         'fairBandP25', fair_band_p25::text,
-         'fairBandP75', fair_band_p75::text,
-         'provenanceAuthor', provenance_author,
-         'craftedAt', crafted_at::text,
-         'appraisedAt', appraised_at::text,
-         'certHash', cert_hash
+      `SELECT public.marketplace_create_appraisal_certificate(
+         $1::uuid, $2::text, $3::text, $4::text
        ) AS cert`,
-      [certId, actor, dto.itemId, dto.itemName, dto.rarity, refValue, fairP25, fairP75, certHash, fee],
+      [actor, dto.itemId, dto.itemName, dto.rarity],
     );
-
     return row?.cert ?? null;
   }
 }
-
