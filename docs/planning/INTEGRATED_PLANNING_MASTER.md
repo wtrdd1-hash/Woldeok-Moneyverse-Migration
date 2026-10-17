@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.18.804 — Core immutable journal direct-DML privilege containment (candidate / Production HOLD)
+- Source code and actual Production v717 dist use journal tables for reads, not direct app DML; nonetheless live app role has broad ledger INSERT/UPDATE/DELETE/TRUNCATE/TRIGGER rights. Migration 277 revokes all journal table rights then regrants SELECT only, retaining existing SECURITY DEFINER role-scoped command boundary; applied twice to an isolated copy of actual Production schema+ACL with all direct write privileges denied. Other 3 financial tables and 19 unverifiable opening/projection balances +4,779,188 WLD remain P0, with v530 signed-in UI/backup/restore gates BLOCKED. [Release](../releases/v2026.10.18.804.md).
+
+
 ## v2026.10.17.802 — Production approval execution, immutable Test candidate STAGED / Production HOLD
 - User authorized promotion. Exact-main `7098f236` build and immutable Test artifact with matching manifest/Next SHA staged (not activated); 56 release unit tests PASS. Active Test is still mixed source `bca8d54a` versus manifest/Next `50fb6395`. Repaired v717 missing runtime restart EnvironmentFile reference using process-matched root-only nonsecret overrides, without service restart. Financial read-only gate remains BLOCKED (5 direct application DML grants, 19 uncertain opening/projection differences +4,779,188 WLD). v530 authenticated route QA, exact candidate Test, session and backup restore not accepted, so no Production switch or financial waiver. [Release](../releases/v2026.10.17.802.md).
 
