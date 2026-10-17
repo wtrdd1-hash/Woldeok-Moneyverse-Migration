@@ -19,8 +19,14 @@ describe('SiteHeader Responsive Clipping Invariant', () => {
 
   it('applies compact padding and gaps on lg and xl viewports for navigation items', () => {
     // lg 및 xl 뷰포트에서 nav gap이 gap-1.5 xl:gap-2.5 2xl:gap-4 lg:flex로 유지되면서 패딩이 콤팩트하게 적용되는지 검증
-    expect(source).toContain('hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-3.5 lg:flex');
+    expect(source).toContain('hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-3.5 2xl:flex');
     expect(source).toContain('px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs 2xl:text-sm');
+  });
+
+  it('keeps the mobile route drawer reachable until wide desktops and scrolls wide navigation instead of clipping it', () => {
+    expect(source).toContain('size-11 rounded-[10px] 2xl:hidden shrink-0');
+    expect(source).toContain('2xl:flex min-w-0 flex-1 overflow-x-auto');
+    expect(source).toContain('tabIndex={0}');
   });
 
   it('retains server clock pill on 2xl and desktop while hiding on compact views', () => {

@@ -885,6 +885,11 @@ nav {
   min-width: 0 !important;
 }
 
+/* The global viewport shield must not undo the 1440px desktop content cap. */
+.moneyverse-main {
+  max-width: min(100%, 1440px) !important;
+}
+
 img,
 svg,
 video,

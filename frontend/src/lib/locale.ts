@@ -105,6 +105,47 @@ export function detectBrowserLocale(): Locale {
   return DEFAULT_LOCALE;
 }
 
+/**
+ * A language-prefixed link is an explicit route override. Changing the user's
+ * preference must navigate away from that override (rather than refreshing it).
+ * The same applies to ?lang= and ?locale= after a manual or automatic choice.
+ *
+ * Returns null when a same-route router.refresh() is enough.
+ */
+export function localeNavigationTarget(
+  pathname: string,
+  search: string,
+  nextLocale: Locale | null,
+): string | null {
+  const prefixMatch = pathname.match(/^\/(ko|en|ja|zh)(?=\/|$)/i);
+  const suffix = prefixMatch ? pathname.slice(prefixMatch[0].length) : '';
+  let nextPath = pathname;
+
+  if (prefixMatch) {
+    if (nextLocale) {
+      nextPath = `/${nextLocale}${suffix}`;
+    } else {
+      // Localized compound calculator has no unprefixed equivalent. Return to
+      // the real calculator route rather than navigating the user into a 404.
+      nextPath = suffix.startsWith('/tools/compound-interest-calculator')
+        ? '/tools/compound-calculator'
+        : (suffix || '/');
+    }
+  }
+
+  const params = new URLSearchParams(search);
+  const hasExplicitLanguageQuery = params.has('lang') || params.has('locale');
+  if (hasExplicitLanguageQuery) {
+    params.delete('lang');
+    params.delete('locale');
+  }
+  const query = hasExplicitLanguageQuery
+    ? params.toString()
+    : search.replace(/^\?/, '');
+  const target = nextPath + (query ? `?${query}` : '');
+  return target === pathname + search ? null : target;
+}
+
 export function localeLabel(
   locale: Locale,
   korean: string,

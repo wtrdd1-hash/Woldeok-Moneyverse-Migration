@@ -7,6 +7,13 @@ function source(path: string): string {
 }
 
 describe('mobile responsive overflow guards', () => {
+  it('preserves the 1440px content cap instead of overriding it with the global overflow guard', () => {
+    const css = source('globals.css');
+    const shell = source('../components/site-shell.tsx');
+    expect(shell).toContain('max-w-[1440px]');
+    expect(css).toMatch(/\.moneyverse-main\s*\{\s*max-width:\s*min\(100%,\s*1440px\)\s*!important;/);
+  });
+
   it('keeps the global drawer and five-tab bottom navigation inside narrow viewports', () => {
     const header = source('../components/site-header.tsx');
     const bottomNav = source('../components/mobile-bottom-nav.tsx');
