@@ -1,5 +1,9 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+## v2026.10.17.802 — Promotion approval: exact-SHA Test artifact staged; Production HOLD
+- Approval execution built/staged an immutable Test SHA `7098f236` artifact with correct Next/manifest identity; not yet activated. Fixed v717 Production missing EnvironmentFile restart hazard without downtime (43 process-matched configuration values, no secrets or PID changes). Release unit checks 56 PASS; read-only finance gate still BLOCKED for 5 app financial DML privileges and 19 uncertified projections +4,779,188 WLD. No Production application promotion. [Release](../releases/v2026.10.17.802.md).
+
+
 ## v2026.10.17.801 — Secret auction ledger safety containment (main merged)
 - Halt new bids before SQL and prevent unjournaled auction settlement; preserve existing auction/log read paths, replace misleading bidder UI with maintenance status. Full local tests, build, typecheck, lint passed; 396 backend DB tests skipped. Production financial release gate still BLOCKED. PR #928 main `bd6cf172` merged after runtime CI and Test candidate image build success. No Test/Production application promotion. [Release](../releases/v2026.10.17.801.md).
 
