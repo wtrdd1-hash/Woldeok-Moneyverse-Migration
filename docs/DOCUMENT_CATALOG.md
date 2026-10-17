@@ -1,5 +1,9 @@
 # 📚 Document Catalog
 
+## v2026.10.17.801 — Full code / runtime audit (AUDIT / BLOCKED)
+- [Full findings EN](findings/MONEYVERSE_FULL_CODE_RECHECK_v2026.10.17.801.md) / [KO](findings/MONEYVERSE_FULL_CODE_RECHECK_v2026.10.17.801.ko.md) · [Worklog EN](worklog/2026-10-17-full-code-recheck-v801.md) / [KO](worklog/2026-10-17-full-code-recheck-v801.ko.md) · [Changelog EN](changelog/2026-10-17-full-code-recheck-v801.md) / [KO](changelog/2026-10-17-full-code-recheck-v801.ko.md) · [GitHub](updates/v2026.10.17.801-github.md) / [Internal](updates/v2026.10.17.801-internal.md). This is evidence only; live finance and exact Test release identity BLOCK production.
+
+
 ## v2026.10.17.782 — MiniPC root safe-cache recovery (HOST VERIFIED)
 - [Worklog EN](worklog/2026-10-17-host-storage-hygiene-v782.md) / [KO](worklog/2026-10-17-host-storage-hygiene-v782.ko.md) · [Exact 26-cache evidence](worklog/host-cleanup-v782-evidence.txt) · [Changelog](changelog/2026-10-17-host-storage-hygiene-v782.md) / [KO](changelog/2026-10-17-host-storage-hygiene-v782.ko.md) · [GitHub](updates/v2026.10.17.782-github.md) / [Internal](updates/v2026.10.17.782-internal.md). System 80%→72%, 8.21GB net reclaimed, no app release.
 

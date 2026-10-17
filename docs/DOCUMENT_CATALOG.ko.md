@@ -1,5 +1,9 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.17.801 — 전체 코드·운영 재점검 (AUDIT / BLOCKED)
+- [영문 보고서](findings/MONEYVERSE_FULL_CODE_RECHECK_v2026.10.17.801.md) / [국문 보고서](findings/MONEYVERSE_FULL_CODE_RECHECK_v2026.10.17.801.ko.md) · [작업 기록 EN](worklog/2026-10-17-full-code-recheck-v801.md) / [KO](worklog/2026-10-17-full-code-recheck-v801.ko.md) · [변경 이력 EN](changelog/2026-10-17-full-code-recheck-v801.md) / [KO](changelog/2026-10-17-full-code-recheck-v801.ko.md) · [GitHub용](updates/v2026.10.17.801-github.md) / [내부용](updates/v2026.10.17.801-internal.md). 검증 기록일 뿐이며 금융 원장 및 테스트 릴리스 SHA 불일치가 운영 승격을 차단한다.
+
+
 ## v2026.10.17.782 — 미니PC 시스템 캐시 정리 (호스트 검증)
 - [작업기록 EN](worklog/2026-10-17-host-storage-hygiene-v782.md) / [KO](worklog/2026-10-17-host-storage-hygiene-v782.ko.md) · [26개 정리 대상 증거](worklog/host-cleanup-v782-evidence.txt) · [변경이력](changelog/2026-10-17-host-storage-hygiene-v782.ko.md) · [GitHub](updates/v2026.10.17.782-github.ko.md) / [내부용](updates/v2026.10.17.782-internal.ko.md). 시스템 사용률 80%→72%, 약 8.21GB 순확보. 앱 릴리스 없음.
 
