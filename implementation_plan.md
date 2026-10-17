@@ -2228,3 +2228,38 @@
 - `npx.cmd vitest run "central-bank" "mint"`: 3 files passed, 9 tests passed
 - `npx.cmd nest build`: exit code 0
 - `npm.cmd run api:contract:check`: API contract artifacts match after internal TypeScript symbol normalization
+
+
+---
+
+## 🚀 [v231 Specification] 원격 자동화 잔여 브랜치 전수 삭제(단일 main 엄수), 접속 IP 기반 GeoIP 자동 언어 설정 시스템 실측 검증 및 CI/CD 승격 매니페스트 무결성 점검
+
+### 1. 현황 및 개선 완료 내역
+1. **[원격 저장소 크론 자동 생성 브랜치 13개 일괄 클린 삭제]**:
+   - 백그라운드 크론에 의해 생성되었던 잔여 브랜치(`auto/hourly-a-*`, `auto/hourly-b-*`, `auto/hourly-c-*`, `docs/planning-*` 등 총 13개)를 `git push origin --delete`로 일괄 삭제.
+   - `git ls-remote --heads origin` 실측 기준 원격 저장소에 오직 `refs/heads/main` (`bca8d54a6ef5b2a4903429c9db02e662d2a66cd2`) 단 1개만 단독 잔존함을 재확인.
+   - `gh pr list` 기준 오픈된 PR 0건(클린 상태) 유지.
+2. **[접속 IP 기반 GeoIP 자동 언어 설정(IP-to-Locale) 시스템 실측 분석 및 검증]**:
+   - **인프라/네트워크 레이어**: Nginx 리버스 프록시에서 Cloudflare `$http_cf_ipcountry` 변수를 `proxy_set_header CF-IPCountry` 헤더로 프론트엔드 컨테이너(Next.js)에 투명 전달 (`/etc/nginx/sites-enabled/moneyverse`).
+   - **프론트엔드 프록시 레이어(`frontend/src/proxy.ts` & `detectLocale`)**:
+     - 3-Tier 로케일 판정 계층 준수: Tier 1(명시적 URL/쿼리) > Tier 2(사용자 수동 선택 쿠키 `wdmv_locale`) > Tier 3(GeoIP 국가 헤더 `cf-ipcountry` + 브라우저 `Accept-Language`).
+     - 국가 매핑: KR/KP → `ko`, JP → `ja`, CN/TW/HK/MO/SG → `zh`, 그 외 미국/유럽 등 글로벌 국가 → 기본 `en` (단, 브라우저가 명시적으로 아시아 언어를 요청한 경우 해당 언어 우선 존중).
+     - SSR 일치 보장: `x-moneyverse-locale` 헤더를 Server Components로 사전 주입하여 첫 HTML 렌더링 시점부터 일치된 언어를 생성, Hydration Mismatch를 원천 방지.
+   - **호스트 라이브 curl 헤더 실측 결과 (포트 3101 및 3234)**:
+     - `CF-IPCountry: JP` 주입 시 → `x-moneyverse-locale: ja` 정확 응답
+     - `CF-IPCountry: US` 주입 시 → `x-moneyverse-locale: en` 정확 응답
+     - `CF-IPCountry: KR` 주입 시 → `x-moneyverse-locale: ko` 정확 응답
+     - `CF-IPCountry: CN` 주입 시 → `x-moneyverse-locale: zh` 정확 응답
+3. **[GitHub Actions Build Production Release 100% 그린 패스 및 승격 상태 점검]**:
+   - Run ID: `39022630201` 성공 완료 (prepare 7s, test-gate 8s, build 3m 12s).
+   - 발행 아티팩트: `production-release-manifest`, `test-attestation`, 불변 Docker 이미지 발행 완료.
+   - GitHub 배포 상태: `production-ready` (ID: `7137890313`) 공식 승인 등록 완료.
+   - 테스트 환경(`test.easy-scraping.com`): 최신 승격 커밋 SHA `bca8d54a6ef5b2a4903429c9db02e662d2a66cd2`로 정상 구동 중.
+   - 프로덕션 환경(`easy-scraping.com`): 무중단 서비스 중.
+
+### 2. 검증 증적
+- `git ls-remote --heads origin`: `refs/heads/main` 1개 확인
+- `gh pr list`: 0건 확인
+- 로컬 포트 GeoIP curl 테스트: JP(ja), US(en), KR(ko), CN(zh) 100% 일치
+- `curl -s https://test.easy-scraping.com/api/version`: `bca8d54a6ef5b2a4903429c9db02e662d2a66cd2` 확인
+- `gh run view 39022630201`: JOBS all ✓, ARTIFACTS all published 확인
