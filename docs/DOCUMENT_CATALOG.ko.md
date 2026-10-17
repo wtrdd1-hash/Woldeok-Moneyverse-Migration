@@ -1,5 +1,8 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.17.782 — 미니PC 시스템 캐시 정리 (호스트 검증)
+- [작업기록 EN](worklog/2026-10-17-host-storage-hygiene-v782.md) / [KO](worklog/2026-10-17-host-storage-hygiene-v782.ko.md) · [26개 정리 대상 증거](worklog/host-cleanup-v782-evidence.txt) · [변경이력](changelog/2026-10-17-host-storage-hygiene-v782.ko.md) · [GitHub](updates/v2026.10.17.782-github.ko.md) / [내부용](updates/v2026.10.17.782-internal.ko.md). 시스템 사용률 80%→72%, 약 8.21GB 순확보. 앱 릴리스 없음.
+
 ## v2026.10.17.781 — 호스트 디스크 안전 정리 (실기기 검증)
 - [작업기록 EN](worklog/2026-10-17-host-disk-cleanup-v781.md) / [KO](worklog/2026-10-17-host-disk-cleanup-v781.ko.md) · [변경이력 EN](changelog/2026-10-17-host-disk-cleanup-v781.md) / [KO](changelog/2026-10-17-host-disk-cleanup-v781.ko.md) · [GitHub 업데이트](updates/v2026.10.17.781-github.ko.md) · [내부 업데이트](updates/v2026.10.17.781-internal.ko.md). Debian 시스템 사용률 90%→79%, 유휴 `.next` 18개만 삭제하여 약 10.99GB 순확보. 앱/DB/배포 변경 없음.
 
