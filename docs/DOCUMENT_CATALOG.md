@@ -1,5 +1,8 @@
 # 📚 Document Catalog
 
+## v2026.10.17.781 — Host disk safe cleanup (HOST VERIFIED)
+- [Worklog EN](worklog/2026-10-17-host-disk-cleanup-v781.md) / [KO](worklog/2026-10-17-host-disk-cleanup-v781.ko.md) · [Changelog EN](changelog/2026-10-17-host-disk-cleanup-v781.md) / [KO](changelog/2026-10-17-host-disk-cleanup-v781.ko.md) · [GitHub update](updates/v2026.10.17.781-github.md) · [Internal update](updates/v2026.10.17.781-internal.md). Debian root 90%→79%, ~10.99GB net reclaimed from 18 inactive `.next` caches; no app/DB/release mutation.
+
 ## v2026.10.16.739 — Safe SEO scheduled-indexing gate
 - [Release EN](releases/v2026.10.16.739.md) / [KO](releases/v2026.10.16.739.ko.md), [worklog](worklog/2026-10-16-seo-cron-isolation-v739.md), [GitHub](updates/v2026.10.16.739-github.md), [internal](updates/v2026.10.16.739-internal.md).
 
