@@ -1,5 +1,24 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.18.856 — 저축 포켓 원장 정합성·실패 시 안전한 UX (기능 보완 / 초안 / 운영 보류)
+
+**회차:** 이전 Feature Addition v853 → 현재 Feature Improvement v856 → 다음 Feature Addition. **기준:** main `b7ee037098a80d03a66f367f5161b0b2659ea640`, `AGENTS.md`, `README.md`, 영문 canonical 및 한국어 대조 기획. 이번 회차는 기획만 수행하며 구현·승인·배포가 아니다.
+
+**2026-10-18 02:10~02:12 KST 읽기 전용 근거:** `frontend/src/app/bank/actions.ts::transferPocketAction`은 `IN|OUT`을 보내지만 `backend/src/bank/pocket.dto.ts::TransferPocketDto`는 `deposit|withdraw`만 허용한다. Action은 호출할 때마다 새 UUID를 만든다. 개발 DB의 실제 `public.bank_transfer_pocket` 함수는 포켓·현금 계좌를 잠그지만 `economy_post_transaction` 및 원장 분개 없이 `accounts.balance`와 `bank_saving_pockets.balance`를 직접 갱신한다. `bank_archive_pocket`은 500 WLD 소각 수수료만 원장에 기록하고 포켓 잔액 환급은 현금 계좌를 직접 증가시킨다. `bank_customize_pocket`은 100 WLD 수수료를 원장 처리하지만 컨트롤러는 모든 요청에 0으로 채운 동일 UUID를 전달하고 이름·목표 변경을 무시한다. 이는 소스·개발 DB의 관찰이며 **운영 환경 피해 입증이 아니다**. 개발 DB 포켓 0건, 앱 계정에 포켓 테이블 INSERT/UPDATE 및 accounts UPDATE 권한 존재, 원장 INSERT는 거부된다. QA v855: 개발 DB 241개 중 235개 직접 DML, migration 266 체크섬 불일치·275~277 미적용, Test v805는 main보다 뒤처짐, Production v717 및 독립 복원·원장 대사 미승인.
+
+**P0 개발 백로그와 수용 기준**
+1. **BP856-01 — 화면~서버 계약:** 화면에서 `deposit|withdraw`만 전송하고 암묵적인 `IN` 기본값을 없앤다. 로그인·동의·CSRF·포켓 UUID·양의 정수 문자열 WLD·DB 상한을 검증하고 거절은 명시적인 400/403/409로 반환한다. DTO 거절 시 성공 알림 금지. 웹과 `/app-api/v1/banking/pockets/:id/transfer` 계약 동기화 및 양방향 UI→컨트롤러→DB 통합시험 필수.
+2. **BP856-02 — 원장 기반 포켓 이동:** 포켓마다 회원 소유의 원장 하위계좌를 고유하게 연결한다(신규 계좌유형 또는 동등한 회계 구조는 격리 마이그레이션 검토에서 확정). 포켓 잔액은 거래 단위로 유지하는 투영값이다. 입금·출금은 기존 WLD를 현금↔포켓 계좌 사이에 옮기는 **균형 잡힌 불변 원장 거래**로 처리하고, 무근거 발행·원장 없는 직접 잔액 수정은 금지한다. `UNIQUE(pocket_id)`, `UNIQUE(ledger_account_id)`, 회원 FK, 음수 잔액 금지, `(user_id,is_archived,created_at DESC)` 인덱스를 요구한다. 기존 잔액은 운영 읽기 전용 재고조사·독립 증빙 대사 후 이관하며 근거 없는 기초 전표 생성이나 잔액 0 처리 금지.
+3. **BP856-03 — 멱등성과 결과불명 복구:** `(회원,작업,포켓,방향,금액)` 지문을 UUID 요청번호와 영구 결합한다. 같은 키·같은 내용은 최초 영수증 반환, 같은 키·다른 내용은 HTTP 409, 동시 제출은 원장 거래 1건만 생성. 클라이언트는 재시도에 키를 유지하고 응답 유실 시 `UNKNOWN`으로 표시한 뒤 본인 소유 `GET /api/v1/banking/pockets/operations/:key` 조회만 한다.
+4. **BP856-04 — 해지·꾸미기 금전 정확성:** 해지 시 포켓→현금 환급과 고지된 500 WLD 현금→SINK 수수료를 동일 원장 트랜잭션으로 기록한다. 수수료 부족 시 부분 환급 없이 명확히 거절하고 재시도는 최초 영수증 조회. 꾸미기는 전 요청에 동일한 0 UUID를 쓰지 말고 의도별 고유 키를 사용해 고지된 100 WLD를 정확히 한 번만 청구하며 충돌 재생은 거절한다. 이름·목표 입력을 실제 저장하거나 미지원 입력을 비활성화한다. 해지 성공 문구에는 수수료를 빠짐없이 표시한다.
+5. **BP856-05 — 최소권한·승격 게이트:** `accounts`, `bank_saving_pockets`, 원장·감사 테이블의 앱 직접 DML을 회수하고 고정 search_path·회원 범위 제한 `SECURITY DEFINER` 함수의 최소 EXECUTE만 허용한다. 폐기 가능한 DB에서 `moneyverse_app` 권한 거부 테스트를 실행한다. migration 266 체크섬, 275~277 미적용 및 금융 대사는 개발/QA가 해결할 문제이며 이 기획 회차에서 DB를 수정하지 않는다.
+
+**P1 제품 명세:** 기존 `/bank` 포켓 카드와 앱 API에서 입출금 계좌·수수료·전후 현금/포켓 잔액·견적 만료를 보여주고 확인 CTA, 처리 중/확정/거절/결과불명 상태, 불변 실제 영수증(거래 UUID·시각·금액·방향·수수료·잔액·정정 관계), 같은 키로 결과 조회 및 접근 가능한 오류를 제공한다. `/wallet`에서는 내부 이동을 신규 WLD 발행과 구분한다. 관리자는 읽기 전용 포켓별 원장 대사·차이 알림·감사만 수행하며 잔액 수동 편집은 허용하지 않는다. 회원 은행/포켓/영수증 URL은 `noindex`, 로그·분석·URL에 개인 금융정보 기록 금지. 모바일 작은 화면·키보드·스크린리더·WCAG 2.2 AA와 App API 동등성을 요구한다. KPI는 DTO 4xx, UNKNOWN 복구 시간, 중복 분개 0건, 원장-포켓 차이 0건, 영수증 완전성·거래 성공률. 테스트는 잘못된 방향·잔액 부족·같은/다른 지문 재생·동시 클릭·커밋 전후 응답 유실·타인 포켓·해지 수수료·꾸미기 반복 키·금액 오버플로·복원·인증 전체 UI 5회·Test 프론트/백엔드/Next manifest exact-SHA를 포함한다.
+
+**배포:** v856은 문서만 변경. 개발 A/B/C는 별도 격리 브랜치에서 RED-GREEN-REFACTOR와 코드/DB 구현, QA는 원장·권한·마이그레이션·전체 UI 독립 검증을 담당한다. 기존 잔액 증빙 대사, exact-SHA Test, expand→backfill→contract 무중단 적용, 세션 유지, 실제 백업 복원 및 롤백 검증 전 운영승격 금지. 불일치가 발견되면 기존 런타임 유지·새 쓰기 경로만 승인된 통제로 차단하고 확정된 원장 거래를 파괴적 롤백하지 않는다. Gemini·타 개발 브랜치는 건드리지 않는다.
+
+**외부 독립 근거 10,000건 게이트:** 출처 독립성·중복 제거·실제 근거 분류 검증 미완료. 이번 회차 신규 승인 **0건**, 누적 **미확인**, **BLOCKED**. PostgreSQL 트랜잭션/권한, OWASP API Security, WCAG 2.2는 후보일 뿐 승인 수량에 포함하지 않는다. 영문·한국어 동등성, PR 검토 전까지 초안이다.
+
 ## v2026.10.18.804 — 불변 원장 직접 DML 권한 회수 (후보 / 운영 보류)
 - 운영 v717/최신 소스는 원장 직접 쓰기 코드가 없지만 실제 앱 DB 계정은 INSERT/UPDATE/DELETE/TRUNCATE/TRIGGER 등 광범위한 원장 권한을 보유. 신규 migration 277로 원장 2테이블 권한 모두 회수 후 SELECT만 복원하며 기존 SECURITY DEFINER 정산 함수를 유지. 운영 schema/ACL만 격리 DB에 복원해 적용·재적용 및 권한 거부를 검증. 나머지 금융 3테이블과 기초잔액 미인증 19계좌 +4,779,188 WLD, v530 인증 UI/복원은 별도 차단 항목. [릴리스](../releases/v2026.10.18.804.ko.md).
 
