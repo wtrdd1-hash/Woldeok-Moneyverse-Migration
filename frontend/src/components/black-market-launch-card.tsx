@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Crown, Sparkles, Flame, Clock, ArrowRight, ShieldCheck, Gavel } from 'lucide-react';
+import { Crown, Sparkles, Clock, ArrowRight, ShieldCheck, Gavel } from 'lucide-react';
 import { BlackMarketAuctionModal } from './black-market-auction-modal';
 
 interface BlackMarketLaunchCardProps {
@@ -9,9 +9,8 @@ interface BlackMarketLaunchCardProps {
   readonly userBalance?: number | undefined;
 }
 
-export function BlackMarketLaunchCard({ currentUserId, userBalance = 0 }: BlackMarketLaunchCardProps) {
+export function BlackMarketLaunchCard({ currentUserId }: BlackMarketLaunchCardProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [balance, setBalance] = useState(userBalance);
 
   return (
     <>
@@ -23,7 +22,7 @@ export function BlackMarketLaunchCard({ currentUserId, userBalance = 0 }: BlackM
                 <Crown className="h-3.5 w-3.5" /> 신화급 (MYTHIC) 한정판
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 border border-rose-500/30 px-2.5 py-0.5 text-xs font-semibold text-rose-400">
-                <Flame className="h-3.5 w-3.5" /> 100% 영구 국고 소각
+                <ShieldCheck className="h-3.5 w-3.5" /> 원장 정산 검증 중
               </span>
             </div>
 
@@ -33,20 +32,20 @@ export function BlackMarketLaunchCard({ currentUserId, userBalance = 0 }: BlackM
             </h3>
 
             <p className="text-xs sm:text-sm text-muted-foreground max-w-xl leading-relaxed">
-              매일 심야에만 열리는 초희귀 영구 버프 및 치장 아이템 실시간 옥션! 크로노스 회중시계, 마이더스 건틀릿, 영구 거래세 면제 카드 등 전 서버 유일의 신화 아이템에 입찰하세요.
+              신규 입찰과 낙찰 지급은 원장 정산 검증이 완료될 때까지 중단되었습니다. 기존 경매 현황과 입찰 기록은 조회할 수 있습니다.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-zinc-400 font-medium">
               <span className="flex items-center gap-1 text-purple-300">
-                <Clock className="h-3.5 w-3.5" /> 안티 스나이핑 30초 연장
+                <Clock className="h-3.5 w-3.5" /> 기존 경매 정보 조회
               </span>
               <span className="text-zinc-600">•</span>
               <span className="flex items-center gap-1 text-rose-300">
-                <Flame className="h-3.5 w-3.5" /> 낙찰 대금 전액 WLD 소각
+                <ShieldCheck className="h-3.5 w-3.5" /> 신규 입찰 중단
               </span>
               <span className="text-zinc-600">•</span>
               <span className="flex items-center gap-1 text-emerald-300">
-                <ShieldCheck className="h-3.5 w-3.5" /> 인벤토리 자동 귀속
+                <ShieldCheck className="h-3.5 w-3.5" /> 지급·소각 미확정
               </span>
             </div>
           </div>
@@ -57,7 +56,7 @@ export function BlackMarketLaunchCard({ currentUserId, userBalance = 0 }: BlackM
               className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 group"
             >
               <Gavel className="h-4 w-4 transition-transform group-hover:rotate-12" />
-              비밀 암시장 입장하기
+              암시장 기록 조회하기
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
           </div>
@@ -68,8 +67,6 @@ export function BlackMarketLaunchCard({ currentUserId, userBalance = 0 }: BlackM
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         currentUserId={currentUserId}
-        userBalance={balance}
-        onBalanceUpdate={(newBal) => setBalance(newBal)}
       />
     </>
   );

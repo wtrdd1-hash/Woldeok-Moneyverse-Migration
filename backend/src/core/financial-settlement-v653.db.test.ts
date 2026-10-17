@@ -96,54 +96,44 @@ describe.runIf(enabled)('separate PostgreSQL atomicity verification (never produ
   });
   afterAll(async () => { await pool?.end(); });
 
-  it('settles one PvP match with conserved total and one settled room', async () => {
+  it('blocks uncertified PvP room creation without touching member balances', async () => {
     const repo = new PvpArenaRepository(pool!);
-    const room = await repo.createRoom({ creatorUserId:creator, gameType:'dice',stakeAmount:1000 });
-    await repo.joinAndPlay({ roomId:room.id, opponentUserId:opponent });
-    expect((await execute('SELECT status FROM public.pvp_wager_rooms WHERE id=$1',[room.id])).rows[0]?.status).toBe('settled');
-    expect(await balance(creatorAccount)+await balance(opponentAccount)+await balance(treasuryAccount)).toBe(20000);
-    expect(await balance(treasuryAccount)).toBe(60);
+    await expect(repo.createRoom({ creatorUserId: creator, gameType: 'dice', stakeAmount: 1000 }))
+      .rejects.toMatchObject({ status: 503 });
+    expect(await balance(creatorAccount)).toBe(10000);
+    expect(await balance(opponentAccount)).toBe(10000);
+    expect(await balance(treasuryAccount)).toBe(0);
   });
-  it('rolls back all PvP money when notification insert fails', async () => {
+
+  it('blocks uncertified PvP settlement without mutating treasury funds', async () => {
     const repo = new PvpArenaRepository(pool!);
-    const room = await repo.createRoom({ creatorUserId:creator,gameType:'dice',stakeAmount:1000 });
-    await execute(`CREATE OR REPLACE FUNCTION public.v639_block_notification() RETURNS trigger LANGUAGE plpgsql AS $$
-      BEGIN RAISE EXCEPTION 'synthetic notification failure'; END; $$`);
-    await execute('CREATE TRIGGER v639_fail_notify BEFORE INSERT ON public.in_app_notifications FOR EACH ROW EXECUTE FUNCTION public.v639_block_notification()');
-    try {
-      await expect(repo.joinAndPlay({roomId:room.id,opponentUserId:opponent})).rejects.toThrow();
-      expect(await balance(creatorAccount)).toBe(10000);
-      expect(await balance(opponentAccount)).toBe(10000);
-      expect(await balance(treasuryAccount)).toBe(0);
-      expect((await execute('SELECT status FROM public.pvp_wager_rooms WHERE id=$1',[room.id])).rows[0]?.status).toBe('waiting');
-    } finally {
-      await execute('DROP TRIGGER IF EXISTS v639_fail_notify ON public.in_app_notifications');
-      await execute('DROP FUNCTION IF EXISTS public.v639_block_notification()');
-    }
+    await expect(repo.joinAndPlay({
+      roomId: randomUUID(), opponentUserId: opponent,
+    })).rejects.toMatchObject({ status: 503 });
+    expect(await balance(creatorAccount)).toBe(10000);
+    expect(await balance(opponentAccount)).toBe(10000);
+    expect(await balance(treasuryAccount)).toBe(0);
   });
-  it('settles one auction with item, sink credit and no duplicate charge', async () => {
+
+  it('does not charge member balances or grant items from uncertified auction settlement', async () => {
     const repo = new BlackMarketRepository(pool!);
-    const auctionId = randomUUID(); await addAuction(auctionId,1000);
-    await Promise.all([repo.settleExpiredAuctions(),repo.settleExpiredAuctions()]);
-    expect(await balance(creatorAccount)).toBe(9000);
-    expect(await balance(sinkAccount)).toBe(1000);
-    expect((await execute('SELECT status FROM public.black_market_auctions WHERE id=$1',[auctionId])).rows[0]?.status).toBe('settled');
-    expect((await execute('SELECT count(*) AS n FROM public.user_inventory_items')).rows[0]?.n).toBe('1');
+    const auctionId = randomUUID();
+    await addAuction(auctionId, 1000);
+    await Promise.all([repo.settleExpiredAuctions(), repo.settleExpiredAuctions()]);
+    expect(await balance(creatorAccount)).toBe(10000);
+    expect(await balance(sinkAccount)).toBe(0);
+    expect((await execute('SELECT status FROM public.black_market_auctions WHERE id=$1', [auctionId])).rows[0]?.status)
+      .toBe('active');
+    expect((await execute('SELECT count(*) AS n FROM public.user_inventory_items')).rows[0]?.n).toBe('0');
   });
-  it('rolls back failed auction and retains active status for retry', async () => {
+
+  it('rejects new auction bids and keeps the original auction state available for recovery', async () => {
     const repo = new BlackMarketRepository(pool!);
-    const auctionId=randomUUID();await addAuction(auctionId,1000);
-    await execute(`CREATE OR REPLACE FUNCTION public.v639_block_inventory() RETURNS trigger LANGUAGE plpgsql AS $$
-      BEGIN RAISE EXCEPTION 'synthetic inventory failure'; END; $$`);
-    await execute('CREATE TRIGGER v639_fail_inventory BEFORE INSERT ON public.user_inventory_items FOR EACH ROW EXECUTE FUNCTION public.v639_block_inventory()');
-    try {
-      await repo.settleExpiredAuctions();
-      expect(await balance(creatorAccount)).toBe(10000);
-      expect(await balance(sinkAccount)).toBe(0);
-      expect((await execute('SELECT status FROM public.black_market_auctions WHERE id=$1',[auctionId])).rows[0]?.status).toBe('active');
-    } finally {
-      await execute('DROP TRIGGER IF EXISTS v639_fail_inventory ON public.user_inventory_items');
-      await execute('DROP FUNCTION IF EXISTS public.v639_block_inventory()');
-    }
+    const auctionId = randomUUID();
+    await addAuction(auctionId, 1000);
+    await expect(repo.placeBid(auctionId, opponent, 2000)).rejects.toMatchObject({ status: 503 });
+    expect((await execute('SELECT status FROM public.black_market_auctions WHERE id=$1', [auctionId])).rows[0]?.status)
+      .toBe('active');
+    expect((await execute('SELECT count(*) AS n FROM public.black_market_bid_logs WHERE auction_id=$1', [auctionId])).rows[0]?.n).toBe('0');
   });
 });

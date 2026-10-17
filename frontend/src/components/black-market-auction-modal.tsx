@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useTransition } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
@@ -12,16 +11,12 @@ import {
   Clock,
   Sparkles,
   Flame,
-  ShieldCheck,
   Crown,
   History,
-  AlertCircle,
   CheckCircle2,
+  ShieldCheck,
   X,
-  Gavel,
   RefreshCw,
-  Coins,
-  ArrowUpRight,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -65,17 +60,10 @@ interface BlackMarketAuctionModalProps {
 export function BlackMarketAuctionModal({
   isOpen,
   onClose,
-  currentUserId,
-  userBalance = 0,
-  onBalanceUpdate,
 }: BlackMarketAuctionModalProps) {
   const [auctions, setAuctions] = useState<BlackMarketAuctionItem[]>([]);
   const [selectedAuction, setSelectedAuction] = useState<BlackMarketAuctionItem | null>(null);
   const [bidLogs, setBidLogs] = useState<BidLog[]>([]);
-  const [bidAmount, setBidAmount] = useState<number>(0);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
 
   // 경매 목록 조회
   const fetchAuctions = async () => {
@@ -123,52 +111,8 @@ export function BlackMarketAuctionModal({
   useEffect(() => {
     if (selectedAuction) {
       fetchBidLogs(selectedAuction.id);
-      const minIncrement = Math.max(10000, Math.round(selectedAuction.currentBid * 0.05));
-      setBidAmount(selectedAuction.currentBid + minIncrement);
     }
   }, [selectedAuction?.id, selectedAuction?.currentBid]);
-
-  // 입찰 실행
-  const handlePlaceBid = async () => {
-    if (!selectedAuction) return;
-    setErrorMsg(null);
-    setSuccessMsg(null);
-
-    const minIncrement = Math.max(10000, Math.round(selectedAuction.currentBid * 0.05));
-    const minRequired = selectedAuction.currentBid + minIncrement;
-
-    if (bidAmount < minRequired) {
-      setErrorMsg(`최소 입찰 가능 금액은 ${minRequired.toLocaleString()} WLD 입니다.`);
-      return;
-    }
-
-    startTransition(async () => {
-      try {
-        const res = await fetch(`/api/market/secret-auction/${selectedAuction.id}/bid`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bidAmount }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          setErrorMsg(data.error || '입찰에 실패했습니다.');
-          return;
-        }
-
-        setSuccessMsg(
-          data.extended
-            ? `입찰 성공! 마감 30초 전 입찰로 인해 경매가 30초 연장되었습니다.`
-            : `입찰 성공! 현재 최고 입찰가: ${bidAmount.toLocaleString()} WLD`,
-        );
-
-        fetchAuctions();
-        fetchBidLogs(selectedAuction.id);
-      } catch {
-        setErrorMsg('네트워크 오류가 발생했습니다.');
-      }
-    });
-  };
 
   const formatTimer = (seconds?: number) => {
     if (seconds === undefined || seconds <= 0) return '종료됨';
@@ -209,6 +153,10 @@ export function BlackMarketAuctionModal({
           </div>
         </div>
 
+        <div role="status" className="mx-5 mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+          원장 정산 검증 중: 신규 입찰과 낙찰 지급은 일시 중단되었습니다. 기존 경매와 입찰 기록은 조회할 수 있습니다.
+          검증되지 않은 낙찰·소각·인벤토리 지급을 완료된 거래로 표시하지 않습니다.
+        </div>
         {/* 바디 콘텐츠: 2열 레이아웃 */}
         <div className="p-5 sm:p-6 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 좌측 1열: 출품 아이템 목록 */}
@@ -219,10 +167,9 @@ export function BlackMarketAuctionModal({
               </span>
               <button
                 onClick={fetchAuctions}
-                disabled={isPending}
                 className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
               >
-                <RefreshCw className={cn('h-3 w-3', isPending && 'animate-spin')} />
+                <RefreshCw className="h-3 w-3" />
               </button>
             </div>
 
@@ -269,30 +216,16 @@ export function BlackMarketAuctionModal({
             {/* 영구 소각 안내 뱃지 */}
             <div className="p-3.5 rounded-xl border border-rose-500/20 bg-rose-500/5 text-xs text-rose-400 space-y-1">
               <span className="font-bold flex items-center gap-1.5">
-                <Flame className="h-4 w-4" /> 100% 영구 통화 소각 (Burn)
+                <Flame className="h-4 w-4" /> 소각 정산 검증 대기
               </span>
               <p className="text-[11px] text-muted-foreground">
-                경매 종료 시 낙찰자가 지불한 WLD는 전액 시스템 SINK 원장으로 이동하여 시장에서 영구히 소각됩니다.
+                현재 낙찰 대금 소각은 확정되지 않았으며 원장 검증 후에만 별도 정산할 수 있습니다.
               </p>
             </div>
           </div>
 
           {/* 우측 2열: 선택된 경매 상세 및 입찰 패널 */}
           <div className="lg:col-span-2 space-y-5">
-            {errorMsg && (
-              <div className="flex items-center gap-2.5 p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-500 text-xs sm:text-sm font-medium">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                <span>{errorMsg}</span>
-              </div>
-            )}
-
-            {successMsg && (
-              <div className="flex items-center gap-2.5 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-500 text-xs sm:text-sm font-medium">
-                <CheckCircle2 className="h-4 w-4 shrink-0" />
-                <span>{successMsg}</span>
-              </div>
-            )}
-
             {selectedAuction && (
               <>
                 {/* 상단 아이템 프리뷰 카드 */}
@@ -342,69 +275,16 @@ export function BlackMarketAuctionModal({
                     <div className="p-3 rounded-xl bg-zinc-900/60 border border-border/50 col-span-2 sm:col-span-1">
                       <span className="text-[10px] text-zinc-500 block">안티 스나이핑 가드</span>
                       <span className="text-xs font-semibold text-emerald-400 mt-0.5 flex items-center gap-1">
-                        <ShieldCheck className="h-3.5 w-3.5" /> 30초 자동 연장
+                        <ShieldCheck className="h-3.5 w-3.5" /> 과거 입찰 정책
                       </span>
-                      <span className="text-[10px] text-zinc-500 block mt-0.5">마감 직전 입찰 방어</span>
+                      <span className="text-[10px] text-zinc-500 block mt-0.5">현재 신규 입찰 중단</span>
                     </div>
                   </div>
                 </div>
 
-                {/* 입찰 조작 폼 */}
-                <div className="rounded-2xl border border-border/80 bg-zinc-900/40 p-4 sm:p-5 space-y-3.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      내 입찰 금액 입력 (최소 단위 +5%)
-                    </label>
-                    <span className="text-xs font-mono text-muted-foreground">
-                      보유 잔액: <strong className="text-foreground">{userBalance.toLocaleString()} WLD</strong>
-                    </span>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min={selectedAuction.currentBid + Math.max(10000, Math.round(selectedAuction.currentBid * 0.05))}
-                      step={10000}
-                      value={bidAmount}
-                      onChange={(e) => setBidAmount(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full rounded-xl border border-border/80 bg-zinc-950 px-4 py-3 text-lg font-mono font-bold text-foreground focus:border-purple-500 focus:outline-none"
-                    />
-                    <span className="absolute right-4 top-3.5 text-sm font-bold text-purple-400">WLD</span>
-                  </div>
-
-                  {/* 퀵 호가 버튼 */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {[10000, 50000, 100000, 500000].map((inc) => (
-                      <button
-                        key={inc}
-                        type="button"
-                        onClick={() => setBidAmount((prev) => prev + inc)}
-                        className="px-2.5 py-1 rounded-lg border border-border/60 bg-zinc-900 text-[11px] font-mono text-zinc-300 hover:text-foreground hover:border-purple-500/50 transition-colors"
-                      >
-                        +{inc.toLocaleString()}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const minInc = Math.max(10000, Math.round(selectedAuction.currentBid * 0.05));
-                        setBidAmount(selectedAuction.currentBid + minInc);
-                      }}
-                      className="px-2.5 py-1 rounded-lg border border-border/60 bg-zinc-900 text-[11px] text-zinc-400 hover:text-foreground transition-colors"
-                    >
-                      최소 호가로 초기화
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handlePlaceBid}
-                    disabled={isPending}
-                    className="w-full py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-all shadow-lg active:scale-[0.99] flex items-center justify-center gap-2"
-                  >
-                    <Gavel className="h-4 w-4" />
-                    {bidAmount.toLocaleString()} WLD 입찰하기
-                  </button>
+                {/* Monetary operations remain disabled until canonical ledger settlement is certified. */}
+                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-muted-foreground">
+                  신규 입찰 중단 · 기존 최고가와 입찰 기록은 참고용이며 실제 소각 또는 아이템 지급 영수증이 아닙니다.
                 </div>
 
                 {/* 최근 입찰 히스토리 로그 */}
@@ -418,7 +298,7 @@ export function BlackMarketAuctionModal({
 
                   {bidLogs.length === 0 ? (
                     <p className="text-xs text-muted-foreground py-3 text-center">
-                      아직 입찰 내역이 없습니다. 첫 번째 입찰자가 되어보세요!
+                      현재 기록된 입찰 내역이 없습니다.
                     </p>
                   ) : (
                     <div className="space-y-1.5 max-h-40 overflow-y-auto">
