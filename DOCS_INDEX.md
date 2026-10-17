@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.18.852 — Independent all-feature and banking second verification; Production finance/Test BLOCKED
+- [Finding EN](docs/findings/MONEYVERSE_FULL_RECHECK_v2026.10.18.852.md) / [한국어](docs/findings/MONEYVERSE_FULL_RECHECK_v2026.10.18.852.ko.md) · [Worklog EN](docs/worklog/2026-10-18-full-feature-banking-recheck-v852.md) / [한국어](docs/worklog/2026-10-18-full-feature-banking-recheck-v852.ko.md) · [Internal](docs/updates/v2026.10.18.852-full-audit-internal.md) / [GitHub](docs/updates/v2026.10.18.852-full-audit-github.md). Isolated latest main lint/typecheck/tests/build PASS, release units 56/56 PASS; 396 backend DB tests skipped. Real read-only finance 19 uncertified projection differences and five app-writable financial tables, bank pocket transfer/archival journal bypass, active Test artifact SHA mismatch, four live 404 links and dopamine/VIP rewards returning success without verified ledger. v851 PR CI PASS but unmerged. No application/financial/runtime mutation, no production promotion.
+
 ## v2026.10.17.755 — Stock League Test 500 read boundary correction; Production remains BLOCKED
 - [Worklog EN](docs/worklog/2026-10-17-stock-league-test-private-read-v755.md) / [한국어](docs/worklog/2026-10-17-stock-league-test-private-read-v755.ko.md) · [Internal](docs/updates/v2026.10.17.755-internal.md) · [GitHub](docs/updates/v2026.10.17.755-github.md). Forward SQL 274 replaces inaccessible `user_roles` and virtual portfolio raw SELECTs with scoped app-executable SECURITY DEFINER helpers. Isolated Test DB app-role read-only acceptance and full local tests PASS. Production 19 historic mismatches, core DML and v530 authenticated UI gates remain blocking.
 
