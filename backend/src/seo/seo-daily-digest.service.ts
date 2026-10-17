@@ -30,6 +30,18 @@ export class SeoDailyDigestService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
+    // Avoid duplicate/outbound digests from Test, shadow and replacement canaries.
+    // Production still needs a designated leader and an explicit scheduling opt-in.
+    const appOrigin = (process.env.APP_BASE_URL ?? '').replace(/\/$/, '');
+    if (
+      process.env.NODE_ENV !== 'production' ||
+      appOrigin !== 'https://easy-scraping.com' ||
+      process.env.MONEYVERSE_SCHEDULER_ENABLED !== 'true' ||
+      process.env.SEO_DAILY_DIGEST_SCHEDULER_ENABLED !== 'true'
+    ) {
+      this.logger.warn('scheduled SEO daily digest disabled (not authorized Production scheduler)');
+      return;
+    }
     // Calculate initial delay to 09:00 KST (UTC+9)
     const now = new Date();
     const kstOffsetMs = 9 * 60 * 60 * 1000;

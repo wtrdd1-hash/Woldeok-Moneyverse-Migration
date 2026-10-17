@@ -1,5 +1,7 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+- **v2026.10.17.786 — SEO background fail-closed (candidate):** Test/shadow outbound crawl and daily digest schedules disabled; explicit Production leader+job opt-in, initial-timer cleanup, 17 targeted tests pass. Production finance and UI release gates remain blocked. [Release](../releases/v2026.10.17.786.md).
+
 ## v2026.10.16.739 — Background SEO scheduling isolation
 - Test and shadow no longer schedule public IndexNow submissions; production requires explicit indexing opt-in. Startup and periodic timers cleaned up, 4 focused tests PASS; Production verification pending. [Release](../releases/v2026.10.16.739.md).
 
