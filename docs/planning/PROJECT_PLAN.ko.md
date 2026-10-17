@@ -1,5 +1,25 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.18.860 — 저축 포켓 계약·원장 진실성 보완 (기획 / 미배포)
+
+**회차:** Previous Feature Addition v858(초안) → Current Feature Improvement v860 → Next Feature Addition. 기준 main `b7ee037098a80d03a66f367f5161b0b2659ea640`, 열린 PR 0, Debian 13.6 서비스 정상, 개발 DB 연결, QA v857 FAILED/BLOCKED.
+
+**확인된 근거:** `frontend/src/app/bank/actions.ts`의 포켓 생성은 멱등성 UUID 누락·목표금액 선택, 이체는 `IN/OUT`과 재시도마다 새 UUID, 꾸미기는 키 누락. `backend/src/bank/pocket.dto.ts`는 생성 UUID·목표금액 필수, 이체 `deposit/withdraw`만 허용. `pocket.controller.ts`는 생성 UUID를 DB로 전달하지 않고 꾸미기에 고정 0 UUID 사용. `bank.repository.ts`의 생성 함수에는 요청번호가 없고 이체·해지 응답에는 불변 원장 영수증 ID가 없다. 개발 DB `bank_transfer_pocket`은 `economy_post_transaction`을 호출하지 않는다. 개발 앱 직접 DML은 235/241개 테이블. 이는 운영 피해가 확인됐다는 뜻이 아니다.
+
+**P0 BP860-01 (개발 A):** 목표금액 선택/목표 미설정 UX를 통일하고 생성 UUID를 프론트→컨트롤러→저장소→DB까지 전달한다. IN→deposit, OUT→withdraw로 정규화하며 색상·아이콘 유효값도 일치시킨다. 생성/이체/해지/꾸미기 400·409 계약 테스트를 추가한다.
+**P0 BP860-02 (개발 B):** 포켓별 원장 하위계좌 또는 동등한 독립 대사 복식부기 모델. 이체·해지 환급·수수료를 불변 균형 분개, 포켓 잔액, 영수증, Outbox와 단일 트랜잭션으로 처리한다. 정수 WLD 가치 보존, 소유권·잔액·해지 상태·CHECK/FK, 결정적 잠금 순서를 DB에서 강제한다. 기존 데이터는 독립 대사 후 이관하며 근거 없는 기초 전표를 만들지 않는다.
+**P0 BP860-03 (개발 A+B):** 요청 의도당 UUID 유지, `(actor_id,idempotency_key,operation)` 고유키와 본문 지문. 동일 키·동일 본문은 원래 영수증, 다른 본문은 409, 동시 중복도 1회 처리. 0 UUID 금지. 결과불명 시 `GET /api/v1/banking/pockets/operations/:key`로 본인 요청 확인.
+**P0 BP860-04 (개발 B+QA):** 직접 DML 최소권한 철회, 필요한 SECURITY DEFINER 함수만 EXECUTE, 42501 우회 권한 확대 금지. 마이그레이션 266 출처, 독립 원장 대사, 복원, Test exact-SHA가 해결되기 전 운영승격 금지.
+
+**P1 BP860-05 (개발 A):** `idle→quoting→confirm→pending→committed(receipt)/rejected/result_unknown` 상태, '포켓 만들기/입금 확인/출금 확인/해지 및 환급 확인' CTA. 정확한 bigint 견적·수수료·출발/도착·영수증 ID 표시. 모의 체험은 실제 잔액 미변경을 명시. 빈 목록·목표 없음·오프라인·잔액 부족·만료·해지·권한 오류를 구분하고 입력값 보존.
+**P1 BP860-06 (개발 A+C):** 기존 포켓 GET/POST/PUT/transfer/archive에 본인 전용 `GET /pockets/operations/:key`, `GET /pockets/:id/receipts?cursor=` 추가. 요청 고유 인덱스, 영수증 `(actor_id,created_at DESC,id DESC)`, 목록 `(actor_id,is_archived,updated_at DESC)` 인덱스 제안(스키마 검증 후). 관리자 읽기 전용 원장 불일치·영수증 누락·Outbox 실패 감사. 세션·동의·쓰기 CSRF·소유권/BOLA·요청 제한, 회원/관리자 noindex, 공개 안내 canonical/hreflang, 320px·키보드·WCAG 2.2 AA, 앱 게이트웨이 사용.
+**P1 BP860-07 (개발 C+QA):** 영수증 성공률, 재생, 결과불명 복구, 원장 불일치, 권한 거절, p50/p95, 이탈, 알림 전달 KPI. TDD·보존 속성·동시 충돌·응답 유실·DB 롤백·타인 접근·로그인 전체 UI 5회 회귀. 무중단 확장→독립 대사 후 이관→검증→스위치 전환; 롤백 때 불변 원장 삭제 금지.
+
+**승인 조건:** 서버 원장 영수증 없는 성공 표시 금지, 설명 불가 WLD 이동 0, 독립 QA·최소권한·복원·정확한 Test SHA. 개발은 별도 브랜치·테스트 선행·명시적 운영승격. 기획 회차는 런타임/DB/WLD/스위치/Test/Production 미변경.
+
+**외부 자료:** 10,000건 중복제거·근거분류 게이트 BLOCKED, 신규 승인 0건, 누적 UNKNOWN. 미승인 공식 후보: [PostgreSQL](https://www.postgresql.org/docs/17/explicit-locking.html), [OWASP](https://api-security.owasp.org/editions/2023/en/0x11-t10/), [WCAG](https://www.w3.org/TR/WCAG22/). 2026-10-18 04:05 KST 기록. 새 분산 기획 파일 금지, 국영문 동등성·main 재확인·PR 검증 전 병합 금지.
+
+
 ## v2026.10.15.688 — F675-06 실제 Search Console 검색·색인 증거 상세기획
 
 - [F675-06 한국어 상세명세](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 공식 개별 기획으로 채택. 기존 관리자 /admin/seo·GSC·v685 수정 재사용, 별도 SEO 플랫폼 중복 금지.
