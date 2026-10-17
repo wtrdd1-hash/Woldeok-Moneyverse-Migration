@@ -1,5 +1,9 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+## v2026.10.17.791 — Reject mismatched frontend build in immutable staging (candidate)
+- Read-only Test identity gate found Next artifact BUILD_ID drift despite 200/version/manifest agreement. Host staging now rejects an artifact whose Next build ID differs from approved SHA before creating a release. RED/GREEN; 56 release tests PASS. No Test/Production cutover. [Release](../releases/v2026.10.17.791.md).
+
+
 ## v2026.10.17.790 — Financial release gate rejects incomplete evidence (candidate)
 - Prevent missing/malformed ledger/grant metrics and inconsistent WLD totals from producing false-green financial preflight. RED/GREEN tests; 55 release tests PASS. Read-only live DB remains BLOCKED (five app DML grants; 19 unexplained balance projections). No Test/Production app deployment. [Release](../releases/v2026.10.17.790.md).
 

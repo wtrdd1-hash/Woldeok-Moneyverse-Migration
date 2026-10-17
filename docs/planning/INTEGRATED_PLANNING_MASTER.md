@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.17.791 — Exact SHA of generated frontend artifact (candidate; Production HOLD)
+- Read-only Test probe caught `frontend_artifact_sha_mismatch` on public Test SHA `4997cf2b`: physical Next BUILD_ID is a timestamp. Host stage release now refuses this mismatch before copying. [Release](../releases/v2026.10.17.791.md). This does NOT certify current Test, v530 UI, or finance. New exact-built Test generation and signed-in continuity must precede a Production decision.
+
+
 ## v2026.10.17.790 — Financial readiness evidence completeness (main merged; Production HOLD)
 - v737 read-only finance gate now rejects missing/invalid ledger counters, malformed app-grant responses and contradictory WLD totals rather than incorrectly returning READY. [Release](../releases/v2026.10.17.790.md). Read-only live snapshot still shows 5 directly app-writable protected tables and 19 uncertified projection differences; PR #921 merged to main `c619fc23` with CI success; no financial reconciliation approval, v530 UI approval or Test/Production promotion.
 
