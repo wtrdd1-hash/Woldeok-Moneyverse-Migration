@@ -1,7 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-## v2026.10.17.801 — Secret-auction unjournaled WLD containment (source candidate / Production HOLD)
-- A new bid was accepted ahead of financial settlement; the legacy auction worker directly changed member/sink balances with no immutable ledger receipt. Pending certification of actor-scoped canonical Economy Core settlement, new bids now fail 503 before SQL and the old financial worker is nonexecuting. Historic read paths remain. [Release](../releases/v2026.10.17.801.md). Existing 19 unverifiable opening-balance projections, 5 direct app finance grants and v530 authenticated UI gate remain BLOCKED; this candidate is not a restored auction feature or Production release.
+## v2026.10.17.801 — Secret-auction unjournaled WLD containment (main merged / Production HOLD)
+- A new bid was accepted ahead of financial settlement; the legacy auction worker directly changed member/sink balances with no immutable ledger receipt. Pending certification of actor-scoped canonical Economy Core settlement, new bids now fail 503 before SQL and the old financial worker is nonexecuting. Historic read paths remain. [Release](../releases/v2026.10.17.801.md). Existing 19 unverifiable opening-balance projections, 5 direct app finance grants and v530 authenticated UI gate remain BLOCKED; [PR #928](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/928) merged main `bd6cf172` after runtime CI and Test candidate image build success. Not a restored auction feature or Production application release.
 
 
 ## v2026.10.17.796 — Marketplace appraisal fail-closed ledger candidate; Production HOLD
