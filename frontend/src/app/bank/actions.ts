@@ -153,11 +153,15 @@ export async function createPocketAction(_previous: ActionState, formData: FormD
   if (!name) {
     return { status: 'error', message: '포켓 통장 이름을 입력해 주세요.' };
   }
+  if (targetAmountRaw && !targetAmount) {
+    return { status: 'error', message: '저축 목표는 1 WLD 이상의 정수 금액이어야 합니다.' };
+  }
 
   try {
     await mutate('/api/v1/banking/pockets', {
       body: {
         name,
+        idempotencyKey: idempotencyKey(),
         targetAmount: targetAmount ? String(targetAmount) : undefined,
         targetDate: targetDate || undefined,
         themeColor,
@@ -173,9 +177,13 @@ export async function createPocketAction(_previous: ActionState, formData: FormD
 
 export async function transferPocketAction(_previous: ActionState, formData: FormData): Promise<ActionState> {
   const pocketId = String(formData.get('pocketId') ?? '').trim();
-  const direction = String(formData.get('direction') ?? 'IN').trim() as 'IN' | 'OUT';
+  const requestedDirection = String(formData.get('direction') ?? '').trim();
+  const direction = requestedDirection === 'IN' ? 'deposit' : requestedDirection === 'OUT' ? 'withdraw' : null;
   const amount = wholeAmount(formData.get('amount'));
 
+  if (!direction) {
+    return { status: 'error', message: '유효한 포켓 이체 방향을 선택해 주세요.' };
+  }
   if (!UUID.test(pocketId)) {
     return { status: 'error', message: '포켓 통장 식별자가 올바르지 않습니다.' };
   }
@@ -193,7 +201,7 @@ export async function transferPocketAction(_previous: ActionState, formData: For
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
-    const dirLabel = direction === 'IN' ? '포켓으로 입금' : '메인 계좌로 출금';
+    const dirLabel = direction === 'deposit' ? '포켓으로 입금' : '메인 계좌로 출금';
     return { status: 'ok', message: `${groupDigits(amount)} WLD를 성공적으로 ${dirLabel}했습니다.` };
   } catch (error) {
     return failure(error, '포켓 자금 이체에 실패했습니다. 잔액을 확인해 주세요.');
@@ -231,6 +239,7 @@ export async function customizePocketAction(_previous: ActionState, formData: Fo
     const res = await mutate<{ cost_wld?: string; theme_color?: string; icon_code?: string }>(`/api/v1/banking/pockets/${pocketId}`, {
       method: 'PUT',
       body: {
+        idempotencyKey: idempotencyKey(),
         themeColor: themeColor || undefined,
         iconCode: iconCode || undefined,
       },

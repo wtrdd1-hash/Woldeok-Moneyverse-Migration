@@ -18,9 +18,10 @@ export class CreatePocketDto {
   name!: string;
 
   @ApiProperty({ description: '목표 저축 금액 (WLD)', example: '50000' })
+  @IsOptional()
   @IsString()
   @Matches(/^[1-9][0-9]*$/, { message: 'targetAmount must be a positive integer string' })
-  targetAmount!: string;
+  targetAmount?: string;
 
   @ApiPropertyOptional({ description: '목표 달성 예정일 (YYYY-MM-DD)', example: '2026-12-31' })
   @IsOptional()
@@ -60,6 +61,10 @@ export class TransferPocketDto {
 }
 
 export class CustomizePocketDto {
+  @ApiProperty({ description: 'Unique idempotency key for the paid theme change', format: 'uuid' })
+  @IsUUID('4')
+  idempotencyKey!: string;
+
   @ApiPropertyOptional({ description: '저금통 이름', example: '내집마련 통장' })
   @IsOptional()
   @IsString()
