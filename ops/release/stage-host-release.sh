@@ -61,6 +61,15 @@ fi
   exit 66
 }
 
+# The release manifest must not advertise the source SHA if Next was built
+# without BUILD_ID=<sha>; its Date.now() fallback would invalidate sessions
+# and conceal frontend artifact drift until after a Test/Production cutover.
+frontend_artifact_sha="$(cat "$source_dir/frontend/.next/BUILD_ID")"
+[[ "$frontend_artifact_sha" == "$expected_sha" ]] || {
+  echo "frontend build identity mismatch: expected=$expected_sha artifact=$frontend_artifact_sha" >&2
+  exit 66
+}
+
 mkdir -p "$release_root"
 short_sha="${expected_sha:0:12}"
 target="$release_root/${channel}-${version}-${short_sha}"

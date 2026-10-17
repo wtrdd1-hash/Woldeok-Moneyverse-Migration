@@ -14,13 +14,15 @@ function makeSource(root) {
   mkdirSync(path.join(source, 'backend', 'dist'), { recursive: true });
   mkdirSync(path.join(source, 'frontend', '.next'), { recursive: true });
   writeFileSync(path.join(source, 'backend', 'dist', 'main.js'), 'console.log("ok");\n');
-  writeFileSync(path.join(source, 'frontend', '.next', 'BUILD_ID'), 'candidate-build\n');
+  writeFileSync(path.join(source, '.gitignore'), 'backend/dist/\nfrontend/.next/\n');
   git(source, 'init');
   git(source, 'config', 'user.email', 'ci@example.invalid');
   git(source, 'config', 'user.name', 'CI');
   git(source, 'add', '.');
   git(source, 'commit', '-m', 'candidate');
-  return { source, sha: git(source, 'rev-parse', 'HEAD') };
+  const sha = git(source, 'rev-parse', 'HEAD');
+  writeFileSync(path.join(source, 'frontend', '.next', 'BUILD_ID'), `${sha}\n`);
+  return { source, sha };
 }
 
 test('stages a new exact-SHA host release without Git metadata and refuses overwrite', () => {
@@ -67,4 +69,19 @@ test('rejects a source tree whose HEAD does not match the approved SHA', () => {
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /source HEAD mismatch/);
+});
+
+test('refuses to stage an artifact from a different frontend build identity', () => {
+  const root = mkdtempSync(path.join(tmpdir(), 'moneyverse-host-release-wrong-build-'));
+  const releaseRoot = path.join(root, 'releases');
+  const { source, sha } = makeSource(root);
+  writeFileSync(path.join(source, 'frontend', '.next', 'BUILD_ID'), 'candidate-build\n');
+  const result = spawnSync(
+    'bash',
+    ['ops/release/stage-host-release.sh', 'test', 'v791', sha, source, releaseRoot],
+    { cwd: process.cwd(), encoding: 'utf8' },
+  );
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /frontend build identity mismatch/);
+  assert.equal(existsSync(releaseRoot), false, 'reject mismatched build before creating a release');
 });
