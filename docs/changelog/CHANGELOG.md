@@ -1,5 +1,9 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+## v2026.10.17.801 — Secret auction ledger safety containment (candidate)
+- Halt new bids before SQL and prevent unjournaled auction settlement; preserve existing auction/log read paths, replace misleading bidder UI with maintenance status. Full local tests, build, typecheck, lint passed; 396 backend DB tests skipped. Production financial release gate still BLOCKED. No Test/Production application promotion. [Release](../releases/v2026.10.17.801.md).
+
+
 - **v2026.10.17.796 — Marketplace appraisal ledger-first (candidate):** Atomic one-transaction fee and certificate, duplicate/insufficient protection; real disposable Test DB E2E passed. Official Test/Production unchanged; financial/UI gates open. [Release](../releases/v2026.10.17.796.md).
 
 ## v2026.10.17.791 — Reject mismatched frontend build in immutable staging (main merged)
