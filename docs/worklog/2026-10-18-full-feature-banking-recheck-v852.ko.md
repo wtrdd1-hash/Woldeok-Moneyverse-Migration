@@ -27,6 +27,8 @@
 - 중간 remote main a5cebaf 재확인, 동시작업 영역 미변경.
 
 
+- 별도 Android 앱 GitHub main ee97ddfc 확인: Android CI 디버그 유닛/빌드 성공, 실기기 로그인·은행 기능은 검증되지 않음.
+
 ## 종료
 - [한국어 최종 진단](../findings/MONEYVERSE_FULL_RECHECK_v2026.10.18.852.ko.md) / [영문 정본](../findings/MONEYVERSE_FULL_RECHECK_v2026.10.18.852.md), 내부/깃허브 업데이트 한영 기록.
 - **운영 금융 차단 및 실 로그인 Test·UI 검증 미실시**. 이번 감사에서 DB 쓰기·금전 이동·서비스 재시작·테스트 서버 교체·운영 승격 전혀 하지 않음.

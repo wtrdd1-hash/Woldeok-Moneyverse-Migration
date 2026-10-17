@@ -28,6 +28,8 @@
 - Existing v851 bank request-contract fix PR #931 is still draft/unmerged despite successful GitHub CI; no release has incorporated it.
 
 
+- Also independently checked the separate Android app GitHub main `ee97ddfc`; Android CI PASS at exact source (`testDebugUnitTest` and `assembleDebug`), but no connected emulator/device OAuth/bank E2E, so mobile real-user acceptance is UNVERIFIED.
+
 ## Finished — disposition
 - Complete **auditable source/runtime/read-only** recheck documented in [English finding](../findings/MONEYVERSE_FULL_RECHECK_v2026.10.18.852.md) and [한국어](../findings/MONEYVERSE_FULL_RECHECK_v2026.10.18.852.ko.md), plus bilingual internal and GitHub updates.
 - Automation/source build success is separate from Production safety or end-to-end user success. The production financial release gate, Test exact-artifact gate and authenticated v530 full UI/DB flows remain **BLOCKED/UNVERIFIED**.
