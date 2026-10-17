@@ -34,6 +34,10 @@ import {
 import { canonicalIntegerString, groupDigits, isPositiveWldInput } from '@/lib/money';
 import { calculatePensionForecast } from '@/lib/pension-money';
 
+// Must match the unconditional backend P0 settlement hold. Reading existing receipts remains available.
+export const PENSION_LEDGER_SETTLEMENT_PAUSED = true;
+const PENSION_HOLD_NOTICE = '원장 정산 검증 중입니다. 국민연금 납입·해지·은퇴 전환·정기 지급이 일시 중단되었습니다. 기존 내역 조회는 가능합니다.';
+
 export interface NationalPensionOverview {
   totalAumWld: string;
   totalSubscribersCount: number;
@@ -120,6 +124,7 @@ export function PensionPortalClient({
   };
 
   const handleContribute = async () => {
+    if (PENSION_LEDGER_SETTLEMENT_PAUSED) { toast.error(PENSION_HOLD_NOTICE); return; }
     if (!isLoggedIn) {
       toast.error('로그인이 필요한 서비스입니다.');
       return;
@@ -166,6 +171,7 @@ export function PensionPortalClient({
   };
 
   const handleToggleRetirement = async () => {
+    if (PENSION_LEDGER_SETTLEMENT_PAUSED) { toast.error(PENSION_HOLD_NOTICE); return; }
     if (!account) return;
     const isCurrentlyReceiving = account.status === 'RETIRED_RECEIVING';
     const confirmMsg = isCurrentlyReceiving
@@ -194,6 +200,7 @@ export function PensionPortalClient({
   };
 
   const handleLiquidate = async () => {
+    if (PENSION_LEDGER_SETTLEMENT_PAUSED) { toast.error(PENSION_HOLD_NOTICE); return; }
     if (!account) return;
     const { refund, welfare } = calculatePensionForecast(account.accumulated_contribution_wld, account.hourly_payout_rate_bps || 8);
 
@@ -250,16 +257,24 @@ export function PensionPortalClient({
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            국민(유저)의 자발적 기여금으로 국고를 든든히 확충하고, 은퇴 후 평생 매시간 확정 기초연금을 보장받는 국가 복지 금융 시스템입니다.
+            국민(유저)의 자발적 기여금으로 국고를 든든히 확충하고, 은퇴 후 기존 연금 내역을 확인할 수 있는 가상경제 서비스입니다. 정산 검증 완료 전 신규 거래 및 지급은 중단됩니다.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="px-3 py-1 text-xs font-mono">
-            중앙 국고 100% 지급보증 (AAA)
+            {PENSION_LEDGER_SETTLEMENT_PAUSED ? '정산 검증 중 · 거래 중단' : '중앙 국고 100% 지급보증 (AAA)'}
           </Badge>
         </div>
       </div>
+
+      {PENSION_LEDGER_SETTLEMENT_PAUSED && (
+        <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-foreground">
+          <strong>국민연금 거래 임시 중단</strong>
+          <p className="mt-1">{PENSION_HOLD_NOTICE}</p>
+          <p className="mt-1 text-muted-foreground">표시되는 수령 예상액은 참고용 계산이며 실제 지급을 보증하지 않습니다.</p>
+        </div>
+      )}
 
       {/* 대국민 기금 운용 현황 배너 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -375,7 +390,7 @@ export function PensionPortalClient({
               <div className="flex flex-wrap items-center gap-2.5 pt-2">
                 <Button
                   onClick={handleToggleRetirement}
-                  disabled={actionLoading || BigInt(accumulated) < 1000n}
+                  disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || actionLoading || BigInt(accumulated) < 1000n}
                   className={`flex-1 font-semibold ${
                     account?.status === 'RETIRED_RECEIVING'
                       ? 'bg-amber-600 hover:bg-amber-700 text-white'
@@ -400,7 +415,7 @@ export function PensionPortalClient({
                     variant="outline"
                     size="sm"
                     onClick={handleLiquidate}
-                    disabled={actionLoading}
+                    disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || actionLoading}
                     className="text-xs text-destructive hover:bg-destructive/10 border-destructive/30"
                   >
                     <LogOut className="h-3.5 w-3.5 mr-1" />
@@ -421,7 +436,7 @@ export function PensionPortalClient({
                 국민연금 기여금 납입하기
               </CardTitle>
               <CardDescription>
-                지갑에서 기여금을 납입하여 연금 적립액과 평생 연금율을 높이세요.
+                {PENSION_LEDGER_SETTLEMENT_PAUSED ? PENSION_HOLD_NOTICE : '지갑에서 기여금을 납입하여 연금 적립액과 평생 연금율을 높이세요.'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -491,7 +506,7 @@ export function PensionPortalClient({
 
               <Button
                 onClick={handleContribute}
-                disabled={contributing || !isLoggedIn}
+                disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || contributing || !isLoggedIn}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold h-10"
               >
                 {contributing ? '납입 처리 중...' : '국민연금 기여금 즉시 납입'}
@@ -499,7 +514,7 @@ export function PensionPortalClient({
 
               <div className="p-2.5 rounded bg-muted/30 border border-border/40 text-[11px] text-muted-foreground space-y-1">
                 <p>• 납입된 금액은 중앙 국고(VAULT_MAIN)로 편입되어 국가 국부펀드로 복리 운용됩니다.</p>
-                <p>• 은퇴 시 매시간 확정 기초연금이 평생 동안 자동으로 개인 지갑에 입금됩니다.</p>
+                <p>• 정기 지급은 현재 원장 정산 검증이 끝날 때까지 중단됩니다.</p>
               </div>
             </CardContent>
           </Card>

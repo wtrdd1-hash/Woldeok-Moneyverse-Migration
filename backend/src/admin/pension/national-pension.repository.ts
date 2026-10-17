@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
 import { requirePositiveWld } from '../../wallet/wallet.repository';
@@ -63,11 +63,31 @@ export function pensionHourlyPayout(principalWld: string, rateBps: number): stri
   return (due > 0n ? due : 1n).toString();
 }
 
+/**
+ * P0 fail-closed: legacy NPS operations directly mutate wallet projections
+ * and fiscal vaults without canonical balanced Core postings. Real database
+ * evidence found 98 x 45 WLD unjournaled hourly payouts since October 11.
+ */
+export class PensionLedgerSettlementHoldError extends ServiceUnavailableException {
+  constructor() {
+    super({
+      statusCode: 503,
+      code: 'PENSION_LEDGER_SETTLEMENT_UNCERTIFIED',
+      message: 'Pension transactions are paused pending funded, ledger-certified settlement.',
+    });
+  }
+}
+
 @Injectable()
 export class NationalPensionRepository {
   private readonly logger = new Logger(NationalPensionRepository.name);
 
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+
+  /** Must be unreachable until a separately certified, funded, balanced NPS Core command replaces legacy SQL. */
+  private assertLedgerSettlementCertified(): void {
+    throw new PensionLedgerSettlementHoldError();
+  }
 
   private calculateTierAndRate(accumulated: bigint): { tier: string; hourlyRateBps: number } {
     if (accumulated >= 10000000n) {
@@ -176,6 +196,7 @@ export class NationalPensionRepository {
   }
 
   async contribute(userId: string, amountWld: string, note = '국민연금 기여금 납입') {
+    this.assertLedgerSettlementCertified();
     amountWld = requirePositiveWld(amountWld, 'amountWld');
 
     const client = await this.pool.connect();
@@ -293,6 +314,7 @@ export class NationalPensionRepository {
   }
 
   async toggleRetirement(userId: string): Promise<NationalPensionAccountRow> {
+    this.assertLedgerSettlementCertified();
     const acc = await this.getOrCreateAccount(userId);
     if (acc.status === 'LIQUIDATED') {
       throw new Error('해지된 계좌입니다. 새로 기여금을 납입하여 연금을 재개하십시오.');
@@ -318,6 +340,7 @@ export class NationalPensionRepository {
   }
 
   async liquidate(userId: string) {
+    this.assertLedgerSettlementCertified();
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -394,6 +417,7 @@ export class NationalPensionRepository {
   }
 
   async distributeHourlyPensionPayouts() {
+    this.assertLedgerSettlementCertified();
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
