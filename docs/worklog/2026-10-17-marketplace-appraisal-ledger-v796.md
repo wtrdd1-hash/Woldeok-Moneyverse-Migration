@@ -9,3 +9,5 @@
 - DISPOSABLE Test database clone migration 276 PASS. As moneyverse_app: 250 WLD cash charge/250 SINK credit, one journal/two balanced postings and one certificate, replay charge 0, insufficient member denied, no direct balance DML. Clone dropped, official Test/Production unchanged.
 - MID: PR CI, official Test exact-source build and complete authenticated QA remain distinct gates. Do not modify other agents' branches/worktrees.
 - End state is not a Production acceptance claim; append exact PR/CI results when validated.
+
+- Full-suite follow-up: the migration's new MARKETPLACE_APPRAISAL transaction type required a Korean wallet label to avoid misleading fallback text; added the display mapping and reran the ledger-label regression.
