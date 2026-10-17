@@ -1,0 +1,36 @@
+# v2026.10.17.782 | 2026-10-17 12:56 KST
+# First field: pre-delete directory allocated bytes (du -s -B1)
+# Second field: exact deleted build-only directory path
+# Rule: old >7d, no matching process CWD, absolute realpath, root filesystem, .next under frontend only
+269479936	/root/worktrees/mobile-home-redesign-v273/frontend/.next
+317882368	/root/worktrees/moneyverse-c-392/frontend/.next
+305635328	/root/worktrees/mv-a-414/frontend/.next
+269713408	/root/worktrees/current-main-v276/frontend/.next
+267124736	/root/worktrees/moneyverse-fix-work-v256/frontend/.next
+267386880	/root/worktrees/moneyverse-full-page-audit-v259/frontend/.next
+267132928	/root/worktrees/moneyverse-app-b1b/frontend/.next
+269590528	/root/worktrees/test-main-b8ea-v273/frontend/.next
+401596416	/root/worktrees/moneyverse-main-v537-merged/frontend/.next
+414908416	/root/worktrees/security-ci-audit-v538/frontend/.next
+481935360	/root/worktrees/admin-mobile-analytics-v537/frontend/.next
+401346560	/root/worktrees/main-v537-merged-d93b/frontend/.next
+269328384	/root/worktrees/frontend-rebuild-v271/frontend/.next
+276926464	/root/worktrees/release-main-279/frontend/.next
+364843008	/root/worktrees/security-p0-next-og-ci-v2026.10.02.508/frontend/.next
+267280384	/root/worktrees/moneyverse-main-v256-e549c5d/frontend/.next
+269471744	/root/worktrees/current-main-v277/frontend/.next
+345559040	/root/workspace/wmv-implemented-features-v391/frontend/.next
+266743808	/root/workspace/wdmv-c-248/frontend/.next
+276897792	/root/workspace/woldeok-c-276/frontend/.next
+512724992	/root/workspace/Woldeok-Moneyverse-Migration/frontend/.next
+269545472	/root/workspace/moneyverse-c-278/frontend/.next
+306032640	/root/workspace/mv-a-408/frontend/.next
+270753792	/root/workspace/mv-c-292-build/frontend/.next
+307712000	/root/workspace/moneyverse-b-427/frontend/.next
+278102016	/root/workspace/qa-shop-v300/frontend/.next
+# Count=26  sum=8215654400 bytes
+# Root initial used=79992172544 final used=71779147776  net saved=8213024768 bytes
+# Root initial available=20867923968 final available=29080948736
+# Used inodes=2831610 -> 2679505
+# Production/Test code+DB+backup+swap untouched
+# Canonical host raw log checksum for removed-root-next.tsv: a0259e54014395a160cad179f34d0215c0cfdf07107f05d847635a2dd8daf941
