@@ -9,6 +9,7 @@ import {
   type Locale,
   isLocale,
   detectBrowserLocale,
+  localeNavigationTarget,
 } from '@/lib/locale';
 
 export type { Locale };
@@ -72,25 +73,37 @@ export function LocaleProvider({
     document.documentElement.setAttribute('data-locale', resolved);
   }, [initialLocale]);
 
-  const value = useMemo<LocaleContextValue>(() => ({
-    locale,
+  const value = useMemo<LocaleContextValue>(() => {
+    const navigateForLanguageChange = (nextLocale: Locale | null) => {
+      const target = localeNavigationTarget(
+        window.location.pathname,
+        window.location.search,
+        nextLocale,
+      );
+      startTransition(() => {
+        if (target && router) router.replace(target);
+        else router?.refresh();
+      });
+    };
+
+    return {
+      locale,
     resetLocaleToAuto() {
       // Earlier automatic selections may have persisted as a manual preference.
       // An explicit user reset removes that ambiguity without overriding real choices.
       document.cookie = LOCALE_COOKIE + '=; Path=/; Max-Age=0; SameSite=Lax; Secure';
       document.cookie = DETECTED_LOCALE_COOKIE + '=; Path=/; Max-Age=0; SameSite=Lax; Secure';
-      startTransition(() => { router?.refresh(); });
+      navigateForLanguageChange(null);
     },
     setLocale(nextLocale) {
       document.cookie = LOCALE_COOKIE + '=' + nextLocale + '; Path=/; Max-Age=31536000; SameSite=Lax; Secure';
       document.documentElement.lang = nextLocale;
       document.documentElement.setAttribute('data-locale', nextLocale);
       updateLocale(nextLocale);
-      startTransition(() => {
-        router?.refresh();
-      });
+      navigateForLanguageChange(nextLocale);
     },
-  }), [locale, router]);
+    };
+  }, [locale, router, startTransition]);
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }

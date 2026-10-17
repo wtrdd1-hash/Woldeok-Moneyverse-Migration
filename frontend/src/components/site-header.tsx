@@ -91,7 +91,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-14 sm:h-16 w-full max-w-[1440px] items-center justify-between gap-1.5 px-2 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-2 xl:gap-3 2xl:gap-4 lg:px-4 xl:px-6 2xl:px-8">
         <Brand />
 
-        <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-3.5 lg:flex shrink-0 mx-auto">
+        <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-3.5 2xl:flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain" tabIndex={0}>
           {items.map((item) =>
             isGroup(item) ? (
               <HeaderGroup key={item.label} group={item} pathname={pathname} locale={locale} />
@@ -122,7 +122,7 @@ export function SiteHeader() {
               <Button
                 variant="outline"
                 size="icon"
-                className="size-10 min-[400px]:size-11 rounded-[10px] lg:hidden shrink-0"
+                className="size-11 rounded-[10px] 2xl:hidden shrink-0"
                 aria-label={localeLabel(locale, '메뉴 열기', 'Open menu', 'メニューを開く', '打开菜单')}
               >
                 <Menu className="size-4.5 sm:size-5" />

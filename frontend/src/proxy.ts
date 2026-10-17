@@ -3,6 +3,8 @@ import type { NextRequest } from 'next/server';
 import { DEFAULT_LOCALE, LOCALE_COOKIE, detectLocale, isLocale, type Locale } from '@/lib/locale';
 import { detectCrawlerBot } from '@/lib/bot-detector';
 
+const INTERNAL_REWRITE_LOCALE_PARAM = '__mv_path_locale';
+
 const API_ORIGIN = process.env.API_ORIGIN ?? (process.env.NODE_ENV === 'production' ? 'http://127.0.0.1:3000' : 'http://127.0.0.1:3020');
 
 function recordCrawlerHitAsync(request: NextRequest, botName: string, statusCode: number = 200) {
@@ -107,6 +109,12 @@ export function proxy(request: NextRequest) {
   // Check for explicit query parameter (?lang=en or ?locale=ja)
   const queryLang = request.nextUrl.searchParams.get('lang') || request.nextUrl.searchParams.get('locale');
   const validQueryLocale = isLocale(queryLang) ? (queryLang as Locale) : null;
+  // Next may evaluate proxy a second time for a rewritten destination. Keep
+  // the locale prefix selection attached to that internal route, independent
+  // of the visitor's current country or manual cookie. This is presentation
+  // state only; never use this parameter as an authorization signal.
+  const rewriteLocaleParam = request.nextUrl.searchParams.get(INTERNAL_REWRITE_LOCALE_PARAM);
+  const internalRewrittenLocale = isLocale(rewriteLocaleParam) ? rewriteLocaleParam : null;
 
   // Check for locale prefix in URL path: /en/stocks, /ja/bank, /zh/wallet, /ko/work, /en, /ja, etc.
   const localePrefixMatch = pathname.match(/^\/([a-z]{2})($|\/.*)/i);
@@ -154,8 +162,8 @@ export function proxy(request: NextRequest) {
 
   let finalLocale: Locale;
 
-  if (explicitPrefixLocale || validQueryLocale) {
-    finalLocale = (explicitPrefixLocale || validQueryLocale)!;
+  if (explicitPrefixLocale || internalRewrittenLocale || validQueryLocale) {
+    finalLocale = (explicitPrefixLocale || internalRewrittenLocale || validQueryLocale)!;
   } else if (userSavedLocale) {
     finalLocale = userSavedLocale;
   } else {
@@ -166,13 +174,19 @@ export function proxy(request: NextRequest) {
   // Always replace the inbound value: clients must not choose the SSR locale by spoofing this header.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-moneyverse-locale', finalLocale);
+  const rewriteTarget = new URL(`${targetPath}${request.nextUrl.search}`, request.url);
+  if (explicitPrefixLocale && targetPath !== pathname) {
+    rewriteTarget.searchParams.set(INTERNAL_REWRITE_LOCALE_PARAM, explicitPrefixLocale);
+  }
   const response = explicitPrefixLocale && targetPath !== pathname
-    ? NextResponse.rewrite(new URL(`${targetPath}${request.nextUrl.search}`, request.url), {
-        request: { headers: requestHeaders },
-      })
+    ? NextResponse.rewrite(rewriteTarget, { request: { headers: requestHeaders } })
     : NextResponse.next({ request: { headers: requestHeaders } });
 
-  if (explicitPrefixLocale || validQueryLocale) {
+  // A localized URL (/ja/stocks, /en/blog, etc.) selects the language for
+  // this request only. Following a shared or crawled link must never silently
+  // overwrite the visitor's manual preference or disable future GeoIP auto mode.
+  // The interactive language switcher writes the explicit preference cookie.
+  if (validQueryLocale && !explicitPrefixLocale && !internalRewrittenLocale) {
     response.cookies.set(LOCALE_COOKIE, finalLocale, {
       path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: 'lax', secure: true,
     });

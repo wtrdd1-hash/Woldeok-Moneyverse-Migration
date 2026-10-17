@@ -31,6 +31,39 @@ describe('GeoIP locale first-request propagation', () => {
     },
   );
 
+  it('does not convert a crawled /ja route into a permanent manual language preference', () => {
+    const response = firstVisit('US', undefined, 'https://easy-scraping.com/ja/stocks');
+    expect(response.headers.get('x-middleware-request-x-moneyverse-locale')).toBe('ja');
+    expect(response.headers.get('set-cookie')).toBeNull();
+  });
+
+  it('keeps an existing manual preference unchanged on a different-language link', () => {
+    const response = firstVisit('JP', 'wdmv_locale=ko', 'https://easy-scraping.com/en/stocks');
+    expect(response.headers.get('x-middleware-request-x-moneyverse-locale')).toBe('en');
+    expect(response.headers.get('set-cookie')).toBeNull();
+  });
+
+  it('preserves prefixed route locale through the internal rewrite even for visitors in a different country', () => {
+    const first = firstVisit('US', undefined, 'https://easy-scraping.com/ja/stocks?sort=recent');
+    const internalRewrite = first.headers.get('x-middleware-rewrite');
+    expect(internalRewrite).toBe('https://easy-scraping.com/stocks?sort=recent&__mv_path_locale=ja');
+    const second = proxy(new NextRequest(internalRewrite!, {
+      headers: { 'cf-ipcountry': 'US', 'accept-language': 'en-US,en;q=0.9' },
+    }));
+    expect(second.headers.get('x-middleware-request-x-moneyverse-locale')).toBe('ja');
+    expect(second.headers.get('set-cookie')).toBeNull();
+  });
+
+  it('retains the locale URL over a conflicting query during internal rewrite', () => {
+    const first = firstVisit('US', undefined, 'https://easy-scraping.com/ja/stocks?lang=ko');
+    const target = first.headers.get('x-middleware-rewrite');
+    const second = proxy(new NextRequest(target!, {
+      headers: { 'cf-ipcountry': 'US', 'accept-language': 'en-US,en;q=0.9' },
+    }));
+    expect(second.headers.get('x-middleware-request-x-moneyverse-locale')).toBe('ja');
+    expect(second.headers.get('set-cookie')).toBeNull();
+  });
+
   it('does not persist auto-detection as a cookie on each public request', () => {
     const res = firstVisit('US');
     expect(res.headers.get('set-cookie')).toBeNull();
