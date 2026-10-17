@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.17.851 — Saving-pocket API source patch and P0 database ledger safety hold
+- [EN worklog](docs/worklog/2026-10-17-banking-functional-audit-v851.md) / [한국어](docs/worklog/2026-10-17-banking-functional-audit-v851.ko.md) · [P0 finding EN](docs/findings/MONEYVERSE_BANK_POCKET_LEDGER_DRIFT_v2026.10.17.851.md) / [한국어](docs/findings/MONEYVERSE_BANK_POCKET_LEDGER_DRIFT_v2026.10.17.851.ko.md) · [Internal](docs/updates/v2026.10.17.851-banking-functional-internal.md) · [GitHub](docs/updates/v2026.10.17.851-banking-functional-github.md). Reproduced and fixed API parity for pocket creation, transfer directions and paid customization; corrected observed 100/500 WLD fee disclosure. Live DB metadata proves pocket transfer/archive direct legacy cash updates without canonical ledger/projection, replay not enforced and source DDL absent from repository. Read-only financial gate **BLOCKED** (19 unproven projection differences, 5 app-writable finance tables). Source candidate only; no Test/Production release.
+
 ## v2026.10.17.755 — Stock League Test 500 read boundary correction; Production remains BLOCKED
 - [Worklog EN](docs/worklog/2026-10-17-stock-league-test-private-read-v755.md) / [한국어](docs/worklog/2026-10-17-stock-league-test-private-read-v755.ko.md) · [Internal](docs/updates/v2026.10.17.755-internal.md) · [GitHub](docs/updates/v2026.10.17.755-github.md). Forward SQL 274 replaces inaccessible `user_roles` and virtual portfolio raw SELECTs with scoped app-executable SECURITY DEFINER helpers. Isolated Test DB app-role read-only acceptance and full local tests PASS. Production 19 historic mismatches, core DML and v530 authenticated UI gates remain blocking.
 

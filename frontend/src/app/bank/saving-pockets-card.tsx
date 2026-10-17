@@ -413,7 +413,7 @@ export function SavingPocketsCard({
                 <span>&apos;{archiveTarget.name}&apos; 저축 포켓 해지</span>
               </DialogTitle>
               <DialogDescription className="text-xs">
-                포켓을 해지하면 보관 중인 잔액 <strong className="font-mono text-foreground">{groupDigits(archiveTarget.balance)} WLD</strong>가 메인 현금 계좌로 즉시 안전하게 반환됩니다.
+                포켓 해지 신청 시 잔액 <strong className="font-mono text-foreground">{groupDigits(archiveTarget.balance)} WLD</strong> 반환을 요청합니다. 별도로 <strong className="font-mono text-foreground">500 WLD</strong> 해지 수수료가 발생합니다.
               </DialogDescription>
             </DialogHeader>
 

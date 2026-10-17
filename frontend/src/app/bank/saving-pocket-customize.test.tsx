@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { SavingPocketCustomizeDialog } from './saving-pocket-customize-dialog';
 import type { SavingPocket } from './types';
 
@@ -18,6 +18,20 @@ const mockPocket: SavingPocket = {
 };
 
 describe('SavingPocketCustomizeDialog Component Tests', () => {
+  it('charges the database-observed fixed 100 WLD for an icon-only theme update', () => {
+    render(
+      <SavingPocketCustomizeDialog
+        pocket={mockPocket}
+        cashBalance="9007199254740993123456789"
+        open={true}
+        onOpenChange={() => {}}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /가상 지갑/i }));
+    expect(screen.getByText('100 WLD로 적용하기')).toBeDefined();
+    expect(screen.queryByText('300 WLD로 적용하기')).toBeNull();
+  });
+
   it('renders preview card and fee details correctly', () => {
     render(
       <SavingPocketCustomizeDialog
