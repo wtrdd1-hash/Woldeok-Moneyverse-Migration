@@ -28,7 +28,7 @@ export function blogHubUrl(locale: BlogLocale): string {
 }
 export function hasCountryEdition(post: BlogPost, locale: BlogLocale): boolean {
   if (locale === 'ko') return true;
-  return post.slug.startsWith('country-guide-') && Boolean(post.translations?.[locale]?.content?.trim());
+  return Boolean(post.translations?.[locale]?.content?.trim());
 }
 export function blogAlternateLanguages(post: BlogPost): Record<string, string> {
   const languages: Record<string, string> = { 'ko-KR': blogUrl(post.slug, 'ko') };

@@ -2195,3 +2195,36 @@
 - `vitest run "blog" "shell-boundary" "macro-market-data"`: 3 files passed, 11 tests passed
 - `pnpm run api:contract:check`: API contract artifacts match after internal TypeScript symbol normalization
 - `git branch -a`: `* main` 단일 브랜치 유지
+
+
+---
+
+## 🚀 [v230 Specification] GitHub 잔여 DRAFT PR 및 원격 브랜치 전수 클린 삭제(단일 main 체제 확립), 블로그 4개 국어 번역·인포그래픽 이미지 렌더러 탑재 및 운영 승격 기준 100% 충족
+
+### 1. 현황 및 개선 완료 내역
+1. **[GitHub Actions 및 원격 브랜치 위생 완전 정상화 (PR 0건, 원격 브랜치 1개)]**:
+   - GitHub에 열려 있던 잔여 드래프트 PR 13건(#912, #898, #892, #871, #870, #868, #866, #865, #862, #859, #857, #851, #844)을 `gh pr close --delete-branch`로 공식 종료 및 연결 브랜치 전수 삭제.
+   - 원격 저장소(`origin`)에 남아 있던 과거 임시 및 자동화 브랜치(`auto/hourly-*`, `docs/planning-*`, `fix/*`, `feature/*`, `audit/*`)를 `git push origin --delete`로 전수 삭제하여 원격에 오직 `refs/heads/main` 단 1개만 잔존하도록 완전 무결하게 정돈.
+2. **[블로그 다국어 감지 게이트(`hasCountryEdition`) 결함 해결]**:
+   - 기존에 `post.slug.startsWith('country-guide-')`에 한정되어 있어 번역 데이터가 존재함에도 영문/일문/중문 페이지가 404를 반환하고 언어 선택 바가 숨겨지던 결함을 `Boolean(post.translations?.[locale]?.content?.trim())`로 일반화하여 해소.
+   - `/blog/2026-10-14-compound-mv83xp86`, `/en/blog/...`, `/ja/blog/...`, `/zh/blog/...` 전 구간에서 정상 렌더링 및 언어 전환 탭(`🇰🇷 한국어`, `🇺🇸 English`, `🇯🇵 日本語`, `🇨🇳 中文`) 정상 노출 보장.
+3. **[블로그 본문 마크다운 이미지 렌더러 탑재 및 인포그래픽 에셋 삽입]**:
+   - `frontend/src/app/blog/[slug]/blog-post-client.tsx`: 본문 마크다운 내 `![alt](src)` 구문 파싱 및 반응형 `<figure>`/`<figcaption>` 이미지 카드 렌더링 블록 신설.
+   - 아인슈타인 72의 법칙 복리 vs 단리 지수함수 곡선 및 청년도약계좌 5,000만 원 목돈 달성 고해상도 인포그래픽(`compound-interest-72-rule.svg`) 본문 4장 하단에 정식 첨부.
+4. **[영/일/중 4개 국어 번역 본문 8개 장 전수 심층 확장 보강]**:
+   - 일본어(`ja`) 및 중국어(`zh`) 번역에 4장 연수익률 구간별 비교표, 5장 청년도약계좌 실전 메커니즘, 6장 배당 재투자(DRIP) 및 1만 회 몬테카를로 시뮬레이션, 7장 머니버스 실전 로드맵, 8장 학술 참고문헌(References)을 누락 없이 전문 번역하여 탑재.
+5. **[운영 승격 기준 풀스택 전수 검증 100% 그린 패스]**:
+   - 프론트엔드 블로그 단위 테스트: 6개 파일, 24개 테스트 100% 통과
+   - 프론트엔드 TypeScript 정적 타입 검사(`tsc --noEmit`): 0 Errors
+   - 백엔드 중앙은행 및 조폐국 단위 테스트: 9개 테스트 100% 통과
+   - 백엔드 컴파일 빌드(`nest build`): exit code 0
+   - 모바일 API 컨트랙트 및 스키마 검증(`api:contract:check`): 179개 엔드포인트 100% 일치
+
+### 2. 검증 증적
+- `git ls-remote --heads origin`: `refs/heads/main` 단 1개 브랜치 확인
+- `gh pr list`: 열려 있는 PR 0건 확인
+- `npx.cmd vitest run "blog"`: 6 files passed, 24 tests passed
+- `npx.cmd tsc --noEmit` (frontend): exit code 0
+- `npx.cmd vitest run "central-bank" "mint"`: 3 files passed, 9 tests passed
+- `npx.cmd nest build`: exit code 0
+- `npm.cmd run api:contract:check`: API contract artifacts match after internal TypeScript symbol normalization

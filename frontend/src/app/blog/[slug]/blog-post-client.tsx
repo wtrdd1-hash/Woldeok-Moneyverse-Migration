@@ -232,6 +232,29 @@ export function BlogPostClient({ post, locale }: Props) {
                 </table>
               </div>
             );
+          } else if (paragraph.startsWith('![') && paragraph.includes('](')) {
+            const match = paragraph.match(/^!\[(.*?)\]\((.*?)\)$/);
+            if (match) {
+              const [, altText, imgSrc] = match;
+              renderedElement = (
+                <figure key={`img-${idx}`} className="my-6 rounded-2xl overflow-hidden border border-border/70 shadow-md bg-card/50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={imgSrc} alt={altText || activeTitle} className="w-full h-auto aspect-[1200/630] object-cover" loading="lazy" />
+                  {altText && (
+                    <figcaption className="px-4 py-2 bg-muted/30 border-t border-border/40 text-[11px] text-muted-foreground font-mono flex items-center justify-between">
+                      <span>🖼️ {altText}</span>
+                      <span className="text-emerald-400 font-bold">{labels.illustration}</span>
+                    </figcaption>
+                  )}
+                </figure>
+              );
+            } else {
+              renderedElement = (
+                <p key={`p-${idx}`} className="leading-relaxed text-foreground/80">
+                  {paragraph}
+                </p>
+              );
+            }
           } else {
             renderedElement = (
               <p key={`p-${idx}`} className="leading-relaxed text-foreground/80">
