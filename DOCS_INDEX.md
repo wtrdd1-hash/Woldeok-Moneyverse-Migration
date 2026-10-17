@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.17.801 — Full functionality regression audit (AUDIT, Production BLOCKED)
+- [Findings EN](docs/findings/MONEYVERSE_FULL_FUNCTIONAL_REGRESSION_AUDIT_v2026.10.17.801.md) / [한국어](docs/findings/MONEYVERSE_FULL_FUNCTIONAL_REGRESSION_AUDIT_v2026.10.17.801.ko.md) · [Worklog](docs/worklog/2026-10-17-full-functional-audit-v801.md) / [KO](docs/worklog/2026-10-17-full-functional-audit-v801.ko.md) · [Internal](docs/updates/v2026.10.17.801-internal.md) · [GitHub](docs/updates/v2026.10.17.801-github.md). Tests/typecheck/lint/build PASS, but financial DML/projection, mixed Test artifact SHA, authenticated UI and Production gates BLOCKED.
+
+
 ## v2026.10.17.755 — Stock League Test 500 read boundary correction; Production remains BLOCKED
 - [Worklog EN](docs/worklog/2026-10-17-stock-league-test-private-read-v755.md) / [한국어](docs/worklog/2026-10-17-stock-league-test-private-read-v755.ko.md) · [Internal](docs/updates/v2026.10.17.755-internal.md) · [GitHub](docs/updates/v2026.10.17.755-github.md). Forward SQL 274 replaces inaccessible `user_roles` and virtual portfolio raw SELECTs with scoped app-executable SECURITY DEFINER helpers. Isolated Test DB app-role read-only acceptance and full local tests PASS. Production 19 historic mismatches, core DML and v530 authenticated UI gates remain blocking.
 

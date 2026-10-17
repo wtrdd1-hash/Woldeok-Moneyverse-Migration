@@ -1,5 +1,9 @@
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
+## v2026.10.17.801 — Full-function regression re-audit (documentation only; release BLOCKED)
+- Minipc read-only production financial and Test identity gates confirmed BLOCKED: five core app DML grants, 19 uncertified balance projections (+4,779,188 WLD), Test v795 compiled artifact with v800 service/public version. Isolated test/typecheck/lint/build PASS with 399 total test skips and 1,076 lint warnings; four actual frontend CTA 404s and 20 direct balance SQL patterns remain. No application release or financial mutation. [Audit](../findings/MONEYVERSE_FULL_FUNCTIONAL_REGRESSION_AUDIT_v2026.10.17.801.md).
+
+
 - **v2026.10.17.796 — Marketplace appraisal ledger-first (candidate):** Atomic one-transaction fee and certificate, duplicate/insufficient protection; real disposable Test DB E2E passed. Official Test/Production unchanged; financial/UI gates open. [Release](../releases/v2026.10.17.796.md).
 
 ## v2026.10.17.791 — Reject mismatched frontend build in immutable staging (main merged)
