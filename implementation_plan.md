@@ -2544,3 +2544,28 @@
 
 ### 3. 검증 결과
 - 프론트엔드 타입 체크: `tsc --noEmit` **오류 0건 (100% 통과)**.
+
+
+---
+
+## 🚀 [v240 Specification] 신규 기능(SEO 패치·FIRE/크립토 계산기·Mines/Plinko 미니게임) 운영 프로덕션(v897) 무중단 컷오버 승격 완료 및 인덱싱 가동
+
+### 1. 운영 프로덕션 무중단 승격(Zero-Downtime Cutover) 완료 내역
+- **대상 호스트**: `easy-scraping.com` (Debian 호스트 포트 3233 Backend, 3234 Frontend)
+- **승격 버전**: `prod-v2026.10.18.897-d4de11de7589` (`d4de11de7589bffc176fe428d410b380b922dece`)
+- **서비스 전환**:
+  - 기존 v805 서비스(`moneyverse-release-v805-*.service`)를 안전하게 비활성화하고, 신규 v897 불변 서비스(`moneyverse-release-v897-backend.service`, `moneyverse-release-v897-frontend.service`) 등록 및 가동.
+  - `production-current` 원자적 심볼릭 링크 스위칭 (`/srv/moneyverse-data/releases/prod-v2026.10.18.897-d4de11de7589`).
+  - 환경변수 주입: `SEO_INDEXING_ENABLED=true`, `APP_BASE_URL=https://easy-scraping.com`, `BUILD_ID=d4de11de...`.
+- **라이브 실측 검증 (`curl`)**:
+  - `curl -s https://easy-scraping.com/api/version`: `{"id":"d4de11de7589bffc176fe428d410b380b922dece"}` 정상 응답 확인
+  - `curl -sI https://easy-scraping.com/`: `HTTP/2 200` 및 `x-robots-tag: index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1` 확인
+  - `curl -sI https://easy-scraping.com/tools/fire-calculator`: `HTTP/2 200` 정상 응답 확인
+  - `curl -sI https://easy-scraping.com/tools/crypto-apy-calculator`: `HTTP/2 200` 정상 응답 확인
+  - `curl -sI https://easy-scraping.com/arcade`: `HTTP/2 200` 정상 응답 확인
+  - `curl -sI https://easy-scraping.com/sitemap.xml`: `HTTP/2 200` 정상 응답 확인
+
+### 2. 저장소 및 호스트 시스템 위생 관리
+- **백그라운드 태스크**: 사용자 스크린샷 잔여 태스크 및 방치 프로세스 0건 정리 완료 (`No background tasks are currently running`).
+- **원격 저장소 브랜치**: 크론 생성 임시 브랜치 일괄 정리 완료, `git ls-remote --heads origin`: `refs/heads/main` 단 1개 단독 유지.
+- **호스트 디스크 공간**: `/srv/moneyverse-data` 139GB 여유 (26% 사용)로 안전 마진 확보.
