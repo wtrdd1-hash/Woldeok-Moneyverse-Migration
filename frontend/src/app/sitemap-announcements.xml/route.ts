@@ -31,7 +31,7 @@ export async function GET() {
   ];
 
   try {
-    const data = await publicApi<{ announcements: AnnouncementItem[] }>('/api/v1/announcements', 3600);
+    const data = await publicApi<{ announcements: AnnouncementItem[] }>('/api/v1/content/announcements', 3600);
     if (data?.announcements) {
       for (const notice of data.announcements) {
         entries.push({

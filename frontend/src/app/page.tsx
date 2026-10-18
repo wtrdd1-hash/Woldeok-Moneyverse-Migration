@@ -124,7 +124,7 @@ interface Announcement {
 
 export default async function HomePage() {
   const [announcements, marketData] = await Promise.all([
-    publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60),
+    publicApi<{ announcements: Announcement[] }>('/api/v1/content/announcements', 60),
     apiOrNull<{ stocks: StockItem[] }>('/api/v1/stocks'),
   ]);
 

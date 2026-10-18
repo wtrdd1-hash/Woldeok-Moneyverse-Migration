@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { SavingPocketsCard } from './saving-pockets-card';
 import type { SavingPocket } from './types';
@@ -49,5 +49,7 @@ describe('SavingPocketsCard', () => {
     expect(screen.getByText('비상금 통장')).toBeDefined();
     expect(screen.getByText(/50% 달성/i)).toBeDefined();
     expect(screen.getByText('5,000')).toBeDefined();
+    fireEvent.click(screen.getByTitle('포켓 해지'));
+    expect(screen.getByText('500 WLD')).toBeDefined();
   });
 });

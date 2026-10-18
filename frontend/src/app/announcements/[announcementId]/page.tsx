@@ -24,7 +24,7 @@ interface PageProps {
 }
 
 async function getAnnouncement(id: string) {
-  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
+  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/content/announcements', 60);
   if (!data?.announcements) return null;
   const current = data.announcements.find((item) => item.announcementId === id);
   const others = data.announcements.filter((item) => item.announcementId !== id).slice(0, 3);

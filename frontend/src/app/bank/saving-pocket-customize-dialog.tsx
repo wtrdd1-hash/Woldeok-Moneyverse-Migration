@@ -74,13 +74,14 @@ export function SavingPocketCustomizeDialog({
   const currentColor = pocket?.theme_color || 'sky';
   const currentIcon = pocket?.icon_code || 'piggy-bank';
 
-  // 변경 여부에 따른 WLD 비용 계산 (색상 변경 100 WLD, 아이콘 변경 300 WLD)
+  // The deployed bank_customize_pocket() debits a fixed 100 WLD once per request,
+  // not an additive per-field fee. Review this with the DB contract on any repricing.
   const isColorChanged = selectedColor !== currentColor;
   const isIconChanged = selectedIcon !== currentIcon;
-  const totalCost = (isColorChanged ? 100 : 0) + (isIconChanged ? 300 : 0);
+  const totalCost = isColorChanged || isIconChanged ? 100n : 0n;
 
-  const cashNum = Number.parseInt(cashBalance.replaceAll(',', '') || '0', 10);
-  const isInsufficient = cashNum < totalCost;
+  const cashDigits = cashBalance.replaceAll(',', '').trim();
+  const isInsufficient = !/^[0-9]+$/.test(cashDigits) || BigInt(cashDigits) < totalCost;
 
   const activeThemeObj = THEME_COLORS.find((c) => c.id === selectedColor) || THEME_COLORS[0];
   const ActiveIconObj = ICON_PACKS.find((i) => i.id === selectedIcon)?.icon || PiggyBank;
@@ -130,16 +131,16 @@ export function SavingPocketCustomizeDialog({
           <input type="hidden" name="themeColor" value={selectedColor} />
           <input type="hidden" name="iconCode" value={selectedIcon} />
 
-          {/* 2. 테마 색상 선택 (100 WLD) */}
+          {/* The 100 WLD fee is charged once for both visual fields. */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
                 <span>테마 색상</span>
-                <span className="text-[10px] font-normal text-muted-foreground">(변경 시 100 WLD)</span>
+                <span className="text-[10px] font-normal text-muted-foreground">(테마·아이콘 통합 변경 100 WLD)</span>
               </label>
               {isColorChanged && (
                 <Badge variant="secondary" className="text-[10px] font-mono text-primary font-bold">
-                  +100 WLD
+                  변경됨
                 </Badge>
               )}
             </div>
@@ -171,16 +172,16 @@ export function SavingPocketCustomizeDialog({
             </div>
           </div>
 
-          {/* 3. 아이콘 팩 선택 (300 WLD) */}
+          {/* No additional charge when icon and theme change together. */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
                 <span>아이콘 팩</span>
-                <span className="text-[10px] font-normal text-muted-foreground">(변경 시 300 WLD)</span>
+                <span className="text-[10px] font-normal text-muted-foreground">(통합 적용 수수료에 포함)</span>
               </label>
               {isIconChanged && (
                 <Badge variant="secondary" className="text-[10px] font-mono text-primary font-bold">
-                  +300 WLD
+                  변경됨
                 </Badge>
               )}
             </div>

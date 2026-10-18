@@ -24,7 +24,7 @@ export function DiscordBanner() {
               </Badge>
               <Badge variant="outline" className="text-[10px] font-bold text-emerald-400 border-emerald-500/30 flex items-center gap-1">
                 <Sparkles className="size-3" />
-                <T korean="웹 출석 시 +10% 추가 WLD" english="Web Check-in +10% Bonus" />
+                <T korean="일일 출석 룰렛 확인" english="Daily Check-in Roulette" />
               </Badge>
             </div>
 
@@ -37,8 +37,8 @@ export function DiscordBanner() {
 
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-2xl">
               <T
-                korean="디스코드 채팅 명령어와 웹 대시보드가 실시간으로 동기화됩니다. 웹사이트에서 출석 시 10% 추가 보너스와 일일 럭키 룰렛 기회를 드립니다."
-                english="Chat commands and web dashboard sync in real-time. Enjoy a 10% attendance bonus and daily lucky wheel rewards on the web."
+                korean="디스코드 채팅 명령어와 웹 대시보드를 활용하고, 웹 도구에서 출석 룰렛의 실제 이용 조건을 확인하세요."
+                english="Chat commands and web dashboard sync in real-time. Visit the web tools hub to see the daily attendance roulette and its current eligibility."
               />
             </p>
 
@@ -74,8 +74,8 @@ export function DiscordBanner() {
               variant="outline"
               className="border-border/80 hover:bg-muted/80 text-foreground font-semibold text-xs rounded-xl px-4 py-2 min-h-[38px]"
             >
-              <Link href="/attendance">
-                <T korean="오늘의 웹 출석 10% 받기" english="Claim +10% Web Check-in" />
+              <Link href="/tools">
+                <T korean="출석 룰렛 확인하기" english="Check Attendance Roulette" />
               </Link>
             </Button>
           </div>

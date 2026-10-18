@@ -305,10 +305,10 @@ export function RoadmapView() {
               </p>
             </div>
             <Link
-              href="/pet"
+              href="/guide/dopamine-system"
               className="text-xs font-semibold text-pink-400 hover:text-pink-300 flex items-center justify-between pt-2 border-t border-zinc-800/60"
             >
-              <span>{t('덕이 펫 돌보러 가기', 'Care for Deoki', 'ペットのお世話へ', '去照顾小德克')}</span>
+              <span>{t('덕이 펫 기능 안내', 'Learn about Deoki Pet', 'ペット機能ガイド', '宠物功能说明')}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>

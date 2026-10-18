@@ -114,7 +114,7 @@ export class PocketController {
     return this.guarded(
       () =>
         this.repository().customizePocket(
-          '00000000-0000-0000-0000-000000000000',
+          body.idempotencyKey,
           requireUserId(request),
           pocketId,
           body.themeColor,

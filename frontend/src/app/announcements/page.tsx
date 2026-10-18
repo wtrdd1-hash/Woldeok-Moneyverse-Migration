@@ -29,7 +29,7 @@ interface Announcement {
 }
 
 export default async function AnnouncementsPage() {
-  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
+  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/content/announcements', 60);
 
   const announcementsBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },

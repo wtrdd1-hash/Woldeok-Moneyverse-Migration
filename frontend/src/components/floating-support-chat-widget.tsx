@@ -1230,7 +1230,7 @@ export function FloatingSupportChatWidget() {
                   </p>
                   <div className="grid gap-1">
                     <Link
-                      href="/guide/getting-started"
+                      href="/guide"
                       className="p-2 rounded-lg bg-muted/40 hover:bg-muted text-[11px] font-medium transition-colors flex items-center justify-between"
                     >
                       <span>

@@ -1,0 +1,1914 @@
+{
+  "version": "v2026.10.18.901",
+  "capturedAtUtc": "2026-10-18T08:46:27.981Z",
+  "sourceRef": "origin/main fe689c4bcd9acdea40755f9ff08ba446bdeeb1c8",
+  "liveSourceSha": "e54e6843df27e01c00e0d409ddb9818f754d2c4c",
+  "scope": "anonymous read-only GET. No authenticated, finance write, screenshot, viewport, dynamic route or real-user UI acceptance.",
+  "routesInInventory": 166,
+  "testedStaticRouteCount": 135,
+  "extraKnownBrokenCTAs": 4,
+  "totalGETsAcrossStaticAndKnown404s": 278,
+  "aggregates": [
+    {
+      "root": "https://easy-scraping.com",
+      "count": 139,
+      "success2xx": 124,
+      "redirect3xx": 11,
+      "notfound": 4,
+      "errors5xx": 0,
+      "networkTimeout": 0,
+      "criticalErrors": 0
+    },
+    {
+      "root": "https://test.easy-scraping.com",
+      "count": 139,
+      "success2xx": 124,
+      "redirect3xx": 11,
+      "notfound": 4,
+      "errors5xx": 0,
+      "networkTimeout": 0,
+      "criticalErrors": 0
+    }
+  ],
+  "routeResults": [
+    {
+      "path": "/",
+      "production": {
+        "status": 200,
+        "durationMs": 1299,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 1027,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/account",
+      "production": {
+        "status": 200,
+        "durationMs": 1480,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 931,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "production": {
+        "status": 200,
+        "durationMs": 1339,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 4005,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/account/notifications",
+      "production": {
+        "status": 200,
+        "durationMs": 1333,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 977,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/account/privacy",
+      "production": {
+        "status": 200,
+        "durationMs": 2516,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 705,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/account/security",
+      "production": {
+        "status": 200,
+        "durationMs": 1334,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 949,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin",
+      "production": {
+        "status": 200,
+        "durationMs": 492,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 347,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/analytics",
+      "production": {
+        "status": 200,
+        "durationMs": 560,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 365,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/api-health",
+      "production": {
+        "status": 200,
+        "durationMs": 546,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 369,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/bank",
+      "production": {
+        "status": 200,
+        "durationMs": 540,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 358,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/blog",
+      "production": {
+        "status": 200,
+        "durationMs": 433,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 363,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/bonds",
+      "production": {
+        "status": 200,
+        "durationMs": 372,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 364,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/catalog",
+      "production": {
+        "status": 200,
+        "durationMs": 496,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 335,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/content",
+      "production": {
+        "status": 200,
+        "durationMs": 433,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 366,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/controls",
+      "production": {
+        "status": 200,
+        "durationMs": 710,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 337,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/discord",
+      "production": {
+        "status": 200,
+        "durationMs": 490,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 358,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/economy",
+      "production": {
+        "status": 200,
+        "durationMs": 394,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 351,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/economy/scenario-lab",
+      "production": {
+        "status": 200,
+        "durationMs": 1037,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 352,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/enterprises",
+      "production": {
+        "status": 200,
+        "durationMs": 632,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 368,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/fx",
+      "production": {
+        "status": 200,
+        "durationMs": 420,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 335,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/kdic",
+      "production": {
+        "status": 200,
+        "durationMs": 669,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 362,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/logs",
+      "production": {
+        "status": 200,
+        "durationMs": 391,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 362,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/logs/activity",
+      "production": {
+        "status": 200,
+        "durationMs": 472,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 349,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/logs/delivery",
+      "production": {
+        "status": 200,
+        "durationMs": 449,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 384,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/logs/integrity",
+      "production": {
+        "status": 200,
+        "durationMs": 406,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 350,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/market",
+      "production": {
+        "status": 200,
+        "durationMs": 440,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 366,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/market/ai-news",
+      "production": {
+        "status": 200,
+        "durationMs": 475,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 358,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/money-flow",
+      "production": {
+        "status": 200,
+        "durationMs": 485,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 377,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/pension",
+      "production": {
+        "status": 200,
+        "durationMs": 620,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 321,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/safety",
+      "production": {
+        "status": 200,
+        "durationMs": 440,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 379,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/security",
+      "production": {
+        "status": 200,
+        "durationMs": 437,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 381,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/seo",
+      "production": {
+        "status": 200,
+        "durationMs": 443,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 365,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/seo-audit",
+      "production": {
+        "status": 200,
+        "durationMs": 507,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 351,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/shop",
+      "production": {
+        "status": 200,
+        "durationMs": 898,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 337,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/support",
+      "production": {
+        "status": 200,
+        "durationMs": 449,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 360,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/treasury",
+      "production": {
+        "status": 200,
+        "durationMs": 482,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 348,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/treasury/grants",
+      "production": {
+        "status": 200,
+        "durationMs": 483,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 359,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/users",
+      "production": {
+        "status": 200,
+        "durationMs": 480,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 359,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/admin/work",
+      "production": {
+        "status": 200,
+        "durationMs": 443,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 331,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/advisor",
+      "production": {
+        "status": 200,
+        "durationMs": 444,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 374,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/announcements",
+      "production": {
+        "status": 200,
+        "durationMs": 646,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 354,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/arcade",
+      "production": {
+        "status": 200,
+        "durationMs": 484,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 364,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/attendance",
+      "production": {
+        "status": 404,
+        "durationMs": 365,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 404,
+        "durationMs": 344,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/bank",
+      "production": {
+        "status": 307,
+        "durationMs": 481,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 362,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/bank/savings-pot",
+      "production": {
+        "status": 200,
+        "durationMs": 709,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 320,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/blog",
+      "production": {
+        "status": 200,
+        "durationMs": 1850,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 411,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/board",
+      "production": {
+        "status": 200,
+        "durationMs": 402,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 393,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/bonds",
+      "production": {
+        "status": 200,
+        "durationMs": 550,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 359,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/businesses",
+      "production": {
+        "status": 200,
+        "durationMs": 727,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 994,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/businesses/ventures",
+      "production": {
+        "status": 200,
+        "durationMs": 472,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 336,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/calendar",
+      "production": {
+        "status": 307,
+        "durationMs": 381,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 1106,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/career-guide",
+      "production": {
+        "status": 404,
+        "durationMs": 408,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 404,
+        "durationMs": 330,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/casino",
+      "production": {
+        "status": 200,
+        "durationMs": 470,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 379,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/chat",
+      "production": {
+        "status": 307,
+        "durationMs": 426,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 365,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/clubs",
+      "production": {
+        "status": 307,
+        "durationMs": 426,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 360,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/clubs/new",
+      "production": {
+        "status": 200,
+        "durationMs": 674,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 334,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/clubs/warfare",
+      "production": {
+        "status": 200,
+        "durationMs": 542,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 344,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/collections",
+      "production": {
+        "status": 307,
+        "durationMs": 447,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 370,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/dashboard",
+      "production": {
+        "status": 307,
+        "durationMs": 604,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 409,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/data-deletion",
+      "production": {
+        "status": 200,
+        "durationMs": 381,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 360,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/design-preview",
+      "production": {
+        "status": 200,
+        "durationMs": 413,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 325,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/developer",
+      "production": {
+        "status": 307,
+        "durationMs": 386,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 388,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/enterprises",
+      "production": {
+        "status": 200,
+        "durationMs": 396,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 375,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/features",
+      "production": {
+        "status": 200,
+        "durationMs": 2301,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 399,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "production": {
+        "status": 200,
+        "durationMs": 649,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 394,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/fx",
+      "production": {
+        "status": 200,
+        "durationMs": 836,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 376,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/gallery",
+      "production": {
+        "status": 200,
+        "durationMs": 506,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 352,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/gallery/submit",
+      "production": {
+        "status": 307,
+        "durationMs": 461,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 1349,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/guide",
+      "production": {
+        "status": 200,
+        "durationMs": 527,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 379,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/guide/career-mastery",
+      "production": {
+        "status": 200,
+        "durationMs": 369,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 386,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/guide/dopamine-system",
+      "production": {
+        "status": 200,
+        "durationMs": 358,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 395,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/guide/getting-started",
+      "production": {
+        "status": 404,
+        "durationMs": 660,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 404,
+        "durationMs": 320,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/guide/glossary",
+      "production": {
+        "status": 200,
+        "durationMs": 487,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 374,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/guide/stock-trading",
+      "production": {
+        "status": 200,
+        "durationMs": 655,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 397,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/guide/virtual-banking",
+      "production": {
+        "status": 200,
+        "durationMs": 998,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 356,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/inventory",
+      "production": {
+        "status": 307,
+        "durationMs": 669,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 369,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/kdic",
+      "production": {
+        "status": 200,
+        "durationMs": 372,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 362,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/lobby",
+      "production": {
+        "status": 200,
+        "durationMs": 423,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 329,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/login",
+      "production": {
+        "status": 200,
+        "durationMs": 1158,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 427,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/login/providers",
+      "production": {
+        "status": 200,
+        "durationMs": 368,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 346,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/marketplace",
+      "production": {
+        "status": 307,
+        "durationMs": 1465,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 392,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/marketplace/auction",
+      "production": {
+        "status": 200,
+        "durationMs": 372,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 358,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/newspaper",
+      "production": {
+        "status": 200,
+        "durationMs": 368,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 338,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/pension",
+      "production": {
+        "status": 200,
+        "durationMs": 1319,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 362,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/pet",
+      "production": {
+        "status": 404,
+        "durationMs": 354,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 404,
+        "durationMs": 345,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/prediction",
+      "production": {
+        "status": 200,
+        "durationMs": 405,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 386,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/privacy",
+      "production": {
+        "status": 200,
+        "durationMs": 362,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 363,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/profile",
+      "production": {
+        "status": 200,
+        "durationMs": 890,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 357,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/profile/settings",
+      "production": {
+        "status": 200,
+        "durationMs": 395,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 398,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/progression",
+      "production": {
+        "status": 200,
+        "durationMs": 360,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 353,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/progression/prestige",
+      "production": {
+        "status": 200,
+        "durationMs": 416,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 732,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/quests",
+      "production": {
+        "status": 200,
+        "durationMs": 384,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 349,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/register",
+      "production": {
+        "status": 200,
+        "durationMs": 357,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 351,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/reset-password",
+      "production": {
+        "status": 200,
+        "durationMs": 394,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 390,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/roadmap",
+      "production": {
+        "status": 200,
+        "durationMs": 759,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 356,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/safety",
+      "production": {
+        "status": 200,
+        "durationMs": 428,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 327,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/safety/takedown",
+      "production": {
+        "status": 200,
+        "durationMs": 380,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 348,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/search",
+      "production": {
+        "status": 200,
+        "durationMs": 686,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 351,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/seasons",
+      "production": {
+        "status": 200,
+        "durationMs": 721,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 354,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/shop",
+      "production": {
+        "status": 200,
+        "durationMs": 1087,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 372,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/shop/catalog",
+      "production": {
+        "status": 200,
+        "durationMs": 413,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 349,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/spaces",
+      "production": {
+        "status": 200,
+        "durationMs": 369,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 882,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/spaces/real-estate",
+      "production": {
+        "status": 200,
+        "durationMs": 1370,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 369,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/status",
+      "production": {
+        "status": 200,
+        "durationMs": 405,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 348,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/stocks",
+      "production": {
+        "status": 200,
+        "durationMs": 504,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 388,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/stocks/alerts",
+      "production": {
+        "status": 200,
+        "durationMs": 1013,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 358,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/stocks/community",
+      "production": {
+        "status": 200,
+        "durationMs": 387,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 346,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/stocks/compare",
+      "production": {
+        "status": 200,
+        "durationMs": 407,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 349,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/stocks/derivatives",
+      "production": {
+        "status": 200,
+        "durationMs": 363,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 355,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/stocks/history",
+      "production": {
+        "status": 200,
+        "durationMs": 436,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 360,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/stocks/league",
+      "production": {
+        "status": 200,
+        "durationMs": 452,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 332,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/stocks/portfolio",
+      "production": {
+        "status": 200,
+        "durationMs": 361,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 336,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/stocks/watchlist",
+      "production": {
+        "status": 200,
+        "durationMs": 409,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 350,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/support",
+      "production": {
+        "status": 307,
+        "durationMs": 652,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 307,
+        "durationMs": 356,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/terms",
+      "production": {
+        "status": 200,
+        "durationMs": 418,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 1003,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools",
+      "production": {
+        "status": 200,
+        "durationMs": 1116,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 395,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/capital-gains-tax-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 377,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 374,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 430,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 370,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/dividend-tax-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 1284,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 362,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/farming-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 620,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 358,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/gift-tax-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 363,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 405,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/goal-wealth-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 392,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 336,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/isa-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 412,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 372,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/kimchi-premium-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 373,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 363,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/loan-interest-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 420,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 339,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/pension-tax-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 402,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 341,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/quant-studio",
+      "production": {
+        "status": 200,
+        "durationMs": 402,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 391,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/real-estate-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 1076,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 357,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/retirement-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 506,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 358,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/salary-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 867,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 347,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 679,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 1117,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/tax-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 421,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 331,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/tools/youth-leap-calculator",
+      "production": {
+        "status": 200,
+        "durationMs": 1484,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 368,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/treasury",
+      "production": {
+        "status": 200,
+        "durationMs": 376,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 399,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/verify-email",
+      "production": {
+        "status": 200,
+        "durationMs": 1515,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 351,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "production": {
+        "status": 200,
+        "durationMs": 426,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 353,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/wallet",
+      "production": {
+        "status": 200,
+        "durationMs": 350,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 323,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/wallet/activity",
+      "production": {
+        "status": 200,
+        "durationMs": 668,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 352,
+        "criticalHtmlError": false
+      }
+    },
+    {
+      "path": "/work",
+      "production": {
+        "status": 200,
+        "durationMs": 486,
+        "criticalHtmlError": false
+      },
+      "test": {
+        "status": 200,
+        "durationMs": 369,
+        "criticalHtmlError": false
+      }
+    }
+  ],
+  "extraApiGetProbes": [
+    {
+      "path": "/api/v1/admin/users",
+      "production": 401,
+      "test": 401
+    },
+    {
+      "path": "/api/v1/announcements",
+      "production": 404,
+      "test": 404
+    },
+    {
+      "path": "/api/v1/bank/loans",
+      "production": 401,
+      "test": 401
+    },
+    {
+      "path": "/api/v1/banking/bonds",
+      "production": 404,
+      "test": 404
+    },
+    {
+      "path": "/api/v1/banking/loans",
+      "production": 404,
+      "test": 404
+    },
+    {
+      "path": "/api/v1/banking/pockets",
+      "production": 401,
+      "test": 401
+    },
+    {
+      "path": "/api/v1/banking/standing",
+      "production": 401,
+      "test": 401
+    },
+    {
+      "path": "/api/v1/chat/conversations",
+      "production": 401,
+      "test": 401
+    },
+    {
+      "path": "/api/v1/engagement/dopamine/status",
+      "production": 401,
+      "test": 401
+    },
+    {
+      "path": "/api/v1/photos",
+      "production": 200,
+      "test": 200
+    },
+    {
+      "path": "/api/v1/stocks",
+      "production": 200,
+      "test": 200
+    },
+    {
+      "path": "/api/v1/wallet",
+      "production": 401,
+      "test": 401
+    },
+    {
+      "path": "/api/version",
+      "production": 200,
+      "test": 200
+    },
+    {
+      "path": "/health",
+      "production": 200,
+      "test": 200
+    }
+  ]
+}
