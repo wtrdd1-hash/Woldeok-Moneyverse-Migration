@@ -140,6 +140,33 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('balanced banking gameplay contract', ()
     });
   });
 
+  it('debits cash and credits the bank account exactly once on a repeated deposit', async () => {
+    await rolledBack(async (client) => {
+      const { actor } = await memberWithBalances(client, 1000n, 250n);
+      const key = randomUUID();
+      await client.query('SET LOCAL ROLE moneyverse_app');
+      const first = await client.query<{ tx_id: string }>(
+        'SELECT public.bank_move_balance($1,$2,$3,$4)::text AS tx_id',
+        [key, actor, 'deposit', 100],
+      );
+      const replay = await client.query<{ tx_id: string }>(
+        'SELECT public.bank_move_balance($1,$2,$3,$4)::text AS tx_id',
+        [key, actor, 'deposit', 100],
+      );
+      await client.query('RESET ROLE');
+      expect(first.rows[0]?.tx_id).toBe(replay.rows[0]?.tx_id);
+      const balances = await client.query<{ account_type: string; available_amount: string }>(
+        `SELECT a.account_type::text, b.available_amount::text
+         FROM public.accounts a JOIN public.account_balances b ON b.account_id = a.id
+         WHERE a.owner_user_id = $1`,
+        [actor],
+      );
+      const byType = Object.fromEntries(balances.rows.map((b) => [b.account_type, b.available_amount]));
+      expect(byType.USER_CASH).toBe('900');
+      expect(byType.USER_BANK).toBe('350');
+    });
+  });
+
   it('replays the same interest claim instead of paying or failing twice', async () => {
     await rolledBack(async (client) => {
       const { actor } = await memberWithBalances(client, 1000n, 100_000n);

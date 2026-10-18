@@ -84,7 +84,7 @@ export function DepositWithdrawCard({
   };
 
   return (
-    <Card className="border-border/60 bg-background/80 backdrop-blur-md mb-8 sm:mb-12">
+    <Card id="bank-real-deposit" className="scroll-mt-24 border-border/60 bg-background/80 backdrop-blur-md mb-8 sm:mb-12">
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 items-center gap-2">
@@ -186,7 +186,7 @@ export function DepositWithdrawCard({
             </div>
 
             <SubmitButton className="w-full font-bold">
-              <T korean="복리 예금에 입금하기" english="Deposit to Compound Savings" />
+              <T korean="실제 WLD 예금 가입·입금하기" english="Open / Deposit WLD Savings" />
             </SubmitButton>
             <ActionAlert state={depositState} />
           </form>
