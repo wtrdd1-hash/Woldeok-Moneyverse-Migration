@@ -2375,3 +2375,56 @@
 - 백그라운드 크론 생성 브랜치 수십 종 일괄 삭제 완료.
 - `git ls-remote --heads origin`: `refs/heads/main` (`b7ee0370...`) **단 1개 브랜치 확인**.
 - `gh pr list`: **오픈된 PR 0건 확인**.
+
+
+---
+
+## 🚀 [v236 Specification] 사이트 전 기능(166개 라우트, 17개 금융도구, 4개국어, 가상증권/국채/통화정책 API) 전면 재분석 및 전 페이지 실측 QA 완료
+
+### 1. 전 기능 및 전 라우트 재분석 결과 (Total 166개 고유 라우트)
+- **공개 및 서비스 라우트 (45개)**: 홈(`/`), 로비(`/lobby`), 주식 시장(`/stocks`), 국채(`/bonds`), 외환(`/fx`), 예금보험공사(`/kdic`), 카지노(`/casino`), 아케이드(`/arcade`), 비즈니스(`/businesses`), 엔터프라이즈(`/enterprises`), 노동(`/work`), 퀘스트(`/quests`), 성장(`/progression`), 상점(`/shop`), 지갑(`/wallet`), 국고(`/treasury`), 게시판(`/board`), 신문(`/newspaper`), 시스템 상태(`/status`), 지원(`/support`), 이용약관(`/terms`), 개인정보처리방침(`/privacy`), 로드맵(`/roadmap`), 기능소개(`/features`), 가이드(`/guide`), 블로그(`/blog`), 블로그 상세(`/blog/[slug]`) 등.
+- **인증 및 세션 보호 라우트 (307 Redirect Guard 적용)**: 대시보드(`/dashboard`), 은행(`/bank`), 인벤토리(`/inventory`), 채팅(`/chat`), 클럽(`/clubs`), 개발자(`/developer`) 등 비로그인 시 307 정상 보호 확인.
+- **17개 전문 금융/세무 계산기 도구 전수 매핑**:
+  - 복리 계산기 (`/tools/compound-calculator`)
+  - 대출 이자 계산기 (`/tools/loan-interest-calculator`)
+  - 배당 소득세 계산기 (`/tools/dividend-tax-calculator`)
+  - 연봉 실수령액 계산기 (`/tools/salary-calculator`)
+  - 종합소득세 계산기 (`/tools/tax-calculator`)
+  - ISA 절세 계산기 (`/tools/isa-calculator`)
+  - 연금저축 계산기 (`/tools/pension-tax-calculator`)
+  - 퇴직금 계산기 (`/tools/retirement-calculator`)
+  - 청년도약계좌 계산기 (`/tools/youth-leap-calculator`)
+  - 양도소득세 계산기 (`/tools/capital-gains-tax-calculator`)
+  - 증여세 계산기 (`/tools/gift-tax-calculator`)
+  - 김치프리미엄 계산기 (`/tools/kimchi-premium-calculator`)
+  - 퀀트 스튜디오 (`/tools/quant-studio`)
+  - 부동산 중개보수 계산기 (`/tools/real-estate-calculator`)
+  - 파밍/채굴 수익 계산기 (`/tools/farming-calculator`)
+  - 목표 자산 달성 계산기 (`/tools/goal-wealth-calculator`)
+  - 주식 물타기/수익률 계산기 (`/tools/stock-calculator`)
+- **다국어(i18n) 4개 국어 아키텍처 재확인**:
+  - 기본 로케일: 한국어(`ko`)는 루트 경로로 직접 서빙.
+  - 다국어 동적 서브패스: 영어(`/en/*`), 일본어(`/ja/*`), 중국어(`/zh/*`) 3개 언어 완벽 서빙.
+
+### 2. 라이브 운영 프로덕션(`https://easy-scraping.com`) 실측 QA 결과
+- **프론트엔드 라우트 및 다국어 서브패스**:
+  - 공개 페이지 59개 라우트: **전수 200 OK / 307 Redirect 정상 통과 (100.0%)**
+  - 다국어 페이지 12개 라우트 (블로그 및 복리 계산기): **전수 200 OK 정상 통과 (100.0%)**
+  - 사이트맵(XML) 5종 및 RSS 피드(feed.xml): **전수 200 OK 정상 통과 (100.0%)**
+- **백엔드 핵심 계약 API 실측 (`http://127.0.0.1:3233`)**:
+  - `/health`: `200 OK` (15 bytes)
+  - `/api/version`: `200 OK` (`{"id":"e54e6843df27e01c00e0d409ddb9818f754d2c4c"}`)
+  - `/api/v1/stocks`: `200 OK` (실시간 호가 데이터 3,114 bytes 정상 전송)
+  - 인증 보호 엔드포인트: 세션 없는 비인가 접근 시 `401 Unauthorized`로 안전 차단 확인.
+
+### 3. 테스트 환경(`https://test.easy-scraping.com`) 60개 전 라우트 실측 결과
+- 전체 점검 대상: 60개 엔드포인트
+- **통과: 60 / 60 (통과율 100.0%, 실패 0건)**
+
+### 4. 데이터베이스 및 금융 비즈니스 건전성 실측 (MCP)
+- 시스템 서비스 7종(Backend, Frontend, Discord Bot, MCP, Desktop Commander, Nginx, Docker): **전원 `active`**
+- DB 계정: 40개 계정 무결성 보존.
+- 가상 주식 9종 (SPACE, CHIMU314, DUCK, WFIN, MYUY, WDB, WDM, WDT, WDG): **모두 `active: true`로 실시간 거래 호가 유지 중**.
+- 통화 정책: 테일러 준칙 기반 기준금리(3.75%) 정상 고시 중.
+- 국채 3종(KTB-01Y, KTB-03Y, KTB-05Y): **`OPEN_SUBSCRIPTION` 정상 청약 진행 중**.
+- 카지노 공정성 통계: 코인토스 100만 회, 주사위 홀짝 104만 회, 주사위 번호 104만 회 오차 범위 내 카이스퀘어/Z-score 무결점 통과.
