@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Calculator, TrendingUp, Landmark, Sparkles, ArrowRight, ShieldCheck, HelpCircle, Target, Coins } from 'lucide-react';
+import { Calculator, TrendingUp, Landmark, Sparkles, ArrowRight, ShieldCheck, HelpCircle, Target, Coins, Flame } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { DailyAttendanceRoulette } from '@/components/retention/daily-attendance-roulette';
@@ -64,6 +64,28 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const TOOLS = [
+  {
+    id: 'fire-calculator',
+    title: 'FIRE 조기은퇴·경제적 자유 시뮬레이터',
+    badge: 'NEW 조기은퇴',
+    badgeColor: 'bg-rose-500/10 text-rose-500 border-rose-500/30',
+    description: '트리니티 스터디 4% 안전 인출률과 인플레이션 실질 복리를 적용하여 5대 FIRE 유형별 목표 자산과 은퇴 가능 나이를 계산합니다.',
+    href: '/tools/fire-calculator',
+    icon: Flame,
+    iconColor: 'text-rose-500 bg-rose-500/10',
+    features: ['트리니티 4% 안전 인출률', 'Lean/Regular/Fat 5대 FIRE 비교', '은퇴 도달 나이 실시간 역산', '인플레이션 실질 복리 반영'],
+  },
+  {
+    id: 'crypto-apy-calculator',
+    title: '크립토 스테이킹 APY/APR 복리 계산기',
+    badge: 'NEW DeFi',
+    badgeColor: 'bg-teal-500/10 text-teal-500 border-teal-500/30',
+    description: '스테이킹 및 DeFi 유동성 풀의 단리(APR)와 복리(APY)를 상호 변환하고 매일 자동 재예치에 따른 복리 수익을 시뮬레이션합니다.',
+    href: '/tools/crypto-apy-calculator',
+    icon: Coins,
+    iconColor: 'text-teal-500 bg-teal-500/10',
+    features: ['APR ↔ APY 상호 변환', '매일/매주/매월 재예치 복리', '일별/월별 수령액 정밀 산출', 'WLD/DeFi 스테이킹 프리셋'],
+  },
   {
     id: 'compound-calculator',
     title: '복리 예금·적금 이자 계산기',

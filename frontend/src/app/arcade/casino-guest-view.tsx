@@ -1,11 +1,27 @@
 import Link from 'next/link';
-import { Coins, Dices, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Coins, Dices, Sparkles, ArrowRight, ShieldCheck, Bomb, Gem, CircleDot } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const GAME_SHOWCASE = [
+  {
+    icon: Gem,
+    title: '지뢰찾기 (Mines)',
+    badge: '최대 24.5배',
+    probability: '자유 난이도',
+    description:
+      '5x5 그리드에서 보석을 뒤집으며 배당률을 극대화하고 언제든 캐시아웃할 수 있는 고몰입 전략 미니게임입니다.',
+  },
+  {
+    icon: CircleDot,
+    title: '플링코 (Plinko)',
+    badge: '최대 29배',
+    probability: '정규분포 배당',
+    description:
+      '상단에서 공을 떨어뜨려 피라미드 핀을 튕기며 외곽 고배당 슬롯을 노리는 클래식 물리 미니게임입니다.',
+  },
   {
     icon: Coins,
     title: '동전 뒤집기 (Coin Flip)',

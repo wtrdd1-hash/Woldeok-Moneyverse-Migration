@@ -29,6 +29,8 @@ import { LuckySlotsGame } from './slots-game';
 import { HiLoCardGame } from './hilo-game';
 import { ThemeGameCard } from './theme-games';
 import { WheelGame } from './wheel-game';
+import { MinesGame } from './mines-game';
+import { PlinkoGame } from './plinko-game';
 import { CasinoJackpotTicker } from './casino-jackpot-ticker';
 import type { CasinoJackpotData } from './casino-jackpot-ticker';
 import { CasinoAudioControls } from '@/components/casino-audio-controls';
@@ -530,6 +532,12 @@ export default async function CasinoPage() {
                 <TabsTrigger value="slots" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
                   🎰 <T korean="럭키 777 슬롯" english="Lucky 777 Slots" />
                 </TabsTrigger>
+                <TabsTrigger value="mines" className="min-h-11 px-4 text-sm font-semibold rounded-xl text-emerald-500 font-bold">
+                  💣 <T korean="지뢰찾기 (Mines)" english="Mines (24.5x)" />
+                </TabsTrigger>
+                <TabsTrigger value="plinko" className="min-h-11 px-4 text-sm font-semibold rounded-xl text-amber-500 font-bold">
+                  ⚪ <T korean="플링코 (Plinko)" english="Plinko (29x)" />
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -703,6 +711,26 @@ export default async function CasinoPage() {
               ) : (
                 <EmptyState title="20구획 휠의 서버 규칙을 불러오지 못했어요." />
               )}
+            </TabsContent>
+
+            {/* 8. 지뢰찾기 (Mines) */}
+            <TabsContent value="mines" className="mt-6 pt-2">
+              <MinesGame
+                minStake={open.min_stake}
+                maxStake={open.max_stake}
+                remainingStake={coinHeadroom}
+                exhausted={coinExhausted}
+              />
+            </TabsContent>
+
+            {/* 9. 플링코 (Plinko) */}
+            <TabsContent value="plinko" className="mt-6 pt-2">
+              <PlinkoGame
+                minStake={open.min_stake}
+                maxStake={open.max_stake}
+                remainingStake={coinHeadroom}
+                exhausted={coinExhausted}
+              />
             </TabsContent>
           </Tabs>
 
