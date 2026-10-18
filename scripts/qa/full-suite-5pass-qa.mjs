@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { assessFullSiteAcceptance } from './e2e-certification.mjs';
 
 const INVENTORY_PATH = path.resolve('artifacts/qa/route-inventory.json');
 const BASE_URL = process.env.QA_BASE_URL || 'http://127.0.0.1:3101';
@@ -90,7 +91,7 @@ async function fetchRoute(routePath, customHeaders = {}) {
 }
 
 async function run() {
-  console.log('=== [Woldeok Moneyverse 5-Pass Full-Route QA Sentinel] ===');
+  console.log('=== [Woldeok Moneyverse HTTP-only route smoke; NOT full E2E acceptance] ===');
   console.log(`Target Frontend: ${BASE_URL}`);
   console.log(`Target Backend:  ${API_URL}`);
 
@@ -104,10 +105,10 @@ async function run() {
 
   const results = {
     pass1: { name: 'HTTP 200 & SSR Rendering Integrity', passed: 0, failed: 0, details: [] },
-    pass2: { name: '5-Viewport Body Overflow Zero & Responsive Bounds', passed: 0, failed: 0, details: [] },
-    pass3: { name: '4-Locale (ko/en/ja/zh) Dynamic & SSR Parity', passed: 0, failed: 0, details: [] },
-    pass4: { name: 'Financial Scale 100T WLD Layout Stress Resistance', passed: 0, failed: 0, details: [] },
-    pass5: { name: 'Admin 34 Routes & Real Transactions Integrity', passed: 0, failed: 0, details: [] },
+    pass2: { name: 'Static HTML width heuristic only (no rendered viewport measurements)', passed: 0, failed: 0, details: [] },
+    pass3: { name: '4-locale HTTP response header check only (not content correctness)', passed: 0, failed: 0, details: [] },
+    pass4: { name: 'Finance page availability only (no 100T WLD data injected)', passed: 0, failed: 0, details: [] },
+    pass5: { name: 'Admin route availability and public API guards (no signed-in transaction)', passed: 0, failed: 0, details: [] },
   };
 
   // -------------------------------------------------------------
@@ -154,7 +155,7 @@ async function run() {
   // -------------------------------------------------------------
   // PASS 2: 5-Viewport Responsive & Horizontal Overflow Defense
   // -------------------------------------------------------------
-  console.log('\n>>> [PASS 2/5] Inspecting 5-Viewport Responsive Defense (320px, 390px, 768px, 1100px, 1280px)...');
+  console.log('\n>>> [PASS 2/5] Checking a static HTML width heuristic (NOT 320–1280px browser rendering)...');
   const layoutSampleRoutes = [
     '/', '/stocks', '/stocks/WLD', '/bank', '/casino',
     '/wallet', '/shop', '/work', '/tools', '/tools/compound-calculator',
@@ -182,7 +183,7 @@ async function run() {
   // -------------------------------------------------------------
   // PASS 3: 4-Locale (ko/en/ja/zh) Dynamic & SSR Parity
   // -------------------------------------------------------------
-  console.log('\n>>> [PASS 3/5] Verifying 4-Locale (KO, EN, JA, ZH) SSR and GeoIP Parity...');
+  console.log('\n>>> [PASS 3/5] Checking 4 locale response headers (NOT translated content parity)...');
   const locales = [
     { code: 'ko', country: 'KR', expectedHeader: 'ko' },
     { code: 'ja', country: 'JP', expectedHeader: 'ja' },
@@ -218,9 +219,9 @@ async function run() {
   console.log(`  [Pass 3 Complete] Checked ${multilingualRoutes.length * locales.length} locale-route pairs. Passed: ${results.pass3.passed}, Failed: ${results.pass3.failed}`);
 
   // -------------------------------------------------------------
-  // PASS 4: Financial Scale 100T WLD Layout Stress Resistance
+  // PASS 4: Finance HTTP Availability, NOT 100T WLD Stress
   // -------------------------------------------------------------
-  console.log('\n>>> [PASS 4/5] Testing Financial Scale 100T WLD Layout Stress Resistance...');
+  console.log('\n>>> [PASS 4/5] Testing Finance HTTP Availability, NOT 100T WLD Stress...');
   const financialRoutes = [
     '/stocks', '/bank', '/wallet', '/casino', '/work', '/admin/treasury', '/admin/market'
   ];
@@ -243,7 +244,7 @@ async function run() {
   // -------------------------------------------------------------
   // PASS 5: Admin 34 Routes & Real Transactions Integrity
   // -------------------------------------------------------------
-  console.log('\n>>> [PASS 5/5] Verifying 34 Administrator Routes & Backend Financial APIs...');
+  console.log('\n>>> [PASS 5/5] Verifying Anonymous Admin Route Responses & API Auth Guards...');
   const adminPages = pages.filter((p) => p.administrator);
 
   for (const ap of adminPages) {
@@ -266,13 +267,13 @@ async function run() {
   }
   console.log(`  [Pass 5 Admin Subtotal] Checked ${adminPages.length} admin routes. Passed: ${results.pass5.passed}, Failed: ${results.pass5.failed}`);
 
-  // Live Backend APIs (Public 200 + Protected 401 Auth Guards)
+  // Direct backend without an internal token; 401 is expected for internal-only reads.
   const backendApis = [
     { path: '/health', expectedStatus: 200, kind: 'public' },
     { path: '/api/version', expectedStatus: 200, kind: 'public' },
     { path: '/api/v1/stocks', expectedStatus: 200, kind: 'public' },
-    { path: '/api/v1/announcements', expectedStatus: 200, kind: 'public' },
-    { path: '/api/v1/photos', expectedStatus: 200, kind: 'public' },
+    { path: '/api/v1/announcements', expectedStatus: 401, kind: 'internal-token-required' },
+    { path: '/api/v1/photos', expectedStatus: 401, kind: 'internal-token-required' },
     { path: '/api/v1/central-bank/base-rate', expectedStatus: 401, kind: 'protected-guard' },
     { path: '/api/v1/central-bank/commercial-rates', expectedStatus: 401, kind: 'protected-guard' },
     { path: '/api/v1/mint/batches', expectedStatus: 401, kind: 'protected-guard' },
@@ -307,13 +308,13 @@ async function run() {
 
   // Summary Report
   console.log('\n=============================================================');
-  console.log('           5-PASS COMPREHENSIVE QA EXECUTION SUMMARY        ');
+  console.log('           HTTP ROUTE SMOKE SUMMARY — E2E NOT CERTIFIED        ');
   console.log('=============================================================');
   console.log(`Pass 1 (HTTP 200 / SSR Integrity):    ${results.pass1.passed} / ${results.pass1.passed + results.pass1.failed} (${results.pass1.failed === 0 ? '✓ PASS' : '✗ FAIL'})`);
-  console.log(`Pass 2 (5-Viewport Overflow Defense): ${results.pass2.passed} / ${results.pass2.passed + results.pass2.failed} (${results.pass2.failed === 0 ? '✓ PASS' : '✗ FAIL'})`);
-  console.log(`Pass 3 (4-Locale Dynamic/SSR Parity): ${results.pass3.passed} / ${results.pass3.passed + results.pass3.failed} (${results.pass3.failed === 0 ? '✓ PASS' : '✗ FAIL'})`);
-  console.log(`Pass 4 (100T WLD Stress Resistance):  ${results.pass4.passed} / ${results.pass4.passed + results.pass4.failed} (${results.pass4.failed === 0 ? '✓ PASS' : '✗ FAIL'})`);
-  console.log(`Pass 5 (Admin & Financial APIs):      ${results.pass5.passed} / ${results.pass5.passed + results.pass5.failed} (${results.pass5.failed === 0 ? '✓ PASS' : '✗ FAIL'})`);
+  console.log(`Pass 2 (HTML Width Heuristic, NOT Actual Viewport): ${results.pass2.passed} / ${results.pass2.passed + results.pass2.failed} (${results.pass2.failed === 0 ? '✓ PASS' : '✗ FAIL'})`);
+  console.log(`Pass 3 (country/locale headers only): ${results.pass3.passed} / ${results.pass3.passed + results.pass3.failed} (${results.pass3.failed === 0 ? '✓ PASS' : '✗ FAIL'})`);
+  console.log(`Pass 4 (finance HTTP only):  ${results.pass4.passed} / ${results.pass4.passed + results.pass4.failed} (${results.pass4.failed === 0 ? '✓ PASS' : '✗ FAIL'})`);
+  console.log(`Pass 5 (anonymous guards only):      ${results.pass5.passed} / ${results.pass5.passed + results.pass5.failed} (${results.pass5.failed === 0 ? '✓ PASS' : '✗ FAIL'})`);
   console.log('=============================================================');
 
   const totalTests = results.pass1.passed + results.pass1.failed +
@@ -326,13 +327,22 @@ async function run() {
 
   console.log(`TOTAL CHECKS: ${totalTests} | PASSED: ${totalPassed} | FAILED: ${totalFailed}`);
 
+  // No viewport/browser/login/ledger receipt instrumentation runs above. Even a
+  // perfectly green HTTP report MUST NOT be advertised as full feature QA.
+  const acceptance = assessFullSiteAcceptance({ httpRoutes: totalFailed === 0 });
+  results.assurance = acceptance;
+  console.log(`FULL FUNCTIONAL ACCEPTANCE: ${acceptance.status}`);
+  console.log(`Missing independent proofs: ${acceptance.missing.join(', ')}`);
+
   const reportPath = path.resolve('artifacts/qa/full-5pass-qa-report.json');
   fs.mkdirSync(path.dirname(reportPath), { recursive: true });
   fs.writeFileSync(reportPath, JSON.stringify(results, null, 2), 'utf8');
   console.log(`Detailed report saved to: ${reportPath}`);
 
-  if (totalFailed > 0) {
-    process.exit(1);
+  // Release/QA callers must use the authenticated evidence ledger validator.
+  // HTTP success is intentionally insufficient, and defaults to fail-closed.
+  if (totalFailed > 0 || !acceptance.ok) {
+    process.exitCode = 2;
   }
 }
 

@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
-  SAVINGS_PLANS,
   calculateDailyInterest,
   calculateExpectedMaturityYield,
   getStoredSavingsPots,
@@ -42,6 +41,14 @@ describe('savings-pot logic & account isolation', () => {
     // Guest should have 0 pots
     const potsGuest = getStoredSavingsPots();
     expect(potsGuest.length).toBe(0);
+  });
+
+  it('does not copy unattributed legacy browser savings into a signed-in member account', () => {
+    const legacyPot = openSavingsPot('7d_flex', 1000);
+    localStorage.setItem('wdmv_savings_pots_v1', JSON.stringify([legacyPot]));
+    expect(getStoredSavingsPots('member-A')).toEqual([]);
+    expect(getStoredSavingsPots('member-B')).toEqual([]);
+    expect(getStoredSavingsPots()).toHaveLength(1);
   });
 
   it('guards against claiming interest before 24 hours', () => {

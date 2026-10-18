@@ -1,3 +1,9 @@
+## v2026.10.18.855 — Full functional verification and QA evidence hardening (candidate)
+- Audited 166 routes × 3 runtime environments (raw: 151 HTTP 200, 13 redirects, 2 expected not-found per environment), public locale headers, runtime versions, complete backend/frontend suites and **fresh 276-migration PostgreSQL Test database**. 1,836 backend DB tests PASS (34 skipped), 1,276 frontend PASS; 0 lint errors/1,060 warnings; TypeScript/Next build/API contract pass.
+- RED/GREEN fix: signed-in savings simulation history was shared across browser accounts; page now passes real wallet user ID to a namespaced client store, fails closed without identity, and no longer imports unauthenticated legacy records into user scopes.
+- QA script no longer mislabels HTTP/HTML heuristics as authenticated 5-viewport/admin/100T monetary E2E acceptance. Smoke checks 256/256 green but full E2E certification rightly BLOCKED; internal-token 401 expectations corrected.
+- **Production HOLD**: 3 sensitive app-role financial DML grants, 19 uncertified ledger projection differences (+4,779,188 WLD); authenticated UI and session/rollback acceptance incomplete. [Audit](../findings/FULL_FUNCTION_VERIFICATION_v2026.10.18.855.md) · [Worklog](../worklog/2026-10-18-all-functional-audit-v855.md).
+
 ## v2026.10.18.806 — Bank deposit enrollment CTA and simulation truth (candidate)
 - Separate 7/30/90-day browser-only savings simulations from the real ledger-backed WLD compound deposit flow. Replace misleading simulation enrollment/payment labels and add a direct `#bank-real-deposit` action.
 - Remove the fabricated 50,000 WLD balance when cash is zero; enforce safe integer amounts for simulated inputs. Real bank deposit still uses idempotent `bank_move_balance` and authoritative ledger, not simulated fixed-term products.

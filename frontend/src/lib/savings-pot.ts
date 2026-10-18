@@ -113,7 +113,9 @@ export function getStoredSavingsPots(userId?: string): SavingsPotRecord[] {
     if (raw) {
       return JSON.parse(raw);
     }
-    // Fallback migration from legacy storage key if exists and userId not explicitly isolated
+    // Legacy unscoped records have no trustworthy owner. Never import them into a
+    // signed-in member's account, or another member on this browser sees them.
+    if (userId && userId.trim() !== '') return [];
     const legacyRaw = localStorage.getItem(DEFAULT_STORAGE_KEY);
     if (legacyRaw) {
       const parsed = JSON.parse(legacyRaw);
