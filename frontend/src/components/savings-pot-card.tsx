@@ -4,15 +4,9 @@ import React, { useState, useEffect } from 'react';
 import {
   Landmark,
   PiggyBank,
-  TrendingUp,
-  Clock,
-  Sparkles,
   Coins,
-  ShieldCheck,
   ChevronRight,
   Plus,
-  CheckCircle2,
-  Calendar,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,21 +33,15 @@ import { formatWld } from '@/lib/money';
 import { toast } from 'sonner';
 import { TranslatedText as T } from '@/components/translated-text';
 
-export function SavingsPotCard({
-  userBalanceWld = 50000,
-  userId,
-}: {
-  readonly userBalanceWld?: number;
-  readonly userId?: string;
-}) {
+export function SavingsPotCard() {
   const [pots, setPots] = useState<SavingsPotRecord[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<SavingsPlan | null>(null);
   const [depositAmount, setDepositAmount] = useState<string>('1000');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    setPots(getStoredSavingsPots(userId));
-  }, [userId]);
+    setPots(getStoredSavingsPots());
+  }, []);
 
   const handleOpenPlan = (plan: SavingsPlan) => {
     setSelectedPlan(plan);
@@ -65,7 +53,7 @@ export function SavingsPotCard({
   const handleConfirmDeposit = () => {
     if (!selectedPlan) return;
     const amount = Number(depositAmount);
-    if (isNaN(amount) || amount < selectedPlan.minDepositWld) {
+    if (!Number.isSafeInteger(amount) || amount < selectedPlan.minDepositWld) {
       toast.error(`최소 가입 금액은 ${formatWld(selectedPlan.minDepositWld)} WLD 입니다.`);
       return;
     }
@@ -74,21 +62,21 @@ export function SavingsPotCard({
       return;
     }
 
-    const created = openSavingsPot(selectedPlan.id, amount, userId);
-    setPots(getStoredSavingsPots(userId));
+    openSavingsPot(selectedPlan.id, amount);
+    setPots(getStoredSavingsPots());
     setIsDialogOpen(false);
     playCoinCollectSound();
-    toast.success(`${selectedPlan.name}에 ${formatWld(amount)} WLD 예치가 완료되었습니다!`);
+    toast.success(`${selectedPlan.name} 모의 가입 기록이 브라우저에 저장되었습니다. 실제 WLD는 차감되지 않았습니다.`);
   };
 
   const handleClaimInterest = (potId: string) => {
-    const res = claimDailyInterestFromPot(potId, userId);
+    const res = claimDailyInterestFromPot(potId);
     if (res.success) {
-      setPots(getStoredSavingsPots(userId));
+      setPots(getStoredSavingsPots());
       playCoinCollectSound();
-      toast.success(`일일 복리 이자 +${res.claimedAmount} WLD를 수령했습니다!`);
+      toast.success(`모의 이자 +${res.claimedAmount} WLD를 계산했습니다. 실제 WLD는 지급되지 않습니다.`);
     } else {
-      toast.error('수령 가능한 이자가 없습니다. (최소 24시간 간격 필요)');
+      toast.error('계산 가능한 모의 이자가 없습니다. (최소 24시간 간격 필요)');
     }
   };
 
@@ -124,12 +112,18 @@ export function SavingsPotCard({
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
                 <T
-                  korean="가상 목표 저축 시뮬레이터입니다. 브라우저에서 매일 복리 이자 정산 메커니즘을 체험해 볼 수 있습니다 (실제 계좌 잔액 미차감)."
-                  english="Simulated savings goal calculator. Experience compound interest calculation in your browser (no live balance deduction)."
+                  korean="가상 목표 저축 시뮬레이터입니다. 브라우저에서 매일 복리 이자 정산 메커니즘을 체험해 볼 수 있습니다 (실제 WLD 잔액과 무관하며 은행 원장에 가입하지 않습니다)."
+                  english="Simulated savings goal calculator. Experience compound interest calculation in your browser (no real WLD transfer or live deposit contract)."
                 />
               </p>
             </div>
           </div>
+          <Button asChild size="sm" className="min-h-11 shrink-0">
+            <a href="#bank-real-deposit">
+              <T korean="실제 복리예금 가입하기" english="Open Real WLD Savings" />
+              <ChevronRight className="size-4" />
+            </a>
+          </Button>
         </div>
 
         {/* Plan Grid */}
@@ -154,7 +148,7 @@ export function SavingsPotCard({
 
               <div className="pt-2 border-t border-border/40 space-y-3">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>최소 가입</span>
+                  <span>모의 최소 예치</span>
                   <span className="font-mono font-bold text-foreground">{formatWld(plan.minDepositWld)} WLD</span>
                 </div>
                 <Button
@@ -162,7 +156,7 @@ export function SavingsPotCard({
                   className="w-full h-9 rounded-xl text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm active:scale-98"
                 >
                   <Plus className="size-3.5 mr-1" />
-                  <T korean="예금 가입하기" english="Open Pot" />
+                  <T korean="모의 가입 체험" english="Try Simulation" />
                 </Button>
               </div>
             </div>
@@ -174,7 +168,7 @@ export function SavingsPotCard({
           <div className="p-4 rounded-2xl border border-border/70 bg-muted/20 space-y-3">
             <h3 className="text-xs font-extrabold text-foreground uppercase tracking-wider flex items-center gap-1.5">
               <PiggyBank className="size-4 text-primary" />
-              <T korean="내 활성 복리 포켓 목록" english="My Active Savings Pots" /> ({pots.length}개)
+              <T korean="내 모의 복리 포켓 기록" english="My Simulated Savings Pots" /> ({pots.length}개)
             </h3>
 
             <div className="space-y-2.5">
@@ -215,7 +209,7 @@ export function SavingsPotCard({
                         className="h-8 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-600 text-black shadow-xs active:scale-95"
                       >
                         <Coins className="size-3.5 mr-1" />
-                        <T korean="일일 이자 받기" english="Claim Daily Yield" />
+                        <T korean="모의 이자 계산" english="Calculate Simulated Yield" />
                       </Button>
                     </div>
                   </div>
@@ -233,7 +227,7 @@ export function SavingsPotCard({
             <DialogHeader>
               <DialogTitle className="text-base font-extrabold flex items-center gap-2">
                 <PiggyBank className="size-5 text-primary" />
-                {selectedPlan.name} 가입
+                {selectedPlan.name} 모의 가입
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 {selectedPlan.description}
@@ -242,7 +236,7 @@ export function SavingsPotCard({
 
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">예치할 WLD 금액</label>
+                <label className="text-xs font-semibold text-foreground">모의 예치 WLD 금액</label>
                 <div className="relative">
                   <Input
                     type="number"
@@ -250,6 +244,7 @@ export function SavingsPotCard({
                     onChange={(e) => setDepositAmount(e.target.value)}
                     min={selectedPlan.minDepositWld}
                     max={selectedPlan.maxDepositWld}
+                    step={1}
                     className="font-mono text-sm font-bold pr-14"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-muted-foreground font-bold">
@@ -258,7 +253,7 @@ export function SavingsPotCard({
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                   <span>최소 {formatWld(selectedPlan.minDepositWld)} WLD</span>
-                  <span>보유 잔액: {formatWld(userBalanceWld)} WLD</span>
+                  <span>실제 WLD 잔액과 무관 · 모의 체험</span>
                 </div>
               </div>
 
@@ -290,7 +285,7 @@ export function SavingsPotCard({
                 취소
               </Button>
               <Button onClick={handleConfirmDeposit} className="rounded-xl text-xs font-bold bg-primary text-primary-foreground">
-                예치 확정
+                모의 예치 기록하기
               </Button>
             </DialogFooter>
           </DialogContent>

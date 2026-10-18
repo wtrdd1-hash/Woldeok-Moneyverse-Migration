@@ -203,7 +203,7 @@ export default async function BankPage() {
       </div>
 
       {/* 중앙은행 스마트 복리 포켓 & 정기예금 카드 */}
-      <SavingsPotCard userBalanceWld={Number(cash) || 50000} />
+      <SavingsPotCard />
 
       {/* 스마트 저축 목표 & 채권 수익 시뮬레이터 위젯 */}
       <SavingsGoalProgressRing

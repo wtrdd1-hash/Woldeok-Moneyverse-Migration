@@ -1,3 +1,8 @@
+## v2026.10.18.806 — Bank deposit enrollment CTA and simulation truth (candidate)
+- Separate 7/30/90-day browser-only savings simulations from the real ledger-backed WLD compound deposit flow. Replace misleading simulation enrollment/payment labels and add a direct `#bank-real-deposit` action.
+- Remove the fabricated 50,000 WLD balance when cash is zero; enforce safe integer amounts for simulated inputs. Real bank deposit still uses idempotent `bank_move_balance` and authoritative ledger, not simulated fixed-term products.
+- Validation: 1,274/1,274 frontend tests across 243 files; Test DB-backed banking suite 6/6 PASS; clean TypeScript, targeted lint, Next production build. Production and Test promotion not claimed. [Worklog](../worklog/2026-10-18-bank-deposit-enrollment-v806.md).
+
 ## v2026.10.16.715 — Documentation PRs #878/#881 integrated; Production HOLD
 
 ## v2026.10.18.804 — Core journal application role privilege narrowing (candidate)
