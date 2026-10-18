@@ -11,10 +11,17 @@
 - Environment: Desktop Commander lists `minipc`, `debian13`, and `weoldog` OFFLINE. GitHub connector usable. No privileged host, real GSC/Naver/GA4, real production analytics, or authenticated user E2E verified this session.
 - No measured Search Console impressions/clicks, zero visitors, indexed-page count, users, registrations, or retention rates are claimed. Owner reported zero customers; treat precise funnel stage as unknown.
 
-## Mid-work checkpoint
+## Mid-work checkpoint — 2026-10-18 KST
 
-Pending source/competitor reference reconciliation and plan draft; do not treat previously found SEO defects as currently uncorrected without source verification.
+- Source current main `frontend/src/app/sitemap.ts` contains a localized route check to suppress double-prefix alternates; `api/admin/seo-audit` uses `not_measured`, and IndexNow/GSC routes require receipt, correcting portions of the historical v602 SEO complaints. Current public runtime still requires exact SHA/locale inspection.
+- v855 authenticated UI and finance/ledger release blockers reviewed. Google recrawl, hreflang, Naver index/crawl, GA4 instrumentation guidance and simulation/gamification competitor models reviewed; no observed traffic counts inferred.
+- Main rechecked at midpoint `a945fb2ffd2f027cb8393701874a6d8209b7558f`, unchanged from start. Separate planning docs and bilingual update notes staged only in branch.
+- All two planning files and four release-note equivalents use EN canonical + KO partner; no other agent worktree or product code overwritten.
 
-## Final record
+## Final record — 2026-10-18 KST
 
-Pending draft-plan and PR verification.
+- Added canonical EN and KO `docs/planning/SEO_ZERO_TRAFFIC_QUALIFIED_ACQUISITION_PLAN_v2026.10.18.860{.ko}.md`, 8 incremental capability IDs, funnel truth registry, 4 experiments and research/rollout decision gates; statuses explicitly PROPOSED not adopted.
+- Added EN/KO internal and GitHub-facing v860 updates, and paired worklogs. Documentation-only change; CI/test server/production not run, not applicable as a proof of code readiness.
+- Final main check: `a945fb2ffd2f027cb8393701874a6d8209b7558f`; unchanged from start.
+- Real Google Search Console metrics, Naver search metrics, any member sign-up data and production runtime checks remain `NOT_VERIFIED`, as MiniPC devices offline. v530 signed-in E2E and finance release gates explicitly BLOCKED and preserved.
+- Draft PR opened separately after documentation inspection; no automatic merge or live promotion.
