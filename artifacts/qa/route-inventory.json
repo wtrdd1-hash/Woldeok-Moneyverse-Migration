@@ -1,0 +1,1173 @@
+{
+  "schemaVersion": 1,
+  "repositoryHead": null,
+  "routeCount": 166,
+  "administratorRouteCount": 34,
+  "dynamicRouteCount": 31,
+  "dataPageMarkerCount": 83,
+  "inventorySha256": "dc9997c85644ae47c380604d8e25e2539517a1a00dab4a408315067c02864e15",
+  "pages": [
+    {
+      "route": "/",
+      "source": "frontend/src/app/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "home"
+    },
+    {
+      "route": "/[locale]/blog",
+      "source": "frontend/src/app/[locale]/blog/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/[locale]/blog/[slug]",
+      "source": "frontend/src/app/[locale]/blog/[slug]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/[locale]/guide/glossary",
+      "source": "frontend/src/app/[locale]/guide/glossary/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": "localized-guide-glossary"
+    },
+    {
+      "route": "/[locale]/guide/glossary/[term]",
+      "source": "frontend/src/app/[locale]/guide/glossary/[term]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/[locale]/tools/compound-interest-calculator",
+      "source": "frontend/src/app/[locale]/tools/compound-interest-calculator/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/[locale]/tools/compound-interest-calculator/[preset]",
+      "source": "frontend/src/app/[locale]/tools/compound-interest-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/account",
+      "source": "frontend/src/app/account/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "account"
+    },
+    {
+      "route": "/account-deletion",
+      "source": "frontend/src/app/account-deletion/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "account-deletion"
+    },
+    {
+      "route": "/account/notifications",
+      "source": "frontend/src/app/account/notifications/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "account-notifications"
+    },
+    {
+      "route": "/account/privacy",
+      "source": "frontend/src/app/account/privacy/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "account-privacy"
+    },
+    {
+      "route": "/account/security",
+      "source": "frontend/src/app/account/security/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "account-security"
+    },
+    {
+      "route": "/admin",
+      "source": "frontend/src/app/admin/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/analytics",
+      "source": "frontend/src/app/admin/analytics/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/api-health",
+      "source": "frontend/src/app/admin/api-health/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-api-health"
+    },
+    {
+      "route": "/admin/bank",
+      "source": "frontend/src/app/admin/bank/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-bank"
+    },
+    {
+      "route": "/admin/blog",
+      "source": "frontend/src/app/admin/blog/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/bonds",
+      "source": "frontend/src/app/admin/bonds/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/catalog",
+      "source": "frontend/src/app/admin/catalog/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-catalog"
+    },
+    {
+      "route": "/admin/content",
+      "source": "frontend/src/app/admin/content/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-content"
+    },
+    {
+      "route": "/admin/controls",
+      "source": "frontend/src/app/admin/controls/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/discord",
+      "source": "frontend/src/app/admin/discord/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-discord"
+    },
+    {
+      "route": "/admin/economy",
+      "source": "frontend/src/app/admin/economy/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-economy"
+    },
+    {
+      "route": "/admin/economy/scenario-lab",
+      "source": "frontend/src/app/admin/economy/scenario-lab/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-economy-scenario-lab"
+    },
+    {
+      "route": "/admin/enterprises",
+      "source": "frontend/src/app/admin/enterprises/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-enterprises"
+    },
+    {
+      "route": "/admin/fx",
+      "source": "frontend/src/app/admin/fx/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/kdic",
+      "source": "frontend/src/app/admin/kdic/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/logs",
+      "source": "frontend/src/app/admin/logs/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-logs"
+    },
+    {
+      "route": "/admin/logs/activity",
+      "source": "frontend/src/app/admin/logs/activity/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-logs-activity"
+    },
+    {
+      "route": "/admin/logs/delivery",
+      "source": "frontend/src/app/admin/logs/delivery/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-logs-delivery"
+    },
+    {
+      "route": "/admin/logs/integrity",
+      "source": "frontend/src/app/admin/logs/integrity/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-logs-integrity"
+    },
+    {
+      "route": "/admin/market",
+      "source": "frontend/src/app/admin/market/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-market"
+    },
+    {
+      "route": "/admin/market/ai-news",
+      "source": "frontend/src/app/admin/market/ai-news/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-market-ai-news"
+    },
+    {
+      "route": "/admin/money-flow",
+      "source": "frontend/src/app/admin/money-flow/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-money-flow"
+    },
+    {
+      "route": "/admin/pension",
+      "source": "frontend/src/app/admin/pension/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/safety",
+      "source": "frontend/src/app/admin/safety/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-safety"
+    },
+    {
+      "route": "/admin/security",
+      "source": "frontend/src/app/admin/security/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-security"
+    },
+    {
+      "route": "/admin/seo",
+      "source": "frontend/src/app/admin/seo/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/seo-audit",
+      "source": "frontend/src/app/admin/seo-audit/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/shop",
+      "source": "frontend/src/app/admin/shop/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-shop"
+    },
+    {
+      "route": "/admin/support",
+      "source": "frontend/src/app/admin/support/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
+      "route": "/admin/treasury",
+      "source": "frontend/src/app/admin/treasury/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-treasury"
+    },
+    {
+      "route": "/admin/treasury/grants",
+      "source": "frontend/src/app/admin/treasury/grants/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-treasury-grants"
+    },
+    {
+      "route": "/admin/users",
+      "source": "frontend/src/app/admin/users/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-users"
+    },
+    {
+      "route": "/admin/users/[id]",
+      "source": "frontend/src/app/admin/users/[id]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": true,
+      "dataPage": "admin-users-id"
+    },
+    {
+      "route": "/admin/work",
+      "source": "frontend/src/app/admin/work/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-work"
+    },
+    {
+      "route": "/advisor",
+      "source": "frontend/src/app/advisor/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/announcements",
+      "source": "frontend/src/app/announcements/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "announcements"
+    },
+    {
+      "route": "/announcements/[announcementId]",
+      "source": "frontend/src/app/announcements/[announcementId]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": "announcements-announcementId"
+    },
+    {
+      "route": "/arcade",
+      "source": "frontend/src/app/arcade/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "arcade"
+    },
+    {
+      "route": "/bank",
+      "source": "frontend/src/app/bank/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "bank"
+    },
+    {
+      "route": "/bank/savings-pot",
+      "source": "frontend/src/app/bank/savings-pot/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/blog",
+      "source": "frontend/src/app/blog/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/blog/[slug]",
+      "source": "frontend/src/app/blog/[slug]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/board",
+      "source": "frontend/src/app/board/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "board"
+    },
+    {
+      "route": "/board/[postId]",
+      "source": "frontend/src/app/board/[postId]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": "board-postId"
+    },
+    {
+      "route": "/bonds",
+      "source": "frontend/src/app/bonds/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/businesses",
+      "source": "frontend/src/app/businesses/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "businesses"
+    },
+    {
+      "route": "/businesses/ventures",
+      "source": "frontend/src/app/businesses/ventures/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/calendar",
+      "source": "frontend/src/app/calendar/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "calendar"
+    },
+    {
+      "route": "/casino",
+      "source": "frontend/src/app/casino/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/chat",
+      "source": "frontend/src/app/chat/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "chat"
+    },
+    {
+      "route": "/clubs",
+      "source": "frontend/src/app/clubs/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/clubs/[clubId]",
+      "source": "frontend/src/app/clubs/[clubId]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/clubs/[clubId]/members",
+      "source": "frontend/src/app/clubs/[clubId]/members/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/clubs/new",
+      "source": "frontend/src/app/clubs/new/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/clubs/warfare",
+      "source": "frontend/src/app/clubs/warfare/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/collections",
+      "source": "frontend/src/app/collections/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/dashboard",
+      "source": "frontend/src/app/dashboard/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "dashboard"
+    },
+    {
+      "route": "/data-deletion",
+      "source": "frontend/src/app/data-deletion/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "data-deletion"
+    },
+    {
+      "route": "/design-preview",
+      "source": "frontend/src/app/design-preview/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "design-preview"
+    },
+    {
+      "route": "/developer",
+      "source": "frontend/src/app/developer/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/enterprises",
+      "source": "frontend/src/app/enterprises/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/features",
+      "source": "frontend/src/app/features/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/forgot-password",
+      "source": "frontend/src/app/forgot-password/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "forgot-password"
+    },
+    {
+      "route": "/fx",
+      "source": "frontend/src/app/fx/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/gallery",
+      "source": "frontend/src/app/gallery/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "gallery"
+    },
+    {
+      "route": "/gallery/[photoId]",
+      "source": "frontend/src/app/gallery/[photoId]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": "gallery-photoId"
+    },
+    {
+      "route": "/gallery/submit",
+      "source": "frontend/src/app/gallery/submit/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "gallery-submit"
+    },
+    {
+      "route": "/guide",
+      "source": "frontend/src/app/guide/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "guide"
+    },
+    {
+      "route": "/guide/career-mastery",
+      "source": "frontend/src/app/guide/career-mastery/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "guide-career-mastery"
+    },
+    {
+      "route": "/guide/dopamine-system",
+      "source": "frontend/src/app/guide/dopamine-system/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/guide/glossary",
+      "source": "frontend/src/app/guide/glossary/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "guide-glossary"
+    },
+    {
+      "route": "/guide/glossary/[term]",
+      "source": "frontend/src/app/guide/glossary/[term]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/guide/stock-trading",
+      "source": "frontend/src/app/guide/stock-trading/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "guide-stock-trading"
+    },
+    {
+      "route": "/guide/virtual-banking",
+      "source": "frontend/src/app/guide/virtual-banking/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "guide-virtual-banking"
+    },
+    {
+      "route": "/inventory",
+      "source": "frontend/src/app/inventory/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "inventory"
+    },
+    {
+      "route": "/invite/[code]",
+      "source": "frontend/src/app/invite/[code]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/kdic",
+      "source": "frontend/src/app/kdic/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/lobby",
+      "source": "frontend/src/app/lobby/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "lobby"
+    },
+    {
+      "route": "/login",
+      "source": "frontend/src/app/login/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "login"
+    },
+    {
+      "route": "/login/providers",
+      "source": "frontend/src/app/login/providers/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "login-providers"
+    },
+    {
+      "route": "/marketplace",
+      "source": "frontend/src/app/marketplace/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "marketplace"
+    },
+    {
+      "route": "/marketplace/auction",
+      "source": "frontend/src/app/marketplace/auction/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/newspaper",
+      "source": "frontend/src/app/newspaper/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/pension",
+      "source": "frontend/src/app/pension/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/prediction",
+      "source": "frontend/src/app/prediction/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/privacy",
+      "source": "frontend/src/app/privacy/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "privacy"
+    },
+    {
+      "route": "/profile",
+      "source": "frontend/src/app/profile/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "profile"
+    },
+    {
+      "route": "/profile/[userId]",
+      "source": "frontend/src/app/profile/[userId]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": "profile-userId"
+    },
+    {
+      "route": "/profile/settings",
+      "source": "frontend/src/app/profile/settings/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/progression",
+      "source": "frontend/src/app/progression/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "progression"
+    },
+    {
+      "route": "/progression/prestige",
+      "source": "frontend/src/app/progression/prestige/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/quests",
+      "source": "frontend/src/app/quests/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "quests"
+    },
+    {
+      "route": "/register",
+      "source": "frontend/src/app/register/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/reset-password",
+      "source": "frontend/src/app/reset-password/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "reset-password"
+    },
+    {
+      "route": "/roadmap",
+      "source": "frontend/src/app/roadmap/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/safety",
+      "source": "frontend/src/app/safety/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "safety-center"
+    },
+    {
+      "route": "/safety/takedown",
+      "source": "frontend/src/app/safety/takedown/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "safety-takedown"
+    },
+    {
+      "route": "/search",
+      "source": "frontend/src/app/search/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "search"
+    },
+    {
+      "route": "/seasons",
+      "source": "frontend/src/app/seasons/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "seasons"
+    },
+    {
+      "route": "/shop",
+      "source": "frontend/src/app/shop/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "shop"
+    },
+    {
+      "route": "/shop/catalog",
+      "source": "frontend/src/app/shop/catalog/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "shop-catalog"
+    },
+    {
+      "route": "/spaces",
+      "source": "frontend/src/app/spaces/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/spaces/real-estate",
+      "source": "frontend/src/app/spaces/real-estate/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/status",
+      "source": "frontend/src/app/status/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "status"
+    },
+    {
+      "route": "/stocks",
+      "source": "frontend/src/app/stocks/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "stocks"
+    },
+    {
+      "route": "/stocks/[symbol]",
+      "source": "frontend/src/app/stocks/[symbol]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": "stocks-symbol"
+    },
+    {
+      "route": "/stocks/alerts",
+      "source": "frontend/src/app/stocks/alerts/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "stocks-alerts"
+    },
+    {
+      "route": "/stocks/community",
+      "source": "frontend/src/app/stocks/community/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/stocks/compare",
+      "source": "frontend/src/app/stocks/compare/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "stocks-compare"
+    },
+    {
+      "route": "/stocks/derivatives",
+      "source": "frontend/src/app/stocks/derivatives/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/stocks/history",
+      "source": "frontend/src/app/stocks/history/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "stocks-history"
+    },
+    {
+      "route": "/stocks/league",
+      "source": "frontend/src/app/stocks/league/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/stocks/portfolio",
+      "source": "frontend/src/app/stocks/portfolio/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "stocks-portfolio"
+    },
+    {
+      "route": "/stocks/watchlist",
+      "source": "frontend/src/app/stocks/watchlist/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "stocks-watchlist"
+    },
+    {
+      "route": "/support",
+      "source": "frontend/src/app/support/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "support"
+    },
+    {
+      "route": "/terms",
+      "source": "frontend/src/app/terms/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "terms"
+    },
+    {
+      "route": "/tools",
+      "source": "frontend/src/app/tools/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator",
+      "source": "frontend/src/app/tools/capital-gains-tax-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator/[preset]",
+      "source": "frontend/src/app/tools/capital-gains-tax-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/compound-calculator",
+      "source": "frontend/src/app/tools/compound-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/compound-calculator/[preset]",
+      "source": "frontend/src/app/tools/compound-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/dividend-tax-calculator",
+      "source": "frontend/src/app/tools/dividend-tax-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/dividend-tax-calculator/[ticker]",
+      "source": "frontend/src/app/tools/dividend-tax-calculator/[ticker]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/farming-calculator",
+      "source": "frontend/src/app/tools/farming-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/farming-calculator/[preset]",
+      "source": "frontend/src/app/tools/farming-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/gift-tax-calculator",
+      "source": "frontend/src/app/tools/gift-tax-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/gift-tax-calculator/[preset]",
+      "source": "frontend/src/app/tools/gift-tax-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/goal-wealth-calculator",
+      "source": "frontend/src/app/tools/goal-wealth-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/isa-calculator",
+      "source": "frontend/src/app/tools/isa-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/isa-calculator/[slug]",
+      "source": "frontend/src/app/tools/isa-calculator/[slug]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator",
+      "source": "frontend/src/app/tools/kimchi-premium-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator/[preset]",
+      "source": "frontend/src/app/tools/kimchi-premium-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/loan-interest-calculator",
+      "source": "frontend/src/app/tools/loan-interest-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/loan-interest-calculator/[preset]",
+      "source": "frontend/src/app/tools/loan-interest-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/pension-tax-calculator",
+      "source": "frontend/src/app/tools/pension-tax-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/pension-tax-calculator/[slug]",
+      "source": "frontend/src/app/tools/pension-tax-calculator/[slug]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/quant-studio",
+      "source": "frontend/src/app/tools/quant-studio/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/real-estate-calculator",
+      "source": "frontend/src/app/tools/real-estate-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/real-estate-calculator/[preset]",
+      "source": "frontend/src/app/tools/real-estate-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/retirement-calculator",
+      "source": "frontend/src/app/tools/retirement-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/retirement-calculator/[slug]",
+      "source": "frontend/src/app/tools/retirement-calculator/[slug]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/salary-calculator",
+      "source": "frontend/src/app/tools/salary-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/salary-calculator/[preset]",
+      "source": "frontend/src/app/tools/salary-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/stock-calculator",
+      "source": "frontend/src/app/tools/stock-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/stock-calculator/[preset]",
+      "source": "frontend/src/app/tools/stock-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/tax-calculator",
+      "source": "frontend/src/app/tools/tax-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/youth-leap-calculator",
+      "source": "frontend/src/app/tools/youth-leap-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/youth-leap-calculator/[preset]",
+      "source": "frontend/src/app/tools/youth-leap-calculator/[preset]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/treasury",
+      "source": "frontend/src/app/treasury/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/verify-email",
+      "source": "frontend/src/app/verify-email/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "verify-email"
+    },
+    {
+      "route": "/verify-email-change",
+      "source": "frontend/src/app/verify-email-change/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "verify-email-change"
+    },
+    {
+      "route": "/wallet",
+      "source": "frontend/src/app/wallet/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "wallet"
+    },
+    {
+      "route": "/wallet/activity",
+      "source": "frontend/src/app/wallet/activity/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "wallet-activity"
+    },
+    {
+      "route": "/work",
+      "source": "frontend/src/app/work/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": "work"
+    }
+  ]
+}

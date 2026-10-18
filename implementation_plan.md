@@ -2342,3 +2342,36 @@
 - 3회차: 256 / 256 통과 (0 결함)
 - **누적 총계: 768 / 768 무결점 통과 (통과율 100.0%)**
 - 증적 아티팩트 파일: `artifacts/qa/full-5pass-qa-report.json`
+
+
+---
+
+## 🚀 [v235 Specification] 운영 프로덕션(easy-scraping.com) v805 무중단 컷오버 승격 완료, 디스크 용량 대규모 정리(약 82GB 확보) 및 단일 main 체제 완전 수렴
+
+### 1. 운영 프로덕션 무중단 승격(Zero-Downtime Cutover) 완료 내역
+- **대상 호스트**: `easy-scraping.com` (Debian 호스트 포트 3233 Backend, 3234 Frontend)
+- **승격 버전**: `e54e6843df27e01c00e0d409ddb9818f754d2c4c` (v805, 166개 라우트 5-Pass 전수 QA 100% 통과 빌드)
+- **서비스 전환**:
+  - 기존 v717 서비스(`moneyverse-release-v717-*.service`)를 안전하게 비활성화하고, 신규 v805 불변 서비스(`moneyverse-release-v805-backend.service`, `moneyverse-release-v805-frontend.service`) 등록 및 활성화.
+  - `production-current` 원자적 심볼릭 링크 스위칭 (`/srv/moneyverse-data/releases/prod-v2026.10.18.805-e54e6843df27`).
+- **실측 라이브 검증 (`curl`)**:
+  - `curl -s https://easy-scraping.com/api/version`: `{"id":"e54e6843df27e01c00e0d409ddb9818f754d2c4c"}` 정상 응답 확인
+  - `curl -sI https://easy-scraping.com/`: `HTTP/2 200` 정상 응답 확인
+  - `curl -sI https://easy-scraping.com/blog/2026-10-14-compound-mv83xp86`: `HTTP/2 200` 및 4개 국어(/en, /ja, /zh) 전수 정상 응답 확인
+
+### 2. 호스트 디스크 용량 대규모 정리 (약 82GB 회수)
+- **`/srv/moneyverse-data` 릴리스 저장소**:
+  - 과거 수십 개의 만료된 레거시 릴리스(v5xx~v78x) 일괄 정리.
+  - 필수 보존 목록: 현재 운영 릴리스(v805), 직전 롤백용 릴리스(v717), 현재 테스트 릴리스(v805), 직전 테스트 롤백용 릴리스(v796), `production-current`, `test-current`.
+  - **정리 전**: 124GB 사용 중 (66%), 여유 64GB
+  - **정리 후**: **45GB 사용 중 (24%), 여유 144GB! (약 80GB 순수 확보)**
+- **루트 파티션 및 도커 볼륨**:
+  - `docker volume prune -f`: 1.847GB 회수
+  - `apt-get clean`, `journalctl --vacuum-time=3d` 실행 완료
+  - **정리 전**: 52GB 사용 중 (56%) -> **정리 후**: **50GB 사용 중 (54%, 약 2GB 추가 확보)**
+- **총 확보 용량**: **약 82GB**의 디스크 공간 확보 완료.
+
+### 3. 원격 저장소 위생 상태
+- 백그라운드 크론 생성 브랜치 수십 종 일괄 삭제 완료.
+- `git ls-remote --heads origin`: `refs/heads/main` (`b7ee0370...`) **단 1개 브랜치 확인**.
+- `gh pr list`: **오픈된 PR 0건 확인**.
