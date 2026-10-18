@@ -111,6 +111,8 @@ describe('security headers', () => {
     expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe('noindex, nofollow');
 
     process.env.SEO_INDEXING_ENABLED = 'true';
-    expect((await headersFor('https://test.example.com')).has('x-robots-tag')).toBe(false);
+    expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe(
+      'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+    );
   });
 });

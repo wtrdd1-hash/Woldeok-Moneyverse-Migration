@@ -12,6 +12,7 @@ const mockInitialData: SeoInitialData = {
   avgDurationMs: 42,
   botDistribution: { Googlebot: 68, 'Naver Yeti': 34, Bingbot: 16 },
   statusDistribution: { '200': 118, '304': 4, '404': 2 },
+  provenance: { source: 'seo-status-api', observedAt: '2026-10-06T00:00:00.000Z', freshness: 'fresh', status: 'operational' },
   stockCoverage: { indexed: 10, total: 10 },
   guideCoverage: { indexed: 5, total: 5 },
   targetUrls: [
@@ -71,11 +72,39 @@ describe('SeoClientView', () => {
     expect(screen.getByText('24시간 봇 크롤링')).toBeTruthy();
     expect(screen.getAllByText('124')[0]).toBeTruthy();
     expect(screen.getByText('Google AdSense 광고 수익화 & 트래픽 관제 타워')).toBeTruthy();
-    expect(screen.getByText('10대 가상 주식 색인율')).toBeTruthy();
+    expect(screen.getByText('10대 가상 주식 봇 방문 현황')).toBeTruthy();
     expect(screen.getByText('10 / 10')).toBeTruthy();
-    expect(screen.getByText('5대 금융 가이드 색인율')).toBeTruthy();
+    expect(screen.getByText('5대 금융 가이드 봇 방문 현황')).toBeTruthy();
     expect(screen.getByText('5 / 5')).toBeTruthy();
     expect(screen.getByText('42')).toBeTruthy();
+  });
+
+
+  it('marks crawler observation as distinct from verified search engine indexing', () => {
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
+    expect(screen.getByText('10대 가상 주식 봇 방문 현황')).toBeTruthy();
+    expect(screen.getByText('5대 금융 가이드 봇 방문 현황')).toBeTruthy();
+    expect(screen.getByText(/Google 색인 확인은 Search Console에서 별도 검사/)).toBeTruthy();
+    expect(screen.queryByText('정상 색인')).toBeNull();
+  });
+
+  it('does not display fabricated zero search coverage when the crawler API is unavailable', () => {
+    const unavailable: SeoInitialData = {
+      ...mockInitialData,
+      provenance: { source: 'fallback', observedAt: null, freshness: 'unknown', status: 'unavailable' },
+      stockCoverage: { indexed: 0, total: 10 },
+      guideCoverage: { indexed: 0, total: 5 },
+      targetUrls: mockInitialData.targetUrls.map((url) => ({
+        ...url, lastVisitedAt: null, lastBot: null, healthStatus: 'unindexed' as const,
+      })),
+    };
+    renderKo(<SeoClientView initialData={unavailable} initialNowMs={initialNowMs} />);
+    expect(screen.getAllByText('관측 자료 없음').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText('자료 없음').length).toBeGreaterThanOrEqual(2);
+    expect(screen.queryByText('초고속 SSR 최적화 (양호)')).toBeNull();
+    expect(screen.queryByText('0 / 10')).toBeNull();
+    expect(screen.queryByText('0 / 5')).toBeNull();
+    expect(screen.queryByText('미방문 (Unindexed)')).toBeNull();
   });
 
   it('renders target URL cards with health badges and names', () => {
@@ -83,6 +112,9 @@ describe('SeoClientView', () => {
 
     expect(screen.getByText('침팬지 반도체 (CHIPS)')).toBeTruthy();
     expect(screen.getAllByText('/stocks/CHIPS')[0]).toBeTruthy();
+    expect(screen.getAllByText('최근 봇 방문').length).toBeGreaterThan(0);
+    expect(screen.queryByText('정상 색인')).toBeNull();
+    expect(screen.queryByText('미방문 (Unindexed)')).toBeNull();
     expect(screen.getByText('가상 주식 실전 매매 가이드')).toBeTruthy();
     expect(screen.getAllByText('/guide/stock-trading')[0]).toBeTruthy();
   });

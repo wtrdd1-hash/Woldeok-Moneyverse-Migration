@@ -76,7 +76,7 @@ interface SeoClientViewProps {
 export type SeoCategory = 'all' | 'stock' | 'guide' | 'hub' | 'static';
 
 function formatRelativeTime(dateString: string | null, referenceNowMs: number): string {
-  if (!dateString) return '미방문 (Unindexed)';
+  if (!dateString) return '봇 방문 기록 없음 (색인 상태 미확인)';
   const diff = referenceNowMs - new Date(dateString).getTime();
   const minutes = Math.floor(diff / 60000);
   if (minutes < 1) return '방금 전 (Just now)';
@@ -247,6 +247,8 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
     observedAt: null,
   };
 
+  const hasObservedCrawlerData = provenance.status === 'operational';
+
   return (
     <div className="space-y-6">
       <section
@@ -285,9 +287,9 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
             <Globe className="size-5" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-base font-bold leading-snug text-foreground">실시간 검색엔진 색인 & 크롤러 관제</h2>
+            <h2 className="text-base font-bold leading-snug text-foreground">검색 크롤러 관제 · 실제 색인은 Search Console 확인</h2>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              Google Search Console, Naver Search Advisor(Yeti), Bingbot 및 IndexNow 프로토콜 실시간 연동
+              봇 방문 로그와 검색 성과·색인 확인은 서로 다른 데이터입니다. 색인 여부는 각 검색엔진 공식 보고서에서 확인합니다.
             </p>
           </div>
         </div>
@@ -350,16 +352,16 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center justify-between text-xs font-bold text-muted-foreground">
               <span>24시간 봇 크롤링</span>
-              <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className={cn('flex size-2 rounded-full', hasObservedCrawlerData ? 'bg-emerald-500' : 'bg-zinc-400')} />
             </CardDescription>
             <CardTitle className="font-mono text-2xl font-black text-foreground">
-              {(data?.totalHits24h ?? 0).toLocaleString()}
+              {hasObservedCrawlerData ? data.totalHits24h.toLocaleString() : '자료 없음'}
               <span className="ml-1.5 text-xs font-normal text-muted-foreground">건</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-[11px] text-muted-foreground">
-              7일 누적: <span className="font-mono font-bold text-foreground">{(data?.totalHits7d ?? 0).toLocaleString()}</span>건
+              7일 누적: <span className="font-mono font-bold text-foreground">{hasObservedCrawlerData ? data.totalHits7d.toLocaleString() : '자료 없음'}</span>건
             </p>
           </CardContent>
         </Card>
@@ -368,18 +370,22 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
         <Card className="border-border/80 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center justify-between text-xs font-bold text-muted-foreground">
-              <span>10대 가상 주식 색인율</span>
+              <span>10대 가상 주식 봇 방문 현황</span>
               <TrendingUp className="size-3.5 text-primary" />
             </CardDescription>
             <CardTitle className="font-mono text-2xl font-black text-foreground">
-              {data?.stockCoverage?.indexed ?? 0} / {data?.stockCoverage?.total ?? 10}
-              <span className="ml-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                ({Math.round(((data?.stockCoverage?.indexed ?? 0) / (data?.stockCoverage?.total || 1)) * 100)}%)
-              </span>
+              {hasObservedCrawlerData
+                ? `${data.stockCoverage.indexed} / ${data.stockCoverage.total}`
+                : <span className="text-base">관측 자료 없음</span>}
+              {hasObservedCrawlerData && data.stockCoverage.total > 0 && (
+                <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                  ({Math.round((data.stockCoverage.indexed / data.stockCoverage.total) * 100)}%)
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-[11px] text-muted-foreground">비로그인 공개 프리뷰 10개 종목 인덱싱</p>
+            <p className="text-[11px] text-muted-foreground">Google 색인 확인은 Search Console에서 별도 검사해야 합니다. 이 값은 봇 방문 기록입니다.</p>
           </CardContent>
         </Card>
 
@@ -387,18 +393,22 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
         <Card className="border-border/80 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center justify-between text-xs font-bold text-muted-foreground">
-              <span>5대 금융 가이드 색인율</span>
+              <span>5대 금융 가이드 봇 방문 현황</span>
               <BookOpen className="size-3.5 text-primary" />
             </CardDescription>
             <CardTitle className="font-mono text-2xl font-black text-foreground">
-              {data?.guideCoverage?.indexed ?? 0} / {data?.guideCoverage?.total ?? 5}
-              <span className="ml-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                ({Math.round(((data?.guideCoverage?.indexed ?? 0) / (data?.guideCoverage?.total || 1)) * 100)}%)
-              </span>
+              {hasObservedCrawlerData
+                ? `${data.guideCoverage.indexed} / ${data.guideCoverage.total}`
+                : <span className="text-base">관측 자료 없음</span>}
+              {hasObservedCrawlerData && data.guideCoverage.total > 0 && (
+                <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                  ({Math.round((data.guideCoverage.indexed / data.guideCoverage.total) * 100)}%)
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-[11px] text-muted-foreground">금융/게임 허브 5종 전수 노출 완료</p>
+            <p className="text-[11px] text-muted-foreground">외부 봇 방문 기록이며 네이버·Google 색인 및 검색 노출 증거가 아닙니다.</p>
           </CardContent>
         </Card>
 
@@ -410,14 +420,12 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
               <Activity className="size-3.5 text-primary" />
             </CardDescription>
             <CardTitle className="font-mono text-2xl font-black text-foreground">
-              {data?.avgDurationMs ?? 0}
+              {hasObservedCrawlerData ? data.avgDurationMs : '자료 없음'}
               <span className="ml-1.5 text-xs font-normal text-muted-foreground">ms</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
-              ✓ 초고속 SSR 최적화 (양호)
-            </p>
+            <p className="text-[11px] text-muted-foreground">크롤러 요청 표본의 응답시간이며 사이트 전체 성능 측정치가 아닙니다.</p>
           </CardContent>
         </Card>
       </div>
@@ -543,7 +551,7 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
                           !isHealthy && !isWarning && 'border-zinc-500/40 bg-zinc-500/10 text-zinc-500',
                         )}
                       >
-                        {isHealthy ? '정상 색인' : isWarning ? '주의' : '미방문'}
+                        {!hasObservedCrawlerData ? '자료 미확인' : isHealthy ? '최근 봇 방문' : isWarning ? '과거 봇 방문' : '봇 방문 기록 없음'}
                       </Badge>
                     </div>
 
