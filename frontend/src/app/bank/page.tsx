@@ -46,10 +46,11 @@ export default async function BankPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [standing, pockets, creditRating] = await Promise.all([
+  const [standing, pockets, creditRating, memberIdentity] = await Promise.all([
     apiOrNull<BankStanding>('/api/v1/banking/standing'),
     apiOrNull<SavingPocket[]>('/api/v1/banking/pockets'),
     apiOrNull<CreditRatingData>('/api/v1/banking/credit-rating'),
+    apiOrNull<{ userId: string }>('/api/v1/wallet?recent=1'),
   ]);
 
   if (!standing) {
@@ -203,7 +204,13 @@ export default async function BankPage() {
       </div>
 
       {/* 중앙은행 스마트 복리 포켓 & 정기예금 카드 */}
-      <SavingsPotCard />
+      {memberIdentity?.userId ? (
+        <SavingsPotCard key={memberIdentity.userId} userId={memberIdentity.userId} />
+      ) : (
+        <p role="status" className="text-sm text-muted-foreground">
+          <T korean="모의 저축 기록의 계정 확인에 실패했습니다. 다시 접속해 주세요. 실제 은행 입출금은 아래에서 이용할 수 있습니다." english="Unable to verify the owner of simulated savings. Reload to try again. Real bank transfers remain available below." />
+        </p>
+      )}
 
       {/* 스마트 저축 목표 & 채권 수익 시뮬레이터 위젯 */}
       <SavingsGoalProgressRing

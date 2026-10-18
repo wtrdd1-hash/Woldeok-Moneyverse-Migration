@@ -33,15 +33,15 @@ import { formatWld } from '@/lib/money';
 import { toast } from 'sonner';
 import { TranslatedText as T } from '@/components/translated-text';
 
-export function SavingsPotCard() {
+export function SavingsPotCard({ userId }: { readonly userId: string }) {
   const [pots, setPots] = useState<SavingsPotRecord[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<SavingsPlan | null>(null);
   const [depositAmount, setDepositAmount] = useState<string>('1000');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    setPots(getStoredSavingsPots());
-  }, []);
+    setPots(getStoredSavingsPots(userId));
+  }, [userId]);
 
   const handleOpenPlan = (plan: SavingsPlan) => {
     setSelectedPlan(plan);
@@ -62,17 +62,17 @@ export function SavingsPotCard() {
       return;
     }
 
-    openSavingsPot(selectedPlan.id, amount);
-    setPots(getStoredSavingsPots());
+    openSavingsPot(selectedPlan.id, amount, userId);
+    setPots(getStoredSavingsPots(userId));
     setIsDialogOpen(false);
     playCoinCollectSound();
     toast.success(`${selectedPlan.name} 모의 가입 기록이 브라우저에 저장되었습니다. 실제 WLD는 차감되지 않았습니다.`);
   };
 
   const handleClaimInterest = (potId: string) => {
-    const res = claimDailyInterestFromPot(potId);
+    const res = claimDailyInterestFromPot(potId, userId);
     if (res.success) {
-      setPots(getStoredSavingsPots());
+      setPots(getStoredSavingsPots(userId));
       playCoinCollectSound();
       toast.success(`모의 이자 +${res.claimedAmount} WLD를 계산했습니다. 실제 WLD는 지급되지 않습니다.`);
     } else {
