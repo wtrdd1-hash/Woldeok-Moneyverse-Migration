@@ -85,10 +85,10 @@ export const viewport: Viewport = {
 
 const META_BY_LOCALE = {
   en: {
-    titleDefault: 'Woldeok Moneyverse - Virtual Stock Exchange & Financial Simulator (+10k WLD Free)',
-    titleTemplate: '%s · Woldeok Moneyverse (+10k WLD Free)',
+    titleDefault: 'Woldeok Moneyverse — Virtual Economy, Stock Simulation & Finance Tools',
+    titleTemplate: '%s · Woldeok Moneyverse',
     description:
-      '[Instant 10,000 WLD Starter Bonus + 10M WLD Mega Lottery Ticket Free] Experience real-time orderbook virtual trading, stop-loss/take-profit, compound calculators, and sovereign wealth economy.',
+      'Explore a fictional community economy, virtual-company stock simulation, and interactive finance calculators. WLD is game currency, not real money or an investment.',
     applicationName: 'Woldeok Moneyverse',
     category: 'Finance & Community Virtual Economy',
     keywords: [
@@ -103,13 +103,13 @@ const META_BY_LOCALE = {
       'Sovereign Wealth Fund',
     ],
     ogLocale: 'en_US',
-    ogTitle: 'Woldeok Moneyverse — Virtual Stock Exchange & 10,000 WLD Free Gift',
+    ogTitle: 'Woldeok Moneyverse — Explore a Fictional Economy & Finance Tools',
   },
   ko: {
-    titleDefault: '월덕 머니버스 - 1만 WLD 즉시지급 가상 주식 거래소 & 실전 금융 계산기',
-    titleTemplate: '%s · 월덕 머니버스 (+10,000 WLD 무료)',
+    titleDefault: '월덕 머니버스 — 가상경제·모의 주식·금융 계산기',
+    titleTemplate: '%s · 월덕 머니버스',
     description:
-      '[가입 즉시 10,000 WLD 정착금 + 1등 1,000만 WLD 잭팟 복권 100% 무료 증정] 실시간 10단 호가창 가상 주식 거래, 스탑로스/익절 자동 감시, 12종 실전 금융 계산기(복리·대출·배당)를 지금 무료로 체험하세요!',
+      '가상 기업의 주식·경제 시뮬레이션과 복리·대출 등 금융 계산기를 체험하세요. WLD는 실제 돈이 아닌 게임 재화이며 금융 수익을 보장하지 않습니다.',
     applicationName: '월덕 머니버스',
     category: '가상 주식 거래소 & 핀테크 시뮬레이터',
     keywords: [
@@ -127,7 +127,7 @@ const META_BY_LOCALE = {
       '디스코드 봇',
     ],
     ogLocale: 'ko_KR',
-    ogTitle: '월덕 머니버스 — 10,000 WLD 즉시 지급 가상 주식 & 금융 포털',
+    ogTitle: '월덕 머니버스 — 가상경제 체험과 금융 계산기',
   },
   ja: {
     titleDefault: 'ウォルドク・マネーバース',
@@ -263,10 +263,10 @@ function getSiteStructuredData(locale: Locale) {
         mainEntity: [
           {
             '@type': 'Question',
-            name: '월덕 머니버스 신규 회원가입 혜택은 무엇인가요?',
+            name: '월덕 머니버스의 WLD는 실제 돈인가요?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: '가입 즉시 10,000 WLD 정착 지원금과 1등 당첨금 1,000만 WLD 메가 잭팟 복권 1장이 100% 무료로 지급됩니다.',
+              text: 'WLD는 서비스 내에서 사용하는 가상 게임 재화이며 현실 화폐, 예금 또는 금융상품이 아닙니다. 보상이 실제로 지급된 경우에만 계정별 확인된 기록으로 안내합니다.',
             },
           },
           {
