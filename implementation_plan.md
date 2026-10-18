@@ -2569,3 +2569,29 @@
 - **백그라운드 태스크**: 사용자 스크린샷 잔여 태스크 및 방치 프로세스 0건 정리 완료 (`No background tasks are currently running`).
 - **원격 저장소 브랜치**: 크론 생성 임시 브랜치 일괄 정리 완료, `git ls-remote --heads origin`: `refs/heads/main` 단 1개 단독 유지.
 - **호스트 디스크 공간**: `/srv/moneyverse-data` 139GB 여유 (26% 사용)로 안전 마진 확보.
+
+
+---
+
+## 🚀 [v241 Specification] 호스트 디스크 용량 정밀 정리 (약 11GB 추가 회수, 148GB 여유 공간 확보)
+
+### 1. 호스트 디스크 정리 조치 내역
+- **`/srv/moneyverse-data` 릴리스 및 빌드 저장소 정리**:
+  - 만료된 불변 릴리스 4종(`prod-...717`, `test-v541-...`, `test-...805`, `test-...806`) 일괄 안전 삭제 (약 5.7GB 회수).
+  - 필수 보존 목록 유지: 현재 운영 릴리스(v897), 직전 운영 롤백용(v805), 현재 테스트 릴리스(v855), 직전 테스트 롤백용(v796), `production-current`, `test-current`.
+  - 완료된 빌드 임시 작업 공간(`/srv/moneyverse-data/build-workspaces/*`) 및 만료된 태스크(`/srv/moneyverse-tasks/` 내 구형 임시 디렉토리) 전수 정리 (약 5GB 회수).
+  - **정리 전**: 49GB 사용 (26%), 여유 139GB -> **정리 후**: **41GB 사용 (22%), 여유 148GB (약 9GB 순수 확보)**.
+- **루트 파티션(`/`) 및 홈 디렉토리 정리**:
+  - `/home/debian` 내 방치된 레거시 빌드 디렉토리 6종(`moneyverse-main-*`, `moneyverse-v268-fix`, `qa-v477-web`, `releases`, `worktrees` 등) 전수 삭제.
+  - 만료된 Git 워크트리(`.worktrees/*`) 정리 및 `git worktree prune` 실행.
+  - Docker 시스템 및 빌드 캐시 프루닝, 저널 로그 진공 청소(`journalctl --vacuum-time=2d`).
+  - **정리 전**: 54GB 사용 (58%), 여유 41GB -> **정리 후**: **52GB 사용 (55%), 여유 43GB (약 2GB 추가 확보)**.
+- **총 확보 용량**: **약 11GB 순수 회수 완료**.
+
+### 2. 정리 후 라이브 서비스 건전성 실측
+- `moneyverse-release-v897-backend.service`: **active (running)**
+- `moneyverse-release-v897-frontend.service`: **active (running)**
+- `curl -sI https://easy-scraping.com/`: **HTTP/2 200 OK**
+- `curl -s https://easy-scraping.com/api/version`: `{"id":"d4de11de7589bffc176fe428d410b380b922dece"}` 정상 응답.
+- 백그라운드 태스크: **0건**.
+- 원격 저장소: `refs/heads/main` **단 1개 브랜치 유지**.
