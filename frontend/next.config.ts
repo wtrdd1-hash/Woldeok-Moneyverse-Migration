@@ -155,11 +155,14 @@ const config: NextConfig = {
       { key: 'x-dns-prefetch-control', value: 'on' },
     ];
 
-    const indexingAllowed =
-      process.env.SEO_INDEXING_ENABLED === 'true' ||
-      (process.env.NODE_ENV === 'production' && process.env.SEO_INDEXING_ENABLED !== 'false');
+    const indexingAllowed = process.env.SEO_INDEXING_ENABLED !== 'false';
     if (!indexingAllowed) {
       security.push({ key: 'x-robots-tag', value: 'noindex, nofollow' });
+    } else {
+      security.push({
+        key: 'x-robots-tag',
+        value: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+      });
     }
 
     return [{ source: '/:path*', headers: security }];

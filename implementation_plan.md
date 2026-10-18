@@ -2523,3 +2523,24 @@
 ### 2. 코드 품질 및 검증 결과
 - TypeScript 컴파일 검증: `pnpm --filter @moneyverse/frontend typecheck` 실행 결과 **오류 0건 (100% 통과)**.
 - `fintech-responsive-layout-engine` 및 `interactive-minigame-web-engine` 가이드라인 100% 준수 (44px 터치 타겟, 카드 클리핑 방지, 320px~1280px 반응형 대응).
+
+
+---
+
+## 🚀 [v239 Specification] SEO 노출 차단 근본 결함(`noindex` 헤더) 해결, 백엔드 자동 핑 활성화 및 은행 모의 예적금 폴백 결함 수정
+
+### 1. SEO 노출 차단의 근본 원인 및 완전 해결
+- **식별된 결정적 장애**:
+  - 운영 프로덕션(`https://easy-scraping.com`)의 모든 HTTP 응답 헤더에 `x-robots-tag: noindex, nofollow`가 정적으로 주입되어 구글/네이버/빙 등 검색 로봇의 사이트 수집을 원천 차단하고 있었음.
+  - 백엔드의 6시간 주기 자동 IndexNow 및 사이트맵 제출 크론(`SeoCronPingService`)이 `SEO_INDEXING_ENABLED` 환경변수 누락으로 `disabled` 상태로 정지되어 있었음.
+- **수정 및 실측 결과**:
+  - `frontend/next.config.ts`: `indexingAllowed = process.env.SEO_INDEXING_ENABLED !== 'false'`로 기본값을 허용(Allow)으로 전환하고, 검색 친화적인 `x-robots-tag: index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1` 헤더를 명시하도록 개선.
+  - 프로덕션 호스트 실측: `curl -sI https://easy-scraping.com/` 및 블로그 페이지 전수 `index, follow` 실시간 헤더 반영 완료.
+  - 프로덕션 백엔드 환경 설정에 `SEO_INDEXING_ENABLED=true` 주입 후 서비스 재시작: `SeoCronPingService initialized: 6-hour automated IndexNow & Sitemap ping scheduled` 정상 기동 확인.
+
+### 2. 가상 은행 예적금 모의 저축 카드 결함 수정
+- **식별된 결함**: `frontend/src/app/bank/page.tsx`에서 세션 복구 지연이나 비로그인 시 `memberIdentity`가 null이 되어 "모의 저축 기록의 계정 확인에 실패했습니다" 오류 안내와 함께 예적금 카드가 통째로 숨겨지던 결함.
+- **개선 내역**: `userId={memberIdentity?.userId ?? 'guest-local'}` 안전 폴백을 적용하여 모든 방문자와 유저가 중앙은행 스마트 복리 포켓과 정기예금 카드를 막힘 없이 정상 이용할 수 있도록 보완.
+
+### 3. 검증 결과
+- 프론트엔드 타입 체크: `tsc --noEmit` **오류 0건 (100% 통과)**.
