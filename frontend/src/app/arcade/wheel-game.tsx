@@ -70,13 +70,9 @@ export function WheelGame({
   const [stakeAmount, setStakeAmount] = useState<number>(Number(minStake));
   const [rotationDegree, setRotationDegree] = useState<number>(0);
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
-  const [history, setHistory] = useState<readonly { seg: number; type: string; isWin: boolean }[]>([
-    { seg: 7, type: 'blue', isWin: true },
-    { seg: 14, type: 'gold', isWin: true },
-    { seg: 2, type: 'blue', isWin: false },
-    { seg: 19, type: 'neutral', isWin: false },
-    { seg: 16, type: 'violet', isWin: true },
-  ]);
+  // No fabricated history: entries below are added only after a successful
+  // server-confirmed play in this mounted screen. Not global user history.
+  const [history, setHistory] = useState<readonly { seg: number; type: string; isWin: boolean }[]>([]);
 
   const maxPlayable = Math.min(Number(maxStake), Number(remainingStake));
   const spinCounter = useRef(0);
@@ -155,10 +151,12 @@ export function WheelGame({
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
           <span className="flex items-center gap-1 font-bold text-muted-foreground shrink-0 text-[11px]">
             <History className="size-3.5" />
-            <span>최근 결과:</span>
+            <span>이 화면에서 확인한 서버 결과:</span>
           </span>
           <div className="flex items-center gap-1.5 shrink-0">
-            {history.map((h, idx) => (
+            {history.length === 0 ? (
+              <span className="text-muted-foreground">현재 화면에서 진행한 결과가 없습니다.</span>
+            ) : history.map((h, idx) => (
               <span
                 key={idx}
                 className={cn(
