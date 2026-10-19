@@ -39,6 +39,12 @@ describe('verified SEO locale versions (v920)', () => {
     expect(getVerifiedLocalePaths('/guide/glossary/per')?.en)
       .toBe('/en/guide/glossary/per');
     expect(getVerifiedLocalePaths('/guide/glossary')?.zh).toBe('/zh/guide/glossary');
+    expect(getVerifiedLocalePaths('/en/guide/glossary/per')).toEqual(
+      getVerifiedLocalePaths('/guide/glossary/per'),
+    );
+    expect(getVerifiedLocalePaths('/ja/tools')).toEqual(
+      getVerifiedLocalePaths('/tools'),
+    );
   });
 
   it('moves only legacy compound home aliases to actual locale-specific calculator', () => {
