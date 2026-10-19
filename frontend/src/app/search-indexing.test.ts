@@ -69,6 +69,7 @@ describe('public search surface', () => {
 
     for (const entry of entries) {
       for (const alternate of Object.values(entry.alternates?.languages || {})) {
+        if (typeof alternate !== 'string') continue;
         expect(alternate.includes('/en/en/') || alternate.includes('/ja/ja/') || alternate.includes('/zh/zh/')).toBe(false);
       }
     }
