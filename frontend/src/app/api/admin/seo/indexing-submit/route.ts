@@ -25,9 +25,13 @@ export async function POST(req: Request) {
     ) {
       return seoResponse({ success: false, error: 'invalid_batch_size' }, 400);
     }
+    if (body.targetCategory !== undefined && !['pseo', 'calculators', 'all'].includes(body.targetCategory)) {
+      return seoResponse({ success: false, error: 'invalid_target_category' }, 400);
+    }
+    const targetCategory = body.targetCategory ?? 'all';
     const batchSize = body.batchSize ?? 100;
     const base = (process.env.APP_BASE_URL || 'https://easy-scraping.com').replace(/\/$/, '');
-    const urls: string[] = [
+    const calculatorUrls: string[] = [
       'loan-interest-calculator',
       'compound-calculator',
       'dividend-tax-calculator',
@@ -41,18 +45,23 @@ export async function POST(req: Request) {
       'real-estate-calculator',
       'kimchi-premium-calculator',
     ].map((name) => `${base}/tools/${name}`);
-    urls.push(`${base}/tools`);
-    if (body.targetCategory !== 'calculators') {
+    calculatorUrls.push(`${base}/tools`);
+    const pseoUrls: string[] = [];
+    if (targetCategory !== 'calculators') {
       for (const slug of ALL_PSEO_POPULAR_SLUGS)
-        urls.push(`${base}/tools/stock-calculator/${slug}`);
+        pseoUrls.push(`${base}/tools/stock-calculator/${slug}`);
     }
-    if (body.targetCategory !== 'pseo') {
+    if (targetCategory !== 'pseo') {
       for (const preset of ALL_SEO_PRESETS) {
         if (preset.category === 'compound')
-          urls.push(`${base}/tools/compound-calculator/${preset.slug}`);
+          calculatorUrls.push(`${base}/tools/compound-calculator/${preset.slug}`);
       }
     }
-    const selectedUrls = [...new Set(urls)].slice(0, batchSize);
+    const urls = [...new Set([
+      ...(targetCategory === 'pseo' ? [] : calculatorUrls),
+      ...(targetCategory === 'calculators' ? [] : pseoUrls),
+    ])];
+    const selectedUrls = urls.slice(0, batchSize);
     const result = await submitToIndexNow(selectedUrls);
     if (!result.success) {
       return seoResponse(
@@ -74,6 +83,7 @@ export async function POST(req: Request) {
         submittedCount: result.submittedCount,
         attemptedCount: selectedUrls.length,
         totalUrlsAvailable: urls.length,
+        targetCategory,
         batchSize: result.submittedCount,
         submittedUrls: selectedUrls.slice(0, 6),
         indexNowSuccess: true,
