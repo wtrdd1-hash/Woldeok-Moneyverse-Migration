@@ -66,3 +66,45 @@ describe('v719 SEO indexing submit safety', () => {
     expect(body.message).not.toMatch(/Google Indexing API|색인 완료/);
   });
 });
+
+
+describe('v930 category-scoped IndexNow notifications', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    apiMock.mockResolvedValue({ consoleSession: { state: 'open' } });
+    submitMock.mockImplementation(async (urls: string[]) => ({
+      success: true, submittedCount: urls.length, status: 202,
+    }));
+  });
+
+  const scopedRequest = (targetCategory: string, batchSize = 200) =>
+    new Request('https://easy-scraping.com/api/admin/seo/indexing-submit', {
+      method: 'POST',
+      headers: { origin: 'https://easy-scraping.com', 'sec-fetch-site': 'same-origin', 'content-type': 'application/json' },
+      body: JSON.stringify({ targetCategory, batchSize }),
+    });
+
+  it('rejects unknown categories without sending requests', async () => {
+    const response = await POST(scopedRequest('invalid'));
+    expect(response.status).toBe(400);
+    expect((await response.json()).error).toBe('invalid_target_category');
+    expect(submitMock).not.toHaveBeenCalled();
+  });
+
+  it('sends only stock pSEO URLs for pseo category', async () => {
+    const response = await POST(scopedRequest('pseo'));
+    const urls = submitMock.mock.calls[0]?.[0] as string[];
+    expect(response.status).toBe(202);
+    expect(urls.length).toBeGreaterThan(0);
+    expect(urls.every((url) => url.includes('/tools/stock-calculator/'))).toBe(true);
+    expect((await response.json()).indexingConfirmed).toBe(false);
+  });
+
+  it('excludes stock pSEO URLs from calculators category', async () => {
+    const response = await POST(scopedRequest('calculators'));
+    const urls = submitMock.mock.calls[0]?.[0] as string[];
+    expect(response.status).toBe(202);
+    expect(urls.length).toBeGreaterThan(0);
+    expect(urls.some((url) => url.includes('/tools/stock-calculator/'))).toBe(false);
+  });
+});
