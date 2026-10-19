@@ -1,8 +1,7 @@
-## v2026.10.14.626 — Admin navigation modal clipping (source only)
-
 ## 2026-10-19 v924 — Feature Improvement (DRAFT)
 Main e76c90fad32d0bbc5a80805c0ea8576f9ba3cfc9; previous Addition v922, current Improvement v924, next Addition v926. MiniPC Debian 13.6 and dev DB read-only checks: `daily_rewards` app-role direct INSERT/UPDATE/DELETE=true, 241 public tables, 0 plus/vip-named tables; no claim that Production is affected. Source: hardcoded VIP eligibility, false chest success on failed POST, missing client CSRF header, local-only membership activation, no visible ledger/inventory write. Detailed EN/KO design added to PROJECT_PLAN and integrated masters. QA v923 FAILED, exact-SHA Test and Production HOLD. External independent reference gate: 0 newly approved, cumulative unknown, 10,000 BLOCKED. No code/DB/WLD/switch/Test/Production changes; v922/PR #940 overlap requires review.
 
+## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
 - Moved the admin navigator modal from a clipped scrolling/backdrop-filtered ancestor to a document-body portal. Targeted regression 2/2, ESLint, TypeScript and Next.js build passed.
 - Full frontend test suite has 35 failed / 1,136 passed; release BLOCKED pending exact-SHA authenticated Test/browser/backend acceptance. No Production promotion.
