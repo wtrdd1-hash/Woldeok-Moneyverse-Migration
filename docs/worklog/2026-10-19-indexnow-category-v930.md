@@ -6,3 +6,9 @@
 - Bug: `targetCategory='pseo'` still includes 13 calculator URLs due to unconditional seed; `targetCategory='calculators'` may include presets, while `targetCategory='all'` includes both. An unrecognized category is silently treated as all. IndexNow only notifies compatible engines; no Google indexing guarantee.
 - Planned fix: explicit category filtering, invalid-category 400, safe deduplication, scoped counts and negative tests. No automatic submissions or financial mutations.
 - Status: START, pending code review, CI, exact-SHA Test, production financial and UI release gates.
+
+## MID / FINAL source checkpoint
+- Scoped IndexNow API URL construction; pSEO selection now excludes the 13 unconditional calculator URLs. Unknown category returns 400 before submission. Existing authorization and Origin gates remain unchanged.
+- Added 3 regression tests to the existing route test suite (unknown category, pure pSEO URLs, calculators excluding stock pSEO). **Tests not executed** because remote host is offline; CI will determine correctness.
+- No automated indexing request was issued. Search engine acceptance is not an indexing guarantee.
+- Production promotion remains BLOCKED until exact commit CI, isolated Test backend/frontend, financial ledger reconciliation, authenticated UI coverage, backup restore and session checks pass.
