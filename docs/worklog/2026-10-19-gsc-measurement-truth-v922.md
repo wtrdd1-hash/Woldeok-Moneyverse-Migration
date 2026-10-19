@@ -6,5 +6,5 @@
 
 **Implementation scope:** pure tested source/presentation helper with `UNMEASURED` display for unconfigured/error/loading/stale; real numeric zeros only when provider reports; even with a successful provider response, CTR/rank undefined when impressions 0. Relabel Googlebot typo: the Search Analytics report concerns Google Search user impressions/clicks, not crawler hits. Add tests and CI. Backend credentials/API, account signup, Naver, WLD, finance, sitemap, Test/Production pointers remain untouched.
 
-**MID:** pending test/code review.
-**FINAL:** pending exact-head CI + release acceptance.
+**MID (2026-10-19 KST):** Tests first: provider unconfigured/error, failed request, observed-zero vs valid numerator/denominator, NaN and source integration. Added `frontend/src/lib/gsc-metric-presentation.ts` and tests; wired its labels to the existing GscAnalyticsCard (no backend change). v921 PR #958 independently reached CI green and merged main `85c86ac80e0ea6f07e869fe50b0f4fa240d48f2d`; this branch touches different files.
+**FINAL SOURCE CHECKPOINT:** Source/test and EN/KO internal/GitHub release notes saved on this branch. Exact PR CI not yet evidenced. MiniPC Test and Production SHA/finance still unverified, no data reset, GSC submission or live service mutation. Production HOLD pending full acceptance.
