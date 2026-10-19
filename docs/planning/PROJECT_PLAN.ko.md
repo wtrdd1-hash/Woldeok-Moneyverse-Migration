@@ -1,5 +1,42 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.19.920 — F675-48 개인정보 요청의 접수 신뢰성·안전 재시도 개선 (Feature Improvement, 초안)
+**회차:** Previous Feature Addition v918 → Current Feature Improvement v920 → Next Feature Addition v922. **main:** `e76c90fad32d0bbc5a80805c0ea8576f9ba3cfc9`. 기획 전용, 구현·Test·운영 승인 아님. 기존 개인정보 센터와 v918 제안을 확장하고 중복 시스템은 만들지 않는다.
+
+### main 실제 소스에서 확인한 사항 (운영 검증 아님)
+- `frontend/src/app/account/privacy/page.tsx`에는 인증·noindex 개인정보 센터, 요청 폼·이력, 접수와 완료를 구분한 문구가 이미 있다. `account/actions.ts`는 성공 후 계정/개인정보 페이지를 재검증한다.
+- `backend/src/privacy/privacy.controller.ts`는 세션·인증·동의·POST CSRF를 적용하며 `GET/POST /api/v1/privacy/requests`를 제공한다. App API에도 `/app-api/v1/privacy/requests`가 있으므로 기존 계약을 보존한다.
+- 서비스/저장소는 5개 요청 유형과 `received`만 지원한다. 조회 기본 30건·최대 100건이며 다음 페이지 커서가 없다. 서버 영수증은 `requestId,requestType,status,createdAt,replayed`를 반환하지만 화면은 일반 성공 문구만 표시한다.
+- 프런트 Server Action은 실행 때마다 `idempotencyKey()`를 새로 만든다. 응답 유실 후 재제출은 다른 키가 될 수 있다. 화면·DTO는 2,000자, 저장 전 정규화·Migration 015는 **정규화 후 1,000자** 제한이어서 검증이 불일치한다.
+- Migration 015에는 회원별 키 유일 제약, 본문 해시, `ON CONFLICT DO NOTHING` 동시 재시도 복구, 소유권 SECURITY DEFINER, 앱 직접 테이블 권한 회수가 **이미 존재**한다. 신규 개선으로 오인하지 않고 보존·검증한다. 관리자 처리·실제 내보내기·자동 삭제는 의도적으로 구현되지 않았다.
+- QA v919 전문 및 운영 DB ACL은 이번 회차에 재검증하지 못했다. 기존 금융/Test HOLD는 신규 통과로 간주하지 않는다.
+
+### P0 개발 백로그와 합격 기준
+**PRIV920-01 동일 의도 재시도·접수 영수증.** 같은 유형/정규화 본문/회원의 제출 의도에서는 UUID를 유지하고 다른 의도·계정 전환 시 새 UUID를 발급한다. 본문·신원정보를 localStorage/분석에 저장하지 않는다. `idle/submitting/outcome_unknown/received/rejected` 상태 구분, 결과불명 시 무조건 실패나 새 제출로 처리하지 않는다. 회원 전용 동일 키 결과 조회 `GET /api/v1/privacy/requests/by-key/:key`는 별도 승인 후 제안한다. 같은 키에 다른 본문은 개인정보를 노출하지 않는 409. 실제 `requestId/createdAt/replayed/received`를 **접수 영수증**으로 표시하고 완료 증명으로 쓰지 않는다. 동시 100건·응답 유실·다른 회원 동일 UUID·내용 변경·세션 만료 테스트 필수.
+
+**PRIV920-02 실제 처리 증거.** 접수만으로 삭제·동의 철회·정정·자료 내보내기를 자동 실행하거나 완료로 표시하지 않는다. 제안 상태: received → reviewing → awaiting_identity/action_required → fulfilled/restricted/rejected/withdrawn. 전이마다 담당자·권한·시각·사유·마스킹된 증거 참조를 불변 기록한다. 증거 없는 관리자 종결은 완료가 아니며 기존 received는 소급 변경하지 않는다. WLD 원장·감사·동의·법령상 보존 자료의 삭제 여부는 법률/정책 검토와 별도 승인 전 확정하지 않는다. 근거 없는 처리기한 약속 금지.
+
+**PRIV920-03 회원 소유권·DB 최소권한·자료 보호.** 회원 ID는 서버 세션에서만 취득한다. 고정 search_path SECURITY DEFINER, 개인정보/감사 테이블 앱 직접 DML 금지, 개발/Test/운영 ACL 실제 재측정. 관리자 별도 역할·중요 작업 재인증·삭제/내보내기 2인 승인·열람 감사. 내보내기 파일 암호화·짧은 만료·수신자에 묶인 일회용 해시 토큰·접근 로그·속도 제한·공개 URL 및 자동 이메일 첨부 금지. 민감정보와 SQL 오류는 로그/응답에서 마스킹.
+
+**REL920-04 운영승격 HOLD.** 금융 원장 출처 불명 차액, 광범위 앱 DML, Migration 체크섬, exact-SHA Test, 로그인 전체 UI, 세션·백업 복원·롤백이 독립 검증될 때까지 차단. 이번 기획에서는 코드·DB·잔액·스위치·Test·Production을 변경하지 않는다.
+
+### P1 개발 백로그
+**PRIV920-05 입력·오류 정합성.** 정규화 후 1,000자 제한을 화면/DTO/DB에서 통일하고 글자 수·평문 정책 안내. 1,000/1,001/2,000자, 한글/유니코드, CRLF·공백·제어문자, 정정 설명 누락, CSRF·동의·세션, 400/401/403/409/429/503·결과불명 회귀 테스트. SQL 원문 노출 금지.
+
+**PRIV920-06 요청 이력 연속성.** 기본 30건 고정 목록을 `(created_at DESC,id DESC)` 커서로 확장한다. 회원 범위 서명 불투명 커서, 1~100건 상한, `nextCursor`, 새 요청 중간 삽입에도 안정 정렬. 기존 `(requester_user_id,created_at DESC,id DESC)` 인덱스 우선 사용, Test EXPLAIN 근거가 있을 때만 인덱스 추가. 빈 목록과 조회 실패는 구분한다.
+
+**PRIV920-07 관리자 처리·감사.** 회원 API와 분리된 관리자 큐, 버전 기반 담당자 배정, 불변 사건 이력·증거 체크리스트, 장기 미처리 에스컬레이션, 워커 장애 복구. `privacy_request_events(id,request_id,seq,actor_id,action,reason_code,evidence_ref,created_at)`, `UNIQUE(request_id,seq)`는 제안 DB 구조이며 개발 담당자가 최신 main과 충돌 검사 후 Migration 번호를 정한다. 상태 전이+감사+Outbox 원자적 트랜잭션. 본문은 공개/분석에 노출 금지.
+
+**PRIV920-08 모바일·접근성·SEO·KPI.** 기존 `/app-api/v1/privacy/requests` 호환, 추가 필드/경로는 버전 관리. 개인정보 이력·다운로드는 로그인·noindex, 공개 개인정보처리방침은 별도 canonical. WCAG 2.2 AA, 320px, 초점·role=status/alert·스크린리더. 집계 KPI는 접수 영수증·결과불명·중복 차단·검토 소요·증거 확인 완료이며 이메일·본문·토큰·잔액 수집 금지.
+
+### 사용자 흐름·API·배포
+내 계정 → 개인정보 센터 → 요청 유형/최소 설명 → **요청 기록하기** → 서버 확인 접수번호 → **내 요청 기록**. 결과불명 문구: "결과를 확인하지 못했습니다. 같은 요청으로 확인하고 새로 제출하지 마세요." 관리자는 별도 인증 큐 → 증거 검토 → 승인 → 불변 결과 → 마스킹된 안내. 기존 POST `{requestType,detail?,idempotencyKey}`와 영수증 계약은 유지한다. 회원 전용 키 조회와 `GET ?cursor=&limit=30`의 `{requests,nextCursor}`는 별도 승인 후 호환 확장. 앱 계정 직접 SELECT를 허용하지 않는다.
+
+개발 예약은 별도 브랜치·TDD RED/GREEN, 100건 동시 재시도, 타인 접근, 관리자 권한 철회, 중복/충돌, 만료 다운로드, 모바일·a11y 회귀를 수행한다. 기본 OFF → 추가형 Migration → 정확한 후보 SHA Test·인증 166경로 5회·관리자 34흐름·원장/ACL·백업 복원 → canary → 롤백. 롤백 시 새 처리 UI/워커만 끄고 기존 접수와 불변 증거를 보존한다. Gemini/개발 A/B/C/QA 작업과 파일 충돌을 피한다.
+
+**외부 독립 근거 gate:** 이번 신규 승인 0건, 중복 제거 누적 승인 미확인, 10,000건 BLOCKED. main 소스 확인은 외부 승인이나 운영 실측이 아니다.
+
+
 ## v2026.10.15.688 — F675-06 실제 Search Console 검색·색인 증거 상세기획
 
 - [F675-06 한국어 상세명세](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 공식 개별 기획으로 채택. 기존 관리자 /admin/seo·GSC·v685 수정 재사용, 별도 SEO 플랫폼 중복 금지.

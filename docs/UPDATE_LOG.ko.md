@@ -1,5 +1,9 @@
 ## v2026.10.14.626 — 관리자 전체 메뉴 잘림 수정 (소스만 구현)
 
+## v2026.10.19.920 — 개인정보 요청 기획 근거·소스 정합성
+회차 Previous 추가 v918 / Current 보완 v920 / Next 추가 v922. 기준 main e76c90fad32d0bbc5a80805c0ea8576f9ba3cfc9; 관련 없는 PR #937/#939 미변경. miniPC 서비스 활성·개발 DB 연결, 원격 셸 차단. 개인정보 센터·Server Action·백엔드 컨트롤러/서비스/저장소·Migration 015·App API 목록 확인. 실제 개선점은 재호출 시 새 UUID, 화면/DTO 2,000자 대 DB 정규화 후 1,000자, 기본 30건/커서 없음, received만 있고 처리 증거 없음. 기존 SQL의 회원별 키 유일 제약·본문 해시·동시 재시도 복구·테이블 권한 회수는 보존. P0 안전 재시도/접수 영수증/권한/운영 HOLD, P1 입력 검증/커서/관리자 증거/모바일·접근성·SEO·KPI. 운영 ACL과 QA v919 전문은 직접 미확인. 신규 외부 승인 0건, 누적 미확인, 10,000건 BLOCKED. 문서 전용, 코드·DB·WLD·Test·운영 미변경.
+
+
 - 관리자 전체 메뉴 모달의 스크롤/블러 내비게이션 하위 fixed 레이어를 body 포털로 분리하여 잘림 원인을 해결함. 관련 회귀 테스트 2/2, ESLint, 타입 검사, Next.js 빌드 통과.
 - 프론트엔드 전수 테스트 35건 실패/1,136건 통과로 RELEASE_BLOCKED; 수정 SHA Test 인증 UI/백엔드 검증 및 Production 승격 미진행.
 - 내부/깃허브 변경기록: `docs/updates/v2026.10.14.626-internal.ko.md`, `docs/updates/v2026.10.14.626-github.ko.md`.

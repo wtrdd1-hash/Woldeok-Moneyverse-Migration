@@ -1,5 +1,9 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.19.920 — F675-48 개인정보 요청 재시도·접수 증명·처리 근거 (초안)
+Previous 기능추가 v918 → Current 기능보완 v920 → Next 기능추가 v922. 기준 main `e76c90fad32d0bbc5a80805c0ea8576f9ba3cfc9`; 상세 영문 [PROJECT_PLAN](PROJECT_PLAN.md) v920 및 [한국어](PROJECT_PLAN.ko.md) 동등 기획. 실제 소스에서 확인한 개선점: `account/actions.ts`가 호출마다 새 멱등 UUID 생성, 화면/DTO 2,000자 대 DB 정규화 후 1,000자 제한 불일치, 최근 요청 기본 30건·커서 부재. 구현 상태는 `received`뿐이며 관리자 실제 처리·자료 제공 증거는 없다. Migration 015에는 회원별 키 유일 제약·본문 해시·동시 재전송 복구·SECURITY DEFINER/REVOKE가 **이미 존재**하므로 중복 구현하거나 없는 것처럼 보고하지 않는다. P0: 동일 의도 재시도·본인 영수증 재조회, 접수와 완료 구분, 법적 보존·권한·앱 직접 DML 금지, 운영 HOLD. P1: 입력 검증 통일, 커서 이력, 증거 기반 관리자 처리, App API·WCAG 2.2 AA·noindex·개인정보 없는 KPI. 개발 A/B/C/QA는 격리 브랜치·TDD·정확한 SHA Test·롤백 담당, 이번에는 문서만 변경. QA v919 전문과 운영 ACL은 직접 미검증. 외부 신규 승인 0건·누적 미확인·10,000건 게이트 BLOCKED.
+
+
 ## v2026.10.18.804 — 불변 원장 직접 DML 권한 회수 (후보 / 운영 보류)
 - 운영 v717/최신 소스는 원장 직접 쓰기 코드가 없지만 실제 앱 DB 계정은 INSERT/UPDATE/DELETE/TRUNCATE/TRIGGER 등 광범위한 원장 권한을 보유. 신규 migration 277로 원장 2테이블 권한 모두 회수 후 SELECT만 복원하며 기존 SECURITY DEFINER 정산 함수를 유지. 운영 schema/ACL만 격리 DB에 복원해 적용·재적용 및 권한 거부를 검증. 나머지 금융 3테이블과 기초잔액 미인증 19계좌 +4,779,188 WLD, v530 인증 UI/복원은 별도 차단 항목. [릴리스](../releases/v2026.10.18.804.ko.md).
 

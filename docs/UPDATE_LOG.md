@@ -1,5 +1,9 @@
 ## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
+## v2026.10.19.920 — Privacy planning evidence and source correction
+Cycle Previous Addition v918 / Current Improvement v920 / Next Addition v922. Main e76c90fad32d0bbc5a80805c0ea8576f9ba3cfc9; PRs #937/#939 unrelated and untouched. MiniPC status active, dev DB connected; remote shell blocked. Source verified: privacy page/action/controller/service/repository, migration 015, app-api catalog. Real gaps: fresh UUID per Server Action retry; 2,000-char UI/DTO vs 1,000 normalized DB; 30-item default without cursor; received-only, no processing evidence. Existing SQL owner/key uniqueness, payload hash, concurrent replay and direct table revoke retained. P0 stable retry/receipt truth/ACL/release HOLD; P1 input parity/cursor/admin evidence/mobile/a11y/SEO/KPI. No live ACL or QA v919 complete report verification. External new approved 0, cumulative unknown, 10,000 BLOCKED. Planning-only, no runtime/DB/WLD/Test/Production change.
+
+
 - Moved the admin navigator modal from a clipped scrolling/backdrop-filtered ancestor to a document-body portal. Targeted regression 2/2, ESLint, TypeScript and Next.js build passed.
 - Full frontend test suite has 35 failed / 1,136 passed; release BLOCKED pending exact-SHA authenticated Test/browser/backend acceptance. No Production promotion.
 - Records: `docs/updates/v2026.10.14.626-internal.md` and `docs/updates/v2026.10.14.626-github.md`.

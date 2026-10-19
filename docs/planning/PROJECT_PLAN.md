@@ -1,5 +1,42 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.19.920 — F675-48 Privacy Request Truth & Safe Retry (Feature Improvement, DRAFT)
+**Cycle:** Previous Feature Addition v918 → Current Feature Improvement v920 → Next Feature Addition v922. **Main:** `e76c90fad32d0bbc5a80805c0ea8576f9ba3cfc9`. Documentation-only candidate, NOT implemented, tested, merged or deployed. Extend existing privacy center and v918 proposal; do not create another subsystem.
+
+### Source findings (main code, not Production runtime acceptance)
+- `frontend/src/app/account/privacy/page.tsx` already has a login-gated noindex privacy center, form, list and honest intake-only wording; `frontend/src/app/account/actions.ts` revalidates both account pages on success.
+- `backend/src/privacy/privacy.controller.ts` uses session/auth/consent guards, POST CSRF, GET/POST `/api/v1/privacy/requests`. App API catalog already exposes `/app-api/v1/privacy/requests`; preserve existing clients.
+- `backend/src/privacy/privacy.service.ts` and repository allow five types, only `received` status, default list 30/max 100 without continuation. Existing DB receipt returns `requestId,requestType,status,createdAt,replayed`, but frontend action displays generic success rather than the receipt.
+- Frontend action generates a new `idempotencyKey()` on each execution: retry after lost response can become a new intent. Form/DTO accept 2,000 characters while repository and migration 015 cap **normalized stored detail at 1,000**. These are the concrete improvement gaps.
+- Migration `015-privacy-data-subject-requests.sql` already enforces `UNIQUE(requester_user_id,idempotency_key)`, payload `request_hash`, concurrent `ON CONFLICT DO NOTHING` replay recovery, owner-scoped SECURITY DEFINER functions and revoked direct app table grants. Preserve and test these safeguards; do not call them missing. There is intentionally no staff workflow, actual export or automatic deletion.
+- QA v919 complete contents and live Production ACLs were not verified during this run. Prior financial/Test/QA HOLD is carried forward, not freshly certified.
+
+### P0 acceptance backlog
+**PRIV920-01 Stable retry and intake receipts.** Preserve one UUID per exact user submission intent across uncertain network responses; rotate when type/normalized detail or signed-in user changes. Never persist sensitive detail in localStorage or analytics. States: idle, submitting, outcome_unknown, received, rejected. Recover the original result by an authenticated owner-scoped lookup using the same key (proposed `GET /api/v1/privacy/requests/by-key/:key`), rather than blind resubmission. Same key+different payload → 409, no sensitive echo. Display server-confirmed requestId, createdAt, replayed and status=received, explicitly NOT fulfilled. Tests: 100 concurrent same-key submissions yield one case; response loss, other-user same UUID, changed-payload 409, session expiry, cross-account denial.
+
+**PRIV920-02 Evidence-backed processing.** Never auto-delete, withdraw consent, correct, export or declare success merely because a request was received. Proposed immutable transitions: received → reviewing → awaiting_identity/action_required → fulfilled/restricted/rejected/withdrawn, with actor, authorization, reason, timestamps and redacted evidence reference. Administrative closure without proof is not fulfillment; legacy received records remain received. Separate legal review for retention/erasure, protected WLD ledger/audit/consent and jurisdictional response timelines; do not invent deadlines.
+
+**PRIV920-03 Least privilege and private delivery.** User identity must come from server session, not payload; owner-scoped SECURITY DEFINER with fixed search_path; no direct app DML on request/audit data; independently check dev/Test/Production ACL. Staff-only queue with fresh step-up for sensitive actions, two-person approval for export/deletion, immutable audit. Encrypted export artifact, expiring one-time recipient-bound download token (hashed at rest), access logs, rate limits, redacted errors, no public URL or unsolicited attachment. Separate export worker from public API.
+
+**REL920-04 Release HOLD.** Existing finance reconciliation, broad app DML, migration checksum parity, exact-SHA active Test, authenticated full UI, session continuity, backup restore and rollback must be proven independently before Production. No code/DB/WLD/switch/Test/Production change from this planning task.
+
+### P1 implementation backlog
+**PRIV920-05 Validation parity.** Match 1,000 normalized-character rule in UI, DTO and database; show counter and safe plain-text guidance. Test 1,000/1,001/2,000, Korean/Unicode, CRLF/whitespace, control characters, correction without detail, CSRF/consent, 400/401/403/409/429/503, unknown result. Never show raw SQL errors.
+
+**PRIV920-06 History continuity.** Introduce bounded cursor pagination using `(created_at DESC,id DESC)`, signed opaque owner-scoped cursor, limit 1–100, `nextCursor`, deterministic ordering under new inserts. Reuse existing `(requester_user_id,created_at DESC,id DESC)` index; add only if Test EXPLAIN shows need. Empty list != unavailable data.
+
+**PRIV920-07 Staff evidence workflow.** Separate private admin queue, versioned assignment/compare-and-swap, evidence checklist, restricted audit, escalation and worker recovery. No client-selected account, no raw free text in analytics. Atomic transition + audit + Outbox, `UNIQUE(request_id,sequence)` event chain. Proposed `privacy_request_events(id,request_id,seq,actor_id,action,reason_code,evidence_ref,created_at)` is DESIGN ONLY; development owner allocates migration number after latest-main conflict check.
+
+**PRIV920-08 Mobile, SEO, a11y, KPI.** Preserve `/app-api/v1/privacy/requests` compatibility with additive versioned changes; noindex all private history/download pages, public privacy policy separate canonical; WCAG 2.2 AA, 320px, focus/role=status/alert and screen-reader tests. Measure aggregate verified intake receipts, uncertain outcomes, deduplicated retries, time-to-review, evidence-backed closure. No names, emails, request detail, tokens, WLD balances in analytics.
+
+### User flow, API and rollout
+Account → Privacy Center → choose type and minimum detail → **Record request** → confirmed receipt → **View request history**. For unknown result: "We could not confirm the outcome. Check this same request; do not submit another." Staff: authorized queue → review evidence → approved action → immutable outcome → redacted member notification. Existing POST body `{requestType,detail?,idempotencyKey}` and receipt remain compatible. Proposed owner-only by-key recovery GET and cursor GET `{requests,nextCursor}` must be independently approved/versioned. Use current index and scoped functions; no direct table SELECT grants.
+
+Development reservations: isolated branch, TDD RED→GREEN, exact paths above, 100-way concurrency, permission and idempotency E2E, mobile/a11y regression; feature OFF by default, additive migration, exact candidate SHA Test + authenticated 166-route five-pass and 34-admin-flow QA, ledger/ACL checks, backup restore, canary and rollback. Rollback disables new processing but preserves original intake and immutable evidence. Avoid Gemini/Dev A/B/C/QA overlapping files.
+
+**Independent external evidence gate:** new approved sources 0, cumulative verified/deduplicated count unknown, 10,000 gate BLOCKED. Main source review is not external approval or live runtime verification. 
+
+
 ## v2026.10.15.688 — F675-06 real Search Console evidence and canonical action center (PLANNING)
 
 - **Adopt** [F675-06 Search Evidence & Canonical Action Center EN](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) as detailed v675 F675-06 design, **extending existing /admin/seo/GSC backend**, preserving v685 SEO transport/audit fixes rather than creating a competing SEO dashboard.
