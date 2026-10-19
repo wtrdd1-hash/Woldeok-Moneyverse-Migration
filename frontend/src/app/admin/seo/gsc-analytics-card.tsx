@@ -19,6 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
+import { presentGscMetrics } from '@/lib/gsc-metric-presentation';
 
 export interface GscTimeSeriesEntry {
   readonly date: string;
@@ -350,6 +351,8 @@ export function GscAnalyticsCard() {
       .join(' ');
   }, [series, activeMetric, maxClicks, maxImpressions]);
 
+  const metricLabels = presentGscMetrics(data, loadError);
+
   return (
     <Card className="border-border/80 shadow-sm">
       <CardHeader className="pb-3">
@@ -363,7 +366,7 @@ export function GscAnalyticsCard() {
                 Google Search Console 검색 성과 분석 (Search Analytics)
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                최근 30일간의 Googlebot 실제 검색 노출수, 클릭수, 평균 CTR 및 10대 검색어 랭킹
+                최근 30일간 Google 검색 결과의 노출수·클릭수·CTR 및 검색어 순위 (크롤러 방문과 별개)
               </CardDescription>
             </div>
           </div>
@@ -467,8 +470,8 @@ export function GscAnalyticsCard() {
               <MousePointerClick className="size-3.5 text-emerald-500" />
             </div>
             <div className="mt-1 font-mono text-xl font-black text-foreground">
-              {(data?.totalClicks30d ?? 0).toLocaleString()}
-              <span className="ml-1 text-xs font-normal text-muted-foreground">회</span>
+              {metricLabels.clicks}
+              {metricLabels.observed && <span className="ml-1 text-xs font-normal text-muted-foreground">회</span>}
             </div>
           </div>
 
@@ -478,8 +481,8 @@ export function GscAnalyticsCard() {
               <Eye className="size-3.5 text-primary" />
             </div>
             <div className="mt-1 font-mono text-xl font-black text-foreground">
-              {(data?.totalImpressions30d ?? 0).toLocaleString()}
-              <span className="ml-1 text-xs font-normal text-muted-foreground">회</span>
+              {metricLabels.impressions}
+              {metricLabels.observed && <span className="ml-1 text-xs font-normal text-muted-foreground">회</span>}
             </div>
           </div>
 
@@ -489,7 +492,7 @@ export function GscAnalyticsCard() {
               <Percent className="size-3.5 text-amber-500" />
             </div>
             <div className="mt-1 font-mono text-xl font-black text-foreground">
-              {data?.avgCtr30d ?? 0}%
+              {metricLabels.ctr}
             </div>
           </div>
 
@@ -499,7 +502,7 @@ export function GscAnalyticsCard() {
               <Award className="size-3.5 text-purple-400" />
             </div>
             <div className="mt-1 font-mono text-xl font-black text-foreground">
-              {data?.avgPosition30d ?? 0}위
+              {metricLabels.position}
             </div>
           </div>
         </div>
