@@ -37,6 +37,12 @@ describe('public search surface', () => {
     const byPath = (path: string) =>
       entries.find((entry) => entry.url === `https://easy-scraping.com${path}`);
 
+    // Each translated homepage and public tool hub has its own sitemap loc.
+    const koHome = entries.find((entry) => entry.url === 'https://easy-scraping.com');
+    expect(byPath('/en')?.alternates?.languages).toEqual(koHome?.alternates?.languages);
+    expect(byPath('/ja/tools')?.alternates?.languages)
+      .toEqual(byPath('/tools')?.alternates?.languages);
+
     const translatedCompound = byPath('/tools/compound-calculator');
     expect(translatedCompound?.alternates?.languages?.en)
       .toBe('https://easy-scraping.com/en/tools/compound-interest-calculator');
