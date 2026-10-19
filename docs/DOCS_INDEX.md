@@ -1,5 +1,10 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## AI calculator demand + blog widget growth engine — v2026.10.19.922
+
+- [English specification](planning/AI_CALCULATOR_BLOG_WIDGET_GROWTH_ENGINE_SPEC_v2026.10.19.922.md) · [한국어 상세기획](planning/AI_CALCULATOR_BLOG_WIDGET_GROWTH_ENGINE_SPEC_v2026.10.19.922.ko.md) · [worklog](worklog/2026-10-19-ai-calculator-content-engine-v922.md) · [internal update](updates/v2026.10.19.922-internal.md) · [GitHub update](updates/v2026.10.19.922-github.md).
+- Current planning baseline is the main branch's 19-calculator dual-surface inventory. Demand evidence must come from auditable providers; internal AI may assist clustering/drafting but cannot invent search volume, formula authority, or autonomous YMYL publication.
+
 ## Search Console evidence detailed plan — v2026.10.15.688
 
 - [F675-06 GSC Search Evidence & Canonical Action](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) · [한국어](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) · [v688 worklog](worklog/2026-10-15-f67506-search-evidence-v688.md). Docs only, no indexing/Production claim.
@@ -60,7 +65,7 @@
 graph TD
     Root["📚 Master Docs Hub<br/>(DOCS_INDEX.md)"] --> D1["1. 거시 금융 & 대국민 국고<br/>(Treasury & Macro Economy)"]
     Root --> D2["2. 가상 주식 거래소 & 작도<br/>(Stocks & Trading Tools)"]
-    Root --> D3["3. 12대 금융 계산기 & SERP<br/>(Calculators & SEO Engine)"]
+    Root --> D3["3. 19대 금융 계산기 & SERP<br/>(Calculators & SEO Engine)"]
     Root --> D4["4. 통합 API & 모바일 규격<br/>(API Master & Contracts)"]
     Root --> D5["5. 관리자 관제 & 보안 규정<br/>(Admin & Governance)"]
     Root --> D6["6. 인프라 & UI/UX 아키텍처<br/>(Infra & Design System)"]
@@ -110,7 +115,7 @@ graph TD
 
 ---
 
-### 3. 🧮 12대 금융 계산기 & 검색엔진 최적화 (Financial Calculators & SERP CRO)
+### 3. 🧮 19대 금융 계산기 & 검색엔진 최적화 (Financial Calculators & SERP CRO)
 구글 4.9점 별점 스니펫(AggregateRating), FAQPage 구조화 데이터, IndexNow 실시간 색인 엔진 및 12대 금융 계산기 규격입니다.
 
 | 계산기 허브 경로 | 주요 기능 및 타겟 키워드 | SEO/스니펫 사양 |
