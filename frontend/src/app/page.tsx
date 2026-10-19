@@ -18,6 +18,7 @@ import {
   Gift,
 } from 'lucide-react';
 import { WalletGlance } from '@/components/wallet-glance';
+import { GuestQuickstart } from '@/components/guest-quickstart';
 import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
 import { MacroLiquidityDashboard } from '@/components/macro-liquidity-dashboard';
@@ -123,6 +124,7 @@ interface Announcement {
 }
 
 export default async function HomePage() {
+  const locale = await getServerLocale();
   const [announcements, marketData] = await Promise.all([
     publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60),
     apiOrNull<{ stocks: StockItem[] }>('/api/v1/stocks'),
@@ -155,6 +157,7 @@ export default async function HomePage() {
       <h1 className="text-lg font-extrabold tracking-tight text-foreground sm:text-2xl">
         <T korean="월덕 머니버스 가상경제 대시보드" english="Woldeok Moneyverse Virtual Economy Dashboard" japanese="ウォルドク・マネーバース 仮想経済ダッシュボード" chinese="Woldeok Moneyverse 虚拟经济仪表盘" />
       </h1>
+      <GuestQuickstart locale={locale} />
       {/* =========================================================================
           🏛️ 2026 STRIPE & LINEAR STYLE FINTECH BENTO COCKPIT
           ========================================================================= */}
@@ -179,7 +182,7 @@ export default async function HomePage() {
               </div>
               <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-300/90 bg-[#00F59B]/10 border border-[#00F59B]/20 px-2.5 py-0.5 rounded-full">
                 <ShieldCheck className="size-3 text-[#00F59B] shrink-0" />
-                <span><T korean="100% 무손실 원장 보호" english="100% Lossless Ledger" japanese="100%無損失元帳保護" chinese="100%无损账本保障" /></span>
+                <span><T korean="가상경제 시뮬레이션" english="Fictional Economy Demo" japanese="仮想経済シミュレーション" chinese="虚拟经济模拟" /></span>
               </div>
             </div>
 
@@ -191,14 +194,14 @@ export default async function HomePage() {
                     <T korean="내 가상 자산 순가치" english="Total Virtual Net Worth" japanese="私の仮想資産総額" chinese="我的虚拟总资产" />
                   </p>
                   <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[#00F59B]/10 text-[#00F59B] border border-[#00F59B]/20 text-[10px] font-mono font-bold">
-                    +4.8% 24h
+                    DEMO
                   </span>
                 </div>
                 <div className="mt-1.5 font-mono tabular-nums text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-zinc-50 flex items-baseline gap-2 min-w-0 max-w-full overflow-hidden">
                   <WalletGlance />
                 </div>
                 <p className="mt-1.5 font-mono text-xs text-zinc-400">
-                  <T korean="≈ ₩179,460,000 KRW (실시간 가상환율 1:1,000 연동)" english="≈ ₩179,460,000 KRW (Live 1:1,000 Peg)" japanese="≈ ₩179,460,000 KRW (為替連動)" chinese="≈ ₩179,460,000 KRW (实时锚定)" />
+                  <T korean="게임 내 잔액과 수익은 실제 현금 가치가 아닙니다" english="In-game balances are not redeemable cash values" japanese="ゲーム内残高は現金の価値を示しません" chinese="游戏内余额不代表真实现金价值" />
                 </p>
               </div>
 
@@ -207,20 +210,20 @@ export default async function HomePage() {
                 <div className="flex items-center justify-between text-[11px] font-medium text-zinc-300">
                   <span className="flex items-center gap-1.5">
                     <span className="size-1.5 rounded-full bg-[#00F59B]" />
-                    <T korean="자산 포트폴리오 구성" english="Asset Allocation" japanese="資産構成比率" chinese="资产配置比例" />
+                    <T korean="자산 구성 예시" english="Example Allocation" japanese="資産配分の例" chinese="资产配置示例" />
                   </span>
-                  <span className="font-mono text-[#00F59B] font-bold">100%</span>
+                  <span className="font-mono text-[#00F59B] font-bold">100% <span className="font-normal text-zinc-400">(DEMO)</span></span>
                 </div>
                 {/* 3-Color Asset Allocation Segmented Bar */}
                 <div className="w-full h-2.5 rounded-full bg-[#181E2C] overflow-hidden flex ring-1 ring-white/5">
-                  <div className="h-full bg-[#00F59B] w-[62%] transition-all" title="현금 지갑 (62%)" />
-                  <div className="h-full bg-blue-500 w-[28%] transition-all" title="가상 주식 (28%)" />
-                  <div className="h-full bg-purple-500 w-[10%] transition-all" title="은행 복리 예금 (10%)" />
+                  <div className="h-full bg-[#00F59B] w-[62%] transition-all" title="예시: 게임 현금 지갑 (62%)" />
+                  <div className="h-full bg-blue-500 w-[28%] transition-all" title="예시: 가상 주식 (28%)" />
+                  <div className="h-full bg-purple-500 w-[10%] transition-all" title="예시: 은행 복리 예금 (10%)" />
                 </div>
                 <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 pt-0.5">
-                  <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-[#00F59B]" /> <T korean="현금 62%" english="Cash 62%" japanese="現金 62%" chinese="现金 62%" /></span>
-                  <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-blue-500" /> <T korean="주식 28%" english="Stocks 28%" japanese="株式 28%" chinese="股票 28%" /></span>
-                  <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-purple-500" /> <T korean="예금 10%" english="Bank 10%" japanese="預金 10%" chinese="储蓄 10%" /></span>
+                  <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-[#00F59B]" /> <T korean="현금 예시 62%" english="Sample Cash 62%" japanese="現金の例 62%" chinese="现金示例 62%" /></span>
+                  <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-blue-500" /> <T korean="주식 예시 28%" english="Sample Stocks 28%" japanese="株式の例 28%" chinese="股票示例 28%" /></span>
+                  <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-purple-500" /> <T korean="예금 예시 10%" english="Sample Bank 10%" japanese="預金の例 10%" chinese="储蓄示例 10%" /></span>
                 </div>
               </div>
             </div>
