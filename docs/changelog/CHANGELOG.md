@@ -1,3 +1,8 @@
+## v2026.10.19.913 — Arcade browser-only demo truth / Mines last-gem math (candidate)
+- Distinguish Mines and Plinko client-only simulations from actual WLD ledger settlements: no real wager, payout, or receipt; remove false fairness badge and false winnings copy.
+- Validate safe-integer bounded simulated stakes and fix Mines last-gem auto cash-out multiplier derived from stale state. Add unit and UI regression cases.
+- GitHub fallback branch because miniPC MCP/remote desktop inaccessible. Finance P0 (19 uncertified ledger balances, app direct DML) and actual Test/Production promotion remain BLOCKED. [EN release](../releases/v2026.10.19.913.md) / [한국어](../releases/v2026.10.19.913.ko.md).
+
 ## v2026.10.18.855 — Full functional verification and QA evidence hardening (candidate)
 - Audited 166 routes × 3 runtime environments (raw: 151 HTTP 200, 13 redirects, 2 expected not-found per environment), public locale headers, runtime versions, complete backend/frontend suites and **fresh 276-migration PostgreSQL Test database**. 1,836 backend DB tests PASS (34 skipped), 1,276 frontend PASS; 0 lint errors/1,060 warnings; TypeScript/Next build/API contract pass.
 - RED/GREEN fix: signed-in savings simulation history was shared across browser accounts; page now passes real wallet user ID to a namespaced client store, fails closed without identity, and no longer imports unauthenticated legacy records into user scopes.
