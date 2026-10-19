@@ -115,12 +115,6 @@ export async function generateMetadata({
     ],
     alternates: {
       canonical: stockUrl,
-      languages: {
-        ko: stockUrl,
-        en: stockUrl,
-        ja: stockUrl,
-        zh: stockUrl,
-      },
     },
     robots: { index: true, follow: true },
     openGraph: {

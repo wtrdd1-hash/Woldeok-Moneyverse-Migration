@@ -33,23 +33,44 @@ describe('public search surface', () => {
     expect(urls).toContain('https://easy-scraping.com/stocks/CHIPS');
     expect(urls.length).toBeGreaterThanOrEqual(35);
 
-    // Base Korean routes declare locale alternatives. Already localized URLs
-    // must not declare bogus /en/en/, /ja/ja/ or /zh/zh/ paths.
+    // Only actually translated equivalents may appear as hreflang alternates.
+    const byPath = (path: string) =>
+      entries.find((entry) => entry.url === `https://easy-scraping.com${path}`);
+
+    // Each translated homepage and public tool hub has its own sitemap loc.
+    const koHome = entries.find((entry) => entry.url === 'https://easy-scraping.com');
+    expect(byPath('/en')?.alternates?.languages).toEqual(koHome?.alternates?.languages);
+    expect(byPath('/ja/tools')?.alternates?.languages)
+      .toEqual(byPath('/tools')?.alternates?.languages);
+
+    const translatedCompound = byPath('/tools/compound-calculator');
+    expect(translatedCompound?.alternates?.languages?.en)
+      .toBe('https://easy-scraping.com/en/tools/compound-interest-calculator');
+    expect(translatedCompound?.alternates?.languages?.ja)
+      .toBe('https://easy-scraping.com/ja/tools/compound-interest-calculator');
+    expect(translatedCompound?.alternates?.languages?.zh)
+      .toBe('https://easy-scraping.com/zh/tools/compound-interest-calculator');
+
+    expect(byPath('/guide/glossary/per')?.alternates?.languages?.ja)
+      .toBe('https://easy-scraping.com/ja/guide/glossary/per');
+    expect(byPath('/en/guide/glossary/per')?.alternates?.languages)
+      .toEqual(byPath('/guide/glossary/per')?.alternates?.languages);
+    expect(byPath('/ja/tools/compound-interest-calculator')?.alternates?.languages)
+      .toEqual(translatedCompound?.alternates?.languages);
+
+    for (const koreanOnlyPath of [
+      '/tools/compound-calculator/10m-3y-5p',
+      '/tools/stock-calculator/chips-minus-20',
+      '/tools/loan-interest-calculator',
+      '/stocks/CHIPS',
+    ]) {
+      expect(byPath(koreanOnlyPath)?.alternates).toBeUndefined();
+    }
+
     for (const entry of entries) {
-      const relativePath = entry.url.slice('https://easy-scraping.com'.length);
-      if (/^\/(en|ja|zh)(\/|$)/.test(relativePath)) {
-        expect(entry.alternates).toBeUndefined();
-        continue;
-      }
-      const languages = entry.alternates?.languages;
-      expect(languages).toBeDefined();
-      expect(languages?.ko).toBeDefined();
-      expect(languages?.en).toBeDefined();
-      expect(languages?.ja).toBeDefined();
-      expect(languages?.zh).toBeDefined();
-      expect(languages?.['x-default']).toBe(entry.url);
-      for (const alternate of Object.values(languages || {})) {
-        expect(alternate).not.toMatch(/\/(en|ja|zh)\/\1(?:\/|$)/);
+      for (const alternate of Object.values(entry.alternates?.languages || {})) {
+        if (typeof alternate !== 'string') continue;
+        expect(alternate.includes('/en/en/') || alternate.includes('/ja/ja/') || alternate.includes('/zh/zh/')).toBe(false);
       }
     }
 
