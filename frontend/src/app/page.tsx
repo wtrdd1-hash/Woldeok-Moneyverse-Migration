@@ -133,24 +133,19 @@ export default async function HomePage() {
   const notices = announcements?.announcements.slice(0, 3) ?? [];
   const rawStocks = marketData?.stocks ?? [];
   
-  // 등락률 계산 및 Top Movers 산출 (데이터 없을 시 기본 4대 종목 fallback)
-  const movers = rawStocks.length > 0
-    ? [...rawStocks]
-        .map((s) => {
-          const cur = Number.parseInt(s.current_price, 10) || 0;
-          const open = Number.parseInt(s.day_open_price, 10) || cur;
-          const diff = cur - open;
-          const pct = open > 0 ? (diff / open) * 100 : 0;
-          return { ...s, cur, open, diff, pct };
-        })
-        .sort((a, b) => Math.abs(b.pct) - Math.abs(a.pct))
-        .slice(0, 4)
-    : [
-        { symbol: 'WDG', name: '월덕게임즈', cur: 1450, pct: 4.8 },
-        { symbol: 'WDT', name: '월덱테크', cur: 1714, pct: 3.2 },
-        { symbol: 'CHIMU', name: '치무테크', cur: 3140, pct: -1.2 },
-        { symbol: 'SHIN', name: '신화바이오', cur: 890, pct: 7.5 },
-      ];
+  // Do not manufacture stock prices or returns when the public API is missing.
+  // Empty telemetry is not observed 0, and must not become mock live quotes.
+  const movers = rawStocks
+    .map((stock) => {
+      const cur = Number.parseInt(stock.current_price, 10);
+      const open = Number.parseInt(stock.day_open_price, 10);
+      if (!Number.isFinite(cur) || !Number.isFinite(open) || open <= 0) return null;
+      const pct = ((cur - open) / open) * 100;
+      return { ...stock, cur, open, pct };
+    })
+    .filter((stock): stock is NonNullable<typeof stock> => stock !== null)
+    .sort((a, b) => Math.abs(b.pct) - Math.abs(a.pct))
+    .slice(0, 4);
 
   return (
     <div data-page="home" className="mv-page mv-page--community mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8 pb-20 sm:pb-12">
@@ -303,6 +298,11 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
+              {movers.length === 0 && (
+                <p className="col-span-full rounded-xl border border-[#222738] bg-[#121622] px-4 py-5 text-sm text-zinc-400" role="status">
+                  <T korean="시세 자료를 불러오지 못했습니다. 임의 가격은 표시하지 않습니다." english="Market quotes are unavailable. We don't display made-up prices." japanese="株価データを取得できませんでした。架空の価格は表示しません。" chinese="行情暂不可用，我们不会展示虚构价格。" />
+                </p>
+              )}
               {movers.map((item) => {
                 const isPositive = item.pct >= 0;
                 return (
