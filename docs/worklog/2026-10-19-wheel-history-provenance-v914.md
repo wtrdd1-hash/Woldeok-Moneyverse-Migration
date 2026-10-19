@@ -7,8 +7,10 @@
 - Isolated GitHub branch from current main (miniPC MCP timed out; remote desktop offline), no overlapping edits with v913 branch.
 - Acceptance: React rendering regression tests, GitHub exact-HEAD CI, isolated Test and Production finance checks required separately. No member WLD, database grants or production pointer changes.
 
-## Interim
-Pending.
+## Interim · GitHub candidate prepared
+- Added a React DOM regression verifying no prefilled #7 BLUE/#14 GOLD before a member plays.
+- Removed five fake WheelGame history items, restored empty-state copy, and relabeled results as only those received during this mounted screen via the existing authenticated server action.
+- EN/KO release records prepared. Actual WLD server action untouched. No deploy, database write or financial waiver.
 
 ## Final
-Pending CI.
+Pending exact-HEAD CI and miniPC availability.
