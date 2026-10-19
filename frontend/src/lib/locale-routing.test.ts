@@ -25,6 +25,13 @@ describe('Multilingual URL Prefix & GeoIP Routing in proxy.ts (v64)', () => {
     expect(proxySource).toContain("response.cookies.set(LOCALE_COOKIE, finalLocale");
   });
 
+  it('redirects legacy localized compound home paths to physical translated pages', () => {
+    expect(proxySource).toContain('getLocalizedCompoundRedirect(pathname)');
+    expect(proxySource).toContain('localizedUrl.pathname = canonicalCompound');
+    expect(proxySource).toContain('NextResponse.redirect(localizedUrl, 308)');
+    expect(proxySource).toContain('request.nextUrl.clone()');
+  });
+
   it('sets high-performance immutable cache headers on static assets', () => {
     expect(proxySource).toContain("Cache-Control', 'public, max-age=31536000, immutable");
   });
