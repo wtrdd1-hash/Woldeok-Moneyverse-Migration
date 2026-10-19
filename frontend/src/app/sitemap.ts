@@ -109,6 +109,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     addEntry(route.path, route.sitemapPriority || 0.7, freq);
   }
 
+  // Include each public home/tools locale URL as its own sitemap loc.
+  // Repeating the same reviewed alternate set on every variant is required
+  // for bidirectional, self-referencing sitemap hreflang relationships.
+  for (const locale of ['en', 'ja', 'zh'] as const) {
+    addEntry(`/${locale}`, 0.95, 'daily');
+    addEntry(`/${locale}/tools`, 0.9, 'weekly');
+  }
+
   // 2. 30+ Longtail Financial Calculator Presets
   for (const preset of ALL_SEO_PRESETS) {
     if (preset.category === 'compound') {
