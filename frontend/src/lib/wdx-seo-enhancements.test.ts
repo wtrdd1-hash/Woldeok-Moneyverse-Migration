@@ -22,7 +22,7 @@ describe('WDX Stocks SEO & Sitemap & Schema Enhancements', () => {
     expect(STOCK_SYMBOLS.length).toBe(18);
   });
 
-  it('generates unique sitemap entries for all 18 stock symbol pages with multilingual alternates', () => {
+  it('keeps all 18 stock sitemap URLs without unverified translated alternates', () => {
     process.env.SEO_INDEXING_ENABLED = 'true';
     const entries = sitemap();
     expect(entries.length).toBeGreaterThan(18);
@@ -35,12 +35,7 @@ describe('WDX Stocks SEO & Sitemap & Schema Enhancements', () => {
     for (const entry of stockSymbolUrls) {
       expect(entry.priority).toBe(0.9);
       expect(entry.changeFrequency).toBe('daily');
-      expect(entry.alternates?.languages).toBeDefined();
-      expect(entry.alternates?.languages?.['ko']).toBeDefined();
-      expect(entry.alternates?.languages?.['en']).toBeDefined();
-      expect(entry.alternates?.languages?.['ja']).toBeDefined();
-      expect(entry.alternates?.languages?.['zh']).toBeDefined();
-      expect(entry.alternates?.languages?.['x-default']).toBe(entry.url);
+      expect(entry.alternates).toBeUndefined();
     }
   });
 
