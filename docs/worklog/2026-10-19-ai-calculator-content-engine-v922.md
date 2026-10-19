@@ -14,7 +14,8 @@
 - Confirmed that the current blog inline calculator is a single compound-interest implementation even when an article links to another calculator.
 - Confirmed that `POST /api/blog/generate` intentionally fails closed with `EDITORIAL_REVIEW_REQUIRED` because legacy generated finance content could contain unsourced or stale claims. v922 preserves this safety boundary.
 - Wrote English and Korean specifications covering provider-grounded demand evidence, existing-tool gap analysis, formula/source versioning, golden tests, typed widget registry, source-grounded AI drafts, automated QA, editorial approval, SEO indexability and Search Console feedback.
-- During the task main advanced again to `68f20881ce5e82b67c6b1f9aa6256617c56d77b5` with the v243 dual-surface implementation-plan update. The planning branch incorporated that change using two-parent merge commit `bc61e941345632b25f352577340f60d9695a15be`.
+- During the task main advanced to `68f20881ce5e82b67c6b1f9aa6256617c56d77b5` with the v243 dual-surface implementation-plan update. The planning branch incorporated that change using two-parent merge commit `bc61e941345632b25f352577340f60d9695a15be`.
+- Before closeout main advanced again to `74d98ca58db9201a187dd6f20107e32393358684` with the v244 benchmark/technical blueprint appended to `implementation_plan.md`. That change was rechecked and incorporated through two-parent merge commit `6ff2e0b30fb7b690c7a02593bdcc85be8a1483be`.
 
 ## END — 2026-10-19 KST
 - Detailed plan: `docs/planning/AI_CALCULATOR_BLOG_WIDGET_GROWTH_ENGINE_SPEC_v2026.10.19.922.md` and Korean companion.
