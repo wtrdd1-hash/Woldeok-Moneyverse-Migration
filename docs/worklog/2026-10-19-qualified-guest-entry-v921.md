@@ -16,6 +16,7 @@
 - Four-language links: Korean tool -> `/tools/compound-calculator`, translated EN/JA/ZH -> `/{locale}/tools/compound-interest-calculator`; translated glossary and public /features. Link clicks do not imply signup/ledger action.
 - Home fixed growth `+4.8% 24h` reclassified demo; faux fiat conversion and absolute 100% ledger protection claims removed. Static portfolio proportions marked as DEMO; actual WalletGlance remains provider-based. Sticky tool conversion now avoids guaranteed 10,000 WLD and unverified permanent-save.
 - Detailed [English/KO v921 spec](../planning/QUALIFIED_GUEST_ACTIVATION_AND_SEARCH_RECOVERY_v2026.10.19.921.md) covers provider status taxonomy, GSC/Naver search delay, consent-minimized events, 30-day first-user research, competitor positioning, content clusters, error acceptance and release gates. S1 instrumentation is **PLANNED**, not silently claimed implemented.
+- Additional outage truth fix: Home had hardcoded four stock prices/percentages when `/api/v1/stocks` was absent, giving visitors plausible but invented live quotes. Added an explicit unavailable market status and no mock stock quotes, with regression test. No change to real market response data.
 - Implementation [PR #958](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/958) created; initial CI submitted, final evidence pending. No DB, reward grant or live service changed.
 
 ## Final
