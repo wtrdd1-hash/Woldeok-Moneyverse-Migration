@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import sitemap, { STOCK_SYMBOLS } from '@/app/sitemap';
 import { stockJsonLd } from '@/lib/seo';
 import { CORPORATE_DISCLOSURES } from '@/config/stock-disclosures.config';
@@ -37,6 +39,14 @@ describe('WDX Stocks SEO & Sitemap & Schema Enhancements', () => {
       expect(entry.changeFrequency).toBe('daily');
       expect(entry.alternates).toBeUndefined();
     }
+  });
+
+  it('does not misrepresent Korean-only stock metadata as four translated pages', () => {
+    const source = readFileSync(join(process.cwd(), 'src/app/stocks/[symbol]/page.tsx'), 'utf8');
+    expect(source).toContain('canonical: stockUrl');
+    expect(source).not.toContain('en: stockUrl');
+    expect(source).not.toContain('ja: stockUrl');
+    expect(source).not.toContain('zh: stockUrl');
   });
 
   it('generates valid Schema.org FinancialProduct JSON-LD for stock details', () => {
