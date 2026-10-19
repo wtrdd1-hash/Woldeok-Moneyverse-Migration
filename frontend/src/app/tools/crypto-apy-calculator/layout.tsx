@@ -45,9 +45,9 @@ export const metadata: Metadata = {
 };
 
 const BREADCRUMB_SCHEMA = breadcrumbJsonLd([
-  { name: '홈', url: '/' },
-  { name: '금융 도구 허브', url: '/tools' },
-  { name: '코인 스테이킹 APY 복리 계산기', url: '/tools/crypto-apy-calculator' },
+  { name: '홈', path: '/' },
+  { name: '금융 도구 허브', path: '/tools' },
+  { name: '코인 스테이킹 APY 복리 계산기', path: '/tools/crypto-apy-calculator' },
 ]);
 
 const FAQ_SCHEMA = faqPageJsonLd([
@@ -66,7 +66,7 @@ const FAQ_SCHEMA = faqPageJsonLd([
 const APP_SCHEMA = softwareApplicationJsonLd({
   name: '코인 스테이킹 APY 복리 계산기',
   description: '암호화폐 스테이킹 및 DeFi 유동성 풀 APR/APY 상호 변환 및 복리 수익률 실시간 시뮬레이터',
-  path: '/tools/crypto-apy-calculator',
+  urlPath: '/tools/crypto-apy-calculator',
   applicationCategory: 'FinanceApplication',
 });
 

@@ -26,6 +26,7 @@ import { P2PTransferModal } from '@/components/p2p-transfer-modal';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { HomeDualSurface } from '@/components/home-dual-surface';
 import { publicApi, apiOrNull } from '@/lib/api';
 import { formatDay } from '@/lib/money';
 import { getServerLocale } from '@/lib/locale-server';
@@ -153,6 +154,7 @@ export default async function HomePage() {
         <T korean="월덕 머니버스 가상경제 대시보드" english="Woldeok Moneyverse Virtual Economy Dashboard" japanese="ウォルドク・マネーバース 仮想経済ダッシュボード" chinese="Woldeok Moneyverse 虚拟经济仪表盘" />
       </h1>
       <GuestQuickstart locale={locale} />
+      <HomeDualSurface>
       {/* =========================================================================
           🏛️ 2026 STRIPE & LINEAR STYLE FINTECH BENTO COCKPIT
           ========================================================================= */}
@@ -664,6 +666,7 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+      </HomeDualSurface>
 
       {/* 5. BOTTOM ADVERTISEMENT */}
       <HomeAdvertisement />

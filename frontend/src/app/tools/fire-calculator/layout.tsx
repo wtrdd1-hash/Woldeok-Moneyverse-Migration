@@ -45,9 +45,9 @@ export const metadata: Metadata = {
 };
 
 const BREADCRUMB_SCHEMA = breadcrumbJsonLd([
-  { name: '홈', url: '/' },
-  { name: '금융 도구 허브', url: '/tools' },
-  { name: 'FIRE 조기은퇴 계산기', url: '/tools/fire-calculator' },
+  { name: '홈', path: '/' },
+  { name: '금융 도구 허브', path: '/tools' },
+  { name: 'FIRE 조기은퇴 계산기', path: '/tools/fire-calculator' },
 ]);
 
 const FAQ_SCHEMA = faqPageJsonLd([
@@ -66,7 +66,7 @@ const FAQ_SCHEMA = faqPageJsonLd([
 const APP_SCHEMA = softwareApplicationJsonLd({
   name: 'FIRE족 조기은퇴 4% 룰 계산기',
   description: '트리니티 4% 안전 인출률 기반 은퇴 목표 자산 및 달성 가능 연도 실시간 시뮬레이터',
-  path: '/tools/fire-calculator',
+  urlPath: '/tools/fire-calculator',
   applicationCategory: 'FinanceApplication',
 });
 
