@@ -68,6 +68,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical: url,
       languages: {
+        ko: canonicalUrl('/tools/compound-calculator'),
+        'ko-KR': canonicalUrl('/tools/compound-calculator'),
         en: canonicalUrl('/en/tools/compound-interest-calculator'),
         ja: canonicalUrl('/ja/tools/compound-interest-calculator'),
         zh: canonicalUrl('/zh/tools/compound-interest-calculator'),
