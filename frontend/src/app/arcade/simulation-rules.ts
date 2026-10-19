@@ -10,7 +10,10 @@ export function parseDemoStake(
 ): number | null {
   const values = [input, minStake, maxStake, remainingStake];
   if (!values.every((value) => /^(0|[1-9][0-9]*)$/.test(value.trim()))) return null;
-  const [amount, minimum, maximum, remaining] = values.map((value) => BigInt(value.trim()));
+  const amount = BigInt(input.trim());
+  const minimum = BigInt(minStake.trim());
+  const maximum = BigInt(maxStake.trim());
+  const remaining = BigInt(remainingStake.trim());
   if (amount < minimum || amount > maximum || amount > remaining) return null;
   if (amount < 1n || amount > BigInt(Number.MAX_SAFE_INTEGER)) return null;
   return Number(amount);
