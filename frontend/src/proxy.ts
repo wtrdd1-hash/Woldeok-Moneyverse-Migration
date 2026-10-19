@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { DEFAULT_LOCALE, LOCALE_COOKIE, detectLocale, isLocale, type Locale } from '@/lib/locale';
 import { detectCrawlerBot } from '@/lib/bot-detector';
+import { getLocalizedCompoundRedirect } from '@/lib/seo-locale-alternates';
 
 const INTERNAL_REWRITE_LOCALE_PARAM = '__mv_path_locale';
 
@@ -81,6 +82,17 @@ export function proxy(request: NextRequest) {
       const target = new URL(`${pathname}${request.nextUrl.search}`, base);
       return NextResponse.redirect(target, 308);
     }
+  }
+
+  // Legacy /en|ja|zh/tools/compound-calculator used to rewrite to a Korean
+  // page with Korean title/H1/canonical despite a foreign-language URL.
+  // Route visitors and search engines to the actual translated calculator.
+  // nextUrl.clone() retains legitimate query parameters.
+  const canonicalCompound = getLocalizedCompoundRedirect(pathname);
+  if (canonicalCompound) {
+    const localizedUrl = request.nextUrl.clone();
+    localizedUrl.pathname = canonicalCompound;
+    return NextResponse.redirect(localizedUrl, 308);
   }
 
   const hasSession = request.cookies.has('__Host-mv_session') || request.cookies.has('mv_session');
