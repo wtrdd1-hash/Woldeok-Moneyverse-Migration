@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.19.931 — AI search-demand calculator & blog widget growth engine (planning)
+- [Planning EN](docs/planning/AI_SEARCH_DEMAND_CALCULATOR_BLOG_ENGINE_SPEC_v2026.10.19.931.md) / [한국어](docs/planning/AI_SEARCH_DEMAND_CALCULATOR_BLOG_ENGINE_SPEC_v2026.10.19.931.ko.md) · [Worklog EN](docs/worklog/2026-10-19-ai-search-demand-calculator-blog-v931.md) / [한국어](docs/worklog/2026-10-19-ai-search-demand-calculator-blog-v931.ko.md) · [Internal](docs/updates/v2026.10.19.931-internal.md) · [GitHub](docs/updates/v2026.10.19.931-github.md). Planning-only design for measured search-demand discovery, shared calculator registry, reusable blog widgets, and source-bounded AI editorial review. No runtime/Test/Production change; AI blog publication safety hold remains intact.
+
 ## v2026.10.17.755 — Stock League Test 500 read boundary correction; Production remains BLOCKED
 - [Worklog EN](docs/worklog/2026-10-17-stock-league-test-private-read-v755.md) / [한국어](docs/worklog/2026-10-17-stock-league-test-private-read-v755.ko.md) · [Internal](docs/updates/v2026.10.17.755-internal.md) · [GitHub](docs/updates/v2026.10.17.755-github.md). Forward SQL 274 replaces inaccessible `user_roles` and virtual portfolio raw SELECTs with scoped app-executable SECURITY DEFINER helpers. Isolated Test DB app-role read-only acceptance and full local tests PASS. Production 19 historic mismatches, core DML and v530 authenticated UI gates remain blocking.
 
