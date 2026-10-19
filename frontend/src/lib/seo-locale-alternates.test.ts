@@ -23,6 +23,12 @@ describe('verified SEO locale versions (v920)', () => {
     expect(getVerifiedLocalePaths('/tools/compound-calculator/')).toEqual(
       getVerifiedLocalePaths('/tools/compound-calculator'),
     );
+    expect(getVerifiedLocalePaths('/en/tools/compound-interest-calculator')).toEqual(
+      getVerifiedLocalePaths('/tools/compound-calculator'),
+    );
+    expect(getVerifiedLocalePaths('/ja/tools/compound-interest-calculator')).toEqual(
+      getVerifiedLocalePaths('/tools/compound-calculator'),
+    );
   });
 
   it('allows verified home, tools and physical localized glossary pages', () => {
