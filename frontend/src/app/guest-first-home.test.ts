@@ -22,6 +22,12 @@ describe('v921 first qualified experience before signup', () => {
     expect(source).toContain('자산 구성 예시');
   });
 
+  it('never invents live stock movers when public backend data is unavailable', () => {
+    expect(source).not.toContain("symbol: 'CHIMU', name: '치무테크', cur: 3140");
+    expect(source).toContain('movers.length === 0');
+    expect(source).toContain('시세 자료를 불러오지 못했습니다');
+  });
+
   it('does not promise unverified WLD signup rewards in the sticky conversion bar', () => {
     const bar = readFileSync(join(__dirname, '../components/tools-guest-conversion-bar.tsx'), 'utf8');
     expect(bar).not.toContain('신규 10,000 WLD 무료');
