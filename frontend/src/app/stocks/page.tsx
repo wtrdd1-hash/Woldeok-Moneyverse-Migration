@@ -55,8 +55,8 @@ const STOCKS_META_BY_LOCALE = {
     canonical: '/en/stocks',
   },
   ko: {
-    title: '가상 주식 거래소 — 실시간 종목 시세 및 캔들 차트 분석',
-    description: '월덕 머니버스 게임 안의 가상 주식 시세·캔들 차트·거래 정보를 확인하는 커뮤니티 가상 거래소입니다.',
+    title: '주식 10단 호가창 모의투자 무료 체험 — 가상 주식 거래소 & 실시간 차트 | 월덕 머니버스',
+    description: '[로그인 없이 1초 모의투자] 18개 가상 종목 실시간 10단 호가창, TradingView급 캔들 차트, 스탑로스·익절 자동감시 무료 시뮬레이터. 가입 즉시 1만 WLD 무료 지급!',
     canonical: '/stocks',
   },
   ja: {
