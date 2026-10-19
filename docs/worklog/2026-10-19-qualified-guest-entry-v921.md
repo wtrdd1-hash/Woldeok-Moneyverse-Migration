@@ -19,5 +19,10 @@
 - Additional outage truth fix: Home had hardcoded four stock prices/percentages when `/api/v1/stocks` was absent, giving visitors plausible but invented live quotes. Added an explicit unavailable market status and no mock stock quotes, with regression test. No change to real market response data.
 - Implementation [PR #958](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/958) created; initial CI submitted, final evidence pending. No DB, reward grant or live service changed.
 
-## Final
-PENDING exact-sha GitHub CI, browser Test and Production acceptance.
+## Final source checkpoint — 2026-10-19 KST
+- [PR #958](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/958) stores homepage and CTA implementation, public-route + source regression tests, detailed EN/KO v921 plans and all change records.
+- Work scope remains source-only: new guest-first links, demo-labelled figures, no fake public market quotes on unavailable backend, no unverified bonus or bank deposit. No member/ledger/database/SEO submission/server runtime changes.
+- Main midpoint recheck `a7be34de9fc12b380592dffd4bc29903ac69a502`, unchanged. Other agents' merged v913/v920 scopes preserved, no Android changes.
+- Local tests and authenticated Test host could not run because MiniPC RPC was unresponsive. GitHub exact-head CI status must be checked independently before any merge. Unknown Production SHA and previously blocked financial gate mean **Production HOLD**, irrespective of reset authorization.
+- Next isolated slices: truthful GA4/server receipt funnel, Google/Naver verified source reports, remaining nonlocalized private/noindex audit, opt-in user acquisition field tests. No false SEO conversion results declared.
+
