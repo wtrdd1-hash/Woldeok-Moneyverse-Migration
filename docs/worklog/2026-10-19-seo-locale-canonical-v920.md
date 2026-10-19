@@ -11,8 +11,13 @@
 - Scope: nonfinancial SEO routes and metadata only. Add verified-alternate allowlist; redirect legacy localized compound-calculator root to corresponding genuinely translated route, with query retained; ensure translated global page returns reciprocal ko alternate; regression tests. No DB reset, financial mutation, operator access, new SEO submission or Production traffic change.
 - Data reset permission cannot substitute for restoring immutable financial evidence, validating transactions, and permission gates. Production promotion requires exact-SHA CI, isolated Test, signed-in acceptance, backup/recovery, session continuity and verified rollback.
 
-## Midpoint
-Pending TDD tests, source fix and GitHub CI evidence.
+## Midpoint — 2026-10-19 KST
+- Authored acceptance tests first: pure locale map and legacy redirect specificity, sitemap URLs with real translated equivalents, source proxy integration. MiniPC disconnected so a locally executed RED test is not claimed.
+- Implemented `frontend/src/lib/seo-locale-alternates.ts`, `frontend/src/app/sitemap.ts`, `frontend/src/proxy.ts`, and reciprocal KO alternate on the physical localized calculator page. Existing Korean canonical paths preserved, no bulk 301 of presets or public route deletion.
+- Google Search Central official [localized-page guidance](https://developers.google.com/search/docs/specialty/international/localized-versions) additionally requires equal self-referencing/bidirectional alternate sets in sitemap entries. Extended the helper and tests so translated glossary and localized compound entries repeat the entire group.
+- First GitHub CI runtime lint failed due invalid escape syntax in new `search-indexing.test.ts` line 62, rather than a Production error. Fixed test to detect literal double-prefix URL fragments; new exact-head CI pending. Do not report red/green result for tests that have not run.
+- Midpoint `main` SHA recheck `c9462af98074306d67030a40037c00ac42e65493`, unchanged. Second GitHub repository `woldeok-moneyverse-app` main `ee97ddfc5a93d7198d2d1ee94bb5a13c3b62ebcb` is the separate Android app and was not edited.
+- Created [implementation PR #944](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/944). Main and public Production are distinct. Public website still served the old guaranteed WLD signup title during this cycle; v911 being merged is not evidence of production rollout.
 
 ## Final
-Pending CI/Test, PR and verified release assessment.
+Pending exact-head GitHub CI, authorized Test backend/browser/finance checks and Production release assessment.
