@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { getVerifiedLocalePaths } from '@/lib/seo-locale-alternates';
 import { getPublicSitemapRoutes } from '@/config/routes.config';
 import { ALL_SEO_PRESETS } from '@/config/seo-presets.config';
 import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
@@ -72,32 +73,32 @@ export default function sitemap(): MetadataRoute.Sitemap {
     if (registeredUrls.has(canonicalUrl)) return;
     registeredUrls.add(canonicalUrl);
 
-    // Localized routes already include their locale prefix. Never construct
-    // /en/en/... alternates or assert translations for those URLs.
-    const isLocalizedRoute = /^\/(en|ja|zh)(\/|$)/.test(cleanPath);
-    const enUrl = `${base}/en${cleanPath === '/' ? '' : cleanPath}`;
-    const jaUrl = `${base}/ja${cleanPath === '/' ? '' : cleanPath}`;
-    const zhUrl = `${base}/zh${cleanPath === '/' ? '' : cleanPath}`;
-    const koUrl = `${base}${cleanPath === '/' ? '' : cleanPath}`;
+    // Crawler access and translated content are separate facts. Do not
+    // manufacture hreflang by prepending /en, /ja or /zh to Korean-only URLs.
+    const verified = getVerifiedLocalePaths(cleanPath);
+    const absolute = (localizedPath: string) =>
+      `${base}${localizedPath === '/' ? '' : localizedPath}`;
 
     entries.push({
       url: canonicalUrl,
       lastModified: RELEASE_TIMESTAMP,
       changeFrequency: changeFrequency || 'daily',
       priority,
-      ...(isLocalizedRoute ? {} : { alternates: {
-        languages: {
-          ko: koUrl,
-          'ko-KR': koUrl,
-          en: enUrl,
-          'en-US': enUrl,
-          ja: jaUrl,
-          'ja-JP': jaUrl,
-          zh: zhUrl,
-          'zh-CN': zhUrl,
-          'x-default': canonicalUrl,
+      ...(verified ? {
+        alternates: {
+          languages: {
+            ko: absolute(verified.ko),
+            'ko-KR': absolute(verified.ko),
+            en: absolute(verified.en),
+            'en-US': absolute(verified.en),
+            ja: absolute(verified.ja),
+            'ja-JP': absolute(verified.ja),
+            zh: absolute(verified.zh),
+            'zh-CN': absolute(verified.zh),
+            'x-default': absolute(verified.ko),
+          },
         },
-      } }),
+      } : {}),
     });
   };
 
