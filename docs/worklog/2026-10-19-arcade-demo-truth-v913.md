@@ -8,8 +8,11 @@
 - Scope: make nonmonetary simulation unambiguous, eliminate fictional WLD payout/success claims, fix deterministic Mines last-gem multiplier, validate finite/safe-int simulated stakes, add tests. No production finance writes and **no real gambling payout** implementation.
 - Verification plan: regression tests for math/invalid amount/copy, GitHub PR policy+test/build CI, exact SHA Test only when authorized host available. Release remains BLOCKED pending Production financial drift, app DML permissions, and signed-in full-route QA.
 
-## Interim
-Pending code changes and verification.
+## Interim · GitHub candidate prepared
+- Dedicated branch created; added simulation-rules with bounded safe-integer demo amounts and current-gem payout calculation, plus Vitest pure and React rendering regression cases.
+- Mines and Plinko now explicitly state real WLD is never debited/credited; no transaction receipt; Plinko's ungrounded RNG verification badge removed; invalid amounts cannot silently become default fake stakes.
+- EN/KO release notes and changelogs committed. No DB migration, application finance API change, production or public Test deployment.
+- Next gate: PR GitHub CI and targeted tests/build; source-only analysis is not a pass, and GitHub merge alone is not a server deployment.
 
 ## Final
 Pending CI / host availability.
