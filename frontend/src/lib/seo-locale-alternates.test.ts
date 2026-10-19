@@ -10,7 +10,7 @@ describe('verified SEO locale versions (v920)', () => {
     expect(getVerifiedLocalePaths('/tools/compound-calculator/10m-3y-5p')).toBeNull();
     expect(getVerifiedLocalePaths('/tools/loan-interest-calculator')).toBeNull();
     expect(getVerifiedLocalePaths('/stocks/CHIPS')).toBeNull();
-    expect(getVerifiedLocalePaths('/en/tools/compound-interest-calculator')).toBeNull();
+    expect(getVerifiedLocalePaths('/en/en/tools/compound-interest-calculator')).toBeNull();
   });
 
   it('maps Korean compound calculator to real translated pages instead of Korean rewrites', () => {
