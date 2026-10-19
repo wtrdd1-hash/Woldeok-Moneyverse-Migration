@@ -21,7 +21,8 @@ export function getVerifiedLocalePaths(path: string): VerifiedLocalePaths | null
 
   // Korean calculator layout is not translated when rewritten at /en/...;
   // physical translations exist at /{locale}/tools/compound-interest-calculator.
-  if (normalized === '/tools/compound-calculator') {
+  if (normalized === '/tools/compound-calculator'
+      || /^\/(en|ja|zh)\/tools\/compound-interest-calculator$/.test(normalized)) {
     return {
       ko: '/tools/compound-calculator',
       en: '/en/tools/compound-interest-calculator',
@@ -30,18 +31,20 @@ export function getVerifiedLocalePaths(path: string): VerifiedLocalePaths | null
     };
   }
 
-  // Global home and tools have localized metadata, while glossary has
-  // dedicated localized pages with genuine translated titles and descriptions.
-  if (!SHARED_LOCALE_PATHS.has(normalized)
-      && !/^\/guide\/glossary\/[a-z0-9-]+$/.test(normalized)) {
+  // Every translated sitemap URL must refer back to the same group, including
+  // itself. Physical glossary translations and localized tools/home are known.
+  const translated = /^\/(en|ja|zh)(\/.*)?$/.exec(normalized);
+  const basePath = translated ? (translated[2] || '/') : normalized;
+  if (!SHARED_LOCALE_PATHS.has(basePath)
+      && !/^\/guide\/glossary\/[a-z0-9-]+$/.test(basePath)) {
     return null;
   }
 
   return {
-    ko: normalized,
-    en: `/en${normalized === '/' ? '' : normalized}`,
-    ja: `/ja${normalized === '/' ? '' : normalized}`,
-    zh: `/zh${normalized === '/' ? '' : normalized}`,
+    ko: basePath,
+    en: `/en${basePath === '/' ? '' : basePath}`,
+    ja: `/ja${basePath === '/' ? '' : basePath}`,
+    zh: `/zh${basePath === '/' ? '' : basePath}`,
   };
 }
 
