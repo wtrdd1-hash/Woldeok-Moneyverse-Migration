@@ -55,7 +55,7 @@ export function ToolsGuestConversionBar() {
   return (
     <aside
       className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-emerald-500/40 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] transition-all duration-300 transform translate-y-0"
-      aria-label="신규 회원 혜택 및 계산 결과 계정 저장 안내"
+      aria-label="계정 저장 가능 여부와 로그인 안내"
     >
       <div className="max-w-6xl mx-auto px-4 py-2.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* 안내 카피 */}
@@ -66,14 +66,14 @@ export function ToolsGuestConversionBar() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono">
-                신규 10,000 WLD 무료
+                가입 없이 무료 체험
               </span>
               <span className="text-xs sm:text-sm font-bold text-zinc-100 tracking-tight">
-                방금 계산한 시뮬레이션을 내 계정에 영구 저장할까요?
+                계산 후 계정 저장 가능 여부를 확인해 보세요
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 line-clamp-1">
-              저장 및 알림 제공 여부는 계정 상태와 실제 기능 지원 여부를 확인해 주세요.
+              WLD는 게임 재화입니다. 로그인해도 저장·보상은 서버 확인 전까지 보장되지 않습니다.
             </p>
           </div>
         </div>
