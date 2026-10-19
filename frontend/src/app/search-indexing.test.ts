@@ -47,6 +47,8 @@ describe('public search surface', () => {
 
     expect(byPath('/guide/glossary/per')?.alternates?.languages?.ja)
       .toBe('https://easy-scraping.com/ja/guide/glossary/per');
+    expect(byPath('/en/guide/glossary/per')?.alternates?.languages)
+      .toEqual(byPath('/guide/glossary/per')?.alternates?.languages);
 
     for (const koreanOnlyPath of [
       '/tools/compound-calculator/10m-3y-5p',
