@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { groupDigits } from '@/lib/money';
+import { parseDemoStake } from './simulation-rules';
 
 // 8행 피라미드 기준 슬롯 배당표 (총 9개 슬롯)
 const MULTIPLIERS = [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29];
@@ -37,6 +38,11 @@ export function PlinkoGame({
   const [lastWinAmount, setLastWinAmount] = useState<number | null>(null);
   const [ballPosition, setBallPosition] = useState<{ x: number; y: number } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const dropIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => () => {
+    if (dropIntervalRef.current !== null) clearInterval(dropIntervalRef.current);
+  }, []);
 
   // 퀵 베팅 프리셋
   const addStake = (amount: number) => {
@@ -51,8 +57,8 @@ export function PlinkoGame({
   // 공 낙하 시뮬레이션
   const dropBall = () => {
     if (isDropping) return;
-    const bet = Number(stake) || 1000;
-    if (bet <= 0) return;
+    const bet = parseDemoStake(stake, minStake, maxStake, remainingStake);
+    if (bet === null || exhausted) return;
 
     setIsDropping(true);
     setLastMultiplier(null);
@@ -75,10 +81,12 @@ export function PlinkoGame({
 
     // 애니메이션 시뮬레이션 타이머
     let currentStep = 0;
-    const interval = setInterval(() => {
+    if (dropIntervalRef.current !== null) clearInterval(dropIntervalRef.current);
+    dropIntervalRef.current = setInterval(() => {
       currentStep++;
       if (currentStep >= 8) {
-        clearInterval(interval);
+        if (dropIntervalRef.current !== null) clearInterval(dropIntervalRef.current);
+        dropIntervalRef.current = null;
         setIsDropping(false);
         setLastMultiplier(winMult);
         setLastWinAmount(winAmt);
@@ -96,32 +104,35 @@ export function PlinkoGame({
             </span>
             <div>
               <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                Plinko 플링코 핀볼 배당
+                Plinko 플링코 핀볼 모의 체험
                 <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-500 border-amber-500/30">
                   최대 29배
                 </Badge>
               </CardTitle>
               <CardDescription className="text-xs">
-                상단에서 공을 떨어뜨려 핀을 튕기며 하단 슬롯에 착지하는 배당을 획득하세요.
+                브라우저에서 공의 낙하와 모의 배당을 계산해 보는 연습 게임입니다.
               </CardDescription>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="font-mono text-xs">
-              RNG 정규분포 검증 완료
+              브라우저 임의 시뮬레이션 · 공정성 인증 아님
             </Badge>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-4 sm:p-6 flex-1 space-y-6">
+        <p role="status" className="rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+          모의 체험 전용입니다. 실제 WLD 잔액은 차감되지 않으며 상금 지급이나 거래 영수증은 생성되지 않습니다.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           {/* Controls Panel */}
           <div className="md:col-span-5 space-y-4">
             {/* Stake Input */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
-                <Label htmlFor="plinko-stake" className="font-semibold">베팅 금액 (WLD)</Label>
+                <Label htmlFor="plinko-stake" className="font-semibold">모의 금액 (WLD 단위)</Label>
                 <span className="text-muted-foreground font-mono">{groupDigits(stake || '0')} WLD</span>
               </div>
               <Input
@@ -192,23 +203,23 @@ export function PlinkoGame({
               <Button
                 type="button"
                 onClick={dropBall}
-                disabled={isDropping || exhausted || Number(stake) <= 0}
+                disabled={isDropping || exhausted || parseDemoStake(stake, minStake, maxStake, remainingStake) === null}
                 className="w-full h-12 text-sm font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-sm gap-2"
               >
                 <CircleDot className={`w-4 h-4 ${isDropping ? 'animate-spin' : ''}`} />
-                {isDropping ? '핀볼 낙하 중...' : '공 떨어뜨리기 (Drop Ball)'}
+                {isDropping ? '모의 낙하 중...' : '모의 공 떨어뜨리기 (Drop Ball)'}
               </Button>
             </div>
 
             {/* Result Display */}
             {lastMultiplier !== null && (
               <div className="p-3 rounded-lg border border-border bg-muted/30 text-center animate-in zoom-in-95 duration-200">
-                <div className="text-xs text-muted-foreground">착지 슬롯 배당</div>
+                <div className="text-xs text-muted-foreground">착지 슬롯 모의 배당</div>
                 <div className={`text-xl font-extrabold font-mono mt-0.5 ${lastMultiplier >= 1.5 ? 'text-emerald-500' : 'text-amber-500'}`}>
                   {lastMultiplier}x
                 </div>
                 <div className="text-xs font-semibold mt-1">
-                  획득 상금: +{groupDigits(String(lastWinAmount))} WLD
+                  모의 결과: +{groupDigits(String(lastWinAmount))} WLD 상당 (실제 지급 없음)
                 </div>
               </div>
             )}

@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { groupDigits } from '@/lib/money';
+import { demoMinesMultiplier, parseDemoStake } from './simulation-rules';
 
 interface TileState {
   index: number;
@@ -49,27 +50,20 @@ export function MinesGame({
 
   // 배당률 공식 계산 (n=25, m=mines, k=gemsFound)
   // Multiplier = (1 - edge) * (25! / (25-k)!) / ((25-m)! / (25-m-k)!)
-  const currentMultiplier = useMemo(() => {
-    if (gemsFound === 0) return 1.0;
-    let mult = 0.98; // 2% 하우스 엣지
-    for (let i = 0; i < gemsFound; i++) {
-      mult *= (25 - i) / (25 - mineCount - i);
-    }
-    return Math.max(1.01, Number(mult.toFixed(2)));
-  }, [gemsFound, mineCount]);
-
-  const nextMultiplier = useMemo(() => {
-    let mult = 0.98;
-    for (let i = 0; i < gemsFound + 1; i++) {
-      mult *= (25 - i) / (25 - mineCount - i);
-    }
-    return Math.max(1.02, Number(mult.toFixed(2)));
-  }, [gemsFound, mineCount]);
+  const currentMultiplier = useMemo(
+    () => demoMinesMultiplier(mineCount, gemsFound),
+    [gemsFound, mineCount],
+  );
+  const nextMultiplier = useMemo(
+    () => demoMinesMultiplier(mineCount, Math.min(gemsFound + 1, 25 - mineCount)),
+    [gemsFound, mineCount],
+  );
 
   // 게임 시작 (새 판 생성)
   const startGame = () => {
-    const bet = Number(stake) || 1000;
-    if (bet <= 0) return;
+    // This is a browser-only demo. The limit is a UI bound, not a server stake.
+    const bet = parseDemoStake(stake, minStake, maxStake, remainingStake);
+    if (bet === null || exhausted) return;
 
     // 25개 중 mineCount개의 랜덤 지뢰 생성
     const mineIndices = new Set<number>();
@@ -121,8 +115,11 @@ export function MinesGame({
     const g = overrideGems ?? gemsFound;
     if (g === 0) return;
 
-    const bet = Number(stake) || 1000;
-    const winAmount = Math.round(bet * currentMultiplier);
+    const bet = parseDemoStake(stake, minStake, maxStake, remainingStake);
+    if (bet === null) return;
+    // Use the newly revealed count, not the stale multiplier from React's
+    // previous render when the last gem triggers automatic demo cash-out.
+    const winAmount = Math.round(bet * demoMinesMultiplier(mineCount, g));
     setCashoutAmount(winAmount);
     setIsPlaying(false);
     setGameResult('won');
@@ -151,32 +148,35 @@ export function MinesGame({
             </span>
             <div>
               <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                Mines 지뢰찾기 보물찾기
+                Mines 지뢰찾기 보물찾기 · 모의 체험
                 <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/30">
                   최대 24.5배+
                 </Badge>
               </CardTitle>
               <CardDescription className="text-xs">
-                5x5 타일에서 보석을 뒤집어 배당을 높이고 폭탄을 피해 원하는 순간 캐시아웃하세요.
+                WLD 거래가 없는 연습 게임입니다. 5x5 타일의 모의 배당을 체험해 보세요.
               </CardDescription>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="font-mono text-xs">
-              배당률: {currentMultiplier}x
+              모의 배당률: {currentMultiplier}x
             </Badge>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-4 sm:p-6 flex-1 space-y-6">
+        <p role="status" className="rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+          모의 체험 전용입니다. 실제 WLD 잔액은 차감되지 않으며 상금 지급이나 거래 영수증은 생성되지 않습니다.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           {/* Controls Panel */}
           <div className="md:col-span-5 space-y-4">
             {/* Stake Input */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
-                <Label htmlFor="mines-stake" className="font-semibold">베팅 금액 (WLD)</Label>
+                <Label htmlFor="mines-stake" className="font-semibold">모의 금액 (WLD 단위)</Label>
                 <span className="text-muted-foreground font-mono">{groupDigits(stake || '0')} WLD</span>
               </div>
               <Input
@@ -271,10 +271,10 @@ export function MinesGame({
                 <Button
                   type="button"
                   onClick={startGame}
-                  disabled={exhausted || Number(stake) <= 0}
+                  disabled={exhausted || parseDemoStake(stake, minStake, maxStake, remainingStake) === null}
                   className="w-full h-12 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                 >
-                  게임 시작 (탐사 개시)
+                  모의 게임 시작 (탐사 개시)
                 </Button>
               ) : (
                 <Button
@@ -284,7 +284,7 @@ export function MinesGame({
                   className="w-full h-12 text-sm font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-sm gap-2"
                 >
                   <Trophy className="w-4 h-4" />
-                  {currentMultiplier}x 캐시아웃 (
+                  {currentMultiplier}x 모의 정산 (
                   {groupDigits(String(Math.round((Number(stake) || 0) * currentMultiplier)))} WLD)
                 </Button>
               )}
@@ -298,7 +298,7 @@ export function MinesGame({
                   <span className="font-bold font-mono text-emerald-500">{gemsFound} / {25 - mineCount}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">다음 타일 배당:</span>
+                  <span className="text-muted-foreground">다음 타일 모의 배당:</span>
                   <span className="font-bold font-mono text-amber-500">{nextMultiplier}x</span>
                 </div>
               </div>
@@ -314,6 +314,7 @@ export function MinesGame({
                   type="button"
                   disabled={!isPlaying || tile.revealed}
                   onClick={() => handleTileClick(tile.index)}
+                  aria-label={`모의 타일 ${tile.index + 1}`}
                   className={`relative flex items-center justify-center rounded-lg font-bold transition-all aspect-square min-h-[44px] min-w-[44px] shadow-sm select-none ${
                     !tile.revealed
                       ? 'bg-card hover:bg-muted/80 border border-border cursor-pointer active:scale-95'
@@ -342,12 +343,12 @@ export function MinesGame({
                 {gameResult === 'won' ? (
                   <div className="text-emerald-500 font-bold text-sm flex items-center gap-1.5 justify-center">
                     <Trophy className="w-4 h-4" />
-                    축하합니다! {currentMultiplier}x 캐시아웃 성공 (+{groupDigits(String(cashoutAmount))} WLD)
+                    모의 정산 결과: {currentMultiplier}x (+{groupDigits(String(cashoutAmount))} WLD 상당, 실제 지급 없음)
                   </div>
                 ) : (
                   <div className="text-rose-500 font-bold text-sm flex items-center gap-1.5 justify-center">
                     <Bomb className="w-4 h-4" />
-                    지뢰 폭발! 베팅금을 잃었습니다. 다음 판에 도전해보세요.
+                    지뢰 폭발! 모의 게임에서 실패했습니다. 실제 WLD는 차감되지 않았습니다.
                   </div>
                 )}
               </div>
