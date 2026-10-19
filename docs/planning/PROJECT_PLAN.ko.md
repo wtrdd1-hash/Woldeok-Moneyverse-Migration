@@ -1,5 +1,43 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.19.924 — F675-49 Plus 자격·보상 지급 진실성 보완 (Feature Improvement, 기획 초안·미배포)
+
+**회차:** 이전 Feature Addition v922 / 현재 Feature Improvement v924 / 다음 Feature Addition v926. **근거:** GitHub main `e76c90fad32d0bbc5a80805c0ea8576f9ba3cfc9`, Debian 13.6 miniPC, 개발 PostgreSQL 읽기 전용 조사, QA v923 FAILED. 아래는 구현 계약이며 실제 지급·운영 검증 결과가 아니다. 미병합 v922 브랜치와 PR #940의 동일 문서 변경은 병합 전 조정한다.
+
+### 실제 소스·DB 근거와 우선순위
+- **VIP924-01/P0:** `frontend/src/app/quests/page.tsx`는 `isPlusUser={true}`를 고정 전달한다. `vip-golden-chest-card.tsx`의 기본값도 true이며 HTTP 실패·네트워크 오류에서도 `setClaimed(true)`와 2,000 WLD·주사위 지급 완료를 표시한다. `backend/src/engagement/dopamine.controller.ts`의 GET 상태는 `isPlusUser:true,claimedToday:false` 고정, POST는 원장·재고 저장 호출 없이 성공 객체를 반환한다. **소스상 위험이며 실제 운영 지급·사고 발생 증거가 아니다.**
+- **VIP924-02/P0:** 브라우저의 황금상자 POST는 `x-csrf-token`을 보내지 않는다. Nest `CsrfGuard`는 변경 요청에 이를 요구한다. Next.js의 `/api/v1/*` → `/app-api/v1/*` 재작성과 catch-all 게이트웨이는 전달받은 CSRF 헤더만 중계한다. 브라우저→BFF→API 전 구간에서 HTTP 실측해야 하며 403 발생을 재현했다고 단정하지 않는다.
+- **VIP924-03/P0:** `membership-tier-card.tsx`는 선택적 콜백의 반환값을 검증하지 않고 클라이언트에서 가입·취소 상태를 바꾼다. `/shop`은 해당 콜백 없이 컴포넌트를 렌더링한다. 화면의 30일/10,000 WLD·100% 소각·광고 제거 등은 **경제정책 승인 및 지급 증거가 없는 UI 주장**으로 분류한다.
+- **VIP924-04/P0:** 개발 DB 읽기 전용 실측: public 기본 테이블 241개, 이름에 plus/vip가 들어간 테이블 0개(다른 명칭의 저장소 부재를 의미하지 않음). 기존 `daily_rewards`는 PK `(user_id,reward_date)`, UNIQUE `idempotency_key`, `transaction_id` FK를 보유하지만 **VIP 황금상자 전용 저장 증거가 아닌 별개 일일 보상 체계**다. `moneyverse_app` 계정의 `public.daily_rewards` 직접 INSERT/UPDATE/DELETE 권한은 모두 허용됐다. 역할 상속·마이그레이션 출처를 조사하고 최소권한으로 개선해야 한다. 운영 DB는 미확인.
+- **REL924-05/P0:** QA v923 FAILED, 개발 금융 테이블 DML 노출, Migration 266 계보 불일치, 275~277 미적용, 포켓 거래 원장·멱등성 문제, Test v805 손상 및 복원 미검증. 운영승격 HOLD. 동일 SHA의 새로운 검증 없이는 해제 불가.
+
+### 사용자·화면·권한 계약
+**목적:** 가짜 가입·보상 성공을 없애고 검증 가능한 KST 일일 보상 영수증을 제공한다. **대상:** 로그인 회원 및 별도 권한을 가진 지원·금융 관리자. **권한:** 회원은 본인 자격·영수증만 조회·신청, 관리자는 마스킹된 감사 기록만 역할별 열람한다. 클라이언트가 자격·보상액·정책·원장 번호를 지정하지 못한다. **진입점:** `/shop` Plus 카드, `/quests` 황금상자, `/wallet/activity` 거래 영수증, 향후 계정 구독 내역. **CTA:** 약관 확인, 가입(승인 후), 상태 확인, 보상 신청, 요청 결과 재조회, 갱신·취소 관리, 고객지원. **화면 상태:** 기능 OFF, 로딩/알 수 없음, 자격 없음, 수령 가능, 처리 중, 결과 불명(새 요청번호로 재시도 금지), 영수증 확인 완료, 이미 수령, 만료·취소, 서비스 오류. 단순 HTTP 2xx나 브라우저 상태만으로 지급 완료를 표시하지 않으며 접수와 실제 원장·재고 반영을 구분한다.
+
+### 제안 API (현행 main 미구현)
+- `GET /api/v1/engagement/dopamine/vip-chest/status` → `{entitlement:{state:'active'|'inactive'|'unknown',expiresAt},claim:{state:'eligible'|'claimed'|'pending'|'unavailable',receiptId,claimDateKst},policy:{version,amountWld,diceSku,enabled},serverTime,nextAvailableAt}`; `private,no-store`.
+- `POST /api/v1/engagement/dopamine/vip-chest` 본문 `{requestId: UUID}`, 인증 세션+CSRF 필수. 원장·재고 영수증 확정 시에만 200, 내구성 있는 처리 대기 202, 같은 UUID의 다른 정규화 내용 409, 자격 없음 403, 요청 제한 429, 서비스 중단 503. 응답 유실 시 같은 UUID를 재사용한다.
+- `GET /api/v1/engagement/dopamine/vip-chest/claims/{requestId}`로 본인 요청의 pending/confirmed/failed 조회. 타인 영수증 정보 차단.
+- 향후 가입·취소·내역 API: `GET /api/v1/membership/plus`, `POST /api/v1/membership/plus/subscribe`, `POST /api/v1/membership/plus/cancel`, `GET /api/v1/membership/plus/receipts`. 경제정책·Test 승인 전 기본 OFF이며 이미 구현됐다고 표기하지 않는다. 기존 App API `engagement` 그룹을 활용해 Android 쿠키·CSRF·계약 동등성 및 401/403/409/426/429/5xx·캐시 금지를 검사한다.
+
+### 제안 DB·트랜잭션·보안
+- 기존 자격·원장·재고 구조를 먼저 조사하고 이미 적용된 마이그레이션 SQL·체크섬은 수정하지 않는다. 필요 시 `plus_entitlements(user_id PK,state,valid_from,valid_until,version,purchase_transaction_id FK,updated_at)`, `plus_reward_claims(id PK,user_id FK,seoul_date DATE,request_id UUID,policy_version,state,ledger_transaction_id FK NULL,inventory_receipt_id NULL,created_at,confirmed_at)`, `plus_subscription_events(id PK,user_id FK,request_id UUID,event_kind,ledger_transaction_id FK NULL,effective_at,created_at)`를 순방향 마이그레이션으로 제안한다. 제약은 `UNIQUE(user_id,seoul_date)`, `UNIQUE(user_id,request_id)`, 상태 CHECK, 금액 음수 금지, 실존 원장·재고 참조 FK(동일 DB일 때). 회원 이력 커서 인덱스 `(user_id,created_at DESC,id DESC)`, 워커 인덱스 `(state,created_at)`.
+- 서울 날짜는 서버 트랜잭션에서 `(transaction_timestamp() AT TIME ZONE 'Asia/Seoul')::date`로 결정하고 브라우저 시간·서버 호스트 `setHours`에 의존하지 않는다. 자격 잠금과 날짜별 유일 수령을 원자화한다. 원장·재고가 동일 DB라면 지급·영수증·감사를 한 트랜잭션에 커밋한다. 서로 다른 저장소라면 내구성 있는 Outbox/Saga와 보정 전표로 복구하고 양쪽 증명 전까지 pending이다. WLD는 정수 문자열/BigInt, 복식부기·공급량 불변 유지. 10,000 WLD 가입비·2,000 WLD 보상은 재원·소각 계정·정책 승인을 받기 전까지 확정 정책이 아니다.
+- 앱 계정의 금융·영수증 테이블 직접 DML은 금지하고 검토된 SECURITY DEFINER 진입점에 최소 EXECUTE만 부여한다. `search_path`, 역할 상속, `PUBLIC EXECUTE`, 함수 소유자, 회원 소유권, 동시성·멱등성을 검사한다. 권한 복구는 별도 개발 예약의 격리 Test에서만 적용하며 전체 권한 부여 금지.
+
+### 관리자·악용 방지·SEO·모바일·분석
+- 제안 `/admin/memberships`: 기본 읽기 전용, 영수증 검색·미완료 처리·자격 출처 검증·Outbox 재처리, 이중 승인·불변 감사(담당자·시각·근거), 민감정보 마스킹. 임의 잔액 수정·허위 자격 부여 금지. 인증·권한·속도제한·요청번호 범위 검증 필수.
+- 개인 자격·영수증 화면 `noindex`, 공개 `/shop`은 진실한 일반 안내만 canonical 유지, 확정되지 않은 혜택을 SEO 문구로 약속하지 않는다. 320–430px 모바일, 200% 확대, 44px 터치, 키보드 초점, WCAG 2.2 AA `role=status` 안내, 색상 외 상태 표기. Android App API도 동일 계약.
+- 개인정보 없는 이벤트 `plus_view`, `plus_eligibility_verified`, `plus_claim_attempt`, `plus_claim_pending`, `plus_claim_confirmed`, `plus_claim_error`. KPI: 가짜 성공 0건, 중복 지급 0건, 원장·재고 불일치 0건, p95 영수증 복구시간, 검증된 가입·잔존율. 실측 전 개선 효과 수치 주장 금지.
+
+### 테스트·무중단 배포·롤백
+- **P1:** VIP924-06 회원 상태/CTA, VIP924-07 관리자 감사, VIP924-08 모바일/a11y/SEO, VIP924-09 개인정보 없는 KPI, VIP924-10 회귀·승격.
+- TDD 실패 테스트부터: 403/500/네트워크 유실·시간초과에 성공 금지, CSRF 누락 거부, 비Plus 지급 거부, 동시 100건 정확히 1회 지급, 같은 UUID 다른 내용 409, 원장 커밋 후 재고 장애 복구, KST 자정·시간오차·만료/취소, 브라우저 2개·Android, RBAC·권한·재생 공격·복원. 기존 `success:true`만으로 성공을 인정하는 단위 테스트는 실제 영수증 검증으로 교체. 전체 인증 UI 관리자 포함 5회, exact-SHA Test 필수.
+- 단계: 기능 OFF·기존 DB/권한 점검 → 읽기 전용 자격·상태 → 원장·재고 영수증 및 Outbox → 격리 Test 단계적 활성 → 정확한 커밋 SHA의 CI·웹/백엔드/DB/App API·원장 대사·백업 복원·롤백 리허설 → QA 및 사람 승인 후 무중단 Production. 롤백은 CTA/워커를 OFF로 전환하되 이미 기록된 원장·영수증은 삭제하지 않는다. 중복 지급·허위 성공·권한 위반·마이그레이션 체크섬·복원 실패 시 즉시 승격 차단.
+- 설계 참고: PostgreSQL https://www.postgresql.org/docs/current/ddl-priv.html ; W3C WCAG 2.2 https://www.w3.org/TR/WCAG22/ ; RFC 9110 https://www.rfc-editor.org/rfc/rfc9110 . **독립 외부 레퍼런스 10,000건 게이트:** 이번 승인 0건, 누적 중복 제거·검증 완료 미확인, NOT MET/BLOCKED. 위 참고 3건은 승인 실적으로 산입하지 않는다.
+- **변경 경계:** 문서만 수정. 코드/DB/WLD/기능 스위치/Test/Production 변경 없음. v922 기획 브랜치·PR #940과 기존 6개 문서 충돌 가능성은 병합 전 재조정.
+
+
 ## v2026.10.15.688 — F675-06 실제 Search Console 검색·색인 증거 상세기획
 
 - [F675-06 한국어 상세명세](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 공식 개별 기획으로 채택. 기존 관리자 /admin/seo·GSC·v685 수정 재사용, 별도 SEO 플랫폼 중복 금지.

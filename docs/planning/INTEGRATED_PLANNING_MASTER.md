@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.19.924 — Plus membership/reward truth improvement (DRAFT)
+Previous Addition v922 → Current Improvement v924 → Next Addition v926. Main e76c90fad32d0bbc5a80805c0ea8576f9ba3cfc9; QA v923 FAILED/Production HOLD. P0 VIP924-01 remove fabricated client/server claim success and hardcoded entitlement; VIP924-02 verify browser/BFF/API CSRF path (client omits token; Nest requires it); VIP924-03 only persisted entitlement/ledger+inventory receipts; VIP924-04 least-privilege dev DB `daily_rewards` direct DML observed; REL924-05 retain financial/migration/exact-SHA Test/restore gates. P1 VIP924-06..10 cover member UX, admin audit, mobile/a11y/SEO, privacy-safe analytics and 100-concurrent-request TDD/rollback. Existing `daily_rewards` is not proof of VIP chest storage. Full implementation contract in canonical `PROJECT_PLAN.md` v924. Proposed endpoints/tables are not implemented; no approved 10k/2k WLD economic policy. External 10,000 independent reference gate BLOCKED (new approved 0, cumulative unknown). Documentation only, no runtime/DB/Test/Production changes; coordinate v922 branch and PR #940 overlapping files.
+
+
 ## v2026.10.18.804 — Core immutable journal direct-DML privilege containment (candidate / Production HOLD)
 - Source code and actual Production v717 dist use journal tables for reads, not direct app DML; nonetheless live app role has broad ledger INSERT/UPDATE/DELETE/TRUNCATE/TRIGGER rights. Migration 277 revokes all journal table rights then regrants SELECT only, retaining existing SECURITY DEFINER role-scoped command boundary; applied twice to an isolated copy of actual Production schema+ACL with all direct write privileges denied. Other 3 financial tables and 19 unverifiable opening/projection balances +4,779,188 WLD remain P0, with v530 signed-in UI/backup/restore gates BLOCKED. [Release](../releases/v2026.10.18.804.md).
 

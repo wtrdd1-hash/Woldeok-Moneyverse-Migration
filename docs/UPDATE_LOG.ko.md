@@ -1,5 +1,9 @@
 ## v2026.10.14.626 — 관리자 전체 메뉴 잘림 수정 (소스만 구현)
 
+## 2026-10-19 v924 — 기능 보완 (DRAFT)
+main e76c90fad32d0bbc5a80805c0ea8576f9ba3cfc9; 이전 기능 추가 v922, 현재 기능 보완 v924, 다음 기능 추가 v926. miniPC Debian 13.6 및 개발 DB 읽기 전용 확인: `daily_rewards` 앱 계정 직접 INSERT/UPDATE/DELETE 허용, public 241개, plus/vip 이름 테이블 0개(운영 DB 미확인). 소스: VIP 자격 고정, 실패해도 황금상자 성공 표시, 클라이언트 CSRF 헤더 누락, 브라우저만 가입 상태 변경, 원장·재고 기록 없는 성공 응답. 상세 한영 기획서·통합 마스터에 개발 계약 반영. QA v923 FAILED, exact-SHA Test/운영승격 HOLD. 외부 독립 근거 신규 승인 0, 누적 미확인, 목표 10,000 BLOCKED. 코드/DB/WLD/스위치/Test/운영 미변경, v922·PR #940 동일 문서 조정 필요.
+
+
 - 관리자 전체 메뉴 모달의 스크롤/블러 내비게이션 하위 fixed 레이어를 body 포털로 분리하여 잘림 원인을 해결함. 관련 회귀 테스트 2/2, ESLint, 타입 검사, Next.js 빌드 통과.
 - 프론트엔드 전수 테스트 35건 실패/1,136건 통과로 RELEASE_BLOCKED; 수정 SHA Test 인증 UI/백엔드 검증 및 Production 승격 미진행.
 - 내부/깃허브 변경기록: `docs/updates/v2026.10.14.626-internal.ko.md`, `docs/updates/v2026.10.14.626-github.ko.md`.
