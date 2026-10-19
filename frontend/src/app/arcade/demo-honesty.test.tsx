@@ -30,6 +30,7 @@ describe('arcade browser-only demo honesty', () => {
     vi.spyOn(Math, 'random').mockImplementation(() => (draw++ % 24) / 25);
     render(<MinesGame />);
     fireEvent.click(screen.getByRole('button', { name: '24개' }));
+    draw = 0; // React / test setup may have drawn randomness before the game starts.
     fireEvent.click(screen.getByRole('button', { name: /모의 게임 시작/ }));
     fireEvent.click(screen.getByRole('button', { name: '모의 타일 25' }));
     expect(screen.getByText(/모의 정산 결과: 24\.5x/)).toBeTruthy();
