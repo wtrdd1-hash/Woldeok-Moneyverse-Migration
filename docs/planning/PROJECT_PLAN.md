@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.20.1022 — Actual Test promotion completed; Production still gated
+- [Full EN release proof](../releases/v2026.10.20.1022.md) / [한국어](../releases/v2026.10.20.1022.ko.md). Source exact 44055156 deployed to official public Test frontend/backend and its actual data DB migrated 278+279 after validated full Test restore. Zero-gap Test blue-green and runtime identity gate PASS, 257/257 HTTP-only routes (NOT full authenticated E2E). Production candidate staged but not promoted: 19 ledger projection accounts, +4,779,188 WLD; 3 direct app DML tables; source/applied 266 checksum divergence; bank_transfer_pocket missing-column; no full Test browser/member session v530 or ACL-preserving Production upgrade proof. Prioritize per-account ledger provenance, scoped financial write control and schema repair before any Production handoff.
+
+
 ## v2026.10.20.1001 — AI blog editorial foundation re-audit / next implementation dependencies
 - [English evidence](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [Korean](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md). User-authorized recheck of v975/v976 identified and repaired SQL replay version/expiry bugs via forward-only 279 plus impossible/ambiguous/private source metadata checks. Isolated TDD/PostgreSQL 17, backend 1271 pass/397 DB skipped, frontend 1321 pass, database 15 pass/3 skipped, typecheck/build/lint passed; six articles last Oct 15 and 28 unique sitemap URLs. Future v975.3 external verified official-source intake, v975.5 human approval and v975.6 publisher remain P0, subject to v530 whole UI/finance/actual Test identity gates. Planning evidence does not lift old publishing 503 or mean Production release.
 

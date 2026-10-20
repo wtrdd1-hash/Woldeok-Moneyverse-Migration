@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.20.1022 — Official Test exact-SHA deployment and Production finance release gate (Test PROMOTED; Prod HOLD)
+- [English full release evidence](docs/releases/v2026.10.20.1022.md) / [한국어](docs/releases/v2026.10.20.1022.ko.md) · [EN worklog](docs/worklog/2026-10-20-production-promotion-v1022.md) / [KO](docs/worklog/2026-10-20-production-promotion-v1022.ko.md) · [Internal EN](docs/updates/v2026.10.20.1022-internal.md) / [KO](docs/updates/v2026.10.20.1022-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.20.1022-github.md) / [KO](docs/updates/v2026.10.20.1022-github.ko.md). Test 44055156 exact source SHA backend/frontend/DB 279 promoted, full DB backup+restore, Nginx blue-green, 257/257 HTTP-only acceptance (not authenticated E2E). Production only immutable candidate staged, still BLOCKED by financial ledger+4,779,188 WLD, app DML grants, original migration 266 checksum difference, bank pocket SQL and no authenticated v530 E2E.
+
+
 ## v2026.10.20.1011 — User-authorized Production promotion preflight (STAGED Test candidate / Production HOLD)
 - [Detailed release acceptance evidence](docs/releases/v2026.10.20.1011.md) · [Implementation worklog](docs/worklog/2026-10-20-blog-production-approval-v1011.md) · [GitHub change note](docs/updates/v2026.10.20.1011-github.md). Exact main 55d99f57 backend/frontend bundle staged to immutable Test candidate, schema-only migration 278/279 and DB-less canary PASS. Official Test switch, financial balance/permission gate, session/v530 and Production promotion are NOT complete. Original live release pointers, database records and AI publishing hold unchanged.
 
