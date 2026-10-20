@@ -9,8 +9,8 @@ import { apiOrNull } from '@/lib/api';
 import { ApiHealthDashboard, type ApiHealthResponse } from './api-health-dashboard';
 
 export const metadata: Metadata = {
-  title: '14대 도메인 API 헬스체크 & 실시간 관제 — 관리자',
-  description: '월덕 머니버스 전 도메인 300+개 REST API의 실시간 가동률, 지연 시간(Latency), 성공률 및 인프라 관제.',
+  title: 'API 도메인 목록 및 실측 DB 상태 — 관리자',
+  description: '관리자 전용 API 경로 카탈로그와 실측 데이터베이스·호스트 상태. 미측정 API 가용성은 명확히 구분합니다.',
   robots: { index: false, follow: false },
 };
 
@@ -31,13 +31,13 @@ export default async function AdminApiHealthPage() {
       </Button>
 
       <PageHeader
-        eyebrow={liveData?.isLiveTelemetry ? 'LIVE SYSTEM TELEMETRY (실측)' : 'SYSTEM TELEMETRY'}
-        title={isEn ? '14-Domain API Real-Time Health Tower' : '14대 도메인 API 실시간 관제 타워'}
+        eyebrow={'API CATALOG / MEASURED DB STATUS'}
+        title={isEn ? 'API Domain Catalog & Measured DB Health' : '14대 API 도메인 목록 및 DB 실측 상태'}
       >
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           {isEn
-            ? 'Authoritative real-time telemetry across all 14 active domains, Cloudflare R2 automated backups, and 300+ REST API endpoints verified for healthy entertainment standards.'
-            : '건전한 엔터테인먼트 아케이드 및 14대 핵심 도메인 300여 개 엔드포인트의 실시간 응답 지연(Latency), 시스템 부하 및 Cloudflare R2 무료 자동 백업 재해 복구 관제입니다.'}
+            ? 'View the listed API domains, measured database and host telemetry, and backup status. API availability and success rates are not measured.'
+            : '14대 API 도메인 경로 목록과 실제 DB·호스트 측정값, 백업 상태를 확인합니다. API 가용성·성공률은 별도 측정하지 않습니다.'}
         </p>
       </PageHeader>
 
