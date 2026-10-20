@@ -1,0 +1,13 @@
+# Blog freshness and safe Markdown repair — v2026.10.20.969
+
+Status: isolated candidate only. No formal Test or Production release.
+
+**v969.1 START — production diagnosis.** 2026-10-20 KST: public blog GET returned HTTP 200; GET /api/blog returned 6 approved public articles, all published 2026-10-15T14:00:00Z. Legacy shared blog-posts.json remained read-only mode 0444 and last modified 2026-10-16 16:16 KST. Source API auto-generation is intentionally blocked with EDITORIAL_REVIEW_REQUIRED, following a previous review of 171 unsourced or highly duplicated AI posts. No production generation POST was attempted.
+
+**v969.2 FIX / TDD.** Root cause: article client split content only at blank lines, while legacy heading and pipe-table lines were adjacent; bold delimiters were also unparsed. New React-element-only Markdown subset renderer supports headings, adjacent tables, strong/emphasis, ordered/unordered lists, quotes, fenced code and locally validated blog illustrations/HTTPS links. No arbitrary HTML rendering or remote image fetches. Existing calc widgets, ad placements, old AI noindex and publication hold preserved. Formatter TDD RED then 4/4 GREEN.
+
+**v969.3 DISPLAY / TDD.** New latest-approved-publication notice appears only when last approved post is older than 48 hours. EN canonical with KO/JA/ZH translations. Freshness test RED then 2/2 GREEN.
+
+**v969.4 VERIFICATION.** Related 20/20 pass; full frontend Vitest 251 files / 1321 tests PASS, strict TypeScript PASS, scoped ESLint PASS, git diff check PASS, independent offline install + contract build + Next production build PASS. Initial build blocked by external node_modules symlink only, then resolved by installing independent worktree dependencies. Local built HTTP on 127.0.0.1:3317: /blog, /en/blog, legacy AI direct URL, /api/blog all 200; SSR included semantic table/strong tags and legacy noindex; hub displays publication date.
+
+**v969.5 RELEASE GATES.** Starting main SHA 74d98ca5, branch fix/blog-markdown-freshness-v2026.10.20.969. GitHub PR and CI then formal test frontend/backend/database, verified SHA, mobile UI, finance/account role/ledger, rollback, sessions and no-downtime approval required before production. No DB, user balances, credentials, running services, production blog data or feature switches changed. Automatic finance article publication remains disabled pending editorial source approvals and duplicate detection.
