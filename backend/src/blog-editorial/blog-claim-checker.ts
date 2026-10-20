@@ -1,3 +1,5 @@
+import { isIP } from 'node:net';
+
 /**
  * Deterministic quality gate for numeric financial claims in AI-assisted drafts.
  * This module DOES NOT fetch citations or certify external providers.
@@ -60,7 +62,7 @@ export interface ClaimAssessment {
 const dayMs = 24 * 60 * 60 * 1000;
 const maxClockSkewMs = 5 * 60 * 1000;
 function instant(value: string | undefined): number | null {
-  if (!value || !/^\d{4}-\d{2}-\d{2}T/.test(value)) return null;
+  if (!value || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) return null;
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
@@ -72,13 +74,20 @@ function isSourceProvenanceValid(receipt: EditorialSourceReceipt, nowMs: number)
   } catch {
     return false;
   }
-  if (url.protocol !== 'https:' || url.username || url.password) return false;
+  // This preflight is NOT a substitute for the future source-ingestion
+  // allowlist, DNS rebinding defenses or HTTPS evidence retrieval.
+  const host = url.hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  if (url.protocol !== 'https:' || url.username || url.password
+    || !host || isIP(host) !== 0
+    || host === 'localhost' || /\.(?:localhost|local|internal|test|invalid)$/.test(host)) return false;
   if (!/^[a-f0-9]{64}$/.test(receipt.contentSha256)) return false;
   const retrievedAt = instant(receipt.retrievedAt);
   const asOfAt = instant(receipt.observedAt);
-  return retrievedAt !== null && asOfAt !== null
+  const validUntil = instant(receipt.validUntil);
+  return retrievedAt !== null && asOfAt !== null && validUntil !== null
     && retrievedAt <= nowMs + maxClockSkewMs
-    && asOfAt <= retrievedAt + maxClockSkewMs;
+    && asOfAt <= retrievedAt + maxClockSkewMs
+    && validUntil > retrievedAt;
 }
 
 /** Only bounded, date-stamped claims can pass; never a publisher authority. */

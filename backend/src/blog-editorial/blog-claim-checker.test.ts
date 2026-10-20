@@ -74,6 +74,29 @@ describe('AI blog financial claim gates v976', () => {
       .toContain('SIMULATION_FIXTURE_MISSING');
   });
 
+  it('rejects a receipt that expires before its purported retrieval timestamp', () => {
+    const impossible = {
+      ...source,
+      retrievedAt: '2026-10-20T01:03:00.000Z',
+      validUntil: '2026-10-20T01:02:00.000Z',
+    };
+    const regulation = { ...claim, kind: 'REGULATION' as const, effectiveYear: 2026 };
+    expect(assessFinancialClaims([regulation], [impossible], now).issues.map((x) => x.code))
+      .toContain('SOURCE_PROVENANCE_INVALID');
+  });
+
+  it('rejects ambiguous local-time source timestamps and nonpublic source hosts', () => {
+    const regulation = { ...claim, kind: 'REGULATION' as const, effectiveYear: 2026 };
+    for (const receipt of [
+      { ...source, observedAt: '2026-10-20T00:10:00' },
+      { ...source, canonicalUrl: 'https://127.0.0.1/official-facts' },
+      { ...source, canonicalUrl: 'https://metadata.google.internal/verify' },
+    ]) {
+      expect(assessFinancialClaims([regulation], [receipt], now).issues.map((x) => x.code))
+        .toContain('SOURCE_PROVENANCE_INVALID');
+    }
+  });
+
   it('never validates promised profit or undated tax rules even with a citation', () => {
     const tax: FinancialClaim = {
       ...claim, kind: 'REGULATION', observedAt: undefined, effectiveYear: undefined,

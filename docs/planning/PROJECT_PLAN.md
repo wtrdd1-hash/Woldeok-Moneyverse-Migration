@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.20.1001 — AI blog editorial foundation re-audit / next implementation dependencies
+- [English evidence](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [Korean](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md). User-authorized recheck of v975/v976 identified and repaired SQL replay version/expiry bugs via forward-only 279 plus impossible/ambiguous/private source metadata checks. Isolated TDD/PostgreSQL 17, backend 1270 pass/397 DB skipped, frontend 1321 pass, database 15 pass/3 skipped, typecheck/build/lint passed; six articles last Oct 15 and 28 unique sitemap URLs. Future v975.3 external verified official-source intake, v975.5 human approval and v975.6 publisher remain P0, subject to v530 whole UI/finance/actual Test identity gates. Planning evidence does not lift old publishing 503 or mean Production release.
+
+
 ## v2026.10.20.975 — Verified AI blog publication and editorial review (new PLANNING proposal)
 - [Detailed design EN](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.md) / [한국어](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.ko.md) and [execution plan EN](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.md) / [한국어](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.ko.md). Implement an actor-approved source receipt, AI draft-only role, deterministic numeric/locale/duplicate gates, immutable revision/approval, unique publication/job outbox and safe public SEO read model; do not unblock old generation 503. v931 unmerged draft dependency and v969 merged-main history explicit. Strict v530, financial DB, same-SHA Test/rollback/zero-downtime Production holds unchanged. Documentation only.
 

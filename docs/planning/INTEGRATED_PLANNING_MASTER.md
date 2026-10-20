@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.20.1001 — Verified AI blog editorial re-audit and replay integrity (candidate, Production HOLD)
+- [Findings EN](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [한국어](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md) · [Worklog EN](../worklog/2026-10-20-ai-blog-recheck-v1001.md) / [KO](../worklog/2026-10-20-ai-blog-recheck-v1001.ko.md). Main v976 audit found two real SQL replay defects (wrong expected revision accepted; committed receipt hidden on source expiry) and two claim provenance defects (invalid chronology; zone-less/private host). Forward-only SQL 279 and strict claim checker tested RED→GREEN against isolated PG17/TS. Backend 1,270 pass/397 DB skipped, frontend 1,321 pass, database 15 pass/3 skipped, contract/typecheck/Nest build/ESLint pass. Four public locale hubs, 6 guides latest Oct 15, sitemap 28 unique and legacy sample noindex; source main differs from Production/Test. Legacy 503, shared JSON 0444 and platform finance/v530/exact-SHA Test release blockers remain intact. No Production/Test/database runtime change.
+
+
 ## v2026.10.20.976 — AI blog editorial source-only foundation candidate (not deployed)
 - Initial approved v975 implementation: migration 278 durable topic/source/revision/review/audit, operator-owned and app/PUBLIC denied; pure numeric-claim and duplicate-candidate reviewers, zero approval/publisher capabilities. [Worklog EN](../worklog/2026-10-20-ai-blog-editorial-foundation-v976.md) / [KO](../worklog/2026-10-20-ai-blog-editorial-foundation-v976.ko.md). Real disposable PG17 smoke and full local tests PASS; 397 backend DB tests skipped; no authenticated Test/Production or financial P0 acceptance. Legacy 503 and JSON 0444 safety hold unchanged; v975 remainder still pending.
 
