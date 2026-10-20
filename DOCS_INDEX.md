@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.20.976 — Safe AI blog editorial backend foundation (candidate, no public posting)
+- [EN worklog](docs/worklog/2026-10-20-ai-blog-editorial-foundation-v976.md) / [한국어](docs/worklog/2026-10-20-ai-blog-editorial-foundation-v976.ko.md) · [Internal](docs/updates/v2026.10.20.976-internal.md) / [KO](docs/updates/v2026.10.20.976-internal.ko.md) · [GitHub](docs/updates/v2026.10.20.976-github.md) / [KO](docs/updates/v2026.10.20.976-github.ko.md). Migration 278 append-only DB editorial records, app permissions blocked, deterministic financial-claim and duplicate draft-only screening. Separate PG17 SQL smoke + local tests PASS; no live approval/publisher/scheduler or Test/Production promotion.
+
+
 ## v2026.10.20.975 — AI blog verified editorial and publishing architecture (PLANNING)
 - [Full EN design](docs/planning/AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.md) / [한국어](docs/planning/AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.ko.md) · [Developer implementation plan EN](docs/superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.md) / [한국어](docs/superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.ko.md) · [Worklog EN](docs/worklog/2026-10-20-ai-blog-editorial-plan-v975.md) / [한국어](docs/worklog/2026-10-20-ai-blog-editorial-plan-v975.ko.md) · [Internal](docs/updates/v2026.10.20.975-internal.md) / [한국어](docs/updates/v2026.10.20.975-internal.ko.md) · [GitHub](docs/updates/v2026.10.20.975-github.md) / [한국어](docs/updates/v2026.10.20.975-github.ko.md). Draft-only; old finance article generation 503 and 171 legacy AI post hold remain, no Test/Production change; v931 separate-branch planning dependency.
 

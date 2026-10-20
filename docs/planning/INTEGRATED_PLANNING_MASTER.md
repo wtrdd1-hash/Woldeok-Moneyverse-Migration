@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.20.976 — AI blog editorial source-only foundation candidate (not deployed)
+- Initial approved v975 implementation: migration 278 durable topic/source/revision/review/audit, operator-owned and app/PUBLIC denied; pure numeric-claim and duplicate-candidate reviewers, zero approval/publisher capabilities. [Worklog EN](../worklog/2026-10-20-ai-blog-editorial-foundation-v976.md) / [KO](../worklog/2026-10-20-ai-blog-editorial-foundation-v976.ko.md). Real disposable PG17 smoke and full local tests PASS; 397 backend DB tests skipped; no authenticated Test/Production or financial P0 acceptance. Legacy 503 and JSON 0444 safety hold unchanged; v975 remainder still pending.
+
+
 ## v2026.10.20.975 — Proposed source-verified AI blog editorial publication engine (PLANNING ONLY)
 - [English full specification](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.md) / [한국어](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.ko.md); [implementation steps](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.md) / [한국어](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.ko.md). Historical 171 AI posts remain unapproved/noindex; public blog six guides last 2026-10-15. New proposal separates source evidence, model draft, claim/duplicate/locale QA, immutable human revision approval and durable idempotent publishing. v931 calculator/blog blueprint is an unmerged parallel proposal requiring reconciliation. v969 PR #963 is merged into main but not verified on Production. No code, DB, legacy store, Test or Production changed; v530/finance and exact-SHA promotion holds remain.
 
