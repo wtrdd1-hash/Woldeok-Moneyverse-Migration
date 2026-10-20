@@ -4,6 +4,10 @@
 - [영문 점검 보고](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [한국어](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md) · [기록 EN](../worklog/2026-10-20-ai-blog-recheck-v1001.md) / [한국어](../worklog/2026-10-20-ai-blog-recheck-v1001.ko.md). 최신 main v976 기초기능에서 작업 재시도 예상버전 우회, 자료 만료 후 완료 영수증 재조회 실패, 비정상 자료시각/내부망 출처 허용 4건을 RED→GREEN 재현 및 새로운 SQL 279·TS 검증 강화로 수정. PostgreSQL 17, 백엔드 1271 통과/DB397 생략, 프론트 1321 통과, DB 15 통과/3 생략, 타입/빌드/린트 통과. 운영 공개글 6편(10/15), sitemap 28개, 구 AI 검색제외, JSON 0444. 생성 API 503 유지, 실제 출처 수집·인간승인·게시 아직 없고 금융/v530/정식 Test SHA/운영승격 차단 유지. 실운영/DB/금융 무변경.
 
 
+
+## v2026.10.20.990 — 국가별 통화·검색 클릭률·블로그 현지화 후보
+- [국문](SEO_CTR_COUNTRY_LOCALIZATION_v2026.10.20.990.ko.md) / [영문](SEO_CTR_COUNTRY_LOCALIZATION_v2026.10.20.990.md), [작업기록](../worklog/2026-10-20-seo-ctr-localization-v990.ko.md). 실제 GSC 노출 1,383/클릭 15/CTR 1.08% 문제에 대응하는 국가별 대출·복리 독립 화폐 예시, 자연 번역, 언어 URL·대표 주소 정규화, 블로그 계산기 연결. v976/v1001 검증·편집 정책과 원장·UI·Test/운영 승격 게이트를 유지. 운영 완료 선언 아님.
+
 ## v2026.10.20.976 — AI 블로그 검증/편집 기초 소스 구현 후보 (운영 미반영)
 - 승인된 v975 기획 중 최초 단계: 신규 SQL 278의 주제·출처·초안·검토·감사 DB, 앱 및 PUBLIC 쓰기/실행 금지. 금융 수치·본문 중복 후보 자동검사 코드 추가, 승인·공개·스케줄러는 **구현하지 않음**. [영문 기록](../worklog/2026-10-20-ai-blog-editorial-foundation-v976.md) / [한국어](../worklog/2026-10-20-ai-blog-editorial-foundation-v976.ko.md). 독립 PG17·로컬 검사 합격, 백엔드 DB 397개 생략 및 Test/금융/운영 안전 수용 미실행. 구 503 및 JSON 0444 유지.
 

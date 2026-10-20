@@ -39,14 +39,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   let description = '';
 
   if (locale === 'en') {
-    title = 'Compound Interest Calculator — S&P 500 & FIRE Simulator | Moneyverse';
-    description = 'Free compound interest calculator with monthly deposits. Visualize 10 to 30 year growth, compare index fund returns, and calculate your FIRE nest egg milestone.';
+    title = 'Compound Interest Calculator | Monthly Savings & Growth';
+    description = 'Estimate the future value of monthly savings and initial deposits in USD. Choose a hypothetical return, amount and time horizon; investment results are not guaranteed.';
   } else if (locale === 'ja') {
-    title = '複利計算シミュレーター（月次積立・S&P500対応） | ウォルドク';
-    description = '毎月の積立投資と初期元本に応じた10年〜30年の複利成長を即時シミュレーション。FIRE達成や資産形成をサポートする無料オンライン計算機。';
+    title = '複利計算シミュレーター｜毎月の積立額と運用期間';
+    description = '日本円で初期元本と毎月の積立額を設定し、複利の効果を試算。想定利回りは保証されず、税金・手数料を含まない計算例です。';
   } else if (locale === 'zh') {
-    title = '复利计算器（支持每月定投与FIRE财务自由测算） | 沃德克';
-    description = '免费在线复利计算器，支持每月定投资金与标普500历史年化收益率。即时测算10至30年资产增长与百万美元退休金积累。';
+    title = '复利计算器｜每月定投与长期储蓄试算';
+    description = '以人民币为单位输入初始本金、每月投入与年化收益率，估算长期复利增长。结果是计算示例，不代表保证收益或实时汇率。';
   }
 
   const ogImageUrl = buildOgImageUrl({
@@ -126,7 +126,7 @@ export default async function GlobalCompoundPage({ params }: PageProps) {
         </Button>
 
         <PageHeader
-          eyebrow="GLOBAL WEALTH COMPOUNDING"
+          eyebrow="COMPOUNDING EXAMPLE"
           title={isEn ? 'Compound Interest & FIRE Nest Egg Calculator' : isJa ? '複利＆資産形成シミュレーター' : '全球复利定投增长计算器'}
         >
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
@@ -146,14 +146,14 @@ export default async function GlobalCompoundPage({ params }: PageProps) {
             <span className="text-[10px] text-muted-foreground">Doubling Time Formula</span>
           </div>
           <div className="rounded-xl border border-border/80 bg-card p-4 text-center">
-            <span className="text-xs text-muted-foreground">Historical S&P 500</span>
-            <div className="text-lg font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">~10% Nominal</div>
-            <span className="text-[10px] text-muted-foreground">Average Annual Return</span>
+            <span className="text-xs text-muted-foreground">Illustrative returns</span>
+            <div className="text-lg font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">User-defined rate</div>
+            <span className="text-[10px] text-muted-foreground">Not a live quote</span>
           </div>
           <div className="rounded-xl border border-border/80 bg-card p-4 text-center">
-            <span className="text-xs text-muted-foreground">4% Safe Withdrawal</span>
-            <div className="text-lg font-mono font-bold text-primary mt-0.5">25x Annual Expense</div>
-            <span className="text-[10px] text-muted-foreground">FIRE Target Milestone</span>
+            <span className="text-xs text-muted-foreground">Illustrative planning</span>
+            <div className="text-lg font-mono font-bold text-primary mt-0.5">Change assumptions</div>
+            <span className="text-[10px] text-muted-foreground">Not guaranteed</span>
           </div>
         </div>
 

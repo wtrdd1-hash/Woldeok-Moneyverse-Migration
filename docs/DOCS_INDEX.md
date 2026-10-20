@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.20.990 — Country-specific SEO, calculators and blog (candidate)
+- [English specification](planning/SEO_CTR_COUNTRY_LOCALIZATION_v2026.10.20.990.md) / [한국어](planning/SEO_CTR_COUNTRY_LOCALIZATION_v2026.10.20.990.ko.md) · [Worklog](worklog/2026-10-20-seo-ctr-localization-v990.md) · [Internal](updates/v2026.10.20.990-internal.md) · [GitHub](updates/v2026.10.20.990-github.md). Search CTR-based native US/JP/CN loan and compound calculators, local currency, locale/canonical routing and translated country blog links; candidate only, Production HOLD.
+
 ## Search Console evidence detailed plan — v2026.10.15.688
 
 - [F675-06 GSC Search Evidence & Canonical Action](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) · [한국어](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) · [v688 worklog](worklog/2026-10-15-f67506-search-evidence-v688.md). Docs only, no indexing/Production claim.

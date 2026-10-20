@@ -23,3 +23,13 @@ Status: STARTED / isolated implementation candidate; Production HOLD pending evi
 ## Completion conditions
 - Commit/push isolated branch, check current main again, rebase/re-run tests and build, inspect GitHub CI/PR.
 - Full authenticated Test + finance/DB/backup/session/zero-downtime gates still independent. Do not misreport implementation candidate as deployed.
+
+## Source verification after rebase — 2026-10-20 KST
+- Detected origin/main moved to 55d99f574fd7c3582527fc3476a26d2b954ee352 (v1001). Rebased v990 source atop the latest main with no overlapping changes; v1001 editorial SQL/replay and claims checker remain untouched.
+- **Complete frontend Vitest**: 256 files / 1,336 tests PASS. TypeScript frontend typecheck PASS. Next production build PASS. Focused ESLint zero errors (warnings reported, no lint failure). Local build executed against isolated worktree, not verified as active public Test.
+- Started candidate Next build on a private loopback port and terminated it after probing: /en, /ja, /zh loan routes all HTTP 200 with native-language title/H1/html lang and distinct self-canonical. Translated compound routes HTTP 200; duplicate prefix examples followed permanent redirect to normalized URL with correct localized HTML. Preview used SEO_INDEXING_ENABLED=false.
+- Changed country compound page titles/descriptions after the full build to remove generic USD focus in JP/CN and fixed-rate promises. This specific metadata-only delta passed TypeScript but requires final exact-head rebuild in CI; older preview does not certify the final copy.
+- Existing v530 authenticated full UI, finance ledger, exact-source test backend/db and session/release gates **not certified** by this standalone preview.
+
+## End-of-cycle evidence
+- End-state depends on GitHub branch/PR and CI; integration/promotion status must be updated with exact SHA and evidence. No Production or member-data changes.
