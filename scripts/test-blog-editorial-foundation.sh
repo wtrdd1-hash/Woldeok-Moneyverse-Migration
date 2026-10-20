@@ -24,3 +24,8 @@ for FILE in bootstrap migration e2e; do
   docker exec "$NAME" psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f "/tmp/${FILE}.sql"
 done
 printf 'PASS: isolated PostgreSQL 17 migration and negative privilege/approval/idempotency/immutability checks\n'
+# A repeat of an already committed request must not silently change version.
+docker cp "$ROOT/packages/database/migrations/279-blog-editorial-replay-idempotency.sql" "$NAME:/tmp/migration-279.sql"
+docker exec "$NAME" psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f /tmp/migration-279.sql
+docker cp "$ROOT/packages/database/test/fixtures/279-blog-editorial-idempotency-e2e.sql" "$NAME:/tmp/replay.sql"
+docker exec "$NAME" psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f /tmp/replay.sql

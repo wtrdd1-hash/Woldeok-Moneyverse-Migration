@@ -1,5 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.20.1001 — AI 블로그 기초 코드 재점검·멱등·공식자료 검증 강화를 반영한 계획
+- [영문 근거](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [한국어](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md). 사용자 승인 재검토: v976 SQL 재시도 버전/출처 만료 영수증 문제, 자료 시각/내부망 URL 오류 등 4건 재현 후 순방향 279·TS 검증으로 해결. 독립 PostgreSQL, 백엔드 1271 통과/DB397 생략, 프론트 1321 통과, DB 15 통과/3 생략, 타입/빌드/린트 통과. 공개글 6편 마지막 10월 15일, 사이트맵 28개. 신규 공식원문 수집·사람 검수/발행·운영기능은 아직 없고 기존 503/JSON 0444 유지. 재무원장/전수UI/실제 Test SHA/세션/무중단 운영승격 차단은 불변.
+
+
 ## v2026.10.20.975 — 내부 AI 블로그 공인자료 검증·편집 승인·발행 상세기획 (제안)
 - [영문 기준 상세기획](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.md) / [한국어 상세기획](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.ko.md)과 [영문 개발 순서](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.md) / [한국어](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.ko.md). 출처/관측시각·내부AI 초안·수치/중복/법역 검사·인간 리비전 승인·작업멱등·공개 SEO 분리. 구 생성 503 및 JSON 0444 유지. v931은 미통합 계산기 초안으로 중복 조정, v969 main 병합은 운영 반영 근거가 아님. 기존 v530 전체 UI·금융 원장·정확 SHA Test/무중단 승격 조건 유지. 문서만 변경, 개발·운영 미실행.
 

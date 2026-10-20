@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.20.1001 — AI Blog re-audit and safe SQL replay foundation
+- [Detailed findings EN](docs/findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [한국어](docs/findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md) · [Worklog EN](docs/worklog/2026-10-20-ai-blog-recheck-v1001.md) / [한국어](docs/worklog/2026-10-20-ai-blog-recheck-v1001.ko.md) · [Internal EN](docs/updates/v2026.10.20.1001-internal.md) / [KO](docs/updates/v2026.10.20.1001-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.20.1001-github.md) / [KO](docs/updates/v2026.10.20.1001-github.ko.md). TDD red/green source-only forward SQL 279 replay identity/expiry, stricter citation chronology/time zone/host checks; PG17 and full frontend/backend tests green with documented DB skips. No new public AI posts; 503 and Production financial/UI/Test gates unchanged.
+
+
 ## v2026.10.20.976 — Safe AI blog editorial backend foundation (candidate, no public posting)
 - [EN worklog](docs/worklog/2026-10-20-ai-blog-editorial-foundation-v976.md) / [한국어](docs/worklog/2026-10-20-ai-blog-editorial-foundation-v976.ko.md) · [Internal](docs/updates/v2026.10.20.976-internal.md) / [KO](docs/updates/v2026.10.20.976-internal.ko.md) · [GitHub](docs/updates/v2026.10.20.976-github.md) / [KO](docs/updates/v2026.10.20.976-github.ko.md). Migration 278 append-only DB editorial records, app permissions blocked, deterministic financial-claim and duplicate draft-only screening. Separate PG17 SQL smoke + local tests PASS; no live approval/publisher/scheduler or Test/Production promotion.
 
