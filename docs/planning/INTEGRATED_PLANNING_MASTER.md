@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.20.975 — Proposed source-verified AI blog editorial publication engine (PLANNING ONLY)
+- [English full specification](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.md) / [한국어](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.ko.md); [implementation steps](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.md) / [한국어](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.ko.md). Historical 171 AI posts remain unapproved/noindex; public blog six guides last 2026-10-15. New proposal separates source evidence, model draft, claim/duplicate/locale QA, immutable human revision approval and durable idempotent publishing. v931 calculator/blog blueprint is an unmerged parallel proposal requiring reconciliation. v969 PR #963 is merged into main but not verified on Production. No code, DB, legacy store, Test or Production changed; v530/finance and exact-SHA promotion holds remain.
+
+
 ## v2026.10.18.804 — Core immutable journal direct-DML privilege containment (candidate / Production HOLD)
 - Source code and actual Production v717 dist use journal tables for reads, not direct app DML; nonetheless live app role has broad ledger INSERT/UPDATE/DELETE/TRUNCATE/TRIGGER rights. Migration 277 revokes all journal table rights then regrants SELECT only, retaining existing SECURITY DEFINER role-scoped command boundary; applied twice to an isolated copy of actual Production schema+ACL with all direct write privileges denied. Other 3 financial tables and 19 unverifiable opening/projection balances +4,779,188 WLD remain P0, with v530 signed-in UI/backup/restore gates BLOCKED. [Release](../releases/v2026.10.18.804.md).
 

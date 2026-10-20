@@ -1,0 +1,13 @@
+# AI Blog Editorial Publication Engine — v2026.10.20.975 (planning worklog)
+
+**START 2026-10-20 KST:** User requested full detailed next-stage planning after legacy article Markdown fix and identification of missing current articles. MiniPC status active, production-current = prod-v2026.10.19.920-01c34e4b, Test current = test-v2026.10.18.805-e54e6843df27. Read-only public blog API previously showed 6 discoverable educational posts, latest 2026-10-15. Dedicated worktree plan/ai-blog-editorial-v2026.10.20.975 chosen; concurrent v971 QA branch left untouched.
+
+**MID authority reconciliation:** Initially origin/main read as 74d98ca5; PR #963 completed CI and was merged while planning began, moving main to 33ba30dde5aaf18dbcf11130a0b51f1c235f1b5b. This v975 isolated worktree was made FROM the new merged main, not stale v969 branch. Integrated Planning Master and Project Plan EN/KO, AGENTS, DOCS_INDEX, legacy Blog Editorial Hold Runbook, v719/v735 and the unmerged v931 plan branch read. Code observations: file-backed BlogPost lacks review provenance; legacy generation 403/503 fail-closed; admin/blog read-only; public isBlogDiscoverable checks !isAiGenerated; v969 safe Markdown and stale-public-date banner already merged main, **not proven on Production**.
+
+**RESEARCH:** Current official Google people-first/scaled content, Article JSON-LD, hreflang, restricted Indexing API, noindex; OWASP Prompt Injection; RFC 9457; WCAG 2.2; PG advisory-lock and project privilege constraints. Research supports separate editorial receipts, source/as-of, localized jurisdiction reviews, state/SEO truth, actor-authenticated publish.
+
+**DESIGN MILESTONES:** v975.1 readonly old-writer/provenance; v975.2 SQL/SECURITY DEFINER lifecycle; v975.3 evidence/claim validation; v975.4 AI drafting+dedup; v975.5 editor queue/approval; v975.6 publisher/outbox/read projection; v975.7 locale SEO; v975.8 scheduled approved publication/recovery; v975.9 calculator integration only after v931 reconciliation; v975.10 existing exact-SHA Test/finance/whole-UI/rollback/no-downtime acceptance.
+
+**Documents:** EN canonical and full Korean partner specification; EN implementation task-by-task plan and Korean execution summary; integrated planning pointers, DOCS_INDEX, internal and GitHub updates. These are **planning-only** artifacts. No blog data, SQL, credentials, bank/economy, scheduler, frontend/backend code, Test or Production changed.
+
+**END:** Pending branch PR creation and CI. No claim of production restored posting; 171 old AI posts remain isolated and new publication requires editor evidence and separate implementation approval. Record CI/PR outcomes in end-log after verification.

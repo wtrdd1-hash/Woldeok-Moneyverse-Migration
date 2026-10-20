@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.20.975 — Verified AI blog publication and editorial review (new PLANNING proposal)
+- [Detailed design EN](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.md) / [한국어](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.ko.md) and [execution plan EN](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.md) / [한국어](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.ko.md). Implement an actor-approved source receipt, AI draft-only role, deterministic numeric/locale/duplicate gates, immutable revision/approval, unique publication/job outbox and safe public SEO read model; do not unblock old generation 503. v931 unmerged draft dependency and v969 merged-main history explicit. Strict v530, financial DB, same-SHA Test/rollback/zero-downtime Production holds unchanged. Documentation only.
+
+
 ## v2026.10.15.688 — F675-06 real Search Console evidence and canonical action center (PLANNING)
 
 - **Adopt** [F675-06 Search Evidence & Canonical Action Center EN](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) as detailed v675 F675-06 design, **extending existing /admin/seo/GSC backend**, preserving v685 SEO transport/audit fixes rather than creating a competing SEO dashboard.

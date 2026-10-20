@@ -1,5 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.20.975 — 내부 AI 블로그 공인자료 검증·편집 승인·발행 상세기획 (제안)
+- [영문 기준 상세기획](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.md) / [한국어 상세기획](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.ko.md)과 [영문 개발 순서](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.md) / [한국어](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.ko.md). 출처/관측시각·내부AI 초안·수치/중복/법역 검사·인간 리비전 승인·작업멱등·공개 SEO 분리. 구 생성 503 및 JSON 0444 유지. v931은 미통합 계산기 초안으로 중복 조정, v969 main 병합은 운영 반영 근거가 아님. 기존 v530 전체 UI·금융 원장·정확 SHA Test/무중단 승격 조건 유지. 문서만 변경, 개발·운영 미실행.
+
+
 ## v2026.10.15.688 — F675-06 실제 Search Console 검색·색인 증거 상세기획
 
 - [F675-06 한국어 상세명세](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 공식 개별 기획으로 채택. 기존 관리자 /admin/seo·GSC·v685 수정 재사용, 별도 SEO 플랫폼 중복 금지.
