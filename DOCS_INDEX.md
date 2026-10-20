@@ -1,6 +1,6 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
-## v2026.10.20.969 — Blog Markdown rendering and approved publication freshness (candidate)
+## v2026.10.20.969 — Blog Markdown rendering and public education publication freshness (candidate)
 - [Worklog EN](docs/worklog/2026-10-20-blog-freshness-markdown-v969.md) / [한국어](docs/worklog/2026-10-20-blog-freshness-markdown-v969.ko.md) · [Internal EN](docs/updates/v2026.10.20.969-internal.md) / [한국어](docs/updates/v2026.10.20.969-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.20.969-github.md) / [한국어](docs/updates/v2026.10.20.969-github.ko.md). Production public articles count=6, last October 15. Safe Markdown and stale-publication disclosure; tests/build/local HTTP PASS. Formal Test and Production not performed; AI publication safety hold remains.
 
 

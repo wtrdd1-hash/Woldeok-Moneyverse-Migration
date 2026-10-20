@@ -6,7 +6,7 @@ Status: isolated candidate only. No formal Test or Production release.
 
 **v969.2 FIX / TDD.** Root cause: article client split content only at blank lines, while legacy heading and pipe-table lines were adjacent; bold delimiters were also unparsed. New React-element-only Markdown subset renderer supports headings, adjacent tables, strong/emphasis, ordered/unordered lists, quotes, fenced code and locally validated blog illustrations/HTTPS links. No arbitrary HTML rendering or remote image fetches. Existing calc widgets, ad placements, old AI noindex and publication hold preserved. Formatter TDD RED then 4/4 GREEN.
 
-**v969.3 DISPLAY / TDD.** New latest-approved-publication notice appears only when last approved post is older than 48 hours. EN canonical with KO/JA/ZH translations. Freshness test RED then 2/2 GREEN.
+**v969.3 DISPLAY / TDD.** New latest-public-education-publication notice appears only when last publicly listed educational post is older than 48 hours. EN canonical with KO/JA/ZH translations. Freshness test RED then 2/2 GREEN.
 
 **v969.4 VERIFICATION.** Related 20/20 pass; full frontend Vitest 251 files / 1321 tests PASS, strict TypeScript PASS, scoped ESLint PASS, git diff check PASS, independent offline install + contract build + Next production build PASS. Initial build blocked by external node_modules symlink only, then resolved by installing independent worktree dependencies. Local built HTTP on 127.0.0.1:3317: /blog, /en/blog, legacy AI direct URL, /api/blog all 200; SSR included semantic table/strong tags and legacy noindex; hub displays publication date.
 

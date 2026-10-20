@@ -9,7 +9,7 @@ const articles = [
 describe('Blog publication freshness v969', () => {
   it('communicates last approved publication, not false real-time updates', () => {
     expect(getBlogFreshnessNotice(articles, 'ko', new Date('2026-10-20T00:00:00Z'))).toContain('2026-10-15');
-    expect(getBlogFreshnessNotice(articles, 'ko', new Date('2026-10-20T00:00:00Z'))).toContain('검증');
+    expect(getBlogFreshnessNotice(articles, 'ko', new Date('2026-10-20T00:00:00Z'))).toContain('마지막 공개 교육 글');
     expect(getBlogFreshnessNotice(articles, 'en', new Date('2026-10-20T00:00:00Z'))).toContain('2026-10-15');
   });
   it('does not warn if a recent approved post exists or posts are empty', () => {
