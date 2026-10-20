@@ -1,5 +1,9 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.20.975 — 공인출처 검증형 AI 블로그 편집·발행 시스템 제안 (기획만)
+- [영문 상세기획](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.md) / [한국어](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.ko.md); [개발 실행계획](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.md) / [한국어](../superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.ko.md). 과거 AI 글 171편 미검증/noindex, 공개교육 글 6편 마지막 10월 15일, 기존 자동발행 안전차단 유지. 자료수집·AI 초안·수치/중복/국가법역 확인·인간 리비전 승인·멱등 발행으로 분리. v931 계산기 연계는 미통합 병렬 초안, v969 PR #963은 main 병합이나 운영 적용 미확인. 코드·실DB·원본JSON·Test/운영 무변경; v530 UI/금융 게이트 유지.
+
+
 ## v2026.10.18.804 — 불변 원장 직접 DML 권한 회수 (후보 / 운영 보류)
 - 운영 v717/최신 소스는 원장 직접 쓰기 코드가 없지만 실제 앱 DB 계정은 INSERT/UPDATE/DELETE/TRUNCATE/TRIGGER 등 광범위한 원장 권한을 보유. 신규 migration 277로 원장 2테이블 권한 모두 회수 후 SELECT만 복원하며 기존 SECURITY DEFINER 정산 함수를 유지. 운영 schema/ACL만 격리 DB에 복원해 적용·재적용 및 권한 거부를 검증. 나머지 금융 3테이블과 기초잔액 미인증 19계좌 +4,779,188 WLD, v530 인증 UI/복원은 별도 차단 항목. [릴리스](../releases/v2026.10.18.804.ko.md).
 

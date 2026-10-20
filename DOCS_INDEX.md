@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.20.975 — AI blog verified editorial and publishing architecture (PLANNING)
+- [Full EN design](docs/planning/AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.md) / [한국어](docs/planning/AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.ko.md) · [Developer implementation plan EN](docs/superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.md) / [한국어](docs/superpowers/plans/2026-10-20-ai-blog-editorial-publication-v975.ko.md) · [Worklog EN](docs/worklog/2026-10-20-ai-blog-editorial-plan-v975.md) / [한국어](docs/worklog/2026-10-20-ai-blog-editorial-plan-v975.ko.md) · [Internal](docs/updates/v2026.10.20.975-internal.md) / [한국어](docs/updates/v2026.10.20.975-internal.ko.md) · [GitHub](docs/updates/v2026.10.20.975-github.md) / [한국어](docs/updates/v2026.10.20.975-github.ko.md). Draft-only; old finance article generation 503 and 171 legacy AI post hold remain, no Test/Production change; v931 separate-branch planning dependency.
+
+
 ## v2026.10.20.969 — Blog Markdown rendering and public education publication freshness (candidate)
 - [Worklog EN](docs/worklog/2026-10-20-blog-freshness-markdown-v969.md) / [한국어](docs/worklog/2026-10-20-blog-freshness-markdown-v969.ko.md) · [Internal EN](docs/updates/v2026.10.20.969-internal.md) / [한국어](docs/updates/v2026.10.20.969-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.20.969-github.md) / [한국어](docs/updates/v2026.10.20.969-github.ko.md). Production public articles count=6, last October 15. Safe Markdown and stale-publication disclosure; tests/build/local HTTP PASS. Formal Test and Production not performed; AI publication safety hold remains.
 
