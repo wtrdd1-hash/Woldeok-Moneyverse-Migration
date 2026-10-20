@@ -1,7 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.20.1001 — AI blog editorial foundation re-audit / next implementation dependencies
-- [English evidence](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [Korean](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md). User-authorized recheck of v975/v976 identified and repaired SQL replay version/expiry bugs via forward-only 279 plus impossible/ambiguous/private source metadata checks. Isolated TDD/PostgreSQL 17, backend 1270 pass/397 DB skipped, frontend 1321 pass, database 15 pass/3 skipped, typecheck/build/lint passed; six articles last Oct 15 and 28 unique sitemap URLs. Future v975.3 external verified official-source intake, v975.5 human approval and v975.6 publisher remain P0, subject to v530 whole UI/finance/actual Test identity gates. Planning evidence does not lift old publishing 503 or mean Production release.
+- [English evidence](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [Korean](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md). User-authorized recheck of v975/v976 identified and repaired SQL replay version/expiry bugs via forward-only 279 plus impossible/ambiguous/private source metadata checks. Isolated TDD/PostgreSQL 17, backend 1271 pass/397 DB skipped, frontend 1321 pass, database 15 pass/3 skipped, typecheck/build/lint passed; six articles last Oct 15 and 28 unique sitemap URLs. Future v975.3 external verified official-source intake, v975.5 human approval and v975.6 publisher remain P0, subject to v530 whole UI/finance/actual Test identity gates. Planning evidence does not lift old publishing 503 or mean Production release.
 
 
 ## v2026.10.20.975 — Verified AI blog publication and editorial review (new PLANNING proposal)

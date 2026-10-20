@@ -1,7 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v2026.10.20.1001 — AI 블로그 전체 재점검·멱등성/자료 검증 수정 (코드 후보, 운영 보류)
-- [영문 점검 보고](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [한국어](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md) · [기록 EN](../worklog/2026-10-20-ai-blog-recheck-v1001.md) / [한국어](../worklog/2026-10-20-ai-blog-recheck-v1001.ko.md). 최신 main v976 기초기능에서 작업 재시도 예상버전 우회, 자료 만료 후 완료 영수증 재조회 실패, 비정상 자료시각/내부망 출처 허용 4건을 RED→GREEN 재현 및 새로운 SQL 279·TS 검증 강화로 수정. PostgreSQL 17, 백엔드 1270 통과/DB397 생략, 프론트 1321 통과, DB 15 통과/3 생략, 타입/빌드/린트 통과. 운영 공개글 6편(10/15), sitemap 28개, 구 AI 검색제외, JSON 0444. 생성 API 503 유지, 실제 출처 수집·인간승인·게시 아직 없고 금융/v530/정식 Test SHA/운영승격 차단 유지. 실운영/DB/금융 무변경.
+- [영문 점검 보고](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [한국어](../findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md) · [기록 EN](../worklog/2026-10-20-ai-blog-recheck-v1001.md) / [한국어](../worklog/2026-10-20-ai-blog-recheck-v1001.ko.md). 최신 main v976 기초기능에서 작업 재시도 예상버전 우회, 자료 만료 후 완료 영수증 재조회 실패, 비정상 자료시각/내부망 출처 허용 4건을 RED→GREEN 재현 및 새로운 SQL 279·TS 검증 강화로 수정. PostgreSQL 17, 백엔드 1271 통과/DB397 생략, 프론트 1321 통과, DB 15 통과/3 생략, 타입/빌드/린트 통과. 운영 공개글 6편(10/15), sitemap 28개, 구 AI 검색제외, JSON 0444. 생성 API 503 유지, 실제 출처 수집·인간승인·게시 아직 없고 금융/v530/정식 Test SHA/운영승격 차단 유지. 실운영/DB/금융 무변경.
 
 
 ## v2026.10.20.976 — AI 블로그 검증/편집 기초 소스 구현 후보 (운영 미반영)

@@ -44,14 +44,16 @@ Do NOT call the old potentially writable generator just to test it. Source still
 
 **Migration rule:** migration 278 was not edited. New 279 only CREATE OR REPLACE for source_record and draft_append, reasserts REVOKE EXECUTE from moneyverse_app and PUBLIC; no finance table, schema table or actual Production DB writes.
 
+**Additional compatibility boundary (R1001-05):** The first strict timezone-aware ISO parser accepted only one to three fractional digits; PostgreSQL and official sources can legitimately include six-digit microseconds. A new positive fixture with +09:00 and .123456Z **failed RED**, then passed after allowing one to nine fractional digits while retaining explicit timezone requirements. This guards against accidentally blocking genuine verified source timestamps, not a broad date parser rewrite.
+
 ## 4. Tests actually run in this turn
 
 | Test | Result |
 |---|---|
 | New v279 PostgreSQL replay/expiry/privilege E2E after deliberate two RED failures | PASS, isolated Docker PostgreSQL 17, network none |
-| Blog claim + dedup targeted tests | 13/13 PASS, including 2 observed RED→GREEN claim regressions |
+| Blog claim + dedup targeted tests | 14/14 PASS, including 2 observed RED→GREEN claim regressions |
 | Database Vitest full | 15 PASS, 3 DB integration tests SKIPPED |
-| Backend Vitest full | 1,270 PASS, 397 DB-dependent tests SKIPPED |
+| Backend Vitest full | 1,271 PASS, 397 DB-dependent tests SKIPPED |
 | Frontend Vitest full | 1,321 PASS |
 | Backend TS/database TS/contract build/backend Nest build | PASS |
 | Changed-file ESLint and git diff --check | PASS |

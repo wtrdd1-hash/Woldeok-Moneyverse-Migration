@@ -12,7 +12,9 @@ TDD SQL: 278 accepted a retry with changed optimistic revision; 278 refused same
 TDD claims: impossible retrieved/expiry sequence, zone-less timestamps, numeric IP or internal hosts each accepted before patch (2 red tests); now fail closed, all 13 claim/dedup related tests PASS. This is not a source-fetch SSRF defense.
 
 ## TEST RESULTS — completed 2026-10-20 16:02:21 KST
-Isolated PG v278+279 tests PASS; database Vitest 15 pass/3 skipped; backend Vitest 1270 pass/397 skipped; frontend Vitest 1321 pass; backend/database TS checks and Nest build, contract build, changed-file ESLint and diff-check PASS. Background task blog-v1001-qa exit 0. No full authenticated designated Test, Production DB or 5-round UI gate. Formal old finance blockers unchanged.
+Isolated PG v278+279 tests PASS; database Vitest 15 pass/3 skipped; backend Vitest 1271 pass/397 skipped; frontend Vitest 1321 pass; backend/database TS checks and Nest build, contract build, changed-file ESLint and diff-check PASS. Background task blog-v1001-qa exit 0. No full authenticated designated Test, Production DB or 5-round UI gate. Formal old finance blockers unchanged.
 
 ## END — pending PR/CI/merge evidence
 Files include EN+KO detailed findings and worklogs, internal and GitHub update descriptions, master plan pointers. Only safe source-level checks plus new migration, no operating Test/Production DB/data or financial table changes. Need separately verify branch CI and decide merge; do not claim release. Architectural remaining tasks v975.3 official source intake, internal AI draft, editor approval, publisher/outbox, localization, approved scheduler and full release gates.
+
+Additional v1001 compatibility RED→GREEN: timestamp parser allows ISO timezone-aware microsecond fractional seconds (1–9 digits), including +09:00; ambiguous timezone-free timestamps still fail.

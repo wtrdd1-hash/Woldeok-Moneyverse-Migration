@@ -74,6 +74,17 @@ describe('AI blog financial claim gates v976', () => {
       .toContain('SIMULATION_FIXTURE_MISSING');
   });
 
+  it('accepts explicit timezone and PostgreSQL microsecond precision in source receipts', () => {
+    const exact = {
+      ...source,
+      observedAt: '2026-10-20T09:10:00.123456+09:00',
+      retrievedAt: '2026-10-20T00:11:00.123456Z',
+      validUntil: '2026-10-21T00:11:00.123456Z',
+    };
+    const regulation = { ...claim, kind: 'REGULATION' as const, effectiveYear: 2026 };
+    expect(assessFinancialClaims([regulation], [exact], now).passed).toBe(true);
+  });
+
   it('rejects a receipt that expires before its purported retrieval timestamp', () => {
     const impossible = {
       ...source,

@@ -62,7 +62,7 @@ export interface ClaimAssessment {
 const dayMs = 24 * 60 * 60 * 1000;
 const maxClockSkewMs = 5 * 60 * 1000;
 function instant(value: string | undefined): number | null {
-  if (!value || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) return null;
+  if (!value || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) return null;
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
