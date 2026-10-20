@@ -1,3 +1,4 @@
+import { BACKEND_API_EXPECTATIONS } from './http-guard-policy.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { assessFullSiteAcceptance } from './e2e-certification.mjs';
@@ -268,19 +269,7 @@ async function run() {
   console.log(`  [Pass 5 Admin Subtotal] Checked ${adminPages.length} admin routes. Passed: ${results.pass5.passed}, Failed: ${results.pass5.failed}`);
 
   // Direct backend without an internal token; 401 is expected for internal-only reads.
-  const backendApis = [
-    { path: '/health', expectedStatus: 200, kind: 'public' },
-    { path: '/api/version', expectedStatus: 200, kind: 'public' },
-    { path: '/api/v1/stocks', expectedStatus: 200, kind: 'public' },
-    { path: '/api/v1/announcements', expectedStatus: 401, kind: 'internal-token-required' },
-    { path: '/api/v1/photos', expectedStatus: 401, kind: 'internal-token-required' },
-    { path: '/api/v1/central-bank/base-rate', expectedStatus: 401, kind: 'protected-guard' },
-    { path: '/api/v1/central-bank/commercial-rates', expectedStatus: 401, kind: 'protected-guard' },
-    { path: '/api/v1/mint/batches', expectedStatus: 401, kind: 'protected-guard' },
-    { path: '/api/v1/mint/seigniorage', expectedStatus: 401, kind: 'protected-guard' },
-    { path: '/api/v1/casino/jackpot', expectedStatus: 401, kind: 'protected-guard' },
-    { path: '/api/v1/casino/clock', expectedStatus: 401, kind: 'protected-guard' },
-  ];
+  const backendApis = BACKEND_API_EXPECTATIONS;
 
   console.log('  [Pass 5 Backend APIs] Probing core live public endpoints & auth security guards...');
   for (const endpoint of backendApis) {
