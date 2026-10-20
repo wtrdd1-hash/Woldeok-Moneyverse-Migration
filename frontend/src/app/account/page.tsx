@@ -25,7 +25,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { ProfileAvatar } from '@/app/profile/profile-avatar';
 import { jobLabel, titleLabel } from '@/app/profile/profile';
@@ -34,6 +33,7 @@ import { formatDay } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { DeleteAccountForm, LinkButton, ReauthButton, UnlinkButton } from './account-forms';
 import { canUnlinkOAuthIdentity, isLinkableOAuthProvider } from './identity-provider';
+import { confirmedOAuthCallback, parseAccountIdentityEvidence } from './account-identity-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,13 +41,6 @@ export const metadata: Metadata = {
   title: '내 계정 센터 - 월덕 머니버스',
   robots: { index: false, follow: false },
 };
-
-interface Identity {
-  readonly identityId: string;
-  readonly provider: string;
-  readonly displayName: string;
-  readonly linkedAt: string;
-}
 
 interface OwnProfileResponse {
   readonly displayName?: string | null;
@@ -97,13 +90,14 @@ export default async function AccountPage({
   const { linked, reauth } = await searchParams;
 
   const [identityData, providerData, profileData] = await Promise.all([
-    apiOrNull<{ identities: Identity[] }>('/api/v1/account/identities'),
+    apiOrNull<unknown>('/api/v1/account/identities'),
     apiOrNull<{ providers: { id: string; enabled: boolean }[] }>('/api/v1/auth/providers'),
     apiOrNull<OwnProfileResponse>('/api/v1/profile'),
   ]);
 
-  const identities = identityData?.identities ?? [];
-  const linkedProviders = new Set(identities.map((identity) => identity.provider));
+  const identityEvidence = parseAccountIdentityEvidence(identityData);
+  const identities = identityEvidence.identities;
+  const linkedProviders: ReadonlySet<string> = new Set(identities.map((identity) => identity.provider));
   const available = (providerData?.providers ?? []).filter(isLinkableOAuthProvider);
   const oauthIdentity = identities.find((identity) => identity.provider !== 'local_email');
   const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
@@ -124,14 +118,6 @@ export default async function AccountPage({
     oauthIdentity?.displayName?.trim() ||
     (userEmail ? userEmail.split('@')[0] : null) ||
     '월덕 회원';
-
-  // 계정 보안 종합 점수 (100점 만점 기준)
-  const isSocialLinked = identities.some((i) => i.provider !== 'local_email');
-  const hasMultipleIdentities = identities.length >= 2;
-  const securityScore = Math.min(
-    100,
-    (isSocialLinked ? 35 : 20) + (hasMultipleIdentities ? 35 : 20) + 30,
-  );
 
   return (
     <div data-page="account" className="mx-auto w-full max-w-6xl space-y-6 pb-20 pt-2 sm:space-y-8 sm:pt-4">
@@ -185,14 +171,21 @@ export default async function AccountPage({
         </Alert>
       )}
 
-      {linked && PROVIDER_NAME[linked] && (
+      {linked && (confirmedOAuthCallback(linked, identityEvidence) ? (
         <Alert className="border-emerald-500/30 bg-emerald-500/5 rounded-2xl">
           <UserCheck className="size-4 text-emerald-500 shrink-0" />
           <AlertDescription className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-            {PROVIDER_NAME[linked]} 계정이 안전하게 연결되었습니다.
+            서버에서 {PROVIDER_NAME[linked]} 로그인 수단의 현재 연결 상태를 확인했습니다.
           </AlertDescription>
         </Alert>
-      )}
+      ) : (
+        <Alert role="alert" className="rounded-2xl border-amber-500/30 bg-amber-500/5">
+          <ShieldAlert className="size-4 shrink-0" />
+          <AlertDescription className="text-xs font-medium">
+            로그인 수단 연결 상태를 확인하지 못했습니다. 연결 목록을 다시 조회해 주세요.
+          </AlertDescription>
+        </Alert>
+      ))}
 
       {/* 2026 Adaptive Bento Grid 2.0 (Linear/Stripe Style) */}
       <div className="grid gap-6 lg:grid-cols-[340px_1fr] items-start">
@@ -208,12 +201,7 @@ export default async function AccountPage({
                   imageUrl={rawImageUrl ?? null}
                   className="size-20 shadow-md ring-2 ring-border/80"
                 />
-                <div
-                  title="보안 인증 완료"
-                  className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md ring-2 ring-background"
-                >
-                  <ShieldCheck className="size-3.5 shrink-0" />
-                </div>
+
               </div>
 
               {/* Real Member Display Name */}
@@ -234,7 +222,7 @@ export default async function AccountPage({
               {/* Badges & Connected Status */}
               <div className="mt-4 flex w-full flex-wrap items-center justify-center gap-2">
                 <Badge variant="secondary" className="rounded-lg text-[11px] font-semibold">
-                  연결 수단 {identities.length}개
+                  {identityEvidence.status === 'ready' ? `연결 수단 ${identities.length}개` : '연결 수단 확인 불가'}
                 </Badge>
                 {joinedDate && (
                   <Badge variant="outline" className="rounded-lg text-[11px] font-medium border-border/80 text-muted-foreground">
@@ -243,18 +231,14 @@ export default async function AccountPage({
                 )}
               </div>
 
-              {/* Account Security Progress Score Widget */}
               <div className="mt-5 w-full rounded-xl border border-border/60 bg-muted/20 p-3 text-left">
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <span className="text-muted-foreground">계정 보안 완성도</span>
-                  <span className="font-mono tabular-nums font-bold text-primary">{securityScore}%</span>
-                </div>
-                <Progress value={securityScore} className="mt-2 h-1.5 bg-muted" />
-                <p className="mt-1.5 text-[10px] text-muted-foreground">
-                  {securityScore >= 90
-                    ? '🛡️ 최고 등급 보안 보호 상태입니다.'
-                    : '💡 추가 로그인 수단을 연동하면 계정 보호가 강화됩니다.'}
+                <p className="text-xs font-semibold">계정 보안 설정</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  로그인 수단과 활성 세션을 확인하고 보안 설정을 관리하세요.
                 </p>
+                <Link href="/account/security" className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary underline underline-offset-4">
+                  보안 설정 확인 <ChevronRight className="ml-1 size-3.5" />
+                </Link>
               </div>
             </div>
 
@@ -346,16 +330,21 @@ export default async function AccountPage({
                   </CardDescription>
                 </div>
                 <Badge variant="secondary" className="text-xs font-bold px-2.5 py-0.5 rounded-lg shrink-0">
-                  {identities.length}개 활성
+                  {identityEvidence.status === 'ready' ? `${identities.length}개 활성` : '확인 불가'}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
-              {identityData === null ? (
-                <EmptyState
-                  title="연결된 로그인 수단을 불러올 수 없어요."
-                  description="페이지를 새로고침하거나 잠시 후 다시 시도해 주세요."
-                />
+              {identityEvidence.status !== 'ready' ? (
+                <div role="alert" className="space-y-3">
+                  <EmptyState
+                    title="연결된 로그인 수단을 확인할 수 없어요."
+                    description="조회에 실패했거나 응답이 올바르지 않습니다. 잠시 후 다시 시도해 주세요."
+                  />
+                  <Button asChild variant="outline" className="min-h-11">
+                    <Link href="/account">다시 조회하기</Link>
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-2.5">
                   {identities.map((identity) => (
@@ -428,7 +417,7 @@ export default async function AccountPage({
           )}
 
           {/* Section 3: Add Other Identities */}
-          {available.length > 0 && (
+          {identityEvidence.status === 'ready' && available.length > 0 && (
             <Card className="rounded-2xl border-zinc-800/80 bg-card/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
