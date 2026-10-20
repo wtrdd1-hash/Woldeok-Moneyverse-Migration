@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.20.1011 — User-authorized Production promotion preflight (STAGED Test candidate / Production HOLD)
+- [Detailed release acceptance evidence](docs/releases/v2026.10.20.1011.md) · [Implementation worklog](docs/worklog/2026-10-20-blog-production-approval-v1011.md) · [GitHub change note](docs/updates/v2026.10.20.1011-github.md). Exact main 55d99f57 backend/frontend bundle staged to immutable Test candidate, schema-only migration 278/279 and DB-less canary PASS. Official Test switch, financial balance/permission gate, session/v530 and Production promotion are NOT complete. Original live release pointers, database records and AI publishing hold unchanged.
+
+
 ## v2026.10.20.1001 — AI Blog re-audit and safe SQL replay foundation
 - [Detailed findings EN](docs/findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.md) / [한국어](docs/findings/MONEYVERSE_AI_BLOG_REAUDIT_v2026.10.20.1001.ko.md) · [Worklog EN](docs/worklog/2026-10-20-ai-blog-recheck-v1001.md) / [한국어](docs/worklog/2026-10-20-ai-blog-recheck-v1001.ko.md) · [Internal EN](docs/updates/v2026.10.20.1001-internal.md) / [KO](docs/updates/v2026.10.20.1001-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.20.1001-github.md) / [KO](docs/updates/v2026.10.20.1001-github.ko.md). TDD red/green source-only forward SQL 279 replay identity/expiry, stricter citation chronology/time zone/host checks; PG17 and full frontend/backend tests green with documented DB skips. No new public AI posts; 503 and Production financial/UI/Test gates unchanged.
 
