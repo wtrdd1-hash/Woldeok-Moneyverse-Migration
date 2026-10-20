@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.20.969 — Blog Markdown rendering and public education publication freshness (candidate)
+- [Worklog EN](docs/worklog/2026-10-20-blog-freshness-markdown-v969.md) / [한국어](docs/worklog/2026-10-20-blog-freshness-markdown-v969.ko.md) · [Internal EN](docs/updates/v2026.10.20.969-internal.md) / [한국어](docs/updates/v2026.10.20.969-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.20.969-github.md) / [한국어](docs/updates/v2026.10.20.969-github.ko.md). Production public articles count=6, last October 15. Safe Markdown and stale-publication disclosure; tests/build/local HTTP PASS. Formal Test and Production not performed; AI publication safety hold remains.
+
+
 ## v2026.10.17.755 — Stock League Test 500 read boundary correction; Production remains BLOCKED
 - [Worklog EN](docs/worklog/2026-10-17-stock-league-test-private-read-v755.md) / [한국어](docs/worklog/2026-10-17-stock-league-test-private-read-v755.ko.md) · [Internal](docs/updates/v2026.10.17.755-internal.md) · [GitHub](docs/updates/v2026.10.17.755-github.md). Forward SQL 274 replaces inaccessible `user_roles` and virtual portfolio raw SELECTs with scoped app-executable SECURITY DEFINER helpers. Isolated Test DB app-role read-only acceptance and full local tests PASS. Production 19 historic mismatches, core DML and v530 authenticated UI gates remain blocking.
 

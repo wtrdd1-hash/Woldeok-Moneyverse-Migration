@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import type { BlogPost } from '../blog.types';
+import { renderBlogMarkdownBlocks } from '../blog-markdown';
 import { blogUrl, blogHubUrl, hasCountryEdition, type BlogLocale } from '../blog-seo';
 import { BlogAdBanner } from '@/components/blog/blog-ad-banner';
 import { BlogInlineCalculator } from '@/components/blog/blog-inline-calculator';
@@ -66,7 +67,7 @@ export function BlogPostClient({ post, locale }: Props) {
   const activeContent = (locale !== 'ko' && post.translations?.[locale]?.content) || post.content;
   const activeTags = (locale !== 'ko' && post.translations?.[locale]?.tags) || post.tags;
 
-  const paragraphs = activeContent.split('\n\n');
+  const blocks = renderBlogMarkdownBlocks(activeContent);
 
   return (
     <article className="max-w-4xl mx-auto space-y-8">
@@ -179,107 +180,20 @@ export function BlogPostClient({ post, locale }: Props) {
       {/* 📊 수학적 금융 인포그래픽 시각화 배너 (선형 원금 대비 복리 기하급수 성장 곡선) */}
       {post.infographicType && <BlogInfographicCard type={post.infographicType} currentLocale={locale} />}
 
-      {/* Article Body (Markdown Rendering with Injected Interactive Widgets & Ads) */}
+      {/* Financial article body: safe Markdown blocks, including adjacent headings/tables. */}
       <div className="prose prose-invert max-w-none space-y-6 text-foreground/90 text-sm sm:text-base leading-relaxed">
-        {paragraphs.map((paragraph, idx) => {
-          let renderedElement: React.ReactNode = null;
-
-          if (paragraph.startsWith('## ')) {
-            renderedElement = (
-              <h2 key={`h2-${idx}`} className="text-xl sm:text-2xl font-black text-foreground pt-4 pb-1 border-b border-border/50">
-                {paragraph.replace('## ', '')}
-              </h2>
-            );
-          } else if (paragraph.startsWith('### ')) {
-            renderedElement = (
-              <h3 key={`h3-${idx}`} className="text-base sm:text-lg font-bold text-foreground pt-2">
-                {paragraph.replace('### ', '')}
-              </h3>
-            );
-          } else if (paragraph.startsWith('> ')) {
-            renderedElement = (
-              <blockquote key={`bq-${idx}`} className="p-3.5 rounded-lg border-l-4 border-blue-500 bg-muted/30 italic text-muted-foreground my-3">
-                {paragraph.replace('> ', '')}
-              </blockquote>
-            );
-          } else if (paragraph.startsWith('```')) {
-            const codeLines = paragraph.replace(/```[a-z]*\n?/g, '').trim();
-            renderedElement = (
-              <pre key={`code-${idx}`} className="p-3 rounded-lg bg-zinc-950/80 border border-border/60 text-emerald-400 font-mono text-xs overflow-x-auto my-3">
-                <code>{codeLines}</code>
-              </pre>
-            );
-          } else if (paragraph.startsWith('| ')) {
-            const rows = paragraph.split('\n').filter((r) => !r.includes('---'));
-            renderedElement = (
-              <div key={`table-${idx}`} className="overflow-x-auto my-4 rounded-xl border border-border/60">
-                <table className="w-full text-xs text-left">
-                  <tbody>
-                    {rows.map((row, rIdx) => {
-                      const cols = row.split('|').filter(Boolean);
-                      const isHeader = rIdx === 0;
-                      return (
-                        <tr key={rIdx} className={isHeader ? 'bg-muted/60 font-bold border-b border-border' : 'border-b border-border/40 hover:bg-muted/20'}>
-                          {cols.map((col, cIdx) => (
-                            <td key={cIdx} className="p-3 whitespace-nowrap">
-                              {col.trim()}
-                            </td>
-                          ))}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            );
-          } else if (paragraph.startsWith('![') && paragraph.includes('](')) {
-            const match = paragraph.match(/^!\[(.*?)\]\((.*?)\)$/);
-            if (match) {
-              const [, altText, imgSrc] = match;
-              renderedElement = (
-                <figure key={`img-${idx}`} className="my-6 rounded-2xl overflow-hidden border border-border/70 shadow-md bg-card/50">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={imgSrc} alt={altText || activeTitle} className="w-full h-auto aspect-[1200/630] object-cover" loading="lazy" />
-                  {altText && (
-                    <figcaption className="px-4 py-2 bg-muted/30 border-t border-border/40 text-[11px] text-muted-foreground font-mono flex items-center justify-between">
-                      <span>🖼️ {altText}</span>
-                      <span className="text-emerald-400 font-bold">{labels.illustration}</span>
-                    </figcaption>
-                  )}
-                </figure>
-              );
-            } else {
-              renderedElement = (
-                <p key={`p-${idx}`} className="leading-relaxed text-foreground/80">
-                  {paragraph}
-                </p>
-              );
-            }
-          } else {
-            renderedElement = (
-              <p key={`p-${idx}`} className="leading-relaxed text-foreground/80">
-                {paragraph}
-              </p>
-            );
-          }
-
-          return (
-            <React.Fragment key={`block-${idx}`}>
-              {renderedElement}
-
-              {/* 본문 중간 인터랙티브 미니 계산기 위젯 삽입 (2번째 단락 이후) */}
-              {idx === 1 && (
-                <BlogInlineCalculator
-                  fullCalculatorHref={post.relatedCalculatorHref}
-                  fullCalculatorName={post.relatedCalculatorName}
-                />
-              )}
-
-              {/* 본문 중간 인피드 네이티브 광고 슬롯 삽입 (4번째 단락 이후) */}
-              {idx === 4 && <BlogAdBanner position="in-feed" />}
-            </React.Fragment>
-          );
-        })}
+        {blocks.map((block, idx) => (
+          <React.Fragment key={'block-' + idx}>
+            {block}
+            {idx === 1 && (
+              <BlogInlineCalculator
+                fullCalculatorHref={post.relatedCalculatorHref}
+                fullCalculatorName={post.relatedCalculatorName}
+              />
+            )}
+            {idx === 4 && <BlogAdBanner position="in-feed" />}
+          </React.Fragment>
+        ))}
       </div>
 
       {/* 2. 본문 하단 매칭형 수익화 광고 슬롯 */}

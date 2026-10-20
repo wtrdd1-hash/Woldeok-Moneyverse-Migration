@@ -6,6 +6,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import { BlogPostClient } from './[slug]/blog-post-client';
 import { BlogHubClient } from './blog-hub-client';
+import { getBlogFreshnessNotice } from './blog-freshness';
 import { getAllBlogPosts, getBlogPostBySlug } from './blog-data';
 import {
   blogAlternateLanguages, blogHubUrl, blogUrl, canonicalBlogSlug,
@@ -77,6 +78,7 @@ export function summarizeBlogPost(post: BlogPost) {
 export function renderBlogHub(locale: BlogLocale) {
   const posts = countryBlogPosts(getAllBlogPosts().filter(isBlogDiscoverable), locale);
   const canonical = blogHubUrl(locale);
+  const freshnessNotice = getBlogFreshnessNotice(posts, locale);
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'Blog', name: PAGE_TITLES[locale],
     description: PAGE_DESCRIPTIONS[locale], url: canonical,
@@ -104,6 +106,11 @@ export function renderBlogHub(locale: BlogLocale) {
               </Link>
             ))}
           </nav>
+          {freshnessNotice && (
+            <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-xs sm:text-sm text-muted-foreground">
+              {freshnessNotice}
+            </p>
+          )}
         </div>
         <BlogHubClient initialPosts={posts.map(summarizeBlogPost)} locale={locale} />
       </div>
