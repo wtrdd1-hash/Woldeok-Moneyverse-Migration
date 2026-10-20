@@ -148,17 +148,17 @@ export const GLOBAL_COMPOUND_PRESETS: readonly GlobalCompoundPreset[] = [
 ];
 
 export interface CompoundCurrency {
-  readonly code: 'USD' | 'EUR' | 'GBP' | 'JPY' | 'KRW';
+  readonly code: 'USD' | 'EUR' | 'GBP' | 'JPY' | 'KRW' | 'CNY';
   readonly symbol: string;
   readonly label: string;
-  readonly rateFromUsd: number; // 1 USD 기준 환율
-  readonly defaultStep: number;
+    readonly defaultStep: number;
 }
 
 export const SUPPORTED_COMPOUND_CURRENCIES: readonly CompoundCurrency[] = [
-  { code: 'USD', symbol: '$', label: 'USD ($)', rateFromUsd: 1.0, defaultStep: 50 },
-  { code: 'EUR', symbol: '€', label: 'EUR (€)', rateFromUsd: 0.92, defaultStep: 50 },
-  { code: 'GBP', symbol: '£', label: 'GBP (£)', rateFromUsd: 0.78, defaultStep: 50 },
-  { code: 'JPY', symbol: '¥', label: 'JPY (¥)', rateFromUsd: 155.0, defaultStep: 10000 },
-  { code: 'KRW', symbol: '₩', label: 'KRW (₩)', rateFromUsd: 1380.0, defaultStep: 100000 },
+  { code: 'USD', symbol: '$', label: 'USD ($)', defaultStep: 50 },
+  { code: 'EUR', symbol: '€', label: 'EUR (€)', defaultStep: 50 },
+  { code: 'GBP', symbol: '£', label: 'GBP (£)', defaultStep: 50 },
+  { code: 'JPY', symbol: '¥', label: 'JPY (¥)', defaultStep: 10000 },
+  { code: 'KRW', symbol: '₩', label: 'KRW (₩)', defaultStep: 100000 },
+  { code: 'CNY', symbol: '¥', label: 'CNY (¥)', defaultStep: 100 },
 ];

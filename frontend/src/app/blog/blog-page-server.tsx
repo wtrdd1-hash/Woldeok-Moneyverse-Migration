@@ -145,7 +145,11 @@ export function renderBlogArticle(slug: string, locale: BlogLocale) {
       <div className="container max-w-5xl mx-auto px-4 py-8">
         {!isBlogDiscoverable(original) && (
           <p role="alert" className="mb-5 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
-            보관된 기존 AI 생성 글입니다. 출처와 수치의 사실 검증 및 편집 승인이 완료되지 않아 신규 독자에게 추천하지 않으며 검색 색인에서 제외하도록 요청 중입니다.
+            {locale === 'ko'
+              ? '보관된 기존 AI 생성 글입니다. 출처와 수치의 검증 및 편집 승인이 완료되지 않아 검색 색인 대상에서 제외합니다.'
+              : locale === 'en' ? 'Archived AI-generated article: sources and figures have not received editorial approval. This page is excluded from search indexing.'
+              : locale === 'ja' ? '過去のAI生成記事です。出典と数値の編集確認が完了していないため、検索インデックスの対象外としています。'
+              : '这是一篇旧版 AI 生成文章。来源和数据尚未经编辑审核，因此不纳入搜索索引。'}
           </p>
         )}
         <BlogPostClient post={{ ...post, heroImage: safeHeroImage(post.heroImage) }} locale={locale} />

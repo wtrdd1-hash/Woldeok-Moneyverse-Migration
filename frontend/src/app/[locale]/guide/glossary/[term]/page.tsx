@@ -14,6 +14,7 @@ import type { GlossaryTerm } from '@/config/pseo-glossary.config';
 import { GLOSSARY_TERMS } from '@/config/pseo-glossary.config';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
 import { isLocale, type Locale } from '@/lib/locale';
+import { getLocalizedGlossaryFormula } from '@/lib/glossary-localization';
 
 export const revalidate = 86400; // 24시간 정적 캐싱
 
@@ -55,21 +56,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (locale === 'en') {
     termName = item.termEn;
-    title = `${item.termEn} Definition, Formula & Guide | Finance Glossary`;
-    description = `${item.termEn} (${item.termKo}) explained simply. Formula: ${item.formula || 'N/A'}. Key takeaways, calculation principles, and practical investment strategy.`;
+    title = `${item.termEn}: Meaning & Examples | Finance Glossary`;
+    description = item.descriptionEn;
   } else if (locale === 'ja') {
     termName = item.termJa;
-    title = `${item.termJa}とは？ 計算式と実戦投資ガイド | 金融用語辞典`;
-    description = `${item.termJa}（${item.termEn}）の基礎知識と計算式をわかりやすく解説。${item.formula ? `計算式: ${item.formula}。` : ''} 株式投資や資産形成に役立つ重要ポイント。`;
+    title = `${item.termJa}とは？意味と使い方 | 金融用語辞典`;
+    description = item.descriptionJa;
   } else if (locale === 'zh') {
     termName = item.termZh;
-    title = `${item.termZh} 是什么意思？计算公式与实战指南 | 金融词典`;
-    description = `${item.termZh}（${item.termEn}）详细通俗解析。计算公式：${item.formula || '无'}。掌握核心估值与投资策略，轻松看懂财报与股市。`;
+    title = `${item.termZh}是什么意思？定义与应用 | 金融词典`;
+    description = item.descriptionZh;
   }
 
   const ogImageUrl = buildOgImageUrl({
     title: termName,
-    description: locale === 'en' ? item.keyTakeawayEn : item.keyTakeawayKo,
+    description: locale === 'en' ? item.keyTakeawayEn : locale === 'ja' ? item.descriptionJa : item.descriptionZh,
     type: 'default',
     badge: 'Finance Glossary',
   });
@@ -131,7 +132,8 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
 
   const localizedTermName = isEn ? item.termEn : isJa ? item.termJa : item.termZh;
   const localizedDescription = isEn ? item.descriptionEn : isJa ? item.descriptionJa : item.descriptionZh;
-  const localizedKeyTakeaway = isEn ? item.keyTakeawayEn : item.keyTakeawayKo;
+  const localizedKeyTakeaway = isEn ? item.keyTakeawayEn : isJa ? item.descriptionJa : item.descriptionZh;
+  const localizedFormula = getLocalizedGlossaryFormula(item.slug, locale, item.formula);
 
   const breadcrumbs = breadcrumbJsonLd([
     { name: isEn ? 'Home' : isJa ? 'ホーム' : '首页', path: `/${locale}` },
@@ -195,12 +197,9 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight">
               {localizedTermName}
             </h1>
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1 text-xs text-muted-foreground">
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇰🇷 {item.termKo}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇺🇸 {item.termEn}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇯🇵 {item.termJa}</span>
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇨🇳 {item.termZh}</span>
-            </div>
+            <p className="pt-1 text-xs text-muted-foreground">
+              {isEn ? 'Financial learning reference' : isJa ? '金融学習のための用語解説' : '金融知识参考'}
+            </p>
           </div>
         </div>
 
@@ -236,20 +235,12 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
           <CardContent className="p-6 pt-3 space-y-4 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
             <p className="text-base font-normal leading-relaxed">{localizedDescription}</p>
 
-            {/* 교차 언어 참조 (KO / EN) */}
-            <div className="mt-4 pt-4 border-t border-border/60">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                {isEn ? 'Original Korean Reference' : 'Global English Summary'}
-              </p>
-              <p className="text-xs text-muted-foreground leading-relaxed italic">
-                &ldquo;{isEn ? item.descriptionKo : item.descriptionEn}&rdquo;
-              </p>
-            </div>
+
           </CardContent>
         </Card>
 
         {/* 공식(Formula) 카드 */}
-        {item.formula && (
+        {localizedFormula && (
           <Card className="border-border/80 bg-card/80 shadow-sm">
             <CardHeader className="p-6 pb-3">
               <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
@@ -259,13 +250,9 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
             </CardHeader>
             <CardContent className="p-6 pt-3 space-y-3">
               <div className="p-4 rounded-xl bg-zinc-900 text-zinc-100 font-mono text-sm sm:text-base border border-zinc-800 shadow-inner overflow-x-auto">
-                <code>{item.formula}</code>
+                <code>{localizedFormula}</code>
               </div>
-              {item.formulaDescriptionKo && (
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  💡 {item.formulaDescriptionKo}
-                </p>
-              )}
+
             </CardContent>
           </Card>
         )}
@@ -278,7 +265,7 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
                 {isEn ? 'Interactive Simulation' : isJa ? 'シミュレーターで試す' : '直接进行在线试算'}
               </span>
               <h4 className="text-base font-bold text-foreground">
-                {item.relatedCalculatorLabelKo || 'Financial Calculator Tool'}
+                {isEn ? 'Explore available calculators' : isJa ? '利用できる計算ツールを探す' : '查看可用的计算工具'}
               </h4>
               <p className="text-xs text-muted-foreground">
                 {isEn
@@ -289,7 +276,7 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
               </p>
             </div>
             <Button asChild className="shrink-0 w-full sm:w-auto font-medium">
-              <Link href={item.relatedCalculatorUrl}>
+              <Link href={`/${locale}/tools`}>
                 {isEn ? 'Launch Calculator' : isJa ? '計算機を起動' : '立即启动计算器'}
                 <ArrowRight className="size-4 ml-1.5" />
               </Link>
@@ -307,11 +294,11 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
               label: 'Metric',
               value: item.slug.toUpperCase(),
             },
-            ...(item.formula
+            ...(localizedFormula
               ? {
                   secondaryMetric: {
                     label: 'Formula',
-                    value: item.formula,
+                    value: localizedFormula || '',
                   },
                 }
               : {}),
@@ -335,7 +322,7 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {otherTerms.map((other) => {
               const otherName = isEn ? other.termEn : isJa ? other.termJa : other.termZh;
-              const otherTakeaway = isEn ? other.keyTakeawayEn : other.keyTakeawayKo;
+              const otherTakeaway = isEn ? other.keyTakeawayEn : isJa ? other.descriptionJa : other.descriptionZh;
 
               return (
                 <Link

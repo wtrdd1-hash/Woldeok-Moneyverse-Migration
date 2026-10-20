@@ -21,6 +21,7 @@ import { renderBlogMarkdownBlocks } from '../blog-markdown';
 import { blogUrl, blogHubUrl, hasCountryEdition, type BlogLocale } from '../blog-seo';
 import { BlogAdBanner } from '@/components/blog/blog-ad-banner';
 import { BlogInlineCalculator } from '@/components/blog/blog-inline-calculator';
+import { BlogLocalizedMoneyWidget } from '@/components/blog/blog-localized-money-widget';
 import { BlogRelatedEcosystem } from '@/components/blog/blog-related-ecosystem';
 import { BlogConversionBanner } from '@/components/blog/blog-conversion-banner';
 import { BlogInfographicCard } from '@/components/blog/blog-infographic-card';
@@ -186,10 +187,18 @@ export function BlogPostClient({ post, locale }: Props) {
           <React.Fragment key={'block-' + idx}>
             {block}
             {idx === 1 && (
-              <BlogInlineCalculator
-                fullCalculatorHref={post.relatedCalculatorHref}
-                fullCalculatorName={post.relatedCalculatorName}
-              />
+              locale === 'ko' ? (
+                <BlogInlineCalculator
+                  fullCalculatorHref={post.relatedCalculatorHref}
+                  fullCalculatorName={post.relatedCalculatorName}
+                />
+              ) : post.slug === 'country-guide-compound' ? (
+                <BlogLocalizedMoneyWidget locale={locale} href={post.relatedCalculatorHref} />
+              ) : (
+                <p className="my-5 text-sm"><Link href={post.relatedCalculatorHref} className="text-primary underline underline-offset-4">
+                  {locale === 'en' ? 'Explore the related financial calculator' : locale === 'ja' ? '関連する金融計算ツールへ' : '查看相关金融计算工具'}
+                </Link></p>
+              )
             )}
             {idx === 4 && <BlogAdBanner position="in-feed" />}
           </React.Fragment>
@@ -214,12 +223,18 @@ export function BlogPostClient({ post, locale }: Props) {
       </div>
 
       {/* 3. 본문 맞춤형 머니버스 생태계 3대 도구 및 가상 주식 퀵 큐레이션 */}
-      <BlogRelatedEcosystem
-        relatedCalculatorHref={post.relatedCalculatorHref}
-        relatedCalculatorName={post.relatedCalculatorName}
-        relatedStockTicker={post.relatedStockTicker}
-        category={post.category}
-      />
+      {locale === 'ko' ? (
+        <BlogRelatedEcosystem
+          relatedCalculatorHref={post.relatedCalculatorHref}
+          relatedCalculatorName={post.relatedCalculatorName}
+          relatedStockTicker={post.relatedStockTicker}
+          category={post.category}
+        />
+      ) : (
+        <p className="my-8"><Link className="font-semibold text-primary underline underline-offset-4" href={post.relatedCalculatorHref}>
+          {locale === 'en' ? 'Try the related financial tool' : locale === 'ja' ? '関連する金融計算ツールを使う' : '使用相关金融计算工具'}
+        </Link></p>
+      )}
 
       {/* 4. 신규 가입 웰컴 지원금(10,000 WLD + 복권) 및 AI 어드바이저 덕이 진단실 고전환 락인 배너 */}
       <BlogConversionBanner />

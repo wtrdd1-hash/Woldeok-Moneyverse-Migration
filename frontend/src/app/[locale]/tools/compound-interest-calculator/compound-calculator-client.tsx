@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Calculator,
@@ -12,6 +12,7 @@ import {
   Share2,
   Coins,
 } from 'lucide-react';
+import { MONEY_COUNTRIES, moneyCountryForLocale } from '@/lib/country-money';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
@@ -37,62 +38,60 @@ export function CompoundCalculatorClient({
   yearsDefault = 20,
   locale = 'en',
 }: Props) {
+  const defaultCountry = moneyCountryForLocale(locale === 'ja' || locale === 'zh' ? locale : 'en');
+  const defaultCode = MONEY_COUNTRIES[defaultCountry].currency;
   const [selectedCurrency, setSelectedCurrency] = useState<CompoundCurrency>(
-    SUPPORTED_COMPOUND_CURRENCIES[0] ?? {
-      code: 'USD',
-      symbol: '$',
-      label: 'USD ($)',
-      rateFromUsd: 1.0,
-      defaultStep: 50,
-    }
+    () => SUPPORTED_COMPOUND_CURRENCIES.find(c => c.code === defaultCode)!
   );
-  const [initialDeposit, setInitialDeposit] = useState<number>(initialDepositDefault);
-  const [monthlyContribution, setMonthlyContribution] = useState<number>(monthlyContributionDefault);
+  const [initialDeposit, setInitialDeposit] = useState<number>(() =>
+    initialDepositDefault === 10000 && locale !== 'en'
+      ? (locale === 'ja' ? 1_000_000 : 70_000)
+      : initialDepositDefault
+  );
+  const [monthlyContribution, setMonthlyContribution] = useState<number>(() =>
+    monthlyContributionDefault === 500 && locale !== 'en'
+      ? (locale === 'ja' ? 50_000 : 3_500)
+      : monthlyContributionDefault
+  );
   const [annualRate, setAnnualRate] = useState<number>(annualRateDefault);
   const [years, setYears] = useState<number>(yearsDefault);
   const [isShareOpen, setIsShareOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    try {
-      const hasAuth =
-        document.cookie.includes('wdmv_session=') ||
-        document.cookie.includes('auth=') ||
-        document.cookie.includes('token=') ||
-        Boolean(localStorage.getItem('token')) ||
-        Boolean(localStorage.getItem('auth_user'));
-      setIsLoggedIn(hasAuth);
-    } catch {
-      // ignore
-    }
-  }, []);
-
   const isEn = locale === 'en';
   const isJa = locale === 'ja';
   const isZh = locale === 'zh';
 
-  // 선택된 통화 배율 적용
-  const rateMultiplier = selectedCurrency.rateFromUsd;
+  // A selected currency is a unit, not an invented live foreign-exchange quote.
   const symbol = selectedCurrency.symbol;
-
-  const result = useMemo(() => {
-    return calculateGlobalCompound(
-      initialDeposit * rateMultiplier,
-      monthlyContribution * rateMultiplier,
-      annualRate,
-      years
-    );
-  }, [initialDeposit, monthlyContribution, annualRate, years, rateMultiplier]);
+  const moneyFormat = (value: number) => new Intl.NumberFormat(
+    selectedCurrency.code === 'JPY' ? 'ja-JP'
+      : selectedCurrency.code === 'CNY' ? 'zh-CN'
+      : selectedCurrency.code === 'KRW' ? 'ko-KR' : 'en-US',
+    { style: 'currency', currency: selectedCurrency.code },
+  ).format(value);
+  const result = useMemo(() => calculateGlobalCompound(
+    initialDeposit, monthlyContribution, annualRate, years
+  ), [initialDeposit, monthlyContribution, annualRate, years]);
 
   const handleCurrencyChange = (curr: CompoundCurrency) => {
     setSelectedCurrency(curr);
+    const examples: Record<string, { start: number; monthly: number }> = {
+      USD: { start: 10000, monthly: 500 },
+      EUR: { start: 10000, monthly: 500 },
+      GBP: { start: 10000, monthly: 500 },
+      JPY: { start: 1000000, monthly: 50000 },
+      KRW: { start: 10000000, monthly: 500000 },
+      CNY: { start: 70000, monthly: 3500 },
+    };
+    const example = examples[curr.code]!;
+    setInitialDeposit(example.start);
+    setMonthlyContribution(example.monthly);
   };
 
   const shareText = isEn
-    ? `My ${years}-year Compounding Plan: Investing ${symbol}${monthlyContribution.toLocaleString()}/mo @ ${annualRate}% grows into ${symbol}${result.totalFutureValue.toLocaleString()}!`
+    ? `My ${years}-year Compounding Plan: Investing ${moneyFormat(monthlyContribution)}/mo @ ${annualRate}% grows into ${moneyFormat(result.totalFutureValue)}!`
     : isJa
-    ? `私の${years}年複利シミュレーション：毎月${symbol}${monthlyContribution.toLocaleString()}を年利${annualRate}%で積立運用すると${symbol}${result.totalFutureValue.toLocaleString()}に！`
-    : `我的${years}年复利定投测算：每月定投${symbol}${monthlyContribution.toLocaleString()}，年化${annualRate}%，最终资产可达${symbol}${result.totalFutureValue.toLocaleString()}！`;
+    ? `私の${years}年複利シミュレーション：毎月${moneyFormat(monthlyContribution)}を年利${annualRate}%で積立運用すると${moneyFormat(result.totalFutureValue)}に！`
+    : `我的${years}年复利定投测算：每月定投${moneyFormat(monthlyContribution)}，年化${annualRate}%，最终资产可达${moneyFormat(result.totalFutureValue)}！`;
 
   const handleTwitterShare = () => {
     const url = typeof window !== 'undefined' ? window.location.href : 'https://easy-scraping.com';
@@ -102,15 +101,6 @@ export function CompoundCalculatorClient({
     window.open(twitterUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleOpenAuthModal = () => {
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent('moneyverse:open-auth-modal', {
-          detail: { mode: 'signup' },
-        })
-      );
-    }
-  };
 
   return (
     <Card className="border-border/80 bg-card/90 shadow-sm overflow-hidden">
@@ -151,6 +141,11 @@ export function CompoundCalculatorClient({
       </CardHeader>
 
       <CardContent className="p-5 sm:p-6 space-y-6">
+        <p className="text-xs text-muted-foreground">
+          {isEn ? 'Amounts use the selected currency. Switching resets the example; this is not an FX conversion or live quote.' :
+            isJa ? '選択した通貨での試算です。通貨切り替え時は例の金額に戻り、為替換算は行いません。' :
+            '使用所选货币计算。切换币种会重置示例本金，不采用实时或预设汇率。'}
+        </p>
         {/* 입력 폼 4개 그리드 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1.5">
@@ -219,8 +214,7 @@ export function CompoundCalculatorClient({
                 {isEn ? 'Estimated Total Future Portfolio Value' : isJa ? '将来の予想資産総額' : '预估最终总资产'}
               </span>
               <div className="text-2xl sm:text-4xl font-mono tabular-nums font-extrabold text-emerald-950 dark:text-emerald-100 mt-1">
-                {symbol}
-                {result.totalFutureValue.toLocaleString()}
+                {moneyFormat(result.totalFutureValue)}
               </div>
             </div>
             <div className="text-left sm:text-right">
@@ -239,8 +233,7 @@ export function CompoundCalculatorClient({
                 {isEn ? 'Total Principal Invested' : isJa ? '総投資元本' : '投资本金总计'}
               </span>
               <div className="text-base font-mono font-bold text-foreground mt-0.5">
-                {symbol}
-                {result.totalPrincipalInvested.toLocaleString()}
+                {moneyFormat(result.totalPrincipalInvested)}
               </div>
             </div>
             <div className="p-3 rounded-xl bg-background/70 border border-border/50">
@@ -248,8 +241,7 @@ export function CompoundCalculatorClient({
                 {isEn ? 'Total Compound Interest Earned' : isJa ? '複利による純利益' : '纯复利收益'}
               </span>
               <div className="text-base font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                +{symbol}
-                {result.totalInterestEarned.toLocaleString()}
+                +{moneyFormat(result.totalInterestEarned)}
               </div>
             </div>
           </div>
@@ -281,7 +273,7 @@ export function CompoundCalculatorClient({
                   <div
                     style={{ height: `${heightPct}%` }}
                     className="w-full max-w-[20px] rounded-t bg-emerald-500/80 hover:bg-emerald-400 transition-all"
-                    title={`Year ${item.year}: ${symbol}${item.value.toLocaleString()}`}
+                    title={`Year ${item.year}: ${moneyFormat(item.value)}`}
                   />
                   <span className="text-[9px] font-mono text-muted-foreground mt-1">
                     {item.year % 5 === 0 || item.year === 1 || item.year === years ? `${item.year}y` : ''}
@@ -336,23 +328,23 @@ export function CompoundCalculatorClient({
           </div>
         </div>
 
-        {/* 시나리오 저장 & 10,000 WLD 무료 정착금 가입 브릿지 */}
+        {/* Optional example saving; WLD grants are not promised. */}
         <CalculatorSaveAction
           scenario={{
             type: 'stock',
-            title: `Compound Plan: ${symbol}${monthlyContribution}/mo @ ${annualRate}% (${years}y)`,
+            title: `Compound Plan: ${moneyFormat(monthlyContribution)}/mo @ ${annualRate}% (${years}y)`,
             badge: 'FIRE PLAN',
             primaryMetric: {
               label: isEn ? 'Future Value' : isJa ? '予想資産' : isZh ? '预期资产' : '예상 자산',
-              value: `${symbol}${result.totalFutureValue.toLocaleString()}`,
+              value: `${moneyFormat(result.totalFutureValue)}`,
             },
             secondaryMetric: {
               label: isEn ? 'Interest Profit' : isJa ? '利息収益' : isZh ? '复利收益' : '복리 수익',
-              value: `+${symbol}${result.totalInterestEarned.toLocaleString()}`,
+              value: `+${moneyFormat(result.totalInterestEarned)}`,
             },
             details: {
-              deposit: `${symbol}${initialDeposit.toLocaleString()}`,
-              monthly: `${symbol}${monthlyContribution.toLocaleString()}`,
+              deposit: `${moneyFormat(initialDeposit)}`,
+              monthly: `${moneyFormat(monthlyContribution)}`,
               rate: `${annualRate}%`,
               years: `${years} yrs`,
             },
@@ -360,40 +352,7 @@ export function CompoundCalculatorClient({
           }}
         />
 
-        {/* 신규 글로벌 유저 10,000 WLD 무료 정착금 획득 & 가상 모의투자 온보딩 카드 */}
-        {!isLoggedIn && (
-          <div className="p-4 sm:p-5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-background to-emerald-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Coins className="size-4 text-amber-500 shrink-0" />
-                <span className="text-xs font-extrabold uppercase tracking-wide text-amber-600 dark:text-amber-400">
-                  {isEn ? 'Beginner Grant Offer' : isJa ? '新規登録ボーナス' : '新手体验金'}
-                </span>
-              </div>
-              <h4 className="text-sm font-bold text-foreground">
-                {isEn
-                  ? 'Claim 10,000 WLD and test this compounding portfolio risk-free!'
-                  : isJa
-                  ? '10,000 WLDを受け取って、この複利ポートフォリオをノーリスクで実践しよう！'
-                  : '立即领取10,000 WLD，零风险开启您的定投模拟盘！'}
-              </h4>
-              <p className="text-xs text-muted-foreground">
-                {isEn
-                  ? 'No credit card required. Free simulated trading portfolio + daily central bank dividends.'
-                  : '가상 화폐로 방금 계산한 ETF/주식 종목을 즉시 매수하고 매일 중앙은행 배당금을 받아보세요.'}
-              </p>
-            </div>
 
-            <Button
-              type="button"
-              onClick={handleOpenAuthModal}
-              className="min-h-[44px] bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm px-5 rounded-xl shrink-0 gap-1.5 shadow-sm"
-            >
-              <span>{isEn ? 'Claim 10,000 WLD Grant' : '10,000 WLD 받기'}</span>
-              <ArrowRight className="size-4" />
-            </Button>
-          </div>
-        )}
       </CardContent>
 
       {/* 바이럴 공유 카드 다이얼로그 */}
@@ -404,7 +363,7 @@ export function CompoundCalculatorClient({
           category: isEn ? 'Compound & FIRE Growth Plan' : '복리 & FIRE 포트폴리오',
           title: `${years}-Year Compounding & FIRE Blueprint`,
           keyMetricLabel: isEn ? 'Expected Portfolio Value' : '예상 총 자산',
-          keyMetricValue: `${symbol}${result.totalFutureValue.toLocaleString()}`,
+          keyMetricValue: `${moneyFormat(result.totalFutureValue)}`,
           keyMetricSubtext: `${annualRate}% Annual Return over ${years} Years`,
           badgeText: `${annualRate}% / ${years}Y`,
           recommendationNote: shareText,
@@ -412,11 +371,11 @@ export function CompoundCalculatorClient({
           metrics: [
             {
               label: isEn ? 'Principal' : '투자 원금',
-              value: `${symbol}${result.totalPrincipalInvested.toLocaleString()}`,
+              value: `${moneyFormat(result.totalPrincipalInvested)}`,
             },
             {
               label: isEn ? 'Compound Interest' : '복리 수익',
-              value: `+${symbol}${result.totalInterestEarned.toLocaleString()}`,
+              value: `+${moneyFormat(result.totalInterestEarned)}`,
               isPositive: true,
             },
             {

@@ -11,6 +11,8 @@ import { canonicalUrl, buildOgImageUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
 import { isLocale, type Locale } from '@/lib/locale';
+import { getCountryCompoundTitle, getCountryCompoundDescription, getCountryCompoundExample } from '@/lib/compound-country-scenarios';
+import { formatCountryMoney, moneyCountryForLocale } from '@/lib/country-money';
 import { GLOBAL_COMPOUND_PRESETS } from '@/config/pseo-compound-global.config';
 import { CompoundCalculatorClient } from './compound-calculator-client';
 
@@ -173,8 +175,8 @@ export default async function GlobalCompoundPage({ params }: PageProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {GLOBAL_COMPOUND_PRESETS.map((preset) => {
-              const title = isEn ? preset.titleEn : isJa ? preset.titleJa : preset.titleZh;
-              const desc = isEn ? preset.descriptionEn : isJa ? preset.descriptionJa : preset.descriptionZh;
+              const title = getCountryCompoundTitle(preset, locale);
+              const desc = getCountryCompoundDescription(locale);
 
               return (
                 <Link
@@ -197,7 +199,7 @@ export default async function GlobalCompoundPage({ params }: PageProps) {
                     </p>
                   </div>
                   <div className="pt-2 mt-2 border-t border-border/50 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                    ${preset.monthlyContribution}/mo • {preset.years} yrs
+                    {formatCountryMoney(getCountryCompoundExample(preset, locale).monthlyContribution || getCountryCompoundExample(preset, locale).initialDeposit, moneyCountryForLocale(locale))} · {preset.years} {isEn ? 'years' : '年'}
                   </div>
                 </Link>
               );

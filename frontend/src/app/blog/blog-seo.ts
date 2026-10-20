@@ -41,7 +41,29 @@ export function getBlogCountryEdition(post: BlogPost, locale: BlogLocale): BlogP
   if (!hasCountryEdition(post, locale)) return undefined;
   if (locale === 'ko') return post;
   const translated = post.translations?.[locale];
-  return translated ? { ...post, ...translated } : undefined;
+  if (!translated) return undefined;
+  // A localized article must never send readers to an unlocalized KRW-only
+  // calculator. Link to the reviewed local tool or to its translated hub.
+  const calculator = post.slug === 'country-guide-loan'
+    ? `/${locale}/tools/loan-interest-calculator`
+    : post.slug === 'country-guide-compound'
+      ? `/${locale}/tools/compound-interest-calculator`
+      : `/${locale}/tools`;
+  return {
+    ...post, ...translated,
+    relatedCalculatorHref: calculator,
+    relatedCalculatorName: ({
+      en: 'Financial calculators', ja: '金融計算ツール', zh: '金融计算工具',
+    })[locale],
+    categoryLabel: ({
+      en: 'Financial education', ja: '金融の基礎知識', zh: '金融知识',
+    })[locale],
+    author: {
+      ...post.author,
+      name: ({ en: 'Woldeok Finance Editorial', ja: 'Woldeok 金融編集部', zh: 'Woldeok 金融编辑部' })[locale],
+      role: ({ en: 'Source-based educational content', ja: '公式資料に基づく金融教育', zh: '基于官方资料的金融教育' })[locale],
+    },
+  };
 }
 export function countryBlogPosts(posts: readonly BlogPost[], locale: BlogLocale): BlogPost[] {
   return posts.flatMap(post => {

@@ -61,11 +61,19 @@ describe('public search surface', () => {
     for (const koreanOnlyPath of [
       '/tools/compound-calculator/10m-3y-5p',
       '/tools/stock-calculator/chips-minus-20',
-      '/tools/loan-interest-calculator',
       '/stocks/CHIPS',
     ]) {
       expect(byPath(koreanOnlyPath)?.alternates).toBeUndefined();
     }
+
+    // v990: reviewed, independently rendered US/JP/CN loan calculators.
+    const loan = byPath('/tools/loan-interest-calculator');
+    expect(byPath('/ja/tools/loan-interest-calculator')?.alternates?.languages)
+      .toEqual(loan?.alternates?.languages);
+    expect(byPath('/zh/tools/loan-interest-calculator')?.alternates?.languages?.zh)
+      .toBe('https://easy-scraping.com/zh/tools/loan-interest-calculator');
+    expect(loan?.alternates?.languages?.en)
+      .toBe('https://easy-scraping.com/en/tools/loan-interest-calculator');
 
     for (const entry of entries) {
       for (const alternate of Object.values(entry.alternates?.languages || {})) {

@@ -8,9 +8,17 @@ describe('verified SEO locale versions (v920)', () => {
   it('only asserts a localized equivalent when actual content is reviewed', () => {
     expect(getVerifiedLocalePaths('/tools/stock-calculator/chips-minus-20')).toBeNull();
     expect(getVerifiedLocalePaths('/tools/compound-calculator/10m-3y-5p')).toBeNull();
-    expect(getVerifiedLocalePaths('/tools/loan-interest-calculator')).toBeNull();
     expect(getVerifiedLocalePaths('/stocks/CHIPS')).toBeNull();
     expect(getVerifiedLocalePaths('/en/en/tools/compound-interest-calculator')).toBeNull();
+  });
+
+  it('maps Korean loan calculator to reviewed country editions', () => {
+    expect(getVerifiedLocalePaths('/tools/loan-interest-calculator')).toEqual({
+      ko: '/tools/loan-interest-calculator',
+      en: '/en/tools/loan-interest-calculator',
+      ja: '/ja/tools/loan-interest-calculator',
+      zh: '/zh/tools/loan-interest-calculator',
+    });
   });
 
   it('maps Korean compound calculator to real translated pages instead of Korean rewrites', () => {

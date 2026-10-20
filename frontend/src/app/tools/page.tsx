@@ -17,22 +17,22 @@ import { canonicalUrl } from '@/lib/seo';
 
 const TOOLS_META_BY_LOCALE = {
   en: {
-    title: 'Financial Calculators & Simulation Tools | Woldeok Moneyverse',
+    title: 'Financial Calculators & Simulation Tools',
     description: 'Explore free financial calculators and virtual-economy simulations, including compound interest, stock averaging, retirement planning, salary and tax estimates.',
     canonical: '/en/tools',
   },
   ko: {
-    title: '금융 계산기·경제 시뮬레이터 도구 모음 | 월덕 머니버스',
+    title: '금융 계산기·경제 시뮬레이터 도구 모음',
     description: '복리·주식 평단가·연봉 실수령액·대출·은퇴·세금 추정과 가상경제 시뮬레이션을 브라우저에서 이용하세요. 실제 금융 정보와 게임 내 WLD 예시를 구분해 확인할 수 있습니다.',
     canonical: '/tools',
   },
   ja: {
-    title: '金融計算・経済シミュレーションツール | ウォルドクマネーバース',
+    title: '金融計算・経済シミュレーションツール',
     description: '複利、株式平均取得単価、退職資金などの金融計算と仮想経済シミュレーションを確認できます。',
     canonical: '/ja/tools',
   },
   zh: {
-    title: '金融计算与经济模拟工具 | 沃尔德克金融元宇宙',
+    title: '金融计算与经济模拟工具',
     description: '提供复利、股票平均成本、退休目标等金融计算和虚拟经济模拟工具。',
     canonical: '/zh/tools',
   },

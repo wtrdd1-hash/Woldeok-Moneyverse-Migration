@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import { DEFAULT_LOCALE, LOCALE_COOKIE, detectLocale, isLocale, type Locale } from '@/lib/locale';
 import { detectCrawlerBot } from '@/lib/bot-detector';
 import { getLocalizedCompoundRedirect } from '@/lib/seo-locale-alternates';
+import { normalizeDoubleLocalePath } from '@/lib/seo-locale-paths';
 
 const INTERNAL_REWRITE_LOCALE_PARAM = '__mv_path_locale';
 
@@ -84,6 +85,15 @@ export function proxy(request: NextRequest) {
     }
   }
 
+  // Previously crawled /ja/en/... and /en/en/... URLs must have exactly one
+  // locale prefix. Permanent redirect preserves search params and intent.
+  const canonicalLocalePath = normalizeDoubleLocalePath(pathname);
+  if (canonicalLocalePath) {
+    const localeCanonicalUrl = request.nextUrl.clone();
+    localeCanonicalUrl.pathname = canonicalLocalePath;
+    return NextResponse.redirect(localeCanonicalUrl, 308);
+  }
+
   // Legacy /en|ja|zh/tools/compound-calculator used to rewrite to a Korean
   // page with Korean title/H1/canonical despite a foreign-language URL.
   // Route visitors and search engines to the actual translated calculator.
@@ -144,7 +154,7 @@ export function proxy(request: NextRequest) {
     if (isLocale(rawLang)) {
       explicitPrefixLocale = rawLang;
       // Physical localized routes (e.g. /[locale]/guide/glossary/..., /[locale]/tools/compound-interest-calculator/...) should not be stripped
-      if (cleanRest === '/blog' || cleanRest.startsWith('/blog/') || cleanRest.startsWith('/guide/glossary') || cleanRest.startsWith('/tools/compound-interest-calculator')) {
+      if (cleanRest === '/blog' || cleanRest.startsWith('/blog/') || cleanRest.startsWith('/guide/glossary') || cleanRest.startsWith('/tools/compound-interest-calculator') || cleanRest === '/tools/loan-interest-calculator') {
         targetPath = pathname;
       } else {
         targetPath = cleanRest;

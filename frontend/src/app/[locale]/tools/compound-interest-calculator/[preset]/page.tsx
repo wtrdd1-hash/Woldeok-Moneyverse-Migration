@@ -12,6 +12,8 @@ import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/pub
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
 import { isLocale, type Locale } from '@/lib/locale';
+import { getCountryCompoundExample, getCountryCompoundTitle, getCountryCompoundDescription } from '@/lib/compound-country-scenarios';
+import { formatCountryMoney, moneyCountryForLocale } from '@/lib/country-money';
 import { GLOBAL_COMPOUND_PRESETS, calculateGlobalCompound } from '@/config/pseo-compound-global.config';
 import { CompoundCalculatorClient } from '../compound-calculator-client';
 
@@ -44,29 +46,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const item = GLOBAL_COMPOUND_PRESETS.find((p) => p.slug === preset);
   if (!item) {
-    return { title: 'Preset Not Found' };
+    return { title: 'Preset Not Found', robots: { index: false, follow: false } };
   }
 
   const url = canonicalUrl(`/${locale}/tools/compound-interest-calculator/${item.slug}`);
-  const result = calculateGlobalCompound(item.initialDeposit, item.monthlyContribution, item.annualRate, item.years);
+  const example = getCountryCompoundExample(item, locale);
+  const money = (value: number) => formatCountryMoney(value, moneyCountryForLocale(locale));
+  const result = calculateGlobalCompound(example.initialDeposit, example.monthlyContribution, item.annualRate, item.years);
 
   let title = '';
   let description = '';
 
-  if (locale === 'en') {
-    title = `${item.titleEn} — Compound Calculator`;
-    description = `${item.titleEn}. Total future value: $${result.totalFutureValue.toLocaleString()}. Invested: $${result.totalPrincipalInvested.toLocaleString()}, compound interest earned: $${result.totalInterestEarned.toLocaleString()}.`;
-  } else if (locale === 'ja') {
-    title = `${item.titleJa} — 複利シミュレーター`;
-    description = `${item.titleJa}。将来資産総額：$${result.totalFutureValue.toLocaleString()}（約${Math.round(result.totalFutureValue * 150 / 10000)}万円）。元本倍率：${(result.totalFutureValue / result.totalPrincipalInvested).toFixed(2)}倍。`;
-  } else if (locale === 'zh') {
-    title = `${item.titleZh} — 复利投资测算`;
-    description = `${item.titleZh}。预估期末总资产：$${result.totalFutureValue.toLocaleString()}。复利净收益：$${result.totalInterestEarned.toLocaleString()}。`;
-  }
+  title = getCountryCompoundTitle(item, locale);
+  description = getCountryCompoundDescription(locale) + ' ' + money(result.totalFutureValue);
 
   const ogImageUrl = buildOgImageUrl({
     title: locale === 'en' ? item.titleEn : item.titleJa,
-    description: `Future Value: $${result.totalFutureValue.toLocaleString()}`,
+    description: `Future Value: ${money(result.totalFutureValue)}`,
     type: 'default',
     badge: 'FIRE Goal',
   });
@@ -119,10 +115,12 @@ export default async function GlobalCompoundPresetPage({ params }: PageProps) {
   const isJa = locale === 'ja';
   const isZh = locale === 'zh';
 
-  const localizedTitle = isEn ? item.titleEn : isJa ? item.titleJa : item.titleZh;
-  const localizedDesc = isEn ? item.descriptionEn : isJa ? item.descriptionJa : item.descriptionZh;
+  const localizedTitle = getCountryCompoundTitle(item, locale);
+  const localizedDesc = getCountryCompoundDescription(locale);
 
-  const result = calculateGlobalCompound(item.initialDeposit, item.monthlyContribution, item.annualRate, item.years);
+  const example = getCountryCompoundExample(item, locale);
+  const money = (value: number) => formatCountryMoney(value, moneyCountryForLocale(locale));
+  const result = calculateGlobalCompound(example.initialDeposit, example.monthlyContribution, item.annualRate, item.years);
 
   const breadcrumbs = breadcrumbJsonLd([
     { name: isEn ? 'Home' : isJa ? 'ホーム' : '首页', path: `/${locale}` },
@@ -186,7 +184,7 @@ export default async function GlobalCompoundPresetPage({ params }: PageProps) {
                     {isEn ? 'Total Future Value' : isJa ? '将来資産総額' : '最终预期总资产'}
                   </span>
                   <div className="text-2xl sm:text-4xl font-mono tabular-nums font-extrabold text-emerald-950 dark:text-emerald-100 mt-1">
-                    ${result.totalFutureValue.toLocaleString()}
+                    {money(result.totalFutureValue)}
                   </div>
                 </div>
                 <div className="text-left sm:text-right">
@@ -202,16 +200,16 @@ export default async function GlobalCompoundPresetPage({ params }: PageProps) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 <div className="p-2.5 rounded-lg bg-background/60 border border-border/40">
                   <span className="text-muted-foreground">{isEn ? 'Initial Deposit' : isJa ? '初期投資' : '初始资金'}</span>
-                  <div className="font-mono font-bold mt-0.5">${item.initialDeposit.toLocaleString()}</div>
+                  <div className="font-mono font-bold mt-0.5">{money(example.initialDeposit)}</div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-background/60 border border-border/40">
                   <span className="text-muted-foreground">{isEn ? 'Monthly' : isJa ? '毎月積立' : '每月定投'}</span>
-                  <div className="font-mono font-bold mt-0.5">${item.monthlyContribution.toLocaleString()}</div>
+                  <div className="font-mono font-bold mt-0.5">{money(example.monthlyContribution)}</div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-background/60 border border-border/40">
                   <span className="text-muted-foreground">{isEn ? 'Interest Profit' : isJa ? '純利益' : '纯复利收益'}</span>
                   <div className="font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    +${result.totalInterestEarned.toLocaleString()}
+                    +{money(result.totalInterestEarned)}
                   </div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-background/60 border border-border/40">
@@ -229,15 +227,15 @@ export default async function GlobalCompoundPresetPage({ params }: PageProps) {
                 badge: 'FIRE STRATEGY',
                 primaryMetric: {
                   label: isEn ? 'Goal Target' : '목표 자산',
-                  value: `$${result.totalFutureValue.toLocaleString()}`,
+                  value: `${money(result.totalFutureValue)}`,
                 },
                 secondaryMetric: {
                   label: isEn ? 'Net Gain' : '순수익',
-                  value: `+$${result.totalInterestEarned.toLocaleString()}`,
+                  value: '+' + money(result.totalInterestEarned),
                 },
                 details: {
                   slug: item.slug,
-                  monthly: `$${item.monthlyContribution.toLocaleString()}`,
+                  monthly: `${money(example.monthlyContribution)}`,
                   period: `${item.years} years`,
                 },
                 sourceUrl: `/${locale}/tools/compound-interest-calculator/${item.slug}`,
@@ -252,8 +250,8 @@ export default async function GlobalCompoundPresetPage({ params }: PageProps) {
             {isEn ? 'Customize Parameters in Real-Time' : isJa ? 'パラメータを自由に変更して再試算' : '实时调整参数在线测算'}
           </h3>
           <CompoundCalculatorClient
-            initialDepositDefault={item.initialDeposit}
-            monthlyContributionDefault={item.monthlyContribution}
+            initialDepositDefault={example.initialDeposit}
+            monthlyContributionDefault={example.monthlyContribution}
             annualRateDefault={item.annualRate}
             yearsDefault={item.years}
             locale={locale}
@@ -282,10 +280,10 @@ export default async function GlobalCompoundPresetPage({ params }: PageProps) {
                   <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
                 <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                  {isEn ? other.titleEn : isJa ? other.titleJa : other.titleZh}
+                  {getCountryCompoundTitle(other, locale)}
                 </h4>
                 <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1">
-                  {isEn ? other.descriptionEn : isJa ? other.descriptionJa : other.descriptionZh}
+                  {getCountryCompoundDescription(locale)}
                 </p>
               </Link>
             ))}

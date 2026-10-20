@@ -31,6 +31,17 @@ export function getVerifiedLocalePaths(path: string): VerifiedLocalePaths | null
     };
   }
 
+  // v990: Real, authored loan calculator content exists per supported locale.
+  if (normalized === '/tools/loan-interest-calculator'
+      || /^\/(en|ja|zh)\/tools\/loan-interest-calculator$/.test(normalized)) {
+    return {
+      ko: '/tools/loan-interest-calculator',
+      en: '/en/tools/loan-interest-calculator',
+      ja: '/ja/tools/loan-interest-calculator',
+      zh: '/zh/tools/loan-interest-calculator',
+    };
+  }
+
   // Every translated sitemap URL must refer back to the same group, including
   // itself. Physical glossary translations and localized tools/home are known.
   const translated = /^\/(en|ja|zh)(\/.*)?$/.exec(normalized);

@@ -9,8 +9,8 @@ import { LoanCalculatorClient } from './loan-calculator-client';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 
 export const metadata: Metadata = {
-  title: '[무료/무로그인] 대출이자 계산기 — 1초 만에 2억·3억 대출 원리금균등 월 납입금 & 총이자 즉시 비교 | 월덕 머니버스',
-  description: '[로그인 없이 1초 산출] 1억·2억·3억·5억 주택담보대출 및 신용대출 30년 상환 시 월 납입금과 총 대출이자 정밀 산출! 원리금균등, 원금균등, 만기일시 상환방식별 총 이자와 월 상환액을 한눈에 즉시 비교하세요.',
+  title: '대출이자 계산기 | 원리금균등·원금균등 월 상환액 비교',
+  description: '대출 원금·연이율·상환 기간을 입력해 월 납입액과 총이자를 계산하고 원리금균등·원금균등·만기일시 상환을 비교하세요. 결과는 입력 조건에 따른 예시입니다.',
   keywords: [
     '2억 대출 30년 상환',
     '대출이자 계산기',

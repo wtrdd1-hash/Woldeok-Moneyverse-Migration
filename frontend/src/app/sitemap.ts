@@ -166,6 +166,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // 2.10. 신규 대출이자 및 배당소득세 계산기 허브 & 롱테일 프리셋
   addEntry('/tools/loan-interest-calculator', 0.95, 'daily');
+  addEntry('/en/tools/loan-interest-calculator', 0.9, 'weekly');
+  addEntry('/ja/tools/loan-interest-calculator', 0.9, 'weekly');
+  addEntry('/zh/tools/loan-interest-calculator', 0.9, 'weekly');
   for (const lp of PSEO_LOAN_PRESETS) {
     addEntry(`/tools/loan-interest-calculator/${lp.slug}`, 0.9, 'daily');
   }
