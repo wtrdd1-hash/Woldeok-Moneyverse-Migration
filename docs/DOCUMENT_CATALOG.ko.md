@@ -1,5 +1,8 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.10.20.981 — 시스템 안전 캐시 정리 (실기기 검증)
+- [작업기록](worklog/2026-10-20-host-storage-cleanup-v981.ko.md) / [영문](worklog/2026-10-20-host-storage-cleanup-v981.md) · [변경기록](changelog/2026-10-20-host-storage-cleanup-v981.ko.md) · [GitHub](updates/v2026.10.20.981-github.ko.md) · [내부용](updates/v2026.10.20.981-internal.ko.md). 루트 64%→62%, 1.51GB 확보, 앱 배포 없음.
+
 ## v2026.10.17.782 — 미니PC 시스템 캐시 정리 (호스트 검증)
 - [작업기록 EN](worklog/2026-10-17-host-storage-hygiene-v782.md) / [KO](worklog/2026-10-17-host-storage-hygiene-v782.ko.md) · [26개 정리 대상 증거](worklog/host-cleanup-v782-evidence.txt) · [변경이력](changelog/2026-10-17-host-storage-hygiene-v782.ko.md) · [GitHub](updates/v2026.10.17.782-github.ko.md) / [내부용](updates/v2026.10.17.782-internal.ko.md). 시스템 사용률 80%→72%, 약 8.21GB 순확보. 앱 릴리스 없음.
 
