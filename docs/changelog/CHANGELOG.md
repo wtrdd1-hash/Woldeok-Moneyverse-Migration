@@ -1,4 +1,9 @@
 ## v2026.10.21.1067 — Fail-closed AI blog editorial hold and CI regression repair (candidate)
+
+## v2026.10.21.1068 — Production deployed with acknowledged finance risk
+- PR #976 bond HTTP error/mobile layout and AI blog editorial safety fixes merged SHA `6d4e258a`; exact-SHA immutable Production backend/front active on 3333/3334, public version/runtime identity PASS, rollback retained and DB snapshot verified.
+- **Financial readiness remains BLOCKED** (three direct-finance app DML grants). Official Test sign-in/finance E2E NOT accepted; isolated Test canary smoke only. This user-directed risk exception is not safe-finance certification. [Release](../releases/v2026.10.21.1068.md) / [KO](../releases/v2026.10.21.1068.ko.md).
+
 - Reject publishing by administrators and scheduled writers without a verified durable editorial approval (503), remove hardcoded scheduler credential bypass, make the admin feed read-only.
 - Correct draft-is-not-publication test; 11/11 local blog tests and 12/12 bond tests passed on miniPC. Financial readiness and exact-SHA Test remain separate gates. [Release](../releases/v2026.10.21.1067.md) / [KO](../releases/v2026.10.21.1067.ko.md).
 
