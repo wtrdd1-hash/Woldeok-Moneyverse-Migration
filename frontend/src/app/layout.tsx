@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import type { Metadata, Viewport } from 'next';
-import Script from 'next/script';
 import { IBM_Plex_Mono, Nanum_Myeongjo, Noto_Sans_KR } from 'next/font/google';
 import { SiteShell } from '@/components/site-shell';
 import { LocaleProvider } from '@/components/locale-provider';
@@ -23,7 +22,7 @@ import { fetchLatestPolicy } from '@/lib/api';
 import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
 import { POINT_PREFERENCE_SCRIPT } from '@/lib/theme';
 import { jsonLd } from '@/lib/json-ld';
-import { homeAdSense } from '@/lib/adsense';
+import { AdProviderBootstrap } from '@/components/ad-provider-bootstrap';
 import { cookies } from 'next/headers';
 import { getServerLocale } from '@/lib/locale-server';
 import type { Locale } from '@/lib/locale';
@@ -310,15 +309,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${myeongjo.variable} ${notoKr.variable} ${plexMono.variable}`}
     >
       <body className="bg-[#090A0F] text-[#F9FAFB] min-h-screen antialiased selection:bg-[#00F59B]/20 selection:text-[#00F59B]">
-        {homeAdSense.enabled && (
-          <Script
-            id="adsense-global-init"
-            async
-            crossOrigin="anonymous"
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${homeAdSense.publisherId}`}
-            strategy="afterInteractive"
-          />
-        )}
+        <AdProviderBootstrap />
         <ConsentGuard
           signedIn={viewer.signedIn}
           consentCurrent={viewer.consentCurrent}
