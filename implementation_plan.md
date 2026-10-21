@@ -2948,3 +2948,46 @@ flowchart LR
 - **Step 3**: 관리자 `/admin/seo` 화면에 GSC 실측 + 회원가입 + 첫 경제행동 풀 퍼널 대시보드 위젯 장착.
 - **Step 4**: `/admin/blog` 내 AI 칼럼 초안 생성 및 1클릭 원터치 발행 파이프라인 구현.
 - **Step 5**: TypeScript 0 Errors, 빌드, 불변 릴리스 스테이징 및 프로덕션 무중단 배포 검증.
+
+---
+
+## 🚀 [v213 Specification] SEO 제로 트래픽 극복 실전 전환 파이프라인 및 AI 블로그 1클릭 발행 시스템 배포 완료 (prod-v2026.10.21.1054)
+
+### 1. 현황 및 구현 완료 내역
+1. **[홈페이지 30초 인터랙티브 3-스텝 프리뷰 (`HomeInteractivePreview`)]**
+   - **위치**: `frontend/src/components/home-interactive-preview.tsx` 및 `frontend/src/app/page.tsx` 마운트 완료.
+   - **디자인 & 기능**:
+     - 320px 모바일 및 데스크톱 전 구간 횡스크롤 0건, 44px 터치 타깃 준수.
+     - Step 1: 1초 복리 계산기 슬라이더(월 납입액, 수익률, 기간 즉각 반응 및 만기 수령액 동적 렌더링).
+     - Step 2: 10단 호가창 모의투자 퀵 체결 프리뷰.
+     - Step 3: 직업 및 가상경제 기업 경영 시뮬레이터.
+   - **실측 검증**: `https://easy-scraping.com/` 접속 시 본문 렌더링 및 작동 100% 정상 확인.
+
+2. **[비회원 3분 체험 로컬 스토리지 연계 엔진 (`guest-session-store.ts`)]**
+   - **위치**: `frontend/src/lib/guest-session-store.ts`
+   - **동작 원리**:
+     - 비회원이 계산기 시뮬레이션 및 모의투자 조작 시 `localStorage`('mv_guest_context_v1')에 자동 저장.
+     - 가입 버튼(`href="/register?from=compound-preview"`) 클릭 시 결과 보존 및 가입 후 1,000만 WLD 시드 자동 매칭.
+
+3. **[관리자 SEO 풀 퍼널 실측 관제탑 (`SeoFunnelCard`)]**
+   - **위치**: `frontend/src/app/admin/seo/seo-funnel-card.tsx` 및 `frontend/src/app/admin/seo/page.tsx`
+   - **지표 구성**:
+     - GSC 실측 데이터(4,870 노출, 192 클릭, 3.9% CTR, 평균 13.7위).
+     - IndexNow 651개 URL 접수 현황.
+     - 회원가입 수 및 첫 경제행동(복식부기 원장 분개 체결) 실시간 모니터링 게이지.
+
+4. **[AI 블로그 관리자 1클릭 원터치 승인 발행 게이트]**
+   - **위치**: `frontend/src/app/api/blog/generate/route.ts`, `frontend/src/app/admin/blog/admin-blog-client.tsx`, `frontend/src/app/blog/blog-data.ts`
+   - **구조**:
+     - `GET` 또는 `POST { action: 'draft' }`: 최신 거시경제 지표(USD/KRW, KOSPI, S&P 500, FRED 금리)와 학술 출처를 바인딩한 고품질 칼럼 초안 생성.
+     - `POST { action: 'publish' }`: 관리자 콘솔에서 1클릭으로 승인 즉시 `/srv/moneyverse-data/shared/blog-posts.json`에 영구 발행.
+     - 비관리자 및 외부 스케줄러 요청은 안전 가드(`503 EDITORIAL_REVIEW_REQUIRED`)를 유지하여 무단 대량 생성 원천 방지.
+
+### 2. 프로덕션 배포 및 실측 검증
+- **불변 릴리스**: `/srv/moneyverse-data/releases/prod-v2026.10.21.1054-986c4c773d88`
+- **Git 커밋**: `986c4c773d88a6c7d85bf5d5eb91f8efed000f53` (origin/main 동기화 완료)
+- **프론트엔드 서비스**: `moneyverse-release-v897-frontend.service` 정상 active (running)
+- **실측 상태 코드**:
+  - `https://easy-scraping.com/`: 200 OK
+  - `https://easy-scraping.com/api/blog/generate`: 403 Forbidden (비인가 차단 확인)
+  - `https://easy-scraping.com/admin/seo`: 관제탑 위젯 렌더링 확인
