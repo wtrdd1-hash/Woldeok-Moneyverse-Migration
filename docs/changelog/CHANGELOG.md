@@ -1,4 +1,9 @@
 ## v2026.10.21.1061 — Bond subscription error handling and mobile tabs (candidate)
+
+## v2026.10.21.1062 — Production Nginx API listener recovery; bond promotion HOLD
+- Fixed four live Nginx Production API proxies from closed backend port 3233 to verified active 3000 with configuration backup and syntax-checked graceful reload: public `/api/version` 502→200, `/health`, `/`, `/bonds` 200. API version payload still `unknown`, exact source identity uncertified.
+- Bond v1061 was **NOT deployed**: PR #976 CI fails four AI editorial guard tests, and financial gate fails three direct app DML privileges; full Test/sign-in/financial acceptance incomplete. [Release](../releases/v2026.10.21.1062.md) / [KO](../releases/v2026.10.21.1062.ko.md).
+
 - Convert low WLD balance to explicit 409 conflict rather than an opaque 500; reject invalid quantity with 400 and closed/exhausted inventory with 409, preserving rollback.
 - Prevent oversubscription in the web form, wrap the subscription heading and stack mobile tabs; new RED/GREEN regression tests (23 related tests PASS), typechecks and both production builds pass.
 - **Not deployed**: existing direct balance writes bypass the Economy Core journal, and isolated authenticated Test/financial gates remain unresolved. [Release](../releases/v2026.10.21.1061.md) / [한국어](../releases/v2026.10.21.1061.ko.md).

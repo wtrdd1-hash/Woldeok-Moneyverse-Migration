@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.21.1062 — Live API upstream repair, bond promotion blocked
+- Restored Nginx Production backend routing (3233→3000) after safe backup and validation, public version endpoint 502→200 but body `unknown`. The v1061 app candidate is **not deployed**: four frontend CI editorial-safety expectation failures, three financial direct-DML blockers, uncertified authenticated Test/mobile/financial paths. See [EN release](../releases/v2026.10.21.1062.md), [KO](../releases/v2026.10.21.1062.ko.md). Do not label the repaired proxy as app release completion.
+
+
 ## v2026.10.21.1061 — Bond HTTP 500 root cause and mobile UX remediation (pre-deploy candidate)
 - Read-only inspection found that a one-unit 100,000 WLD KTB-05Y purchase exceeded the API cash balance of 51,351 WLD, but an untyped Error rendered as HTTP 500. Candidate code maps insufficient balance to HTTP 409, invalid units to HTTP 400, and corrects cramped mobile subscription header/tabs; 23 focused tests, both builds and typechecks passed. [Release](../releases/v2026.10.21.1061.md). **Test/Production not verified**. Direct financial balance DML and missing idempotent Economy Core journal settlement remain separate P0 blockers.
 
