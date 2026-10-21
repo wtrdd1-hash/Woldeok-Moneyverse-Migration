@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AdminBackupCard } from './admin-backup-card';
 import { AdminApiDomainGrid } from './admin-api-domain-grid';
+import { isFreshApiHealthResponse } from './api-health-response-validation';
 
 export interface DomainHealthData {
   readonly id: string;
@@ -50,12 +51,12 @@ interface Props {
 }
 
 export function ApiHealthDashboard({ initialData, isEn }: Props) {
-  const [data, setData] = useState<ApiHealthResponse | null>(initialData);
+  const [data, setData] = useState<ApiHealthResponse | null>(() => isFreshApiHealthResponse(initialData) ? initialData : null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState(false);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(
-    initialData?.serverTime ? new Date(initialData.serverTime) : null,
+    isFreshApiHealthResponse(initialData) ? new Date(initialData.serverTime) : null,
   );
   const requestId = useRef(0);
 
@@ -65,11 +66,12 @@ export function ApiHealthDashboard({ initialData, isEn }: Props) {
     try {
       const response = await fetch('/api/v1/admin/api-health/status', { cache: 'no-store' });
       if (!response.ok) throw new Error('API health unavailable');
-      const next = await response.json() as ApiHealthResponse;
+      const next: unknown = await response.json();
+      if (!isFreshApiHealthResponse(next)) throw new Error('Stale or invalid API health response');
       if (current !== requestId.current) return;
       setData(next);
       setRefreshError(false);
-      setLastRefreshedAt(new Date());
+      setLastRefreshedAt(new Date(next.serverTime));
     } catch {
       if (current !== requestId.current) return;
       setData(null);
@@ -81,7 +83,7 @@ export function ApiHealthDashboard({ initialData, isEn }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!initialData) void fetchTelemetry();
+    if (!isFreshApiHealthResponse(initialData)) void fetchTelemetry();
     return () => { requestId.current += 1; };
   }, [fetchTelemetry, initialData]);
 
