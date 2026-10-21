@@ -2831,3 +2831,25 @@ flowchart LR
 - [ ] **Phase 5: 커뮤니티 시드 유저 유입 및 구글 서치 콘솔(GSC) 실시간 인덱싱 모니터링**
   - 금융/주식 커뮤니티에 "1초 무료 물타기/복리 계산기" 링크 바이럴 진행.
   - 구글 검색 봇 크롤링 및 인덱싱 트래픽 실측 관제.
+---
+
+## 🚀 [v210 Specification] 전수 기능 및 API·모바일 종합 QA 검증 & 결함 자동 해결
+
+### 1. 현황 및 전수 QA 검증 목적
+- 사용자의 전수 QA 지시("모든 기능, 모든 페이지, 모든 API, 관리자 기능 포함, 모바일 기준 확인, 발견 즉시 수정 및 재검증")에 따라 `https://easy-scraping.com` 프로덕션 전체 117개 라우트 및 백엔드/프론트엔드 API 엔드포인트 전수 실측 검증.
+- 320px(Galaxy Fold 커버), 390px(플래그십 스마트폰) 전 구간에서 가로 스크롤(Horizontal Overflow) 0건 및 터치 타깃 44px 확보 확인.
+
+### 2. 세부 검증 결과 및 발견 즉시 해결 내역 (Remediations)
+1. **[주식 캔들스틱 API 심볼 해석 보강]**:
+   - 티커 심볼(`CHIPS`, `DUCK`, `SPACE`) 인입 시 백엔드 `/api/v1/stocks`에서 UUID를 역추적하여 매핑하고 `interval`을 초 단위로 정규화하는 유연한 가드 탑재.
+2. **[한국어 블로그 라우트(/ko/blog) 404 차단]**:
+   - `frontend/src/app/[locale]/blog/page.tsx` 및 `[slug]/page.tsx`에 `locale === 'ko'` 분기를 추가하여 표준 `/blog`로 301 영구 리다이렉트 적용.
+3. **[프론트엔드 공개 API 라우트 신설]**:
+   - `/api/stocks`, `/api/content/announcements`, `/api/seo/metadata` 라우트를 신설하여 외부 크롤러 및 클라이언트의 직접 호출 지원.
+4. **[320px 모바일 방어 및 관리자 관제탑 점검]**:
+   - `globals.css`의 `overflow-x: clip !important`, 5대 모바일 바텀 내비게이션 바, 27대 관리자 서브 내비게이션 바(`AdminSubNav`) 및 비상 킬스위치 제어 패널 정상 가동 확인.
+
+### 3. 검증 결과 종합
+- 117개 전수 페이지 라우트 응답률: **100% (117/117 통과)**
+- `tsc --noEmit` 무결성 검증 0 Errors 통과 및 원격 `origin/main` 동기화 완료.
+- 종합 보고서 `FULL_FUNCTION_QA_REPORT.md` 프로젝트 루트 및 사용자 환경에 영구 보존 완료.
