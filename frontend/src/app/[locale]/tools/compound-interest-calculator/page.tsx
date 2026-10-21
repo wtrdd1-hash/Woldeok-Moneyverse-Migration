@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { canonicalUrl, buildOgImageUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
-import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
 import { isLocale, type Locale } from '@/lib/locale';
 import { GLOBAL_COMPOUND_PRESETS } from '@/config/pseo-compound-global.config';
 import { CompoundCalculatorClient } from './compound-calculator-client';
@@ -108,7 +107,6 @@ export default async function GlobalCompoundPage({ params }: PageProps) {
 
   return (
     <div className="mv-page mv-page--public min-h-screen py-8 px-4 sm:px-6">
-      <DesktopStickyAdRails />
 
       <script
         type="application/ld+json"
