@@ -1,5 +1,16 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.21.1067 — Editorial security CI regression repair (candidate only)
+- Current main exposes an unreviewed admin/scheduler blog publication path without durable approval evidence. Candidate restores 503 editorial hold, makes admin catalog read-only, and fixes the draft-persistence assumption; local blog tests 11/11 and bond tests 12/12 PASS. **Not a financial-ledger remediation or exact-SHA Test/Production deployment.** [Release](../releases/v2026.10.21.1067.md).
+
+
+## v2026.10.21.1062 — Live API upstream repair, bond promotion blocked
+- Restored Nginx Production backend routing (3233→3000) after safe backup and validation, public version endpoint 502→200 but body `unknown`. The v1061 app candidate is **not deployed**: four frontend CI editorial-safety expectation failures, three financial direct-DML blockers, uncertified authenticated Test/mobile/financial paths. See [EN release](../releases/v2026.10.21.1062.md), [KO](../releases/v2026.10.21.1062.ko.md). Do not label the repaired proxy as app release completion.
+
+
+## v2026.10.21.1061 — Bond HTTP 500 root cause and mobile UX remediation (pre-deploy candidate)
+- Read-only inspection found that a one-unit 100,000 WLD KTB-05Y purchase exceeded the API cash balance of 51,351 WLD, but an untyped Error rendered as HTTP 500. Candidate code maps insufficient balance to HTTP 409, invalid units to HTTP 400, and corrects cramped mobile subscription header/tabs; 23 focused tests, both builds and typechecks passed. [Release](../releases/v2026.10.21.1061.md). **Test/Production not verified**. Direct financial balance DML and missing idempotent Economy Core journal settlement remain separate P0 blockers.
+
 ## v2026.10.20.1022 — Actual official Test application promotion, Production finance/security HOLD
 - [Verified EN release report](../releases/v2026.10.20.1022.md) / [한국어](../releases/v2026.10.20.1022.ko.md). Approved exact main SHA 4405515674179d0d5d9762ff991e0ddcc2184c45 genuinely deployed to public Test backend/frontend on 3100/3101 using rollback-safe Test blue-green; full official Test DB data backup+restored and migrations 278/279 actually applied, privileged security guards still enforced, noindex remains. Identity gate PASS; 257/257 anonymous HTTP-only checks PASS, but actual v530 authenticated UI, banking workflows, sessions and admin five-round E2E remain BLOCKED. Prod artifact staged but Production NOT switched: 19/40 balance mismatches +4,779,188 WLD, app raw financial DML on three tables, 266 checksum drift and bank transfer missing-column function. Production financial/user data unchanged; no AI auto-publishing.
 

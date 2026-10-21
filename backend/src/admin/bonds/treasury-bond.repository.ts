@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
 
@@ -261,7 +261,9 @@ export class TreasuryBondRepository {
     totalPriceWld: string;
     maturityAt: string;
   }> {
-    if (units <= 0) throw new Error('청약 좌수는 1좌 이상이어야 합니다.');
+    if (!Number.isSafeInteger(units) || units <= 0) {
+      throw new BadRequestException('청약 좌수는 1 이상의 정수여야 합니다.');
+    }
 
     const client: PoolClient = await this.pool.connect();
     try {
@@ -271,12 +273,12 @@ export class TreasuryBondRepository {
         SELECT * FROM public.treasury_bonds WHERE id = $1 FOR UPDATE
       `, [bondId]);
       const bond = bondRes.rows[0];
-      if (!bond) throw new Error('존재하지 않는 국채입니다.');
+      if (!bond) throw new NotFoundException('존재하지 않는 국채입니다.');
       if (bond.status !== 'OPEN_SUBSCRIPTION' && bond.status !== 'TRADING') {
-        throw new Error('현재 청약이 마감되었거나 일시 정지된 국채입니다.');
+        throw new ConflictException('현재 청약이 마감되었거나 일시 정지된 국채입니다.');
       }
       if (BigInt(bond.available_units) < BigInt(units)) {
-        throw new Error(`청약 잔여 좌수가 부족합니다. (잔여: ${bond.available_units}좌)`);
+        throw new ConflictException(`청약 잔여 좌수가 부족합니다. (잔여: ${bond.available_units}좌)`);
       }
 
       const parValue = BigInt(bond.par_value_wld);
@@ -289,7 +291,7 @@ export class TreasuryBondRepository {
       `, [accountId]);
       const currentBal = BigInt(balRes.rows[0]?.available_amount ?? '0');
       if (currentBal < totalPrice) {
-        throw new Error('계좌 잔액(WLD)이 부족합니다.');
+        throw new ConflictException('국채 청약에 필요한 WLD 잔액이 부족합니다.');
       }
 
       // 잔액 차감
