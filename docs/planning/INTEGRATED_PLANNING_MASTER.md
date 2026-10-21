@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.21.1067 — Editorial security CI regression repair (candidate only)
+- Current main exposes an unreviewed admin/scheduler blog publication path without durable approval evidence. Candidate restores 503 editorial hold, makes admin catalog read-only, and fixes the draft-persistence assumption; local blog tests 11/11 and bond tests 12/12 PASS. **Not a financial-ledger remediation or exact-SHA Test/Production deployment.** [Release](../releases/v2026.10.21.1067.md).
+
+
 ## v2026.10.21.1062 — Live API upstream repair, bond promotion blocked
 - Restored Nginx Production backend routing (3233→3000) after safe backup and validation, public version endpoint 502→200 but body `unknown`. The v1061 app candidate is **not deployed**: four frontend CI editorial-safety expectation failures, three financial direct-DML blockers, uncertified authenticated Test/mobile/financial paths. See [EN release](../releases/v2026.10.21.1062.md), [KO](../releases/v2026.10.21.1062.ko.md). Do not label the repaired proxy as app release completion.
 

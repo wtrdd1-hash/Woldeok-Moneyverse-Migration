@@ -1,3 +1,7 @@
+## v2026.10.21.1067 — Fail-closed AI blog editorial hold and CI regression repair (candidate)
+- Reject publishing by administrators and scheduled writers without a verified durable editorial approval (503), remove hardcoded scheduler credential bypass, make the admin feed read-only.
+- Correct draft-is-not-publication test; 11/11 local blog tests and 12/12 bond tests passed on miniPC. Financial readiness and exact-SHA Test remain separate gates. [Release](../releases/v2026.10.21.1067.md) / [KO](../releases/v2026.10.21.1067.ko.md).
+
 ## v2026.10.21.1061 — Bond subscription error handling and mobile tabs (candidate)
 
 ## v2026.10.21.1062 — Production Nginx API listener recovery; bond promotion HOLD
