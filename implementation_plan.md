@@ -2991,3 +2991,38 @@ flowchart LR
   - `https://easy-scraping.com/`: 200 OK
   - `https://easy-scraping.com/api/blog/generate`: 403 Forbidden (비인가 차단 확인)
   - `https://easy-scraping.com/admin/seo`: 관제탑 위젯 렌더링 확인
+
+---
+
+## 🚀 [v214 Specification] AI 블로그 일일 자동 발행 스케줄러 & 가상 주식 하이브리드 자동 속보 엔진 아키텍처 명세
+
+### 1. 사용자 확정 요구사항 (Interactive Alignment Results)
+1. **[가상 주식 하이브리드 속보 엔진 (2시간 주기)]**:
+   - 외부 LLM API가 설정되어 있으면 심층 LLM 뉴스 생성, 미설정/일시 장애 시 10대 가상 상장사(치무전자, 치무 초전도, 덕덕 물산 등)의 실시간 호가 체결강도, 거래량, 전일 대비 등락률을 분석하여 사실적인 금융 속보를 결정론적으로 100% 무중단 자동 생성·발행.
+   - 발행된 뉴스는 `/newspaper` 피드에 등록되고, 개별 주식 차트(`/stocks/[symbol]`) 상에 시각화 마커를 연동하며, 시세 호재/악재 이벤트(`public.virtual_stock_market_events`)와 연동되어 주가 흐름에 자연스러운 파동 부여.
+2. **[AI 금융 블로그 일일 자동 스케줄러 (매일 새벽 06:00 KST)]**:
+   - 실시간 거시경제 펄스(USD/KRW, S&P 500, KOSPI, Fed Funds, 한국은행 기준금리)를 바인딩하여 매일 새벽 06:00 KST에 검증된 1편의 고품질 금융공학 칼럼을 자동 작성·발행.
+   - 발행 즉시 `/srv/moneyverse-data/shared/blog-posts.json`에 영구 기록하고 `IndexNow API`로 Google/Naver/Bing 검색엔진에 실시간 색인 핑 전송.
+3. **[관리자 콘솔 실시간 제어]**:
+   - `/admin/blog` 및 `/admin/market/ai-news`에서 자동 발행 토글 스위치, 강제 즉시 발행 트리거, 발행 내역 삭제/검토 기능 완비.
+
+### 2. 세부 개발 파일 및 구현 명세
+- **`backend/src/stock/stock-news-deterministic.engine.ts` (신규)**:
+  - 10대 상장사별 실시간 시세/거래량 기반 금융공학 속보 생성 알고리즘.
+  - 호재(매수 우세, 신고가, 기술 혁신) vs 악재(차익 실현, 공급망 지연, 원자재 상승) 시나리오 팩토리.
+- **`backend/src/admin/ai-news.service.ts`**:
+  - `autoGenerateAndPublish` 메서드에서 LLM 실패 시 `stock-news-deterministic.engine`으로 seamless fallback 처리.
+- **`backend/src/scheduler/scheduler.ts` & `scheduler.module.ts`**:
+  - `stock.ai_scenario_auto` 주기를 2시간 간격으로 정비하고, 자동 발행 활성화 가드 정비.
+  - `blog.daily_publish` (매일 06:00 KST) 스케줄러 job 등록.
+- **`frontend/src/app/api/blog/cron/route.ts` (신규 또는 route.ts 연계)**:
+  - 새벽 06:00 KST 트리거를 안전하게 수신하여 블로그 포스트를 생성 및 IndexNow 전송하는 엔드포인트.
+- **`frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx`**:
+  - 차트 타임라인 상에 당일 뉴스 깃발(N) 아이콘 오버레이 렌더링.
+
+### 3. 검증 계획
+1. TypeScript 무결성 검증 (`pnpm exec tsc --noEmit`): 0 Errors
+2. 백엔드 빌드 및 단위 테스트 검증
+3. Git 커밋 및 origin/main 동기화
+4. 불변 프로덕션 릴리스 스테이징 및 무중단 배포
+5. 라이브 엔드포인트 실측 검증

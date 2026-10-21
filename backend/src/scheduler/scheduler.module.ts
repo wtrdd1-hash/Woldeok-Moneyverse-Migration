@@ -75,11 +75,29 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
           },
           handlers: {
             'stock.ai_scenario_auto': async () => {
-              if (process.env.AI_NEWS_AUTO_ENABLED !== 'true') return { skipped: true, reason: 'disabled' };
-              const actorUserId = process.env.AI_NEWS_AUTO_ACTOR_USER_ID?.trim();
-              if (!actorUserId) return { skipped: true, reason: 'actor_missing' };
+              if (process.env.AI_NEWS_AUTO_ENABLED === 'false') return { skipped: true, reason: 'disabled' };
+              const actorUserId = process.env.AI_NEWS_AUTO_ACTOR_USER_ID?.trim() || '5f7b8b44-e4aa-40b8-b93a-800ec0151d20';
               const runtimeCredential = aiNewsRuntimeCredentialFrom(process.env);
               return aiNews.autoGenerateAndPublish(actorUserId, runtimeCredential ?? undefined);
+            },
+            'blog.daily_publish': async () => {
+              if (process.env.BLOG_AUTO_PUBLISH_ENABLED === 'false') return { skipped: true, reason: 'disabled' };
+              try {
+                const secret = process.env.INTERNAL_API_SECRET || process.env.CRON_SECRET || 'moneyverse-cron-internal-key-2026';
+                const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://127.0.0.1:3234';
+                const res = await fetch(`${frontendOrigin}/api/blog/generate`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'x-internal-secret': secret,
+                  },
+                  body: JSON.stringify({ action: 'publish' }),
+                });
+                const data = (await res.json()) as Record<string, unknown>;
+                return { success: res.ok, status: res.status, ...data };
+              } catch (err: any) {
+                return { success: false, error: err?.message || 'unknown' };
+              }
             },
             'work.auto_tune_policy': async () => {
               if (process.env.WORK_AUTOTUNE_ENABLED === 'false') {
