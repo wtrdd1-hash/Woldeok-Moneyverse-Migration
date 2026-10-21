@@ -1,5 +1,7 @@
 # Country-native AI blog instant publication and post-review — implementation plan v1107
 
+**v1108 final supersession:** Overdue reviews trigger notifications only; never automatically unpublish. [Current policy](../../planning/AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.md).
+
 **Status: PLANNING, not executed.** [한국어 개발 계획](2026-10-22-blog-country-auto-publish-v1107.ko.md). Authority: [EN product spec](../../planning/AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.md), [KO](../../planning/AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.ko.md), plus adopted `PROJECT_PLAN`, `INTEGRATED_PLANNING_MASTER` and v975 safety architecture. Use Superpowers isolation, systematic debugging, TDD RED/GREEN/refactor, review and verification. Re-fetch current main before and midway; coordinate Gemini branches; reserve migration number only when starting code. No production writes or legacy generator reactivation from this plan.
 
 ## Phase 1107.1 — Root cause, versioned country contract and safety prerequisites
@@ -22,9 +24,9 @@
 
 ## Phase 1107.4 — Retrospective 24-hour review and safe removal
 
-- Add `backend/src/blog-editorial/blog-post-review.service.ts` and `blog-withdrawal.service.ts` with `PUBLISHED_UNREVIEWED`, `REVIEW_DUE`, `REVIEWED`, `CORRECTION_REQUIRED`, `WITHDRAWN`. At 24h without approved post-review, atomically auto-withdraw and invalidate public projection. Admin manual withdraw is immediate, single actor and reason audited.
+- Add `backend/src/blog-editorial/blog-post-review.service.ts` and `blog-withdrawal.service.ts` with `PUBLISHED_UNREVIEWED`, `REVIEW_DUE`, `REVIEWED`, `CORRECTION_REQUIRED`, `WITHDRAWN`. At 24h without a review, emit a deduplicated reviewer alert and preserve public visibility, public SEO metadata and the same publication receipt. **Do not auto-withdraw/noindex/delete on any review timeout, including missed scheduler leases/restarts.** Admin manual withdraw is immediate, actor-scoped and reason-audited.
 - Propose scoped BFF endpoints for queue, review, corrections, withdraw, global/per-country kill switch. Revoked slug returns `410` or clear correction page with `noindex`; never erase immutable audit history or leak draft body. Expire public/Next/CDN cache and sitemap/outbox but acknowledge crawler de-index delay.
-- RED tests: scheduler offline across due time; one withdraw races with publish and loses; duplicate withdraw resurrects; admin client bypasses role/CSRF; withdrawn article remains sitemap/JSON-LD. Fix and test exact effects against PostgreSQL isolated instance, not just mocks.
+- RED tests: scheduler offline across due time must never auto-withdraw; one authorized human withdraw races with publish and loses; duplicate withdraw resurrects; admin client bypasses role/CSRF; withdrawn article remains sitemap/JSON-LD. Fix and test exact effects against PostgreSQL isolated instance, not just mocks.
 
 ## Phase 1107.5 — SEO locale projection, admin, calculators
 
@@ -35,5 +37,5 @@
 
 ## Phase 1107.6–7 — release evidence and staged promotion
 
-- Run contract build + backend/DB/frontend tests, lint, typechecks and Next build. Real PostgreSQL tests enforce PUBLIC/application ACL; check finance grants and balances unchanged. Test duplicate publication/withdrawal crash/retry/lease/clock and 24h expiry.
+- Run contract build + backend/DB/frontend tests, lint, typechecks and Next build. Real PostgreSQL tests enforce PUBLIC/application ACL; check finance grants and balances unchanged. Test duplicate publication/withdrawal crash/retry/lease/clock and 24h **alert-only** overdue status with unchanged public visibility.
 - New isolated branch, PR/CI and exact commit immutable formal Test. Test has no outbound SEO submission or live publishing; prove administrative auth/CSRF/session restart and full v530 mobile/login/admin routes; do not label skipped checks passing. Verify official Test noindex, Production v1106 indexing rules intact, version and code hash match, Nginx blue/green rollback and no duplicate writers. Production application promotion only upon applicable project-wide gates and explicit authorization, with EN/KO versioned start/mid/end and GitHub/internal updates.

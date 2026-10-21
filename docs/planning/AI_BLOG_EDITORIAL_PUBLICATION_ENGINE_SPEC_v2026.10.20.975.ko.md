@@ -319,3 +319,6 @@ TOPIC_PROPOSED → SOURCE_GATHERING → SOURCE_READY → DRAFTING → DRAFT_READ
 - 과거 AI 171편이나 교육 글 6편에 존재하지 않는 승인증빙을 소급 생성하지 않는다.
 - 공유 JSON 0444 변경, 구버전 발행 서버 우회, 일반 블로그에 Google Indexing API 호출 금지.
 - 원장 직접 DML·기초잔액 대사·v530 관리자 포함 5회 UI·정식 Test SHA·세션 유지·무중단 승격의 미해결 조건을 임의 면제하지 않는다.
+
+## v2026.10.22.1108 — 사용자 최신 지시로 사후 자동 철회 조건 완전 변경
+- [한국어 최신 정책](AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.ko.md) / [영문](AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.md). 이전 v1107 GREEN 발행 후 24시간 미심사 **자동 비공개**는 사용자 요청으로 폐기. 미심사 시 알림만, 언제나 공개 유지하며 관리자가 수동으로 철회·정정할 때만 검색/공개 상태 변경. 민감 AMBER/위험 RED의 사전 발행 차단, 구형 API 403/503 및 DB 보안은 불변.
