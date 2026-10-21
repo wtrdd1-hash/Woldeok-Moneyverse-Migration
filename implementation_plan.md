@@ -2853,3 +2853,98 @@ flowchart LR
 - 117개 전수 페이지 라우트 응답률: **100% (117/117 통과)**
 - `tsc --noEmit` 무결성 검증 0 Errors 통과 및 원격 `origin/main` 동기화 완료.
 - 종합 보고서 `FULL_FUNCTION_QA_REPORT.md` 프로젝트 루트 및 사용자 환경에 영구 보존 완료.
+
+---
+
+## 🚀 [v211 Specification] SEO 제로 트래픽 극복 및 실사용자 획득 실행 계획 (v2026.10.18.860 승인 반영)
+
+### 1. 배경 및 사용자 승인 개요
+- 사용자가 공식 승인한 `docs/planning/SEO_ZERO_TRAFFIC_QUALIFIED_ACQUISITION_PLAN_v2026.10.18.860.ko.md` 기획에 따라, 단순 메타태그 생성 수준을 넘어 **실제 검색 유입 ➔ 방문자 효용 경험 ➔ 회원가입 ➔ 첫 경제 행동**으로 이어지는 완전한 전환 파이프라인을 구축한다.
+- 실측 데이터 기반 관리(GSC 실측 4,870 노출, 192 클릭, 13.7위 순위 및 651개 IndexNow 제출 상태 연계).
+
+### 2. 8대 중점 개선 과제 (G860-01 ~ G860-08) 구현 명세
+
+#### ① [G860-01 P0] 실측 SEO ➔ 가입 ➔ 첫 행동 전환 대시보드 (`/admin/seo`)
+- GSC API 실측 실적(클릭/노출/CTR/게재순위)과 내부 백엔드 가입(`sign_up`), 튜토리얼 완료(`tutorial_complete`), 첫 가상 주식/은행 행동(`first_action`)을 단일 관제 화면에 결합.
+- `ZERO_OBSERVED / NO_ROWS / NOT_CONFIGURED / STALE` 상태 명확 분리.
+
+#### ② [G860-02 P0] 다국어 검색 품질 및 실제 배포 상태 감사
+- 한국어(KO), 영어(EN), 일본어(JA), 중국어(ZH) 4개 국어 사이트맵, canonical 태그, hreflang 양방향 교차 검증.
+- 일본 대출이자 계산기(`ja/tools/loan-interest-calculator`) 노출 폭증(+1,100%) 유입자의 온전한 현지화 경험 보장.
+
+#### ③ [G860-03 P0] 홈페이지 '30초 안에 무엇을 할 수 있나' 가치 명확화
+- 메인 헤드라인: "현금 투자가 아닌 지속 가능한 가상경제 시뮬레이터" 명확화.
+- 3대 핵심 진입점 직관적 노출:
+  1. 1초 금융 계산기 (복리, 대출, 평단가)
+  2. 가상 주식 및 10단 호가창 모의투자
+  3. 직업 체험 및 기업 경영 시뮬레이션
+
+#### ④ [G860-04 P1] 비회원 3분 체험과 가입 후 이어 하기 (Guest Context Persistence)
+- 로그인 강제 차단 없이 비회원 상태에서 계산기 및 모의 거래 결과를 100% 온전히 산출.
+- 결과 저장/포트폴리오 등록 시 가입 유도 ➔ 가입 완료 후 직전 작업 컨텍스트로 원활히 복귀.
+
+#### ⑤ [G860-05 P1] 친구에게 공유하는 첫 가상경제 선택 카드
+- 계산 결과 및 가상 자산 진단 결과를 인스타그램 스토리/카카오톡 공유용 고화질 카드 이미지로 렌더링.
+- 개인정보(계좌번호, 이메일)를 노출하지 않고 순수 시뮬레이션 결과만 공유.
+
+#### ⑥ [G860-06 P1] 양질의 SEO 금융 진입 콘텐츠 & 7일 학습 경로
+- 복리(72의 법칙), 연봉 실수령액, ISA 세제 혜택 등 검색 수요 1위 키워드 군집 심층화.
+- 비회원도 접근 가능한 7일 단계별 금융/가상경제 챌린지 로드맵 탑재.
+
+#### ⑦ [G860-07 P2] 주간 가상경제 펄스 및 AI 금융 칼럼 안전 가동
+- FRED, Yahoo Finance 실시간 거시경제 지표(금리, 환율, 지수)를 반영한 주간 브리프 자동 갱신.
+- 안전 가드가 적용된 AI 칼럼 발행 파이프라인 정비.
+
+#### ⑧ [G860-08 P2] 이탈 원인 1문항 피드백 위젯
+- 비회원 이탈 시 또는 특정 페이지 체류 후 이탈 시 '원하는 기능을 찾으셨나요?' 1문항 마이크로 설문 제공.
+
+### 3. 검증 및 롤아웃 계획
+- `npm run test` 및 TypeScript 0 Errors 검증.
+- 320px 모바일 / 데스크톱 전 구간 횡스크롤 0건 및 반응형 검증.
+- 불변 릴리스 스테이징 및 프로덕션 무중단 배포.
+
+---
+
+## 🚀 [v212 Specification] 사용자 조율 기반 확정 세부 구현 명세 (Interactive Alignment Results)
+
+### 1. 확정된 5대 핵심 아키텍처 및 구현 방향
+1. **[홈페이지 30초 가치 제안 & 인터랙티브 3-스텝 프리뷰]**
+   - **대상 파일**: `frontend/src/app/page.tsx`, `frontend/src/components/home-interactive-preview.tsx`
+   - **디자인 규격**: Linear/Stripe 수준의 고정밀 크래프트맨십. 320px 극소 모바일에서도 횡스크롤 0건(`overflow-x: clip`), 44px 터치 타깃 준수.
+   - **3대 진입 카드 구성**:
+     - Step 1: `1초 금융 계산기 (복리/대출/실수령액 즉석 계산 및 결과 프리뷰)`
+     - Step 2: `가상 주식 & 10단 호가창 (CHIPS/DUCK 실시간 호가 모의 체결 체험)`
+     - Step 3: `직업 & 기업 경영 (가상경제 생산/수익 파이프라인 체험)`
+   - **명확한 헤드카피**: "실제 돈이 들지 않는, 지속 가능한 엔터프라이즈급 가상경제 시뮬레이터"
+
+2. **[비회원 3분 체험 데이터 ➔ 가입 후 100% 자동 병합 엔진 (Guest-to-Member)]**
+   - **대상 파일**: `frontend/src/lib/guest-session-store.ts`, `frontend/src/app/auth/callback/route.ts`, `frontend/src/app/register/page.tsx`
+   - **메커니즘**:
+     - 비회원이 계산기 시뮬레이션 또는 모의 거래 수행 시 `localStorage('mv_guest_context')`에 자동 캐싱.
+     - 가입 또는 소셜 로그인 완료 시 클라이언트 콜백에서 게스트 컨텍스트를 감지하여 백엔드 계정 메타데이터로 원활히 마이그레이션.
+     - 작업 중단 없이 원래 보고 있던 계산기 결과 또는 주식 포트폴리오 화면으로 즉시 복귀.
+
+3. **[관리자 SEO 풀 퍼널 실측 전환 관제탑]**
+   - **대상 파일**: `frontend/src/app/admin/seo/page.tsx`, `frontend/src/app/admin/seo/seo-funnel-card.tsx`, `backend/src/seo/seo.service.ts`
+   - **연동 데이터**:
+     - 구글 서치 콘솔(GSC) 실측: 4,870 노출, 192 클릭, 3.9% CTR, 평균 13.7위.
+     - IndexNow 실시간 접수: 651개 URL.
+     - 백엔드 실제 회원가입 수 (`SELECT COUNT(*) FROM members`).
+     - 첫 경제 행동(예금/주식/작업) 전환율 (`SELECT COUNT(DISTINCT user_id) FROM ledger_postings`).
+
+4. **[AI 블로그 칼럼 관리자 1클릭 원터치 승인 발행 시스템]**
+   - **대상 파일**: `frontend/src/app/api/blog/generate/route.ts`, `frontend/src/app/admin/blog/page.tsx`, `backend/src/blog-editorial/blog-draft.service.ts`
+   - **메커니즘**:
+     - 실시간 거시경제 펄스(USD/KRW 1,385.5원, KOSPI 2,685pt, S&P 500 5,815pt 등)를 바탕으로 AI 칼럼 초안(Draft) 자동 구성.
+     - 관리자 콘솔(`/admin/blog`)에서 초안 확인 후 [즉시 발행] 버튼을 누르면 `/srv/moneyverse-data/shared/blog-posts.json`에 영구 등록 및 IndexNow 자동 핑 전송.
+     - 안전성과 속도를 동시에 만족하는 최적의 거버넌스 확립.
+
+5. **[과거 블로그 301 리다이렉트 및 다국어 검색 품질 검증 완료 상태 유지]**
+   - `/entry/*`, `/post/*` ➔ 301 Moved Permanently 유지 (`location: /roadmap`, `/guide/career-mastery`, `/tools`, `/`).
+
+### 2. 단계별 구현 액션 플랜
+- **Step 1**: 비회원 게스트 세션 저장소(`guest-session-store.ts`) 및 가입 후 데이터 병합 로직 작성.
+- **Step 2**: 홈페이지 Linear 스타일 인터랙티브 3-스텝 프리뷰 컴포넌트(`home-interactive-preview.tsx`) 구현 및 `page.tsx` 결합.
+- **Step 3**: 관리자 `/admin/seo` 화면에 GSC 실측 + 회원가입 + 첫 경제행동 풀 퍼널 대시보드 위젯 장착.
+- **Step 4**: `/admin/blog` 내 AI 칼럼 초안 생성 및 1클릭 원터치 발행 파이프라인 구현.
+- **Step 5**: TypeScript 0 Errors, 빌드, 불변 릴리스 스테이징 및 프로덕션 무중단 배포 검증.
