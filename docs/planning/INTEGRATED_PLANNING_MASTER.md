@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.22.1106 — Actual Production SEO indexing operational correction (not new product-plan authority)
+- [Release](../releases/v2026.10.22.1106.md) / [KO](../releases/v2026.10.22.1106.ko.md); [incident analysis](../findings/MONEYVERSE_SEO_BLOG_INDEXING_INCIDENT_v2026.10.22.1106.md) / [KO](../findings/MONEYVERSE_SEO_BLOG_INDEXING_INCIDENT_v2026.10.22.1106.ko.md). Source SHA stays v1083 `6a989b5a`; SEO_INDEXING_ENABLED was false in public Production and suppressed crawling and sitemaps. Same-source config-only new frontend artifact on `:3354` now responds index/follow and 1,018/6/28 sitemap entries; protected private-page HTML noindex persists, no new approved AI articles, editorial v975 remains P0 unimplemented. This is observed runtime evidence and **does not supersede PROJECT_PLAN, v975 design, or financial/full-authenticated UI release gates**.
+
+
 ## v2026.10.21.1068 — Production cutover completed, finance risk acknowledged but unresolved
 - [Evidence](../releases/v2026.10.21.1068.md) / [한국어](../releases/v2026.10.21.1068.ko.md). User accepted unresolved integrity hazards and specifically ordered live promotion. PR #976 was merged SHA `6d4e258a`; immutable v1068 backend/frontend now serve public Production through 3333/3334. Official source identity PASS and route smoke PASS. Production DB backed up and pre/post core row counts unchanged. **Financial readiness is still BLOCKED by protected direct DML grants and outstanding ledger-first bond/Repo/FX/pension/SWF contracts**; no successful member transaction was certified. Official public Test still older SHA and scheduler leadership is temporarily split between legacy backend and new serving backend (new scheduler disabled). The deployment is real, not an integrity approval.
 
