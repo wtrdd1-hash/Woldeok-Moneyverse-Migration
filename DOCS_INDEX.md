@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.21.1068 — Production bond/mobile fixes deployed (financial integrity risk remains)
+- [English deployment report](docs/releases/v2026.10.21.1068.md) / [한국어](docs/releases/v2026.10.21.1068.ko.md) · [Worklog EN](docs/worklog/2026-10-21-production-risk-accepted-v1068.md) / [KO](docs/worklog/2026-10-21-production-risk-accepted-v1068.ko.md) · [Internal EN](docs/updates/v2026.10.21.1068-internal.md) / [KO](docs/updates/v2026.10.21.1068-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.21.1068-github.md) / [KO](docs/updates/v2026.10.21.1068-github.ko.md). User-directed risk-accepted main SHA 6d4e258a, exact v1068 public Production backend/frontend identity PASS, Nginx blue-green, DB backup and 200/401/403 smoke; **finance direct DML and journal idempotency remain BLOCKED, official Test signed-in E2E pending**.
+
+
 ## v2026.10.20.1022 — Official Test exact-SHA deployment and Production finance release gate (Test PROMOTED; Prod HOLD)
 - [English full release evidence](docs/releases/v2026.10.20.1022.md) / [한국어](docs/releases/v2026.10.20.1022.ko.md) · [EN worklog](docs/worklog/2026-10-20-production-promotion-v1022.md) / [KO](docs/worklog/2026-10-20-production-promotion-v1022.ko.md) · [Internal EN](docs/updates/v2026.10.20.1022-internal.md) / [KO](docs/updates/v2026.10.20.1022-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.20.1022-github.md) / [KO](docs/updates/v2026.10.20.1022-github.ko.md). Test 44055156 exact source SHA backend/frontend/DB 279 promoted, full DB backup+restore, Nginx blue-green, 257/257 HTTP-only acceptance (not authenticated E2E). Production only immutable candidate staged, still BLOCKED by financial ledger+4,779,188 WLD, app DML grants, original migration 266 checksum difference, bank pocket SQL and no authenticated v530 E2E.
 

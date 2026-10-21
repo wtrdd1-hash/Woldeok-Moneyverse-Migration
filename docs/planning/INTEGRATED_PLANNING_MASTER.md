@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.21.1068 — Production cutover completed, finance risk acknowledged but unresolved
+- [Evidence](../releases/v2026.10.21.1068.md) / [한국어](../releases/v2026.10.21.1068.ko.md). User accepted unresolved integrity hazards and specifically ordered live promotion. PR #976 was merged SHA `6d4e258a`; immutable v1068 backend/frontend now serve public Production through 3333/3334. Official source identity PASS and route smoke PASS. Production DB backed up and pre/post core row counts unchanged. **Financial readiness is still BLOCKED by protected direct DML grants and outstanding ledger-first bond/Repo/FX/pension/SWF contracts**; no successful member transaction was certified. Official public Test still older SHA and scheduler leadership is temporarily split between legacy backend and new serving backend (new scheduler disabled). The deployment is real, not an integrity approval.
+
+
 ## v2026.10.21.1067 — Editorial security CI regression repair (candidate only)
 - Current main exposes an unreviewed admin/scheduler blog publication path without durable approval evidence. Candidate restores 503 editorial hold, makes admin catalog read-only, and fixes the draft-persistence assumption; local blog tests 11/11 and bond tests 12/12 PASS. **Not a financial-ledger remediation or exact-SHA Test/Production deployment.** [Release](../releases/v2026.10.21.1067.md).
 
