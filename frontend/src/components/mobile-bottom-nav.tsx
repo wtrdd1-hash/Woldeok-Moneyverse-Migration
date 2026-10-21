@@ -59,7 +59,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-background/95 backdrop-blur-md border-t border-border/80 shadow-lg px-2 pb-[env(safe-area-inset-bottom)] zero-overflow-shield"
+      className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-background/90 dark:bg-[#090d14]/95 backdrop-blur-2xl border-t border-border/70 dark:border-slate-800/80 shadow-2xl px-2 pb-[env(safe-area-inset-bottom)] zero-overflow-shield"
     >
       <div className="grid grid-cols-5 items-center min-h-[58px] max-w-lg mx-auto min-w-0">
         {navItems.map((item) => {
@@ -68,7 +68,7 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full min-h-[44px] py-1 text-center transition-all duration-150 active:scale-90 min-w-0 ${
+              className={`flex flex-col items-center justify-center w-full h-full min-h-[44px] py-1 text-center transition-all duration-150 active:scale-[0.98] min-w-0 ${
                 item.isActive ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
               }`}
             >

@@ -245,7 +245,7 @@ export default async function AdminPage({
                   <span className="size-1.5 rounded-full bg-emerald-500 animate-ping mr-1" />
                   실시간 관제 가동 중
                 </Badge>
-                <Badge variant="outline" className="h-5 text-[10px] font-mono text-muted-foreground">
+                <Badge variant="outline" className="h-5 text-[10px] font-fintech text-muted-foreground">
                   139 REST Endpoints OK
                 </Badge>
               </div>
@@ -293,7 +293,7 @@ export default async function AdminPage({
         {/* KPI 0: User Money Flow & Ledger Audit */}
         <Link
           href="/admin/money-flow"
-          className="group relative flex flex-col justify-between rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 to-card p-4 sm:p-5 shadow-plate hover:border-emerald-500/70 hover:shadow-md transition-all"
+          className="group relative flex flex-col justify-between fintech-card p-4 sm:p-5 border-emerald-500/30 hover:border-emerald-500/70 hover:shadow-md transition-all"
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">유저 자금 흐름</span>
@@ -302,7 +302,7 @@ export default async function AdminPage({
             </div>
           </div>
           <div className="my-2">
-            <div className="text-2xl font-extrabold tracking-tight font-mono text-emerald-500">
+            <div className="text-2xl font-extrabold tracking-tight font-fintech text-emerald-500">
               원장 추적
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -316,7 +316,7 @@ export default async function AdminPage({
         </Link>
         <Link
           href="/admin/controls"
-          className="group relative flex flex-col justify-between rounded-2xl border bg-card p-4 sm:p-5 shadow-plate hover:border-primary/40 hover:shadow-md transition-all"
+          className="group relative flex flex-col justify-between fintech-card p-4 sm:p-5 hover:border-primary/40 hover:shadow-md transition-all"
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-muted-foreground">기능 스위치 통제</span>
@@ -344,7 +344,7 @@ export default async function AdminPage({
         {/* KPI 2: Ledger Integrity */}
         <Link
           href="/admin/economy"
-          className="group relative flex flex-col justify-between rounded-2xl border bg-card p-4 sm:p-5 shadow-plate hover:border-primary/40 hover:shadow-md transition-all"
+          className="group relative flex flex-col justify-between fintech-card p-4 sm:p-5 hover:border-primary/40 hover:shadow-md transition-all"
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-muted-foreground">원장 및 복식부기 무결성</span>
@@ -372,7 +372,7 @@ export default async function AdminPage({
         {/* KPI 3: Registered Users & Active Population */}
         <Link
           href="/admin/users"
-          className="group relative flex flex-col justify-between rounded-2xl border bg-card p-4 sm:p-5 shadow-plate hover:border-primary/40 hover:shadow-md transition-all"
+          className="group relative flex flex-col justify-between fintech-card p-4 sm:p-5 hover:border-primary/40 hover:shadow-md transition-all"
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-muted-foreground">등록 회원 인구</span>
@@ -397,7 +397,7 @@ export default async function AdminPage({
         {/* KPI 4: Virtual Equity Market */}
         <Link
           href="/admin/market"
-          className="group relative flex flex-col justify-between rounded-2xl border bg-card p-4 sm:p-5 shadow-plate hover:border-primary/40 hover:shadow-md transition-all"
+          className="group relative flex flex-col justify-between fintech-card p-4 sm:p-5 hover:border-primary/40 hover:shadow-md transition-all"
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-muted-foreground">가상 주식 시장</span>
@@ -558,7 +558,7 @@ export default async function AdminPage({
                 <span className="text-muted-foreground flex items-center gap-1.5">
                   <Clock className="size-3.5" /> 콘솔 세션 만료
                 </span>
-                <span className="font-mono font-bold text-foreground">
+                <span className="font-fintech font-bold text-foreground">
                   {admin.consoleSession.expiresAt
                     ? formatMoment(admin.consoleSession.expiresAt)
                     : '—'}
@@ -568,7 +568,7 @@ export default async function AdminPage({
                 <span className="text-muted-foreground flex items-center gap-1.5">
                   <Lock className="size-3.5" /> 유휴 자동 잠금
                 </span>
-                <span className="font-mono font-bold text-foreground">
+                <span className="font-fintech font-bold text-foreground">
                   {admin.consoleSession.idleExpiresAt
                     ? formatMoment(admin.consoleSession.idleExpiresAt)
                     : '—'}

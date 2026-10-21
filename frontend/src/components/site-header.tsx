@@ -87,7 +87,7 @@ export function SiteHeader() {
   const mobileAdmin = mobileAdminEntries(viewer);
 
   return (
-    <header className="moneyverse-site-header sticky top-0 z-30 border-b border-emerald-500/15 bg-background/80 backdrop-blur-xl w-full max-w-full overflow-hidden transition-all shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
+    <header className="moneyverse-site-header sticky top-0 z-30 border-b border-border/70 dark:border-slate-800/80 bg-background/80 dark:bg-[#090d14]/85 backdrop-blur-2xl w-full max-w-full overflow-hidden transition-all shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
       <div className="mx-auto flex h-14 sm:h-16 w-full max-w-[1440px] items-center justify-between gap-1.5 px-2 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-2 xl:gap-3 2xl:gap-4 lg:px-4 xl:px-6 2xl:px-8">
         <Brand />
 
