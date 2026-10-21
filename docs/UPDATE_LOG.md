@@ -1,3 +1,6 @@
+## v2026.10.22.1108 — F675-84 Contextual Support Help (DRAFT)
+Planning only. EN/KO canonical specs; 0 approved of 10,000 external references. No runtime changes. P0 support ACL, QA v1105, exact-SHA Test. P1 curated guide links, private suggestions, accessible UI, feedback, rollback.
+
 ## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
 - Moved the admin navigator modal from a clipped scrolling/backdrop-filtered ancestor to a document-body portal. Targeted regression 2/2, ESLint, TypeScript and Next.js build passed.
