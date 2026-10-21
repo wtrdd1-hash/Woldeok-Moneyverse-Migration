@@ -21,3 +21,10 @@
 - First focused test run: 6/7 expected failures before implementation. Patched typed domain HTTP exceptions and mobile layouts.
 - Follow-up tests: 23/23 PASS (7 repository, 5 service, 11 ProblemFilter). Backend Nest build PASS; backend/frontend TypeScript PASS; Next production build PASS after installing workspace-local dependencies offline (external node_modules symlinks were initially rejected by Turbopack). ESLint: 0 errors, 16 existing UI warnings.
 - Re-fetched origin/main: SHA remained `0d12f99b` at checkpoint. No migrations or live monetary writes performed. Pending GitHub CI/PR and operational Test evaluation.
+
+## Finished checkpoint (2026-10-21 10:28 KST)
+- Candidate committed and pushed at `53ab5104`; draft PR #976: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/976.
+- Both production builds, both TypeScript checks, focused tests 23/23 and scoped lint (0 errors; 16 existing UI warnings) completed successfully in the isolated worktree. This is **unit/build verification**, NOT authenticated browser or financial settlement E2E.
+- Official read-only financial readiness gate: **BLOCKED**, exit 2. `direct_application_financial_dml` remains for `account_balances`, `accounts`, and `system_treasury_vaults`. Current DB projection discrepancy metric was zero but financial provenance and ledger-first bond settlement remain uncertified.
+- GitHub CI run #2844 began for original candidate commit: classify and policy succeeded, runtime-check was still in progress when checked. No CI completion claim.
+- Exact-SHA Test deploy not undertaken because financial gate fails and concurrent Test/Production release worktrees are active; Production **not deployed**. No user data modified. PR stays draft until financial and live Test gates pass. Final main re-fetch still at `0d12f99b`.
