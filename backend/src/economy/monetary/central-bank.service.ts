@@ -55,7 +55,8 @@ export class CentralBankService {
       active_policy_orders_count: Number(counts?.active_orders || 0),
       total_mint_certificates_count: Number(counts?.mints || 0),
       total_retirement_certificates_count: Number(counts?.retirements || 0),
-      verified_invariant: true,
+      // Bank and escrow holdings are not independently reconciled here.
+      verified_invariant: false,
       last_reconciled_at: new Date().toISOString(),
     };
   }

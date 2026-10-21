@@ -21,65 +21,34 @@ export class MintBureauService {
       throw new BadRequestException('멱등성 키(idempotencyKey)는 필수입니다.');
     }
 
-    // 1. Check Issuance Frozen
-    const statusRes = await this.pool.query<{ is_issuance_frozen: boolean }>(
-      `SELECT is_issuance_frozen FROM public.monetary_system_status WHERE id = 1`,
-    );
-    if (statusRes.rows[0]?.is_issuance_frozen) {
-      throw new ForbiddenException('중앙은행에 의해 통화 발행이 긴급 동결된 상태입니다.');
-    }
-
-    // 2. Fetch Policy Order and Lock row
-    const orderRes = await this.pool.query<MonetaryPolicyOrder>(
-      `SELECT * FROM public.monetary_policy_orders WHERE id = $1 FOR UPDATE`,
-      [policyOrderId],
-    );
-    const order = orderRes.rows[0];
-    if (!order) {
-      throw new BadRequestException('지정된 통화정책 명령서를 찾을 수 없습니다.');
-    }
-    if (order.status !== 'APPROVED') {
-      throw new ForbiddenException(`통화정책 명령서가 승인(APPROVED) 상태가 아닙니다 (현재: ${order.status}).`);
-    }
-    if (new Date(order.expires_at).getTime() < Date.now()) {
-      throw new ForbiddenException('해당 통화정책 명령서의 유효기간이 만료되었습니다.');
-    }
-
-    const maxAmt = BigInt(order.max_amount_wld);
-    const executedAmt = BigInt(order.executed_amount_wld);
-    const reqAmt = BigInt(amountWld);
-
-    if (executedAmt + reqAmt > maxAmt) {
-      throw new ForbiddenException(
-        `발행 한도 초과: 잔여 한도는 ${(maxAmt - executedAmt).toString()} WLD이나 ${amountWld} WLD 발행을 시도했습니다.`,
-      );
-    }
-
-    // 3. Atomically Record Mint Certificate and Update Policy Order
-    const certRes = await this.pool.query<MintCertificate>(
-      `
-      INSERT INTO public.mint_certificates (
-        policy_order_id, amount_wld, source_envelope, recipient_user_id, idempotency_key, actor_id
+    // One PostgreSQL statement makes limit reservation and certificate recording atomic.
+    // The guarded UPDATE serializes competing issuers on the policy order row.
+    const result = await this.pool.query<MintCertificate>(
+      `WITH reserved AS (
+        UPDATE public.monetary_policy_orders
+           SET executed_amount_wld = (executed_amount_wld::numeric + $2::numeric)::text,
+               status = CASE WHEN executed_amount_wld::numeric + $2::numeric = max_amount_wld::numeric
+                             THEN 'EXECUTED' ELSE 'APPROVED' END,
+               updated_at = clock_timestamp()
+         WHERE id = $1::uuid AND order_type = 'MINT' AND status = 'APPROVED'
+           AND expires_at > clock_timestamp()
+           AND executed_amount_wld::numeric + $2::numeric <= max_amount_wld::numeric
+           AND EXISTS (
+             SELECT 1 FROM public.monetary_system_status
+             WHERE id = 1 AND is_issuance_frozen = false
+           )
+         RETURNING id, target_envelope
       )
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING *
-    `,
-      [policyOrderId, amountWld, order.target_envelope, recipientUserId, idempotencyKey, actorId],
+      INSERT INTO public.mint_certificates
+        (policy_order_id, amount_wld, source_envelope, recipient_user_id, idempotency_key, actor_id)
+      SELECT id, $2, target_envelope, $3::uuid, $4, $5::uuid FROM reserved
+      RETURNING *`,
+      [policyOrderId, amountWld, recipientUserId, idempotencyKey, actorId],
     );
-
-    const newExecuted = (executedAmt + reqAmt).toString();
-    const isFullyExecuted = executedAmt + reqAmt === maxAmt;
-
-    await this.pool.query(
-      `
-      UPDATE public.monetary_policy_orders
-      SET executed_amount_wld = $1, status = $2, updated_at = NOW()
-      WHERE id = $3
-    `,
-      [newExecuted, isFullyExecuted ? 'EXECUTED' : 'APPROVED', policyOrderId],
-    );
-
-    return certRes.rows[0]!;
+    if (!result.rows[0]) {
+      throw new ForbiddenException('Issuance is frozen, expired, cancelled, or exceeds approved capacity');
+    }
+    return result.rows[0];
   }
 
   async retireAuthorizedAmount(
