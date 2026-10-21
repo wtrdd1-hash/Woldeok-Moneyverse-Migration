@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.22.1108 — F675-84 Contextual Help Before Support (DRAFT)
+- Canonical details: PROJECT_PLAN.md v1108, Korean parity: PROJECT_PLAN.ko.md v1108. Existing /support and /guide GUIDE_FAQS provide up to three vetted bilingual suggestions; human contact always available. Client-side matching avoids transmitting private drafts. Feedback is consented, CSRF-protected and idempotent, with restricted DB access and no WLD effects.
+- P0 HELP1108-01..03: support ACL, QA/finance/Test exact-SHA gates, stable request keys. P1 HELP1108-04..08: catalog, accessible UI, feedback API/DB, admin aggregates, concurrency and rollback. 10,000 external reference gate BLOCKED: 3 official issuers reviewed, 0 approved, cumulative unknown. No runtime changes; do not merge until review.
+
 ## v2026.10.22.1106 — Actual Production SEO indexing operational correction (not new product-plan authority)
 - [Release](../releases/v2026.10.22.1106.md) / [KO](../releases/v2026.10.22.1106.ko.md); [incident analysis](../findings/MONEYVERSE_SEO_BLOG_INDEXING_INCIDENT_v2026.10.22.1106.md) / [KO](../findings/MONEYVERSE_SEO_BLOG_INDEXING_INCIDENT_v2026.10.22.1106.ko.md). Source SHA stays v1083 `6a989b5a`; SEO_INDEXING_ENABLED was false in public Production and suppressed crawling and sitemaps. Same-source config-only new frontend artifact on `:3354` now responds index/follow and 1,018/6/28 sitemap entries; protected private-page HTML noindex persists, no new approved AI articles, editorial v975 remains P0 unimplemented. This is observed runtime evidence and **does not supersede PROJECT_PLAN, v975 design, or financial/full-authenticated UI release gates**.
 
