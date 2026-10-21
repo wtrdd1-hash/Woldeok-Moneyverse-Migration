@@ -17,10 +17,22 @@ export async function POST(req: Request) {
 
     const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
 
+    // 관리자 세션에서 유효한 CSRF 토큰 획득
+    let csrfToken: string | undefined = req.headers.get('x-csrf-token') || undefined;
+    if (!csrfToken) {
+      try {
+        const session = await api<{ csrfToken?: string }>('/api/v1/auth/session');
+        csrfToken = session.csrfToken;
+      } catch {
+        // Fallback swallow
+      }
+    }
+
     // 표준 api()를 통해 x-internal-token, 쿠키, CSRF 토큰을 안전하게 주입
     const data = await api<Record<string, unknown>>('/api/v1/admin/discord/test-dm', {
       method: 'POST',
       body,
+      ...(csrfToken ? { csrfToken } : {}),
     });
 
     return NextResponse.json(data);
