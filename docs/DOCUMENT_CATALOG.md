@@ -1,5 +1,9 @@
 # 📚 Document Catalog
 
+## v2026.10.22.1107 — Four-market native editorial auto-publish plan (PLANNING)
+- [English country/publish-first authoritative design](planning/AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.md) / [Korean](planning/AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.ko.md), [implementation plan EN](superpowers/plans/2026-10-22-blog-country-auto-publish-v1107.md) / [KO](superpowers/plans/2026-10-22-blog-country-auto-publish-v1107.ko.md). Distinct KR/US/JP/CN originals, GREEN immediate safety-gated publish, 24h retrospective review and instant withdrawal; AMBER preapproved, RED blocked. No runtime release.
+
+
 ## v2026.10.20.981 — Verified safe root cache cleanup (HOST VERIFIED)
 - [Worklog EN](worklog/2026-10-20-host-storage-cleanup-v981.md) / [KO](worklog/2026-10-20-host-storage-cleanup-v981.ko.md) · [Changelog](changelog/2026-10-20-host-storage-cleanup-v981.md) / [KO](changelog/2026-10-20-host-storage-cleanup-v981.ko.md) · [GitHub](updates/v2026.10.20.981-github.md) · [Internal](updates/v2026.10.20.981-internal.md). Root 64%→62%, net 1.51GB safely recovered; no application deployment.
 
