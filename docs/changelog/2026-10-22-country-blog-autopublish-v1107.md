@@ -1,0 +1,3 @@
+# v2026.10.22.1107 — Country-native AI blog & immediate publication planning
+
+**PLANNING ONLY:** Adopted four-market KR/US/JP/CN independently authored originals and bounded GREEN instant auto-publication with mandatory 24h human retrospective review/auto withdrawal. AMBER sensitive financial/legal country claims preapproved; RED prohibited. New EN/KO design, Superpowers plan, top-level authorities, v975 addendum and internal/GitHub updates. No application/DB/production changes, no new public articles. Engineering follows issue #983. [Detailed specification](../planning/AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.md) / [Korean](../planning/AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.ko.md).
