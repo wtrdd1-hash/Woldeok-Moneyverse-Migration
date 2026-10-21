@@ -1,3 +1,8 @@
+## v2026.10.21.1061 — Bond subscription error handling and mobile tabs (candidate)
+- Convert low WLD balance to explicit 409 conflict rather than an opaque 500; reject invalid quantity with 400 and closed/exhausted inventory with 409, preserving rollback.
+- Prevent oversubscription in the web form, wrap the subscription heading and stack mobile tabs; new RED/GREEN regression tests (23 related tests PASS), typechecks and both production builds pass.
+- **Not deployed**: existing direct balance writes bypass the Economy Core journal, and isolated authenticated Test/financial gates remain unresolved. [Release](../releases/v2026.10.21.1061.md) / [한국어](../releases/v2026.10.21.1061.ko.md).
+
 ## v2026.10.19.913 — Arcade browser-only demo truth / Mines last-gem math (candidate)
 - Distinguish Mines and Plinko client-only simulations from actual WLD ledger settlements: no real wager, payout, or receipt; remove false fairness badge and false winnings copy.
 - Validate safe-integer bounded simulated stakes and fix Mines last-gem auto cash-out multiplier derived from stale state. Add unit and UI regression cases.

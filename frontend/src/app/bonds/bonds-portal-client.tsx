@@ -109,8 +109,12 @@ export function BondsPortalClient({
       toast.error('국채 청약은 로그인 후 이용하실 수 있습니다.');
       return;
     }
-    if (unitsToSubscribe <= 0) {
-      toast.error('청약 좌수는 1좌 이상이어야 합니다.');
+    if (!Number.isSafeInteger(unitsToSubscribe) || unitsToSubscribe <= 0) {
+      toast.error('청약 좌수는 1 이상의 정수여야 합니다.');
+      return;
+    }
+    if (BigInt(unitsToSubscribe) > BigInt(selectedBond.available_units)) {
+      toast.error('남은 국채 청약 좌수를 초과했습니다.');
       return;
     }
 
@@ -375,11 +379,11 @@ export function BondsPortalClient({
 
       {/* Subscription Modal / Drawer inline */}
       {selectedBond && (
-        <Card className="border-sky-500/50 bg-sky-500/5 p-6 animate-in fade-in duration-200">
+        <Card className="border-sky-500/50 bg-sky-500/5 p-4 sm:p-6 animate-in fade-in duration-200">
           <div className="max-w-xl mx-auto space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-foreground">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base sm:text-lg font-bold text-foreground break-words">
                   [{selectedBond.name}] 청약 신청
                 </h3>
                 <p className="text-xs text-muted-foreground">
@@ -389,6 +393,7 @@ export function BondsPortalClient({
               <Button
                 variant="ghost"
                 size="sm"
+                className="shrink-0"
                 onClick={() => setSelectedBond(null)}
               >
                 취소
@@ -438,10 +443,10 @@ export function BondsPortalClient({
 
       {/* 3. User Holdings, Repo Loans & Information Tabs */}
       <Tabs defaultValue="holdings" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-xl mx-auto mb-6">
-          <TabsTrigger value="holdings">내 보유 채권 ({holdings.length})</TabsTrigger>
-          <TabsTrigger value="repo">국채 담보 대출 (Repo)</TabsTrigger>
-          <TabsTrigger value="guide">국채 제도 및 상환 안내</TabsTrigger>
+        <TabsList className="grid h-auto w-full grid-cols-1 gap-2 mb-6 p-1 sm:grid-cols-3 sm:max-w-xl sm:mx-auto">
+          <TabsTrigger value="holdings" className="min-h-11 whitespace-normal text-center leading-snug">내 보유 채권 ({holdings.length})</TabsTrigger>
+          <TabsTrigger value="repo" className="min-h-11 whitespace-normal text-center leading-snug">국채 담보 대출 (Repo)</TabsTrigger>
+          <TabsTrigger value="guide" className="min-h-11 whitespace-normal text-center leading-snug">국채 제도 및 상환 안내</TabsTrigger>
         </TabsList>
 
         {/* Tab 1: Holdings */}

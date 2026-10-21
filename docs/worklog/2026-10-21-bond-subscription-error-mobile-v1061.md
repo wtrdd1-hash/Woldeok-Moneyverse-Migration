@@ -16,3 +16,8 @@
 
 ## Finished
 - Pending verification and deployment evidence.
+
+## In progress checkpoint (2026-10-21 10:23 KST)
+- First focused test run: 6/7 expected failures before implementation. Patched typed domain HTTP exceptions and mobile layouts.
+- Follow-up tests: 23/23 PASS (7 repository, 5 service, 11 ProblemFilter). Backend Nest build PASS; backend/frontend TypeScript PASS; Next production build PASS after installing workspace-local dependencies offline (external node_modules symlinks were initially rejected by Turbopack). ESLint: 0 errors, 16 existing UI warnings.
+- Re-fetched origin/main: SHA remained `0d12f99b` at checkpoint. No migrations or live monetary writes performed. Pending GitHub CI/PR and operational Test evaluation.
