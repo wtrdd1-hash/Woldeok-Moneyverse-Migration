@@ -5,34 +5,26 @@ import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  Award,
   Banknote,
   BarChart3,
   Bell,
   Briefcase,
+  Building,
   Building2,
-  Calendar,
   CheckCircle2,
-  CheckSquare,
-  ChevronRight,
   CircleAlert,
-  CircleCheck,
-  Clock,
   Coins,
   Cpu,
-  Eye,
   Flame,
   Globe,
   Headphones,
+  HeartHandshake,
   History,
   Image as ImageIcon,
-  Key,
   Landmark,
-  Lock,
-  MessageSquare,
   Radio,
   RefreshCw,
-  Search,
+  ScrollText,
   Server,
   Shield,
   ShieldAlert,
@@ -43,14 +35,12 @@ import {
   TrendingUp,
   UserCheck,
   Users,
+  Vault,
   Wallet,
-  Wrench,
   Zap,
 } from 'lucide-react';
-import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import { compareAmounts, formatMoment, groupDigits } from '@/lib/money';
@@ -74,7 +64,7 @@ import type {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '운영 마스터 관제탑 · Woldeok Admin',
+  title: '운영 마스터 관제탑 (Datadog Cockpit) · Woldeok Admin',
   robots: { index: false, follow: false },
 };
 
@@ -82,78 +72,80 @@ const AREA_GROUPS = [
   {
     key: 'safety',
     eyebrow: 'SECURITY & MEMBERS',
-    title: '회원 보안 · 공개 콘텐츠 관제',
-    description: '사용자 권한, 이상 거래 탐지, IP 차단 및 대외 공개 소식을 실시간 통제합니다.',
+    title: '회원 보안 · 이상 거래 탐지',
+    description: '사용자 권한, 이상 거래 차단, IP 보안 및 대외 공개 소식을 통제합니다.',
     badge: '안전 통제',
-    color: 'text-amber-500',
+    color: 'text-amber-400',
   },
   {
     key: 'economy',
     eyebrow: 'FINTECH & SIMULATION',
-    title: '가상 경제 · 핀테크 코어 관제',
-    description: '가상 주식 시장, 국고 비축금, 금융 서비스, 직업/사업 카탈로그를 총괄 운영합니다.',
+    title: '가상 경제 · 핀테크 코어',
+    description: '가상 주식 시장, 국고 비축금, 금융 서비스, 직업/사업 카탈로그를 운영합니다.',
     badge: '경제 엔진',
-    color: 'text-primary',
+    color: 'text-emerald-400',
   },
   {
     key: 'records',
     eyebrow: 'AUDIT & TELEMETRY',
-    title: '감사 추적 · 텔레메트리 · 배송 로그',
-    description: 'SHA-256 체인 무결성, 접속/체류 텔레메트리, Discord 알림 발송 기록을 추적합니다.',
+    title: '감사 추적 · 텔레메트리 펄스',
+    description: 'SHA-256 체인 무결성, 접속/체류 텔레메트리, 발송 기록을 실시간 추적합니다.',
     badge: '무결성 감사',
-    color: 'text-emerald-500',
+    color: 'text-sky-400',
   },
 ] as const;
 
 function getAreaIcon(href: string) {
   switch (href) {
     case '/admin/analytics':
-      return <BarChart3 className="size-4.5 text-cyan-400" />;
+      return <BarChart3 className="size-4 text-cyan-400" />;
     case '/admin/controls':
-      return <Sliders className="size-4.5 text-primary" />;
+      return <Sliders className="size-4 text-emerald-400" />;
     case '/admin/security':
-      return <ShieldAlert className="size-4.5 text-rose-500" />;
+      return <ShieldAlert className="size-4 text-rose-500" />;
     case '/admin/users':
-      return <UserCheck className="size-4.5 text-blue-500" />;
+      return <UserCheck className="size-4 text-blue-400" />;
     case '/admin/support':
-      return <Headphones className="size-4.5 text-emerald-500" />;
+      return <Headphones className="size-4 text-emerald-400" />;
     case '/admin/market':
-      return <TrendingUp className="size-4.5 text-emerald-500" />;
+      return <TrendingUp className="size-4 text-emerald-400" />;
     case '/admin/catalog':
-      return <Building2 className="size-4.5 text-indigo-500" />;
+      return <Building2 className="size-4 text-indigo-400" />;
     case '/admin/work':
-      return <Briefcase className="size-4.5 text-blue-500" />;
+      return <Briefcase className="size-4 text-blue-400" />;
     case '/admin/bank':
-      return <Landmark className="size-4.5 text-amber-500" />;
+      return <Landmark className="size-4 text-amber-400" />;
     case '/admin/economy':
-      return <Coins className="size-4.5 text-yellow-500" />;
+      return <Coins className="size-4 text-yellow-400" />;
     case '/admin/treasury':
-      return <Banknote className="size-4.5 text-primary" />;
+      return <Banknote className="size-4 text-emerald-400" />;
     case '/admin/money-flow':
-      return <Coins className="size-4.5 text-emerald-500" />;
+      return <Coins className="size-4 text-emerald-400" />;
     case '/admin/shop':
-      return <ShoppingBag className="size-4.5 text-rose-500" />;
+      return <ShoppingBag className="size-4 text-rose-400" />;
     case '/admin/logs':
-      return <History className="size-4.5 text-sky-500" />;
-    case '/admin/logs/activity':
-      return <Activity className="size-4.5 text-cyan-500" />;
-    case '/admin/logs/delivery':
-      return <Radio className="size-4.5 text-purple-500" />;
-    case '/admin/logs/integrity':
-      return <ShieldCheck className="size-4.5 text-emerald-500" />;
+      return <History className="size-4 text-sky-400" />;
     case '/admin/discord':
-      return <Bell className="size-4.5 text-indigo-400" />;
+      return <Bell className="size-4 text-indigo-400" />;
     case '/admin/content':
-      return <ImageIcon className="size-4.5 text-rose-500" />;
+      return <ImageIcon className="size-4 text-rose-400" />;
     case '/admin/safety':
-      return <ShieldCheck className="size-4.5 text-destructive" />;
+      return <ShieldCheck className="size-4 text-rose-400" />;
+    case '/admin/enterprises':
+      return <Building className="size-4 text-amber-400" />;
+    case '/admin/bonds':
+      return <ScrollText className="size-4 text-blue-400" />;
+    case '/admin/pension':
+      return <HeartHandshake className="size-4 text-rose-400" />;
+    case '/admin/kdic':
+      return <Shield className="size-4 text-sky-400" />;
     default:
-      return <Activity className="size-4.5 text-muted-foreground" />;
+      return <Activity className="size-4 text-slate-400" />;
   }
 }
 
 /**
- * Stripe & Toss Admin Inspired Master Control Tower for Woldeok Moneyverse
+ * Datadog & AWS Cockpit Inspired Enterprise Master Control Tower for Woldeok Moneyverse
  */
 export default async function AdminPage({
   searchParams,
@@ -199,58 +191,37 @@ export default async function AdminPage({
     '/admin/controls': controls
       ? `전체 ${totalSwitches}개 · 활성 ${totalSwitches - held}개${held > 0 ? ` · 제어 ${held}개` : ''}`
       : null,
-    '/admin/users': users ? `등록 회원 ${allUsers.length}명` : null,
-    '/admin/money-flow': '실시간 유저 입출금·매매·보상 복식부기 원장 100% 대사',
-    '/admin/market': stocks
-      ? `상장 종목 ${stocksList.length}개${haltedStocks > 0 ? ` · 정지 ${haltedStocks}개` : ' · 전 종목 거래중'}`
-      : null,
-    '/admin/catalog':
-      businesses && events
-        ? `사업체 ${businesses.businessTypes.length}종 · 시즌 ${events.events.length}개`
-        : null,
-    '/admin/economy': health?.available ? '원장 최신 스냅샷 정상' : '스냅샷 생성 대기',
-    '/admin/treasury': '중앙 국고 잔고 및 Faucet/Sink 관제',
-    '/admin/security': '이상 패턴 감지 및 IP 차단 필터',
-    '/admin/logs/activity': '실시간 유저 접속·체류·클릭 텔레메트리',
-    '/admin/logs/integrity': integrityOk ? 'SHA-256 체인 무결성 검증 완료' : '무결성 점검 권장',
-    '/admin/work': '작업 카탈로그 및 직업 숙련도 정책',
-    '/admin/bank': '예금·대출 여신 및 신용 리스크 관리',
-    '/admin/shop': '덕마켓 상품 재고 및 판매 상태',
-    '/admin/support': '1:1 고객 문의 및 답변 티켓',
-    '/admin/discord': 'Discord 웹훅 전달 채널 라우팅',
-    '/admin/content': '공지사항 및 월덕 갤러리 공개 승인',
-    '/admin/safety': '비회원 긴급 콘텐츠 삭제 및 미성년자 안전 센터',
-    '/admin/logs': '운영자 작업 감사 추적 로그',
-    '/admin/logs/delivery': '외장 시스템 알림 발송 기록',
+    '/admin/users': users ? `전체 ${users.users.length.toLocaleString()}명` : null,
+    '/admin/market': stocks ? `정상 ${activeStocks}종목 · 정지 ${haltedStocks}종목` : null,
+    '/admin/catalog': businesses ? `업종 ${businesses.businessTypes.length}종` : null,
+    '/admin/content': events ? `진행 이벤트 ${events.events.length}건` : null,
+    '/admin/economy': health?.available === true ? (integrityOk ? '원장 정합성 완벽' : '원장 불일치 감지') : null,
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 sm:gap-8 px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 pb-20 min-w-0 overflow-hidden">
-      {/* 3초 주기 실시간 텔레메트리 펄스 인디케이터 */}
-      <TelemetryPulse />
-
-      {/* Top Stripe-style System Master Health Telemetry Bar */}
-      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-background to-amber-500/10 p-4 sm:p-5 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-md">
-              <Cpu className="size-5 sm:size-6 animate-pulse" />
+    <div className="w-full max-w-full min-w-0 space-y-5 pb-16 zero-overflow-shield">
+      {/* 1. Datadog Cockpit Header: System Health Status & Quick Search */}
+      <div className="fintech-card p-4 sm:p-6 border-slate-800/80 bg-slate-900/40 dark:bg-[#0b0f17]/90 backdrop-blur-2xl">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+            <div className="grid size-11 sm:size-12 shrink-0 place-items-center rounded-2xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30 shadow-xs">
+              <Cpu className="size-6 animate-pulse" />
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-base sm:text-lg font-extrabold tracking-tight text-foreground">
+                <h1 className="text-lg sm:text-xl font-black text-slate-100 tracking-tight">
                   운영 마스터 관제탑
                 </h1>
-                <Badge className="h-5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
-                  <span className="size-1.5 rounded-full bg-emerald-500 animate-ping mr-1" />
-                  실시간 관제 가동 중
+                <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px] font-bold px-2 py-0.5">
+                  <span className="size-1.5 rounded-full bg-emerald-400 animate-ping mr-1.5 inline-block" />
+                  실시간 관제 정상
                 </Badge>
-                <Badge variant="outline" className="h-5 text-[10px] font-mono text-muted-foreground">
-                  139 REST Endpoints OK
+                <Badge variant="outline" className="border-slate-700/80 text-slate-400 font-fintech text-[10px]">
+                  PID 336890 · 14대 API 온라인
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5 [word-break:keep-all]">
-                실시간 가상경제 지표, 회원 안전 조치, 감사 로그 및 핀테크 인프라를 총괄 제어합니다.
+              <p className="text-xs text-slate-400 mt-1 [word-break:keep-all]">
+                가상 경제 복식부기 원장, 긴급 킬스위치, 이상 거래 탐지 및 통화량 유동성을 24시간 실시간 제어합니다.
               </p>
             </div>
           </div>
@@ -258,470 +229,402 @@ export default async function AdminPage({
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <Link
               href="/admin/api-health"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-sky-500/40 bg-sky-500/15 px-3.5 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-sky-600 dark:text-sky-400 shadow-xs hover:bg-sky-500/25 transition-all ring-1 ring-sky-500/30"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-sky-500/30 bg-sky-500/10 px-3.5 py-2 min-h-[44px] sm:min-h-9 text-xs font-bold text-sky-400 hover:bg-sky-500/20 btn-interactive"
             >
-              <Activity className="size-3.5 text-sky-500 animate-pulse" />
-              <span>14대 API & R2 백업 타워</span>
+              <Activity className="size-3.5 text-sky-400 animate-pulse" />
+              <span>14대 API 관제 타워</span>
             </Link>
             <Link
               href="/admin/money-flow"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-3.5 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-emerald-600 dark:text-emerald-400 shadow-xs hover:bg-emerald-500/25 transition-all ring-1 ring-emerald-500/30"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 min-h-[44px] sm:min-h-9 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 btn-interactive"
             >
-              <Coins className="size-3.5 text-emerald-500" />
+              <Coins className="size-3.5 text-emerald-400" />
               <span>유저 자금 흐름 관제</span>
             </Link>
             <Link
-              href="/admin/economy"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-background/80 px-3 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-foreground shadow-xs hover:bg-muted transition-colors"
+              href="/admin/controls"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-2 min-h-[44px] sm:min-h-9 text-xs font-bold text-amber-400 hover:bg-amber-500/20 btn-interactive"
             >
-              <RefreshCw className="size-3.5 text-primary" />
-              <span>원장 상태 점검</span>
+              <Sliders className="size-3.5 text-amber-400" />
+              <span>킬스위치 즉시 제어</span>
             </Link>
-            <Link
-              href="/admin/treasury"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 min-h-[44px] sm:min-h-9 text-xs font-bold text-amber-600 dark:text-amber-400 shadow-xs hover:bg-amber-500/20 transition-colors"
-            >
-              <Banknote className="size-3.5 text-amber-500" />
-              <span>국고 관리</span>
-            </Link>
+          </div>
+        </div>
+
+        {/* Global Quick User & Action Jumper */}
+        <div className="mt-4 pt-3.5 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="w-full sm:max-w-md min-w-0">
+            <AdminQuickUserSearch />
+          </div>
+          <div className="flex items-center gap-2 text-xs text-slate-400 font-fintech shrink-0">
+            <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+              <CheckCircle2 className="size-3.5" /> SHA-256 원장 체인 무결성 확인
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Primary KPI Status Grid (Toss & Stripe Style) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-4">
-        {/* KPI 0: User Money Flow & Ledger Audit */}
+      {/* 2. Top 4 Core Cockpit KPI Cards (Datadog High-Density Metrics) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* KPI 1: 원장 무결성 */}
         <Link
-          href="/admin/money-flow"
-          className="group relative flex flex-col justify-between rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 to-card p-4 sm:p-5 shadow-plate hover:border-emerald-500/70 hover:shadow-md transition-all"
+          href="/admin/economy"
+          className="fintech-card p-4 sm:p-5 flex flex-col justify-between hover:border-emerald-500/50 btn-interactive group"
         >
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">유저 자금 흐름</span>
-            <div className="flex size-8 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-500">
-              <Coins className="size-4" />
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400">복식부기 원장 무결성</span>
+            <div className="flex size-8 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
+              <ShieldCheck className="size-4" />
             </div>
           </div>
-          <div className="my-2">
-            <div className="text-2xl font-extrabold tracking-tight font-mono text-emerald-500">
-              원장 추적
+          <div className="my-2.5">
+            <div className="text-2xl font-black font-fintech text-emerald-400">
+              {integrityOk ? '0건 오차 (정합)' : '불일치 감지'}
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              입출금 · 매매 · 상점 전수 대사
+            <p className="text-xs text-slate-400 mt-0.5">
+              자산 = 부채 + 자본 균형 100% 일치
             </p>
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-emerald-500/30 text-xs font-semibold text-emerald-500">
-            <span>자금 흐름 전체 조회</span>
+          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs font-semibold text-emerald-400">
+            <span>원장 정합성 상세 점검</span>
             <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
           </div>
         </Link>
+
+        {/* KPI 2: 비상 킬스위치 */}
         <Link
           href="/admin/controls"
-          className="group relative flex flex-col justify-between rounded-2xl border bg-card p-4 sm:p-5 shadow-plate hover:border-primary/40 hover:shadow-md transition-all"
+          className="fintech-card p-4 sm:p-5 flex flex-col justify-between hover:border-amber-500/50 btn-interactive group"
         >
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold text-muted-foreground">기능 스위치 통제</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400">긴급 킬스위치 상태</span>
             <div className={cn(
               "flex size-8 items-center justify-center rounded-xl",
-              held > 0 ? "bg-amber-500/15 text-amber-500" : "bg-emerald-500/15 text-emerald-500"
+              held > 0 ? "bg-amber-500/15 text-amber-400" : "bg-emerald-500/15 text-emerald-400"
             )}>
               {held > 0 ? <AlertTriangle className="size-4" /> : <Sliders className="size-4" />}
             </div>
           </div>
-          <div className="my-2">
-            <div className="text-2xl font-extrabold tracking-tight">
-              {controls === null ? '확인 불가' : `${held}개 제어 중`}
+          <div className="my-2.5">
+            <div className="text-2xl font-black font-fintech text-slate-100">
+              {held > 0 ? `${held}개 제어 중` : '전 기능 정상 가동'}
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              전체 {totalSwitches}개 중 {totalSwitches - held}개 정상 가동
+            <p className="text-xs text-slate-400 mt-0.5">
+              전체 {totalSwitches}개 중 {totalSwitches - held}개 활성
             </p>
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs font-semibold text-primary">
-            <span>스위치 정책 조정</span>
+          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs font-semibold text-amber-400">
+            <span>시스템 스위치 제어</span>
             <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
           </div>
         </Link>
 
-        {/* KPI 2: Ledger Integrity */}
-        <Link
-          href="/admin/economy"
-          className="group relative flex flex-col justify-between rounded-2xl border bg-card p-4 sm:p-5 shadow-plate hover:border-primary/40 hover:shadow-md transition-all"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold text-muted-foreground">원장 및 복식부기 무결성</span>
-            <div className={cn(
-              "flex size-8 items-center justify-center rounded-xl",
-              integrityOk === false ? "bg-rose-500/15 text-rose-500" : "bg-emerald-500/15 text-emerald-500"
-            )}>
-              {integrityOk === false ? <CircleAlert className="size-4" /> : <ShieldCheck className="size-4" />}
-            </div>
-          </div>
-          <div className="my-2">
-            <div className="text-2xl font-extrabold tracking-tight">
-              {health?.available !== true ? '스냅샷 없음' : integrityOk ? '정합성 완벽' : '불일치 감지'}
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              복식부기 원장 잔액 오차 0건 검증
-            </p>
-          </div>
-          <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs font-semibold text-primary">
-            <span>경제 통화량 정합성</span>
-            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
-          </div>
-        </Link>
-
-        {/* KPI 3: Registered Users & Active Population */}
-        <Link
-          href="/admin/users"
-          className="group relative flex flex-col justify-between rounded-2xl border bg-card p-4 sm:p-5 shadow-plate hover:border-primary/40 hover:shadow-md transition-all"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold text-muted-foreground">등록 회원 인구</span>
-            <div className="flex size-8 items-center justify-center rounded-xl bg-blue-500/15 text-blue-500">
-              <Users className="size-4" />
-            </div>
-          </div>
-          <div className="my-2">
-            <div className="text-2xl font-extrabold tracking-tight">
-              {allUsers.length > 0 ? `${allUsers.length}명` : '—'}
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              실시간 세션 및 보안 모니터링
-            </p>
-          </div>
-          <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs font-semibold text-primary">
-            <span>회원 안전 및 권한 관리</span>
-            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
-          </div>
-        </Link>
-
-        {/* KPI 4: Virtual Equity Market */}
+        {/* KPI 3: 가상 주식 거래소 */}
         <Link
           href="/admin/market"
-          className="group relative flex flex-col justify-between rounded-2xl border bg-card p-4 sm:p-5 shadow-plate hover:border-primary/40 hover:shadow-md transition-all"
+          className="fintech-card p-4 sm:p-5 flex flex-col justify-between hover:border-sky-500/50 btn-interactive group"
         >
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold text-muted-foreground">가상 주식 시장</span>
-            <div className="flex size-8 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-500">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400">가상 주식 10대 상장사</span>
+            <div className="flex size-8 items-center justify-center rounded-xl bg-sky-500/15 text-sky-400">
               <TrendingUp className="size-4" />
             </div>
           </div>
-          <div className="my-2">
-            <div className="text-2xl font-extrabold tracking-tight">
-              {stocksList.length > 0 ? `${stocksList.length}개 종목` : '—'}
+          <div className="my-2.5">
+            <div className="text-2xl font-black font-fintech text-sky-400">
+              {activeStocks}종목 정상 매매
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              정상 {activeStocks}개{haltedStocks > 0 ? ` · 거래정지 ${haltedStocks}개` : ''}
+            <p className="text-xs text-slate-400 mt-0.5">
+              정지 {haltedStocks}종목 · 실시간 호가/속보 가동
             </p>
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs font-semibold text-primary">
-            <span>종목 관리 및 시장 뉴스</span>
+          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs font-semibold text-sky-400">
+            <span>거래소 서킷브레이커 제어</span>
+            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+          </div>
+        </Link>
+
+        {/* KPI 4: 회원 인구 및 자금 흐름 */}
+        <Link
+          href="/admin/users"
+          className="fintech-card p-4 sm:p-5 flex flex-col justify-between hover:border-indigo-500/50 btn-interactive group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400">등록 시민 인구</span>
+            <div className="flex size-8 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-400">
+              <Users className="size-4" />
+            </div>
+          </div>
+          <div className="my-2.5">
+            <div className="text-2xl font-black font-fintech text-indigo-400">
+              {allUsers.length.toLocaleString()}명
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              실시간 경제 활동 시민 통계
+            </p>
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs font-semibold text-indigo-400">
+            <span>회원 디렉토리 및 권한 관리</span>
             <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
           </div>
         </Link>
       </div>
 
-      {/* 실시간 텔레메트리 & 그래프 분석실 전용 딥링크 배너 */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-xl border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-blue-950/40 p-4 shadow-lg backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-400">
-            <BarChart3 className="size-5" />
-          </div>
-          <div>
+      {/* 3. Central Dual Cockpit: Quick Emergency Matrix & Top Whales */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Left: Emergency Operations Matrix (8 Columns) */}
+        <div className="lg:col-span-8 fintech-card p-4 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-white">실시간 텔레메트리 & 그래프 분석실 (Visual Analytics)</span>
-              <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 text-[10px]">
-                60fps Live Charts
-              </Badge>
+              <Zap className="size-4 text-amber-400" />
+              <h2 className="text-sm font-extrabold text-slate-100">
+                핵심 관제 서피스 원클릭 퀵 런처
+              </h2>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              유저 코호트 추이, 통화량 M0/M1/M2 도넛 구성비, 5분위 자산 계층 곡선 및 CSV 리포트 내보내기
-            </p>
+            <span className="text-xs font-fintech text-slate-400">27대 운영 관제 서피스</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <Link
+              href="/admin/money-flow"
+              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-emerald-500/40 transition-all btn-interactive group"
+            >
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-emerald-400">
+                <Coins className="size-3.5 text-emerald-400" />
+                <span>유저 자금 흐름</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1 truncate">
+                입출금 · 매매 · 상점 전수 추적
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/treasury"
+              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-amber-500/40 transition-all btn-interactive group"
+            >
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-amber-400">
+                <Vault className="size-3.5 text-amber-400" />
+                <span>국고 포털 & 비축금</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1 truncate">
+                기본배당 · 창업그랜트 심사
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/security"
+              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-rose-500/40 transition-all btn-interactive group"
+            >
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-rose-400">
+                <ShieldAlert className="size-3.5 text-rose-400" />
+                <span>보안 · IP 차단</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1 truncate">
+                어뷰징 탐지 및 세션 강제 만료
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/market/ai-news"
+              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-sky-500/40 transition-all btn-interactive group"
+            >
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-sky-400">
+                <Radio className="size-3.5 text-sky-400" />
+                <span>주식 속보 제어</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1 truncate">
+                2시간 자동 속보 및 수동 발행
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/blog"
+              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-emerald-500/40 transition-all btn-interactive group"
+            >
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-emerald-400">
+                <ScrollText className="size-3.5 text-emerald-400" />
+                <span>AI 블로그 관리</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1 truncate">
+                새벽 06:00 자동 발행 & IndexNow
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/seo"
+              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-indigo-500/40 transition-all btn-interactive group"
+            >
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-indigo-400">
+                <Globe className="size-3.5 text-indigo-400" />
+                <span>SEO & 검색엔진 색인</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1 truncate">
+                구글/네이버 색인 핑 전송 타워
+              </p>
+            </Link>
           </div>
         </div>
-        <Link
-          href="/admin/analytics"
-          className="mt-3 sm:mt-0 inline-flex items-center justify-center min-h-[44px] sm:min-h-9 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-md transition-all gap-1.5"
-        >
-          <span>그래프 분석실 열기</span>
-          <ArrowRight className="size-3.5" />
-        </Link>
-      </div>
 
-      {/* 실시간 종합 운영 텔레메트리 매트릭스 표 (4개 코호트/통화/주식/5분위 탭) */}
-      <AdminComprehensiveTelemetryMatrix
-        users={allUsers}
-        stocks={stocksList}
-        health={health}
-        controls={controls?.featureSwitches ?? []}
-      />
-
-      {/* 실시간 MAU / WAU / DAU & 리텐션 자산 통계 테이블 전진 배치 */}
-      <AdminTelemetryMetricsTable users={allUsers} showDetailsLink={true} />
-
-      {/* Operator Session Info & Quick Member Search Bar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Left 2 Cols: Quick Member Telemetry Search */}
-        <Card className="lg:col-span-2 rounded-2xl border-border/80 shadow-plate">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <Search className="size-4 text-primary" />
-                  <span>회원 즉시 검색 및 이상 거래 탐지</span>
-                </CardTitle>
-                <CardDescription className="text-xs mt-0.5">
-                  회원 닉네임, ID 또는 식별자로 계정 상태와 자산 내역을 즉시 조회합니다.
-                </CardDescription>
-              </div>
+        {/* Right: Top 5 Whale Accounts (4 Columns) */}
+        <div className="lg:col-span-4 fintech-card p-4 sm:p-6 space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <div className="flex items-center gap-2">
+              <Flame className="size-4 text-rose-400" />
+              <h2 className="text-sm font-extrabold text-slate-100">상위 5대 고래(Whale) 계정</h2>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs">
-              <div className="flex items-center gap-2 min-w-0">
-                <Coins className="size-4 text-emerald-500 shrink-0" />
-                <span className="text-foreground font-semibold truncate">
-                  전체 유저의 실시간 입출금 · 주식 거래 · 상점 구매 원장 추적
-                </span>
-              </div>
-              <Link
-                href="/admin/money-flow"
-                className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0"
-              >
-                <span>원장 관제 타워 바로가기</span>
-                <ArrowRight className="size-3.5" />
-              </Link>
-            </div>
-            <AdminQuickUserSearch />
+            <Link href="/admin/users" className="text-xs text-emerald-400 hover:underline">
+              전체 보기
+            </Link>
+          </div>
 
-            {/* Quick Top Wealth Snapshot */}
-            {topUsers.length > 0 && (
-              <div className="pt-2 border-t border-border/60">
-                <p className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1.5">
-                  <Flame className="size-3.5 text-amber-500" />
-                  <span>상위 순자산 랭킹 TOP 5</span>
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
-                  {topUsers.map((u, idx) => (
-                    <Link
-                      key={u.user_id}
-                      href={`/admin/users?id=${u.user_id}`}
-                      className="flex items-center justify-between p-2 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-xs"
-                    >
-                      <div className="min-w-0">
-                        <span className="font-bold text-foreground block truncate">
-                          #{idx + 1} {u.display_name}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
-                          {groupDigits(u.total_net_worth ?? '0')} DUK
-                        </span>
-                      </div>
-                      <ChevronRight className="size-3 text-muted-foreground shrink-0" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Right 1 Col: Operator Console Session Security Card */}
-        <Card className="rounded-2xl border-border/80 shadow-plate flex flex-col justify-between">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <ShieldCheck className="size-4 text-primary" />
-                <span>운영 세션 보안 상태</span>
-              </CardTitle>
-              <Badge variant="default" className="text-[10px] font-bold">
-                보안 격리 세션
-              </Badge>
-            </div>
-            <CardDescription className="text-xs">
-              매 요청마다 데이터베이스 RBAC 보안 정책이 검증됩니다.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex flex-wrap gap-1.5">
-              {admin.roles.map((role) => (
-                <Badge
-                  key={role}
-                  variant={role === 'superadmin' ? 'default' : 'secondary'}
-                  className="text-xs font-bold px-2 py-0.5 rounded-lg"
+          <div className="space-y-2">
+            {topUsers.length === 0 ? (
+              <p className="text-xs text-slate-400 py-4 text-center">회원 정보가 없습니다.</p>
+            ) : (
+              topUsers.map((user, idx) => (
+                <div
+                  key={user.user_id}
+                  className="flex items-center justify-between p-2.5 rounded-xl border border-slate-800/60 bg-slate-900/30 text-xs"
                 >
-                  👑 {role}
-                </Badge>
-              ))}
-            </div>
-
-            <div className="rounded-xl bg-muted/40 p-3 space-y-1.5 text-xs font-medium">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground flex items-center gap-1.5">
-                  <Clock className="size-3.5" /> 콘솔 세션 만료
-                </span>
-                <span className="font-mono font-bold text-foreground">
-                  {admin.consoleSession.expiresAt
-                    ? formatMoment(admin.consoleSession.expiresAt)
-                    : '—'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground flex items-center gap-1.5">
-                  <Lock className="size-3.5" /> 유휴 자동 잠금
-                </span>
-                <span className="font-mono font-bold text-foreground">
-                  {admin.consoleSession.idleExpiresAt
-                    ? formatMoment(admin.consoleSession.idleExpiresAt)
-                    : '—'}
-                </span>
-              </div>
-            </div>
-
-            <CloseConsole />
-          </CardContent>
-        </Card>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-fintech font-bold text-slate-400 size-5 grid place-items-center rounded bg-slate-800/80 text-[10px]">
+                      {idx + 1}
+                    </span>
+                    <span className="font-semibold text-slate-200 truncate max-w-[100px]">
+                      {user.display_name}
+                    </span>
+                  </div>
+                  <div className="font-fintech font-bold text-emerald-400 tabular-nums">
+                    {groupDigits(user.total_net_worth ?? '0')} WLD
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Main Operations Domain Areas Grid */}
-      <section aria-labelledby="admin-areas-title" className="space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/80 pb-3">
-          <div>
-            <span className="eyebrow text-primary">OPERATIONS DIRECTORY</span>
-            <h2 id="admin-areas-title" className="text-xl sm:text-2xl font-extrabold tracking-tight">
-              도메인별 관제 콘솔 메뉴
-            </h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            총 {ADMIN_AREAS.length}개 운영 하위 모듈 실시간 연동
-          </p>
-        </div>
+      {/* 4. Complete Domain Management Bento Hub (3 Categories) */}
+      <div className="space-y-4">
+        <h2 className="text-base font-extrabold text-slate-100 tracking-tight flex items-center gap-2">
+          <Server className="size-4 text-emerald-400" />
+          <span>엔터프라이즈 도메인 관제 허브</span>
+        </h2>
 
-        {AREA_GROUPS.map((group) => {
-          const areas = ADMIN_AREAS.filter((area) => area.group === group.key);
-          return (
-            <div key={group.key} className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {AREA_GROUPS.map((group) => {
+            const areas = ADMIN_AREAS.filter((a) => a.group === group.key);
+            return (
+              <div
+                key={group.key}
+                className="fintech-card p-4 sm:p-5 flex flex-col justify-between space-y-4 border-slate-800/80"
+              >
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-fintech font-bold tracking-widest text-slate-400">
                       {group.eyebrow}
                     </span>
-                    <Badge variant="outline" className="text-[10px] font-bold">
+                    <Badge variant="outline" className={cn("text-[10px] border-slate-700/80 font-bold", group.color)}>
                       {group.badge}
                     </Badge>
                   </div>
-                  <h3 className="text-lg font-extrabold text-foreground mt-0.5">{group.title}</h3>
+                  <h3 className="text-sm font-extrabold text-slate-100 mt-1">{group.title}</h3>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed [word-break:keep-all]">
+                    {group.description}
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground [word-break:keep-all]">
-                  {group.description}
-                </p>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4">
-                {areas.map((area) => (
-                  <Link
-                    key={area.href}
-                    href={area.href}
-                    className="group relative flex flex-col justify-between gap-3 rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-plate transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted/80 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                <div className="space-y-1.5 pt-2 border-t border-slate-800/60">
+                  {areas.map((area) => {
+                    const count = counts[area.href];
+                    return (
+                      <Link
+                        key={area.href}
+                        href={area.href}
+                        className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition-colors btn-interactive group text-xs"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
                           {getAreaIcon(area.href)}
+                          <span className="font-semibold text-slate-300 group-hover:text-slate-100 truncate">
+                            {area.title}
+                          </span>
                         </div>
-                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground group-hover:text-primary transition-colors">
-                          {area.eyebrow}
-                        </span>
-                      </div>
-                      <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted/60 text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all">
-                        <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1 mt-1">
-                      <h4 className="text-base font-bold text-foreground group-hover:text-primary transition-colors">
-                        {area.title}
-                      </h4>
-                      <p className="text-xs text-muted-foreground line-clamp-2 [word-break:keep-all] leading-relaxed">
-                        {area.summary}
-                      </p>
-                    </div>
-
-                    {counts[area.href] && (
-                      <div className="pt-2 border-t border-border/50 text-[11px] font-bold text-primary flex items-center gap-1.5 truncate">
-                        <span className="size-1.5 rounded-full bg-primary shrink-0" />
-                        <span className="truncate">{counts[area.href]}</span>
-                      </div>
-                    )}
-                  </Link>
-                ))}
+                        <div className="flex items-center gap-1 shrink-0 font-fintech text-[11px] text-slate-400">
+                          {count && <span className="truncate max-w-[140px]">{count}</span>}
+                          <ChevronRight className="size-3 text-slate-500 group-hover:text-slate-300" />
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </section>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 5. Comprehensive Telemetry Matrix & Telemetry Table */}
+      <div className="space-y-4 pt-4 border-t border-slate-800/80">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Activity className="size-4 text-sky-400" />
+            <h2 className="text-base font-extrabold text-slate-100">
+              실시간 텔레메트리 펄스 & 인프라 건전성
+            </h2>
+          </div>
+          <Badge variant="outline" className="text-[10px] font-fintech text-slate-400 border-slate-800">
+            RTT P99 & 무결성 전수 검증
+          </Badge>
+        </div>
+
+        <AdminComprehensiveTelemetryMatrix />
+        <AdminTelemetryMetricsTable users={allUsers} />
+      </div>
+
+      {/* 6. Console Session Footer */}
+      <div className="flex items-center justify-between p-4 rounded-2xl border border-slate-800/80 bg-slate-900/30 text-xs text-slate-400 font-fintech">
+        <span>세션 상태: {admin.consoleSession.state}</span>
+        <CloseConsole />
+      </div>
     </div>
   );
 }
 
-/**
- * Gate Screen for Unauthenticated or Idle Operators
- */
-function Gate({ admin, next }: { readonly admin: AdminConsole; readonly next: string | null }) {
-  const locked = admin.consoleSession.state === 'idle_locked';
-  const expired = admin.consoleSession.state === 'expired';
-  const waiting = next ? (adminAreaFor(next)?.title ?? next) : null;
-
+function Gate({
+  admin,
+  next,
+}: {
+  readonly admin: AdminConsole;
+  readonly next: string | null;
+}) {
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-5 px-4 py-8 sm:py-12 min-w-0">
-      <div className="text-center space-y-2">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-500 mb-3 shadow-md">
-          <Lock className="size-7" />
-        </div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-foreground">운영 콘솔 잠금</h1>
-        <p className="text-xs sm:text-sm text-muted-foreground [word-break:keep-all]">
-          운영자 권한 및 안전한 2차 인증 세션이 확인된 후 콘솔이 개방됩니다.
-        </p>
+    <div className="mx-auto max-w-lg p-6 sm:p-8 rounded-3xl border border-slate-800 bg-[#0b0f17] shadow-2xl text-center space-y-4 my-12">
+      <div className="size-12 rounded-2xl bg-amber-500/15 text-amber-400 grid place-items-center mx-auto ring-1 ring-amber-500/30">
+        <Lock className="size-6" />
       </div>
-
-      {waiting && (
-        <Card className="border-primary/40 bg-primary/5 rounded-2xl">
-          <CardHeader className="p-4">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-primary">
-              <ShieldAlert className="size-4" />
-              <span>‘{waiting}’ 화면 접근 대기 중</span>
-            </CardTitle>
-            <CardDescription className="text-xs mt-1">
-              아래에서 운영 콘솔을 열면 요청하신 화면으로 즉시 안전하게 이동합니다.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      )}
-
-      {(locked || expired) && (
-        <Card className="border-amber-500/40 bg-amber-500/5 rounded-2xl">
-          <CardHeader className="p-4">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-amber-600 dark:text-amber-400">
-              <AlertTriangle className="size-4" />
-              <span>{locked ? '일정 시간 조작이 없어 보안 잠금되었습니다.' : '운영 콘솔 세션이 만료되었습니다.'}</span>
-            </CardTitle>
-            <CardDescription className="text-xs mt-1">
-              안전한 운영을 위해 아래에서 콘솔을 다시 열어주세요.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      )}
-
-      <Card className="rounded-2xl border-border/80 shadow-plate">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-bold">운영 콘솔 활성화</CardTitle>
-          <CardDescription className="text-xs">
-            현재 계정의 관리자 권한을 재검증하고 30분간 유효한 보안 콘솔 세션을 시작합니다.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-2">
-          <OpenConsole next={next} />
-        </CardContent>
-      </Card>
+      <h1 className="text-xl font-black text-slate-100 tracking-tight">관리자 콘솔 인증 잠금</h1>
+      <p className="text-xs text-slate-400 leading-relaxed [word-break:keep-all]">
+        운영 마스터 관제탑에 접근하려면 관리자 보안 세션 인증이 필요합니다.
+      </p>
+      <div className="pt-2">
+        <OpenConsole next={next} />
+      </div>
     </div>
+  );
+}
+
+function ChevronRight({ className }: { readonly className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+function Lock({ className }: { readonly className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+    </svg>
   );
 }

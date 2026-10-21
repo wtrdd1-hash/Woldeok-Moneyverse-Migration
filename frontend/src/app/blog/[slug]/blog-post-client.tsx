@@ -20,6 +20,7 @@ import type { BlogPost } from '../blog.types';
 import { renderBlogMarkdownBlocks } from '../blog-markdown';
 import { blogUrl, blogHubUrl, hasCountryEdition, type BlogLocale } from '../blog-seo';
 import { BlogAdBanner } from '@/components/blog/blog-ad-banner';
+import { getBlogAdPlan } from '@/lib/ad-placement-policy';
 import { BlogInlineCalculator } from '@/components/blog/blog-inline-calculator';
 import { BlogRelatedEcosystem } from '@/components/blog/blog-related-ecosystem';
 import { BlogConversionBanner } from '@/components/blog/blog-conversion-banner';
@@ -68,6 +69,7 @@ export function BlogPostClient({ post, locale }: Props) {
   const activeTags = (locale !== 'ko' && post.translations?.[locale]?.tags) || post.tags;
 
   const blocks = renderBlogMarkdownBlocks(activeContent);
+  const adPlan = getBlogAdPlan(blocks.length);
 
   return (
     <article className="max-w-4xl mx-auto space-y-8">
@@ -112,7 +114,7 @@ export function BlogPostClient({ post, locale }: Props) {
       </nav>
 
       {/* 1. 상단 리더보드 수익화 광고 슬롯 */}
-      <BlogAdBanner position="top" />
+      {adPlan.showTop && <BlogAdBanner position="top" />}
 
       {/* Article Header */}
       <div className="space-y-4 border-b border-border/60 pb-6">
@@ -191,13 +193,13 @@ export function BlogPostClient({ post, locale }: Props) {
                 fullCalculatorName={post.relatedCalculatorName}
               />
             )}
-            {idx === 4 && <BlogAdBanner position="in-feed" />}
+            {adPlan.inlineAfter.includes(idx) && <BlogAdBanner position="in-feed" />}
           </React.Fragment>
         ))}
       </div>
 
       {/* 2. 본문 하단 매칭형 수익화 광고 슬롯 */}
-      <BlogAdBanner position="bottom" />
+      {adPlan.showBottom && <BlogAdBanner position="bottom" />}
 
       {/* Tags */}
       <div className="pt-4 border-t border-border/60 space-y-2">

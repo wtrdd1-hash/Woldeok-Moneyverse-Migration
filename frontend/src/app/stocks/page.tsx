@@ -233,7 +233,7 @@ export default async function StocksPage({
       <StockLeagueLaunchCard />
 
       {/* 토스형 주주 라운지 & 실시간 모의투자 소셜 피드 배너 */}
-      <div className="bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-900 border border-indigo-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+      <div className="fintech-card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-indigo-500/30 bg-slate-900/40 dark:bg-[#0c1018]/90 backdrop-blur-2xl">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 text-lg">
             💬
@@ -341,7 +341,7 @@ export default async function StocksPage({
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {stocks.map((row) => (
-              <Card key={row.id} className="gap-4">
+              <Card key={row.id} className="fintech-card gap-4 hover:border-emerald-500/40 btn-interactive">
                 <CardHeader>
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">

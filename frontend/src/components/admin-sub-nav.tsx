@@ -106,7 +106,7 @@ export function AdminSubNav() {
     <nav
       ref={navRef}
       aria-label="관리자 세부 내비게이션"
-      className="w-full max-w-full min-w-0 mb-4 overflow-x-auto rounded-xl sm:rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-1.5 shadow-sm scrollbar-none touch-pan-x overscroll-x-contain select-none [&::-webkit-scrollbar]:hidden"
+      className="w-full max-w-full min-w-0 mb-4 overflow-x-auto rounded-xl sm:rounded-2xl border border-border/60 bg-slate-900/40 dark:bg-[#0c1017]/80 backdrop-blur-2xl p-1.5 shadow-sm scrollbar-none touch-pan-x overscroll-x-contain select-none [&::-webkit-scrollbar]:hidden"
     >
       <ul className="flex w-max items-center gap-1 px-2 sm:w-auto sm:flex-wrap sm:px-0">
         <li className="shrink-0 pr-1 border-r border-border/60 mr-1">
@@ -125,7 +125,7 @@ export function AdminSubNav() {
                 className={cn(
                   'group flex min-h-[44px] sm:min-h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all active:scale-[0.98] outline-none',
                   isActive
-                    ? 'bg-primary/15 text-primary font-black ring-1 ring-primary/40 shadow-xs'
+                    ? 'bg-emerald-500/15 text-emerald-400 font-bold ring-1 ring-emerald-500/30 shadow-xs'
                     : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground',
                 )}
               >

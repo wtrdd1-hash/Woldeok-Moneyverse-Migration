@@ -1,5 +1,9 @@
 # AI Blog Editorial, Verified Publication & Search-Growth Engine — v2026.10.20.975
 
+## Authority addendum — v2026.10.22.1107 (superseding publication mode for GREEN only)
+- The newer [country-original/instant-publication design](AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.md) / [한국어](AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.ko.md) is explicitly adopted by the authoritative living Project Plan and Integrated Master. For **deterministically source-verified low-risk GREEN original educational articles only**, replace the v975 blanket *human prepublication approval* requirement with a safe atomic **immediate auto-publish → human review within 24h → automatic withdrawal when overdue** workflow. AMBER finance/tax/pension/current-rate/eligibility claims still need human prepublication approval; RED is blocked. v975's source receipts, role-separated publisher/DB ACL, idempotency, legacy route 403/503, correction and full platform/Test gate still apply. This is a planning clarification, not a release or blanket publisher unlock.
+
+
 **Canonical language:** English. [한국어 상세 명세](AI_BLOG_EDITORIAL_PUBLICATION_ENGINE_SPEC_v2026.10.20.975.ko.md)
 **Status:** PROPOSED / ARCHITECTURAL DESIGN / PLANNING ONLY. **No publication permission, AI auto-posting, Test promotion or Production release is granted by this document.**
 **Audited source:** updated origin/main 33ba30dde5aaf18dbcf11130a0b51f1c235f1b5b (2026-10-20 KST). PR #963 was merged to that SHA. Production release was independently observed as prod-v2026.10.19.920-01c34e4b; do not equate main with Production.
