@@ -1,3 +1,6 @@
+## v2026.10.22.1092 — F675-80 monthly WLD category spending targets (PLANNING DRAFT)
+- Proposed private member-set fictional WLD category targets with owner-scoped ledger proof, exclusion of internal bank/cash moves, refunds/reversals, manual > automatic category precedence, READY only after complete reconciled evidence; feature OFF. F675-78/79 and complete wallet cursor are unimplemented dependencies. QA v1091 FAILED, exact-SHA Test and Production finance approval blocked. No runtime/DB/Test/Production change. See `docs/worklog/2026-10-22-f67580-wallet-category-targets-v1092.md`. External 10,000-source gate: 0 newly approved; cumulative unknown.
+
 ## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
 - Moved the admin navigator modal from a clipped scrolling/backdrop-filtered ancestor to a document-body portal. Targeted regression 2/2, ESLint, TypeScript and Next.js build passed.
