@@ -9,6 +9,7 @@ import { AiNewsRepository } from '../admin/ai-news.repository';
 import { AiNewsService, aiNewsRuntimeCredentialFrom } from '../admin/ai-news.service';
 import { OperationsRepository } from '../admin/operations.repository';
 import { sealingKeyFrom } from '../auth/totp';
+import { sendDirectAdminAlert } from '../discord/discord-direct-alert';
 import { Scheduler } from './scheduler';
 
 /**
@@ -78,7 +79,20 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
               if (process.env.AI_NEWS_AUTO_ENABLED === 'false') return { skipped: true, reason: 'disabled' };
               const actorUserId = process.env.AI_NEWS_AUTO_ACTOR_USER_ID?.trim() || '5f7b8b44-e4aa-40b8-b93a-800ec0151d20';
               const runtimeCredential = aiNewsRuntimeCredentialFrom(process.env);
-              return aiNews.autoGenerateAndPublish(actorUserId, runtimeCredential ?? undefined);
+              const result = await aiNews.autoGenerateAndPublish(actorUserId, runtimeCredential ?? undefined);
+              if (result && !('skipped' in result)) {
+                await sendDirectAdminAlert({
+                  title: '📰 [가상 주식] 실시간 속보 자동 발행 완료',
+                  description: `**헤드라인:** ${result.leadHeadline || '신규 시황 속보'}`,
+                  color: 3447003, // Blue
+                  fields: [
+                    { name: '배치 ID', value: String(result.batchId || 'N/A'), inline: true },
+                    { name: '시장 심리지수', value: `${result.sentimentScore || 50}점 (${result.sentimentLabel || 'NEUTRAL'})`, inline: true },
+                    { name: '활성 이벤트 수', value: `${result.activeEventsCount || 1}건`, inline: true },
+                  ],
+                }).catch(() => {});
+              }
+              return result;
             },
             'blog.daily_publish': async () => {
               if (process.env.BLOG_AUTO_PUBLISH_ENABLED === 'false') return { skipped: true, reason: 'disabled' };
