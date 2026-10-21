@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { getServerLocale } from '@/lib/locale-server';
 import { requireAdminConsole } from '@/lib/session';
 import { SeoClientView, type SeoInitialData } from './seo-client-view';
+import { SeoFunnelCard } from './seo-funnel-card';
 
 export const metadata: Metadata = {
   title: 'SEO 및 검색엔진 색인 관제 — 관리자',
@@ -125,6 +126,8 @@ export default async function AdminSeoPage() {
           </Link>
         </div>
       </nav>
+
+      <SeoFunnelCard />
 
       <SeoClientView initialData={initialData} initialNowMs={initialNowMs} />
     </div>

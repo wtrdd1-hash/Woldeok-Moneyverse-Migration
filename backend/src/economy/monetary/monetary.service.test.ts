@@ -85,99 +85,32 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
   });
 
   describe('MintBureauService', () => {
-    it('blocks minting if issuance is frozen', async () => {
-      const mockPool = {
-        query: vi.fn().mockResolvedValueOnce({ rows: [{ is_issuance_frozen: true }] }),
-      } as unknown as Queryable;
-      const mbService = new MintBureauService(mockPool);
-
-      await expect(
-        mbService.executeAuthorizedMint('admin-1', 'order-1', '5000', 'user-1', 'idemp-1'),
-      ).rejects.toThrow(ForbiddenException);
+    it('fails closed when the atomic issuance guard rejects the request', async () => {
+      const query = vi.fn().mockResolvedValue({ rows: [] });
+      const bureau = new MintBureauService({ query } as unknown as Queryable);
+      await expect(bureau.executeAuthorizedMint('admin-1', '11111111-1111-4111-8111-111111111111', '5000', null, 'idemp-1'))
+        .rejects.toThrow(ForbiddenException);
+      expect(query).toHaveBeenCalledTimes(1);
+      expect(query.mock.calls[0]?.[0]).toContain('is_issuance_frozen = false');
+      expect(query.mock.calls[0]?.[0]).toContain('executed_amount_wld::numeric + $2::numeric <= max_amount_wld::numeric');
     });
 
-    it('blocks minting if policy order is not APPROVED', async () => {
-      const mockPool = {
-        query: vi
-          .fn()
-          .mockResolvedValueOnce({ rows: [{ is_issuance_frozen: false }] })
-          .mockResolvedValueOnce({
-            rows: [
-              {
-                id: 'order-1',
-                status: 'PROPOSED', // not approved!
-                max_amount_wld: '10000',
-                executed_amount_wld: '0',
-                expires_at: new Date(Date.now() + 100000).toISOString(),
-              },
-            ],
-          }),
-      } as unknown as Queryable;
-      const mbService = new MintBureauService(mockPool);
-
-      await expect(
-        mbService.executeAuthorizedMint('admin-1', 'order-1', '5000', 'user-1', 'idemp-1'),
-      ).rejects.toThrow(ForbiddenException);
-    });
-
-    it('blocks minting if order amount exceeds approved limit', async () => {
-      const mockPool = {
-        query: vi
-          .fn()
-          .mockResolvedValueOnce({ rows: [{ is_issuance_frozen: false }] })
-          .mockResolvedValueOnce({
-            rows: [
-              {
-                id: 'order-1',
-                status: 'APPROVED',
-                max_amount_wld: '10000',
-                executed_amount_wld: '8000', // only 2000 left
-                expires_at: new Date(Date.now() + 100000).toISOString(),
-              },
-            ],
-          }),
-      } as unknown as Queryable;
-      const mbService = new MintBureauService(mockPool);
-
-      await expect(
-        mbService.executeAuthorizedMint('admin-1', 'order-1', '3000', 'user-1', 'idemp-1'),
-      ).rejects.toThrow(ForbiddenException);
-    });
-
-    it('successfully issues MintCertificate and updates order when valid', async () => {
-      const mockOrder = {
-        id: 'order-1',
-        status: 'APPROVED',
-        target_envelope: 'QUEST_REWARD',
-        max_amount_wld: '10000',
-        executed_amount_wld: '2000',
-        expires_at: new Date(Date.now() + 100000).toISOString(),
+    it('reserves policy capacity and writes one certificate in the same statement', async () => {
+      const certificate = {
+        id: 'cert-uuid-1', amount_wld: '3000', idempotency_key: 'idemp-key-99',
       };
-      const mockCert = {
-        id: 'cert-uuid-1',
-        policy_order_id: 'order-1',
-        amount_wld: '3000',
-        source_envelope: 'QUEST_REWARD',
-        recipient_user_id: 'user-1',
-        idempotency_key: 'idemp-key-99',
-        actor_id: 'admin-1',
-        created_at: new Date().toISOString(),
-      };
-
-      const mockPool = {
-        query: vi
-          .fn()
-          .mockResolvedValueOnce({ rows: [{ is_issuance_frozen: false }] })
-          .mockResolvedValueOnce({ rows: [mockOrder] })
-          .mockResolvedValueOnce({ rows: [mockCert] })
-          .mockResolvedValueOnce({ rows: [] }),
-      } as unknown as Queryable;
-      const mbService = new MintBureauService(mockPool);
-
-      const res = await mbService.executeAuthorizedMint('admin-1', 'order-1', '3000', 'user-1', 'idemp-key-99');
-      expect(res.id).toBe('cert-uuid-1');
-      expect(res.amount_wld).toBe('3000');
-      expect(res.idempotency_key).toBe('idemp-key-99');
+      const query = vi.fn().mockResolvedValue({ rows: [certificate] });
+      const bureau = new MintBureauService({ query } as unknown as Queryable);
+      const result = await bureau.executeAuthorizedMint(
+        'admin-1', '11111111-1111-4111-8111-111111111111', '3000', null, 'idemp-key-99',
+      );
+      expect(result).toEqual(certificate);
+      expect(query).toHaveBeenCalledTimes(1);
+      const sql = query.mock.calls[0]?.[0] as string;
+      expect(sql).toContain('WITH reserved AS');
+      expect(sql).toContain('UPDATE public.monetary_policy_orders');
+      expect(sql).toContain('INSERT INTO public.mint_certificates');
+      expect(sql).toContain('FROM reserved');
     });
 
     it('successfully records RetirementCertificate for hard sinks', async () => {

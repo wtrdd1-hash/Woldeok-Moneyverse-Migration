@@ -12,6 +12,7 @@ import type {
 } from './ai-news.repository';
 import { AiNewsInputError } from './ai-news.repository';
 import { safeFetch } from '../security/ssrf-defense';
+import { generateDeterministicStockNews } from '../stock/stock-news-deterministic.engine';
 
 /**
  * Why a generation could not run, in a word the route can turn into a
@@ -831,32 +832,54 @@ export class AiNewsService {
     actorUserId: string,
     runtimeCredential?: AiNewsRuntimeCredential,
   ): Promise<Record<string, unknown>> {
-    const credential = runtimeCredential ?? await this.open(actorUserId);
     const context = await this.repository.context(actorUserId);
     const listedSymbols = registeredStockSymbols(context);
     if (listedSymbols.size === 0) {
       return { skipped: true, reason: 'no_registered_stocks' };
     }
-    const batch = await this.caller({
-      apiBaseUrl: credential.apiBaseUrl,
-      apiKey: credential.apiKey,
-      model: credential.model,
-      deploymentLocalModel: runtimeCredential !== undefined
-        && credential.apiBaseUrl === 'http://127.0.0.1:11434/v1',
-      system: SYSTEM_PROMPT,
-      user: userPrompt(
-        context,
-        '자동 시장 뉴스: 현재 활성 등록 종목만 사용하세요. 전체시장(null) 효과는 만들지 말고, 실제 등록 심볼을 정확히 사용하며 현재 흐름을 자연스럽게 이어가되 과도한 충격은 피하세요.',
-      ),
-    });
-    const scenarios = normaliseRegisteredStockAuto(batch, context);
-    if (scenarios.length === 0) {
-      throw new AiNewsUnavailableError('ai_news_model_unusable', 'the model wrote nothing safe enough to store');
+
+    let scenarios: ScenarioProposal[] = [];
+    let usedModel = 'deterministic-financial-engine';
+
+    // 1. Try LLM generation if credentials available
+    try {
+      const credential = runtimeCredential ?? await this.open(actorUserId);
+      usedModel = credential.model;
+      const batch = await this.caller({
+        apiBaseUrl: credential.apiBaseUrl,
+        apiKey: credential.apiKey,
+        model: credential.model,
+        deploymentLocalModel: runtimeCredential !== undefined
+          && credential.apiBaseUrl === 'http://127.0.0.1:11434/v1',
+        system: SYSTEM_PROMPT,
+        user: userPrompt(
+          context,
+          '자동 시장 뉴스: 현재 활성 등록 종목만 사용하세요. 전체시장(null) 효과는 만들지 말고, 실제 등록 심볼을 정확히 사용하며 현재 흐름을 자연스럽게 이어가되 과도한 충격은 피하세요.',
+        ),
+      });
+      scenarios = normaliseRegisteredStockAuto(batch, context);
+    } catch {
+      // 2. Fallback to deterministic financial news engine
+      scenarios = generateDeterministicStockNews(context);
     }
+
+    if (scenarios.length === 0) {
+      scenarios = generateDeterministicStockNews(context);
+    }
+
+    if (scenarios.length === 0) {
+      return { skipped: true, reason: 'no_scenarios_generated' };
+    }
+
     const created = await this.repository.createBatch({
-      idempotencyKey: randomUUID(), actorUserId, prompt: 'AUTO',
-      model: credential.model, context, scenarios,
+      idempotencyKey: randomUUID(),
+      actorUserId,
+      prompt: 'AUTO',
+      model: usedModel,
+      context,
+      scenarios,
     });
+
     const stored = await this.repository.latest(actorUserId);
     const candidates = (stored?.scenarios ?? []).filter((scenario) => {
       const movers = scenario.effects.filter((effect) => effect.direction !== 'none');
@@ -864,14 +887,17 @@ export class AiNewsService {
         && movers.length >= 1 && movers.length <= 2
         && movers.every((effect) => effect.stock_id !== null && effect.strength <= 2);
     });
+
     const selected = [...candidates].sort((a, b) => {
       const strengthA = a.effects.reduce((sum, effect) => sum + (effect.direction === 'none' ? 0 : effect.strength), 0);
       const strengthB = b.effects.reduce((sum, effect) => sum + (effect.direction === 'none' ? 0 : effect.strength), 0);
       return strengthA - strengthB || a.effects.length - b.effects.length || a.ordinal - b.ordinal;
     })[0];
+
     if (!selected) {
       return { generated: scenarios.length, published: false, batchId: created.batch_id, reason: 'no_bounded_candidate' };
     }
+
     const receipt = await this.publish({
       actorUserId,
       scenarioId: selected.id,
@@ -882,10 +908,12 @@ export class AiNewsService {
         stockId: effect.stock_id, direction: effect.direction, strength: effect.strength,
       })),
     });
+
     return {
       generated: scenarios.length, published: true, batchId: created.batch_id,
       scenarioId: selected.id, headline: selected.headline,
       eventId: receipt.event_id, eventsPublished: receipt.published,
+      engine: usedModel,
     };
   }
 

@@ -1,0 +1,19 @@
+# v2026.10.21.1062 — Requested bond hotfix Production promotion: blocked gates and repaired Nginx API upstream
+
+## Before work (13:31 KST)
+- User authorized immediate promotion of v2026.10.21.1061. Re-read `docs/RELEASING.ko.md`, operations deployment runbook, release documentation policy, integrated plan, candidate PR #976 and live systemd/Nginx topology.
+- Branch for the earlier candidate is `fix/bond-subscribe-errors-mobile-v2026.10.21.1061`, HEAD `ff441253`, while fetched `main` remained `0d12f99b`. Both Test and Production were already occupied by other exact-SHA generations; no checkout, deployment pointer or database data was changed.
+- PR #976 was still draft/open. Its GitHub CI #2845 failed at frontend tests: four unrelated preexisting AI editorial hold expectations no longer match `main`'s new blog generator route, including scheduler/publication 503 versus 200. Treat the safety-contract mismatch as a real CI failure; do not bypass or falsify the tests.
+- Official `verify-financial-readiness.mjs` on approved production env returned exit code 2, `BLOCKED`: direct app write permissions on `accounts`, `account_balances`, and `system_treasury_vaults` (ledger/projection mismatch count 0, which is not sufficient for release certification). Existing bond purchase still directly mutates wallet/vault balances without canonical journal/idempotency.
+- Runtime release identity preflight also failed: Production `/api/version` HTTP 502. Verified systemd backend was listening on `127.0.0.1:3000` at source `0d12f99b` while Nginx pointed the Production `/health`, `/api/version`, `/socket.io`, Discord integration proxy to closed port `3233`. Public frontend proxy `3234` was independently live on the same backend release generation; original Production frontend systemd `3001` was a different source generation.
+
+## In progress: narrowly scoped live incident recovery
+- Saved `/etc/nginx/sites-enabled/moneyverse` to root-owned `/etc/nginx/.moneyverse-v1062-rollback-20261021-133539`, outside the glob-included enabled sites.
+- Corrected exactly four Production proxy upstream targets from `127.0.0.1:3233` to the confirmed `127.0.0.1:3000` backend. No frontend upstream, Test routing, secret, application code, systemd unit, schema, session, financial function or balance changed.
+- Verified `nginx -t` and performed graceful `systemctl reload nginx`; public `/api/version` moved HTTP 502 to 200, `/health` 200, `/` 200, `/bonds` 200. Verified stable Nginx syntax again after reload.
+
+## Finished status
+- **Operational Nginx API connectivity restored**, with on-host rollback backup available. Public `/api/version` currently returns `{"id":"unknown"}` even with HTTP 200, therefore it is NOT acceptable exact-SHA release identity evidence. The backend/frontend generations and exact source authority still need a supervised, zero-downtime reconciliation.
+- **v1061 bond code was NOT promoted**: required CI failed, financial gate is BLOCKED, exact-candidate authenticated Test is not certified, and public release identity is UNKNOWN. Do not merge the draft PR, bypass gates, silently revoke grants (which would break current direct-write financial flows), or rewrite source/finance provenance until respective remediation and transaction tests pass.
+- Production public pages remain live; no data modification or bond purchase was attempted.
+- Required follow-ups: (1) fix AI editorial publish security-contract regressions without weakening tests; (2) implement ledger-first idempotent bond, pension, Repo, FX, SWF and other direct financial writers before safe role revocation; (3) certify exact-SHA Test including authenticated failure/success flows, mobile/browser behavior, session continuity and journal conservation; (4) correctly bind Production BUILD_ID and matched frontend/backend candidate and redo public smoke and finance gates.

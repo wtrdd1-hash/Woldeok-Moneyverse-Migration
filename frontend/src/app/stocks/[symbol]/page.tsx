@@ -145,18 +145,27 @@ export default async function StockHubPage({
   if (!stock) notFound();
 
   const encodedSymbol = encodeURIComponent(stock.symbol);
-  const [portfolio, watchlist, discussion, alertResult, receiptsResult] = await Promise.all([
+  const [portfolio, watchlist, discussion, alertResult, receiptsResult, pulseResult] = await Promise.all([
     apiOrNull<{ holdings: HubHolding[] }>('/api/v1/stocks/portfolio'),
     apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist'),
     apiOrNull<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts?stock=${encodedSymbol}`),
     apiOrNull<{ alerts: StockAlertRule[] }>('/api/v1/stocks/alerts'),
     apiOrNull<{ receipts: StockHaltReceipt[] }>('/api/v1/stocks/halt-receipts'),
+    apiOrNull<{ success: boolean; data: { leadHeadline: string; updatedAt: string } }>('/api/v1/newspaper/pulse'),
   ]);
   const holding = findHoldingForStock(portfolio?.holdings ?? [], stock.id);
   const watching = (watchlist?.stocks ?? []).some((row) => row.stock_id === stock.id);
   const posts = discussion?.posts ?? [];
   const stockAlerts = (alertResult?.alerts ?? []).filter((rule) => rule.stock_id === stock.id);
   const stockReceipt = (receiptsResult?.receipts ?? []).find((r) => r.stock_id === stock.id);
+  const newsList = pulseResult?.data?.leadHeadline && pulseResult.data.leadHeadline !== '현재 진행 중인 시장 소식이 없습니다'
+    ? [{
+        id: 'pulse-lead',
+        headline: pulseResult.data.leadHeadline,
+        direction: (stock.day_open_price && Number(stock.current_price) >= Number(stock.day_open_price) ? 'up' : 'down') as 'up' | 'down',
+        publishedAt: pulseResult.data.updatedAt,
+      }]
+    : [];
   const isHalted =
     stock.halt_status === 'HALTED_SETTLED' ||
     stock.halt_status === 'HALTED_SETTLING' ||
@@ -266,6 +275,7 @@ export default async function StockHubPage({
         symbol={stock.symbol}
         stockId={stock.id}
         isEn={isEn}
+        newsItems={newsList}
       />
 
       {/* 1.5. 실시간 시장 체결 플로팅 미니 토스트 */}

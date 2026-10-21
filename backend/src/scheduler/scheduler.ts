@@ -108,6 +108,13 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
     connection: 'app',
   },
   {
+    // Automated AI financial blog publication at 06:00 KST daily.
+    job: 'blog.daily_publish',
+    cadence: 'daily',
+    notBefore: 0,
+    connection: 'app',
+  },
+  {
     // A daily shadow run proves the configured models are actually reachable
     // even when sample sufficiency blocks policy. It writes only shadow
     // evidence and therefore cannot authorize an automatic economy change.

@@ -45,7 +45,7 @@ describe('AI Daily Blog System', () => {
     expect(post?.translations?.zh?.title).toContain('72法则');
   });
 
-  it('generates new daily AI blog post with high-converting keywords', () => {
+  it('generates an unpublished AI draft without mutating the editorial store', () => {
     const initialCount = getAllBlogPosts().length;
     const newPost = generateDailyAiBlogPost();
 
@@ -56,7 +56,7 @@ describe('AI Daily Blog System', () => {
     expect(newPost.readTimeMinutes).toBeGreaterThan(0);
 
     const afterCount = getAllBlogPosts().length;
-    expect(afterCount).toBe(initialCount + 1);
+    expect(afterCount).toBe(initialCount);
   });
 
   it('verifies GET /api/blog endpoint returns post array', async () => {

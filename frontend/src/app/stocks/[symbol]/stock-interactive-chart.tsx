@@ -14,6 +14,13 @@ import {
   getDrawingStorageKey,
 } from './stock-chart-drawing.types';
 
+interface StockNewsMarker {
+  readonly id: string;
+  readonly headline: string;
+  readonly direction: 'up' | 'down' | 'none';
+  readonly publishedAt?: string | undefined;
+}
+
 interface StockInteractiveChartProps {
   readonly currentPrice: string;
   readonly dayOpenPrice?: string | undefined;
@@ -22,6 +29,7 @@ interface StockInteractiveChartProps {
   readonly symbol: string;
   readonly stockId?: string | undefined;
   readonly isEn?: boolean | undefined;
+  readonly newsItems?: readonly StockNewsMarker[] | undefined;
 }
 
 type Timeframe = '1D' | '1W' | '1M' | '1Y';
@@ -72,6 +80,7 @@ export function StockInteractiveChart({
   symbol,
   stockId,
   isEn = false,
+  newsItems = [],
 }: StockInteractiveChartProps) {
   const [timeframe, setTimeframe] = useState<Timeframe>('1D');
   const [chartType, setChartType] = useState<ChartType>('candle');
@@ -787,6 +796,14 @@ export function StockInteractiveChart({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-mono text-xs font-bold text-muted-foreground">{symbol}</span>
+              {newsItems.length > 0 && (
+                <span
+                  title={newsItems[0]?.headline}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold cursor-help font-mono animate-pulse"
+                >
+                  📰 속보 {newsItems.length}
+                </span>
+              )}
               <Badge
                 variant={isUp ? 'default' : 'destructive'}
                 className="font-mono text-xs font-bold flex items-center gap-1 tabular-nums"

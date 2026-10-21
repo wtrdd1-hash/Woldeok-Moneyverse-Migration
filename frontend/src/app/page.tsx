@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { WalletGlance } from '@/components/wallet-glance';
 import { GuestQuickstart } from '@/components/guest-quickstart';
+import { HomeInteractivePreview } from '@/components/home-interactive-preview';
 import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
 import { MacroLiquidityDashboard } from '@/components/macro-liquidity-dashboard';
@@ -154,6 +155,7 @@ export default async function HomePage() {
         <T korean="월덕 머니버스 가상경제 대시보드" english="Woldeok Moneyverse Virtual Economy Dashboard" japanese="ウォルドク・マネーバース 仮想経済ダッシュボード" chinese="Woldeok Moneyverse 虚拟经济仪表盘" />
       </h1>
       <GuestQuickstart locale={locale} />
+      <HomeInteractivePreview />
       <HomeDualSurface>
       {/* =========================================================================
           🏛️ 2026 STRIPE & LINEAR STYLE FINTECH BENTO COCKPIT
