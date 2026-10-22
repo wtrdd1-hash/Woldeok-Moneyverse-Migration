@@ -8,20 +8,21 @@ const toolsSource = readFileSync('src/app/tools/page.tsx', 'utf8');
 const workSource = readFileSync('src/app/work/page.tsx', 'utf8');
 
 describe('E2E Real-Click Profitability and Full-Stack Flow QA', () => {
-  it('verifies 2026 Bento Grid 2.0 and Inset Border hero on Homepage', () => {
-    expect(homeSource).toContain('border-[#222738]');
-    expect(homeSource).toContain('bg-[#0E1117]');
+  it('verifies the 2026 accessible fintech card and authenticated wallet glance', () => {
+    expect(homeSource).toContain('border-slate-800/80');
+    expect(homeSource).toContain('dark:bg-[#0d121c]');
     expect(homeSource).toContain('WalletGlance');
     expect(homeSource).toContain('href="/tools/compound-calculator"');
     expect(homeSource).toContain('href="/tools/stock-calculator"');
   });
 
-  it('verifies 4 Core Quick Actions with 44px+ touch targets', () => {
+  it('verifies three major quick actions with 44px+ touch targets and P2P transfer', () => {
     expect(homeSource).toContain('P2PTransferModal');
     expect(homeSource).toContain('href="/work"');
     expect(homeSource).toContain('href="/stocks"');
     expect(homeSource).toContain('href="/bank"');
-    expect(homeSource).toContain('grid grid-cols-2 sm:grid-cols-4');
+    expect(homeSource).toContain('grid grid-cols-3 gap-2 sm:gap-3');
+    expect(homeSource).toContain('min-h-[88px]');
   });
 
   it('verifies Real Member Profile Integration and Security Score', () => {

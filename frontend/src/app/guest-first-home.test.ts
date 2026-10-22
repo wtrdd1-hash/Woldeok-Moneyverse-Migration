@@ -19,7 +19,8 @@ describe('v921 first qualified experience before signup', () => {
     expect(source).not.toContain('179,460,000 KRW');
     expect(source).not.toContain('₩179,460,000 KRW');
     expect(source).not.toContain('+4.8% 24h');
-    expect(source).toContain('자산 구성 예시');
+    expect(source).toContain('<WalletGlance />');
+    expect(source).not.toContain('10,000');
   });
 
   it('never invents live stock movers when public backend data is unavailable', () => {
