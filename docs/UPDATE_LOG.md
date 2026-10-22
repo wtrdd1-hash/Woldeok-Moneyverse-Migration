@@ -1,5 +1,9 @@
 ## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
+## v2026.10.22.1140 — F675-92 calculator issue intake and verified corrections (PLANNING DRAFT)
+- Cycle: Previous Improvement v1138 / Current Addition v1140 / Next Improvement v1142 (provisional). GitHub main c3e62cd49da66c0b7c48223fcc81be888166f183; 5 open PRs; QA v1135 CI 7 failures and finance/production holds. Verified source risks in capital gains, save/alert/WLD claims, and dev app-role ACL. Drafted EN/KO integrated design, API/DB/roles/transactions/SEO/mobile/a11y/KPI/TDD/rollback. Independent references reviewed 3 publishers, accepted 0, cumulative unknown, 10,000 gate BLOCKED. No runtime/DB/deployment changes; Draft PR review required.
+
+
 - Moved the admin navigator modal from a clipped scrolling/backdrop-filtered ancestor to a document-body portal. Targeted regression 2/2, ESLint, TypeScript and Next.js build passed.
 - Full frontend test suite has 35 failed / 1,136 passed; release BLOCKED pending exact-SHA authenticated Test/browser/backend acceptance. No Production promotion.
 - Records: `docs/updates/v2026.10.14.626-internal.md` and `docs/updates/v2026.10.14.626-github.md`.

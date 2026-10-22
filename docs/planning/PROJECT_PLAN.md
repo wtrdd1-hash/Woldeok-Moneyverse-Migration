@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.22.1140 — F675-92 Calculator Accuracy Reports and Verified Correction Notices (PLANNING)
+- Addition cycle after v1138 improvement; next v1142 improvement. New member issue intake and public verified corrections extend existing `/tools/*`, support-thread and notification infrastructure, not an alternative financial ledger.
+- P0: review capital-gains calculator's unconditional spouse-gift deduction, misleading tax-saving/tax-free claims and hardcoded May 1–31 filing date against NTS 2026 guidance; fix false save/alert/WLD success; restore app-role least privilege; hold exact-SHA finance/Test/Production gates. P1: member/admin APIs, immutable correction events, independent approval, deduped notifications, public notice UX, mobile/a11y, SEO and regression.
+- Full canonical design and detailed P0/P1 acceptance in [integrated master](INTEGRATED_PLANNING_MASTER.md#v202610221140--f675-92-calculator-accuracy-reports--verified-correction-notices-planning--draft); Korean counterpart in PROJECT_PLAN.ko.md. Evidence: 3 publishers reviewed, 0 newly accepted, 10,000 gate BLOCKED. Docs-only isolated candidate; no code/DB/deployment change.
+
+
 ## v2026.10.22.1111 — truthful guest homepage/mobile regressions repaired (source candidate)
 - Corrected redesigned guest homepage's static `10,000 WLD` presented under personalized “my virtual assets” to the authenticated `WalletGlance` component (logged-out, real member balance and read-unavailable states never misrepresented). Distinguish missing stock feed from perpetual fetching, retain existing native guest-first quickstart and accessible three-action mobile nav. Link existing canonical `/tools/compound-calculator` and `/tools/stock-calculator` resources. Updated six obsolete hardcoded-design class assertions to semantically test 2026 slate/Toss design and honest finance behavior, without disabling coverage. Frontend full **1,356 tests PASS in NODE_ENV=test**, typecheck and changed-file lint pass. No real wallet/account data, Test/Production or blog-publisher switch changed in this source candidate. [Source worklog](../worklog/2026-10-22-home-truthfulness-v1111.md).
 
