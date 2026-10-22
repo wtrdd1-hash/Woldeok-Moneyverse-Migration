@@ -14980,6 +14980,90 @@
                     }
                   ]
                 },
+                "cashDelta": {
+                  "oneOf": [
+                    {
+                      "type": "undefined"
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "__wld": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "note": "depth-limited"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "note": "depth-limited"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "description"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "__wld"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "bankDelta": {
+                  "oneOf": [
+                    {
+                      "type": "undefined"
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "__wld": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "note": "depth-limited"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "note": "depth-limited"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "description"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "__wld"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
                 "direction": {
                   "oneOf": [
                     {
