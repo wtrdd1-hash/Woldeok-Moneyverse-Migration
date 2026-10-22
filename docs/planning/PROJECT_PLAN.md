@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.23.1160 — F675-97 P2P Dispute Evidence and Human-Reviewed Resolution (PLANNING / DRAFT)
+- **Cycle:** Previous Improvement v1158 / Current Addition v1160 / Next Improvement v1162 (provisional). Main `26a5ddbb`; 6 open PRs; QA v1159 FAILED/HOLD. No runtime deployment.
+- **P0:** Fix false P2P receipts, per-POST fresh UUID and post-ledger notification ambiguity before accepting disputes; maintain ledger append-only and owner-scoped access. Finance DB privilege, migration-266, main CI, backup restore and Test/Production exact-SHA identity remain release BLOCKED.
+- **P1 F675-97:** Member-reported transfer disputes tied only to verified owner/recipient ledger receipts, idempotent case intake, existing support conversation reuse, admin independent evidence review, immutable case/audit events and NO automatic WLD reversal. Member `/wallet/disputes/:id`; admin `/admin/wallet/disputes`; authenticated/CSRF/MFA API, DB constraints and cursor indexes, 100-retry/concurrency and 10,001-row regression, mobile/a11y and private-page noindex. See detailed EN/KO integrated master design (KO synchronization pending).
+- **Evidence gate:** New accepted external references 0, cumulative approved UNKNOWN, target 10,000 BLOCKED. Docs only; feature flag OFF, Test exact-SHA and rollout/rollback owned by separate development and QA workstreams.
+
+
 ## v2026.10.22.1140 — F675-92 Calculator Accuracy Reports and Verified Correction Notices (PLANNING)
 - Addition cycle after v1138 improvement; next v1142 improvement. New member issue intake and public verified corrections extend existing `/tools/*`, support-thread and notification infrastructure, not an alternative financial ledger.
 - P0: review capital-gains calculator's unconditional spouse-gift deduction, misleading tax-saving/tax-free claims and hardcoded May 1–31 filing date against NTS 2026 guidance; fix false save/alert/WLD success; restore app-role least privilege; hold exact-SHA finance/Test/Production gates. P1: member/admin APIs, immutable correction events, independent approval, deduped notifications, public notice UX, mobile/a11y, SEO and regression.
