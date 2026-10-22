@@ -1,20 +1,28 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import {
+  Wallet,
+  ArrowRightLeft,
+  Landmark,
+  FileText,
+  PieChart,
+  ShieldCheck,
+  Send,
+  History,
+  IdCard,
+} from 'lucide-react';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { LiveRefresh } from '@/components/live-refresh';
-import { PageHeader, SectionHeader } from '@/components/page-header';
 import { PostingStrip } from '@/components/posting-strip';
 import { TruncatedList } from '@/components/truncated-list';
 import { TranslatedText as T } from '@/components/translated-text';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { formatMoment } from '@/lib/money';
+import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
-import { FiatBadge } from '@/components/fiat-amount';
 import { PortfolioAllocationRadar } from '@/components/portfolio-allocation-radar';
 import { sides } from './sides';
 import type { Overview } from './sides';
@@ -28,13 +36,15 @@ import {
 } from './wallet-forms';
 import type { LoanView } from './wallet-forms';
 import type { RewardAvailability } from './wallet-forms';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const dynamic = 'force-dynamic';
 
-const LATEST_ON_WALLET = 5;
+const LATEST_ON_WALLET = 10;
 
 export const metadata: Metadata = {
-  title: '내 지갑',
+  title: '내 지갑 & P2P 간편 송금',
+  description: 'WLD 가상 잔액 조회, 원클릭 P2P 송금, 복식부기 원장 거래 내역 및 자산 배분을 한곳에서 관리하는 토스형 내 지갑',
   robots: { index: false, follow: false },
 };
 
@@ -50,8 +60,7 @@ export default async function WalletPage() {
 
   if (!wallet) {
     return (
-      <div data-page="wallet" className="mv-page mv-page--finance grid gap-4">
-        <PageHeader title={<T korean="내 지갑" english="My Wallet" />} />
+      <div data-page="wallet" className="min-h-screen pb-24 space-y-6">
         <EmptyState
           title={<T korean="지금은 지갑을 불러올 수 없어요." english="Cannot load wallet at this time." />}
           description={<T korean="잠시 후 다시 확인해 주세요." english="Please try again in a few moments." />}
@@ -63,134 +72,144 @@ export default async function WalletPage() {
   const { balances, recentTransactions, userId } = wallet;
   const loans = loanData?.loans ?? [];
 
+  const stockHoldings = portfolioData?.holdings ?? [];
+  const actualStocksValue = stockHoldings.reduce(
+    (sum, h) => sum + Math.round((Number(h.current_price) || 0) * (Number(h.quantity) || 0)),
+    0
+  );
+
   return (
-    <div data-page="wallet" className="mv-page mv-page--finance grid gap-6 w-full max-w-full min-w-0 overflow-hidden">
+    <div data-page="wallet" className="min-h-screen pb-24 space-y-6">
       <LiveRefresh />
-      <PageHeader title={<T korean="내 지갑" english="My Wallet" />}>
-        <T
-          korean="WLD는 게임 안에서만 사용하는 가상 데이터입니다. 실제 화폐가 아닙니다."
-          english="WLD is virtual game currency used only inside the community economy. It is not real money."
-        />
-      </PageHeader>
 
-      <nav aria-label="Wallet tools" className="flex flex-wrap gap-2">
-        <Button asChild variant="default" size="sm">
-          <Link href="/wallet"><T korean="지갑 홈" english="Wallet Home" /></Link>
-        </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/bank"><T korean="가상 은행" english="Virtual Bank" /></Link>
-        </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/wallet/activity"><T korean="전체 거래 내역" english="All Activity" /></Link>
-        </Button>
-      </nav>
-
-      <Alert>
-        <AlertTitle>
-          <T korean="경제 원장 기준" english="Ledger-backed Balance" />
-        </AlertTitle>
-        <AlertDescription>
-          <T
-            korean="잔액과 최근 내역은 내 지갑의 기록을 기준으로 표시됩니다."
-            english="Balances and transaction history are verified against the real-time community ledger."
-          />
-        </AlertDescription>
-      </Alert>
-
-      <Card>
-        <CardHeader>
-          <CardDescription>
-            <T korean="보유" english="Total" /> {balances.currency}
-          </CardDescription>
-          <CardTitle className="text-3xl flex items-baseline gap-2 flex-wrap">
-            <Amount value={balances.totalAvailableAmount} />{' '}
-            <span className="text-base font-normal text-muted-foreground">
-              {balances.currency}
-            </span>
-            <FiatBadge amount={balances.totalAvailableAmount} />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <dl className="grid gap-3 sm:grid-cols-2">
-            <Pocket
-              term={<T korean="활동 지갑" english="Active Cash" />}
-              detail={<T korean="송금과 구매에 바로 쓰이는 잔액" english="Balance ready for transfers and shop purchases" />}
-              amount={balances.cash.availableAmount}
-            />
-            <Pocket
-              term={<T korean="보관함" english="Bank Vault" />}
-              detail={<T korean="은행에 넣어 둔 잔액" english="Safe savings deposited in the bank vault" />}
-              amount={balances.bank.availableAmount}
-            />
-          </dl>
-          <RewardButtons availability={rewardAvailability} />
-        </CardContent>
-      </Card>
-
-      <CitizenTaxReceiptCard />
-
-      {(() => {
-        const stockHoldings = portfolioData?.holdings ?? [];
-        const actualStocksValue = stockHoldings.reduce(
-          (sum, h) => sum + Math.round((Number(h.current_price) || 0) * (Number(h.quantity) || 0)),
-          0
-        );
-        return (
-          <PortfolioAllocationRadar
-            cashWld={Number(balances.cash.availableAmount) || 0}
-            savingsWld={Number(balances.bank.availableAmount) || 0}
-            stocksWld={actualStocksValue}
-            bondsWld={0}
-          />
-        );
-      })()}
-
-      <BankPanel />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <T korean="내 대출" english="My Loans" />
-          </CardTitle>
-          <CardDescription>
-            {loanData === null ? (
-              <T korean="대출 정보를 확인할 수 없어요." english="Unable to retrieve loan information." />
-            ) : (
-              <T korean="원금과 이자를 합한 금액을 상환합니다." english="Repay the principal amount plus 5% fixed interest." />
-            )}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loans.length === 0 ? (
-            <EmptyState title={<T korean="진행 중인 대출이 없어요." english="No active loans." />} />
-          ) : (
-            <LoanList loans={loans} />
-          )}
-        </CardContent>
-      </Card>
-
-      <TransferForm currency={balances.currency} />
-
-      <section aria-labelledby="activity-title" className="grid gap-3">
-        <SectionHeader
-          eyebrow="RECENT ACTIVITY"
-          title={<T korean="내 지갑 기록" english="Transaction History" />}
-          id="activity-title"
-          action={
-            <div className="flex items-center gap-2">
-              <ExportLedgerCsvButton transactions={recentTransactions} />
-              <Link href="/wallet/activity" className="shrink-0 text-sm font-extrabold text-clay-ink">
-                <T korean="전체 보기 →" english="View All →" />
-              </Link>
+      {/* 1. 상단 토스형 내 자산 메인 히어로 카드 */}
+      <div className="toss-card p-6 sm:p-8 space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <Wallet className="size-5" />
             </div>
-          }
-        />
-        <Card>
-          <CardContent>
+            <div>
+              <span className="text-xs text-muted-foreground font-semibold">내 가상 자산 총액</span>
+              <h1 className="text-sm font-bold text-foreground">활동 현금 + 은행 예금 합산</h1>
+            </div>
+          </div>
+          <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/50">
+            {balances.currency}
+          </span>
+        </div>
+
+        {/* 큼직한 총 잔액 */}
+        <div className="space-y-1">
+          <div className="font-fintech text-4xl sm:text-5xl font-black text-foreground tracking-tight">
+            <Amount value={balances.totalAvailableAmount} />{' '}
+            <span className="text-xl sm:text-2xl font-bold text-muted-foreground">WLD</span>
+          </div>
+        </div>
+
+        {/* 지갑 세부 잔액 스트립 (활동 현금 vs 은행 예금) */}
+        <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-muted/20 border border-border/40">
+          <div>
+            <span className="text-xs text-muted-foreground block">활동 현금 (즉시 사용)</span>
+            <span className="font-fintech font-bold text-base sm:text-lg text-primary">
+              <Amount value={balances.cash.availableAmount} /> WLD
+            </span>
+          </div>
+          <div>
+            <span className="text-xs text-muted-foreground block">은행 예금 (복리 적립 중)</span>
+            <span className="font-fintech font-bold text-base sm:text-lg text-foreground">
+              <Amount value={balances.bank.availableAmount} /> WLD
+            </span>
+          </div>
+        </div>
+
+        {/* 일일 보상 수령 바 */}
+        <RewardButtons availability={rewardAvailability} />
+
+        {/* 하단 2대 큼직한 퀵 액션 버튼 */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <Button
+            asChild
+            className="h-13 rounded-2xl btn-toss font-black text-sm flex items-center justify-center gap-2 shadow-sm"
+          >
+            <Link href="#wallet-transfer">
+              <Send className="size-4" />
+              <span>간편 송금하기</span>
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="h-13 rounded-2xl font-black text-sm border-border/80 bg-card hover:bg-muted/40 text-foreground flex items-center justify-center gap-2"
+          >
+            <Link href="/bank">
+              <Landmark className="size-4" />
+              <span>가상 은행 가기</span>
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* 2. 안전 고지 칩 */}
+      <div className="p-3.5 px-4 rounded-2xl bg-muted/20 border border-border/40 text-xs text-muted-foreground flex items-center gap-2">
+        <ShieldCheck className="size-4 text-emerald-500 shrink-0" />
+        <span>모든 송금 및 잔액 변동은 복식부기 불변 경제 원장에 안전하게 기록됩니다.</span>
+      </div>
+
+      {/* 3. 3대 핵심 탭 UI (간편 송금 & 은행, 활동 내역, 자산 배분 & ID) */}
+      <Tabs defaultValue="transfer" className="space-y-6">
+        <TabsList className="grid grid-cols-3 max-w-md w-full h-11 p-1 bg-muted/60 rounded-xl">
+          <TabsTrigger value="transfer" className="rounded-lg text-xs sm:text-sm font-semibold">
+            간편 송금 & 입출금
+          </TabsTrigger>
+          <TabsTrigger value="history" className="rounded-lg text-xs sm:text-sm font-semibold">
+            원장 활동 내역
+          </TabsTrigger>
+          <TabsTrigger value="allocation" className="rounded-lg text-xs sm:text-sm font-semibold">
+            자산 배분 & ID
+          </TabsTrigger>
+        </TabsList>
+
+        {/* 탭 1: P2P 간편 송금 및 은행 창구 */}
+        <TabsContent value="transfer" className="space-y-6 focus-visible:outline-none">
+          <div id="wallet-transfer" className="scroll-mt-24">
+            <TransferForm currency={balances.currency} />
+          </div>
+
+          <BankPanel />
+
+          {/* 대출 현황 (진행 중일 경우만 노출) */}
+          {loans.length > 0 && (
+            <div className="toss-card p-6 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                <h3 className="font-bold text-sm text-foreground">진행 중인 가상 대출</h3>
+                <span className="text-xs text-muted-foreground">{loans.length}건</span>
+              </div>
+              <LoanList loans={loans} />
+            </div>
+          )}
+        </TabsContent>
+
+        {/* 탭 2: 복식부기 원장 최근 활동 내역 */}
+        <TabsContent value="history" className="space-y-6 focus-visible:outline-none">
+          <div className="toss-card p-6 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border/50">
+              <div className="flex items-center gap-2">
+                <History className="size-4 text-primary" />
+                <h3 className="font-bold text-base text-foreground">원장 거래 기록</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <ExportLedgerCsvButton transactions={recentTransactions} />
+                <Button asChild variant="outline" size="sm" className="h-8 text-xs">
+                  <Link href="/wallet/activity">전체 내역 보기 →</Link>
+                </Button>
+              </div>
+            </div>
+
             {recentTransactions.length === 0 ? (
               <EmptyState
-                title={<T korean="아직 기록된 활동이 없어요." english="No activity recorded yet." />}
-                description={<T korean="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다." english="When you claim rewards or transfer WLD, entries appear here." />}
+                title="아직 기록된 활동이 없어요."
+                description="보상을 받거나 WLD를 송금하면 실제 원장 기록이 여기에 표시됩니다."
               />
             ) : (
               <TruncatedList
@@ -211,89 +230,29 @@ export default async function WalletPage() {
                 })}
               />
             )}
-          </CardContent>
-        </Card>
-      </section>
+          </div>
+        </TabsContent>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardDescription>
-              <T korean="내 머니버스 ID" english="My Moneyverse ID" />
-            </CardDescription>
-            <CardTitle className="text-base">
-              <T korean="지갑 식별 정보" english="Wallet Identity" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* 탭 3: 자산 배분 레이더, 식별 정보 및 세무 영수증 */}
+        <TabsContent value="allocation" className="space-y-6 focus-visible:outline-none">
+          <PortfolioAllocationRadar
+            cashWld={Number(balances.cash.availableAmount) || 0}
+            savingsWld={Number(balances.bank.availableAmount) || 0}
+            stocksWld={actualStocksValue}
+            bondsWld={0}
+          />
+
+          <CitizenTaxReceiptCard />
+
+          <div className="toss-card p-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <IdCard className="size-4 text-muted-foreground" />
+              <h3 className="text-sm font-bold text-foreground">내 머니버스 고유 ID</h3>
+            </div>
             <MoneyverseId userId={userId} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardDescription>
-              <T korean="지갑 안내" english="Wallet Guide" />
-            </CardDescription>
-            <CardTitle className="text-base">
-              <T korean="안전하게 사용하기" english="Safe Usage" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3">
-            <Guide
-              title={<T korean="송금 전 확인" english="Verify Before Sending" />}
-              detail={<T korean="받는 사람의 ID와 금액을 확인해 주세요." english="Double-check the recipient ID and transfer amount." />}
-            />
-            <Guide
-              title={<T korean="원장 기록" english="Ledger History" />}
-              detail={<T korean="모든 변동은 내 지갑 기록에서 확인할 수 있어요." english="Every balance change is permanently verified." />}
-            />
-            <Guide
-              title={<T korean="🏛️ 국고 세금 환원 & 시민 배당" english="🏛️ Treasury Tax Redistribution" />}
-              detail={<T korean="거래세(2%) 및 송금세 등으로 걷힌 국고는 시민 기본소득 배당과 공공 프로젝트로 전액 재순환됩니다." english="Taxes collected into the national treasury are redistributed back to active citizens as dividends and public grants." />}
-            />
-            <Guide
-              title={<T korean="이용 기준" english="Terms of Use" />}
-              detail={<T korean="WLD는 현금이나 환전 수단이 아닙니다." english="WLD cannot be exchanged for cash or real currency." />}
-            />
-            <Button asChild variant="ghost" className="w-fit">
-              <Link href="/terms">
-                <T korean="이용 기준 보기 →" english="View Terms →" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
-  );
-}
-
-function Pocket({
-  term,
-  detail,
-  amount,
-}: {
-  readonly term: React.ReactNode;
-  readonly detail: React.ReactNode;
-  readonly amount: string;
-}) {
-  return (
-    <div className="rounded-xl border border-border/80 bg-card/70 p-3.5 min-w-0 shadow-xs">
-      <dt className="text-xs font-medium text-muted-foreground">{term}</dt>
-      <dd className="text-xl font-bold font-mono flex items-baseline gap-2 flex-wrap min-w-0 my-0.5">
-        <Amount value={amount} />
-        <FiatBadge amount={amount} />
-      </dd>
-      <dd className="text-[11px] text-muted-foreground leading-relaxed [word-break:keep-all]">{detail}</dd>
-    </div>
-  );
-}
-
-function Guide({ title, detail }: { readonly title: React.ReactNode; readonly detail: React.ReactNode }) {
-  return (
-    <p className="text-sm">
-      <b className="font-medium">{title}</b>
-      <span className="block text-xs text-muted-foreground">{detail}</span>
-    </p>
   );
 }
