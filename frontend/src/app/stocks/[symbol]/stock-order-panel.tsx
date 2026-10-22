@@ -157,7 +157,7 @@ export function StockOrderPanel({
   };
 
   return (
-    <Card className="border-border/80 bg-card/60 shadow-md">
+    <Card className="toss-card border-border/80 shadow-md">
       <CardHeader className="p-4 sm:p-5 pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-bold flex items-center gap-2">

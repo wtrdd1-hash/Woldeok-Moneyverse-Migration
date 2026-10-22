@@ -245,7 +245,7 @@ export function StockOrderbook({
   const isBuyDominant = intensityPct >= 100;
 
   return (
-    <Card className="border-border/80 bg-card/60 shadow-sm overflow-hidden select-none">
+    <Card className="toss-card border-border/80 shadow-sm overflow-hidden select-none">
       <CardHeader className="p-3.5 sm:p-4 pb-2 border-b border-border/60 bg-muted/20">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-bold flex items-center gap-1.5">

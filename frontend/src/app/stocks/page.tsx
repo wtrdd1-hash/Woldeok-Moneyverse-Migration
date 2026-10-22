@@ -1,72 +1,48 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Amount } from '@/components/amount';
-import { EmptyState } from '@/components/empty-state';
-import { PageHeader } from '@/components/page-header';
-import type { SparkPoint } from '@/components/sparkline';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+  TrendingUp,
+  TrendingDown,
+  Flame,
+  HelpCircle,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { apiOrNull } from '@/lib/api';
-import { getCachedStockData } from '@/lib/stock-market-cache';
 import { getServerLocale } from '@/lib/locale-server';
-import { formatMoment, groupDigits } from '@/lib/money';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import { isLoggedInMember } from '@/lib/session';
-import { LiveBadge, LiveHoldingValue, LiveQuote, LiveSparkline } from './live';
+import { LiveBadge } from './live';
 import dynamicImport from 'next/dynamic';
-import { MarketNews } from './market-news';
-import type { MarketEvent } from './market-news';
-import { MarketSentimentGauge } from './market-sentiment-gauge';
 import { StockDisclosureTicker } from '@/components/stock-disclosure-ticker';
 import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
-import { FinancialKnowledgeHub } from '@/components/financial-knowledge-hub';
-import { StockSeasonLeaderboard } from '@/components/stock-season-leaderboard';
-import { StockLeagueLaunchCard } from '@/components/stock-league-launch-card';
 import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
-import { WatchlistToggle } from './watchlist-toggle';
-import { filterStocks, normalizeStockQuery } from './stock-search';
 import { canonicalUrl } from '@/lib/seo';
 
-const StockDetailDialog = dynamicImport(
-  () => import('./stock-detail-dialog').then((mod) => mod.StockDetailDialog),
-);
 const TradeDialog = dynamicImport(
   () => import('./trade-dialog').then((mod) => mod.TradeDialog),
-);
-const TradeDiaryDrawer = dynamicImport(
-  () => import('@/components/trade-diary-drawer').then((mod) => mod.TradeDiaryDrawer),
 );
 
 export const dynamic = 'force-dynamic';
 
 const STOCKS_META_BY_LOCALE = {
   en: {
-    title: 'Virtual Stock Exchange — Real-time Quotes & Candlestick Charts',
-    description: 'Track real-time stock quotes, candlestick charts, and trade community virtual shares in Woldeok Moneyverse.',
+    title: 'Virtual Stock Exchange — Toss-style Real-time Orderbook & Trading',
+    description: 'Track real-time virtual quotes, 10-depth orderbooks, and trade 10 listed companies with ease.',
     canonical: '/en/stocks',
   },
   ko: {
-    title: '주식 10단 호가창 모의투자 무료 체험 — 가상 주식 거래소 & 실시간 차트 | 월덕 머니버스',
-    description: '[로그인 없이 1초 모의투자] 18개 가상 종목 실시간 10단 호가창, TradingView급 캔들 차트, 스탑로스·익절 자동감시 무료 시뮬레이터. 가입 즉시 1만 WLD 무료 지급!',
+    title: '가상 주식 거래소 — 실시간 10단 호가창 & 모의투자 | 월덕 머니버스',
+    description: '[토스 증권 스타일] 10대 가상 상장사 실시간 호가, 캔들 차트, 1초 모의투자 시뮬레이터. 가입 즉시 1만 WLD 지급!',
     canonical: '/stocks',
   },
   ja: {
-    title: '仮想株式取引所 — リアルタイム相場とローソク足チャート分析',
-    description: 'ウォルドクマネーバースの仮想株式相場、ローソク足チャート、取引情報を確認できるコミュニティ取引所です。',
+    title: '仮想株式取引所 — リアルタイム10段階気配値＆模擬投資',
+    description: 'トス証券スタイルの直感的な仮想株式取引所。10大上場企業のリアルタイム相場とチャート。',
     canonical: '/ja/stocks',
   },
   zh: {
-    title: '虚拟股票交易所 — 实时行情与K线图表分析',
-    description: '查看沃尔德克金融元宇宙内的虚拟股票行情、K线图表与交易信息的社区交易所。',
+    title: '虚拟股票交易所 — 实时10档深度盘口与模拟交易',
+    description: 'Toss风格极简虚拟股票交易所，实时查看10大标的行情与深度K线。',
     canonical: '/zh/stocks',
   },
 };
@@ -97,7 +73,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/** The API returns these rows as the database shapes them. */
 interface StockRow {
   readonly id: string;
   readonly symbol: string;
@@ -105,456 +80,165 @@ interface StockRow {
   readonly description: string;
   readonly current_price: string;
   readonly day_open_price: string;
-  /** Today's range, from the candle the market ticker keeps. */
   readonly day_high_price: string;
   readonly day_low_price: string;
-  /** How many shares exist, and how many nobody is holding (053). */
   readonly shares_outstanding: string;
   readonly shares_available: string;
   readonly halt_status?: string;
 }
 
-/** Every listed stock's recent prices, most recent first (055). */
-interface SparkSeries {
-  readonly stock_id: string;
-  readonly prices: readonly string[];
-}
-
-interface WatchlistRow {
-  readonly stock_id: string;
-  readonly symbol: string;
-  readonly name: string;
-  readonly current_price: string;
-  readonly day_open_price: string;
-  readonly created_at: string;
-}
-
-interface HoldingRow {
-  readonly stock_id: string;
-  readonly symbol: string;
-  readonly name: string;
-  readonly quantity: string;
-  readonly average_cost: string;
-  readonly market_value: string;
-  readonly current_price: string;
-}
-
-interface TradeRow {
-  readonly trade_id: string;
-  readonly symbol: string;
-  readonly side: string;
-  readonly quantity: string;
-  readonly unit_price: string;
-  readonly gross_amount: string;
-  readonly tax_amount: string;
-  readonly created_at: string;
-}
-
-export const revalidate = 0;
-
-/**
- * How much recent movement each card's sparkline draws: one hour, a point a
- * minute (136). A count of price changes was the window before that, which
- * under 124's per-second walk is a different length of time on every card.
- */
-const SPARK_POINTS = 60;
-
 export default async function StocksPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string | string[]; readonly sort?: string | string[] }>;
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const isLoggedIn = await isLoggedInMember();
-  const locale = await getServerLocale();
-  const isEn = locale === 'en';
-  const { q: rawQuery, sort: rawSort } = await searchParams;
-  const query = normalizeStockQuery(rawQuery);
-  const sort = normalizeStockSort(Array.isArray(rawSort) ? rawSort[0] : rawSort);
+  const params = await searchParams;
+  const sortParam = Array.isArray(params.sort) ? params.sort[0] : params.sort;
+  const sort = normalizeStockSort(sortParam);
+  const isEn = (await getServerLocale()) === 'en';
+  const member = await isLoggedInMember();
 
-  const [market, sparks, news, portfolio, history, watchlist] = await Promise.all([
-    getCachedStockData('stocks:market:all', () => apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'), 1000),
-    getCachedStockData(`stocks:sparks:${SPARK_POINTS}`, () => apiOrNull<{ series: SparkSeries[] }>(`/api/v1/stocks/sparklines?limit=${SPARK_POINTS}`), 1000),
-    getCachedStockData('stocks:news:events', () => apiOrNull<{ events: MarketEvent[] }>('/api/v1/stocks/market-events'), 3000),
-    isLoggedIn ? apiOrNull<{ holdings: HoldingRow[] }>('/api/v1/stocks/portfolio') : Promise.resolve(null),
-    isLoggedIn ? apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history') : Promise.resolve(null),
-    isLoggedIn ? apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist') : Promise.resolve(null),
-  ]);
-
+  const market = await apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks');
   const allStocks = market?.stocks ?? [];
-  const filteredStocks = filterStocks(allStocks, query, locale);
-  const stocks = sortMarketStocks(filteredStocks, sort);
-  const watchedStockIds = new Set((watchlist?.stocks ?? []).map((row) => row.stock_id));
-
-  const seriesFor = new Map<string, readonly SparkPoint[]>(
-    (sparks?.series ?? []).map((row) => [
-      row.stock_id,
-      (row.prices ?? []).map((price) => ({ price })),
-    ]),
-  );
-
-  const events = news?.events ?? [];
-
-  const avgPriceChange24h = allStocks.length > 0
-    ? allStocks.reduce((sum, s) => {
-        const cur = Number.parseInt(s.current_price, 10) || 0;
-        const open = Number.parseInt(s.day_open_price ?? s.current_price, 10) || 1;
-        return sum + (((cur - open) / open) * 100);
-      }, 0) / allStocks.length
-    : 0;
-
-  const marketFactors = {
-    priceChange24hPct: Math.round(avgPriceChange24h * 10) / 10,
-    volumeScore: allStocks.length > 0 ? 65 : 50,
-    orderPressureBidRatio: 55,
-  };
+  const stocks = sortMarketStocks(allStocks, sort);
 
   return (
     <MarketPricesProvider>
-    <div data-page="stocks" className="mv-page mv-page--finance grid gap-6 w-full max-w-full min-w-0 overflow-hidden">
-      <PageHeader
-        eyebrow="VIRTUAL MARKET"
-        title={isEn ? 'Virtual Stock Market' : '가상 주식 시장'}
-      >
-        {isEn
-          ? 'A community market where virtual prices fluctuate based on the game economy. Not real stocks or financial products.'
-          : '경제 상황에 따라 가격이 바뀌는 10대 종목 전용 가상 시장입니다. 실제 주식·현금·투자 상품이 아닙니다.'}
-      </PageHeader>
-
-      {/* 실시간 국내외 거시경제 펄스 티커 (한국은행, Fed, 코스피, S&P500 등) */}
-      <GlobalMacroPulseTicker />
-
-      {/* AI 뉴스 및 다요소 가중 시장 감성 지수 & 펄스 게이지 위젯 */}
-      <MarketSentimentGauge events={events} marketFactors={marketFactors} isEn={isEn} />
-
-      {/* WDX 실시간 가상 기업 공시 & 속보 피드 (Section 5.6) */}
-      <StockDisclosureTicker />
-
-      {/* 가상 주식 실전 챔피언십 리그 & 상위 1% 고래 카피 트레이딩 배너 */}
-      <StockLeagueLaunchCard />
-
-      {/* 토스형 주주 라운지 & 실시간 모의투자 소셜 피드 배너 */}
-      <div className="fintech-card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-indigo-500/30 bg-slate-900/40 dark:bg-[#0c1018]/90 backdrop-blur-2xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 text-lg">
-            💬
-          </div>
+      <div data-page="stocks" className="mx-auto w-full max-w-2xl space-y-4 sm:space-y-6 px-3 sm:px-0 py-2 sm:py-4 pb-24 zero-overflow-shield">
+        {/* 1. Header: Toss Securities Style Ultra-Clean Title & Live Badge */}
+        <div className="flex items-center justify-between pt-1">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
-                NEW 토스형 주주 인증 피드
-              </span>
-              <span className="text-xs text-slate-400">실시간 수익률 뱃지 & 매매 일지</span>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight">
+                가상 주식 거래소
+              </h1>
+              <LiveBadge />
             </div>
-            <h3 className="text-sm font-semibold text-white mt-0.5">
-              주주 라운지에서 실전 투자자들의 수익률과 매매 전략을 확인하세요
-            </h3>
+            <p className="text-xs text-slate-400 mt-0.5 font-fintech">
+              10대 가상 상장사 실시간 호가 & 1초 모의투자
+            </p>
           </div>
+
+          <Link
+            href="/stocks/community"
+            className="btn-toss min-h-[38px] px-3.5 bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700/60"
+          >
+            주주 라운지 →
+          </Link>
         </div>
-        <Link
-          href="/stocks/community"
-          className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-medium text-xs transition shadow-md shrink-0 min-h-[40px]"
-        >
-          주주 피드 바로가기 →
-        </Link>
-      </div>
 
-      {/* 시장 소식 & 월드 펄스 뉴스 목록 */}
-      <MarketNews events={events} />
-
-      {/* 투자 거래일지 & 매매 복기 다이어리 (Section 5.7) */}
-      <TradeDiaryDrawer />
-
-      {/* 가상 주식 시즌 투자 리더보드 & 주간 랭킹전 (Section 5.8) */}
-      <StockSeasonLeaderboard />
-
-      <section aria-labelledby="market-title" className="grid gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <h2 id="market-title" className="text-lg">
-              {isEn ? 'Available Stocks' : '거래 가능 종목'}
-            </h2>
-            <LiveBadge />
-          </div>
-          <div className="text-xs text-muted-foreground font-medium">
-            {isEn ? `Total ${allStocks.length} listed` : `총 ${allStocks.length}개 상장`}
-          </div>
+        {/* 2. Global Macro & Disclosure Ticker */}
+        <div className="space-y-2">
+          <GlobalMacroPulseTicker />
+          <StockDisclosureTicker />
         </div>
-        <form action="/stocks" method="get" role="search" className="flex w-full max-w-2xl flex-wrap gap-2">
-          {sort !== 'default' ? <input type="hidden" name="sort" value={sort} /> : null}
-          <label htmlFor="stock-search" className="sr-only">
-            {isEn ? 'Search virtual stocks' : '가상 주식 종목 검색'}
-          </label>
-          <input
-            id="stock-search"
-            name="q"
-            type="search"
-            defaultValue={query}
-            maxLength={80}
-            placeholder={isEn ? 'Search symbol, name, or description' : '종목 코드, 이름, 설명 검색'}
-            className="min-h-11 min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
-          <Button type="submit" className="min-h-11">
-            {isEn ? 'Search' : '검색'}
-          </Button>
-          {query ? (
-            <Button asChild type="button" variant="outline" className="min-h-11">
-              <Link href={sort === 'default' ? '/stocks' : `/stocks?sort=${sort}`}>{isEn ? 'Clear' : '초기화'}</Link>
-            </Button>
-          ) : null}
-        </form>
-        <nav aria-label={isEn ? 'Sort stocks' : '종목 정렬'} className="flex flex-wrap gap-2">
+
+        {/* 3. Toss Style Filter Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {[
-            ['default', isEn ? 'Default' : '기본순'],
-            ['change', isEn ? 'Top movers' : '등락률순'],
-            ['price', isEn ? 'Price' : '가격순'],
-            ['available', isEn ? 'Availability' : '거래 가능순'],
-            ['name', isEn ? 'Name' : '이름순'],
+            ['default', '전체 10종목'],
+            ['change', '급등·급락순'],
+            ['price', '가격순'],
+            ['name', '이름순'],
           ].map(([value, label]) => {
-            const params = new URLSearchParams();
-            if (query) params.set('q', query);
-            if (value && value !== 'default') params.set('sort', value);
-            const href = params.size ? `/stocks?${params.toString()}` : '/stocks';
+            const isActive = sort === value;
             return (
-              <Button key={value} asChild size="sm" variant={sort === value ? 'default' : 'outline'}>
-                <Link href={href} aria-current={sort === value ? 'page' : undefined}>{label}</Link>
-              </Button>
+              <Link
+                key={value}
+                href={value === 'default' ? '/stocks' : `/stocks?sort=${value}`}
+                className={`btn-toss min-h-[36px] px-3.5 text-xs font-bold transition-all shrink-0 ${
+                  isActive
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                    : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`}
+              >
+                {label}
+              </Link>
             );
           })}
-        </nav>
-        {query ? (
-          <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
-            {isEn
-              ? `${stocks.length} result${stocks.length === 1 ? '' : 's'} for “${query}”`
-              : `“${query}” 검색 결과 ${stocks.length}개`}
-          </p>
-        ) : null}
-        {market === null ? (
-          <EmptyState
-            title={isEn ? 'Failed to load stock data.' : '주식 정보를 불러오지 못했어요.'}
-            description={isEn ? 'Please try again in a few moments.' : '잠시 후 다시 시도해 주세요.'}
-          />
-        ) : stocks.length === 0 ? (
-          <EmptyState
-            title={query ? (isEn ? 'No virtual stocks match your search.' : '검색 조건에 맞는 가상 종목이 없습니다.') : (isEn ? 'No tradable stocks currently available.' : '현재 거래 가능한 종목이 없습니다.')}
-            description={query ? (isEn ? 'Try a symbol, company name, or a broader keyword.' : '종목 코드, 이름 또는 더 넓은 검색어로 다시 찾아보세요.') : undefined}
-          />
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {stocks.map((row) => (
-              <Card key={row.id} className="fintech-card gap-4 hover:border-emerald-500/40 btn-interactive">
-                <CardHeader>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="secondary" className="font-mono">
-                        {row.symbol}
-                      </Badge>
-                      {(row.halt_status === 'HALTED_SETTLED' || row.halt_status === 'HALTED_SETTLING' || row.halt_status === 'HALTING') && (
-                        <Badge variant="destructive" className="font-semibold text-[11px] px-1.5 py-0">
-                          {isEn ? 'Halted' : '거래정지'}
-                        </Badge>
-                      )}
+        </div>
+
+        {/* 4. 10 Listed Companies: Toss Clean Card List */}
+        <div className="space-y-2.5">
+          {stocks.length === 0 ? (
+            <div className="toss-card p-8 text-center text-slate-400 text-xs bg-[#0f1422]">
+              거래 가능한 종목이 없습니다.
+            </div>
+          ) : (
+            stocks.map((stock) => {
+              const cur = Number.parseInt(stock.current_price, 10);
+              const open = Number.parseInt(stock.day_open_price || stock.current_price, 10);
+              const pct = open > 0 ? ((cur - open) / open) * 100 : 0;
+              const isPositive = pct >= 0;
+              const isHalted = stock.halt_status && stock.halt_status.includes('HALT');
+
+              return (
+                <div
+                  key={stock.id}
+                  className="toss-card p-4 sm:p-5 flex items-center justify-between gap-3 bg-[#0f1422] border-slate-800/80 hover:border-emerald-500/40 transition-all btn-interactive"
+                >
+                  {/* Stock Brand Icon & Name */}
+                  <Link href={`/stocks/${stock.symbol}`} className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="size-11 sm:size-12 rounded-2xl bg-slate-800/80 border border-slate-700/60 grid place-items-center font-black font-fintech text-xs text-slate-200 shrink-0">
+                      {stock.symbol.slice(0, 3)}
                     </div>
-                    <WatchlistToggle stockId={row.id} watching={watchedStockIds.has(row.id)} />
-                  </div>
-                  <CardTitle className="text-base">{row.name}</CardTitle>
-                  <CardDescription>
-                    {row.description || (isEn ? 'A virtual stock traded within the game economy.' : '게임 경제 안에서 거래하는 가상 종목입니다.')}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-3">
-                  <div className="flex items-end justify-between gap-3">
-                    <LiveQuote
-                      stockId={row.id}
-                      price={row.current_price}
-                      open={row.day_open_price}
-                    />
-                    <LiveSparkline
-                      stockId={row.id}
-                      points={seriesFor.get(row.id) ?? []}
-                      price={row.current_price}
-                      open={row.day_open_price}
-                      limit={SPARK_POINTS}
-                      className="w-28 shrink-0"
-                    />
-                  </div>
-                  <p className="tabular text-xs text-muted-foreground">
-                    {isEn
-                      ? `Today High ${groupDigits(row.day_high_price)} · Low ${groupDigits(row.day_low_price)}`
-                      : `오늘 고가 ${groupDigits(row.day_high_price)} · 저가 ${groupDigits(row.day_low_price)}`}
-                  </p>
-                  <p className="tabular text-xs text-muted-foreground">
-                    {isEn
-                      ? `Available ${groupDigits(row.shares_available)} shares · Total Issued ${groupDigits(row.shares_outstanding)} shares`
-                      : `거래 가능 ${groupDigits(row.shares_available)}주 · 총 발행 ${groupDigits(row.shares_outstanding)}주`}
-                  </p>
-                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
-                    {row.halt_status === 'HALTED_SETTLED' || row.halt_status === 'HALTED_SETTLING' || row.halt_status === 'HALTING' ? (
-                      <Button
-                        disabled
-                        variant="outline"
-                        className="col-span-2 min-h-10 sm:min-h-11 border-destructive/30 text-destructive bg-destructive/5 cursor-not-allowed opacity-80 text-xs sm:text-sm font-bold"
-                      >
-                        {isEn ? 'Trading Halted' : '거래정지 (정산완료)'}
-                      </Button>
-                    ) : (
-                      <>
-                        <TradeDialog
-                          stockId={row.id}
-                          symbol={row.symbol}
-                          name={row.name}
-                          currentPrice={row.current_price}
-                          available={row.shares_available}
-                          side="buy"
-                        />
-                        <TradeDialog
-                          stockId={row.id}
-                          symbol={row.symbol}
-                          name={row.name}
-                          currentPrice={row.current_price}
-                          available={row.shares_available}
-                          side="sell"
-                        />
-                      </>
-                    )}
-                    <div className="col-span-2 sm:w-auto">
-                      <StockDetailDialog
-                        stockId={row.id}
-                        symbol={row.symbol}
-                        name={row.name}
-                        currentPrice={row.current_price}
-                        dayOpenPrice={row.day_open_price}
-                        available={row.shares_available}
-                      />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs sm:text-sm font-black text-slate-100 truncate">
+                          {stock.name}
+                        </span>
+                        {isHalted && (
+                          <Badge variant="destructive" className="text-[9px] px-1 py-0 font-bold shrink-0">
+                            거래정지
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-fintech text-slate-400 font-semibold block mt-0.5">
+                        {stock.symbol}
+                      </span>
                     </div>
-                    <Button asChild variant="outline" className="col-span-2 sm:w-auto min-h-10 sm:min-h-11 text-xs sm:text-sm font-bold">
-                      <Link href={`/stocks/${encodeURIComponent(row.symbol)}`}>
-                        {isEn ? 'Open hub' : '종목 허브'}
-                      </Link>
-                    </Button>
+                  </Link>
+
+                  {/* Price & Change Rate */}
+                  <Link href={`/stocks/${stock.symbol}`} className="text-right shrink-0 min-w-[90px]">
+                    <div className="text-xs sm:text-sm font-black font-fintech text-white tabular-nums">
+                      {cur.toLocaleString()} <span className="text-[10px] text-slate-400 font-normal">WLD</span>
+                    </div>
+                    <div className={`text-xs font-extrabold font-fintech tabular-nums mt-0.5 flex items-center justify-end gap-0.5 ${
+                      isPositive ? 'text-emerald-400' : 'text-rose-400'
+                    }`}>
+                      {isPositive ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+                      <span>{isPositive ? `+${pct.toFixed(1)}%` : `${pct.toFixed(1)}%`}</span>
+                    </div>
+                  </Link>
+
+                  {/* Trade Action Trigger */}
+                  <div className="shrink-0 pl-1">
+                    <TradeDialog
+                      stockId={stock.id}
+                      symbol={stock.symbol}
+                      name={stock.name}
+                      currentPrice={stock.current_price}
+                      side="buy"
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* 5. Safe Simulation Notice */}
+        <div className="toss-card p-4 sm:p-5 bg-[#0f1422] border-slate-800/80 flex items-start gap-3 text-xs text-slate-400">
+          <HelpCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <span className="font-bold text-slate-200">100% 안전한 가상 모의투자 안내</span>
+            <p className="leading-relaxed [word-break:keep-all]">
+              월덕 머니버스의 모든 종목 시세와 재화(WLD)는 게임 내 알고리즘에 의해 움직이는 가상 경제이며, 실제 현금 입출금이나 실제 주식 투자 상품이 아닙니다.
+            </p>
           </div>
-        )}
-      </section>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{isEn ? 'My Holdings' : '내 보유 종목'}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!isLoggedIn ? (
-            <EmptyState
-              title={isEn ? 'Sign in to view your holdings.' : '로그인하시면 내 보유 종목을 확인할 수 있어요.'}
-              description={isEn ? 'Log in or sign up to trade virtual stocks and track your portfolio.' : '로그인 후 가상 주식을 매수하고 나만의 포트폴리오를 실시간으로 확인해 보세요.'}
-            />
-          ) : portfolio === null ? (
-            <EmptyState title={isEn ? 'Failed to load holdings.' : '보유 종목을 불러오지 못했어요.'} />
-          ) : portfolio.holdings.length === 0 ? (
-            <EmptyState title={isEn ? 'You do not own any virtual stocks.' : '보유한 가상 주식이 없습니다.'} />
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{isEn ? 'Stock' : '종목'}</TableHead>
-                    <TableHead className="text-right">{isEn ? 'Quantity' : '수량'}</TableHead>
-                    <TableHead className="text-right">{isEn ? 'Avg Cost' : '평균 매입가'}</TableHead>
-                    <TableHead className="text-right">{isEn ? 'Market Value' : '평가액'}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {portfolio.holdings.map((holding) => (
-                    <TableRow key={holding.stock_id}>
-                      <TableCell>
-                        <span className="font-mono text-xs text-muted-foreground">
-                          {holding.symbol}
-                        </span>{' '}
-                        {holding.name}
-                      </TableCell>
-                      <TableCell className="tabular text-right">
-                        {holding.quantity}{isEn ? ' shares' : '주'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Amount value={holding.average_cost} />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <LiveHoldingValue
-                          stockId={holding.stock_id}
-                          quantity={holding.quantity}
-                          price={holding.current_price}
-                          averageCost={holding.average_cost}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex-row items-center justify-between gap-3">
-          <CardTitle>{isEn ? 'My Trade History' : '내 거래 내역'}</CardTitle>
-          <Button asChild size="sm" variant="outline"><Link href="/stocks/history">{isEn ? 'Search history' : '거래 내역 찾기'}</Link></Button>
-        </CardHeader>
-        <CardContent>
-          {!isLoggedIn ? (
-            <EmptyState
-              title={isEn ? 'Sign in to view your trade history.' : '로그인하시면 내 거래 내역을 확인할 수 있어요.'}
-              description={isEn ? 'Every buy and sell order is tracked transparently once you sign in.' : '로그인 후 체결된 매수 및 매도 내역이 실시간으로 투명하게 기록됩니다.'}
-            />
-          ) : history === null ? (
-            <EmptyState title={isEn ? 'Failed to load trade history.' : '거래 내역을 불러오지 못했어요.'} />
-          ) : history.trades.length === 0 ? (
-            <EmptyState title={isEn ? 'No trade history yet.' : '아직 거래 내역이 없습니다.'} />
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{isEn ? 'Time' : '시각'}</TableHead>
-                    <TableHead>{isEn ? 'Stock' : '종목'}</TableHead>
-                    <TableHead>{isEn ? 'Type' : '구분'}</TableHead>
-                    <TableHead className="text-right">{isEn ? 'Quantity' : '수량'}</TableHead>
-                    <TableHead className="text-right">{isEn ? 'Price' : '체결가'}</TableHead>
-                    <TableHead className="text-right">{isEn ? 'Tax' : '세금'}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {history.trades.map((trade) => (
-                    <TableRow key={trade.trade_id}>
-                      <TableCell className="whitespace-nowrap text-muted-foreground">
-                        {formatMoment(trade.created_at, isEn ? 'Checking...' : '기록 확인 중')}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">{trade.symbol}</TableCell>
-                      <TableCell>
-                        <Badge variant={trade.side === 'buy' ? 'default' : 'outline'}>
-                          {trade.side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도')}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="tabular text-right">{trade.quantity}{isEn ? ' shares' : '주'}</TableCell>
-                      <TableCell className="text-right">
-                        <Amount value={trade.unit_price} />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Amount value={trade.tax_amount} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* 실전 금융 & 경제 지식 아카데미 백과사전 및 통화 변환기 */}
-      <FinancialKnowledgeHub />
-    </div>
+        </div>
+      </div>
     </MarketPricesProvider>
   );
 }
