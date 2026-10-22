@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.22.1111 — truthful guest homepage/mobile regressions repaired (source candidate)
+- Corrected redesigned guest homepage's static `10,000 WLD` presented under personalized “my virtual assets” to the authenticated `WalletGlance` component (logged-out, real member balance and read-unavailable states never misrepresented). Distinguish missing stock feed from perpetual fetching, retain existing native guest-first quickstart and accessible three-action mobile nav. Link existing canonical `/tools/compound-calculator` and `/tools/stock-calculator` resources. Updated six obsolete hardcoded-design class assertions to semantically test 2026 slate/Toss design and honest finance behavior, without disabling coverage. Frontend full **1,356 tests PASS in NODE_ENV=test**, typecheck and changed-file lint pass. No real wallet/account data, Test/Production or blog-publisher switch changed in this source candidate. [Source worklog](../worklog/2026-10-22-home-truthfulness-v1111.md).
+
+
 ## v2026.10.22.1109 — wallet owner pocket delta read-model correction (source implementation candidate)
 - To unblock verified blog-policy PR #986 without hiding finance CI failures, read-only wallet transaction projection was corrected to supply exact, signed `cash_delta` and `bank_delta` from existing owner-scoped ledger postings; `cashDelta + bankDelta = netAmount` is checked using exact BigInt strings, malformed/noncanonical fields are rejected. No SQL writes, migration, money movement or change to DB roles. Earlier main failed all four pocket-delta regression tests, and focused TDD now passes 4/4, owner wallet integration/precision 27/27, full local backend 1283 passed with 397 DB tests skipped, TS and Nest build PASS. **This is source-only candidate, not Test or Production finance acceptance**. Exact commit GitHub CI, official Test authentication and current deployment gates remain binding.
 

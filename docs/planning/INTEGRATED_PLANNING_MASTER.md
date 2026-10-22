@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.22.1111 — Homepage redesign source QA repair before blog Promotion
+- Baseline main homepage was passing builds but failed 6 existing frontend CI checks (old Bento style tests and substantive guest-finance transparency). Isolated source candidate replaces sample 10,000 WLD with authenticated WalletGlance, truthful missing market fallback, canonical guest calculators, accessibility home heading, and updates stale class/layout assertions to current 3-action mobile structure. Frontend full 1356/1356 tests PASS using NODE_ENV=test; no Production/Test or financial data changes, editorial hold preserved. Documented separately from wallet CI fix v1109 and blog v1108.
+
+
 ## v2026.10.22.1109 — wallet financial read model prerequisite for blog CI
 - Isolated source-only wallet projection correction in `WalletService`/`PostgresWalletRepository`: account-bucket debit/credit aggregation, exact cash/bank signed strings and mismatch failure, preserving legacy mock compatibility. Resolves the 4 existing regression test failures blocking blog PR #986 without disabling tests. Local backend full 1283 pass and 397 DB tests skipped; no financial DML, app privileges, Production/Test cutover, published content or user WLD balance modifications. Separate wallet PR/CI required before integration; this does not certify financial transactions or lift v530 platform acceptance holds.
 

@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.22.1111 — honest homepage regression repair (source, Test/Production pending)
+- [EN worklog](docs/worklog/2026-10-22-home-truthfulness-v1111.md) / [KO](docs/worklog/2026-10-22-home-truthfulness-v1111.ko.md), [GitHub EN](docs/updates/v2026.10.22.1111-ui-github.md) / [KO](docs/updates/v2026.10.22.1111-ui-github.ko.md). Dynamic authenticated wallet truth replaces bogus sample member balance; unavailable stock feed is acknowledged; three-button accessible mobile/home and canonical calculator links; six old CI cases repaired without hiding tests. Frontend all 1356 PASS (`NODE_ENV=test`); no live site release yet.
+
+
 ## v2026.10.22.1109 — wallet pocket projection regression CI unblock (source candidate)
 - [English worklog](docs/worklog/2026-10-22-wallet-pocket-projection-v1109.md) / [KO](docs/worklog/2026-10-22-wallet-pocket-projection-v1109.ko.md), [GitHub update](docs/updates/v2026.10.22.1109-wallet-github.md) / [KO](docs/updates/v2026.10.22.1109-wallet-github.ko.md). Read-only cash/bank signed ledger projection, 4 previously failing tests fixed, backend 1,283 pass/397 DB skip, no financial writes or live deployment.
 
