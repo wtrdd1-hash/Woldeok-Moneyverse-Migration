@@ -237,3 +237,6 @@ Primary external standards (reviewed 2026-10-20):
 - **No fabricated market quotes, provider response times, backtests, keyword volume, view counts or index status.**
 - **No general Indexing API for regular blog posts.**
 - **No Production or financial/DB authority changes under a planning-only PR.**
+
+## v2026.10.22.1108 — Latest override for retrospective review (owner correction)
+- [Current policy](AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.md) / [한국어](AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.ko.md) explicitly **prohibits** the v1107 retrospective 24h auto-withdraw rule. Once independently source-verified GREEN is published, late human review is **notification-only** and never changes visibility, robots, sitemap or response status. Human manual moderation/withdrawal and independent legal/security emergency controls remain separately authorized. Old 403/503 and original publication permission safeguards remain.

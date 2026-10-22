@@ -1,5 +1,9 @@
 # 📚 Document Catalog
 
+## v2026.10.22.1108 — No automatic unpublishing, country blog domain foundation
+- [EN owner supersession](planning/AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.md) / [KO](planning/AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.ko.md). 24h or later review delay never auto-hides published article; admin alert only. Four-country risk candidate/domain review-state code and tests developed on isolated branch; publish-first DB/scheduler integration is pending.
+
+
 ## v2026.10.22.1107 — Four-market native editorial auto-publish plan (PLANNING)
 - [English country/publish-first authoritative design](planning/AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.md) / [Korean](planning/AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.ko.md), [implementation plan EN](superpowers/plans/2026-10-22-blog-country-auto-publish-v1107.md) / [KO](superpowers/plans/2026-10-22-blog-country-auto-publish-v1107.ko.md). Distinct KR/US/JP/CN originals, GREEN immediate safety-gated publish, 24h retrospective review and instant withdrawal; AMBER preapproved, RED blocked. No runtime release.
 
