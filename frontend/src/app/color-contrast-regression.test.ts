@@ -66,8 +66,8 @@ describe('frontend rebuild contrast contract', () => {
     const source = fs.readFileSync(path.join(APP, 'page.tsx'), 'utf8');
     expect(source).not.toContain('text-white');
     expect(source).not.toContain('bg-white/[0.06]');
-    // Homepage uses fixed dark surface cards; muted text is zinc-400 rather than the light-theme token.
-    expect(source).toContain('text-zinc-400');
+    // Refreshed mobile homepage uses a slate surface palette rather than legacy zinc.
+    expect(source).toContain('text-slate-400');
   });
 
   it('does not use known low-contrast light-theme shop label shades', () => {

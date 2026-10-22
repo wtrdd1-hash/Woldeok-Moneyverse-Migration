@@ -15,6 +15,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { GuestQuickstart } from '@/components/guest-quickstart';
+import { WalletGlance } from '@/components/wallet-glance';
 import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
@@ -106,21 +107,20 @@ export default async function HomePage() {
       <GuestQuickstart locale={locale} />
 
       {/* 2. Toss Style Hero Asset Card (한눈에 들어오는 내 잔고) */}
-      <div className="fintech-card p-6 sm:p-7 border-slate-800/80 bg-slate-900/60 dark:bg-[#0d121c] backdrop-blur-2xl space-y-4">
+      <section aria-labelledby="hero-balance-heading" className="fintech-card p-6 sm:p-7 border-slate-800/80 bg-slate-900/60 dark:bg-[#0d121c] backdrop-blur-2xl space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-400">내 가상 자산</span>
+          <h2 id="hero-balance-heading" className="text-xs font-semibold text-slate-400">내 가상 자산</h2>
           <Badge variant="outline" className="text-[10px] border-emerald-500/30 text-emerald-400 font-fintech">
             <span className="size-1.5 rounded-full bg-emerald-400 mr-1.5 inline-block" />
-            정상 보관 중
+            게임 재화
           </Badge>
         </div>
 
         <div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl sm:text-4xl font-black font-fintech text-slate-100 tabular-nums tracking-tight">
-              10,000
+              <WalletGlance />
             </span>
-            <span className="text-lg font-bold text-slate-400 font-fintech">WLD</span>
           </div>
           <p className="text-[11px] text-slate-500 font-fintech mt-1">
             * 게임 내 가상 재화이며 실제 현금과 무관합니다.
@@ -138,7 +138,7 @@ export default async function HomePage() {
             내역 조회
           </Link>
         </div>
-      </div>
+      </section>
 
       {/* 3. Toss Style 3 Core Action Buttons (누르기 쉬운 큼직한 3대 메뉴) */}
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -178,7 +178,7 @@ export default async function HomePage() {
         <div className="flex items-center justify-between border-b border-slate-800/60 pb-2.5">
           <div className="flex items-center gap-1.5">
             <Flame className="size-4 text-emerald-400" />
-            <h2 className="text-xs font-bold text-slate-200">실시간 인기 주식</h2>
+            <h2 className="text-xs font-bold text-slate-200">가상주식 변동</h2>
           </div>
           <Link href="/stocks" className="text-xs text-slate-400 hover:text-emerald-400 flex items-center gap-0.5">
             <span>더보기</span>
@@ -188,7 +188,7 @@ export default async function HomePage() {
 
         <div className="divide-y divide-slate-800/60">
           {movers.length === 0 ? (
-            <p className="py-4 text-xs text-slate-500 text-center">시세 정보를 불러오는 중입니다.</p>
+            <p className="py-4 text-xs text-slate-500 text-center">시세 자료를 불러오지 못했습니다.</p>
           ) : (
             movers.map((item) => {
               const isPositive = item.pct >= 0;
@@ -234,7 +234,7 @@ export default async function HomePage() {
 
         <div className="grid grid-cols-2 gap-2">
           <Link
-            href="/tools/compound"
+            href="/tools/compound-calculator"
             className="p-3 rounded-xl border border-slate-800/60 bg-slate-900/30 hover:border-emerald-500/40 transition-colors btn-interactive"
           >
             <span className="block text-xs font-bold text-slate-200">복리 수익률</span>
@@ -242,7 +242,7 @@ export default async function HomePage() {
           </Link>
 
           <Link
-            href="/tools/stock-dca"
+            href="/tools/stock-calculator"
             className="p-3 rounded-xl border border-slate-800/60 bg-slate-900/30 hover:border-sky-500/40 transition-colors btn-interactive"
           >
             <span className="block text-xs font-bold text-slate-200">주식 물타기</span>

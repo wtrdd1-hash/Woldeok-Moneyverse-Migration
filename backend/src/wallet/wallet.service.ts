@@ -127,6 +127,8 @@ export interface WalletTransactionView {
   readonly type: string;
   readonly label: string;
   readonly netAmount: WldAmount;
+  readonly cashDelta?: WldAmount | undefined;
+  readonly bankDelta?: WldAmount | undefined;
   readonly direction: WalletTransactionDirection;
   readonly occurredAt: string;
 }
@@ -301,11 +303,23 @@ function normalizeBalances(rows: readonly WalletBalanceRow[]): WalletBalancesVie
 function normalizeTransactions(rows: readonly WalletTransactionRow[]): WalletTransactionView[] {
   return rows.map((row) => {
     const netAmount = wldAmount(row.net_amount, 'transaction amount');
+    // Legacy mock rows may have neither pocket field; actual repository always
+    // supplies both. A partially supplied pair is a corrupt read projection.
+    if ((row.cash_delta === undefined) !== (row.bank_delta === undefined)) {
+      throw new Error('wallet pocket delta mismatch: missing pocket amount');
+    }
+    const cashDelta = row.cash_delta === undefined ? undefined : wldAmount(row.cash_delta, 'cash pocket amount');
+    const bankDelta = row.bank_delta === undefined ? undefined : wldAmount(row.bank_delta, 'bank pocket amount');
+    if (cashDelta !== undefined && bankDelta !== undefined
+      && BigInt(cashDelta) + BigInt(bankDelta) !== BigInt(netAmount)) {
+      throw new Error('wallet pocket delta mismatch: total does not match owner net amount');
+    }
     return {
       transactionId: requireUuid(row.transaction_id, 'database transaction id'),
       type: row.type,
       label: transactionLabel(row.type),
       netAmount,
+      ...(cashDelta === undefined ? {} : { cashDelta, bankDelta }),
       direction: directionFor(netAmount),
       occurredAt: timestamp(row.created_at, 'transaction timestamp'),
     };

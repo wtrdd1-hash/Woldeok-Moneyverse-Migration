@@ -44,6 +44,8 @@ export interface WalletTransactionRow {
   readonly type: string;
   readonly created_at: Date;
   readonly net_amount: string;
+  readonly cash_delta?: string;
+  readonly bank_delta?: string;
 }
 
 /** public.wallet_active_recipient_by_id return column: packages/database/migrations/010-account-lifecycle.sql */
@@ -195,7 +197,25 @@ export class PostgresWalletRepository {
              WHEN 'debit'::public.posting_direction THEN posting.amount
              ELSE -posting.amount
            END
-         ), 0)::text AS net_amount
+         ), 0)::text AS net_amount,
+         COALESCE(SUM(
+           CASE WHEN account.account_type = 'USER_CASH'::public.account_type THEN
+             CASE posting.direction
+               WHEN 'debit'::public.posting_direction THEN posting.amount
+               ELSE -posting.amount
+             END
+           ELSE 0
+           END
+         ), 0)::text AS cash_delta,
+         COALESCE(SUM(
+           CASE WHEN account.account_type = 'USER_BANK'::public.account_type THEN
+             CASE posting.direction
+               WHEN 'debit'::public.posting_direction THEN posting.amount
+               ELSE -posting.amount
+             END
+           ELSE 0
+           END
+         ), 0)::text AS bank_delta
        FROM public.ledger_transactions AS ledger_transaction
        JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
        JOIN public.accounts AS account ON account.id = posting.account_id
