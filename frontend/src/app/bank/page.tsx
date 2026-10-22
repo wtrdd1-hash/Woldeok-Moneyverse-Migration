@@ -199,7 +199,7 @@ export default async function BankPage() {
 
         {/* 탭 3: 순자산 분석 & 건전성 (4대 지표 카드 + Kinked 점프 이자율 곡선) */}
         <TabsContent value="analytics" className="space-y-6 focus-visible:outline-none">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
             <div className="toss-card p-4 space-y-1">
               <span className="text-xs text-muted-foreground">{isEn ? 'Net Worth' : '순 금융 자산'}</span>
               <div className="font-fintech text-lg sm:text-2xl font-black text-foreground">

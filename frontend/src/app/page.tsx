@@ -20,9 +20,10 @@ import { GuestQuickstart } from '@/components/guest-quickstart';
 import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
+import { WalletGlance } from '@/components/wallet-glance';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Badge } from '@/components/ui/badge';
-import { publicApi, apiOrNull } from '@/lib/api';
+import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 
@@ -63,12 +64,6 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale();
   const meta = HOME_META_BY_LOCALE[locale] ?? HOME_META_BY_LOCALE.en;
 
-  const ogImage = buildOgImageUrl({
-    title: meta.title,
-    description: meta.description,
-    type: 'default',
-  });
-
   return {
     title: { absolute: meta.title },
     description: meta.description,
@@ -107,14 +102,14 @@ export default async function HomePage() {
       {/* 1. Toss Style Clean Onboarding */}
       <GuestQuickstart locale={locale} />
 
-      {/* 2. Toss 2026 Hero Balance Card (시원한 24px 둥근 모서리) */}
-      <div className="toss-card p-6 sm:p-8 space-y-5 bg-[#0f1422] border-slate-800/80">
+      {/* 2. Toss 2026 Hero Balance Card */}
+      <section aria-labelledby="hero-balance-heading" className="toss-card p-6 sm:p-8 space-y-5 bg-[#0f1422] dark:bg-[#0d121c] border-slate-800/80">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="size-6 rounded-full bg-emerald-500/20 text-emerald-400 grid place-items-center">
               <Coins className="size-3.5" />
             </div>
-            <span className="text-xs sm:text-sm font-bold text-slate-300">내 가상 자산</span>
+            <h2 id="hero-balance-heading" className="text-xs sm:text-sm font-bold text-slate-300">내 가상 자산</h2>
           </div>
           <Badge variant="outline" className="text-[10px] border-emerald-500/30 text-emerald-400 font-fintech px-2 py-0.5">
             <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse mr-1.5 inline-block" />
@@ -123,12 +118,7 @@ export default async function HomePage() {
         </div>
 
         <div className="space-y-1">
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl sm:text-5xl font-black font-fintech text-white tabular-nums tracking-tight">
-              10,000
-            </span>
-            <span className="text-xl font-extrabold text-slate-400 font-fintech">WLD</span>
-          </div>
+          <WalletGlance />
           <p className="text-xs text-slate-400 font-fintech">
             가상 재화로 즐기는 100% 안전한 금융 모의 시뮬레이션
           </p>
@@ -145,43 +135,43 @@ export default async function HomePage() {
             내역 조회
           </Link>
         </div>
-      </div>
+      </section>
 
-      {/* 3. Toss Style 3 Core Action Cards (누르기 편한 큼직한 높이 94px 버튼) */}
-      <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
+      {/* 3. Toss Style 3 Core Action Cards */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <Link
           href="/stocks"
-          className="toss-card p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-2.5 hover:border-emerald-500/50 btn-interactive min-h-[96px] bg-[#0f1422]"
+          className="toss-card p-3 sm:p-5 flex flex-col items-center justify-center text-center gap-2 hover:border-emerald-500/50 btn-interactive min-h-[88px] sm:min-h-[96px] bg-[#0f1422] dark:bg-[#0d121c] border-slate-800/80"
         >
-          <div className="size-11 rounded-2xl bg-emerald-500/15 text-emerald-400 grid place-items-center">
-            <TrendingUp className="size-5.5" />
+          <div className="size-10 sm:size-11 rounded-2xl bg-emerald-500/15 text-emerald-400 grid place-items-center">
+            <TrendingUp className="size-5" />
           </div>
           <span className="text-xs sm:text-sm font-extrabold text-slate-100">주식 거래</span>
         </Link>
 
         <Link
           href="/work"
-          className="toss-card p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-2.5 hover:border-sky-500/50 btn-interactive min-h-[96px] bg-[#0f1422]"
+          className="toss-card p-3 sm:p-5 flex flex-col items-center justify-center text-center gap-2 hover:border-sky-500/50 btn-interactive min-h-[88px] sm:min-h-[96px] bg-[#0f1422] dark:bg-[#0d121c] border-slate-800/80"
         >
-          <div className="size-11 rounded-2xl bg-sky-500/15 text-sky-400 grid place-items-center">
-            <Briefcase className="size-5.5" />
+          <div className="size-10 sm:size-11 rounded-2xl bg-sky-500/15 text-sky-400 grid place-items-center">
+            <Briefcase className="size-5" />
           </div>
           <span className="text-xs sm:text-sm font-extrabold text-slate-100">직업 출근</span>
         </Link>
 
         <Link
           href="/bank"
-          className="toss-card p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-2.5 hover:border-amber-500/50 btn-interactive min-h-[96px] bg-[#0f1422]"
+          className="toss-card p-3 sm:p-5 flex flex-col items-center justify-center text-center gap-2 hover:border-amber-500/50 btn-interactive min-h-[88px] sm:min-h-[96px] bg-[#0f1422] dark:bg-[#0d121c] border-slate-800/80"
         >
-          <div className="size-11 rounded-2xl bg-amber-500/15 text-amber-400 grid place-items-center">
-            <Landmark className="size-5.5" />
+          <div className="size-10 sm:size-11 rounded-2xl bg-amber-500/15 text-amber-400 grid place-items-center">
+            <Landmark className="size-5" />
           </div>
           <span className="text-xs sm:text-sm font-extrabold text-slate-100">가상 은행</span>
         </Link>
       </div>
 
-      {/* 4. 실시간 인기 주식 TOP 3 스트립 (깔끔한 Toss 리스트 뷰) */}
-      <div className="toss-card p-5 sm:p-6 space-y-3.5 bg-[#0f1422] border-slate-800/80">
+      {/* 4. 실시간 인기 주식 TOP 3 스트립 */}
+      <div className="toss-card p-5 sm:p-6 space-y-3.5 bg-[#0f1422] dark:bg-[#0d121c] border-slate-800/80">
         <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <div className="flex items-center gap-2">
             <Flame className="size-4 text-emerald-400" />
@@ -195,7 +185,7 @@ export default async function HomePage() {
 
         <div className="divide-y divide-slate-800/60">
           {movers.length === 0 ? (
-            <p className="py-5 text-xs text-slate-500 text-center">시세 정보를 불러오는 중입니다.</p>
+            <p className="py-5 text-xs text-slate-400 text-center">시세 자료를 불러오지 못했습니다.</p>
           ) : (
             movers.map((item) => {
               const isPositive = item.pct >= 0;
@@ -228,7 +218,7 @@ export default async function HomePage() {
       </div>
 
       {/* 5. 필수 금융 계산기 4선 */}
-      <div className="toss-card p-5 sm:p-6 space-y-3.5 bg-[#0f1422] border-slate-800/80">
+      <div className="toss-card p-5 sm:p-6 space-y-3.5 bg-[#0f1422] dark:bg-[#0d121c] border-slate-800/80">
         <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <div className="flex items-center gap-2">
             <Calculator className="size-4 text-sky-400" />
@@ -242,7 +232,7 @@ export default async function HomePage() {
 
         <div className="grid grid-cols-2 gap-2.5">
           <Link
-            href="/tools/compound"
+            href="/tools/compound-calculator"
             className="p-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/40 hover:border-emerald-500/50 transition-colors btn-interactive space-y-1"
           >
             <div className="size-7 rounded-xl bg-emerald-500/15 text-emerald-400 grid place-items-center">
@@ -253,7 +243,7 @@ export default async function HomePage() {
           </Link>
 
           <Link
-            href="/tools/stock-dca"
+            href="/tools/stock-calculator"
             className="p-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/40 hover:border-sky-500/50 transition-colors btn-interactive space-y-1"
           >
             <div className="size-7 rounded-xl bg-sky-500/15 text-sky-400 grid place-items-center">
@@ -264,7 +254,7 @@ export default async function HomePage() {
           </Link>
 
           <Link
-            href="/tools/dividend"
+            href="/tools/dividend-tax-calculator"
             className="p-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/40 hover:border-amber-500/50 transition-colors btn-interactive space-y-1"
           >
             <div className="size-7 rounded-xl bg-amber-500/15 text-amber-400 grid place-items-center">
@@ -275,7 +265,7 @@ export default async function HomePage() {
           </Link>
 
           <Link
-            href="/tools/loan"
+            href="/tools/loan-interest-calculator"
             className="p-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/40 hover:border-rose-500/50 transition-colors btn-interactive space-y-1"
           >
             <div className="size-7 rounded-xl bg-rose-500/15 text-rose-400 grid place-items-center">
