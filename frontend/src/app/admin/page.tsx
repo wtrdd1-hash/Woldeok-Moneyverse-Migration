@@ -12,7 +12,6 @@ import {
   Building,
   Building2,
   CheckCircle2,
-  CircleAlert,
   Coins,
   Cpu,
   Flame,
@@ -23,9 +22,7 @@ import {
   Image as ImageIcon,
   Landmark,
   Radio,
-  RefreshCw,
   ScrollText,
-  Server,
   Shield,
   ShieldAlert,
   ShieldCheck,
@@ -42,7 +39,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { apiOrNull } from '@/lib/api';
-import { cn } from '@/lib/cn';
 import { compareAmounts, formatMoment, groupDigits } from '@/lib/money';
 import { adminConsole } from '@/lib/session';
 import { ADMIN_AREAS, adminAreaFor, consoleReturnPath } from './areas';
@@ -51,6 +47,7 @@ import { CloseConsole, OpenConsole } from './console-gate';
 import { TelemetryPulse } from './components/telemetry-pulse';
 import { AdminTelemetryMetricsTable } from './components/admin-telemetry-metrics-table';
 import { AdminComprehensiveTelemetryMatrix } from './components/admin-comprehensive-telemetry-matrix';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type {
   AdminBusiness,
   AdminConsole,
@@ -64,7 +61,7 @@ import type {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '운영 마스터 관제탑 (Datadog Cockpit) · Woldeok Admin',
+  title: '운영 마스터 관제탑 (Admin Cockpit) · Woldeok Admin',
   robots: { index: false, follow: false },
 };
 
@@ -144,9 +141,6 @@ function getAreaIcon(href: string) {
   }
 }
 
-/**
- * Datadog & AWS Cockpit Inspired Enterprise Master Control Tower for Woldeok Moneyverse
- */
 export default async function AdminPage({
   searchParams,
 }: {
@@ -157,12 +151,11 @@ export default async function AdminPage({
   const next = consoleReturnPath(params.next);
 
   if (admin.consoleSession.state !== 'open') {
-    return <Gate admin={admin} next={next} />;
+    return <Gate next={next} />;
   }
 
   if (next) redirect(next);
 
-  // Parallel Telemetry & Operations Snapshot Fetching
   const [controls, users, stocks, businesses, events, health] = await Promise.all([
     apiOrNull<{ featureSwitches: FeatureSwitch[] }>('/api/v1/admin/controls'),
     apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users'),
@@ -187,76 +180,57 @@ export default async function AdminPage({
   const activeStocks = stocksList.filter((s) => s.active && s.halt_status !== 'halted').length;
   const haltedStocks = stocksList.filter((s) => !s.active || s.halt_status === 'halted').length;
 
-  const counts: Readonly<Record<string, string | null>> = {
-    '/admin/controls': controls
-      ? `전체 ${totalSwitches}개 · 활성 ${totalSwitches - held}개${held > 0 ? ` · 제어 ${held}개` : ''}`
-      : null,
-    '/admin/users': users ? `전체 ${users.users.length.toLocaleString()}명` : null,
-    '/admin/market': stocks ? `정상 ${activeStocks}종목 · 정지 ${haltedStocks}종목` : null,
-    '/admin/catalog': businesses ? `업종 ${businesses.businessTypes.length}종` : null,
-    '/admin/content': events ? `진행 이벤트 ${events.events.length}건` : null,
-    '/admin/economy': health?.available === true ? (integrityOk ? '원장 정합성 완벽' : '원장 불일치 감지') : null,
-  };
-
   return (
-    <div className="w-full max-w-full min-w-0 space-y-5 pb-16 zero-overflow-shield">
-      {/* 1. Datadog Cockpit Header: System Health Status & Quick Search */}
-      <div className="fintech-card p-4 sm:p-6 border-slate-800/80 bg-slate-900/40 dark:bg-[#0b0f17]/90 backdrop-blur-2xl">
+    <div className="w-full max-w-full min-w-0 space-y-6 pb-20">
+      {/* 1. 상단 토스 2026 Admin 대형 관제탑 헤더 */}
+      <div className="toss-card p-6 sm:p-8 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-            <div className="grid size-11 sm:size-12 shrink-0 place-items-center rounded-2xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30 shadow-xs">
+            <div className="size-12 shrink-0 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
               <Cpu className="size-6 animate-pulse" />
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-black text-slate-100 tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
                   운영 마스터 관제탑
                 </h1>
                 <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px] font-bold px-2 py-0.5">
                   <span className="size-1.5 rounded-full bg-emerald-400 animate-ping mr-1.5 inline-block" />
                   실시간 관제 정상
                 </Badge>
-                <Badge variant="outline" className="border-slate-700/80 text-slate-400 font-fintech text-[10px]">
-                  PID 336890 · 14대 API 온라인
+                <Badge variant="outline" className="font-fintech text-[10px]">
+                  14대 API 온라인
                 </Badge>
               </div>
-              <p className="text-xs text-slate-400 mt-1 [word-break:keep-all]">
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 가상 경제 복식부기 원장, 긴급 킬스위치, 이상 거래 탐지 및 통화량 유동성을 24시간 실시간 제어합니다.
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <Link
-              href="/admin/api-health"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-sky-500/30 bg-sky-500/10 px-3.5 py-2 min-h-[44px] sm:min-h-9 text-xs font-bold text-sky-400 hover:bg-sky-500/20 btn-interactive"
-            >
-              <Activity className="size-3.5 text-sky-400 animate-pulse" />
-              <span>14대 API 관제 타워</span>
-            </Link>
-            <Link
-              href="/admin/money-flow"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 min-h-[44px] sm:min-h-9 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 btn-interactive"
-            >
-              <Coins className="size-3.5 text-emerald-400" />
-              <span>유저 자금 흐름 관제</span>
-            </Link>
-            <Link
-              href="/admin/controls"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-2 min-h-[44px] sm:min-h-9 text-xs font-bold text-amber-400 hover:bg-amber-500/20 btn-interactive"
-            >
-              <Sliders className="size-3.5 text-amber-400" />
-              <span>킬스위치 즉시 제어</span>
-            </Link>
+            <Button asChild size="sm" className="h-10 rounded-xl btn-toss text-xs font-bold gap-1.5 shadow-sm">
+              <Link href="/admin/controls">
+                <Sliders className="size-3.5" />
+                <span>킬스위치 즉시 제어</span>
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm" className="h-10 rounded-xl text-xs font-bold gap-1.5">
+              <Link href="/admin/money-flow">
+                <Coins className="size-3.5 text-emerald-400" />
+                <span>유저 자금 흐름</span>
+              </Link>
+            </Button>
+            <CloseConsole />
           </div>
         </div>
 
-        {/* Global Quick User & Action Jumper */}
-        <div className="mt-4 pt-3.5 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* 빠른 유저 검색창 */}
+        <div className="pt-3 border-t border-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="w-full sm:max-w-md min-w-0">
             <AdminQuickUserSearch />
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400 font-fintech shrink-0">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-fintech shrink-0">
             <span className="flex items-center gap-1 text-emerald-400 font-semibold">
               <CheckCircle2 className="size-3.5" /> SHA-256 원장 체인 무결성 확인
             </span>
@@ -264,367 +238,227 @@ export default async function AdminPage({
         </div>
       </div>
 
-      {/* 2. Top 4 Core Cockpit KPI Cards (Datadog High-Density Metrics) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {/* 2. 4대 핵심 고대비 KPI 카드 (원장 무결성, 킬스위치, 주식 시장, 회원 인구) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* KPI 1: 원장 무결성 */}
-        <Link
-          href="/admin/economy"
-          className="fintech-card p-4 sm:p-5 flex flex-col justify-between hover:border-emerald-500/50 btn-interactive group"
-        >
+        <Link href="/admin/economy" className="toss-card p-5 space-y-2 group hover:border-emerald-500/50 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400">복식부기 원장 무결성</span>
-            <div className="flex size-8 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
+            <span className="text-xs font-bold text-muted-foreground">복식부기 원장</span>
+            <div className="size-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
               <ShieldCheck className="size-4" />
             </div>
           </div>
-          <div className="my-2.5">
-            <div className="text-2xl font-black font-fintech text-emerald-400">
+          <div>
+            <div className="text-xl sm:text-2xl font-black font-fintech text-emerald-400">
               {integrityOk ? '0건 오차 (정합)' : '불일치 감지'}
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              자산 = 부채 + 자본 균형 100% 일치
-            </p>
-          </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs font-semibold text-emerald-400">
-            <span>원장 정합성 상세 점검</span>
-            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+            <p className="text-[11px] text-muted-foreground mt-0.5">자산 = 부채 + 자본 균형</p>
           </div>
         </Link>
 
         {/* KPI 2: 비상 킬스위치 */}
-        <Link
-          href="/admin/controls"
-          className="fintech-card p-4 sm:p-5 flex flex-col justify-between hover:border-amber-500/50 btn-interactive group"
-        >
+        <Link href="/admin/controls" className="toss-card p-5 space-y-2 group hover:border-amber-500/50 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400">긴급 킬스위치 상태</span>
-            <div className={cn(
-              "flex size-8 items-center justify-center rounded-xl",
-              held > 0 ? "bg-amber-500/15 text-amber-400" : "bg-emerald-500/15 text-emerald-400"
-            )}>
-              {held > 0 ? <AlertTriangle className="size-4" /> : <Sliders className="size-4" />}
+            <span className="text-xs font-bold text-muted-foreground">비상 킬스위치</span>
+            <div className="size-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
+              <Sliders className="size-4" />
             </div>
           </div>
-          <div className="my-2.5">
-            <div className="text-2xl font-black font-fintech text-slate-100">
+          <div>
+            <div className="text-xl sm:text-2xl font-black font-fintech text-foreground">
               {held > 0 ? `${held}개 제어 중` : '전 기능 정상 가동'}
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              전체 {totalSwitches}개 중 {totalSwitches - held}개 활성
-            </p>
-          </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs font-semibold text-amber-400">
-            <span>시스템 스위치 제어</span>
-            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+            <p className="text-[11px] text-muted-foreground mt-0.5">총 {totalSwitches}개 스위치</p>
           </div>
         </Link>
 
         {/* KPI 3: 가상 주식 거래소 */}
-        <Link
-          href="/admin/market"
-          className="fintech-card p-4 sm:p-5 flex flex-col justify-between hover:border-sky-500/50 btn-interactive group"
-        >
+        <Link href="/admin/market" className="toss-card p-5 space-y-2 group hover:border-sky-500/50 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400">가상 주식 10대 상장사</span>
-            <div className="flex size-8 items-center justify-center rounded-xl bg-sky-500/15 text-sky-400">
+            <span className="text-xs font-bold text-muted-foreground">가상 주식 시장</span>
+            <div className="size-8 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center">
               <TrendingUp className="size-4" />
             </div>
           </div>
-          <div className="my-2.5">
-            <div className="text-2xl font-black font-fintech text-sky-400">
+          <div>
+            <div className="text-xl sm:text-2xl font-black font-fintech text-sky-400">
               {activeStocks}종목 정상 매매
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              정지 {haltedStocks}종목 · 실시간 호가/속보 가동
-            </p>
-          </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs font-semibold text-sky-400">
-            <span>거래소 서킷브레이커 제어</span>
-            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+            <p className="text-[11px] text-muted-foreground mt-0.5">정지 {haltedStocks}종목</p>
           </div>
         </Link>
 
-        {/* KPI 4: 회원 인구 및 자금 흐름 */}
-        <Link
-          href="/admin/users"
-          className="fintech-card p-4 sm:p-5 flex flex-col justify-between hover:border-indigo-500/50 btn-interactive group"
-        >
+        {/* KPI 4: 회원 인구 */}
+        <Link href="/admin/users" className="toss-card p-5 space-y-2 group hover:border-indigo-500/50 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400">등록 시민 인구</span>
-            <div className="flex size-8 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-400">
+            <span className="text-xs font-bold text-muted-foreground">시민 인구</span>
+            <div className="size-8 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center">
               <Users className="size-4" />
             </div>
           </div>
-          <div className="my-2.5">
-            <div className="text-2xl font-black font-fintech text-indigo-400">
+          <div>
+            <div className="text-xl sm:text-2xl font-black font-fintech text-indigo-400">
               {allUsers.length.toLocaleString()}명
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              실시간 경제 활동 시민 통계
-            </p>
-          </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs font-semibold text-indigo-400">
-            <span>회원 디렉토리 및 권한 관리</span>
-            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+            <p className="text-[11px] text-muted-foreground mt-0.5">경제 활동 유저 통계</p>
           </div>
         </Link>
       </div>
 
-      {/* 3. Central Dual Cockpit: Quick Emergency Matrix & Top Whales */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left: Emergency Operations Matrix (8 Columns) */}
-        <div className="lg:col-span-8 fintech-card p-4 sm:p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <Zap className="size-4 text-amber-400" />
-              <h2 className="text-sm font-extrabold text-slate-100">
-                핵심 관제 서피스 원클릭 퀵 런처
-              </h2>
-            </div>
-            <span className="text-xs font-fintech text-slate-400">27대 운영 관제 서피스</span>
-          </div>
+      {/* 3. 3대 탭 UI: [원클릭 퀵 런처 & 고래 순위], [27대 서피스 맵], [텔레메트리 펄스] */}
+      <Tabs defaultValue="launcher" className="space-y-6">
+        <TabsList className="grid grid-cols-3 max-w-md w-full h-11 p-1 bg-muted/60 rounded-xl">
+          <TabsTrigger value="launcher" className="rounded-lg text-xs sm:text-sm font-semibold">
+            핵심 퀵 런처
+          </TabsTrigger>
+          <TabsTrigger value="surfaces" className="rounded-lg text-xs sm:text-sm font-semibold">
+            27대 서피스 맵
+          </TabsTrigger>
+          <TabsTrigger value="telemetry" className="rounded-lg text-xs sm:text-sm font-semibold">
+            텔레메트리 펄스
+          </TabsTrigger>
+        </TabsList>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-            <Link
-              href="/admin/money-flow"
-              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-emerald-500/40 transition-all btn-interactive group"
-            >
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-emerald-400">
-                <Coins className="size-3.5 text-emerald-400" />
-                <span>유저 자금 흐름</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 truncate">
-                입출금 · 매매 · 상점 전수 추적
-              </p>
-            </Link>
-
-            <Link
-              href="/admin/treasury"
-              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-amber-500/40 transition-all btn-interactive group"
-            >
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-amber-400">
-                <Vault className="size-3.5 text-amber-400" />
-                <span>국고 포털 & 비축금</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 truncate">
-                기본배당 · 창업그랜트 심사
-              </p>
-            </Link>
-
-            <Link
-              href="/admin/security"
-              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-rose-500/40 transition-all btn-interactive group"
-            >
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-rose-400">
-                <ShieldAlert className="size-3.5 text-rose-400" />
-                <span>보안 · IP 차단</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 truncate">
-                어뷰징 탐지 및 세션 강제 만료
-              </p>
-            </Link>
-
-            <Link
-              href="/admin/market/ai-news"
-              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-sky-500/40 transition-all btn-interactive group"
-            >
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-sky-400">
-                <Radio className="size-3.5 text-sky-400" />
-                <span>주식 속보 제어</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 truncate">
-                2시간 자동 속보 및 수동 발행
-              </p>
-            </Link>
-
-            <Link
-              href="/admin/blog"
-              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-emerald-500/40 transition-all btn-interactive group"
-            >
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-emerald-400">
-                <ScrollText className="size-3.5 text-emerald-400" />
-                <span>AI 블로그 관리</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 truncate">
-                새벽 06:00 자동 발행 & IndexNow
-              </p>
-            </Link>
-
-            <Link
-              href="/admin/seo"
-              className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/40 hover:border-indigo-500/40 transition-all btn-interactive group"
-            >
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-200 group-hover:text-indigo-400">
-                <Globe className="size-3.5 text-indigo-400" />
-                <span>SEO & 검색엔진 색인</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 truncate">
-                구글/네이버 색인 핑 전송 타워
-              </p>
-            </Link>
-          </div>
-        </div>
-
-        {/* Right: Top 5 Whale Accounts (4 Columns) */}
-        <div className="lg:col-span-4 fintech-card p-4 sm:p-6 space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <Flame className="size-4 text-rose-400" />
-              <h2 className="text-sm font-extrabold text-slate-100">상위 5대 고래(Whale) 계정</h2>
-            </div>
-            <Link href="/admin/users" className="text-xs text-emerald-400 hover:underline">
-              전체 보기
-            </Link>
-          </div>
-
-          <div className="space-y-2">
-            {topUsers.length === 0 ? (
-              <p className="text-xs text-slate-400 py-4 text-center">회원 정보가 없습니다.</p>
-            ) : (
-              topUsers.map((user, idx) => (
-                <div
-                  key={user.user_id}
-                  className="flex items-center justify-between p-2.5 rounded-xl border border-slate-800/60 bg-slate-900/30 text-xs"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="font-fintech font-bold text-slate-400 size-5 grid place-items-center rounded bg-slate-800/80 text-[10px]">
-                      {idx + 1}
-                    </span>
-                    <span className="font-semibold text-slate-200 truncate max-w-[100px]">
-                      {user.display_name}
-                    </span>
-                  </div>
-                  <div className="font-fintech font-bold text-emerald-400 tabular-nums">
-                    {groupDigits(user.total_net_worth ?? '0')} WLD
-                  </div>
+        {/* 탭 1: 핵심 퀵 런처 및 고래 순위 */}
+        <TabsContent value="launcher" className="space-y-6 focus-visible:outline-none">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* 퀵 런처 9선 */}
+            <div className="lg:col-span-8 toss-card p-6 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-border/40">
+                <div className="flex items-center gap-2">
+                  <Zap className="size-4 text-amber-400" />
+                  <h2 className="text-sm font-bold text-foreground">핵심 운영 관제 바로가기</h2>
                 </div>
-              ))
-            )}
+                <span className="text-xs text-muted-foreground">자주 쓰는 9대 창구</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                {[
+                  { href: '/admin/money-flow', icon: Coins, title: '유저 자금 흐름', desc: '입출금 전수 추적', color: 'text-emerald-400' },
+                  { href: '/admin/treasury', icon: Vault, title: '국고 & 비축금', desc: '기본배당 · 창업그랜트', color: 'text-amber-400' },
+                  { href: '/admin/security', icon: ShieldAlert, title: '보안 · IP 차단', desc: '이상 거래 및 어뷰징', color: 'text-rose-400' },
+                  { href: '/admin/market/ai-news', icon: Radio, title: '주식 속보 제어', desc: '2시간 자동 시나리오', color: 'text-sky-400' },
+                  { href: '/admin/blog', icon: ScrollText, title: 'AI 블로그 관리', desc: '새벽 06:00 자동 발행', color: 'text-emerald-400' },
+                  { href: '/admin/discord', icon: Bell, title: '디스코드 관제', desc: '관리자 1:1 DM 알림', color: 'text-indigo-400' },
+                  { href: '/admin/bonds', icon: ScrollText, title: 'KTB 국채 발행', desc: '이자 쿠폰 자동 정산', color: 'text-blue-400' },
+                  { href: '/admin/pension', icon: HeartHandshake, title: '국민연금 기금', desc: '연금 배당 분배 관리', color: 'text-rose-400' },
+                  { href: '/admin/kdic', icon: Shield, title: '예금보험공사', desc: '보호 한도 및 대위변제', color: 'text-sky-400' },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="p-3.5 rounded-2xl border border-border/50 bg-muted/20 hover:bg-muted/40 transition-all group"
+                    >
+                      <div className="flex items-center gap-2 text-xs font-bold text-foreground group-hover:text-primary">
+                        <Icon className={`size-3.5 ${item.color}`} />
+                        <span>{item.title}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-1 truncate">{item.desc}</p>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 우측: 상위 5대 고래 유저 순위 */}
+            <div className="lg:col-span-4 toss-card p-6 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-border/40">
+                <div className="flex items-center gap-2">
+                  <Flame className="size-4 text-rose-400" />
+                  <h2 className="text-sm font-bold text-foreground">최고 자산 보유 시민</h2>
+                </div>
+                <span className="text-xs text-muted-foreground font-mono">TOP 5</span>
+              </div>
+
+              <div className="space-y-2.5">
+                {topUsers.map((u, idx) => (
+                  <Link
+                    key={u.user_id}
+                    href={`/admin/users/${u.user_id}`}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-muted/20 hover:bg-muted/40 transition-all text-xs"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono font-bold text-muted-foreground w-4">#{idx + 1}</span>
+                      <span className="font-semibold text-foreground truncate">{u.display_name}</span>
+                    </div>
+                    <span className="font-fintech font-bold text-primary">
+                      {groupDigits(u.total_net_worth ?? '0')} WLD
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </TabsContent>
 
-      {/* 4. Complete Domain Management Bento Hub (3 Categories) */}
-      <div className="space-y-4">
-        <h2 className="text-base font-extrabold text-slate-100 tracking-tight flex items-center gap-2">
-          <Server className="size-4 text-emerald-400" />
-          <span>엔터프라이즈 도메인 관제 허브</span>
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {AREA_GROUPS.map((group) => {
-            const areas = ADMIN_AREAS.filter((a) => a.group === group.key);
-            return (
-              <div
-                key={group.key}
-                className="fintech-card p-4 sm:p-5 flex flex-col justify-between space-y-4 border-slate-800/80"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-fintech font-bold tracking-widest text-slate-400">
+        {/* 탭 2: 27대 전체 서피스 맵 */}
+        <TabsContent value="surfaces" className="space-y-6 focus-visible:outline-none">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {AREA_GROUPS.map((group) => {
+              const areas = ADMIN_AREAS.filter((a) => a.group === group.key);
+              return (
+                <div key={group.key} className="toss-card p-6 space-y-4">
+                  <div className="space-y-1 pb-3 border-b border-border/40">
+                    <span className="text-[10px] font-mono font-bold text-muted-foreground uppercase">
                       {group.eyebrow}
                     </span>
-                    <Badge variant="outline" className={cn("text-[10px] border-slate-700/80 font-bold", group.color)}>
-                      {group.badge}
-                    </Badge>
+                    <h3 className={`text-base font-bold ${group.color}`}>{group.title}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{group.description}</p>
                   </div>
-                  <h3 className="text-sm font-extrabold text-slate-100 mt-1">{group.title}</h3>
-                  <p className="text-xs text-slate-400 mt-1 leading-relaxed [word-break:keep-all]">
-                    {group.description}
-                  </p>
-                </div>
 
-                <div className="space-y-1.5 pt-2 border-t border-slate-800/60">
-                  {areas.map((area) => {
-                    const count = counts[area.href];
-                    return (
+                  <div className="space-y-2">
+                    {areas.map((area) => (
                       <Link
                         key={area.href}
                         href={area.href}
-                        className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition-colors btn-interactive group text-xs"
+                        className="flex items-center justify-between p-3 rounded-xl bg-muted/20 hover:bg-muted/40 transition-all group"
                       >
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground group-hover:text-primary">
                           {getAreaIcon(area.href)}
-                          <span className="font-semibold text-slate-300 group-hover:text-slate-100 truncate">
-                            {area.title}
-                          </span>
+                          <span>{area.title}</span>
                         </div>
-                        <div className="flex items-center gap-1 shrink-0 font-fintech text-[11px] text-slate-400">
-                          {count && <span className="truncate max-w-[140px]">{count}</span>}
-                          <ChevronRight className="size-3 text-slate-500 group-hover:text-slate-300" />
-                        </div>
+                        <ArrowRight className="size-3 text-muted-foreground group-hover:translate-x-1 transition-transform" />
                       </Link>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 5. Comprehensive Telemetry Matrix & Telemetry Table */}
-      <div className="space-y-4 pt-4 border-t border-slate-800/80">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Activity className="size-4 text-sky-400" />
-            <h2 className="text-base font-extrabold text-slate-100">
-              실시간 텔레메트리 펄스 & 인프라 건전성
-            </h2>
+              );
+            })}
           </div>
-          <Badge variant="outline" className="text-[10px] font-fintech text-slate-400 border-slate-800">
-            RTT P99 & 무결성 전수 검증
-          </Badge>
-        </div>
+        </TabsContent>
 
-        <AdminComprehensiveTelemetryMatrix />
-        <AdminTelemetryMetricsTable users={allUsers} />
-      </div>
-
-      {/* 6. Console Session Footer */}
-      <div className="flex items-center justify-between p-4 rounded-2xl border border-slate-800/80 bg-slate-900/30 text-xs text-slate-400 font-fintech">
-        <span>세션 상태: {admin.consoleSession.state}</span>
-        <CloseConsole />
-      </div>
+        {/* 탭 3: 텔레메트리 펄스 및 메트릭스 매트릭스 */}
+        <TabsContent value="telemetry" className="space-y-6 focus-visible:outline-none">
+          <TelemetryPulse />
+          <AdminTelemetryMetricsTable users={allUsers} />
+          <AdminComprehensiveTelemetryMatrix />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
 
 function Gate({
-  admin,
   next,
 }: {
-  readonly admin: AdminConsole;
   readonly next: string | null;
 }) {
   return (
-    <div className="mx-auto max-w-lg p-6 sm:p-8 rounded-3xl border border-slate-800 bg-[#0b0f17] shadow-2xl text-center space-y-4 my-12">
-      <div className="size-12 rounded-2xl bg-amber-500/15 text-amber-400 grid place-items-center mx-auto ring-1 ring-amber-500/30">
-        <Lock className="size-6" />
-      </div>
-      <h1 className="text-xl font-black text-slate-100 tracking-tight">관리자 콘솔 인증 잠금</h1>
-      <p className="text-xs text-slate-400 leading-relaxed [word-break:keep-all]">
-        운영 마스터 관제탑에 접근하려면 관리자 보안 세션 인증이 필요합니다.
-      </p>
-      <div className="pt-2">
+    <div className="min-h-[70vh] flex items-center justify-center p-4">
+      <div className="toss-card max-w-md w-full p-8 text-center space-y-6">
+        <div className="size-16 rounded-3xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto border border-amber-500/20">
+          <ShieldAlert className="size-8" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-xl font-bold text-foreground">운영 콘솔 게이트</h1>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            관리자 관제탑에 접근하려면 관리자 비밀번호 세션 잠금 해제가 필요합니다.
+          </p>
+        </div>
         <OpenConsole next={next} />
       </div>
     </div>
-  );
-}
-
-function ChevronRight({ className }: { readonly className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  );
-}
-
-function Lock({ className }: { readonly className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-    </svg>
   );
 }
