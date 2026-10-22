@@ -103,7 +103,7 @@ export default async function HomePage() {
       <GuestQuickstart locale={locale} />
 
       {/* 2. Toss 2026 Hero Balance Card */}
-      <section aria-labelledby="hero-balance-heading" className="toss-card p-6 sm:p-8 space-y-5 bg-[#0f1422] dark:bg-[#0d121c] border-slate-800/80">
+      <section aria-labelledby="hero-balance-heading" className="toss-card toss-card-primary p-6 sm:p-8 space-y-5 bg-[#0f1422] dark:bg-[#0d121c] border-slate-800/80">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="size-6 rounded-full bg-emerald-500/20 text-emerald-400 grid place-items-center">

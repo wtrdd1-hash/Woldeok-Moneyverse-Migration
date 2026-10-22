@@ -1001,3 +1001,16 @@ iframe {
     transform: scale(0.97);
   }
 }
+
+/* 🌟 TOSS 2026 VISUAL OVERHAUL - HIGH-CONTRAST FINTECH SURFACE */
+.toss-card-primary {
+  background: linear-gradient(135deg, #131b2e 0%, #0d121c 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.75rem;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(16, 185, 129, 0.1);
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.toss-card-primary:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 16px 40px -4px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(16, 185, 129, 0.25);
+}
