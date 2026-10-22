@@ -102,7 +102,7 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
 
       {/* Featured Main Post */}
       {featuredPost && (
-        <Card className="border-indigo-500/30 bg-gradient-to-br from-indigo-950/30 via-background to-card/80 overflow-hidden relative shadow-lg">
+        <Card className="toss-card border-indigo-500/30 overflow-hidden relative shadow-lg">
           <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
             <BookOpen className="size-48 text-indigo-400" />
           </div>
@@ -188,7 +188,7 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
             {regularPosts.map((post) => (
               <Card
                 key={post.slug}
-                className="border-border/60 bg-card/70 hover:border-indigo-500/40 hover:bg-card transition-all flex flex-col justify-between"
+                className="toss-card hover:border-indigo-500/40 transition-all flex flex-col justify-between"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between gap-2 mb-1.5">

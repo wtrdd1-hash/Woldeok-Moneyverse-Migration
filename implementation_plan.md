@@ -1,10 +1,11 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v231)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v232)
 
 - **v209**: [주민참여예산 투표제(DAO Budget Voting), 관리자 창업 그랜트 심사 대시보드(/admin/treasury/grants), 전역 국고 축하 브로드캐스트 토스트 & 전 문서 총괄 정돈] (+95, -0)
 
 - **v208**: [대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 (기본배당, 창업그랜트, 긴급구호금, 바이백소각, 국채부스터) 구축] (+85, -0)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v232**: [Phase 3: 가상 은행(/bank) 및 지갑(/wallet) 토스뱅크 2026 원카드 아키텍처 및 실시간 복리 이자 라이브 수령 백지 리빌드 완료 & Phase 4 착수 사양] (+95, -0)
 - **v231**: [Phase 2: 가상 주식 거래소 목록(/stocks) 및 10-Depth 호가창(/stocks/[symbol]) 토스형 백지 리빌드 완료 & Phase 3(가상 은행/지갑/송금) 착수 사양] (+95, -0)
 - **v230**: [프론트엔드 전면 백지(Ground-Up) 리빌드: Toss 2026 차세대 핀테크 디자인 시스템 구축 계획 & Phase 1 배포 완료] (+135, -0)
 - **v229**: [토스(Toss) 스타일 극초간결 미니멀리즘 UI 정리 및 유저 편의성 극대화 계획] (+90, -0)
@@ -3160,3 +3161,46 @@ flowchart LR
 1. `tsc --noEmit` 정적 타입 0 에러 검증.
 2. Vitest 단위 테스트 실행.
 3. 원격 프로덕션 빌드 및 실서버 승격 배포, `https://easy-scraping.com/bank` HTTP 200 실측.
+
+
+---
+
+## 🚀 [v232 Specification] Phase 3: 가상 은행 및 지갑 백지 리빌드 완료 & Phase 4 착수 사양
+
+### 1. Phase 3 개발 및 무중단 배포 완료 내역
+- **토스뱅크 2026 원카드 통장 컴포넌트 (`frontend/src/app/bank/toss-bank-hero-card.tsx`)**:
+  - 사용자 Interactive Alignment 확정 사양 100% 반영: "토스뱅크형 단일 통장 원카드 아키텍처" + "지금 이자 받기 실시간 복리 이자 애니메이션".
+  - 매 1초마다 초 단위로 올라가는 대기 이자(`liveInterest`) 실시간 증분 렌더링.
+  - `[지금 이자 받기]` 버튼 클릭 시 Web Audio API 절제된 골드 코인 사운드(`playCoinCollectSound`) 및 이자 즉시 수령 애니메이션.
+  - 큼직한 `[채우기 (입금)]` 및 `[보내기 (출금)]` 52px 퀵 액션 버튼 및 내장 다이얼로그 모달(빠른 금액 프리셋: +1천/+1만/+5만/전액).
+- **가상 은행 메인 화면 (`frontend/src/app/bank/page.tsx`)**:
+  - 기존 10개 이상의 파편화된 긴 카드 나열을 완전히 제거하고, 최상단 TossBankHeroCard ➔ 3대 탭(`[저축 & 모으기]`, `[대출 & 신용]`, `[순자산 분석]`)으로 정보 위계 정돈.
+  - 탭 1: 중앙은행 저축팟, 저축 목표 링, 목적별 포켓, 일일 복리 이자 정산소.
+  - 탭 2: 스마트 가상 대출, 개인 신용평가 리포트, KTB 가상 국채 창구.
+  - 탭 3: 순 금융 자산 4대 지표 카드 + 바젤 III 지급준비금 및 Kinked 점프 이자율 곡선.
+- **내 지갑 메인 화면 (`frontend/src/app/wallet/page.tsx`)**:
+  - 총 보유 WLD 대형 원카드 + 2대 큼직한 버튼(`[간편 송금하기]`, `[가상 은행 가기]`) + 일일 보상 퀵 바.
+  - 3대 탭(`[간편 송금 & 입출금]`, `[원장 활동 내역]`, `[자산 배분 & ID]`)으로 완벽하게 정리.
+- **검증 및 프로덕션 무중단 승격**:
+  - `tsc --noEmit` 0 에러 정적 타입 무결성 통과.
+  - `site-header.test.tsx` 단위 테스트 통과 (4/4).
+  - Git commit `ea858e02` 및 원격 `origin/main` 푸시 완료.
+  - 원격 서버 Next.js 프로덕션 빌드 및 서비스 재시작 완료 (`HTTP/2 200` 실측 확인).
+
+### 2. Phase 4 착수 사양: 금융 계산기 10종 & 블로그/뉴스 리딩 뷰 백지 리빌드
+- **대상 화면**:
+  1. `frontend/src/app/tools/page.tsx`: 실전 금융 계산기 10종 통합 허브
+  2. `frontend/src/app/tools/compound-calculator/page.tsx`: 복리 예금·적금 계산기
+  3. `frontend/src/app/tools/stock-calculator/page.tsx`: 주식 물타기·평단가 계산기
+  4. `frontend/src/app/tools/loan-interest-calculator/page.tsx`: 대출이자 & 원리금 상환 계산기
+  5. `frontend/src/app/tools/dividend-tax-calculator/page.tsx`: 배당소득세 계산기
+  6. `frontend/src/app/newspaper/page.tsx` & `frontend/src/app/blog/page.tsx`: AI 경제 브리프 & 블로그 리딩 뷰
+- **디자인 원칙 (Toss Tools 2026)**:
+  - 큼직한 실시간 슬라이더 및 시각적 차트 결과 카드.
+  - 군더더기 없는 입력 필드 (단위 칩 자동 붙임).
+  - 모바일 320px 가로스크롤 0건 및 1-TAP 결과 복사/공유.
+
+### 3. 검증 계획
+1. `tsc --noEmit` 정적 타입 0 에러 검증.
+2. 단위 테스트 실행.
+3. 원격 프로덕션 빌드 및 배포, HTTP 200 실측.
