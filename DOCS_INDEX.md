@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.22.1109 — wallet pocket projection regression CI unblock (source candidate)
+- [English worklog](docs/worklog/2026-10-22-wallet-pocket-projection-v1109.md) / [KO](docs/worklog/2026-10-22-wallet-pocket-projection-v1109.ko.md), [GitHub update](docs/updates/v2026.10.22.1109-wallet-github.md) / [KO](docs/updates/v2026.10.22.1109-wallet-github.ko.md). Read-only cash/bank signed ledger projection, 4 previously failing tests fixed, backend 1,283 pass/397 DB skip, no financial writes or live deployment.
+
+
 ## v2026.10.22.1107 — New authoritative four-country blog + bounded instant-publish/withdraw plan
 - [EN design](docs/planning/AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.md) / [한국어 상세](docs/planning/AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.ko.md) · [EN implementation](docs/superpowers/plans/2026-10-22-blog-country-auto-publish-v1107.md) / [KO](docs/superpowers/plans/2026-10-22-blog-country-auto-publish-v1107.ko.md) · [Worklog](docs/worklog/2026-10-22-country-blog-autopublish-v1107.md) / [한국어](docs/worklog/2026-10-22-country-blog-autopublish-v1107.ko.md) · [GitHub update](docs/updates/v2026.10.22.1107-country-blog-github.md) / [KO](docs/updates/v2026.10.22.1107-country-blog-github.ko.md). Korea/US/Japan/mainland-China each get genuinely native independent article, not scaled translations. GREEN verified safe education publishes automatically right after deterministic gate, receives human review within 24h or auto withdrawal; AMBER high-impact financial claims preapproved, RED blocked. Moderator can immediately withdraw/rectify and remove public SEO projection. **PLANNING only; nothing newly posted/deployed**; legacy publisher 503 remains.
 

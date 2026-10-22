@@ -1,5 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.22.1109 — 지갑 통장별 변동 내역 읽기 전용 처리 수정 (코드 후보)
+- 블로그 PR #986의 CI를 차단하던 지갑 4건 오류를 별도 브랜치에서 해결. 사용자의 `USER_CASH`·`USER_BANK` 계정 원장 거래를 각기 합산하여 `cash_delta`/`bank_delta`를 제공하고, `cashDelta + bankDelta = netAmount` BigInt 정수 검증·잘못된 금액 거부. **원장/잔액 데이터 쓰기, DB 마이그레이션, 권한 변경 없음**. 이전 실패 4/4 재현 후 수정 통과 4/4, 지갑 집중 27/27, 로컬 백엔드 전체 1283 통과/DB 397 생략, 타입/빌드 PASS. **아직 운영·공식 Test 금융 인증 아님**. CI·로그인·정확 SHA 검증 필요.
+
+
 ## v2026.10.22.1107 — 공식 채택: 4개 국가별 원어글 독립 작성·GREEN 즉시 발행·사후 삭제 (기획)
 - [신규 상세기획](AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.ko.md) / [영문 정본](AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.md) · [개발 순서](../superpowers/plans/2026-10-22-blog-country-auto-publish-v1107.ko.md) / [영문](../superpowers/plans/2026-10-22-blog-country-auto-publish-v1107.md). 한국 `ko-KR`, 미국 `en-US`, 일본 `ja-JP`, 중국 `zh-CN` 각각 검색의도·원어표현·현지법규·공식출처·통화·사례를 독립적으로 작성한다. 번역본 네 개로 채우지 않는다. **작성 후 즉시 자동 발행하고 관리자가 나중에 삭제할 수 있도록** 안전등급을 도입한다. GREEN 기초교육은 독립적인 자동 출처/중복/숫자 검증을 통과하면 사전 인간승인 없이 바로 공개하고 24시간 이내 사후심사, 초과 시 자동 철회한다. AMBER 세금·연금·금리·제도·투자 관련 판단은 사전 사람승인을 거쳐야 하고 RED 허위/무출처/대량 중복 글은 게시 금지다.
 - 관리자 즉시 철회·정정·감사영수증·사이트맵/캐시 제거·`410`/정정 `noindex` 적용. 검색엔진 즉시 삭제는 보장 불가. v975 보안/증빙/원장/발행멱등, 구형 API 403/503, v1106 SEO 운영 복구, 정식 Test·금융·v530 게이트는 그대로 유지. **문서 기획만 변경했고 실제 코드/DB/운영 발행하지 않았다.** [후속 개발 #983](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/983).
