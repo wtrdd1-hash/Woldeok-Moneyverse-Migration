@@ -16,6 +16,8 @@ export interface TransactionView {
   readonly type: string;
   readonly label: string;
   readonly netAmount: string;
+  readonly cashDelta?: string | undefined;
+  readonly bankDelta?: string | undefined;
   readonly direction: 'in' | 'out' | 'neutral';
   readonly occurredAt: string;
 }
@@ -32,15 +34,49 @@ export interface Overview {
 }
 
 /**
- * The API reports a direction and a net amount rather than the two accounts a
- * posting names, because the underlying ledger transaction has more than two
- * legs and only the member's own side is theirs to see.
- *
- * The strip still shows both ends — one of them is the member's wallet and
- * the other is where the money came from or went — so the entry reads as the
- * balanced movement it is rather than as a signed number.
+ * The server supplies owner-scoped, signed cash and bank movements when it can
+ * prove both ledger pockets. A zero-net bank transfer is not a zero movement.
+ * Never infer missing pocket values from labels or from the overall direction.
  */
+const CANONICAL_WLD = /^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$/;
+
+export function isCanonicalWld(value: unknown): value is string {
+  return typeof value === 'string'
+    && CANONICAL_WLD.test(value)
+    && (value.startsWith('-') ? value.length - 1 : value.length) <= 38;
+}
+
+export function pocketBreakdown(
+  entry: TransactionView,
+): { cashDelta: string; bankDelta: string } | null {
+  const { cashDelta, bankDelta, netAmount } = entry;
+  if (!isCanonicalWld(cashDelta) || !isCanonicalWld(bankDelta) || !isCanonicalWld(netAmount)) {
+    return null;
+  }
+  if (BigInt(cashDelta) + BigInt(bankDelta) !== BigInt(netAmount)) return null;
+  return { cashDelta, bankDelta };
+}
+
+export function postingAmount(entry: TransactionView): string | null {
+  if (!isCanonicalWld(entry.netAmount)) return null;
+  const pockets = pocketBreakdown(entry);
+  if (entry.netAmount === '0' && pockets && pockets.cashDelta !== '0') {
+    return pockets.cashDelta.startsWith('-') ? pockets.cashDelta.slice(1) : pockets.cashDelta;
+  }
+  return entry.netAmount.startsWith('-') ? entry.netAmount.slice(1) : entry.netAmount;
+}
+
+/** Display labels describe only the owner's view, never every ledger leg. */
 export function sides(entry: TransactionView): { debit: string; credit: string } {
+  const pockets = pocketBreakdown(entry);
+  if (entry.netAmount === '0' && pockets) {
+    if (pockets.cashDelta.startsWith('-') && BigInt(pockets.bankDelta) > 0n) {
+      return { debit: '활동 지갑', credit: '은행 보관함' };
+    }
+    if (pockets.bankDelta.startsWith('-') && BigInt(pockets.cashDelta) > 0n) {
+      return { debit: '은행 보관함', credit: '활동 지갑' };
+    }
+  }
   return entry.direction === 'out'
     ? { debit: '내 지갑', credit: entry.label }
     : { debit: entry.label, credit: '내 지갑' };
