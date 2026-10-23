@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -89,6 +90,23 @@ export class WalletController {
       throw new BadRequestException('recent must be a whole number');
     }
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
+  }
+
+  @Get('wallet/activity/:transactionId')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Private receipt for one of the caller latest 50 posted ledger entries' })
+  async recentReceipt(
+    @Req() request: RequestWithSession,
+    @Param('transactionId') transactionId: string,
+  ) {
+    try {
+      const receipt = await this.service().recentReceiptForUser(requireUserId(request), transactionId);
+      if (!receipt) throw new NotFoundException('receipt is unavailable');
+      return receipt;
+    } catch (error) {
+      if (error instanceof WalletInputError) throw new NotFoundException('receipt is unavailable');
+      throw error;
+    }
   }
 
   @Get('wallet/recipients/search')

@@ -44,8 +44,8 @@ export default async function WalletActivityPage() {
       </Button>
 
       <PageHeader eyebrow="RECENT ACTIVITY" title="내 지갑 기록">
-        내 지갑을 거쳐 간 최근 기록입니다. 각 줄은 돈이 어디서 나와 어디로 갔는지와, 그 둘을
-        맞춘 금액을 보여 줍니다.
+        최근 50건까지 확인할 수 있습니다. 더 오래된 거래는 현재 조회할 수 없습니다.
+        거래 확인을 열면 원장에 기록된 내 WLD 변동과 참조번호를 볼 수 있습니다.
       </PageHeader>
 
       <Card>
@@ -61,14 +61,22 @@ export default async function WalletActivityPage() {
             wallet.recentTransactions.map((entry) => {
               const { debit, credit } = sides(entry);
               return (
-                <PostingStrip
-                  key={entry.transactionId}
-                  debit={debit}
-                  credit={credit}
-                  amount={entry.netAmount}
-                  label={entry.label}
-                  at={formatMoment(entry.occurredAt)}
-                />
+                <div key={entry.transactionId} className="grid gap-1">
+                  <PostingStrip
+                    debit={debit}
+                    credit={credit}
+                    amount={entry.netAmount}
+                    label={entry.label}
+                    at={formatMoment(entry.occurredAt)}
+                  />
+                  <Link
+                    href={`/wallet/activity/${encodeURIComponent(entry.transactionId)}`}
+                    className="w-fit text-sm font-medium underline underline-offset-4"
+                    aria-label={`${entry.label} 거래 확인 보기`}
+                  >
+                    거래 확인 보기
+                  </Link>
+                </div>
               );
             })
           )}

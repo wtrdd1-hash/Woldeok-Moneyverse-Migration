@@ -145,6 +145,21 @@ export interface WalletOverview {
   readonly recentTransactions: WalletTransactionView[];
 }
 
+/** A confirmed posting in the owner's latest 50 entries, not a lifetime statement. */
+export interface WalletRecentReceipt {
+  readonly receiptVersion: 1;
+  readonly state: 'CONFIRMED';
+  readonly transactionId: string;
+  readonly currency: 'WLD';
+  readonly reason: string;
+  readonly occurredAt: string;
+  readonly netWalletDelta: WldAmount;
+  readonly cashDelta: WldAmount | null;
+  readonly bankDelta: WldAmount | null;
+  readonly detailCompleteness: 'VERIFIED' | 'PARTIAL';
+  readonly historyScope: 'LATEST_50';
+}
+
 export interface WalletTransferReceipt {
   readonly transactionId: string;
 }
@@ -380,6 +395,36 @@ export class WalletService {
       userId,
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
+    };
+  }
+
+  /**
+   * A receipt is not a public transaction lookup. Reuse the existing
+   * owner-filtered, bounded ledger projection until a reviewed cursor/read
+   * function can support older entries. An unknown/old/other-owner id is null.
+   */
+  async recentReceiptForUser(
+    authenticatedUserId: string,
+    transactionId: string,
+  ): Promise<WalletRecentReceipt | null> {
+    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
+    const reference = requireUuid(transactionId, 'transaction id');
+    const rows = await this.repository.recentTransactionsForUser(actor, 50);
+    const entry = normalizeTransactions(rows).find((item) => item.transactionId === reference);
+    if (!entry) return null;
+    const complete = entry.cashDelta !== undefined && entry.bankDelta !== undefined;
+    return {
+      receiptVersion: 1,
+      state: 'CONFIRMED',
+      transactionId: entry.transactionId,
+      currency: 'WLD',
+      reason: entry.label === '경제 활동' ? '거래 사유 확인 필요' : entry.label,
+      occurredAt: entry.occurredAt,
+      netWalletDelta: entry.netAmount,
+      cashDelta: complete ? entry.cashDelta! : null,
+      bankDelta: complete ? entry.bankDelta! : null,
+      detailCompleteness: complete ? 'VERIFIED' : 'PARTIAL',
+      historyScope: 'LATEST_50',
     };
   }
 
