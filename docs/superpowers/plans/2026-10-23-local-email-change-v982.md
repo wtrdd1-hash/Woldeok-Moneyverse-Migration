@@ -18,8 +18,8 @@
 - Missing five SQL placeholders; missing confirmation token placeholder; rejection without reauthentication; consumed token reuse; session invalidation; mobile screen-reader activity labels.
 
 ## Tasks
-1. [ ] Add focused failing backend SQL binding tests and verify RED on original source.
-2. [ ] Add real-PostgreSQL email change test and security page label assertions; verify RED.
-3. [ ] Correct SQL placeholders and add precise security activity labels; verify focused GREEN.
-4. [ ] Run typecheck, build, lint, all unit/integration, real PostgreSQL, security, app-api, E2E where available.
-5. [ ] Fetch main, resolve meaningful changes, rerun exact-SHA gates; record EN/KO evidence; PR only if safe; no deployment without release gate.
+1. [x] Add focused failing backend SQL binding tests and verify RED on original source.
+2. [x] Add real-PostgreSQL email change test and security page label assertions; UI RED and DB GREEN observed.
+3. [x] Correct SQL placeholders and add precise security activity labels; verify focused GREEN.
+4. [ ] Run gates: typecheck/build/unit/focused PostgreSQL/app-api PASS; full lint/security audit FAIL, official browser E2E NOT VERIFIED.
+5. [x] Fetch unchanged main, record EN/KO evidence, create Draft PR #1019 HOLD; no merge/deployment without release gate.
