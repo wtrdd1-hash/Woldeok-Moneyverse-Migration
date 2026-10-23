@@ -68,6 +68,14 @@ describe('bounded wallet CSV export', () => {
     expect(csv).toContain("'=HYPERLINK");
   });
 
+  it('neutralizes C1 control-prefixed spreadsheet formulas', () => {
+    const c1 = String.fromCharCode(0x85);
+    const csv = ledgerCsvContent([entry({ label: `${c1}=SUM(1,1)` })], true);
+    expect(csv).not.toContain(c1);
+    expect(csv).not.toContain('"=SUM(1,1)"');
+    expect(csv).toContain("'=SUM(1,1)");
+  });
+
   it('marks legacy pocket projections as unavailable, never zero', () => {
     const csv = ledgerCsvContent([entry({ cashDelta: undefined, bankDelta: undefined })], true);
     expect(csv).toContain('"Unavailable"');
