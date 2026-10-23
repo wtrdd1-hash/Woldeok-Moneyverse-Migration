@@ -81,9 +81,14 @@ export function FirstTradeOnboardingModal() {
   const [targetStock, setTargetStock] = useState<SavedStock | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (localStorage.getItem(DISMISSED_KEY) === 'true') return;
+    try {
+      if (localStorage.getItem(DISMISSED_KEY) === 'true') return;
+    } catch {
+      return;
+    }
     const stock = savedStock();
     if (!stock) return;
 
@@ -118,11 +123,26 @@ export function FirstTradeOnboardingModal() {
   useEffect(() => {
     if (!isOpen) return;
     closeRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false);
+    const handleDialogKeys = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusables = dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]');
+      if (!focusables?.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
     };
-    window.addEventListener('keydown', closeOnEscape);
-    return () => window.removeEventListener('keydown', closeOnEscape);
+    window.addEventListener('keydown', handleDialogKeys);
+    return () => window.removeEventListener('keydown', handleDialogKeys);
   }, [isOpen]);
 
   const dismiss = () => {
@@ -139,6 +159,7 @@ export function FirstTradeOnboardingModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="first-trade-title"

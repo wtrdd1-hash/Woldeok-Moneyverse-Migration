@@ -66,7 +66,18 @@ describe('first trade onboarding uses actual session and real trading flow', () 
     expect(dialog.getAttribute('aria-describedby')).toBe('first-trade-description');
     expect(screen.getByRole('link', { name: /Review on the exchange/ }).getAttribute('href')).toBe('/en/stocks');
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close dialog' }));
+    fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Maybe later' }));
+    fireEvent.keyDown(window, { key: 'Tab' });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close dialog' }));
     fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('does not crash or open a trade prompt when browser storage is blocked', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('storage disabled'); });
+    vi.stubGlobal('fetch', mockViewer(true));
+    expect(() => render(<FirstTradeOnboardingModal />)).not.toThrow();
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
