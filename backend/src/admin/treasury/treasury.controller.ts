@@ -11,6 +11,9 @@ import {
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validator';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
+import { ReauthGuard } from '../../auth/guards/reauth.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -143,7 +146,7 @@ export class TreasuryBuybackBurnDto {
 
 @ApiTags('Admin Treasury')
 @Controller('admin/treasury')
-@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard)
+@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard, AdminSessionGuard)
 export class AdminTreasuryController {
   constructor(
     private readonly service: TreasuryService,
@@ -206,6 +209,7 @@ export class AdminTreasuryController {
 
   @Post('inject')
   @ApiOperation({ summary: '국고 자금 긴급 주입 (Step-Up/Admin)' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async injectFunds(
     @Req() request: RequestWithSession,
     @Body() dto: TreasuryOperationDto,
@@ -216,6 +220,7 @@ export class AdminTreasuryController {
 
   @Post('drain')
   @ApiOperation({ summary: '국고 잉여 자금 영구 소각 (Step-Up/Admin)' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async absorbFunds(
     @Req() request: RequestWithSession,
     @Body() dto: TreasuryOperationDto,
@@ -226,6 +231,7 @@ export class AdminTreasuryController {
 
   @Post('disburse/dividend')
   @ApiOperation({ summary: '시민 보편 배당 및 기본소득 환원금 일괄 집행 (Safe Reserve 30% Guard)' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async disburseDividend(
     @Req() request: RequestWithSession,
     @Body() dto: TreasuryDisburseDividendDto,
@@ -245,6 +251,7 @@ export class AdminTreasuryController {
 
   @Post('disburse/targeted')
   @ApiOperation({ summary: '저자산 초기 시민 타겟팅 국고 선별 지원금 집행 (Targeted Relief)' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async disburseTargetedSubsidy(
     @Req() request: RequestWithSession,
     @Body() dto: TreasuryDisburseTargetedSubsidyDto,
@@ -260,6 +267,7 @@ export class AdminTreasuryController {
 
   @Post('donate')
   @ApiOperation({ summary: '시민 자발적 국고 기부 및 잉여 자금 흡수 (명예 칭호 수여)' })
+  @UseGuards(CsrfGuard)
   async userDonate(
     @Req() request: RequestWithSession,
     @Body() dto: TreasuryUserDonateDto,
@@ -276,6 +284,7 @@ export class AdminTreasuryController {
 
   @Post('disburse/grant')
   @ApiOperation({ summary: '공공 프로젝트 펀딩 및 복지 보조금 지출 집행 (Safe Reserve 30% Guard)' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async disburseGrant(
     @Req() request: RequestWithSession,
     @Body() dto: TreasuryDisburseGrantDto,
@@ -292,6 +301,7 @@ export class AdminTreasuryController {
 
   @Post('budget/distribute')
   @ApiOperation({ summary: '헌법적 4분할 목적별 예산 배정 집행 (복지40/인프라30/비상20/소각10)' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async distributeBudget(
     @Req() request: RequestWithSession,
     @Body() dto: TreasuryDistributeBudgetDto,
@@ -302,6 +312,7 @@ export class AdminTreasuryController {
 
   @Post('buyback/burn')
   @ApiOperation({ summary: '룬스케이프형 역매수 영구소각 집행 (장터 덤핑 매물 국고 매입/소각)' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async buybackBurn(
     @Req() request: RequestWithSession,
     @Body() dto: TreasuryBuybackBurnDto,
@@ -327,6 +338,7 @@ export class AdminTreasuryController {
 
   @Post('tax/wealth')
   @ApiOperation({ summary: '초고액 자산가 누진적 부유세 과세 일괄 집행 (복지기금 전액 적립)' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async executeWealthTax(
     @Req() request: RequestWithSession,
     @Body() dto: TreasuryExecuteWealthTaxDto,
@@ -349,6 +361,7 @@ export class AdminTreasuryController {
 
   @Post('backup/snapshot')
   @ApiOperation({ summary: '무료 클라우드 스토리지 불변 원장 백업 스냅샷 수동 발행' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async createBackupSnapshot(
     @Req() request: RequestWithSession,
     @Body('provider') provider?: string,
@@ -373,6 +386,7 @@ export class AdminTreasuryController {
 
   @Post('swf/rebalance')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 잉여 세수 시장 재순환 즉시 집행' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async triggerSwfRebalance() {
     if (!this.swfService) {
       return { executed: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
@@ -382,6 +396,7 @@ export class AdminTreasuryController {
 
   @Post('swf/liquidate')
   @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') targetPortfolioAumWld?: string) {
     if (!this.swfService) {
       return { success: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
@@ -391,6 +406,7 @@ export class AdminTreasuryController {
 
   @Put('swf/config')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 안전 준비금 및 투자 한도 튜닝' })
+  @UseGuards(CsrfGuard, ReauthGuard)
   async updateSwfConfig(@Body() body: Record<string, unknown>) {
     if (!this.swfService) {
       return { success: false };

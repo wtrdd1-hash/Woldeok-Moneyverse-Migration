@@ -1,44 +1,14 @@
 import { NextResponse } from 'next/server';
-import { api, ApiError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  try {
-    const data = await api('/api/v1/admin/treasury/swf');
-    return NextResponse.json(data);
-  } catch (error) {
-    const status = error instanceof ApiError ? error.status : 500;
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return NextResponse.json({ error: message }, { status });
-  }
-}
+// Browser-accessible proxies must never carry internal credentials for
+// privileged treasury operations. The elevated server actions own this flow.
+const retired = () => NextResponse.json(
+  { error: 'This endpoint has been retired. Use the administrator console.' },
+  { status: 410, headers: { 'Cache-Control': 'private, no-store' } },
+);
 
-export async function POST() {
-  try {
-    const data = await api('/api/v1/admin/treasury/swf/rebalance', {
-      method: 'POST',
-      body: {},
-    });
-    return NextResponse.json(data);
-  } catch (error) {
-    const status = error instanceof ApiError ? error.status : 500;
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return NextResponse.json({ error: message }, { status });
-  }
-}
-
-export async function PUT(request: Request) {
-  try {
-    const body = await request.json().catch(() => ({}));
-    const data = await api('/api/v1/admin/treasury/swf/config', {
-      method: 'PUT',
-      body,
-    });
-    return NextResponse.json(data);
-  } catch (error) {
-    const status = error instanceof ApiError ? error.status : 500;
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return NextResponse.json({ error: message }, { status });
-  }
-}
+export const GET = retired;
+export const POST = retired;
+export const PUT = retired;

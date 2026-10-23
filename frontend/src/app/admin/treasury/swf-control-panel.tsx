@@ -5,6 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { groupDigits } from '@/lib/money';
+import {
+  getSwfStatus, liquidateSwfToTreasury, saveSwfGovernanceConfig, triggerSwfRebalance,
+} from './swf-actions';
 
 export interface SwfPortfolioItem {
   id: string;
@@ -57,7 +61,7 @@ export function SwfControlPanel({
   const [savingConfig, setSavingConfig] = useState(false);
 
   // 국고 자금 안전 보존 및 투자 거버넌스 튜닝 상태
-  const [isEnabled, setIsEnabled] = useState<boolean>(initialConfig?.is_enabled ?? true);
+  const [isEnabled, setIsEnabled] = useState<boolean>(initialConfig?.is_enabled ?? false);
   const [reinvestRatio, setReinvestRatio] = useState<number>(initialConfig?.reinvestment_ratio_pct ?? 15);
   const [maxInvestCap, setMaxInvestCap] = useState<number>(initialConfig?.max_investment_ratio_pct ?? 20);
   const [safeReserve, setSafeReserve] = useState<string>(initialConfig?.safe_reserve_wld || '25000000');
@@ -72,33 +76,27 @@ export function SwfControlPanel({
     0,
   );
 
+  async function refreshVerifiedSwf() {
+    const status = await getSwfStatus();
+    setPortfolios(status.portfolios as unknown as SwfPortfolioItem[]);
+    setEvents(status.events as unknown as SwfEvent[]);
+  }
+
   async function handleSaveGovernanceConfig() {
     setSavingConfig(true);
     try {
-      const res = await fetch('/api/admin/treasury/swf', {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          is_enabled: isEnabled,
-          reinvestment_ratio_pct: Number(reinvestRatio),
-          max_investment_ratio_pct: Number(maxInvestCap),
-          safe_reserve_wld: safeReserve,
-          max_single_investment_wld: maxSingle,
-        }),
+      await saveSwfGovernanceConfig({
+        is_enabled: isEnabled,
+        reinvestment_ratio_pct: reinvestRatio,
+        max_investment_ratio_pct: maxInvestCap,
+        safe_reserve_wld: safeReserve,
+        max_single_investment_wld: maxSingle,
       });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok) {
-        toast.success('국고 자금 투자 비율 및 안전 보존 정책이 저장되었습니다!', {
-          description: `투자비율 ${reinvestRatio}% / 최대상한 ${maxInvestCap}% / 국고보존금 ${Number(safeReserve).toLocaleString()} WLD`,
-        });
-      } else {
-        const errorMsg = data.error || data.detail || '설정 저장 중 오류가 발생했습니다.';
-        toast.error(errorMsg);
-      }
+      toast.success('국고 자금 투자 비율 및 안전 보존 정책이 저장되었습니다!', {
+        description: `투자비율 ${reinvestRatio}% / 최대상한 ${maxInvestCap}% / 국고보존금 ${groupDigits(safeReserve)} WLD`,
+      });
     } catch {
-      toast.error('네트워크 통신 중 오류가 발생했습니다.');
+      toast.error('관리자 재인증 또는 국고 정책 저장 결과를 확인하지 못했습니다.');
     } finally {
       setSavingConfig(false);
     }
@@ -107,28 +105,19 @@ export function SwfControlPanel({
   async function handleTriggerRebalance() {
     setRebalancing(true);
     try {
-      const res = await fetch('/api/admin/treasury/swf', {
-        method: 'POST',
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data.executed) {
+      const receipt = await triggerSwfRebalance();
+      if (receipt.executed) {
         toast.success('국고 복리 성장 및 자율 리밸런싱이 집행되었습니다!', {
-          description: `총 AUM: ${Number(data.totalAumWld || 0).toLocaleString()} WLD (세수 +${Number(data.taxCollectedWld || 0).toLocaleString()} WLD, 수익 실현 +${Number(data.harvestedWld || 0).toLocaleString()} WLD, 재투자 ${Number(data.reinvestedWld || 0).toLocaleString()} WLD)`,
+          description: `총 AUM: ${groupDigits(receipt.totalAumWld!)} WLD (세수 +${groupDigits(receipt.taxCollectedWld!)} WLD, 수익 실현 +${groupDigits(receipt.harvestedWld!)} WLD, 재투자 ${groupDigits(receipt.reinvestedWld!)} WLD)`,
         });
-        const refreshRes = await fetch('/api/admin/treasury/swf');
-        if (refreshRes.ok) {
-          const refreshed = await refreshRes.json();
-          if (refreshed.portfolios) setPortfolios(refreshed.portfolios);
-          if (refreshed.events) setEvents(refreshed.events);
-        }
+        await refreshVerifiedSwf();
       } else {
         toast.info('성장 엔진 평가 완료 (대기 상태)', {
-          description: data.reason || '조건을 확인해주세요.',
+          description: receipt.reason || '조건을 확인해주세요.',
         });
       }
     } catch {
-      toast.error('성장 엔진 집행 요청 중 오류가 발생했습니다.');
+      toast.error('관리자 재인증 또는 국고 리밸런싱 결과를 확인하지 못했습니다.');
     } finally {
       setRebalancing(false);
     }
@@ -140,28 +129,17 @@ export function SwfControlPanel({
     }
     setLiquidating(true);
     try {
-      const res = await fetch('/api/admin/treasury/swf/liquidate', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ targetPortfolioAumWld: '20000000' }),
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data.success) {
-        toast.success('국고 자금 정상화 회수가 성공적으로 집행되었습니다!', {
-          description: `회수된 현금: +${Number(data.liquidatedWld || 0).toLocaleString()} WLD | 확보된 국고 현금: ${Number(data.vaultCashAfter || 0).toLocaleString()} WLD | 잔여 포트폴리오: ${Number(data.portfolioAfter || 0).toLocaleString()} WLD`,
-        });
-        const refreshRes = await fetch('/api/admin/treasury/swf');
-        if (refreshRes.ok) {
-          const refreshed = await refreshRes.json();
-          if (refreshed.portfolios) setPortfolios(refreshed.portfolios);
-          if (refreshed.events) setEvents(refreshed.events);
-        }
+      const receipt = await liquidateSwfToTreasury('20000000');
+      if (receipt.liquidatedWld === '0') {
+        toast.info('국고 투자 자산이 이미 목표 수준 이하입니다.');
       } else {
-        toast.error(data.error || '자금 회수 중 오류가 발생했습니다.');
+        toast.success('국고 자금 정상화 회수가 성공적으로 집행되었습니다!', {
+          description: `회수된 현금: +${groupDigits(receipt.liquidatedWld)} WLD | 확보된 국고 현금: ${groupDigits(receipt.vaultCashAfter)} WLD | 잔여 포트폴리오: ${groupDigits(receipt.portfolioAfter)} WLD`,
+        });
       }
+      await refreshVerifiedSwf();
     } catch {
-      toast.error('네트워크 통신 중 오류가 발생했습니다.');
+      toast.error('관리자 재인증 또는 국고 회수 결과를 확인하지 못했습니다.');
     } finally {
       setLiquidating(false);
     }

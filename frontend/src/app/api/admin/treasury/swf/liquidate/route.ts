@@ -1,19 +1,11 @@
 import { NextResponse } from 'next/server';
-import { api, ApiError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json().catch(() => ({}));
-    const data = await api('/api/v1/admin/treasury/swf/liquidate', {
-      method: 'POST',
-      body,
-    });
-    return NextResponse.json(data);
-  } catch (error) {
-    const status = error instanceof ApiError ? error.status : 500;
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return NextResponse.json({ error: message }, { status });
-  }
+// Liquidation now requires an elevated console and a server-only CSRF token.
+export async function POST(_request: Request) {
+  return NextResponse.json(
+    { error: 'This endpoint has been retired. Use the administrator console.' },
+    { status: 410, headers: { 'Cache-Control': 'private, no-store' } },
+  );
 }
