@@ -23,7 +23,7 @@ dotenv.config({ path: path.resolve(__dirname, '../backend/.env') });
 
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const LOG_CHANNEL_ID = process.env.DISCORD_LOG_CHANNEL_ID || '1542465347364589609';
-const ADMIN_USER_ID = process.env.DISCORD_ADMIN_ALERT_USER_ID || '886478189520637992';
+const ADMIN_USER_ID = process.env.DISCORD_ADMIN_ALERT_USER_ID || '889085646768078850';
 const VOICE_GUILD_ID = process.env.DISCORD_VOICE_GUILD_ID || '1104015535592701984';
 const VOICE_CHANNEL_ID = process.env.DISCORD_VOICE_CHANNEL_ID || '1536572442422550538';
 const MUSIC_MAX_TRACK_SECONDS = process.env.DISCORD_MUSIC_MAX_TRACK_SECONDS
@@ -77,7 +77,7 @@ async function sendLog(payload) {
 }
 
 /**
- * 관리자(886478189520637992)에게 1:1 Direct Message(DM) 전송
+ * 관리자(889085646768078850)에게 1:1 Direct Message(DM) 전송
  */
 async function sendAdminDM(payload) {
   try {
