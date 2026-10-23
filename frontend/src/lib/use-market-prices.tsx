@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from 'react';
 import { LiveRefresh } from '@/components/live-refresh';
-import { acquireSiteSocket, releaseSiteSocket } from '@/lib/site-socket';
+import { acquireSiteSocket, releaseSiteSocket, subscribeSocketRoom } from '@/lib/site-socket';
+import { appendVerifiedStockTrade, type VerifiedStockTrade } from '@/lib/verified-stock-trade';
 
 /**
  * The market, as it moves.
@@ -117,14 +118,9 @@ export interface LiveOrderbookData {
   readonly updatedAt?: string;
 }
 
-export interface LiveTradeData {
-  readonly id: string;
-  readonly stockId: string;
-  readonly price: string;
-  readonly quantity: number;
-  readonly side: 'BUY' | 'SELL';
-  readonly timestamp: string;
-}
+export type LiveTradeData = VerifiedStockTrade;
+
+const EMPTY_TRADES: readonly LiveTradeData[] = [];
 
 class OrderbookStore {
   private readonly books = new Map<string, LiveOrderbookData>();
@@ -159,16 +155,17 @@ class TradeFeedStore {
     return () => this.listeners.delete(listener);
   };
 
-  readonly get = (stockId: string): readonly LiveTradeData[] => this.trades.get(stockId) ?? [];
+  readonly get = (stockId: string): readonly LiveTradeData[] => this.trades.get(stockId) ?? EMPTY_TRADES;
 
   apply(payload: unknown): void {
-    if (!payload || typeof payload !== 'object') return;
-    const trade = payload as LiveTradeData;
-    if (!trade.stockId || !trade.price) return;
-
-    const current = this.trades.get(trade.stockId) ?? [];
-    const next = [trade, ...current.slice(0, 49)];
-    this.trades.set(trade.stockId, next);
+    const stockId = payload && typeof payload === 'object' && 'stockId' in payload
+      ? (payload as { stockId?: unknown }).stockId
+      : undefined;
+    if (typeof stockId !== 'string') return;
+    const current = this.get(stockId);
+    const next = appendVerifiedStockTrade(current, payload);
+    if (next === current) return;
+    this.trades.set(stockId, next);
     for (const listener of this.listeners) listener();
   }
 }
@@ -245,24 +242,50 @@ export function useOrderbook(stockId: string, fallback?: LiveOrderbookData): Liv
   return live ?? fallback;
 }
 
-/**
- * Live Trade execution stream for one stock.
- */
+const tradeRoomHolders = new Map<string, { refs: number; stop: () => void }>();
+
+function retainTradeRoom(stockId: string): () => void {
+  const existing = tradeRoomHolders.get(stockId);
+  if (existing) {
+    existing.refs += 1;
+  } else {
+    const stop = subscribeSocketRoom<unknown>(
+      `stock:${stockId}`,
+      'stock:subscribe',
+      'stock:unsubscribe',
+      'stock:trade',
+      stockId,
+      (payload) => {
+        if (payload && typeof payload === 'object' && 'stockId' in payload &&
+          (payload as { stockId: unknown }).stockId === stockId) {
+          globalTradeStore.apply(payload);
+        }
+      },
+    );
+    tradeRoomHolders.set(stockId, { refs: 1, stop });
+  }
+  return () => {
+    const holder = tradeRoomHolders.get(stockId);
+    if (!holder) return;
+    holder.refs -= 1;
+    if (holder.refs === 0) {
+      tradeRoomHolders.delete(stockId);
+      holder.stop();
+    }
+  };
+}
+
+/** Verified DB-backed trade events for the selected stock, never inferred from quote changes. */
 export function useStockTrades(stockId: string): readonly LiveTradeData[] {
   useEffect(() => {
     if (!stockId) return;
-    const socket = acquireSiteSocket();
-    socket.emit('stock:subscribe', stockId);
-    return () => {
-      if (socket.connected) socket.emit('stock:unsubscribe', stockId);
-      releaseSiteSocket();
-    };
+    return retainTradeRoom(stockId);
   }, [stockId]);
 
   return useSyncExternalStore(
     globalTradeStore.subscribe,
     () => globalTradeStore.get(stockId),
-    () => [],
+    () => EMPTY_TRADES,
   );
 }
 

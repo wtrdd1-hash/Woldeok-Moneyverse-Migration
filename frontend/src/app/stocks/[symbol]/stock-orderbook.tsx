@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Scale, Zap, Activity, AreaChart, ListOrdered } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
-import { useQuote } from '@/lib/use-market-prices';
+import { useQuote, useStockTrades } from '@/lib/use-market-prices';
 import { generateKrxLadder, getKrxTickSize } from '../tick-size';
 import { playStockTickSound } from '@/lib/audio-effects';
 import { StockDepthChart } from './stock-depth-chart';
@@ -27,14 +27,6 @@ export interface OrderbookRow {
   readonly volume: number;
   readonly percent: number;
   readonly cumulativeVolume: number;
-}
-
-export interface RecentTradeItem {
-  readonly id: string;
-  readonly time: string;
-  readonly price: string;
-  readonly volume: number;
-  readonly side: 'buy' | 'sell';
 }
 
 export interface OrderbookData {
@@ -180,53 +172,19 @@ export function StockOrderbook({
   const [flash, setFlash] = useState<'rise' | 'fall' | null>(null);
   const prevPriceRef = useRef<string>(livePrice);
 
-  // 최근 체결 틱 스트림 상태 (최신 5개)
-  const [recentTrades, setRecentTrades] = useState<RecentTradeItem[]>([]);
-
-  useEffect(() => {
-    // 초기 틱 스트림 세팅 (현재가 기반 5건)
-    const baseNum = Number.parseInt(livePrice.replaceAll(',', '') || '1000', 10);
-    const now = new Date();
-    const initialTrades: RecentTradeItem[] = Array.from({ length: 5 }).map((_, i) => {
-      const d = new Date(now.getTime() - (5 - i) * 3500);
-      const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
-      const side: 'buy' | 'sell' = i % 2 === 0 ? 'buy' : 'sell';
-      const offset = (i - 2) * 5;
-      return {
-        id: `t-init-${i}`,
-        time: timeStr,
-        price: Math.max(1, baseNum + offset).toString(),
-        volume: 10 + (i * 17) % 50,
-        side,
-      };
-    });
-    setRecentTrades(initialTrades);
-  }, []);
+  // A quote movement is not a trade. Only the backend's committed execution feed qualifies.
+  const recentTrades = useStockTrades(stockId ?? '').filter((trade) => trade.stockId === stockId).slice(0, 5);
 
   useEffect(() => {
     if (prevPriceRef.current && prevPriceRef.current !== livePrice) {
       const prevNum = Number.parseInt(prevPriceRef.current.replaceAll(',', ''), 10);
       const currNum = Number.parseInt(livePrice.replaceAll(',', ''), 10);
 
-      const side: 'buy' | 'sell' = currNum >= prevNum ? 'buy' : 'sell';
       if (currNum > prevNum) {
         setFlash('rise');
       } else if (currNum < prevNum) {
         setFlash('fall');
       }
-
-      // 새 체결 틱 스트림에 추가
-      const d = new Date();
-      const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
-      const newTrade: RecentTradeItem = {
-        id: `t-${Date.now()}`,
-        time: timeStr,
-        price: livePrice,
-        volume: Math.floor(10 + Math.random() * 45),
-        side,
-      };
-
-      setRecentTrades((prev) => [newTrade, ...prev.slice(0, 4)]);
 
       const timer = setTimeout(() => {
         setFlash(null);
@@ -465,26 +423,31 @@ export function StockOrderbook({
         </div>
 
         {/* 최근 체결 틱 5건 미니 스트림 (Recent Trades Stream) */}
-        {recentTrades.length > 0 && (
+        {(
           <div className="pt-2.5 mt-2 border-t border-border/60 px-1 space-y-1">
             <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
               <span>{isEn ? 'Recent Trades' : '최근 체결 틱'}</span>
-              <span className="text-[9px] font-normal opacity-70">{isEn ? 'Time / Price / Qty' : '시간 · 체결가 · 수량'}</span>
+              <span className="text-[9px] font-normal opacity-70">{isEn ? 'Time / Price / Qty (session only)' : '시간 · 체결가 · 수량 (현재 접속 이후)'}</span>
             </div>
             <div className="space-y-1">
+              {recentTrades.length === 0 && (
+                <p role="status" className="px-2 py-2 text-[11px] text-muted-foreground">
+                  {isEn ? 'No confirmed trades received in this session.' : '현재 접속에서 확인된 체결이 없습니다.'}
+                </p>
+              )}
               {recentTrades.map((t) => {
-                const isTradeBuy = t.side === 'buy';
+                const isTradeBuy = t.side === 'BUY';
                 return (
                   <div
                     key={t.id}
                     className="flex items-center justify-between text-[11px] px-2 py-1 rounded bg-muted/20 border border-border/40 animate-in fade-in"
                   >
-                    <span className="text-muted-foreground/80 text-[10px]">{t.time}</span>
+                    <span className="text-muted-foreground/80 text-[10px]"><time dateTime={t.timestamp}>{new Date(t.timestamp).toLocaleTimeString(isEn ? 'en-US' : 'ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</time></span>
                     <span className={`font-bold ${isTradeBuy ? 'text-emerald-500' : 'text-rose-500'}`}>
                       {groupDigits(t.price)}
                     </span>
                     <span className="text-muted-foreground font-medium text-[10px]">
-                      {groupDigits(t.volume.toString())}{isEn ? 'sh' : '주'}
+                      {groupDigits(t.quantity.toString())}{isEn ? 'sh' : '주'}
                     </span>
                   </div>
                 );
