@@ -1,0 +1,6 @@
+# Moneyverse planning v1200 — 2026-10-24
+- Previous Feature Improvement v1198; Current Feature Addition v1200; Next Feature Improvement v1202 (provisional).
+- MiniPC Debian 13.6 connected, using-superpowers and brainstorming/verification skills read from installed worktree after skills__list returned empty. Main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede; AGENTS, README, EN/KO plans checked at start and mid. QA v1201 FAILED/HOLD and new P0 #1053 LIVE shared Production/dev DB reviewed.
+- Code read: privacy frontend, Nest controller/repository, migration 015, Android App API. Existing access request is intake-only. Feature F675-107 private owner-scoped data access package proposed in existing EN/KO integrated master, plans and update logs; no new distributed spec. No code/DB/WLD/Test/Production changes. All future DB tests require isolated Test identity proof.
+- P0 ENV1200-01 SEC1200-02 PRIV1200-03 REL1200-04; P1 PRIV1200-05..08. Dependencies A wallet, B admin/ACL, C account UX, QA #1053; other PRs preserved. Independent publisher families PIPC, KLRI, EDPB, OWASP reviewed; newly approved 0, cumulative verified UNKNOWN / 10,000 BLOCKED.
+- Release remains DRAFT/HOLD. Exact SHA Test, CI, security, migration266, backup restore and environment separation remain gates.

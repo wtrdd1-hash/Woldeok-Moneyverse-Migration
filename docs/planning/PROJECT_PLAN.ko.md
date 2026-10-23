@@ -1,5 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1200 — F675-107 본인 확인형 개인정보 열람 패키지 (기획 초안 / 운영승격 보류)
+- Previous 기능 보완 v1198 / Current 기능 추가 v1200 / Next 기능 보완 v1202(잠정). 시작·중간 main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede; 최신 QA v1201 FAILED/HOLD. /account/privacy는 열람 요청을 기록할 뿐 다운로드 사본은 제공하지 않음. 개인정보 API와 migration 015는 received 상태의 접수만 구현. 미병합 Draft #1052 후속 문서 기획이며 구현·배포 아님.
+- **중요 QA 정정:** 공개 Production API 3343과 개발 백엔드 3000이 5433/woldeok_moneyverse_dev를 공유함. 이름과 무관하게 운영 API 연결 DB이므로 #1053 해결 전 5433에 쓰기·마이그레이션·fixture·통합테스트·내보내기 작업 금지. 공식 Test는 별도 5585/wdmv_v761_test_acl. 운영 연결 DB의 원장 877거래/1,784전표/불균형 0은 읽기 전용 대사이며 운영 인증 E2E 통과가 아님.
+- 기능: /account/privacy/packages에서 본인 최근 재인증(목표 10분), 1회성 비공개 다운로드, 제3자 정보 제외·법적 심사, 서버 확정 영수증·불변 이력, 암호화 파일·만료. 회원/관리자/Android API, 순방향 DB, SECURITY DEFINER 소유권, 멱등/CAS, 50MiB 제안, no-store/noindex, 320px/WCAG, KPI, 100건 동시성·10,001 커서·CSV/ZIP 악용·정확 SHA 롤백은 [통합 상세기획](INTEGRATED_PLANNING_MASTER.ko.md) 참조. WLD 변경 및 타인 개인정보 무검토 공개 금지.
+- P0 ENV1200-01 (#1053), SEC1200-02 (#993), PRIV1200-03 (필드 소유권/재인증/심사), REL1200-04 (lint/프론트 테스트/Next Critical2 High1/Migration266/백업/정확 SHA). P1 PRIV1200-05 PRIV1200-06 PRIV1200-07 PRIV1200-08 (DB/API, 암호화 스냅샷, 웹/관리자/Android, 보안·동시성·롤백). 기능 OFF, runtime/DB/Test/Production 변경 없음.
+- 외부 참고 발행기관 계열 4곳(PIPC/KLRI/EDPB/OWASP), 신규 승인 0건, 누적 중복 제거 승인 UNKNOWN / 목표 10,000건. 검증 게이트 BLOCKED / IN PROGRESS.
+
+
+
 ## v2026.10.24.1198 — F675-106 WLD 거래 이의제기 증거·심사 무결성 강화 (기획 초안 / 보류)
 - 이전 기능 추가 v1196 / 현재 기능 보완 v1198 / 다음 기능 추가 v1200(잠정). 시작·중간 main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede, QA v1199 FAILED/HOLD. 미병합 Draft #1048 후속 문서 기획이며 구현·금융 변경·배포 없음.
 - 실제 지갑 API/화면은 회원 소유 원장 최근 50건만 표시; Draft #1049 영수증도 최근 50건이며 미병합. 51번째 이전 거래를 존재하지 않는 거래로 오인하지 않고 확정 전표 소유권을 원자적으로 재검증. 현금/은행 개별 부호·순변동 0·큰 숫자 문자열 정확, 타인/미존재 동일 404, 상대방 비공개.

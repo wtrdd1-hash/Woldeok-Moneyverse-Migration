@@ -1,5 +1,43 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1200 — F675-107 본인 확인형 개인정보 열람 패키지 (기능 추가 / 기획 초안 / 운영승격 보류)
+
+### 회차·근거·범위
+- Previous: 기능 보완 v1198 / Current: 기능 추가 v1200 / Next: 기능 보완 v1202(잠정). 시작·중간 최신 main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede. main의 AGENTS.md, README.md, PROJECT_PLAN.md(영어 정본), PROJECT_PLAN.ko.md(한국어 대조) 확인. 미병합 Draft #1052 후속 기획으로 실제 기능 구현·테스트 통과·법률 자문·배포를 의미하지 않음.
+- 소스 확인: /account/privacy는 개인정보 열람 요청을 기록·표시하지만 다운로드 가능한 완성 데이터 사본은 제공하지 않음. privacy.controller.ts는 GET/POST privacy/requests, 세션·인증·동의 검사와 POST CSRF를 사용. privacy.repository.ts의 요청 상태는 received뿐이며 migration 015는 외부 전송 주소, 파일, 자동 데이터 내보내기와 계정 변경을 명시적으로 금지. 기존 지갑 CSV는 전체 개인정보 사본이 아님. 요청 접수를 패키지 생성 성공으로 표현 금지.
+- **QA v1201의 중요 정정:** 운영 공개 API 3343과 개발 백엔드 3000은 모두 127.0.0.1:5433/woldeok_moneyverse_dev를 사용. 이름에 dev가 있어도 **실제 운영 API 연결 DB**임. 공식 Test 3363은 별도 5585/wdmv_v761_test_acl 사용. 이 회차에서 5433 DB에 쓰기·마이그레이션·fixture·권한 실험·패키지 작업 절대 금지. #1053 환경 분리 승인과 증명이 선행되어야 함. 이전 보고서의 운영 DB 별개 추정은 최신 QA로 정정됨. 운영 연결 DB 원장 877거래/1,784전표/불균형 0은 읽기 전용 측정이며 운영 금융 E2E 인증은 아님.
+- 목적: 기존 열람 요청을 재사용하여 **본인의 허용된 정보만** 별도 신원 재확인 후 확인·다운로드. 국내 법률의 실제 적용 범위는 검토가 필요하며 GDPR 이동권을 국내 서비스에 자동 적용한다고 주장하지 않음. 다른 회원 정보·비밀번호·토큰·관리자 내부 기록·비공개 지원 증빙 기본 제외. 이 기능에서 WLD 변경 없음.
+
+### 이용자·관리자·화면·상태
+- 회원: /account/privacy -> 내 열람 요청 -> 비공개 사본 신청 -> /account/privacy/packages. CTA: 사본 신청, 본인 재확인, 상태 확인, 포함 항목 보기, 1회 다운로드, 재신청, 검토 요청. 기존 개인정보 열람 요청의 소유권·종류(access)를 확인한 뒤 별도 패키지 작업을 시작. 접수와 완료를 분리.
+- 회원 권한: 활성 계정, 유효 세션, 동의, 최근 재인증(설계 목표 10분 이내). 탈퇴·제한 계정은 법적 권리 행사 경로를 안내하며 가짜 성공 메시지를 표시하지 않음. 관리자 privacy.review와 privacy.release를 분리하고 최근 관리자 재인증·CSRF·사유 감사 기록 필수. 민감 범주에 대해서는 이중 승인; 담당자의 자기 승인 금지.
+- 상태: NOT_REQUESTED -> VERIFY_REQUIRED -> QUEUED -> COLLECTING -> REVIEW_REQUIRED -> READY -> DOWNLOADED 또는 EXPIRED. 예외 REJECTED_WITH_REASON, FAILED_RETRYABLE, CANCELLED, UNAVAILABLE. 서버 확정 영수증과 실제 비공개 객체 검증 없이는 READY 표시 금지. 이의신청·법적 제한 근거 표시, 자동 처리 완료 기한 약속 금지.
+- 포함: 본인 프로필, OAuth 제공자 이름(토큰 제외), 동의 이력, 본인 개인정보 요청 이력, 허용된 본인 작성 공개 게시글·댓글, 본인 소유 원장 분개·잔액의 정확한 가상 WLD 문자열(상대방·비공개 메모 제외), 본인 알림 설정. 비공개 대화·고객지원 증빙·제3자 정보·보안 비밀은 별도 법적 검토 전 기본 제외. 항목별 원천·기준시각·개수·허용 필드·제외 이유를 manifest에 기록. UTF-8 JSON 우선, CSV는 수식 주입 차단, ZIP 경로 제한과 50MiB 상한(측정 후 조정).
+
+### API·DB·트랜잭션·보안
+- 제안 API: GET /api/v1/privacy/access-packages?cursor&limit=1..25(본인, 서명 커서, no-store); POST /api/v1/privacy/access-packages {privacyRequestId,idempotencyKey UUID,categories[]} (세션·CSRF·최근 재인증), 202 {packageId,state:QUEUED,receiptId,createdAt}는 원자적 커밋 후에만 반환. 같은 회원/키/내용은 기존 영수증, 같은 키 다른 내용은 409. GET /:id는 본인 상태와 최소 manifest; POST /:id/download-intent는 최근 재인증·CSRF로 1회성 세션 결속 다운로드 권한 발급, GET /:id/download는 서버에서 원자적으로 소모한 권한만 허용하며 URL에 토큰 금지. 관리자 GET /api/v1/admin/privacy/access-packages와 POST /:id/review 또는 /release는 고급 권한·버전·사유 필수. Android App API는 동일 권한·오류·최소 버전 계약과 OS 비공개 저장 적용.
+- DB(미적용 제안): privacy_access_packages(id UUID PK, owner_user_id FK, privacy_request_id FK, state CHECK, version>0, request_key UUID, request_digest 32바이트, 허용 categories, requested_at, expires_at 등), UNIQUE(owner_user_id,request_key), 인덱스 (owner_user_id,requested_at DESC,id DESC), (state,requested_at,id), 원 개인정보 요청과 동일 소유자 강제. privacy_access_events는 append-only UNIQUE(package_id,version); privacy_access_artifacts는 package_id UNIQUE, private_object_id UNIQUE, sha256 32바이트, manifest_hash, 크기<=50MiB, 암호화 키 버전·만료일. 1회 다운로드 권한은 해시·사용시각·세션 결속으로 저장. 공개 버킷/객체키/서명 URL 클라이언트 노출 금지.
+- 트랜잭션: (1) 소유권·계정 상태·멱등 키 잠금 후 작업/이벤트/outbox 원자적 생성, (2) lease/version으로 worker 선점, 허용된 회원별 조회 함수를 일관된 읽기 스냅샷으로 제한 수집, 금융 쓰기 없이 암호화 저장, (3) SHA256·크기·manifest·검토 후 CAS로 READY+감사 확정, (4) 업로드만 성공했거나 오류가 난 경우 READY 금지, 고아 객체 정리와 안전 재시도. 제안 보관은 READY 24시간, 만료 후 48시간 이내 객체 삭제; 감사 메타데이터는 승인된 보존 정책과 법적 보존 예외 적용. 백업까지 즉시 물리 삭제됐다고 약속 금지.
+- DB 앱 계정은 민감 테이블 직접 DML/무제한 SELECT 금지, 고정 search_path SECURITY DEFINER의 행위자 결속 함수에 최소 EXECUTE만 허용, PUBLIC EXECUTE 회수. 경로 탐색·ZIP 폭탄·CSV 수식·임의 이메일/URL 전송·무제한 수집 금지. 기본 제한은 활성 작업 1개/7일 2회(법적 권리 예외 검토 필요), 요청 크기·실행 시간·동시 worker 예산. 운영 연결 5433 DB는 테스트 데이터베이스가 아님.
+
+### 운영·품질·회귀·승격
+- 관리자 큐: 상태·대기시간·가린 범주 개수·승인 사유·접근 감사, 원문 기본 미노출. Kill switch는 신규 생성·다운로드를 중단하되 요청·이력은 보존. 비공개 회원·관리자 화면 sitemap 제외, noindex/nofollow, API·Next BFF·edge·파일 응답 모두 private,no-store, referrer 최소화, 분석에 개인정보 금지. 320px·키보드·초점·진행상태 live region·WCAG 2.2 AA. Android는 위조 가능한 클라이언트 헤더를 신원 근거로 사용 금지.
+- KPI: 신청→확정 영수증, 대기 p50/p95, 승인된 데이터 범위, 실제 다운로드 성공률, 만료 객체 삭제 지연, 잘못된 READY 0건, 타 회원 유출 0건, 재인증 실패와 관리자 예외. 기준 수치 미측정이면 UNKNOWN 표기.
+- 수용 회귀: 같은 키 100건 동시 요청→패키지·이벤트·outbox 1건; 다른 내용 재사용 100건→409; 타 회원 요청/파일 접근 100건 전부 차단; 만료 세션/재인증 거부; 1회 권한 100건 동시 다운로드→최대 1회 소모; 동일 시각 10,001건 키셋 누락 0; 업로드 실패/손상/객체 없음→READY 0; 38자리 WLD 문자열 정밀도 유지; CSV =,+,-,@ 및 제어문자 접두 방어; ZIP 경로·크기·압축 폭탄 방어; 법적 제한/이의신청, Android, WCAG, SEO, 암호화 백업 격리 복원, 정확 SHA Test 5-pass. **#1053 분리 이전 운영 연결 DB에서 테스트 금지.**
+- 배포: 기능 기본 OFF. A 지갑 원장, B 관리자 권한/DB ACL, C 계정 UI, QA DB 환경·정확 SHA를 각각 소유; Gemini/기존 PR 범위 변경 금지. 새 코드는 별도 개발 브랜치와 현재 끝번호 이후 순방향 마이그레이션, 266 과거 파일 수정 금지. DB host/port/name/user/credential fingerprint로 Test 격리 검증, 전체 CI·보안·감사·복원·인증 E2E·카나리 후 승격. 실패 시 생성·다운로드 중단, 불변 요청·감사 보존, 안전 만료, WLD 자동 보정 없음. #1053, #993, Next.js 취약점, lint/frontend test, migration266, 백업·실행 SHA 차단 유지.
+
+### P0/P1 백로그 및 외부 근거
+- P0 ENV1200-01: #1053 운영/개발 DB 공유 구조 분리 및 안전한 Test 자격·fixture 증명.
+- P0 SEC1200-02: #993 광범위 앱 DML 및 PUBLIC 함수 실행권한을 순방향 최소권한으로 정리, 격리 PG 부정 테스트.
+- P0 PRIV1200-03: 본인/제3자 필드별 공개 정책, 최근 재인증, 관리자 법적 예외 심사, 허위 READY 0건.
+- P0 REL1200-04: main lint·프론트 테스트·Next.js Critical 2/High 1·Migration266·백업 복원·정확 SHA Test/Production 게이트.
+- P1 PRIV1200-05: 패키지/이벤트/객체/1회 권한 스키마, 불변 감사, 소유권·멱등 API.
+- P1 PRIV1200-06: 제한적 스냅샷 worker, 암호화 객체, SHA256 manifest, TTL 삭제, CAS 확정.
+- P1 PRIV1200-07: 회원·관리자·Android UX, 320px/WCAG, noindex/no-store.
+- P1 PRIV1200-08: 100건 동시성, 10,001 커서, CSV/ZIP/재인증/보존·롤백 회귀.
+- 외부 참고: 개인정보 포털(PIPC), 한국법제연구원(KLRI), 유럽개인정보보호이사회(EDPB), OWASP 4개 발행기관 계열 검토. 독립 승인 증빙으로 편입한 건수는 **신규 0건**, 누적 중복 제거 승인 **UNKNOWN**, 10,000건 게이트 **BLOCKED / IN PROGRESS**. https://www.privacy.go.kr/front/wcp/dcl/per/persnalInfo.do ; https://elaw.klri.re.kr/eng_service/lawTwoView.do?hseq=62389 ; https://www.edpb.europa.eu/system/files/2023-04/edpb_guidelines_202201_data_subject_rights_access_v2_en.pdf ; https://cheatsheetseries.owasp.org/
+
+
 ## v2026.10.24.1198 — F675-106 WLD 거래 이의제기 증거·심사 무결성 강화 (기능 보완 / 초안 / 운영승격 보류)
 
 ### 회차·근거·경계
