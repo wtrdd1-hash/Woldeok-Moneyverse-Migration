@@ -1,5 +1,12 @@
 ## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
+## 2026-10-23 v1180 — F675-102 notification consent and quiet-hours planning (DRAFT)
+- Previous Feature Improvement v1178 / Current Feature Addition v1180 / Next Feature Improvement v1182 (provisional). Main baseline `b147ed18`; QA v1181 FAILED/HOLD.
+- Integrated EN/KO master and PROJECT_PLAN EN/KO extended in place; existing notification governance remains canonical. Read-only DEV: notification_preferences table already exists with owner-purpose-channel PK and 0 rows; app-role direct DML/TRUNCATE and RLS OFF are P0 risks. No duplicate preference table or new scattered feature spec.
+- P0 actor/consent/queued suppression/financial ACL/Next/migration266/CI/backup/Test SHA; P1 API, audit, quiet hours, Android/admin/a11y/SEO/KPI, concurrency and rollback. Four official publishers reviewed; 0 newly accepted; cumulative unknown vs 10,000 BLOCKED.
+- Documentation-only candidate, no implementation tests, runtime/DB/WLD/feature switch/Test/Production changes. GitHub Draft/HOLD, no merge or deploy.
+
+
 ## v2026.10.22.1140 — F675-92 calculator issue intake and verified corrections (PLANNING DRAFT)
 - Cycle: Previous Improvement v1138 / Current Addition v1140 / Next Improvement v1142 (provisional). GitHub main c3e62cd49da66c0b7c48223fcc81be888166f183; 5 open PRs; QA v1135 CI 7 failures and finance/production holds. Verified source risks in capital gains, save/alert/WLD claims, and dev app-role ACL. Drafted EN/KO integrated design, API/DB/roles/transactions/SEO/mobile/a11y/KPI/TDD/rollback. Independent references reviewed 3 publishers, accepted 0, cumulative unknown, 10,000 gate BLOCKED. No runtime/DB/deployment changes; Draft PR review required.
 
