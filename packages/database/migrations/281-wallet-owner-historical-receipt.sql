@@ -1,4 +1,4 @@
--- Read one committed owner wallet transaction without exposing other ledger legs.
+-- Migration 281: read one committed owner wallet transaction without exposing other ledger legs.
 -- Forward-only: a receipt is evidence of posted WLD movement, not a refund.
 BEGIN;
 

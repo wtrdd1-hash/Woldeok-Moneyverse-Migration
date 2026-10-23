@@ -12,7 +12,7 @@ Status: bounded implementation authorized by the recurring development directive
 
 ## Tasks and acceptance
 1. Add unit and controller tests first; observe RED for missing historical read and owner isolation. Add DB integration checks with foreign/old/zero-net/large amounts.
-2. Add migration 280 owner-scoped receipt function and repository/service/controller. Confirm strict input validation and exact amount invariants.
+2. Add migration 281 (stacked after C #1064 migration 281) owner-scoped receipt function and repository/service/controller. Confirm strict input validation and exact amount invariants.
 3. Add private web detail/lookup and Android gateway tests. Confirm user-visible retrieval and honest unavailable states.
 4. Run focused + complete build/lint/typecheck/unit/integration/security/a11y/SEO/API/E2E/real PostgreSQL where possible. Record exact SHA, failures and skipped tests. Never claim unrun gates passed.
 5. Re-fetch main and current plan, inspect open PR/CI and conflicts, push isolated Draft PR, keep release hold until every required gate is independently proven.

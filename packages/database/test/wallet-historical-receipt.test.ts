@@ -2,9 +2,9 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const migration = () => readFileSync(join(__dirname, '../migrations/280-wallet-owner-historical-receipt.sql'), 'utf8');
+const migration = () => readFileSync(join(__dirname, '../migrations/281-wallet-owner-historical-receipt.sql'), 'utf8');
 
-describe('migration 280: owner historical ledger receipt privilege boundary', () => {
+describe('migration 281: owner historical ledger receipt privilege boundary', () => {
   it('uses a single owner-scoped, immutable read function and no direct DML grants', () => {
     const sql = migration();
     expect(sql).toMatch(/SECURITY DEFINER/i);
