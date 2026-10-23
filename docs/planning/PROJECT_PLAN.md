@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.23.1180 — F675-102 Member Notification Consent & Quiet Hours (PLANNING / DRAFT)
+- Cycle: Previous Feature Improvement v1178, Current Feature Addition v1180, Next Feature Improvement v1182 (provisional). Existing governance spec `NOTIFICATION_REACTIVATION_GOVERNANCE_SPEC.md` remains authority; this is its actionable member/API/DB implementation slice, not a parallel system.
+- Source: `/account/notifications` currently exposes only engagement goal/NPC toggle. Read-only DEV confirms existing `notification_preferences` (0 rows, PK owner+purpose+channel, seven purposes/four channels/six states), no preference-specific DB functions, direct app-role DML/TRUNCATE and RLS OFF. Reuse existing table, restore least privilege; distinguish required security/transactional from opt-in optional/marketing.
+- P0 NOTIF1180-01/02 and REL1180-03: actor-bound SECURITY DEFINER and DB negative-role tests, queued-message opt-out suppression, QA v1181 Next/ACL/migration266/CI/backup/Test exact-SHA HOLD. P1 NOTIF1180-04..08: versioned consent API, append-only audit, 22:00–08:00 quiet hours with DST, web/Android UI, admin aggregates, SEO noindex, WCAG AA, 100-way idempotency/concurrency, 10,001 audit pagination, opt-out-safe rollback.
+- Full EN/KO design in existing `INTEGRATED_PLANNING_MASTER.md` and `INTEGRATED_PLANNING_MASTER.ko.md`. External 4 independent publishers reviewed; newly accepted 0, cumulative independently deduplicated UNKNOWN / target 10,000 BLOCKED. Docs-only Draft; no runtime/DB/WLD/Test/Production change.
+
+
 ## v2026.10.22.1140 — F675-92 Calculator Accuracy Reports and Verified Correction Notices (PLANNING)
 - Addition cycle after v1138 improvement; next v1142 improvement. New member issue intake and public verified corrections extend existing `/tools/*`, support-thread and notification infrastructure, not an alternative financial ledger.
 - P0: review capital-gains calculator's unconditional spouse-gift deduction, misleading tax-saving/tax-free claims and hardcoded May 1–31 filing date against NTS 2026 guidance; fix false save/alert/WLD success; restore app-role least privilege; hold exact-SHA finance/Test/Production gates. P1: member/admin APIs, immutable correction events, independent approval, deduped notifications, public notice UX, mobile/a11y, SEO and regression.
