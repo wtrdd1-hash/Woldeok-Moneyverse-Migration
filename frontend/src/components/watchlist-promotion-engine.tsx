@@ -1,165 +1,55 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { BookmarkCheck, ArrowRight, X, Sparkles, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { ArrowRight, BookmarkCheck, X } from 'lucide-react';
+import { useViewer } from '@/lib/use-viewer';
 
 interface SavedScenario {
-  ticker: string;
-  stockName: string;
-  targetPrice: string;
-  reboundRate: string;
-  savedAt: number;
+  readonly ticker?: string;
+  readonly stockName?: string;
+  readonly targetPrice?: string;
 }
 
 export function WatchlistPromotionEngine() {
-  const [pendingScenarios, setPendingScenarios] = useState<SavedScenario[]>([]);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isPromoting, setIsPromoting] = useState(false);
-  const [promotedSuccess, setPromotedSuccess] = useState(false);
+  const viewer = useViewer();
+  const [scenarios, setScenarios] = useState<SavedScenario[]>([]);
+  const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
-    // 클라이언트 사이드에서만 실행
+    if (!viewer?.signedIn || !viewer.consentCurrent) return;
     try {
-      const savedStr = localStorage.getItem('wdmv_saved_scenarios');
-      const isAlreadyPromoted = localStorage.getItem('wdmv_scenarios_promoted');
-
-      if (!savedStr || isAlreadyPromoted === 'true') {
-        return;
-      }
-
-      const scenarios: SavedScenario[] = JSON.parse(savedStr);
-      if (Array.isArray(scenarios) && scenarios.length > 0) {
-        // 로그인 쿠키나 토큰/세션이 있는지 감지 (쿠키나 세션 스토리지)
-        const hasAuthSession = 
-          document.cookie.includes('wdmv_session=') || 
-          document.cookie.includes('auth=') || 
-          document.cookie.includes('token=') ||
-          Boolean(localStorage.getItem('token')) ||
-          Boolean(localStorage.getItem('auth_user'));
-
-        if (hasAuthSession) {
-          setPendingScenarios(scenarios);
-          // 1.5초 후 자연스럽게 슬라이드 인
-          const timer = setTimeout(() => {
-            setIsVisible(true);
-          }, 1500);
-          return () => clearTimeout(timer);
-        }
+      if (sessionStorage.getItem('wdmv_promotion_dismissed') === 'true') return;
+      const value: unknown = JSON.parse(localStorage.getItem('wdmv_saved_scenarios') || '[]');
+      if (Array.isArray(value)) {
+        const items = value.filter((item): item is SavedScenario => item !== null && typeof item === 'object' && typeof item.stockName === 'string').slice(0, 30);
+        if (items.length > 0) { setScenarios(items); setDismissed(false); }
       }
     } catch {
-      // ignore
+      // Local storage is not an account record; failure never implies a promotion.
     }
-  }, []);
+  }, [viewer?.signedIn, viewer?.consentCurrent]);
 
-  const handlePromoteToWatchlist = async () => {
-    setIsPromoting(true);
-    try {
-      // 서버 관심 종목 API로 배치 승격 시도
-      const tickers = pendingScenarios.map(s => s.ticker);
-      
-      const res = await fetch('/api/portfolio/watchlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tickers,
-          scenarios: pendingScenarios,
-          promotedFrom: 'guest_calculator',
-        }),
-      }).catch(() => null);
-
-      // 성공 또는 오프라인 승격 완료 처리
-      localStorage.setItem('wdmv_scenarios_promoted', 'true');
-      setPromotedSuccess(true);
-      
-      setTimeout(() => {
-        setIsVisible(false);
-      }, 3000);
-    } catch {
-      localStorage.setItem('wdmv_scenarios_promoted', 'true');
-      setPromotedSuccess(true);
-      setTimeout(() => {
-        setIsVisible(false);
-      }, 3000);
-    } finally {
-      setIsPromoting(false);
-    }
-  };
-
-  const handleDismiss = () => {
-    setIsVisible(false);
-    // 이번 세션에서는 닫음 처리
-    sessionStorage.setItem('wdmv_promotion_dismissed', 'true');
-  };
-
-  if (!isVisible || pendingScenarios.length === 0) {
-    return null;
+  function dismiss() {
+    setDismissed(true);
+    try { sessionStorage.setItem('wdmv_promotion_dismissed', 'true'); } catch { /* Optional local preference. */ }
   }
 
-  const firstItem = pendingScenarios[0];
-  const otherCount = pendingScenarios.length - 1;
+  if (dismissed || scenarios.length === 0) return null;
+  const first = scenarios[0];
 
   return (
-    <div className="fixed bottom-20 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
-      <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/95 border border-emerald-500/40 shadow-2xl backdrop-blur-xl text-zinc-100 flex flex-col gap-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              <BookmarkCheck className="w-4 h-4" />
-            </span>
-            <span className="text-xs font-bold text-emerald-400">
-              비로그인 저장 내역 발견
-            </span>
-          </div>
-          <button
-            onClick={handleDismiss}
-            className="text-zinc-400 hover:text-zinc-200 p-1 rounded-md transition-colors"
-            aria-label="닫기"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div>
-          <h4 className="text-sm font-semibold text-zinc-100">
-            {promotedSuccess ? (
-              <span className="flex items-center gap-1.5 text-emerald-400">
-                <CheckCircle2 className="w-4 h-4" /> 내 관심 포트폴리오 및 시뮬레이션 원장으로 승격 저장되었습니다!
-              </span>
-            ) : (
-              <>
-                계산기에서 저장한 <span className="text-emerald-400 font-bold">{firstItem?.stockName ?? '시나리오'}</span>
-                {otherCount > 0 ? ` 외 ${otherCount}건` : ''}을 내 포트폴리오에 등록할까요?
-              </>
-            )}
-          </h4>
-          <p className="text-xs text-zinc-400 mt-1">
-            {promotedSuccess 
-              ? '주식 거래소 및 대시보드 관심 종목 탭에서 바로 확인하실 수 있습니다.'
-              : `목표 탈출가 및 절세 시뮬레이션(${firstItem?.targetPrice ?? '-'})이 회원 계정에 안전하게 동기화됩니다.`}
-          </p>
-        </div>
-
-        {!promotedSuccess && (
-          <div className="flex items-center gap-2 pt-1">
-            <button
-              onClick={handlePromoteToWatchlist}
-              disabled={isPromoting}
-              className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-md shadow-emerald-900/40 flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              {isPromoting ? '동기화 중...' : '내 관심 종목으로 승격 저장'}
-            </button>
-            <button
-              onClick={handleDismiss}
-              className="py-2 px-3 rounded-xl bg-zinc-800/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs font-medium transition-colors"
-            >
-              나중에
-            </button>
-          </div>
-        )}
+    <aside role="region" aria-label="브라우저 계산 결과 안내" className="fixed bottom-20 left-4 right-4 z-50 rounded-2xl border border-emerald-500/40 bg-zinc-900 p-4 text-zinc-100 shadow-2xl sm:bottom-6 sm:left-auto sm:right-6 sm:max-w-md sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-sm font-semibold"><BookmarkCheck aria-hidden="true" className="size-4 text-emerald-400" /> 브라우저 계산 결과 안내</h2>
+        <button type="button" onClick={dismiss} aria-label="안내 닫기" className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"><X aria-hidden="true" className="size-4" /></button>
       </div>
-    </div>
+      <p className="mt-2 text-sm">{first?.stockName || '계산 결과'}{scenarios.length > 1 ? ` 외 ${scenarios.length - 1}건` : ''}은 이 브라우저에만 보관되어 있습니다. 회원 계정의 관심 종목이나 금융 원장에 자동으로 저장되지 않았습니다.</p>
+      <p className="mt-2 text-xs text-zinc-300">실제 관심 종목에 추가하려면 거래소에서 직접 선택하세요. 저장된 계산값은 서버로 전송되지 않습니다.</p>
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <Link href="/stocks" onClick={dismiss} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400">거래소에서 직접 추가 <ArrowRight aria-hidden="true" className="size-4" /></Link>
+        <Link href="/stocks/watchlist" onClick={dismiss} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-zinc-600 px-3 py-2 text-sm hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400">내 관심 종목 보기</Link>
+      </div>
+    </aside>
   );
 }

@@ -40,13 +40,15 @@ export function CalculatorRetentionFunnel({
       const items: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       if (Array.isArray(items)) {
         setSaved(items.some((item: unknown) =>
-          typeof item === 'object' && item !== null && 'ticker' in item && item.ticker === ticker,
+          typeof item === 'object' && item !== null && 'ticker' in item && item.ticker === ticker &&
+          'targetPrice' in item && item.targetPrice === targetPrice &&
+          'reboundRate' in item && item.reboundRate === reboundRate,
         ));
       }
     } catch {
       // Storage is optional. The page remains usable without it.
     }
-  }, [ticker]);
+  }, [ticker, targetPrice, reboundRate]);
 
   function saveInBrowser() {
     try {

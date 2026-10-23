@@ -25,6 +25,13 @@ describe('CalculatorRetentionFunnel: truthful local retention', () => {
     expect(screen.getByRole('button', { name: /브라우저에 저장됨/ })).toBeDefined();
   });
 
+  it('treats a revised price calculation as unsaved until explicitly stored', () => {
+    const { rerender } = render(<CalculatorRetentionFunnel {...scenario} />);
+    fireEvent.click(screen.getByRole('button', { name: /이 브라우저에 저장/ }));
+    rerender(<CalculatorRetentionFunnel {...scenario} targetPrice="140 WLD" />);
+    expect(screen.getByRole('button', { name: /이 브라우저에 저장/ })).toBeDefined();
+  });
+
   it('does not claim success when browser storage is unavailable', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('quota'); });
     render(<CalculatorRetentionFunnel {...scenario} />);
