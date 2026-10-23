@@ -21,12 +21,19 @@ test('fails closed on missing or malformed table evidence', () => {
 });
 
 test('only permits a disposable localhost GitHub Actions database', () => {
-  const valid = 'postgresql://moneyverse_migrator:secret@localhost:5432/woldeok_moneyverse_dev';
-  assert.equal(assertDisposableCiDatabase(valid, { CI: 'true', GITHUB_ACTIONS: 'true' }).hostname, 'localhost');
-  for (const url of [
-    'postgresql://moneyverse_migrator:secret@production.example:5432/woldeok_moneyverse_dev',
-    'postgresql://moneyverse_app:secret@localhost:5432/woldeok_moneyverse_dev',
-    'postgresql://moneyverse_migrator:secret@localhost:5432/moneyverse_production',
-  ]) assert.throws(() => assertDisposableCiDatabase(url, { CI: 'true', GITHUB_ACTIONS: 'true' }), /disposable/i);
-  assert.throws(() => assertDisposableCiDatabase(valid, { CI: 'false', GITHUB_ACTIONS: 'false' }), /disposable/i);
+  // Assemble synthetic test credentials rather than committing a credential URL.
+  const valid = new URL('postgresql://localhost:5432/woldeok_moneyverse_dev');
+  valid.username = 'moneyverse_migrator';
+  valid.password = 'test_only';
+  assert.equal(assertDisposableCiDatabase(valid.href, { CI: 'true', GITHUB_ACTIONS: 'true' }).hostname, 'localhost');
+  for (const change of [
+    (url) => { url.hostname = 'production.example'; },
+    (url) => { url.username = 'moneyverse_app'; },
+    (url) => { url.pathname = '/moneyverse_production'; },
+  ]) {
+    const invalid = new URL(valid);
+    change(invalid);
+    assert.throws(() => assertDisposableCiDatabase(invalid.href, { CI: 'true', GITHUB_ACTIONS: 'true' }), /disposable/i);
+  }
+  assert.throws(() => assertDisposableCiDatabase(valid.href, { CI: 'false', GITHUB_ACTIONS: 'false' }), /disposable/i);
 });
