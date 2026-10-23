@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, TrendingUp, BarChart3, ShieldCheck, Zap, BookOpen, Layers } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, BarChart3, ShieldCheck, Zap, BookOpen, Layers } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
