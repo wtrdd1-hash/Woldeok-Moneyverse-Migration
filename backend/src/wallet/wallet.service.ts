@@ -84,6 +84,7 @@ export class WalletRecipientError extends Error {
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
   recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]>;
+  transactionForUser?(userId: string, transactionId: string): Promise<WalletTransactionRow | null>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -143,6 +144,20 @@ export interface WalletOverview {
   readonly userId: string;
   readonly balances: WalletBalancesView;
   readonly recentTransactions: WalletTransactionView[];
+}
+
+export interface WalletHistoricalReceipt {
+  readonly receiptVersion: 1;
+  readonly state: 'CONFIRMED';
+  readonly transactionId: string;
+  readonly currency: 'WLD';
+  readonly reason: string;
+  readonly occurredAt: string;
+  readonly netWalletDelta: WldAmount;
+  readonly cashDelta: WldAmount | null;
+  readonly bankDelta: WldAmount | null;
+  readonly detailCompleteness: 'VERIFIED' | 'PARTIAL';
+  readonly historyScope: 'ALL_POSTED';
 }
 
 export interface WalletTransferReceipt {
@@ -380,6 +395,32 @@ export class WalletService {
       userId,
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
+    };
+  }
+
+  /** Return no receipt for an unposted, foreign or nonexistent transaction. */
+  async historicalReceiptForUser(authenticatedUserId: string, transactionId: string): Promise<WalletHistoricalReceipt | null> {
+    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
+    const reference = requireUuid(transactionId, 'transaction id');
+    if (!this.repository.transactionForUser) throw new Error('historical receipt read is unavailable');
+    const row = await this.repository.transactionForUser(actor, reference);
+    if (!row) return null;
+    const [entry] = normalizeTransactions([row]);
+    if (!entry) throw new Error('historical receipt normalization failed');
+    if (entry.transactionId !== reference) throw new Error('historical receipt reference mismatch');
+    const complete = entry.cashDelta !== undefined && entry.bankDelta !== undefined;
+    return {
+      receiptVersion: 1,
+      state: 'CONFIRMED',
+      transactionId: entry.transactionId,
+      currency: 'WLD',
+      reason: entry.label === '경제 활동' ? '거래 사유 확인 필요' : entry.label,
+      occurredAt: entry.occurredAt,
+      netWalletDelta: entry.netAmount,
+      cashDelta: complete ? entry.cashDelta! : null,
+      bankDelta: complete ? entry.bankDelta! : null,
+      detailCompleteness: complete ? 'VERIFIED' : 'PARTIAL',
+      historyScope: 'ALL_POSTED',
     };
   }
 

@@ -49,6 +49,21 @@ export default async function WalletActivityPage() {
       </PageHeader>
 
       <Card>
+        <CardContent className="grid gap-3 py-4">
+          <h2 className="font-semibold">이전 거래 참조번호로 조회</h2>
+          <p className="text-sm text-muted-foreground">최근 50건보다 오래된 거래도 원장 참조번호로 본인 기록을 확인할 수 있습니다.</p>
+          <form action="/wallet/activity/lookup" method="get" className="flex flex-col gap-2 sm:flex-row">
+            <label htmlFor="wallet-transaction-reference" className="sr-only">거래 참조번호(UUID)</label>
+            <input id="wallet-transaction-reference" name="transactionId" type="text" required maxLength={36}
+              pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+              placeholder="거래 참조번호(UUID)" autoComplete="off"
+              className="min-w-0 flex-1 rounded-md border bg-background px-3 py-2 text-sm" />
+            <Button type="submit">거래 확인</Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardContent>
           {!wallet ? (
             <EmptyState title="지금은 기록을 불러올 수 없어요." />
@@ -61,14 +76,18 @@ export default async function WalletActivityPage() {
             wallet.recentTransactions.map((entry) => {
               const { debit, credit } = sides(entry);
               return (
-                <PostingStrip
-                  key={entry.transactionId}
-                  debit={debit}
-                  credit={credit}
-                  amount={entry.netAmount}
-                  label={entry.label}
-                  at={formatMoment(entry.occurredAt)}
-                />
+                <Link key={entry.transactionId} href={`/wallet/activity/${encodeURIComponent(entry.transactionId)}`}
+                  className="block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  aria-label={`${entry.label} 거래 참조번호 확인`}>
+                  <PostingStrip
+                    debit={debit}
+                    credit={credit}
+                    amount={entry.netAmount}
+                    label={entry.label}
+                    at={formatMoment(entry.occurredAt)}
+                  />
+                  <span className="block px-3 pb-2 text-xs text-muted-foreground">거래 확인 →</span>
+                </Link>
               );
             })
           )}

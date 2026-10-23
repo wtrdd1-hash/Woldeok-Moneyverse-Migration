@@ -17,3 +17,10 @@
 
 ## Finished
 - PENDING. No main merge, Test or Production release without full gate PASS.
+
+## Midpoint — 07:35 KST
+- Re-fetched main `54d5140d...` unchanged; 46 open PRs; latest planning Draft v1206 read from its isolated branch, v1198 wallet dispute plan examined. No other worktree touched.
+- RED proved four missing backend receipt tests; GREEN 5/5. RED proved upstream public wallet cache leak; GREEN gateway 2/2. RED proved cross-reference receipt acceptance; GREEN backend/frontend mismatch rejection. Web receipt helper/page/lookup focused 8/8.
+- Transactional DEV PostgreSQL 17 proof: migration 280 `CREATE FUNCTION`, `REVOKE`, `GRANT`, older-than-50 owner receipt, exact net=cash+bank, foreign/unknown 0, app-role EXECUTE and PUBLIC revoked; explicit ROLLBACK; subsequent pg_proc count 0. No DB mutation persisted.
+- Full pre-final local gates: backend 1,319 PASS/398 SKIP, frontend 1,392 PASS/1 FAIL (existing blog category assertion), DB 15 PASS/3 SKIP, typecheck/build/API contract PASS; full lint FAIL on existing wallet CSV no-control-regex; security FAIL 2 critical/3 high. QA PR #1076 already contains independently owned fixes; do not duplicate or overwrite.
+- No official exact-SHA Test financial E2E, production or release promotion. RELEASE HOLD.

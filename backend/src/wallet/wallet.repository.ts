@@ -183,6 +183,18 @@ export class PostgresWalletRepository {
     );
   }
 
+  /** A single owner-scoped ledger receipt, including entries older than the recent list. */
+  async transactionForUser(userId: string, transactionId: string): Promise<WalletTransactionRow | null> {
+    const actor = requireUuid(userId, 'authenticated user id');
+    const reference = requireUuid(transactionId, 'transaction id');
+    return queryOne<WalletTransactionRow>(
+      this.pool,
+      `SELECT transaction_id::text, type, created_at, net_amount, cash_delta, bank_delta
+       FROM public.wallet_owner_transaction_receipt($1::uuid, $2::uuid)`,
+      [actor, reference],
+    );
+  }
+
   async recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]> {
     const ownerUserId = requireUuid(userId, 'authenticated user id');
     const recentLimit = requireRecentLimit(limit);
