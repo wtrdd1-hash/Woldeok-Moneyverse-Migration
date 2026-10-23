@@ -1,5 +1,15 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.23.1186 — F675-103 Verified Digest Dispatch Hardening (PLANNING DRAFT / HOLD)
+- Previous Addition v1184; Current Improvement v1186; Next Addition v1188 provisional. Baseline latest main `1a31a6f2df2b75a0accceef12662dc42d9ab2d45`, predecessor Draft PR #1014, QA v1187 FAILED/HOLD older than current main. Docs-only stacked candidate; no runtime or database changes.
+- P0: fail-closed explicit purpose/channel consent (do not trust `OPTED_IN` default), verified category/source mapping, unique digest dispatch/outbox key and truthful provider acceptance/unknown state; app-role least privilege, CI/security/migration266/backup+restore/exact-SHA Test HOLD. P1: revocation/lease fencing, stable keyset history, member/Android parity, admin/a11y/SEO/KPI, concurrency/DST/rollback tests. See [integrated master](INTEGRATED_PLANNING_MASTER.md) for API, DB, state and acceptance contracts. 3 external publishers reviewed, newly accepted 0, cumulative unknown / 10,000 BLOCKED.
+
+
+## v2026.10.23.1184 — F675-103 Opt-in Notification Digest (PLANNING DRAFT / HOLD)
+- Cycle: Previous Improvement v1182; Current Addition v1184; Next Improvement v1186 provisional. Baseline main `8dc8d7d34fb110db7c3b4702fe310d390165a502`, 27 open PRs, QA v1185 FAILED/HOLD (older SHA). Source-backed existing in-app notifications, preference PK and outbox; no digest API. F675-101/102 dependencies are unmerged drafts. New optional daily/weekly digest is OFF by default, never delays mandatory security/transaction notices, never moves WLD.
+- P0: `NOTIF1184-01` consent+source+owner truth, `SEC1184-02` DB least privilege, `REL1184-03` CI/migration266/backup+restore/exact-SHA gates. P1: `NOTIF1184-04..08` versioned settings, deterministic timezone/DST windows and idempotent outbox, member+Android/admin API, privacy/SEO/a11y/KPI, concurrency/rollback. Complete API/DB/transaction/UX acceptance in [integrated master](INTEGRATED_PLANNING_MASTER.md). References: 5 independent publishers reviewed, accepted 0, cumulative unknown / 10,000 gate BLOCKED. Documentation only; no runtime/Test/Production claim.
+
+
 ## v2026.10.22.1140 — F675-92 Calculator Accuracy Reports and Verified Correction Notices (PLANNING)
 - Addition cycle after v1138 improvement; next v1142 improvement. New member issue intake and public verified corrections extend existing `/tools/*`, support-thread and notification infrastructure, not an alternative financial ledger.
 - P0: review capital-gains calculator's unconditional spouse-gift deduction, misleading tax-saving/tax-free claims and hardcoded May 1–31 filing date against NTS 2026 guidance; fix false save/alert/WLD success; restore app-role least privilege; hold exact-SHA finance/Test/Production gates. P1: member/admin APIs, immutable correction events, independent approval, deduped notifications, public notice UX, mobile/a11y, SEO and regression.
