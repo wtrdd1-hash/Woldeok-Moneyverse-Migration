@@ -13,7 +13,7 @@
 - [x] Backend receipt API uses the already owner-filtered recent ledger projection, no direct SQL privilege expansion or migration.
 - [x] Frontend detail and activity link, noindex/no-store, truthful limit and unclassified reason, exact signed pockets.
 - [x] Android app-api route/response privacy and auth forwarding regression.
-- [ ] Recheck origin/main and planning before integration; full tests and CI evidence.
+- [x] Recheck origin/main and planning before integration; full tests and CI evidence recorded; mandatory failures remain HOLD.
 
 ## In-progress evidence (02:33 KST)
 - Backend RED 4/4 missing-method failures; GREEN receipt service 4/4, controller 3/3, route/auth 23/23.
@@ -23,5 +23,10 @@
 - Typecheck PASS; whole lint FAIL on existing `frontend/src/app/wallet/export-ledger-csv.tsx:19` `no-control-regex` (QA PR #1021 owns that change). Changed-file ESLint: zero errors.
 - Main rechecked unchanged `54d5140d`; planning v1186 still a draft; no merge/release authority.
 
-## Finished
-Pending full gates and CI.
+## Finished (02:39 KST; DRAFT / HOLD)
+- Code SHA `bb2a028bddb22fdf95a769187930c27738c83eea` pushed, Draft PR #1049 opened; full QA/release in `docs/releases/v2026.10.24.a0225.md` and Korean secondary.
+- Backend full 1,322 pass/398 skipped; frontend full 1,388 pass/1 fail (blog); database 15 pass/3 skipped; typecheck/build/api-contract pass.
+- Full lint fails existing wallet CSV no-control-regex; audit fails Next.js 16.3.8 (2 critical/1 high). QA/other developer ownership respected, no duplicate fix.
+- Real dev PostgreSQL read-only: owner sample 1 vs unrelated owner 0; 877 ledger/1,784 postings, unbalanced/underposted 0; app INSERT on 235 tables (P0).
+- Branch count 24→25, open PR 23→24, deleted 0. All non-main unique commits protected. No main merge, Test/Production promotion, migration, DB write, rollback or reservation change.
+- CI checks and official Test finance E2E remain release-blocking; exact final documentation SHA must be checked independently.
