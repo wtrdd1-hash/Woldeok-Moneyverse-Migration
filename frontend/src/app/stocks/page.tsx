@@ -4,14 +4,11 @@ import {
   TrendingUp,
   TrendingDown,
   HelpCircle,
-  MessageSquare,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
-import { isLoggedInMember } from '@/lib/session';
-import { LiveBadge } from './live';
 import dynamicImport from 'next/dynamic';
 import { StockDisclosureTicker } from '@/components/stock-disclosure-ticker';
 import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
@@ -104,39 +101,14 @@ export default async function StocksPage({
 
   return (
     <MarketPricesProvider>
-      <div data-page="stocks" className="mx-auto w-full max-w-5xl space-y-5 sm:space-y-6 px-3 sm:px-6 py-2 sm:py-4 pb-28 zero-overflow-shield">
-        {/* 1. Header: Toss Securities Style Ultra-Clean Title & Live Badge */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 pb-1">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">
-                가상 주식 거래소
-              </h1>
-              <LiveBadge />
-            </div>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
-              10대 가상 상장사 실시간 10단 호가창 · 1초 체결 모의투자 시뮬레이터
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <Link
-              href="/stocks/community"
-              className="btn-toss h-10 px-4 bg-slate-800/90 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700/70 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
-            >
-              <MessageSquare className="size-3.5 text-primary" />
-              <span>주주 라운지 →</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* 2. Global Macro & Disclosure Ticker */}
+      <div data-page="stocks" className="space-y-6">
+        {/* 1. Global Macro & Disclosure Ticker */}
         <div className="space-y-4">
           <GlobalMacroPulseTicker />
           <StockDisclosureTicker />
         </div>
 
-        {/* 3. Toss Style Filter Tabs */}
+        {/* 2. Toss Style Filter Tabs */}
         <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/60">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             {[
@@ -166,7 +138,7 @@ export default async function StocksPage({
           </span>
         </div>
 
-        {/* 4. 10 Listed Companies: Toss Clean Card List */}
+        {/* 3. 10 Listed Companies: Toss Clean Card List */}
         <div className="space-y-2.5">
           {stocks.length === 0 ? (
             <div className="toss-card p-10 text-center text-slate-400 text-xs bg-[#0f1422] rounded-2xl">
@@ -239,7 +211,7 @@ export default async function StocksPage({
           )}
         </div>
 
-        {/* 5. Safe Simulation Notice */}
+        {/* 4. Safe Simulation Notice */}
         <div className="toss-card p-4 sm:p-5 bg-[#0f1422] border-slate-800/80 flex items-start gap-3 text-xs text-slate-400 rounded-2xl">
           <HelpCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
           <div className="space-y-1">

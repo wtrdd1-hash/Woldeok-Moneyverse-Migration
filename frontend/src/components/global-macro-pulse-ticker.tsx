@@ -10,7 +10,6 @@ import {
   Calendar,
   Clock,
   AlertCircle,
-  ChevronRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -91,11 +90,11 @@ const FALLBACK_PULSE: MacroPulseData = {
     },
     {
       id: 'kospi',
-      name: 'KOSPI 코스피',
+      name: 'KOSPI 코스피 종합지수',
       nameEn: 'KOSPI Index',
-      value: 2642.8,
+      value: 2628,
       unit: 'pt',
-      changeRate: 0.45,
+      changeRate: -0.47,
       description: '대한민국 유가증권시장 대표 종합주가지수',
       descriptionEn: 'Korea Benchmark Index',
       educationalTip: '반도체와 2차전지 등 수출 대형주 비중이 높아 글로벌 경기 및 환율에 민감합니다.',
@@ -103,21 +102,33 @@ const FALLBACK_PULSE: MacroPulseData = {
     },
     {
       id: 'usd_krw',
-      name: '원/달러 환율',
+      name: '원/달러 환율 (USD/KRW)',
       nameEn: 'USD/KRW',
       value: 1382.4,
       unit: '원',
-      changeRate: 0.12,
+      changeRate: 0,
       description: '1 미국 달러당 원화 교환 비율',
       descriptionEn: 'Exchange Rate',
       educationalTip: '환율 상승 시 수출주의 실적은 개선되지만 수입 원자재 가격이 올라 물가 부담이 커집니다.',
       educationalTipEn: 'Boosts export margins but imports inflation pressure.',
     },
+    {
+      id: 'kr_cpi',
+      name: '소비자물가상승률 (CPI YoY)',
+      nameEn: 'Consumer Price Inflation',
+      value: 2.1,
+      unit: '%',
+      changeRate: -0.1,
+      description: '전년 동월 대비 소비자 물가 변동률',
+      descriptionEn: 'YoY Inflation Rate',
+      educationalTip: '물가가 안정 목표(2.0%)에 근접할수록 중앙은행의 금리 인하 여력이 넓어집니다.',
+      educationalTipEn: 'Target inflation allows central banks to ease monetary policy.',
+    },
   ],
   global: [
     {
       id: 'fed_funds',
-      name: '미국 연준 기준금리',
+      name: '미국 연준(Fed) 기준금리',
       nameEn: 'Fed Funds Rate',
       value: 4.75,
       unit: '%',
@@ -128,28 +139,52 @@ const FALLBACK_PULSE: MacroPulseData = {
       educationalTipEn: 'Primary benchmark discount rate for global capital flows.',
     },
     {
-      id: 'sp500',
-      name: 'S&P 500',
-      nameEn: 'S&P 500 Index',
-      value: 5784.5,
+      id: 'nasdaq',
+      name: 'NASDAQ 나스닥 종합지수',
+      nameEn: 'NASDAQ Composite',
+      value: 18211.6,
       unit: 'pt',
-      changeRate: 0.38,
+      changeRate: -0.22,
+      description: '글로벌 빅테크 및 기술 성장주 중심 지수',
+      descriptionEn: 'Tech Innovation Index',
+      educationalTip: '금리 하락기나 AI 신기술 모멘텀 시기에 가장 탄력적으로 상승하는 성장형 지수입니다.',
+      educationalTipEn: 'Outperforms during rate cuts due to lower discount rates.',
+    },
+    {
+      id: 'sp500',
+      name: 'S&P 500 종합지수',
+      nameEn: 'S&P 500 Index',
+      value: 5770.4,
+      unit: 'pt',
+      changeRate: -0.17,
       description: '미국 시가총액 상위 500대 우량 상장기업 지수',
       descriptionEn: 'US Large Cap Index',
       educationalTip: '장기 적립식 복리 투자의 대표 벤치마크로 미국 경제 전체의 성장성을 대변합니다.',
       educationalTipEn: 'Gold standard for long-term compounding index portfolios.',
     },
     {
-      id: 'nasdaq',
-      name: 'NASDAQ 나스닥',
-      nameEn: 'NASDAQ Composite',
-      value: 18260.2,
+      id: 'dxy',
+      name: '달러 인덱스 (DXY)',
+      nameEn: 'US Dollar Index',
+      value: 103.62,
       unit: 'pt',
-      changeRate: 0.72,
-      description: '글로벌 빅테크 및 기술 성장주 중심 지수',
-      descriptionEn: 'Tech Innovation Index',
-      educationalTip: '금리 하락기나 AI 신기술 모멘텀 시기에 가장 탄력적으로 상승하는 성장형 지수입니다.',
-      educationalTipEn: 'Outperforms during rate cuts due to lower discount rates.',
+      changeRate: 0.17,
+      description: '주요 6개국 통화 대비 달러 가치',
+      descriptionEn: 'DXY Currency Index',
+      educationalTip: '달러 인덱스가 강세를 보이면 신흥국 증시에서 외국인 자금이 유출되는 경향이 있습니다.',
+      educationalTipEn: 'Strong USD typically triggers capital outflows from emerging markets.',
+    },
+    {
+      id: 'us10y',
+      name: '미국채 10년물 금리',
+      nameEn: 'US 10Y Yield',
+      value: 4.21,
+      unit: '%',
+      changeRate: 0.03,
+      description: '글로벌 무위험 채권 수익률의 기준 지표',
+      descriptionEn: '10-Year Benchmark Treasury Yield',
+      educationalTip: '10년물 금리가 급등하면 성장주의 미래 이익에 대한 할인율이 커져 주가 조정을 받습니다.',
+      educationalTipEn: 'Higher 10Y yields compress equity valuation multiples.',
     },
   ],
   exchangeRates: [
@@ -160,15 +195,15 @@ const FALLBACK_PULSE: MacroPulseData = {
   economicCalendar: [
     {
       id: 'us-cpi',
-      title: '미국 9월 소비자물가지수 (CPI)',
+      title: '미국 9월 소비자물가지수 (CPI) 발표',
       titleEn: 'US September Consumer Price Index (CPI)',
       scheduledDate: '2026-10-08',
       scheduledTime: '21:30 KST',
       dDay: 1,
       importance: 'HIGH',
       country: 'US',
-      previousValue: '2.5%',
-      forecastValue: '2.3%',
+      previousValue: '2.5% YoY',
+      forecastValue: '2.3% YoY',
       analysisKo: '물가 둔화세가 확고해지면 미 연준의 금리 인하 여력이 넓어져 주식 시장에 강력한 호재가 됩니다.',
       analysisEn: 'Disinflation confirmation will boost Fed easing bets, favoring tech growth equities.',
       marketImpactTipKo: '예측치(2.3%) 하회 시 ➡️ 기술주 급등, 달러 약세 / 예측치 상회 시 ➡️ 금리 재반등 및 변동성 확대',
@@ -176,7 +211,7 @@ const FALLBACK_PULSE: MacroPulseData = {
     },
     {
       id: 'fomc-rate',
-      title: '미국 연준 FOMC 기준금리 결정',
+      title: '미국 연준 FOMC 정례회의 기준금리 결정',
       titleEn: 'FOMC Interest Rate Decision',
       scheduledDate: '2026-10-10',
       scheduledTime: '03:00 KST',
@@ -192,15 +227,15 @@ const FALLBACK_PULSE: MacroPulseData = {
     },
     {
       id: 'us-nfp',
-      title: '미국 비농업 고용보고서 (NFP)',
+      title: '미국 비농업 고용보고서 (NFP) 및 실업률',
       titleEn: 'US Non-Farm Payrolls',
       scheduledDate: '2026-10-12',
       scheduledTime: '21:30 KST',
       dDay: 5,
       importance: 'HIGH',
       country: 'US',
-      previousValue: '142K',
-      forecastValue: '150K',
+      previousValue: '142K / 4.2%',
+      forecastValue: '150K / 4.2%',
       analysisKo: '고용 지표의 완만한 둔화는 경기 침체 없는 연착륙(Soft Landing) 시나리오의 핵심 검증대입니다.',
       analysisEn: 'Measures labor cooling to gauge whether US economy achieves a soft landing.',
       marketImpactTipKo: '적정 수준의 고용 증가와 임금 안정은 시장이 가장 선호하는 골디락스 장세를 형성합니다.',
@@ -208,7 +243,7 @@ const FALLBACK_PULSE: MacroPulseData = {
     },
     {
       id: 'bok-rate',
-      title: '한국은행 금통위 기준금리 결정',
+      title: '한국은행 금통위 기준금리 피벗 결정',
       titleEn: 'Bank of Korea Rate Decision',
       scheduledDate: '2026-10-14',
       scheduledTime: '10:00 KST',
@@ -216,7 +251,7 @@ const FALLBACK_PULSE: MacroPulseData = {
       importance: 'HIGH',
       country: 'KR',
       previousValue: '3.50%',
-      forecastValue: '3.25% (-25bp 피벗)',
+      forecastValue: '3.25% (-25bp)',
       analysisKo: '물가 안정과 가계부채 추이를 검토하며 통화 긴축을 마무리하고 완화로 전환하는 첫 분기점입니다.',
       analysisEn: 'Evaluating real estate and household debt, potential first easing cycle in 3+ years.',
       marketImpactTipKo: '금리 인하 시작 시 예금 이율이 하락하며 시중 자금이 가상주식과 위험자산으로 이동할 유인이 커집니다.',
@@ -224,9 +259,9 @@ const FALLBACK_PULSE: MacroPulseData = {
     },
   ],
   marketSummary: {
-    sentiment: 'RISK_ON',
-    summaryKo: '글로벌 유동성 완화 기대감이 확산되며 기술 성장주 선호가 이어지고 있습니다.',
-    summaryEn: 'Risk-on sentiment supported by tech resilience.',
+    sentiment: 'RISK_OFF',
+    summaryKo: '글로벌 유동성 및 긴축 기조 관망세로 방어적 분산 투자 심리가 우세합니다.',
+    summaryEn: 'Defensive risk-off sentiment prevails amid macro caution.',
     actionTipKo: '💡 실전 팁: 한미 기준금리 격차와 환율 추이를 종합하여 분산 포트폴리오를 유지하세요.',
     actionTipEn: '💡 Pro Tip: The rate spread explains cross-border asset flows.',
   },
@@ -260,14 +295,16 @@ export function GlobalMacroPulseTicker() {
 
   return (
     <div className="w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-slate-800/80 bg-[#0d131f] p-4 sm:p-5 shadow-xl backdrop-blur-md space-y-4">
-      {/* 1. 상단 상태 헤더 바 */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 pb-3 border-b border-slate-800/80">
+      {/* 1. 상단 상태 헤더 바 (텍스트 겹침 및 찌그러짐 원천 차단) */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
             <Globe className="size-3.5 animate-spin" style={{ animationDuration: '14s' }} />
             <span>실시간 거시경제 지표 (Macro Pulse)</span>
           </div>
-          <span className="text-[11px] text-slate-400 font-mono">10분 자동 갱신</span>
+          <span className="text-[11px] font-mono text-slate-400 bg-slate-900/90 px-2 py-0.5 rounded-full border border-slate-800">
+            10분 자동 갱신
+          </span>
         </div>
 
         <div className="flex items-center gap-2 text-xs flex-wrap">
@@ -286,8 +323,8 @@ export function GlobalMacroPulseTicker() {
         </div>
       </div>
 
-      {/* 2. 🔥 핵심 개선: 수치 쪼개짐 없는 핀테크 표준 6대 지표 카드 그리드 */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+      {/* 2. 🔥 9개 지표 3x3 완벽 대칭형 벤토 카드 그리드 (너비 충분 확보로 텍스트 잘림 제로) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {allIndicators.map((item) => {
           const isUp = item.changeRate > 0;
           const isDown = item.changeRate < 0;
@@ -297,21 +334,21 @@ export function GlobalMacroPulseTicker() {
               key={item.id}
               onClick={() => setSelectedItem(item)}
               type="button"
-              className="group flex flex-col justify-between rounded-xl bg-slate-900/90 p-3 text-left border border-slate-800/90 hover:border-emerald-500/50 hover:bg-slate-800/90 transition-all cursor-pointer min-h-[92px] active:scale-[0.98]"
+              className="group flex flex-col justify-between rounded-xl bg-slate-900/90 p-3.5 text-left border border-slate-800/90 hover:border-emerald-500/50 hover:bg-slate-800/90 transition-all cursor-pointer min-h-[100px] active:scale-[0.98] shadow-xs"
             >
               {/* 상단: 지표명 및 안내 아이콘 */}
-              <div className="flex items-center justify-between w-full gap-1">
-                <span className="text-xs text-slate-300 font-bold truncate group-hover:text-emerald-300 transition-colors">
+              <div className="flex items-center justify-between w-full gap-2">
+                <span className="text-xs sm:text-sm text-slate-200 font-bold truncate group-hover:text-emerald-300 transition-colors">
                   {item.name}
                 </span>
-                <HelpCircle className="size-3 text-slate-500 group-hover:text-emerald-400 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" />
+                <HelpCircle className="size-3.5 text-slate-500 group-hover:text-emerald-400 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" />
               </div>
 
               {/* 중단: 큼직하고 안정적인 모노스페이스 수치 (독립 행으로 줄바꿈 쪼개짐 원천 차단) */}
-              <div className="my-1.5 min-w-0">
-                <div className="font-mono text-sm sm:text-base font-black text-slate-100 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
+              <div className="my-2 min-w-0">
+                <div className="font-mono text-base sm:text-lg font-black text-slate-100 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                   {item.value.toLocaleString()}
-                  <span className="text-xs font-semibold text-slate-400 ml-1">{item.unit}</span>
+                  <span className="text-xs font-semibold text-slate-400 ml-1.5">{item.unit}</span>
                 </div>
               </div>
 
@@ -319,17 +356,17 @@ export function GlobalMacroPulseTicker() {
               <div className="flex items-center">
                 {item.changeRate !== 0 ? (
                   <span
-                    className={`inline-flex items-center gap-0.5 text-[11px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                    className={`inline-flex items-center gap-1 text-xs font-mono font-bold px-2 py-0.5 rounded-md ${
                       isUp
                         ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
                         : 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
                     }`}
                   >
-                    {isUp ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+                    {isUp ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
                     <span>{isUp ? '+' : ''}{item.changeRate}%</span>
                   </span>
                 ) : (
-                  <span className="text-[11px] font-mono font-medium text-slate-400 px-1 py-0.5">
+                  <span className="text-xs font-mono font-medium text-slate-400 px-1 py-0.5">
                     보합 (0.0%)
                   </span>
                 )}
@@ -439,7 +476,7 @@ export function GlobalMacroPulseTicker() {
                   key={evt.id}
                   type="button"
                   onClick={() => setSelectedEvent(evt)}
-                  className="shrink-0 flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-850 transition-all text-left cursor-pointer group min-w-[200px]"
+                  className="shrink-0 flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-850 transition-all text-left cursor-pointer group min-w-[220px]"
                 >
                   <span
                     className={`px-2 py-1 rounded-md text-[10px] font-mono font-black shrink-0 ${

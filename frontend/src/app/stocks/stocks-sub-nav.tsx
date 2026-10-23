@@ -40,9 +40,9 @@ export function StocksSubNav() {
   return (
     <nav
       aria-label={isEn ? 'Virtual Stock Navigation' : '가상 주식 주요 메뉴'}
-      className="w-full overflow-x-auto pb-1 scrollbar-none border-b border-border/60 bg-background/50 backdrop-blur-md sticky top-14 sm:top-16 z-20"
+      className="w-full overflow-x-auto pb-1 scrollbar-none border-b border-slate-800/80 bg-[#090A0F]"
     >
-      <div className="flex items-center gap-1 sm:gap-2 min-w-max px-1 py-1">
+      <div className="flex items-center gap-1 sm:gap-1.5 min-w-max py-1">
         {STOCK_NAV_ITEMS.map((item) => {
           const isActive = item.exact
             ? pathname === item.href
@@ -54,16 +54,16 @@ export function StocksSubNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all min-h-[40px] whitespace-nowrap ${
+              className={`relative flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition-all min-h-[40px] whitespace-nowrap active:scale-95 ${
                 isActive
-                  ? 'text-primary bg-primary/10 font-extrabold shadow-xs'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40 font-semibold'
+                  ? 'text-emerald-400 bg-emerald-500/10 font-black shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 font-semibold'
               }`}
             >
-              <Icon className={`size-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+              <Icon className={`size-4 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
               <span>{isEn ? item.labelEn : item.labelKo}</span>
               {isActive && (
-                <span className="absolute bottom-0 inset-x-2 h-[2.5px] rounded-full bg-primary" />
+                <span className="absolute bottom-0 inset-x-2 h-[2.5px] rounded-full bg-emerald-400" />
               )}
             </Link>
           );
