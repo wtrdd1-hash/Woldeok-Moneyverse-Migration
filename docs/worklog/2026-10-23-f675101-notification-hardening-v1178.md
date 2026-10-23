@@ -13,6 +13,9 @@
 - Refine P0 privacy/dedupe/receipt truthfulness, P1 keyset cursor and category mapping, read idempotency, Android/admin, regression and rollback. Do not invent Production exploit evidence. Use canonical English integrated plan and equivalent Korean, existing PROJECT_PLAN and UPDATE_LOG. No new feature-spec fragments.
 - Three official publishers reviewed (OWASP Authorization, PostgreSQL INSERT/unique indexes, W3C WCAG 2.2). Newly accepted independently deduplicated external references 0, cumulative UNKNOWN vs 10,000; gate BLOCKED.
 
-## Finished / verification (to be updated after writes)
-- Confirm branch diff and six EN/KO planning documents, cross-language parity, main drift, draft stacked PR, no runtime/DB/WLD/Test/Production changes.
-- Production promotion remains BLOCKED; require exact-SHA CI, real PostgreSQL negative-role/ownership tests, isolated Test, restore/rollback before deployment.
+## Finished / verification (2026-10-23 17:08 KST)
+- EN/KO integrated masters, canonical PROJECT_PLAN EN/KO, UPDATE_LOG EN/KO updated in isolated branch; `git compare` against parent v1176 head shows seven changed documentation/worklog files, no deletions. Each of six official EN/KO docs contains the v1178 section. Manual thematic parity: cycle, P0/P1, evidence, DB constraints, QA and release gate align; formal translation review pending.
+- Stacked [Draft PR #998](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/998) created with base v1176 [Draft PR #994](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/994); DO NOT MERGE. At PR creation branch was 7 commits ahead of parent and no commits behind it.
+- **Main drift during work:** `8a1b466b` → `ea9b1845` (one commit, only stock page/layout/ticker files). No overlap with v1178 docs; parent and stacked branch now one commit behind latest main. Rebase parent then stacked branch and rerun checks before integration. Do not merge unrelated stocks changes into this stacked PR.
+- Latest QA v1179 FAILED/HOLD, no implementation tests or exact-SHA Test run in this planning cycle. Production promotion remains BLOCKED; require dependency audit, financial negative-role/ownership tests, migration checksum provenance, CI, isolated backup restore, exact-SHA Test and zero-downtime rollback before release.
+- No runtime source changes, database writes, WLD movement, feature-switch change, Test or Production deployment. External official publishers reviewed 3; accepted new 0, cumulative verified UNKNOWN / 10,000 = BLOCKED.
