@@ -16,17 +16,17 @@ import {
   Send,
   Sparkles,
   ArrowUpRight,
+  BookOpen,
+  Compass,
 } from 'lucide-react';
 import { GuestQuickstart } from '@/components/guest-quickstart';
-import { LobbyCount } from '@/components/lobby-count';
-import { HomeAdvertisement } from '@/components/home-advertisement';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
 import { WalletGlance } from '@/components/wallet-glance';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Badge } from '@/components/ui/badge';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
-import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
+import { canonicalUrl } from '@/lib/seo';
 
 export const revalidate = 60;
 
@@ -89,7 +89,7 @@ export default async function HomePage() {
   const movers = rawStocks
     .map((stock) => {
       const cur = Number.parseInt(stock.current_price, 10);
-      const open = Number.parseInt(stock.day_open_price, 10);
+      const open = Number.parseInt(stock.day_open_price || stock.current_price, 10);
       if (!Number.isFinite(cur) || !Number.isFinite(open) || open <= 0) return null;
       const pct = ((cur - open) / open) * 100;
       return { ...stock, cur, open, pct };
@@ -99,11 +99,24 @@ export default async function HomePage() {
     .slice(0, 4);
 
   return (
-    <div data-page="home" className="mx-auto w-full max-w-5xl space-y-6 sm:space-y-8 px-4 sm:px-6 py-2 sm:py-6 pb-28 zero-overflow-shield">
-      {/* 1. 상단 온보딩 가이드 */}
-      <GuestQuickstart locale={locale} />
+    <div data-page="home" className="mx-auto w-full max-w-5xl space-y-6 sm:space-y-8 px-3 sm:px-6 py-2 sm:py-6 pb-28 zero-overflow-shield">
+      {/* 1. 상단 환영 인라인 바 (누런 배너 대신 깔끔한 미니 칩) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
+        <div className="flex items-center gap-2">
+          <div className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-xs sm:text-sm font-bold text-slate-200">
+            실시간 복식부기 불변 원장 시스템 정상 가동 중
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+          <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-400 bg-emerald-500/10 font-bold px-2 py-0.5">
+            Verified Ledger
+          </Badge>
+          <span className="hidden sm:inline">· 100% 안전한 금융 모의 시뮬레이터</span>
+        </div>
+      </div>
 
-      {/* 2. PC 와이드 벤토 그리드 (모바일에서는 1열 스택) */}
+      {/* 2. PC 와이드 벤토 그리드 (7:5 비대칭 핀테크 레이아웃) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
         {/* 좌측 메인 칼럼: 자산 대시보드 + 3대 퀵 액션 (7/12) */}
         <div className="lg:col-span-7 space-y-5">
@@ -116,24 +129,23 @@ export default async function HomePage() {
 
             <div className="flex items-center justify-between relative z-10">
               <div className="flex items-center gap-2.5">
-                <div className="size-8 rounded-2xl bg-emerald-500/20 text-emerald-400 grid place-items-center shadow-inner">
-                  <Coins className="size-4.5" />
+                <div className="size-9 rounded-2xl bg-emerald-500/20 text-emerald-400 grid place-items-center shadow-inner">
+                  <Coins className="size-5" />
                 </div>
                 <div>
                   <h2 id="hero-balance-heading" className="text-sm font-extrabold text-slate-200">
-                    내 가상 자산
+                    내 가상 자산 총액
                   </h2>
-                  <span className="text-[11px] text-slate-400 font-medium">실시간 복식부기 안전 보관</span>
+                  <span className="text-[11px] text-slate-400 font-medium">활동 현금 + 은행 예치금 실시간 집계</span>
                 </div>
               </div>
               <Badge variant="outline" className="text-[11px] border-emerald-500/40 text-emerald-400 bg-emerald-500/10 font-semibold px-2.5 py-1 rounded-full">
-                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse mr-1.5 inline-block" />
                 원장 정합성 100%
               </Badge>
             </div>
 
             <div className="space-y-1.5 relative z-10 pt-2">
-              <div className="text-3xl sm:text-4xl font-black font-fintech text-slate-100 tabular-nums tracking-tight flex items-baseline gap-2">
+              <div className="text-3xl sm:text-5xl font-black font-fintech text-slate-100 tabular-nums tracking-tight flex items-baseline gap-2">
                 <WalletGlance />
               </div>
               <p className="text-xs text-slate-400 font-medium">
@@ -198,50 +210,59 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* 우측 보조 칼럼: 실시간 인기 주식 TOP 4 + 필수 금융 계산기 (5/12) */}
+        {/* 우측 서브 칼럼: 실시간 핫 종목 TOP 4 + 경제 무결성 (5/12) */}
         <div className="lg:col-span-5 space-y-5">
-          {/* 실시간 인기 주식 스트립 */}
-          <div className="toss-card p-5 sm:p-6 space-y-3.5 bg-[#0f1422] dark:bg-[#0d121c] border border-slate-800 rounded-3xl shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+          {/* 실시간 핫 종목 위젯 */}
+          <section className="toss-card p-5 sm:p-6 space-y-4 bg-[#0f1422] border-slate-800/80 rounded-3xl shadow-xl">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
               <div className="flex items-center gap-2">
-                <Flame className="size-4.5 text-emerald-400 animate-pulse" />
-                <h2 className="text-xs sm:text-sm font-black text-slate-100 tracking-tight">실시간 급상승 종목</h2>
+                <Flame className="size-4.5 text-rose-400 animate-bounce" />
+                <h3 className="font-extrabold text-sm sm:text-base text-slate-100">
+                  실시간 급등락 상장 종목
+                </h3>
               </div>
-              <Link href="/stocks" className="text-xs font-bold text-slate-400 hover:text-emerald-400 flex items-center gap-0.5 transition-colors">
-                <span>전체보기</span>
+              <Link
+                href="/stocks"
+                className="text-xs font-bold text-slate-400 hover:text-emerald-400 flex items-center gap-0.5 transition-colors"
+              >
+                <span>전체 보기</span>
                 <ChevronRight className="size-3.5" />
               </Link>
             </div>
 
-            <div className="divide-y divide-slate-800/60">
+            <div className="space-y-2">
               {movers.length === 0 ? (
-                <p className="py-6 text-xs text-slate-400 text-center font-medium">시세 자료를 불러오지 못했습니다.</p>
+                <div className="p-4 text-center text-xs text-slate-400">
+                  실시간 호가 데이터를 불러오는 중입니다.
+                </div>
               ) : (
-                movers.map((item) => {
-                  const isPositive = item.pct >= 0;
+                movers.map((stock) => {
+                  const isUp = stock.pct >= 0;
                   return (
                     <Link
-                      key={item.symbol}
-                      href={`/stocks/${item.symbol}`}
-                      className="flex items-center justify-between py-3 hover:bg-slate-800/40 px-2 rounded-xl transition-all group"
+                      key={stock.symbol}
+                      href={`/stocks/${encodeURIComponent(stock.symbol)}`}
+                      className="flex items-center justify-between p-3 rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/60 transition-all group"
                     >
-                      <div className="min-w-0 pr-2">
-                        <div className="text-xs sm:text-sm font-black text-slate-100 truncate group-hover:text-emerald-400 transition-colors">
-                          {item.name}
-                        </div>
-                        <span className="text-[10px] font-fintech text-slate-400 uppercase font-semibold">
-                          {item.symbol}
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-lg bg-slate-800 text-slate-200">
+                          {stock.symbol}
+                        </span>
+                        <span className="text-xs sm:text-sm font-bold text-slate-200 truncate group-hover:text-primary transition-colors">
+                          {stock.name}
                         </span>
                       </div>
-                      <div className="text-right shrink-0">
-                        <div className="font-fintech font-black text-xs sm:text-sm text-slate-100 tabular-nums">
-                          {item.cur.toLocaleString()} WLD
+                      <div className="text-right font-mono shrink-0 pl-2">
+                        <div className="text-xs sm:text-sm font-extrabold text-slate-100 tabular-nums">
+                          {stock.cur.toLocaleString()} <span className="text-[10px] text-slate-400 font-normal">WLD</span>
                         </div>
-                        <div className={`font-fintech text-xs font-black tabular-nums flex items-center justify-end gap-0.5 ${
-                          isPositive ? 'text-emerald-400' : 'text-rose-400'
-                        }`}>
-                          {isPositive ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-                          <span>{isPositive ? `+${item.pct.toFixed(1)}%` : `${item.pct.toFixed(1)}%`}</span>
+                        <div
+                          className={`text-xs font-bold tabular-nums flex items-center justify-end gap-0.5 ${
+                            isUp ? 'text-emerald-400' : 'text-rose-400'
+                          }`}
+                        >
+                          {isUp ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+                          <span>{isUp ? `+${stock.pct.toFixed(1)}%` : `${stock.pct.toFixed(1)}%`}</span>
                         </div>
                       </div>
                     </Link>
@@ -249,73 +270,89 @@ export default async function HomePage() {
                 })
               )}
             </div>
-          </div>
+          </section>
 
-          {/* 필수 금융 계산기 4선 */}
-          <div className="toss-card p-5 sm:p-6 space-y-3.5 bg-[#0f1422] dark:bg-[#0d121c] border border-slate-800 rounded-3xl shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-              <div className="flex items-center gap-2">
-                <Calculator className="size-4.5 text-sky-400" />
-                <h2 className="text-xs sm:text-sm font-black text-slate-100 tracking-tight">필수 금융 도구</h2>
-              </div>
-              <Link href="/tools" className="text-xs font-bold text-slate-400 hover:text-sky-400 flex items-center gap-0.5 transition-colors">
-                <span>전체 20종</span>
-                <ChevronRight className="size-3.5" />
-              </Link>
+          {/* 안전 모의 시뮬레이션 안내 카드 */}
+          <div className="p-4 sm:p-5 rounded-3xl bg-[#0f1422] border border-slate-800/80 space-y-2 text-xs text-slate-400">
+            <div className="flex items-center gap-2 font-bold text-slate-200">
+              <ShieldCheck className="size-4 text-emerald-400" />
+              <span>100% 안전한 가상 금융 시뮬레이션</span>
             </div>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              <Link
-                href="/tools/compound-calculator"
-                className="p-3 sm:p-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/50 hover:border-emerald-500/50 hover:bg-slate-800/40 transition-all space-y-1.5 group"
-              >
-                <div className="size-7 rounded-xl bg-emerald-500/15 text-emerald-400 grid place-items-center group-hover:scale-110 transition-transform">
-                  <Percent className="size-3.5" />
-                </div>
-                <span className="block text-xs font-black text-slate-100 truncate">복리 수익률</span>
-                <span className="block text-[11px] text-slate-400 truncate">적립식 계산</span>
-              </Link>
-
-              <Link
-                href="/tools/stock-calculator"
-                className="p-3 sm:p-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/50 hover:border-sky-500/50 hover:bg-slate-800/40 transition-all space-y-1.5 group"
-              >
-                <div className="size-7 rounded-xl bg-sky-500/15 text-sky-400 grid place-items-center group-hover:scale-110 transition-transform">
-                  <TrendingDown className="size-3.5" />
-                </div>
-                <span className="block text-xs font-black text-slate-100 truncate">주식 물타기</span>
-                <span className="block text-[11px] text-slate-400 truncate">평단가 탈출</span>
-              </Link>
-
-              <Link
-                href="/tools/dividend-tax-calculator"
-                className="p-3 sm:p-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/50 hover:border-amber-500/50 hover:bg-slate-800/40 transition-all space-y-1.5 group"
-              >
-                <div className="size-7 rounded-xl bg-amber-500/15 text-amber-400 grid place-items-center group-hover:scale-110 transition-transform">
-                  <Coins className="size-3.5" />
-                </div>
-                <span className="block text-xs font-black text-slate-100 truncate">배당소득세</span>
-                <span className="block text-[11px] text-slate-400 truncate">실수령 계산</span>
-              </Link>
-
-              <Link
-                href="/tools/loan-interest-calculator"
-                className="p-3 sm:p-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/50 hover:border-rose-500/50 hover:bg-slate-800/40 transition-all space-y-1.5 group"
-              >
-                <div className="size-7 rounded-xl bg-rose-500/15 text-rose-400 grid place-items-center group-hover:scale-110 transition-transform">
-                  <Scale className="size-3.5" />
-                </div>
-                <span className="block text-xs font-black text-slate-100 truncate">대출 상환 이자</span>
-                <span className="block text-[11px] text-slate-400 truncate">원리금 균등</span>
-              </Link>
-            </div>
+            <p className="leading-relaxed [word-break:keep-all]">
+              월덕 머니버스의 모든 화폐(WLD)와 주식 거래는 실제 현금이나 금융상품이 아닌 게임 내 알고리즘으로 구동되는 안전한 가상 경제입니다.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* 3. 하단 신뢰 메타 & 커뮤니티 통계 */}
-      <HomeAdvertisement />
-      <LobbyCount />
+      {/* 3. 하단 벤토 그리드: 12대 실전 금융 계산기 퀵 허브 */}
+      <section className="space-y-4 pt-2">
+        <div className="flex items-center justify-between pb-1">
+          <div className="flex items-center gap-2">
+            <Calculator className="size-4.5 text-emerald-400" />
+            <h3 className="font-extrabold text-base text-slate-100">
+              실전 금융 계산기 & 시뮬레이터
+            </h3>
+          </div>
+          <Link
+            href="/tools"
+            className="text-xs font-bold text-slate-400 hover:text-emerald-400 flex items-center gap-0.5 transition-colors"
+          >
+            <span>전체 12종 계산기 보기</span>
+            <ChevronRight className="size-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Link
+            href="/tools/compound-calculator"
+            className="toss-card p-5 bg-[#0f1422] border-slate-800/80 hover:border-emerald-500/50 rounded-2xl transition-all group"
+          >
+            <div className="size-10 rounded-xl bg-emerald-500/15 text-emerald-400 grid place-items-center mb-3 group-hover:scale-105 transition-transform">
+              <Percent className="size-5" />
+            </div>
+            <h4 className="text-sm font-bold text-slate-100 group-hover:text-emerald-400 transition-colors">
+              복리 예금·적금 계산기
+            </h4>
+            <p className="text-xs text-slate-400 mt-1">
+              월 적립식 복리 이자와 72의 법칙 목표 자산 달성 시점 시뮬레이션
+            </p>
+          </Link>
+
+          <Link
+            href="/tools/loan-interest-calculator"
+            className="toss-card p-5 bg-[#0f1422] border-slate-800/80 hover:border-sky-500/50 rounded-2xl transition-all group"
+          >
+            <div className="size-10 rounded-xl bg-sky-500/15 text-sky-400 grid place-items-center mb-3 group-hover:scale-105 transition-transform">
+              <Scale className="size-5" />
+            </div>
+            <h4 className="text-sm font-bold text-slate-100 group-hover:text-sky-400 transition-colors">
+              대출이자 & 상환 계산기
+            </h4>
+            <p className="text-xs text-slate-400 mt-1">
+              원리금균등, 원금균등, 만기일시 상환 방식별 총이자 비교
+            </p>
+          </Link>
+
+          <Link
+            href="/tools/stock-calculator"
+            className="toss-card p-5 bg-[#0f1422] border-slate-800/80 hover:border-amber-500/50 rounded-2xl transition-all group"
+          >
+            <div className="size-10 rounded-xl bg-amber-500/15 text-amber-400 grid place-items-center mb-3 group-hover:scale-105 transition-transform">
+              <Coins className="size-5" />
+            </div>
+            <h4 className="text-sm font-bold text-slate-100 group-hover:text-amber-400 transition-colors">
+              주식 물타기·평단가 계산기
+            </h4>
+            <p className="text-xs text-slate-400 mt-1">
+              추가 매수 시 희석되는 평균 단가 및 탈출 목표가 역산
+            </p>
+          </Link>
+        </div>
+      </section>
+
+      {/* 4. 하단 온보딩 가이드 (상단 뷰포트를 방해하지 않도록 하단 안착) */}
+      <GuestQuickstart locale={locale} />
     </div>
   );
 }

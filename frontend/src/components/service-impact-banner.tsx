@@ -17,16 +17,21 @@ export async function ServiceImpactBanner() {
   const impact = serviceImpact(data.status ?? [], Date.now());
   if (!impact) return null;
 
+  // 단순 unknown이나 정상 시에는 상단 뷰포트 잠식을 방지하고, 장애 또는 점검 시에만 명시적 띠 배너 노출
+  if (impact.state !== 'outage' && impact.state !== 'maintenance') {
+    return null;
+  }
+
   return (
     <aside
       aria-live="polite"
       aria-label="서비스 상태 알림"
-      className="border-b border-amber-500/30 bg-amber-500/10 text-amber-950 dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-200 px-2.5 min-[400px]:px-3 min-[480px]:px-4 sm:px-6 lg:px-5 xl:px-8 py-2 text-xs select-none backdrop-blur-sm"
+      className="border-b border-rose-500/30 bg-rose-500/10 text-rose-200 px-3 sm:px-6 py-2 text-xs select-none backdrop-blur-sm"
     >
       <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center gap-x-3 gap-y-1">
         <strong className="font-bold">{MESSAGE[impact.state]}</strong>
         {impact.staleCount > 0 ? (
-          <span className="text-[11px] opacity-80">{impact.staleCount}개 항목 최신 확인 필요</span>
+          <span className="text-[11px] opacity-80">{impact.staleCount}개 항목 점검 필요</span>
         ) : null}
         <Link
           href="/status"
