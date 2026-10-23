@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
@@ -71,16 +71,24 @@ const REQUEST_TYPES = [
   { value: 'deletion', label: '개인정보 삭제 요청' },
 ] as const;
 
-export function PrivacyRequestForm() {
+export function PrivacyRequestForm({ submissionKey }: { readonly submissionKey: string }) {
   const [state, action] = useActionState(createPrivacyRequest, IDLE);
   const [requestType, setRequestType] = useState<string>('access');
+  const [key, setKey] = useState(submissionKey);
+
+  // Keep the same key when retrying an unchanged request after an ambiguous
+  // network error. A confirmed receipt or a changed payload is a new request.
+  useEffect(() => {
+    if (state.status === 'ok') setKey(crypto.randomUUID());
+  }, [state]);
 
   return (
     <form action={action} className="grid gap-4">
       <input type="hidden" name="requestType" value={requestType} />
+      <input type="hidden" name="idempotencyKey" value={key} />
       <Field>
         <FieldLabel htmlFor="privacy-request-type">요청 종류</FieldLabel>
-        <Select value={requestType} onValueChange={setRequestType}>
+        <Select value={requestType} onValueChange={(value) => { setRequestType(value); setKey(crypto.randomUUID()); }}>
           <SelectTrigger id="privacy-request-type" className="min-h-11 w-full rounded-xl">
             <SelectValue />
           </SelectTrigger>
@@ -105,7 +113,8 @@ export function PrivacyRequestForm() {
           id="privacy-request-detail"
           name="detail"
           rows={4}
-          maxLength={2000}
+          maxLength={1000}
+          onChange={() => setKey(crypto.randomUUID())}
           autoComplete="off"
           placeholder="정정이 필요한 항목처럼 처리에 필요한 최소 설명만 적어 주세요."
           className="rounded-xl"

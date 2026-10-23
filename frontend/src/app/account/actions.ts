@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import type { ActionState } from '@/lib/action-state';
 import { api, apiWithCookie } from '@/lib/api';
 import { relaySetCookie } from '@/lib/cookie-relay';
-import { failure, idempotencyKey, mutate } from '@/lib/mutate';
+import { failure, mutate } from '@/lib/mutate';
 
 const PROVIDERS = new Set(['discord', 'google']);
 
@@ -73,34 +73,67 @@ export async function unlinkIdentity(
   }
 }
 
+const PRIVACY_REQUEST_TYPES = new Set(['access', 'correction', 'restriction', 'withdrawal', 'deletion']);
+const PRIVACY_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+interface PrivacyReceipt {
+  readonly requestId: string;
+  readonly requestType: string;
+  readonly status: string;
+  readonly replayed: boolean;
+}
+
 export async function createPrivacyRequest(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const requestType = String(formData.get('requestType') ?? '');
   const detail = String(formData.get('detail') ?? '').trim();
+  const requestKey = String(formData.get('idempotencyKey') ?? '');
 
-  if (requestType === '') return { status: 'error', message: '요청 종류를 선택해 주세요.' };
+  if (!PRIVACY_REQUEST_TYPES.has(requestType)) {
+    return { status: 'error', message: '요청 종류를 다시 선택해 주세요.' };
+  }
+  if (!PRIVACY_UUID.test(requestKey)) {
+    return { status: 'error', message: '요청 식별자가 유효하지 않습니다. 페이지를 새로고침해 주세요.' };
+  }
   if (requestType === 'correction' && detail === '') {
     return { status: 'error', message: '정정 요청은 간단한 설명이 필요해요.' };
   }
-  if (detail.length > 2000) {
-    return { status: 'error', message: '설명은 2000자 이내로 적어 주세요.' };
+  if (detail.length > 1000) {
+    return { status: 'error', message: '설명은 1000자 이내로 적어 주세요.' };
   }
 
   try {
-    await mutate('/api/v1/privacy/requests', {
+    const receipt = await mutate<PrivacyReceipt>('/api/v1/privacy/requests', {
       body: {
         requestType,
         ...(detail === '' ? {} : { detail }),
-        idempotencyKey: idempotencyKey(),
+        idempotencyKey: requestKey,
       },
     });
+    // Never claim a request was recorded unless the authoritative API
+    // returns a receipt for this exact request. A timeout is indeterminate.
+    if (
+      !receipt ||
+      !PRIVACY_UUID.test(receipt.requestId) ||
+      receipt.requestType !== requestType ||
+      receipt.status !== 'received' ||
+      typeof receipt.replayed !== 'boolean'
+    ) {
+      return { status: 'error', message: '접수 결과를 확인하지 못했습니다. 내 요청 기록을 확인한 뒤 다시 시도해 주세요.' };
+    }
     revalidatePath('/account');
     revalidatePath('/account/privacy');
-    return { status: 'ok', message: '요청을 접수 기록으로 남겼어요.' };
+    return {
+      status: 'ok',
+      message: `개인정보 요청이 접수 기록에 저장되었습니다. 접수번호: ${receipt.requestId}. 실제 처리 완료를 뜻하지 않습니다.`,
+    };
   } catch (error) {
-    return failure(error, '지금은 요청을 기록할 수 없어요.');
+    const result = failure(error, '접수 결과를 확인하지 못했습니다. 내 요청 기록을 확인한 뒤 같은 요청을 다시 시도해 주세요.');
+    return result.status === 'error'
+      ? { ...result, message: `${result.message} 처리 여부가 불확실하면 내 요청 기록을 먼저 확인해 주세요.` }
+      : result;
   }
 }
 

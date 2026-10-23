@@ -30,10 +30,10 @@ export class CreatePrivacyRequestDto {
   @IsIn(PRIVACY_REQUEST_TYPES as string[])
   readonly requestType!: string;
 
-  @ApiProperty({ required: false, maxLength: 2000 })
+  @ApiProperty({ required: false, maxLength: 1000 })
   @IsOptional()
   @IsString()
-  @MaxLength(2000)
+  @MaxLength(1000)
   readonly detail?: string;
 
   @ApiProperty({ format: 'uuid' })
