@@ -46,6 +46,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
+import { runMonetaryCommand } from './monetary-actions';
 
 export interface MonetaryTelemetryData {
   readonly m_total: string;
@@ -222,76 +223,44 @@ export function MonetaryBureauCard({
     setIsSubmitting(true);
     setFeedbackMsg(null);
     try {
-      const res = await fetch('/api/v1/admin/economy/monetary/ai-council/propose-policy', {
-        method: 'POST',
-      });
-      if (res.ok) {
-        setActiveTab('orders');
-        await refreshData();
-      } else {
-        const err = await res.json();
-        setFeedbackMsg(err.message || 'AI 정책 위원회 명령서 자동 등록 실패');
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+      const result = await runMonetaryCommand('propose-ai');
+      if (result.success) { setActiveTab('orders'); await refreshData(); }
+      else setFeedbackMsg(result.error);
+    } finally { setIsSubmitting(false); }
   };
 
   const handleToggleAutoRegulation = async () => {
     if (!autoConfig) return;
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/v1/admin/economy/monetary/auto-regulation/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_enabled: !autoConfig.is_enabled }),
-      });
-      if (res.ok) {
-        await refreshData();
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+      const result = await runMonetaryCommand('update-regulation', { is_enabled: !autoConfig.is_enabled });
+      if (result.success) await refreshData();
+      else setFeedbackMsg(result.error);
+    } finally { setIsSubmitting(false); }
   };
 
   const handleSaveAutoConfig = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/v1/admin/economy/monetary/auto-regulation/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          target_faucet_sink_ratio: Number(cfgTargetRatio),
-          tolerance_band_pct: Number(cfgTolerancePct),
-          max_step_pct: Number(cfgMaxStepPct),
-        }),
+      const result = await runMonetaryCommand('update-regulation', {
+        target_faucet_sink_ratio: Number(cfgTargetRatio),
+        tolerance_band_pct: Number(cfgTolerancePct),
+        max_step_pct: Number(cfgMaxStepPct),
       });
-      if (res.ok) {
-        setIsConfigOpen(false);
-        await refreshData();
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+      if (result.success) { setIsConfigOpen(false); await refreshData(); }
+      else setFeedbackMsg(result.error);
+    } finally { setIsSubmitting(false); }
   };
 
   const handleRunAutoRegulationNow = async () => {
     setIsSubmitting(true);
     setFeedbackMsg(null);
     try {
-      const res = await fetch('/api/v1/admin/economy/monetary/auto-regulation/run', {
-        method: 'POST',
-      });
-      if (res.ok) {
-        await refreshData();
-      } else {
-        const err = await res.json();
-        setFeedbackMsg(err.message || '평가 실행 실패');
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+      const result = await runMonetaryCommand('run-regulation');
+      if (result.success) await refreshData();
+      else setFeedbackMsg(result.error);
+    } finally { setIsSubmitting(false); }
   };
 
   const handleProposeOrder = async (e: React.FormEvent) => {
@@ -303,62 +272,36 @@ export function MonetaryBureauCard({
     setIsSubmitting(true);
     setFeedbackMsg(null);
     try {
-      const res = await fetch('/api/v1/admin/economy/monetary/orders/propose', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          order_type: orderType,
-          target_envelope: targetEnvelope,
-          max_amount_wld: maxAmountWld,
-          reason: proposeReason,
-        }),
+      const result = await runMonetaryCommand('propose', {
+        order_type: orderType,
+        target_envelope: targetEnvelope,
+        max_amount_wld: maxAmountWld,
+        reason: proposeReason,
       });
-      if (res.ok) {
-        setIsProposeOpen(false);
-        setProposeReason('');
-        await refreshData();
-      } else {
-        const err = await res.json();
-        setFeedbackMsg(err.detail || err.message || '명령서 발의 실패');
-      }
-    } catch (err: unknown) {
-      setFeedbackMsg(String(err));
-    } finally {
-      setIsSubmitting(false);
-    }
+      if (result.success) { setIsProposeOpen(false); setProposeReason(''); await refreshData(); }
+      else setFeedbackMsg(result.error);
+    } finally { setIsSubmitting(false); }
   };
 
   const handleApproveOrder = async (orderId: string) => {
     setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/v1/admin/economy/monetary/orders/${orderId}/approve`, {
-        method: 'POST',
-      });
-      if (res.ok) {
-        await refreshData();
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+      const result = await runMonetaryCommand('approve', { id: orderId });
+      if (result.success) await refreshData();
+      else setFeedbackMsg(result.error);
+    } finally { setIsSubmitting(false); }
   };
 
   const handleToggleFreeze = async () => {
     if (!telemetry) return;
     setIsSubmitting(true);
     try {
-      if (telemetry.is_issuance_frozen) {
-        await fetch('/api/v1/admin/economy/monetary/unfreeze', { method: 'POST' });
-      } else {
-        await fetch('/api/v1/admin/economy/monetary/freeze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reason: '중앙은행 관리자 긴급 통화 발행 동결 조치' }),
-        });
-      }
-      await refreshData();
-    } finally {
-      setIsSubmitting(false);
-    }
+      const result = telemetry.is_issuance_frozen
+        ? await runMonetaryCommand('unfreeze')
+        : await runMonetaryCommand('freeze', { reason: '중앙은행 관리자 긴급 통화 발행 동결 조치' });
+      if (result.success) await refreshData();
+      else setFeedbackMsg(result.error);
+    } finally { setIsSubmitting(false); }
   };
 
   return (

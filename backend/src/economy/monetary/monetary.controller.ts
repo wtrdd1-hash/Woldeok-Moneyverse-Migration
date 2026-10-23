@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
+import { ReauthGuard } from '../../auth/guards/reauth.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -13,7 +16,7 @@ import type { MonetaryOrderType, MonetaryTargetEnvelope } from './monetary.types
 
 @ApiTags('Admin Monetary & Central Bank')
 @ApiBearerAuth()
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
 @Controller('admin/economy/monetary')
 export class MonetaryController {
   constructor(
@@ -53,6 +56,7 @@ export class MonetaryController {
 
   @Post('auto-regulation/run')
   @ApiOperation({ summary: '화폐량 자동 조절 즉시 1회 수동 평가 및 집행' })
+  @UseGuards(ReauthGuard)
   async runAutoRegulationManually(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
     const event = await this.autoRegulation.evaluateAndExecute(adminId);
@@ -117,6 +121,7 @@ export class MonetaryController {
 
   @Post('orders/:id/approve')
   @ApiOperation({ summary: '통화정책 명령서 공식 승인 (APPROVED)' })
+  @UseGuards(ReauthGuard)
   async approveOrder(@Req() req: RequestWithSession, @Param('id') orderId: string) {
     const adminId = requireUserId(req);
     return this.centralBank.approvePolicyOrder(adminId, orderId);
@@ -124,6 +129,7 @@ export class MonetaryController {
 
   @Post('freeze')
   @ApiOperation({ summary: '신규 통화 발행 긴급 동결' })
+  @UseGuards(ReauthGuard)
   async freeze(@Req() req: RequestWithSession, @Body('reason') reason: string) {
     const adminId = requireUserId(req);
     return this.centralBank.freezeIssuance(adminId, reason);
@@ -131,6 +137,7 @@ export class MonetaryController {
 
   @Post('unfreeze')
   @ApiOperation({ summary: '통화 발행 긴급 동결 해제' })
+  @UseGuards(ReauthGuard)
   async unfreeze(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
     return this.centralBank.unfreezeIssuance(adminId);
@@ -150,6 +157,7 @@ export class MonetaryController {
 
   @Post('execute-mint')
   @ApiOperation({ summary: '승인된 명령에 따른 조폐국 정식 발행 실행' })
+  @UseGuards(ReauthGuard)
   async executeMint(
     @Req() req: RequestWithSession,
     @Body()
