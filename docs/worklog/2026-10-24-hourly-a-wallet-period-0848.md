@@ -12,8 +12,8 @@
 - [x] Backend TDD RED→GREEN: six semantic failures then 6/6 PASS.
 - [x] Frontend/app-api TDD RED→GREEN: missing helper failure then 13/13 PASS.
 - [x] Intermediate main/plan refresh: main remained 54d5140d; reviewed integrated plan v1208.
-- [ ] Full local and remote gates; real DB read-only.
-- [ ] Draft PR, QA/release report, final main refresh.
+- [x] Full local gates and real DB read-only: test/lint/security FAIL, typecheck/build/API contract/DB PASS; remote CI pending.
+- [x] EN/KO QA/release reports written, final main refresh; Draft PR and remote CI pending.
 
 ## Mid-work checkpoint — code candidate
 - Test RED: backend 6 semantic failures after contract build, frontend helper module absent; no false-positive RED from missing contract build counted.
@@ -24,3 +24,10 @@
 
 ## Evidence and final disposition
 Pending full CI, security, real PostgreSQL read-only and official Test. Production HOLD; no rollback initiated.
+
+## Pre-PR final local evidence — 08:59 KST
+- Code SHA `5dca5504b15c2d8ce161656bae6a6f02a6a2ba95`; root test: backend 1,319 PASS / 398 SKIPPED, frontend 1,386 PASS / 1 FAIL (existing blog), DB package 15 PASS / 3 SKIPPED. Full Lint FAIL at existing wallet CSV regex. Dependency audit FAIL (2 Critical / 4 High). Changed-file ESLint, typecheck, build and 179-endpoint API contract PASS; bot 8 PASS after offline install.
+- Actual PostgreSQL with `moneyverse_app`, `woldeok_moneyverse_dev`, read-only transaction and ROLLBACK: sample owner 274 transactions, unfiltered 50, 7-day 1, 90-day 50, unknown owner 0; cutoff/owner/cap checks PASS. No write or migration.
+- Branch audit: 56 non-main refs, all 56 unique unmerged, no identical heads or safe cleanup, no reported conflicts; 54 open PRs snapshot. 0 deleted, 0 force pushes.
+- Official isolated Test exact SHA, authenticated finance E2E, browser accessibility/SEO and production GitOps gate NOT VERIFIED/BLOCKED. No merge, Test or Production deployment, service restart or rollback.
+- Final remote CI evidence and PR URL to be appended as a PR comment; no false PASS claim.
