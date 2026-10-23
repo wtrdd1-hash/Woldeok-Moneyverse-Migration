@@ -48,6 +48,7 @@ describe('AI blog generator authorization', () => {
   it('rejects unauthenticated publication', async () => {
     const res = await POST(request({ 'x-cron-secret': 'invalid-key' }));
     expect(res.status).toBe(403);
+    expect((await res.json()).code).toBe('BLOG_PUBLISH_FORBIDDEN');
     expect(publishMock).not.toHaveBeenCalled();
     expect(res.headers.get('cache-control')).toContain('no-store');
   });

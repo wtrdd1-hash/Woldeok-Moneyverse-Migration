@@ -45,10 +45,10 @@ export async function POST(req: Request) {
   // A browser session must prove same-origin intent and an open elevated console.
   // Scheduler credentials are independent of cookies and do not require Origin.
   if (!isAuthorized) {
-    const wrongOrigin = verifySeoWriteOrigin(req);
-    if (wrongOrigin) return wrongOrigin;
     const viewer = await currentViewer();
     if (isAdministrator(viewer)) {
+      const wrongOrigin = verifySeoWriteOrigin(req);
+      if (wrongOrigin) return wrongOrigin;
       const denied = await verifySeoOperator();
       if (denied) return denied;
       isAuthorized = true;
