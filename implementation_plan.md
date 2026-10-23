@@ -3243,3 +3243,67 @@ flowchart LR
   - `https://easy-scraping.com/tools` (HTTP 200)
   - `https://easy-scraping.com/blog` (HTTP 200)
   - `https://easy-scraping.com/admin` (HTTP 200)
+
+---
+
+## 🏛️ [v234 Specification] 학술적 인지 심리학 & 글로벌 최고 핀테크 표준 기반 프론트엔드 전면 백지(Ground-Up) 재구축 마스터 플랜
+
+### 1. 학술 연구 및 글로벌 디자인 시스템 심층 분석 (Academic & Industry Benchmark)
+
+#### 1) HCI 및 인지 심리학 학술 연구 근거 (Cognitive Psychology Foundations)
+- **밀러의 법칙 (Miller's Law, 1956 - $7 \pm 2$ Chunking Theory)**:
+  - 인간의 단기 작업 기억(Working Memory)은 한 번에 5~9개 이상의 독립 정보를 인지할 때 급격한 피로와 이탈률을 겪는다.
+  - 기존 화면의 문제점: 상단 누런 배너 2개 + 티커 띠 + 체험 박스 + 자산 카드 등이 무질서하게 병렬 나열되어 인지 과부하(Cognitive Overload)를 유발함.
+  - 개선 적용: 전체 대시보드 정보를 **'1) 내 통합 자산', '2) 실시간 금융 시장', '3) 퀵 금융 도구' 3대 핵심 덩어리(Macro Chunks)**로 엄격히 청킹(Chunking).
+- **피츠의 법칙 (Fitts's Law, 1954 - Target Acquisition Time $T = a + b \log_2(2D/W)$)**:
+  - 타깃의 크기($W$)가 클수록, 이동 거리($D$)가 가까울수록 조작 시간과 오류율이 지수함수적으로 감소한다.
+  - 모바일 뷰포트에서 엄지손가락이 닿기 쉬운 자연스러운 영역(Natural Thumb Zone)인 하단 화면 25%에 **44px 이상 터치 타깃을 갖춘 5대 바텀 내비게이션**을 영구 안착시킴.
+- **게슈탈트 지각 법칙 (Gestalt Principles of Visual Perception)**:
+  - **근접성의 원리(Proximity) & 공통 영역(Common Region)**: 상호 연관된 활동 현금, 은행 복리 예금, 주식 평가액을 하나의 통합 서피스 카드(`toss-card`)로 감싸 단일 자산으로 묶음.
+  - **연속성의 원리(Continuity)**: 서브 탭과 내비게이션 인디케이터가 시선의 자연스러운 흐름을 유도하도록 1px 슬림 라인과 미세 하이라이트 제공.
+
+#### 2) 글로벌 최상위 핀테크 및 프로덕트 디자인 시스템 벤치마크
+- **토스 TDS (Toss Design System 2026)**:
+  - 과장된 네온 그라데이션 대신 차분한 다크 슬레이트(`#090A0F`, `#0f1422`)와 고대비 텍스트(`text-slate-100`, `text-slate-400`).
+  - 자간 `-0.025em`의 타이트하고 단단한 한글 타이포그래피(Pretendard/Noto Sans KR).
+  - 금융 수치의 자릿수 떨림(Jittering)을 100% 방지하는 `tabular-nums` 모노스페이스.
+- **Linear & Vercel Geist**:
+  - 서피스 고저차(Elevation)를 화려한 그림자가 아닌 **0.5px 미세 보더(`border-slate-800/80`)와 배경 명도 차이(1%~2% Light Tint)**로 구현하는 정밀 크래프트맨십.
+- **Apple Human Interface Guidelines (HIG)**:
+  - 320px(Galaxy Fold 커버 디스플레이)부터 1440px+(와이드 데스크톱) 전 구간에서 **가로 스크롤 0건(Zero Horizontal Overflow)** 및 인터랙티브 44px 터치 보장.
+
+---
+
+### 2. 5대 Phase 단계별 전면 재구축 세부 명세
+
+#### Phase 1: 글로벌 쉘, 슬림 헤더 & 시스템 알림 마이크로화
+- **파일**: `frontend/src/components/site-header.tsx`, `frontend/src/components/mobile-bottom-nav.tsx`, `frontend/src/app/globals.css`
+- **핵심 변경점**:
+  - 상단 2중 누런색 경고 배너 전면 철거 -> 헤더 내 세련된 1.5px 펄스 마이크로 칩(`실시간 복식부기 원장 가동 중`)으로 압축 통합.
+  - 헤더 내 로고 + 퀵 링크 + 언어 변경 + 유저 프로필 아이콘의 유기적 시각 위계 정돈.
+  - 모바일 바텀 내비게이션 바: 44px 터치 타깃 확보 및 `pb-24` 세이프에어리어 보장.
+
+#### Phase 2: 메인 홈 대시보드(`/`) 토스 비대칭 벤토 그리드 전면 백지 리빌드
+- **파일**: `frontend/src/app/page.tsx`, `frontend/src/components/guest-quickstart.tsx`, `frontend/src/components/wallet-glance.tsx`
+- **핵심 변경점**:
+  - 기존의 촌스러운 "가입 없이 시작" 녹색 박스 및 단조로운 0 WLD 카드 전면 교체.
+  - **7:5 비대칭 핀테크 벤토 그리드(Asymmetric Bento Grid)** 구축:
+    - **좌측 메인 컬럼(7/12)**: 토스형 통합 순자산 카드 (활동 현금 + 은행 복리 예금 + 주식 평가액 3분할 서피스 + 1:1 간편 송금 / 입출금 퀵 액션).
+    - **우측 서브 컬럼(5/12)**: 실시간 핫 급등락 가상 주식 4종 미니 호가 티커 + 원장 무결성 상태 카드.
+    - **하단 벤토 스트립**: 12대 실전 금융 계산기 퀵 허브(복리/대출/배당 계산기) + 일일 도파민 출석/퀘스트.
+
+#### Phase 3: 가상 주식 거래소(`/stocks`) 3x3 대칭 그리드 및 서브내비 완성
+- **파일**: `frontend/src/app/stocks/layout.tsx`, `frontend/src/app/stocks/stocks-sub-nav.tsx`, `frontend/src/components/global-macro-pulse-ticker.tsx`
+- **핵심 변경점**:
+  - 텍스트 겹침 버그가 완전 해결된 통합 헤더 및 `StocksSubNav` 확정 유지.
+  - 9대 거시경제 3x3 대칭 벤토 카드와 10대 상장사 호가 리스트의 완벽한 폰트/보더 일체감 완성.
+
+#### Phase 4: 가상 지갑(`/wallet`) & 가상 은행(`/bank`) 통합 재구축
+- **파일**: `frontend/src/app/wallet/page.tsx`, `frontend/src/app/bank/page.tsx`
+- **핵심 변경점**:
+  - 보유 가상 주식 실시간 평가액 및 원터치 `TradeDialog (side="sell")` 매도 연동 확정.
+  - 복식부기 불변 원장 활동 내역 및 은행 복리 예치금의 실시간 이자 수령 인터페이스 시각화.
+
+#### Phase 5: 320px~1440px 전 뷰포트 자가 검증 및 무중단 배포
+- **검증 명령**: `pnpm typecheck`, `pnpm test`, `pnpm build`
+- **실 브라우저 검증**: `document.documentElement.scrollWidth <= window.innerWidth` (횡스크롤 제로), 텍스트 겹침 제로, 버튼 짤림 제로 확인 후 프로덕션 승격.
