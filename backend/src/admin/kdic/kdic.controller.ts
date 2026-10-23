@@ -8,8 +8,11 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
+import { ReauthGuard } from '../../auth/guards/reauth.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import { SkipInternalToken } from '../../auth/guards/skip-internal-token.decorator';
 import type { RequestWithSession } from '../../auth/session.context';
@@ -18,7 +21,7 @@ import { KdicService } from './kdic.service';
 
 @ApiTags('Deposit Insurance (KDIC) & Financial Stability Control')
 @Controller('admin/kdic')
-@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard)
+@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard, AdminSessionGuard)
 export class AdminKdicController {
   constructor(private readonly kdicService: KdicService) {}
 
@@ -30,6 +33,7 @@ export class AdminKdicController {
   }
 
   @Post('assess-premiums')
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '부보 금융기관 분기별 예금보험료 정기 징수 집행' })
   async assessPremiums(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
@@ -42,6 +46,7 @@ export class AdminKdicController {
   }
 
   @Post('liquidity-loan')
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '부실 우려 금융기관 긴급 유동성 대여(Bailout) 집행' })
   async injectLiquidity(
     @Body() body: { institutionId: string; amountWld: number },
@@ -61,6 +66,7 @@ export class AdminKdicController {
   }
 
   @Post('payout')
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '파산 금융기관 피해 예금자 대위변제금 집행' })
   async executePayout(
     @Body() body: { institutionId: string; userId: string },

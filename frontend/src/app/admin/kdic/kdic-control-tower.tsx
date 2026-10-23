@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { assessKdicPremiums, executeKdicPayout, getKdicOverview, injectKdicLiquidity } from './actions';
 
 export interface KdicOverviewData {
   fund: {
@@ -64,10 +65,9 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
 
   const refreshData = async () => {
     try {
-      const res = await fetch('/api/v1/admin/kdic/overview');
-      const json = await res.json();
-      if (json.success && json.data) {
-        setData(json.data);
+      const result = await getKdicOverview();
+      if (result.success) {
+        setData(result.data);
       }
     } catch (e) {
       console.error('Failed to refresh KDIC overview', e);
@@ -79,11 +79,7 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
     setIsProcessing(true);
 
     try {
-      const res = await fetch('/api/v1/admin/kdic/assess-premiums', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await res.json();
+      const result = await assessKdicPremiums();
       if (result.success) {
         toast.success('🏦 [예금보험공사] 정기 예금보험료 징수 완료!', {
           description: `총 ${result.data.totalCollectedWld.toLocaleString()} WLD 예보기금 편입 (${result.data.recordsCount}개 기관)`,
@@ -104,12 +100,7 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
     setIsProcessing(true);
 
     try {
-      const res = await fetch('/api/v1/admin/kdic/liquidity-loan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ institutionId, amountWld: 1000000 }),
-      });
-      const result = await res.json();
+      const result = await injectKdicLiquidity(institutionId, 1000000);
       if (result.success) {
         toast.success('🚨 [금융안정기금] 100만 WLD 긴급 유동성 대여 집행 완료!', {
           description: `회복 후 BIS 자기자본비율: ${result.data.newBisRatioPct.toFixed(2)}%`,
@@ -131,12 +122,7 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
     setIsProcessing(true);
 
     try {
-      const res = await fetch('/api/v1/admin/kdic/payout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ institutionId: payoutInstId, userId: payoutUserId.trim() }),
-      });
-      const result = await res.json();
+      const result = await executeKdicPayout(payoutInstId, payoutUserId.trim());
       if (result.success) {
         toast.success('🛡️ [예금자보호법] 피해 예금자 대위변제금 지급 완료!', {
           description: `환급액: ${result.data.payoutAmountWld.toLocaleString()} WLD (최고 50만 WLD 한도 보장)`,
