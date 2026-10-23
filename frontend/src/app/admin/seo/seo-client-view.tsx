@@ -133,7 +133,7 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
   const refreshData = async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch('/api/seo/status');
+      const res = await fetch('/api/admin/seo/status');
       if (res.ok) {
         const json = await res.json();
         if (json && typeof json === 'object') {

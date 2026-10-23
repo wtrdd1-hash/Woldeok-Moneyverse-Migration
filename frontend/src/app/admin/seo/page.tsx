@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { getServerLocale } from '@/lib/locale-server';
 import { requireAdminConsole } from '@/lib/session';
+import { api } from '@/lib/api';
 import { SeoClientView, type SeoInitialData } from './seo-client-view';
 import { SeoFunnelCard } from './seo-funnel-card';
 
@@ -14,70 +15,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
-
-async function fetchSeoData(): Promise<SeoInitialData> {
+async function fetchSeoData(): Promise<SeoInitialData | null> {
   try {
-    const res = await fetch(`${API_ORIGIN}/api/v1/seo/status`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      return {
-        ...data,
-        provenance: {
-          source: 'seo-status-api',
-          observedAt: new Date().toISOString(),
-          freshness: 'fresh',
-          status: 'operational',
-        },
-      };
-    }
-  } catch {
-    // Graceful fallback
-  }
-
-  return {
-    provenance: {
-      source: 'fallback',
-      observedAt: null,
-      freshness: 'unknown',
-      status: 'unavailable',
-    },
-    totalHits24h: 0,
-    totalHits7d: 0,
-    avgDurationMs: 0,
-    botDistribution: { Googlebot: 0, 'Naver Yeti': 0, Bingbot: 0, Others: 0 },
-    statusDistribution: { '200': 0, '304': 0, '404': 0 },
-    stockCoverage: { indexed: 0, total: 10 },
-    guideCoverage: { indexed: 0, total: 5 },
-    targetUrls: [
-      { path: '/stocks/CHIPS', category: 'stock', name: '침팬지 반도체 (CHIPS)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/DUCKS', category: 'stock', name: '월덕 인더스트리 (DUCKS)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/COIN', category: 'stock', name: '도지 밈 파이낸스 (COIN)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/SPACE', category: 'stock', name: '덕스페이스 로켓 (SPACE)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/CYBER', category: 'stock', name: '네오사이버 시큐리티 (CYBER)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/ROBOT', category: 'stock', name: '휴머노이드 다이내믹스 (ROBOT)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/GOLD', category: 'stock', name: '골든덕 홀딩스 (GOLD)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/ENERGY', category: 'stock', name: '쿼크 에너지 코퍼레이션 (ENERGY)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/BIO', category: 'stock', name: '바이오덕 테라퓨틱스 (BIO)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/GAME', category: 'stock', name: '도파민 게임즈 (GAME)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/guide/stock-trading', category: 'guide', name: '가상 주식 실전 매매 가이드', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/guide/virtual-banking', category: 'guide', name: '가상 금융 & 복리 예금 가이드', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/guide/career-mastery', category: 'guide', name: '직업 & 일일 파밍 루틴 가이드', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/guide/glossary', category: 'guide', name: '핀테크 & 가상경제 핵심 용어사전', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/guide/dopamine-system', category: 'guide', name: '도파민 보상 & 확률 가이드', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/', category: 'hub', name: '월덕 머니버스 메인 포털', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks', category: 'hub', name: '가상 주식 거래소 종합 허브', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/announcements', category: 'hub', name: '공식 공지사항 허브', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-    ],
-    recentLogs: [],
-    indexNowKey: 'moneyverse-indexnow-key-2026',
-    sitemapUrl: 'https://easy-scraping.com/sitemap.xml',
-  };
+    const data = await api<SeoInitialData>('/api/v1/seo/status/admin');
+    return { ...data, provenance: {
+      source: 'seo-status-api', observedAt: new Date().toISOString(),
+      freshness: 'fresh', status: 'operational',
+    } };
+  } catch { return null; }
 }
 
 export default async function AdminSeoPage() {
@@ -129,7 +74,13 @@ export default async function AdminSeoPage() {
 
       <SeoFunnelCard />
 
-      <SeoClientView initialData={initialData} initialNowMs={initialNowMs} />
+      {initialData ? (
+        <SeoClientView initialData={initialData} initialNowMs={initialNowMs} />
+      ) : (
+        <div role="status" className="rounded-lg border border-border p-5 text-sm text-muted-foreground">
+          관리자 SEO 데이터를 불러올 수 없습니다. 권한 및 서버 연결을 확인해 주세요.
+        </div>
+      )}
     </div>
   );
 }
