@@ -1,5 +1,12 @@
 ## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
+## 2026-10-23 19:00 KST — Planning v1182 (Feature Improvement, DRAFT/HOLD)
+- Previous v1180 Feature Addition; Current v1182 Feature Improvement; Next v1184 Feature Addition (provisional). Main f032c4aebd518c8730e56058327ca35f97b4165b; stacked after Draft #1005 without touching A/B/C/QA runtime.
+- Read-only DEV: notification_preferences.state DEFAULT OPTED_IN (0 rows), no numeric row version, app DML/TRUNCATE, RLS OFF. Main account notifications page trusts forgeable ?saved=1 success. Source/DB risk, not proven external misuse. New P0 fail-closed default, server receipt, revocation/send fence and least privilege; P1 versioned owner API, audit, DST, Android/a11y/admin/rollback.
+- QA v1183 FAILED/HOLD (Next advisories, CI skipped, lint/home failures, finance ACL, migration266, Cron backup, exact-SHA Test/Production blocked). Existing #1004 coordinates implementation; no tests executed here.
+- Integrated EN/KO masters, PROJECT_PLAN EN/KO and UPDATE_LOG EN/KO updated in isolated docs branch. External new accepted 0; cumulative 10,000 gate BLOCKED. No runtime, DB, WLD, switch, Test or Production changes.
+
+
 ## 2026-10-23 v1180 — F675-102 notification consent and quiet-hours planning (DRAFT)
 - Previous Feature Improvement v1178 / Current Feature Addition v1180 / Next Feature Improvement v1182 (provisional). Main baseline `b147ed18`; QA v1181 FAILED/HOLD.
 - Integrated EN/KO master and PROJECT_PLAN EN/KO extended in place; existing notification governance remains canonical. Read-only DEV: notification_preferences table already exists with owner-purpose-channel PK and 0 rows; app-role direct DML/TRUNCATE and RLS OFF are P0 risks. No duplicate preference table or new scattered feature spec.
