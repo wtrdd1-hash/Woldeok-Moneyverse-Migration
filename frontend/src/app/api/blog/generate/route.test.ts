@@ -10,10 +10,14 @@ vi.mock('@/lib/viewer', () => ({
 }));
 import { POST, GET } from './route';
 
-const request = (headers?: Record<string, string>) =>
-  new Request('https://easy-scraping.com/api/blog/generate', { method: 'POST', headers: headers ?? {} });
+const request = (headers?: Record<string, string>, body?: any) =>
+  new Request('https://easy-scraping.com/api/blog/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(headers ?? {}) },
+    body: body ? JSON.stringify(body) : null,
+  });
 
-describe('AI blog editorial publication engine', () => {
+describe('AI blog editorial publication engine with multi-country & tech support', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     delete process.env.INTERNAL_API_SECRET;
@@ -37,24 +41,26 @@ describe('AI blog editorial publication engine', () => {
     expect(data.success).toBe(true);
     expect(data.post).toBeDefined();
     expect(data.post.slug).toBeDefined();
-    expect(data.post.title).toBeDefined();
+    expect(data.post.country).toBeDefined();
   });
 
-  it('allows administrators to trigger verified AI blog publication', async () => {
+  it('allows administrators to generate specific country (US) and TECH articles', async () => {
     adminMock.mockReturnValue(true);
-    const res = await POST(request());
+    const res = await POST(request({}, { country: 'US', category: 'TECH' }));
     expect(res.status).toBe(201);
     const data = await res.json();
     expect(data.success).toBe(true);
-    expect(data.post.url).toMatch(/^\/blog\//);
+    expect(data.post.category).toBe('TECH');
+    expect(data.post.country).toBe('US');
   });
 
-  it('provides ready status on GET for administrators', async () => {
+  it('provides ready status on GET for administrators with country info', async () => {
     adminMock.mockReturnValue(true);
-    const res = await GET();
+    const res = await GET(new Request('https://easy-scraping.com/api/blog/generate'));
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.success).toBe(true);
-    expect(data.status).toBe('READY');
+    expect(data.supportedCountries).toContain('KR');
+    expect(data.supportedCategories).toContain('TECH');
   });
 });

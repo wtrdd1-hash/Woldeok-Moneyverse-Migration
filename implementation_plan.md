@@ -3360,3 +3360,30 @@ flowchart LR
   - 프로덕션 (`easy-scraping.com`, 포트 3354): 최신 릴리스 동기화 완료
   - 테스트 서버 (`test.easy-scraping.com`, 포트 3364): 최신 릴리스 동기화 및 `moneyverse-release-v1110-test-frontend.service` 재시작 완료
 - **HTTP 200 실측 검증**: `/guide`, `/guide/stock-trading`, `/guide/virtual-banking` 모두 최신 키워드 정상 서빙 확인.
+
+
+---
+## 🚀 [v236 Specification] 국가별 맞춤 AI 블로그(KR/US/JP/VN) & 연구자료 주입 & 개발 칼럼 & 관리자 2단계 삭제 통합 사양
+
+### 1. 사용자 확정 요구사항
+- **국가별 콘텐츠 분기**: 대한민국(KR), 미국(US), 일본(JP), 베트남(VN) 4개국 시장 환경, 언어, 통화(KRW/USD/JPY/VND), 중앙은행에 맞춘 전문 칼럼 생성.
+- **연구자료 및 공인 출처 주입**: FRED, ECOS, Yahoo Finance 실시간 거시경제 지표 + ArXiv, NBER, IEEE, 한국은행 BOK 경제연구원 등 공인 학술 레퍼런스 메타데이터 주입.
+- **경제 칼럼 + 개발 기술(Tech) 칼럼 지원**:
+  - 요일별 교차 순환: 월/수/금 경제·금융 분석, 화/목/토 핀테크 개발·분산 아키텍처, 일 종합 랩업.
+  - 관리자 패널에서 [경제 & 금융] vs [핀테크 & 개발] 즉시 선택 발행 지원.
+- **하루 1회 자동 발행 스케줄러**: 매일 새벽 04:00 KST 글로벌 시장 마감 직후 Cron 스케줄러를 통한 자동 발행.
+- **관리자 2단계 삭제 제어**:
+  - 1단계: 실시간 철회(소프트 삭제, 410 Gone/비공개 처리, 목록에서 취소선 및 WITHDRAWN 뱃지 표시)
+  - 2단계: 영구 삭제 (Purge, 공유 디스크 JSON 저장소에서 완전 소거)
+
+### 2. 세부 변경 내역
+- `frontend/src/app/blog/blog.types.ts`: `TECH` 카테고리, `BlogCountry` ('KR'|'US'|'JP'|'VN'), `AcademicReference`, `BlogPostStatus` ('PUBLISHED'|'WITHDRAWN') 인터페이스 확장.
+- `frontend/src/app/blog/blog-data.ts`:
+  - `TECH_TEMPLATES` 4종 (분산원장 BigInt 무결성, 초저지연 Canvas 호가창 스트리밍, 제로트러스트 보안, 퀀트 알고리즘) 탑재.
+  - `COUNTRY_MARKET_PROFILES` 4개국 시장 데이터 맵핑.
+  - `getAllBlogPosts()` 소프트 삭제 필터링 및 관리자용 `getAllBlogPostsForAdmin()` 신설.
+  - `deleteBlogPost(slug, purge)` 2단계 삭제 로직 구현.
+- `frontend/src/app/api/blog/generate/route.ts`: 국가별/카테고리별 쿼리/바디 수신 및 요일별 자동 순환 로직 탑재.
+- `frontend/src/app/api/admin/blog/[slug]/route.ts`: 관리자 전용 삭제 API 신설 (403 인가 검증, purge 파라미터 처리).
+- `frontend/src/app/admin/blog/admin-blog-client.tsx`: 국가 4종 탭, 주제 2종 버튼, 관리자 행별 [철회] 및 [영구삭제] 버튼과 모달 피드백 UI 탑재.
+- 미니 PC Crontab: 매일 04:00 KST `POST /api/blog/generate` 자동 실행 등록.

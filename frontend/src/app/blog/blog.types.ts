@@ -1,4 +1,4 @@
-export type BlogCategory = 'WEALTH' | 'COMPOUND' | 'STOCKS' | 'TAX' | 'MACRO';
+export type BlogCategory = 'WEALTH' | 'COMPOUND' | 'STOCKS' | 'TAX' | 'MACRO' | 'TECH';
 
 export const BLOG_CATEGORIES: ReadonlyArray<{ id: BlogCategory; label: string }> = [
   { id: 'COMPOUND', label: '복리 & 저축' },
@@ -6,6 +6,7 @@ export const BLOG_CATEGORIES: ReadonlyArray<{ id: BlogCategory; label: string }>
   { id: 'STOCKS', label: '가상 주식 투자' },
   { id: 'WEALTH', label: '자산 배분 & 포트폴리오' },
   { id: 'MACRO', label: '거시 경제 & 국고' },
+  { id: 'TECH', label: '핀테크 & 소프트웨어 공학' },
 ];
 
 export interface BlogAuthor {
@@ -20,6 +21,18 @@ export interface BlogTranslation {
   readonly content: string;
   readonly tags: readonly string[];
 }
+
+export interface AcademicReference {
+  readonly title: string;
+  readonly authors: string;
+  readonly institution: string;
+  readonly year: number;
+  readonly doiOrUrl?: string | undefined;
+}
+
+export type BlogCountry = 'KR' | 'US' | 'JP' | 'VN';
+
+export type BlogPostStatus = 'PUBLISHED' | 'WITHDRAWN';
 
 export interface BlogPost {
   readonly slug: string;
@@ -40,6 +53,9 @@ export interface BlogPost {
   readonly views: number;
   readonly heroImage?: string | undefined;
   readonly infographicType?: 'COMPOUND_CURVE' | 'MACRO_RADAR' | 'TAX_WATERFALL' | 'DCA_BENCHMARK' | undefined;
+  readonly country?: BlogCountry | undefined;
+  readonly status?: BlogPostStatus | undefined;
+  readonly academicReferences?: readonly AcademicReference[] | undefined;
   readonly translations?: {
     readonly en?: BlogTranslation | undefined;
     readonly ja?: BlogTranslation | undefined;

@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
 import { generateDailyAiBlogPost, publishBlogPost } from '@/app/blog/blog-data';
+import type { BlogCountry, BlogCategory } from '@/app/blog/blog.types';
 
 export const dynamic = 'force-dynamic';
 
 const headers = { 'Cache-Control': 'no-store' } as const;
 
-export async function GET() {
+export async function GET(req: Request) {
   const viewer = await currentViewer();
   if (!isAdministrator(viewer)) {
     return NextResponse.json(
@@ -18,8 +19,10 @@ export async function GET() {
     {
       success: true,
       status: 'READY',
-      engine: 'AI Financial Editorial Publication Engine v2026',
-      message: 'AI blog publication pipeline is active and ready for generation.',
+      engine: 'AI Financial & Tech Multi-Country Editorial Engine v2026',
+      supportedCountries: ['KR', 'US', 'JP', 'VN'],
+      supportedCategories: ['WEALTH', 'COMPOUND', 'STOCKS', 'TAX', 'MACRO', 'TECH'],
+      message: 'AI blog publication pipeline is active and ready for multi-country tech & finance generation.',
     },
     { status: 200, headers },
   );
@@ -53,9 +56,42 @@ export async function POST(req: Request) {
     );
   }
 
+  // Parse optional target country and category from JSON body or URL query
+  let country: BlogCountry | undefined;
+  let category: BlogCategory | undefined;
+
   try {
-    // Generate verified market-driven high quality AI blog post
-    const post = generateDailyAiBlogPost();
+    const url = new URL(req.url);
+    const qCountry = url.searchParams.get('country')?.toUpperCase();
+    const qCategory = url.searchParams.get('category')?.toUpperCase();
+    if (qCountry === 'KR' || qCountry === 'US' || qCountry === 'JP' || qCountry === 'VN') {
+      country = qCountry;
+    }
+    if (qCategory && ['WEALTH', 'COMPOUND', 'STOCKS', 'TAX', 'MACRO', 'TECH'].includes(qCategory)) {
+      category = qCategory as BlogCategory;
+    }
+
+    if (req.headers.get('content-type')?.includes('application/json')) {
+      const body = await req.json().catch(() => null);
+      if (body) {
+        if (body.country && ['KR', 'US', 'JP', 'VN'].includes(body.country)) {
+          country = body.country;
+        }
+        if (body.category && ['WEALTH', 'COMPOUND', 'STOCKS', 'TAX', 'MACRO', 'TECH'].includes(body.category)) {
+          category = body.category;
+        }
+      }
+    }
+  } catch {
+    // Ignore parameter parsing error and proceed with defaults
+  }
+
+  try {
+    // Generate verified market-driven high quality AI blog post (multi-country & tech/finance)
+    const postOptions: { country?: BlogCountry | undefined; category?: BlogCategory | undefined } = {};
+    if (country) postOptions.country = country;
+    if (category) postOptions.category = category;
+    const post = generateDailyAiBlogPost(postOptions);
     // Publish to durable shared disk store
     publishBlogPost(post);
 
@@ -68,6 +104,7 @@ export async function POST(req: Request) {
           title: post.title,
           category: post.category,
           categoryLabel: post.categoryLabel,
+          country: post.country,
           publishedAt: post.publishedAt,
           url: `/blog/${post.slug}`,
         },

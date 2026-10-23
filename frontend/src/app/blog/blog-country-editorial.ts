@@ -153,7 +153,7 @@ export function createCountryBlogPost(topic: CountryBlogTopic): BlogPost {
     excerpt: definition.editions.ko.excerpt,
     content: localizedArticle(definition.editions.ko, 'ko'),
     category: definition.category,
-    categoryLabel: { COMPOUND: '복리 & 저축', TAX: '세금 & 제도', STOCKS: 'ETF & 주식', WEALTH: '자산 설계', MACRO: '거시 경제' }[definition.category],
+    categoryLabel: { COMPOUND: '복리 & 저축', TAX: '세금 & 제도', STOCKS: 'ETF & 주식', WEALTH: '자산 설계', MACRO: '거시 경제', TECH: '핀테크 & 소프트웨어 공학' }[definition.category] || '핀테크 칼럼',
     author: { name: '월덕 금융 교육 편집팀', role: '공식 자료 기반 금융 교육', badge: 'Editorial' },
     publishedAt: date.toISOString(), updatedAt: date.toISOString(), readTimeMinutes: 4,
     tags: definition.editions.ko.tags,
