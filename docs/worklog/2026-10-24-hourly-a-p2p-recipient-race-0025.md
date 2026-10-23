@@ -15,3 +15,19 @@ Pending implementation and verification.
 
 ## FINISHED
 Pending. Production RELEASE HOLD until full security, privilege, authenticated Test, ledger and GitOps gates pass.
+
+## IN PROGRESS (00:30–00:36 KST)
+- RED: 3/3 new browser component regressions failed on baseline: older HTTP response replaced newer nickname results; obsolete member stayed selectable after typing a different query; malformed recipient IDs were selectable.
+- GREEN: 5/5 new component regressions PASS. Aborts obsolete requests, invalidates async continuations even if the transport ignores abort, clears results immediately on query changes, rejects malformed/oversized recipient data, caps selectable results to ten, and displays an accessible search failure.
+- Focused frontend app-api + P2P UI: **15/15 PASS**. Focused backend wallet E2E/precision: **23/23 PASS**. Changed-file ESLint **0 errors / 3 pre-existing warnings**. Typecheck PASS; build PASS.
+- Full tests: contract and DB package executed; backend **1,313 PASS / 398 SKIPPED**; frontend **1,388 PASS / 1 FAIL** (`src/app/blog/blog.test.tsx` AI draft title assertion). QA PR #1039 owns blog test repair. Do not duplicate.
+- Full lint **FAIL** due pre-existing `frontend/src/app/wallet/export-ledger-csv.tsx:19` `no-control-regex` (QA PR #1021 owns). Full production dependency audit **FAIL**: `next@16.3.8`, Critical 2 / High 1; existing A recovery PR #1023 contains Next 16.4.2, unmerged.
+- Development DB read-only: 877 ledger transactions, 1,784 postings, 0 unbalanced, 0 short-posting; 241 public tables, app role can INSERT into 235 (P0 #993 unresolved). Eight profiles with nonempty display names. No production DB verification or data writes.
+- Code commit: `f85a4690f768d0724c94292f3ab4c64f49dae9e8`; only `frontend/src/components/p2p-transfer-modal.tsx` and new `p2p-recipient-race.test.tsx` changed in code. No backend/DB/app-api implementation changed; their existing route contracts were tested but this is not a complete new five-layer financial feature.
+- Latest main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` rechecked mid-work and before integration; unchanged. English/Korean living plans and integrated master reread. New isolated branch preserves #1026 and #1034 (potential future modal integration conflict), B/C/QA and Gemini refs.
+
+## FINISHED (source candidate / RELEASE HOLD)
+- Regression implementation complete at source level, but required full lint, full tests and security audit are failing on unrelated main-baseline issues. Exact-SHA remote CI and official Test pending.
+- **No main merge, Test promotion, Production deployment, DB migration, balance mutation, branch deletion, or automation modification.** Rollback: keep Draft PR unmerged. If merged later, revert the P2P recipient-search UI commit after verification.
+- Do not treat backend mock tests or development DB read-only integrity as authenticated exact-SHA finance E2E. Migration266 parity, least privilege, app-api auth, Test/Production ledger projection, backup+restore and GitOps gate remain BLOCKED.
+- Final PR URL, final SHA, CI and branch/PR count will be appended to PR discussion after push.
