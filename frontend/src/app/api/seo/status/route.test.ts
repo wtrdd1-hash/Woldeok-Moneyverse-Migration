@@ -10,7 +10,7 @@ describe('public SEO status BFF', () => {
       botDistribution: {}, statusDistribution: {},
       stockCoverage: { indexed: 0, total: 10 },
       guideCoverage: { indexed: 0, total: 5 },
-      sitemapUrl: '/sitemap.xml',
+      sitemapUrl: 'https://easy-scraping.com/sitemap.xml',
       recentLogs: [{ ipAddress: 'example-ip' }],
       indexNowKey: 'example-key',
       targetUrls: [{ path: '/example' }],
@@ -31,4 +31,26 @@ describe('public SEO status BFF', () => {
     expect(response.status).toBe(503);
     expect((await response.json()).totalHits24h).toBeUndefined();
   });
+  it.each([
+    ['missing coverage', { stockCoverage: undefined }],
+    ['negative hits', { totalHits24h: -1 }],
+    ['invalid coverage', { guideCoverage: { indexed: 6, total: 5 } }],
+    ['untrusted bot label', { botDistribution: { 'private@example.com': 1 } }],
+    ['unsafe sitemap', { sitemapUrl: 'javascript:alert(1)' }],
+  ])('rejects %s instead of returning an incomplete success', async (_label, override) => {
+    const metrics = {
+      totalHits24h: 2, totalHits7d: 3, avgDurationMs: 4,
+      botDistribution: { Googlebot: 2 }, statusDistribution: { '200': 2 },
+      stockCoverage: { indexed: 0, total: 10 },
+      guideCoverage: { indexed: 0, total: 5 },
+      sitemapUrl: 'https://easy-scraping.com/sitemap.xml',
+      ...override,
+    };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify(metrics), { status: 200 })));
+    const response = await GET();
+    expect(response.status).toBe(502);
+    expect(await response.json()).toEqual({ error: 'seo_status_invalid' });
+    expect(response.headers.get('cache-control')).toBe('no-store');
+  });
+
 });
