@@ -9,8 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
-import { OVERALL_HEADLINE, STATUS_LABEL, overallState } from '@/lib/status';
-import { asStatusState } from '@/lib/status';
+import { OVERALL_HEADLINE, STATUS_LABEL, overallState, statusFromSnapshot } from '@/lib/status';
 import type { StatusState } from '@/lib/status';
 import { canonicalUrl } from '@/lib/seo';
 
@@ -57,7 +56,7 @@ const VARIANT: Readonly<Record<StatusState, 'default' | 'secondary' | 'destructi
 export default async function StatusPage() {
   const data = await publicApi<{ status: StatusRow[] }>('/api/v1/status', 30);
   const rows = data?.status ?? [];
-  const overall = overallState(rows.map((row) => asStatusState(row.state)));
+  const overall = overallState(rows.map((row) => statusFromSnapshot(row.state, row.freshnessState)));
   const staleCount = rows.filter((row) => row.freshnessState !== 'fresh').length;
 
   return (
@@ -81,7 +80,7 @@ export default async function StatusPage() {
       <Card className="border-l-4 border-l-forest">
         <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <StatusDot state={overall} />
-          <p className="text-lg font-bold">{OVERALL_HEADLINE[overall]}</p>
+          <p className="text-lg font-bold" role="status" aria-live="polite">{OVERALL_HEADLINE[overall]}</p>
           <p className="ml-auto text-xs text-muted-foreground">
             {rows.length > 0 ? `${rows.length}개 항목 관측 중${staleCount > 0 ? ` · ${staleCount}개 최신 확인 필요` : ''}` : '관측 중인 항목 없음'}
           </p>
@@ -109,7 +108,7 @@ export default async function StatusPage() {
             <CardContent>
               <dl className="grid gap-3">
                 {rows.map((row) => {
-                  const state = asStatusState(row.state);
+                  const state = statusFromSnapshot(row.state, row.freshnessState);
                   const needsFreshness = row.freshnessState !== 'fresh';
                   return (
                     <div
@@ -153,9 +152,9 @@ export default async function StatusPage() {
                 and changes while the page is open. */}
             <Figure term="웹 로비 접속자" value={<LobbyCount />} />
             <Figure
-              term="상태 수집 주기"
-              value={<span className="tabular">30초</span>}
-              detail="두 번의 수집 주기(60초)를 넘긴 기록은 최신 확인 필요로 표시됩니다."
+              term="상태 최신성"
+              value={<span>서버 판정 기준</span>}
+              detail="최신성은 서버의 상태 정책에 따라 판정됩니다."
             />
           </CardContent>
         </Card>

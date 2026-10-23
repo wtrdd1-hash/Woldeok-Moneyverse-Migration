@@ -24,6 +24,15 @@ export function asStatusState(value: unknown): StatusState {
 }
 
 /**
+ * A collector's health label is not evidence of current health unless the
+ * backend also confirms the observation is fresh. This is a UI safety belt:
+ * server-side freshness and authorization remain authoritative.
+ */
+export function statusFromSnapshot(state: unknown, freshnessState: unknown): StatusState {
+  return freshnessState === 'fresh' ? asStatusState(state) : 'unknown';
+}
+
+/**
  * The one sentence the top of the status page leads with.
  *
  * Worst-first, and never better than the worst thing recorded: a page that
