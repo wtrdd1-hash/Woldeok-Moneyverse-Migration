@@ -5,11 +5,11 @@ import { CAPITAL_GAINS_TAX_PRESETS } from '@/config/capital-gains-tax-presets.co
 import { buildCalculatorRichSnippet, jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '[2026 최신] 해외주식 양도소득세 계산기 — [무료/1초] 미국주식 250만원 비과세 & 손익상계 절세 즉시 산출 | 월덕 머니버스',
-  description: '[로그인 없이 1초 산출] 미국주식 및 해외주식 22% 양도소득세, 연간 250만원 기본공제, 연말 손실 종목 상계 매도(Tax-loss harvesting) 및 분할 매도 절세 효과를 0.1초 만에 무료 계산하세요!',
+  title: '[2026 최신] 해외주식 양도소득세 계산기 — [무료/1초] 미국주식 250만원 기본공제 & 손익통산 예상 세액 | 월덕 머니버스',
+  description: '[로그인 없이 1초 산출] 미국주식 및 해외주식 22% 양도소득세, 연간 250만원 기본공제, 손익통산을 가정한 예상 세액을 무료로 확인하세요. 실제 신고 시에는 국세청 기준과 개인별 요건을 확인해야 합니다.',
   keywords: [
     '해외주식 양도소득세 계산기',
-    '미국주식 250만원 비과세',
+    '미국주식 250만원 기본공제',
     '주식 양도세 계산기',
     '손익상계 계산기',
     '해외주식 22% 세금',
@@ -30,18 +30,18 @@ export const metadata: Metadata = {
 export default function CapitalGainsTaxCalculatorPage() {
   const defaultPreset = CAPITAL_GAINS_TAX_PRESETS[0];
   const richSnippet = buildCalculatorRichSnippet({
-    name: '2026 무료 해외주식 양도소득세 & 250만원 절세 계산기',
-    description: '미국주식 실현수익에 대한 22% 양도소득세 및 손실 상계를 통한 절세액 실시간 시뮬레이터',
+    name: '2026 해외주식 양도소득세 기본공제 예상 계산기',
+    description: '미국주식 실현수익에 대한 22% 양도소득세 및 손실 실현을 가정한 세액 추정 시뮬레이터',
     url: 'https://easy-scraping.com/tools/capital-gains-tax-calculator',
     category: 'FinanceApplication',
     faqItems: [
       {
         question: '해외주식 양도소득세 기본공제 250만원은 어떻게 적용되나요?',
-        answer: '매년 1월 1일부터 12월 31일까지 발생한 해외주식 전체 실현손익 합산액에서 250만원을 먼저 차감(비과세)한 후 초과분에 대해서만 22% 세율이 부과됩니다.',
+        answer: '매년 1월 1일부터 12월 31일까지 발생한 해외주식 전체 실현손익 합산액에서 250만원 기본공제를 반영한 추정치를 보여 줍니다. 개별 거래 및 신고 요건은 별도로 확인해야 합니다.',
       },
       {
         question: '손익 상계(Tax-loss harvesting) 절세란 무엇인가요?',
-        answer: '수익이 발생한 해에 손실 중인 종목을 함께 매도하여 전체 과세표준을 낮춤으로써 합법적으로 양도소득세를 0원으로 줄이는 절세 기법입니다.',
+        answer: '수익이 발생한 해에 손실 중인 종목을 함께 매도하여 실현손실이 같은 과세연도에 통산 가능한 경우 예상 과세표준이 낮아질 수 있습니다. 보유 중 평가손실은 확정손실이 아닙니다.',
       },
     ],
     howToSteps: [

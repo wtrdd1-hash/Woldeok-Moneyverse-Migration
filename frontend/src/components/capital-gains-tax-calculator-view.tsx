@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calculator, TrendingUp, ShieldCheck, DollarSign, Receipt, Sparkles } from 'lucide-react';
+import { Calculator, TrendingUp, Receipt } from 'lucide-react';
 import Link from 'next/link';
 import type { TaxPreset } from '@/config/capital-gains-tax-presets.config';
 import { CAPITAL_GAINS_TAX_PRESETS } from '@/config/capital-gains-tax-presets.config';
@@ -26,7 +26,6 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
   const [unrealizedLoss, setUnrealizedLoss] = useState<number>(defaultPreset.unrealizedLossKrw);
   const [applyLossHarvesting, setApplyLossHarvesting] = useState<boolean>(defaultPreset.applyLossHarvesting);
   const [applyBasicDeduction, setApplyBasicDeduction] = useState<boolean>(defaultPreset.applyBasicDeduction);
-  const [applySpouseGift, setApplySpouseGift] = useState<boolean>(defaultPreset.applySpouseGiftDeduction);
 
   const result = useMemo(() => {
     return calculateCapitalGainsTax({
@@ -34,16 +33,15 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
       unrealizedLossKrw: unrealizedLoss,
       applyLossHarvesting,
       applyBasicDeduction,
-      applySpouseGiftDeduction: applySpouseGift,
     });
-  }, [realizedGain, unrealizedLoss, applyLossHarvesting, applyBasicDeduction, applySpouseGift]);
+  }, [realizedGain, unrealizedLoss, applyLossHarvesting, applyBasicDeduction]);
 
   const viralPayload = useMemo(() => {
     const title = initialPreset
       ? `${initialPreset.name} 절세 진단서`
       : '해외주식 양도소득세 & 절세 진단서';
 
-    const savedTax = result.taxSavedByLossHarvesting + result.taxSavedByBasicDeduction;
+    const savedTax = Math.round(result.grossGainKrw * 0.20) + Math.round(result.grossGainKrw * 0.02) - result.totalTaxPayableKrw;
 
     return {
       category: '주식 양도세 절세 진단서',
@@ -51,7 +49,7 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
       subtitle: `실현수익 ${(realizedGain / 10000).toLocaleString()}만원 | 과세표준 ${(result.taxableBaseKrw / 10000).toLocaleString()}만원`,
       keyMetricLabel: '최종 납부 예상 세액 (22%)',
       keyMetricValue: `${result.totalTaxPayableKrw.toLocaleString()}원`,
-      badgeText: result.totalTaxPayableKrw === 0 ? '🎉 전액 비과세 (세금 0원)' : `💡 절세액 ${savedTax.toLocaleString()}원 달성`,
+      badgeText: result.totalTaxPayableKrw === 0 ? '입력 조건의 예상 세액 0원' : `가정상 세액 차이 ${savedTax.toLocaleString()}원`,
       recommendationNote: result.adviceNotes[0] || '연말 손익 상계와 250만원 공제를 활용한 스마트 절세 전략',
       metrics: [
         { label: '세후 실수령액', value: `${(result.netProfitAfterTaxKrw / 10000).toFixed(1)}만원`, isPositive: true },
@@ -130,9 +128,12 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
           </CardHeader>
           <CardContent className="p-5 pt-0 space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-zinc-300">올해 총 실현 수익 (원)</Label>
+              <Label htmlFor="realized-gain" className="text-xs text-zinc-300">올해 총 실현 수익 (원)</Label>
               <Input
+                id="realized-gain"
                 type="number"
+                min={0}
+                inputMode="numeric"
                 value={realizedGain}
                 onChange={(e) => setRealizedGain(Number(e.target.value))}
                 className="bg-zinc-950 border-zinc-700 font-mono text-xs"
@@ -141,9 +142,12 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs text-zinc-300">보유 중인 손실 종목 평가손실 (원)</Label>
+              <Label htmlFor="unrealized-loss" className="text-xs text-zinc-300">보유 중인 손실 종목 평가손실 (원)</Label>
               <Input
+                id="unrealized-loss"
                 type="number"
+                min={0}
+                inputMode="numeric"
                 value={unrealizedLoss}
                 onChange={(e) => setUnrealizedLoss(Number(e.target.value))}
                 className="bg-zinc-950 border-zinc-700 font-mono text-xs"
@@ -174,16 +178,10 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
                 </label>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="spouseGift"
-                  checked={applySpouseGift}
-                  onCheckedChange={(c) => setApplySpouseGift(!!c)}
-                />
-                <label htmlFor="spouseGift" className="text-xs text-zinc-300 cursor-pointer">
-                  배우자 증여 후 매도 (10년 6억원 증여공제 활용)
-                </label>
-              </div>
+              <p role="note" className="text-xs leading-relaxed text-amber-200">
+                배우자 증여재산공제는 양도차익에서 직접 차감되지 않습니다. 증여 후 매도에 따른 취득가액과 과세 여부는 별도로 확인하세요.
+                {' '}<a href="https://www.nts.go.kr" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">국세청 공식 안내</a>
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -217,14 +215,16 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
                       realizedGain,
                       unrealizedLoss,
                       taxableBase: result.taxableBaseKrw,
-                      taxSaved: result.taxSavedByLossHarvesting + result.taxSavedByBasicDeduction,
+                      taxSaved: Math.round(result.grossGainKrw * 0.20) + Math.round(result.grossGainKrw * 0.02) - result.totalTaxPayableKrw,
                     },
                   }}
                 />
               </div>
             </div>
             <CardTitle className="text-3xl font-bold font-mono text-white mt-2">
-              {result.totalTaxPayableKrw.toLocaleString()}원
+              <output aria-live="polite" aria-atomic="true" aria-label="예상 양도소득세">
+                {result.totalTaxPayableKrw.toLocaleString()}원
+              </output>
             </CardTitle>
             <CardDescription className="text-xs text-zinc-400">
               납부 예상 양도소득세 (국세 20% + 지방세 2%)

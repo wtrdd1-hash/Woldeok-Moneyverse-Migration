@@ -86,14 +86,14 @@ export const CAPITAL_GAINS_TAX_PRESETS: TaxPreset[] = [
   },
   {
     slug: 'spouse-gift-600m',
-    name: '배우자 증여(6억 비과세) 절세 모델',
-    nameEn: 'Spouse Gift 600M Exemption Model',
+    name: '배우자 증여 후 양도세 별도 검토',
+    nameEn: 'Spouse Gift Tax Review (No Automatic Deduction)',
     realizedGainKrw: 50000000,
     unrealizedLossKrw: 0,
     applyLossHarvesting: false,
     applyBasicDeduction: true,
-    applySpouseGiftDeduction: true,
-    description: '배우자 10년 6억원 증여공제를 활용하여 취득가액을 높이고 양도세를 0원으로 절감',
+    applySpouseGiftDeduction: false,
+    description: '배우자 증여재산공제는 양도차익에서 직접 차감되지 않습니다. 취득가액과 적용 요건은 별도 확인이 필요합니다.',
     seoKeywords: ['해외주식 배우자 증여', '미국주식 증여 양도세 절세', '주식 증여세 면제 한도', '주식 양도세 합법적 절세'],
   },
   {
