@@ -1,5 +1,6 @@
 import type { NavEntry } from '@/lib/navigation';
 import { navLabel } from '@/lib/navigation';
+import { GLOSSARY_TERMS, type GlossaryTerm } from '@/config/pseo-glossary.config';
 
 export interface SearchEntry extends NavEntry {
   readonly access: 'public' | 'member' | 'admin';
@@ -59,3 +60,48 @@ export function filterSearchEntries(
   });
 }
 
+/** Search only articles already published at canonical public glossary routes. */
+export interface GlossarySearchResult {
+  readonly slug: string;
+  readonly href: string;
+  readonly termKo: string;
+  readonly termEn: string;
+  readonly descriptionKo: string;
+}
+
+export function searchGlossaryTerms(
+  query: string,
+  terms: readonly GlossaryTerm[] = GLOSSARY_TERMS,
+): readonly GlossarySearchResult[] {
+  const normalized = query.trim().normalize('NFKC').toLocaleLowerCase();
+  if (!normalized || normalized.length > 80) return [];
+
+  const seen = new Set<string>();
+  const ranked: { score: number; result: GlossarySearchResult }[] = [];
+  for (const term of terms) {
+    // Never turn an untrusted or malformed slug into an arbitrary navigation URL.
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(term.slug) || seen.has(term.slug)) continue;
+    seen.add(term.slug);
+    const names = [term.slug, term.termKo, term.termEn, term.termJa, term.termZh]
+      .map((name) => name.normalize('NFKC').toLocaleLowerCase());
+    const descriptions = [term.descriptionKo, term.descriptionEn, term.descriptionJa, term.descriptionZh]
+      .map((description) => description.normalize('NFKC').toLocaleLowerCase());
+    const score = names.some((name) => name === normalized) ? 0
+      : names.some((name) => name.startsWith(normalized)) ? 1
+        : names.some((name) => name.includes(normalized)) ? 2
+          : descriptions.some((description) => description.includes(normalized)) ? 3 : -1;
+    if (score < 0) continue;
+    ranked.push({
+      score,
+      result: {
+        slug: term.slug,
+        href: `/guide/glossary/${term.slug}`,
+        termKo: term.termKo,
+        termEn: term.termEn,
+        descriptionKo: term.descriptionKo,
+      },
+    });
+  }
+  return ranked.sort((a, b) => a.score - b.score || a.result.slug.localeCompare(b.result.slug))
+    .slice(0, 12).map(({ result }) => result);
+}

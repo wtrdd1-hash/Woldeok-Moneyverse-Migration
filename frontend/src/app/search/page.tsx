@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ADMIN_NAV, MEMBER_NAV, PUBLIC_NAV, navLabel } from '@/lib/navigation';
 import { currentViewer } from '@/lib/viewer';
-import { filterSearchEntries, searchableEntries } from './search';
+import { filterSearchEntries, searchableEntries, searchGlossaryTerms } from './search';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
@@ -23,10 +23,10 @@ const ACCESS_LABEL = { public: '공개', member: '회원', admin: '운영' } as 
 export default async function SearchPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string }>;
+  readonly searchParams: Promise<{ readonly q?: string | string[] }>;
 }) {
-  const [{ q = '' }, viewer] = await Promise.all([searchParams, currentViewer()]);
-  const query = q.slice(0, 80);
+  const [{ q }, viewer] = await Promise.all([searchParams, currentViewer()]);
+  const query = typeof q === 'string' ? q.slice(0, 80) : '';
   const signedIn = viewer.signedIn && viewer.consentCurrent;
   const entries = searchableEntries(
     PUBLIC_NAV,
@@ -36,6 +36,8 @@ export default async function SearchPage({
     signedIn && viewer.adminRoles.length > 0,
   );
   const results = filterSearchEntries(entries, query);
+  const glossaryResults = searchGlossaryTerms(query);
+  const totalResults = results.length + glossaryResults.length;
 
   return (
     <div data-page="search" className="mv-page mv-page--member grid gap-6">
@@ -61,30 +63,53 @@ export default async function SearchPage({
       </form>
 
       {!query.trim() ? (
-        <EmptyState title="찾을 기능을 입력해 주세요." description="한글·영문 기능명이나 경로로 검색할 수 있습니다." />
-      ) : results.length === 0 ? (
+        <EmptyState title="찾을 기능을 입력해 주세요." description="기능명·경로나 한국어·영어·일본어·중국어 금융 용어로 검색할 수 있습니다." />
+      ) : totalResults === 0 ? (
         <EmptyState title="검색 결과가 없습니다." description="다른 기능명으로 검색하거나 메뉴에서 원하는 화면을 찾아보세요." />
       ) : (
-        <section aria-labelledby="search-results" className="grid gap-3">
-          <h2 id="search-results" className="text-lg font-bold">검색 결과 {results.length}개</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {results.map((entry) => (
-              <Card key={entry.href}>
-                <CardHeader className="gap-2 pb-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <CardTitle className="text-base">{entry.label}</CardTitle>
-                    <Badge variant="secondary">{ACCESS_LABEL[entry.access]}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="grid gap-3">
-                  <p className="text-sm text-muted-foreground">{navLabel(entry.label, 'en')} · {entry.href}</p>
-                  <Button asChild variant="outline" className="min-h-11 w-full">
-                    <Link href={entry.href}>이 화면으로 이동</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+        <section aria-labelledby="search-results" className="grid gap-5">
+          <h2 id="search-results" aria-live="polite" className="text-lg font-bold">검색 결과 {totalResults}개</h2>
+          {results.length > 0 && <div className="grid gap-3">
+            <h3 className="text-base font-semibold">기능 및 화면</h3>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {results.map((entry) => (
+                <Card key={entry.href}>
+                  <CardHeader className="gap-2 pb-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <CardTitle className="text-base">{entry.label}</CardTitle>
+                      <Badge variant="secondary">{ACCESS_LABEL[entry.access]}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="grid gap-3">
+                    <p className="text-sm text-muted-foreground">{navLabel(entry.label, 'en')} · {entry.href}</p>
+                    <Button asChild variant="outline" className="min-h-11 w-full">
+                      <Link href={entry.href}>이 화면으로 이동</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>}
+          {glossaryResults.length > 0 && <div className="grid gap-3">
+            <h3 className="text-base font-semibold">공개 금융 용어사전</h3>
+            <p className="text-sm text-muted-foreground">이미 공개된 용어 설명으로 바로 이동합니다.</p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {glossaryResults.map((term) => (
+                <Card key={term.href}>
+                  <CardHeader className="gap-1 pb-2">
+                    <CardTitle className="text-base">{term.termKo}</CardTitle>
+                    <p className="text-xs text-muted-foreground">{term.termEn}</p>
+                  </CardHeader>
+                  <CardContent className="grid gap-3">
+                    <p className="line-clamp-3 text-sm text-muted-foreground">{term.descriptionKo}</p>
+                    <Button asChild variant="outline" className="min-h-11 w-full">
+                      <Link href={term.href} aria-label={`${term.termKo} 용어 설명 보기`}>용어 설명 보기</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>}
         </section>
       )}
     </div>
