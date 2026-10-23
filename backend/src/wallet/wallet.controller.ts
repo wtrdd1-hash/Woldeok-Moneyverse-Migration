@@ -6,6 +6,7 @@ import {
   Controller,
   Get,
   GoneException,
+  Header,
   Inject,
   NotFoundException,
   Param,
@@ -92,6 +93,7 @@ export class WalletController {
   }
 
   @Get('wallet/recipients/search')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Search active member recipients by display name for wire transfer' })
   searchRecipients(@Req() request: RequestWithSession, @Query('query') query?: string) {
     return this.service().searchRecipients(requireUserId(request), query || '');

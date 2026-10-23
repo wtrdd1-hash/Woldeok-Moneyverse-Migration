@@ -394,17 +394,25 @@ export class PostgresWalletRepository {
 
   async searchRecipients(query: string, currentUserId: string): Promise<{ userId: string; displayName: string }[]> {
     const q = (query || '').trim();
-    if (!q) return [];
+    // A one-character or unbounded lookup is an account enumeration primitive.
+    // Count Unicode code points so Korean and emoji queries have the same bounds.
+    const length = Array.from(q).length;
+    if (length < 2 || length > 40) return [];
+    const actor = requireUuid(currentUserId, 'authenticated user id');
+    // Parameterization stops SQL injection; escaping LIKE metacharacters also
+    // stops '%' and '_' from broadening the result set.
+    const literalPattern = q.replace(/[\\%_]/g, '\\$&');
     return queryRows<{ userId: string; displayName: string }>(
       this.pool,
       `SELECT profile.user_id::text AS "userId", profile.display_name AS "displayName"
        FROM public.member_profiles AS profile
        JOIN public.users AS u ON u.id = profile.user_id
-       WHERE profile.display_name ILIKE $1
+       WHERE profile.display_name ILIKE $1 ESCAPE chr(92)
          AND profile.user_id != $2::uuid
          AND u.status = 'active'::public.user_status
+       ORDER BY profile.display_name ASC, profile.user_id ASC
        LIMIT 10`,
-      [`%${q}%`, currentUserId],
+      [`%${literalPattern}%`, actor],
     );
   }
 
