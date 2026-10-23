@@ -64,4 +64,12 @@ describe('PostingStrip', () => {
     render(<PostingStrip debit="a" credit="b" amount="1" />);
     expect(screen.getByText('1')).toBeDefined();
   });
-})
+});
+
+describe('PostingStrip unavailable amount', () => {
+  it('announces unavailable owner evidence without displaying zero', () => {
+    render(<PostingStrip debit="Cash" credit="Bank" amount={null} />);
+    expect(screen.getByLabelText('금액 확인 불가 / Amount unavailable')).toBeDefined();
+    expect(screen.queryByText('0')).toBeNull();
+  });
+});
