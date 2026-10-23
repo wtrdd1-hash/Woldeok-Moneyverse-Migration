@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.23.1180 — F675-102 회원 알림 동의·방해금지 제어판 (기획 / 초안)
+- 회차: 이전 Feature Improvement v1178, 현재 Feature Addition v1180, 다음 Feature Improvement v1182(잠정). 기존 `NOTIFICATION_REACTIVATION_GOVERNANCE_SPEC.ko.md`가 상위 기준이며 회원·API·DB 구현 단위를 구체화할 뿐 중복 알림 시스템을 만들지 않는다.
+- 실제 `/account/notifications`는 목표/NPC 알림 토글만 제공. DEV 읽기 전용 조회에서 기존 `notification_preferences`(0행, 회원+목적+채널 PK, 목적 7종·채널 4종·상태 6종), 전용 DB 함수 부재, 앱 계정 직접 DML/TRUNCATE, RLS OFF 확인. 기존 테이블 재사용·최소권한 복구, 필수 보안/거래 알림과 선택형 광고 동의 분리.
+- P0 `NOTIF1180-01/02`, `REL1180-03`: 신뢰된 행위자·SECURITY DEFINER·DB 거부 테스트, 발송 직전 수신거부 강제, QA v1181 Next/권한/Migration266/CI/백업/정확 SHA Test 차단 유지. P1 `NOTIF1180-04..08`: 버전형 동의 API·불변 감사·22~08시 방해금지/DST·웹/Android·관리자 집계·SEO 비색인·WCAG AA·동시 100건·감사 10,001건·수신거부 보존 롤백.
+- 상세 국영문 설계는 기존 `INTEGRATED_PLANNING_MASTER.md`와 `INTEGRATED_PLANNING_MASTER.ko.md`에 동등 반영. 외부 4개 독립 발행기관 검토, 신규 최종 승인 0, 누적 중복 제거 승인 미확인 / 목표 10,000 BLOCKED. 기획 Draft만, 런타임·DB·WLD·Test·Production 변경 없음.
+
+
 ## v2026.10.22.1140 — F675-92 계산기 오류 신고 및 공식 검증 정정 공지 (기획)
 - v1138 기능 보완 다음 기능 추가 회차, 다음 v1142 기능 보완(잠정). 기존 `/tools/*`, 고객지원·알림 기반의 회원 신고와 공개 정정 기능으로 금융 원장과 독립.
 - P0: 해외주식 양도세 계산기의 배우자 증여 직접 공제·과도한 절세/비과세 표현·5월 1~31일 고정 신고기한을 국세청 2026 자료와 재검토; 저장/알림/WLD 허위 성공 표시 개선; DB 앱 계정 최소권한 복구; 금융/정확 SHA Test/운영 차단 유지. P1: 회원·관리자 API, 불변 정정 이벤트, 독립 승인, 중복 알림, 공개 공지, 모바일·접근성·SEO·회귀.
