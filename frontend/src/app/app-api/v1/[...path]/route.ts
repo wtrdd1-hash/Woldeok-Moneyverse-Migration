@@ -112,6 +112,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     'x-moneyverse-gateway': 'app-api-v1',
   });
   for (const name of APP_API_REQUEST_HEADERS) {
+    // A private wallet representation must never be revalidated from a prior user's cache.
+    if (parts[0] === 'wallet' && ['if-none-match', 'if-modified-since', 'if-range', 'range'].includes(name)) continue;
     const value = request.headers.get(name);
     if (value) outgoing.set(name, value);
   }
@@ -167,7 +169,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
-  return proxy(request, (await context.params).path);
+  const parts = (await context.params).path;
+  const response = await proxy(request, parts);
+  if (parts[0] === 'wallet') {
+    // The wallet is always personalized, even when the upstream response is an error.
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.delete('etag');
+    response.headers.delete('last-modified');
+    response.headers.delete('expires');
+  }
+  return response;
 }
 
 export const GET = handle;
