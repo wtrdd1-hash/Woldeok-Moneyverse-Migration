@@ -1,180 +1,99 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Bell, BellRing, Check, X, Sparkles, Calendar, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { BellRing, X } from 'lucide-react';
 
 interface SavedScenario {
-  ticker?: string;
-  stockName?: string;
-  targetPrice?: string;
-  reboundRate?: string;
-  savedAt: number;
-  calculatorType?: string;
-  annualDividend?: number;
-  exDividendDate?: string;
+  readonly ticker?: string;
+  readonly stockName?: string;
 }
 
+/** A calculator scenario is only browser data, never a subscribed server alert. */
 export function StockAlertPushEngine() {
-  const [permission, setPermission] = useState<NotificationPermission>('default');
-  const [isSupported, setIsSupported] = useState(false);
   const [bannerVisible, setBannerVisible] = useState(false);
-  const [latestStock, setLatestStock] = useState<string>('');
-  const [alertType, setAlertType] = useState<'escape' | 'dividend' | 'market_close'>('escape');
+  const [latestStock, setLatestStock] = useState('');
+  const [stockSymbol, setStockSymbol] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setIsSupported(true);
-      setPermission(Notification.permission);
+    try {
+      // Old UI set these keys on browser permission alone, without any push subscription.
+      localStorage.removeItem('wdmv_push_active');
+      localStorage.removeItem('wdmv_last_market_push');
+      if (localStorage.getItem('wdmv_push_banner_dismissed') === 'true') return;
 
-      // 이미 승인되었거나 거부되었거나 닫은 적이 있는지 확인
-      const bannerDismissed = localStorage.getItem('wdmv_push_banner_dismissed');
-      if (Notification.permission === 'default' && !bannerDismissed) {
-        try {
-          const savedStr = localStorage.getItem('wdmv_saved_scenarios');
-          if (savedStr) {
-            const scenarios: SavedScenario[] = JSON.parse(savedStr);
-            if (scenarios.length > 0) {
-              const last = scenarios[scenarios.length - 1];
-              setLatestStock(last?.stockName || last?.ticker || '');
-
-              if (last?.calculatorType === 'dividend' || last?.exDividendDate) {
-                setAlertType('dividend');
-              } else {
-                setAlertType('escape');
-              }
-
-              // 3초 후 조용히 배너 노출
-              const timer = setTimeout(() => {
-                setBannerVisible(true);
-              }, 3000);
-              return () => clearTimeout(timer);
-            }
-          }
-        } catch {
-          // ignore
-        }
-      }
-
-      // 이미 권한이 승인된 경우, 장마감/배당락일 시뮬레이션 브로드캐스트 점검
-      if (Notification.permission === 'granted') {
-        const lastCheck = localStorage.getItem('wdmv_last_market_push');
-        const now = Date.now();
-        // 24시간에 1회만 장마감/배당락일 요약 알림 트리거
-        if (!lastCheck || now - parseInt(lastCheck, 10) > 86400000) {
-          try {
-            const savedStr = localStorage.getItem('wdmv_saved_scenarios');
-            if (savedStr) {
-              const scenarios: SavedScenario[] = JSON.parse(savedStr);
-              if (scenarios.length > 0) {
-                const stock = scenarios[0]?.stockName || '관심 종목';
-                setTimeout(() => {
-                  new Notification(`[머니버스 장마감 리포트] ${stock}`, {
-                    body: `보관하신 ${stock}의 오늘 거래가 마감되었습니다. 목표가 및 다가오는 배당락일 일정을 확인해보세요.`,
-                    icon: '/favicon.ico',
-                  });
-                  localStorage.setItem('wdmv_last_market_push', now.toString());
-                }, 10000); // 페이지 진입 10초 후
-              }
-            }
-          } catch {
-            // ignore
-          }
-        }
-      }
+      const raw = localStorage.getItem('wdmv_saved_scenarios');
+      if (!raw) return;
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed) || parsed.length === 0) return;
+      const last: unknown = parsed[parsed.length - 1];
+      if (!last || typeof last !== 'object') return;
+      const scenario = last as SavedScenario;
+      const symbol = typeof scenario.ticker === 'string' ? scenario.ticker.trim().toUpperCase() : '';
+      setStockSymbol(/^[A-Z0-9._-]{1,24}$/.test(symbol) ? symbol : '');
+      setLatestStock(typeof scenario.stockName === 'string' ? scenario.stockName.slice(0, 60) : '');
+      const timer = window.setTimeout(() => setBannerVisible(true), 3000);
+      return () => window.clearTimeout(timer);
+    } catch {
+      // Malformed or unavailable browser storage must never create an alert.
     }
   }, []);
 
-  const requestPushPermission = async () => {
-    if (!isSupported) return;
-
-    try {
-      const res = await Notification.requestPermission();
-      setPermission(res);
-      setBannerVisible(false);
-
-      if (res === 'granted') {
-        const title = alertType === 'dividend'
-          ? '배당락일 D-Day & 장마감 알림 활성화'
-          : '목표 탈출가 & 장마감 알림 활성화';
-
-        const body = alertType === 'dividend'
-          ? `${latestStock || '보관 종목'}의 다가오는 배당락일 디데이와 가상 배당금 입금 알림을 보내드립니다.`
-          : `${latestStock || '관심 종목'}의 목표 탈출가 도달 및 일일 장마감 리포트를 알려드립니다.`;
-
-        new Notification(title, {
-          body,
-          icon: '/favicon.ico',
-        });
-        localStorage.setItem('wdmv_push_active', 'true');
-      }
-    } catch {
-      setBannerVisible(false);
-    }
-  };
-
   const handleDismiss = () => {
-    localStorage.setItem('wdmv_push_banner_dismissed', 'true');
+    try {
+      localStorage.setItem('wdmv_push_banner_dismissed', 'true');
+    } catch {
+      // Closing the banner must work even when storage is disabled.
+    }
     setBannerVisible(false);
   };
 
-  if (!isSupported || !bannerVisible || permission !== 'default') {
-    return null;
-  }
+  if (!bannerVisible) return null;
+
+  const href = stockSymbol ? `/stocks/alerts?stock=${encodeURIComponent(stockSymbol)}` : '/stocks/alerts';
 
   return (
-    <div className="fixed top-16 right-4 sm:right-6 z-40 max-w-sm w-full bg-zinc-900 border border-emerald-500/30 rounded-xl p-4 shadow-xl backdrop-blur-md animate-in slide-in-from-top-4 duration-300 text-zinc-100">
+    <aside
+      role="region"
+      aria-labelledby="stock-alert-handoff-title"
+      className="fixed top-16 left-4 right-4 sm:left-auto sm:right-6 z-40 sm:max-w-sm rounded-xl border border-emerald-500/30 bg-zinc-900 p-4 text-zinc-100 shadow-xl"
+    >
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
-          <BellRing className="w-5 h-5 animate-pulse" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold text-white mb-1 flex items-center gap-1.5">
-            {alertType === 'dividend' ? (
-              <>
-                <Calendar className="size-3.5 text-emerald-400" />
-                <span>배당락일 D-Day 알림 받기</span>
-              </>
-            ) : (
-              <>
-                <TrendingUp className="size-3.5 text-emerald-400" />
-                <span>목표가 도달 & 장마감 알림</span>
-              </>
-            )}
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">
-              FREE
-            </span>
-          </h4>
-          <p className="text-[11px] text-zinc-400 leading-snug mb-3">
-            {alertType === 'dividend'
-              ? `${latestStock ? `${latestStock}의 ` : ''}다가오는 배당락일(Ex-dividend Date) D-Day와 분기 실지급액을 놓치지 않도록 알려드립니다.`
-              : `${latestStock ? `${latestStock}의 ` : ''}목표 탈출가에 도달하거나 일일 장마감 시세 변동이 발생하면 브라우저 알림으로 즉시 알려드립니다.`}
+        <BellRing aria-hidden="true" className="mt-1 size-5 shrink-0 text-emerald-400" />
+        <div className="min-w-0 flex-1 space-y-3">
+          <h2 id="stock-alert-handoff-title" className="text-sm font-semibold">
+            {latestStock ? `${latestStock} · ` : ''}가상 주식 조건부 알림
+          </h2>
+          <p className="text-xs leading-relaxed text-zinc-300">
+            계산기 보관 기록은 알림으로 등록되지 않았습니다. 서버에서 직접 조건을 설정하면
+            가상 주식 가격·변동 조건의 발생 내역을 회원 화면에서 확인할 수 있습니다.
+            브라우저 푸시나 배당 지급 알림이 자동으로 켜지는 것은 아닙니다.
           </p>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={requestPushPermission}
-              className="flex-1 py-1.5 px-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-lg text-xs transition-colors flex items-center justify-center gap-1"
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={href}
+              className="inline-flex min-h-11 items-center justify-center rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              <Check className="w-3.5 h-3.5" />
-              <span>알림 켜기</span>
-            </button>
+              조건부 알림 설정
+            </Link>
             <button
+              type="button"
               onClick={handleDismiss}
-              className="py-1.5 px-3 text-zinc-400 hover:text-zinc-200 text-xs font-medium transition-colors"
+              className="min-h-11 rounded-md px-3 text-sm text-zinc-200 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               다음에
             </button>
           </div>
         </div>
-
         <button
+          type="button"
           onClick={handleDismiss}
-          className="text-zinc-500 hover:text-zinc-300 p-0.5"
+          className="flex size-11 shrink-0 items-center justify-center rounded-md text-zinc-300 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           aria-label="닫기"
         >
-          <X className="w-4 h-4" />
+          <X aria-hidden="true" className="size-4" />
         </button>
       </div>
-    </div>
+    </aside>
   );
 }
