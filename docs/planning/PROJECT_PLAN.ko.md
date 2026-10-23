@@ -1,5 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.23.1182 — F675-102 알림 동의 기본값·발송 철회 경합·영수증 보완 (기획 / 초안)
+- **회차:** 이전 Feature Addition v1180 / 현재 Feature Improvement v1182 / 다음 Feature Addition v1184(잠정). 최신 main `f032c4aebd518c8730e56058327ca35f97b4165b`; v1180 Draft #1005 미병합, 후속 분리 기획이지 운영 기능 아님.
+- **읽기 전용 P0 실측:** 개발 `notification_preferences.state DEFAULT 'OPTED_IN'`, 조회 당시 0행, 정수형 `version` 없음(`policy_version`은 정책 문자열), 기존 복합 PK·인덱스 존재, 앱 계정 직접 DML/TRUNCATE·RLS OFF. 향후 state 생략 INSERT가 광고 동의로 오인될 수 있으나 실제 무단 발송 증거는 없음. main 알림 화면은 `?saved=1`만으로 서버 영수증 없이 성공 표시 가능. 기존 백엔드는 알림함 API이지 동의 API가 아님.
+- **P0 `NOTIF1182-01..03` / `SEC1182-04`:** 검토된 순방향 DB 마이그레이션으로 OPTED_IN 자동 기본값 제거, 긍정 동의 출처 검증, UNKNOWN 발송 차단. URL 위조 성공을 회원·세션 연결 서버 영수증/결과불명 조회로 대체. 선택형 제공자 발송 시작과 철회를 펜스로 직렬화, 진행 중 lease 완료/취소 후 철회 효력 확정. 앱 직접 DML/TRUNCATE 회수, actor-bound DB 함수·실 PG 부정 권한 테스트.
+- **P0 `REL1182-05`:** QA v1183 FAILED/HOLD: Next 16.3.8 Critical 2/High 1, main runtime-check SKIPPED, 지갑 CSV 린트·홈 테스트 실패, 개발 앱 DML 235/241, Migration 266 체크섬, Cron 백업, 운영 실행 SHA 불일치·정확 SHA 인증 Test 부재. QA 이후 main 전진, 재검증 필수. 운영승격 금지.
+- **P1 `NOTIF1182-06..10`:** 기존 테이블 버전 API·멱등 영수증·불변 감사, 신규 행 UPSERT 경합 잠금, 22~08시/DST, Android OS 권한 분리, 웹 320px/WCAG AA/noindex/no-store, 관리자 RBAC 집계, 회원 감사 10,001건 커서, 철회 보존 롤백. 수용: 기본 광고 INSERT 100건→유효 자동동의 0, 위조 성공 URL 100건→확정 0, 발송/철회 동시 100건→효력 후 새 발송 0, 타 회원 100건 거부, 동일키 100회→이벤트 1, WLD 불변.
+- **정본·근거:** 국영문 상세는 기존 통합 기획 마스터에 동등 반영, 알림 거버넌스 상위 명세 재사용, 분산기획 파일 추가 없음. PostgreSQL·OWASP·Android 자료 검토, 신규 승인 0, 누적 중복제거 미확인 / 10,000 BLOCKED. 문서만 수정; 코드·DB·WLD·스위치·Test·운영 미변경. 별도 개발 브랜치·정확 SHA 게이트 필수.
+
+
 ## v2026.10.23.1180 — F675-102 회원 알림 동의·방해금지 제어판 (기획 / 초안)
 - 회차: 이전 Feature Improvement v1178, 현재 Feature Addition v1180, 다음 Feature Improvement v1182(잠정). 기존 `NOTIFICATION_REACTIVATION_GOVERNANCE_SPEC.ko.md`가 상위 기준이며 회원·API·DB 구현 단위를 구체화할 뿐 중복 알림 시스템을 만들지 않는다.
 - 실제 `/account/notifications`는 목표/NPC 알림 토글만 제공. DEV 읽기 전용 조회에서 기존 `notification_preferences`(0행, 회원+목적+채널 PK, 목적 7종·채널 4종·상태 6종), 전용 DB 함수 부재, 앱 계정 직접 DML/TRUNCATE, RLS OFF 확인. 기존 테이블 재사용·최소권한 복구, 필수 보안/거래 알림과 선택형 광고 동의 분리.
