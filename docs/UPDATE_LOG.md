@@ -1,5 +1,11 @@
 ## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
+## v2026.10.23.1176 — F675-101 notification evidence inbox (planning draft)
+- Previous Feature Improvement v1174 / Current Feature Addition v1176 / Next Feature Improvement v1178 (provisional); baseline main `8a1b466b`, 10 open PRs, QA v1179 FAILED/HOLD.
+- Source: six hardcoded local-only member notices versus existing real authenticated notification API; DEV notification rows 0, app UPDATE/DELETE allowed, RLS OFF. Plan owner-scoped stable cursor, verified ledger evidence and truthful unavailable state; P0 false financial notices, dependency/DB ACL/CI/migration/backup/exact-SHA release blockers; P1 web, app-api, admin, a11y, SEO, tests and rollback.
+- EN/KO integrated masters and PROJECT_PLAN synchronized in isolated planning branch. External 3 publishers reviewed, new accepted 0, cumulative unknown/10,000 BLOCKED. No runtime, DB, WLD, Test or Production changes; draft only, do not merge before QA/parity review.
+
+
 ## v2026.10.22.1140 — F675-92 calculator issue intake and verified corrections (PLANNING DRAFT)
 - Cycle: Previous Improvement v1138 / Current Addition v1140 / Next Improvement v1142 (provisional). GitHub main c3e62cd49da66c0b7c48223fcc81be888166f183; 5 open PRs; QA v1135 CI 7 failures and finance/production holds. Verified source risks in capital gains, save/alert/WLD claims, and dev app-role ACL. Drafted EN/KO integrated design, API/DB/roles/transactions/SEO/mobile/a11y/KPI/TDD/rollback. Independent references reviewed 3 publishers, accepted 0, cumulative unknown, 10,000 gate BLOCKED. No runtime/DB/deployment changes; Draft PR review required.
 
