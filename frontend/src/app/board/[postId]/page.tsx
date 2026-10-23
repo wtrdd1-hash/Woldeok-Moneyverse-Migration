@@ -6,7 +6,8 @@ import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { apiOrNull } from '@/lib/api';
+import { api, apiOrNull } from '@/lib/api';
+import { readPublicBoardPost, readMemberBoardPost } from './board-post-reader';
 import { formatMoment } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd, forumPostingJsonLd, buildOgImageUrl } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
@@ -38,10 +39,7 @@ interface Comment {
 }
 
 async function publicPost(postId: string): Promise<Post | null> {
-  const data = await apiOrNull<{ post: Post }>(
-    `/api/v1/board/public/posts/${encodeURIComponent(postId)}`,
-  );
-  return data?.post ?? null;
+  return readPublicBoardPost<Post>(postId, api);
 }
 
 export async function generateMetadata({
@@ -96,20 +94,16 @@ export default async function PostPage({
 }) {
   const { postId } = await params;
   const encodedPostId = encodeURIComponent(postId);
-  const memberPostData = await apiOrNull<{ post: Post }>(`/api/v1/board/posts/${encodedPostId}`);
+  const memberPostData = await readMemberBoardPost<Post>(postId, api);
   const member = memberPostData !== null;
-  const postData =
-    memberPostData ??
-    (await apiOrNull<{ post: Post }>(`/api/v1/board/public/posts/${encodedPostId}`));
+  const post = memberPostData?.post ?? (await publicPost(postId));
   const commentData = await apiOrNull<{ comments: Comment[] }>(
     member
       ? `/api/v1/board/posts/${encodedPostId}/comments`
       : `/api/v1/board/public/posts/${encodedPostId}/comments`,
   );
 
-  if (!postData) notFound();
-
-  const post = postData.post;
+  if (!post) notFound();
   const comments = commentData?.comments ?? [];
 
   const postBreadcrumb = breadcrumbJsonLd([
