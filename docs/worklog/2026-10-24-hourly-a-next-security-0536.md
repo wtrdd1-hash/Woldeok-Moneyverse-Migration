@@ -18,3 +18,7 @@
 
 ## Finished
 - Pending. No merge, Test promotion, Production deployment, or branch deletion authorized without evidence.
+
+### RED evidence — 05:38 KST
+- Baseline `pnpm audit --prod --audit-level high --json` returned nonzero; three Next.js 16.3.8 advisories (2 Critical, 1 High). Evidence: `/tmp/mva_audit_red_0536.json` on miniPC.
+- Branch start checkpoint pushed at `bf7c18ba4313e73a75a4e22425e02b41c6e76e4b`.
