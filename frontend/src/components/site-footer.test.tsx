@@ -9,7 +9,8 @@ describe('SiteFooter mobile accessibility', () => {
     expect(source).toContain("const linkClass = 'inline-flex min-h-11 items-center");
     expect(source).toContain('focus-visible:outline');
     const links = source.match(/<Link href="\/[^"]+" className=\{linkClass\}>/g) ?? [];
-    expect(links).toHaveLength(5);
+    expect(links).toHaveLength(6);
+    expect(links).toContain('<Link href="/accessibility" className={linkClass}>');
   });
 
   it('uses compact wrapping gaps so 360px layouts do not depend on oversized inter-link spacing', () => {

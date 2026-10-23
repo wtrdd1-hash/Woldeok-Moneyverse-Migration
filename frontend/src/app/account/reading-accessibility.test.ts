@@ -12,7 +12,7 @@ describe('accessible reading preference entrypoints', () => {
   });
   it('makes the member page private and links it from account navigation', () => {
     expect(source('app/account/accessibility/page.tsx')).toContain('await requireMember()');
-    expect(source('app/account/accessibility/page.tsx')).toContain('noindex');
+    expect(source('app/account/accessibility/page.tsx')).toContain('robots: { index: false, follow: false }');
     expect(source('app/account/page.tsx')).toContain('href="/account/accessibility"');
   });
   it('applies the validated preference before the first paint', () => {

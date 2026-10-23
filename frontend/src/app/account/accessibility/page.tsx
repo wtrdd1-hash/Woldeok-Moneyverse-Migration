@@ -6,7 +6,7 @@ import { ReadingScaleControls } from '@/components/reading-scale-controls';
 import { requireMember } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: '회원 읽기 접근성 설정', robots: { index: false, follow: false } }; // noindex
+export const metadata: Metadata = { title: '회원 읽기 접근성 설정', robots: { index: false, follow: false } };
 
 export default async function AccountAccessibilityPage() {
   await requireMember();
