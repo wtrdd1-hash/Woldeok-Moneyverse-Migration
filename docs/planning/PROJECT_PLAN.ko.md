@@ -1,5 +1,10 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1192 — F675-105 고객지원 비공개 증빙 보관함 (기획 초안 / 운영 보류)
+- 이전 Feature Improvement v1190 / 현재 Feature Addition v1192 / 다음 Feature Improvement v1194(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede`, QA v1193 FAILED/HOLD. 실제 고객지원 위젯은 검사한 이미지를 올린 뒤 미디어 URL을 문의 본문에 넣고, `ChatUploadController.getChatMedia`는 명시적 인증·소유권 가드 없이 공개 immutable 캐시 헤더를 보낸다. 엣지 외부 접근 및 실제 유출은 확인되지 않았다. 개발 DB 문의 3건/메시지 6건, 전용 증빙 테이블 없음. 선행 사건 관리 v1188/v1190은 미병합 Draft #1028/#1033; 본 변경은 문서 전용 후속 기획이다.
+- 회원 소유권을 확인하는 비공개 이미지 증빙, PNG/JPEG/WebP 파일당 8MiB·메시지당 3개, 검사·재인코딩·EXIF 제거 및 검사 장애 차단. `support_evidence`·`support_message_evidence`와 대화 일치 복합 FK, 고유 저장키, 불변 영수증·감사, SECURITY DEFINER 소유권 확인 및 앱 직접 DML 금지. 회원 업로드·연결·다운로드·영수증, 관리자 RBAC·격리, Android 동등성, private/no-store/noindex, 320px·WCAG 2.2 AA, 악용 방지, 기존 공개 URL 조사·안전한 전환. 자동 WLD 조정·범용 공개 업로드 금지. API·DB·화면·테스트·롤백 상세는 [통합 기획서](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 `SUP1192-01` 고객지원 공개 URL 조사·비공개 전환 게이트, `SEC1192-02` 소유권·관리자 권한·no-store·DB 최소권한, `REL1192-03` Next 보안·CI lint·Migration266·브랜치 보존·정확 SHA Test·격리 복원. P1 `SUP1192-04` 전용 DB/보관/검사, `SUP1192-05` 멱등 API·영수증, `SUP1192-06` 회원·관리자·Android, `SUP1192-07` 개인정보·접근성·SEO·KPI, `SUP1192-08` 100건 소유권/재시도/경쟁·10,001건 커서·롤백 회귀. 기능 기본 OFF, 런타임·DB·Test·운영 변경 없음. 외부 발행기관 2곳 검토, 신규 승인 0건, 누적 미확인/목표 10,000건 BLOCKED.
+
 ## v2026.10.23.1190 — F675-104 고객지원 사건 동시성·재시도 정합성 보완 (기획 초안 / 보류)
 - 이전 Addition v1188 / 현재 Improvement v1190 / 다음 Addition v1192(잠정). 소스·개발 DB에서 문의 3건/메시지 6건, 대화 생성 키의 첫 요청 지문 미검증, 답변 SELECT→INSERT UNIQUE 충돌 가능성, 관리자 상태 변경의 CAS/버전 부재 및 회원 답변 충돌 가능성, 앱 계정 지원 테이블 직접 UPDATE/DELETE 확인. 기존 UNIQUE 재사용; 운영 사고 주장 금지.
 - P0 `SUP1190-01` 요청 지문·안전한 멱등 영수증, `SUP1190-02` 대화 행 잠금·버전형 상태/답변/재검토·불변 이력, `SEC1190-03` 지원 DML 회수·본인/RBAC 검증, `REL1190-04` QA v1191 실패·Next 보안·main CI·Migration266·브랜치 보존 #1022·정확 SHA Test·격리 복원. P1 `SUP1190-05/SUP1190-06/SUP1190-07/SUP1190-08` 영수증 스키마·웹/Android/관리자 상태·개인정보/접근성/SEO/KPI·동시성 100건/커서 10,001건/롤백. API·DB·트랜잭션 상세는 [통합 기획서](INTEGRATED_PLANNING_MASTER.ko.md). 기능 기본 OFF, 선행 Draft #1028·이슈 #1029 후속 문서 기획, WLD·런타임·Test·운영 미변경. 독립 발행기관 2곳 검토, 신규 승인 0건/누적 미확인/목표 10,000건 BLOCKED.
