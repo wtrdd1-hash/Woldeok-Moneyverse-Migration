@@ -1,3 +1,6 @@
+## v2026.10.23.1184 — F675-103 opt-in notification digest planning (DRAFT/HOLD)
+- Previous Improvement v1182 / Current Addition v1184 / Next Improvement v1186 provisional. Debian 13.6 miniPC, main 8dc8d7d34fb110db7c3b4702fe310d390165a502, 27 open PRs, QA v1185 FAILED/HOLD. Read-only source/DB inspection; EN/KO integrated master and canonical plans updated in isolated planning branch. Proposed default-OFF daily/weekly digest, owner-scoped consent, deterministic DST, atomic outbox, honest receipts, admin audit, app-api parity and safe rollback. P0 NOTIF1184-01 / SEC1184-02 / REL1184-03; P1 NOTIF1184-04..08. 5 external publishers reviewed, 0 accepted; cumulative unknown, 10,000 BLOCKED. No code/DB/financial/Test/Production change, merge held for review and exact-SHA gates.
+
 ## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
 ## v2026.10.22.1140 — F675-92 calculator issue intake and verified corrections (PLANNING DRAFT)
