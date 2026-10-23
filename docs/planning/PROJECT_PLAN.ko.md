@@ -1,5 +1,10 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.23.1190 — F675-104 고객지원 사건 동시성·재시도 정합성 보완 (기획 초안 / 보류)
+- 이전 Addition v1188 / 현재 Improvement v1190 / 다음 Addition v1192(잠정). 소스·개발 DB에서 문의 3건/메시지 6건, 대화 생성 키의 첫 요청 지문 미검증, 답변 SELECT→INSERT UNIQUE 충돌 가능성, 관리자 상태 변경의 CAS/버전 부재 및 회원 답변 충돌 가능성, 앱 계정 지원 테이블 직접 UPDATE/DELETE 확인. 기존 UNIQUE 재사용; 운영 사고 주장 금지.
+- P0 `SUP1190-01` 요청 지문·안전한 멱등 영수증, `SUP1190-02` 대화 행 잠금·버전형 상태/답변/재검토·불변 이력, `SEC1190-03` 지원 DML 회수·본인/RBAC 검증, `REL1190-04` QA v1191 실패·Next 보안·main CI·Migration266·브랜치 보존 #1022·정확 SHA Test·격리 복원. P1 `SUP1190-05/SUP1190-06/SUP1190-07/SUP1190-08` 영수증 스키마·웹/Android/관리자 상태·개인정보/접근성/SEO/KPI·동시성 100건/커서 10,001건/롤백. API·DB·트랜잭션 상세는 [통합 기획서](INTEGRATED_PLANNING_MASTER.ko.md). 기능 기본 OFF, 선행 Draft #1028·이슈 #1029 후속 문서 기획, WLD·런타임·Test·운영 미변경. 독립 발행기관 2곳 검토, 신규 승인 0건/누적 미확인/목표 10,000건 BLOCKED.
+
+
 ## v2026.10.23.1188 — F675-104 문의 사건 진행·재검토 영수증 (기획 초안 / 배포 보류)
 - 이전 보완 v1186 / 현재 추가 v1188 / 다음 보완 v1190(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede`, QA v1189 FAILED/HOLD(현 main 이전). 실제 회원/관리자 문의 화면, Nest 컨트롤러·저장소, 마이그레이션 196 확인. 개발 DB 문의 3건·메시지 6건, 앱 역할 직접 DML 위험. 기존 대화를 보존하며 회원용 사건 이력, 관리자 분류, 서버 확정 재검토 영수증, 보장이 아닌 응답 목표 추가. WLD 변동·자동 환불 없음.
 - 회원별 `GET /api/v1/support/cases/:id`, 커서 이력, UUID 멱등 키와 `If-Match`를 요구하는 `POST .../escalations`, 관리자 큐·분류·결정·종료 RBAC 및 Android App API 동등성 제안. 추가형 사건 메타데이터/이벤트/재검토/정책 FK·UNIQUE·CHECK·복합 인덱스, 원자적 SECURITY DEFINER 상태 변경·버전·영수증, 타 회원 404·오래된 버전 409·불확실 결과 503. 회원 `/support/cases/:id`, 관리자 `/admin/support/cases`, CTA/빈 상태/오류/대기, noindex/no-store, 320px·WCAG 2.2 AA. 비식별 관리자 지표·남용 방지·개인정보·감사 포함.
