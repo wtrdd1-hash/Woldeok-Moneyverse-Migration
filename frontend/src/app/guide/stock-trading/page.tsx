@@ -221,6 +221,57 @@ export default async function StockTradingGuidePage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Section 4: Holding Verification & Instant Selling Guide */}
+        <Card className="border-border/80 bg-card/60">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-rose-500/10 text-rose-500">
+                <TrendingDown className="size-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base sm:text-lg font-bold">
+                  {isEn ? '4. Checking Holdings & One-Click Selling (Cash-out)' : '4. 보유 주식 확인 및 원클릭 즉시 판매(매도) 방법'}
+                </CardTitle>
+                <CardDescription>
+                  {isEn ? 'How to monitor positions and cash out profits instantly.' : '내 지갑과 포트폴리오에서 보유 주식을 확인하고 실시간 매도하는 방법'}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm leading-relaxed text-muted-foreground">
+            <p>
+              {isEn
+                ? 'You can review all your active stock holdings and execute immediate profit-taking sell orders across multiple surfaces:'
+                : '매수한 가상 주식은 다음 3가지 방법으로 손쉽게 확인하고 즉시 원클릭으로 판매(매도)하여 현금화할 수 있습니다:'}
+            </p>
+            <div className="grid sm:grid-cols-3 gap-3 pt-1">
+              <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 space-y-1.5">
+                <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider block">방법 1: 내 지갑</span>
+                <p className="font-bold text-xs text-foreground">지갑 메인 (/wallet)</p>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  자산 카드 아래 [내 보유 주식] 목록에서 종목별 수익률을 확인하고 빨간색 <b>[매도]</b> 버튼으로 즉시 판매합니다.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 space-y-1.5">
+                <span className="text-[10px] font-bold text-sky-500 uppercase tracking-wider block">방법 2: 포트폴리오</span>
+                <p className="font-bold text-xs text-foreground">포트폴리오 분석 (/stocks/portfolio)</p>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  3섹터 비중 도넛 차트와 종목 카드에서 <b>[매도]</b>를 눌러 원하는 수량만큼 분할 또는 전량 매도합니다.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 space-y-1.5">
+                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider block">방법 3: 종목 허브</span>
+                <p className="font-bold text-xs text-foreground">호가창 주문창 (/stocks/[종목])</p>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  호가창 우측 주문 패널에서 [매도] 탭을 선택하고 25%~100% 퀵 프리셋 버튼으로 즉시 매도 주문을 넣습니다.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}

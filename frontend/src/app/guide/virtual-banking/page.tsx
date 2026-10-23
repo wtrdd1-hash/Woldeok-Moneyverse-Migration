@@ -201,6 +201,42 @@ export default async function VirtualBankingGuidePage() {
             </p>
           </CardContent>
         </Card>
+
+        {/* Section 4: Single Bank Account One-Card */}
+        <Card className="border-border/80 bg-card/60">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-sky-500/10 text-sky-500">
+                <Sparkles className="size-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base sm:text-lg font-bold">
+                  {isEn ? '4. Toss-style Single Bank Account & Live Interest Counting' : '4. 토스뱅크형 단일 통장 원카드 & 실시간 이자 카운팅'}
+                </CardTitle>
+                <CardDescription>
+                  {isEn ? 'Instant deposit, withdrawal and live ticking interest rewards.' : '채우기/보내기 퀵 액션과 1초 단위로 쌓이는 미수령 이자 즉시 수령'}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm leading-relaxed text-muted-foreground">
+            <p>
+              {isEn
+                ? 'The top of the bank page features an all-in-one bank card. You can watch your accrued interest tick up in real time and hit "Claim Interest" at any time to compound your balance instantly.'
+                : '가상 은행 상단의 올인원 통장 원카드에서는 1초 단위로 실시간 증가하는 미수령 이자 틱을 라이브로 관찰할 수 있으며, [이자 받기] 버튼을 누르는 즉시 예금 원금에 합산되어 복리 레버리지가 극대화됩니다.'}
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3 pt-1">
+              <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                <p className="font-bold text-xs text-foreground">채우기 (현금 → 예금)</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">지갑의 유동 현금을 예금으로 옮겨 복리 이자를 적용받습니다.</p>
+              </div>
+              <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                <p className="font-bold text-xs text-foreground">보내기 (예금 → 현금)</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">필요할 때 언제든 수수료 없이 지갑으로 즉시 인출합니다.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}
@@ -217,7 +253,7 @@ export default async function VirtualBankingGuidePage() {
               : '원금 손실 없는 100% 안전 자산 복리 계좌를 개설하세요.'}
           </p>
         </div>
-        <Button asChild className="shrink-0 w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white">
+        <Button asChild className="shrink-0 w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-slate-100">
           <Link href="/bank">
             <Wallet className="size-4 mr-1.5" />
             {isEn ? 'Go to Virtual Bank' : '가상 은행 바로가기'}
