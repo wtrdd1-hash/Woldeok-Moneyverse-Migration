@@ -163,3 +163,19 @@ test('merged branch cleanup batches PR evidence and uses local ancestry', async 
   assert.match(workflow, /pulls\?state=closed&base=main&per_page=100/);
   assert.match(workflow, /--force-with-lease/);
 });
+
+
+test('automatic branch reconciliation never silently prefers main during a content conflict', async () => {
+  const workflow = await readFile(new URL('../../.github/workflows/auto-integrate-promote.yml', import.meta.url), 'utf8');
+  assert.doesNotMatch(workflow, /git merge --no-edit -X theirs origin\/main/);
+  assert.match(workflow, /if ! git merge --no-edit origin\/main; then/);
+  assert.match(workflow, /git merge --abort/);
+});
+
+test('auto integration never closes or deletes an unmerged PR head as a cleanup shortcut', async () => {
+  const workflow = await readFile(new URL('../../.github/workflows/auto-integrate-promote.yml', import.meta.url), 'utf8');
+  assert.doesNotMatch(workflow, /gh api --method PATCH .*state=closed/);
+  assert.doesNotMatch(workflow, /gh api --method DELETE .*git\/refs\/heads/);
+  assert.match(workflow, /if git diff --quiet origin\/main HEAD -- \.; then[\s\S]*?return 1/);
+  assert.match(workflow, /if \[\[ "\$ahead" -eq 0 \]\]; then[\s\S]*?continue/);
+});
