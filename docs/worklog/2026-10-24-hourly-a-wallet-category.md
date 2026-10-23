@@ -14,3 +14,9 @@
 
 ## Finished
 - Pending validation; no merge/Test/Production promotion authorized.
+
+### 08:26 KST — In progress checkpoint
+- Confirmed origin/main unchanged at 54d5140d; re-read latest mutable integrated plan v1208.
+- TDD RED: backend 3 failed/1 passed after contract build; frontend missing-helper import failed. Then backend 4/4 and frontend+Android gateway 13/13 GREEN.
+- Implemented parameterized category SQL after owner scope, before limit, service/controller validation, SSR filter and Android query parity. No migration or DB write.
+- Typecheck found exactOptionalPropertyTypes issue; corrected without relaxing types. Full verification pending.

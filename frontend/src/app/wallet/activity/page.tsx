@@ -11,6 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
+import { walletCategoryApiPath, walletCategoryFromQuery } from './category-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +29,14 @@ export const metadata: Metadata = {
  * the top of the screen to make room for it was the wrong trade — so the rest
  * of it lives here.
  */
-export default async function WalletActivityPage() {
+export default async function WalletActivityPage({
+  searchParams,
+}: { readonly searchParams: Promise<{ category?: string | string[] }> }) {
   await requireMember();
+  const category = walletCategoryFromQuery((await searchParams).category);
   // 50 is the API's ceiling for this list, so this page shows everything it
   // will give rather than a page size chosen here.
-  const wallet = await apiOrNull<Overview>('/api/v1/wallet?recent=50');
+  const wallet = await apiOrNull<Overview>(walletCategoryApiPath(category));
 
   return (
     <div data-page="wallet-activity" className="mv-page mv-page--finance grid gap-5">
@@ -50,11 +54,28 @@ export default async function WalletActivityPage() {
 
       <Card>
         <CardContent>
+          <form method="get" action="/wallet/activity" className="mb-5 flex flex-wrap items-end gap-3">
+            <div className="grid gap-1.5">
+              <label htmlFor="wallet-activity-category" className="text-sm font-medium">거래 종류</label>
+              <select
+                id="wallet-activity-category"
+                name="category"
+                defaultValue={category}
+                className="min-h-11 rounded-md border border-border bg-background px-3 text-sm"
+              >
+                <option value="">전체 거래</option>
+                <option value="transfer">송금·계정 통합</option>
+                <option value="bank">은행 입출금·대출·이자</option>
+                <option value="reward">보상·지급</option>
+              </select>
+            </div>
+            <Button type="submit" variant="outline" className="min-h-11">조회</Button>
+          </form>
           {!wallet ? (
             <EmptyState title="지금은 기록을 불러올 수 없어요." />
           ) : wallet.recentTransactions.length === 0 ? (
             <EmptyState
-              title="아직 기록된 활동이 없어요."
+              title={category ? "선택한 종류의 최근 거래가 없어요." : "아직 기록된 활동이 없어요."}
               description="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다."
             />
           ) : (

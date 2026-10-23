@@ -24,6 +24,21 @@ export function requirePositiveWld(value: unknown, field: string): string {
   throw new WalletInputError(`${field} must be a positive safe integer or canonical WLD integer string`);
 }
 
+export type WalletTransactionCategory = 'transfer' | 'bank' | 'reward';
+
+/** Keep the filter finite: transaction types come from the ledger, never from client SQL. */
+const WALLET_CATEGORY_TYPES: Readonly<Record<WalletTransactionCategory, readonly string[]>> = {
+  transfer: ['USER_TO_USER', 'ACCOUNT_MERGE_TRANSFER'],
+  bank: ['BANK_DEPOSIT', 'BANK_WITHDRAW', 'BANK_LOAN_ISSUED', 'BANK_LOAN_REPAYMENT', 'BANK_DEPOSIT_INTEREST'],
+  reward: ['MINT_TO_USER', 'WORK_REWARD', 'WORK_TASK_REWARD', 'EARLY_EVENT_REWARD', 'TREASURY_TO_USER'],
+};
+
+export function requireWalletCategory(value: unknown): WalletTransactionCategory | undefined {
+  if (value === undefined) return undefined;
+  if (value === 'transfer' || value === 'bank' || value === 'reward') return value;
+  throw new WalletInputError('category must be transfer, bank or reward');
+}
+
 export function requireRecentLimit(value: unknown): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 1 || value > 50) {
     throw new WalletInputError('recent transaction limit must be an integer between 1 and 50');
@@ -183,9 +198,11 @@ export class PostgresWalletRepository {
     );
   }
 
-  async recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]> {
+  async recentTransactionsForUser(userId: string, limit: number, category?: WalletTransactionCategory): Promise<WalletTransactionRow[]> {
     const ownerUserId = requireUuid(userId, 'authenticated user id');
     const recentLimit = requireRecentLimit(limit);
+    const selectedCategory = requireWalletCategory(category);
+    const categoryPredicate = selectedCategory === undefined ? '' : ' AND ledger_transaction.type = ANY($3::text[])';
     return queryRows<WalletTransactionRow>(
       this.pool,
       `SELECT
@@ -223,11 +240,11 @@ export class PostgresWalletRepository {
          AND account.account_type IN (
            'USER_CASH'::public.account_type,
            'USER_BANK'::public.account_type
-         )
+         )${categoryPredicate}
        GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
        ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
        LIMIT $2`,
-      [ownerUserId, recentLimit],
+      selectedCategory === undefined ? [ownerUserId, recentLimit] : [ownerUserId, recentLimit, WALLET_CATEGORY_TYPES[selectedCategory]],
     );
   }
 

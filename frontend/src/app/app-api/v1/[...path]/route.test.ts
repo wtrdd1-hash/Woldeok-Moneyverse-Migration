@@ -36,6 +36,20 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('forwards authenticated wallet category filters without caching the private response', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ recentTransactions: [] }), {
+      headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/wallet?recent=50&category=bank', {
+      cookie: 'session=example',
+    }), context('wallet'));
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/wallet?recent=50&category=bank');
+    expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('cookie')).toBe('session=example');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);
