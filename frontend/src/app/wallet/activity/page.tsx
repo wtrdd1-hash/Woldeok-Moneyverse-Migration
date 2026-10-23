@@ -11,6 +11,8 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
+import { directionFromSearch, walletActivityHref } from './direction';
+import type { WalletDirection } from './direction';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +30,16 @@ export const metadata: Metadata = {
  * the top of the screen to make room for it was the wrong trade — so the rest
  * of it lives here.
  */
-export default async function WalletActivityPage() {
+export default async function WalletActivityPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ direction?: string | string[] }>;
+}) {
   await requireMember();
+  const direction = directionFromSearch((await searchParams).direction);
   // 50 is the API's ceiling for this list, so this page shows everything it
   // will give rather than a page size chosen here.
-  const wallet = await apiOrNull<Overview>('/api/v1/wallet?recent=50');
+  const wallet = await apiOrNull<Overview>(`/api/v1/wallet?recent=50${direction ? `&direction=${direction}` : ''}`);
 
   return (
     <div data-page="wallet-activity" className="mv-page mv-page--finance grid gap-5">
@@ -48,14 +55,31 @@ export default async function WalletActivityPage() {
         맞춘 금액을 보여 줍니다.
       </PageHeader>
 
+      <nav aria-label="거래 방향 필터" className="flex flex-wrap gap-2">
+        {([
+          [undefined, '전체'],
+          ['in', '들어온 WLD'],
+          ['out', '나간 WLD'],
+          ['neutral', '순변동 0'],
+        ] as const satisfies readonly (readonly [WalletDirection | undefined, string])[]).map(([value, label]) => (
+          <Button key={value ?? 'all'} asChild variant={direction === value ? 'default' : 'outline'} size="sm">
+            <Link href={walletActivityHref(value)} aria-current={direction === value ? 'page' : undefined}>
+              {label}
+            </Link>
+          </Button>
+        ))}
+      </nav>
+      <p className="text-xs text-muted-foreground">
+        선택한 방향의 최근 기록 최대 50건만 표시합니다. 전체 기간의 거래내역은 아닙니다.
+      </p>
       <Card>
         <CardContent>
           {!wallet ? (
             <EmptyState title="지금은 기록을 불러올 수 없어요." />
           ) : wallet.recentTransactions.length === 0 ? (
             <EmptyState
-              title="아직 기록된 활동이 없어요."
-              description="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다."
+              title={direction ? '선택한 방향의 기록이 없어요.' : '아직 기록된 활동이 없어요.'}
+              description={direction ? '다른 방향을 선택해 확인해 보세요.' : '보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다.'}
             />
           ) : (
             wallet.recentTransactions.map((entry) => {

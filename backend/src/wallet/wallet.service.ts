@@ -15,6 +15,7 @@ import type {
   WalletRewardRow,
   WalletRewardAvailabilityRow,
   WalletTransactionRow,
+  WalletActivityDirection,
   WalletTransferInput,
 } from './wallet.repository';
 import {
@@ -22,6 +23,7 @@ import {
   WalletInputError,
   requirePositiveWld,
   requireRecentLimit,
+  requireWalletDirection,
   requireUuid,
 } from './wallet.repository';
 
@@ -83,7 +85,7 @@ export class WalletRecipientError extends Error {
  */
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
-  recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]>;
+  recentTransactionsForUser(userId: string, limit: number, direction?: WalletActivityDirection): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -196,6 +198,7 @@ export interface WalletRepayReceipt {
 
 export interface WalletOverviewOptions {
   readonly recentLimit?: number;
+  readonly direction?: unknown;
 }
 
 export interface WalletTransferRequest {
@@ -368,13 +371,14 @@ export class WalletService {
 
   async overview(
     authenticatedUserId: string,
-    { recentLimit = 10 }: WalletOverviewOptions = {},
+    { recentLimit = 10, direction }: WalletOverviewOptions = {},
   ): Promise<WalletOverview> {
     const userId = requireUuid(authenticatedUserId, 'authenticated user id');
     const limit = requireRecentLimit(recentLimit);
+    const requestedDirection = requireWalletDirection(direction);
     const [balances, transactions] = await Promise.all([
       this.repository.balancesForUser(userId),
-      this.repository.recentTransactionsForUser(userId, limit),
+      this.repository.recentTransactionsForUser(userId, limit, requestedDirection),
     ]);
     return {
       userId,
