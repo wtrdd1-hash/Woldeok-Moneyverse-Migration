@@ -116,6 +116,9 @@ export default async function HomePage() {
         </div>
       </div>
 
+      {/* 2. 가입 전 게스트 유저를 위한 퀵 스타트 배너 */}
+      <GuestQuickstart locale={locale} />
+
       {/* 2. PC 와이드 벤토 그리드 (7:5 비대칭 핀테크 레이아웃) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
         {/* 좌측 메인 칼럼: 자산 대시보드 + 3대 퀵 액션 (7/12) */}
@@ -233,7 +236,7 @@ export default async function HomePage() {
             <div className="space-y-2">
               {movers.length === 0 ? (
                 <div className="p-4 text-center text-xs text-slate-400">
-                  실시간 호가 데이터를 불러오는 중입니다.
+                  시세 자료를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.
                 </div>
               ) : (
                 movers.map((stock) => {
@@ -351,8 +354,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 4. 하단 온보딩 가이드 (상단 뷰포트를 방해하지 않도록 하단 안착) */}
-      <GuestQuickstart locale={locale} />
     </div>
   );
 }
