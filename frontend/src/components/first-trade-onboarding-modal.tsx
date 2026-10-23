@@ -1,222 +1,185 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Sparkles, TrendingUp, CheckCircle2, ArrowRight, X, ShieldCheck } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { ArrowRight, ShieldCheck, TrendingUp, X } from 'lucide-react';
+import { useLocale } from '@/components/locale-provider';
 
-interface SavedScenario {
-  ticker: string;
-  stockName: string;
-  targetPrice: string;
-  reboundRate: string;
-  savedAt: number;
+interface SavedStock {
+  readonly ticker: string;
+  readonly name: string;
+}
+
+const DISMISSED_KEY = 'wdmv_first_trade_onboarded';
+const SCENARIOS_KEY = 'wdmv_saved_scenarios';
+
+const COPY = {
+  ko: {
+    title: '첫 거래 안내',
+    close: '창 닫기',
+    badge: '계산기에서 저장한 시나리오',
+    heading: '가상 주식 거래소에서 직접 확인해 보세요',
+    detail: '계산기 결과는 매수 주문이나 실제 보유 주식이 아닙니다. 거래소에서 현재 종목과 가격을 확인한 뒤 직접 주문할 수 있습니다.',
+    saved: '브라우저에 저장된 종목',
+    cta: '거래소에서 직접 확인',
+    later: '나중에 확인하기',
+    notice: '이 안내는 WLD 지급·주식 체결·계정 저장을 실행하지 않습니다.',
+  },
+  en: {
+    title: 'First trade guide',
+    close: 'Close dialog',
+    badge: 'Scenario saved in calculator',
+    heading: 'Review your first trade on the virtual exchange',
+    detail: 'A calculator scenario is not an order or a holding. Check the live listing and price on the exchange before placing an order yourself.',
+    saved: 'Stock saved in this browser',
+    cta: 'Review on the exchange',
+    later: 'Maybe later',
+    notice: 'This guide does not issue WLD, place orders, or save holdings to your account.',
+  },
+  ja: {
+    title: '初回取引ガイド',
+    close: '閉じる',
+    badge: '計算機に保存したシナリオ',
+    heading: '仮想取引所で銘柄を確認しましょう',
+    detail: '計算結果は注文や保有株ではありません。取引所で現在の銘柄と価格を確認し、ご自身で注文してください。',
+    saved: 'このブラウザに保存した銘柄',
+    cta: '取引所で直接確認',
+    later: '後で確認する',
+    notice: 'この案内ではWLD付与・株式注文・口座への保有登録を行いません。',
+  },
+  zh: {
+    title: '首次交易指南',
+    close: '关闭窗口',
+    badge: '计算器保存的情景',
+    heading: '前往虚拟交易所自行确认',
+    detail: '计算结果不是订单或持仓。请在交易所确认当前股票及价格后自行下单。',
+    saved: '保存在此浏览器的股票',
+    cta: '前往交易所查看',
+    later: '稍后再看',
+    notice: '本指南不会发放WLD、提交订单或写入账户持仓。',
+  },
+} as const;
+
+function savedStock(): SavedStock | null {
+  try {
+    const scenarios: unknown = JSON.parse(localStorage.getItem(SCENARIOS_KEY) ?? 'null');
+    if (!Array.isArray(scenarios)) return null;
+    const last = scenarios.at(-1) as Record<string, unknown> | undefined;
+    if (!last || typeof last.ticker !== 'string' || typeof last.stockName !== 'string') return null;
+    const ticker = last.ticker.trim();
+    const name = last.stockName.trim();
+    if (!ticker || ticker.length > 32 || !name || name.length > 120) return null;
+    return { ticker, name };
+  } catch {
+    return null;
+  }
 }
 
 export function FirstTradeOnboardingModal() {
+  const { locale } = useLocale();
+  const copy = COPY[locale];
+  const [targetStock, setTargetStock] = useState<SavedStock | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [targetStock, setTargetStock] = useState<{ ticker: string; name: string } | null>(null);
-  const [isExecuting, setIsExecuting] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    try {
-      // 이미 온보딩을 경험했는지 확인
-      const alreadyOnboarded = localStorage.getItem('wdmv_first_trade_onboarded');
-      if (alreadyOnboarded === 'true') {
-        return;
+    if (localStorage.getItem(DISMISSED_KEY) === 'true') return;
+    const stock = savedStock();
+    if (!stock) return;
+
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    void (async () => {
+      try {
+        // The HttpOnly session cannot be inferred from document.cookie or localStorage.
+        const response = await fetch('/api/viewer', {
+          cache: 'no-store',
+          credentials: 'same-origin',
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        const viewer: unknown = await response.json();
+        if (!viewer || typeof viewer !== 'object' || !('signedIn' in viewer) || viewer.signedIn !== true) return;
+        if (controller.signal.aborted) return;
+        timer = setTimeout(() => {
+          setTargetStock(stock);
+          setIsOpen(true);
+        }, 1000);
+      } catch {
+        // Unknown session is not permission to show a member-only prompt.
       }
-
-      // 로그인 세션 확인
-      const hasAuthSession =
-        document.cookie.includes('wdmv_session=') ||
-        document.cookie.includes('auth=') ||
-        document.cookie.includes('token=') ||
-        Boolean(localStorage.getItem('token')) ||
-        Boolean(localStorage.getItem('auth_user'));
-
-      if (!hasAuthSession) {
-        return;
-      }
-
-      // 방금 계산기에서 저장한 종목이 있는지 확인
-      const savedStr = localStorage.getItem('wdmv_saved_scenarios');
-      let foundStock = { ticker: '005930', name: '삼성전자' };
-
-      if (savedStr) {
-        const scenarios: SavedScenario[] = JSON.parse(savedStr);
-        if (Array.isArray(scenarios) && scenarios.length > 0) {
-          const last = scenarios[scenarios.length - 1];
-          if (last) {
-            foundStock = { ticker: last.ticker, name: last.stockName };
-          }
-        }
-      }
-
-      setTargetStock(foundStock);
-
-      // 로그인 후 1초 뒤 부드럽게 팝업 오픈
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    } catch {
-      // ignore
-    }
+    })();
+    return () => {
+      controller.abort();
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
-  const handleExecuteFirstTrade = async () => {
-    if (!targetStock) return;
-    setIsExecuting(true);
+  useEffect(() => {
+    if (!isOpen) return;
+    closeRef.current?.focus();
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [isOpen]);
 
+  const dismiss = () => {
     try {
-      // 모의 주문 API 호출 시도
-      await fetch('/api/stocks/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ticker: targetStock.ticker,
-          type: 'BUY',
-          quantity: 1,
-          isStarterBonus: true,
-        }),
-      }).catch(() => null);
-
-      // 로컬 원장 기록 및 온보딩 플래그 저장
-      localStorage.setItem('wdmv_first_trade_onboarded', 'true');
-      const holdings = JSON.parse(localStorage.getItem('wdmv_virtual_holdings') || '[]');
-      holdings.push({
-        ticker: targetStock.ticker,
-        stockName: targetStock.name,
-        quantity: 1,
-        boughtAt: new Date().toISOString(),
-      });
-      localStorage.setItem('wdmv_virtual_holdings', JSON.stringify(holdings));
-
-      setIsCompleted(true);
+      localStorage.setItem(DISMISSED_KEY, 'true');
     } catch {
-      localStorage.setItem('wdmv_first_trade_onboarded', 'true');
-      setIsCompleted(true);
-    } finally {
-      setIsExecuting(false);
+      // A failed preference write must not fabricate a completed trade.
     }
-  };
-
-  const handleClose = () => {
-    localStorage.setItem('wdmv_first_trade_onboarded', 'true');
     setIsOpen(false);
   };
 
   if (!isOpen || !targetStock) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl text-zinc-100 overflow-hidden">
-        {/* 우측 상단 닫기 */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="first-trade-title"
+        aria-describedby="first-trade-description"
+        className="relative w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-900 p-5 text-zinc-100 shadow-2xl sm:p-6"
+      >
         <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 p-1.5 text-zinc-400 hover:text-zinc-200 rounded-lg hover:bg-zinc-800/60 transition-colors"
-          aria-label="닫기"
+          ref={closeRef}
+          type="button"
+          onClick={dismiss}
+          aria-label={copy.close}
+          className="absolute right-3 top-3 flex min-h-11 min-w-11 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
         >
-          <X className="w-5 h-5" />
+          <X className="h-5 w-5" aria-hidden="true" />
         </button>
-
-        {!isCompleted ? (
-          <div>
-            {/* 뱃지 */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-4">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>신규 회원 10,000 WLD 무료 정착금 지급 완료</span>
-            </div>
-
-            {/* 헤더 */}
-            <h3 className="text-xl font-bold tracking-tight text-white mb-2">
-              방금 계산한 {targetStock.name},<br />
-              첫 모의 매수로 시작해보세요!
-            </h3>
-            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
-              실제 현금 위험 없는 100% 안전한 시뮬레이션입니다. 무료 지원금 10,000 WLD 중 1주를 지금 바로 1초 만에 매수 체결해드립니다.
-            </p>
-
-            {/* 종목 요약 카드 */}
-            <div className="bg-zinc-800/60 border border-zinc-700/60 rounded-xl p-4 mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                  <TrendingUp className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-white">{targetStock.name}</div>
-                  <div className="text-xs font-mono text-zinc-400">{targetStock.ticker} · 모의 1주 매수</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-xs text-emerald-400 font-semibold px-2 py-0.5 rounded bg-emerald-500/10">
-                  정착금 차감
-                </span>
-              </div>
-            </div>
-
-            {/* CTA 버튼 */}
-            <div className="space-y-2.5">
-              <button
-                onClick={handleExecuteFirstTrade}
-                disabled={isExecuting}
-                className="w-full h-11 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-xl text-sm transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-emerald-500/20"
-              >
-                {isExecuting ? (
-                  <span>주문 체결 중...</span>
-                ) : (
-                  <>
-                    <span>1초 원클릭 모의 매수 체결</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-              <button
-                onClick={handleClose}
-                className="w-full h-10 text-xs text-zinc-400 hover:text-zinc-200 font-medium transition-colors"
-              >
-                나중에 직접 주문할게요
-              </button>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-center gap-1.5 text-[11px] text-zinc-500">
-              <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-              <span>실제 금융 거래가 아닌 게임 시뮬레이션 데이터입니다</span>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-4 animate-in zoom-in-95 duration-200">
-            <div className="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="w-8 h-8" />
-            </div>
-
-            <h3 className="text-xl font-bold text-white mb-2">
-              {targetStock.name} 모의 매수 완료!
-            </h3>
-            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
-              첫 번째 거래가 정상 체결되었습니다.<br />
-              내 포트폴리오에서 실시간 수익률과 가상 배당금을 확인하세요.
-            </p>
-
-            <div className="space-y-2.5">
-              <Link
-                href="/stocks"
-                onClick={handleClose}
-                className="w-full h-11 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-xl text-sm transition-all"
-              >
-                <span>내 주식 포트폴리오 확인하기</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <button
-                onClick={handleClose}
-                className="w-full h-10 text-xs text-zinc-400 hover:text-zinc-200 font-medium transition-colors"
-              >
-                창 닫기
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+          <TrendingUp className="h-4 w-4" aria-hidden="true" />
+          {copy.badge}
+        </div>
+        <h2 id="first-trade-title" className="mb-2 pr-10 text-xl font-bold">{copy.title}</h2>
+        <h3 className="mb-3 text-base font-semibold text-white">{copy.heading}</h3>
+        <p id="first-trade-description" className="mb-5 text-sm leading-relaxed text-zinc-300">{copy.detail}</p>
+        <div className="mb-5 rounded-xl border border-zinc-700 bg-zinc-800/60 p-4">
+          <span className="block text-xs text-zinc-400">{copy.saved}</span>
+          <span className="mt-1 block break-words font-semibold">{targetStock.name}</span>
+          <span className="mt-1 block break-all text-xs text-zinc-400">{targetStock.ticker}</span>
+        </div>
+        <Link
+          href={locale === 'ko' ? '/stocks' : `/${locale}/stocks`}
+          onClick={dismiss}
+          className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 text-sm font-bold text-zinc-950 hover:bg-emerald-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
+        >
+          {copy.cta} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
+        <button type="button" onClick={dismiss} className="mt-2 min-h-11 w-full rounded-lg text-sm text-zinc-300 hover:text-white focus-visible:outline-2 focus-visible:outline-emerald-400">
+          {copy.later}
+        </button>
+        <p className="mt-3 flex items-start gap-2 border-t border-zinc-800 pt-3 text-xs leading-relaxed text-zinc-400">
+          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          {copy.notice}
+        </p>
       </div>
     </div>
   );
