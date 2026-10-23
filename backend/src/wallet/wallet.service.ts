@@ -26,6 +26,15 @@ import {
 } from './wallet.repository';
 
 const ACCOUNT_TYPES = new Set(['USER_CASH', 'USER_BANK']);
+export type WalletPeriod = '7d' | '30d' | '90d';
+
+/** Rolling UTC durations; never interpret user input as a SQL expression or owner selector. */
+export function requireWalletPeriod(value: unknown): WalletPeriod | undefined {
+  if (value === undefined) return undefined;
+  if (value === '7d' || value === '30d' || value === '90d') return value;
+  throw new WalletInputError('period must be 7d, 30d or 90d');
+}
+
 const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   MINT_TO_USER: '보상 지급',
   USER_TO_USER: '사용자 송금',
@@ -83,7 +92,7 @@ export class WalletRecipientError extends Error {
  */
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
-  recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]>;
+  recentTransactionsForUser(userId: string, limit: number, since?: Date): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -196,6 +205,7 @@ export interface WalletRepayReceipt {
 
 export interface WalletOverviewOptions {
   readonly recentLimit?: number;
+  readonly period?: string;
 }
 
 export interface WalletTransferRequest {
@@ -368,13 +378,18 @@ export class WalletService {
 
   async overview(
     authenticatedUserId: string,
-    { recentLimit = 10 }: WalletOverviewOptions = {},
+    { recentLimit = 10, period: requestedPeriod }: WalletOverviewOptions = {},
   ): Promise<WalletOverview> {
     const userId = requireUuid(authenticatedUserId, 'authenticated user id');
     const limit = requireRecentLimit(recentLimit);
+    const period = requireWalletPeriod(requestedPeriod);
+    const periodDays = period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : 0;
+    const now = periodDays ? this.clock() : null;
+    if (now && !Number.isFinite(now.getTime())) throw new Error('invalid wallet clock');
+    const since = now ? new Date(now.getTime() - periodDays * 86_400_000) : undefined;
     const [balances, transactions] = await Promise.all([
       this.repository.balancesForUser(userId),
-      this.repository.recentTransactionsForUser(userId, limit),
+      this.repository.recentTransactionsForUser(userId, limit, since),
     ]);
     return {
       userId,

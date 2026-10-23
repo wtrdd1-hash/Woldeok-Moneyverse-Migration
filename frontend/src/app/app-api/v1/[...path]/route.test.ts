@@ -171,3 +171,23 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('wallet period Android app-api compatibility', () => {
+  it('forwards the exact period and session cookie and keeps wallet data private', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ recentTransactions: [] }), {
+      status: 200,
+      headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/wallet?recent=50&period=7d', { cookie: 'mv_session=opaque' }),
+      context('wallet'),
+    );
+    const [url, init] = fetchSpy.mock.calls[0] as unknown as [URL, RequestInit];
+    expect(url.search).toBe('?recent=50&period=7d');
+    expect(new Headers(init.headers).get('cookie')).toContain('mv_session=opaque');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.status).toBe(200);
+  });
+});

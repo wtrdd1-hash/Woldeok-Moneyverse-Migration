@@ -183,7 +183,7 @@ export class PostgresWalletRepository {
     );
   }
 
-  async recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]> {
+  async recentTransactionsForUser(userId: string, limit: number, since?: Date): Promise<WalletTransactionRow[]> {
     const ownerUserId = requireUuid(userId, 'authenticated user id');
     const recentLimit = requireRecentLimit(limit);
     return queryRows<WalletTransactionRow>(
@@ -224,10 +224,11 @@ export class PostgresWalletRepository {
            'USER_CASH'::public.account_type,
            'USER_BANK'::public.account_type
          )
+       AND ($3::timestamptz IS NULL OR ledger_transaction.created_at >= $3::timestamptz)
        GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
        ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
        LIMIT $2`,
-      [ownerUserId, recentLimit],
+      [ownerUserId, recentLimit, since ?? null],
     );
   }
 

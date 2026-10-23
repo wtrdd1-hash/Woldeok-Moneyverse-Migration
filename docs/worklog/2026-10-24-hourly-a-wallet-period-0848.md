@@ -9,11 +9,18 @@
 
 ## Checklist
 - [x] System and repository read; design and implementation plan.
-- [ ] Backend TDD RED→GREEN.
-- [ ] Frontend/app-api TDD RED→GREEN.
-- [ ] Intermediate main/plan refresh.
+- [x] Backend TDD RED→GREEN: six semantic failures then 6/6 PASS.
+- [x] Frontend/app-api TDD RED→GREEN: missing helper failure then 13/13 PASS.
+- [x] Intermediate main/plan refresh: main remained 54d5140d; reviewed integrated plan v1208.
 - [ ] Full local and remote gates; real DB read-only.
 - [ ] Draft PR, QA/release report, final main refresh.
 
+## Mid-work checkpoint — code candidate
+- Test RED: backend 6 semantic failures after contract build, frontend helper module absent; no false-positive RED from missing contract build counted.
+- GREEN: backend 6/6; frontend + Android app-api 13/13; `pnpm typecheck` PASS; changed-file ESLint PASS; `git diff --check` PASS.
+- Code scope: session-derived actor, server-clock UTC rolling 7/30/90-day cutoff, parameterized PostgreSQL read before LIMIT, explicit private/no-store, accessible Next link selector, Android forwarding/cookie tests.
+- No migration, role grants, WLD write, DB modification, branch deletion or deployment.
+- Main refresh: `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede`, unchanged. Latest editable integrated plan v1208 reviewed.
+
 ## Evidence and final disposition
-Pending. No deployment or rollback initiated.
+Pending full CI, security, real PostgreSQL read-only and official Test. Production HOLD; no rollback initiated.

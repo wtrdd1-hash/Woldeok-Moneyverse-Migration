@@ -11,6 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
+import { walletPeriodFromSearchParam, walletPeriodHref } from './period-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +29,14 @@ export const metadata: Metadata = {
  * the top of the screen to make room for it was the wrong trade — so the rest
  * of it lives here.
  */
-export default async function WalletActivityPage() {
+export default async function WalletActivityPage({
+  searchParams,
+}: { searchParams?: Promise<{ period?: string | string[] }> }) {
   await requireMember();
+  const period = walletPeriodFromSearchParam((await searchParams)?.period);
   // 50 is the API's ceiling for this list, so this page shows everything it
   // will give rather than a page size chosen here.
-  const wallet = await apiOrNull<Overview>('/api/v1/wallet?recent=50');
+  const wallet = await apiOrNull<Overview>(`/api/v1/wallet?recent=50${period ? `&period=${period}` : ''}`);
 
   return (
     <div data-page="wallet-activity" className="mv-page mv-page--finance grid gap-5">
@@ -48,6 +52,26 @@ export default async function WalletActivityPage() {
         맞춘 금액을 보여 줍니다.
       </PageHeader>
 
+      <nav aria-label="거래 기간 선택" className="flex flex-wrap gap-2">
+        {([
+          { value: null, label: '전체 (최근 50건)' },
+          { value: '7d', label: '최근 7일' },
+          { value: '30d', label: '최근 30일' },
+          { value: '90d', label: '최근 90일' },
+        ] as const).map((option) => (
+          <Link
+            key={option.value ?? 'all'}
+            href={walletPeriodHref(option.value)}
+            aria-current={period === option.value ? 'page' : undefined}
+            className="rounded-lg border px-3 py-2 text-sm hover:bg-muted aria-[current=page]:bg-muted aria-[current=page]:font-semibold"
+          >
+            {option.label}
+          </Link>
+        ))}
+      </nav>
+      <p className="text-sm text-muted-foreground">
+        {period ? '선택한 기간의 거래 중 최신 최대 50건을 표시합니다.' : '최근 거래 최대 50건을 표시합니다.'}
+      </p>
       <Card>
         <CardContent>
           {!wallet ? (

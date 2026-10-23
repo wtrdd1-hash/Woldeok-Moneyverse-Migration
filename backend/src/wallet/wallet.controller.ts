@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -25,7 +26,7 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
 import { WalletInputError } from './wallet.repository';
-import { WalletRecipientError, WalletService } from './wallet.service';
+import { WalletRecipientError, WalletService, requireWalletPeriod } from './wallet.service';
 
 /**
  * Guard order is semantic, not cosmetic. SessionGuard resolves the session
@@ -81,14 +82,25 @@ export class WalletController {
    * an unbounded query.
    */
   @Get('wallet')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Balances and recent ledger entries for the caller' })
-  overview(@Req() request: RequestWithSession, @Query('recent') recent?: string) {
-    if (recent === undefined) return this.service().overview(requireUserId(request));
-    const parsed = Number(recent);
+  overview(@Req() request: RequestWithSession, @Query('recent') recent?: string, @Query('period') period?: string) {
+    let validPeriod: ReturnType<typeof requireWalletPeriod>;
+    try {
+      validPeriod = requireWalletPeriod(period);
+    } catch (error) {
+      if (error instanceof WalletInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
+    if (recent === undefined && validPeriod === undefined) return this.service().overview(requireUserId(request));
+    const parsed = recent === undefined ? 10 : Number(recent);
     if (!Number.isSafeInteger(parsed)) {
       throw new BadRequestException('recent must be a whole number');
     }
-    return this.service().overview(requireUserId(request), { recentLimit: parsed });
+    return this.service().overview(requireUserId(request), {
+      recentLimit: parsed,
+      ...(validPeriod ? { period: validPeriod } : {}),
+    });
   }
 
   @Get('wallet/recipients/search')
