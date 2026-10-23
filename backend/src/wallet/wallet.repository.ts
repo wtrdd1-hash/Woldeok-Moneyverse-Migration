@@ -231,6 +231,57 @@ export class PostgresWalletRepository {
     );
   }
 
+  /** Stable, owner-scoped history pagination beyond the overview's 50-row cap.
+   * The anchor is resolved in PostgreSQL to preserve microsecond precision;
+   * a foreign/unknown transaction id intentionally yields no page.
+   */
+  async historyForUser(userId: string, limit: number, beforeId?: string): Promise<WalletTransactionRow[]> {
+    const ownerUserId = requireUuid(userId, 'authenticated user id');
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 51) {
+      throw new WalletInputError('history limit must be between 1 and 51');
+    }
+    const anchorId = beforeId === undefined ? null : requireUuid(beforeId, 'history cursor');
+    return queryRows<WalletTransactionRow>(
+      this.pool,
+      `WITH anchor AS (
+         SELECT transaction_anchor.created_at, transaction_anchor.id
+         FROM public.ledger_transactions AS transaction_anchor
+         WHERE transaction_anchor.id = $2::uuid
+           AND EXISTS (
+             SELECT 1 FROM public.ledger_postings AS anchor_posting
+             JOIN public.accounts AS anchor_account ON anchor_account.id = anchor_posting.account_id
+             WHERE anchor_posting.transaction_id = transaction_anchor.id
+               AND anchor_account.owner_user_id = $1
+               AND anchor_account.account_type IN (
+                 'USER_CASH'::public.account_type, 'USER_BANK'::public.account_type
+               )
+           )
+       )
+       SELECT ledger_transaction.id::text AS transaction_id,
+              ledger_transaction.type, ledger_transaction.created_at,
+              COALESCE(SUM(CASE posting.direction
+                WHEN 'debit'::public.posting_direction THEN posting.amount
+                ELSE -posting.amount END), 0)::text AS net_amount,
+              COALESCE(SUM(CASE WHEN account.account_type = 'USER_CASH'::public.account_type
+                THEN CASE posting.direction WHEN 'debit'::public.posting_direction
+                  THEN posting.amount ELSE -posting.amount END ELSE 0 END), 0)::text AS cash_delta,
+              COALESCE(SUM(CASE WHEN account.account_type = 'USER_BANK'::public.account_type
+                THEN CASE posting.direction WHEN 'debit'::public.posting_direction
+                  THEN posting.amount ELSE -posting.amount END ELSE 0 END), 0)::text AS bank_delta
+       FROM public.ledger_transactions AS ledger_transaction
+       JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
+       JOIN public.accounts AS account ON account.id = posting.account_id
+       WHERE account.owner_user_id = $1
+         AND account.account_type IN ('USER_CASH'::public.account_type, 'USER_BANK'::public.account_type)
+         AND ($2::uuid IS NULL OR (ledger_transaction.created_at, ledger_transaction.id) <
+           (SELECT anchor.created_at, anchor.id FROM anchor))
+       GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
+       ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
+       LIMIT $3`,
+      [ownerUserId, anchorId, limit],
+    );
+  }
+
   /**
    * Recipient resolution deliberately accepts only the internal user UUID.
    * It exposes neither OAuth subjects nor profile data, preventing this query

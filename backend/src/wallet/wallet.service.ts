@@ -84,6 +84,7 @@ export class WalletRecipientError extends Error {
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
   recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]>;
+  historyForUser?(userId: string, limit: number, beforeId?: string): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -143,6 +144,11 @@ export interface WalletOverview {
   readonly userId: string;
   readonly balances: WalletBalancesView;
   readonly recentTransactions: WalletTransactionView[];
+}
+
+export interface WalletHistoryView {
+  readonly transactions: WalletTransactionView[];
+  readonly nextCursor: string | null;
 }
 
 export interface WalletTransferReceipt {
@@ -380,6 +386,18 @@ export class WalletService {
       userId,
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
+    };
+  }
+
+  async history(authenticatedUserId: string, beforeId?: string): Promise<WalletHistoryView> {
+    const userId = requireUuid(authenticatedUserId, 'authenticated user id');
+    const cursor = beforeId === undefined ? undefined : requireUuid(beforeId, 'history cursor');
+    if (!this.repository.historyForUser) throw new Error('wallet history repository is unavailable');
+    const rows = await this.repository.historyForUser(userId, 21, cursor);
+    const transactions = normalizeTransactions(rows.slice(0, 20));
+    return {
+      transactions,
+      nextCursor: rows.length > 20 ? transactions[transactions.length - 1]!.transactionId : null,
     };
   }
 

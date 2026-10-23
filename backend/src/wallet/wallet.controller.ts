@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -89,6 +90,19 @@ export class WalletController {
       throw new BadRequestException('recent must be a whole number');
     }
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
+  }
+
+  @Get('wallet/history')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Owner-scoped WLD ledger history with stable cursor pagination' })
+  history(@Req() request: RequestWithSession, @Query('before') before?: string) {
+    if (before !== undefined && (typeof before !== 'string' || before.length !== 36)) {
+      throw new BadRequestException('invalid history cursor');
+    }
+    return this.guarded(
+      () => this.service().history(requireUserId(request), before),
+      'wallet history is unavailable',
+    );
   }
 
   @Get('wallet/recipients/search')
