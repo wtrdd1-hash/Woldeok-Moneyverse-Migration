@@ -1,5 +1,44 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1202 — F675-107 본인 확인형 개인정보 열람 패키지: 영수증·격리·공개 통제 강화 (기능 보완 / 초안 / 운영승격 보류)
+
+### 회차·확인 근거
+- Previous 기능 추가 v1200 / Current 기능 보완 v1202 / Next 기능 추가 v1204(잠정). 시작·중간 main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede. main의 AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md 및 한국어 대조, v1200 통합 기획, QA v1203(04:39), GitHub PR, 실제 privacy API/저장소/migration 015 확인.
+- 기존 privacy/requests GET·POST는 개인정보 요청 접수·영수증 기능일 뿐 데이터 사본 발급 기능이 아님. Migration 015의 RETURNS TABLE 출력변수 created_at과 INSERT RETURNING id, created_at이 충돌할 수 있음. 개발 C Draft PR #1064는 격리 PostgreSQL 17.11에서 SQLSTATE 42702를 재현하고 순방향 migration 280, 안정적 폼 멱등 키를 제안했으나 **main 미병합·미배포**. 기획 예약은 C의 코드를 중복 수정하지 않고 검토·정확 SHA 검증을 선행 의존성으로 지정.
+- QA v1203: 운영 API와 개발 백엔드는 5433/woldeok_moneyverse_dev 공유(#1053); 운영 연결 DB Docker 포트가 0.0.0.0 및 [::] 바인딩(#1060), 외부 실제 접속 가능 여부는 미검증. 앱 계정 241개 중 235개 테이블 UPDATE/DELETE, bank SECURITY DEFINER 3개 PUBLIC EXECUTE(#993). Migration 266 체크섬 불일치, main lint·프론트 테스트·Next.js 보안 감사 실패, Test DB 스키마 불일치, 정확 SHA Test/복원 미검증. 공유 DB에 쓰기·마이그레이션·fixture·export worker 금지.
+- v1200 범위를 유지하면서 실제 접수 영수증, 법률·기술 승인, 원천별 공개 정책, 객체 원자성, 권한 철회 및 환경 격리를 강화. **문서 기획만 수행**하며 실제 사본 생성·법적 승인·코드 배포·DB 변경이 아님.
+
+### 회원·관리자·상태 및 진실성
+- 회원 경로 /account/privacy → /account/privacy/packages; CTA 사본 신청, 본인 재확인, 상태 확인, 포함/제외 항목 확인, 다운로드, 문제 신고. ACCESS_REQUEST_RECEIVED(기존 접수), PACKAGE_QUEUED(새 작업 커밋), PACKAGE_READY(객체 검증·공개 승인)를 엄격히 구분. 접수 행 존재나 성공 URL만으로 발급·완료 표시 금지.
+- 접수 재시도는 정규화된 종류/설명이 동일하면 폼별 UUID 재사용, 서버 영수증의 ID·소유자·종류·상태·키 검증 후 성공 표시. 같은 키 다른 내용은 409, 결과 불명은 이력 확인과 안전 재시도 안내, 42702/500은 실패 처리. 개발 C #1064와 순방향 280 검증에 연계하며 기획 브랜치에서 코드 복제 금지.
+- 패키지 상태 VERIFY_REQUIRED → QUEUED → SNAPSHOTTING → POLICY_REVIEW → APPROVED → ENCRYPTING → READY → DOWNLOADING → DOWNLOADED 또는 EXPIRED; REJECTED_WITH_REASON, CANCELLED, RETRY_PENDING, REVOKED, OBJECT_UNAVAILABLE 예외. APPROVED≠READY. 객체 누락·해시 오류·심사 철회·암호키 폐기 시 READY 금지. 1회 다운로드 도중 연결이 끊겼으면 실제 다운로드 성공이라고 주장 금지.
+- 회원 세션·최근 재인증(제안 10분 이내) 필수. 관리자 privacy.review와 privacy.release 분리, 민감 범주 2인 승인·최근 재인증·CSRF·사유 감사. 탈퇴/제한 계정은 법적 권리 행사 별도 경로. 신분증 업로드를 기본 요구하지 않음. 포함·제외 사유, 기준시각, 만료, 비식별 영수증만 노출.
+
+### 데이터·API·DB·동시성 계약
+- 버전형 원천별 허용 필드: 본인 프로필, 동의·요청 이력, 본인 작성 공개 콘텐츠, 본인 원장 분개·가상 WLD 금액의 정확한 문자열, 알림 설정. DM·지원 증빙·OAuth 토큰·금융 비밀·관리자 기록·제3자 식별자·삭제/비식별 정보는 기본 제외. 법적 예외는 별도 심사 사례번호와 감사가 필요하며 전체 테이블 SELECT * 내보내기 금지.
+- 제안 API(미구현): POST /api/v1/privacy/access-packages {privacyRequestId,idempotencyKey,requestedCategories,disclosurePolicyVersion}은 작업·이벤트·outbox 커밋 후에만 202. GET /:id 및 서명 키셋 목록은 본인만, POST /:id/download-intent는 최근 재인증+CSRF, GET /:id/download는 세션 결속 1회 권한 원자적 소비. 관리자 /api/v1/admin/privacy/access-packages/:id/review 및 /release는 expectedVersion·사유·권한·이중 승인. 401 미인증, 403 권한 없음, 404 타인/미존재 구분 불가, 409 충돌, 410 만료/철회, 423 심사 보류, 503 장애. 객체 저장 경로는 절대 반환 금지.
+- 제안 순방향 스키마: packages UNIQUE(owner_user_id,idempotency_key), 32바이트 request_digest, source_policy_version, state_version, owner+privacy_request 복합 FK; events append-only UNIQUE(package_id,version); artifacts UNIQUE(package_id,object_id), SHA256, 암호화 키 버전·크기·검증시각; grants UNIQUE(grant_hash), consumed_at, expires_at, session_fingerprint, revoked_at. (owner_user_id,created_at DESC,id DESC), worker lease용 부분 인덱스, 만료 삭제 인덱스. SECURITY DEFINER 고정 search_path, 요청·소유자 일치 강제, 앱 직접 DML/PUBLIC EXECUTE 금지.
+- 작업·이벤트·outbox 원자적 생성 → lease/epoch 선점 → 범위 제한 일관 스냅샷 읽기 → 비공개 암호화 객체 업로드·해시/manifest/정책/승인 검증 → CAS READY+감사. 업로드 성공만으로 READY 금지; 실패 시 고아 객체 정리. 재심사/철회는 버전 증가 및 권한 폐기, 이후 **새 스트림 시작 금지**. 이미 전송된 바이트를 회수한다고 약속하지 않음. 다운로드 권한은 스트리밍 전에 원자적으로 소모, 실패 재시도는 재인증 후 새 권한.
+- UTF-8 JSON 우선, CSV 수식 주입 무력화, ZIP 고정 경로·압축폭탄/심볼릭 링크/경로 탐색 차단, 크기·실행시간 상한, 암호화 저장·TLS·private/no-store/nosniff/no-referrer. 브라우저 분석·공유 캐시에 개인정보 금지. 보관기한은 법률 검토 후 확정, 백업까지 즉시 물리 삭제됐다는 주장 금지.
+
+### 운영·접근성·지표·배포
+- 관리자 화면은 가린 건수·원천 정책 버전·대기시간·승인/공개/철회 감사를 표시하고 원문 기본 미노출. Kill switch는 새 작업/권한만 중단하고 요청·감사 보존. Android App API 동일 소유권·재인증 및 OS 비공개 저장. 320px, WCAG 2.2 AA, 키보드·초점·상태 알림; 회원/관리자 noindex·sitemap 제외, BFF/API/edge/객체 no-store.
+- KPI: 접수 영수증 정확도, READY 객체 무결성, 심사 대기 p50/p95, 타 회원 차단, 정책 버전 불일치, 권한 재사용 시도, 만료 삭제 지연, 무단 공개 목표 0. 기준값 UNKNOWN; 법적 처리기한은 개인정보 책임자 확인 전 임의 약속 금지.
+- 기본 OFF. #1053/#1060 환경 연결 신원(host/port/db/user) 및 외부 접근 차단 증명 → 순방향 migration 검토 → 실제 격리 PG 소유자 부정 테스트 → 전체 보안 감사/CI → 정확 SHA 공식 Test 인증 E2E·암호화 복원 → 카나리·롤백. 과거 015/266 변경 금지. 실패 시 작업·다운로드 중단, 권한 폐기, 요청·감사 보존, 고아 객체 정리, WLD 자동 변경 없음. 개발 A/B/C/QA/Gemini 변경 영역은 유지.
+
+### P0/P1 개발 백로그·수용 조건
+- P0 ENV1202-01: #1053/#1060 운영/개발 DB 격리 및 5433 wildcard 노출 차단을 승인된 변경으로 수행; 외부 차단·정상 API/백업·Test 신원 증명.
+- P0 PRIV1202-02: C Draft #1064의 migration 015 SQLSTATE 42702 격리 재현, 순방향 280·폼 키·확정 영수증 검토/통합/정확 SHA 검증. 중복 마이그레이션 금지.
+- P0 SEC1202-03: #993 앱 광범위 DML/PUBLIC bank EXECUTE 제한, 회원별 접근 및 관리자 privacy.review/release 분리, 격리 PG 부정 테스트.
+- P0 REL1202-04: QA v1203 Next.js Critical2/High1, lint/블로그 테스트, 266 출처, Test 동등성·정확 SHA·백업 복원. 운영승격 보류.
+- P1 PRIV1202-05: 회원·요청 복합 제약, 버전형 공개 정책, 원천 허용 필드, 불변 manifest·제3자 예외 심사.
+- P1 PRIV1202-06: lease fencing, 제한적 export, 객체+DB READY CAS, 손상/철회/고아 객체 처리.
+- P1 PRIV1202-07: 세션 결속 1회 다운로드, 철회·만료 거부, 진실한 재시도 영수증, 비공개 캐시.
+- P1 PRIV1202-08: 회원·관리자·Android UX, WCAG/320px, SEO, 비식별 감사·KPI.
+- P1 PRIV1202-09: 같은 키 동시 100건→작업/영수증 1건, 다른 내용 재사용 100건→409, 타 회원 100건→공개 0, 다운로드 동시 100건→소모 최대 1회, 동일 시각 10,001건 키셋 누락 0, 객체 손상/누락 READY 0, 철회 후 새 스트림 0, 38자리 WLD 문자열 보존, CSV/ZIP 악성 입력 차단, 격리 Test·복원·롤백 검증.
+- 외부 독립 참고 발행기관: PostgreSQL, OWASP, EDPB 3곳 검토. 신규 독립 분류·중복 제거 최종 승인 근거 **0건**, 누적 승인 **UNKNOWN/10,000**, gate **BLOCKED / IN PROGRESS**. 참고: https://www.postgresql.org/docs/current/plpgsql-implementation.html ; https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html ; https://www.edpb.europa.eu/documents/guideline/guidelines-012022-on-data-subject-rights-right-of-access_en . 법률 자문이나 10,000건 확보 증명이 아님.
+
+
 ## v2026.10.24.1200 — F675-107 본인 확인형 개인정보 열람 패키지 (기능 추가 / 기획 초안 / 운영승격 보류)
 
 ### 회차·근거·범위

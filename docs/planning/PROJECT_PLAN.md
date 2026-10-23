@@ -1,4 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
+- Full backlog IDs / 전체 백로그 식별자: ENV1202-01 PRIV1202-02 SEC1202-03 REL1202-04 PRIV1202-05 PRIV1202-06 PRIV1202-07 PRIV1202-08 PRIV1202-09
+
+
+## v2026.10.24.1202 — F675-107 private data access receipt/isolation/disclosure hardening (PLANNING DRAFT / RELEASE HOLD)
+- Previous Addition v1200 / Current Improvement v1202 / Next Addition v1204 provisional. Main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede unchanged at start/mid. QA v1203 FAILED/HOLD; Production/dev shared 5433 DB (#1053), wildcard DB bind (#1060), app DML 235/241 and bank PUBLIC EXECUTE (#993), migration 266 mismatch, Next.js audit and CI fail. No live DB writes, Test or Production deployment.
+- Source-backed dependency: existing privacy request is intake-only; migration 015 ambiguous RETURNING created_at triggers SQLSTATE 42702 on isolated PG per unmerged C Draft #1064, which proposes additive migration 280 and stable receipt retries. Do not duplicate or claim it released. Hardened F675-107 with three distinct intake/job/READY receipts, owner/step-up/reviewer separation, source allowlist, immutable policy-version manifest, encrypted artifact CAS, revocation-fenced one-use download, no-store/noindex/Android/WCAG and precise rollback.
+- P0 ENV1202-01, PRIV1202-02, SEC1202-03, REL1202-04; P1 PRIV1202-05 through PRIV1202-09. Full API/DB/UX/concurrency/rollback criteria in integrated English master and Korean counterpart. Independent publishers reviewed 3, newly accepted evidence 0, cumulative verified UNKNOWN/10,000 BLOCKED. Documentation-only stacked Draft; runtime unchanged.
+
 
 ## v2026.10.24.1200 — F675-107 Verified Private Data Access Package (PLANNING DRAFT / RELEASE HOLD)
 - Previous Improvement v1198 / Current Addition v1200 / Next Improvement v1202 (provisional). Main start/mid 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede; latest QA v1201 FAILED/HOLD. Source: /account/privacy records access requests but does not deliver a data copy; privacy GET/POST and migration 015 are intake-only (received status, no export destination). Docs-only successor of Draft #1052, not implemented or deployed.

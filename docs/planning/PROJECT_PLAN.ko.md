@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+- Full backlog IDs / 전체 백로그 식별자: ENV1202-01 PRIV1202-02 SEC1202-03 REL1202-04 PRIV1202-05 PRIV1202-06 PRIV1202-07 PRIV1202-08 PRIV1202-09
+
+
+## v2026.10.24.1202 — F675-107 개인정보 열람 패키지 영수증·환경격리·공개 통제 강화 (기획 초안 / 운영승격 보류)
+- Previous 기능 추가 v1200 / Current 기능 보완 v1202 / Next 기능 추가 v1204(잠정). 시작·중간 main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede 동일. QA v1203 FAILED/HOLD: 운영/개발 5433 DB 공유(#1053), wildcard 포트(#1060), 앱 계정 235/241 직접 DML·bank PUBLIC EXECUTE(#993), migration 266, Next.js 취약점·CI 차단. 운영 연결 DB 쓰기·Test·배포 없음.
+- 기존 개인정보 요청은 접수만 가능. Migration 015 RETURNING created_at 충돌(SQLSTATE 42702)은 개발 C 미병합 Draft #1064에서 격리 PG 재현 및 순방향 280 제안; 기획에서 중복 구현·배포 주장 금지. 접수/패키지 작업/실제 READY 영수증 분리, 본인·재인증·심사 분리, 허용 필드·정책 버전·불변 manifest, 암호화 객체 CAS, 철회 가능한 1회 다운로드, 비공개 캐시·Android·WCAG·롤백 조건 보완.
+- P0 ENV1202-01, PRIV1202-02, SEC1202-03, REL1202-04; P1 PRIV1202-05~09. 상세 API/DB/UX/동시성/검증은 영어 통합 정본·한국어 동등 문서 참조. 독립 발행기관 3곳 검토, 신규 승인 0건, 누적 승인 UNKNOWN/10,000 BLOCKED. 문서 기획만 수행.
+
 
 ## v2026.10.24.1200 — F675-107 본인 확인형 개인정보 열람 패키지 (기획 초안 / 운영승격 보류)
 - Previous 기능 보완 v1198 / Current 기능 추가 v1200 / Next 기능 보완 v1202(잠정). 시작·중간 main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede; 최신 QA v1201 FAILED/HOLD. /account/privacy는 열람 요청을 기록할 뿐 다운로드 사본은 제공하지 않음. 개인정보 API와 migration 015는 received 상태의 접수만 구현. 미병합 Draft #1052 후속 문서 기획이며 구현·배포 아님.
