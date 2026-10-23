@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Param,
   Post,
   Put,
@@ -52,9 +53,12 @@ export class AdminEnterpriseController {
 
   @Post('soes/harvest')
   @ApiOperation({ summary: '3대 국가 기간 공기업 법정 배당금 국고 즉시 수취 집행' })
-  async harvestSoeDividends(@Req() req: RequestWithSession) {
+  async harvestSoeDividends(
+    @Req() req: RequestWithSession,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ) {
     const adminId = requireUserId(req);
-    return this.service.harvestSoeDividends(adminId);
+    return this.service.harvestSoeDividends(adminId, idempotencyKey);
   }
 
   @Put('soes/:code')
