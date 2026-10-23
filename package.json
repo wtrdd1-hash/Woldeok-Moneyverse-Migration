@@ -9,7 +9,7 @@
   "scripts": {
     "build": "pnpm -r --sequential build",
     "typecheck": "pnpm --filter @moneyverse/contract build && pnpm -r --sequential typecheck",
-    "test": "node --test scripts/security/next-advisory-floor.test.mjs scripts/backup/verify-backup-evidence.test.mjs scripts/release/verify-main-required-checks.test.mjs ops/storage/dual-disk-check.test.mjs && pnpm api:contract:check && pnpm --filter @moneyverse/contract build && pnpm -r --sequential test",
+    "test": "node --test scripts/security/next-advisory-floor.test.mjs scripts/security/zod-advisory-floor.test.mjs scripts/backup/verify-backup-evidence.test.mjs scripts/release/verify-main-required-checks.test.mjs ops/storage/dual-disk-check.test.mjs && pnpm api:contract:check && pnpm --filter @moneyverse/contract build && pnpm -r --sequential test",
     "lint": "eslint .",
     "format": "prettier --write .",
     "qa:route-inventory": "node scripts/qa/generate-full-route-inventory.mjs",
