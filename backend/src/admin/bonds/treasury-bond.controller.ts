@@ -12,6 +12,8 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
+import { ReauthGuard } from '../../auth/guards/reauth.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -45,12 +47,14 @@ export class AdminTreasuryBondController {
   }
 
   @Post('distribute-coupons')
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '전체 유저 보유 국채 쿠폰 이자 즉시 일괄 정산 집행' })
   async distributeCoupons() {
     return this.service.processHourlyCouponsAndMaturities();
   }
 
   @Put(':id/status')
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '국채 운영 상태 및 표면금리 변경 (동결/마감 제어)' })
   async updateStatus(
     @Param('id') id: string,

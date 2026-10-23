@@ -5,12 +5,8 @@ import {
   FileText,
   Coins,
   TrendingUp,
-  Percent,
-  Clock,
   ShieldCheck,
   RefreshCw,
-  CheckCircle2,
-  AlertTriangle,
   Play,
   Send,
 } from 'lucide-react';
@@ -27,6 +23,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
+import { distributeBondCoupons, refreshBondAdminData } from './actions';
 
 export interface TreasuryBondItem {
   id: string;
@@ -84,12 +81,11 @@ export function BondControlTower({
   const refreshData = async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch('/api/admin/bonds/overview');
-      if (!res.ok) throw new Error('데이터 갱신 실패');
-      const data = await res.json();
-      setOverview(data.overview);
-      setBonds(data.bonds);
-      setLogs(data.couponLogs);
+      const result = await refreshBondAdminData();
+      if (!result.ok) throw new Error(result.error);
+      setOverview(result.data.overview);
+      setBonds(result.data.bonds);
+      setLogs(result.data.couponLogs);
       toast.success('국채 관제 데이터가 최신으로 동기화되었습니다.');
     } catch {
       toast.error('국채 관제 데이터를 불러오는데 실패했습니다.');
@@ -101,18 +97,15 @@ export function BondControlTower({
   const handleDistributeCoupons = async () => {
     setIsDistributing(true);
     try {
-      const res = await fetch('/api/admin/bonds/distribute-coupons', {
-        method: 'POST',
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '이자 지급 실패');
+      const result = await distributeBondCoupons();
+      if (!result.ok) throw new Error(result.error);
 
       toast.success(
-        `국채 쿠폰 이자 ${groupDigits(data.couponsDistributedWld)} WLD 정산 완료! (관리자 Discord DM 발송됨)`,
+        `국채 쿠폰 이자 ${groupDigits(result.receipt.couponsDistributedWld)} WLD 정산 완료 (만기 상환: ${groupDigits(result.receipt.maturitiesRedeemedWld)} WLD)`,
       );
       await refreshData();
-    } catch (err: any) {
-      toast.error(err.message || '쿠폰 이자 일괄 지급에 실패했습니다.');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : '쿠폰 이자 일괄 지급에 실패했습니다.');
     } finally {
       setIsDistributing(false);
     }

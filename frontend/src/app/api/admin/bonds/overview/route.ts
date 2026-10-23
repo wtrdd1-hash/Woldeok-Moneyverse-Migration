@@ -1,18 +1,10 @@
 import { NextResponse } from 'next/server';
-import { api } from '@/lib/api';
 
+// The old browser proxy could not establish the elevated console session.
+// Admin bond reads and mutations now run through session-bound server actions.
 export async function GET() {
-  try {
-    const [overview, bonds, couponLogs] = await Promise.all([
-      api('/api/v1/admin/bonds/overview'),
-      api('/api/v1/admin/bonds/list'),
-      api('/api/v1/admin/bonds/coupon-logs?limit=30'),
-    ]);
-    return NextResponse.json({ overview, bonds, couponLogs });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || '국채 관제 데이터를 불러오는데 실패했습니다.' },
-      { status: error?.status || 500 },
-    );
-  }
+  return NextResponse.json(
+    { error: 'This endpoint has been retired; use the administrator console action.' },
+    { status: 410, headers: { 'Cache-Control': 'no-store' } },
+  );
 }
