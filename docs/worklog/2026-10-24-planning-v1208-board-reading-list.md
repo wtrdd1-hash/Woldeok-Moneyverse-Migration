@@ -7,6 +7,6 @@
 - [x] Source exploration — public board detail/controller/service, migration 044 UUID/deleted_at and public visibility; blog static data is not a Nest-authoritative source; Android gateway contract requires engineering. No unverified claims of implemented reading list.
 - [x] MID 2026-10-24 08:11 KST — remote main and canonical EN/KO SHA256 rechecked; isolated worktree created from v1206. Public board only; explicit TOP/COMMENTS marker, no passive tracking.
 - [x] Detailed P0/P1, member/admin/Android/API/DB/atomicity/security/SEO/WCAG/KPI/100-way tests/rollback specified in existing six EN/KO documents. No separate feature-spec files created.
-- [ ] FINAL verification and GitHub Draft PR/issue references to be recorded after commit and push.
+- [x] FINAL — Draft PR #1087, issue #1086; six EN/KO docs verified for ten P0/P1 IDs; GitHub compare one ahead and zero behind, seven files. RELEASE HOLD; no runtime deployment. Final SHA in miniPC END log.
 
 Blockers: QA v1211 main lint/frontend failures, pnpm audit Critical4/High10 and bot Critical1/High4, Production/dev shared DB and 5433, app DML 235/241 and PUBLIC bank EXECUTE 3, migration266 checksum drift, authenticated official exact-SHA Test and isolated backup restore. C #1081/#1085, A #1083, B #1084, QA #1076 remain independent. Evidence: OWASP/PostgreSQL/W3C 3 publisher families reviewed, newly accepted 0, cumulative verified UNKNOWN / 10,000 BLOCKED.
