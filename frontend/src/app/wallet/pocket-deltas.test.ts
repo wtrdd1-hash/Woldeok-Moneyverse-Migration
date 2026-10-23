@@ -68,6 +68,12 @@ describe('bounded wallet CSV export', () => {
     expect(csv).toContain("'=HYPERLINK");
   });
 
+  it('removes Unicode C1 controls before guarding spreadsheet formulas', () => {
+    const csv = ledgerCsvContent([entry({ label: '\u0085=HYPERLINK("https://example.invalid")' })], true);
+    expect(csv).not.toContain('\u0085');
+    expect(csv).toContain("'=HYPERLINK");
+  });
+
   it('marks legacy pocket projections as unavailable, never zero', () => {
     const csv = ledgerCsvContent([entry({ cashDelta: undefined, bankDelta: undefined })], true);
     expect(csv).toContain('"Unavailable"');
