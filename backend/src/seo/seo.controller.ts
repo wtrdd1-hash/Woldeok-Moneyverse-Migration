@@ -24,6 +24,7 @@ import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
 import { SeoDailyDigestService } from './seo-daily-digest.service';
 import { TwitterPublisherService } from './twitter-publisher.service';
 import { SeoService } from './seo.service';
+import { publicSeoMetrics } from './seo-status-public';
 
 export interface CrawlerLogDto {
   readonly botName: string;
@@ -81,8 +82,15 @@ export class SeoController {
 
   @Get('status')
   @SkipInternalToken()
-  @ApiOperation({ summary: 'Get SEO crawler metrics, index health, and recent bot logs' })
+  @ApiOperation({ summary: 'Get public aggregate SEO crawler metrics' })
   async getStatus() {
+    return publicSeoMetrics(await this.seoService.getSeoMetrics());
+  }
+
+  @Get('status/admin')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
+  @ApiOperation({ summary: 'Get administrator-only SEO crawler visit details' })
+  async getAdminStatus() {
     return this.seoService.getSeoMetrics();
   }
 
