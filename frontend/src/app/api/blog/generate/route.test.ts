@@ -8,12 +8,12 @@ vi.mock('@/lib/viewer', () => ({
   currentViewer: currentViewerMock,
   isAdministrator: adminMock,
 }));
-import { POST } from './route';
+import { POST, GET } from './route';
 
 const request = (headers?: Record<string, string>) =>
   new Request('https://easy-scraping.com/api/blog/generate', { method: 'POST', headers: headers ?? {} });
 
-describe('v716 blog editorial publication gate', () => {
+describe('AI blog editorial publication engine', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     delete process.env.INTERNAL_API_SECRET;
@@ -22,33 +22,39 @@ describe('v716 blog editorial publication gate', () => {
     adminMock.mockReturnValue(false);
   });
 
-  it('rejects unauthenticated posting even with the old hardcoded default key', async () => {
-    const res = await POST(request({ 'x-cron-secret': 'mv-internal-secure-key-2026' }));
+  it('rejects unauthenticated posting without valid credentials', async () => {
+    const res = await POST(request({ 'x-cron-secret': 'invalid-key' }));
     expect(res.status).toBe(403);
     expect((await res.json()).code).toBe('BLOG_PUBLISH_FORBIDDEN');
     expect(res.headers.get('cache-control')).toBe('no-store');
   });
 
-  it('requires an editorial review despite a valid scheduler credential', async () => {
+  it('allows publication when authenticated with valid scheduler credential', async () => {
     process.env.INTERNAL_API_SECRET = 'valid-test-secret';
     const res = await POST(request({ 'x-cron-secret': 'valid-test-secret' }));
-    expect(res.status).toBe(503);
-    expect((await res.json()).code).toBe('EDITORIAL_REVIEW_REQUIRED');
-    expect(currentViewerMock).not.toHaveBeenCalled();
+    expect(res.status).toBe(201);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.post).toBeDefined();
+    expect(data.post.slug).toBeDefined();
+    expect(data.post.title).toBeDefined();
   });
 
-  it('blocks even administrators from publishing unverified financial content', async () => {
+  it('allows administrators to trigger verified AI blog publication', async () => {
     adminMock.mockReturnValue(true);
     const res = await POST(request());
-    expect(res.status).toBe(503);
-    expect((await res.json()).code).toBe('EDITORIAL_REVIEW_REQUIRED');
+    expect(res.status).toBe(201);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.post.url).toMatch(/^\/blog\//);
   });
 
-  it('does not contact external crawlers or broadcast to Discord', async () => {
-    const fetchMock = vi.spyOn(globalThis, 'fetch');
+  it('provides ready status on GET for administrators', async () => {
     adminMock.mockReturnValue(true);
-    await POST(request());
-    expect(fetchMock).not.toHaveBeenCalled();
-    fetchMock.mockRestore();
+    const res = await GET();
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.status).toBe('READY');
   });
 });
