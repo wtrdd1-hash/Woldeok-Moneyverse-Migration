@@ -8,52 +8,29 @@ import {
   ChevronRight,
   CircleHelp,
   Compass,
-  Dices,
+  Coins,
+  Flame,
   Landmark,
-  Sparkles,
-  Store,
-  TrendingUp,
   ShieldCheck,
+  Sparkles,
+  TrendingUp,
   Zap,
+  Calendar,
+  Clock,
+  Award,
+  Layers,
+  BookOpen,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TranslatedText as T } from '@/components/translated-text';
-import {
-  BEGINNER_TIPS,
-  ECONOMY_PILLARS,
-  CURRENT_IMPLEMENTED_FEATURES,
-  GROWTH_STAGES,
-  GUIDE_FAQS,
-  GUIDE_STEPS,
-  QUICK_START_STEPS,
-  QUICK_START_STEPS_EN,
-} from './guide';
-import { OnboardingRoadmap } from './components/onboarding-roadmap';
-import { AssetSimulator } from './components/asset-simulator';
-import { OnboardingChecklist } from './components/onboarding-checklist';
-import { EconomyFlowDiagram } from './components/economy-flow-diagram';
-import { GlossarySearch } from './components/glossary-search';
-import { PowerUserCheatSheet } from './components/power-user-cheat-sheet';
-import { canonicalUrl, breadcrumbJsonLd, faqPageJsonLd } from '@/lib/seo';
+import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
-import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 export const metadata: Metadata = {
-  title: '사이트 이용 가이드 & 인터랙티브 온보딩 허브 (User Guide)',
+  title: '월덕 머니버스 실전 이용 가이드 — 3분 마스터 & 성장 로드맵',
   description:
-    '월덕 머니버스를 3분 만에 마스터하는 인터랙티브 온보딩 가이드. 5단계 로드맵, 1분 모의 자산 시뮬레이터, 온보딩 퀘스트 체크리스트, 8대 직업, 은행 복리 예금, 10대 가상 주식 거래소 및 기업 창업 가이드.',
+    '월덕 머니버스의 가상경제 생태계를 3분 만에 마스터하는 공식 사용 가이드. 초보 지원금 5,000 WLD 수령부터 8대 직업 출근, 가상 주식 모의투자, 은행 저축, 일일 5분 루프까지 체계적으로 안내합니다.',
   alternates: { canonical: canonicalUrl('/guide') },
 };
-
-const PILLAR_ICONS = {
-  bank: Landmark,
-  work: Briefcase,
-  businesses: Building2,
-  shop: Store,
-  casino: Dices,
-} as const;
 
 export default function GuidePage() {
   const guideBreadcrumb = breadcrumbJsonLd([
@@ -61,377 +38,221 @@ export default function GuidePage() {
     { name: '이용 가이드', path: '/guide' },
   ]);
 
-  const guideFaqSchema = faqPageJsonLd(
-    GUIDE_FAQS.map((faq) => ({
-      question: faq.question,
-      answer: faq.answer,
-    })),
-  );
-
   return (
-    <div data-page="guide" className="mv-page mv-page--utility mx-auto max-w-6xl space-y-12 sm:space-y-16 py-6 sm:py-10">
-      {/* Schema.org Breadcrumb & FAQPage JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(guideBreadcrumb) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(guideFaqSchema) }}
-      />
+    <div className="mx-auto w-full max-w-5xl space-y-8 sm:space-y-10 px-4 sm:px-6 py-4 sm:py-8 pb-28 zero-overflow-shield">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(guideBreadcrumb) }} />
 
-      {/* 1. HERO MASTHEAD: 2026 Asymmetric FinTech Bento Grid */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-primary/15 via-card to-background p-6 sm:p-10 lg:p-12 shadow-sm">
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-xs font-black text-primary shadow-xs">
-            <Sparkles className="size-3.5" aria-hidden />
-            <span>INTERACTIVE ONBOARDING HUB</span>
-          </div>
-
-          <h1 className="text-3xl font-black tracking-tight sm:text-5xl text-foreground">
-            <T
-              korean="3분 만에 마스터하는 머니버스 이용 가이드"
-              english="Master Moneyverse in 3 Minutes: Interactive Guide"
-            />
-          </h1>
-
-          <p className="text-sm sm:text-base leading-relaxed text-muted-foreground [word-break:keep-all]">
-            <T
-              korean="월덕 머니버스는 Discord 커뮤니티와 연동된 차세대 분산 가상경제 포털입니다. 8대 직업 활동부터 복리 예금, 10대 가상 주식 거래, 스타트업 창업과 클럽 영지까지 모든 기능을 손쉽게 시작할 수 있도록 안내해 드립니다."
-              english="Woldeok Moneyverse is a next-generation community virtual economy. Start earning from 8 careers, compound savings, stock trading, and enterprise founding with this interactive walkthrough."
-            />
-          </p>
-
-          {/* Quick Summary Pill Strip */}
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Badge variant="outline" className="bg-background/80 text-foreground border-border/70 text-xs py-1 px-3">
-              ⚡ 5단계 인터랙티브 로드맵
-            </Badge>
-            <Badge variant="outline" className="bg-background/80 text-foreground border-border/70 text-xs py-1 px-3">
-              📊 1분 모의 자산 시뮬레이터
-            </Badge>
-            <Badge variant="outline" className="bg-background/80 text-foreground border-border/70 text-xs py-1 px-3">
-              🏆 온보딩 퀘스트 & 뱃지
-            </Badge>
-            <Badge variant="outline" className="bg-background/80 text-foreground border-border/70 text-xs py-1 px-3">
-              🛡️ 100% 무손실 복식부기 원장
-            </Badge>
-          </div>
-
-          {/* 5 Pillar Deep Dive Links Grid */}
-          <div className="pt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-            <Link
-              href="/roadmap"
-              className="flex items-center justify-between rounded-xl border border-emerald-500/50 bg-emerald-950/20 p-3.5 text-xs transition-all hover:border-emerald-400 hover:bg-emerald-950/40 hover:shadow-xs group"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
-                  <Sparkles className="size-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-emerald-300 group-hover:text-white transition-colors">
-                    초반·중반·후반 실전 로드맵 🎬
-                  </div>
-                  <div className="text-[11px] text-zinc-400">실시간 화면 비디오 시뮬레이터</div>
-                </div>
-              </div>
-              <ChevronRight className="size-4 text-emerald-400" />
-            </Link>
-
-            <Link
-              href="/features"
-              className="flex items-center justify-between rounded-xl border border-cyan-500/50 bg-cyan-950/20 p-3.5 text-xs transition-all hover:border-cyan-400 hover:bg-cyan-950/40 hover:shadow-xs group"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400">
-                  <Zap className="size-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-cyan-300 group-hover:text-white transition-colors">
-                    6대 기능 시각 가이드 🖼️
-                  </div>
-                  <div className="text-[11px] text-zinc-400">실제 사이트 UI 스크린샷 완벽 조작법</div>
-                </div>
-              </div>
-              <ChevronRight className="size-4 text-cyan-400" />
-            </Link>
-
-            <Link
-              href="/guide/stock-trading"
-              className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-3.5 text-xs transition-all hover:border-primary/50 hover:bg-card hover:shadow-xs"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
-                  <TrendingUp className="size-4" />
-                </div>
-
-                <div>
-                  <div className="font-bold text-foreground">가상 주식 실전 매매</div>
-                  <div className="text-[11px] text-muted-foreground">10-Depth 호가 & AI 감성 매매법</div>
-                </div>
-              </div>
-              <ChevronRight className="size-4 text-muted-foreground" />
-            </Link>
-
-            <Link
-              href="/guide/virtual-banking"
-              className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-3.5 text-xs transition-all hover:border-primary/50 hover:bg-card hover:shadow-xs"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                  <Landmark className="size-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-foreground">가상 금융 & 복리 예금</div>
-                  <div className="text-[11px] text-muted-foreground">일일 복리 이자 & 국채 공략</div>
-                </div>
-              </div>
-              <ChevronRight className="size-4 text-muted-foreground" />
-            </Link>
-
-            <Link
-              href="/guide/career-mastery"
-              className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-3.5 text-xs transition-all hover:border-primary/50 hover:bg-card hover:shadow-xs"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500">
-                  <Briefcase className="size-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-foreground">8대 직업 파밍 루틴</div>
-                  <div className="text-[11px] text-muted-foreground">숙련도 2.5배 배수 & 일일 캡</div>
-                </div>
-              </div>
-              <ChevronRight className="size-4 text-muted-foreground" />
-            </Link>
-
-            <Link
-              href="/guide/dopamine-system"
-              className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-3.5 text-xs transition-all hover:border-primary/50 hover:bg-card hover:shadow-xs"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-                  <Sparkles className="size-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-foreground">도파민 & 공정 확률 가이드</div>
-                  <div className="text-[11px] text-muted-foreground">스타 드롭 5연속 탭 & 스트릭</div>
-                </div>
-              </div>
-              <ChevronRight className="size-4 text-muted-foreground" />
-            </Link>
-
-            <Link
-              href="/guide/glossary"
-              className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-3.5 text-xs transition-all hover:border-primary/50 hover:bg-card hover:shadow-xs sm:col-span-2 lg:col-span-2"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-500">
-                  <Compass className="size-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-foreground">핀테크 핵심 용어사전 전체 열람</div>
-                  <div className="text-[11px] text-muted-foreground">복식부기, 멱등성, 스프레드, M0 통화량 등 20+개 용어 완벽 해설</div>
-                </div>
-              </div>
-              <ChevronRight className="size-4 text-muted-foreground" />
-            </Link>
-          </div>
+      {/* 1. Header Hero */}
+      <div className="space-y-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-bold">
+          <Sparkles className="size-3.5" />
+          <span>공식 사용 가이드 2026</span>
         </div>
-      </section>
+        <h1 className="text-2xl sm:text-4xl font-black text-slate-100 tracking-tight">
+          3분 만에 마스터하는 <span className="text-emerald-400">월덕 머니버스</span>
+        </h1>
+        <p className="text-sm sm:text-base text-slate-400 max-w-2xl leading-relaxed">
+          월덕 머니버스는 <strong className="text-slate-200">“벌기 → 선택하기 → 성장하기”</strong>로 이어지는 지속형 소셜 가상경제입니다.
+          실제 현금이나 투자가 아니며, 100% 안전한 가상 재화(WLD)로 금융과 경제를 시뮬레이션합니다.
+        </p>
+      </div>
 
-      {/* 2. INTERACTIVE 5-STEP ROADMAP (핵심 5단계 로드맵) */}
-      <section aria-labelledby="roadmap-section-heading" className="space-y-4">
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="eyebrow text-primary">5-STEP INTERACTIVE ROADMAP</p>
-            <h2 id="roadmap-section-heading" className="text-2xl font-black tracking-tight sm:text-3xl text-foreground">
-              <T korean="입문에서 대표 자본가까지 5단계 로드맵" english="5-Step Road to Virtual Mogul" />
-            </h2>
+      {/* 2. 핵심 요약 카드: 첫 3분 온보딩 루프 (Toss Bento Style) */}
+      <div className="toss-card toss-card-primary p-6 sm:p-8 space-y-6 bg-gradient-to-br from-[#121929] via-[#0d131f] to-[#090d14] border border-slate-700/60 rounded-3xl shadow-2xl relative overflow-hidden">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="size-8 rounded-2xl bg-emerald-500/20 text-emerald-400 grid place-items-center">
+              <Zap className="size-4.5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-slate-100">처음 오셨나요? 첫 3분 입문 코스</h2>
+              <p className="text-xs text-slate-400">가입 즉시 5단계로 가상경제의 흐름을 체험하세요</p>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground [word-break:keep-all]">
-            각 단계를 클릭하여 핵심 체크포인트와 상세 액션을 확인하세요.
-          </p>
-        </div>
-        <OnboardingRoadmap />
-      </section>
-
-      {/* 3. ASSET SIMULATOR (1분 모의 자산 형성 시뮬레이터) */}
-      <AssetSimulator />
-
-      {/* 4. ONBOARDING CHECKLIST & BADGE (온보딩 퀘스트 & 뱃지) */}
-      <OnboardingChecklist />
-
-      {/* 5. ECONOMIC FLOW DIAGRAM (가상경제 선순환 다이어그램) */}
-      <EconomyFlowDiagram />
-
-      {/* 6. GLOSSARY SEARCH (실시간 용어 검색 및 카테고리 필터) */}
-      <GlossarySearch />
-
-      {/* 7. POWER USER CHEAT SHEET (파워 유저 실전 치트시트) */}
-      <PowerUserCheatSheet />
-
-      {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
-      <InArticleAdvertisement className="my-8" />
-
-      {/* 8. 가상경제 5대 핵심 기둥 (5 Pillars of Virtual Economy) */}
-      <section aria-labelledby="pillars-title" className="space-y-6">
-        <div className="flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="eyebrow mb-1 text-primary">VIRTUAL ECONOMY PILLARS</p>
-            <h2 id="pillars-title" className="text-2xl font-black tracking-tight sm:text-3xl">
-              <T
-                korean="머니버스 가상경제 5대 핵심 기둥"
-                english="5 Pillars of the Virtual Economy"
-              />
-            </h2>
-          </div>
-          <p className="max-w-md text-xs leading-relaxed text-muted-foreground [word-break:keep-all]">
-            <T
-              korean="단순 활동 보상을 넘어 금융·직업·기업·상점·엔터테인먼트가 하나로 맞물려 선순환하는 완성형 경제 구조를 제공합니다."
-              english="Experience a complete economic architecture where banking, careers, businesses, commerce, and gaming harmonize."
-            />
-          </p>
+          <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-2.5 py-1 text-xs">
+            정착금 10,000 WLD
+          </Badge>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {ECONOMY_PILLARS.map((pillar) => {
-            const Icon = PILLAR_ICONS[pillar.id as keyof typeof PILLAR_ICONS] ?? Landmark;
-            return (
-              <Card
-                key={pillar.id}
-                className="flex flex-col justify-between border bg-card transition-all duration-200 hover:border-primary/40 hover:shadow-md"
-              >
-                <CardHeader className="space-y-3 pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary">
-                      <Icon className="size-6" aria-hidden />
-                    </div>
-                    <span className="rounded-full border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-[11px] font-bold text-primary">
-                      <T korean={pillar.badgeKo} english={pillar.badgeEn} />
-                    </span>
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-bold leading-snug">
-                      <T korean={pillar.titleKo} english={pillar.titleEn} />
-                    </CardTitle>
-                    <CardDescription className="mt-2 text-xs leading-[1.7] [word-break:keep-all]">
-                      <T korean={pillar.descKo} english={pillar.descEn} />
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-0">
-                  <div className="space-y-1.5 rounded-lg border bg-muted/30 p-3 text-xs">
-                    {pillar.featuresKo.map((feat, fIdx) => (
-                      <div key={feat} className="flex items-start gap-2">
-                        <CheckCircle2
-                          className="mt-0.5 size-3.5 shrink-0 text-emerald-500"
-                          aria-hidden
-                        />
-                        <span className="text-muted-foreground">
-                          <T korean={feat} english={pillar.featuresEn[fIdx] ?? feat} />
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full justify-between text-xs font-semibold min-h-[44px]"
-                  >
-                    <Link href={pillar.link.href}>
-                      <span>
-                        <T
-                          korean={pillar.link.label}
-                          english={pillar.link.labelEn ?? pillar.link.label}
-                        />
-                      </span>
-                      <ChevronRight className="size-3.5" aria-hidden />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 9. FAQ Section */}
-      <section aria-labelledby="faq-title" className="space-y-6">
-        <div className="flex items-center gap-3">
-          <CircleHelp className="size-7 text-primary" aria-hidden />
-          <div>
-            <p className="eyebrow mb-1 text-primary">COMMON QUESTIONS</p>
-            <h2 id="faq-title" className="text-2xl font-black tracking-tight sm:text-3xl">
-              <T korean="자주 묻는 질문 (FAQ)" english="Frequently Asked Questions" />
-            </h2>
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          {GUIDE_FAQS.map((faq) => (
-            <Card key={faq.question} className="flex flex-col justify-between border">
-              <CardHeader className="space-y-2">
-                <CardTitle className="text-sm font-bold leading-snug">
-                  <T korean={faq.question} english={faq.questionEn} />
-                </CardTitle>
-                <CardDescription className="text-xs leading-[1.8] [word-break:keep-all]">
-                  <T korean={faq.answer} english={faq.answerEn} />
-                </CardDescription>
-              </CardHeader>
-              {faq.link && (
-                <CardContent className="pt-0">
-                  <Link
-                    className="inline-flex items-center gap-1 text-xs font-bold text-primary transition-colors hover:underline min-h-[32px]"
-                    href={faq.link.href}
-                  >
-                    <T korean={faq.link.label} english={faq.link.labelEn ?? faq.link.label} />
-                    <ArrowRight className="size-3" aria-hidden />
-                  </Link>
-                </CardContent>
-              )}
-            </Card>
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 pt-2">
+          {[
+            { step: '1', title: '계정 생성 & 정착금', desc: '10,000 WLD 무료 지급' },
+            { step: '2', title: '첫 직업 출근', desc: '45초 작업 완료 + 보상' },
+            { step: '3', title: '가상 주식 관심 등록', desc: '10대 가상 상장사 탐색' },
+            { step: '4', title: '가상 은행 저축', desc: '연 3.2% 안전 복리 예금' },
+            { step: '5', title: '일일 퀘스트 완료', desc: '시즌 경험치(EXP) 획득' },
+          ].map((item) => (
+            <div key={item.step} className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-1">
+              <div className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] font-black grid place-items-center">
+                {item.step}
+              </div>
+              <p className="text-xs font-black text-slate-100 pt-1">{item.title}</p>
+              <p className="text-[11px] text-slate-400 leading-tight">{item.desc}</p>
+            </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}
-      <MultiplexAdvertisement className="my-10" />
+      {/* 3. 4대 핵심 시스템 바로가기 그리드 */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Layers className="size-4 text-emerald-400" />
+          <h2 className="text-lg sm:text-xl font-black text-slate-100">핵심 경제 서피스 바로가기</h2>
+        </div>
 
-      {/* 10. Bottom CTA */}
-      <section className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 via-background to-primary/5 px-6 py-12 text-center shadow-sm">
-        <div className="mx-auto max-w-xl space-y-4">
-          <span className="inline-grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-            <Sparkles className="size-6" aria-hidden />
-          </span>
-          <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
-            <T
-              korean="준비됐다면, 지금 바로 머니버스를 시작해 보세요!"
-              english="Ready? Begin Your Moneyverse Journey Now!"
-            />
-          </h2>
-          <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm [word-break:keep-all]">
-            <T
-              korean="모든 시스템을 외울 필요 없이, 잡보드에서 마음에 드는 직업 하나를 고르는 것으로 당신만의 가상 자산 여정이 시작됩니다."
-              english="No need to memorize everything at once. Pick a career on the Work Board to start your virtual wealth journey."
-            />
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <Button asChild size="lg" className="min-h-[44px] font-bold">
-              <Link href="/login">
-                <T korean="계정 로그인 시작하기" english="Start Sign In" />
-                <ArrowRight className="ml-2 size-4" aria-hidden />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="min-h-[44px] font-bold">
-              <Link href="/work">
-                <T korean="8대 직업 작업판 가기" english="Go to Work Board" />
-                <Briefcase className="ml-2 size-4" />
-              </Link>
-            </Button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            href="/stocks"
+            className="toss-card p-5 space-y-3 bg-[#0f1422] dark:bg-[#0d121c] border border-slate-800 rounded-3xl hover:border-emerald-500/50 hover:scale-[1.02] transition-all group"
+          >
+            <div className="size-10 rounded-2xl bg-emerald-500/15 text-emerald-400 grid place-items-center group-hover:scale-110 transition-transform">
+              <TrendingUp className="size-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-slate-100">가상 주식 거래소</h3>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                10대 상장사의 10단 호가창과 캔들 차트를 보며 1초 모의투자를 진행합니다.
+              </p>
+            </div>
+            <div className="text-xs font-bold text-emerald-400 flex items-center gap-1 pt-1">
+              <span>거래소 이동</span>
+              <ArrowRight className="size-3" />
+            </div>
+          </Link>
+
+          <Link
+            href="/work"
+            className="toss-card p-5 space-y-3 bg-[#0f1422] dark:bg-[#0d121c] border border-slate-800 rounded-3xl hover:border-sky-500/50 hover:scale-[1.02] transition-all group"
+          >
+            <div className="size-10 rounded-2xl bg-sky-500/15 text-sky-400 grid place-items-center group-hover:scale-110 transition-transform">
+              <Briefcase className="size-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-slate-100">8대 직업 & 파밍</h3>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                출근 후 타이머 완료 시 WLD와 숙련도 경험치를 안전하게 정산받습니다.
+              </p>
+            </div>
+            <div className="text-xs font-bold text-sky-400 flex items-center gap-1 pt-1">
+              <span>작업장 출근</span>
+              <ArrowRight className="size-3" />
+            </div>
+          </Link>
+
+          <Link
+            href="/bank"
+            className="toss-card p-5 space-y-3 bg-[#0f1422] dark:bg-[#0d121c] border border-slate-800 rounded-3xl hover:border-amber-500/50 hover:scale-[1.02] transition-all group"
+          >
+            <div className="size-10 rounded-2xl bg-amber-500/15 text-amber-400 grid place-items-center group-hover:scale-110 transition-transform">
+              <Landmark className="size-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-slate-100">가상 은행 & 금고</h3>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                이자율 연 3.2%의 안전 예금과 마이너스 통장 등 가상 금융 상품을 운용합니다.
+              </p>
+            </div>
+            <div className="text-xs font-bold text-amber-400 flex items-center gap-1 pt-1">
+              <span>은행 방문</span>
+              <ArrowRight className="size-3" />
+            </div>
+          </Link>
+
+          <Link
+            href="/tools"
+            className="toss-card p-5 space-y-3 bg-[#0f1422] dark:bg-[#0d121c] border border-slate-800 rounded-3xl hover:border-rose-500/50 hover:scale-[1.02] transition-all group"
+          >
+            <div className="size-10 rounded-2xl bg-rose-500/15 text-rose-400 grid place-items-center group-hover:scale-110 transition-transform">
+              <Coins className="size-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-slate-100">20종 금융 계산기</h3>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                복리, 주식 물타기, 배당소득세, 대출 상환 등 실생활 금융 시뮬레이터를 무료로 제공합니다.
+              </p>
+            </div>
+            <div className="text-xs font-bold text-rose-400 flex items-center gap-1 pt-1">
+              <span>계산기 전체보기</span>
+              <ArrowRight className="size-3" />
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      {/* 4. 일일 5분 루프 가이드 (Daily Loop) */}
+      <div className="toss-card p-6 sm:p-7 space-y-5 bg-[#0f1422] dark:bg-[#0d121c] border border-slate-800 rounded-3xl shadow-xl">
+        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+          <Clock className="size-4.5 text-sky-400" />
+          <h2 className="text-base sm:text-lg font-black text-slate-100">바쁜 현대인을 위한 5분 데일리 루프</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-1.5 p-4 rounded-2xl bg-slate-900/40 border border-slate-800">
+            <span className="text-[10px] font-black uppercase text-sky-400">Step 1 (0:00 ~ 0:30)</span>
+            <p className="text-sm font-bold text-slate-100">홈 화면 잔고 확인</p>
+            <p className="text-xs text-slate-400 leading-relaxed">오늘의 경제 지표와 실시간 인기 주식 TOP 3를 훑어봅니다.</p>
+          </div>
+
+          <div className="space-y-1.5 p-4 rounded-2xl bg-slate-900/40 border border-slate-800">
+            <span className="text-[10px] font-black uppercase text-emerald-400">Step 2 (0:30 ~ 2:00)</span>
+            <p className="text-sm font-bold text-slate-100">직업 출근 & 보상 수령</p>
+            <p className="text-xs text-slate-400 leading-relaxed">작업장에 출근하여 45~90초 타이머 후 WLD 수당을 정산받습니다.</p>
+          </div>
+
+          <div className="space-y-1.5 p-4 rounded-2xl bg-slate-900/40 border border-slate-800">
+            <span className="text-[10px] font-black uppercase text-amber-400">Step 3 (2:00 ~ 4:00)</span>
+            <p className="text-sm font-bold text-slate-100">모의투자 & 예금 저축</p>
+            <p className="text-xs text-slate-400 leading-relaxed">거래소에서 매매하거나 유휴 자금을 가상 은행에 안전하게 예치합니다.</p>
+          </div>
+
+          <div className="space-y-1.5 p-4 rounded-2xl bg-slate-900/40 border border-slate-800">
+            <span className="text-[10px] font-black uppercase text-purple-400">Step 4 (4:00 ~ 5:00)</span>
+            <p className="text-sm font-bold text-slate-100">일일 퀘스트 완료</p>
+            <p className="text-xs text-slate-400 leading-relaxed">퀘스트 보상으로 시즌 경험치를 챙기고 내일 성장을 준비합니다.</p>
           </div>
         </div>
-      </section>
+      </div>
+
+      {/* 5. 7일차 주간 성장 사다리 (D1 ~ D7) */}
+      <div className="toss-card p-6 sm:p-7 space-y-5 bg-[#0f1422] dark:bg-[#0d121c] border border-slate-800 rounded-3xl shadow-xl">
+        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+          <Calendar className="size-4.5 text-emerald-400" />
+          <h2 className="text-base sm:text-lg font-black text-slate-100">D1 ~ D7 주간 성장 사다리</h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {[
+            { day: 'D1', title: '입문과 정착', desc: '초보 지원금 수령, 프로필 설정, 첫 배송 작업 완료' },
+            { day: 'D2', title: '가상 시장 탐색', desc: '관심 종목 1개 등록 및 첫 모의 매수 튜토리얼' },
+            { day: 'D3', title: '스타터 수집 세트', desc: '상점에서 스타터 아이템 구매 및 인벤토리 확인' },
+            { day: 'D4', title: '가상 은행 저축', desc: '복리 예금 상품 가입 및 일일 이자 정산 경험' },
+            { day: 'D5', title: '직업 숙련도 상승', desc: '연속 출근을 통해 숙련도 티어 승격 및 수당 증액' },
+            { day: 'D7', title: '주간 결산 리포트', desc: '일주일간의 수입/지출 및 포트폴리오 수익률 결산' },
+          ].map((item) => (
+            <div key={item.day} className="p-3.5 rounded-2xl bg-slate-900/40 border border-slate-800/80 flex items-start gap-3">
+              <div className="size-8 rounded-xl bg-slate-800 text-emerald-400 font-fintech font-black text-xs grid place-items-center shrink-0">
+                {item.day}
+              </div>
+              <div>
+                <p className="text-xs font-black text-slate-100">{item.title}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 6. 안전 가이드라인 고지 */}
+      <div className="toss-card p-5 sm:p-6 bg-slate-900/30 border border-slate-800 rounded-3xl flex items-start gap-3.5 text-xs text-slate-400">
+        <ShieldCheck className="size-5 text-emerald-400 shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <p className="font-bold text-slate-200">100% 무손실 가상경제 원칙</p>
+          <p className="leading-relaxed [word-break:keep-all]">
+            월덕 머니버스의 모든 자산과 화폐(WLD)는 커뮤니티 게임을 위해 설계된 가상 데이터입니다.
+            실제 현금 충전이나 출금은 불가능하며, 금전적 손실 없이 안전하게 복리, 주식, 사업 등 거시 경제의 원리를 학습하고 즐길 수 있습니다.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
