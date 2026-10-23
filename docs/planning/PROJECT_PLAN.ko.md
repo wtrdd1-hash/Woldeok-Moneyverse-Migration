@@ -1,5 +1,10 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.23.1188 — F675-104 문의 사건 진행·재검토 영수증 (기획 초안 / 배포 보류)
+- 이전 보완 v1186 / 현재 추가 v1188 / 다음 보완 v1190(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede`, QA v1189 FAILED/HOLD(현 main 이전). 실제 회원/관리자 문의 화면, Nest 컨트롤러·저장소, 마이그레이션 196 확인. 개발 DB 문의 3건·메시지 6건, 앱 역할 직접 DML 위험. 기존 대화를 보존하며 회원용 사건 이력, 관리자 분류, 서버 확정 재검토 영수증, 보장이 아닌 응답 목표 추가. WLD 변동·자동 환불 없음.
+- 회원별 `GET /api/v1/support/cases/:id`, 커서 이력, UUID 멱등 키와 `If-Match`를 요구하는 `POST .../escalations`, 관리자 큐·분류·결정·종료 RBAC 및 Android App API 동등성 제안. 추가형 사건 메타데이터/이벤트/재검토/정책 FK·UNIQUE·CHECK·복합 인덱스, 원자적 SECURITY DEFINER 상태 변경·버전·영수증, 타 회원 404·오래된 버전 409·불확실 결과 503. 회원 `/support/cases/:id`, 관리자 `/admin/support/cases`, CTA/빈 상태/오류/대기, noindex/no-store, 320px·WCAG 2.2 AA. 비식별 관리자 지표·남용 방지·개인정보·감사 포함.
+- P0 `SUP1188-01` 소유권·영수증, `SEC1188-02` 문의 테이블 최소권한, `REL1188-03` 브랜치 손실 #1016/#1022 및 보안/CI/Migration266/백업/정확 SHA 보류. P1 `SUP1188-04` 사건 DB, `SUP1188-05` 원자적 재검토, `SUP1188-06` 웹/Android, `SUP1188-07` 관리자·개인정보·접근성·SEO·KPI, `SUP1188-08` 동시 100건·타 회원 100건·커서 10,001건·DST·롤백 검증. 개발 A/B/C·Gemini·QA 브랜치 미변경, 문서만 작업, 병합·배포 없음. 독립 발행기관 3곳 검토, 신규 승인 근거 0건, 누적 미확인 / 목표 10,000건 BLOCKED. 상세: [통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+
 ## v2026.10.23.1186 — F675-103 검증형 알림 묶음 발송 안전성 강화 (기획 초안 / 보류)
 - 이전 Addition v1184, 현재 Improvement v1186, 다음 Addition v1188(잠정). 기준 최신 main `1a31a6f2df2b75a0accceef12662dc42d9ab2d45`, 선행 Draft PR #1014, QA v1187 FAILED/HOLD는 현재 main 이전. 격리 문서 기획만 수행하고 런타임·DB 변경 없음.
 - P0: 목적/채널별 명시적 동의(기본 `OPTED_IN` 신뢰 금지), 검증된 분류·원천, 고유 발송/Outbox 키 및 외부 수락·불명 상태의 정직한 표시, 앱 계정 최소권한, CI·보안·Migration266·백업/격리복원·정확 SHA Test 보류. P1: 철회/임대 펜싱, 안정적 키셋 이력, 웹/Android 동등성, 관리자·접근성·SEO·KPI, 동시성·DST·롤백 검증. API·DB·상태·수용 조건은 [통합 기획서](INTEGRATED_PLANNING_MASTER.ko.md)에 상세 기재. 외부 발행기관 3곳 검토, 신규 승인 0건, 누적 미확인 / 10,000건 BLOCKED.
