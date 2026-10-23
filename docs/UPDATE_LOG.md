@@ -2,6 +2,7 @@
 - Previous Improvement v1194 / Current Addition v1196 / Next Improvement v1198. Origin/main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede; QA v1197 FAILED/HOLD. Isolated stacked planning worktree; seven planning/worklog files only.
 - Source/DEV inspection: wallet recent=50 without dispute action, generic support and admin, Android app-api gateway, 877 transactions/1,784 postings, 3 support threads/6 messages, 0 dispute tables. #1025 P2P replay and finance/support DB direct DML remain P0.
 - Added F675-106 owner-scoped dispute receipts, strict no-balance-write boundary, immutable review event and verified correction reference, 10 P0/P1 development tasks: WAL1196-01, WAL1196-02, SEC1196-03, REL1196-04, WAL1196-05, WAL1196-06, WAL1196-07, WAL1196-08, WAL1196-09, WAL1196-10 (see integrated master for exact contracts).
+- GitHub: docs-only Draft PR #1048 (parent #1043), P1 implementation issue #1047; no merge.
 - External publishers reviewed 3, accepted evidence 0, cumulative deduplicated UNKNOWN / 10,000 BLOCKED. No runtime/DB/Test/Production action; official exact-SHA release HOLD.
 
 ## 2026-10-24 v1192 — F675-105 private support evidence vault (planning draft / release HOLD)

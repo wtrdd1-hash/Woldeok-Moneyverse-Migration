@@ -9,3 +9,4 @@
 - Existing dependencies: #1025 P2P replay, #993 DB ACL, #1037 private evidence, #1029 support case, QA v1197 FAILED/HOLD, migration 266 checksum and exact-SHA Test.
 - External sources: OWASP API1 BOLA, PostgreSQL 17 concurrency, W3C WCAG 2.2 status messages. Reviewed 3 independent publishers; accepted evidence 0; cumulative approved unknown / target 10,000 BLOCKED.
 - No runtime code, DB, feature switches, WLD balances, Test or Production changes. No merge or deployment. Release HOLD.
+- GitHub: initial docs commit 04bf4371c50b88eaa177c404292bd084d58ac6e5; Draft PR #1048 (base Draft #1043); implementation issue #1047. Follow-up contract review removes an unnecessary global UNIQUE restriction on correction transaction references.
