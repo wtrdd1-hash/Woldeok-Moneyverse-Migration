@@ -133,7 +133,7 @@ export default async function HomePage() {
             </div>
 
             <div className="space-y-1.5 relative z-10 pt-2">
-              <div className="text-3xl sm:text-4xl font-black font-fintech text-white tabular-nums tracking-tight flex items-baseline gap-2">
+              <div className="text-3xl sm:text-4xl font-black font-fintech text-slate-100 tabular-nums tracking-tight flex items-baseline gap-2">
                 <WalletGlance />
               </div>
               <p className="text-xs text-slate-400 font-medium">
