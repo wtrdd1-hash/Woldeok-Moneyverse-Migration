@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.23.1178 — F675-101 실제 알림·중복 방지·원장 근거 보안 강화 (기능 보완 / 초안)
+- **회차:** 이전 Feature Addition v1176 → 현재 Feature Improvement v1178 → 다음 Feature Addition v1180(잠정). 최신 main `8a1b466b`; 미병합 Draft PR #994의 후속 격리 브랜치. 소스·개발 DB 위험 검토이며 운영 사고 확정 아님. 코드·DB·WLD·Test·운영 변경 없음.
+- **P0 SEC1178-01 / NOTIF1178-02:** `notification_publish_in_app`은 비NULL 전역 `dedupe_key` 충돌 시 수취인·내용 확인 없이 기존 행 전체를 반환하고 SELECT→INSERT 경쟁 조건이 있다. 개발 DB에는 부분 UNIQUE `idx_in_app_notif_dedupe`가 **이미 존재**하므로 중복 생성하지 않는다. 신뢰 가능한 행위자·원천 이벤트 결속, 회원별 요청 지문 일치, 원자적 충돌 처리를 요구하고 타인 영수증 반환을 금지한다. `notification_mark_read`는 이미 읽은 본인 행에 false를 반환하여 BFF가 404로 표시하므로 `read_at` 불변 멱등 성공으로 수정한다. 앱 계정 직접 DML·RLS OFF는 실제 DB 부정 테스트를 거쳐 최소권한 복구. 가짜 알림 6개 제거.
+- **P1 NOTIF1178-04..07:** Backend는 시각만 정렬하는 offset 목록, Next BFF는 offset 누락. 회원·분류에 결속된 `(created_at,id)` 키셋 커서·호환 API·인덱스, 필수 `SECURITY_CRITICAL/TRANSACTIONAL` 화면 분류, 본인 실제 확정 원장 근거 또는 `pending/unavailable`, 서버 읽음 상태, Android·관리자·접근성·비색인·KPI를 명세한다. 동시 중복 발행 100건, 읽음 재시도 100회, 타인 접근 100회, 동시간 10,001건 커서, 응답 유실, 필수 알림 보존, WLD 무변경 테스트. 롤백은 읽음 기록·보안 알림 보존.
+- **P0 REL1178-03:** QA v1179 FAILED/HOLD(Next 보안 의존성, 금융 DB 권한, Migration 266, CI lint, 백업 cron, 릴리스 포인터/SHA). 전체 CI·DB 권한 부정 시험·격리 복원·정확 SHA 인증 Test·무중단 롤백 승인 전 병합/운영승격 금지. [한국어 상세](INTEGRATED_PLANNING_MASTER.ko.md) / [영문 정본](INTEGRATED_PLANNING_MASTER.md). 외부 공식 발행기관 3곳 검토, 신규 최종 승인 0, 누적 미확인/목표 10,000 BLOCKED.
+
+
 ## v2026.10.23.1176 — F675-101 실제 알림·원장 근거 확인함 (기획 / 초안)
 - **회차:** 이전 Feature Improvement v1174 → 현재 Feature Addition v1176 → 다음 Feature Improvement v1178(잠정). GitHub main `8a1b466b`, QA v1179 FAILED/HOLD, 열린 PR 10건. 문서 기획만 수행하며 상세 국문은 [통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md#v202610231176--f675-101-실제-알림원장-증거-확인함-기능-추가--초안), 영문이 정본.
 - **실측 문제:** `notification-tabs-bar.tsx`의 하드코딩 알림 6개·브라우저 로컬 읽음 처리와 별도로 NestJS 인증 알림 API, Next BFF, 참여 알림 설정 API가 이미 존재한다. Backend 목록은 `created_at DESC LIMIT/OFFSET` 동률 정렬이 불안정하고 BFF는 offset을 전달하지 않는다. 개발 `in_app_notifications` 0행, 앱 계정 UPDATE/DELETE 허용, RLS OFF. 실제 운영 사고가 확인된 것은 아니다.
