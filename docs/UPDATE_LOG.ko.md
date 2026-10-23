@@ -1,5 +1,12 @@
 ## v2026.10.14.626 — 관리자 전체 메뉴 잘림 수정 (소스만 구현)
 
+## 2026-10-23 19:00 KST — 기획 v1182 (Feature Improvement, DRAFT/HOLD)
+- 이전 v1180 기능 추가 / 현재 v1182 기능 보완 / 다음 v1184 기능 추가(잠정). main f032c4aebd518c8730e56058327ca35f97b4165b; 미병합 Draft #1005 기반 후속 기획, 개발 A/B/C·QA 런타임과 분리.
+- 개발 DB 읽기 전용: notification_preferences.state 기본 OPTED_IN(0행), 행 버전 부재, 앱 직접 DML/TRUNCATE, RLS OFF. main 회원 알림 화면은 ?saved=1 URL만으로 저장 성공 표시. 실제 외부 악용·무단 발송 증거는 아님. P0 자동동의 기본값 제거·서버 영수증·철회/발송 경합 펜스·최소권한, P1 버전 API·감사·DST·Android·접근성·관리자·롤백.
+- QA v1183 FAILED/HOLD(Next 취약성, CI 검사 생략, 린트/홈 실패, 금융 권한, Migration266, Cron 백업, 정확 SHA Test/운영 차단). 기존 개발 이슈 #1004 연계, 이번 회차 테스트 미실행.
+- 기존 통합 기획·PROJECT_PLAN·UPDATE_LOG 국영문 동등 갱신. 외부 신규 최종 승인 0, 누적 10,000 근거 게이트 BLOCKED. 런타임·DB·WLD·스위치·Test·운영 변경 없음.
+
+
 ## 2026-10-23 v1180 — F675-102 알림 동의·방해금지 기획 (초안)
 - 이전 기능 보완 v1178 / 현재 기능 추가 v1180 / 다음 기능 보완 v1182(잠정). 기준 main `b147ed18`, QA v1181 FAILED/HOLD.
 - 기존 통합 기획 국영문과 PROJECT_PLAN 국영문에 반영, 알림 거버넌스 원본 유지. DEV 읽기 전용: `notification_preferences` 테이블 기존 존재(회원·목적·채널 PK, 0행), 앱 계정 직접 DML/TRUNCATE 및 RLS OFF P0. 중복 테이블·분산 기능 명세 생성 금지.
