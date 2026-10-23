@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { getFxStatus, interveneFx, drawdownFxSwap, settleFxForward, toggleFxHalt } from './actions';
 
 export interface FxStatusData {
   reserves: {
@@ -92,11 +93,8 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
 
   const refreshData = async () => {
     try {
-      const res = await fetch('/api/v1/admin/fx/status');
-      const json = await res.json();
-      if (json.success && json.data) {
-        setData(json.data);
-      }
+      const status = await getFxStatus();
+      if (status) setData(status);
     } catch (e) {
       console.error('Failed to refresh FX status', e);
     }
@@ -108,12 +106,7 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
     const actionLabel = type === 'SELL_USD' ? '달러 매도 개입 (환율 하락 안정화)' : '달러 매수 개입 (외환보유액 확충)';
     
     try {
-      const res = await fetch('/api/v1/admin/fx/intervene', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, amountUsd }),
-      });
-      const result = await res.json();
+      const result = await interveneFx(type, amountUsd);
       if (result.success) {
         toast.success(`🏛️ [스무딩 오퍼레이션] ${actionLabel} 완료!`, {
           description: `조정 후 환율: 1 USD = ${result.data.newRate.toFixed(2)} WLD (잔여 외환보유액: $${result.data.newReservesUsd.toLocaleString()})`,
@@ -134,16 +127,7 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
     setIsProcessing(true);
 
     try {
-      const res = await fetch('/api/v1/admin/fx/swaps/drawdown', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          agreementId,
-          amountUsd: swapDrawAmount,
-          purpose: '외환위기 대응 긴급 유동성 수혈 및 시장 안정화',
-        }),
-      });
-      const result = await res.json();
+      const result = await drawdownFxSwap(agreementId, swapDrawAmount);
       if (result.success) {
         toast.success('🚨 [통화스왑] 우방국 긴급 자금 인출 및 외환보유액 확충 완료!', {
           description: `$${swapDrawAmount.toLocaleString()} USD 인출 집행 (확충 후 보유액: $${result.data.newReservesUsd.toLocaleString()})`,
@@ -164,12 +148,7 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
     setIsProcessing(true);
 
     try {
-      const res = await fetch('/api/v1/admin/fx/forward/settle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contractId }),
-      });
-      const result = await res.json();
+      const result = await settleFxForward(contractId);
       if (result.success) {
         toast.success('선물환 계약 즉시 정산 완료', {
           description: `환급액: ${result.data.refundWld.toLocaleString()} WLD (실현손익: ${result.data.contract.realizedPnlWld?.toLocaleString()} WLD)`,
@@ -191,12 +170,7 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
     const nextHaltState = !data.reserves.isHalted;
 
     try {
-      const res = await fetch('/api/v1/admin/fx/halt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isHalted: nextHaltState }),
-      });
-      const result = await res.json();
+      const result = await toggleFxHalt(nextHaltState);
       if (result.success) {
         toast.warning(nextHaltState ? '🚨 외환시장이 긴급 동결되었습니다.' : '✅ 외환시장이 정상 재개되었습니다.');
         await refreshData();

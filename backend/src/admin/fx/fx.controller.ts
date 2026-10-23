@@ -8,6 +8,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -18,7 +20,7 @@ import { FxService } from './fx.service';
 
 @ApiTags('Foreign Exchange (FX) & Reserves Control')
 @Controller('admin/fx')
-@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard)
+@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
 export class AdminFxController {
   constructor(private readonly fxService: FxService) {}
 

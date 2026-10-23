@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { requireAdminConsole } from '@/lib/session';
-import { api } from '@/lib/api';
-import { FxControlTower, type FxStatusData } from './fx-control-tower';
+import { getFxStatus } from './actions';
+import { FxControlTower } from './fx-control-tower';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function AdminFxPage() {
   await requireAdminConsole('/admin/fx');
 
-  const statusData = await api<FxStatusData>('/api/v1/admin/fx/status').catch(() => null);
+  const statusData = await getFxStatus().catch(() => null);
 
   return (
     <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
