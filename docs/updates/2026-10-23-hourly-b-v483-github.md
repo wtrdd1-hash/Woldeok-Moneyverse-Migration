@@ -16,3 +16,5 @@ The crawler telemetry write endpoint `POST /api/v1/seo/log` bypassed the shared 
 - GREEN: backend 1/1; frontend 2/2. Workspace typecheck/build PASS, changed-file ESLint PASS.
 - Full lint FAIL on QA-owned CSV regex (`#991`); full frontend unit tests 2 unrelated homepage redesign assertions FAIL; backend 1304 PASS, 397 DB SKIPPED.
 - Exact-SHA GitHub CI, real PostgreSQL, authenticated E2E, isolated Test and GitOps Production release gates remain BLOCKED. **Do not merge or deploy** until required checks pass.
+
+- Draft PR #1002 created; merge and Production remain HOLD.
