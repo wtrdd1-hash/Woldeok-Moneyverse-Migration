@@ -43,6 +43,28 @@ describe('wallet owner pocket deltas', () => {
     expect(wallet.recentTransactions[0]?.bankDelta).toBe(HUGE);
   });
 
+  it('exposes the verified positive amount of a zero-net bank deposit and withdrawal', async () => {
+    const deposit = await new WalletService(repositoryFor('-2500', '2500', '0')).overview(ACTOR);
+    const withdrawal = await new WalletService(repositoryFor('2500', '-2500', '0')).overview(ACTOR);
+    expect(deposit.recentTransactions[0]?.movementAmount).toBe('2500');
+    expect(withdrawal.recentTransactions[0]?.movementAmount).toBe('2500');
+  });
+
+  it('exposes the absolute amount for ordinary spending without losing its outflow direction', async () => {
+    const wallet = await new WalletService(repositoryFor('-2500', '0', '-2500')).overview(ACTOR);
+    expect(wallet.recentTransactions[0]).toMatchObject({ movementAmount: '2500', direction: 'out' });
+  });
+
+  it('does not invent a movement for a neutral zero-posting', async () => {
+    const wallet = await new WalletService(repositoryFor('0', '0', '0')).overview(ACTOR);
+    expect(wallet.recentTransactions[0]?.movementAmount).toBeNull();
+  });
+
+  it('keeps 38-digit bank movement exact', async () => {
+    const wallet = await new WalletService(repositoryFor('-' + HUGE, HUGE, '0')).overview(ACTOR);
+    expect(wallet.recentTransactions[0]?.movementAmount).toBe(HUGE);
+  });
+
   it('refuses a transaction whose pocket deltas disagree with its net amount', async () => {
     await expect(new WalletService(repositoryFor('-10', '9', '0')).overview(ACTOR))
       .rejects.toThrow(/wallet pocket delta mismatch/i);

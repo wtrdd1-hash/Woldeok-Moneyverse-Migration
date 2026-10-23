@@ -3,14 +3,12 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
-import { PostingStrip } from '@/components/posting-strip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import { sides } from '../sides';
 import type { Overview } from '../sides';
+import { WalletPosting } from '../wallet-posting';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,19 +56,9 @@ export default async function WalletActivityPage() {
               description="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다."
             />
           ) : (
-            wallet.recentTransactions.map((entry) => {
-              const { debit, credit } = sides(entry);
-              return (
-                <PostingStrip
-                  key={entry.transactionId}
-                  debit={debit}
-                  credit={credit}
-                  amount={entry.netAmount}
-                  label={entry.label}
-                  at={formatMoment(entry.occurredAt)}
-                />
-              );
-            })
+            wallet.recentTransactions.map((entry) => (
+              <WalletPosting key={entry.transactionId} entry={entry} />
+            ))
           )}
         </CardContent>
       </Card>

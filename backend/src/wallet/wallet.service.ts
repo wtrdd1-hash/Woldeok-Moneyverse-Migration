@@ -127,6 +127,8 @@ export interface WalletTransactionView {
   readonly type: string;
   readonly label: string;
   readonly netAmount: WldAmount;
+  /** Verified absolute owner movement; null if zero-net movement has no provable pocket leg. */
+  readonly movementAmount: WldAmount | null;
   readonly cashDelta?: WldAmount | undefined;
   readonly bankDelta?: WldAmount | undefined;
   readonly direction: WalletTransactionDirection;
@@ -314,11 +316,23 @@ function normalizeTransactions(rows: readonly WalletTransactionRow[]): WalletTra
       && BigInt(cashDelta) + BigInt(bankDelta) !== BigInt(netAmount)) {
       throw new Error('wallet pocket delta mismatch: total does not match owner net amount');
     }
+    // A bank deposit/withdrawal moves WLD between the owner's pockets,
+    // but its net cash+bank change is zero. Never show that as a zero-value
+    // transfer. Only a balanced pair of actual posting deltas proves it.
+    const net = BigInt(netAmount);
+    const pocketMovement = net === 0n && cashDelta !== undefined && bankDelta !== undefined
+      && BigInt(cashDelta) !== 0n && BigInt(cashDelta) === -BigInt(bankDelta)
+      ? (BigInt(cashDelta) < 0n ? -BigInt(cashDelta) : BigInt(cashDelta))
+      : null;
+    const movementAmount = net !== 0n
+      ? wldAmount((net < 0n ? -net : net).toString(), 'movement amount')
+      : pocketMovement === null ? null : wldAmount(pocketMovement.toString(), 'movement amount');
     return {
       transactionId: requireUuid(row.transaction_id, 'database transaction id'),
       type: row.type,
       label: transactionLabel(row.type),
       netAmount,
+      movementAmount,
       ...(cashDelta === undefined ? {} : { cashDelta, bankDelta }),
       direction: directionFor(netAmount),
       occurredAt: timestamp(row.created_at, 'transaction timestamp'),

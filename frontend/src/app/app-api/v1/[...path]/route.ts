@@ -115,6 +115,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     const value = request.headers.get(name);
     if (value) outgoing.set(name, value);
   }
+  if (parts[0] === 'wallet') {
+    // Never let a mobile cache validator turn an owner-scoped receipt into a
+    // 304 response with no ledger evidence or a cross-session cached body.
+    outgoing.delete('if-none-match');
+    outgoing.delete('if-modified-since');
+    outgoing.delete('if-range');
+  }
   const publicOrigin = appGatewayOrigin(request.headers);
   if (publicOrigin) outgoing.set('x-public-origin', publicOrigin);
 
@@ -143,6 +150,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
     if (value) headers.set(name, value);
+  }
+  // All wallet endpoints are authenticated owner data, including read-only
+  // ledger receipts. Upstream cache hints must never make them shared-cache
+  // eligible or enable conditional revalidation with a private ETag.
+  if (parts[0] === 'wallet') {
+    headers.set('cache-control', 'private, no-store');
+    headers.delete('etag');
+    headers.delete('last-modified');
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
 

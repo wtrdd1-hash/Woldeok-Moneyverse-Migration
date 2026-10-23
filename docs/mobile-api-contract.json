@@ -14980,6 +14980,48 @@
                     }
                   ]
                 },
+                "movementAmount": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "__wld": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "note": "depth-limited"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "note": "depth-limited"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "description"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "__wld"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
                 "cashDelta": {
                   "oneOf": [
                     {
@@ -15089,6 +15131,7 @@
                 "type",
                 "label",
                 "netAmount",
+                "movementAmount",
                 "direction",
                 "occurredAt"
               ]

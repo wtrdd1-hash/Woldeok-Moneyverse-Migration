@@ -4747,6 +4747,7 @@ _No request body._
 | recentTransactions[].type | true | string |  |
 | recentTransactions[].label | true | string |  |
 | recentTransactions[].netAmount | true | string & object |  |
+| recentTransactions[].movementAmount | true | null \| string & object |  |
 | recentTransactions[].cashDelta | false | undefined \| string & object |  |
 | recentTransactions[].bankDelta | false | undefined \| string & object |  |
 | recentTransactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |

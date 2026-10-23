@@ -20,19 +20,18 @@ import {
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { LiveRefresh } from '@/components/live-refresh';
-import { PostingStrip } from '@/components/posting-strip';
 import { TruncatedList } from '@/components/truncated-list';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { formatMoment, groupDigits } from '@/lib/money';
+import { groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
 import { PortfolioAllocationRadar } from '@/components/portfolio-allocation-radar';
-import { sides } from './sides';
 import type { Overview } from './sides';
 import { ExportLedgerCsvButton } from './export-ledger-csv';
+import { WalletPosting } from './wallet-posting';
 import {
   BankPanel,
   RewardButtons,
@@ -435,19 +434,9 @@ export default async function WalletPage() {
               <TruncatedList
                 title="내 지갑 기록"
                 visibleCount={LATEST_ON_WALLET}
-                rows={recentTransactions.map((entry) => {
-                  const { debit, credit } = sides(entry);
-                  return (
-                    <PostingStrip
-                      key={entry.transactionId}
-                      debit={debit}
-                      credit={credit}
-                      amount={entry.netAmount}
-                      label={entry.label}
-                      at={formatMoment(entry.occurredAt)}
-                    />
-                  );
-                })}
+                rows={recentTransactions.map((entry) => (
+                  <WalletPosting key={entry.transactionId} entry={entry} />
+                ))}
               />
             )}
           </div>

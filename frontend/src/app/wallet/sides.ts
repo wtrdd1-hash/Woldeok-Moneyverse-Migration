@@ -16,6 +16,7 @@ export interface TransactionView {
   readonly type: string;
   readonly label: string;
   readonly netAmount: string;
+  readonly movementAmount?: string | null | undefined;
   readonly cashDelta?: string | undefined;
   readonly bankDelta?: string | undefined;
   readonly direction: 'in' | 'out' | 'neutral';
@@ -60,10 +61,25 @@ export function pocketBreakdown(
 export function postingAmount(entry: TransactionView): string | null {
   if (!isCanonicalWld(entry.netAmount)) return null;
   const pockets = pocketBreakdown(entry);
-  if (entry.netAmount === '0' && pockets && pockets.cashDelta !== '0') {
-    return pockets.cashDelta.startsWith('-') ? pockets.cashDelta.slice(1) : pockets.cashDelta;
+  // When the server supplies a pocket pair, invalid or inconsistent fields
+  // must not be disguised as a plausible amount.
+  if ((entry.cashDelta !== undefined || entry.bankDelta !== undefined) && !pockets) return null;
+  const net = BigInt(entry.netAmount);
+  let amount: string | null = null;
+  if (net !== 0n) {
+    amount = (net < 0n ? -net : net).toString();
+  } else if (pockets && BigInt(pockets.cashDelta) !== 0n
+    && BigInt(pockets.cashDelta) === -BigInt(pockets.bankDelta)) {
+    const cash = BigInt(pockets.cashDelta);
+    amount = (cash < 0n ? -cash : cash).toString();
   }
-  return entry.netAmount.startsWith('-') ? entry.netAmount.slice(1) : entry.netAmount;
+  // New API clients can use the explicit movementAmount field. Verify it
+  // against the owner-scoped posting proof instead of trusting a stale proxy.
+  if (entry.movementAmount !== undefined
+    && (entry.movementAmount !== amount || (amount !== null && !isCanonicalWld(entry.movementAmount)))) {
+    return null;
+  }
+  return amount;
 }
 
 /** Display labels describe only the owner's view, never every ledger leg. */
