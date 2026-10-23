@@ -1,6 +1,8 @@
-import { BadGatewayException, BadRequestException, Inject, Injectable, Logger, Optional } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Inject, Injectable, Logger, Optional, ServiceUnavailableException } from '@nestjs/common';
 import type { Pool } from 'pg';
 import { PG_POOL } from '../core/pool.provider';
+import { CONFIG } from '../core/config';
+import type { AppConfig } from '../core/config';
 import { EncryptionService } from '../security/encryption.service';
 import { safeFetch } from '../security/ssrf-defense';
 import {
@@ -156,9 +158,14 @@ export class SeoService {
   constructor(
     @Optional() @Inject(PG_POOL) private readonly pool?: Pool,
     @Optional() @Inject(EncryptionService) private readonly encryptionService?: EncryptionService,
+    @Inject(CONFIG) private readonly config?: AppConfig,
   ) {
     this.indexNowKey = process.env.INDEXNOW_KEY || 'moneyverse-indexnow-key-2026';
     this.baseUrl = (process.env.APP_BASE_URL || 'https://easy-scraping.com').replace(/\/$/, '');
+  }
+
+  private get requiresDatabase(): boolean {
+    return this.config?.production === true;
   }
 
   getIndexNowKey(): string {
@@ -184,10 +191,9 @@ export class SeoService {
       createdAt: new Date().toISOString(),
     };
 
-    // Store in memory ring buffer (keep last 500)
-    this.memoryLogs.unshift(entry);
-    if (this.memoryLogs.length > 500) {
-      this.memoryLogs.pop();
+    // A production receipt must mean the row reached PostgreSQL, not a transient process buffer.
+    if (this.requiresDatabase && !this.pool) {
+      throw new ServiceUnavailableException('Crawler telemetry database unavailable');
     }
 
     // Persist to PostgreSQL if pool is available
@@ -208,14 +214,25 @@ export class SeoService {
           ],
         );
       } catch (err) {
+        if (this.requiresDatabase) {
+          this.logger.warn('Crawler telemetry persistence failed');
+          throw new ServiceUnavailableException('Crawler telemetry database unavailable');
+        }
         this.logger.warn(`Failed to persist crawler log to DB: ${(err as Error).message}`);
       }
     }
+
+    // The local ring is a development aid; failed production writes never enter it.
+    this.memoryLogs.unshift(entry);
+    if (this.memoryLogs.length > 500) this.memoryLogs.pop();
 
     return entry;
   }
 
   async getSeoMetrics(): Promise<SeoMetricsResponse> {
+    if (this.requiresDatabase && !this.pool) {
+      throw new ServiceUnavailableException('Crawler telemetry database unavailable');
+    }
     let logs: CrawlerLogEntry[] = [];
 
     if (this.pool) {
@@ -229,6 +246,10 @@ export class SeoService {
         );
         logs = result.rows;
       } catch (err) {
+        if (this.requiresDatabase) {
+          this.logger.warn('Crawler telemetry query failed');
+          throw new ServiceUnavailableException('Crawler telemetry database unavailable');
+        }
         this.logger.warn(`Failed to fetch logs from DB, falling back to memory: ${(err as Error).message}`);
         logs = [...this.memoryLogs];
       }
