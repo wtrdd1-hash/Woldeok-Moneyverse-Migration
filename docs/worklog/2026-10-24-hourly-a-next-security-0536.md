@@ -37,3 +37,11 @@
 ### RED evidence — 05:38 KST
 - Baseline `pnpm audit --prod --audit-level high --json` returned nonzero; three Next.js 16.3.8 advisories (2 Critical, 1 High). Evidence: `/tmp/mva_audit_red_0536.json` on miniPC.
 - Branch start checkpoint pushed at `bf7c18ba4313e73a75a4e22425e02b41c6e76e4b`.
+
+### GitHub exact-SHA CI checkpoint — 05:46 KST
+- Code candidate `a3eaf294950e295c52186b62b5023aa577e4ae3a` was pushed and Draft PR #1069 created.
+- CI run #40021478928: **FAIL**. Build Test Candidate run #40021473152: **FAIL**.
+- Both runtime-check jobs stopped at the pre-existing `frontend/src/app/wallet/export-ledger-csv.tsx:19` `no-control-regex` lint failure. Downstream build/release jobs SKIPPED; not PASS.
+- Local exact code SHA audit: 0 High/Critical; regression test 2 PASS. No CI security/DB/Test PASS claimed beyond observed checks.
+- Issue #1067 updated; QA #1061 independent fix left untouched. No branch cleanup; all unique work protected.
+- Release decision: **HOLD**. No integration, Test, Production, migration or rollback. Latest main remained `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` at pre-final check.
