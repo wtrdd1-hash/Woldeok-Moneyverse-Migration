@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.23.1176 — F675-101 실제 알림·원장 근거 확인함 (기획 / 초안)
+- **회차:** 이전 Feature Improvement v1174 → 현재 Feature Addition v1176 → 다음 Feature Improvement v1178(잠정). GitHub main `8a1b466b`, QA v1179 FAILED/HOLD, 열린 PR 10건. 문서 기획만 수행하며 상세 국문은 [통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md#v202610231176--f675-101-실제-알림원장-증거-확인함-기능-추가--초안), 영문이 정본.
+- **실측 문제:** `notification-tabs-bar.tsx`의 하드코딩 알림 6개·브라우저 로컬 읽음 처리와 별도로 NestJS 인증 알림 API, Next BFF, 참여 알림 설정 API가 이미 존재한다. Backend 목록은 `created_at DESC LIMIT/OFFSET` 동률 정렬이 불안정하고 BFF는 offset을 전달하지 않는다. 개발 `in_app_notifications` 0행, 앱 계정 UPDATE/DELETE 허용, RLS OFF. 실제 운영 사고가 확인된 것은 아니다.
+- **P0:** NOTIF1176-01 회원 금융 알림·읽음 허위 성공 제거; SEC1176-02 SECURITY DEFINER 및 실 DB 소유권 부정 테스트를 거친 앱 직접 DML 회수; REL1176-03 Next 16.3.8 critical/high 보안경고, CI lint, Migration 266 체크섬, 백업 Cron, 실제 실행 SHA/포인터 불일치 해결 후 정확 SHA Test/운영 검증.
+- **P1:** NOTIF1176-04 소유자 전용 안정 커서/분류/읽음 영수증; NOTIF1176-05 실제 원장 거래 근거 또는 확인 불가 상태; NOTIF1176-06 웹/선택 알림 설정; NOTIF1176-07 Android·관리자·접근성·SEO·KPI; NOTIF1176-08 실제 PostgreSQL 동시성/권한 부정 테스트, 10,001건 커서, 동일 재시도 100회, 롤백. 알림으로 WLD 이동·임의 TX·보상·허위 성공 금지. 비공개 경로 noindex/no-store, 모바일 WCAG 2.2 AA, 필수 보안 알림은 선택 수신 해제와 별개. 신규 기능 기본 OFF.
+- **외부 10,000 근거:** OWASP·PostgreSQL·W3C 독립 발행기관 3곳 검토, 신규 최종 승인·중복 제거 0건, 누적 미확인, 목표 10,000건 BLOCKED. 코드·DB·WLD·Test·운영 배포 변경 없음.
+
+
 ## v2026.10.22.1140 — F675-92 계산기 오류 신고 및 공식 검증 정정 공지 (기획)
 - v1138 기능 보완 다음 기능 추가 회차, 다음 v1142 기능 보완(잠정). 기존 `/tools/*`, 고객지원·알림 기반의 회원 신고와 공개 정정 기능으로 금융 원장과 독립.
 - P0: 해외주식 양도세 계산기의 배우자 증여 직접 공제·과도한 절세/비과세 표현·5월 1~31일 고정 신고기한을 국세청 2026 자료와 재검토; 저장/알림/WLD 허위 성공 표시 개선; DB 앱 계정 최소권한 복구; 금융/정확 SHA Test/운영 차단 유지. P1: 회원·관리자 API, 불변 정정 이벤트, 독립 승인, 중복 알림, 공개 공지, 모바일·접근성·SEO·회귀.
