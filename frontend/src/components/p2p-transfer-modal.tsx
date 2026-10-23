@@ -20,6 +20,16 @@ interface Recipient {
   displayName: string;
 }
 
+const RECIPIENT_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function validRecipient(value: unknown): value is Recipient {
+  if (typeof value !== 'object' || value === null) return false;
+  const item = value as Record<string, unknown>;
+  return typeof item.userId === 'string' && RECIPIENT_UUID.test(item.userId)
+    && typeof item.displayName === 'string' && item.displayName.trim().length > 0
+    && item.displayName.length <= 80;
+}
+
 const STICKERS = [
   { id: 'cheer', label: '🎉 축하해' },
   { id: 'coffee', label: '☕ 커피 한잔' },
@@ -38,6 +48,7 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
   const [message, setMessage] = useState('');
   const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<{
@@ -49,29 +60,48 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
   } | null>(null);
 
 
-  // 수취인 검색 디바운스
+  // A superseded request must never make an earlier member selectable.
   useEffect(() => {
-    if (!searchQuery.trim() || selectedRecipient) {
-      setSearchResults([]);
+    const query = searchQuery.trim();
+    setSearchResults([]);
+    setSearchError(null);
+    if (query.length < 2 || selectedRecipient) {
+      setIsSearching(false);
       return;
     }
 
+    let cancelled = false;
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(`/api/transfers/search?query=${encodeURIComponent(searchQuery)}`);
-        if (res.ok) {
-          const data = await res.json();
-          setSearchResults(data.recipients || []);
+        const res = await fetch(`/api/transfers/search?query=${encodeURIComponent(query)}`, {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+        if (!res.ok) throw new Error('recipient search unavailable');
+        const payload: unknown = await res.json();
+        if (cancelled) return;
+        if (!payload || typeof payload !== 'object' || !('recipients' in payload)
+          || !Array.isArray(payload.recipients)) {
+          throw new Error('invalid recipient search response');
         }
+        setSearchResults(payload.recipients.filter(validRecipient).slice(0, 10));
       } catch {
-        // ignore
+        if (!cancelled) {
+          setSearchResults([]);
+          setSearchError('검색 결과를 불러올 수 없습니다. 다시 시도해 주세요.');
+        }
       } finally {
-        setIsSearching(false);
+        if (!cancelled) setIsSearching(false);
       }
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [searchQuery, selectedRecipient]);
 
   const handleTransfer = async () => {
@@ -227,7 +257,11 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
                   <Input
                     placeholder="수취인 닉네임을 검색하세요..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setSearchResults([]);
+                      setSearchError(null);
+                    }}
                     className="pl-9 h-10 rounded-xl"
                   />
                   {/* 검색 결과 드롭다운 */}
@@ -245,6 +279,9 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
                         </button>
                       ))}
                     </div>
+                  )}
+                  {searchError && (
+                    <p role="alert" className="mt-1 text-xs text-destructive">{searchError}</p>
                   )}
                   {isSearching && (
                     <div className="absolute right-3 top-3 text-[11px] text-muted-foreground animate-pulse">
