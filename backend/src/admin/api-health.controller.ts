@@ -1,6 +1,8 @@
 import os from 'node:os';
 import { Controller, Get, Inject, Optional, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -14,48 +16,51 @@ export interface DomainHealthSummary {
   readonly name: string;
   readonly nameEn: string;
   readonly endpointCount: number;
-  readonly status: 'OPERATIONAL' | 'DEGRADED' | 'MAINTENANCE';
-  readonly latencyMs: number;
-  readonly successRate: number;
+  readonly status: 'UNVERIFIED';
+  readonly latencyMs: null;
+  readonly successRate: null;
   readonly sampleEndpoints: readonly string[];
 }
 
 @ApiTags('admin')
 @Controller('admin/api-health')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
 export class ApiHealthController {
   constructor(@Optional() @Inject(PG_POOL) private readonly pool: Queryable | null = null) {}
 
   @Get('status')
-  @ApiOperation({ summary: 'Get comprehensive real-time health and latency metrics across all 14 API domains' })
+  @ApiOperation({ summary: 'Get host and database probe telemetry plus the unverified API domain inventory' })
   async getApiHealthStatus() {
-    let measuredDbLatency = 8;
-    let dbStatus: 'OPERATIONAL' | 'DEGRADED' = 'OPERATIONAL';
-    let activeConnections = 1;
-    let dbCacheHitRatio = 99.8;
+    let measuredDbLatency: number | null = null;
+    let dbProbeState: 'ok' | 'failed' | 'unavailable' = 'unavailable';
+    let activeConnections: number | null = null;
+    let dbCacheHitRatio: number | null = null;
 
     if (this.pool) {
       const start = Date.now();
       try {
         await queryOne(this.pool, 'SELECT 1 AS ping');
+        dbProbeState = 'ok';
         measuredDbLatency = Math.max(1, Date.now() - start);
 
         const connRow = await queryOne<{ count: string }>(
           this.pool,
           'SELECT count(*)::text AS count FROM pg_stat_activity WHERE datname = current_database()',
         );
-        activeConnections = Number(connRow?.count ?? 1);
+        activeConnections = connRow?.count !== undefined && Number.isFinite(Number(connRow.count)) ? Number(connRow.count) : null;
 
         const cacheRow = await queryOne<{ ratio: string }>(
           this.pool,
-          'SELECT COALESCE(round(sum(blks_hit)*100.0/greatest(sum(blks_hit+blks_read), 1), 1), 99.9)::text AS ratio FROM pg_stat_database WHERE datname = current_database()',
+          'SELECT round(sum(blks_hit)*100.0/nullif(sum(blks_hit+blks_read), 0), 1)::text AS ratio FROM pg_stat_database WHERE datname = current_database()',
         );
-        if (cacheRow?.ratio) {
+        if (cacheRow?.ratio && Number.isFinite(Number(cacheRow.ratio))) {
           dbCacheHitRatio = Number(cacheRow.ratio);
         }
       } catch {
-        dbStatus = 'DEGRADED';
-        measuredDbLatency = Math.max(1, Date.now() - start);
+        dbProbeState = 'failed';
+        measuredDbLatency = null;
+        activeConnections = null;
+        dbCacheHitRatio = null;
       }
     }
 
@@ -71,15 +76,12 @@ export class ApiHealthController {
       dbCacheHitRatio,
     };
 
-    const domains: DomainHealthSummary[] = [
+    const domains: Omit<DomainHealthSummary, 'status' | 'latencyMs' | 'successRate'>[] = [
       {
         id: 'auth',
         name: '인증 및 세션',
         nameEn: 'Authentication & Sessions',
         endpointCount: 9,
-        status: 'OPERATIONAL',
-        latencyMs: 12,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/auth/session', '/api/v1/auth/local/login', '/api/v1/auth/bootstrap'],
       },
       {
@@ -87,9 +89,6 @@ export class ApiHealthController {
         name: '계정 및 보안 센터',
         nameEn: 'Account & Security Center',
         endpointCount: 7,
-        status: 'OPERATIONAL',
-        latencyMs: 14,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/account', '/api/v1/account/security/sessions', '/api/v1/privacy/data-export'],
       },
       {
@@ -97,9 +96,6 @@ export class ApiHealthController {
         name: '지갑 및 자산 원장',
         nameEn: 'Wallet & Ledger',
         endpointCount: 4,
-        status: 'OPERATIONAL',
-        latencyMs: 8,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/wallet/balance', '/api/v1/wallet/transfer', '/api/v1/wallet/transactions'],
       },
       {
@@ -107,9 +103,6 @@ export class ApiHealthController {
         name: '가상 중앙은행 및 채권',
         nameEn: 'Virtual Banking & Bonds',
         endpointCount: 9,
-        status: 'OPERATIONAL',
-        latencyMs: 15,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/bank/summary', '/api/v1/bank/deposit', '/api/v1/bank/bonds'],
       },
       {
@@ -117,9 +110,6 @@ export class ApiHealthController {
         name: '직업 및 일일 커리어',
         nameEn: 'Work & Career Mastery',
         endpointCount: 5,
-        status: 'OPERATIONAL',
-        latencyMs: 11,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/work/status', '/api/v1/work/careers', '/api/v1/work/tasks/complete'],
       },
       {
@@ -127,9 +117,6 @@ export class ApiHealthController {
         name: '가상 주식 거래소',
         nameEn: 'Virtual Stock Exchange',
         endpointCount: 8,
-        status: 'OPERATIONAL',
-        latencyMs: 9,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/stocks', '/api/v1/stocks/CHIPS', '/api/v1/stocks/orders'],
       },
       {
@@ -137,9 +124,6 @@ export class ApiHealthController {
         name: '사업체 운영 및 상업',
         nameEn: 'Businesses & Operations',
         endpointCount: 4,
-        status: 'OPERATIONAL',
-        latencyMs: 16,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/businesses', '/api/v1/businesses/acquire', '/api/v1/businesses/:id/settle'],
       },
       {
@@ -147,9 +131,6 @@ export class ApiHealthController {
         name: 'P2P 마켓플레이스 및 제작',
         nameEn: 'Marketplace & Crafting',
         endpointCount: 6,
-        status: 'OPERATIONAL',
-        latencyMs: 13,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/marketplace/listings', '/api/v1/crafting/recipes', '/api/v1/crafting/craft'],
       },
       {
@@ -157,9 +138,6 @@ export class ApiHealthController {
         name: '상점 및 도파민 보상',
         nameEn: 'Shop & Dopamine Engagement',
         endpointCount: 11,
-        status: 'OPERATIONAL',
-        latencyMs: 10,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/shop/items', '/api/v1/engagement/dopamine/golden-duck', '/api/v1/engagement/dopamine/star-drop'],
       },
       {
@@ -167,9 +145,6 @@ export class ApiHealthController {
         name: '성장 및 시즌 패스',
         nameEn: 'Progression & Seasons',
         endpointCount: 4,
-        status: 'OPERATIONAL',
-        latencyMs: 12,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/progression/summary', '/api/v1/progression/prestige', '/api/v1/season/current'],
       },
       {
@@ -177,9 +152,6 @@ export class ApiHealthController {
         name: '커뮤니티 게시판 및 미디어',
         nameEn: 'Community Board & Media',
         endpointCount: 5,
-        status: 'OPERATIONAL',
-        latencyMs: 18,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/board/posts', '/api/v1/content/photos/upload'],
       },
       {
@@ -187,9 +159,6 @@ export class ApiHealthController {
         name: '1:1 비공개 쪽지 및 안전',
         nameEn: 'Direct Messages & Safety',
         endpointCount: 5,
-        status: 'OPERATIONAL',
-        latencyMs: 7,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/chat/threads', '/api/v1/chat/threads/:id/messages', '/api/v1/safety/takedown/request'],
       },
       {
@@ -197,9 +166,6 @@ export class ApiHealthController {
         name: '클럽 및 개인 공간',
         nameEn: 'Clubs & Spaces',
         endpointCount: 4,
-        status: 'OPERATIONAL',
-        latencyMs: 14,
-        successRate: 100.0,
         sampleEndpoints: ['/api/v1/club', '/api/v1/club/create', '/api/v1/space/my-space'],
       },
       {
@@ -207,35 +173,31 @@ export class ApiHealthController {
         name: '관리자 관제 타워 및 국고',
         nameEn: 'Admin Control Tower & Treasury',
         endpointCount: 8,
-        status: dbStatus,
-        latencyMs: Math.max(1, measuredDbLatency),
-        successRate: dbStatus === 'OPERATIONAL' ? 100.0 : 92.5,
         sampleEndpoints: ['/api/v1/admin/economy/overview', '/api/v1/admin/treasury/vaults', '/api/v1/admin/audit/logs'],
       },
     ];
 
+    // This is a route catalogue, not an uptime monitor. A successful DB ping
+    // must never be promoted into unmeasured domain latency or availability.
     const totalEndpoints = domains.reduce((acc, d) => acc + d.endpointCount, 0);
-    const avgLatency = Math.round(
-      (domains.reduce((acc, d) => acc + d.latencyMs, 0) + measuredDbLatency) / (domains.length + 1)
-    );
-
     return {
-      status: dbStatus === 'OPERATIONAL' ? 'HEALTHY' : 'DEGRADED',
+      status: dbProbeState === 'ok' ? 'DB_REACHABLE' : dbProbeState === 'failed' ? 'DEGRADED' : 'UNKNOWN',
+      dbProbeState,
       serverTime: new Date().toISOString(),
       uptimeSeconds: Math.floor(process.uptime()),
       dbLatencyMs: measuredDbLatency,
-      isLiveTelemetry: true,
+      isLiveTelemetry: false,
       systemTelemetry,
       totalDomains: domains.length,
       totalEndpoints,
-      averageLatencyMs: avgLatency,
-      globalSuccessRate: dbStatus === 'OPERATIONAL' ? 100.0 : 98.2,
-      domains: domains.map((d) =>
-        d.id === 'wallet' || d.id === 'bank' || d.id === 'account'
-          ? { ...d, latencyMs: Math.max(1, Math.round((d.latencyMs + measuredDbLatency) / 2)), status: dbStatus }
-          : d
-      ),
+      averageLatencyMs: null,
+      globalSuccessRate: null,
+      domains: domains.map((domain): DomainHealthSummary => ({
+        ...domain,
+        status: 'UNVERIFIED',
+        latencyMs: null,
+        successRate: null,
+      })),
     };
   }
 }
-

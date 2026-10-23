@@ -9,8 +9,8 @@ import { apiOrNull } from '@/lib/api';
 import { ApiHealthDashboard, type ApiHealthResponse } from './api-health-dashboard';
 
 export const metadata: Metadata = {
-  title: '14대 도메인 API 헬스체크 & 실시간 관제 — 관리자',
-  description: '월덕 머니버스 전 도메인 300+개 REST API의 실시간 가동률, 지연 시간(Latency), 성공률 및 인프라 관제.',
+  title: 'API 관측 현황 및 미검증 도메인 — 관리자',
+  description: '관리자 전용 DB·호스트 관측과 API 도메인 검증 상태.',
   robots: { index: false, follow: false },
 };
 
@@ -31,13 +31,13 @@ export default async function AdminApiHealthPage() {
       </Button>
 
       <PageHeader
-        eyebrow={liveData?.isLiveTelemetry ? 'LIVE SYSTEM TELEMETRY (실측)' : 'SYSTEM TELEMETRY'}
-        title={isEn ? '14-Domain API Real-Time Health Tower' : '14대 도메인 API 실시간 관제 타워'}
+        eyebrow={'HOST & DATABASE TELEMETRY'}
+        title={isEn ? 'API Domain Evidence & Host Health' : 'API 도메인 검증 현황과 호스트 상태'}
       >
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           {isEn
-            ? 'Authoritative real-time telemetry across all 14 active domains, Cloudflare R2 automated backups, and 300+ REST API endpoints verified for healthy entertainment standards.'
-            : '건전한 엔터테인먼트 아케이드 및 14대 핵심 도메인 300여 개 엔드포인트의 실시간 응답 지연(Latency), 시스템 부하 및 Cloudflare R2 무료 자동 백업 재해 복구 관제입니다.'}
+            ? 'Live host and database observations are separated from API domains that have not been individually probed.'
+            : '실제 측정한 호스트·데이터베이스 상태와 개별 확인하지 않은 API 도메인 목록을 구분합니다. 미검증 항목을 정상 가동으로 표시하지 않습니다.'}
         </p>
       </PageHeader>
 
@@ -46,7 +46,7 @@ export default async function AdminApiHealthPage() {
       <div className="flex items-center justify-between p-4 rounded-xl border border-primary/20 bg-primary/5">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Activity className="size-4 text-primary animate-pulse" />
-          <span>공식 마스터 API 명세서: <b>docs/API_CATALOG_MASTER.ko.md</b> 동기화 완료</span>
+          <span>API 목록 참고: <b>docs/API_CATALOG_MASTER.ko.md</b> (실제 가동 검증과 별개)</span>
         </div>
         <Button asChild size="sm" variant="outline">
           <Link href="/developer">

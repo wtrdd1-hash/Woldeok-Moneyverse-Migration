@@ -28,9 +28,9 @@ export interface DomainHealthData {
   readonly name: string;
   readonly nameEn: string;
   readonly endpointCount: number;
-  readonly status: 'OPERATIONAL' | 'DEGRADED' | 'MAINTENANCE';
-  readonly latencyMs: number;
-  readonly successRate: number;
+  readonly status: 'UNVERIFIED';
+  readonly latencyMs: number | null;
+  readonly successRate: number | null;
   readonly sampleEndpoints: readonly string[];
 }
 
@@ -41,21 +41,22 @@ export interface SystemTelemetry {
   readonly freeMemMb: number;
   readonly heapUsedMb: number;
   readonly rssMb: number;
-  readonly activeDbConnections: number;
-  readonly dbCacheHitRatio?: number;
+  readonly activeDbConnections: number | null;
+  readonly dbCacheHitRatio: number | null;
 }
 
 export interface ApiHealthResponse {
   readonly status: string;
   readonly serverTime: string;
   readonly uptimeSeconds: number;
-  readonly dbLatencyMs?: number;
+  readonly dbLatencyMs: number | null;
+  readonly dbProbeState: 'ok' | 'failed' | 'unavailable';
   readonly isLiveTelemetry?: boolean;
   readonly systemTelemetry?: SystemTelemetry;
   readonly totalDomains: number;
   readonly totalEndpoints: number;
-  readonly averageLatencyMs: number;
-  readonly globalSuccessRate: number;
+  readonly averageLatencyMs: number | null;
+  readonly globalSuccessRate: number | null;
   readonly domains: readonly DomainHealthData[];
 }
 
@@ -91,7 +92,8 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isTriggeringBackup, setIsTriggeringBackup] = useState(false);
   const [backupFeedback, setBackupFeedback] = useState<string | null>(null);
-  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(() => initialData?.serverTime && Number.isFinite(Date.parse(initialData.serverTime)) ? new Date(initialData.serverTime) : null);
+  const [requestError, setRequestError] = useState(initialData === null);
 
   const fetchTelemetry = useCallback(async () => {
     setIsRefreshing(true);
@@ -100,10 +102,17 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
       if (res.ok) {
         const json: ApiHealthResponse = await res.json();
         setData(json);
-        setLastRefreshedAt(new Date());
+        setLastRefreshedAt(Number.isFinite(Date.parse(json.serverTime)) ? new Date(json.serverTime) : null);
+        setRequestError(false);
+      } else {
+        setData(null);
+        setRequestError(true);
+        setLastRefreshedAt(null);
       }
     } catch {
-      // Keep existing data on error
+      setData(null);
+      setRequestError(true);
+      setLastRefreshedAt(null);
     } finally {
       setIsRefreshing(false);
     }
@@ -143,7 +152,7 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
         headers: { 'Content-Type': 'application/json' },
       });
       if (res.ok) {
-        setBackupFeedback(isEn ? 'Backup triggered in background!' : '백업 파이프라인이 즉시 백그라운드에서 가동되었습니다!');
+        setBackupFeedback(isEn ? 'Backup request accepted; completion not yet verified.' : '백업 요청이 접수됐습니다. 완료 여부는 아직 확인되지 않았습니다.');
         setTimeout(() => {
           fetchBackupStatus();
         }, 3000);
@@ -160,15 +169,14 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
 
   const domains = data?.domains ?? [];
   const totalEndpoints = data?.totalEndpoints ?? domains.reduce((acc, d) => acc + d.endpointCount, 0);
-  const avgLatency = data?.averageLatencyMs ?? 8;
-  const successRate = data?.globalSuccessRate ?? 100.0;
-  const dbLatency = data?.dbLatencyMs ?? 8;
-  const isLive = data?.isLiveTelemetry ?? true;
+  const avgLatency = data?.averageLatencyMs ?? null;
+  const successRate = data?.globalSuccessRate ?? null;
+  const dbLatency = data?.dbLatencyMs ?? null;
   const telemetry = data?.systemTelemetry;
 
-  const cpuPercent = telemetry ? Math.min(100, Math.round((telemetry.cpuLoad1m / telemetry.cpuCores) * 100)) : 15;
-  const ramPercent = telemetry ? Math.min(100, Math.round((telemetry.heapUsedMb / telemetry.totalMemMb) * 100)) : 22;
-  const cacheHitRatio = telemetry?.dbCacheHitRatio ?? 99.9;
+  const cpuPercent = telemetry && telemetry.cpuCores > 0 ? Math.min(100, Math.round((telemetry.cpuLoad1m / telemetry.cpuCores) * 100)) : 0;
+  const ramPercent = telemetry && telemetry.totalMemMb > 0 ? Math.min(100, Math.round((telemetry.heapUsedMb / telemetry.totalMemMb) * 100)) : 0;
+  const cacheHitRatio = telemetry?.dbCacheHitRatio ?? null;
 
   return (
     <div className="space-y-6">
@@ -177,17 +185,17 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              <span className={`absolute inline-flex h-full w-full rounded-full ${requestError ? 'bg-muted-foreground' : 'bg-sky-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${requestError ? 'bg-muted-foreground' : 'bg-sky-500'}`}></span>
             </span>
             <span className="text-xs font-mono font-medium text-foreground">
-              {isEn ? 'LIVE METRICS' : '실시간 텔레메트리 관제'}
+              {requestError ? (isEn ? 'TELEMETRY UNAVAILABLE' : '상태 조회 불가') : (isEn ? 'HOST + DB SNAPSHOT' : '호스트·DB 실측 (API 도메인 미검증)')}
             </span>
           </div>
           <span className="text-xs text-muted-foreground hidden sm:inline">|</span>
           <span className="text-xs text-muted-foreground font-mono hidden sm:inline">
             {isEn ? 'Last sync: ' : '최근 동기화: '}
-            {lastRefreshedAt.toLocaleTimeString()}
+            {lastRefreshedAt?.toLocaleTimeString() ?? '—'}
           </span>
         </div>
 
@@ -218,6 +226,9 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
         </div>
       </div>
 
+      {requestError && <p role="status" aria-live="polite" className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive">{isEn ? 'Unable to load health data. No live status is confirmed.' : '상태 정보를 불러오지 못했습니다. 현재 가동 상태를 확인할 수 없습니다.'}</p>}
+      {!requestError && <p role="status" aria-live="polite" className="rounded-lg border p-3 text-sm text-muted-foreground">{isEn ? 'Only host and database observations are measured. API domain status and success rates are unverified.' : '호스트와 DB 관측값만 실측입니다. API 도메인별 가동률·응답속도는 아직 검증되지 않았습니다.'}</p>}
+
       {/* 4 Core Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         <Card className="border-border/80 bg-card/60">
@@ -228,8 +239,8 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-1">
-            <div className="text-2xl font-bold font-mono">{domains.length || 14}개</div>
-            <div className="text-[11px] text-emerald-500 font-medium mt-0.5">100% 정상 가동</div>
+            <div className="text-2xl font-bold font-mono">{data ? `${domains.length}개` : '—'}</div>
+            <div className="text-[11px] text-emerald-500 font-medium mt-0.5">목록에 등록된 도메인 · 상태 미검증</div>
           </CardContent>
         </Card>
 
@@ -241,8 +252,8 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-1">
-            <div className="text-2xl font-bold font-mono">{totalEndpoints}개</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">REST BFF 정합</div>
+            <div className="text-2xl font-bold font-mono">{data ? `${totalEndpoints}개` : '—'}</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">등록된 경로 수 · 개별 검증 아님</div>
           </CardContent>
         </Card>
 
@@ -254,8 +265,8 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-1">
-            <div className="text-2xl font-bold font-mono text-emerald-500">{avgLatency}ms</div>
-            <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">초고속 최적화</div>
+            <div className="text-2xl font-bold font-mono text-emerald-500">{avgLatency === null ? '미측정' : `${avgLatency}ms`}</div>
+            <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">도메인별 실제 응답시간 미수집</div>
           </CardContent>
         </Card>
 
@@ -267,9 +278,9 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-1">
-            <div className="text-2xl font-bold font-mono text-cyan-500">{successRate.toFixed(1)}%</div>
+            <div className="text-2xl font-bold font-mono text-cyan-500">{successRate === null ? '미측정' : `${successRate.toFixed(1)}%`}</div>
             <div className="text-[11px] text-cyan-600 dark:text-cyan-400 mt-0.5">
-              {isLive ? `DB 핑 ${dbLatency}ms 실측` : 'Zero Error Rate'}
+              {data?.dbProbeState === 'ok' && dbLatency !== null ? `DB 핑 ${dbLatency}ms 실측` : 'DB 연결 확인 불가'}
             </div>
           </CardContent>
         </Card>
@@ -293,7 +304,7 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
                 </span>
               </div>
               <Progress value={cpuPercent} className="h-1.5" />
-              <div className="text-[11px] text-emerald-500 font-medium">안정적 저부하 가동 중</div>
+              <div className="text-[11px] text-emerald-500 font-medium">현재 프로세스의 호스트 부하</div>
             </CardContent>
           </Card>
 
@@ -328,15 +339,15 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
             <CardContent className="p-4 pt-1 space-y-2">
               <div className="flex items-baseline justify-between">
                 <span className="text-xl font-bold font-mono text-cyan-500">
-                  {telemetry.activeDbConnections}개 활성
+                  {telemetry.activeDbConnections === null ? '미측정' : `${telemetry.activeDbConnections}개 활성`}
                 </span>
                 <span className="text-xs font-mono text-emerald-500 font-bold">
-                  캐시 적중률 {cacheHitRatio}%
+                  캐시 적중률 {cacheHitRatio === null ? '미측정' : `${cacheHitRatio}%`}
                 </span>
               </div>
-              <Progress value={cacheHitRatio} className="h-1.5" />
+              <Progress value={cacheHitRatio ?? 0} className="h-1.5" />
               <div className="text-[11px] text-muted-foreground">
-                타임아웃 15s / 30s 락 보호막 활성화
+                실제 DB 관측값만 표시
               </div>
             </CardContent>
           </Card>
@@ -350,12 +361,12 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
             <div>
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <CloudUpload className="size-4 text-sky-500" />
-                <span>{isEn ? 'Cloudflare R2 Free Cloud Automated Backup' : 'Cloudflare R2 무료 클라우드 자동 백업 DR'}</span>
+                <span>{isEn ? 'Backup Inventory' : '백업 상태 및 보관 현황'}</span>
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground mt-0.5">
                 {isEn
-                  ? 'Zero-cost disaster recovery pipeline. Daily 04:00 AM snapshot with 30-day retention.'
-                  : 'Cloudflare R2 10GB 무료 티어 및 영구 무과금($0 Egress) 재해 복구 파이프라인 (매일 04:00 자동 스냅샷 / 30일 보관).'}
+                  ? 'Displays backup inventory returned by the service; availability must be verified.'
+                  : '서버에서 확인된 백업 목록과 설정만 표시합니다. 실제 복구 가능 여부는 별도 검증이 필요합니다.'}
               </CardDescription>
             </div>
             <Button
@@ -381,19 +392,19 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
               <div className="text-muted-foreground text-[11px]">R2 버킷</div>
-              <div className="font-mono font-bold mt-0.5 truncate">{backupData?.r2Bucket || 'moneyverse-backup'}</div>
+              <div className="font-mono font-bold mt-0.5 truncate">{backupData?.r2Bucket || '미확인'}</div>
             </div>
             <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
               <div className="text-muted-foreground text-[11px]">보관 주기</div>
-              <div className="font-mono font-bold mt-0.5">{backupData?.retentionDays || 30}일 롤링</div>
+              <div className="font-mono font-bold mt-0.5">{backupData ? `${backupData.retentionDays}일` : '미확인'}</div>
             </div>
             <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
               <div className="text-muted-foreground text-[11px]">총 백업본 개수</div>
-              <div className="font-mono font-bold mt-0.5">{backupData?.totalBackups ?? 0}개 스냅샷</div>
+              <div className="font-mono font-bold mt-0.5">{backupData ? `${backupData.totalBackups}개 스냅샷` : '미확인'}</div>
             </div>
             <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
               <div className="text-muted-foreground text-[11px]">총 보관 용량</div>
-              <div className="font-mono font-bold mt-0.5 text-sky-500">{backupData?.totalSizeMb ?? 0} MB</div>
+              <div className="font-mono font-bold mt-0.5 text-sky-500">{backupData ? `${backupData.totalSizeMb} MB` : '미확인'}</div>
             </div>
           </div>
 
@@ -428,11 +439,11 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
             <CardHeader className="p-4 pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <CheckCircle2 className="size-4 text-emerald-500" />
+                  <AlertCircle className="size-4 text-muted-foreground" />
                   <span>{isEn ? domain.nameEn : domain.name}</span>
                 </CardTitle>
-                <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/40 bg-emerald-500/10">
-                  {domain.status}
+                <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                  {domain.status === 'UNVERIFIED' ? (isEn ? 'Unverified' : '미검증') : domain.status}
                 </Badge>
               </div>
               <CardDescription className="text-xs font-mono text-muted-foreground">
@@ -443,11 +454,11 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
               <div className="flex items-center justify-between border-t border-border/50 pt-2 text-muted-foreground">
                 <span>
                   {isEn ? 'Latency: ' : '응답 지연: '}
-                  <b className="font-mono text-foreground">{domain.latencyMs}ms</b>
+                  <b className="font-mono text-foreground">{domain.latencyMs === null ? '미측정' : `${domain.latencyMs}ms`}</b>
                 </span>
                 <span>
                   {isEn ? 'Success: ' : '성공률: '}
-                  <b className="font-mono text-emerald-500">{domain.successRate.toFixed(1)}%</b>
+                  <b className="font-mono text-emerald-500">{domain.successRate === null ? '미측정' : `${domain.successRate.toFixed(1)}%`}</b>
                 </span>
               </div>
               <div className="rounded-md bg-muted/40 p-2 text-[11px] font-mono text-muted-foreground truncate space-y-0.5">
