@@ -1,4 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
+
+- Full backlog IDs / 전체 백로그 식별자: ENV1208-01 SEC1208-02 REL1208-03 BOARD1208-04 BOARD1208-05 BOARD1208-06 BOARD1208-07 BOARD1208-08 BOARD1208-09 BOARD1208-10
+
+## v2026.10.24.1208 — F675-109 Verified Board Reading List (PLANNING DRAFT / RELEASE HOLD)
+- Previous Improvement v1206 / Current Addition v1208 / Next Improvement v1210 provisional. Main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede start/mid; QA v1211 FAILED/HOLD. Prior v1206 #1082 unmerged, not main. Source: public board post UUID/deleted_at, canonical public visibility function; no verified reading-list API. Static locale blog excluded until authoritative publish/visibility contract. Manual member Save/Remove and explicit TOP/COMMENTS marker only; no passive tracking or WLD effects.
+- P0 ENV1208-01 SEC1208-02 REL1208-03 BOARD1208-04 cover shared Production/dev DB and 5433 exposure, app-role 235/241 DML and PUBLIC bank functions, QA security/CI/migration266/exact-SHA Test, and deleted/moderated-post visibility races. P1 BOARD1208-05 BOARD1208-06 BOARD1208-07 BOARD1208-08 BOARD1208-09 BOARD1208-10 cover owner-only idempotent API, versioned tombstones, signed cursor, web/Android/admin aggregate, privacy/SEO/WCAG/KPI, concurrency and flag-off rollback. Full screen/API/DB/transaction/permissions/test specification in integrated EN/KO masters.
+- QA v1211 main pnpm audit 4 Critical/10 High, bot 1 Critical/4 High, lint and frontend test FAIL; candidate #1076 CI success is not official Test promotion. External publishers OWASP/PostgreSQL/W3C reviewed 3, newly approved deduplicated records 0, cumulative UNKNOWN/10,000 BLOCKED. Docs-only; no runtime/DB/WLD/Test/Production changes.
+
 - Full backlog IDs / 전체 백로그 식별자: ENV1206-01 SEC1206-02 REL1206-03 A11Y1206-04 A11Y1206-05 A11Y1206-06 A11Y1206-07 A11Y1206-08 A11Y1206-09 A11Y1206-10
 
 ## v2026.10.24.1206 — F675-108 Accessibility Identity and Sync Hardening (PLANNING DRAFT / RELEASE HOLD)

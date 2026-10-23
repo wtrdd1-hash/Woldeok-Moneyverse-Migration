@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+
+- Full backlog IDs / 전체 백로그 식별자: ENV1208-01 SEC1208-02 REL1208-03 BOARD1208-04 BOARD1208-05 BOARD1208-06 BOARD1208-07 BOARD1208-08 BOARD1208-09 BOARD1208-10
+
+## v2026.10.24.1208 — F675-109 회원 게시판 읽기 목록·수동 이어읽기 (기획 초안 / 운영 보류)
+- Previous 기능 보완 v1206 / Current 기능 추가 v1208 / Next 기능 보완 v1210(잠정). 최신 main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede 시작·중간 확인, QA v1211 FAILED/HOLD. 선행 v1206 #1082 미병합. 공개 게시판 UUID·deleted_at·공개 조회 함수 확인, 읽기 목록 API는 미확인. 정적 다국어 블로그는 신뢰 가능한 공개 여부 계약 전 제외. 회원 수동 저장/삭제와 TOP/COMMENTS 명시적 표시만 지원, 자동 추적·WLD 변경 없음.
+- P0 ENV1208-01 SEC1208-02 REL1208-03 BOARD1208-04: 운영·개발 공유 DB/5433, 앱 DML 235/241 및 PUBLIC 은행 함수, QA·보안·Migration266·정확 SHA Test, 삭제/관리제한 글 노출 경합. P1 BOARD1208-05 BOARD1208-06 BOARD1208-07 BOARD1208-08 BOARD1208-09 BOARD1208-10: 본인 멱등 API·버전 묘비·서명 커서·웹/Android/관리자 집계·개인정보/SEO/WCAG/KPI·동시성·기능 OFF 롤백. 상세 화면·API·DB·트랜잭션·테스트 명세는 통합 국영문 정본에 기재.
+- QA v1211 main pnpm 보안 Critical4/High10, bot Critical1/High4, 린트/프론트 실패. 후보 #1076 CI 성공은 공식 Test 운영승격 아님. OWASP/PostgreSQL/W3C 발행기관 3곳 검토, 신규 승인 0건, 누적 미확인/10,000 BLOCKED. 문서만 변경, 런타임·DB·WLD·Test·운영 변경 없음.
+
 - Full backlog IDs / 전체 백로그 식별자: ENV1206-01 SEC1206-02 REL1206-03 A11Y1206-04 A11Y1206-05 A11Y1206-06 A11Y1206-07 A11Y1206-08 A11Y1206-09 A11Y1206-10
 
 ## v2026.10.24.1206 — F675-108 접근성 계정·동기화 무결성 강화 (기획 초안 / 운영 보류)

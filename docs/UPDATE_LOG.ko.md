@@ -1,4 +1,9 @@
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
+
+## 2026-10-24 v1208 — F675-109 회원 게시판 읽기 목록 (기능 추가 / DRAFT / 운영 보류)
+- Previous 기능 보완 v1206 / Current 기능 추가 v1208 / Next 기능 보완 v1210(잠정). main 54d5140d 시작·중간 동일, QA v1211 FAILED/HOLD. 공개 게시글 조회/삭제 확인, 정적 블로그 제외. 회원 수동 저장·삭제·TOP/COMMENTS, 자동 추적·WLD 변경 없음.
+- P0 ENV1208-01 SEC1208-02 REL1208-03 BOARD1208-04; P1 BOARD1208-05 BOARD1208-06 BOARD1208-07 BOARD1208-08 BOARD1208-09 BOARD1208-10. 본인 API, 최초 멱등 영수증, DB 공개 검사·묘비, Android·관리자 집계, noindex/no-store, WCAG, 100건 동시성 및 롤백은 국영문 통합문서에 명세. 공유 DB/5433·앱 광범위 DML·Migration266·보안감사·정확 SHA Test·격리복원 미해결. 외부 발행기관 3곳, 신규 승인 0건, 누적 미확인 / 10,000 BLOCKED.
+
 - Previous 기능 추가 v1204 / Current 기능 보완 v1206 / Next 기능 추가 v1208(잠정); main 54d5140d 시작·중간 동일, QA v1209 FAILED/HOLD. 첫 화면·OS 강제 색상, 계정 전환 응답 차단, 명시적 동기화, 버전 철회 tombstone, 원본 영수증·100건 동시성 명세. 구현·배포 주장 없음.
 - P0 ENV1206-01 SEC1206-02 REL1206-03 A11Y1206-04; P1 A11Y1206-05 A11Y1206-06 A11Y1206-07 A11Y1206-08 A11Y1206-09 A11Y1206-10. API/DB/화면/관리자/Android/SEO/KPI/롤백은 기존 국영문 통합 문서. 전체 pnpm 치명적2/높음8, bot 치명적1/높음4, DB 공유/권한/Migration266, 실제 E2E·정확 SHA Test 보류. 독립 근거 발행기관 2계열 검토, 신규 승인 0, 누적 미확인 / 10,000 BLOCKED.
 

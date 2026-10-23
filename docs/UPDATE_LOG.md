@@ -1,4 +1,9 @@
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
+
+## 2026-10-24 v1208 — F675-109 verified member board reading list (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1206 / Current Addition v1208 / Next Improvement v1210 provisional. Main 54d5140d unchanged start/mid, QA v1211 FAILED/HOLD. Board public visibility and deleted_at verified; static blog excluded. Member-only manual Save/Remove/TOP/COMMENTS, no passive tracking or WLD.
+- P0 ENV1208-01 SEC1208-02 REL1208-03 BOARD1208-04; P1 BOARD1208-05 BOARD1208-06 BOARD1208-07 BOARD1208-08 BOARD1208-09 BOARD1208-10. Owner-scoped API, original idempotency receipts, DB visibility locks/tombstones, Android/admin aggregates, noindex/no-store, WCAG, 100-way concurrency and rollback in integrated EN/KO. Shared DB/5433, broad app DML, migration266, security audits, exact-SHA Test and restore remain HOLD. External publishers 3, approved 0, cumulative UNKNOWN / 10,000 BLOCKED.
+
 - Previous Addition v1204 / Current Improvement v1206 / Next Addition v1208 provisional; main 54d5140d unchanged start/mid; QA v1209 FAILED/HOLD. Hardens prepaint/OS forced-colors, account-switch stale responses, explicit sync, versioned disable tombstone, original atomic receipts and 100-way races. No implementation or release claim.
 - P0 ENV1206-01 SEC1206-02 REL1206-03 A11Y1206-04; P1 A11Y1206-05 A11Y1206-06 A11Y1206-07 A11Y1206-08 A11Y1206-09 A11Y1206-10. Full API/DB/UX/admin/Android/SEO/KPI/rollback in integrated EN/KO. Full pnpm Critical2/High8, bot Critical1/High4, shared DB/privileges/migration266, real route E2E and exact-SHA Test HOLD. Independent evidence 2 publisher families reviewed, 0 accepted, cumulative UNKNOWN / 10,000 BLOCKED.
 

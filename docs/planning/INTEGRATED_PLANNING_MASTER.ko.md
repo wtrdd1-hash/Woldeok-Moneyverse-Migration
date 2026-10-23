@@ -1,5 +1,46 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1208 — F675-109 검증형 회원 게시판 읽기 목록·수동 이어읽기 (기능 추가 / DRAFT / 운영 보류)
+
+### 회차·기준·실제 소스·범위
+- Previous 기능 보완 v1206 / Current 기능 추가 v1208 / Next 기능 보완 v1210(잠정). 최신 main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 재조회. 선행 v1206 Draft #1082는 미병합 문서 브랜치로 main이 아니다. QA v1211(2026-10-24 07:28 KST) FAILED/운영 보류. 런타임·DB·WLD·Test·Production·기능 스위치·타 작업자 브랜치 변경 없음.
+- 소스 확인: `frontend/src/app/board/[postId]/page.tsx`는 공개/회원 게시글을 렌더링한다. `backend/src/board/public-board.controller.ts`와 `public-board.service.ts`는 `member_board_public_get`로 공개 여부를 판단한다. Migration 044의 `member_board_posts`는 UUID와 `deleted_at`, 공개 글 인덱스를 갖는다. 확인한 main 소스·마이그레이션에는 회원 읽기 목록 API/북마크 테이블이 없다. 블로그는 `blog-page-server.tsx`의 로컬 다국어 데이터에 기반해 NestJS 공개 여부 검증 계약이 확인되지 않아 **이번 범위에서 제외**한다. 별도 승인된 발행 매니페스트/백엔드 공개 계약 이후 확장한다. 컬렉션 즐겨찾기나 개발 C의 글자 크기 기능을 중복 구현하지 않는다.
+- 목적·대상: 로그인 회원이 **공개된 게시글만 수동 저장**해 기기간 재방문하고, 명시적으로 글 처음/댓글 위치를 표시한다. 자동 스크롤 추적, 읽기 완료 추정, 관심사 프로파일링은 금지한다. 대상은 회원, Android 회원, 집계 지표만 보는 운영자, 권한 있는 개인정보 감사자다. 비회원은 공개 글을 읽되 저장은 로그인 후에만 가능하다. WLD·보상·거래·추천 광고·자동 이메일/푸시와 무관하다.
+
+### 진입점·화면·CTA·상태
+- `/board/[postId]`에서 **읽기 목록에 저장 / 저장 취소**, `/account/reading-list`에서 **글 열기 / 댓글부터 이어읽기 / 시작·댓글 표시 / 삭제 / 새로고침**을 제공한다. 계정·게시판에 목록 진입 링크를 둔다. 비회원 저장은 안전한 동일 출처 복귀 경로를 가진 로그인 안내로 연결하고 서버 저장 기록은 만들지 않는다.
+- 상태 `guest|loading|not_saved|saving|saved|removing|unavailable|conflict|error|unknown`. 서버 DB 확정 영수증 없이는 저장 성공을 표시하지 않으며 네트워크 불명 상태에서는 **저장 상태 확인** CTA를 보여준다. 빈 목록은 게시판으로 이동한다. 삭제·관리제한·비공개 글은 **이용할 수 없는 글**과 **목록에서 삭제**만 보여주며 기존 제목·작성자·본문·이미지를 노출하지 않는다. 비공개 개인 목록 안의 이용 불가 건수도 외부에 공개하지 않는다.
+- 자동 읽기 위치 수집은 없다. `TOP|COMMENTS` 중 명시적 버튼 클릭으로만 위치를 저장한다. CSS 선택자·DOM 경로·임의 URL·자유 입력 앵커를 거부한다. 열기 시 현재 공개 상태를 재확인하고 `/board/<UUID>`의 정규 링크만 사용한다.
+
+### API·인증·Android 제안(미구현)
+- `GET /api/v1/board/reading-list?cursor=&limit=20`: 세션+동의, 최대 100, `(saved_at DESC,post_id DESC)` 서명 불투명 키셋 커서, `items:[{postId,savedAt,marker,version,available,publicTitle?}]`, `nextCursor`. 타인/비공개 본문 반환 금지. `GET /api/v1/board/reading-list/:postId`: 본인 저장 상태만, 미저장·타인 404. `POST /api/v1/board/reading-list`: 로그인+CSRF+동의, `{postId:UUID}`, `Idempotency-Key:UUID`. `PUT /api/v1/board/reading-list/:postId/marker`: `{marker:TOP|COMMENTS}`, `If-Match:version` 및 멱등 키. `DELETE /api/v1/board/reading-list/:postId`: 같은 권한과 멱등 키. 성공 시 DB 확정 `{receiptId,postId,version,state,savedAt?}` 반환.
+- 서버는 회원 ID를 세션에서만 결정한다. 400 잘못된 UUID/위치, 401 미로그인, 403 CSRF·동의, 404 비공개·타인·미저장, 409 구버전·다른 본문으로 키 재사용·저장 한도, 429 호출 제한, 503 확정 불명(상태 재조회) 처리. Next 서버 전용 BFF에서 세션·CSRF를 전달하고 내부 토큰 노출 금지. Android `/app-api/v1/board/reading-list/*`는 **제안**이며 route-map·허용 목록·기기 세션 검증 후 개발한다. 모든 개인 응답은 `Cache-Control: private, no-store`.
+
+### DB 제약·인덱스·원자성·보존
+- 개발 단계에서 기존 미병합 Migration 280/281 및 main 이력을 조정한 뒤 **새 순방향 마이그레이션** 번호를 지정한다. `member_board_reading_list(user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,post_id uuid NOT NULL REFERENCES member_board_posts(id) ON DELETE RESTRICT,saved_at timestamptz NOT NULL,updated_at timestamptz NOT NULL,removed_at timestamptz,marker text NOT NULL DEFAULT 'TOP' CHECK(marker IN ('TOP','COMMENTS')),version bigint NOT NULL DEFAULT 1 CHECK(version>0),PRIMARY KEY(user_id,post_id))`. 활성 목록 부분 인덱스 `(user_id,saved_at DESC,post_id DESC) WHERE removed_at IS NULL`. 게시글 제목·본문의 사본은 저장하지 않는다.
+- `member_board_reading_requests(user_id uuid,idempotency_key uuid,request_hash bytea,receipt_id uuid UNIQUE,post_id uuid,operation text CHECK IN ('SAVE','MARK','REMOVE'),result_version bigint,created_at timestamptz,PRIMARY KEY(user_id,idempotency_key))`와 불변 `member_board_reading_events(id uuid PK,user_id uuid,post_id uuid,event_type text,version bigint,created_at timestamptz)` 및 `(user_id,created_at DESC,id DESC)` 감사 인덱스. 세션 토큰·IP·열람시간·자동 탐색이력·임의 앵커 저장 금지. 삭제 묘비/감사기록 보존 90일은 개인정보·법률 검토 전 **제안**이며 필수 보안기록 임의 삭제 금지.
+- 고정 `search_path=pg_catalog,pg_temp`를 가진 본인 검증 `SECURITY DEFINER` 함수, `PUBLIC EXECUTE` 철회, 허용된 함수 `EXECUTE`만 앱 역할에 부여, 테이블 직접 DML 금지. SAVE는 `member_board_public_get`과 동일한 공개 조건을 트랜잭션에서 검사하고 삭제·제한 변경과 경합하지 않도록 글 행을 잠근다. 회원 users 행을 SELECT ... FOR UPDATE로 잠가 회원별 활성 건수 검사를 직렬화하고 최대 500건 한도를 원자적으로 검사하며 동일 회원+글 행 잠금·원본 멱등 영수증·이벤트를 함께 확정한다. 동일 키/동일 지문은 **최초의 역사적 영수증**을 반환하되 현재 저장 상태는 별도로 재조회한다(과거 저장 영수증은 현재 저장 보장이 아님). 다른 지문은 409. REMOVE는 버전 묘비를 남겨 오래된 SAVE/MARK가 되살리지 못하게 하며 재저장은 새 명시적 키와 버전으로만 허용한다. 조회 시 현재 공개 여부 재검증, 삭제 글의 제목·작성자 캐시 유출 0. WLD 원장 변경 없음.
+
+### 관리자·보안·SEO·접근성·KPI
+- 일반 관리자 화면에는 회원별 목록을 노출하지 않는다. `GET /api/v1/admin/board/reading-list/metrics`는 저장/삭제 건수, 공개 차단, 409/429/5xx, p95 지연만 충분히 집계해 작은 표본은 숨긴다. 예외 개인정보 조사 시 별도 역할·최근 재인증·사유·불변 감사가 필요하고 일괄 내보내기는 기본 금지. 초안 제한: 회원당 분당 쓰기 30건, 활성 저장 500건, 운영 기준선으로 조정. BOLA·CSRF·재전송·열거·악성 입력·부하 테스트 필요.
+- 개인 목록/저장 상태는 `noindex,nofollow`, 사이트맵 제외, `private,no-store`. 공개 게시글의 canonical/SEO는 유지하고 삭제 글은 목록을 통해 부활시키지 않는다. 320px·200% 확대, 44px 터치, 의미 있는 버튼, 키보드·포커스, 저장 토글 `aria-pressed`, 확정 상태만 `role=status`, 오류는 `role=alert` 및 WCAG 2.2 AA. Android도 동등한 레이블과 권한, 백그라운드 읽기 추적·푸시 권한 추정 금지.
+- KPI: 저장 확정/CTA 노출, 7일 내 명시적 재방문(집계), 비공개 원천 차단, 409/불명 영수증, 목록 지연 p50/p95, 개인정보 불만·타 회원 접근 실패. 개인 ID·탐색 기록을 분석에 적재하지 않는다. 실제 기준선 없는 성장 목표 수치 발명 금지. 안전 기준: 타인 노출 0/100, 삭제 글 제목 유출 0, 거짓 성공 영수증 0.
+
+### P0/P1 개발 백로그·회귀·승격 차단
+- **P0 ENV1208-01** — 운영·개발 공유 DB `woldeok_moneyverse_dev` 격리, PostgreSQL 5433 와일드카드 바인딩을 승인된 네트워크 정책으로 보호하고 실제 연결 대상을 분리 증명.
+- **P0 SEC1208-02** — 앱 역할 DML 241개 중 235개 테이블, 은행 함수 `PUBLIC EXECUTE` 3개를 순방향 최소권한 변경 및 실 PostgreSQL 권한 거부 테스트로 해결. 운영 임의 REVOKE 금지.
+- **P0 REL1208-03** — QA v1211 린트/프론트 실패, main pnpm audit Critical4/High10, bot Critical1/High4, Migration266 체크섬 근거, 정확 SHA CI/Test, 격리 백업복원 및 승인 GitOps 게이트. QA #1076 CI 성공은 실제 Test/운영 승인과 다름.
+- **P0 BOARD1208-04** — 공개 글 조회·삭제·관리제한 조건과 저장 경합, 100건 저장 대 삭제 경쟁, 타인/비공개 존재 노출 및 오래된 제목 누출 0 검증.
+- **P1 BOARD1208-05** — 순방향 DB·본인 SECURITY DEFINER·동일 키 100건 동시 영수증 1개·서로 다른 지문 100건 409·버전 묘비·500건 한도.
+- **P1 BOARD1208-06** — 회원 웹 저장/삭제/목록/빈 상태/접근불가/불명 영수증, 동일 시각 10,001건 키셋 커서 무누락.
+- **P1 BOARD1208-07** — 명시적 TOP/COMMENTS 위치, If-Match CAS, 세션 전환 격리, 안전한 정규 URL, 자동 추적 금지.
+- **P1 BOARD1208-08** — Android App API 계약 동등성, 관리자 집계 전용 지표, 역할/CSRF/재인증 거부 테스트.
+- **P1 BOARD1208-09** — 개인정보 보존·삭제 검토, SEO 분리, WCAG 2.2 AA 320px/200% 확대, 개인정보 최소 KPI.
+- **P1 BOARD1208-10** — RED/GREEN·실 PostgreSQL·계약·웹/Android·QA 회귀, 마이그레이션 연속성, 동시성/멱등성/404·409·429·503/삭제 경합/10,001 커서/기능 OFF 롤백.
+- 신규 스위치 `board_reading_list`는 기본 OFF. 별도 개발 브랜치에서 마이그레이션·코드를 구현하고 최종 정확 SHA의 전체 린트·타입·빌드·테스트·보안감사, 격리 PostgreSQL ACL, 백업 격리복원, 공식 Test 인증 사용자·Android·금융 회귀, 단계적 카나리 통과 뒤 승인된 GitOps 무중단 운영승격. OFF 시 신규 저장·수정만 중지하고 묘비/영수증/개인정보 기록은 보존, 구버전 클라이언트 재활성화 차단. 기획 예약은 병합·배포하지 않는다.
+- **독립 근거 게이트:** OWASP API1 (https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/), PostgreSQL ON CONFLICT (https://www.postgresql.org/docs/17/sql-insert.html), W3C WCAG 2.2 (https://www.w3.org/TR/WCAG22/) 발행기관 3곳 검토. **승인된 독립 레퍼런스 3건이라는 뜻이 아님.** 신규 중복 제거 승인 **0건**, 누적 승인 **미확인**, 목표 **10,000건**, 게이트 **BLOCKED / IN PROGRESS**.
+
+
 ## v2026.10.24.1206 — F675-108 접근성 환경설정: 계정·첫 화면·동기화 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·소스·목적
