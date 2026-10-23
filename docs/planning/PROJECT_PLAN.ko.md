@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1194 — F675-105 비공개 지원 증빙의 소유권·내구성·레거시 링크 보완 (기획 초안 / 운영 보류)
+- 이전 Addition v1192 / 현재 Improvement v1194 / 다음 Addition v1196(잠정). 최신 main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede, QA v1195 FAILED/HOLD, 선행 Draft #1038 미병합.
+- 소스/개발 DB: 일반 이미지 업로드 응답에 storageKey 포함, GET media/:key 명시적 소유권 가드 부재 및 공개 캐시, 원본 버퍼 저장, Next 게이트웨이 메모리 버퍼·15초 제한. 개발 문의 3건/메시지 6건/기존 미디어 URL 포함 메시지 1건, 증빙 테이블 없음. 운영 유출 입증되지 않음.
+- P0 SUP1194-01 기존 URL·storageKey 차단, SEC1194-02 소유권·비공개 캐시, SEC1194-03 DB 최소권한, REL1194-04 CI·보안·Migration266·백업·정확 SHA 게이트. P1 SUP1194-05 내구성 검사 영수증, SUP1194-06 원자적 첨부, SUP1194-07 BFF 자원 제한, SUP1194-08 웹·Android·접근성·SEO, SUP1194-09 관리자·KPI, SUP1194-10 부정·동시성·롤백 테스트. 상세 API·DB·화면·관리자·남용 방지·무중단 배포 계약은 기존 통합 기획서 참조.
+- 격리 문서 기획만 수행, 런타임·DB·WLD·Test·Production 미변경. 외부 발행기관 3곳 검토, 신규 승인 0건, 누적 미확인/10,000건 BLOCKED.
+
+
 ## v2026.10.24.1192 — F675-105 고객지원 비공개 증빙 보관함 (기획 초안 / 운영 보류)
 - 이전 Feature Improvement v1190 / 현재 Feature Addition v1192 / 다음 Feature Improvement v1194(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede`, QA v1193 FAILED/HOLD. 실제 고객지원 위젯은 검사한 이미지를 올린 뒤 미디어 URL을 문의 본문에 넣고, `ChatUploadController.getChatMedia`는 명시적 인증·소유권 가드 없이 공개 immutable 캐시 헤더를 보낸다. 엣지 외부 접근 및 실제 유출은 확인되지 않았다. 개발 DB 문의 3건/메시지 6건, 전용 증빙 테이블 없음. 선행 사건 관리 v1188/v1190은 미병합 Draft #1028/#1033; 본 변경은 문서 전용 후속 기획이다.
 - 회원 소유권을 확인하는 비공개 이미지 증빙, PNG/JPEG/WebP 파일당 8MiB·메시지당 3개, 검사·재인코딩·EXIF 제거 및 검사 장애 차단. `support_evidence`·`support_message_evidence`와 대화 일치 복합 FK, 고유 저장키, 불변 영수증·감사, SECURITY DEFINER 소유권 확인 및 앱 직접 DML 금지. 회원 업로드·연결·다운로드·영수증, 관리자 RBAC·격리, Android 동등성, private/no-store/noindex, 320px·WCAG 2.2 AA, 악용 방지, 기존 공개 URL 조사·안전한 전환. 자동 WLD 조정·범용 공개 업로드 금지. API·DB·화면·테스트·롤백 상세는 [통합 기획서](INTEGRATED_PLANNING_MASTER.ko.md).

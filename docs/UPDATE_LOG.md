@@ -1,4 +1,9 @@
 ## 2026-10-24 v1192 — F675-105 private support evidence vault (planning draft / release HOLD)
+
+## 2026-10-24 v1194 — F675-105 support evidence privacy hardening (planning only / HOLD)
+- Previous Addition v1192 / Current Improvement v1194 / Next Addition v1196 provisional; main 54d5140d, QA v1195 FAILED/HOLD, parent Draft #1038. Fresh DEV aggregate: 3 threads, 6 messages, 1 support message with legacy media URL; no evidence table. Code exposes storageKey, public immutable media cache, original-buffer storage and buffered 15s BFF. No confirmed Production leak.
+- Existing integrated EN/KO masters and PROJECT_PLAN EN/KO updated for owner-scoped private evidence, cache/HEAD/Range negative tests, durable scanner/object/DB receipt saga, DB least privilege, bounded gateway, Android/a11y, audit/KPI and safe rollback. P0 SUP1194-01/SEC1194-02/SEC1194-03/REL1194-04; P1 SUP1194-05/SUP1194-06/SUP1194-07/SUP1194-08/SUP1194-09/SUP1194-10. No runtime/DB/Production writes. 3 publishers reviewed, 0 newly accepted evidence, cumulative UNKNOWN/10,000 BLOCKED.
+
 - Previous Improvement v1190 / Current Addition v1192 / Next Improvement v1194 provisional. Latest main 54d5140d, QA v1193 FAILED/HOLD. Source-verified support image URL insertion and unguarded public-cache media GET; external reachability or Production leakage not proven. Propose owner-scoped scanned private support evidence with idempotent attachment receipts, admin RBAC, Android parity, secure legacy URL transition and flag OFF. P0 SUP1192-01, SEC1192-02, REL1192-03; P1 SUP1192-04/SUP1192-05/SUP1192-06/SUP1192-07/SUP1192-08. See existing EN/KO integrated masters and PROJECT_PLAN. Docs-only stacked after Draft #1033/#1028, no runtime/DB/WLD/deploy changes. Two independent publishers reviewed, 0 accepted evidence records, cumulative UNKNOWN/10000 BLOCKED.
 
 ## 2026-10-23 v1190 — F675-104 support concurrency/replay hardening (planning draft)
