@@ -273,6 +273,7 @@ export function InteractiveOnboardingTracker() {
           ) : (
             <Button
               onClick={() => setIsOpen(true)}
+              aria-label={t('온보딩 퀘스트 열기', 'Open onboarding guide', 'ガイドを開く', '打开新手指南')}
               className="h-10 max-w-[calc(100vw-2rem)] px-3 min-[400px]:px-3.5 rounded-full bg-zinc-950/90 hover:bg-zinc-900 border border-emerald-500/40 text-white font-bold text-xs shadow-xl backdrop-blur-xl flex items-center gap-1.5 min-[400px]:gap-2 ring-1 ring-emerald-500/20 active:scale-95 transition-all group/chip cursor-pointer"
             >
               <div className="relative">

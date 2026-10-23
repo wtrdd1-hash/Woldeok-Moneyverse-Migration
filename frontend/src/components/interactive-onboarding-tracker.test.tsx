@@ -94,3 +94,24 @@ describe('onboarding reward truthfulness', () => {
     expect(screen.queryByRole('button', { name: /받기/ })).toBeNull();
   });
 });
+
+describe('narrow mobile accessibility', () => {
+  it('gives the collapsed icon-only control a localized accessible name', () => {
+    render(<LocaleProvider initialLocale="ko"><InteractiveOnboardingTracker /></LocaleProvider>);
+    const button = screen.getByRole('button', { name: /온보딩 퀘스트/ });
+    expect(button.getAttribute('aria-label')).toMatch(/온보딩 퀘스트 열기/);
+  });
+});
+
+describe('historical browser reward claims', () => {
+  it('scrubs unverified local wallet amounts while keeping guide progress', () => {
+    localStorage.setItem('moneyverse_onboarding_progress_v1', JSON.stringify({
+      completed: ['spin_roulette'], claimed: ['spin_roulette'], totalEarnedWld: 10000,
+    }));
+    render(<LocaleProvider initialLocale="ko"><InteractiveOnboardingTracker /></LocaleProvider>);
+    const persisted = JSON.parse(localStorage.getItem('moneyverse_onboarding_progress_v1') || '{}');
+    expect(persisted.completed).toEqual(['spin_roulette']);
+    expect(persisted.claimed).toEqual([]);
+    expect(persisted.totalEarnedWld).toBe(0);
+  });
+});

@@ -202,6 +202,13 @@ export function getOnboardingState(): OnboardingState {
       : [];
     // Historical local claim flags never prove a server-side wallet credit.
     inMemoryState = { completed, claimed: [], totalEarnedWld: 0 };
+    if (parsed?.claimed?.length || parsed?.totalEarnedWld) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(inMemoryState));
+      } catch {
+        // Display sanitized progress even when browser storage is unavailable.
+      }
+    }
     return inMemoryState;
   } catch {
     return inMemoryState;
