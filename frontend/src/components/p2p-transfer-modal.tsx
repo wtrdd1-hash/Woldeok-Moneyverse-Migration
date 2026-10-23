@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { resolveP2PAttempt, type P2PAttempt } from './p2p-transfer-attempt';
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,7 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
   const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const pendingAttempt = useRef<P2PAttempt | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<{
     recipientName: string;
@@ -80,19 +82,24 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
       return;
     }
 
+    if (isSubmitting) return;
     setIsSubmitting(true);
     setErrorMsg(null);
+
+    const payload = {
+      recipientUserId: selectedRecipient.userId,
+      amount,
+      ...(message.trim() ? { message: message.trim() } : {}),
+      ...(selectedSticker ? { sticker: selectedSticker } : {}),
+    };
+    const attempt = resolveP2PAttempt(pendingAttempt.current, payload);
+    pendingAttempt.current = attempt;
 
     try {
       const res = await fetch('/api/transfers/p2p', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recipientUserId: selectedRecipient.userId,
-          amount,
-          message: message.trim() || undefined,
-          sticker: selectedSticker || undefined,
-        }),
+        body: JSON.stringify({ ...payload, idempotencyKey: attempt.key }),
       });
 
       const data = await res.json();
@@ -103,21 +110,26 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
         return;
       }
 
+      if (typeof data.transactionId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.transactionId)) {
+        throw new Error('송금 결과를 확인할 수 없습니다. 거래내역을 확인해주세요.');
+      }
+      pendingAttempt.current = null;
       setReceipt({
         recipientName: selectedRecipient.displayName,
         amount,
         message: message.trim() || undefined,
         sticker: selectedSticker || undefined,
-        txId: data.transactionId || 'TX-' + Math.random().toString(36).slice(2, 9),
+        txId: data.transactionId,
       });
     } catch (err: any) {
-      setErrorMsg(err?.message || '네트워크 오류가 발생했습니다.');
+      setErrorMsg('송금 결과가 불확실합니다. 거래내역을 확인한 뒤 동일 요청으로 재시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleReset = () => {
+    pendingAttempt.current = null;
     setSelectedRecipient(null);
     setSearchQuery('');
     setAmount('');
@@ -159,7 +171,7 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
             </div>
             <h3 className="text-lg font-bold text-foreground">송금 완료!</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              수취인에게 실시간 알림이 발송되었습니다.
+              송금 거래가 원장에 기록되었습니다.
             </p>
 
             <div className="w-full mt-5 p-4 rounded-xl border border-border/50 bg-muted/20 text-left space-y-2 text-sm">
