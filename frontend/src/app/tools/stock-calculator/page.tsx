@@ -331,10 +331,10 @@ export default function StockCalculatorPage() {
           {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
           <InArticleAdvertisement className="my-6" />
 
-          {/* 실전 모의투자 전환 & 10,000 WLD 지원금 락인 배너 */}
+          {/* 가상 거래소 안내 */}
           <CalculatorConversionBanner
             title="물타기 시뮬레이션 완료! 실제 모의투자로 검증해보세요"
-            description="계산된 평단가 전략을 실제 10-Depth 실시간 호가창에서 테스트해보세요. 가입 즉시 10,000 WLD 지원금이 100% 무료 지급됩니다."
+            description="계산된 평단가 전략을 실제 10-Depth 실시간 호가창에서 테스트해보세요. 가상 종목은 게임 데이터이며 가입만으로 WLD가 지급되거나 주문이 체결되지 않습니다."
             targetSymbol="CHIPS"
           />
 

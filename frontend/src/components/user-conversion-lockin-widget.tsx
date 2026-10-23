@@ -2,11 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Download, Bell, Sparkles, Check, ArrowRight, ShieldCheck, Coins } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowRight, Bookmark, Download, TrendingUp } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useViewer } from '@/lib/use-viewer';
 
 interface UserConversionLockInWidgetProps {
   readonly title: string;
@@ -15,182 +13,67 @@ interface UserConversionLockInWidgetProps {
   readonly toolCategory?: string | undefined;
 }
 
+type Tab = 'save' | 'market' | 'share';
+
 export function UserConversionLockInWidget({
   title,
   summaryValue,
   summaryLabel,
   toolCategory = 'finance',
 }: UserConversionLockInWidgetProps) {
-  const viewer = useViewer();
-  const [activeTab, setActiveTab] = useState<'save_alert' | 'welcome_bonus' | 'share_card'>('save_alert');
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [tab, setTab] = useState<Tab>('save');
+  const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
 
-  const handleSimulatedSave = () => {
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3500);
-  };
+  function saveLocally() {
+    try {
+      localStorage.setItem('wdmv_calculator_result', JSON.stringify({
+        title, summaryValue, summaryLabel, toolCategory, savedAt: Date.now(),
+      }));
+      setMessage({ text: '계산 결과를 이 브라우저에 저장했습니다. 계정이나 서버에 동기화되지 않으며 브라우저 데이터를 삭제하면 사라집니다.', error: false });
+    } catch {
+      setMessage({ text: '브라우저에 계산 결과를 저장하지 못했습니다. 브라우저 저장 공간과 설정을 확인해 주세요.', error: true });
+    }
+  }
+
+  async function copySummary() {
+    try {
+      await navigator.clipboard.writeText(`[머니버스 ${title}]\n${summaryLabel}: ${summaryValue}`);
+      setMessage({ text: '계산 결과 요약을 클립보드에 복사했습니다.', error: false });
+    } catch {
+      setMessage({ text: '클립보드에 복사하지 못했습니다. 브라우저 권한을 확인해 주세요.', error: true });
+    }
+  }
 
   return (
-    <Card className="border-border/80 bg-gradient-to-br from-card/95 via-card/80 to-amber-950/10 shadow-xl backdrop-blur-md overflow-hidden transition-all">
-      <CardHeader className="pb-3 border-b border-border/40">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse" />
-            <CardTitle className="text-sm font-extrabold text-foreground tracking-tight">
-              ⚡ 맞춤형 결과 보존 & 웰컴 리워드 센터
-            </CardTitle>
-          </div>
-          <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-400 text-[11px] font-bold">
-            신규 혜택 +10,000 WLD
-          </Badge>
-        </div>
-        <CardDescription className="text-xs text-muted-foreground">
-          방금 계산하신 <span className="font-bold text-foreground">[{title}]</span> 결과를 영구 저장하고 맞춤형 금융 혜택을 수령하세요.
-        </CardDescription>
+    <Card className="overflow-hidden border-border/80 bg-card">
+      <CardHeader className="border-b border-border/40">
+        <CardTitle className="text-base">계산 결과 보관 및 가상 경제 안내</CardTitle>
+        <CardDescription>방금 계산한 [{title}] 결과는 이 브라우저에만 저장할 수 있습니다. 계정 저장이나 자동 알림은 제공되지 않습니다.</CardDescription>
       </CardHeader>
-
-      <CardContent className="pt-4 space-y-4">
-        {/* 3대 A/B 전환 탭 바 */}
-        <div className="flex rounded-xl bg-secondary/50 p-1 border border-border/60">
-          <button
-            type="button"
-            onClick={() => setActiveTab('save_alert')}
-            className={`flex-1 min-h-[38px] px-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 'save_alert'
-                ? 'bg-primary text-primary-foreground shadow-md'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Bell className="size-3.5" />
-            <span>결과 저장 & 만기 알림</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('welcome_bonus')}
-            className={`flex-1 min-h-[38px] px-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 'welcome_bonus'
-                ? 'bg-primary text-primary-foreground shadow-md'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Coins className="size-3.5 text-amber-300" />
-            <span>10만 WLD 시드 받기</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('share_card')}
-            className={`flex-1 min-h-[38px] px-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 'share_card'
-                ? 'bg-primary text-primary-foreground shadow-md'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Download className="size-3.5" />
-            <span>인증 리포트 소장</span>
-          </button>
+      <CardContent className="space-y-4 pt-4">
+        <div className="grid grid-cols-3 gap-2" aria-label="계산 결과 다음 단계">
+          <button type="button" aria-pressed={tab === 'save'} onClick={() => { setTab('save'); setMessage(null); }} className={`min-h-11 rounded-lg px-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${tab === 'save' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>브라우저 저장</button>
+          <button type="button" aria-pressed={tab === 'market'} onClick={() => { setTab('market'); setMessage(null); }} className={`min-h-11 rounded-lg px-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${tab === 'market' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>가상 거래소</button>
+          <button type="button" aria-pressed={tab === 'share'} onClick={() => { setTab('share'); setMessage(null); }} className={`min-h-11 rounded-lg px-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${tab === 'share' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>결과 공유</button>
         </div>
-
-        {/* 탭 1: 결과 저장 & 만기 알림 등록 */}
-        {activeTab === 'save_alert' && (
-          <div className="rounded-xl border border-border/60 bg-background/50 p-3.5 space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">{summaryLabel}</span>
-              <span className="font-mono font-black text-amber-400 text-sm">{summaryValue}</span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              이 계산 수치를 내 계정에 영구 보존하고, 목표 만기일 도래 시 카카오톡/이메일로 무료 알림을 보내드립니다.
-            </p>
-            {viewer ? (
-              <Button
-                size="sm"
-                onClick={handleSimulatedSave}
-                disabled={savedSuccess}
-                className="w-full min-h-[40px] font-bold text-xs bg-amber-500 hover:bg-amber-600 text-black gap-1.5"
-              >
-                {savedSuccess ? (
-                  <>
-                    <Check className="size-4" /> 내 포트폴리오에 성공적으로 저장되었습니다!
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="size-4" /> 내 계정에 현재 진단 결과 즉시 저장하기
-                  </>
-                )}
-              </Button>
-            ) : (
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button
-                  size="sm"
-                  asChild
-                  className="flex-1 min-h-[40px] font-bold text-xs bg-amber-500 hover:bg-amber-600 text-black gap-1.5"
-                >
-                  <Link href="/register">
-                    간편가입 후 결과 저장 & 알림 받기 <ArrowRight className="size-3.5" />
-                  </Link>
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  asChild
-                  className="min-h-[40px] font-semibold text-xs border-border"
-                >
-                  <Link href="/login">기존 회원 로그인</Link>
-                </Button>
-              </div>
-            )}
+        {tab === 'save' ? (
+          <div className="space-y-3 rounded-xl border border-border bg-background p-4">
+            <p className="text-sm"><span className="text-muted-foreground">{summaryLabel}:</span> <strong className="break-words">{summaryValue}</strong></p>
+            <p className="text-xs text-muted-foreground">브라우저 전용 저장입니다. 로그인 여부와 무관하며 서버 저장·만기 알림을 등록하지 않습니다.</p>
+            <Button type="button" onClick={saveLocally} className="min-h-11 w-full gap-2"><Bookmark aria-hidden="true" className="size-4" /> 이 브라우저에 결과 저장</Button>
+          </div>
+        ) : tab === 'market' ? (
+          <div className="space-y-3 rounded-xl border border-border bg-background p-4">
+            <p className="text-sm text-muted-foreground">가상 종목과 WLD는 게임 데이터입니다. 회원가입이나 이 화면의 버튼은 보상 지급 또는 주문 체결을 수행하지 않습니다.</p>
+            <Button asChild className="min-h-11 w-full gap-2"><Link href="/stocks"><TrendingUp aria-hidden="true" className="size-4" /> 가상 거래소 둘러보기 <ArrowRight aria-hidden="true" className="size-4" /></Link></Button>
+          </div>
+        ) : (
+          <div className="space-y-3 rounded-xl border border-border bg-background p-4">
+            <p className="text-xs text-muted-foreground">현재 화면의 계산 요약을 텍스트로 복사합니다. 공식 검증 영수증이나 금융 수익 증빙은 아닙니다.</p>
+            <Button type="button" variant="outline" onClick={() => { void copySummary(); }} className="min-h-11 w-full gap-2"><Download aria-hidden="true" className="size-4" /> 계산 결과 요약 복사</Button>
           </div>
         )}
-
-        {/* 탭 2: 1만 WLD 시드머니 웰컴 리워드 */}
-        {activeTab === 'welcome_bonus' && (
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3.5 space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-amber-300">신규 회원 전용 무상 지원금</span>
-              <span className="font-mono font-black text-amber-400 text-sm">+10,000 WLD</span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              방금 확인하신 <span className="text-foreground font-semibold">{summaryValue}</span> 목표를 달성할 수 있도록, 가상 주식 거래소 및 중앙은행에서 자유롭게 굴릴 수 있는 정착 지원금 1만 WLD와 복권 1장을 즉시 지급해 드립니다.
-            </p>
-            <Button
-              size="sm"
-              asChild
-              className="w-full min-h-[40px] font-bold text-xs bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black gap-1.5 shadow-md shadow-amber-950"
-            >
-              <Link href={viewer ? '/bank' : '/register'}>
-                <Sparkles className="size-4" />
-                {viewer ? '중앙은행 스마트 복리 포켓 바로가기' : '1만 WLD 지원금 받고 모의투자 시작하기'}
-              </Link>
-            </Button>
-          </div>
-        )}
-
-        {/* 탭 3: 인증 리포트 소장 & 공유 */}
-        {activeTab === 'share_card' && (
-          <div className="rounded-xl border border-border/60 bg-background/50 p-3.5 space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">인증 배지</span>
-              <span className="font-mono font-bold text-cyan-400">Verified Calculator Report</span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              본 진단 결과를 깔끔한 핀테크 영수증 카드 형태로 캡처하여 오픈채팅방이나 SNS에 친구들과 간편하게 공유할 수 있습니다.
-            </p>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                  navigator.clipboard.writeText(`[월덕 머니버스 ${title} 진단 결과]\n${summaryLabel}: ${summaryValue}\n지금 확인하기: https://easy-scraping.com`);
-                  setSavedSuccess(true);
-                  setTimeout(() => setSavedSuccess(false), 3000);
-                }
-              }}
-              className="w-full min-h-[40px] font-bold text-xs border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 gap-1.5"
-            >
-              <Download className="size-4" />
-              {savedSuccess ? '클립보드에 진단 요약이 복사되었습니다!' : '진단 결과 요약 텍스트 복사하기'}
-            </Button>
-          </div>
-        )}
+        {message ? <p role={message.error ? 'alert' : 'status'} className={`text-sm ${message.error ? 'text-destructive' : 'text-muted-foreground'}`}>{message.text}</p> : null}
       </CardContent>
     </Card>
   );

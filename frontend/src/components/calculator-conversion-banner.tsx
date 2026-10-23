@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, TrendingUp, ShieldCheck, Gift } from 'lucide-react';
+import { ArrowRight, ShieldCheck, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface CalculatorConversionBannerProps {
@@ -10,77 +9,41 @@ interface CalculatorConversionBannerProps {
   readonly description?: string;
   readonly targetSymbol?: string;
   readonly targetUrl?: string;
+  /** Legacy presentation prop; no reward is implied without a verified ledger receipt. */
   readonly bonusAmount?: string;
 }
 
 export function CalculatorConversionBanner({
-  title = '계산된 전략, 실전 가상 투자로 지금 바로 검증해보세요!',
-  description = '신규 가입 즉시 10,000 WLD 투자 지원금 100% 무료 지급! 실제 손실 위험 없이 실시간 호가창에서 모의투자를 시작하세요.',
+  title = '계산한 시나리오를 가상 거래소에서 살펴보세요',
+  description = '가상 종목과 호가 정보를 확인하고 직접 주문할 수 있습니다. 계산 결과나 회원가입은 WLD 지급 또는 주문 체결을 뜻하지 않습니다.',
   targetSymbol = 'CHIPS',
   targetUrl,
-  bonusAmount = '10,000 WLD',
 }: CalculatorConversionBannerProps) {
-  const destination = targetUrl || (targetSymbol ? `/stocks/${targetSymbol}` : '/stocks');
+  const destination = targetUrl?.startsWith('/stocks') && !targetUrl.startsWith('//')
+    ? targetUrl
+    : targetSymbol ? `/stocks/${encodeURIComponent(targetSymbol)}` : '/stocks';
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 p-6 shadow-xl backdrop-blur-xl sm:p-8">
-      {/* Background glowing ambient effect */}
-      <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-emerald-500/15 blur-3xl" />
-      <div className="pointer-events-none absolute -left-12 -bottom-12 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl" />
-
-      <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-3 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
-            <Gift className="size-3.5 animate-bounce" />
-            <span>신규 회원 웰컴 혜택: {bonusAmount} 즉시 지급</span>
-          </div>
-
-          <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
-            <Sparkles className="size-5 text-amber-400 shrink-0" />
-            <span>{title}</span>
-          </h3>
-
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            {description}
-          </p>
-
-          <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-400">
-            <div className="flex items-center gap-1">
-              <ShieldCheck className="size-4 text-emerald-400" />
-              <span>100% 안전한 무손실 가상 모의투자</span>
-            </div>
-            <span className="text-slate-600">·</span>
-            <div className="flex items-center gap-1">
-              <TrendingUp className="size-4 text-cyan-400" />
-              <span>실시간 10-Depth 호가창 & 캔들 차트</span>
-            </div>
+    <section aria-label="가상 거래소 안내" className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 p-6 shadow-xl sm:p-8">
+      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="max-w-2xl space-y-3">
+          <h2 className="text-lg font-bold tracking-tight text-white sm:text-xl">{title}</h2>
+          <p className="text-sm leading-relaxed text-slate-200">{description}</p>
+          <p className="text-xs leading-relaxed text-slate-300">가입만으로 WLD 보상은 확정되지 않습니다. 가상 주식과 WLD는 실제 투자 상품이나 현금이 아니며, 결과는 서버에서 확인해야 합니다.</p>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300">
+            <span className="inline-flex items-center gap-1"><ShieldCheck aria-hidden="true" className="size-4" /> 게임 속 가상 데이터</span>
+            <span className="inline-flex items-center gap-1"><TrendingUp aria-hidden="true" className="size-4" /> 가상 종목 정보</span>
           </div>
         </div>
-
-        <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 shrink-0">
-          <Button
-            asChild
-            size="lg"
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-950/50 text-sm gap-2"
-          >
-            <Link href={destination}>
-              <span>{targetSymbol ? `${targetSymbol} 실전 모의투자 시작` : '가상 거래소 입장하기'}</span>
-              <ArrowRight className="size-4" />
-            </Link>
+        <div className="flex shrink-0 flex-col gap-3 sm:flex-row md:flex-col">
+          <Button asChild size="lg" className="min-h-11 w-full bg-emerald-600 text-sm font-bold text-white hover:bg-emerald-500">
+            <Link href={destination}>{targetSymbol ? `${targetSymbol} 가상 종목 보기` : '가상 거래소 보기'} <ArrowRight aria-hidden="true" className="size-4" /></Link>
           </Button>
-
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="w-full border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs"
-          >
-            <Link href="/register">
-              1초 간편 회원가입하고 지원금 받기
-            </Link>
+          <Button asChild variant="outline" size="sm" className="min-h-11 w-full border-slate-600 bg-slate-800 text-xs text-white hover:bg-slate-700">
+            <Link href="/register">회원가입 안내</Link>
           </Button>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
