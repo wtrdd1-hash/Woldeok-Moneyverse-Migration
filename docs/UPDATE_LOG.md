@@ -1,5 +1,11 @@
 ## v2026.10.14.626 — Admin navigation modal clipping (source only)
 
+## v2026.10.23.1178 — F675-101 Notification Hardening (PLANNING DRAFT)
+- Previous Addition v1176 / Current Improvement v1178 / Next Addition v1180 (provisional); latest main `8a1b466b`, stacked after draft PR #994 without touching other agents' branches.
+- Fresh DEV SQL found an existing partial UNIQUE `dedupe_key` index, app-role direct DML and RLS OFF; publisher's global dedupe SELECT may return a different user's full notification and races with INSERT; repeated owned mark-read returns false/404. This is a design/security risk, **not evidence of actual Production abuse**.
+- Integrated P0 actor/source binding, collision-safe atomic publish, idempotent read and false notice removal; P1 owner-bound keyset/category, verified ledger evidence, web/Android/admin/a11y/SEO, concurrency and rollback into EN/KO masters and PROJECT_PLAN. QA v1179 FAILED/HOLD; Production release BLOCKED. External 3 publishers reviewed, accepted 0, cumulative unknown/10,000 BLOCKED. No code, DB, WLD, Test or Production changes.
+
+
 ## v2026.10.23.1176 — F675-101 notification evidence inbox (planning draft)
 - Previous Feature Improvement v1174 / Current Feature Addition v1176 / Next Feature Improvement v1178 (provisional); baseline main `8a1b466b`, 10 open PRs, QA v1179 FAILED/HOLD.
 - Source: six hardcoded local-only member notices versus existing real authenticated notification API; DEV notification rows 0, app UPDATE/DELETE allowed, RLS OFF. Plan owner-scoped stable cursor, verified ledger evidence and truthful unavailable state; P0 false financial notices, dependency/DB ACL/CI/migration/backup/exact-SHA release blockers; P1 web, app-api, admin, a11y, SEO, tests and rollback.
