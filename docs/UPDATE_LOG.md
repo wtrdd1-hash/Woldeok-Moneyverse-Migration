@@ -1,4 +1,10 @@
 ## v2026.10.24.1196 — Planning Feature Addition F675-106 (DRAFT / HOLD)
+
+## v2026.10.24.1198 — F675-106 evidence/review hardening (DRAFT / HOLD)
+- Previous Addition v1196 / Current Improvement v1198 / Next Addition v1200. Main 54d5140d at start/mid; latest QA v1199 FAILED/HOLD. Unmerged stacked planning only, separate from A/B/C/QA/Gemini.
+- Verified recent-50 owner-posting wallet source, generic support, and unmerged #1049 receipt 50-boundary. Hardened older-transaction eligibility, net-zero signed receipt proof, atomic ownership and request digest, admin version/step-up, independent correction proof, F675-104/105 privacy and 12 negative/concurrency cases. P0 WAL1198-01, WAL1198-02, SEC1198-03, REL1198-04; P1 WAL1198-05, WAL1198-06, WAL1198-07, WAL1198-08, WAL1198-09, WAL1198-10.
+- QA v1199: DEV ledger 877/1784 balanced, app broad DML 235/241, bank PUBLIC EXECUTE 3, lint/test/audit/migration/restore/exact-SHA Test blocked. No runtime/DB/WLD/Test/Production changes. Independent publishers reviewed 3, newly accepted 0, cumulative UNKNOWN/10,000 BLOCKED.
+
 - Previous Improvement v1194 / Current Addition v1196 / Next Improvement v1198. Origin/main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede; QA v1197 FAILED/HOLD. Isolated stacked planning worktree; seven planning/worklog files only.
 - Source/DEV inspection: wallet recent=50 without dispute action, generic support and admin, Android app-api gateway, 877 transactions/1,784 postings, 3 support threads/6 messages, 0 dispute tables. #1025 P2P replay and finance/support DB direct DML remain P0.
 - Added F675-106 owner-scoped dispute receipts, strict no-balance-write boundary, immutable review event and verified correction reference, 10 P0/P1 development tasks: WAL1196-01, WAL1196-02, SEC1196-03, REL1196-04, WAL1196-05, WAL1196-06, WAL1196-07, WAL1196-08, WAL1196-09, WAL1196-10 (see integrated master for exact contracts).

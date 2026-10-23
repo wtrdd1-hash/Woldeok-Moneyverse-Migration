@@ -1,5 +1,39 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1198 — F675-106 WLD 거래 이의제기 증거·심사 무결성 강화 (기능 보완 / 초안 / 운영승격 보류)
+
+### 회차·근거·경계
+- **이전:** 기능 추가 v1196 / **현재:** 기능 보완 v1198 / **다음:** 기능 추가 v1200(잠정). 시작·중간 origin/main SHA 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede. AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md와 한국어 대조 문서 확인. 최신 QA v1199(2026-10-24 02:25 KST) FAILED/HOLD. 미병합 Draft #1048(선행 #1043)에 쌓는 문서 기획이며 구현·운영 사고·Test 인증으로 주장하지 않음.
+- **실제 소스 확인:** backend/src/wallet/wallet.repository.ts의 recentTransactionsForUser는 회원 소유 USER_CASH/USER_BANK 원장 전표를 거래별 합산하고 (created_at DESC,id DESC)로 최근 50건만 조회. frontend/src/app/wallet/activity/page.tsx도 50건만 표시하며 이의제기 버튼 없음. backend/src/wallet/wallet.controller.ts에 이의제기 API 없음. support.repository.ts는 일반 문의 함수 사용, Android App API 프록시 존재. QA v1199의 개발 DB 877거래/1,784전표·불균형 0건은 **운영 원장 인증이 아님**. Draft #1049의 비공개 거래 영수증도 최근 50건 범위이며 미병합이므로 오래된 거래를 이의제기 불가로 오인하거나 기능이 구현됐다고 표시하지 않음.
+- **핵심 보완:** 최근 50건 화면, 알림 문구, 거래 actor, 클라이언트 입력 금액이 아니라 **DB 트랜잭션 안에서 실제 확정 전표의 회원 소유권을 재검증**. 51번째 이전 거래도 안전한 제한 조회를 통해 신청 가능해야 함. 현금↔은행 이동처럼 순변동 0인 거래도 현금·은행 개별 부호와 전표로 증명. 신청·심사 API는 WLD 차감·지급·동결·환불·취소를 수행하지 않음.
+
+### 회원·관리자 화면, API 및 상태
+- **진입·CTA:** /wallet/activity 또는 향후 소유권 검증된 거래 이력/영수증에서 거래 검토 → /wallet/disputes/new?transactionId=UUID. 최근 50건 밖의 거래는 ‘최근 목록에 없음’으로 구분하고 안전한 조회/이력 경로 제공; 단지 50건 밖이라는 이유로 ‘거래 없음’ 금지. 회원: 이의제기 접수·영수증 보기·정보 보완·재검토 요청. 관리자: /admin/support/transaction-disputes에서 분류·담당·정보 요청·결정·감사 조회. 상태 DRAFT/SUBMITTING/SUBMITTED/TRIAGED/NEEDS_MEMBER_INFO/UNDER_REVIEW/RESOLVED_NO_CHANGE/RESOLVED_CORRECTION_REFERENCED/REJECTED/CLOSED/UNAVAILABLE/RETRY_UNKNOWN. 타임아웃 시 성공·실패를 단정하지 말고 같은 멱등 키로 영수증 재조회.
+- **자격 조회:** GET /api/v1/wallet/transactions/:transactionId/dispute-eligibility는 최근 50건 여부와 무관하게 로그인 회원이 소유한 확정 USER_CASH/USER_BANK 전표 존재를 DB에서 확인. 타인/미존재는 동일 404, 원장 불가 503, 비공개 캐시. 응답 {transactionId,eligible,existingOpenDisputeId?,receiptAvailable,observedAt}로 제한하고 상대 회원·비공개 메모 미노출. 무제한 거래 검색 금지.
+- **접수:** POST /api/v1/wallet/disputes는 세션·동의·CSRF·UUID 멱등 키와 transactionId/category/정규화 summary만 허용. DB 함수에서 전표 소유권·요청 지문을 재검증. 동일 회원/키/지문 재시도는 같은 확정 영수증(200), 동일 키·다른 내용 409, 동일 회원·거래에 열린 사건 중복은 409 또는 본인 사건으로만 안내. 타인/미존재 404. 사건+문의+첫 불변 이벤트+Outbox 의도를 **한 트랜잭션**으로 확정한 경우에만 201. 결과 불명 시 RETRY_UNKNOWN 및 같은 키 조회. 원장 잔액 불변.
+- **관리자 결정:** POST /api/v1/admin/wallet/disputes/:id/decisions는 support.dispute.resolve 별도 권한, 관리자 승격 세션·최근 재인증·CSRF, 사유 코드, expectedVersion, 멱등 키 필요. 행 잠금 아래 상태/버전 확인 후 이벤트와 버전 한 번만 확정. 담당자가 자신의 거래를 심사하지 못하며 상담 API는 금융 전표를 생성하지 못함. 정정 거래 참조는 독립 금융 승인과 확정·균형 원장을 검증한 뒤에만 기록. 같은 정정 거래를 여러 피해 회원 사건에서 참조할 수 있으므로 전역 UNIQUE 금지, 본인 전표 정보만 공개. 재검토는 F675-104, 비공개 증빙은 F675-105 책임으로 유지.
+
+### DB·보안·검증·운영
+- **DB:** v1196 wallet_disputes/events/resolution 구조와 회원별 열린 사건 부분 UNIQUE 유지. 원장 UUID, 회원, 문의, 요청 지문, 사유, 버전, 시각, 영수증을 불변 기록. 인덱스 (owner_user_id,request_key), (owner_user_id,created_at DESC,id DESC), (state,updated_at,id). ledger_transaction_id 및 correction_transaction_id 전역 UNIQUE 금지. 재검토는 기존 사건 행 잠금·버전 증가·이력 보존으로 처리. 문의/사건/이벤트/Outbox 부분 실패 시 전체 롤백, Outbox는 ‘발송 의도’이지 전달 성공 증거가 아님. 앱 계정은 회원 세션 결합·고정 search_path SECURITY DEFINER의 제한 EXECUTE만, 광범위한 금융/문의 직접 DML 및 무검토 PUBLIC EXECUTE 금지.
+- **다른 작업과 분리:** 개발 A 영수증 #1049·P2P #1025, 개발 B 금융 관리자 #1050, 개발 C 상태/온보딩 #1046/#1051, QA v1199, Gemini 및 F675-104/105 PR은 별도 소유. 미병합 PR의 기능을 main에 있다고 가정하거나 Runtime 파일 수정하지 않음. QA v1199: 개발 DB 241개 중 235개 테이블 앱 UPDATE/DELETE, bank 함수 3개 PUBLIC EXECUTE, Next.js 16.3.8 Critical 2/High 1, Migration 266 체크섬 불일치, main 린트 오류·프론트 테스트 1건 실패. 운영 악용/유출은 확인되지 않음. 권한·마이그레이션·보안 의존성·CI·격리 백업 복원·공식 Test 정확 SHA 인증 전까지 운영승격 HOLD.
+- **개인정보·모바일·접근성:** 회원/관리자 화면 및 API 비색인·비공개 no-store(Backend/BFF/App API/엣지), 타인 거래·사건 동일 404. Android 세션·CSRF·오프라인 동일 키 재시도·버전·409/503 상태 동등. 320px 모바일·키보드·상태 알림 라이브 영역·WCAG 2.2 AA. 권한 열람·내보내기·결정은 사유 포함 감사, 분석에는 상대 회원·원장 메모·첨부 URL·회원 ID 미수집. KPI는 실제 영수증 기반 접수율, 최초 응답 p95, 미해결 기간, 중복 억제, 정정 검증 실패, 타인 차단, 허위 성공 0건; 지연 목표치는 측정 후 확정.
+- **회귀 수용:** 동일 키 동시 100건→사건/문의/이벤트/Outbox/영수증 각 1개; 동일 키 다른 본문 100건→409; 타인 거래·공유 P2P UUID 100건→소유자 전표만 공개; 51번째 이전 거래 접수 가능; 현금↔은행 순변동 0 및 38자리 금액 문자열 정확; 관리자 동시 버전 변경 100건→유실 없음; 동일 시각 이벤트 10,001건 키셋 누락 0; 부분 트랜잭션 실패 전부 롤백; 응답 유실 재시도 기존 영수증; 미승인·불균형·무관한 정정 거부; 앱 DML/PUBLIC EXECUTE/타인 권한/캐시 부정 테스트; Android/웹/a11y/SEO/암호화 백업 격리 복원·정확 SHA 5회 사용자 흐름.
+- **배포·롤백:** wallet_transaction_disputes 플래그 기본 OFF, 순방향 추가 마이그레이션과 권한 검토, 합성 계정으로 복원 Test에서 원장 소유권 그림자 검증, 정확 SHA CI/인증된 Test/QA 승인 후 제한적 활성화. 장애 시 신규 접수·관리자 결정을 차단하되 기존 사건·이벤트·증빙·읽기 영수증 보존. 적용된 Migration 266 수정·과거 원장 삭제·자동 WLD 보정 금지. **이번 회차 Runtime/DB/Test/Production/기능 스위치 변경 없음.**
+
+### P0/P1 개발 백로그·외부 근거 게이트
+- **P0 WAL1198-01:** 최근 50건 초과 확정 전표 소유권, 현금·은행 부호·영수증 정확성(#1049 의존); 이전 거래/타인/순변동0/38자리 테스트.
+- **P0 WAL1198-02:** #1025 P2P 재시도 부가정보·알림을 원장 증거와 분리, 미확정 근거 거부; 재시도 100건 중복 부작용 0.
+- **P0 SEC1198-03:** 순방향 DB 최소권한, bank PUBLIC EXECUTE 검토, 관리자 승격·CSRF·재인증, 실제 PG 부정 테스트.
+- **P0 REL1198-04:** QA v1199 린트/프론트/보안/Migration 266/브랜치 보존/격리 복원/정확 SHA CI·Test 차단 해결.
+- **P1 WAL1198-05:** 회원 결합 원자적 사건·문의·이벤트·Outbox, 요청 지문·멱등 재시도·열린 사건 UNIQUE·버전형 재검토.
+- **P1 WAL1198-06:** 독립 승인된 정정 원장 참조·불변 심사, 상담 API 원장 변경 금지.
+- **P1 WAL1198-07:** 오래된 거래 탐색·진실한 CTA/상태·Android App API·비색인/no-store·WCAG/모바일.
+- **P1 WAL1198-08:** F675-104 재검토·F675-105 비공개 증빙 연결·관리자 감사·보존/법적 보류.
+- **P1 WAL1198-09:** 속도 제한·개인정보 안전 KPI·관리자 지연 지표·허위 성공 0.
+- **P1 WAL1198-10:** 12종 동시성/보안/롤백 검증·공식 Test 정확 SHA 5회·카나리/복귀 검증.
+- **외부 독립 근거:** OWASP API1 BOLA, PostgreSQL 17 명시적 잠금, W3C WCAG 2.2 상태 메시지(발행기관 3곳 검토, **신규 최종 승인 0건**, 누적 중복 제거 승인 수량 **미확인**, 목표 **10,000건**, 게이트 **BLOCKED / IN PROGRESS**). https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/ ; https://www.postgresql.org/docs/17/explicit-locking.html ; https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html . 10,000건 달성 주장 금지.
+
+
 ## v2026.10.24.1196 — F675-106 검증된 WLD 거래 이의제기·처리 영수증 (기능 추가 / 초안 / 운영승격 보류)
 
 ### 회차·권위·실제 근거와 금지사항
