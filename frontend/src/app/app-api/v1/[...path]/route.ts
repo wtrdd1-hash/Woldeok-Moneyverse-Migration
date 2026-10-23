@@ -15,6 +15,12 @@ const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const ANDROID_ONLY = process.env.APP_API_ANDROID_ONLY === 'true';
 
+// These paths contain per-member balances, credit or reward eligibility.
+// Never share their validators or response bodies between sessions.
+function isPrivateFinancialResource(parts: readonly string[]): boolean {
+  return parts[0] === 'wallet' || parts[0] === 'bank' || parts[0] === 'rewards';
+}
+
 function parseAppVersion(value: string | null): [number, number, number] | null {
   const match = value?.trim().match(/^(\d+)\.(\d+)\.(\d+)$/);
   if (!match) return null;
@@ -112,8 +118,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     'x-moneyverse-gateway': 'app-api-v1',
   });
   for (const name of APP_API_REQUEST_HEADERS) {
-    // A private wallet representation must never be revalidated from a prior user's cache.
-    if (parts[0] === 'wallet' && ['if-none-match', 'if-modified-since', 'if-range', 'range'].includes(name)) continue;
+    // Private financial responses must never reuse validators from another session.
+    if (isPrivateFinancialResource(parts) && ['if-none-match', 'if-modified-since', 'if-range', 'range'].includes(name)) continue;
     const value = request.headers.get(name);
     if (value) outgoing.set(name, value);
   }
@@ -171,8 +177,8 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
-  if (parts[0] === 'wallet') {
-    // The wallet is always personalized, even when the upstream response is an error.
+  if (isPrivateFinancialResource(parts)) {
+    // Financial responses are personalized, even when upstream returns an error.
     response.headers.set('cache-control', 'private, no-store');
     response.headers.delete('etag');
     response.headers.delete('last-modified');
