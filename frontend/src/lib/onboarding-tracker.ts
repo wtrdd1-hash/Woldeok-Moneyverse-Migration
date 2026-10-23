@@ -1,14 +1,4 @@
-/**
- * Interactive Onboarding & Growth Tracker Engine.
- * Tracks user actions across 6 core onboarding steps:
- * 1. spin_roulette (초반 무료 룰렛) -> +10,000 WLD
- * 2. complete_work (인턴 첫 업무) -> +15,000 WLD
- * 3. open_savings (30일 복리 포켓) -> +25,000 WLD
- * 4. buy_stock (WDX 주식 첫 매수) -> +30,000 WLD
- * 5. use_calculator (5대 계산기 진단) -> +20,000 WLD
- * 6. buy_land (가상 랜드/오피스 분양) -> +50,000 WLD
- * Total Onboarding Bonus: 150,000 WLD
- */
+/** Local onboarding guide progress. Wallet rewards require verified server ledger receipts. */
 
 import type { Locale } from './locale';
 
@@ -25,8 +15,6 @@ export interface OnboardingStep {
   readonly id: OnboardingActionType;
   readonly title: string;
   readonly description: string;
-  readonly rewardWld: number;
-  readonly rewardXp: number;
   readonly linkHref: string;
   readonly badge: string;
   readonly titleEn?: string;
@@ -51,8 +39,6 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     descEn: 'Spin the 24h free wheel in Arcade to claim your initial luck rewards.',
     descJa: 'アーケードで24時間無料ルーレットを回して最初の幸運ボーナスを獲得しましょう。',
     descZh: '在街机中每24小时免费转盘一次，领取初始幸运大礼。',
-    rewardWld: 10000,
-    rewardXp: 50,
     linkHref: '/arcade',
     badge: '초반 1단계',
     badgeEn: 'Stage 1-1',
@@ -69,8 +55,6 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     descEn: 'Complete your first shift as a Developer or Trader to deposit your salary.',
     descJa: 'フィンテック開発者またはトレーダーとして最初の業務を完了し給与を受給。',
     descZh: '作为工程师或交易员完成首次打卡工作，领取第一笔薪水。',
-    rewardWld: 15000,
-    rewardXp: 75,
     linkHref: '/work',
     badge: '초반 2단계',
     badgeEn: 'Stage 1-2',
@@ -87,8 +71,6 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     descEn: 'Take a 30s quiz to diagnose your risk profile and optimal allocation.',
     descJa: '30秒診断でタイプを判定し、最適な資産配分比率を確認しましょう。',
     descZh: '通过30秒测评诊断投资风格，获取专属最优资产配置比例。',
-    rewardWld: 20000,
-    rewardXp: 80,
     linkHref: '/roadmap#quiz',
     badge: '초반 3단계',
     badgeEn: 'Stage 1-3',
@@ -105,8 +87,6 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     descEn: 'Deposit funds into 30-day pot and compound interest daily at midnight.',
     descJa: '30日複利ポケットに預け入れ、毎日午前0時に利息を複利運用。',
     descZh: '将闲置资金存入30天复利口袋，每日零点自动结息滚存。',
-    rewardWld: 25000,
-    rewardXp: 100,
     linkHref: '/bank',
     badge: '중반 1단계',
     badgeEn: 'Stage 2-1',
@@ -123,8 +103,6 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     descEn: 'Fill your first limit order on WDX-TEC via 10-Depth live orderbook.',
     descJa: 'WDX半導体やAI銘柄を10段階気配値板で初めて約定させましょう。',
     descZh: '在10档深度买卖盘中撮合成交芯片或AI科技龙头股。',
-    rewardWld: 30000,
-    rewardXp: 125,
     linkHref: '/stocks',
     badge: '중반 2단계',
     badgeEn: 'Stage 2-2',
@@ -141,8 +119,6 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     descEn: 'Calculate DCA/Compound/Real Estate targets and create viral cards.',
     descJa: 'ナンピン・複利・不動産計算機で診断し、共有カードを作成。',
     descZh: '使用补仓/复利/地产/税费计算器诊断并一键生成精美分享卡。',
-    rewardWld: 20000,
-    rewardXp: 80,
     linkHref: '/tools',
     badge: '중반 3단계',
     badgeEn: 'Stage 2-3',
@@ -159,8 +135,6 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     descEn: 'Acquire Teheran-ro prime land to receive midnight automated passive rent.',
     descJa: '江南または板橋のランドを取得し、毎晩不労所得家賃を受給。',
     descZh: '认购核心商圈写字楼地块，每晚零点自动坐享被动租金。',
-    rewardWld: 50000,
-    rewardXp: 200,
     linkHref: '/spaces/real-estate',
     badge: '후반 1단계',
     badgeEn: 'Stage 3-1',
@@ -223,18 +197,22 @@ export function getOnboardingState(): OnboardingState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return inMemoryState;
     const parsed = JSON.parse(raw);
-    inMemoryState = parsed;
-    return parsed;
+    const completed = Array.isArray(parsed?.completed)
+      ? ONBOARDING_STEPS.filter((step) => parsed.completed.includes(step.id)).map((step) => step.id)
+      : [];
+    // Historical local claim flags never prove a server-side wallet credit.
+    inMemoryState = { completed, claimed: [], totalEarnedWld: 0 };
+    return inMemoryState;
   } catch {
     return inMemoryState;
   }
 }
 
 export function saveOnboardingState(state: OnboardingState): void {
-  inMemoryState = state;
+  inMemoryState = { completed: state.completed, claimed: [], totalEarnedWld: 0 };
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(inMemoryState));
   } catch {
     // Ignore storage quota errors
   }
@@ -258,22 +236,11 @@ export function markOnboardingActionComplete(action: OnboardingActionType): {
   return { isNewlyCompleted: true, state: nextState };
 }
 
-export function claimOnboardingReward(action: OnboardingActionType): {
+/** Compatibility: a browser-only click must never fabricate a payout receipt. */
+export function claimOnboardingReward(_action: OnboardingActionType): {
   rewardWld: number;
   rewardXp: number;
   state: OnboardingState;
 } {
-  const current = getOnboardingState();
-  const step = ONBOARDING_STEPS.find((s) => s.id === action);
-  if (!step || current.claimed.includes(action) || !current.completed.includes(action)) {
-    return { rewardWld: 0, rewardXp: 0, state: current };
-  }
-
-  const nextState: OnboardingState = {
-    ...current,
-    claimed: [...current.claimed, action],
-    totalEarnedWld: current.totalEarnedWld + step.rewardWld,
-  };
-  saveOnboardingState(nextState);
-  return { rewardWld: step.rewardWld, rewardXp: step.rewardXp, state: nextState };
+  return { rewardWld: 0, rewardXp: 0, state: getOnboardingState() };
 }

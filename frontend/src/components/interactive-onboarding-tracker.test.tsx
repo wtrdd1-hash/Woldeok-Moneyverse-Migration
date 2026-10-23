@@ -36,7 +36,7 @@ describe('InteractiveOnboardingTracker Component', () => {
     fireEvent.click(openBtn);
 
     // Modal is opened
-    expect(screen.getByText(/7대 핵심 기능을 완료하고/)).toBeDefined();
+    expect(screen.getByText(/7개 기능을 살펴보고/)).toBeDefined();
 
     // Close with X button
     const closeBtn = screen.getByTitle(/창 닫기 \(ESC\)/i);
@@ -44,7 +44,7 @@ describe('InteractiveOnboardingTracker Component', () => {
 
     // Reopened
     fireEvent.click(screen.getByText(/온보딩 퀘스트/));
-    expect(screen.getByText(/7대 핵심 기능을 완료하고/)).toBeDefined();
+    expect(screen.getByText(/7개 기능을 살펴보고/)).toBeDefined();
 
     // Close with ESC key
     fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
@@ -58,7 +58,7 @@ describe('InteractiveOnboardingTracker Component', () => {
     );
     fireEvent.click(screen.getByText(/Onboarding Quests/));
 
-    const heading = screen.getByText('Onboarding Quests & Bonus');
+    const heading = screen.getByText('Onboarding Guide');
     const card = heading.closest('[class*="max-w-[390px]"]');
     expect(card).not.toBeNull();
     expect(card?.className).toContain('w-[calc(100vw-1.75rem)]');
@@ -80,6 +80,17 @@ describe('InteractiveOnboardingTracker Component', () => {
 
     // Click undismiss
     fireEvent.click(screen.getByText(/퀘스트 다시보기/));
-    expect(screen.getByText(/7대 핵심 기능을 완료하고/)).toBeDefined();
+    expect(screen.getByText(/7개 기능을 살펴보고/)).toBeDefined();
+  });
+});
+
+describe('onboarding reward truthfulness', () => {
+  it('shows local-only progress, never claims wallet deposits or guaranteed bonuses', () => {
+    render(<LocaleProvider initialLocale="ko"><InteractiveOnboardingTracker /></LocaleProvider>);
+    fireEvent.click(screen.getByText(/온보딩 퀘스트/));
+    expect(screen.getByText(/이 기기의 안내 진행 상태/)).toBeDefined();
+    expect(screen.getByRole('link', { name: /실제 지갑 확인/ }).getAttribute('href')).toBe('/wallet');
+    expect(screen.queryByText(/170,000 WLD/)).toBeNull();
+    expect(screen.queryByRole('button', { name: /받기/ })).toBeNull();
   });
 });

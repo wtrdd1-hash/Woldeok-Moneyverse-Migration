@@ -12,10 +12,9 @@ describe('onboarding-tracker engine', () => {
     saveOnboardingState({ completed: [], claimed: [], totalEarnedWld: 0 });
   });
 
-  it('contains 7 defined onboarding steps summing to 170,000 WLD', () => {
+  it('lists seven guide destinations without invented WLD reward amounts', () => {
     expect(ONBOARDING_STEPS).toHaveLength(7);
-    const totalWld = ONBOARDING_STEPS.reduce((acc, step) => acc + step.rewardWld, 0);
-    expect(totalWld).toBe(170000);
+    expect(ONBOARDING_STEPS.every((step) => !('rewardWld' in step))).toBe(true);
   });
 
   it('marks an action complete and avoids duplicate marking', () => {
@@ -27,17 +26,30 @@ describe('onboarding-tracker engine', () => {
     expect(res2.isNewlyCompleted).toBe(false);
   });
 
-  it('claims reward for completed step and adds WLD to totalEarnedWld', () => {
+  it('does not create a wallet credit from a completed guide step', () => {
     markOnboardingActionComplete('spin_roulette');
-    const claimRes = claimOnboardingReward('spin_roulette');
+    const result = claimOnboardingReward('spin_roulette');
+    expect(result.rewardWld).toBe(0);
+    expect(result.state.totalEarnedWld).toBe(0);
+    expect(result.state.claimed).toEqual([]);
+  });
+});
 
-    expect(claimRes.rewardWld).toBe(10000);
-    expect(claimRes.rewardXp).toBe(50);
-    expect(claimRes.state.claimed).toContain('spin_roulette');
-    expect(claimRes.state.totalEarnedWld).toBe(10000);
+describe('unverified onboarding rewards must fail closed', () => {
+  it('never credits a wallet or marks a local step as a paid reward', () => {
+    saveOnboardingState({ completed: ['spin_roulette'], claimed: [], totalEarnedWld: 0 });
+    const result = claimOnboardingReward('spin_roulette');
+    expect(result.rewardWld).toBe(0);
+    expect(result.rewardXp).toBe(0);
+    expect(result.state.claimed).toEqual([]);
+    expect(result.state.totalEarnedWld).toBe(0);
+  });
 
-    // Repeated claim should return 0
-    const repeatClaim = claimOnboardingReward('spin_roulette');
-    expect(repeatClaim.rewardWld).toBe(0);
+  it('does not trust historical local claimed WLD as actual wallet balance', () => {
+    saveOnboardingState({ completed: ['spin_roulette'], claimed: ['spin_roulette'], totalEarnedWld: 10000 });
+    const state = getOnboardingState();
+    expect(state.claimed).toEqual([]);
+    expect(state.totalEarnedWld).toBe(0);
+    expect(state.completed).toContain('spin_roulette');
   });
 });

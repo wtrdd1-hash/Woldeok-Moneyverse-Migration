@@ -3,16 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
-  Sparkles,
-  Award,
   CheckCircle2,
   ChevronRight,
-  ChevronDown,
   Gift,
-  Zap,
   ArrowRight,
   X,
-  Minus,
   EyeOff,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -22,11 +17,9 @@ import { useLocale } from '@/components/locale-provider';
 import {
   ONBOARDING_STEPS,
   getOnboardingState,
-  claimOnboardingReward,
   getLocalizedOnboardingStep,
 } from '@/lib/onboarding-tracker';
-import type { OnboardingState, OnboardingActionType } from '@/lib/onboarding-tracker';
-import { playWinSound, playCoinCollectSound } from '@/lib/audio-effects';
+import type { OnboardingState } from '@/lib/onboarding-tracker';
 
 const DISMISS_STORAGE_KEY = 'wdmv_onboarding_dismissed_until';
 
@@ -39,7 +32,6 @@ export function InteractiveOnboardingTracker() {
     claimed: [],
     totalEarnedWld: 0,
   });
-  const [justClaimedReward, setJustClaimedReward] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const t = (ko: string, en: string, ja: string, zh: string) => {
@@ -93,21 +85,8 @@ export function InteractiveOnboardingTracker() {
   }, [isOpen]);
 
   const totalSteps = ONBOARDING_STEPS.length;
-  const totalPossibleWld = ONBOARDING_STEPS.reduce((sum, s) => sum + s.rewardWld, 0);
   const completedCount = state.completed.length;
-  const unclaimedCount = state.completed.filter((id) => !state.claimed.includes(id)).length;
   const progressPercent = Math.round((completedCount / totalSteps) * 100);
-
-  const handleClaim = (actionId: OnboardingActionType) => {
-    const { rewardWld, state: nextState } = claimOnboardingReward(actionId);
-    if (rewardWld > 0) {
-      playWinSound();
-      playCoinCollectSound();
-      setJustClaimedReward(rewardWld);
-      setState(nextState);
-      setTimeout(() => setJustClaimedReward(null), 3000);
-    }
-  };
 
   const handleDismissToday = () => {
     try {
@@ -132,21 +111,6 @@ export function InteractiveOnboardingTracker() {
 
   return (
     <div className="fixed bottom-20 left-3.5 z-40 sm:bottom-6 sm:left-6 select-none max-w-[calc(100vw-1.5rem)] overflow-hidden">
-      {/* 플로팅 축하 알림 배너 */}
-      {justClaimedReward && (
-        <div className="mb-2 p-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl shadow-2xl border border-emerald-400 font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <Sparkles className="w-4 h-4 animate-spin text-amber-300" />
-          <span>
-            {t(
-              `보상 획득! +${justClaimedReward.toLocaleString()} WLD가 지갑에 입금되었습니다!`,
-              `Reward Claimed! +${justClaimedReward.toLocaleString()} WLD deposited to wallet!`,
-              `報酬獲得！ +${justClaimedReward.toLocaleString()} WLDがウォレットに入金されました！`,
-              `奖励已领取！ +${justClaimedReward.toLocaleString()} WLD 已存入钱包！`
-            )}
-          </span>
-        </div>
-      )}
-
       {/* 펼쳐진 상태 (Expanded Modal Card) */}
       {isOpen ? (
         <div ref={cardRef}>
@@ -158,15 +122,15 @@ export function InteractiveOnboardingTracker() {
                     <Gift className="w-4 h-4" />
                   </span>
                   <CardTitle className="text-sm font-bold text-white tracking-tight">
-                    {t('온보딩 퀘스트 & 보너스', 'Onboarding Quests & Bonus', 'オンボーディングクエスト＆ボーナス', '新手引导任务与奖励')}
+                    {t('온보딩 기능 안내', 'Onboarding Guide', 'オンボーディングガイド', '新手引导指南')}
                   </CardTitle>
                 </div>
                 <CardDescription className="text-[11px] text-zinc-400 font-medium">
                   {t(
-                    `${totalSteps}대 핵심 기능을 완료하고 총 ${totalPossibleWld.toLocaleString()} WLD 획득!`,
-                    `Complete ${totalSteps} core steps to earn ${totalPossibleWld.toLocaleString()} WLD!`,
-                    `${totalSteps}大コア機能を完了して合計${totalPossibleWld.toLocaleString()} WLDを獲得！`,
-                    `完成${totalSteps}项核心体验，畅领${totalPossibleWld.toLocaleString()} WLD大礼！`
+                    `${totalSteps}개 기능을 살펴보고 이 기기에서 진행 상태를 기록하세요.`,
+                    `Explore ${totalSteps} features and track progress on this device.`,
+                    `${totalSteps}つの機能を確認し、この端末で進捗を記録できます。`,
+                    `探索${totalSteps}项功能，仅在本设备记录进度。`
                   )}
                 </CardDescription>
               </div>
@@ -178,7 +142,7 @@ export function InteractiveOnboardingTracker() {
                   variant="outline"
                   onClick={() => setIsOpen(false)}
                   title={t('창 닫기 (ESC)', 'Close (ESC)', '閉じる (ESC)', '关闭 (ESC)')}
-                  aria-label="Close Onboarding Modal"
+                  aria-label={t('온보딩 안내 닫기', 'Close onboarding guide', 'ガイドを閉じる', '关闭新手指南')}
                   className="h-8 w-8 p-0 rounded-full bg-zinc-800 hover:bg-zinc-700 border-zinc-600 text-zinc-200 hover:text-white shadow-md flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4 text-zinc-100" />
@@ -187,6 +151,15 @@ export function InteractiveOnboardingTracker() {
             </CardHeader>
 
             <CardContent className="p-4 space-y-4 max-h-[420px] overflow-y-auto">
+              <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-2.5 text-[11px] text-zinc-300" role="status">
+                {t('이 기기의 안내 진행 상태이며 실제 활동 완료나 WLD 지급을 증명하지 않습니다.',
+                  'Progress on this device only; it does not verify completed transactions or WLD payments.',
+                  'この端末の進捗記録です。取引完了やWLD支払いを証明しません。',
+                  '仅为本设备的进度记录，不代表交易完成或WLD到账。')}
+                {' '}<Link href="/wallet" className="text-emerald-300 underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                  {t('실제 지갑 확인', 'View actual wallet', '実際のウォレットを確認', '查看实际钱包')}
+                </Link>
+              </div>
               {/* 프로그레스 바 */}
               <div className="space-y-1.5 font-mono text-xs p-2.5 rounded-xl bg-zinc-900/80 border border-zinc-800/80">
                 <div className="flex justify-between items-center text-[11px]">
@@ -199,6 +172,8 @@ export function InteractiveOnboardingTracker() {
                 </div>
                 <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
                   <div
+                    role="progressbar" aria-valuenow={completedCount} aria-valuemin={0} aria-valuemax={totalSteps}
+                    aria-label={t('로컬 안내 진행', 'Local guide progress', 'ローカル進捗', '本地进度')}
                     className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full rounded-full transition-all duration-500"
                     style={{ width: `${progressPercent}%` }}
                   />
@@ -210,15 +185,12 @@ export function InteractiveOnboardingTracker() {
                 {ONBOARDING_STEPS.map((step) => {
                   const localized = getLocalizedOnboardingStep(step, locale);
                   const isCompleted = state.completed.includes(step.id);
-                  const isClaimed = state.claimed.includes(step.id);
 
                   return (
                     <div
                       key={step.id}
                       className={`p-2.5 rounded-xl border transition-all text-xs flex items-center justify-between gap-2 ${
-                        isClaimed
-                          ? 'bg-zinc-900/40 border-zinc-800/60 opacity-60'
-                          : isCompleted
+                        isCompleted
                           ? 'bg-emerald-950/30 border-emerald-500/40 shadow-sm ring-1 ring-emerald-500/20'
                           : 'bg-zinc-900/70 border-zinc-800 hover:border-zinc-700'
                       }`}
@@ -236,18 +208,11 @@ export function InteractiveOnboardingTracker() {
                       </div>
 
                       <div className="shrink-0">
-                        {isClaimed ? (
-                          <span className="text-[10px] font-bold text-zinc-500 flex items-center gap-0.5">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500/70" /> {t('수령완료', 'Claimed', '受取済', '已领取')}
+                        {isCompleted ? (
+                          <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
+                            <CheckCircle2 aria-hidden="true" className="w-3 h-3 text-emerald-400" />
+                            {t('로컬 기록됨', 'Saved locally', '端末に記録済み', '已本地记录')}
                           </span>
-                        ) : isCompleted ? (
-                          <Button
-                            size="sm"
-                            onClick={() => handleClaim(step.id)}
-                            className="h-7 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] shadow-md animate-pulse cursor-pointer"
-                          >
-                            +{step.rewardWld.toLocaleString()} {t('받기', 'Claim', '受取', '领取')}
-                          </Button>
                         ) : (
                           <Button
                             asChild
@@ -312,9 +277,6 @@ export function InteractiveOnboardingTracker() {
             >
               <div className="relative">
                 <Gift className="w-4 h-4 text-emerald-400 group-hover/chip:rotate-12 transition-transform" />
-                {unclaimedCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-                )}
               </div>
               <span className="tracking-tight text-[11px] sm:text-xs hidden min-[440px]:inline">
                 {t('온보딩 퀘스트', 'Onboarding Quests', 'オンボーディングクエスト', '新手任务')}
@@ -322,9 +284,6 @@ export function InteractiveOnboardingTracker() {
               <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] px-1.5 py-0 h-4 font-mono font-bold">
                 {completedCount}/{totalSteps}
               </Badge>
-              {unclaimedCount > 0 && (
-                <span className="h-2 w-2 rounded-full bg-amber-400 ring-2 ring-zinc-950 animate-pulse" />
-              )}
             </Button>
           )}
         </div>
