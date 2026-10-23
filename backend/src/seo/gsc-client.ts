@@ -235,6 +235,25 @@ function normalizedPrefix(baseUrl: string): string {
   return baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 }
 
+function propertyCoversCanonicalSite(property: string, baseUrl: string): boolean {
+  const canonical = new URL(baseUrl);
+  if (property.startsWith('sc-domain:')) {
+    const domain = property.slice('sc-domain:'.length).toLowerCase();
+    return Boolean(domain) && (canonical.hostname === domain || canonical.hostname.endsWith(`.${domain}`));
+  }
+
+  try {
+    const prefix = new URL(property);
+    if (prefix.origin !== canonical.origin || prefix.username || prefix.password || prefix.search || prefix.hash) {
+      return false;
+    }
+    // A URL-prefix property for /blog/ cannot establish ownership of the site's / root.
+    return normalizedPrefix(canonical.pathname).startsWith(normalizedPrefix(prefix.pathname));
+  } catch {
+    return false;
+  }
+}
+
 export function chooseGscProperty(
   sites: readonly GscSiteEntry[],
   baseUrl: string,
@@ -251,6 +270,9 @@ export function chooseGscProperty(
     if (!usable.includes(configuredProperty)) {
       throw new Error(`configured Search Console property is not accessible: ${configuredProperty}`);
     }
+    if (!propertyCoversCanonicalSite(configuredProperty, baseUrl)) {
+      throw new Error('configured Search Console property does not cover the canonical site');
+    }
     return configuredProperty;
   }
 
@@ -262,18 +284,25 @@ export function chooseGscProperty(
   if (usable.includes(prefix)) return prefix;
   if (usable.includes(baseUrl)) return baseUrl;
 
-  const hostMatch = usable.find((siteUrl) => {
-    if (siteUrl.startsWith('sc-domain:')) return siteUrl.slice('sc-domain:'.length) === hostname;
-    try {
-      return new URL(siteUrl).hostname === hostname;
-    } catch {
-      return false;
-    }
-  });
-  if (hostMatch) return hostMatch;
+  const match = usable.find((siteUrl) => propertyCoversCanonicalSite(siteUrl, baseUrl));
+  if (match) return match;
+  throw new Error('no accessible Search Console property covers the canonical site');
+}
 
-  if (usable.length === 1) return usable[0]!;
-  throw new Error('multiple Search Console properties are accessible; configure GSC_SITE_URL explicitly');
+function assertCanonicalSitemapUrl(sitemapUrl: string, baseUrl: string): void {
+  let sitemap: URL;
+  try {
+    sitemap = new URL(sitemapUrl);
+  } catch {
+    throw new Error('sitemap URL must be an absolute canonical site URL');
+  }
+  const canonical = new URL(baseUrl);
+  if (
+    sitemap.origin !== canonical.origin || sitemap.username || sitemap.password || sitemap.hash ||
+    !normalizedPrefix(sitemap.pathname).startsWith(normalizedPrefix(canonical.pathname))
+  ) {
+    throw new Error('sitemap URL must belong to the canonical site');
+  }
 }
 
 function numericLong(value: unknown): number {
@@ -289,6 +318,7 @@ export async function submitGscSitemap(
   sitemapUrl = `${baseUrl.replace(/\/$/, '')}/sitemap.xml`,
   fetcher: GscFetch = safeFetch,
 ): Promise<GscSitemapStatus> {
+  assertCanonicalSitemapUrl(sitemapUrl, baseUrl);
   const accessToken = await exchangeServiceAccountToken(credential, fetcher, SEARCH_CONSOLE_WRITE_SCOPE);
   const sites = await listAccessibleGscSites(accessToken, fetcher);
   const propertyUrl = chooseGscProperty(sites, baseUrl, configuredProperty);

@@ -221,6 +221,45 @@ describe('Google Search Console client', () => {
     expect(fetcher).toHaveBeenCalledTimes(4);
   });
 
+  it('refuses to attribute Moneyverse analytics to a sole unrelated Search Console property', () => {
+    expect(() => chooseGscProperty(
+      [{ siteUrl: 'sc-domain:other.example', permissionLevel: 'siteOwner' }],
+      'https://easy-scraping.com',
+    )).toThrow(/canonical|property|match/i);
+  });
+
+  it('refuses an explicitly configured property that does not cover the canonical origin', () => {
+    expect(() => chooseGscProperty(
+      [{ siteUrl: 'sc-domain:other.example', permissionLevel: 'siteOwner' }],
+      'https://easy-scraping.com',
+      'sc-domain:other.example',
+    )).toThrow(/canonical|property|match/i);
+  });
+
+  it('rejects HTTP-only and path-limited URL-prefix properties for an HTTPS root origin', () => {
+    for (const property of ['http://easy-scraping.com/', 'https://easy-scraping.com/blog/']) {
+      expect(() => chooseGscProperty(
+        [{ siteUrl: property }], 'https://easy-scraping.com', property,
+      )).toThrow(/canonical|property|match/i);
+    }
+  });
+
+  it('accepts a parent domain property for a canonical subdomain', () => {
+    expect(chooseGscProperty(
+      [{ siteUrl: 'sc-domain:easy-scraping.com' }],
+      'https://www.easy-scraping.com',
+    )).toBe('sc-domain:easy-scraping.com');
+  });
+
+  it('rejects foreign sitemap submissions before requesting a Google OAuth token', async () => {
+    const credential = parseGscServiceAccount(testCredentialJson());
+    const fetcher = vi.fn();
+    await expect(submitGscSitemap(
+      credential, 'https://easy-scraping.com', null, 'https://other.example/sitemap.xml', fetcher,
+    )).rejects.toThrow(/sitemap|canonical|origin/i);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it('rejects non-service-account JSON', () => {
     expect(() => parseGscServiceAccount(JSON.stringify({ type: 'authorized_user' }))).toThrow(
       'Google service account JSON is required',

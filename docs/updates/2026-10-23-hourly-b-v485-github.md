@@ -1,0 +1,7 @@
+# Backend B v485 — Search Console canonical ownership safety
+
+- **P1 issue:** Google Search Console site discovery could select a sole unrelated accessible property, and an explicitly configured unrelated property was accepted. Analytics could then be misattributed; an administrator could submit an unrelated sitemap to Google before a local ownership check.
+- **Code:** `backend/src/seo/gsc-client.ts` now selects only properties that cover the canonical service origin. Exact/parent `sc-domain:` ownership and canonical HTTPS URL-prefix ownership are supported; HTTP-only, unrelated or path-limited properties cannot stand in for the canonical root. Sitemap URLs are validated as canonical-site URLs before Google OAuth/network calls.
+- **Tests:** four RED regressions before fix, then 10/10 GSC client PASS; backend full 1308 PASS / 397 SKIPPED, workspace typecheck PASS, build PASS, changed-file ESLint PASS, database package 15 PASS / 3 SKIPPED, contract 31 PASS.
+- **Known unrelated blockers:** workspace lint FAIL due QA-owned `frontend/src/app/wallet/export-ledger-csv.tsx:19` `no-control-regex` (#991); frontend full NODE_ENV=test 1367 PASS / 2 pre-existing guest-home failures (#1006). Official real PostgreSQL/authenticated Test exact-SHA/GitOps release gates not completed.
+- No new API route, no DB schema/migration, no finance ledger changes, no live Search Console calls, no main merge or Production deployment. Candidate remains DRAFT/HOLD.
