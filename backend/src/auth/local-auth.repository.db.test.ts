@@ -67,6 +67,45 @@ describe.skipIf(!DATABASE_URL)('LocalAuthRepository against a real database', ()
     expect(Array.isArray(overview.recentTransactions)).toBe(true);
   });
 
+  it('changes a verified local email only after reauthentication, once, and revokes sessions', async () => {
+    const sessions = new SessionRepository(pool);
+    const local = new LocalAuthRepository(pool);
+    const prelogin = await sessions.create();
+    const policy = await sessions.currentConsentVersion();
+    expect(policy).not.toBeNull();
+    await sessions.grantPreloginConsent(prelogin.id, {
+      termsCompleted: true, privacyCompleted: true, ageConfirmed: true,
+      termsVersion: policy!.terms_version, privacyVersion: policy!.privacy_version,
+    });
+    const originalEmail = `qa-email-original-${crypto.randomUUID()}@example.test`;
+    const newEmail = `qa-email-new-${crypto.randomUUID()}@example.test`;
+    const registrationToken = randomToken();
+    expect(await local.startRegistration({
+      preAuthSessionId: prelogin.id, email: originalEmail, emailHash: sha256(originalEmail),
+      passwordVerifier: await hashPassword('local email change qa password!'),
+      displayName: 'Email Change QA', verificationTokenHash: sha256(registrationToken),
+    })).toBe(true);
+    const member = await local.completeRegistration(registrationToken);
+    const token = randomToken();
+    await expect(local.startEmailChange(
+      member.session_id, member.user_id, newEmail, sha256(newEmail), sha256(token),
+    )).rejects.toMatchObject({ code: '42501' });
+    expect(await sessions.markLocalReauthenticated(member.session_id, member.user_id)).toBe(true);
+    expect(await local.startEmailChange(
+      member.session_id, member.user_id, newEmail, sha256(newEmail), sha256(token),
+    )).toBe(true);
+    expect((await local.credential(sha256(originalEmail)))?.user_id).toBe(member.user_id);
+    expect(await local.credential(sha256(newEmail))).toBeNull();
+    expect(await local.completeEmailChange(token)).toBe(true);
+    expect(await local.completeEmailChange(token)).toBe(false);
+    expect(await local.credential(sha256(originalEmail))).toBeNull();
+    expect((await local.credential(sha256(newEmail)))?.user_id).toBe(member.user_id);
+    const { rows } = await pool.query<{ revoked_at: Date | null }>(
+      'SELECT revoked_at FROM public.auth_sessions WHERE id=$1', [member.session_id],
+    );
+    expect(rows[0]?.revoked_at).not.toBeNull();
+  });
+
   it('exchanges a mobile OAuth handoff once and creates a separate app session', async () => {
     const sessions = new SessionRepository(pool);
     const local = new LocalAuthRepository(pool);
