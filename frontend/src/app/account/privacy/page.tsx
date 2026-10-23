@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
@@ -49,13 +50,17 @@ export default async function AccountPrivacyPage() {
           <Link href="/privacy#privacy-rights" className="text-primary">이용자 권리와 처리 기준 보기 →</Link>
         </p>
 
+        <p className="max-w-prose text-xs text-muted-foreground" role="note">
+          응답이 끊기면 중복 요청을 피하도록 내 요청 기록에서 접수 여부를 먼저 확인해 주세요.
+          기록에 없다면 입력 내용을 바꾸지 않고 다시 제출할 수 있습니다.
+        </p>
         {privacyData === null ? (
           <EmptyState title="개인정보 요청 기록을 불러올 수 없어요." description="잠시 후 다시 시도해 주세요." />
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader><CardTitle className="text-base">새 요청 기록</CardTitle></CardHeader>
-              <CardContent><PrivacyRequestForm /></CardContent>
+              <CardContent><PrivacyRequestForm submissionKey={randomUUID()} /></CardContent>
             </Card>
             <Card>
               <CardHeader><CardTitle className="text-base">내 요청 기록</CardTitle></CardHeader>
