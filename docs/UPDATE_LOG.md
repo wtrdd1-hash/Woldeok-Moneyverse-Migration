@@ -1,3 +1,7 @@
+## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1204 / Current Improvement v1206 / Next Addition v1208 provisional; main 54d5140d unchanged start/mid; QA v1209 FAILED/HOLD. Hardens prepaint/OS forced-colors, account-switch stale responses, explicit sync, versioned disable tombstone, original atomic receipts and 100-way races. No implementation or release claim.
+- P0 ENV1206-01 SEC1206-02 REL1206-03 A11Y1206-04; P1 A11Y1206-05 A11Y1206-06 A11Y1206-07 A11Y1206-08 A11Y1206-09 A11Y1206-10. Full API/DB/UX/admin/Android/SEO/KPI/rollback in integrated EN/KO. Full pnpm Critical2/High8, bot Critical1/High4, shared DB/privileges/migration266, real route E2E and exact-SHA Test HOLD. Independent evidence 2 publisher families reviewed, 0 accepted, cumulative UNKNOWN / 10,000 BLOCKED.
+
 ## 2026-10-24 v1204 — F675-108 member accessibility preferences (FEATURE ADDITION / DRAFT / HOLD)
 - Previous Improvement v1202 / Current Addition v1204 / Next Improvement v1206 provisional. Source-backed account menu gap, existing local theme and OS reduced motion; main 54d5140d unchanged start/mid; QA v1205 FAILED/HOLD. No duplicate session center.
 - P0 ENV1204-01 SEC1204-02 REL1204-03 A11Y1204-04; P1 A11Y1204-05 A11Y1204-06 A11Y1204-07 A11Y1204-08 A11Y1204-09 A11Y1204-10. Defined guest-local/member opt-in sync, versioned owner-only API/DB/receipt, OS priority, Android, admin aggregate, noindex/no-store, WCAG/zoom/contrast, concurrency/rollback in integrated EN/KO plans.

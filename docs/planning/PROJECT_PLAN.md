@@ -1,4 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
+- Full backlog IDs / 전체 백로그 식별자: ENV1206-01 SEC1206-02 REL1206-03 A11Y1206-04 A11Y1206-05 A11Y1206-06 A11Y1206-07 A11Y1206-08 A11Y1206-09 A11Y1206-10
+
+## v2026.10.24.1206 — F675-108 Accessibility Identity and Sync Hardening (PLANNING DRAFT / RELEASE HOLD)
+- Previous Addition v1204 / Current Improvement v1206 / Next Addition v1208 provisional. Main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede unchanged start/mid; QA v1209 FAILED/HOLD. Prior v1204 is an unmerged Draft, not main; no runtime/DB/WLD/Test/Production changes.
+- Source: existing next-themes and point prepaint, OS reduced-motion, missing account accessibility link and session/consent/CSRF guards. P0 ENV1206-01 SEC1206-02 REL1206-03 A11Y1206-04 cover isolated DB/5433, least privilege, full pnpm/bot audit, migration266, exact-SHA Test and critical WCAG baseline. P1 A11Y1206-05 A11Y1206-06 A11Y1206-07 A11Y1206-08 A11Y1206-09 A11Y1206-10 cover bounded prepaint, account isolation, opt-in conflict, versioned disable tombstone, original receipt, forced-colors/OS precedence, Android/admin/SEO/KPI and 100-way tests. Full implementable API/DB/CTA/rollback in integrated EN/KO.
+- QA candidate local tests PASS but full audit Critical2/High8, bot Critical1/High4, live DB overlap/235 app DML, migration266 and authenticated Test E2E/restore remain HOLD. 10,000 external evidence gate BLOCKED: W3C/MDN 2 publisher families reviewed, newly accepted 0, cumulative accepted UNKNOWN.
+
 - Full backlog IDs / 전체 백로그 식별자: ENV1204-01 SEC1204-02 REL1204-03 A11Y1204-04 A11Y1204-05 A11Y1204-06 A11Y1204-07 A11Y1204-08 A11Y1204-09 A11Y1204-10
 
 ## v2026.10.24.1204 — F675-108 Member Accessibility Reading & Interaction Preferences (PLANNING DRAFT / RELEASE HOLD)

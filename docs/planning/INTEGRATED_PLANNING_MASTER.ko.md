@@ -1,5 +1,45 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1206 — F675-108 접근성 환경설정: 계정·첫 화면·동기화 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
+
+### 회차·소스·목적
+- Previous 기능 추가 v1204 / Current 기능 보완 v1206 / Next 기능 추가 v1208(잠정). 시작·중간 기준 main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede 동일, v1204는 미병합 Draft. QA v1209(2026-10-24 06:45 KST) FAILED/HOLD. 문서 기획만 수행하며 런타임·DB·WLD·Test·운영·기능 스위치·다른 작업자 브랜치 변경 없음.
+- frontend/src/app/layout.tsx에는 SiteShell 이전 POINT_PREFERENCE_SCRIPT와 next-themes ThemeProvider, frontend/src/lib/theme.ts에는 wdmv.theme/wdmv.point가 있다. globals.css/cosmetics.css는 OS 움직임 줄이기를 이미 지원한다. 계정 화면에는 접근성 링크가 없고 backend/src/account/account.controller.ts에는 SessionGuard/AuthenticatedGuard/ConsentGuard 및 쓰기 CsrfGuard가 있다. 신규 접근성 API·DB는 확인되지 않았다. 테마·포인트색·세션/기기 관리·OS 설정을 중복 구현하지 않는다.
+- 확인된 운영 사고가 아닌 설계 위험: 진행 중 회원 응답의 계정 간 덮어쓰기, 공용 localStorage에 서버 스냅샷 유출, 버전 없는 DELETE 후 오래된 요청의 재활성화, 사이트 CSS의 OS 강제 색상·움직임 줄이기 무력화.
+
+### 진입점·CTA·상태·우선순위
+- 방문자 /accessibility, 회원 /account/accessibility, 계정/유틸리티 바로가기. 글자 100/125/150/175/200%, 대비 기본/높음, 움직임 기기 설정 따름/줄이기. CTA 미리보기·이 기기에 저장·내 기기 간 동기화(명시적 선택 전 OFF)·버전 비교·이 기기 값 사용·다른 기기 값 사용·재시도·기기 초기화·동기화 중단. 로그인·WLD 확인·보안 알림을 이 설정에 종속시키지 않는다.
+- PREVIEW_UNSAVED(메모리), LOCAL_SAVED(기기만), SERVER_CONFIRMED(서버 확정 영수증), SYNC_PENDING, CONFLICT, OFFLINE, SAVE_FAILED, SYNC_DISABLED를 분리한다. aria-live로 실제 저장 위치를 안내하고 요청 전송만으로 완료 표시 금지. 오프라인 변경은 로컬에만 반영하고 재연결 시 자동 동기화 금지.
+- OS forced-colors가 사이트 고대비/포인트색보다 우선, OS reduced-motion이 앱 움직임 선택보다 우선한다. 앱은 움직임을 더 줄일 수만 있다. Canvas/CanvasText, ButtonFace/ButtonText 등 시스템 색상 짝과 포커스·테두리를 사용하며 전역 forced-color-adjust:none 금지. 브라우저 확대·Android 글꼴 확대를 제한하지 않고 기존 next-themes class/포인트색 저장 책임을 보존한다. 밝음/어두움·forced-colors·prefers-contrast 조합 검증.
+- 첫 화면에서 wdmv.accessibility.v1 JSON을 UTF-8 512바이트 이하, version=1, 정확한 필드·열거값만 수용한다. 루트 속성 data-a11y-scale(100|125|150|175|200), data-a11y-contrast(standard|high), data-a11y-motion(device|reduce)만 허용하며 임의 CSS/HTML/스크립트 금지. 셸 이전 적용하되 wdmv.theme/point는 변경하지 않는다. 저장소 차단/잘못된 JSON은 OS 안전 기본값, SSR/첫 CSR 일치, 마운트 전 컨트롤 선택 상태 보류, JS 차단 시 기본 화면 가독성 유지.
+- 사용자가 직접 저장한 기기 설정은 계정 전환 후 남을 수 있지만 서버 회원 스냅샷·계정 ID를 공용 localStorage에 저장하지 않는다. 서버 스냅샷은 세션 메모리만 사용한다. 로그아웃·계정 전환·동의 철회·만료 시 auth-generation 증가, 진행 중 GET/PUT/DELETE 응답 폐기, 서버 유래 루트 속성 제거, 명시적 로컬 설정만 재적용. 탭 간 신호에는 회원 ID/값/영수증을 포함하지 않는다. 로컬과 서버가 다르면 명시적 비교 후 선택하며 조용한 덮어쓰기 금지.
+- 충돌 화면에 로컬 미리보기·서버 버전/시각과 두 선택을 제공한다. 기기 초기화는 서버 동기화 철회가 아니며 동기화 중단은 버전 있는 서버 작업이고 로컬 설정을 보존한다. 오류/재시도는 키보드·스크린리더 접근 가능해야 한다.
+
+### API·DB·동시성·개인정보 (제안, 미구현)
+- GET /api/v1/account/accessibility-preferences는 인증된 본인에게만 200 {syncEnabled,textScalePct,contrastMode,motionMode,version,updatedAt}, 강한 ETag "vN"; 행이 없으면 200 {syncEnabled:false,values:null,version:0}, ETag "v0". API/BFF/엣지 private,no-store. 요청의 userId를 신뢰하지 않는다. 웹 세션·동의·쓰기 CSRF, Android 동등 인증·소유권 검증.
+- PUT는 If-Match:"vN", Idempotency-Key UUID 및 {textScalePct:150,contrastMode:"high",motionMode:"reduce",syncEnabled:true}를 요구한다. 기본 동의 추정 금지. 확정 영수증 {receiptId,operation:"UPSERT",committedVersion,serverConfirmedAt,replayed}. DELETE는 If-Match·UUID로 동기화 중단, operation:"DISABLE" 영수증; 행 삭제/버전 초기화 금지. 같은 키/지문 재전송은 나중에 버전이 바뀌어도 최초 영수증 반환, 현재 상태라고 표시하지 않는다.
+- 401 미인증, 403 권한/동의 거부, 409 VERSION_CONFLICT(현재 버전만 제공, GET 비교) 또는 IDEMPOTENCY_KEY_REUSED(다른 내용/작업), 422 ETag/UUID/값 오류, 429 사용자별 속도 제한, 503 장애. 미리보기·로컬 저장은 서버 쓰기 없음. 내구성 있는 영수증 없이 동기화 성공 표시 금지.
+- 추가형 member_accessibility_preferences(user_id UUID PK FK users(id), text_scale_pct SMALLINT CHECK 100/125/150/175/200, contrast_mode CHECK standard/high, motion_mode CHECK device/reduce, sync_enabled BOOLEAN NOT NULL DEFAULT FALSE, version BIGINT NOT NULL CHECK>0, updated_at timestamptz, disabled_at nullable). receipts(id UUID PK,user_id UUID FK,idempotency_key UUID,operation UPSERT/DISABLE,request_digest bytea 길이32,committed_version bigint,created_at timestamptz,UNIQUE(user_id,idempotency_key)). 본인 조회는 PK 인덱스 활용, 불필요한 user_id 인덱스 추가 금지. 영수증·로그·분석에 원시 값 저장 금지.
+- SECURITY DEFINER 함수는 SET search_path=pg_catalog,pg_temp, public 객체 완전 수식, 앱 계정만 EXECUTE. 본인·동의·정규화된 지문 확인 후 최초 삽입은 회원 잠금/advisory lock, 이후 행 잠금과 버전 CAS로 직렬화한다. 한 트랜잭션에서 값/버전 변경과 영수증 기록을 원자적으로 확정한다. DISABLE은 버전 증가 tombstone(sync_enabled=false, disabled_at)을 남겨 오래된 재활성화 차단. 앱 직접 DML·PUBLIC EXECUTE 금지. 동일 키 PUT 100건 -> 변경/영수증 각 1건, 서로 다른 키 구버전 PUT 100건 -> 최대 1회 증가, PUT/DISABLE 100건 -> 단조 버전·철회 부활 0건. 격리 PostgreSQL 실제 권한 거부 테스트 필수.
+- 장애 추정·기기 지문·관리자 개인별 열람·광고 개인화·회원 연계 분석 금지. tombstone/영수증 보존 및 계정 삭제 처리는 법률/개인정보 검토 후 확정, 무단 무기한 보존 금지. WLD 잔액·원장·금융 권한 영향 없음.
+
+### 관리자·모바일·SEO·접근성·배포·백로그
+- /admin/experience/accessibility는 익명 집계만, 개인별 조회/변경 금지. 모든 코호트 k>=10 및 필터 조합 차분 추론 방지, 부족하면 표본 부족. KPI: 미리보기→로컬 저장, 동기화 선택률, 확정 영수증률, 충돌률, 비인가 공개(목표 0), WCAG 실패, 200% 글자/320px 핵심 과업, 첫 화면 변화 p95. 기준값 미확인. 세 설정 화면 noindex/nofollow·사이트맵 제외, 개인 API/BFF private,no-store.
+- Android App API는 OS 글꼴·대비·움직임 줄이기 우선, WebView localStorage 비의존, 웹과 같은 동의·ETag·UUID 영수증·철회 tombstone. TalkBack·스위치·오프라인·계정 전환 검증. WCAG 2.2 AA 일반 대비 4.5:1·큰 글자 3:1, 글자 200% 확대, 320 CSS px 리플로(1280px에서 400% 확대), 1.4.12 글자 간격, 가려지지 않는 키보드 포커스. WLD 부호/금액·주문 확인·오류 의미 보존. 기존 가로 스크롤 잠금이 중요 내용을 숨기지 않는지 검사. Safari/Chrome/Firefox, 강제 색상, JS/저장소 차단 검증.
+- P0 ENV1206-01 — 운영/개발/Test DB 및 5433 격리, 격리 백업 복원 증명 (#1053/#1060/#1066).
+- P0 SEC1206-02 — 앱 계정 최소권한/PUBLIC 은행 EXECUTE 철회, 격리 PG 거부 테스트 (#993).
+- P0 REL1206-03 — Migration266, 전체 pnpm 감사(치명적2/높음8 #1075), bot 감사(치명적1/높음4 #1077), 실제 3회 E2E(#1078), 정확 SHA CI/Test/GitOps.
+- P0 A11Y1206-04 — 지갑/주문/고객지원/관리자 대비·320px/400%·OS 움직임/강제 색상·포커스 기준선, 중요 실패 시 출시 차단.
+- P1 A11Y1206-05 — 제한된 첫 화면 파서·SSR hydration·JS/저장소 장애·기존 테마/포인트색 보존.
+- P1 A11Y1206-06 — auth-generation 계정 격리·충돌 화면·오프라인·탭 간 비노출 신호.
+- P1 A11Y1206-07 — 본인 API·ETag/CAS·버전 철회 tombstone·원자적 원본 영수증.
+- P1 A11Y1206-08 — 의미 기반 CSS·OS 우선·200%/320px·금융 의미 회귀.
+- P1 A11Y1206-09 — Android 동등성·관리자 최소 표본 집계·SEO/no-store·개인정보/KPI/악용방지.
+- P1 A11Y1206-10 — 100건 동시성/타 회원 거부·브라우저/TalkBack/JS 차단/오프라인·Test 정확 SHA·롤백.
+- 기능 스위치 기본 OFF. QA v1209 후보 로컬 lint/typecheck/build/test PASS는 전체 출시 PASS가 아니다. 운영/개발 DB 공유, 241개 중 235개 앱 DML, PUBLIC 은행 함수 3개, Migration266, 전체/bot 보안 감사, 정확 SHA 공식 Test 인증 E2E·격리 복원 미완료. 별도 개발 브랜치·검토된 전방향 마이그레이션·격리 Test 정확 SHA·승인된 GitOps 카나리 후에만 런타임 변경. 롤백은 스위치 OFF·신규 동기화/CSS 중단, 영수증·OS 접근성 유지, WLD 불변. Gemini/개발 A/B/C/QA 브랜치 미변경.
+- 외부 독립 근거 목표 10,000건. W3C·MDN 발행기관 2계열 검토, 신규 중복 제거 승인 0, 누적 승인 수량 미확인 => BLOCKED/IN PROGRESS. 검토 자료: https://www.w3.org/TR/WCAG22/ ; https://www.w3.org/WAI/WCAG22/Understanding/reflow.html ; https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/forced-colors ; https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion .
+
+
 ## v2026.10.24.1204 — F675-108 회원별 읽기·상호작용 접근성 환경설정 (기능 추가 / DRAFT / RELEASE HOLD)
 
 ### 회차, 기준 문서 및 실제 확인한 공백

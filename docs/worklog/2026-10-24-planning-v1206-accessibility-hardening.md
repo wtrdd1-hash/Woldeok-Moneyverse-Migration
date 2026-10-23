@@ -6,8 +6,8 @@
 - [x] START 2026-10-24 07:03 KST — MiniPC Debian 13.6 healthy; main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede; QA v1209 FAILED/HOLD. Installed Superpowers skills read because connector list empty.
 - [x] Investigate source: account nav missing a11y, next-themes owns theme, point prepaint is independent, OS motion CSS already exists; no server-side accessibility preference API or DB migration verified.
 - [x] Isolated branch created from v1204 planning; no financial mutation.
-- [ ] MID — recheck main/QA and canonical docs; update precise API/DB/UX/security contracts in EN/KO integrated plans and living plans.
-- [ ] Verify all six official documents, worklog, diff, branch ancestry; push isolated branch and create Draft PR, update issue #1071.
+- [x] MID 2026-10-24 07:05 KST — main/QA and canonical EN/KO SHA256 rechecked; detailed API/DB/UX/security/rollout contract added to existing integrated EN/KO masters and living plans.
+- [x] Verified 2026-10-24 07:08 KST — all 10 v1206 backlog IDs in six official documents; EN/KO API/If-Match/Idempotency-Key/tombstone/Android/320px/100-way parity; git diff --check PASS; main SHA unchanged.
 - [ ] END — record evidence, limitations, release HOLD, 10,000 independent-reference gate truth.
 
 Current known blockers: shared Production/development DB (#1053), wildcard 5433 (#1060), app-role DML and PUBLIC bank EXECUTE (#993), migration 266 mismatch, full pnpm audit (#1075), bot npm audit (#1077), route-ledger E2E evidence (#1078), Test exact-SHA and restore unverified. QA v1209 candidate passing local tests does not unblock these.
