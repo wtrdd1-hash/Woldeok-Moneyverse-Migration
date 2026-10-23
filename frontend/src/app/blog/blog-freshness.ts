@@ -8,10 +8,12 @@ export function getBlogFreshnessNotice(
   locale: BlogLocale,
   now: Date = new Date(),
 ): string | null {
-  const dates = posts.map(p => Date.parse(p.publishedAt)).filter(Number.isFinite);
+  const nowTime = now.getTime();
+  if (!Number.isFinite(nowTime)) return null;
+  const dates = posts.map(p => Date.parse(p.publishedAt)).filter(date => Number.isFinite(date) && date <= nowTime);
   if (!dates.length) return null;
   const latest = Math.max(...dates);
-  if (now.getTime() - latest <= 48 * 60 * 60 * 1000) return null;
+  if (nowTime - latest <= 48 * 60 * 60 * 1000) return null;
   const date = new Date(latest).toISOString().slice(0, 10);
   const labels: Record<BlogLocale, string> = {
     en: 'Most recent public educational post: ' + date + '. Financial articles require source and editorial review before further publication; this is not a real-time news feed.',
