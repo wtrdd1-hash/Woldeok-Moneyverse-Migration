@@ -170,4 +170,30 @@ describe('app API route compatibility', () => {
     expect(JSON.stringify(body)).not.toContain('attacker.example');
   });
 
+  it('preserves owner wallet pocket deltas as exact strings through the Android app gateway', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    const huge = '90071992547409931234567890123456789012';
+    let forwarded = new Headers();
+    vi.stubGlobal('fetch', vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      forwarded = new Headers(init?.headers);
+      return new Response(JSON.stringify({
+        recent_transactions: [{ transaction_id: 'wallet-entry', net_amount: '0', cash_delta: `-${huge}`, bank_delta: huge }],
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }));
+
+    const response = await GET(
+      request('/app-api/v1/wallet', { cookie: 'session=member-session' }),
+      context('wallet'),
+    );
+    expect(response.status).toBe(200);
+    expect(forwarded.get('cookie')).toBe('session=member-session');
+    expect(forwarded.get('x-internal-token')).toHaveLength(32);
+    expect(response.headers.has('x-internal-token')).toBe(false);
+    const body = await response.json();
+    expect(body.recentTransactions[0]).toMatchObject({
+      netAmount: '0', cashDelta: `-${huge}`, bankDelta: huge,
+    });
+    expect(body.recent_transactions[0].cash_delta).toBe(`-${huge}`);
+  });
+
 });

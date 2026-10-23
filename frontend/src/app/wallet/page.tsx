@@ -30,7 +30,7 @@ import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
 import { PortfolioAllocationRadar } from '@/components/portfolio-allocation-radar';
-import { sides } from './sides';
+import { postingAmount, sides } from './sides';
 import type { Overview } from './sides';
 import { ExportLedgerCsvButton } from './export-ledger-csv';
 import {
@@ -442,7 +442,7 @@ export default async function WalletPage() {
                       key={entry.transactionId}
                       debit={debit}
                       credit={credit}
-                      amount={entry.netAmount}
+                      amount={postingAmount(entry)}
                       label={entry.label}
                       at={formatMoment(entry.occurredAt)}
                     />

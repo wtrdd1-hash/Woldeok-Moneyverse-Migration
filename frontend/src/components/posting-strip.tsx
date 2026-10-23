@@ -22,7 +22,7 @@ export interface PostingStripProps {
   /** What the money reached. */
   readonly credit: string;
   /** Canonical integer string. Never a number — 38 digits do not survive one. */
-  readonly amount: string;
+  readonly amount: string | null;
   readonly label?: string;
   readonly at?: string;
   readonly className?: string;
@@ -45,7 +45,13 @@ export function PostingStrip({ debit, credit, amount, label, at, className }: Po
 
         <span className="flex items-center gap-1 sm:gap-2 shrink-0">
           <Hairline />
-          <Amount value={amount} className="text-xs sm:text-base font-bold tabular-nums" />
+          {amount === null ? (
+            <span role="status" aria-label="금액 확인 불가 / Amount unavailable" className="text-xs sm:text-sm font-semibold text-muted-foreground">
+              금액 확인 불가
+            </span>
+          ) : (
+            <Amount value={amount} className="text-xs sm:text-base font-bold tabular-nums" />
+          )}
           <Hairline />
         </span>
 
