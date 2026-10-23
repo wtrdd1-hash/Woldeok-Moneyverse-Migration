@@ -9,7 +9,7 @@ import { POST as liquidate } from './liquidate/route';
 describe('retired browser-facing treasury SWF proxy', () => {
   it('refuses every previous read/write route without contacting the privileged backend', async () => {
     const responses = await Promise.all([
-      GET(), POST(), PUT(new Request('http://localhost/api/admin/treasury/swf', { method: 'PUT' })),
+      GET(), POST(), PUT(),
       liquidate(new Request('http://localhost/api/admin/treasury/swf/liquidate', { method: 'POST' })),
     ]);
     for (const response of responses) {
