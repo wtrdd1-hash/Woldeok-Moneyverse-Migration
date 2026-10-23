@@ -77,7 +77,7 @@ export function AdminBlogClient({ initialPosts }: Props) {
           title: data.post.title,
           excerpt: data.post.title,
           content: '',
-          category: data.post.category as any,
+          category: data.post.category as BlogCategory,
           categoryLabel: data.post.categoryLabel,
           author: { name: '덕이 (Deoki)', role: '월덕 금융연구소 수석 AI 애널리스트', badge: 'AI Analyst' },
           publishedAt: data.post.publishedAt,
@@ -112,6 +112,7 @@ export function AdminBlogClient({ initialPosts }: Props) {
     try {
       const res = await fetch(`/api/admin/blog/${encodeURIComponent(slug)}?purge=${purge ? 'true' : 'false'}`, {
         method: 'DELETE',
+        headers: purge ? { 'x-blog-purge-confirmation': slug } : {},
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -240,6 +241,9 @@ export function AdminBlogClient({ initialPosts }: Props) {
           {/* 작업 결과 피드백 */}
           {result && (
             <div
+              role={result.success ? 'status' : 'alert'}
+              aria-live={result.success ? 'polite' : 'assertive'}
+              aria-atomic="true"
               className={`p-3 rounded-lg flex items-start gap-3 text-sm ${
                 result.success
                   ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'

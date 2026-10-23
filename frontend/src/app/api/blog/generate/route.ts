@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { verifySeoOperator, verifySeoWriteOrigin } from '@/lib/admin-seo-authority';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
 import { generateDailyAiBlogPost, publishBlogPost } from '@/app/blog/blog-data';
 import type { BlogCountry, BlogCategory } from '@/app/blog/blog.types';
@@ -7,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 const headers = { 'Cache-Control': 'no-store' } as const;
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   const viewer = await currentViewer();
   if (!isAdministrator(viewer)) {
     return NextResponse.json(
@@ -41,10 +42,15 @@ export async function POST(req: Request) {
     isAuthorized = true;
   }
 
-  // 2. Administrator session check if not authenticated via scheduler secret
+  // A browser session must prove same-origin intent and an open elevated console.
+  // Scheduler credentials are independent of cookies and do not require Origin.
   if (!isAuthorized) {
+    const wrongOrigin = verifySeoWriteOrigin(req);
+    if (wrongOrigin) return wrongOrigin;
     const viewer = await currentViewer();
     if (isAdministrator(viewer)) {
+      const denied = await verifySeoOperator();
+      if (denied) return denied;
       isAuthorized = true;
     }
   }

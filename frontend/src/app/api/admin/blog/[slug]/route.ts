@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import { verifySeoOperator, verifySeoWriteOrigin } from '@/lib/admin-seo-authority';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
-import { deleteBlogPost, getBlogPostBySlug, getAllBlogPostsForAdmin } from '@/app/blog/blog-data';
+import { deleteBlogPost } from '@/app/blog/blog-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,9 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const wrongOrigin = verifySeoWriteOrigin(req);
+  if (wrongOrigin) return wrongOrigin;
+
   const viewer = await currentViewer();
   if (!isAdministrator(viewer)) {
     return NextResponse.json(
@@ -17,6 +21,9 @@ export async function DELETE(
       { status: 403, headers },
     );
   }
+
+  const denied = await verifySeoOperator();
+  if (denied) return denied;
 
   const { slug } = await params;
   if (!slug) {
@@ -28,6 +35,13 @@ export async function DELETE(
 
   const url = new URL(req.url);
   const purge = url.searchParams.get('purge') === 'true';
+  // A confirmation dialog alone is bypassable by direct API calls.
+  if (purge && req.headers.get('x-blog-purge-confirmation') !== slug) {
+    return NextResponse.json(
+      { success: false, code: 'PURGE_CONFIRMATION_REQUIRED', message: 'Confirm the exact article slug before permanent deletion' },
+      { status: 428, headers },
+    );
+  }
 
   const deleted = deleteBlogPost(slug, purge);
   if (!deleted) {
