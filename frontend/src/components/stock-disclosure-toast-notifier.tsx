@@ -77,7 +77,7 @@ export function StockDisclosureToastNotifier({ onSelectDisclosure }: StockDisclo
         ),
         {
           duration: 6000,
-          position: 'top-right',
+          position: 'bottom-right',
         }
       );
     }, 1800);

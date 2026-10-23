@@ -3,8 +3,8 @@ import Link from 'next/link';
 import {
   TrendingUp,
   TrendingDown,
-  Flame,
   HelpCircle,
+  MessageSquare,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { apiOrNull } from '@/lib/api';
@@ -92,76 +92,84 @@ export default async function StocksPage({
 }: {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const params = await searchParams;
-  const sortParam = Array.isArray(params.sort) ? params.sort[0] : params.sort;
-  const sort = normalizeStockSort(sortParam);
-  const isEn = (await getServerLocale()) === 'en';
-  const member = await isLoggedInMember();
+  const [marketData, params] = await Promise.all([
+    apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'),
+    searchParams,
+  ]);
 
-  const market = await apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks');
-  const allStocks = market?.stocks ?? [];
-  const stocks = sortMarketStocks(allStocks, sort);
+  const rawStocks = marketData?.stocks ?? [];
+  const sortParam = Array.isArray(params?.sort) ? params.sort[0] : params?.sort;
+  const sort = normalizeStockSort(sortParam);
+  const stocks = sortMarketStocks(rawStocks, sort);
 
   return (
     <MarketPricesProvider>
-      <div data-page="stocks" className="mx-auto w-full max-w-2xl space-y-4 sm:space-y-6 px-3 sm:px-0 py-2 sm:py-4 pb-24 zero-overflow-shield">
+      <div data-page="stocks" className="mx-auto w-full max-w-5xl space-y-5 sm:space-y-6 px-3 sm:px-6 py-2 sm:py-4 pb-28 zero-overflow-shield">
         {/* 1. Header: Toss Securities Style Ultra-Clean Title & Live Badge */}
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 pb-1">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight">
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">
                 가상 주식 거래소
               </h1>
               <LiveBadge />
             </div>
-            <p className="text-xs text-slate-400 mt-0.5 font-fintech">
-              10대 가상 상장사 실시간 호가 & 1초 모의투자
+            <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
+              10대 가상 상장사 실시간 10단 호가창 · 1초 체결 모의투자 시뮬레이터
             </p>
           </div>
 
-          <Link
-            href="/stocks/community"
-            className="btn-toss min-h-[38px] px-3.5 bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700/60"
-          >
-            주주 라운지 →
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/stocks/community"
+              className="btn-toss h-10 px-4 bg-slate-800/90 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700/70 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+            >
+              <MessageSquare className="size-3.5 text-primary" />
+              <span>주주 라운지 →</span>
+            </Link>
+          </div>
         </div>
 
         {/* 2. Global Macro & Disclosure Ticker */}
-        <div className="space-y-2">
+        <div className="space-y-4">
           <GlobalMacroPulseTicker />
           <StockDisclosureTicker />
         </div>
 
         {/* 3. Toss Style Filter Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          {[
-            ['default', '전체 10종목'],
-            ['change', '급등·급락순'],
-            ['price', '가격순'],
-            ['name', '이름순'],
-          ].map(([value, label]) => {
-            const isActive = sort === value;
-            return (
-              <Link
-                key={value}
-                href={value === 'default' ? '/stocks' : `/stocks?sort=${value}`}
-                className={`btn-toss min-h-[36px] px-3.5 text-xs font-bold transition-all shrink-0 ${
-                  isActive
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                    : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800'
-                }`}
-              >
-                {label}
-              </Link>
-            );
-          })}
+        <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/60">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            {[
+              ['default', '전체 10종목'],
+              ['change', '급등·급락순'],
+              ['price', '가격순'],
+              ['name', '이름순'],
+            ].map(([value, label]) => {
+              const isActive = sort === value;
+              return (
+                <Link
+                  key={value}
+                  href={value === 'default' ? '/stocks' : `/stocks?sort=${value}`}
+                  className={`btn-toss min-h-[36px] px-3.5 text-xs font-bold rounded-xl transition-all shrink-0 ${
+                    isActive
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-xs'
+                      : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800 hover:bg-slate-800/60'
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+          <span className="text-xs font-mono text-slate-400 hidden sm:inline shrink-0">
+            총 {stocks.length}개 종목 상장 중
+          </span>
         </div>
 
         {/* 4. 10 Listed Companies: Toss Clean Card List */}
         <div className="space-y-2.5">
           {stocks.length === 0 ? (
-            <div className="toss-card p-8 text-center text-slate-400 text-xs bg-[#0f1422]">
+            <div className="toss-card p-10 text-center text-slate-400 text-xs bg-[#0f1422] rounded-2xl">
               거래 가능한 종목이 없습니다.
             </div>
           ) : (
@@ -175,25 +183,25 @@ export default async function StocksPage({
               return (
                 <div
                   key={stock.id}
-                  className="toss-card p-4 sm:p-5 flex items-center justify-between gap-3 bg-[#0f1422] border-slate-800/80 hover:border-emerald-500/40 transition-all btn-interactive"
+                  className="toss-card p-4 sm:p-5 flex items-center justify-between gap-3.5 bg-[#0f1422] border-slate-800/80 hover:border-emerald-500/40 transition-all btn-interactive rounded-2xl shadow-sm"
                 >
                   {/* Stock Brand Icon & Name */}
-                  <Link href={`/stocks/${stock.symbol}`} className="flex items-center gap-3.5 min-w-0 flex-1">
-                    <div className="size-11 sm:size-12 rounded-2xl bg-slate-800/80 border border-slate-700/60 grid place-items-center font-black font-fintech text-xs text-slate-200 shrink-0">
+                  <Link href={`/stocks/${stock.symbol}`} className="flex items-center gap-3.5 min-w-0 flex-1 group">
+                    <div className="size-11 sm:size-12 rounded-2xl bg-slate-800/80 border border-slate-700/60 grid place-items-center font-black font-fintech text-xs text-slate-200 shrink-0 group-hover:scale-105 transition-transform shadow-inner">
                       {stock.symbol.slice(0, 3)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs sm:text-sm font-black text-slate-100 truncate">
+                        <span className="text-xs sm:text-sm font-black text-slate-100 truncate group-hover:text-primary transition-colors">
                           {stock.name}
                         </span>
                         {isHalted && (
-                          <Badge variant="destructive" className="text-[9px] px-1 py-0 font-bold shrink-0">
+                          <Badge variant="destructive" className="text-[9px] px-1.5 py-0 font-bold shrink-0">
                             거래정지
                           </Badge>
                         )}
                       </div>
-                      <span className="text-[11px] font-fintech text-slate-400 font-semibold block mt-0.5">
+                      <span className="text-[11px] font-mono text-slate-400 font-semibold block mt-0.5">
                         {stock.symbol}
                       </span>
                     </div>
@@ -201,7 +209,7 @@ export default async function StocksPage({
 
                   {/* Price & Change Rate */}
                   <Link href={`/stocks/${stock.symbol}`} className="text-right shrink-0 min-w-[90px]">
-                    <div className="text-xs sm:text-sm font-black font-fintech text-white tabular-nums">
+                    <div className="text-xs sm:text-sm font-black font-fintech text-slate-100 tabular-nums">
                       {cur.toLocaleString()} <span className="text-[10px] text-slate-400 font-normal">WLD</span>
                     </div>
                     <div className={`text-xs font-extrabold font-fintech tabular-nums mt-0.5 flex items-center justify-end gap-0.5 ${
@@ -220,6 +228,9 @@ export default async function StocksPage({
                       name={stock.name}
                       currentPrice={stock.current_price}
                       side="buy"
+                      triggerLabel="매수"
+                      triggerVariant="default"
+                      triggerClassName="h-9 px-3.5 text-xs font-bold font-mono active:scale-95 btn-toss rounded-xl"
                     />
                   </div>
                 </div>
@@ -229,7 +240,7 @@ export default async function StocksPage({
         </div>
 
         {/* 5. Safe Simulation Notice */}
-        <div className="toss-card p-4 sm:p-5 bg-[#0f1422] border-slate-800/80 flex items-start gap-3 text-xs text-slate-400">
+        <div className="toss-card p-4 sm:p-5 bg-[#0f1422] border-slate-800/80 flex items-start gap-3 text-xs text-slate-400 rounded-2xl">
           <HelpCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <span className="font-bold text-slate-200">100% 안전한 가상 모의투자 안내</span>
