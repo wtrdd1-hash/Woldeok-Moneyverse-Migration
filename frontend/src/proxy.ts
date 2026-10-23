@@ -10,13 +10,16 @@ const API_ORIGIN = process.env.API_ORIGIN ?? (process.env.NODE_ENV === 'producti
 
 function recordCrawlerHitAsync(request: NextRequest, botName: string, statusCode: number = 200) {
   try {
+    // The Nest ingestion endpoint is internal-only; do not send unsigned telemetry.
+    const internalToken = process.env.INTERNAL_API_TOKEN;
+    if (!internalToken) return;
     const userAgent = request.headers.get('user-agent') || '';
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
     const path = request.nextUrl.pathname;
 
     fetch(`${API_ORIGIN}/api/v1/seo/log`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-internal-token': internalToken },
       body: JSON.stringify({
         botName,
         path,
