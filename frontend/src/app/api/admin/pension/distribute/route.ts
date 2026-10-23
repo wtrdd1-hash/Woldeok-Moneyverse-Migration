@@ -1,16 +1,10 @@
 import { NextResponse } from 'next/server';
-import { api } from '@/lib/api';
 
+// This browser-accessible proxy cannot prove one-time CSRF ownership.
+// Pension payouts now run exclusively through a same-origin server action.
 export async function POST() {
-  try {
-    const data = await api('/api/v1/admin/pension/distribute-payouts', {
-      method: 'POST',
-    });
-    return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || '국민연금 일괄 지급 집행에 실패했습니다.' },
-      { status: error?.status || 500 },
-    );
-  }
+  return NextResponse.json(
+    { error: 'This endpoint has been retired; use the administrator console action.' },
+    { status: 410, headers: { 'Cache-Control': 'no-store' } },
+  );
 }

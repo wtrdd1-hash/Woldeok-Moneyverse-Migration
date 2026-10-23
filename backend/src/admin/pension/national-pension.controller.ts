@@ -10,6 +10,8 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
+import { ReauthGuard } from '../../auth/guards/reauth.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -37,6 +39,7 @@ export class AdminNationalPensionController {
   }
 
   @Post('distribute-payouts')
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '은퇴 연금 수령 대상자 대상 기초연금 일괄 수동 집행' })
   async distributePayouts() {
     return this.service.distributeHourlyPensionPayouts();

@@ -26,6 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
+import { distributePensionPayouts } from './actions';
 
 export interface NationalPensionOverview {
   totalAumWld: string;
@@ -80,12 +81,11 @@ export function PensionControlTower({
     }
     setDistributing(true);
     try {
-      const res = await fetch('/api/admin/pension/distribute', { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '연금 지급 실패');
+      const result = await distributePensionPayouts();
+      if (!result.ok) throw new Error(result.error);
 
       toast.success(
-        `기초연금 지급 집행 완료: 총 ${groupDigits(data.totalPayoutAmount ?? '0')} WLD (수령자: ${data.pensionersCount || 0}명)`,
+        `기초연금 지급 집행 완료: 총 ${groupDigits(result.receipt.totalPayoutAmount)} WLD (수령자: ${result.receipt.pensionersCount}명)`,
       );
       await refreshData();
     } catch (err: any) {
