@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -81,6 +82,7 @@ export class WalletController {
    * an unbounded query.
    */
   @Get('wallet')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Balances and recent ledger entries for the caller' })
   overview(
     @Req() request: RequestWithSession,

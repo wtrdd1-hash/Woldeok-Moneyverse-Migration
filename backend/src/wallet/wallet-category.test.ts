@@ -1,4 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
+import { BadRequestException } from '@nestjs/common';
+import { HEADERS_METADATA } from '@nestjs/common/constants';
+import { WalletController } from './wallet.controller';
+import type { RequestWithSession } from '../auth/session.context';
 import { PostgresWalletRepository, requireWalletCategory } from './wallet.repository';
 import { WalletService, type WalletRepositoryLike } from './wallet.service';
 
@@ -12,6 +16,15 @@ describe('owner-scoped wallet activity categories', () => {
     }
     expect(requireWalletCategory('bank')).toBe('bank');
     expect(requireWalletCategory(undefined)).toBeUndefined();
+  });
+
+  it('rejects invalid categories at the HTTP boundary and marks wallet data private', () => {
+    const service = { overview: vi.fn() } as unknown as WalletService;
+    const controller = new WalletController(service);
+    expect(() => controller.overview({} as RequestWithSession, '20', 'transfer OR 1=1')).toThrow(BadRequestException);
+    expect(service.overview).not.toHaveBeenCalled();
+    const headers = Reflect.getMetadata(HEADERS_METADATA, WalletController.prototype.overview) as Array<{ name: string; value: string }>;
+    expect(headers).toContainEqual({ name: 'Cache-Control', value: 'private, no-store' });
   });
 
   it('filters in SQL before the limit while keeping the actor bound', async () => {
