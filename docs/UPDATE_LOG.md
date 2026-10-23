@@ -1,3 +1,9 @@
+## 2026-10-24 v1204 — F675-108 member accessibility preferences (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1202 / Current Addition v1204 / Next Improvement v1206 provisional. Source-backed account menu gap, existing local theme and OS reduced motion; main 54d5140d unchanged start/mid; QA v1205 FAILED/HOLD. No duplicate session center.
+- P0 ENV1204-01 SEC1204-02 REL1204-03 A11Y1204-04; P1 A11Y1204-05 A11Y1204-06 A11Y1204-07 A11Y1204-08 A11Y1204-09 A11Y1204-10. Defined guest-local/member opt-in sync, versioned owner-only API/DB/receipt, OS priority, Android, admin aggregate, noindex/no-store, WCAG/zoom/contrast, concurrency/rollback in integrated EN/KO plans.
+- 5433 shared live DB, wildcard binding, app role grants, Next.js advisories, lint/frontend failure, migration266, backup and exact-SHA Test remain HOLD. No runtime/DB/WLD/Test/Production modifications. W3C/MDN reviewed 2, approved 0, cumulative accepted UNKNOWN/10,000 BLOCKED.
+
+
 ## 2026-10-24 v1200 — F675-107 verified private data access package (PLANNING DRAFT / HOLD)
 - Full backlog IDs / 전체 백로그 식별자: ENV1202-01 PRIV1202-02 SEC1202-03 REL1202-04 PRIV1202-05 PRIV1202-06 PRIV1202-07 PRIV1202-08 PRIV1202-09
 

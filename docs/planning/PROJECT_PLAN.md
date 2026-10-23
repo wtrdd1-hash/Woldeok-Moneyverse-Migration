@@ -1,4 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
+- Full backlog IDs / 전체 백로그 식별자: ENV1204-01 SEC1204-02 REL1204-03 A11Y1204-04 A11Y1204-05 A11Y1204-06 A11Y1204-07 A11Y1204-08 A11Y1204-09 A11Y1204-10
+
+## v2026.10.24.1204 — F675-108 Member Accessibility Reading & Interaction Preferences (PLANNING DRAFT / RELEASE HOLD)
+- Previous Feature Improvement v1202 / Current Feature Addition v1204 / Next Feature Improvement v1206 (provisional). Canonical main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede unchanged start/mid; QA v1205 FAILED/HOLD. Existing account menu has no accessibility preference link; local theme/point and OS reduced-motion already exist. Do not duplicate session/device center, theme storage or OS protections.
+- New member/guest flow: /account/accessibility and guest /accessibility; local preview, text 100–200%, audited high contrast, motion follow-device/reduce, opt-in cross-device sync OFF by default; accurate LOCAL_ONLY/SYNC_PENDING/SYNCED/CONFLICT/OFFLINE/FAILED receipts. Proposed owner-only GET/PUT/DELETE API, additive member_accessibility_preferences + idempotency receipt tables, CAS/version/strict enums, no app DML/PUBLIC grants. Admin aggregate only, Android native accessibility priority, noindex/no-store, WCAG 2.2 AA, 320px/200% zoom, KPI and feature-flag rollback.
+- P0 ENV1204-01 (#1053/#1060 shared Production/dev DB and wildcard 5433), SEC1204-02 (#993 app DML/PUBLIC bank EXECUTE), REL1204-03 (#1067 Next Critical2/High1, #1066 backup, CI, migration266, exact-SHA Test), A11Y1204-04 critical flow a11y baseline. P1 A11Y1204-05..10 local UI, owner sync/receipts, CSS precedence, Android/admin aggregate, privacy/SEO/KPI and 100-way/400%-zoom regressions. Full detailed contract in existing integrated English canonical and Korean counterpart. No runtime, DB, WLD, Test or Production changes.
+- Independent publishers reviewed W3C and MDN (2), newly approved evidence 0, cumulative independently deduplicated approved UNKNOWN / 10,000; gate BLOCKED. Draft only, separate from Gemini/A/B/C/QA.
+
 - Full backlog IDs / 전체 백로그 식별자: ENV1202-01 PRIV1202-02 SEC1202-03 REL1202-04 PRIV1202-05 PRIV1202-06 PRIV1202-07 PRIV1202-08 PRIV1202-09
 
 

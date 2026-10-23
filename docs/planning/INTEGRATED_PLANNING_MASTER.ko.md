@@ -1,5 +1,46 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1204 — F675-108 회원별 읽기·상호작용 접근성 환경설정 (기능 추가 / DRAFT / RELEASE HOLD)
+
+### 회차, 기준 문서 및 실제 확인한 공백
+- Previous: Feature Improvement v1202; Current: Feature Addition v1204; Next: Feature Improvement v1206(잠정). 시작·중간 main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede 및 국영문 canonical SHA256 불변. 최신 QA v1205 FAILED/HOLD. 코드·DB·Test·Production·WLD 변경 없음.
+- 소스 근거: frontend/src/app/account/page.tsx에는 프로필·보안·알림·개인정보 링크는 있지만 접근성 환경설정 화면은 없다. frontend/src/lib/theme.ts는 브라우저별 테마/포인트색 localStorage를 이미 담당하고, globals.css/cosmetics.css는 운영체제 prefers-reduced-motion을 이미 따른다. 이를 중복 구현하거나 덮어쓰지 않는다. frontend/src/app/layout.tsx는 브라우저 확대(최대 배율 5)를 허용한다. 보안 페이지에는 이미 활성 세션 확인·원격 로그아웃이 구현되어 있으므로 기기 관리 기능은 이번 범위에서 제외한다.
+- 목적: 저시력·운동 기능 제약·움직임 민감성 등 다양한 사용자가 가독성과 상호작용을 선택적으로 조정하되 기본 접근성과 가상 WLD 잔액은 유지한다. 대상은 비로그인 방문자(해당 브라우저만), 로그인 회원(로컬 우선·명시적 기기간 동기화), Android(운영체제 접근성 우선), 관리자(익명 집계만)이다. 장애 여부 추정·진단·프로파일링은 금지한다.
+
+### 진입점, 화면·CTA·상태 및 사용자 흐름
+- 진입점: /account -> /account/accessibility, 사이트 유틸리티와 로그인 화면의 접근성 바로가기; 비로그인 /accessibility. CTA: 미리보기, 글자 100/125/150/175/200%, 대비 기본/높음, 움직임 기기 설정 따름/줄이기, 이 기기에 저장, 내 기기 간 동기화(명시적 동의), 초기화, 기기 설정 복원. 기존 밝음/어두움/포인트색 설정은 별도 브라우저 저장 방식으로 유지한다.
+- 미리보기는 즉시 적용하되 서버 저장 성공으로 표시하지 않는다. 상태 LOCAL_ONLY, SYNC_PENDING, SYNCED(version), CONFLICT, OFFLINE, SAVE_FAILED. 저장 전 미리보기·브라우저 저장·서버 확정 영수증을 구분한다. 실패 시 읽기 쉬운 로컬 표현을 유지하고 재시도/이 기기에만 유지 CTA를 제공한다. 로그인·거래 확인·중요 경고를 설정 화면에 종속시키지 않는다.
+- 최초 방문에서는 OS/브라우저의 움직임 줄이기와 강제 색상·대비 설정을 우선 적용한다. OS에서 움직임 줄이기가 켜졌다면 앱 설정으로 움직임을 다시 활성화할 수 없다. 앱은 더 줄일 수만 있다. 높은 대비는 검증된 의미 기반 팔레트만 사용하고 임의 전경/배경색 입력이나 forced-colors 비활성화를 허용하지 않는다. 앱 글자 크기 조절은 브라우저 확대를 제한하지 않는다.
+- 방문자는 로컬 설정만 사용한다. 로그인 회원의 기기간 동기화는 기본 OFF이고 명시적으로 선택해야 한다. 계정 전환·로그아웃 시 이전 계정의 동기화 스냅샷을 제거하되 사용자가 별도로 선택한 브라우저 로컬 설정은 임의 삭제하지 않는다. 오프라인/충돌 시 로컬 가독성을 유지한다. 서버 값으로 명시적 로컬 선택을 조용히 덮어쓰지 않고 충돌 화면에 이 기기 값/다른 기기 값과 버전·시각을 표시한다.
+- 320px~1280px 모바일, 키보드·스크린리더·큰 글씨, 보이는 포커스, 라벨 있는 라디오/슬라이더, 가능한 44 CSS px 터치 영역, 색상 외 상태 표시, 접근성 live 영역, 움직임 없는 미리보기를 요구한다. 200% 글자 확대와 브라우저 확대에서도 로그인, WLD 금액 부호, 호가 주문, 관리자 확인의 의미가 잘리거나 바뀌면 안 된다.
+
+### 제안 API·DB·트랜잭션·동시성 (미구현)
+- 회원 GET /api/v1/account/accessibility-preferences는 본인 허용 필드·버전·updatedAt만 반환한다. PUT는 If-Match 버전 및 Idempotency-Key UUID로 명시적 동기화 설정을 저장하고, DELETE는 If-Match와 함께 서버 동기화 설정을 초기화한다. 비로그인 방문자는 localStorage만 사용하며 서버 API를 호출하지 않는다. 401 미인증, 403 권한 없음, 409 버전 충돌/키 재사용 내용 불일치, 422 범위·열거형 오류, 429 속도 제한, 503 장애. GET은 private/no-store. 서버 세션과 동의 상태에서 소유자를 결정하며 본문 userId를 신뢰하지 않는다. 웹 변경에는 CSRF, Android에는 동등한 네이티브 인증을 적용한다.
+- 신규 전방향 마이그레이션 제안: member_accessibility_preferences 테이블에 user_id UUID PRIMARY KEY FK users(id) ON DELETE CASCADE, text_scale_pct SMALLINT CHECK IN (100,125,150,175,200), contrast_mode CHECK IN ('standard','high'), motion_mode CHECK IN ('device','reduce'), sync_enabled BOOLEAN DEFAULT FALSE, version BIGINT NOT NULL CHECK(version>0), updated_at timestamptz. 별도 member_accessibility_preference_receipts에 UNIQUE(user_id,idempotency_key), request_digest bytea(32), committed_version, created_at. (user_id,updated_at DESC) 인덱스는 실제 쿼리 계획에서 필요성이 확인될 때만 추가한다. 자유 형식 CSS·임의 URL·기기 지문·추정 장애 속성은 저장하지 않는다.
+- 고정 search_path의 SECURITY DEFINER 함수가 세션·소유권을 확인하고 행 잠금/CAS로 한 트랜잭션에서 범위 검증·예상 버전 비교·요청 지문 결합·단일 행 갱신·영수증 기록을 원자적으로 수행한다. 같은 키·같은 지문은 기존 확정 영수증, 같은 키·다른 지문은 409. 같은 버전의 100개 동시 요청에서는 하나만 버전을 증가시키고 나머지는 409 또는 확정 재전송 응답. 앱 계정 직접 INSERT/UPDATE/DELETE와 PUBLIC EXECUTE 금지; 격리 PostgreSQL에서 거부 테스트가 필요하다.
+- 방문자 localStorage 키 wdmv.accessibility.v1은 엄격한 JSON 스키마·길이 제한·허용값 검증을 거친다. 스크립트나 임의 CSS를 받지 않는다. 첫 화면 표시 전 허용된 루트 data 속성만 적용해 화면 번쩍임을 줄이고, 저장소 접근 실패는 비치명적으로 처리한다. 서버 환경설정은 인증 정보나 금융 권한 근거가 아니며 회원 식별 정보와 결합해 로깅하지 않는다. 계정 삭제 시 FK 연쇄 삭제와 보존 정책을 검토하고, 감사에는 상태/버전/작업의 최소 정보만 기록한다.
+
+### 관리자·SEO·보안·분석·배포
+- 관리자 /admin/experience/accessibility는 동기화 선택률·저장 실패·접근성 회귀의 집계만 보여준다. 회원별 값 열람/변경 기능은 제공하지 않는다. 집계 공개 최소 표본 >=10; 회원별 추적·기기 지문·원시 값 저장 금지. KPI: 설정 진입, 로컬 미리보기 성공, 동기화 선택, 서버 확정 저장률, 충돌률, WCAG 테스트 실패, 200% 확대 작업 완료율, UI 레이아웃 변화 p95. 기준값은 미확인; 비인가 공개 목표 0건.
+- 회원/관리자 화면 noindex/nofollow·사이트맵 제외, API/BFF/엣지 private,no-store 및 공유 캐시 금지. CSS만으로 보안을 달성했다고 주장하지 않는다. WCAG 2.2 AA 일반 글자 대비 4.5:1·큰 글자 3:1, 200% 확대, 320 CSS px 리플로, 포커스·움직임 줄이기를 검증한다. WAI-Adapt는 참고 자료이며 해당 표준을 구현했다고 주장하지 않는다.
+- Android App API는 네이티브 글자 크기·OS 움직임 줄이기·강제 대비를 우선하며 웹뷰 localStorage에 의존하지 않고 명시적 동기화 기능을 제공한다. TalkBack·스크린리더 레이블 검증 필수. 접근성 선호를 광고 개인화에 사용하지 않는다.
+- 기능 스위치 기본 OFF. Production/개발이 5433 DB를 공유하고 wildcard 바인딩된 상태(#1053/#1060)에서는 DB 마이그레이션과 데이터 테스트를 차단한다. #993 앱 광범위 DML·PUBLIC 은행 EXECUTE, #1067 Next.js Critical2/High1, main 린트/프론트 테스트, Migration266 체크섬, #1066 구형 백업, 격리 복원 및 정확 SHA Test를 먼저 해결해야 한다. 검토된 추가형 마이그레이션만 허용한다. 공식 Test exact-SHA에서 100건 동시성, 소유권 부정 테스트, 스크린리더, forced-colors, 밝음/어두움, OS 움직임, 200% 확대, Android 검증 후 승인된 카나리와 되돌릴 수 있는 스위치로 승격한다. 롤백 시 서버 동기화/새 CSS 속성을 끄되 안전한 로컬 OS 동작과 확정 영수증은 보존한다. WLD/원장 변경 금지.
+
+### P0/P1 개발 백로그 및 수용 기준
+- P0 ENV1204-01 — #1053/#1060 운영·개발·Test DB 분리와 5433 외부 바인딩 제한(승인된 변경); 외부 차단·허용된 API·암호화 백업·격리 복원 증명.
+- P0 SEC1204-02 — #993 앱 계정 직접 DML·PUBLIC 은행 함수 EXECUTE 권한 최소화; 검토된 전방향 보안 변경, 실제 격리 PG의 타 회원 거부 및 금융 회귀 검증.
+- P0 REL1204-03 — #1067/#1066, main 린트/테스트, Migration266, 정확 SHA CI/Test·백업/롤백 장애 해소 전 운영승격 금지.
+- P0 A11Y1204-04 — 계정·지갑·주식 주문·고객지원·관리자 중요 흐름의 대비·리플로·키보드·OS 우선순위 기준선; 중요 확인 화면이 접근 불가능하면 출시 차단.
+- P1 A11Y1204-05 — 방문자/회원 로컬 설정, 미리보기·초기화, 엄격한 localStorage, 안전한 첫 화면.
+- P1 A11Y1204-06 — 회원별 동기화 API·SECURITY DEFINER·버전 CAS·100건 동시 멱등 영수증·409 충돌; 기본 OFF.
+- P1 A11Y1204-07 — 의미 기반 CSS 토큰, OS/forced-colors 우선, 검증된 높은 대비, 200% 확대; 기존 테마 저장 책임 유지.
+- P1 A11Y1204-08 — Android App API·네이티브 동등성 및 최소 표본 기반 관리자 익명 집계.
+- P1 A11Y1204-09 — CSRF·소유권·개인정보·SEO·캐시·악용방지·장애 추정 없는 KPI.
+- P1 A11Y1204-10 — PUT 동일 키 100건/구버전 충돌, 타 회원 100회 차단, 320px·200% 글자·400% 브라우저 확대, forced-colors, 스크린리더, 모바일·오프라인·계정 전환·정확 SHA Test·롤백 회귀.
+- 작업 소유권: Draft #1065 이후에 쌓는 문서 전용 기획. 개발 A/B/C·Gemini·QA 브랜치 변경 없음. 코드는 별도 개발 브랜치 및 Test exact-SHA 게이트 필수. 외부 독립 근거 10,000건 게이트 BLOCKED: W3C·MDN 2개 발행기관 계열 검토, 신규 중복 제거 승인 0건, 누적 승인 실수량 미확인. 임의 집계 금지.
+- 참고 근거(검토했으나 승인 근거 DB에 등록하지 않음): https://www.w3.org/TR/WCAG22/ ; https://www.w3.org/WAI/adapt/ ; https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Media_queries/Using_for_accessibility .
+
+
 ## v2026.10.24.1202 — F675-107 본인 확인형 개인정보 열람 패키지: 영수증·격리·공개 통제 강화 (기능 보완 / 초안 / 운영승격 보류)
 
 ### 회차·확인 근거

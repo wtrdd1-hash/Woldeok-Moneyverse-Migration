@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+- Full backlog IDs / 전체 백로그 식별자: ENV1204-01 SEC1204-02 REL1204-03 A11Y1204-04 A11Y1204-05 A11Y1204-06 A11Y1204-07 A11Y1204-08 A11Y1204-09 A11Y1204-10
+
+## v2026.10.24.1204 — F675-108 회원 읽기·상호작용 접근성 환경설정 (기획 초안 / 운영승격 보류)
+- Previous 기능 보완 v1202 / Current 기능 추가 v1204 / Next 기능 보완 v1206(잠정). main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede 시작·중간 동일, QA v1205 FAILED/HOLD. 계정 메뉴에는 접근성 설정이 없지만 브라우저별 테마·포인트색과 OS 움직임 줄이기는 이미 구현됨. 기기 세션 관리·테마 저장·OS 접근성 기능을 중복 구현하지 않는다.
+- 방문자 /accessibility, 회원 /account/accessibility: 로컬 미리보기, 글자 100~200%, 검증된 높은 대비, 기기 설정 따름/움직임 줄이기, 기본 OFF인 명시적 기기간 동기화. LOCAL_ONLY/SYNC_PENDING/SYNCED/CONFLICT/OFFLINE/FAILED 영수증 구분. 본인 전용 GET/PUT/DELETE API, 신규 설정/멱등 영수증 테이블, CAS/버전·엄격한 허용값, 앱 직접 DML·PUBLIC 권한 금지. 관리자 익명 집계, Android OS 접근성 우선, noindex/no-store, WCAG 2.2 AA, 320px·200% 확대, KPI·기능 스위치 롤백.
+- P0 ENV1204-01 (#1053/#1060 운영/개발 DB 공유·5433 바인딩), SEC1204-02 (#993 앱 DML/PUBLIC 은행 함수), REL1204-03 (#1067 Next Critical2/High1·#1066 백업·CI·Migration266·정확 SHA Test), A11Y1204-04 핵심 흐름 접근성 기준선. P1 A11Y1204-05~10 로컬 UI, 본인 동기화/영수증, CSS 우선순위, Android/관리자 집계, 개인정보/SEO/KPI, 100건 동시성·400% 확대 회귀. 상세 계약은 기존 영어 통합 정본과 한국어 동등 문서에 반영. 런타임·DB·WLD·Test·운영 변경 없음.
+- 외부 독립 발행기관 W3C·MDN 2곳 검토, 신규 승인 0건, 누적 중복 제거 승인 UNKNOWN/10,000 BLOCKED. Gemini/A/B/C/QA 작업과 분리된 Draft 문서 기획.
+
 - Full backlog IDs / 전체 백로그 식별자: ENV1202-01 PRIV1202-02 SEC1202-03 REL1202-04 PRIV1202-05 PRIV1202-06 PRIV1202-07 PRIV1202-08 PRIV1202-09
 
 
