@@ -52,6 +52,8 @@ const SECURITY_EVENT_LABEL: Readonly<Record<string, string>> = {
   local_password_reset_requested: '비밀번호 재설정 요청',
   local_password_reset_completed: '비밀번호 재설정 완료',
   local_password_changed: '비밀번호 변경',
+  local_email_change_requested: '로그인 이메일 변경 요청',
+  local_email_changed: '로그인 이메일 변경 완료',
 };
 
 const PROVIDER_NAME: Readonly<Record<string, string>> = {
