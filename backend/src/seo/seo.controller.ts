@@ -167,7 +167,6 @@ export class SeoController {
 
   @Post('log')
   @HttpCode(HttpStatus.OK)
-  @SkipInternalToken()
   @ApiOperation({ summary: 'Record a crawler visit from middleware or edge loggers' })
   async logCrawlerHit(@Body() body: CrawlerLogDto, @Req() req: Request) {
     const ip = body.ipAddress || (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '';
