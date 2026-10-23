@@ -33,3 +33,7 @@
 - [x] Full local tests/build/typecheck/contract executed; backend/DB PASS with skips, frontend FAIL 1, lint FAIL 1, security FAIL. Changed-file ESLint PASS. See paired release reports.
 - [ ] GitHub CI/Test Candidate final SHA and official authenticated Test/Production gates remain BLOCKED/PENDING; no merge/deploy.
 - Reports: `docs/releases/v2026.10.24.a0725.md` and `.ko.md`. Next: QA #1076 baseline fixes, migration266/least privilege and exact-SHA Test.
+
+## Integration-preflight discovery — 07:42 KST
+- Cross-branch migration inventory revealed **collision**: C Draft #1064 owns `280-privacy-request-receipt-binding.sql`; A had independently proposed `280-wallet-owner-historical-receipt.sql`. Both were unique and unmerged; parity on a combined tree would fail. This is a real integration blocker, not a reason to delete C's work.
+- Per AGENTS.md migration stacking, preserve C's full commit and file, merge its branch into A's isolated worktree, rename only A's new migration to 281, and rebase PR #1083 on C #1064. C branch/PR remain unchanged. Do not merge to main or release until both stacks pass independently.
