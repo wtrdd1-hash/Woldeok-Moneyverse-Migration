@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import { sides } from '../sides';
+import { postingAmount, sides } from '../sides';
 import type { Overview } from '../sides';
 
 export const dynamic = 'force-dynamic';
@@ -65,7 +65,7 @@ export default async function WalletActivityPage() {
                   key={entry.transactionId}
                   debit={debit}
                   credit={credit}
-                  amount={entry.netAmount}
+                  amount={postingAmount(entry)}
                   label={entry.label}
                   at={formatMoment(entry.occurredAt)}
                 />

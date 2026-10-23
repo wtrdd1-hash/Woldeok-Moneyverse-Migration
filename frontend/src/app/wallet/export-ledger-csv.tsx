@@ -16,7 +16,7 @@ const headersKo = [
 
 /** CSV is a spreadsheet input, not a trusted data channel. */
 function csvCell(value: string): string {
-  const normalized = value.replace(/[\r\n\u0000-\u001f\u007f]+/g, ' ').trim();
+  const normalized = value.replace(/\p{Cc}+/gu, ' ').trim();
   const safe = /^[=+\-@]/.test(normalized) && !isCanonicalWld(normalized)
     ? `'${normalized}`
     : normalized;

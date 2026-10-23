@@ -60,6 +60,11 @@ export function pocketBreakdown(
 export function postingAmount(entry: TransactionView): string | null {
   if (!isCanonicalWld(entry.netAmount)) return null;
   const pockets = pocketBreakdown(entry);
+  // Legacy nonzero net amounts can be displayed without pocket detail, but a
+  // zero-net transfer or contradictory pocket evidence must never invent zero.
+  if (!pockets && (entry.netAmount === '0' || entry.cashDelta !== undefined || entry.bankDelta !== undefined)) {
+    return null;
+  }
   if (entry.netAmount === '0' && pockets && pockets.cashDelta !== '0') {
     return pockets.cashDelta.startsWith('-') ? pockets.cashDelta.slice(1) : pockets.cashDelta;
   }
