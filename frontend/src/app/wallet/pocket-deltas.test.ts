@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { ledgerCsvContent } from './export-ledger-csv';
 import { pocketBreakdown, postingAmount, sides, type TransactionView } from './sides';
@@ -75,5 +76,25 @@ describe('bounded wallet CSV export', () => {
 
   it('rejects noncanonical net amount instead of rounding', () => {
     expect(() => ledgerCsvContent([entry({ netAmount: '01' })], true)).toThrow(/amount|canonical/i);
+  });
+});
+
+
+describe('wallet posting display integrity', () => {
+  it('wires both wallet views to the verified pocket amount', () => {
+    for (const path of ['./page.tsx', './activity/page.tsx']) {
+      const source = readFileSync(new URL(path, import.meta.url), 'utf8');
+      expect(source).toContain('postingAmount(entry)');
+      expect(source).not.toContain('amount={entry.netAmount}');
+    }
+  });
+
+  it('never substitutes zero when owner pocket evidence is absent or contradictory', () => {
+    expect(postingAmount(entry({ cashDelta: undefined }))).toBeNull();
+    expect(postingAmount(entry({ bankDelta: '2499' }))).toBeNull();
+    expect(postingAmount(entry({ netAmount: '2500', cashDelta: '2000', bankDelta: '100' }))).toBeNull();
+    expect(postingAmount(entry({ netAmount: '01' }))).toBeNull();
+    expect(postingAmount(entry({ cashDelta: '0', bankDelta: '0' }))).toBe('0');
+    expect(postingAmount(entry({ netAmount: '-2500', cashDelta: undefined, bankDelta: undefined }))).toBe('2500');
   });
 });

@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -80,6 +81,7 @@ export class WalletController {
    * service, so a value outside it is rejected there rather than turning into
    * an unbounded query.
    */
+  @Header('Cache-Control', 'private, no-store')
   @Get('wallet')
   @ApiOperation({ summary: 'Balances and recent ledger entries for the caller' })
   overview(@Req() request: RequestWithSession, @Query('recent') recent?: string) {
@@ -91,24 +93,28 @@ export class WalletController {
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Get('wallet/recipients/search')
   @ApiOperation({ summary: 'Search active member recipients by display name for wire transfer' })
   searchRecipients(@Req() request: RequestWithSession, @Query('query') query?: string) {
     return this.service().searchRecipients(requireUserId(request), query || '');
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Get('rewards/availability')
   @ApiOperation({ summary: 'Next eligible times for the caller reward controls' })
   rewardAvailability(@Req() request: RequestWithSession) {
     return this.service().rewardAvailability(requireUserId(request));
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Get('bank/loans')
   @ApiOperation({ summary: 'Outstanding loans for the caller' })
   async loans(@Req() request: RequestWithSession) {
     return { loans: await this.service().loans(requireUserId(request)) };
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Post('wallet/transfers')
   @ApiOperation({ summary: 'Send WLD to another member' })
   transfer(@Req() request: RequestWithSession, @Body() body: TransferDto) {
@@ -118,6 +124,7 @@ export class WalletController {
     );
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Post('wallet/transfers/p2p')
   @ApiOperation({ summary: 'Send WLD to another member with custom thank-you note and sticker' })
   p2pTransfer(@Req() request: RequestWithSession, @Body() body: P2PTransferDto) {
@@ -128,6 +135,7 @@ export class WalletController {
   }
 
 
+  @Header('Cache-Control', 'private, no-store')
   @Post('bank/movements')
   @ApiOperation({ summary: 'Move balance between cash and bank' })
   bankMovement(@Req() request: RequestWithSession, @Body() body: BankMovementDto) {
@@ -137,6 +145,7 @@ export class WalletController {
     );
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Post('bank/loans')
   @ApiOperation({ summary: 'Borrow from the virtual bank' })
   borrow(@Req() request: RequestWithSession, @Body() body: BorrowDto) {
@@ -146,6 +155,7 @@ export class WalletController {
     );
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Post('bank/loans/:id/repayments')
   @ApiOperation({ summary: 'Repay part or all of a loan' })
   repay(
@@ -159,6 +169,7 @@ export class WalletController {
     );
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Post('rewards/daily/claims')
   @ApiOperation({ summary: 'Claim the daily reward' })
   claimDaily(@Req() request: RequestWithSession, @Body() body: ClaimDto) {
@@ -168,12 +179,14 @@ export class WalletController {
     );
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Post('rewards/work/claims')
   @ApiOperation({ summary: 'Retired legacy work faucet; use professional work tasks', deprecated: true })
   claimWork() {
     throw new GoneException('legacy work reward retired; complete a professional task on /work');
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Get('wallet/tax-receipt')
   @ApiOperation({ summary: '시민 납세 투명성 영수증 조회 (1 WLD 단위 실시간 목적별 분배 추적)' })
   async getTaxReceipt(@Req() request: RequestWithSession) {
@@ -181,6 +194,7 @@ export class WalletController {
     return this.service().getCitizenTaxReceipt(userId);
   }
 
+  @Header('Cache-Control', 'private, no-store')
   @Post('wallet/governance/vote')
   @ApiOperation({ summary: '분기별 국고 예산안 우선순위 시민 거버넌스 투표 제출' })
   async voteBudget(@Req() request: RequestWithSession, @Body() body: CitizenBudgetVoteDto) {

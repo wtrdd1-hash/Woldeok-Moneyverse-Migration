@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { TranslatedText as T } from '@/components/translated-text';
 import { IDLE } from '@/lib/action-state';
+import type { ActionState } from '@/lib/action-state';
 import { formatDay } from '@/lib/money';
 import { borrow, claimDaily, moveBank, repay, transfer } from './actions';
 
@@ -67,18 +68,26 @@ export function RewardButtons({ availability }: { readonly availability: RewardA
   );
 }
 
+/** A retry after a timeout must reuse the same database idempotency key.
+ * Only a confirmed success or a change of intent starts a new operation. */
+function useRetryKey(state: ActionState) {
+  const [key, setKey] = useState('');
+  useEffect(() => { setKey(crypto.randomUUID()); }, []);
+  useEffect(() => {
+    if (state.status === 'ok') setKey(crypto.randomUUID());
+  }, [state]);
+  return [key, () => setKey(crypto.randomUUID())] as const;
+}
+
 export function TransferForm({ currency }: { readonly currency: string }) {
   const [state, action] = useActionState(transfer, IDLE);
   const [amount, setAmount] = useState('');
-  const [requestKey, setRequestKey] = useState('');
-
-  useEffect(() => {
-    setRequestKey(crypto.randomUUID());
-  }, [state]);
+  const [requestKey, rotateRequestKey] = useRetryKey(state);
 
   const addAmount = (num: number) => {
     const cur = parseInt(amount, 10) || 0;
     setAmount(String(cur + num));
+    rotateRequestKey();
   };
 
   return (
@@ -109,6 +118,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
                 placeholder="UUID"
                 required
                 className="min-h-11"
+                onChange={rotateRequestKey}
               />
               <FieldDescription>
                 <T
@@ -132,7 +142,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
                   step={1}
                   placeholder="0"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => { setAmount(e.target.value); rotateRequestKey(); }}
                   required
                   className="min-h-11"
                 />
@@ -165,7 +175,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
             <p className="text-xs text-muted-foreground">
               <T korean={`1 ${currency} 이상 정수만 보낼 수 있어요.`} english={`Only whole integers of 1 ${currency} or more can be sent.`} />
             </p>
-            <SubmitButton className="min-h-11 font-bold">
+            <SubmitButton className="min-h-11 font-bold" disabled={!requestKey}>
               <T korean="돈 보내기" english="Send WLD" />
             </SubmitButton>
           </div>
@@ -179,6 +189,9 @@ export function TransferForm({ currency }: { readonly currency: string }) {
 export function BankPanel() {
   const [moveState, moveAction] = useActionState(moveBank, IDLE);
   const [borrowState, borrowAction] = useActionState(borrow, IDLE);
+  const [depositKey, rotateDeposit] = useRetryKey(moveState);
+  const [withdrawKey, rotateWithdraw] = useRetryKey(moveState);
+  const [borrowKey, rotateBorrow] = useRetryKey(borrowState);
 
   return (
     <Card>
@@ -195,17 +208,19 @@ export function BankPanel() {
       </CardHeader>
       <CardContent className="grid gap-6 sm:grid-cols-2">
         <form action={moveAction} className="grid gap-3">
+          <input type="hidden" name="depositKey" value={depositKey} />
+          <input type="hidden" name="withdrawKey" value={withdrawKey} />
           <Field>
             <FieldLabel htmlFor="bank-move-amount">
               <T korean="입출금 WLD" english="Vault Deposit / Withdraw" />
             </FieldLabel>
-            <AmountInput id="bank-move-amount" name="amount" placeholder="0" required />
+            <AmountInput id="bank-move-amount" name="amount" placeholder="0" onChange={() => { rotateDeposit(); rotateWithdraw(); }} required />
           </Field>
           <div className="flex flex-wrap gap-2">
-            <SubmitButton name="direction" value="deposit">
+            <SubmitButton name="direction" value="deposit" disabled={!depositKey}>
               <T korean="은행에 넣기" english="Deposit to Bank" />
             </SubmitButton>
-            <SubmitButton name="direction" value="withdraw" variant="outline">
+            <SubmitButton name="direction" value="withdraw" variant="outline" disabled={!withdrawKey}>
               <T korean="은행에서 꺼내기" english="Withdraw from Bank" />
             </SubmitButton>
           </div>
@@ -213,16 +228,17 @@ export function BankPanel() {
         </form>
 
         <form action={borrowAction} className="grid gap-3">
+          <input type="hidden" name="idempotencyKey" value={borrowKey} />
           <Field>
             <FieldLabel htmlFor="loan-principal">
               <T korean="대출 WLD (100~500,000)" english="Borrow WLD (100–500,000)" />
             </FieldLabel>
-            <AmountInput id="loan-principal" name="principalAmount" placeholder="0" required />
+            <AmountInput id="loan-principal" name="principalAmount" placeholder="0" onChange={rotateBorrow} required />
             <FieldDescription>
               <T korean="대출 원금에 5% 이자가 더해집니다." english="5% fixed interest is added to the principal amount." />
             </FieldDescription>
           </Field>
-          <SubmitButton className="w-fit">
+          <SubmitButton className="w-fit" disabled={!borrowKey}>
             <T korean="대출금 받기" english="Apply for Loan" />
           </SubmitButton>
           <ActionAlert state={borrowState} />
@@ -240,6 +256,24 @@ export interface LoanView {
   readonly status: 'active' | 'repaid' | 'overdue';
   readonly issuedAt: string;
   readonly repaidAt: string | null;
+}
+
+function RepaymentForm({ loanId, state, action }: {
+  readonly loanId: string;
+  readonly state: ActionState;
+  readonly action: (formData: FormData) => void;
+}) {
+  const [key, rotateKey] = useRetryKey(state);
+  return (
+    <form action={action} className="flex flex-wrap items-end gap-2">
+      <input type="hidden" name="loanId" value={loanId} />
+      <input type="hidden" name="idempotencyKey" value={key} />
+      <AmountInput name="amount" className="w-40" placeholder="0" ariaLabel="상환할 WLD" onChange={rotateKey} required />
+      <SubmitButton variant="outline" disabled={!key}>
+        <T korean="상환" english="Repay" />
+      </SubmitButton>
+    </form>
+  );
 }
 
 export function LoanList({ loans }: { readonly loans: readonly LoanView[] }) {
@@ -266,21 +300,7 @@ export function LoanList({ loans }: { readonly loans: readonly LoanView[] }) {
             </Badge>
           </div>
 
-          {loan.status !== 'repaid' && (
-            <form action={action} className="flex flex-wrap items-end gap-2">
-              <input type="hidden" name="loanId" value={loan.loanId} />
-              <AmountInput
-                name="amount"
-                className="w-40"
-                placeholder="0"
-                ariaLabel="상환할 WLD"
-                required
-              />
-              <SubmitButton variant="outline">
-                <T korean="상환" english="Repay" />
-              </SubmitButton>
-            </form>
-          )}
+          {loan.status !== 'repaid' && <RepaymentForm loanId={loan.loanId} state={state} action={action} />}
         </div>
       ))}
       <ActionAlert state={state} />
