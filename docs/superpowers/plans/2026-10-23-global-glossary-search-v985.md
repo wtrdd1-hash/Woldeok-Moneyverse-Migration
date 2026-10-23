@@ -9,15 +9,15 @@
 **Tech Stack:** Next.js App Router, TypeScript, Vitest, Playwright Chromium.
 
 ## Task 1 — RED
-- [ ] Add `frontend/src/app/search/glossary-search.test.ts` for slug, KO/EN/JA/ZH names, public-only canonical URL, case-insensitive matching, blank query, deduplication and bounds.
-- [ ] Execute focused test and record RED failure.
+- [x] Add `frontend/src/app/search/glossary-search.test.ts` for slug, KO/EN/JA/ZH names, public-only canonical URL, case-insensitive matching, blank query, deduplication and bounds.
+- [x] Execute focused test and record RED failure.
 
 ## Task 2 — GREEN
-- [ ] Add pure `searchGlossaryTerms` helper in `frontend/src/app/search/search.ts` reusing canonical glossary data.
-- [ ] Add SSR results section to `frontend/src/app/search/page.tsx`, noindex and semantic headings, mobile layout and screen-reader count.
-- [ ] Execute focused test and component SSR regression.
+- [x] Add pure `searchGlossaryTerms` helper in `frontend/src/app/search/search.ts` reusing canonical glossary data.
+- [x] Add SSR results section to `frontend/src/app/search/page.tsx`, noindex and semantic headings, mobile layout and screen-reader count.
+- [x] Execute focused test and component SSR regression.
 
 ## Task 3 — Verification and release
-- [ ] Re-fetch latest main and both plans; check open PRs for overlap.
-- [ ] Run exact-HEAD focused + full lint/typecheck/build/unit/integration/security/app-api/real PostgreSQL and mobile/desktop E2E; capture any failures precisely.
-- [ ] Open Draft PR only, preserve other agents' branches, do not merge/deploy without every gate PASS. Update English/Korean worklogs at midpoint and closeout.
+- [x] Re-fetch latest main and both plans; check open PRs for overlap.
+- [x] Attempt exact-HEAD focused + full lint/typecheck/build/unit/integration/security/app-api/real PostgreSQL and mobile/desktop E2E; capture any failures precisely. Full lint/audit/CI failed and real PostgreSQL/official Test remain BLOCKED.
+- [x] Open Draft PR only, preserve other agents' branches, do not merge/deploy without every gate PASS. Update English/Korean worklogs at midpoint and closeout.
