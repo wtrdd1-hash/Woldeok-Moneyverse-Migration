@@ -15,7 +15,7 @@
 - Maintain CSRF, actor ownership, mobile and keyboard semantics, noindex.
 
 ## Tasks
-1. [ ] Add action regression tests proving same form key forwarded unchanged on retry, malformed keys rejected without API writes, and created-thread receipt determines redirect. Run tests to observe RED.
-2. [ ] Implement minimal actions and server-rendered hidden UUID fields; validate UUID before API calls. Run focused tests GREEN.
-3. [ ] Add regression tests for server page key binding, accessible field labels and SEO, then verify focused tests.
+1. [x] Add action regression tests proving same form key forwarded unchanged on retry, malformed keys rejected without API writes, and created-thread receipt determines redirect. Run tests to observe RED.
+2. [x] Implement minimal actions and server-rendered hidden UUID fields; validate UUID before API calls. Run focused tests GREEN.
+3. [x] Add regression tests for server page key binding, accessible field labels and SEO, then verify focused tests.
 4. [ ] Fetch main/plan again, run exact-SHA gates, inspect CI, record blockers; open Draft PR only unless all release gates pass.
