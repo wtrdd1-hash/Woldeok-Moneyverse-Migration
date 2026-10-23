@@ -29,6 +29,13 @@ describe('account security mobile accessibility', () => {
     expect(source).not.toContain('최근 OAuth 본인 확인 후에만 허용됩니다.');
   });
 
+  it('labels email change request and completion events without exposing email addresses', () => {
+    expect(source).toContain("local_email_change_requested: '로그인 이메일 변경 요청'");
+    expect(source).toContain("local_email_changed: '로그인 이메일 변경 완료'");
+    expect(source).toContain('action={requestLocalEmailChange}');
+    expect(source).toContain('name="email" type="email"');
+  });
+
   it('retains the member-only and noindex security boundary', () => {
     expect(source).toContain('await requireMember();');
     expect(source).toContain('robots: { index: false, follow: false }');
