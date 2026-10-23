@@ -1,226 +1,203 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-  Bell,
-  CheckCheck,
-  Building2,
-  Landmark,
-  Trophy,
-  Home,
-  ShieldAlert,
-  Sparkles,
-  Inbox,
-  Clock,
-} from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Bell, CheckCheck, Clock, Inbox, RefreshCw } from 'lucide-react';
+import { parseNotificationFeed, type NotificationItem } from '@/components/notification-feed';
 
-export type NotificationCategory =
-  | 'ALL'
-  | 'BUSINESS'
-  | 'BANK'
-  | 'SEASON'
-  | 'SPACE'
-  | 'SECURITY'
-  | 'SYSTEM';
+const CATEGORY_LABELS: Readonly<Record<string, string>> = {
+  TRANSACTIONAL: '송금·거래',
+  PRODUCT_ACTIVITY: '서비스 활동',
+  SEASON_LIVEOPS: '시즌·이벤트',
+  SECURITY_CRITICAL: '보안·인증',
+  SYSTEM: '시스템',
+};
 
-interface NotificationItem {
-  readonly id: string;
-  readonly category: NotificationCategory;
-  readonly title: string;
-  readonly message: string;
-  readonly time: string;
-  read: boolean;
+function categoryLabel(category: string): string {
+  return CATEGORY_LABELS[category] ?? '기타';
 }
 
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'notif-1',
-    category: 'BUSINESS',
-    title: '원자재 조달 및 수급 완료',
-    message: '스마트 편의점 부자재 20개 입고 완료. 운영비 2% 하드 싱크(20 WLD) 소각 정산되었습니다.',
-    time: '10분 전',
-    read: false,
-  },
-  {
-    id: 'notif-2',
-    category: 'BANK',
-    title: '일일 게임 예금 이자 적립 대기',
-    message: '새로운 가상 예금 이자 +1,840 WLD가 계산되었습니다. 가상 은행 화면에서 수령하세요.',
-    time: '1시간 전',
-    read: false,
-  },
-  {
-    id: 'notif-3',
-    category: 'SEASON',
-    title: '시즌 1: First Capital 랭킹 업데이트',
-    message: '시즌 명예 순위가 갱신되었습니다. 현재 상위 5위권 헌액록을 확인해 보세요.',
-    time: '3시간 전',
-    read: false,
-  },
-  {
-    id: 'notif-4',
-    category: 'SPACE',
-    title: '개인 공간 인테리어 VIBE 달성',
-    message: '스타터 룸 가구 배치로 룸 분위기 점수 120pt를 달성했습니다.',
-    time: '어제',
-    read: true,
-  },
-  {
-    id: 'notif-5',
-    category: 'SECURITY',
-    title: '보안 감사 세션 확인',
-    message: '새로운 브라우저 환경에서 안전한 세션 토큰이 발급되었습니다.',
-    time: '2일 전',
-    read: true,
-  },
-  {
-    id: 'notif-6',
-    category: 'SYSTEM',
-    title: '머니버스 v392 경제 엔진 활성화',
-    message: '사업체 공급망 루프와 5대 혁신 위젯이 성공적으로 가동되었습니다.',
-    time: '3일 전',
-    read: true,
-  },
-];
+async function postRead(payload: { notificationId: string } | { markAll: true }): Promise<unknown> {
+  const response = await fetch('/api/notifications', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Moneyverse-Notification-Action': '1' },
+    credentials: 'same-origin',
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) throw new Error('Read receipt unavailable');
+  return response.json();
+}
 
-const CATEGORIES: { id: NotificationCategory; label: string; icon: React.ElementType }[] = [
-  { id: 'ALL', label: '전체', icon: Bell },
-  { id: 'BUSINESS', label: '사업·공급망', icon: Building2 },
-  { id: 'BANK', label: '금융·이자', icon: Landmark },
-  { id: 'SEASON', label: '시즌·순위', icon: Trophy },
-  { id: 'SPACE', label: '공간·도시', icon: Home },
-  { id: 'SECURITY', label: '보안·인증', icon: ShieldAlert },
-  { id: 'SYSTEM', label: '시스템', icon: Sparkles },
-];
-
+/**
+ * The account inbox must show the same actor-scoped DB receipts as the header
+ * notification center. A local sample feed can falsely assert money movement.
+ */
 export function NotificationTabsBar() {
-  const [items, setItems] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
-  const [selectedCat, setSelectedCat] = useState<NotificationCategory>('ALL');
+  const [items, setItems] = useState<NotificationItem[]>([]);
+  const [status, setStatus] = useState<'loading' | 'error' | 'ready'>('loading');
+  const [selectedCat, setSelectedCat] = useState('ALL');
+  const [actionError, setActionError] = useState(false);
+  const [mutating, setMutating] = useState(false);
+  const requestId = useRef(0);
+  const mutationPending = useRef(false);
 
-  const unreadCount = items.filter((item) => !item.read).length;
+  const loadFeed = useCallback(async () => {
+    const id = ++requestId.current;
+    setStatus('loading');
+    try {
+      const response = await fetch('/api/notifications?limit=50', {
+        credentials: 'same-origin',
+        cache: 'no-store',
+      });
+      if (!response.ok) throw new Error('Feed unavailable');
+      const verified = parseNotificationFeed(await response.json());
+      if (id === requestId.current) {
+        setItems(verified);
+        setStatus('ready');
+      }
+    } catch {
+      if (id === requestId.current) {
+        setItems([]);
+        setStatus('error');
+      }
+    }
+  }, []);
 
-  const handleMarkAllAsRead = () => {
-    setItems((prev) => prev.map((item) => ({ ...item, read: true })));
+  useEffect(() => {
+    void loadFeed();
+    return () => { requestId.current += 1; };
+  }, [loadFeed]);
+
+  const markOneRead = async (id: string) => {
+    if (mutationPending.current) return;
+    mutationPending.current = true;
+    setMutating(true);
+    setActionError(false);
+    try {
+      const receipt = await postRead({ notificationId: id });
+      if (!receipt || typeof receipt !== 'object' || !('read' in receipt) || receipt.read !== true) {
+        throw new Error('Invalid read receipt');
+      }
+      setItems((current) => current.map((item) =>
+        item.id === id ? { ...item, is_read: true } : item));
+    } catch {
+      setActionError(true);
+    } finally {
+      mutationPending.current = false;
+      setMutating(false);
+    }
   };
 
-  const handleItemClick = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, read: true } : item)),
-    );
+  const markAllRead = async () => {
+    if (mutationPending.current) return;
+    mutationPending.current = true;
+    setMutating(true);
+    setActionError(false);
+    try {
+      const receipt = await postRead({ markAll: true });
+      const count = receipt && typeof receipt === 'object' && 'updatedCount' in receipt
+        ? receipt.updatedCount : null;
+      if (typeof count !== 'number' || !Number.isSafeInteger(count) || count < 0) {
+        throw new Error('Invalid read-all receipt');
+      }
+      // The DB read-all function operates on this member's entire inbox.
+      // A zero update against an older local snapshot needs a fresh read.
+      if (count === 0 && items.some((item) => !item.is_read)) {
+        await loadFeed();
+      } else {
+        setItems((current) => current.map((item) => ({ ...item, is_read: true })));
+      }
+    } catch {
+      setActionError(true);
+    } finally {
+      mutationPending.current = false;
+      setMutating(false);
+    }
   };
 
-  const filteredItems = items.filter(
-    (item) => selectedCat === 'ALL' || item.category === selectedCat,
-  );
+  const categories = Array.from(new Set(items.map((item) => item.category)));
+  const filtered = items.filter((item) => selectedCat === 'ALL' || item.category === selectedCat);
+  const unreadCount = items.filter((item) => !item.is_read).length;
 
   return (
-    <div className="space-y-4">
-      {/* 상단 탭 & 일괄 읽음 처리 바 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
-        {/* 가로 스크롤 카테고리 탭 */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            const isSelected = selectedCat === cat.id;
-            const catUnread = items.filter(
-              (i) => !i.read && (cat.id === 'ALL' || i.category === cat.id),
-            ).length;
-
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setSelectedCat(cat.id)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
-                  isSelected
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'bg-muted/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground'
-                }`}
-              >
-                <Icon className="size-3.5" />
-                <span>{cat.label}</span>
-                {catUnread > 0 && (
-                  <span
-                    className={`ml-1 rounded-full px-1.5 py-0.2 text-[10px] font-black ${
-                      isSelected
-                        ? 'bg-background text-primary'
-                        : 'bg-primary/20 text-primary'
-                    }`}
-                  >
-                    {catUnread}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+    <section aria-label="회원 알림 내역" className="grid min-w-0 gap-4">
+      <div className="flex flex-col gap-3 border-b pb-3 sm:flex-row sm:items-center sm:justify-between">
+        <div aria-label="알림 분류" className="flex min-w-0 gap-2 overflow-x-auto pb-1">
+          {[{ id: 'ALL', label: '전체' }, ...categories.map((id) => ({
+            id, label: categoryLabel(id),
+          }))].map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={selectedCat === id}
+              onClick={() => setSelectedCat(id)}
+              className="min-h-11 shrink-0 rounded-xl border px-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              {label}
+            </button>
+          ))}
         </div>
-
-        {/* 전체 읽음 처리 버튼 */}
         <button
           type="button"
-          onClick={handleMarkAllAsRead}
-          disabled={unreadCount === 0}
-          className={`shrink-0 inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-all active:scale-95 ${
-            unreadCount > 0
-              ? 'border-border/80 bg-background text-foreground hover:bg-muted'
-              : 'border-transparent text-muted-foreground/50 cursor-not-allowed'
-          }`}
+          onClick={() => void markAllRead()}
+          disabled={status !== 'ready' || mutating || unreadCount === 0}
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border px-3 text-sm font-semibold disabled:opacity-50"
         >
-          <CheckCheck className="size-4 text-emerald-500" />
-          <span>모두 읽음 ({unreadCount})</span>
+          <CheckCheck aria-hidden="true" className="size-4" />
+          모두 읽음
         </button>
       </div>
-
-      {/* 알림 피드 리스트 */}
-      <div className="space-y-2.5">
-        {filteredItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 py-10 text-center">
-            <Inbox className="size-8 text-muted-foreground/50 mb-2" />
-            <p className="text-sm font-semibold text-muted-foreground">
-              해당 분류의 알림 내역이 없습니다.
-            </p>
-          </div>
-        ) : (
-          filteredItems.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => handleItemClick(item.id)}
-              className={`group flex items-start gap-3.5 rounded-2xl border p-4 transition-all cursor-pointer ${
-                item.read
-                  ? 'border-border/50 bg-card/40 opacity-70 hover:opacity-100 hover:bg-card/70'
-                  : 'border-primary/40 bg-primary/5 shadow-sm hover:border-primary/60 hover:bg-primary/10'
-              }`}
-            >
-              {/* 안읽음 인디케이터 점 */}
-              <div className="mt-1 flex size-2 shrink-0 items-center justify-center">
-                {!item.read && (
-                  <span className="size-2 rounded-full bg-primary animate-pulse" />
+      <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
+        {status === 'loading' ? '알림을 불러오는 중입니다.' :
+          status === 'error' ? '알림 개수를 확인할 수 없습니다.' :
+            `현재 목록 미확인 ${unreadCount}건 · 최근 50건까지 표시`}
+      </p>
+      {actionError && <p role="alert" className="text-sm text-destructive">
+        읽음 처리에 실패했습니다. 목록을 새로고침한 후 다시 시도해 주세요.
+      </p>}
+      {status === 'error' ? (
+        <div role="alert" className="grid justify-items-center gap-3 rounded-xl border p-6 text-center">
+          <p>알림을 불러오지 못했습니다. 알림이 없다는 의미는 아닙니다.</p>
+          <button type="button" onClick={() => void loadFeed()}
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg border px-4">
+            <RefreshCw aria-hidden="true" className="size-4" /> 다시 시도
+          </button>
+        </div>
+      ) : status === 'ready' && filtered.length === 0 ? (
+        <div className="grid justify-items-center gap-2 rounded-xl border border-dashed p-8 text-center">
+          <Inbox aria-hidden="true" className="size-7 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">알림 내역이 없습니다.</p>
+        </div>
+      ) : status === 'ready' ? (
+        <ul className="grid min-w-0 gap-3">
+          {filtered.map((item) => (
+            <li key={item.id} className="min-w-0 rounded-xl border bg-card p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs text-muted-foreground">{categoryLabel(item.category)}</span>
+                  <p className="break-words font-semibold">{item.title}</p>
+                  <p className="mt-1 break-words text-sm text-muted-foreground">{item.body}</p>
+                  <p className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock aria-hidden="true" className="size-3" />
+                    <time dateTime={item.created_at}>
+                      {new Date(item.created_at).toLocaleString('ko-KR')}
+                    </time>
+                  </p>
+                </div>
+                {item.is_read ? (
+                  <span className="text-xs text-muted-foreground">읽음</span>
+                ) : (
+                  <button type="button" disabled={mutating}
+                    onClick={() => void markOneRead(item.id)}
+                    className="min-h-11 shrink-0 rounded-lg border px-3 text-xs font-semibold disabled:opacity-50"
+                    aria-label={`${item.title} 읽음 처리`}>
+                    <Bell aria-hidden="true" className="mr-1 inline size-4" /> 읽음 처리
+                  </button>
                 )}
               </div>
-
-              {/* 내용 */}
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-foreground">
-                      {item.title}
-                    </span>
-                    <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground font-semibold">
-                      {item.category}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0">
-                    <Clock className="size-3" /> {item.time}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {item.message}
-                </p>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
   );
 }
