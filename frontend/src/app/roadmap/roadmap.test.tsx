@@ -116,3 +116,13 @@ describe('RoadmapPage & RoadmapView (i18n Multi-Language Support)', () => {
     expect(screen.getByText(/시연 재생/i)).toBeDefined();
   });
 });
+
+describe('Deoki roadmap entry trust', () => {
+  it('links to a real pet route and never advertises an unverified 5,000 WLD grant', () => {
+    render(<LocaleProvider initialLocale="ko"><RoadmapView /></LocaleProvider>);
+    const link = screen.getByRole('link', { name: /덕이 펫 돌보러 가기/ });
+    expect(link.getAttribute('href')).toBe('/pet');
+    expect(screen.queryByText('+5,000 WLD + 호감도')).toBeNull();
+    expect(screen.getByText(/덕이 펫은.*WLD.*지급되지/)).toBeDefined();
+  });
+});

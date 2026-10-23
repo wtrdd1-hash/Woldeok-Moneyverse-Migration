@@ -283,13 +283,13 @@ export function RoadmapView() {
                   <Heart className="w-4 h-4" /> {t('02. 덕이 펫 돌보기', '02. Deoki Pet Care', '02. ドギペットのお世話', '02. 德克宠物抚育')}
                 </span>
                 <Badge variant="outline" className="text-[10px] border-pink-500/40 text-pink-300 bg-pink-500/10">
-                  {t('매일 보너스', 'Daily Bonus', '毎日ボーナス', '每日福利')}
+                  {t('보상 없음', 'No payout', '報酬なし', '无奖励')}
                 </Badge>
               </div>
               <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800/80 text-center space-y-1">
                 <div className="text-2xl">🦆</div>
                 <div className="text-xs font-bold text-pink-300 font-mono">
-                  {t('+5,000 WLD + 호감도', '+5,000 WLD + Love', '+5,000 WLD + 親密度', '+5,000 WLD + 好感度')}
+                  {t('정보성 점괘 · 보상 없음', 'Informational quote · No payout', 'おみくじ・報酬なし', '趣味签文·无奖励')}
                 </div>
                 <div className="text-[10px] text-zinc-400">
                   {t('쓰다듬기 & 먹이주기', 'Pet & Feed', '撫でる＆餌やり', '抚摸与喂食')}
@@ -297,10 +297,10 @@ export function RoadmapView() {
               </div>
               <p className="text-xs text-zinc-300 leading-relaxed">
                 {t(
-                  '마스코트 덕이 펫을 쓰다듬고 먹이를 주면 친밀도가 올라가며 일일 케어 지원금을 지급합니다.',
-                  'Pet and feed mascot Deoki to increase affection level and receive daily care subsidies.',
-                  'マスコットのドギを撫でて餌をあげると親密度が上がり、毎日のケア支援金が支給されます。',
-                  '抚摸吉祥物小德克并喂食，提升好感度即可领取每日专属抚育补贴。'
+                  '덕이 펫은 화면에서만 친밀도를 표시하며 WLD가 지급되지 않습니다. 서버에서 정보성 점괘를 확인할 수 있습니다.',
+                  'Deoki affection is local to this screen. No WLD is paid; the server provides an informational fortune.',
+                  'ドギの親密度は画面内のみです。WLDは支給されず、サーバーがおみくじを表示します。',
+                  '德克好感度仅在当前画面显示。不发放 WLD，服务器仅提供趣味签文。'
                 )}
               </p>
             </div>
@@ -594,7 +594,7 @@ export function RoadmapView() {
                     <div className="flex justify-between items-center">
                       <span className="text-pink-400 font-bold text-sm flex items-center gap-1.5">
                         <Heart className="w-4 h-4" />{' '}
-                        {t('씬 02: 마스코트 덕이 펫 케어 & 보너스 수령', 'Scene 02: Mascot Deoki Pet Care & Subsidy', 'シーン02：ドギペット育成＆ボーナス受取', '第2幕：德克宠物互动抚育与福利领取')}
+                        {t('씬 02: 덕이 펫과 정보성 점괘', 'Scene 02: Deoki Pet and Informational Fortune', 'シーン02：ドギのおみくじ', '第2幕：德克宠物与趣味签文')}
                       </span>
                       <Badge className="bg-pink-500/20 text-pink-300 border-pink-500/40">
                         {t('호감도 Lv.2', 'Affection Lv.2', '親密度 Lv.2', '好感度 Lv.2')}
@@ -614,9 +614,9 @@ export function RoadmapView() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-emerald-400 font-bold text-sm">+5,000 WLD</div>
+                          <div className="text-emerald-400 font-bold text-sm">{t('WLD 지급 없음', 'No WLD payout', 'WLD支給なし', '不发放 WLD')}</div>
                           <div className="text-[10px] text-zinc-400">
-                            {t('일일 돌봄 지원금', 'Daily Care Allowance', 'デイリー育成支援金', '每日抚育补贴')}
+                            {t('정보성 점괘', 'Informational fortune', 'おみくじ', '趣味签文')}
                           </div>
                         </div>
                       </div>
@@ -628,7 +628,7 @@ export function RoadmapView() {
                       <span>{t('조작 팁: [쓰다듬기] & [먹이주기]', 'Tip: [Pet] & [Feed]', '操作：[撫でる]＆[餌やり]', '操作提示：[抚摸]与[喂食]')}</span>
                       <span className="text-pink-400 font-bold flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />{' '}
-                        {t('친밀도 +15% 상승', '+15% Affection Gain', '親密度+15%アップ', '好感度+15%提升')}
+                        {t('화면 연출 · 저장 안 됨', 'Local display only · Not saved', '画面演出・保存なし', '仅画面演示·不保存')}
                       </span>
                     </div>
                   </div>
