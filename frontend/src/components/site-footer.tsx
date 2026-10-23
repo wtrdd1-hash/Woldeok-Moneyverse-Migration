@@ -311,6 +311,9 @@ export function SiteFooter() {
               <Link href="/privacy" className={linkClass}>
                 {privacyLabel}
               </Link>
+              <Link href="/accessibility" className={linkClass}>
+                {localeLabel(locale, '읽기 접근성', 'Reading accessibility', '読みやすさ設定', '阅读无障碍')}
+              </Link>
               <Link href="/status" className={linkClass}>
                 {statusLabel}
               </Link>

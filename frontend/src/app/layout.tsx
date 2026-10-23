@@ -21,6 +21,7 @@ import { currentViewer } from '@/lib/viewer';
 import { fetchLatestPolicy } from '@/lib/api';
 import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
 import { POINT_PREFERENCE_SCRIPT } from '@/lib/theme';
+import { READING_SCALE_SCRIPT } from '@/lib/reading-scale';
 import { jsonLd } from '@/lib/json-ld';
 import { AdProviderBootstrap } from '@/components/ad-provider-bootstrap';
 import { cookies } from 'next/headers';
@@ -327,6 +328,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* And the reader's point colour, for the same reason: a colour
             applied after paint is a colour the reader watches change. */}
         <script dangerouslySetInnerHTML={{ __html: POINT_PREFERENCE_SCRIPT }} />
+        {/* The validated device-only text size is applied before the UI paints. */}
+        <script dangerouslySetInnerHTML={{ __html: READING_SCALE_SCRIPT }} />
         {/* Auto-recover from chunk load failures caused by rolling deployments */}
         <script
           dangerouslySetInnerHTML={{

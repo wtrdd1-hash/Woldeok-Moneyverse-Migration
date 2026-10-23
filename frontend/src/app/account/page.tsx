@@ -306,6 +306,14 @@ export default async function AccountPage({
                 </Link>
 
                 <Link
+                  href="/account/accessibility"
+                  className="flex min-h-11 items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted/70 hover:text-primary"
+                >
+                  <span className="flex items-center gap-2.5 min-w-0">읽기 접근성 · 글자 크기</span>
+                  <ChevronRight className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+                </Link>
+
+                <Link
                   href="/account/privacy"
                   className="flex min-h-11 items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted/70 hover:text-primary"
                 >
