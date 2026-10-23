@@ -76,6 +76,27 @@ describe('authenticated wallet mobile cache isolation', () => {
     expect(notModified.headers.get('etag')).toBeNull();
   });
 
+  it.each([
+    ['bank', 'loans'],
+    ['rewards', 'availability'],
+  ])('never caches authenticated %s/%s data or forwards cache validators', async (...parts) => {
+    let outgoing = new Headers();
+    vi.stubGlobal('fetch', vi.fn(async (_target: RequestInfo | URL, init?: RequestInit) => {
+      outgoing = new Headers(init?.headers);
+      return new Response(JSON.stringify({ balance: '12345678901234567890123456789012345678' }), {
+        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600', etag: '"other-user"' },
+      });
+    }));
+    const response = await GET(new NextRequest('https://easy-scraping.com/app-api/v1/' + parts.join('/'), {
+      headers: { cookie: 'session=member-one', 'if-none-match': '"other-user"' },
+    }), ctx(...parts));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('etag')).toBeNull();
+    expect(outgoing.get('if-none-match')).toBeNull();
+    expect(JSON.stringify(await response.json())).toContain('12345678901234567890123456789012345678');
+  });
+
   it('preserves explicit public caching and validators for unrelated media resources', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('bytes', {
       headers: { 'cache-control': 'public, max-age=300', etag: '"image"' },
