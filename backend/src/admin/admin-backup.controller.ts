@@ -3,6 +3,8 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { Controller, Get, Post, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -30,7 +32,7 @@ export interface BackupStatusResponse {
 
 @ApiTags('admin')
 @Controller('admin/backups')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
 export class AdminBackupController {
   private getBackupDir(): string {
     const defaultProd = '/srv/moneyverse-data/backups/daily';
