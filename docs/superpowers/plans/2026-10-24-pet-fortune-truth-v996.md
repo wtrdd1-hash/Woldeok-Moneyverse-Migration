@@ -23,15 +23,15 @@
 - Mobile: 320px content and status announcements remain accessible.
 
 ## Task 1 — backend contract
-- [ ] Write failing backend test: pet/fortune both have `rewardAmount=0`, `rewardCredited=false`, `affinityGained=0`, `simulationOnly=true`, `servedAt` and no `claimedAt`.
-- [ ] Run RED focused test; update controller; run GREEN.
+- [x] Write failing backend test: pet/fortune both have `rewardAmount=0`, `rewardCredited=false`, `affinityGained=0`, `simulationOnly=true`, `servedAt` and no `claimedAt`.
+- [x] Run RED focused test; update controller; run GREEN.
 
 ## Task 2 — browser API and UI
-- [ ] Write failing client tests for no wallet event and frontend tests for success/failure/keyboard.
-- [ ] Run RED; implement no-payout informational UI, error/retry and parent copy.
-- [ ] Run GREEN and accessibility checks.
+- [x] Write failing client tests for no wallet event and frontend tests for success/failure/keyboard.
+- [x] Run RED; implement no-payout informational UI, error/retry and parent copy.
+- [x] Run GREEN and accessibility checks.
 
 ## Task 3 — verification/release HOLD
-- [ ] Fetch origin/main and planning again; review diff for overlap.
-- [ ] Run exact HEAD build/lint/typecheck/unit/integration/real-PG/security/app-api/E2E/CI as available; report SKIP/BLOCKED honestly.
-- [ ] Push English/Korean logs and Draft PR; keep main/Test/Production unchanged if any gate fails.
+- [x] Fetch origin/main and planning again; review diff for overlap.
+- [x] Run exact product HEAD build/lint/typecheck/unit/integration/real-PG/security/app-api/E2E/CI as available; report SKIP/BLOCKED honestly. Release gates remain FAIL/BLOCKED; see worklog.
+- [x] Push English/Korean logs and Draft PR #1089; keep main/Test/Production unchanged because gates failed.
