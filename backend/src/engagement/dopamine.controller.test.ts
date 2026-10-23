@@ -71,3 +71,27 @@ describe('DopamineController - Golden Duck Fever', () => {
     expect(result.newBalance).toBe('50000');
   });
 });
+
+describe('DopamineController - pet fortune receipt truth', () => {
+  const request = { session: { user_id: '11111111-2222-4333-8444-555555555555' } } as unknown as RequestWithSession;
+
+  for (const petAction of ['pet', 'fortune'] as const) {
+    it(`does not claim a WLD payout or persistent affinity for ${petAction}`, async () => {
+      const controller = new DopamineController(null);
+      const result = await controller.claimPetFortune(request, {
+        petAction,
+        idempotencyKey: '11111111-2222-4333-8444-555555555555',
+      });
+      expect(result).toMatchObject({
+        success: true,
+        action: petAction,
+        rewardAmount: 0,
+        rewardCredited: false,
+        affinityGained: 0,
+        simulationOnly: true,
+      });
+      expect(result).toHaveProperty('servedAt');
+      expect(result).not.toHaveProperty('claimedAt');
+    });
+  }
+});

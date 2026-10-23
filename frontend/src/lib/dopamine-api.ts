@@ -20,10 +20,12 @@ export interface PetFortuneResult {
   success: boolean;
   userId: string;
   action: 'pet' | 'fortune';
-  rewardAmount: number;
+  rewardAmount: 0;
+  rewardCredited: false;
+  simulationOnly: true;
   quote: string;
-  affinityGained: number;
-  claimedAt: string;
+  affinityGained: 0;
+  servedAt: string;
 }
 
 export interface BullBearVoteResult {
@@ -55,7 +57,7 @@ export interface StarDropResult {
   claimedAt: string;
 }
 
-async function postDopamine<T>(endpoint: string, body: Record<string, unknown>): Promise<T | null> {
+async function postDopamine<T>(endpoint: string, body: Record<string, unknown>, notifyWallet = true): Promise<T | null> {
   try {
     const res = await fetch(`/app-api/v1/engagement/dopamine/${endpoint}`, {
       method: 'POST',
@@ -72,7 +74,7 @@ async function postDopamine<T>(endpoint: string, body: Record<string, unknown>):
     const data = (await res.json()) as T;
     
     // 브라우저 환경에서 지갑 갱신 이벤트 전파
-    if (typeof window !== 'undefined') {
+    if (notifyWallet && typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('moneyverse:wallet-updated', { detail: data }));
     }
     
@@ -94,13 +96,13 @@ export async function claimGoldenDuckFever(clickCount: number, comboMultiplier: 
 }
 
 /**
- * 덕이 펫 쓰다듬기 또는 1일 1회 포춘쿠키 개봉 보상 수령
+ * 덕이 펫 정보성 점괘 조회 (WLD 지급이나 영속 친밀도 기록 없음)
  */
 export async function claimPetFortune(action: 'pet' | 'fortune'): Promise<PetFortuneResult | null> {
   return postDopamine<PetFortuneResult>('pet-fortune', {
     petAction: action,
-    idempotencyKey: `pet_${action}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-  });
+    idempotencyKey: crypto.randomUUID(),
+  }, false);
 }
 
 /**

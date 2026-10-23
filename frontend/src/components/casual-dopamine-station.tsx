@@ -10,8 +10,6 @@ import {
   Dices,
   TrendingUp,
   Shield,
-  Zap,
-  Coins,
   ChevronRight,
   CheckCircle2,
 } from 'lucide-react';
@@ -69,7 +67,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
 
       {/* Floating Reward Toast */}
       {lastRewardNotice && (
-        <div className="mt-3 flex items-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-950/60 p-3 text-xs font-bold text-emerald-300 shadow-lg animate-fadeIn">
+        <div role="status" aria-live="polite" className="mt-3 flex items-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-950/60 p-3 text-xs font-bold text-emerald-300 shadow-lg animate-fadeIn">
           <CheckCircle2 className="h-4 w-4 text-emerald-400" />
           <span>{lastRewardNotice}</span>
         </div>
@@ -236,8 +234,8 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               </button>
             </div>
             <DeokiPetStation
-              onClaimFortune={(bonusWld, quote) => {
-                showRewardNotice(`포춘쿠키 보너스 +${bonusWld.toLocaleString()} WLD 수령!`);
+              onClaimFortune={() => {
+                showRewardNotice('서버 점괘를 확인했습니다. WLD 지급은 없습니다.');
               }}
               onTriggerFever={() => {
                 setActiveModal('fever');

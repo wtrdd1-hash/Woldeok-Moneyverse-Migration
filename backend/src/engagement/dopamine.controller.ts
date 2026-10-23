@@ -111,7 +111,7 @@ export class DopamineController {
 
   @Post('pet-fortune')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Interact with Deoki Pet and claim daily fortune cookie reward' })
+  @ApiOperation({ summary: 'Get an informational Deoki pet fortune; no WLD or affinity is credited' })
   async claimPetFortune(
     @Req() request: RequestWithSession,
     @Body() body: PetFortuneDto,
@@ -125,16 +125,17 @@ export class DopamineController {
       '분할 매수와 리밸런싱이 최고의 방어선입니다.',
     ];
     const fortuneQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    const rewardAmount = body.petAction === 'fortune' ? 500 + Math.floor(Math.random() * 501) : 100;
-
+    // No ledger or affinity write exists for this endpoint. Do not invent a payout receipt.
     return {
       success: true,
       userId,
       action: body.petAction,
-      rewardAmount,
+      rewardAmount: 0,
+      rewardCredited: false,
+      simulationOnly: true,
       quote: fortuneQuote,
-      affinityGained: body.petAction === 'pet' ? 10 : 50,
-      claimedAt: new Date().toISOString(),
+      affinityGained: 0,
+      servedAt: new Date().toISOString(),
     };
   }
 
