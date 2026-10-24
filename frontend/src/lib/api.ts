@@ -93,6 +93,8 @@ export interface ApiRequest {
   readonly method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   readonly body?: unknown;
   readonly csrfToken?: string;
+  /** Stable caller-supplied retry identity for money-moving requests. */
+  readonly idempotencyKey?: string;
   /** Seconds. Omit for no caching, which is right for anything per-caller. */
   readonly revalidate?: number;
   /** Abort a slow internal API call instead of leaving a server action pending forever. */
@@ -113,7 +115,7 @@ export interface ApiRequest {
  * it decides from what is forwarded here, not from anything Next asserts.
  */
 export async function api<T>(path: string, request: ApiRequest = {}): Promise<T> {
-  const { method = 'GET', body, csrfToken, revalidate, timeoutMs } = request;
+  const { method = 'GET', body, csrfToken, idempotencyKey, revalidate, timeoutMs } = request;
 
   const cookieHeader = request.cookieHeader ?? (await callerCookies());
 
@@ -124,6 +126,12 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
   if (cookieHeader) requestHeaders.cookie = cookieHeader;
   if (body !== undefined) requestHeaders['content-type'] = 'application/json';
   if (csrfToken) requestHeaders['x-csrf-token'] = csrfToken;
+  if (idempotencyKey !== undefined) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey)) {
+      throw new Error('invalid idempotency key');
+    }
+    requestHeaders['idempotency-key'] = idempotencyKey;
+  }
 
   // The real client address, so the API's rate limiter counts the visitor
   // rather than counting this process once for everybody.

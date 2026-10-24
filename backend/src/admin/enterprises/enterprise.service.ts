@@ -33,9 +33,9 @@ export class EnterpriseService {
     return this.repository.listRecentDividendLogs(limit);
   }
 
-  async harvestSoeDividends(adminId?: string) {
+  async harvestSoeDividends(adminId?: string, idempotencyKey?: string) {
     this.logger.log('Starting SOE dividend remittance to Central Treasury...');
-    const result = await this.repository.distributeSoeDividends(adminId);
+    const result = await this.repository.distributeSoeDividends(adminId, idempotencyKey);
     this.logger.log(`SOE dividends harvested: ${result.total_dividends_collected} WLD across ${result.enterprises_processed} SOEs`);
 
     // 디스코드 관리자 알림 발송
@@ -44,8 +44,8 @@ export class EnterpriseService {
         const title = '🏛️ [국가 공기업] 3대 기간 공기업 법정 이익배당 국고 납입 완료';
         const description =
           `월덱 국가투자공사(WSHC) 산하 3대 공기업(W-Power, W-Net, WDB)으로부터 당기순이익 30% 법정 배당금이 중앙 국고로 전액 납입되었습니다.\n\n` +
-          `• **징수 총 배당금**: +${Number(result.total_dividends_collected).toLocaleString('ko-KR')} WLD\n` +
-          `• **국고 잔액**: ${Number(result.treasury_balance_after).toLocaleString('ko-KR')} WLD\n` +
+          `• **징수 총 배당금**: +${BigInt(result.total_dividends_collected).toLocaleString('ko-KR')} WLD\n` +
+          `• **국고 잔액**: ${BigInt(result.treasury_balance_after).toLocaleString('ko-KR')} WLD\n` +
           `• **적용 모델**: 싱가포르 테마섹 + 노르웨이 GPFG 지주회사 배당 환원 체계`;
 
         await this.discordAlertService.sendAdminDirectMessage(
