@@ -17,7 +17,10 @@
 - [x] Main rechecked during work: `c9a868b1e622341e2daa8b936ddf0988eda9988e` unchanged.
 - [x] Failed gates recorded: frontend 1,397 PASS / 6 FAIL (pre-existing i18n, SEO, login, M2 regression); default Turbopack build FAIL (worktree dependency symlink outside root); Webpack build FAIL (1GiB heap OOM); production dependency audit FAIL (2 High: body-parser, multer).
 - [ ] Exact candidate SHA CI, real isolated PostgreSQL application-role/security tests, authenticated E2E, official Test exact-SHA not yet passed. Do not use shared 5433 Production-connected DB.
-- [ ] Draft PR and final status record.
+- [x] Draft PR #1214 created; code commit `5c437dbdb2a75fdc227324038a9dcc097cc7be57`; CI #40121695029 and Build Test Candidate #40121671055 in progress at last check. Issue #1073 updated.
+- [x] Five core reservations confirmed enabled; no automation or other worker branch/worktree modified.
 
-## Finished
-- **PARTIAL / BLOCKED.** Code and regression tests are implemented, but required release gates are not green. No main merge, Test/Production promotion or branch cleanup. Keep B/A/C/planning/QA reservations enabled.
+## Finished — 2026-10-25 03:40 KST
+- **PARTIAL / BLOCKED.** Seven changed files (including runtime code, dependency lockfile, security tests and worklog). Main unchanged at `c9a868b1e622341e2daa8b936ddf0988eda9988e` at final pre-PR check.
+- No API or DB contract change, no migration, no ledger mutation. Real isolated PostgreSQL tests were not run because the worktree has no DB environment and the miniPC root disk is full; do not use shared Production-connected 5433.
+- No main merge, Test/Production promotion, rollback or branch cleanup. Draft PR and unique branch retained. Keep B/A/C/planning/QA reservations enabled.
