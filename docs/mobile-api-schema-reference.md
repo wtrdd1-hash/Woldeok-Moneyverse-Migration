@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.09.22.359**
+Update version: **v2026.10.24.1325**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4751,6 +4751,44 @@ _No request body._
 | recentTransactions[].bankDelta | false | undefined \| string & object |  |
 | recentTransactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
 | recentTransactions[].occurredAt | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/wallet/transactions` — Recent owner-only cash or bank pocket movements (up to 50)
+
+- Authorization: 로그인 + 최신 약관 동의 필수; 본인 거래만 반환
+- Success status: 200
+- Response mode: json
+- After success: 읽기 전용; 변경 없음
+- Operation ID: `WalletController_pocketTransactions`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| pocket | query | true | string | enum="cash","bank" |
+| recent | query | false | string | pattern="^[1-9][0-9]*$"; description="1..50; default 50" |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| pocket | true | string="cash" \| string="bank" |  |
+| limit | true | number |  |
+| transactions[] | true | object[] |  |
+| transactions[] | true | object |  |
+| transactions[].transactionId | true | string |  |
+| transactions[].type | true | string |  |
+| transactions[].label | true | string |  |
+| transactions[].netAmount | true | string & object |  |
+| transactions[].cashDelta | false | undefined \| string & object |  |
+| transactions[].bankDelta | false | undefined \| string & object |  |
+| transactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
+| transactions[].occurredAt | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
