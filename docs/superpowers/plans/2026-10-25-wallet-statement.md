@@ -12,4 +12,4 @@
 2. [x] Implement serializer and controller endpoint (GREEN), no new DB migrations.
 3. [x] Write Android app-api passthrough regression test (existing proxy already supports CSV).
 4. [x] Add member activity download CTA and focused frontend regression.
-5. [ ] Recheck latest main and integrated EN/KO planning mid/final; verify focused/full test and real isolated PG permissions, then PR/HOLD or gated merge.
+5. [x] Recheck latest main and integrated EN/KO planning mid/final; verify focused/full tests and isolated PG permissions; Draft PR/HOLD because full frontend/security/official Test gates fail.
