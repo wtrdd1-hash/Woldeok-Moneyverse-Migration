@@ -8,8 +8,8 @@
 
 **Tech Stack:** Next.js App Router, NestJS existing `/api/v1/stocks`, PostgreSQL existing stock reads, Vitest, React Testing Library.
 
-- [ ] Write failing regression tests for fake trade removal, validated live stock rows, unavailable/empty, keyboard links and metadata.
-- [ ] Run RED and record failure.
-- [ ] Implement server-rendered safe page; avoid adding prediction write routes or database grants.
+- [x] Write failing regression tests for fake trade removal, validated live stock rows, unavailable/empty, keyboard links and metadata.
+- [x] Run RED and record failure.
+- [x] Implement server-rendered safe page; avoid adding prediction write routes or database grants.
 - [ ] Run GREEN, lint, typecheck, build and security/CI checks.
 - [ ] Refresh main, verify changed plan, open Draft PR; never merge/deploy with failed gates.
