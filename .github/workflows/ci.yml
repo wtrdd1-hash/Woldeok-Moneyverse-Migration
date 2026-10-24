@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   classify:
@@ -120,6 +121,15 @@ jobs:
 
       - name: Test release identity classifier and workflow contract
         run: node --test scripts/release/*.test.mjs
+
+      - name: Reject migration numbers claimed by another open PR
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node scripts/release/check-open-pr-migration-numbers.mjs
 
       - name: Test tracked deployment and CI database helpers
         run: |
