@@ -977,17 +977,15 @@ export class TreasuryRepository {
     return res.rows[0]?.result ?? {};
   }
 
-  async getGovernanceVotes(quarter = '2026-Q4'): Promise<{
+  async getGovernanceVotes(actorId: string, quarter = '2026-Q4'): Promise<{
     quarter: string;
     total_votes: number;
     results: { choice: string; count: number; percentage: number }[];
   }> {
     const res = await this.pool.query<{ priority_choice: string; vote_count: string }>(`
-      SELECT priority_choice, count(*)::text as vote_count
-      FROM public.treasury_citizen_budget_votes
-      WHERE quarter = $1
-      GROUP BY priority_choice
-    `, [quarter]);
+      SELECT priority_choice, vote_count::text AS vote_count
+      FROM public.treasury_budget_vote_totals($1::uuid, $2::text)
+    `, [actorId, quarter]);
 
     let total = 0;
     for (const r of res.rows) {
