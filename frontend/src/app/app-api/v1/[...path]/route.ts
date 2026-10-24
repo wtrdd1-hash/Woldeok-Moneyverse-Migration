@@ -145,6 +145,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
+  // The wallet is always session-private, even if a misconfigured upstream
+  // accidentally advertises a shared cache or emits validators.
+  if (parts[0] === 'wallet') {
+    headers.set('cache-control', 'private, no-store');
+    headers.delete('etag');
+    headers.delete('last-modified');
+  }
+
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

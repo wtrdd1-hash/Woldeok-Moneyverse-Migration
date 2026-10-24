@@ -84,6 +84,7 @@ export class WalletRecipientError extends Error {
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
   recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]>;
+  transactionForUser?(userId: string, transactionId: string): Promise<WalletTransactionRow | null>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -381,6 +382,25 @@ export class WalletService {
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
     };
+  }
+
+  /** This is a read-only, committed owner receipt; it never retries a transfer. */
+  async historicalReceiptForUser(
+    authenticatedUserId: string,
+    transactionId: string,
+  ): Promise<(WalletTransactionView & { readonly state: 'CONFIRMED'; readonly historyScope: 'ALL_POSTED' }) | null> {
+    const owner = requireUuid(authenticatedUserId, 'authenticated user id');
+    const reference = requireUuid(transactionId, 'transaction id');
+    if (!this.repository.transactionForUser) {
+      throw new Error('historical wallet receipts are unavailable');
+    }
+    const row = await this.repository.transactionForUser(owner, reference);
+    if (!row) return null;
+    if (requireUuid(row.transaction_id, 'database transaction id') !== reference) {
+      throw new Error('wallet receipt reference mismatch');
+    }
+    const normalized = normalizeTransactions([row])[0]!;
+    return { ...normalized, state: 'CONFIRMED', historyScope: 'ALL_POSTED' };
   }
 
   async transfer(

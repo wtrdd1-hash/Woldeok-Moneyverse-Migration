@@ -31,6 +31,7 @@ import { requireMember } from '@/lib/session';
 import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
 import { PortfolioAllocationRadar } from '@/components/portfolio-allocation-radar';
 import { sides } from './sides';
+import { postingAmount } from './sides';
 import type { Overview } from './sides';
 import { ExportLedgerCsvButton } from './export-ledger-csv';
 import {
@@ -438,14 +439,20 @@ export default async function WalletPage() {
                 rows={recentTransactions.map((entry) => {
                   const { debit, credit } = sides(entry);
                   return (
-                    <PostingStrip
+                    <Link
                       key={entry.transactionId}
-                      debit={debit}
-                      credit={credit}
-                      amount={entry.netAmount}
-                      label={entry.label}
-                      at={formatMoment(entry.occurredAt)}
-                    />
+                      href={`/wallet/activity/${encodeURIComponent(entry.transactionId)}`}
+                      aria-label={`${entry.label} 거래 영수증 보기`}
+                      className="block rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:bg-muted/30"
+                    >
+                      <PostingStrip
+                        debit={debit}
+                        credit={credit}
+                        amount={postingAmount(entry) ?? entry.netAmount}
+                        label={entry.label}
+                        at={formatMoment(entry.occurredAt)}
+                      />
+                    </Link>
                   );
                 })}
               />
