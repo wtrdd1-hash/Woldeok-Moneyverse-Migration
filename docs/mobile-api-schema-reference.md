@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.09.22.359**
+Update version: **v2026.10.25.0625**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -1211,6 +1211,43 @@ _None._
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
 | transactionId | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/banking/bonds/:id/redemption-preview` — Owner-only read-only virtual bond redemption projection; never a payment receipt
+
+- Authorization: 로그인 + 최신 동의 (본인 보유 채권만, 응답 private/no-store)
+- Success status: 200
+- Response mode: json
+- After success: 미리보기는 금융 거래가 아니며, 실제 수령 요청 후 별도 영수증과 최신 은행 잔액을 확인
+- Operation ID: `BankController_redemptionPreview`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| bondId | true | string |  |
+| bondName | true | string |  |
+| bondCode | true | string |  |
+| principalAmount | true | string |  |
+| maturityAmount | true | string |  |
+| maturityAt | true | string |  |
+| currentCashBalance | true | string |  |
+| projectedCashBalance | true | string |  |
+| maturityStatus | true | string="LOCKED" \| string="MATURED" |  |
+| eligibleForRedemption | true | boolean |  |
+| previewOnly | true | boolean=true | const=true |
+| payoutGuaranteed | true | boolean=false | const=false |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

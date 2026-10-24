@@ -1,5 +1,5 @@
 {
-  "contractVersion": "v2026.09.22.359",
+  "contractVersion": "v2026.10.25.0625",
   "apiVersion": "v2026.09.22.359",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
@@ -3423,6 +3423,121 @@
         },
         "required": [
           "transactionId"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/banking/bonds/:id/redemption-preview",
+      "purpose": "본인 보유 가상 채권의 만기 수령 예상액을 읽기 전용으로 확인 (실제 지급 아님)",
+      "callWhen": "보유 채권에서 수령 예상액 확인을 눌렀을 때",
+      "authorization": "로그인 + 최신 동의 (본인 보유 채권만, 응답 private/no-store)",
+      "afterSuccess": "미리보기는 금융 거래가 아니며, 실제 수령 요청 후 별도 영수증과 최신 은행 잔액을 확인",
+      "backendRoute": "/api/banking/bonds/:id/redemption-preview",
+      "operationId": "BankController_redemptionPreview",
+      "backendOpenApiPath": "/banking/bonds/{id}/redemption-preview",
+      "summary": "Owner-only read-only virtual bond redemption projection; never a payment receipt",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "bondId",
+          "bondName",
+          "principalAmount",
+          "maturityAmount",
+          "currentCashBalance",
+          "projectedCashBalance",
+          "maturityStatus",
+          "eligibleForRedemption",
+          "previewOnly",
+          "payoutGuaranteed"
+        ],
+        "note": "All WLD amounts are canonical integer strings. Never treat previewOnly=true as a committed payment."
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "bondId": {
+            "type": "string"
+          },
+          "bondName": {
+            "type": "string"
+          },
+          "bondCode": {
+            "type": "string"
+          },
+          "principalAmount": {
+            "type": "string"
+          },
+          "maturityAmount": {
+            "type": "string"
+          },
+          "maturityAt": {
+            "type": "string"
+          },
+          "currentCashBalance": {
+            "type": "string"
+          },
+          "projectedCashBalance": {
+            "type": "string"
+          },
+          "maturityStatus": {
+            "oneOf": [
+              {
+                "type": "string",
+                "const": "LOCKED"
+              },
+              {
+                "type": "string",
+                "const": "MATURED"
+              }
+            ]
+          },
+          "eligibleForRedemption": {
+            "type": "boolean"
+          },
+          "previewOnly": {
+            "type": "boolean",
+            "const": true
+          },
+          "payoutGuaranteed": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "required": [
+          "bondId",
+          "bondName",
+          "bondCode",
+          "principalAmount",
+          "maturityAmount",
+          "maturityAt",
+          "currentCashBalance",
+          "projectedCashBalance",
+          "maturityStatus",
+          "eligibleForRedemption",
+          "previewOnly",
+          "payoutGuaranteed"
         ]
       },
       "responseCompatibility": {

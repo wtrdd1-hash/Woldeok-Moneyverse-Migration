@@ -36,6 +36,29 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('proxies private bond redemption previews with session and no-store', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const bondId = '0a0a0a0a-0000-4000-8000-000000000001';
+    const proxyFetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      expect(init?.method).toBe('GET');
+      expect(init?.cache).toBe('no-store');
+      expect(new Headers(init?.headers).get('cookie')).toBe('test_session=example');
+      return new Response(JSON.stringify({ bondId, previewOnly: true, payoutGuaranteed: false }), {
+        status: 200,
+        headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', proxyFetch);
+    const response = await GET(
+      request(`/app-api/v1/banking/bonds/${bondId}/redemption-preview`, { cookie: 'test_session=example' }),
+      context('banking', 'bonds', bondId, 'redemption-preview'),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ bondId, previewOnly: true });
+    expect(proxyFetch).toHaveBeenCalledTimes(1);
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

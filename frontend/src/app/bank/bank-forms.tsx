@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import Link from 'next/link';
 import {
   Coins,
   CreditCard,
@@ -658,6 +659,13 @@ export function VirtualBondsCard({
                     </div>
                   </div>
 
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href={`/bank/bonds/redeem-preview?bondId=${encodeURIComponent(bond.id)}`}
+                      className="inline-flex min-h-11 items-center rounded-lg border border-border px-3 text-xs font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2"
+                    >
+                      <T korean="수령 예상액 확인" english="Preview payout" />
+                    </Link>
                   {bond.is_matured && (
                     <form action={doRedeem} className="shrink-0">
                       <input type="hidden" name="bondId" value={bond.id} />
@@ -667,6 +675,7 @@ export function VirtualBondsCard({
                       </SubmitButton>
                     </form>
                   )}
+                  </div>
                 </div>
               ))}
               <ActionAlert state={redeemState} />

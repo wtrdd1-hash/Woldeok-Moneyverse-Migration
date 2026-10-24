@@ -5,7 +5,9 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Post,
@@ -28,7 +30,7 @@ import {
   BankTransferDto,
   IdempotentDto,
 } from './bank.dto';
-import { BankInputError, BankRepository } from './bank.repository';
+import { BankBondNotFoundError, BankInputError, BankReadUnavailableError, BankRepository } from './bank.repository';
 
 @ApiTags('banking')
 @Controller('banking')
@@ -46,6 +48,8 @@ export class BankController {
       return await work();
     } catch (error: unknown) {
       if (error instanceof BankInputError) throw new BadRequestException(error.message);
+      if (error instanceof BankBondNotFoundError) throw new NotFoundException('bond is unavailable');
+      if (error instanceof BankReadUnavailableError) throw new ServiceUnavailableException('verified bank standing unavailable');
       if (isAuthorizationFailure(error)) throw new ForbiddenException('this is not yours');
       if (isExpectedCommandFailure(error)) {
         const msg = error instanceof Error && error.message ? error.message : conflictMessage;
@@ -138,6 +142,16 @@ export class BankController {
           body.amount,
         ),
       'failed to repay loan',
+    );
+  }
+
+  @Get('bonds/:id/redemption-preview')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Owner-only, read-only virtual bond redemption projection (not a payout)' })
+  redemptionPreview(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) bondId: string) {
+    return this.guarded(
+      () => this.repository().getBondRedemptionPreview(requireUserId(request), bondId),
+      'verified bond preview unavailable',
     );
   }
 
