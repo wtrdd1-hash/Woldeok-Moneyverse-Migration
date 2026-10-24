@@ -37,6 +37,26 @@ describe.skipIf(!DATABASE_URL)('wallet against a real database', () => {
     );
   });
 
+  it('reads exact owner cash/bank allocation using the real read-only PostgreSQL projection', async () => {
+    const sample = await pool.query<{ owner_user_id: string }>(
+      `SELECT owner_user_id::text FROM public.accounts
+       WHERE account_type = 'USER_CASH' AND owner_user_id IS NOT NULL LIMIT 1`,
+    );
+    const owner = sample.rows[0]?.owner_user_id;
+    if (!owner) {
+      await expect(service.allocation(UNKNOWN_USER)).rejects.toThrow('active cash and bank wallets are required');
+      return;
+    }
+    const allocation = await service.allocation(owner);
+    const cash = BigInt(allocation.cash.availableAmount);
+    const bank = BigInt(allocation.bank.availableAmount);
+    expect(allocation.totalAvailableAmount).toBe((cash + bank).toString());
+    expect(cash >= 0n && bank >= 0n).toBe(true);
+    expect(BigInt(allocation.cash.shareBps) + BigInt(allocation.bank.shareBps)).toBe(
+      cash + bank === 0n ? 0n : 10000n,
+    );
+  });
+
   it('finds no loans for a user who has none', async () => {
     await expect(service.loans(UNKNOWN_USER)).resolves.toEqual([]);
   });
