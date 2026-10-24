@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { WldAmount } from '@moneyverse/contract';
 import { wldAmount } from '@moneyverse/contract';
 import type {
@@ -177,6 +177,17 @@ export interface WalletLoanView {
   readonly status: WalletLoanStatus;
   readonly issuedAt: string;
   readonly repaidAt: string | null;
+}
+
+/** Owner-only snapshot of the virtual loan read model. No WLD is moved. */
+export interface WalletLoanObligations {
+  readonly currency: 'WLD';
+  readonly loanCount: number;
+  readonly activeCount: number;
+  readonly overdueCount: number;
+  readonly repaidCount: number;
+  readonly outstandingAmount: WldAmount;
+  readonly overdueOutstandingAmount: WldAmount;
 }
 
 export interface WalletBorrowReceipt {
@@ -512,6 +523,45 @@ export class WalletService {
       issuedAt: timestamp(row.issued_at, 'loan issued timestamp'),
       repaidAt: row.repaid_at ? timestamp(row.repaid_at, 'loan repaid timestamp') : null,
     }));
+  }
+
+  async loanObligations(authenticatedUserId: string): Promise<WalletLoanObligations> {
+    // Unlike the legacy loan list, this endpoint must not report zero when
+    // the DB read model is unavailable. A genuine empty result is distinct.
+    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
+    if (typeof this.repository.loansForUser !== 'function') {
+      throw new ServiceUnavailableException('loan read model is unavailable');
+    }
+    const loans = await this.loans(actor);
+    let activeCount = 0;
+    let overdueCount = 0;
+    let repaidCount = 0;
+    let outstanding = 0n;
+    let overdueOutstanding = 0n;
+    for (const loan of loans) {
+      const amount = BigInt(loan.outstandingAmount);
+      if (amount < 0n) throw new Error('database returned negative loan outstanding');
+      if (loan.status === 'active') {
+        activeCount += 1;
+        outstanding += amount;
+      } else if (loan.status === 'overdue') {
+        overdueCount += 1;
+        outstanding += amount;
+        overdueOutstanding += amount;
+      } else {
+        if (amount !== 0n) throw new Error('database returned repaid loan with outstanding debt');
+        repaidCount += 1;
+      }
+    }
+    return {
+      currency: 'WLD',
+      loanCount: loans.length,
+      activeCount,
+      overdueCount,
+      repaidCount,
+      outstandingAmount: wldAmount(outstanding.toString(), 'loan outstanding total'),
+      overdueOutstandingAmount: wldAmount(overdueOutstanding.toString(), 'overdue outstanding total'),
+    };
   }
 
   async borrow(
