@@ -1,5 +1,43 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1234 — F675-115 구매 인증형 상점 후기: 증빙·심사·삭제 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+
+### 회차·정본·실제 소스 및 설계 수정
+- 이전 **기능 추가 v1232**(미병합 Draft #1167) → 현재 **기능 보완 v1234** → 다음 **기능 추가 v1236**(잠정). main `49788d09494fed3e463651945b83386e87dd47bc`와 main 영문 정본/국문 대조 기획서를 시작·중간 재조회. v1232는 **미배포 문서 제안**이다. 최신 완료 QA **v1240(2026-10-24 20:57 KST) FAILED/HOLD**; v1239 전체 테스트는 이번 QA에서 재실행하지 않았다. 런타임·DB·원장·WLD·Test·Production·기능 스위치 변경 없음.
+- 실제 Migration 071: `shop_purchases(id,user_id,catalog_id,quantity,unit_price,transaction_id NOT NULL REFERENCES ledger_transactions,idempotency_key UNIQUE)`, `shop_catalog(active)`. Migration 072는 구매·경제 원장 기록을 트랜잭션으로 처리하고, Migration 218은 경제 명령 재시도 영수증을 구매 행과 대조한다. 그러나 **원장 FK만으로 취소·역분개·최종 확정 여부까지 증명되지는 않는다**. Migration 168의 관리자는 `shop_catalog.active`를 변경할 수 있으며 관리자 상점 컨트롤러는 AdminGuard·AdminSessionGuard, 변경 시 CSRF·Reauth를 요구한다. 후기 테이블/API는 main에 **미구현**. 기존 `GET /api/v1/shop/purchases`는 레거시 구매 목록으로 Store 2.0 인증 증빙이 아니다.
+- v1232 수정점: (1) `UNIQUE(user_id,catalog_id)`가 있으면 철회 후 신규 INSERT가 불가능하므로 **회원·상품당 영속 행 1개**, WITHDRAWN은 승인된 재개 정책 전까지 최종 상태로 정의한다. (2) 관리자의 승인은 후기 ID뿐 아니라 **본문 버전과 해시**에 묶는다. (3) 멱등 영수증은 **과거 확정 결과**이지 현재 공개 상태가 아니다. (4) FK 삭제/개인정보 보존은 무조건 CASCADE/RESTRICT가 아닌 승인된 정책이 필요하다. (5) 공개 커서가 심사·숨김과 동시에 변경되면 고정 스냅샷을 보장한다고 주장하지 않는다.
+
+### 회원·관리자·Android 화면, 상태, 접근성, SEO
+- v1232 진입점 유지: `/shop`의 **인증 후기 보기**, 로그인 및 구매 검증 후 **후기 작성**; `/account/shop-reviews`의 **내 후기/수정/철회/상태 새로고침**; `/admin/shop/reviews`의 **검토/승인/거절/숨김/감사**. 신규 공개 상품 상세 URL, 유료 보상, 후기 기반 WLD·재고·보유 아이템 변경은 제외. 평점 정수 1~5, 정규화된 유니코드 본문 30~1,500자 유지.
+- 상태 `SOURCE_UNVERIFIED`(원장·상품 조회 실패), `NOT_ELIGIBLE`(신뢰 가능한 부적격), `ELIGIBLE`, `PENDING_MODERATION`, `APPROVED_VISIBLE`, `HIDDEN_BY_OPERATOR`, `WITHDRAWN`, `STALE_REVISION`, `UNKNOWN_COMMIT`, `SIGNED_OUT` 구분. 현재 상태는 새로 조회한 본인 전용 API만 확정하며 동일 요청 재시도 시 과거 영수증과 현재 상태를 분리 표시한다. 상품 비활성·삭제 시 공개 후기/집계는 숨기되 본인은 상품 정보를 가린 채 철회할 수 있어야 한다. 증빙 조회 실패를 후기 0건·구매 없음으로 오표시 금지.
+- 공개 API는 승인된 **현재 본문 버전**과 활성 상품만 반환하고 안전하게 텍스트 렌더링한다. 초기 공개 후기 API는 심사 취소 지연 검증 전 `Cache-Control: no-store`, 본인/관리자 BFF는 `private,no-store`; 개인정보 화면 `noindex,nofollow`, 로그아웃·계정 전환 시 응답 무효화. `Review`/`AggregateRating` JSON-LD·가짜 별점·신규 사이트맵 금지. WCAG 2.2 AA 입력 라벨·오류 연결·상태 알림·포커스 복구·320px/400% 확대·움직임 줄이기, Android 동일 세션/동의/CSRF/버전/영수증 계약, 오프라인 승인 완료 표시 금지.
+
+### 제안 API·DB·잠금·멱등 영수증(미구현)
+- v1232 API 유지: 공개 `GET /api/v1/shop/catalog/:catalogId/reviews?limit=1..50&cursor=`, 본인 `GET /api/v1/shop/reviews/mine`, `GET /api/v1/shop/reviews/receipts/:requestKey`, `POST /api/v1/shop/catalog/:catalogId/reviews`, `PATCH/DELETE /api/v1/shop/reviews/:reviewId`; 관리자 `GET /api/v1/admin/shop/reviews`, `POST /api/v1/admin/shop/reviews/:id/moderation`. 모든 쓰기는 세션·동의·CSRF·UUID Idempotency-Key, PATCH/DELETE/심사는 강한 `If-Match: "vN"` 또는 동등한 expectedVersion 필수. 사용자 입력의 actor/purchaseId를 권한으로 사용 금지. 400/422 형식, 401 미인증, 403 권한, 404 타인·부재 구분 불가, 409 버전·키 지문 충돌, 429 악용, 503 증빙·확정 불명. 근거 없는 2xx 금지.
+- 순방향 `shop_item_reviews`에 영속 `UNIQUE(user_id,catalog_id)`, 양수 버전, 상태 CHECK, `approved_revision`, 32바이트 `content_digest`, `published_at`, `withdrawn_at`; `shop_review_events`는 `UNIQUE(review_id,version)` 불변 감사 이벤트(본문 원문 대신 역할·사유·해시), `shop_review_requests`는 `PRIMARY KEY(user_id,request_key)` 및 정규 요청 지문·최초 확정 응답·버전. `verified_purchase_id`는 **동일 회원·상품**의 실제 Store 2.0 구매와 최종 확정 원장에 연결되어야 하며 body 값은 불신. 구매 테이블에는 현재 `PK(id)`만 있으므로 복합 FK를 쓰려면 `(id,user_id,catalog_id)` UNIQUE를 별도 승인된 순방향 변경으로 추가해야 한다. 또는 잠금 DB 함수와 검증 가능한 제약으로 동등성을 보장한다. 이미 복합 FK가 있다고 주장하지 않는다. 구매/상품 완전 삭제 시 후기가 임의 삭제·보존 방해하지 않도록 탈퇴·법정 보존·비식별 처리 정책 승인 전 **BLOCKED**.
+- 결정적 순서: 신뢰 가능한 게이트웨이에서 회원 신원 확인 → 회원별 직렬화 잠금 → **가변 자격·버전 검사 전에** 멱등 키 선점·지문 대조/최초 결과 조회 → 활성 상품 `FOR SHARE`(관리자 active UPDATE와 경합) → 본인 후기 `FOR UPDATE` → 본인 Store 2.0 구매·원장 최종 확정 확인 → 버전·본문 해시 검증 → 후기/이벤트/원본 영수증 단일 커밋. 최초 동시 생성은 UNIQUE 충돌 안전 INSERT/재조회; SELECT 후 무조건 INSERT 금지. 관리자 심사는 상품 `FOR SHARE` → 후기 `FOR UPDATE` → expectedVersion과 제출 본문 `content_digest` 대조 → 사유 이벤트와 공개 상태를 한 트랜잭션으로 갱신. 관리자 상품 비활성화와 승인 순서 보장, 비활성화 이후 시작한 공개 조회는 active 재확인. 외부 심사/네트워크 호출 중 DB 잠금 보유 금지.
+- 승인 후기 수정은 **이전 공개 버전을 즉시 숨기고** 새 버전을 PENDING으로, `published_at`·공개 집계는 같은 트랜잭션에서 제거. 오래된 버전 승인, 철회와 동시 승인, 중복 심사는 409(또는 동일 키의 과거 확정 영수증)이며 옛 본문을 재공개하지 않는다. WITHDRAWN은 v1 최종 상태; 재작성은 신규 행 INSERT가 아니라 별도 승인된 **동일 행 재개** 상태 전환으로만 가능. 운영자 HIDE 이후 자동 복구 금지. 같은 키·같은 정규 요청은 **과거 영수증**, 다른 요청은 409; 현재 공개 여부는 별도 GET으로 재확인한다.
+- 공개 커서 `(published_at DESC,id DESC)`에 상품·필터·버전·만료를 서명하고 첫 페이지 `asOf`를 고정한다. 이후 신규 공개는 제외하지만 중간 숨김/수정으로 발생하는 건너뜀까지 완전 방지하지는 못한다. 따라서 **정적 격리 합성 10,001건**에 대해서만 누락·중복 없는 페이지네이션을 검증한다. HTTP 요청 간 완전 스냅샷이 필요하면 별도 버전 읽기 모델을 설계한다. 공개 API에서 회원 UUID·구매액·구매시각·심사 사유 제외; 관리자 집계는 10명 미만 코호트 숨김, 원문·거래 ID 수집 금지.
+- `moneyverse_app`의 후기·구매·원장·감사 이벤트 직접 DML 금지, 고정 search_path SECURITY DEFINER 허용 함수만 EXECUTE, PUBLIC REVOKE 및 격리 실제 PostgreSQL 부정 권한 테스트. 단순 `p_actor` 또는 임의 설정 가능한 세션 GUC는 DB 인증이 아니므로 호출자 위조 방지 경계를 별도로 검증한다. 운영자 RBAC/CSRF/최근 재인증, 개인정보·XSS·스팸·별점 조작·신고·이의신청, 계정 삭제, Android/접근성·다국어 회귀 검증.
+
+### P0/P1 개발 백로그·수용·배포 보류
+- **P0 ENV1234-01** — 운영·개발 5433 공유 DB 분리·외부 바인딩 제한·암호화 백업/격리 복원; 루트 디스크 94~96%(QA #1170) 용량 관리, 다른 작업자 파일 임의 삭제 금지.
+- **P0 SEC1234-02** — 241개 중 235개 앱 직접 UPDATE/DELETE와 PUBLIC 은행 EXECUTE 3개를 승인된 순방향 최소권한으로 수정; 본인/관리자 신원, BOLA·PII·XSS·구매 증빙 검증. 운영 DB 즉흥 GRANT/REVOKE 금지.
+- **P0 REL1234-03** — QA v1240 FAILED/HOLD: v1239 프론트 5건 실패, 전체 감사 Critical2/High10, 봇 Critical1/High5, Migration266 체크섬 불일치, Migration280 4중 충돌 #1147, CI 우회 #1088, Test backend SHA와 main 불일치, 공식 Test 정확 SHA 금융 E2E·격리 복원 미확인. 병합·운영승격 금지.
+- **P0 SHOP1234-04** — Store 2.0 구매 회원/상품/원장 연결 및 취소·역분개·최종 확정 정책 검증. FK만으로 인증 완료 선언하거나 레거시 구매 사용 금지. 불명확하면 공개 BLOCK.
+- **P1 SHOP1234-05** — 회원·상품당 영속 1행, 복합 증빙, FK 삭제·개인정보 보존, 불변 영수증·심사 이벤트.
+- **P1 SHOP1234-06** — 결정적 잠금, 원자적 멱등 작성/수정/철회, 본문 해시·버전 승인 CAS, 상품 비활성 경합, UNKNOWN_COMMIT 복구.
+- **P1 SHOP1234-07** — NestJS·Next 공개/회원/관리자 API·화면·CTA·상태, no-store, 세션 무효화, Android app-api 동등성.
+- **P1 SHOP1234-08** — 본문 버전별 심사·이의신청·개인정보 삭제·스팸/PII·관리자 권한·감사.
+- **P1 SHOP1234-09** — 공개 커서 한계·SEO 구조화 데이터 금지·WCAG 2.2 AA·다국어·KPI·비식별 집계.
+- **P1 SHOP1234-10** — 격리 실제 PG TDD, 동일 키 100개, 다른 내용 재시도 100개, 타 회원 100개, 수정/승인/철회/비활성 100회 경합, 정적 10,001건 커서, 계정 삭제·소스 오류·큰 정수·OFF/롤백 회귀.
+- **수용 조건(테스트 미수행):** 동일 키 동시 100건→후기·이벤트·최초 영수증 각 1개, 다른 내용 409, 타 회원 100건 노출 0, 수정/철회/숨김/비활성 후 공개/집계 0, 오래된 버전 승인 불가, 취소 상태 불명 원장은 구매 인증 불가, WLD·원장·재고·보유 아이템 변경 0, 과거 영수증 후 현재 상태 재조회.
+- **운영승격:** `shop_verified_reviews` 기본 OFF, #1147 해결 전 Migration 번호 미할당. 별도 개발 브랜치에서 격리 PostgreSQL 권한·금융 테스트, 정확 HEAD 전체 CI/보안, 공식 Test **정확 SHA** 구매자·심사자·Android·금융 E2E, 백업 복원, 독립 QA, 승인 GitOps 단계 배포. 롤백은 기능 OFF+공개 캐시 제거, 합법적 영수증 보존, 파괴적 스키마 되돌림 금지.
+- **외부 근거 게이트:** PostgreSQL/OWASP/W3C/Google Search Central **독립 발행기관 계열 4곳 검토**(기술 지침일 뿐 승인 증거 개별 건수 아님), 신규 중복 제거·최종 승인 **0건**, 누적 독립 승인 **미확인/10,000**, **BLOCKED / IN PROGRESS**. 발행기관 4곳·합성 테스트 건수를 10,000건 달성으로 계산 금지. 출처: https://www.postgresql.org/docs/17/ddl-constraints.html ; https://www.postgresql.org/docs/17/explicit-locking.html ; https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/ ; https://www.w3.org/TR/WCAG22/ ; https://developers.google.com/search/docs/appearance/structured-data/review-snippet .
+
+Full backlog IDs / 전체 백로그 식별자: ENV1234-01 SEC1234-02 REL1234-03 SHOP1234-04 SHOP1234-05 SHOP1234-06 SHOP1234-07 SHOP1234-08 SHOP1234-09 SHOP1234-10
+
+
 ## v2026.10.24.1232 — F675-115 실제 구매 검증형 상점 후기·운영자 심사 (기능 추가 / 기획 초안 / 운영 보류)
 
 ### 회차·기준 문서·실제 확인된 공백
