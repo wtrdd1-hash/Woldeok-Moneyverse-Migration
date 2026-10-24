@@ -266,6 +266,13 @@ export function LoanList({ loans }: { readonly loans: readonly LoanView[] }) {
             </Badge>
           </div>
 
+          <Link
+            href={`/bank/loans/${loan.loanId}`}
+            className="w-fit text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:underline"
+          >
+            <T korean="대출 상세 및 영수증 보기" english="View loan details" />
+          </Link>
+
           {loan.status !== 'repaid' && (
             <form action={action} className="flex flex-wrap items-end gap-2">
               <input type="hidden" name="loanId" value={loan.loanId} />

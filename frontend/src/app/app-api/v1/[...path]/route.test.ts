@@ -36,6 +36,25 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('proxies owner loan detail without accepting caller-selected identity and preserves private cache policy', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      expect(new Headers(init?.headers).get('cookie')).toBe('session=member-session');
+      return new Response(JSON.stringify({ loanId: '22222222-2222-4222-8222-222222222222', outstandingAmount: '90071992547409931234567890123456789012' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/bank/loans/22222222-2222-4222-8222-222222222222', {
+      cookie: 'session=member-session',
+    }), context('bank', 'loans', '22222222-2222-4222-8222-222222222222'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ outstandingAmount: '90071992547409931234567890123456789012' });
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/bank/loans/22222222-2222-4222-8222-222222222222');
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

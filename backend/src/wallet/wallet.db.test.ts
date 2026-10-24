@@ -37,6 +37,10 @@ describe.skipIf(!DATABASE_URL)('wallet against a real database', () => {
     );
   });
 
+  it('does not disclose any loan for an unknown owner through the detail lookup', async () => {
+    await expect(service.loanById(UNKNOWN_USER, '22222222-2222-4222-8222-222222222222')).resolves.toBeNull();
+  });
+
   it('finds no loans for a user who has none', async () => {
     await expect(service.loans(UNKNOWN_USER)).resolves.toEqual([]);
   });
