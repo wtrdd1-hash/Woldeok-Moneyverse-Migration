@@ -1,5 +1,10 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1250 — F675-119 바로가기 초기화·식별·영수증 무결성 강화 (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1248 → 현재 보완 v1250 → 다음 추가 v1252(잠정). main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 동일, QA v1253 FAILED/HOLD. #1219 미병합 기반 문서 전용. 대시보드는 이미 noindex, 탈퇴 함수는 users 행을 삭제하지 않으므로 FK CASCADE만으로 정리 불가, Android 게이트웨이는 DELETE 본문을 전달하지만 If-Match/Idempotency-Key 헤더는 전달하지 않는다. Reset 시 customized=false 영속 표식과 단조 증가 버전으로 ABA 방지, 사용자→설정 잠금 및 자식 순서 원자적 교체, 본문 CAS·불변 영수증·세션 세대 응답 차단 명세.
+- 백로그: ENV1250-01 SEC1250-02 REL1250-03 DASH1250-04 DASH1250-05 DASH1250-06 DASH1250-07 DASH1250-08 DASH1250-09 DASH1250-10. P0는 디스크/DB 분리·5433·DB 과권한·QA/보안·Migration 266/280·정확 SHA Test·탈퇴/게이트웨이 검증. P1은 DB·동시성·API/Android·접근성·탈퇴 개인정보·관리자/SEO/KPI·100건 경합·합성 회원 10,001명 시험. 상세 명세는 [통합 기획 마스터](INTEGRATED_PLANNING_MASTER.ko.md). 기능 OFF, 런타임/DB/WLD/Test/운영 변경 없음, Production BLOCKED. 외부 독립 근거 신규 승인 0건, 누적 중복 제거 승인 미확인/10,000 BLOCKED.
+
+
 ## v2026.10.25.1248 — F675-119 회원 대시보드 바로가기 고정·순서 설정 (기능 추가 / 기획 초안 / 운영 보류)
 - 이전 기능 보완 v1246 / 현재 기능 추가 v1248 / 다음 기능 보완 v1250(잠정). 시작·중간 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 확인, 최신 QA v1251 FAILED/HOLD, 이전 알림 기획 #1210 미병합. 독립 문서 브랜치이며 런타임·DB·WLD·Test·운영 변경 없음.
 - 실제 `frontend/src/app/dashboard/page.tsx`의 다음 활동은 4개 고정 경로이며 조사 범위에 회원별 바로가기 API가 없다. Android app-api `account` 그룹은 기존에 있다. 회원별 1~6개 허용 경로 키, DEFAULT/CUSTOM 구분, `/dashboard`·`/account/shortcuts` 편집/저장/초기화/순서 변경, 임의 URL·권한 우회 금지. 본인 GET/PUT/DELETE/영수증, 추가형 DB 세트·항목·멱등 영수증, 버전 CAS·회원 행 잠금, 409/412/503, CSRF, 30일 영수증 보존 승인, WCAG AA, 비색인, 관리자 비식별 집계, 기본 OFF·단계적 롤백. [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md)에 상세 구현 계약 수록.

@@ -1,4 +1,8 @@
 ## 2026-10-25 v1248 — F675-119 Member Dashboard Shortcut Pins (FEATURE ADDITION / DRAFT / HOLD)
+
+## 2026-10-25 v1250 — F675-119 Shortcut Reset/Privacy Integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1248 / Current Improvement v1250 / Next Addition v1252; main `c9a868b1` stable start/mid, QA v1253 FAILED/HOLD. Fix proposed reset ABA with durable monotonic tombstone, ordered-row UNIQUE reorder race, soft-delete non-erasure despite FK CASCADE, mobile missing If-Match/Idempotency-Key headers; keep body CAS/receipt and private session fencing. Backlog: ENV1250-01 SEC1250-02 REL1250-03 DASH1250-04 DASH1250-05 DASH1250-06 DASH1250-07 DASH1250-08 DASH1250-09 DASH1250-10. External newly approved 0, cumulative UNKNOWN/10,000 BLOCKED. Docs-only stacked on #1219, no deployment.
+
 - Previous Improvement v1246 / Current Addition v1248 / Next Improvement v1250; main c9a868b1, QA v1251 FAILED/HOLD. Existing dashboard has four fixed Next actions. Owner-only 1–6 internal shortcuts, atomic versioned DB and immutable receipts, web/Android/a11y/SEO/admin KPI, OFF-by-default rollout. Backlog: ENV1248-01 SEC1248-02 REL1248-03 DASH1248-04 DASH1248-05 DASH1248-06 DASH1248-07 DASH1248-08 DASH1248-09 DASH1248-10. New approved independent sources 0, cumulative UNKNOWN / 10,000 BLOCKED. Docs-only, no runtime/finance/DB/Test/Production changes.
 
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
