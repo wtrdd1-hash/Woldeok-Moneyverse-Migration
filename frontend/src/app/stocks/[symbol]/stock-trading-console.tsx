@@ -62,7 +62,7 @@ export function StockTradingConsole({
       <button
         type="button"
         onClick={() => setTradingTab('order')}
-        className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
+        className={`flex-1 min-h-11 py-2 px-3 rounded-lg text-xs font-bold transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
           tradingTab === 'order'
             ? 'bg-card text-foreground shadow-xs border border-border/80'
             : 'text-muted-foreground hover:text-foreground'
@@ -73,13 +73,13 @@ export function StockTradingConsole({
       <button
         type="button"
         onClick={() => setTradingTab('conditional')}
-        className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
+        className={`flex-1 min-h-11 py-2 px-3 rounded-lg text-xs font-bold transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
           tradingTab === 'conditional'
             ? 'bg-card text-foreground shadow-xs border border-border/80'
             : 'text-muted-foreground hover:text-foreground'
         }`}
       >
-        {isEn ? 'Conditional (SL/TP)' : '자동 감시 (스탑로스/익절)'}
+        {isEn ? 'Price alerts' : '가격 알림'}
       </button>
     </div>
   );
