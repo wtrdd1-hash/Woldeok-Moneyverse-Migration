@@ -7,6 +7,13 @@ describe('login mobile touch targets', () => {
 
   it('keeps local credential inputs and actions at least 44px tall', () => {
     expect(view.match(/className="min-h-11"/g)?.length).toBeGreaterThanOrEqual(2);
-    expect(view).toContain('className="min-h-11 w-full sm:w-fit"');
+    const classLists = [...view.matchAll(/className="([^"]+)"/g)].map((match) =>
+      match[1].split(/\s+/),
+    );
+    expect(
+      classLists.some((classes) =>
+        ['min-h-11', 'w-full', 'sm:w-fit'].every((token) => classes.includes(token)),
+      ),
+    ).toBe(true);
   });
 });

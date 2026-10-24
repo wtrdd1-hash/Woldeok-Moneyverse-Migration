@@ -8,12 +8,12 @@ describe('locale detection', () => {
     expect(detectLocale(null, null)).toBe('ko');
   });
 
-  it('uses English for visitors outside Korea/Japan/China by default', () => {
+  it('uses English where no dedicated country locale exists and Vietnamese for Vietnam', () => {
     expect(detectLocale('US', 'en-US,en;q=0.9')).toBe('en');
     expect(detectLocale('GB', null)).toBe('en');
     expect(detectLocale('DE', null)).toBe('en');
     expect(detectLocale('FR', null)).toBe('en');
-    expect(detectLocale('VN', null)).toBe('en');
+    expect(detectLocale('VN', null)).toBe('vi');
     expect(detectLocale('BR', null)).toBe('en');
     expect(detectLocale('AU', null)).toBe('en');
   });
@@ -46,6 +46,7 @@ describe('locale detection', () => {
     expect(isLocale('en')).toBe(true);
     expect(isLocale('ja')).toBe(true);
     expect(isLocale('zh')).toBe(true);
+    expect(isLocale('vi')).toBe(true);
     expect(isLocale('fr')).toBe(false);
     expect(isLocale('de')).toBe(false);
   });
