@@ -1,5 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-119 — v2026.10.25.1248 Member Dashboard Shortcut Pins (DRAFT / RELEASE HOLD)
+- Source-backed: `frontend/src/app/dashboard/page.tsx` has four fixed Next actions and inspected main lacks member-specific shortcut persistence. Design owner-only six-key ordered set, strict canonical internal allowlist, versioned atomic PUT/DELETE, original idempotency receipts, dashboard/editor/Android parity, safe unavailable states, admin privacy aggregates, SEO noindex and zero WLD/ledger effects. Exact implementation and rollout contract: [Integrated Planning Master](INTEGRATED_PLANNING_MASTER.md).
+- Previous Improvement v1246 → Current Addition v1248 → Next Improvement v1250. Main c9a868b1; QA v1251 FAILED/HOLD; no deployment. Backlog: ENV1248-01 SEC1248-02 REL1248-03 DASH1248-04 DASH1248-05 DASH1248-06 DASH1248-07 DASH1248-08 DASH1248-09 DASH1248-10. Independent reference approval 0 new / UNKNOWN of 10,000; BLOCKED / IN PROGRESS.
+
+
 ## F675-06 detailed adoption — v2026.10.15.688
 
 - [Google Search Evidence & Canonical Action Center](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) is the next v675 adopted **detailed planning** feature. Reuses /admin/seo and v685; identifies top-10-only GSC data, missing date=0, GSC PT/freshness, crawler-indexed mislabel and legacy index submission success/Google Indexing API misclaims. Separates source/submission/Google indexed-version/performance into independently verifiable evidence, 16 Google/WCAG references and D0–D7 gated implementation. Not a live SEO audit or deployed feature.

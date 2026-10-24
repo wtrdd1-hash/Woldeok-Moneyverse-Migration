@@ -1,5 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## F675-119 — v2026.10.25.1248 회원 대시보드 바로가기 고정·순서 설정 (초안 / 운영 보류)
+- 코드 근거: `frontend/src/app/dashboard/page.tsx`의 다음 활동 4개가 고정되어 있으며 조사한 main에는 회원별 바로가기 저장 기능이 없다. 본인 전용 6개 이내 정렬 세트, 허용 내부 경로, 버전 기반 원자적 PUT/DELETE, 원본 멱등 영수증, 대시보드/편집기/Android 동등성, 이용 불가 상태, 관리자 비식별 집계, 비색인, WLD·원장 영향 없음. 상세 구현·배포 계약: [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- 이전 보완 v1246 → 현재 추가 v1248 → 다음 보완 v1250. main c9a868b1; QA v1251 FAILED/HOLD, 미배포. 백로그: ENV1248-01 SEC1248-02 REL1248-03 DASH1248-04 DASH1248-05 DASH1248-06 DASH1248-07 DASH1248-08 DASH1248-09 DASH1248-10. 외부 근거 신규 승인 0건 / 누적 미확인 10,000건, BLOCKED / IN PROGRESS.
+
+
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
 
 - [GSC 실제 검색성과·색인 증거 센터 상세기획](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 정식 상세기획으로 채택. 기존 /admin/seo·v685 재사용, GSC 날짜/상위 10개·무행0·크롤러 색인 오인·레거시 제출 성공/Google Indexing API 안내 오류 기록, 기술·제출·Google 색인본·검색 노출 실제 증거 분리, 구글/WCAG 16개 자료·D0~D7. 실제 SEO/GSC 운영 검증이나 코드 배포 아님.
