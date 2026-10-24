@@ -26,3 +26,6 @@ Migration 280 is already claimed by other unmerged PRs. This branch is a nonmerg
 - Disposable Docker PostgreSQL 17.11-alpine: initialized all 002–280 migrations, verified raw table ACL denial, nonadmin rejection, two synthetic members' aggregate, existing vote function, transaction ROLLBACK. Container destroyed. No shared/live DB touched.
 - TDD GREEN: 4/4 DB regression tests (including actual PG), 1/1 backend repository unit; changed-file ESLint 0 errors / 8 preexisting warnings.
 - Collision still open: other PRs claim 280. Candidate cannot merge until coordinated renumber/rebase and new SHA gates.
+
+## Main synchronization (22:52 KST)
+- Main advanced from `49788d09494fed3e463651945b83386e87dd47bc` to `57f393395d16495b06187de69c17592d2c13d251` (shop UI only, no overlapping DB/backend files). Rebased this independent branch onto exact latest main; all changes preserved. Earlier tests were run before rebase; targeted regressions and CI must be re-run on final SHA.
