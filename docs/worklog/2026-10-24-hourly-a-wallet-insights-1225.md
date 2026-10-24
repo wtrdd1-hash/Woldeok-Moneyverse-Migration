@@ -15,3 +15,8 @@
 - Lint: PASS 0 errors, 1,137 warnings; Typecheck PASS; Build PASS; API contract generated (179 endpoints, changed wallet schema); `pnpm audit --audit-level high` FAIL 2 Critical/10 High (26 total).
 - Real isolated PostgreSQL owner/ACL/finance E2E: BLOCKED; `woldeok_moneyverse_dev` is Production-linked and must not be used for writes or test fixtures. `pg_isready` unavailable. No migration, SQL writes, DB changes or service restart.
 - Main/branch safety: all existing remote non-main branches retained; no cleanup until unique-commit and CI gates proven. No Test/Production promotion. Rollback: disable feature by reverting this additive code before deployment; existing wallet API remains usable, no schema rollback needed.
+
+## End-run pre-report (12:40–12:43 KST)
+- Code SHA `0a4c7b780c42345fd506b2e6719db9c9ec37eb5c`, pushed. Draft PR #1121 created. Mobile API contract check PASS after committing generated EN/KO schemas.
+- Root pnpm test re-run: FAIL only at known 5 frontend regressions (3 SEO, 1 locale, 1 login accessibility); backend 1,318 PASS/398 SKIPPED. Security audit FAIL. GitHub CI pending at reporting checkpoint. Production HOLD.
+- No deletion, main merge, official Test/Production promotion, DB write, migration, service restart or rollback. 24 remote non-main branches after push; 0 eligible fully integrated branches. Final docs SHA to be recorded on PR.
