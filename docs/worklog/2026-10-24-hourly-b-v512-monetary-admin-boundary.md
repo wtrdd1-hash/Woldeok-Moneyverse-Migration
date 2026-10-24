@@ -10,10 +10,11 @@
 - API contract: monetary admin GET now requires an elevated console session; all POST routes additionally require CSRF and recent reauthentication (403/401 on failure). Payload/response shapes unchanged.
 - Plan: (1) TDD RED guard metadata tests, (2) GREEN controller decorators, (3) focused tests, lint/typecheck/build/full gates and security audit, (4) CI + Test exact-SHA review, (5) Draft PR and final HOLD log.
 
-## In progress
+## In progress — 2026-10-24 19:35 KST
+- RED checkpoint 923df320becfbda3029359d1820fd5130c39deaa: 9 missing guard assertions reproduced. GREEN: 12 focused tests PASS, including all POST-route coverage and denied-session/CSRF/stale reauth cases.
 - [x] Reproduced missing guard wiring: 9 new assertions RED; no source implementation yet. Local backend suite also has unrelated DB-dependent failures due absent isolated database.
-- [ ] Implement the smallest controller-only fix.
-- [ ] Validate changed SHA and document all failures.
+- [x] Added AdminSessionGuard to controller, and CsrfGuard + ReauthGuard to all eight POST routes; no DTO or DB changes.
+- [ ] Validate changed SHA and document all failures (focused guard regression 12/12 PASS; full gates pending).
 
 ## Finished
 - Pending.

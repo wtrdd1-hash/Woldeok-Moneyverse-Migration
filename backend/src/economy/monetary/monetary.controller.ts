@@ -1,8 +1,11 @@
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
+import { ReauthGuard } from '../../auth/guards/reauth.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
@@ -13,7 +16,7 @@ import type { MonetaryOrderType, MonetaryTargetEnvelope } from './monetary.types
 
 @ApiTags('Admin Monetary & Central Bank')
 @ApiBearerAuth()
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
 @Controller('admin/economy/monetary')
 export class MonetaryController {
   constructor(
@@ -30,6 +33,7 @@ export class MonetaryController {
     return { config, events };
   }
 
+  @UseGuards(CsrfGuard, ReauthGuard)
   @Post('auto-regulation/update')
   @ApiOperation({ summary: '화폐량 자동 조절 설정값 변경' })
   async updateAutoRegulation(
@@ -51,6 +55,7 @@ export class MonetaryController {
     );
   }
 
+  @UseGuards(CsrfGuard, ReauthGuard)
   @Post('auto-regulation/run')
   @ApiOperation({ summary: '화폐량 자동 조절 즉시 1회 수동 평가 및 집행' })
   async runAutoRegulationManually(@Req() req: RequestWithSession) {
@@ -71,6 +76,7 @@ export class MonetaryController {
     return this.centralBank.generateAiCouncilRecommendation();
   }
 
+  @UseGuards(CsrfGuard, ReauthGuard)
   @Post('ai-council/propose-policy')
   @ApiOperation({ summary: 'AI 정책 위원회 권고안 기반 통화정책 명령서 자동 등록 (PROPOSED)' })
   async proposeFromAiCouncil(@Req() req: RequestWithSession) {
@@ -91,6 +97,7 @@ export class MonetaryController {
     return this.centralBank.listPolicyOrders(limit ? Number(limit) : 20);
   }
 
+  @UseGuards(CsrfGuard, ReauthGuard)
   @Post('orders/propose')
   @ApiOperation({ summary: '신규 통화정책 명령서 발의 (PROPOSED)' })
   async proposeOrder(
@@ -115,6 +122,7 @@ export class MonetaryController {
     );
   }
 
+  @UseGuards(CsrfGuard, ReauthGuard)
   @Post('orders/:id/approve')
   @ApiOperation({ summary: '통화정책 명령서 공식 승인 (APPROVED)' })
   async approveOrder(@Req() req: RequestWithSession, @Param('id') orderId: string) {
@@ -122,6 +130,7 @@ export class MonetaryController {
     return this.centralBank.approvePolicyOrder(adminId, orderId);
   }
 
+  @UseGuards(CsrfGuard, ReauthGuard)
   @Post('freeze')
   @ApiOperation({ summary: '신규 통화 발행 긴급 동결' })
   async freeze(@Req() req: RequestWithSession, @Body('reason') reason: string) {
@@ -129,6 +138,7 @@ export class MonetaryController {
     return this.centralBank.freezeIssuance(adminId, reason);
   }
 
+  @UseGuards(CsrfGuard, ReauthGuard)
   @Post('unfreeze')
   @ApiOperation({ summary: '통화 발행 긴급 동결 해제' })
   async unfreeze(@Req() req: RequestWithSession) {
@@ -148,6 +158,7 @@ export class MonetaryController {
     return this.mintBureau.listRetirementCertificates(limit ? Number(limit) : 20);
   }
 
+  @UseGuards(CsrfGuard, ReauthGuard)
   @Post('execute-mint')
   @ApiOperation({ summary: '승인된 명령에 따른 조폐국 정식 발행 실행' })
   async executeMint(
