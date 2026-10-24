@@ -193,16 +193,16 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <TrendingUp className="h-5 w-5" />
             </div>
             <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold text-blue-300 border border-blue-500/30">
-              {t('arcade.poll.badge', locale, '일일 배팅')}
+              {locale === 'ko' ? '투표 중단' : 'Voting unavailable'}
             </span>
           </div>
           <div className="mt-3">
             <h3 className="text-sm font-bold text-slate-100 flex items-center justify-between">
-              {t('arcade.poll.title', locale, '주식 여론 잭팟')}
+              {locale === 'ko' ? '주식 여론 투표' : 'Market sentiment poll'}
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              {t('arcade.poll.desc', locale, '내일의 코스피/나스닥 상승/하락을 투표하고 다수결/소수결 보너스를 획득하세요.')}
+              {locale === 'ko' ? '검증된 투표 영수증과 집계 기능을 준비 중입니다.' : 'Voting is paused until verified receipts and counts are available.'}
             </p>
           </div>
         </div>
@@ -267,9 +267,6 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
             <BullBearPoll
               symbol="CHIPS"
               stockName="침팬지 반도체"
-              onVote={(dir) => {
-                showRewardNotice(`[${dir === 'bull' ? '상승' : '하락'}] 투표 완료! 자정 10,000 WLD 잭팟 풀 등록.`);
-              }}
             />
           </div>
         </div>

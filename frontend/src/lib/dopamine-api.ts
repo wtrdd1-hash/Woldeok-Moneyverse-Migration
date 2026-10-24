@@ -3,6 +3,7 @@ export interface DopamineStatusResponse {
   goldenDuckFeverAvailable: boolean;
   fortuneCookieAvailable: boolean;
   bullBearVotedToday: boolean;
+  bullBearVotingAvailable?: boolean;
   dailyShowdownsRemaining: number;
   starDropRemaining: number;
 }

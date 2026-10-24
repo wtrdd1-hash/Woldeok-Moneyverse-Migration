@@ -1,49 +1,42 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { BullBearPoll } from './bull-bear-poll';
 
-vi.mock('@/lib/dopamine-api', () => ({
-  voteBullBear: vi.fn().mockResolvedValue({ success: true, poolEligible: true }),
-}));
+const { voteBullBear } = vi.hoisted(() => ({ voteBullBear: vi.fn() }));
+vi.mock('@/lib/dopamine-api', () => ({ voteBullBear }));
 
-describe('BullBearPoll Component', () => {
+describe('BullBearPoll authoritative receipt boundary', () => {
   afterEach(() => {
     cleanup();
+    voteBullBear.mockReset();
   });
 
-  it('renders poll and calculates percentages properly', () => {
-    render(
-      <BullBearPoll
-        symbol="CHIPS"
-        stockName="침팬지 반도체"
-        initialBullCount={100}
-        initialBearCount={100}
-      />
-    );
-
+  it('does not show fabricated counts, percentages, or jackpot eligibility', () => {
+    render(<BullBearPoll symbol="CHIPS" stockName="침팬지 반도체" />);
     expect(screen.getByText(/침팬지 반도체/)).toBeDefined();
-    expect(screen.getByText(/상승 \(Bull\) 50%/)).toBeDefined();
-    expect(screen.getByText(/하락 \(Bear\) 50%/)).toBeDefined();
+    expect(screen.queryByText(/142표|88표|230명/)).toBeNull();
+    expect(screen.queryByText(/10,000 WLD/)).toBeNull();
+    expect(screen.getByRole('status').textContent).toMatch(/준비|중단|unavailable/i);
   });
 
-  it('handles user vote and increments selected option', async () => {
-    const onVoteMock = vi.fn();
+  it('ignores unverified caller-provided counts and prevents client-only success', () => {
+    const onVote = vi.fn();
     render(
       <BullBearPoll
         symbol="CHIPS"
         initialBullCount={100}
         initialBearCount={100}
-        onVote={onVoteMock}
-      />
+        onVote={onVote}
+      />,
     );
-
-    const bullBtn = screen.getByRole('button', { name: '상승 투표 떡상 가자' });
-    fireEvent.click(bullBtn);
-
-    await waitFor(() => {
-      expect(onVoteMock).toHaveBeenCalledWith('bull');
-      expect(screen.getByText(/101표/)).toBeDefined();
-    });
+    expect(screen.queryByText(/100표|50%|200명/)).toBeNull();
+    const bullButton = screen.getByRole('button', { name: /상승 투표/ });
+    const bearButton = screen.getByRole('button', { name: /하락 투표/ });
+    expect(bullButton.hasAttribute('disabled')).toBe(true);
+    expect(bearButton.hasAttribute('disabled')).toBe(true);
+    fireEvent.click(bullButton);
+    expect(voteBullBear).not.toHaveBeenCalled();
+    expect(onVote).not.toHaveBeenCalled();
   });
 });
