@@ -171,3 +171,27 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+
+describe('private wallet transfer preview Android app-api', () => {
+  it('forwards query and session without leaking the internal token, and never caches even an error', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const seen: string[] = [];
+    const fetchSpy = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      seen.push(String(url));
+      expect(new Headers(init?.headers).get('cookie')).toBe('session=opaque');
+      return new Response(JSON.stringify({ status: 404 }), { status: 404, headers: { 'content-type': 'application/problem+json' } });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/wallet/transfers/preview?recipientUserId=22222222-2222-4222-8222-222222222222&amount=42', { cookie: 'session=opaque' }),
+      context('wallet', 'transfers', 'preview'),
+    );
+    expect(response.status).toBe(404);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+    expect(seen[0]).toContain('/api/v1/wallet/transfers/preview?recipientUserId=');
+    expect(seen[0]).toContain('&amount=42');
+    expect(seen[0]).not.toContain('x'.repeat(32));
+  });
+});

@@ -14,7 +14,8 @@ import { Input } from '@/components/ui/input';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { TranslatedText as T } from '@/components/translated-text';
 import { IDLE } from '@/lib/action-state';
-import { formatDay } from '@/lib/money';
+import { formatDay, groupDigits } from '@/lib/money';
+import { isPreviewCurrent, transferAmountInput, type TransferPreview } from './transfer-preview';
 import { borrow, claimDaily, moveBank, repay, transfer } from './actions';
 
 export interface RewardAvailability {
@@ -70,15 +71,53 @@ export function RewardButtons({ availability }: { readonly availability: RewardA
 export function TransferForm({ currency }: { readonly currency: string }) {
   const [state, action] = useActionState(transfer, IDLE);
   const [amount, setAmount] = useState('');
+  const [recipient, setRecipient] = useState('');
+  const [preview, setPreview] = useState<TransferPreview | null>(null);
+  const [previewMessage, setPreviewMessage] = useState('');
+  const [checking, setChecking] = useState(false);
   const [requestKey, setRequestKey] = useState('');
 
   useEffect(() => {
     setRequestKey(crypto.randomUUID());
+    setPreview(null);
   }, [state]);
 
   const addAmount = (num: number) => {
-    const cur = parseInt(amount, 10) || 0;
-    setAmount(String(cur + num));
+    const current = transferAmountInput(amount) ?? '0';
+    setAmount((BigInt(current) + BigInt(num)).toString());
+    setPreview(null);
+  };
+
+  const verifyTransfer = async () => {
+    const canonical = transferAmountInput(amount);
+    if (!canonical || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recipient)) {
+      setPreviewMessage('받는 사람의 UUID와 1 WLD 이상 정수 금액을 확인해 주세요.');
+      return;
+    }
+    setChecking(true);
+    setPreview(null);
+    setPreviewMessage('받는 사람과 활동 지갑 잔액을 확인하고 있어요.');
+    try {
+      const response = await fetch(
+        '/api/transfers/preview?recipientUserId=' + encodeURIComponent(recipient) + '&amount=' + encodeURIComponent(canonical),
+        { cache: 'no-store', credentials: 'same-origin' },
+      );
+      if (!response.ok) throw new Error('preview unavailable');
+      const result = await response.json() as TransferPreview;
+      if (result.readOnly !== true || result.recipientUserId !== recipient.toLowerCase() || result.amount !== canonical ||
+        typeof result.cashAvailable !== 'string' || typeof result.shortfall !== 'string') {
+        throw new Error('invalid preview');
+      }
+      setPreview(result);
+      setPreviewMessage(result.canSend
+        ? '받는 사람과 현금 잔액이 확인됐어요. 실제 송금은 아래 버튼을 눌러야 진행됩니다.'
+        : '활동 지갑 잔액이 부족합니다. 부족한 금액: ' + groupDigits(result.shortfall) + ' WLD');
+    } catch {
+      setPreview(null);
+      setPreviewMessage('지금은 송금 사전 확인을 완료할 수 없어요. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      setChecking(false);
+    }
   };
 
   return (
@@ -106,6 +145,8 @@ export function TransferForm({ currency }: { readonly currency: string }) {
                 autoCapitalize="off"
                 spellCheck={false}
                 maxLength={36}
+                value={recipient}
+                onChange={(event) => { setRecipient(event.target.value); setPreview(null); setPreviewMessage(''); }}
                 placeholder="UUID"
                 required
                 className="min-h-11"
@@ -126,13 +167,13 @@ export function TransferForm({ currency }: { readonly currency: string }) {
                 <InputGroupInput
                   id="transfer-amount"
                   name="amount"
-                  type="number"
+                  type="text"
                   inputMode="numeric"
-                  min={1}
-                  step={1}
+                  pattern="[1-9][0-9]*"
+                  maxLength={38}
                   placeholder="0"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => { setAmount(e.target.value); setPreview(null); setPreviewMessage(''); }}
                   required
                   className="min-h-11"
                 />
@@ -161,11 +202,23 @@ export function TransferForm({ currency }: { readonly currency: string }) {
             </Field>
           </FieldGroup>
 
+          <div className="space-y-2 rounded-lg border border-border/60 p-3">
+            <Button type="button" variant="outline" className="min-h-11" onClick={verifyTransfer} disabled={checking}>
+              <T korean="받는 사람·잔액 확인" english="Verify recipient and cash" />
+            </Button>
+            <p role="status" aria-live="polite" className="text-xs text-muted-foreground">{previewMessage}</p>
+            {isPreviewCurrent(preview, recipient, amount) && (
+              <p className="text-xs text-muted-foreground">
+                <T korean="조회 시점의 현금 잔액" english="Cash at time of check" />: {groupDigits(preview!.cashAvailable)} WLD.
+                <T korean=" 이 확인은 자금을 예약하지 않으며 송금 성공을 보장하지 않습니다." english=" This check does not reserve funds or guarantee settlement." />
+              </p>
+            )}
+          </div>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
               <T korean={`1 ${currency} 이상 정수만 보낼 수 있어요.`} english={`Only whole integers of 1 ${currency} or more can be sent.`} />
             </p>
-            <SubmitButton className="min-h-11 font-bold">
+            <SubmitButton className="min-h-11 font-bold" disabled={!isPreviewCurrent(preview, recipient, amount) || checking}>
               <T korean="돈 보내기" english="Send WLD" />
             </SubmitButton>
           </div>
