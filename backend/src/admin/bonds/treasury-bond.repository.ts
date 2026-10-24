@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
+import { requireLedgerBackedBondSettlement } from './bond-ledger-hold';
 
 export interface TreasuryBondRow {
   id: string;
@@ -265,6 +266,7 @@ export class TreasuryBondRepository {
       throw new BadRequestException('청약 좌수는 1 이상의 정수여야 합니다.');
     }
 
+    requireLedgerBackedBondSettlement();
     const client: PoolClient = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -381,6 +383,7 @@ export class TreasuryBondRepository {
     loanId: string;
     loanAmountWld: string;
   }> {
+    requireLedgerBackedBondSettlement();
     const client: PoolClient = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -457,6 +460,7 @@ export class TreasuryBondRepository {
   ): Promise<{
     repaidAmountWld: string;
   }> {
+    requireLedgerBackedBondSettlement();
     const client: PoolClient = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -527,6 +531,7 @@ export class TreasuryBondRepository {
     holdingsProcessed: number;
     maturedCount: number;
   }> {
+    requireLedgerBackedBondSettlement();
     const client: PoolClient = await this.pool.connect();
     let totalCoupons = BigInt(0);
     let totalMaturities = BigInt(0);

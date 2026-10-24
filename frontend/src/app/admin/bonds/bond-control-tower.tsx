@@ -79,7 +79,6 @@ export function BondControlTower({
   const [bonds, setBonds] = useState<TreasuryBondItem[]>(initialBonds);
   const [logs, setLogs] = useState<CouponLogItem[]>(initialLogs);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isDistributing, setIsDistributing] = useState(false);
 
   const refreshData = async () => {
     setIsRefreshing(true);
@@ -95,26 +94,6 @@ export function BondControlTower({
       toast.error('국채 관제 데이터를 불러오는데 실패했습니다.');
     } finally {
       setIsRefreshing(false);
-    }
-  };
-
-  const handleDistributeCoupons = async () => {
-    setIsDistributing(true);
-    try {
-      const res = await fetch('/api/admin/bonds/distribute-coupons', {
-        method: 'POST',
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '이자 지급 실패');
-
-      toast.success(
-        `국채 쿠폰 이자 ${groupDigits(data.couponsDistributedWld)} WLD 정산 완료! (관리자 Discord DM 발송됨)`,
-      );
-      await refreshData();
-    } catch (err: any) {
-      toast.error(err.message || '쿠폰 이자 일괄 지급에 실패했습니다.');
-    } finally {
-      setIsDistributing(false);
     }
   };
 
@@ -153,12 +132,12 @@ export function BondControlTower({
 
           <Button
             size="sm"
-            onClick={handleDistributeCoupons}
-            disabled={isDistributing}
+            disabled
+            title="원장 기반 정산 기능이 검증될 때까지 중지됩니다"
             className="gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-medium"
           >
             <Play className="h-4 w-4" />
-            쿠폰 이자 즉시 일괄 지급
+            쿠폰 이자 지급 일시 중지
           </Button>
         </div>
       </div>
@@ -371,7 +350,7 @@ export function BondControlTower({
                 {logs.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground text-sm">
-                      아직 정산된 국채 이자 로그가 없습니다. 상단의 '쿠폰 이자 즉시 일괄 지급' 버튼을 눌러 테스트할 수 있습니다.
+                      아직 정산된 국채 이자 로그가 없습니다. 상단의 '쿠폰 이자 지급 일시 중지' 버튼을 눌러 테스트할 수 있습니다.
                     </TableCell>
                   </TableRow>
                 ) : (

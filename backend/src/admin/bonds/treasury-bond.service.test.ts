@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { TreasuryBondService } from './treasury-bond.service';
 import type { TreasuryBondRepository } from './treasury-bond.repository';
@@ -71,37 +72,23 @@ describe('TreasuryBondService Unit Tests', () => {
     expect(overview.totalFundedWld).toBe('50000000');
   });
 
-  it('국채 청약 실행 시 국고 자금 조달 및 관리자 디스코드 알림을 전송한다', async () => {
-    const res = await service.subscribeBond('test-user-id', 'bond-1', 5);
-    expect(res.holdingId).toBe('holding-1');
-    expect(res.totalPriceWld).toBe('50000');
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('국채 청약'),
-      }),
-      '886478189520637992',
-    );
+  it('국채 청약은 원장 정산이 준비될 때까지 거부하고 관리자 알림을 보내지 않는다', async () => {
+    await expect(service.subscribeBond('test-user-id', 'bond-1', 5)).rejects.toBeInstanceOf(ServiceUnavailableException);
+    expect(mockRepo.subscribeBond).not.toHaveBeenCalled();
+    expect(mockDiscord.sendAdminDirectMessage).not.toHaveBeenCalled();
   });
 
-  it('시간당 쿠폰 이자 정산 시 이자 지급 집행 및 관리자 알림을 전송한다', async () => {
-    const res = await service.processHourlyCouponsAndMaturities();
-    expect(res.couponsDistributedWld).toBe('4500');
-    expect(res.maturedCount).toBe(1);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('국채 정산'),
-      }),
-      '886478189520637992',
-    );
+  it('쿠폰 이자와 만기 원금 정산은 원장 없이 지급하지 않는다', async () => {
+    await expect(service.processHourlyCouponsAndMaturities()).rejects.toBeInstanceOf(ServiceUnavailableException);
+    expect(mockRepo.processHourlyCouponsAndMaturities).not.toHaveBeenCalled();
+    expect(mockDiscord.sendAdminDirectMessage).not.toHaveBeenCalled();
   });
 
-  it('국채 담보 80% LTV 레포 대출 신청 및 상환을 성공적으로 처리한다', async () => {
-    const loanRes = await service.createRepoLoan('test-user-id', 'holding-1');
-    expect(loanRes.loanId).toBe('repo-loan-1');
-    expect(loanRes.loanAmountWld).toBe('40000');
-
-    const repayRes = await service.repayRepoLoan('test-user-id', 'repo-loan-1');
-    expect(repayRes.repaidAmountWld).toBe('40050');
+  it('레포 대출 실행 및 상환 모두 원장 없이 실행하지 않는다', async () => {
+    await expect(service.createRepoLoan('test-user-id', 'holding-1')).rejects.toBeInstanceOf(ServiceUnavailableException);
+    await expect(service.repayRepoLoan('test-user-id', 'repo-loan-1')).rejects.toBeInstanceOf(ServiceUnavailableException);
+    expect(mockRepo.createRepoLoan).not.toHaveBeenCalled();
+    expect(mockRepo.repayRepoLoan).not.toHaveBeenCalled();
   });
 
   it('만기 시 자동 롤오버 재투자 설정을 정상적으로 토글한다', async () => {
