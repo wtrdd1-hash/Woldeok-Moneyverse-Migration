@@ -15,11 +15,11 @@
 - No merge/release without all CI, security, exact-SHA Test and finance gates.
 
 ## Tasks
-- [ ] Add failing repository/service/controller tests for historical owner receipt, UUID, 404, 38-digit amounts and neutral pocket movement.
-- [ ] Implement a read-only owner-filtered repository query, service normalization, and guarded GET route.
-- [ ] Add failing frontend page/Android app-api regression checks; implement noindex/no-store private receipt page and navigation.
-- [ ] Verify targeted tests, lint/typecheck/build, API contract, full suites, security, real isolated PostgreSQL and E2E where safe.
-- [ ] Recheck latest main/plan and all PRs; publish QA/release/worklog and Draft PR, HOLD if gates fail.
+- [x] Add failing repository/service/controller tests for historical owner receipt, UUID, 404, 38-digit amounts and neutral pocket movement.
+- [x] Implement a read-only owner-filtered repository query, service normalization, and guarded GET route.
+- [x] Add failing frontend page/Android app-api regression checks; implement noindex/no-store private receipt page and navigation.
+- [x] Verify targeted tests, lint/typecheck/build, API contract, full suites, security, real isolated PostgreSQL and E2E where safe (full test/security/E2E gates BLOCKED).
+- [x] Recheck latest main/plan and all PRs; publish QA/release/worklog and Draft PR, HOLD if gates fail.
 
 ## Review focus
 - Foreign and nonexistent IDs must return indistinguishable 404.

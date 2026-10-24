@@ -31,3 +31,13 @@
 - Isolated PostgreSQL `moneyverse-test-db / wdmv_v761_history_1011`: read-only transaction as `moneyverse_app`, owner receipt 1, exact cash+bank=net true, foreign owner 0, ROLLBACK. No Production-connected 5433 writes.
 - New migration: none; existing 280 is reserved by unmerged B PR #1105. Do not touch that stack.
 - Remaining: publish Draft PR, check exact SHA CI, full Test authenticated E2E/security/a11y/SEO and release gate HOLD.
+
+## Finished for this run — PARTIAL / BLOCKED
+- Branch: `auto/hourly-a-wallet-receipt-recovery-20261024-1125`; worktree `/home/debian/worktrees/mv-a-wallet-receipt-20261024-1125`.
+- Start main `46794ff0ac3deeae87862ac9b74d209798e8d074`, mid/pre-PR same; initial SHA `36f228ffb32b7f574e8a369f1f83d83b11318c4d`, code SHA `6eca70faf1e500af1784369dd8d5fdd5f721d26f`; final docs SHA and CI posted to PR #1115.
+- Start branches 19 including main, 17 open PRs; end snapshot branches 20 including main, 18 open PRs; 19 non-main refs all with unique commits, deletion 0. PR #1107 CONFLICTING; remaining PRs MERGEABLE at snapshot but CI gates may fail.
+- Code/test/plan/worklog files: 17 at implementation checkpoint, plus EN/KO QA release and internal/GitHub updates (4 files) at final checkpoint. Exact final file list via `git diff --name-only origin/main...HEAD`.
+- Targeted backend 30 PASS; frontend/app-api 25 PASS. Full lint 0 errors/1,144 warnings; typecheck/build PASS. Full test FAIL (frontend SEO 3, locale 1, login accessibility 1); audit FAIL (2 Critical/10 High/11 Moderate/3 Low). All skips preserved, not counted as passes.
+- Isolated PostgreSQL READ ONLY owner 1 / foreign 0 / signed pocket sum true; explicit ROLLBACK. Official exact-SHA Test authenticated E2E, SEO/a11y suite and security release gates remain BLOCKED.
+- Main merge 0; Test promotion 0; Production promotion 0; DB migration/write 0; service restart 0; rollback action 0. Rollback if later merged is application revert only, since no migration.
+- Preserve all B/C/Gemini/QA/planning and earlier A unique commits; no cleanup without safe integration evidence. Draft PR #1115 is not release approval.
