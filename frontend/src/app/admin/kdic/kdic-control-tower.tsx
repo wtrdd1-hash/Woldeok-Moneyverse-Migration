@@ -1,8 +1,5 @@
 'use client';
 
-import React, { useState } from 'react';
-import { toast } from 'sonner';
-
 export interface KdicOverviewData {
   fund: {
     id: string;
@@ -57,101 +54,7 @@ export interface KdicOverviewData {
 }
 
 export function KdicControlTower({ initialData }: { initialData: KdicOverviewData | null }) {
-  const [data, setData] = useState<KdicOverviewData | null>(initialData);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [payoutUserId, setPayoutUserId] = useState('');
-  const [payoutInstId, setPayoutInstId] = useState('BANK_COMMERCIAL');
-
-  const refreshData = async () => {
-    try {
-      const res = await fetch('/api/v1/admin/kdic/overview');
-      const json = await res.json();
-      if (json.success && json.data) {
-        setData(json.data);
-      }
-    } catch (e) {
-      console.error('Failed to refresh KDIC overview', e);
-    }
-  };
-
-  const handleAssessPremiums = async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const res = await fetch('/api/v1/admin/kdic/assess-premiums', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await res.json();
-      if (result.success) {
-        toast.success('🏦 [예금보험공사] 정기 예금보험료 징수 완료!', {
-          description: `총 ${result.data.totalCollectedWld.toLocaleString()} WLD 예보기금 편입 (${result.data.recordsCount}개 기관)`,
-        });
-        await refreshData();
-      } else {
-        toast.error('예보료 징수 실패', { description: result.error });
-      }
-    } catch {
-      toast.error('예보료 징수 중 오류가 발생했습니다.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleInjectLiquidity = async (institutionId: string) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const res = await fetch('/api/v1/admin/kdic/liquidity-loan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ institutionId, amountWld: 1000000 }),
-      });
-      const result = await res.json();
-      if (result.success) {
-        toast.success('🚨 [금융안정기금] 100만 WLD 긴급 유동성 대여 집행 완료!', {
-          description: `회복 후 BIS 자기자본비율: ${result.data.newBisRatioPct.toFixed(2)}%`,
-        });
-        await refreshData();
-      } else {
-        toast.error('긴급 대여 실패', { description: result.error });
-      }
-    } catch {
-      toast.error('유동성 대여 중 오류가 발생했습니다.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleExecutePayout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isProcessing || !payoutUserId.trim()) return;
-    setIsProcessing(true);
-
-    try {
-      const res = await fetch('/api/v1/admin/kdic/payout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ institutionId: payoutInstId, userId: payoutUserId.trim() }),
-      });
-      const result = await res.json();
-      if (result.success) {
-        toast.success('🛡️ [예금자보호법] 피해 예금자 대위변제금 지급 완료!', {
-          description: `환급액: ${result.data.payoutAmountWld.toLocaleString()} WLD (최고 50만 WLD 한도 보장)`,
-        });
-        setPayoutUserId('');
-        await refreshData();
-      } else {
-        toast.error('대위변제 실패', { description: result.error });
-      }
-    } catch {
-      toast.error('대위변제 처리 중 오류가 발생했습니다.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  const data = initialData;
 
   const fund = data?.fund;
   const institutions = data?.institutions ?? [];
@@ -161,6 +64,9 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
 
   return (
     <div className="space-y-6">
+      <p role="status" className="rounded-xl border border-amber-700 bg-amber-950/40 p-4 text-sm text-amber-200">
+        KDIC 금융 집행 일시 중단 — 예보료 징수, 긴급 유동성 대여 및 대위변제는 원장·권한·멱등성 검증 전까지 사용할 수 없습니다. 조회는 계속 가능합니다.
+      </p>
       {/* 1. 상단 브리핑 헤더 & 정기 징수 액션 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl backdrop-blur-md">
         <div>
@@ -182,16 +88,14 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
 
         <div className="flex items-center gap-3">
           <button
-            onClick={refreshData}
-            disabled={isProcessing}
+            onClick={() => window.location.reload()}
             className="px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all"
           >
             새로고침
           </button>
           <button
-            onClick={handleAssessPremiums}
-            disabled={isProcessing}
-            className="px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30 active:scale-95 transition-all"
+            disabled
+            className="px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50 bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30 active:scale-95 transition-all"
           >
             분기별 예보료(0.08%) 일괄 징수
           </button>
@@ -206,10 +110,10 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
             예금보험기금 총자산 (KDIC Vault)
           </span>
           <div className="mt-2 text-2xl font-bold font-mono text-emerald-400">
-            {fund ? fund.totalFundWld.toLocaleString() : '10,000,000'} <span className="text-sm font-sans text-slate-400">WLD</span>
+            {fund ? fund.totalFundWld.toLocaleString() : '—'} <span className="text-sm font-sans text-slate-400">WLD</span>
           </div>
           <div className="mt-1 text-xs text-slate-500">
-            부보예금 대비 기금적립률: {summary ? summary.reserveCoverageRatioPct : 40.0}% (건전)
+            부보예금 대비 기금적립률: {summary ? `${summary.reserveCoverageRatioPct}%` : '확인 불가'}
           </div>
         </div>
 
@@ -219,10 +123,10 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
             법정 1인당 예금자보호 한도
           </span>
           <div className="mt-2 text-2xl font-bold font-mono text-cyan-400">
-            500,000 <span className="text-sm font-sans text-slate-400">WLD</span>
+            {fund ? fund.protectionLimitPerUser.toLocaleString() : '—'} <span className="text-sm font-sans text-slate-400">WLD</span>
           </div>
           <div className="mt-1 text-xs text-slate-500">
-            원화 5,000만원 상당 (원리금 전액 보증)
+            현재 공개된 보장 한도 기준 (조회 불가 시 — 표시)
           </div>
         </div>
 
@@ -232,10 +136,10 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
             부보 금융기관 평균 BIS 비율
           </span>
           <div className="mt-2 text-2xl font-bold font-mono text-indigo-400">
-            {summary ? summary.averageBisRatioPct : 14.0}% <span className="text-sm font-sans text-slate-400">자기자본비율</span>
+            {summary ? `${summary.averageBisRatioPct}%` : '확인 불가'} <span className="text-sm font-sans text-slate-400">자기자본비율</span>
           </div>
           <div className="mt-1 text-xs text-slate-500">
-            바젤III 규제 권고치(10.5%) 상회 우량 상태
+            금융기관 건전성 지표 (실제 조회값 기준)
           </div>
         </div>
 
@@ -291,9 +195,8 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
                 </div>
               </div>
               <button
-                onClick={() => handleInjectLiquidity(inst.id)}
-                disabled={isProcessing}
-                className="w-full py-2.5 min-h-[44px] rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/30 active:scale-95 transition-all"
+                disabled
+                className="w-full py-2.5 min-h-[44px] rounded-xl text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50 bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/30 active:scale-95 transition-all"
               >
                 긴급 유동성 100만 WLD 대여(Bailout) 집행
               </button>
@@ -309,17 +212,16 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
             <span>🛡️</span> 예금자보호법 제31조: 부실 금융기관 피해 예금자 대위변제 집행
           </h3>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            파산 또는 영업정지된 금융기관의 예금자에 대해 1인당 최고 50만 WLD 한도 내에서 즉각 대위변제금을 지급합니다.
-            중앙은행 MINT 원천 계좌로부터 유저 현금 계좌(USER_CASH)로 복식부기 원장 분개(Double-entry Ledger)가 원자적으로 체결됩니다.
+            대위변제 집행은 현재 중단되었습니다. 원장과 금융기관 적격성 검증이 완료되기 전까지 실제 지급이 발생하지 않습니다.
           </p>
         </div>
 
-        <form onSubmit={handleExecutePayout} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <form className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-medium text-slate-400 mb-1">대상 부보 기관</label>
             <select
-              value={payoutInstId}
-              onChange={(e) => setPayoutInstId(e.target.value)}
+              defaultValue="BANK_COMMERCIAL"
+              disabled
               className="w-full px-3 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs"
             >
               {institutions.map(i => (
@@ -332,15 +234,14 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
             <input
               type="text"
               placeholder="피해 예금자 UUID 입력"
-              value={payoutUserId}
-              onChange={(e) => setPayoutUserId(e.target.value)}
+              disabled
               className="w-full px-3 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-mono"
             />
           </div>
           <div className="flex items-end">
             <button
               type="submit"
-              disabled={isProcessing || !payoutUserId.trim()}
+              disabled
               className="w-full py-2.5 min-h-[44px] rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 text-white shadow-lg shadow-rose-900/30 active:scale-95 transition-all"
             >
               대위변제금(최고 50만 WLD) 즉시 환급
