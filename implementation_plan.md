@@ -1,4 +1,4 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v235)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v242)
 
 - **v235**: [공식 실전 이용 가이드(/guide, /guide/stock-trading, /guide/virtual-banking) 2026 최신 기획 전면 개편: 토스형 3분 입문 로드맵, 보유 주식 확인 및 원클릭 매도 방법, 월덕뱅크 단일 통장 원카드 및 실시간 복리이자 가이드 구축] (+120, -0)
 
@@ -3550,3 +3550,23 @@ flowchart LR
 3. **단위 테스트 및 빌드 검증**:
    - 백엔드 및 프론트엔드 테스트 실행.
    - 미니 PC 운영 서버 동기화 및 서비스 재기동.
+
+### 3. 최종 배포 및 실측 검증 완료 (Verification & Deployment Report)
+- **Git Commit & Push**:
+  - `0c2f0eb2`: fix(ledger): patch account_balances sum cancellation and align M2 telemetry with double-entry ledger
+- **운영 서버 서비스 배포 및 재기동**:
+  - 백엔드: `moneyverse-backend.service` 최신 dist 동기화 후 restart (Active: running)
+  - 프론트엔드: `moneyverse-release-v1106-seo-frontend.service` 최신 .next/src 동기화 후 restart (Active: running on port 3354, Ready in 163ms)
+- **DB 원장 대사 및 실측 수치 100% 무결성 확인**:
+  - `economy_run_reconciliation_check()`: integrity_ok = true, tripped = []
+  - `ledger_unbalanced_transaction_count`: 0건
+  - `balance_mismatch_account_count`: 0건
+  - `disallowed_negative_balance_account_count`: 0건
+  - `balance_total_delta_amount`: 0 WLD
+  - `corrected_circulating_wld` (유통 통화량): **4,823,510 WLD** (종전 버그 쿼리 0 WLD에서 완전 복구)
+  - `net_mint_issuance_amount`: 5,060,810 WLD
+  - `sink_absorbed_amount`: 237,300 WLD
+  - 순 발행액 (Net Mint - Sink): **4,823,510 WLD**
+- **HTTP 엔드포인트 헬스체크**:
+  - `http://127.0.0.1:3354/`: 200 OK
+  - 국고/중앙은행 텔레메트리/주간신문 유통 통화량 0 노출 결함 완전 소멸.
