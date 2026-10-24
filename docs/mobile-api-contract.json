@@ -1,5 +1,5 @@
 {
-  "contractVersion": "v2026.09.22.359",
+  "contractVersion": "v2026.10.24.a2057",
   "apiVersion": "v2026.09.22.359",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
@@ -15099,6 +15099,89 @@
           "userId",
           "balances",
           "recentTransactions"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/wallet/activity/daily",
+      "purpose": "Owner-only UTC daily summary of the latest 50 WLD ledger entries; never full-day totals",
+      "callWhen": "On wallet activity page or explicit member refresh",
+      "authorization": "Authenticated member session and current consent; owner derived from server session",
+      "afterSuccess": "Render date buckets as sampled latest-50 data; never interpret as complete calendar-day turnover",
+      "backendRoute": "/api/wallet/activity/daily",
+      "operationId": "WalletController_dailyActivity",
+      "backendOpenApiPath": "/wallet/activity/daily",
+      "summary": "UTC daily breakdown of the caller latest 50 ledger transactions only",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "scope",
+          "inspectedTransactions",
+          "days"
+        ],
+        "note": "Integer-string WLD amounts; UTC dates; private no-store; 50 most recent owner transactions only."
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "latest-50"
+          },
+          "inspectedTransactions": {
+            "type": "number"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string"
+                },
+                "transactionCount": {
+                  "type": "number"
+                },
+                "incomingAmount": {
+                  "type": "string"
+                },
+                "outgoingAmount": {
+                  "type": "string"
+                },
+                "netAmount": {
+                  "type": "string"
+                },
+                "internalTransferCount": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "date",
+                "transactionCount",
+                "incomingAmount",
+                "outgoingAmount",
+                "netAmount",
+                "internalTransferCount"
+              ]
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "inspectedTransactions",
+          "days"
         ]
       },
       "responseCompatibility": {

@@ -144,6 +144,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     const value = response.headers.get(name);
     if (value) headers.set(name, value);
   }
+  // A private ledger summary must never become shared-cacheable even when an
+  // upstream proxy omits the privacy header (including non-2xx responses).
+  if (parts.length === 3 && parts[0] === 'wallet' && parts[1] === 'activity' && parts[2] === 'daily') {
+    headers.set('cache-control', 'private, no-store');
+  }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
