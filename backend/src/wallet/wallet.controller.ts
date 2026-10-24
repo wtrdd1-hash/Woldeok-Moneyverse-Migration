@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -24,7 +25,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
-import { WalletInputError } from './wallet.repository';
+import { WalletInputError, requireWalletDirection, requireWalletCategory, requireWalletPeriod } from './wallet.repository';
 import { WalletRecipientError, WalletService } from './wallet.service';
 
 /**
@@ -81,14 +82,39 @@ export class WalletController {
    * an unbounded query.
    */
   @Get('wallet')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Balances and recent ledger entries for the caller' })
-  overview(@Req() request: RequestWithSession, @Query('recent') recent?: string) {
-    if (recent === undefined) return this.service().overview(requireUserId(request));
-    const parsed = Number(recent);
-    if (!Number.isSafeInteger(parsed)) {
-      throw new BadRequestException('recent must be a whole number');
+  overview(
+    @Req() request: RequestWithSession,
+    @Query('recent') recent?: string,
+    @Query('direction') direction?: string,
+    @Query('category') category?: string,
+    @Query('period') period?: string,
+  ) {
+    let selectedDirection: ReturnType<typeof requireWalletDirection>;
+    let selectedCategory: ReturnType<typeof requireWalletCategory>;
+    let selectedPeriod: ReturnType<typeof requireWalletPeriod>;
+    try {
+      selectedDirection = requireWalletDirection(direction);
+      selectedCategory = requireWalletCategory(category);
+      selectedPeriod = requireWalletPeriod(period);
+    } catch (error) {
+      if (error instanceof WalletInputError) throw new BadRequestException(error.message);
+      throw error;
     }
-    return this.service().overview(requireUserId(request), { recentLimit: parsed });
+    if (recent === undefined && selectedDirection === undefined && selectedCategory === undefined && selectedPeriod === undefined) {
+      return this.service().overview(requireUserId(request));
+    }
+    const parsed = recent === undefined ? 10 : Number(recent);
+    if (!Number.isSafeInteger(parsed) || parsed < 1 || parsed > 50) {
+      throw new BadRequestException('recent must be an integer between 1 and 50');
+    }
+    return this.service().overview(requireUserId(request), {
+      recentLimit: parsed,
+      ...(selectedDirection ? { direction: selectedDirection } : {}),
+      ...(selectedCategory ? { category: selectedCategory } : {}),
+      ...(selectedPeriod ? { period: selectedPeriod } : {}),
+    });
   }
 
   @Get('wallet/recipients/search')

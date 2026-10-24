@@ -11,6 +11,11 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
+import { directionFromSearch } from './direction';
+import type { WalletDirection } from './direction';
+import { walletCategoryFromQuery } from './category-filter';
+import { walletPeriodFromSearchParam } from './period-filter';
+import { walletActivityApiPath, walletActivityPageHref } from './wallet-filters';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +33,17 @@ export const metadata: Metadata = {
  * the top of the screen to make room for it was the wrong trade — so the rest
  * of it lives here.
  */
-export default async function WalletActivityPage() {
+export default async function WalletActivityPage({
+  searchParams,
+}: { readonly searchParams?: Promise<{ direction?: string | string[]; category?: string | string[]; period?: string | string[] }> }) {
   await requireMember();
-  // 50 is the API's ceiling for this list, so this page shows everything it
-  // will give rather than a page size chosen here.
-  const wallet = await apiOrNull<Overview>('/api/v1/wallet?recent=50');
+  const raw = (await searchParams) ?? {};
+  const direction = directionFromSearch(raw.direction);
+  const category = walletCategoryFromQuery(raw.category);
+  const period = walletPeriodFromSearchParam(raw.period);
+  const filters = { direction, category, period };
+  // Filters are applied by the owner-scoped SQL query before the latest-50 cap.
+  const wallet = await apiOrNull<Overview>(walletActivityApiPath(filters));
 
   return (
     <div data-page="wallet-activity" className="mv-page mv-page--finance grid gap-5">
@@ -48,14 +59,63 @@ export default async function WalletActivityPage() {
         맞춘 금액을 보여 줍니다.
       </PageHeader>
 
+      <nav aria-label="거래 방향 필터" className="flex flex-wrap gap-2">
+        {([
+          [undefined, '전체'],
+          ['in', '들어온 WLD'],
+          ['out', '나간 WLD'],
+          ['neutral', '순변동 0'],
+        ] as const satisfies readonly (readonly [WalletDirection | undefined, string])[]).map(([value, label]) => (
+          <Button key={value ?? 'all'} asChild variant={direction === value ? 'default' : 'outline'} size="sm">
+            <Link href={walletActivityPageHref({ ...filters, direction: value })} aria-current={direction === value ? 'page' : undefined}>
+              {label}
+            </Link>
+          </Button>
+        ))}
+      </nav>
+      <nav aria-label="거래 기간 선택" className="flex flex-wrap gap-2">
+        {([
+          { value: null, label: '전체 기간' },
+          { value: '7d', label: '최근 7일' },
+          { value: '30d', label: '최근 30일' },
+          { value: '90d', label: '최근 90일' },
+        ] as const).map(({ value, label }) => (
+          <Link
+            key={value ?? 'all'}
+            href={walletActivityPageHref({ ...filters, period: value })}
+            aria-current={period === value ? 'page' : undefined}
+            className="rounded-lg border px-3 py-2 text-sm hover:bg-muted aria-[current=page]:bg-muted aria-[current=page]:font-semibold"
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
+      <p className="text-xs text-muted-foreground">
+        선택한 조건의 최근 기록 최대 50건만 표시합니다. 전체 거래내역을 모두 표시하는 것은 아닙니다.
+      </p>
       <Card>
         <CardContent>
+          <form method="get" action="/wallet/activity" className="mb-5 flex flex-wrap items-end gap-3">
+            {direction && <input type="hidden" name="direction" value={direction} />}
+            {period && <input type="hidden" name="period" value={period} />}
+            <div className="grid gap-1.5">
+              <label htmlFor="wallet-activity-category" className="text-sm font-medium">거래 종류</label>
+              <select id="wallet-activity-category" name="category" defaultValue={category}
+                className="min-h-11 rounded-md border border-border bg-background px-3 text-sm">
+                <option value="">전체 거래</option>
+                <option value="transfer">송금·계정 통합</option>
+                <option value="bank">은행 입출금·대출·이자</option>
+                <option value="reward">보상·지급</option>
+              </select>
+            </div>
+            <Button type="submit" variant="outline" className="min-h-11">조회</Button>
+          </form>
           {!wallet ? (
             <EmptyState title="지금은 기록을 불러올 수 없어요." />
           ) : wallet.recentTransactions.length === 0 ? (
             <EmptyState
-              title="아직 기록된 활동이 없어요."
-              description="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다."
+              title={direction || category || period ? '선택한 조건의 기록이 없어요.' : '아직 기록된 활동이 없어요.'}
+              description={direction || category || period ? '다른 필터를 선택해 확인해 보세요.' : '보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다.'}
             />
           ) : (
             wallet.recentTransactions.map((entry) => {

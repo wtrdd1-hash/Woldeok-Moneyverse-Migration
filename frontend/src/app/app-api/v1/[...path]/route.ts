@@ -106,12 +106,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     });
   }
 
+  const privateWallet = parts[0] === 'wallet';
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
     'x-moneyverse-gateway': 'app-api-v1',
   });
   for (const name of APP_API_REQUEST_HEADERS) {
+    if (privateWallet && (name === 'if-none-match' || name === 'if-modified-since' || name === 'if-range')) continue;
     const value = request.headers.get(name);
     if (value) outgoing.set(name, value);
   }
@@ -145,6 +147,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
+  if (privateWallet) {
+    headers.set('cache-control', 'private, no-store');
+    headers.delete('etag');
+    headers.delete('last-modified');
+  }
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

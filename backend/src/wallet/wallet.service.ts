@@ -15,6 +15,9 @@ import type {
   WalletRewardRow,
   WalletRewardAvailabilityRow,
   WalletTransactionRow,
+  WalletTransactionCategory,
+  WalletActivityPeriod,
+  WalletActivityFilterInput,
   WalletTransferInput,
 } from './wallet.repository';
 import {
@@ -22,6 +25,9 @@ import {
   WalletInputError,
   requirePositiveWld,
   requireRecentLimit,
+  requireWalletDirection,
+  requireWalletCategory,
+  requireWalletPeriod,
   requireUuid,
 } from './wallet.repository';
 
@@ -83,7 +89,7 @@ export class WalletRecipientError extends Error {
  */
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
-  recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]>;
+  recentTransactionsForUser(userId: string, limit: number, filter?: WalletActivityFilterInput): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -196,6 +202,9 @@ export interface WalletRepayReceipt {
 
 export interface WalletOverviewOptions {
   readonly recentLimit?: number;
+  readonly direction?: unknown;
+  readonly category?: WalletTransactionCategory;
+  readonly period?: WalletActivityPeriod;
 }
 
 export interface WalletTransferRequest {
@@ -368,13 +377,26 @@ export class WalletService {
 
   async overview(
     authenticatedUserId: string,
-    { recentLimit = 10 }: WalletOverviewOptions = {},
+    { recentLimit = 10, direction, category, period }: WalletOverviewOptions = {},
   ): Promise<WalletOverview> {
     const userId = requireUuid(authenticatedUserId, 'authenticated user id');
     const limit = requireRecentLimit(recentLimit);
+    const requestedDirection = requireWalletDirection(direction);
+    const selectedCategory = requireWalletCategory(category);
+    const selectedPeriod = requireWalletPeriod(period);
+    const periodDays = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : selectedPeriod === '90d' ? 90 : 0;
+    const now = periodDays ? this.clock() : null;
+    if (now && !Number.isFinite(now.getTime())) throw new Error('invalid wallet clock');
+    const since = now ? new Date(now.getTime() - periodDays * 86_400_000) : undefined;
+    const selectedCount = Number(requestedDirection !== undefined) + Number(selectedCategory !== undefined) + Number(since !== undefined);
+    const filter: WalletActivityFilterInput | undefined = selectedCount > 1
+      ? { ...(requestedDirection ? { direction: requestedDirection } : {}),
+          ...(selectedCategory ? { category: selectedCategory } : {}),
+          ...(since ? { since } : {}) }
+      : requestedDirection ?? selectedCategory ?? since;
     const [balances, transactions] = await Promise.all([
       this.repository.balancesForUser(userId),
-      this.repository.recentTransactionsForUser(userId, limit),
+      this.repository.recentTransactionsForUser(userId, limit, filter),
     ]);
     return {
       userId,
