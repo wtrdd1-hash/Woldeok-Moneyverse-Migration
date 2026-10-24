@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Building2,
   Coins,
@@ -129,7 +130,7 @@ export function EnterpriseControlTower({
   const [overview] = useState<StateHoldingOverviewItem>(initialOverview);
   const [soes, setSoes] = useState<StateEnterpriseItem[]>(initialSoes);
   const [privateEnterprises] = useState<PrivateEnterpriseItem[]>(initialPrivate);
-  const [dividendLogs, setDividendLogs] = useState<DividendLogItem[]>(initialDividendLogs);
+  const [dividendLogs] = useState<DividendLogItem[]>(initialDividendLogs);
   const [isHarvesting, setIsHarvesting] = useState(false);
   const [loadingCode, setLoadingCode] = useState<string | null>(null);
 
@@ -141,22 +142,10 @@ export function EnterpriseControlTower({
       if (!res.ok) throw new Error(data.error || '배당 수취 실패');
 
       toast.success(
-        `🏛️ 공기업 법정 배당금 수취 완료: +${Number(data.total_dividends_collected).toLocaleString('ko-KR')} WLD (국고 잔액: ${Number(data.treasury_balance_after).toLocaleString('ko-KR')} WLD)`,
+        `🏛️ 공기업 법정 배당금 수취 완료: +${groupDigits(data.total_dividends_collected)} WLD (국고 잔액: ${groupDigits(data.treasury_balance_after)} WLD)`,
       );
-
-      // 즉시 로그 갱신
-      const updatedLogs: DividendLogItem[] = soes.map((s) => ({
-        id: crypto.randomUUID(),
-        enterprise_id: s.id,
-        enterprise_code: s.code,
-        enterprise_name: s.name,
-        dividend_amount_wld: ((BigInt(s.net_profit_hourly_wld) * BigInt(s.dividend_rate_bps)) / BigInt(10000)).toString(),
-        revenue_wld: s.operating_revenue_hourly_wld,
-        net_profit_wld: s.net_profit_hourly_wld,
-        eval_grade: s.eval_grade,
-        created_at: new Date().toISOString(),
-      }));
-      setDividendLogs((prev) => [...updatedLogs, ...prev].slice(0, 20));
+      // Do not fabricate ledger rows. Reload server-verified dividend history.
+      window.location.reload();
     } catch (err: any) {
       toast.error(err.message || '공기업 배당금 수취 중 오류가 발생했습니다.');
     } finally {
@@ -217,6 +206,9 @@ export function EnterpriseControlTower({
                 <RefreshCw className={`h-3.5 w-3.5 ${isHarvesting ? 'animate-spin' : ''}`} />
                 공기업 배당 국고 즉시 수취
               </Button>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                금융 변경은 최근 재인증이 필요합니다. <Link href="/account/security" className="underline">계정 보안</Link>
+              </p>
             </div>
           </div>
         </CardHeader>
