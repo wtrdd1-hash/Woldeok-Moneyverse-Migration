@@ -16,3 +16,11 @@
 
 ## Finished
 - Pending.
+
+### Midpoint — 2026-10-25 01:25 KST
+- `origin/main` re-fetched: still `c9a868b1e622341e2daa8b936ddf0988eda9988e`; integrated EN plan re-read. No overlapping open PR for bond maturity overview (bond mutation fix #1152 remains separate).
+- Backend tests observed RED (missing method/module), then 6/6 GREEN. Frontend tests observed RED (missing component), then 16/16 GREEN after fixing ambiguous test locator and setting `NODE_ENV=test`.
+- Implemented authenticated read-only Nest projection of existing `bank_get_my_standing` JSON; no SQL write or migration. Added private member route, 7-day/matured-unredeemed status, exact WLD strings, bank entry link, Android gateway route contract regression.
+- [x] Backend tests RED then implementation GREEN.
+- [x] Frontend tests RED then UI GREEN; Android app-api path contract.
+- [ ] Full verification and release gate evidence.

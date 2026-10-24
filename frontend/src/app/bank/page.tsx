@@ -224,6 +224,10 @@ export default async function BankPage() {
 
           {/* KTB 기획재정국채 발행 창구 */}
           <VirtualBondsCard bonds={bonds} cashBalance={cash} />
+          <Link href="/bank/bonds" className="inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 py-2 font-semibold hover:bg-muted">
+            {localeLabel(locale, '내 채권 만기 현황 보기', 'View bond maturity schedule', '債券の満期を確認', '查看债券到期时间')}
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
         </TabsContent>
 
         {/* 탭 3: 순자산 분석 & 건전성 (4대 지표 카드 + Kinked 점프 이자율 곡선) */}

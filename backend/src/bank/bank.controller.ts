@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -29,6 +30,7 @@ import {
   IdempotentDto,
 } from './bank.dto';
 import { BankInputError, BankRepository } from './bank.repository';
+import { projectBondMaturities } from './bond-maturity';
 
 @ApiTags('banking')
 @Controller('banking')
@@ -62,6 +64,20 @@ export class BankController {
       () => this.repository().getStanding(requireUserId(request)),
       'failed to load bank standing',
     );
+  }
+
+  @Get('bonds/maturity-overview')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Owner-only verified bond holdings and upcoming maturity overview' })
+  bondMaturityOverview(@Req() request: RequestWithSession) {
+    return this.guarded(async () => {
+      const standing = await this.repository().getStanding(requireUserId(request));
+      try {
+        return projectBondMaturities(standing);
+      } catch {
+        throw new ServiceUnavailableException('verified bond maturity data unavailable');
+      }
+    }, 'failed to load bond maturity overview');
   }
 
   @Post('deposit')
