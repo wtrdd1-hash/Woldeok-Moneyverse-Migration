@@ -1,3 +1,6 @@
+## 2026-10-25 v1240 — F675-117 verified shop restock watch (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1238 / Current Addition v1240 / Next Improvement v1242 provisional. Main c9a868b1e622341e2daa8b936ddf0988eda9988e start/mid. Source: shop UI/controller, migrations 071/072/114/123. Owner-only 30-cap finite-stock-zero watches; real inventory 0→positive event and one in-app receipt, no WLD/ledger effect. P0 ENV1240-01 SEC1240-02 REL1240-03 SHOP1240-04; P1 SHOP1240-05..10. Full EN/KO master. QA v1243 FAILED/HOLD, disk 97%, external approved 0/10,000 (cumulative UNKNOWN), no deployment.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)

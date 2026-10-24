@@ -1,5 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-117 adoption — v2026.10.25.1240 (DRAFT / RELEASE HOLD)
+- Source-backed gap: current /shop Store 2.0 catalogue reports finite nullable inventory and enforces stock at purchase, but inspected main has no owner restock watch. New member-only 30-cap out-of-stock watch and deduplicated in-app notice on committed finite inventory 0→positive; never a reservation, guaranteed checkout or WLD movement. Existing notification consent and review plans remain independent.
+- Web /shop → /account/shop-watches; private owner API/Android parity; request-digest immutable receipts, version CAS, SQL stock transition and dispatch recheck, admin aggregate, noindex/no-store, WCAG AA, 100-way concurrency and 10,001 isolated synthetic cursor fixture. P0 ENV1240-01 SEC1240-02 REL1240-03 SHOP1240-04; P1 SHOP1240-05 SHOP1240-06 SHOP1240-07 SHOP1240-08 SHOP1240-09 SHOP1240-10. Full spec in integrated EN/KO masters.
+- QA v1243 HOLD; official Test exact-SHA, shared DB/5433, migration266/280, privilege/audit/root capacity and backup restore gates not passed. External 3 publisher families reviewed, approved 0, cumulative UNKNOWN/10,000. Docs only.
+
+
 ## F675-06 detailed adoption — v2026.10.15.688
 
 - [Google Search Evidence & Canonical Action Center](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) is the next v675 adopted **detailed planning** feature. Reuses /admin/seo and v685; identifies top-10-only GSC data, missing date=0, GSC PT/freshness, crawler-indexed mislabel and legacy index submission success/Google Indexing API misclaims. Separates source/submission/Google indexed-version/performance into independently verifiable evidence, 16 Google/WCAG references and D0–D7 gated implementation. Not a live SEO audit or deployed feature.
