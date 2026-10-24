@@ -1,5 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1214 — F675-110 임시글 발행·재시도·개인정보 보존 강화 (기획 초안 / 운영승격 보류)
+- 이전 Feature Addition v1212, 현재 Feature Improvement v1214, 다음 Feature Addition v1216(잠정). main 46794ff0ac3deeae87862ac9b74d209798e8d074 시작·중간 확인; v1212 Draft #1103 미병합, QA v1219 다른 SHA에서 FAILED/HOLD. 문서만 변경.
+- 실제 코드: Preview에서 본문 입력 누락, 서버 액션마다 멱등 UUID 재생성, 기존 게시 함수의 원래 payload digest 미검증. 7일 영수증/30일 복구, 계정 탈퇴 FK, 발행 postId 보존 문제 보완. 안정적 발행 의도·불변 digest 영수증·확정 불명 복구·종결 CAS·이미지 정리·본인정보 보호·Android/접근성·배포 게이트를 [통합 기획서](INTEGRATED_PLANNING_MASTER.ko.md)에 명세.
+- P0 ENV1214-01 SEC1214-02 REL1214-03 BOARD1214-04; P1 BOARD1214-05 BOARD1214-06 BOARD1214-07 BOARD1214-08 BOARD1214-09 BOARD1214-10. 동일 저장 100건→영수증 1, 동일 게시 100건→게시글 1, 타 회원 100회→노출 0, 다른 digest→409, 종결 후 저장→409, Preview 본문 보존, 격리 합성 커서 10,001건, WLD 변경 0. 기능 기본 OFF, 정확 SHA의 실제 Test 배포/인증 금융 E2E/PG 권한/복원/보안/GitOps 전 병합·승격 금지. 외부 발행기관 3곳 검토, 신규 승인 0, 누적 미확인/10,000 BLOCKED.
+
+
 ## v2026.10.24.1212 — F675-110 비공개 게시글 임시저장함·기기간 이어쓰기 (기능 추가 초안 / 운영 보류)
 - 회차: 이전 **기능 보완 v1210**, 현재 **기능 추가 v1212**, 다음 **기능 보완 v1214(잠정)**. 시작·중간 최신 main `5072d43e43dd93191d1c738c31c94ef1c1a5319d`, 완료 QA v1217 (검증 SHA b9746298, 현재 main 5072d43e와 다름) FAILED/HOLD. 이전 v1210 PR #1094는 **미병합 종료**이므로 제안 기능을 운영 반영으로 간주하지 않는다. 새 기획 브랜치는 최신 main에서 독립 분기, Runtime/DB/WLD/Test/Production 변경 없음.
 - 소스 공백: `frontend/src/app/board/board-forms.tsx`는 본문을 React 상태에만 보유하고 미리보기 시 `name=body` 필드를 언마운트하여 제출 누락 가능성이 있다. `stock-actions.ts`는 즉시 게시하며 main에서 임시저장 API/테이블은 확인되지 않았다. F675-110은 로그인 회원 본인만의 텍스트 임시글, 선택형 서버 자동저장, 저장/재시도/충돌/게시 영수증, 기기간 이어쓰기, 게시 시 사진 재선택을 기획한다. 입력 추적·WLD 이동 없음.
