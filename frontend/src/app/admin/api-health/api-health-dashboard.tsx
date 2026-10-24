@@ -140,7 +140,7 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
     setBackupFeedback(null);
     try {
       const result = await triggerAdminBackup();
-      setBackupFeedback(result.message);
+      setBackupFeedback(result.message ?? (result.status === 'ok' ? 'Backup request accepted.' : 'Backup request failed.'));
       if (result.status === 'ok') {
         setTimeout(() => {
           fetchBackupStatus();
