@@ -26,3 +26,10 @@
 - TDD GREEN: backend calculation/controller 18 PASS; frontend preview, Android gateway and route 28 PASS.
 - Implemented member-only loan repayment preview using existing owner-scoped bank_get_my_standing; bank repayment SQL caps overpayment with LEAST, mirrored exactly with BigInt; no monetary mutations or migration.
 - Backend/frontend typecheck PASS, changed-file lint PASS; latest main still c9a868b1e622341e2daa8b936ddf0988eda9988e. Full suite, build, security, isolated PostgreSQL and official Test remain pending.
+
+## In-progress checkpoint 2 (00:40 KST)
+- Code SHA 483ebca8a5e0900be725b9117ad094e5cdc52435 after added HTTP boundary regression and early invalid-amount rejection.
+- Backend exact code 1,333 PASS / 398 SKIPPED; frontend 1,401 PASS / 6 FAIL; DB 15 PASS / 3 SKIPPED; contract 38 PASS; Android app-api 179 endpoint contract PASS. Focused backend 20 PASS and frontend 28 PASS.
+- Backend/frontend typecheck, full lint (0 errors, 1,137 warnings), backend build and alternate Webpack frontend build PASS. Default Turbopack build FAIL on external node_modules symlink. Security audit FAIL (full 2 Critical/10 High, prod 2 High, bot 1 Critical/5 High).
+- Isolated real PostgreSQL: 17 active users, 0 active loans, 0 ledger rows; owner standing function PASS as app role, ledger INSERT and Posting UPDATE denied, READ ONLY / ROLLBACK. No Test exact-SHA finance E2E.
+- Remote branch and PR audit: 3 conflicting PRs #1143/#1110/#1107; preserve all unique work. No production, no cleanup.
