@@ -372,6 +372,10 @@ export default async function AdminEconomyPage({
           title="자동 조정 엔진"
           id="economy-engine"
         />
+        <p className="text-sm text-muted-foreground">
+          자동 정책 실행과 조정 범위 변경에는 최근 15분 이내 본인 재인증이 필요합니다.
+          <Link href="/account/security" className="ml-1 underline underline-offset-2">계정 보안에서 재인증</Link> 후 실행하세요.
+        </p>
 
         {engine === null ? (
           <Card>
