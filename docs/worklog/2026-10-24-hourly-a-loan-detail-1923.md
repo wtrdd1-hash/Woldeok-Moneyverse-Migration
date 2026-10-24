@@ -14,3 +14,5 @@
 - 19:37: build/typecheck/lint/API contract PASS; pnpm and bot dependency audits FAIL.
 - main and EN/KO planning rechecked mid/pre-integration unchanged. Code SHA a942bf35281895569269cb381b3c229de5426ac5. Production RELEASE HOLD.
 - Final push inventory: 59 remote heads (58 non-main), 56 open PRs; Draft PR #1163; deleted 0; preserved all unique worker branches. No Test/Production deployment or rollback.
+- Post-push SQL review: migration 194 owner read has LIMIT 20. Clarified API and UI as latest-20 only; no historical coverage claim. New code SHA required and all checks re-evaluated.
+- Final revalidation after SQL bound correction: full test still 5 frontend FAIL, build/typecheck/lint/app-api PASS; latest main and integrated EN/KO unchanged. Keep Draft PR and RELEASE HOLD.

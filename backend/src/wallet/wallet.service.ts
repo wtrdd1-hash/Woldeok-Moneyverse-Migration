@@ -514,7 +514,11 @@ export class WalletService {
     }));
   }
 
-  /** Read only the authenticated actor's loans; never fetch by an unscoped loan id. */
+  /**
+   * Read only the authenticated actor's most recent 20 loans. The existing
+   * bank_my_loans(actor) function is bounded at 20 in migration 194; do not
+   * claim this can retrieve arbitrary older history without a new migration.
+   */
   async loanById(authenticatedUserId: string, loanId: string): Promise<WalletLoanView | null> {
     const actor = requireUuid(authenticatedUserId, 'authenticated user id');
     const id = requireUuid(loanId, 'loan id');

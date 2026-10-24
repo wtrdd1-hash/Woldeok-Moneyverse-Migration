@@ -46,7 +46,7 @@ export default async function LoanDetailPage({ params }: { params: Promise<{ id:
       <Button asChild variant="ghost" className="w-fit"><Link href="/wallet">← 내 지갑</Link></Button>
       <header className="space-y-2">
         <h1 className="text-2xl font-bold">가상 대출 상세</h1>
-        <p className="text-sm text-muted-foreground">실제 화폐가 아닌 WLD 가상 대출 기록입니다.</p>
+        <p className="text-sm text-muted-foreground">실제 화폐가 아닌 WLD 가상 대출 기록입니다. 최근 20건 이내에서만 상세 조회가 가능합니다.</p>
       </header>
       <Card>
         <CardHeader><CardTitle>확인된 대출 기록</CardTitle></CardHeader>

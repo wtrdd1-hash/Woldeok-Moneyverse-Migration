@@ -112,7 +112,7 @@ export class WalletController {
 
   @Get('bank/loans/:id')
   @Header('Cache-Control', 'private, no-store')
-  @ApiOperation({ summary: 'Owner-verified virtual loan detail' })
+  @ApiOperation({ summary: 'Owner-verified detail from the most recent 20 virtual loans' })
   async loanDetail(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) loanId: string) {
     const loan = await this.service().loanById(requireUserId(request), loanId);
     if (!loan) throw new NotFoundException('loan not found');

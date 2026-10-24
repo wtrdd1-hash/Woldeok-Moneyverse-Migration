@@ -33,6 +33,7 @@ describe('private owner loan detail page', () => {
     const html = renderToStaticMarkup(await LoanDetailPage({ params: Promise.resolve({ id: ID }) }));
     expect(api).toHaveBeenCalledWith(`/api/v1/bank/loans/${ID}`);
     expect(html).toContain(BigInt(ACTOR_LOAN.outstandingAmount).toLocaleString('en-US'));
+    expect(html).toContain('최근 20건 이내');
     expect(html).toContain('내 지갑에서 상환하기');
     expect(html).toContain(ID);
     expect(metadata.robots).toEqual({ index: false, follow: false });

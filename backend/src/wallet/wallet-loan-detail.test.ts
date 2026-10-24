@@ -32,7 +32,7 @@ describe('owner-scoped virtual loan detail', () => {
     expect(repo.loansForUser).toHaveBeenCalledWith(ACTOR);
     expect(loan).toMatchObject({ loanId: LOAN, principalAmount: HUGE, outstandingAmount: HUGE, status: 'active' });
   });
-  it('does not expose a foreign or nonexistent loan', async () => {
+  it('does not expose a foreign, nonexistent, or out-of-window loan', async () => {
     const wallet = new WalletService(repository());
     await expect(wallet.loanById(ACTOR, FOREIGN)).resolves.toBeNull();
     await expect(wallet.loanById(FOREIGN, LOAN)).resolves.toBeNull();
