@@ -149,6 +149,51 @@ describe('app API route compatibility', () => {
     });
   });
 
+  it('streams owner-only wallet CSV with private no-store, download and nosniff headers', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const csv = '\uFEFF"scope (recent 50 max)","net_wld"\r\n"recent 50 max","900719925474099312345"';
+    const upstream = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://127.0.0.1:3020/api/v1/wallet/statement.csv');
+      expect(new Headers(init?.headers).get('cookie')).toBe('session=private');
+      return new Response(csv, {
+        status: 200,
+        headers: {
+          'content-type': 'text/csv; charset=utf-8',
+          'content-disposition': 'attachment; filename="moneyverse-wallet-recent-50.csv"',
+          'cache-control': 'private, no-store',
+          'x-content-type-options': 'nosniff',
+        },
+      });
+    });
+    vi.stubGlobal('fetch', upstream);
+    const response = await GET(
+      request('/app-api/v1/wallet/statement.csv', { cookie: 'session=private' }),
+      context('wallet', 'statement.csv'),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('text/csv');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('content-disposition')).toContain('attachment');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+    expect(new TextDecoder('utf-8', { ignoreBOM: true }).decode(bytes)).toBe(csv);
+    expect(upstream).toHaveBeenCalledOnce();
+  });
+
+  it('does not invent a CSV file when owner authentication fails upstream', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(
+      JSON.stringify({ status: 401, title: 'Unauthorized' }),
+      { status: 401, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store' } },
+    )));
+    const response = await GET(request('/app-api/v1/wallet/statement.csv'), context('wallet', 'statement.csv'));
+    expect(response.status).toBe(401);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('content-disposition')).toBeNull();
+    expect(await response.json()).toMatchObject({ status: 401 });
+  });
+
   it('does not transform binary media bodies', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {

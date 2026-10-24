@@ -8,8 +8,8 @@
 
 **Tech Stack:** NestJS, TypeScript, PostgreSQL, Next.js, Vitest.
 
-1. [ ] Write backend serializer and route tests (RED), including injection, precision, bounds, unauthenticated denial.
-2. [ ] Implement serializer and controller endpoint (GREEN), no new DB migrations.
-3. [ ] Write Android app-api passthrough regression test (RED) then implement any required gateway fixes.
-4. [ ] Add member activity download CTA and focused frontend regression.
+1. [x] Write backend serializer and route tests (RED), including injection, precision, bounds, unauthenticated denial.
+2. [x] Implement serializer and controller endpoint (GREEN), no new DB migrations.
+3. [x] Write Android app-api passthrough regression test (existing proxy already supports CSV).
+4. [x] Add member activity download CTA and focused frontend regression.
 5. [ ] Recheck latest main and integrated EN/KO planning mid/final; verify focused/full test and real isolated PG permissions, then PR/HOLD or gated merge.

@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -26,6 +27,7 @@ import { requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
 import { WalletInputError } from './wallet.repository';
 import { WalletRecipientError, WalletService } from './wallet.service';
+import { walletStatementCsv } from './wallet-statement';
 
 /**
  * Guard order is semantic, not cosmetic. SessionGuard resolves the session
@@ -89,6 +91,17 @@ export class WalletController {
       throw new BadRequestException('recent must be a whole number');
     }
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
+  }
+
+  @Get('wallet/statement.csv')
+  @Header('Content-Type', 'text/csv; charset=utf-8')
+  @Header('Content-Disposition', 'attachment; filename="moneyverse-wallet-recent-50.csv"')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({ summary: 'Download up to 50 recent owner-only WLD ledger entries as CSV' })
+  async statementCsv(@Req() request: RequestWithSession): Promise<string> {
+    const wallet = await this.service().overview(requireUserId(request), { recentLimit: 50 });
+    return walletStatementCsv(wallet.recentTransactions);
   }
 
   @Get('wallet/recipients/search')

@@ -9,7 +9,11 @@
 - Preserve all unique unmerged work, other workers, Gemini. No branch deletions without proof of main integration.
 
 ## MID
-- Pending.
+- Re-fetched main and the newer unmerged EN/KO integrated planning context; main remains `c9a868b1e622341e2daa8b936ddf0988eda9988e`, latest planning Draft v1246. No overlap with C notification/marketplace or B security work.
+- TDD RED confirmed missing Nest route and serializer; GREEN focused backend 30/30, frontend Android app-api 12/12. Second RED discovered zero-width format character CSV formula hazard; GREEN sanitizer strips Cc/Cf before formula detection.
+- Implemented guarded `GET /api/v1/wallet/statement.csv`, 50-row bounded existing owner PostgreSQL projection, private/no-store CSV attachment, exact integer strings, no DB writes; activity download link. Android app-api already supports text/csv passthrough; added explicit success/auth-denial tests.
+- Root filesystem 100% used with ~376 MiB available; avoid local Next build until safe isolation; preserve unrelated worktrees.
+
 
 ## END
 - Pending.
