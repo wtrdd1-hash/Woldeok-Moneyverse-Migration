@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
+import { writeFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/api', () => ({ apiOrNull: vi.fn() }));
@@ -37,6 +38,9 @@ describe('marketplace authenticated server-rendered read-only flow', () => {
       return null;
     });
     const html = renderToStaticMarkup(await MarketplacePage());
+    if (process.env.MV_C_BROWSER_FIXTURE) {
+      writeFileSync(process.env.MV_C_BROWSER_FIXTURE, `<!doctype html><html lang="ko"><head><meta name="robots" content="noindex,nofollow"></head><body>${html}</body></html>`);
+    }
     expect(requireMember).toHaveBeenCalledOnce();
     expect(html).toContain('검증된 매물');
     expect(html).toContain('42');
