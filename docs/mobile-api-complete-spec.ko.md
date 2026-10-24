@@ -8,6 +8,8 @@
 > 대상: Android/iOS 네이티브 앱, 프론트엔드/백엔드 엔지니어, 앱 심사/QA 담당자
 > 영문 기준 문서: [mobile-api-complete-spec.md](mobile-api-complete-spec.md)
 
+> **미출시 후보 v2026.10.24.a1550:** 이 개발 브랜치의 기계 판독 모바일 계약은 기존 179개에서 **181개**로 확장되며, 회원 전용 `GET /app-api/v1/shop/wishlist` 및 `POST /app-api/v1/shop/wishlist/mutations`를 추가합니다. `SHOP_WISHLIST_ENABLED` 기본 OFF, 회원 세션·동의·쓰기 CSRF가 필수입니다. 저장은 구매나 WLD 지급이 아니며 서버 영수증과 재조회 후에만 성공을 표시합니다. 개인정보 응답은 private/no-store입니다. 정확한 SHA의 전체 검증·승격 전에는 운영 제공 기능으로 간주하지 않습니다. 아래 기존 179개 수치는 이전 기준입니다.
+
 ## 0. 이 문서만 따라야 하는 이유
 
 이 파일은 모바일 앱이 사용해야 하는 API 계약을 한 곳에 통합한 기준 문서다. 앱은 웹 페이지 URL이나 비공개 NestJS 주소를 추측해서 호출하지 않는다. 일반 사용자 기능은 반드시 `https://easy-scraping.com/app-api/v1/*` BFF를 통해 호출한다.

@@ -6,6 +6,8 @@ Update version: **v2026.09.14.76**
 
 This is the execution contract for Android/iOS/Flutter/React Native clients and AI coding agents. It covers all 139 app endpoints with URL, method, authorization, path/query/body inputs, success statuses, response transport shape, and authoritative re-sync rules.
 
+> **Draft v2026.10.24.a1550 extension (not deployed):** the machine-readable contract adds two member-only shop wishlist routes (`GET /app-api/v1/shop/wishlist`, `POST /app-api/v1/shop/wishlist/mutations`) and totals 181 candidate endpoints. Feature flag defaults OFF; a wishlist save is never a purchase or WLD transfer. Always send session cookies and CSRF for mutation, require the verified receipt and re-fetch the private no-store list. The older 139 count below refers to the original catalog revision.
+
 ## 1. Non-negotiable client rules
 
 - Use `https://easy-scraping.com/app-api/v1` as the only native base URL. Never call the private `/api/v1/*` backend directly.

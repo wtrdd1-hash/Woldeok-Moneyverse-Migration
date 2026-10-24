@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.09.22.359**
+Update version: **v2026.10.24.a1550**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 181 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -3805,6 +3805,72 @@ _No request body._
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
 | cosmetics | true | object |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/shop/wishlist` — Owner-only saved shop items; never purchases
+
+- Authorization: 로그인 + 최신 동의, 기능 플래그 활성화
+- Success status: 200
+- Response mode: json
+- After success: Wishlist GET 재조회; 구매나 잔액 변경 없음
+- Operation ID: `ShopController_wishlist`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| items[] | true | object[] |  |
+| items[] | true | object |  |
+| items[].catalog_id | true | string |  |
+| items[].name | true | null \| string |  |
+| items[].price | true | null \| string |  |
+| items[].available | true | boolean |  |
+| items[].version | true | number |  |
+| items[].updated_at | true | string (date-time) |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/shop/wishlist/mutations` — Save or remove an item without purchasing it
+
+- Authorization: 로그인 + 최신 동의, 기능 플래그 활성화
+- Success status: 201
+- Response mode: json
+- After success: Wishlist GET 재조회; 구매나 잔액 변경 없음
+- Operation ID: `ShopController_mutateWishlist`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `WishlistMutationDto`
+
+| Field | Required | Type | Constraints |
+|---|---|---|---|
+| catalogId | true | string (uuid) | description="Catalogue item to save or remove" |
+| action | true | string | enum="SAVE","REMOVE" |
+| idempotencyKey | true | string (uuid) | description="Unique client retry key" |
+
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| saved | true | boolean |  |
+| replayed | true | boolean |  |
+| version | true | number |  |
+| receiptId | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

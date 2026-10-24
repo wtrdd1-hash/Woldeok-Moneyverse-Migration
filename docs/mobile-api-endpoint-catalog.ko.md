@@ -6,6 +6,8 @@
 
 이 문서는 Android/iOS/Flutter/React Native 앱 또는 다른 AI가 Moneyverse 앱을 구현할 때 **추측 없이 호출 코드를 만들 수 있도록** 작성한 실행 계약이다. 전체 앱 API 139개를 포함하며 URL, method, 인증 조건, path/query/body, 성공 상태코드, 응답 방식, write 이후 재동기화 규칙을 기록한다.
 
+> **미출시 v2026.10.24.a1550 확장:** 기계 판독 계약에는 회원 전용 상점 관심 상품 조회 `GET /app-api/v1/shop/wishlist` 및 저장·삭제 `POST /app-api/v1/shop/wishlist/mutations`가 추가되어 후보 엔드포인트 181개입니다. 기능 플래그 기본 OFF, 구매·WLD 변동 없음, 회원 쿠키와 쓰기 CSRF 필수, 서버 영수증·비공개 재조회 검증 후 성공 표시. 아래 139개 표기는 구버전 카탈로그 기준이며 운영 배포를 의미하지 않습니다.
+
 ## 1. 절대 규칙
 
 - 앱의 base URL은 `https://easy-scraping.com/app-api/v1`이다. private backend `/api/v1/*`를 직접 호출하지 않는다.

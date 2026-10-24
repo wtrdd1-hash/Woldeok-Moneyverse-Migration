@@ -38,16 +38,19 @@ BEGIN
   END IF;
   RETURN QUERY
   SELECT w.catalog_id,
-         CASE WHEN c.active THEN c.name ELSE NULL::text END,
-         CASE WHEN c.active THEN c.base_price::text ELSE NULL::text END,
-         c.active AND EXISTS (
-           SELECT 1 FROM public.shop_inventory AS i WHERE i.catalog_id = c.id
-           AND (i.starts_at IS NULL OR i.starts_at <= pg_catalog.clock_timestamp())
-           AND (i.ends_at IS NULL OR i.ends_at > pg_catalog.clock_timestamp())
-         ),
+         CASE WHEN visibility.available THEN c.name ELSE NULL::text END,
+         CASE WHEN visibility.available THEN c.base_price::text ELSE NULL::text END,
+         visibility.available,
          w.version, w.updated_at
   FROM public.shop_wishlist_items AS w
   JOIN public.shop_catalog AS c ON c.id = w.catalog_id
+  CROSS JOIN LATERAL (
+    SELECT c.active AND EXISTS (
+      SELECT 1 FROM public.shop_inventory AS i WHERE i.catalog_id = c.id
+      AND (i.starts_at IS NULL OR i.starts_at <= pg_catalog.clock_timestamp())
+      AND (i.ends_at IS NULL OR i.ends_at > pg_catalog.clock_timestamp())
+    ) AS available
+  ) AS visibility
   WHERE w.user_id = p_actor AND w.saved
   ORDER BY w.updated_at DESC, w.catalog_id DESC
   LIMIT 50;
