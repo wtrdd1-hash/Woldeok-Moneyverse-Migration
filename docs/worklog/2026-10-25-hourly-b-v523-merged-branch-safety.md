@@ -10,10 +10,16 @@
 - Planned: TDD negative regression; disable merged-event deletion; retain ancestry-proven scheduled prune; verify targeted tests and required checks; no automatic merge or Production release.
 
 ## In progress
-- [ ] RED negative cleanup regression
-- [ ] Minimal workflow safety patch
-- [ ] GREEN regression + repository checks
-- [ ] Refresh main/plan and create Draft PR
+- [x] RED negative cleanup regression: 1 failure / 2 pass (merged-event deletion exposed)
+- [x] Minimal workflow safety patch: removed merged-event destructive job; preserved exact-head/ancestry/lease scheduled prune, protected stacked open PRs, reduced PR permission to read
+- [x] GREEN: 59/59 release tests; lint 0 errors (1,137 warnings), typecheck PASS, build PASS, backend 1,313 PASS / 398 SKIPPED, database 15 PASS / 3 SKIPPED, workflow YAML parsed
+- [ ] Refresh main/plan and create Draft PR (main unchanged at mid-check)
+
+## Verification checkpoint
+- Root `pnpm test` FAILED: Frontend 1,397 PASS / 6 FAIL (existing locale, SEO x3, login touch target, M2 telemetry). API contract and security prefix passed before frontend failure.
+- `pnpm audit --prod --audit-level=high` FAILED: 2 High (`body-parser`, `multer`); unrelated to cleanup workflow but release-blocking.
+- Real PostgreSQL ACL/finance E2E and official Test exact-SHA not performed; this workflow-only patch does not modify DB or API.
+- No main merge, deployment, Production data mutation or other worker branch deletion.
 
 ## Finished
-- Pending verification.
+- Awaiting remote CI and PR review; release HOLD.
