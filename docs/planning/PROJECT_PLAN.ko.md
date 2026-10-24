@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1244 — F675-118 검증형 회원 알림함 및 원천 근거 연결 (기능 추가 / 초안 / 운영승격 보류)
+- 회차: 이전 Feature Improvement v1242 → 현재 Feature Addition v1244 → 다음 Feature Improvement v1246(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 확인, 최신 완료 QA v1247 FAILED/HOLD. 미병합 기획 #1200 및 개발 A/B/C/QA/Gemini와 분리된 main 기반 문서 브랜치.
+- **코드로 확인한 문제:** `frontend/src/app/account/notifications/notification-tabs-bar.tsx`가 가상의 6개 알림(20 WLD 소각, 1,840 WLD 이자 포함)을 하드코딩하고 읽음·카테고리 수를 브라우저 상태로만 변경함. 실제 NestJS 알림 컨트롤러/서비스는 `in_app_notifications`에서 본인 목록·미읽음·읽음·전체읽음 API를 제공하고 Next `/api/notifications`는 배열 여부만 확인. `/account/notifications`는 현재 정적 탭을 사용. 이 가상 수치를 실제 원장 확정으로 주장 금지. C #1101은 별도 헤더, #1130은 설정, #999/#1004/#1015 및 B #1117은 미병합 의존성.
+- **신규 기능:** 회원 인증 기반 `/account/notifications` 검증형 알림 타임라인, 서버 확정 카테고리/미읽음 필터·서명 커서·읽음 영수증·원천 증거 상세. 금융 원천 검증 실패 시 금액·지급완료 배지 금지, UNVERIFIED 명시. 필수 보안 알림은 선택적 수신거부로 차단하지 않음. 보상 수령·WLD 잔액·원장·구매 변경 없음.
+- **개발 백로그:** P0 ENV1244-01 운영/개발/Test DB 격리·5433·복원, SEC1244-02 본인 검증·원천 근거·앱 권한, REL1244-03 QA·보안·Migration266/280·정확 SHA·디스크, NOTIF1244-04 가상 금융 안내 제거 및 원천 발행자 검증. P1 NOTIF1244-05, NOTIF1244-06, NOTIF1244-07, NOTIF1244-08, NOTIF1244-09, NOTIF1244-10 DB/조회, 원자적 읽음 영수증, Next/Nest/Android 화면, 관리자 익명 통계·개인정보, KPI·접근성·SEO, 격리 회귀·롤백. 상세 구현 계약은 [국문 통합 정본](INTEGRATED_PLANNING_MASTER.ko.md).
+- **승격 차단:** QA v1247, 루트 디스크 현재 100%/28MiB 잔여, 운영 연결 개발 DB, 5433 전체 바인딩, 241개 중 235개 앱 UPDATE+DELETE, PUBLIC 은행 함수 3개, Migration266 체크섬, 280 중복 4건, 런타임 CI/공식 Test 정확 SHA 금융 E2E·격리 복원 미검증. 기본 OFF·문서 전용·main 병합 및 Test/운영 승격 금지. 외부 독립 근거 신규 승인 0건, 누적 중복 제거 승인 UNKNOWN/10,000 = BLOCKED / IN PROGRESS.
+- 백로그 ID: ENV1244-01 SEC1244-02 REL1244-03 NOTIF1244-04 NOTIF1244-05 NOTIF1244-06 NOTIF1244-07 NOTIF1244-08 NOTIF1244-09 NOTIF1244-10.
+
 ## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
 - 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.

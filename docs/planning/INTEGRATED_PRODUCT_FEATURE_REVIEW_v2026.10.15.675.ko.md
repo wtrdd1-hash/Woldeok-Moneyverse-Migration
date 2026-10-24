@@ -1,5 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## F675-118 (v1244) — 검증형 알림함·원천 증거 이력 [기능 추가, 초안/보류]
+- 실제 `/account/notifications/notification-tabs-bar.tsx`는 가상 6개 안내(20 WLD 소각·1,840 WLD 이자)를 정적 표시하고 읽음도 브라우저에서만 변경. Nest 본인 알림 목록/읽음과 Next `/api/notifications`가 존재하지만 이 정적 탭에는 연결되지 않음. 보상 claim-all은 의도적으로 409. 운영 금융 사고나 실제 지급을 뜻하지 않음.
+- 본인 검증형 카테고리/미읽음 타임라인, 근거 확인 CTA, 서명 키셋 커서, 원자적 읽음 영수증, 근거 없음/원천 장애 상태. 검증 없는 WLD 지급 표시 금지, 보상·원장·WLD 변경 없음. #999/#1004/#1015, C #1101/#1130, B #1117과 변경 분리. 기본 OFF, #1147 전 신규 migration 번호 금지.
+- P0 ENV1244-01 SEC1244-02 REL1244-03 NOTIF1244-04; P1 NOTIF1244-05 NOTIF1244-06 NOTIF1244-07 NOTIF1244-08 NOTIF1244-09 NOTIF1244-10. 화면/API/DB/트랜잭션/관리자/개인정보/SEO/Android/접근성/KPI/테스트/배포는 국문 통합 정본. QA v1247 FAILED/HOLD, 디스크 100%/28MiB, 운영 연결 5433, 앱 DML/PUBLIC 금융 함수, Migration266/280, 보안·정확 SHA Test/복원 차단. 신규 외부 근거 승인 0건, 누적 UNKNOWN/10,000 BLOCKED. 문서만 변경.
+
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
 
 - [GSC 실제 검색성과·색인 증거 센터 상세기획](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 정식 상세기획으로 채택. 기존 /admin/seo·v685 재사용, GSC 날짜/상위 10개·무행0·크롤러 색인 오인·레거시 제출 성공/Google Indexing API 안내 오류 기록, 기술·제출·Google 색인본·검색 노출 실제 증거 분리, 구글/WCAG 16개 자료·D0~D7. 실제 SEO/GSC 운영 검증이나 코드 배포 아님.

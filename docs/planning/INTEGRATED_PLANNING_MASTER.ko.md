@@ -1,5 +1,55 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## F675-118 / 기획 v1244 — 검증형 회원 알림함 및 원천 근거 타임라인 (기능 추가 / 초안·보류)
+
+### 목적·대상·실제 구현 근거
+- **목적/대상:** 회원에게 예시 금융 안내가 아니라 실제 서버 확정 기록에 근거한 알림함 제공. 최신 main의 `frontend/src/app/account/notifications/notification-tabs-bar.tsx`는 6개 고정 `INITIAL_NOTIFICATIONS`(20 WLD 소각, 1,840 WLD 이자 포함)를 렌더링하고 `useState`로만 읽음 처리. `/account/notifications/page.tsx`가 이 탭을 렌더링함. **실제 지급·회원 손해가 있었다는 근거가 아니라 소스상 표시 문제**임.
+- 기존 Nest `GET /api/v1/notifications`, `/unread-count`, `POST /:id/read`, `/read-all`은 세션·인증·동의, 쓰기 CSRF 가드와 `in_app_notifications` 조회를 사용함. `NotificationService.listNotifications`는 본인 조건으로 `id,category,title,body,link,dedupe_key,is_read,read_at,created_at`을 OFFSET 조회. Next `GET /api/notifications`는 배열 형태만 검증. `claim-all`은 보상 지급 미구현으로 409를 반환. F675-101 #999 중복 발행, F675-102 #1004 수신 동의, F675-103 #1015 다이제스트, C 헤더 #1101·설정 #1130, B P2P #1117과 중복 구현 금지.
+- **범위:** 실제 근거 연결형 회원 타임라인, 본인 읽음 영수증, 검증 상세, 반응형 카테고리 및 Android 동등성. 이메일·푸시·다이제스트·마케팅 수신 설정, 보상 수령, WLD/원장 변경, 증거 없는 기존 기록의 자동 검증 승격 금지. `verified_notification_inbox` 기능 스위치 기본 OFF.
+
+### 회원 화면·진입점·CTA·상태
+1. 계정 > '알림 센터 & 설정', 검증 완료 후 헤더 종, `/account/notifications` 직접 접근. 로그인 본인만 사용. 기존 목표/NPC 수신 설정은 독립적으로 유지하며 전체 채널 동의로 오인하지 않음.
+2. 로딩·준비·검증된 빈 목록·로그인 필요·서버 확인 실패·계정 전환·재시도 상태를 분리. 서버 실패를 알림 0건 또는 가짜 6건으로 표시 금지. 로그아웃/계정 전환 시 지연 응답·커서·낙관적 읽음 처리 폐기.
+3. 전체/사업/은행/시즌/공간/보안/시스템/기타 탭과 미읽음 필터는 서버 기준. 알 수 없는 카테고리는 기타로 표시하며 보안으로 위장 금지. 생성·읽음·검증 시각 분리.
+4. 카드에는 서버 제목·안전한 본문·시간·미읽음·'근거 확인'(권한 있는 증거만)·'읽음 표시'(대기/확정/실패) CTA. `link`를 그대로 열지 않고 내부 경로 허용목록과 접근 권한 확인. 필수 보안 알림은 선택 수신 거부와 관계없이 유지.
+5. 근거 상세에는 `VERIFIED/UNVERIFIED/NOT_APPLICABLE`, 원천 종류·시각·본인 허용 참조만 표시. WLD 금액은 **본인 소유 계정 전표와 확정 원장 거래를 검증한 경우에만 정확한 문자열**로 노출. 검증 불가면 금액·지급 완료 배지 숨김. 다른 회원/없는 증거는 구별 불가능한 404, 원천 장애는 503·검증 불가.
+6. 전체 읽음은 서버 확정 스냅샷과 영수증으로 표시하며 브라우저 상태만 일괄 변경 금지. 응답 불확실 시 다시 조회. 근거 링크는 지급 영수증이나 은행 이체 지시가 아님.
+
+### 제안 API·상태 계약 (미구현)
+- `GET /api/v1/notifications/verified?category=ALL|...&unreadOnly=true|false&limit=20&cursor=...` => `{items:[{id,category,title,body,createdAt,isRead,readAt,evidenceStatus,evidenceKind,evidenceAvailable}],nextCursor,unreadCount,snapshotAt}`. 기본 20·최대 100, `(created_at DESC,id DESC)` 안정 키셋 커서. 본인·세션·필터·스냅샷 HMAC 결합. 잘못된 커서 400, 타인 커서 403/404, 클라이언트 userId 금지.
+- `GET /api/v1/notifications/:id/evidence` => `{notificationId,status,sourceKind,sourceTimestamp,sourceReference,amountWld?}`. 금액은 본인 확정 원장에 한해 문자열로 반환. 타인/미존재 404, 원천 장애 503, 타인 개인정보·관리자 비밀·외부 임의 URL 제외.
+- 기존 `POST /api/v1/notifications/:id/read`, `/read-all`은 #999의 멱등·본인 검증과 통합. `Idempotency-Key: UUID`, 요청 해시, `If-Match`/스냅샷, `{status:'CONFIRMED',readAt,requestId,affectedCount}` 영수증 제안. 동일 키·내용 최초 결과 반환, 동일 키·다른 내용 409. Next 동일 출처 `/api/notifications/verified`와 증거 BFF, Android `/app-api/notifications/verified` 및 읽음/증거 동등성은 계약·인증 테스트 이후 제공. 현재 구현된 것으로 주장 금지.
+
+### DB·권한·트랜잭션
+- 먼저 **격리 복원 PostgreSQL**에서 실제 `in_app_notifications`, `notification_preferences`, 발행 함수·권한·RLS, 원장/보안/이벤트 원천 확인. 운영 연결 5433에 fixture·마이그레이션 금지. Migration280 중복 #1147 해결 전 번호 배정 금지, 적용된 266 수정 금지.
+- 순방향 후보 `notification_evidence_links`: UUID PK, notification_id FK(보존·삭제 승인 후 CASCADE 여부 확정), UNIQUE(notification_id), user_id, 허용 source_kind, source_id UUID, 불변 source_digest, proof_state, verified_at, created_at; 검증 완료 시 source ID·digest 필수 CHECK; `(user_id,created_at DESC,notification_id DESC)` 및 `(source_kind,source_id)` 인덱스. 다형 source_id 자체는 증명이 아니므로 `SECURITY DEFINER`가 실제 원천에 JOIN해 확정·본인 소유를 다시 확인. 기존 근거 없는 기록은 `UNVERIFIED`로 유지.
+- 추가 후보 불변 `notification_read_receipts`: UNIQUE(user_id,request_id), payload_digest, notification_id(전체 읽음은 NULL), snapshot/version, committed_at, outcome. `SECURITY DEFINER SET search_path = pg_catalog, public`, 신뢰 가능한 세션 본인 결합, 앱 직접 DML/PUBLIC EXECUTE 금지. #999 기존 읽음 SQL 보완과 충돌하지 않도록 개발 소유자와 조정.
+- 읽음 처리: 회원 알림과 영수증 일관 잠금 순서, 스냅샷·버전 확인, `is_read/read_at` 갱신과 불변 영수증을 한 트랜잭션으로 확정. 재시도는 최초 영수증과 최초 read_at 유지. 원천 증거 조회는 읽기 전용, WLD 지급 트랜잭션이 아님. 삭제/보존 경합은 개인정보 노출 없이 404. 증거·영수증 보존 기간은 별도 승인 필요.
+
+### 관리자·보안·SEO·모바일·KPI
+- `/admin/notifications/evidence`: 검증/미검증 건수, 발행 지연, 원천 오류율, 중복·타인 접근 거절, 오래된 증거만 익명 집계. 회원 본문·원장 금액·타인 증거 상세 공개 금지. 관리자 임의 검증 증거 생성/원장 편집 금지. 권한 있는 진단은 재인증·감사 필요.
+- 제목/본문 XSS 방지, 내부 이동 경로 허용목록, 요청량 제한(초기 제안 읽음 20회/분/회원, 실측 후 조정), CSRF·세션·동의·열거 방지, 로그 PII 최소화. 필수 보안 알림은 선택 마케팅 거부와 분리. 외부 알림 발송 없음.
+- 계정·증거 URL `noindex,nofollow`, `private,no-store`, 사이트맵/구조화 별점 제외. 320px, 글자 200%, 44x44 터치, 시각적 초점, 의미 있는 목록·탭, 상태 변경만 aria-live, 모션 감소. Android OS 푸시 권한과 앱 내 알림은 독립.
+- 콘텐츠 없는 분석 이벤트 `verified_inbox_view`, `filter_selected`, `proof_open_success/fail`, `mark_read_confirmed`, `stale_source_suppressed`; 원천 증명 비율, 금융 허위 확정 표시 목표 0, 타인 노출 목표 0, 중복 읽음 영수증 목표 0, 검증 지연·접근성 성공률 측정. 개인정보 심사·보존 정책 승인 전 계측 활성화 금지.
+
+### P0/P1 개발 인계 (독립 검토 10개)
+- **P0 ENV1244-01:** 운영/개발/Test DB 격리, 5433 전체 바인딩 제거, 암호화 백업·격리 복원과 DB 신원 검증.
+- **P0 SEC1244-02:** 본인/발행자 신원 검증, 앱 직접 알림 DML·PUBLIC 금융 EXECUTE 차단, 격리 PG 타인·위조 근거 부정 테스트, #999/#1004 연계.
+- **P0 REL1244-03:** QA v1247 디스크 100%, 266 체크섬·280 중복, 런타임 CI 미실행, 프론트 실패·보안 감사, GitOps 링크 #1113, 정확 SHA Test 금융 E2E/롤백 해결.
+- **P0 NOTIF1244-04:** 6개 가상 카드·실제 발행자·P2P/보안/원장 근거 조사, 금융 안내 검증 실패 시 안전한 문구·링크 처리. C 헤더 #1101·B P2P #1117 중복 수정 금지.
+- **P1 NOTIF1244-05:** 격리 DB 스키마 조사 후 증거·영수증 PK/FK/UNIQUE/CHECK/인덱스·권한·보존·순방향 마이그레이션 설계.
+- **P1 NOTIF1244-06:** 본인 증거 조회, 원자적 멱등 읽음/전체읽음, 서명 커서, 잠금·409 재시도 충돌·원천 장애 차단.
+- **P1 NOTIF1244-07:** Nest DTO/가드, Next BFF/SSR 카테고리 화면, 근거 CTA, 장애 상태, 내부 경로 허용목록, 로그아웃 응답 차단.
+- **P1 NOTIF1244-08:** Android App API 동등성, WCAG 2.2 AA, 320px/200% 확대, 초점·스크린리더·다국어; 푸시 권한과 분리.
+- **P1 NOTIF1244-09:** 관리자 익명 진단, 개인정보 삭제 승인, 악용 방지, 비색인 SEO, 개인정보 없는 KPI.
+- **P1 NOTIF1244-10:** 격리 PostgreSQL/API/Next/Android 회귀, 보안, 정확 SHA Test, 무중단 단계 배포·롤백 검증.
+
+### 수용 테스트·무중단 배포·롤백
+- RED/GREEN: 6개 가상 카드 실제로 표시 금지, 20/1,840 WLD 지급/소각 주장 금지; 증거 없으면 금액·완료 배지 숨김, 본인 확정 원장만 정확 문자열, 위조 원천/타인 ID/악성 URL 노출 0. claim-all은 409 유지. 카테고리·미읽음 서버 값 일치, 비정상 응답은 EMPTY가 아니라 UNAVAILABLE.
+- 격리 합성: 동일 읽음 키 100건 => 영수증·read_at 1개, 동일 키 다른 내용 100건 => 409, 타인 증거 100건 => 누출 0, 전체읽음·새 알림·로그아웃 경합 100건 => 다른 회원 UI 오염 0, 동일 시각 합성 알림 10,001건 => 커서 중복·누락 0. 합성 데이터 10,001건은 외부 독립 근거 수가 아님. 원천 롤백/삭제/장애, 필수 보안 알림, Android, 관리자 부정 권한, 320px·200% 접근성 검증.
+- 1단계 기본 OFF에서 순방향 DB·그림자 조회, 기존 기록 재작성 금지. 2단계 공식 격리 Test 정확 SHA·서명된 로그인/은행/원장/알림 E2E, 보안/QA·백업 복원. 3단계 승인 GitOps 무중단 카나리, 허위 표시·타인 접근 감시, 문제 시 스위치 OFF·이전 불변 릴리스로 롤백하되 증거 데이터 임의 삭제 금지. **이번 기획은 실제 런타임/E2E 테스트 0건, DB/원장/Test/운영 변경 0건.**
+- **외부 독립 근거 게이트:** 실물 자료 10,000건 개별 수집·중복 제거·발행자 및 증거 분류 필수. 신규 승인 **0건**, 누적 검증 승인 **UNKNOWN/10,000**, **BLOCKED / IN PROGRESS**. 이전 OWASP/PostgreSQL/W3C 발행기관 계열을 10,000건으로 계산 금지.
+
 ## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스와 수정 사유
