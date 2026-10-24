@@ -1,5 +1,49 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1256 — F675-121 회원 게시판 글 팔로우·검증형 새 댓글 알림 (기능 추가 / 기획 초안 / 운영 보류)
+
+### 회차·근거·범위
+- 이전 **Feature Improvement v1254**, 현재 **Feature Addition v1256**, 다음 **Feature Improvement v1258**(잠정). 기준: 시작·중간 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e`, `AGENTS.md`, `README.md`, 영문 `PROJECT_PLAN.md` 정본과 국문 대조. 최신 QA **v1259 FAILED/HOLD**. 미병합 기획 PR #1235 위에 쌓인 문서 초안이며 **구현·배포 완료가 아니다**.
+- main 확인: `frontend/src/app/board/page.tsx` 공개 게시글, `board/[postId]` 댓글, `backend/src/board/board.controller.ts` 및 Migration 048의 인증된 댓글 작성, Migration 259의 공개 댓글·작성자 조회. `member_board_comment_create`는 멱등 키로 댓글을 저장하지만 글별 팔로우·알림 기능은 확인되지 않았다. `backend/src/notification/notification.controller.ts`에 회원 알림 조회/읽음 API가 존재한다. 개발 C의 미병합 #1206 실제 알림함과 **연계하되 중복 구현·병합 가정 금지**. F675-109 읽기 목록, F675-110 초안, F675-116 수정 이력과 범위를 분리한다.
+- 목적: 회원이 명시적으로 팔로우한 글에 **실제로 확정되고 여전히 공개된 새 댓글**이 생기면 앱 내에서 알린다. 자동 구독·금융 알림·WLD 보상·이메일/푸시·공개 팔로워 수 기능은 제외한다.
+
+### 회원 흐름·권한·화면
+- 공개 `/board/[postId]`의 **새 댓글 팔로우** CTA. 로그인하지 않은 방문자에게는 **로그인 후 팔로우**만 표시하며 자동 구독하지 않는다. 활성·최신 동의 회원만 공개/미삭제/비제한 글을 팔로우한다. 본인 글 팔로우는 허용하되 본인 댓글은 알리지 않는다.
+- 비공개 `/account/board-follows`: `팔로우 중`, `알림 끔`, `이용 불가` 탭, 20건 서명 키셋 페이지, **글 열기·알림 끄기/켜기·팔로우 해제**, 삭제/제한 글은 제목·본문 없이 **목록에서 제거**. 기존 `/account/notifications`는 C의 실제 알림함 계약이 병합·검증된 후에만 재사용한다. 별도 가상 알림함·보상 수령 기능 생성 금지.
+- 상태: `NOT_FOLLOWING/FOLLOWING/MUTED/PENDING/CONFLICT/OFFLINE/UNAVAILABLE/ERROR`. 서버 확정 영수증만 성공 표시. 네트워크 실패는 성공으로 위장하지 않으며 같은 `requestId`로 재시도; 412면 최신 버전 재조회. 키보드 초점 복귀, 상태 라이브 영역, 44px 터치, 320px 화면·200% 확대, WCAG 2.2 AA.
+- 권한: 본인 목록·팔로우·영수증만 접근, 관리자는 비식별 큐 통계만 조회. 읽기 Session+Authenticated+Consent, 변경은 CSRF 추가. 요청의 userId는 신뢰하지 않고 세션에서 회원 식별. 탈퇴·정지·비공개·삭제된 글/댓글 차단. 기능 OFF 시 신규 팔로우/알림 중단, 기존 내역 조회 및 안전한 해제는 허용.
+
+### 제안 API(미구현)
+- `GET /api/v1/board/follows?status=following|muted|all&limit=20&cursor=...` → `{items:[{postId,status,version,updatedAt,available,href?}],nextCursor}`. 제목·링크는 매번 공개 여부 확인 후 제공. HMAC 커서는 회원·세션·필터·스냅샷 상한·마지막 `(created_at,post_id)` 결합. 상태 변경이 일어나면 불변 created_at 정렬도 과거 시점 완전 스냅샷은 아님을 명시. 개인 응답 `Cache-Control: private, no-store`.
+- `PUT /api/v1/board/posts/:postId/follow` 본문 `{requestId:UUID,expectedVersion:0 이상 정수,muted:boolean}`, 최초 등록 버전 0. 반환 `{status,version,receiptId,committedAt}`. `DELETE /api/v1/board/posts/:postId/follow`도 동일 본문으로 묘비 처리. `GET /api/v1/board/follows/receipts/:requestId`는 본인만 원본 확정 결과 메타데이터 조회(숨긴 제목·댓글 본문 없음).
+- 오류 400 입력, 401 인증, 403 동의/CSRF, 404 부재·타인·비공개를 동일 처리, 409 동일 키/다른 HMAC 요청, 412 구버전, 429 제한, 503 의존성 실패. Android `/app-api/v1/board/...`는 현재 `frontend/src/lib/app-gateway.ts`가 `If-Match`/`Idempotency-Key` 헤더를 전달하지 않으므로 JSON `requestId/expectedVersion` 사용. 쿠키·CSRF·계정 전환 응답 차단 필수.
+
+### DB·트랜잭션·알림 무결성
+- 순방향 Migration 번호는 기존 **280 충돌 해결 후** 할당한다. 제안 `member_board_thread_follows`: `(user_id,post_id)` PK, `version bigint>=1`, `generation bigint`, `active`, `muted`, `start_event_seq bigint`, `created_at`, `updated_at`. 회원별 활성 최대 **200개**, 인덱스 `(user_id,active,created_at DESC,post_id DESC)`. 글 FK가 승인된 완전 삭제를 막아서는 안 되며 묘비·영수증으로 이전 상태가 재생성되지 않아야 한다.
+- 제안 `member_board_reply_sequences(post_id PK,last_seq)`, `member_board_reply_events(comment_id UNIQUE,post_id,event_seq,committed_at)`와 `(post_id,event_seq)` UNIQUE, `member_board_reply_deliveries(user_id,comment_id,generation,notification_id,delivered_at)`의 `(user_id,comment_id)` UNIQUE. `member_board_follow_receipts(user_id,request_id,request_hmac,key_version,result_json,created_at)`는 본문·제목·URL을 저장하지 않는다. HMAC 키 순환 및 보존기간은 개인정보 승인 전 미확정. 워커 재시도·백오프·실패 격리와 큐 관측 포함.
+- 팔로우 변경과 **신규 댓글** 확정은 동일 글 행을 일관된 순서로 잠그고, 진짜 신규 INSERT에만 글별 증가 `event_seq`를 부여해 댓글·이벤트·아웃박스를 같은 트랜잭션에 확정한다. 팔로우는 잠금 상태의 `start_event_seq`를 기록하며 그보다 큰 이벤트와 **동일한 활성 generation**만 알린다. 회원 구독 행 `FOR UPDATE`·버전 CAS로 팔로우/해제/재팔로우 ABA 차단. 동일 키 재전송은 최초 영수증, 다른 내용은 409. 롤백 시 이벤트·알림·영수증 **0건**.
+- 알림 워커는 실제 발송 직전에 회원 활성·동의, 구독 generation·mute, 글 공개 상태, 댓글 존재/삭제, 작성자≠수신자를 재검증한다. `(user_id,comment_id)` 유일성으로 재시도 중복 차단. 글/댓글 삭제·운영 제한·팔로우 해제 시 대기 알림 폐기. 내구 알림 페이로드에 댓글 본문·금융 금액·숨겨진 제목 저장 금지. C #1206 알림 계약 미병합이면 **발송 OFF**를 유지한다.
+- Migration 010/163 소프트 탈퇴·계정 병합은 FK CASCADE를 보장하지 않으므로 별도 순방향 정리·병합 사전차단, 무단 구독 이전·과거 계정 열람 확대 금지. 보존·백업 삭제는 개인정보 정책 승인 필요. PUBLIC/`moneyverse_app`의 신규 테이블 직접 DML 금지, 본인 검증 `SECURITY DEFINER` 함수만 허용하며 실제 PostgreSQL 권한 부정 테스트 필수.
+
+### 운영·분석·테스트·승격
+- 회원당 분당 쓰기 12회, 활성 200개, 글별 과도한 알림 큐 상한·지연·악용신고. 관리자에게 익명 큐 적체/실패/재시도 지연/기능 스위치만 표시. KPI: 팔로우 전환율, 실제 댓글 알림 지연 p95, 중복 전달 목표 0, 삭제 글 정보 유출 목표 0, 열람률(개인 추적 없음), 429 비율. 공개 글 canonical SEO 유지, 비공개 계정·영수증 `noindex/no-store`, 동일 출처 안전 링크, Android/TalkBack·VoiceOver·키보드 검증.
+- 향후 격리 검증: 동일 키 100건 동시 등록→영수증 1건, 동일 키 다른 내용 100건→409, 타 회원 100건→비노출, 댓글 작성/팔로우 경합, 멱등 댓글 재생, 글/댓글 삭제·운영 제한, 해제/재팔로우 generation, mute, 계정 병합·탈퇴, 워커 재시작·큐 실패·롤백. **합성** 전달 10,001건 커서 시험(운영 팔로우 200개 상한 유지). 실DB 권한 부정, Nest/Next/Android/금융 회귀 시험 필요. **이번 기획에서 테스트 미실행**.
+- 기본 OFF. 개발 A/B/C/Gemini/QA와 분리된 구현 브랜치. P0 루트 용량·운영/개발/Test DB 분리·최소권한·Migration 266/280·보안/CI·격리 암호화 백업 복원, 인증된 **정확 head-SHA 공식 Test** 웹/API/DB/모바일/접근성/금융 E2E, 승인 GitOps 카나리 후 점진 활성화. 롤백 시 신규 등록·알림 차단, 불안전 큐 폐기, 묘비·영수증 보존, WLD·원장 불변. 기획 단계 런타임·DB·Test·Production 변경 없음.
+
+### P0/P1 개발 백로그(총 10건)
+- **P0 ENV1256-01** — 소유자 확인 후 루트 디스크 복구, 운영/개발/Test DB 격리, 백업 복원 준비.
+- **P0 SEC1256-02** — 격리 PG에서 검증한 순방향 앱 DML·PUBLIC 은행 함수 권한 축소, 회원 ACL/BOLA.
+- **P0 REL1256-03** — QA v1259 보안 감사·프론트 CI 6건·Migration 266/280·정확 SHA Test/GitOps 차단 해소.
+- **P0 BOARD1256-04** — 실제 댓글 INSERT/재생·글 공개/운영 제한·C #1206 알림 연동·잠금 순서 선행 검증.
+- **P1 BOARD1256-05** — 회원 전용 구독/묘비/버전/영수증 DB·인덱스·200개 상한.
+- **P1 BOARD1256-06** — 원자적 글별 이벤트 순번·트랜잭션 아웃박스·중복방지·generation 검증.
+- **P1 BOARD1256-07** — NestJS 본인 API·404/409/412/429/503 및 Android JSON 계약.
+- **P1 BOARD1256-08** — Next.js 팔로우 CTA·목록·Android·키보드/TalkBack·오프라인 상태.
+- **P1 BOARD1256-09** — 관리자 익명 통계·개인정보/병합·악용방지·SEO/KPI.
+- **P1 BOARD1256-10** — 격리 100건 경합·합성 10,001 커서·정확 SHA 회귀·카나리·롤백.
+- 외부 독립 근거 10,000건 게이트: PostgreSQL·OWASP·W3C **발행기관 3곳** 검토, 신규 승인·중복 제거 **0건**, 누적 승인 **미확인/10,000**, **BLOCKED / IN PROGRESS**. 참고: https://www.postgresql.org/docs/17/explicit-locking.html ; https://api-security.owasp.org/editions/2023/en/0x11-t10/ ; https://www.w3.org/TR/WCAG22/ . 발행기관 3곳을 근거 10,000건으로 계산하지 않는다.
+
+
 ## v2026.10.25.1254 — F675-120 거래 메모의 계정 병합·삭제·커서 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
 
 ### 회차·영문 정본·실제 소스에서 확인한 위험

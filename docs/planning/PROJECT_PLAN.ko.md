@@ -1,5 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1256 — F675-121 게시판 글 팔로우·검증형 새 댓글 알림 (기획 초안 / 운영 보류)
+- 이전 기능 보완 v1254 → 현재 기능 추가 v1256 → 다음 기능 보완 v1258(잠정). 시작·중간 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e`, QA v1259 FAILED/HOLD. Migration 048 댓글 확정·259 공개 조회·Nest 게시판 및 기존 알림 API 확인. main의 글별 팔로우 알림 미확인, 개발 C #1206 미병합 알림함 중복 구현 금지.
+- `/board/[postId]` 팔로우/알림 끄기/해제, 비공개 `/account/board-follows`, 실제 확정·공개 댓글만 알림, 본인 댓글 제외, 서버 영수증·본인 API, 글별 잠금 이벤트 순번·generation CAS·전달 중복 방지·삭제/제한 재검증, 활성 200개·분당 12회. Android 본문 requestId/version, 익명 관리자, noindex/no-store, WCAG AA, 합성 10,001 커서, 정확 SHA Test·기능 OFF 롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 참조. WLD/원장 불변.
+- P0 ENV1256-01 SEC1256-02 REL1256-03 BOARD1256-04; P1 BOARD1256-05 BOARD1256-06 BOARD1256-07 BOARD1256-08 BOARD1256-09 BOARD1256-10. QA v1259 루트 100%, 앱 DML 235/241, PUBLIC 은행 EXECUTE 3개, Migration 266 체크섬·280 충돌, 의존성 Critical2/High10, 프론트 CI 6건 실패; 정확 SHA Test·격리 복원 BLOCKED. 외부 PostgreSQL/OWASP/W3C 3곳 검토, 신규 중복 제거 승인 0건, 누적 미확인/10,000 BLOCKED/IN PROGRESS. 미병합 문서 초안, 런타임·DB·WLD·Test·운영 변경 없음.
+
+
 ## v2026.10.25.1254 — F675-120 거래 메모 계정 병합·개인정보·커서 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1252 → 현재 기능 보완 v1254 → 다음 기능 추가 v1256(잠정). 원격 main c9a868b1e622341e2daa8b936ddf0988eda9988e 시작·중간 확인, AGENTS/README 및 영문 정본·국문 대조, QA v1257 FAILED/HOLD. 미병합 Draft #1229 기반 문서 전용.
 - Migration 163은 p_merge 식별자·세션을 p_keep으로 이동하나 과거 계좌·전표는 p_merge 소유로 남기고 소프트 삭제한다. 기존 병합 거부 목록에 신규 메모/영수증이 없으므로 P0 순방향 사전검사에서 원천의 활성 메모·묘비·영수증이 하나라도 있으면 금융 이동 전 병합 전체 거부. 무단 메모 이전·과거 원장 노출 금지. 소프트 삭제는 FK CASCADE가 아니다.

@@ -1,5 +1,12 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v2026.10.25.1256 — F675-121 Board Reply Follow Product Review (FEATURE ADDITION / HOLD)
+- Problem: the public board supports real posts and comments but has no confirmed opt-in thread follow with verified reply alerts on main. This is distinct from reading-list bookmarking, board drafts, revision history and C's unmerged verified notification inbox #1206.
+- Value and trust: explicit Follow/Mute/Unfollow, private list, only newly committed and still-visible comments from other authors, no financial claim or reward. A 503 never becomes a success toast. Queue delivers once after generation and visibility checks; no stored private comment body or hidden title.
+- Design: owner-only SECURITY DEFINER DB, 200 active subscriptions, per-post locked event_seq, CAS version/tombstone and HMAC receipts, Android JSON-body requestId/expectedVersion, 12 writes/min, admin anonymized health, noindex/no-store, WCAG 2.2 AA, queue/cursor/rollback. P0 ENV1256-01 SEC1256-02 REL1256-03 BOARD1256-04; P1 BOARD1256-05 BOARD1256-06 BOARD1256-07 BOARD1256-08 BOARD1256-09 BOARD1256-10. Full API/DB/UX/test contract in [English integrated master](INTEGRATED_PLANNING_MASTER.md).
+- QA v1259 FAILED/HOLD: root 100%, app 235/241 DML, three PUBLIC bank EXECUTE, migration266/280, audit Critical2/High10, frontend six failures, exact-SHA Test and restore blocked. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED. Documentation-only; no runtime/DB/WLD/Test/Production changes.
+
+
 ## v2026.10.25.1254 — F675-120 Wallet Annotation Lifecycle and Privacy Review (FEATURE IMPROVEMENT / HOLD)
 - Product integrity: verified migration 163 account merge leaves historical owner postings under deleted p_merge while moving identities/sessions to p_keep. Annotations cannot be silently reassigned. P0 forward-only preflight blocks merges with source annotations/tombstones/receipts until an explicit audited portability policy exists. Do not claim a live incident.
 - Member trust: Remove must clear category/note and caches, preserve only version tombstone; receipts contain no private text, HMAC request fingerprint replaces raw SHA256; 30-day receipt retention is proposed, pending privacy sign-off. No ledger/WLD modification.
