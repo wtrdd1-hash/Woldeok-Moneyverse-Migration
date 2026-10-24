@@ -8,10 +8,15 @@ export interface ShopDeadlineItem {
 
 export function upcomingShopDeadlines(
   items: readonly ShopDeadlineItem[],
+  nowMs: number,
   limit = 6,
 ): readonly ShopDeadlineItem[] {
   return items
-    .filter((item) => item.sale_ends_at !== null && Number.isFinite(Date.parse(item.sale_ends_at)))
+    .filter((item) => {
+      if (item.sale_ends_at === null || !Number.isFinite(nowMs)) return false;
+      const endMs = Date.parse(item.sale_ends_at);
+      return Number.isFinite(endMs) && endMs > nowMs;
+    })
     .sort((left, right) => Date.parse(left.sale_ends_at!) - Date.parse(right.sale_ends_at!))
     .slice(0, Math.max(0, limit));
 }
