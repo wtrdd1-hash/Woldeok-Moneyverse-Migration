@@ -16,11 +16,11 @@
 - Accessibility 320px/keyboard/screen reader, noindex for unverified invite URLs.
 
 ## Tasks
-- [ ] Add tests rejecting fabricated default stats/rewards and unsupported route; run RED.
-- [ ] Implement service-sharing CTA with truthful copy, validated copy/share actions, and accessible labels.
-- [ ] Replace unverified invite landing with truthful service introduction, safe registration/login and noindex; run GREEN.
-- [ ] Run lint, typecheck, build, frontend/backend/contract/security and browser checks; record exact SHA and CI outcomes.
-- [ ] Re-fetch main, document results in English/Korean, open Draft PR, never merge without full PASS.
+- [x] Add tests rejecting fabricated default stats/rewards and unsupported route; run RED.
+- [x] Implement service-sharing CTA with truthful copy, validated copy/share actions, and accessible labels.
+- [x] Replace unverified invite landing with truthful service introduction, safe registration/login and noindex; run GREEN.
+- [x] Run lint, typecheck, build, frontend/backend/contract/security and browser checks; record exact SHA and CI outcomes.
+- [x] Re-fetch main, document results in English/Korean, open Draft PR, never merge without full PASS.
 
 ## Review Focus
 - Malicious/oversized code in legacy URLs; copied link does not expose arbitrary code; no guaranteed WLD claim; failed clipboard does not report success; share cancel is not success.
