@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -89,6 +90,14 @@ export class WalletController {
       throw new BadRequestException('recent must be a whole number');
     }
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
+  }
+
+  @Get('wallet/transactions/export')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({ summary: 'Owner-only last 50 ledger entries for verified web CSV and Android export' })
+  exportRecent(@Req() request: RequestWithSession) {
+    return this.service().exportRecent(requireUserId(request));
   }
 
   @Get('wallet/recipients/search')

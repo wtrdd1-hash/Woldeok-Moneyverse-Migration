@@ -149,6 +149,17 @@ describe('app API route compatibility', () => {
     });
   });
 
+  it('proxies owner wallet export with private no-store even if upstream omits cache headers', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      currency: 'WLD', recentLimit: 50, transactions: [],
+    }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' } })));
+    const response = await GET(request('/app-api/v1/wallet/transactions/export'), context('wallet', 'transactions', 'export'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ currency: 'WLD', recentLimit: 50 });
+  });
+
   it('does not transform binary media bodies', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {

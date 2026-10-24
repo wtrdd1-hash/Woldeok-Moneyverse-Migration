@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
+import { ExportLedgerCsvButton } from '../export-ledger-csv';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
 
@@ -47,6 +48,8 @@ export default async function WalletActivityPage() {
         내 지갑을 거쳐 간 최근 기록입니다. 각 줄은 돈이 어디서 나와 어디로 갔는지와, 그 둘을
         맞춘 금액을 보여 줍니다.
       </PageHeader>
+
+      <div className="flex justify-end"><ExportLedgerCsvButton /></div>
 
       <Card>
         <CardContent>

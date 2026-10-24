@@ -18,9 +18,9 @@
 - No merge or deploy without full CI, security, isolated Test exact-SHA authenticated E2E.
 
 ## Tasks
-- [ ] Add failing NestJS service/controller and app-api tests for export and privacy.
-- [ ] Implement bounded normalized read and private endpoint, then re-run tests.
-- [ ] Add failing BFF CSV tests for signed-out, unavailable, owner rows, 50 cap, formula and exact 38 digits.
-- [ ] Move pure CSV formatter to server-safe module; implement BFF route and web download control.
+- [x] Add failing NestJS service/controller and app-api tests for export and privacy.
+- [x] Implement bounded normalized read and private endpoint, then re-run tests.
+- [x] Add failing BFF CSV tests for signed-out, unavailable, owner rows, 50 cap, formula and exact 38 digits.
+- [x] Move pure CSV formatter to server-safe module; implement BFF route and web download control.
 - [ ] Run focused tests, lint, typecheck, build, API contract, full tests, dependency security, isolated PostgreSQL read.
 - [ ] Recheck main/plans and PR conflicts; document exact evidence, rollback and release HOLD.

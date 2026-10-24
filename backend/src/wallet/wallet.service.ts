@@ -145,6 +145,13 @@ export interface WalletOverview {
   readonly recentTransactions: WalletTransactionView[];
 }
 
+export interface WalletRecentExport {
+  readonly currency: 'WLD';
+  readonly recentLimit: 50;
+  readonly generatedAt: string;
+  readonly transactions: readonly WalletTransactionView[];
+}
+
 export interface WalletTransferReceipt {
   readonly transactionId: string;
 }
@@ -380,6 +387,27 @@ export class WalletService {
       userId,
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
+    };
+  }
+
+  /** A bounded fresh ledger read, never the five rows already rendered on the wallet screen. */
+  async exportRecent(authenticatedUserId: string): Promise<WalletRecentExport> {
+    const userId = requireUuid(authenticatedUserId, 'authenticated user id');
+    const rows = await this.repository.recentTransactionsForUser(userId, 50);
+    if (rows.length > 50) throw new Error('database exceeded recent wallet export limit');
+    const transactions = normalizeTransactions(rows);
+    for (const entry of transactions) {
+      for (const amount of [entry.netAmount, entry.cashDelta, entry.bankDelta]) {
+        if (amount === undefined || (amount.startsWith('-') ? amount.length - 1 : amount.length) > 38) {
+          throw new Error('database returned invalid export pocket precision');
+        }
+      }
+    }
+    return {
+      currency: 'WLD',
+      recentLimit: 50,
+      generatedAt: timestamp(this.clock(), 'export timestamp'),
+      transactions,
     };
   }
 
