@@ -10,9 +10,11 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -30,7 +32,7 @@ export class CentralBankController {
   constructor(private readonly centralBankService: CentralBankService) {}
 
   @Post('mint-batches/:id/accept')
-  @UseGuards(AdminGuard, CsrfGuard)
+  @UseGuards(AdminGuard, AdminSessionGuard, CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '조폐국 주조 화폐 인수 및 국고/시중 유통 승인 (중앙은행 2단계 견제)' })
   async acceptMintBatch(
     @Param('id') batchId: string,
@@ -54,7 +56,7 @@ export class CentralBankController {
   }
 
   @Put('base-rate')
-  @UseGuards(AdminGuard, CsrfGuard)
+  @UseGuards(AdminGuard, AdminSessionGuard, CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '국가 기준금리(Base Rate) 결정 및 공시 (금융통화위원회)' })
   async updateBaseRate(
     @Body() dto: UpdateBaseRateDto,
@@ -71,7 +73,7 @@ export class CentralBankController {
   }
 
   @Put('reserve-requirement')
-  @UseGuards(AdminGuard, CsrfGuard)
+  @UseGuards(AdminGuard, AdminSessionGuard, CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '시중 상업은행 법정 지급준비율 갱신 및 공시' })
   async updateReserveRequirement(
     @Body() dto: UpdateReserveRequirementDto,
