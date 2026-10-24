@@ -25,7 +25,7 @@ function belongsTo(item: NotificationItem, category: Category): boolean {
 
 /** Notifications are announcements, not ledger-backed financial receipts. */
 function hasUnverifiedFinancialClaim(item: NotificationItem): boolean {
-  return item.category === 'TRANSACTIONAL' || /WLD|₩|정산|소각|이자|지급|송금|입금|출금|수령|보상|잔액|수익|이체/i.test(item.body);
+  return item.category === 'TRANSACTIONAL' || /WLD|₩|\d[\d,]*\s*원|정산|소각|이자|지급|송금|입금|출금|수령|보상|잔액|수익|이체/i.test(`${item.title} ${item.body}`);
 }
 
 export function NotificationTabsBar() {
@@ -139,10 +139,11 @@ export function NotificationTabsBar() {
         <ul className="grid gap-3">
           {filteredItems.map((item) => {
             const financial = hasUnverifiedFinancialClaim(item);
+            const displayTitle = financial ? '금융 관련 알림' : item.title;
             return (
               <li key={item.id} className={`min-w-0 rounded-xl border p-4 ${item.is_read ? 'bg-card/60' : 'border-primary/40 bg-primary/5'}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <h3 className="break-words text-sm font-semibold">{item.title}</h3>
+                  <h3 className="break-words text-sm font-semibold">{displayTitle}</h3>
                   <time dateTime={item.created_at} className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString('ko-KR')}</time>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{item.category} · {item.is_read ? '읽음' : '미확인'}</p>
@@ -152,7 +153,7 @@ export function NotificationTabsBar() {
                     <Link href="/wallet/activity" className="inline-flex min-h-11 items-center rounded-lg underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">지갑 거래 내역 확인</Link>
                   </div>
                 ) : <p className="mt-2 break-words text-sm text-muted-foreground">{item.body}</p>}
-                {!item.is_read && <button type="button" onClick={() => void markRead(item.id)} disabled={pending} className="mt-3 min-h-11 rounded-lg border px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50" aria-label={`읽음 처리: ${item.title}`}>읽음 처리</button>}
+                {!item.is_read && <button type="button" onClick={() => void markRead(item.id)} disabled={pending} className="mt-3 min-h-11 rounded-lg border px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50" aria-label={`읽음 처리: ${displayTitle}`}>읽음 처리</button>}
               </li>
             );
           })}

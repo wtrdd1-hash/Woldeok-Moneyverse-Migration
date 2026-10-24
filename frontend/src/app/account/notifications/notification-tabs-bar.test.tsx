@@ -15,11 +15,19 @@ describe('verified member notification inbox', () => {
     vi.mocked(fetch).mockResolvedValue(response({ notifications: [item] }));
     render(<NotificationTabsBar />);
     expect(screen.queryByText(/20 WLD|1,840 WLD|시즌 1: First Capital/)).toBeNull();
-    expect(await screen.findByText('거래 안내')).toBeDefined();
+    expect(await screen.findByRole('heading', { name: '금융 관련 알림' })).toBeDefined();
     expect(screen.getByText(/거래 내역에서 확인/)).toBeDefined();
     expect(screen.queryByText('1,840 WLD 지급 완료')).toBeNull();
     expect(screen.getByRole('link', { name: /지갑 거래 내역/ }).getAttribute('href')).toBe('/wallet/activity');
     expect(vi.mocked(fetch).mock.calls[0]?.[0]).toContain('/api/notifications');
+  });
+
+  it('does not repeat an unverified WLD payout claim in the title or accessible read action', async () => {
+    vi.mocked(fetch).mockResolvedValue(response({ notifications: [{ ...item, title: '1,840 WLD 지급 완료' }] }));
+    render(<NotificationTabsBar />);
+    expect(await screen.findByRole('heading', { name: '금융 관련 알림' })).toBeDefined();
+    expect(screen.queryByText('1,840 WLD 지급 완료')).toBeNull();
+    expect(screen.getByRole('button', { name: '읽음 처리: 금융 관련 알림' })).toBeDefined();
   });
 
   it('distinguishes an empty verified feed from a failed feed and retries', async () => {
@@ -37,8 +45,8 @@ describe('verified member notification inbox', () => {
       .mockResolvedValueOnce(response({ read: true }))
       .mockResolvedValueOnce(response({ notifications: [{ ...item, is_read: true }] }));
     render(<NotificationTabsBar />);
-    fireEvent.click(await screen.findByRole('button', { name: /읽음 처리: 거래 안내/ }));
-    await waitFor(() => expect(screen.queryByRole('button', { name: /읽음 처리: 거래 안내/ })).toBeNull());
+    fireEvent.click(await screen.findByRole('button', { name: /읽음 처리: 금융 관련 알림/ }));
+    await waitFor(() => expect(screen.queryByRole('button', { name: /읽음 처리: 금융 관련 알림/ })).toBeNull());
     expect(vi.mocked(fetch).mock.calls[1]?.[1]).toMatchObject({ method: 'POST' });
     expect(JSON.parse(String(vi.mocked(fetch).mock.calls[1]?.[1]?.body))).toEqual({ notificationId: id });
     expect(vi.mocked(fetch).mock.calls[2]?.[0]).toContain('/api/notifications');
@@ -51,17 +59,17 @@ describe('verified member notification inbox', () => {
     render(<NotificationTabsBar />);
     fireEvent.click(await screen.findByRole('button', { name: /모두 읽음/ }));
     expect(await screen.findByRole('alert')).toBeDefined();
-    expect(screen.getByRole('button', { name: /읽음 처리: 거래 안내/ })).toBeDefined();
+    expect(screen.getByRole('button', { name: /읽음 처리: 금융 관련 알림/ })).toBeDefined();
   });
 
   it('offers keyboard-accessible category filters and mobile touch targets', async () => {
     vi.mocked(fetch).mockResolvedValue(response({ notifications: [item, { ...item, id: 'a28e8a22-f589-4ec2-90d4-56b4a4302a2c', category: 'SECURITY_CRITICAL', title: '새 로그인', body: '확인하세요' }] }));
     render(<NotificationTabsBar />);
-    expect(await screen.findByText('거래 안내')).toBeDefined();
+    expect(await screen.findByRole('heading', { name: '금융 관련 알림' })).toBeDefined();
     const security = screen.getByRole('button', { name: /보안/ });
     expect(security.className).toContain('min-h-11');
     fireEvent.click(security);
     expect(screen.getByText('새 로그인')).toBeDefined();
-    expect(screen.queryByRole('heading', { name: '거래 안내' })).toBeNull();
+    expect(screen.queryByRole('heading', { name: '금융 관련 알림' })).toBeNull();
   });
 });
