@@ -1,5 +1,8 @@
 'use client';
 
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
+
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Calculator, ArrowLeft, RotateCcw, Sparkles, Briefcase, Award, Coins, HelpCircle } from 'lucide-react';
@@ -17,6 +20,7 @@ const PROFESSIONS = [
 ];
 
 export default function FarmingCalculatorPage() {
+  const { locale } = useLocale();
   const [selectedProfession, setSelectedProfession] = useState<string>('developer');
   const [masteryLevel, setMasteryLevel] = useState<number>(5);
   const [dailyTasksCount, setDailyTasksCount] = useState<number>(5);
@@ -110,9 +114,15 @@ export default function FarmingCalculatorPage() {
 
       <div className="space-y-2">
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
-          <Calculator className="size-7 text-blue-500" />
-          <span>직업별 일일 파밍 수익 최적화 계산기</span>
-        </h1>
+            {localeLabel(
+              locale,
+              '직업별 일일 파밍 수익 최적화 계산기',
+              'Career Daily Yield & Farming Optimization Calculator',
+              '職業別デイリーファーミング収益最適化計算機',
+              '各职业日常产出收益最优化计算器',
+              'Máy tính Tối ưu hóa Lợi nhuận Nghề nghiệp'
+            )}
+          </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
           5대 직업과 숙련도 레벨별 업무 보상, 일일 퀘스트 보너스 및 중앙은행 복리 결합 기대 자산을 시뮬레이션하세요.
         </p>

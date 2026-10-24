@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -56,7 +58,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function GiftTaxCalculatorPage() {
+export default async function GiftTaxCalculatorPage() {
+  const locale = await getServerLocale();
   const breadcrumbs = breadcrumbJsonLd([
     { name: '홈', path: '/' },
     { name: '금융 도구 허브', path: '/tools' },

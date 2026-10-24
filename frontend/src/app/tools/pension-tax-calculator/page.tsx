@@ -1,5 +1,8 @@
 'use client';
 
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
+
 import React, { useState, useId } from 'react';
 import Link from 'next/link';
 import { 
@@ -18,6 +21,7 @@ import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/pub
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
 export default function PensionTaxCalculatorPage() {
+  const { locale } = useLocale();
   const salaryId = useId();
   const pensionId = useId();
   const irpId = useId();
@@ -108,8 +112,15 @@ export default function PensionTaxCalculatorPage() {
           </span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-          연금저축 & IRP 세액공제 계산기
-        </h1>
+            {localeLabel(
+              locale,
+              '연금저축 & IRP 세액공제 계산기',
+              'Pension Savings & Tax Credit Calculator',
+              '年金貯蓄＆税額控除計算機',
+              '个人养老金与税额扣除计算器',
+              'Máy tính Khấu trừ Thuế Tiết kiệm Hưu trí'
+            )}
+          </h1>
         <p className="text-sm sm:text-base text-zinc-400 max-w-3xl">
           총급여와 연간 연금저축/IRP 납입액을 입력하시면 이번 연말정산에서 13월의 월급으로 돌려받을 수 있는 세액공제 환급금과 장기 복리 효과를 즉시 계산합니다.
         </p>

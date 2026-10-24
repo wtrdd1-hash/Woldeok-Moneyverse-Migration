@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ShieldCheck, AlertOctagon, HeartHandshake, FileText, ArrowRight } from 'lucide-react';
@@ -11,12 +13,20 @@ export const metadata: Metadata = {
   description: '아동·청소년 보호 지침, 비회원 긴급 콘텐츠 삭제 및 권리 구제 센터',
 };
 
-export default function SafetyCenterPage() {
+export default async function SafetyCenterPage() {
+  const locale = await getServerLocale();
   return (
     <div data-page="safety-center" className="mv-page grid gap-6 py-6 max-w-4xl mx-auto px-4">
       <PageHeader
         eyebrow="SAFETY & CONSUMER PROTECTION"
-        title="머니버스 안전 & 권리 보호 센터"
+        title={localeLabel(
+          locale,
+          '머니버스 안전 & 권리 보호 센터',
+          'Safety & User Protection Center',
+          '安心・安全および権利保護センター',
+          '安全与权益保护中心',
+          'Trung tâm An toàn & Bảo vệ Quyền lợi'
+        )}
       >
         모든 사용자와 청소년이 안심하고 이용할 수 있는 가상 경제 생태계를 지향합니다.
       </PageHeader>

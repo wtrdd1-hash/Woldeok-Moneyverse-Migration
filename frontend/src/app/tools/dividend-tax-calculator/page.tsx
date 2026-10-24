@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -58,7 +60,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DividendTaxCalculatorPage() {
+export default async function DividendTaxCalculatorPage() {
+  const locale = await getServerLocale();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
@@ -122,7 +125,7 @@ export default function DividendTaxCalculatorPage() {
             className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>금융 계산기 목록으로</span>
+            <span>{localeLabel(locale, '금융 계산기 목록으로', 'Back to Tools Hub', '計算機一覧へ戻る', '返回金融工具列表', 'Quay lại danh sách máy tính')}</span>
           </Link>
           <span className="text-xs text-zinc-500 font-mono">FIN-CALC-DIVIDEND-V1</span>
         </div>
@@ -134,7 +137,14 @@ export default function DividendTaxCalculatorPage() {
             <span>2026년 배당소득세 및 금융종합과세 기준</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
-            배당소득세 계산기 (국내 · 미국주식)
+            {localeLabel(
+              locale,
+              '배당소득세 계산기 (국내 · 미국주식)',
+              'Dividend Income Tax Calculator (Domestic & US Stocks)',
+              '配当所得税計算機（国内・米国株式）',
+              '股息红利所得税计算器（国内 · 美股）',
+              'Máy tính Thuế Thu nhập Cổ tức'
+            )}
           </h1>
           <p className="text-sm text-zinc-400 leading-relaxed">
             원천징수 15.4% 세액과 통장에 입금되는 실수령 배당금, 2,000만원 초과 시 종합과세 부담을 즉시 계산합니다.

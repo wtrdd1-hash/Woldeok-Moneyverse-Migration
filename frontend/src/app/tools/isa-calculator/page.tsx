@@ -1,5 +1,8 @@
 'use client';
 
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
+
 import React, { useState, useId } from 'react';
 import Link from 'next/link';
 import { 
@@ -18,6 +21,7 @@ import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/pub
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
 export default function IsaCalculatorPage() {
+  const { locale } = useLocale();
   const profitId = useId();
   const [isaType, setIsaType] = useState<'general' | 'frugal'>('general');
   const [totalProfit, setTotalProfit] = useState<number>(5000000);
@@ -100,8 +104,15 @@ export default function IsaCalculatorPage() {
           </span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-          ISA(개인종합자산관리계좌) 비과세 절세 계산기
-        </h1>
+            {localeLabel(
+              locale,
+              'ISA(개인종합자산관리계좌) 비과세 절세 계산기',
+              'ISA Tax-Exempt Wealth Growth Calculator',
+              'ISA（個人総合資産管理）非課税節税計算機',
+              'ISA免税个人财富账户计算器',
+              'Máy tính Tiết kiệm Miễn thuế ISA'
+            )}
+          </h1>
         <p className="text-sm sm:text-base text-zinc-400 max-w-3xl">
           국내주식, 배당 ETF, 채권 투자 순수익을 입력하시면 일반 증권 계좌(15.4%) 대비 ISA 계좌에서 실제로 아낄 수 있는 절세 금액을 한눈에 비교해 드립니다.
         </p>

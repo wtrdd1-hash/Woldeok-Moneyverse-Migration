@@ -1,5 +1,8 @@
 'use client';
 
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
+
 import React, { useState, useId } from 'react';
 import Link from 'next/link';
 import { 
@@ -20,6 +23,7 @@ import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/pub
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
 export default function SalaryCalculatorPage() {
+  const { locale } = useLocale();
   const salaryInputId = useId();
   const [annualSalary, setAnnualSalary] = useState<number>(50000000);
   const [isWldClaimed, setIsWldClaimed] = useState(false);
@@ -86,8 +90,15 @@ export default function SalaryCalculatorPage() {
           2026 대한민국 최신 4대보험 & 세제 기준
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
-          연봉별 실수령액 계산기
-        </h1>
+            {localeLabel(
+              locale,
+              '연봉별 실수령액 계산기 (4대보험 공제)',
+              'Salary Take-Home Pay & After-Tax Calculator',
+              '年収手取り額計算機（社会保険料控除）',
+              '税后薪资实际到手收入计算器',
+              'Máy tính Lương Thực nhận Sau Thuế'
+            )}
+          </h1>
         <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-3xl leading-relaxed">
           내 연봉의 실제 월 입금액은 얼마일까? 국민연금·건강보험·장기요양·고용보험과 소득세를 1원 단위까지 투명하게 확인하고 내 자산 목표를 시뮬레이션하세요.
         </p>

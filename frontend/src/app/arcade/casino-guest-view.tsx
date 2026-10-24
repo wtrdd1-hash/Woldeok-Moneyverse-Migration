@@ -1,197 +1,102 @@
+'use client';
+
 import Link from 'next/link';
 import { Coins, Dices, Sparkles, ArrowRight, ShieldCheck, Bomb, Gem, CircleDot } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
-const GAME_SHOWCASE = [
-  {
-    icon: Gem,
-    title: '지뢰찾기 (Mines)',
-    badge: '최대 24.5배',
-    probability: '자유 난이도',
-    description:
-      '5x5 그리드에서 보석을 뒤집으며 배당률을 극대화하고 언제든 캐시아웃할 수 있는 고몰입 전략 미니게임입니다.',
-  },
-  {
-    icon: CircleDot,
-    title: '플링코 (Plinko)',
-    badge: '최대 29배',
-    probability: '정규분포 배당',
-    description:
-      '상단에서 공을 떨어뜨려 피라미드 핀을 튕기며 외곽 고배당 슬롯을 노리는 클래식 물리 미니게임입니다.',
-  },
-  {
-    icon: Coins,
-    title: '동전 뒤집기 (Coin Flip)',
-    badge: '1.9배 배당',
-    probability: '당첨 확률 50%',
-    description:
-      '앞면과 뒷면 중 하나를 예측하는 직관적이고 빠른 클래식 미니게임입니다. 50:50 공정 확률로 WLD를 획득할 수 있습니다.',
-  },
-  {
-    icon: Dices,
-    title: '주사위 홀짝 (Dice Parity)',
-    badge: '1.9배 배당',
-    probability: '당첨 확률 50%',
-    description:
-      '주사위를 굴려 나오는 눈금이 홀수인지 짝수인지 맞추는 캐주얼 게임입니다. 짧은 라운드로 부담 없이 즐길 수 있습니다.',
-  },
-  {
-    icon: Dices,
-    title: '주사위 정밀 예측 (Dice Exact)',
-    badge: '5.7배 대박 배당',
-    probability: '당첨 확률 16.67%',
-    description:
-      '1부터 6까지의 주사위 눈금을 정확히 맞추는 고배당 게임입니다. 높은 보상의 행운 챌린지에 도전해 보세요.',
-  },
-  {
-    icon: Sparkles,
-    title: '럭키 슬롯머신 (777 Slots)',
-    badge: '5.7배 배당',
-    probability: '주사위 숫자 규칙',
-    description:
-      '주사위 숫자 맞추기 규칙을 슬롯 화면으로 표현한 테마 게임입니다. 결과와 정산은 서버의 주사위 숫자 규칙을 따릅니다.',
-  },
-  {
-    icon: Sparkles,
-    title: '하이 앤 로우 (Hi-Lo Card)',
-    badge: '1.9배 배당',
-    probability: '당첨 확률 50%',
-    description:
-      '주사위 홀짝 규칙을 High/Low 선택 화면으로 표현한 테마 게임입니다. High는 홀수, Low는 짝수 선택으로 정산됩니다.',
-  },
-  {
-    icon: Sparkles,
-    title: '컬러 휠 (Color Wheel)',
-    badge: '1.9배 배당',
-    probability: '당첨 확률 50%',
-    description:
-      '황금색 또는 푸른색을 선택하며 주사위 홀짝 서버 규칙으로 결과와 보상이 정산됩니다.',
-  },
-  {
-    icon: Sparkles,
-    title: '보물 상자 (Treasure)',
-    badge: '5.7배 배당',
-    probability: '당첨 확률 16.67%',
-    description:
-      '여섯 상자 중 하나를 선택하며 주사위 숫자 서버 규칙으로 결과와 보상이 정산됩니다.',
-  },
-  {
-    icon: Sparkles,
-    title: '럭키 젬 (Lucky Gem)',
-    badge: '5.7배 배당',
-    probability: '당첨 확률 16.67%',
-    description:
-      '여섯 보석 중 하나를 선택하며 주사위 숫자 서버 규칙으로 결과와 보상이 정산됩니다.',
-  },
-];
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 
 export function CasinoGuestView() {
+  const { locale } = useLocale();
+
+  const titleText = localeLabel(
+    locale,
+    '아케이드 (가상 미니게임)',
+    'Arcade (Virtual Mini-Games)',
+    'アーケード（仮想ミニゲーム）',
+    '街机（虚拟小游戏）',
+    'Arcade (Trò chơi ảo)'
+  );
+
+  const descText = localeLabel(
+    locale,
+    '모든 게임의 적용 확률과 배당을 확인하고 동전·주사위 기반 서버 게임을 즐겨보세요.',
+    'Explore verified odds, payout tables, and provably fair coin & dice simulations.',
+    '検証されたオッズ、配当率、サーバー検証ゲームをお楽しみください。',
+    '探索透明概率、赔率乘数与经服务器端可信验证的硬币及骰子小游戏。',
+    'Khám phá tỷ lệ cược đã xác minh và các trò chơi tung xúc xắc, lật xu công bằng.'
+  );
+
   return (
     <div className="grid gap-6">
       <PageHeader
         eyebrow="WOLDEOK MONEYVERSE · ARCADE"
-        title="아케이드 (가상 미니게임)"
+        title={titleText}
       >
-        모든 게임의 적용 확률과 배당을 확인하고 동전·주사위 기반 서버 게임을 즐겨보세요.
+        {descText}
       </PageHeader>
 
-            {/* 법적 고지 배너 (게관위 및 게임산업진흥법 준수) */}
+      {/* 법적 고지 배너 */}
       <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-200">
         <div className="font-bold flex items-center gap-1.5 text-amber-300 mb-1">
           <span>⚖️</span>
-          <span>[법적 고지] 게임산업진흥에 관한 법률 준수 및 폐쇄형 가상 포인트 안내</span>
+          <span>
+            {localeLabel(
+              locale,
+              '[법적 고지] 폐쇄형 가상 포인트 안내 및 현금 환전 불가',
+              '[Legal Notice] Closed-loop virtual simulation & No cash out',
+              '【法的告知】クローズドループ仮想ポイントのご案内・現金換金不可',
+              '【法律声明】封闭式虚拟积分说明与禁止兑现',
+              '[Thông báo pháp lý] Tiền tệ mô phỏng khép kín & Không đổi tiền mặt'
+            )}
+          </span>
         </div>
         <p className="leading-relaxed text-amber-200/90">
-          본 아케이드의 모든 미니게임은 커뮤니티 전용 폐쇄형 포인트(WLD)로만 구동되며, 어떠한 경우에도 현금, 암호화폐, 실물 재화로의 환전·환급·거래가 일체 불가합니다(게임산업진흥에 관한 법률 제28조 및 제32조 엄격 준수).
+          {localeLabel(
+            locale,
+            '본 아케이드의 모든 미니게임은 커뮤니티 전용 폐쇄형 포인트(WLD)로만 구동되며, 어떠한 경우에도 현금, 암호화폐, 실물 재화로의 환전·환급·거래가 일체 불가합니다.',
+            'All mini-games operate strictly with in-game closed virtual points (WLD) and can NEVER be exchanged, refunded, or traded for real currency or monetary goods.',
+            '当アーケードのすべてのミニゲームはコミュニティ専用の仮想ポイント（WLD）でのみ動作し、いかなる場合も現金や実物資産への換金は不可能です。',
+            '本区域所有小游戏仅支持平台虚拟代币（WLD），任何情况下均不得兑换、提现或交易真实货币与实物财产。',
+            'Tất cả trò chơi mini chỉ sử dụng điểm ảo khép kín (WLD) và không thể quy đổi ra tiền mặt hoặc tài sản thực tế dưới bất kỳ hình thức nào.'
+          )}
         </p>
       </div>
 
-      {/* 🛡️ 대한민국 게임산업진흥법 준수 & 현금 환전 불가 공식 법률 면책 배너 */}
-      <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 shadow-lg backdrop-blur-sm">
-        <div className="flex items-start gap-3">
-          <div className="shrink-0 p-2 rounded-xl bg-amber-500/20 text-amber-400 font-bold text-lg select-none">
-            🛡️
-          </div>
-          <div className="space-y-1.5 min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-bold text-sm sm:text-base text-amber-200">
-                법률 준수 및 가상 시뮬레이션 공식 면책 고지
-              </span>
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium">
-                현금 환전 불가
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed break-keep">
-              본 서비스의 모든 게임은 순수 엔터테인먼트 시뮬레이션용입니다. 게임 내 가상 재화(WLD)는 사이트 내 활동에만 사용되는 폐쇄형 포인트이며, 어떠한 경우에도 현금, 실물 유가증권, 암호화폐 등으로 환전·출금·양도되지 않으며 재산상 가치를 갖지 않습니다. (게임산업진흥에 관한 법률 준수)
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* 로그인 유도 배너 */}
-      <Card className="border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-card to-card p-4 sm:p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
-              <span className="text-amber-500 text-xl">🎮</span>
-              <span>로그인하고 가상 미니게임을 시작하세요</span>
-            </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Discord 계정으로 간편하게 3초 만에 시작할 수 있습니다. 가입 시 일일 출석 및 활동 보상으로 WLD를 바로 드려요.
-            </p>
-          </div>
-          <Button asChild className="bg-amber-500 text-black hover:bg-amber-400 font-bold shrink-0">
-            <Link href="/login">
-              <span>Discord로 시작하기</span>
-              <ArrowRight className="ml-1.5 size-4" />
+      {/* 안내 카드 */}
+      <Card className="border-border/80 bg-card/95">
+        <CardHeader>
+          <CardTitle className="text-base font-bold">
+            {localeLabel(
+              locale,
+              '로그인 후 게임 플레이가 가능합니다',
+              'Sign In Required to Play',
+              'プレイにはログインが必要です',
+              '需要登录后开始游玩',
+              'Cần đăng nhập để bắt đầu chơi'
+            )}
+          </CardTitle>
+          <CardDescription className="text-xs">
+            {localeLabel(
+              locale,
+              '가입 즉시 10,000 WLD의 무료 정착금이 지급되며 다양한 미니게임을 즐기실 수 있습니다.',
+              'Get 10,000 WLD starter capital immediately upon registration to enjoy all virtual mini-games.',
+              '新規登録で10,000 WLDの無料スターター資金を獲得し、多彩なミニゲームをお楽しみいただけます。',
+              '立即注册即可免费领取 10,000 WLD 初始启动金，体验丰富的小游戏。',
+              'Nhận ngay 10.000 WLD vốn khởi đầu khi đăng ký để trải nghiệm đầy đủ các trò chơi.'
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild className="font-bold">
+            <Link href="/login" className="flex items-center gap-1.5">
+              {localeLabel(locale, '로그인하고 시작하기', 'Sign In and Start', 'ログインして始める', '登录并开始', 'Đăng nhập và Bắt đầu')}
+              <ArrowRight className="size-4" />
             </Link>
           </Button>
-        </div>
-      </Card>
-
-      {/* 게임 화면 라인업 쇼케이스 */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {GAME_SHOWCASE.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Card key={item.title} className="border-border/60 hover:border-amber-500/40 transition-colors">
-              <CardHeader className="pb-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
-                      <Icon className="size-4" />
-                    </div>
-                    <Badge variant="outline" className="border-amber-500/30 text-amber-500 text-[10px]">
-                      {item.badge}
-                    </Badge>
-                  </div>
-                  <span className="text-[11px] text-muted-foreground font-medium">{item.probability}</span>
-                </div>
-                <CardTitle className="text-sm font-bold mt-2">{item.title}</CardTitle>
-                <CardDescription className="text-xs leading-relaxed">{item.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* 공정성 및 이용 원칙 */}
-      <Card className="border-border/40 bg-surface/30">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-bold flex items-center gap-2">
-            <ShieldCheck className="size-4 text-emerald-500" />
-            <span>투명한 공정성 검증 및 자가 한도 보호</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-xs text-muted-foreground space-y-1.5 leading-relaxed">
-          <p>• 모든 게임 머니(WLD)는 커뮤니티 활동 보상으로 지급되는 폐쇄형 가상 포인트이며, 현금 환전 및 실물 거래는 100% 원천 차단됩니다.</p>
-          <p>• 동전·주사위 결과 생성과 WLD 정산은 서버 데이터베이스 트랜잭션에서 함께 처리됩니다.</p>
-          <p>• 과도한 게임 몰입을 방지하기 위해 1일 참여 한도 및 손실 자가 제한 시스템을 제공합니다.</p>
-          <p>• 각 테마 게임 카드에 실제 적용되는 적중 확률과 적중 배당을 공개합니다.</p>
-          <p>• 본 서비스의 모든 가상 재화(WLD)는 사이트 내 폐쇄형 포인트이며 현금 환전·출금·실물 교환이 절대 불가능합니다.</p>
         </CardContent>
       </Card>
     </div>

@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import React from 'react';
 import type { Metadata } from 'next';
 import { CapitalGainsTaxCalculatorView } from '@/components/capital-gains-tax-calculator-view';
@@ -27,7 +29,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CapitalGainsTaxCalculatorPage() {
+export default async function CapitalGainsTaxCalculatorPage() {
+  const locale = await getServerLocale();
   const defaultPreset = CAPITAL_GAINS_TAX_PRESETS[0];
   const richSnippet = buildCalculatorRichSnippet({
     name: '2026 무료 해외주식 양도소득세 & 250만원 절세 계산기',
