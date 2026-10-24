@@ -159,6 +159,23 @@ describe('app API route compatibility', () => {
     expect([...new Uint8Array(await response.arrayBuffer())]).toEqual([1, 2, 3]);
   });
 
+  it('forwards verified treasury ledger GET as a private Android response with exact decimal strings', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const amount = '9'.repeat(100);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({
+      source: 'posted_owner_ledger', transactionType: 'USER_TO_TREASURY',
+      totalOutflowAmount: amount, transactionCount: '1', isTaxTotal: false,
+    }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/wallet/treasury-outflows', { cookie: 'sid=example' }), context('wallet', 'treasury-outflows'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ totalOutflowAmount: amount, transactionCount: '1', isTaxTotal: false });
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const [target] = fetchSpy.mock.calls[0]! as unknown as [RequestInfo | URL];
+    expect(String(target)).toContain('/api/v1/wallet/treasury-outflows');
+  });
+
   it('does not reflect a spoofed forwarded host into contract metadata', async () => {
     const response = await GET(
       request('/app-api/v1/meta/contract', { 'x-forwarded-host': 'attacker.example', 'x-forwarded-proto': 'http' }),

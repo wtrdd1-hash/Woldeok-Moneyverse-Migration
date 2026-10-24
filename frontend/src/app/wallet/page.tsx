@@ -28,7 +28,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
+import { TreasuryLedgerSummary, type TreasuryOutflowSummary } from '@/components/treasury-ledger-summary';
 import { PortfolioAllocationRadar } from '@/components/portfolio-allocation-radar';
 import { sides } from './sides';
 import type { Overview } from './sides';
@@ -67,11 +67,12 @@ function signedPercent(bpsText: string): string {
 export default async function WalletPage() {
   await requireMember();
 
-  const [wallet, loanData, rewardAvailability, portfolioData] = await Promise.all([
+  const [wallet, loanData, rewardAvailability, portfolioData, treasuryOutflows] = await Promise.all([
     apiOrNull<Overview>('/api/v1/wallet?recent=50'),
     apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
     apiOrNull<RewardAvailability>('/api/v1/rewards/availability'),
     apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio'),
+    apiOrNull<TreasuryOutflowSummary>('/api/v1/wallet/treasury-outflows'),
   ]);
 
   if (!wallet) {
@@ -453,7 +454,7 @@ export default async function WalletPage() {
           </div>
         </TabsContent>
 
-        {/* 탭 3: 자산 배분 레이더, 식별 정보 및 세무 영수증 */}
+        {/* 탭 3: 자산 배분, 확인된 국고 이동 원장 및 식별 정보 */}
         <TabsContent value="allocation" className="space-y-6 focus-visible:outline-none">
           <PortfolioAllocationRadar
             cashWld={Number(balances.cash.availableAmount) || 0}
@@ -462,7 +463,7 @@ export default async function WalletPage() {
             bondsWld={0}
           />
 
-          <CitizenTaxReceiptCard />
+          <TreasuryLedgerSummary summary={treasuryOutflows} />
 
           <div className="toss-card p-6 space-y-3">
             <div className="flex items-center gap-2">

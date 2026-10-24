@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -174,11 +175,18 @@ export class WalletController {
     throw new GoneException('legacy work reward retired; complete a professional task on /work');
   }
 
+  @Get('wallet/treasury-outflows')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Verified owner-only USER_TO_TREASURY ledger outflow, not a tax receipt' })
+  treasuryOutflows(@Req() request: RequestWithSession) {
+    return this.service().treasuryOutflows(requireUserId(request));
+  }
+
   @Get('wallet/tax-receipt')
-  @ApiOperation({ summary: '시민 납세 투명성 영수증 조회 (1 WLD 단위 실시간 목적별 분배 추적)' })
-  async getTaxReceipt(@Req() request: RequestWithSession) {
-    const userId = requireUserId(request);
-    return this.service().getCitizenTaxReceipt(userId);
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Retired: legacy tax estimate fabricated baseline and allocation evidence', deprecated: true })
+  getTaxReceipt(@Req() _request: RequestWithSession) {
+    throw new ServiceUnavailableException('ledger-backed tax attribution is not yet verified');
   }
 
   @Post('wallet/governance/vote')
