@@ -1,5 +1,12 @@
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
+## 2026-10-24 v1220 — F675-112 Member Work Task Shortlist (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1218 / Current Addition v1220 / Next Improvement v1222 provisional. Main 49788d09494fed3e463651945b83386e87dd47bc rechecked. #1125 unmerged; QA v1225 FAILED/HOLD. Issue #1131; docs-only.
+- Source-verified work board/authenticated task endpoint and no inspected favorite path. Proposed owner-only Save/Remove, 0–280-char note, 50 cap, live task/reward recheck, immutable idempotency receipt, DB SECURITY DEFINER, Android parity, private noindex/no-store, WCAG and feature-OFF rollback. No WLD/ledger/assignment effects.
+- P0 ENV1220-01 SEC1220-02 REL1220-03 WORK1220-04; P1 WORK1220-05 WORK1220-06 WORK1220-07 WORK1220-08 WORK1220-09 WORK1220-10. QA blockers remain shared DB/5433, app ACL, migration266, frontend 5 FAIL, audit Critical2/High10, bot, build-only gate, exact-SHA Test and restore.
+- Independent publishers reviewed PostgreSQL/OWASP/W3C 3; new approved evidence 0; cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. No runtime, DB, WLD, Test, Production, flag, merge or deployment.
+
+
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - Previous Addition v1208 / Current Improvement v1210 / Next Addition v1212 provisional. Main 54d5140d unchanged start/mid; QA v1213 FAILED/HOLD; predecessor #1087 unmerged. Fix proposed RESTRICT FK, unavailable-saved REMOVE, actual `#comments-title`, transaction lock order, original digest receipts, owner HMAC cursor, account switch and 500-vs-10,001 isolated fixture. P0 ENV1210-01 SEC1210-02 REL1210-03 BOARD1210-04; P1 BOARD1210-05 BOARD1210-06 BOARD1210-07 BOARD1210-08 BOARD1210-09 BOARD1210-10. New P0 #1088: candidate image build alone must not authorize merge without actual exact-SHA Test/authenticated finance E2E. Full EN/KO integrated design; no runtime or deployment.
 - External publishers 3 reviewed; newly approved 0, cumulative UNKNOWN / 10,000 BLOCKED. Shared DB/5433, broad DML, migration266, audits, Test, restore and disk 93% remain HOLD.

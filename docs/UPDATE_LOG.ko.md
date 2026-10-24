@@ -1,5 +1,12 @@
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
 
+## 2026-10-24 v1220 — F675-112 회원 업무 즐겨찾기 (기능 추가 / 초안 / 보류)
+- 이전 Improvement v1218 / 현재 Addition v1220 / 다음 Improvement v1222(잠정). main 49788d09494fed3e463651945b83386e87dd47bc 재확인. #1125 미병합, QA v1225 FAILED/HOLD. 이슈 #1131, 문서 전용.
+- 실제 업무 보드·인증 API 및 즐겨찾기 부재를 확인. 본인 저장·삭제, 0~280자 메모, 50건, 최신 업무·보상 재검증, 불변 영수증, DB SECURITY DEFINER, Android 동등성, 비공개 noindex/no-store, WCAG, 스위치 OFF 롤백을 제안. WLD/원장/배정 부작용 없음.
+- P0 ENV1220-01 SEC1220-02 REL1220-03 WORK1220-04; P1 WORK1220-05 WORK1220-06 WORK1220-07 WORK1220-08 WORK1220-09 WORK1220-10. QA 공유 DB/5433, 앱 ACL, Migration266, 프론트 5건, 감사 Critical2/High10, Bot, 자동 병합 게이트, 정확 SHA Test/복원 미해결.
+- PostgreSQL/OWASP/W3C 3개 기관 검토, 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·Test·운영·스위치·병합·배포 없음.
+
+
 ## 2026-10-24 v1210 — F675-109 게시판 읽기 목록 삭제·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main 54d5140d 시작·중간 동일, QA v1213 FAILED/HOLD, 선행 #1087 미병합. 글 완전 삭제를 막는 RESTRICT FK, 삭제된 저장 글 제거, 실제 `#comments-title`, 잠금 순서·원본 지문 영수증·본인 HMAC 커서·계정 전환·운영 500건과 격리 10,001건 테스트를 보완. P0 ENV1210-01 SEC1210-02 REL1210-03 BOARD1210-04; P1 BOARD1210-05 BOARD1210-06 BOARD1210-07 BOARD1210-08 BOARD1210-09 BOARD1210-10. 신규 P0 #1088: 실제 정확 SHA Test/인증 금융 E2E 없이 이미지 빌드만으로 자동 병합 금지. 국영문 통합 명세, 런타임·운영 변경 없음.
 - 외부 발행기관 3곳 검토, 신규 승인 0건, 누적 미확인/10,000 BLOCKED. 운영·개발 DB 공유/5433/과다 DML/Migration266/보안 감사/정확 SHA Test/격리 복원/디스크 93% 보류.
