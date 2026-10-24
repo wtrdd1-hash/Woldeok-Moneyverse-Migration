@@ -9,9 +9,11 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -20,12 +22,12 @@ import { MintService } from './mint.service';
 
 @ApiTags('mint')
 @Controller('mint')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
 export class MintController {
   constructor(private readonly mintService: MintService) {}
 
   @Post('batches')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '신규 본원통화(M0) 주조 요청 생성 (국가조폐국)' })
   async createMintBatch(
     @Body() dto: CreateMintBatchDto,
@@ -54,7 +56,7 @@ export class MintController {
   }
 
   @Post('burn')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '통화 영구 소각(Destroy/Sinks) 집행 및 공인 인증서 발행' })
   async burnCurrency(
     @Body() dto: BurnCurrencyDto,
