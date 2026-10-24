@@ -23,6 +23,8 @@ const DOC_PATHS = [
 ];
 
 const CONTROL_PATHS = [
+  // A legacy commit-message sidecar is release metadata, never application code.
+  /^commit_msg\.txt$/,
   /^\.github\//,
   /^ops\//,
   /^deploy\//,
@@ -63,6 +65,7 @@ const RUNTIME_GIT_PATHS = [
 ];
 
 const CONTROL_GIT_PATHS = [
+  'commit_msg.txt',
   '.github',
   'ops',
   'deploy',

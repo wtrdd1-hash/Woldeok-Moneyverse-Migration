@@ -78,6 +78,15 @@ test('application plus release-control changes are mixed', () => {
   );
 });
 
+test('legacy commit message metadata does not block runtime release classification', () => {
+  assert.equal(classifyPaths(['commit_msg.txt']), 'CONTROL_PLANE_ONLY');
+  assert.equal(
+    classifyPaths(['commit_msg.txt', 'frontend/src/app/page.tsx']),
+    'MIXED',
+  );
+  assert.equal(classifyPaths(['commit_msg.txt', 'unexpected-root-config.toml']), 'UNKNOWN');
+});
+
 test('unclassified paths fail closed', () => {
   assert.equal(classifyPaths(['unexpected-root-config.toml']), 'UNKNOWN');
   assert.equal(classifyPaths([]), 'UNKNOWN');
