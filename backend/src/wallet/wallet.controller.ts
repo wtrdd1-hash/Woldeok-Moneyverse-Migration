@@ -6,6 +6,7 @@ import {
   Controller,
   Get,
   GoneException,
+  Header,
   Inject,
   NotFoundException,
   Param,
@@ -89,6 +90,13 @@ export class WalletController {
       throw new BadRequestException('recent must be a whole number');
     }
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
+  }
+
+  @Get('wallet/flow-summary')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Owner-only signed WLD flow over at most 50 recent ledger transactions' })
+  flowSummary(@Req() request: RequestWithSession) {
+    return this.service().flowSummary(requireUserId(request));
   }
 
   @Get('wallet/recipients/search')

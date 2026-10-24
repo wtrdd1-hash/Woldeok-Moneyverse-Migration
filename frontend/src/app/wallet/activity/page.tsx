@@ -43,6 +43,10 @@ export default async function WalletActivityPage() {
         </Link>
       </Button>
 
+      <Button asChild variant="outline" className="w-fit">
+        <Link href="/wallet/flows">최근 50건 수입·지출 요약 보기</Link>
+      </Button>
+
       <PageHeader eyebrow="RECENT ACTIVITY" title="내 지갑 기록">
         내 지갑을 거쳐 간 최근 기록입니다. 각 줄은 돈이 어디서 나와 어디로 갔는지와, 그 둘을
         맞춘 금액을 보여 줍니다.

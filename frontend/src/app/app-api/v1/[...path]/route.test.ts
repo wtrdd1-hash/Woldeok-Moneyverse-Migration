@@ -36,6 +36,36 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('forwards owner-only wallet flow summary with exact strings and private cache policy', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({
+      currency: 'WLD', scope: 'recent_50', completeHistory: false,
+      transactionCount: 1, incomingCount: 1, outgoingCount: 0, internalMovementCount: 0,
+      incomingAmount: '90071992547409931234567890', outgoingAmount: '0',
+      netAmount: '90071992547409931234567890',
+    }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/wallet/flow-summary', { cookie: 'session=opaque' }),
+      context('wallet', 'flow-summary'),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ incomingAmount: '90071992547409931234567890' });
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/wallet/flow-summary');
+  });
+
+  it('preserves upstream wallet flow unavailability rather than inventing empty totals', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      status: 503, title: 'Service Unavailable',
+    }), { status: 503, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store' } })));
+    const response = await GET(request('/app-api/v1/wallet/flow-summary'), context('wallet', 'flow-summary'));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ status: 503 });
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

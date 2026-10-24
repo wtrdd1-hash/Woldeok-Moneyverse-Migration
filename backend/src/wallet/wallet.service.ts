@@ -133,6 +133,19 @@ export interface WalletTransactionView {
   readonly occurredAt: string;
 }
 
+export interface WalletFlowSummary {
+  readonly currency: 'WLD';
+  readonly scope: 'recent_50';
+  readonly completeHistory: false;
+  readonly transactionCount: number;
+  readonly incomingCount: number;
+  readonly outgoingCount: number;
+  readonly internalMovementCount: number;
+  readonly incomingAmount: WldAmount;
+  readonly outgoingAmount: WldAmount;
+  readonly netAmount: WldAmount;
+}
+
 export interface WalletOverview {
   /**
    * The caller's own Moneyverse id, which is what another member types to
@@ -380,6 +393,49 @@ export class WalletService {
       userId,
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
+    };
+  }
+
+  async flowSummary(authenticatedUserId: string): Promise<WalletFlowSummary> {
+    const userId = requireUuid(authenticatedUserId, 'authenticated user id');
+    // The owner-scoped ledger query is limited to 50 rows. Never present this
+    // sample as a statement of all historical income or spending.
+    const transactions = normalizeTransactions(
+      await this.repository.recentTransactionsForUser(userId, 50),
+    );
+    let incoming = 0n;
+    let outgoing = 0n;
+    let incomingCount = 0;
+    let outgoingCount = 0;
+    let internalMovementCount = 0;
+    for (const transaction of transactions) {
+      // Real PostgreSQL always supplies both pocket deltas. Without them a
+      // zero-net row could hide a bank movement, so refuse the projection.
+      if (transaction.cashDelta === undefined || transaction.bankDelta === undefined) {
+        throw new Error('wallet flow requires authoritative pocket deltas');
+      }
+      const net = BigInt(transaction.netAmount);
+      if (net > 0n) {
+        incoming += net;
+        incomingCount += 1;
+      } else if (net < 0n) {
+        outgoing -= net;
+        outgoingCount += 1;
+      } else if (BigInt(transaction.cashDelta) !== 0n || BigInt(transaction.bankDelta) !== 0n) {
+        internalMovementCount += 1;
+      }
+    }
+    return {
+      currency: 'WLD',
+      scope: 'recent_50',
+      completeHistory: false,
+      transactionCount: transactions.length,
+      incomingCount,
+      outgoingCount,
+      internalMovementCount,
+      incomingAmount: wldAmount(incoming.toString(), 'flow incoming amount'),
+      outgoingAmount: wldAmount(outgoing.toString(), 'flow outgoing amount'),
+      netAmount: wldAmount((incoming - outgoing).toString(), 'flow net amount'),
     };
   }
 
