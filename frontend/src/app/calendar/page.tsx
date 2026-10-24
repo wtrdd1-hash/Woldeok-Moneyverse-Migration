@@ -52,7 +52,7 @@ export default async function CalendarPage() {
   const weeklyGoals = earlyGame?.goals ?? [];
   const weekStart = weeklyGoals.find((goal) => goal.goal_window === 'week')?.week_start ?? null;
   const nextReset = weekStart ? nextWeekStart(weekStart) : null;
-  const shopDeadlines = upcomingShopDeadlines(shopData?.catalogItems ?? []);
+  const shopDeadlines = upcomingShopDeadlines(shopData?.catalogItems ?? [], Date.now());
 
   return (
     <div data-page="calendar" className="mv-page mv-page--gameplay grid gap-8">
@@ -171,7 +171,11 @@ export default async function CalendarPage() {
                     판매 종료{' '}
                     <time dateTime={item.sale_ends_at!}>{formatMoment(item.sale_ends_at!)}</time>
                   </p>
-                  <Link href="/shop" className="text-sm text-primary">
+                  <Link
+                    href="/shop"
+                    aria-label={`${item.name} 상품을 상점에서 확인하기`}
+                    className="inline-flex min-h-11 w-fit items-center rounded-md text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
                     상점에서 확인하기 →
                   </Link>
                 </CardContent>
