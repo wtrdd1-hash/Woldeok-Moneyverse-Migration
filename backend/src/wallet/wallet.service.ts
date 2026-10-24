@@ -120,6 +120,31 @@ export interface WalletBalancesView {
   readonly totalAvailableAmount: WldAmount;
 }
 
+export type WalletActivityCategory = 'all' | 'rewards' | 'transfers' | 'banking' | 'purchases' | 'markets' | 'other';
+
+const ACTIVITY_CATEGORIES = new Set<WalletActivityCategory>([
+  'all', 'rewards', 'transfers', 'banking', 'purchases', 'markets', 'other',
+]);
+
+function requireActivityCategory(value: unknown): WalletActivityCategory {
+  if (typeof value === 'string' && ACTIVITY_CATEGORIES.has(value as WalletActivityCategory)) {
+    return value as WalletActivityCategory;
+  }
+  throw new WalletInputError('unknown wallet activity category');
+}
+
+/** User-facing categories, not a substitute for the canonical ledger type. */
+function categoryForTransaction(type: string): Exclude<WalletActivityCategory, 'all'> {
+  if (type === 'MINT_TO_USER' || type === 'WORK_REWARD' || type === 'WORK_TASK_REWARD'
+    || type === 'EARLY_EVENT_REWARD') return 'rewards';
+  if (type === 'USER_TO_USER' || type === 'ACCOUNT_MERGE_TRANSFER') return 'transfers';
+  if (type.startsWith('BANK_')) return 'banking';
+  if (type.startsWith('SHOP_') || type === 'BUSINESS_PURCHASE' || type === 'CONSUMPTION_EVENT') return 'purchases';
+  if (type.startsWith('MARKET_') || type.startsWith('VIRTUAL_STOCK_')
+    || type.startsWith('BOND_') || type === 'STOCK_LEAGUE_ENTRY') return 'markets';
+  return 'other';
+}
+
 export type WalletTransactionDirection = 'in' | 'out' | 'neutral';
 
 export interface WalletTransactionView {
@@ -196,6 +221,7 @@ export interface WalletRepayReceipt {
 
 export interface WalletOverviewOptions {
   readonly recentLimit?: number;
+  readonly category?: string;
 }
 
 export interface WalletTransferRequest {
@@ -368,8 +394,9 @@ export class WalletService {
 
   async overview(
     authenticatedUserId: string,
-    { recentLimit = 10 }: WalletOverviewOptions = {},
+    { recentLimit = 10, category = 'all' }: WalletOverviewOptions = {},
   ): Promise<WalletOverview> {
+    const activityCategory = requireActivityCategory(category);
     const userId = requireUuid(authenticatedUserId, 'authenticated user id');
     const limit = requireRecentLimit(recentLimit);
     const [balances, transactions] = await Promise.all([
@@ -379,7 +406,11 @@ export class WalletService {
     return {
       userId,
       balances: normalizeBalances(balances),
-      recentTransactions: normalizeTransactions(transactions),
+      // The category is applied AFTER the bounded owner-scoped last-N query.
+      // Never claim this is a search across the entire ledger.
+      recentTransactions: normalizeTransactions(transactions).filter(
+        (entry) => activityCategory === 'all' || categoryForTransaction(entry.type) === activityCategory,
+      ),
     };
   }
 

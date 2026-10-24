@@ -10,6 +10,7 @@ import {
   appGatewayOrigin,
   appGatewayPath,
   isJsonMediaType,
+  isPrivateWalletAppPath,
 } from './app-gateway';
 
 describe('appGatewayPath', () => {
@@ -148,5 +149,13 @@ describe('app API compatibility contract', () => {
     expect(isJsonMediaType('application/problem+json')).toBe(true);
     expect(isJsonMediaType('image/png')).toBe(false);
     expect(isJsonMediaType(null)).toBe(false);
+  });
+});
+
+describe('wallet activity Android cache protection', () => {
+  it('marks wallet reads as private and does not apply public caching', () => {
+    expect(isPrivateWalletAppPath(['wallet'])).toBe(true);
+    expect(isPrivateWalletAppPath(['wallet', 'transfers'])).toBe(true);
+    expect(isPrivateWalletAppPath(['stocks'])).toBe(false);
   });
 });

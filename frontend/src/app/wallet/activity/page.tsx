@@ -11,6 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
+import { ACTIVITY_CATEGORIES, activityCategory, activityCategoryHref } from './category';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +29,16 @@ export const metadata: Metadata = {
  * the top of the screen to make room for it was the wrong trade — so the rest
  * of it lives here.
  */
-export default async function WalletActivityPage() {
+export default async function WalletActivityPage({
+  searchParams,
+}: { searchParams: Promise<{ category?: string | string[] }> }) {
   await requireMember();
+  const category = activityCategory((await searchParams).category);
   // 50 is the API's ceiling for this list, so this page shows everything it
   // will give rather than a page size chosen here.
-  const wallet = await apiOrNull<Overview>('/api/v1/wallet?recent=50');
+  const wallet = await apiOrNull<Overview>(
+    `/api/v1/wallet?recent=50${category === 'all' ? '' : `&category=${category}`}`,
+  );
 
   return (
     <div data-page="wallet-activity" className="mv-page mv-page--finance grid gap-5">
@@ -48,13 +54,26 @@ export default async function WalletActivityPage() {
         맞춘 금액을 보여 줍니다.
       </PageHeader>
 
+      <nav aria-label="최근 거래 종류 필터" className="flex flex-wrap gap-2">
+        {ACTIVITY_CATEGORIES.map((item) => (
+          <Button key={item.value} asChild size="sm" variant={category === item.value ? 'default' : 'outline'}>
+            <Link href={activityCategoryHref(item.value)} aria-current={category === item.value ? 'page' : undefined}>
+              {item.label}
+            </Link>
+          </Button>
+        ))}
+      </nav>
+      <p className="text-xs text-muted-foreground">
+        최근 최대 50건의 거래만 분류합니다. 전체 거래내역이나 기간별 합계가 아닙니다.
+      </p>
+
       <Card>
         <CardContent>
           {!wallet ? (
             <EmptyState title="지금은 기록을 불러올 수 없어요." />
           ) : wallet.recentTransactions.length === 0 ? (
             <EmptyState
-              title="아직 기록된 활동이 없어요."
+              title={category === 'all' ? '아직 기록된 활동이 없어요.' : '선택한 종류의 최근 거래가 없어요.'}
               description="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다."
             />
           ) : (
