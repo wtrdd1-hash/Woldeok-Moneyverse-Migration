@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useActionState } from 'react';
+import Link from 'next/link';
 import { ShieldCheck, AlertCircle, FileText, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -95,12 +96,16 @@ export function PolicyVersionCard({
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
               <FileText className="size-5 text-primary" />
-              법적 정책 신규 버전 발행 (2단계 확인)
+              법적 정책 신규 버전 발행 (확인 문구)
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-              ⚠️ 새로운 버전을 발행하면 모든 활성 회원에게 다음 접속 시 동의 팝업이 노출됩니다. 사유와 확인 문구를 신중히 입력해 주세요.
+              ⚠️ 새 버전 발행은 계정 보안 설정에서 15분 이내 재인증한 관리자만 가능합니다. 발행 후 미동의 회원에게 재동의가 요구됩니다. 확인 문구는 재인증을 대체하지 않습니다.
             </DialogDescription>
           </DialogHeader>
+
+          <Link href="/account/security" className="inline-flex min-h-11 items-center text-xs font-medium text-primary underline underline-offset-4">
+            계정 보안 설정에서 재인증하기
+          </Link>
 
           <form action={formAction} className="mt-4 space-y-4 text-xs">
             <div className="grid grid-cols-2 gap-3">
