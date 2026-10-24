@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -107,6 +108,15 @@ export class WalletController {
   @ApiOperation({ summary: 'Outstanding loans for the caller' })
   async loans(@Req() request: RequestWithSession) {
     return { loans: await this.service().loans(requireUserId(request)) };
+  }
+
+  @Get('bank/loans/:id')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Owner-verified detail from the most recent 20 virtual loans' })
+  async loanDetail(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) loanId: string) {
+    const loan = await this.service().loanById(requireUserId(request), loanId);
+    if (!loan) throw new NotFoundException('loan not found');
+    return loan;
   }
 
   @Post('wallet/transfers')

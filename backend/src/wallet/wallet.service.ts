@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { WldAmount } from '@moneyverse/contract';
 import { wldAmount } from '@moneyverse/contract';
 import type {
@@ -512,6 +512,21 @@ export class WalletService {
       issuedAt: timestamp(row.issued_at, 'loan issued timestamp'),
       repaidAt: row.repaid_at ? timestamp(row.repaid_at, 'loan repaid timestamp') : null,
     }));
+  }
+
+  /**
+   * Read only the authenticated actor's most recent 20 loans. The existing
+   * bank_my_loans(actor) function is bounded at 20 in migration 194; do not
+   * claim this can retrieve arbitrary older history without a new migration.
+   */
+  async loanById(authenticatedUserId: string, loanId: string): Promise<WalletLoanView | null> {
+    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
+    const id = requireUuid(loanId, 'loan id');
+    if (typeof this.repository.loansForUser !== 'function') {
+      throw new ServiceUnavailableException('loan records are unavailable');
+    }
+    const loans = await this.loans(actor);
+    return loans.find((loan) => loan.loanId === id) ?? null;
   }
 
   async borrow(
