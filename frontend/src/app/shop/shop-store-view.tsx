@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
+import Link from 'next/link';
+import { buyStoreItem } from './store-actions';
 import { useRouter } from 'next/navigation';
 import {
   Sparkles,
@@ -48,6 +50,7 @@ interface ShopStoreViewProps {
   readonly userBalance: string;
   readonly currentUsername?: string | undefined;
   readonly userAvatarUrl?: string | null | undefined;
+  readonly signedIn: boolean;
 }
 
 const CATEGORIES = [
@@ -69,6 +72,7 @@ export function ShopStoreView({
   userBalance,
   currentUsername = '모험가',
   userAvatarUrl,
+  signedIn,
 }: ShopStoreViewProps) {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -76,6 +80,12 @@ export function ShopStoreView({
   const [buyingItem, setBuyingItem] = useState<CatalogItem | null>(null);
   const [buyQuantity, setBuyQuantity] = useState<number>(1);
   const [buyStatus, setBuyStatus] = useState<string | null>(null);
+  const [buyPending, setBuyPending] = useState(false);
+  const [buySucceeded, setBuySucceeded] = useState(false);
+  const [buyIntent, setBuyIntent] = useState<{ itemId: string; key: string } | null>(null);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+  const buyDialogRef = useRef<HTMLDivElement>(null);
+  const buyOpenerRef = useRef<HTMLElement | null>(null);
   const [, startTransition] = useTransition();
 
 
@@ -84,34 +94,66 @@ export function ShopStoreView({
     return item.category === selectedCategory;
   });
 
+  const openBuy = (item: CatalogItem) => {
+    buyOpenerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setBuyingItem(item);
+    setBuyQuantity(1);
+    setBuyStatus(null);
+    setBuySucceeded(false);
+    // An unresolved charge must not acquire a new key merely because the dialog was closed.
+    setBuyIntent((previous) => previous?.itemId === item.catalog_id
+      ? previous
+      : { itemId: item.catalog_id, key: crypto.randomUUID() });
+  };
+
+  const closeBuy = () => {
+    setBuyingItem(null);
+    queueMicrotask(() => buyOpenerRef.current?.focus());
+  };
+
   const handleBuy = async (item: CatalogItem) => {
-    setBuyStatus('구매 처리 중...');
+    if (!signedIn || buyPending || buySucceeded || !buyIntent || buyIntent.itemId !== item.catalog_id) return;
+    setBuyPending(true);
+    setBuyStatus('서버에서 결제 결과를 확인하는 중...');
     try {
-      const idempotencyKey = crypto.randomUUID();
-      const res = await fetch(`/api/v1/shop/catalog/${item.catalog_id}/purchases`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idempotencyKey, quantity: buyQuantity }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || '구매에 실패했습니다.');
+      const result = await buyStoreItem(item.catalog_id, buyQuantity, buyIntent.key);
+      if (result.status !== 'ok') {
+        setBuyStatus(`${result.message ?? '구매 상태를 확인할 수 없습니다.'} 동일한 요청으로 재시도할 수 있습니다.`);
+        return;
       }
-
-      setBuyStatus('구매가 완료되었습니다!');
-      setTimeout(() => {
-        setBuyingItem(null);
-        setBuyStatus(null);
-        startTransition(() => {
-          router.refresh();
-        });
-      }, 1200);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '오류가 발생했습니다.';
-      setBuyStatus(`실패: ${msg}`);
+      setBuySucceeded(true);
+      setBuyStatus(result.message ?? '서버에서 구매 영수증을 확인했습니다.');
+      setBuyIntent(null);
+      startTransition(() => router.refresh());
+    } catch {
+      // A lost server-action response does not prove a failed charge; keep the same key.
+      setBuyStatus('결제 결과를 확인하지 못했어요. 동일한 요청으로 재시도하거나 지갑 거래 내역을 확인해 주세요.');
+    } finally {
+      setBuyPending(false);
     }
   };
+
+  useEffect(() => {
+    if (!buyingItem) return;
+    confirmRef.current?.focus();
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !buyPending) closeBuy();
+      if (event.key !== 'Tab') return;
+      const controls = Array.from(buyDialogRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href]') ?? []);
+      const first = controls[0];
+      const last = controls.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onEscape);
+    return () => document.removeEventListener('keydown', onEscape);
+  }, [buyingItem, buyPending, buySucceeded]);
 
   // Build composite preview data for fitting room
   const fittingCosmetics: UserCosmetics | null = previewItem
@@ -278,7 +320,11 @@ export function ShopStoreView({
                     <span>미리보기</span>
                   </button>
 
-                  {isOwned && item.purchase_limit === 'account_one' ? (
+                  {!signedIn ? (
+                    <Link href="/login" className="flex-1 min-h-11 rounded-xl border border-border px-3 py-2 text-center text-xs font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+                      로그인 후 구매
+                    </Link>
+                  ) : isOwned && item.purchase_limit === 'account_one' ? (
                     <button
                       disabled
                       className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-emerald-300 bg-emerald-50 py-2 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
@@ -288,11 +334,7 @@ export function ShopStoreView({
                     </button>
                   ) : (
                     <button
-                      onClick={() => {
-                        setBuyingItem(item);
-                        setBuyQuantity(1);
-                        setBuyStatus(null);
-                      }}
+                      onClick={() => openBuy(item)}
                       className={cn(
                         'flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm',
                         canAfford
@@ -365,7 +407,7 @@ export function ShopStoreView({
               </button>
               <button
                 onClick={() => {
-                  setBuyingItem(previewItem);
+                  openBuy(previewItem);
                   setPreviewItem(null);
                 }}
                 className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20"
@@ -380,10 +422,10 @@ export function ShopStoreView({
       {/* Buy Confirmation Dialog */}
       {buyingItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-base font-bold text-foreground mb-2">아이템 구매 확인</h3>
-            <p className="text-xs text-muted-foreground mb-4">
-              구매 금액은 시스템 소각 계정(SYSTEM_SINK)으로 100% 영구 소각 처리됩니다.
+          <div ref={buyDialogRef} role="dialog" aria-modal="true" aria-labelledby="shop-buy-title" aria-describedby="shop-buy-description" className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <h3 id="shop-buy-title" className="text-base font-bold text-foreground mb-2">아이템 구매 확인</h3>
+            <p id="shop-buy-description" className="text-xs text-muted-foreground mb-4">
+              화면 가격은 참고용이며 서버가 최종 가격과 재고를 확인합니다. 구매 금액은 시스템 소각 계정(SYSTEM_SINK)으로 100% 영구 소각 처리됩니다.
             </p>
 
             <div className="rounded-2xl border border-border/50 bg-surface/50 p-4 mb-4 flex items-center justify-between">
@@ -400,25 +442,26 @@ export function ShopStoreView({
             </div>
 
             {buyStatus && (
-              <div className="mb-4 text-center text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800 rounded-xl py-2">
+              <div role="status" aria-live="polite" className="mb-4 text-center text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800 rounded-xl py-2">
                 {buyStatus}
               </div>
             )}
 
             <div className="flex gap-2">
               <button
-                disabled={Boolean(buyStatus)}
-                onClick={() => setBuyingItem(null)}
-                className="flex-1 py-2.5 rounded-xl border border-border/50 text-xs font-bold text-muted-foreground hover:bg-surface disabled:opacity-50"
+                disabled={buyPending}
+                onClick={closeBuy}
+                className="flex-1 min-h-11 py-2.5 rounded-xl border border-border/50 text-xs font-bold text-muted-foreground hover:bg-surface disabled:opacity-50"
               >
                 취소
               </button>
               <button
-                disabled={Boolean(buyStatus) || compareAmounts(userBalance, buyingItem.price) < 0}
-                onClick={() => handleBuy(buyingItem)}
-                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20 disabled:opacity-50"
+                ref={confirmRef}
+                disabled={buyPending || buySucceeded || compareAmounts(userBalance, buyingItem.price) < 0}
+                onClick={() => void handleBuy(buyingItem)}
+                className="flex-1 min-h-11 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20 disabled:opacity-50"
               >
-                {compareAmounts(userBalance, buyingItem.price) < 0 ? '잔액 부족' : '확인 및 결제'}
+                {buyPending ? '결제 확인 중' : buySucceeded ? '영수증 확인됨' : compareAmounts(userBalance, buyingItem.price) < 0 ? '잔액 부족' : buyStatus ? '같은 요청 재확인' : '확인 및 결제'}
               </button>
             </div>
           </div>
