@@ -3449,3 +3449,35 @@ flowchart LR
    - 4개 언어 홈 화면의 핵심 UI 번역 토큰 누락 제로 검증.
 6. **빌드, 프로덕션 배포 및 라이브 실측**:
    - `curl https://easy-scraping.com/en`, `/ja`, `/zh` 실측을 통해 잔여 한글 토큰 정화 확인.
+
+---
+## 🚀 [v240 Specification] 39개 공개 URL H1 한국어 잔존 0개 달성 및 대규모 본문 누출 해소
+
+### 1. 배경 및 성과
+- **H1 한국어 잔존 전수 박멸**: 39개 공개 핵심 경로의 H1 검사 결과 [EN] 0/39, [JA] 0/39, [ZH] 0/39로 100% 현지화 달성.
+- **본문 한글 대량 누출 해소**:
+  - `/terms`: 2,077자 -> 3자 (99.9% 영문화 완료)
+  - `/privacy`: 4,078자 -> 3자 (99.9% 영문화 완료)
+  - `/tools`: 1,415자 -> 228자 (72.5% 한글 감소)
+  - `/tools/loan-interest-calculator`: 852자 -> 411자 (51.8% 한글 감소)
+
+### 2. 세부 구현 내역
+1. **클라이언트 컴포넌트 'use client' 최상단 보장**:
+   - `stock-calculator`, `salary-calculator`, `retirement-calculator`, `youth-leap-calculator`, `isa-calculator`, `pension-tax-calculator`, `crypto-apy-calculator`, `farming-calculator` 8개 컴포넌트의 Next.js Turbopack 컴파일 무결성 확보.
+2. **가이드 4종 및 안전센터 H1 5개 언어 현지화**:
+   - `career-mastery`, `dopamine-system`, `stock-trading`, `virtual-banking`, `safety/takedown`
+3. **계산기 7종 프리셋 및 H1 현지화**:
+   - `real-estate-calculator-view`, `capital-gains-tax-calculator-view`, `kimchi-premium-calculator-view`, `gift-tax-calculator`, `fire-calculator`, `tax-calculator`, `goal-wealth-calculator`, `quant-studio`
+4. **금융 도구 허브 10종 카드 5개 언어 현지화 (`tools/page.tsx`)**:
+   - 10종 카드의 제목, 뱃지, 설명, 주요 기능 리스트를 5개 언어(`LOCALIZED_TOOLS`)로 확장.
+   - 5개 카테고리 탭 라벨, FAQ 질문·답변, CTA 버튼 현지화.
+5. **이용약관 및 개인정보처리방침 영문 지원 (`TermsDocument`, `PrivacyDocument`)**:
+   - `locale` prop 전달을 통해 영문/다국어 법률 문서 전문 렌더링.
+6. **대출이자 계산기 심층 가이드 및 사이트맵 제출 박스 현지화**:
+   - `loan-interest-calculator` 3대 상환 방식 가이드, FAQ, 법적 고지 5개 언어 적용.
+   - `public-sitemap-submit-box` 사이트맵 선택 라벨 및 안내 문구 5개 언어 적용.
+
+### 3. 검증 결과
+- TypeScript 컴파일: 0 에러 (`tsc --noEmit` 통과)
+- 단위 테스트: Vitest 5개 스위트 38개 테스트 100% 통과
+- 운영 배포: 미니 PC (`127.0.0.1:3354`) 서비스 재기동 및 curl 실측 완료
