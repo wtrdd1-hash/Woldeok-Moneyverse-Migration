@@ -8,3 +8,9 @@
 - No code, migration, DB, WLD, Test, Production, feature-switch or financial change. Proposed feature OFF. 100-way/10,001 synthetic tests specified, NOT executed.
 - External independent records: newly approved 0, cumulative verified UNKNOWN/10,000, BLOCKED/IN PROGRESS.
 - GitHub engineering issue #1204: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1204. Draft PR will be linked in completion log. Release gate HOLD until isolated PostgreSQL, finance ACL, migration266/280, full CI/security, exact-SHA official Test and approved GitOps/rollback.
+
+## GitHub handoff and completion cross-links
+- Draft PR #1205: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1205 (docs only, main unmerged).
+- Development issue #1204: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1204; source baseline commit fe24031926ae6332ed37c80219854206ae270330.
+- Root-disk escalation #1170: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6387097043 (27 MiB remaining, no cleanup).
+- All QA/security/official exact-SHA Test/Production gates remain HOLD; no runtime test was executed in this planning run.
