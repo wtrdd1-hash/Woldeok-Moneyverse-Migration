@@ -1,5 +1,39 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1214 — F675-110 게시글 임시저장 발행·재시도·개인정보 보존 강화 (기능 보완 / 기획 초안 / 운영승격 보류)
+
+### 회차 및 실제 소스·QA 근거
+- 이전 Feature Addition v1212, 현재 Feature Improvement v1214, 다음 Feature Addition v1216(잠정). 최신 main 46794ff0ac3deeae87862ac9b74d209798e8d074와 공식 영문 원본·한국어 대조 기획서를 시작·중간에 확인했다. v1212 Draft PR #1103은 OPEN/미병합이며 이번 문서는 해당 독립 기획 브랜치에 쌓은 제안이지 배포 기능이 아니다. QA v1219(10:32 KST)는 이전의 다른 SHA에서 FAILED/HOLD. 개발 A/B/C, Gemini, QA, 다국어 작업자의 변경과 분리했다.
+- 실제 frontend/src/app/board/board-forms.tsx는 미리보기 전환 시 name=body 입력 요소를 제거한다. frontend/src/app/board/stock-actions.ts는 서버 액션 호출마다 idempotencyKey()를 새로 만들기 때문에 확정 불명 후 재시도에 새 키가 사용될 수 있다. backend/src/board/board.controller.ts와 stock-community.controller.ts는 UUID 키를 받는다. migration 044-member-board.sql의 게시글 멱등 키는 전역 UNIQUE지만 원래 함수는 재생 시 제목·본문의 digest 동일성을 검증하지 않는다. migration 181-stock-tagged-community.sql의 주식 연계 게시글은 기존 이미지 게시 함수와 주식 컨텍스트 삽입을 같은 SQL 트랜잭션에서 처리한다. 이는 코드·설계상 위험이며 실제 중복 게시 사고 증거가 아니다. migration 278의 블로그 편집 임시글은 별도 시스템으로 재사용하지 않는다.
+- v1212의 회원 본인 전용·선택적 기기간 텍스트 임시저장과 WLD 비변경 원칙은 유지한다. 영수증 7일 보존과 임시글 30일 복구 기간의 충돌, 계정 탈퇴를 막을 수 있는 owner RESTRICT FK, ON DELETE SET NULL로 유일한 발행 증거가 사라질 수 있는 문제를 보완한다.
+
+### 회원 흐름·화면·버튼·상태·접근성
+- 진입: /board 작성창의 임시저장/내 임시글, /account/board-drafts 목록의 이어쓰기/삭제/게시, 선택적 /account/board-drafts/[draftId] 편집. 상태 LOCAL_DIRTY, SAVING, SAVED_CONFIRMED(version,time), UNKNOWN_COMMIT, STALE_CONFLICT, PUBLISHING, PUBLISHED(postId), EXPIRED, SIGNED_OUT. 타임아웃에 저장 완료를 표시하지 않고 저장 상태 확인을 제공한다. 확정 게시 시 원본 게시글 주소를 표시한다. 충돌에는 내 글 복사/서버 버전 불러오기/새 임시글 저장을 제공하며 다른 기기 수정본을 자동 덮어쓰지 않는다.
+- 작성·미리보기 모두 제목·종목 메타데이터와 제어된 본문을 FormData에 등록(숨김 필드 등)하고 이중 제출을 방지한다. 게시 전 명시적으로 확인하며 확정 불명 저장 중에는 게시를 비활성화한다. 자동저장은 회원 동의 시 2초 디바운스, 활성 상태 최대 30초 간격으로 제한한다. 게시·삭제·만료·로그아웃·계정 전환·동의 철회 및 게시 중에는 중단하고 이전 세션의 늦은 응답을 세션 세대와 버전으로 무효화한다. visibilitychange는 최선의 시도, beforeunload는 미저장 상태의 경고일 뿐 저장 내구성 보장이 아니다.
+- 개인 화면·BFF/API는 Cache-Control: private, no-store 및 noindex,nofollow. 제목·본문은 사이트맵·OG·관리자 통계·로그에 포함하지 않는다. WCAG 2.2 AA, 320px, 200% 확대, 키보드, 확정 저장 role=status, 오류 role=alert, 충돌 포커스, 움직임 줄이기 준수. Android App API는 본인 확인·충돌·영수증·복구에서 웹과 동등해야 한다.
+
+### API·DB·트랜잭션·권한 명세(개발 승인 전 제안)
+- 세션에서 본인 식별: POST/GET /api/v1/board/drafts, GET/PATCH/DELETE /:id, POST /:id/publish, BFF 및 /app-api/v1/board/drafts 동등 구현. 논리적 저장·발행 의도당 UUID Idempotency-Key를 단 한 번 생성하고 확정 여부를 확인할 때까지 서버의 임시글·발행 의도에 결합해 재사용한다. 서버 액션 재시도마다 키를 다시 만들지 않는다. PATCH/PUBLISH는 If-Match: "vN" 또는 기대 버전을 요구하고 receiptId,draftId,version,status,postId?,requestId를 반환한다. 같은 키·같은 정규화 digest는 최초 불변 영수증을 반환하고 다른 내용·동작·회원이면 409. 서버가 제목·본문·종목·분류·관점·보유 관계·승인된 이미지 참조를 정규화해 digest를 계산한다. 타임아웃 후 본인 GET/영수증 조회로 확정 여부를 확인하고 미확정인 경우에만 같은 키로 재시도한다.
+- 오류: 잘못된 값 400/422, 미인증 401, CSRF·동의 거부 403, 타인/없는 임시글 동일 404, 버전·digest·한도 충돌 409, 본인 소유 확인 후에만 만료 410, 용량 413, 제한 429, 확정 불명 503(복구 URL 제공). PUBLISHED/DELETED/EXPIRED는 종결 상태로 오래된 자동저장 PATCH가 복구할 수 없다. 과거 영수증을 재생하더라도 현재 상태 조회 없이 편집 가능하다고 안내하지 않는다.
+- Forward-only DB: owner_user_id FK는 계정 삭제를 막지 않아야 하므로 ON DELETE CASCADE와 기존 계정 삭제 함수를 격리 PG에서 검증한다. UNIQUE(owner_user_id,id), version>0·상태·길이 CHECK, 회원별 updated_at/id·만료 인덱스. 불변 영수증은 UNIQUE(owner_user_id,operation,idempotency_key), 32바이트 request_digest CHECK, 최초 결과·버전·시각, 발행 의도 UNIQUE(draft_id). 기존 게시글 키의 전역 UNIQUE는 추가 방어일 뿐 같은 payload의 증명이 아니다. 타인·일반/주식 유형 간 키 충돌 시 기존 게시글 재사용 금지. 승인된 게시글 완전 삭제 후에도 발행된 postId를 불변 영수증으로 확인할 수 있어야 하며 유일한 참조를 SET NULL로 지우지 않는다. 중복 방지를 위해 삭제된 본문을 보존하지 않는다. 7일 영수증 폐기와 30일 복구를 양립시키려면 개인정보·법무 승인된 보존 정책이 필요하다.
+- 단일 DB 트랜잭션: 본인·동의 확인→임시글 FOR UPDATE 잠금→버전·종결 검사→충돌 안전한 고유 발행 의도 예약→digest 확인→같은 연결/트랜잭션에서 일반 또는 주식 SECURITY DEFINER 게시 함수 실행→postId·PUBLISHED·불변 영수증 저장→COMMIT. 주식 컨텍스트·이미지 예약·계정 탈퇴의 잠금 순서를 함께 검증하며 직렬화/교착 오류는 같은 키로만 재시도한다. 바이너리 업로드는 SQL 원자성 밖에 있으므로 회원·발행 의도에 연결된 만료형 업로드 예약, 악성코드/형식/용량/대체 텍스트 검증, 실패 시 orphan 정리 작업을 둔다. 임시글에는 이미지 원본을 저장하지 않으며 WLD 변경도 없다.
+- SQL 함수 안에서 소유권 검증·고정 search_path, 앱 직접 DML/PUBLIC EXECUTE 회수, CSRF·Origin·세션 확인, 생성/저장/게시별 속도 제한(자동저장 무제한 예외 금지). 관리자는 임시글 총량·만료 지연·오류·악용 경보 등 집계만 열람하고 본문 열람은 별도 승인·감사를 요구한다. 회원 범위 서명 커서는 updated_at/id 순서, 활성 20건 한도는 회원 잠금으로 직렬화한다. 동일 시각 10,001건 커서 시험은 격리 합성 데이터에서만 실행한다. KPI: 건강한 Test 저장 확정률 99.9% 이상, 합성 p95 800ms 미만, 중복 게시 0, 타인 노출 0, 이미지 orphan 정리율·확정 불명 복구율을 개인정보 없는 집계로 확인한다.
+
+### P0/P1 개발 백로그·수용 기준·승격 제한
+- P0 ENV1214-01: 운영 연동 DB/개발 DB 분리, 5433 전체 바인딩 제한, 연결 실체와 암호화 백업 격리 복원 검증 전 쓰기·테스트 데이터 금지.
+- P0 SEC1214-02: 앱 직접 DML 235/241, PUBLIC 은행 함수 3개, migration266 체크섬을 forward-only·실제 격리 PG 권한 허용/거부 시험으로 해결.
+- P0 REL1214-03: QA v1219 프론트 4건 실패, 프로덕션 감사 High 2건/전체 Critical 2+High 10/봇 Critical 1+High 5, route inventory, classifier 경쟁 #1106/#1107, 자동 병합 #1088. 빌드 성공만으로 병합 금지; 정확 SHA의 실제 배포 Test 로그인·금융 E2E, 보안·복원·승인·GitOps 필수.
+- P0 BOARD1214-04: Preview 본문 누락과 서버 액션의 새 키 재시도 재현, 안정적 발행 의도·digest·확정 불명 복구·일반/주식 게시 식별 계약 테스트.
+- P1 BOARD1214-05: 불변 발행 의도/digest/영수증과 게시글 삭제 후 식별, 격리 실제 PG 동시성.
+- P1 BOARD1214-06: 회원→임시글→발행 의도 잠금/CAS, 종결 자동저장 및 계정 전환 응답 차단, 100건 동시성.
+- P1 BOARD1214-07: 소유권 확인 후 만료 410, 계정 탈퇴 FK, 보존 승인, 서명 커서, 민감 로그 차단.
+- P1 BOARD1214-08: Nest/BFF/Android, 재시도 키 유지, Preview 본문, 접근 가능한 충돌/복구, 이미지 예약과 orphan 정리.
+- P1 BOARD1214-09: 관리자 집계, noindex/no-store, 320px/200%/WCAG, KPI, 속도 제한·악용 방지.
+- P1 BOARD1214-10: 격리 PG/실제 Test 회귀, 기능 기본 OFF, 승인 후 1%→10%→100%, 문제 시 UI/쓰기 중단·영수증 보존, 파괴적 DB 롤백 금지.
+- 수용: 같은 키 동시 저장 100건→영수증 1건, 동일 발행 100건→게시글 1건, 타 회원 접근 100건→노출 0건, 같은 키 다른 내용→409, 게시 후 오래된 PATCH→409/재활성화 0, 타임아웃 재시도→원래 postId, Preview 본문 보존, 계정 삭제 FK 차단 0, 격리 합성 커서 10,001건 누락·중복 0, 오프라인 허위 저장 0, WLD 변화 0. 중복 게시·정보 유출·영수증 소실·DB 권한 이탈·보안/금융 회귀 발생 시 승격 중단.
+- 외부 독립 발행기관 PostgreSQL/MDN/OWASP 3곳 검토, 신규 중복제거 승인 근거 0건, 누적 승인 실수량 미확인/10,000 => BLOCKED / IN PROGRESS. 이번 기획에서는 런타임·DB·WLD·스위치·Test·Production을 변경하지 않는다.
+
+
 ## v2026.10.24.1212 — F675-110 회원 전용 게시글 임시저장함·기기간 이어쓰기 (기능 추가 / 초안 / 운영 보류)
 
 ### 회차·근거·목표

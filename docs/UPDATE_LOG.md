@@ -1,5 +1,11 @@
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
+## 2026-10-24 v1214 — F675-110 draft publication/replay/privacy hardening (DRAFT / HOLD)
+- Previous Addition v1212 -> Current Improvement v1214 -> Next Addition v1216 provisional; main 46794ff0ac3deeae87862ac9b74d209798e8d074 start/mid; v1212 Draft #1103 unmerged; QA v1219 FAILED/HOLD older SHA.
+- Verified source: Preview body missing, new key per server action, no original replay digest. Harden stable publish intent, immutable receipt, unknown commit, account erasure/retention, terminal CAS, stock/image side effects, Android/SEO/WCAG/KPI. Six bilingual official docs and one worklog only.
+- P0 ENV1214-01 SEC1214-02 REL1214-03 BOARD1214-04; P1 BOARD1214-05 BOARD1214-06 BOARD1214-07 BOARD1214-08 BOARD1214-09 BOARD1214-10. External publisher families reviewed 3, newly approved 0, cumulative deduplicated UNKNOWN/10,000 BLOCKED. No runtime/DB/WLD/Test/Production changes.
+
+
 ## 2026-10-24 v1212 — F675-110 private board drafts and cross-device continuation (FEATURE ADDITION / DRAFT / HOLD)
 - Previous Improvement v1210 / Current Addition v1212 / Next Improvement v1214 provisional. Main 5072d43e at start/mid, QA v1217 (tested b9746298, not current main 5072d43e) FAILED/HOLD; prior #1094 CLOSED UNMERGED, independent latest-main branch. Source `board-forms.tsx` unsaved React body and Preview unmounted body input; `stock-actions.ts` publishes immediately, no draft API/table found. Drafted owner-only 20-item/30-day private text autosave and explicit receipt, atomic board/stock publish, Android, admin aggregates, WCAG, SEO, abuse protection and rollback.
 - P0 ENV1212-01 SEC1212-02 REL1212-03 BOARD1212-04; P1 BOARD1212-05 BOARD1212-06 BOARD1212-07 BOARD1212-08 BOARD1212-09 BOARD1212-10. Full specification in integrated EN/KO; docs-only, no DB/runtime/WLD/Test/Production/flag changes. QA security/CI/isolated exact-SHA Test/backup and release still HOLD.

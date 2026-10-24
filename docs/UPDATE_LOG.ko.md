@@ -1,5 +1,11 @@
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
 
+## 2026-10-24 v1214 — F675-110 임시글 발행·재시도·보존 강화 (DRAFT / HOLD)
+- 이전 Addition v1212→현재 Improvement v1214→다음 Addition v1216(잠정). main 46794ff0ac3deeae87862ac9b74d209798e8d074 시작·중간 확인, v1212 Draft #1103 미병합, QA v1219 다른 SHA에서 FAILED/HOLD.
+- Preview 본문 필드 누락, 서버 액션별 새 멱등 키, 게시 함수 digest 미검증을 소스에서 확인. 안정적 발행 의도·불변 영수증·확정 불명 복구·계정 삭제/보존·종결 CAS·이미지 orphan 정리·Android/SEO/WCAG/KPI를 국영문 통합 기획과 프로젝트 계획에 반영.
+- P0 ENV1214-01 SEC1214-02 REL1214-03 BOARD1214-04; P1 BOARD1214-05 BOARD1214-06 BOARD1214-07 BOARD1214-08 BOARD1214-09 BOARD1214-10. 외부 발행기관 3곳 검토, 신규 승인 0, 누적 중복 제거 승인 수량 미확인/10,000 BLOCKED. 런타임/DB/WLD/Test/Production 변경 없음.
+
+
 ## 2026-10-24 v1212 — F675-110 비공개 게시글 임시저장·기기간 이어쓰기 (기능 추가 / 초안 / 보류)
 - 이전 보완 v1210 / 현재 추가 v1212 / 다음 보완 v1214(잠정). 시작·중간 main 5072d43e, QA v1217 (검증 SHA b9746298, 현재 main 5072d43e와 다름) FAILED/HOLD; 이전 #1094 미병합 종료로 최신 main 독립 브랜치. `board-forms.tsx`의 React 메모리 본문·미리보기 입력 언마운트, `stock-actions.ts`의 즉시 게시 및 임시저장 API/DB 부재 확인. 본인 전용 활성 20개/30일 보존·서버 영수증·원자적 게시·Android·관리자 익명 집계·WCAG·SEO·남용방지·롤백 기획.
 - P0 ENV1212-01 SEC1212-02 REL1212-03 BOARD1212-04; P1 BOARD1212-05 BOARD1212-06 BOARD1212-07 BOARD1212-08 BOARD1212-09 BOARD1212-10. 상세는 국영문 통합문서, 런타임/DB/WLD/Test/Production/스위치 변경 없음. QA 보안/CI/격리 정확 SHA Test/복원/운영승격 계속 보류.
