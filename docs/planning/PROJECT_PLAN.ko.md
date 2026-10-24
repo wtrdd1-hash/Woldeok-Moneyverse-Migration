@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1242 — F675-117 재고 권위·알림 경합 무결성 강화 (기능 보완 / 초안 / 배포 보류)
+- 이전 추가 v1240 → 현재 보완 v1242 → 다음 추가 v1244(잠정). 시작·중간 main c9a868b1e622341e2daa8b936ddf0988eda9988e; 선행 Draft #1195 미병합. Gemini/개발 A/B/C/QA와 분리된 문서 작업.
+- **P0 코드상 재고 불일치:** Migration 168 관리자 함수는 shop_catalog.current_stock을 수정하지만 Migration 165 상점 조회·구매는 shop_inventory.quantity를 사용하고 Migration 092 정책도 실제 재고를 수정한다. 관리자 필드만 바뀐 것은 재입고 증거가 아니며 알림·무단 보정 금지. 격리 읽기 전용 DB로 차이·작성자·화면 권위를 검증해야 한다.
+- 회원당 관심 30개, /shop CTA·/account/shop-watches·본인 API/Android, 불변 멱등 영수증·비공개/noindex·접근성, WLD/원장 영향 없음. 실제 재고 0→양수 트랜잭션 이벤트·출처·epoch, 발송 직전 재고·동의·해제 잠금 재검증, 알림 원자적 영수증, 롤백·재품절·관리자 메타데이터 변경 시 거짓 알림 금지. 상품/재고 잠금 역전 금지. 국영문 통합 마스터 상세 명세.
+- P0 ENV1242-01 SEC1242-02 REL1242-03 SHOP1242-04; P1 SHOP1242-05 SHOP1242-06 SHOP1242-07 SHOP1242-08 SHOP1242-09 SHOP1242-10. QA v1243 FAILED/HOLD, DB 공유/5433·과다 DML/PUBLIC 은행 EXECUTE·Migration266/280·보안 감사·정확 SHA Test·격리 복원 미검증, 루트 99%/여유 1.1GB. 런타임·DB·WLD·Test·운영 변경 없음.
+- 외부 독립 근거 게이트: 기존 발행기관 3곳 검토, 신규 승인 0건, 누적 실제 승인 미확인/10,000건 = BLOCKED/IN PROGRESS.
+
 ## v2026.10.25.1240 — F675-117 상점 재입고 관심 등록 (기능 추가 / 초안 / 배포 보류)
 - 회차: 이전 기능 보완 v1238 → 현재 기능 추가 v1240 → 다음 기능 보완 v1242(잠정). 최신 main c9a868b1e622341e2daa8b936ddf0988eda9988e 시작·중간 동일, v1238 #1189 미병합. QA v1243 FAILED/HOLD. A/B/C/Gemini/QA와 분리된 문서 작업.
 - 상점 화면·API·Migration 071/072/114/123 확인: 재고 권위는 shop_inventory.quantity, 구매는 재고 잠금·판매기간·한도를 재검증. 본인 재입고 관심 등록은 확인되지 않음. 회원당 유한 재고 0인 상품 최대 30개, /shop CTA·/account/shop-watches, 확정 0→양수 전환당 앱 내 알림 최대 1건. 예약·구매 보장·외부 메시지·WLD/원장 변동 없음.

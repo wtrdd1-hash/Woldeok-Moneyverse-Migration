@@ -1,4 +1,9 @@
 ## 2026-10-25 v1240 — F675-117 verified shop restock watch (FEATURE ADDITION / DRAFT / HOLD)
+
+## 2026-10-25 v1242 — F675-117 stock authority and notice-race hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1240 / Current Improvement v1242 / Next Addition v1244 provisional. Main c9a868b1e622341e2daa8b936ddf0988eda9988e start/mid. Source evidence: migration 168 admin writes catalogue.current_stock only; 165 listing/purchase and 092 policy use inventory.quantity. Treat as P0 source mismatch, not a verified production incident. No false admin restock notifications or silent sync.
+- Added inventory transition epoch/provenance, locked current availability + consent/cancel before atomic notice, admin contract remediation and 100-way race/rollback regressions. P0 ENV1242-01 SEC1242-02 REL1242-03 SHOP1242-04; P1 SHOP1242-05..10. QA v1243 HOLD; root 99%, exact-SHA/restore blocked. 0 approved independent references, cumulative UNKNOWN/10,000. Docs-only; no deployment.
+
 - Previous Improvement v1238 / Current Addition v1240 / Next Improvement v1242 provisional. Main c9a868b1e622341e2daa8b936ddf0988eda9988e start/mid. Source: shop UI/controller, migrations 071/072/114/123. Owner-only 30-cap finite-stock-zero watches; real inventory 0→positive event and one in-app receipt, no WLD/ledger effect. P0 ENV1240-01 SEC1240-02 REL1240-03 SHOP1240-04; P1 SHOP1240-05..10. Full EN/KO master. QA v1243 FAILED/HOLD, disk 97%, external approved 0/10,000 (cumulative UNKNOWN), no deployment.
 
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
