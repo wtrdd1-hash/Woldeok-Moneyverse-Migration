@@ -8,9 +8,11 @@ import { requireAdminConsole } from '@/lib/session';
 import { apiOrNull } from '@/lib/api';
 import { ApiHealthDashboard, type ApiHealthResponse } from './api-health-dashboard';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
-  title: '14대 도메인 API 헬스체크 & 실시간 관제 — 관리자',
-  description: '월덕 머니버스 전 도메인 300+개 REST API의 실시간 가동률, 지연 시간(Latency), 성공률 및 인프라 관제.',
+  title: '서버·데이터베이스 실측 상태 — 관리자',
+  description: '관리자 전용 백엔드 프로세스 및 PostgreSQL 상태 측정',
   robots: { index: false, follow: false },
 };
 
@@ -18,40 +20,35 @@ export default async function AdminApiHealthPage() {
   await requireAdminConsole('/admin/api-health');
   const locale = await getServerLocale();
   const isEn = locale === 'en';
-
-  const liveData = await apiOrNull<ApiHealthResponse>('/api/v1/admin/api-health/status');
+  const data = await apiOrNull<ApiHealthResponse>('/api/v1/admin/api-health/status');
 
   return (
-    <div data-page="admin-api-health" className="mv-page mv-page--admin grid gap-6 max-w-6xl mx-auto">
-      <Button asChild variant="ghost" className="w-fit -ml-3 text-muted-foreground">
+    <div data-page="admin-api-health" className="mv-page mv-page--admin mx-auto grid max-w-6xl gap-6">
+      <Button asChild variant="ghost" className="-ml-3 min-h-11 w-fit text-muted-foreground">
         <Link href="/admin">
-          <ArrowLeft />
+          <ArrowLeft aria-hidden="true" />
           {isEn ? 'Back to Admin Console' : '관리자 콘솔로 돌아가기'}
         </Link>
       </Button>
 
-      <PageHeader
-        eyebrow={liveData?.isLiveTelemetry ? 'LIVE SYSTEM TELEMETRY (실측)' : 'SYSTEM TELEMETRY'}
-        title={isEn ? '14-Domain API Real-Time Health Tower' : '14대 도메인 API 실시간 관제 타워'}
-      >
-        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+      <PageHeader eyebrow="MEASURED BACKEND TELEMETRY"
+        title={isEn ? 'Backend & PostgreSQL Measurements' : '백엔드·PostgreSQL 실측 관제'}>
+        <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
           {isEn
-            ? 'Authoritative real-time telemetry across all 14 active domains, Cloudflare R2 automated backups, and 300+ REST API endpoints verified for healthy entertainment standards.'
-            : '건전한 엔터테인먼트 아케이드 및 14대 핵심 도메인 300여 개 엔드포인트의 실시간 응답 지연(Latency), 시스템 부하 및 Cloudflare R2 무료 자동 백업 재해 복구 관제입니다.'}
+            ? 'Read-only measurements from the backend process and one PostgreSQL ping. This is not a per-route uptime monitor or a backup verification.'
+            : '백엔드 프로세스와 PostgreSQL 단일 응답을 읽기 전용으로 확인합니다. 개별 API 가동률이나 백업 검증을 의미하지 않습니다.'}
         </p>
       </PageHeader>
 
-      <ApiHealthDashboard initialData={liveData} isEn={isEn} />
+      <ApiHealthDashboard initialData={data} isEn={isEn} />
 
-      <div className="flex items-center justify-between p-4 rounded-xl border border-primary/20 bg-primary/5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Activity className="size-4 text-primary animate-pulse" />
-          <span>공식 마스터 API 명세서: <b>docs/API_CATALOG_MASTER.ko.md</b> 동기화 완료</span>
+          <Activity className="size-4" aria-hidden="true" />
+          {isEn ? 'Endpoint coverage is not verified by this view.' : '개별 API 정상 여부는 별도 회귀 테스트로 확인해야 합니다.'}
         </div>
-        <Button asChild size="sm" variant="outline">
-          <Link href="/developer">
-            개발자 포털 바로가기
-          </Link>
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href="/admin">{isEn ? 'Admin Console' : '관리자 콘솔'}</Link>
         </Button>
       </div>
     </div>
