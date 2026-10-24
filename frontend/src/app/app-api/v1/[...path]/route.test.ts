@@ -38,7 +38,7 @@ describe('app API route compatibility', () => {
 
   it('forwards owner-only wallet flow summary with exact strings and private cache policy', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({
       currency: 'WLD', scope: 'recent_50', completeHistory: false,
       transactionCount: 1, incomingCount: 1, outgoingCount: 0, internalMovementCount: 0,
       incomingAmount: '90071992547409931234567890', outgoingAmount: '0',

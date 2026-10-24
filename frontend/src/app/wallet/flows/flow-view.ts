@@ -25,7 +25,7 @@ export function parseFlowSummary(value: unknown): FlowSummary | null {
   if (count > 50 || (data.incomingCount as number) + (data.outgoingCount as number)
     + (data.internalMovementCount as number) > count) return null;
   const amounts = ['incomingAmount', 'outgoingAmount', 'netAmount'] as const;
-  if (amounts.some((key) => typeof data[key] !== 'string' || !CANONICAL.test(data[key] as string))) return null;
+  if (amounts.some((key) => typeof data[key] !== 'string' || (data[key] as string).length > 128 || !CANONICAL.test(data[key] as string))) return null;
   if ((data.incomingAmount as string).startsWith('-') || (data.outgoingAmount as string).startsWith('-')) return null;
   if (BigInt(data.incomingAmount as string) - BigInt(data.outgoingAmount as string) !== BigInt(data.netAmount as string)) return null;
   return data as unknown as FlowSummary;

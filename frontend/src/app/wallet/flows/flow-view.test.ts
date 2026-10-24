@@ -21,5 +21,6 @@ describe('recent wallet flow view boundary', () => {
   it('rejects noncanonical and unsafe monetary input', () => {
     expect(parseFlowSummary({ ...valid, incomingAmount: '9e50' })).toBeNull();
     expect(parseFlowSummary({ ...valid, transactionCount: -1 })).toBeNull();
+    expect(parseFlowSummary({ ...valid, incomingAmount: '9'.repeat(129), netAmount: '9'.repeat(129), outgoingAmount: '0' })).toBeNull();
   });
 });
