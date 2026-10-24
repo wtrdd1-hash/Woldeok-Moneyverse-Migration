@@ -17,3 +17,8 @@
 
 ## Verification
 - Documentation-only parity and `git diff --check` to be verified before commit/PR. No product runtime tests performed.
+
+## GitHub handoff (confirmed)
+- Draft PR **#1175**: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1175 ; stacked on unmerged Draft #1167, not on main.
+- Existing development issue **#1166** updated: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1166#issuecomment-6384075188 .
+- Main merge **NOT performed**; review/CI/Test/Production **HOLD**. Documentation checks: 10/10 backlog IDs in all six EN/KO files; staged diff check PASS. Product tests NOT RUN.
