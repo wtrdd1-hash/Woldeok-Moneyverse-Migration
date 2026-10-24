@@ -24,6 +24,7 @@ describe('BankController.repaymentPreview', () => {
     const getStanding = vi.fn().mockResolvedValue({ cash_balance: '200' });
     const controller = new BankController({ getStanding } as unknown as BankRepository);
     await expect(controller.repaymentPreview(request, '-1')).rejects.toBeInstanceOf(BadRequestException);
+    expect(getStanding).not.toHaveBeenCalled();
   });
 
   it('returns conflict for no active loan', async () => {

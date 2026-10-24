@@ -74,6 +74,9 @@ export class BankController {
     @Req() request: RequestWithSession,
     @Query('amount') amount: string | undefined,
   ) {
+    if (typeof amount !== 'string' || !/^[1-9][0-9]{0,99}$/.test(amount)) {
+      throw new BadRequestException('positive integer amount required');
+    }
     const standing = await this.guarded(
       () => this.repository().getStanding(requireUserId(request)),
       'failed to load bank standing',
