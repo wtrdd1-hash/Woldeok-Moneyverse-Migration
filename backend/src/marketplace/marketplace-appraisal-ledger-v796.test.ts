@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { MarketplaceService } from './marketplace.service';
 import { queryOne } from '../core/db';
 import type { Queryable } from '../core/db';
@@ -14,24 +15,15 @@ const input = { itemId: 'item_trophy_01', itemName: '골드 메달', rarity: 'EP
 describe('v796 marketplace appraisal fail-closed ledger settlement', () => {
   beforeEach(() => vi.resetAllMocks());
 
-  it('delegates fee and certificate issuance to exactly one owner-controlled database transaction', async () => {
-    const cert = { certId: 'CERT-2026-ABC', appraisedValueWld: '4000', itemId: input.itemId };
-    vi.mocked(queryOne).mockResolvedValue({ cert });
+  it('does not call the ledger function until DB-side ownership verification is available', async () => {
     const service = new MarketplaceService({ query: vi.fn() } as unknown as Queryable);
-    const result = await service.requestAppraisal(actor, input);
-    expect(result).toEqual(cert);
-    expect(queryOne).toHaveBeenCalledTimes(1);
-    const [pool, sql, params] = vi.mocked(queryOne).mock.calls[0]!;
-    expect(pool).toBeTruthy();
-    expect(sql).toContain('public.marketplace_create_appraisal_certificate(');
-    expect(sql).not.toMatch(/(?:UPDATE\s+public\.account_balances|DO\s+\$\$)/i);
-    expect(params).toEqual([actor, input.itemId, input.itemName, input.rarity]);
+    await expect(service.requestAppraisal(actor, input)).rejects.toThrow(ServiceUnavailableException);
+    expect(queryOne).not.toHaveBeenCalled();
   });
 
-  it('does not return a certificate if the ledger/fee settlement fails', async () => {
-    vi.mocked(queryOne).mockRejectedValue(new Error('insufficient balance'));
-    const service = new MarketplaceService({ query: vi.fn() } as unknown as Queryable);
-    await expect(service.requestAppraisal(actor, input)).rejects.toThrow('insufficient balance');
-    expect(queryOne).toHaveBeenCalledTimes(1);
+  it('refuses issuance even when the database pool is unavailable', async () => {
+    const service = new MarketplaceService(null);
+    await expect(service.requestAppraisal(actor, input)).rejects.toThrow(ServiceUnavailableException);
+    expect(queryOne).not.toHaveBeenCalled();
   });
 });

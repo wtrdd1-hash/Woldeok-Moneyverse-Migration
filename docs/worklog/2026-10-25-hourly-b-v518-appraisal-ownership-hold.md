@@ -9,8 +9,9 @@
 
 ## In progress
 - [x] RED: 3/3 focused tests fail (unsafe SQL attempted / controller permits forged certificate); evidence in internal `red.txt`.
-- [ ] GREEN: reject all appraisal issuance before DB call; keep read route.
+- [x] GREEN: service + controller reject issuance with HTTP 503 before DB call; owner reads unchanged. 10/10 focused unit and 2/2 HTTP tests PASS. HTTP TDD RED observed HTTP 201 (old code), GREEN HTTP 503 (new code).
 - [ ] Verify unit/contract/lint/typecheck/build/PG/security/CI; record failures accurately.
+- Midpoint main: `c9a868b1e622341e2daa8b936ddf0988eda9988e` (unchanged); newest planning PR #1195 v1240 still draft.
 
 ## Finished
 - Pending.

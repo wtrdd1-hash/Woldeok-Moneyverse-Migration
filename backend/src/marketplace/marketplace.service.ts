@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -427,16 +427,12 @@ export class MarketplaceService {
     actor: string,
     dto: { itemId: string; itemName: string; rarity: string },
   ): Promise<unknown> {
-    if (!this.pool) throw new Error('database pool unavailable');
-    // SECURITY DEFINER function atomically owns journal and certificate.
-    // App role cannot directly mutate core money tables or certificates.
-    const row = await queryOne<{ cert: unknown }>(
-      this.pool,
-      `SELECT public.marketplace_create_appraisal_certificate(
-         $1::uuid, $2::text, $3::text, $4::text
-       ) AS cert`,
-      [actor, dto.itemId, dto.itemName, dto.rarity],
+    // Migration 276 settles the fee atomically but trusts unverified item
+    // metadata. Only a database-side ownership check can safely re-enable it.
+    void actor;
+    void dto;
+    throw new ServiceUnavailableException(
+      'appraisal issuance paused pending authoritative item ownership verification',
     );
-    return row?.cert ?? null;
   }
 }
