@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { PostingStrip } from '@/components/posting-strip';
@@ -11,6 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
+import { StatementDownloadLink } from './statement-link';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,14 +49,7 @@ export default async function WalletActivityPage() {
         맞춘 금액을 보여 줍니다.
       </PageHeader>
 
-      {wallet && wallet.recentTransactions.length > 0 && (
-        <Button asChild variant="outline" size="sm" className="w-fit">
-          <a href="/app-api/v1/wallet/statement.csv" download="moneyverse-wallet-recent-50.csv">
-            <Download aria-hidden="true" className="size-4" />
-            최근 최대 50건 CSV 다운로드
-          </a>
-        </Button>
-      )}
+      {wallet && wallet.recentTransactions.length > 0 && <StatementDownloadLink />}
 
       <Card>
         <CardContent>
