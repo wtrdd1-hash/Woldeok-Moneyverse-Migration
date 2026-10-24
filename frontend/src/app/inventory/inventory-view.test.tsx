@@ -29,6 +29,12 @@ describe('inventory accessible equipment controls', () => {
     expect(html).not.toContain('/api/v1/shop/holdings/');
   });
 
+  it('gives a verified empty inventory an accessible shop navigation target', () => {
+    const html = renderToStaticMarkup(<InventoryView holdings={[]} />);
+    expect(html).toContain('href="/shop/catalog"');
+    expect(html).toContain('min-h-11');
+  });
+
   it('uses the persisted badge slot for unequip instead of silently clearing badge_1', () => {
     const html = renderToStaticMarkup(<InventoryView holdings={[{ ...item, category: 'badge', is_equipped: true, equipped_slot: 'badge_2' }]} />);
     expect(html).toContain('name="slot" value="badge_2"');

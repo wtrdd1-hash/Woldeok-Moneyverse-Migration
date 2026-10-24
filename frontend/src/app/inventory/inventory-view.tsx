@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import Link from 'next/link';
 import { Check, RotateCcw } from 'lucide-react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
@@ -167,6 +168,7 @@ export function InventoryView({
         <div className="rounded-3xl border border-dashed border-border/60 p-12 text-center text-muted-foreground bg-card/30">
           <p className="text-sm font-bold">보유한 아이템이 없습니다.</p>
           <p className="text-xs mt-1">상점 2.0에서 마음에 드는 아이템을 둘러보세요!</p>
+          <Link href="/shop/catalog" className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-4 text-sm font-bold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">아이템 상점 보기</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -234,9 +236,8 @@ function EquipControl({ item }: { readonly item: HeldItem }) {
         <input type="hidden" name="slot" value={slot} />
         <input type="hidden" name="equip" value={String(equip)} />
         <SubmitButton
-          size="sm"
           variant={equip ? 'default' : 'outline'}
-          className="min-h-11 max-w-full text-xs focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="h-11 min-h-11 max-w-full text-xs focus-visible:outline-2 focus-visible:outline-offset-2"
         >
           {equip ? <Check aria-hidden="true" className="size-3" /> : <RotateCcw aria-hidden="true" className="size-3" />}
           {equip ? '장착' : '해제'} <span className="sr-only">{item.name}</span>
