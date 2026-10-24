@@ -165,7 +165,18 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    // Member notification history must never inherit the public indexing header.
+    // The more specific rule comes last so it overrides the catch-all rule.
+    return [
+      { source: '/:path*', headers: security },
+      {
+        source: '/account/notifications',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
+    ];
   },
 
   async redirects() {
