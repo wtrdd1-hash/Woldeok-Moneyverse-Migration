@@ -128,7 +128,7 @@ export async function generateMetadata({
     alternates: {
       canonical: stockUrl,
     },
-    robots: { index: true, follow: true },
+    robots: { index: false, follow: false },
     openGraph: {
       title: `${stock.name} (${stock.symbol}) — 가상 주식 시세 & 차트`,
       description: `${stock.name}의 실시간 가상 주식 호가 및 차트`,
