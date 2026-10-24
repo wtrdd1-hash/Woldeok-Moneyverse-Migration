@@ -1,0 +1,6 @@
+# 2026-10-24 — Planning v1226 / F675-113 Cosmetic Preset Integrity Hardening
+
+- **START (17:05 KST):** Previous Feature Addition v1224 → Current Feature Improvement v1226 → Next Feature Addition v1228 (provisional). Debian 13 miniPC and services/DB reachable; origin/main `49788d09494fed3e463651945b83386e87dd47bc`. Parent planning Draft #1144 remains unmerged. This worktree branches from that Draft; no runtime or live database writes.
+- **Sources read:** Superpowers using-superpowers, brainstorming, using-git-worktrees, writing-plans, verification-before-completion; AGENTS.md, README.md, canonical PROJECT_PLAN.md and Korean counterpart; migration 071/114, shop NestJS repository/controller, inventory Next.js, latest QA v1231 and GitHub open PRs.
+- **Planned:** refine preset/legacy-equip serialization, catalogue/ownership/expiry constraints, receipt replay and retry status, owner privacy, UI and Android parity, real-PostgreSQL negative/concurrency tests and rollback gates. Update six existing EN/KO canonical docs, preserve other workers' branches, draft PR and GitHub issue tracking. External 10,000 independent evidence gate remains open.
+- **Progress:** START; documentation only. No feature enabled, no Test/Production promotion.
