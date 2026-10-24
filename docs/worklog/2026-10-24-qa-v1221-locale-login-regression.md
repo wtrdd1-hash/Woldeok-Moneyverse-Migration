@@ -19,9 +19,9 @@
 - [x] Inspect exact-main failures, source implementation and overlapping PRs.
 - [x] Record failing baseline in isolated QA workspace.
 - [x] Replace brittle assertions with current supported locale and class-token checks.
-- [x] Verify focused tests, lint, full regression (FAIL), build; exact-head CI to be checked after push.
-- [ ] Create Draft PR, preserve concurrent PRs, do not merge or deploy.
-- [ ] Record final gate results and blockers.
+- [x] Reverify focused tests (7/7 PASS), lint (0 errors), full regression (3 SEO FAIL / 1,397 PASS), typecheck (PASS), and build (PASS) after TS2532 fix. Exact-head CI remains required.
+- [x] Create Draft PR #1114, preserve concurrent PRs, do not merge or deploy.
+- [x] Record final local gate results and blockers; exact-head CI to be tracked separately.
 
 ## Release decision
 
@@ -31,7 +31,13 @@ HOLD: no Production promotion until full security, deployed isolated Test exact-
 
 - Focused GREEN: locale + login 7/7 PASS.
 - Independent full candidate regression: 3 frontend FAIL / 1,397 PASS, all in concurrent SEO file; 1,313 backend PASS / 398 skipped; DB package 15 PASS / 3 skipped; 38 contract PASS; 179 app-api endpoint references match.
-- Candidate lint: 0 errors, 1,144 warnings; typecheck PASS; build PASS.
+- Candidate lint: 0 errors, 1,144 warnings; initial candidate typecheck FAILED TS2532 (optional regex capture), and build FAILED for the same reason. The fix uses a nullish fallback before split; fresh full typecheck and build both PASS after correction.
 - Security: production pnpm audit 2 HIGH; full pnpm audit 2 CRITICAL/10 HIGH; Discord bot npm audit 1 CRITICAL/5 HIGH.
 - Real isolated Test exact-SHA auth/finance E2E and restore: NOT RUN. Release HOLD.
 - Remaining work: coordinate Draft PR #1099 for SEO expectations and verify security + finance gates before any merge.
+
+## Final candidate checkpoint
+
+- Initial commit b5e021da5fded7aad85c3b0cea864542198f71a2 exposed TS2532 at login test regex capture; the follow-up fixes this with a nullish fallback.
+- Full local candidate regression remains FAILED solely for three SEO expectations in concurrent Draft PR #1099. The QA PR is not merge-ready.
+- Production/Test deployment, authenticated finance E2E and isolated restore: BLOCKED / NOT RUN.
