@@ -1,8 +1,11 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useActionState, useState } from 'react';
+import Link from 'next/link';
 import { Check, RotateCcw } from 'lucide-react';
+import { ActionAlert, SubmitButton } from '@/components/action-form';
+import { IDLE } from '@/lib/action-state';
+import { equipHeldItem } from './actions';
 import { cn } from '@/lib/cn';
 import { AvatarWithCosmetics, NameplateWithTitle, type UserCosmetics } from '@/components/profile-cosmetics';
 
@@ -49,10 +52,7 @@ export function InventoryView({
   currentUsername = '모험가',
   userAvatarUrl,
 }: InventoryViewProps) {
-  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [actionStatus, setActionStatus] = useState<string | null>(null);
-  const [, startTransition] = useTransition();
 
   const filtered = holdings.filter((h) => {
     if (selectedCategory === 'all') return true;
@@ -81,36 +81,6 @@ export function InventoryView({
     })),
   };
 
-  const handleToggleEquip = async (item: HeldItem) => {
-    setActionStatus(`${item.name} ${item.is_equipped ? '해제' : '장착'} 중...`);
-    try {
-      const res = await fetch(`/api/v1/shop/holdings/${item.catalog_id}/equip`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          equip: !item.is_equipped,
-          slot: item.category === 'badge' ? 'badge_1' : item.category,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || '장착 설정에 실패했습니다.');
-      }
-
-      setActionStatus(`${item.name} ${item.is_equipped ? '해제' : '장착'} 완료!`);
-      setTimeout(() => {
-        setActionStatus(null);
-        startTransition(() => {
-          router.refresh();
-        });
-      }, 800);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '오류가 발생했습니다.';
-      setActionStatus(`실패: ${msg}`);
-      setTimeout(() => setActionStatus(null), 2500);
-    }
-  };
 
   return (
     <div className="grid gap-6">
@@ -165,12 +135,6 @@ export function InventoryView({
         </div>
       </div>
 
-      {actionStatus && (
-        <div className="p-3 text-center text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800 rounded-2xl animate-in fade-in">
-          {actionStatus}
-        </div>
-      )}
-
       {/* Category Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         {CATEGORIES.map((cat) => {
@@ -184,8 +148,9 @@ export function InventoryView({
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
+              aria-pressed={isSelected}
               className={cn(
-                'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border whitespace-nowrap',
+                'min-h-11 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2',
                 isSelected
                   ? 'bg-amber-500 border-amber-500 text-black shadow-sm'
                   : 'bg-card border-border/40 text-muted-foreground hover:bg-surface',
@@ -203,6 +168,7 @@ export function InventoryView({
         <div className="rounded-3xl border border-dashed border-border/60 p-12 text-center text-muted-foreground bg-card/30">
           <p className="text-sm font-bold">보유한 아이템이 없습니다.</p>
           <p className="text-xs mt-1">상점 2.0에서 마음에 드는 아이템을 둘러보세요!</p>
+          <Link href="/shop/catalog" className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-4 text-sm font-bold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">아이템 상점 보기</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -243,25 +209,7 @@ export function InventoryView({
                 {['frame', 'background', 'effect', 'nameplate', 'title', 'badge'].includes(
                   item.category,
                 ) ? (
-                  <button
-                    onClick={() => handleToggleEquip(item)}
-                    className={cn(
-                      'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1',
-                      item.is_equipped
-                        ? 'bg-surface hover:bg-muted text-muted-foreground border border-border/50'
-                        : 'bg-amber-500 hover:bg-amber-400 text-black shadow-sm',
-                    )}
-                  >
-                    {item.is_equipped ? (
-                      <>
-                        <RotateCcw className="size-3" /> 해제
-                      </>
-                    ) : (
-                      <>
-                        <Check className="size-3" /> 장착
-                      </>
-                    )}
-                  </button>
+                  <EquipControl item={item} />
                 ) : (
                   <span className="text-xs font-bold text-muted-foreground">소장품</span>
                 )}
@@ -270,6 +218,32 @@ export function InventoryView({
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+/** Each card owns its action state; only a verified PostgreSQL receipt reports success. */
+function EquipControl({ item }: { readonly item: HeldItem }) {
+  const [state, action] = useActionState(equipHeldItem, IDLE);
+  const equip = !item.is_equipped;
+  const slot = item.is_equipped && item.equipped_slot
+    ? item.equipped_slot
+    : item.category === 'badge' ? 'badge_1' : item.category;
+  return (
+    <div className="grid min-w-0 gap-2">
+      <form action={action}>
+        <input type="hidden" name="catalogId" value={item.catalog_id} />
+        <input type="hidden" name="slot" value={slot} />
+        <input type="hidden" name="equip" value={String(equip)} />
+        <SubmitButton
+          variant={equip ? 'default' : 'outline'}
+          className="h-11 min-h-11 max-w-full text-xs focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          {equip ? <Check aria-hidden="true" className="size-3" /> : <RotateCcw aria-hidden="true" className="size-3" />}
+          {equip ? '장착' : '해제'} <span className="sr-only">{item.name}</span>
+        </SubmitButton>
+      </form>
+      <ActionAlert state={state} />
     </div>
   );
 }
