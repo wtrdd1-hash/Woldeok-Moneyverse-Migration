@@ -1,5 +1,45 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1224 — F675-113 회원 치장 프리셋 및 원자적 장착 (기능 추가 / 기획 초안 / 배포 보류)
+
+**주기 및 기준:** 이전 Feature Improvement v1222 → 현재 Feature Addition v1224 → 다음 Feature Improvement v1226(잠정). 작업 시작 시 최신 `origin/main`은 `49788d09494fed3e463651945b83386e87dd47bc`; 영어 `PROJECT_PLAN.md`가 정본이고 한국어는 동등한 대조본이다. 이전 기획 Draft #1136은 미병합이므로 운영 반영으로 간주하지 않는다. 최신 확인 QA v1229(2026-10-24 15:26 KST)는 FAILED/HOLD. 개발 추적 이슈 #1142. **사용자 승인 전의 설계 제안**이며 런타임·실DB·WLD·Test·Production·기능 스위치를 변경하지 않는다.
+
+### 실제 코드 근거, 목적, 대상, 대안
+- `frontend/src/app/inventory/page.tsx` 및 `inventory-view.tsx` 확인: 로그인 회원의 `/inventory`는 `GET /api/v1/shop/holdings`를 통해 `frame`, `background`, `effect`, `nameplate`, `title`, `badge_1..3` 치장 슬롯을 표시한다. 개별 장착/해제는 `POST /api/v1/shop/holdings/:id/equip` 호출로 처리된다. `apiOrNull`로 조회에 실패하면 빈 배열로 보일 수 있으므로 프리셋은 오류를 빈 보유 목록으로 위장하지 않는다.
+- `backend/src/shop/shop.controller.ts`, `shop.repository.ts`, `114-economy-faucet-sink-and-shop-2.sql`, `frontend/src/app/app-api/v1/[...path]/route.ts`를 확인했다. 기존 `inventory_equip_item(actor,catalog,slot,equip)`은 수량 기반 소유 여부와 슬롯 이름은 확인하지만 카탈로그 종류-슬롯 일치, 아이템 만료, 회원 단위 직렬화 및 장착 버전을 보장하지 않는다. 이는 구현 전 검증할 설계상 결함이며 운영 악용이 재현됐다는 주장이 아니다. 최신 main의 검사 범위에서 프리셋 테이블·API·여러 슬롯의 원자적 장착은 확인되지 않았다.
+- 목적: 회원이 **최대 3개**의 이름 붙인 치장 조합을 저장하고 여러 번의 장착 요청에서 발생하는 부분 적용 없이 한 번에 전환한다. 대상은 웹 및 공식 Android의 로그인 회원이다. 대안 A 브라우저 저장(계정 간 노출·기기간 미동기화), B 기존 장착 API 8회 호출(부분 실패·경합), C 소유자 전용 서버 프리셋과 단일 DB 트랜잭션(선택). 구매·대여·아이템 지급·WLD·원장·자동 장착·거래는 범위에서 제외한다.
+
+### 회원 화면, 권한, 상태, CTA
+- 진입점은 기존 비공개 `/inventory`의 '치장 프리셋' 영역이며 `/inventory#cosmetic-presets` 딥링크를 허용한다. 프리셋 최대 3개, 이름은 NFC 정규화 후 유니코드 코드포인트 1~32자, 슬롯 최대 8개, 슬롯당 카탈로그 UUID 1개 및 프리셋 내 동일 아이템 중복 금지. 비어 있는 슬롯은 명시적 `null`. 허용 슬롯은 `frame,background,effect,nameplate,title,badge_1,badge_2,badge_3`뿐이며 배지는 배지 슬롯에만, 나머지는 종류와 슬롯이 정확히 일치해야 한다. 이름에 HTML/CSS를 허용하지 않는다.
+- CTA: '현재 장착 저장', '미리보기', '이름 변경', '프리셋 수정', '적용', '삭제', '보유 목록 새로고침', '적용 상태 확인', '재시도', '로그인'. 미리보기는 읽기 전용이고 명시적 적용에서만 장착을 변경한다. 저장은 서버가 검증한 장착 버전에서 생성한다. 서버에서 정상적으로 빈 인벤토리임을 확인했을 때만 빈 프리셋을 허용하며, 조회 실패는 SOURCE_UNVERIFIED다.
+- 상태: EMPTY/LOADING → READY, SAVING → SAVED_CONFIRMED(서버 확정 영수증), APPLYING → APPLIED_CONFIRMED(커밋 영수증 + 최신 장착 재조회), STALE(버전 변경), INVALID_ITEM(소유권 상실/만료/비활성), CONFLICT(409), UNKNOWN_COMMIT(통신 결과 불명), SOURCE_UNVERIFIED(503), FAILED, SIGNED_OUT. 과거 적용 영수증만으로 현재 장착 상태를 보장하지 않으며 최신 장착 버전과 대조한다. 로그아웃/계정 변경 시 지연 응답과 개인 캐시를 폐기하고 localStorage에 프리셋을 저장하지 않는다.
+- 프리셋은 본인만 접근하며 다른 회원의 UUID와 없는 UUID는 동일한 404로 응답한다. 관리자는 회원별 이름·아이템 조합을 볼 수 없고 비식별 집계만 확인한다. 계정 탈퇴 시 보존/삭제 정책에 따라 프리셋과 영수증을 삭제한다. 기능 스위치 `cosmetic_loadout_presets`는 기본 OFF다.
+
+### 제안 API 및 Android 동등성(미구현)
+- NestJS 회원 전용 `GET /api/v1/shop/cosmetic-presets?limit=3`, `GET /api/v1/shop/cosmetic-presets/:presetId`, `POST /api/v1/shop/cosmetic-presets`(name, source=current, expectedInventoryRevision), `PATCH /api/v1/shop/cosmetic-presets/:presetId`(name?, slots?, expectedVersion), `DELETE /api/v1/shop/cosmetic-presets/:presetId`(expectedVersion), `POST /api/v1/shop/cosmetic-presets/:presetId/apply`(expectedPresetVersion, expectedInventoryRevision). `GET /api/v1/shop/holdings`에는 `equipRevision`, `equippedSlots`를 후방호환으로 추가하도록 제안한다. 시간값으로 버전을 추정하지 않는다.
+- 변경 요청에는 UUID `Idempotency-Key`, 인증 세션, CSRF, 동의 및 요청 크기 제한이 필요하다. 서버가 회원 ID를 세션에서 결정한다. 400 잘못된 입력, 401 미인증, 403 동의/CSRF 거부, 404 타인/없는 프리셋, 409 버전·영수증 다이제스트 충돌, 422 소유하지 않음/만료/종류-슬롯 불일치, 429 과다 요청, 503 DB·보유목록 확인 불가. 모든 개인 HTML/BFF/API에 `Cache-Control: private, no-store`. Next의 서버 전용 `lib/api.ts`를 사용하고 `INTERNAL_API_TOKEN`은 클라이언트에 노출하지 않는다.
+- Android `/app-api/v1/shop/cosmetic-presets...`는 기존 게이트웨이 허용 경로와 인증·버전·CSRF 정책을 거쳐 웹과 같은 소유권·영수증·버전 계약을 준수한다. 기존 92개 원본 경로 불변식을 유지한다. 응답에는 본인만 `presetId,presetVersion,equipRevision,receiptId,appliedSlots,status`를 받으며 금융 데이터는 포함하지 않는다. 공개 색인 불가.
+
+### 추가형 DB, 제약·인덱스·원자성·보안(제안)
+- `member_cosmetic_presets(id uuid PK,user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,name text NOT NULL,version bigint NOT NULL CHECK(version>0),created_at,updated_at,deleted_at)` 추가. API와 보안 정의 함수에서 이름 NFC 및 길이 1~32 검증, 인덱스 `(user_id,deleted_at,created_at DESC,id DESC)`. `member_cosmetic_preset_slots(preset_id uuid REFERENCES member_cosmetic_presets(id) ON DELETE CASCADE,slot text CHECK(8종 허용),catalog_id uuid NOT NULL,PRIMARY KEY(preset_id,slot),UNIQUE(preset_id,catalog_id))`. 상품 완전 삭제 후에도 회원이 프리셋을 삭제할 수 있도록 카탈로그 FK는 두지 않고 저장·수정·적용 시 현재 카탈로그/소유권을 재검증한다. 조회 시 사용할 수 없는 아이템 정보는 가린다.
+- `member_equip_revisions(user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,revision bigint NOT NULL CHECK(revision>=0))`를 추가하고 기존 단일 장착과 신규 일괄 적용이 **동일 회원 잠금**을 사용하고 변경 커밋 시 버전을 올리도록 한다. `(user_id,equipped_slot) WHERE is_equipped AND equipped_slot IS NOT NULL` 부분 유니크 인덱스는 기존 중복 장착 데이터 검사 및 별도 승인된 정리 이후에만 추가한다. 기획 회차에서 실제 회원 치장을 수정하지 않는다.
+- `member_cosmetic_preset_receipts(actor_id uuid,key uuid,request_digest bytea,original_response jsonb,created_at,PRIMARY KEY(actor_id,key))`는 최초 결과를 불변 보관하고 탈퇴 시 삭제 정책을 명시한다. 지속적인 재실행 방지 장치가 검증되기 전 영수증 자동 TTL 삭제를 금지한다. `moneyverse_app`과 PUBLIC에 테이블 직접 DML/SELECT를 허용하지 않고 고정 search_path·소유자 확인·활성 회원 확인이 있는 SECURITY DEFINER 함수의 EXECUTE만 최소 부여한다. 기존 114 마이그레이션 수정 금지, 적용된 최대 번호보다 높은 연속 번호의 새 마이그레이션 사용.
+- 트랜잭션: 입력 검증 → (회원,멱등 키) advisory lock → 기존 영수증 및 요청 다이제스트 비교 → `users` 본인 행 FOR UPDATE(3개 제한 및 장착 직렬화) → 프리셋 행 FOR UPDATE/버전 CAS → 보유 `user_items`를 catalog UUID 순서로 잠그고 현재 `shop_catalog` 확인 → 수량>0, 만료되지 않음, 상품 활성, 종류-슬롯 일치, 중복 없음, 장착 버전 일치 검증 → 기존 장착 해제 및 목표 장착 **단일 트랜잭션** 변경 → 버전 증가 → 불변 영수증 기록 → 커밋. 만료·소진·동시 소비·기존 장착과의 충돌은 부분 변경 **0건**으로 실패해야 한다. 저장·이름 변경·삭제도 CAS/영수증을 적용한다. 같은 키·같은 다이제스트는 최초 결과, 같은 키·다른 내용은 409. 구매·발행·보상·원장 함수를 호출하지 않는다.
+- 기존 `inventory_equip_item`은 원래 함수 서명을 유지한 새 마이그레이션으로 공통 회원 잠금·종류/만료 검사·버전 증가를 적용해야 한다. 이 연동이 없으면 **배포 불가**. 상점 구매·소모와 공개 프로필 치장 조회의 호환성을 검증한다. 기능 OFF 롤백 시 기존 장착 상태와 프리셋 데이터는 유지하고 테이블/영수증을 삭제하지 않는다.
+
+### 관리자, 보안, SEO, 접근성, KPI 및 수용 기준
+- 관리자는 개인 프리셋을 열람/변경할 수 없고 집계값만 조회하며 10명 미만 집계는 비공개 처리한다. 감사에는 행위/결과/영수증 해시만 남기고 이름·아이템 ID·본문·광고 개인화는 금지한다. 개인 `/inventory`와 API는 noindex,nofollow, 사이트맵 제외, 공유 캐시 금지; 기존 공개 프로필 치장 기능은 유지하되 비공개 프리셋 이름은 노출하지 않는다.
+- 웹/Android WCAG 2.2 AA: 키보드 슬롯 이동, 44px 터치 대상, 포커스 표시, 320px 재배치/200% 확대, 스크린리더 미리보기·오류 안내, 확정 영수증 뒤 `aria-live`, 움직임 줄이기 및 강제 색상 우선. 미리보기/호버로 장착을 변경하지 않는다.
+- KPI: 확정 생성·적용률, 7일 내 명시적 재사용, 아이템 무효·충돌률, 결과 불명 복구율, 타 회원 접근 거부, p95 지연. 개인 아이템 조합을 수집하지 않는다. 수용: 동일 키 APPLY 100개 병렬 → 영수증 1개·최종 조합 1개, 기존 장착과 적용 100개 경합 → 직렬화 및 정확한 버전, 타 회원 100건 → 노출 0건, 오래된 버전 409, 만료·소모 아이템 422 및 부분 변경 0건, 3개 한도 경합, WLD/원장/구매 변경 0건, Android 동등성 및 접근성 회귀.
+- **P0 ENV1224-01:** 운영/개발 DB 분리, 실제 5433 전체 바인딩 승인 배포로 제거, 격리 복원; **P0 SEC1224-02:** 앱 DML(최근 측정 235/241) 및 PUBLIC 은행 함수 3개 재측정/최소권한; **P0 REL1224-03:** QA v1229 프론트 테스트 5건 실패, 전체 pnpm Critical 2/High 10, 운영 High 2, 봇 Critical 1/High 5, migration266, #1088 자동 병합 게이트, 정확 SHA Test 금융 E2E·백업 복원; **P0 INV1224-04:** 기존 장착의 슬롯/종류/만료/경합 검증 및 데이터 사전 검사.
+- **P1 INV1224-05:** 추가형 프리셋·슬롯·영수증·버전 DB/ACL; **P1 INV1224-06:** 기존 장착과 일괄 적용의 공통 잠금·원자적 정의 함수; **P1 INV1224-07:** NestJS/Next/Android 소유자 전용 API·CSRF·조회·게이트웨이; **P1 INV1224-08:** /inventory 확정 상태 UX·접근성; **P1 INV1224-09:** 비식별 관리자·개인정보·SEO·KPI; **P1 INV1224-10:** 격리 PostgreSQL 100개 동시성·부분 변경 0건·금융 부작용 0건·보안/모바일/롤백 검증.
+- 배포: 기본 OFF → 별도 개발 브랜치·승인된 명세/작업계획 → 정확 HEAD 전체 CI/보안 및 격리 PostgreSQL ACL/마이그레이션/백업 복원 → 공식 Test에 **동일 후보 SHA** 배포하고 인증 금융 E2E **3회 반복** → 사람의 GitOps 승인 → 제한적 카나리 및 기능 OFF 롤백. 이 기획 회차는 운영 코드를 배포하거나 DB를 수정하지 않는다. QA v1229 결과만으로 배포 승인 불가.
+
+### 외부 독립 레퍼런스 10,000건 검증 게이트
+- 검토한 **독립 발행기관 계열 3곳**: PostgreSQL 행 잠금(https://www.postgresql.org/docs/current/explicit-locking.html), OWASP Authorization(https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html), W3C WCAG 2.2(https://www.w3.org/TR/WCAG22/). 이들은 설계 참고자료이며 독립 증거 3건이 승인됐다는 의미가 아니다.
+- 신규 중복 제거·승인된 근거 **0건**, 누적 검증·승인 수 **UNKNOWN / 10,000**, 게이트 **BLOCKED / IN PROGRESS**. 목표 달성 주장 금지. 분산 기획 파일을 새로 만들지 않고 기존 국영문 통합 문서에 흡수한다. Gemini/개발 A/B/C/QA와 기획 브랜치를 분리한다.
+
+
 ## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스와 수정 사유
