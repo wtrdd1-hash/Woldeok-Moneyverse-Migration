@@ -16,6 +16,7 @@ import { NPCS } from './quests';
 import type { EngagementBoard } from './quests';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { VipGoldenChestCard } from '@/components/vip-golden-chest-card';
+import type { VipChestStatus } from '@/components/vip-golden-chest-card';
 
 /** One member's own goals and standing. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
   title: '일일 퀘스트 및 도전과제 — 활동 보상 시스템',
   description: '디스코드 커뮤니티 활동과 연동되는 일일 퀘스트와 연속 출석 도전과제를 달성하고 WLD 보상을 수령하세요.',
   alternates: { canonical: questsUrl },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
   openGraph: {
     title: '일일 퀘스트 및 도전과제 — 월덕 머니버스',
     description: '디스코드 커뮤니티 활동과 연동되는 일일 퀘스트와 연속 출석 도전과제를 달성하고 WLD 보상을 수령하세요.',
@@ -67,11 +68,12 @@ export default async function QuestsPage() {
   // early-game read is separate because it is a different kind of answer --
   // 101 computes every figure in it from work receipts, shop purchases and
   // ledger postings rather than from anything a member reported.
-  const [board, earlyGame, today, firstDay] = await Promise.all([
+  const [board, earlyGame, today, firstDay, vipChest] = await Promise.all([
     apiOrNull<EngagementBoard>('/api/v1/engagement'),
     apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
     apiOrNull<{ steps: readonly FirstDayStep[] }>('/api/v1/early-game/first-day'),
+    apiOrNull<VipChestStatus>('/api/v1/engagement/dopamine/vip-chest/status'),
   ]);
 
   return (
@@ -82,7 +84,7 @@ export default async function QuestsPage() {
       </PageHeader>
 
       {/* Moneyverse Plus VIP Daily Golden Chest */}
-      <VipGoldenChestCard isPlusUser={true} />
+      <VipGoldenChestCard status={vipChest} />
 
       {/* The day's event comes first because it expires: the ladder, the
           books and the weekly goals are all still there tomorrow, and this is

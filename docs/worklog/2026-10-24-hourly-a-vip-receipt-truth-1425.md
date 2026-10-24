@@ -9,9 +9,13 @@
 - Known blockers: shared Production/development DB and least privilege audit; full frontend regression/security audit CI previously failing. Never write to DB or merge on partial PASS.
 
 ## In progress
-- [ ] Write red tests for false success on POST/status/UI and Android private response.
-- [ ] Implement minimal fail-closed repair, avoid overlapping A/B/C branches.
+- [x] Write red tests for false success on POST/status/UI and Android private response. Backend RED 2/2, frontend RED 2/2, Android gateway baseline PASS 2/2.
+- [x] Implement minimal fail-closed repair, avoid overlapping A/B/C branches. Backend GREEN 2/2; frontend and Android GREEN 6/6; existing VIP tests updated. GET is explicitly unavailable; POST 503; quests noindex; no fabricated WLD/dice claim.
 - [ ] Run focused/full gates, isolated PG read-only evidence, exact SHA CI.
 
 ## Finished
-- Pending.
+- Pending full gates, security, exact-SHA CI and isolated DB verification.
+
+## Midpoint
+- Main SHA re-fetched unchanged: `49788d09494fed3e463651945b83386e87dd47bc`; English/Korean living plans rechecked.
+- No new migration or ledger write. Android proxy already preserves upstream status/private headers, verified by tests.

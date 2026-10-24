@@ -9,7 +9,7 @@
 **Tech Stack:** NestJS, Next.js, TypeScript, Vitest, PostgreSQL read-only validation.
 
 ## Steps
-- [ ] Add failing backend tests for GET false entitlement and POST false receipt; add frontend UI tests for disabled/unavailable and request failure; add Android gateway no-store regression.
-- [ ] Implement backend fail-closed 503 and status, frontend status-gated view, no fake success, private headers.
+- [x] Add failing backend tests for GET false entitlement and POST false receipt; add frontend UI tests for disabled/unavailable and request failure; add Android gateway no-store regression.
+- [x] Implement backend fail-closed 503 and status, frontend status-gated view, no fake success, private headers.
 - [ ] Run targeted tests, lint, typecheck, build, full suites, audit, isolated PostgreSQL read-only checks, CI; record PASS/FAIL exact SHA.
 - [ ] Push separate Draft PR only; hold merge, Test and Production until all release gates pass.

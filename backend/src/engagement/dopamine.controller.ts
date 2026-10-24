@@ -4,12 +4,14 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Inject,
   InternalServerErrorException,
   Post,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -221,43 +223,31 @@ export class DopamineController {
   }
 
   @Get('vip-chest/status')
-  @ApiOperation({ summary: 'Get Moneyverse Plus VIP Golden Chest claim status and cooldown' })
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Read the verified VIP chest availability (disabled until ledger-backed claims exist)' })
   async getVipChestStatus(@Req() request: RequestWithSession) {
     const userId = requireUserId(request);
-    const now = new Date();
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-
+    // No authoritative Plus entitlement, daily claim receipt or ledger-backed
+    // VIP grant exists yet. Never present a hypothetical award as committed.
     return {
       userId,
-      isPlusUser: true, // Supported via Moneyverse Plus tier
-      claimedToday: false,
-      rewardAmount: 2000,
-      diceAwarded: 1,
-      nextAvailableAt: midnight.toISOString(),
-      currentServerTime: now.toISOString(),
+      available: false,
+      isPlusUser: null,
+      claimedToday: null,
+      rewardAmount: '0',
+      diceAwarded: 0,
     };
   }
 
   @Post('vip-chest')
+  @Header('Cache-Control', 'private, no-store')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim Moneyverse Plus VIP Golden Chest (2,000 WLD + 1 Lucky Dice)' })
+  @ApiOperation({ summary: 'VIP chest claims are disabled pending an atomic ledger-backed receipt' })
   async claimVipChest(@Req() request: RequestWithSession) {
-    const userId = requireUserId(request);
-    const now = new Date();
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-
-    return {
-      success: true,
-      userId,
-      isPlusUser: true,
-      rewardAmount: 2000,
-      diceAwarded: 1,
-      claimedAt: now.toISOString(),
-      nextAvailableAt: midnight.toISOString(),
-      message: 'Moneyverse Plus VIP 일일 황금 상자 수령 완료 (2,000 WLD + VIP 럭키 다이스 1개 지급)',
-    };
+    requireUserId(request);
+    // A 2xx here would be a false financial receipt: there is no DB posting,
+    // idempotency record, or verified Plus entitlement behind this endpoint.
+    throw new ServiceUnavailableException('VIP reward claims are not available');
   }
 
   @Get('attendance/status')
