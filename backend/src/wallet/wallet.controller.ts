@@ -185,6 +185,9 @@ export class WalletController {
   @ApiOperation({ summary: '분기별 국고 예산안 우선순위 시민 거버넌스 투표 제출' })
   async voteBudget(@Req() request: RequestWithSession, @Body() body: CitizenBudgetVoteDto) {
     const userId = requireUserId(request);
-    return this.service().voteCitizenBudget(userId, body.quarter || '2026-Q4', body.choice);
+    return this.guarded(
+      () => this.service().voteCitizenBudget(userId, body.quarter, body.choice),
+      'citizen budget vote was rejected',
+    );
   }
 }

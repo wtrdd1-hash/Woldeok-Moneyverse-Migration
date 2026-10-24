@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import type { WldAmount } from '@moneyverse/contract';
 import { wldAmount } from '@moneyverse/contract';
@@ -24,6 +25,12 @@ import {
   requireRecentLimit,
   requireUuid,
 } from './wallet.repository';
+
+/** The community budget uses Korean civil quarters, regardless of the visitor's timezone. */
+export function currentKstQuarter(at: Date = new Date()): string {
+  const kst = new Date(at.getTime() + 9 * 60 * 60 * 1000);
+  return `${kst.getUTCFullYear()}-Q${Math.floor(kst.getUTCMonth() / 3) + 1}`;
+}
 
 const ACCOUNT_TYPES = new Set(['USER_CASH', 'USER_BANK']);
 const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
@@ -567,11 +574,15 @@ export class WalletService {
   ): Promise<{ success: boolean; quarter: string; choice: string }> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const validChoices = ['WELFARE', 'INFRASTRUCTURE', 'CITIZEN_DIVIDEND', 'CURRENCY_STABILIZATION'];
-    if (!validChoices.includes(choice)) {
-      throw new Error('유효하지 않은 예산 우선순위 선택입니다');
+    if (!validChoices.includes(choice) || quarter !== currentKstQuarter()) {
+      throw new WalletInputError('invalid budget priority or current Korean quarter');
     }
-    if (typeof this.repository.voteCitizenBudget === 'function') {
-      return this.repository.voteCitizenBudget(actorUserId, quarter, choice);
+    if (typeof this.repository.voteCitizenBudget !== 'function') {
+      throw new ServiceUnavailableException('citizen budget vote persistence is unavailable');
+    }
+    const receipt = await this.repository.voteCitizenBudget(actorUserId, quarter, choice);
+    if (receipt?.success !== true || receipt.quarter !== quarter || receipt.choice !== choice) {
+      throw new ServiceUnavailableException('citizen budget vote was not confirmed');
     }
     return { success: true, quarter, choice };
   }
