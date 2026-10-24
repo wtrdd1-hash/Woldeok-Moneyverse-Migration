@@ -9,11 +9,11 @@
 - Gates: existing frontend five failures and dependency audit hold; no Test/Production promotion without full exact-SHA evidence.
 
 ## Checklist
-- [ ] RED→GREEN repository, API, gateway, frontend tests
-- [ ] Additive SQL owner-only wishlist with ACL, replay, 50 cap and safe REMOVE
-- [ ] Real isolated PostgreSQL checks and rollback
-- [ ] Full test/lint/typecheck/build/security/CI
-- [ ] QA release evidence, pre-integration main refresh, Draft PR
+- [x] RED→GREEN repository, API, gateway, frontend tests
+- [x] Additive SQL owner-only wishlist with ACL, replay, 50 cap and safe REMOVE
+- [x] Real isolated PostgreSQL checks and rollback
+- [x] Full test/lint/typecheck/build/security/CI (full test/audit FAIL, CI awaiting final status)
+- [x] QA release evidence, pre-integration main refresh, Draft PR #1143
 
 ## Midpoint (15:58 KST)
 - Refetched main and English/Korean integrated plans: main remains `49788d09494fed3e463651945b83386e87dd47bc`.
@@ -30,3 +30,10 @@
 - Mobile machine-readable contract extended from 179 to 181 candidate endpoints, bilingual schema references and draft appendices. Contract version candidate v2026.10.24.a1550, not Production.
 - Pre-integration origin/main and latest planning v1222 English/Korean re-fetched: main still `49788d09494fed3e463651945b83386e87dd47bc`. Remote 42 heads including main, 41 non-main all unmerged with unique commits; open PR 39, #1107 conflicting. No branch deletion.
 - Provisional migration 280 conflicts with B #1105/#1117 and A #1139; hold PR as Draft, do not merge or deploy.
+
+## Pre-integration / final source verification (16:07–16:12 KST)
+- Source SHA `37499e17bf40f7796d499cd070c9d2a0f4a11d27`; Draft PR #1143 created. Main unchanged after fresh fetch; no integration attempted.
+- Fresh exact source SHA: mobile API contract 181 PASS; typecheck PASS; lint 0 errors/1,137 warnings PASS; build PASS; contract 38 PASS; DB 15 PASS/3 SKIP; backend 1,318 PASS/400 SKIP; frontend 1,399 PASS/5 FAIL; bot 8 PASS after using existing local bot dependency install (initial missing dependency was an isolated worktree setup error, not a source failure).
+- Security audit remains FAIL (Frontend 26 vulnerabilities including 2 Critical/10 High, Bot 6 including 1 Critical/5 High). SEO and login a11y baseline failures persist. Official Test authenticated E2E/Production gate BLOCKED.
+- GitHub PR #1143 is Draft and merge-state BLOCKED; CI and Test Candidate were still IN_PROGRESS at 16:12. Release report EN/KO `docs/releases/v2026.10.24.a1550{,.ko}.md`.
+- No deployed Test or Production changes. All non-main unique commits preserved, no deletion. Flag OFF; migration 280 collision unresolved. Rollback not needed because nothing deployed.
