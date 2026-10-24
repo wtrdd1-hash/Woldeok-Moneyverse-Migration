@@ -24,7 +24,7 @@
 - Awaiting full build/lint/tests, generated Android contract, real isolated PostgreSQL ACL and official exact-SHA Test gate.
 
 ### Post-implementation evidence (07:01 KST)
-- Focused backend 6 PASS; frontend and Android gateway 16 PASS; backend full 1,319 PASS / 398 SKIPPED; frontend full 1,403 PASS / 6 FAIL (locale, SEO x3, login a11y, admin M2).
+- Focused backend 7 PASS; frontend and Android gateway 16 PASS; backend full 1,320 PASS / 398 SKIPPED; frontend full 1,404 PASS / 6 FAIL (locale, SEO x3, login a11y, admin M2).
 - Database package 15 PASS / 3 SKIPPED; contract 38 PASS; bot 8 PASS after installing missing local bot dependencies.
 - Typecheck, ESLint (0 errors, 1,137 warnings), backend build and default Turbopack frontend build PASS. Android API schema now explicitly includes 180 endpoints.
 - Real isolated PostgreSQL app role SELECT denied on four restricted tables; bank standing function EXECUTE allowed; exact numeric string and rate types verified; ledger INSERT/posting UPDATE denied. READ ONLY and ROLLBACK.
@@ -32,3 +32,11 @@
 - Public Test still serves different SHA `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; new endpoint 404. No official candidate deployment or authenticated finance E2E.
 - `git ls-remote --heads origin`: 116 actual remote branches (local remote-tracking cache has 1,170 refs, not an authoritative remote count); 111 open PRs at 07:01 before this PR. Conflict PRs #1107/#1110/#1143 retained. No branch deleted.
 - No Production, Test, schema, GitOps, or other worker mutations. HOLD.
+
+## FINISHED — source implementation, release gates remain BLOCKED (07:08 KST)
+- Draft PR #1234, 18 changed files, source SHA `b2befdffab0aa4e5ea5b4b40e7cee3c5c63bd58c`, contract/report SHA `e0674f7627e0502ecb4ba6606793308ee5c9b02d`, auth/guard regression SHA `0c88a2b5926f0be6f4d3197fbb783d4ebfb74c09`; final docs tip recorded in PR comment.
+- Final focused tests 7 backend and 17 frontend/Android PASS; full backend 1,320 PASS / 398 SKIPPED; frontend 1,404 PASS / 6 FAIL; lint 0 errors / 1,137 warnings. Full CI not PASS.
+- Remote branch audit: 116 total, 115 non-main, all 115 tips with unique unmerged commits and distinct final trees; 112 open PRs. Conflict PRs #1107/#1110/#1143 preserved. Deleted 0. Initial 1,170 remote-tracking refs were stale, not the remote count.
+- Security, accessibility, SEO, official exact-SHA Test login/finance E2E and GitOps release gate remain HOLD. No Production, Test, WLD, DB schema/data, service restart, GitOps or rollback actions.
+- Rollback plan: revert additive read-only endpoint, card/page and Android contract in a reviewed commit. No DB migration or ledger changes to undo.
+- Branch is retained Draft; do not merge or delete while any required gate is missing. Recurring schedules were not modified.

@@ -36,4 +36,4 @@
 ### Task 3 — Evidence and release
 - [x] Run focused and full tests, typecheck, lint, builds, contract, security, real isolated PostgreSQL ACL and authenticated Test exact-SHA E2E.
 - [x] Re-fetch main/integrated plan mid-run and pre-integration; review conflicts and CI.
-- [ ] Record before/during/after worklog, EN/KO release reports, branch counts, SHAs, PASS/FAIL/BLOCKED, rollback and deletion decisions; push Draft PR, no unsafe merge.
+- [x] Record before/during/after worklog, EN/KO release reports, branch counts, SHAs, PASS/FAIL/BLOCKED, rollback and deletion decisions; push Draft PR, no unsafe merge.
