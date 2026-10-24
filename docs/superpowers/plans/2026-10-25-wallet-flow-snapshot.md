@@ -11,8 +11,8 @@
 **Spec:** This plan and `docs/worklog/2026-10-25-hourly-a-wallet-flow-0225.md` (bounded delegated feature selection).
 
 ## Tasks
-1. [ ] Write backend failing tests for owner ID, signed large WLD, internal pocket move, invalid projection, DB unavailable; run RED.
-2. [ ] Implement service aggregation and guarded GET route; run GREEN.
-3. [ ] Write frontend/gateway tests for noindex, verified recent-window copy, error/empty state and Android path; run RED.
-4. [ ] Implement member page, navigation, and Android contract coverage; run GREEN.
+1. [x] Write backend failing tests for owner ID, signed large WLD, internal pocket move, invalid projection, DB unavailable; run RED.
+2. [x] Implement service aggregation and guarded GET route; run GREEN.
+3. [x] Write frontend/gateway tests for noindex, verified recent-window copy, error/empty state and Android path; run RED.
+4. [x] Implement member page, navigation, and Android contract coverage; run GREEN.
 5. [ ] Verify focused tests, full lint/typecheck/build/test, real isolated PG read-only, security/a11y/SEO/E2E and exact-SHA CI; update logs and release HOLD evidence. Do not merge on failure.

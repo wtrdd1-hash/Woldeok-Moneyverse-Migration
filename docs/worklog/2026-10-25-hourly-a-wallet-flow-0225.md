@@ -9,9 +9,9 @@
 - Branch `auto/hourly-a-wallet-flow-20261025-0225`; isolated worktree; no changes to other worktrees.
 
 ## In progress
-- [ ] RED regression tests for signed WLD precision, internal movements, owner boundary, fail-closed errors, Android gateway contract.
-- [ ] Implement Nest service/controller, member UI and Android app-api pass-through; no direct DB table grants.
-- [ ] Test full gates and isolated real PostgreSQL (read-only); re-fetch main/planning mid-work.
+- [x] RED regression tests: backend 4/4 failed because method absent; frontend module resolution failed before implementation. GREEN backend 28/28, frontend 29/29 focused tests.
+- [x] Nest service/controller + private no-store, member /wallet/flows UI, activity navigation, Android app-api gateway tests. No migration or table grant.
+- [ ] Full gates and isolated real PostgreSQL (read-only). Mid-work main c9a868b1 unchanged, planning PR #1205 e744bafe unchanged; 89 open PRs, 94 branches including new branch.
 
 ## Finished
 - PENDING. No merge, Test or Production promotion without every required gate.
