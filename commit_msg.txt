@@ -1,1 +1,0 @@
-expand full 5-locale support with Vietnamese and modal translations
