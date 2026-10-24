@@ -9,7 +9,6 @@ import {
   Clock,
   RefreshCw,
   AlertTriangle,
-  Play,
   Users,
   Award,
 } from 'lucide-react';
@@ -57,7 +56,6 @@ export function PensionControlTower({
   const [overview, setOverview] = useState<NationalPensionOverview>(initialOverview);
   const [payoutLogs, setPayoutLogs] = useState<PayoutLogItem[]>(initialPayoutLogs);
   const [loading, setLoading] = useState(false);
-  const [distributing, setDistributing] = useState(false);
 
   const refreshData = async () => {
     setLoading(true);
@@ -71,27 +69,6 @@ export function PensionControlTower({
       toast.error('국민연금 관제 데이터 갱신에 실패했습니다.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDistributePayouts = async () => {
-    if (!confirm('현재 은퇴 수령 중인 모든 국민에게 1시간 주기 기초연금을 즉시 일괄 지급하시겠습니까? (국고 차감 -> 개인 계좌 입금)')) {
-      return;
-    }
-    setDistributing(true);
-    try {
-      const res = await fetch('/api/admin/pension/distribute', { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '연금 지급 실패');
-
-      toast.success(
-        `기초연금 지급 집행 완료: 총 ${groupDigits(data.totalPayoutAmount ?? '0')} WLD (수령자: ${data.pensionersCount || 0}명)`,
-      );
-      await refreshData();
-    } catch (err: any) {
-      toast.error(err.message || '연금 지급 집행 중 오류가 발생했습니다.');
-    } finally {
-      setDistributing(false);
     }
   };
 
@@ -126,15 +103,18 @@ export function PensionControlTower({
             새로고침
           </Button>
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
-            onClick={handleDistributePayouts}
-            disabled={distributing}
-            className="h-9 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
+            disabled
+            aria-describedby="pension-payout-hold"
+            className="h-9 gap-1.5"
           >
-            <Play className={`h-4 w-4 ${distributing ? 'animate-spin' : ''}`} />
-            기초연금 즉시 일괄 지급
+            <AlertTriangle className="h-4 w-4" />
+            기초연금 지급 중지
           </Button>
+          <p id="pension-payout-hold" className="text-xs text-amber-500">
+            금융 원장 정산 검증 전까지 수동 지급을 사용할 수 없습니다.
+          </p>
         </div>
       </div>
 
