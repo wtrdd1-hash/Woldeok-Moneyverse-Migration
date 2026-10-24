@@ -1,5 +1,7 @@
 'use client';
 
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
@@ -38,6 +40,7 @@ const HISTORICAL_SAMPLE_PRICES = [
 ];
 
 export default function QuantStudioPage() {
+  const { locale } = useLocale();
   const [bots, setBots] = useState<readonly QuantBotConfig[]>(INITIAL_QUANT_PRESETS);
   const [strategyType, setStrategyType] = useState<QuantStrategyType>('DCA');
   const [symbol, setSymbol] = useState<string>('CHIPS');

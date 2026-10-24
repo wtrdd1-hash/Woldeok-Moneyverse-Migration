@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 export const revalidate = 3600;

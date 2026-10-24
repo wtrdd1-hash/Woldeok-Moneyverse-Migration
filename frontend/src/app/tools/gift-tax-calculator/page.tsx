@@ -85,7 +85,7 @@ export default async function GiftTaxCalculatorPage() {
 
         <PageHeader
           eyebrow="2026 GIFT TAX CALCULATOR"
-          title="2026 증여세 계산기 & 면제 한도 시뮬레이터"
+          title={localeLabel(locale, '2026 증여세 계산기 & 면제 한도 시뮬레이터', '2026 Gift Tax Calculator & Exemption Simulator', '2026 贈与税計算機＆非課税枠シミュレーター', '2026 赠与税计算器与免税额度模拟器', 'Máy tính thuế tặng cho & mô phỏng miễn trừ 2026')}
         >
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             배우자 6억원, 성인 자녀 5,000만원, 혼인·출산 1.5억원 증여재산공제와 10%~50% 누진세율 및 자진신고 3% 공제를 반영하여 최종 실부담 증여세를 즉시 산출합니다.

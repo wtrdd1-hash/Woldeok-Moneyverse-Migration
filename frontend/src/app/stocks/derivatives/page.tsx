@@ -2,6 +2,19 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
+
+function getStockDisplayName(symbol: string, defaultName: string, locale: string): string {
+  if (locale === 'ko') return defaultName;
+  const map: Record<string, { en: string; ja: string; zh: string; vi: string }> = {
+    'WDG': { en: 'Woldeok Games', ja: 'ウォルドクゲームズ', zh: '沃尔德克游戏', vi: 'Woldeok Games' },
+    'WLD': { en: 'Woldeok Core', ja: 'ウォルドクコア', zh: '沃尔德克核心', vi: 'Woldeok Core' }
+  };
+  const item = map[symbol.toUpperCase()];
+  if (!item) return defaultName;
+  return locale === 'ja' ? item.ja : (locale === 'zh' ? item.zh : (locale === 'vi' ? item.vi : item.en));
+}
 import {
   TrendingUp,
   TrendingDown,
@@ -42,6 +55,7 @@ import { Button } from '@/components/ui/button';
 import { groupDigits } from '@/lib/money';
 
 export default function DerivativesPage() {
+  const { locale } = useLocale();
   const [symbols, setSymbols] = useState<DerivativesMarketSymbol[]>(DERIVATIVES_MARKET_SYMBOLS);
   const [selectedSymbol, setSelectedSymbol] = useState<DerivativesMarketSymbol>(DERIVATIVES_MARKET_SYMBOLS[0]!);
   
@@ -189,7 +203,7 @@ export default function DerivativesPage() {
           <div className="space-y-4 lg:col-span-8">
             <div className="flex flex-wrap items-baseline gap-3">
               <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-                {selectedSymbol.name}
+                {getStockDisplayName(selectedSymbol.symbol, selectedSymbol.name, locale)}
                 <span className="text-sm sm:text-lg font-mono font-bold text-muted-foreground">
                   {selectedSymbol.symbol}/WLD
                 </span>
