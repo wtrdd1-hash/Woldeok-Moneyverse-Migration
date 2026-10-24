@@ -1,3 +1,4 @@
+import { requireLedgerBackedFxSettlement } from './fx-ledger-safety';
 import { Injectable, Logger } from '@nestjs/common';
 import { Pool, PoolClient } from 'pg';
 
@@ -201,6 +202,7 @@ export class FxRepository {
     userId: string,
     wldAmount: number
   ): Promise<{ usdCredited: number; feeWld: number; appliedRate: number }> {
+    requireLedgerBackedFxSettlement();
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -295,6 +297,7 @@ export class FxRepository {
     userId: string,
     usdAmount: number
   ): Promise<{ wldCredited: number; feeWld: number; appliedRate: number }> {
+    requireLedgerBackedFxSettlement();
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -564,6 +567,7 @@ export class FxRepository {
     contractRate: number,
     spotRate: number
   ): Promise<FxForwardContract> {
+    requireLedgerBackedFxSettlement();
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -685,6 +689,7 @@ export class FxRepository {
     contractId: string,
     currentSpotRate: number
   ): Promise<{ contract: FxForwardContract; refundWld: number }> {
+    requireLedgerBackedFxSettlement();
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');

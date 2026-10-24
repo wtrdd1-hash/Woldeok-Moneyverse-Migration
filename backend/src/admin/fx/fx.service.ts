@@ -1,3 +1,4 @@
+import { requireLedgerBackedFxSettlement } from './fx-ledger-safety';
 import { Injectable, Logger } from '@nestjs/common';
 import { FxRepository, FxReserveStatus, FxRatePoint, FxWallet, FxTransaction } from './fx.repository';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
@@ -50,6 +51,7 @@ export class FxService {
     if (wldAmount < 1000) {
       throw new Error('최소 환전 금액은 1,000 WLD 이상이어야 합니다.');
     }
+    requireLedgerBackedFxSettlement();
     const result = await this.repo.swapWldToUsd(userId, wldAmount);
 
     if (this.discordAlertService && wldAmount >= 50000) {
@@ -75,6 +77,7 @@ export class FxService {
     if (usdAmount < 1) {
       throw new Error('최소 환전 금액은 $1 이상이어야 합니다.');
     }
+    requireLedgerBackedFxSettlement();
     const result = await this.repo.swapUsdToWld(userId, usdAmount);
 
     if (this.discordAlertService && usdAmount >= 50) {
@@ -193,6 +196,7 @@ export class FxService {
     if (contractAmountUsd < 10) {
       throw new Error('최소 선물환 계약금액은 $10 USD 이상이어야 합니다.');
     }
+    requireLedgerBackedFxSettlement();
     const forwardRates = await this.getForwardRates();
     const rateInfo = forwardRates.rates[tenor];
     if (!rateInfo) {
@@ -234,6 +238,7 @@ export class FxService {
   }
 
   async settleForwardContract(contractId: string) {
+    requireLedgerBackedFxSettlement();
     const currentSpotRate = await this.repo.getLatestRate();
     return this.repo.settleForwardContract(contractId, currentSpotRate);
   }
