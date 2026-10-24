@@ -56,6 +56,7 @@ export interface WalletActiveRecipientRow {
 /** public.economy_transfer return column: packages/database/migrations/005-economy-hardening.sql */
 export interface WalletTransferRow {
   readonly transaction_id: string;
+  readonly replayed: boolean;
 }
 
 /** public.economy_claim_daily / public.economy_claim_work RETURNS TABLE: packages/database/migrations/005-economy-hardening.sql, packages/database/migrations/021-work-reward.sql */
@@ -251,7 +252,7 @@ export class PostgresWalletRepository {
     recipientUserId,
     amount,
     idempotencyKey,
-  }: WalletTransferInput): Promise<{ transactionId: string }> {
+  }: WalletTransferInput): Promise<{ transactionId: string; replayed: boolean }> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const recipient = requireUuid(recipientUserId, 'recipient user id');
     const transferAmount = requirePositiveWld(amount, 'amount');
@@ -260,11 +261,11 @@ export class PostgresWalletRepository {
 
     const row = await queryOne<WalletTransferRow>(
       this.pool,
-      'SELECT public.economy_transfer($1, $2, $3, $4::numeric)::text AS transaction_id',
+      'SELECT tx_id::text AS transaction_id, replayed FROM public.wallet_transfer_receipt($1, $2, $3, $4::numeric)',
       [key, actor, recipient, transferAmount],
     );
     if (!row?.transaction_id) throw new Error('database did not return a transfer receipt');
-    return { transactionId: requireUuid(row.transaction_id, 'database transaction id') };
+    return { transactionId: requireUuid(row.transaction_id, 'database transaction id'), replayed: row.replayed === true };
   }
 
   async claimDaily({ actorUserId, idempotencyKey }: WalletClaimDailyInput): Promise<WalletRewardRow> {
@@ -408,45 +409,29 @@ export class PostgresWalletRepository {
     );
   }
 
-  async recordP2PTransfer(data: {
-    senderId: string;
-    receiverId: string;
-    receiverName: string;
-    amount: string;
-    message?: string;
-    sticker?: string;
-  }): Promise<void> {
-    await queryOne(
+  async p2pTransfer(data: WalletTransferInput & {
+    message?: string | undefined;
+    sticker?: string | undefined;
+  }): Promise<{ transactionId: string; replayed: boolean }> {
+    const row = await queryOne<{ transaction_id: string; replayed: boolean }>(
       this.pool,
-      `INSERT INTO public.p2p_wire_transfers (sender_id, receiver_id, receiver_name, amount_wld, message, sticker)
-       VALUES ($1::uuid, $2::uuid, $3, $4::numeric, $5, $6)`,
+      `SELECT tx_id::text AS transaction_id, replayed
+       FROM public.wallet_p2p_transfer($1::uuid,$2::uuid,$3::uuid,$4::numeric,$5::text,$6::text)`,
       [
-        data.senderId,
-        data.receiverId,
-        data.receiverName,
-        data.amount,
+        requireUuid(data.idempotencyKey, 'idempotency key'),
+        requireUuid(data.actorUserId, 'authenticated user id'),
+        requireUuid(data.recipientUserId, 'recipient user id'),
+        requirePositiveWld(data.amount, 'amount'),
         data.message ?? null,
         data.sticker ?? null,
       ],
     );
-
-    const sender = await queryOne<{ display_name: string }>(
-      this.pool,
-      `SELECT display_name FROM public.member_profiles WHERE user_id = $1::uuid`,
-      [data.senderId],
-    );
-    const senderName = sender?.display_name ?? '익명의 머니버스 시민';
-
-    await queryOne(
-      this.pool,
-      `INSERT INTO public.in_app_notifications (user_id, category, title, body, link)
-       VALUES ($1::uuid, 'TRANSACTIONAL', $2, $3, '/wallet')`,
-      [
-        data.receiverId,
-        `💸 [P2P 송금] ${senderName}님으로부터 ${data.amount} WLD가 입금되었습니다!`,
-        `${data.message ? `메모: "${data.message}"` : '안전하게 송금되었습니다.'} ${data.sticker ? `(스티커: ${data.sticker})` : ''}`,
-      ],
-    );
+    if (!row?.transaction_id || typeof row.replayed !== 'boolean') {
+      throw new Error('database did not return a durable P2P receipt');
+    }
+    return {
+      transactionId: requireUuid(row.transaction_id, 'database P2P transaction id'),
+      replayed: row.replayed,
+    };
   }
 }
-
