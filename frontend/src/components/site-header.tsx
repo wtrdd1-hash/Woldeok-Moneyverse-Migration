@@ -213,7 +213,7 @@ export function SiteHeader() {
           </Sheet>
         </div>
       </div>
-      <TreasuryBroadcastToast />
+      <TreasuryBroadcastToast signedIn={viewer?.signedIn === true} />
     </header>
   );
 }
