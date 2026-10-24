@@ -40,6 +40,13 @@ describe('owner-only loan history status filter', () => {
     expect(await service.loans(ACTOR, 'all')).toHaveLength(2);
   });
 
+  it('does not fabricate an empty history when the database read is unavailable', async () => {
+    const repository = fakeRepository(async () => rows);
+    delete (repository as { loansForUser?: unknown }).loansForUser;
+    const service = new WalletService(repository);
+    await expect(service.loans(ACTOR)).rejects.toThrow('loan history is unavailable');
+  });
+
   it('rejects invalid status before any database read', async () => {
     const loansForUser = vi.fn(async () => rows);
     const service = new WalletService(fakeRepository(loansForUser));

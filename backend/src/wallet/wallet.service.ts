@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { WldAmount } from '@moneyverse/contract';
 import { wldAmount } from '@moneyverse/contract';
 import type {
@@ -504,7 +504,9 @@ export class WalletService {
       throw new WalletInputError('loan status must be all, active, overdue or repaid');
     }
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
-    if (typeof this.repository.loansForUser !== 'function') return [];
+    if (typeof this.repository.loansForUser !== 'function') {
+      throw new ServiceUnavailableException('loan history is unavailable');
+    }
     const rows = await this.repository.loansForUser(actorUserId);
     if (!Array.isArray(rows)) throw new Error('database returned invalid loans');
     const loans = rows.map((row) => ({
