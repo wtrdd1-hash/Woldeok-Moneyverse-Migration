@@ -114,6 +114,12 @@ describe('CatalogCard', () => {
     expect(container.textContent).not.toContain('가질 수 있어요');
   });
 
+  it('does not claim zero ownership when the holdings API failed', () => {
+    const { container } = render(<CatalogCard item={item()} held={null} />);
+    expect(container.textContent).toContain('보유 수량 확인 불가');
+    expect(container.textContent).not.toContain('0개 보유');
+  });
+
   it('says how many the member already holds', () => {
     const { container } = render(<CatalogCard item={item()} held={3} />);
     expect(container.textContent).toContain('3개 보유 중');

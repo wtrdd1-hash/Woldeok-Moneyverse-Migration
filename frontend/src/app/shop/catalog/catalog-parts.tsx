@@ -70,7 +70,7 @@ export function CatalogCard({
   children,
 }: {
   readonly item: CatalogItem;
-  readonly held?: number;
+  readonly held?: number | null;
   readonly children?: React.ReactNode;
 }) {
   const stock = stockLabel(item.quantity);
@@ -86,7 +86,12 @@ export function CatalogCard({
           <Badge variant="outline" className="font-normal">
             {effectLabel(item.effect_kind)}
           </Badge>
-          {held > 0 && (
+          {held === null && (
+            <Badge variant="outline" className="font-normal">
+              보유 수량 확인 불가
+            </Badge>
+          )}
+          {typeof held === 'number' && held > 0 && (
             <Badge variant="outline" className="font-normal">
               {countLabel(held)} 보유 중
             </Badge>

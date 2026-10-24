@@ -44,9 +44,8 @@ export default async function ShopCatalogPage({
   ]);
   const marketSaleActive = today?.event?.event_code === 'market_sale' && today.event.claimed;
 
-  // How many of each the member holds right now. A failed shelf read leaves
-  // this empty, which shows one 보유 중 badge fewer -- it never turns into a
-  // claim that they hold none.
+  // A failed holdings read is unknown, not zero. In particular a single-hold
+  // item must not offer purchase until the member's existing quantity is known.
   const held = new Map<string, number>(
     (mine?.holdings ?? []).map((item) => [item.catalog_id, item.quantity]),
   );
@@ -118,6 +117,19 @@ export default async function ShopCatalogPage({
           </form>
         </div>
 
+        {catalog !== null && mine === null && (
+          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+            <p className="min-w-0 flex-1">
+              보유한 아이템을 확인할 수 없어 구매를 잠시 제한했어요. 보유 수량을 확인한 후 다시 시도해 주세요.
+            </p>
+            <Link
+              href={query ? `/shop/catalog?q=${encodeURIComponent(rawQuery?.trim() ?? '')}` : '/shop/catalog'}
+              className="inline-flex min-h-11 items-center rounded-md border border-current px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              다시 확인하기
+            </Link>
+          </div>
+        )}
         {catalog === null ? (
           <EmptyState
             title="상점 목록을 불러오지 못했어요."
@@ -154,8 +166,12 @@ export default async function ShopCatalogPage({
                   const owned = held.get(item.catalog_id) ?? 0;
                   const max = maxPurchasable(item);
                   return (
-                    <CatalogCard key={item.catalog_id} item={item} held={owned}>
-                      {isHeldToTheLimit(item.purchase_limit, owned) ? (
+                    <CatalogCard key={item.catalog_id} item={item} held={mine === null ? null : owned}>
+                      {mine === null ? (
+                        <span className="text-sm text-muted-foreground">
+                          보유 수량 확인 후 구매할 수 있어요.
+                        </span>
+                      ) : isHeldToTheLimit(item.purchase_limit, owned) ? (
                         <Badge variant="outline">보유 중</Badge>
                       ) : max === 0 ? (
                         // The catalogue named a stock of zero. 072 refuses the
