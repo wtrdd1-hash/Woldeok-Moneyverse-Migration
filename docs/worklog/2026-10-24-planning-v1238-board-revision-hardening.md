@@ -10,7 +10,7 @@
 - [x] IN PROGRESS: English canonical and Korean parity updates in the four integrated planning files and two project plans.
 - [x] MID: recheck main and canonical plans; reconcile conflicts and source evidence.
 - [x] VERIFY: docs-only diff, backlog ID parity, no secret leakage, git diff --check, worktree clean after commit.
-- [ ] FINISH: commit/push, Draft PR and GitHub issue update; final release HOLD evidence.
+- [x] FINISH: commit/push, Draft PR and GitHub issue update; final release HOLD evidence.
 
 ## Evidence and restrictions
 - Latest main advances after QA v1242: three shop/docs commits. The predecessor planning Draft is not merged into main. Current update function was last replaced by migration 259 (not 048). Existing web action generates a fresh idempotency key per submission and sends no revision precondition. Legacy delete function in migration 044 sets `deleted_at` without recording request keys. No Production incidents inferred from source inspection.
@@ -24,3 +24,9 @@
 - `git diff --check`: PASS; exactly seven docs/worklog files changed; six canonical/parity planning documents contain identical 10 P0/P1 IDs; top v1238 heading appears once in both living plans.
 - Main rechecked at `57f393395d16495b06187de69c17592d2c13d251`; latest completed QA v1242 FAILED/HOLD. Source/contract findings are read-only; no runtime/DB tests claimed.
 - External references: 4 publisher families consulted, 0 newly approved independent records, cumulative accepted UNKNOWN / 10,000 BLOCKED.
+
+## FINISHED — 2026-10-24 23:08 KST (PARTIAL / DRAFT / RELEASE HOLD)
+- Draft PR #1189 OPEN, based on predecessor Draft #1184 (unmerged); GitHub issue #1183 updated: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1183#issuecomment-6385182007.
+- Latest main checked at start/mid/final: `57f393395d16495b06187de69c17592d2c13d251`; three commits newer than branch fork, integration/rebase and QA required before merge. Canonical main project plan blobs: EN `51683ec364f9fc1be7bd97e565f48ea2f257ac2a`, KO `ba7d055fd2c53e2f04282ac0a9448d0ee8e36254`.
+- All six planning documents carry ten matching P0/P1 IDs; `git diff --check` passed. QA v1242 FAILED/HOLD; runtime tests and release not run, no Test/Production promotion.
+- Feature flag OFF, migration number UNASSIGNED, privacy/retention approval pending, 10,000 verified independent references BLOCKED (0 new, cumulative UNKNOWN).
