@@ -143,7 +143,7 @@ const ProposalSchema = z.preprocess((value) => {
 }));
 
 const BatchSchema = z.object({
-  scenarios: z.array(ProposalSchema).min(1),
+  scenarios: z.array(ProposalSchema).min(1).max(20),
 });
 
 export type ScenarioBatch = z.infer<typeof BatchSchema>;
@@ -290,6 +290,8 @@ const MAX_TOKENS = 16_000;
 const CALL_TIMEOUT_MS = 180_000;
 const LIST_TIMEOUT_MS = 15_000;
 const DETAIL_LIMIT = 200;
+/** Reject model responses before decoding large remote payloads into JSON. */
+const MAX_MODEL_RESPONSE_BYTES = 256 * 1024;
 
 /**
  * Strict structured output, as the standard spells it. No bounds: several
@@ -407,6 +409,28 @@ export function approvedDeploymentModelEndpoint(url: string): boolean {
   }
 }
 
+async function boundedResponseText(response: Response): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) return '';
+  const chunks: Uint8Array[] = [];
+  let bytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > MAX_MODEL_RESPONSE_BYTES) {
+        void reader.cancel().catch(() => {});
+        throw new AiNewsUnavailableError('ai_news_model_unusable', 'model response exceeds size limit');
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)), bytes).toString('utf8');
+}
+
 async function send(
   url: string,
   apiKey: string,
@@ -438,9 +462,9 @@ async function send(
   }
   let text = '';
   try {
-    text = await response.text();
-  } catch {
-    text = '';
+    text = await boundedResponseText(response);
+  } catch (error) {
+    if (error instanceof AiNewsUnavailableError) throw error;
   }
   return { ok: response.ok, status: response.status, text };
 }
@@ -459,7 +483,7 @@ const CompletionSchema = z.object({
     message: z.object({
       content: z.union([
         z.string(),
-        z.array(z.object({ text: z.string().nullish() })),
+        z.array(z.object({ text: z.string().nullish() })).max(32),
         z.null(),
       ]).optional(),
       /** Where a reasoning model puts its thinking. Never the answer. */
@@ -468,10 +492,10 @@ const CompletionSchema = z.object({
     }).optional(),
     /** 'length' means the answer was cut off, which reads as broken JSON. */
     finish_reason: z.string().nullish(),
-  })).min(1),
+  })).min(1).max(4),
 });
 
-const ModelsSchema = z.object({ data: z.array(z.object({ id: z.string() })) });
+const ModelsSchema = z.object({ data: z.array(z.object({ id: z.string() })).max(1_000) });
 
 function contentOf(message: z.infer<typeof CompletionSchema>['choices'][number]['message']): string {
   const content = message?.content;
