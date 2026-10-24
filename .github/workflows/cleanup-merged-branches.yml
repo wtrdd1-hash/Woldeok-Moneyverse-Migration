@@ -1,9 +1,8 @@
 name: Cleanup Merged Branches
 
 on:
-  pull_request:
-    types: [closed]
-    branches: [main]
+  # A merged PR event is not sufficient proof that a squashed source tip is
+  # contained in main. Only the ancestry-checked scheduled/manual path prunes.
   push:
     branches: [main]
   schedule:
@@ -12,39 +11,14 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
+  pull-requests: read
 
 concurrency:
   group: cleanup-merged-branches
   cancel-in-progress: false
 
 jobs:
-  delete-merged-pr-branch:
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref != 'main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          fetch-depth: 0
-          persist-credentials: true
-
-      - name: Delete merged source branch
-        env:
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          git push --force-with-lease="refs/heads/${HEAD_REF}:${HEAD_SHA}" origin ":refs/heads/${HEAD_REF}" || {
-            echo "branch moved after merge, is already absent, or is protected: $HEAD_REF"
-          }
-
   prune-contained-branches:
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -67,7 +41,8 @@ jobs:
           trap 'rm -f "$merged_evidence" "$open_heads"' EXIT
           gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=closed&base=main&per_page=100" \
             --jq '.[] | select(.merged_at != null and .head.repo.full_name == .base.repo.full_name) | [.head.ref, .head.sha, (.number|tostring)] | @tsv' > "$merged_evidence"
-          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=open&base=main&per_page=100" \
+          # Protect active stacked PRs too, even when their base is not main.
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=open&per_page=100" \
             --jq '.[] | select(.head.repo.full_name == .base.repo.full_name) | .head.ref' > "$open_heads"
 
           deleted=0
