@@ -1,5 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1232 — F675-115 실제 구매 검증형 상점 후기·운영자 심사 (기능 추가 / 기획 초안 / 운영 보류)
+- 회차: 이전 **Feature Improvement v1230**(Draft #1161 미병합) → 현재 **Feature Addition v1232** → 다음 **Feature Improvement v1234**(잠정). 기준 main `49788d09494fed3e463651945b83386e87dd47bc` 시작·중간 재조회, 영문 원본/국문 대조 동일, QA v1237 FAILED/HOLD. 문서만 수정하며 런타임·DB·WLD·Test·운영 미변경.
+- 코드 근거: `/shop` Store 2.0 카탈로그와 Migration071의 `shop_catalog`/`shop_purchases` 및 Migration218 경제 영수증 확인, main에는 후기 테이블/API/UI 없음. 회원 본인의 확정 구매당 상품별 현재 후기 1개, 1~5점·30~1,500자, 심사 후 공개. 구형 `purchases`·원장 취소 불명·보유만으로 구매 인증 금지. 후기 보상·금융 변경 없음.
+- 회원 `/shop` 후기 보기/쓰기, `/account/shop-reviews` 내 후기·수정·철회·영수증, 관리자 `/admin/shop/reviews` 승인·거절·숨김·강화 인증·감사. 승인 후기만 공개, 본인 전용 API·불변 영수증·버전 CAS, 제안 DB `shop_item_reviews`, `shop_review_requests`, `shop_review_events`, 구매/회원 일치 검증, 원자적 심사, Android 동등·비공개 no-store. 상품별 검증된 canonical URL 없으므로 별점 JSON-LD 미사용. WCAG 2.2 AA, 스팸·개인정보, KPI, 기본 OFF 롤백. 세부 구현 명세는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 `ENV1232-01` 운영·개발 공유 DB/5433/복원; `SEC1232-02` 앱 직접 DML 235/241·PUBLIC 은행 함수 3개·사용자/심사 권한; `REL1232-03` QA v1237 프론트 5건 실패, Critical2/High10 감사, Migration266, Migration280 4중 #1147, #1088 정확 SHA 게이트 누락, 디스크 92%; `SHOP1232-04` Store 2.0 확정 구매 증거·금융 부작용 0. P1 `SHOP1232-05` DB·소유권, `SHOP1232-06` 잠금·영수증, `SHOP1232-07` 웹/API/Android, `SHOP1232-08` 심사·개인정보, `SHOP1232-09` SEO·접근성·KPI, `SHOP1232-10` 격리 실DB·100건 동시성·합성 10,001건·금융 회귀·롤백.
+- 전체 백로그 식별자: ENV1232-01 SEC1232-02 REL1232-03 SHOP1232-04 SHOP1232-05 SHOP1232-06 SHOP1232-07 SHOP1232-08 SHOP1232-09 SHOP1232-10.
+- `shop_verified_reviews` 기본 OFF; #1147 해결 전 신규 Migration 번호 미할당. 별도 개발 브랜치·권한 검증·정확 SHA 전체 CI·격리 PG·공식 Test 인증된 금융 E2E·백업 복원·독립 QA·승인 GitOps 전 운영승격 금지. 독립 발행기관 PostgreSQL/OWASP/W3C/Google **4곳 검토**, 신규 승인 **0건**, 누적 **미확인/10,000건** → **BLOCKED / IN PROGRESS**.
+
+
+
 ## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
 - 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.
