@@ -7,7 +7,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
+import { ReauthGuard } from '../../auth/guards/reauth.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -16,9 +20,47 @@ import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { FxService } from './fx.service';
 
+// The global validation pipe rejects unknown fields; these concrete classes
+// also prevent malformed financial amounts from reaching direct SQL paths.
+export class FxInterventionDto {
+  @IsIn(['SELL_USD', 'BUY_USD'])
+  type!: 'SELL_USD' | 'BUY_USD';
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(1_000_000_000)
+  amountUsd?: number;
+}
+
+export class FxSwapDrawdownDto {
+  @IsUUID()
+  agreementId!: string;
+
+  @IsInt()
+  @Min(1)
+  @Max(1_000_000_000)
+  amountUsd!: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(250)
+  purpose?: string;
+}
+
+export class FxForwardSettleDto {
+  @IsUUID()
+  contractId!: string;
+}
+
+export class FxHaltDto {
+  @IsBoolean()
+  isHalted!: boolean;
+}
+
 @ApiTags('Foreign Exchange (FX) & Reserves Control')
 @Controller('admin/fx')
-@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard)
+@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard, AdminSessionGuard)
 export class AdminFxController {
   constructor(private readonly fxService: FxService) {}
 
@@ -49,9 +91,10 @@ export class AdminFxController {
   }
 
   @Post('intervene')
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '중앙은행 외환당국 스무딩 오퍼레이션 시장개입 집행' })
   async intervene(
-    @Body() body: { type: 'SELL_USD' | 'BUY_USD'; amountUsd?: number },
+    @Body() body: FxInterventionDto,
     @Req() req: RequestWithSession
   ) {
     const adminId = requireUserId(req);
@@ -65,15 +108,16 @@ export class AdminFxController {
   }
 
   @Post('swaps/drawdown')
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '우방국 양자간 통화스왑 비상 자금 인출 및 외환보유액 공급' })
   async drawdownSwap(
-    @Body() body: { agreementId: string; amountUsd: number; purpose?: string },
+    @Body() body: FxSwapDrawdownDto,
     @Req() req: RequestWithSession
   ) {
     const adminId = requireUserId(req);
     const result = await this.fxService.drawdownCurrencySwap(
       body.agreementId,
-      Number(body.amountUsd),
+      body.amountUsd,
       adminId,
       body.purpose
     );
@@ -85,8 +129,9 @@ export class AdminFxController {
   }
 
   @Post('forward/settle')
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '선물환(Forward) 계약 수동/만기 즉시 정산' })
-  async settleForward(@Body() body: { contractId: string }) {
+  async settleForward(@Body() body: FxForwardSettleDto) {
     const result = await this.fxService.settleForwardContract(body.contractId);
     return {
       success: true,
@@ -96,8 +141,9 @@ export class AdminFxController {
   }
 
   @Post('halt')
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '외환시장 거래 긴급 일시정지(Halt) 킬스위치 제어' })
-  async toggleHalt(@Body() body: { isHalted: boolean }, @Req() req: RequestWithSession) {
+  async toggleHalt(@Body() body: FxHaltDto, @Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
     const result = await this.fxService.setHalt(body.isHalted, adminId);
     return {
