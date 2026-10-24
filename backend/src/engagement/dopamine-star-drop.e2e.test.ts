@@ -15,7 +15,7 @@ describe('Star Drop authenticated HTTP refusal', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const moduleRef = await Test.createTestingModule({
       controllers: [DopamineController],
       providers: [{ provide: DopamineRepository, useValue: null }],
     })
@@ -24,7 +24,7 @@ describe('Star Drop authenticated HTTP refusal', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = moduleRef.createNestApplication();
     app.use((req: { session?: unknown }, _res: unknown, next: () => void) => {
       req.session = { user_id: '11111111-2222-4333-8444-555555555555' };
       next();
