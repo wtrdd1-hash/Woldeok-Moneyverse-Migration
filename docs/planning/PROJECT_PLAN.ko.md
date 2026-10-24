@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1226 — F675-113 치장 프리셋·기존 장착 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 주기: 이전 기능 추가 v1224 → 현재 기능 보완 v1226 → 다음 기능 추가 v1228(잠정). 원격 main 49788d09494fed3e463651945b83386e87dd47bc 시작·중간 재확인, 선행 Draft #1144 미병합; 해당 초안에 쌓은 문서 전용 개선으로 운영 배포 아님. QA v1231 본선 FAILED/HOLD(프론트 5 FAIL/1,395 PASS, 전체 감사 Critical 2/High 10, 운영 High 2, 봇 Critical 1/High 5); 별도 후보 로컬 PASS는 공식 Test 정확 SHA 인증 아님. 이슈 #1142.
+- 코드 근거: migration 114의 inventory_equip_item은 보유 수량·슬롯 이름만 검사하며 종류-슬롯, expires_at, 카탈로그 활성·정지, 회원 공통 잠금·버전, 실제 장착 해제 슬롯을 보장하지 않는다. Migration 123 보유 목록은 만료를 걸러도 비활성/정지를 거르지 않으며 인벤토리 화면은 조회 실패를 빈 목록으로 처리한다. 기존 Equip와 원자적 프리셋 Apply에 공통 회원 잠금·단조 equipRevision·자격 검사, null 슬롯의 DB 행 생략, 확정 재조회·불변 본인 재시도/상태 조회를 적용한다. 운영 악용 재현 주장은 하지 않으며 WLD·원장·재고 부작용 금지.
+- P0 **ENV1226-01** 운영·개발 공유 DB/5433/복원, **SEC1226-02** 앱 DML/PUBLIC 은행 권한, **REL1226-03** QA v1231/보안/migration266/#1088/정확 SHA, **INV1226-04** 기존 Equip 자격·슬롯 사전점검. P1 **INV1226-05** 전진형 DB 제약·버전·영수증, **INV1226-06** 원자적 공통 잠금·재시도·만료 경합, **INV1226-07** NestJS/Next/Android 본인 API·작업 상태, **INV1226-08** 실제 확인된 인벤토리 화면/320px/WCAG, **INV1226-09** 관리자·개인정보·비색인·KPI, **INV1226-10** 격리 PG 100회 경합·부정·롤백. **전체 ID:** ENV1226-01 SEC1226-02 REL1226-03 INV1226-04 INV1226-05 INV1226-06 INV1226-07 INV1226-08 INV1226-09 INV1226-10.
+- 목적·대상·본인 권한·진입점/CTA/상태·API·스키마/인덱스·트랜잭션·보안·SEO·Android/접근성·KPI·회귀·단계 배포·롤백은 [기존 한국어 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md)에 상세 기술하고 영어 정본과 동등하게 유지한다. 기능 OFF, 런타임·DB·WLD·Test·Production 변경 없음. 별도 개발 브랜치·migration 번호 충돌 해결·정확 SHA CI/보안·격리 실제 PG ACL/복원·공식 Test 금융 E2E 3회·독립 QA·사람 GitOps 승인 필요.
+- 참고 발행기관 3곳(PostgreSQL/OWASP/W3C), 신규 최종 승인 독립 근거 0건, 누적 중복 제거 승인 UNKNOWN/10,000: BLOCKED / IN PROGRESS.
+
 ## v2026.10.24.1224 — F675-113 회원 치장 프리셋 및 원자적 장착 (기능 추가 / 기획 초안 / 운영 보류)
 - 주기: 이전 Feature Improvement v1222 → 현재 Feature Addition v1224 → 다음 Feature Improvement v1226(잠정). main `49788d09494fed3e463651945b83386e87dd47bc` 시작/중간 재확인, 선행 v1222 Draft #1136 미병합·운영 미반영. QA v1229 FAILED/HOLD. 개발 이슈 #1142. 문서만 변경.
 - 실제 코드: `/inventory`의 `apiOrNull(GET /api/v1/shop/holdings)` 및 아이템별 장착 POST, migration114 `inventory_equip_item`은 수량/슬롯 이름을 검사하지만 종류·만료·공통 회원 장착 버전은 보장하지 않는다. 회원 전용 최대 3개 이름 프리셋/8개 슬롯, 서버 확인 저장·미리보기·원자적 적용·삭제, 구버전 409, 소유권 상실/만료 422, 조회 불명 503, WLD·원장·구매 영향 없음.

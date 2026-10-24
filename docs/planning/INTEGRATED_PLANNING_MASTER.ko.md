@@ -1,5 +1,35 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1226 — F675-113 치장 프리셋·기존 장착 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+
+**주기·기준:** 이전 기능 추가 v1224 → 현재 기능 보완 v1226 → 다음 기능 추가 v1228(잠정). 원격 main 49788d09494fed3e463651945b83386e87dd47bc; 선행 기획 Draft #1144는 미병합이며 이번 문서 브랜치는 해당 초안에 쌓되 배포된 것으로 간주하지 않는다. 영문 PROJECT_PLAN.md가 정본, 한국어는 동등한 대조본이다. QA v1231 본선(2026-10-24 16:17~16:21 KST)은 FAILED/HOLD: lint·typecheck·build PASS, 프론트 5 FAIL/1,395 PASS, 전체 의존성 Critical 2/High 10, 운영 의존성 High 2, Discord Bot Critical 1/High 5. 별도 후보의 로컬 프론트/lint/typecheck/build PASS는 공식 Test 정확 SHA 인증이 아니다. 개발 연계 이슈 #1142. 런타임·실DB·WLD·기능 스위치·Test·Production 변경 금지.
+
+### 실제 코드 근거·위험·범위 보정
+- Migration 114의 **inventory_equip_item(actor,catalog,slot,equip)**은 보유 수량과 8개 슬롯 이름만 검사한다. 카탈로그 종류와 슬롯 일치, **user_items.expires_at** 만료, **shop_catalog.active**, 사용 정지 상태, 회원 공통 잠금·장착 버전을 확인하지 않는다. 장착 해제 반환 슬롯도 실제 과거 슬롯이 아닌 요청/추론 슬롯일 수 있다. Migration 071은 비치장 상품 종류도 허용하므로 슬롯 이름 검증만으로 치장 상품이 보장되지 않는다. 이는 코드에서 확인된 검증 누락이지 운영 악용 재현 주장이 아니다.
+- Migration 123의 **shop_my_items_v2**는 만료·수량을 필터링하지만 카탈로그 활성 여부 및 반환되는 **suspended** 상태를 필터링하지 않는다. 따라서 보유 목록을 프리셋 적용의 최종 자격 판정으로 사용할 수 없다. **frontend/src/app/inventory/page.tsx**는 조회 실패를 빈 배열로 처리해 진짜 빈 인벤토리와 장애를 혼동한다. 최신 main에 구현된 프리셋 API/테이블은 확인되지 않았다.
+- v1224의 목적(회원 전용 최대 3개 프리셋, 8개 치장 슬롯, 변경 없는 미리보기, 서버 확정 저장·적용·삭제, Android 동등성)은 유지한다. 이번 개선은 기존 개별 장착과 프리셋 적용이 **동일한 자격·잠금·버전 규칙**을 따르게 한다. 브라우저 전용 상태(계정 혼동), 8회 연속 Equip 호출(부분 적용), 프리셋 API만 보완(기존 장착 우회)은 제외한다. 자동 구매·아이템 지급·WLD·원장·상점 재고 부작용 없음.
+
+### 회원 화면·권한·CTA·상태·API 보완
+- 비공개 진입점 **/inventory#cosmetic-presets**. 보유 목록/장착 버전 조회 실패는 **SOURCE_UNVERIFIED**와 새로고침·재시도 CTA를 표시하고, 성공한 서버 응답만 **EMPTY**로 인정한다. 배지 슬롯 badge_1/2/3을 명시적으로 선택하게 하고, 이름은 NFC 정규화 유니코드 코드포인트 1~32자로 제한하여 일반 텍스트로 출력한다. 만료·비활성·정지 아이템은 **UNAVAILABLE**로 표기하며 상품 정보 누출 없이 해당 프리셋 수정·삭제를 허용한다. SIGN_IN, LOADING, SAVING, SAVED_CONFIRMED, APPLYING, APPLIED_CONFIRMED, STALE, INVALID_ITEM, CONFLICT, UNKNOWN_COMMIT, FAILED, SIGNED_OUT 각각의 접근성 상태 메시지를 정의한다. APPLIED_CONFIRMED는 커밋된 영수증과 최신 equipRevision 재조회가 모두 있을 때만 표시한다.
+- v1224의 **/api/v1/shop/cosmetic-presets** 목록/상세 GET, 생성 POST, 수정 PATCH, 삭제 DELETE, 적용 POST를 유지한다. 불명확한 커밋을 조회하는 본인 전용 읽기 **GET /api/v1/shop/cosmetic-presets/operations/:idempotencyKey**를 제안하며 타인/없는 키는 동일한 404, GET은 데이터 변경 금지. 기존 **POST /api/v1/shop/holdings/:id/equip**는 경로를 유지하면서 동일한 트랜잭션 불변식을 적용하고 실제 확정 슬롯/버전을 반환한다. **GET /api/v1/shop/holdings**는 권위 있는 **equipRevision/equippedSlots** 또는 명시적 503을 반환해야 하며 타임스탬프·캐시로 버전을 추측하지 않는다.
+- 변경 요청은 세션·회원 인증·동의·CSRF, UUID Idempotency-Key, 회원/작업/대상/기대 버전/정규화 슬롯을 포함한 요청 다이제스트를 강제한다. 동일 키·동일 내용은 과거 불변 응답, 다른 내용은 409. If-Match/expectedPresetVersion·expectedInventoryRevision 불일치도 409. 잘못된 본문 400, 타인/없는 리소스 404, 부적격 아이템 422, 요청 제한 429, 원천 확인 불가 503. 과거 성공 영수증과 **현재 장착 상태**는 구별한다. 로그아웃·계정 전환 시 요청 취소·비공개 캐시 제거·세션 epoch로 늦은 응답을 차단한다.
+- Android **/app-api/v1/shop/cosmetic-presets**는 기존 게이트웨이 인증·버전·CSRF 규칙으로 동등하게 제공하고 직접 백엔드 노출 금지. 신규 조회·작업 상태 경로는 allowlist와 국영문 모바일 계약을 갱신한다. GET도 인증·동의를 우회하지 않으며 기존 92개 레거시 경로 규칙을 유지한다.
+
+### 전진형 DB·잠금·영수증 설계
+- 신규 migration 전 **읽기 전용 사전점검**: 동일 회원·슬롯의 중복 장착, is_equipped와 equipped_slot 불일치, 종류-슬롯 불일치, 만료·비활성·정지 장착, 유효하지 않은 상품 참조, 미병합 A/B 브랜치의 migration 280 번호 충돌. 승인된 운영자에게만 건수와 제한된 표본 ID를 제공한다. 운영 회원의 치장을 임의로 수정하지 않으며 사전점검·별도 승인된 복구·격리 복원 후 제약을 추가한다. 적용된 migration 114 수정 금지.
+- 승인된 신규 연속 migration에서 **is_equipped = (equipped_slot IS NOT NULL)** 제약과 **(user_id,equipped_slot) WHERE is_equipped** 부분 유니크 인덱스를 사전점검·복구 후 추가한다. badge는 badge_1..3만, frame/background/effect/nameplate/title은 같은 종류 슬롯만 허용한다. 잠금 상태에서 수량 양수, 카탈로그 active, 미만료, 승인된 정지/연체 정책을 재검증한다. 비치장 종류·다른 슬롯 지정은 거부한다. 상품 소모·삭제 및 연체 정지 작업도 공통 잠금 또는 버전 무효화에 참여하도록 연계 테스트를 정의한다.
+- v1224의 **member_cosmetic_presets**, **member_cosmetic_preset_slots**, **member_equip_revisions**, 본인 키 기준 불변 영수증 구조를 유지한다. API의 **null 슬롯**은 의도적인 비움을 뜻하고 DB에서는 **catalog_id NOT NULL**이므로 해당 슬롯 행을 만들지 않는다. 읽기 응답에는 8개 슬롯 모두를 null 포함 명시한다. 회원 공통 잠금으로 활성 프리셋 최대 3개를 직렬화하며 UNIQUE(preset_id,slot), UNIQUE(preset_id,catalog_id), version>0, 본인 목록 인덱스 (user_id,deleted_at,created_at DESC,id DESC)를 적용한다. 상품 완전 삭제가 프리셋 삭제를 방해하지 않도록 슬롯에서 카탈로그 FK를 강제하지 않으며 불가용 상품은 비공개 처리한다. 계정 삭제 시 개인정보 연계 삭제.
+- 모든 기존 Equip/프리셋 저장·수정·삭제·적용은 **한 트랜잭션, 같은 잠금 순서**: 세션에서 actor 결정 → (actor,멱등 키) 영수증 잠금·조회 → users 회원 행 FOR UPDATE → 대상 프리셋 행 잠금 → 보유·카탈로그·연체 행을 catalog UUID 오름차순 잠금 → 소유·종류·수량·만료·활성·정지 재검증 → 기대 버전 CAS → 8개 슬롯 전체 원자적 교체 → 실제 변경 시 equipRevision 1회 증가 → 불변 영수증 저장 → COMMIT. 서로 다른 키는 **회원 행 잠금**으로 직렬화한다(키 잠금만으로 부족). 같은 키 재실행은 과거 응답만 돌려주며 버전을 증가시키지 않는다. 실패·롤백 시 부분 장착 금지.
+- 영수증 원본 응답은 크기 제한·제3자/금융정보 배제, 검토된 영구 재실행 차단 장치 없이 TTL 삭제 금지. 작업 상태 GET은 과거 결과임을 표시하며 화면은 최신 장착 버전을 다시 조회한다. SECURITY DEFINER 고정 search_path, PUBLIC 권한/앱 계정 직접 테이블 DML 금지, 격리 PostgreSQL에서 타인 ID·함수 실행권한 부정 테스트 필수.
+
+### 관리자·보안·SEO·모바일·접근성·KPI·검증·승격
+- 관리자에게는 생성/적용/충돌/오류 비식별 집계만 제공하고 표본 10명 미만은 숨긴다. 회원 이름·프리셋 명칭·아이템 조합·원본 영수증은 제공하지 않는다. 개인 인벤토리 HTML/API/Android는 **private,no-store**, noindex/nofollow, 사이트맵 제외, 공유 캐시 금지. 공개 프로필 치장 조회는 유지하되 비공개 프리셋 메타데이터 유출 금지. 회원별 속도 제한·본문 제한·3개/8개 한도, Unicode 검증 및 마크업 거부. WCAG 2.2 AA: 320px 재배치, 200% 확대, 터치 44px, 키보드 배지 선택, 포커스·실제 성공 후 상태 알림, 강제 색상/움직임 줄이기.
+- KPI: 실제 확정 Save/Apply 비율, 7일 수동 재사용, 버전 충돌·부적격 비율, UNKNOWN_COMMIT 해소 p95, 타인 접근 차단 건수, Apply p95. 상품 조합 원본 수집 금지, 매출·활성 수치 임의 생성 금지. **TEST TARGET**(실측 아님): 개인정보 유출 0, 부분 적용 0, WLD/원장/재고 변화 0, 거짓 성공 안내 0.
+- 격리 실제 PostgreSQL 테스트: 같은 키 Apply 100회 동시 → 영수증 1개·최종 버전 1회; 다른 키 Apply와 기존 Equip 100회 경합 → 직렬 순서·단조 증가 버전; 타인/비인증 100회 → 정보 0; 동시 생성 3개 한도; 종류 불일치, badge_2/3, 적용 시각 만료, 비활성·정지·연체 전환, 소모/삭제, 중복 장착 사전점검, null 슬롯 직렬화, 삭제 후 재시도, 동일 키 다른 내용, 커밋 전/후 타임아웃, 계정 전환, 페이지네이션이 생길 경우 격리 합성 10,001건. 실패 후 기존 치장 유지 및 WLD·원장·재고 불변 검증.
+- P0 **ENV1226-01** 운영·개발 DB 분리/5433/독립 복원(#1053), **SEC1226-02** 앱 DML 최근 235/241 및 PUBLIC 은행 함수 3개 재측정·최소권한, **REL1226-03** QA v1231 전체 테스트/보안/migration266/#1088/정확 SHA 배포 게이트, **INV1226-04** 기존 Equip 종류·만료·정지·슬롯 무결성 사전점검. P1 **INV1226-05** 전진형 제약·공통 버전·영수증, **INV1226-06** 원자적 잠금 순서·타 작성자 무효화·재시도, **INV1226-07** NestJS/Next/Android API·본인 작업 상태·세션 차단, **INV1226-08** 정확한 화면·접근성, **INV1226-09** 관리자·개인정보·SEO·KPI, **INV1226-10** 격리 PG 동시성·회귀·백업·롤백. **전체 ID:** ENV1226-01 SEC1226-02 REL1226-03 INV1226-04 INV1226-05 INV1226-06 INV1226-07 INV1226-08 INV1226-09 INV1226-10.
+- **운영승격 HOLD:** cosmetic_loadout_presets 기본 OFF. 개발 예약은 별도 브랜치에서 migration 번호 충돌부터 해결한다. 최종 정확 SHA 전체 CI/lint/typecheck/build/test/보안 감사, 격리 실제 PG migration/ACL/사전점검/복원, 공식 Test 정확 SHA 인증 회원·금융 E2E **3회**, 독립 QA, 사람 GitOps 승인, 단계적 카나리·모니터링·스위치 OFF 롤백이 필수. 기획 문서는 병합/배포 승인서가 아니다.
+- 외부 독립 근거 게이트: PostgreSQL·OWASP·W3C **발행기관 계열 3곳**은 설계 참고일 뿐, 이번 신규 독립 중복 제거·최종 승인 기록 **0건**, 누적 승인 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 링크·PR·반복 자료를 승인 기록으로 세지 않는다. 별도 분산기획 문서 생성 금지.
+
 ## v2026.10.24.1224 — F675-113 회원 치장 프리셋 및 원자적 장착 (기능 추가 / 기획 초안 / 배포 보류)
 
 **주기 및 기준:** 이전 Feature Improvement v1222 → 현재 Feature Addition v1224 → 다음 Feature Improvement v1226(잠정). 작업 시작 시 최신 `origin/main`은 `49788d09494fed3e463651945b83386e87dd47bc`; 영어 `PROJECT_PLAN.md`가 정본이고 한국어는 동등한 대조본이다. 이전 기획 Draft #1136은 미병합이므로 운영 반영으로 간주하지 않는다. 최신 확인 QA v1229(2026-10-24 15:26 KST)는 FAILED/HOLD. 개발 추적 이슈 #1142. **사용자 승인 전의 설계 제안**이며 런타임·실DB·WLD·Test·Production·기능 스위치를 변경하지 않는다.

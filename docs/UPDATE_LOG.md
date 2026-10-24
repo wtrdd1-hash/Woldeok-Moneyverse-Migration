@@ -1,3 +1,8 @@
+## 2026-10-24 v1226 — F675-113 cosmetic preset integrity hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- Previous Addition v1224 → Current Improvement v1226 → Next Addition v1228 provisional; remote main 49788d09494fed3e463651945b83386e87dd47bc unchanged start/mid, stacked on unmerged Draft #1144; QA v1231 main full Frontend 5 FAIL/1,395 PASS, audits Critical 2/High 10, production High 2, bot Critical 1/High 5. No release evidence.
+- Tightened shared legacy Equip/preset Apply category/expiry/active/suspension checks, actor locking, monotonic revision, preflight of duplicate slots and status mismatch, explicit null-slot mapping, immutable replay and operation-status GET, source-unverified UX, Android, private noindex/no-store, admin aggregate, WCAG and 100-way isolated PostgreSQL regression. IDs: ENV1226-01 SEC1226-02 REL1226-03 INV1226-04 INV1226-05 INV1226-06 INV1226-07 INV1226-08 INV1226-09 INV1226-10.
+- HOLD: shared live DB/5433, broad DML/PUBLIC functions, migration266, #1088, failed audits/tests, isolated backup restore and official Test exact-SHA authenticated finance E2E x3; flag OFF. External independent evidence 0 newly accepted, cumulative UNKNOWN/10,000 BLOCKED. Documentation only, no runtime/DB/WLD/Test/Production changes.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1224 — F675-113 member cosmetic loadout presets (FEATURE ADDITION / DRAFT / RELEASE HOLD)
