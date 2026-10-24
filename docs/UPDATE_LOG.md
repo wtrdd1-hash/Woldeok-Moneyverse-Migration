@@ -2,6 +2,7 @@
 - Previous Addition v1252 / Current Improvement v1254 / Next Addition v1256 provisional. Main c9a868b1e622341e2daa8b936ddf0988eda9988e rechecked start/mid; QA v1257 FAILED/HOLD. Migration 163 preserves historical source account ownership after identity/session merge: P0 preflight blocks merges with private annotation/receipt data, no silent note or old-ledger portability.
 - Corrected v1252 privacy/cursor design: clear text on tombstone, metadata-only original receipt, keyed HMAC fingerprint/key rotation, approved retention/backup erasure, immutable created_at keyset rather than mutable updated_at, explicit non-snapshot concurrency semantics. P0 ENV1254-01 SEC1254-02 REL1254-03 WAL1254-04; P1 WAL1254-05..10. Tests specified but not run; no runtime/DB/WLD/Production change.
 - Root 100%, dev app 235/241 DML and 3 PUBLIC bank EXECUTE, migration266/280, security/CI, exact-SHA official Test and restore HOLD. Independent external evidence newly approved 0, cumulative UNKNOWN/10,000 BLOCKED. Stacked unmerged documentation branch, no other-worker changes.
+- GitHub v1254: Draft PR #1235 (stacked on #1229); issue #1227 updated, comment 6390184248. Release HOLD.
 
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
