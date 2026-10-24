@@ -123,7 +123,7 @@ describe('app API route compatibility', () => {
 
   it('passes the owner-only bank borrow quote through Android app-api without caching', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ eligible: true, principalWld: '101', interestWld: '5', totalDueWld: '106', binding: false }), {
+    const fetchSpy = vi.fn(async (_target: URL, _options: RequestInit) => new Response(JSON.stringify({ eligible: true, principalWld: '101', interestWld: '5', totalDueWld: '106', binding: false }), {
       status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
     }));
     vi.stubGlobal('fetch', fetchSpy);

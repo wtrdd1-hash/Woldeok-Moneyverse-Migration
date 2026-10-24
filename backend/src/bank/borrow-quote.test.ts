@@ -24,6 +24,7 @@ describe('owner-scoped new loan origination quote', () => {
     expect(() => quoteNewBorrow(standing, '500001')).toThrow();
     expect(() => quoteNewBorrow({ ...standing, loan_interest_bps: Number.NaN }, '100')).toThrow();
     expect(() => quoteNewBorrow(null, '100')).toThrow();
+    expect(() => quoteNewBorrow({ credit_limit: '500000', loan_interest_bps: 450, loan_term_days: 30 }, '100')).toThrow();
   });
   it('refuses to offer a new loan when another loan is outstanding', () => {
     expect(quoteNewBorrow({ ...standing, active_loan: { loan_id: 'opaque' } }, '100')).toMatchObject({

@@ -20,6 +20,10 @@ describe('authenticated new-loan quote endpoint', () => {
     await expect(controller.borrowQuote({} as RequestWithSession, '100')).rejects.toThrow('no session');
     await expect(controller.borrowQuote(request, '100')).rejects.toMatchObject({ status: 503 });
   });
+  it('fails closed with HTTP 503 if authoritative lending policy is incomplete', async () => {
+    const controller = new BankController({ getStanding: async () => ({ ...standing, loan_interest_bps: null }) } as unknown as BankRepository);
+    await expect(controller.borrowQuote(request, '100')).rejects.toMatchObject({ status: 503 });
+  });
   it('rejects malformed and over-limit amounts with HTTP 400', async () => {
     const controller = new BankController({ getStanding: async () => standing } as unknown as BankRepository);
     await expect(controller.borrowQuote(request, '1e6')).rejects.toMatchObject({ status: 400 });

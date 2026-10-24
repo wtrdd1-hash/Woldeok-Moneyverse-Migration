@@ -13,21 +13,24 @@ export interface BorrowQuote {
   notice: string;
 }
 
+export class BorrowQuoteUnavailableError extends Error {}
+
 const AMOUNT = /^(?:0|[1-9][0-9]{0,99})$/;
 const NOTICE = 'Read-only estimate using the current virtual-bank policy; not a loan, approval, or locked quote. Borrowing rechecks the database policy.';
 
 export function quoteNewBorrow(raw: unknown, requested: unknown): BorrowQuote {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-    throw new Error('authoritative bank standing unavailable');
+    throw new BorrowQuoteUnavailableError('authoritative bank standing unavailable');
   }
   const standing = raw as Record<string, unknown>;
   const limitText = standing.credit_limit;
   const bps = standing.loan_interest_bps;
   const days = standing.loan_term_days;
-  if (typeof limitText !== 'string' || !AMOUNT.test(limitText) ||
+  if (!Object.prototype.hasOwnProperty.call(standing, 'active_loan') ||
+      typeof limitText !== 'string' || !AMOUNT.test(limitText) ||
       typeof bps !== 'number' || !Number.isInteger(bps) || bps < 0 || bps > 10000 ||
       typeof days !== 'number' || !Number.isInteger(days) || days < 1 || days > 365) {
-    throw new Error('authoritative bank lending policy unavailable');
+    throw new BorrowQuoteUnavailableError('authoritative bank lending policy unavailable');
   }
   if (typeof requested !== 'string' || !/^[1-9][0-9]{0,99}$/.test(requested)) {
     throw new BankInputError('amount must be a positive canonical integer string');

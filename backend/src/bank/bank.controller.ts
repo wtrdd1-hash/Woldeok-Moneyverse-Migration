@@ -31,7 +31,7 @@ import {
   IdempotentDto,
 } from './bank.dto';
 import { BankInputError, BankRepository } from './bank.repository';
-import { quoteNewBorrow } from './borrow-quote';
+import { BorrowQuoteUnavailableError, quoteNewBorrow } from './borrow-quote';
 
 @ApiTags('banking')
 @Controller('banking')
@@ -74,7 +74,14 @@ export class BankController {
     return this.guarded(async () => {
       const standing = await this.repository().getStanding(requireUserId(request));
       if (!standing) throw new ServiceUnavailableException('bank standing unavailable');
-      return quoteNewBorrow(standing, amount);
+      try {
+        return quoteNewBorrow(standing, amount);
+      } catch (error) {
+        if (error instanceof BorrowQuoteUnavailableError) {
+          throw new ServiceUnavailableException('authoritative lending policy unavailable');
+        }
+        throw error;
+      }
     }, 'failed to quote virtual bank loan');
   }
 
