@@ -14,3 +14,10 @@
 - [ ] Real isolated PostgreSQL checks and rollback
 - [ ] Full test/lint/typecheck/build/security/CI
 - [ ] QA release evidence, pre-integration main refresh, Draft PR
+
+## Midpoint (15:58 KST)
+- Refetched main and English/Korean integrated plans: main remains `49788d09494fed3e463651945b83386e87dd47bc`.
+- RED evidence: 3 backend repository failures (methods missing), 1 frontend helper import failure, 1 Android gateway private-cache failure; original five frontend suite failures also observed.
+- GREEN focused: backend 16 PASS, frontend/Android 13 PASS. Typecheck PASS; changed-file lint found one test literal precision error, corrected.
+- Code now spans backend repository/controller/DTO, PostgreSQL SECURITY DEFINER migration, frontend shop save/list UI, Android app API privacy and regression tests. Release flag defaults OFF.
+- Migration 280 collision with unmerged A/B candidates persists. No live DB writes, no deployment.

@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   NotFoundException,
   Param,
@@ -28,6 +29,7 @@ import {
   ItemConsumptionDto,
   PurchaseDto,
   UpkeepSettlementDto,
+  WishlistMutationDto,
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
@@ -140,6 +142,33 @@ export class ShopController {
       'the catalogue is unavailable',
     );
     return { catalogItems: filterShopItems(catalogItems, query) };
+  }
+
+  @Get('wishlist')
+  @Header('Cache-Control', 'private, no-store')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @ApiOperation({ summary: 'Owner-only saved shop items; never purchases' })
+  async wishlist(@Req() request: RequestWithSession) {
+    if (process.env.SHOP_WISHLIST_ENABLED !== 'true') throw new ServiceUnavailableException('wishlist is disabled');
+    return {
+      items: await this.guarded(
+        () => this.repository().wishlist(requireUserId(request)),
+        'wishlist is unavailable',
+      ),
+    };
+  }
+
+  @Post('wishlist/mutations')
+  @Header('Cache-Control', 'private, no-store')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @ApiOperation({ summary: 'Save or remove an item without purchasing it' })
+  async mutateWishlist(@Req() request: RequestWithSession, @Body() body: WishlistMutationDto) {
+    if (process.env.SHOP_WISHLIST_ENABLED !== 'true') throw new ServiceUnavailableException('wishlist is disabled');
+    const receipt = await this.guarded(
+      () => this.repository().setWishlist(requireUserId(request), body.catalogId, body.action === 'SAVE', body.idempotencyKey),
+      'wishlist change was not accepted',
+    );
+    return { saved: receipt.saved, replayed: receipt.replayed, version: receipt.version, receiptId: receipt.receipt_id };
   }
 
   @Get('holdings')

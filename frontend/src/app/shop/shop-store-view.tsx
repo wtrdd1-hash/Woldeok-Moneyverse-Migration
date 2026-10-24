@@ -2,6 +2,8 @@
 
 import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { normalizeShopWishlist, wishlistAction, type ShopWishlistItem } from './shop-wishlist';
 import {
   Sparkles,
   ShoppingBag,
@@ -16,6 +18,7 @@ import {
   Tag,
   Clock,
   Coins,
+  Bookmark,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { compareAmounts, groupDigits } from '@/lib/money';
@@ -48,6 +51,9 @@ interface ShopStoreViewProps {
   readonly userBalance: string;
   readonly currentUsername?: string | undefined;
   readonly userAvatarUrl?: string | null | undefined;
+  readonly wishlistEnabled?: boolean;
+  readonly wishlistGuest?: boolean;
+  readonly wishlistItems?: ShopWishlistItem[] | null;
 }
 
 const CATEGORIES = [
@@ -69,6 +75,9 @@ export function ShopStoreView({
   userBalance,
   currentUsername = '모험가',
   userAvatarUrl,
+  wishlistEnabled = false,
+  wishlistGuest = false,
+  wishlistItems = null,
 }: ShopStoreViewProps) {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -77,9 +86,44 @@ export function ShopStoreView({
   const [buyQuantity, setBuyQuantity] = useState<number>(1);
   const [buyStatus, setBuyStatus] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  const [savedItems, setSavedItems] = useState<ShopWishlistItem[] | null>(wishlistItems);
+  const [wishlistBusy, setWishlistBusy] = useState<string | null>(null);
+  const [wishlistError, setWishlistError] = useState<string | null>(null);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const savedIds = new Set(savedItems?.map((item) => item.catalogId) ?? []);
+
+  const handleWishlist = async (catalogId: string, saved: boolean) => {
+    setWishlistBusy(catalogId);
+    setWishlistError(null);
+    try {
+      const response = await fetch('/api/v1/shop/wishlist/mutations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        cache: 'no-store',
+        body: JSON.stringify({ catalogId, action: saved ? 'SAVE' : 'REMOVE', idempotencyKey: crypto.randomUUID() }),
+      });
+      if (!response.ok || !wishlistAction(await response.json().catch(() => null), saved)) {
+        throw new Error('저장 결과를 확인할 수 없습니다.');
+      }
+      const latest = await fetch('/api/v1/shop/wishlist', { cache: 'no-store', credentials: 'same-origin' });
+      const verified = latest.ok ? normalizeShopWishlist(await latest.json().catch(() => null)) : null;
+      if (!verified) {
+        setSavedItems(null);
+        throw new Error('서버의 최신 저장 목록을 확인하지 못했습니다. 다시 시도해 주세요.');
+      }
+      setSavedItems(verified);
+    } catch (error: unknown) {
+      setWishlistError(error instanceof Error ? error.message : '저장 요청에 실패했습니다.');
+    } finally {
+      setWishlistBusy(null);
+    }
+  };
+
 
 
   const filteredItems = items.filter((item) => {
+    if (showSavedOnly && !savedIds.has(item.catalog_id)) return false;
     if (selectedCategory === 'all') return true;
     return item.category === selectedCategory;
   });
@@ -161,6 +205,20 @@ export function ShopStoreView({
           );
         })}
       </div>
+
+      {wishlistEnabled && (
+        <div className="flex flex-wrap items-center gap-3" aria-live="polite">
+          {wishlistGuest ? (
+            <Link href="/login?next=%2Fshop" className="text-sm underline underline-offset-4">로그인 후 관심 상품 저장</Link>
+          ) : savedItems ? (
+            <button type="button" aria-pressed={showSavedOnly} onClick={() => setShowSavedOnly(!showSavedOnly)}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm">
+              <Bookmark className="size-4" /> 저장한 상품 {savedItems.length}개 {showSavedOnly ? '· 전체 보기' : '· 모아 보기'}
+            </button>
+          ) : <p role="status" className="text-sm text-muted-foreground">관심 상품 목록을 확인할 수 없습니다. 저장 기능은 잠시 사용할 수 없습니다.</p>}
+          {wishlistError && <p role="alert" className="text-sm text-red-700 dark:text-red-300">{wishlistError}</p>}
+        </div>
+      )}
 
       {/* Items Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -269,6 +327,16 @@ export function ShopStoreView({
                   </div>
                 </div>
 
+                {wishlistEnabled && !wishlistGuest && (
+                  <button type="button" disabled={!savedItems || wishlistBusy !== null}
+                    aria-pressed={savedIds.has(item.catalog_id)}
+                    aria-label={`${item.name} ${savedIds.has(item.catalog_id) ? '관심 상품 삭제' : '관심 상품 저장'}`}
+                    onClick={() => void handleWishlist(item.catalog_id, !savedIds.has(item.catalog_id))}
+                    className="mb-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-xs font-semibold disabled:opacity-50">
+                    <Bookmark className="size-4" />
+                    {wishlistBusy === item.catalog_id ? '서버 확인 중...' : savedIds.has(item.catalog_id) ? '저장됨 · 삭제' : '관심 상품 저장'}
+                  </button>
+                )}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setPreviewItem(item)}
@@ -310,6 +378,19 @@ export function ShopStoreView({
           );
         })}
       </div>
+
+      {wishlistEnabled && showSavedOnly && savedItems && savedItems.filter((item) => !item.available).length > 0 && (
+        <section aria-label="판매 종료된 저장 상품" className="rounded-xl border border-border p-4">
+          <h2 className="mb-3 text-sm font-bold">현재 판매하지 않는 저장 상품</h2>
+          {savedItems.filter((item) => !item.available).map((item) => (
+            <div key={item.catalogId} className="flex items-center justify-between gap-3 py-2">
+              <span className="text-xs text-muted-foreground">판매가 종료된 상품 (상세 정보 비공개)</span>
+              <button type="button" className="min-h-11 rounded-lg border px-3 text-sm" disabled={wishlistBusy !== null}
+                onClick={() => void handleWishlist(item.catalogId, false)}>저장 목록에서 삭제</button>
+            </div>
+          ))}
+        </section>
+      )}
 
       {/* Fitting Room Modal */}
       {previewItem && (

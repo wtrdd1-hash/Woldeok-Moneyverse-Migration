@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
 
 export class PurchaseDto {
   @ApiProperty({ format: 'uuid', description: 'Client-generated idempotency key' })
@@ -53,6 +53,20 @@ export class ItemConsumptionDto {
  */
 export class UpkeepSettlementDto {
   @ApiProperty({ format: 'uuid', description: 'Client-generated idempotency key' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+}
+
+export class WishlistMutationDto {
+  @ApiProperty({ format: 'uuid', description: 'Catalogue item to save or remove' })
+  @IsUUID()
+  readonly catalogId!: string;
+
+  @ApiProperty({ enum: ['SAVE', 'REMOVE'] })
+  @IsEnum(['SAVE', 'REMOVE'])
+  readonly action!: 'SAVE' | 'REMOVE';
+
+  @ApiProperty({ format: 'uuid', description: 'Unique client retry key' })
   @IsUUID()
   readonly idempotencyKey!: string;
 }

@@ -166,6 +166,22 @@ export interface ShopCatalogListingRow {
   readonly user_is_equipped: boolean;
 }
 
+export interface ShopWishlistRow {
+  readonly catalog_id: string;
+  readonly name: string | null;
+  readonly price: string | null;
+  readonly available: boolean;
+  readonly version: number;
+  readonly updated_at: Date;
+}
+
+export interface ShopWishlistReceipt {
+  readonly saved: boolean;
+  readonly replayed: boolean;
+  readonly version: number;
+  readonly receipt_id: string;
+}
+
 /** Store 2.0 user holdings row */
 export interface ShopHoldingRow {
   readonly catalog_id: string;
@@ -253,6 +269,35 @@ export class ShopCatalogRepository {
        FROM public.shop_catalog_list_v2($1) AS listing`,
       [actorUserId],
     );
+  }
+
+  /** Owner-only wishlist: the application role receives EXECUTE, never table DML. */
+  async wishlist(actor: unknown): Promise<ShopWishlistRow[]> {
+    const userId = requireShopUuid(actor, 'authenticated user id');
+    return queryRows<ShopWishlistRow>(
+      this.pool,
+      `SELECT catalog_id::text AS catalog_id, name, price, available, version, updated_at
+       FROM public.shop_wishlist_list($1)`,
+      [userId],
+    );
+  }
+
+  async setWishlist(actor: unknown, catalogId: unknown, saved: boolean, key: unknown): Promise<ShopWishlistReceipt> {
+    const userId = requireShopUuid(actor, 'authenticated user id');
+    const itemId = requireShopUuid(catalogId, 'catalog item id');
+    const idempotencyKey = requireShopUuid(key, 'idempotency key');
+    if (typeof saved !== 'boolean') throw new ShopInputError('saved must be boolean');
+    const row = await queryOne<ShopWishlistReceipt>(
+      this.pool,
+      `SELECT saved, replayed, version, receipt_id::text AS receipt_id
+       FROM public.shop_wishlist_set($1, $2, $3, $4)`,
+      [userId, itemId, saved, idempotencyKey],
+    );
+    if (!row || typeof row.saved !== 'boolean' || typeof row.replayed !== 'boolean' ||
+        !Number.isSafeInteger(row.version) || row.version < 0 || !row.receipt_id) {
+      throw new Error('database did not return a valid wishlist receipt');
+    }
+    return row;
   }
 
   async holdings(actor: unknown): Promise<ShopHoldingRow[]> {

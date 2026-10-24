@@ -36,6 +36,16 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('never allows Android shop wishlist responses to be cached, even if upstream misconfigures headers', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('{"items":[]}', {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' },
+    })));
+    const response = await GET(request('/app-api/v1/shop/wishlist'), context('shop', 'wishlist'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

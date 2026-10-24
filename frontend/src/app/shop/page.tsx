@@ -9,6 +9,7 @@ import { apiOrNull, publicApi } from '@/lib/api';
 import { isLoggedInMember } from '@/lib/session';
 import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
+import { normalizeShopWishlist } from './shop-wishlist';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 import { MembershipTierCard } from '@/components/membership-tier-card';
 
@@ -37,7 +38,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const query = params.q?.trim() ?? '';
   const querySuffix = query ? `?q=${encodeURIComponent(query)}` : '';
 
-  const [catalogData, walletData, profileData] = await Promise.all([
+  const wishlistEnabled = process.env.SHOP_WISHLIST_ENABLED === 'true';
+  const [catalogData, walletData, profileData, wishlistData] = await Promise.all([
     loggedIn
       ? apiOrNull<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/catalog${querySuffix}`)
       : publicApi<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/public-catalog${querySuffix}`, 60),
@@ -47,6 +49,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           '/api/v1/profile',
         )
       : null,
+    wishlistEnabled && loggedIn ? apiOrNull<unknown>('/api/v1/shop/wishlist') : null,
   ]);
 
   const items = catalogData?.catalogItems || [];
@@ -129,6 +132,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         userBalance={userBalance}
         currentUsername={username}
         userAvatarUrl={avatarUrl}
+        wishlistEnabled={wishlistEnabled}
+        wishlistGuest={!loggedIn}
+        wishlistItems={wishlistEnabled && loggedIn ? normalizeShopWishlist(wishlistData) : null}
       />
     </div>
   );
