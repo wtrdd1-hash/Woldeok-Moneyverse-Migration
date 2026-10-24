@@ -1,3 +1,7 @@
+## 2026-10-24 — Development C v1012: verified stock league read-only safety (DRAFT PR #1168 / RELEASE HOLD)
+- Main `49788d09` unchanged start/mid/end. Removed fabricated +184.2% whale returns and fictional copy-trade subscription from `/stocks/league`; real PostgreSQL-backed league read API now supplies bounded server-rendered rankings. Browser copy-trade subscription/cancel endpoints return 503/no-store until ledger-backed receipts are verified. No WLD, DB, Test or Production writes.
+- TDD 11/11 PASS; lint/typecheck/build, backend unit, contract/app-api, repository security and Chromium 320/390/1280 PASS. CI isolated PostgreSQL migration and backend 1,893 PASS / 34 SKIP. Full frontend 1,402 PASS / 5 FAIL, dependency audit 2 production HIGH / 26 total (2 CRITICAL), GitHub CI FAIL, exact-SHA official Test mismatch. Draft #1168 and backend follow-up #1169; no merge/deploy/cleanup. See worklog `docs/worklog/2026-10-24-hourly-c-v1012.md`.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
