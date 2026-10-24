@@ -19,3 +19,10 @@
 
 ## Integration / rollback gate
 - Code is a read-only snapshot: rollback = stop routing endpoint/revert this PR, no migration/data rollback needed. No Test or Production promotion, no GitOps or service restarts. Exact-SHA authenticated user-flow and all CI/security/SEO/a11y gates remain required; until then PR stays Draft and Production RELEASE HOLD.
+
+## After push — exact code checkpoint
+- Code + initial reports commit `c4a2ae921f19bd83e51391914db7a7b5a8769bf8`; Draft PR #1199, mergeable but intentionally HOLD. No merge requested.
+- Final local verification on code SHA: `pnpm test` FAIL (frontend 6, backend 1,318 PASS/398 SKIPPED, DB 15 PASS/3 SKIPPED, contract 38 PASS); `pnpm lint` PASS 0 errors/1,137 warnings; `pnpm typecheck` PASS; `pnpm build` PASS; `pnpm audit --prod --audit-level high` FAIL (2 High). Android contract 179 endpoints PASS.
+- GitHub CI #40109356499 and Test Candidate #40109345307 on code SHA: classify/policy/release-input PASS, runtime pending at checkpoint. These are NOT final gate PASS evidence.
+- Actual remote branches after push: 87 incl main (86 non-main; original 85 all retained, plus this new branch). Open PRs 83. Deleted 0; protected unmerged branches retained for unique commits. Latest main still `c9a868b1e622341e2daa8b936ddf0988eda9988e`; EN/KO plans rechecked pre-PR.
+- Official Test exact-SHA user/auth/finance E2E, security/a11y/SEO and GitOps release gates NOT PASS. Test and Production NOT promoted. Production DB writes/restarts 0. Rollback: revert this read-only feature PR only; no migrations or ledger changes.
