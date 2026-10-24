@@ -106,6 +106,19 @@ describe('security headers', () => {
     expect(csp.get('form-action')).toBe("'self'");
   });
 
+  it('overrides the public indexing header for authenticated gameplay pages', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const rules = await config.headers!();
+    for (const source of ['/quests', '/businesses']) {
+      const override = rules.find((rule) => rule.source === source);
+      expect(override, `${source} needs a dedicated response header`).toBeDefined();
+      expect(override?.headers.find((header) => header.key === 'x-robots-tag')?.value).toBe(
+        'noindex, nofollow',
+      );
+    }
+    expect(rules.find((rule) => rule.source === '/guide')).toBeUndefined();
+  });
+
   it('refuses indexing unless the environment asks for it', async () => {
     process.env.SEO_INDEXING_ENABLED = 'false';
     expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe('noindex, nofollow');
