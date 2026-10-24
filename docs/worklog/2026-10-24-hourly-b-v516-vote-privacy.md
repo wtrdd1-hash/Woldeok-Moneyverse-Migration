@@ -15,3 +15,7 @@
 
 ## Release HOLD
 Migration 280 is already claimed by other unmerged PRs. This branch is a nonmergeable candidate until numbering and exact-SHA validation are reconciled. No Test or Production promotion.
+
+## In progress — TDD RED (22:42 KST)
+- Added 3 structural regressions + 1 disposable-PG integration contract. Observed **3 RED / 1 SKIP** before implementation: migration absent, aggregate function absent, direct table SELECT still present.
+- Test role uses only CI-provided localhost:5432 disposable migrator DB; never touches Production-linked 5433.
