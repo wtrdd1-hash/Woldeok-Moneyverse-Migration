@@ -1,1 +1,1 @@
-expand full 5-locale support with Vietnamese and modal translations
+fix(i18n): localize H1 headings and metadata across all calculators and subpages

@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 'use client';
 
 import React, { useState, useId } from 'react';
@@ -21,7 +23,8 @@ import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/pub
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 import { SocialShareBar } from '@/components/social-share-bar';
 
-export default function RetirementCalculatorPage() {
+export default async function RetirementCalculatorPage() {
+  const locale = await getServerLocale();
   const yearsId = useId();
   const monthsId = useId();
   const salaryId = useId();
@@ -169,8 +172,15 @@ export default function RetirementCalculatorPage() {
           </span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-          직장인 퇴직금 실수령액 & IRP 절세 계산기
-        </h1>
+            {localeLabel(
+              locale,
+              '직장인 퇴직금 실수령액 & IRP 절세 계산기',
+              'Severance Pay & Retirement Pension Tax Calculator',
+              '退職金手取り額＆年金節税計算機',
+              '退休遣散费到手与税收优惠计算器',
+              'Máy tính Trợ cấp Thôi việc & Hưu trí'
+            )}
+          </h1>
         <p className="text-sm sm:text-base text-zinc-400 max-w-3xl">
           근속연수와 최근 3개월 평균임금을 입력하시면 법정 퇴직금, 근속연수 공제, 실효세율 및 일반 통장 수령 대비 IRP 계좌 수령 시 아낄 수 있는 절세액을 즉시 계산해 드립니다.
         </p>

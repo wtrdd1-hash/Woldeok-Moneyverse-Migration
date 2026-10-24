@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import React from 'react';
 import type { Metadata } from 'next';
 import { RealEstateCalculatorView } from '@/components/real-estate-calculator-view';
@@ -27,7 +29,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RealEstateCalculatorPage() {
+export default async function RealEstateCalculatorPage() {
+  const locale = await getServerLocale();
   const defaultPreset = REAL_ESTATE_PRESETS[0];
   const richSnippet = buildCalculatorRichSnippet({
     name: '2026 무료 부동산 월세/임대 수익률 계산기',

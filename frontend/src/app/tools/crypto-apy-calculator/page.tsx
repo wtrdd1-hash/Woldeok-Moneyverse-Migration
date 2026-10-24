@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -15,7 +17,8 @@ import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 type CompoundFreq = 'daily' | 'weekly' | 'monthly' | 'block' | 'annually';
 
-export default function CryptoApyCalculatorPage() {
+export default async function CryptoApyCalculatorPage() {
+  const locale = await getServerLocale();
   const [principal, setPrincipal] = useState<number>(10000000); // 1,000만 원 or WLD
   const [rate, setRate] = useState<number>(12.5); // 12.5%
   const [rateType, setRateType] = useState<'APR' | 'APY'>('APR');
@@ -123,7 +126,16 @@ export default function CryptoApyCalculatorPage() {
               <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
                 <Coins className="w-6 h-6" />
               </span>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">크립토 스테이킹 APY/APR 계산기</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            {localeLabel(
+              locale,
+              '크립토 스테이킹 APY/APR 복리 계산기',
+              'Crypto Staking APY/APR Compound Calculator',
+              '暗号資産ステーキング APY/APR 計算機',
+              '加密资产质押 APY/APR 复利计算器',
+              'Máy tính Lãi kép Staking APY/APR Crypto'
+            )}
+          </h1>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
               DeFi 스테이킹, 단일 예치 풀, 가상통화(WLD)의 단리(APR) 및 복리(APY) 실질 수익과 자동 재예치 효과를 시뮬레이션합니다.

@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -40,7 +42,8 @@ export const metadata: Metadata = {
   alternates: { canonical: canonicalUrl('/guide') },
 };
 
-export default function GuidePage() {
+export default async function GuidePage() {
+  const locale = await getServerLocale();
   const guideBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
     { name: '이용 가이드', path: '/guide' },
@@ -57,7 +60,14 @@ export default function GuidePage() {
           <span>공식 실전 이용 가이드 2026 최신판</span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-black text-slate-100 tracking-tight">
-          3분 만에 마스터하는 <span className="text-emerald-400">월덕 머니버스</span>
+          {localeLabel(
+            locale,
+            '3분 만에 마스터하는 월덕 머니버스',
+            'Master Woldeok Moneyverse in 3 Minutes',
+            '3分でマスターするウォルドク・マネーバース',
+            '3分钟玩转月德虚拟金融元宇宙',
+            'Làm chủ Woldeok Moneyverse trong 3 phút'
+          )}
         </h1>
         <p className="text-sm sm:text-base text-slate-400 max-w-2xl leading-relaxed">
           월덕 머니버스는 <strong className="text-slate-200">“자산 관리 → 모의 투자 → 복리 성장”</strong>으로 이어지는 100% 안전한 지속형 가상 금융경제 시뮬레이터입니다.

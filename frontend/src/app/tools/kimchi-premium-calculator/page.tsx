@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import React from 'react';
 import type { Metadata } from 'next';
 import { KimchiPremiumCalculatorView } from '@/components/kimchi-premium-calculator-view';
@@ -27,7 +29,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function KimchiPremiumCalculatorPage() {
+export default async function KimchiPremiumCalculatorPage() {
+  const locale = await getServerLocale();
   const defaultPreset = KIMCHI_PREMIUM_PRESETS[0];
   const richSnippet = buildCalculatorRichSnippet({
     name: '2026 무료 코인 김치프리미엄 & 환율 차익 계산기',

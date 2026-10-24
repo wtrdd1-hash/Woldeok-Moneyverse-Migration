@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { canonicalUrl, buildOgImageUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { GLOSSARY_TERMS, GLOSSARY_CATEGORIES } from '@/config/pseo-glossary.config';
 import { DesktopStickyAdRails } from '@/components/desktop-sticky-ad-rails';
@@ -104,7 +105,14 @@ export default async function GlossaryPage() {
 
         <PageHeader
           eyebrow="GLOBAL FINANCIAL GLOSSARY"
-          title={isEn ? '50 Essential Investment & Finance Terms' : '50대 핵심 실전 투자 & 금융 용어사전'}
+          title={localeLabel(
+            locale,
+            '50대 핵심 실전 투자 & 금융 용어사전',
+            '50 Essential Investment & Finance Terms',
+            '50大投資・金融重要用語辞典',
+            '50大核心投资与金融术语词典',
+            '50 Thuật ngữ Đầu tư & Tài chính Cốt lõi'
+          )}
         >
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-3xl">
             {isEn

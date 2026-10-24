@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -59,7 +61,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LoanInterestCalculatorPage() {
+export default async function LoanInterestCalculatorPage() {
+  const locale = await getServerLocale();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
@@ -131,7 +134,7 @@ export default function LoanInterestCalculatorPage() {
             className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>금융 계산기 목록으로</span>
+            <span>{localeLabel(locale, '금융 계산기 목록으로', 'Back to Tools Hub', '計算機一覧へ戻る', '返回金融工具列表', 'Quay lại danh sách máy tính')}</span>
           </Link>
           <span className="text-xs text-zinc-500 font-mono">FIN-CALC-LOAN-V1</span>
         </div>
@@ -143,7 +146,14 @@ export default function LoanInterestCalculatorPage() {
             <span>2026년 최신 은행 기준 금리 완벽 반영</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
-            대출이자 계산기 (원리금균등 · 원금균등)
+            {localeLabel(
+              locale,
+              '대출이자 계산기 (원리금균등 · 원금균등)',
+              'Loan Interest Calculator (Amortization & Equal Principal)',
+              'ローン金利計算機（元利均等・元金均等）',
+              '贷款利息计算器（等额本息 · 等额本金）',
+              'Máy tính Lãi suất Vay (Gốc & Lãi Đều)'
+            )}
           </h1>
           <p className="text-sm text-zinc-400 leading-relaxed">
             대출 금액, 연 금리, 상환 기간에 따른 월별 상환금액과 총 이자를 즉시 비교 계산합니다.

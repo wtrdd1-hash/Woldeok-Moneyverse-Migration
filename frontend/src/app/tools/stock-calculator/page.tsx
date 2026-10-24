@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -22,7 +24,8 @@ const POPULAR_STOCKS = [
   { symbol: 'GAME', name: '도파민 게임즈', currentPrice: 28000 },
 ];
 
-export default function StockCalculatorPage() {
+export default async function StockCalculatorPage() {
+  const locale = await getServerLocale();
   const [initialPrice, setInitialPrice] = useState<number>(50000);
   const [initialQuantity, setInitialQuantity] = useState<number>(100);
   const [additionalPrice, setAdditionalPrice] = useState<number>(40000);
@@ -119,9 +122,15 @@ export default function StockCalculatorPage() {
 
       <div className="space-y-2">
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
-          <TrendingUp className="size-7 text-emerald-500" />
-          <span>주식 물타기·평단가 & 수익률 계산기</span>
-        </h1>
+            {localeLabel(
+              locale,
+              '주식 물타기·평단가 & 수익률 계산기',
+              'Stock DCA & Average Cost Calculator',
+              '株式ナンピン・平均取得単価＆収益率計算機',
+              '股票补仓摊薄成本与收益率计算器',
+              'Máy tính Bình quân Giá Cổ phiếu (DCA)'
+            )}
+          </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
           추가 매수(물타기/불타기) 시 변경되는 최종 평단가를 즉시 확인하고, 목표 수익률 달성을 위한 매도가를 정밀 산출하세요.
         </p>

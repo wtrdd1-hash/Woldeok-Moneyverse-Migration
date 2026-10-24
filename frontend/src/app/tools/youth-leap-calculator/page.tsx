@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 'use client';
 
 import React, { useState, useId } from 'react';
@@ -17,7 +19,8 @@ import {
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
-export default function YouthLeapCalculatorPage() {
+export default async function YouthLeapCalculatorPage() {
+  const locale = await getServerLocale();
   const depositId = useId();
   const rateId = useId();
   const [monthlyDeposit, setMonthlyDeposit] = useState<number>(700000);
@@ -118,8 +121,15 @@ export default function YouthLeapCalculatorPage() {
           2026 청년도약계좌 공식 매칭 기준
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
-          청년도약계좌 만기 5,000만원 계산기
-        </h1>
+            {localeLabel(
+              locale,
+              '청년도약계좌 만기 5,000만원 계산기',
+              'Youth Savings Ladder Maturity Yield Calculator',
+              '青年跳躍口座満期利回り計算機',
+              '青年成长储蓄阶梯到期收益计算器',
+              'Máy tính Tích lũy Tài chính Thanh niên'
+            )}
+          </h1>
         <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-3xl leading-relaxed">
           월 최대 70만원 저축으로 5년 뒤 5천만원 목돈 만들기! 내 소득 구간별 매칭되는 정부기여금과 은행 비과세 이자를 1초 만에 확인하세요.
         </p>
