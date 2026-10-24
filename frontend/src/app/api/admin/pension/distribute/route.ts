@@ -1,16 +1,15 @@
 import { NextResponse } from 'next/server';
-import { api } from '@/lib/api';
 
+// The pension repository deliberately refuses unjournaled WLD payouts.
+// Keep this browser-facing proxy closed until ledger settlement and
+// elevated administrator CSRF/reauth flows have been certified together.
 export async function POST() {
-  try {
-    const data = await api('/api/v1/admin/pension/distribute-payouts', {
-      method: 'POST',
-    });
-    return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || '국민연금 일괄 지급 집행에 실패했습니다.' },
-      { status: error?.status || 500 },
-    );
-  }
+  return NextResponse.json(
+    {
+      ok: false,
+      code: 'PENSION_LEDGER_SETTLEMENT_UNCERTIFIED',
+      error: 'Pension payouts are paused pending authoritative ledger verification.',
+    },
+    { status: 503, headers: { 'Cache-Control': 'private, no-store' } },
+  );
 }
