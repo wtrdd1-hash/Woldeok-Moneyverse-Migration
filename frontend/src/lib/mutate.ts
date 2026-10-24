@@ -21,8 +21,13 @@ export async function mutate<T>(
     readonly method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
     readonly body?: unknown;
     readonly timeoutMs?: number;
+    readonly idempotencyKey?: string;
   } = {},
 ): Promise<T> {
+  if (request.idempotencyKey !== undefined &&
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(request.idempotencyKey)) {
+    throw new Error('invalid idempotency key');
+  }
   const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session', {
     ...(request.timeoutMs === undefined ? {} : { timeoutMs: request.timeoutMs }),
   });
@@ -30,6 +35,7 @@ export async function mutate<T>(
     method: request.method ?? 'POST',
     body: request.body,
     csrfToken,
+    ...(request.idempotencyKey === undefined ? {} : { idempotencyKey: request.idempotencyKey }),
     ...(request.timeoutMs === undefined ? {} : { timeoutMs: request.timeoutMs }),
   });
 }

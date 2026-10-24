@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Building2,
   Coins,
@@ -26,6 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
+import { harvestEnterpriseDividends, updateEnterpriseStatus } from './actions';
 
 export interface StateEnterpriseItem {
   id: string;
@@ -131,34 +132,29 @@ export function EnterpriseControlTower({
   const [privateEnterprises] = useState<PrivateEnterpriseItem[]>(initialPrivate);
   const [dividendLogs, setDividendLogs] = useState<DividendLogItem[]>(initialDividendLogs);
   const [isHarvesting, setIsHarvesting] = useState(false);
+  // Preserve this operation identity across ambiguous failures within the page.
+  // Only an authoritative receipt permits rotating the key.
+  const pendingHarvestKey = useRef<string | null>(null);
   const [loadingCode, setLoadingCode] = useState<string | null>(null);
 
   const handleHarvestDividends = async () => {
     setIsHarvesting(true);
     try {
-      const res = await fetch('/api/admin/enterprises/harvest', { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '배당 수취 실패');
-
+      const key = pendingHarvestKey.current ?? crypto.randomUUID();
+      pendingHarvestKey.current = key;
+      const result = await harvestEnterpriseDividends(key);
+      if (!result.ok) throw new Error(result.error);
+      pendingHarvestKey.current = null;
       toast.success(
-        `🏛️ 공기업 법정 배당금 수취 완료: +${Number(data.total_dividends_collected).toLocaleString('ko-KR')} WLD (국고 잔액: ${Number(data.treasury_balance_after).toLocaleString('ko-KR')} WLD)`,
+        `🏛️ 공기업 배당 국고 수취 확인: +${groupDigits(result.receipt.total_dividends_collected)} WLD (국고 잔액: ${groupDigits(result.receipt.treasury_balance_after)} WLD)`,
       );
-
-      // 즉시 로그 갱신
-      const updatedLogs: DividendLogItem[] = soes.map((s) => ({
-        id: crypto.randomUUID(),
-        enterprise_id: s.id,
-        enterprise_code: s.code,
-        enterprise_name: s.name,
-        dividend_amount_wld: ((BigInt(s.net_profit_hourly_wld) * BigInt(s.dividend_rate_bps)) / BigInt(10000)).toString(),
-        revenue_wld: s.operating_revenue_hourly_wld,
-        net_profit_wld: s.net_profit_hourly_wld,
-        eval_grade: s.eval_grade,
-        created_at: new Date().toISOString(),
-      }));
-      setDividendLogs((prev) => [...updatedLogs, ...prev].slice(0, 20));
-    } catch (err: any) {
-      toast.error(err.message || '공기업 배당금 수취 중 오류가 발생했습니다.');
+      if (result.logs !== null) {
+        setDividendLogs(result.logs);
+      } else {
+        toast.info('배당 이력은 현재 확인할 수 없어 기존 이력을 유지합니다.');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '공기업 배당금 수취 결과를 확인할 수 없습니다.');
     } finally {
       setIsHarvesting(false);
     }
@@ -168,20 +164,14 @@ export function EnterpriseControlTower({
     const nextStatus = soe.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
     setLoadingCode(soe.code);
     try {
-      const res = await fetch('/api/admin/enterprises/status', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: soe.code, status: nextStatus }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '상태 변경 실패');
-
+      const result = await updateEnterpriseStatus(soe.code, nextStatus);
+      if (!result.ok) throw new Error(result.error);
       setSoes((prev) =>
         prev.map((item) => (item.code === soe.code ? { ...item, status: nextStatus } : item)),
       );
       toast.success(`${soe.name} 상태가 [${nextStatus}]로 변경되었습니다.`);
-    } catch (err: any) {
-      toast.error(err.message || '상태 변경 중 오류가 발생했습니다.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '상태 변경 결과를 확인할 수 없습니다.');
     } finally {
       setLoadingCode(null);
     }
