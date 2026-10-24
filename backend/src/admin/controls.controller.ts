@@ -161,11 +161,10 @@ export class RoleDesignationDto extends ReasonedCommandDto {
 /**
  * The control plane the single superadmin replaced two-person approval with.
  *
- * The guard chain is the console's, plus two more on every write:
- * `ReauthGuard`, so the caller has proved control of their OAuth identity,
- *; the retired second factor is no longer part of the request. Flipping a feature off, moving the economy to a
- * new policy version and handing somebody the superadmin designation are the
- * three things nobody else can now object to, so each of them costs both.
+ * Economy policy mutations and role designation require both CSRF and
+ * recent identity reauthentication in addition to the console session.
+ * Feature switches deliberately retain the operator-approved CSRF-only
+ * boundary; the retired second factor is not part of either flow.
  *
  * Every command is idempotent by a caller-supplied key and returns the state
  * before as well as the state after, because the screen that asked has to be
@@ -258,7 +257,7 @@ export class AdminControlsController {
   }
 
   @Post('policies')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Create an economy policy version, immediate or scheduled' })
   createPolicyVersion(@Req() request: RequestWithSession, @Body() body: PolicyVersionDto) {
     return this.guarded(
@@ -276,7 +275,7 @@ export class AdminControlsController {
   }
 
   @Post('policies/rollbacks')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Return the economy to the previous policy version' })
   rollbackPolicy(@Req() request: RequestWithSession, @Body() body: ReasonedCommandDto) {
     return this.guarded(
@@ -296,7 +295,7 @@ export class AdminControlsController {
    * one that calls this on a clock.
    */
   @Post('policies/activations')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Activate every policy version whose effective time has passed' })
   activateDuePolicies() {
     return this.guarded(
@@ -323,7 +322,7 @@ export class AdminControlsController {
   }
 
   @Post('auto-policy/runs')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Run the dual-lane automatic adjustment now instead of waiting for Monday' })
   runAutoPolicy(@Req() request: RequestWithSession, @Body() body: ReasonedCommandDto) {
     return this.guarded(
@@ -338,7 +337,7 @@ export class AdminControlsController {
   }
 
   @Put('auto-policy/knobs/:knobKey')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Take one knob off automatic, or move its approved range' })
   setPolicyKnob(
     @Req() request: RequestWithSession,

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
@@ -131,6 +132,10 @@ export default async function AdminControlsPage() {
 
       <section aria-labelledby="policy-versions" className="grid gap-3">
         <SectionHeader eyebrow="ECONOMY POLICY" title="정책 버전" id="policy-versions" />
+        <p className="text-sm text-muted-foreground">
+          정책 버전 생성·되돌리기·발효에는 최근 15분 이내 본인 재인증이 필요합니다.
+          <Link href="/account/security" className="ml-1 underline underline-offset-2">계정 보안에서 재인증</Link> 후 실행하세요.
+        </p>
 
         <Card>
           <CardHeader>
