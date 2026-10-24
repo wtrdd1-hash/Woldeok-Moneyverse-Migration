@@ -1,5 +1,37 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1228 — F675-114 회원 주간 목표 집중 보드 (기능 추가 / DRAFT / 운영 보류)
+
+### 회차·실제 코드·목적
+- 이전 **기능 보완 v1226** → 현재 **기능 추가 v1228** → 다음 **기능 보완 v1230**(잠정). 최신 원격 main `49788d09494fed3e463651945b83386e87dd47bc`, 영문 정본 및 국문 대조 문서를 시작·중간에 재확인했다. v1226 Draft #1149는 미병합 문서로 배포된 코드가 아니다. 최신 QA v1233(2026-10-24 17:21 KST) **FAILED/HOLD**. 이번 회차는 기획 문서만 수정하며 운영 연결 DB·WLD·런타임·기능 스위치·Test·Production을 변경하지 않는다.
+- **확인한 실제 구현:** 회원 인증이 필요한 `frontend/src/app/quests/page.tsx`는 `GET /api/v1/engagement/early-game`의 `earlyGame.goals`를 보여준다. `backend/src/early-game/early-game.repository.ts`는 Migration 101의 `public.early_game_weekly_goals(actor)`를 호출한다. 이 함수는 목표 코드, `week/lifetime` 기간, 서울 시간 기준 월요일 `week_start`, bigint 문자열 진행도·목표치, 자기신고 여부, 완료 여부를 반환한다. 작업·구매·원장 기반 지표 3개와 **자기신고 NPC 친밀도** 지표를 구분해야 한다. 확인한 main에는 목표 고정 저장소/API가 없다. 현재 `/quests`는 `requireMember()`를 사용하면서 `robots.index=true`로 선언하므로 비공개 SEO 정책 정정이 필요하다. #1133의 VIP 상자 허위 보상 응답은 실제 보상 영수증이 아니다.
+- **목적/대상:** 로그인한 회원이 기존 목표 중 최대 **3개**를 집중 목표로 고정하고, `/quests` 및 `/account/goal-focus`에서 진짜 진행도와 근거를 확인한다. 신규 퀘스트·보상·자기신고 입력·WLD 이동·자동 알림은 만들지 않는다. 로컬스토리지만 사용하면 기기간 동기화·계정 격리 문제가 있어 배제하고, 별도 보상 원장은 금융 권한 중복이므로 배제한다. 기능 플래그 `member_goal_focus`는 기본 OFF.
+
+### 회원 흐름·화면·상태·접근성
+- 진입: `/quests`의 목표 카드에서 **목표 고정/고정 해제**, `/account/goal-focus`에서 **목표 열기/진행도 새로고침/제거/이번 주 다시 고정**. 로그인·동의 필수, 타 회원 데이터와 관리자 대리 조작 불허. 상태: `LOADING`, `EMPTY_CONFIRMED`, `PINNING`, `PINNED_CONFIRMED`, `REMOVING`, `EXPIRED_WEEK`, `SOURCE_UNAVAILABLE`, `GOAL_INACTIVE`, `CONFLICT`, `UNKNOWN_COMMIT`, `SIGNED_OUT`. API 실패를 빈 목록 또는 저장 성공으로 위장하지 않는다.
+- `goal_window=week`는 서버가 반환한 서울 기준 `week_start`를 저장하며 월요일이 바뀌면 **EXPIRED_WEEK**로 처리하고 자동 이월하지 않는다. 새 주 고정은 새 요청 키·현재 버전으로 명시적으로 수행한다. `lifetime` 목표는 `scope_week_start=NULL`로 저장해 주간 전환에도 유지한다. 비활성/삭제 목표는 제목·진행도 없이 본인만 제거 가능하다. 현재 진행도는 항상 원본 함수에서 재조회하고 WLD bigint를 부동소수점으로 변환하지 않는다. NPC 자기신고 지표는 검증된 작업으로 표현하지 않는다.
+- 응답 시간초과 시 `UNKNOWN_COMMIT`로 표시하고 본인 GET 및 원본 영수증으로 재확인한다. 새 키를 자동 생성해 재시도하지 않는다. 로그아웃·계정 전환·동의 철회 시 비동기 응답과 개인 캐시를 폐기한다. WCAG 2.2 AA, 키보드 포커스, 상태 알림(`aria-live`), 터치 영역, 320px, 200~400% 확대, 움직임 줄이기, 다국어 및 Android 네이티브 접근성을 적용한다. 개인 화면·JSON은 `noindex,nofollow`·사이트맵 제외·`private,no-store`; 기존 `/quests` robots도 수정한다.
+
+### 제안 API·DB·트랜잭션·관리자·보안 (미구현)
+- 기존 `GET /api/v1/engagement/early-game`만 진행도 정본으로 사용한다. 신규 본인 전용 `GET /api/v1/engagement/focus`, `PUT /api/v1/engagement/focus/:goalCode` (본문 `{weekStart:string|null}`), `DELETE /api/v1/engagement/focus/:goalCode`. Next 서버 액션·NestJS 세션·동의·CSRF를 검증하고 actor는 서버에서 결정한다. PUT/DELETE는 UUID `Idempotency-Key`와 `If-Match: "vN"`을 필수로 하고 GET은 ETag와 최신 상태 버전을 반환한다. 응답에는 `receiptId,operation,originalResultVersion,currentStateVersion,goalCode,weekStart,status,replayed`를 포함한다. 동일 키·동일 지문은 **최초 확정 영수증**을 반환하며 다른 지문은 409. 401 미인증, 403 동의/CSRF, 404 비공개/비소유, 409 버전/한도/키 충돌, 422 잘못된 목표·주, 429 과다 요청, 503 원본 확인 불가. 요청의 userId·진행도·목표치는 절대 신뢰하지 않는다.
+- 신규 번호는 **미할당**(열린 PR 네 개가 Migration 280 중복). 전진형 테이블 제안: `member_goal_focus_state(user_id PK/FK users ON DELETE CASCADE,version>0,updated_at)`, `member_goal_focus(user_id FK,goal_code,scope_week_start nullable,pinned_at,removed_at nullable,version>0,PK(user_id,goal_code))`, `member_goal_focus_requests(user_id FK,key uuid,digest 32byte,operation,immutable_result,created_at,PK(user_id,key))`. 인덱스 `(user_id,removed_at,pinned_at DESC,goal_code)`, `(user_id,scope_week_start)`. 제목·금액·진행도·메모는 복제 저장하지 않는다. 개인정보 보존·영수증 삭제 정책 승인 전에는 임의 자동 정리하지 않고 탈퇴 시 회원별 행을 삭제한다. 목표 카탈로그 FK를 임의 가정하지 않고 현재 활성 카탈로그·기간·주를 서버에서 검증한다. 비활성화 후에도 본인의 제거는 허용한다.
+- **잠금 순서:** 회원별 `focus_state FOR UPDATE`(없는 행은 `INSERT ... ON CONFLICT DO NOTHING`) → 동일 키 영수증 원자 삽입/조회 → 고정 시 활성 카탈로그 `FOR SHARE` → 회원 목표 행. 최초 영수증 재생 여부를 버전 변경 전에 확인하고, 현재 주 유효 고정 최대 3개를 회원 잠금 아래 검증한다. SQL 정본의 `goal_window/week_start` 일치·CAS 버전·저장/영수증 **단일 트랜잭션**을 필수로 한다. 과거 요청은 새 주 목표를 부활시키지 못한다. 목록 조회는 목표 활성 상태와 서울 기준 주를 재확인하며 원본 함수 실패 시 503으로 닫는다. `moneyverse_app`에 직접 테이블 권한을 주지 않고 actor 검증·고정 `search_path`의 최소권한 `SECURITY DEFINER`만 사용한다. 관리자에게는 표본 10명 미만 비공개 집계만 제공하며 회원별 목록 조회는 허용하지 않는다. BOLA/BFLA·CSRF·입력 크기·요청 속도·멱등 키 악용 테스트를 포함한다.
+- **Android/App API:** 기존 인증 게이트를 통한 `/app-api/v1/engagement/focus` 읽기/쓰기 동등성, 버전 호환성, 동일 오류·영수증, 오프라인 `NOT_SYNCED` 명시, 접근성·재조회 확인. 자동 푸시·메일·금융 처리 없음.
+
+### P0/P1 개발 백로그 및 검증(10개, 별도 개발 브랜치 인계)
+- **P0 ENV1228-01:** 운영 연결/dev/CI/Test DB 격리, 5433 노출 인터페이스 제한, 접속 DB 신원 검증, 독립 암호화 백업·격리 전체 복원 후에만 테스트 데이터 생성.
+- **P0 SEC1228-02:** 앱 계정 241개 중 235개 테이블 UPDATE/DELETE 권한 및 PUBLIC 은행 함수 3개 권한을 검토된 전진형 마이그레이션으로 최소화; 실제 격리 PG 부정 테스트, 운영 즉석 REVOKE 금지.
+- **P0 REL1228-03:** #1147 Migration 280 4중 충돌(#1105/#1117/#1139/#1143), #1088 빌드만으로 자동 병합, Migration266 체크섬 불일치, 프론트 5건 실패, 전체 Critical2/High10 및 봇 Critical1/High5, 경로 인벤토리 누락, 정확 SHA Test 금융 E2E·복원 미검증을 운영 차단. #1148 정책 CI만 통과해도 운영 승인 아님.
+- **P0 QUEST1228-04:** 기존 목표의 근거·자기신고 여부를 검증하고 #1133 VIP 상자 허위 보상 및 NPC 친밀도를 검증된 원장/작업 보상으로 취급하지 않도록 차단. 회원 전용 `/quests` robots noindex 정정.
+- **P1 QUEST1228-05:** 소유자 전용 SECURITY DEFINER DB·ACL·회원 잠금·삭제표식·불변 영수증 구현. Migration 번호는 열린 PR 충돌 해소 후 할당.
+- **P1 QUEST1228-06:** NestJS API, Next 서버 액션, 목표 고정/해제 CTA, 계정 집중 보드, 정본 진행도 재조회.
+- **P1 QUEST1228-07:** 서울 월요일 전환, 주간/평생 구분, 오래된 버전·지연 응답 무효화, 비활성 목표 정보 가림, 100건 동시 요청 아래 3개 한도.
+- **P1 QUEST1228-08:** Android App API 동등성, 반응형·키보드·스크린리더·확대·다국어, 오프라인·확정 불명 재확인, 세션 격리.
+- **P1 QUEST1228-09:** 관리자 비식별 집계, 탈퇴 삭제, noindex/no-store/사이트맵 제외, 속도 제한, 목표별 개인정보 없는 지표. KPI는 **가설/테스트 목표**로 고정률·D7 유지율·새 주 재고정·정본 조회 성공률·충돌률·WLD 부작용 0건을 측정.
+- **P1 QUEST1228-10:** 격리 PG 동일 키 PUT 100건, 타 회원 조회 100건, 고정/삭제 경합, 서울 월요일 경계, 비활성 목표, **격리 합성** 10,001건(운영 한도 3개는 유지), bigint 경계, 조회 실패·재시도·탈퇴; 정확 SHA 공식 Test 인증 금융 E2E, 보안 감사, 마이그레이션 무결성, 플래그 OFF 롤백, 승인 GitOps 배포.
+- **판정:** DRAFT / RELEASE HOLD. 기획은 배포하지 않음. 별도 개발 → 격리 PG → 정확 SHA CI·보안 → 공식 Test 인증 백엔드/API/DB/금융 E2E → 백업 복원 → 독립 검토 → 명시적 GitOps 승인 → 운영 스모크·롤백. 외부 독립 발행기관 PostgreSQL/OWASP/W3C **3곳 검토**, 신규 중복 제거·승인 근거 **0건**, 누적 승인 **미확인/10,000**, 검증 게이트 **BLOCKED / IN PROGRESS**. 참고: https://www.postgresql.org/docs/current/explicit-locking.html ; https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/ ; https://www.w3.org/TR/WCAG22/.
+
+
 ## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스와 수정 사유

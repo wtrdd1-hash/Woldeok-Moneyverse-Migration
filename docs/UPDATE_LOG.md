@@ -1,5 +1,10 @@
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
+## 2026-10-24 v1228 — F675-114 verified weekly goal focus board (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1226 / Current Addition v1228 / Next Improvement v1230 provisional; main 49788d09 unchanged start/mid; QA v1233 FAILED/HOLD. Authenticated `/quests` uses migration101 weekly goals with Seoul week_start and bigint strings; NPC affinity is self-reported. New max-3 owner-scoped pinboard, week/lifetime rollover, original receipts, no progress/reward writes, private SEO fix and Android parity. P0/P1: ENV1228-01 SEC1228-02 REL1228-03 QUEST1228-04 QUEST1228-05 QUEST1228-06 QUEST1228-07 QUEST1228-08 QUEST1228-09 QUEST1228-10. Full EN/KO integrated spec; docs only.
+- P0 #1147 migration280 collision, #1088 build-only auto-merge, #1133 false VIP reward, 235/241 app DML, 3 PUBLIC bank EXECUTE, 5 frontend failures, root Critical2/High10, bot Critical1/High5, migration266 and exact-SHA Test/restore HOLD. External publishers 3 reviewed, 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED; no runtime, WLD or Production changes.
+
+
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - Previous Addition v1208 / Current Improvement v1210 / Next Addition v1212 provisional. Main 54d5140d unchanged start/mid; QA v1213 FAILED/HOLD; predecessor #1087 unmerged. Fix proposed RESTRICT FK, unavailable-saved REMOVE, actual `#comments-title`, transaction lock order, original digest receipts, owner HMAC cursor, account switch and 500-vs-10,001 isolated fixture. P0 ENV1210-01 SEC1210-02 REL1210-03 BOARD1210-04; P1 BOARD1210-05 BOARD1210-06 BOARD1210-07 BOARD1210-08 BOARD1210-09 BOARD1210-10. New P0 #1088: candidate image build alone must not authorize merge without actual exact-SHA Test/authenticated finance E2E. Full EN/KO integrated design; no runtime or deployment.
 - External publishers 3 reviewed; newly approved 0, cumulative UNKNOWN / 10,000 BLOCKED. Shared DB/5433, broad DML, migration266, audits, Test, restore and disk 93% remain HOLD.
