@@ -36,7 +36,7 @@
 - [x] Run GREEN and targeted lint.
 
 ### Task 3 — Validation and release hold
-- [ ] Verify current main and planning again; rebase if advanced.
+- [x] Verify current main and planning again; rebase if advanced.
 - [ ] Run exact-SHA typecheck/build/lint/unit/contract/backend/security and isolated PostgreSQL if safe.
 - [ ] Run browser/a11y regression where feasible; distinguish mocked from official Test.
-- [ ] Publish EN/KO worklog and Draft PR; merge/promote only after ALL gates PASS.
+- [x] Publish EN/KO worklog and Draft PR; merge/promote only after ALL gates PASS.
