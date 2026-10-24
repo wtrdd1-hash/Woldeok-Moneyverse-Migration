@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -29,6 +30,7 @@ import {
   IdempotentDto,
 } from './bank.dto';
 import { BankInputError, BankRepository } from './bank.repository';
+import { buildInterestClaimPreview } from './interest-claim-preview';
 
 @ApiTags('banking')
 @Controller('banking')
@@ -94,6 +96,17 @@ export class BankController {
         ),
       'failed to withdraw WLD from bank',
     );
+  }
+
+  @Get('claim-interest/preview')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Read-only preview of accrued virtual bank interest for the signed-in member' })
+  async previewInterestClaim(@Req() request: RequestWithSession) {
+    const standing = await this.guarded(
+      () => this.repository().getStanding(requireUserId(request)),
+      'failed to load bank interest preview',
+    );
+    return buildInterestClaimPreview(standing);
   }
 
   @Post('claim-interest')

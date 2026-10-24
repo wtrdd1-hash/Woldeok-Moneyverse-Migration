@@ -18,3 +18,9 @@
 
 ## Finished
 - Pending verification.
+
+### In-progress checkpoint — 04:30 KST
+- RED confirmed: backend and frontend focused tests failed due to missing preview modules.
+- GREEN confirmed: backend 9/9, frontend 6/6 tests pass. Backend uses existing owner-scoped SECURITY DEFINER standing function; no SQL write, no migration. Web renders a verified server response and explicitly disclaims eligibility/transaction effects. Android generic app-api gateway path tested.
+- Disk safety: removed only generated `.next` build output (396 MiB) from Development A's own completed 2026-10-24 23:25 worktree. No source, branches, or other agent worktrees deleted.
+- Remaining: broad gates, real PostgreSQL, current-main refresh, release gate.
