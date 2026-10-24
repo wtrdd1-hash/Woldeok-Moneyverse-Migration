@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Building2,
   Coins,
@@ -205,6 +206,9 @@ export function EnterpriseControlTower({
                 <RefreshCw className={`h-3.5 w-3.5 ${isHarvesting ? 'animate-spin' : ''}`} />
                 공기업 배당 국고 즉시 수취
               </Button>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                금융 변경은 최근 재인증이 필요합니다. <Link href="/account/security" className="underline">계정 보안</Link>
+              </p>
             </div>
           </div>
         </CardHeader>
