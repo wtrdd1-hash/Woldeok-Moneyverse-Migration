@@ -17,9 +17,9 @@
 - Require exact-SHA CI and official isolated Test verification before merging or releasing.
 
 ## Tasks
-- [ ] Add pure parser tests for authentic active/owned listings, invalid response, decimal WLD and empty results; run RED.
-- [ ] Implement strict parser against NestJS PostgreSQL row shape; run GREEN.
-- [ ] Add regression tests that member page uses authenticated listing APIs and no fabricated list, balance or indexable metadata; run RED.
-- [ ] Replace marketplace page and fabricated fixed-price UI with server-backed read-only listings, error/empty states, keyboard-accessible refresh, and preserve independent tabs; run GREEN.
+- [x] Add pure parser tests for authentic active/owned listings, invalid response, decimal WLD and empty results; run RED.
+- [x] Implement strict parser against NestJS PostgreSQL row shape; run GREEN.
+- [x] Add regression tests that member page uses authenticated listing APIs and no fabricated list, balance or indexable metadata; run RED.
+- [x] Replace marketplace page and fabricated fixed-price UI with server-backed read-only listings, error/empty states, keyboard-accessible refresh, and preserve independent tabs; run GREEN.
 - [ ] Verify focused tests, lint, typecheck, build, backend contract and required CI on exact SHA; record any failures honestly.
 - [ ] Re-fetch main, publish EN/KO start/mid/end worklog and Draft PR; never merge or deploy unless every gate passes.
