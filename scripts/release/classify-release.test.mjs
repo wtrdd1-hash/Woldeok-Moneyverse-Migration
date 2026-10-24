@@ -78,6 +78,16 @@ test('application plus release-control changes are mixed', () => {
   );
 });
 
+test('legacy root commit-message cleanup remains fail-closed for other text files', () => {
+  assert.equal(classifyPaths(['commit_msg.txt']), 'CONTROL_PLANE_ONLY');
+  assert.equal(
+    classifyPaths(['commit_msg.txt', 'frontend/src/app/page.tsx']),
+    'MIXED',
+  );
+  assert.equal(classifyPaths(['another_commit_msg.txt']), 'UNKNOWN');
+  assert.equal(classifyPaths(['random_notes.txt']), 'UNKNOWN');
+});
+
 test('unclassified paths fail closed', () => {
   assert.equal(classifyPaths(['unexpected-root-config.toml']), 'UNKNOWN');
   assert.equal(classifyPaths([]), 'UNKNOWN');

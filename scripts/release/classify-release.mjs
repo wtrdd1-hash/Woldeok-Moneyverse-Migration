@@ -23,6 +23,7 @@ const DOC_PATHS = [
 ];
 
 const CONTROL_PATHS = [
+  /^commit_msg\.txt$/, // Narrow legacy root artifact: safe to classify its deletion without allowing arbitrary .txt files.
   /^\.github\//,
   /^ops\//,
   /^deploy\//,
