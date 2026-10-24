@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   title: '일일 퀘스트 및 도전과제 — 활동 보상 시스템',
   description: '디스코드 커뮤니티 활동과 연동되는 일일 퀘스트와 연속 출석 도전과제를 달성하고 WLD 보상을 수령하세요.',
   alternates: { canonical: questsUrl },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
   openGraph: {
     title: '일일 퀘스트 및 도전과제 — 월덕 머니버스',
     description: '디스코드 커뮤니티 활동과 연동되는 일일 퀘스트와 연속 출석 도전과제를 달성하고 WLD 보상을 수령하세요.',

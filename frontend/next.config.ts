@@ -165,7 +165,13 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    // The catch-all permits public SEO; these two member-only routes must
+    // override that response header even if metadata or an edge layer changes.
+    const privateGameplayHeaders = ['/quests', '/businesses'].map((source) => ({
+      source,
+      headers: [{ key: 'x-robots-tag', value: 'noindex, nofollow' }],
+    }));
+    return [{ source: '/:path*', headers: security }, ...privateGameplayHeaders];
   },
 
   async redirects() {
