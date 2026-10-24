@@ -221,6 +221,13 @@ export function proxy(request: NextRequest) {
 
   response.headers.set('x-moneyverse-locale', finalLocale);
 
+  // This member-only route includes balances; never let an SEO environment
+  // override its private response policy, including on locale-prefixed URLs.
+  if (targetPath === '/progression/prestige') {
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('Cache-Control', 'private, no-store');
+  }
+
   if (requestHost === 'test.easy-scraping.com' || process.env.SEO_INDEXING_ENABLED === 'false') {
     response.headers.set('x-robots-tag', 'noindex, nofollow');
   }
