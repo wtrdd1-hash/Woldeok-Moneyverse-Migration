@@ -54,3 +54,25 @@ describe('verified first-trade onboarding', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 });
+
+describe('onboarding state and keyboard isolation', () => {
+  it('respects a previous dismissal without generating a new trade', () => {
+    localStorage.setItem('wdmv_first_trade_onboarded', 'true');
+    openOnboarding(true);
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(localStorage.getItem('wdmv_virtual_holdings')).toBeNull();
+  });
+
+  it('keeps keyboard Tab navigation inside the dialog', () => {
+    openOnboarding(true);
+    const dialog = screen.getByRole('dialog');
+    const close = screen.getByRole('button', { name: '닫기' });
+    const last = screen.getByRole('button', { name: '나중에 둘러보기' });
+    last.focus();
+    fireEvent.keyDown(last, { key: 'Tab' });
+    expect(document.activeElement).toBe(close);
+    fireEvent.keyDown(close, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(last);
+    expect(dialog.contains(document.activeElement)).toBe(true);
+  });
+});
