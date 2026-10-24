@@ -165,7 +165,17 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    return [
+      { source: '/:path*', headers: security },
+      // A member-only trading ledger view must never inherit public indexing/cache policy.
+      {
+        source: '/marketplace',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
+    ];
   },
 
   async redirects() {
