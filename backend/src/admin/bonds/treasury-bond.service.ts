@@ -7,6 +7,7 @@ import {
   type TreasuryBondsOverview,
 } from './treasury-bond.repository';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
+import { requireLedgerBackedBondSettlement } from './bond-ledger-hold';
 
 @Injectable()
 export class TreasuryBondService {
@@ -34,6 +35,7 @@ export class TreasuryBondService {
   }
 
   async subscribeBond(userId: string, bondId: string, units: number) {
+    requireLedgerBackedBondSettlement();
     this.logger.log(`User ${userId} subscribing to bond ${bondId} for ${units} units...`);
     const res = await this.repository.subscribeBond(userId, bondId, units);
     const bond = await this.repository.getBondById(bondId);
@@ -66,6 +68,7 @@ export class TreasuryBondService {
   }
 
   async processHourlyCouponsAndMaturities() {
+    requireLedgerBackedBondSettlement();
     this.logger.log('Starting hourly treasury bond coupon interest & maturity processing...');
     const result = await this.repository.processHourlyCouponsAndMaturities();
     this.logger.log(
@@ -110,11 +113,13 @@ export class TreasuryBondService {
   }
 
   async createRepoLoan(userId: string, holdingId: string) {
+    requireLedgerBackedBondSettlement();
     this.logger.log(`User ${userId} taking repo loan against bond holding ${holdingId}`);
     return this.repository.createRepoLoan(userId, holdingId);
   }
 
   async repayRepoLoan(userId: string, loanId: string) {
+    requireLedgerBackedBondSettlement();
     this.logger.log(`User ${userId} repaying repo loan ${loanId}`);
     return this.repository.repayRepoLoan(userId, loanId);
   }
