@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -5617,6 +5617,36 @@ _No request body._
 ### Success response fields
 
 _None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/wallet/treasury-outflows` — Verified owner-only USER_TO_TREASURY ledger outflow, not a tax receipt
+
+- Authorization: 로그인 및 최신 동의 필요; 본인 세션만
+- Success status: 200
+- Response mode: json
+- After success: 추가 변경 없음 (읽기 전용)
+- Operation ID: `WalletController_treasuryOutflows`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| source | true | string="posted_owner_ledger" | const="posted_owner_ledger" |
+| transactionType | true | string="USER_TO_TREASURY" | const="USER_TO_TREASURY" |
+| currency | true | string="WLD" | const="WLD" |
+| totalOutflowAmount | true | string & object |  |
+| transactionCount | true | string |  |
+| lastOccurredAt | true | null \| string |  |
+| isTaxTotal | true | boolean=false | const=false |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

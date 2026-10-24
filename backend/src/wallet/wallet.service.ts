@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { WldAmount } from '@moneyverse/contract';
 import { wldAmount } from '@moneyverse/contract';
 import type {
@@ -15,6 +15,7 @@ import type {
   WalletRewardRow,
   WalletRewardAvailabilityRow,
   WalletTransactionRow,
+  WalletTreasuryOutflowRow,
   WalletTransferInput,
 } from './wallet.repository';
 import {
@@ -83,6 +84,7 @@ export class WalletRecipientError extends Error {
  */
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
+  treasuryOutflowsForUser?(userId: string): Promise<WalletTreasuryOutflowRow | null>;
   recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
@@ -143,6 +145,16 @@ export interface WalletOverview {
   readonly userId: string;
   readonly balances: WalletBalancesView;
   readonly recentTransactions: WalletTransactionView[];
+}
+
+export interface WalletTreasuryOutflows {
+  readonly source: 'posted_owner_ledger';
+  readonly transactionType: 'USER_TO_TREASURY';
+  readonly currency: 'WLD';
+  readonly totalOutflowAmount: WldAmount;
+  readonly transactionCount: string;
+  readonly lastOccurredAt: string | null;
+  readonly isTaxTotal: false;
 }
 
 export interface WalletTransferReceipt {
@@ -380,6 +392,32 @@ export class WalletService {
       userId,
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
+    };
+  }
+
+  async treasuryOutflows(authenticatedUserId: string): Promise<WalletTreasuryOutflows> {
+    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
+    if (typeof this.repository.treasuryOutflowsForUser !== 'function') {
+      throw new ServiceUnavailableException('verified treasury ledger read is unavailable');
+    }
+    const row = await this.repository.treasuryOutflowsForUser(actor);
+    if (!row || !/^(0|[1-9][0-9]*)$/.test(row.transaction_count)) {
+      throw new Error('invalid treasury ledger count');
+    }
+    const totalOutflowAmount = wldAmount(row.total_amount, 'treasury ledger outflow');
+    const count = BigInt(row.transaction_count);
+    if ((count === 0n && (row.last_occurred_at !== null || BigInt(totalOutflowAmount) !== 0n))
+      || (count > 0n && (row.last_occurred_at === null || BigInt(totalOutflowAmount) <= 0n))) {
+      throw new Error('inconsistent treasury ledger aggregate');
+    }
+    return {
+      source: 'posted_owner_ledger',
+      transactionType: 'USER_TO_TREASURY',
+      currency: 'WLD',
+      totalOutflowAmount,
+      transactionCount: row.transaction_count,
+      lastOccurredAt: row.last_occurred_at === null ? null : timestamp(row.last_occurred_at, 'treasury ledger timestamp'),
+      isTaxTotal: false,
     };
   }
 

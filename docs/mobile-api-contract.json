@@ -17067,6 +17067,118 @@
         "legacySnakeCasePreserved": true,
         "camelCaseAliasesAddedRecursively": true
       }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/wallet/treasury-outflows",
+      "purpose": "본인 국고 이동 원장 합계·건수 조회 (전체 세금/예산배분 아님)",
+      "callWhen": "지갑 자산 탭 진입/새로고침",
+      "authorization": "로그인 및 최신 동의 필요; 본인 세션만",
+      "afterSuccess": "추가 변경 없음 (읽기 전용)",
+      "backendRoute": "/api/wallet/treasury-outflows",
+      "operationId": "WalletController_treasuryOutflows",
+      "backendOpenApiPath": "/wallet/treasury-outflows",
+      "summary": "Verified owner-only USER_TO_TREASURY ledger outflow, not a tax receipt",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "source",
+          "transactionType",
+          "currency",
+          "totalOutflowAmount",
+          "transactionCount",
+          "lastOccurredAt",
+          "isTaxTotal"
+        ],
+        "note": "Verified owner-scoped ledger subset only; private no-store. WLD and count are decimal strings, never JSON numbers."
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "const": "posted_owner_ledger"
+          },
+          "transactionType": {
+            "type": "string",
+            "const": "USER_TO_TREASURY"
+          },
+          "currency": {
+            "type": "string",
+            "const": "WLD"
+          },
+          "totalOutflowAmount": {
+            "allOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "__wld": {
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "oneOf": [
+                          {
+                            "type": "undefined"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "description"
+                    ]
+                  }
+                },
+                "required": [
+                  "__wld"
+                ]
+              }
+            ]
+          },
+          "transactionCount": {
+            "type": "string"
+          },
+          "lastOccurredAt": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "isTaxTotal": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "required": [
+          "source",
+          "transactionType",
+          "currency",
+          "totalOutflowAmount",
+          "transactionCount",
+          "lastOccurredAt",
+          "isTaxTotal"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
     }
   ],
   "compatibility": {

@@ -108,6 +108,13 @@ export interface WalletRepayRow {
   readonly replayed: boolean;
 }
 
+/** Owner-scoped, confirmed ledger postings. This is NOT a tax estimate. */
+export interface WalletTreasuryOutflowRow {
+  readonly total_amount: string;
+  readonly transaction_count: string;
+  readonly last_occurred_at: Date | null;
+}
+
 export interface WalletTransferInput {
   readonly actorUserId: string;
   readonly recipientUserId: string;
@@ -160,6 +167,24 @@ export class PostgresWalletRepository {
     if (!pool || typeof pool.query !== 'function')
       throw new TypeError('a PostgreSQL pool is required');
     this.pool = pool;
+  }
+
+  async treasuryOutflowsForUser(userId: string): Promise<WalletTreasuryOutflowRow | null> {
+    const actor = requireUuid(userId, 'authenticated user id');
+    return queryOne<WalletTreasuryOutflowRow>(
+      this.pool,
+      `SELECT COALESCE(SUM(posting.amount), 0)::text AS total_amount,
+              COUNT(DISTINCT ledger_transaction.id)::text AS transaction_count,
+              MAX(ledger_transaction.created_at) AS last_occurred_at
+       FROM public.ledger_transactions AS ledger_transaction
+       JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
+       JOIN public.accounts AS account ON account.id = posting.account_id
+       WHERE account.owner_user_id = $1
+         AND account.account_type IN ('USER_CASH'::public.account_type, 'USER_BANK'::public.account_type)
+         AND ledger_transaction.type = 'USER_TO_TREASURY'
+         AND posting.direction = 'credit'::public.posting_direction`,
+      [actor],
+    );
   }
 
   async balancesForUser(userId: string): Promise<WalletBalanceRow[]> {
