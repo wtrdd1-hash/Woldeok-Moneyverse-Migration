@@ -1,5 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-118 v1246 — Provenance and Read-State Improvement (DRAFT/HOLD)
+- Previous Addition v1244 → Current Improvement v1246 → Next Addition v1248. Latest main `c9a868b1e622341e2daa8b936ddf0988eda9988e`, QA v1249 FAILED/HOLD. Development C Draft #1206 already removes six fictional cards and validates server-fed reads; its CI runtime-check FAILED and it is unmerged. Do not duplicate C's UI/BFF. Textual redaction is not committed owner-ledger evidence.
+- Main Nest notification list uses actor-filtered direct table SELECT, `created_at DESC` + OFFSET; boolean/count read endpoints lack immutable request receipts. Improve with DB-enforced trusted actor/source, deterministic `(created_at,id)` owner seek cursor, signed snapshot, authorized source proof/404/503 fail-closed, immutable idempotent read/read-all receipts, C integration and Android parity. `claim-all` stays 409, no WLD mutation.
+- Backlog P0 `ENV1246-01 SEC1246-02 REL1246-03 NOTIF1246-04`; P1 `NOTIF1246-05 NOTIF1246-06 NOTIF1246-07 NOTIF1246-08 NOTIF1246-09 NOTIF1246-10`. Full data, UI/CTA/states, API, DB, transaction, admin, security, SEO, accessibility, KPI, tests, canary/rollback in integrated master. Feature OFF. No code, DB, release or Test changes. Independent approved external records: 0 new, cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
+
 ## F675-118 (v1244) — Verified Notification Inbox / Evidence-linked History [FEATURE ADDITION, DRAFT/HOLD]
 - Source: `/account/notifications/notification-tabs-bar.tsx` currently contains six static sample notices, including invented 20 WLD burn and 1,840 WLD interest; local read state is not persisted. Existing Nest notification owner list/read APIs and Next `/api/notifications` are not wired to this sample tab; backend claim-all is deliberately 409. No incident or real financial settlement inferred.
 - New owner-only verified category/unread inbox, evidence CTA, signed seek cursor, atomic read receipt and explicit unverified/source-outage states. Never show unverified WLD payout amounts; no reward claim, ledger or WLD mutation. Existing #999/#1004/#1015, C #1101/#1130, B #1117 remain separate dependencies. Feature OFF, no migration number before #1147.

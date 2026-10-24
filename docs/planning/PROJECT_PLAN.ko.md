@@ -1,5 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1246 — F675-118 알림 근거 검증·읽음 영수증·개발 C 통합 보완 (기능 보완 / 초안 / 운영승격 보류)
+- **회차:** 이전 Feature Addition v1244 → 현재 Feature Improvement v1246 → 다음 Feature Addition v1248(잠정). 최신 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재확인. v1244 #1205는 미병합 기획 문맥이며 main이 아님. 최신 완료 QA v1249 FAILED/HOLD, 루트 디스크 100%(기획 시작 시 약 594MiB 여유). 이번 브랜치는 통합 문서만 수정.
+- **새 통합 사실:** 개발 C Draft #1206(`857d3244243fc8edcafdced09e78308ddca84755`)이 이미 가상 알림 6개를 서버 조회, BFF 데이터 검증, 읽음 재조회 및 미검증 금융 안내로 교체함. GitHub runtime-check FAILED, 미병합 상태. **C의 화면/BFF를 중복 구현하거나 수정하지 않음.** 그러나 #1206은 원장 근거 상세 확인과 영속적인 검증 증거까지 제공하지 않음. 문구의 금액 숨김은 금융 거래 증명이 아님.
+- **main 코드 공백:** `NotificationService.listNotifications`는 `in_app_notifications`를 actor WHERE로 직접 SELECT하고 `(created_at DESC)`+OFFSET을 사용해 동시간 데이터에서 안정적 커서가 없음. actor WHERE만으로 DB 호출자 권한이 입증되지는 않음. `markRead`는 boolean, `markAllRead`는 건수만 반환하여 요청키·다이제스트·불변 영수증을 입증하지 못함. 기존 Next BFF는 배열만 확인하며 이 부분은 C #1206 담당. 제목·링크·`dedupe_key`는 확정된 본인 원장 거래의 근거가 아님.
+- **결정:** C #1206의 실제 알림 UI를 기반으로 별도 개발에서 발행자·원천 근거, 인증된 읽음 영수증, 안정적 커서, 근거 불가 상태, 안전한 링크, Android 동등성, 비식별 관리자 통계를 명세. WLD·원장 변경과 claim-all 활성화 금지. 예시 알림을 근거 있는 과거 이벤트로 소급 변환하지 않음.
+- **백로그:** P0 `ENV1246-01`, `SEC1246-02`, `REL1246-03`, `NOTIF1246-04`; P1 `NOTIF1246-05`, `NOTIF1246-06`, `NOTIF1246-07`, `NOTIF1246-08`, `NOTIF1246-09`, `NOTIF1246-10`. 세부 수용 조건은 영문 정본·한국어 통합 마스터에 동등 반영.
+- **보류:** 운영 연계 개발 DB, 5433 전체 바인딩, 앱 DML 241개 중 235개 테이블 및 PUBLIC 은행 함수 3개, migration266 체크섬 불일치·280 4중 충돌, 루트 100%, 프런트/보안 실패, 정확 SHA 인증 Test 금융 E2E·격리 복원·GitOps 검증 부재. 런타임·마이그레이션·Test·Production·잔액·원장·기능 스위치·병합·다른 작업자 브랜치 변경 없음. 독립 외부 근거 10,000건 게이트 신규 승인 0, 누적 UNKNOWN: BLOCKED/IN PROGRESS.
+
+
 ## v2026.10.25.1244 — F675-118 검증형 회원 알림함 및 원천 근거 연결 (기능 추가 / 초안 / 운영승격 보류)
 - 회차: 이전 Feature Improvement v1242 → 현재 Feature Addition v1244 → 다음 Feature Improvement v1246(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 확인, 최신 완료 QA v1247 FAILED/HOLD. 미병합 기획 #1200 및 개발 A/B/C/QA/Gemini와 분리된 main 기반 문서 브랜치.
 - **코드로 확인한 문제:** `frontend/src/app/account/notifications/notification-tabs-bar.tsx`가 가상의 6개 알림(20 WLD 소각, 1,840 WLD 이자 포함)을 하드코딩하고 읽음·카테고리 수를 브라우저 상태로만 변경함. 실제 NestJS 알림 컨트롤러/서비스는 `in_app_notifications`에서 본인 목록·미읽음·읽음·전체읽음 API를 제공하고 Next `/api/notifications`는 배열 여부만 확인. `/account/notifications`는 현재 정적 탭을 사용. 이 가상 수치를 실제 원장 확정으로 주장 금지. C #1101은 별도 헤더, #1130은 설정, #999/#1004/#1015 및 B #1117은 미병합 의존성.

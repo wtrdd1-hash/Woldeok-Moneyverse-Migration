@@ -1,5 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## F675-118 v1246 — 알림 근거·읽음 상태 기능 보완 (초안/보류)
+- 이전 기능 추가 v1244 → 현재 기능 보완 v1246 → 다음 기능 추가 v1248. 최신 main `c9a868b1e622341e2daa8b936ddf0988eda9988e`, QA v1249 FAILED/HOLD. 개발 C Draft #1206은 이미 가상 카드 6개를 실제 서버 목록·읽음으로 교체하며 CI runtime-check FAILED, 미병합. C 화면/BFF 중복 구현 금지. 문자열 금액 숨김은 본인 원장 확정 증거가 아님.
+- main Nest 알림 목록은 actor 필터 직접 SELECT와 `created_at DESC`+OFFSET, 읽음 API는 boolean/건수만 반환해 불변 요청 영수증 없음. DB 신뢰 actor/발행 원천 검증, `(created_at,id)` 안정적 본인 커서·서명 스냅샷, 404/503 실패 폐쇄 근거 확인, 원자적 멱등 읽음/전체 읽음 영수증, C 연계·Android 동등성으로 개선. `claim-all` 409 유지, WLD 변경 없음.
+- P0 `ENV1246-01 SEC1246-02 REL1246-03 NOTIF1246-04`; P1 `NOTIF1246-05 NOTIF1246-06 NOTIF1246-07 NOTIF1246-08 NOTIF1246-09 NOTIF1246-10`. 화면·CTA·상태, API, DB·트랜잭션, 관리자, 보안, SEO, 접근성, KPI, 테스트, 카나리/롤백 상세는 통합 마스터 참조. 기능 OFF. 코드·DB·배포·Test 변경 없음. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
+
 ## F675-118 (v1244) — 검증형 알림함·원천 증거 이력 [기능 추가, 초안/보류]
 - 실제 `/account/notifications/notification-tabs-bar.tsx`는 가상 6개 안내(20 WLD 소각·1,840 WLD 이자)를 정적 표시하고 읽음도 브라우저에서만 변경. Nest 본인 알림 목록/읽음과 Next `/api/notifications`가 존재하지만 이 정적 탭에는 연결되지 않음. 보상 claim-all은 의도적으로 409. 운영 금융 사고나 실제 지급을 뜻하지 않음.
 - 본인 검증형 카테고리/미읽음 타임라인, 근거 확인 CTA, 서명 키셋 커서, 원자적 읽음 영수증, 근거 없음/원천 장애 상태. 검증 없는 WLD 지급 표시 금지, 보상·원장·WLD 변경 없음. #999/#1004/#1015, C #1101/#1130, B #1117과 변경 분리. 기본 OFF, #1147 전 신규 migration 번호 금지.
