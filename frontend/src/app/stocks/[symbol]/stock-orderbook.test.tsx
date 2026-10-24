@@ -23,17 +23,17 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
     );
 
     // 체결강도 배지 렌더링 검증
-    expect(screen.getByText(/체결강도/i)).toBeDefined();
-    // 호가창 단계 타이틀 검증 (5단계 실시간 호가)
-    expect(screen.getByText(/5단계 실시간 호가/i)).toBeDefined();
+    expect(screen.getAllByText(/예시 잔량비/i).length).toBeGreaterThan(0);
+    // 호가창 단계 타이틀 검증 (5단계 호가 예시)
+    expect(screen.getByText(/5단계 호가 예시/i)).toBeDefined();
     // 5D, 10D 깊이 토글 버튼 검증
     const btn10D = screen.getByText('10D');
     expect(btn10D).toBeDefined();
     fireEvent.click(btn10D);
-    expect(screen.getByText(/10단계 실시간 호가/i)).toBeDefined();
+    expect(screen.getByText(/10단계 호가 예시/i)).toBeDefined();
 
     // 최근 체결 틱 스트림 헤더 검증
-    expect(screen.getByText(/최근 체결 틱/i)).toBeDefined();
+    expect(screen.getByText(/확인된 체결이 아직 없습니다/i)).toBeDefined();
     // 매도/매수 압력 비율 표시 검증
     expect(screen.getByText(/매도 \d+%/i)).toBeDefined();
     expect(screen.getByText(/매수 \d+%/i)).toBeDefined();
@@ -178,7 +178,6 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
     const { container } = render(
       <StockMarketToast
         symbol="WDG"
-        currentPrice="15,000"
         isEn={false}
       />
     );
@@ -295,14 +294,14 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
 
     // 심도 탭 클릭 -> 심도 차트 모드로 전환
     fireEvent.click(depthBtn);
-    expect(screen.getByText(/실시간 호가 심도 \(Depth\)/i)).toBeDefined();
+    expect(screen.getByText(/예시 호가 심도 \(Depth\)/i)).toBeDefined();
     expect(screen.getByText(/실시간 매수\/매도 매물대 심도/i)).toBeDefined();
     expect(screen.getByText(/매수 누적/i)).toBeDefined();
     expect(screen.getByText(/매도 누적/i)).toBeDefined();
 
     // 다시 호가 탭 클릭 -> 호가 테이블로 복귀
     fireEvent.click(ladderBtn);
-    expect(screen.getByText(/(5|10)단계 실시간 호가/i)).toBeDefined();
+    expect(screen.getByText(/(5|10)단계 호가 예시/i)).toBeDefined();
   });
 
   it('renders interactive drawing toolbar with cursor, trendline, horizontal line, fibonacci tools and handles tool switching', () => {

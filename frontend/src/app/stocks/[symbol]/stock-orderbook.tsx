@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Scale, Zap, Activity, AreaChart, ListOrdered } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
-import { useQuote } from '@/lib/use-market-prices';
+import { useQuote, useStockTrades } from '@/lib/use-market-prices';
 import { generateKrxLadder, getKrxTickSize } from '../tick-size';
 import { playStockTickSound } from '@/lib/audio-effects';
 import { StockDepthChart } from './stock-depth-chart';
@@ -27,14 +27,6 @@ export interface OrderbookRow {
   readonly volume: number;
   readonly percent: number;
   readonly cumulativeVolume: number;
-}
-
-export interface RecentTradeItem {
-  readonly id: string;
-  readonly time: string;
-  readonly price: string;
-  readonly volume: number;
-  readonly side: 'buy' | 'sell';
 }
 
 export interface OrderbookData {
@@ -180,53 +172,19 @@ export function StockOrderbook({
   const [flash, setFlash] = useState<'rise' | 'fall' | null>(null);
   const prevPriceRef = useRef<string>(livePrice);
 
-  // 최근 체결 틱 스트림 상태 (최신 5개)
-  const [recentTrades, setRecentTrades] = useState<RecentTradeItem[]>([]);
-
-  useEffect(() => {
-    // 초기 틱 스트림 세팅 (현재가 기반 5건)
-    const baseNum = Number.parseInt(livePrice.replaceAll(',', '') || '1000', 10);
-    const now = new Date();
-    const initialTrades: RecentTradeItem[] = Array.from({ length: 5 }).map((_, i) => {
-      const d = new Date(now.getTime() - (5 - i) * 3500);
-      const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
-      const side: 'buy' | 'sell' = i % 2 === 0 ? 'buy' : 'sell';
-      const offset = (i - 2) * 5;
-      return {
-        id: `t-init-${i}`,
-        time: timeStr,
-        price: Math.max(1, baseNum + offset).toString(),
-        volume: 10 + (i * 17) % 50,
-        side,
-      };
-    });
-    setRecentTrades(initialTrades);
-  }, []);
+  // Confirmed executions only: the server publishes stock:trade after the DB trade returns.
+  const verifiedTrades = useStockTrades(stockId ?? '').slice(0, 5);
 
   useEffect(() => {
     if (prevPriceRef.current && prevPriceRef.current !== livePrice) {
       const prevNum = Number.parseInt(prevPriceRef.current.replaceAll(',', ''), 10);
       const currNum = Number.parseInt(livePrice.replaceAll(',', ''), 10);
 
-      const side: 'buy' | 'sell' = currNum >= prevNum ? 'buy' : 'sell';
       if (currNum > prevNum) {
         setFlash('rise');
       } else if (currNum < prevNum) {
         setFlash('fall');
       }
-
-      // 새 체결 틱 스트림에 추가
-      const d = new Date();
-      const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
-      const newTrade: RecentTradeItem = {
-        id: `t-${Date.now()}`,
-        time: timeStr,
-        price: livePrice,
-        volume: Math.floor(10 + Math.random() * 45),
-        side,
-      };
-
-      setRecentTrades((prev) => [newTrade, ...prev.slice(0, 4)]);
 
       const timer = setTimeout(() => {
         setFlash(null);
@@ -252,8 +210,8 @@ export function StockOrderbook({
             <Scale className="size-4 text-primary" />
             <span>
               {viewMode === 'depth'
-                ? (isEn ? 'Market Depth Chart' : '실시간 호가 심도 (Depth)')
-                : (isEn ? `Orderbook (${depth}-Depth)` : `${depth}단계 실시간 호가`)}
+                ? (isEn ? 'Indicative Depth Preview' : '예시 호가 심도 (Depth)')
+                : (isEn ? `Indicative Ladder (${depth}-Depth)` : `${depth}단계 호가 예시`)}
             </span>
             {flash && (
               <span className="flex size-2 relative ml-1">
@@ -290,7 +248,7 @@ export function StockOrderbook({
                     ? 'bg-primary text-primary-foreground font-bold shadow-xs'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
-                title={isEn ? 'Cumulative Market Depth Chart' : '실시간 누적 심도 차트'}
+                title={isEn ? 'Cumulative Indicative Depth Preview' : '예시 누적 심도 차트'}
               >
                 <AreaChart className="size-3" />
                 <span>{isEn ? 'Depth' : '심도'}</span>
@@ -305,10 +263,10 @@ export function StockOrderbook({
                   ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-500 font-bold'
                   : 'border-rose-500/40 bg-rose-500/10 text-rose-500 font-bold'
               }`}
-              title={isEn ? 'Buy-Sell Volume Intensity' : '체결강도 (매수잔량/매도잔량)'}
+              title={isEn ? 'Buy-Sell Volume Intensity' : '예시 잔량비 (실제 주문장 미연결)'}
             >
               <Activity className="size-3 mr-1" />
-              <span>{isEn ? 'Intensity' : '체결강도'} {intensityPct}%</span>
+              <span>{isEn ? 'Intensity' : '예시 잔량비'} {intensityPct}%</span>
             </Badge>
 
             <Badge variant="outline" className="font-mono tabular-nums text-[10px] text-primary/80 hidden sm:inline-flex border-primary/30 bg-primary/5">
@@ -346,6 +304,9 @@ export function StockOrderbook({
       </CardHeader>
 
       <CardContent className="p-2 space-y-1.5 text-xs font-mono tabular-nums tracking-tight select-none">
+        <p role="note" className="rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-2 text-[11px] font-sans text-muted-foreground">
+          {isEn ? 'Indicative price ladder and depth volumes are simulated, not verified orders. Only executions below come from the server.' : '호가 단계·잔량·심도·체결강도는 실제 주문장이 아닌 예시입니다. 아래 체결 기록만 서버에서 확인됩니다.'}
+        </p>
         {viewMode === 'depth' ? (
           <StockDepthChart
             bids={bids}
@@ -389,7 +350,7 @@ export function StockOrderbook({
           })}
         </div>
 
-        {/* 현재 체결가 중앙 바 (순간 플래시 펄스 애니메이션 탑재) */}
+        {/* 현재 시세 중앙 바 (순간 플래시 펄스 애니메이션 탑재) */}
         <div className={`flex items-center justify-between px-3 py-2 rounded-lg border font-bold transition-all duration-300 ${
           flash === 'rise'
             ? 'bg-[var(--rise)]/25 border-[var(--rise)]/50 shadow-xs'
@@ -399,7 +360,7 @@ export function StockOrderbook({
         }`}>
           <span className="text-primary flex items-center gap-1.5">
             <Zap className={`size-3.5 transition-transform duration-300 ${flash ? 'scale-125 text-amber-500' : ''}`} />
-            <span>{isEn ? 'Current Price' : '현재 체결가'}</span>
+            <span>{isEn ? 'Current Price' : '현재 시세'}</span>
           </span>
           <span className={`text-sm font-extrabold transition-colors duration-300 ${
             flash === 'rise' ? 'text-[var(--rise)]' : flash === 'fall' ? 'text-[var(--fall)]' : 'text-foreground'
@@ -464,34 +425,29 @@ export function StockOrderbook({
           </div>
         </div>
 
-        {/* 최근 체결 틱 5건 미니 스트림 (Recent Trades Stream) */}
-        {recentTrades.length > 0 && (
-          <div className="pt-2.5 mt-2 border-t border-border/60 px-1 space-y-1">
-            <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              <span>{isEn ? 'Recent Trades' : '최근 체결 틱'}</span>
-              <span className="text-[9px] font-normal opacity-70">{isEn ? 'Time / Price / Qty' : '시간 · 체결가 · 수량'}</span>
-            </div>
-            <div className="space-y-1">
-              {recentTrades.map((t) => {
-                const isTradeBuy = t.side === 'buy';
-                return (
-                  <div
-                    key={t.id}
-                    className="flex items-center justify-between text-[11px] px-2 py-1 rounded bg-muted/20 border border-border/40 animate-in fade-in"
-                  >
-                    <span className="text-muted-foreground/80 text-[10px]">{t.time}</span>
-                    <span className={`font-bold ${isTradeBuy ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      {groupDigits(t.price)}
-                    </span>
-                    <span className="text-muted-foreground font-medium text-[10px]">
-                      {groupDigits(t.volume.toString())}{isEn ? 'sh' : '주'}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+        {/* Executions are server-confirmed socket receipts, never derived from price changes. */}
+        <section aria-label={isEn ? 'Confirmed stock executions' : '확인된 주식 체결'} className="pt-2.5 mt-2 border-t border-border/60 px-1 space-y-1">
+          <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground tracking-wider">
+            <span>{isEn ? 'Recent confirmed executions' : '최근 확인된 체결'}</span>
+            <span className="font-normal">{isEn ? 'Time · Price · Quantity' : '시간 · 체결가 · 수량'}</span>
           </div>
-        )}
+          {verifiedTrades.length === 0 ? (
+            <p role="status" className="rounded-md border border-border/50 bg-muted/20 px-3 py-3 text-xs text-muted-foreground">
+              {isEn ? 'No confirmed executions received yet.' : '확인된 체결이 아직 없습니다.'}
+            </p>
+          ) : (
+            <ol className="space-y-1" aria-live="polite">
+              {verifiedTrades.map((trade) => (
+                <li key={trade.id} className="flex flex-wrap items-center justify-between gap-2 rounded border border-border/40 bg-muted/20 px-2 py-2 text-[11px]">
+                  <time dateTime={trade.timestamp} className="text-muted-foreground">{new Date(trade.timestamp).toLocaleTimeString(isEn ? 'en-US' : 'ko-KR', { hour12: false })}</time>
+                  <span className="font-bold">{groupDigits(trade.price)} WLD</span>
+                  <span className="font-medium">{groupDigits(trade.quantity.toString())}{isEn ? ' shares' : '주'}</span>
+                  <span className={trade.side === 'BUY' ? 'text-emerald-500' : 'text-rose-500'}>{trade.side === 'BUY' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도')}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
         </>
         )}
       </CardContent>
