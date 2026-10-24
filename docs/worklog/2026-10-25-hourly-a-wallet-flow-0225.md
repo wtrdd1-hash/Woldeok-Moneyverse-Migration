@@ -11,7 +11,12 @@
 ## In progress
 - [x] RED regression tests: backend 4/4 failed because method absent; frontend module resolution failed before implementation. GREEN backend 28/28, frontend 29/29 focused tests.
 - [x] Nest service/controller + private no-store, member /wallet/flows UI, activity navigation, Android app-api gateway tests. No migration or table grant.
-- [ ] Full gates and isolated real PostgreSQL (read-only). Mid-work main c9a868b1 unchanged, planning PR #1205 e744bafe unchanged; 89 open PRs, 94 branches including new branch.
+- [x] Full gates attempted: root tests FAIL (frontend 6 baseline), security audits FAIL; root typecheck/lint/API contract PASS. Isolated real PostgreSQL READ ONLY/ROLLBACK PASS (0 ledger rows, app ACL least privilege). Mid-work main c9a868b1 unchanged, planning PR #1205 e744bafe unchanged; 89 open PRs, 94 branches including new branch.
 
 ## Finished
-- PENDING. No merge, Test or Production promotion without every required gate.
+- Code SHA: 69fa6b51aa48dbee43aaf772278efe13bc1b9882. Detailed English and Korean release/QA reports: docs/releases/v2026.10.25.a0225.md and .ko.md.
+- Test-first: RED 4 backend failures + missing frontend module; GREEN 28 backend + 32 frontend focused tests. Additional 129-digit RED/GREEN.
+- Full pnpm test FAIL: backend 1,320 PASS/398 SKIP; frontend 1,402 PASS/6 FAIL (locale 1, SEO 3, login a11y 1, M2 telemetry 1). Root typecheck PASS, lint 0 errors/1,137 warnings, API contract 179 PASS. Production audit 2 High, full audit 2 Critical/10 High; bot 1 Critical/5 High.
+- Backend build PASS. Worktree Next default build blocked by external node_modules symlink; separate detached build worktree with local dependencies produced default Turbopack PASS at f52183fb, same runtime code. Final SHA build check pending.
+- Isolated real PG: wdmv_v761_test_acl, app role read-only owner query PASS, 0 transaction fixtures, ledger INSERT and posting UPDATE blocked, ROLLBACK. Authenticated real-member E2E BLOCKED.
+- No Test or Production deployment, no DB writes, no service restarts, no GitOps, no branch deletion, no rollback. PR Draft and RELEASE HOLD pending CI/QA and official exact-SHA Test.
