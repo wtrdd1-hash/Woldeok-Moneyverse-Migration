@@ -1,5 +1,40 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1236 — F675-116 게시판 작성자 전용 수정 이력·충돌 방지 복원 (기능 추가 / 기획 초안 / 배포 보류)
+
+**회차:** 이전 기능 보완 v1234(미병합 Draft #1175) → 현재 기능 추가 v1236 → 다음 기능 보완 v1238(잠정). 정본: origin/main `49788d09494fed3e463651945b83386e87dd47bc`, AGENTS.md, README.md, 영문 PROJECT_PLAN.md 및 한국어 대조본. 최신 QA v1241 FAILED/HOLD(2026-10-24 21:25 KST). 문서만 변경하며 런타임·DB·WLD·Test·Production을 변경하지 않는다.
+
+### 실제 근거·목적·대안
+- `frontend/src/app/board/[postId]/post-forms.tsx`에는 수정 버전 토큰이 없고 `frontend/src/app/board/actions.ts`의 PUT는 새 UUID 키를 보낸다. NestJS `backend/src/board/board.controller.ts`와 `board.repository.ts`는 `member_board_update` 호출. Migration `048-member-board-threads.sql` 151~197행은 `p_key`를 검사만 하고 저장하지 않으며 마지막 수정 우선 덮어쓰기로 이전 본문을 보존하지 않는다. 조사한 main에서 이력 테이블/작성자 이력·복원 API 미확인. 이는 설계상 위험이며 운영 사고를 뜻하지 않는다. F675-110 게시글 임시저장(#1102) 및 F675-109 읽기 목록과 범위를 분리한다.
+- 브라우저 로컬 되돌리기는 기기간 이력 보존·서버 확정 증명이 불가능하고 공개 전체 수정 이력은 삭제된 개인정보를 노출할 수 있다. **작성자만 조회 가능한 서버 수정 이력**을 채택하며 일반 독자에게는 수정 시각만 보인다. `board_author_revisions` 기본 OFF. 예약 게시·임시저장·공개 과거 본문·과거 이미지 복원·금융 보상·운영자 권한 확대는 제외한다.
+
+### 회원 화면·권한·상태
+- 로그인·동의 완료한 원작성자가 `/board/[postId]`의 **수정 기록** 진입 → 최신 20개 버전(번호·시각·행위) → **보기**(제목·본문 읽기 전용) → **이 버전 복원**(확인) → **새로고침/취소**. 복원은 제목·본문만 변경하고 현재 이미지·댓글을 유지한다. 이전 이미지를 되살리거나 소유권 검사를 우회하지 않는다. 기존 글은 검증된 기준 버전만 만들고 과거 수정을 조작하지 않는다.
+- 상태: `LOADING`, `NO_REVISIONS`, `READY`, `STALE_VERSION`, `REDACTED`, `POST_DELETED`, `SOURCE_UNAVAILABLE`, `UNKNOWN_COMMIT`, `SIGNED_OUT`, `RESTORED_CONFIRMED`. 빈 이력과 서버 장애 구분. 타인 글과 없는 글 모두 404이며 건수·시각 유출 금지. 삭제·숨김 글의 과거 원문은 보존 정책 승인 전 노출 금지.
+- 웹/Android App API 동일 계약, `private,no-store`, `noindex,nofollow`, 사이트맵/JSON-LD 제외. 인증·동의·쓰기 CSRF·서버 소유권·로그아웃/계정 전환 응답 차단·오프라인 성공 허위표시 금지. WCAG 2.2 AA, 320px/400% 확대, 키보드, 포커스 복귀, 스크린리더 상태·충돌 안내, 모션 감소. 비공개 이력의 SEO 성과는 0으로 간주한다.
+
+### API·DB·원자성·보안(구현 전 제안)
+- 작성자 GET `/api/v1/board/posts/:postId/revisions?limit=1..20&cursor=`, GET `.../revisions/:revision`, POST `.../revisions/:revision/restore`, 확정 불명 조회 GET `/api/v1/board/posts/:postId/revision-requests/:requestKey`. 복원은 UUID `Idempotency-Key`와 강한 `If-Match: "vN"` 필요. 기존 PUT 수정은 웹/Android 호출자가 버전 계약을 지원한 뒤 expectedRevision 필수로 전환. 작성자에게 현재 버전·ETag 제공. 요청 본문 actor ID는 신뢰하지 않는다.
+- 목록 `{postId,currentRevision,revisions:[{revision,editedAt,action}],nextCursor}`, 복원 영수증 `{requestKey,postId,fromRevision,toRevision,committedAt}`. 서명 커서는 사용자·게시글·정렬·만료·세션에 결속한 `revision DESC` 키셋. 동시 수정 중 다중 페이지를 고정 스냅샷이라고 주장하지 않는다. 400/422 형식 오류, 401 미인증, 403 동의, 404 타인/없음, 409 오래된 버전·동일 키 다른 해시, 429 남용, 503 확정 불명. 확정 불명에서 허위 2xx 금지. 동일 요청 재시도는 원본 영수증을 반환하고 현재 상태는 별도 조회한다.
+- #1147 Migration280 충돌 해소 전 **신규 번호 미할당**. 전진형 제안 `member_board_post_revisions(post_id uuid,revision bigint CHECK(revision>0),editor_user_id uuid,title text,body text,created_at timestamptz,content_digest bytea CHECK(octet_length(content_digest)=32),action text CHECK(action IN ('CREATE','EDIT','RESTORE')),PRIMARY KEY(post_id,revision))`, 인덱스 `(post_id,revision DESC)`; `member_board_revision_requests(actor_user_id uuid,request_key uuid,request_digest bytea,post_id uuid,original_status text,result_revision bigint,committed_at timestamptz,PRIMARY KEY(actor_user_id,request_key))`. 소유자 제한 SECURITY DEFINER·고정 search_path·필요 EXECUTE만 허용, 앱 직접 SELECT/DML 및 PUBLIC EXECUTE 금지.
+- FK·탈퇴·삭제·보존·비식별화 법적 근거는 **개인정보 승인 전 BLOCKED**, 무단 CASCADE나 무기한 보존 주장 금지. 기존 글은 작성자·현재 내용 검증 후 기준 버전만 생성한다. 기존 수정 함수의 미사용 키는 적용된 Migration048을 고치지 않고 신규 전진형 교체로 해결한다.
+- 트랜잭션: 신뢰된 세션 사용자 → 요청 키·정규화 내용 해시 영수증 확보/비교 → 수정·복원·삭제 공통 게시글 `FOR UPDATE` → 작성자·공개 정책·expectedRevision 검사 → 단조 증가 불변 수정 스냅샷 → 현재 제목·본문·버전 갱신 → 감사 메타데이터·최초 영수증과 원자적 커밋. 동일 키 재시도는 이후 글이 변경돼도 최초 결과, 다른 본문이면 409. 오래된 수정과 복원↔수정·복원↔삭제 경합 직렬화. 이미지·댓글 유지, WLD·원장·보상·상점·주식에 영향 없음.
+- 남용 방지: 회원·글별 조회/수정/복원 제한, XSS 안전 렌더링, 제목 1~120자/본문 1~5000자, 로그·분석 원문 제외. 관리자 v1은 비식별 건수·저장비용·남용 통계만, 원문 조회·대리 복원 금지. 별도 법적/RBAC/재인증 승인 없는 포렌식 접근 금지.
+
+### 개발 P0/P1 백로그 10건 및 수용 게이트
+- **P0 ENV1236-01** 운영/개발/공식 Test DB 분리, 5433 전체 바인딩 제거, 암호화 백업 격리 복원.
+- **P0 SEC1236-02** 앱 직접 DML 235/241·PUBLIC 은행 EXECUTE 3개 최소권한 조치, 타인 이력 차단.
+- **P0 REL1236-03** QA v1241 프론트 타깃 5실패, 전체 감사 Critical2/High10·봇 Critical1/High5, Migration266 체크섬, Migration280 4중 충돌, 루트 디스크 97%, 정확 SHA Test/CI/GitOps.
+- **P0 BOARD1236-04** Migration048 덮어쓰기·키 미보존, 삭제/이미지/운영자 숨김 경합 및 보존 정책 승인.
+- **P1 BOARD1236-05** 전진형 스키마·불변 영수증·기준 버전·인덱스·격리 DB ACL 부정 테스트.
+- **P1 BOARD1236-06** 단일 트랜잭션 버전 CAS·재시도 원본 영수증·수정/복원/삭제 잠금·확정 불명 조회.
+- **P1 BOARD1236-07** NestJS/Next.js API, ETag/기존 PUT 호환 전환, Android App API 동등성.
+- **P1 BOARD1236-08** 이력 화면·복원 확인·오류/충돌·언어·320px/400%·접근성·세션 차단.
+- **P1 BOARD1236-09** 관리자 집계만, 개인정보 삭제·보존, 비색인·캐시, 남용 지표·KPI.
+- **P1 BOARD1236-10** 격리 PostgreSQL 동일 키 복원 100건→영수증 1, 타 회원 접근 100건→누출 0, 수정/복원/삭제 경합 100건→유실 0, 합성 10,001개 이력 키셋, 과거 이미지 재연결·금융 부작용 0; 회귀·롤백·공식 정확 SHA Test.
+- KPI(실측 아닌 가설): 복원 완료율, 수정 유실 신고, 충돌률, 이용률, 개인정보 민원, 활성 작성자당 저장비용, p95 지연. 기본 OFF → 격리 마이그레이션/ACL/보안 → 공식 인증 정확 HEAD SHA Test 웹/Android/금융 E2E → 독립 QA → 승인 GitOps 카나리/스모크/롤백. FAIL/HOLD에서 병합·운영승격 금지, 기능 OFF 비파괴 롤백.
+- 외부 독립 근거: PostgreSQL 잠금·OWASP API1/BOLA·W3C WCAG 2.2 **발행기관 3곳 검토, 신규 중복제거·승인 0건, 누적 검증 미확인 / 10,000건 → BLOCKED / IN PROGRESS**. 기관 수를 레퍼런스 실수량으로 계산하지 않는다. https://www.postgresql.org/docs/current/explicit-locking.html ; https://api-security.owasp.org/editions/2023/en/0x11-t10/ ; https://www.w3.org/TR/WCAG22/.
+
 ## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스와 수정 사유
