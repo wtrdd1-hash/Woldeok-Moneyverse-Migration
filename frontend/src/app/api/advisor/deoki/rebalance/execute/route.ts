@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' };
 
 /** No ledger-backed, idempotent execution contract exists for this route. */
-export async function POST(): Promise<NextResponse> {
+export async function POST(_request: Request): Promise<NextResponse> {
   const viewer = await viewerOrUnknown();
   if (!viewer) return NextResponse.json({ error: 'Authentication unavailable' }, { status: 503, headers });
   if (!viewer.signedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers });

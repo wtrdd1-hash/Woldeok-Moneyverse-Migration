@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import { DeokiAdvisorController } from './deoki-advisor.controller';
 import { DeokiAdvisorRepository } from './deoki-advisor.repository';
 
 class MockQueryable {
   public queries: Array<{ sql: string; params: any[] }> = [];
   public results: any[] = [];
+  public failOn = 0;
 
   async query(sql: string, params: any[] = []) {
     this.queries.push({ sql, params });
+    if (this.queries.length === this.failOn) throw new Error('permission denied for relation');
     const nextResult = this.results.shift();
     return nextResult || { rows: [] };
   }
@@ -102,5 +105,20 @@ describe('DeokiAdvisorRepository Unit Tests', () => {
 
     expect(result.answer).toContain('꽥! 덕이가 분석해 드릴게요!');
     expect(result.tips.length).toBeGreaterThan(0);
+  });
+});
+
+
+describe('Advisor verified owner boundary', () => {
+  it('refuses missing session instead of diagnosing a demo user', async () => {
+    const controller = new DeokiAdvisorController({ diagnoseUserPortfolio: async () => ({}) } as never);
+    await expect(controller.getDiagnosis({ session: null } as never)).rejects.toMatchObject({ status: 401 });
+  });
+  it('fails closed if any source of asset balances cannot be read', async () => {
+    for (const failingQuery of [1, 2, 3, 4]) {
+      const db = new MockQueryable();
+      db.failOn = failingQuery;
+      await expect(new DeokiAdvisorRepository(db as never).diagnoseUserPortfolio('user-1')).rejects.toThrow();
+    }
   });
 });
