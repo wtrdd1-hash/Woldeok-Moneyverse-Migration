@@ -12,10 +12,15 @@
 ## In progress
 - [ ] Backend tests RED then implementation GREEN.
 - [ ] Frontend tests RED then UI GREEN; Android app-api contract regression.
-- [ ] Full verification and release gate evidence.
+- [x] Full verification and release gate evidence (FAIL/BLOCKED; release hold).
 
-## Finished
-- Pending.
+## Finished — 2026-10-25 KST
+- Branch/PR: 88→89 remote branches (including main), 84→85 open PRs; Draft #1201. All 87 baseline non-main unique branches retained; 0 deletions; conflicting #1143/#1110/#1107 preserved.
+- Files: Backend projection, controller and tests; frontend view/page/tests, bank link, app-gateway test; plan/worklog and EN/KO release reports. Feature SHA `7395020a54d6e94ff456e593ead82d5791470caf`.
+- Full local gates: lint PASS, typecheck PASS, backend 1319 PASS/398 SKIP, database 15 PASS/3 SKIP, contract 38 PASS, frontend 1399 PASS/6 FAIL, bot 8 PASS, Webpack PASS, default Turbopack FAIL due external dependency symlink, app-api contract 179 PASS, prod audit 2 HIGH, full audit 2 CRITICAL/10 HIGH/11 MODERATE/3 LOW.
+- Real PostgreSQL `woldeok_moneyverse_ci`: moneyverse_app bank_get_my_standing EXECUTE allowed, direct bond SELECT/INSERT and ledger INSERT denied; real active test member returned bonds array with 0 rows; read-only ROLLBACK. Not a positive-bond financial E2E.
+- No merge, Test candidate promotion, Production deployment, DB write, service restart, rollback or branch deletion. Exact-SHA authenticated Test and security gates BLOCKED. Draft PR retained.
+- Rollback plan: close unmerged Draft; no migration/data change. Any later merged code requires reviewed revert PR. Preserve all other workers' unique changes.
 
 ### Midpoint — 2026-10-25 01:25 KST
 - `origin/main` re-fetched: still `c9a868b1e622341e2daa8b936ddf0988eda9988e`; integrated EN plan re-read. No overlapping open PR for bond maturity overview (bond mutation fix #1152 remains separate).
@@ -23,4 +28,4 @@
 - Implemented authenticated read-only Nest projection of existing `bank_get_my_standing` JSON; no SQL write or migration. Added private member route, 7-day/matured-unredeemed status, exact WLD strings, bank entry link, Android gateway route contract regression.
 - [x] Backend tests RED then implementation GREEN.
 - [x] Frontend tests RED then UI GREEN; Android app-api path contract.
-- [ ] Full verification and release gate evidence.
+- [x] Full verification and release gate evidence (FAIL/BLOCKED; release hold).
