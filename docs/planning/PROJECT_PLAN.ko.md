@@ -1,5 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1224 — F675-113 회원 치장 프리셋 및 원자적 장착 (기능 추가 / 기획 초안 / 운영 보류)
+- 주기: 이전 Feature Improvement v1222 → 현재 Feature Addition v1224 → 다음 Feature Improvement v1226(잠정). main `49788d09494fed3e463651945b83386e87dd47bc` 시작/중간 재확인, 선행 v1222 Draft #1136 미병합·운영 미반영. QA v1229 FAILED/HOLD. 개발 이슈 #1142. 문서만 변경.
+- 실제 코드: `/inventory`의 `apiOrNull(GET /api/v1/shop/holdings)` 및 아이템별 장착 POST, migration114 `inventory_equip_item`은 수량/슬롯 이름을 검사하지만 종류·만료·공통 회원 장착 버전은 보장하지 않는다. 회원 전용 최대 3개 이름 프리셋/8개 슬롯, 서버 확인 저장·미리보기·원자적 적용·삭제, 구버전 409, 소유권 상실/만료 422, 조회 불명 503, WLD·원장·구매 영향 없음.
+- P0 **ENV1224-01** (운영·개발 DB/5433 분리·복원), **SEC1224-02** (최근 앱 DML 235/241 및 PUBLIC 은행 함수 3개), **REL1224-03** (QA v1229 프론트 5 FAIL·전체 Critical 2/High 10·봇 Critical 1/High 5·migration266·#1088·정확 SHA Test), **INV1224-04** (기존 장착 소유권·종류·만료·경합 검사). P1 **INV1224-05** (프리셋·슬롯·영수증·버전 DB), **INV1224-06** (회원 공통 잠금·원자적 적용), **INV1224-07** (NestJS/Next/Android 본인 API), **INV1224-08** (확정 상태 UI/접근성), **INV1224-09** (관리자 비식별·개인정보·SEO·KPI), **INV1224-10** (100개 동시성·롤백·실제 PG 회귀). **전체 ID:** ENV1224-01 SEC1224-02 REL1224-03 INV1224-04 INV1224-05 INV1224-06 INV1224-07 INV1224-08 INV1224-09 INV1224-10.
+- 목적·대상·권한·CTA/상태·API·DB 제약/인덱스·트랜잭션·관리자·보안·SEO·Android/WCAG·KPI·수용/기능 OFF 롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 참조. 별도 승인된 개발 브랜치의 추가형 마이그레이션, 정확 SHA CI/보안, 격리 PostgreSQL ACL/복원, 공식 Test 인증 금융 E2E 3회, 사람의 GitOps 승인 전 승격 금지. 런타임·DB·WLD·Test·Production·스위치 변경 없음.
+- 외부 독립 발행기관 3곳(PostgreSQL/OWASP/W3C) 검토, 신규 승인 0건, 누적 검증·승인 UNKNOWN/10,000: **BLOCKED / IN PROGRESS**.
+
+
+
 ## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
 - 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.
