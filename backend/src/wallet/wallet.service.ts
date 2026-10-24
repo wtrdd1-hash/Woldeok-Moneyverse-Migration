@@ -168,6 +168,7 @@ export interface WalletRewardAvailability {
  * it, and the screen has to be able to tell it apart from `active`.
  */
 export type WalletLoanStatus = 'active' | 'repaid' | 'overdue';
+export type WalletLoanFilter = WalletLoanStatus | 'all';
 
 export interface WalletLoanView {
   readonly loanId: string;
@@ -498,12 +499,15 @@ export class WalletService {
     return { transactionId: requireUuid(receipt.transaction_id, 'database transaction id') };
   }
 
-  async loans(authenticatedUserId: string): Promise<WalletLoanView[]> {
+  async loans(authenticatedUserId: string, status: string = 'all'): Promise<WalletLoanView[]> {
+    if (!['all', 'active', 'overdue', 'repaid'].includes(status)) {
+      throw new WalletInputError('loan status must be all, active, overdue or repaid');
+    }
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     if (typeof this.repository.loansForUser !== 'function') return [];
     const rows = await this.repository.loansForUser(actorUserId);
     if (!Array.isArray(rows)) throw new Error('database returned invalid loans');
-    return rows.map((row) => ({
+    const loans = rows.map((row) => ({
       loanId: requireUuid(row.loan_id, 'loan id'),
       principalAmount: positiveWldAmount(row.principal_amount, 'loan principal'),
       interestAmount: wldAmount(row.interest_amount, 'loan interest'),
@@ -512,6 +516,7 @@ export class WalletService {
       issuedAt: timestamp(row.issued_at, 'loan issued timestamp'),
       repaidAt: row.repaid_at ? timestamp(row.repaid_at, 'loan repaid timestamp') : null,
     }));
+    return status === 'all' ? loans : loans.filter((loan) => loan.status === status);
   }
 
   async borrow(

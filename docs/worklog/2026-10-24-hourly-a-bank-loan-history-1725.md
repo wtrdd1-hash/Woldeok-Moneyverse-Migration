@@ -18,3 +18,10 @@
 - Re-read current main and EN/KO plans before implementation; main remains `49788d09494fed3e463651945b83386e87dd47bc`.
 - Added backend service/controller, web UI, and Android query/no-store regression tests before implementation. Backend RED verified: 4 expected failures (status ignored, invalid status accepted, controller not forwarding); frontend RED verified: missing component import. Contract build prerequisite repaired before valid backend RED.
 - Existing Android app-api already forwards the query and preserves backend `cache-control`; new regression covers it without changing gateway security boundaries.
+
+### Checkpoint 2 — GREEN and isolated SQL
+- Implemented strict `status=all|active|overdue|repaid` filter on the existing authenticated `GET /api/v1/bank/loans`, with 400 on invalid values, no-store response, exact WLD strings, and no DB schema/ledger changes. Controller takes only the server session's user id.
+- Added `/bank/loans` authenticated noindex server page, accessible filter navigation and explicit empty/unavailable states; linked from Bank loan tab. Android app-api existing allowlist forwards status and `private, no-store` response; regression added.
+- Focused backend: 5 PASS; frontend including app-api: 13 PASS after using `NODE_ENV=test`; frontend typecheck PASS. TDD initial backend 4 RED and missing frontend component RED recorded.
+- Real isolated PostgreSQL (`moneyverse-test-db` / `woldeok_moneyverse_ci`) read-only transaction: `bank_my_loans(uuid)` exists, `moneyverse_app` has EXECUTE, unknown owner returns 0, explicit ROLLBACK. No fixtures or writes. Full authenticated Test E2E not established.
+- `origin/main` and English/Korean integrated plans refreshed; still baseline `49788d09494fed3e463651945b83386e87dd47bc`. Other worker branches and migrations untouched.

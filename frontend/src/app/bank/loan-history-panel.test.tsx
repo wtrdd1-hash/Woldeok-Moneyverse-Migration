@@ -13,7 +13,7 @@ const overdue = {
 describe('loan history member view', () => {
   it('shows server-verified overdue status and full WLD precision', () => {
     render(<LoanHistoryPanel loans={[overdue]} status="overdue" isEn={false} />);
-    expect(screen.getByText('연체')).toBeDefined();
+    expect(screen.getAllByText('연체')).toHaveLength(2);
     expect(screen.getByText(/90,071,992,547,409,931,234,567,891/)).toBeDefined();
     expect(screen.getByRole('link', { name: '상환 완료' }).getAttribute('href')).toBe('/bank/loans?status=repaid');
   });

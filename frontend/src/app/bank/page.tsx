@@ -211,6 +211,13 @@ export default async function BankPage() {
             cashBalance={cash}
           />
 
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href="/bank/loans">
+              {localeLabel(locale, '내 가상 대출 기록 보기', 'View my loan history', 'ローン履歴を見る', '查看贷款记录')}
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </Button>
+
           {/* 개인 신용 평가 리포트 */}
           <div className="toss-card p-6">
             <CreditScoreCard

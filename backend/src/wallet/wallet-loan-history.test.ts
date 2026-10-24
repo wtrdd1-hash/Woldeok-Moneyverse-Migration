@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { WalletService, type WalletRepositoryLike } from './wallet.service';
 import { WalletController } from './wallet.controller';
 import { WalletInputError } from './wallet.repository';
+import { HEADERS_METADATA } from '@nestjs/common/constants';
 import type { RequestWithSession } from '../auth/session.context';
 
 const ACTOR = '11111111-1111-4111-8111-111111111111';
@@ -44,6 +45,11 @@ describe('owner-only loan history status filter', () => {
     const service = new WalletService(fakeRepository(loansForUser));
     await expect(service.loans(ACTOR, 'pending')).rejects.toBeInstanceOf(WalletInputError);
     expect(loansForUser).not.toHaveBeenCalled();
+  });
+
+  it('marks private loan history as no-store', () => {
+    const headers = Reflect.getMetadata(HEADERS_METADATA, WalletController.prototype.loans) as { name: string; value: string }[];
+    expect(headers).toContainEqual({ name: 'Cache-Control', value: 'private, no-store' });
   });
 
   it('passes the authenticated actor and selected filter through the controller', async () => {

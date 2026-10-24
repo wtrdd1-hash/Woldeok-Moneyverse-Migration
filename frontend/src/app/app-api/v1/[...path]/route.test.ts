@@ -38,7 +38,7 @@ describe('app API route compatibility', () => {
 
   it('forwards loan status query and preserves private no-store receipts for Android', async () => {
     vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
-    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ loans: [] }), {
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ loans: [] }), {
       status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
     }));
     vi.stubGlobal('fetch', fetchSpy);
