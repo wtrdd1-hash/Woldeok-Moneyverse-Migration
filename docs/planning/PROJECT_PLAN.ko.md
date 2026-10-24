@@ -1,5 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1234 — F675-115 구매 인증 후기 증빙·심사·삭제 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+- 회차: 이전 기능 추가 v1232(미병합 Draft #1167) → 현재 기능 보완 v1234 → 다음 기능 추가 v1236(잠정). main `49788d09494fed3e463651945b83386e87dd47bc` 및 main 영문 정본/국문 대조 문서 시작·중간 재확인. 최신 QA v1240(2026-10-24 20:57 KST) FAILED/HOLD, v1239 전체 테스트 재실행 아님. 미병합 문서 기획, 런타임·DB·WLD·Test·운영 변경 없음.
+- 실제 Migration071 Store 2.0 `shop_purchases`의 회원·상품·원장 FK, Migration072 원자적 구매, Migration218 경제 명령 재시도, Migration168 관리자 `shop_catalog.active` 변경 확인. 원장 FK만으로 취소·역분개·최종 확정까지 증명 불가. v1232의 `UNIQUE(user_id,catalog_id)`와 철회 후 신규 생성 모순을 회원·상품당 영속 1행 및 WITHDRAWN 최종 상태로 수정(재개는 승인된 동일 행 전환). 심사는 정확한 본문 버전·해시에 결합, 재시도 영수증은 과거 결과, 삭제·개인정보 정책 별도 승인, 정적 스냅샷에만 커서 무누락 보장.
+- `/shop`, `/account/shop-reviews`, `/admin/shop/reviews` 및 회원·공개·관리자 Nest API/Android app-api 유지. 제안된 상품 FOR SHARE→후기 FOR UPDATE, 신뢰된 회원/키 선점·지문 영수증·승인/철회/비활성 경합, 공개 승인·활성 상품만 no-store, 개인정보 noindex/no-store, WCAG 2.2 AA, Review/AggregateRating JSON-LD 미출력. 원장 최종 확정 불명은 인증 차단, WLD·재고·원장 부작용 0. 화면·CTA·상태·API·DB·제약·트랜잭션·관리자·보안·SEO·접근성·KPI·롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 `ENV1234-01` DB 격리/5433/복원/디스크 #1170, `SEC1234-02` 앱 DML 235/241·PUBLIC 은행 EXECUTE 3·신원/권한, `REL1234-03` QA v1240 프론트 5건 실패·감사 Critical2/High10·봇 Critical1/High5·Migration266·280 4중 충돌 #1147·CI 우회 #1088·정확 SHA Test/복원 HOLD, `SHOP1234-04` Store 2.0 원장 최종 확정. P1 `SHOP1234-05` 스키마/삭제, `SHOP1234-06` 잠금/CAS/영수증, `SHOP1234-07` 웹/API/Android, `SHOP1234-08` 심사/개인정보, `SHOP1234-09` SEO/접근성/KPI/커서, `SHOP1234-10` 100동시/정적 10,001건/롤백.
+- Full backlog IDs / 전체 백로그 식별자: ENV1234-01 SEC1234-02 REL1234-03 SHOP1234-04 SHOP1234-05 SHOP1234-06 SHOP1234-07 SHOP1234-08 SHOP1234-09 SHOP1234-10.
+- 기능 기본 OFF, #1147 해결 전 Migration 번호 미할당, 별도 개발 브랜치 TDD, 정확 HEAD 전체 CI/보안, 격리 실제 PG 권한·원장, 공식 Test 정확 SHA 인증 E2E·복원·독립 QA·승인 GitOps 필수. 외부 발행기관 4곳 검토, 신규 최종 승인 0건, 누적 미확인/10,000 → BLOCKED / IN PROGRESS.
+
+
 ## v2026.10.24.1232 — F675-115 실제 구매 검증형 상점 후기·운영자 심사 (기능 추가 / 기획 초안 / 운영 보류)
 - 회차: 이전 **Feature Improvement v1230**(Draft #1161 미병합) → 현재 **Feature Addition v1232** → 다음 **Feature Improvement v1234**(잠정). 기준 main `49788d09494fed3e463651945b83386e87dd47bc` 시작·중간 재조회, 영문 원본/국문 대조 동일, QA v1237 FAILED/HOLD. 문서만 수정하며 런타임·DB·WLD·Test·운영 미변경.
 - 코드 근거: `/shop` Store 2.0 카탈로그와 Migration071의 `shop_catalog`/`shop_purchases` 및 Migration218 경제 영수증 확인, main에는 후기 테이블/API/UI 없음. 회원 본인의 확정 구매당 상품별 현재 후기 1개, 1~5점·30~1,500자, 심사 후 공개. 구형 `purchases`·원장 취소 불명·보유만으로 구매 인증 금지. 후기 보상·금융 변경 없음.

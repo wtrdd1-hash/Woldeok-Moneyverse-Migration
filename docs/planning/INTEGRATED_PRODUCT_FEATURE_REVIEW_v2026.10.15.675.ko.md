@@ -1,5 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1234 포트폴리오 반영 — F675-115 구매 인증 후기 심사 무결성 (기능 보완 / 초안 / 운영 보류)
+- 이전 기능 추가 v1232 → 현재 기능 보완 v1234 → 다음 기능 추가 v1236(잠정). main `49788d09494fed3e463651945b83386e87dd47bc` 시작·중간 동일, v1232 Draft #1167 미병합, QA v1240 FAILED/HOLD. 실제 Migration071/072/218은 Store 2.0 구매·원장 거래 연결을 확인할 뿐 **역분개·최종 확정은 미증명**; Migration168 관리자는 상품을 비활성화할 수 있다. 후기 시스템은 제안만 존재한다.
+- 회원/상품 UNIQUE와 철회 후 재작성 모순, 정확한 본문 해시·버전 심사 CAS, 과거 멱등 영수증과 현재 공개 상태 분리, 상품 비활성·본인 가림 철회, FK/삭제, 정적 테스트 한정 커서 보장, no-store, WCAG/Android, Review JSON-LD 금지 보완. WLD·원장·재고 변경 없음. 상세는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0/P1 식별자: ENV1234-01 SEC1234-02 REL1234-03 SHOP1234-04 SHOP1234-05 SHOP1234-06 SHOP1234-07 SHOP1234-08 SHOP1234-09 SHOP1234-10. QA v1240 공유 DB/5433, 앱 DML 235/241, PUBLIC 은행 EXECUTE 3, 감사 Critical2/High10, 프론트 5건 실패, Migration266·280 충돌, 정확 SHA Test/복원 및 디스크 #1170 HOLD. 외부 발행기관 4곳 검토, 신규 승인 0, 누적 미확인/10,000 BLOCKED. 기획만 수행, 기능 OFF.
+
+
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
 
 - [GSC 실제 검색성과·색인 증거 센터 상세기획](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 정식 상세기획으로 채택. 기존 /admin/seo·v685 재사용, GSC 날짜/상위 10개·무행0·크롤러 색인 오인·레거시 제출 성공/Google Indexing API 안내 오류 기록, 기술·제출·Google 색인본·검색 노출 실제 증거 분리, 구글/WCAG 16개 자료·D0~D7. 실제 SEO/GSC 운영 검증이나 코드 배포 아님.

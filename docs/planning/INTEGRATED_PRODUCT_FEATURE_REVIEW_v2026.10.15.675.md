@@ -1,5 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1234 portfolio update — F675-115 Verified Review Moderation Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- Previous Addition v1232 → Current Improvement v1234 → Next Addition v1236 provisional; main `49788d09494fed3e463651945b83386e87dd47bc` start/mid unchanged; v1232 Draft #1167 unmerged, QA v1240 FAILED/HOLD. Real migrations 071/072/218 prove Store 2.0 purchase + ledger transaction linkage but **not reversal finality**; admin migration168 can deactivate catalog. New review subsystem remains proposed only.
+- Resolve durable UNIQUE owner/catalog vs withdrawal recreation, exact content-hash moderation CAS, public visibility vs historical idempotency receipt, catalog deactivation/owner redacted withdrawal, FK/erasure, cursor static-fixture scope, private/public no-store, WCAG/Android, SEO without Review JSON-LD. No WLD/ledger/stock mutations. Detailed implementation contract in [integrated EN master](INTEGRATED_PLANNING_MASTER.md).
+- P0/P1 IDs: ENV1234-01 SEC1234-02 REL1234-03 SHOP1234-04 SHOP1234-05 SHOP1234-06 SHOP1234-07 SHOP1234-08 SHOP1234-09 SHOP1234-10. QA v1240 shared DB/5433, app DML 235/241, PUBLIC bank EXECUTE 3, audit Critical2/High10, frontend 5 FAIL, migration266 and 280 conflict, exact-SHA Test/restore and disk #1170 HOLD. External four publisher families reviewed, 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED. Planning only, flag OFF.
+
+
 ## F675-06 detailed adoption — v2026.10.15.688
 
 - [Google Search Evidence & Canonical Action Center](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) is the next v675 adopted **detailed planning** feature. Reuses /admin/seo and v685; identifies top-10-only GSC data, missing date=0, GSC PT/freshness, crawler-indexed mislabel and legacy index submission success/Google Indexing API misclaims. Separates source/submission/Google indexed-version/performance into independently verifiable evidence, 16 Google/WCAG references and D0–D7 gated implementation. Not a live SEO audit or deployed feature.
