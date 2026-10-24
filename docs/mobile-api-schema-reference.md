@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.09.22.359**
+Update version: **v2026.10.24.a2057**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4751,6 +4751,39 @@ _No request body._
 | recentTransactions[].bankDelta | false | undefined \| string & object |  |
 | recentTransactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
 | recentTransactions[].occurredAt | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/wallet/activity/daily` — UTC daily breakdown of the caller latest 50 ledger transactions only
+
+- Authorization: Authenticated member session and current consent; owner derived from server session
+- Success status: 200
+- Response mode: json
+- After success: Render date buckets as sampled latest-50 data; never interpret as complete calendar-day turnover
+- Operation ID: `WalletController_dailyActivity`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="latest-50" | const="latest-50" |
+| inspectedTransactions | true | number |  |
+| days[] | true | object[] |  |
+| days[] | true | object |  |
+| days[].date | true | string |  |
+| days[].transactionCount | true | number |  |
+| days[].incomingAmount | true | string |  |
+| days[].outgoingAmount | true | string |  |
+| days[].netAmount | true | string |  |
+| days[].internalTransferCount | true | number |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

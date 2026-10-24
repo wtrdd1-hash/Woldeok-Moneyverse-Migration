@@ -145,6 +145,20 @@ export interface WalletOverview {
   readonly recentTransactions: WalletTransactionView[];
 }
 
+/** Aggregates only the owner's most recent <=50 ledger rows; not full calendar totals. */
+export interface WalletDailyActivity {
+  readonly scope: 'latest-50';
+  readonly inspectedTransactions: number;
+  readonly days: readonly {
+    readonly date: string; // UTC YYYY-MM-DD
+    readonly transactionCount: number;
+    readonly incomingAmount: string;
+    readonly outgoingAmount: string; // positive magnitude
+    readonly netAmount: string;
+    readonly internalTransferCount: number;
+  }[];
+}
+
 export interface WalletTransferReceipt {
   readonly transactionId: string;
 }
@@ -380,6 +394,48 @@ export class WalletService {
       userId,
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
+    };
+  }
+
+  /** Read-only, owner-scoped UTC grouping. Never claim a complete daily ledger. */
+  async dailyActivity(authenticatedUserId: string): Promise<WalletDailyActivity> {
+    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
+    const rows = await this.repository.recentTransactionsForUser(actor, 50);
+    const transactions = normalizeTransactions(rows);
+    const byDate = new Map<string, {
+      transactionCount: number;
+      incomingAmount: bigint;
+      outgoingAmount: bigint;
+      netAmount: bigint;
+      internalTransferCount: number;
+    }>();
+    for (const transaction of transactions) {
+      const date = transaction.occurredAt.slice(0, 10);
+      const group = byDate.get(date) ?? {
+        transactionCount: 0, incomingAmount: 0n, outgoingAmount: 0n,
+        netAmount: 0n, internalTransferCount: 0,
+      };
+      const net = BigInt(transaction.netAmount);
+      group.transactionCount += 1;
+      if (net > 0n) group.incomingAmount += net;
+      if (net < 0n) group.outgoingAmount -= net;
+      group.netAmount += net;
+      if (net === 0n && transaction.cashDelta !== undefined && transaction.bankDelta !== undefined
+        && BigInt(transaction.cashDelta) !== 0n && BigInt(transaction.bankDelta) !== 0n) {
+        group.internalTransferCount += 1;
+      }
+      byDate.set(date, group);
+    }
+    return {
+      scope: 'latest-50', inspectedTransactions: transactions.length,
+      days: [...byDate.entries()].sort(([a], [b]) => b.localeCompare(a)).map(([date, group]) => ({
+        date,
+        transactionCount: group.transactionCount,
+        incomingAmount: group.incomingAmount.toString(),
+        outgoingAmount: group.outgoingAmount.toString(),
+        netAmount: group.netAmount.toString(),
+        internalTransferCount: group.internalTransferCount,
+      })),
     };
   }
 

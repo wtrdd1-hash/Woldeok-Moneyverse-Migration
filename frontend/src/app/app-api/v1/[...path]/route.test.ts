@@ -121,6 +121,24 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
+  it('proxies the owner-only daily wallet summary without dropping private cache policy', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let forwarded = '';
+    vi.stubGlobal('fetch', vi.fn(async (url: RequestInfo | URL) => {
+      forwarded = String(url);
+      return new Response(JSON.stringify({ scope: 'latest-50', inspectedTransactions: 0, days: [] }), {
+        status: 200, headers: { 'content-type': 'application/json' },
+      });
+    }));
+    const response = await GET(
+      request('/app-api/v1/wallet/activity/daily'), context('wallet', 'activity', 'daily'),
+    );
+    expect(forwarded).toBe('http://127.0.0.1:3020/api/v1/wallet/activity/daily');
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toEqual({ scope: 'latest-50', inspectedTransactions: 0, days: [] });
+  });
+
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network down'); }));

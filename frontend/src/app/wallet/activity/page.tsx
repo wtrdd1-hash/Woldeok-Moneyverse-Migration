@@ -11,6 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
+import { WalletDailyActivity, type DailyActivityView } from './daily-activity';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,7 @@ export default async function WalletActivityPage() {
   // 50 is the API's ceiling for this list, so this page shows everything it
   // will give rather than a page size chosen here.
   const wallet = await apiOrNull<Overview>('/api/v1/wallet?recent=50');
+  const daily = await apiOrNull<DailyActivityView>('/api/v1/wallet/activity/daily');
 
   return (
     <div data-page="wallet-activity" className="mv-page mv-page--finance grid gap-5">
@@ -47,6 +49,8 @@ export default async function WalletActivityPage() {
         내 지갑을 거쳐 간 최근 기록입니다. 각 줄은 돈이 어디서 나와 어디로 갔는지와, 그 둘을
         맞춘 금액을 보여 줍니다.
       </PageHeader>
+
+      <WalletDailyActivity data={daily} />
 
       <Card>
         <CardContent>
