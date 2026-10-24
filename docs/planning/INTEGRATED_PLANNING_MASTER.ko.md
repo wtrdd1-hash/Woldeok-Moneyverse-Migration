@@ -1,5 +1,41 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1230 — F675-114 주간 목표 집중 보드의 주간 전환·영수증·근거 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+
+### 회차·근거·v1228 설계 오류 정정
+- 이전 **기능 추가 v1228** → 현재 **기능 보완 v1230** → 다음 **기능 추가 v1232**(잠정). 최신 원격 main `49788d09494fed3e463651945b83386e87dd47bc`와 정본 국영문 PROJECT_PLAN 시작·중간 재조회 결과 변경 없음. 선행 Draft PR #1155는 **미병합**이며 구현·배포된 기능이 아님. 최신 완료 QA **v1235(2026-10-24 18:20 KST) FAILED / RELEASE HOLD**. 문서만 변경하고 런타임·DB·WLD·기능 스위치·Test·운영은 변경하지 않음.
+- **실제 코드 근거:** Migration 101의 `early_weekly_goal_catalog`는 기간(`window_kind`), 활성 여부, 자기신고 여부를 보유하고 `early_game_weekly_goals(actor)`는 `date_trunc('week', clock_timestamp() AT TIME ZONE 'Asia/Seoul')::date`로 주 시작일을 계산함. **평생 목표에도 week_start 값을 반환**하지만 평생 고정의 식별자로 사용해서는 안 됨. 주간 작업·구매·원장 기반 지표와 평생 NPC 친밀도(`self_reported=true`)를 구별해야 함. 회원 전용 `/quests`는 `apiOrNull`을 사용하며 현재 `robots.index=true`; 기존 `early-game.ts`는 bigint 문자열을 안전하게 표시함. 최신 main에는 고정 기능 API/테이블이 확인되지 않음.
+- **정정 1 — 평생 목표:** `goal_window=lifetime`이면 저장하는 `scope_week_start=NULL`; 함수가 반환하는 월요일 날짜를 평생 고정에 적용하지 않음. 평생 목표는 월요일에 만료되지 않음.
+- **정정 2 — 만료 목표의 한도:** 제안된 PK `(user_id,goal_code)`는 한 목표의 여러 주 기록을 동시에 저장할 수 없으므로 **현재 슬롯 모델**로 명시. 지난주 만료 고정은 본인에게 제거 가능하되 현재 활성 고정 3개 한도에서 제외. 이번 주 재고정은 새로운 멱등 키·현재 버전으로 명시적으로 실행하고 같은 행의 주 범위를 교체하되, 과거 근거는 불변 영수증/최소 이벤트에 보존. 자동 재고정 금지.
+- **정정 3 — 월요일 경계와 재실행:** 실제 함수의 `clock_timestamp()`는 조회·저장 사이에 날짜가 바뀔 수 있음. 회원 상태 잠금 후 서버 시각을 고정해 서울 현재 주를 계산하고, 원본 함수의 week_start와 불일치하면 저장하지 않고 충돌/새로고침을 요구. 동일 키 재실행은 현재 주·활성·버전 검증 **이전**에 영수증을 조회하여 원래 결과만 반환하며, 별도 본인 GET으로 현재 고정 여부를 확인. 클라이언트 시각 불신.
+- **정정 4 — 보상과 신원:** `goal_completed`는 목표치 계산 결과이지 보상 지급 영수증이 아님. NPC 친밀도는 자기신고이므로 검증된 작업/보상으로 표시하거나 VIP 보상 후보 #1133을 근거로 사용하지 않음. `SOURCE_UNAVAILABLE`과 `EMPTY_CONFIRMED`을 분리. `p_actor` UUID 인자만으로 DB 사용자의 신원이 인증되는 것은 아니므로 세션→DB 신뢰 경계와 임의 actor 치환 공격을 별도 검증.
+
+### 회원 화면·API·Android·접근성·개인정보
+- 회원 전용 `/quests` 고정/해제, `/account/goal-focus` 열기/진행 새로고침/제거/이번 주 재고정. 주간+평생 **현재 활성 최대 3개**. 상태: `LOADING`, `EMPTY_CONFIRMED`, `PINNING`, `PINNED_CONFIRMED`, `EXPIRED_WEEK`, `INACTIVE_REDACTED`, `SOURCE_UNAVAILABLE`, `CONFLICT`, `UNKNOWN_COMMIT`, `REPLAYED_OLD_RECEIPT`, `SIGNED_OUT`. 비활성 목표는 과거 제목·진행도 없이 본인 제거만 허용. 원본 Migration101 진행도만 읽고 bigint 문자열·BigInt 계산을 유지하며 보상·WLD·원장·퀘스트 진행도·알림은 변경하지 않음.
+- **제안 API(미구현):** 본인 전용 `GET /api/v1/engagement/focus`, `PUT /api/v1/engagement/focus/:goalCode`, `DELETE /api/v1/engagement/focus/:goalCode`. PUT `{weekStart:string|null}`은 클라이언트가 주장하는 범위가 아니라 서버 카탈로그 기간/서울 현재 주와 일치해야 하는 요청값. 평생은 null 필수. GET은 `ETag: "vN"`, `sourceAsOf`, `currentWeekStart`, `items`, `stateVersion`, `sourceStatus`; 최초 GET이 버전 1을 초기화하고 v0 무조회 생성 금지. 쓰기는 UUID `Idempotency-Key`와 강한 `If-Match: "vN"` 필수. 영수증 `{receiptId,operation,goalCode,scopeWeekStart,originalResultVersion,currentStateVersion,replayed,committedAt}`; 재실행 시 최초 확정 결과를 돌려주며 현재 UI는 본인 GET으로 재확인. 401 로그인 없음, 403 동의/CSRF, 404 타인/고정 불가, 409 버전·키 지문·한도·주 전환, 422 코드·주·기간 오류, 429 과다 요청, 503 원본/DB 확인 불가. userId·진행도·보상·완료 여부·금액 입력 금지.
+- 세션에서만 actor 파생, 동의·CSRF·로그아웃/계정전환 응답 세대 차단, `private,no-store`. 앱 DB 역할이 임의 `p_actor`로 함수를 호출할 수 있는지 보안 검토하고 DB 검증 신원 또는 독립 승인된 제한 게이트웨이 증명 전에는 DB 자체 신원 인증 완료를 주장하지 않음. 타인 100건 및 SQL actor 치환 음성 테스트. `/quests`와 개인 집중 화면은 `noindex,nofollow`, 사이트맵 제외, 개인 OpenGraph 제거; 공개 안내는 별도 비개인 URL에서만. Android App API는 기간·CAS·원본 영수증·오류 동일 계약, 오프라인 `NOT_SYNCED`, 가짜 성공 금지.
+- WCAG 2.2 AA: 키보드 순서, `aria-pressed`, 확정 영수증만 `aria-live`, 320px·200~400% 확대, 44px 터치 목표 검증, 화면읽기 자기신고 안내, 움직임 줄이기, 서울 날짜 현지화. 관리자는 회원별 고정 내역 없이 집계만 확인(표본 10명 미만 비공개). KPI: 고정 전환, D7 재방문, 만료 후 재고정, 원본 오류, 가짜 성공 0, 타인 노출 0, WLD 부작용 0. 개인 친밀도 프로파일링·자유 메모 금지.
+
+### DB·트랜잭션·회귀·롤백(설계만)
+- `member_goal_focus_state(user_id PK REFERENCES users ON DELETE CASCADE,version bigint DEFAULT 1 CHECK(version>=1),updated_at)`; `member_goal_focus(user_id,goal_code,goal_window CHECK IN ('week','lifetime'),scope_week_start date NULL,pinned_at,removed_at,version bigint CHECK(version>=1),PRIMARY KEY(user_id,goal_code),CHECK((goal_window='week' AND scope_week_start IS NOT NULL) OR (goal_window='lifetime' AND scope_week_start IS NULL)))`; `member_goal_focus_requests(user_id,key,digest bytea CHECK(octet_length(digest)=32),operation,immutable_result jsonb,created_at,PRIMARY KEY(user_id,key))`와 본인 FK 삭제 연동. 과거 주 재고정은 최소 불변 이벤트로 기록. 인덱스 `(user_id,removed_at,goal_window,scope_week_start)`, `(user_id,pinned_at DESC,goal_code)`. 만료 주간 행은 현재 한도에서 제외, 멱등 영수증의 임의 TTL 삭제 금지. Migration 280 4중 충돌 #1147 해결 전 새 번호 배정 금지.
+- 잠금 순서: 검증된 actor/세션 → 본인 상태 행 `FOR UPDATE`(충돌 안전 생성, 버전 1) → 동일 키 영수증/지문 **먼저** 조회 → PUT은 활성 카탈로그 행 `FOR SHARE` → 실제 원본과 서버 서울 주 일치 검증 → `If-Match` CAS → 본인 고정 행 → 불변 영수증·최소 이벤트를 한 트랜잭션에 커밋. 지문은 actor·HTTP 방식·경로·목표 코드·기간·기대 버전을 결합. 동일 키+동일 지문은 지난주/삭제 후에도 최초 결과만 반환, 다른 지문은 409; 재실행이 고정/해제를 다시 수행하지 않음. 비활성 목표는 신규 고정 거절하되 본인 삭제 허용. 앱 역할 직접 DML/SELECT 및 PUBLIC EXECUTE 금지, DB 신원 검증 별도.
+- 수용 테스트: 동일 키 PUT 100건→고정·영수증 각각 1건, 동일 키 다른 지문 100건→409, 타인 100건·SQL actor 치환→노출 0, 서로 다른 목표 100건 동시 고정→현재 활성 3개 이하, PIN/DELETE 및 관리자 비활성화 경합, 서울 일요일 23:59:59.999/월요일 00:00:00.000와 긴 트랜잭션, 평생 고정 유지, 오래된 영수증 재실행 시 부활 없음, 격리 합성 10,001건(운영 한도 변경 아님), bigint 2^53 초과, 원본 장애·계정 삭제·robots·Android·320px/400% 확대. 별도 개발 브랜치에서 TDD·격리 PostgreSQL ACL 검증, 정확 SHA 전체 CI/보안, 공식 Test 인증 금융 E2E, 암호화 백업 격리 복원, 독립 GitOps 승인 전 운영승격 금지. 기능 `member_goal_focus` 기본 OFF, OFF 롤백 시 쓰기 중단·영수증/묘비 보존, 운영 금융 스키마 역마이그레이션 금지.
+
+### P0/P1 개발 인계(총 10건)
+- **P0 ENV1230-01:** 운영 연결 DB와 개발/Test 분리, 5433 바인딩 통제, 암호화 백업 격리 복원 및 DB 식별자 검증.
+- **P0 SEC1230-02:** 241개 중 235개 앱 직접 UPDATE/DELETE, PUBLIC 은행 함수 3개를 전방향 최소권한으로 수정; DB actor 신원과 타인 100건 검증.
+- **P0 REL1230-03:** #1147 Migration280 충돌, #1088 빌드만 자동 병합, Migration266 체크섬, QA v1235 프론트 5건, 전체 Critical2/High10·운영 High2·봇 Critical1/High5, 경로 증거 실패, 정확 SHA Test/격리 복원 미검증 차단.
+- **P0 QUEST1230-04:** Migration101 근거·서울 주 전환·평생 week_start 오해·허위 보상 #1133·개인 `/quests` robots 수정 조건 검증.
+- **P1 QUEST1230-05:** 기간 CHECK·본인 상태·묘비·원본 영수증·보존·현재 한도 DB 명세 및 번호 충돌 후 마이그레이션.
+- **P1 QUEST1230-06:** NestJS/Next 본인 API·상태/영수증 재조회·원본 장애 분리·입력 actor/진행도 거부.
+- **P1 QUEST1230-07:** 잠금 순서, 동일 키 100건·재고정/제거·비활성화·월요일 경계 경합 검증.
+- **P1 QUEST1230-08:** 웹/Android 사실 기반 상태·세션 세대 차단·키보드/화면읽기·320px/400%·비공개 noindex/no-store.
+- **P1 QUEST1230-09:** 비식별 관리자 집계·계정 삭제·남용 방지·KPI·보상/금융 부작용 0.
+- **P1 QUEST1230-10:** 격리 PostgreSQL ACL/동시성/시간/bigint/Android/금융 회귀, 정확 SHA 공식 Test·복원·기능 OFF 롤백.
+- **외부 독립 근거 10,000건 게이트:** PostgreSQL·OWASP·W3C·IETF **4개 발행기관 계열 검토**, 신규 중복 제거·최종 승인 **0건**, 누적 승인 **미확인/10,000 = BLOCKED / IN PROGRESS**. 2026-10-22 IETF Idempotency-Key 자료는 **정식 RFC가 아닌 Internet-Draft**. 참고: https://www.postgresql.org/docs/17/functions-datetime.html ; https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/ ; https://www.w3.org/TR/WCAG22/ ; https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/ . 10,000건 달성·운영 준비 완료 주장 금지.
+
+
+
 ## v2026.10.24.1228 — F675-114 회원 주간 목표 집중 보드 (기능 추가 / DRAFT / 운영 보류)
 
 ### 회차·실제 코드·목적
