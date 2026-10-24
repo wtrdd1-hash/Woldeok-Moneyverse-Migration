@@ -3,7 +3,7 @@ import type { Queryable } from '../core/db';
 import type { RequestWithSession } from '../auth/session.context';
 import { BankController } from './bank.controller';
 import { BankRepository } from './bank.repository';
-import { projectCreditPolicy } from './credit-policy';
+import { BankPolicyUnavailableError, projectCreditPolicy } from './credit-policy';
 
 const actor = '77a071a6-a75e-4bcb-ac7e-10ae50aa86ef';
 const verified = {
@@ -65,6 +65,12 @@ describe('verified game credit policy (owner-only DB authority)', () => {
     expect(calls[0]?.sql).toContain('public.bank_get_my_standing($1)');
     expect(calls[0]?.params).toEqual([actor]);
     expect(calls[0]?.sql).not.toMatch(/FROM\s+public\.(users|virtual_bank_loans|user_job_progress)/i);
+  });
+
+  it('maps corrupt bank policy to a fail-closed 503 instead of fabricated values', async () => {
+    const controller = new BankController({ getCreditPolicy: vi.fn().mockRejectedValue(new BankPolicyUnavailableError()) } as unknown as BankRepository);
+    const request = { session: { user_id: actor } } as unknown as RequestWithSession;
+    await expect(controller.creditPolicy(request)).rejects.toMatchObject({ status: 503 });
   });
 
   it('takes actor from the guarded session, never from a request parameter', async () => {

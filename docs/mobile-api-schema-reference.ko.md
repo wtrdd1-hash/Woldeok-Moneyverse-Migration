@@ -4,7 +4,7 @@
 
 업데이트 버전: **v2026.09.22.359**
 
-이 문서는 179개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
+이 문서는 180개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
 ## 공통 호환성 규칙
 
@@ -1331,6 +1331,39 @@ _None._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
+## `GET` `/app-api/v1/banking/credit-policy` — 검증된 회원 본인 가상 은행 신용 정책 조회(모의 점수 미표시)
+
+- 인증/권한: 로그인 필요(기능에 따라 최신 동의 필요)
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 대출 상태 변경 후 본인 신용 정책 재조회
+- Operation ID: `BankController_creditPolicy`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| creditGrade | true | string |  |
+| creditLimitWld | true | string |  |
+| interestRateBps | true | number |  |
+| termDays | true | number |  |
+| minimumRepaymentWld | true | string |  |
+| activeLoanOutstandingWld | true | null \| string |  |
+| activeLoanStatus | true | null \| string="active" \| string="overdue" |  |
+| hasActiveLoan | true | boolean |  |
+| canRequestNewLoan | true | boolean |  |
+| source | true | string="BANK_STANDING" | const="BANK_STANDING" |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
 ## `POST` `/app-api/v1/banking/deposit` — 은행 예금 입금
 
 - 인증/권한: 로그인 + 최신 동의 + CSRF(변경 요청)
@@ -1352,6 +1385,138 @@ _None._
 |---|---|---|---|
 | amount | true | string | example="1000" |
 | idempotencyKey | true | string (uuid) |  |
+
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/banking/pockets` — 내 저금통(통장 쪼개기) 목록 및 잔액 조회
+
+- 인증/권한: 로그인 + 최신 동의
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `PocketController_listPockets`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/banking/pockets` — 신규 저금통 생성
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 저금통 목록을 다시 조회
+- Operation ID: `PocketController_createPocket`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `CreatePocketDto`
+
+_None._
+
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `PUT` `/app-api/v1/banking/pockets/:id` — 저금통 테마 색상 및 아이콘 커스터마이즈
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 저금통 목록 갱신
+- Operation ID: `PocketController_customizePocket`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `CustomizePocketDto`
+
+_None._
+
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/banking/pockets/:id/archive` — 저금통 해지 및 전액 본계좌 회수
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 저금통 및 본계좌 잔액 갱신
+- Operation ID: `PocketController_archivePocket`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `ArchivePocketDto`
+
+_None._
+
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/banking/pockets/:id/transfer` — 본계좌 ↔ 저금통 입출금 자금 이체
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 저금통 및 은행 잔액 갱신
+- Operation ID: `PocketController_transferPocket`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `TransferPocketDto`
+
+_None._
 
 
 ### 성공 응답 필드
@@ -2665,6 +2830,54 @@ _요청 본문 없음._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
+## `POST` `/app-api/v1/crafting/execute` — 아이템 원자적 조합 및 WLD 수수료 소각 제작 실행
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 인벤토리 및 잔액 갱신
+- Operation ID: `CraftingController_executeCrafting`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `ExecuteCraftingDto`
+
+_None._
+
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/crafting/recipes` — P0 제작 레시피 목록 및 필요 재료 조회
+
+- 인증/권한: 로그인 + 최신 동의
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 레시피 목록 렌더링
+- Operation ID: `CraftingController_listRecipes`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
 ## `POST` `/app-api/v1/early-game/claims` — 오늘 초반 이벤트 보상 수령
 
 - 인증/권한: 로그인 + 최신 동의 + CSRF(변경 요청)
@@ -2937,6 +3150,133 @@ _요청 본문 없음._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
+## `GET` `/app-api/v1/marketplace/listings` — 활성 마켓플레이스 판매 목록 조회
+
+- 인증/권한: 로그인 + 최신 동의
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 마켓 목록 렌더링
+- Operation ID: `MarketplaceController_listListings`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| category | query | false | string |  |
+| search | query | false | string |  |
+| limit | query | false | integer |  |
+| offset | query | false | integer |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/marketplace/listings` — 내 인벤토리 아이템 거래소 판매 등록
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 인벤토리 및 내 판매 목록 갱신
+- Operation ID: `MarketplaceController_createListing`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `CreateListingDto`
+
+_None._
+
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/marketplace/listings/:id/buy` — 거래소 등록 아이템 즉시 구매 (1% 소각 및 판매자 99% 정산)
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 잔액 및 인벤토리 갱신
+- Operation ID: `MarketplaceController_buyListing`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `BuyListingDto`
+
+_None._
+
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/marketplace/listings/:id/cancel` — 활성 판매 등록 취소 및 에스크로 인벤토리 즉시 반환
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 인벤토리 및 내 리스팅 갱신
+- Operation ID: `MarketplaceController_cancelListing`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/marketplace/my-listings` — 내 판매 등록 물품 목록 및 정산 이력 조회
+
+- 인증/권한: 로그인 + 최신 동의
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 내 리스팅 목록 렌더링
+- Operation ID: `MarketplaceController_listMyListings`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
 ## `GET` `/app-api/v1/media/:key` — 일반 미디어 파일 조회
 
 - 인증/권한: 공개: 로그인 불필요
@@ -2980,6 +3320,235 @@ _요청 본문 없음._
 ### 성공 응답 필드
 
 _바이너리 본문. JSON 디코딩 금지._
+
+## `GET` `/app-api/v1/newspaper/lore` — 주간 금융 개념 교육 아티클 3종(복리, 스프레드, 화폐유통) 조회
+
+- 인증/권한: 공개: 로그인 불필요
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getFinancialLore`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| success | true | boolean |  |
+| data[] | true | object[] |  |
+| data[] | true | object |  |
+| data[].id | true | string |  |
+| data[].category | true | string |  |
+| data[].title | true | string |  |
+| data[].summary | true | string |  |
+| data[].readTimeMinutes | true | number |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/newspaper/poll` — 주간 시장 전망 4지선다 여론조사 현황 및 득표수 조회
+
+- 인증/권한: 공개: 로그인 불필요
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getWeeklyPoll`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.id | true | string |  |
+| data.question | true | string |  |
+| data.options[] | true | object[] |  |
+| data.options[] | true | object |  |
+| data.options[].id | true | string |  |
+| data.options[].label | true | string |  |
+| data.options[].votes | true | number |  |
+| data.options[].percentage | true | number |  |
+| data.totalVotes | true | number |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/newspaper/poll/vote` — 이번 주 시장 전망 여론조사 투표 참여 및 실시간 집계 반환
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF(변경 요청)
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 관련 GET을 다시 호출해 서버 상태와 동기화
+- Operation ID: `NewspaperController_voteWeeklyPoll`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+- Content-Type: `undefined`
+
+_None._
+
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.id | true | string |  |
+| data.question | true | string |  |
+| data.options[] | true | object[] |  |
+| data.options[] | true | object |  |
+| data.options[].id | true | string |  |
+| data.options[].label | true | string |  |
+| data.options[].votes | true | number |  |
+| data.options[].percentage | true | number |  |
+| data.totalVotes | true | number |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/newspaper/pulse` — 실시간 시장 심리 지수(0~100) 및 활성 시나리오 헤드라인 요약 조회
+
+- 인증/권한: 공개: 로그인 불필요
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getMarketPulse`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.sentimentScore | true | number |  |
+| data.sentimentLabel | true | string="VERY_BULLISH" \| string="BULLISH" \| string="NEUTRAL" \| string="BEARISH" \| string="VERY_BEARISH" |  |
+| data.activeEventsCount | true | number |  |
+| data.leadHeadline | true | string |  |
+| data.leadSummary | true | string |  |
+| data.updatedAt | true | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/notifications` — 내 인앱 알림 목록 조회
+
+- 인증/권한: 로그인 + 최신 동의
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 알림 피드 렌더링
+- Operation ID: `NotificationController_listNotifications`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| unreadOnly | query | false | boolean |  |
+| limit | query | false | integer |  |
+| offset | query | false | integer |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/notifications/:id/read` — 단일 알림 읽음 처리
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 알림 상태 및 배지 갱신
+- Operation ID: `NotificationController_markRead`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/notifications/read-all` — 전체 알림 일괄 읽음 처리
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 알림 목록 및 배지 0으로 갱신
+- Operation ID: `NotificationController_markAllRead`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/notifications/unread-count` — 미확인 알림 개수 조회
+
+- 인증/권한: 로그인 + 최신 동의
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 헤더 배지 숫자 반영
+- Operation ID: `NotificationController_unreadCount`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| unreadCount | true | number |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
 ## `GET` `/app-api/v1/photos` — 갤러리 사진 목록 조회
 
@@ -5077,542 +5646,6 @@ _요청 본문 없음._
 |---|---|---|---|
 | idempotencyKey | true | string (uuid) |  |
 
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/newspaper/pulse` — 실시간 시장 심리 지수(0~100) 및 활성 시나리오 헤드라인 요약 조회
-
-- 인증/권한: 공개: 로그인 불필요
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `NewspaperController_getMarketPulse`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| success | true | boolean |  |
-| data | true | object |  |
-| data.sentimentScore | true | number |  |
-| data.sentimentLabel | true | string="VERY_BULLISH" \| string="BULLISH" \| string="NEUTRAL" \| string="BEARISH" \| string="VERY_BEARISH" |  |
-| data.activeEventsCount | true | number |  |
-| data.leadHeadline | true | string |  |
-| data.leadSummary | true | string |  |
-| data.updatedAt | true | string |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/newspaper/poll` — 주간 시장 전망 4지선다 여론조사 현황 및 득표수 조회
-
-- 인증/권한: 공개: 로그인 불필요
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `NewspaperController_getWeeklyPoll`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| success | true | boolean |  |
-| data | true | object |  |
-| data.id | true | string |  |
-| data.question | true | string |  |
-| data.options[] | true | object[] |  |
-| data.options[] | true | object |  |
-| data.options[].id | true | string |  |
-| data.options[].label | true | string |  |
-| data.options[].votes | true | number |  |
-| data.options[].percentage | true | number |  |
-| data.totalVotes | true | number |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/newspaper/poll/vote` — 이번 주 시장 전망 여론조사 투표 참여 및 실시간 집계 반환
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF(변경 요청)
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 관련 GET을 다시 호출해 서버 상태와 동기화
-- Operation ID: `NewspaperController_voteWeeklyPoll`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-- Content-Type: `undefined`
-
-_None._
-
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| success | true | boolean |  |
-| data | true | object |  |
-| data.id | true | string |  |
-| data.question | true | string |  |
-| data.options[] | true | object[] |  |
-| data.options[] | true | object |  |
-| data.options[].id | true | string |  |
-| data.options[].label | true | string |  |
-| data.options[].votes | true | number |  |
-| data.options[].percentage | true | number |  |
-| data.totalVotes | true | number |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/newspaper/lore` — 주간 금융 개념 교육 아티클 3종(복리, 스프레드, 화폐유통) 조회
-
-- 인증/권한: 공개: 로그인 불필요
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `NewspaperController_getFinancialLore`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| success | true | boolean |  |
-| data[] | true | object[] |  |
-| data[] | true | object |  |
-| data[].id | true | string |  |
-| data[].category | true | string |  |
-| data[].title | true | string |  |
-| data[].summary | true | string |  |
-| data[].readTimeMinutes | true | number |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/banking/pockets` — 내 저금통(통장 쪼개기) 목록 및 잔액 조회
-
-- 인증/권한: 로그인 + 최신 동의
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `PocketController_listPockets`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/banking/pockets` — 신규 저금통 생성
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 저금통 목록을 다시 조회
-- Operation ID: `PocketController_createPocket`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `CreatePocketDto`
-
-_None._
-
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/banking/pockets/:id/transfer` — 본계좌 ↔ 저금통 입출금 자금 이체
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 저금통 및 은행 잔액 갱신
-- Operation ID: `PocketController_transferPocket`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `TransferPocketDto`
-
-_None._
-
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `PUT` `/app-api/v1/banking/pockets/:id` — 저금통 테마 색상 및 아이콘 커스터마이즈
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 저금통 목록 갱신
-- Operation ID: `PocketController_customizePocket`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `CustomizePocketDto`
-
-_None._
-
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/banking/pockets/:id/archive` — 저금통 해지 및 전액 본계좌 회수
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 저금통 및 본계좌 잔액 갱신
-- Operation ID: `PocketController_archivePocket`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `ArchivePocketDto`
-
-_None._
-
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/crafting/recipes` — P0 제작 레시피 목록 및 필요 재료 조회
-
-- 인증/권한: 로그인 + 최신 동의
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 레시피 목록 렌더링
-- Operation ID: `CraftingController_listRecipes`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/crafting/execute` — 아이템 원자적 조합 및 WLD 수수료 소각 제작 실행
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 인벤토리 및 잔액 갱신
-- Operation ID: `CraftingController_executeCrafting`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `ExecuteCraftingDto`
-
-_None._
-
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/marketplace/listings` — 활성 마켓플레이스 판매 목록 조회
-
-- 인증/권한: 로그인 + 최신 동의
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 마켓 목록 렌더링
-- Operation ID: `MarketplaceController_listListings`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| category | query | false | string |  |
-| search | query | false | string |  |
-| limit | query | false | integer |  |
-| offset | query | false | integer |  |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/marketplace/my-listings` — 내 판매 등록 물품 목록 및 정산 이력 조회
-
-- 인증/권한: 로그인 + 최신 동의
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 내 리스팅 목록 렌더링
-- Operation ID: `MarketplaceController_listMyListings`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/marketplace/listings` — 내 인벤토리 아이템 거래소 판매 등록
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 인벤토리 및 내 판매 목록 갱신
-- Operation ID: `MarketplaceController_createListing`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `CreateListingDto`
-
-_None._
-
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/marketplace/listings/:id/buy` — 거래소 등록 아이템 즉시 구매 (1% 소각 및 판매자 99% 정산)
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 잔액 및 인벤토리 갱신
-- Operation ID: `MarketplaceController_buyListing`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `BuyListingDto`
-
-_None._
-
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/marketplace/listings/:id/cancel` — 활성 판매 등록 취소 및 에스크로 인벤토리 즉시 반환
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 인벤토리 및 내 리스팅 갱신
-- Operation ID: `MarketplaceController_cancelListing`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/notifications` — 내 인앱 알림 목록 조회
-
-- 인증/권한: 로그인 + 최신 동의
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 알림 피드 렌더링
-- Operation ID: `NotificationController_listNotifications`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| unreadOnly | query | false | boolean |  |
-| limit | query | false | integer |  |
-| offset | query | false | integer |  |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/notifications/unread-count` — 미확인 알림 개수 조회
-
-- 인증/권한: 로그인 + 최신 동의
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 헤더 배지 숫자 반영
-- Operation ID: `NotificationController_unreadCount`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| unreadCount | true | number |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/notifications/:id/read` — 단일 알림 읽음 처리
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 알림 상태 및 배지 갱신
-- Operation ID: `NotificationController_markRead`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/notifications/read-all` — 전체 알림 일괄 읽음 처리
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 알림 목록 및 배지 0으로 갱신
-- Operation ID: `NotificationController_markAllRead`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-_요청 본문 없음._
 
 ### 성공 응답 필드
 
