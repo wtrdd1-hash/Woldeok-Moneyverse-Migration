@@ -138,8 +138,20 @@ describe('AdminComprehensiveTelemetryMatrix', () => {
 
     expect(screen.getByText(/M0 \(협의 통화 \/ 유동 현금\)/)).toBeDefined();
     expect(screen.getByText(/M1 \(요구불 예금 포함 통화\)/)).toBeDefined();
-    expect(screen.getByText(/M2 \(광의 통화 \/ 총 순자산\)/)).toBeDefined();
+    expect(screen.getByText(/M2 \(광의 통화 \/ 시중 유통 통화\)/)).toBeDefined();
+    expect(screen.getByText(/민간 총자산 평가액 \(Private Wealth\)/)).toBeDefined();
     expect(screen.getByText(/정상 일치/)).toBeDefined();
+  });
+
+  it('excludes bonds and stock valuations from estimated M2 when ledger supply is unavailable', () => {
+    render(<AdminComprehensiveTelemetryMatrix users={mockUsers} health={null} />);
+    fireEvent.click(screen.getByRole('button', { name: /통화 유동성/ }));
+    // Cash 12.5m + bank 59.5m = 72m; bonds 20m and stocks 30m are wealth, not M2.
+    const m2Row = screen.getByText(/M2 \(광의 통화 \/ 시중 유통 통화\)/).closest('tr');
+    expect(m2Row).not.toBeNull();
+    expect(m2Row?.textContent).toContain('₩72,000,000');
+    expect(screen.getByText(/원장 미확인 \(추정\)/)).toBeDefined();
+    expect(screen.getByText(/민간 총자산 평가액 \(Private Wealth\)/)).toBeDefined();
   });
 
   it('switches to market tab and displays stock market statistics', () => {

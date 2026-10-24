@@ -117,10 +117,10 @@ export function AdminComprehensiveTelemetryMatrix({
     });
 
     const m1Sum = m0Cash + m1Bank;
-    // M2 통화량: 중앙은행 원장 실측 M2가 있으면 이를 우선하고, 없으면 현금+예금+채권 유동성으로 계산
-    m2Total = health?.supply ? Number(health.supply.m2Amount) : (m1Sum + bondTotal);
+    // M2 is monetary supply, not total wealth: exclude bonds and stock valuations from the fallback.
+    m2Total = health?.supply ? Number(health.supply.m2Amount) : m1Sum;
     const isBalanced = health?.integrity ? health.integrity.ok : true;
-    const moneySupplyHealth = health?.available ? (isBalanced ? '정상 일치' : '불일치 감지') : '실측 산출';
+    const moneySupplyHealth = health?.available && health?.integrity ? (isBalanced ? '정상 일치' : '불일치 감지') : '원장 미확인 (추정)';
     const deltaAmount = health?.integrity ? Number(health.integrity.balanceTotalDeltaAmount) || 0 : 0;
     const treasuryBalance = health?.supply ? Number(health.supply.treasuryBalanceAmount) || 0 : 0;
 
@@ -473,7 +473,7 @@ export function AdminComprehensiveTelemetryMatrix({
                     ? ((monetaryStats.m2Total / monetaryStats.totalPrivateWealth) * 100).toFixed(1)
                     : 100}%
                 </td>
-                <td className="py-2.5 px-3 text-slate-400">복식부기 원장 기반 시중 유통 총 통화량 (M0+M1+채권)</td>
+                <td className="py-2.5 px-3 text-slate-400">원장 실측 M2 (현금·예금 기준, 원장 미제공 시 추정)</td>
               </tr>
               <tr className="hover:bg-slate-800/30 transition-colors bg-indigo-950/20">
                 <td className="py-2.5 px-3 font-medium text-indigo-300">민간 총자산 평가액 (Private Wealth)</td>
