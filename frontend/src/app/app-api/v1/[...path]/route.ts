@@ -145,8 +145,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     const value = response.headers.get(name);
     if (value) headers.set(name, value);
   }
-  for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
   if (isPrivateWalletAppPath(parts)) headers.set('cache-control', 'private, no-store');
+  for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
