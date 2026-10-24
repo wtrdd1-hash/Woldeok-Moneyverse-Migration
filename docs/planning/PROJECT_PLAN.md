@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.24.1222 — F675-112 Work Favorites Integrity Hardening (PLANNING DRAFT / RELEASE HOLD)
+- Cycle: Previous Addition v1220 → Current Improvement v1222 → Next Addition v1224 provisional. Main `49788d09494fed3e463651945b83386e87dd47bc` and EN/KO canonical plans rechecked start/mid; parent Draft #1132 unmerged. QA v1227 FAILED/HOLD. Docs only.
+- Source: migration 095 `work_task_board` exposes only active tasks and dynamic reward previews; work repository caches feature switch for 30s and computes non-authoritative floating-point `net_reward`; work page `apiOrNull` fallback can mask source failure as empty. Harden owner saved state vs catalog visibility vs eligibility, redacted SOURCE_UNVERIFIED, fresh /work assignment checks, no reward promise or financial write.
+- P0 ENV1222-01 SEC1222-02 REL1222-03 WORK1222-04: shared Production/dev DB and wildcard 5433, 235/241 app DML + 3 PUBLIC bank functions, QA v1227 frontend 5 FAIL/security audits/migration266/#1088/exact-SHA Test/restore, fail-closed work switch/job/quota/source. P1 WORK1222-05 WORK1222-06 WORK1222-07 WORK1222-08 WORK1222-09 WORK1222-10: tombstone CAS/immutable replay, task FOR SHARE+actor quota locks, owner status API/signed cursor/Android, UX/a11y/no-store, aggregate admin/SEO/KPI, 100-way and 10,001 isolated regressions.
+- Full API/DB/transactions/CTA/privacy/rollout in [integrated master](INTEGRATED_PLANNING_MASTER.md). Feature OFF; separate engineering branch, exact-head CI/security, isolated real-PG ACL+restore and official Test authenticated finance E2E 3 runs before human GitOps approval. No runtime/DB/WLD/Test/Production changes. Independent publisher families reviewed 3, newly approved 0, cumulative verified UNKNOWN/10,000 => BLOCKED / IN PROGRESS.
+
+
+
 ## v2026.10.24.1220 — F675-112 Member Work Task Shortlist (PLANNING DRAFT / RELEASE HOLD)
 - Cycle: Previous Improvement v1218 → Current Addition v1220 → Next Improvement v1222 (provisional). Main 49788d09494fed3e463651945b83386e87dd47bc rechecked start/mid. Prior #1125 unmerged; QA v1225 FAILED/HOLD. Tracking issue #1131; documentation only.
 - Source: /work reads authenticated GET /api/v1/work/tasks and renders career filter/search; backend work_task_board(actor) in migration095 is authoritative. No inspected work favorite route/table. F675-112 proposes owner-only task Save/Remove and optional 0–280 character private note, cap 50, /account/work-favorites, live status/reward recheck; never an assignment or WLD promise.

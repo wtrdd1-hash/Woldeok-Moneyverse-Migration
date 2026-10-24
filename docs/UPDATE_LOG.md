@@ -1,3 +1,9 @@
+## 2026-10-24 — Planning v1222 / F675-112 work favorites integrity hardening
+- Previous Feature Addition v1220; Current Feature Improvement v1222; Next Feature Addition v1224 provisional. Canonical main `49788d09494fed3e463651945b83386e87dd47bc`, parent unmerged Draft #1132; QA v1227 FAILED/HOLD.
+- Hardened verified task catalog/feature-state/active-job/quota separation, source-outage redaction, immutable replay vs current status, tombstone CAS, owner-scoped HMAC cursor, account erasure, source-row FOR SHARE and 50-item quota locking, Android/web/admin/a11y/SEO/KPI/rollback. Ten backlog IDs ENV1222-01 SEC1222-02 REL1222-03 WORK1222-04 WORK1222-05 WORK1222-06 WORK1222-07 WORK1222-08 WORK1222-09 WORK1222-10.
+- Documentation-only Draft; no runtime/DB/WLD/Test/Production writes. QA 5 frontend failures, full audit 2 Critical/10 High, bot audit 1 Critical/5 High, 5433 wildcard, broad DML, migration266, exact-SHA Test/restore BLOCKED. External 3 publisher families reviewed, 0 newly accepted, cumulative UNKNOWN/10,000 BLOCKED. Full contracts in integrated EN/KO masters.
+
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1220 — F675-112 Member Work Task Shortlist (FEATURE ADDITION / DRAFT / HOLD)

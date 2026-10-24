@@ -1,5 +1,34 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1222 — F675-112 업무 즐겨찾기 계정·자격·재시도·커서 무결성 강화 (기능 보완 / DRAFT / 출시 보류)
+
+**주기·기준:** 이전 기능 추가 v1220 → 현재 기능 보완 v1222 → 다음 기능 추가 v1224(잠정). 공식 origin/main `49788d09494fed3e463651945b83386e87dd47bc` 및 main의 영문 정본·국문 기획서를 시작·중간에 재조회. 선행 Draft PR #1132는 OPEN·미병합이며 이번 문서 브랜치는 그 SHA를 기반으로 한다. 배포된 기능이 아니다. QA v1227(2026-10-24 14:26 KST) FAILED / 운영 보류. 런타임·DB·원장·WLD·Test·Production 변경 없음.
+
+### 실제 코드 근거와 선행 설계의 보완점
+- `packages/database/migrations/095-work-task-board.sql`의 `work_task_board(p_actor)`는 활성 회원을 확인하고 `work_task_catalog.active`인 업무만 반환하며 동적 `reward_preview`를 계산한다. 이는 STABLE 조회 함수이며 행 잠금을 통한 최종 배정 자격 확인이 아니다. `backend/src/work/work.repository.ts`는 별도 `feature_switch_state('work')`를 최대 30초 캐시하고, 추가 `net_reward`를 `parseFloat`로 계산하므로 이 값을 지급 보장액·금융 영수증으로 저장하거나 표시하지 않는다. `work.controller.ts`는 세션·인증·동의·CSRF 가드를 사용한다. `frontend/src/app/work/page.tsx`는 `apiOrNull` 실패 시 빈 업무 배열을 사용하므로 즐겨찾기에서는 조회 장애를 저장 0건으로 오인하면 안 된다. `career-tasks-board.tsx`의 실제 업무 시작은 현재 직업·한도·미리보기 가능 여부를 검사한다.
+- v1220에서 구분이 부족했던 업무 스위치 OFF, 카탈로그 조회 실패, 업무 비활성화, 현재 직업 불일치, 한도 소진, REMOVE 이후 오래된 SAVE 영수증을 명확히 분리한다. 이는 구현 전 기획 보완이며 실제 운영 장애 발생을 단정하지 않는다. 회원당 50개, 개인 메모 280자, 비공개 탐색 보조 목적 유지. 개발 A/B/C·Gemini·QA 변경과 분리.
+
+### 회원 화면·권한·현재 수행 가능 여부
+- 진입점은 /work 저장/제거와 비공개 /account/work-favorites. 상태 NOT_SAVED, SAVE_PENDING, SAVED_CONFIRMED, REMOVE_PENDING, REMOVED_CONFIRMED, NOTE_PENDING, CONFLICT, UNKNOWN_COMMIT, SOURCE_UNVERIFIED, TASK_UNAVAILABLE, CURRENTLY_INELIGIBLE, SIGNED_OUT. 확정 영수증만 쓰기 결과를 증명하며 과거 SAVE 영수증이 나중의 REMOVE를 뒤집지는 못한다. 재시도·시간초과·계정 전환 시 본인 GET으로 현재 상태를 재확인하고 다른 회원 메모를 브라우저 공용 저장소에 남기지 않는다.
+- **저장 소유권**, **현재 업무 공개 여부**, **실제 수행 자격**을 분리한다. 삭제·비활성·제한 업무는 과거 제목·보상·직업을 숨긴 “업무 이용 불가”로 표시하되 본인 제거는 허용한다. 카탈로그 확인 실패는 SOURCE_UNVERIFIED/503으로 처리하고 제목·보상·업무 시작을 숨긴다. 이를 “저장 목록이 비어 있음”으로 표시하지 않는다. work 스위치 disabled/paused/safe_mode, 현재 직업 불일치, 일일 제한·대기·한도 소진 또는 미리보기 null은 CURRENTLY_INELIGIBLE이며 시작을 비활성화한다. 30초 캐시를 최종 자격 판정으로 사용하지 않는다. “현재 업무 보기”는 /work로 이동하며 기존 서버 배정 엔드포인트가 최신 상태를 다시 검증한다.
+- CTA: 현재 업무 보기, 메모 수정, 목록에서 제거, 저장 상태 확인, 업무 상태 새로고침, 재시도, 로그인. 즐겨찾기에서 직접 업무 배정·전직·WLD/EXP 청구 금지. requireMember, 세션 세대값에 따른 지연 응답 폐기, CSRF, 비공개 no-store/noindex. Android /app-api/v1/work/favorites는 기존 모바일 인증·버전 게이트를 따르며 내부 NestJS 토큰을 공개하지 않는다.
+
+### API·DB·트랜잭션·커서(제안, 미구현)
+- v1220의 본인 전용 GET/POST/PATCH/DELETE `/api/v1/work/favorites` 및 Android 동등 경로 유지. 현재 상태 대조용 `GET /api/v1/work/favorites/:taskId` 추가 제안: 미저장/타인은 구분 불가 404, 본인 저장/삭제표식은 원본이 비공개여도 제목 없는 상태 조회 가능. 목록 응답은 `saved`, `sourceVerified`, `available`, `eligibleNow`, 허용 목록의 `ineligibilityReason`, 현재 서버 기준 `currentRewardPreview`(정수 문자열 또는 null), `version`을 분리한다. 계산형 `net_reward`를 권위 있는 지급액으로 사용하지 않는다. 카탈로그 장애 시 503 또는 개인정보를 가린 SOURCE_UNVERIFIED만 반환하고 본인 제거는 유지. Next/BFF/API `Cache-Control: private, no-store`, 확정 불명에 가짜 2xx 금지.
+- POST `{taskId,note?,expectedVersion}`의 버전 0은 처음 저장하는 행에만 허용. REMOVE 후 재저장은 새 UUID 멱등 키와 현재 tombstone 버전 필요. PATCH/DELETE도 현재 버전과 불변 `Idempotency-Key` 요구, 오래된 버전 409. 메모는 NFC 정규화 후 유니코드 코드포인트 280자 이내, NUL·위험 제어문자 거부, 일반 텍스트 이스케이프. 요청 지문에는 actor/action/taskId/정규화 메모/expectedVersion을 포함하고 메모 본문·토큰·서명키는 로그 금지. 동일 actor/key·동일 지문은 최초 불변 영수증, 다른 지문은 409. 동시 100건 동일 요청은 행·영수증 각 1개. REMOVE 뒤 과거 SAVE 재전송은 과거 영수증만 반환하고 GET으로 현재 REMOVED_CONFIRMED를 확인한다.
+- 추가형 DB: `member_work_task_favorites.user_id REFERENCES public.users(id) ON DELETE CASCADE`, `PRIMARY KEY(user_id,task_id)`, 메모 길이 CHECK, 양수 증가 버전, 불변 `first_saved_at`, 삭제표식 `removed_at`, 인덱스 `(user_id,removed_at,first_saved_at DESC,task_id DESC)`. 카탈로그 외래키는 두지 않아 업무 완전 삭제 후 본인 제거를 보장한다. 영수증은 `(actor_id,key)` 고유, 계정 탈퇴 삭제·감사 보존 정책 명시, 소비 키는 재실행 방지책 승인 전 자동 정리 금지. 영수증 불변 트리거와 탈퇴 연쇄 삭제 충돌을 별도 테스트한다. moneyverse_app 직접 테이블 DML/SELECT 및 PUBLIC EXECUTE 금지.
+- DB 함수 순서: 입력 제한 검증 → actor+key 트랜잭션 advisory lock → 원본 영수증/지문 조회 → 활성 users 행 FOR UPDATE로 회원당 50개 한도 직렬화 → SAVE 시 `work_task_catalog` 행 FOR SHARE 잠금 후 active 재검사(동시 비활성화 UPDATE와 충돌) → 본인 저장 행 FOR UPDATE/CAS → 행·삭제표식·불변 영수증 한 트랜잭션 확정. REMOVE는 카탈로그 공개 여부를 요구하지 않는다. SAVE-비활성화, SAVE-REMOVE, 과거 영수증-재저장, 49개 상태에서 서로 다른 2개 동시 SAVE 회귀. 업무 배정·보상·원장·잔액 함수 호출 금지.
+- 커서는 불변 `first_saved_at DESC,task_id DESC` 기준. 재저장해도 “최초 저장 시각” 위치 유지, 최근 저장 순서로 오인하지 않는다. HMAC 서명 커서는 회원·세션·정렬/필터·만료·키 버전 결속, 위변조/만료/타인 재사용 400 거부, 로그아웃 무효화. 실시간 keyset은 완전한 스냅샷이 아니다. 동일 시각 10,001개는 격리 합성 테스트 전용이며 운영 한도 50개 유지. 커서에 메모·식별정보 기록 금지.
+
+### 관리자·접근성·SEO·KPI·배포 보류
+- 관리자 비식별 집계만(10명 미만 셀 숨김), 개인 메모/업무 ID 조회·대리 저장 금지. 감사에는 행위/결과만 남긴다. 비공개 noindex,nofollow 및 sitemap 제외, Next/BFF/NestJS/엣지 no-store, /work 공개 검색 정책 불변. 웹/Android 320px·200% 확대·44px 터치·포커스·aria-pressed, 확정 영수증만 aria-live, SOURCE_UNVERIFIED와 CURRENTLY_INELIGIBLE를 구분해 스크린리더 안내, 재시도 중 메모 보존 및 로그아웃 격리.
+- KPI: 확정 저장·7일 내 수동 재방문·원본 검증 실패·비공개 가림·충돌·확정 불명·타인 접근 차단·p95. 메모 본문·관심사 추정·광고 개인화·WLD 보상 기여 추적 금지. 수용 조건: 타인 100회 정보 노출 0, REMOVE/과거 재시도 후 잘못된 SAVED 0, 원본 장애 시 과거 제목 노출 0, 금융 부작용 0, 동일 키 100건에서 영수증 1개, 업무 비활성화 경합 100건 무효 저장 0, 합성 10,001건 중복 없는 커서, 웹/Android 동등성, 운영승격 전 정확 SHA 금융 E2E 3회.
+- P0 **ENV1222-01** 운영·개발 공유 DB와 실제 5433 전체 바인딩(#1053/#1060, #1126은 미배포); **SEC1222-02** 앱 DML 241개 중 235개·PUBLIC 은행 함수 3개(#993); **REL1222-03** QA v1227 프론트 5건 실패, 전체 의존성 Critical 2/High 10, 운영 의존성 High 2, bot Critical 1/High 5, Migration266 체크섬, #1088 자동병합, 정확 SHA Test/복원, #1126 CI 실패; **WORK1222-04** 카탈로그·스위치·직업·한도 분리 및 보상 오인 방지. P1 **WORK1222-05** 버전 삭제표식·원본 재시도·탈퇴 삭제, **WORK1222-06** 원본 잠금·한도·본인 ACL·경합, **WORK1222-07** 상태 대조 API·서명 커서·Android 계약, **WORK1222-08** 웹 UX/no-store/접근성, **WORK1222-09** 관리자·개인정보·SEO·KPI, **WORK1222-10** 격리 PG/CI/롤백 및 정확 SHA E2E.
+- QA v1227: lint/typecheck/build PASS(경고 1,137개), 전체 테스트 FAIL(프론트 1,395 PASS/5 FAIL), bot 테스트 8/8 PASS이나 보안 감사 FAIL. 운영 연결 DB 5433은 0.0.0.0/[::] 바인딩, 광범위 권한·Migration266 불일치·정확 SHA 인증 금융 Test E2E·격리 복원 미검증. 일부 성공은 출시 승인 근거가 아니다. 기능 스위치 `work_task_favorites` 기본 OFF. 별도 개발 브랜치·추가형 마이그레이션·전체 CI/보안·격리 실제 PG ACL/백업 복원·공식 Test 정확 SHA 인증 금융 E2E 3회·사람의 GitOps 승인·점진 활성화 후 운영. 문제 시 데이터 삭제 없이 기능 OFF 롤백. 기획 예약은 병합·배포하지 않는다.
+- 외부 근거: PostgreSQL 잠금(https://www.postgresql.org/docs/current/explicit-locking.html), OWASP Authorization(https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html), W3C WCAG 2.2(https://www.w3.org/TR/WCAG22/) **독립 발행기관 3곳 검토**, 승인 독립 근거로 계산하지 않는다. 신규 중복 제거 최종 승인 **0건**, 누적 승인 **UNKNOWN / 10,000**, 게이트 **BLOCKED / IN PROGRESS**. 새 분산 기획 파일 없이 기존 통합 문서에 반영.
+
+
+
 ## v2026.10.24.1220 — F675-112 회원 업무 즐겨찾기·개인 메모 (기능 추가 / 기획 초안 / 출시 보류)
 
 **주기:** 이전 Feature Improvement v1218 → 현재 Feature Addition v1220 → 다음 Feature Improvement v1222(잠정). **기준:** origin/main 49788d09494fed3e463651945b83386e87dd47bc, 시작·중간 재조회 시 불변. 이전 관심상품 Draft #1125는 미병합이므로 배포된 기능으로 간주하지 않는다. 추적 이슈 #1131. QA v1225 FAILED/HOLD. 이 절은 승인 전 문서 기획이며 런타임 코드·DB 스키마는 미구현이다.

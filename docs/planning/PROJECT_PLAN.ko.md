@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1222 — F675-112 업무 즐겨찾기 자격·계정·재시도 무결성 보완 (기획 초안 / 운영 보류)
+- 주기: 이전 기능 추가 v1220 → 현재 기능 보완 v1222 → 다음 기능 추가 v1224(잠정). main `49788d09494fed3e463651945b83386e87dd47bc` 및 국영문 정본 시작·중간 재조회, 선행 Draft #1132 미병합. QA v1227 FAILED/HOLD. 문서만 변경.
+- 실제 Migration 095 `work_task_board`는 활성 업무와 동적 보상 미리보기를 제공, 업무 저장소는 스위치를 30초 캐시하고 비권위적 실수형 `net_reward`를 계산, /work의 `apiOrNull` 실패는 빈 목록으로 보일 수 있음. 저장 소유권/카탈로그 공개/수행 자격 분리, SOURCE_UNVERIFIED 정보 가림, /work에서 최종 재검증, 보상 약속·금융 변경 금지.
+- P0 ENV1222-01 SEC1222-02 REL1222-03 WORK1222-04: 운영·개발 공유 DB·5433 외부 바인딩, 앱 DML 235/241·PUBLIC 은행 함수 3개, QA v1227 프론트 5건 FAIL/보안·Migration266/#1088/정확 SHA Test·복원, 스위치·직업·한도·원본 장애 시 차단. P1 WORK1222-05 WORK1222-06 WORK1222-07 WORK1222-08 WORK1222-09 WORK1222-10: 버전 묘비·원본 영수증, 업무 FOR SHARE·회원 한도 잠금, 본인 상태 API/서명 커서/Android, 접근성·no-store, 관리자 집계/SEO/KPI, 동시성 100건·격리 합성 10,001건.
+- 전체 API·DB·트랜잭션·화면·개인정보·배포 조건은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md). 기능 기본 OFF, 별도 개발 브랜치·전체 CI/보안·격리 PG ACL/복원·공식 정확 SHA 인증 금융 Test E2E 3회·사람 GitOps 승인 전 운영 금지. 런타임·DB·WLD·Test·운영 변경 없음. 외부 발행기관 3곳 검토, 신규 승인 0, 누적 승인 미확인/10,000 => BLOCKED / IN PROGRESS.
+
+
+
 ## v2026.10.24.1220 — F675-112 회원 업무 즐겨찾기·메모 (기획 초안 / 출시 보류)
 - 주기: 이전 Improvement v1218 → 현재 Addition v1220 → 다음 Improvement v1222(잠정). main 49788d09494fed3e463651945b83386e87dd47bc 시작·중간 재확인. 이전 #1125 미병합; QA v1225 FAILED/HOLD. 개발 이슈 #1131, 문서 전용.
 - 코드 근거: /work는 인증된 GET /api/v1/work/tasks를 조회하고 직업 필터·검색을 제공한다. Migration095의 work_task_board(actor)가 현재 업무의 권위 있는 조회 함수다. 검사한 코드에는 업무 즐겨찾기 API/테이블이 없다. F675-112는 본인 저장·삭제·선택형 0~280자 메모, 50건 한도, /account/work-favorites, 최신 이용 가능/보상 재확인을 제안한다. 배정·WLD 지급 약속 아님.
