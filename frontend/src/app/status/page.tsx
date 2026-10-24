@@ -9,9 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
-import { OVERALL_HEADLINE, STATUS_LABEL, overallState } from '@/lib/status';
-import { asStatusState } from '@/lib/status';
+import { OVERALL_HEADLINE, STATUS_LABEL } from '@/lib/status';
 import type { StatusState } from '@/lib/status';
+import { overallSnapshotState, statusSnapshot } from '@/lib/status-freshness';
 import { canonicalUrl } from '@/lib/seo';
 
 /**
@@ -57,8 +57,9 @@ const VARIANT: Readonly<Record<StatusState, 'default' | 'secondary' | 'destructi
 export default async function StatusPage() {
   const data = await publicApi<{ status: StatusRow[] }>('/api/v1/status', 30);
   const rows = data?.status ?? [];
-  const overall = overallState(rows.map((row) => asStatusState(row.state)));
-  const staleCount = rows.filter((row) => row.freshnessState !== 'fresh').length;
+  const nowMs = Date.now();
+  const overall = overallSnapshotState(rows, nowMs);
+  const staleCount = rows.filter((row) => statusSnapshot(row, nowMs).stale).length;
 
   return (
     <div data-page="status" className="mv-page mv-page--utility grid gap-6">
@@ -72,8 +73,7 @@ export default async function StatusPage() {
           </>
         }
       >
-        수집기가 남긴 최근 기록만 표시합니다. 확인되지 않은 항목은 추정하지 않고 확인 중으로
-        둡니다.
+        수집기가 남긴 최근 기록만 표시합니다. 확인되지 않은 항목은 추정하지 않고 확인 중으로 둡니다.
       </PageHeader>
 
       {/* The headline is worst-first and never better than the worst row: a
@@ -81,9 +81,15 @@ export default async function StatusPage() {
       <Card className="border-l-4 border-l-forest">
         <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <StatusDot state={overall} />
-          <p className="text-lg font-bold">{OVERALL_HEADLINE[overall]}</p>
+          <p className="text-lg font-bold" role="status" aria-live="polite">
+            {overall === 'unknown' && staleCount > 0
+              ? '최신 서비스 상태를 확인할 수 없어요.'
+              : OVERALL_HEADLINE[overall]}
+          </p>
           <p className="ml-auto text-xs text-muted-foreground">
-            {rows.length > 0 ? `${rows.length}개 항목 관측 중${staleCount > 0 ? ` · ${staleCount}개 최신 확인 필요` : ''}` : '관측 중인 항목 없음'}
+            {rows.length > 0
+              ? `${rows.length}개 항목 관측 중${staleCount > 0 ? ` · ${staleCount}개 최신 확인 필요` : ''}`
+              : '관측 중인 항목 없음'}
           </p>
         </CardContent>
       </Card>
@@ -109,32 +115,35 @@ export default async function StatusPage() {
             <CardContent>
               <dl className="grid gap-3">
                 {rows.map((row) => {
-                  const state = asStatusState(row.state);
-                  const needsFreshness = row.freshnessState !== 'fresh';
+                  const snapshot = statusSnapshot(row, nowMs);
+                  const state = snapshot.state;
+                  const needsFreshness = snapshot.stale;
                   return (
                     <div
                       key={row.sourceKey}
                       className="flex items-start justify-between gap-3 border-b pb-3 last:border-b-0 last:pb-0"
                     >
-                      <div className="grid gap-0.5">
+                      <div className="grid min-w-0 flex-1 gap-0.5">
                         <dt className="font-bold">{row.displayName}</dt>
                         {/* The collector writes what it measured here — a
                             round trip in milliseconds, or the status code it
                             was refused with. */}
                         {row.detail && (
-                          <dd className="text-xs text-muted-foreground">{row.detail}</dd>
+                          <dd className="break-words text-xs text-muted-foreground">
+                            {row.detail}
+                          </dd>
                         )}
                         {row.observedAt && (
                           <dd className="text-xs text-muted-foreground">
-                            <time dateTime={row.observedAt}>
-                              {formatMoment(row.observedAt)}
-                            </time>{' '}
+                            <time dateTime={row.observedAt}>{formatMoment(row.observedAt)}</time>{' '}
                             기준 · <TimeAgo at={row.observedAt} />
                           </dd>
                         )}
                       </div>
                       <dd className="shrink-0">
-                        <Badge variant={VARIANT[state]}>{needsFreshness ? '최신 확인 필요' : STATUS_LABEL[state]}</Badge>
+                        <Badge variant={VARIANT[state]}>
+                          {needsFreshness ? '최신 확인 필요' : STATUS_LABEL[state]}
+                        </Badge>
                       </dd>
                     </div>
                   );
