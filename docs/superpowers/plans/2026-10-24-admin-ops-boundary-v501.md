@@ -34,4 +34,4 @@
 ## Task 3: Verify and publish
 - [x] Run lint/typecheck/build/unit/security/CI as feasible, log exact results and skips.
 - [x] Fetch main and recheck plan, inspect diff and record final SHA.
-- [ ] Open Draft PR only; do not merge or deploy without official Test exact-SHA.
+- [x] Open Draft PR #1109 only; do not merge or deploy without official Test exact-SHA.
