@@ -1,180 +1,127 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Bell, BellRing, Check, X, Sparkles, Calendar, TrendingUp } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { BellRing, X } from 'lucide-react';
+import {
+  parseVerifiedBrowserStockAlertSnapshot,
+  selectNewVerifiedStockAlertEvents,
+} from '@/lib/stock-alert-browser-events';
 
-interface SavedScenario {
-  ticker?: string;
-  stockName?: string;
-  targetPrice?: string;
-  reboundRate?: string;
-  savedAt: number;
-  calculatorType?: string;
-  annualDividend?: number;
-  exDividendDate?: string;
-}
+const DISMISSED_KEY = 'wdmv_verified_stock_alert_prompt_dismissed_v1';
+const POLL_MS = 60_000;
 
+/**
+ * Browser notifications are a foreground convenience, not background push.
+ * The only source of a notification is a persisted, owner-scoped server event.
+ */
 export function StockAlertPushEngine() {
   const [permission, setPermission] = useState<NotificationPermission>('default');
-  const [isSupported, setIsSupported] = useState(false);
-  const [bannerVisible, setBannerVisible] = useState(false);
-  const [latestStock, setLatestStock] = useState<string>('');
-  const [alertType, setAlertType] = useState<'escape' | 'dividend' | 'market_close'>('escape');
+  const [activeCount, setActiveCount] = useState(0);
+  const [dismissed, setDismissed] = useState(true);
+  const lastSuccessfulPollAt = useRef<number | null>(null);
+  const inFlight = useRef(false);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setIsSupported(true);
-      setPermission(Notification.permission);
-
-      // 이미 승인되었거나 거부되었거나 닫은 적이 있는지 확인
-      const bannerDismissed = localStorage.getItem('wdmv_push_banner_dismissed');
-      if (Notification.permission === 'default' && !bannerDismissed) {
-        try {
-          const savedStr = localStorage.getItem('wdmv_saved_scenarios');
-          if (savedStr) {
-            const scenarios: SavedScenario[] = JSON.parse(savedStr);
-            if (scenarios.length > 0) {
-              const last = scenarios[scenarios.length - 1];
-              setLatestStock(last?.stockName || last?.ticker || '');
-
-              if (last?.calculatorType === 'dividend' || last?.exDividendDate) {
-                setAlertType('dividend');
-              } else {
-                setAlertType('escape');
-              }
-
-              // 3초 후 조용히 배너 노출
-              const timer = setTimeout(() => {
-                setBannerVisible(true);
-              }, 3000);
-              return () => clearTimeout(timer);
-            }
-          }
-        } catch {
-          // ignore
-        }
+  const poll = useCallback(async () => {
+    if (typeof Notification === 'undefined' || Notification.permission === 'denied' ||
+        document.visibilityState === 'hidden' || inFlight.current) return;
+    inFlight.current = true;
+    try {
+      const response = await fetch('/api/stocks/alerts/browser-events', {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { accept: 'application/json' },
+      });
+      if (response.status === 401) {
+        lastSuccessfulPollAt.current = null;
+        setActiveCount(0);
+        return;
       }
-
-      // 이미 권한이 승인된 경우, 장마감/배당락일 시뮬레이션 브로드캐스트 점검
+      if (!response.ok) return;
+      const snapshot = parseVerifiedBrowserStockAlertSnapshot(await response.json());
+      if (!snapshot) return;
+      const now = Date.now();
+      setActiveCount(snapshot.activeAlertCount);
+      const newEvents = selectNewVerifiedStockAlertEvents(
+        snapshot.events, lastSuccessfulPollAt.current, now,
+      );
+      lastSuccessfulPollAt.current = now;
       if (Notification.permission === 'granted') {
-        const lastCheck = localStorage.getItem('wdmv_last_market_push');
-        const now = Date.now();
-        // 24시간에 1회만 장마감/배당락일 요약 알림 트리거
-        if (!lastCheck || now - parseInt(lastCheck, 10) > 86400000) {
+        for (const event of newEvents) {
           try {
-            const savedStr = localStorage.getItem('wdmv_saved_scenarios');
-            if (savedStr) {
-              const scenarios: SavedScenario[] = JSON.parse(savedStr);
-              if (scenarios.length > 0) {
-                const stock = scenarios[0]?.stockName || '관심 종목';
-                setTimeout(() => {
-                  new Notification(`[머니버스 장마감 리포트] ${stock}`, {
-                    body: `보관하신 ${stock}의 오늘 거래가 마감되었습니다. 목표가 및 다가오는 배당락일 일정을 확인해보세요.`,
-                    icon: '/favicon.ico',
-                  });
-                  localStorage.setItem('wdmv_last_market_push', now.toString());
-                }, 10000); // 페이지 진입 10초 후
-              }
-            }
+            new Notification(`머니버스 가상 주식 알림 · ${event.symbol}`, {
+              body: `${event.name} · 서버 기록 가격 ${event.triggerPrice} WLD. 자세한 내용은 알림 내역에서 확인하세요.`,
+              icon: '/favicon.ico',
+            });
           } catch {
-            // ignore
+            // A blocked browser notification must never be reported as delivered.
           }
         }
       }
+    } catch {
+      // Network errors do not advance the event baseline or fabricate a receipt.
+    } finally {
+      inFlight.current = false;
     }
   }, []);
 
-  const requestPushPermission = async () => {
-    if (!isSupported) return;
+  useEffect(() => {
+    if (typeof Notification === 'undefined') return;
+    setPermission(Notification.permission);
+    try { setDismissed(sessionStorage.getItem(DISMISSED_KEY) === 'true'); }
+    catch { setDismissed(false); }
+    void poll();
+    const timer = window.setInterval(() => { void poll(); }, POLL_MS);
+    document.addEventListener('visibilitychange', poll);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', poll);
+    };
+  }, [poll]);
 
+  const requestPermission = async () => {
     try {
-      const res = await Notification.requestPermission();
-      setPermission(res);
-      setBannerVisible(false);
-
-      if (res === 'granted') {
-        const title = alertType === 'dividend'
-          ? '배당락일 D-Day & 장마감 알림 활성화'
-          : '목표 탈출가 & 장마감 알림 활성화';
-
-        const body = alertType === 'dividend'
-          ? `${latestStock || '보관 종목'}의 다가오는 배당락일 디데이와 가상 배당금 입금 알림을 보내드립니다.`
-          : `${latestStock || '관심 종목'}의 목표 탈출가 도달 및 일일 장마감 리포트를 알려드립니다.`;
-
-        new Notification(title, {
-          body,
-          icon: '/favicon.ico',
-        });
-        localStorage.setItem('wdmv_push_active', 'true');
-      }
+      const result = await Notification.requestPermission();
+      setPermission(result);
+      setDismissed(true);
+      try { sessionStorage.setItem(DISMISSED_KEY, 'true'); } catch { /* optional */ }
     } catch {
-      setBannerVisible(false);
+      setDismissed(true);
     }
   };
 
-  const handleDismiss = () => {
-    localStorage.setItem('wdmv_push_banner_dismissed', 'true');
-    setBannerVisible(false);
+  const dismiss = () => {
+    setDismissed(true);
+    try { sessionStorage.setItem(DISMISSED_KEY, 'true'); } catch { /* optional */ }
   };
 
-  if (!isSupported || !bannerVisible || permission !== 'default') {
-    return null;
-  }
+  if (permission !== 'default' || activeCount === 0 || dismissed) return null;
 
   return (
-    <div className="fixed top-16 right-4 sm:right-6 z-40 max-w-sm w-full bg-zinc-900 border border-emerald-500/30 rounded-xl p-4 shadow-xl backdrop-blur-md animate-in slide-in-from-top-4 duration-300 text-zinc-100">
+    <aside aria-label="가상 주식 브라우저 알림 안내"
+      className="fixed right-4 top-16 z-40 w-[calc(100vw-2rem)] max-w-sm rounded-xl border border-emerald-500/30 bg-zinc-900 p-4 text-zinc-100 shadow-xl sm:right-6">
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
-          <BellRing className="w-5 h-5 animate-pulse" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold text-white mb-1 flex items-center gap-1.5">
-            {alertType === 'dividend' ? (
-              <>
-                <Calendar className="size-3.5 text-emerald-400" />
-                <span>배당락일 D-Day 알림 받기</span>
-              </>
-            ) : (
-              <>
-                <TrendingUp className="size-3.5 text-emerald-400" />
-                <span>목표가 도달 & 장마감 알림</span>
-              </>
-            )}
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">
-              FREE
-            </span>
-          </h4>
-          <p className="text-[11px] text-zinc-400 leading-snug mb-3">
-            {alertType === 'dividend'
-              ? `${latestStock ? `${latestStock}의 ` : ''}다가오는 배당락일(Ex-dividend Date) D-Day와 분기 실지급액을 놓치지 않도록 알려드립니다.`
-              : `${latestStock ? `${latestStock}의 ` : ''}목표 탈출가에 도달하거나 일일 장마감 시세 변동이 발생하면 브라우저 알림으로 즉시 알려드립니다.`}
+        <BellRing aria-hidden="true" className="mt-1 size-5 shrink-0 text-emerald-400" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <h2 className="text-sm font-semibold">서버 주식 가격 알림</h2>
+          <p className="text-xs leading-relaxed text-zinc-300">
+            설정한 가상 주식 알림 {activeCount}건을 확인했습니다. 이 페이지를 열어 둔 동안 새로 발생한 서버 알림만 브라우저에서 알려드립니다. 백그라운드 푸시나 실제 주식·배당 알림은 제공하지 않습니다.
           </p>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={requestPushPermission}
-              className="flex-1 py-1.5 px-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-lg text-xs transition-colors flex items-center justify-center gap-1"
-            >
-              <Check className="w-3.5 h-3.5" />
-              <span>알림 켜기</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => { void requestPermission(); }}
+              className="min-h-11 rounded-md bg-emerald-500 px-3 text-xs font-semibold text-zinc-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+              브라우저 알림 허용
             </button>
-            <button
-              onClick={handleDismiss}
-              className="py-1.5 px-3 text-zinc-400 hover:text-zinc-200 text-xs font-medium transition-colors"
-            >
-              다음에
-            </button>
+            <Link href="/stocks/alerts" className="inline-flex min-h-11 items-center rounded-md px-2 text-xs underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+              서버 알림 내역
+            </Link>
           </div>
         </div>
-
-        <button
-          onClick={handleDismiss}
-          className="text-zinc-500 hover:text-zinc-300 p-0.5"
-          aria-label="닫기"
-        >
-          <X className="w-4 h-4" />
+        <button type="button" onClick={dismiss} aria-label="주식 알림 안내 닫기"
+          className="flex size-11 shrink-0 items-center justify-center rounded-md text-zinc-300 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+          <X aria-hidden="true" className="size-5" />
         </button>
       </div>
-    </div>
+    </aside>
   );
 }
