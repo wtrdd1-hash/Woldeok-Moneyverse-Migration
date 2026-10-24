@@ -140,7 +140,7 @@ export default async function StatusPage() {
                         )}
                       </div>
                       <dd className="shrink-0">
-                        <Badge variant={VARIANT[state]}>
+                        <Badge variant={VARIANT[needsFreshness ? 'unknown' : state]}>
                           {needsFreshness ? '최신 확인 필요' : STATUS_LABEL[state]}
                         </Badge>
                       </dd>

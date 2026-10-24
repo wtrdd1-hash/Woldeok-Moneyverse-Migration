@@ -26,6 +26,7 @@ describe('public service status SSR', () => {
     const html = renderToStaticMarkup(await StatusPage());
     expect(html).toContain('최신 서비스 상태를 확인할 수 없어요.');
     expect(html).toContain('최신 확인 필요');
+    expect(html).toMatch(/data-variant="outline"[^>]*>최신 확인 필요/);
     expect(html).not.toContain('모든 서비스가 정상입니다.');
     expect(html).toContain('role="status"');
   });
