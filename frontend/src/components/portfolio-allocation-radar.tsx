@@ -6,39 +6,40 @@ import { PieChart, TrendingUp, ShieldCheck, ArrowRight, Sparkles, Scale, Info, W
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
+import { exactAssetShares } from '@/lib/wallet-allocation';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 import { cn } from '@/lib/cn';
 
 export interface PortfolioAllocationRadarProps {
-  readonly cashWld?: number;
-  readonly stocksWld?: number;
-  readonly bondsWld?: number;
-  readonly savingsWld?: number;
+  readonly cashWld?: string;
+  readonly stocksWld?: string;
+  readonly bondsWld?: string;
+  readonly savingsWld?: string;
   readonly className?: string;
 }
 
 interface AssetSlice {
   readonly id: 'cash' | 'stocks' | 'bonds' | 'savings';
   readonly label: string;
-  readonly value: number;
+  readonly value: string;
   readonly color: string;
   readonly bgClass: string;
   readonly textClass: string;
 }
 
 export function PortfolioAllocationRadar({
-  cashWld = 1000000,
-  stocksWld = 450000,
-  bondsWld = 200000,
-  savingsWld = 350000,
+  cashWld = '0',
+  stocksWld = '0',
+  bondsWld = '0',
+  savingsWld = '0',
   className = '',
 }: PortfolioAllocationRadarProps) {
   const { locale } = useLocale();
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
   const [strategy, setStrategy] = useState<'buffett' | 'allWeather' | 'conservative'>('buffett');
 
-  const totalWealth = Math.max(1, cashWld + stocksWld + bondsWld + savingsWld);
+  const { totalAmount: totalWealth, shareBps } = exactAssetShares([cashWld, stocksWld, bondsWld, savingsWld]);
 
   const assets: AssetSlice[] = [
     {
@@ -80,8 +81,8 @@ export function PortfolioAllocationRadar({
   const circumference = 2 * Math.PI * radius; // ~439.82
   let accumulatedPercent = 0;
 
-  const slices = assets.map((asset) => {
-    const percent = (asset.value / totalWealth) * 100;
+  const slices = assets.map((asset, index) => {
+    const percent = (shareBps[index] ?? 0) / 100;
     const strokeDasharray = `${(percent / 100) * circumference} ${circumference}`;
     const strokeDashoffset = -((accumulatedPercent / 100) * circumference);
     accumulatedPercent += percent;
@@ -94,8 +95,8 @@ export function PortfolioAllocationRadar({
   });
 
   // AI 리밸런싱 조언 모델
-  const cashRatio = (cashWld / totalWealth) * 100;
-  const stockRatio = (stocksWld / totalWealth) * 100;
+  const cashRatio = (shareBps[0] ?? 0) / 100;
+  const stockRatio = (shareBps[1] ?? 0) / 100;
 
   let adviceTitle = '';
   let adviceDesc = '';

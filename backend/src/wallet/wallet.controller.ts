@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -89,6 +90,13 @@ export class WalletController {
       throw new BadRequestException('recent must be a whole number');
     }
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
+  }
+
+  @Get('wallet/allocation')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Exact cash/bank WLD allocation for the authenticated wallet owner' })
+  allocation(@Req() request: RequestWithSession) {
+    return this.service().allocation(requireUserId(request));
   }
 
   @Get('wallet/recipients/search')
