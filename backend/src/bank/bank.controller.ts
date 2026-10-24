@@ -5,10 +5,12 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
@@ -29,6 +31,7 @@ import {
   IdempotentDto,
 } from './bank.dto';
 import { BankInputError, BankRepository } from './bank.repository';
+import { quoteNewBorrow } from './borrow-quote';
 
 @ApiTags('banking')
 @Controller('banking')
@@ -62,6 +65,17 @@ export class BankController {
       () => this.repository().getStanding(requireUserId(request)),
       'failed to load bank standing',
     );
+  }
+
+  @Get('borrow-quote')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Owner-only read-only quote for a new virtual bank loan' })
+  borrowQuote(@Req() request: RequestWithSession, @Query('amount') amount: string) {
+    return this.guarded(async () => {
+      const standing = await this.repository().getStanding(requireUserId(request));
+      if (!standing) throw new ServiceUnavailableException('bank standing unavailable');
+      return quoteNewBorrow(standing, amount);
+    }, 'failed to quote virtual bank loan');
   }
 
   @Post('deposit')

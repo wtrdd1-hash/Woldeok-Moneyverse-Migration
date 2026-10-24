@@ -211,6 +211,10 @@ export default async function BankPage() {
             cashBalance={cash}
           />
 
+          <Link href="/bank/borrow-quote" className="inline-flex min-h-11 items-center rounded-lg border px-4 py-3 text-sm font-semibold hover:bg-muted">
+            신규 가상 대출 예상 견적 확인 →
+          </Link>
+
           {/* 개인 신용 평가 리포트 */}
           <div className="toss-card p-6">
             <CreditScoreCard
