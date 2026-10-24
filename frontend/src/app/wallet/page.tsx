@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment, groupDigits } from '@/lib/money';
+import { formatShareBps } from '@/lib/wallet-allocation';
 import { requireMember } from '@/lib/session';
 import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
 import { PortfolioAllocationRadar } from '@/components/portfolio-allocation-radar';
@@ -55,6 +56,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+interface WalletPocketAllocation {
+  readonly currency: 'WLD';
+  readonly cash: { readonly availableAmount: string; readonly shareBps: string };
+  readonly bank: { readonly availableAmount: string; readonly shareBps: string };
+  readonly totalAvailableAmount: string;
+}
+
 const LATEST_ON_WALLET = 10;
 
 function signedPercent(bpsText: string): string {
@@ -67,11 +75,12 @@ function signedPercent(bpsText: string): string {
 export default async function WalletPage() {
   await requireMember();
 
-  const [wallet, loanData, rewardAvailability, portfolioData] = await Promise.all([
+  const [wallet, loanData, rewardAvailability, portfolioData, pocketAllocation] = await Promise.all([
     apiOrNull<Overview>('/api/v1/wallet?recent=50'),
     apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
     apiOrNull<RewardAvailability>('/api/v1/rewards/availability'),
     apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio'),
+    apiOrNull<WalletPocketAllocation>('/api/v1/wallet/allocation'),
   ]);
 
   if (!wallet) {
@@ -455,11 +464,37 @@ export default async function WalletPage() {
 
         {/* 탭 3: 자산 배분 레이더, 식별 정보 및 세무 영수증 */}
         <TabsContent value="allocation" className="space-y-6 focus-visible:outline-none">
+          {pocketAllocation ? (
+            <section className="toss-card p-6 space-y-4" aria-label="확인된 현금 및 은행 WLD 비중">
+              <h2 className="font-bold text-base">내 현금·은행 WLD 비중</h2>
+              <p className="text-xs text-muted-foreground">본인 원장 잔액 기준 · 가상 주식과 국채는 포함하지 않습니다.</p>
+              <p className="font-mono text-lg font-bold tabular-nums">합계 {groupDigits(pocketAllocation.totalAvailableAmount)} WLD</p>
+              {([['cash', '활동 현금'], ['bank', '은행 예금']] as const).map(([key, label]) => {
+                const pocket = pocketAllocation[key];
+                const percentage = formatShareBps(pocket.shareBps);
+                return (
+                  <div key={key} className="space-y-1.5">
+                    <div className="flex flex-wrap justify-between gap-2 text-sm">
+                      <span>{label}: <strong className="font-mono">{groupDigits(pocket.availableAmount)} WLD</strong></span>
+                      <strong className="font-mono">{percentage}</strong>
+                    </div>
+                    <div role="progressbar" aria-label={`${label} 비중`} aria-valuemin={0} aria-valuemax={100}
+                      aria-valuenow={Number(pocket.shareBps) / 100} aria-valuetext={percentage}
+                      className="h-2 rounded-full bg-muted overflow-hidden">
+                      <div className="h-full bg-primary rounded-full" style={{ width: `${Number(pocket.shareBps) / 100}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </section>
+          ) : (
+            <p role="status" className="text-sm text-muted-foreground">현금·은행 배분 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.</p>
+          )}
           <PortfolioAllocationRadar
-            cashWld={Number(balances.cash.availableAmount) || 0}
-            savingsWld={Number(balances.bank.availableAmount) || 0}
-            stocksWld={Number(actualStocksValue)}
-            bondsWld={0}
+            cashWld={balances.cash.availableAmount}
+            savingsWld={balances.bank.availableAmount}
+            stocksWld={actualStocksValue.toString()}
+            bondsWld="0"
           />
 
           <CitizenTaxReceiptCard />

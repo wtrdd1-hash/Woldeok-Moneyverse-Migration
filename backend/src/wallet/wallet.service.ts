@@ -120,6 +120,13 @@ export interface WalletBalancesView {
   readonly totalAvailableAmount: WldAmount;
 }
 
+export interface WalletAllocationView {
+  readonly currency: 'WLD';
+  readonly cash: WalletBalanceView & { readonly shareBps: string };
+  readonly bank: WalletBalanceView & { readonly shareBps: string };
+  readonly totalAvailableAmount: WldAmount;
+}
+
 export type WalletTransactionDirection = 'in' | 'out' | 'neutral';
 
 export interface WalletTransactionView {
@@ -380,6 +387,25 @@ export class WalletService {
       userId,
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
+    };
+  }
+
+  async allocation(authenticatedUserId: string): Promise<WalletAllocationView> {
+    const userId = requireUuid(authenticatedUserId, 'authenticated user id');
+    const balances = normalizeBalances(await this.repository.balancesForUser(userId));
+    const cash = BigInt(balances.cash.availableAmount);
+    const bank = BigInt(balances.bank.availableAmount);
+    // User cash and bank accounts cannot be negative. Never turn a corrupt
+    // balance into a plausible-looking chart or a silently rounded Number.
+    if (cash < 0n || bank < 0n) throw new Error('database returned negative wallet balance');
+    const total = cash + bank;
+    const cashShareBps = total === 0n ? 0n : (cash * 10000n) / total;
+    const bankShareBps = total === 0n ? 0n : 10000n - cashShareBps;
+    return {
+      currency: 'WLD',
+      cash: { ...balances.cash, shareBps: cashShareBps.toString() },
+      bank: { ...balances.bank, shareBps: bankShareBps.toString() },
+      totalAvailableAmount: balances.totalAvailableAmount,
     };
   }
 

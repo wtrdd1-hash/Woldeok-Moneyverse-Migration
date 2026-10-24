@@ -145,6 +145,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
+  // The owner-only wallet allocation is private even if a misconfigured
+  // upstream cache policy tries to publish it to shared caches.
+  if (parts[0] === 'wallet' && parts[1] === 'allocation' && parts.length === 2) {
+    headers.set('cache-control', 'private, no-store');
+    headers.set('x-robots-tag', 'noindex');
+  }
+
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

@@ -22,6 +22,29 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+describe('wallet allocation app API privacy', () => {
+  it('proxies only the authenticated owner request and never publicly caches allocation', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let target = '';
+    let cookie = '';
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      target = String(input);
+      cookie = new Headers(init?.headers).get('cookie') ?? '';
+      return new Response(JSON.stringify({ totalAvailableAmount: '900719925474099312345' }), {
+        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+      });
+    }));
+    const response = await GET(
+      request('/app-api/v1/wallet/allocation', { cookie: 'moneyverse_session=owner' }),
+      context('wallet', 'allocation'),
+    );
+    expect(target).toContain('/api/v1/wallet/allocation');
+    expect(cookie).toContain('moneyverse_session=owner');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect((await response.json()).totalAvailableAmount).toBe('900719925474099312345');
+  });
+});
+
 describe('app API route compatibility', () => {
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
