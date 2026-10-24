@@ -81,6 +81,22 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
   });
 
+  it('proxies owner-only bank loan summary to Android without caching private data', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    const fetchSpy = vi.fn(async (target: URL) => {
+      expect(String(target)).toContain('/api/v1/bank/loans/summary');
+      return new Response(JSON.stringify({ currency: 'WLD', outstandingAmount: '9007199254740993' }), {
+        headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/bank/loans/summary'), context('bank', 'loans', 'summary'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ outstandingAmount: '9007199254740993' });
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     const fetchSpy = vi.fn();

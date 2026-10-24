@@ -34,6 +34,7 @@ import { BankLiquidityCard } from './bank-liquidity-card';
 import { CreditScoreCard, type CreditRatingData } from './credit-score-card';
 import { SavingsPotCard } from '@/components/savings-pot-card';
 import { TossBankHeroCard } from './toss-bank-hero-card';
+import { LoanObligationsCard, type LoanObligations } from './loan-obligations-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { BankStanding, SavingPocket } from './types';
 
@@ -50,11 +51,12 @@ export default async function BankPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [standing, pockets, creditRating, memberIdentity] = await Promise.all([
+  const [standing, pockets, creditRating, memberIdentity, loanObligations] = await Promise.all([
     apiOrNull<BankStanding>('/api/v1/banking/standing'),
     apiOrNull<SavingPocket[]>('/api/v1/banking/pockets'),
     apiOrNull<CreditRatingData>('/api/v1/banking/credit-rating'),
     apiOrNull<{ userId: string }>('/api/v1/wallet?recent=1'),
+    apiOrNull<LoanObligations>('/api/v1/bank/loans/summary'),
   ]);
 
   if (!standing) {
@@ -199,6 +201,8 @@ export default async function BankPage() {
               </p>
             </div>
           )}
+
+          <LoanObligationsCard summary={loanObligations} isEn={isEn} />
 
           {/* 스마트 가상 대출 카드 */}
           <SmartLoanCard
