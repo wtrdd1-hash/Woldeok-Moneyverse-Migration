@@ -1,6 +1,7 @@
-import { getServerLocale } from '@/lib/locale-server';
-import { localeLabel } from '@/lib/locale';
 'use client';
+
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -17,8 +18,8 @@ import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 type CompoundFreq = 'daily' | 'weekly' | 'monthly' | 'block' | 'annually';
 
-export default async function CryptoApyCalculatorPage() {
-  const locale = await getServerLocale();
+export default function CryptoApyCalculatorPage() {
+  const { locale } = useLocale();
   const [principal, setPrincipal] = useState<number>(10000000); // 1,000만 원 or WLD
   const [rate, setRate] = useState<number>(12.5); // 12.5%
   const [rateType, setRateType] = useState<'APR' | 'APY'>('APR');

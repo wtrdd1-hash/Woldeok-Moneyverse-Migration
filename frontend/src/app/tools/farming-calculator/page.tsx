@@ -1,6 +1,7 @@
-import { getServerLocale } from '@/lib/locale-server';
-import { localeLabel } from '@/lib/locale';
 'use client';
+
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -18,8 +19,8 @@ const PROFESSIONS = [
   { id: 'sheriff', name: '보안관 (Sheriff)', baseReward: 1300, icon: '🛡️', desc: '치안 순찰 및 사기 거래 단속' },
 ];
 
-export default async function FarmingCalculatorPage() {
-  const locale = await getServerLocale();
+export default function FarmingCalculatorPage() {
+  const { locale } = useLocale();
   const [selectedProfession, setSelectedProfession] = useState<string>('developer');
   const [masteryLevel, setMasteryLevel] = useState<number>(5);
   const [dailyTasksCount, setDailyTasksCount] = useState<number>(5);

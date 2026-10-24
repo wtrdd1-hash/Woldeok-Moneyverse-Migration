@@ -1,6 +1,7 @@
-import { getServerLocale } from '@/lib/locale-server';
-import { localeLabel } from '@/lib/locale';
 'use client';
+
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 
 import React, { useState, useId } from 'react';
 import Link from 'next/link';
@@ -19,8 +20,8 @@ import { PENSION_TAX_SCENARIOS } from '@/config/pseo-tax-retirement.config';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
-export default async function PensionTaxCalculatorPage() {
-  const locale = await getServerLocale();
+export default function PensionTaxCalculatorPage() {
+  const { locale } = useLocale();
   const salaryId = useId();
   const pensionId = useId();
   const irpId = useId();

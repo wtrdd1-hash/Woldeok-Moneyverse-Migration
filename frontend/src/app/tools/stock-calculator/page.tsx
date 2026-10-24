@@ -1,6 +1,7 @@
-import { getServerLocale } from '@/lib/locale-server';
-import { localeLabel } from '@/lib/locale';
 'use client';
+
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -24,8 +25,8 @@ const POPULAR_STOCKS = [
   { symbol: 'GAME', name: '도파민 게임즈', currentPrice: 28000 },
 ];
 
-export default async function StockCalculatorPage() {
-  const locale = await getServerLocale();
+export default function StockCalculatorPage() {
+  const { locale } = useLocale();
   const [initialPrice, setInitialPrice] = useState<number>(50000);
   const [initialQuantity, setInitialQuantity] = useState<number>(100);
   const [additionalPrice, setAdditionalPrice] = useState<number>(40000);

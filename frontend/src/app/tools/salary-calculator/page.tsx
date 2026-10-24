@@ -1,6 +1,7 @@
-import { getServerLocale } from '@/lib/locale-server';
-import { localeLabel } from '@/lib/locale';
 'use client';
+
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 
 import React, { useState, useId } from 'react';
 import Link from 'next/link';
@@ -21,8 +22,8 @@ import { calculateSalaryBreakdown, SALARY_PRESETS } from '@/config/pseo-salary.c
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
-export default async function SalaryCalculatorPage() {
-  const locale = await getServerLocale();
+export default function SalaryCalculatorPage() {
+  const { locale } = useLocale();
   const salaryInputId = useId();
   const [annualSalary, setAnnualSalary] = useState<number>(50000000);
   const [isWldClaimed, setIsWldClaimed] = useState(false);

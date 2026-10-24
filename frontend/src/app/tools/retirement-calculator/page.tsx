@@ -1,6 +1,7 @@
-import { getServerLocale } from '@/lib/locale-server';
-import { localeLabel } from '@/lib/locale';
 'use client';
+
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 
 import React, { useState, useId } from 'react';
 import Link from 'next/link';
@@ -23,8 +24,8 @@ import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/pub
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 import { SocialShareBar } from '@/components/social-share-bar';
 
-export default async function RetirementCalculatorPage() {
-  const locale = await getServerLocale();
+export default function RetirementCalculatorPage() {
+  const { locale } = useLocale();
   const yearsId = useId();
   const monthsId = useId();
   const salaryId = useId();

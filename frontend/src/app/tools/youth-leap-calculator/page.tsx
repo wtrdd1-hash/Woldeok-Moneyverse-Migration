@@ -1,6 +1,7 @@
-import { getServerLocale } from '@/lib/locale-server';
-import { localeLabel } from '@/lib/locale';
 'use client';
+
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 
 import React, { useState, useId } from 'react';
 import Link from 'next/link';
@@ -19,8 +20,8 @@ import {
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
-export default async function YouthLeapCalculatorPage() {
-  const locale = await getServerLocale();
+export default function YouthLeapCalculatorPage() {
+  const { locale } = useLocale();
   const depositId = useId();
   const rateId = useId();
   const [monthlyDeposit, setMonthlyDeposit] = useState<number>(700000);
