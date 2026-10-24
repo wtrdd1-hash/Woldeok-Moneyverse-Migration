@@ -400,6 +400,13 @@ export function AdminSupportView({
         </div>
       </div>
 
+      <div role="note" className="flex flex-col gap-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <span>관리자 답장 및 문의 상태 변경에는 최근 15분 내 재인증이 필요합니다. 재인증하지 않은 요청은 서버에서 거부됩니다.</span>
+        <Link href="/account/security" className="inline-flex min-h-11 shrink-0 items-center font-semibold text-primary underline underline-offset-4">
+          계정 보안에서 재인증
+        </Link>
+      </div>
+
       {/* 4대 상태 탭 바 */}
       <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-1.5 pb-1">
         {[

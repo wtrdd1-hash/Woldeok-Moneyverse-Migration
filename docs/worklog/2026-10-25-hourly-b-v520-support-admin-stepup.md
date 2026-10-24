@@ -18,3 +18,9 @@ Date: 2026-10-25 02:40 KST. State: **BEFORE WORK / RELEASE HOLD**.
 - [ ] Refresh latest main and plan, document immutable SHA, release HOLD, PR and no Production promotion.
 
 No DB migrations, account balances, member support writes, deployment or existing worktrees may be changed.
+
+## IN PROGRESS — test-first implementation
+- Backend RED: 2 failed reauthentication guard assertions (2 existing CSRF tests passed); frontend RED under `NODE_ENV=test`: 1 missing step-up notice/link (3 existing UI tests passed). The host defaults to `NODE_ENV=production`; unmodified React tests fail with `React.act is not a function` unless explicitly set to test.
+- GREEN: backend support+auth guards 36/36; frontend support view+page 7/7.
+- Actual changes: method-level ReauthGuard on admin reply/status only; administrator support page links to existing `/account/security` reauthentication. No member support path, DB, ledger, or API wire format changes.
+- Next: run full gates and CI; official Test exact-SHA remains a required release blocker.
