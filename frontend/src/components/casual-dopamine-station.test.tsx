@@ -8,13 +8,13 @@ const renderKo = (ui: React.ReactElement) => render(<LocaleProvider initialLocal
 
 vi.mock('@/lib/dopamine-api', () => ({
   claimGoldenDuckFever: vi.fn().mockResolvedValue({ success: true, rewardAmount: 1000 }),
-  claimPetFortune: vi.fn().mockResolvedValue({ success: true, rewardAmount: 500 }),
+  fetchPetFortunePreview: vi.fn().mockResolvedValue({ kind: 'preview', quote: 'A balanced plan matters more than a lucky prediction.', rewardPosted: false }),
   voteBullBear: vi.fn().mockResolvedValue({ success: true, poolEligible: true }),
   resolveMiniShowdown: vi.fn().mockResolvedValue({ success: true, payout: 190 }),
   claimStarDrop: vi.fn().mockResolvedValue({ success: true, rewardAmount: 2500 }),
   fetchDopamineStatus: vi.fn().mockResolvedValue({
     goldenDuckFeverAvailable: true,
-    fortuneCookieAvailable: true,
+    fortuneCookieAvailable: false,
     bullBearVotedToday: false,
     dailyShowdownsRemaining: 10,
     starDropRemaining: 3,

@@ -1,13 +1,15 @@
-import { randomUUID } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Inject,
   InternalServerErrorException,
+  ServiceUnavailableException,
   Post,
   Req,
   UseGuards,
@@ -109,33 +111,29 @@ export class DopamineController {
     };
   }
 
-  @Post('pet-fortune')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Interact with Deoki Pet and claim daily fortune cookie reward' })
-  async claimPetFortune(
-    @Req() request: RequestWithSession,
-    @Body() body: PetFortuneDto,
-  ) {
-    const userId = requireUserId(request);
+  @Get('pet-fortune/preview')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Preview a nonfinancial fortune quote; no WLD reward or claim is posted' })
+  previewPetFortune(@Req() request: RequestWithSession) {
+    requireUserId(request);
     const quotes = [
-      '호가창의 스프레드를 지배하는 자가 시장을 지배한다.',
-      '매일 자정 복리 예금은 배신하지 않는다.',
-      '직업 숙련도를 2.5배로 끌어올리면 WLD 파밍이 쉬워집니다.',
-      '침팬지 반도체의 매수세가 오늘 심상치 않군요!',
-      '분할 매수와 리밸런싱이 최고의 방어선입니다.',
-    ];
-    const fortuneQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    const rewardAmount = body.petAction === 'fortune' ? 500 + Math.floor(Math.random() * 501) : 100;
+      'A balanced plan matters more than a lucky prediction.',
+      'Virtual markets are games, not investment advice.',
+      'Patience and learning beat promises of guaranteed returns.',
+      'A fortune is a thought for today, not a financial forecast.',
+    ] as const;
+    return { kind: 'preview' as const, quote: quotes[randomInt(quotes.length)]!, rewardPosted: false as const };
+  }
 
-    return {
-      success: true,
-      userId,
-      action: body.petAction,
-      rewardAmount,
-      quote: fortuneQuote,
-      affinityGained: body.petAction === 'pet' ? 10 : 50,
-      claimedAt: new Date().toISOString(),
-    };
+  @Post('pet-fortune')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Retired fortune reward claim; no ledger-backed payout is available', deprecated: true })
+  claimPetFortune(@Req() request: RequestWithSession, @Body() body: PetFortuneDto) {
+    requireUserId(request);
+    if (body.petAction !== 'pet' && body.petAction !== 'fortune') {
+      throw new BadRequestException('invalid pet action');
+    }
+    throw new ServiceUnavailableException('pet fortune WLD rewards are unavailable until ledger-backed claims are implemented');
   }
 
   @Post('bull-bear-vote')
@@ -213,7 +211,7 @@ export class DopamineController {
     return {
       userId,
       goldenDuckFeverAvailable: true,
-      fortuneCookieAvailable: true,
+      fortuneCookieAvailable: false,
       bullBearVotedToday: false,
       dailyShowdownsRemaining: 10,
       starDropRemaining: 3,

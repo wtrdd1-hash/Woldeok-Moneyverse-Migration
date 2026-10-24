@@ -36,6 +36,24 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('proxies only the nonfinancial fortune preview and preserves private no-store', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({
+      kind: 'preview', quote: 'A balanced plan matters more than a lucky prediction.', rewardPosted: false,
+    }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const preview = await GET(request('/app-api/v1/engagement/dopamine/pet-fortune/preview'),
+      context('engagement', 'dopamine', 'pet-fortune', 'preview'));
+    expect(preview.status).toBe(200);
+    expect(preview.headers.get('cache-control')).toBe('private, no-store');
+    expect(await preview.json()).toMatchObject({ kind: 'preview', rewardPosted: false });
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const blocked = await GET(request('/app-api/v1/engagement/dopamine/star-drop'),
+      context('engagement', 'dopamine', 'star-drop'));
+    expect(blocked.status).toBe(404);
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

@@ -236,8 +236,8 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               </button>
             </div>
             <DeokiPetStation
-              onClaimFortune={(bonusWld, quote) => {
-                showRewardNotice(`포춘쿠키 보너스 +${bonusWld.toLocaleString()} WLD 수령!`);
+              onPreviewFortune={() => {
+                showRewardNotice('포춘쿠키 운세를 확인했습니다. WLD 지급은 없습니다.');
               }}
               onTriggerFever={() => {
                 setActiveModal('fever');

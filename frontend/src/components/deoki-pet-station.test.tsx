@@ -2,9 +2,10 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import React from 'react';
 import { DeokiPetStation } from './deoki-pet-station';
+import { fetchPetFortunePreview } from '@/lib/dopamine-api';
 
 vi.mock('@/lib/dopamine-api', () => ({
-  claimPetFortune: vi.fn().mockResolvedValue({ success: true, rewardAmount: 500 }),
+  fetchPetFortunePreview: vi.fn().mockResolvedValue({ kind: 'preview', quote: 'Diversification is not a promise.', rewardPosted: false }),
 }));
 
 describe('DeokiPetStation Component', () => {
@@ -23,16 +24,22 @@ describe('DeokiPetStation Component', () => {
     expect(screen.getByText(/22 pts/)).toBeDefined();
   });
 
-  it('cracks fortune cookie and claims bonus WLD', async () => {
-    const onClaimFortuneMock = vi.fn();
-    render(<DeokiPetStation onClaimFortune={onClaimFortuneMock} />);
+  it('shows only a verified quote and never invents a WLD reward', async () => {
+    const onPreview = vi.fn();
+    render(<DeokiPetStation onPreviewFortune={onPreview} />);
+    fireEvent.click(screen.getByRole('button', { name: '포춘쿠키 쪼개기' }));
+    await waitFor(() => expect(onPreview).toHaveBeenCalledWith('Diversification is not a promise.'));
+    expect(screen.getByText(/Diversification is not a promise/)).toBeDefined();
+    expect(screen.queryByText(/WLD 즉시 지급/)).toBeNull();
+  });
 
-    const cookieButton = screen.getByRole('button', { name: '포춘쿠키 쪼개기' });
-    fireEvent.click(cookieButton);
-
-    await waitFor(() => {
-      expect(onClaimFortuneMock).toHaveBeenCalledTimes(1);
-      expect(screen.getByText(/WLD 즉시 지급!/)).toBeDefined();
-    });
+  it('does not mark a failed preview as claimed or notify a reward', async () => {
+    vi.mocked(fetchPetFortunePreview).mockResolvedValueOnce(null);
+    const onPreview = vi.fn();
+    render(<DeokiPetStation onPreviewFortune={onPreview} />);
+    fireEvent.click(screen.getByRole('button', { name: '포춘쿠키 쪼개기' }));
+    await waitFor(() => expect(screen.getByRole('alert')).toBeDefined());
+    expect(onPreview).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: '포춘쿠키 쪼개기' }).hasAttribute('disabled')).toBe(false);
   });
 });

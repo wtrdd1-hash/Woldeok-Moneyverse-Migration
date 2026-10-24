@@ -16,14 +16,10 @@ export interface GoldenDuckClaimResult {
   claimedAt: string;
 }
 
-export interface PetFortuneResult {
-  success: boolean;
-  userId: string;
-  action: 'pet' | 'fortune';
-  rewardAmount: number;
+export interface PetFortunePreview {
+  kind: 'preview';
   quote: string;
-  affinityGained: number;
-  claimedAt: string;
+  rewardPosted: false;
 }
 
 export interface BullBearVoteResult {
@@ -93,14 +89,22 @@ export async function claimGoldenDuckFever(clickCount: number, comboMultiplier: 
   });
 }
 
-/**
- * 덕이 펫 쓰다듬기 또는 1일 1회 포춘쿠키 개봉 보상 수령
- */
-export async function claimPetFortune(action: 'pet' | 'fortune'): Promise<PetFortuneResult | null> {
-  return postDopamine<PetFortuneResult>('pet-fortune', {
-    petAction: action,
-    idempotencyKey: `pet_${action}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-  });
+/** The fortune cookie is a read-only quote, never a wallet credit. */
+export async function fetchPetFortunePreview(): Promise<PetFortunePreview | null> {
+  try {
+    const res = await fetch('/app-api/v1/engagement/dopamine/pet-fortune/preview', {
+      method: 'GET',
+      headers: { accept: 'application/json' },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as Partial<PetFortunePreview>;
+    if (data.kind !== 'preview' || data.rewardPosted !== false
+      || typeof data.quote !== 'string' || data.quote.length < 8 || data.quote.length > 500) return null;
+    return { kind: 'preview', quote: data.quote, rewardPosted: false };
+  } catch {
+    return null;
+  }
 }
 
 /**

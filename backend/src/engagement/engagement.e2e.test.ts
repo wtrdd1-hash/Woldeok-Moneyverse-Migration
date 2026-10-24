@@ -39,6 +39,17 @@ describe('engagement routes', () => {
     process.env = { ...ORIGINAL_ENV };
   });
 
+  it('mounts read-only fortune preview behind session guards and no fake claim', async () => {
+    const preview = await request(app.getHttpServer()).get('/api/v1/engagement/dopamine/pet-fortune/preview');
+    expect(preview.status).not.toBe(404);
+    expect(preview.status).toBeGreaterThanOrEqual(400);
+    const legacy = await request(app.getHttpServer())
+      .post('/api/v1/engagement/dopamine/pet-fortune')
+      .send({ petAction: 'fortune', idempotencyKey: KEY });
+    expect(legacy.status).not.toBe(200);
+    expect(legacy.status).not.toBe(404);
+  });
+
   it('mounts the engagement summary behind a session', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/engagement');
     expect(response.status).not.toBe(404);

@@ -1,34 +1,28 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Heart, Sparkles, Gift, Shield, CheckCircle2, MessageCircle, RefreshCw } from 'lucide-react';
+import { Heart, Sparkles, Gift, Shield, CheckCircle2, MessageCircle } from 'lucide-react';
 
-import { claimPetFortune } from '@/lib/dopamine-api';
+import { fetchPetFortunePreview } from '@/lib/dopamine-api';
 
 interface DeokiPetStationProps {
   initialAffection?: number;
-  onClaimFortune?: (wldBonus: number, quote: string) => void;
+  onPreviewFortune?: (quote: string) => void;
   onTriggerFever?: () => void;
 }
 
-const QUOTES = [
-  { text: '오늘의 행운 종목은 CHIPS! 분할 매수 타이밍입니다.', target: 'CHIPS (+3.4%)' },
-  { text: '인내심이 곧 최고의 복리입니다. 적금 포켓을 채워보세요.', target: '가상 국채 (+5.0%)' },
-  { text: '직감의 날! 20구획 휠에서 골드 구획을 노려보세요.', target: 'WHEEL_20 (3.80x)' },
-  { text: '작은 티끌이 모여 거대한 태산이 됩니다. 매일 출석 완료!', target: '스트릭 보너스' },
-  { text: '시장의 공포를 탐욕의 기회로 바꾸는 지혜가 필요한 날입니다.', target: 'SPACE 주식' },
-];
-
 export function DeokiPetStation({
   initialAffection = 20,
-  onClaimFortune,
+  onPreviewFortune,
   onTriggerFever,
 }: DeokiPetStationProps) {
   const [affection, setAffection] = useState<number>(initialAffection);
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [dialogue, setDialogue] = useState<string>('안녕! 오늘도 열심히 WLD 모아보자 꽥! 🐥');
   const [isCookieCracked, setIsCookieCracked] = useState<boolean>(false);
-  const [fortuneData, setFortuneData] = useState<{ quote: string; target: string; wld: number } | null>(null);
+  const [fortuneData, setFortuneData] = useState<{ quote: string } | null>(null);
+  const [previewPending, setPreviewPending] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
   const [cookieClaimed, setCookieClaimed] = useState<boolean>(false);
 
   const level = Math.min(5, Math.floor(affection / 25) + 1);
@@ -37,9 +31,6 @@ export function DeokiPetStation({
   const handlePet = async (e: React.MouseEvent<HTMLDivElement>) => {
     const nextAffection = affection + 2;
     setAffection(nextAffection);
-
-    // Call backend API for pet interaction
-    void claimPetFortune('pet');
 
     // Dynamic dialogue
     const dialogues = [
@@ -64,27 +55,21 @@ export function DeokiPetStation({
   };
 
   const handleCrackCookie = async () => {
-    if (cookieClaimed) return;
-
-    const randomFortune = QUOTES[Math.floor(Math.random() * QUOTES.length)]!;
-    const bonusWld = Math.floor(Math.random() * 500) + 500; // 500 ~ 1,000 WLD
-
-    setFortuneData({
-      quote: randomFortune.text,
-      target: randomFortune.target,
-      wld: bonusWld,
-    });
-    setIsCookieCracked(true);
-    setCookieClaimed(true);
-
+    if (cookieClaimed || previewPending) return;
+    setPreviewPending(true);
+    setPreviewError(false);
     try {
-      await claimPetFortune('fortune');
-    } catch {
-      // Offline fallback
-    }
-
-    if (onClaimFortune) {
-      onClaimFortune(bonusWld, randomFortune.text);
+      const preview = await fetchPetFortunePreview();
+      if (!preview) {
+        setPreviewError(true);
+        return;
+      }
+      setFortuneData({ quote: preview.quote });
+      setIsCookieCracked(true);
+      setCookieClaimed(true);
+      onPreviewFortune?.(preview.quote);
+    } finally {
+      setPreviewPending(false);
     }
   };
 
@@ -103,7 +88,7 @@ export function DeokiPetStation({
                 Lv.{level}
               </span>
             </h3>
-            <p className="text-[11px] text-slate-400">쓰다듬어 친밀도를 올리고 일일 포춘쿠키를 쪼개보세요</p>
+            <p className="text-[11px] text-slate-400">쓰다듬기는 화면 안에서만 반영됩니다. 운세는 보상 없는 미리보기입니다.</p>
           </div>
         </div>
 
@@ -157,7 +142,7 @@ export function DeokiPetStation({
           {/* Affection Progress Bar */}
           <div className="mt-3 w-full">
             <div className="flex justify-between text-[10px] text-slate-400 mb-1">
-              <span>친밀도 (Affection)</span>
+              <span>화면 내 친밀도 (Affection)</span>
               <span className="font-mono text-amber-400 font-bold">{affection} pts</span>
             </div>
             <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
@@ -174,49 +159,47 @@ export function DeokiPetStation({
           <div className="flex items-center justify-between border-b border-slate-800/60 pb-2">
             <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
               <Gift className="h-3.5 w-3.5 text-amber-400" />
-              1일 1회 행운의 포춘쿠키
+              보상 없는 포춘쿠키 미리보기
             </span>
             <span className="text-[10px] font-mono text-slate-400">
-              {cookieClaimed ? '오늘 수령 완료' : '무료 개봉 가능'}
+              {cookieClaimed ? '이번 화면에서 열람함' : '무료 미리보기'}
             </span>
           </div>
 
           {!isCookieCracked ? (
             <div className="my-auto flex flex-col items-center justify-center py-3 text-center">
               <div className="text-4xl mb-2 animate-bounce">🥠</div>
-              <p className="text-xs text-slate-300 font-medium">쿠키를 쪼개 오늘의 투자 점괘와 보너스 WLD를 받으세요!</p>
+              <p className="text-xs text-slate-300 font-medium">쿠키를 열어 오늘의 가벼운 운세 문구를 확인하세요. WLD는 지급되지 않습니다.</p>
               <button
                 type="button"
                 aria-label="포춘쿠키 쪼개기"
                 onClick={handleCrackCookie}
-                disabled={cookieClaimed}
+                disabled={cookieClaimed || previewPending}
                 className="mt-3 w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 py-2.5 text-xs font-bold text-slate-950 shadow-md hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 transition-all active:scale-95"
               >
-                포춘쿠키 쪼개기 🥠
+                {previewPending ? '운세 확인 중…' : '포춘쿠키 쪼개기 🥠'}
               </button>
             </div>
           ) : (
             <div className="my-auto flex flex-col items-center justify-center py-2 text-center animate-fadeIn">
               <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold mb-1">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                +{fortuneData?.wld.toLocaleString()} WLD 즉시 지급!
+                보상 없는 운세 미리보기
               </div>
               <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-2.5 text-xs text-slate-200 leading-relaxed">
                 &quot;{fortuneData?.quote}&quot;
               </div>
-              <div className="mt-2 flex items-center gap-1 text-[11px] text-amber-400 font-medium">
-                <span>추천 점괘:</span>
-                <span className="font-bold underline">{fortuneData?.target}</span>
-              </div>
+
             </div>
           )}
 
+          {previewError && <p role="alert" className="mt-2 text-xs text-rose-300">운세를 확인할 수 없습니다. 다시 시도해 주세요.</p>}
           <div className="mt-2 flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-800/60 pt-2">
             <span className="flex items-center gap-1">
               <Shield className="h-3 w-3 text-emerald-400" />
-              100% 무료 가상 리워드
+              WLD 보상 없음
             </span>
-            <span>매일 00:00 KST 초기화</span>
+            <span>화면을 닫으면 다시 열람 가능</span>
           </div>
         </div>
       </div>

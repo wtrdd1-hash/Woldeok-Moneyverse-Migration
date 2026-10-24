@@ -10,9 +10,9 @@
 - Design constraints: explicit PREVIEW status, `rewardPosted:false`, no daily claim or fabricated affinity, no wallet-updated event, no anonymous preview, no arbitrary gateway engagement access, no production/Test deployment.
 
 ## IN PROGRESS
-- [ ] TDD RED: backend preview + retired claim, frontend failure/success truth, narrow Android gateway path.
-- [ ] GREEN: implement minimal authenticated GET, frontend quote-only flow, app-api allowlist, tests.
-- [ ] Validate isolated real PostgreSQL ACL, Typecheck, lint, tests, build, audit, official exact-SHA CI.
+- [x] TDD RED: backend 3 behavioral failures; frontend app-gateway allowlist failure. Initial frontend React test env mismatch corrected to NODE_ENV=test.
+- [x] GREEN: authenticated GET preview, 503 legacy claim, status no reward, narrowly allowlisted Android gateway, quote-only web with failure retry. Focused backend 17 PASS and frontend 33 PASS.
+- [ ] Validate isolated real PostgreSQL ACL, full tests, build, audit, official exact-SHA CI. Typecheck PASS; lint PASS (0 errors, 1,135 warnings).
 
 ## FINISHED
-- Pending verification. Production RELEASE HOLD; rollback = revert feature commit (no DB migration or data writes).
+- In-progress code checkpoint; full release gates pending. Production RELEASE HOLD; rollback = revert feature commit (no DB migration or data writes).

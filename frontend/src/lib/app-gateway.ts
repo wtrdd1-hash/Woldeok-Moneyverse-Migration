@@ -49,6 +49,13 @@ export function appGatewayPath(parts: readonly string[]): string | null {
   if (parts.length === 0) return null;
   const clean = parts.map((part) => part.trim());
   if (clean.some((part) => !part || part === '.' || part === '..' || part.includes('/'))) return null;
+  // Allow only the read-only fortune preview, not unverified engagement payout commands.
+  if (clean[0] === 'engagement') {
+    return clean.length === 4 && clean[1] === 'dopamine'
+      && clean[2] === 'pet-fortune' && clean[3] === 'preview'
+      ? '/api/v1/engagement/dopamine/pet-fortune/preview'
+      : null;
+  }
   if (!APP_API_GROUP_SET.has(clean[0]!)) return null;
 
   if (clean[0] === 'media') {
