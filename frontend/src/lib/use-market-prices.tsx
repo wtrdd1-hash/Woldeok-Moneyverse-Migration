@@ -150,6 +150,9 @@ class OrderbookStore {
   }
 }
 
+const EMPTY_TRADES: readonly LiveTradeData[] = Object.freeze([]);
+const tradeSubscriptionCounts = new Map<string, number>();
+
 class TradeFeedStore {
   private readonly trades = new Map<string, readonly LiveTradeData[]>();
   private readonly listeners = new Set<() => void>();
@@ -159,14 +162,22 @@ class TradeFeedStore {
     return () => this.listeners.delete(listener);
   };
 
-  readonly get = (stockId: string): readonly LiveTradeData[] => this.trades.get(stockId) ?? [];
+  readonly get = (stockId: string): readonly LiveTradeData[] => this.trades.get(stockId) ?? EMPTY_TRADES;
 
   apply(payload: unknown): void {
     if (!payload || typeof payload !== 'object') return;
     const trade = payload as LiveTradeData;
-    if (!trade.stockId || !trade.price) return;
+    if (
+      typeof trade.id !== 'string' || trade.id.length < 1 || trade.id.length > 128 ||
+      typeof trade.stockId !== 'string' || trade.stockId.length < 1 || trade.stockId.length >= 64 ||
+      typeof trade.price !== 'string' || !/^\d{1,30}$/.test(trade.price) || BigInt(trade.price) <= 0n ||
+      !Number.isSafeInteger(trade.quantity) || trade.quantity <= 0 ||
+      (trade.side !== 'BUY' && trade.side !== 'SELL') ||
+      typeof trade.timestamp !== 'string' || !Number.isFinite(Date.parse(trade.timestamp))
+    ) return;
 
-    const current = this.trades.get(trade.stockId) ?? [];
+    const current = this.trades.get(trade.stockId) ?? EMPTY_TRADES;
+    if (current.some((row) => row.id === trade.id)) return;
     const next = [trade, ...current.slice(0, 49)];
     this.trades.set(trade.stockId, next);
     for (const listener of this.listeners) listener();
@@ -252,9 +263,20 @@ export function useStockTrades(stockId: string): readonly LiveTradeData[] {
   useEffect(() => {
     if (!stockId) return;
     const socket = acquireSiteSocket();
-    socket.emit('stock:subscribe', stockId);
+    const count = tradeSubscriptionCounts.get(stockId) ?? 0;
+    tradeSubscriptionCounts.set(stockId, count + 1);
+    const subscribe = () => socket.emit('stock:subscribe', stockId);
+    socket.on('connect', subscribe);
+    if (socket.connected) subscribe();
     return () => {
-      if (socket.connected) socket.emit('stock:unsubscribe', stockId);
+      socket.off('connect', subscribe);
+      const remaining = (tradeSubscriptionCounts.get(stockId) ?? 1) - 1;
+      if (remaining <= 0) {
+        tradeSubscriptionCounts.delete(stockId);
+        if (socket.connected) socket.emit('stock:unsubscribe', stockId);
+      } else {
+        tradeSubscriptionCounts.set(stockId, remaining);
+      }
       releaseSiteSocket();
     };
   }, [stockId]);
@@ -262,7 +284,7 @@ export function useStockTrades(stockId: string): readonly LiveTradeData[] {
   return useSyncExternalStore(
     globalTradeStore.subscribe,
     () => globalTradeStore.get(stockId),
-    () => [],
+    () => EMPTY_TRADES,
   );
 }
 

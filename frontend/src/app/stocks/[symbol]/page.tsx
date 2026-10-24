@@ -328,8 +328,8 @@ export default async function StockHubPage({
 
       {/* 실시간 틱 토스트 알림 */}
       <StockMarketToast
+        stockId={stock.id}
         symbol={stock.symbol}
-        currentPrice={stock.current_price}
         isEn={isEn}
       />
 
