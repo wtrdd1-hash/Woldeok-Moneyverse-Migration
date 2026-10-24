@@ -1,3 +1,6 @@
+## 2026-10-25 v1248 — F675-119 Member Dashboard Shortcut Pins (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1246 / Current Addition v1248 / Next Improvement v1250; main c9a868b1, QA v1251 FAILED/HOLD. Existing dashboard has four fixed Next actions. Owner-only 1–6 internal shortcuts, atomic versioned DB and immutable receipts, web/Android/a11y/SEO/admin KPI, OFF-by-default rollout. Backlog: ENV1248-01 SEC1248-02 REL1248-03 DASH1248-04 DASH1248-05 DASH1248-06 DASH1248-07 DASH1248-08 DASH1248-09 DASH1248-10. New approved independent sources 0, cumulative UNKNOWN / 10,000 BLOCKED. Docs-only, no runtime/finance/DB/Test/Production changes.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)

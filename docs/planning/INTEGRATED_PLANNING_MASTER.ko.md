@@ -1,5 +1,37 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1248 — F675-119 회원 대시보드 바로가기 고정·순서 설정 (기능 추가 / 기획 초안 / 운영 보류)
+
+### 회차, 근거, 작업 중복 방지
+- **이전:** 기능 보완 v1246(F675-118 알림 근거·읽음 무결성, 미병합 Draft #1210). **현재:** 기능 추가 v1248. **다음:** 기능 보완 v1250(잠정). 시작·중간 확인한 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e`. main의 AGENTS.md, README.md, PROJECT_PLAN.md(영문 정본) 및 PROJECT_PLAN.ko.md를 확인했다. 최신 완료 QA **v1251 FAILED/HOLD**(2026-10-25 03:19 KST). 이전 Draft와 독립된 문서 전용 브랜치이며 개발·병합을 뜻하지 않는다.
+- **코드 근거:** `frontend/src/app/dashboard/page.tsx`의 다음 활동은 `/quests`, `/work`, `/wallet`, `/stocks` 네 경로로 고정되어 있고, 조사한 dashboard/profile/account 코드에는 사용자별 바로가기 편집 계약이 없다. Next `/app-api/v1/[...path]`는 `frontend/src/lib/app-gateway.ts`에 이미 존재하는 `account` 그룹을 사용하므로 새 모바일 게이트웨이 그룹은 필요 없다. 이는 코드 확인 결과이며 운영에서 다른 탐색 방법이 없다는 주장은 아니다.
+- **경계:** 기존 대시보드·계정 경로를 재사용하고 개발 C #1206 알림·#1198 계정 보안, 개발 A 지갑·은행 요약, 개발 B 관리자·보안, Gemini 및 QA 변경과 중복하지 않는다. 바로가기는 화면 이동 설정일 뿐 주식 관심종목, 자동 금융 명령, 보상, 원장, SEO 리다이렉트, 마케팅 타기팅, 접근권한이 아니다.
+
+### 목적, 대상, 권한, 진입점
+- **목적:** 회원의 반복 탐색 단계를 줄이되 목적지의 독립된 권한 검사를 유지한다. **대상:** 로그인·동의가 완료된 회원. 관리자는 비식별 집계 상태만 볼 수 있다. 비회원은 기존 공개 메뉴를 이용하며 타 회원의 설정을 조회·수정할 수 없다.
+- **진입:** `/dashboard`의 “바로가기 편집” 버튼과 `/account/shortcuts`의 키보드 접근 가능한 편집기, 선택적 계정 메뉴 링크. 기능 OFF 시 기존 “다음 활동” 4개를 그대로 유지한다. 바로가기 클릭은 정상 Next 내부 이동만 수행하며, 목적지의 세션·권한·기능 스위치 검사를 우회하지 않는다.
+- **허용 경로 키 v1:** `quests`→`/quests`, `work`→`/work`, `wallet`→`/wallet`, `stocks`→`/stocks`, `shop`→`/shop`, `board`→`/board`, `inventory`→`/inventory`, `collections`→`/collections`, `bank`→`/bank`. 서버 소유 레지스트리가 안정적인 키를 이름·내부 경로로 변환한다. 임의 URL·쿼리·외부 리다이렉트·관리자 경로·클라이언트 제공 href는 금지한다. 저장된 키는 권한이 아니므로 조회·클릭 시 현재 권한과 기능 스위치를 재확인한다.
+- **한도·기본값:** 회원당 정렬된 바로가기 세트 1개, **중복 없는 키 1~6개**. 처음에는 `quests,work,wallet,stocks`를 DEFAULT(기본값)로 표시하고 실제 저장 완료인 것처럼 표현하지 않는다. “기본값으로 초기화”는 명시적으로 사용자 설정을 해제한다. 이용 불가한 저장 경로는 제거 가능하지만 클릭 불가 상태와 “현재 이용 불가” 문구를 표시한다.
+
+### 웹·모바일 화면, CTA, 상태
+- **편집기:** 선택 항목에 **위로 이동 / 아래로 이동** 키보드 버튼 제공(드래그는 선택 사항), 허용 경로에서 추가, 제거, 저장, 취소, 초기화. 각 버튼은 명확한 접근성 이름과 순서 안내를 갖는다. 저장은 이동이나 실제 금융·게임 동작을 실행하지 않는다. 중복·6개 초과는 제출 전에 차단하며 미저장 변경 중 초기화에는 확인을 요구한다.
+- **상태:** GUEST→LOGIN_REQUIRED, LOADING, DEFAULT, EDITING, SAVING, SAVED_CONFIRMED(서버 영수증), STALE_VERSION(412·다시 불러오기), IDEMPOTENCY_CONFLICT(409), ROUTE_UNAVAILABLE, UNKNOWN_COMMIT(시간 초과 시 영수증→GET 조회, 새로운 키로 무작정 재전송 금지), OFFLINE(저장 완료로 표시 금지), ERROR/RETRY, SIGNED_OUT(이전 응답 폐기·회원 캐시 제거). 조회 실패 시 기본 경로는 임시 탐색 수단이라고 명확히 표시하며 개인 설정으로 오인시키지 않는다.
+- **모바일:** `account/dashboard-shortcuts` 아래 Android app-api 동일 계약(키·버전·오류·영수증). 허용 목적지에 한해 네이티브 딥링크 변환, 계정 전환 시 캐시 삭제·응답 버전 검증. WCAG 2.2 AA: 최소 24px AA 목표 크기(터치 44px 지향), 명확한 포커스, 200% 확대·320px 폭, 스크린리더 순서 변경 알림, 드래그만으로 순서 변경 강제 금지, 한·영 라벨 동등성·움직임 줄이기.
+
+### 구체적인 API·DB·트랜잭션 계약(개발 제안, 미배포)
+- **NestJS:** `GET /api/v1/account/dashboard-shortcuts` → `{version,source:'DEFAULT'|'CUSTOM',items:[{key,label,href,available}],allowedKeys}`; `PUT` 본문 `{expectedVersion,keys:[...],requestId:uuid}` → `{version,items,receiptId,committedAt}`; `DELETE` `{expectedVersion,requestId}` → 기본값 초기화 영수증; `GET /api/v1/account/dashboard-shortcuts/receipts/:requestId` → 최초 확정 결과. Next BFF는 동일 출처 CSRF 보호 서버 액션, no-store 응답. 저장소에는 세션으로 확인한 사용자만 전달하고 본문·쿼리의 userId를 신뢰하지 않는다. 401/403 인증·동의, 400 유효하지 않거나 중복된 키, 409 같은 멱등 키에 다른 본문, 412 구버전, 429 요청 제한, 503 DB 장애. 본문 최대 2KB·배열과 문자열 길이 제한.
+- **추가형 PostgreSQL 설계(Migration 280 충돌 해결 후 번호 확정):** `member_dashboard_shortcut_sets(user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, version bigint NOT NULL CHECK(version>=0), customized boolean NOT NULL, updated_at timestamptz NOT NULL)`; `member_dashboard_shortcut_items(user_id uuid NOT NULL REFERENCES member_dashboard_shortcut_sets(user_id) ON DELETE CASCADE, route_key text NOT NULL, position smallint NOT NULL CHECK(position BETWEEN 1 AND 6), PRIMARY KEY(user_id,route_key), UNIQUE(user_id,position))`; `member_dashboard_shortcut_receipts(user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE, request_id uuid NOT NULL, payload_sha256 bytea NOT NULL CHECK(octet_length(payload_sha256)=32), response_json jsonb NOT NULL, committed_at timestamptz NOT NULL, PRIMARY KEY(user_id,request_id))`. `(user_id,position)` 인덱스로 본인 정렬 조회; 30일 영수증 보존 인덱스는 개인정보·법무 승인 후 결정. 임의 URL에 UNIQUE를 걸지 않는다. DB의 CHECK/허용목록 검증과 경로 레지스트리는 일치해야 한다.
+- **트랜잭션:** 고정 search_path·스키마 명시·PUBLIC 실행권한 회수·`moneyverse_app`에만 EXECUTE를 부여한 `SECURITY DEFINER` 조회/교체/초기화/영수증 함수, 앱 직접 테이블 DML 금지. 서비스는 인증된 actor를 전달하고 DB는 활성 사용자와 소유자를 확인한다. 사용자 행 `FOR UPDATE`→바로가기 세트 행 순으로 직렬화하고, 요청 키와 본문 해시를 먼저 검증한다. 완전히 동일한 재시도에는 최초 확정 영수증을 반환하고 다른 본문은 거절한다. `expectedVersion` CAS 후 정렬 항목 전체를 원자 교체하고 버전 증가·불변 영수증을 동일 트랜잭션에 기록한다. 오류 시 전체 롤백. 과거 영수증으로 제거된 바로가기를 되살리지 않으며 현재 상태는 GET이 권위이다. 기능 OFF는 기존 대시보드를 보존하고 쓰기를 막지만 저장 데이터를 삭제하지 않는다.
+- **개인정보·악용 방지:** 본인만 읽기·쓰기, 관리자는 개인 경로 설정 조회 금지, 20명 미만 집계 셀 숨김, 임의 URL·SSRF·오픈 리다이렉트 차단, CSRF·세션·동의, 회원당 분당 10회 등 변경 제한, 관리자 집계 접근 감사, 영수증 30일 보존 정책은 별도 승인, 계정 삭제 시 법적 검토 후 연쇄 삭제. WLD 잔액·원장·주식 보유·인벤토리·알림·보상 데이터 변경 없음.
+
+### 관리자, SEO, KPI, 배포·검증
+- **관리자:** 개인정보를 제거한 사용률·저장 오류/충돌률·경로별 사용률만 확인하고 작은 집계는 숨긴다. 타 회원의 바로가기를 임의로 재정렬할 수 없다. **SEO:** `/dashboard`, `/account/shortcuts` noindex/nofollow·비공개 no-store·사이트맵 제외·개인 데이터 구조화 마크업 금지. **KPI 가설:** 7일 대시보드→목적지 클릭률, 7일 재방문 후 작업 완료율, 정상 Test에서 저장 성공 ≥99.5%, 계정 간 노출 0, 권한 없는 경로 열기 0. 이벤트 `shortcut_editor_opened`, `shortcut_save_committed`, `shortcut_destination_opened`는 경로 키만 사용하고 공개 분석에 회원 식별자를 포함하지 않는다.
+- **P0 백로그:** ENV1248-01 운영/개발/Test PostgreSQL 분리·루트 디스크 ENOSPC 대응; SEC1248-02 앱 계정 과도한 DML·PUBLIC 은행 함수 EXECUTE 회수 및 본인 경계; REL1248-03 Migration266 체크섬·Migration280 4중 번호 충돌·의존성/CI/runtime-check·정확 SHA Test 금융 E2E·백업 복원 차단 해소; DASH1248-04 실제 대시보드/app-api 목적지 허용목록·기능 가용성·인증/세션/동의·계정 전환 검증.
+- **P1 백로그:** DASH1248-05 본인 전용 추가형 DB·제약·함수·불변 영수증; DASH1248-06 원자적 교체/초기화·버전 CAS·동일/동시 요청 100건; DASH1248-07 NestJS DTO/가드·Next 서버 액션·2KB 제한·오류 계약; DASH1248-08 대시보드/편집기/Android app-api 동등성·접근성·오프라인·계정 전환; DASH1248-09 관리자 비식별 집계·SEO·KPI·30일 보존 승인; DASH1248-10 격리 실제 PostgreSQL 권한 부정 테스트·타 회원 접근 100건·교체/초기화 100건 경합·**합성 회원 10,001명** 집계 페이지네이션(회원당 10,001개 바로가기 아님)·E2E·스위치 롤백·복원 검증.
+- **배포:** 현재 문서만 변경. 설계 승인 후 개발은 별도 브랜치, 후보 정확 SHA GitHub CI·격리 Test PG 최소권한 부정 검증·웹/Android 인증 E2E·Migration 체크섬/충돌 해소·보안 감사·독립 백업 복원 통과 후 진행한다. 기능 기본 OFF, 1%→5%→25%→100% 단계적 활성화와 SLO 감시, 문제 시 OFF 복귀. 운영 직접 배포 금지. 루트 디스크 100%·여유 약 0.5GB이며 다른 작업자의 파일을 임의 삭제하지 않는다.
+- **외부 독립 근거 게이트:** PostgreSQL 잠금, OWASP CSRF, W3C WCAG 2.2 공식 발행기관 **3곳** 검토. 신규 중복 제거·최종 승인 **0건**, 누적 최종 승인 **미확인 / 10,000**, **BLOCKED / IN PROGRESS**. 참고: https://www.postgresql.org/docs/current/explicit-locking.html ; https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html ; https://www.w3.org/TR/wcag/ . 기술 문서 3건을 독립 근거 10,000건 달성으로 계산하지 않는다.
+
+
 ## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스와 수정 사유

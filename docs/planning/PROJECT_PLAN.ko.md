@@ -1,5 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1248 — F675-119 회원 대시보드 바로가기 고정·순서 설정 (기능 추가 / 기획 초안 / 운영 보류)
+- 이전 기능 보완 v1246 / 현재 기능 추가 v1248 / 다음 기능 보완 v1250(잠정). 시작·중간 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 확인, 최신 QA v1251 FAILED/HOLD, 이전 알림 기획 #1210 미병합. 독립 문서 브랜치이며 런타임·DB·WLD·Test·운영 변경 없음.
+- 실제 `frontend/src/app/dashboard/page.tsx`의 다음 활동은 4개 고정 경로이며 조사 범위에 회원별 바로가기 API가 없다. Android app-api `account` 그룹은 기존에 있다. 회원별 1~6개 허용 경로 키, DEFAULT/CUSTOM 구분, `/dashboard`·`/account/shortcuts` 편집/저장/초기화/순서 변경, 임의 URL·권한 우회 금지. 본인 GET/PUT/DELETE/영수증, 추가형 DB 세트·항목·멱등 영수증, 버전 CAS·회원 행 잠금, 409/412/503, CSRF, 30일 영수증 보존 승인, WCAG AA, 비색인, 관리자 비식별 집계, 기본 OFF·단계적 롤백. [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md)에 상세 구현 계약 수록.
+- P0/P1 백로그: ENV1248-01 SEC1248-02 REL1248-03 DASH1248-04 DASH1248-05 DASH1248-06 DASH1248-07 DASH1248-08 DASH1248-09 DASH1248-10. P0는 루트 디스크 100%, 운영/개발 DB 공유, 앱 DML 235/241, PUBLIC 은행 함수 3개, Migration266/280, CI·정확 SHA Test E2E를 포함. P1은 본인 DB/API/Next/Android·개인정보·SEO·KPI·100건 경합·합성 회원 10,001명 검증. PostgreSQL/OWASP/W3C 3개 발행기관 검토, 신규 최종 승인 0건, 누적 미확인 / 10,000 => BLOCKED / IN PROGRESS.
+
+
 ## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
 - 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.
