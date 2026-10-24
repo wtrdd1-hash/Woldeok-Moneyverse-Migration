@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { WldAmount } from '@moneyverse/contract';
 import { wldAmount } from '@moneyverse/contract';
 import type {
@@ -168,6 +168,17 @@ export interface WalletRewardAvailability {
  * it, and the screen has to be able to tell it apart from `active`.
  */
 export type WalletLoanStatus = 'active' | 'repaid' | 'overdue';
+
+export interface WalletLoanExposureView {
+  readonly currency: 'WLD';
+  readonly scope: 'latest-20';
+  readonly totalLoans: number;
+  readonly activeCount: number;
+  readonly overdueCount: number;
+  readonly repaidCount: number;
+  readonly outstandingAmount: WldAmount;
+  readonly overdueAmount: WldAmount;
+}
 
 export interface WalletLoanView {
   readonly loanId: string;
@@ -512,6 +523,43 @@ export class WalletService {
       issuedAt: timestamp(row.issued_at, 'loan issued timestamp'),
       repaidAt: row.repaid_at ? timestamp(row.repaid_at, 'loan repaid timestamp') : null,
     }));
+  }
+
+  async loanExposure(authenticatedUserId: string): Promise<WalletLoanExposureView> {
+    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
+    if (typeof this.repository.loansForUser !== 'function') {
+      throw new ServiceUnavailableException('loan history is unavailable');
+    }
+    // bank_my_loans is owner-scoped and capped at 20; do not present these
+    // figures as a complete lifetime loan balance or an authoritative payoff.
+    const loans = await this.loans(actor);
+    if (loans.length > 20) throw new Error('database returned more than 20 loans');
+    let activeCount = 0;
+    let overdueCount = 0;
+    let repaidCount = 0;
+    let outstanding = 0n;
+    let overdue = 0n;
+    for (const loan of loans) {
+      const amount = BigInt(loan.outstandingAmount);
+      if (amount < 0n) throw new Error('database returned negative loan outstanding');
+      if (loan.status === 'repaid') {
+        if (amount !== 0n) throw new Error('repaid loan has nonzero outstanding');
+        repaidCount += 1;
+      } else if (loan.status === 'overdue') {
+        overdueCount += 1;
+        outstanding += amount;
+        overdue += amount;
+      } else {
+        activeCount += 1;
+        outstanding += amount;
+      }
+    }
+    return {
+      currency: 'WLD', scope: 'latest-20', totalLoans: loans.length,
+      activeCount, overdueCount, repaidCount,
+      outstandingAmount: wldAmount(outstanding.toString(), 'outstanding loan amount'),
+      overdueAmount: wldAmount(overdue.toString(), 'overdue loan amount'),
+    };
   }
 
   async borrow(
