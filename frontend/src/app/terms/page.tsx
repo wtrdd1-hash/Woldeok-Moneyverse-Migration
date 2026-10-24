@@ -35,7 +35,7 @@ export default async function TermsPage() {
           'Điều khoản Dịch vụ'
         )}
       />
-      <TermsDocument />
+      <TermsDocument locale={locale} />
     </div>
   );
 }

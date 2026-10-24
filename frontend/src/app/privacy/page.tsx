@@ -35,7 +35,7 @@ export default async function PrivacyPage() {
           'Chính sách Quyền riêng tư'
         )}
       />
-      <PrivacyDocument />
+      <PrivacyDocument locale={locale} />
     </div>
   );
 }
