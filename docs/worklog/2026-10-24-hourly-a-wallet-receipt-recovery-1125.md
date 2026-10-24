@@ -17,3 +17,17 @@
 
 ## In progress
 - 11:25 KST: worktree initialized; implementation pending.
+
+### RED/GREEN checkpoint
+- RED reproduced: backend 6 failures (missing service/repository and 404 route), frontend private cache policy failure, missing receipt card and reference path.
+- Implementation: owner-filtered existing ledger SELECT (no new migration), guarded Nest receipt endpoint, private Next receipt and reference lookup, Android gateway wallet cache override, precision-aware receipt card.
+- Shared Production-connected DB not touched.
+
+### Midpoint (11:35 KST)
+- Main still `46794ff0ac3deeae87862ac9b74d209798e8d074`; planning successor Draft #1111 reviewed and left untouched. 20 remote branches including this task branch; 17 open PRs before creating this PR.
+- GREEN: backend focused 28/28; frontend focused 5/5; full typecheck PASS; full lint exit 0 (1,144 warnings); full build PASS with both private dynamic receipt routes.
+- Full root test FAIL: frontend 5 failures (SEO 3, locale 1, login touch targets 1) matching overlapping prior QA/A areas; backend 1,320 PASS/398 SKIP; database 15 PASS/3 SKIP; contract 38 PASS. Do not repair competing QA/A branches here.
+- Dependency audit FAIL: 26 findings (2 Critical, 10 High, 11 Moderate, 3 Low). P0 gate unresolved.
+- Isolated PostgreSQL `moneyverse-test-db / wdmv_v761_history_1011`: read-only transaction as `moneyverse_app`, owner receipt 1, exact cash+bank=net true, foreign owner 0, ROLLBACK. No Production-connected 5433 writes.
+- New migration: none; existing 280 is reserved by unmerged B PR #1105. Do not touch that stack.
+- Remaining: publish Draft PR, check exact SHA CI, full Test authenticated E2E/security/a11y/SEO and release gate HOLD.

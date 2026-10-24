@@ -231,6 +231,56 @@ export class PostgresWalletRepository {
     );
   }
 
+  /** A committed receipt is selected by owner AND transaction id, not by a recent-list window. */
+  async transactionForUser(userId: string, transactionId: string): Promise<WalletTransactionRow | null> {
+    const ownerUserId = requireUuid(userId, 'authenticated user id');
+    const reference = requireUuid(transactionId, 'transaction id');
+    return queryOne<WalletTransactionRow>(
+      this.pool,
+      `SELECT
+         ledger_transaction.id::text AS transaction_id,
+         ledger_transaction.type,
+         ledger_transaction.created_at,
+         COALESCE(SUM(
+           CASE posting.direction
+             WHEN 'debit'::public.posting_direction THEN posting.amount
+             ELSE -posting.amount
+           END
+         ), 0)::text AS net_amount,
+         COALESCE(SUM(
+           CASE WHEN account.account_type = 'USER_CASH'::public.account_type THEN
+             CASE posting.direction
+               WHEN 'debit'::public.posting_direction THEN posting.amount
+               ELSE -posting.amount
+             END
+           ELSE 0
+           END
+         ), 0)::text AS cash_delta,
+         COALESCE(SUM(
+           CASE WHEN account.account_type = 'USER_BANK'::public.account_type THEN
+             CASE posting.direction
+               WHEN 'debit'::public.posting_direction THEN posting.amount
+               ELSE -posting.amount
+             END
+           ELSE 0
+           END
+         ), 0)::text AS bank_delta
+       FROM public.ledger_transactions AS ledger_transaction
+       JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
+       JOIN public.accounts AS account ON account.id = posting.account_id
+       WHERE account.owner_user_id = $1
+         AND ledger_transaction.id = $2::uuid
+         AND account.account_type IN (
+           'USER_CASH'::public.account_type,
+           'USER_BANK'::public.account_type
+         )
+       GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
+       ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
+       LIMIT 1`,
+      [ownerUserId, reference],
+    );
+  }
+
   /**
    * Recipient resolution deliberately accepts only the internal user UUID.
    * It exposes neither OAuth subjects nor profile data, preventing this query

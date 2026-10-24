@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
+import { postingAmount } from '../sides';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
+import { receiptPath } from './receipt-path';
 import type { Overview } from '../sides';
 
 export const dynamic = 'force-dynamic';
@@ -48,6 +50,10 @@ export default async function WalletActivityPage() {
         맞춘 금액을 보여 줍니다.
       </PageHeader>
 
+      <Button asChild variant="outline" className="w-fit">
+        <Link href="/wallet/activity/lookup">거래 참조번호로 찾기</Link>
+      </Button>
+
       <Card>
         <CardContent>
           {!wallet ? (
@@ -60,16 +66,23 @@ export default async function WalletActivityPage() {
           ) : (
             wallet.recentTransactions.map((entry) => {
               const { debit, credit } = sides(entry);
-              return (
-                <PostingStrip
+              const path = receiptPath(entry.transactionId);
+              return path ? (
+                <Link
                   key={entry.transactionId}
-                  debit={debit}
-                  credit={credit}
-                  amount={entry.netAmount}
-                  label={entry.label}
-                  at={formatMoment(entry.occurredAt)}
-                />
-              );
+                  href={path}
+                  className="block rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:bg-muted/30"
+                  aria-label={`${entry.label} 거래 영수증 보기`}
+                >
+                  <PostingStrip
+                    debit={debit}
+                    credit={credit}
+                    amount={postingAmount(entry) ?? entry.netAmount}
+                    label={entry.label}
+                    at={formatMoment(entry.occurredAt)}
+                  />
+                </Link>
+              ) : null;
             })
           )}
         </CardContent>
