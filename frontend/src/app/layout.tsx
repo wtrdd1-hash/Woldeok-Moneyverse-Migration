@@ -380,7 +380,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <RouteAwareFloatingUtilities />
               <SessionKeepAlive />
               <WatchlistPromotionEngine />
-              <FirstTradeOnboardingModal />
+              <FirstTradeOnboardingModal eligible={viewer.signedIn && viewer.consentCurrent} />
               <StockAlertPushEngine />
             </ThemeProvider>
 
