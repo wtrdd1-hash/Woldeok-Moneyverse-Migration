@@ -1,5 +1,14 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v2026.10.25.1252 — F675-120 Private Ledger Annotation Product Review (FEATURE ADDITION / HOLD)
+- User problem: a wallet transaction may be hard to remember later, while the inspected `/wallet/activity` displays at most 50 recent owner transactions and its CSV only exports supplied recent rows. Avoid duplicating the existing transfer message, wallet dispute Draft #1048 or the authoritative ledger.
+- Proposed value: an optional personal note and allowlisted category bound to a transaction proven by an owner cash/bank posting; `/wallet/activity` Save/Remove and `/wallet/annotations` list, immutable receipts, versioned tombstone, signed keyset pagination, Android parity, keyboard/320px/200% and private noindex/no-store. Personal labels are not official financial classification.
+- Permissions/security: member-owned only; no admin content access, no public notes, no cross-member lookup; SECURITY DEFINER least privilege, no direct app table grants, 12 writes/min and 500 active note cap. No WLD/ledger mutation.
+- P0 ENV1252-01 SEC1252-02 REL1252-03 WAL1252-04; P1 WAL1252-05 WAL1252-06 WAL1252-07 WAL1252-08 WAL1252-09 WAL1252-10. QA v1255 FAILED/HOLD; root 100%, migration266/280, app DB ACL, supply-chain, CI and exact-SHA Test/restore blockers. Full implementation-ready contracts in the English [Integrated Master](INTEGRATED_PLANNING_MASTER.md) and Korean equivalent.
+- 10,000 independent external evidence gate: newly accepted 0, cumulative UNKNOWN; BLOCKED/IN PROGRESS. No runtime/DB/Test/Production changes.
+
+
+
 ## F675-06 detailed adoption — v2026.10.15.688
 
 - [Google Search Evidence & Canonical Action Center](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) is the next v675 adopted **detailed planning** feature. Reuses /admin/seo and v685; identifies top-10-only GSC data, missing date=0, GSC PT/freshness, crawler-indexed mislabel and legacy index submission success/Google Indexing API misclaims. Separates source/submission/Google indexed-version/performance into independently verifiable evidence, 16 Google/WCAG references and D0–D7 gated implementation. Not a live SEO audit or deployed feature.

@@ -1,5 +1,46 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1252 — F675-120 회원 전용 WLD 거래 메모·개인 분류 (기능 추가 / 기획 초안 / 운영 보류)
+
+### 회차·기준 문서·중복 방지
+- **Previous:** Feature Improvement v1250(F675-119 대시보드 바로가기, 미병합 Draft #1224). **Current:** Feature Addition v1252. **Next:** Feature Improvement v1254(잠정). 시작·중간 main `c9a868b1e622341e2daa8b936ddf0988eda9988e`. 최신 main의 `AGENTS.md`, `README.md`, `docs/planning/PROJECT_PLAN.md`(영문 정본), `PROJECT_PLAN.ko.md`(국문 대조) 우선. QA v1255 **FAILED/HOLD**. 문서 전용 독립 브랜치이며 실제 개발·배포가 아니다.
+- **코드 근거:** `frontend/src/app/wallet/activity/page.tsx`는 `GET /api/v1/wallet?recent=50`을 호출해 최근 거래 최대 50건만 표시한다. `wallet/export-ledger-csv.tsx`는 전달받은 최근 데이터만 CSV로 내보내며 전체 원장 추출 기능이 아니다. 검사한 main의 `wallet.controller.ts`에는 거래별 개인 메모 API가 없다. `wallet.repository.ts`는 `ledger_transactions`→`ledger_postings`→`accounts.owner_user_id`를 사용한다. 초기 원장 스키마에는 별도 거래 status 열이 없으므로 거래 행과 본인 전표의 원자적 존재가 확정 근거다. `app-gateway.ts`는 wallet 경로를 허용하지만 Android 메서드·본문·헤더는 별도 검증이 필요하다. 모든 열린 PR에 유사 기능이 없다고 단정하지 않는다.
+- **범위 분리:** 회원 개인 메모는 원장 수정, 이의제기 심사, 환급, 잔액 재계산, 자동 분류, 공식 거래 증명, 전체 이력 CSV가 아니다. 기존 거래 이의제기 Draft #1048, 지갑 읽기·CSV 작업과 연계하되 Gemini/개발 A/B/C/QA 브랜치는 변경하지 않는다.
+
+### 목적·회원 흐름·상태
+- **목적/대상:** 상점·작업·송금·은행 이용이 많은 회원이 실제 원장 거래에 사적인 설명과 개인 카테고리를 저장한다. 기본 기능 OFF, 서버 확정 전에는 저장 성공으로 표시하지 않는다. 주체는 활성 상태·동의 완료 본인 회원이며 관리자는 비식별 집계만 확인한다.
+- **진입:** 기존 `/wallet/activity` 최근 50건의 각 행에 **개인 메모** CTA를 추가하고 `/wallet/annotations`에서 저장된 메모를 키셋 페이지로 조회한다. 50건보다 오래된 거래도 서버에서 소유권 확인은 가능하지만, 현재 전체 과거 거래 탐색 UI가 존재한다고 주장하지 않는다. 별도 승인된 과거 이력 조회 UI와 연계하기 전까지 최근 50건을 작성 진입점으로 삼는다.
+- **편집:** 개인 분류 `PERSONAL|WORK|SHOP|TRANSFER|BANK|OTHER`는 거래 원장의 type을 변경하지 않는다. 메모는 NFC 정규화한 유니코드 1~240 코드포인트, HTML 해석 금지. **저장/취소/메모 삭제/재시도/원본 영수증 확인** 버튼. 원장 WLD 금액·현금/은행 증감·거래 유형·시간·ID는 그대로 유지한다. 개인 메모를 은행이나 원장이 인증한 사실처럼 표시하지 않는다.
+- **상태:** NO_NOTE(가상 버전 0), EDITING, SAVING, SAVED_CONFIRMED, REMOVED_CONFIRMED(영속 묘비), STALE_VERSION(412), KEY_REUSE_CONFLICT(409), UNKNOWN_COMMIT(영수증 조회 후 현재 상태 GET), NOT_OWNED_OR_NOT_FOUND(동일 404), OFFLINE, UNAVAILABLE(503), SIGNED_OUT. 서버 응답 없이 낙관적 임시 저장을 확정으로 표시하지 않는다. 계정 전환·동의 철회·탈퇴·세션 교체 시 임시 내용과 캐시를 지우고 진행 중인 응답을 사용자 세대별로 차단한다.
+
+### API·DB·원자성 명세(별도 개발 브랜치 필요)
+- **본인 전용 NestJS:** `GET /api/v1/wallet/transactions/:transactionId/annotation`; 동일 경로 `PUT {category,note,expectedVersion,requestId}`, `DELETE {expectedVersion,requestId}`; `GET /api/v1/wallet/transaction-annotations?limit=20&cursor=...`(최대 50); `GET /api/v1/wallet/transaction-annotations/receipts/:requestId`. 세션·인증·동의·쓰기 CSRF 필수, actor는 서버 세션에서만 취득. UUID와 요청 본문 최대 2KiB, 표준 요청 지문 검증. 결과는 현재 버전·확정시각·상태·원본 불변 영수증·재실행 여부를 포함하며 상대방 개인정보를 제외한다. 잘못된 입력 400, 인증/동의/CSRF 401/403, 본인 거래 없음/타인 거래 404, 키 내용 불일치 409, 버전 충돌 412, 속도 제한 429, DB 불확실 503. 본인 API 전부 `Cache-Control: private, no-store`.
+- **DB 제안:** `member_wallet_transaction_annotations(user_id uuid REFERENCES users(id),transaction_id uuid REFERENCES ledger_transactions(id),category text CHECK(...),note text,version bigint NOT NULL CHECK(version>=1),is_deleted boolean NOT NULL,created_at timestamptz,updated_at timestamptz,PRIMARY KEY(user_id,transaction_id))`; `member_wallet_annotation_receipts(user_id,request_id,transaction_id,operation,payload_sha256,committed_version,committed_at,original_result,PRIMARY KEY(user_id,request_id))`. 보존 기간은 법무/개인정보 승인 필요. `(user_id,updated_at DESC,transaction_id DESC)` 인덱스 및 길이 CHECK. 삭제 후 행을 없애 버전을 0으로 되돌리지 않고 영속 묘비를 유지하여 ABA를 방지한다. `account_soft_delete`는 사용자 상태만 변경하므로 FK CASCADE만으로 메모가 지워지지 않는다.
+- **소유권·권한:** 고정 search_path, 완전한 스키마 수식, 본인/활성 사용자 확인이 있는 검토된 `SECURITY DEFINER` 함수만 사용한다. 앱 계정에는 함수 EXECUTE만 최소 부여하고 PUBLIC EXECUTE 및 새 테이블 직접 DML/SELECT를 차단한다. 조회·쓰기마다 `ledger_postings p JOIN accounts a ON a.id=p.account_id`에서 `p.transaction_id=:tx AND a.owner_user_id=:actor AND a.account_type IN ('USER_CASH','USER_BANK')`의 존재를 확인한다. `ledger_transactions.actor_user_id`만으로 소유권을 판단하지 않는다. 역사적 거래는 계좌가 현재 비활성이어도 실제 본인 전표가 있으면 소유권 근거가 된다. 상대방·시스템 계좌 정보는 반환하지 않는다.
+- **원자성:** 활성 회원 행 잠금→소유 전표 검증→메모 행/영수증 순서로 잠근다. 회원별 요청 ID의 최초 결과와 지문을 먼저 확인해 완전히 동일한 재시도는 CAS 전에 최초 영수증을 반환하고 다른 내용이면 409를 반환한다. 첫 저장은 expectedVersion=0, 저장·삭제마다 버전 증가, 오래된 버전은 412. 메모·묘비·영수증을 한 트랜잭션에서 확정한다. 원장·전표·계좌·잔액·outbox·WLD에는 쓰지 않는다. 영수증 30일 보존 제안은 승인 전 확정 정책이 아니며 만료 후 현재 GET으로 재조정한다. 목록 커서는 회원 서명 및 (updated_at,transaction_id) 스냅샷/워터마크에 결속하고 동시 수정으로 인한 중복·누락을 방지한다. 필요하면 수명이 제한된 서버 스냅샷 토큰을 사용한다.
+
+### 관리자·보안·Android·접근성·SEO·분석·검증
+- **보안/악용:** 타인 거래와 없는 거래를 구별 불가능한 404로 처리하고 존재 여부 추측을 제한한다. 회원당 분당 12회 쓰기, 활성 메모 500개, 본문 240 코드포인트. 제어문자·양방향 덮어쓰기 문자 제거, 텍스트 이스케이프, CSRF/CSP, 대량 열람 차단, 로그에 메모 본문 미기록. 관리자는 본문 편집·열람 권한 없음. 탈퇴 후 접근 차단과 물리 삭제/보존은 개인정보 정책 승인 필요.
+- **Android/a11y/SEO:** `/app-api/v1/wallet/*` PUT/DELETE 본문·CSRF·요청 ID·세션 전달을 실제 계약으로 확인한다. If-Match/Idempotency-Key가 전달되지 않으면 본문 `expectedVersion`/`requestId` 사용. TalkBack·키보드·초점·44px 터치·320px·200% 확대·KO/EN·실시간 상태 알림. `/wallet/annotations`와 본인 API는 noindex/no-store. 메모 본문은 구조화 데이터·공개 사이트맵·검색 엔진에 노출 금지.
+- **관리자/KPI:** 확정 저장/삭제·409/412/503·복구·지연시간·30일 유지율의 비식별 집계만, 코호트 최소 20명과 차분 공격 방어. 메모·회원 ID·거래 ID를 분석 이벤트에 기록하지 않는다. 목표: 타인 유출 0, 원장 무단 변경 0, 격리 Test 정상 시 저장 성공률 99.5% 이상, p95 조회 500ms/쓰기 800ms 이내(측정 완료가 아닌 제안).
+- **수용 테스트:** 격리 실제 PostgreSQL에서 SECURITY DEFINER 소유/타인/시스템 전표, 앱 직접 DML 및 PUBLIC EXECUTE 거부, 탈퇴·세션 만료, ABA, 동일 요청 100건, 동일 키 다른 내용 100건, 저장-삭제 경합, 계정 전환, 응답 유실 영수증, 500개 한도, 10,001개 합성 다회원 데이터 키셋, 유니코드/CSV 악용, Android, 키보드/TalkBack, noindex/no-store, 원장·잔액 불변 검증. 이번 기획 회차에서 런타임 테스트는 수행하지 않았다.
+- **배포/롤백:** 별도 개발 브랜치와 순방향 마이그레이션. Migration266 체크섬·280 네 PR(#1105/#1117/#1139/#1143) 충돌 해결 전 번호 할당 금지. 기본 OFF, 과거 데이터 자동 생성 없음. 정확한 후보 SHA 전체 CI/보안·격리 PG 권한·공식 Test 인증 지갑/금융/Android E2E·암호화 백업 복원·승인 GitOps 통과 후 1→5→25→100% 점진적 활성화. OFF는 새 편집을 막되 기존 버전·묘비·영수증을 유지하고 불확실 요청의 본인 확인 조회를 허용한다. 기획 예약은 Test/Production 및 DB를 변경하지 않는다.
+
+### P0/P1 개발 백로그·외부 근거 게이트
+- **P0 ENV1252-01:** 루트 디스크 100%(이번 회차 여유 약 19MiB), 운영/개발/Test DB 분리, 5433 외부 바인딩, 다른 작업자 자료 보존, 격리 복원.
+- **P0 SEC1252-02:** 개발 DB 앱 UPDATE/DELETE 235/241 테이블, PUBLIC 은행 함수 3개 권한을 승인된 순방향 변경·부정 테스트로 해결; 운영 DB 권한이라고 단정하지 않음.
+- **P0 REL1252-03:** QA v1255 FAILED/HOLD, 의존성 Critical 2/High 10, 봇 Critical 1/High 5, 프론트 6건 실패, CI runtime-check SKIPPED, Migration266/280, 정확 SHA Test/복원 미검증.
+- **P0 WAL1252-04:** 본인 원장 전표 소유권·최근 50건 화면/CSV 한계·개인정보 정책·기존 이의제기 PR 범위 확인.
+- **P1 WAL1252-05:** DB 제약/인덱스, 본인 전용 SECURITY DEFINER, 버전 묘비·지문 영수증.
+- **P1 WAL1252-06:** 잠금·CAS·멱등 재실행·응답 유실 복구·서명 스냅샷 커서.
+- **P1 WAL1252-07:** NestJS API, Next 최근 거래 메모 CTA/편집기 및 저장 목록.
+- **P1 WAL1252-08:** Android 게이트웨이, 계정 세대 분리, TalkBack·320px·200% 접근성.
+- **P1 WAL1252-09:** 개인정보 삭제·보존, 비식별 관리자, noindex/no-store, 악용 방지/KPI.
+- **P1 WAL1252-10:** 격리 PG 동시성 100건, 타인 접근 100건, 다회원 합성 10,001건, 전체 회귀·OFF 롤백·정확 SHA 게이트.
+- **외부 독립 근거:** URL/출처/라이선스/시각·중복 제거·실제 분류가 확인된 **10,000건** 목표. 신규 최종 승인 **0건**, 누적 승인 **미확인**. 공식 발행기관 3곳을 독립 근거 10,000건으로 집계하지 않음. **BLOCKED / IN PROGRESS**. 문서 전용 회차로 런타임·DB·원장·WLD·Test·운영 미변경.
+
+
+
 ## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스와 수정 사유

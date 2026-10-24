@@ -1,5 +1,11 @@
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
+## 2026-10-25 06:xx KST — Planning v1252 F675-120 (Feature Addition / Draft / HOLD)
+- Previous Improvement v1250 / Current Addition v1252 / Next Improvement v1254 provisional. Main `c9a868b1e622341e2daa8b936ddf0988eda9988e` verified start/mid; QA v1255 FAILED/HOLD. Added owner-private WLD transaction annotations with verified posting ownership, 1–240-character note, personal category, recent-50 row CTA and saved-note list, owner API, CAS/tombstone, immutable idempotency receipts, signed cursor, Android and a11y, anonymous admin, SEO/privacy and staged OFF rollback. No ledger/WLD mutation.
+- P0 ENV1252-01 SEC1252-02 REL1252-03 WAL1252-04; P1 WAL1252-05..10. Root disk 100%, app ACL and PUBLIC bank grants, migration266/280, dependency/CI, official Test exact-SHA/restore remain HOLD. External independent evidence newly approved 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only, no deployment.
+
+
+
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - Previous Addition v1208 / Current Improvement v1210 / Next Addition v1212 provisional. Main 54d5140d unchanged start/mid; QA v1213 FAILED/HOLD; predecessor #1087 unmerged. Fix proposed RESTRICT FK, unavailable-saved REMOVE, actual `#comments-title`, transaction lock order, original digest receipts, owner HMAC cursor, account switch and 500-vs-10,001 isolated fixture. P0 ENV1210-01 SEC1210-02 REL1210-03 BOARD1210-04; P1 BOARD1210-05 BOARD1210-06 BOARD1210-07 BOARD1210-08 BOARD1210-09 BOARD1210-10. New P0 #1088: candidate image build alone must not authorize merge without actual exact-SHA Test/authenticated finance E2E. Full EN/KO integrated design; no runtime or deployment.
 - External publishers 3 reviewed; newly approved 0, cumulative UNKNOWN / 10,000 BLOCKED. Shared DB/5433, broad DML, migration266, audits, Test, restore and disk 93% remain HOLD.

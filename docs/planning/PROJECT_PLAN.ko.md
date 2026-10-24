@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1252 — F675-120 회원 전용 WLD 거래 메모·개인 분류 (기획 초안 / 운영 보류)
+- Previous 기능 보완 v1250 → Current 기능 추가 v1252 → Next 기능 보완 v1254(잠정). main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 확인, 영문 PROJECT_PLAN.md 정본·국문 대조, QA v1255 FAILED/HOLD. 이전 기획 Draft #1224 미병합.
+- 현재 지갑 기록은 최근 원장 50건만 조회하고 CSV도 최근 데이터만 출력하며 검사한 main에는 거래별 본인 메모 API가 없다. `/wallet/activity` 개인 메모 CTA와 `/wallet/annotations` 저장 목록, 원장 본인 전표 검증, 개인 분류/본문, 본인 전용 GET/PUT/DELETE/영수증/목록, 버전 CAS·삭제 묘비·불변 지문·서명 커서·500개 한도·Android·비색인·비식별 관리자·개인정보 정책·기본 OFF 롤백을 기획했다. **원장·잔액·WLD·원본 거래 유형은 절대 변경하지 않는다.** API/DB/잠금/보안/검증 상세는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 ENV1252-01 SEC1252-02 REL1252-03 WAL1252-04, P1 WAL1252-05 WAL1252-06 WAL1252-07 WAL1252-08 WAL1252-09 WAL1252-10. 루트 디스크 100%, 개발 DB 앱 DML 235/241·PUBLIC 은행 3개, Migration266/280, 보안 감사·정확 SHA Test/복원 차단. 동시 요청 100건·타인 접근 100건·다회원 합성 10,001건은 **미실행 수용 기준**.
+- 외부 독립 근거 신규 승인 **0건**, 누적 중복 제거 승인 **미확인/10,000건** ⇒ BLOCKED/IN PROGRESS. 문서 전용 Draft, 런타임·DB·원장·WLD·Test·운영 변경 없음.
+
+
+
 ## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
 - 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.

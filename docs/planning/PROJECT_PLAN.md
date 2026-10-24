@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.25.1252 — F675-120 Owner-Private Wallet Transaction Annotations (DRAFT / HOLD)
+- Previous Feature Improvement v1250 → Current Feature Addition v1252 → Next Feature Improvement v1254 provisional. Main `c9a868b1e622341e2daa8b936ddf0988eda9988e` rechecked start/mid; main English project plan canonical, Korean parity. QA v1255 FAILED/HOLD. Prior planning Draft #1224 remains unmerged.
+- Verified wallet activity reads only recent 50 ledger transactions, recent CSV export is not full history, and inspected main has no owner-private annotation API. New `/wallet/activity` row CTA and `/wallet/annotations` allow personal category/note for verified owner-posting transaction IDs. Owner-only GET/PUT/DELETE/receipt/list, CAS and durable tombstone, immutable request digest, signed cursor, 500 active-note cap, Android app-api parity, noindex/no-store, anonymous admin metrics, privacy review and staged OFF rollback. **Never change ledger, balances, WLD or authoritative transaction type.** Full API, DB, locks, security and test contract in [Integrated Master](INTEGRATED_PLANNING_MASTER.md).
+- P0: ENV1252-01 SEC1252-02 REL1252-03 WAL1252-04. P1: WAL1252-05 WAL1252-06 WAL1252-07 WAL1252-08 WAL1252-09 WAL1252-10. Root 100%, dev app 235/241 DML and 3 PUBLIC bank functions, migration266 checksum and 280 four-way collision, dependency audit and exact-SHA Test/restore block release. 100-way races, 100 foreign owner probes, 10,001 cross-member synthetic pagination required; **not executed**.
+- Independent external references newly approved **0**, cumulative deduplicated approved **UNKNOWN/10,000** ⇒ BLOCKED/IN PROGRESS. Documentation-only Draft; no runtime, database, ledger, WLD, Test or Production changes.
+
+
+
 ## v2026.10.24.1210 — F675-109 Reading List Deletion/Cursor/Resume Hardening (PLANNING DRAFT / RELEASE HOLD)
 - Cycle: Previous Addition v1208; Current Improvement v1210; Next Addition v1212 provisional. Authoritative main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` unchanged start/mid; predecessor Draft #1087 unmerged. QA v1213 FAILED/HOLD; new P0 release gate #1088. Docs only.
 - Source: board public functions in migrations 175/259 only expose `deleted_at IS NULL` posts; post page's comments anchor is `#comments-title`. Fix v1208's proposed RESTRICT FK blocking authorized hard purge, allow redacted owner REMOVE of saved-but-unavailable post, lock actor→post FOR SHARE→saved row, immutable digest-bound receipts and tombstone re-save, owner/session-bound HMAC snapshot cursor, logout response fencing. Keep production 500 saved cap; 10,001-item pagination test only in isolated synthetic fixture.
