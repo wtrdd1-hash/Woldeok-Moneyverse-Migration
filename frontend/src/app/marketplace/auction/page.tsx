@@ -3,9 +3,7 @@
 import React, { useState } from 'react';
 import { Gavel, Flame, Sparkles, Shield, Clock, Plus, Tag, ArrowUpRight, CheckCircle2, AlertCircle, Bot } from 'lucide-react';
 import {
-  AuctionLiveToastStream,
   AuctionLiveTickerStrip,
-  type LiveBidEvent,
 } from '@/components/auction-live-toast-stream';
 import { AuctionDepthChart } from '@/components/auction-depth-chart';
 import { VipThemeSelector, type VipNeonTheme, VIP_THEME_OPTIONS } from '@/components/vip-theme-selector';
@@ -145,8 +143,6 @@ export default function AuctionMarketplacePage() {
   return (
     <div className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100 sm:px-6 lg:px-8">
       <div role="status" className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">시뮬레이션 · 미리보기: 경매 아이템, 잔액, 낙찰 효과는 예시입니다. 여기서 실제 WLD 입찰이나 구매는 이루어지지 않습니다. <a className="underline font-semibold" href="/marketplace">실제 플레이어 마켓으로 이동</a></div>
-      {/* Global WebSocket Live Toast Stream */}
-      <AuctionLiveToastStream />
 
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Top Header */}
@@ -189,7 +185,7 @@ export default function AuctionMarketplacePage() {
           </div>
         </div>
 
-        {/* 60fps Live Bidding Ticker Strip */}
+        {/* Authenticated server-readback verified auction activity; preview auctions remain separate. */}
         <AuctionLiveTickerStrip />
 
         {/* Midnight Black Market Secret Auction */}
