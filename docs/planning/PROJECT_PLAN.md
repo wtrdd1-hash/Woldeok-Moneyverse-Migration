@@ -1,5 +1,14 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.24.1218 — F675-111 Wishlist Integrity Hardening (PLANNING DRAFT / RELEASE HOLD)
+- **Cycle:** Previous Addition v1216 → Current Improvement v1218 → Next Addition v1220 (provisional). Stacked docs-only on unmerged Draft #1120; main 49788d09494fed3e463651945b83386e87dd47bc unchanged at start/mid; latest QA v1223 FAILED/HOLD. No implementation.
+- **Source-backed corrections:** migration071 shop_catalog hard-purge contradicts v1216 wishlist catalog FK ON DELETE CASCADE and unavailable-item REMOVE; propose opaque catalog UUID without catalog FK, SAVE current visibility under lock, REMOVE owner row after purge. Migration165 shop_catalog_list_v2 returns only active/time-valid member catalogue, so hidden items are redacted. Replace mutable updated_at cursor with immutable first_saved_at+catalog_id live keyset; no snapshot claim. Do not prune 180-day receipts until consumed-key replay fence and privacy-approved retention exist.
+- **Contracts:** key advisory lock before replay/actor checks; actor quota lock and SAVE catalog lock; immutable digest receipt + CAS; HMAC actor/session cursor; owner-only private GET and CSRF POST; 100 active cap; Android parity, admin aggregates only, noindex/no-store, WCAG 2.2 AA, 100-way race and synthetic 10,001-row tests; no WLD/ledger/stock/purchase writes.
+- **P0:** ENV1218-01 SEC1218-02 REL1218-03 SHOP1218-04. **P1:** SHOP1218-05 SHOP1218-06 SHOP1218-07 SHOP1218-08 SHOP1218-09 SHOP1218-10. **All IDs:** ENV1218-01 SEC1218-02 REL1218-03 SHOP1218-04 SHOP1218-05 SHOP1218-06 SHOP1218-07 SHOP1218-08 SHOP1218-09 SHOP1218-10.
+- **HOLD:** production/dev DB sharing, wildcard 5433, 235/241 app DML, 3 PUBLIC bank EXECUTE, migration266 drift, QA v1223 frontend 5 FAIL, full audit 2 CRITICAL/10 HIGH, production audit 2 HIGH, #1088, missing isolated restore and official exact-SHA authenticated Test finance E2E. Separate development branch→CI→exact-SHA Test→approved promotion only; planning changes no runtime/DB/feature flag.
+- **Evidence:** PostgreSQL/OWASP/W3C 3 publisher families reviewed, 0 new independently accepted records, cumulative deduplicated approved UNKNOWN/10,000 → BLOCKED / IN PROGRESS. Full EN/KO design in integrated master.
+
+
 ## v2026.10.24.1216 — F675-111 Verified Member Shop Wishlist (PLANNING DRAFT / RELEASE HOLD)
 - **Tracking / 개발 추적:** GitHub issue #1119 OPEN; implementation not started; docs-only Draft PR pending.
 - **Cycle:** Previous Improvement v1214 → Current Addition v1216 → Next Improvement v1218 (provisional). Latest main `49788d09494fed3e463651945b83386e87dd47bc` checked at start and midpoint; v1212 #1103 and v1214 #1111 unmerged Drafts, this docs-only change starts from main. Latest completed QA v1221 FAILED/HOLD on older SHA `46794ff0`; exact-current-main Test E2E unverified.

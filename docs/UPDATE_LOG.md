@@ -1,3 +1,9 @@
+## 2026-10-24 v1218 — F675-111 Wishlist Purge/Cursor/Replay Improvement (DRAFT/HOLD)
+- Previous Addition v1216; Current Improvement v1218; Next Addition v1220 provisional. Stacked on open #1120; main 49788d09494fed3e463651945b83386e87dd47bc rechecked; QA v1223 FAILED/HOLD.
+- Source audit: migration071 shop_catalog FK deletion conflict, migration165 active-only personalized catalog, v1216 mutable updated_at cursor and 180-day receipt pruning conflict. Spec fixes in existing integrated EN/KO masters and plans only; no runtime changes.
+- Backlog: ENV1218-01 SEC1218-02 REL1218-03 SHOP1218-04 SHOP1218-05 SHOP1218-06 SHOP1218-07 SHOP1218-08 SHOP1218-09 SHOP1218-10. P0 4/P1 6, separate development ownership.
+- Independent publisher families PostgreSQL/OWASP/W3C reviewed 3, accepted new 0, cumulative UNKNOWN/10,000, BLOCKED. No merge, deploy, Test, DB, WLD or feature-switch writes.
+
 ## 2026-10-24 v1216 — F675-111 verified shop wishlist (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Tracking / 개발 추적:** GitHub issue #1119 OPEN; implementation not started; docs-only Draft PR pending.
 - Previous Improvement v1214 / Current Addition v1216 / Next Improvement v1218 provisional. Latest main 49788d09 start/mid; QA v1221 FAILED/HOLD on older 46794ff0. Source verified Store 2.0 catalog/purchase and no shop wishlist; unrelated stock watchlist exists. Unmerged #1103/#1111 not assumed deployed.

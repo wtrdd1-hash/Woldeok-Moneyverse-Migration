@@ -1,3 +1,9 @@
+## 2026-10-24 v1218 — F675-111 관심상품 삭제·커서·재시도 보완 (초안/보류)
+- 이전 Addition v1216, 현재 Improvement v1218, 다음 Addition v1220(잠정). 미병합 #1120 기반; main 49788d09494fed3e463651945b83386e87dd47bc 재확인; QA v1223 FAILED/HOLD.
+- Migration071 상품 FK 삭제 충돌, Migration165 활성 상품/회원 가격, v1216의 가변 updated_at 커서·180일 영수증 정리 충돌을 확인. 기존 국영문 통합 문서와 계획서에 보완; 런타임 변경 없음.
+- 백로그: ENV1218-01 SEC1218-02 REL1218-03 SHOP1218-04 SHOP1218-05 SHOP1218-06 SHOP1218-07 SHOP1218-08 SHOP1218-09 SHOP1218-10. P0 4/P1 6, 개발 예약과 변경 분리.
+- PostgreSQL/OWASP/W3C 3개 발행기관 검토, 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED. 병합·배포·Test·DB·WLD·스위치 변경 없음.
+
 ## 2026-10-24 v1216 — F675-111 회원 상점 관심상품 (기능 추가 / 초안 / 배포 보류)
 - **Tracking / 개발 추적:** GitHub issue #1119 OPEN; implementation not started; docs-only Draft PR pending.
 - 이전 보완 v1214 / 현재 추가 v1216 / 다음 보완 v1218(잠정). 최신 main 49788d09 시작·중간 확인, 최신 QA v1221 FAILED/HOLD는 이전 46794ff0 대상. 실제 상점 카탈로그/구매 API에 관심상품 없음 확인. 미병합 #1103/#1111을 구현 완료로 간주하지 않음.

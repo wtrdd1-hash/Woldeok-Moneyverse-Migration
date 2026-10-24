@@ -1,5 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1218 — F675-111 관심상품 무결성 보완 (기획 초안 / 출시 보류)
+- **주기:** 이전 Addition v1216 → 현재 Improvement v1218 → 다음 Addition v1220(잠정). 미병합 Draft #1120 기반 문서 전용 보완. main 49788d09494fed3e463651945b83386e87dd47bc 시작/중간 불변, 최신 QA v1223 FAILED/HOLD. 기능 미구현.
+- **코드 근거 수정:** Migration071의 상품 완전 삭제와 v1216 관심상품 FK ON DELETE CASCADE는 비공개 행 표시·삭제 요구와 충돌. 상품 FK 없는 UUID로 저장하고 SAVE는 현재 상품 공개 검증+잠금, REMOVE는 삭제 상품도 본인 저장행으로 처리. Migration165의 shop_catalog_list_v2는 활성·판매기간 내 회원별 상품만 제공하므로 숨김 상품 메타데이터는 비공개. 가변 updated_at 커서 대신 불변 first_saved_at+catalog_id 실시간 keyset, 스냅샷 보장 금지. 소비 키 차단/보존 승인 이전 180일 영수증 자동 정리 금지.
+- **계약:** 멱등 키 잠금→영수증/회원 확인→한도·상품 잠금→CAS/불변 해시 영수증. HMAC 회원·세션 커서, 본인 비공개 GET/CSRF POST, 활성 100개 제한, Android 동등성, 관리자 비식별 집계, noindex/no-store, WCAG 2.2 AA, 동시 100건·합성 10,001건 검증; WLD/원장/재고/구매 쓰기 금지.
+- **P0:** ENV1218-01 SEC1218-02 REL1218-03 SHOP1218-04. **P1:** SHOP1218-05 SHOP1218-06 SHOP1218-07 SHOP1218-08 SHOP1218-09 SHOP1218-10. **전체 ID:** ENV1218-01 SEC1218-02 REL1218-03 SHOP1218-04 SHOP1218-05 SHOP1218-06 SHOP1218-07 SHOP1218-08 SHOP1218-09 SHOP1218-10.
+- **보류:** 운영/개발 DB 공유, 5433 전체 바인딩, 앱 DML 235/241, PUBLIC 은행 함수 3개, Migration266 불일치, QA v1223 프론트 실패 5건, 전체 감사 Critical 2/High 10, 운영 감사 High 2, #1088, 격리 복원 및 공식 Test 정확 SHA 금융 E2E 부재. 별도 개발 브랜치→CI→정확 SHA Test→승인된 승격. 기획은 런타임/DB/스위치 미변경.
+- **근거:** PostgreSQL/OWASP/W3C 3개 발행기관 검토, 신규 독립 승인 0건, 누적 중복 제거 승인 UNKNOWN/10,000 → BLOCKED / IN PROGRESS. 상세는 국영문 통합 기획서.
+
+
 ## v2026.10.24.1216 — F675-111 회원 전용 상점 관심상품 목록 (기획 초안 / 운영승격 보류)
 - **Tracking / 개발 추적:** GitHub issue #1119 OPEN; implementation not started; docs-only Draft PR pending.
 - **주기:** 이전 기능 보완 v1214 → 현재 기능 추가 v1216 → 다음 기능 보완 v1218(잠정). 최신 main `49788d09494fed3e463651945b83386e87dd47bc` 시작·중간 확인. v1212 #1103/v1214 #1111은 미병합 Draft이므로 이번 문서 변경은 main에서 독립 시작. 최신 완료 QA v1221 FAILED/HOLD는 이전 SHA `46794ff0` 기준이며 현 main 정확 SHA Test E2E는 미검증.
