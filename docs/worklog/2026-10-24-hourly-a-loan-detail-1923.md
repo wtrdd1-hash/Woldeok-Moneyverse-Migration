@@ -13,3 +13,4 @@
 - 19:35: isolated PostgreSQL read-only role test PASS, ROLLBACK, no DB writes.
 - 19:37: build/typecheck/lint/API contract PASS; pnpm and bot dependency audits FAIL.
 - main and EN/KO planning rechecked mid/pre-integration unchanged. Code SHA a942bf35281895569269cb381b3c229de5426ac5. Production RELEASE HOLD.
+- Final push inventory: 59 remote heads (58 non-main), 56 open PRs; Draft PR #1163; deleted 0; preserved all unique worker branches. No Test/Production deployment or rollback.
