@@ -4751,6 +4751,14 @@ _요청 본문 없음._
 | recentTransactions[].bankDelta | false | undefined \| string & object |  |
 | recentTransactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
 | recentTransactions[].occurredAt | true | string |  |
+| recentInsights | true | object |  |
+| recentInsights.scope | true | string="recent" | const="recent" |
+| recentInsights.requestedLimit | true | number |  |
+| recentInsights.sampledCount | true | number |  |
+| recentInsights.incomingAmount | true | string |  |
+| recentInsights.outgoingAmount | true | string |  |
+| recentInsights.netAmount | true | string |  |
+| recentInsights.neutralCount | true | number |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 

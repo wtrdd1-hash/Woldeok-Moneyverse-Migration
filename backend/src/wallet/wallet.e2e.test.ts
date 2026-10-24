@@ -1,4 +1,6 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { HEADERS_METADATA } from '@nestjs/common/constants';
+import { WalletController } from './wallet.controller';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -70,6 +72,16 @@ describe('wallet routes', () => {
   // The session store is null here, so SessionGuard reports the store
   // unavailable before any other guard can speak. That is the honest answer:
   // the request was not rejected, it could not be judged.
+  it('marks the authenticated overview success response private and non-cacheable', () => {
+    expect(Reflect.getMetadata(HEADERS_METADATA, WalletController.prototype.overview))
+      .toContainEqual({ name: 'Cache-Control', value: 'private, no-store' });
+  });
+
+  it('keeps member wallet ledger and insight responses private even when session fails', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/wallet?recent=50');
+    expect([401, 403, 503]).toContain(response.status);
+  });
+
   it('reports 503 rather than 401 when the session store is offline', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/wallet');
     expect([401, 503]).toContain(response.status);

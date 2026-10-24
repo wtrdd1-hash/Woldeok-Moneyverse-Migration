@@ -1,3 +1,5 @@
+import type { RecentInsightsView } from './activity/recent-insights';
+
 /**
  * The wallet's row shapes, and the one rule for reading a posting.
  *
@@ -31,6 +33,7 @@ export interface Overview {
     readonly totalAvailableAmount: string;
   };
   readonly recentTransactions: readonly TransactionView[];
+  readonly recentInsights?: RecentInsightsView;
 }
 
 /**

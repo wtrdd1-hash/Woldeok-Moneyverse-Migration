@@ -133,6 +133,17 @@ export interface WalletTransactionView {
   readonly occurredAt: string;
 }
 
+/** This is a bounded sample, NOT a complete ledger or lifetime total. */
+export interface WalletRecentInsights {
+  readonly scope: 'recent';
+  readonly requestedLimit: number;
+  readonly sampledCount: number;
+  readonly incomingAmount: string;
+  readonly outgoingAmount: string;
+  readonly netAmount: string;
+  readonly neutralCount: number;
+}
+
 export interface WalletOverview {
   /**
    * The caller's own Moneyverse id, which is what another member types to
@@ -143,6 +154,7 @@ export interface WalletOverview {
   readonly userId: string;
   readonly balances: WalletBalancesView;
   readonly recentTransactions: WalletTransactionView[];
+  readonly recentInsights: WalletRecentInsights;
 }
 
 export interface WalletTransferReceipt {
@@ -326,6 +338,26 @@ function normalizeTransactions(rows: readonly WalletTransactionRow[]): WalletTra
   });
 }
 
+/** Aggregate already-authorized ledger rows using exact integer arithmetic. */
+function recentInsights(transactions: readonly WalletTransactionView[], requestedLimit: number): WalletRecentInsights {
+  let incoming = 0n;
+  let outgoing = 0n;
+  let net = 0n;
+  let neutralCount = 0;
+  for (const transaction of transactions) {
+    const amount = BigInt(transaction.netAmount);
+    net += amount;
+    if (amount > 0n) incoming += amount;
+    else if (amount < 0n) outgoing -= amount;
+    else neutralCount += 1;
+  }
+  return {
+    scope: 'recent', requestedLimit, sampledCount: transactions.length,
+    incomingAmount: incoming.toString(), outgoingAmount: outgoing.toString(),
+    netAmount: net.toString(), neutralCount,
+  };
+}
+
 import { MarketBroadcast } from '../stock/market-broadcast';
 
 /**
@@ -376,10 +408,12 @@ export class WalletService {
       this.repository.balancesForUser(userId),
       this.repository.recentTransactionsForUser(userId, limit),
     ]);
+    const recentTransactions = normalizeTransactions(transactions);
     return {
       userId,
       balances: normalizeBalances(balances),
-      recentTransactions: normalizeTransactions(transactions),
+      recentTransactions,
+      recentInsights: recentInsights(recentTransactions, limit),
     };
   }
 
