@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1230 — F675-114 주간 목표 집중 보드 주 전환·영수증·근거 무결성 보완 (기획 초안 / 운영 보류)
+- 이전 기능 추가 v1228 → 현재 기능 보완 v1230 → 다음 기능 추가 v1232(잠정). 최신 main `49788d09494fed3e463651945b83386e87dd47bc` 및 정본 국영문 기획서 시작·중간 동일, 선행 Draft #1155 미병합, QA v1235 FAILED/HOLD. 문서만 변경.
+- Migration101 원본 함수는 서울 `clock_timestamp` 기준이며 **평생 목표에도 week_start를 반환**함. 평생 고정은 NULL 주 범위, 만료된 주간 고정은 현재 활성 3개 한도에서 제외, 명시적 재고정만 새 키/버전으로 허용, 원본 영수증은 과거 근거로 보존. 월요일 경계에서 서버 현재 주와 원본 주가 다르면 409/재조회, 동일 키 재실행은 주/버전 확인 전에 최초 영수증 반환하되 삭제된 고정을 부활시키지 않음. 자기신고 NPC 및 계산된 `goal_completed`를 보상 영수증으로 취급하지 않고 `/quests`의 비공개 robots 설정 정정. SQL `p_actor`만으로 DB 신원 인증이 되지 않으므로 치환 공격 검증 필요.
+- P0 ENV1230-01(DB/5433/복원), SEC1230-02(앱 DML 235/241·PUBLIC 은행 3개·DB actor), REL1230-03(#1147 Migration280 충돌, #1088 자동 병합, Migration266, QA v1235 프론트 5건, 전체 Critical2/High10·운영 High2·봇 Critical1/High5, 정확 SHA Test/복원), QUEST1230-04(시간·원본·자기신고·SEO). P1 QUEST1230-05(스키마·영수증), QUEST1230-06(본인 API/UI), QUEST1230-07(잠금·100건 경합), QUEST1230-08(Android·접근성·세션·SEO), QUEST1230-09(관리자·개인정보·KPI), QUEST1230-10(격리 DB·금융 회귀·Test·롤백). 전체 상세는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- 기능 기본 OFF, 별도 개발 브랜치, #1147 해결 후 전방향 Migration 번호, 격리 PostgreSQL·정확 SHA 공식 Test 인증 금융 E2E·백업 복원·GitOps 승인 전 배포 금지. 외부 PostgreSQL/OWASP/W3C/IETF 4개 발행기관 계열 검토, 신규 최종 승인 0, 누적 미확인/10,000 BLOCKED / IN PROGRESS. IETF 멱등 키 문서는 정식 RFC가 아닌 Internet-Draft. 런타임·DB·WLD·Test·운영 변경 없음.
+
+
 ## v2026.10.24.1228 — F675-114 회원 주간 목표 집중 보드 (기능 추가 / 기획 초안 / 운영 보류)
 - 이전 기능 보완 v1226 → 현재 기능 추가 v1228 → 다음 기능 보완 v1230(잠정). 최신 main `49788d09494fed3e463651945b83386e87dd47bc` 시작·중간 동일, v1226 Draft #1149 미병합, QA v1233 FAILED/HOLD. 문서만 변경.
 - 실제 `/quests` → `GET /api/v1/engagement/early-game` → Migration 101 `public.early_game_weekly_goals`에서 서울 주 시작일, 주간/평생 기간, bigint 문자열 진행도, 자기신고 NPC 지표를 확인. 본인 전용 최대 3개 고정, `/account/goal-focus`, 불변 영수증·CAS·월요일 만료, 진행도 조작·WLD 보상 없음. 회원 전용 `/quests`의 robots index=true 수정 필요. 화면·CTA·상태·API·DB·트랜잭션·관리자·보안·SEO·Android·접근성·KPI·회귀·롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md)에 상세 명세.

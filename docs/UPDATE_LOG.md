@@ -1,3 +1,7 @@
+## 2026-10-24 v1230 — F675-114 weekly focus rollover, receipt and provenance hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1228 / Current Improvement v1230 / Next Addition v1232 provisional. Main 49788d09 and canonical plans unchanged start/mid; QA v1235 FAILED/HOLD; predecessor #1155 unmerged. Source-verified lifetime goal also carries a Monday date; prevent false lifetime expiry, stale-week pin quota, rollover races and old-receipt resurrection. Explicit original receipt vs current GET, DB actor proof, noindex private /quests, self-reported NPC caveat, Android/a11y and financial non-effects.
+- Backlog: ENV1230-01 SEC1230-02 REL1230-03 QUEST1230-04 QUEST1230-05 QUEST1230-06 QUEST1230-07 QUEST1230-08 QUEST1230-09 QUEST1230-10. P0 migration280 collision #1147, build-only auto-merge #1088, migration266, shared DB/5433, app ACL, QA frontend 5 FAIL, security audits, missing exact-SHA Test and isolated restore. Docs only; new approved external evidence 0, cumulative UNKNOWN/10,000 BLOCKED.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1228 — F675-114 verified weekly goal focus board (FEATURE ADDITION / DRAFT / HOLD)

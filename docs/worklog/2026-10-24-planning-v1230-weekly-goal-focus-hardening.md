@@ -1,0 +1,9 @@
+# Planning v1230 — F675-114 weekly goal focus hardening
+- Date: 2026-10-24 19:08+09:00 onward. Previous Addition v1228 → Current Improvement v1230 → Next Addition v1232 provisional.
+- Baseline: remote main 49788d09494fed3e463651945b83386e87dd47bc; previous Draft #1155 unmerged. QA v1235 FAILED/HOLD. Documentation only.
+- Source: migration101 `early_game_weekly_goals` clock_timestamp/Seoul week and lifetime week_start, catalog active/window/self_reported; Next /quests robots.index=true; BigInt-safe goalPercent; NestJS early-game read. No focus persistence/API in main.
+- Hardening: lifetime NULL scope; current-active 3-pin cap excluding expired weekly rows; explicit repin; original immutable receipt replay before CAS/week; no stale Monday commits; catalog row lock and owner lock; unknown-vs-empty; actor substitution security gate; no false reward; private SEO; Android/a11y; rollback.
+- Backlog: ENV1230-01 SEC1230-02 REL1230-03 QUEST1230-04 QUEST1230-05 QUEST1230-06 QUEST1230-07 QUEST1230-08 QUEST1230-09 QUEST1230-10 (P0 4/P1 6). Detailed EN/KO integrated master is authoritative for proposed design.
+- Release: DRAFT / HOLD. #1147 migration280 collision, #1088 auto-merge, migration266 mismatch, live DB shared/5433, app ACL, frontend 5 FAIL, root Critical2/High10, prod High2, bot Critical1/High5, missing exact-SHA official Test E2E and isolated restore. Feature OFF; no runtime, DB, WLD, Test or Production changes.
+- Independent external evidence: PostgreSQL/OWASP/W3C/IETF publisher families reviewed 4; newly approved 0; cumulative accepted UNKNOWN / 10,000, BLOCKED / IN PROGRESS. IETF Idempotency-Key remains an Internet-Draft.
+- GitHub PR/issue and final SHA: pending final log update.
