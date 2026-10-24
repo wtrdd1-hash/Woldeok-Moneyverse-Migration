@@ -172,7 +172,11 @@ export function SwfControlPanel({
 
   return (
     <div className="space-y-6">
-      {/* 1. 관리자 전용 국고 자금 안전 보존 및 투자 비율 정밀 조절 카드 */}
+      <p role="status" className="rounded-md border p-3 text-sm">
+        ASWF 자금 집행·회수·정책 변경은 금융 원장 정산 및 관리자 재인증 검증 전까지
+        일시 중단되어 있습니다. 조회만 가능합니다.
+      </p>
+            {/* 1. 관리자 전용 국고 자금 안전 보존 및 투자 비율 정밀 조절 카드 */}
       <Card className="border border-blue-500/30 bg-slate-900/95 text-white shadow-xl relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500" />
         <CardHeader className="pb-4 border-b border-slate-800">
@@ -196,7 +200,7 @@ export function SwfControlPanel({
             <Button
               size="sm"
               onClick={handleSaveGovernanceConfig}
-              disabled={savingConfig}
+              disabled={true}
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md active:scale-95 transition-all shrink-0 w-full sm:w-auto"
             >
               {savingConfig ? '저장 중...' : '💾 정책 설정 저장'}
@@ -383,7 +387,7 @@ export function SwfControlPanel({
               <Button
                 size="sm"
                 onClick={handleLiquidateToTreasury}
-                disabled={liquidating}
+                disabled={true}
                 className="bg-emerald-700 hover:bg-emerald-600 text-white font-semibold shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto"
               >
                 {liquidating ? '회수 환원 진행 중...' : '🏦 주식 자금 즉시 회수 (현금 85% 정상화)'}
@@ -391,7 +395,7 @@ export function SwfControlPanel({
               <Button
                 size="sm"
                 onClick={handleTriggerRebalance}
-                disabled={rebalancing}
+                disabled={true}
                 className="bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-md active:scale-95 transition-all w-full sm:w-auto"
               >
                 {rebalancing ? '성장 평가 및 집행 중...' : '⚡ 즉시 복리 성장 트리거'}

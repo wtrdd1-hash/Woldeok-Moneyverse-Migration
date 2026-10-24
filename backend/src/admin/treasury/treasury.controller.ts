@@ -4,6 +4,7 @@ import {
   Get,
   Post,
   Put,
+  ServiceUnavailableException,
   Query,
   Req,
   UseGuards,
@@ -371,31 +372,26 @@ export class AdminTreasuryController {
     return { config, portfolios, events };
   }
 
+  // Release HOLD: the current SWF service mutates treasury vault and portfolio
+  // tables without a verified double-entry ledger receipt. Do not forward any
+  // administrator HTTP write until finance settlement and step-up gates pass.
   @Post('swf/rebalance')
-  @ApiOperation({ summary: '자율 국부펀드(ASWF) 잉여 세수 시장 재순환 즉시 집행' })
+  @ApiOperation({ summary: 'ASWF rebalance temporarily unavailable pending ledger certification' })
   async triggerSwfRebalance() {
-    if (!this.swfService) {
-      return { executed: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
-    }
-    return this.swfService.evaluateAndRebalance();
+    throw new ServiceUnavailableException('SWF_FINANCIAL_SETTLEMENT_NOT_VERIFIED');
   }
 
   @Post('swf/liquidate')
-  @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
-  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') targetPortfolioAumWld?: string) {
-    if (!this.swfService) {
-      return { success: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
-    }
-    return this.swfService.liquidateToTreasuryVault(targetPortfolioAumWld);
+  @ApiOperation({ summary: 'ASWF liquidation temporarily unavailable pending ledger certification' })
+  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') _targetPortfolioAumWld?: string) {
+    throw new ServiceUnavailableException('SWF_FINANCIAL_SETTLEMENT_NOT_VERIFIED');
   }
 
   @Put('swf/config')
-  @ApiOperation({ summary: '자율 국부펀드(ASWF) 안전 준비금 및 투자 한도 튜닝' })
-  async updateSwfConfig(@Body() body: Record<string, unknown>) {
-    if (!this.swfService) {
-      return { success: false };
-    }
-    return this.swfService.updateConfig(body);
+  @ApiOperation({ summary: 'ASWF governance writes temporarily unavailable pending ledger certification' })
+  async updateSwfConfig(@Body() _body: Record<string, unknown>) {
+    throw new ServiceUnavailableException('SWF_FINANCIAL_SETTLEMENT_NOT_VERIFIED');
   }
+
 }
 
