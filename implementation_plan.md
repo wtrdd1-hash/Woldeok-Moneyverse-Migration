@@ -3481,3 +3481,34 @@ flowchart LR
 - TypeScript 컴파일: 0 에러 (`tsc --noEmit` 통과)
 - 단위 테스트: Vitest 5개 스위트 38개 테스트 100% 통과
 - 운영 배포: 미니 PC (`127.0.0.1:3354`) 서비스 재기동 및 curl 실측 완료
+
+### 3. 최종 구현 및 프로덕션 검증 결과
+1. **상점 모달 뷰포트 격리 및 안전장치 완비**:
+   - `frontend/src/app/shop/shop-store-view.tsx`: `createPortal(modal, document.body)`를 적용하여 부모 컨테이너의 `overflow-hidden` 및 스크롤 컨텍스트로부터 100% 분리.
+   - 배경(Backdrop) 클릭 및 `Escape` 키 입력 시 즉각 닫히는 이벤트 핸들러 및 우상단 `✕` 닫기 버튼 추가.
+   - 기존의 실패하던 브라우저 직접 fetch(`/api/v1/...`)를 `buyCatalogItemDirect` Server Action으로 완전 대체하여 CSRF 토큰 및 세션 쿠키 정상 전송.
+2. **Next.js Turbopack `use server` 규격 준수**:
+   - `export const VIP_PASS_CATALOG_ID` 상수를 `shop-constants.ts`로 분리하여 `Only async functions are allowed to be exported in a "use server" file` 에러 원천 차단.
+3. **Moneyverse Plus VIP 멤버십 지속성 연동**:
+   - `shop_catalog`의 `item_vip_lounge_pass` 기본 가격을 `10,000 WLD`로 동기화.
+   - `shop-membership-section.tsx` 클라이언트 래퍼 신설: `subscribePlusMembership` (10,000 WLD 소각 및 30일 패스 발급) 및 `cancelPlusMembership` 연동.
+   - `shop/page.tsx`에서 사용자의 실제 패스 보유 수량(`user_owned_quantity > 0`)을 기반으로 `isPlusMember`를 계산하여 주입. 새로고침이나 탭 이동 후에도 VIP 상태가 영구 보존됨.
+   - `membership-tier-card.tsx`에 `useEffect` 동기화 훅 추가.
+4. **품질 검증 통과 내역**:
+   - TypeScript 컴파일: 0 에러 (`tsc --noEmit` 통과)
+   - Vitest 단위 테스트: 17개 테스트 100% 통과 (`shop-modal-membership.test.ts`, `i18n-full-coverage.test.ts`, `seo-sitemap-integrity.test.ts`)
+   - Next.js Turbopack 프로덕션 빌드: 593개 정적/동적 라우트 컴파일 100% 성공
+   - 운영 서버 배포 및 실측:
+     - `/` (홈): 200 OK (45ms)
+     - `/shop` (상점): 200 OK (49ms, 619KB)
+     - `/stocks` (주식): 200 OK (61ms)
+     - `/bank` (은행): 307 OK (보안 리다이렉트)
+     - `/arcade` (아케이드): 200 OK (37ms)
+     - `/quests` (퀘스트): 200 OK (32ms)
+     - `/tools` (금융 도구): 200 OK (52ms)
+     - `/tools/compound-calculator` (복리 계산기): 200 OK (62ms)
+     - `/roadmap` (로드맵): 200 OK (30ms)
+     - `/bonds` (채권): 200 OK (49ms)
+     - `/pension` (연금): 200 OK (109ms)
+     - `/terms` (약관): 200 OK (33ms)
+     - `/privacy` (개인정보): 200 OK (43ms)
