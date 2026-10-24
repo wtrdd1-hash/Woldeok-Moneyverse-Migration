@@ -165,7 +165,18 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    return [
+      { source: '/:path*', headers: security },
+      // The auction page includes authenticated live state alongside a public preview.
+      // Override the permissive site-wide indexing header on this exact route.
+      {
+        source: '/marketplace/auction',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
+    ];
   },
 
   async redirects() {

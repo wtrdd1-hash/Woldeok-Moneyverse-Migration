@@ -106,6 +106,16 @@ describe('security headers', () => {
     expect(csp.get('form-action')).toBe("'self'");
   });
 
+  it('forces auction preview HTTP noindex and private caching even when public SEO is enabled', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const auction = groups.find((group) => group.source === '/marketplace/auction');
+    expect(auction).toBeDefined();
+    const headers = new Map(auction!.headers.map((header) => [header.key, header.value]));
+    expect(headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(headers.get('cache-control')).toBe('private, no-store');
+  });
+
   it('refuses indexing unless the environment asks for it', async () => {
     process.env.SEO_INDEXING_ENABLED = 'false';
     expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe('noindex, nofollow');
