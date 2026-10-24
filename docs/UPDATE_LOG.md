@@ -1,3 +1,6 @@
+## 2026-10-25 — C v1030 verified season standing/archive (DRAFT / RELEASE HOLD)
+- P1: removed fake season XP, milestone claims, invented honorees and burn totals; wired authenticated NestJS `currentSeason` and `hallOfFame` read contracts. Member-only noindex, responsive disclosure, settled-only final claim banner. Focused tests 7 PASS, typecheck/lint PASS; full frontend 6 FAIL and dependency audits FAIL. No merge/Production. See `docs/worklog/2026-10-25-hourly-c-v1030.md`.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)

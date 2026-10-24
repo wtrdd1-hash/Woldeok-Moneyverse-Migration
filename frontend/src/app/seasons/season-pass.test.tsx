@@ -1,25 +1,25 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { SeasonPassTrack, SEASON_1_MILESTONES } from './season-pass-track';
+import { describe, expect, it } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { SeasonPassTrack } from './season-pass-track';
 
-describe('SeasonPassTrack Component', () => {
-  it('시즌 패스 50레벨 로드맵 및 티어 정보가 정상 렌더링된다', () => {
-    render(<SeasonPassTrack userXp={18500} initialClaimedLevels={[1, 5, 10, 15]} />);
-
-    expect(screen.getByText('시즌 1 패스 & 마일스톤 로드맵')).toBeDefined();
-    // 18,500 XP => Level 19
-    expect(screen.getByText('현재 티어: Level 19')).toBeDefined();
-    expect(screen.getByText('시즌 1 완료 황금 트로피', { exact: false })).toBeDefined();
+describe('Verified season pass', () => {
+  it('does not invent XP, claimed levels, or successful reward receipts when unavailable', () => {
+    render(<SeasonPassTrack currentSeason={null} />);
+    expect(screen.getByText(/시즌 진행 정보를 확인할 수 없습니다/)).toBeDefined();
+    expect(screen.queryByText(/18,500|수령 완료|수령 가능 보상 전체 받기/)).toBeNull();
+    expect(screen.queryByRole('button', { name: /보상 받기|수령/ })).toBeNull();
   });
 
-  it('수령 가능한 보상이 있을 때 전체 수령(Claim All) 버튼이 활성화되고 클릭 시 일괄 수령된다', () => {
-    // Level 19인데 1, 5만 수령된 상태면 10, 15 수령 가능
-    render(<SeasonPassTrack userXp={18500} initialClaimedLevels={[1, 5]} />);
-
-    const claimAllBtn = screen.getByText(/수령 가능 보상 전체 받기/);
-    expect(claimAllBtn).toBeDefined();
-
-    fireEvent.click(claimAllBtn);
-    expect(screen.getByText(/한 번에 모두 수령했습니다/)).toBeDefined();
+  it('displays only the member-scoped score, tier and rank returned by the server', () => {
+    render(<SeasonPassTrack currentSeason={{
+      seasonId: 'season-1', seasonName: '2026 가을', myScore: 250,
+      myTier: 'BRONZE', myRank: 3, lifecycleState: 'active', tierRewardWld: 100, tierTrophy: null,
+    }} />);
+    expect(screen.getByText('2026 가을')).toBeDefined();
+    expect(screen.getByText(/250점/)).toBeDefined();
+    expect(screen.getByText(/BRONZE/)).toBeDefined();
+    expect(screen.getByText(/3위/)).toBeDefined();
+    expect(screen.getByText(/마일스톤 보상은 현재 미리보기/)).toBeDefined();
+    expect(screen.queryByRole('button', { name: /보상 받기|수령/ })).toBeNull();
   });
 });

@@ -16,16 +16,16 @@
 - Responsive layout, keyboard/screen reader semantics, member-only noindex.
 
 ## Task 1 — RED/GREEN verified pass
-- [ ] Write a failing component regression proving the default 18,500 XP and fake claim completion are absent.
-- [ ] Replace fake claim UI with server-provided score/tier/rank and explicitly nonredeemable roadmap.
-- [ ] Run targeted tests and inspect failure/success.
+- [x] Write a failing component regression proving the default 18,500 XP and fake claim completion are absent.
+- [x] Replace fake claim UI with server-provided score/tier/rank and explicitly nonredeemable roadmap.
+- [x] Run targeted tests and inspect failure/success.
 
 ## Task 2 — RED/GREEN verified archive
-- [ ] Write a failing regression requiring actual honorees or honest empty/unavailable states.
-- [ ] Replace static fabricated hall of fame with actual `hallOfFame` response and accessible disclosure.
-- [ ] Wire both server responses through `/seasons` page and assert wrapper contract.
+- [x] Write a failing regression requiring actual honorees or honest empty/unavailable states.
+- [x] Replace static fabricated hall of fame with actual `hallOfFame` response and accessible disclosure.
+- [x] Wire both server responses through `/seasons` page and assert wrapper contract.
 
 ## Task 3 — Verification and release decision
-- [ ] Re-fetch main and review A/B/QA overlap.
+- [x] Re-fetch main and review A/B/QA overlap.
 - [ ] Run targeted, lint, typecheck, build, frontend/backend/DB/contract/security/app-api/CI where safe.
 - [ ] Record exact SHA, Test/Production status, blockers, and preserve branch when gates fail.

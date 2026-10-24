@@ -13,6 +13,7 @@ import { EnterButton } from './enter-button';
 import { SeasonHallOfFameTicker } from './hall-of-fame-ticker';
 import { SeasonRewardClaimBanner } from './season-reward-claim-banner';
 import { SeasonPassTrack } from './season-pass-track';
+import { parseCurrentSeason, parseHallOfFame } from './season-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,19 +33,6 @@ interface SeasonEvent {
   readonly ends_at: string | null;
 }
 
-interface CurrentSeasonStatus {
-  readonly seasonId: string;
-  readonly seasonName: string;
-  readonly startsAt: unknown;
-  readonly endsAt: unknown;
-  readonly lifecycleState: string;
-  readonly totalParticipants: number;
-  readonly myRank: number | null;
-  readonly myScore: number;
-  readonly myTier: string;
-  readonly tierRewardWld: number;
-  readonly tierTrophy: string | null;
-}
 
 interface LeaderboardEntry {
   readonly rank: number;
@@ -90,11 +78,14 @@ export default async function SeasonsPage({
   await requireMember();
   const { event: requested } = await searchParams;
 
-  const [data, currentStatus] = await Promise.all([
+  const [data, currentResponse, archiveResponse] = await Promise.all([
     apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
-    apiOrNull<CurrentSeasonStatus>('/api/v1/seasons/current'),
+    apiOrNull<unknown>('/api/v1/seasons/current'),
+    apiOrNull<unknown>('/api/v1/seasons/hall-of-fame'),
   ]);
 
+  const currentStatus = parseCurrentSeason(currentResponse);
+  const archivedSeasons = parseHallOfFame(archiveResponse);
   const events = data?.events ?? [];
   const selected = events.find((event) => event.event_id === requested) ?? events[0];
   const board = selected
@@ -110,7 +101,7 @@ export default async function SeasonsPage({
       </PageHeader>
 
       {/* 시즌 랭킹 최종 보상 수령 배너 (정산된 보상이 있는 경우 상단 노출) */}
-      {currentStatus && (
+      {currentStatus?.lifecycleState === 'closed' && (
         <SeasonRewardClaimBanner
           seasonId={currentStatus.seasonId}
           seasonName={currentStatus.seasonName}
@@ -122,10 +113,10 @@ export default async function SeasonsPage({
       )}
 
       {/* 시즌 1: First Capital 명예의 전당 티커 & 아카이브 */}
-      <SeasonHallOfFameTicker />
+      <SeasonHallOfFameTicker seasons={archivedSeasons} />
 
       {/* 시즌 1 패스 50레벨 로드맵 & 마일스톤 보상 트랙 */}
-      <SeasonPassTrack />
+      <SeasonPassTrack currentSeason={currentStatus} />
 
       <section aria-labelledby="events-title" className="grid gap-4">
         <h2 id="events-title" className="text-xl font-bold flex items-center gap-2">
