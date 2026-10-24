@@ -1,5 +1,11 @@
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
+## 2026-10-24 v1212 — F675-110 private board drafts and cross-device continuation (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1210 / Current Addition v1212 / Next Improvement v1214 provisional. Main 5072d43e at start/mid, QA v1217 FAILED/HOLD; prior #1094 CLOSED UNMERGED, independent latest-main branch. Source `board-forms.tsx` unsaved React body and Preview unmounted body input; `stock-actions.ts` publishes immediately, no draft API/table found. Drafted owner-only 20-item/30-day private text autosave and explicit receipt, atomic board/stock publish, Android, admin aggregates, WCAG, SEO, abuse protection and rollback.
+- P0 ENV1212-01 SEC1212-02 REL1212-03 BOARD1212-04; P1 BOARD1212-05 BOARD1212-06 BOARD1212-07 BOARD1212-08 BOARD1212-09 BOARD1212-10. Full specification in integrated EN/KO; docs-only, no DB/runtime/WLD/Test/Production/flag changes. QA security/CI/isolated exact-SHA Test/backup and release still HOLD.
+- Independent references OWASP HTML5 Security, MDN Page Visibility/beforeunload, PostgreSQL INSERT/ON CONFLICT (3 publishers reviewed); newly approved 0, cumulative deduplicated UNKNOWN / 10,000 = BLOCKED.
+
+
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - Previous Addition v1208 / Current Improvement v1210 / Next Addition v1212 provisional. Main 54d5140d unchanged start/mid; QA v1213 FAILED/HOLD; predecessor #1087 unmerged. Fix proposed RESTRICT FK, unavailable-saved REMOVE, actual `#comments-title`, transaction lock order, original digest receipts, owner HMAC cursor, account switch and 500-vs-10,001 isolated fixture. P0 ENV1210-01 SEC1210-02 REL1210-03 BOARD1210-04; P1 BOARD1210-05 BOARD1210-06 BOARD1210-07 BOARD1210-08 BOARD1210-09 BOARD1210-10. New P0 #1088: candidate image build alone must not authorize merge without actual exact-SHA Test/authenticated finance E2E. Full EN/KO integrated design; no runtime or deployment.
 - External publishers 3 reviewed; newly approved 0, cumulative UNKNOWN / 10,000 BLOCKED. Shared DB/5433, broad DML, migration266, audits, Test, restore and disk 93% remain HOLD.

@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1212 — F675-110 비공개 게시글 임시저장함·기기간 이어쓰기 (기능 추가 초안 / 운영 보류)
+- 회차: 이전 **기능 보완 v1210**, 현재 **기능 추가 v1212**, 다음 **기능 보완 v1214(잠정)**. 시작·중간 최신 main `5072d43e43dd93191d1c738c31c94ef1c1a5319d`, 완료 QA v1217 FAILED/HOLD. 이전 v1210 PR #1094는 **미병합 종료**이므로 제안 기능을 운영 반영으로 간주하지 않는다. 새 기획 브랜치는 최신 main에서 독립 분기, Runtime/DB/WLD/Test/Production 변경 없음.
+- 소스 공백: `frontend/src/app/board/board-forms.tsx`는 본문을 React 상태에만 보유하고 미리보기 시 `name=body` 필드를 언마운트하여 제출 누락 가능성이 있다. `stock-actions.ts`는 즉시 게시하며 main에서 임시저장 API/테이블은 확인되지 않았다. F675-110은 로그인 회원 본인만의 텍스트 임시글, 선택형 서버 자동저장, 저장/재시도/충돌/게시 영수증, 기기간 이어쓰기, 게시 시 사진 재선택을 기획한다. 입력 추적·WLD 이동 없음.
+- P0: **ENV1212-01** 운영/개발 DB·5433 격리, **SEC1212-02** 앱 직접 DML/PUBLIC 은행 함수 최소권한, **REL1212-03** QA 보안/Migration266/정확 SHA Test/자동 병합 #1088, **BOARD1212-04** 비공개 소유권·원자적 게시·미리보기 본문 회귀. P1: **BOARD1212-05** DB/CAS/영수증, **BOARD1212-06** Nest/BFF/Android API, **BOARD1212-07** 접근성 작성/목록, **BOARD1212-08** 원자적 게시, **BOARD1212-09** 관리자 집계/개인정보/SEO/WCAG/KPI, **BOARD1212-10** 동시성·격리 배포/롤백.
+- API `/api/v1/board/drafts` POST/GET, `/:id` GET/PATCH/DELETE, `/:id/publish` POST, 401/404/409/410/413/429, 세션 회원 소유권·CSRF·멱등 키. DB 초안/불변 영수증, 회원+작업+키 UNIQUE, 버전 CAS, 활성 20개, 30일 만료, 본인/수정일 인덱스, 고정 search_path SECURITY DEFINER, 앱 직접 DML 금지. 기존 게시판·주식 게시 함수로 게시와 초안 상태를 단일 트랜잭션에서 확정하며 중복 게시·WLD 변경 없음. 비공개 no-store/noindex, Android·WCAG 2.2 AA. 상세 화면/API/DB/트랜잭션/관리자/보안/분석/SEO/회귀/롤백은 [한국어 통합문서](INTEGRATED_PLANNING_MASTER.ko.md) 참조.
+- 수용: 동일 키 100건 저장→영수증 1개, 동시 게시 100건→게시글 1개, 타인 접근 100건→노출 0, 격리 합성 10,001건 페이지네이션, 미리보기 본문 유지, 오프라인 저장 완료 오표시 금지. 기능 기본 OFF; 정확 SHA 공식 Test·인증 금융 E2E·격리 PG 권한/복원·보안·승인·GitOps 없이는 병합/운영승격 금지. 외부 OWASP/MDN/PostgreSQL 3개 발행기관 계열 검토, 신규 승인 0건, 누적 중복 제거 승인 **미확인/10,000 → BLOCKED / IN PROGRESS**.
+
+
 ## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
 - 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.

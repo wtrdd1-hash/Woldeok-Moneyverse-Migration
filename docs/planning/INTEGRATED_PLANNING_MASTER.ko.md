@@ -1,5 +1,42 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1212 — F675-110 회원 전용 게시글 임시저장함·기기간 이어쓰기 (기능 추가 / 초안 / 운영 보류)
+
+### 회차·근거·목표
+- 이전 **기능 보완 v1210**, 현재 **기능 추가 v1212**, 다음 **기능 보완 v1214(잠정)**. 시작·중간 최신 main `5072d43e43dd93191d1c738c31c94ef1c1a5319d`, 최신 완료 QA v1217(09:48 KST) **FAILED/HOLD**. 과거 기획 PR #1094는 **미병합 종료** 상태이므로 기존 제안이 운영에 반영됐다고 보지 않는다. 새 브랜치는 최신 main에서 독립 분기한다.
+- 실제 `frontend/src/app/board/board-forms.tsx`는 본문을 React 메모리에만 유지해 새로고침 시 사라지며, 미리보기로 전환하면 `name=body` 텍스트 영역이 언마운트되어 미리보기 상태의 제출에서 필수 본문이 누락될 수 있다. `stock-actions.ts`는 `/api/v1/board/posts` 또는 `/api/v1/board/stock-posts`로 즉시 공개 게시한다. `044-member-board.sql`은 공개 게시글용이며 확인한 main에는 `member_board_drafts` 테이블/함수가 없다. **소스 수준의 설계 공백**이지 운영 장애 발생 확정이 아니다.
+- 목적: 로그인 회원이 작성 중인 **비공개** 게시글을 안전하게 저장하고 기기간 이어서 작성한다. 대상: 활성 회원·게시판 약관 동의자. 비회원 동기화, 자동 게시, 입력 행동 추적, 광고 타기팅, WLD 이동은 제외한다. 댓글·정적 다국어 블로그·기존 F675-109 읽기 목록·이미지 원본 임시저장은 범위 밖이다.
+
+### 화면·CTA·상태·사용자 흐름
+- 진입: `/board`의 **임시저장/내 임시글**, `/account/board-drafts` 목록, `/account/board-drafts/[draftId]` 편집. 모든 비공개 화면은 세션 필수·`noindex,nofollow`·`private,no-store`. 공개 `/board`의 SEO는 유지하고 임시글은 사이트맵/OG/검색/알림에 노출하지 않는다.
+- 필드: 제목 120자, 본문 5,000자, 선택적 종목코드 16자·분류·관점·보유 관계·이미지 대체 텍스트. 미완성 초안은 허용하지만 **게시 시에는 기존 게시판/주식 게시글 검증과 동의 정책을 재적용**한다. 미리보기 중에도 `body` 폼 필드를 유지해 제출 누락을 막는다.
+- 상태: **미저장 → 저장 중 → [시간] 저장됨 → 저장 실패/재시도 → 충돌**; 보조기술에 상태를 안내한다. 명시적 **임시저장**과 선택형 2초 디바운스 자동저장(활성 탭 30초 이내 재시도). 서버 확정 영수증 전에는 '저장됨' 표시 금지. `visibilitychange`는 최선의 추가 저장이며 종료 시 저장 보장으로 오인시키지 않는다.
+- 브라우저 `localStorage/IndexedDB`에 평문을 기본 저장하지 않는다. 오프라인에서는 현재 탭 메모리에만 보존하고 사용자가 선택하면 직접 복사할 수 있게 한다. 확인 전 창을 닫으면 손실 가능성을 고지한다. 로그아웃·계정 변경 시 메모리 및 늦게 도착한 응답을 무효화한다.
+- 목록: 최근 수정순, 회원당 활성 초안 20개, 서명 커서, **이어쓰기·삭제·게시** 버튼, 삭제 확인. 최종 확정 저장 30일 후 만료, 삭제 묘비/멱등 영수증 7일 보존(법무·개인정보 정책 검토 필요). 만료된 본인 초안은 민감 정보 없이 410과 안내 제공.
+- 이미지: v1 초안에 사진 바이너리나 내부 저장키를 보관하지 않는다. 게시 시 사진을 다시 선택하고 기존 유형·크기·악성코드·소유권 검증을 통과해야 한다. 실패 업로드는 정리한다.
+
+### API·DB·권한·트랜잭션
+- 회원 전용 NestJS `/api/v1/board/drafts`, Next BFF 및 Android `/app-api/v1/board/drafts` 동등 계약: `POST /` 생성, `GET /` 목록, `GET /:id` 상세, `PATCH /:id` 버전 저장, `DELETE /:id` 삭제, `POST /:id/publish` 게시. 영수증 `{draftId,version,updatedAt,status,requestId}`; 게시 성공에만 `postId` 추가. 세션에서 회원 식별, CSRF, UUID 멱등 키, `If-Match` 버전. 401 비로그인, 404 타인/부재 동일 응답, 409 버전 충돌·키 재사용 불일치, 410 본인 만료, 413 초과, 429 속도 제한.
+- 향후 **격리 Test에서만** 검증할 순방향 마이그레이션: `member_board_drafts(id PK uuid,owner_user_id FK users,title,body,stock_symbol,category,stance,position_disclosure,image_alt_text,version bigint>0,status DRAFT/PUBLISHED/DELETED/EXPIRED,created_at,updated_at,expires_at,published_post_id FK posts SET NULL,deleted_at)`; `member_board_draft_receipts(id,owner_user_id,draft_id,operation,idempotency_key,request_digest,response_json,created_at,UNIQUE(owner_user_id,operation,idempotency_key))`. 제목 120/본문 5000 제한·허용 값 검사, `(owner_user_id,updated_at DESC,id DESC) WHERE status='DRAFT'`, 만료·영수증 정리 인덱스. 앱 계정에 직접 DML 부여 금지, 고정 search_path의 SECURITY DEFINER 함수로 소유권 검사.
+- 저장은 회원 단위 직렬화로 20개 한도 보장, 초안 행 `FOR UPDATE`, `WHERE version=expected` CAS, 요청 지문 및 영수증을 **동일 트랜잭션**에서 확정한다. 동일 키+본문이면 최초 영수증 재전달, 동일 키+다른 본문이면 409. 게시 또한 **단일 DB 트랜잭션**에서 활성 회원·동의·종목/보유 관계 검증 → 기존 게시글 생성 함수 호출(안정적 게시 멱등 키) → 초안 PUBLISHED 및 postId/영수증 확정; 오류면 모두 롤백. 동시 게시 100건에서도 공개 게시글 1건. 오래된 자동저장은 게시 완료 초안을 재활성화하지 못한다. WLD·원장 변경 없음.
+- 보안·관리: 초안 본문/제목/보유 관계는 로그·분석에 저장 금지. 모든 조회·수정에 회원 소유권·CSRF·Origin·입력 제한·XSS 안전 미리보기·공유 캐시 차단, 회원당 분당 6회 저장(자동저장에는 별도 예산과 백오프), 남용 탐지. 관리자는 **익명 집계 건수·만료 큐·실패율**만 확인하며 본문 열람·수정은 기본 불가. 예외적 법적 접근은 별도 심사와 감사가 필요하다.
+- 모바일·접근성: Android 동일 세션/쿠키·API 계약, 저장/재시도/충돌/게시 상태, 320px·200% 확대·키보드/스크린리더·포커스 복구·WCAG 2.2 AA, 운영체제 움직임 감소 우선. KPI는 개인 내용 없이 저장 성공률 >=99.9%(정상 Test), p95 <800ms(합성 부하), 중복 게시 0, 타 회원 접근 0, 만료 처리 지연 <1h, 집계 전환율.
+
+### P0/P1 백로그·검증·배포
+- **P0 ENV1212-01** 운영 연결 `woldeok_moneyverse_dev`와 개발 DB 격리, 5433 접근 통제, 격리 복원 검증.
+- **P0 SEC1212-02** 앱 계정 광범위 DML·PUBLIC 은행 함수 EXECUTE 최소권한 단계적 제거 및 회귀.
+- **P0 REL1212-03** QA 보안/CI/Migration 266 및 자동 병합 위험 #1088 해결, 정확 SHA 공식 Test·인증 금융 E2E·격리 PG ACL·백업 복원·승인·GitOps 증거 전 병합/승격 금지.
+- **P0 BOARD1212-04** 회원 소유권·비공개 위협 모델, 원자적 게시, 미리보기 `body` 누락 재현 및 차단.
+- **P1 BOARD1212-05** 신규 DB/함수·제약·인덱스·CAS·멱등 영수증과 격리 PG 테스트.
+- **P1 BOARD1212-06** Nest/BFF/Android API·DTO·CSRF·속도 제한·로그아웃 응답 차단.
+- **P1 BOARD1212-07** 웹 작성/목록·저장/재시도/충돌/미리보기/게시·사진 재선택 UX.
+- **P1 BOARD1212-08** 기존 게시판·주식 토론 함수 재사용 원자적 게시, 중복/삭제/동의 경합.
+- **P1 BOARD1212-09** 관리자 익명 집계·만료/보존·SEO·WCAG·모바일·개인정보·KPI.
+- **P1 BOARD1212-10** 동시성·회귀·무중단 배포·롤백: 기본 OFF, 승인된 Test 후 1%→10%→100% 단계, 타인 열람/중복 게시/확정 저장 손실/마이그레이션 드리프트/금융 불균형 발견 시 즉시 중단. 롤백은 UI/쓰기 비활성화, 데이터·순방향 스키마 보존.
+- 수용 조건: 동일 키 100회 동시 저장→영수증 1개; 100회 동시 게시→게시글 1개; 타인 접근 100회→노출 0; 격리 합성 초안 10,001개 커서 누락/중복 0(운영 한도 20개 유지); 미리보기 제출 본문 보존; 오프라인 미확정 저장 표시 금지; 계정 변경 누출 0; 320px/200%/스크린리더 검증; WLD 변경 0.
+- 독립 참고 발행기관: OWASP HTML5 Security, MDN Page Visibility/beforeunload, PostgreSQL INSERT/ON CONFLICT **3계열 검토**. 신규 중복 제거 승인 **0건**, 누적 검증 수 **미확인 / 10,000**, 게이트 **BLOCKED / IN PROGRESS**. 이번 회차는 기획 문서만 수정, Runtime/DB/WLD/Test/Production/스위치 변경 없음.
+
+
 ## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스와 수정 사유
