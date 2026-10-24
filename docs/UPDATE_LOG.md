@@ -1,3 +1,6 @@
+## 2026-10-24 — C v1004 Verified Notification Preference (DRAFT / RELEASE HOLD)
+- Next server action validates PostgreSQL-backed engagement preference receipt; member UI independently re-reads server state, fails closed on malformed responses, and no longer claims success from `saved=1` URL alone. Keyboard/ARIA/320–1280px SSR browser checks. 17 focused/integration PASS; build/typecheck/lint PASS; full frontend 5 FAIL, bot 1 FAIL, prod audit 2 HIGH, exact-SHA authenticated Test BLOCKED. No main merge or Production changes. See `docs/worklog/2026-10-24-hourly-c-v1004.md`.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)

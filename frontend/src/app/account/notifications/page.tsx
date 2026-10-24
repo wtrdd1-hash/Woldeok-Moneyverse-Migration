@@ -9,6 +9,7 @@ import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { saveGoalNotifications } from './actions';
 import { NotificationTabsBar } from './notification-tabs-bar';
+import { verifiedNotificationPreference } from './notification-preference';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '알림 설정', robots: { index: false, follow: false } };
@@ -16,11 +17,16 @@ export const metadata: Metadata = { title: '알림 설정', robots: { index: fal
 export default async function NotificationSettingsPage({ searchParams }: { readonly searchParams: Promise<Record<string,string|string[]|undefined>> }) {
   await requireMember();
   const params = await searchParams;
-  const board = await apiOrNull<{ notifications_enabled: boolean }>('/api/v1/engagement');
-  const enabled = board?.notifications_enabled === true;
+  const board = await apiOrNull<unknown>('/api/v1/engagement');
+  const preference = verifiedNotificationPreference(board);
+  const enabled = preference === true;
+  const requested = params.requested === 'on' ? true : params.requested === 'off' ? false : null;
+  const confirmedByRead = requested !== null && preference !== null && requested === preference;
+  const mismatchedRead = requested !== null && preference !== null && requested !== preference;
   return <div data-page="account-notifications" className="mv-page mv-page--member grid gap-6">
     <PageHeader eyebrow="ACCOUNT · NOTIFICATIONS" title="알림 센터 & 설정">중요한 비즈니스 수급, 금융 이자, 목표와 소식을 확인하고 수신 여부를 직접 정할 수 있습니다.</PageHeader>
-    {params.saved === '1' ? <Alert><CheckCircle2 className="size-4"/><AlertDescription>알림 설정을 저장했습니다. 퀘스트 화면에도 바로 적용됩니다.</AlertDescription></Alert> : null}
+    {confirmedByRead ? <Alert role="status"><CheckCircle2 className="size-4" aria-hidden="true"/><AlertDescription>서버에서 확인한 현재 설정: {enabled ? '알림 받는 중' : '알림 꺼짐'}. 퀘스트에도 이 설정이 적용됩니다.</AlertDescription></Alert> : null}
+    {mismatchedRead ? <Alert role="alert" variant="destructive"><AlertDescription>요청한 설정과 서버에서 확인한 현재 상태가 다릅니다. 새로고침 후 다시 시도해 주세요.</AlertDescription></Alert> : null}
     {params.error ? <Alert variant="destructive"><AlertDescription>알림 설정을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.</AlertDescription></Alert> : null}
 
     {/* 7대 카테고리 알림 탭 바 & 전체 읽음 처리 */}
@@ -33,7 +39,7 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
           <div><CardTitle>게임 진행 알림</CardTitle><CardDescription className="mt-1">목표 달성 기회와 NPC 주문 변화를 놓치지 않도록 알려드립니다.</CardDescription></div>
         </CardHeader>
         <CardContent className="grid gap-5 pt-6">
-          {board === null ? <Alert variant="destructive"><AlertDescription>현재 설정을 불러오지 못했습니다. 설정을 바꾸지 않았으니 잠시 후 다시 확인해 주세요.</AlertDescription></Alert> : <>
+          {preference === null ? <Alert role="alert" variant="destructive"><AlertDescription>서버에서 현재 설정을 확인할 수 없어 변경을 잠시 중단했습니다. 저장 요청의 결과가 불확실할 수 있으니 잠시 후 다시 확인해 주세요.</AlertDescription></Alert> : <>
             <div className="flex items-start gap-3 rounded-xl border p-4"><Goal className="mt-0.5 size-5 shrink-0" aria-hidden="true"/><div><p className="font-medium">목표·NPC 주문</p><p className="mt-1 text-sm text-muted-foreground">현재 상태: <strong className="text-foreground">{enabled ? '알림 받는 중' : '알림 꺼짐'}</strong></p></div></div>
             <form action={saveGoalNotifications} className="grid gap-3 sm:grid-cols-2" aria-label="목표 및 NPC 주문 알림 설정">
               <Button name="notificationsEnabled" value="true" type="submit" aria-pressed={enabled} variant={enabled ? 'default' : 'outline'} className="min-h-12 w-full">알림 받기</Button>
