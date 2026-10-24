@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1240 — F675-117 상점 재입고 관심 등록 (기능 추가 / 초안 / 배포 보류)
+- 회차: 이전 기능 보완 v1238 → 현재 기능 추가 v1240 → 다음 기능 보완 v1242(잠정). 최신 main c9a868b1e622341e2daa8b936ddf0988eda9988e 시작·중간 동일, v1238 #1189 미병합. QA v1243 FAILED/HOLD. A/B/C/Gemini/QA와 분리된 문서 작업.
+- 상점 화면·API·Migration 071/072/114/123 확인: 재고 권위는 shop_inventory.quantity, 구매는 재고 잠금·판매기간·한도를 재검증. 본인 재입고 관심 등록은 확인되지 않음. 회원당 유한 재고 0인 상품 최대 30개, /shop CTA·/account/shop-watches, 확정 0→양수 전환당 앱 내 알림 최대 1건. 예약·구매 보장·외부 메시지·WLD/원장 변동 없음.
+- 본인 전용 조회·등록·취소·영수증 API, UUID 멱등 키/해시·If-Match, 원자적 SECURITY DEFINER 관심·전환·알림 영수증, 본인 커서, 비식별 관리자, Android 동등성, noindex, WCAG 2.2 AA, 개인정보·동의, 100건 동시성·격리 합성 10,001건 커서 테스트, 기본 OFF·롤백. 전체 국영문 명세는 INTEGRATED_PLANNING_MASTER.
+- P0 ENV1240-01 SEC1240-02 REL1240-03 SHOP1240-04; P1 SHOP1240-05 SHOP1240-06 SHOP1240-07 SHOP1240-08 SHOP1240-09 SHOP1240-10. DB 공유·5433·앱 DML/PUBLIC 은행 권한·Migration 266/280·의존성 Critical2/High10·프론트 6건·봇 Critical1/High5·디스크 97%·정확 SHA Test·격리 복원 미해결. 런타임/DB/WLD/Test/운영 변경 없음.
+- 외부 독립 자료: PostgreSQL/OWASP/W3C 발행기관 3곳 검토, 신규 중복 제거·승인 0건, 누적 확인 불가/10,000건 = BLOCKED/IN PROGRESS.
+
+
 ## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
 - 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.

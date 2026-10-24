@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.25.1240 — F675-117 Verified Shop Restock Watch (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- Cycle Previous Improvement v1238 → Current Addition v1240 → Next Improvement v1242 provisional. Canonical main c9a868b1e622341e2daa8b936ddf0988eda9988e unchanged start/mid; v1238 #1189 unmerged. QA v1243 FAILED/HOLD. Docs-only, separate from A/B/C/Gemini/QA.
+- Inspected shop web/controller and migrations 071/072/114/123: catalogue exposes shop_inventory.quantity; purchase locks inventory and rechecks sale window/limits. No verified owner restock watch. Proposed 30 active finite-stock-zero watches/member, /shop CTA and /account/shop-watches, verified 0→positive transition and deduplicated in-app notification only; no reservation, purchase guarantee, external messaging or WLD/ledger change.
+- Owner-only GET/POST/DELETE/receipt API, UUID key+digest/If-Match, atomic SECURITY DEFINER watch/transition/notice receipts, actor-scoped cursor, admin aggregate, Android parity, SEO noindex, WCAG 2.2 AA, privacy/consent, 100-way concurrency, 10,001 isolated synthetic cursor test, flag OFF/rollback. Full English/Korean spec in INTEGRATED_PLANNING_MASTER.
+- P0 ENV1240-01 SEC1240-02 REL1240-03 SHOP1240-04; P1 SHOP1240-05 SHOP1240-06 SHOP1240-07 SHOP1240-08 SHOP1240-09 SHOP1240-10. Shared DB/5433, excessive app DML/PUBLIC bank EXECUTE, migration 266/280, audit Critical2/High10, frontend 6 failures, bot Critical1/High5, root disk 97%, official exact-SHA Test and restore BLOCKED. No runtime/DB/WLD/Test/Production changes.
+- External independent references: PostgreSQL/OWASP/W3C publisher families 3 reviewed; newly deduplicated/approved 0; cumulative verified UNKNOWN/10,000 = BLOCKED/IN PROGRESS.
+
+
 ## v2026.10.24.1210 — F675-109 Reading List Deletion/Cursor/Resume Hardening (PLANNING DRAFT / RELEASE HOLD)
 - Cycle: Previous Addition v1208; Current Improvement v1210; Next Addition v1212 provisional. Authoritative main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` unchanged start/mid; predecessor Draft #1087 unmerged. QA v1213 FAILED/HOLD; new P0 release gate #1088. Docs only.
 - Source: board public functions in migrations 175/259 only expose `deleted_at IS NULL` posts; post page's comments anchor is `#comments-title`. Fix v1208's proposed RESTRICT FK blocking authorized hard purge, allow redacted owner REMOVE of saved-but-unavailable post, lock actor→post FOR SHARE→saved row, immutable digest-bound receipts and tombstone re-save, owner/session-bound HMAC snapshot cursor, logout response fencing. Keep production 500 saved cap; 10,001-item pagination test only in isolated synthetic fixture.

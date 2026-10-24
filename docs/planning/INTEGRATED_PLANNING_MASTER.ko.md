@@ -1,5 +1,40 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1240 — F675-117 상점 재입고 관심 등록 및 검증된 앱 내 재고 알림 영수증 (기능 추가 / 초안 / 배포 보류)
+
+### 회차·근거·범위
+- 이전 **기능 보완 v1238**(미병합 Draft #1189), 현재 **기능 추가 v1240**, 다음 **기능 보완 v1242**(잠정). 시작 시 최신 main c9a868b1e622341e2daa8b936ddf0988eda9988e. Gemini·개발 A/B/C·QA 및 기존 후기 기획과 분리된 문서 전용 작업이다.
+- 확인한 구현: frontend/src/app/shop/page.tsx, shop-store-view.tsx, backend/src/shop/shop.controller.ts, shop.repository.ts, DB Migration 071/072/114/123. 실제 상점 조회는 shop_inventory.quantity(널 허용)를 제공하고 비활성·판매기간 외 상품은 제외한다. 구매 함수 shop_purchase_catalog는 상품·재고 행을 잠그고 재고, 구매한도, 판매기간을 재검증한다. 조사한 main에서 회원 재입고 관심 등록 API/테이블은 확인되지 않았다. 이는 **기획상 공백**이며 운영 장애 발생의 증거가 아니다.
+- 최신 QA v1243 **FAILED/HOLD**: 프론트엔드 전체 테스트 6건 실패/1,397건 통과, 의존성 감사 Critical 2/High 10, 디스코드 봇 Critical 1/High 5. DB 테스트 15건 통과/3건 건너뜀은 격리 실제 PostgreSQL 검증 완료가 아니다. 운영 연결 개발 DB 공유, PostgreSQL 5433 외부 바인딩, 앱 직접 DML 과다·PUBLIC 은행 함수 실행 권한, Migration 266 체크섬·280 중복, 정확 SHA 공식 Test 금융 E2E·격리 복원, 루트 디스크 97% 사용이 차단 조건이다.
+
+### 목적·대상·진입점·화면·상태
+- 로그인·동의 유효 회원이 **현재 노출되는 유한 재고 상품 중 실제 재고 0인 상품**을 직접 등록하고, DB에 확정된 **0→양수 재고 전환당 회원별 최대 1건**의 앱 내 알림을 받는 기능. 회원당 활성 관심 상품 **30개**. 예약·구매 보장·가격 고정·자동 결제·WLD/원장 이동·외부 푸시/이메일/SMS가 아니다. 재고 NULL은 무제한이지 품절이 아니다. 비활성·판매 전·판매 종료 상품의 신규 등록은 불허한다.
+- /shop 품절 카드 **재입고 알림 등록**, /account/shop-watches 본인 목록(페이지당 20개, 본인에 귀속된 불투명 스냅샷 커서). 비회원에게는 로그인 안내만 제공한다. CTA: 등록·알림 중단·관심 상품 보기·현재 재고 확인·상품 열기·알림 닫기. 상품이 목록에서 사라져도 기존 관심 등록은 메타데이터를 가린 채 본인이 취소할 수 있다.
+- 상태 LOADING, NOT_WATCHING, WATCHING_PENDING, WATCHING_CONFIRMED, CANCEL_PENDING, CANCELLED, SOLD_OUT, RESTOCK_VERIFIED, IN_APP_NOTICE_COMMITTED, SOURCE_UNVERIFIED, ITEM_UNAVAILABLE, CAP_REACHED, STALE_VERSION, UNKNOWN_COMMIT, SIGNED_OUT. 서버 오류를 빈 목록이나 발송 완료로 표시하지 않는다. 확정 여부 불명·재시도 뒤에는 본인 조회로 재검증하며 과거 영수증으로 취소 상태를 뒤집지 않는다. 알림 문구는 **"재고가 있는 것으로 확인되었습니다. 현재 구매 가능 여부는 상점에서 다시 확인해 주세요."** 구매 시 서버가 재고·판매기간·구매한도·WLD를 재검증하므로 구매 가능을 확약하지 않는다.
+- v1의 이벤트는 shop_inventory.quantity의 **실제 유한 재고 0→양수 확정 갱신**만 인정한다. shop_catalog.current_stock, 가격 변화, NULL 재고, 상품 재활성화, 예정 판매 개시를 재입고로 해석하지 않는다. 실제 재고 변경 경로와 조회 모델의 권위가 일치하는지 구현 전에 검증한다. 근거가 불명확하면 이벤트를 생성하지 않는다.
+
+### API·DB·트랜잭션 (구현 제안, 미구현)
+- 인증 GET /api/v1/shop/availability-watches?cursor=, POST /api/v1/shop/availability-watches 본문 {catalogId}, DELETE /api/v1/shop/availability-watches/:catalogId, GET /api/v1/shop/availability-watches/requests/:key. 본인 watchId, catalogId, 가린 상품 요약, state, version, observedAt, lastTransitionId 및 불변 receiptId/replayed/committedVersion만 반환한다. POST/DELETE는 UUID Idempotency-Key·정규화된 요청 해시, DELETE는 강한 If-Match "vN"이 필요하다. 서버 세션의 회원 신원, ConsentGuard, CsrfGuard로 권한을 판단하며 본문 actor UUID를 신원 증명으로 인정하지 않는다. 400 형식, 401 비인증, 403 동의/CSRF, 404 존재·소유 여부 비노출, 409 한도/요청 해시 불일치, 412 버전 충돌, 429 제한, 503 확정 불명. 실패를 2xx로 포장하지 않는다.
+- 추가형 shop_availability_watches: PK(user_id,catalog_id), active, 양수 version, 생성·변경·취소 시간, last_notified_transition_id, 활성/취소 일관성 CHECK, (user_id,active,updated_at DESC,catalog_id) 인덱스. 회원·상품 FK와 삭제 연쇄 정책은 개인정보 보존 검토 후 승인한다. shop_availability_watch_requests: UNIQUE(user_id,idempotency_key), 32바이트 요청 해시 CHECK, operation, 불변 영수증, committed_version. shop_stock_transition_events: 상품 ID, 이전 수량 0·새 수량 양수 CHECK, 유일 이벤트 ID, **재고 UPDATE와 동일한 트랜잭션**에서만 생성. shop_watch_notice_receipts: UNIQUE(user_id,transition_id), notification_id, 상태·시간. 실 DB DDL 이전 보존·삭제 정책 승인 필수, 개인정보 이력 무기한 축적 금지.
+- 변경 순서: 입력 검증 → UUID 멱등 키 기준 트랜잭션 advisory lock → 기존 영수증과 회원·해시 검증 → 회원 한도 및 관심 행 잠금 → 상품·재고 FOR SHARE 잠금 → 유한 재고 0/판매 노출/30개 한도 확인 → 관심 기록과 최초 영수증 원자적 확정. 상품이 사라져도 본인 취소 허용. 재입고 큐는 **큐 행에만 FOR UPDATE SKIP LOCKED** 사용하고 앱 내 알림 기록 직전에 현재 양수 유한 재고·활성 판매기간·유효 관심 등록·수신 억제 설정을 재검증한다. (회원, 전환 이벤트) UNIQUE로 중복 발송 차단. 외부 공급자 호출 없음. 앱 내 알림 행이 확정되기 전에는 발송 완료로 표현하지 않는다. 취소 뒤 과거 이벤트가 알림을 재활성화하거나 품절 재발생 뒤 오래된 알림을 발송하지 않는다. SECURITY DEFINER 함수의 search_path는 pg_catalog,pg_temp로 고정하고 EXECUTE 최소 부여·PUBLIC/앱 테이블 DML 회수. actor UUID만으로 인증하지 않는다.
+- Next.js는 서버 전용 frontend/src/lib/api.ts 경유, 개인 화면·API private/no-store/noindex/nofollow, 공개 /shop의 canonical SEO는 유지. 개인정보를 JSON-LD·OpenGraph·사이트맵·제3자 분석에 포함하지 않는다. 로그아웃·계정 변경·동의 철회 시 이전 계정의 지연 응답을 폐기한다. Android /app-api/v1/shop/availability-watches/*는 인증·동의·영수증·오류·재접속 정합성 동등, 상품 이동 시 최신 재고 확인. 320px, 200% 확대, 44px 터치, 키보드·명확한 포커스·모션 감소, WCAG 2.2 AA, 확정 상태에만 aria-live.
+- 관리자 /admin/shop에는 활성 등록·실제 전환·큐 지연·확정 알림·억제 및 실패 사유의 **비식별 집계만** 제공한다. 회원별 관심 목록 열람이나 가짜 재입고 생성 권한은 부여하지 않는다. 기존 재고 변경은 재인증·2FA·감사·무결성 검증 유지. 악용 방지: 30개 한도, 계정당 분당 10회 변경, 페이지 제한, 상품 존재 여부 추측 방지, 비공개 로그. KPI 목표: 거짓 확정 알림 0건, 동일 회원·전환 중복 0건, 큐 정상 시 유효 이벤트의 99% 이상 10분 내 앱 내 확정; 억제·동의 철회는 별도 측정. 측정 전 달성 주장 금지.
+
+### P0/P1 개발 백로그·수용·배포 조건
+- **P0 ENV1240-01:** 운영·개발·Test DB 격리, 5433 외부 노출 해소, 암호화 백업·격리 복원.
+- **P0 SEC1240-02:** 앱 과다 DML·PUBLIC 은행 EXECUTE 회수, 회원별 접근 차단 검증.
+- **P0 REL1240-03:** QA v1243 실패·의존성 취약점·Migration 266/280·정확 SHA Test 금융 E2E·디스크 용량 게이트.
+- **P0 SHOP1240-04:** 격리 실제 PostgreSQL에서 shop_inventory.quantity와 shop_catalog.current_stock, 구매·관리자·재입고 갱신 경로, 판매기간·구매한도 근거를 대조; 불일치 시 차단.
+- **P1 SHOP1240-05:** 추가형 테이블·인덱스·제약·보존 정책·불변 영수증·본인 전용 함수.
+- **P1 SHOP1240-06:** 원자적 재고 전환 기록, 중복 없는 앱 내 알림, 재시도·확정 불명 복구.
+- **P1 SHOP1240-07:** NestJS·Next.js 본인 API, /shop CTA, /account/shop-watches.
+- **P1 SHOP1240-08:** Android App API 동등성, 계정 전환 격리, 접근성·다국어.
+- **P1 SHOP1240-09:** 비식별 관리자, 동의·개인정보·SEO·악용 방지·KPI.
+- **P1 SHOP1240-10:** 격리 실제 DB/API/Android 동시성·금융 회귀·정확 SHA Test·롤백.
+- 수용 기준: 동일 키 100개 동시 등록→행·영수증 각 1개; 타 회원 100건 조회→노출 0; 재입고·구매·취소 100건 경합→허위·중복 알림 0; 0→양수→0 후 발송 직전 재검증→알림 0; NULL 재고 알림 0; 30개 상한 경합; **합성 데이터 10,001건 페이지네이션은 격리 테스트만**(운영 상한 30개). 웹/Android/모바일/키보드/SEO와 기존 구매·원장 대사 회귀. 이번 회차 테스트 **미실행**.
+- 기능 스위치 shop_availability_watch **기본 OFF**, Migration 충돌 #1147 해결 전 번호 할당 금지. 별도 개발 브랜치·TDD·불변 마이그레이션 검토, 후보 정확 SHA 공식 Test 회원/관리자/Android/금융 E2E, 보안·격리 복원 승인, 무중단 GitOps·롤백 이미지 검증 이후 운영 승격. OFF는 신규 등록·발송을 멈추되 기존 취소·영수증·확정 알림은 보존한다. 이번 기획은 런타임/DB/WLD/Test/Production 미변경. **RELEASE HOLD.**
+- 외부 독립 근거 게이트: PostgreSQL 잠금 https://www.postgresql.org/docs/current/explicit-locking.html, OWASP API 권한 https://api-security.owasp.org/editions/2023/en/0x11-t10/, W3C WCAG https://www.w3.org/TR/WCAG22/ (발행기관 계열 3곳 검토, 승인 독립 자료 3건이라는 뜻 아님). 신규 중복 제거·최종 승인 **0건**, 누적 검증 **미확인 / 10,000건** = **BLOCKED / IN PROGRESS**.
+
 ## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스와 수정 사유
