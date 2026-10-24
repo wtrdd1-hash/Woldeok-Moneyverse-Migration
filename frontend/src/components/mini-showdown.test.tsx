@@ -3,8 +3,8 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import React from 'react';
 import { MiniShowdownModal } from './mini-showdown-modal';
 
-vi.mock('@/lib/dopamine-api', () => ({
-  resolveMiniShowdown: vi.fn().mockResolvedValue({ success: true, payout: 190 }),
+vi.mock('@/app/arcade/showdown-actions', () => ({
+  playMiniShowdownRound: vi.fn(() => new Promise(() => {})),
 }));
 
 describe('MiniShowdownModal Component', () => {
@@ -14,7 +14,7 @@ describe('MiniShowdownModal Component', () => {
 
   it('renders showdown arena and round counters', () => {
     const onCloseMock = vi.fn();
-    render(<MiniShowdownModal isOpen={true} onClose={onCloseMock} stake={100} />);
+    render(<MiniShowdownModal isOpen={true} onClose={onCloseMock} />);
 
     expect(screen.getByText(/1:1 주사위 미니 결투/)).toBeDefined();
     expect(screen.getByText(/ROUND 1/)).toBeDefined();

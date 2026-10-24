@@ -39,6 +39,14 @@ describe('engagement routes', () => {
     process.env = { ...ORIGINAL_ENV };
   });
 
+  it('mounts the mini-showdown practice endpoint behind a session and refuses anonymous money claims', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/engagement/dopamine/mini-showdown')
+      .send({ outcome: 'win', playerRoll: [6], aiRoll: [1], stake: 100 });
+    expect(response.status).not.toBe(404);
+    expect(response.status).toBeGreaterThanOrEqual(400);
+  });
+
   it('mounts the engagement summary behind a session', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/engagement');
     expect(response.status).not.toBe(404);

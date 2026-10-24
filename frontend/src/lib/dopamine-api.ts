@@ -3,7 +3,8 @@ export interface DopamineStatusResponse {
   goldenDuckFeverAvailable: boolean;
   fortuneCookieAvailable: boolean;
   bullBearVotedToday: boolean;
-  dailyShowdownsRemaining: number;
+  dailyShowdownsRemaining: number | null;
+  showdownMode?: 'PRACTICE_ONLY';
   starDropRemaining: number;
 }
 
@@ -34,17 +35,6 @@ export interface BullBearVoteResult {
   poolEligible: boolean;
   airdropPoolWld: number;
   settlementTime: string;
-}
-
-export interface MiniShowdownResult {
-  success: boolean;
-  userId: string;
-  outcome: 'win' | 'loss';
-  stake: number;
-  payout: number;
-  playerRoll: number[];
-  aiRoll: number[];
-  resolvedAt: string;
 }
 
 export interface StarDropResult {
@@ -110,23 +100,6 @@ export async function voteBullBear(vote: 'bull' | 'bear', stockSymbol = 'MARKET_
   return postDopamine<BullBearVoteResult>('bull-bear-vote', {
     vote,
     stockSymbol,
-  });
-}
-
-/**
- * AI 덕이봇과의 1:1 주사위 미니 쇼다운 승부 결과 결제/정산
- */
-export async function resolveMiniShowdown(
-  outcome: 'win' | 'loss',
-  playerRoll: number[],
-  aiRoll: number[],
-  stake = 100,
-): Promise<MiniShowdownResult | null> {
-  return postDopamine<MiniShowdownResult>('mini-showdown', {
-    outcome,
-    playerRoll,
-    aiRoll,
-    stake,
   });
 }
 

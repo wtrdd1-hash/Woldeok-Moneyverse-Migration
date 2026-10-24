@@ -1,9 +1,10 @@
-import { randomUUID } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Inject,
@@ -35,13 +36,6 @@ export interface PetFortuneDto {
 export interface BullBearVoteDto {
   readonly vote: 'bull' | 'bear';
   readonly stockSymbol?: string;
-}
-
-export interface MiniShowdownDto {
-  readonly outcome: 'win' | 'loss';
-  readonly playerRoll: readonly number[];
-  readonly aiRoll: readonly number[];
-  readonly stake?: number;
 }
 
 export interface StarDropClaimDto {
@@ -159,24 +153,28 @@ export class DopamineController {
 
   @Post('mini-showdown')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Resolve 1:1 Instant Dice Showdown against AI' })
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Roll a server-generated, non-monetary mini-showdown practice round' })
   async resolveMiniShowdown(
     @Req() request: RequestWithSession,
-    @Body() body: MiniShowdownDto,
+    @Body() body: unknown,
   ) {
     const userId = requireUserId(request);
-    const stake = body.stake ?? 100;
-    const isWin = body.outcome === 'win';
-    const rewardAmount = isWin ? Math.floor(stake * 1.9) : 0;
-
+    // No caller-controlled dice, result or stake: a practice round never posts WLD.
+    if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 0) {
+      throw new BadRequestException('practice round accepts no dice, outcome or stake');
+    }
+    const player = randomInt(1, 7);
+    const ai = randomInt(1, 7);
     return {
       success: true,
+      mode: 'PRACTICE_ONLY' as const,
       userId,
-      outcome: body.outcome,
-      stake,
-      payout: rewardAmount,
-      playerRoll: body.playerRoll,
-      aiRoll: body.aiRoll,
+      outcome: player > ai ? 'win' as const : player < ai ? 'loss' as const : 'draw' as const,
+      playerRoll: [player],
+      aiRoll: [ai],
+      stake: '0',
+      payout: '0',
       resolvedAt: new Date().toISOString(),
     };
   }
@@ -215,7 +213,8 @@ export class DopamineController {
       goldenDuckFeverAvailable: true,
       fortuneCookieAvailable: true,
       bullBearVotedToday: false,
-      dailyShowdownsRemaining: 10,
+      dailyShowdownsRemaining: null,
+      showdownMode: 'PRACTICE_ONLY',
       starDropRemaining: 3,
     };
   }

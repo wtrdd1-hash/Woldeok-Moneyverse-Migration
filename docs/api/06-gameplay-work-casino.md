@@ -973,3 +973,17 @@ curl -X POST "https://easy-scraping.com/api/v1/work/tasks/{id}/complete" \
 
 ---
 
+
+## Mini-showdown practice-only integrity (candidate v2026.10.25.a0848, release HOLD)
+
+`POST /api/v1/engagement/dopamine/mini-showdown` is an authenticated, consent-checked, CSRF-protected **non-monetary practice** round. Request body must be exactly `{}`; the client cannot provide dice, outcome, stake, or payout. The backend uses cryptographically secure independent dice in the range 1–6 and returns:
+
+```json
+{"success":true,"mode":"PRACTICE_ONLY","outcome":"win","playerRoll":[6],"aiRoll":[1],"stake":"0","payout":"0","resolvedAt":"2026-10-25T00:00:00.000Z"}
+```
+
+This is an example response, not a guaranteed roll. Draws return `outcome:"draw"`. The endpoint never creates a ledger transaction, charges a stake, or awards WLD. A client must not interpret a local best-of-three scoreboard as a persisted match or financial receipt. Malformed legacy payloads with client-supplied outcome/dice/stake return HTTP 400. Response is `Cache-Control: private, no-store`.
+
+Android parity: `POST /app-api/v1/engagement/dopamine/mini-showdown`, same `{}` body and session cookie + `x-csrf-token` header; the gateway forwards the private API response and no-store cache policy. App API contract header is `v2026.10.25.a0848`. Clients must treat non-2xx/transport failures as **unknown/not played**, never a win or WLD payment. `GET /api/v1/engagement/dopamine/status` exposes `showdownMode:"PRACTICE_ONLY"` and `dailyShowdownsRemaining:null` (no paid daily quota).
+
+This source candidate is **not** a ledger-backed paid game. Reintroducing financial stakes or WLD rewards requires a separate PostgreSQL SECURITY DEFINER transaction, immutable idempotent receipts, verified Test finance E2E and independent release authorization. Until then, any claim of paid settlement is prohibited.
