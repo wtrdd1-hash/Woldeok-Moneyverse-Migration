@@ -30,3 +30,10 @@
 - Full lint PASS (0 errors, 1,137 warnings), app-api contract PASS (179 endpoints), `pnpm typecheck` PASS. Dependency audit FAIL (26 vulnerabilities: 2 critical/10 high); bot audit FAIL (6: 1 critical/5 high).
 - Default Turbopack build FAIL due isolated worktree `frontend/node_modules` symlink pointing outside project root; contract/backend builds passed. Webpack fallback attempted but does not substitute default build gate.
 - Isolated DB `moneyverse_v991` has existing vote function with app EXECUTE and no direct INSERT/UPDATE; however app role retains direct SELECT on all `treasury_citizen_budget_votes`, an existing least-privilege/privacy blocker. No SQL writes performed.
+
+## FINISHED — code complete, release BLOCKED (21:46 KST)
+- Exact baseline main `49788d09` re-fetched before final documentation; both canonical EN/KO plans unchanged. Other workers' branches preserved.
+- Final code commit before release report: `6946bd8572ba40319556cae43ec9903ed714f349`. Full backend 1,332 PASS/398 skipped; full frontend 1,403 PASS/5 FAIL; focused DTO/HTTP 40 PASS; Lint PASS, Typecheck PASS, Android 179-contract PASS, default Turbopack FAIL, diagnostic Webpack PASS, security audits FAIL. See EN/KO release reports for complete evidence.
+- Found app-wide SELECT on citizen vote table despite write ACL restrictions; created P0 privacy issue #1179, no production mutation.
+- Draft PR #1178 created; exact final report SHA and CI results will be posted to PR. No main merge, Test or Production deployment, migrations, branch deletion, restart, or rollback. RELEASE HOLD.
+- Starting 1,124 remote branches/65 open PRs; finishing snapshot 1,125 branches/67 open PRs, 825 unmerged. Zero deletions; merged refs not cleaned without dependency proof.
