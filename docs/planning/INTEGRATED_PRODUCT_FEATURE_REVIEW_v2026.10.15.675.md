@@ -1,5 +1,13 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v2026.10.25.1254 — F675-120 Wallet Annotation Lifecycle and Privacy Review (FEATURE IMPROVEMENT / HOLD)
+- Product integrity: verified migration 163 account merge leaves historical owner postings under deleted p_merge while moving identities/sessions to p_keep. Annotations cannot be silently reassigned. P0 forward-only preflight blocks merges with source annotations/tombstones/receipts until an explicit audited portability policy exists. Do not claim a live incident.
+- Member trust: Remove must clear category/note and caches, preserve only version tombstone; receipts contain no private text, HMAC request fingerprint replaces raw SHA256; 30-day receipt retention is proposed, pending privacy sign-off. No ledger/WLD modification.
+- UX correctness: immutable created_at+transactionId keyset and owner/session/asOf cursor avoid update-driven skips/repeats; concurrent remove/re-add means stable order is not an exact snapshot. Preserve recent-50 CTA, saved-note list, owner-only 404, account-switch fencing, Android body requestId/expectedVersion, 320px/200%/TalkBack and private noindex/no-store.
+- P0 ENV1254-01 SEC1254-02 REL1254-03 WAL1254-04; P1 WAL1254-05 WAL1254-06 WAL1254-07 WAL1254-08 WAL1254-09 WAL1254-10. QA v1257 FAILED/HOLD, root 100%, DB ACL, migration266/280, CI/security/official Test exact-SHA/restore gates unresolved. Details and future 100-way/10,001-item tests in EN/KO integrated master.
+- External independent reference target 10,000: newly approved 0, cumulative verified UNKNOWN, gate BLOCKED/IN PROGRESS. Docs only; release HOLD.
+
+
 ## v2026.10.25.1252 — F675-120 Private Ledger Annotation Product Review (FEATURE ADDITION / HOLD)
 - User problem: a wallet transaction may be hard to remember later, while the inspected `/wallet/activity` displays at most 50 recent owner transactions and its CSV only exports supplied recent rows. Avoid duplicating the existing transfer message, wallet dispute Draft #1048 or the authoritative ledger.
 - Proposed value: an optional personal note and allowlisted category bound to a transaction proven by an owner cash/bank posting; `/wallet/activity` Save/Remove and `/wallet/annotations` list, immutable receipts, versioned tombstone, signed keyset pagination, Android parity, keyboard/320px/200% and private noindex/no-store. Personal labels are not official financial classification.
