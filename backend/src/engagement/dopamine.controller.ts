@@ -9,6 +9,7 @@ import {
   Inject,
   InternalServerErrorException,
   Post,
+  ServiceUnavailableException,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -140,21 +141,16 @@ export class DopamineController {
 
   @Post('bull-bear-vote')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Vote on Bull/Bear market sentiment and join 10,000 WLD midnight pool' })
+  @ApiOperation({ summary: 'Bull/Bear voting is disabled pending authoritative receipts and settlement' })
   async voteBullBear(
     @Req() request: RequestWithSession,
-    @Body() body: BullBearVoteDto,
+    @Body() _body: BullBearVoteDto,
   ) {
-    const userId = requireUserId(request);
-    return {
-      success: true,
-      userId,
-      vote: body.vote,
-      stockSymbol: body.stockSymbol || 'MARKET_OVERALL',
-      poolEligible: true,
-      airdropPoolWld: 10000,
-      settlementTime: '00:00:00 KST',
-    };
+    requireUserId(request);
+    // A successful vote without a persisted owner-scoped receipt is not a vote.
+    throw new ServiceUnavailableException(
+      'Bull/Bear voting is unavailable until verified receipts and settlement are implemented',
+    );
   }
 
   @Post('mini-showdown')
@@ -215,6 +211,7 @@ export class DopamineController {
       goldenDuckFeverAvailable: true,
       fortuneCookieAvailable: true,
       bullBearVotedToday: false,
+      bullBearVotingAvailable: false,
       dailyShowdownsRemaining: 10,
       starDropRemaining: 3,
     };
