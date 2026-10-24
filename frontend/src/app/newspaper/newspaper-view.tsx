@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Newspaper,
@@ -9,11 +9,9 @@ import {
   Building2,
   Sparkles,
   BookOpen,
-  Vote,
   ShieldAlert,
   ArrowRight,
   Clock,
-  CheckCircle2,
   Landmark,
   Briefcase,
   Share2,
@@ -58,6 +56,7 @@ interface NewspaperViewProps {
   readonly stocks: readonly StockTickerItem[];
   readonly weeklyBrief?: WeeklyBriefData | undefined;
   readonly initialTab?: 'brief' | 'live' | undefined;
+  readonly eventsUnavailable?: boolean;
 }
 
 const STRENGTH_LABEL: Readonly<Record<number, { ko: string; en: string; ja: string; zh: string; vi?: string }>> = {
@@ -75,6 +74,7 @@ function StockTickerPopover({
   readonly name?: string | null;
   readonly stocks: readonly StockTickerItem[];
 }) {
+  const { locale } = useLocale();
   const stock = stocks.find((s) => s.symbol === symbol);
   const currentPrice = stock ? BigInt(stock.current_price || '0') : null;
   const openPrice = stock ? BigInt(stock.day_open_price || '0') : null;
@@ -122,7 +122,7 @@ function StockTickerPopover({
               </div>
             </div>
             <Badge variant="outline" className="font-mono text-[10px]">
-              실시간 호가
+              서버 기준 시세
             </Badge>
           </div>
 
@@ -147,29 +147,12 @@ function StockTickerPopover({
             </div>
           </div>
 
-          {/* 미니 트렌드 스파크라인 SVG 시각화 */}
-          <div className="rounded-lg bg-muted/40 p-2.5">
-            <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground mb-1.5">
-              <span>호가 변동 모멘텀</span>
-              <span>{isUp ? '매수 우세' : isDown ? '매도 우세' : '균형'}</span>
-            </div>
-            <svg viewBox="0 0 100 24" className="w-full h-6 overflow-visible" preserveAspectRatio="none">
-              <polyline
-                fill="none"
-                stroke={isUp ? '#10b981' : isDown ? '#f43f5e' : '#6b7280'}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                points={
-                  isUp
-                    ? '0,20 20,16 40,18 60,10 80,12 100,4'
-                    : isDown
-                    ? '0,6 20,8 40,14 60,12 80,18 100,22'
-                    : '0,12 20,12 40,11 60,13 80,12 100,12'
-                }
-              />
-            </svg>
-          </div>
+          <p className="rounded-lg bg-muted/40 p-2.5 text-xs text-muted-foreground">
+            {localeLabel(locale, '현재가는 서버 조회 시점의 기록입니다. 실시간 호가나 과거 차트는 제공하지 않습니다.',
+              'This is the last server-reported price, not a live order book or historical chart.',
+              'サーバー取得時点の価格であり、リアルタイム板や履歴チャートではありません。',
+              '此价格来自服务器查询，并非实时订单簿或历史走势图。')}
+          </p>
 
           <Button asChild size="sm" className="w-full h-9 rounded-xl font-bold text-xs gap-1.5 shadow-sm">
             <Link href={`/stocks/${symbol}`}>
@@ -188,90 +171,19 @@ export function NewspaperView({
   stocks = [],
   weeklyBrief,
   initialTab = 'live',
+  eventsUnavailable = false,
 }: NewspaperViewProps) {
   const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<'brief' | 'live'>(initialTab);
-  const [selectedPoll, setSelectedPoll] = useState<number | null>(null);
-  const [hasVoted, setHasVoted] = useState<boolean>(false);
-  const [pollCounts, setPollCounts] = useState<number[]>([142, 98, 45, 31]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const saved = localStorage.getItem('mv_newspaper_poll_vote_v343');
-      if (saved !== null) {
-        const idx = Number.parseInt(saved, 10);
-        if (!Number.isNaN(idx) && idx >= 0 && idx < 4) {
-          setSelectedPoll(idx);
-          setHasVoted(true);
-        }
-      }
-    } catch {
-      // storage access fallback
-    }
-  }, []);
-
-  const handleVote = (index: number) => {
-    if (hasVoted) return;
-    setSelectedPoll(index);
-    setHasVoted(true);
-    setPollCounts((prev) => {
-      const next = [...prev];
-      next[index] = (next[index] ?? 0) + 1;
-      return next;
-    });
-    try {
-      localStorage.setItem('mv_newspaper_poll_vote_v343', String(index));
-    } catch {
-      // ignore
-    }
-  };
-
-  const totalVotes = pollCounts.reduce((a, b) => a + b, 0);
-
   // Sentiment metrics computation
   const upEvents = events.filter((e) => e.direction === 'up');
   const downEvents = events.filter((e) => e.direction === 'down');
   const totalEvents = events.length;
-  const bullRatio = totalEvents > 0 ? Math.round((upEvents.length / totalEvents) * 100) : 50;
-  const bearRatio = totalEvents > 0 ? 100 - bullRatio : 50;
+  const hasVerifiedEvents = !eventsUnavailable && totalEvents > 0;
+  const bullRatio = hasVerifiedEvents ? Math.round((upEvents.length / totalEvents) * 100) : 0;
+  const bearRatio = hasVerifiedEvents ? 100 - bullRatio : 0;
 
   const leadEvent = events.find((e) => e.strength === 3) || events[0];
-
-  const pollOptions = [
-    {
-      labelKo: '강력 상승 (Bullish Surge)',
-      labelEn: 'Bullish Surge',
-      labelJa: '強気上昇 (Bullish Surge)',
-      labelZh: '强劲上涨 (Bullish Surge)',
-      descKo: '산업 호재 및 유동성 확대로 전반적 상승세 전망',
-      descEn: 'Overall upward trend led by market catalysts',
-    },
-    {
-      labelKo: '완만한 우상향 (Moderate Up)',
-      labelEn: 'Moderate Upward Trend',
-      labelJa: '緩やかな上昇 (Moderate Up)',
-      labelZh: '温和上涨 (Moderate Up)',
-      descKo: '개별 종목별 실적에 따른 차별화 상승',
-      descEn: 'Gradual gains supported by corporate performance',
-    },
-    {
-      labelKo: '보합 및 횡보 (Sideways Range)',
-      labelEn: 'Sideways Range',
-      labelJa: 'もみ合い・横ばい (Sideways)',
-      labelZh: '震荡盘整 (Sideways Range)',
-      descKo: '호재와 악재 상쇄로 박스권 횡보 지속',
-      descEn: 'Range-bound consolidation with mixed signals',
-    },
-    {
-      labelKo: '조정 및 하락 (Bearish Drop)',
-      labelEn: 'Bearish Correction',
-      labelJa: '調整・下落 (Bearish Correction)',
-      labelZh: '回调下跌 (Bearish Drop)',
-      descKo: '차익 실현 매물 출회 및 조정 리스크',
-      descEn: 'Profit-taking pressure and downside risk',
-    },
-  ];
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8 px-3.5 sm:px-6 py-6 overflow-x-clip">
@@ -392,7 +304,7 @@ export function NewspaperView({
             {localeLabel(locale, '실시간 시장 심리 지수', 'Market Sentiment Index', 'リアルタイム市場センチメント', '实时市场情绪指数')}
           </h2>
           <span className="text-xs font-mono font-semibold text-muted-foreground">
-            {localeLabel(locale, `진행 중인 사건: ${totalEvents}건`, `Active Catalysts: ${totalEvents}`, `進行中のイベント: ${totalEvents}件`, `进行中事件: ${totalEvents}件`)}
+            {localeLabel(locale, eventsUnavailable ? '진행 중인 사건: 확인 불가' : `진행 중인 사건: ${totalEvents}건`, eventsUnavailable ? 'Active events unavailable' : `Active Catalysts: ${totalEvents}`, eventsUnavailable ? '有効なイベント: 取得不可' : `進行中のイベント: ${totalEvents}件`, eventsUnavailable ? '当前事件：无法获取' : `进行中事件: ${totalEvents}件`)}
           </span>
         </div>
 
@@ -404,7 +316,9 @@ export function NewspaperView({
                   {localeLabel(locale, '시장 심리 진단', 'Market Sentiment State', '市場心理診断', '市场情绪诊断')}
                 </span>
                 <p className="text-lg font-bold text-foreground">
-                  {bullRatio >= 60
+                  {!hasVerifiedEvents
+                    ? localeLabel(locale, '판단할 시장 사건 정보가 없습니다', 'No event data to assess', '判定する市場イベント情報がありません', '暂无可评估的市场事件')
+                    : bullRatio >= 60
                     ? localeLabel(locale, '🟢 낙관 우세 (Bullish Leaning)', '🟢 Bullish Leaning', '🟢 強気優勢', '🟢 看多情绪占优')
                     : bullRatio <= 40
                     ? localeLabel(locale, '🔴 관망 및 조정 (Bearish Leaning)', '🔴 Bearish Leaning', '🔴 弱気警戒', '🔴 谨慎回调偏向')
@@ -412,31 +326,26 @@ export function NewspaperView({
                 </p>
               </div>
 
-              <div className="flex items-center gap-4 text-xs font-mono">
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-                  <TrendingUp className="size-3.5" />
-                  {localeLabel(locale, `호재 ${bullRatio}%`, `Bullish ${bullRatio}%`, `好材料 ${bullRatio}%`, `利好 ${bullRatio}%`)}
-                </span>
-                <span className="text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1">
-                  <TrendingDown className="size-3.5" />
-                  {localeLabel(locale, `악재 ${bearRatio}%`, `Bearish ${bearRatio}%`, `悪材料 ${bearRatio}%`, `利空 ${bearRatio}%`)}
-                </span>
-              </div>
+              {hasVerifiedEvents && (
+                <div className="flex items-center gap-4 text-xs font-mono">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                    <TrendingUp className="size-3.5" />
+                    {localeLabel(locale, `호재 ${bullRatio}%`, `Bullish ${bullRatio}%`, `好材料 ${bullRatio}%`, `利好 ${bullRatio}%`)}
+                  </span>
+                  <span className="text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1">
+                    <TrendingDown className="size-3.5" />
+                    {localeLabel(locale, `악재 ${bearRatio}%`, `Bearish ${bearRatio}%`, `悪材料 ${bearRatio}%`, `利空 ${bearRatio}%`)}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* Gauge bar */}
-            <div className="w-full bg-muted/60 rounded-full h-3 flex overflow-hidden">
-              <div
-                className="bg-emerald-500 transition-all duration-500"
-                style={{ width: `${bullRatio}%` }}
-                title={`호재: ${bullRatio}%`}
-              />
-              <div
-                className="bg-rose-500 transition-all duration-500"
-                style={{ width: `${bearRatio}%` }}
-                title={`악재: ${bearRatio}%`}
-              />
-            </div>
+            {hasVerifiedEvents && (
+              <div className="w-full bg-muted/60 rounded-full h-3 flex overflow-hidden" aria-hidden="true">
+                <div className="bg-emerald-500" style={{ width: `${bullRatio}%` }} />
+                <div className="bg-rose-500" style={{ width: `${bearRatio}%` }} />
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
@@ -447,7 +356,7 @@ export function NewspaperView({
           <div className="flex items-center justify-between">
             <h3 id="stocks-rail-heading" className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <Activity className="size-3.5 text-primary" />
-              <span>{localeLabel(locale, '관련 가상 상장사 실시간 호가 (클릭 시 미니 호가 차트)', 'Virtual Market Stocks Pulse', '上場銘柄リアルタイム気配値', '挂牌企业实时行情')}</span>
+              <span>{localeLabel(locale, '관련 가상 상장사 서버 조회 시세', 'Server-Reported Virtual Stock Quotes', '仮想株式のサーバー取得価格', '虚拟股票服务器报价')}</span>
             </h3>
             <span className="text-[11px] font-mono text-muted-foreground">총 {stocks.length}개 종목</span>
           </div>
@@ -471,9 +380,11 @@ export function NewspaperView({
           <Card className="lg:col-span-2 rounded-2xl border-primary/20 bg-gradient-to-br from-card via-card to-muted/30 shadow-md flex flex-col justify-between">
             <CardHeader className="p-5 sm:p-7 pb-4">
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <Badge className={cn('font-bold', leadEvent?.direction === 'up' ? 'bg-emerald-600 hover:bg-emerald-600' : 'bg-rose-600 hover:bg-rose-600')}>
-                  {leadEvent?.direction === 'up' ? '▲ ' + localeLabel(locale, '핵심 호재', 'Key Catalyst', '主要好材料', '核心利好') : '▼ ' + localeLabel(locale, '주요 악재', 'Market Headwind', '主要悪材料', '重大利空')}
-                </Badge>
+                {leadEvent && (
+                  <Badge className={cn('font-bold', leadEvent.direction === 'up' ? 'bg-emerald-600 hover:bg-emerald-600' : 'bg-rose-600 hover:bg-rose-600')}>
+                    {leadEvent.direction === 'up' ? '▲ ' + localeLabel(locale, '핵심 호재', 'Key Catalyst', '主要好材料', '核心利好') : '▼ ' + localeLabel(locale, '주요 악재', 'Market Headwind', '主要悪材料', '重大利空')}
+                  </Badge>
+                )}
                 {leadEvent && (
                   <Badge variant="outline" className="font-mono text-xs">
                     {STRENGTH_LABEL[leadEvent.strength]?.[locale as 'ko'|'en'|'ja'|'zh'] ?? '보통'}
@@ -495,18 +406,22 @@ export function NewspaperView({
               </div>
 
               <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight [word-break:keep-all] text-foreground leading-snug">
-                {leadEvent ? leadEvent.headline : localeLabel(locale, '가상 경제 원장과 시장 수급이 균형을 유지하고 있습니다.', 'Virtual ledger and market liquidity remain balanced.', '仮想経済元帳と市場需給が均衡を維持しています。', '虚拟经济账本与市场供需保持平衡。')}
+                {leadEvent ? leadEvent.headline : eventsUnavailable
+                  ? localeLabel(locale, '시장 사건 정보를 불러오지 못했습니다', 'Market events are unavailable', '市場イベントを取得できませんでした', '无法获取市场事件')
+                  : localeLabel(locale, '현재 활성 시장 사건이 없습니다', 'No active market events', '現在有効な市場イベントはありません', '当前没有活跃市场事件')}
               </CardTitle>
 
               <CardDescription className="mt-3 text-sm sm:text-base leading-relaxed text-muted-foreground [word-break:keep-all]">
-                {leadEvent ? leadEvent.body : localeLabel(locale, '현재 발효 중인 돌발 시장 시나리오가 없으며, 정규 원장 거래 및 자산 거래가 정상 진행 중입니다.', 'No critical market scenarios are currently active. Regular trading operations proceed stably.', '現在発生中の突発的な市場シナリオはなく、正規の取引が安定して行われています。', '目前没有突发的市场事件，常规交易正常平稳进行。')}
+                {leadEvent ? leadEvent.body : eventsUnavailable
+                  ? localeLabel(locale, '서버 조회 실패로 사건 상태를 확인할 수 없습니다. 잠시 후 다시 확인해 주세요.', 'Unable to verify event state; please try again later.', 'サーバーからイベント状態を取得できません。後でもう一度お試しください。', '服务器查询失败，请稍后重试。')
+                  : localeLabel(locale, '서버가 확인한 활성 사건은 없습니다. 이 결과만으로 원장이나 거래 상태를 판단할 수 없습니다.', 'No active events were returned. This does not verify ledger or trading health.', '有効なイベントはありません。元帳や取引の正常性を示すものではありません。', '未返回活跃事件，但这不代表账本或交易状态正常。')}
               </CardDescription>
             </CardHeader>
 
             <CardContent className="p-5 sm:p-7 pt-0">
               <div className="pt-4 border-t border-border/60 flex items-center justify-between">
                 <span className="text-xs text-muted-foreground font-mono">
-                  {leadEvent?.source ? `출처: ${leadEvent.source}` : '월덕 머니버스 경제 관제 시스템'}
+                  {leadEvent?.source ? `출처: ${leadEvent.source}` : '출처: 서버 활성 시장 사건 조회'}
                 </span>
                 {leadEvent?.symbol ? (
                   <Button asChild size="sm" className="gap-1 text-xs font-semibold">
@@ -561,7 +476,7 @@ export function NewspaperView({
                 <p className="text-xs text-muted-foreground [word-break:keep-all]">
                   {localeLabel(
                     locale,
-                    '추가 발효 중인 이벤트가 없습니다. 안정적인 거래 환경입니다.',
+                    '추가 활성 사건이 없습니다. 거래 상태는 별도로 확인해야 합니다.',
                     'No additional scenarios currently active.',
                     '追加のイベントはありません。',
                     '暂无其他生效中的事件。',
@@ -640,86 +555,61 @@ export function NewspaperView({
         </div>
       </section>
 
-      {/* 5. Interactive Market Sentiment Poll */}
+      {/* Verified PostgreSQL market-event directions, not an unpersisted member poll. */}
       <section aria-labelledby="poll-heading" className="space-y-4">
         <h2 id="poll-heading" className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-          <Vote className="size-4 text-primary" />
-          {localeLabel(locale, '독자 참여형 시장 전망 투표', 'Community Market Sentiment Poll', '読者参加型 市場見通し投票', '玩家互动：市场走势投票')}
+          <Activity className="size-4 text-primary" aria-hidden="true" />
+          {localeLabel(locale, '검증된 활성 시장 사건', 'Verified Active Market Events', '検証済みの有効市場イベント', '已验证的活跃市场事件')}
         </h2>
-
         <Card className="rounded-2xl border-border/80 bg-card shadow-sm">
           <CardHeader className="p-5 sm:p-6 pb-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <CardTitle className="text-lg sm:text-xl font-bold [word-break:keep-all]">
-                {localeLabel(
-                  locale,
-                  '다음 주기 월덕 머니버스 주식 시장의 흐름은 어떻게 될까요?',
-                  'How will the Moneyverse stock market move in the next cycle?',
-                  '次サイクルのウォルドク株式市場はどう動くと思いますか？',
-                  '您认为下一个周期月德股市将呈现何种走势？',
-                )}
-              </CardTitle>
-              <Badge variant="secondary" className="font-mono text-xs w-fit">
-                {localeLabel(locale, `총 참여자 ${totalVotes}명`, `Total Votes: ${totalVotes}`, `総投票数: ${totalVotes}`, `总投票数: ${totalVotes}`)}
-              </Badge>
-            </div>
-            <CardDescription className="text-xs text-muted-foreground">
-              {hasVoted
-                ? localeLabel(locale, '투표에 참여해 주셔서 감사합니다. 실시간 집계 현황입니다.', 'Thank you for voting. Real-time community tally below.', 'ご投票ありがとうございます。現在の集計結果です。', '感谢您的参与，以下为实时统计结果。')
-                : localeLabel(locale, '자신의 시장 전망을 1개 선택하여 투표해 보세요.', 'Cast your projection to see community sentiment.', 'あなたの予想を選択して投票してください。', '请选择您的预测并参与投票。')}
+            <CardTitle className="text-lg sm:text-xl font-bold">
+              {localeLabel(locale, '서버가 확인한 시장 사건의 방향', 'Direction of Server-Verified Market Events', 'サーバーで確認した市場イベントの方向', '服务器已确认的市场事件方向')}
+            </CardTitle>
+            <CardDescription className="text-xs leading-relaxed">
+              {localeLabel(locale,
+                '회원 투표가 아닙니다. PostgreSQL에서 현재 활성 상태로 조회된 가상 주식 시장 사건만 집계합니다.',
+                'Not a member poll. Only active virtual-stock market events returned by PostgreSQL are counted.',
+                '会員投票ではありません。PostgreSQLから取得した有効な仮想市場イベントのみ集計します。',
+                '这不是会员投票。仅统计 PostgreSQL 返回的活跃虚拟股票市场事件。')}
             </CardDescription>
           </CardHeader>
-
-          <CardContent className="p-5 sm:p-6 pt-2 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {pollOptions.map((opt, idx) => {
-                const count = pollCounts[idx] ?? 0;
-                const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
-                const isSelected = selectedPoll === idx;
-
-                return (
-                  <button
-                    key={opt.labelEn}
-                    type="button"
-                    onClick={() => handleVote(idx)}
-                    disabled={hasVoted}
-                    className={cn(
-                      'relative overflow-hidden rounded-xl border p-4 text-left transition-all active:scale-[0.98]',
-                      isSelected
-                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                        : 'border-border/80 bg-background/50 hover:border-border hover:bg-muted/30',
-                      hasVoted ? 'cursor-default' : 'cursor-pointer',
-                    )}
-                  >
-                    {/* Background fill bar for results */}
-                    {hasVoted && (
-                      <div
-                        className="absolute inset-y-0 left-0 bg-primary/10 transition-all duration-700 pointer-events-none"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    )}
-
-                    <div className="relative z-10 flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 font-bold text-sm text-foreground">
-                          {isSelected && <CheckCircle2 className="size-4 text-primary shrink-0" />}
-                          <span>{localeLabel(locale, opt.labelKo, opt.labelEn, opt.labelJa, opt.labelZh)}</span>
-                        </div>
-                        <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
-                          {localeLabel(locale, opt.descKo, opt.descEn)}
-                        </p>
-                      </div>
-
-                      {hasVoted && (
-                        <span className="font-mono text-xs font-extrabold text-primary shrink-0">
-                          {percentage}%
-                        </span>
-                      )}
+          <CardContent className="p-5 sm:p-6 pt-2" aria-live="polite">
+            {eventsUnavailable ? (
+              <p role="status" className="text-sm text-muted-foreground">
+                {localeLabel(locale, '시장 사건 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.',
+                  'Market events are unavailable. Please try again later.',
+                  '市場イベントを取得できませんでした。後でもう一度お試しください。',
+                  '无法获取市场事件，请稍后重试。')}
+              </p>
+            ) : !hasVerifiedEvents ? (
+              <p role="status" className="text-sm text-muted-foreground">
+                {localeLabel(locale, '현재 활성 시장 사건이 없습니다. 회원 투표 수나 시장 건전성은 추정하지 않습니다.',
+                  'There are no active market events. No vote totals or market health are inferred.',
+                  '有効な市場イベントはありません。投票数や市場の健全性は推測しません。',
+                  '当前没有活跃市场事件，不推测投票数或市场健康状况。')}
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {([
+                  { direction: 'up', count: upEvents.length, ratio: bullRatio,
+                    label: localeLabel(locale, `호재 사건 ${upEvents.length}건`, `Positive events: ${upEvents.length}`, `好材料イベント ${upEvents.length}件`, `利好事件 ${upEvents.length}件`) },
+                  { direction: 'down', count: downEvents.length, ratio: bearRatio,
+                    label: localeLabel(locale, `악재 사건 ${downEvents.length}건`, `Negative events: ${downEvents.length}`, `悪材料イベント ${downEvents.length}件`, `利空事件 ${downEvents.length}件`) },
+                ] as const).map((item) => (
+                  <div key={item.direction} className="min-w-0 space-y-2 rounded-xl border border-border/80 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-semibold">
+                      <span>{item.label}</span>
+                      <span className="font-mono">{item.ratio}%</span>
                     </div>
-                  </button>
-                );
-              })}
-            </div>
+                    <progress className="h-3 w-full accent-primary" max={totalEvents} value={item.count} aria-label={item.label} />
+                  </div>
+                ))}
+              </div>
+            )}
+            <Link href="/stocks" className="mt-4 inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+              {localeLabel(locale, '가상 주식 시장 확인 →', 'View Virtual Stock Market →', '仮想株式市場を見る →', '查看虚拟股票市场 →')}
+            </Link>
           </CardContent>
         </Card>
       </section>

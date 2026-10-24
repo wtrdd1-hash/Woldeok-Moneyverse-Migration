@@ -25,6 +25,6 @@ export default async function NewspaperPage() {
   const stocks: readonly StockTickerItem[] = stocksResult?.stocks ?? [];
   const weeklyBrief = weeklyBriefResult ?? undefined;
 
-  return <NewspaperView events={events} stocks={stocks} weeklyBrief={weeklyBrief} />;
+  return <NewspaperView events={events} stocks={stocks} weeklyBrief={weeklyBrief} eventsUnavailable={eventsResult === null} />;
 }
 
