@@ -46,6 +46,8 @@ test('CI policy and automatic integration both enforce the migration guard', asy
   const ci = await readFile(new URL('../../.github/workflows/ci.yml', import.meta.url), 'utf8');
   const integration = await readFile(new URL('../../.github/workflows/auto-integrate-promote.yml', import.meta.url), 'utf8');
   assert.match(ci, /pull-requests: read/);
+  const candidate = await readFile(new URL('../../.github/workflows/test-candidate.yml', import.meta.url), 'utf8');
+  assert.match(candidate, /permissions:\s*\n\s*contents: read\s*\n\s*pull-requests: read/);
   assert.match(ci, /run: node scripts\/release\/check-open-pr-migration-numbers\.mjs/);
   assert.match(integration, /git show HEAD:scripts\/release\/check-open-pr-migration-numbers\.mjs/);
   assert.match(integration, /PR_NUMBER="\$pr" node "\$guard_script"/);
