@@ -129,6 +129,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         userBalance={userBalance}
         currentUsername={username}
         userAvatarUrl={avatarUrl}
+        signedIn={loggedIn}
       />
     </div>
   );
