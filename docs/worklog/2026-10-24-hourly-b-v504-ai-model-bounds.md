@@ -14,3 +14,9 @@
 
 ## Finished
 - Pending. No merge or deployment authorized.
+
+### Mid-task checkpoint (2026-10-24 12:04 KST)
+- RED: three focused regressions failed on main behavior (oversized JSON body, 21 scenario proposals, 1,001 model entries). Evidence: internal `red.log`.
+- GREEN: same three focused regressions passed after bounding response bytes (256 KiB streaming, abort on overflow), scenarios (20), completion choices (4), content segments (32), model IDs (1,000). Evidence: internal `green.log`.
+- No DB/API route/financial ledger changes; upstream AI response contract rejects oversized data with existing `ai_news_model_unusable` code.
+- Worktree dependency install used `pnpm install --offline --frozen-lockfile --ignore-scripts`; no Production/dev database changes.

@@ -422,6 +422,24 @@ describe('endpoint', () => {
   });
 });
 
+describe('P1 external model response bounds', () => {
+  it('rejects a response over the model byte budget before parsing its JSON', async () => {
+    vi.stubGlobal('fetch', server(new Response(`${' '.repeat(300_000)}${JSON.stringify({ choices: [{ message: { content: JSON.stringify(BATCH) } }] })}`, { status: 200 })));
+    await expect(openAiCaller(CALL)).rejects.toMatchObject({ code: 'ai_news_model_unusable', message: expect.stringContaining('size limit') });
+  });
+
+  it('rejects excess scenarios rather than validating and retaining an oversized collection', async () => {
+    const content = JSON.stringify({ scenarios: Array.from({ length: 21 }, () => BATCH.scenarios[0]) });
+    vi.stubGlobal('fetch', server(completion(content)));
+    await expect(openAiCaller(CALL)).rejects.toMatchObject({ code: 'ai_news_model_unusable' });
+  });
+
+  it('rejects oversized model catalogs rather than sorting unbounded remote collections', async () => {
+    vi.stubGlobal('fetch', server(new Response(JSON.stringify({ data: Array.from({ length: 1_001 }, (_, i) => ({ id: `model-${i}` })) }), { status: 200 })));
+    await expect(openAiLister(CALL)).rejects.toMatchObject({ code: 'ai_news_model_unusable' });
+  });
+});
+
 describe('openAiCaller', () => {
   it('permits only explicit deployment-owned Ollama completions without weakening generic SSRF', async () => {
     const fetcher = server(completion(JSON.stringify(BATCH)));
