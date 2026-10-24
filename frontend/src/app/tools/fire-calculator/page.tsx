@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import Link from 'next/link';
 import { ArrowLeft, Flame, TrendingUp, Sparkles, ShieldCheck, HelpCircle, RotateCcw, Share2, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -14,6 +16,7 @@ import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
 import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 export default function FireCalculatorPage() {
+  const { locale } = useLocale();
   const [currentAge, setCurrentAge] = useState<number>(30);
   const [targetRetireAge, setTargetRetireAge] = useState<number>(45);
   const [currentNetWorth, setCurrentNetWorth] = useState<number>(50000000);
@@ -137,7 +140,9 @@ export default function FireCalculatorPage() {
               <span className="p-2 rounded-lg bg-rose-500/10 text-rose-500">
                 <Flame className="w-6 h-6" />
               </span>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">FIRE 조기은퇴 시뮬레이터</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            {localeLabel(locale, 'FIRE 조기은퇴 시뮬레이터', 'FIRE Early Retirement Simulator', 'FIRE 早期リタイア シミュレーター', 'FIRE 提前退休模拟器', 'Trình mô phỏng nghỉ hưu sớm FIRE')}
+          </h1>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
               트리니티 스터디(Trinity Study) 4% 안전 인출률과 실질 복리 투자 모델을 적용하여 경제적 자유 달성 시점을 정밀 산출합니다.

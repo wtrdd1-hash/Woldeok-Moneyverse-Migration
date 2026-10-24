@@ -1,5 +1,7 @@
 'use client';
 
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,6 +22,7 @@ interface CapitalGainsTaxCalculatorViewProps {
 }
 
 export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTaxCalculatorViewProps) {
+  const { locale } = useLocale();
   const defaultPreset = initialPreset ?? CAPITAL_GAINS_TAX_PRESETS[0]!;
 
   const [realizedGain, setRealizedGain] = useState<number>(defaultPreset.realizedGainKrw);
@@ -73,7 +76,7 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
             </span>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
-                {initialPreset ? initialPreset.name : '해외주식 양도소득세 & 250만원 절세 시뮬레이터'}
+                {localeLabel(locale, initialPreset ? initialPreset.name : '해외주식 양도소득세 & 250만원 절세 시뮬레이터', initialPreset ? ('Capital Gains Tax: ' + initialPreset.slug) : 'Capital Gains Tax Calculator', initialPreset ? ('譲渡所得税: ' + initialPreset.slug) : '海外株式譲渡所得税計算機', initialPreset ? ('资本利得税: ' + initialPreset.slug) : '海外股票资本利得税计算器', initialPreset ? ('Thuế vốn: ' + initialPreset.slug) : 'Máy tính thuế lãi vốn chứng khoán')}
               </h1>
               <p className="text-xs text-zinc-400 mt-0.5">
                 미국주식 250만 기본공제, 손실 상계(Tax-loss harvesting) 및 분할 매도 절세 효과를 0.1초 만에 무료 계산

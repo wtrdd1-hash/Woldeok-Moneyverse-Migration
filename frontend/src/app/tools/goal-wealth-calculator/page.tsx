@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import Link from 'next/link';
 import { Target, ArrowLeft, RotateCcw, TrendingUp, Sparkles, HelpCircle, ShieldCheck, Flame, Landmark, Calculator, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -54,6 +56,7 @@ const PRESETS: Preset[] = [
 ];
 
 export default function GoalWealthCalculatorPage() {
+  const { locale } = useLocale();
   const [currentWealth, setCurrentWealth] = useState<number>(100000000);
   const [monthlyContribution, setMonthlyContribution] = useState<number>(3000000);
   const [annualReturn, setAnnualReturn] = useState<number>(8.0);
@@ -205,8 +208,8 @@ export default function GoalWealthCalculatorPage() {
           <span>FIRE & 은퇴 시뮬레이터</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-          목표 자산·은퇴·FIRE 달성 계산기
-        </h1>
+              {localeLabel(locale, '목표 자산·은퇴·FIRE 달성 계산기', 'Target Wealth & Retirement Calculator', '目標資産・リタイア・FIRE達成計算機', '目标资产·退休·FIRE达成计算器', 'Máy tính mục tiêu tài sản & FIRE')}
+            </h1>
         <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
           저축액과 투자 수익률, 인플레이션을 반영하여 목표 금액 도달 시점을 예측하고, 4% 룰에 따른 안전 은퇴 생활비와 자금 유지 기간을 실시간으로 확인하세요.
         </p>

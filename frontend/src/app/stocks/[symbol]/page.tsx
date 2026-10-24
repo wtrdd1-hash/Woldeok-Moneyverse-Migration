@@ -1,3 +1,15 @@
+
+function getStockDisplayName(symbol: string, defaultName: string, locale: string): string {
+  if (locale === 'ko') return defaultName;
+  const map: Record<string, { en: string; ja: string; zh: string; vi: string }> = {
+    'WDG': { en: 'Woldeok Games', ja: 'ウォルドクゲームズ', zh: '沃尔德克游戏', vi: 'Woldeok Games' },
+    'WLD': { en: 'Woldeok Core', ja: 'ウォルドクコア', zh: '沃尔德克核心', vi: 'Woldeok Core' }
+  };
+  const item = map[symbol.toUpperCase()];
+  if (!item) return defaultName;
+  return locale === 'ja' ? item.ja : (locale === 'zh' ? item.zh : (locale === 'vi' ? item.vi : item.en));
+}
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -9,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { WatchlistToggle } from '../watchlist-toggle';
@@ -289,7 +302,7 @@ export default async function StockHubPage({
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-              {stock.name}
+              {getStockDisplayName(stock.symbol, stock.name, locale)}
             </h1>
           </div>
 

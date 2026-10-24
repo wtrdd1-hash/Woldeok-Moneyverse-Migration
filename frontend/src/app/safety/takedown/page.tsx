@@ -8,9 +8,12 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { IDLE } from '@/lib/action-state';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import { submitEmergencyTakedown } from './actions';
 
 export default function EmergencyTakedownPage() {
+  const { locale } = useLocale();
   const [state, formAction] = useActionState(submitEmergencyTakedown, IDLE);
 
   return (
@@ -23,7 +26,7 @@ export default function EmergencyTakedownPage() {
         </Button>
         <PageHeader
           eyebrow="EMERGENCY TAKEDOWN REQUEST"
-          title="비회원 긴급 콘텐츠 삭제 요청"
+          title={localeLabel(locale, '비회원 긴급 콘텐츠 삭제 요청', 'Emergency Content Takedown Request', '非会員緊急コンテンツ削除リクエスト', '非会员紧急内容删除申请', 'Yêu cầu gỡ bỏ nội dung khẩn cấp không cần tài khoản')}
         >
           본인 또는 미성년자의 동의 없이 게시된 사생활 침해, 성착취물, 협박 및 유해 콘텐츠의 긴급 삭제를 신청합니다.
         </PageHeader>

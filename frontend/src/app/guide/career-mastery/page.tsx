@@ -26,6 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CareerStepByStepGuide } from './career-step-by-step-guide';
 import { LegacyVisitorBanner } from './legacy-visitor-banner';
@@ -118,7 +119,7 @@ export default async function CareerMasteryGuidePage() {
 
       <PageHeader
         eyebrow="CAREER & WORKFORCE MASTERCLASS"
-        title={isEn ? '8 Professional Careers & Daily Farming Master Guide' : '8대 전문 직업 2.0 & 실전 급여 파밍 완벽 가이드'}
+        title={localeLabel(locale, '8대 전문 직업 2.0 & 실전 급여 파밍 완벽 가이드', '8 Professional Careers & Daily Farming Master Guide', '8大専門職業2.0＆実践給与ファーミング完全ガイド', '8大专业职业2.0与实战工资挖矿完全指南', 'Hướng dẫn chuyên sâu 8 nghề nghiệp 2.0 & cày lương thực tế')}
       >
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           {isEn

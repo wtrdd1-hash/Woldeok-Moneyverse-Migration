@@ -1,3 +1,5 @@
+import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Sparkles, Shield, Flame, Trophy, Crown, Gavel, Landmark, ChevronRight, CheckCircle2 } from 'lucide-react';
@@ -17,7 +19,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DopamineSystemGuidePage() {
+export default async function DopamineSystemGuidePage() {
+  const locale = await getServerLocale();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -55,7 +58,7 @@ export default function DopamineSystemGuidePage() {
               <Sparkles className="h-6 w-6" />
             </span>
             <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
-              도파민 보상 루프 & 공정 확률 가이드
+              {localeLabel(locale, '도파민 보상 루프 & 공정 확률 가이드', 'Dopamine Reward Loop & Fair Probability Guide', 'ドーパミン報酬ループ＆公正確率ガイド', '多巴胺奖励循环与公平概率指南', 'Hướng dẫn vòng lặp phần thưởng dopamine & xác suất công bằng')}
             </h1>
           </div>
           <p className="mt-2 text-xs text-slate-400 sm:text-sm leading-relaxed">

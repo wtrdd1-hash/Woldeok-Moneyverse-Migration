@@ -1,5 +1,7 @@
 'use client';
 
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +21,7 @@ interface RealEstateCalculatorViewProps {
 }
 
 export function RealEstateCalculatorView({ initialPreset }: RealEstateCalculatorViewProps) {
+  const { locale } = useLocale();
   const defaultPreset = initialPreset ?? REAL_ESTATE_PRESETS[0]!;
 
   const [purchasePrice, setPurchasePrice] = useState<number>(defaultPreset.purchasePrice);
@@ -71,7 +74,7 @@ export function RealEstateCalculatorView({ initialPreset }: RealEstateCalculator
             </span>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
-                {initialPreset ? initialPreset.name : '가상 부동산 월세/임대 수익률 계산기'}
+                {localeLabel(locale, initialPreset ? initialPreset.name : '가상 부동산 월세/임대 수익률 계산기', initialPreset ? ('Virtual Real Estate: ' + initialPreset.slug) : 'Virtual Real Estate Cap Rate Calculator', initialPreset ? ('仮想不動産: ' + initialPreset.slug) : '仮想不動産賃貸利回り計算機', initialPreset ? ('虚拟房地产: ' + initialPreset.slug) : '虚拟房地产租金回报率计算器', initialPreset ? ('BĐS Ảo: ' + initialPreset.slug) : 'Máy tính lợi nhuận BĐS ảo')}
               </h1>
               {initialPreset && (
                 <div className="flex items-center gap-1.5 text-xs text-zinc-400 mt-0.5">

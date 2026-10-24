@@ -1,5 +1,7 @@
 'use client';
 
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,6 +20,7 @@ interface KimchiPremiumCalculatorViewProps {
 }
 
 export function KimchiPremiumCalculatorView({ initialPreset }: KimchiPremiumCalculatorViewProps) {
+  const { locale } = useLocale();
   const defaultPreset = initialPreset ?? KIMCHI_PREMIUM_PRESETS[0]!;
 
   const [domesticPrice, setDomesticPrice] = useState<number>(defaultPreset.domesticPriceKrw);

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import Link from 'next/link';
 import { ShieldCheck, ArrowLeft, RotateCcw, TrendingUp, Sparkles, HelpCircle, AlertTriangle, Coins, Globe, Landmark, Calculator, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -56,6 +58,7 @@ const PRESETS: TaxPreset[] = [
 ];
 
 export default function TaxCalculatorPage() {
+  const { locale } = useLocale();
   const [category, setCategory] = useState<TaxCategory>('crypto');
   const [sellAmount, setSellAmount] = useState<number>(50000000);
   const [buyAmount, setBuyAmount] = useState<number>(20000000);
@@ -165,8 +168,8 @@ export default function TaxCalculatorPage() {
           <span>2026/2027 세법 개정 반영</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-          가상자산·금융투자 세금 계산기
-        </h1>
+              {localeLabel(locale, '가상자산·금융투자 세금 계산기', 'Crypto & Investment Tax Calculator', '暗号資産・金融投資税金計算機', '加密资产与金融投资税收计算器', 'Máy tính thuế tài sản mã hóa & đầu tư')}
+            </h1>
         <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
           가상자산 22% 양도소득세, 해외주식 기본공제 250만 원, 배당소득 15.4% 원천징수 및 금융소득 종합과세(건보료 피부양자 영향)를 실시간으로 계산하세요.
         </p>
