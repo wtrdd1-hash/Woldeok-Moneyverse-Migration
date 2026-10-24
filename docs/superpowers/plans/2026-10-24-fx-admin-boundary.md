@@ -23,10 +23,10 @@
 - [x] Run focused frontend suites; 8/8 passed.
 
 ## Task 3 — Release verification and integration
-- [ ] Run repository-wide lint, typecheck, build, test, API contract and security audit.
-- [ ] Confirm isolated PostgreSQL and exact-SHA Test gates; do not use Production-linked dev DB.
-- [ ] Re-fetch main and planning; review PR conflicts, open QA/A/C PRs and required CI.
-- [ ] Open Draft PR; hold merge/Production on any incomplete gate.
-- [ ] Log final SHA, code/contract, tests, blockers and cleanup decision.
+- [x] Run repository-wide lint, typecheck, build, test, API contract and security audit; frontend/audit gates fail.
+- [x] Assess isolated PostgreSQL and exact-SHA Test gates: BLOCKED; Production-linked dev DB untouched.
+- [x] Re-fetch main and planning; review PR conflicts, open QA/A/C PRs and required CI.
+- [x] Open Draft PR #1128; hold merge/Production on incomplete gates.
+- [x] Log code/contract, tests, blockers and cleanup decision; final SHA from final log commit.
 
 **Known out-of-scope blocker:** FX repository has direct account balance UPDATE without posting through the authoritative ledger, and direct app-role table DML. This must be redesigned and validated in a separate audited DB migration before production enablement; this branch must not claim financial integrity or end-to-end completion.
