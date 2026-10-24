@@ -15093,12 +15093,49 @@
                 "occurredAt"
               ]
             }
+          },
+          "recentInsights": {
+            "type": "object",
+            "properties": {
+              "scope": {
+                "type": "string",
+                "const": "recent"
+              },
+              "requestedLimit": {
+                "type": "number"
+              },
+              "sampledCount": {
+                "type": "number"
+              },
+              "incomingAmount": {
+                "type": "string"
+              },
+              "outgoingAmount": {
+                "type": "string"
+              },
+              "netAmount": {
+                "type": "string"
+              },
+              "neutralCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "scope",
+              "requestedLimit",
+              "sampledCount",
+              "incomingAmount",
+              "outgoingAmount",
+              "netAmount",
+              "neutralCount"
+            ]
           }
         },
         "required": [
           "userId",
           "balances",
-          "recentTransactions"
+          "recentTransactions",
+          "recentInsights"
         ]
       },
       "responseCompatibility": {

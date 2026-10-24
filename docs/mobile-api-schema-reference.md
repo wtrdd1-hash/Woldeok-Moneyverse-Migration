@@ -4751,6 +4751,14 @@ _No request body._
 | recentTransactions[].bankDelta | false | undefined \| string & object |  |
 | recentTransactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
 | recentTransactions[].occurredAt | true | string |  |
+| recentInsights | true | object |  |
+| recentInsights.scope | true | string="recent" | const="recent" |
+| recentInsights.requestedLimit | true | number |  |
+| recentInsights.sampledCount | true | number |  |
+| recentInsights.incomingAmount | true | string |  |
+| recentInsights.outgoingAmount | true | string |  |
+| recentInsights.netAmount | true | string |  |
+| recentInsights.neutralCount | true | number |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

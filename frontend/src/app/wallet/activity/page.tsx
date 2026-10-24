@@ -11,6 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
+import { RecentLedgerInsights } from './recent-insights';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +51,7 @@ export default async function WalletActivityPage() {
 
       <Card>
         <CardContent>
+          {wallet?.recentInsights && <RecentLedgerInsights insights={wallet.recentInsights} />}
           {!wallet ? (
             <EmptyState title="지금은 기록을 불러올 수 없어요." />
           ) : wallet.recentTransactions.length === 0 ? (

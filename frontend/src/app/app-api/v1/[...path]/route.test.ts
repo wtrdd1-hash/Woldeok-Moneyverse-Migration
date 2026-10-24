@@ -171,3 +171,20 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('Android wallet insights parity', () => {
+  it('passes exact integer-string insights with a private no-store cache policy', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const insights = { scope: 'recent', requestedLimit: 50, sampledCount: 1,
+      incomingAmount: '9'.repeat(38), outgoingAmount: '0', netAmount: '9'.repeat(38), neutralCount: 0 };
+    const fetchSpy = vi.fn(async (_url: RequestInfo | URL) => new Response(JSON.stringify({ recentInsights: insights }), {
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/wallet?recent=50'), context('wallet'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect((await response.json()).recentInsights).toEqual(insights);
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/wallet?recent=50');
+  });
+});
