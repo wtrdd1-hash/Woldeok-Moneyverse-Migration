@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -215,9 +216,11 @@ export class MarketplaceController {
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Request system provenance appraisal for collectible with fee burn' })
   requestAppraisal(@Req() request: RequestWithSession, @Body() body: RequestAppraisalDto) {
-    return this.guarded(
-      () => this.marketplaceService.requestAppraisal(requireUserId(request), body),
-      'failed to request appraisal',
+    requireUserId(request);
+    void body;
+    // Do not delegate to a mocked or future service that can bypass the hold.
+    throw new ServiceUnavailableException(
+      'appraisal issuance paused pending authoritative item ownership verification',
     );
   }
 }
