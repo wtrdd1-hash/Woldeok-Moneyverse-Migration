@@ -34,8 +34,8 @@ export default async function AdminShopPage() {
         }
       >
         <T
-          korean="등록된 78종 상품의 실시간 가격, 판매 활성화/비활성화, 한정판 수량 잔여 재고를 즉시 수정하고 제어할 수 있습니다."
-          english="Inspect and control prices, availability, and remaining stocks across all 78 registered shop items."
+          korean="상품 가격과 판매 상태를 관리합니다. 재고 수치는 참고용이며, 실제 구매 재고와 일치하는지 검증될 때까지 재고 수정은 중단됩니다."
+          english="Manage catalog prices and sale status. Stock figures are reference-only; stock editing is paused pending inventory reconciliation."
         />
       </PageHeader>
 

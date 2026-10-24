@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Save, Search, CheckCircle, XCircle, ShoppingBag, Package, Sparkles } from 'lucide-react';
+import { Save, Search, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { groupDigits } from '@/lib/money';
 
@@ -30,7 +30,6 @@ export function AdminShopView({ items }: AdminShopViewProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState<string>('');
   const [editActive, setEditActive] = useState<boolean>(true);
-  const [editStock, setEditStock] = useState<string>('');
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
   const filtered = localItems.filter(
@@ -44,19 +43,17 @@ export function AdminShopView({ items }: AdminShopViewProps) {
     setEditingId(item.id);
     setEditPrice(item.base_price);
     setEditActive(item.active);
-    setEditStock(item.current_stock !== null ? String(item.current_stock) : '');
   };
 
   const handleSave = async (id: string) => {
     setStatusMsg('저장 중...');
     try {
-      const res = await fetch(`/api/v1/admin/shop/items/${id}`, {
+      const res = await fetch(`/api/admin/shop/items/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           base_price: editPrice,
           active: editActive,
-          current_stock: editStock ? Number(editStock) : null,
         }),
       });
 
@@ -71,7 +68,6 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                 ...it,
                 base_price: editPrice,
                 active: editActive,
-                current_stock: editStock ? Number(editStock) : null,
               }
             : it,
         ),
@@ -105,6 +101,10 @@ export function AdminShopView({ items }: AdminShopViewProps) {
           </div>
         )}
       </div>
+
+      <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+        재고 수정 보류: 표시된 카탈로그 재고는 실제 구매 가능 재고가 아닐 수 있습니다. 가격과 판매 상태만 수정할 수 있습니다.
+      </p>
 
       {/* 1. 모바일 뷰: 스택형 카드 뷰 (md:hidden) */}
       <div className="grid gap-3 md:hidden">
@@ -188,24 +188,10 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-muted-foreground block mb-0.5">재고 수량</span>
-                  {isEditing ? (
-                    <input
-                      type="number"
-                      value={editStock}
-                      onChange={(e) => setEditStock(e.target.value)}
-                      placeholder="무제한"
-                      className="w-full px-2.5 py-1.5 bg-surface border border-border/80 rounded-lg text-xs font-mono"
-                    />
-                  ) : (
-                    <span className="font-mono font-medium text-foreground text-xs">
-                      {item.current_stock !== null ? (
-                        `${groupDigits(String(item.current_stock))}개`
-                      ) : (
-                        <span className="text-muted-foreground">무제한</span>
-                      )}
-                    </span>
-                  )}
+                  <span className="text-[11px] text-muted-foreground block mb-0.5">재고 참고값 (수정 보류)</span>
+                  <span className="font-mono font-medium text-muted-foreground text-xs">
+                    {item.current_stock !== null ? `${groupDigits(String(item.current_stock))}개` : '무제한 표시'}
+                  </span>
                 </div>
               </div>
 
@@ -290,19 +276,10 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                       )}
                     </td>
                     <td className="px-4 py-3 font-mono">
-                      {isEditing ? (
-                        <input
-                          type="number"
-                          value={editStock}
-                          onChange={(e) => setEditStock(e.target.value)}
-                          placeholder="무제한"
-                          className="w-20 px-2 py-1 bg-surface border border-border/80 rounded text-xs font-mono"
-                        />
-                      ) : (
-                        <span>
-                          {item.current_stock !== null ? `${groupDigits(String(item.current_stock))}개` : '무제한'}
-                        </span>
-                      )}
+                      <span className="text-muted-foreground">
+                        {item.current_stock !== null ? `${groupDigits(String(item.current_stock))}개` : '무제한 표시'}
+                        <span className="block text-[10px]">재고 수정 보류 · 참고값</span>
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       {isEditing ? (
