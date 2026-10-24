@@ -22,3 +22,21 @@
 - Root disk reached ENOSPC while other workers were active; cleaned only regenerable npm cache and pnpm metadata. No shared source, branch, worktree or DB mutation. End snapshot ~508 MiB free, filesystem still 100% used. All services last confirmed active.
 - Remote branch snapshots 1155→1156, unmerged 855, merged refs 301, open PRs 96→97 before new PR, conflicting #1143/#1110/#1107. Deleted 0; unique unmerged commits and worker worktrees preserved. Full patch-ID duplication check not claimed.
 - Test: isolated DB read-only PASS, official Test deployment/exact SHA/auth E2E BLOCKED. Production: RELEASE HOLD, no deploy/rollback. EN/KO QA reports `docs/releases/v2026.10.25.a0347.md` and `.ko.md`.
+
+## Exact changed-file inventory (14 files)
+- `backend/src/bank/bank.controller.ts`
+- `backend/src/bank/borrow-quote.controller.test.ts`
+- `backend/src/bank/borrow-quote.test.ts`
+- `backend/src/bank/borrow-quote.ts`
+- `docs/releases/v2026.10.25.a0347.ko.md`
+- `docs/releases/v2026.10.25.a0347.md`
+- `docs/superpowers/plans/2026-10-25-borrow-quote.md`
+- `docs/worklog/2026-10-25-hourly-a-borrow-quote-0347.md`
+- `frontend/src/app/app-api/v1/[...path]/route.test.ts`
+- `frontend/src/app/bank/borrow-quote/borrow-quote-card.test.tsx`
+- `frontend/src/app/bank/borrow-quote/borrow-quote-card.tsx`
+- `frontend/src/app/bank/borrow-quote/page.test.tsx`
+- `frontend/src/app/bank/borrow-quote/page.tsx`
+- `frontend/src/app/bank/page.tsx`
+
+- Final pre-close snapshot: remote refs 1,155 → 1,157 (other agents also active), open PRs 96 → 98 (including Draft #1217); merged ancestors 301, unmerged 856, conflicts #1143/#1110/#1107; deleted branches/worktrees 0. Do not remove other workers' unique unmerged commits.
