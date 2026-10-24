@@ -11,7 +11,7 @@
 - Plan: (1) TDD RED guard metadata tests, (2) GREEN controller decorators, (3) focused tests, lint/typecheck/build/full gates and security audit, (4) CI + Test exact-SHA review, (5) Draft PR and final HOLD log.
 
 ## In progress
-- [ ] Reproduce missing guard wiring in tests before implementation.
+- [x] Reproduced missing guard wiring: 9 new assertions RED; no source implementation yet. Local backend suite also has unrelated DB-dependent failures due absent isolated database.
 - [ ] Implement the smallest controller-only fix.
 - [ ] Validate changed SHA and document all failures.
 
