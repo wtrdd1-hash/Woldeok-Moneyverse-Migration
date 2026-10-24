@@ -4,12 +4,14 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Inject,
   InternalServerErrorException,
   Post,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -183,30 +185,20 @@ export class DopamineController {
 
   @Post('star-drop')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim Star Drop 5-tap upgrade tier reward' })
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Star Drop reward claims are disabled until ledger-backed receipts and quota enforcement exist' })
   async claimStarDrop(
     @Req() request: RequestWithSession,
-    @Body() body: StarDropClaimDto,
+    @Body() _body: StarDropClaimDto,
   ) {
-    const userId = requireUserId(request);
-    const tierRewards = {
-      rare: 1000,
-      epic: 2500,
-      legendary: 5000,
-      mythic: 10000,
-    };
-    const rewardAmount = tierRewards[body.tapTier] || 1000;
-
-    return {
-      success: true,
-      userId,
-      tier: body.tapTier,
-      rewardAmount,
-      claimedAt: new Date().toISOString(),
-    };
+    requireUserId(request);
+    // A client-chosen rarity cannot authorize WLD, stock or inventory issuance.
+    // Keep this endpoint mounted but fail closed until atomic, idempotent receipts exist.
+    throw new ServiceUnavailableException('Star Drop rewards are unavailable until verified ledger and inventory receipts exist');
   }
 
   @Get('status')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Get available daily dopamine activity quotas and cooldowns' })
   async getDopamineStatus(@Req() request: RequestWithSession) {
     const userId = requireUserId(request);
@@ -216,7 +208,7 @@ export class DopamineController {
       fortuneCookieAvailable: true,
       bullBearVotedToday: false,
       dailyShowdownsRemaining: 10,
-      starDropRemaining: 3,
+      starDropRemaining: 0,
     };
   }
 

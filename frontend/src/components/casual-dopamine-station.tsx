@@ -19,7 +19,7 @@ import { GoldenDuckFever } from './golden-duck-fever';
 import { DeokiPetStation } from './deoki-pet-station';
 import { BullBearPoll } from './bull-bear-poll';
 import { MiniShowdownModal } from './mini-showdown-modal';
-import { StarDropModal, type StarDropReward } from './star-drop-modal';
+import { StarDropModal } from './star-drop-modal';
 
 interface CasualDopamineStationProps {
   className?: string;
@@ -141,7 +141,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <Sparkles className="h-5 w-5" />
             </div>
             <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold text-indigo-300 border border-indigo-500/30">
-              {t('arcade.stardrop.badge', locale, '100% 당첨')}
+              스타 드롭 미리보기
             </span>
           </div>
           <div className="mt-3">
@@ -150,7 +150,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-indigo-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              {t('arcade.stardrop.desc', locale, '하늘에서 떨어지는 별빛 상자를 열고 랜덤 WLD와 레어 뱃지를 수집하세요.')}
+              상자를 다섯 번 탭해 등급 변화를 미리 확인하세요. WLD나 아이템은 지급되지 않습니다.
             </p>
           </div>
         </div>
@@ -291,10 +291,6 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
       <StarDropModal
         isOpen={activeModal === 'stardrop'}
         onClose={() => setActiveModal(null)}
-        dailyFreeRemaining={3}
-        onClaimReward={(reward: StarDropReward) => {
-          showRewardNotice(`스타 드롭 [${reward.title}] 수령 완료!`);
-        }}
       />
     </div>
   );
