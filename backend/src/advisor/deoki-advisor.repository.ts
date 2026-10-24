@@ -48,7 +48,7 @@ export class DeokiAdvisorRepository {
       const firstCash = cashRes.rows[0];
       cash = firstCash ? Math.max(0, Number(firstCash.balance)) : 0;
     } catch {
-      cash = 0;
+      throw new Error('Verified cash balance unavailable');
     }
 
     // 2. 예금/뱅킹 잔액 조회 (R11: 실제 DB enum인 USER_BANK 사용)
@@ -64,9 +64,8 @@ export class DeokiAdvisorRepository {
       );
       const firstSavings = savingsRes.rows[0];
       savings = firstSavings ? Math.max(0, Number(firstSavings.balance)) : 0;
-    } catch (err) {
-      console.warn('[DeokiAdvisor] Failed to query USER_BANK balance:', err);
-      savings = 0;
+    } catch {
+      throw new Error('Verified savings balance unavailable');
     }
 
     // 3. 보유 가상 주식 평가액 조회
@@ -94,9 +93,8 @@ export class DeokiAdvisorRepository {
           evalVal: val,
         });
       }
-    } catch (err) {
-      console.warn('[DeokiAdvisor] Failed to query stock positions:', err);
-      totalStockVal = 0;
+    } catch {
+      throw new Error('Verified stock positions unavailable');
     }
 
     // 4. 국채 보유액 조회 (R11: 실제 국채 보유 테이블 treasury_bond_holdings 연동)
@@ -112,17 +110,17 @@ export class DeokiAdvisorRepository {
       if (firstBond) {
         bondsVal = Number(firstBond.total_bonds);
       }
-    } catch (err) {
-      console.warn('[DeokiAdvisor] Failed to query treasury bonds:', err);
-      bondsVal = 0;
+    } catch {
+      throw new Error('Verified bond holdings unavailable');
     }
 
-    const totalAsset = Math.max(1, cash + savings + totalStockVal + bondsVal);
+    const totalAsset = cash + savings + totalStockVal + bondsVal;
+    const ratioDenominator = Math.max(1, totalAsset);
 
     // 5. 비중 및 집중도(HHI) 계산
-    const cashRatio = (cash + savings) / totalAsset;
-    const stockRatio = totalStockVal / totalAsset;
-    const bondRatio = bondsVal / totalAsset;
+    const cashRatio = (cash + savings) / ratioDenominator;
+    const stockRatio = totalStockVal / ratioDenominator;
+    const bondRatio = bondsVal / ratioDenominator;
 
     let hhi = 0;
     let topSymbol: string | null = null;

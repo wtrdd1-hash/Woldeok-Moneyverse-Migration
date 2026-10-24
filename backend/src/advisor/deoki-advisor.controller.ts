@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  UnauthorizedException,
   Body,
   Controller,
   Get,
@@ -29,8 +30,8 @@ export class DeokiAdvisorController {
       throw new BadRequestException('AI 금융 비서 덕이 서비스가 현재 점검 중입니다.');
     }
 
-    // 비로그인 상태이거나 데모 유저일 경우를 위한 폴백 처리
-    const userId = req.session?.user_id || '00000000-0000-0000-0000-000000000000';
+    const userId = req.session?.user_id;
+    if (!userId) throw new UnauthorizedException('Member session required');
 
     try {
       const diagnosis = await this.repository.diagnoseUserPortfolio(userId);
@@ -56,7 +57,8 @@ export class DeokiAdvisorController {
       throw new BadRequestException('상담 질문을 입력해주세요.');
     }
 
-    const userId = req.session?.user_id || '00000000-0000-0000-0000-000000000000';
+    const userId = req.session?.user_id;
+    if (!userId) throw new UnauthorizedException('Member session required');
 
     try {
       const advice = await this.repository.askDeoki(userId, question);
