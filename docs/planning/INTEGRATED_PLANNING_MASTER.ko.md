@@ -1,5 +1,40 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1242 — F675-117 재입고 관심 등록: 재고 권위·알림 경합 무결성 강화 (기능 보완 / 초안 / 배포 보류)
+
+### 회차·실제 코드에 근거한 정정
+- 이전 **Feature Addition v1240**(미병합 Draft #1195) → 현재 **Feature Improvement v1242** → 다음 **Feature Addition v1244**(잠정). 시작·중간 main c9a868b1e622341e2daa8b936ddf0988eda9988e. v1240 기획 브랜치 기반 문서 작업이며 Gemini/개발 A/B/C/QA 변경과 분리. 런타임·DB·WLD·Test·Production 변경 없음.
+- **코드상 재고 불일치 확인(운영 장애 발생을 증명한 것은 아님):** Migration 168의 admin_shop_update_item은 shop_catalog.current_stock만 수정하며 관리자 조회·컨트롤러도 해당 필드를 사용한다. 반면 Migration 165의 shop_catalog_list_v2와 실제 구매 함수 shop_purchase_catalog_policy_v215(Migration 218 래핑)는 shop_inventory.quantity를 조회·잠금·차감한다. Migration 092의 자동 경제 정책도 shop_inventory.quantity를 수정한다. 따라서 관리자 current_stock 변경만으로 실제 구매 가능한 재입고를 확인하거나 알림 이벤트를 만들면 거짓 알림이 된다. v1240의 포괄적 재고 작성자 검증을 명시적 P0로 격상한다.
+- 현재 구매 기준의 정본 수량은 **shop_inventory.quantity**다. NULL은 무제한이며 품절이 아니다. shop_catalog.current_stock은 불일치 조사와 관리자 계약 수정 전까지 비권위 레거시 값으로 취급한다. 레거시 필드에서 조용히 값을 복사하거나 동기화 완료·재입고 완료를 주장하지 않는다. NULL→양수, 상품 재활성화, 판매 시작, 가격 변경만으로 알림 이벤트를 만들지 않는다.
+
+### 목적·대상·화면·CTA·상태
+- 대상은 로그인·동의 유효 회원이며 실제 유한 재고 0인 상품을 **최대 30개** 관심 등록한다. 목적은 검증된 재입고 시점 안내이며 구매 예약·가격 보장·자동 구매가 아니다. /shop 품절 카드 **재입고 알림 받기** → 비공개 /account/shop-watches. CTA는 **관심 해제**, **현재 재고 확인**, **상품 보기**, **알림 닫기**, **새로고침**. 삭제·숨김 상품도 정보가 가려진 본인 카드에서 관심 해제가 가능하다. 비로그인은 로그인 안내. 등록·해제·알림으로 WLD·원장·재고·구매 한도가 바뀌지 않는다.
+- 상태: NOT_WATCHING, WATCHING_PENDING, WATCHING_CONFIRMED, CANCEL_PENDING, CANCELLED, STOCK_ZERO, STOCK_POSITIVE_VERIFIED, EVENT_PENDING, NOTICE_COMMITTED, NOTICE_SUPPRESSED, SOURCE_MISMATCH, SOURCE_UNVERIFIED, STALE_VERSION, UNKNOWN_COMMIT, ITEM_UNAVAILABLE, CAP_REACHED, SIGNED_OUT. 확인 실패를 저장 성공·재입고 성공으로 표시하지 않는다. 과거 영수증으로 취소된 관심을 되살리지 않는다. 타임아웃 시 본인 요청 영수증과 현재 관심 목록을 순서대로 재조회한다.
+- 알림 문구: **"확인 시점에 재고가 있었습니다. 현재 구매 가능 여부를 상점에서 다시 확인하세요. 상품이 예약된 것은 아닙니다."** 이동·구매 직전 최신 상품 조회, 실제 구매 시 재고·활성 상태·inventory.starts_at/ends_at·개인 한도·잔액·원장 권위를 재검증한다. catalog.sale_ends_at은 할인/가격 메타데이터일 수 있으므로 inventory 판매 기간과 동일하다고 추정하지 않는다.
+
+### API·DB·트랜잭션·관리자·보안
+- 회원 전용 GET/POST/DELETE /api/v1/shop/availability-watches 및 GET /api/v1/shop/availability-watches/requests/:key, Android /app-api/v1/shop/availability-watches 동등 경로. 인증 세션에서 actor를 결정하며 요청 본문 UUID로 신원을 인증하지 않는다. POST/DELETE UUID Idempotency-Key·32바이트 요청 지문·불변 영수증, DELETE 강한 If-Match/ETag. 비공개 상품도 본인 관심 해제 허용. 오류 400 입력, 401 세션, 403 동의/CSRF, 404 접근 불가 구별 방지, 409 한도/지문, 412 버전, 429 제한, 503 출처/커밋 불명. 본인·세션 세대·필터·정렬·만료에 묶인 HMAC 커서, 페이지 20개, private/no-store.
+- 제안 DB: shop_availability_watches 복합 PK(user_id,catalog_id), version>0, 활성·취소 시각 제약, 활성 부분 인덱스(user_id,updated_at DESC,catalog_id); shop_availability_watch_requests UNIQUE(user_id,idempotency_key), 지문 32바이트·불변 결과; shop_stock_transition_events PK(event_id), 상품 FK, from_quantity=0·to_quantity>0 CHECK, inventory_epoch·committed_at, UNIQUE(catalog_id,inventory_epoch); shop_watch_notice_receipts UNIQUE(user_id,event_id), 알림 ID·억제 사유. 기존 알림 모듈의 실제 테이블/API를 확인한 뒤 연동하고 가짜 전송 성공을 만들지 않는다. 보존·탈퇴 삭제·FK 정책은 개인정보 승인 전 확정하지 않는다.
+- **P0 정본 전환안(미승인·미실행):** 격리 읽기 전용 PostgreSQL에서 상품별 current_stock과 quantity, 관리자·정책·구매·시드 작성자 및 화면 조회 모델을 대조한다. 관리자 재고 조회·PATCH를 shop_inventory.quantity 기준으로 바꾸되 **상품 행 → 재고 행** 순서로 잠그고, current_stock은 소비자와 정합성 정책 승인 전까지 비권위 레거시로 명시한다. inventory→catalogue 단순 동기화 트리거 금지: Migration 092는 재고부터 변경하고 구매·관리자는 상품부터 잠가 잠금 순서 역전·교착이 가능하다. 미승인 일괄 보정 금지. 자동 정책의 0→양수 변화는 실제 커밋·판매 가능·작성자 출처가 확인된 경우에만 처리하며 관리자 재입고와 POLICY_REBALANCE를 통계에서 분리한다.
+- 실제 shop_inventory UPDATE의 유한 0→양수 변화만 같은 트랜잭션의 검증된 AFTER UPDATE 행 트리거 또는 단일 권한 있는 함수로 이벤트/아웃박스에 기록한다. 원 재고 트랜잭션이 롤백되면 이벤트도 롤백한다. 0→0·양수→양수·NULL·메타데이터 변경은 제외한다. event_id, 상품별 단조 증가 epoch 또는 동등한 충돌 없는 버전과 작성자 출처를 기록한다. 누락 이벤트 점검은 허용하되 스냅샷만 보고 과거 재입고 알림을 꾸며내지 않는다.
+- **알림 확정 순서:** SKIP LOCKED로 이벤트를 짧게 점유 → 실제 재고 행 FOR SHARE 잠금 → 재고 양수·판매 가능성 재검증 → 본인 관심 행 FOR UPDATE 잠금 → 활성·동의·해제·해당 이벤트 대상 여부 재확인 → 기존 앱 내 알림과 UNIQUE(user_id,event_id) 영수증을 원자적 커밋. 선행 구매로 재고가 소진되면 억제한다. 재고 잠금 동안 구매 UPDATE가 대기하므로 커밋 시점의 조건을 일관되게 검사한다. 해제와 알림은 관심 행에서 직렬화한다. 잠금 순서 이벤트→재고→관심을 통일하고 역순 경로를 금지한다. DB 잠금 중 외부 네트워크 호출 금지. 알림 저장이 분리된 구조면 영속 아웃박스·멱등 소비자를 사용하고 QUEUED와 COMMITTED를 구별한다.
+- SECURITY DEFINER는 고정 pg_catalog,pg_temp search_path, PUBLIC EXECUTE 및 앱 직접 DML/SELECT 철회, 최소 EXECUTE, 본인 권한 검증. 회원당 활성 30개를 회원 잠금으로 직렬화하고 분당 변경 10회 제한, 상품 ID 추측 공격 차단, CSRF·동의·로그아웃/계정 전환 응답 차단. 관리자는 총 관심 수·실제 재고 이벤트·출처·큐 지연·억제/실패 사유만 집계하며 회원별 관심 목록 조회나 임의 재입고 생성은 금지한다. 관리자 재고 변경은 기존 ReauthGuard·역할·감사를 유지한다.
+- 공개 /shop SEO는 유지, 본인 화면·영수증 API는 private/no-store/noindex, 사이트맵·구조화 데이터·외부 분석에서 제외. Android 인증 App API·영수증·오류·계정 전환 동일성. 모바일 320px·200% 확대·44px 터치·키보드/초점·모션 감소·확정 상태 aria-live·WCAG 2.2 AA. KPI는 **미달성 목표**: 거짓 확정 0, 사용자/이벤트 중복 0, 확정 취소 후 알림 0, 경합 테스트 중 오래된 알림 0, 정상 큐에서 10분 이내 적격 알림 커밋 99%; 정책 재균형/재고 소진/동의 철회 억제율, 이탈·지원 문의·출처 불일치·큐 지연 측정.
+
+### P0/P1 개발 백로그·회귀·배포
+- **P0 ENV1242-01:** 운영·개발·Test DB 격리, 5433 외부 바인딩 차단, 암호화 백업·격리 복원·원장 대조.
+- **P0 SEC1242-02:** 앱 과다 DML·PUBLIC 은행 함수 EXECUTE 최소화, 실제 앱 계정 권한·BOLA/BFLA 부정 테스트.
+- **P0 REL1242-03:** QA v1243 FAILED/HOLD(프론트 6실패/1,397통과, 감사 Critical2/High10, 봇 Critical1/High5, Migration266/280), 루트 디스크 99%·여유 1.1GB, 정확 SHA 공식 Test·롤백 게이트. 타 작업자 Worktree 임의 삭제 금지.
+- **P0 SHOP1242-04:** 관리자 current_stock과 실제 inventory.quantity 불일치, 모든 관리자·정책·구매·시드 작성자, 화면·판매기간 권위 검증 및 정본 계약 승인.
+- **P1 SHOP1242-05:** 정방향 관심·이벤트·영수증 DB, 인덱스·epoch·보존 정책·본인 함수. #1147 해결 전 마이그레이션 번호 미할당.
+- **P1 SHOP1242-06:** 관리자 재고 조회·수정 계약 정정, 원자적 실제 재고 전환 포착·작성자 출처·잠금 순서, 무단 보정 금지.
+- **P1 SHOP1242-07:** 재고/동의/취소 재검증을 포함한 제한된 큐 발송, 중복 없는 확정 앱 알림·재시도·아웃박스.
+- **P1 SHOP1242-08:** NestJS/Next.js 상점·본인 목록·영수증, Android 동등성, 모바일 접근성·세션 차단.
+- **P1 SHOP1242-09:** 관리자 비식별 지표, 개인정보·SEO·악용 방지, 출처 불일치·큐 경보.
+- **P1 SHOP1242-10:** 격리 실제 PostgreSQL TDD: 동일 키 100건→행·영수증 1개, 타 회원 접근 100건→유출 0, 관리자 재입고/정책 변경/구매/해제 경합 100건→거짓·중복 0, current_stock만 변경→이벤트 0, 롤백 재고 변경→이벤트 0, 0→양수→0 발송 전→알림 0, NULL→양수/양수→양수→이벤트 0, 30개 제한 경합, 격리 합성 10,001건 커서, WLD·원장 회귀, 정확 SHA 공식 Test 웹·관리자·Android.
+- 기능 스위치 기본 OFF. 승인된 격리 백업·복원 후 추가형 정방향 DB, 구버전 호환, 검증된 카나리, 별도 개발 브랜치·Test exact-SHA·보안/QA·승인 GitOps·무중단 운영 승격. 롤백은 신규 등록·알림 발송 중단, 본인 해제·확정 영수증·기존 알림 유지, 재고 거래·원장 역조작 금지. 기획 예약은 병합·배포하지 않는다.
+- 외부 독립 레퍼런스 **실제 10,000건 확보·중복 제거·출처/분류 승인 게이트 유지**. PostgreSQL/OWASP/W3C 3개 발행기관 검토는 승인 레코드 수가 아니다. 이번 신규 승인 **0건**, 누적 실제 검증 **미확인/10,000건**, **BLOCKED / IN PROGRESS**.
+
 ## v2026.10.25.1240 — F675-117 상점 재입고 관심 등록 및 검증된 앱 내 재고 알림 영수증 (기능 추가 / 초안 / 배포 보류)
 
 ### 회차·근거·범위

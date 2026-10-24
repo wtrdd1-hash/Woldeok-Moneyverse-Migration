@@ -1,5 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-117 hardening — v2026.10.25.1242 (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Verified mismatch: admin shop migration 168 changes catalogue.current_stock, while read/checkout migration 165 uses inventory.quantity; macro policy migration 092 also writes inventory. Catalogue-only edits are NOT restock proof; no event/notification until stock authority and admin contract are reconciled in isolated PostgreSQL.
+- P0 ENV1242-01 SEC1242-02 REL1242-03 SHOP1242-04; P1 SHOP1242-05 SHOP1242-06 SHOP1242-07 SHOP1242-08 SHOP1242-09 SHOP1242-10. Inventory 0→positive same-transaction event with provenance/epoch, lock-safe dispatcher rechecking positive stock, active watch and consent, immutable unique notice receipts, no stale/cancelled notices. Full UX/API/DB/Android/a11y/SEO/KPI/rollback in EN/KO integrated masters.
+- Previous Addition v1240 / Current Improvement v1242 / Next Addition v1244. QA v1243 HOLD, root 99%, no Test exact-SHA or restore; 0 new approved independent records, cumulative UNKNOWN/10,000. Docs only.
+
 ## F675-117 adoption — v2026.10.25.1240 (DRAFT / RELEASE HOLD)
 - Source-backed gap: current /shop Store 2.0 catalogue reports finite nullable inventory and enforces stock at purchase, but inspected main has no owner restock watch. New member-only 30-cap out-of-stock watch and deduplicated in-app notice on committed finite inventory 0→positive; never a reservation, guaranteed checkout or WLD movement. Existing notification consent and review plans remain independent.
 - Web /shop → /account/shop-watches; private owner API/Android parity; request-digest immutable receipts, version CAS, SQL stock transition and dispatch recheck, admin aggregate, noindex/no-store, WCAG AA, 100-way concurrency and 10,001 isolated synthetic cursor fixture. P0 ENV1240-01 SEC1240-02 REL1240-03 SHOP1240-04; P1 SHOP1240-05 SHOP1240-06 SHOP1240-07 SHOP1240-08 SHOP1240-09 SHOP1240-10. Full spec in integrated EN/KO masters.
