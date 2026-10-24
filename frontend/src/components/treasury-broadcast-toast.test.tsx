@@ -2,8 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { TreasuryBroadcastToast } from './treasury-broadcast-toast';
 
+const localeState = vi.hoisted(() => ({ value: 'ko' }));
 vi.mock('@/components/locale-provider', () => ({
-  useLocale: () => ({ locale: 'ko' }),
+  useLocale: () => ({ locale: localeState.value }),
 }));
 
 const receipt = {
@@ -19,6 +20,7 @@ afterEach(() => {
   cleanup();
   vi.useRealTimers();
   vi.restoreAllMocks();
+  localeState.value = 'ko';
 });
 
 describe('TreasuryBroadcastToast — verified server notices only', () => {
@@ -68,6 +70,17 @@ describe('TreasuryBroadcastToast — verified server notices only', () => {
     rerender(<TreasuryBroadcastToast signedIn />);
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(3));
     expect(screen.queryByRole('status')).toBeNull();
+  });
+
+  it('supports Vietnamese member notice labels after the main 5-locale expansion', async () => {
+    localeState.value = 'vi';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ notifications: [{ ...receipt, created_at: new Date().toISOString() }] }),
+    } as Response);
+    render(<TreasuryBroadcastToast signedIn />);
+    expect(await screen.findByRole('link', { name: 'Mở thông báo' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Đóng thông báo' })).toBeTruthy();
   });
 
   it('does not reveal a late response after sign-out', async () => {
