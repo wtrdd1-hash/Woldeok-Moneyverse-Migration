@@ -16,12 +16,14 @@ import type {
   WalletRewardAvailabilityRow,
   WalletTransactionRow,
   WalletTransferInput,
+  WalletPocket,
 } from './wallet.repository';
 import {
   PostgresWalletRepository,
   WalletInputError,
   requirePositiveWld,
   requireRecentLimit,
+  requireWalletPocket,
   requireUuid,
 } from './wallet.repository';
 
@@ -84,6 +86,7 @@ export class WalletRecipientError extends Error {
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
   recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]>;
+  pocketTransactionsForUser?(userId: string, pocket: WalletPocket, limit: number): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -381,6 +384,28 @@ export class WalletService {
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
     };
+  }
+
+  async pocketTransactions(
+    authenticatedUserId: string,
+    pocket: unknown,
+    recentLimit = 50,
+  ): Promise<{ pocket: WalletPocket; limit: number; transactions: WalletTransactionView[] }> {
+    const userId = requireUuid(authenticatedUserId, 'authenticated user id');
+    const selected = requireWalletPocket(pocket);
+    const limit = requireRecentLimit(recentLimit);
+    // A repository without this read model is not a reason to return empty history.
+    if (!this.repository.pocketTransactionsForUser) throw new Error('wallet pocket history is unavailable');
+    const rows = await this.repository.pocketTransactionsForUser(userId, selected, limit);
+    const transactions = normalizeTransactions(rows);
+    // Guard against stale/broken projections that silently return other-pocket rows.
+    for (const transaction of transactions) {
+      const delta = selected === 'cash' ? transaction.cashDelta : transaction.bankDelta;
+      if (delta === undefined || BigInt(delta) === 0n) {
+        throw new Error('wallet pocket history returned an invalid projection');
+      }
+    }
+    return { pocket: selected, limit, transactions };
   }
 
   async transfer(

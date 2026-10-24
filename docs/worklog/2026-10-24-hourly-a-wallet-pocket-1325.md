@@ -18,3 +18,9 @@
 
 ## Status
 STARTED; no code change or DB writes. Scope is owner-specific pocket movement history, not a financial transfer.
+## Midpoint — 2026-10-24 13:33 KST
+- TDD RED: backend 3 expected failures (missing pocket method); frontend missing pocket helper import; preserved `/tmp/mv-a1325-red-{backend,frontend}.log`.
+- TDD GREEN: backend focused 26/26 PASS (pocket 3 + mounted/auth 23); frontend 14/14 PASS (pocket 3 + Android gateway 11).
+- Full workspace TypeScript typecheck PASS; no migration, production SQL write, or deployment.
+- Implemented backend owner-filtered SQL pocket read model with numeric aggregation and filter BEFORE limit; guarded `GET /api/v1/wallet/transactions`, 1..50, private/no-store/noindex. Android generic gateway forwards same query and privacy headers. UI adds accessible All/Cash/Bank links and signed pocket deltas.
+- Known limitation: activity shows only most recent 50 per selected pocket; no claim of all-history completeness.
