@@ -9,6 +9,7 @@ import {
   appGatewayOrigin,
   appGatewayPath,
   isJsonMediaType,
+  isPrivateWalletAppPath,
 } from '@/lib/app-gateway';
 
 const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
@@ -144,6 +145,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     const value = response.headers.get(name);
     if (value) headers.set(name, value);
   }
+  if (isPrivateWalletAppPath(parts)) headers.set('cache-control', 'private, no-store');
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {

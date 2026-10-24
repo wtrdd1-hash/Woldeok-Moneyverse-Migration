@@ -36,6 +36,50 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('forwards bounded wallet category query without caching member WLD data on Android', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let upstreamUrl = '';
+    const fetchSpy = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      upstreamUrl = String(url);
+      expect(new Headers(init?.headers).get('x-internal-token')).toHaveLength(32);
+      return new Response(JSON.stringify({ recentTransactions: [{ netAmount: '900719925474099312345678901234567890' }] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/wallet?recent=50&category=banking', { cookie: 'session=example' }),
+      context('wallet'),
+    );
+    expect(response.status).toBe(200);
+    expect(upstreamUrl).toContain('/api/v1/wallet?recent=50&category=banking');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect((await response.json()).recentTransactions[0].netAmount).toBe('900719925474099312345678901234567890');
+  });
+
+  it('forwards bounded wallet category query without caching member WLD data on Android', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let upstreamUrl = '';
+    const fetchSpy = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      upstreamUrl = String(url);
+      expect(new Headers(init?.headers).get('x-internal-token')).toHaveLength(32);
+      return new Response(JSON.stringify({ recentTransactions: [{ netAmount: '900719925474099312345678901234567890' }] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/wallet?recent=50&category=banking', { cookie: 'session=example' }),
+      context('wallet'),
+    );
+    expect(response.status).toBe(200);
+    expect(upstreamUrl).toContain('/api/v1/wallet?recent=50&category=banking');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect((await response.json()).recentTransactions[0].netAmount).toBe('900719925474099312345678901234567890');
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

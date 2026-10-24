@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -81,14 +82,18 @@ export class WalletController {
    * an unbounded query.
    */
   @Get('wallet')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Balances and recent ledger entries for the caller' })
-  overview(@Req() request: RequestWithSession, @Query('recent') recent?: string) {
-    if (recent === undefined) return this.service().overview(requireUserId(request));
+  overview(@Req() request: RequestWithSession, @Query('recent') recent?: string, @Query('category') category?: string) {
+    if (category !== undefined && !['all', 'rewards', 'transfers', 'banking', 'purchases', 'markets', 'other'].includes(category)) {
+      throw new BadRequestException('unknown wallet activity category');
+    }
+    if (recent === undefined) return this.service().overview(requireUserId(request), { ...(category === undefined ? {} : { category }) });
     const parsed = Number(recent);
     if (!Number.isSafeInteger(parsed)) {
       throw new BadRequestException('recent must be a whole number');
     }
-    return this.service().overview(requireUserId(request), { recentLimit: parsed });
+    return this.service().overview(requireUserId(request), { recentLimit: parsed, ...(category === undefined ? {} : { category }) });
   }
 
   @Get('wallet/recipients/search')

@@ -169,3 +169,8 @@ export function appApiContract(origin: string) {
     groups: [...APP_API_GROUPS],
   } as const;
 }
+
+/** Owner financial API responses must never be cached by mobile intermediaries. */
+export function isPrivateWalletAppPath(parts: readonly string[]): boolean {
+  return parts[0] === 'wallet';
+}
