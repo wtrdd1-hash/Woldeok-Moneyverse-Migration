@@ -1,5 +1,43 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## F675-118 / 기획 v1246 — 알림 근거·읽음 상태 무결성 보완 (기능 보완 / 초안·보류)
+
+### 기준·작업 분리·이전 가정 정정
+- 이전 Feature Addition v1244 → 현재 Feature Improvement v1246 → 다음 Feature Addition v1248(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재확인. 이전 기획 #1205 및 개발 C #1206 미병합. 최신 QA v1249 FAILED/HOLD. **이번 기획은 UI·런타임·DB·타 작업자 브랜치 변경 없음.**
+- 개발 C Draft #1206(HEAD `857d3244243fc8edcafdced09e78308ddca84755`)은 이미 가상 카드 6개 제거, BFF 데이터 검증, 서버 읽음·전체 읽음 재조회, 비공개 캐시, 접근성 및 미검증 금융 문구 숨김을 담당. GitHub `runtime-check` FAILED. **C의 컴포넌트·BFF를 중복 개발하지 않음.** 제목·본문 금액 문자열 숨김은 보조 안전장치이지 실제 원장 거래의 증명이 아님.
+- 실제 main의 `NotificationService.listNotifications`는 `public.in_app_notifications`를 `user_id=$1`로 직접 SELECT하며 `created_at DESC`+OFFSET 사용. 동시간 기록의 ID 보조 정렬이 없고 삽입 경합 시 중복·누락 가능. 앱 계정의 직접 조회 권한과 세션 actor 결합은 격리 DB에서 검증해야 하며 TypeScript WHERE만으로 DB 권한 경계가 증명되지 않음. `markRead`는 boolean, `markAllRead`는 건수만 반환하여 요청키·불변 영수증·원자적 전체 읽음 스냅샷이 입증되지 않음.
+
+### 회원 화면·API·근거 계약(제안이며 미구현)
+1. 기존 `/account/notifications` 및 C #1206의 목록·필터·읽음 UI를 1단계 기준으로 유지. 후속 개발에서 검증된 본인 원천에만 '근거 확인' CTA 추가. LOADING, READY, VERIFIED_EMPTY, UNAVAILABLE, SOURCE_UNVERIFIED, SOURCE_UNAVAILABLE, SIGNED_OUT, CONFLICT, UNKNOWN_COMMIT 구분. 503을 빈 목록으로 처리하지 않고 계정 전환의 오래된 응답을 폐기. claim-all 409 유지, 목표/NPC 동의 설정과 분리.
+2. 본인 전용 `GET /api/v1/notifications/verified?category=...&unreadOnly=...&limit=20&cursor=...` → `{items,nextCursor,snapshotAt,unreadCount}`. `(created_at DESC,id DESC)` seek 정렬과 회원·세션·필터·스냅샷·만료에 결합된 HMAC 커서, 한도 1~100. 위조·만료·타 회원 커서는 정보 노출 없이 거부. 기존 OFFSET API는 계약 이행 없이 임의 변경 금지.
+3. 본인 전용 `GET /api/v1/notifications/:id/evidence` → `{notificationId,status:'VERIFIED'|'UNVERIFIED'|'NOT_APPLICABLE',sourceKind,verifiedAt,amountWld?}`. 신뢰된 발행자 레지스트리 및 서버 내부 JOIN으로 확정된 원천·계정 소유권·원장 posting/정산을 조회 시점에 검증. **본인 확정 원장 근거가 있을 때만** 정확한 십진 문자열 `amountWld` 표시. 제목·본문·링크·`dedupe_key`·발행자 자기선언·클라이언트 UUID는 증거가 아님. 부재/타인 근거 404, 원천 장애 503이며 금액·지급 배지 미표시. 임의 URL·상대방 정보 금지.
+4. 읽음 요청은 세션 actor·동의·CSRF·UUID 멱등 키·정규화 요청 다이제스트 필수. 같은 키/본문은 최초 불변 `{requestId,readAt,affectedCount,snapshotVersion}` 반환, 다른 본문은 409. 전체 읽음은 대상 스냅샷을 고정해 이후 도착한 알림은 미확인 유지. C #1206의 boolean/count 재조회만으로 exactly-once 보장 주장 금지. 확정 여부 미상은 영수증 및 현재 서버 상태 재조회; 과거 영수증으로 삭제·새 상태 덮어쓰기 금지.
+5. 링크는 동일 출처 허용 경로만 제공하고 클릭 시 권한 재검증. 임의 리디렉션·HTML 주입 금지. `SECURITY_CRITICAL`은 선택적 마케팅/목표 수신 거부와 분리. 로그아웃·계정 변경·동의 철회 시 공유 캐시 및 지연 응답 차단. OS 푸시·이메일 의존 없음.
+
+### DB 권위·제약·잠금·개인정보·배포
+- 마이그레이션 번호 부여 전 격리 복원 DB에서 실제 스키마·발행자·권한·마이그레이션 이력 읽기 전용 확인. `notification_evidence_links` 제안: UUID PK, `notification_id` UNIQUE/FK(삭제 연쇄는 개인정보 정책 승인 후), `user_id` FK, 허용 `source_kind` CHECK, `source_id`, 불변 32바이트 다이제스트, `proof_status`, `verified_at`, `created_at`; VERIFIED에는 원천 ID·다이제스트 필수. 본인 seek 인덱스 `(user_id,created_at DESC,id DESC)`, 근거 조회 `(source_kind,source_id)`는 실제 통계/EXPLAIN 후 확정. 기존 출처 미상 알림은 UNVERIFIED로 남기고 가상 소급 근거 생성 금지.
+- `notification_read_receipts`: `(user_id,idempotency_key)` UNIQUE, `payload_digest`, `snapshot_at`, `read_at`, `affected_count`, `result_version`, 불변 확정 결과 및 승인된 보존 정책. 트랜잭션 잠금 순서: 신뢰 actor/회원 잠금 → 요청 영수증 충돌 처리 → UUID 정렬된 대상 알림 잠금 → `is_read/read_at` 최초 1회 변경 → 영수증 원자 커밋. 같은 키 100건에서도 첫 결과 유지, 다른 본문 409, 발행자·개인정보 삭제와 교착 방지. 전체 읽음 스냅샷 이후 알림은 미확인 유지. 실제 잠금·트랜잭션은 격리 PostgreSQL TDD 필수.
+- `SECURITY DEFINER` 고정 search_path·객체 명시·본인 확인·최소 EXECUTE, 앱 계정 광범위 직접 DML 및 PUBLIC 권한 금지. #999 발행 중복, #1004 선호, #1015 요약, C #1206/#1101/#1130, B #1117 P2P와 조정. migration266 수정 금지, #1147의 280 충돌 해결 전 번호 부여 금지. 운영 연계 DB는 읽기 전용.
+- 관리자 `/admin/notifications/evidence`는 검증률·발행 지연·원천 장애·타인 접근 차단 건수의 비식별 집계만 제공; 본문·PII·원장 금액·증거 조작 기능 금지. 영수증/증거 보존·계정 삭제·감사 로그·개인정보 표본화 승인 필요. WCAG 2.2 AA, 320px·200% 확대·44px 터치·초점·상태 aria-live·모션 감소, 회원 페이지 private/no-store/noindex/nofollow, Android app-api 동등성 계약 테스트. KPI 허위 지급 주장 0, 타 회원 유출 0, 오래된 재시도 오판 0, 검증률·지연시간은 개인정보 없이 측정.
+
+### P0/P1 독립 개발 백로그 10개
+- **P0 ENV1246-01** — 루트 100%(현재 여유 약 594MiB) 용량을 타 작업자 파일 삭제 없이 안정화, 운영/개발/Test DB 분리, 5433 전체 바인딩 제한, DB 식별 및 암호화 격리 복원 증명.
+- **P0 SEC1246-02** — QA v1249 앱 UPDATE+DELETE 241개 중 235개 테이블, PUBLIC 은행 EXECUTE 3개 및 알림 직접 SELECT 권한 감사; 신뢰 actor/발행자 결합과 타 회원·위조 발행자·권한 부정 테스트. 승인된 순방향 최소권한 변경만.
+- **P0 REL1246-03** — QA v1249 FAILED/HOLD, C #1206 CI runtime-check FAILED, migration266 체크섬·280 충돌, 전체 프런트/보안 감사, 정확 SHA 인증 Test 금융 E2E, GitOps 심볼릭 링크/롤백·격리 복원 게이트 해결.
+- **P0 NOTIF1246-04** — 발행자→알림→원천 연결 전수 분류, 금융/보안 카테고리·링크별 검증, C #1206 UI 및 B #1117 P2P 작업과 책임 분리. 예시 문구를 실제 지급 증거로 간주 금지.
+- **P1 NOTIF1246-05** — 본인 근거 링크·불변 영수증의 추가형 DB, PK/FK/UNIQUE/CHECK/인덱스·삭제/보존·마이그레이션 패리티. 번호는 #1147 해결 후.
+- **P1 NOTIF1246-06** — 확정된 본인 원장/권위 발행 원천만 읽기 검증, 404/503 실패 폐쇄, 증명된 경우만 정확한 WLD 십진 문자열.
+- **P1 NOTIF1246-07** — HMAC 회원·스냅샷 커서, 원자적 단건/전체 읽음 멱등성·버전 경계, 다른 본문 409, 확정 불명 시 재조회, 스냅샷 이후 신규 알림 미확인 유지.
+- **P1 NOTIF1246-08** — C #1206과 계약 통합(화면 중복 개발 금지), Next BFF/SSR 근거 CTA·오류 상태, Android `/app-api/v1` 동등성, 로그아웃 차단, 320px/200%/스크린리더 테스트.
+- **P1 NOTIF1246-09** — 관리자 비식별 원천 건전성, 개인정보/삭제 승인, 악용 방지, SEO 비색인·캐시 금지, 원천 안전 KPI·금융 오인 배지 금지.
+- **P1 NOTIF1246-10** — 격리 PostgreSQL+Nest/Next/Android 회귀, 동일 키 100건·타 회원 100건·전체 읽음/신규 알림 경합 100건·동일 시각 합성 10,001건 커서, 복원·정확 SHA Test·기능 OFF 롤백. 모두 **테스트 계획이며 이번 회차 미실행**.
+
+### 수용 기준·외부 근거·운영승격 보류
+- 동일 키 100건은 영수증 1개와 최초 read_at 보존, 같은 키 다른 본문 100건은 409, 타 회원 증거 조회 100건 유출 0, 동시간 합성 10,001건 중복·누락 0, 전체 읽음 이후 신규 알림 미확인, 근거 없으면 지급액 미표시, C #1206 실제 알림 유지, `claim-all` 409. 이번 기획 런타임 테스트 0건.
+- 별도 개발 브랜치 → 승인된 추가형 마이그레이션·격리 DB ACL/복원 → 정확 HEAD CI/보안·인증 Test 웹/Android/금융 E2E → QA/GitOps 승인 카나리 → 모든 게이트 통과 후 운영. `verified_notification_inbox` 기능 스위치 OFF 유지. 롤백은 OFF+이전 불변 릴리스, 증거/영수증 보존, 원장 재작성 금지. 이번 회차 런타임·DB·WLD·Test·Production·main 병합·타 작업자 변경 없음.
+- **외부 근거 게이트:** 실제 독립 자료 10,000건 수집·중복 제거·근거 분류·승인 유지. 신규 승인 0, 누적 검증 UNKNOWN/10,000 = BLOCKED / IN PROGRESS. 기술 문서 발행기관 및 합성 10,001건은 독립 승인 자료 수량이 아님.
+
+
 ## F675-118 / 기획 v1244 — 검증형 회원 알림함 및 원천 근거 타임라인 (기능 추가 / 초안·보류)
 
 ### 목적·대상·실제 구현 근거
