@@ -18,8 +18,14 @@
 ## In progress
 - Initial isolated worktree created; implementation pending TDD RED.
 
-## Finished
-- PENDING.
+## Finished (00:42 KST)
+- Implementation and targeted regressions completed in independent branch; **release not completed** (PARTIAL / BLOCKED). Code SHA: 483ebca8a5e0900be725b9117ad094e5cdc52435. New Draft PR #1197; exact final documentation SHA and CI status are tracked in the PR.
+- Changed 15 files (Backend controller/calculator/tests/E2E, Next member page/card/types/loan link, Android app-gateway contract/tests, EN/KO release notes and worklog). No migration, ledger write, production database change or service restart.
+- Start remote heads 83 (82 non-main), open PRs 79. End remote heads 85 (84 non-main), open PRs 81. Counts include other workers' concurrent branches/PRs. Three pre-existing conflicting PRs #1143/#1110/#1107 preserved; no branch deletion. Our branch contains unique unmerged commits; prior A/B/C/Gemini/QA work preserved.
+- Test: isolated PG role/owner read PASS; official exact-SHA Test backend/API/DB/auth/positive-loan flow BLOCKED. Production: NOT DEPLOYED; GitOps gate BLOCKED. Rollback: NOT EXECUTED; no DB/schema rollback needed.
+- Unresolved: six existing frontend failures, Turbopack symlink build failure, security advisories, official Test positive-loan E2E and backup/restore attestation. CI final SHA must not be interpreted as a release authorization without full gates.
+- Host cleanup: removed only this task worktree's generated .next and temporary dependency symlinks, preserving all other agents' worktrees and data. Scheduled tasks left untouched.
+
 
 ## In-progress checkpoint 1 (00:26 KST)
 - TDD RED: backend repayment preview test could not import missing module (expected failure); frontend initially 3 FAIL due inherited NODE_ENV=production causing React.act unavailable. Re-ran with NODE_ENV=test, 17 PASS.
