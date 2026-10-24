@@ -47,9 +47,10 @@ describe('AI Daily Blog System', () => {
 
   it('generates an unpublished AI draft without mutating the editorial store', () => {
     const initialCount = getAllBlogPosts().length;
-    const newPost = generateDailyAiBlogPost();
+    const newPost = generateDailyAiBlogPost({ category: 'WEALTH', country: 'KR' });
 
     expect(newPost).toBeDefined();
+    expect(newPost.category).toBe('WEALTH');
     expect(newPost.title).toContain('[AI 금융칼럼]');
     expect(newPost.isAiGenerated).toBe(true);
     expect(newPost.content).toContain('덕이');
@@ -57,6 +58,14 @@ describe('AI Daily Blog System', () => {
 
     const afterCount = getAllBlogPosts().length;
     expect(afterCount).toBe(initialCount);
+  });
+
+  it('labels explicitly selected technology drafts as technology columns', () => {
+    const newPost = generateDailyAiBlogPost({ category: 'TECH', country: 'KR' });
+
+    expect(newPost.category).toBe('TECH');
+    expect(newPost.title).toContain('[AI 테크칼럼]');
+    expect(newPost.isAiGenerated).toBe(true);
   });
 
   it('verifies GET /api/blog endpoint returns post array', async () => {
