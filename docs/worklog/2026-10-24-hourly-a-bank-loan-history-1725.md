@@ -13,3 +13,8 @@
 
 ## Finished
 - Pending; Test/Production release HOLD until verified.
+
+### Checkpoint 1 — RED
+- Re-read current main and EN/KO plans before implementation; main remains `49788d09494fed3e463651945b83386e87dd47bc`.
+- Added backend service/controller, web UI, and Android query/no-store regression tests before implementation. Backend RED verified: 4 expected failures (status ignored, invalid status accepted, controller not forwarding); frontend RED verified: missing component import. Contract build prerequisite repaired before valid backend RED.
+- Existing Android app-api already forwards the query and preserves backend `cache-control`; new regression covers it without changing gateway security boundaries.
