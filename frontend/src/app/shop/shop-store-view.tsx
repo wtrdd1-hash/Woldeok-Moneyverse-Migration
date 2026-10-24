@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import {
   Sparkles,
@@ -16,11 +17,13 @@ import {
   Tag,
   Clock,
   Coins,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { compareAmounts, groupDigits } from '@/lib/money';
 import { FiatBadge } from '@/components/fiat-amount';
 import { AvatarWithCosmetics, NameplateWithTitle, type UserCosmetics } from '@/components/profile-cosmetics';
+import { buyCatalogItemDirect } from './actions';
 
 export interface CatalogItem {
   readonly catalog_id: string;
@@ -71,6 +74,7 @@ export function ShopStoreView({
   userAvatarUrl,
 }: ShopStoreViewProps) {
   const router = useRouter();
+  const [mounted, setMounted] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [previewItem, setPreviewItem] = useState<CatalogItem | null>(null);
   const [buyingItem, setBuyingItem] = useState<CatalogItem | null>(null);
@@ -78,6 +82,21 @@ export function ShopStoreView({
   const [buyStatus, setBuyStatus] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Keyboard shortcut: Escape to close open modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !buyStatus) {
+        setBuyingItem(null);
+        setPreviewItem(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [buyStatus]);
 
   const filteredItems = items.filter((item) => {
     if (selectedCategory === 'all') return true;
@@ -87,19 +106,12 @@ export function ShopStoreView({
   const handleBuy = async (item: CatalogItem) => {
     setBuyStatus('구매 처리 중...');
     try {
-      const idempotencyKey = crypto.randomUUID();
-      const res = await fetch(`/api/v1/shop/catalog/${item.catalog_id}/purchases`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idempotencyKey, quantity: buyQuantity }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || '구매에 실패했습니다.');
+      const result = await buyCatalogItemDirect(item.catalog_id, buyQuantity);
+      if (!result.success) {
+        throw new Error(result.message);
       }
 
-      setBuyStatus('구매가 완료되었습니다!');
+      setBuyStatus(result.message);
       setTimeout(() => {
         setBuyingItem(null);
         setBuyStatus(null);
@@ -311,119 +323,160 @@ export function ShopStoreView({
         })}
       </div>
 
-      {/* Fitting Room Modal */}
-      {previewItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-3xl border border-amber-500/30 bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Sparkles className="size-5 text-amber-700 dark:text-amber-300" />
-                <h3 className="text-base font-bold text-foreground">피팅룸 · 실시간 착용 미리보기</h3>
-              </div>
-              <button
-                onClick={() => setPreviewItem(null)}
-                className="text-muted-foreground hover:text-foreground text-sm font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Fitting Showcase */}
+      {/* Fitting Room Modal - Isolated via Portal */}
+      {mounted &&
+        previewItem &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="피팅룸 실시간 착용 미리보기"
+            onClick={() => setPreviewItem(null)}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto"
+          >
             <div
-              className={cn(
-                'rounded-2xl border border-border/40 p-6 flex flex-col items-center justify-center gap-4 my-4 relative overflow-hidden transition-all',
-                fittingCosmetics?.background?.animation_css || 'bg-surface/50',
-              )}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md my-auto rounded-3xl border border-amber-500/30 bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
             >
-              <AvatarWithCosmetics
-                cosmetics={fittingCosmetics}
-                name={currentUsername}
-                src={userAvatarUrl}
-                size="xl"
-              />
-              <NameplateWithTitle
-                cosmetics={fittingCosmetics}
-                username={currentUsername}
-              />
-            </div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="size-5 text-amber-700 dark:text-amber-300" />
+                  <h3 className="text-base font-bold text-foreground">피팅룸 · 실시간 착용 미리보기</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPreviewItem(null)}
+                  className="rounded-lg p-1 text-muted-foreground hover:bg-surface hover:text-foreground transition-colors"
+                  aria-label="닫기"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
 
-            <div className="text-center mb-5">
-              <h4 className="font-bold text-base text-foreground">{previewItem.name}</h4>
-              <p className="text-xs text-muted-foreground mt-1">{previewItem.description}</p>
-              <div className="flex items-center justify-center gap-1 font-extrabold text-amber-700 dark:text-amber-300 text-lg mt-2">
-                <Coins className="size-5 text-amber-700 dark:text-amber-300" />
-                <span>{groupDigits(previewItem.price)} WLD</span>
+              {/* Fitting Showcase */}
+              <div
+                className={cn(
+                  'rounded-2xl border border-border/40 p-6 flex flex-col items-center justify-center gap-4 my-4 relative overflow-hidden transition-all',
+                  fittingCosmetics?.background?.animation_css || 'bg-surface/50',
+                )}
+              >
+                <AvatarWithCosmetics
+                  cosmetics={fittingCosmetics}
+                  name={currentUsername}
+                  src={userAvatarUrl}
+                  size="xl"
+                />
+                <NameplateWithTitle
+                  cosmetics={fittingCosmetics}
+                  username={currentUsername}
+                />
+              </div>
+
+              <div className="text-center mb-5">
+                <h4 className="font-bold text-base text-foreground">{previewItem.name}</h4>
+                <p className="text-xs text-muted-foreground mt-1">{previewItem.description}</p>
+                <div className="flex items-center justify-center gap-1 font-extrabold text-amber-700 dark:text-amber-300 text-lg mt-2">
+                  <Coins className="size-5 text-amber-700 dark:text-amber-300" />
+                  <span>{groupDigits(previewItem.price)} WLD</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPreviewItem(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-border/50 text-xs font-bold text-muted-foreground hover:bg-surface transition-colors"
+                >
+                  닫기
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBuyingItem(previewItem);
+                    setPreviewItem(null);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20 transition-all"
+                >
+                  이 아이템 구매하기
+                </button>
               </div>
             </div>
+          </div>,
+          document.body,
+        )}
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPreviewItem(null)}
-                className="flex-1 py-2.5 rounded-xl border border-border/50 text-xs font-bold text-muted-foreground hover:bg-surface"
-              >
-                닫기
-              </button>
-              <button
-                onClick={() => {
-                  setBuyingItem(previewItem);
-                  setPreviewItem(null);
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20"
-              >
-                이 아이템 구매하기
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Buy Confirmation Dialog */}
-      {buyingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-base font-bold text-foreground mb-2">아이템 구매 확인</h3>
-            <p className="text-xs text-muted-foreground mb-4">
-              구매 금액은 시스템 소각 계정(SYSTEM_SINK)으로 100% 영구 소각 처리됩니다.
-            </p>
-
-            <div className="rounded-2xl border border-border/50 bg-surface/50 p-4 mb-4 flex items-center justify-between">
-              <div>
-                <p className="font-bold text-sm text-foreground">{buyingItem.name}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{buyingItem.category}</p>
+      {/* Buy Confirmation Dialog - Isolated via Portal */}
+      {mounted &&
+        buyingItem &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="아이템 구매 확인 다이얼로그"
+            onClick={() => !buyStatus && setBuyingItem(null)}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md my-auto rounded-3xl border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-base font-bold text-foreground">아이템 구매 확인</h3>
+                <button
+                  type="button"
+                  disabled={Boolean(buyStatus)}
+                  onClick={() => setBuyingItem(null)}
+                  className="rounded-lg p-1 text-muted-foreground hover:bg-surface hover:text-foreground disabled:opacity-30 transition-colors"
+                  aria-label="닫기"
+                >
+                  <X className="size-4" />
+                </button>
               </div>
-              <div className="text-right">
-                <p className="font-extrabold text-sm text-amber-700 dark:text-amber-300">
-                  {groupDigits(buyingItem.price)} WLD
-                </p>
-                <p className="text-[11px] text-muted-foreground">내 잔액: {groupDigits(userBalance)} WLD</p>
+              <p className="text-xs text-muted-foreground mb-4">
+                구매 금액은 시스템 소각 계정(SYSTEM_SINK)으로 100% 영구 소각 처리됩니다.
+              </p>
+
+              <div className="rounded-2xl border border-border/50 bg-surface/50 p-4 mb-4 flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-sm text-foreground">{buyingItem.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{buyingItem.category}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-extrabold text-sm text-amber-700 dark:text-amber-300">
+                    {groupDigits(buyingItem.price)} WLD
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">내 잔액: {groupDigits(userBalance)} WLD</p>
+                </div>
+              </div>
+
+              {buyStatus && (
+                <div className="mb-4 text-center text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800 rounded-xl py-2">
+                  {buyStatus}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={Boolean(buyStatus)}
+                  onClick={() => setBuyingItem(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-border/50 text-xs font-bold text-muted-foreground hover:bg-surface disabled:opacity-50 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  disabled={Boolean(buyStatus) || compareAmounts(userBalance, buyingItem.price) < 0}
+                  onClick={() => handleBuy(buyingItem)}
+                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20 disabled:opacity-50 transition-all"
+                >
+                  {compareAmounts(userBalance, buyingItem.price) < 0 ? '잔액 부족' : '확인 및 결제'}
+                </button>
               </div>
             </div>
-
-            {buyStatus && (
-              <div className="mb-4 text-center text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800 rounded-xl py-2">
-                {buyStatus}
-              </div>
-            )}
-
-            <div className="flex gap-2">
-              <button
-                disabled={Boolean(buyStatus)}
-                onClick={() => setBuyingItem(null)}
-                className="flex-1 py-2.5 rounded-xl border border-border/50 text-xs font-bold text-muted-foreground hover:bg-surface disabled:opacity-50"
-              >
-                취소
-              </button>
-              <button
-                disabled={Boolean(buyStatus) || compareAmounts(userBalance, buyingItem.price) < 0}
-                onClick={() => handleBuy(buyingItem)}
-                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20 disabled:opacity-50"
-              >
-                {compareAmounts(userBalance, buyingItem.price) < 0 ? '잔액 부족' : '확인 및 결제'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

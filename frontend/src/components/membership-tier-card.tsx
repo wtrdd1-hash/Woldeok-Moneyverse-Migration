@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Crown,
   Check,
@@ -17,8 +17,8 @@ import {
 interface MembershipTierCardProps {
   userBalance?: number | string;
   isPlusMember?: boolean;
-  onSubscribe?: () => Promise<boolean> | void;
-  onCancel?: () => Promise<boolean> | void;
+  onSubscribe?: () => Promise<boolean | void> | void;
+  onCancel?: () => Promise<boolean | void> | void;
 }
 
 export function MembershipTierCard({
@@ -31,6 +31,10 @@ export function MembershipTierCard({
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  useEffect(() => {
+    setActiveTier(Boolean(isPlusMember));
+  }, [isPlusMember]);
+
   const numericBalance = typeof userBalance === 'string' ? parseInt(userBalance, 10) || 0 : userBalance;
   const PLUS_PRICE = 10000; // 10,000 WLD / month
 
@@ -39,25 +43,42 @@ export function MembershipTierCard({
     setIsProcessing(true);
     setFeedback(null);
 
-    if (activeTier) {
-      // Cancel
-      if (onCancel) await onCancel();
-      setActiveTier(false);
-      setFeedback('Moneyverse Plus 구독이 취소되었습니다. (다음 결제일까지 혜택 유지)');
-    } else {
-      // Subscribe
-      if (numericBalance < PLUS_PRICE) {
-        setFeedback(`잔액이 부족합니다. (필요: ${PLUS_PRICE.toLocaleString()} WLD / 보유: ${numericBalance.toLocaleString()} WLD)`);
-        setIsProcessing(false);
-        return;
+    try {
+      if (activeTier) {
+        // Cancel
+        if (onCancel) {
+          const res = await onCancel();
+          if (res === false) {
+            setIsProcessing(false);
+            return;
+          }
+        }
+        setActiveTier(false);
+        setFeedback('Moneyverse Plus 구독 취소 접수 완료. (만료일까지 모든 VIP 혜택 유지)');
+      } else {
+        // Subscribe
+        if (numericBalance < PLUS_PRICE) {
+          setFeedback(`잔액이 부족합니다. (필요: ${PLUS_PRICE.toLocaleString()} WLD / 보유: ${numericBalance.toLocaleString()} WLD)`);
+          setIsProcessing(false);
+          return;
+        }
+
+        if (onSubscribe) {
+          const res = await onSubscribe();
+          if (res === false) {
+            setIsProcessing(false);
+            return;
+          }
+        }
+        setActiveTier(true);
+        setFeedback('🎉 축하합니다! Moneyverse Plus VIP 멤버십이 활성화되었습니다! 10,000 WLD가 영구 소각되었습니다.');
       }
-
-      if (onSubscribe) await onSubscribe();
-      setActiveTier(true);
-      setFeedback('🎉 축하합니다! Moneyverse Plus VIP 멤버십이 활성화되었습니다!');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : '오류가 발생했습니다.';
+      setFeedback(`처리 실패: ${msg}`);
+    } finally {
+      setIsProcessing(false);
     }
-
-    setIsProcessing(false);
   };
 
   return (

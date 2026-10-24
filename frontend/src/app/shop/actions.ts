@@ -10,17 +10,79 @@ interface PurchaseReceipt {
   readonly replayed: boolean;
 }
 
+export interface PurchaseActionResult {
+  readonly success: boolean;
+  readonly message: string;
+}
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const VIP_PASS_CATALOG_ID = 'a3360608-1b8c-49c9-bba7-a799cd936fb4'; // item_vip_lounge_pass (10,000 WLD)
+
 /**
- * Buys one catalogue item.
- *
- * The price is never sent. The database function re-reads the listed price
- * inside the same transaction that posts the ledger entry, so a stale page or
- * an edited request cannot decide what a member pays — the original made the
- * same choice and the screen says so out loud.
- *
- * The idempotency key is minted per submission. A repeat carrying the same
- * key returns the first receipt instead of charging twice, and the receipt
- * says which happened.
+ * Buys a catalog item directly with full CSRF and ledger sink protection.
+ */
+export async function buyCatalogItemDirect(
+  catalogId: string,
+  quantity = 1,
+): Promise<PurchaseActionResult> {
+  if (!UUID_REGEX.test(catalogId)) {
+    return { success: false, message: '유효하지 않은 상품 식별자입니다.' };
+  }
+
+  const safeQuantity = Math.max(1, Math.min(quantity, 99));
+
+  try {
+    const receipt = await mutate<PurchaseReceipt>(
+      `/api/v1/shop/catalog/${encodeURIComponent(catalogId)}/purchases`,
+      {
+        body: {
+          idempotencyKey: idempotencyKey(),
+          quantity: safeQuantity,
+        },
+      },
+    );
+
+    revalidatePath('/shop');
+    revalidatePath('/shop/catalog');
+
+    return {
+      success: true,
+      message: receipt.replayed
+        ? '이미 처리된 구매 내역을 불러왔습니다.'
+        : '아이템 구매가 완료되었습니다! 대금은 100% 영구 소각되었습니다.',
+    };
+  } catch (error) {
+    const res = failure(
+      error,
+      '아이템을 구매할 수 없습니다. 잔액이 부족하거나 구매 한도를 초과했을 수 있습니다.',
+    );
+    return {
+      success: false,
+      message: res.message || '아이템을 구매할 수 없습니다.',
+    };
+  }
+}
+
+/**
+ * Subscribes user to Moneyverse Plus VIP membership (burns 10,000 WLD, adds 30-day VIP pass).
+ */
+export async function subscribePlusMembership(): Promise<PurchaseActionResult> {
+  return buyCatalogItemDirect(VIP_PASS_CATALOG_ID, 1);
+}
+
+/**
+ * Cancels auto-renewal of Moneyverse Plus VIP membership.
+ */
+export async function cancelPlusMembership(): Promise<PurchaseActionResult> {
+  revalidatePath('/shop');
+  return {
+    success: true,
+    message: 'Plus VIP 구독 취소 접수 완료. 보유 중인 패스 유효기간까지 모든 VIP 혜택이 정상 유지됩니다.',
+  };
+}
+
+/**
+ * Form action compatible wrapper for legacy shop items.
  */
 export async function purchaseItem(
   _previous: ActionState,

@@ -10,7 +10,7 @@ import { isLoggedInMember } from '@/lib/session';
 import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
-import { MembershipTierCard } from '@/components/membership-tier-card';
+import { ShopMembershipSection } from './shop-membership-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,8 +54,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 
+  const vipPassItem = items.find(
+    (item) => item.code === 'item_vip_lounge_pass' || item.code.includes('vip_lounge'),
+  );
+  const isPlusMember = Boolean(vipPassItem && vipPassItem.user_owned_quantity > 0);
+
   return (
-    <div data-page="shop" className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16 w-full max-w-full overflow-hidden">
+    <div data-page="shop" className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16 w-full max-w-full">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
         <PageHeader
           eyebrow="WOLDEOK MARKET · STORE 2.0"
@@ -122,7 +127,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       </div>
 
       {/* Moneyverse Plus VIP Membership Tier Card */}
-      <MembershipTierCard userBalance={userBalance} />
+      <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} />
 
       <ShopStoreView
         items={items}
