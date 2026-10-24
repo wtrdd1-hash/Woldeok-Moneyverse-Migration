@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/mutate';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
+import { VIP_PASS_CATALOG_ID } from './shop-constants';
 
 interface PurchaseReceipt {
   readonly purchaseId: string;
@@ -16,7 +17,6 @@ export interface PurchaseActionResult {
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-export const VIP_PASS_CATALOG_ID = 'a3360608-1b8c-49c9-bba7-a799cd936fb4'; // item_vip_lounge_pass (10,000 WLD)
 
 /**
  * Buys a catalog item directly with full CSRF and ledger sink protection.

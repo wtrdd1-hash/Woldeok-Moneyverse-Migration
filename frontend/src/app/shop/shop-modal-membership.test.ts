@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { VIP_PASS_CATALOG_ID } from './actions';
+import { VIP_PASS_CATALOG_ID } from './shop-constants';
 import type { CatalogItem } from './shop-store-view';
 
 describe('Shop & VIP Membership Integrity Tests', () => {
