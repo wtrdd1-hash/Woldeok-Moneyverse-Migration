@@ -116,3 +116,15 @@ describe('security headers', () => {
     );
   });
 });
+
+describe('member security page robots policy', () => {
+  it('overrides the public index header with a private noindex response', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const accountSecurity = groups.find((group) => group.source === '/account/security');
+    expect(accountSecurity).toBeDefined();
+    const headers = new Map(accountSecurity!.headers.map((header) => [header.key, header.value]));
+    expect(headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(headers.get('cache-control')).toBe('private, no-store');
+  });
+});
