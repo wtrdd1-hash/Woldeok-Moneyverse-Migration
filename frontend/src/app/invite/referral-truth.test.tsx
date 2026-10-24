@@ -19,7 +19,7 @@ describe('referral truth and signup navigation', () => {
   });
 
   it('never verifies arbitrary invite codes or claims an unimplemented WLD reward', async () => {
-    const html = renderToStaticMarkup(await InviteLandingPage({ params: Promise.resolve({ code: 'ANYTHING' }) }));
+    const html = renderToStaticMarkup(await InviteLandingPage());
     expect(html).not.toMatch(/인증 완료|1,000만 WLD|즉시 지급 확정|100% 무료|피로회복제 5개/);
     expect(html).toContain('확인되지');
     expect(html).toContain('href="/register"');
@@ -28,7 +28,7 @@ describe('referral truth and signup navigation', () => {
   });
 
   it('keeps unverified referral URLs out of search and does not echo user input into metadata', async () => {
-    const metadata = await generateMetadata({ params: Promise.resolve({ code: 'UNTRUSTED-PAYLOAD' }) });
+    const metadata = await generateMetadata();
     expect(metadata.robots).toEqual({ index: false, follow: false });
     expect(JSON.stringify(metadata)).not.toContain('UNTRUSTED-PAYLOAD');
     expect(inviteSource).not.toContain('https://easy-scraping.com/invite/${code}');

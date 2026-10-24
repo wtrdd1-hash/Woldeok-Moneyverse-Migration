@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, AlertTriangle, Briefcase, Landmark, TrendingUp } from 'lucide-react';
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: '월덕 머니버스 서비스 소개',
   description: '가상 주식, 은행, 직업 활동을 경험하는 월덕 머니버스를 소개합니다.',
   robots: { index: false, follow: false },
