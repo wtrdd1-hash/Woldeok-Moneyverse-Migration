@@ -36,7 +36,7 @@ describe('monetary policy admin boundary', () => {
     const postMethods = Object.getOwnPropertyNames(MonetaryController.prototype)
       .filter((name) => {
         const handler = Object.getOwnPropertyDescriptor(MonetaryController.prototype, name)?.value as
-          | Function
+          | object
           | undefined;
         return handler && Reflect.getMetadata(METHOD_METADATA, handler) === RequestMethod.POST;
       });

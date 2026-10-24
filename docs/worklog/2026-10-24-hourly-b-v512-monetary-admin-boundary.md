@@ -14,7 +14,11 @@
 - RED checkpoint 923df320becfbda3029359d1820fd5130c39deaa: 9 missing guard assertions reproduced. GREEN: 12 focused tests PASS, including all POST-route coverage and denied-session/CSRF/stale reauth cases.
 - [x] Reproduced missing guard wiring: 9 new assertions RED; no source implementation yet. Local backend suite also has unrelated DB-dependent failures due absent isolated database.
 - [x] Added AdminSessionGuard to controller, and CsrfGuard + ReauthGuard to all eight POST routes; no DTO or DB changes.
-- [ ] Validate changed SHA and document all failures (focused guard regression 12/12 PASS; full gates pending).
+- [ ] Validate changed SHA and document all failures (focused guard regression 12/12 PASS; full gates in progress).
+- Midpoint main fetch: 49788d09494fed3e463651945b83386e87dd47bc unchanged. No planning/main changes requiring rebase.
+- Local lint initially found one new test type error; fixed it (full lint 0 errors, 1137 pre-existing warnings). Typecheck, build and API contract PASS.
+- Frontend first run mistakenly inherited NODE_ENV=production and yielded invalid React.act failures; rerun with the repository's NODE_ENV=test script gives 1,395 PASS / 5 FAIL (pre-existing locale/SEO/touch tests). Do not count the invalid run as a baseline regression.
+- Production dependency audit: 2 High; bot dependency audit: 1 Critical, 5 High. DB package: 15 PASS / 3 SKIP. All fail gates remain HOLD.
 
 ## Finished
 - Pending.
