@@ -33,6 +33,7 @@ import { SavingPocketsCard } from './saving-pockets-card';
 import { BankLiquidityCard } from './bank-liquidity-card';
 import { CreditScoreCard, type CreditRatingData } from './credit-score-card';
 import { SavingsPotCard } from '@/components/savings-pot-card';
+import { LoanExposureCard, type LoanExposureSummary } from './loan-exposure-card';
 import { TossBankHeroCard } from './toss-bank-hero-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { BankStanding, SavingPocket } from './types';
@@ -50,11 +51,12 @@ export default async function BankPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [standing, pockets, creditRating, memberIdentity] = await Promise.all([
+  const [standing, pockets, creditRating, memberIdentity, loanExposure] = await Promise.all([
     apiOrNull<BankStanding>('/api/v1/banking/standing'),
     apiOrNull<SavingPocket[]>('/api/v1/banking/pockets'),
     apiOrNull<CreditRatingData>('/api/v1/banking/credit-rating'),
     apiOrNull<{ userId: string }>('/api/v1/wallet?recent=1'),
+    apiOrNull<LoanExposureSummary>('/api/v1/bank/loans/summary'),
   ]);
 
   if (!standing) {
@@ -199,6 +201,8 @@ export default async function BankPage() {
               </p>
             </div>
           )}
+
+          <LoanExposureCard summary={loanExposure} locale={locale} />
 
           {/* 스마트 가상 대출 카드 */}
           <SmartLoanCard

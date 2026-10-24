@@ -15,6 +15,7 @@ import {
 describe('appGatewayPath', () => {
   it('allows member-facing API groups', () => {
     expect(appGatewayPath(['wallet', 'transfers'])).toBe('/api/v1/wallet/transfers');
+    expect(appGatewayPath(['bank', 'loans', 'summary'])).toBe('/api/v1/bank/loans/summary');
     expect(appGatewayPath(['auth', 'session'])).toBe('/api/v1/auth/session');
     expect(appGatewayPath(['stocks'])).toBe('/api/v1/stocks');
     expect(appGatewayPath(['developer'])).toBe('/api/v1/developer');
