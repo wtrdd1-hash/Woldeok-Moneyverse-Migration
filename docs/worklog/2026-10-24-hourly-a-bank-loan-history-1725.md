@@ -25,3 +25,12 @@
 - Focused backend: 5 PASS; frontend including app-api: 13 PASS after using `NODE_ENV=test`; frontend typecheck PASS. TDD initial backend 4 RED and missing frontend component RED recorded.
 - Real isolated PostgreSQL (`moneyverse-test-db` / `woldeok_moneyverse_ci`) read-only transaction: `bank_my_loans(uuid)` exists, `moneyverse_app` has EXECUTE, unknown owner returns 0, explicit ROLLBACK. No fixtures or writes. Full authenticated Test E2E not established.
 - `origin/main` and English/Korean integrated plans refreshed; still baseline `49788d09494fed3e463651945b83386e87dd47bc`. Other worker branches and migrations untouched.
+
+## Finished — 2026-10-24 KST (integration blocked)
+- Code SHA: `4406f94063e742212783851591a7f6a34f0447eb`; Draft PR #1150. Branch from main remains isolated, no merge/rebase conflict; latest fetched main unchanged.
+- A further TDD RED (missing repository returned fabricated `[]`) was reproduced, then fixed to 503 and retested: focused backend 6 PASS, frontend/Android 13 PASS.
+- Full candidate code SHA rerun: backend 1,319 PASS/398 SKIPPED; database 15 PASS/3 SKIPPED; contract 38 PASS; frontend 1,398 PASS/5 FAIL (3 SEO, 1 locale, 1 login a11y). Lint PASS 0 errors/1,136 warnings; typecheck PASS; build PASS; Android API contract 179 PASS; bot 8 PASS after offline dependencies.
+- Security FAIL: root dependency audit Critical2/High10 (26 total), bot Critical1/High5. Isolated PostgreSQL READ ONLY `bank_my_loans` permission and no-owner smoke PASS, ROLLBACK. Populated real-loan and authenticated Test E2E unverified.
+- Initial GitHub heads 48 including main, final 49; initial open PRs 45, final 46. Local PR review refs 1,054, not additional remote heads. No fully verified safe-to-delete remote branch; deleted 0. All A/B/C/Gemini/QA unique changes preserved. PR #1107 still conflicts.
+- Changed source: wallet controller/service + tests; bank page, new loan page/panel + tests; Android gateway test. No migration, grant, ledger mutation, production DB access, runtime restart, merge, official Test promotion, Production deployment or rollback.
+- GitHub PR CI still requires exact-final-SHA runtime confirmation; no PASS claimed from a pending job. Release decision PARTIAL / BLOCKED, Production RELEASE HOLD. See `docs/releases/v2026.10.24.a1725.md` and `.ko.md`.
