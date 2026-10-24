@@ -16,9 +16,9 @@
 
 ## GitHub handoff
 - Branch: `auto/planning-v1232-verified-shop-reviews-20261024-2005` (from main; not stacked on unmerged v1230).
-- Draft PR: **PENDING**.
+- Draft PR: **#1167** — https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1167.
 - Development issue: **#1166** — https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1166.
 - Independent engineering: isolate real PostgreSQL → TDD + ACL/owner negative tests → full exact-SHA CI/security → official Test authenticated finance E2E → backup restore → independent review → authorized GitOps; never promote while any gate is FAIL/BLOCKED.
 
 ## Verification
-- Pending final `git diff --check`, six-doc backlog-ID parity, branch comparison and GitHub confirmation. Planning-only verification cannot certify product tests.
+- Six-doc backlog-ID parity and `git diff --check` verified; PR #1167 Draft opened on main. Planning-only verification cannot certify product tests.
