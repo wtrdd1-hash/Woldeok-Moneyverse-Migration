@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from './route';
+import { GET, POST } from './route';
 import { APP_API_CONTRACT_VERSION } from '@/lib/app-gateway';
 
 function request(path: string, headers: Record<string, string> = {}) {
@@ -119,6 +119,29 @@ describe('app API route compatibility', () => {
     );
     expect(response.status).toBe(200);
     expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+
+  it('forwards native citizen vote with CSRF and prevents caching private receipts', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let forwarded = new Headers();
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      forwarded = new Headers(init?.headers);
+      return new Response(JSON.stringify({ success: true, quarter: '2026-Q4', choice: 'WELFARE' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await POST(new NextRequest('https://easy-scraping.com/app-api/v1/wallet/governance/vote', {
+      method: 'POST',
+      headers: { cookie: 'session=test', 'x-csrf-token': 'one-time-token', 'content-type': 'application/json' },
+      body: JSON.stringify({ quarter: '2026-Q4', choice: 'WELFARE' }),
+    }), context('wallet', 'governance', 'vote'));
+    expect(response.status).toBe(200);
+    expect(forwarded.get('x-csrf-token')).toBe('one-time-token');
+    expect(forwarded.get('cookie')).toBe('session=test');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ success: true, choice: 'WELFARE' });
   });
 
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
