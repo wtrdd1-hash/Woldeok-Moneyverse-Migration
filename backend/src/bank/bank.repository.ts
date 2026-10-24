@@ -1,5 +1,6 @@
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import { isAuthorizationFailure } from '../core/pg-error';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -23,6 +24,35 @@ function assertAmount(value: unknown, field: string): bigint {
   return BigInt(value);
 }
 
+/** A missing/foreign bond is deliberately indistinguishable at the HTTP boundary. */
+export class BankBondNotFoundError extends Error {
+  constructor() { super('bond is unavailable'); this.name = 'BankBondNotFoundError'; }
+}
+
+/** Reject partial or malformed financial projections instead of inventing zero. */
+export class BankReadUnavailableError extends Error {
+  constructor() { super('verified bank standing is unavailable'); this.name = 'BankReadUnavailableError'; }
+}
+
+export interface BondRedemptionPreview {
+  readonly bondId: string;
+  readonly bondName: string;
+  readonly bondCode: string;
+  readonly principalAmount: string;
+  readonly maturityAmount: string;
+  readonly maturityAt: string;
+  readonly currentCashBalance: string;
+  readonly projectedCashBalance: string;
+  readonly maturityStatus: 'LOCKED' | 'MATURED';
+  readonly eligibleForRedemption: boolean;
+  readonly previewOnly: true;
+  readonly payoutGuaranteed: false;
+}
+
+function canonicalNonnegativeWld(value: unknown): value is string {
+  return typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value);
+}
+
 export class BankRepository {
   constructor(private readonly pool: Queryable) {}
 
@@ -34,6 +64,60 @@ export class BankRepository {
       [actor],
     );
     return row?.standing ?? null;
+  }
+
+  /**
+   * Read-only projection from the owner-scoped SECURITY DEFINER standing function.
+   * A preview never calls bank_redeem_bond or writes to a ledger. The DB is the
+   * authority for maturity, payout and holdings; client dates cannot override it.
+   */
+  async getBondRedemptionPreview(actor: unknown, bondId: unknown): Promise<BondRedemptionPreview> {
+    assertUuid(actor, 'actor');
+    assertUuid(bondId, 'bond id');
+    let standing: unknown;
+    try {
+      standing = await this.getStanding(actor);
+    } catch (error: unknown) {
+      if (isAuthorizationFailure(error)) throw error;
+      throw new BankReadUnavailableError();
+    }
+    if (!standing || typeof standing !== 'object' || Array.isArray(standing)) {
+      throw new BankReadUnavailableError();
+    }
+    const data = standing as Record<string, unknown>;
+    if (!canonicalNonnegativeWld(data.cash_balance) || !Array.isArray(data.bonds)) {
+      throw new BankReadUnavailableError();
+    }
+    const bond = data.bonds.find((entry: unknown) =>
+      !!entry && typeof entry === 'object' && !Array.isArray(entry) &&
+      (entry as Record<string, unknown>).id === bondId,
+    ) as Record<string, unknown> | undefined;
+    if (!bond) throw new BankBondNotFoundError();
+    if (
+      bond.status !== 'holding' || typeof bond.bond_name !== 'string' ||
+      typeof bond.bond_code !== 'string' || !canonicalNonnegativeWld(bond.principal_amount) ||
+      !canonicalNonnegativeWld(bond.maturity_amount) ||
+      typeof bond.maturity_at !== 'string' || !Number.isFinite(Date.parse(bond.maturity_at)) ||
+      typeof bond.is_matured !== 'boolean'
+    ) {
+      throw new BankReadUnavailableError();
+    }
+    const maturityAmount = bond.maturity_amount;
+    const cash = data.cash_balance;
+    return {
+      bondId: bondId as string,
+      bondName: bond.bond_name,
+      bondCode: bond.bond_code,
+      principalAmount: bond.principal_amount,
+      maturityAmount,
+      maturityAt: bond.maturity_at,
+      currentCashBalance: cash,
+      projectedCashBalance: (BigInt(cash) + BigInt(maturityAmount)).toString(),
+      maturityStatus: bond.is_matured ? 'MATURED' : 'LOCKED',
+      eligibleForRedemption: bond.is_matured,
+      previewOnly: true,
+      payoutGuaranteed: false,
+    };
   }
 
   /** Read-only, actor-scoped game credit signals; no synthetic activity or repayments. */

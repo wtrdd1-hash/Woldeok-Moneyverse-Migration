@@ -2,9 +2,9 @@
 
 [English](mobile-api-schema-reference.md) | **한국어** | [기계 판독 계약](mobile-api-contract.json)
 
-업데이트 버전: **v2026.09.22.359**
+업데이트 버전: **v2026.10.25.0625**
 
-이 문서는 179개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
+이 문서는 180개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
 ## 공통 호환성 규칙
 
@@ -1211,6 +1211,43 @@ _None._
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
 | transactionId | true | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/banking/bonds/:id/redemption-preview` — 본인 보유 가상 채권의 만기 수령 예상액을 읽기 전용으로 확인 (실제 지급 아님)
+
+- 인증/권한: 로그인 + 최신 동의 (본인 보유 채권만, 응답 private/no-store)
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 미리보기는 금융 거래가 아니며, 실제 수령 요청 후 별도 영수증과 최신 은행 잔액을 확인
+- Operation ID: `BankController_redemptionPreview`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| bondId | true | string |  |
+| bondName | true | string |  |
+| bondCode | true | string |  |
+| principalAmount | true | string |  |
+| maturityAmount | true | string |  |
+| maturityAt | true | string |  |
+| currentCashBalance | true | string |  |
+| projectedCashBalance | true | string |  |
+| maturityStatus | true | string="LOCKED" \| string="MATURED" |  |
+| eligibleForRedemption | true | boolean |  |
+| previewOnly | true | boolean=true | const=true |
+| payoutGuaranteed | true | boolean=false | const=false |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
