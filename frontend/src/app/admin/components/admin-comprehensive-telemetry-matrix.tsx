@@ -100,6 +100,8 @@ export function AdminComprehensiveTelemetryMatrix({
     let stockEvalTotal = 0;
     let m2Total = 0;
 
+    let totalPrivateWealth = 0;
+
     effectiveUsers.forEach((u) => {
       const cash = Number(u.cash_balance) || 0;
       const bank = Number(u.bank_balance) || 0;
@@ -111,10 +113,12 @@ export function AdminComprehensiveTelemetryMatrix({
       m1Bank += bank;
       bondTotal += bond;
       stockEvalTotal += stockEval;
-      m2Total += netWorth;
+      totalPrivateWealth += netWorth;
     });
 
     const m1Sum = m0Cash + m1Bank;
+    // M2 통화량: 중앙은행 원장 실측 M2가 있으면 이를 우선하고, 없으면 현금+예금+채권 유동성으로 계산
+    m2Total = health?.supply ? Number(health.supply.m2Amount) : (m1Sum + bondTotal);
     const isBalanced = health?.integrity ? health.integrity.ok : true;
     const moneySupplyHealth = health?.available ? (isBalanced ? '정상 일치' : '불일치 감지') : '실측 산출';
     const deltaAmount = health?.integrity ? Number(health.integrity.balanceTotalDeltaAmount) || 0 : 0;
@@ -127,6 +131,7 @@ export function AdminComprehensiveTelemetryMatrix({
       bondTotal,
       stockEvalTotal,
       m2Total,
+      totalPrivateWealth,
       moneySupplyHealth,
       ledgerDiff: deltaAmount,
       systemReserve: treasuryBalance,
@@ -459,14 +464,26 @@ export function AdminComprehensiveTelemetryMatrix({
                 <td className="py-2.5 px-3 text-slate-400">전체 유저 보유 주식 잔고의 실시간 평가액</td>
               </tr>
               <tr className="hover:bg-slate-800/30 transition-colors bg-blue-950/20">
-                <td className="py-2.5 px-3 font-medium text-blue-300">M2 (광의 통화 / 총 순자산)</td>
+                <td className="py-2.5 px-3 font-medium text-blue-300">M2 (광의 통화 / 시중 유통 통화)</td>
                 <td className="py-2.5 px-3 text-right font-mono tabular-nums text-purple-300 font-bold">
                   ₩{monetaryStats.m2Total.toLocaleString()}
                 </td>
                 <td className="py-2.5 px-3 text-right font-mono tabular-nums text-purple-300 font-bold">
+                  {monetaryStats.totalPrivateWealth > 0
+                    ? ((monetaryStats.m2Total / monetaryStats.totalPrivateWealth) * 100).toFixed(1)
+                    : 100}%
+                </td>
+                <td className="py-2.5 px-3 text-slate-400">복식부기 원장 기반 시중 유통 총 통화량 (M0+M1+채권)</td>
+              </tr>
+              <tr className="hover:bg-slate-800/30 transition-colors bg-indigo-950/20">
+                <td className="py-2.5 px-3 font-medium text-indigo-300">민간 총자산 평가액 (Private Wealth)</td>
+                <td className="py-2.5 px-3 text-right font-mono tabular-nums text-indigo-300 font-bold">
+                  ₩{monetaryStats.totalPrivateWealth.toLocaleString()}
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono tabular-nums text-indigo-300 font-bold">
                   100.0%
                 </td>
-                <td className="py-2.5 px-3 text-slate-400">가상 세계관 전체 유통 자산의 총 유동성 규모</td>
+                <td className="py-2.5 px-3 text-slate-400">유저 현금·예금·채권 및 주식 평가액을 합산한 경제 총자산</td>
               </tr>
               <tr className="hover:bg-slate-800/30 transition-colors">
                 <td className="py-2.5 px-3 font-medium text-white">복식부기 원장 무결성 상태</td>

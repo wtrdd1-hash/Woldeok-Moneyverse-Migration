@@ -22,7 +22,7 @@ export class CentralBankService {
     }>(`
       SELECT
         coalesce((SELECT sum(balance_wld::numeric) FROM public.system_treasury_vaults), 0)::bigint::text AS treasury_wld,
-        coalesce((SELECT sum(available_amount) FROM public.account_balances), 0)::bigint::text AS user_balances_wld,
+        coalesce((SELECT sum(ab.available_amount) FROM public.accounts a JOIN public.account_balances ab ON ab.account_id = a.id WHERE a.account_type IN ('USER_CASH', 'USER_BANK')), 0)::bigint::text AS user_balances_wld,
         coalesce((SELECT is_issuance_frozen FROM public.monetary_system_status WHERE id = 1), false) AS is_issuance_frozen
     `);
 

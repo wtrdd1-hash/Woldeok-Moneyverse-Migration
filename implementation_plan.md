@@ -3512,3 +3512,41 @@ flowchart LR
      - `/pension` (연금): 200 OK (109ms)
      - `/terms` (약관): 200 OK (33ms)
      - `/privacy` (개인정보): 200 OK (43ms)
+
+---
+## 🚀 [v242 Specification] 가상 금융 원장(Ledger) 대사 쿼리 상쇄 버그 4건 박멸 및 M0/M1/M2/총자산 회계 정합화
+
+### 1. 사용자 요구사항 및 배경
+- **사용자 요청**: "전체 버그 기능 확인해봐 뮈 슷자안맞는다 장부가안ㅁ맞는다 등등 다해결해"
+- **근본 원인 분석**:
+  1. **치명적 원장 집계 쿼리 상쇄 버그 (M0/M2 유통 통화량이 0으로 계산되는 결함)**:
+     - `backend/src/admin/treasury/treasury.repository.ts` (라인 421)
+     - `backend/src/economy/monetary/central-bank.service.ts` (라인 25)
+     - `backend/src/stock/newspaper.controller.ts` (라인 85)
+     - 위 3개 파일에서 `SELECT sum(available_amount) FROM public.account_balances`를 무조건 실행하여 복식부기 원칙상 `MINT` 계정의 음수(-5,060,810 WLD)와 `SINK` 계정의 양수(+237,300 WLD)와 유저 현금(+4,823,510 WLD)이 전부 상쇄되어 **합계가 정확히 0**이 됨.
+     - 결과: 국고 대시보드의 `totalCirculating`이 **0 WLD**로 나오고 비축률(reserve ratio)이 비정상적으로 계산되며, 중앙은행 텔레메트리의 `m_circulating`이 **0 WLD**로 찍히고, 주간 신문에서 통화량 계산 실패로 가짜 fallback 상수가 표시되는 심각한 결함 발생.
+  2. **유통속도 및 소득분위 집계 시 시스템 소각액(SINK) 오염 결함**:
+     - `backend/src/admin/economy.repository.ts` (라인 541)
+     - `FROM public.account_balances WHERE available_amount > 0`로 조회하여 유저 계좌가 아닌 `SINK` 계정(237,300 WLD)까지 유저 통화량 p50/p90/p95/p99 및 유통속도 분모에 섞여 통계가 왜곡됨.
+  3. **프론트엔드 관리자 텔레메트리 매트릭스의 M2 통화량 왜곡 결함**:
+     - `frontend/src/app/admin/components/admin-comprehensive-telemetry-matrix.tsx` (라인 108~114)
+     - `m2Total += netWorth` 코드로 인해 M2(광의통화)에 주식 평가액(`stockEval`)과 채권(`bond`)이 합산되어 주가 변동에 따라 M2가 널뛰며 실제 DB의 M2(4,823,510 WLD)와 수백만 WLD씩 어긋나는 현상 발생.
+
+### 2. 세부 구현 및 정합화 계획
+1. **백엔드 유통 통화량 쿼리 4건 전수 교정**:
+   - `SELECT coalesce(sum(ab.available_amount), 0)::bigint::text AS total FROM public.accounts a JOIN public.account_balances ab ON ab.account_id = a.id WHERE a.account_type IN ('USER_CASH', 'USER_BANK')` 로 교체.
+   - 대상 파일:
+     - `backend/src/admin/treasury/treasury.repository.ts`
+     - `backend/src/economy/monetary/central-bank.service.ts`
+     - `backend/src/stock/newspaper.controller.ts`
+     - `backend/src/admin/economy.repository.ts`
+2. **프론트엔드 M0/M1/M2/총자산 회계 통계 분리 정합화**:
+   - `frontend/src/app/admin/components/admin-comprehensive-telemetry-matrix.tsx`:
+     - `m0Cash`: 시중 유통 현금 (USER_CASH)
+     - `m1Bank`: 요구불/단기 예금 (USER_BANK)
+     - `m1Sum`: 협의통화 (M1 = m0Cash + m1Bank)
+     - `m2Total`: 광의통화 (M2 = DB 실측 M2 `health?.supply?.m2Amount` 또는 `m0Cash + m1Bank`)
+     - `totalPrivateWealth`: 유저 총 순자산 (m0Cash + m1Bank + bondTotal + stockEvalTotal)
+3. **단위 테스트 및 빌드 검증**:
+   - 백엔드 및 프론트엔드 테스트 실행.
+   - 미니 PC 운영 서버 동기화 및 서비스 재기동.

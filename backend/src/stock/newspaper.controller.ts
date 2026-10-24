@@ -82,7 +82,10 @@ export class NewspaperController {
     if (this.pool) {
       try {
         const circRes = await this.pool.query<{ total: string }>(
-          `SELECT coalesce(sum(available_amount), 12450000)::bigint::text AS total FROM public.account_balances`,
+          `SELECT coalesce(sum(ab.available_amount), 0)::bigint::text AS total
+           FROM public.accounts a
+           JOIN public.account_balances ab ON ab.account_id = a.id
+           WHERE a.account_type IN ('USER_CASH', 'USER_BANK')`,
         );
         if (circRes.rows[0]?.total) {
           m0 = Math.max(1000000, Number(circRes.rows[0].total));

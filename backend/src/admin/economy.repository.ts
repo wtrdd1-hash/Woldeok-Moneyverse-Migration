@@ -538,8 +538,10 @@ export class EconomyConsoleRepository {
          coalesce(percentile_cont(0.9) WITHIN GROUP (ORDER BY available_amount), 0)::text AS p90,
          coalesce(percentile_cont(0.95) WITHIN GROUP (ORDER BY available_amount), 0)::text AS p95,
          coalesce(percentile_cont(0.99) WITHIN GROUP (ORDER BY available_amount), 0)::text AS p99
-       FROM public.account_balances
-       WHERE available_amount > 0`,
+       FROM public.accounts a
+       JOIN public.account_balances ab ON ab.account_id = a.id
+       WHERE a.account_type IN ('USER_CASH', 'USER_BANK')
+         AND ab.available_amount > 0`,
     );
 
     const circSupply = parseFloat(distRow?.active_circulating_wld || distRow?.total_wld || '1') || 1;

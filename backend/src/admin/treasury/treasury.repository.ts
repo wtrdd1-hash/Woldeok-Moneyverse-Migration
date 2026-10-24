@@ -414,21 +414,17 @@ export class TreasuryRepository {
       totalTreasury += BigInt(v.balance_wld);
     }
 
-    // 2. Circulating user currency M0 (sum of all user balances)
+    // 2. Circulating user currency M0/M2 (sum of all user cash and bank balances)
     let totalCirculating = BigInt(0);
     try {
       const circRes = await this.pool.query<{ total: string }>(`
-        SELECT coalesce(sum(available_amount), 0)::bigint::text AS total FROM public.account_balances
+        SELECT coalesce(sum(ab.available_amount), 0)::bigint::text AS total
+        FROM public.accounts a
+        JOIN public.account_balances ab ON ab.account_id = a.id
+        WHERE a.account_type IN ('USER_CASH', 'USER_BANK')
       `);
-      if (circRes.rows[0]?.total && BigInt(circRes.rows[0].total) > BigInt(0)) {
+      if (circRes.rows[0]?.total) {
         totalCirculating = BigInt(circRes.rows[0].total);
-      } else {
-        const uRes = await this.pool.query<{ total: string }>(`
-          SELECT coalesce(sum(balance), 0)::bigint::text AS total FROM public.users
-        `);
-        if (uRes.rows[0]?.total) {
-          totalCirculating = BigInt(uRes.rows[0].total);
-        }
       }
     } catch {
       // fallback
