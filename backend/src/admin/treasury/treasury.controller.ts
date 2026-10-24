@@ -312,8 +312,8 @@ export class AdminTreasuryController {
 
   @Get('governance/votes')
   @ApiOperation({ summary: '시민 거버넌스 예산안 투표 집계 현황 조회' })
-  async getGovernanceVotes(@Query('quarter') quarter?: string) {
-    return this.service.getGovernanceVotes(quarter || '2026-Q4');
+  async getGovernanceVotes(@Req() request: RequestWithSession, @Query('quarter') quarter?: string) {
+    return this.service.getGovernanceVotes(requireUserId(request), quarter || '2026-Q4');
   }
 
   @Get('export/csv')

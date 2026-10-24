@@ -19,3 +19,10 @@ Migration 280 is already claimed by other unmerged PRs. This branch is a nonmerg
 ## In progress — TDD RED (22:42 KST)
 - Added 3 structural regressions + 1 disposable-PG integration contract. Observed **3 RED / 1 SKIP** before implementation: migration absent, aggregate function absent, direct table SELECT still present.
 - Test role uses only CI-provided localhost:5432 disposable migrator DB; never touches Production-linked 5433.
+
+## In progress — implementation and isolated PostgreSQL (22:45 KST)
+- New forward-only **candidate** migration 280 revokes app/PUBLIC direct vote table privileges, adds a SECURITY DEFINER admin-only aggregate with pinned search_path and narrow app EXECUTE.
+- Admin controller/service/repository now pass authenticated actor and query aggregate; vote submission contract unchanged.
+- Disposable Docker PostgreSQL 17.11-alpine: initialized all 002–280 migrations, verified raw table ACL denial, nonadmin rejection, two synthetic members' aggregate, existing vote function, transaction ROLLBACK. Container destroyed. No shared/live DB touched.
+- TDD GREEN: 4/4 DB regression tests (including actual PG), 1/1 backend repository unit; changed-file ESLint 0 errors / 8 preexisting warnings.
+- Collision still open: other PRs claim 280. Candidate cannot merge until coordinated renumber/rebase and new SHA gates.

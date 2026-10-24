@@ -209,8 +209,8 @@ export class TreasuryService {
     return this.repository.getCitizenTaxReceipt(userId);
   }
 
-  async getGovernanceVotes(quarter = '2026-Q4') {
-    return this.repository.getGovernanceVotes(quarter);
+  async getGovernanceVotes(actorId: string, quarter = '2026-Q4') {
+    return this.repository.getGovernanceVotes(actorId, quarter);
   }
 
   async voteCitizenBudget(userId: string, quarter: string, priorityChoice: string) {
