@@ -11,3 +11,4 @@
 - **GitHub:** issue and Draft PR links to be appended after creation; code implementation belongs to a separate development branch.
 
 - **GitHub development handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1183 (OPEN, no runtime approval).
+- **GitHub Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1184 (DRAFT, RELEASE HOLD).
