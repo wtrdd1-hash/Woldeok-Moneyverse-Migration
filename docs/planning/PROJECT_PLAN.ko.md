@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1228 — F675-114 회원 주간 목표 집중 보드 (기능 추가 / 기획 초안 / 운영 보류)
+- 이전 기능 보완 v1226 → 현재 기능 추가 v1228 → 다음 기능 보완 v1230(잠정). 최신 main `49788d09494fed3e463651945b83386e87dd47bc` 시작·중간 동일, v1226 Draft #1149 미병합, QA v1233 FAILED/HOLD. 문서만 변경.
+- 실제 `/quests` → `GET /api/v1/engagement/early-game` → Migration 101 `public.early_game_weekly_goals`에서 서울 주 시작일, 주간/평생 기간, bigint 문자열 진행도, 자기신고 NPC 지표를 확인. 본인 전용 최대 3개 고정, `/account/goal-focus`, 불변 영수증·CAS·월요일 만료, 진행도 조작·WLD 보상 없음. 회원 전용 `/quests`의 robots index=true 수정 필요. 화면·CTA·상태·API·DB·트랜잭션·관리자·보안·SEO·Android·접근성·KPI·회귀·롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md)에 상세 명세.
+- P0 ENV1228-01(DB 격리/5433/복원), SEC1228-02(앱 DML 235/241·PUBLIC 은행 함수 3개), REL1228-03(Migration280 4중 충돌 #1147, 빌드만 자동 병합 #1088, Migration266, 프론트 5건, 보안 감사, 정확 SHA Test), QUEST1228-04(#1133 허위 보상/자기신고 근거 및 비공개 SEO). P1 QUEST1228-05..10: 본인 전용 SQL·영수증·API/UI·서울 주 전환·Android·개인정보/분석·격리 회귀/배포. 전체 ID: ENV1228-01 SEC1228-02 REL1228-03 QUEST1228-04 QUEST1228-05 QUEST1228-06 QUEST1228-07 QUEST1228-08 QUEST1228-09 QUEST1228-10.
+- 기능 기본 OFF, 런타임·DB·WLD·Test·Production 변경 없음. PostgreSQL/OWASP/W3C 3개 발행기관 검토, 신규 승인 0, 누적 승인 미확인/10,000 BLOCKED / IN PROGRESS. 별도 개발 브랜치와 공식 Test 정확 SHA·독립 GitOps 승인 필요.
+
+
 ## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
 - 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.
