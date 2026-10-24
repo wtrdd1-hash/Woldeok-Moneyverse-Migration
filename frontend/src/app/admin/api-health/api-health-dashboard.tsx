@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Activity,
   CheckCircle2,
   ShieldCheck,
   Zap,
@@ -15,13 +14,13 @@ import {
   CloudUpload,
   Clock,
   Play,
-  Check,
   AlertCircle,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { backupStatusLabel, backupRetentionLabel } from './backup-status';
 
 export interface DomainHealthData {
   readonly id: string;
@@ -350,12 +349,12 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
             <div>
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <CloudUpload className="size-4 text-sky-500" />
-                <span>{isEn ? 'Cloudflare R2 Free Cloud Automated Backup' : 'Cloudflare R2 무료 클라우드 자동 백업 DR'}</span>
+                <span>{isEn ? 'Backup archive inventory (unverified)' : '백업 파일 목록 (검증 전)'}</span>
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground mt-0.5">
                 {isEn
-                  ? 'Zero-cost disaster recovery pipeline. Daily 04:00 AM snapshot with 30-day retention.'
-                  : 'Cloudflare R2 10GB 무료 티어 및 영구 무과금($0 Egress) 재해 복구 파이프라인 (매일 04:00 자동 스냅샷 / 30일 보관).'}
+                  ? 'Legacy SQL files are not proof of encrypted backups or successful restore. The verified systemd backup is tracked separately.'
+                  : '레거시 SQL 파일은 암호화·복원 검증 증거가 아닙니다. 검증된 systemd 백업은 별도로 관리합니다.'}
               </CardDescription>
             </div>
             <Button
@@ -372,8 +371,8 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
         </CardHeader>
         <CardContent className="p-4 pt-1 space-y-3">
           {backupFeedback && (
-            <div className="p-2.5 rounded-md bg-sky-500/10 border border-sky-500/30 text-xs text-sky-600 dark:text-sky-400 flex items-center gap-2">
-              <Check className="size-3.5" />
+            <div className="p-2.5 rounded-md bg-muted border border-border text-xs text-muted-foreground flex items-center gap-2">
+              <AlertCircle className="size-3.5" />
               <span>{backupFeedback}</span>
             </div>
           )}
@@ -381,15 +380,15 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
               <div className="text-muted-foreground text-[11px]">R2 버킷</div>
-              <div className="font-mono font-bold mt-0.5 truncate">{backupData?.r2Bucket || 'moneyverse-backup'}</div>
+              <div className="font-mono font-bold mt-0.5 truncate">{backupData?.r2Configured ? backupData.r2Bucket : (isEn ? 'Not configured' : '미설정')}</div>
             </div>
             <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
               <div className="text-muted-foreground text-[11px]">보관 주기</div>
-              <div className="font-mono font-bold mt-0.5">{backupData?.retentionDays || 30}일 롤링</div>
+              <div className="font-mono font-bold mt-0.5">{backupRetentionLabel(backupData?.retentionDays ?? 0, isEn)}</div>
             </div>
             <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
               <div className="text-muted-foreground text-[11px]">총 백업본 개수</div>
-              <div className="font-mono font-bold mt-0.5">{backupData?.totalBackups ?? 0}개 스냅샷</div>
+              <div className="font-mono font-bold mt-0.5">{backupData?.totalBackups ?? 0}개 파일</div>
             </div>
             <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
               <div className="text-muted-foreground text-[11px]">총 보관 용량</div>
@@ -400,14 +399,19 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
           {backupData?.files && backupData.files.length > 0 && (
             <div className="space-y-1.5">
               <div className="text-xs font-semibold text-muted-foreground">
-                {isEn ? 'Recent Backup Snapshots' : '최근 스냅샷 목록 (검증 완료)'}
+                {isEn ? 'Recent legacy dump files (unverified)' : '최근 레거시 덤프 파일 (검증 전)'}
               </div>
               <div className="divide-y divide-border/40 rounded-lg border border-border/60 bg-background/50 overflow-hidden text-xs">
                 {backupData.files.slice(0, 3).map((f) => (
                   <div key={f.fileName} className="p-2.5 flex items-center justify-between gap-2 font-mono">
                     <div className="flex items-center gap-2 truncate">
-                      <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                      {f.status === 'VERIFIED' ? (
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                      ) : (
+                        <AlertCircle className="size-3.5 text-amber-500 shrink-0" />
+                      )}
                       <span className="truncate">{f.fileName}</span>
+                      <span className="text-muted-foreground">{backupStatusLabel(f.status, isEn)}</span>
                     </div>
                     <div className="flex items-center gap-3 shrink-0 text-muted-foreground">
                       <span className="font-bold text-foreground">{f.sizeMb} MB</span>
