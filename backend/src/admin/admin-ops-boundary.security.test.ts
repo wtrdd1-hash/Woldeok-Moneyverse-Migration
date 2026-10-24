@@ -7,11 +7,11 @@ import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { AdminBackupController } from './admin-backup.controller';
 import { ApiHealthController } from './api-health.controller';
 
-function controllerGuards(controller: Function): unknown[] {
+function controllerGuards(controller: typeof AdminBackupController | typeof ApiHealthController): unknown[] {
   return (Reflect.getMetadata(GUARDS_METADATA, controller) as unknown[]) ?? [];
 }
 
-function methodGuards(controller: Function, method: string): unknown[] {
+function methodGuards(controller: typeof AdminBackupController, method: keyof AdminBackupController): unknown[] {
   return (Reflect.getMetadata(GUARDS_METADATA, controller.prototype[method]) as unknown[]) ?? [];
 }
 

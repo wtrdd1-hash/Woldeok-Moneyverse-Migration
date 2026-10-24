@@ -23,15 +23,15 @@
 - A request accepted is not proof a backup completed.
 
 ## Task 1: Backend guard regression
-- [ ] Add metadata assertions for class-level AdminGuard and AdminSessionGuard on both controllers and method-level ReauthGuard on trigger.
-- [ ] Run focused Vitest, capture RED.
-- [ ] Implement guards and rerun GREEN.
+- [x] Add metadata assertions for class-level AdminGuard and AdminSessionGuard on both controllers and method-level ReauthGuard on trigger.
+- [x] Run focused Vitest, capture RED.
+- [x] Implement guards and rerun GREEN.
 
 ## Task 2: Frontend safe trigger
-- [ ] Add tests proving server action calls `mutate` and validates accepted response; browser UI no longer sends direct POST.
-- [ ] Run RED, then implement server action and UI, rerun GREEN.
+- [x] Add tests proving server action calls `mutate` and validates accepted response; browser UI no longer sends direct POST.
+- [x] Run RED, then implement server action and UI, rerun GREEN.
 
 ## Task 3: Verify and publish
-- [ ] Run lint/typecheck/build/unit/security/CI as feasible, log exact results and skips.
-- [ ] Fetch main and recheck plan, inspect diff and record final SHA.
+- [x] Run lint/typecheck/build/unit/security/CI as feasible, log exact results and skips.
+- [x] Fetch main and recheck plan, inspect diff and record final SHA.
 - [ ] Open Draft PR only; do not merge or deploy without official Test exact-SHA.
