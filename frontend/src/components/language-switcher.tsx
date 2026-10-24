@@ -20,6 +20,7 @@ export const LANGUAGE_OPTIONS: Array<{ value: Locale; label: string; shortLabel:
   { value: 'en', label: 'English (US)', shortLabel: 'EN' },
   { value: 'ja', label: '日本語 (Japanese)', shortLabel: 'JA' },
   { value: 'zh', label: '简体中文 (Chinese)', shortLabel: 'ZH' },
+  { value: 'vi', label: 'Tiếng Việt (Vietnamese)', shortLabel: 'VI' },
 ];
 
 export const DEFAULT_CURRENCY_FOR_LOCALE: Record<Locale, Currency> = {
@@ -27,6 +28,7 @@ export const DEFAULT_CURRENCY_FOR_LOCALE: Record<Locale, Currency> = {
   en: 'USD',
   ja: 'JPY',
   zh: 'CNY',
+  vi: 'USD',
 };
 
 export function LanguageSwitcher({
@@ -52,6 +54,7 @@ export function LanguageSwitcher({
     en: 'Language & Currency',
     ja: '言語・通貨設定',
     zh: '语言与货币设置',
+    vi: 'Cài đặt Ngôn ngữ & Tiền tệ',
   };
 
   const langLabelMap: Record<Locale, string> = {
@@ -59,6 +62,7 @@ export function LanguageSwitcher({
     en: 'Language',
     ja: '言語 (Language)',
     zh: '语言 (Language)',
+    vi: 'Ngôn ngữ (Language)',
   };
 
   const automaticLabel: Record<Locale, string> = {
@@ -66,6 +70,7 @@ export function LanguageSwitcher({
     en: 'Automatic (country & browser)',
     ja: '自動判定 (国・ブラウザー)',
     zh: '自动识别 (国家及浏览器)',
+    vi: 'Tự động phát hiện (Quốc gia & Trình duyệt)',
   };
 
   const currencyLabelMap: Record<Locale, string> = {
@@ -73,6 +78,7 @@ export function LanguageSwitcher({
     en: 'Display Currency',
     ja: '表示通貨 (Currency)',
     zh: '显示货币 (Currency)',
+    vi: 'Tiền tệ hiển thị (Currency)',
   };
 
   const ariaMap: Record<Locale, string> = {
@@ -80,6 +86,7 @@ export function LanguageSwitcher({
     en: 'Change language and currency',
     ja: '言語と通貨を変更する',
     zh: '更改语言与货币',
+    vi: 'Thay đổi ngôn ngữ và tiền tệ',
   };
 
   return (

@@ -78,6 +78,7 @@ const LOCALE_BCP47_MAP: Record<Locale, string> = {
   en: 'en-US',
   ja: 'ja-JP',
   zh: 'zh-CN',
+  vi: 'vi-VN',
 };
 
 const FORMATTERS_MOMENT = new Map<Locale, Intl.DateTimeFormat>();

@@ -1,12 +1,12 @@
-export type Locale = 'ko' | 'en' | 'ja' | 'zh';
+export type Locale = 'ko' | 'en' | 'ja' | 'zh' | 'vi';
 
 export const DEFAULT_LOCALE: Locale = 'ko';
-export const SUPPORTED_LOCALES: readonly Locale[] = ['ko', 'en', 'ja', 'zh'] as const;
+export const SUPPORTED_LOCALES: readonly Locale[] = ['ko', 'en', 'ja', 'zh', 'vi'] as const;
 export const LOCALE_COOKIE = 'wdmv_locale';
 export const DETECTED_LOCALE_COOKIE = 'wdmv_detected_locale';
 
 export function isLocale(value: string | null | undefined): value is Locale {
-  return value === 'ko' || value === 'en' || value === 'ja' || value === 'zh';
+  return value === 'ko' || value === 'en' || value === 'ja' || value === 'zh' || value === 'vi';
 }
 
 /**
@@ -14,11 +14,13 @@ export function isLocale(value: string | null | undefined): value is Locale {
  * Korean: KR (South Korea), KP (North Korea)
  * Japanese: JP (Japan)
  * Chinese (Simplified/Regional): CN (China), TW (Taiwan), HK (Hong Kong), MO (Macau), SG (Singapore)
- * English (Global default): All other global countries (US, GB, CA, AU, NZ, DE, FR, VN, TH, PH, IN, BR, RU, etc.)
+ * Vietnamese: VN (Vietnam)
+ * English (Global default): All other global countries (US, GB, CA, AU, NZ, DE, FR, TH, PH, IN, BR, RU, etc.)
  */
 const KOREAN_COUNTRIES = new Set(['KR', 'KP']);
 const JAPANESE_COUNTRIES = new Set(['JP']);
 const CHINESE_COUNTRIES = new Set(['CN', 'TW', 'HK', 'MO', 'SG']);
+const VIETNAMESE_COUNTRIES = new Set(['VN']);
 
 /**
  * Parse Accept-Language header taking quality values (q-factor) into account.
@@ -49,6 +51,7 @@ export function parseAcceptLanguage(header: string | null | undefined): Locale |
     if (lang.startsWith('ko')) return 'ko';
     if (lang.startsWith('ja')) return 'ja';
     if (lang.startsWith('zh')) return 'zh';
+    if (lang.startsWith('vi')) return 'vi';
     if (lang.startsWith('en')) return 'en';
   }
 
@@ -70,11 +73,12 @@ export function detectLocale(country: string | null | undefined, acceptLanguage:
     if (KOREAN_COUNTRIES.has(normalisedCountry)) return 'ko';
     if (JAPANESE_COUNTRIES.has(normalisedCountry)) return 'ja';
     if (CHINESE_COUNTRIES.has(normalisedCountry)) return 'zh';
+    if (VIETNAMESE_COUNTRIES.has(normalisedCountry)) return 'vi';
     
-    // Any other recognised or unrecognised country (US, GB, DE, FR, VN, BR, IN, etc.)
-    // Check if user's browser explicitly requested an Asian locale (KO/JA/ZH)
+    // Any other recognised or unrecognised country (US, GB, DE, FR, BR, IN, etc.)
+    // Check if user's browser explicitly requested an Asian/localized locale (KO/JA/ZH/VI)
     const headerLang = parseAcceptLanguage(acceptLanguage);
-    if (headerLang && (headerLang === 'ja' || headerLang === 'zh' || headerLang === 'ko')) {
+    if (headerLang && (headerLang === 'ja' || headerLang === 'zh' || headerLang === 'ko' || headerLang === 'vi')) {
       return headerLang;
     }
     // Otherwise, always automatically default to English
@@ -100,6 +104,7 @@ export function detectBrowserLocale(): Locale {
     if (l.startsWith('ko')) return 'ko';
     if (l.startsWith('ja')) return 'ja';
     if (l.startsWith('zh')) return 'zh';
+    if (l.startsWith('vi')) return 'vi';
     if (l.startsWith('en')) return 'en';
   }
   return DEFAULT_LOCALE;
@@ -117,7 +122,7 @@ export function localeNavigationTarget(
   search: string,
   nextLocale: Locale | null,
 ): string | null {
-  const prefixMatch = pathname.match(/^\/(ko|en|ja|zh)(?=\/|$)/i);
+  const prefixMatch = pathname.match(/^\/(ko|en|ja|zh|vi)(?=\/|$)/i);
   const suffix = prefixMatch ? pathname.slice(prefixMatch[0].length) : '';
   let nextPath = pathname;
 
@@ -151,10 +156,12 @@ export function localeLabel(
   korean: string,
   english: string,
   japanese?: string,
-  chinese?: string
+  chinese?: string,
+  vietnamese?: string
 ): string {
   if (locale === 'ja') return japanese || english;
   if (locale === 'zh') return chinese || english;
+  if (locale === 'vi') return vietnamese || english;
   if (locale === 'en') return english;
   return korean;
 }

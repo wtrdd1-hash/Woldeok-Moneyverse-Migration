@@ -62,6 +62,11 @@ const ARCADE_META_BY_LOCALE = {
     description: "在沃尔德克金融元宇宙使用WLD体验抛硬币、掷骰子、老虎机和高低牌等服务器验证游戏。",
     canonical: "/zh/arcade",
   },
+  vi: {
+    title: "Khu Trò chơi Mini Arcade (Mô phỏng Ảo) — Tung đồng xu, Xúc xắc, Slot",
+    description: "Trải nghiệm các trò chơi nhỏ được xác minh bằng máy chủ như tung đồng xu, xúc xắc, slot và high-low bằng WLD.",
+    canonical: "/vi/arcade",
+  },
 };
 
 export async function generateMetadata(): Promise<Metadata> {

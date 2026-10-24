@@ -27,6 +27,7 @@ export const CURRENCY_CONFIG: Record<Currency, CurrencyMeta> = {
       en: 'Korean Won (KRW)',
       ja: '韓国ウォン (KRW)',
       zh: '韩元 (KRW)',
+      vi: 'Won Hàn Quốc (KRW)',
     },
     rateAgainstWld: 1.0,
     decimals: 0,
@@ -39,6 +40,7 @@ export const CURRENCY_CONFIG: Record<Currency, CurrencyMeta> = {
       en: 'US Dollar (USD)',
       ja: '米ドル (USD)',
       zh: '美元 (USD)',
+      vi: 'Đô la Mỹ (USD)',
     },
     rateAgainstWld: 1350.0,
     decimals: 2,
@@ -51,6 +53,7 @@ export const CURRENCY_CONFIG: Record<Currency, CurrencyMeta> = {
       en: 'Japanese Yen (JPY)',
       ja: '日本円 (JPY)',
       zh: '日元 (JPY)',
+      vi: 'Yên Nhật (JPY)',
     },
     rateAgainstWld: 9.0,
     decimals: 0,
@@ -63,6 +66,7 @@ export const CURRENCY_CONFIG: Record<Currency, CurrencyMeta> = {
       en: 'Chinese Yuan (CNY)',
       ja: '中国人民元 (CNY)',
       zh: '人民币 (CNY)',
+      vi: 'Nhân dân tệ (CNY)',
     },
     rateAgainstWld: 190.0,
     decimals: 2,
@@ -78,6 +82,7 @@ export function isCurrency(value: unknown): value is Currency {
 export function getLocaleDefaultCurrency(locale: Locale): Currency {
   switch (locale) {
     case 'en':
+    case 'vi':
       return 'USD';
     case 'ja':
       return 'JPY';
@@ -118,7 +123,7 @@ export function formatFiat(
   const sign = amount < 0 ? '−' : '';
 
   const formattedNumber = new Intl.NumberFormat(
-    locale === 'ko' ? 'ko-KR' : locale === 'ja' ? 'ja-JP' : locale === 'zh' ? 'zh-CN' : 'en-US',
+    locale === 'ko' ? 'ko-KR' : locale === 'ja' ? 'ja-JP' : locale === 'zh' ? 'zh-CN' : locale === 'vi' ? 'vi-VN' : 'en-US',
     {
       minimumFractionDigits: config.decimals,
       maximumFractionDigits: config.decimals,
@@ -155,7 +160,6 @@ export function formatWldWithFiat(
 
   return `≈ ${fiatStr} ${currency}`;
 }
-
 
 /**
  * Exact WLD-to-fiat display. Configured WLD rates are whole integers; perform

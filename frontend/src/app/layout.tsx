@@ -168,6 +168,26 @@ const META_BY_LOCALE = {
     ogLocale: 'zh_CN',
     ogTitle: '月德 Moneyverse — Discord社区虚拟经济',
   },
+  vi: {
+    titleDefault: 'Woldeok Moneyverse — Kinh tế Ảo, Cổ phiếu & Công cụ Tài chính',
+    titleTemplate: '%s · Woldeok Moneyverse',
+    description:
+      'Khám phá nền kinh tế ảo, sàn giao dịch cổ phiếu giả lập và các công cụ tính toán tài chính trực quan. WLD là tiền tệ mô phỏng trò chơi.',
+    applicationName: 'Woldeok Moneyverse',
+    category: 'Tài chính & Kinh tế Mô phỏng',
+    keywords: [
+      'Woldeok Moneyverse',
+      'Sàn giao dịch cổ phiếu ảo',
+      'Khớp lệnh thời gian thực',
+      'Máy tính lãi kép',
+      'Kinh tế ảo',
+      'Discord Bot',
+      'WLD',
+      'Ngân hàng trung ương ảo',
+    ],
+    ogLocale: 'vi_VN',
+    ogTitle: 'Woldeok Moneyverse — Mô phỏng Tài chính Kiểu Toss Thế Hệ Mới',
+  },
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -345,7 +365,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-0 focus:z-[100] focus:rounded-b-lg focus:bg-forest focus:px-4 focus:py-3 focus:text-white"
         >
-          {localeLabel(locale, '본문으로 건너뛰기', 'Skip to main content', '本文へスキップ', '跳至正文')}
+          {localeLabel(locale, '본문으로 건너뛰기', 'Skip to main content', '本文へスキップ', '跳至正文', 'Chuyển đến nội dung chính')}
         </a>
         <LocaleProvider initialLocale={locale}>
           <CurrencyProvider initialCurrency={initialCurrency}>

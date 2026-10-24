@@ -44,6 +44,11 @@ const STOCKS_META_BY_LOCALE = {
     description: 'Toss风格极简虚拟股票交易所，实时查看10大标的行情与深度K线。',
     canonical: '/zh/stocks',
   },
+  vi: {
+    title: 'Sàn giao dịch Cổ phiếu ảo | Woldeok Moneyverse',
+    description: 'Trải nghiệm sàn giao dịch cổ phiếu ảo thời gian thực với sổ lệnh khớp giá tốc độ cao.',
+    canonical: '/vi/stocks',
+  },
 };
 
 export async function generateMetadata(): Promise<Metadata> {

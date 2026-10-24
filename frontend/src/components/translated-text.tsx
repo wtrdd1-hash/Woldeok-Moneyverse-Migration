@@ -8,6 +8,7 @@ export interface TranslatedTextProps {
   readonly english?: string;
   readonly japanese?: string;
   readonly chinese?: string;
+  readonly vietnamese?: string;
   readonly token?: string;
   readonly fallback?: string;
 }
@@ -17,6 +18,7 @@ export function TranslatedText({
   english = '',
   japanese,
   chinese,
+  vietnamese,
   token,
   fallback,
 }: TranslatedTextProps) {
@@ -29,12 +31,12 @@ export function TranslatedText({
   // Explicit override props
   if (locale === 'ja' && japanese) return <>{japanese}</>;
   if (locale === 'zh' && chinese) return <>{chinese}</>;
+  if (locale === 'vi' && vietnamese) return <>{vietnamese}</>;
   if (locale === 'en' && english) return <>{english}</>;
   if (locale === 'ko' && korean) return <>{korean}</>;
 
-  // Automatic 4-language reverse dictionary lookup
+  // Automatic 5-language reverse dictionary lookup
   const sourceText = korean || english;
   const translated = lookupText(sourceText, locale, english || korean || fallback);
   return <>{translated}</>;
 }
-

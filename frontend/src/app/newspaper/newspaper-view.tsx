@@ -60,7 +60,7 @@ interface NewspaperViewProps {
   readonly initialTab?: 'brief' | 'live' | undefined;
 }
 
-const STRENGTH_LABEL: Readonly<Record<number, { ko: string; en: string; ja: string; zh: string }>> = {
+const STRENGTH_LABEL: Readonly<Record<number, { ko: string; en: string; ja: string; zh: string; vi?: string }>> = {
   1: { ko: '소폭 영향', en: 'Mild Impact', ja: '小幅影響', zh: '轻微影响' },
   2: { ko: '보통 영향', en: 'Moderate Impact', ja: '通常影響', zh: '中度影响' },
   3: { ko: '강력 영향', en: 'Major Impact', ja: '強力影響', zh: '重大影响' },
@@ -476,7 +476,7 @@ export function NewspaperView({
                 </Badge>
                 {leadEvent && (
                   <Badge variant="outline" className="font-mono text-xs">
-                    {STRENGTH_LABEL[leadEvent.strength]?.[locale] ?? '보통'}
+                    {STRENGTH_LABEL[leadEvent.strength]?.[locale as 'ko'|'en'|'ja'|'zh'] ?? '보통'}
                   </Badge>
                 )}
                 {leadEvent?.symbol && (

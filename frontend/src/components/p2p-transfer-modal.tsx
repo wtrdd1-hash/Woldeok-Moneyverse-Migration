@@ -13,23 +13,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits, isPositiveWldInput } from '@/lib/money';
-import { Send, Search, CheckCircle2, User, Heart, Sparkles, AlertCircle } from 'lucide-react';
+import { Send, Search, CheckCircle2, User, AlertCircle } from 'lucide-react';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 
 interface Recipient {
   userId: string;
   displayName: string;
 }
 
-const STICKERS = [
-  { id: 'cheer', label: '🎉 축하해' },
-  { id: 'coffee', label: '☕ 커피 한잔' },
-  { id: 'debt', label: '💸 빚 청산' },
-  { id: 'rocket', label: '🚀 떡상 기원' },
-  { id: 'thanks', label: '❤️ 고마워' },
-  { id: 'pizza', label: '🍕 맛있는 밥' },
-];
-
-export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { triggerText?: string }) {
+export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
+  const { locale } = useLocale();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Recipient[]>([]);
@@ -48,6 +42,32 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
     txId: string;
   } | null>(null);
 
+  const STICKERS = [
+    {
+      id: 'cheer',
+      label: localeLabel(locale, '🎉 축하해', '🎉 Congrats', '🎉 おめでとう', '🎉 祝贺', '🎉 Chúc mừng'),
+    },
+    {
+      id: 'coffee',
+      label: localeLabel(locale, '☕ 커피 한잔', '☕ Coffee on me', '☕ コーヒー一杯', '☕ 请喝咖啡', '☕ Mời ly cà phê'),
+    },
+    {
+      id: 'debt',
+      label: localeLabel(locale, '💸 빚 청산', '💸 Debt cleared', '💸 借金返済', '💸 还清债务', '💸 Thanh toán nợ'),
+    },
+    {
+      id: 'rocket',
+      label: localeLabel(locale, '🚀 떡상 기원', '🚀 To the moon', '🚀 爆上がり祈願', '🚀 暴涨暴富', '🚀 Chúc phát tài'),
+    },
+    {
+      id: 'thanks',
+      label: localeLabel(locale, '❤️ 고마워', '❤️ Thank you', '❤️ ありがとう', '❤️ 感谢有你', '❤️ Cảm ơn bạn'),
+    },
+    {
+      id: 'pizza',
+      label: localeLabel(locale, '🍕 맛있는 밥', '🍕 Treat meal', '🍕 美味しいご飯', '🍕 请吃顿饭', '🍕 Bữa ăn ngon'),
+    },
+  ];
 
   // 수취인 검색 디바운스
   useEffect(() => {
@@ -76,7 +96,16 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
 
   const handleTransfer = async () => {
     if (!selectedRecipient || !isPositiveWldInput(amount)) {
-      setErrorMsg('수취인과 송금 금액(1 WLD 이상)을 입력해주세요.');
+      setErrorMsg(
+        localeLabel(
+          locale,
+          '수취인과 송금 금액(1 WLD 이상)을 입력해주세요.',
+          'Please enter a recipient and transfer amount (min 1 WLD).',
+          '受取人と送金金額（1 WLD以上）を入力してください。',
+          '请输入收款人和转账金额（至少 1 WLD）。',
+          'Vui lòng nhập người nhận và số tiền chuyển (tối thiểu 1 WLD).'
+        )
+      );
       return;
     }
 
@@ -98,7 +127,17 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMsg(data.error || '송금 처리에 실패했습니다.');
+        setErrorMsg(
+          data.error ||
+            localeLabel(
+              locale,
+              '송금 처리에 실패했습니다.',
+              'Transfer processing failed.',
+              '送金処理に失敗しました。',
+              '转账处理失败。',
+              'Xử lý chuyển tiền thất bại.'
+            )
+        );
         setIsSubmitting(false);
         return;
       }
@@ -111,7 +150,17 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
         txId: data.transactionId || 'TX-' + Math.random().toString(36).slice(2, 9),
       });
     } catch (err: any) {
-      setErrorMsg(err?.message || '네트워크 오류가 발생했습니다.');
+      setErrorMsg(
+        err?.message ||
+          localeLabel(
+            locale,
+            '네트워크 오류가 발생했습니다.',
+            'A network error occurred.',
+            'ネットワークエラーが発生しました。',
+            '发生网络错误。',
+            'Đã xảy ra lỗi mạng.'
+          )
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -127,12 +176,21 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
     setReceipt(null);
   };
 
+  const defaultTrigger = localeLabel(
+    locale,
+    '스마트 P2P 송금',
+    'Smart P2P Transfer',
+    'スマート P2P 送金',
+    '智能 P2P 转账',
+    'Chuyển tiền P2P'
+  );
+
   return (
     <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) handleReset(); }}>
       <DialogTrigger asChild>
         <Button className="h-10 px-4 font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/10">
           <Send className="h-4 w-4 mr-2" />
-          {triggerText}
+          {triggerText || defaultTrigger}
         </Button>
       </DialogTrigger>
 
@@ -143,9 +201,25 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
               <Send className="h-4 w-4" />
             </div>
             <div>
-              <DialogTitle className="text-lg font-bold">1:1 P2P 스마트 안심 송금</DialogTitle>
+              <DialogTitle className="text-lg font-bold">
+                {localeLabel(
+                  locale,
+                  '1:1 P2P 스마트 안심 송금',
+                  '1:1 P2P Smart Safe Transfer',
+                  '1:1 P2P スマート安全送金',
+                  '1:1 P2P 智能安全转账',
+                  'Chuyển tiền P2P Nhanh chóng'
+                )}
+              </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                수수료 0원! 감사 메모와 귀여운 스티커를 동봉해 마음을 전하세요.
+                {localeLabel(
+                  locale,
+                  '수수료 0원! 감사 메모와 귀여운 스티커를 동봉해 마음을 전하세요.',
+                  'Zero fee! Send thoughtful notes and expressive stickers directly.',
+                  '手数料無料！感謝メッセージと可愛いスタンプを添えて気持ちを伝えましょう。',
+                  '0 手续费！附上感谢留言与专属表情传递心意。',
+                  'Miễn phí 0đ! Gửi kèm lời nhắn và nhãn dán biểu cảm trực tiếp.'
+                )}
               </DialogDescription>
             </div>
           </div>
@@ -157,36 +231,53 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
             <div className="h-14 w-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3">
               <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h3 className="text-lg font-bold text-foreground">송금 완료!</h3>
+            <h3 className="text-lg font-bold text-foreground">
+              {localeLabel(locale, '송금 완료!', 'Transfer Complete!', '送金完了！', '转账完成！', 'Chuyển tiền thành công!')}
+            </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              수취인에게 실시간 알림이 발송되었습니다.
+              {localeLabel(
+                locale,
+                '수취인에게 실시간 알림이 발송되었습니다.',
+                'Real-time notification delivered to recipient ledger.',
+                '受取人にリアルタイム通知が送信されました。',
+                '已向收款人发送实时账单通知。',
+                'Thông báo thời gian thực đã được gửi đến người nhận.'
+              )}
             </p>
 
             <div className="w-full mt-5 p-4 rounded-xl border border-border/50 bg-muted/20 text-left space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground text-xs">받는 분</span>
+                <span className="text-muted-foreground text-xs">
+                  {localeLabel(locale, '받는 분', 'Recipient', '受取人', '收款人', 'Người nhận')}
+                </span>
                 <span className="font-semibold text-foreground">{receipt.recipientName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground text-xs">보낸 금액</span>
+                <span className="text-muted-foreground text-xs">
+                  {localeLabel(locale, '보낸 금액', 'Amount Sent', '送金金額', '转账金额', 'Số tiền gửi')}
+                </span>
                 <span className="font-mono font-bold text-primary text-base">{receipt.amount} WLD</span>
               </div>
               {receipt.message && (
                 <div className="flex justify-between pt-1 border-t border-border/30">
-                  <span className="text-muted-foreground text-xs">동봉 메시지</span>
+                  <span className="text-muted-foreground text-xs">
+                    {localeLabel(locale, '동봉 메시지', 'Memo', 'メッセージ', '附言', 'Lời nhắn')}
+                  </span>
                   <span className="text-xs font-medium text-foreground">{receipt.message}</span>
                 </div>
               )}
               {receipt.sticker && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground text-xs">스티커</span>
+                  <span className="text-muted-foreground text-xs">
+                    {localeLabel(locale, '스티커', 'Sticker', 'スタンプ', '贴纸', 'Nhãn dán')}
+                  </span>
                   <Badge variant="outline" className="text-xs">{receipt.sticker}</Badge>
                 </div>
               )}
             </div>
 
             <Button onClick={handleReset} className="w-full mt-6 h-11 rounded-xl font-bold">
-              새로운 송금하기
+              {localeLabel(locale, '새로운 송금하기', 'Make Another Transfer', '新しい送金を行う', '发起新转账', 'Thực hiện chuyển tiền mới')}
             </Button>
           </div>
         ) : (
@@ -195,13 +286,15 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
             {/* 1. 수취인 검색 / 선택 */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                <span>받는 사람 (닉네임)</span>
+                <span>
+                  {localeLabel(locale, '받는 사람 (닉네임)', 'Recipient (Nickname)', '受取人 (ニックネーム)', '收款人（昵称）', 'Người nhận (Biệt danh)')}
+                </span>
                 {selectedRecipient && (
                   <button
                     onClick={() => { setSelectedRecipient(null); setSearchQuery(''); }}
                     className="text-xs text-primary underline"
                   >
-                    변경
+                    {localeLabel(locale, '변경', 'Change', '変更', '更改', 'Thay đổi')}
                   </button>
                 )}
               </label>
@@ -218,14 +311,21 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
                     </div>
                   </div>
                   <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
-                    인증됨
+                    {localeLabel(locale, '인증됨', 'Verified', '認証済み', '已认证', 'Đã xác minh')}
                   </Badge>
                 </div>
               ) : (
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="수취인 닉네임을 검색하세요..."
+                    placeholder={localeLabel(
+                      locale,
+                      '수취인 닉네임을 검색하세요...',
+                      'Search recipient by nickname...',
+                      '受取人のニックネームを検索...',
+                      '搜索收款人昵称...',
+                      'Tìm kiếm người nhận theo biệt danh...'
+                    )}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9 h-10 rounded-xl"
@@ -248,7 +348,7 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
                   )}
                   {isSearching && (
                     <div className="absolute right-3 top-3 text-[11px] text-muted-foreground animate-pulse">
-                      검색 중...
+                      {localeLabel(locale, '검색 중...', 'Searching...', '検索中...', '搜索中...', 'Đang tìm kiếm...')}
                     </div>
                   )}
                 </div>
@@ -257,7 +357,9 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
 
             {/* 2. 금액 입력 */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">송금 금액 (WLD)</label>
+              <label className="text-xs font-semibold text-foreground">
+                {localeLabel(locale, '송금 금액 (WLD)', 'Transfer Amount (WLD)', '送金金額 (WLD)', '转账金额 (WLD)', 'Số tiền chuyển (WLD)')}
+              </label>
               <div className="relative">
                 <Input
                   type="number"
@@ -289,11 +391,20 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
             {/* 3. 감사 메모 (선택) */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-foreground">감사 메모 (선택)</label>
-                <span className="text-[10px] text-muted-foreground">{message.length}/30자</span>
+                <label className="text-xs font-semibold text-foreground">
+                  {localeLabel(locale, '감사 메모 (선택)', 'Personal Memo (Optional)', 'メッセージ (任意)', '附言（可选）', 'Lời nhắn (Tùy chọn)')}
+                </label>
+                <span className="text-[10px] text-muted-foreground">{message.length}/30</span>
               </div>
               <Input
-                placeholder="도박 빚 갚는다! / 커피 맛있게 마셔"
+                placeholder={localeLabel(
+                  locale,
+                  '도박 빚 갚는다! / 커피 맛있게 마셔',
+                  'Thanks for the coffee! / Bill split',
+                  'コーヒーごちそうさま！ / 割り勘',
+                  '请你喝咖啡！ / 账单分摊',
+                  'Cảm ơn bạn nhé! / Chia tiền cà phê'
+                )}
                 maxLength={30}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -303,7 +414,9 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
 
             {/* 4. 스티커 동봉 (선택) */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">감정 스티커 동봉</label>
+              <label className="text-xs font-semibold text-foreground">
+                {localeLabel(locale, '감정 스티커 동봉', 'Attach Expressive Sticker', 'スタンプを添える', '附带表情贴纸', 'Đính kèm nhãn dán')}
+              </label>
               <div className="grid grid-cols-3 gap-1.5">
                 {STICKERS.map((stk) => (
                   <button
@@ -335,7 +448,9 @@ export function P2PTransferModal({ triggerText = '스마트 P2P 송금' }: { tri
               disabled={isSubmitting || !selectedRecipient || !isPositiveWldInput(amount)}
               className="w-full h-11 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white mt-2 shadow-lg shadow-blue-500/20"
             >
-              {isSubmitting ? '안심 송금 처리 중...' : `${amount ? groupDigits(amount) : 0} WLD 즉시 송금하기`}
+              {isSubmitting
+                ? localeLabel(locale, '안심 송금 처리 중...', 'Processing transfer...', '送金処理中...', '转账处理中...', 'Đang xử lý chuyển tiền...')
+                : `${amount ? groupDigits(amount) : 0} WLD ${localeLabel(locale, '즉시 송금하기', 'Send Now', '即時送金する', '立即转账', 'Chuyển tiền ngay')}`}
             </Button>
           </div>
         )}

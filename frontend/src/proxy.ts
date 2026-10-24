@@ -164,7 +164,7 @@ export function proxy(request: NextRequest) {
       } else {
         targetPath = cleanRest;
       }
-    } else if (!RESERVED_APP_ROUTES.has(rawLang) && ['fr', 'de', 'es', 'it', 'pt', 'ru', 'vi', 'th', 'id', 'ms', 'ar', 'hi'].includes(rawLang)) {
+    } else if (!RESERVED_APP_ROUTES.has(rawLang) && ['fr', 'de', 'es', 'it', 'pt', 'ru', 'th', 'id', 'ms', 'ar', 'hi'].includes(rawLang)) {
       // User entered a known unsupported language prefix (e.g. /fr/stocks, /de/bank)
       // Automatically redirect to English (/en/...)
       const fallbackUrl = new URL(`/en${cleanRest === '/' ? '' : cleanRest}${request.nextUrl.search}`, request.url);

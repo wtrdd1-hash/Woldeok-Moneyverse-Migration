@@ -20,7 +20,13 @@ export function GuestQuickstart({ locale }: { readonly locale: Locale }) {
       data-testid="guest-quickstart"
     >
       <p className="mb-2 text-xs font-semibold tracking-wide text-emerald-400">
-        <T korean="가입 없이 시작" english="Try before you sign up" japanese="登録せずに体験" chinese="无需注册，先体验" />
+        <T
+          korean="가입 없이 시작"
+          english="Try before you sign up"
+          japanese="登録せずに体験"
+          chinese="无需注册，先体验"
+          vietnamese="Trải nghiệm không cần đăng ký"
+        />
       </p>
       <h2 id="guest-quickstart-heading" className="text-lg sm:text-xl font-bold text-foreground">
         <T
@@ -28,6 +34,7 @@ export function GuestQuickstart({ locale }: { readonly locale: Locale }) {
           english="See how it works before creating an account"
           japanese="アカウント作成前に体験してみましょう"
           chinese="注册账户前，先亲自体验"
+          vietnamese="Trải nghiệm thử một tính năng ngay"
         />
       </h2>
       <p className="mt-2 text-sm text-muted-foreground">
@@ -36,6 +43,7 @@ export function GuestQuickstart({ locale }: { readonly locale: Locale }) {
           english="Explore finance tools and definitions without signing in. WLD is fictional game currency, not cash or an investment."
           japanese="金融計算機や用語解説はログイン不要です。WLDは現金や金融商品ではなくゲーム内通貨です。"
           chinese="无需登录即可使用金融计算器和阅读金融术语。WLD是游戏内虚拟货币，不是真实现金或投资产品。"
+          vietnamese="Khám phá các công cụ tính toán và thuật ngữ tài chính không cần đăng nhập. WLD là tiền ảo mô phỏng, không phải tiền thật."
         />
       </p>
       <nav aria-labelledby="guest-quickstart-heading" className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -46,7 +54,13 @@ export function GuestQuickstart({ locale }: { readonly locale: Locale }) {
         >
           <Calculator aria-hidden="true" className="size-5 shrink-0 text-emerald-500" />
           <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">
-            <T korean="복리 계산 직접 해보기" english="Try a compound calculator" japanese="複利を計算する" chinese="试用复利计算器" />
+            <T
+              korean="복리 계산 직접 해보기"
+              english="Try a compound calculator"
+              japanese="複利を計算する"
+              chinese="试用复利计算器"
+              vietnamese="Thử máy tính lãi kép"
+            />
           </span>
           <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground group-hover:translate-x-0.5" />
         </Link>
@@ -57,7 +71,13 @@ export function GuestQuickstart({ locale }: { readonly locale: Locale }) {
         >
           <BookOpen aria-hidden="true" className="size-5 shrink-0 text-emerald-500" />
           <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">
-            <T korean="경제 용어부터 배우기" english="Learn finance terms" japanese="金融用語を学ぶ" chinese="学习金融术语" />
+            <T
+              korean="경제 용어부터 배우기"
+              english="Learn finance terms"
+              japanese="金融用語を学ぶ"
+              chinese="学习金融术语"
+              vietnamese="Học thuật ngữ tài chính"
+            />
           </span>
           <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground group-hover:translate-x-0.5" />
         </Link>
@@ -68,7 +88,13 @@ export function GuestQuickstart({ locale }: { readonly locale: Locale }) {
         >
           <Compass aria-hidden="true" className="size-5 shrink-0 text-emerald-500" />
           <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">
-            <T korean="가상경제 기능 알아보기" english="Explore the fictional economy" japanese="仮想経済の機能を見る" chinese="了解虚拟经济玩法" />
+            <T
+              korean="가상경제 기능 알아보기"
+              english="Explore the fictional economy"
+              japanese="仮想経済の機能を見る"
+              chinese="了解虚拟经济玩法"
+              vietnamese="Tìm hiểu kinh tế mô phỏng"
+            />
           </span>
           <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground group-hover:translate-x-0.5" />
         </Link>

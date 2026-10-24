@@ -39,6 +39,7 @@ const HOME_H1_BY_LOCALE = {
   en: 'Woldeok Moneyverse — Toss-style Next-Gen FinTech Simulator',
   ja: 'ウォルドク・マネーバース — 次世代フィンテック仮想金融シミュレーター',
   zh: '月德 Moneyverse — Toss风格次世代虚拟金融模拟器',
+  vi: 'Woldeok Moneyverse — Mô phỏng Tài chính Kiểu Toss Thế Hệ Mới',
 } as const;
 
 const HOME_META_BY_LOCALE = {
@@ -61,6 +62,11 @@ const HOME_META_BY_LOCALE = {
     title: '月德 Moneyverse — Toss风格次世代虚拟金融模拟器',
     description: '极简直观的虚拟股票交易与复利金融计算工具。',
     canonical: '/zh',
+  },
+  vi: {
+    title: 'Woldeok Moneyverse — Mô phỏng Tài chính Kiểu Toss Thế Hệ Mới',
+    description: 'Thị trường cổ phiếu ảo, máy tính lãi kép và mô phỏng kinh tế trực quan không độ trễ.',
+    canonical: '/vi',
   },
 };
 

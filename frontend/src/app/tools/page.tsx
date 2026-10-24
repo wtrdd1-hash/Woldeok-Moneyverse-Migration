@@ -51,6 +51,11 @@ const TOOLS_META_BY_LOCALE = {
     description: '提供复利、股票平均成本、退休目标等金融计算和虚拟经济模拟工具。',
     canonical: '/zh/tools',
   },
+  vi: {
+    title: 'Bộ máy tính tài chính & Mô phỏng kinh tế | Woldeok Moneyverse',
+    description: 'Cung cấp các công cụ tính lãi kép, DCA cổ phiếu, hưu trí và mô phỏng kinh tế trực quan.',
+    canonical: '/vi/tools',
+  },
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -199,6 +204,7 @@ export default async function ToolsHubPage() {
     ko: { badge: '실전 금융 계산기 & 시뮬레이터', heading: '실전 금융 웹 계산기 10선', description: '복리·주식 평단가·대출이자·배당소득세·연봉 실수령액을 직관적인 차트와 함께 1초 만에 무료로 시뮬레이션하세요.' },
     ja: { badge: '金融計算・シミュレーション', heading: '金融計算ツールハブ', description: '複利、株式の平均取得単価、退職資金、給与、ローン、税金の試算ツールです。' },
     zh: { badge: '金融计算与模拟工具', heading: '金融工具中心', description: '复利、股票平均成本、退休、薪资、贷款和税费估算工具。' },
+      vi: { badge: 'Công cụ Tính toán Tài chính', heading: 'Trung tâm Máy tính Tài chính', description: 'Tính toán lãi kép, bình quân giá cổ phiếu (DCA), kế hoạch hưu trí, lương và ước tính lãi vay.' },
   }[locale];
 
   return (
