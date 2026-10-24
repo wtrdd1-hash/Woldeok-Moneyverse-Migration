@@ -165,7 +165,18 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    // The global public indexing header must not override the account security
+    // page's noindex metadata; route-specific headers are applied last.
+    return [
+      { source: '/:path*', headers: security },
+      {
+        source: '/account/security',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
+    ];
   },
 
   async redirects() {

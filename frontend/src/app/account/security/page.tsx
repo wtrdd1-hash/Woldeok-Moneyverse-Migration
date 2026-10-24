@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
+import { hasRecentServerReauthentication } from './verified-feedback';
 import {
   beginSecurityReauthentication,
   terminateOtherSessions,
@@ -80,7 +81,7 @@ export default async function AccountSecurityPage({
   const events = eventData?.events ?? [];
   const otherCount = sessions.filter((session) => !session.current).length;
   const error = typeof params.error === 'string' ? params.error : null;
-  const revoked = typeof params.revoked === 'string' ? params.revoked : null;
+  const recentlyReauthenticated = hasRecentServerReauthentication(sessionData?.sessions ?? null, Date.now());
 
   return (
     <div data-page="account-security" className="mx-auto w-full max-w-4xl space-y-6 pb-16 pt-2 sm:space-y-8 sm:pt-4">
@@ -104,39 +105,11 @@ export default async function AccountSecurityPage({
       </div>
 
       {/* Alerts */}
-      {params.reauth === 'done' && (
-        <Alert className="border-primary/30 bg-primary/5">
+      {recentlyReauthenticated && (
+        <Alert role="status" className="border-primary/30 bg-primary/5">
           <ShieldCheck className="size-4 text-primary" />
           <AlertDescription className="text-xs font-medium">
-            본인 확인이 완료되었습니다. 민감한 보안 작업을 안전하게 계속할 수 있습니다.
-          </AlertDescription>
-        </Alert>
-      )}
-      {params.email === 'verification-sent' && (
-        <Alert className="border-primary/30 bg-primary/5">
-          <AlertDescription className="text-xs font-medium">
-            새 로그인 이메일로 확인 링크를 보냈습니다. 링크 확인 완료 시 모든 세션이 종료됩니다.
-          </AlertDescription>
-        </Alert>
-      )}
-      {params.password === 'changed' && (
-        <Alert className="border-emerald-500/30 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
-          <AlertDescription className="text-xs font-medium">
-            비밀번호를 성공적으로 변경하였으며 다른 로그인 세션을 모두 안전하게 종료했습니다.
-          </AlertDescription>
-        </Alert>
-      )}
-      {params.session === 'revoked' && (
-        <Alert>
-          <AlertDescription className="text-xs font-medium">
-            선택한 기기의 세션을 원격으로 종료했습니다.
-          </AlertDescription>
-        </Alert>
-      )}
-      {revoked !== null && (
-        <Alert>
-          <AlertDescription className="text-xs font-medium">
-            다른 활성 세션 {revoked}개를 모두 안전하게 종료했습니다.
+            현재 세션의 최근 본인 확인이 서버에서 확인되었습니다.
           </AlertDescription>
         </Alert>
       )}
@@ -362,7 +335,7 @@ export default async function AccountSecurityPage({
       <Card className="border-border/80 bg-card/90 shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">최근 보안 활동</CardTitle>
-          <CardDescription className="text-xs">계정 접근 및 주요 보안 설정 변경 이력입니다.</CardDescription>
+          <CardDescription className="text-xs">계정 접근 및 주요 보안 설정 변경 이력입니다. 보안 작업 결과는 URL 메시지가 아닌 서버 기록으로 확인하세요.</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           {eventData === null ? (
