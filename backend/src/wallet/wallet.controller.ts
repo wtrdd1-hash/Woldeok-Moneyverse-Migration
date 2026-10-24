@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -24,7 +25,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
-import { WalletInputError, requireWalletDirection } from './wallet.repository';
+import { WalletInputError, requireWalletDirection, requireWalletCategory, requireWalletPeriod } from './wallet.repository';
 import { WalletRecipientError, WalletService } from './wallet.service';
 
 /**
@@ -81,20 +82,27 @@ export class WalletController {
    * an unbounded query.
    */
   @Get('wallet')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Balances and recent ledger entries for the caller' })
   overview(
     @Req() request: RequestWithSession,
     @Query('recent') recent?: string,
     @Query('direction') direction?: string,
+    @Query('category') category?: string,
+    @Query('period') period?: string,
   ) {
-    let requestedDirection;
+    let selectedDirection: ReturnType<typeof requireWalletDirection>;
+    let selectedCategory: ReturnType<typeof requireWalletCategory>;
+    let selectedPeriod: ReturnType<typeof requireWalletPeriod>;
     try {
-      requestedDirection = requireWalletDirection(direction);
+      selectedDirection = requireWalletDirection(direction);
+      selectedCategory = requireWalletCategory(category);
+      selectedPeriod = requireWalletPeriod(period);
     } catch (error) {
       if (error instanceof WalletInputError) throw new BadRequestException(error.message);
       throw error;
     }
-    if (recent === undefined && requestedDirection === undefined) {
+    if (recent === undefined && selectedDirection === undefined && selectedCategory === undefined && selectedPeriod === undefined) {
       return this.service().overview(requireUserId(request));
     }
     const parsed = recent === undefined ? 10 : Number(recent);
@@ -103,7 +111,9 @@ export class WalletController {
     }
     return this.service().overview(requireUserId(request), {
       recentLimit: parsed,
-      ...(requestedDirection ? { direction: requestedDirection } : {}),
+      ...(selectedDirection ? { direction: selectedDirection } : {}),
+      ...(selectedCategory ? { category: selectedCategory } : {}),
+      ...(selectedPeriod ? { period: selectedPeriod } : {}),
     });
   }
 

@@ -32,6 +32,33 @@ export function requireWalletDirection(value: unknown): WalletActivityDirection 
   throw new WalletInputError('direction must be in, out or neutral');
 }
 
+export type WalletTransactionCategory = 'transfer' | 'bank' | 'reward';
+export type WalletActivityPeriod = '7d' | '30d' | '90d';
+export interface WalletActivityQuery {
+  readonly direction?: WalletActivityDirection;
+  readonly category?: WalletTransactionCategory;
+  readonly since?: Date;
+}
+export type WalletActivityFilterInput = WalletActivityDirection | WalletTransactionCategory | Date | WalletActivityQuery;
+
+const WALLET_CATEGORY_TYPES: Readonly<Record<WalletTransactionCategory, readonly string[]>> = {
+  transfer: ['USER_TO_USER', 'ACCOUNT_MERGE_TRANSFER'],
+  bank: ['BANK_DEPOSIT', 'BANK_WITHDRAW', 'BANK_LOAN_ISSUED', 'BANK_LOAN_REPAYMENT', 'BANK_DEPOSIT_INTEREST'],
+  reward: ['MINT_TO_USER', 'WORK_REWARD', 'WORK_TASK_REWARD', 'EARLY_EVENT_REWARD', 'TREASURY_TO_USER'],
+};
+
+export function requireWalletCategory(value: unknown): WalletTransactionCategory | undefined {
+  if (value === undefined) return undefined;
+  if (value === 'transfer' || value === 'bank' || value === 'reward') return value;
+  throw new WalletInputError('category must be transfer, bank or reward');
+}
+
+export function requireWalletPeriod(value: unknown): WalletActivityPeriod | undefined {
+  if (value === undefined) return undefined;
+  if (value === '7d' || value === '30d' || value === '90d') return value;
+  throw new WalletInputError('period must be 7d, 30d or 90d');
+}
+
 export function requireRecentLimit(value: unknown): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 1 || value > 50) {
     throw new WalletInputError('recent transaction limit must be an integer between 1 and 50');
@@ -191,10 +218,35 @@ export class PostgresWalletRepository {
     );
   }
 
-  async recentTransactionsForUser(userId: string, limit: number, direction?: WalletActivityDirection): Promise<WalletTransactionRow[]> {
+  async recentTransactionsForUser(userId: string, limit: number, filter?: WalletActivityFilterInput): Promise<WalletTransactionRow[]> {
     const ownerUserId = requireUuid(userId, 'authenticated user id');
     const recentLimit = requireRecentLimit(limit);
-    const requestedDirection = requireWalletDirection(direction);
+    const filters: WalletActivityQuery = filter instanceof Date ? { since: filter }
+      : typeof filter === 'string' ? (filter === 'in' || filter === 'out' || filter === 'neutral'
+        ? { direction: requireWalletDirection(filter)! } : { category: requireWalletCategory(filter)! })
+      : filter ?? {};
+    const direction = requireWalletDirection(filters.direction);
+    const category = requireWalletCategory(filters.category);
+    const since = filters.since;
+    if (since !== undefined && (!(since instanceof Date) || !Number.isFinite(since.getTime()))) {
+      throw new WalletInputError('since must be a valid Date');
+    }
+    const params: unknown[] = [ownerUserId, recentLimit];
+    const categoryPredicate = category === undefined ? '' : (() => {
+      params.push(WALLET_CATEGORY_TYPES[category]);
+      return ` AND ledger_transaction.type = ANY($${params.length}::text[])`;
+    })();
+    const sincePredicate = since === undefined ? '' : (() => {
+      params.push(since);
+      return ` AND ledger_transaction.created_at >= $${params.length}::timestamptz`;
+    })();
+    const directionPredicate = direction === undefined ? 'TRUE' : (() => {
+      params.push(direction);
+      const ref = `$${params.length}::text`;
+      return `(${ref} = 'in' AND net_amount::numeric > 0)
+         OR (${ref} = 'out' AND net_amount::numeric < 0)
+         OR (${ref} = 'neutral' AND net_amount::numeric = 0)`;
+    })();
     return queryRows<WalletTransactionRow>(
       this.pool,
       `WITH owner_activity AS (
@@ -233,18 +285,15 @@ export class PostgresWalletRepository {
          AND account.account_type IN (
            'USER_CASH'::public.account_type,
            'USER_BANK'::public.account_type
-         )
+         )${categoryPredicate}${sincePredicate}
        GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
        )
        SELECT transaction_id, type, created_at, net_amount, cash_delta, bank_delta
        FROM owner_activity
-       WHERE ($3::text IS NULL
-         OR ($3::text = 'in' AND net_amount::numeric > 0)
-         OR ($3::text = 'out' AND net_amount::numeric < 0)
-         OR ($3::text = 'neutral' AND net_amount::numeric = 0))
+       WHERE (${directionPredicate})
        ORDER BY created_at DESC, transaction_id DESC
        LIMIT $2`,
-      [ownerUserId, recentLimit, requestedDirection ?? null],
+      params,
     );
   }
 
