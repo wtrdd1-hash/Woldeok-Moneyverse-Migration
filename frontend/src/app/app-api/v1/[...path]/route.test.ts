@@ -36,6 +36,21 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('forwards loan status query and preserves private no-store receipts for Android', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ loans: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/bank/loans?status=overdue'), context('bank', 'loans'),
+    );
+    expect(fetchSpy.mock.calls[0]?.[0].toString()).toContain('/api/v1/bank/loans?status=overdue');
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toEqual({ loans: [] });
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);
