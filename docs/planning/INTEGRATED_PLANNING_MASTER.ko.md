@@ -1,5 +1,54 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1220 — F675-112 회원 업무 즐겨찾기·개인 메모 (기능 추가 / 기획 초안 / 출시 보류)
+
+**주기:** 이전 Feature Improvement v1218 → 현재 Feature Addition v1220 → 다음 Feature Improvement v1222(잠정). **기준:** origin/main 49788d09494fed3e463651945b83386e87dd47bc, 시작·중간 재조회 시 불변. 이전 관심상품 Draft #1125는 미병합이므로 배포된 기능으로 간주하지 않는다. 추적 이슈 #1131. QA v1225 FAILED/HOLD. 이 절은 승인 전 문서 기획이며 런타임 코드·DB 스키마는 미구현이다.
+
+### 목적·대상·범위·실제 코드 근거
+- 목적: 로그인 회원이 자주 수행하는 전문직 업무를 저장하고 선택형 개인 메모를 기록하여 다시 업무를 찾는 시간을 줄인다. 대상: 8개 직업군의 반복 이용 회원과 Android 이용자.
+- 확인 근거: frontend/src/app/work/page.tsx는 GET /api/v1/work/tasks를 읽고 career-tasks-board.tsx는 직업 필터·검색을 제공한다. frontend/src/app/work/work.ts에는 UUID task_id, 동적 reward_preview, taken_today, job_type이 있다. backend/src/work/work.controller.ts는 인증된 업무/배정 경로를 제공하며 backend/src/work/work.repository.ts는 Migration 095의 public.work_task_board(actor)를 호출한다. 검사한 업무 코드에서 즐겨찾기 API/테이블은 발견되지 않았다.
+- 기존 업무 검색·추천·일일 한도·전직·배정·보상 함수는 그대로 권위 있는 기준이다. 즐겨찾기는 비공개 탐색 보조 기능이며 배정·자격 확인·재고 예약·WLD 지급 약속이 아니다. 저장 당시 보상 미리보기를 지급 예정액으로 표시하지 않고 실제 수행 전에 최신 서버 상태를 다시 확인한다. work_verify_and_reward, 잔액, 원장, 보상 정책, 전직 로직은 변경하지 않는다.
+- 대안: 브라우저 저장(기기간 동기화·계정 격리 취약), 범용 즐겨찾기(권한 범위 과다), 업무 전용 본인 소유 즐겨찾기(선택). 실제 개발에는 별도 승인된 명세·구현계획이 필요하다.
+
+### 권한·진입점·화면·CTA·상태
+- 진입: /work 업무 카드의 “업무 저장”·“저장 취소” 보조 버튼, 계정 메뉴의 비공개 /account/work-favorites. 로그인 필수. 비회원은 저장된 UUID를 노출하지 않고 로그인 화면으로 이동한다.
+- 목록: 현재 업무 보드에서 검증된 제목·직업·이용 가능 여부·최신 보상 미리보기와 선택형 0~280자 일반 텍스트 개인 메모. CTA는 “현재 업무 보기”, “메모 수정”, “목록에서 제거”. 회원당 활성 저장 50건. 삭제·비활성·권한 제한·카탈로그 읽기 실패 시 과거 제목·보상·숨김 정보를 표시하지 않고 “업무를 이용할 수 없음”만 표시하되 본인 삭제는 허용한다.
+- 상태: NOT_SAVED → SAVING → SAVED, SAVED → REMOVING → NOT_SAVED, SAVED → EDITING → SAVED. CONFLICT(409)는 새로고침 안내, OFFLINE/FAILED는 저장 성공을 주장하지 않는다. UNAVAILABLE에서는 “업무 시작”을 비활성화하고 삭제는 유지한다. 서버 확정 영수증 이후에만 aria-live 성공 알림. 로그아웃·계정 전환 시 진행 중 응답·캐시·메모를 폐기한다.
+- 저장 목록은 일일 한도, 직업 조건, 대기시간, 현재 활성 직업, 업무 스위치, 제출·검증 절차를 우회하지 않는다. 실제 배정은 /work에서 서버 상태를 새로 확인해야 한다.
+
+### 제안 API·트랜잭션·DB (미구현)
+- NestJS 본인 전용 GET /api/v1/work/favorites?limit=20&cursor=..., POST /api/v1/work/favorites {taskId,note?,expectedVersion:0}, PATCH /api/v1/work/favorites/:taskId {note,expectedVersion}, DELETE /api/v1/work/favorites/:taskId {expectedVersion}. 변경에는 UUID Idempotency-Key, 세션 인증 및 Next 서버 액션 CSRF가 필요하다. 응답 {taskId,saved,version,receiptId,savedAt}, 조회 {items,nextCursor}. UUID·1~50 페이지·280자 메모·활성 50개·본인 소유권 검증. 400 형식, 401 미인증, 403 권한, 404 비공개 누락, 409 버전/요청지문 충돌, 429 제한, 503 카탈로그 불가.
+- Next.js는 기존 lib/api.ts 및 requireMember의 서버 전용 경로를 사용하고 INTERNAL_API_TOKEN을 브라우저에 전달하지 않는다. Android /app-api/v1/work/favorites 동등 GET/POST/PATCH/DELETE는 기존 모바일 인증 계약을 사용하며 DB 직접 접근을 허용하지 않는다. API 계약·엔드포인트 목록 동등성 및 거부 테스트 필요. 신규 경로를 기존 원본 92개 경로의 route-map에 추가하지 않는다.
+- 추가형 DB 제안: public.member_work_task_favorites(user_id uuid NOT NULL, task_id uuid NOT NULL, note text NOT NULL DEFAULT '', first_saved_at timestamptz NOT NULL, updated_at timestamptz NOT NULL, removed_at timestamptz NULL, version bigint NOT NULL CHECK(version>0), PRIMARY KEY(user_id,task_id), CHECK(char_length(note)<=280)); 인덱스 (user_id,removed_at,first_saved_at DESC,task_id DESC). 업무 카탈로그 완전 삭제 후에도 회원이 저장 기록을 제거할 수 있도록 task UUID를 외래키 없이 보존하고 SAVE 시 SECURITY DEFINER 내부에서 현재 활성 업무를 검증한다. 탈퇴 시 개인 메모와 저장 기록 삭제.
+- 별도 append-only member_work_task_favorite_receipts(actor_id,key,request_digest,result_code,receipt_id,created_at), UNIQUE(actor_id,key), 최초 응답 불변·메모 본문 감사/분석 기록 금지. 개인정보 보존 정책 및 재사용 차단 묘비 승인 전 소비된 키 자동 삭제 금지. moneyverse_app/PUBLIC에 테이블 직접 SELECT/INSERT/UPDATE/DELETE 부여 금지. 제한된 SECURITY DEFINER 함수만 EXECUTE, 고정 search_path, 식별자 명시, 활성 사용자 확인 및 본인 필터.
+- 함수: work_favorite_list(p_actor,p_limit,p_before_saved_at,p_before_task)는 본인 keyset 행(first_saved_at DESC,task_id DESC)을 반환하고 카탈로그 미확인 정보는 숨긴다. 회원·세션·필터 결속 HMAC 커서의 검증·서명은 NestJS에서 수행하며 서명 비밀은 SQL에 전달하지 않는다. work_favorite_mutate(p_actor,p_key,p_task,p_action,p_note,p_expected_version)는 단일 트랜잭션에서 actor/key advisory lock → 원본 요청 지문/영수증 조회 → 활성 사용자·회원별 한도 직렬화 잠금 → SAVE 시 현재 업무 잠금/검증(REMOVE는 제외) → 즐겨찾기 행 잠금/CAS → 행·삭제표식·영수증 원자적 확정. 동일 키·동일 본문은 원래 영수증, 다른 본문은 409, 오래된 버전은 409. 업무 삭제 후 본인 REMOVE 허용. 잠금 순서와 경합 회귀 테스트 필수.
+- 실시간 keyset은 완전한 스냅샷을 보장하지 않는다. 재저장 시 불변 first_saved_at은 유지하고 version만 변경한다. 10,001건 페이지네이션은 격리 합성 데이터 전용이며 운영 한도 증가를 의미하지 않는다.
+
+### 관리자·보안·SEO·모바일·접근성·지표
+- 관리자는 개인 메모·저장 업무 ID·열람 기록 없이 비식별 집계만 조회하고 10명 미만 집계 구간은 숨긴다. 관리자가 회원 즐겨찾기를 대신 만들거나 업무 자격을 우회하지 못한다. 감사는 행위자·목적·결과만 남기고 메모 본문은 제외한다.
+- 모든 계층 본인 권한, CSRF, 요청 횟수 제한, 비공개 HTML/API Cache-Control: private,no-store, /account/work-favorites noindex/nofollow, 메모 일반 텍스트 이스케이프·능동 HTML 실행 금지, 로그 마스킹, 로그아웃 응답 차단. 활성 한도는 UI가 아니라 DB 회원 잠금으로 보장.
+- Android app-api 동등성, aria-pressed 저장 버튼·스크린리더 설명·키보드 포커스·44px 터치 영역·320px 재배치·200% 글자 확대·메모 보존 재시도. WCAG 2.2 AA 회귀.
+- KPI: 저장 회원 수, 7일 내 재방문, 저장→최신 업무 화면 이동률, 저장 실패/충돌률, 타인 접근 차단률, p95 응답. 메모 내용·민감 속성 추론·광고 개인화·WLD 보상 기여 추적 금지. 출시 전 삭제/동의 정책 확정.
+
+### P0/P1 개발 백로그·수용 조건
+- **P0 ENV1220-01:** 운영·개발 DB 격리(#1053), #1126의 승인·컨테이너 재생성 전 실제 5433 외부 바인딩 해결로 간주 금지, 방화벽·격리 복원 확인. 공유 5433 테스트 쓰기 금지.
+- **P0 SEC1220-02:** 앱 역할 직접 DML 및 PUBLIC 은행 함수 3개(#993) 재측정, 신규 테이블 기본 거부·함수별 EXECUTE 최소권한; 금융 권한 확대 금지.
+- **P0 REL1220-03:** QA v1225 프론트 5건 실패, 전체 의존성 Critical 2/High 10, Bot 실패, Migration266 체크섬, #1088 이미지 빌드만으로 병합하는 게이트, 공식 정확 SHA Test/인증 금융 E2E·백업 복원·GitOps 승인 해결. #1128 FX 원장 없는 직접 잔액 변경 위험 별도 금융 개선 필요.
+- **P0 WORK1220-04:** 업무 활성·숨김·삭제 검증, 즐겨찾기와 실제 배정/보상 경계 분리, 과거 보상 미리보기 약속 금지, WLD·원장·보상 불변 검증.
+- **P1 WORK1220-05:** 격리 PostgreSQL 추가 마이그레이션, 본인 행·불변 영수증·고유/체크/인덱스·함수/ACL 테스트.
+- **P1 WORK1220-06:** NestJS·Next BFF·Android 인증/CSRF/제한/본인 API 및 엔드포인트 계약(원본 92개 route-map 보존).
+- **P1 WORK1220-07:** /work 저장 토글·/account/work-favorites 접근성·서버 영수증·메모 유효성·로그아웃 차단.
+- **P1 WORK1220-08:** 한도 잠금·CAS·원본 지문 재시도·삭제 업무 정보 가림/삭제·서명 커서·탈퇴 삭제.
+- **P1 WORK1220-09:** 관리자 집계, 개인정보·SEO·no-store, Android/a11y, 개인정보 없는 KPI.
+- **P1 WORK1220-10:** RED→GREEN: 동일 SAVE 100건 동시 → 행·영수증 1개, 동일 키 다른 메모 → 409, 타 회원 100회 → 정보 노출 0, 비활성화/저장 경합 → 무효 저장 0, 격리 합성 10,001건 중복 없는 커서, 320px/200% 확대·Android 동등성, 스위치 OFF 롤백·금융 부작용 0.
+- 배포: 기능 기본 OFF, 추가형 호환 마이그레이션은 격리 DB 복원·동등성 확인 이후만 허용. 별도 개발 브랜치 → 전체 CI/보안 → 정확 후보 SHA 공식 Test 배포 및 인증 금융 E2E 3회 → 사람의 GitOps 승인 → 점진 활성화 → 문제 시 스위치 OFF. 기록이 남은 DB를 운영에서 무조건 다운그레이드하거나 정리하지 않는다. 이번 기획은 병합·배포하지 않는다.
+
+### 외부 독립 근거 10,000건 게이트
+- 검토한 독립 발행기관 3곳: PostgreSQL INSERT/ON CONFLICT (https://www.postgresql.org/docs/17/sql-insert.html), OWASP Authorization (https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html), W3C WCAG 2.2 (https://www.w3.org/TR/WCAG22/). 문맥 참고자료이며 신규 승인 근거 3건으로 집계하지 않는다.
+- 이번 신규 독립 중복 제거·최종 승인 근거 **0건**, 누적 승인 실수 **UNKNOWN / 10,000**, 게이트 **BLOCKED / IN PROGRESS**. 10,000건 달성 주장 금지.
+- 변경 분리: 기존 국영문 통합·공식계획·업데이트 문서 6개와 작업일지 1개만 변경하며 Gemini/개발 A/B/C/QA 브랜치, 런타임·Test·Production을 건드리지 않는다.
+
+
 ## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스와 수정 사유

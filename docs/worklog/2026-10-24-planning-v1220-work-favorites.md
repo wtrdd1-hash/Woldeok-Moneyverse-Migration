@@ -1,0 +1,15 @@
+# 2026-10-24 — Planning v1220 / F675-112 Work Task Shortlist
+- Time: 2026-10-24 14:09–14:xx KST; planning only.
+- BEFORE WORK: main/AGENTS/README/canonical EN+KO and skill instructions reviewed; miniPC Debian 13.6 services active.
+- IN PROGRESS: work task source/QA/GitHub reviewed; six EN/KO documents updated; mid-run main/plan hashes rechecked.
+- FINISHED (DOCS ONLY): diff whitespace and 10 backlog identifiers across all six official docs checked; no runtime code changed. Draft PR remains release-HOLD and must not be merged/deployed.
+- Previous cycle: Feature Improvement v1218; current: Feature Addition v1220; next: Feature Improvement v1222 (provisional).
+- Skills: using-superpowers, brainstorming, writing-plans, using-git-worktrees, verification-before-completion read locally; skills connector returned no installed entries.
+- Canonical origin/main: 49788d09494fed3e463651945b83386e87dd47bc. Main AGENTS.md, README.md, PROJECT_PLAN.md (English canonical) and PROJECT_PLAN.ko.md compared at start and midpoint. Prior planning #1125 is unmerged.
+- Source inspected: frontend/src/app/work/page.tsx, career-tasks-board.tsx, work.ts, backend/src/work/work.controller.ts, work.repository.ts, packages/database/migrations/095-work-task-board.sql. No favorite implementation observed in inspected work paths.
+- Design: member-only manual Save/Remove, optional private note, live authoritative work eligibility, 50 active cap, private list, SECURITY DEFINER read/mutate and immutable receipts, Android parity, admin aggregate only, no WLD/ledger mutation.
+- P0: ENV1220-01 SEC1220-02 REL1220-03 WORK1220-04. P1: WORK1220-05 WORK1220-06 WORK1220-07 WORK1220-08 WORK1220-09 WORK1220-10.
+- QA v1225 FAIL/HOLD: frontend 5 failures, full audit Critical2/High10, bot failure, shared Production/dev DB, live wildcard 5433 pending Draft #1126, broad app ACL, migration266, exact-SHA Test E2E/restore and build-only auto-merge issue #1088. #1128 FX direct balance writes remain separate finance P0.
+- GitHub issue #1131; no changes to development A/B/C/QA/Gemini branches. No runtime tests (docs-only), no DB writes, WLD, feature switches, Test or Production changes.
+- External reference families: PostgreSQL, OWASP, W3C = 3 reviewed; 0 newly accepted evidence records; cumulative approved UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+- Verification: diff whitespace, 10 backlog IDs in all six docs, clean commit/worktree and GitHub PR to be recorded on completion.
