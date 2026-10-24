@@ -1,5 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1216 — F675-111 회원 전용 상점 관심상품 목록 (기획 초안 / 운영승격 보류)
+- **Tracking / 개발 추적:** GitHub issue #1119 OPEN; implementation not started; docs-only Draft PR pending.
+- **주기:** 이전 기능 보완 v1214 → 현재 기능 추가 v1216 → 다음 기능 보완 v1218(잠정). 최신 main `49788d09494fed3e463651945b83386e87dd47bc` 시작·중간 확인. v1212 #1103/v1214 #1111은 미병합 Draft이므로 이번 문서 변경은 main에서 독립 시작. 최신 완료 QA v1221 FAILED/HOLD는 이전 SHA `46794ff0` 기준이며 현 main 정확 SHA Test E2E는 미검증.
+- **실제 소스 기반 공백:** `/shop`은 회원·공개 `shop_catalog_list_v2`와 기존 구매 API를 사용하지만 회원별 관심상품은 없다. F675-111은 본인 저장/삭제와 비공개 `/account/shop-wishlist`, 현재 가격·재고·종료·비공개 상태의 정확한 표시를 제공한다. 자동구매·자동 알림·원장/재고 변경 없음.
+- **계약:** `GET /api/v1/shop/wishlist` HMAC 키셋, `POST /api/v1/shop/wishlist/mutations` 원본 digest·고정 멱등 키·예상 버전 CAS·세션/동의/CSRF. 전진 전용 DB, 본인 SECURITY DEFINER, ACTIVE/REMOVED 묘비행, 회원당 100개, 불변 영수증, 숨김 상품 비노출, 탈퇴 삭제. 관리자 비식별 집계, 개인 noindex/no-store, Android, WCAG 2.2 AA, 100건 동시성·격리 합성 10,001건 페이지네이션. 목적·권한·화면·API·DB·트랜잭션·보안·SEO·KPI·테스트·롤백 및 파일 지도는 국영문 통합 마스터에 명세.
+- **P0:** ENV1216-01 SEC1216-02 REL1216-03 SHOP1216-04. **P1:** SHOP1216-05 SHOP1216-06 SHOP1216-07 SHOP1216-08 SHOP1216-09 SHOP1216-10. **전체 식별자:** ENV1216-01 SEC1216-02 REL1216-03 SHOP1216-04 SHOP1216-05 SHOP1216-06 SHOP1216-07 SHOP1216-08 SHOP1216-09 SHOP1216-10.
+- **승격 차단:** 운영/개발 DB 공유, 5433 전체 바인딩, 앱 DML 235/241, PUBLIC 은행 함수 3개, Migration266 체크섬, 보안 감사, QA/CI 실패, #1088 빌드만으로 병합 가능 위험, #1113 배포 링크, 격리 복원·공식 정확 SHA 인증 금융 E2E 부재. 기능 기본 OFF, 별도 개발 브랜치, 런타임·DB·WLD·Test·Production 변경 없음.
+- **외부 근거:** PostgreSQL/OWASP/W3C 독립 발행기관 3곳 검토, 신규 실제 승인 기록 0건, 누적 중복 제거 승인 UNKNOWN/10,000 → BLOCKED / IN PROGRESS.
+
+
 ## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
 - 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.

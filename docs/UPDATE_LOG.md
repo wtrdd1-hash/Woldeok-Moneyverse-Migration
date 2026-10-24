@@ -1,3 +1,9 @@
+## 2026-10-24 v1216 — F675-111 verified shop wishlist (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **Tracking / 개발 추적:** GitHub issue #1119 OPEN; implementation not started; docs-only Draft PR pending.
+- Previous Improvement v1214 / Current Addition v1216 / Next Improvement v1218 provisional. Latest main 49788d09 start/mid; QA v1221 FAILED/HOLD on older 46794ff0. Source verified Store 2.0 catalog/purchase and no shop wishlist; unrelated stock watchlist exists. Unmerged #1103/#1111 not assumed deployed.
+- Owner-only Save/Remove and private list, original-digest receipts, optimistic version/CAS, 100-active cap, HMAC keyset, catalog visibility/deactivation race, redacted hidden entries, no auto-buy/alerts/WLD/stock changes. Full EN/KO integrated spec includes API/DB/admin/Android/SEO/WCAG/KPI/rollback. Backlog: ENV1216-01 SEC1216-02 REL1216-03 SHOP1216-04 SHOP1216-05 SHOP1216-06 SHOP1216-07 SHOP1216-08 SHOP1216-09 SHOP1216-10.
+- QA P0 shared DB/5433, 235/241 DML, 3 PUBLIC bank functions, migration266, #1088 merge gate, #1113 release symlink, security audit and exact-SHA Test/restore HOLD. 3 external publishers reviewed, 0 newly accepted evidence records, cumulative UNKNOWN/10,000 BLOCKED. Docs-only Draft; no merge/deploy.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)

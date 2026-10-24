@@ -1,5 +1,58 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1216 — F675-111 회원 전용 상점 관심상품 목록 (기능 추가 / 기획 초안 / 배포 보류)
+- **Tracking / 개발 추적:** GitHub issue #1119 OPEN; implementation not started; docs-only Draft PR pending.
+
+**주기:** 이전 Feature Improvement v1214 → 현재 Feature Addition v1216 → 다음 Feature Improvement v1218(잠정). **기준:** 최신 origin/main `49788d09494fed3e463651945b83386e87dd47bc`, 시작·중간 재확인. 영문 canonical/한국어 대조 기획서의 원본 체크섬을 내부 기록에 보존. v1212 #1103과 v1214 #1111은 미병합 Draft이므로 구현된 기능으로 간주하지 않으며 이번 기획은 main에서 독립 작성. **QA:** 최신 완료 v1221 FAILED/HOLD(이전 SHA `46794ff0` 대상). 런타임·DB·WLD·기능 스위치·공식 Test·Production 변경 없음.
+
+### 1. 목적·근거·대안·범위
+- **확인된 사용자 문제:** 실제 `/shop` 화면은 `catalog_id`, 문자열 가격, 재고, 판매 종료, 보유량 및 구매 CTA를 표시하지만 회원별 관심상품 저장/목록은 없다. 회원 `GET /api/v1/shop/catalog`는 `shop_catalog_list_v2(actor)`를 사용하고, 비회원 `/public-catalog`는 별도 공개 조회이다. 주식 관심종목 기능은 상점 관심상품과 다르다. 조사한 최신 main의 상점 경로에서 관심상품 테이블/API/화면을 확인하지 못했다.
+- **대상:** 가상 아이템을 여러 방문·기기에서 비교하는 로그인 및 필수 동의 완료 회원. **성공 조건:** 명시적 저장·삭제, 본인 전용 목록, 품절·종료·비공개 상태의 정확한 안내, 기존 구매 흐름으로 안전한 이동. 비회원 저장은 내부 경로만 허용하는 로그인 화면으로 이동하며 성공한 것처럼 표시하지 않는다.
+- **대안 비교:** 브라우저 로컬 찜(간단하지만 기기 간 공유 불가), DB 기반 회원 찜(선택, 일관성·감사 가능), 재입고/가격 자동 알림 및 자동구매(초기 범위 제외: 재고 경합·동의·금융 위험). **자동구매·재고 예약·가격 보장·WLD 지급·알림 자동발송 없음.** 저장 작업에서 금융 원장이나 구매 함수를 호출하지 않는다.
+- **경계:** Next.js 서버 전용 BFF → NestJS 인증 API → PostgreSQL `SECURITY DEFINER` 함수. `moneyverse_app`에 테이블 직접 DML/SELECT 권한을 추가하지 않는다. 기존 Store 2.0 및 구매 API는 그대로 유지. 개발 A/B/C/QA/Gemini의 동시 브랜치(#1116 게시판 검색, #1115 지갑 영수증 등)와 변경 영역을 분리한다.
+
+### 2. 회원 흐름·권한·화면 상태
+- **진입점:** `/shop` 상품 카드, 비공개 `/account/shop-wishlist`, 계정 메뉴. 비회원 Save는 `/login?next=/shop`로 이동(서버에서 내부 경로 검증). 회원은 `저장`/`삭제`, 상태가 드러나는 버튼, `관심상품 보기`를 사용한다. 저장 버튼은 구매를 실행하지 않는다.
+- **목록:** 현재 이름·분류·가격(정확한 십진 문자열, JS 부동소수점 금지)·보유량·실제 판매 가능 여부를 정규 카탈로그에서 재조회한다. `상점에서 보기`는 기존 상품 구매 화면으로 연결하며 구매 시 재고·잔액을 다시 검증한다. 향후 가격·재고를 약속하지 않는다.
+- **상태:** LOADING, UNSAVED, SAVING, SAVED, REMOVING, REMOVED, CONFLICT, UNAVAILABLE, EXPIRED, SOLD_OUT, AUTH_REQUIRED, OFFLINE/ERROR. 503 발생 시 과거 화면을 유지할 수 있지만 미검증 상태로 표시하며 빈 목록을 성공으로 위장하지 않는다. 타임아웃 후 원래 멱등 키로 조회/재시도하고 새 키를 발급하지 않는다. 비공개·삭제된 상품은 상품명·가격을 노출하지 않고 본인 저장 기록만 제거할 수 있다.
+- **권한:** 로그인 세션 주체만 자신의 항목을 조회·변경. 관리자는 회원별 관심사 대신 비식별 집계만 조회. 관리자/지원 직원에게 우회 접근권을 임의로 만들지 않는다. 로그아웃·계정 변경 시 진행 요청을 중단하고 캐시를 지우며 이전 응답을 무효화한다.
+
+### 3. API·검증·오류
+- **GET `/api/v1/shop/wishlist?limit=50&cursor=...`:** SessionGuard/AuthenticatedGuard/ConsentGuard. 본인 전용, limit 1~50, `(updated_at DESC,catalog_id DESC)` 순서의 회원·세션 바인딩 HMAC 키셋 커서. 응답 `{items:[{catalogId,version,state,updatedAt,currentCatalog:{name,category,price,quantity,saleEndsAt,available}|null}],nextCursor}`. 비공개 상품은 `currentCatalog=null`로 정보 차단. 상점 화면은 첫 페이지의 제한된 목록으로 저장 배지를 계산하며 N+1 조회 금지.
+- **POST `/api/v1/shop/wishlist/mutations`:** Session/Authenticated/Consent/CSRF, 본문 `{catalogId:uuid,action:"SAVE"|"REMOVE",expectedVersion:0이상 정수,idempotencyKey:uuid}`. 사용자 ID는 요청 본문이 아니라 세션에서 얻는다. SAVE는 현재 공개·판매 대상 상품만 허용하되 품절 상품은 SOLD_OUT 표시로 저장 가능; 비활성·비공개 상품 신규 저장은 거부. REMOVE는 기존 저장 항목이면 비활성화 이후에도 허용. 확정 트랜잭션 후 `{catalogId,state,version,replayed,receiptId}` 반환.
+- **오류:** 400 형식 오류, 401 미로그인, 403 CSRF/동의, 404 비공개·타인·미존재 동일 응답, 409 버전 충돌/같은 키 다른 요청, 413 본문 과다, 429 제한, 503 의존성 실패. 계정·상품 존재 여부 추측 방지. 기존 `frontend/src/lib/mutate.ts` 경로 재사용. Android App API 허용 경로·인증·CSRF 계약 검증 후 확장하며 내부 토큰 노출 금지.
+- **캐시:** `Cache-Control: private, no-store` 및 적절한 `Vary: Cookie`. 개인 찜 정보를 공개 CDN/서비스워커/정적 HTML에 캐시하지 않는다. 이전 Android 버전의 기존 상점 동작 유지.
+
+### 4. DB·인덱스·트랜잭션·보존
+- **전진 전용 Migration(병합된 선행 작업을 확인한 뒤 유일한 다음 번호 사용, 280 선점 금지):** `shop_wishlist_entries(user_id uuid FK users ON DELETE CASCADE,catalog_id uuid FK shop_catalog ON DELETE CASCADE,state CHECK ACTIVE/REMOVED,version bigint>=1,created_at,updated_at,PRIMARY KEY(user_id,catalog_id))`. REMOVED 묘비행을 유지해 이전 버전의 저장 요청이 복구시키지 못하도록 한다. `shop_wishlist_receipts(user_id,key uuid,request_digest bytea,action,catalog_id,expected_version,result_version,result_state,committed_at,PRIMARY KEY(user_id,key))`. 회원 탈퇴 시 영수증도 삭제하며 상품 완전 삭제 이후 FK 충돌을 피하도록 영수증에는 식별용 UUID 값만 기록하고 본인에게만 공개한다. 보존은 개인정보 정책 승인 필요: 영수증 180일 제안, 묘비행은 탈퇴 시까지. 안전한 오래된 재시도 정책이 검증되기 전 자동 압축 금지.
+- **인덱스:** 회원·상품 PK, `(user_id,updated_at DESC,catalog_id DESC)` 키셋 인덱스, 실행계획이 필요할 때 ACTIVE 부분 인덱스, 영수증 `(user_id,key)` PK. 활성 관심상품 회원당 100개 한도는 DB 함수에서 회원별 트랜잭션 advisory lock을 사용해 경쟁 상태 없이 적용.
+- **원자성:** 고정 `search_path=pg_catalog,pg_temp` 및 완전 수식 테이블을 사용하는 `SECURITY DEFINER` 함수. 앱 역할에는 함수 EXECUTE만 부여하고 PUBLIC EXECUTE는 회수. 회원 범위 → SAVE 시 카탈로그 가시성 → 찜 행 순서로 잠금. 원본 요청 digest의 불변 영수증과 예상 버전 CAS를 같은 트랜잭션에 저장. 같은 키·같은 digest는 원래 영수증 재생, 다른 digest는 409, 오래된 버전은 409. 원장·잔액·재고·구매·outbox·알림 쓰기 금지.
+- **경합:** 상품 비활성/삭제와 SAVE가 동시에 오면 직렬화하거나 안전하게 실패. REMOVE는 비공개 상품에도 작동. 상품 완전 삭제 시 FK cascade로 찜 행 제거 가능하며 비공개 메타데이터 노출 금지. 동일 시각 10,001건 페이지네이션은 격리된 합성 DB에서만 검증(운영 회원 한도 100개).
+
+### 5. 관리자·보안·SEO·접근성·KPI·배포
+- **관리자:** 전체 활성 저장 수, 오류 유형, 버전 충돌률, 비공개 전환 상품 수 등의 집계만 제공. 회원별 관심상품 목록·개인화 광고 데이터 금지. 역할별 집계 권한, 보존·삭제, 사용자/IP 제한, JSON 크기 제한, CSRF, 로그의 토큰·개인정보 배제를 명세.
+- **SEO/개인정보:** `/account/shop-wishlist` noindex/nofollow·sitemap 제외·no-store, 공개 `/shop` canonical 유지. 관심상품 ID를 메타데이터·OG·비회원 HTML·분석 로그에 넣지 않는다. 개인정보 최소화 및 탈퇴 시 연쇄 삭제 검증.
+- **모바일/접근성:** Android App API의 본인 조회/수정 계약 동등성, WCAG 2.2 AA 키보드 조작·44px 터치 목표·스크린리더 상태 알림(`role=status`)·200% 확대·320px 재배치·지원 언어/RTL·움직임 줄이기·삭제 후 포커스 복원·색상 외 상태 표시.
+- **KPI:** 익명 집계 저장→재방문, 저장→기존 구매 화면 이동, 멱등 재생률, 권한 거부, 409/503 비율, 읽기/쓰기 p95. 개인 관심사를 광고나 수동 추적에 활용하지 않는다.
+- **승격:** 기능 플래그 기본 OFF. 격리 PostgreSQL 전진 Migration/부정 권한 테스트, 백업 격리 복원, 정확한 head SHA CI 보안·계약·lint·typecheck·build·unit, 공식 Test에 실제 배포한 동일 SHA의 인증 웹/Android/금융 E2E, 독립 QA 승인, 별도 GitOps 운영승격. 조건 충족 후 1%→10%→100% 단계 적용. 롤백은 기능 OFF로 쓰기 차단하고 기존 기록 보존; 파괴적 다운 Migration 금지.
+
+### 6. P0/P1 개발 백로그 및 수용 조건
+- **P0 ENV1216-01:** 운영·개발 DB 분리(#1053), 5433 전체 바인딩 차단(#1060), 격리 복원 검증. 분리 전 DB 쓰기 금지.
+- **P0 SEC1216-02:** 최소권한(#993). QA v1221 기준 앱 UPDATE+DELETE 235/241개 테이블, PUBLIC 은행 함수 3개. 실제 격리 PG 부정 권한 테스트.
+- **P0 REL1216-03:** 이미지 빌드만으로 병합하지 않도록 정확 SHA Test/인증 금융 E2E 게이트(#1088), Migration 266 체크섬·보안 감사·QA 실패·끊어진 배포 심볼릭 링크(#1113) 해결.
+- **P0 SHOP1216-04:** 실제 카탈로그 가시성·비활성화·완전 삭제 및 구매 경계 검증. 관심상품 저장이 재고 예약이나 WLD 이동을 일으키지 않음 증명.
+- **P1 SHOP1216-05:** 전진 전용 DB·불변 요청 digest 영수증·본인 함수·부정 ACL·동일 요청 100회 동시성.
+- **P1 SHOP1216-06:** NestJS DTO/컨트롤러/서비스, Next BFF, Android App API 계약·인증·CSRF·동의·오류 통일.
+- **P1 SHOP1216-07:** 상점 저장/삭제, 비공개 관심상품 화면, 비회원 로그인, 충돌·재시도·오류 UX.
+- **P1 SHOP1216-08:** 키셋 커서, 회원당 100개, 숨김 상품 비노출, 로그아웃·계정 전환, 탈퇴 삭제.
+- **P1 SHOP1216-09:** 관리자 비식별 집계, 개인정보·SEO·Android·WCAG 2.2 AA·KPI.
+- **P1 SHOP1216-10:** TDD RED→GREEN, 동일 SAVE 100건에서 변경 1건·영수증 1건·재생 99건, 타인 접근 100건 차단, SAVE/REMOVE 100건 버전 일관성, 동일 시각 합성 10,001건 누락·중복 0, 비활성화 경합, WLD/재고 변화 0, OFF/롤백 검증.
+- **개발 파일 지도(이번 회차 수정 대상 아님):** `packages/database/migrations/<next>-shop-wishlist.sql`, `backend/src/shop/shop.controller.ts`, `backend/src/shop/shop.repository.ts`, `backend/src/shop/shop.dto.ts`, `backend/src/shop/shop-wishlist.db.test.ts`, `frontend/src/app/shop/shop-store-view.tsx`, `frontend/src/app/account/shop-wishlist/page.tsx`, `frontend/src/app/app-api/v1/[...path]/route.test.ts`, 관련 계약·route-map 및 UI 테스트. 각 단위는 실패 테스트 작성→RED 확인→최소 구현→GREEN→리뷰→정확 SHA 게이트.
+- **외부 근거 10,000건 게이트:** 이번 검토 독립 발행기관 3곳(PostgreSQL, OWASP, W3C), 신규 실제 승인·중복 제거 기록 **0건**, 누적 승인 수량 **UNKNOWN**, 목표 **10,000건** → **BLOCKED / IN PROGRESS**. 근거: https://www.postgresql.org/docs/18/sql-insert.html ; https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html ; https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/ . 문서 열람은 독립 승인 근거 1건으로 간주하지 않는다.
+
+**백로그 식별자:** ENV1216-01 SEC1216-02 REL1216-03 SHOP1216-04 SHOP1216-05 SHOP1216-06 SHOP1216-07 SHOP1216-08 SHOP1216-09 SHOP1216-10
+
+
 ## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스와 수정 사유
