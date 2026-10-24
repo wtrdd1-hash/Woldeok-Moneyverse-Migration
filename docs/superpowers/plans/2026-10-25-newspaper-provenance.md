@@ -24,8 +24,10 @@
 - Event direction distribution must not be confused with member opinion polls.
 
 ## Tasks
-- [ ] Add failing tests to `frontend/src/app/newspaper/newspaper-view.test.tsx` for source-backed tally, empty and unavailable states, and no synthetic ticker chart.
-- [ ] Run focused Vitest RED and capture failure.
-- [ ] Update `newspaper-view.tsx` and `page.tsx` to use verified events, no localStorage poll, accurate labels and accessible mobile layout.
-- [ ] Run focused Vitest GREEN; inspect diff, typecheck, lint, build and full suites.
-- [ ] Re-fetch main/plan, record final exact SHA gates and CI, open Draft PR only; no merge or Production without full PASS.
+- [x] Add failing tests to `frontend/src/app/newspaper/newspaper-view.test.tsx` for source-backed tally, empty and unavailable states, and no synthetic ticker chart.
+- [x] Run focused Vitest RED and capture failure.
+- [x] Update `newspaper-view.tsx` and `page.tsx` to use verified events, no localStorage poll, accurate labels and accessible mobile layout.
+- [x] Run focused Vitest GREEN; inspect diff, typecheck, lint, build and full suites.
+- [x] Re-fetch main/plan, record final exact SHA gates and CI, open Draft PR only; no merge or Production without full PASS.
+
+**Release gate:** BLOCKED (six pre-existing Frontend failures, dependency audits and official exact-SHA Test). PR #1215 remains Draft.
