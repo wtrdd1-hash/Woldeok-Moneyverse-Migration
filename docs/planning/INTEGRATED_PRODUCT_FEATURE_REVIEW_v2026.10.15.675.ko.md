@@ -1,5 +1,14 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v2026.10.25.1252 — F675-120 개인 원장 거래 메모 제품 검토 (기능 추가 / 보류)
+- 문제: 현재 `/wallet/activity`는 최근 50건만 표시하고 CSV도 최근 전달 데이터만 내보내므로 거래를 나중에 개인적으로 구분하기 어렵다. 기존 송금 메시지·거래 이의제기 Draft #1048·원장 자체와 기능을 혼동하거나 중복하지 않는다.
+- 제안: 회원 소유 현금/은행 전표로 확인한 거래에만 개인 분류·메모를 연결한다. `/wallet/activity` 저장/삭제, `/wallet/annotations` 목록, 불변 영수증·버전 묘비·서명 키셋·Android·키보드·320px/200%·noindex/no-store. 개인 분류는 공식 금융 거래 유형이 아니다.
+- 권한/보안: 회원 본인 전용, 관리자는 본문 열람 불가, 공개 메모 없음, 타인 거래 조회 금지. SECURITY DEFINER 최소권한, 앱 직접 테이블 권한 금지, 분당 12회 쓰기·활성 500개 한도. 원장/WLD 변경 없음.
+- P0 ENV1252-01 SEC1252-02 REL1252-03 WAL1252-04; P1 WAL1252-05 WAL1252-06 WAL1252-07 WAL1252-08 WAL1252-09 WAL1252-10. QA v1255 FAILED/HOLD, 루트 100%, Migration266/280, DB 권한·보안·CI·정확 SHA Test/복원 차단. 상세 구현 명세는 [영문 통합 마스터](INTEGRATED_PLANNING_MASTER.md)와 [국문 동등 문서](INTEGRATED_PLANNING_MASTER.ko.md).
+- 외부 독립 근거 10,000건 게이트 신규 승인 0건, 누적 미확인 ⇒ BLOCKED/IN PROGRESS. 런타임·DB·Test·운영 미변경.
+
+
+
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
 
 - [GSC 실제 검색성과·색인 증거 센터 상세기획](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 정식 상세기획으로 채택. 기존 /admin/seo·v685 재사용, GSC 날짜/상위 10개·무행0·크롤러 색인 오인·레거시 제출 성공/Google Indexing API 안내 오류 기록, 기술·제출·Google 색인본·검색 노출 실제 증거 분리, 구글/WCAG 16개 자료·D0~D7. 실제 SEO/GSC 운영 검증이나 코드 배포 아님.
