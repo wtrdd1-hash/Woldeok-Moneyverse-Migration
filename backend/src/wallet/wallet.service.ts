@@ -85,7 +85,7 @@ export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
   recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
-  transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
+  transfer(input: WalletTransferInput): Promise<{ transactionId: string; replayed?: boolean }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
   claimWork(input: WalletClaimWorkInput): Promise<WalletRewardRow>;
   rewardAvailabilityForUser?(userId: string): Promise<WalletRewardAvailabilityRow>;
@@ -96,14 +96,10 @@ export interface WalletRepositoryLike {
   getCitizenTaxReceipt?(userId: string): Promise<Record<string, unknown>>;
   voteCitizenBudget?(userId: string, quarter: string, choice: string): Promise<{ success: boolean; quarter: string; choice: string }>;
   searchRecipients?(query: string, currentUserId: string): Promise<{ userId: string; displayName: string }[]>;
-  recordP2PTransfer?(data: {
-    senderId: string;
-    receiverId: string;
-    receiverName: string;
-    amount: string;
+  p2pTransfer?(input: WalletTransferInput & {
     message?: string | undefined;
     sticker?: string | undefined;
-  }): Promise<void>;
+  }): Promise<{ transactionId: string; replayed: boolean }>;
 }
 
 
@@ -405,11 +401,11 @@ export class WalletService {
       idempotencyKey: key,
     });
 
-    if (this.broadcast) {
+    if (this.broadcast && receipt.replayed !== true) {
       try {
         // Notify recipient in real-time
         this.broadcast.publishUserNotification(recipient, {
-          id: `notif_recv_${Date.now()}`,
+          id: `notif_recv_${receipt.transactionId}`,
           title: 'WLD 송금 도착',
           message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD가 도착했습니다.`,
           type: 'success',
@@ -417,7 +413,7 @@ export class WalletService {
         });
         // Notify sender in real-time
         this.broadcast.publishUserNotification(actorUserId, {
-          id: `notif_send_${Date.now()}`,
+          id: `notif_send_${receipt.transactionId}`,
           title: 'WLD 송금 완료',
           message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD 송금이 완료되었습니다.`,
           type: 'info',
@@ -603,30 +599,51 @@ export class WalletService {
       sticker?: string;
     } = {},
   ): Promise<WalletTransferReceipt & { message?: string; sticker?: string }> {
-    const receipt = await this.transfer(authenticatedUserId, {
-      recipientUserId,
-      amount,
-      idempotencyKey,
-    });
-
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const recipient = requireUuid(recipientUserId, 'recipient user id');
     const transferAmount = requirePositiveWld(amount, 'amount');
-
-    if (typeof this.repository.recordP2PTransfer === 'function') {
-      const activeRecipient = await this.repository.activeRecipientById(recipient);
-      await this.repository.recordP2PTransfer({
-        senderId: actorUserId,
-        receiverId: recipient,
-        receiverName: activeRecipient?.userId ?? recipient,
-        amount: transferAmount,
-        message: message ? String(message).slice(0, 50) : undefined,
-        sticker: sticker ? String(sticker).slice(0, 20) : undefined,
-      });
+    const key = requireUuid(idempotencyKey, 'idempotency key');
+    if (actorUserId === recipient) throw new WalletInputError('cannot transfer to yourself');
+    const activeRecipient = await this.repository.activeRecipientById(recipient);
+    if (!activeRecipient || activeRecipient.userId !== recipient) throw new WalletRecipientError();
+    if (typeof this.repository.p2pTransfer !== 'function') {
+      throw new Error('atomic P2P transfer is unavailable');
+    }
+    const receipt = await this.repository.p2pTransfer({
+      actorUserId,
+      recipientUserId: recipient,
+      amount: transferAmount,
+      idempotencyKey: key,
+      ...(message !== undefined ? { message: String(message).slice(0, 50) } : {}),
+      ...(sticker !== undefined ? { sticker: String(sticker).slice(0, 20) } : {}),
+    });
+    if (typeof receipt.replayed !== 'boolean') {
+      throw new Error('database returned an invalid P2P receipt');
+    }
+    const transactionId = requireUuid(receipt.transactionId, 'database P2P transaction id');
+    if (this.broadcast && !receipt.replayed) {
+      try {
+        this.broadcast.publishUserNotification(recipient, {
+          id: `notif_recv_${transactionId}`,
+          title: 'WLD 송금 도착',
+          message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD가 도착했습니다.`,
+          type: 'success',
+          href: '/wallet',
+        });
+        this.broadcast.publishUserNotification(actorUserId, {
+          id: `notif_send_${transactionId}`,
+          title: 'WLD 송금 완료',
+          message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD 송금이 완료되었습니다.`,
+          type: 'info',
+          href: '/wallet',
+        });
+      } catch {
+        // Durable DB notification remains authoritative when realtime delivery fails.
+      }
     }
 
     return {
-      ...receipt,
+      transactionId,
       ...(message !== undefined ? { message } : {}),
       ...(sticker !== undefined ? { sticker } : {}),
     };

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsUUID, registerDecorator, type ValidationArguments, type ValidationOptions } from 'class-validator';
+import { IsIn, IsUUID, IsOptional, IsString, MaxLength, registerDecorator, type ValidationArguments, type ValidationOptions } from 'class-validator';
 
 /** Monetary request values prefer canonical decimal strings. Safe integer JSON
  * numbers remain accepted for backward compatibility with older app builds. */
@@ -96,10 +96,16 @@ export class P2PTransferDto {
   @IsUUID()
   readonly idempotencyKey!: string;
 
-  @ApiProperty({ required: false, description: 'Optional thank-you or cheer note (up to 30 chars)' })
+  @ApiProperty({ required: false, description: 'Optional thank-you or cheer note (up to 50 chars)' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
   readonly message?: string;
 
   @ApiProperty({ required: false, description: 'Optional reaction sticker' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
   readonly sticker?: string;
 }
 
