@@ -73,6 +73,17 @@ describe('verified auction activity', () => {
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/marketplace/auctions', { cache: 'no-store', credentials: 'same-origin' });
   });
 
+  it('does not call an unchanged persisted bid a new bid after a replay', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([auction])));
+    render(<AuctionLiveTickerStrip />);
+    await screen.findByText('실제 경매품');
+    await act(async () => {
+      await listeners.get('auction:bid')?.({ id: 'replayed-id', auctionId: auction.id,
+        itemTitle: auction.itemName, bidAmount: 1500, bidderName: '검증회원' });
+    });
+    expect(screen.queryByText('검증된 신규 입찰')).toBeNull();
+  });
+
   it('does not announce unverified bids, forged amounts, or client-only events', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([auction])));
     render(<AuctionLiveTickerStrip />);

@@ -77,6 +77,7 @@ export function AuctionLiveTickerStrip() {
   const [connected, setConnected] = useState(false);
   const [toast, setToast] = useState<VerifiedBid | null>(null);
   const rooms = useRef(new Set<string>());
+  const snapshots = useRef(new Map<string, AuctionSnapshot>());
   const seen = useRef(new Set<string>());
   const pending = useRef(new Set<string>());
 
@@ -98,6 +99,7 @@ export function AuctionLiveTickerStrip() {
     const socket = acquireSiteSocket();
     setConnected(socket.connected);
     const syncRooms = (rows: readonly AuctionSnapshot[]) => {
+      snapshots.current = new Map(rows.map((row) => [row.id, row]));
       const next = new Set(rows.map((row) => row.id));
       for (const id of rooms.current) {
         if (!next.has(id)) {
@@ -132,8 +134,11 @@ export function AuctionLiveTickerStrip() {
     const dropped = () => setConnected(false);
     const received = async (value: unknown) => {
       const bid = parseBid(value);
-      if (!bid || !rooms.current.has(bid.auctionId) || seen.current.has(bid.id) || pending.current.has(bid.id)) return;
-      pending.current.add(bid.id);
+      if (!bid || !rooms.current.has(bid.auctionId)) return;
+      const key = `${bid.auctionId}:${bid.id}`;
+      const previous = snapshots.current.get(bid.auctionId);
+      if (!previous || seen.current.has(key) || pending.current.has(key)) return;
+      pending.current.add(key);
       try {
         // A socket message is not a ledger receipt: confirm current persisted auction state.
         const result = await readAuctions();
@@ -148,14 +153,14 @@ export function AuctionLiveTickerStrip() {
         syncRooms(result.rows);
         const row = result.rows.find((item) => item.id === bid.auctionId);
         if (
-          !row || row.bidCount < 1 || parseAmount(row.currentBidWld) !== bid.amount ||
+          !row || row.bidCount <= previous.bidCount || parseAmount(row.currentBidWld) !== bid.amount ||
           row.highestBidderName !== bid.bidderName || row.itemName !== bid.itemTitle
         ) return;
-        seen.current.add(bid.id);
+        seen.current.add(key);
         if (seen.current.size > 100) seen.current.delete(seen.current.values().next().value!);
         setToast(bid);
       } finally {
-        pending.current.delete(bid.id);
+        pending.current.delete(key);
       }
     };
     socket.on('connect', opened);
