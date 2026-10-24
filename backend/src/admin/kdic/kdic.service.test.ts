@@ -86,35 +86,13 @@ describe('KdicService', () => {
     expect(coverage.isFullyProtected).toBe(false);
   });
 
-  it('분기별 예금보험료를 정기 징수하고 관리자 DM을 발송한다', async () => {
-    const res = await service.assessQuarterlyPremiums('ADMIN_TEST');
-    expect(res.totalCollectedWld).toBe(5000);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('예금보험료 정기 징수'),
-      })
-    );
-  });
-
-  it('부실 우려 금융기관에 긴급 유동성 대여를 집행하고 BIS 비율을 회복시킨다', async () => {
-    const res = await service.injectEmergencyLiquidity('BANK_COMMERCIAL', 1000000, 'ADMIN_TEST');
-    expect(res.newBisRatioPct).toBe(15.5);
-    expect(res.newFundWld).toBe(9000000);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('긴급 유동성 대여'),
-      })
-    );
-  });
-
-  it('파산 금융기관 예금자에 대해 50만 WLD 한도 내 대위변제를 집행한다', async () => {
-    const res = await service.executeDepositPayout('BANK_COMMERCIAL', 'user-victim', 'ADMIN_TEST');
-    expect(res.payoutAmountWld).toBe(500000);
-    expect(res.newFundWld).toBe(9500000);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('대위변제금(Payout) 지급 완료'),
-      })
-    );
+  it.each([
+    ['assessQuarterlyPremiums', ['ADMIN_TEST'], 'assessQuarterlyPremiums'],
+    ['injectEmergencyLiquidity', ['BANK_COMMERCIAL', 1000000, 'ADMIN_TEST'], 'injectEmergencyLiquidity'],
+    ['executeDepositPayout', ['BANK_COMMERCIAL', 'user-victim', 'ADMIN_TEST'], 'executeDepositPayout'],
+  ] as const)('%s refuses unverified KDIC financial mutations before repository or notifications', async (method, args, repoMethod) => {
+    await expect((service[method] as unknown as (...values: unknown[]) => Promise<unknown>)(...args)).rejects.toMatchObject({ status: 503 });
+    expect(mockRepo[repoMethod]).not.toHaveBeenCalled();
+    expect(mockDiscord.sendAdminDirectMessage).not.toHaveBeenCalled();
   });
 });
