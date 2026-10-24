@@ -14,3 +14,9 @@
 
 ## Finished
 - Pending.
+
+### Implementation checkpoint
+- RED: eight new safety assertions failed against original service/repository behavior. Original backend test command also hit missing contract dist; installed frozen dependencies and will build contract before focused rerun.
+- GREEN implementation: explicit 503 safety hold in both service and repository before any FX WLD-changing DB command. Existing legacy success-path unit tests updated to assert fail-closed behavior. Read-only FX and reserve administration unchanged.
+- GREEN: `pnpm --filter @moneyverse/backend exec vitest run src/admin/fx/fx-ledger-hold.test.ts src/admin/fx/fx.service.test.ts` = 17/17 PASS. Validation for below-minimum WLD amount remains unchanged before the 503 guard.
+- Existing C #1130 and A #1127 overlap neither FX service nor repository. FX admin PR #1128 remains Draft; do not modify its worktree or branch.

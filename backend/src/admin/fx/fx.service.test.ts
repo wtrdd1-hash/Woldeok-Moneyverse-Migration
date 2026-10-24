@@ -61,11 +61,10 @@ describe('FxService', () => {
     );
   });
 
-  it('정상 WLD ➡️ USD 환전을 수행한다', async () => {
-    const res = await service.swapWldToUsd('user-1', 100000);
-    expect(res.usdCredited).toBe(73.78);
-    expect(res.feeWld).toBe(200);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalled();
+  it('원장에 기록되지 않는 WLD ➡️ USD 환전을 거부한다', async () => {
+    await expect(service.swapWldToUsd('user-1', 100000)).rejects.toMatchObject({ status: 503 });
+    expect(mockRepo.swapWldToUsd).not.toHaveBeenCalled();
+    expect(mockDiscord.sendAdminDirectMessage).not.toHaveBeenCalled();
   });
 
   it('스무딩 오퍼레이션 시장개입을 집행하고 관리자 DM 알림을 발송한다', async () => {
@@ -125,26 +124,13 @@ describe('FxService', () => {
     expect(result.rates['6M'].forwardRate).toBeLessThan(result.rates['3M'].forwardRate);
   });
 
-  it('선물환 환헤지 계약을 체결하고 증거금을 기록한다', async () => {
+  it('원장에 기록되지 않는 선물환 증거금 차감을 거부한다', async () => {
     mockRepo.getLatestRate = vi.fn().mockResolvedValue(1350.0);
-    mockRepo.createForwardContract = vi.fn().mockResolvedValue({
-      id: 'contract-uuid',
-      userId: 'user-1',
-      position: 'BUY_USD',
-      tenor: '3M',
-      contractAmountUsd: 2000,
-      contractRate: 1344.15,
-      spotRateAtContract: 1350.0,
-      marginWld: 268830,
-      maturityDate: new Date().toISOString(),
-      status: 'ACTIVE',
-    });
-
-    const contract = await service.createForwardContract('user-1', 'BUY_USD', '3M', 2000);
-    expect(contract.position).toBe('BUY_USD');
-    expect(contract.tenor).toBe('3M');
-    expect(contract.marginWld).toBe(268830);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalled();
+    mockRepo.createForwardContract = vi.fn();
+    await expect(service.createForwardContract('user-1', 'BUY_USD', '3M', 2000)).rejects.toMatchObject({ status: 503 });
+    expect(mockRepo.getLatestRate).not.toHaveBeenCalled();
+    expect(mockRepo.createForwardContract).not.toHaveBeenCalled();
+    expect(mockDiscord.sendAdminDirectMessage).not.toHaveBeenCalled();
   });
 
   it('EWS 외환위기 조기경보 지표를 정확히 산출한다', async () => {
