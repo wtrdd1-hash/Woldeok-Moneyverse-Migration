@@ -5,6 +5,7 @@
 - MID/END: pending.
 - RED-GREEN: backend 7 expected RED then 10 category/HTTP GREEN; frontend missing helper/module RED then 29 focused GREEN; full backend 1,323 PASS/398 SKIP, full frontend 1,400 PASS/5 FAIL, DB 15 PASS/3 SKIP, contract 38 PASS, Android contract 179 PASS, bot 8 PASS.
 - MID: 19:00 KST origin/main unchanged 49788d09494fed3e463651945b83386e87dd47bc; integrated English/Korean planning rechecked. Isolated read-only PostgreSQL ci database 0 ledger rows, no app ledger INSERT/posting UPDATE, ROLLBACK. No Production-linked DB writes.
-- Build/typecheck/lint: backend build PASS, typecheck PASS, lint 0 errors/1,137 warnings; frontend first webpack 1024MiB heap OOM, rerun 2048MiB; audit FAIL 2 Critical/10 High (26 total).
+- Build/typecheck/lint: backend build PASS, typecheck PASS, lint 0 errors/1,137 warnings; frontend first webpack 1024MiB heap OOM, 2048MiB webpack build PASS exit 0; audit FAIL 2 Critical/10 High (26 total).
 - Full branch/PR audit: 54 actual tracked non-main remote branches all with unique unmerged commits; 52 open PRs (51 mergeable/1 conflicting #1107), 37 with failed CI checks. No deletion or changes to B/C/Gemini/QA branches.
 - END: code SHA e50b108b81b678cf0db65c38441bfb31b87ee712; final docs SHA/PR CI to be recorded in PR comment. No merge, official Test/Production deploy, rollback or branch deletion. RELEASE HOLD.
+- FINAL PRE-PR: 19:10 KST main still 49788d09494fed3e463651945b83386e87dd47bc. Draft PR #1160 created. Remote non-main 55, open PR 53, deleted 0. Isolated PG SELECT under moneyverse_app returned 0 fixture rows, INSERT/UPDATE denied, ROLLBACK. CI final SHA pending; do not merge or deploy.
