@@ -62,6 +62,19 @@ describe('AdminSupportView component', () => {
     vi.clearAllMocks();
   });
 
+  it('links administrators to a real recent reauthentication flow before member-visible writes', () => {
+    render(
+      <AdminSupportView
+        initialThreads={mockThreads}
+        initialMessages={mockMessages}
+        selectedId="thread-1"
+        initialStatus={null}
+      />
+    );
+    expect(screen.getByText(/최근 15분 내 재인증/)).toBeDefined();
+    expect(screen.getByRole('link', { name: '계정 보안에서 재인증' }).getAttribute('href')).toBe('/account/security');
+  });
+
   it('renders threads list and chat timeline accurately', () => {
     render(
       <AdminSupportView
