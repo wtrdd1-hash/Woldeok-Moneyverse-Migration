@@ -19,6 +19,7 @@ describe('DeokiPetStation Component', () => {
     expect(screen.getByText(/20 pts/)).toBeDefined();
 
     const petBox = screen.getByRole('button', { name: '덕이 펫 쓰다듬기' });
+    expect(petBox.tagName).toBe('BUTTON'); // Native keyboard activation, not a clickable div.
     fireEvent.click(petBox);
 
     expect(screen.getByText(/22 pts/)).toBeDefined();

@@ -28,7 +28,7 @@ export function DeokiPetStation({
   const level = Math.min(5, Math.floor(affection / 25) + 1);
   const progressToNext = (affection % 25) * 4;
 
-  const handlePet = async (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePet = (e: React.MouseEvent<HTMLButtonElement>) => {
     const nextAffection = affection + 2;
     setAffection(nextAffection);
 
@@ -107,12 +107,11 @@ export function DeokiPetStation({
       {/* Main Grid: Left Petting / Right Fortune Cookie */}
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Left: Interactive Petting Box */}
-        <div
+        <button
+          type="button"
           onClick={handlePet}
-          className="relative flex flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/60 p-4 cursor-pointer select-none transition-all duration-200 hover:border-amber-500/50 hover:bg-slate-950/80 active:scale-98 group overflow-hidden"
-          role="button"
+          className="relative flex flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/60 p-4 cursor-pointer select-none transition-all duration-200 hover:border-amber-500/50 hover:bg-slate-950/80 active:scale-98 group overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300"
           aria-label="덕이 펫 쓰다듬기"
-          tabIndex={0}
         >
           {/* Dialogue Speech Bubble */}
           <div className="mb-2 flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200 shadow-sm animate-fadeIn">
@@ -152,7 +151,7 @@ export function DeokiPetStation({
               />
             </div>
           </div>
-        </div>
+        </button>
 
         {/* Right: Fortune Cookie Station */}
         <div className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
