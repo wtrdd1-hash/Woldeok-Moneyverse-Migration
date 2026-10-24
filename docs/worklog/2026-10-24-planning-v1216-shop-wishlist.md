@@ -19,3 +19,9 @@
 - Proposed implementation must use its own engineering branch, exact-SHA official Test/CI/ACL/security/restore and separately approved GitOps Production promotion. No release claim from document verification.
 
 - GitHub implementation issue: #1119 OPEN; separate engineering ownership, not implemented.
+
+## Stage checkpoints and final review
+- [x] BEFORE: read canonical main and latest QA, selected isolated planning scope and recorded source hashes.
+- [x] IN PROGRESS: inspected shop/DB/app-api source, drafted paired EN/KO integrated specifications, rechecked main.
+- [x] FINISHED: corrected idempotency lock ordering against AGENTS.md §4; 10 backlog IDs in all six official docs, git diff check, GitHub Draft PR #1120 and issue #1119, no runtime/deployment.
+- Release remains HOLD; exact-head CI and official Test financial E2E not run.
