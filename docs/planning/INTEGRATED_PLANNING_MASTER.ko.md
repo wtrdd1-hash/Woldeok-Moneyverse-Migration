@@ -1,5 +1,38 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1210 — F675-109 게시판 읽기 목록 삭제·멱등성·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 운영 보류)
+
+### 회차·기준·실제 소스와 수정 사유
+- Previous **기능 추가 v1208** / Current **기능 보완 v1210** / Next **기능 추가 v1212**(잠정). 최신 원격 main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 및 main의 영문 정본·국문 대조 기획서를 시작·중간 재조회했다. 선행 Draft PR #1087은 **미병합 문서 기획**이지 배포된 코드가 아니다. 최신 QA v1213(2026-10-24 08:25 KST)은 FAILED/HOLD. 런타임·운영 연결 DB·WLD·기능 스위치·Test·Production·타 작업자 변경 없음.
+- 소스 근거: Migration `044-member-board.sql`은 `member_board_posts(id,deleted_at)` 및 글 소프트 삭제 함수 `member_board_delete`를 정의한다. Migration `175-member-board-public-read.sql`, `259-board-author-user-id-and-chat-search.sql`의 `member_board_public_get`은 `deleted_at IS NULL`인 글만 반환한다. 실제 게시글 화면의 댓글 제목 앵커는 `id="comments-title"`이며 `id="comments"`가 아니다. main에는 읽기 목록 테이블/API가 확인되지 않았다. 선행 v1208의 글 FK `ON DELETE RESTRICT`는 향후 글 완전 삭제를 막을 수 있고, 모호한 404 처리 규칙은 이미 저장한 삭제 글의 목록 제거까지 차단할 수 있다. 이는 **구현 전 해결할 설계 결함**이지 확인된 운영 사고가 아니다.
+- 기능은 회원의 수동 저장/삭제와 명시적 TOP/COMMENTS 이어읽기만 제공한다. 자동 스크롤·완독 추적, 관심사 추정, 광고 개인화, 알림 발송, WLD 지급·이동은 금지한다. 정적 다국어 블로그는 검증 가능한 게시 상태 계약이 마련될 때까지 제외한다. 기존 게시판/계정 UX를 활용하며 Gemini·개발 A/B/C·QA와 코드를 중복 수정하지 않는다.
+
+### 회원 화면·CTA·상태·웹/Android
+- 진입점: `/board/[postId]`의 저장/저장 취소, `/account/reading-list`의 본인 목록. 상태 GUEST, LOADING, NOT_SAVED, SAVING, SAVED_CONFIRMED, UNAVAILABLE_SAVED, REMOVING, CONFLICT, UNKNOWN_COMMIT, ERROR, SIGNED_OUT. CTA는 저장, 목록에서 제거, 글 열기, 댓글부터 이어읽기, TOP 표시, COMMENTS 표시, 저장 상태 새로고침, 재로그인 후 재시도. 원본 글이 삭제·비공개여도 **본인이 저장한 기록은 제목·본문·작성자·이미지를 가린 채 제거 가능**해야 한다. 본인 GET은 `available:false`로 응답할 수 있지만 삭제된 글의 신규 SAVE는 존재 여부를 구별하지 못하는 404. 미저장/타인 기록의 GET·DELETE는 404. 기존 기록 제거는 원본 공개 여부와 무관하게 확정 묘비 영수증을 반환하며, 같은 키 재전송은 원본 영수증만 반환한다.
+- 실제 댓글 제목 앵커는 `h2#comments-title`이므로 이어읽기 정규 주소는 공개 여부를 재확인한 뒤 `/board/<정규-UUID>#comments-title`이다. 임의 해시·URL·CSS 선택자·리다이렉트 입력 금지. 키보드 사용자가 앵커로 이동했을 때 제목에 프로그램 포커스를 줄 수 있도록 `tabIndex=-1` 또는 동등 처리, 보이는 포커스 표시, 고정 헤더 아래 스크롤 여백을 개발 요구사항으로 둔다. TOP은 해시 없는 정규 글 주소. 글이 삭제됐으면 딥링크 대신 제목이 가려진 카드와 제거 버튼을 표시한다. 운영체제 움직임 줄이기 설정을 무시하지 않는다. Android는 네이티브 댓글 영역 이동으로 동등하게 제공하며 자동 열람 기록을 수집하지 않는다.
+- 로그아웃·계정 전환·동의 철회·세션 만료 시 인증 세대값을 갱신해 진행 중인 GET/쓰기 응답과 이전 계정의 제목/목록 캐시를 폐기한다. 개인 API·BFF·엣지는 `Cache-Control: private, no-store`, 개인 화면은 `noindex,nofollow`. 타 계정 목록을 공용 localStorage에 저장하지 않는다. 과거 멱등 영수증이 이후 REMOVE된 항목의 현재 SAVED_CONFIRMED 상태를 보장하지 않으므로 재조회한다.
+
+### API·DB 제약·트랜잭션·커서(제안, 미구현)
+- v1208의 본인 전용 `GET /api/v1/board/reading-list`, `GET .../:postId`, `POST`, `PUT .../:postId/marker`, `DELETE .../:postId`와 제안된 Android `/app-api/v1/board/reading-list/*` 계약을 유지한다. 회원 ID·동의·CSRF는 서버 세션에서 검증하고 body의 userId를 신뢰하지 않는다. POST/PUT/DELETE는 UUID `Idempotency-Key`, PUT/DELETE는 `If-Match: "vN"` 및 응답 ETag/committedVersion을 요구한다. 오류는 400/422 잘못된 형식, 401 미인증, 403 동의·CSRF 거부, 404 타인/미저장 또는 비공개 글 신규 SAVE, 409 버전·멱등 지문 충돌/한도, 429 제한, 503 확정 불명. 네트워크 시간초과에 근거 없는 2xx 금지. **본인이 저장한 이용 불가 글의 DELETE는 허용**하고 제목이 없는 200 확정 영수증을 반환한다.
+- 순방향 신규 `member_board_reading_list`: `(user_id,post_id)` 복합 PK, `user_id REFERENCES users(id) ON DELETE CASCADE`, `post_id REFERENCES member_board_posts(id) ON DELETE CASCADE`로 v1208의 **RESTRICT를 변경**한다. `saved_at,updated_at,removed_at`, `marker CHECK IN ('TOP','COMMENTS')`, 양수 단조 증가 `version`, 활성 목록 `(user_id,saved_at DESC,post_id DESC) WHERE removed_at IS NULL` 인덱스. 글의 소프트 삭제는 본인 목록에 UNAVAILABLE_SAVED로 남고, 별도 승인된 **완전 삭제**만 저장 행을 연쇄 제거한다. 기존 글/계정 삭제 정책과 호환성을 격리 DB에서 검증하며 임의로 운영 글을 완전 삭제하지 않는다. 완전 삭제 후 이전 영수증이 현재 글을 되살릴 수 없다. `member_board_reading_requests`와 `member_board_reading_events`는 `user_id REFERENCES users(id) ON DELETE CASCADE` 또는 별도 승인된 익명화 보안기록 보존 정책을 명시하고, `post_id` UUID는 글 완전 삭제를 막는 FK로 묶지 않는다. 요청 지문 `bytea` 길이 32 검증, `UNIQUE(user_id,idempotency_key)`, 불변 receiptId/operation/resultVersion을 사용한다. 원문 제목·본문·토큰·IP·자동 열람 기록은 저장하지 않는다. 묘비/감사 90일은 법률·개인정보 검토 전 제안일 뿐 승인된 삭제 정책이 아니다.
+- 일관된 잠금 순서: **회원 users 행 → 원본 글 FOR SHARE → 본인 저장 행 → 멱등 요청 삽입/조회**(글이 존재하는 SAVE/MARK/REMOVE). 원본이 삭제된 REMOVE는 글의 공개 여부를 요구하지 않고 회원+저장 행 잠금만으로 처리한다. SAVE는 글 행 `FOR SHARE` 획득 후 `deleted_at IS NULL` 재검사, 회원 행 잠금 아래 활성 500건 한도 직렬화, 버전 CAS, 영수증·이벤트를 한 트랜잭션에 확정한다. 글 소프트 삭제 UPDATE는 잠금 해제까지 대기한다. **삭제 확정 이전 시작된 조회를 사후 회수할 수 있다고 주장하지 않는다**. 삭제 트랜잭션이 확정된 뒤 시작한 읽기에서는 글 메타데이터를 공개하지 않는다. 동일 키 동시 요청은 UNIQUE 충돌을 안전하게 재조회해 동일 지문에 최초 확정 영수증 1개, 다른 지문에 409(단순 SELECT 후 INSERT의 경쟁 오류 방치 금지). REMOVE 후 재저장은 **새 키와 최신 묘비 버전**을 모두 요구하고 오래된 SAVE/MARK가 부활시키지 못한다.
+- 커서는 HMAC 인증 불투명 값에 본인·세션 세대·필터/버전·만료·`saved_at,post_id` 키셋을 결합한다. 타인 재사용·변조·만료·필터 불일치는 400/422, 타인 목록 노출은 0. 최초 페이지의 `asOf` 경계로 새 저장이 기존 페이지에 섞이지 않게 하고, 동시 삭제로 결과 수가 줄어들 수 있음을 UI에 정직하게 표시한다. 동일 시각 10,001건 커서 회귀는 **운영 한도 500을 바꾸지 않고 격리 DB의 합성 테스트 fixture에만 한도 예외**를 적용한다. 원시 회원별 읽기 기록은 분석으로 보내지 않는다.
+
+### P0/P1 개발 백로그·QA·운영승격
+- **P0 ENV1210-01** — 운영·개발이 공유하는 `woldeok_moneyverse_dev`를 격리하고 5433 외부 바인딩을 승인된 방화벽/네트워크 정책으로 제한. 연결 식별자·암호화 백업의 격리 복원 확인 전 쓰기·fixture 금지. 루트 디스크 93% 용량 경보; 다른 작업자 Worktree 삭제 금지.
+- **P0 SEC1210-02** — 앱 역할 241개 중 235개 테이블 UPDATE/DELETE, PUBLIC 은행 EXECUTE 3개를 승인된 순방향 최소권한으로 개선. 격리 실 PostgreSQL 부정 권한 테스트, 운영 임의 REVOKE 금지.
+- **P0 REL1210-03** — QA v1213 main 린트(wallet CSV)·프론트 토요일 블로그 테스트 실패, 전체 pnpm 감사 Critical4/High10, bot Critical1/High4, Migration266 체크섬 불일치, route-ledger inventory 누락, 격리 복원 및 정확 SHA Test 미완료. **신규 P0 #1088**: Test Candidate 이미지 빌드 SUCCESS만으로 ready PR 자동 병합·브랜치 삭제 금지. PR head와 정확히 일치하는 실제 Test 배포·backend/API/DB·인증 로그인/금융 E2E·보안 PASS 독립 증명 및 부정 워크플로 회귀를 병합 선행조건으로 요구.
+- **P0 BOARD1210-04** — 글 공개/삭제/저장 경합과 이용 불가 글의 비공개 REMOVE 계약. SAVE 대 삭제 경쟁 100건, 타 회원 열거 100건, 삭제 확정 뒤 시작한 조회의 글 메타데이터 유출 0, 목록·SEO 제목 노출 0 검증.
+- **P1 BOARD1210-05** — 순방향 CASCADE FK·계정/글 삭제 동등성, 본인 전용 SECURITY DEFINER, 회원→글→저장 잠금, 요청 지문과 100건 동시 원본 영수증, 완전 삭제/탈퇴 fixture.
+- **P1 BOARD1210-06** — HMAC 본인/세션/만료/스냅샷 커서, 활성 500건 제한, 격리 합성 10,001건 동일 시각 페이지네이션, 동시 추가/삭제·키 교체 회귀.
+- **P1 BOARD1210-07** — 실제 `#comments-title` 이어읽기, 명시적 위치 CAS, 키보드 포커스/스크롤 여백/움직임 줄이기/320px·200% 확대 및 Android 네이티브 이동.
+- **P1 BOARD1210-08** — 계정 전환·세션 무효화, no-store/noindex, 소규모 집계 숨김 관리자 지표, CSRF/BOLA/속도 제한, 개인정보 삭제·동의 철회.
+- **P1 BOARD1210-09** — 웹/Android 확정 영수증·불명 확정·이용 불가 목록/제거 UI, 권한 거부·409 재시도, 거짓 성공률 KPI, 자동 추적 금지.
+- **P1 BOARD1210-10** — 격리 PostgreSQL TDD, 100건 SAVE/MARK/REMOVE/삭제 동시성, 마이그레이션 체크섬, 기능 OFF 롤백에서 묘비·영수증·기존 게시판 접근 보존.
+- 스위치 `board_reading_list` 기본 OFF. 별도 개발 브랜치에서만 구현하고 정확 SHA 전체 CI·보안·격리 PG ACL/백업 복원·공식 Test 인증 웹/Android/금융 회귀·실제 배포 독립 증명·승인 GitOps 카나리 뒤 운영승격. 이미지 빌드 성공만으로 병합/배포하지 않는다. 기획은 코드·DB·Test·Production을 배포하지 않고 타 작업자의 브랜치·PR을 병합/삭제하지 않는다.
+- **외부 독립 근거 게이트:** PostgreSQL 행 잠금(https://www.postgresql.org/docs/17/explicit-locking.html), OWASP 인가 지침(https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html), W3C 포커스 가림 방지(https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum) 발행기관 **3곳 검토**, 신규 중복 제거·최종 승인 **0건**, 누적 승인 **미확인 / 10,000건**. 상태 **BLOCKED / IN PROGRESS**. 문서 3건을 검토한 사실은 독립 승인 근거 10,000건 확보와 다르다.
+
+
 ## v2026.10.24.1208 — F675-109 검증형 회원 게시판 읽기 목록·수동 이어읽기 (기능 추가 / DRAFT / 운영 보류)
 
 ### 회차·기준·실제 소스·범위

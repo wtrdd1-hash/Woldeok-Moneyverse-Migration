@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
+- 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
+- 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.
+- P0 ENV1210-01 (운영·개발 공유 DB/5433/복원), SEC1210-02 (앱 DML 235/241·PUBLIC 은행 EXECUTE 3개), REL1210-03 (QA v1213 감사/린트/테스트/Migration266/정확 SHA 및 #1088 빌드만으로 자동 병합 금지), BOARD1210-04 (공개/삭제 경합·이용 불가 글 제거). P1 BOARD1210-05 (FK/잠금/영수증), BOARD1210-06 (커서/한도), BOARD1210-07 (실제 댓글 앵커/접근성/Android), BOARD1210-08 (세션/개인정보/관리자), BOARD1210-09 (웹·앱 영수증), BOARD1210-10 (격리 PG/롤백). 화면·API·DB·트랜잭션·SEO·KPI·수용 기준은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- 기능 기본 OFF, 별도 개발 브랜치 및 정확 SHA 실제 공식 Test 금융 E2E·격리 PG ACL·백업 복원·보안 감사·승인 GitOps 전 운영승격 금지. 외부 발행기관 3곳 검토, 신규 승인 0건, 누적 미확인/10,000 BLOCKED / IN PROGRESS. 런타임·DB·WLD·Test·운영 변경 없음.
+
+
 - Full backlog IDs / 전체 백로그 식별자: ENV1208-01 SEC1208-02 REL1208-03 BOARD1208-04 BOARD1208-05 BOARD1208-06 BOARD1208-07 BOARD1208-08 BOARD1208-09 BOARD1208-10
 
 ## v2026.10.24.1208 — F675-109 회원 게시판 읽기 목록·수동 이어읽기 (기획 초안 / 운영 보류)

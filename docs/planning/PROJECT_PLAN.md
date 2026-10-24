@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.24.1210 — F675-109 Reading List Deletion/Cursor/Resume Hardening (PLANNING DRAFT / RELEASE HOLD)
+- Cycle: Previous Addition v1208; Current Improvement v1210; Next Addition v1212 provisional. Authoritative main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` unchanged start/mid; predecessor Draft #1087 unmerged. QA v1213 FAILED/HOLD; new P0 release gate #1088. Docs only.
+- Source: board public functions in migrations 175/259 only expose `deleted_at IS NULL` posts; post page's comments anchor is `#comments-title`. Fix v1208's proposed RESTRICT FK blocking authorized hard purge, allow redacted owner REMOVE of saved-but-unavailable post, lock actor→post FOR SHARE→saved row, immutable digest-bound receipts and tombstone re-save, owner/session-bound HMAC snapshot cursor, logout response fencing. Keep production 500 saved cap; 10,001-item pagination test only in isolated synthetic fixture.
+- P0 ENV1210-01 (shared Production/dev DB, 5433, restore), SEC1210-02 (235/241 app DML, 3 PUBLIC bank EXECUTE), REL1210-03 (QA v1213 audits/lint/test/migration266/exact-SHA and #1088 no build-only auto-merge), BOARD1210-04 (visibility/deletion races, unavailable REMOVE). P1 BOARD1210-05 (FK/locks/receipts), BOARD1210-06 (cursor/cap), BOARD1210-07 (real anchor/a11y/Android), BOARD1210-08 (session/privacy/admin), BOARD1210-09 (web/mobile receipts), BOARD1210-10 (isolated PG/rollback). Full UX/API/DB/transaction/SEO/KPI/acceptance in [integrated master](INTEGRATED_PLANNING_MASTER.md).
+- Feature OFF; separate engineering branch and actual exact-SHA official Test/finance E2E, isolated real-PG ACL, backup restore, full security and authorized GitOps before merge/Production. External publisher families reviewed 3; newly approved 0, cumulative UNKNOWN / 10,000 => BLOCKED / IN PROGRESS. No runtime/DB/WLD/Test/Production changes.
+
+
 - Full backlog IDs / 전체 백로그 식별자: ENV1208-01 SEC1208-02 REL1208-03 BOARD1208-04 BOARD1208-05 BOARD1208-06 BOARD1208-07 BOARD1208-08 BOARD1208-09 BOARD1208-10
 
 ## v2026.10.24.1208 — F675-109 Verified Board Reading List (PLANNING DRAFT / RELEASE HOLD)

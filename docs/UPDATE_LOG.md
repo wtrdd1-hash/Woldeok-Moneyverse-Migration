@@ -1,5 +1,10 @@
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
+## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1208 / Current Improvement v1210 / Next Addition v1212 provisional. Main 54d5140d unchanged start/mid; QA v1213 FAILED/HOLD; predecessor #1087 unmerged. Fix proposed RESTRICT FK, unavailable-saved REMOVE, actual `#comments-title`, transaction lock order, original digest receipts, owner HMAC cursor, account switch and 500-vs-10,001 isolated fixture. P0 ENV1210-01 SEC1210-02 REL1210-03 BOARD1210-04; P1 BOARD1210-05 BOARD1210-06 BOARD1210-07 BOARD1210-08 BOARD1210-09 BOARD1210-10. New P0 #1088: candidate image build alone must not authorize merge without actual exact-SHA Test/authenticated finance E2E. Full EN/KO integrated design; no runtime or deployment.
+- External publishers 3 reviewed; newly approved 0, cumulative UNKNOWN / 10,000 BLOCKED. Shared DB/5433, broad DML, migration266, audits, Test, restore and disk 93% remain HOLD.
+
+
 ## 2026-10-24 v1208 — F675-109 verified member board reading list (FEATURE ADDITION / DRAFT / HOLD)
 - Previous Improvement v1206 / Current Addition v1208 / Next Improvement v1210 provisional. Main 54d5140d unchanged start/mid, QA v1211 FAILED/HOLD. Board public visibility and deleted_at verified; static blog excluded. Member-only manual Save/Remove/TOP/COMMENTS, no passive tracking or WLD.
 - P0 ENV1208-01 SEC1208-02 REL1208-03 BOARD1208-04; P1 BOARD1208-05 BOARD1208-06 BOARD1208-07 BOARD1208-08 BOARD1208-09 BOARD1208-10. Owner-scoped API, original idempotency receipts, DB visibility locks/tombstones, Android/admin aggregates, noindex/no-store, WCAG, 100-way concurrency and rollback in integrated EN/KO. Shared DB/5433, broad app DML, migration266, security audits, exact-SHA Test and restore remain HOLD. External publishers 3, approved 0, cumulative UNKNOWN / 10,000 BLOCKED.

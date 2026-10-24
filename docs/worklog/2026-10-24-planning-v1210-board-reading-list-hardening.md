@@ -1,0 +1,9 @@
+# Moneyverse Planning v1210 — Board Reading List Integrity Hardening
+- 2026-10-24 KST; Previous Addition v1208, Current Improvement v1210, Next Addition v1212 provisional.
+- Remote main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede; main canonical EN/KO hashes in /srv/moneyverse-tasks/Moneyverse-Planning-v2026.10.24.1210-mid.md. Predecessor Draft #1087 unmerged. Fresh QA v1213 FAILED/HOLD and new P0 release gate issue #1088.
+- Read AGENTS.md, README.md, canonical main PROJECT_PLAN EN/KO, frontend board post page comments-title, backend public-board controller/service, migrations 044/175/259, v1208 EN/KO plans, QA v1213. Production-linked DB never used for fixtures or writes.
+- Fix unavailable-saved REMOVE with redaction, proposed FK RESTRICT to CASCADE for approved hard purge, owner/account erasure, SAVE-vs-delete locks, original idempotency receipts and tombstones, HMAC owner/snapshot cursor, accurate comments-title keyboard anchor, stale session fences, 500 cap vs isolated 10,001 fixture.
+- P0 ENV1210-01 SEC1210-02 REL1210-03 BOARD1210-04; P1 BOARD1210-05 BOARD1210-06 BOARD1210-07 BOARD1210-08 BOARD1210-09 BOARD1210-10. Separate engineering implementation, full exact-SHA official Test/authenticated finance E2E/real-PG ACL/restore/full security before GitOps.
+- QA blockers: shared live/dev DB, wildcard 5433, 235/241 app DML, 3 PUBLIC bank functions, migration266 mismatch, main lint and frontend Saturday blog test, pnpm Critical4/High10, bot Critical1/High4, #1088 build-only auto-merge gap, Test/restore not proven, disk ~93%.
+- External publisher families 3 consulted (PostgreSQL/OWASP/W3C); newly approved 0, cumulative accepted UNKNOWN / 10,000 => BLOCKED / IN PROGRESS.
+- No runtime code, DB, WLD, feature switch, Test/Production, merge, branch deletion or automation changes.
