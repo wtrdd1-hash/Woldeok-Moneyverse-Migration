@@ -395,7 +395,7 @@ export class AdminControlsController {
   }
 
   @Post('consent-versions')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Publish a new terms and privacy policy version (Superadmin only)' })
   publishConsentVersion(@Req() request: RequestWithSession, @Body() body: ConsentVersionDto) {
     if (body.confirmText !== 'PUBLISH_NEW_POLICY_VERSION') {
