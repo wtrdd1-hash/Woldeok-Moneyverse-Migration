@@ -32,3 +32,23 @@
 5. Roll back only via approved GitOps/security procedure, never by restoring the inline secret. If no safe credential is available, keep the job disabled rather than bypassing the check.
 
 **Current host:** the original 04:00 cron still embeds its old credential. This PR does **not** remediate live exposure until approved host rollout and rotation; P1 #1137 remains OPEN/HOLD.
+
+## Final local verification (2026-10-24 15:47 KST)
+- Second RED/GREEN: new non-201 test failed before status check; after fix **7/7 PASS** (isolated fake curl, no HTTP to live service).
+- Backend scheduler unit tests **15/15 PASS**; DB package **15 PASS / 3 SKIPPED**; API contract PASS.
+- Full lint PASS (0 errors, 1,137 warnings); typecheck PASS; build PASS.
+- Frontend suite **1,395 PASS / 5 FAIL** (existing locale, SEO ×3, login touch-target).
+- Root `pnpm test` FAIL: 1,349 backend PASS / 185 FAIL / 393 SKIPPED because `DATABASE_URL` was deliberately set to invalid local port 1, preventing access to shared live Production/dev DB. This is **not** a valid PostgreSQL integration pass. No live DB writes performed.
+- Production dependency audit FAIL: 2 High (`body-parser`, `multer`); bot audit FAIL: 1 Critical / 5 High.
+- Isolated real PostgreSQL integration, authenticated end-to-end, official Test exact-SHA, and required GitHub CI are **NOT PASS**; no merge/Production promotion permitted.
+- Main re-fetched before PR: `49788d09494fed3e463651945b83386e87dd47bc`, unchanged. EN/KO plan read again.
+- No migration, DB, ledger, live cron, credential, Test or Production mutation. No branch cleanup.
+
+## Exit
+- [x] RED/GREEN security regression: 7/7 PASS.
+- [x] Backend scheduler focused tests, DB package, API contract, lint, typecheck, build recorded.
+- [x] Main/plan synchronization before PR.
+- [ ] Full test, security audit, isolated PG, exact-SHA Test, CI, security-approved rollout: BLOCKED/HOLD.
+- [ ] Production secret rotation and live crontab replacement: not authorized by release gates.
+- Outcome: **PARTIAL / BLOCKED**, not production-remediated. Keep issue #1137 open and draft PR unmerged.
+- Packaging check found the repository's global `*.sh` ignore rule. The new runner was explicitly force-added to Git; CI must verify the file exists at the candidate SHA.

@@ -26,4 +26,5 @@
 - [x] RED test confirmed 6 failures.
 - [x] GREEN test confirmed 6 passes.
 - [x] Scheduler hardcoded fallback removed; missing credential skips before network call.
-- [ ] Full CI, exact-SHA Test, security review, and approved rotation pending.
+- [ ] Full CI, exact-SHA Test, security review, and approved rotation pending (HOLD).
+- [x] Require HTTP 201, fail on unexpected success-shaped responses (second RED/GREEN).

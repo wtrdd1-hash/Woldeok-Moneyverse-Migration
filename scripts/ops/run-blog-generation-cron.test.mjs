@@ -12,14 +12,14 @@ function fixture(run) {
   const file = join(dir, 'blog-cron-header');
   const curl = join(dir, 'curl');
   const log = join(dir, 'curl-argv');
-  writeFileSync(curl, '#!/bin/sh\nprintf "%s\\n" "$@" > "$MOCK_CURL_LOG"\n', { mode: 0o700 });
+  writeFileSync(curl, '#!/bin/sh\nprintf "%s\\n" "$@" > "$MOCK_CURL_LOG"\nprintf "%s" "${MOCK_CURL_STATUS:-201}"\n', { mode: 0o700 });
   try {
     return run({
       file,
       log,
-      execute: () => spawnSync('/bin/sh', [script], {
+      execute: (extraEnv = {}) => spawnSync('/bin/sh', [script], {
         encoding: 'utf8',
-        env: { ...process.env, BLOG_CRON_HEADER_FILE: file, MOCK_CURL_LOG: log, PATH: `${dir}:${process.env.PATH}` },
+        env: { ...process.env, BLOG_CRON_HEADER_FILE: file, MOCK_CURL_LOG: log, ...extraEnv, PATH: `${dir}:${process.env.PATH}` },
       }),
     });
   } finally {
@@ -72,3 +72,10 @@ test('backend blog scheduler never uses a hardcoded credential fallback', () => 
   assert.doesNotMatch(source, /moneyverse-cron-internal-key-2026/);
   assert.match(source, /if \(!secret\)/);
 });
+
+test('non-201 responses are not treated as successful publication', () => fixture(({ file, execute }) => {
+  writeFileSync(file, 'x-cron-secret: dummy-credential\n', { mode: 0o600 });
+  const res = execute({ MOCK_CURL_STATUS: '403' });
+  assert.notEqual(res.status, 0);
+  assert.doesNotMatch(res.stdout + res.stderr, /dummy-credential/);
+}));
