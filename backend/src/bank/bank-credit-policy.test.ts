@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Queryable } from '../core/db';
 import type { RequestWithSession } from '../auth/session.context';
 import { BankController } from './bank.controller';
+import { GUARDS_METADATA, HEADERS_METADATA } from '@nestjs/common/constants';
 import { BankRepository } from './bank.repository';
 import { BankPolicyUnavailableError, projectCreditPolicy } from './credit-policy';
 
@@ -71,6 +72,13 @@ describe('verified game credit policy (owner-only DB authority)', () => {
     const controller = new BankController({ getCreditPolicy: vi.fn().mockRejectedValue(new BankPolicyUnavailableError()) } as unknown as BankRepository);
     const request = { session: { user_id: actor } } as unknown as RequestWithSession;
     await expect(controller.creditPolicy(request)).rejects.toMatchObject({ status: 503 });
+  });
+
+  it('retains the authentication and consent guards and private no-store response metadata', () => {
+    const guards = Reflect.getMetadata(GUARDS_METADATA, BankController) as Array<{ name: string }>;
+    expect(guards.map((guard) => guard.name)).toEqual(['SessionGuard', 'AuthenticatedGuard', 'ConsentGuard']);
+    const headers = Reflect.getMetadata(HEADERS_METADATA, BankController.prototype.creditPolicy) as Array<{ name: string; value: string }>;
+    expect(headers).toContainEqual({ name: 'Cache-Control', value: 'private, no-store' });
   });
 
   it('takes actor from the guarded session, never from a request parameter', async () => {

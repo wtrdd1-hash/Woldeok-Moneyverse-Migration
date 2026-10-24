@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import CreditPolicyPage, { dynamic, metadata } from './page';
@@ -28,6 +27,12 @@ describe('private verified credit policy report', () => {
     expect(metadata.robots).toEqual({ index: false, follow: false });
     expect(html).toContain('1,234,567,890,123,456,789,012,345');
     expect(html).not.toContain('1,000점');
+  });
+
+  it('never fetches banking policy when the member guard rejects the request', async () => {
+    vi.mocked(requireMember).mockRejectedValueOnce(new Error('authentication required'));
+    await expect(CreditPolicyPage()).rejects.toThrow('authentication required');
+    expect(apiOrNull).not.toHaveBeenCalled();
   });
 
   it('renders unavailable rather than synthetic bank figures when API fails', async () => {
