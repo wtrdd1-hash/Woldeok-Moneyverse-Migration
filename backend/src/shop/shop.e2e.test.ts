@@ -77,6 +77,15 @@ describe('shop routes', () => {
   // not from the handler: `shop catalogue is unavailable` in `detail` would
   // mean the request reached `ShopController.catalog` with no guard in front
   // of it.
+  it('mounts private wishlist reads and mutations behind session guards', async () => {
+    const read = await request(app.getHttpServer()).get('/api/v1/shop/wishlist');
+    expect(read.status).not.toBe(404);
+    const write = await request(app.getHttpServer()).post('/api/v1/shop/wishlist/mutations')
+      .send({ catalogId: '00000000-0000-4000-8000-000000000000', action: 'SAVE', idempotencyKey: '00000000-0000-4000-8000-000000000001' });
+    expect(write.status).not.toBe(404);
+    expect([401, 403, 428, 503]).toContain(write.status);
+  });
+
   it('mounts the catalogue behind a session', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/shop/catalog');
     expect(response.status).not.toBe(404);

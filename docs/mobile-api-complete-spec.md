@@ -9,6 +9,8 @@
 > Backend controllers: 57 controllers / 335 total endpoints (179 mobile contract endpoints verified)
 > Audience: Android/iOS clients, frontend/backend engineers, QA and store-review preparation
 
+> **Unreleased candidate v2026.10.24.a1550:** this branch extends the machine-readable mobile contract from 179 to **181** endpoints with owner-only `GET /app-api/v1/shop/wishlist` and `POST /app-api/v1/shop/wishlist/mutations`. These routes are behind `SHOP_WISHLIST_ENABLED` (default OFF), require member session/consent and CSRF on writes, and never purchase an item or change WLD. Responses must be private/no-store and mutations must be confirmed by a server receipt and follow-up read. This candidate is not available in Production and must not be treated as released until exact-SHA gates pass. The 179 count below describes the earlier released baseline.
+
 ## 0. Contract authority
 
 This file is the single integration contract for the native app. User-facing native code MUST use `https://easy-scraping.com/app-api/v1/*`; it must not guess web-page URLs or call the private NestJS origin.
