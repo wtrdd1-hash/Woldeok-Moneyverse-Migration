@@ -41,6 +41,11 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
+          # Freeze the guard from the authoritative main checkout before any
+          # branch reconciliation changes HEAD in this long-running loop.
+          guard_script="$RUNNER_TEMP/moneyverse-migration-pr-guard.mjs"
+          git show HEAD:scripts/release/check-open-pr-migration-numbers.mjs > "$guard_script"
+
           merged_count=0
           validated_count=0
           validation_dispatched_count=0
@@ -190,6 +195,14 @@ jobs:
               current_head="$(gh api "repos/${REPO}/pulls/${pr}" --jq '.head.sha')"
               if [[ "$current_head" != "$branch_sha" ]]; then
                 echo "skip PR #${pr}: head moved from ${branch_sha} to ${current_head}"
+                continue
+              fi
+
+              # Required checks alone cannot protect against a later open PR
+              # claiming the same migration version; recheck just before merge.
+              if ! GITHUB_EVENT_NAME=pull_request GITHUB_REPOSITORY="$REPO" \
+                GITHUB_TOKEN="$GH_TOKEN" PR_NUMBER="$pr" node "$guard_script"; then
+                echo "::warning::skip PR #${pr}: open-PR migration number collision or unverified API state"
                 continue
               fi
 
