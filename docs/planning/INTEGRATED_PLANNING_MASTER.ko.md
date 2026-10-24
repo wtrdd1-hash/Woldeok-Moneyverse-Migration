@@ -1,5 +1,29 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1250 — F675-119 대시보드 바로가기 초기화·계정 식별·영수증 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+
+### 회차·정본·실제 코드 근거
+- **이전:** 기능 추가 v1248(F675-119, 미병합 Draft #1219). **현재:** 기능 보완 v1250. **다음:** 기능 추가 v1252(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재확인. main의 AGENTS.md, README.md, 영문 PROJECT_PLAN.md 정본 및 한국어 PROJECT_PLAN.ko.md 대조. 최신 QA **v1253 FAILED/HOLD**(2026-10-25 04:24 KST). #1219에 쌓은 독립 문서 전용 브랜치로 런타임·DB·Test·운영·다른 작업자 브랜치는 변경하지 않는다.
+- **확인된 사실:** `frontend/src/app/dashboard/page.tsx`는 이미 `robots: {index:false,follow:false}`이고 다음 활동 4개가 고정이다. `backend/src/account/account.controller.ts`는 `softDeleteAccount`를 호출하며 Migration 010의 `account_soft_delete`는 사용자 상태를 `deleted`로 바꾸고 세션을 취소하지만 **users 행을 DELETE하지 않는다**. 따라서 v1248에서 제안한 `ON DELETE CASCADE`만으로 탈퇴 시 바로가기 정보가 삭제된다고 볼 수 없다. `frontend/src/lib/app-gateway.ts`는 `x-csrf-token`, `x-request-id`는 전달하나 `if-match`, `idempotency-key`는 전달하지 않는다. `/app-api/v1/[...path]/route.ts`는 DELETE 본문을 전달한다. 이는 코드 근거로 확인한 설계 위험이지 실제 운영 사고 확인은 아니다.
+
+### 회원 흐름·화면·상태·접근성
+- `/dashboard`의 '바로가기 편집'에서 `/account/shortcuts`로 이동한다. 본인만 허용된 내부 경로 키 1~6개를 추가·제거·위아래 이동·저장·취소·기본값 초기화한다. 키보드만으로 정렬, 스크린리더 순서 안내, 320px/200% 확대, 한영 라벨, Android TalkBack, 허용된 딥링크를 지원한다. 저장한 경로도 이동 시 대상 화면의 권한·기능 스위치를 다시 검증한다. 기존 대시보드는 이미 noindex이므로 중복 SEO 작업을 하지 않고 신규 편집 화면의 noindex/no-store를 보장한다.
+- 상태는 DEFAULT_UNSAVED(행 없음, 버전 0), CUSTOM_CONFIRMED, DEFAULT_RESET_CONFIRMED(초기화 영속 기록과 증가한 버전), EDITING, SAVING, STALE_VERSION(412), KEY_CONFLICT(409), UNKNOWN_COMMIT(영수증 조회 후 현재 GET), ROUTE_UNAVAILABLE, OFFLINE, SIGNED_OUT로 구분한다. API 장애 시 기본 바로가기를 임시로 표시하되 '저장 완료'로 오인시키지 않는다. 로그아웃·계정 변경·동의 철회·탈퇴·세션 교체 시 이전 계정의 응답을 세션 세대 번호로 폐기하고 웹/모바일 캐시를 지운다. 기능 OFF에서는 기존 4개 버튼을 유지하고 쓰기는 차단하되 이전 미확정 요청의 영수증 조회는 적법한 동일 계정 세션에서만 제한적으로 허용한다.
+
+### API·DB·트랜잭션 수정 명세(미구현)
+- `GET /api/v1/account/dashboard-shortcuts`, `PUT` 본문 `{expectedVersion,keys:[허용 키 1~6개],requestId:UUID}`, `DELETE` 본문 `{expectedVersion,requestId}`, 본인 전용 `GET .../receipts/:requestId`를 유지한다. 조회는 version/source/items/allowedKeys/featureAvailable을, 쓰기 성공은 receiptId/operation/committedVersion/committedAt/replayed를 반환한다. 오류는 400 잘못된 키, 401/403 인증·동의·CSRF, 409 동일 키 다른 본문, 412 구버전, 429 과다 요청, 503 DB 불확실로 구분한다. 본문 2KiB 제한. 현 Android 게이트웨이가 전달하지 않는 If-Match·Idempotency-Key 헤더에만 의존하지 않는다. DELETE 본문은 코드상 전달되지만 실제 프록시·Android 클라이언트 호환성 테스트가 필요하며 실패 시 버전 관리된 `POST /reset` 전환을 별도 검토한다.
+- **ABA 방지:** Reset 시 `member_dashboard_shortcut_sets` 행을 DELETE하거나 버전을 0으로 되돌리지 않는다. `customized=false` 초기화 표식(tombstone)을 유지하고 PUT·RESET이 확정될 때마다 버전을 1 증가시킨다. 최초 행이 없는 GET만 가상 기본값/버전 0을 반환한다. 최초 쓰기는 users 행을 잠그고 버전 1 행을 만든다. 이후 Reset N→N+1 뒤 과거 버전 0 또는 N의 저장 요청은 412로 거부한다. 기능 OFF나 롤백에서도 버전을 되돌리지 않는다.
+- **정렬 유일성:** 자식 테이블은 `(user_id,route_key)` PK, `(user_id,position)` UNIQUE, `position BETWEEN 1 AND 6`, 사용자별 `(user_id,position)` 인덱스 및 연속 위치 1..N을 보장한다. 즉시 UNIQUE 검사 중 두 위치를 UPDATE로 교환하지 말고, 동일 트랜잭션 안에서 사용자→부모 행 잠금 후 기존 자식을 지우고 검증된 순서 전체를 INSERT한다(또는 심사된 DEFERRABLE 제약 사용). API뿐 아니라 SECURITY DEFINER 함수에서도 중복·허용되지 않은 키를 거부한다.
+- **멱등 영수증:** 사용자 행 잠금→(user_id,request_id) 기존 영수증 확인→같은 정규화 해시이면 최초 확정 결과 반환→다른 내용이면 409→버전 CAS 및 자식 갱신→불변 영수증 기록을 한 트랜잭션으로 처리한다. 해시는 작업 종류·순서 있는 키·expectedVersion·계약 버전을 포함하고 사용자에게 귀속한다. 과거 영수증은 과거 확정 사실이며 현재 저장 상태는 GET으로 확인한다. 영수증 30일 보존은 개인정보 정책 승인 전 제안일 뿐이며 만료 후 무제한 재시도 안전성을 주장하지 않는다.
+- **탈퇴 개인정보:** 실제 `account_soft_delete`는 users 행을 보존하므로 FK CASCADE만으로 삭제되지 않는다. 탈퇴 즉시 계정 상태·세션·동의 검증으로 읽기/쓰기 차단하고, 승인된 보존기간 후 별도 순방향 정리 절차로 바로가기 및 영수증을 삭제하거나 적법하게 보존해야 한다. 즉시 물리 삭제를 보장한다고 표시하지 않는다. 하드 삭제 시 CASCADE는 보조 보호책이다.
+
+### 관리자·보안·KPI·수용 시험·배포
+- 서버 세션에서 사용자 식별, CSRF, 분당 10회 변경 제한, 고정 search_path·명시적 스키마·PUBLIC EXECUTE 회수·앱 계정 직접 DML 금지. 관리자는 20명 미만 집계 비공개 및 차분 공격 방어를 적용한 비식별 지표만 조회하며 개인별 경로는 볼 수 없다. 지표: 정상 Test에서 확정 저장/초기화 성공률 99.5% 이상, 타 계정 유출 0, 구버전 저장 허용 0, 클릭률·409/412/미확정 비율. 분석에 개인 식별자·사용자 URL 금지. 금융 원장·잔액·재고·주식 포지션은 변경하지 않는다.
+- **P0 ENV1250-01:** 루트 디스크 100%(v1250 확인 약 641MiB 여유), 운영/개발/Test DB 분리·5433 노출 통제·격리 복원. **P0 SEC1250-02:** 241개 중 235개 테이블 앱 계정 DML 및 PUBLIC 은행 함수 3개 과권한을 심사된 순방향 변경으로 해소하고 탈퇴/타인 접근 음성 테스트. **P0 REL1250-03:** QA v1253 FAILED/HOLD, Migration 266 체크섬·280 네 갈래 충돌, 의존성/CI/정확 SHA Test 금융 E2E·복원 차단 해소. **P0 DASH1250-04:** 실제 경로·기존 noindex·탈퇴 소프트삭제·Android 헤더/본문 전달·권한 검증.
+- **P1 DASH1250-05:** 버전 단조 증가·초기화 표식·정렬 제약·불변 영수증 DB. **P1 DASH1250-06:** 사용자→설정→자식/영수증 잠금 순서·원자적 교체/초기화·ABA·100건 경합. **P1 DASH1250-07:** NestJS DTO/세션/CSRF·웹/Android 본문 CAS·2KiB·영수증 재조회 및 오류 계약. **P1 DASH1250-08:** 화면/한영/모바일/접근성·계정 전환 응답 차단·비활성 경로. **P1 DASH1250-09:** 소프트탈퇴 정리·관리자 집계·개인정보·SEO·KPI. **P1 DASH1250-10:** 격리 PostgreSQL 권한·탈퇴·동일 요청 100건·타 회원 100건·합성 회원 10,001명 집계·롤백 회귀.
+- **배포 보류:** 별도 개발 브랜치, Migration 266/280 정리 후 번호 부여, 후보 정확 SHA 전체 CI/보안, 격리 PostgreSQL 권한, 공식 Test 인증 웹/Android/금융 E2E, 암호화 백업 격리 복원, 승인된 1→5→25→100% 점진 배포와 OFF 롤백 필요. QA 실패 및 디스크 부족으로 Production **BLOCKED**. 외부 독립 근거 신규 승인 **0건**, 중복 제거 누적 승인 **미확인/10,000** ⇒ **BLOCKED / IN PROGRESS**. 발행기관 수를 독립 근거 수로 계산하지 않는다.
+
+
 ## v2026.10.25.1248 — F675-119 회원 대시보드 바로가기 고정·순서 설정 (기능 추가 / 기획 초안 / 운영 보류)
 
 ### 회차, 근거, 작업 중복 방지
