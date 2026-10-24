@@ -143,7 +143,7 @@ const ProposalSchema = z.preprocess((value) => {
 }));
 
 const BatchSchema = z.object({
-  scenarios: z.array(ProposalSchema).min(1),
+  scenarios: z.array(ProposalSchema).min(1).max(8),
 });
 
 export type ScenarioBatch = z.infer<typeof BatchSchema>;
@@ -459,7 +459,7 @@ const CompletionSchema = z.object({
     message: z.object({
       content: z.union([
         z.string(),
-        z.array(z.object({ text: z.string().nullish() })),
+        z.array(z.object({ text: z.string().nullish() })).max(16),
         z.null(),
       ]).optional(),
       /** Where a reasoning model puts its thinking. Never the answer. */
@@ -468,10 +468,10 @@ const CompletionSchema = z.object({
     }).optional(),
     /** 'length' means the answer was cut off, which reads as broken JSON. */
     finish_reason: z.string().nullish(),
-  })).min(1),
+  })).min(1).max(8),
 });
 
-const ModelsSchema = z.object({ data: z.array(z.object({ id: z.string() })) });
+const ModelsSchema = z.object({ data: z.array(z.object({ id: z.string() })).max(512) });
 
 function contentOf(message: z.infer<typeof CompletionSchema>['choices'][number]['message']): string {
   const content = message?.content;

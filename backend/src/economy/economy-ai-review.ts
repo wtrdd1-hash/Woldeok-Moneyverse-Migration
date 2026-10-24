@@ -78,12 +78,12 @@ const ChatResponseSchema = z.object({
         message: z.object({
           content: z.union([
             z.string(),
-            z.array(z.object({ type: z.string().optional(), text: z.string().optional() })),
+            z.array(z.object({ type: z.string().optional(), text: z.string().optional() })).max(16),
           ]),
         }),
       }),
     )
-    .min(1),
+    .min(1).max(8),
   usage: z.object({ prompt_tokens: z.number().optional(), completion_tokens: z.number().optional(), total_tokens: z.number().optional() }).optional(),
 });
 
