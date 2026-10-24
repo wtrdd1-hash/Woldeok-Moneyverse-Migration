@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  ServiceUnavailableException,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -101,17 +102,19 @@ export class AdminShopController {
       throw new BadRequestException('No update parameters provided');
     }
 
+    // Migration 168 edits shop_catalog.current_stock, while checkout and
+    // availability read shop_inventory.quantity. Reject even no-op/null stock
+    // payloads until both sources are reconciled atomically in PostgreSQL.
+    if (updateStock) {
+      throw new ServiceUnavailableException({
+        code: 'SHOP_STOCK_AUTHORITY_UNVERIFIED',
+        message: 'Stock updates are paused until authoritative inventory reconciliation is verified.',
+      });
+    }
+
     const price = updatePrice ? positiveIntegerText(body.base_price) : null;
     if (updatePrice && price === null) {
       throw new BadRequestException('base_price must be a positive integer');
-    }
-
-    if (
-      updateStock &&
-      body.current_stock !== null &&
-      (!Number.isSafeInteger(body.current_stock) || (body.current_stock ?? 0) < 0)
-    ) {
-      throw new BadRequestException('current_stock must be null or a non-negative integer');
     }
 
     try {
