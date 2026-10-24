@@ -65,9 +65,9 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
     const controller = new DerivativesController();
     const markets = await controller.listMarkets();
     expect(markets.markets.length).toBeGreaterThan(0);
+    expect(markets).toMatchObject({ simulated: true });
 
-    const positions = await controller.listMyPositions(mockReq);
-    expect(positions.positions.length).toBeGreaterThan(0);
+    await expect(controller.listMyPositions(mockReq)).rejects.toMatchObject({ status: 503 });
 
     // Unbacked leverage actions are deliberately blocked until the ledger is authoritative.
     await expect(controller.openPosition(mockReq, {
@@ -82,8 +82,7 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
       idempotencyKey: 'b1b2c3d4-e5f6-7890-abcd-ef1234567891',
     })).rejects.toMatchObject({ status: 503 });
 
-    const history = await controller.getTradeHistory(mockReq);
-    expect(history.history.length).toBeGreaterThan(0);
+    await expect(controller.getTradeHistory(mockReq)).rejects.toMatchObject({ status: 503 });
   });
 
   it('가상 스타트업 VC 엔젤투자 & 크라우드펀딩 엔드포인트 정상 동작', async () => {

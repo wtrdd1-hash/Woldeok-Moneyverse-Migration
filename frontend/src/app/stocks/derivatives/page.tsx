@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
@@ -41,7 +41,6 @@ import {
   DERIVATIVES_MARKET_SYMBOLS,
   LEVERAGE_PRESETS,
   calculateLiquidationPrice,
-  calculateDerivativesPnL,
   calculateFundingFee,
   calculateLiquidationSettlement,
   generateLiquidationHeatmap,
@@ -56,7 +55,7 @@ import { groupDigits } from '@/lib/money';
 
 export default function DerivativesPage() {
   const { locale } = useLocale();
-  const [symbols, setSymbols] = useState<DerivativesMarketSymbol[]>(DERIVATIVES_MARKET_SYMBOLS);
+  const symbols: DerivativesMarketSymbol[] = DERIVATIVES_MARKET_SYMBOLS;
   const [selectedSymbol, setSelectedSymbol] = useState<DerivativesMarketSymbol>(DERIVATIVES_MARKET_SYMBOLS[0]!);
   
   // 주문 폼 상태
@@ -67,96 +66,16 @@ export default function DerivativesPage() {
   const [tpPriceInput, setTpPriceInput] = useState<string>('');
   const [slPriceInput, setSlPriceInput] = useState<string>('');
   
-  // 유저 자산 및 포지션 상태
-  const [userWldBalance] = useState<number>(50000000); // 5천만 WLD 가상 시드
-  const [positions, setPositions] = useState<DerivativesPosition[]>([
-    {
-      id: 'pos-1',
-      symbol: 'WDG',
-      name: '월덕게임즈',
-      side: 'LONG',
-      marginMode: 'ISOLATED',
-      leverage: 10,
-      entryPrice: 12100,
-      currentPrice: 12500,
-      margin: 2000000,
-      positionValue: 20000000,
-      quantity: 1652.89,
-      liquidationPrice: 11495,
-      takeProfitPrice: 13500,
-      stopLossPrice: 11800,
-      pnl: 661157,
-      roi: 33.06,
-      createdAt: '2026-09-28 00:15:00',
-    },
-    {
-      id: 'pos-2',
-      symbol: 'BIO',
-      name: '월덕바이오',
-      side: 'SHORT',
-      marginMode: 'ISOLATED',
-      leverage: 5,
-      entryPrice: 6500,
-      currentPrice: 6200,
-      margin: 1500000,
-      positionValue: 7500000,
-      quantity: 1153.84,
-      liquidationPrice: 7475,
-      pnl: 346153,
-      roi: 23.08,
-      createdAt: '2026-09-28 00:45:00',
-    },
-  ]);
+  // Derivatives execution/ledger is not available. Never invent member holdings.
+  const positions: DerivativesPosition[] = [];
 
   // 통계 및 알림 상태
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [pnlCardModalPosition, setPnlCardModalPosition] = useState<DerivativesPosition | null>(null);
   const [copiedPnl, setCopiedPnl] = useState<boolean>(false);
 
-  // 실시간 시세 변동 타이머 시뮬레이션
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSymbols((prev) =>
-        prev.map((s) => {
-          const delta = (Math.random() - 0.48) * (s.currentPrice * 0.004);
-          const nextPrice = Math.max(10, Math.round(s.currentPrice + delta));
-          return {
-            ...s,
-            currentPrice: nextPrice,
-          };
-        })
-      );
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // 선택 종목 동기화 및 포지션 실시간 PnL 갱신
-  useEffect(() => {
-    const current = symbols.find((s) => s.symbol === selectedSymbol.symbol);
-    if (current) {
-      setSelectedSymbol(current);
-    }
-
-    setPositions((prev) =>
-      prev.map((pos) => {
-        const symbolData = symbols.find((s) => s.symbol === pos.symbol);
-        const currPrice = symbolData ? symbolData.currentPrice : pos.currentPrice;
-        const { pnl, roi } = calculateDerivativesPnL(
-          pos.entryPrice,
-          currPrice,
-          pos.margin,
-          pos.leverage,
-          pos.side
-        );
-        return {
-          ...pos,
-          currentPrice: currPrice,
-          pnl,
-          roi,
-        };
-      })
-    );
-  }, [symbols, selectedSymbol.symbol]);
+  // All quote, funding, heatmap and liquidation figures below are fixed DEMO inputs.
+  // Never simulate a live feed or mutate an unverified member position.
 
   const marginNumber = Math.max(0, parseInt(marginInput.replace(/,/g, ''), 10) || 0);
   const estimatedLiquidationPrice = calculateLiquidationPrice(selectedSymbol.currentPrice, leverage, side);
@@ -182,7 +101,7 @@ export default function DerivativesPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1440px] space-y-8 px-3 sm:px-6 py-6 sm:py-8 overflow-x-hidden">
-      <p role="status" className="mb-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">시뮬레이션 · 미리보기: 선물 잔액·포지션·손익은 예시이며 실제 WLD 증거금, 체결, 청산은 지원하지 않습니다.</p>
+      <p role="status" className="mb-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">시뮬레이션 · 미리보기: 아래 가격·거래량·펀딩비·청산 히트맵은 고정 예시입니다. 실제 회원 잔액·보유 포지션·체결·정산은 조회하거나 실행하지 않습니다.</p>
       {/* 1. HERO BENTO GRID HEADER */}
       <section className="rounded-2xl sm:rounded-3xl border border-zinc-800/80 bg-card/95 p-5 sm:p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/60">
@@ -243,25 +162,25 @@ export default function DerivativesPage() {
                   {selectedSymbol.fundingRate >= 0 ? '+' : ''}{selectedSymbol.fundingRate}%
                 </span>
                 <span className="text-[10px] text-muted-foreground/80 mt-0.5 block flex items-center gap-1">
-                  <Clock className="size-2.5" /> 4시간 후 정산
+                  <Clock className="size-2.5" /> 실제 정산 없음
                 </span>
               </div>
               <div className="rounded-xl border border-zinc-800/80 bg-background/50 p-3">
-                <span className="text-[11px] font-medium text-muted-foreground block">24시간 선물 거래대금</span>
+                <span className="text-[11px] font-medium text-muted-foreground block">예시 24시간 거래대금</span>
                 <span className="font-mono text-sm font-bold text-foreground block mt-0.5">
                   {groupDigits(selectedSymbol.volume24h)} WLD
                 </span>
-                <span className="text-[10px] text-muted-foreground/80 mt-0.5 block">10대 종목 활성</span>
+                <span className="text-[10px] text-muted-foreground/80 mt-0.5 block">예시 종목 데이터</span>
               </div>
               <div className="rounded-xl border border-zinc-800/80 bg-background/50 p-3">
                 <span className="text-[11px] font-medium text-muted-foreground block">24H 최고 / 최저가</span>
                 <span className="font-mono text-xs font-bold text-foreground block mt-0.5">
                   {groupDigits(selectedSymbol.high24h)} / {groupDigits(selectedSymbol.low24h)}
                 </span>
-                <span className="text-[10px] text-muted-foreground/80 mt-0.5 block">변동폭 정상</span>
+                <span className="text-[10px] text-muted-foreground/80 mt-0.5 block">고정 예시 수치</span>
               </div>
               <div className="rounded-xl border border-zinc-800/80 bg-background/50 p-3">
-                <span className="text-[11px] font-medium text-muted-foreground block">롱/숏 포지션 비율</span>
+                <span className="text-[11px] font-medium text-muted-foreground block">예시 롱/숏 비율</span>
                 <div className="flex items-center justify-between text-[11px] font-mono font-bold mt-0.5">
                   <span className="text-emerald-400">L {selectedSymbol.longRatio}%</span>
                   <span className="text-rose-400">S {selectedSymbol.shortRatio}%</span>
@@ -277,38 +196,28 @@ export default function DerivativesPage() {
           <div className="rounded-2xl border border-zinc-800/80 bg-background/60 p-4 sm:p-6 lg:col-span-4 flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground">내 WLD 가용 증거금</span>
+                <span className="text-xs font-semibold text-muted-foreground">내 파생상품 가용 증거금</span>
                 <Badge variant="secondary" className="font-mono text-[10px] bg-emerald-500/10 text-emerald-400 border-none">
-                  격리 잔고 실시간
+                  미지원 · 예시 아님
                 </Badge>
               </div>
-              <div className="mt-2 font-mono text-2xl sm:text-3xl font-black text-foreground">
-                {groupDigits(userWldBalance)}{' '}
-                <span className="text-xs sm:text-sm font-bold text-muted-foreground">WLD</span>
-              </div>
+              <div className="mt-2 font-mono text-2xl sm:text-3xl font-black text-foreground">조회 미지원</div>
             </div>
 
             <div className="space-y-2 pt-2 border-t border-border/40 text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">오픈 포지션 수</span>
-                <span className="font-mono font-bold text-foreground">{positions.length}개</span>
+                <span className="text-muted-foreground">검증된 포지션 수</span>
+                <span className="font-mono font-bold text-foreground">조회 미지원</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">총 담보 예치 증거금</span>
+                <span className="text-muted-foreground">검증된 담보 증거금</span>
                 <span className="font-mono font-bold text-foreground">
-                  {groupDigits(positions.reduce((acc, p) => acc + p.margin, 0))} WLD
+                  조회 미지원
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">총 미실현 손익 (PnL)</span>
-                <span
-                  className={`font-mono font-bold ${
-                    positions.reduce((acc, p) => acc + p.pnl, 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'
-                  }`}
-                >
-                  {positions.reduce((acc, p) => acc + p.pnl, 0) >= 0 ? '+' : ''}
-                  {groupDigits(positions.reduce((acc, p) => acc + p.pnl, 0))} WLD
-                </span>
+                <span className="text-muted-foreground">검증된 미실현 손익 (PnL)</span>
+                <span className="font-mono font-bold text-muted-foreground">조회 미지원</span>
               </div>
             </div>
 
@@ -361,7 +270,7 @@ export default function DerivativesPage() {
             <Sparkles className="size-4 text-purple-400 shrink-0" />
             <span>{actionMessage}</span>
           </div>
-          <button onClick={() => setActionMessage(null)} className="text-muted-foreground hover:text-foreground">
+          <button type="button" aria-label="안내 닫기" onClick={() => setActionMessage(null)} className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-400">
             <XCircle className="size-4" />
           </button>
         </div>
@@ -371,20 +280,20 @@ export default function DerivativesPage() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         {/* Left 8-Cols: 청산 히트맵 & 활성 포지션 콘솔 */}
         <div className="space-y-6 lg:col-span-8">
-          {/* ① 10대 가상 주식 실시간 청산 히트맵 (Liquidation Heatmap) */}
+          {/* ① 10대 가상 주식 예시 청산 히트맵 (Liquidation Heatmap) */}
           <Card className="rounded-2xl border-zinc-800/80 bg-card/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
                   <Activity className="size-5 text-purple-400" />
-                  {selectedSymbol.name} 실시간 청산 히트맵 (Liquidation Heatmap)
+                  {selectedSymbol.name} 예시 청산 히트맵 (Liquidation Heatmap)
                 </CardTitle>
                 <Badge variant="outline" className="text-[10px] font-mono border-zinc-700">
                   클러스터 밀집도 분석
                 </Badge>
               </div>
               <CardDescription className="text-xs">
-                현재가({groupDigits(selectedSymbol.currentPrice)} WLD) 기준 레버리지 배율별 롱/숏 강제 청산 위험 가격대 분포입니다.
+                예시 가격({groupDigits(selectedSymbol.currentPrice)} WLD) 기준 레버리지 배율별 롱/숏 강제 청산 위험 가격대 분포입니다.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -438,26 +347,26 @@ export default function DerivativesPage() {
             </CardContent>
           </Card>
 
-          {/* ② 활성 포지션 콘솔 & 실시간 미실현 PnL 게이지 */}
+          {/* ② 활성 포지션 콘솔 & 예시 미실현 PnL 게이지 */}
           <Card className="rounded-2xl border-zinc-800/80 bg-card/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
                   <Layers className="size-5 text-purple-400" />
-                  보유 격리 포지션 ({positions.length})
+                  파생상품 보유 기록 · 조회 미지원
                 </CardTitle>
                 <Badge variant="outline" className="text-[10px] font-mono border-zinc-700">
-                  실시간 PnL 동기화
+                  원장 미연결
                 </Badge>
               </div>
               <CardDescription className="text-xs">
-                현재 오픈된 격리 마진 포지션 목록입니다. 시장가로 즉시 정산 종료하거나 자랑용 PnL 카드를 생성할 수 있습니다.
+                실제 보유 포지션 조회는 지원되지 않습니다. 예시 수익률 계산은 실제 거래·보유 기록이 아닙니다.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {positions.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-zinc-800 p-8 text-center text-xs text-muted-foreground">
-                  현재 보유 중인 오픈 포지션이 없습니다. 우측 주문 콘솔에서 롱/숏 포지션을 개설해보세요.
+                  실제 보유 포지션 조회는 지원되지 않습니다. 주문 실행 및 정산 기능도 비활성화되어 있습니다.
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -573,7 +482,7 @@ export default function DerivativesPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
                 <Sliders className="size-5 text-purple-400" />
-                선물 주문 콘솔
+                선물 주문 콘솔 · 시뮬레이션
               </CardTitle>
               <CardDescription className="text-xs">
                 격리 마진(Isolated) 모드로 안전하게 1x~10x 레버리지 주문을 실행합니다.
@@ -646,7 +555,7 @@ export default function DerivativesPage() {
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-semibold text-muted-foreground">담보 증거금 (Margin)</span>
                   <span className="text-[11px] text-muted-foreground">
-                    잔고: {groupDigits(userWldBalance)} WLD
+                    실제 잔고: 조회 미지원
                   </span>
                 </div>
                 <div className="relative">
@@ -666,7 +575,8 @@ export default function DerivativesPage() {
                     <button
                       key={pct}
                       type="button"
-                      onClick={() => setMarginInput(Math.floor((userWldBalance * pct) / 100).toString())}
+                      disabled
+                      title="실제 잔고를 확인할 수 없어 비율 입력을 사용할 수 없습니다"
                       className="rounded-lg border border-zinc-800 bg-background/40 py-1 text-[10px] font-mono font-bold text-muted-foreground hover:bg-muted hover:text-foreground"
                     >
                       {pct}%
@@ -746,7 +656,7 @@ export default function DerivativesPage() {
                     : 'bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-600/20'
                 }`}
               >
-                {selectedSymbol.name} {leverage}x {side === 'LONG' ? '롱(매수)' : '숏(매도)'} 진입
+                {selectedSymbol.name} {leverage}x {side === 'LONG' ? '롱(매수)' : '숏(매도)'} 시뮬레이션 확인
               </Button>
             </CardContent>
           </Card>

@@ -16,7 +16,6 @@ import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
-import { requireUserId } from '../auth/session.context';
 
 export class OpenDerivativePositionDto {
   @ApiProperty({ description: '종목 티커', example: 'KRX_005930' })
@@ -128,37 +127,16 @@ export class DerivativesController {
   async listMarkets() {
     return {
       markets: this.mockMarkets,
+      simulated: true,
       timestamp: new Date().toISOString(),
     };
   }
 
   @ApiOperation({ summary: '내 활성 가상 선물 포지션 목록 조회' })
   @Get('positions')
-  async listMyPositions(@Req() req: RequestWithSession) {
-    const actorUserId = requireUserId(req);
-    // 모의 포지션 리스트 반환 (실시간 PnL 계산 포함)
-    const positions: DerivativePosition[] = [
-      {
-        id: 'pos-deriv-001',
-        userId: actorUserId,
-        ticker: 'KRX_005930',
-        side: 'LONG',
-        entryPrice: 76000,
-        markPrice: 78500,
-        leverage: 5,
-        collateralWld: 500000,
-        positionSizeWld: 2500000,
-        liquidationPrice: 62000,
-        unrealizedPnlWld: 82236,
-        roiPercent: 16.45,
-        createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-      },
-    ];
-    return {
-      positions,
-      totalCollateralWld: 500000,
-      totalUnrealizedPnlWld: 82236,
-    };
+  async listMyPositions(@Req() _req: RequestWithSession) {
+    // No authoritative derivatives ledger exists. Never bind demo rows to a real member.
+    throw new ServiceUnavailableException('파생상품 보유 기록 조회는 원장 검증 전까지 지원되지 않습니다.');
   }
 
   @ApiOperation({ summary: '가상 레버리지 선물 포지션 진입 (증거금 잠금)' })
@@ -182,24 +160,8 @@ export class DerivativesController {
 
   @ApiOperation({ summary: '과거 선물 청산/정산 이력 조회' })
   @Get('history')
-  async getTradeHistory(@Req() req: RequestWithSession) {
-    const actorUserId = requireUserId(req);
-    return {
-      history: [
-        {
-          id: 'hist-001',
-          userId: actorUserId,
-          ticker: 'INDEX_WLD100',
-          side: 'LONG',
-          leverage: 10,
-          entryPrice: 11800,
-          exitPrice: 12400,
-          collateralWld: 1000000,
-          realizedPnlWld: 508474,
-          roiPercent: 50.85,
-          closedAt: new Date(Date.now() - 86400000).toISOString(),
-        },
-      ],
-    };
+  async getTradeHistory(@Req() _req: RequestWithSession) {
+    // A synthetic settlement must not be represented as a member's trade history.
+    throw new ServiceUnavailableException('파생상품 정산 이력은 원장 검증 전까지 지원되지 않습니다.');
   }
 }
