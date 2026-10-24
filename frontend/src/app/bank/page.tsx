@@ -31,7 +31,7 @@ import {
 import { SavingsGoalProgressRing } from './savings-progress-ring';
 import { SavingPocketsCard } from './saving-pockets-card';
 import { BankLiquidityCard } from './bank-liquidity-card';
-import { CreditScoreCard, type CreditRatingData } from './credit-score-card';
+import { VerifiedCreditPolicyCard, type VerifiedCreditPolicy } from './verified-credit-policy-card';
 import { SavingsPotCard } from '@/components/savings-pot-card';
 import { TossBankHeroCard } from './toss-bank-hero-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -50,10 +50,10 @@ export default async function BankPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [standing, pockets, creditRating, memberIdentity] = await Promise.all([
+  const [standing, pockets, creditPolicy, memberIdentity] = await Promise.all([
     apiOrNull<BankStanding>('/api/v1/banking/standing'),
     apiOrNull<SavingPocket[]>('/api/v1/banking/pockets'),
-    apiOrNull<CreditRatingData>('/api/v1/banking/credit-rating'),
+    apiOrNull<VerifiedCreditPolicy>('/api/v1/banking/credit-policy'),
     apiOrNull<{ userId: string }>('/api/v1/wallet?recent=1'),
   ]);
 
@@ -213,13 +213,7 @@ export default async function BankPage() {
 
           {/* 개인 신용 평가 리포트 */}
           <div className="toss-card p-6">
-            <CreditScoreCard
-              initialRating={creditRating ?? undefined}
-              standingCreditLimit={creditLimit}
-              standingCreditGrade={standing.credit_grade}
-              standingLoanInterestBps={standing.loan_interest_bps}
-              standingLoanTermDays={standing.loan_term_days}
-            />
+            <VerifiedCreditPolicyCard policy={creditPolicy} />
           </div>
 
           {/* KTB 기획재정국채 발행 창구 */}

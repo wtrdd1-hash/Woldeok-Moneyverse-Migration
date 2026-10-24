@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -29,6 +30,7 @@ import {
   IdempotentDto,
 } from './bank.dto';
 import { BankInputError, BankRepository } from './bank.repository';
+import { BankPolicyUnavailableError } from './credit-policy';
 
 @ApiTags('banking')
 @Controller('banking')
@@ -46,6 +48,9 @@ export class BankController {
       return await work();
     } catch (error: unknown) {
       if (error instanceof BankInputError) throw new BadRequestException(error.message);
+      if (error instanceof BankPolicyUnavailableError) {
+        throw new ServiceUnavailableException('verified bank policy unavailable');
+      }
       if (isAuthorizationFailure(error)) throw new ForbiddenException('this is not yours');
       if (isExpectedCommandFailure(error)) {
         const msg = error instanceof Error && error.message ? error.message : conflictMessage;
@@ -61,6 +66,16 @@ export class BankController {
     return this.guarded(
       () => this.repository().getStanding(requireUserId(request)),
       'failed to load bank standing',
+    );
+  }
+
+  @Get('credit-policy')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Verified member-only game credit policy from bank standing' })
+  creditPolicy(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.repository().getCreditPolicy(requireUserId(request)),
+      'failed to load verified bank policy',
     );
   }
 

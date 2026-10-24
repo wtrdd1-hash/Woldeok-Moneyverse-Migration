@@ -171,3 +171,23 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('verified credit policy Android API parity', () => {
+  it('forwards only the signed-in cookie to the existing guarded banking endpoint and preserves private no-store', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const spy = vi.fn(async (_target: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(_target)).toContain('/api/v1/banking/credit-policy');
+      expect(new Headers(init?.headers).get('cookie')).toBe('session=member-only');
+      expect(init?.cache).toBe('no-store');
+      return new Response(JSON.stringify({ creditLimitWld: '90071992547409931234567', source: 'BANK_STANDING' }), {
+        status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', spy);
+    const response = await GET(request('/app-api/v1/banking/credit-policy', { cookie: 'session=member-only' }), context('banking', 'credit-policy'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect((await response.json()).creditLimitWld).toBe('90071992547409931234567');
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+});

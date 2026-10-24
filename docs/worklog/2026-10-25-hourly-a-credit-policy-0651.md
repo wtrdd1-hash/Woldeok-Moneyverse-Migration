@@ -14,3 +14,11 @@
 
 ## FINISHED
 - Pending final evidence, CI and rollback report.
+
+### Mid-run checkpoint (06:56 KST)
+- Main/English/Korean/integrated plan re-fetched; `origin/main` still `c9a868b1e622341e2daa8b936ddf0988eda9988e`. Other Draft PRs remain unmerged.
+- TDD RED: backend test failed for missing `credit-policy` module; frontend test failed for missing component.
+- GREEN: backend credit policy 5/5 PASS; frontend card 3/3 PASS; Android app-api gateway 11/11 PASS.
+- Fixed local test harness mismatch (`NODE_ENV=test`) and replaced unavailable Chai matcher with standard `getAttribute`; these were test harness issues, not runtime product changes.
+- Full workspace typecheck PASS. No DB migrations, WLD writes, production services or other branches changed.
+- Awaiting full build/lint/tests, generated Android contract, real isolated PostgreSQL ACL and official exact-SHA Test gate.

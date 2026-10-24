@@ -24,14 +24,14 @@
 - Android proxy preserves private no-store, session and noindex; no cache leakage.
 
 ### Task 1 — Backend contract (RED/GREEN)
-- [ ] Add failing repository tests for strict projection, no direct table SQL, huge amounts, active loan and invalid data.
-- [ ] Add `BankRepository.getCreditPolicy` from `getStanding`; rerun tests.
-- [ ] Add failing controller actor/guard test and authenticated GET; rerun.
+- [x] Add failing repository tests for strict projection, no direct table SQL, huge amounts, active loan and invalid data.
+- [x] Add `BankRepository.getCreditPolicy` from `getStanding`; rerun tests.
+- [x] Add failing controller actor/guard test and authenticated GET; rerun.
 
 ### Task 2 — Web/Android (RED/GREEN)
-- [ ] Add failing tests for private verified policy card and no fabricated score.
-- [ ] Add `VerifiedCreditPolicyCard`, authenticated noindex `/bank/credit-policy` and bank dashboard entry; rerun.
-- [ ] Add failing Android gateway regression and rerun with existing allowlist.
+- [x] Add failing tests for private verified policy card and no fabricated score.
+- [x] Add `VerifiedCreditPolicyCard`, authenticated noindex `/bank/credit-policy` and bank dashboard entry; rerun.
+- [x] Add failing Android gateway regression and rerun with existing allowlist.
 
 ### Task 3 — Evidence and release
 - [ ] Run focused and full tests, typecheck, lint, builds, contract, security, real isolated PostgreSQL ACL and authenticated Test exact-SHA E2E.

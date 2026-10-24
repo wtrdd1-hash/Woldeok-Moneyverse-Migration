@@ -1,5 +1,6 @@
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import { projectCreditPolicy, type VerifiedCreditPolicy } from './credit-policy';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -34,6 +35,11 @@ export class BankRepository {
       [actor],
     );
     return row?.standing ?? null;
+  }
+
+  async getCreditPolicy(actor: unknown): Promise<VerifiedCreditPolicy> {
+    assertUuid(actor, 'actor');
+    return projectCreditPolicy(await this.getStanding(actor));
   }
 
   /** Read-only, actor-scoped game credit signals; no synthetic activity or repayments. */
