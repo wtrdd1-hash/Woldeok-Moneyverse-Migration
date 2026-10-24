@@ -16,6 +16,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { IsIn, Matches } from 'class-validator';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -34,7 +35,10 @@ import { WalletRecipientError, WalletService } from './wallet.service';
  * changes which failure a caller sees, and can let a write through unchecked.
  */
 export class CitizenBudgetVoteDto {
+  @Matches(/^[0-9]{4}-Q[1-4]$/)
   quarter!: string;
+
+  @IsIn(['WELFARE', 'INFRASTRUCTURE', 'CITIZEN_DIVIDEND', 'CURRENCY_STABILIZATION'])
   choice!: string;
 }
 

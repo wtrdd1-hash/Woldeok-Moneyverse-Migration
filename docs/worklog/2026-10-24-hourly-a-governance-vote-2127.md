@@ -23,3 +23,10 @@
 - `pnpm typecheck` PASS and targeted ESLint PASS. A first UI test run used production NODE_ENV and failed on React.act; reran with NODE_ENV=test. A UI assertion was corrected to await React transition completion; new tests pass.
 - Isolated real PostgreSQL: `moneyverse_v991` and `moneyverse_audit_v855` both contain `treasury_cast_citizen_budget_vote(uuid,text,text)`, grant EXECUTE to app and deny direct INSERT/UPDATE on votes. Read-only transactions rolled back. `woldeok_moneyverse_ci` lacks the vote function/table, so it cannot be the financial Test acceptance environment.
 - No database writes, schema edits, ledger mutation, Test/Production promotion or branch deletion.
+
+### Additional P0 validation finding (21:43 KST)
+- The vote DTO had no class-validator decorators; real Nest global whitelist rejected even a valid `{quarter,choice}` body with HTTP 400. New RED DTO test reproduced `property quarter/choice should not exist`. Decorated both properties and added strict accepted values; 4 DTO tests GREEN, 40 focused backend tests PASS.
+- Full `pnpm test` observed backend 1,328 PASS/398 SKIPPED, database 15 PASS/3 SKIPPED, contract 38 PASS, frontend 1,403 PASS/5 FAIL (3 SEO, 1 locale, 1 login touch target). Existing five frontend tests also failed on previous development A SHA; no test gate waived.
+- Full lint PASS (0 errors, 1,137 warnings), app-api contract PASS (179 endpoints), `pnpm typecheck` PASS. Dependency audit FAIL (26 vulnerabilities: 2 critical/10 high); bot audit FAIL (6: 1 critical/5 high).
+- Default Turbopack build FAIL due isolated worktree `frontend/node_modules` symlink pointing outside project root; contract/backend builds passed. Webpack fallback attempted but does not substitute default build gate.
+- Isolated DB `moneyverse_v991` has existing vote function with app EXECUTE and no direct INSERT/UPDATE; however app role retains direct SELECT on all `treasury_citizen_budget_votes`, an existing least-privilege/privacy blocker. No SQL writes performed.
