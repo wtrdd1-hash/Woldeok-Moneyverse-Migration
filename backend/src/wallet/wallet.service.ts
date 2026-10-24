@@ -145,6 +145,18 @@ export interface WalletOverview {
   readonly recentTransactions: WalletTransactionView[];
 }
 
+export interface BankMovePreview {
+  readonly direction: 'deposit' | 'withdraw';
+  readonly amount: WldAmount;
+  readonly canMove: boolean;
+  readonly cashBefore: WldAmount;
+  readonly bankBefore: WldAmount;
+  readonly cashAfter: WldAmount | null;
+  readonly bankAfter: WldAmount | null;
+  readonly maxMoveAmount: WldAmount;
+  readonly asOf: string;
+}
+
 export interface WalletTransferReceipt {
   readonly transactionId: string;
 }
@@ -481,6 +493,45 @@ export class WalletService {
       workNextEligibleAt: availability.work_next_eligible_at
         ? timestamp(availability.work_next_eligible_at, 'work next eligible time')
         : null,
+    };
+  }
+
+  async bankMovePreview(
+    authenticatedUserId: string,
+    { direction, amount }: { direction?: unknown; amount?: unknown },
+  ): Promise<BankMovePreview> {
+    const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
+    if (direction !== 'deposit' && direction !== 'withdraw') {
+      throw new WalletInputError('direction must be deposit or withdraw');
+    }
+    const parsedAmount = requirePositiveWld(amount, 'amount');
+    // The deployed account_balances column is bigint, so a larger input
+    // cannot be represented by the authoritative bank movement function.
+    if (BigInt(parsedAmount) > 9223372036854775807n) {
+      throw new WalletInputError('amount exceeds the supported WLD range');
+    }
+    const balances = normalizeBalances(await this.repository.balancesForUser(actorUserId));
+    const cash = BigInt(balances.cash.availableAmount);
+    const bank = BigInt(balances.bank.availableAmount);
+    const moved = BigInt(parsedAmount);
+    const available = direction === 'deposit' ? cash : bank;
+    const cashAfter = direction === 'deposit' ? cash - moved : cash + moved;
+    const bankAfter = direction === 'deposit' ? bank + moved : bank - moved;
+    const canMove = moved <= available && cashAfter >= 0n && bankAfter >= 0n
+      && cashAfter <= 9223372036854775807n && bankAfter <= 9223372036854775807n;
+    return {
+      direction,
+      amount: wldAmount(parsedAmount, 'preview amount'),
+      canMove,
+      cashBefore: balances.cash.availableAmount,
+      bankBefore: balances.bank.availableAmount,
+      cashAfter: canMove ? wldAmount(cashAfter.toString(), 'projected cash') : null,
+      bankAfter: canMove ? wldAmount(bankAfter.toString(), 'projected bank') : null,
+      maxMoveAmount: wldAmount(available.toString(), 'available to move'),
+      asOf: new Date(Math.max(
+        Date.parse(balances.cash.updatedAt),
+        Date.parse(balances.bank.updatedAt),
+      )).toISOString(),
     };
   }
 

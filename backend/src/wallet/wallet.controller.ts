@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -127,6 +128,20 @@ export class WalletController {
     );
   }
 
+
+  @Get('bank/movements/preview')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Read-only owner-scoped WLD bank movement estimate' })
+  bankMovePreview(
+    @Req() request: RequestWithSession,
+    @Query('direction') direction?: string,
+    @Query('amount') amount?: string,
+  ) {
+    return this.guarded(
+      () => this.service().bankMovePreview(requireUserId(request), { direction, amount }),
+      'bank movement preview is unavailable',
+    );
+  }
 
   @Post('bank/movements')
   @ApiOperation({ summary: 'Move balance between cash and bank' })

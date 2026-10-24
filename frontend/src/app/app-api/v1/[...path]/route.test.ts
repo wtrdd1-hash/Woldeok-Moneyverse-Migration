@@ -121,6 +121,29 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
+  it('proxies authenticated bank movement previews with private no-store and exact WLD strings', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const amount = '9007199254740993000';
+    const fetchSpy = vi.fn(async (target: URL | RequestInfo, init?: RequestInit) => {
+      expect(String(target)).toContain('/api/v1/bank/movements/preview?direction=deposit&amount=' + amount);
+      expect(new Headers(init?.headers).get('cookie')).toBe('session=private');
+      return new Response(JSON.stringify({
+        direction: 'deposit', amount, canMove: true, cashBefore: amount, bankBefore: '0',
+        cashAfter: '0', bankAfter: amount, maxMoveAmount: amount,
+        asOf: '2026-10-24T11:00:00.000Z',
+      }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' } });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/bank/movements/preview?direction=deposit&amount=' + amount, { cookie: 'session=private' }),
+      context('bank', 'movements', 'preview'),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect((await response.json()).bankAfter).toBe(amount);
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network down'); }));

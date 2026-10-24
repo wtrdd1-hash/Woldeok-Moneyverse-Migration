@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { api } from '@/lib/api';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
 
@@ -34,6 +35,47 @@ export async function transfer(_previous: ActionState, formData: FormData): Prom
     return { status: 'ok', message: '송금을 원장에 기록했어요.' };
   } catch (error) {
     return failure(error, '지금은 송금을 처리할 수 없어요.');
+  }
+}
+
+export interface BankMovePreviewResult {
+  readonly direction: 'deposit' | 'withdraw';
+  readonly amount: string;
+  readonly canMove: boolean;
+  readonly cashBefore: string;
+  readonly bankBefore: string;
+  readonly cashAfter: string | null;
+  readonly bankAfter: string | null;
+  readonly maxMoveAmount: string;
+  readonly asOf: string;
+}
+
+export interface BankMovePreviewState extends ActionState {
+  readonly preview?: BankMovePreviewResult;
+}
+
+export async function previewBankMove(
+  _previous: BankMovePreviewState,
+  formData: FormData,
+): Promise<BankMovePreviewState> {
+  const direction = String(formData.get('direction') ?? '');
+  const amount = wholeAmount(formData.get('amount'));
+  if (direction !== 'deposit' && direction !== 'withdraw') {
+    return { status: 'error', message: '입금 또는 출금을 선택해 주세요.' };
+  }
+  if (amount === null) return { status: 'error', message: '1 WLD 이상 정수를 입력해 주세요.' };
+  try {
+    const preview = await api<BankMovePreviewResult>(
+      `/api/v1/bank/movements/preview?direction=${direction}&amount=${encodeURIComponent(amount)}`,
+    );
+    return {
+      status: 'ok',
+      tone: 'neutral',
+      message: preview.canMove ? '현재 잔액 기준 예상 결과입니다. 실제 이동은 아직 실행되지 않았습니다.' : '잔액이 부족해 이동할 수 없습니다.',
+      preview,
+    };
+  } catch (error) {
+    return failure(error, '현재 잔액을 확인할 수 없어 예상 결과를 표시하지 않습니다.');
   }
 }
 
