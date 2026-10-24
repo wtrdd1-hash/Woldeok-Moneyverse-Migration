@@ -4,12 +4,9 @@ import {
   Bell,
   ChevronRight,
   Edit3,
-  ExternalLink,
   KeyRound,
   Lock,
-  Mail,
   Plus,
-  QrCode,
   Shield,
   ShieldAlert,
   ShieldCheck,
@@ -17,7 +14,6 @@ import {
   Sparkles,
   User,
   UserCheck,
-  UserX,
 } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { RefreshOnReturn } from '@/components/refresh-on-return';
@@ -25,7 +21,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { ProfileAvatar } from '@/app/profile/profile-avatar';
 import { jobLabel, titleLabel } from '@/app/profile/profile';
@@ -34,6 +29,7 @@ import { formatDay } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { DeleteAccountForm, LinkButton, ReauthButton, UnlinkButton } from './account-forms';
 import { canUnlinkOAuthIdentity, isLinkableOAuthProvider } from './identity-provider';
+import { resolveIdentityEvidence, type AccountIdentity } from './account-security-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,13 +37,6 @@ export const metadata: Metadata = {
   title: '내 계정 센터 - 월덕 머니버스',
   robots: { index: false, follow: false },
 };
-
-interface Identity {
-  readonly identityId: string;
-  readonly provider: string;
-  readonly displayName: string;
-  readonly linkedAt: string;
-}
 
 interface OwnProfileResponse {
   readonly displayName?: string | null;
@@ -97,14 +86,17 @@ export default async function AccountPage({
   const { linked, reauth } = await searchParams;
 
   const [identityData, providerData, profileData] = await Promise.all([
-    apiOrNull<{ identities: Identity[] }>('/api/v1/account/identities'),
+    apiOrNull<{ identities: AccountIdentity[] }>('/api/v1/account/identities'),
     apiOrNull<{ providers: { id: string; enabled: boolean }[] }>('/api/v1/auth/providers'),
     apiOrNull<OwnProfileResponse>('/api/v1/profile'),
   ]);
 
-  const identities = identityData?.identities ?? [];
+  const identityEvidence = resolveIdentityEvidence(identityData);
+  const identities = identityEvidence.identities;
   const linkedProviders = new Set(identities.map((identity) => identity.provider));
-  const available = (providerData?.providers ?? []).filter(isLinkableOAuthProvider);
+  const available = identityEvidence.status === 'unavailable'
+    ? []
+    : (providerData?.providers ?? []).filter(isLinkableOAuthProvider);
   const oauthIdentity = identities.find((identity) => identity.provider !== 'local_email');
   const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
 
@@ -125,14 +117,6 @@ export default async function AccountPage({
     (userEmail ? userEmail.split('@')[0] : null) ||
     '월덕 회원';
 
-  // 계정 보안 종합 점수 (100점 만점 기준)
-  const isSocialLinked = identities.some((i) => i.provider !== 'local_email');
-  const hasMultipleIdentities = identities.length >= 2;
-  const securityScore = Math.min(
-    100,
-    (isSocialLinked ? 35 : 20) + (hasMultipleIdentities ? 35 : 20) + 30,
-  );
-
   return (
     <div data-page="account" className="mx-auto w-full max-w-6xl space-y-6 pb-20 pt-2 sm:space-y-8 sm:pt-4">
       <RefreshOnReturn when={reauth === 'done' || linked !== undefined} />
@@ -142,8 +126,8 @@ export default async function AccountPage({
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-              <ShieldCheck className="size-3.5 shrink-0" />
-              보안 인증 계정
+              <User className="size-3.5 shrink-0" />
+              로그인된 회원
             </span>
             {userTitle && (
               <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-500">
@@ -180,12 +164,12 @@ export default async function AccountPage({
         <Alert className="border-primary/30 bg-primary/5 rounded-2xl">
           <ShieldCheck className="size-4 text-primary shrink-0" />
           <AlertDescription className="text-xs font-medium">
-            본인 확인이 완료되었습니다. 15분간 중요한 계정 설정을 변경할 수 있습니다.
+            본인 확인 화면에서 돌아왔습니다. 중요한 변경 시 서버에서 인증 상태를 다시 검증합니다.
           </AlertDescription>
         </Alert>
       )}
 
-      {linked && PROVIDER_NAME[linked] && (
+      {linked && PROVIDER_NAME[linked] && linkedProviders.has(linked) && (
         <Alert className="border-emerald-500/30 bg-emerald-500/5 rounded-2xl">
           <UserCheck className="size-4 text-emerald-500 shrink-0" />
           <AlertDescription className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -208,12 +192,6 @@ export default async function AccountPage({
                   imageUrl={rawImageUrl ?? null}
                   className="size-20 shadow-md ring-2 ring-border/80"
                 />
-                <div
-                  title="보안 인증 완료"
-                  className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md ring-2 ring-background"
-                >
-                  <ShieldCheck className="size-3.5 shrink-0" />
-                </div>
               </div>
 
               {/* Real Member Display Name */}
@@ -227,14 +205,14 @@ export default async function AccountPage({
                   </p>
                 )}
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {userJobType ? `${jobLabel(userJobType)} (Lv.${userJobLevel})` : '인증된 커뮤니티 계정'}
+                  {userJobType ? `${jobLabel(userJobType)} (Lv.${userJobLevel})` : '커뮤니티 회원'}
                 </p>
               </div>
 
               {/* Badges & Connected Status */}
               <div className="mt-4 flex w-full flex-wrap items-center justify-center gap-2">
                 <Badge variant="secondary" className="rounded-lg text-[11px] font-semibold">
-                  연결 수단 {identities.length}개
+                  {identityEvidence.methodCount === null ? '연결 수단 확인 불가' : `연결 수단 ${identityEvidence.methodCount}개`}
                 </Badge>
                 {joinedDate && (
                   <Badge variant="outline" className="rounded-lg text-[11px] font-medium border-border/80 text-muted-foreground">
@@ -243,18 +221,28 @@ export default async function AccountPage({
                 )}
               </div>
 
-              {/* Account Security Progress Score Widget */}
-              <div className="mt-5 w-full rounded-xl border border-border/60 bg-muted/20 p-3 text-left">
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <span className="text-muted-foreground">계정 보안 완성도</span>
-                  <span className="font-mono tabular-nums font-bold text-primary">{securityScore}%</span>
+              {/* The API reports linked methods, not a verified protection grade. */}
+              <div role="status" aria-label="로그인 수단 확인 결과" className="mt-5 w-full rounded-xl border border-border/60 bg-muted/20 p-3 text-left">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
+                  <span className="text-muted-foreground">로그인 수단 확인</span>
+                  <span className="font-semibold text-foreground">
+                    {identityEvidence.status === 'unavailable'
+                      ? '확인 불가'
+                      : identityEvidence.status === 'empty'
+                        ? '연결 정보 없음'
+                        : `${identityEvidence.methodCount}개 확인`}
+                  </span>
                 </div>
-                <Progress value={securityScore} className="mt-2 h-1.5 bg-muted" />
-                <p className="mt-1.5 text-[10px] text-muted-foreground">
-                  {securityScore >= 90
-                    ? '🛡️ 최고 등급 보안 보호 상태입니다.'
-                    : '💡 추가 로그인 수단을 연동하면 계정 보호가 강화됩니다.'}
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  {identityEvidence.status === 'unavailable'
+                    ? '로그인 수단 정보를 불러오지 못했습니다. 현재 보호 상태를 판단할 수 없습니다.'
+                    : identityEvidence.status === 'empty'
+                      ? '서버에서 연결된 로그인 수단을 확인하지 못했습니다. 다시 확인해 주세요.'
+                      : '서버에 등록된 로그인 수단 수입니다. 계정의 보안 등급이나 복구 가능성을 의미하지 않습니다.'}
                 </p>
+                <Link href="/account/security" className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-4 hover:underline focus-visible:underline">
+                  기기·세션 및 보안 설정 확인
+                </Link>
               </div>
             </div>
 
@@ -328,7 +316,7 @@ export default async function AccountPage({
               <span>안전한 계정 관리 팁</span>
             </div>
             <p className="text-[11px]">
-              소셜 로그인 수단을 2개 이상 등록해두면 계정 분실 시 언제든 안전하게 복구할 수 있습니다.
+              추가 로그인 수단은 로그인 선택지를 넓히지만 계정 복구나 보호 수준을 보장하지 않습니다. 실제 로그인 기기와 본인 확인 상태는 보안 설정에서 확인하세요.
             </p>
           </div>
         </aside>
@@ -346,12 +334,12 @@ export default async function AccountPage({
                   </CardDescription>
                 </div>
                 <Badge variant="secondary" className="text-xs font-bold px-2.5 py-0.5 rounded-lg shrink-0">
-                  {identities.length}개 활성
+                  {identityEvidence.methodCount === null ? '확인 불가' : `${identityEvidence.methodCount}개 확인`}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
-              {identityData === null ? (
+              {identityEvidence.status === 'unavailable' ? (
                 <EmptyState
                   title="연결된 로그인 수단을 불러올 수 없어요."
                   description="페이지를 새로고침하거나 잠시 후 다시 시도해 주세요."

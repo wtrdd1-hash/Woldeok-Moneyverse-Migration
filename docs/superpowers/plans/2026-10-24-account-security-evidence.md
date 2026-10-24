@@ -25,15 +25,15 @@
 - Non-identity profile and existing member-only actions must remain intact.
 
 ### Task 1 — Regression tests
-- [ ] Add unit tests for unavailable, empty, duplicates, valid providers and invalid response.
-- [ ] Replace obsolete assertion that requires a fabricated security percentage.
-- [ ] Observe RED before implementation.
+- [x] Add unit tests for unavailable, empty, duplicates, valid providers and invalid response.
+- [x] Replace obsolete assertion that requires a fabricated security percentage.
+- [x] Observe RED before implementation.
 
 ### Task 2 — Product implementation
-- [ ] Implement minimal pure login-method evidence state.
-- [ ] Replace false verification badges, score/progress and recovery guarantee with honest server-backed status.
-- [ ] Preserve responsive account card, links, member auth, SEO.
-- [ ] Run GREEN and targeted lint.
+- [x] Implement minimal pure login-method evidence state.
+- [x] Replace false verification badges, score/progress and recovery guarantee with honest server-backed status.
+- [x] Preserve responsive account card, links, member auth, SEO.
+- [x] Run GREEN and targeted lint.
 
 ### Task 3 — Validation and release hold
 - [ ] Verify current main and planning again; rebase if advanced.
