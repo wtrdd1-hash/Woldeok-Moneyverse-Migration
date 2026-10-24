@@ -1,0 +1,234 @@
+{
+  "source_files": 888,
+  "routes": 168,
+  "locale_hook_files": 67,
+  "dictionaries": {
+    "lib/translations.ts": {
+      "count": 68,
+      "missing": [],
+      "missing_total": 0,
+      "mixed": [],
+      "mixed_total": 0,
+      "dups": [],
+      "ko_en_hangul_copy_total": 0
+    },
+    "lib/i18n-dictionary.ts": {
+      "count": 257,
+      "missing": [],
+      "missing_total": 0,
+      "mixed": [],
+      "mixed_total": 0,
+      "dups": [],
+      "ko_en_hangul_copy_total": 0
+    }
+  },
+  "divergent_shared_keys": 17,
+  "divergent_sample": [
+    {
+      "key": "nav.finance",
+      "languages": [
+        "zh"
+      ],
+      "first": {
+        "ko": "금융·투자",
+        "en": "Finance & Invest",
+        "ja": "金融・投資",
+        "zh": "金融与投资"
+      },
+      "second": {
+        "ko": "금융·투자",
+        "en": "Finance & Invest",
+        "ja": "金融・投資",
+        "zh": "金融·投资"
+      }
+    },
+    {
+      "key": "nav.economy",
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "first": {
+        "ko": "경제·활동",
+        "en": "Economy & Work",
+        "ja": "経済・活動",
+        "zh": "经济与活动"
+      },
+      "second": {
+        "ko": "경제·활동",
+        "en": "Economy & Activity",
+        "ja": "経済・活動",
+        "zh": "经济·活动"
+      }
+    },
+    {
+      "key": "nav.play",
+      "languages": [
+        "zh"
+      ],
+      "first": {
+        "ko": "플레이·시즌",
+        "en": "Play & Season",
+        "ja": "プレイ・シーズン",
+        "zh": "娱乐与赛季"
+      },
+      "second": {
+        "ko": "플레이·시즌",
+        "en": "Play & Season",
+        "ja": "プレイ・シーズン",
+        "zh": "游玩·赛季"
+      }
+    },
+    {
+      "key": "nav.admin",
+      "languages": [
+        "ko",
+        "en",
+        "ja",
+        "zh"
+      ],
+      "first": {
+        "ko": "운영 콘솔",
+        "en": "Admin Console",
+        "ja": "管理コンソール",
+        "zh": "管理控制台"
+      },
+      "second": {
+        "ko": "운영 관제 타워",
+        "en": "Operations Control Tower",
+        "ja": "運営管制タワー",
+        "zh": "运营控制塔"
+      }
+    },
+    {
+      "key": "nav.wallet",
+      "languages": [
+        "ko",
+        "en",
+        "ja",
+        "zh"
+      ],
+      "first": {
+        "ko": "내 지갑",
+        "en": "My Wallet",
+        "ja": "マイウォレット",
+        "zh": "我的钱包"
+      },
+      "second": {
+        "ko": "내 지갑 & 보유 자산",
+        "en": "Wallet & Assets",
+        "ja": "ウォレット＆資産",
+        "zh": "我的钱包与资产"
+      }
+    },
+    {
+      "key": "nav.security",
+      "languages": [
+        "ko",
+        "en",
+        "ja",
+        "zh"
+      ],
+      "first": {
+        "ko": "계정 보안",
+        "en": "Security",
+        "ja": "セキュリティ",
+        "zh": "账户安全"
+      },
+      "second": {
+        "ko": "보안 & 2단계 인증",
+        "en": "Security & 2FA",
+        "ja": "セキュリティ＆2段階認証",
+        "zh": "安全与双重认证"
+      }
+    }
+  ],
+  "jsx_korean_text_total": 6963,
+  "jsx_korean_props_total": 602,
+  "metadata_korean_literals": 177,
+  "short_localeLabel_total": 1,
+  "translated_text_two_language_total": 9,
+  "missing_t_key_total": 0,
+  "missing_t_key_examples": [],
+  "top": {
+    "jsx_text": {
+      "components/policy/privacy-document.tsx": 122,
+      "app/admin/treasury/treasury-view.tsx": 107,
+      "app/businesses/ventures/page.tsx": 83,
+      "app/guide/page.tsx": 77,
+      "app/admin/economy/monetary-bureau-card.tsx": 74,
+      "app/admin/analytics/analytics-client-view.tsx": 73,
+      "app/admin/economy/admin-control-center-v2.tsx": 70,
+      "app/admin/seo/gsc-analytics-card.tsx": 67,
+      "app/admin/components/admin-comprehensive-telemetry-matrix.tsx": 64,
+      "components/policy/terms-document.tsx": 64,
+      "app/fx/page.tsx": 63,
+      "app/admin/admin-forms.tsx": 61,
+      "app/features/features-view.tsx": 61,
+      "app/bonds/bonds-portal-client.tsx": 60,
+      "app/admin/fx/fx-control-tower.tsx": 59,
+      "app/kdic/page.tsx": 58,
+      "app/tools/goal-wealth-calculator/page.tsx": 56,
+      "app/tools/tax-calculator/page.tsx": 56
+    },
+    "jsx_props": {
+      "app/quests/page.tsx": 21,
+      "app/admin/economy/page.tsx": 16,
+      "app/admin/logs/audit-logs-filter-form.tsx": 13,
+      "app/calendar/page.tsx": 11,
+      "app/arcade/page.tsx": 10,
+      "app/board/board-forms.tsx": 10,
+      "app/admin/logs/integrity/page.tsx": 9,
+      "app/admin/users/user-directory.tsx": 9,
+      "app/shop/catalog/page.tsx": 9,
+      "app/admin/admin-forms.tsx": 8,
+      "app/admin/controls/page.tsx": 8,
+      "app/admin/logs/audit-logs-view.tsx": 8,
+      "app/admin/users/[id]/page.tsx": 8,
+      "app/progression/page.tsx": 8,
+      "app/admin/logs/activity/page.tsx": 7,
+      "app/admin/logs/activity/traffic-dashboard.tsx": 7,
+      "app/admin/logs/delivery/page.tsx": 7,
+      "components/policy/privacy-document.tsx": 7
+    },
+    "missing_keys": {},
+    "short_localeLabel": {
+      "app/newspaper/newspaper-view.tsx": 1
+    },
+    "transl_text_missing": {
+      "app/arcade/page.tsx": 9
+    }
+  },
+  "jsx_examples": [
+    {
+      "file": "app/account/account-forms.tsx",
+      "line": 44,
+      "text": "본인 확인하기 →"
+    },
+    {
+      "file": "app/account/account-forms.tsx",
+      "line": 58,
+      "text": "연결 해제 →"
+    },
+    {
+      "file": "app/account/account-forms.tsx",
+      "line": 82,
+      "text": "요청 종류"
+    },
+    {
+      "file": "app/account/account-forms.tsx",
+      "line": 99,
+      "text": "간단한 설명"
+    },
+    {
+      "file": "app/account/account-forms.tsx",
+      "line": 101,
+      "text": "정정 요청 시 필수"
+    },
+    {
+      "file": "app/account/account-forms.tsx",
+      "line": 114,
+      "text": "연락처, 비밀번호, 인증번호, 결제·계정 비밀값은 쓰지 마세요."
+    }
+  ]
+}
