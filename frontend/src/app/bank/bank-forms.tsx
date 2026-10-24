@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import Link from 'next/link';
 import {
   Coins,
   CreditCard,
@@ -302,6 +303,9 @@ export function CompoundInterestCard({
           </SubmitButton>
         </form>
         <ActionAlert state={state} />
+        <Button asChild variant="outline" className="w-full">
+          <Link href="/bank/interest-preview"><T korean="수령 전 잔액 미리보기" english="Preview balance before claiming" /></Link>
+        </Button>
 
         <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
           <p className="font-semibold text-foreground">가상 은행 복리 시스템 안내</p>
