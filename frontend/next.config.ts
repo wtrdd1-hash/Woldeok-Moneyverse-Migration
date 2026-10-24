@@ -165,7 +165,18 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    return [
+      { source: '/:path*', headers: security },
+      // The unfinished prediction market must not inherit the public site's
+      // permissive robots header or cache an unverified market state.
+      {
+        source: '/prediction',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
+    ];
   },
 
   async redirects() {
