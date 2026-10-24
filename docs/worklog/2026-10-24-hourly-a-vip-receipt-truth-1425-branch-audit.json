@@ -1,0 +1,290 @@
+{
+  "captured_at_kst": "2026-10-24T14:36:47.370797+09:00",
+  "main_sha": "49788d09494fed3e463651945b83386e87dd47bc",
+  "remote_branch_count_including_main": 35,
+  "open_pr_count": 32,
+  "fully_merged_count": 0,
+  "unmerged_unique_count": 34,
+  "merge_conflict_prs": [
+    {
+      "number": 1107,
+      "branch": "auto/hourly-a-repair-ci-classifier-20261024-1025"
+    }
+  ],
+  "branches": [
+    {
+      "branch": "audit/i18n-naturalness-v2026.10.24.1251",
+      "sha": "6a5a6aba476a974782549a7b913eaee55e490864",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": 1100,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "audit/i18n-recheck-v2026.10.24.1254",
+      "sha": "bfb9fbb90724360eebe1293237f1da0947b6c380",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": 1104,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "audit/qa-release-classifier-v1219-20261024-1022",
+      "sha": "b67f1fe627cb97a0232e3dc2b66f0290cfff3148",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": 1106,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "audit/qa-v1221-20261024-1115",
+      "sha": "59f457a44ef7059b0c13cb69ed4ad62df5c6feca",
+      "fully_merged": false,
+      "unique_commit_count": 2,
+      "open_pr": 1114,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "audit/qa-v1225-db-loopback-20261024-1320",
+      "sha": "b899bfec05adc261f342a71c49cc6c6f20f0dbbe",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": 1126,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-a-repair-ci-classifier-20261024-1025",
+      "sha": "d15085822d6ad66a97c6a11a9438e1bdd2bad808",
+      "fully_merged": false,
+      "unique_commit_count": 2,
+      "open_pr": 1107,
+      "mergeable": "CONFLICTING"
+    },
+    {
+      "branch": "auto/hourly-a-repair-http-deps-20261024-0940",
+      "sha": "7c3efcf30d015c52bddbd7510ba116ca11455c00",
+      "fully_merged": false,
+      "unique_commit_count": 2,
+      "open_pr": 1097,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-a-repair-seo-private-route-20261024-0950",
+      "sha": "0f14e0ea07eda9a55c9eadfade70e43b504dbd6f",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": 1099,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-a-vip-receipt-truth-20261024-1425",
+      "sha": "852822d9b3b4c06bc9ee96eedf647bfac9b1fdfa",
+      "fully_merged": false,
+      "unique_commit_count": 2,
+      "open_pr": 1133,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-a-wallet-filters-unified-20261024-0925",
+      "sha": "02d94655093c62c7c913c9108bc5e5b059e46e65",
+      "fully_merged": false,
+      "unique_commit_count": 6,
+      "open_pr": 1096,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-a-wallet-pocket-20261024-1325",
+      "sha": "e6b0f740b959c8d5a884f09cfb6cf14e39fa622f",
+      "fully_merged": false,
+      "unique_commit_count": 4,
+      "open_pr": 1127,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-a-wallet-receipt-recovery-20261024-1125",
+      "sha": "94972829fd0021a7a60741889cd9a0d72726cbba",
+      "fully_merged": false,
+      "unique_commit_count": 3,
+      "open_pr": 1115,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-a-wallet-recent-insights-20261024-1225",
+      "sha": "780266088fca8d4d586a94f98ff669d780261994",
+      "fully_merged": false,
+      "unique_commit_count": 2,
+      "open_pr": 1121,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-b-admin-ops-boundary-v501-20261024-1022",
+      "sha": "1323aca1f88c886bde062483b7a8e580d958fd87",
+      "fully_merged": false,
+      "unique_commit_count": 8,
+      "open_pr": 1109,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-b-ai-response-bounds-v504-20261024-1205",
+      "sha": "56fddeefa937254706a8ebc6955e1bc6f245007c",
+      "fully_merged": false,
+      "unique_commit_count": 3,
+      "open_pr": 1118,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-b-central-bank-admin-v505-20261024-1235",
+      "sha": "77c65e1e5e7537d8e4738630e1029dfe00e4f5b9",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": 1122,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-b-fx-admin-boundary-v506-20261024-1335",
+      "sha": "9f286fbeb48b576b21bacf1d3f44a45d11a36523",
+      "fully_merged": false,
+      "unique_commit_count": 3,
+      "open_pr": 1128,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-b-fx-wld-write-failclosed-v507-20261024-1435",
+      "sha": "d061bf92da1c4a12da631317904a69fdb126ff46",
+      "fully_merged": false,
+      "unique_commit_count": 2,
+      "open_pr": null,
+      "mergeable": null
+    },
+    {
+      "branch": "auto/hourly-b-legacy-backup-failclosed-v502-20261024-1055",
+      "sha": "1a5a57652fceaa0317baebd170db2bef4c9ff076",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": 1112,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-b-p2p-atomic-v503-20261024-1135",
+      "sha": "12fb64469a80acd73cc50d7d618118e695f842e6",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": 1117,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-b-release-gate-v499-20261024-0935",
+      "sha": "944695f2825022d0b15b3c5080924d0c65a58d89",
+      "fully_merged": false,
+      "unique_commit_count": 5,
+      "open_pr": 1098,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-b-soe-dividend-concurrency-v500-20261024-0955",
+      "sha": "f6bf392b60fe9a90b326dcc483f1d16e7b067dfe",
+      "fully_merged": false,
+      "unique_commit_count": 2,
+      "open_pr": 1105,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-c-account-security-evidence-v1000-20261024-1025",
+      "sha": "3f6f7ee3c54b664147dd99f364d353cc1539a46f",
+      "fully_merged": false,
+      "unique_commit_count": 3,
+      "open_pr": 1108,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-c-notification-preference-truth-v1004-20261024-1345",
+      "sha": "ced0d7b7efe394e7d65f05f1353a258eaef603bb",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": 1130,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-c-public-board-search-v1002-20261024-1145",
+      "sha": "4050a5d02070be319678172327307259ac6eda73",
+      "fully_merged": false,
+      "unique_commit_count": 3,
+      "open_pr": 1116,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-c-shop-holdings-safety-v1003-20261024-1245",
+      "sha": "512ac0abe89c62e502431a76f585ddf722df9a13",
+      "fully_merged": false,
+      "unique_commit_count": 4,
+      "open_pr": 1124,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-c-shop-purchase-receipt-v1001-20261024-1051",
+      "sha": "09dfdde406c8c2b1a79569fb97f7ee6f71ef840a",
+      "fully_merged": false,
+      "unique_commit_count": 3,
+      "open_pr": 1110,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/hourly-c-support-thread-guard-v998-20261024-0945",
+      "sha": "996a60aa8fb741243bad9a19cc2d1abde9ecbedb",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": null,
+      "mergeable": null
+    },
+    {
+      "branch": "auto/hourly-c-verified-treasury-notices-v999-20261024-0955",
+      "sha": "1159c4906a5c3bcf42ef7b0d159640b76fb74fe2",
+      "fully_merged": false,
+      "unique_commit_count": 4,
+      "open_pr": 1101,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/planning-v1216-shop-wishlist-20261024-1205",
+      "sha": "207a0cef223eecbd0b5fe40804d90e89a8e73b71",
+      "fully_merged": false,
+      "unique_commit_count": 2,
+      "open_pr": 1120,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/planning-v1218-shop-wishlist-hardening-20261024-1305",
+      "sha": "e57205809d70cf112eb1c670be626efd6d57973e",
+      "fully_merged": false,
+      "unique_commit_count": 3,
+      "open_pr": 1125,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "auto/planning-v1220-work-task-favorites-20261024-1405",
+      "sha": "953595f3a1da67e8d884dc945260fad6b570b10b",
+      "fully_merged": false,
+      "unique_commit_count": 1,
+      "open_pr": 1132,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "planning/feature-addition-v1212-20261024-1005",
+      "sha": "ddd033723fc4195b10950463dad7af3e0e115dae",
+      "fully_merged": false,
+      "unique_commit_count": 2,
+      "open_pr": 1103,
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "branch": "planning/feature-improvement-v1214-20261024-1105",
+      "sha": "848d7d9de793c9efd01bd69cddcec06e4894459f",
+      "fully_merged": false,
+      "unique_commit_count": 3,
+      "open_pr": 1111,
+      "mergeable": "MERGEABLE"
+    }
+  ],
+  "deleted_branches": [],
+  "retention_reason": "Every non-main tip with commits absent from main is preserved; no branch is deleted without full merge/equivalence proof."
+}
