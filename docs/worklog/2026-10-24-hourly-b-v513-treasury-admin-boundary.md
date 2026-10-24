@@ -16,7 +16,7 @@
 
 ## FINISHED — LOCAL IMPLEMENTATION / RELEASE HOLD
 - Main rechecked mid/end: 49788d09494fed3e463651945b83386e87dd47bc (unchanged). Branch isolated; no changes to A/C/QA/Gemini worktrees or automations.
-- Files: \ (elevated console on all admin treasury requests; CSRF+recent reauth on 12 POST/1 PUT); \ (18 focused assertions, dynamic route inventory, positive and negative guard checks).
+- Files: `backend/src/admin/treasury/treasury.controller.ts` (elevated console on all admin treasury requests; CSRF+recent reauth on 12 POST/1 PUT); `backend/src/admin/treasury/treasury-admin-boundary.test.ts` (18 focused assertions, dynamic route inventory, positive and negative guard checks).
 - API contract: same routes and payloads; mutations now require open admin console, valid CSRF, recent reauth; missing/stale credentials return 401/403. Read-only routes require console but not repeated reauth. No schema/migration/ledger/production-data change.
 - TDD: RED 14 fail / 3 pass before implementation; GREEN 17/17; final focused 18/18 PASS.
 - Full lint PASS (0 errors, 1,137 warnings); typecheck PASS; build PASS; contract 38/38 PASS; database package 15 PASS / 3 skipped.
