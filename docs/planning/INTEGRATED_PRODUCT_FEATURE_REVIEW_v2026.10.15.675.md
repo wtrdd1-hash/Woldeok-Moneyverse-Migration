@@ -1,5 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-118 (v1244) — Verified Notification Inbox / Evidence-linked History [FEATURE ADDITION, DRAFT/HOLD]
+- Source: `/account/notifications/notification-tabs-bar.tsx` currently contains six static sample notices, including invented 20 WLD burn and 1,840 WLD interest; local read state is not persisted. Existing Nest notification owner list/read APIs and Next `/api/notifications` are not wired to this sample tab; backend claim-all is deliberately 409. No incident or real financial settlement inferred.
+- New owner-only verified category/unread inbox, evidence CTA, signed seek cursor, atomic read receipt and explicit unverified/source-outage states. Never show unverified WLD payout amounts; no reward claim, ledger or WLD mutation. Existing #999/#1004/#1015, C #1101/#1130, B #1117 remain separate dependencies. Feature OFF, no migration number before #1147.
+- P0 ENV1244-01 SEC1244-02 REL1244-03 NOTIF1244-04; P1 NOTIF1244-05 NOTIF1244-06 NOTIF1244-07 NOTIF1244-08 NOTIF1244-09 NOTIF1244-10. Full UX/CTA/API/DB/transaction/admin/privacy/SEO/Android/WCAG/KPI/test/rollout in English master. QA v1247 FAILED/HOLD; root 100%/28MiB free, shared 5433 DB, app DML, PUBLIC bank grants, migration266/280, security and exact-SHA Test/restore blockers. 0 newly approved external records, cumulative UNKNOWN/10,000 BLOCKED. Docs only.
+
 ## F675-06 detailed adoption — v2026.10.15.688
 
 - [Google Search Evidence & Canonical Action Center](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) is the next v675 adopted **detailed planning** feature. Reuses /admin/seo and v685; identifies top-10-only GSC data, missing date=0, GSC PT/freshness, crawler-indexed mislabel and legacy index submission success/Google Indexing API misclaims. Separates source/submission/Google indexed-version/performance into independently verifiable evidence, 16 Google/WCAG references and D0–D7 gated implementation. Not a live SEO audit or deployed feature.

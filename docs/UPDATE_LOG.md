@@ -1,3 +1,8 @@
+## 2026-10-25 v1244 — F675-118 verified member notification inbox (FEATURE ADDITION / DRAFT / HOLD)
+- GitHub handoff: Draft #1205 / engineering #1204; root-capacity escalation #1170. Docs-only candidate; no runtime test or release.
+- Previous Improvement v1242 / Current Addition v1244 / Next Improvement v1246 provisional; main `c9a868b1e622341e2daa8b936ddf0988eda9988e` start/mid, QA v1247 FAILED/HOLD. Source: six fake notification cards and local-only read state; real owner-scoped backend list/read API exists, but is not wired into account tab. No actual WLD payout evidence. Plan verified evidence timeline, safe source drilldown, atomic read receipts, server filters and Android parity; preserve C/B notification work.
+- P0 ENV1244-01 SEC1244-02 REL1244-03 NOTIF1244-04; P1 NOTIF1244-05 NOTIF1244-06 NOTIF1244-07 NOTIF1244-08 NOTIF1244-09 NOTIF1244-10. Engineering issue #1204. See integrated master EN/KO. Feature OFF; no runtime, DB, ledger, Test or Production changes. Root disk 100%/28MiB; QA/ACL/migration266/280/exact-SHA Test HOLD. External evidence newly approved 0, cumulative UNKNOWN/10,000 BLOCKED.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
