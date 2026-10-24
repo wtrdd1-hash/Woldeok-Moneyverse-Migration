@@ -138,6 +138,25 @@ describe('app API route compatibility', () => {
     expect((await response.json()).recentTransactions[0].netAmount).toBe(huge);
   });
 
+  it('forwards composed wallet filters and private session without validator cache headers', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const huge = '90071992547409931234567890123456789012';
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ recentTransactions: [{ netAmount: huge }] }), {
+      status: 200, headers: { 'content-type': 'application/json', etag: 'sensitive' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/wallet?recent=50&direction=out&category=bank&period=7d', {
+      cookie: 'session=opaque', 'if-none-match': 'sensitive',
+    }), context('wallet'));
+    const [target, init] = fetchSpy.mock.calls[0] as unknown as [URL, RequestInit];
+    expect(String(target)).toContain('/api/v1/wallet?recent=50&direction=out&category=bank&period=7d');
+    expect(new Headers(init.headers).get('cookie')).toBe('session=opaque');
+    expect(new Headers(init.headers).get('if-none-match')).toBeNull();
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('etag')).toBeNull();
+    expect((await response.json()).recentTransactions[0].netAmount).toBe(huge);
+  });
+
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network down'); }));
