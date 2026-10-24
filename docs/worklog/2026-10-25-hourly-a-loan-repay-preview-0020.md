@@ -20,3 +20,9 @@
 
 ## Finished
 - PENDING.
+
+## In-progress checkpoint 1 (00:26 KST)
+- TDD RED: backend repayment preview test could not import missing module (expected failure); frontend initially 3 FAIL due inherited NODE_ENV=production causing React.act unavailable. Re-ran with NODE_ENV=test, 17 PASS.
+- TDD GREEN: backend calculation/controller 18 PASS; frontend preview, Android gateway and route 28 PASS.
+- Implemented member-only loan repayment preview using existing owner-scoped bank_get_my_standing; bank repayment SQL caps overpayment with LEAST, mirrored exactly with BigInt; no monetary mutations or migration.
+- Backend/frontend typecheck PASS, changed-file lint PASS; latest main still c9a868b1e622341e2daa8b936ddf0988eda9988e. Full suite, build, security, isolated PostgreSQL and official Test remain pending.

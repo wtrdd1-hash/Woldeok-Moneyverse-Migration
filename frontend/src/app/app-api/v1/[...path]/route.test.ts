@@ -36,6 +36,22 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('forwards owner-only repayment preview query and private cache policy to Android', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(
+      JSON.stringify({ previewOnly: true, effectiveAmount: '100', canRepay: true }),
+      { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' } },
+    ));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/banking/repayment-preview?amount=100', { cookie: 'session=member' }),
+      context('banking', 'repayment-preview'),
+    );
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/banking/repayment-preview?amount=100');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ previewOnly: true, effectiveAmount: '100' });
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

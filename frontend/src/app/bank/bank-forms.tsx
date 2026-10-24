@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import Link from 'next/link';
 import {
   Coins,
   CreditCard,
@@ -455,6 +456,9 @@ export function SmartLoanCard({
                 <T korean="대출금 상환하기" english="Repay Loan" />
               </SubmitButton>
               <ActionAlert state={repayState} />
+              <Button asChild variant="outline" className="min-h-11 w-full">
+                <Link href="/bank/repayment-preview">상환 전 잔액·부채 미리보기</Link>
+              </Button>
             </form>
           </div>
         ) : (

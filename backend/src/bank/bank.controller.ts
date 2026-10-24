@@ -5,8 +5,10 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
+  Query,
   ParseUUIDPipe,
   Post,
   Req,
@@ -29,6 +31,7 @@ import {
   IdempotentDto,
 } from './bank.dto';
 import { BankInputError, BankRepository } from './bank.repository';
+import { previewLoanRepayment, RepaymentPreviewError } from './repayment-preview';
 
 @ApiTags('banking')
 @Controller('banking')
@@ -62,6 +65,29 @@ export class BankController {
       () => this.repository().getStanding(requireUserId(request)),
       'failed to load bank standing',
     );
+  }
+
+  @Get('repayment-preview')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Preview repayment for the signed-in member active virtual loan, without posting WLD' })
+  async repaymentPreview(
+    @Req() request: RequestWithSession,
+    @Query('amount') amount: string | undefined,
+  ) {
+    const standing = await this.guarded(
+      () => this.repository().getStanding(requireUserId(request)),
+      'failed to load bank standing',
+    );
+    try {
+      return previewLoanRepayment(standing, amount);
+    } catch (error) {
+      if (error instanceof RepaymentPreviewError) {
+        if (error.code === 'INVALID_AMOUNT') throw new BadRequestException('positive integer amount required');
+        if (error.code === 'NO_ACTIVE_LOAN') throw new ConflictException('no active loan for this member');
+        throw new ServiceUnavailableException('verified bank standing unavailable');
+      }
+      throw error;
+    }
   }
 
   @Post('deposit')
