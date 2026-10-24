@@ -121,6 +121,21 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
+  it('passes the owner-only bank borrow quote through Android app-api without caching', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_target: URL, _options: RequestInit) => new Response(JSON.stringify({ eligible: true, principalWld: '101', interestWld: '5', totalDueWld: '106', binding: false }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/banking/borrow-quote?amount=101', { cookie: 'session=example' }), context('banking', 'borrow-quote'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ eligible: true, principalWld: '101', totalDueWld: '106' });
+    const [target, options] = fetchSpy.mock.calls[0]!;
+    expect(String(target)).toContain('/api/v1/banking/borrow-quote?amount=101');
+    expect(options?.cache).toBe('no-store');
+  });
+
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network down'); }));
