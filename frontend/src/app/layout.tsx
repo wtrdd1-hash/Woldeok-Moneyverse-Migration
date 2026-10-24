@@ -25,7 +25,7 @@ import { jsonLd } from '@/lib/json-ld';
 import { AdProviderBootstrap } from '@/components/ad-provider-bootstrap';
 import { cookies } from 'next/headers';
 import { getServerLocale } from '@/lib/locale-server';
-import type { Locale } from '@/lib/locale';
+import { localeLabel, type Locale } from '@/lib/locale';
 import { CURRENCY_COOKIE, type Currency, isCurrency } from '@/lib/currency';
 import { canonicalUrl as _canonicalUrl, webApplicationJsonLd } from '@/lib/seo';
 // Keep the downloaded Bootstrap distribution quarantined in styles/vendor.
@@ -262,26 +262,26 @@ function getSiteStructuredData(locale: Locale) {
         mainEntity: [
           {
             '@type': 'Question',
-            name: '월덕 머니버스의 WLD는 실제 돈인가요?',
+            name: localeLabel(locale, '월덕 머니버스의 WLD는 실제 돈인가요?', 'Is WLD currency real money?', 'WLDは実際の通貨ですか？', 'WLD是真实货币吗？'),
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'WLD는 서비스 내에서 사용하는 가상 게임 재화이며 현실 화폐, 예금 또는 금융상품이 아닙니다. 보상이 실제로 지급된 경우에만 계정별 확인된 기록으로 안내합니다.',
+              text: localeLabel(locale, 'WLD는 서비스 내에서 사용하는 가상 게임 재화이며 현실 화폐, 예금 또는 금융상품이 아닙니다. 보상이 실제로 지급된 경우에만 계정별 확인된 기록으로 안내합니다.', 'WLD is a simulated in-game virtual currency, not fiat money, bank deposits, or real financial securities.', 'WLDはゲーム内シミュレーション通貨であり、現実の法定通貨、預金、または金融商品ではありません。', 'WLD是仅用于游戏内模拟的虚拟游戏道具，绝非真实现金、银行存款或金融投资产品。'),
             },
           },
           {
             '@type': 'Question',
-            name: '가상 주식 거래소는 실시간으로 운영되나요?',
+            name: localeLabel(locale, '가상 주식 거래소는 실시간으로 운영되나요?', 'Does the virtual stock exchange run in real-time?', '仮想株式取引所はリアルタイムで運営されていますか？', '虚拟股票交易所是实时运行的吗？'),
             acceptedAnswer: {
               '@type': 'Answer',
-              text: '네, 18개 상장사의 실시간 10단 호가창, TradingView급 인터랙티브 캔들 차트, MACD/RSI/볼린저 보조지표, 스탑로스 및 익절 자동 감시 주문을 수수료 없이 무료로 제공합니다.',
+              text: localeLabel(locale, '네, 18개 상장사의 실시간 10단 호가창, TradingView급 인터랙티브 캔들 차트, MACD/RSI/볼린저 보조지표, 스탑로스 및 익절 자동 감시 주문을 수수료 없이 무료로 제공합니다.', 'Yes, it provides 10-depth orderbooks for 18 companies, interactive candlestick charts, technical indicators, and automated stop-loss/take-profit orders.', 'はい、18大上場企業の10段階気配値板、インタラクティブなローソク足チャート、自動ストップロス注文をリアルタイムでシミュレートしています。', '是的，提供18家虚拟上标的实时10档深度盘口、K线交互图表与全自动止盈止损盯盘策略。'),
             },
           },
           {
             '@type': 'Question',
-            name: '어떤 금융 계산기 도구를 무료로 이용할 수 있나요?',
+            name: localeLabel(locale, '어떤 금융 계산기 도구를 무료로 이용할 수 있나요?', 'Which finance calculators can I use for free?', 'どの金融計算機を無料で利用できますか？', '可以免费使用哪些金融计算器？'),
             acceptedAnswer: {
               '@type': 'Answer',
-              text: '복리 예금·적금(CAGR/DCA), 대출이자 상환, 배당소득세, 청년도약계좌, ISA 비과세, 부동산 취득세 등 12종 실전 계산기를 즉시 무료로 이용할 수 있습니다.',
+              text: localeLabel(locale, '복리 예금·적금(CAGR/DCA), 대출이자 상환, 배당소득세, 청년도약계좌, ISA 비과세, 부동산 취득세 등 12종 실전 계산기를 즉시 무료로 이용할 수 있습니다.', 'You can freely use 12 financial calculators including compound interest, loan amortization, dividend tax, retirement planning, and crypto yields.', '複利預金・積立、ローン返済利息、配当所得税、退職資産シミュレーターなど12種類の計算ツールを無料ですぐにご利用いただけます。', '可免费即刻使用复利储蓄、贷款分期偿还、股息所得税、退休养老规划等12款实用金融测算工具。'),
             },
           },
         ],
@@ -345,7 +345,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-0 focus:z-[100] focus:rounded-b-lg focus:bg-forest focus:px-4 focus:py-3 focus:text-white"
         >
-          본문으로 건너뛰기
+          {localeLabel(locale, '본문으로 건너뛰기', 'Skip to main content', '本文へスキップ', '跳至正文')}
         </a>
         <LocaleProvider initialLocale={locale}>
           <CurrencyProvider initialCurrency={initialCurrency}>

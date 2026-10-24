@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
 import { compareAmounts, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import {
@@ -60,8 +61,20 @@ export default async function BankPage() {
     return (
       <div data-page="bank" className="min-h-screen pb-24 space-y-6">
         <EmptyState
-          title={isEn ? 'Cannot load banking services right now.' : '지금은 은행 서비스를 불러올 수 없어요.'}
-          description={isEn ? 'Please try again in a few moments.' : '잠시 후 다시 접속해 주세요.'}
+          title={localeLabel(
+            locale,
+            '지금은 은행 서비스를 불러올 수 없어요.',
+            'Cannot load banking services right now.',
+            '現在、銀行サービスを読み込めません。',
+            '暂时无法加载银行服务。',
+          )}
+          description={localeLabel(
+            locale,
+            '잠시 후 다시 접속해 주세요.',
+            'Please try again in a few moments.',
+            'しばらくしてからもう一度お試しください。',
+            '请稍后重试。',
+          )}
         />
       </div>
     );
@@ -99,13 +112,17 @@ export default async function BankPage() {
         <div className="flex items-center gap-2">
           <ShieldCheck className="size-4 text-sky-500 shrink-0" />
           <span>
-            {isEn
-              ? 'WLD Virtual Banking: Game simulator only. Not actual financial products.'
-              : '월덕뱅크는 게임 내 모의 금융 서비스이며, 실제 화폐 또는 금융상품이 아닙니다.'}
+            {localeLabel(
+              locale,
+              '월덕뱅크는 게임 내 모의 금융 서비스이며, 실제 화폐 또는 금융상품이 아닙니다.',
+              'WLD Virtual Banking: Game simulator only. Not actual financial products.',
+              'ウォルドク銀行はゲーム内の模擬金融サービスであり、実際の通貨や金融商品ではありません。',
+              '月德银行仅为游戏内模拟金融服务，非真实货币或金融产品。',
+            )}
           </span>
         </div>
         <Link href="/guide/virtual-banking" className="font-semibold text-primary hover:underline shrink-0 hidden sm:inline">
-          {isEn ? 'Guide' : '가이드 보기'}
+          {localeLabel(locale, '가이드 보기', 'Guide', 'ガイドを見る', '查看指南')}
         </Link>
       </div>
 
@@ -113,13 +130,13 @@ export default async function BankPage() {
       <Tabs defaultValue="savings" className="space-y-6">
         <TabsList className="grid grid-cols-3 max-w-md w-full h-11 p-1 bg-muted/60 rounded-xl">
           <TabsTrigger value="savings" className="rounded-lg text-xs sm:text-sm font-semibold">
-            {isEn ? 'Savings & Pockets' : '저축 & 모으기'}
+            {localeLabel(locale, '저축 & 모으기', 'Savings & Pockets', '貯蓄＆ポケット', '储蓄与口袋')}
           </TabsTrigger>
           <TabsTrigger value="loan" className="rounded-lg text-xs sm:text-sm font-semibold">
-            {isEn ? 'Loans & Credit' : '대출 & 신용'}
+            {localeLabel(locale, '대출 & 신용', 'Loans & Credit', 'ローン＆信用', '贷款与信用')}
           </TabsTrigger>
           <TabsTrigger value="analytics" className="rounded-lg text-xs sm:text-sm font-semibold">
-            {isEn ? 'Net Worth' : '순자산 분석'}
+            {localeLabel(locale, '순자산 분석', 'Net Worth', '純資産分析', '净资产分析')}
           </TabsTrigger>
         </TabsList>
 
@@ -161,12 +178,24 @@ export default async function BankPage() {
           {activeLoan && (
             <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-xs space-y-1">
               <span className="font-bold text-amber-500 block">
-                {isEn ? 'Active Virtual Loan in Progress' : '실행 중인 가상 대출이 있습니다'}
+                {localeLabel(locale, '실행 중인 가상 대출이 있습니다', 'Active Virtual Loan in Progress', '実行中の仮想ローンがあります', '有生效中的虚拟贷款')}
               </span>
               <p className="text-muted-foreground">
                 {canCoverMinimumRepayment
-                  ? (isEn ? `You have sufficient cash for minimum repayment of ${groupDigits(minimumRepayment)} WLD.` : `현재 보유 현금으로 최소 상환액 ${groupDigits(minimumRepayment)} WLD를 충당할 수 있습니다.`)
-                  : (isEn ? `Your cash is below minimum repayment of ${groupDigits(minimumRepayment)} WLD.` : `최소 상환액 ${groupDigits(minimumRepayment)} WLD를 충당하기 위한 현금이 부족합니다.`)}
+                  ? localeLabel(
+                      locale,
+                      `현재 보유 현금으로 최소 상환액 ${groupDigits(minimumRepayment)} WLD를 충당할 수 있습니다.`,
+                      `You have sufficient cash for minimum repayment of ${groupDigits(minimumRepayment)} WLD.`,
+                      `現在の保有現金で最低返済額 ${groupDigits(minimumRepayment)} WLDを充当できます。`,
+                      `当前可用现金可覆盖最低还款额 ${groupDigits(minimumRepayment)} WLD。`,
+                    )
+                  : localeLabel(
+                      locale,
+                      `최소 상환액 ${groupDigits(minimumRepayment)} WLD를 충당하기 위한 현금이 부족합니다.`,
+                      `Your cash is below minimum repayment of ${groupDigits(minimumRepayment)} WLD.`,
+                      `最低返済額 ${groupDigits(minimumRepayment)} WLDを充当するための現金が不足しています。`,
+                      `当前现金不足以覆盖最低还款额 ${groupDigits(minimumRepayment)} WLD。`,
+                    )}
               </p>
             </div>
           )}
@@ -201,35 +230,57 @@ export default async function BankPage() {
         <TabsContent value="analytics" className="space-y-6 focus-visible:outline-none">
           <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
             <div className="toss-card p-4 space-y-1">
-              <span className="text-xs text-muted-foreground">{isEn ? 'Net Worth' : '순 금융 자산'}</span>
+              <span className="text-xs text-muted-foreground">
+                {localeLabel(locale, '순 금융 자산', 'Net Worth', '純資産分析', '净资产总计')}
+              </span>
               <div className="font-fintech text-lg sm:text-2xl font-black text-foreground">
                 <Amount value={netFinancialWorth} currency />
               </div>
-              <span className="text-[10px] text-muted-foreground/80 block">현금+예금+채권-대출</span>
+              <span className="text-[10px] text-muted-foreground/80 block">
+                {localeLabel(locale, '현금+예금+채권-대출', 'Cash + Deposits + Bonds - Loans', '現金＋預金＋債券－ローン', '现金+存款+债券-贷款')}
+              </span>
             </div>
 
             <div className="toss-card p-4 space-y-1">
-              <span className="text-xs text-muted-foreground">{isEn ? 'Cash' : '사용 가능 현금'}</span>
+              <span className="text-xs text-muted-foreground">
+                {localeLabel(locale, '사용 가능 현금', 'Available Cash', '利用可能現金', '可用现金')}
+              </span>
               <div className="font-fintech text-lg sm:text-2xl font-black text-sky-400">
                 <Amount value={cash} currency />
               </div>
-              <span className="text-[10px] text-muted-foreground/80 block">지갑 보유 잔액</span>
+              <span className="text-[10px] text-muted-foreground/80 block">
+                {localeLabel(locale, '지갑 보유 잔액', 'Wallet Balance', 'ウォレット保有残高', '钱包可用余额')}
+              </span>
             </div>
 
             <div className="toss-card p-4 space-y-1">
-              <span className="text-xs text-muted-foreground">{isEn ? 'Savings' : '예금 잔액'}</span>
+              <span className="text-xs text-muted-foreground">
+                {localeLabel(locale, '예금 잔액', 'Bank Deposits', '預金残高', '存款余额')}
+              </span>
               <div className="font-fintech text-lg sm:text-2xl font-black text-emerald-400">
                 <Amount value={bank} currency />
               </div>
-              <span className="text-[10px] text-muted-foreground/80 block">일일 {standing.daily_interest_rate_pct}% 복리</span>
+              <span className="text-[10px] text-muted-foreground/80 block">
+                {localeLabel(
+                  locale,
+                  `일일 ${standing.daily_interest_rate_pct}% 복리`,
+                  `Daily ${standing.daily_interest_rate_pct}% compound`,
+                  `日次 ${standing.daily_interest_rate_pct}% 複利`,
+                  `日利率 ${standing.daily_interest_rate_pct}% 复利`,
+                )}
+              </span>
             </div>
 
             <div className="toss-card p-4 space-y-1">
-              <span className="text-xs text-muted-foreground">{isEn ? 'Credit Limit' : '신용 대출 한도'}</span>
+              <span className="text-xs text-muted-foreground">
+                {localeLabel(locale, '신용 대출 한도', 'Credit Limit', '信用融資枠', '信用贷款额度')}
+              </span>
               <div className="font-fintech text-lg sm:text-2xl font-black text-purple-400">
                 <Amount value={creditLimit} currency />
               </div>
-              <span className="text-[10px] text-muted-foreground/80 block">등급 {standing.credit_grade}</span>
+              <span className="text-[10px] text-muted-foreground/80 block">
+                {localeLabel(locale, `등급 ${standing.credit_grade}`, `Grade ${standing.credit_grade}`, `等級 ${standing.credit_grade}`, `信用等级 ${standing.credit_grade}`)}
+              </span>
             </div>
           </div>
 
@@ -249,14 +300,26 @@ export default async function BankPage() {
       <div className="toss-card p-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Landmark className="size-4" />
-          <span>자산 포트폴리오를 주식 및 사업과 함께 균형 있게 분산하세요.</span>
+          <span>
+            {localeLabel(
+              locale,
+              '자산 포트폴리오를 주식 및 사업과 함께 균형 있게 분산하세요.',
+              'Diversify your virtual assets across stocks, savings, and enterprises.',
+              '資産ポートフォリオを株式や事業とともにバランスよく分散させましょう。',
+              '合理配置股票、储蓄与实业，保持虚拟资产组合均衡。',
+            )}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" size="sm" className="h-8 text-xs">
-            <Link href="/wallet">{isEn ? 'Wallet' : '내 지갑'}</Link>
+            <Link href="/wallet">
+              {localeLabel(locale, '내 지갑', 'Wallet', 'ウォレット', '我的钱包')}
+            </Link>
           </Button>
           <Button asChild variant="outline" size="sm" className="h-8 text-xs">
-            <Link href="/stocks">{isEn ? 'Stocks' : '주식 거래소'}</Link>
+            <Link href="/stocks">
+              {localeLabel(locale, '주식 거래소', 'Stocks', '株式取引所', '股票交易所')}
+            </Link>
           </Button>
         </div>
       </div>

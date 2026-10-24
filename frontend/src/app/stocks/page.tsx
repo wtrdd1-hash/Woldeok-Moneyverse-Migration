@@ -8,6 +8,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
+import { localeLabel } from '@/lib/locale';
+import { getStockName } from '@/lib/i18n-dictionary';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import dynamicImport from 'next/dynamic';
 import { StockDisclosureTicker } from '@/components/stock-disclosure-ticker';
@@ -89,6 +91,7 @@ export default async function StocksPage({
 }: {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const locale = await getServerLocale();
   const [marketData, params] = await Promise.all([
     apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'),
     searchParams,
@@ -98,6 +101,13 @@ export default async function StocksPage({
   const sortParam = Array.isArray(params?.sort) ? params.sort[0] : params?.sort;
   const sort = normalizeStockSort(sortParam);
   const stocks = sortMarketStocks(rawStocks, sort);
+
+  const filterOptions = [
+    { value: 'default', label: localeLabel(locale, '전체 10종목', 'All 10 Stocks', '全10銘柄', '全部10只股票') },
+    { value: 'change', label: localeLabel(locale, '급등·급락순', 'Top Movers', '変動率順', '涨跌幅榜') },
+    { value: 'price', label: localeLabel(locale, '가격순', 'By Price', '価格順', '价格高低') },
+    { value: 'name', label: localeLabel(locale, '이름순', 'By Name', '名前順', '名称排序') },
+  ];
 
   return (
     <MarketPricesProvider>
@@ -111,12 +121,7 @@ export default async function StocksPage({
         {/* 2. Toss Style Filter Tabs */}
         <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/60">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-            {[
-              ['default', '전체 10종목'],
-              ['change', '급등·급락순'],
-              ['price', '가격순'],
-              ['name', '이름순'],
-            ].map(([value, label]) => {
+            {filterOptions.map(({ value, label }) => {
               const isActive = sort === value;
               return (
                 <Link
@@ -134,7 +139,13 @@ export default async function StocksPage({
             })}
           </div>
           <span className="text-xs font-mono text-slate-400 hidden sm:inline shrink-0">
-            총 {stocks.length}개 종목 상장 중
+            {localeLabel(
+              locale,
+              `총 ${stocks.length}개 종목 상장 중`,
+              `${stocks.length} stocks listed`,
+              `計${stocks.length}銘柄上場中`,
+              `现已上市${stocks.length}只股票`,
+            )}
           </span>
         </div>
 
@@ -142,7 +153,13 @@ export default async function StocksPage({
         <div className="space-y-2.5">
           {stocks.length === 0 ? (
             <div className="toss-card p-10 text-center text-slate-400 text-xs bg-[#0f1422] rounded-2xl">
-              거래 가능한 종목이 없습니다.
+              {localeLabel(
+                locale,
+                '거래 가능한 종목이 없습니다.',
+                'No tradable stocks available.',
+                '取引可能な銘柄がありません。',
+                '暂无可交易股票。',
+              )}
             </div>
           ) : (
             stocks.map((stock) => {
@@ -151,6 +168,7 @@ export default async function StocksPage({
               const pct = open > 0 ? ((cur - open) / open) * 100 : 0;
               const isPositive = pct >= 0;
               const isHalted = stock.halt_status && stock.halt_status.includes('HALT');
+              const localizedStockName = getStockName(stock.symbol, locale, stock.name);
 
               return (
                 <div
@@ -165,11 +183,11 @@ export default async function StocksPage({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-xs sm:text-sm font-black text-slate-100 truncate group-hover:text-primary transition-colors">
-                          {stock.name}
+                          {localizedStockName}
                         </span>
                         {isHalted && (
                           <Badge variant="destructive" className="text-[9px] px-1.5 py-0 font-bold shrink-0">
-                            거래정지
+                            {localeLabel(locale, '거래정지', 'HALTED', '取引停止', '暂停交易')}
                           </Badge>
                         )}
                       </div>
@@ -197,10 +215,10 @@ export default async function StocksPage({
                     <TradeDialog
                       stockId={stock.id}
                       symbol={stock.symbol}
-                      name={stock.name}
+                      name={localizedStockName}
                       currentPrice={stock.current_price}
                       side="buy"
-                      triggerLabel="매수"
+                      triggerLabel={localeLabel(locale, '매수', 'Buy', '買い', '买入')}
                       triggerVariant="default"
                       triggerClassName="h-9 px-3.5 text-xs font-bold font-mono active:scale-95 btn-toss rounded-xl"
                     />
@@ -215,9 +233,23 @@ export default async function StocksPage({
         <div className="toss-card p-4 sm:p-5 bg-[#0f1422] border-slate-800/80 flex items-start gap-3 text-xs text-slate-400 rounded-2xl">
           <HelpCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <span className="font-bold text-slate-200">100% 안전한 가상 모의투자 안내</span>
+            <span className="font-bold text-slate-200">
+              {localeLabel(
+                locale,
+                '100% 안전한 가상 모의투자 안내',
+                '100% Risk-Free Trading Simulation',
+                '100%安全な仮想模擬投資ガイド',
+                '100%安全的模拟投资提示',
+              )}
+            </span>
             <p className="leading-relaxed [word-break:keep-all]">
-              월덕 머니버스의 모든 종목 시세와 재화(WLD)는 게임 내 알고리즘에 의해 움직이는 가상 경제이며, 실제 현금 입출금이나 실제 주식 투자 상품이 아닙니다.
+              {localeLabel(
+                locale,
+                '월덕 머니버스의 모든 종목 시세와 재화(WLD)는 게임 내 알고리즘에 의해 움직이는 가상 경제이며, 실제 현금 입출금이나 실제 주식 투자 상품이 아닙니다.',
+                'All stock prices and WLD currency are algorithm-driven virtual game assets, not actual money or real financial securities.',
+                'ウォルドク・マネーバースのすべての銘柄相場と通貨(WLD)はゲーム内アルゴリズムにより動作する仮想経済であり、実際の現金や実在の株式商品ではありません。',
+                '月德Moneyverse内所有标的行情与WLD货币均为由算法驱动的虚拟游戏资产，非真实现金或真实证券。',
+              )}
             </p>
           </div>
         </div>

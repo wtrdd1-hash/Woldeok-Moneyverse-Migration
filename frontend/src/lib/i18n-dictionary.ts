@@ -10,6 +10,36 @@ export type TranslationDictionary = Record<string, Record<Locale, string>>;
  * - Japanese (JA): SBI Securities, Rakuten Bank, PayPay, Coincheck, Nomura
  * - Simplified Chinese (ZH): Ant Financial (Alipay), Tencent Finance, Binance, Futu
  */
+
+export const STOCK_NAMES_BY_LOCALE: Record<string, Record<Locale, string>> = {
+  'WDG': { ko: '월덕글로벌', en: 'Woldeok Global', ja: 'ウォルドク・グローバル', zh: '月德全球' },
+  'CHIMU314': { ko: '치무전자', en: 'Chimu Electronics', ja: 'チム電子', zh: '奇武电子' },
+  'WDM': { ko: '월덕모터스', en: 'Woldeok Motors', ja: 'ウォルドク・モータース', zh: '月德汽车' },
+  'WDB': { ko: '월덕바이오', en: 'Woldeok Bio', ja: 'ウォルドク・バイオ', zh: '月德生物' },
+  'WDT': { ko: '월덕통신', en: 'Woldeok Telecom', ja: 'ウォルドク通信', zh: '月德电信' },
+  'MYUY': { ko: '뮤야 엔터테인먼트', en: 'Myuya Entertainment', ja: 'ミュヤ・エンターテインメント', zh: '缪亚娱乐' },
+  'CHIPS': { ko: '침팬지 반도체', en: 'Chimpanzee Semi', ja: 'チンパンジー半導体', zh: '黑猩猩半导体' },
+  'DUCK': { ko: '월덕 인더스트리', en: 'Woldeok Industries', ja: 'ウォルドク・インダストリー', zh: '月德工业' },
+  'WFIN': { ko: '월덕 파이낸셜', en: 'Woldeok Financial', ja: 'ウォルドク・フィナンシャル', zh: '月德金融' },
+  'SPACE': { ko: '월덕 스페이스', en: 'Woldeok Space', ja: 'ウォルドク・スペース', zh: '月德航天' },
+  'WDX-TEC': { ko: '월덱 테크', en: 'Woldeck Tech', ja: 'ウォルデック・テック', zh: '月德科技' },
+  'WDX-FIN': { ko: '월덱 금융', en: 'Woldeck Finance', ja: 'ウォルデック金融', zh: '月德数科' },
+  'WDX-RET': { ko: '월덱 리테일', en: 'Woldeck Retail', ja: 'ウォルデック・リテール', zh: '月德零售' },
+  'WDX-LOG': { ko: '월덱 물류', en: 'Woldeck Logistics', ja: 'ウォルデック物流', zh: '月德物流' },
+  'WDX-BIO': { ko: '월덱 헬스케어', en: 'Woldeck Healthcare', ja: 'ウォルデック・ヘルスケア', zh: '月德医疗' },
+  'WDX-ENT': { ko: '월덱 미디어', en: 'Woldeck Media', ja: 'ウォルデック・メディア', zh: '月德传媒' },
+  'WDX-ENG': { ko: '월덱 에너지', en: 'Woldeck Energy', ja: 'ウォルデック・エナジー', zh: '月德能源' },
+  'WDX-DEF': { ko: '월덱 방산', en: 'Woldeck Defense', ja: 'ウォルデック防衛', zh: '月德防务' },
+};
+
+export function getStockName(symbol: string, locale: Locale, fallback?: string): string {
+  const upper = symbol.toUpperCase();
+  if (STOCK_NAMES_BY_LOCALE[upper]) {
+    return STOCK_NAMES_BY_LOCALE[upper][locale] || STOCK_NAMES_BY_LOCALE[upper].en || fallback || symbol;
+  }
+  return fallback || symbol;
+}
+
 export const I18N_DICTIONARY: TranslationDictionary = {
   // ==========================================
   // 1. Navigation & Global Layout
@@ -1626,6 +1656,239 @@ export const I18N_DICTIONARY: TranslationDictionary = {
     ja: 'リアルタイムリーグ順位',
     zh: '实时联赛排行',
   },
+
+  // ==========================================
+  // 18. FinTech Home Landing & Stocks
+  // ==========================================
+  'home.ledger_running': {
+    ko: '실시간 복식부기 불변 원장 시스템 정상 가동 중',
+    en: 'Real-time double-entry immutable ledger operating normally',
+    ja: 'リアルタイム複式簿記不変元帳システム正常稼働中',
+    zh: '实时复式记账不可变账本系统正常运行中',
+  },
+  'home.verified_sim': {
+    ko: '· 100% 안전한 금융 모의 시뮬레이터',
+    en: '· 100% Safe Financial Simulation',
+    ja: '· 100%安全な金融模擬シミュレーター',
+    zh: '· 100%安全的虚拟金融模拟器',
+  },
+  'home.total_virtual_assets': {
+    ko: '내 가상 자산 총액',
+    en: 'Total Virtual Assets',
+    ja: '仮想資産総額',
+    zh: '虚拟资产总额',
+  },
+  'home.cash_bank_aggregate': {
+    ko: '활동 현금 + 은행 예치금 실시간 집계',
+    en: 'Live sum of active cash + bank deposits',
+    ja: 'アクティブ現金＋銀行預金のリアルタイム集計',
+    zh: '活动现金与银行存款实时汇总',
+  },
+  'home.ledger_integrity_100': {
+    ko: '원장 정합성 100%',
+    en: '100% Ledger Integrity',
+    ja: '元帳整合性100%',
+    zh: '账本一致性100%',
+  },
+  'home.login_to_view': {
+    ko: '로그인 후 확인',
+    en: 'Sign in to view',
+    ja: 'ログインして確認',
+    zh: '登录后查看',
+  },
+  'home.safe_sim_desc': {
+    ko: '가상 재화로 즐기는 100% 안전한 금융 모의 시뮬레이션',
+    en: '100% risk-free simulated financial playground',
+    ja: '仮想資産で体験する100%安全な金融模擬体験',
+    zh: '尽享零风险虚拟金融模拟体验',
+  },
+  'home.p2p_transfer': {
+    ko: '1:1 간편 송금',
+    en: 'Instant Transfer',
+    ja: 'かんたん送金',
+    zh: '1:1快捷转账',
+  },
+  'home.view_history': {
+    ko: '내역 조회',
+    en: 'History',
+    ja: '履歴照会',
+    zh: '明细查询',
+  },
+  'home.stock_trading': {
+    ko: '주식 거래',
+    en: 'Stock Trading',
+    ja: '株式取引',
+    zh: '股票交易',
+  },
+  'home.stock_trading_desc': {
+    ko: '10개 가상 상장사',
+    en: '10 Listed Companies',
+    ja: '10の上場企業',
+    zh: '10家精选虚拟公司',
+  },
+  'home.work_farming': {
+    ko: '직업 출근',
+    en: 'Career Work',
+    ja: '職業出勤',
+    zh: '职场上班',
+  },
+  'home.work_farming_desc': {
+    ko: '일일 파밍 보상',
+    en: 'Daily Farming Rewards',
+    ja: 'デイリーファーミング報酬',
+    zh: '每日工作收益',
+  },
+  'home.virtual_bank': {
+    ko: '가상 은행',
+    en: 'Virtual Bank',
+    ja: '仮想銀行',
+    zh: '虚拟银行',
+  },
+  'home.virtual_bank_desc': {
+    ko: '예금 및 대출',
+    en: 'Deposits & Loans',
+    ja: '預金＆ローン',
+    zh: '存款与贷款',
+  },
+  'home.live_market_movers': {
+    ko: '실시간 급등락 상장 종목',
+    en: 'Live Market Movers',
+    ja: 'リアルタイム急変動銘柄',
+    zh: '实时异动上榜股票',
+  },
+  'home.view_all_stocks': {
+    ko: '전체 보기',
+    en: 'View All',
+    ja: 'すべて見る',
+    zh: '查看全部',
+  },
+  'home.safe_simulation_guide': {
+    ko: '100% 안전한 가상 금융 시뮬레이션',
+    en: '100% Safe Virtual Economy',
+    ja: '100%安全な仮想金融シミュレーション',
+    zh: '100%安全的虚拟金融模拟',
+  },
+  'home.safe_simulation_body': {
+    ko: '월덕 머니버스의 모든 화폐(WLD)와 주식 거래는 실제 현금이나 금융상품이 아닌 게임 내 알고리즘으로 구동되는 안전한 가상 경제입니다.',
+    en: 'All WLD currency and stock trades are simulated game data governed by algorithms, not real-world cash or investment products.',
+    ja: 'ウォルドク・マネーバースのすべての通貨(WLD)と株式取引は、実際の現金や金融商品ではなく、ゲーム内アルゴリズムで動作する安全な仮想経済です。',
+    zh: '月德Moneyverse内所有货币(WLD)与股票交易均为基于算法的游戏模拟数据，绝非真实现金或金融投资品。',
+  },
+  'home.calc_hub_title': {
+    ko: '실전 금융 계산기 & 시뮬레이터',
+    en: 'Financial Calculators & Simulators',
+    ja: '実践金融計算機＆シミュレーター',
+    zh: '实用金融计算器与模拟器',
+  },
+  'home.calc_view_all': {
+    ko: '전체 12종 계산기 보기',
+    en: 'View All 12 Tools',
+    ja: '全12種ツールを見る',
+    zh: '查看全部12款工具',
+  },
+  'home.calc_compound_title': {
+    ko: '복리 예금·적금 계산기',
+    en: 'Compound Interest Calculator',
+    ja: '複利預金・積立計算機',
+    zh: '复利储蓄计算器',
+  },
+  'home.calc_compound_desc': {
+    ko: '월 적립식 복리 이자와 72의 법칙 목표 자산 달성 시점 시뮬레이션',
+    en: 'Simulate monthly contributions, compound interest, and Rule of 72 targets',
+    ja: '毎月積立複利利息と72の法則による資産達成シミュレーション',
+    zh: '测算定投复利收益与72法则目标达成时间',
+  },
+  'home.calc_loan_title': {
+    ko: '대출이자 & 상환 계산기',
+    en: 'Loan Repayment Calculator',
+    ja: 'ローン利息＆返済計算機',
+    zh: '贷款利息与还款计算器',
+  },
+  'home.calc_loan_desc': {
+    ko: '원리금균등, 원금균등, 만기일시 상환 방식별 총이자 비교',
+    en: 'Compare total interest across amortized, equal principal, and lump sum plans',
+    ja: '元利均等、元金均等、期日一括返済ごとの総利息比較',
+    zh: '等额本息、等额本金与先息后本方案总利息对比',
+  },
+  'home.calc_stock_title': {
+    ko: '주식 물타기·평단가 계산기',
+    en: 'Stock Average Down Calculator',
+    ja: '株式買増し・平均単価計算機',
+    zh: '股票补仓均价计算器',
+  },
+  'home.calc_stock_desc': {
+    ko: '추가 매수 시 희석되는 평균 단가 및 탈출 목표가 역산',
+    en: 'Calculate revised average price on dips and target break-even exit',
+    ja: '買増し時の平均取得単価と損益分岐点脱出価格を逆算',
+    zh: '计算加仓后摊薄成本均价与保本解套目标价',
+  },
+  'stocks.filter_all': {
+    ko: '전체 10종목',
+    en: 'All 10 Stocks',
+    ja: '全10銘柄',
+    zh: '全部10只股票',
+  },
+  'stocks.filter_movers': {
+    ko: '급등·급락순',
+    en: 'Top Movers',
+    ja: '変動率順',
+    zh: '涨跌幅榜',
+  },
+  'stocks.filter_price': {
+    ko: '가격순',
+    en: 'By Price',
+    ja: '価格順',
+    zh: '价格高低',
+  },
+  'stocks.filter_name': {
+    ko: '이름순',
+    en: 'By Name',
+    ja: '名前順',
+    zh: '名称排序',
+  },
+  'stocks.listed_count': {
+    ko: '총 {count}개 종목 상장 중',
+    en: '{count} stocks listed',
+    ja: '計{count}銘柄上場中',
+    zh: '现已上市{count}只股票',
+  },
+  'stocks.no_available': {
+    ko: '거래 가능한 종목이 없습니다.',
+    en: 'No tradable stocks available.',
+    ja: '取引可能な銘柄がありません。',
+    zh: '暂无可交易股票。',
+  },
+  'stocks.halted': {
+    ko: '거래정지',
+    en: 'HALTED',
+    ja: '取引停止',
+    zh: '暂停交易',
+  },
+  'stocks.buy_action': {
+    ko: '매수',
+    en: 'Buy',
+    ja: '買い',
+    zh: '买入',
+  },
+  'stocks.safe_notice_title': {
+    ko: '100% 안전한 가상 모의투자 안내',
+    en: '100% Risk-Free Trading Simulation',
+    ja: '100%安全な仮想模擬投資ガイド',
+    zh: '100%安全的模拟投资提示',
+  },
+  'stocks.safe_notice_body': {
+    ko: '월덕 머니버스의 모든 종목 시세와 재화(WLD)는 게임 내 알고리즘에 의해 움직이는 가상 경제이며, 실제 현금 입출금이나 실제 주식 투자 상품이 아닙니다.',
+    en: 'All stock prices and WLD currency are algorithm-driven virtual game assets, not actual money or real financial securities.',
+    ja: 'ウォルドク・マネーバースのすべての銘柄相場と通貨(WLD)はゲーム内アルゴリズムにより動作する仮想経済であり、実際の現金や実在の株式商品ではありません。',
+    zh: '月德Moneyverse内所有标的行情与WLD货币均为由算法驱动的虚拟游戏资产，非真实现金或真实证券。',
+  },
+  'skip.content': {
+    ko: '본문으로 건너뛰기',
+    en: 'Skip to main content',
+    ja: '本文へスキップ',
+    zh: '跳至正文',
+  },
+
   'stocks.league.simulated': {
     ko: '시즌 개막 준비 중 (모의 예시)',
     en: 'Pre-season (Simulated)',

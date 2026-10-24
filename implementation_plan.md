@@ -3420,3 +3420,32 @@ flowchart LR
 ### 4. 검증 결과
 - Vitest: 5/5 테스트 성공 (`src/lib/seo-sitemap-integrity.test.ts` 20ms)
 - Typecheck: `tsc --noEmit` 무오류 통과 (0 errors)
+
+
+---
+## 🚀 [v238 Specification] 전 서피스 4개 언어(KO/EN/JA/ZH) 완전 번역화 및 자동 언어 감지 체계 정밀 고도화
+
+### 1. 사용자 요구사항 및 현황 분석
+- **사용자 요청**: 모든 페이지의 번역 상태 전수 확인, 번역 레퍼런스 발굴 및 자연스러운 현지화, 자동 언어 선택 기능 작동 검증.
+- **실측 진단 결과**:
+  - `Total TS/TSX Source Files Scanned`: 888개 중 i18n 적용 파일 106개, 한국어 하드코딩 파일 다수 식별.
+  - 특히 메인 홈(`/en`) 실측 시 34개 이상의 주요 UI 문장 및 642개 한글 토큰이 그대로 노출됨.
+  - 가상 주식(`/stocks`), 가상 은행(`/bank`) 등 핵심 서피스에서 필터, 종목명, 안전 안내 텍스트가 번역 래퍼 없이 렌더링됨.
+  - 자동 언어 감지(GeoIP + Accept-Language)는 `proxy.ts`에 우수하게 구현되어 있으나, 첫 페이지 SSR 번역 주입이 온전하지 못해 영문 접속자에게 한글이 섞여 나오는 현상 발생.
+
+### 2. 세부 구현 계획
+1. **번역 사전(`i18n-dictionary.ts`) 대규모 확장 & 현지 금융 용어 정비**:
+   - 메인 홈 대시보드, 불변 원장 시스템 배너, 3대 퀵 액션 카드, 실시간 급등락 종목, 12대 금융 계산기 툴킷, 종목명 다국어 맵 등 40+ 핵심 표현 신규 등록.
+   - 영어(Stripe·Robinhood급), 일본어(PayPay·SBI증권급), 중국어(Alipay·Binance급) 자연스러운 금융 전문 어휘 적용.
+2. **`frontend/src/app/page.tsx` 메인 홈 4개 언어 SSR 완전 번역**:
+   - `locale = await getServerLocale()` 기반으로 상단부터 하단까지 모든 하드코딩 한글 텍스트를 `localeLabel` 및 다국어 사전으로 교체.
+3. **`frontend/src/app/stocks/page.tsx` & `frontend/src/app/bank/page.tsx` 다국어화**:
+   - 주식 거래소 필터 탭, 상장 안내, 종목명, 매수 트리거 및 은행 서비스 상태를 4개 언어로 완전 지원.
+4. **`frontend/src/app/layout.tsx` 스킵 링크 및 구조화 데이터(JSON-LD) 다국어화**:
+   - `본문으로 건너뛰기` 스킵 링크 4개 언어 적용.
+   - `WebApplication` / `FAQPage` 스키마 다국어 메타데이터 제공.
+5. **자동화 회귀 방지 테스트(`i18n-full-coverage.test.ts`) 구축**:
+   - GeoIP(KR, JP, CN, US, VN 등) 및 Accept-Language 자동 감지 정확도 검증.
+   - 4개 언어 홈 화면의 핵심 UI 번역 토큰 누락 제로 검증.
+6. **빌드, 프로덕션 배포 및 라이브 실측**:
+   - `curl https://easy-scraping.com/en`, `/ja`, `/zh` 실측을 통해 잔여 한글 토큰 정화 확인.
