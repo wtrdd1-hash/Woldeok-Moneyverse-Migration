@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from './route';
+import { GET, HEAD, POST } from './route';
 import { APP_API_CONTRACT_VERSION } from '@/lib/app-gateway';
 
 function request(path: string, headers: Record<string, string> = {}) {
@@ -168,6 +168,61 @@ describe('app API route compatibility', () => {
     expect(response.status).toBe(200);
     expect(body.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
     expect(JSON.stringify(body)).not.toContain('attacker.example');
+  });
+
+  it('continues to proxy text-only chat and support API routes', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ items: [] }), {
+      status: 200, headers: { 'content-type': 'application/json' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const chat = await GET(request('/app-api/v1/chat/rooms'), context('chat', 'rooms'));
+    const support = await GET(request('/app-api/v1/support/threads'), context('support', 'threads'));
+    expect(chat.status).toBe(200);
+    expect(support.status).toBe(200);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('blocks legacy chat media GET and HEAD before private API proxying and shared caching', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), { status: 200 }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const path = '/app-api/v1/content/chat/media/chat_00000000-0000-0000-0000-000000000000.png';
+    const parts = context('content', 'chat', 'media', 'chat_00000000-0000-0000-0000-000000000000.png');
+    const get = await GET(request(path), parts);
+    expect(get.status).toBe(404);
+    expect(get.headers.get('cache-control')).toBe('private, no-store');
+    const head = await HEAD(new NextRequest(`https://easy-scraping.com${path}`, { method: 'HEAD' }), parts);
+    expect(head.status).toBe(404);
+    expect(head.headers.get('cache-control')).toBe('private, no-store');
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('cannot bypass the chat-media hold with whitespace normalized by the gateway', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), { status: 200 }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/content%20/chat/media/chat_00000000-0000-0000-0000-000000000000.png'),
+      context('content ', 'chat', 'media', 'chat_00000000-0000-0000-0000-000000000000.png'),
+    );
+    expect(response.status).toBe(404);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('blocks chat image POST before buffering multipart body or contacting backend', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ success: true }), { status: 200 }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const req = new NextRequest('https://easy-scraping.com/app-api/v1/content/chat/upload', {
+      method: 'POST',
+      body: 'fake multipart payload',
+    });
+    const response = await POST(req, context('content', 'chat', 'upload'));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ code: 'chat_media_unavailable', status: 503 });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
 });
