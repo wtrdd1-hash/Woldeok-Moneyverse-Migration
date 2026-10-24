@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.24.1238 — F675-116 게시판 수정 이력 출처·재시도·삭제 무결성 보완 (기능 보완 / 초안 / 운영승격 보류)
+- 회차: 이전 기능 추가 v1236 → 현재 기능 보완 v1238 → 다음 기능 추가 v1240(잠정). 최신 main `57f393395d16495b06187de69c17592d2c13d251` 시작·중간 확인(QA v1242 당시보다 3커밋 전진), 선행 Draft #1184 미병합. QA v1242 FAILED/HOLD. v1236의 Migration048 현재 함수 주장 정정: 최신 `member_board_update`는 Migration259이며 `p_key` 미저장·버전 없는 덮어쓰기, 삭제 함수는 Migration044이며 키 미저장. 기존 PUT DTO 이미지 필드 수용/실제 수정 무시, 웹 제출마다 새 UUID, App API 이력 경로 없음. 운영 사고 확인이 아닌 코드상 위험.
+- 작성자 본인 `/board/[postId]` 이력(20개씩) → 보기/비교 → 제목·본문만 복원 확인(현재 이미지·댓글 유지). 본인 목록/상세/영수증 GET·복원 POST, 강한 ETag `"vN"`/If-Match; 누락 428, 오래됨 412, 동일 키 다른 요청 409, 확정 불명 503. 불확실한 재시도에 같은 UUID 유지, 원본 불변 영수증과 현재 상태 구분. CSRF/세션/동의/작성자, 세션 결합 서명 커서, 타인/없는 글 404, noindex/no-store, Android App API 동등성, 320px·400% WCAG, 관리자 비식별 집계.
+- #1147 Migration280 충돌·Migration266 체크섬 해결 전 신규 번호 미할당. 글 버전 NULL 허용 후 검증, `(post_id,revision)` 불변 이력, `(actor,requestKey)` 해시 영수증, 작성자 범위 SECURITY DEFINER, 앱 직접 DML·PUBLIC 권한 금지. 기존 글은 **현재 확인된 내용만** `BASELINE_CAPTURED`로 저장하며 원본/과거 수정본을 꾸며내지 않는다. 영수증 선점 → 글 FOR UPDATE → 예상 버전 CAS → 이력/수정/삭제/영수증 원자적 커밋. 구형 웹/Android 수정·삭제 전환 후 활성화, ON 시 버전 없는 PUT 428, OFF에서도 이력 기록 중단으로 불일치 발생 금지. 보존·FK·삭제·운영제한 정책은 법률 승인 전 BLOCKED.
+- P0 ENV1238-01 (DB 분리/5433/복원), SEC1238-02 (앱 DML 235/241·PUBLIC 은행 함수 3개/본인 권한), REL1238-03 (QA v1242 프론트 5·전체 감사 Critical2/High10·봇 Critical1/High5·Migration266/280·루트 약 94%·정확 SHA Test), BOARD1238-04 (실제 259/044 코드·DTO/UUID·개인정보). P1 BOARD1238-05 (DB/기준선), BOARD1238-06 (CAS/영수증), BOARD1238-07 (Nest/웹/Android), BOARD1238-08 (UX/접근성), BOARD1238-09 (개인정보/관리자/SEO/KPI), BOARD1238-10 (격리 동일 키 100·타인 100·경합 100·합성 커서 10,001·롤백). 전체 명세는 INTEGRATED_PLANNING_MASTER.ko.md 참조.
+- 문서만 변경, 런타임·DB·WLD·Test·Production 변경/병합/승격 없음. 격리 PG 권한·복원, 정확 SHA CI·공식 Test 인증 금융 E2E, 독립 QA, 승인 GitOps 전 운영승격 금지. PostgreSQL/OWASP/W3C/IETF 발행기관 계열 4곳 참고, **신규 중복제거 승인 근거 0건**, 누적 검증 미확인 / 10,000 = BLOCKED / IN PROGRESS.
+
 ## v2026.10.24.1236 — F675-116 작성자 전용 게시글 수정 이력 (기능 추가 / 초안 / 배포 보류)
 - 회차 이전 보완 v1234 → 현재 추가 v1236 → 다음 보완 v1238(잠정). main `49788d09494fed3e463651945b83386e87dd47bc` 시작·중간 확인, QA v1241 FAILED/HOLD. Draft #1175는 main이 아님. Migration048 `member_board_update`는 멱등 키를 검사만 하고 보존하지 않으며 마지막 수정으로 덮어쓴다. 웹 PUT 버전 토큰과 이력 API/테이블 미확인. F675-110 임시저장·F675-109 읽기 목록과 별도.
 - 작성자 전용 `/board/[postId]` 수정 기록→보기/복원/새로고침/취소, 최신 20개 요약, 제목·본문만 복원(현재 이미지·댓글 유지), 확인 및 충돌/확정불명/삭제/빈 목록/오류 상태. 작성자 GET 목록·상세·영수증, POST 복원 UUID 키+강한 If-Match, 기존 PUT 버전 CAS 전환, Android 동일 계약, 비색인·캐시 금지, WCAG 2.2 AA, 관리자 비식별 집계만.

@@ -1,5 +1,41 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.24.1238 — F675-116 게시판 수정 이력의 출처·재시도·삭제/복원 무결성 보완 (기능 보완 / 초안 / 운영승격 보류)
+
+**회차·정본:** 이전 기능 추가 v1236(미병합 Draft #1184) → 현재 기능 보완 v1238 → 다음 기능 추가 v1240(잠정). 시작·중간 GitHub main `57f393395d16495b06187de69c17592d2c13d251` 확인(QA v1242 당시 `49788d09` 이후 상점/문서 커밋 3건 추가). AGENTS.md, README.md, 최신 main PROJECT_PLAN.md 영문 정본과 .ko.md 대조. QA v1242 FAILED/HOLD. 미병합 v1236 설계를 수정하는 문서 기획이며 런타임 수정·배포 증거가 아니다.
+
+### 실제 코드 정정 및 제품 범위
+- **v1236의 중요 정정:** `048-member-board-threads.sql`은 과거 정의이고, 최신 `member_board_update`는 `259-board-author-user-id-and-chat-search.sql:169-201`에서 재정의됐다(`173-member-board-images.sql` 이후). 최신 함수도 `p_key`를 받지만 저장하지 않고 예상 버전 없이 제목/본문을 덮어쓰며 이력 테이블이 없다. 별도 `member_board_delete`는 `044-member-board.sql`에 남아 있고 `deleted_at`만 설정하며 `p_key`를 기록하지 않는다. 이미 적용된 044/048/173/259 파일 수정 금지. 코드상 설계 위험이지 실제 운영 사고를 확인한 것은 아니다.
+- `backend/src/board/board.controller.ts`의 PUT은 `UpdatePostDto extends CreatePostDto`, CSRF/동의/세션 가드를 사용하지만 If-Match가 없다. DTO가 상속한 이미지 필드는 허용되지만 `board.repository.ts`의 수정 호출에서는 무시된다. `frontend/src/app/board/actions.ts`는 수정 제출마다 새 UUID를 생성하므로 네트워크 실패 후 재제출이 같은 논리적 요청의 재시도라고 볼 수 없다. `post-forms.tsx`에 버전 필드가 없고 현재 App API 계약에 수정 이력 경로도 없다. 백엔드·웹·Android를 함께 전환한다.
+- 작성자 본인만 `/board/[postId]` 수정 이력 → 보기 → 복원 확인 → 새로고침/취소. 제목·본문만 복원하며 현재 이미지·댓글 유지. 과거 본문 공개, 관리자 권한 우회, WLD·원장·보상·인벤토리 변경 없음. `board_author_revisions` 기본 OFF. F675-110 임시저장 및 F675-109 읽기 목록과 중복 개발하지 않는다.
+
+### 화면 상태·API·Android·접근성
+- 작성자 GET `/api/v1/board/posts/:postId/revisions?limit=1..20&cursor=`, GET `.../revisions/:revision`, POST `.../revisions/:revision/restore`, GET `.../revision-requests/:requestKey`. 수정 권한이 있는 작성자에게만 현재 글 GET의 `currentRevision` 및 강한 ETag `"vN"` 제공. 활성화 이후 기존 PUT에 `If-Match: "vN"` 요구: 누락 428, 오래된 버전 412, 같은 멱등 키에 다른 요청 409, 글 없음/타인 404, 비로그인 401, 동의 부족 403, 남용 429, 확정 불명 503. 쓰기 요청에 세션·동의·CSRF·속도 제한 적용. 서버가 검증한 세션의 사용자 ID만 신뢰하며 SECURITY DEFINER에 `p_actor`를 전달하는 행위만으로 신원이 입증되는 것은 아니다.
+- 사용자 의도별 편집·복원 요청에 하나의 UUID `Idempotency-Key`를 부여하고 불확실한 실패 시 재제출/새로고침에도 동일 키를 유지한다. 동일 요청 재시도는 글이 나중에 변경·삭제돼도 최초 확정 영수증을 반환하며, 현재 상태는 별도 본인 조회로 확인한다. 타임아웃이나 오래된 영수증만으로 `RESTORED_CONFIRMED` 표시 금지. 오프라인 낙관적 완료 금지.
+- 상태: `LOADING`, `BASELINE_ONLY`, `READY`, `STALE_VERSION`, `REDACTED`, `POST_DELETED`, `SOURCE_UNAVAILABLE`, `UNKNOWN_COMMIT`, `SIGNED_OUT`, `RESTORED_CONFIRMED`. 충돌 화면은 비교/새로고침/취소와 미저장 초안의 로컬 보존을 제공하며 자동 덮어쓰기 금지. 삭제·운영 제한 글의 과거 본문은 개인정보 정책 승인 전 노출 금지. 서명된 만료 커서는 사용자·세션 세대·글·상한 버전·마지막 버전·만료시각에 결합, 페이지당 최대 20개, 동시 삭제 중 완전 스냅샷 보장 주장 금지.
+- 신규 `/app-api/v1/board/posts/:id/revisions` 목록/상세/복원/영수증 및 기존 PUT/DELETE 동등성을 위해 계약 재생성, 인증 게이트웨이, 서버 전용 내부 토큰, Android UI·접근성·다국어 확인. 320px·400% 확대, 초점 복귀·오류 라이브 알림·키보드·동작 줄이기. 본인 데이터 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex,nofollow`, 사이트맵·JSON-LD 제외. `/admin/board`는 익명화된 건수·용량·남용 집계만 조회하며 원문 이력은 열람하지 않는다.
+
+### DB·원자적 트랜잭션·개인정보·전환
+- 순방향 마이그레이션 번호는 **미할당**: #1147의 280번 4중 충돌 및 적용된 266번 체크섬 불일치 해결 후 지정. 제안 `member_board_posts.current_revision bigint`는 우선 NULL 허용으로 추가하고 검증·백필 후 NOT NULL; `member_board_post_revisions(post_id,revision,editor_user_id,title,body,action,created_at,content_digest)` 기본키 `(post_id,revision)` 및 `(post_id,revision DESC)` 조회 인덱스; `member_board_revision_requests(actor_user_id,request_key,request_digest,post_id,operation,original_result_revision,original_status,committed_at)` 기본키 `(actor_user_id,request_key)`, 32바이트 해시 제약. 제목·본문 범위, action 허용값, 양의 단조 버전. 앱 테이블 직접 권한·PUBLIC EXECUTE 금지, SECURITY DEFINER 고정 search_path·함수 내부 소유권 검증.
+- **기존 글의 최초 스냅샷은 과거 이력 복원이 아니다.** 신뢰 가능한 편집 기록이 없으므로 같은 글 `FOR UPDATE` 잠금 아래 현재 확인된 제목·본문만 버전 1, `BASELINE_CAPTURED`, 캡처 시각, `historicalCoverage=FROM_BASELINE_ONLY`로 저장한다. 최초 작성본이나 이전 버전이라고 허위 표시하지 않는다. 신규 글은 확정 CREATE부터 버전 1. 지연 캡처와 모든 쓰기를 직렬화하며 삭제된 글은 재활성화하지 않는다.
+- 신규/기존 작성·수정·복원·삭제 모두 잠금 순서를 통일: 인증된 사용자 → 불변 `(actor,requestKey)` 영수증 선점·해시 비교 → 글 `FOR UPDATE` → 작성자·활성/삭제/운영제한·예상 버전·보존정책 확인 → 불변 이력 추가 + CAS 수정/소프트삭제 → 원본 영수증과 함께 커밋. 같은 키·같은 요청은 재쓰기 없이 최초 영수증, 같은 키·다른 요청은 409. 오래된 If-Match 412, 활성화 후 누락 428. `updated_at`을 버전으로 대체하지 않는다.
+- 활성화 전 웹·Android 호출자를 먼저 전환하고, 활성화 후 조건부 헤더 없는 구형 PUT은 428로 차단한다(무조건 덮어쓰기 금지). OFF 단계에서도 모든 작성 경로가 새 공통 DB 함수에서 이력·버전을 유지해야만 기능을 켤 수 있다. 기능 OFF로 UI만 내릴 때 쓰기 이력까지 중단하면 불일치하므로 OFF만으로 안전한 롤백이라고 주장하지 않는다. 순방향 스키마 롤백은 파괴적으로 수행하지 않는다. 백필은 승인된 격리 복원 DB에서 제한된 배치로만 검증하며 공유 `woldeok_moneyverse_dev`에 쓰지 않는다.
+- FK/보존 기간/계정 삭제/운영 제한은 **개인정보·법률 승인 전 BLOCKED**. 법적 근거, 만료, 열람·삭제, 가림 정책을 먼저 확정하고 무조건 CASCADE·영구 원문 보존·과거 글 재공개 금지. 본인·동의 검증, 계정 전환 시 늦게 도착한 응답 폐기, 감사·분석 로그의 원문 제외. 원본 조회 실패와 빈 이력을 구분한다.
+
+### P0/P1 개발 백로그 — 고유 10개
+- **P0 ENV1238-01** 운영·개발·Test DB 분리, 5433 전체 바인딩 차단, 암호화 백업·격리 복원 검증.
+- **P0 SEC1238-02** 앱 계정 241개 중 235개 테이블 쓰기 권한 및 PUBLIC 은행 함수 3개 개선, SECURITY DEFINER 본인 범위·타인 차단 검증.
+- **P0 REL1238-03** QA v1242 프론트 5건 실패, 전체 감사 Critical 2/High 10·봇 Critical 1/High 5, Migration 266·280, QA 정리 후 루트 약 94%, 경로 검증 CLI, 정확 SHA CI/Test 인증 금융 E2E·롤백; 운영승격 금지.
+- **P0 BOARD1238-04** 실제 Migration 259 수정·044 삭제, DTO 이미지 필드 불일치, 제출마다 새 UUID, 모든 쓰기 호출자 및 개인정보 보존 승인 확인.
+- **P1 BOARD1238-05** 버전·이력·영수증 순방향 DB, BASELINE_CAPTURED, 검증된 배치 백필, 불변 해시·권한 테스트.
+- **P1 BOARD1238-06** 작성·수정·복원·삭제 동일 잠금·CAS, 원본 영수증 재전송, 428/412/409/503 및 삭제 경합.
+- **P1 BOARD1238-07** NestJS·웹 기존 PUT/DELETE 호환 게이트, 이력/복원/영수증 API, App API 계약 생성 및 Android 연동.
+- **P1 BOARD1238-08** 작성자 이력·비교·복원·확정불명 UI, 320px·400%·WCAG·다국어·로그아웃 응답 무효화.
+- **P1 BOARD1238-09** 법률상 보존·삭제·운영제한, 관리자 비식별 통계, noindex/no-store, 남용 방지, p95·용량·개인정보 KPI.
+- **P1 BOARD1238-10** 격리 실제 PG에서 동일 키 100건→수정/영수증 각 1개, 타인 조회 100건→내용/건수 유출 0, 수정·복원·삭제 경합 100건→유실 0, 합성 10,001개 커서, 기준선 출처, 과거 이미지 미복원·금융 영향 0; 정확 SHA 웹/Android/금융 회귀·백업 복원·기능 OFF 검증.
+
+**출시·근거:** 문서 Draft만 변경. 기능 OFF, 별도 개발 브랜치, 번호 충돌 해결 후 순방향 SQL, 부정 권한 테스트·개인정보 승인, 정확 SHA 전체 CI 및 공식 Test 인증 금융 E2E, 독립 QA, 명시적 승인 GitOps 카나리·롤백 전 운영승격 금지. 런타임·DB·WLD·Test·Production 변경 없음. 외부 발행기관 계열 PostgreSQL·OWASP·W3C·IETF 4곳 참고; **신규 독립 중복제거 승인 근거 0건, 누적 승인 수량 미확인 / 10,000 → BLOCKED / IN PROGRESS**. 발행기관·링크 수를 승인 근거 수로 집계하지 않는다. 참고: https://www.postgresql.org/docs/current/explicit-locking.html ; https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/ ; https://www.w3.org/TR/WCAG22/ ; https://www.rfc-editor.org/rfc/rfc9110.html.
+
 ## v2026.10.24.1236 — F675-116 게시판 작성자 전용 수정 이력·충돌 방지 복원 (기능 추가 / 기획 초안 / 배포 보류)
 
 **회차:** 이전 기능 보완 v1234(미병합 Draft #1175) → 현재 기능 추가 v1236 → 다음 기능 보완 v1238(잠정). 정본: origin/main `49788d09494fed3e463651945b83386e87dd47bc`, AGENTS.md, README.md, 영문 PROJECT_PLAN.md 및 한국어 대조본. 최신 QA v1241 FAILED/HOLD(2026-10-24 21:25 KST). 문서만 변경하며 런타임·DB·WLD·Test·Production을 변경하지 않는다.
