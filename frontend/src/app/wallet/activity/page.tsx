@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -10,7 +11,8 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
-import type { Overview } from '../sides';
+import { pocketHistoryHref, selectedPocket, selectedPocketDelta } from '../pocket-history';
+import type { Overview, TransactionView } from '../sides';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +30,21 @@ export const metadata: Metadata = {
  * the top of the screen to make room for it was the wrong trade — so the rest
  * of it lives here.
  */
-export default async function WalletActivityPage() {
+export default async function WalletActivityPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<{ pocket?: string | string[] }>;
+}) {
   await requireMember();
-  // 50 is the API's ceiling for this list, so this page shows everything it
-  // will give rather than a page size chosen here.
-  const wallet = await apiOrNull<Overview>('/api/v1/wallet?recent=50');
+  const pocket = selectedPocket((await searchParams).pocket);
+  if (!pocket) notFound();
+  // Each pocket is filtered in PostgreSQL BEFORE its independent 50-row cap.
+  // The all-pocket view intentionally retains the original wallet overview.
+  const transactions = pocket === 'all'
+    ? (await apiOrNull<Overview>('/api/v1/wallet?recent=50'))?.recentTransactions
+    : (await apiOrNull<{ transactions: TransactionView[] }>(
+      `/api/v1/wallet/transactions?pocket=${pocket}&recent=50`,
+    ))?.transactions;
 
   return (
     <div data-page="wallet-activity" className="mv-page mv-page--finance grid gap-5">
@@ -48,24 +60,47 @@ export default async function WalletActivityPage() {
         맞춘 금액을 보여 줍니다.
       </PageHeader>
 
+      <nav aria-label="거래 지갑 선택" className="flex flex-wrap gap-2">
+        {([
+          ['all', '전체 거래'],
+          ['cash', '활동 지갑'],
+          ['bank', '은행 보관함'],
+        ] as const).map(([key, label]) => (
+          <Button key={key} asChild variant={pocket === key ? 'default' : 'outline'} size="sm">
+            <Link href={pocketHistoryHref(key)} aria-current={pocket === key ? 'page' : undefined}>
+              {label}
+            </Link>
+          </Button>
+        ))}
+      </nav>
+      <p className="text-xs text-muted-foreground">
+        {pocket === 'all'
+          ? '전체 지갑의 최근 거래 최대 50건입니다. 전체 기간 거래내역은 아닙니다.'
+          : `${pocket === 'cash' ? '활동 지갑' : '은행 보관함'}에서 실제 금액이 변동된 최근 거래 최대 50건입니다. 내부 이동은 두 지갑에 모두 표시됩니다.`}
+      </p>
+
       <Card>
         <CardContent>
-          {!wallet ? (
+          {!transactions ? (
             <EmptyState title="지금은 기록을 불러올 수 없어요." />
-          ) : wallet.recentTransactions.length === 0 ? (
+          ) : transactions.length === 0 ? (
             <EmptyState
               title="아직 기록된 활동이 없어요."
               description="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다."
             />
           ) : (
-            wallet.recentTransactions.map((entry) => {
+            transactions.map((entry) => {
               const { debit, credit } = sides(entry);
+              const amount = selectedPocketDelta(entry, pocket);
+              if (amount === null) {
+                return <EmptyState key={entry.transactionId} title="거래 금액을 검증할 수 없어요." />;
+              }
               return (
                 <PostingStrip
                   key={entry.transactionId}
                   debit={debit}
                   credit={credit}
-                  amount={entry.netAmount}
+                  amount={amount}
                   label={entry.label}
                   at={formatMoment(entry.occurredAt)}
                 />

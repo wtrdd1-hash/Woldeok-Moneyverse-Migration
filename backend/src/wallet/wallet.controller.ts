@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -89,6 +90,24 @@ export class WalletController {
       throw new BadRequestException('recent must be a whole number');
     }
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
+  }
+
+  @Get('wallet/transactions')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Recent owner-only cash or bank pocket movements (up to 50)' })
+  pocketTransactions(
+    @Req() request: RequestWithSession,
+    @Query('pocket') pocket?: string,
+    @Query('recent') recent?: string,
+  ) {
+    if (recent !== undefined && !/^[1-9][0-9]*$/.test(recent)) {
+      throw new BadRequestException('recent must be a canonical positive integer');
+    }
+    return this.guarded(
+      () => this.service().pocketTransactions(requireUserId(request), pocket, recent === undefined ? 50 : Number(recent)),
+      'wallet history is unavailable',
+    );
   }
 
   @Get('wallet/recipients/search')

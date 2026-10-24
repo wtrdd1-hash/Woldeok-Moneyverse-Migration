@@ -1,5 +1,5 @@
 {
-  "contractVersion": "v2026.09.22.359",
+  "contractVersion": "v2026.10.24.1325",
   "apiVersion": "v2026.09.22.359",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
@@ -15099,6 +15099,247 @@
           "userId",
           "balances",
           "recentTransactions"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/wallet/transactions",
+      "purpose": "내 활동 지갑 또는 은행 보관함에서 실제 변동된 최근 거래 최대 50건 조회",
+      "callWhen": "지갑 거래내역에서 활동 지갑/은행 보관함 탭을 열거나 새로고침할 때",
+      "authorization": "로그인 + 최신 약관 동의 필수; 본인 거래만 반환",
+      "afterSuccess": "읽기 전용; 변경 없음",
+      "backendRoute": "/api/wallet/transactions",
+      "operationId": "WalletController_pocketTransactions",
+      "backendOpenApiPath": "/wallet/transactions",
+      "summary": "Recent owner-only cash or bank pocket movements (up to 50)",
+      "parameters": [
+        {
+          "name": "pocket",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "bank"
+            ]
+          }
+        },
+        {
+          "name": "recent",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$",
+            "description": "1..50; default 50"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "pocket",
+          "limit",
+          "transactions"
+        ],
+        "note": "Signed WLD fields remain exact decimal integer strings. Only selected-pocket nonzero movements, including net-zero internal transfers; 50-row maximum, not full history."
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "pocket": {
+            "oneOf": [
+              {
+                "type": "string",
+                "const": "cash"
+              },
+              {
+                "type": "string",
+                "const": "bank"
+              }
+            ]
+          },
+          "limit": {
+            "type": "number"
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "transactionId": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "netAmount": {
+                  "allOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "__wld": {
+                          "type": "object",
+                          "properties": {
+                            "description": {
+                              "oneOf": [
+                                {
+                                  "type": "undefined"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "__wld"
+                      ]
+                    }
+                  ]
+                },
+                "cashDelta": {
+                  "oneOf": [
+                    {
+                      "type": "undefined"
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "__wld": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "note": "depth-limited"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "note": "depth-limited"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "description"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "__wld"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "bankDelta": {
+                  "oneOf": [
+                    {
+                      "type": "undefined"
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "__wld": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "note": "depth-limited"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "note": "depth-limited"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "description"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "__wld"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "direction": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "const": "neutral"
+                    },
+                    {
+                      "type": "string",
+                      "const": "in"
+                    },
+                    {
+                      "type": "string",
+                      "const": "out"
+                    }
+                  ]
+                },
+                "occurredAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "transactionId",
+                "type",
+                "label",
+                "netAmount",
+                "direction",
+                "occurredAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "pocket",
+          "limit",
+          "transactions"
         ]
       },
       "responseCompatibility": {

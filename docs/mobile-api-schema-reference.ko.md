@@ -2,9 +2,9 @@
 
 [English](mobile-api-schema-reference.md) | **한국어** | [기계 판독 계약](mobile-api-contract.json)
 
-업데이트 버전: **v2026.09.22.359**
+업데이트 버전: **v2026.10.24.1325**
 
-이 문서는 179개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
+이 문서는 180개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
 ## 공통 호환성 규칙
 
@@ -4751,6 +4751,44 @@ _요청 본문 없음._
 | recentTransactions[].bankDelta | false | undefined \| string & object |  |
 | recentTransactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
 | recentTransactions[].occurredAt | true | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/wallet/transactions` — 내 활동 지갑 또는 은행 보관함에서 실제 변동된 최근 거래 최대 50건 조회
+
+- 인증/권한: 로그인 + 최신 약관 동의 필수; 본인 거래만 반환
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 읽기 전용; 변경 없음
+- Operation ID: `WalletController_pocketTransactions`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| pocket | query | true | string | enum="cash","bank" |
+| recent | query | false | string | pattern="^[1-9][0-9]*$"; description="1..50; default 50" |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| pocket | true | string="cash" \| string="bank" |  |
+| limit | true | number |  |
+| transactions[] | true | object[] |  |
+| transactions[] | true | object |  |
+| transactions[].transactionId | true | string |  |
+| transactions[].type | true | string |  |
+| transactions[].label | true | string |  |
+| transactions[].netAmount | true | string & object |  |
+| transactions[].cashDelta | false | undefined \| string & object |  |
+| transactions[].bankDelta | false | undefined \| string & object |  |
+| transactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
+| transactions[].occurredAt | true | string |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 

@@ -31,6 +31,15 @@ export function requireRecentLimit(value: unknown): number {
   return value;
 }
 
+export type WalletPocket = 'cash' | 'bank';
+
+export function requireWalletPocket(value: unknown): WalletPocket {
+  if (value !== 'cash' && value !== 'bank') {
+    throw new WalletInputError('pocket must be cash or bank');
+  }
+  return value;
+}
+
 /** accounts / account_balances columns: packages/database/init/001-economy-core.sql */
 export interface WalletBalanceRow {
   readonly account_type: string;
@@ -145,6 +154,45 @@ export interface WalletRepayInput {
   readonly idempotencyKey: string;
 }
 
+/** Shared owner-only ledger projection. The pocket filter runs before LIMIT. */
+const OWNED_WALLET_TRANSACTIONS_SQL = `SELECT
+         ledger_transaction.id::text AS transaction_id,
+         ledger_transaction.type,
+         ledger_transaction.created_at,
+         COALESCE(SUM(
+           CASE posting.direction
+             WHEN 'debit'::public.posting_direction THEN posting.amount
+             ELSE -posting.amount
+           END
+         ), 0)::text AS net_amount,
+         COALESCE(SUM(
+           CASE WHEN account.account_type = 'USER_CASH'::public.account_type THEN
+             CASE posting.direction
+               WHEN 'debit'::public.posting_direction THEN posting.amount
+               ELSE -posting.amount
+             END
+           ELSE 0
+           END
+         ), 0)::text AS cash_delta,
+         COALESCE(SUM(
+           CASE WHEN account.account_type = 'USER_BANK'::public.account_type THEN
+             CASE posting.direction
+               WHEN 'debit'::public.posting_direction THEN posting.amount
+               ELSE -posting.amount
+             END
+           ELSE 0
+           END
+         ), 0)::text AS bank_delta
+       FROM public.ledger_transactions AS ledger_transaction
+       JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
+       JOIN public.accounts AS account ON account.id = posting.account_id
+       WHERE account.owner_user_id = $1
+         AND account.account_type IN (
+           'USER_CASH'::public.account_type,
+           'USER_BANK'::public.account_type
+         )
+       GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at`;
+
 /**
  * Read-model and command gateway for a single wallet owner.
  *
@@ -188,46 +236,29 @@ export class PostgresWalletRepository {
     const recentLimit = requireRecentLimit(limit);
     return queryRows<WalletTransactionRow>(
       this.pool,
-      `SELECT
-         ledger_transaction.id::text AS transaction_id,
-         ledger_transaction.type,
-         ledger_transaction.created_at,
-         COALESCE(SUM(
-           CASE posting.direction
-             WHEN 'debit'::public.posting_direction THEN posting.amount
-             ELSE -posting.amount
-           END
-         ), 0)::text AS net_amount,
-         COALESCE(SUM(
-           CASE WHEN account.account_type = 'USER_CASH'::public.account_type THEN
-             CASE posting.direction
-               WHEN 'debit'::public.posting_direction THEN posting.amount
-               ELSE -posting.amount
-             END
-           ELSE 0
-           END
-         ), 0)::text AS cash_delta,
-         COALESCE(SUM(
-           CASE WHEN account.account_type = 'USER_BANK'::public.account_type THEN
-             CASE posting.direction
-               WHEN 'debit'::public.posting_direction THEN posting.amount
-               ELSE -posting.amount
-             END
-           ELSE 0
-           END
-         ), 0)::text AS bank_delta
-       FROM public.ledger_transactions AS ledger_transaction
-       JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
-       JOIN public.accounts AS account ON account.id = posting.account_id
-       WHERE account.owner_user_id = $1
-         AND account.account_type IN (
-           'USER_CASH'::public.account_type,
-           'USER_BANK'::public.account_type
-         )
-       GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
+      `${OWNED_WALLET_TRANSACTIONS_SQL}
        ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
        LIMIT $2`,
       [ownerUserId, recentLimit],
+    );
+  }
+
+  /**
+   * The selected cash/bank pocket is filtered after aggregating owned postings,
+   * before limiting rows. Net-zero internal movements belong to both pockets.
+   */
+  async pocketTransactionsForUser(userId: string, pocket: WalletPocket, limit: number): Promise<WalletTransactionRow[]> {
+    const ownerUserId = requireUuid(userId, 'authenticated user id');
+    const selected = requireWalletPocket(pocket);
+    const recentLimit = requireRecentLimit(limit);
+    return queryRows<WalletTransactionRow>(
+      this.pool,
+      `SELECT owned.* FROM (${OWNED_WALLET_TRANSACTIONS_SQL}) AS owned
+       WHERE CASE WHEN $2::text = 'cash' THEN owned.cash_delta::numeric
+                  ELSE owned.bank_delta::numeric END <> 0
+       ORDER BY owned.created_at DESC, owned.transaction_id DESC
+       LIMIT $3`,
+      [ownerUserId, selected, recentLimit],
     );
   }
 
