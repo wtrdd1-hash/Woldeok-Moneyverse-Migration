@@ -201,6 +201,29 @@ export class WorkRepository {
     );
   }
 
+  async favorites(actor: unknown): Promise<string[]> {
+    assertUuid(actor, 'actor');
+    const rows = await queryRows<{ task_id: string }>(
+      this.pool,
+      'SELECT task_id::text FROM public.work_favorites_list($1)',
+      [actor],
+    );
+    return rows.map((row) => row.task_id);
+  }
+
+  async setFavorite(actor: unknown, task: unknown, saved: boolean): Promise<{ saved: boolean; replayed: boolean }> {
+    assertUuid(actor, 'actor');
+    assertUuid(task, 'task');
+    if (typeof saved !== 'boolean') throw new WorkInputError('saved must be boolean');
+    const row = await queryOne<{ saved: boolean; replayed: boolean }>(
+      this.pool,
+      'SELECT saved, replayed FROM public.work_favorite_set($1, $2, $3)',
+      [actor, task, saved],
+    );
+    if (!row) throw new Error('work favorite receipt unavailable');
+    return row;
+  }
+
   async tasks(actor: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
     const rows = await queryRows<WorkTaskRow>(

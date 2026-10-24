@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsBoolean, IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class WorkAssignmentDto {
   @ApiProperty({ format: 'uuid' }) @IsUUID() readonly taskId!: string;
@@ -145,3 +145,7 @@ export interface QualificationItem {
   readonly acquired_at: string;
 }
 
+export class WorkFavoriteDto {
+  @ApiProperty({ type: Boolean })
+  @IsBoolean() readonly saved!: boolean;
+}

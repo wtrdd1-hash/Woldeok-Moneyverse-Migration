@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -28,6 +29,7 @@ import {
   WorkAssignmentDto,
   WorkCompletionDto,
   WorkDashboardResponseDto,
+  WorkFavoriteDto,
 } from './work.dto';
 import { WorkInputError, WorkRepository } from './work.repository';
 
@@ -109,6 +111,40 @@ export class WorkController {
       this.guarded(() => repository.tasks(actor), 'the task board is unavailable'),
     ]);
     return { featureState, tasks };
+  }
+
+  private requireFavoritesEnabled(): void {
+    if (process.env.WORK_FAVORITES_ENABLED !== 'true') {
+      throw new ServiceUnavailableException('work favorites are not enabled');
+    }
+  }
+
+  @Get('favorites')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'List current member-only saved work task identifiers' })
+  async favorites(@Req() request: RequestWithSession) {
+    this.requireFavoritesEnabled();
+    return {
+      task_ids: await this.guarded(
+        () => this.repository().favorites(requireUserId(request)),
+        'work favorites are unavailable',
+      ),
+    };
+  }
+
+  @Post('favorites/:id')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Save or remove one work task from the member shortlist' })
+  setFavorite(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) taskId: string,
+    @Body() body: WorkFavoriteDto,
+  ) {
+    this.requireFavoritesEnabled();
+    return this.guarded(
+      () => this.repository().setFavorite(requireUserId(request), taskId, body.saved),
+      'work favorite could not be updated',
+    );
   }
 
   @Post('tasks/:id/complete')

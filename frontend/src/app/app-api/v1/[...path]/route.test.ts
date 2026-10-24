@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from './route';
+import { GET, POST } from './route';
 import { APP_API_CONTRACT_VERSION } from '@/lib/app-gateway';
 
 function request(path: string, headers: Record<string, string> = {}) {
@@ -34,6 +34,43 @@ describe('app API route compatibility', () => {
     expect(body.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
     expect(body.auth.persistentCookieJarRequired).toBe(true);
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('never exposes private work favorites with a public cache policy', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ task_ids: [] }), {
+      status: 200,
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300', etag: '"private"' },
+    })));
+    const response = await GET(request('/app-api/v1/work/favorites'), context('work', 'favorites'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('etag')).toBeNull();
+  });
+
+  it('proxies an Android work favorite write without leaking private cache validators', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let forwardedBody = '';
+    vi.stubGlobal('fetch', vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      forwardedBody = init?.body instanceof ArrayBuffer
+        ? new TextDecoder().decode(init.body)
+        : String(init?.body ?? '');
+      return new Response(JSON.stringify({ saved: true, replayed: false }), {
+        status: 200,
+        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+      });
+    }));
+    const taskId = '00000000-0000-4000-8000-000000000002';
+    const req = new NextRequest(`https://easy-scraping.com/app-api/v1/work/favorites/${taskId}`, {
+      method: 'POST',
+      headers: { host: 'easy-scraping.com', 'x-forwarded-proto': 'https', 'content-type': 'application/json' },
+      body: JSON.stringify({ saved: true }),
+    });
+    const response = await POST(req, context('work', 'favorites', taskId));
+    expect(response.status).toBe(200);
+    expect(JSON.parse(forwardedBody)).toEqual({ saved: true });
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ saved: true, replayed: false });
   });
 
   it('returns a stable problem document for paths outside the app allow-list', async () => {

@@ -20,6 +20,8 @@ import { switchJobAction } from './actions';
 import { TakeButton } from './work-forms';
 import { dailyQuotaLabel } from './work-quota';
 import { filterWorkTasks } from './work-search';
+import { favoriteWorkTasks } from './work-favorites';
+import { FavoriteTaskButton } from './favorite-task-button';
 import {
   boardOrder,
   difficultyLabel,
@@ -56,17 +58,19 @@ function QuickCareerSwitchButton({
 
 export function CareerTasksBoard({
   tasks,
+  favoriteTaskIds = null,
   activeJobType,
   quotaBlock,
 }: {
   readonly tasks: readonly WorkTask[];
+  readonly favoriteTaskIds?: readonly string[] | null;
   readonly activeJobType?: string | null | undefined;
   readonly quotaBlock?: WorkQuotaBlock | null;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
 
-  const [filter, setFilter] = useState<'my_job' | 'all'>(activeJobType ? 'my_job' : 'all');
+  const [filter, setFilter] = useState<'my_job' | 'all' | 'favorites'>(activeJobType ? 'my_job' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const activeJobName = activeJobType ? jobLabel(activeJobType, locale) : '';
@@ -74,7 +78,9 @@ export function CareerTasksBoard({
   const myTasks = activeJobType ? tasks.filter((t) => t.job_type === activeJobType) : [];
   const myCompletedToday = myTasks.reduce((sum, t) => sum + t.taken_today, 0);
 
-  const scopedTasks = filter === 'my_job' && activeJobType && myTasks.length > 0 ? myTasks : tasks;
+  const scopedTasks = filter === 'favorites'
+    ? favoriteWorkTasks(tasks, favoriteTaskIds)
+    : filter === 'my_job' && activeJobType && myTasks.length > 0 ? myTasks : tasks;
   const displayTasks = boardOrder(filterWorkTasks(scopedTasks, searchQuery), activeJobType);
 
   return (
@@ -113,6 +119,18 @@ export function CareerTasksBoard({
                 {tasks.length}
               </Badge>
             </Button>
+            {favoriteTaskIds !== null && (
+              <Button
+                size="sm"
+                variant={filter === 'favorites' ? 'default' : 'outline'}
+                onClick={() => setFilter('favorites')}
+                aria-pressed={filter === 'favorites'}
+                className="min-h-11 gap-1 text-xs"
+              >
+                <Star aria-hidden="true" className="size-4" />
+                {isEn ? 'Saved tasks' : '저장한 업무'} ({favoriteWorkTasks(tasks, favoriteTaskIds).length})
+              </Button>
+            )}
           </div>
 
           {activeJobType && (
@@ -200,6 +218,9 @@ export function CareerTasksBoard({
                       </Badge>
                     </div>
                   </div>
+                  {favoriteTaskIds !== null && (
+                    <FavoriteTaskButton taskId={task.task_id} saved={favoriteTaskIds.includes(task.task_id)} />
+                  )}
                   <CardTitle className="text-base mt-2 flex items-center justify-between">
                     <span className="truncate">{task.name}</span>
                   </CardTitle>
