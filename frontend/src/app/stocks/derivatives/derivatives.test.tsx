@@ -65,7 +65,7 @@ describe('가상 파생상품 10x 레버리지 선물 거래소 계약 & 계산 
     expect(settlement.insuranceFundDeposit + settlement.hardBurnWld).toBe(margin);
   });
 
-  it('4. 10대 종목 실시간 청산 히트맵 클러스터를 정상 생성해야 한다', () => {
+  it('4. 10대 종목 예시 청산 히트맵 클러스터를 정상 생성해야 한다', () => {
     const currentPrice = 12500;
     const heatmap = generateLiquidationHeatmap(currentPrice);
     expect(heatmap.length).toBeGreaterThan(0);
@@ -76,7 +76,10 @@ describe('가상 파생상품 10x 레버리지 선물 거래소 계약 & 계산 
   it('5. 프론트엔드 파생상품 거래소 화면이 정상 렌더링되어야 한다', () => {
     render(<DerivativesPage />);
     expect(screen.getByText(/10X 레버리지 파생상품 선물 거래소/i)).toBeDefined();
-    expect(screen.getByText(/실시간 청산 히트맵/i)).toBeDefined();
+    expect(screen.getByText(/예시 청산 히트맵/i)).toBeDefined();
     expect(screen.getByText(/선물 주문 콘솔/i)).toBeDefined();
+    expect(screen.getAllByText(/실제 보유 포지션 조회는 지원되지 않습니다/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/격리 잔고 실시간/i)).toBeNull();
+    expect(screen.queryByText(/50,000,000/)).toBeNull();
   });
 });
