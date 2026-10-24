@@ -24,7 +24,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
-import { WalletInputError } from './wallet.repository';
+import { WalletInputError, requireWalletDirection } from './wallet.repository';
 import { WalletRecipientError, WalletService } from './wallet.service';
 
 /**
@@ -82,13 +82,29 @@ export class WalletController {
    */
   @Get('wallet')
   @ApiOperation({ summary: 'Balances and recent ledger entries for the caller' })
-  overview(@Req() request: RequestWithSession, @Query('recent') recent?: string) {
-    if (recent === undefined) return this.service().overview(requireUserId(request));
-    const parsed = Number(recent);
-    if (!Number.isSafeInteger(parsed)) {
-      throw new BadRequestException('recent must be a whole number');
+  overview(
+    @Req() request: RequestWithSession,
+    @Query('recent') recent?: string,
+    @Query('direction') direction?: string,
+  ) {
+    let requestedDirection;
+    try {
+      requestedDirection = requireWalletDirection(direction);
+    } catch (error) {
+      if (error instanceof WalletInputError) throw new BadRequestException(error.message);
+      throw error;
     }
-    return this.service().overview(requireUserId(request), { recentLimit: parsed });
+    if (recent === undefined && requestedDirection === undefined) {
+      return this.service().overview(requireUserId(request));
+    }
+    const parsed = recent === undefined ? 10 : Number(recent);
+    if (!Number.isSafeInteger(parsed) || parsed < 1 || parsed > 50) {
+      throw new BadRequestException('recent must be an integer between 1 and 50');
+    }
+    return this.service().overview(requireUserId(request), {
+      recentLimit: parsed,
+      ...(requestedDirection ? { direction: requestedDirection } : {}),
+    });
   }
 
   @Get('wallet/recipients/search')

@@ -24,6 +24,14 @@ export function requirePositiveWld(value: unknown, field: string): string {
   throw new WalletInputError(`${field} must be a positive safe integer or canonical WLD integer string`);
 }
 
+export type WalletActivityDirection = 'in' | 'out' | 'neutral';
+
+export function requireWalletDirection(value: unknown): WalletActivityDirection | undefined {
+  if (value === undefined) return undefined;
+  if (value === 'in' || value === 'out' || value === 'neutral') return value;
+  throw new WalletInputError('direction must be in, out or neutral');
+}
+
 export function requireRecentLimit(value: unknown): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 1 || value > 50) {
     throw new WalletInputError('recent transaction limit must be an integer between 1 and 50');
@@ -183,12 +191,14 @@ export class PostgresWalletRepository {
     );
   }
 
-  async recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]> {
+  async recentTransactionsForUser(userId: string, limit: number, direction?: WalletActivityDirection): Promise<WalletTransactionRow[]> {
     const ownerUserId = requireUuid(userId, 'authenticated user id');
     const recentLimit = requireRecentLimit(limit);
+    const requestedDirection = requireWalletDirection(direction);
     return queryRows<WalletTransactionRow>(
       this.pool,
-      `SELECT
+      `WITH owner_activity AS (
+       SELECT
          ledger_transaction.id::text AS transaction_id,
          ledger_transaction.type,
          ledger_transaction.created_at,
@@ -225,9 +235,16 @@ export class PostgresWalletRepository {
            'USER_BANK'::public.account_type
          )
        GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
-       ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
+       )
+       SELECT transaction_id, type, created_at, net_amount, cash_delta, bank_delta
+       FROM owner_activity
+       WHERE ($3::text IS NULL
+         OR ($3::text = 'in' AND net_amount::numeric > 0)
+         OR ($3::text = 'out' AND net_amount::numeric < 0)
+         OR ($3::text = 'neutral' AND net_amount::numeric = 0))
+       ORDER BY created_at DESC, transaction_id DESC
        LIMIT $2`,
-      [ownerUserId, recentLimit],
+      [ownerUserId, recentLimit, requestedDirection ?? null],
     );
   }
 

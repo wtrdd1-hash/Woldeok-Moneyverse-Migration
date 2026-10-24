@@ -121,6 +121,23 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
+  it('forwards wallet direction, owner cookie and 38-digit amount without shared caching', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const huge = '90071992547409931234567890123456789012';
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ recentTransactions: [{ netAmount: huge }] }), {
+      status: 200, headers: { 'content-type': 'application/json', etag: '"private-receipt"' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/wallet?recent=20&direction=in', { cookie: 'session=opaque' }), context('wallet'));
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const [target, init] = fetchSpy.mock.calls[0] as unknown as [URL, RequestInit];
+    expect(String(target)).toContain('/api/v1/wallet?recent=20&direction=in');
+    expect(new Headers(init.headers).get('cookie')).toBe('session=opaque');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('etag')).toBeNull();
+    expect((await response.json()).recentTransactions[0].netAmount).toBe(huge);
+  });
+
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network down'); }));
