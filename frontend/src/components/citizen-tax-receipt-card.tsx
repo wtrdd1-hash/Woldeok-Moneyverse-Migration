@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
+import { currentBudgetQuarter } from '@moneyverse/contract';
+import { castCitizenBudgetVote } from '@/app/wallet/actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,11 +32,10 @@ export function CitizenTaxReceiptCard() {
   const [loading, setLoading] = useState(true);
   const [selectedChoice, setSelectedChoice] = useState<string>('WELFARE');
   const [voteSubmitted, setVoteSubmitted] = useState<boolean>(false);
-  const [voteMessage, setVoteMessage] = useState<string | null>(null);
+  const [voteMessage, setVoteMessage] = useState<{ status: 'ok' | 'error'; message: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const now = new Date();
-  const currentQuarter = `${now.getFullYear()}-Q${Math.floor(now.getMonth() / 3) + 1}`;
+  const currentQuarter = currentBudgetQuarter();
 
   useEffect(() => {
     let mounted = true;
@@ -59,25 +60,11 @@ export function CitizenTaxReceiptCard() {
 
   const handleVote = () => {
     startTransition(async () => {
-      try {
-        const res = await fetch('/api/v1/wallet/governance/vote', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            quarter: currentQuarter,
-            choice: selectedChoice,
-          }),
-        });
-        const json = await res.json();
-        if (res.ok && json.success) {
-          setVoteSubmitted(true);
-          setVoteMessage(`${currentQuarter} 분기 예산 지출 우선순위 투표가 성공적으로 국고 회계 감사 원장에 기록되었습니다!`);
-        } else {
-          setVoteMessage(json.message || '투표 처리에 실패했습니다.');
-        }
-      } catch {
-        setVoteMessage('네트워크 오류가 발생했습니다.');
-      }
+      const form = new FormData();
+      form.set('choice', selectedChoice);
+      const result = await castCitizenBudgetVote({ status: 'idle', message: '' }, form);
+      setVoteMessage({ status: result.status === 'ok' ? 'ok' : 'error', message: result.message ?? '투표 저장 여부를 확인할 수 없습니다.' });
+      if (result.status === 'ok') setVoteSubmitted(true);
     });
   };
 
@@ -118,6 +105,7 @@ export function CitizenTaxReceiptCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4 sm:p-6 pt-0 space-y-5">
+        {data ? (<>
         {/* 총 납세액 요약 배너 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="rounded-lg border bg-background/80 p-3 sm:p-4 shadow-xs">
@@ -210,6 +198,9 @@ export function CitizenTaxReceiptCard() {
           </div>
         </div>
 
+        </>) : (
+          <p role="status" className="text-sm text-muted-foreground">검증된 납세 영수증을 불러올 수 없습니다. 납세액을 0 WLD로 확정하지 않습니다.</p>
+        )}
         {/* 분기별 시민 거버넌스 예산 지출 우선순위 투표 섹션 */}
         <div className="rounded-lg border bg-background/60 p-4 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
@@ -217,7 +208,7 @@ export function CitizenTaxReceiptCard() {
               <Vote className="h-4 w-4 text-primary" />
               <span className="text-xs font-semibold text-foreground">{currentQuarter} 분기 예산 집행 우선순위 시민 거버넌스 투표</span>
             </div>
-            <span className="text-[11px] text-muted-foreground font-mono">1인 1표 직접 민주제</span>
+            <span className="text-[11px] text-muted-foreground font-mono">회원당 분기별 선택 1건 · 재선택 가능</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
@@ -227,7 +218,7 @@ export function CitizenTaxReceiptCard() {
                 name="gov_budget_choice"
                 value="WELFARE"
                 checked={selectedChoice === 'WELFARE'}
-                onChange={() => setSelectedChoice('WELFARE')}
+                onChange={() => { setSelectedChoice('WELFARE'); setVoteMessage(null); }}
                 className="mt-0.5"
               />
               <div>
@@ -236,28 +227,28 @@ export function CitizenTaxReceiptCard() {
               </div>
             </label>
 
-            <label className={`flex items-start gap-2.5 p-2.5 rounded border cursor-pointer transition-colors ${selectedChoice === 'BUYBACK_BURN' ? 'border-primary bg-primary/5' : 'hover:bg-muted/40'}`}>
+            <label className={`flex items-start gap-2.5 p-2.5 rounded border cursor-pointer transition-colors ${selectedChoice === 'CURRENCY_STABILIZATION' ? 'border-primary bg-primary/5' : 'hover:bg-muted/40'}`}>
               <input
                 type="radio"
                 name="gov_budget_choice"
-                value="BUYBACK_BURN"
-                checked={selectedChoice === 'BUYBACK_BURN'}
-                onChange={() => setSelectedChoice('BUYBACK_BURN')}
+                value="CURRENCY_STABILIZATION"
+                checked={selectedChoice === 'CURRENCY_STABILIZATION'}
+                onChange={() => { setSelectedChoice('CURRENCY_STABILIZATION'); setVoteMessage(null); }}
                 className="mt-0.5"
               />
               <div>
-                <span className="font-semibold block text-foreground">룬스케이프형 역매수 영구소각 우선 (Deflation First)</span>
-                <span className="text-[11px] text-muted-foreground">시장 덤핑 아이템을 국고가 사들여 소각, 화폐 가치 방어</span>
+                <span className="font-semibold block text-foreground">가상 화폐 안정화 우선 (Currency Stability)</span>
+                <span className="text-[11px] text-muted-foreground">가상 화폐의 안정적인 운영과 변동성 대응을 우선</span>
               </div>
             </label>
 
-            <label className={`flex items-start gap-2.5 p-2.5 rounded border cursor-pointer transition-colors ${selectedChoice === 'INFRA' ? 'border-primary bg-primary/5' : 'hover:bg-muted/40'}`}>
+            <label className={`flex items-start gap-2.5 p-2.5 rounded border cursor-pointer transition-colors ${selectedChoice === 'INFRASTRUCTURE' ? 'border-primary bg-primary/5' : 'hover:bg-muted/40'}`}>
               <input
                 type="radio"
                 name="gov_budget_choice"
-                value="INFRA"
-                checked={selectedChoice === 'INFRA'}
-                onChange={() => setSelectedChoice('INFRA')}
+                value="INFRASTRUCTURE"
+                checked={selectedChoice === 'INFRASTRUCTURE'}
+                onChange={() => { setSelectedChoice('INFRASTRUCTURE'); setVoteMessage(null); }}
                 className="mt-0.5"
               />
               <div>
@@ -266,18 +257,18 @@ export function CitizenTaxReceiptCard() {
               </div>
             </label>
 
-            <label className={`flex items-start gap-2.5 p-2.5 rounded border cursor-pointer transition-colors ${selectedChoice === 'EMERGENCY' ? 'border-primary bg-primary/5' : 'hover:bg-muted/40'}`}>
+            <label className={`flex items-start gap-2.5 p-2.5 rounded border cursor-pointer transition-colors ${selectedChoice === 'CITIZEN_DIVIDEND' ? 'border-primary bg-primary/5' : 'hover:bg-muted/40'}`}>
               <input
                 type="radio"
                 name="gov_budget_choice"
-                value="EMERGENCY"
-                checked={selectedChoice === 'EMERGENCY'}
-                onChange={() => setSelectedChoice('EMERGENCY')}
+                value="CITIZEN_DIVIDEND"
+                checked={selectedChoice === 'CITIZEN_DIVIDEND'}
+                onChange={() => { setSelectedChoice('CITIZEN_DIVIDEND'); setVoteMessage(null); }}
                 className="mt-0.5"
               />
               <div>
-                <span className="font-semibold block text-foreground">비상 준비금 비축 극대화 (Safety First)</span>
-                <span className="text-[11px] text-muted-foreground">블랙 스완 사태 대비 주식 정산 및 유동성 방어 준비금 적립</span>
+                <span className="font-semibold block text-foreground">시민 배당 우선 (Citizen Dividend)</span>
+                <span className="text-[11px] text-muted-foreground">가상 국고의 시민 배당 지급을 우선</span>
               </div>
             </label>
           </div>
@@ -285,11 +276,11 @@ export function CitizenTaxReceiptCard() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1">
             <div className="text-[11px] text-muted-foreground">
               {voteMessage ? (
-                <span className="text-emerald-600 font-medium flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> {voteMessage}
+                <span role={voteMessage.status === 'ok' ? 'status' : 'alert'} className={`${voteMessage.status === 'ok' ? 'text-emerald-600' : 'text-destructive'} font-medium flex items-center gap-1`}>
+                  {voteMessage.status === 'ok' && <CheckCircle2 className="h-3.5 w-3.5" />} {voteMessage.message}
                 </span>
               ) : (
-                '투표 결과는 다음 분기 헌법적 재정 배정 비율에 즉시 가중치로 반영됩니다.'
+                '선택은 국고 예산 우선순위 의견으로 기록되며, 실제 집행이나 배당을 보장하지 않습니다.'
               )}
             </div>
             <Button

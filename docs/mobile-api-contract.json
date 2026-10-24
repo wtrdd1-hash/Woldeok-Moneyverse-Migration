@@ -17067,6 +17067,87 @@
         "legacySnakeCasePreserved": true,
         "camelCaseAliasesAddedRecursively": true
       }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/wallet/governance/vote",
+      "purpose": "분기별 시민 예산 우선순위 선택을 데이터베이스에 기록 또는 변경",
+      "callWhen": "회원이 네 가지 실제 지원 우선순위 중 하나를 명시적으로 선택하고 제출할 때",
+      "authorization": "로그인 + 최신 동의 + CSRF(변경 요청)",
+      "afterSuccess": "성공 응답의 success=true, quarter, choice를 요청과 대조. 별도의 개인 투표 조회 API는 아직 없음",
+      "backendRoute": "/api/wallet/governance/vote",
+      "operationId": "WalletController_voteBudget",
+      "backendOpenApiPath": "/wallet/governance/vote",
+      "summary": "Record the authenticated member current-quarter budget priority vote",
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/CitizenBudgetVoteDto"
+        },
+        "schemaName": "CitizenBudgetVoteDto",
+        "resolvedSchema": {
+          "type": "object",
+          "properties": {
+            "quarter": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-Q[1-4]$",
+              "description": "Current Asia/Seoul quarter only"
+            },
+            "choice": {
+              "type": "string",
+              "enum": [
+                "WELFARE",
+                "INFRASTRUCTURE",
+                "CITIZEN_DIVIDEND",
+                "CURRENCY_STABILIZATION"
+              ]
+            }
+          },
+          "required": [
+            "quarter",
+            "choice"
+          ]
+        }
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "success",
+          "quarter",
+          "choice"
+        ],
+        "note": "True only after SECURITY DEFINER function returned true; a repeat changes the same quarter choice, not an immutable ballot."
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "quarter": {
+            "type": "string"
+          },
+          "choice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "quarter",
+          "choice"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
     }
   ],
   "compatibility": {

@@ -18,3 +18,9 @@
 
 ## Finished
 - Pending.
+
+## In progress — 07:29 KST
+- RED: missing contract module/action failed as expected. GREEN: shared 2, backend 28, frontend+Android gateway 16 focused PASS; typecheck PASS. Four DB choice values now match UI; browser writes use CSRF server action, no false success on transport/receipt failure; tax read failures no longer appear as zero paid.
+- Android contract added (180 endpoints), gateway POST forwarding test; generated schema docs updated.
+- Isolated PostgreSQL `woldeok_moneyverse_ci` read-only probe found treasury vote function absent (`function_present=0`), so authenticated real-PG vote test BLOCKED; no database writes attempted. Do not use Production-connected 5433.
+- Main re-fetched at 07:26 and remains c9a868b1e622341e2daa8b936ddf0988eda9988e. Other worker branches preserved.

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from './route';
+import { GET, POST } from './route';
 import { APP_API_CONTRACT_VERSION } from '@/lib/app-gateway';
 
 function request(path: string, headers: Record<string, string> = {}) {
@@ -34,6 +34,30 @@ describe('app API route compatibility', () => {
     expect(body.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
     expect(body.auth.persistentCookieJarRequired).toBe(true);
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('forwards authenticated citizen budget votes with CSRF and no shared cache', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    const fetchSpy = vi.fn(async (_target: URL, init: RequestInit) => {
+      expect(_target.pathname).toBe('/api/v1/wallet/governance/vote');
+      expect(init.method).toBe('POST');
+      expect(new Headers(init.headers).get('x-csrf-token')).toBe('valid-csrf');
+      expect(new Headers(init.headers).get('cookie')).toBe('session=opaque');
+      expect(JSON.parse(new TextDecoder().decode(init.body as ArrayBuffer))).toEqual({ quarter: '2026-Q4', choice: 'WELFARE' });
+      return new Response(JSON.stringify({ success: true, quarter: '2026-Q4', choice: 'WELFARE' }), {
+        status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const req = new NextRequest('https://easy-scraping.com/app-api/v1/wallet/governance/vote', {
+      method: 'POST', headers: { host: 'easy-scraping.com', cookie: 'session=opaque', 'x-csrf-token': 'valid-csrf', 'content-type': 'application/json' },
+      body: JSON.stringify({ quarter: '2026-Q4', choice: 'WELFARE' }),
+    });
+    const response = await POST(req, context('wallet', 'governance', 'vote'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ success: true, quarter: '2026-Q4' });
+    expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
   it('returns a stable problem document for paths outside the app allow-list', async () => {

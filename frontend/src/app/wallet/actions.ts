@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { currentBudgetQuarter, isBudgetVoteChoice } from '@moneyverse/contract';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
 
@@ -127,4 +128,27 @@ export async function claimDaily(_previous: ActionState): Promise<ActionState> {
     already: '오늘은 이미 보상을 받았거나, 지금은 받을 수 없어요.',
     granted: '오늘의 보상을 지갑에 넣었어요.',
   });
+}
+
+/** Only a committed matching database response can confirm a citizen's choice. */
+export async function castCitizenBudgetVote(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const choice = formData.get('choice');
+  if (!isBudgetVoteChoice(choice)) {
+    return { status: 'error', message: '예산 우선순위를 다시 선택해 주세요.' };
+  }
+  const quarter = currentBudgetQuarter();
+  try {
+    const receipt = await mutate<unknown>('/api/v1/wallet/governance/vote', {
+      body: { quarter, choice },
+    });
+    if (!receipt || typeof receipt !== 'object' || !('success' in receipt) ||
+        !('quarter' in receipt) || !('choice' in receipt) ||
+        receipt.success !== true || receipt.quarter !== quarter || receipt.choice !== choice) {
+      return { status: 'error', message: '투표 저장 여부를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.' };
+    }
+    revalidatePath('/wallet');
+    return { status: 'ok', message: `${quarter} 예산 우선순위 선택이 저장되었습니다. 같은 분기에 다시 제출하면 선택이 변경됩니다.` };
+  } catch (error) {
+    return failure(error, '투표 저장 여부를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+  }
 }

@@ -6,6 +6,7 @@ import {
   Controller,
   Get,
   GoneException,
+  Header,
   Inject,
   NotFoundException,
   Param,
@@ -23,7 +24,7 @@ import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
-import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
+import { BankMovementDto, BorrowDto, CitizenBudgetVoteDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
 import { WalletInputError } from './wallet.repository';
 import { WalletRecipientError, WalletService } from './wallet.service';
 
@@ -33,11 +34,6 @@ import { WalletRecipientError, WalletService } from './wallet.service';
  * CsrfGuard cannot verify a token without a session id. Reordering these
  * changes which failure a caller sees, and can let a write through unchecked.
  */
-export class CitizenBudgetVoteDto {
-  quarter!: string;
-  choice!: string;
-}
-
 @ApiTags('wallet')
 @Controller()
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
@@ -182,9 +178,10 @@ export class WalletController {
   }
 
   @Post('wallet/governance/vote')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: '분기별 국고 예산안 우선순위 시민 거버넌스 투표 제출' })
   async voteBudget(@Req() request: RequestWithSession, @Body() body: CitizenBudgetVoteDto) {
     const userId = requireUserId(request);
-    return this.service().voteCitizenBudget(userId, body.quarter || '2026-Q4', body.choice);
+    return this.guarded(() => this.service().voteCitizenBudget(userId, body.quarter, body.choice), 'budget vote could not be recorded');
   }
 }

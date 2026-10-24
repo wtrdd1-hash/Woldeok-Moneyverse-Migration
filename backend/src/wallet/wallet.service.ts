@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { WldAmount } from '@moneyverse/contract';
-import { wldAmount } from '@moneyverse/contract';
+import { currentBudgetQuarter, isBudgetVoteChoice, wldAmount } from '@moneyverse/contract';
 import type {
   WalletBalanceRow,
   WalletBankMoveRow,
@@ -566,14 +566,20 @@ export class WalletService {
     choice: string,
   ): Promise<{ success: boolean; quarter: string; choice: string }> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
-    const validChoices = ['WELFARE', 'INFRASTRUCTURE', 'CITIZEN_DIVIDEND', 'CURRENCY_STABILIZATION'];
-    if (!validChoices.includes(choice)) {
-      throw new Error('유효하지 않은 예산 우선순위 선택입니다');
+    if (!isBudgetVoteChoice(choice)) {
+      throw new WalletInputError('invalid budget vote priority');
     }
-    if (typeof this.repository.voteCitizenBudget === 'function') {
-      return this.repository.voteCitizenBudget(actorUserId, quarter, choice);
+    if (quarter !== currentBudgetQuarter(this.clock())) {
+      throw new WalletInputError('budget vote must target the current Korea quarter');
     }
-    return { success: true, quarter, choice };
+    if (typeof this.repository.voteCitizenBudget !== 'function') {
+      throw new ServiceUnavailableException('budget vote persistence is unavailable');
+    }
+    const receipt = await this.repository.voteCitizenBudget(actorUserId, quarter, choice);
+    if (receipt?.success !== true || receipt.quarter !== quarter || receipt.choice !== choice) {
+      throw new ServiceUnavailableException('budget vote could not be confirmed');
+    }
+    return receipt;
   }
 
   async searchRecipients(

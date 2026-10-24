@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -5617,6 +5617,39 @@ _No request body._
 ### Success response fields
 
 _None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/wallet/governance/vote` — Record the authenticated member current-quarter budget priority vote
+
+- Authorization: 로그인 + 최신 동의 + CSRF(변경 요청)
+- Success status: 201
+- Response mode: json
+- After success: 성공 응답의 success=true, quarter, choice를 요청과 대조. 별도의 개인 투표 조회 API는 아직 없음
+- Operation ID: `WalletController_voteBudget`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `CitizenBudgetVoteDto`
+
+| Field | Required | Type | Constraints |
+|---|---|---|---|
+| quarter | true | string | pattern="^[0-9]{4}-Q[1-4]$"; description="Current Asia/Seoul quarter only" |
+| choice | true | string | enum="WELFARE","INFRASTRUCTURE","CITIZEN_DIVIDEND","CURRENCY_STABILIZATION" |
+
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| success | true | boolean |  |
+| quarter | true | string |  |
+| choice | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

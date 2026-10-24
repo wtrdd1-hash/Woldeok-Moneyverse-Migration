@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsUUID, registerDecorator, type ValidationArguments, type ValidationOptions } from 'class-validator';
+import { IsIn, IsUUID, Matches, registerDecorator, type ValidationArguments, type ValidationOptions } from 'class-validator';
 
 /** Monetary request values prefer canonical decimal strings. Safe integer JSON
  * numbers remain accepted for backward compatibility with older app builds. */
@@ -103,3 +103,13 @@ export class P2PTransferDto {
   readonly sticker?: string;
 }
 
+
+export class CitizenBudgetVoteDto {
+  @ApiProperty({ pattern: '^[0-9]{4}-Q[1-4]$', example: '2026-Q4' })
+  @Matches(/^[0-9]{4}-Q[1-4]$/)
+  readonly quarter!: string;
+
+  @ApiProperty({ enum: ['WELFARE', 'INFRASTRUCTURE', 'CITIZEN_DIVIDEND', 'CURRENCY_STABILIZATION'] })
+  @IsIn(['WELFARE', 'INFRASTRUCTURE', 'CITIZEN_DIVIDEND', 'CURRENCY_STABILIZATION'])
+  readonly choice!: string;
+}
