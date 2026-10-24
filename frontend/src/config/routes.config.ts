@@ -702,8 +702,8 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
   {
     path: '/work',
     label: { ko: '직업 및 커리어 파밍', en: 'Career & Work Farming', ja: '職業と業務ファーミング', zh: '工作与职业养成' },
-    isPublic: true,
-    authRequired: false,
+    isPublic: false,
+    authRequired: true,
     indexable: false,
     changeFrequency: 'daily',
     group: 'economy',
@@ -794,6 +794,7 @@ export function getDisallowedCrawlerRoutes(): string[] {
     '/quests',
     '/businesses',
     '/wallet',
+    '/work',
     '/bank$', // Exact protected bank landing; preserve public /bank/savings-pot SEO.
     '/socket.io/',
     '/_next/data/',
