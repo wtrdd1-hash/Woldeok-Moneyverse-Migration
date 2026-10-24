@@ -1,7 +1,7 @@
 ## 2026-10-25 08:xx KST — Planning v1256 F675-121 (Feature Addition / Draft / HOLD)
 - Previous Improvement v1254 / Current Addition v1256 / Next Improvement v1258 provisional. Remote main c9a868b1e622341e2daa8b936ddf0988eda9988e checked start/mid, QA v1259 FAILED/HOLD. Source-backed proposal: opt-in board thread follows with committed comment event sequence, generation/visibility-fenced delivery through existing notification system (C #1206 still unmerged), no duplicate inbox or WLD effects.
 - P0 ENV1256-01 SEC1256-02 REL1256-03 BOARD1256-04; P1 BOARD1256-05 BOARD1256-06 BOARD1256-07 BOARD1256-08 BOARD1256-09 BOARD1256-10. English canonical/Korean parity updated in six existing planning docs and two update logs; one worklog. Root disk 100%, app ACL, migration266/280, CI/audits and exact-SHA Test/restore remain HOLD. External reviewed publishers 3, new approved 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime/DB/Test/Production change.
-- GitHub issue #1240 created; Draft PR pending; final links in run logs.
+- GitHub Draft PR #1241 OPEN (base planning/v1254), development issue #1240 OPEN; main unmerged, release HOLD.
 
 
 ## 2026-10-25 07:xx KST — Planning v1254 F675-120 (Feature Improvement / Draft / HOLD)
