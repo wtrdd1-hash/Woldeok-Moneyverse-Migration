@@ -1,23 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, Trophy, Shield, Info, X, Zap, CheckCircle2, Gift } from 'lucide-react';
+import { Sparkles, Trophy, Shield, Info, X, Zap, Gift } from 'lucide-react';
 
 export type StarDropRarity = 'rare' | 'super_rare' | 'epic' | 'mythic' | 'legendary';
-
-export interface StarDropReward {
-  rarity: StarDropRarity;
-  rewardType: 'wld' | 'stock' | 'badge' | 'freeze';
-  title: string;
-  amount: number;
-}
 
 interface StarDropModalProps {
   isOpen: boolean;
   onClose: () => void;
-  dailyFreeRemaining?: number;
   hasLuckyCharm?: boolean;
-  onClaimReward?: (reward: StarDropReward) => void;
 }
 
 const RARITY_CONFIG = {
@@ -27,7 +18,6 @@ const RARITY_CONFIG = {
     border: 'border-cyan-400',
     text: 'text-cyan-300',
     bg: 'bg-cyan-500/20',
-    rewardText: '1,000 ~ 3,000 WLD',
   },
   super_rare: {
     label: '초희귀 (Super Rare)',
@@ -35,7 +25,6 @@ const RARITY_CONFIG = {
     border: 'border-emerald-400',
     text: 'text-emerald-300',
     bg: 'bg-emerald-500/20',
-    rewardText: '5,000 ~ 10,000 WLD',
   },
   epic: {
     label: '에픽 (Epic)',
@@ -43,7 +32,6 @@ const RARITY_CONFIG = {
     border: 'border-purple-400',
     text: 'text-purple-300',
     bg: 'bg-purple-500/20',
-    rewardText: '20,000 WLD + 스트릭 프리즈 1회',
   },
   mythic: {
     label: '신화 (Mythic)',
@@ -51,7 +39,6 @@ const RARITY_CONFIG = {
     border: 'border-rose-400',
     text: 'text-rose-300',
     bg: 'bg-rose-500/20',
-    rewardText: '50,000 WLD + 우량주 1.0주',
   },
   legendary: {
     label: '전설 (Legendary)',
@@ -59,20 +46,15 @@ const RARITY_CONFIG = {
     border: 'border-amber-300',
     text: 'text-amber-300',
     bg: 'bg-amber-500/25',
-    rewardText: '100,000 WLD + 황금 칭호 + 주식 5.0주',
   },
 };
 
 const RARITY_ORDER: StarDropRarity[] = ['rare', 'super_rare', 'epic', 'mythic', 'legendary'];
 
-import { claimStarDrop } from '@/lib/dopamine-api';
-
 export function StarDropModal({
   isOpen,
   onClose,
-  dailyFreeRemaining = 3,
   hasLuckyCharm = false,
-  onClaimReward,
 }: StarDropModalProps) {
   const [tapCount, setTapCount] = useState<number>(0);
   const [currentRarity, setCurrentRarity] = useState<StarDropRarity>('rare');
@@ -100,40 +82,6 @@ export function StarDropModal({
     if (nextTap >= 5) {
       setIsOpened(true);
     }
-  };
-
-  const getFinalReward = (): StarDropReward => {
-    switch (currentRarity) {
-      case 'legendary':
-        return { rarity: 'legendary', rewardType: 'wld', title: '100,000 WLD & 전설 아티팩트', amount: 100000 };
-      case 'mythic':
-        return { rarity: 'mythic', rewardType: 'stock', title: '50,000 WLD & 우량주 1.0주', amount: 50000 };
-      case 'epic':
-        return { rarity: 'epic', rewardType: 'freeze', title: '20,000 WLD & 스트릭 프리즈', amount: 20000 };
-      case 'super_rare':
-        return { rarity: 'super_rare', rewardType: 'wld', title: '8,000 WLD', amount: 8000 };
-      default:
-        return { rarity: 'rare', rewardType: 'wld', title: '2,500 WLD', amount: 2500 };
-    }
-  };
-
-  const handleClaim = async () => {
-    const reward = getFinalReward();
-    const tierMap: Record<StarDropRarity, 'rare' | 'epic' | 'legendary' | 'mythic'> = {
-      rare: 'rare',
-      super_rare: 'rare',
-      epic: 'epic',
-      mythic: 'mythic',
-      legendary: 'legendary',
-    };
-    try {
-      await claimStarDrop(tierMap[currentRarity]);
-    } catch {
-      // Offline fallback
-    }
-
-    if (onClaimReward) onClaimReward(reward);
-    onClose();
   };
 
   const config = RARITY_CONFIG[currentRarity];
@@ -182,7 +130,7 @@ export function StarDropModal({
             <Shield className="h-3.5 w-3.5 text-emerald-400" />
             100% 가상 시뮬레이터 (현금 환전 불가)
           </span>
-          <span className="font-mono text-amber-400">일일 무료: {dailyFreeRemaining}회</span>
+          <span className="font-mono text-amber-400">실제 보상 지급 비활성</span>
         </div>
 
         {/* Main Interactive Star Drop Area */}
@@ -207,7 +155,7 @@ export function StarDropModal({
                   현재 등급: {config.label}
                 </span>
                 <p className="mt-1 text-xs text-slate-400">
-                  상자를 {5 - tapCount}번 더 탭하면 등급이 상승하며 보상이 개봉됩니다!
+                  상자를 {5 - tapCount}번 더 탭하면 시뮬레이션 등급을 확인할 수 있습니다.
                 </p>
               </div>
 
@@ -234,19 +182,19 @@ export function StarDropModal({
 
               <div>
                 <span className={`text-xs font-black tracking-wider ${config.text}`}>
-                  🎉 {config.label} 잭팟 달성!
+                  시뮬레이션 결과: {config.label}
                 </span>
                 <h3 className="mt-1 text-lg font-extrabold text-white">
-                  {getFinalReward().title}
+                  실제 WLD·주식·아이템은 지급되지 않습니다.
                 </h3>
               </div>
 
               <button
                 type="button"
-                onClick={handleClaim}
+                onClick={onClose}
                 className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 py-3 text-sm font-bold text-slate-950 shadow-lg hover:from-amber-400 hover:to-amber-500 active:scale-95"
               >
-                보상 수령하고 인벤토리에 넣기
+                미리보기 종료
               </button>
             </div>
           )}
@@ -287,7 +235,7 @@ export function StarDropModal({
             <div>
               <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <h3 id="prob-modal-title" className="text-sm font-bold text-white">
-                  공정 확률표 (2024 게임산업진흥법 준수)
+                  스타 드롭 시뮬레이션 등급 안내
                 </h3>
                 <button
                   type="button"
@@ -301,28 +249,28 @@ export function StarDropModal({
               <div className="mt-3 space-y-2 text-xs">
                 <div className="flex justify-between border-b border-slate-800/60 pb-1.5">
                   <span className="text-cyan-300 font-semibold">희귀 (Rare)</span>
-                  <span className="font-mono text-slate-300">50.0% (기본 배정)</span>
+                  <span className="font-mono text-slate-300">시뮬레이션 전용</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-800/60 pb-1.5">
                   <span className="text-emerald-300 font-semibold">초희귀 (Super Rare)</span>
-                  <span className="font-mono text-slate-300">28.0% (1회 이상 승급)</span>
+                  <span className="font-mono text-slate-300">시뮬레이션 전용</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-800/60 pb-1.5">
                   <span className="text-purple-300 font-semibold">에픽 (Epic)</span>
-                  <span className="font-mono text-slate-300">14.0% (2회 이상 승급)</span>
+                  <span className="font-mono text-slate-300">시뮬레이션 전용</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-800/60 pb-1.5">
                   <span className="text-rose-300 font-semibold">신화 (Mythic)</span>
-                  <span className="font-mono text-slate-300">6.0% (3회 이상 승급)</span>
+                  <span className="font-mono text-slate-300">시뮬레이션 전용</span>
                 </div>
                 <div className="flex justify-between pb-1.5">
                   <span className="text-amber-300 font-semibold">전설 (Legendary)</span>
-                  <span className="font-mono text-amber-300 font-bold">2.0% (4회 연속 승급)</span>
+                  <span className="font-mono text-amber-300 font-bold">시뮬레이션 전용</span>
                 </div>
               </div>
 
               <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900 p-2.5 text-[11px] text-slate-400 leading-relaxed">
-                본 확률표는 모든 유저에게 균등하게 적용되는 의사난수(PRNG) 기반이며, 획득한 보상은 가상 시뮬레이션 포인트로 현금 환전 및 외부 거래가 일체 불가합니다.
+                등급 변화는 브라우저 미리보기 효과입니다. 확률 인증이나 실제 WLD·아이템 지급을 의미하지 않습니다.
               </div>
             </div>
 

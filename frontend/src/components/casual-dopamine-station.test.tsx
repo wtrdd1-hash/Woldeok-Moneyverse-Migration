@@ -43,7 +43,7 @@ describe('CasualDopamineStation', () => {
     const starDropCard = screen.getAllByText(/럭키 스타드롭/)[0]!;
     fireEvent.click(starDropCard);
 
-    expect(screen.getByText(/스타 드롭/)).toBeDefined();
+    expect(screen.getByRole('dialog', { name: /스타 드롭/ })).toBeDefined();
   });
 
   it('opens mini showdown modal when showdown card is clicked', () => {

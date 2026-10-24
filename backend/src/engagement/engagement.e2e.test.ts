@@ -39,6 +39,14 @@ describe('engagement routes', () => {
     process.env = { ...ORIGINAL_ENV };
   });
 
+  it('never permits an anonymous Star Drop reward claim', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/engagement/dopamine/star-drop')
+      .send({ tapTier: 'mythic', idempotencyKey: KEY });
+    expect([401, 403, 428, 503]).toContain(response.status);
+    expect(response.body).not.toMatchObject({ success: true });
+  });
+
   it('mounts the engagement summary behind a session', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/engagement');
     expect(response.status).not.toBe(404);

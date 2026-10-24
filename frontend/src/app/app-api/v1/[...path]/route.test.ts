@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from './route';
+import { GET, POST } from './route';
 import { APP_API_CONTRACT_VERSION } from '@/lib/app-gateway';
 
 function request(path: string, headers: Record<string, string> = {}) {
@@ -168,6 +168,29 @@ describe('app API route compatibility', () => {
     expect(response.status).toBe(200);
     expect(body.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
     expect(JSON.stringify(body)).not.toContain('attacker.example');
+  });
+
+
+  it('preserves the upstream Star Drop refusal for Android without caching a fake receipt', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      expect(init?.method).toBe('POST');
+      return new Response(JSON.stringify({ statusCode: 503, message: 'reward not available' }), {
+        status: 503,
+        headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const req = new NextRequest('https://easy-scraping.com/app-api/v1/engagement/dopamine/star-drop', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: 'session=test', 'x-csrf-token': 'test' },
+      body: JSON.stringify({ tapTier: 'mythic', idempotencyKey: 'a1b2c3d4-e5f6-4a1b-8c2d-3e4f5a6b7c8d' }),
+    });
+    const response = await POST(req, context('engagement', 'dopamine', 'star-drop'));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ statusCode: 503 });
+    expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
 });

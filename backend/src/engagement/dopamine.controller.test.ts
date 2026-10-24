@@ -71,3 +71,22 @@ describe('DopamineController - Golden Duck Fever', () => {
     expect(result.newBalance).toBe('50000');
   });
 });
+
+
+describe('DopamineController - Star Drop ledger truth', () => {
+  const request = { session: { user_id: '11111111-2222-4333-8444-555555555555' } } as unknown as RequestWithSession;
+
+  it('refuses a WLD claim without an atomic ledger and inventory receipt', async () => {
+    const controller = new DopamineController(null);
+    await expect(controller.claimStarDrop(request, {
+      tapTier: 'mythic',
+      idempotencyKey: 'a1b2c3d4-e5f6-4a1b-8c2d-3e4f5a6b7c8d',
+    })).rejects.toMatchObject({ status: 503 });
+  });
+
+  it('does not advertise claim quota when no claim ledger exists', async () => {
+    const controller = new DopamineController(null);
+    const status = await controller.getDopamineStatus(request);
+    expect(status.starDropRemaining).toBe(0);
+  });
+});
