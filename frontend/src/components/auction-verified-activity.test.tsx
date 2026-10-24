@@ -36,6 +36,15 @@ describe('verified auction activity', () => {
     expect(screen.getByText('실시간 연결됨')).toBeTruthy();
   });
 
+  it('treats malformed server rows as an error, never as proof of an empty auction market', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([
+      { id: 'not-a-uuid', itemName: 'malformed', currentBidWld: '900' },
+    ])));
+    render(<AuctionLiveTickerStrip />);
+    expect(await screen.findByText('경매 기록을 확인할 수 없습니다.')).toBeTruthy();
+    expect(screen.queryByText('활성 경매가 없습니다.')).toBeNull();
+  });
+
   it('fails closed when authenticated auction API is unavailable', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({}, false, 503)));
     render(<AuctionLiveTickerStrip />);

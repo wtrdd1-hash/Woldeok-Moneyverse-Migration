@@ -33,8 +33,9 @@ function parseAmount(value: unknown): bigint | null {
 
 function parseAuctions(value: unknown): AuctionSnapshot[] | null {
   if (!Array.isArray(value)) return null;
-  return value.flatMap((entry: unknown) => {
-    if (!entry || typeof entry !== 'object') return [];
+  const rows: AuctionSnapshot[] = [];
+  for (const entry of value as unknown[]) {
+    if (!entry || typeof entry !== 'object') return null;
     const row = entry as Record<string, unknown>;
     if (
       typeof row.id !== 'string' || !UUID.test(row.id) ||
@@ -43,13 +44,14 @@ function parseAuctions(value: unknown): AuctionSnapshot[] | null {
       !Number.isSafeInteger(row.bidCount) || Number(row.bidCount) < 0 ||
       (row.highestBidderName !== null && typeof row.highestBidderName !== 'string') ||
       typeof row.endsAt !== 'string' || !Number.isFinite(Date.parse(row.endsAt))
-    ) return [];
-    return [{
+    ) return null;
+    rows.push({
       id: row.id, itemName: row.itemName.slice(0, 120), currentBidWld: row.currentBidWld as string,
       highestBidderName: row.highestBidderName as string | null,
       bidCount: row.bidCount as number, endsAt: row.endsAt,
-    }];
-  }).slice(0, 100);
+    });
+  }
+  return rows.slice(0, 100);
 }
 
 function parseBid(value: unknown): VerifiedBid | null {
