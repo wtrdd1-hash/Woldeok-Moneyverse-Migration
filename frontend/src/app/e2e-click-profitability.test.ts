@@ -25,10 +25,11 @@ describe('E2E Real-Click Profitability and Full-Stack Flow QA', () => {
     expect(homeSource).toContain('min-h-[88px]');
   });
 
-  it('verifies Real Member Profile Integration and Security Score', () => {
+  it('verifies Real Member Profile Integration and server-backed sign-in evidence', () => {
     expect(accountSource).toContain('rawDisplayName?.trim()');
     expect(accountSource).toContain('<ProfileAvatar');
-    expect(accountSource).toContain('securityScore');
+    expect(accountSource).toContain('resolveIdentityEvidence(identityData)');
+    expect(accountSource).not.toContain('securityScore');
     expect(accountSource).toContain('border-zinc-800/80');
   });
 
