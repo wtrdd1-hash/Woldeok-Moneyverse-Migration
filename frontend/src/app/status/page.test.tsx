@@ -30,14 +30,31 @@ describe('public service status SSR', () => {
     expect(html).toContain('role="status"');
   });
 
-  it('does not trust a fresh flag without a trustworthy timestamp', async () => {
-    vi.mocked(publicApi).mockResolvedValue({ status: [source('fresh', null)] });
+  it('keeps mixed fresh and stale operational snapshots non-green', async () => {
+    vi.mocked(publicApi).mockResolvedValue({
+      status: [
+        source('fresh'),
+        { ...source('stale'), sourceKey: 'backend', displayName: 'Backend' },
+      ],
+    });
     const html = renderToStaticMarkup(await StatusPage());
-    expect(html).toContain('최신 확인 필요');
+    expect(html).toContain('최신 서비스 상태를 확인할 수 없어요.');
     expect(html).not.toContain('모든 서비스가 정상입니다.');
   });
 
-  it('shows operational only for a recent confirmed source and remains non-indexable', async () => {
+  it('prioritizes a confirmed outage over a stale source', async () => {
+    vi.mocked(publicApi).mockResolvedValue({
+      status: [
+        { ...source('fresh'), state: 'outage' },
+        { ...source('stale'), sourceKey: 'backend', displayName: 'Backend' },
+      ],
+    });
+    const html = renderToStaticMarkup(await StatusPage());
+    expect(html).toContain('일부 서비스에 장애가 있어요.');
+    expect(html).not.toContain('모든 서비스가 정상입니다.');
+  });
+
+  it('shows operational only for a server-confirmed fresh source and remains non-indexable', async () => {
     vi.mocked(publicApi).mockResolvedValue({ status: [source('fresh')] });
     const html = renderToStaticMarkup(await StatusPage());
     expect(html).toContain('모든 서비스가 정상입니다.');

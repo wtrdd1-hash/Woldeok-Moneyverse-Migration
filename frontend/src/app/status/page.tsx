@@ -9,9 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
-import { OVERALL_HEADLINE, STATUS_LABEL } from '@/lib/status';
+import { OVERALL_HEADLINE, STATUS_LABEL, asStatusState, overallState } from '@/lib/status';
 import type { StatusState } from '@/lib/status';
-import { overallSnapshotState, statusSnapshot } from '@/lib/status-freshness';
 import { canonicalUrl } from '@/lib/seo';
 
 /**
@@ -57,9 +56,10 @@ const VARIANT: Readonly<Record<StatusState, 'default' | 'secondary' | 'destructi
 export default async function StatusPage() {
   const data = await publicApi<{ status: StatusRow[] }>('/api/v1/status', 30);
   const rows = data?.status ?? [];
-  const nowMs = Date.now();
-  const overall = overallSnapshotState(rows, nowMs);
-  const staleCount = rows.filter((row) => statusSnapshot(row, nowMs).stale).length;
+  const overall = overallState(
+    rows.map((row) => (row.freshnessState !== 'fresh' ? 'unknown' : asStatusState(row.state))),
+  );
+  const staleCount = rows.filter((row) => row.freshnessState !== 'fresh').length;
 
   return (
     <div data-page="status" className="mv-page mv-page--utility grid gap-6">
@@ -115,9 +115,8 @@ export default async function StatusPage() {
             <CardContent>
               <dl className="grid gap-3">
                 {rows.map((row) => {
-                  const snapshot = statusSnapshot(row, nowMs);
-                  const state = snapshot.state;
-                  const needsFreshness = snapshot.stale;
+                  const state = asStatusState(row.state);
+                  const needsFreshness = row.freshnessState !== 'fresh';
                   return (
                     <div
                       key={row.sourceKey}
