@@ -15,7 +15,8 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { TranslatedText as T } from '@/components/translated-text';
 import { IDLE } from '@/lib/action-state';
 import { formatDay } from '@/lib/money';
-import { borrow, claimDaily, moveBank, repay, transfer } from './actions';
+import { borrow, claimDaily, moveBank, previewBankMove, repay, transfer } from './actions';
+import type { BankMovePreviewState } from './actions';
 
 export interface RewardAvailability {
   readonly dailyAvailable: boolean;
@@ -178,6 +179,10 @@ export function TransferForm({ currency }: { readonly currency: string }) {
 
 export function BankPanel() {
   const [moveState, moveAction] = useActionState(moveBank, IDLE);
+  const [previewState, previewAction] = useActionState(previewBankMove, { status: 'idle' } as BankMovePreviewState);
+  const [previewAmount, setPreviewAmount] = useState('');
+  const currentPreview = moveState.status === 'ok' || previewState.preview?.amount !== previewAmount
+    ? null : previewState.preview;
   const [borrowState, borrowAction] = useActionState(borrow, IDLE);
 
   return (
@@ -199,7 +204,7 @@ export function BankPanel() {
             <FieldLabel htmlFor="bank-move-amount">
               <T korean="입출금 WLD" english="Vault Deposit / Withdraw" />
             </FieldLabel>
-            <AmountInput id="bank-move-amount" name="amount" placeholder="0" required />
+            <AmountInput id="bank-move-amount" name="amount" placeholder="0" required onChange={(value) => setPreviewAmount(value.replace(/,/g, ''))} />
           </Field>
           <div className="flex flex-wrap gap-2">
             <SubmitButton name="direction" value="deposit">
@@ -209,6 +214,30 @@ export function BankPanel() {
               <T korean="은행에서 꺼내기" english="Withdraw from Bank" />
             </SubmitButton>
           </div>
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" formAction={previewAction} name="direction" value="deposit" variant="secondary">
+              <T korean="입금 예상" english="Preview deposit" />
+            </Button>
+            <Button type="submit" formAction={previewAction} name="direction" value="withdraw" variant="secondary">
+              <T korean="출금 예상" english="Preview withdrawal" />
+            </Button>
+          </div>
+          {currentPreview && (
+            <div role="status" aria-live="polite" className="rounded-lg border p-3 text-sm space-y-1">
+              <p><T korean="조회 시점 기준 예상 결과 · 실제 거래 아님" english="Estimate as of balance snapshot · no transfer made" /></p>
+              <p><T korean="이동 가능" english="Can move" />: {currentPreview.canMove ? 'Yes' : 'No'}</p>
+              <p><T korean="최대 이동 가능" english="Maximum available" />: <Amount value={currentPreview.maxMoveAmount} /> WLD</p>
+              {currentPreview.canMove && currentPreview.cashAfter !== null && currentPreview.bankAfter !== null && (
+                <p><T korean="이동 후 예상 현금 / 은행" english="Estimated cash / bank after move" />:{' '}
+                  <Amount value={currentPreview.cashAfter} /> / <Amount value={currentPreview.bankAfter} /> WLD
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                <T korean="실행 시 서버가 잔액을 다시 검증합니다." english="The server rechecks balances when you submit." />
+              </p>
+            </div>
+          )}
+          <ActionAlert state={previewState} />
           <ActionAlert state={moveState} />
         </form>
 
