@@ -97,7 +97,8 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
             'blog.daily_publish': async () => {
               if (process.env.BLOG_AUTO_PUBLISH_ENABLED === 'false') return { skipped: true, reason: 'disabled' };
               try {
-                const secret = process.env.INTERNAL_API_SECRET || process.env.CRON_SECRET || 'moneyverse-cron-internal-key-2026';
+                const secret = process.env.INTERNAL_API_SECRET?.trim() || process.env.CRON_SECRET?.trim();
+                if (!secret) return { skipped: true, reason: 'missing scheduler credential' };
                 const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://127.0.0.1:3234';
                 const res = await fetch(`${frontendOrigin}/api/blog/generate`, {
                   method: 'POST',
