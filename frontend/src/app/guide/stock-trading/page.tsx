@@ -91,7 +91,7 @@ export default async function StockTradingGuidePage() {
 
       <PageHeader
         eyebrow="FINANCE STRATEGY PILLAR"
-        title={isEn ? 'Virtual Stock Trading & Orderbook Mastery' : '가상 주식 실전 매매 & 호가창 분석 가이드'}
+        title={localeLabel(locale, '가상 주식 실전 매매 & 호가창 분석 가이드', 'Virtual Stock Trading & Orderbook Mastery', '仮想株式実践売買＆板情報分析マスターガイド', '虚拟股票实战交易与买卖盘精通指南', 'Hướng dẫn giao dịch chứng khoán ảo & làm chủ sổ lệnh')}
       >
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           {isEn

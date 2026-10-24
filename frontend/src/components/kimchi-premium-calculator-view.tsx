@@ -72,7 +72,7 @@ export function KimchiPremiumCalculatorView({ initialPreset }: KimchiPremiumCalc
             </span>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
-                {initialPreset ? `${initialPreset.name} (${initialPreset.symbol}) 김치프리미엄 계산기` : '코인 김치프리미엄 & 환율 차익 계산기'}
+                {localeLabel(locale, initialPreset ? (initialPreset.name + ' (' + initialPreset.symbol + ') 김치프리미엄 계산기') : '코인 김치프리미엄 & 환율 차익 계산기', initialPreset ? (initialPreset.symbol + ' Kimchi Premium Calculator') : 'Crypto Kimchi Premium & Arbitrage Calculator', initialPreset ? (initialPreset.symbol + ' キムチプレミアム計算機') : '暗号資産キムチプレミアム＆為替差益計算機', initialPreset ? (initialPreset.symbol + ' 泡菜溢价计算器') : '加密货币泡菜溢价与汇率套利计算器', initialPreset ? (initialPreset.symbol + ' Máy tính Kimchi Premium') : 'Máy tính chênh lệch giá Kimchi Premium')}
               </h1>
               <p className="text-xs text-zinc-400 mt-0.5">
                 업비트/빗썸 vs 바이낸스/바이비트 실시간 시세 격차 및 전송 수수료 차감 후 순차익 시뮬레이션

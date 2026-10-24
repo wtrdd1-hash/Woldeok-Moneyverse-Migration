@@ -93,7 +93,7 @@ export default function QuantStudioPage() {
           <div>
             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
               <Cpu className="size-8 text-purple-400" />
-              <span>노코드 퀀트 봇 스튜디오</span>
+              <span>{localeLabel(locale, '노코드 퀀트 봇 스튜디오', 'No-Code Quant Bot Studio', 'ノーコード クオンツボット スタジオ', '无代码量化机器人工作室', 'Studio bot định lượng không cần mã')}</span>
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1 max-w-2xl leading-relaxed">
               복잡한 파이썬 코드 없이 클릭만으로 DCA, 그리드, RSI 퀀트 전략을 설계하고 과거 시세로 1초 만에 수익률을 백테스팅하세요.

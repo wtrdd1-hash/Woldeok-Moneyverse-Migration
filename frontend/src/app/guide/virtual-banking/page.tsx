@@ -91,7 +91,7 @@ export default async function VirtualBankingGuidePage() {
 
       <PageHeader
         eyebrow="FINANCE STRATEGY PILLAR"
-        title={isEn ? 'Virtual Banking & Compound Interest Strategy' : '가상 금융 & 복리 예금·국채 전략 가이드'}
+        title={localeLabel(locale, '가상 금융 & 복리 예금·국채 전략 가이드', 'Virtual Banking & Compound Interest Strategy', '仮想金融＆複利預金・国債戦略ガイド', '虚拟金融与复利存款·国债策略指南', 'Hướng dẫn tài chính ảo & chiến lược gửi tiết kiệm lãi kép')}
       >
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           {isEn
