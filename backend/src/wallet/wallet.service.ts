@@ -145,6 +145,16 @@ export interface WalletOverview {
   readonly recentTransactions: WalletTransactionView[];
 }
 
+export interface WalletTransferPreview {
+  readonly recipientUserId: string;
+  readonly amount: WldAmount;
+  readonly cashAvailable: WldAmount;
+  readonly canSend: boolean;
+  readonly shortfall: WldAmount;
+  readonly checkedAt: string;
+  readonly readOnly: true;
+}
+
 export interface WalletTransferReceipt {
   readonly transactionId: string;
 }
@@ -380,6 +390,36 @@ export class WalletService {
       userId,
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
+    };
+  }
+
+  /** A nonbinding owner-only read; the ledger transfer still authorizes and settles atomically. */
+  async previewTransfer(
+    authenticatedUserId: string,
+    recipientUserId: unknown,
+    amount: unknown,
+  ): Promise<WalletTransferPreview> {
+    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
+    const recipient = requireUuid(recipientUserId, 'recipient user id');
+    const requested = requirePositiveWld(amount, 'amount');
+    if (requested.length > 38) throw new WalletInputError('amount exceeds WLD precision');
+    if (actor === recipient) throw new WalletInputError('cannot transfer to yourself');
+
+    const [activeRecipient, balanceRows] = await Promise.all([
+      this.repository.activeRecipientById(recipient),
+      this.repository.balancesForUser(actor),
+    ]);
+    if (!activeRecipient || activeRecipient.userId !== recipient) throw new WalletRecipientError();
+    const cashAvailable = normalizeBalances(balanceRows).cash.availableAmount;
+    const difference = BigInt(requested) - BigInt(cashAvailable);
+    return {
+      recipientUserId: recipient,
+      amount: wldAmount(requested, 'transfer amount'),
+      cashAvailable,
+      canSend: difference <= 0n,
+      shortfall: wldAmount((difference > 0n ? difference : 0n).toString(), 'transfer shortfall'),
+      checkedAt: this.clock().toISOString(),
+      readOnly: true,
     };
   }
 

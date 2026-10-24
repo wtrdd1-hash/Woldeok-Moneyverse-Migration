@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   GoneException,
   Inject,
   NotFoundException,
@@ -89,6 +90,24 @@ export class WalletController {
       throw new BadRequestException('recent must be a whole number');
     }
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
+  }
+
+  @Get('wallet/transfers/preview')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Read-only transfer recipient and cash preflight, not a transfer receipt' })
+  async previewTransfer(
+    @Req() request: RequestWithSession,
+    @Query('recipientUserId') recipientUserId?: string,
+    @Query('amount') amount?: string,
+  ) {
+    try {
+      return await this.service().previewTransfer(requireUserId(request), recipientUserId, amount);
+    } catch (error: unknown) {
+      if (error instanceof WalletInputError) throw new BadRequestException(error.message);
+      if (error instanceof WalletRecipientError) throw new NotFoundException('recipient is unavailable');
+      throw error;
+    }
   }
 
   @Get('wallet/recipients/search')
