@@ -3387,3 +3387,36 @@ flowchart LR
 - `frontend/src/app/api/admin/blog/[slug]/route.ts`: 관리자 전용 삭제 API 신설 (403 인가 검증, purge 파라미터 처리).
 - `frontend/src/app/admin/blog/admin-blog-client.tsx`: 국가 4종 탭, 주제 2종 버튼, 관리자 행별 [철회] 및 [영구삭제] 버튼과 모달 피드백 UI 탑재.
 - 미니 PC Crontab: 매일 04:00 KST `POST /api/blog/generate` 자동 실행 등록.
+
+
+---
+## 🚀 [v237 Specification] SEO 사이트맵 & 색인 정합성 운영 표준 제정 및 3대 결함 영구 해소
+
+### 1. 배경 및 사용자 피드백
+- 구글 서치 콘솔(GSC) 및 SEO 감사 지적 사항:
+  1) **P0: 사이트맵과 색인 정책 불일치**: `/arcade`, `/work`, `/seasons` 페이지가 sitemap.xml에 포함되어 있으나 실제 HTML은 `noindex`로 설정되어 검색 크롤러 경고 발생.
+  2) **P1: 잘못된 수정일 관리**: 1,018개 URL의 `lastmod`가 10월 13일 고정값으로 방치되어 재크롤링 주기 지연.
+  3) **P1: 페이지 메타데이터**: 4개 언어 홈페이지 서버 HTML에서 H1 태그 누락.
+
+### 2. 표준 규격 문서 제정
+- `docs/standards/SEO_SITEMAP_INDEXING_STANDARD.ko.md`:
+  - 원칙 1: Zero-Conflict Invariant (noindex 대상 사이트맵 등록 절대 금지)
+  - 원칙 2: Truthful Modification Date (`lastmod` 동적 갱신 강제)
+  - 원칙 3: 단일 시맨틱 H1 태그 및 메타데이터 정합성 (4개 언어 지원)
+
+### 3. 코드 변경 및 영구 해결
+1. `frontend/src/config/routes.config.ts`:
+   - `/arcade`, `/seasons`, `/work` 라우트의 `indexable`을 `false`로 변경하고 `sitemapPriority` 배제.
+   - 사이트맵 생성 SSOT에서 완전히 제외되어 robots 태그와 100% 일치 보장.
+2. `frontend/src/app/sitemap.ts`:
+   - 하드코딩된 `2026-10-13` 날짜 제거.
+   - `process.env.APP_RELEASE_DATE || '2026-10-24T00:00:00.000Z'`로 최신 배포일자 동적 바인딩.
+3. `frontend/src/app/page.tsx`:
+   - `HOME_H1_BY_LOCALE` 매핑 추가 (`ko`, `en`, `ja`, `zh` 4개 언어 완벽 지원).
+   - 최상단에 접근성 표준 `<h1 className="sr-only">` 렌더링 추가하여 디자인 붕괴 없이 검색 크롤러의 핵심 주제 인식 보장.
+4. `frontend/src/lib/seo-sitemap-integrity.test.ts`:
+   - 사이트맵-noindex 충돌 방지, `lastmod` 최신성, 4개 언어 H1 렌더링을 지속 검증하는 CI 회귀 방지 테스트 추가 (5개 테스트 100% 통과).
+
+### 4. 검증 결과
+- Vitest: 5/5 테스트 성공 (`src/lib/seo-sitemap-integrity.test.ts` 20ms)
+- Typecheck: `tsc --noEmit` 무오류 통과 (0 errors)

@@ -29,7 +29,7 @@ export const revalidate = 3600;
  * Using a fixed release timestamp instead of request-time new Date() ensures
  * search engines receive honest, cacheable modification dates.
  */
-const RELEASE_TIMESTAMP = new Date('2026-10-13T09:30:00.000Z');
+const RELEASE_TIMESTAMP = new Date(process.env.APP_RELEASE_DATE || '2026-10-24T00:00:00.000Z');
 
 /**
  * 18 Canonical Virtual Stock Symbols (10 Classic + 8 WDX Listed) for SEO Long-tail Indexing.

@@ -38,6 +38,13 @@ interface StockItem {
   readonly day_open_price: string;
 }
 
+const HOME_H1_BY_LOCALE = {
+  ko: '월덕 머니버스 — 토스 스타일 차세대 핀테크 가상경제 시뮬레이터',
+  en: 'Woldeok Moneyverse — Toss-style Next-Gen FinTech Simulator',
+  ja: 'ウォルドク・マネーバース — 次世代フィンテック仮想金融シミュレーター',
+  zh: '月德 Moneyverse — Toss风格次世代虚拟金融模拟器',
+} as const;
+
 const HOME_META_BY_LOCALE = {
   en: {
     title: 'Woldeok Moneyverse — Toss-style Next-Gen FinTech Simulator',
@@ -100,6 +107,11 @@ export default async function HomePage() {
 
   return (
     <div data-page="home" className="mx-auto w-full max-w-5xl space-y-6 sm:space-y-8 px-3 sm:px-6 py-2 sm:py-6 pb-28 zero-overflow-shield">
+            {/* 0. SEO 메인 시맨틱 H1 태그 (검색 크롤러 및 웹 접근성 표준 인덱싱) */}
+      <h1 className="sr-only">
+        {HOME_H1_BY_LOCALE[locale] ?? HOME_H1_BY_LOCALE.en}
+      </h1>
+
       {/* 1. 상단 환영 인라인 바 (누런 배너 대신 깔끔한 미니 칩) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
         <div className="flex items-center gap-2">
