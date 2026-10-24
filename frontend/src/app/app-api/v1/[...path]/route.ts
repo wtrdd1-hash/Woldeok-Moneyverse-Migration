@@ -66,6 +66,24 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  // P0 issue #1037: the legacy chat/support media store has no durable
+  // owner/recipient authorization. Block both uploads and old media at the
+  // public gateway *before* buffering multipart bodies or contacting the
+  // private API, including while mixed application versions are deployed.
+  // Text-only chat and other content endpoints remain unaffected.
+  const normalizedParts = parts.map((part) => part.trim()); // appGatewayPath normalizes the same way.
+  const legacyChatUpload = normalizedParts.length === 3 && normalizedParts[0] === 'content' && normalizedParts[1] === 'chat' && normalizedParts[2] === 'upload';
+  const legacyChatMedia = normalizedParts.length === 4 && normalizedParts[0] === 'content' && normalizedParts[1] === 'chat' && normalizedParts[2] === 'media';
+  if (legacyChatUpload || legacyChatMedia) {
+    const response = legacyChatMedia
+      ? gatewayProblem(404, 'Not Found', 'chat_media_unavailable', 'private media is unavailable')
+      : gatewayProblem(503, 'Service Unavailable', 'chat_media_unavailable', 'image attachments are temporarily unavailable');
+    response.headers.set('cache-control', 'private, no-store');
+    return request.method === 'HEAD'
+      ? new NextResponse(null, { status: response.status, headers: response.headers })
+      : response;
+  }
+
   const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
   if (minimumVersionRaw) {
     const minimumVersion = parseAppVersion(minimumVersionRaw);
