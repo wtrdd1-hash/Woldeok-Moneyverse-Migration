@@ -20,6 +20,8 @@ const SAMPLE_ID = '00000000-0000-4000-8000-000000000001';
 const ROUTES = [
   ['get', '/api/v1/work'],
   ['get', '/api/v1/work/tasks'],
+  ['get', '/api/v1/work/favorites'],
+  ['post', `/api/v1/work/favorites/${SAMPLE_ID}`],
   ['post', `/api/v1/work/tasks/${SAMPLE_ID}/complete`],
   ['get', '/api/v1/work/receipts'],
   ['get', '/api/v1/work/assignments'],
@@ -85,7 +87,7 @@ describe('work routes', () => {
     }
   });
 
-  it.each(['dashboard', 'tasks', 'completeTask', 'receipts', 'assignments', 'assign', 'submit', 'verify'] as const)(
+  it.each(['dashboard', 'tasks', 'favorites', 'setFavorite', 'completeTask', 'receipts', 'assignments', 'assign', 'submit', 'verify'] as const)(
     'leaves the class stack in place on %s',
     (handler) => {
       const own: unknown = Reflect.getMetadata(GUARDS_METADATA, WorkController.prototype[handler]);

@@ -62,7 +62,7 @@ export default async function WorkPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [board, assignments, receipts, profile, summary, qualificationsRes] = await Promise.all([
+  const [board, assignments, receipts, profile, summary, qualificationsRes, favoritesRes] = await Promise.all([
     apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks'),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
     apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
@@ -72,6 +72,7 @@ export default async function WorkPage() {
       authoritative_catalog: readonly QualificationCatalogItem[];
       acquired: readonly JobQualificationItem[];
     }>('/api/v1/work/qualifications'),
+    apiOrNull<{ task_ids: string[] }>('/api/v1/work/favorites'),
   ]);
 
   const tasks = board?.tasks ?? [];
@@ -303,6 +304,7 @@ export default async function WorkPage() {
 
         <CareerTasksBoard
           tasks={tasks}
+          favoriteTaskIds={favoritesRes?.task_ids ?? null}
           activeJobType={activeJob?.job_type}
           quotaBlock={quotaBlock}
         />
