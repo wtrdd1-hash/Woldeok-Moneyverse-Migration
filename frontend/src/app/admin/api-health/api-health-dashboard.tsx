@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { triggerAdminBackup } from './actions';
 
 export interface DomainHealthData {
   readonly id: string;
@@ -138,18 +139,12 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
     setIsTriggeringBackup(true);
     setBackupFeedback(null);
     try {
-      const res = await fetch('/api/v1/admin/backups/trigger', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (res.ok) {
-        setBackupFeedback(isEn ? 'Backup triggered in background!' : '백업 파이프라인이 즉시 백그라운드에서 가동되었습니다!');
+      const result = await triggerAdminBackup();
+      setBackupFeedback(result.message);
+      if (result.status === 'ok') {
         setTimeout(() => {
           fetchBackupStatus();
         }, 3000);
-      } else {
-        const errJson = await res.json().catch(() => ({}));
-        setBackupFeedback(errJson.message || (isEn ? 'Backup trigger failed' : '백업 실행 요청 실패'));
       }
     } catch {
       setBackupFeedback(isEn ? 'Backup request error' : '백업 요청 통신 에러');
