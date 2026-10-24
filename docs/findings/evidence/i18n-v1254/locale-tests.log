@@ -1,0 +1,16 @@
+ DEPRECATED  "environmentMatchGlobs" is deprecated. Use `test.projects` to define different configurations instead.
+
+ RUN  v3.2.7 /home/debian/Woldeok-Moneyverse-Migration/frontend
+
+ ✓ src/lib/i18n-full-coverage.test.ts (9 tests) 11ms
+ ✓ src/lib/locale-first-render.test.ts (16 tests) 27ms
+ ✓ src/lib/i18n-dictionary.test.ts (3 tests) 42ms
+ ✓ src/lib/locale.test.ts (6 tests) 4ms
+ ✓ src/lib/seo-locale-alternates.test.ts (4 tests) 5ms
+ ✓ src/lib/locale-routing.test.ts (5 tests) 4ms
+ ✓ src/components/locale-provider-navigation.test.tsx (5 tests) 131ms
+
+ Test Files  7 passed (7)
+      Tests  48 passed (48)
+   Start at  10:12:49
+   Duration  2.01s (transform 239ms, setup 665ms, collect 336ms, tests 224ms, environment 442ms, prepare 426ms)
