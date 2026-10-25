@@ -22,3 +22,11 @@
 
 ## Finished
 - Pending.
+
+### Mid-work checkpoint (14:28–14:32 KST)
+- Re-fetched origin/main: advanced from 3a116b27 to 91babf77 (unrelated i18n/glossary/loan/dividend files). Re-read English and Korean canonical plans; no lottery conflict or competing open lottery PR.
+- RED: Nest and Next new tests failed before implementation (missing modules/allowlist). GREEN: 7 backend focused tests including real Nest HTTP 503/404, 7 frontend focused tests including browser loading/error and Android gateway mapping.
+- Frontend focused first attempt ran with production NODE_ENV and React.act was unavailable; reran with NODE_ENV=test. Corrected a test's mistaken grouping of a >2^53 WLD integer; final 7/7 PASS.
+- Real isolated PostgreSQL 17.11 v855: read-only app role query returned round 1 OPEN, ticketPrice 1000, recorded pool 100000000, tickets 0; INSERT on rounds and UPDATE on ledger_postings denied; ROLLBACK. No write.
+- Typecheck PASS and lint PASS (0 errors, 1118 pre-existing warnings) before final branch synchronization.
+- Implementation is public read-only; fabricated purchases and historical jackpot/burn/seed assertions removed. Exact-SHA full CI and release remain pending.
