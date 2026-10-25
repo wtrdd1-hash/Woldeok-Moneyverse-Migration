@@ -1,5 +1,11 @@
 ## v2026.10.25.1268 — F675-124 Member Board Author Mutes and Private Feed (FEATURE ADDITION / DRAFT / HOLD)
 
+## 2026-10-25 v1274 — F675-125 monthly statement integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- Previous Addition v1272 → Current Improvement v1274 → Next Addition v1276 provisional; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid; predecessor Draft #1296; issue #1295.
+- Corrected proposed archive BIGINT to exact NUMERIC after verifying migration194 and dev DB; added transaction-timestamp month membership, debit/credit sign, reversal-as-new-transaction, merge ownership, writer-coordinated source seal and fail-closed completeness, atomic generation/receipt, precision/concurrency/late-commit regressions. Ten P0/P1 IDs ENV1274-01 SEC1274-02 REL1274-03 WAL1274-04..10.
+- QA v1271 FAILED/HOLD, live root 95%/~4.8GiB, security/CI/migrations/Test/restore gates blocked. No runtime/DB/WLD/ledger/Test/Production change. External new approved 0; cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+
+
 - **2026-10-25 16:05 KST — Planning v1272 (Feature Addition, F675-125, DRAFT/HOLD):** Source-verified member-only monthly WLD statement design in six integrated EN/KO plans. Existing wallet/activity/CSV cap at 50; proposed immutable month generations, completeness/independent opening anchor, HMAC receipt, owner-only APIs, Android, accessible private screens, CSV safety, 10 P0/P1 backlog items. Main 1c5b84a1; QA v1270 FAILED/HOLD, migration266/280 and DB ACL/security/Test/restore blocked. Engineering [#1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295); new approved external 0, cumulative UNKNOWN/10,000 BLOCKED. Planning-only, no runtime or Production changes.
 
 - Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD; engineering issue #1280 OPEN; main unmerged, runtime/Test/Production unchanged.

@@ -1,5 +1,11 @@
 ## v2026.10.25.1268 — F675-124 게시판 작성자 숨김·개인 피드 (기능 추가 / 초안 / 운영 보류)
 
+## 2026-10-25 v1274 — F675-125 월간 명세서 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1272 → 현재 보완 v1274 → 다음 추가 v1276(잠정); main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 Draft #1296, 개발 이슈 #1295.
+- Migration194·개발 DB 확인에 따라 BIGINT 보관안을 정확 NUMERIC으로 정정. 거래시각 월 판정, 차변·대변 부호, 새 역거래, 계정 병합 소유권, 전체 쓰기 경로 seal·완결성 실패 폐쇄, 불변 세대·영수증·큰 수/동시성/늦은 커밋 테스트를 추가. P0/P1 10개 ENV1274-01 SEC1274-02 REL1274-03 WAL1274-04..10.
+- QA v1271 FAILED/HOLD, 루트 95%·약 4.8GiB, 보안/CI/Migration/Test/복원 차단. 런타임/DB/WLD/원장/Test/운영 변경 없음. 외부 신규 승인 0건·누적 미확인/10,000 BLOCKED/IN PROGRESS.
+
+
 - **2026-10-25 16:05 KST — 기획 v1272 (기능 추가, F675-125, 초안/보류):** 회원 전용 검증형 월간 WLD 명세서를 공식 국영문 통합 기획 6개에 반영. 기존 지갑·활동·CSV 최근 50건 한계, 불변 월 세대·원천 완결/기초잔액 검증·HMAC 영수증·본인 API·Android·접근성·CSV 보안·P0/P1 10건 명세. main 1c5b84a1, QA v1270 FAILED/HOLD, Migration266/280·DB 권한·보안·Test·복원 차단. 개발 이슈 [#1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295), 외부 신규 승인 0·누적 미확인/10,000 BLOCKED. 런타임·운영 변경 없음.
 
 - Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD, 개발 이슈 #1280 OPEN, main 미병합·런타임/Test/운영 변경 없음.
