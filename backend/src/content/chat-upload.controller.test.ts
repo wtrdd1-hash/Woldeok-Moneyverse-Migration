@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import type { Response } from 'express';
 import { ChatUploadController } from './chat-upload.controller';
 import { AntivirusThreatError } from './antivirus-scanner.service';
@@ -75,6 +75,16 @@ describe('ChatUploadController', () => {
         title: expect.stringContaining('보안 경보'),
       }),
     );
+  });
+
+  it('ClamAV outage returns 503 without a false malware alert', async () => {
+    const req = { session: { user_id: 'user_1' } } as RequestWithSession;
+    const file = { buffer: Buffer.from('image-data'), originalname: 'photo.png', size: 10, mimetype: 'image/png' };
+    vi.mocked(mockStorage.save!).mockRejectedValue(
+      new AntivirusThreatError('CLAMAV_UNAVAILABLE', 'scan unavailable'),
+    );
+    await expect(controller.uploadChatImage(req, file)).rejects.toThrow(ServiceUnavailableException);
+    expect(mockDiscordAlert.sendAdminDirectMessage).not.toHaveBeenCalled();
   });
 
   it('존재하지 않는 미디어 요청 시 NotFoundException을 던진다', async () => {

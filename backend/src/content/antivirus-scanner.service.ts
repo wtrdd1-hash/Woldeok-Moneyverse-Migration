@@ -269,12 +269,28 @@ export class AntivirusScannerService {
 
     const clamHost = process.env.CLAMAV_HOST;
     const clamPort = Number.parseInt(process.env.CLAMAV_PORT || '3310', 10);
-    if (!hasUnixSocket && !clamHost) return null;
+    if (!hasUnixSocket && !clamHost) {
+      if (process.env.CLAMAV_SOCKET?.trim()) {
+        throw new AntivirusThreatError('CLAMAV_UNAVAILABLE', 'Configured ClamAV socket is unavailable');
+      }
+      return null; // No daemon was configured; retain the built-in signature policy.
+    }
 
-    return new Promise((resolve) => {
+    // A configured daemon is an enforced security control. If it cannot confirm
+    // a clean scan, do not silently downgrade to the signature-only scanner.
+    return new Promise((resolve, reject) => {
       const socket = hasUnixSocket
         ? net.createConnection({ path: socketPath }, onConnected)
         : net.createConnection({ host: clamHost!, port: clamPort }, onConnected);
+      let settled = false;
+      let response = '';
+
+      const fail = (): void => {
+        if (settled) return;
+        settled = true;
+        socket.destroy();
+        reject(new AntivirusThreatError('CLAMAV_UNAVAILABLE', 'ClamAV scan could not be completed'));
+      };
 
       function onConnected() {
         socket.write('zINSTREAM\0');
@@ -292,32 +308,33 @@ export class AntivirusScannerService {
       }
 
       socket.setTimeout(2500);
-      let response = '';
-
       socket.on('data', (data) => {
         response += data.toString('utf-8');
+        if (response.length > 4096) fail();
       });
-
       socket.on('end', () => {
-        if (response.includes('OK')) {
+        if (settled) return;
+        const reply = response.replace(/\0+$/, '').trim();
+        if (/^stream:\s+OK$/.test(reply)) {
+          settled = true;
           resolve({ isClean: true });
-        } else if (response.includes('FOUND')) {
-          const match = response.match(/stream:\s+(.+)\s+FOUND/);
-          const virusName = (match && match[1]) ? match[1] : 'Unknown ClamAV Threat';
-          resolve({ isClean: false, virusName });
-        } else {
-          resolve(null);
+          return;
         }
+        const match = /^stream:\s+(.+?)\s+FOUND$/.exec(reply);
+        if (match) {
+          settled = true;
+          resolve({ isClean: false, virusName: match[1] });
+          return;
+        }
+        fail();
       });
-
       socket.on('error', (err) => {
-        this.logger.debug(`ClamAV socket connect failed, fallback to builtin: ${err.message}`);
-        resolve(null);
+        this.logger.warn(`Configured ClamAV scan unavailable: ${err.code ?? 'socket error'}`);
+        fail();
       });
-
-      socket.on('timeout', () => {
-        socket.destroy();
-        resolve(null);
+      socket.on('timeout', fail);
+      socket.on('close', () => {
+        if (!settled) fail();
       });
     });
   }

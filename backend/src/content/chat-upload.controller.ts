@@ -9,6 +9,7 @@ import {
   Post,
   Req,
   Res,
+  ServiceUnavailableException,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -68,6 +69,9 @@ export class ChatUploadController {
       };
     } catch (error) {
       if (error instanceof AntivirusThreatError) {
+        if (error.threatType === 'CLAMAV_UNAVAILABLE') {
+          throw new ServiceUnavailableException('이미지 보안 검사 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해주세요.');
+        }
         // 관리자 디스코드 DM으로 긴급 보안 경보 전송
         if (this.discordAlert) {
           this.discordAlert

@@ -10,11 +10,18 @@
 ## Checklist
 - [x] Read latest main, AGENTS, README, English/Korean plans, PR/CI and QA context.
 - [x] Isolated worktree from origin/main; existing A/C/QA branches protected.
-- [ ] RED tests and failure evidence.
-- [ ] Implementation and GREEN evidence.
+- [x] RED tests and failure evidence: first 4 failing cases, then missing Unix socket failing case.
+- [x] Implementation and GREEN evidence: 20/20 focused tests on configured TCP daemon, malformed response, timeout, missing Unix socket, HTTP 503, and default behavior.
 - [ ] Fresh main sync, lint/typecheck/build/unit/security/PG/E2E/CI evidence.
 - [ ] Draft PR and final release HOLD record.
 
 ## Start gates
 - miniPC Debian 13.6 active; root 98% (2.1 GiB free), data volume 67% (63 GiB free).
 - Last v541 Draft #1342 runtime CI failed. Main is unchanged. No Test or Production mutation authorized.
+
+## Midpoint
+- Latest `origin/main` fetched again and English/Korean planning files checked; main unchanged from baseline.
+- No database migrations, SQL, WLD, ledger, Test or Production changes.
+- API contract: `POST /api/v1/content/chat/upload` returns HTTP 503 when configured ClamAV unavailable (instead of false 400 malware finding). Existing 400 for actual detected threats; success response unchanged.
+- Unit tests use isolated loopback TCP daemon and synthetic image bytes; no production file or DB access.
+- Existing open PR #1300 changes blog scheduler; #1332 encryption; QA #1317 frontend/security dependencies; no overlap with this scanner/controller change.
