@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import type { CasinoPlayState } from './casino-state';
+import { isReceiptUuid, parseVerifiedWheelOutcome } from './wheel-receipt-history';
 import { canonicalIntegerString, groupDigits } from '@/lib/money';
 import { failure, idempotencyKey, mutate, wholeNumber } from '@/lib/mutate';
 import {
@@ -274,6 +275,7 @@ export async function playDiceNumber(
 
 interface ThemeReceipt {
   readonly play_id: string;
+  readonly transaction_id: string;
   readonly outcome: string;
   readonly net_amount: unknown;
   readonly replayed: boolean;
@@ -301,12 +303,17 @@ export async function playThemeGame(
     const receipt = await mutate<ThemeReceipt>('/api/v1/casino/theme/plays', {
       body: { game, choice, stake, idempotencyKey: idempotencyKey() },
     });
+    if (receipt === null || typeof receipt !== 'object') {
+      throw new TypeError('casino theme receipt missing verified settlement evidence');
+    }
+    const netAmount = canonicalIntegerString(receipt.net_amount);
+    if (!isReceiptUuid(receipt.play_id) || !isReceiptUuid(receipt.transaction_id) ||
+        typeof receipt.replayed !== 'boolean' || typeof receipt.outcome !== 'string' ||
+        netAmount === null || (game === 'wheel_20' && !parseVerifiedWheelOutcome(receipt.outcome))) {
+      throw new TypeError('casino theme receipt missing verified settlement evidence');
+    }
     revalidatePath('/arcade');
     revalidatePath('/casino');
-
-    const netAmount = canonicalIntegerString(receipt.net_amount);
-    if (netAmount === null)
-      throw new TypeError('casino theme receipt returned an invalid net amount');
     const amount = groupDigits(absAmount(netAmount));
     const result = resultOf(netAmount);
     const detail = formatOutcome(receipt.outcome);
@@ -325,8 +332,13 @@ export async function playThemeGame(
       netAmount,
       replayed: receipt.replayed,
       themeOutcome: receipt.outcome,
+      playId: receipt.play_id,
+      transactionId: receipt.transaction_id,
     };
   } catch (error) {
+    if (error instanceof TypeError && error.message.startsWith('casino theme receipt')) {
+      return { status: 'error', message: '서버 정산 영수증을 확인하지 못했습니다. 지갑 거래 내역을 확인하고 중복 참여를 피해주세요.' };
+    }
     return closedOr(
       error,
       '이번 도전은 정상 처리되지 않았어요. 보유 잔액과 오늘 남은 일일 이용 한도, 설정된 과열방지 잠금을 확인해 주세요.',

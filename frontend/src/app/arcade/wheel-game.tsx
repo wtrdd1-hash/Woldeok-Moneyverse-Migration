@@ -12,6 +12,8 @@ import { groupDigits } from '@/lib/money';
 import { playWheel20 } from './actions';
 import { CASINO_IDLE } from './casino-state';
 import type { CasinoPlayState } from './casino-state';
+import { addVerifiedWheelResult, parseVerifiedWheelOutcome } from './wheel-receipt-history';
+import type { VerifiedWheelResult } from './wheel-receipt-history';
 
 // 20개 구획 정의 (1..20)
 // 1..10: Blue (50%, 1.90배)
@@ -70,23 +72,28 @@ export function WheelGame({
   const [stakeAmount, setStakeAmount] = useState<number>(Number(minStake));
   const [rotationDegree, setRotationDegree] = useState<number>(0);
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
-  const [history, setHistory] = useState<readonly { seg: number; type: string; isWin: boolean }[]>([
-    { seg: 7, type: 'blue', isWin: true },
-    { seg: 14, type: 'gold', isWin: true },
-    { seg: 2, type: 'blue', isWin: false },
-    { seg: 19, type: 'neutral', isWin: false },
-    { seg: 16, type: 'violet', isWin: true },
-  ]);
+  const [history, setHistory] = useState<readonly VerifiedWheelResult[]>([]);
 
   const maxPlayable = Math.min(Number(maxStake), Number(remainingStake));
   const spinCounter = useRef(0);
 
   // 서버 응답 수신 시 정확한 각도로 회전
   useEffect(() => {
-    if (state.status === 'ok' && state.themeOutcome) {
-      const [segStr, clsStr] = state.themeOutcome.split(':');
-      const segmentNum = parseInt(segStr ?? '1', 10);
-      const segmentClass = clsStr ?? 'neutral';
+    if (state.status === 'ok' && state.themeOutcome && state.playId && state.transactionId && state.netAmount) {
+      const parsed = parseVerifiedWheelOutcome(state.themeOutcome);
+      if (!parsed) return;
+      const segmentNum = parsed.seg;
+      const verifiedReceipt = {
+        playId: state.playId,
+        transactionId: state.transactionId,
+        themeOutcome: state.themeOutcome,
+        netAmount: state.netAmount,
+        replayed: state.replayed === true,
+      };
+      if (state.replayed) {
+        setHistory((previous) => addVerifiedWheelResult(previous, verifiedReceipt));
+        return;
+      }
 
       // 1번 세그먼트는 0도..18도 (중심 9도)
       // 12시 방향(0도)에 세그먼트 중심이 위치하려면 반대 회전 적용
@@ -105,10 +112,7 @@ export function WheelGame({
 
       const timer = setTimeout(() => {
         setIsSpinning(false);
-        setHistory((prev) => [
-          { seg: segmentNum, type: segmentClass, isWin: state.result === 'win' },
-          ...prev.slice(0, 9),
-        ]);
+        setHistory((previous) => addVerifiedWheelResult(previous, verifiedReceipt));
       }, 3200);
 
       return () => clearTimeout(timer);
@@ -155,12 +159,13 @@ export function WheelGame({
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
           <span className="flex items-center gap-1 font-bold text-muted-foreground shrink-0 text-[11px]">
             <History className="size-3.5" />
-            <span>최근 결과:</span>
+            <span>이번 화면에서 서버 확인한 결과:</span>
           </span>
-          <div className="flex items-center gap-1.5 shrink-0">
-            {history.map((h, idx) => (
+          <div className="flex items-center gap-1.5 shrink-0" role="status" aria-live="polite" aria-atomic="true">
+            {history.length === 0 && <span className="text-muted-foreground">아직 확인된 룰렛 결과가 없습니다.</span>}
+            {history.map((h) => (
               <span
-                key={idx}
+                key={h.playId}
                 className={cn(
                   'px-2 py-0.5 rounded-full font-bold font-mono text-[11px] border',
                   h.type === 'blue' && 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30',
@@ -370,7 +375,7 @@ export function WheelGame({
                 size="sm"
                 onClick={() => handleAddStake(1000)}
                 disabled={pending || isSpinning || exhausted}
-                className="h-8 text-xs font-mono font-bold rounded-lg"
+                className="min-h-11 text-xs font-mono font-bold rounded-lg"
               >
                 +1,000
               </Button>
@@ -380,7 +385,7 @@ export function WheelGame({
                 size="sm"
                 onClick={() => handleAddStake(5000)}
                 disabled={pending || isSpinning || exhausted}
-                className="h-8 text-xs font-mono font-bold rounded-lg"
+                className="min-h-11 text-xs font-mono font-bold rounded-lg"
               >
                 +5,000
               </Button>
@@ -390,7 +395,7 @@ export function WheelGame({
                 size="sm"
                 onClick={() => handleAddStake(10000)}
                 disabled={pending || isSpinning || exhausted}
-                className="h-8 text-xs font-mono font-bold rounded-lg"
+                className="min-h-11 text-xs font-mono font-bold rounded-lg"
               >
                 +10,000
               </Button>
@@ -400,7 +405,7 @@ export function WheelGame({
                 size="sm"
                 onClick={handleMaxStake}
                 disabled={pending || isSpinning || exhausted}
-                className="h-8 text-xs font-mono font-black text-primary rounded-lg"
+                className="min-h-11 text-xs font-mono font-black text-primary rounded-lg"
               >
                 MAX
               </Button>

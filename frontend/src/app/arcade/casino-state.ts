@@ -8,6 +8,8 @@ export interface CasinoPlayState extends ActionState {
   readonly outcomeFace?: number;
   readonly coinOutcome?: string;
   readonly themeOutcome?: string;
+  readonly playId?: string;
+  readonly transactionId?: string;
 }
 
 export const CASINO_IDLE: CasinoPlayState = { status: 'idle' };
