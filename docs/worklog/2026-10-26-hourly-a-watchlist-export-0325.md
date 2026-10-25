@@ -27,3 +27,12 @@
 
 ## Finished state
 - Candidate code and QA/release EN+KO documented. Final SHA and post-document validation/CI evidence to be attached to PR. No Production rollback necessary because no release was performed.
+
+## Post-document full-gate recheck (2026-10-26 03:40–03:45 KST)
+- Evidence SHA `35c45c4084f3887ef004df580853e9a6b3cd9c24`: `pnpm typecheck` PASS; `pnpm lint` PASS (0 errors/1,128 warnings); `pnpm build` PASS; `pnpm test` FAIL: backend 1,315 PASS/398 SKIP, DB 15 PASS/3 SKIP, contract 38 PASS, frontend 1,402 PASS/6 FAIL.
+- Security recheck at evidence SHA: production dependencies High2, full dependencies Critical2/High10, bot Critical1/High5; all FAIL.
+- GitHub CI #40222380287 and Test Candidate #40222365806 running at 03:45 KST; not PASS.
+- End-of-run remote audit snapshot: 215 branches (214 non-main, all with unmerged commits, no duplicate tips/trees), 211 open PRs including Draft #1360; zero deleted. PR #1107/#1110/#1143 conflicting and preserved.
+- Changed source: stock controller, stock export backend test, private watchlist page, private CSV route and tests, app gateway headers/test, SEO regression test. Docs: QA, EN+KO release, worklog.
+- Current Test and Production version SHA mismatch; no official exact-SHA authenticated E2E. Production changes 0, rollback not required. Integration and release HOLD.
+- Final documentation commit SHA and final recheck will be recorded in Draft PR #1360; final SHA cannot be embedded in its own commit content.

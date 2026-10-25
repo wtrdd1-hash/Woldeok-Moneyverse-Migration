@@ -10,7 +10,7 @@
 
 ## RED/GREEN and full gate evidence
 - RED: 2 backend failures (missing method), frontend route import failure; SEO metadata test failed before fix. GREEN: backend 2/2, frontend/Android/SEO 15/15 on implementation checkpoint.
-- Full suite (pre-final-document SHA): backend **1,315 PASS / 398 SKIPPED**; database **15 PASS / 3 SKIPPED**; contract **38 PASS**; frontend **1,401 PASS / 6 FAIL** (SEO 3, login a11y 1, registration link 1, admin M2 telemetry 1). The 6 failures remain **BLOCKING**, not ignored.
+- Full suite (final candidate recheck before report correction): backend **1,315 PASS / 398 SKIPPED**; database **15 PASS / 3 SKIPPED**; contract **38 PASS**; frontend **1,402 PASS / 6 FAIL** (SEO 3, login a11y 1, registration link 1, admin M2 telemetry 1). The 6 failures remain **BLOCKING**, not ignored.
 - Typecheck **PASS**; lint **PASS with 0 errors / 1,128 warnings**. Initial Turbopack build failed due to a worktree-only `node_modules` symlink outside filesystem root; after an offline `pnpm install` inside this worktree, standard `pnpm build` **PASS** (Next.js 16.4.2). No global dependency changes.
 - `pnpm audit --prod`: **FAIL (High 2)**; full `pnpm audit`: **FAIL (Critical 2 / High 10)**; bot `npm audit`: **FAIL (Critical 1 / High 5)**. No security PASS claim.
 - Real isolated PostgreSQL 17.11 `wdmv_v761_test_acl`, 281 applied migrations: transaction inserted one temporary watchlist record; as `moneyverse_app`, owner lookup **1**, other-user lookup **0**, integer-string precision **PASS**, direct watchlist table SELECT **DENIED**, ledger INSERT **DENIED**; `ROLLBACK` and zero remaining fixture rows. **No Production DB writes.**
@@ -20,4 +20,4 @@
 - Audit snapshot: 215 remote branches (214 non-main); all 214 non-main refs had commits absent from main, zero duplicate tips or trees; no safe deletion. 210 open PRs before this PR; 208 drafts. Known conflicting PRs #1107, #1110 and #1143 remain untouched. No unique unmerged work discarded.
 - Debian 13.6 connected; backend/frontend/bot/nginx/docker active. Root filesystem 99% (1.6 GiB available), data volume 69%: operational capacity risk. No cleanup of other workers' worktrees.
 - Rollback: no production changes to roll back. If ever merged, revert this feature commit and keep the prior release image; verify GitOps rollback image availability before release.
-- Final exact SHA and final rerun status are recorded in the PR and worklog. **Do not merge on focused PASS or build-only CI.**
+- Post-document full gates were rerun: typecheck PASS, lint 0 errors/1,128 warnings, build PASS, frontend 1,402 PASS/6 FAIL, backend 1,315 PASS/398 SKIP, DB 15 PASS/3 SKIP, contract 38 PASS. Audits remain FAIL. Final exact SHA and CI status are recorded in the PR; no merge. **Do not merge on focused PASS or build-only CI.**
