@@ -20,3 +20,17 @@
 - Rechecked remote main: `1c5b84a1c45baafcca83f375a6f99698121e9bb5` unchanged. Android proxy contract and private-header regression added.
 - **P0 finding (isolated PG 17):** `wdmv_v761_test_acl` does NOT contain `public.in_app_notifications` or any `notification_%` functions. Main migrations through 279 also contain no definition. The pre-existing notification service references this missing relation. Consequently the proposed archive cannot be real-PG/E2E verified or deployed. Do not invent data, grant direct access or edit applied migrations. Requires independently reviewed additive migration/architecture decision in a separate safe sequence; main already has competing unmerged migrations 280/281.
 - P0 host root remains 100% (741 MiB free); no deletions performed to preserve other worktrees and live service data.
+
+### Verification — 08:09–08:13 KST
+- Focused backend 3 PASS, frontend 18 PASS including app-api session/private headers. Mobile contract generated/check 180 endpoints PASS. Typecheck PASS, lint 0 errors/1128 warnings, full build PASS after fixing local dependency resolution without touching other worktrees.
+- Full root test FAIL: contract 38 PASS, DB 15 PASS/3 SKIP, backend 1316 PASS/398 SKIP, frontend 1402 PASS/6 FAIL. Security FAIL: prod 2 High, full 2 Critical/10 High, bot 1 Critical/5 High; bot tests 8 PASS.
+- Isolated PG 17.11 read-only check: 281 migrations, source relation missing, 0 notification functions. No owner/foreign ACL or exact-SHA E2E evidence. No fixture, no DDL, no financial ledger writes. No official Test or Production promotion.
+- Remote branch heads checked: 238 heads, no duplicate head SHA. Three known conflicting PRs #1107/#1110/#1143. Other developers' unique commits not exhaustively proved; delete 0.
+
+## Finished — candidate HOLD
+- [x] RED tests and GREEN focused implementation.
+- [x] Web/API/Android candidate, EN/KO docs, exact build/typecheck/lint and full-test evidence.
+- [ ] Real-PG notification source and owner/foreign ACL (BLOCKED: source table absent).
+- [ ] Full frontend/security gates and official exact-SHA authenticated Test E2E (BLOCKED).
+- [ ] main merge, GitOps promotion and Production smoke (PROHIBITED).
+- Rollback: no runtime or schema change, leave Production and main unchanged. No branch cleanup, preserve all unique work.
