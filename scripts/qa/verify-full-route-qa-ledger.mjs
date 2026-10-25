@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -25,7 +26,7 @@ function addIssue(issues, message) {
   issues.push(message);
 }
 
-export function verifyLedger({ inventory, fixtures, ledger }) {
+export function verifyLedger({ inventory, fixtures, ledger, expectedCandidateSha }) {
   const issues = [];
   if (inventory.schemaVersion !== 1 || !Array.isArray(inventory.pages)) {
     addIssue(issues, 'inventory must be schemaVersion 1 with pages');
@@ -38,6 +39,14 @@ export function verifyLedger({ inventory, fixtures, ledger }) {
   }
   if (issues.length > 0) return { ok: false, issues, summary: null };
 
+  const actualInventoryHash = createHash('sha256').update(JSON.stringify(inventory.pages)).digest('hex');
+  if (inventory.inventorySha256 !== actualInventoryHash) {
+    addIssue(issues, `inventory content hash mismatch: expected ${actualInventoryHash}, got ${inventory.inventorySha256 ?? 'missing'}`);
+  }
+  if (expectedCandidateSha) {
+    if (ledger.candidateSha !== expectedCandidateSha) addIssue(issues, `candidate SHA mismatch: expected ${expectedCandidateSha}, got ${ledger.candidateSha ?? 'missing'}`);
+    if (inventory.repositoryHead !== expectedCandidateSha) addIssue(issues, `inventory repository SHA mismatch: expected ${expectedCandidateSha}, got ${inventory.repositoryHead ?? 'missing'}`);
+  }
   if (ledger.inventorySha256 !== inventory.inventorySha256) {
     addIssue(issues, `inventory hash mismatch: expected ${inventory.inventorySha256}, got ${ledger.inventorySha256 ?? 'missing'}`);
   }
@@ -58,6 +67,7 @@ export function verifyLedger({ inventory, fixtures, ledger }) {
     if (!isNonEmptyString(entry.evidenceUri)) addIssue(issues, `${label} requires evidenceUri`);
     if (!isNonEmptyString(entry.executedAt)) addIssue(issues, `${label} requires executedAt`);
     if (!isNonEmptyString(entry.runtimeVersion)) addIssue(issues, `${label} requires runtimeVersion`);
+    else if (expectedCandidateSha && entry.runtimeVersion !== expectedCandidateSha) addIssue(issues, `${label} runtime SHA mismatch: expected ${expectedCandidateSha}, got ${entry.runtimeVersion}`);
     if (!isNonEmptyString(entry.apiVersion)) addIssue(issues, `${label} requires apiVersion`);
     if (entry.result !== 'PASS' && !isNonEmptyString(entry.defectId)) {
       addIssue(issues, `${label} requires defectId for ${entry.result ?? 'non-pass'} result`);
@@ -98,10 +108,14 @@ export function verifyLedger({ inventory, fixtures, ledger }) {
 
 async function main() {
   const argv = process.argv.slice(2);
+  const usage = 'Usage: node scripts/qa/verify-full-route-qa-ledger.mjs --inventory <generated-inventory.json> --fixtures <fixtures.json> --ledger <real-e2e-ledger.json> --candidate-sha <40-character-commit-sha>';
+  if (['--inventory', '--fixtures', '--ledger', '--candidate-sha'].some((flag) => !argv.includes(flag))) throw new Error(usage);
+  const expectedCandidateSha = requiredOption(argv, '--candidate-sha');
+  if (!/^[a-f0-9]{40}$/i.test(expectedCandidateSha)) throw new Error(`invalid --candidate-sha; ${usage}`);
   const inventory = await readJson(requiredOption(argv, '--inventory'));
   const fixtures = await readJson(requiredOption(argv, '--fixtures'));
   const ledger = await readJson(requiredOption(argv, '--ledger'));
-  const report = verifyLedger({ inventory, fixtures, ledger });
+  const report = verifyLedger({ inventory, fixtures, ledger, expectedCandidateSha });
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   if (!report.ok) process.exitCode = 1;
 }

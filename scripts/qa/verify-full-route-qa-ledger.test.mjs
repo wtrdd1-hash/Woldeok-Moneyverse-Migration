@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { verifyLedger } from './verify-full-route-qa-ledger.mjs';
 
 const fixtures = {
@@ -12,6 +13,7 @@ const fixtures = {
 
 const inventory = {
   schemaVersion: 1,
+  repositoryHead: 'a'.repeat(40),
   inventorySha256: 'inventory-sha',
   pages: [
     { route: '/', routeKind: 'static', administrator: false },
@@ -19,6 +21,8 @@ const inventory = {
     { route: '/items/[id]', routeKind: 'dynamic', administrator: false },
   ],
 };
+
+inventory.inventorySha256 = createHash('sha256').update(JSON.stringify(inventory.pages)).digest('hex');
 
 function entry(route, passNumber, overrides = {}) {
   return {
@@ -28,7 +32,7 @@ function entry(route, passNumber, overrides = {}) {
     result: 'PASS',
     evidenceUri: `artifacts/${route.replaceAll('/', '_')}-${passNumber}.png`,
     executedAt: '2026-09-26T00:00:00.000Z',
-    runtimeVersion: 'candidate-sha',
+    runtimeVersion: 'a'.repeat(40),
     apiVersion: 'v1',
     ...overrides,
   };
@@ -44,7 +48,7 @@ function completeLedger() {
   entries.push(entry('/items/[id]', 1, { dynamicScenario: 'valid' }));
   entries.push(entry('/items/[id]', 2, { dynamicScenario: 'not_found' }));
   entries.push(entry('/items/[id]', 3, { dynamicScenario: 'permission_denied' }));
-  return { schemaVersion: 1, candidateSha: 'candidate-sha', inventorySha256: 'inventory-sha', entries };
+  return { schemaVersion: 1, candidateSha: 'a'.repeat(40), inventorySha256: inventory.inventorySha256, entries };
 }
 
 test('accepts complete five-pass coverage with required admin and dynamic evidence', () => {
@@ -69,4 +73,43 @@ test('rejects non-pass evidence without a defect identifier', () => {
   const report = verifyLedger({ inventory, fixtures, ledger });
   assert.equal(report.ok, false);
   assert.match(report.issues.join('\n'), /requires defectId/);
+});
+
+test('rejects stale route inventory content even when ledger repeats its claimed hash', () => {
+  const changed = structuredClone(inventory);
+  changed.pages[0].route = '/tampered';
+  const report = verifyLedger({ inventory: changed, fixtures, ledger: completeLedger() });
+  assert.equal(report.ok, false);
+  assert.match(report.issues.join('\n'), /inventory content hash mismatch/);
+});
+
+test('rejects a candidate SHA mismatch and an unverified deployed runtime', () => {
+  const ledger = completeLedger();
+  ledger.candidateSha = 'b'.repeat(40);
+  ledger.entries[0].runtimeVersion = 'c'.repeat(40);
+  const staleInventory = { ...inventory, repositoryHead: 'd'.repeat(40) };
+  const report = verifyLedger({ inventory: staleInventory, fixtures, ledger, expectedCandidateSha: 'a'.repeat(40) });
+  assert.equal(report.ok, false);
+  assert.match(report.issues.join('\n'), /candidate SHA mismatch/);
+  assert.match(report.issues.join('\n'), /runtime SHA mismatch/);
+  assert.match(report.issues.join('\n'), /inventory repository SHA mismatch/);
+});
+
+test('CLI refuses absent real evidence inputs with actionable usage', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const result = spawnSync(process.execPath, ['scripts/qa/verify-full-route-qa-ledger.mjs', '--fixtures', 'scripts/qa/fixtures/full-route-fixtures.v1.json'], { encoding: 'utf8' });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /--inventory.*--ledger.*--candidate-sha/s);
+});
+
+test('package QA command fails closed without independently collected E2E artifacts', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const result = spawnSync(process.execPath, ['scripts/qa/check-full-route-qa-ledger.mjs'], { encoding: 'utf8' });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /BLOCKED: missing independently collected route QA evidence/);
+});
+
+test('accepts exact SHA evidence when all route runtime receipts match', () => {
+  const report = verifyLedger({ inventory, fixtures, ledger: completeLedger(), expectedCandidateSha: 'a'.repeat(40) });
+  assert.equal(report.ok, true, report.issues.join('\n'));
 });

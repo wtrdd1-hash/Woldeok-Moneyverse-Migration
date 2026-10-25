@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -69,7 +70,7 @@ if (duplicates.length > 0) {
 const canonical = JSON.stringify(pages);
 const inventory = {
   schemaVersion: 1,
-  repositoryHead: process.env.GITHUB_SHA ?? null,
+  repositoryHead: process.env.GITHUB_SHA ?? execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   routeCount: pages.length,
   administratorRouteCount: pages.filter((page) => page.administrator).length,
   dynamicRouteCount: pages.filter((page) => page.routeKind === 'dynamic').length,
