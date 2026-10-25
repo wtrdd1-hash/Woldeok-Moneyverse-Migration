@@ -11,8 +11,8 @@
 **Spec:** `docs/worklog/2026-10-26-hourly-b-v548-rate-limit-ip-identity.md`.
 
 ## Tasks
-- [ ] Add regression tests in `backend/src/security/rate-limit.test.ts` for canonical IPv6 and IPv4-mapped peer identities, ambiguous CF header arrays, and existing trusted-edge fallback.
-- [ ] Run focused tests and record expected RED failures.
-- [ ] Implement minimal normalization in `backend/src/security/rate-limit.ts` without changing rate budgets or proxy-trust configuration.
-- [ ] Run focused GREEN tests, full backend/contract/security gates, lint, typecheck, build, and audit; record exact SHA and skips.
-- [ ] Reconcile fresh main and plans, submit Draft PR only, keep Test/Production HOLD until all required gates pass.
+- [x] Add regression tests in `backend/src/security/rate-limit.test.ts` for canonical IPv6 and IPv4-mapped peer identities, ambiguous CF header arrays, and existing trusted-edge fallback.
+- [x] Run focused tests and record expected RED failures.
+- [x] Implement minimal normalization in `backend/src/security/rate-limit.ts` without changing rate budgets or proxy-trust configuration.
+- [x] Run focused GREEN tests, full backend/contract/security gates, lint, typecheck, build, and audit; record exact SHA and skips (failed mandatory frontend/audit gates remain HOLD).
+- [x] Reconcile fresh main and plans, submit Draft PR only, keep Test/Production HOLD until all required gates pass.
