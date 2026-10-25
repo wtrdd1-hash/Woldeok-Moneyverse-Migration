@@ -27,5 +27,5 @@
 
 ## Task 3 — Verification and release decision
 - [x] Re-fetch main and review A/B/QA overlap.
-- [ ] Run targeted, lint, typecheck, build, frontend/backend/DB/contract/security/app-api/CI where safe.
-- [ ] Record exact SHA, Test/Production status, blockers, and preserve branch when gates fail.
+- [x] Run targeted, lint, typecheck, build, frontend/backend/DB/contract/security/app-api/CI where safe; document failures and skips.
+- [x] Record exact SHA, Test/Production status, blockers, and preserve branch when gates fail.

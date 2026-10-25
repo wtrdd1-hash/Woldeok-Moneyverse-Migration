@@ -1,5 +1,5 @@
 ## 2026-10-25 — 개발 C v1030 시즌 기록·명예의 전당 검증 (DRAFT / 운영 보류)
-- 임의 시즌 XP·보상 수령·헌액자·소각액 제거, 인증된 NestJS `currentSeason`/`hallOfFame` 조회 연동. 비색인/반응형/접근성 및 종료 시즌에 한정한 최종 보상 표시. 집중 7 PASS, 타입/린트 PASS; 전체 프론트 6 FAIL·의존성 감사 FAIL. 병합/운영배포 없음. `docs/worklog/2026-10-25-hourly-c-v1030.ko.md` 참고.
+- 임의 시즌 XP·보상 수령·헌액자·소각액 제거, 인증된 NestJS `currentSeason`/`hallOfFame` 조회 연동. 비색인/반응형/접근성 및 종료 시즌에 한정한 최종 보상 및 영수증 UUID·금액·트로피 검증. 집중 11 PASS, 타입/린트 PASS; 전체 프론트 6 FAIL·의존성 감사 FAIL. 병합/운영배포 없음. `docs/worklog/2026-10-25-hourly-c-v1030.ko.md` 참고.
 
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
 
