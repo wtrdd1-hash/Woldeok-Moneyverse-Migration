@@ -164,7 +164,7 @@ export default function StockCalculatorPage() {
               className="text-xs h-8 gap-1.5 bg-background/50 hover:bg-emerald-500/10 hover:border-emerald-500/40"
             >
               <span className="font-bold text-foreground">{stock.symbol}</span>
-              <span className="text-muted-foreground">({locale === 'en' ? stock.nameEn : stock.nameKo})</span>
+              <span className="text-muted-foreground">({locale === 'ko' ? stock.nameKo : stock.nameEn})</span>
               <span className="font-mono text-emerald-500">{curr.symbol}{stock.currentPrice.toLocaleString()}</span>
             </Button>
           ))}
