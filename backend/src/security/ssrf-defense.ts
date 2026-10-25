@@ -1,5 +1,5 @@
 import dns from 'node:dns/promises';
-import { isIP } from 'node:net';
+import { BlockList, isIP } from 'node:net';
 
 export class SsrffSecurityError extends Error {
   constructor(message: string) {
@@ -44,6 +44,11 @@ function isPrivateIPv4(ip: string): boolean {
   return false;
 }
 
+// Node's CIDR matcher recognizes both compressed and expanded IPv4-mapped
+// IPv6 forms. Prefix matching avoids trusting the DNS resolver's text format.
+const ipv4MappedRange = new BlockList();
+ipv4MappedRange.addSubnet('::ffff:0:0', 96, 'ipv6');
+
 /**
  * Checks if an IPv6 address falls into loopback, unique local, link-local, or IPv4-mapped private ranges.
  */
@@ -55,12 +60,19 @@ function isPrivateIPv6(ip: string): boolean {
     return true;
   }
 
-  // IPv4-mapped IPv6 (::ffff:x.x.x.x)
-  if (normalized.startsWith('::ffff:')) {
-    const ipv4Part = normalized.slice(7);
-    if (isIP(ipv4Part) === 4) {
-      return isPrivateIPv4(ipv4Part);
-    }
+  // A resolver may encode the mapped IPv4 bytes as two hexadecimal
+  // hextets (::ffff:7f00:1) rather than a dotted quad (::ffff:127.0.0.1).
+  if (ipv4MappedRange.check(normalized, 'ipv6')) {
+    const segments = normalized.split(':');
+    const last = segments.at(-1) ?? '';
+    if (isIP(last) === 4) return isPrivateIPv4(last);
+
+    const upper = Number.parseInt(segments.at(-2) ?? '', 16);
+    const lower = Number.parseInt(last, 16);
+    if (!Number.isInteger(upper) || !Number.isInteger(lower)) return true;
+    return isPrivateIPv4(
+      `${upper >>> 8}.${upper & 255}.${lower >>> 8}.${lower & 255}`,
+    );
   }
 
   // fc00::/7 (Unique Local Address)

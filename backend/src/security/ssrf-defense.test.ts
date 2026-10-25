@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import dns from 'node:dns/promises';
 import { assertSafeOutboundUrl, isPrivateIp, SsrffSecurityError } from './ssrf-defense';
 
 describe('SSRF Defense Engine', () => {
@@ -50,10 +51,27 @@ describe('SSRF Defense Engine', () => {
       expect(isPrivateIp('::ffff:127.0.0.1')).toBe(true);
       expect(isPrivateIp('::ffff:169.254.169.254')).toBe(true);
       expect(isPrivateIp('::ffff:8.8.8.8')).toBe(false);
+      // DNS answers may use hexadecimal mapped IPv4 instead of dotted quads.
+      expect(isPrivateIp('::ffff:7f00:1')).toBe(true);
+      expect(isPrivateIp('0:0:0:0:0:ffff:a00:1')).toBe(true);
+      expect(isPrivateIp('::ffff:a9fe:a9fe')).toBe(true);
+      expect(isPrivateIp('::ffff:808:808')).toBe(false);
     });
   });
 
   describe('assertSafeOutboundUrl', () => {
+    it('rejects hexadecimal IPv4-mapped private DNS answers before fetching', async () => {
+      const lookup = vi.spyOn(dns, 'lookup').mockResolvedValueOnce([
+        { address: '::ffff:7f00:1', family: 6 },
+      ]);
+      try {
+        await expect(assertSafeOutboundUrl('https://example.com/private'))
+          .rejects.toThrow(SsrffSecurityError);
+      } finally {
+        lookup.mockRestore();
+      }
+    });
+
     it('blocks forbidden protocols', async () => {
       await expect(assertSafeOutboundUrl('file:///etc/passwd')).rejects.toThrow(SsrffSecurityError);
       await expect(assertSafeOutboundUrl('gopher://127.0.0.1:6379/_')).rejects.toThrow(SsrffSecurityError);
