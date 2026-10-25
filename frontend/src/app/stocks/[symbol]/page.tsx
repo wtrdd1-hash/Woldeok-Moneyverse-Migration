@@ -31,6 +31,7 @@ import { StockDiscussionSection } from './stock-discussion-section';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockTradingConsole } from './stock-trading-console';
 import { StockMarketToast } from './stock-market-toast';
+import { MarketPricesProvider } from '@/lib/use-market-prices';
 import { QuickOrderbookSimulator } from '@/components/quick-orderbook-simulator';
 import { StockSentimentPoll } from '@/components/stock-sentiment-poll';
 import { StockHaltBanner } from './stock-halt-banner';
@@ -232,6 +233,7 @@ export default async function StockHubPage({
   };
 
   return (
+    <MarketPricesProvider>
     <div data-page="stocks-symbol" className="min-h-screen pb-24 space-y-6">
       <script
         type="application/ld+json"
@@ -328,6 +330,7 @@ export default async function StockHubPage({
 
       {/* 실시간 틱 토스트 알림 */}
       <StockMarketToast
+        stockId={stock.id}
         symbol={stock.symbol}
         currentPrice={stock.current_price}
         isEn={isEn}
@@ -597,6 +600,7 @@ export default async function StockHubPage({
         본 가상 주식 거래소의 모든 데이터 및 시세는 월덕 머니버스 게임 시스템에서 제공하는 모의 데이터이며, 실제 금융 거래와 전혀 무관합니다.
       </div>
     </div>
+    </MarketPricesProvider>
   );
 }
 

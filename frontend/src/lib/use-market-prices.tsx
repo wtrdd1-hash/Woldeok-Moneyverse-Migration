@@ -150,6 +150,30 @@ class OrderbookStore {
   }
 }
 
+const EMPTY_TRADES: readonly LiveTradeData[] = Object.freeze([]);
+
+export function parseStockTradeEvent(payload: unknown): LiveTradeData | null {
+  if (!payload || typeof payload !== 'object') return null;
+  const trade = payload as Partial<LiveTradeData>;
+  if (
+    typeof trade.id !== 'string' || trade.id.length === 0 || trade.id.length > 128 ||
+    typeof trade.stockId !== 'string' || trade.stockId.length === 0 || trade.stockId.length > 64 ||
+    typeof trade.price !== 'string' || trade.price.length > 30 || !/^\d+$/.test(trade.price) ||
+    BigInt(trade.price) <= 0n ||
+    !Number.isSafeInteger(trade.quantity) || (trade.quantity ?? 0) <= 0 ||
+    (trade.side !== 'BUY' && trade.side !== 'SELL') ||
+    typeof trade.timestamp !== 'string' || !Number.isFinite(Date.parse(trade.timestamp))
+  ) return null;
+  return {
+    id: trade.id,
+    stockId: trade.stockId,
+    price: trade.price,
+    quantity: trade.quantity,
+    side: trade.side,
+    timestamp: trade.timestamp,
+  } as LiveTradeData;
+}
+
 class TradeFeedStore {
   private readonly trades = new Map<string, readonly LiveTradeData[]>();
   private readonly listeners = new Set<() => void>();
@@ -159,16 +183,15 @@ class TradeFeedStore {
     return () => this.listeners.delete(listener);
   };
 
-  readonly get = (stockId: string): readonly LiveTradeData[] => this.trades.get(stockId) ?? [];
+  readonly get = (stockId: string): readonly LiveTradeData[] => this.trades.get(stockId) ?? EMPTY_TRADES;
 
   apply(payload: unknown): void {
-    if (!payload || typeof payload !== 'object') return;
-    const trade = payload as LiveTradeData;
-    if (!trade.stockId || !trade.price) return;
-
-    const current = this.trades.get(trade.stockId) ?? [];
-    const next = [trade, ...current.slice(0, 49)];
-    this.trades.set(trade.stockId, next);
+    const trade = parseStockTradeEvent(payload);
+    if (!trade) return;
+    const current = this.get(trade.stockId);
+    // A replayed socket message must not become a second execution notification.
+    if (current.some((item) => item.id === trade.id)) return;
+    this.trades.set(trade.stockId, [trade, ...current.slice(0, 49)]);
     for (const listener of this.listeners) listener();
   }
 }
@@ -262,7 +285,7 @@ export function useStockTrades(stockId: string): readonly LiveTradeData[] {
   return useSyncExternalStore(
     globalTradeStore.subscribe,
     () => globalTradeStore.get(stockId),
-    () => [],
+    () => EMPTY_TRADES,
   );
 }
 
