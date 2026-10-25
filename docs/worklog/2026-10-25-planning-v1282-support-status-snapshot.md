@@ -2,6 +2,7 @@
 
 **Cycle:** Previous Feature Addition v1280 → Current Feature Improvement v1282 → Next Feature Addition v1284 (provisional). **Result:** DRAFT / RELEASE HOLD; planning only.
 
+- GitHub: Draft PR [#1329](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1329) based on prior Draft #1324; engineering issue #1323 updated; root-capacity issue #1170 updated. Final remote SHA must be reverified after this note.
 ## Evidence
 - Debian 13.6 miniPC services ACTIVE, dev PostgreSQL connected. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid. Authority: AGENTS.md, README.md, canonical English PROJECT_PLAN.md and Korean counterpart. Isolated sparse docs worktree based on unmerged Draft #1324; QA/Development A/B/C/Gemini untouched.
 - Source: `packages/database/migrations/196-user-admin-support-chat.sql`, `backend/src/support/support.repository.ts`, `backend/src/support/support.controller.ts`, `backend/src/core/db.ts`, `backend/src/core/with-transaction.ts`. Identified idempotency check-before-insert race, no-op status audit, unconditional status/last_message_at update, timestamp regression under contention, and unpinned Queryable export snapshots. These are design risks, not proven Production incidents.

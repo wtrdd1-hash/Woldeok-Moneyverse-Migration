@@ -1,5 +1,6 @@
 ## 2026-10-25 v1282 — F675-127 support status/snapshot integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - Previous Addition v1280 → Current Improvement v1282 → Next Addition v1284; main `1c5b84a1` start/mid; predecessor Draft #1324, engineering #1323. Migration 196 source race review and Queryable transaction scope: versioned status receipt, thread-locked monotonic event sequence/timestamp, pinned REPEATABLE READ, immutable cross-request snapshot, no partial 200, owner HMAC cursor, privacy/Android/a11y, exact-SHA release gate.
+- **GitHub handoff:** Draft [#1329](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1329) stacked on #1324; issues #1323 and #1170 updated; no merge or release.
 - P0 ENV1282-01 SEC1282-02 REL1282-03 SUP1282-04; P1 SUP1282-05 SUP1282-06 SUP1282-07 SUP1282-08 SUP1282-09 SUP1282-10. QA v1275 FAILED/HOLD, root 98%, ACL/migrations/audits/finance E2E/restore unresolved. External new approved 0, cumulative UNKNOWN vs 10,000 BLOCKED. Docs-only; no runtime/DB/deploy.
 
 ## 2026-10-25 v1280 — F675-127 owner support transcript + status timeline (FEATURE ADDITION / DRAFT / RELEASE HOLD)

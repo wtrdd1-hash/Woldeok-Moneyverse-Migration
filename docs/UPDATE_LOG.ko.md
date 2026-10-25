@@ -1,5 +1,6 @@
 ## 2026-10-25 v1282 — F675-127 상담 상태·스냅샷 무결성 (기능 보완 / DRAFT / HOLD)
 - 이전 추가 v1280 → 현재 보완 v1282 → 다음 추가 v1284; main `1c5b84a1` 시작·중간, 선행 Draft #1324, 개발 #1323. Migration196 경합 및 Queryable 트랜잭션 범위 검토: 버전형 상태 영수증, 상담 행 잠금·순차 이벤트/시각, 고정 REPEATABLE READ, 다중 페이지 불변 스냅샷, 부분 200 금지, 본인 HMAC 커서, 개인정보/Android/접근성/정확 SHA 게이트.
+- **GitHub 인계:** 선행 #1324 기반 Draft [#1329](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1329), 이슈 #1323·#1170 갱신; 병합·배포 없음.
 - P0 ENV1282-01 SEC1282-02 REL1282-03 SUP1282-04; P1 SUP1282-05 SUP1282-06 SUP1282-07 SUP1282-08 SUP1282-09 SUP1282-10. QA v1275 FAILED/HOLD, 루트 98%, DB 권한/마이그레이션/감사/금융 E2E/복원 미해결. 외부 신규 0, 누적 미확인/10,000 BLOCKED. 문서만 변경.
 
 ## 2026-10-25 v1280 — F675-127 회원 상담 대화록·상태 이력 (기능 추가 / DRAFT / RELEASE HOLD)
