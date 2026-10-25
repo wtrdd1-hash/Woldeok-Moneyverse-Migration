@@ -264,7 +264,7 @@ export default async function LocalizedGlossaryHubPage({ params }: PageProps) {
 
                     {item.formula && (
                       <div className="mt-3 pt-2.5 border-t border-border/50 text-[11px] font-mono text-zinc-500 dark:text-zinc-400 line-clamp-1">
-                        {item.formula}
+                        {localizeFormula(item.formula, locale)}
                       </div>
                     )}
                   </Link>
