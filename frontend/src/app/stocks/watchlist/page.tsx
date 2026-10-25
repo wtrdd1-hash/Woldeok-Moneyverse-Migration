@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -10,6 +11,9 @@ import { getServerLocale } from '@/lib/locale-server';
 import { groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { WatchlistToggle } from '../watchlist-toggle';
+
+export const dynamic = 'force-dynamic';
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 interface WatchlistRow {
   readonly stock_id: string;
