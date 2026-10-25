@@ -73,4 +73,23 @@ describe('verified owner-only bank movements', () => {
     await expect(controller.movements(request, '999')).rejects.toThrow();
     expect(recentMovements).not.toHaveBeenCalled();
   });
+
+  it('controller derives actor from the bound session, defaults to 20 and returns verified source', async () => {
+    const recentMovements = vi.fn(async () => []);
+    const controller = new BankController({ recentMovements } as unknown as BankRepository);
+    const request = { session: { user_id: actor } } as never;
+    expect(await controller.movements(request)).toEqual({
+      movements: [], count: 0, limit: 20, source: 'LEDGER_POSTINGS',
+    });
+    expect(await controller.movements(request, '50')).toMatchObject({ count: 0, limit: 50 });
+    expect(recentMovements).toHaveBeenNthCalledWith(1, actor, 20);
+    expect(recentMovements).toHaveBeenNthCalledWith(2, actor, 50);
+  });
+
+  it('controller returns 503 instead of empty success on a failed ledger read', async () => {
+    const recentMovements = vi.fn(async () => { throw new Error('database down'); });
+    const controller = new BankController({ recentMovements } as unknown as BankRepository);
+    await expect(controller.movements({ session: { user_id: actor } } as never))
+      .rejects.toMatchObject({ status: 503 });
+  });
 });

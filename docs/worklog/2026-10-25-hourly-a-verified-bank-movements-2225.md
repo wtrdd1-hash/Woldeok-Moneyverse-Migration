@@ -17,5 +17,12 @@
 - Next: full lint/typecheck/test/build/audit/contract/SEO/a11y, remote CI and exact-SHA Test checks. Global release HOLD remains.
 
 
-## Final
-PENDING
+## Final (2026-10-25 22:45 KST)
+- Code SHA `aac1ce7cfc79aa0775ea8e671e845e61d3dbd202`; documentation/report commit to follow. Draft PR #1336. Main remains `1c5b84a1c45baafcca83f375a6f99698121e9bb5` at final preflight.
+- Changed code: `backend/src/bank/bank.controller.ts`, `backend/src/bank/bank.repository.ts`, `backend/src/bank/bank-movements.test.ts`, `frontend/src/app/bank/page.tsx`, `frontend/src/app/bank/movements/page.tsx`, `frontend/src/app/bank/movements/page.test.tsx`, `frontend/src/app/app-api/v1/[...path]/route.ts`, `frontend/src/app/app-api/v1/[...path]/bank-movements-app-api.test.ts`. New plan/QA/EN+KO release/worklog docs.
+- 11 focused PASS. `pnpm typecheck` PASS, `pnpm lint` 0 errors/1,128 warnings, `pnpm build` PASS, API contract 179 PASS, real isolated PostgreSQL owner/foreign/ACL/ROLLBACK PASS. Backend 1,318 PASS/398 SKIP; database 15 PASS/3 SKIP; contract 38 PASS; Frontend 1,400 PASS/6 FAIL (SEO3, login a11y1, calculator CTA1, admin M2 1); Bot 8 PASS. Audits: prod High2, full Critical2/High10, bot Critical1/High5.
+- Remote branches 193→194; open PR 189→190; 193 non-main branch tips unique unmerged; 0 safe deletions, 0 duplicate tip/tree/last patch groups (2 patch unknown); conflicts #1107/#1110/#1143 preserved. No other developer worktree touched.
+- Test public SHA `6f697e74b7bf0cd1e4521d36534cfd9c140f8010` != candidate; Production SHA `6a989b5ac0c6155587d43426d64f6def6b62c917`. Exact-SHA Test authenticated E2E and GitOps release gates BLOCKED. No main merge, Test staging, Production deployment, Production DB write, restart, or branch deletion. Rollback: revert read-only feature commit; no schema migration.
+- Reports: `docs/qa/2026-10-25-a2225-verified-bank-movements.md`, `docs/releases/v2026.10.25.a2225.md`, `.ko.md`. Final GitHub CI and PR status must be rechecked on report commit.
+- **Outcome: PARTIAL / BLOCKED — Production RELEASE HOLD.** Recurring schedules untouched.
+

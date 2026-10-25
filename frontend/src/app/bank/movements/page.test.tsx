@@ -28,6 +28,14 @@ describe('member bank ledger receipts', () => {
     expect(metadata.robots).toMatchObject({ index: false, follow: false });
   });
 
+  it('distinguishes verified empty history from unavailable history', async () => {
+    api.mockResolvedValue({ movements: [] });
+    render(await BankMovementsPage());
+    expect(screen.getByText(/No verified bank deposits or withdrawals/)).toBeTruthy();
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByRole('link', { name: /Back to bank/ }).getAttribute('href')).toBe('/bank');
+  });
+
   it('never invents bank movements on API failure or invalid ledger proof', async () => {
     api.mockRejectedValueOnce(new Error('unavailable'));
     render(await BankMovementsPage());
