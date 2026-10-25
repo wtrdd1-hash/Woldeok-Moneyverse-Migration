@@ -1,5 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1286 — F675-128 검색 조건·금액 정밀도 보완 (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1284 → 현재 보완 v1286 → 다음 추가 v1288(잠정). 최신 main `1c5b84a1` 시작·중간 재확인, 미병합 기획 #1335와 개발 이슈 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334) 분리.
+- 실제 소스: Migration 232 `NUMERIC(20,4)`와 UI `BigInt`/`Number(BigInt 차이)` 충돌 위험, ILIKE 와일드카드 미이스케이프, DTO 검색 길이 제한 부재, 판매자명 검색 UI/SQL 불일치, OFFSET·비유일 정렬. 모의 매물/구매/잔액 P0 유지. 운영 사고 입증 아님.
+- 리터럴 검색 정규화 필터 v2·정확한 금액 문자열·SQL 선필터/키셋 유일 정렬·본인/버전 서명 커서·20건 한도/원자적 영수증·계정 병합/탈퇴·404 BOLA·비공개 SEO·Android·접근성 명세. 세부 사항은 통합 마스터.
+- **P0:** ENV1286-01 SEC1286-02 REL1286-03 MKT1286-04. **P1:** MKT1286-05 MKT1286-06 MKT1286-07 MKT1286-08 MKT1286-09 MKT1286-10. 완료 QA v1276 FAILED/HOLD, v1277 원시 증거 프론트 1397 통과/6 실패·감사 실패, 루트 98%/2.2GiB, 정확 SHA Test·복원 미검증. 운영 배포 없음.
+- 외부 근거 신규 승인 0건, 중복 제거 누적 미확인/목표 10,000건, BLOCKED / IN PROGRESS.
+- **Backlog IDs:** ENV1286-01 SEC1286-02 REL1286-03 MKT1286-04 MKT1286-05 MKT1286-06 MKT1286-07 MKT1286-08 MKT1286-09 MKT1286-10
+
+
 ## v2026.10.25.1284 — F675-128 회원 마켓 검색 조건 보관함 (기능 추가 / 초안 / 운영 보류)
 - 이전 기능 보완 v1282 → 현재 기능 추가 v1284 → 다음 기능 보완 v1286(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 확인; 선행 Draft #1329, 개발 이슈 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334). 문서만 변경.
 - 실제 소스의 `INITIAL_MARKET_LISTINGS` 모의 매물, 타이머 후 구매 성공·브라우저 보유량 변경, 지갑 실패 시 임의 `1000` WLD 표시를 확인. NestJS 실제 ACTIVE 목록은 OFFSET·동률 정렬 누락, Migration 232 가격은 NUMERIC(20,4). main에는 회원 저장 검색 CRUD 미확인. **모의 매물·브라우저 성공을 실제 정산으로 표시 금지.**

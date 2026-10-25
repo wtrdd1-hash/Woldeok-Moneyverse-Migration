@@ -1,3 +1,8 @@
+## 2026-10-25 — Planning v1286 F675-128 filter/decimal integrity (DRAFT / HOLD)
+- Previous Addition v1284 → Current Improvement v1286 → Next Addition v1288 provisional; main `1c5b84a1` checked at start/mid, prior Draft #1335. Scope: planning docs only, no runtime/DB/WLD changes.
+- Source evidence: migration232 NUMERIC(20,4) versus UI BigInt, SQL ILIKE wildcard and seller-search mismatch, DTO unbounded inputs, unstable OFFSET. New normalized filter v2, exact decimal, SQL keyset, HMAC owner cursor, lifecycle/privacy and regression gate. 4 P0 / 6 P1 in canonical plan/master.
+- QA v1276 completed FAILED/HOLD, v1277 raw tests 1397 pass/6 fail and audits fail, root 98%/2.2GiB; Production blocked. Independent source corpus new approved 0, cumulative UNKNOWN/10,000 BLOCKED.
+
 ## 2026-10-25 v1284 — F675-128 Marketplace Saved Searches (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - Previous Improvement v1282 → Current Addition v1284 → Next Improvement v1286 (provisional); main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked. Actual marketplace UI mock data/fake buy/fallback balance and real listing API OFFSET documented. P0 4 + P1 6 in canonical English/Korean integrated plans; issue [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334). QA v1276 FAILED/HOLD; independent evidence new approved 0, cumulative UNKNOWN/10,000 BLOCKED. Docs-only; no runtime/DB/WLD/Test/Production changes. [Draft PR #1335](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1335) OPEN / unmerged.
 

@@ -1,3 +1,8 @@
+## 2026-10-25 — 기획 v1286 F675-128 검색 조건·소수 금액 보완 (초안 / 보류)
+- 이전 추가 v1284 → 현재 보완 v1286 → 다음 추가 v1288(잠정). main `1c5b84a1` 시작·중간 확인, 이전 Draft #1335. 기획 문서만 변경, 런타임/DB/WLD 변경 없음.
+- 실제 Migration232 NUMERIC(20,4)와 UI BigInt 충돌, SQL ILIKE 와일드카드·판매자명 검색 불일치, DTO 입력 상한 부재, OFFSET 비유일 정렬. 필터 v2·정확 10진·키셋·회원 HMAC 커서·계정 생명주기·회귀 조건 및 P0 4/P1 6 갱신.
+- 완료 QA v1276 FAILED/HOLD, v1277 원시 증거 1397 통과/6 실패·감사 실패, 루트 98%/2.2GiB, 운영 보류. 외부 승인 신규 0·누적 미확인/10,000 BLOCKED.
+
 ## 2026-10-25 v1284 — F675-128 회원 마켓 검색 조건 보관함 (기능 추가 / 초안 / 운영 보류)
 - 이전 기능 보완 v1282 → 현재 기능 추가 v1284 → 다음 기능 보완 v1286(잠정), main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 확인. 실제 마켓 UI 모의 데이터·허위 구매 성공·임의 잔액 및 서버 목록 OFFSET을 근거로 P0 4개/P1 6개 국영문 통합 문서 반영. 개발 이슈 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334). QA v1276 FAILED/HOLD, 외부 신규 승인 0/누적 미확인/10,000 BLOCKED. 문서만 변경, 런타임·DB·WLD·Test·운영 미변경. [Draft PR #1335](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1335) OPEN / 미병합.
 

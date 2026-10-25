@@ -1,5 +1,14 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.25.1286 — F675-128 saved-search filter/decimal integrity (Improvement / DRAFT / HOLD)
+- Previous Addition v1284 → Current Improvement v1286 → Next Addition v1288 provisional; latest main `1c5b84a1` checked start/mid. Draft #1335 is unmerged; engineering [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334) owns implementation.
+- Verified source: migration232 `price_wld NUMERIC(20,4)` vs UI `BigInt` and `Number(BigInt delta)`; unescaped ILIKE wildcards, unbounded DTO search/category, seller-name UI/SQL mismatch, OFFSET/non-unique sort; mock buy/balance truth gate remains P0. These are potential defects, not demonstrated Production incidents.
+- Improve literal normalized filter v2, exact decimal strings, SQL prefilter/keyset total ordering, signed owner+revision cursor, 20-search quota/atomic receipts, merge/erase policy, 404 BOLA, private noindex/Android parity, accessible failure states. Full specification and 10 concrete backlog tasks in integrated master.
+- **P0:** ENV1286-01 SEC1286-02 REL1286-03 MKT1286-04. **P1:** MKT1286-05 MKT1286-06 MKT1286-07 MKT1286-08 MKT1286-09 MKT1286-10. Latest completed QA v1276 FAILED/HOLD; newer v1277 evidence 1397 pass/6 fail and audits fail; root 98%/2.2GiB; exact-SHA Test/restore unverified. No runtime deployment.
+- Independent external source gate: new approved 0, cumulative deduplicated approved UNKNOWN / 10,000, BLOCKED / IN PROGRESS.
+- **Backlog IDs:** ENV1286-01 SEC1286-02 REL1286-03 MKT1286-04 MKT1286-05 MKT1286-06 MKT1286-07 MKT1286-08 MKT1286-09 MKT1286-10
+
+
 ## v2026.10.25.1284 — F675-128 Marketplace Saved Searches (Feature Addition / DRAFT / HOLD)
 - Previous Improvement v1282 → Current Addition v1284 → Next Improvement v1286 (provisional); main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` verified; predecessor Draft #1329, engineering [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334). Docs only.
 - Source gap: `MarketplaceTabs` seeds synthetic `INITIAL_MARKET_LISTINGS`, purchase UI reports success after a timeout and changes browser-only holdings, `/marketplace` defaults missing balance to `1000` WLD. Actual NestJS `GET /marketplace/listings` uses `ACTIVE` + OFFSET and nonunique created_at order; Migration 232 price NUMERIC(20,4). No owner saved-search CRUD on main. **Never mistake fake offers or browser success for a settled trade.**

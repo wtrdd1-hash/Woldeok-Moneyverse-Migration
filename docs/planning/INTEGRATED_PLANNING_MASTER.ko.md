@@ -1,5 +1,41 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1286 — F675-128 회원 마켓 검색 조건 의미·금액 정밀도 보완 (기능 보완 / 초안 / 운영 보류)
+
+### 기준·회차·실제 소스 근거
+- **회차:** 이전 기능 추가 v1284 → 현재 기능 보완 v1286 → 다음 기능 추가 v1288(잠정). 시작·중간 원격 `main=1c5b84a1c45baafcca83f375a6f99698121e9bb5` 확인, `AGENTS.md`·`README.md`·영문 정본 `PROJECT_PLAN.md`·한국어 대조본 재확인. 미병합 기획 Draft [#1335](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1335) 위에만 누적하며 개발 인계 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334)를 유지. 개발 A/B/C·Gemini·QA 브랜치는 수정하지 않음.
+- **실제 main에서 확인한 호환성 위험(운영 사고 입증 아님):** Migration 232의 `marketplace_listings.price_wld`는 `NUMERIC(20,4)`. `market-listings-view.tsx`의 `BigInt(priceWld)`는 `1.2500` 같은 소수 문자열에서 예외를 내며 `Number(BigInt 차이)` 정렬은 큰 값에서 정밀도를 잃음. `marketplace.service.ts`의 `ILIKE` 검색은 `%`·`_` 와일드카드를 이스케이프하지 않음. `MarketplaceQueryDto` 검색어·카테고리 길이 제한 없음. UI는 판매자명·상품명·설명을 검색하지만 SQL은 상품명·설명만 검색하고 판매자명을 반환하지 않음. `created_at DESC LIMIT/OFFSET`에는 유일 순서가 없음. 모의 매물·타이머 구매 성공·임의 1000 WLD 잔액도 P0 차단 대상.
+
+### 검색 조건·금액 계약 정정
+- **기존 F675-128 범위 유지:** 로그인·동의 회원의 `ACTIVE` 고정가 매물 검색 조건 저장(가격·재고 예약, 알림, 구매, 정산, WLD 이동 없음). `/marketplace` → **이 검색 저장** → `/account/marketplace-searches` → **검색 실행/이름 수정/조건 변경/삭제**. 상태 `LOADING/EMPTY/SAVED/DUPLICATE/LIMIT_REACHED/STALE_REVISION/SESSION_EXPIRED/DATA_UNAVAILABLE/FEATURE_OFF`를 유지하고 `INVALID_FILTER/PRICE_UNAVAILABLE/RESULTS_CHANGED`와 다시 시도/새로고침 CTA 추가. 모의 매물과 가짜 구매 영수증은 검증된 결과로 표시 금지.
+- **정규화 필터 v2:** `{query,category,maxPriceWld,sort}`. 검색어는 NFKC·공백 제거, 유니코드 80코드포인트/UTF-8 320바이트 이하, 제어·양방향 제어문자 거부, SQL 패턴이 아닌 **문자 그대로의 부분 문자열**. 지문·API·SQL이 같은 정규화 값을 사용. `ILIKE`의 역슬래시·`%`·`_` 이스케이프 및 `ESCAPE '\\'`, 바인딩 파라미터, 쿼리 시간 제한. 카테고리는 실제 DB 기반 승인 목록(1~60코드포인트), 정렬은 `newest|price_asc|price_desc`. 개인정보·인덱스가 검증된 판매자명 조인이 구현되기 전에는 **판매자명 검색 안내 제거**(프론트·API 의미 일치).
+- **정확한 WLD:** 최고가격은 선택적 양수 10진 문자열, 정수 최대 16자리·소수 최대 4자리, 지수·콤마·부호·무한대·JS Number 변환 금지. `NUMERIC(20,4)` 초과값은 반올림하지 않고 422. PostgreSQL NUMERIC으로 필터/정렬, JSON·Android는 문자열. UI 잔액 비교는 10^4 정수 스케일 또는 검토된 decimal 라이브러리 사용. `BigInt('1.2500')`와 `Number(BigInt 차이)` 금지. 지갑 원천 장애 시 `PRICE_UNAVAILABLE`, 잔액 추정 금지. 검색 저장 영수증과 실제 구매 정산 영수증은 별개.
+
+### 결과 페이지·DB·보안·계정 생명주기
+- **서버 선필터:** `status='ACTIVE'`·카테고리·리터럴 키워드·`price_wld<=maxPrice`를 LIMIT 이전에 적용. 최신순 `(created_at DESC,id DESC)`, 가격 오름/내림순 `(price_wld ASC|DESC,created_at DESC,id DESC)`에 맞는 키셋 비교 및 UUID 최종 타이브레이커. 격리된 실제 PostgreSQL 대표 데이터의 `EXPLAIN (ANALYZE, BUFFERS)`로 인덱스 결정. 현재 목록은 실시간 가변 데이터이므로 페이지 사이 판매·취소 가능, `RESULTS_CHANGED` 및 새로고침 제공, 고정 스냅샷/완전성 보장 금지.
+- **서명 커서:** 회원·세션, 검색 ID·revision·정규화 지문, 정밀도 보존된 마지막 가격 문자열, 시간/UUID, 정렬, 키 버전, 15분 만료를 HMAC으로 묶음. 매 페이지 소유자·동의·활성 회원·삭제 여부 확인. 세션 만료 401, 타 회원/없는 ID는 동일 404, 변경된 revision 409, 잘못된 필터/커서 422, 호출 초과 429, DB 장애 503. 수정·삭제·계정 병합 후 기존 커서 무효화.
+- **저장 원자성:** 회원당 활성 20건, `(user_id,filter_fingerprint) WHERE deleted_at IS NULL` 부분 UNIQUE, 회원별 최근순 인덱스, `UNIQUE(user_id,request_key)` 불변 영수증. **같은 정규화 조건을 다른 이름으로 저장해도 중복 409**(명칭 수정은 PATCH). 멱등 요청키 advisory lock → 원본 요청 지문·영수증 확인 → 회원 행 FOR UPDATE → 검색 행 FOR UPDATE → 한도·revision CAS·중복 검사·영수증을 단일 트랜잭션에서 확정. 회원+UUID 범위 잠금, DB UNIQUE로 충돌 최종 방어. `SECURITY DEFINER` 고정 search_path·본인/동의 검사·PUBLIC EXECUTE 회수·앱 광범위 DML 금지.
+- **탈퇴·병합:** Migration 010은 논리 탈퇴, 163은 계정 병합이므로 FK 자동 삭제에 의존 불가. 검색/영수증이 남은 계정 병합은 승인된 이전·삭제 정책과 테스트가 마련되기 전까지 차단. 계정 상태 변경 시 세션·커서 무효화, 승인된 보존기간에 따라 검색어/요청 메타데이터 삭제·익명화. 관리자에는 k>=20 비식별 집계만, 검색어·회원 ID 노출 금지. 회원 API/페이지 no-store·noindex, 변경 CSRF, Android `/app-api/v1` 동등성, 키보드·초점·44px·동작 감소·WCAG 2.2 AA.
+
+### P0/P1 개발 백로그 및 수용 기준
+| 우선순위 | ID | 구체적 인계·수용 조건 |
+| --- | --- | --- |
+| P0 | ENV1286-01 | 루트 98%·약 2.2GiB 잔여, DB 격리·복원·24시간 용량 감시; 다른 작업자 파일/볼륨 보존. |
+| P0 | SEC1286-02 | 앱 DB 직접 쓰기·PUBLIC 함수 권한 회수, SECDEF 본인 검증·타 회원 100건 부정 테스트·생명주기. |
+| P0 | REL1286-03 | 완료 QA v1276 FAILED/HOLD, v1277 신규 실패 근거, Migration 266/280, 감사·경로 인벤토리·정확 SHA Test·복원 게이트. |
+| P0 | MKT1286-04 | 모의 매물·임의 1000 WLD·타이머 구매 성공 fail-closed; 실제 매물·정산 영수증을 저장 영수증과 분리 검증. |
+| P1 | MKT1286-05 | 필터 v2·와일드카드 문자 검색·판매자명 의미 일치·NUMERIC(20,4) UI/API 정밀도. |
+| P1 | MKT1286-06 | 회원 20건 한도·정규화 중복 정책·원자적 CAS/멱등 영수증·병합/탈퇴 처리. |
+| P1 | MKT1286-07 | SQL ACTIVE 선필터·유일 키셋 정렬·HMAC 커서·실측 인덱스·변경/재시작 상태. |
+| P1 | MKT1286-08 | NestJS/Next.js/Android 오류·세션·동의·CSRF·no-store·금액 문자열 계약. |
+| P1 | MKT1286-09 | 회원 화면·관리자 k>=20·개인정보·SEO noindex·모바일 WCAG·실제 KPI. |
+| P1 | MKT1286-10 | 격리 PostgreSQL 동시 저장 100·BOLA 100·동률 매물 10,001·`%`/`_`·1.2500/최댓값·커서/병합/롤백 검증. |
+
+- **QA:** 최근 완료 v1276 FAILED/HOLD. v1277 22:23 KST 원시 증거는 프론트 1,397 통과/6 실패, 타입·린트·빌드 종료코드 0, 테스트/경로 검사/전체·운영·봇 감사 종료코드 1; 최종 QA 승인 미확인. 루트 98%·2.2GiB, 금융 Test 정확 SHA·격리 복원 미검증, 운영 승격 **BLOCKED**.
+- **배포:** 기획 문서만 수정. 별도 개발 브랜치·기본 `marketplace_saved_searches_v1=OFF`·검토된 순방향 마이그레이션 → 격리 DB/권한/금액·경로 회귀 → 정확 SHA CI → 로그인 Test E2E → QA 승인 → 1%/10%/100% → 스모크. 문제 발생 시 기능 OFF, 매물·에스크로·WLD·원장 불변.
+- **외부 독립 레퍼런스 10,000건 게이트:** 신규 승인 0건, 중복 제거 누적 승인 수량 **미확인**, 목표 10,000건, **BLOCKED / IN PROGRESS**. 소스코드 분석·중복 링크·공식문서 단순 검토는 자동 승인 실적이 아님.
+
+
 ## v2026.10.25.1284 — F675-128 회원 전용 검증형 마켓 검색 조건 보관함 (기능 추가 / 초안 / 운영 보류)
 
 ### 정본·범위·근거
