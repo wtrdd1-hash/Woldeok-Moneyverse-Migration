@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1262 — F675-122 주간 이력 원자적 발행·원천 완결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 이전 기능 추가 v1260 → 현재 기능 보완 v1262 → 다음 기능 추가 v1264(잠정). main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재확인, main AGENTS/README·영문 정본 PROJECT_PLAN/국문 대조 검토. 미병합 #1257의 문서 후속, QA v1265 FAILED/HOLD.
+- 실제 Migration101은 주간 `created_at` 하한만 사용하고 현재 직업 순위가 변동 가능하며 과거 주차 완결성 체크포인트가 없음. v1260 목표별 head는 혼합 버전 위험, 24시간 유예만으로 원천 수집 완결성 증명 불가. 불변 주차 전체 세대+단일 원자적 head, 원천별 연속 체크포인트, 근거 없는 VERIFIED 금지, HMAC 근거 지문, 본인 API·Android의 세대 일관 서명 커서 및 변경 시 409 재시작으로 보완. 수정 시 주차 전체 새 세대 추가, 임의 소급 생성·NPC 평생 지표의 주간 검증 포함·WLD/원장 변경 금지.
+- P0 ENV1262-01 SEC1262-02 REL1262-03 QUEST1262-04; P1 QUEST1262-05 QUEST1262-06 QUEST1262-07 QUEST1262-08 QUEST1262-09 QUEST1262-10. 화면·API·DB·잠금·관리자·개인정보·SEO·접근성·KPI·100건 경합·합성 10,001건·롤백 상세는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 및 [영문 정본](INTEGRATED_PLANNING_MASTER.md).
+- QA v1265 루트 100%(약 368MiB), 개발 앱 DML 235/241, PUBLIC 은행 함수 3개, Migration266/280, PR #1255 프론트 6건 실패, main CI runtime-check SKIPPED, 정확 SHA Test/복원 HOLD. 외부 신규 승인 0, 누적 미확인/10,000 BLOCKED/IN PROGRESS. 기획 문서만 변경, 런타임·DB·WLD·Test·운영 변경 없음.
+
+
 ## v2026.10.25.1260 — F675-122 검증형 주간 퀘스트 이력 (기능 추가 / 기획 초안 / 운영 보류)
 - 이전 기능 보완 v1258 → 현재 기능 추가 v1260 → 다음 기능 보완 v1262(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 확인, QA v1264 FAILED/HOLD. 미병합 #1248 위의 **문서 초안**이며 구현·운영 기능이 아니다.
 - 실제 main: `/quests`는 Migration101 `early_game_weekly_goals`의 이번 서울 주차만 조회, 종료 주차 보존 없음. 세 지표는 영수증·원장 기반, NPC는 평생 누적·자가 신고로 과거 주간 달성률 제외. 현재 직업 순위로 과거 직업 작업을 재구성할 수 없다. 본인 전용 `/quests/history`, 주차 종료 후 24시간+워터마크 불변 근거 스냅샷, 근거 없는 소급 금지, NOT_ARCHIVED/UNVERIFIABLE/CORRECTED, 서명 커서, Android 읽기 동등성, 관리자 비식별 집계, SEO·접근성·개인정보·롤백 설계.

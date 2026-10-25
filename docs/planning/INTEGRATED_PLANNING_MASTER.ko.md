@@ -1,5 +1,35 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1262 — F675-122 주간 퀘스트 이력의 일관된 발행·원천 완결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+
+### 회차 및 실제 근거
+- 이전 **기능 추가 v1260** → 현재 **기능 보완 v1262** → 다음 **기능 추가 v1264**(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재확인. main `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md`, 국문 대조 문서를 검토. 미병합 Draft #1257의 **문서 기획 후속**이며 실제 구현이 아님. 최신 완료 QA **v1265 FAILED/HOLD**(2026-10-25 10:20 KST).
+- 실제 마이그레이션 `101-early-game-progress.sql`의 현재 주차 계산은 `created_at >= v_from`만 적용하고 **주차 종료 배타적 상한이 없으며**, 현재의 변경 가능한 최고 레벨 직업을 사용함. NPC 지표는 평생 누적·자가 신고로 주간 검증 대상에서 제외. 현행 함수를 과거 주차 마감 함수로 재사용하지 않고 고정된 직업·목표 근거와 주차 양쪽 경계로 별도 계산해야 함.
+- **v1260 미구현 설계의 추가 위험:** 목표별 최신 head가 독립 변경되면 한 주의 일부 목표만 수정된 혼합 버전이 조회될 수 있음. 마감 후 24시간 경과만으로 원천 영수증·원장의 수집 완결성을 증명할 수 없음. 실제 장애나 데이터 유실 발생을 확인했다는 뜻은 아님.
+
+### 주차 단위 원자적 발행 및 완결성 계약(제안)
+1. **주차 전체 세대(generation) 단일 권위:** 추가 전용 `member_weekly_goal_archive_generations(user_id,week_start,generation,published_at,source_cutoff,policy_version,completeness_status,prior_generation,reason_code,provenance_hmac,key_version)`, 추가 전용 `member_weekly_goal_archive_goals(user_id,week_start,generation,goal_code,target,progress,source_family,evidence_status,source_count,...)`, 단일 최신 포인터 `member_weekly_goal_archive_week_heads(user_id,week_start,generation)` 제안. PK는 각각 `(user_id,week_start,generation)`, `(user_id,week_start,generation,goal_code)`, 목표→세대 및 포인터→세대 FK, 회원·주차 head UNIQUE. 세대/목표 양수, 진행도 음수 금지, 서울 월요일·7일 경계, 허용 목표·상태, `window_kind='week' AND self_reported=false` CHECK. 목록 `(user_id,week_start DESC)`, 상세 `(user_id,week_start,generation,goal_code)` 인덱스. Migration 266/280 정리 전 번호 배정 금지.
+2. **주차 전체 원자적 발행:** 회원·주차 단위 advisory lock → 주차 head 행 잠금 → 일관된 원천 스냅샷 → **검증 대상 3개 목표 전체**와 세대 선언·감사 영수증 삽입 → 목표 코드 집합/건수 및 완결성 검증 → 같은 트랜잭션에서 단일 head 교체. 일부만 기록된 주차는 공개 금지. 목표 하나만 수정돼도 **3개 전체를 담은 새로운 세대**를 발행하고 이전 세대·근거는 불변 유지. 동일 재시도는 최초 세대 반환, 다른 근거는 승인된 수정 이력 필요. 커밋 전 오류는 새 head가 전혀 노출되지 않아야 함.
+3. **VERIFIED 전 원천 완결성 증명:** 작업 보상 영수증, 해당 원장 거래·전표, 고정된 직업/목표 정책 등 필수 원천별 내구성 있는 연속 체크포인트·시퀀스와 상한을 보관. 단순 `현재시각-24시간` 또는 `MAX(created_at)`는 완결성 워터마크가 아님. 서울 주차 종료 시점까지 모든 원천의 연속 수집 증명, 지연 도착/소급 변경 재조정 정책, 최소 24시간 유예가 모두 충족될 때만 VERIFIED. 현재 파이프라인이 증명하지 못하면 `PENDING_FINALIZATION` 또는 `UNVERIFIABLE`, 검증 달성 분자 제외. 소급/역분개 발생 시 새 전체 세대로 수정하고 과거 근거는 덮어쓰지 않음. 은행 순저축은 입금-출금, 배타적 주차 상한과 정확한 bigint/문자열 사용.
+4. **조회 일관성·개인정보:** 목록/상세/영수증은 단일 SQL 문 또는 안정된 읽기 트랜잭션에서 **동일 발행 세대**를 한 번 선택해 목표와 합계를 조인. 본인 API에 `generation`, `completenessStatus`, `sourceFamilyStatus`, `publishedAt`, `correctedFromGeneration` 추가. 서명 커서는 회원/세션 및 발행 기준 시점을 고정하거나 변경 시 409 `ARCHIVE_CHANGED`와 재시작 토큰을 반환하여 페이지 간 세대 혼합 방지. 타인 영수증은 404, 근거 장애는 503이며 가짜 VERIFIED/0 반환 금지. 근거 지문은 키 버전·회전·보존 정책을 가진 HMAC 사용; 원장 원문·개인식별자·추측 가능한 원천 ID를 영수증/로그에 저장하지 않음.
+5. **회원·관리자·Android·접근성:** `/quests/history` 목록/상세에 `PENDING_SOURCE`, `PENDING_FINALIZATION`, `VERIFIED`, `CORRECTED`, `UNVERIFIABLE`, `NOT_ARCHIVED`, `ERROR`를 색상 외 텍스트로 표기하고 근거 설명 CTA 제공. 수정 배너는 개인정보 없는 세대 이력으로 이동. 보상 Claim/Complete 버튼과 WLD 변경 금지. Android app-api도 본인 세대/상태 계약과 계정 전환 시 캐시 무효화 동일 적용. 관리자는 k≥20 집계로 체크포인트 누락·수정·지연만 확인(차분 공격 방지), 회원 원문 및 목표 수동 수정 권한 없음. 개인 화면 sitemap 제외, `noindex,nofollow`, `private,no-store`; WCAG 2.2 AA, 키보드, 320px/200% 확대 지원.
+6. **KPI·격리 검증·배포:** 혼합 세대 조회 **0**, 잘못된 VERIFIED **0**, 타인 노출 **0**, 원장/WLD 변경 **0**을 필수 지표로 지정. 원천별 체크포인트 지연 p95, 미확정 비율, 수정 지연, 아카이브 범위 집계. 향후 격리 실제 PostgreSQL에서 마감 재시도·수정 경합 100건, 타인 조회 100건, 수정 중 합성 10,001건 커서, 목표 삽입~head 변경 사이 장애, 지연·소급 영수증/역분개, 서울 월요일/종료 상한, 직업/목표 변경, 2^53 초과 정수, HMAC 키 회전, 탈퇴·병합, Android·로그아웃 검증. 디스크·DB 권한·Migration·CI/보안·정확 최종 SHA 공식 Test 금융 E2E·승인된 카나리/GitOps·복원 게이트 전 기능 OFF. 롤백은 조회/마감만 중지하고 불변 이력은 보존.
+
+### P0/P1 개발 인계 — 10개
+- **P0 ENV1262-01** — 루트 용량 안전 복구(QA v1265: 100%, 약 368MiB), 운영·개발·Test DB 격리, 암호화 백업 격리 복원; 타 작업자 보존.
+- **P0 SEC1262-02** — 개발 앱 계정 UPDATE/DELETE 235/241 및 PUBLIC 은행 함수 3개 권한 개선, 본인 검증 SECURITY DEFINER, 타인 접근·관리자 권한·HMAC 개인정보 음성 테스트.
+- **P0 REL1262-03** — 적용 Migration 266 체크섬 불일치, 280 번호 4중 충돌, 프론트 CI 6건 실패, 보안 감사, 정확 SHA Test·승격 HOLD 해결.
+- **P0 QUEST1262-04** — 원천별 연속 완결성 체크포인트, 주차 양쪽 경계, 과거 직업/목표 정책 증빙 확보; 증빙 없으면 VERIFIED 금지.
+- **P1 QUEST1262-05** — 순방향 불변 주차 세대·목표·단일 head FK/UNIQUE/인덱스와 개인정보 안전 근거 증명.
+- **P1 QUEST1262-06** — 전체 주차 원자적 마감, 체크포인트 게이트, 잠금 순서, 멱등 영수증, 전체 세대 수정 및 장애 롤백.
+- **P1 QUEST1262-07** — NestJS 본인 전용 세대 일관 목록/상세/근거 API, 409 커서 재시작, 404/503, bigint 문자열.
+- **P1 QUEST1262-08** — Next.js 근거/수정 화면, Android app-api 동등성, 세션 무효화, WCAG 2.2 AA.
+- **P1 QUEST1262-09** — 탈퇴·병합·보존, 비식별 관리자, SEO/no-store, HMAC 키 회전, 원천 지연 KPI.
+- **P1 QUEST1262-10** — 격리 PG 동시성·타인·커서·지연 원천·장애 주입 회귀, 정확 최종 SHA Test/복원/카나리/롤백.
+
+**QA·근거 진실:** v1265 FAILED/HOLD. main CI 성공 표시는 runtime-check SKIPPED, PR #1255 runtime-check FAILED(프론트 6건). 루트 100%, 개발 DB 과도 권한, Migration 266/280, 운영/Test SHA가 main과 다름. 외부 독립 레퍼런스 10,000건 중 이번 승인 **0**, 누적 승인 **미확인(UNKNOWN)** → **BLOCKED / IN PROGRESS**. 기획은 런타임·DB·WLD·원장·Test·운영을 변경하지 않으며 다른 작업자와 예약도 변경하지 않음.
+
+
 ## v2026.10.25.1260 — F675-122 검증형 주간 퀘스트 목표 이력·원천 근거 아카이브 (기능 추가 / 기획 초안 / 운영 보류)
 
 ### 회차·코드 근거·기능 경계

@@ -1,5 +1,11 @@
 ## 2026-10-25 08:xx KST — Planning v1256 F675-121 (Feature Addition / Draft / HOLD)
 
+## 2026-10-25 v1262 — F675-122 archive publication consistency (planning-only, HOLD)
+- Previous Addition v1260 / Current Improvement v1262 / Next Addition v1264 provisional. Remote main `c9a868b1e622341e2daa8b936ddf0988eda9988e`; QA v1265 FAILED/HOLD.
+- Reviewed migration101 bounded-week gaps and proposed per-goal heads; hardened to atomic full-week generations, per-source completeness proofs, correction history, owner/session-bound stable cursor and privacy-safe HMAC evidence.
+- P0 4/P1 6: ENV1262-01 SEC1262-02 REL1262-03 QUEST1262-04..10. External accepted +0, cumulative UNKNOWN/10,000 BLOCKED. Runtime/Test/Production unchanged; separate engineering exact-SHA gate required.
+
+
 ## 2026-10-25 10:xx KST — Planning v1260 F675-122 (Feature Addition / Draft / HOLD)
 - GitHub Draft PR #1257 OPEN (stacked on unmerged #1248); development handoff issue #1256 OPEN. Main unmerged, release HOLD.
 - Previous Improvement v1258 / Current Addition v1260 / Next Improvement v1262 provisional. Exact main `c9a868b1e622341e2daa8b936ddf0988eda9988e` verified; QA v1264 FAILED/HOLD. Proposed verified closed-week quest archive with immutable evidence revisions, Seoul boundary/24h+watermark, policy/job provenance, owner-only API and no false backfill or NPC weekly claim. Detailed EN/KO parity in six existing planning docs; no runtime/DB/WLD/Test/Production changes.
