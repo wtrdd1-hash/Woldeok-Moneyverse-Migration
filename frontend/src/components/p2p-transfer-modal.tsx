@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,8 @@ import { groupDigits, isPositiveWldInput } from '@/lib/money';
 import { Send, Search, CheckCircle2, User, AlertCircle } from 'lucide-react';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
+import { verifiedP2PReceipt } from '@/lib/p2p-receipt';
+import Link from 'next/link';
 
 interface Recipient {
   userId: string;
@@ -33,6 +35,8 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
   const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [outcomeUnknown, setOutcomeUnknown] = useState(false);
+  const pendingKey = useRef<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<{
     recipientName: string;
@@ -81,8 +85,8 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
       try {
         const res = await fetch(`/api/transfers/search?query=${encodeURIComponent(searchQuery)}`);
         if (res.ok) {
-          const data = await res.json();
-          setSearchResults(data.recipients || []);
+          const data = await res.json().catch(() => null);
+          setSearchResults(Array.isArray(data?.recipients) ? data.recipients : []);
         }
       } catch {
         // ignore
@@ -109,26 +113,32 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
       return;
     }
 
+    if (outcomeUnknown || isSubmitting) return;
     setIsSubmitting(true);
     setErrorMsg(null);
 
     try {
+      if (!pendingKey.current) {
+        if (!globalThis.crypto?.randomUUID) throw new Error('Secure transfer request ID unavailable');
+        pendingKey.current = globalThis.crypto.randomUUID();
+      }
       const res = await fetch('/api/transfers/p2p', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           recipientUserId: selectedRecipient.userId,
           amount,
+          idempotencyKey: pendingKey.current,
           message: message.trim() || undefined,
           sticker: selectedSticker || undefined,
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
-      if (!res.ok) {
+      if (!res.ok && res.status < 500 && data?.code !== 'TRANSFER_OUTCOME_UNKNOWN' && res.status !== 409) {
         setErrorMsg(
-          data.error ||
+          data?.error ||
             localeLabel(
               locale,
               '송금 처리에 실패했습니다.',
@@ -138,7 +148,12 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
               'Xử lý chuyển tiền thất bại.'
             )
         );
-        setIsSubmitting(false);
+        return;
+      }
+
+      const confirmed = res.ok ? verifiedP2PReceipt(data) : null;
+      if (!confirmed) {
+        setOutcomeUnknown(true);
         return;
       }
 
@@ -147,20 +162,10 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
         amount,
         message: message.trim() || undefined,
         sticker: selectedSticker || undefined,
-        txId: data.transactionId || 'TX-' + Math.random().toString(36).slice(2, 9),
+        txId: confirmed.transactionId,
       });
-    } catch (err: any) {
-      setErrorMsg(
-        err?.message ||
-          localeLabel(
-            locale,
-            '네트워크 오류가 발생했습니다.',
-            'A network error occurred.',
-            'ネットワークエラーが発生しました。',
-            '发生网络错误。',
-            'Đã xảy ra lỗi mạng.'
-          )
-      );
+    } catch {
+      setOutcomeUnknown(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -174,6 +179,8 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
     setSelectedSticker(null);
     setErrorMsg(null);
     setReceipt(null);
+    setOutcomeUnknown(false);
+    pendingKey.current = null;
   };
 
   const defaultTrigger = localeLabel(
@@ -188,7 +195,7 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
   return (
     <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) handleReset(); }}>
       <DialogTrigger asChild>
-        <Button className="h-10 px-4 font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/10">
+        <Button className="min-h-11 px-4 font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/10">
           <Send className="h-4 w-4 mr-2" />
           {triggerText || defaultTrigger}
         </Button>
@@ -227,7 +234,7 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
 
         {receipt ? (
           /* 송금 완료 영수증 */
-          <div className="py-6 flex flex-col items-center text-center animate-in fade-in zoom-in-95">
+          <div role="status" className="py-6 flex flex-col items-center text-center animate-in fade-in zoom-in-95">
             <div className="h-14 w-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3">
               <CheckCircle2 className="h-8 w-8" />
             </div>
@@ -235,14 +242,7 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
               {localeLabel(locale, '송금 완료!', 'Transfer Complete!', '送金完了！', '转账完成！', 'Chuyển tiền thành công!')}
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {localeLabel(
-                locale,
-                '수취인에게 실시간 알림이 발송되었습니다.',
-                'Real-time notification delivered to recipient ledger.',
-                '受取人にリアルタイム通知が送信されました。',
-                '已向收款人发送实时账单通知。',
-                'Thông báo thời gian thực đã được gửi đến người nhận.'
-              )}
+              {localeLabel(locale, '서버 원장에서 확인된 송금 기록입니다.', 'Transfer confirmed by the server ledger.', 'サーバー台帳で確認された送金記録です。', '转账已由服务器账本确认。', 'Giao dịch đã được xác nhận trên sổ cái máy chủ.')}
             </p>
 
             <div className="w-full mt-5 p-4 rounded-xl border border-border/50 bg-muted/20 text-left space-y-2 text-sm">
@@ -257,6 +257,12 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
                   {localeLabel(locale, '보낸 금액', 'Amount Sent', '送金金額', '转账金额', 'Số tiền gửi')}
                 </span>
                 <span className="font-mono font-bold text-primary text-base">{receipt.amount} WLD</span>
+              </div>
+              <div className="flex flex-col gap-1 border-t border-border/30 pt-2">
+                <span className="text-muted-foreground text-xs">
+                  {localeLabel(locale, '거래 확인 번호', 'Ledger transaction ID', '取引確認番号', '交易确认编号', 'Mã giao dịch')}
+                </span>
+                <code className="text-xs break-all select-all">{receipt.txId}</code>
               </div>
               {receipt.message && (
                 <div className="flex justify-between pt-1 border-t border-border/30">
@@ -291,8 +297,8 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
                 </span>
                 {selectedRecipient && (
                   <button
-                    onClick={() => { setSelectedRecipient(null); setSearchQuery(''); }}
-                    className="text-xs text-primary underline"
+                    onClick={() => { setSelectedRecipient(null); setSearchQuery(''); pendingKey.current = null; }}
+                    className="inline-flex min-h-11 items-center text-xs text-primary underline"
                   >
                     {localeLabel(locale, '변경', 'Change', '変更', '更改', 'Thay đổi')}
                   </button>
@@ -328,7 +334,7 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
                     )}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 h-10 rounded-xl"
+                    className="pl-9 h-11 rounded-xl"
                   />
                   {/* 검색 결과 드롭다운 */}
                   {searchResults.length > 0 && (
@@ -337,8 +343,8 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
                         <button
                           key={user.userId}
                           type="button"
-                          onClick={() => { setSelectedRecipient(user); setSearchResults([]); }}
-                          className="w-full flex items-center justify-between px-3 py-2 text-left text-sm rounded-lg hover:bg-muted transition-colors"
+                          onClick={() => { setSelectedRecipient(user); setSearchResults([]); pendingKey.current = null; }}
+                          className="min-h-11 w-full flex items-center justify-between px-3 py-2 text-left text-sm rounded-lg hover:bg-muted transition-colors"
                         >
                           <span className="font-semibold text-foreground">{user.displayName}</span>
                           <span className="text-[10px] text-muted-foreground font-mono">{user.userId.slice(0, 6)}</span>
@@ -366,7 +372,7 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
                   placeholder="0"
                   min="1"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => { setAmount(e.target.value); pendingKey.current = null; }}
                   className="h-11 font-mono text-base font-bold pr-14 rounded-xl"
                 />
                 <span className="absolute right-3 top-3 text-xs font-bold text-muted-foreground">WLD</span>
@@ -379,8 +385,8 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setAmount(String(preset))}
-                    className="h-7 text-xs px-2.5 rounded-lg border-border/40 font-mono"
+                    onClick={() => { setAmount(String(preset)); pendingKey.current = null; }}
+                    className="min-h-11 text-xs px-2.5 rounded-lg border-border/40 font-mono"
                   >
                     +{preset}
                   </Button>
@@ -407,7 +413,7 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
                 )}
                 maxLength={30}
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => { setMessage(e.target.value); pendingKey.current = null; }}
                 className="h-9 rounded-xl text-xs"
               />
             </div>
@@ -422,8 +428,8 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
                   <button
                     key={stk.id}
                     type="button"
-                    onClick={() => setSelectedSticker(selectedSticker === stk.label ? null : stk.label)}
-                    className={`px-2 py-1.5 rounded-lg border text-xs text-center transition-all ${
+                    onClick={() => { setSelectedSticker(selectedSticker === stk.label ? null : stk.label); pendingKey.current = null; }}
+                    className={`min-h-11 px-2 py-1.5 rounded-lg border text-xs text-center transition-all ${
                       selectedSticker === stk.label
                         ? 'border-blue-500 bg-blue-500/15 text-blue-400 font-bold ring-1 ring-blue-500/30'
                         : 'border-border/40 bg-muted/20 text-muted-foreground hover:bg-muted/40'
@@ -436,16 +442,31 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
             </div>
 
             {errorMsg && (
-              <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-1.5">
+              <div role="alert" className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-1.5">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{errorMsg}</span>
+              </div>
+            )}
+
+            {outcomeUnknown && (
+              <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+                <p>{localeLabel(locale,
+                  '송금 결과를 확인할 수 없습니다. 실제 송금이 처리되었을 수 있으니 다시 송금하지 말고 지갑 거래 내역을 확인하세요.',
+                  'Transfer outcome is unknown. WLD may have moved. Check your wallet history before attempting another transfer.',
+                  '送金結果が不明です。再送金する前にウォレット履歴を確認してください。',
+                  '转账结果未知。再次转账前请检查钱包交易记录。',
+                  'Không rõ kết quả chuyển tiền. Hãy kiểm tra lịch sử ví trước khi gửi lại.'
+                )}</p>
+                <Link href="/wallet" className="mt-2 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+                  {localeLabel(locale, '지갑 거래 내역 확인', 'Review wallet history', 'ウォレット履歴を確認', '查看钱包记录', 'Xem lịch sử ví')}
+                </Link>
               </div>
             )}
 
             {/* 송금 버튼 */}
             <Button
               onClick={handleTransfer}
-              disabled={isSubmitting || !selectedRecipient || !isPositiveWldInput(amount)}
+              disabled={outcomeUnknown || isSubmitting || !selectedRecipient || !isPositiveWldInput(amount)}
               className="w-full h-11 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white mt-2 shadow-lg shadow-blue-500/20"
             >
               {isSubmitting
