@@ -144,6 +144,7 @@ export interface CollectorOptions {
 export class StatusCollector {
   private readonly options: CollectorOptions;
   private timer: ReturnType<typeof setInterval> | null = null;
+  private collecting = false;
 
   constructor(options: CollectorOptions) {
     if (!options.recorder?.query) throw new TypeError('a recording pool is required');
@@ -152,25 +153,33 @@ export class StatusCollector {
   }
 
   async collectOnce(): Promise<void> {
-    for (const probe of this.options.probes) {
-      let outcome: { state: StatusState; detail: string };
-      try {
-        outcome = await probe.run();
-      } catch (error: unknown) {
-        this.options.onError?.(probe.sourceKey, error);
-        outcome = { state: 'outage', detail: '확인에 실패했습니다.' };
-      }
+    // A slow earlier probe must not overwrite a newer outage with stale green.
+    // Skipped beats are safer than overlapping snapshots; stale status expires.
+    if (this.collecting) return;
+    this.collecting = true;
+    try {
+      for (const probe of this.options.probes) {
+        let outcome: { state: StatusState; detail: string };
+        try {
+          outcome = await probe.run();
+        } catch (error: unknown) {
+          this.options.onError?.(probe.sourceKey, error);
+          outcome = { state: 'outage', detail: '확인에 실패했습니다.' };
+        }
 
-      try {
-        await this.options.recorder.query(
-          'SELECT public.content_record_server_status($1,$2,$3,$4)',
-          [probe.sourceKey, outcome.state, outcome.detail, new Date()],
-        );
-      } catch (error: unknown) {
-        // Losing the write is not worth taking the process down: the snapshot
-        // goes stale and the page falls back to 확인 중, which is true.
-        this.options.onError?.(probe.sourceKey, error);
+        try {
+          await this.options.recorder.query(
+            'SELECT public.content_record_server_status($1,$2,$3,$4)',
+            [probe.sourceKey, outcome.state, outcome.detail, new Date()],
+          );
+        } catch (error: unknown) {
+          // Losing the write is not worth taking the process down: the snapshot
+          // goes stale and the page falls back to 확인 중, which is true.
+          this.options.onError?.(probe.sourceKey, error);
+        }
       }
+    } finally {
+      this.collecting = false;
     }
   }
 

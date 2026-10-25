@@ -8,7 +8,11 @@
 - Plan: reproduce with deferred probes (RED); add minimal single-flight guard with finally reset; run focused, backend, build/typecheck, lint, security and CI; do not merge or deploy without all required gates.
 
 ## In progress
-- RED/GREEN and verification pending.
+- Baseline on unmodified main: status collector 13/13 PASS.
+- RED: new concurrency tests 2 FAIL / 1 PASS; overlapping invocations observed (2 calls) and 3 timer beats added 3 calls (4 total).
+- GREEN: single-flight `collectOnce` guard with `finally` reset; 16/16 focused status tests PASS. No migration, route or public response changes.
+- Mid-run `origin/main` re-fetch: `1c5b84a1c45baafcca83f375a6f99698121e9bb5` unchanged.
+- Broader verification pending.
 
 ## Finished
 - Pending.
