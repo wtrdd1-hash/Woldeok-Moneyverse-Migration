@@ -1,5 +1,8 @@
-import type { QueryResultRow } from 'pg';
 import { ConflictException } from '@nestjs/common';
+import { GUARDS_METADATA } from '@nestjs/common/constants';
+import { SessionGuard } from '../auth/guards/session.guard';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { ConsentGuard } from '../auth/guards/consent.guard';
 import { describe, expect, it, vi } from 'vitest';
 import type { Queryable } from '../core/db';
 import { AccountSecurityController } from './account-security.controller';
@@ -15,6 +18,12 @@ const row = {
 };
 
 describe('member active-session export', () => {
+  it('inherits session, authentication and consent guards at the controller boundary', () => {
+    expect(Reflect.getMetadata(GUARDS_METADATA, AccountSecurityController)).toEqual([
+      SessionGuard, AuthenticatedGuard, ConsentGuard,
+    ]);
+  });
+
   it('uses a bounded SECURITY DEFINER owner read, excluding session IDs and private device metadata', async () => {
     const query = vi.fn(async (_sql: string, _values: readonly unknown[]) => ({ rows: [row] }));
     const repo = new AccountSecurityRepository({ query } as unknown as Queryable);

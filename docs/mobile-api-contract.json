@@ -38,6 +38,7 @@
       "accept-ranges",
       "content-range",
       "content-disposition",
+      "x-robots-tag",
       "x-request-id",
       "x-ratelimit-limit",
       "x-ratelimit-remaining",
@@ -406,6 +407,93 @@
           }
         },
         "required": [
+          "sessions"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/account/security/sessions/export",
+      "purpose": "Download the authenticated member’s current active-session inventory as private JSON (web CSV is a separate server-only route)",
+      "purposeKo": "로그인 회원 본인의 현재 활성 세션 정보만 개인정보를 최소화하여 조회",
+      "callWhen": "When the member explicitly requests the active-session inventory",
+      "authorization": "Authenticated session and current consent, backend-derived owner and current session",
+      "afterSuccess": "Display as a point-in-time snapshot only; do not cache, never claim historical completeness",
+      "backendRoute": "/api/account/security/sessions/export",
+      "operationId": "AccountSecurityController_exportSessions",
+      "backendOpenApiPath": "/account/security/sessions/export",
+      "summary": "Privacy-minimized active session inventory for the authenticated member",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "limit",
+          "complete",
+          "asOf",
+          "sessions"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number"
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "asOf": {
+            "type": "string"
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string"
+                },
+                "expiresAt": {
+                  "type": "string"
+                },
+                "lastSeenAt": {
+                  "type": "string"
+                },
+                "deviceLabel": {
+                  "type": "string"
+                },
+                "current": {
+                  "type": "boolean"
+                },
+                "administratorSession": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "createdAt",
+                "expiresAt",
+                "lastSeenAt",
+                "deviceLabel",
+                "current",
+                "administratorSession"
+              ]
+            }
+          }
+        },
+        "required": [
+          "limit",
+          "complete",
+          "asOf",
           "sessions"
         ]
       },

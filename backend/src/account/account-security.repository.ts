@@ -23,6 +23,24 @@ export interface MemberSessionView {
   readonly deviceLabel: string;
 }
 
+interface ExportSessionRow {
+  readonly created_at: Date;
+  readonly expires_at: Date;
+  readonly last_seen_at: Date;
+  readonly device_label: string;
+  readonly current: boolean;
+  readonly administrator_session: boolean;
+}
+
+export interface MemberSessionExportView {
+  readonly createdAt: string;
+  readonly expiresAt: string;
+  readonly lastSeenAt: string;
+  readonly deviceLabel: string;
+  readonly current: boolean;
+  readonly administratorSession: boolean;
+}
+
 interface SecurityEventRow {
   readonly event_type: string;
   readonly created_at: Date;
@@ -60,6 +78,27 @@ export class AccountSecurityRepository {
       administratorSession: row.admin_opened_at !== null,
       lastSeenAt: row.last_seen_at.toISOString(),
       deviceLabel: row.device_label,
+    }));
+  }
+
+  async activeSessionsForExport(userId: string, currentSessionId: string): Promise<MemberSessionExportView[]> {
+    // Fetch one extra row so a truncated inventory cannot masquerade as complete.
+    const rows = await queryRows<ExportSessionRow>(
+      this.pool,
+      `SELECT created_at, expires_at, last_seen_at, device_label,
+              (session_id = $2::uuid) AS current,
+              (admin_opened_at IS NOT NULL) AS administrator_session
+       FROM public.account_active_sessions($1::uuid, $2::uuid)
+       LIMIT 101`,
+      [userId, currentSessionId],
+    );
+    return rows.map((row) => ({
+      createdAt: row.created_at.toISOString(),
+      expiresAt: row.expires_at.toISOString(),
+      lastSeenAt: row.last_seen_at.toISOString(),
+      deviceLabel: row.device_label,
+      current: row.current,
+      administratorSession: row.administrator_session,
     }));
   }
 

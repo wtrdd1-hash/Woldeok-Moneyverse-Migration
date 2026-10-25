@@ -2,10 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/lib/api';
 
 const apiMock = vi.hoisted(() => vi.fn());
-vi.mock('@/lib/api', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@/lib/api')>();
-  return { ...original, api: apiMock };
-});
+vi.mock('@/lib/api', () => ({
+  api: apiMock,
+  ApiError: class extends Error {
+    readonly status: number;
+    constructor(status: number) {
+      super('API refused');
+      this.status = status;
+    }
+  },
+}));
 import { GET } from './route';
 
 const session = { createdAt: '2026-10-26T00:00:00.000Z', lastSeenAt: '2026-10-26T00:00:00.000Z', expiresAt: '2026-11-26T00:00:00.000Z', deviceLabel: 'Android device', current: true, administratorSession: false };

@@ -1,7 +1,9 @@
 import {
   Controller,
+  ConflictException,
   Delete,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -43,6 +45,21 @@ export class AccountSecurityController {
         requireSession(request).id,
       ),
     };
+  }
+
+  @Get('sessions/export')
+  @Header('Cache-Control', 'private, no-store, max-age=0')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Privacy-minimized active session inventory for the authenticated member' })
+  async exportSessions(@Req() request: RequestWithSession) {
+    const sessions = await this.repository().activeSessionsForExport(
+      requireUserId(request),
+      requireSession(request).id,
+    );
+    if (sessions.length > 100) {
+      throw new ConflictException('active session inventory exceeds export limit');
+    }
+    return { limit: 100, complete: true, asOf: new Date().toISOString(), sessions };
   }
 
   @Get('events')

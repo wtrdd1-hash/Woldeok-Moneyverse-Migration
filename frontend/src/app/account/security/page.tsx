@@ -169,6 +169,13 @@ export default async function AccountSecurityPage({
                 현재 계정에 로그인된 모든 브라우저 및 디바이스입니다.
               </CardDescription>
             </div>
+            {sessionData !== null && (
+              <Button asChild variant="outline" size="sm" className="min-h-11">
+                <Link href="/account/security/sessions.csv" download prefetch={false}>
+                  현재 로그인 기기 CSV 다운로드
+                </Link>
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-3 pt-0">

@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -179,6 +179,40 @@ _No request body._
 | sessions[].administratorSession | true | boolean |  |
 | sessions[].lastSeenAt | true | string |  |
 | sessions[].deviceLabel | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/account/security/sessions/export` — Privacy-minimized active session inventory for the authenticated member
+
+- Authorization: Authenticated session and current consent, backend-derived owner and current session
+- Success status: 200
+- Response mode: json
+- After success: Display as a point-in-time snapshot only; do not cache, never claim historical completeness
+- Operation ID: `AccountSecurityController_exportSessions`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| limit | true | number |  |
+| complete | true | boolean |  |
+| asOf | true | string |  |
+| sessions[] | true | object[] |  |
+| sessions[] | true | object |  |
+| sessions[].createdAt | true | string |  |
+| sessions[].expiresAt | true | string |  |
+| sessions[].lastSeenAt | true | string |  |
+| sessions[].deviceLabel | true | string |  |
+| sessions[].current | true | boolean |  |
+| sessions[].administratorSession | true | boolean |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

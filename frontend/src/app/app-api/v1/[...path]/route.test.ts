@@ -171,3 +171,34 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('private active-session export Android gateway', () => {
+  it('forwards the session cookie and enforces private, non-indexable JSON without trusting upstream cache headers', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    let forwarded = new Headers();
+    vi.stubGlobal('fetch', vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      forwarded = new Headers(init?.headers);
+      return Response.json({ limit: 100, complete: true, asOf: '2026-10-26T00:00:00.000Z', sessions: [] });
+    }));
+    const response = await GET(
+      request('/app-api/v1/account/security/sessions/export', { cookie: 'moneyverse_session=opaque' }),
+      context('account', 'security', 'sessions', 'export'),
+    );
+    expect(response.status).toBe(200);
+    expect(forwarded.get('cookie')).toBe('moneyverse_session=opaque');
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+    expect(await response.json()).toMatchObject({ limit: 100, complete: true, sessions: [] });
+  });
+  it('preserves authentication refusal rather than converting it to a successful snapshot', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ status: 401, code: 'unauthorized' }, { status: 401 })));
+    const response = await GET(
+      request('/app-api/v1/account/security/sessions/export'),
+      context('account', 'security', 'sessions', 'export'),
+    );
+    expect(response.status).toBe(401);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+  });
+});
