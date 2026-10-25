@@ -18,3 +18,8 @@
 ### Mid-run evidence (01:37 KST)
 - RED: missing CSRF guard, HTTP 200 empty X receipt and malformed X ID produced three test failures. GREEN: 13/13 focused tests passed.
 - Re-fetched main and English/Korean plans; baseline unchanged. No DB/API route additions, no financial effects.
+
+### BFF integration checkpoint (01:40 KST)
+- Browser `/api/admin/seo/twitter` POST was independently cross-site callable and accepted a success flag without a tweet ID. RED 3/4 tests.
+- Added same-origin request and elevated console guards at BFF, plus receipt validation. GREEN 4/4 tests. Existing frontend browser flow remains supported through server-side `mutate` CSRF forwarding.
+- This frontend change is necessary for end-to-end CSRF protection; no unrelated C/A UI work modified.
