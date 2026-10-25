@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Inject,
   Post,
   Req,
@@ -60,6 +61,15 @@ export class PrivacyController {
   @ApiOperation({ summary: 'Data subject requests the caller has made' })
   async list(@Req() request: RequestWithSession) {
     return { requests: await this.service().myRequests(requireUserId(request)) };
+  }
+
+  @Get('snapshot')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Owner-only recent 30 privacy-request intake receipts, not a personal-data export' })
+  async snapshot(@Req() request: RequestWithSession) {
+    const requests = await this.service().myRequests(requireUserId(request), { limit: 30 });
+    return { scope: 'recent_intake_receipts' as const, limit: 30 as const, requests };
   }
 
   @Post()

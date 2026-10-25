@@ -66,17 +66,28 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const privatePrivacySnapshot = parts.length === 3 &&
+    parts[0] === 'privacy' && parts[1] === 'requests' && parts[2] === 'snapshot';
+  const protectPrivacySnapshot = (response: NextResponse): NextResponse => {
+    if (privatePrivacySnapshot) {
+      response.headers.set('cache-control', 'private, no-store');
+      response.headers.set('x-robots-tag', 'noindex, nofollow');
+      response.headers.set('x-content-type-options', 'nosniff');
+    }
+    return response;
+  };
+
   const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
   if (minimumVersionRaw) {
     const minimumVersion = parseAppVersion(minimumVersionRaw);
     if (!minimumVersion) {
-      return gatewayProblem(503, 'Service Unavailable', 'app_gateway_version_policy_invalid', 'the app compatibility policy is unavailable');
+      return protectPrivacySnapshot(gatewayProblem(503, 'Service Unavailable', 'app_gateway_version_policy_invalid', 'the app compatibility policy is unavailable'));
     }
     const currentVersion = parseAppVersion(request.headers.get('x-moneyverse-app-version'));
     if (!currentVersion || isVersionBelow(currentVersion, minimumVersion)) {
       const response = gatewayProblem(426, 'Upgrade Required', 'app_upgrade_required', `app version ${minimumVersionRaw} or newer is required`);
       response.headers.set('x-moneyverse-min-app-version', minimumVersionRaw);
-      return response;
+      return protectPrivacySnapshot(response);
     }
   }
 
@@ -84,12 +95,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // /api routes are unaffected. This is intentionally not cryptographic proof;
   // strong Android attestation must use a verified Play Integrity verdict.
   if (ANDROID_ONLY && !looksLikeOfficialAndroid(request)) {
-    return gatewayProblem(
+    return protectPrivacySnapshot(gatewayProblem(
       403,
       'Forbidden',
       'android_client_required',
       'this app API is restricted to the Android client',
-    );
+    ));
   }
 
   if (
@@ -106,9 +117,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     });
   }
 
+  let gatewayToken: string;
+  try {
+    gatewayToken = internalToken();
+  } catch {
+    return protectPrivacySnapshot(gatewayProblem(503, 'Service Unavailable', 'app_gateway_configuration', 'the private API gateway is unavailable'));
+  }
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
-    'x-internal-token': internalToken(),
+    'x-internal-token': gatewayToken,
     'x-moneyverse-gateway': 'app-api-v1',
   });
   for (const name of APP_API_REQUEST_HEADERS) {
@@ -134,9 +151,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   } catch (error: unknown) {
     const name = error instanceof Error ? error.name : '';
     if (name === 'TimeoutError' || name === 'AbortError') {
-      return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
+      return protectPrivacySnapshot(gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds'));
     }
-    return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+    return protectPrivacySnapshot(gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached'));
   }
 
   const headers = appendAppContractHeaders(new Headers());
@@ -145,6 +162,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
+  if (privatePrivacySnapshot) {
+    headers.set('cache-control', 'private, no-store');
+    headers.set('x-robots-tag', 'noindex, nofollow');
+    headers.set('x-content-type-options', 'nosniff');
+  }
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

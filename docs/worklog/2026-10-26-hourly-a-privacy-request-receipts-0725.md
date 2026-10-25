@@ -1,0 +1,13 @@
+# A0725 — Privacy request intake receipt CSV worklog
+
+- START 2026-10-26 07:27 KST. MiniPC Debian 13.6; services active, DB connected. Root filesystem 100%, data filesystem 74-76%.
+- Authoritative remote main SHA `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; remote branches 234, open PRs 230 at start. New isolated branch/worktree from main, no modification to any other branch.
+- Read AGENTS.md, README.md, canonical EN/KO project plans and integrated master, prior A0625 QA, open PRs/CI. No privacy intake CSV PR found. Existing full privacy-data access package is separately planned and explicitly out of scope.
+- Safety: Test/Production RELEASE HOLD by default; no writes to shared live/dev DB. 2026-10-24 A-owned `/tmp` source workspaces preserved by moving to data partition and leaving original symlink paths intact; no branch or code deleted.
+- PLAN: fixed recent-30 intake receipts, no false assertion of request completion or full personal-data export, no new DB migrations or financial writes.
+- MID-TASK: authoritative remote main and EN/KO plans rechecked, SHA unchanged. New snapshot is a new endpoint, not an original legacy route; removed the attempted route-map addition after its RED contract regression (94 vs fixed 93 original routes). Android machine-readable contract is separately updated to 180 endpoints.
+- TDD RED: backend missing `snapshot` 2 failures; frontend CSV module absent; Android private-header 2 failures; gateway missing-token failure. GREEN: backend 2 PASS, frontend privacy CSV 3 PASS, Android gateway 13 PASS, private CSV route 3 PASS; frontend privacy page regression 3 PASS.
+- Isolated real PostgreSQL 17.11 `wdmv_v761_test_acl`: session-owner function 1 record, other actor 0, status/detail verified, direct table SELECT and ledger INSERT denied; transaction ROLLBACK left 0 fixtures. No shared/Production DB write.
+- Initial full workspace test found a self-introduced historical route-map count failure, corrected by preserving 93-original-route mapping. Security audits remain blocked; initial Bot test needed missing local dependencies, installed into isolated worktree and Bot 8 PASS.
+- PRE-PR: remote main unchanged; 235 remote heads/231 open PRs, 234 non-main unique unmerged, duplicate tip SHA 0, conflicts #1107/#1110/#1143 protected; deletions 0. Backend 2/Frontend 23 focused PASS; real isolated PG ACL+rollback PASS. Typecheck/Lint/Build PASS; full Frontend 6 existing FAIL; security audits FAIL. Test/Production SHAs differ from candidate; release HOLD.
+- RED/GREEN security: zero-width-prefixed CSV formula and missing app gateway credential now fail closed. EN/KO mobile API contract 180 endpoints. No migrations, ledger writes, Test/Production deployment.

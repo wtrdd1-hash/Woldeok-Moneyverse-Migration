@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -3119,6 +3119,38 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| requests[] | true | object[] |  |
+| requests[] | true | object |  |
+| requests[].requestId | true | string |  |
+| requests[].requestType | true | string |  |
+| requests[].detail | true | null \| string |  |
+| requests[].status | true | string |  |
+| requests[].createdAt | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/privacy/requests/snapshot` — Owner-only recent 30 privacy-request intake receipts, not a personal-data export
+
+- Authorization: Authenticated member session and consent required
+- Success status: 200
+- Response mode: json
+- After success: Show verified recent intake receipts only; never claim processing completed
+- Operation ID: `PrivacyController_snapshot`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="recent_intake_receipts" | const="recent_intake_receipts" |
+| limit | true | number=30 | const=30 |
 | requests[] | true | object[] |  |
 | requests[] | true | object |  |
 | requests[].requestId | true | string |  |

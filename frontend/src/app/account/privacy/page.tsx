@@ -59,7 +59,9 @@ export default async function AccountPrivacyPage() {
             </Card>
             <Card>
               <CardHeader><CardTitle className="text-base">내 요청 기록</CardTitle></CardHeader>
-              <CardContent>
+              <CardContent className="grid gap-3">
+                <p className="text-xs text-muted-foreground">최근 접수 기록 최대 30건만 다운로드합니다. 전체 이력이나 개인정보 열람·삭제 처리 완료 증명은 아닙니다.</p>
+                <Button asChild variant="outline" className="min-h-11 w-fit"><Link href="/account/privacy/requests.csv">최근 개인정보 요청 접수 기록 CSV 다운로드</Link></Button>
                 {privacyData.requests.length === 0 ? (
                   <p className="text-sm text-muted-foreground">아직 기록한 개인정보 요청이 없어요.</p>
                 ) : (

@@ -171,3 +171,40 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('private privacy intake snapshot on Android app-api', () => {
+  it('forwards the session cookie but overrides cacheable upstream headers', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    let forwarded = new Headers();
+    vi.stubGlobal('fetch', vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      forwarded = new Headers(init?.headers);
+      return new Response(JSON.stringify({ scope: 'recent_intake_receipts', limit: 30, requests: [] }), {
+        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' },
+      });
+    }));
+    const result = await GET(request('/app-api/v1/privacy/requests/snapshot', { cookie: 'session=private' }), context('privacy', 'requests', 'snapshot'));
+    expect(result.status).toBe(200);
+    expect(forwarded.get('cookie')).toBe('session=private');
+    expect(result.headers.get('cache-control')).toBe('private, no-store');
+    expect(result.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+  });
+
+  it('fails closed with private headers when internal gateway credentials are missing', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', '');
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const result = await GET(request('/app-api/v1/privacy/requests/snapshot'), context('privacy', 'requests', 'snapshot'));
+    expect(result.status).toBe(503);
+    expect(result.headers.get('cache-control')).toBe('private, no-store');
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps private no-store/noindex even when the upstream service is down', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+    const result = await GET(request('/app-api/v1/privacy/requests/snapshot'), context('privacy', 'requests', 'snapshot'));
+    expect(result.status).toBe(502);
+    expect(result.headers.get('cache-control')).toBe('private, no-store');
+    expect(result.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+  });
+});

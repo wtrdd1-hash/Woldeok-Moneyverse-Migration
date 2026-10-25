@@ -9331,6 +9331,92 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/app-api/v1/privacy/requests/snapshot",
+      "purpose": "Download recent 30 owner-only privacy request intake receipts (not personal-data export)",
+      "callWhen": "On explicit account privacy receipt download or native intake history refresh",
+      "authorization": "Authenticated member session and consent required",
+      "afterSuccess": "Show verified recent intake receipts only; never claim processing completed",
+      "backendRoute": "/api/v1/privacy/requests/snapshot",
+      "operationId": "PrivacyController_snapshot",
+      "backendOpenApiPath": "/privacy/requests/snapshot",
+      "summary": "Owner-only recent 30 privacy-request intake receipts, not a personal-data export",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "scope",
+          "limit",
+          "requests"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "recent_intake_receipts"
+          },
+          "limit": {
+            "type": "number",
+            "const": 30
+          },
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "requestId": {
+                  "type": "string"
+                },
+                "requestType": {
+                  "type": "string"
+                },
+                "detail": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "status": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "requestId",
+                "requestType",
+                "detail",
+                "status",
+                "createdAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "limit",
+          "requests"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
       "method": "POST",
       "path": "/app-api/v1/privacy/requests",
       "purpose": "개인정보 열람·삭제 등 요청 생성",
