@@ -2,15 +2,15 @@ import {
   Body,
   Controller,
   Get,
-  Inject,
   Param,
+  Header,
   Post,
   ServiceUnavailableException,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsIn, IsInt, IsObject, IsPositive, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { IsInt, IsObject, IsPositive, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
@@ -89,43 +89,20 @@ export interface QuantStrategy {
 @Controller('quant')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
 export class QuantController {
-  private mockStrategies: QuantStrategy[] = [
-    {
-      id: 'strat-001',
-      userId: 'user-sample',
-      name: 'RSI 30 이하 과매도 반등 봇',
-      targetTicker: 'KRX_005930',
-      targetTickerName: '삼성전자',
-      isActive: true,
-      orderAmountWld: 200000,
-      totalPnlWld: 485000,
-      winRatePercent: 71.4,
-      totalTrades: 28,
-      createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
-    },
-    {
-      id: 'strat-002',
-      userId: 'user-sample',
-      name: '골든크로스 5/20 이평선 추세추종',
-      targetTicker: 'INDEX_WLD100',
-      targetTickerName: '월덕 인덱스 100',
-      isActive: false,
-      orderAmountWld: 500000,
-      totalPnlWld: -32000,
-      winRatePercent: 45.0,
-      totalTrades: 20,
-      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-    },
-  ];
+  private unavailable(): never {
+    // No authoritative strategy store, execution ledger or historical price feed exists.
+    throw new ServiceUnavailableException({
+      code: 'QUANT_EVIDENCE_UNAVAILABLE',
+      message: 'Verified quant strategy, execution and backtest evidence is unavailable.',
+    });
+  }
 
   @ApiOperation({ summary: '내 퀀트 알고리즘 봇 전략 목록 조회' })
   @Get('strategies')
+  @Header('Cache-Control', 'no-store')
   async listStrategies(@Req() req: RequestWithSession) {
-    const actorUserId = requireUserId(req);
-    return {
-      strategies: this.mockStrategies.map((s) => ({ ...s, userId: actorUserId })),
-      totalActiveBots: this.mockStrategies.filter((s) => s.isActive).length,
-    };
+    requireUserId(req);
+    return this.unavailable();
   }
 
   @ApiOperation({ summary: '노코드 퀀트 전략 신규 생성 및 배포' })
@@ -137,30 +114,15 @@ export class QuantController {
     throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 
-  @ApiOperation({ summary: '과거 시장 틱 데이터 기반 퀀트 백테스팅 실행' })
+  @ApiOperation({ summary: '검증된 과거 가격 데이터 부재 시 퀀트 백테스트 차단' })
   @Post('backtest')
+  @Header('Cache-Control', 'no-store')
   async runBacktest(
     @Req() req: RequestWithSession,
     @Body() dto: RunQuantBacktestDto,
   ) {
-    const totalReturnPercent = 18.75;
-    const netProfitWld = Math.round(dto.initialCapitalWld * (totalReturnPercent / 100));
-    return {
-      success: true,
-      result: {
-        targetTicker: dto.targetTicker,
-        periodDays: dto.periodDays,
-        initialCapitalWld: dto.initialCapitalWld,
-        finalCapitalWld: dto.initialCapitalWld + netProfitWld,
-        netProfitWld,
-        totalReturnPercent,
-        maxDrawdownPercent: -4.2,
-        winRatePercent: 68.5,
-        totalTradesExecuted: 42,
-        profitFactor: 2.14,
-        sharpeRatio: 1.82,
-      },
-    };
+    requireUserId(req);
+    return this.unavailable();
   }
 
   @ApiOperation({ summary: '퀀트 봇 실시간 자동매매 가동 상태 토글' })
@@ -172,36 +134,14 @@ export class QuantController {
     throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
   }
 
-  @ApiOperation({ summary: '퀀트 봇 실시간 자동 주문 체결 로그 조회' })
+  @ApiOperation({ summary: '검증된 퀀트 자동 주문 체결 기록 부재 시 조회 차단' })
   @Get('strategies/:id/logs')
+  @Header('Cache-Control', 'no-store')
   async getStrategyLogs(
     @Req() req: RequestWithSession,
     @Param('id') strategyId: string,
   ) {
-    const actorUserId = requireUserId(req);
-    return {
-      logs: [
-        {
-          id: 'log-001',
-          strategyId,
-          ticker: 'KRX_005930',
-          action: 'BUY',
-          price: 77200,
-          quantity: 2,
-          reason: 'RSI(14) 28.4 도달 (과매도 매수 시그널)',
-          executedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-        },
-        {
-          id: 'log-002',
-          strategyId,
-          ticker: 'KRX_005930',
-          action: 'SELL',
-          price: 78500,
-          quantity: 2,
-          reason: '목표 익절가(+1.68%) 도달로 전량 매도 체결',
-          executedAt: new Date(Date.now() - 1800000).toISOString(),
-        },
-      ],
-    };
+    requireUserId(req);
+    return this.unavailable();
   }
 }

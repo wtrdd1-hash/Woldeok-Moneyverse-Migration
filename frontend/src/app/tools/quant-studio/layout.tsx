@@ -9,9 +9,9 @@ import {
 import { jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '노코드 퀀트 봇 스튜디오 — DCA·그리드·RSI 알고리즘 백테스팅 & 자동 매매 | 월덕 머니버스',
+  title: '노코드 퀀트 시뮬레이션 — DCA·그리드·RSI 교육용 샘플 | 월덕 머니버스',
   description:
-    '코딩 없이 클릭 몇 번으로 가상 주식 DCA 분할 매수, 20단 그리드 무한 차익, RSI 스윙 퀀트 봇을 설계하고 과거 시세로 수익률을 정밀 백테스팅하세요.',
+    '교육용 샘플 가격으로 DCA·그리드·RSI 전략을 모의 계산합니다. 실제 주문을 실행하지 않으며 과거 시장 데이터 검증을 제공하지 않습니다.',
   keywords: [
     '노코드 퀀트',
     '퀀트 봇 스튜디오',
@@ -27,13 +27,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: '노코드 퀀트 봇 스튜디오 | 월덕 머니버스',
-    description: '코딩 없는 알고리즘 봇 설계, DCA/그리드/RSI 실시간 백테스팅 및 가상 주식 자동 매매 툴킷.',
+    description: '교육용 샘플 가격을 이용한 DCA/그리드/RSI 모의 계산 도구입니다. 실제 주문을 실행하지 않습니다.',
     url: canonicalUrl('/tools/quant-studio'),
     images: [
       {
         url: buildOgImageUrl({
           title: '노코드 퀀트 봇 스튜디오',
-          description: 'DCA · 20단 그리드 · RSI 스윙 봇 실시간 백테스팅 시뮬레이터',
+          description: 'DCA · 그리드 · RSI 교육용 샘플 시뮬레이터',
           badge: 'Quant Studio',
           type: 'default',
         }),
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: '노코드 퀀트 봇 스튜디오 | 월덕 머니버스',
-    description: '코딩 없는 알고리즘 봇 설계, DCA/그리드/RSI 실시간 백테스팅 및 가상 주식 자동 매매 툴킷.',
+    description: '교육용 샘플 가격을 이용한 DCA/그리드/RSI 모의 계산 도구입니다. 실제 주문을 실행하지 않습니다.',
   },
 };
 
@@ -54,17 +54,17 @@ const FAQS = [
   {
     question: '노코드 퀀트 봇 스튜디오는 코딩 지식이 없어도 쓸 수 있나요?',
     answer:
-      '네, 파이썬이나 프로그래밍 코드 작성 없이 DCA 분할 매수, 그리드 레벨, 익절/손절 비율을 슬라이더와 입력창으로 손쉽게 조절하여 나만의 알고리즘 봇을 생성할 수 있습니다.',
+      '네, 코딩 없이 교육용 DCA·그리드·RSI 모의 전략을 구성할 수 있습니다. 실제 자동매매 봇이 생성되지는 않습니다.',
   },
   {
     question: '백테스팅 시뮬레이션은 어떤 데이터를 기반으로 작동하나요?',
     answer:
-      '침팬지 반도체, 월덕 인더스트리 등 10대 가상 주식의 과거 틱 데이터 및 분봉 차트를 기반으로 승률, 최대 낙폭(MDD), 총 수익률을 1초 만에 정밀 역산합니다.',
+      '고정된 교육용 샘플 가격 배열로 계산합니다. 실제 과거 틱 데이터나 검증된 투자 성과를 제공하지 않습니다.',
   },
   {
     question: '생성한 봇을 실전 가상 거래에 투입할 수 있나요?',
     answer:
-      '네, 백테스팅을 통과한 봇을 활성화하면 백그라운드에서 지정된 조건에 맞춰 자동으로 매수/매도 주문을 체결합니다.',
+      '아니요. 전략과 성과는 교육용 시뮬레이션이며 실제 주문을 체결하지 않습니다.',
   },
 ];
 
@@ -82,9 +82,9 @@ export default function QuantStudioLayout({ children }: { children: React.ReactN
     applicationCategory: 'FinanceApplication',
     features: [
       'DCA 분할매수 / 그리드 차익 / RSI 모멘텀 전략 프리셋',
-      '과거 시세 기반 1초 백테스팅 엔진 (승률, 수익률, MDD)',
-      '10대 가상 종목 실시간 차트 및 호가 연동',
-      '익절 및 손절매 리스크 관리 자동화',
+      '샘플 가격 기반 모의 계산 (승률, 수익률, MDD)',
+      '고정 샘플 가격 기반 전략 계산',
+      '익절 및 손절 조건의 교육용 시뮬레이션',
     ],
   });
 
