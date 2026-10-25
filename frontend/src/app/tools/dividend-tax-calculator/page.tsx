@@ -96,8 +96,8 @@ export default async function DividendTaxCalculatorPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: '배당소득세 & Dividend Yield 계산기',
-    description: '배당수익률 및 국내/미국 주식 배당금 원천징수 세액, 2,000만원 금융소득종합과세 계산기',
+    name: isEn ? 'Dividend Tax & Dividend Yield Calculator' : '배당소득세 & Dividend Yield 계산기',
+    description: isEn ? 'Dividend Yield and Withholding Tax Simulation for Domestic and US Stocks' : '배당수익률 및 국내/미국 주식 배당금 원천징수 세액, 2,000만원 금융소득종합과세 계산기',
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'All',
   };
@@ -112,7 +112,13 @@ export default async function DividendTaxCalculatorPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 space-y-6">
         {/* 한국 법제도 고유 계산기 글로벌 안내 배너 */}
         <DomesticRegulationBanner
-          toolName="2026 대한민국 배당소득세 계산기 (South Korea Dividend Tax & 20M KRW Threshold Calculator)"
+          toolName={localeLabel(
+    locale,
+    '2026 대한민국 배당소득세 계산기 (South Korea Dividend Tax & 20M KRW Threshold Calculator)',
+    'South Korea Dividend Income Tax & 20M KRW Threshold Calculator',
+    '韓国 配当所得税および2,000万ウォン総合課税シミュレーター',
+    '韩国 股息红利所得税与2000万韩元综合课税测算工具'
+  )}
           recommendedAlternativeUrl="/tools/stock-calculator"
           recommendedAlternativeLabel={isEn ? 'Explore Global Stock DCA Calculator' : '글로벌 주식 물타기/DCA 계산기 보기'}
         />

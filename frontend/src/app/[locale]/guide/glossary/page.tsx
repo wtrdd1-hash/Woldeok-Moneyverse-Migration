@@ -84,6 +84,43 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+
+function localizeFormula(formula?: string, locale?: string): string {
+  if (!formula) return '';
+  if (!locale || locale === 'ko') return formula;
+
+  let f = formula;
+  const replacements: [RegExp, string][] = [
+    [/현재 주가/g, 'Stock Price'],
+    [/주당순이익\(EPS\)/g, 'EPS'],
+    [/주당순자산가치\(BPS\)/g, 'BPS'],
+    [/당기순이익/g, 'Net Income'],
+    [/자기자본/g, 'Total Equity'],
+    [/배당기준일 1영업일 전 \(한국 D\+2 결제 기준\)/g, 'Record Date - 1 Business Day (T+2 Settlement)'],
+    [/배당락일/g, 'Ex-Div Date'],
+    [/배당기준일/g, 'Record Date'],
+    [/연간 주당 배당금/g, 'Annual Dividend Per Share'],
+    [/시가배당률/g, 'Dividend Yield'],
+    [/물타기 평단가/g, 'DCA Avg Price'],
+    [/기존/g, 'Initial'],
+    [/추가/g, 'Additional'],
+    [/매수액/g, 'Cost'],
+    [/매수수량/g, 'Shares'],
+    [/보유액/g, 'Value'],
+    [/원천징수/g, 'Withholding Tax'],
+    [/종합과세/g, 'Comprehensive Tax'],
+    [/세율/g, 'Rate'],
+    [/수수료/g, 'Fee'],
+    [/최고가/g, 'Peak'],
+    [/최저가/g, 'Trough'],
+  ];
+
+  for (const [pattern, replacement] of replacements) {
+    f = f.replace(pattern, replacement);
+  }
+  return f;
+}
+
 export default async function LocalizedGlossaryHubPage({ params }: PageProps) {
   const { locale } = await params;
   if (!isLocale(locale) || locale === 'ko') {
@@ -108,7 +145,7 @@ export default async function LocalizedGlossaryHubPage({ params }: PageProps) {
       name: isEn ? item.termEn : isJa ? item.termJa : item.termZh,
       acceptedAnswer: {
         '@type': 'Answer',
-        text: `${isEn ? item.descriptionEn : isJa ? item.descriptionJa : item.descriptionZh} ${item.formula ? `Formula: ${item.formula}` : ''}`,
+        text: `${isEn ? item.descriptionEn : isJa ? item.descriptionJa : item.descriptionZh} ${item.formula ? `Formula: ${localizeFormula(item.formula, locale)}` : ''}`,
       },
     })),
   };
