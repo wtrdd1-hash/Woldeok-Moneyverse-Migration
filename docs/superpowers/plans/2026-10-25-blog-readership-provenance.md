@@ -13,3 +13,6 @@
 2. [x] Update blog types, seed/editorial/generated posts and UI. Run tests GREEN; verify localized article header, 320px responsive header, focusable navigation and public SEO metadata remain intact.
 3. [x] Run lint, typecheck, targeted and full tests, build, API contract, security, isolated PostgreSQL/backend gates. Record precise failures and skipped gates.
 4. [x] Re-fetch main/plan, integrate semantic changes if advanced, verify final HEAD, create Draft PR and attach evidence; merge/deploy only on complete required PASS.
+
+## Additional RED/GREEN discovery
+- [x] Historical on-disk JSON can still carry `views` despite a cleaned TypeScript interface. Add regression for legacy persisted records, normalize reads and subsequent writes without modifying live storage during the development run.

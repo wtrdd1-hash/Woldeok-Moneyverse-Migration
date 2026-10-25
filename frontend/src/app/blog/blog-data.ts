@@ -598,6 +598,13 @@ function getBlogStoreFilePath(): string {
   return path.join(dataDir, 'blog-posts.json');
 }
 
+/** Older persisted articles can contain invented readership counts. Never return or rewrite them. */
+export function withoutLegacyBlogViews(post: BlogPost): BlogPost {
+  const normalized: BlogPost & { views?: unknown } = { ...post };
+  delete normalized.views;
+  return normalized;
+}
+
 function loadPostsFromDisk(): BlogPost[] {
   try {
     const filePath = getBlogStoreFilePath();
@@ -628,7 +635,7 @@ function loadPostsFromDisk(): BlogPost[] {
             }
           }
         }
-        return combined;
+        return combined.map(withoutLegacyBlogViews);
       }
     }
   } catch (err) {
@@ -644,7 +651,7 @@ function savePostsToDisk(posts: BlogPost[]): void {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(filePath, JSON.stringify(posts, null, 2), 'utf-8');
+    fs.writeFileSync(filePath, JSON.stringify(posts.map(withoutLegacyBlogViews), null, 2), 'utf-8');
   } catch (err) {
     console.error('[BlogStore] Failed to write blog posts to disk:', err);
     throw err;
