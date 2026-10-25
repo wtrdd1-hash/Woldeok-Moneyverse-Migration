@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import { Button } from '@/components/ui/button';
 import { Share2, Copy, Check, MessageCircle, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,6 +24,7 @@ export function SocialShareToolbar({
   className = '',
   compact = false,
 }: SocialShareToolbarProps) {
+  const { locale } = useLocale();
   const [isCopied, setIsCopied] = useState(false);
 
   const getTargetUrl = () => {
@@ -37,10 +40,10 @@ export function SocialShareToolbar({
     try {
       await navigator.clipboard.writeText(target);
       setIsCopied(true);
-      toast.success('공유 링크가 클립보드에 복사되었습니다.');
+      toast.success(localeLabel(locale, '공유 링크가 클립보드에 복사되었습니다.', 'Share link copied to clipboard.', '共有リンクをクリップボードにコピーしました。', '分享链接已复制到剪贴板。'));
       setTimeout(() => setIsCopied(false), 2500);
     } catch {
-      toast.error('링크 복사에 실패했습니다.');
+      toast.error(localeLabel(locale, '링크 복사에 실패했습니다.', 'Failed to copy link.', 'リンクのコピーに失敗しました。', '复制链接失败。'));
     }
   };
 
@@ -59,7 +62,7 @@ export function SocialShareToolbar({
     // 모바일 기기 감지 시 카카오링크 커스텀 스킴 우선 시도
     const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isMobile) {
-      // 카카오톡 텍스트 공유 웹 인텐트
+      // {localeLabel(locale, '카카오톡', 'Kakao', 'カカオ', 'Kakao')} 텍스트 공유 웹 인텐트
       const kakaoScheme = `kakaolink://send?msg=${encodeURIComponent(shareText)}&url=${encodeURIComponent(target)}`;
       window.location.href = kakaoScheme;
       setTimeout(() => {
@@ -144,8 +147,8 @@ export function SocialShareToolbar({
             <Share2 className="w-4 h-4" />
           </span>
           <div>
-            <h4 className="text-xs font-bold text-zinc-200">1초만에 SNS 공유하고 친구에게 자랑하기</h4>
-            <p className="text-[11px] text-zinc-400">카카오톡, X(트위터), 커뮤니티로 바로 공유해 보세요.</p>
+            <h4 className="text-xs font-bold text-zinc-200">{localeLabel(locale, '1초만에 SNS 공유하고 친구에게 자랑하기', 'Share results on Social & Chats in 1 second', '1秒でSNSシェアして共有する', '一秒分享模拟结果至社交平台')}</h4>
+            <p className="text-[11px] text-zinc-400">{localeLabel(locale, '카카오톡, X(트위터), 커뮤니티로 바로 공유해 보세요.', 'Share instantly via Twitter (X), Facebook, and direct link.', 'X(Twitter)、Facebook、リンクで即時シェア。', '支持通过Twitter (X)、Facebook及直达链接即刻分享。')}</p>
           </div>
         </div>
 
@@ -169,10 +172,10 @@ export function SocialShareToolbar({
             className="h-8 px-3 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs border border-zinc-700 active:scale-95 transition-transform"
           >
             <span className="font-bold mr-1.5 text-xs">𝕏</span>
-            트위터 공유
+            {localeLabel(locale, '트위터 공유', 'Share on X', 'Xでシェア', '分享至X')}
           </Button>
 
-          {/* 페이스북 */}
+          {/* {localeLabel(locale, '페이스북', 'Facebook', 'Facebook', 'Facebook')} */}
           <Button
             type="button"
             size="sm"
@@ -195,7 +198,7 @@ export function SocialShareToolbar({
             {isCopied ? (
               <>
                 <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" />
-                복사완료!
+                {localeLabel(locale, '복사완료!', 'Copied!', 'コピー完了!', '已复制!')}
               </>
             ) : (
               <>

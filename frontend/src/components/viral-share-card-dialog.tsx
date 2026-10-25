@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useLocale } from '@/components/locale-provider';
 import {
   Dialog,
   DialogContent,
@@ -92,13 +93,14 @@ export function ViralShareCardDialog({
   const [isCopied, setIsCopied] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
   const pathname = usePathname() || '';
+  const { locale: contextLocale } = useLocale();
 
   const locale: 'ko' | 'en' | 'ja' | 'zh' =
-    pathname.startsWith('/en')
+    pathname.startsWith('/en') || contextLocale === 'en'
       ? 'en'
-      : pathname.startsWith('/ja')
+      : pathname.startsWith('/ja') || contextLocale === 'ja'
       ? 'ja'
-      : pathname.startsWith('/zh')
+      : pathname.startsWith('/zh') || contextLocale === 'zh'
       ? 'zh'
       : 'ko';
   const t = DIALOG_I18N[locale];
