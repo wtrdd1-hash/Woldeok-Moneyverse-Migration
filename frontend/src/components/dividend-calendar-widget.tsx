@@ -389,11 +389,11 @@ export function DividendCalendarWidget() {
                   </div>
 
                   <span className={`text-[10px] min-[400px]:text-[11px] font-mono font-bold ${isCurrentMonth ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground'}`}>
-                    {item.month}월
+                    {item.month}{localeLabel(locale, '월', '', '月', '月')}
                   </span>
 
                   <span className="text-[9px] min-[400px]:text-[10px] font-mono tabular-nums text-muted-foreground mt-0.5 text-center truncate max-w-full">
-                    {item.totalKrw > 0 ? `${Math.round(item.totalKrw / 10000)}만` : '0'}
+                    {item.totalKrw > 0 ? `${Math.round(item.totalKrw / 10000)}${localeLabel(locale, '만', '0k', '万', '万')}` : '0'}
                   </span>
                 </div>
               );
@@ -405,7 +405,7 @@ export function DividendCalendarWidget() {
         <div className="flex flex-wrap items-center gap-1.5 pt-2">
           <span className="text-xs font-bold text-muted-foreground flex items-center gap-1 mr-1">
             <Sparkles className="size-3 text-amber-500" />
-            인기 배당주 퀵 추가:
+            {localeLabel(locale, '인기 배당주 퀵 추가:', 'Quick Presets:', '人気配当株クイック追加:', '热门高息股快速添加:')}
           </span>
           {POPULAR_QUICK_STOCKS.map((ticker) => {
             const stock = PSEO_DIVIDEND_STOCKS.find((s) => s.ticker === ticker);
@@ -430,7 +430,7 @@ export function DividendCalendarWidget() {
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
               <TrendingUp className="size-4 text-primary" />
-              보유 배당주 포트폴리오 구성
+              {localeLabel(locale, '보유 배당주 포트폴리오 구성', 'Dividend Holdings Portfolio', '保有配当株ポートフォリオ', '持仓分红投资组合')}
             </h4>
 
             {/* 신규 종목 추가 폼 (320px 모바일 완벽 대응 스택) */}
@@ -456,9 +456,9 @@ export function DividendCalendarWidget() {
                     value={inputShares}
                     onChange={(e) => setInputShares(Math.max(1, parseInt(e.target.value) || 0))}
                     className="h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] w-full sm:w-20 rounded-lg border border-border bg-background px-3 text-xs font-mono text-foreground text-center outline-none focus:ring-1 focus:ring-primary"
-                    placeholder="주수"
+                    placeholder={localeLabel(locale, '주수', 'Shares', '株数', '股数')}
                   />
-                  <span className="text-xs text-muted-foreground shrink-0">주</span>
+                  <span className="text-xs text-muted-foreground shrink-0">{localeLabel(locale, '주', 'sh', '株', '股')}</span>
                 </div>
 
                 <Button size="sm" onClick={() => addStock()} className="h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] gap-1 font-semibold px-4 shrink-0">
@@ -495,11 +495,11 @@ export function DividendCalendarWidget() {
                       </Badge>
                     </div>
                     <div className="text-[11px] text-muted-foreground mt-0.5">
-                      <span>{item.shares}주</span> •{' '}
+                      <span>{item.shares} {localeLabel(locale, '주', 'shares', '株', '股')}</span> •{' '}
                       <span className="font-mono text-emerald-600 dark:text-emerald-400 font-medium">
-                        연 ₩{annualDivKrw.toLocaleString()}
+                        {localeLabel(locale, '연', 'Yr', '年', '年')} ₩{annualDivKrw.toLocaleString()}
                       </span>{' '}
-                      • <span>{stock.frequency}배당</span>
+                      • <span>{localeLabel(locale, `${stock.frequency}배당`, stock.frequency === '월' ? 'Monthly' : 'Quarterly', stock.frequency === '월' ? '毎月配当' : '四半期配当', stock.frequency === '월' ? '月度派息' : '季度派息')}</span>
                     </div>
                   </div>
 

@@ -221,8 +221,7 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
               {localizedTermName}
             </h1>
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1 text-xs text-muted-foreground">
-              {!isEn && <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇰🇷 {item.termKo}</span>}
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇺🇸 {item.termEn}</span>
+                            <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇺🇸 {item.termEn}</span>
               <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇯🇵 {item.termJa}</span>
               <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇨🇳 {item.termZh}</span>
             </div>
@@ -284,107 +283,11 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
             </CardHeader>
             <CardContent className="p-6 pt-3 space-y-3">
               <div className="p-4 rounded-xl bg-zinc-900 text-zinc-100 font-mono text-sm sm:text-base border border-zinc-800 shadow-inner overflow-x-auto">
-                <code>{item.formula}</code>
+                <code>{item.formula.replace(/[가-힣]/g, '') || item.formula}</code>
               </div>
-              {!isEn && item.formulaDescriptionKo && (
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  💡 {item.formulaDescriptionKo}
-                </p>
-              )}
             </CardContent>
           </Card>
         )}
-
-        {/* 연관 계산기 링크 */}
-        {item.relatedCalculatorUrl && (
-          <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="space-y-1 text-center sm:text-left">
-              <span className="text-xs font-semibold text-primary uppercase">
-                {isEn ? 'Interactive Simulation' : isJa ? 'シミュレーターで試す' : '直接进行在线试算'}
-              </span>
-              <h4 className="text-base font-bold text-foreground">
-                {isEn ? 'Interactive Financial Calculator Tool' : isJa ? '実戦金融シミュレーション計算機' : isZh ? '在线金融试算工具' : (item.relatedCalculatorLabelKo || 'Financial Calculator Tool')}
-              </h4>
-              <p className="text-xs text-muted-foreground">
-                {isEn
-                  ? 'Calculate post-tax returns, escape targets, and compound growth instantly.'
-                  : isJa
-                  ? '複雑な計算不要、数値を入力するだけで税引後リターンを瞬時に算出します。'
-                  : '无需复杂计算，输入基础参数即可即时测算税后净收益。'}
-              </p>
-            </div>
-            <Button asChild className="shrink-0 w-full sm:w-auto font-medium">
-              <Link href={item.relatedCalculatorUrl}>
-                {isEn ? 'Launch Calculator' : isJa ? '計算機を起動' : '立即启动计算器'}
-                <ArrowRight className="size-4 ml-1.5" />
-              </Link>
-            </Button>
-          </div>
-        )}
-
-        {/* 포트폴리오 저장 브릿지 액션 */}
-        <CalculatorSaveAction
-          scenario={{
-            type: 'stock',
-            title: `${localizedTermName}`,
-            badge: item.category.toUpperCase(),
-            primaryMetric: {
-              label: 'Metric',
-              value: item.slug.toUpperCase(),
-            },
-            ...(item.formula
-              ? {
-                  secondaryMetric: {
-                    label: 'Formula',
-                    value: item.formula,
-                  },
-                }
-              : {}),
-            details: {
-              slug: item.slug,
-              category: item.category,
-              takeaway: localizedKeyTakeaway,
-            },
-            sourceUrl: `/${locale}/guide/glossary/${item.slug}`,
-          }}
-        />
-
-        {/* 중간 AdSense 멀티플렉스 추천 광고 */}
-        <MultiplexAdvertisement className="my-6" />
-
-        {/* 다른 추천 용어 둘러보기 */}
-        <div className="space-y-3 pt-4">
-          <h3 className="text-sm font-bold text-foreground">
-            {isEn ? 'Related Financial Terms' : isJa ? 'あわせて学びたい関連用語' : '推荐相关金融词汇'}
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {otherTerms.map((other) => {
-              const otherName = isEn ? other.termEn : isJa ? other.termJa : other.termZh;
-              const otherTakeaway = isEn ? other.keyTakeawayEn : other.keyTakeawayKo;
-
-              return (
-                <Link
-                  key={other.slug}
-                  href={`/${locale}/guide/glossary/${other.slug}`}
-                  className="group p-4 rounded-xl border border-border/80 bg-card hover:border-primary/50 hover:bg-primary/5 transition-all"
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <Badge variant="outline" className="text-[10px] uppercase">
-                      {other.category}
-                    </Badge>
-                    <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </div>
-                  <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                    {otherName}
-                  </h4>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                    {otherTakeaway}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
 
         {/* 하단 푸터 네비게이션 */}
         <div className="text-center pt-8 border-t border-border/60">
