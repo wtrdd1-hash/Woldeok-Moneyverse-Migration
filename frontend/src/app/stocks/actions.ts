@@ -55,11 +55,19 @@ export async function setWatchlist(_previous: ActionState, formData: FormData): 
     return { status: 'error', message: '관심종목 상태를 확인할 수 없어요.' };
   }
   try {
-    await mutate(`/api/v1/stocks/${encodeURIComponent(stockId)}/watchlist`, {
-      body: { watching: watching === 'true' },
-    });
+    const requested = watching === 'true';
+    const receipt = await mutate<{ readonly watching: boolean }>(
+      `/api/v1/stocks/${encodeURIComponent(stockId)}/watchlist`,
+      { body: { watching: requested } },
+    );
+    // A 2xx response alone cannot prove the database accepted the requested state.
+    if (!receipt || typeof receipt.watching !== 'boolean' || receipt.watching !== requested) {
+      return { status: 'error', message: '서버에서 관심종목 변경 결과를 확인할 수 없어요. 새로고침 후 확인해 주세요.' };
+    }
     revalidatePath('/stocks');
-    return { status: 'ok', message: watching === 'true' ? '관심종목에 추가했어요.' : '관심종목에서 제거했어요.' };
+    revalidatePath('/stocks/watchlist');
+    revalidatePath('/stocks/[symbol]', 'page');
+    return { status: 'ok', message: requested ? '관심종목에 추가했어요.' : '관심종목에서 제거했어요.' };
   } catch (error) {
     return failure(error, '관심종목을 변경할 수 없어요.');
   }
