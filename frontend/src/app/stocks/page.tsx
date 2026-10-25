@@ -25,28 +25,28 @@ export const dynamic = 'force-dynamic';
 
 const STOCKS_META_BY_LOCALE = {
   en: {
-    title: 'Virtual Stock Exchange — Toss-style Real-time Orderbook & Trading',
-    description: 'Track real-time virtual quotes, 10-depth orderbooks, and trade 10 listed companies with ease.',
+    title: 'Virtual Stock Exchange — Quotes, Charts & Manual Price Entry',
+    description: 'Explore virtual stock quotes and charts. Reference price steps are not real order-book liquidity.',
     canonical: '/en/stocks',
   },
   ko: {
-    title: '가상 주식 거래소 — 실시간 10단 호가창 & 모의투자 | 월덕 머니버스',
-    description: '[토스 증권 스타일] 10대 가상 상장사 실시간 호가, 캔들 차트, 1초 모의투자 시뮬레이터. 가입 즉시 1만 WLD 지급!',
+    title: '가상 주식 거래소 — 시세·차트·가격 참조표 | 월덕 머니버스',
+    description: '10대 가상 상장사의 시세·차트와 수동 주문용 가격 참조표. 참조 가격은 실제 주문 잔량이 아닙니다.',
     canonical: '/stocks',
   },
   ja: {
-    title: '仮想株式取引所 — リアルタイム10段階気配値＆模擬投資',
-    description: 'トス証券スタイルの直感的な仮想株式取引所。10大上場企業のリアルタイム相場とチャート。',
+    title: '仮想株式取引所 — 価格情報・チャート・参考価格',
+    description: '仮想株式の価格とチャート。参考価格は実際の注文板や流動性ではありません。',
     canonical: '/ja/stocks',
   },
   zh: {
-    title: '虚拟股票交易所 — 实时10档深度盘口与模拟交易',
-    description: 'Toss风格极简虚拟股票交易所，实时查看10大标的行情与深度K线。',
+    title: '虚拟股票交易所 — 报价、图表与参考价格',
+    description: '查看虚拟股票报价与图表。参考价格不代表真实挂单深度。',
     canonical: '/zh/stocks',
   },
   vi: {
     title: 'Sàn giao dịch Cổ phiếu ảo | Woldeok Moneyverse',
-    description: 'Trải nghiệm sàn giao dịch cổ phiếu ảo thời gian thực với sổ lệnh khớp giá tốc độ cao.',
+    description: 'Xem giá và biểu đồ cổ phiếu ảo. Mức giá tham khảo không phải lệnh chờ thực tế.',
     canonical: '/vi/stocks',
   },
 };

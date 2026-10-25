@@ -114,7 +114,7 @@ export async function generateMetadata({
 
   return {
     title: `${stock.symbol} ${stock.name} — 실시간 가상 주식 시세 & 차트`,
-    description: `${stock.name}(${stock.symbol})의 월덕 머니버스 실시간 가상 시세, 10-Depth 호가창, 차트 및 커뮤니티 토론. 실제 금융상품이 아닌 게임 가상재화입니다.`,
+    description: `${stock.name}(${stock.symbol})의 월덕 머니버스 가상 시세, 실제 주문 잔량이 아닌 가격 참조표, 차트 및 커뮤니티 토론. 실제 금융상품이 아닌 게임 가상재화입니다.`,
     keywords: [
       `${stock.name}`,
       `${stock.symbol}`,
@@ -131,7 +131,7 @@ export async function generateMetadata({
     robots: { index: true, follow: true },
     openGraph: {
       title: `${stock.name} (${stock.symbol}) — 가상 주식 시세 & 차트`,
-      description: `${stock.name}의 실시간 가상 주식 호가 및 차트`,
+      description: `${stock.name}의 가상 주식 시세·차트 및 참조 가격`,
       url: stockUrl,
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },

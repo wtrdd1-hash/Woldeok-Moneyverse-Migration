@@ -32,11 +32,11 @@ export default async function StocksLayout({ children }: { readonly children: Re
         <p className="text-xs sm:text-sm text-slate-400 font-medium">
           {localeLabel(
             locale,
-            '10대 가상 상장사 실시간 10단 호가창 · 1초 체결 모의투자 시뮬레이터',
-            'Real-time Level 2 orderbook matching simulation with instant execution across virtual equities.',
-            '仮想上場企業10社のリアルタイム板情報・1秒約定の模擬投資シミュレーター。',
-            '10家虚拟上市公司实时十档盘口与秒级撮合模拟交易平台。',
-            'Mô phỏng khớp lệnh thời gian thực và sổ lệnh cấp 2 của 10 công ty niêm yết ảo.'
+            '10대 가상 상장사 시세·차트 · 주문 잔량이 아닌 수동 입력용 가격 참조표',
+            'Virtual stock quotes and charts with reference prices for manual order entry; no live order-book depth.',
+            '仮想株式の相場・チャートと注文入力用の参考価格。実際の注文板ではありません。',
+            '10家虚拟上市公司报价与图表，参考价格仅供手动输入，并非真实挂单。',
+            'Báo giá và biểu đồ cổ phiếu ảo; mức giá tham khảo không phải sổ lệnh thực tế.'
           )}
         </p>
       </div>

@@ -10,33 +10,15 @@ import { StockConditionalOrders } from './stock-conditional-orders';
 import type { HubStock } from '../stock-hub';
 
 describe('StockOrderbook & Interactive Chart Suite', () => {
-  it('renders orderbook with ask/bid levels, intensity badge, and recent trades stream', () => {
+  it('renders price references without fabricated order pressure', () => {
     const handleSelect = vi.fn();
-    render(
-      <StockOrderbook
-        stockId="WDG"
-        symbol="WDG"
-        currentPrice="15,000"
-        isEn={false}
-        onSelectPrice={handleSelect}
-      />
-    );
-
-    // 체결강도 배지 렌더링 검증
-    expect(screen.getByText(/체결강도/i)).toBeDefined();
-    // 호가창 단계 타이틀 검증 (5단계 실시간 호가)
-    expect(screen.getByText(/5단계 실시간 호가/i)).toBeDefined();
-    // 5D, 10D 깊이 토글 버튼 검증
-    const btn10D = screen.getByText('10D');
-    expect(btn10D).toBeDefined();
+    render(<StockOrderbook stockId="WDG" symbol="WDG" currentPrice="15,000" isEn={false} onSelectPrice={handleSelect} />);
+    expect(screen.getByText(/5단계 가격 참조표/)).toBeDefined();
+    expect(screen.queryByText(/체결강도/)).toBeNull();
+    const btn10D = screen.getByRole('button', { name: '10D' });
     fireEvent.click(btn10D);
-    expect(screen.getByText(/10단계 실시간 호가/i)).toBeDefined();
-
-    // 최근 체결 틱 스트림 헤더 검증
-    expect(screen.getByText(/최근 체결 틱/i)).toBeDefined();
-    // 매도/매수 압력 비율 표시 검증
-    expect(screen.getByText(/매도 \d+%/i)).toBeDefined();
-    expect(screen.getByText(/매수 \d+%/i)).toBeDefined();
+    expect(screen.getByText(/10단계 가격 참조표/)).toBeDefined();
+    expect(btn10D.getAttribute('aria-pressed')).toBe('true');
   });
 
   it('renders interactive chart with MA, Bollinger Bands, and RSI indicator suite', () => {
@@ -275,34 +257,12 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
     expect(screen.getByText(/익절 감시 주문 등록/i)).toBeDefined();
   });
 
-  it('renders orderbook depth chart and toggles between ladder and depth views', () => {
-    const handleSelect = vi.fn();
-    render(
-      <StockOrderbook
-        stockId="WDG"
-        symbol="WDG"
-        currentPrice="15,000"
-        isEn={false}
-        onSelectPrice={handleSelect}
-      />
-    );
-
-    // 호가, 심도 탭 버튼 확인
-    const ladderBtn = screen.getByText('호가');
-    const depthBtn = screen.getByText('심도');
-    expect(ladderBtn).toBeDefined();
-    expect(depthBtn).toBeDefined();
-
-    // 심도 탭 클릭 -> 심도 차트 모드로 전환
-    fireEvent.click(depthBtn);
-    expect(screen.getByText(/실시간 호가 심도 \(Depth\)/i)).toBeDefined();
-    expect(screen.getByText(/실시간 매수\/매도 매물대 심도/i)).toBeDefined();
-    expect(screen.getByText(/매수 누적/i)).toBeDefined();
-    expect(screen.getByText(/매도 누적/i)).toBeDefined();
-
-    // 다시 호가 탭 클릭 -> 호가 테이블로 복귀
-    fireEvent.click(ladderBtn);
-    expect(screen.getByText(/(5|10)단계 실시간 호가/i)).toBeDefined();
+  it('never offers an unverified live depth chart', () => {
+    render(<StockOrderbook stockId="WDG" symbol="WDG" currentPrice="15,000" isEn={false} />);
+    expect(screen.getByRole('status').textContent).toContain('실제 매수·매도 주문 잔량이 아닙니다');
+    expect(screen.queryByText('심도')).toBeNull();
+    expect(screen.queryByText(/매수 누적/)).toBeNull();
+    expect(screen.queryByText(/매도 누적/)).toBeNull();
   });
 
   it('renders interactive drawing toolbar with cursor, trendline, horizontal line, fibonacci tools and handles tool switching', () => {

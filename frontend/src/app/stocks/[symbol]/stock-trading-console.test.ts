@@ -34,15 +34,11 @@ describe('computeOrderbook', () => {
       expect(Number.parseInt(bid.price, 10)).toBeLessThan(priceNum);
     }
 
-    // Best ask is the lowest ask (step 1: +1틱 100원 -> 50,100)
-    expect(data.bestAsk).toBe(50100);
-    // Best bid is the highest bid (step 1: -1틱 50원 -> 49,950)
-    expect(data.bestBid).toBe(49950);
-
-    // Spread = 50100 - 49950 = 150
-    expect(data.spread).toBe(150);
-    // Spread Bps = (150 / 50000) * 100 = 0.30%
-    expect(data.spreadBps).toBe('0.30');
+    // Reference prices cannot claim real best orders or a real market spread.
+    expect(data.bestAsk).toBe(0);
+    expect(data.bestBid).toBe(0);
+    expect(data.spread).toBe(0);
+    expect(data.spreadBps).toBe('0.00');
   });
 
   it('handles comma-formatted price strings cleanly', () => {
