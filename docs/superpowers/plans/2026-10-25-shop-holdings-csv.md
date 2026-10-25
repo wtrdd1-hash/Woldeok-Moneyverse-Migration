@@ -22,5 +22,5 @@
 - [x] Create isolated worktree at exact origin/main.
 - [x] RED: backend auth, CSV escaping/schema and Android gateway tests.
 - [x] GREEN: guarded backend export, safe CSV builder, private Next handler, member CTA.
-- [ ] Run focused tests, build/lint/typecheck, real isolated PostgreSQL read and ACL, security checks.
-- [ ] Recheck main and integrated EN/KO plans, review diff and CI, record release HOLD if any gate fails.
+- [x] Run focused tests, build/lint/typecheck, real isolated PostgreSQL read and ACL, security checks (full/security gates FAIL/HOLD).
+- [x] Recheck main and integrated EN/KO plans, review diff and CI, record release HOLD.

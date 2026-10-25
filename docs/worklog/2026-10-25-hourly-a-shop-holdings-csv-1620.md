@@ -26,3 +26,12 @@
 - Full frontend baseline has six failures (SEO 3, login touch target, registration link, admin M2). Security audit and exact-SHA official Test must pass before merge.
 - Root disk 94% used, data disk 57%; production/dev PostgreSQL 5433 wildcard exposure remains a separate release blocker.
 - GitOps production gate: HOLD. No main merge, official Test promotion, production deployment, DB write, service restart or branch deletion of other workers.
+
+## Candidate and post-work evidence
+- Candidate code SHA 980e704f1bc0e5c1e5170e76f2158a8819226476, Draft PR #1299.
+- 18 changed files: backend controller+tests, Next CSV parser/route/page+tests, Android gateway test, generated 180-endpoint API contract EN/KO references, QA/release/worklog and TDD plan.
+- Frontend full 1404 PASS / 6 FAIL; backend 1316 PASS / 398 SKIPPED; production audit High 2; full audit Critical 2 / High 10; bot audit Critical 1 / High 5.
+- Production build route /shop/holdings.csv present; lint 0 errors / 1128 warnings; typecheck PASS.
+- Initial CI #40173435093 and Test Candidate #40173431938 were IN_PROGRESS when captured, therefore not PASS.
+- Remote branch/PR mid-cycle counts 164/160; all unique changes protected. No remote branch deletions; local scratch NPC branch was main-identical and removed safely.
+- Exact-SHA official Test and production promotion BLOCKED. Rollback is revert of unmerged code; no database migration exists.
