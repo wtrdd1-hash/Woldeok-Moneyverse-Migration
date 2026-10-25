@@ -1,4 +1,5 @@
 # Planning v1288 — Verified Member Shop Wishlist — 2026-10-26
+- **GitHub planning review:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 - **Cycle:** Previous Feature Improvement v1286 / Current Feature Addition v1288 / Next Feature Improvement v1290 provisional.
 - **Authority:** remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid; AGENTS.md, README.md, canonical PROJECT_PLAN.md, Korean parity. Planning stacked on unmerged Draft #1340; engineering [#1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344). No overlap with Development A/B/C, Gemini or QA branches.

@@ -1,4 +1,5 @@
 ## 2026-10-26 — 기획 v1288 F675-129 회원 상점 찜 목록 (기능 추가 / 초안 / 보류)
+- **GitHub 기획 검토:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 - 이전 보완 v1286 → 현재 추가 v1288 → 다음 보완 v1290(잠정); 원격 main `1c5b84a1` 시작·중간 확인, 기존 Draft #1340 기반, 개발 [#1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344). 기획 문서만 변경, 런타임/DB/WLD/원장/Test/운영 미변경.
 - 실제 상점 카탈로그·구매 API 확인, 본인 찜 CRUD 미확인. 회원당 30건, 검증 영수증, 현재 재고·BIGINT 가격 문자열, 원자적 멱등성·DB 본인 권한·개인정보·모바일/접근성·SEO·기본 OFF/롤백. P0 4개/P1 6개 영문·국문 통합 기획서 반영.
 - QA v1278 원시 프론트 1397 통과/6 실패·시간초과·감사 실패, 루트 98%/약 2.1GiB, 운영 보류. 외부 신규 승인 0·누적 미확인/10,000 BLOCKED.

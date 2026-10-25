@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **GitHub 기획 검토:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v2026.10.26.1288 — F675-129 회원 전용 검증형 상점 찜 목록 (기능 추가 / 초안 / 운영 보류)
 - 이전 기능 보완 v1286 → 현재 기능 추가 v1288 → 다음 기능 보완 v1290(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인; AGENTS.md·README.md·영어 canonical 기획서 및 한국어 대조본 검토. 미병합 Draft #1340 위 문서 브랜치, 별도 개발 [#1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344); A/B/C·Gemini·QA와 변경 분리.

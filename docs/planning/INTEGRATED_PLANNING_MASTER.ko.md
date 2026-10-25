@@ -1,4 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- **GitHub 기획 검토:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v2026.10.26.1288 — F675-129 회원 전용 검증형 상점 찜 목록 (기능 추가 / 초안 / 운영 보류)
 

@@ -1,4 +1,5 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- **GitHub planning review:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v1288 / F675-129 — Verified member shop wishlist (Addition / DRAFT / HOLD)
 - Main `1c5b84a1` start/mid; previous Improvement v1286 → Addition v1288 → next Improvement v1290 provisional; unmerged planning Draft #1340 and separate engineering [#1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344). No overlap with A/B/C/Gemini/QA runtime changes.
