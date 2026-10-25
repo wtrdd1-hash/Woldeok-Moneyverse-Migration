@@ -15,7 +15,7 @@ const PURCHASE = {
   itemId: '00000000-0000-4000-8000-000000000002',
   transactionId: '00000000-0000-4000-8000-000000000003',
   itemName: '  =1+2\r\n',
-  amount: '900719925474099312345678901',
+  amount: '9007199254740993',
   purchasedAt: '2026-10-25T10:00:00.000Z',
 };
 
@@ -38,7 +38,7 @@ describe('private shop purchases CSV export', () => {
     const bytes = new Uint8Array(await response.arrayBuffer());
     expect([...bytes.slice(0, 3)]).toEqual([239, 187, 191]);
     const csv = new TextDecoder().decode(bytes);
-    expect(csv).toContain('900719925474099312345678901');
+    expect(csv).toContain('9007199254740993');
     expect(csv).toContain("'=1+2");
     expect(csv.split('\r\n')).toHaveLength(2);
   });
@@ -66,6 +66,22 @@ describe('private shop purchases CSV export', () => {
     expect(response.status).toBe(status);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(response.headers.get('content-disposition')).toBeNull();
+  });
+
+  it('strips hidden control characters before neutralizing a formula-leading item name', async () => {
+    apiMock.mockResolvedValue({ purchases: [{ ...PURCHASE, itemName: '\u200B=2+2\u2028tail' }] });
+    const response = await GET(request());
+    expect(response.status).toBe(200);
+    const csv = await response.text();
+    expect(csv).toContain("'=2+2 tail");
+    expect(csv).not.toContain('\u200B');
+  });
+
+  it('rejects oversized financial amounts and upstream records exceeding the requested bound', async () => {
+    apiMock.mockResolvedValueOnce({ purchases: [{ ...PURCHASE, amount: '9999999999999999999999' }] })
+      .mockResolvedValueOnce({ purchases: Array.from({ length: 21 }, () => PURCHASE) });
+    expect((await GET(request())).status).toBe(503);
+    expect((await GET(request('?limit=20'))).status).toBe(503);
   });
 
   it('never turns a failed API call or malformed receipt into an empty successful export', async () => {

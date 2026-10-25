@@ -24,7 +24,7 @@ const PRIVATE_HEADERS = {
 
 function csvCell(value: string): string {
   // Spreadsheet software evaluates leading formulas even in quoted CSV cells.
-  const normalized = value.replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ').trim();
+  const normalized = value.replace(/[\p{Cc}\p{Cf}\u2028\u2029]+/gu, ' ').trim();
   const escaped = /^[=+@-]/.test(normalized) ? `'${normalized}` : normalized;
   return `"${escaped.replace(/"/g, '""')}"`;
 }
@@ -42,7 +42,7 @@ function parsePurchase(value: unknown): Purchase {
   if (typeof record.itemName !== 'string' || !record.itemName.trim() || record.itemName.length > 160) {
     throw new Error('invalid purchase item');
   }
-  if (typeof record.amount !== 'string' || !WLD.test(record.amount) || BigInt(record.amount) <= 0n) {
+  if (typeof record.amount !== 'string' || !WLD.test(record.amount) || record.amount.length > 19 || BigInt(record.amount) <= 0n || BigInt(record.amount) > 9223372036854775807n) {
     throw new Error('invalid purchase amount');
   }
   if (typeof record.purchasedAt !== 'string' || !Number.isFinite(Date.parse(record.purchasedAt))) {
