@@ -1,4 +1,45 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.26.1300 — F675-132 회원 전용 로그인 세션 별칭 (기능 추가 / DRAFT / RELEASE HOLD)
+- **회차:** 이전 기능 보완 v1298 → 현재 기능 추가 v1300 → 다음 기능 보완 v1302(잠정). 최신 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인. 선행 미병합 기획 Draft #1371 기반 문서만 변경, 개발 A/B/C·Gemini·QA 작업과 분리. 개발 인계: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378.
+
+### 실제 코드 근거·목표·제외 범위
+- **확인:** `/account/security`에는 이미 로그인 세션 목록·보안 이벤트가 있으며, NestJS `GET /api/v1/account/security/sessions` 및 CSRF·재인증을 요구하는 기존 세션 종료 API가 존재한다. Migration 213의 `account_active_sessions`는 사용자 에이전트 문자열로 Android/Windows 등의 **추정** 기기명을 만든다. Migration 214는 실제 회원 보안 이벤트를 최근 20건(함수 최대 50건) 조회한다. 확인한 main 코드에서는 회원이 기기명을 직접 저장·수정하는 별칭 API와 DB를 발견하지 못했다. 실제 운영 장애가 발생했다는 뜻은 아니다.
+- **목적·대상:** 여러 브라우저·휴대전화로 접속하는 회원이 세션을 구별할 수 있도록 **자기만 보는 표시용 별칭**을 제공한다. 별칭은 기기 신원·보안 등급·로그인 권한의 검증 근거가 아니다. 화면에 “내가 지정한 이름이며 기기 신원 확인을 뜻하지 않습니다.”를 항상 표시한다.
+- **비범위:** 기존 세션 목록·로그아웃·보안 이벤트 중복 구현 금지. IP 위치 추적·지문 채집·기기 인증·패스키·세션 토큰 표시·자동 신뢰·원장/WLD 거래·허위 알림·로그인 이력 복원 없음. 별칭 변경으로 세션 만료·재인증 시각·활동시각이 달라져서는 안 된다.
+
+### 회원 화면·CTA·상태
+- **진입:** `/account/security` > 활성 세션 행 > “기기 이름 수정”. 현재 기기·관리자 세션 배지는 서버 필드 그대로 유지하고, 별도 사용자 지정 이름과 기존 추정 기기명을 구별한다. 대화상자에는 편집·글자수·저장·기본 이름으로 초기화·취소 CTA를 제공한다. 초기화는 명시적인 별칭 제거이며 빈 문자열 저장은 허용하지 않는다. 기존 본인 확인 화면을 재사용한다.
+- **상태:** INITIAL_LOADING, READY_DEFAULT, READY_CUSTOM, EDITING, REAUTH_REQUIRED, SAVING, SAVED_CONFIRMED, RESET_CONFIRMED, VERSION_CONFLICT(새로고침), SESSION_REVOKED_OR_EXPIRED(410), NOT_OWNED_OR_UNKNOWN(404), CONSENT_REQUIRED, SESSION_EXPIRED, RATE_LIMITED(429), OFFLINE, SOURCE_UNAVAILABLE(503), UNCONFIRMED. 네트워크 응답 유실 시 성공으로 표시하지 않고 본인 세션·버전을 재조회한다. 중복 저장 방지 및 접근성 상태 안내를 적용한다.
+- **입력 검증:** NFC 정규화 후 유니코드 공백 양끝 제거, 1~40개 그래핌 클러스터 **및** UTF-8 160바이트 이하; 제어문자·줄바꿈·양방향 문자 조작·제로폭 위장 금지. 클라이언트와 서버의 그래핌 분할 규칙을 맞추되 서버 검증이 최종 기준이다. HTML 문자열로 삽입하지 않고 안전한 텍스트 렌더링을 사용한다. 비슷한 이름이나 동일 별칭은 인증 근거로 사용하지 않는다.
+
+### API·DB·트랜잭션
+- **기존 GET 확장:** `GET /api/v1/account/security/sessions`의 기존 필드를 유지하고 `customLabel:null|string`, `labelVersion` 정수 문자열(처음 0), `labelUpdatedAt`을 추가한다. 회원 식별자는 서버 세션에서만 가져오며 `Cache-Control: private, no-store`를 적용한다.
+- **신규 PUT/DELETE:** `/api/v1/account/security/sessions/:id/label`에 `{label,expectedVersion,requestId}` 저장 또는 `{expectedVersion,requestId}` 초기화. SessionGuard·AuthenticatedGuard·ConsentGuard·CsrfGuard·ReauthGuard 필수, 대상 활성·본인 소유 검증, 회원당 시간당 성공 변경 10건 제한. 커밋 후에만 `confirmed:true`와 새 버전을 응답한다. 버전 충돌 409, 타인/미존재 404, 본인 만료·철회 410, 입력 오류 400, 제한 429, 저장소 장애 503. 관리자 세션 별칭도 관리자 권한의 근거로 쓰지 않는다.
+- **DB 설계안(미적용):** account_session_label_states(session_id UUID PRIMARY KEY REFERENCES auth_sessions(id) ON DELETE CASCADE, user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, label TEXT NULL, version BIGINT NOT NULL CHECK(version>=1), updated_at TIMESTAMPTZ NOT NULL DEFAULT now(), CHECK(label IS NULL OR (char_length(label)>0 AND octet_length(label)<=160))). label=NULL은 별칭 초기화 후에도 버전을 유지하는 revision tombstone이다. 최초 저장 전 행이 없을 때만 버전 0, 저장·초기화 때마다 버전 증가. session_id PK 조인 우선, 실제 EXPLAIN 필요 시 (user_id,updated_at DESC,session_id) 인덱스 추가. account_session_label_requests(user_id,request_id,session_id,payload_hash,response_version,outcome,created_at, PRIMARY KEY(user_id,request_id))는 24시간 후 정리하고 원본 토큰·IP·UA·이메일은 저장하지 않는다. 탈퇴 시 연쇄 삭제, 만료·철회 세션 정리는 별도 보존기간 기준.
+- **원자성:** 권한·재인증·동의·기능 플래그를 먼저 확인하고 현재 세션→대상 세션→상태/리비전→멱등 영수증 순서로 잠근다. 잠금 후 만료·철회를 다시 확인한다. 첫 저장은 버전 1, 이후 저장과 초기화는 모두 버전 증가(label=NULL tombstone 유지)로 ABA를 차단한다. 동일 회원·요청 UUID·payload는 현재 권한 재검증 후 커밋 결과만 재전달하고 payload 불일치는 409. 상태·버전·영수증·감사 이벤트가 한 트랜잭션에서 커밋되며 실패 시 모두 롤백. 응답 유실·세션 철회 경쟁에서 거짓 성공을 표시하지 않는다.
+- **권한 경계:** 새 SECURITY DEFINER 함수는 schema-qualified SQL, 고정 search_path, PUBLIC EXECUTE 철회, moneyverse_app EXECUTE 최소 부여. 애플리케이션 계정에 신규 테이블 직접 SELECT/INSERT/UPDATE/DELETE를 주지 않는다. 기존 세션 조회 함수만 회원 소유 별칭과 안전하게 조인한다. 사용자 식별은 인증된 서버 세션에서 유도하며 타 회원 별칭을 응답하지 않는다.
+
+### 운영·보안·접근성·검증
+- **관리자:** 개별 회원 별칭·세션 ID는 관리자 통계에 노출하지 않고, 최소 표본 20명 이상 비식별 집계만 제공한다. 보안 감사 이벤트에는 실제 커밋된 변경의 유형·식별자만 남기고 별칭 원문을 기록하지 않는다. 성공하지 않은 변경에 감사 성공 이벤트를 생성하지 않는다.
+- **개인정보·악용 방지:** CSRF·최근 재인증·동의·세션 검증, 100건 타 회원 BOLA 테스트, 레이트 리밋, 요청 로그 마스킹, XSS·유니코드 위장 방지, 계정 탈퇴·철회 경쟁 조건, URL/제3자 분석에 별칭 금지. 404 응답은 타인 세션 존재를 유추하지 못하게 한다.
+- **SEO/모바일/a11y:** `/account/security` noindex/nofollow, no-store, 공개 구조화 데이터 없음. Android app-api는 동일 회원 전용 GET/PUT/DELETE, 인증·CSRF·재인증·오류를 유지하고 OS 기기 인증과 혼동하지 않는다. WCAG 2.2 AA, 키보드 대화상자·포커스 복귀·스크린리더 안내·44px 터치·320px·200% 확대·모션 축소.
+- **분석/KPI:** 실제 서버 커밋된 별칭 변경 수/활성 세션 화면을 본 적격 회원 수, 7·30일 채택률, 409 충돌률, 404/410 오류율, 접근성 완료율, 지연시간을 비식별 측정한다. 버튼 클릭이나 응답 유실은 성공으로 집계하지 않는다.
+- **회귀·배포·롤백:** 같은 세션 동시 CAS 100건, 타 회원 100건, 세션 만료·철회·현재/관리자 세션, 40그래핌·160바이트·NFC·양방향 문자·XSS, 요청 UUID 재사용·리비전 ABA·계정 삭제·Android·키보드·SEO 검증. 실제 격리 PostgreSQL에서 app 직접 DML 거부/함수 EXECUTE/롤백 검증. `account_session_nicknames_v1` 기본 OFF; 별도 개발 브랜치와 정확 SHA 공식 CI, 인증된 Test E2E·금융 회귀·격리 복원·보안감사·승인된 GitOps 이후에만 승격. 문제 발생 시 기능 OFF로 기존 추정 기기명 표시, 기존 로그아웃 기능 유지. 기획 회차에서 런타임·DB·운영 환경 변경 금지.
+
+### P0/P1 개발 백로그·게이트
+- **P0 ENV1300-01:** 루트 99%/약 1.0GiB, 다른 작업자 Worktree 보존하며 용량·백업 복원·DB 격리 해결.
+- **P0 SEC1300-02:** 개발 DB 앱 계정 235/241 테이블 UPDATE+DELETE, PUBLIC 은행 함수 3개, 본인 소유/CSRF/재인증/DB 권한 음성 검증.
+- **P0 REL1300-03:** QA v1284 프론트 1,397 통과/6 실패, 운영 보안감사 High 2, 전체 Critical 2/High 10, Migration 266 이력 불일치, 정확 SHA Test·복원·GitOps HOLD.
+- **P0 AUTH1300-04:** 기존 UA 기반 추정 기기명·기존 세션 철회가 사용자 지정 별칭과 혼동되지 않도록 진실성 검증.
+- **P1 AUTH1300-05:** 스키마·단조 리비전 tombstone·인덱스·SECDEF 소유권.
+- **P1 AUTH1300-06:** 트랜잭션 잠금·CAS·멱등성·24시간 정리·철회 경합.
+- **P1 AUTH1300-07:** NestJS GET 확장·PUT/DELETE·입력/오류/속도 제한.
+- **P1 AUTH1300-08:** Next.js 수정·초기화 UI, Android 동등성, 서버 확인 상태·접근성.
+- **P1 AUTH1300-09:** 개인정보·탈퇴·관리자 최소 20명 통계·SEO·KPI.
+- **P1 AUTH1300-10:** 격리 DB 100 동시/100 타인·유니코드·회귀·단계 배포/기능 OFF 롤백.
+- **Backlog IDs / 백로그 식별자:** ENV1300-01 SEC1300-02 REL1300-03 AUTH1300-04 AUTH1300-05 AUTH1300-06 AUTH1300-07 AUTH1300-08 AUTH1300-09 AUTH1300-10.
+- **외부 독립 근거 10,000건:** 이번 회차 중복 제거·최종 승인 신규 **0건**, 누적 승인 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 이름만 언급된 표준·웹사이트를 승인 건수에 포함하지 않는다. 최신 QA v1284 **FAILED / RELEASE HOLD**. 문서만 변경, 운영 승격 금지.
+
 ## v2026.10.26.1298 — F675-131 알림 보관함 CSV 내보내기 무결성 보완 (기능 보완 / DRAFT / RELEASE HOLD)
 - **v1298 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1371; **개발 인계:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363; DRAFT / RELEASE HOLD.
 

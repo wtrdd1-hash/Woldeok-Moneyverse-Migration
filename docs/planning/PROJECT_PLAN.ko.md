@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+## v2026.10.26.1300 — F675-132 회원 로그인 세션 별칭 (기능 추가 / DRAFT / HOLD)
+- **회차:** 이전 기능 보완 v1298 → 현재 기능 추가 v1300 → 다음 기능 보완 v1302(잠정). 최신 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 확인, 미병합 기획 #1371 기반 문서만 수정, 개발 인계 https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378. Gemini/A/B/C/QA 변경과 분리.
+- **실제 코드:** `/account/security`의 세션·보안 이벤트·세션 철회는 이미 구현. Migration 213의 기기명은 사용자 에이전트로 **추정**한 이름이다. 회원이 직접 수정·저장하는 별칭 API는 확인되지 않았다. 실제 운영 사고가 확인된 것은 아니며 기존 목록/로그아웃 중복 구현 금지.
+- **기능:** 세션 행의 “기기 이름 수정/기본 이름으로 초기화”, 표시용 별칭(기기 신원 확인 아님). NFC 1~40 그래핌·160바이트, 유니코드 위장 방지, 서버 확인 후 성공 표시. 기존 회원 GET 필드 확장과 본인 전용 PUT/DELETE, 세션·동의·CSRF·최근 재인증, 버전 CAS·요청 UUID 멱등성·시간당 10건 제한. 별칭/단조 리비전 tombstone/영수증 DB, SECDEF·직접 앱 DML 금지. 원장/WLD 변경 없음.
+- **구현 조건:** 상태·DTO·오류·잠금·개인정보·계정 삭제·관리자 20명 이상 비식별 통계·noindex/no-store·Android·WCAG 2.2 AA·KPI·동시 100건/타 회원 100건/유니코드/ABA/철회 테스트·기능 OFF 롤백을 영문 정본과 한국어 통합 마스터에 명세.
+- **P0:** ENV1300-01 용량/복원, SEC1300-02 권한/소유권, REL1300-03 QA/정확 SHA/Migration266, AUTH1300-04 추정 기기명 진실성. **P1:** AUTH1300-05 스키마, AUTH1300-06 CAS, AUTH1300-07 API, AUTH1300-08 웹/Android, AUTH1300-09 개인정보/관리자, AUTH1300-10 격리 DB/롤백.
+- **백로그 ID:** ENV1300-01 SEC1300-02 REL1300-03 AUTH1300-04 AUTH1300-05 AUTH1300-06 AUTH1300-07 AUTH1300-08 AUTH1300-09 AUTH1300-10. **QA v1284:** 프론트 1,397 통과/6 실패, 운영 보안감사 High 2, 전체 Critical 2/High 10, 루트 99%, 정확 SHA Test·복원 BLOCKED. **외부 근거 10,000건:** 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED. 기능 OFF·문서만 변경·운영 승격 HOLD.
+
 ## v2026.10.26.1298 — F675-131 알림 보관함 CSV 무결성 보완 (기능 보완 / DRAFT / HOLD)
 - **v1298 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1371; **개발 인계:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363; DRAFT / RELEASE HOLD.
 - **회차:** 이전 기능 추가 v1296 → 현재 기능 보완 v1298 → 다음 기능 추가 v1300(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`, 영문 정본·한국어 동등 문서. Draft #1364 기반 문서만 수정, 개발 A/B/C/Gemini/QA 런타임 변경 금지.

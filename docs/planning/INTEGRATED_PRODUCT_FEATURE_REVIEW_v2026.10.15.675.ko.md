@@ -1,4 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+## 기획 v1300 — F675-132 회원 로그인 세션 별칭 (기능 추가 / DRAFT / HOLD)
+- 이전 보완 v1298 / 현재 추가 v1300 / 다음 보완 v1302(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 확인. 선행 기획 Draft #1371 미병합, 개발 이슈 https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378; A/B/C/Gemini/QA 코드 수정 없음.
+- 실제 main의 `/account/security`는 이미 회원 세션/보안 이벤트 조회·CSRF/재인증 세션 철회를 제공한다. Migration 213의 `deviceLabel`은 UA 기반 **추정** 기기명이며 실제 기기 인증이 아니다. 직접 편집하는 회원 별칭 저장 API는 확인되지 않았다.
+- 기존 세션 행에 편집/초기화 CTA, NFC 40그래핌/160바이트, 서버 확인 후 성공·충돌·만료·오프라인 상태. GET 필드 확장, 본인 전용 PUT/DELETE, CAS/멱등성/단조 리비전 tombstone, SECDEF DB·앱 직접 DML 금지, 시간당 10건, 개인정보·계정 삭제, noindex/no-store, Android·WCAG AA, 관리자 표본 20명 이상 통계·KPI·롤백. 세션 권한/철회 및 WLD는 변경하지 않는다. 세부 명세는 영문·국문 통합 마스터.
+- P0 ENV1300-01 SEC1300-02 REL1300-03 AUTH1300-04; P1 AUTH1300-05 AUTH1300-06 AUTH1300-07 AUTH1300-08 AUTH1300-09 AUTH1300-10. **백로그 ID:** ENV1300-01 SEC1300-02 REL1300-03 AUTH1300-04 AUTH1300-05 AUTH1300-06 AUTH1300-07 AUTH1300-08 AUTH1300-09 AUTH1300-10.
+- QA v1284 FAILED/HOLD(프론트 1,397/6, 운영 High 2, 전체 Critical 2/High 10, 루트 99%); 정확 SHA Test/격리 복원 미입증. 외부 독립 근거 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 기능 OFF·기획만 수행·운영 승격 금지.
+
 ## v2026.10.26.1298 — F675-131 알림 보관함 CSV 무결성 보완 (기능 보완 / DRAFT / HOLD)
 - **회차:** 이전 기능 추가 v1296 → 현재 기능 보완 v1298 → 다음 기능 추가 v1300(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`, 영문 정본·한국어 동등 문서. Draft #1364 기반 문서만 수정, 개발 A/B/C/Gemini/QA 런타임 변경 금지.
 - **main 근거:** 알림 회원 필터 직접 SELECT가 OFFSET/생성시각 단독 정렬·dedupe_key 반환·불리언 변환을 사용하며 CSV API는 미구현. 개발 B #1356 페이징 수정과 분리, 운영 사고 단정 금지.

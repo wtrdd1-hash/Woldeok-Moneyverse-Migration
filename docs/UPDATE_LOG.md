@@ -1,3 +1,6 @@
+## 2026-10-26 06:xx KST — Planning v1300 / F675-132 (Feature Addition / DRAFT / HOLD)
+- Previous Improvement v1298 → Current Addition v1300 → Next Improvement v1302 provisional. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` rechecked. QA v1284 FAILED/HOLD, root 99%. Existing account security sessions are server-backed; UA-derived deviceLabel is not attestation. New member-owned display-only session nickname proposed with guarded PUT/DELETE, CAS/tombstone, isolated DB tests, Android/a11y/privacy/SEO and flag-OFF rollback. Engineering https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378. P0/P1 4/6; independent corpus new 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime, database, WLD, Test or Production changes.
+
 ## 2026-10-26 — Planning v1290 F675-129 shop wishlist integrity (IMPROVEMENT / DRAFT / HOLD)
 - 2026-10-26 v1298 F675-131 Improvement: bounded no-partial CSV, spreadsheet formula caveat, single-transaction snapshot, session/role gate, QA v1283 HOLD. Docs only; P0/P1 backlog 10, external corpus 0 new/UNKNOWN cumulative.
 - **v1296 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1364 (base: unmerged #1359; RELEASE HOLD).

@@ -1,3 +1,6 @@
+## 2026-10-26 06시 KST — 기획 v1300 / F675-132 (기능 추가 / DRAFT / HOLD)
+- 이전 보완 v1298 → 현재 추가 v1300 → 다음 보완 v1302(잠정). 최신 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 재확인. QA v1284 FAILED/HOLD, 루트 99%. 기존 회원 세션 목록의 UA 추정 기기명은 실제 인증이 아니며, 회원이 직접 정하는 표시용 별칭을 신규 제안. 세션·동의·CSRF·재인증 기반 PUT/DELETE, CAS·리비전 tombstone, 격리 DB 검증, Android·접근성·개인정보·SEO, 기능 OFF 롤백. 개발 인계 https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378. P0 4개/P1 6개, 외부 근거 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·WLD·Test·Production 변경 없음.
+
 ## 2026-10-26 — 기획 v1290 F675-129 상점 찜 목록 무결성 (기능 보완 / 초안 / 보류)
 - 2026-10-26 v1298 F675-131 기능 보완: 부분 파일 없는 제한 CSV·수식 방어 한계·단일 트랜잭션·세션/권한 게이트·QA v1283 HOLD. 문서만 수정, P0/P1 10개, 외부 근거 신규 0/누적 UNKNOWN.
 - **v1296 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1364 (base: unmerged #1359; RELEASE HOLD).
