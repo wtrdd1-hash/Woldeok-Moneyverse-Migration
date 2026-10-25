@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from './route';
+import { GET, POST } from './route';
 import { APP_API_CONTRACT_VERSION } from '@/lib/app-gateway';
 
 function request(path: string, headers: Record<string, string> = {}) {
@@ -23,6 +23,41 @@ afterEach(() => {
 });
 
 describe('app API route compatibility', () => {
+  it('passes owner session through Android Golden Duck status and preserves no-store', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({
+      claimedToday: false, transactionId: null, rewardClaimsEnabled: false,
+    }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/engagement/dopamine/golden-duck/status', {
+      cookie: 'moneyverse_session=owner-session',
+      'x-moneyverse-client': 'android',
+    }), context('engagement', 'dopamine', 'golden-duck', 'status'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(await response.json()).toMatchObject({ claimedToday: false, rewardClaimsEnabled: false });
+    const [, init] = fetchSpy.mock.calls[0]!;
+    expect(new Headers(init?.headers).get('cookie')).toContain('moneyverse_session=owner-session');
+  });
+
+  it('forwards Android Golden Duck claim hold and CSRF, never converts 503 to success', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ code: 'golden_duck_settlement_unavailable' }), {
+      status: 503, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const req = new NextRequest('https://easy-scraping.com/app-api/v1/engagement/dopamine/golden-duck', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: 'moneyverse_session=owner-session', 'x-csrf-token': 'csrf-proof' },
+      body: JSON.stringify({ clickCount: 100, comboMultiplier: 2 }),
+    });
+    const response = await POST(req, context('engagement', 'dopamine', 'golden-duck'));
+    expect(response.status).toBe(503);
+    expect((await response.json()).code).toBe('golden_duck_settlement_unavailable');
+    const [, init] = fetchSpy.mock.calls[0]!;
+    expect(new Headers(init?.headers).get('x-csrf-token')).toBe('csrf-proof');
+  });
+
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);

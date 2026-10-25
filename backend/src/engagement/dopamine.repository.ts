@@ -69,6 +69,30 @@ export interface GoldenDuckClaimRecord {
 export class DopamineRepository {
   constructor(private readonly pool: Queryable) {}
 
+  /** Read-only, owner-filtered evidence of an actual posted cash credit in Seoul today. */
+  async goldenDuckLedgerStatus(actorUserId: string): Promise<{ claimedToday: boolean; transactionId: string | null }> {
+    assertUuid(actorUserId, 'actorUserId');
+    const row = await queryOne<{ transaction_id: string }>(
+      this.pool,
+      `SELECT tx.id::text AS transaction_id
+       FROM public.ledger_transactions AS tx
+       JOIN public.ledger_postings AS posting ON posting.transaction_id = tx.id
+       JOIN public.accounts AS account ON account.id = posting.account_id
+       WHERE tx.actor_user_id = $1::uuid
+         AND account.owner_user_id = $1::uuid
+         AND account.account_type = 'USER_CASH'::public.account_type
+         AND posting.direction = 'credit'::public.posting_direction
+         AND posting.amount > 0
+         AND tx.policy_version = 'game.dopamine.golden_duck'
+         AND tx.created_at >= ((now() AT TIME ZONE 'Asia/Seoul')::date::timestamp AT TIME ZONE 'Asia/Seoul')
+         AND tx.created_at < (((now() AT TIME ZONE 'Asia/Seoul')::date + 1)::timestamp AT TIME ZONE 'Asia/Seoul')
+       ORDER BY tx.created_at DESC, tx.id DESC
+       LIMIT 1`,
+      [actorUserId],
+    );
+    return { claimedToday: Boolean(row), transactionId: row?.transaction_id ?? null };
+  }
+
   /**
    * 황금 오리 광클 피버 보상 원장 기록 및 지갑(USER_CASH) 입금
    * 1일 1회 제한 및 세션당 최대 1,000 WLD 경제 밸런스 보호

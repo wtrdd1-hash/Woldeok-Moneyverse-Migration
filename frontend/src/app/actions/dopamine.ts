@@ -2,8 +2,27 @@
 
 import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
-import { ApiError } from '@/lib/api';
+import { ApiError, api } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
+
+export type GoldenDuckLedgerStatus =
+  | { readonly state: 'verified'; readonly claimedToday: boolean }
+  | { readonly state: 'unavailable' };
+
+/** The only financial information the practice game may show is read-only ledger evidence. */
+export async function getGoldenDuckStatusAction(): Promise<GoldenDuckLedgerStatus> {
+  try {
+    const result = await api<{ claimedToday: boolean; rewardClaimsEnabled: boolean }>(
+      '/api/v1/engagement/dopamine/golden-duck/status',
+    );
+    if (typeof result.claimedToday !== 'boolean' || result.rewardClaimsEnabled !== false) {
+      return { state: 'unavailable' };
+    }
+    return { state: 'verified', claimedToday: result.claimedToday };
+  } catch {
+    return { state: 'unavailable' };
+  }
+}
 
 export interface GoldenDuckActionResult {
   readonly success: boolean;

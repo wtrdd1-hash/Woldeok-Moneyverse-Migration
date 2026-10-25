@@ -8,6 +8,8 @@ import {
   HttpStatus,
   Inject,
   InternalServerErrorException,
+  ServiceUnavailableException,
+  Header,
   Post,
   Req,
   UseGuards,
@@ -64,49 +66,34 @@ export class DopamineController {
     @Inject(DopamineRepository) private readonly repository: DopamineRepository | null,
   ) {}
 
-  @Post('golden-duck')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim Golden Duck Fever clicking reward (up to 1,000 WLD, daily limit: 1)' })
-  async claimGoldenDuck(
-    @Req() request: RequestWithSession,
-    @Body() body: GoldenDuckClaimDto,
-  ) {
+  /**
+   * Only a posted owner cash credit counts as historical reward evidence.
+   * The old click-count-driven mint path has no atomic daily cap and must
+   * remain unreachable until a reviewed DB-owned settlement migration ships.
+   */
+  @Get('golden-duck/status')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Read owner-verified Golden Duck ledger history; reward claims are held' })
+  async getGoldenDuckLedgerStatus(@Req() request: RequestWithSession) {
     const userId = requireUserId(request);
-    const validClicks = Math.min(Math.max(1, body.clickCount || 1), 200);
-    const validMultiplier = Math.min(Math.max(1.0, body.comboMultiplier || 1.0), 2.0);
-    const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
-      ? body.idempotencyKey
-      : randomUUID();
-
-    if (this.repository) {
-      try {
-        return await this.repository.claimGoldenDuck({
-          actorUserId: userId,
-          idempotencyKey: key,
-          clickCount: validClicks,
-          comboMultiplier: validMultiplier,
-        });
-      } catch (error: unknown) {
-        if (error instanceof DopamineInputError) {
-          throw new BadRequestException(error.message);
-        }
-        const msg = error instanceof Error ? error.message : String(error);
-        throw new InternalServerErrorException(msg);
-      }
+    if (!this.repository) throw new ServiceUnavailableException('golden duck ledger status unavailable');
+    try {
+      const evidence = await this.repository.goldenDuckLedgerStatus(userId);
+      return { ...evidence, rewardClaimsEnabled: false };
+    } catch {
+      throw new ServiceUnavailableException('golden duck ledger status unavailable');
     }
+  }
 
-    // 저장소 미주입 환경 (테스트 등) 폴백
-    const rewardAmount = Math.min(1000, Math.floor(validClicks * 10 * validMultiplier));
-    return {
-      success: true,
-      userId,
-      transactionId: key,
-      rewardAmount,
-      newBalance: '0',
-      clicks: validClicks,
-      multiplier: validMultiplier,
-      claimedAt: new Date().toISOString(),
-    };
+  @Post('golden-duck')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Golden Duck WLD claims held until atomic ledger-backed settlement exists' })
+  async claimGoldenDuck(@Req() request: RequestWithSession, @Body() _body: GoldenDuckClaimDto) {
+    requireUserId(request);
+    throw new ServiceUnavailableException({
+      code: 'golden_duck_settlement_unavailable',
+      message: 'Golden Duck practice awards no WLD; ledger-backed rewards are unavailable',
+    });
   }
 
   @Post('pet-fortune')
@@ -212,7 +199,7 @@ export class DopamineController {
     const userId = requireUserId(request);
     return {
       userId,
-      goldenDuckFeverAvailable: true,
+      goldenDuckFeverAvailable: false,
       fortuneCookieAvailable: true,
       bullBearVotedToday: false,
       dailyShowdownsRemaining: 10,
