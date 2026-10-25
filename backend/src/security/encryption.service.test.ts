@@ -77,6 +77,14 @@ describe('EncryptionService', () => {
     expect(() => service.encryptDeterministic(forged)).toThrow('encrypted value could not be authenticated');
   });
 
+  it('preserves authenticated envelopes and legacy five-part ciphertext', () => {
+    const encrypted = service.encrypt('verified profile value')!;
+    expect(service.encrypt(encrypted)).toBe(encrypted);
+    expect(service.encryptDeterministic(encrypted)).toBe(encrypted);
+    const legacy = encrypted.replace('enc:v1:rnd:', 'enc:v1:');
+    expect(service.decrypt(legacy)).toBe('verified profile value');
+  });
+
   it('returns plaintext if not encrypted with enc:v1:', () => {
     const raw = 'legacy-unencrypted-string';
     expect(service.decrypt(raw)).toBe(raw);

@@ -10,9 +10,14 @@
 
 ## In progress
 - [x] TDD RED recorded — encryption.service.test.ts: 4 failed / 5 passed at 21:39 KST; malformed envelope, tampered tag, unknown key, forged prefix.
-- [ ] Implementation and GREEN
+- [x] Implementation and GREEN — targeted 9/9 PASS; backend TypeScript PASS; extended legacy and authenticated-reuse coverage added
 - [ ] Local and CI evidence
 - [ ] Mid-work main/plan recheck
 
 ## Finished
 - Pending.
+
+### Implementation checkpoint
+- Reproduced four failing security tests before code edits; then strict format and AES-GCM tag verification in `EncryptionService.decrypt`, rejecting invalid envelopes and unconfigured keys with a generic error.
+- `encrypt` and `encryptDeterministic` no longer trust arbitrary `enc:v1:` prefixes without authenticating them first.
+- Valid ciphertext, key rotation, legacy plaintext and five-part encrypted values remain supported. No key, DB, API route or financial mutation.

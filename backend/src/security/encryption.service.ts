@@ -31,7 +31,10 @@ export class EncryptionService {
   encryptDeterministic(plaintext: string | null | undefined): string | null {
     if (plaintext === null || plaintext === undefined) return null;
     if (plaintext === '') return '';
-    if (plaintext.startsWith('enc:v1:')) return plaintext;
+    if (plaintext.startsWith('enc:v1:')) {
+      this.decrypt(plaintext); // Reuse requires an authenticated envelope, not a user-supplied prefix.
+      return plaintext;
+    }
 
     const iv = createHmac('sha256', this.key).update(plaintext).digest().subarray(0, 12);
     const cipher = createCipheriv('aes-256-gcm', this.key, iv);
@@ -65,7 +68,10 @@ export class EncryptionService {
   encrypt(plaintext: string | null | undefined): string | null {
     if (plaintext === null || plaintext === undefined) return null;
     if (plaintext === '') return '';
-    if (plaintext.startsWith('enc:v1:')) return plaintext;
+    if (plaintext.startsWith('enc:v1:')) {
+      this.decrypt(plaintext); // Reuse requires an authenticated envelope, not a user-supplied prefix.
+      return plaintext;
+    }
 
     const iv = randomBytes(12);
     const cipher = createCipheriv('aes-256-gcm', this.key, iv);
@@ -88,50 +94,39 @@ export class EncryptionService {
     if (ciphertext === '') return '';
     if (!ciphertext.startsWith('enc:v1:')) return ciphertext;
 
-    try {
-      const parts = ciphertext.split(':');
-      // format: enc:v1:type:iv:tag:cipher (6 parts) or enc:v1:iv:tag:cipher (5 parts legacy)
-      let ivHex: string;
-      let tagHex: string;
-      let cipherHex: string;
+    const reject = (): never => {
+      // Never return unverified encrypted bytes to a PII caller or UI.
+      throw new Error('encrypted value could not be authenticated');
+    };
+    const parts = ciphertext.split(':');
+    // Legacy five-part envelopes have no explicit rnd/det mode.
+    const isCurrent = parts.length === 6 && (parts[2] === 'rnd' || parts[2] === 'det');
+    const isLegacy = parts.length === 5;
+    if (!isCurrent && !isLegacy) return reject();
 
-      if (parts.length === 6 && parts[0] === 'enc' && parts[1] === 'v1') {
-        ivHex = parts[3] ?? '';
-        tagHex = parts[4] ?? '';
-        cipherHex = parts[5] ?? '';
-      } else if (parts.length === 5 && parts[0] === 'enc' && parts[1] === 'v1') {
-        ivHex = parts[2] ?? '';
-        tagHex = parts[3] ?? '';
-        cipherHex = parts[4] ?? '';
-      } else {
-        return ciphertext;
+    const offset = isCurrent ? 1 : 0;
+    const ivHex = parts[2 + offset] ?? '';
+    const tagHex = parts[3 + offset] ?? '';
+    const cipherHex = parts[4 + offset] ?? '';
+    if (
+      !/^[a-fA-F0-9]{24}$/.test(ivHex) ||
+      !/^[a-fA-F0-9]{32}$/.test(tagHex) ||
+      !/^(?:[a-fA-F0-9]{2})+$/.test(cipherHex)
+    ) return reject();
+
+    const iv = Buffer.from(ivHex, 'hex');
+    const tag = Buffer.from(tagHex, 'hex');
+    const encrypted = Buffer.from(cipherHex, 'hex');
+    for (const key of this.decryptionKeys) {
+      try {
+        const decipher = createDecipheriv('aes-256-gcm', key, iv);
+        decipher.setAuthTag(tag);
+        const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+        return decrypted.toString('utf8');
+      } catch {
+        // Only configured rotation keys may decrypt historical ciphertext.
       }
-
-      if (!ivHex || !tagHex || !cipherHex) {
-        return ciphertext;
-      }
-
-      const iv = Buffer.from(ivHex, 'hex');
-      const tag = Buffer.from(tagHex, 'hex');
-      const encrypted = Buffer.from(cipherHex, 'hex');
-
-      if (iv.length !== 12 || tag.length !== 16) {
-        return ciphertext;
-      }
-
-      for (const key of this.decryptionKeys) {
-        try {
-          const decipher = createDecipheriv('aes-256-gcm', key, iv);
-          decipher.setAuthTag(tag);
-          const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
-          return decrypted.toString('utf8');
-        } catch {
-          // Historical deployments implicitly used another application secret.
-        }
-      }
-      return ciphertext;
-    } catch {
-      return ciphertext;
     }
+    return reject();
   }
 }
