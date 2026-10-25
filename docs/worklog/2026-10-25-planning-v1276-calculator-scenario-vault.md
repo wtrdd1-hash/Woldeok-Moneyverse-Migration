@@ -7,3 +7,5 @@
 - Backlog P0 ENV1276-01 SEC1276-02 REL1276-03 CAL1276-04; P1 CAL1276-05 CAL1276-06 CAL1276-07 CAL1276-08 CAL1276-09 CAL1276-10. 100 concurrent/100 BOLA/10,001 synthetic/legacy malformed/locale/accessibility acceptance proposed, not executed.
 - QA v1272 FAILED/HOLD (official CI audit failure; full audit Critical2 High10; bot Critical1 High5; app-role DML 235/241; PUBLIC bank EXECUTE 3; migration266 checksum/migration280 collisions; no exact-SHA Test financial E2E or isolated restore). Root disk 97% (~3.1GiB) at start, data disk ~79GiB. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 - Docs-only planning, no runtime tests or Production promotion claimed.
+
+- GitHub Draft PR #1310 OPEN stacked on #1304; issue #1309 and root-capacity issue #1170 updated. Mid-run QA v1273 at 18:20 KST: main stable, root 97% (~3.0GiB), audit Critical2/High10, app UPDATE+DELETE 235/241, migration266, Test exact-SHA finance and restore unverified. Latest completed QA remains v1272 FAILED/HOLD.

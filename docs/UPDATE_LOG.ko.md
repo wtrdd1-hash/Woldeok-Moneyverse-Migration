@@ -1,4 +1,5 @@
 ## v2026.10.25.1268 — F675-124 게시판 작성자 숨김·개인 피드 (기능 추가 / 초안 / 운영 보류)
+- GitHub 인계: [Draft PR #1310](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1310) OPEN(선행 #1304 기반), [이슈 #1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309) 갱신. QA v1273 18:20 KST 중간 점검에서도 루트 97%(약 3.0GiB), 감사 Critical2/High10, 앱 DML 235/241, Migration266, 정확 SHA Test·복원 HOLD; 최신 완료 QA는 v1272 FAILED.
 
 ## 2026-10-25 v1276 — F675-126 검증형 계산기 시나리오 보관함 (기능 추가 / 초안 / 운영 보류)
 - 이전 Improvement v1274 → 현재 Addition v1276 → 다음 Improvement v1278, main 1c5b84a1 시작·중간 확인, 선행 Draft #1304, 개발 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).

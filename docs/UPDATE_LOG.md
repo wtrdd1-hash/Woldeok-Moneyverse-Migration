@@ -1,4 +1,5 @@
 ## v2026.10.25.1268 — F675-124 Member Board Author Mutes and Private Feed (FEATURE ADDITION / DRAFT / HOLD)
+- GitHub handoff: [Draft PR #1310](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1310) OPEN stacked on #1304; [issue #1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309) updated. QA v1273 MID at 18:20 KST still shows root 97% (~3.0GiB), audit Critical2/High10, app DML 235/241, migration266, exact-SHA Test and restore HOLD; latest completed QA remains v1272 FAILED.
 
 ## 2026-10-25 v1276 — F675-126 verified calculator scenario vault (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - Previous Improvement v1274 → Current Addition v1276 → Next Improvement v1278; main 1c5b84a1 start/mid, predecessor Draft #1304, engineering [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
