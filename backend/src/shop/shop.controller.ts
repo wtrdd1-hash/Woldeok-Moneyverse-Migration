@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   NotFoundException,
   Param,
@@ -88,6 +89,7 @@ export class ShopController {
   }
 
   @Get('purchases')
+  @Header('Cache-Control', 'private, no-store')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Purchases made by the caller' })
   async purchases(@Req() request: RequestWithSession) {

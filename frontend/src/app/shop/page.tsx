@@ -11,6 +11,7 @@ import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 import { ShopMembershipSection } from './shop-membership-section';
+import { MyReceipts } from './my-receipts';
 
 export const dynamic = 'force-dynamic';
 
@@ -128,6 +129,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
       {/* Moneyverse Plus VIP Membership Tier Card */}
       <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} />
+
+      {loggedIn ? <MyReceipts /> : null}
 
       <ShopStoreView
         items={items}

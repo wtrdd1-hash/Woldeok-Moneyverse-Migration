@@ -170,4 +170,36 @@ describe('app API route compatibility', () => {
     expect(JSON.stringify(body)).not.toContain('attacker.example');
   });
 
+
+  it('passes verified shop purchase history through the Android gateway without rounding WLD', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const amount = '900719925474099312345678901234567890';
+    const fetchSpy = vi.fn(async (_target: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(_target)).toContain('/api/v1/shop/purchases');
+      expect(new Headers(init?.headers).get('cookie')).toBe('session=member-cookie');
+      return new Response(JSON.stringify({ purchases: [{
+        purchaseId: '11111111-1111-4111-8111-111111111111', amount,
+      }] }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' } });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/shop/purchases', { cookie: 'session=member-cookie' }),
+      context('shop', 'purchases'),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect((await response.json()).purchases[0].amount).toBe(amount);
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+
+  it('preserves shop history authorization failure instead of forging an empty receipt list', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      status: 401, code: 'login_required',
+    }), { status: 401, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store' } })));
+    const response = await GET(request('/app-api/v1/shop/purchases'), context('shop', 'purchases'));
+    expect(response.status).toBe(401);
+    expect((await response.json()).purchases).toBeUndefined();
+  });
+
 });
