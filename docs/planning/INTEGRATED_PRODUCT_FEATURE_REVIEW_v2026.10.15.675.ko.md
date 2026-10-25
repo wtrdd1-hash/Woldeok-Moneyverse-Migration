@@ -1,5 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1282 — F675-127 상담 상태 경합·스냅샷 진실성 (기능 보완 / HOLD)
+- 이전 추가 v1280 → 현재 보완 v1282 → 다음 추가 v1284; main `1c5b84a1`, Draft #1324, 개발 #1323. Migration196 멱등키 중복 경합, 답변의 무조건 상태 갱신, 시각 역행, 관리자 동일 상태 감사 위험. 일반 Queryable 풀은 REPEATABLE READ 보장 불가. 버전형 멱등 상태 API·상담 행 선잠금 순차번호·메시지/상태/감사 원자성·GREATEST 시각, 고정 읽기 전용 REPEATABLE READ·다중 페이지 불변 스냅샷 또는 비인증 현재 조회. 10k/2MiB/30초 413, HMAC 커서/409, Android·개인정보·SEO·접근성·롤백.
+- P0 ENV1282-01 SEC1282-02 REL1282-03 SUP1282-04; P1 SUP1282-05 SUP1282-06 SUP1282-07 SUP1282-08 SUP1282-09 SUP1282-10. QA v1275 FAILED/HOLD, 루트 98%, 감사/DB/마이그레이션/Test 미해결. 외부 신규 0, 누적 미확인/10,000 BLOCKED. 문서 전용.
+- **전체 ID:** ENV1282-01 SEC1282-02 REL1282-03 SUP1282-04 SUP1282-05 SUP1282-06 SUP1282-07 SUP1282-08 SUP1282-09 SUP1282-10
+
+
 ## v1280 — F675-127 회원 상담 대화록·상태 출처 검증 (기능 추가 / HOLD)
 - 이전 보완 v1278 → 현재 추가 v1280 → 다음 보완 v1282; main `1c5b84a1` 시작·중간 확인, 선행 Draft #1316, 개발 [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
 - 실제 `/support` 회원 상담/메시지 상한 50/200건, 키셋 커서 부재. Migration 196에 본인 확인 가능 이전/이후 상태 이력이 없고 컨트롤러에 내보내기 API 없음. 본인 전용 페이지 조회·TXT 스냅샷, `HISTORY_PARTIAL` 명시 및 검증 불가 과거 이력 생성 금지. Next `/support/transcripts/[threadId]`, NestJS/Android 본인 API, DB 불변 상태 이벤트, `REPEATABLE READ` 스냅샷, 10,000건/2MiB/30초, HMAC 커서·digest·타인 404, 관리자 k>=20, noindex/no-store, WCAG 2.2 AA, 1%→10%→100% 승인 배포·스위치 롤백.

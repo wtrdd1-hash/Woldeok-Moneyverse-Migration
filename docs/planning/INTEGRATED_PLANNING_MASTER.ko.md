@@ -1,5 +1,45 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1282 — F675-127 상담 대화록 스냅샷·상태 변경 무결성 보완 (기능 보완 / DRAFT / RELEASE HOLD)
+
+### 기준·실제 코드 확인
+- **회차:** 이전 기능 추가 v1280 → 현재 기능 보완 v1282 → 다음 기능 추가 v1284(잠정). 시작·중간에 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 확인. AGENTS.md, README.md, 영문 canonical PROJECT_PLAN.md 및 한국어 대조. 선행 미병합 Draft #1324 기반, 개발 [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323) 인계. QA·개발 A/B/C·Gemini의 작업과 분리한 **문서 전용** 회차.
+- **실제 근거:** Migration 196의 `support_add_message`와 `admin_support_reply`는 메시지 INSERT 후 상담 상태·`last_message_at`을 무조건 갱신함. 두 함수의 멱등키 조회는 INSERT 전에 수행되어 같은 키 동시 요청에서 기존 영수증 대신 고유 제약 `23505`가 발생할 위험이 있음. `admin_support_set_status(p_actor,p_thread,p_status)`는 요청 키가 없는 3인자 boolean 함수이며 상태가 변하지 않아도 감사 기록을 남김. 메시지 `created_at`은 상담 행 잠금 전에 `clock_timestamp()`로 생성되므로 먼저 시작한 요청이 늦게 행 잠금을 획득하면 `last_message_at`을 이전 시각으로 되돌릴 수 있음. 이는 **소스 기반 경합 위험**이지 운영 사고가 확인된 것은 아님. 기존 회원 메시지는 시간 오름차순 200건 요청(SQL 최대 500건)이어서 후속 대화가 누락될 수 있음. `SupportRepository`의 일반 `Queryable` 연속 조회는 단일 REPEATABLE READ 스냅샷을 보장하지 않음.
+
+### 상태 변경·멱등성·DB 원자성
+- **상담별 직렬화:** 향후 회원 답변, 관리자 답변, 관리자 상태 변경의 모든 쓰기 경로에서 상담 행을 `FOR UPDATE`로 먼저 잠그고 회원·관리자 권한, 활성·동의 상태, 요청 키·페이로드, 현재 상태를 잠금 내부에서 재검증. 메시지 INSERT, 실제 상태 변경 시 불변 이벤트 추가, 감사 기록 및 `last_message_at=GREATEST(기존 값, 잠금 후 확정 시각)`을 **단일 DB 트랜잭션**으로 처리. 잠금 전에 생성된 시각이나 UUID를 이벤트 순서로 사용 금지. 상담별 `event_seq`를 동일 잠금 아래 증가시켜 순서 확정; 기존 메시지 표시용 `created_at`은 임의 수정 금지.
+- **상태 값:** 실제 허용값은 `open/waiting_user/resolved`. 기존 `admin_support_set_status`는 3인자 boolean이므로 새로운 멱등 상태 변경은 **버전이 구분된 함수/API**가 필요함. 기존 반환 계약을 조용히 바꾸지 않음. UUID 요청 키+정규화 페이로드 지문을 회원·상담·이전/다음 상태에 결합; 동일 재시도 원래 영수증 반환, 다른 내용 재사용 409. 상태가 그대로인 요청은 `unchanged`로 응답하고 가짜 전이 기록 금지. 세 쓰기 경로를 공통 잠금·이력 함수에 수렴시키며 상담 생성은 과거 상태가 없는 `initial_observation`으로만 표기.
+- **제안 스키마:** 상담별 행 잠금 기반 `event_seq` 또는 `support_thread_event_clock(thread_id PK FK,next_seq BIGINT CHECK(next_seq>0))`; `support_status_events(id UUID PK,thread_id FK,seq BIGINT,actor_id UUID NULL,old_status TEXT NULL,new_status TEXT NOT NULL,origin TEXT,request_key UUID NULL,payload_digest BYTEA NULL,changed_at timestamptz)`. CHECK: `initial_observation`이면 이전 상태/요청 키 NULL, `recorded`이면 둘 다 NOT NULL; 허용 상태값 CHECK, UNIQUE(thread_id,seq), 요청 키 NULL 제외 부분 UNIQUE(thread_id,request_key), INDEX(thread_id,seq,id). 개인정보 삭제·보존 정책에 따른 FK 처리 검토. `moneyverse_app`에 테이블 DML 직접 부여 금지, SECURITY DEFINER 함수에 고정 search_path·PUBLIC EXECUTE REVOKE·DB 내부 본인/관리자 확인.
+
+### 스냅샷·커서·내보내기 진실성
+- **동일 DB 연결:** 기존 `queryRows`를 풀에 연속 호출해도 한 스냅샷이 아님. 새 다운로드는 `connect()` 가능한 `PoolClient`를 고정하고 `BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY` → 본인 확인·건수·본문·상태 이벤트·digest를 동일 연결에서 조회 → COMMIT/ROLLBACK → finally release. 제한 시간·쿼리 타임아웃 설정, 트랜잭션 연결이 없으면 실패로 처리. 기본 READ COMMITTED 트랜잭션 도우미를 스냅샷 보장으로 오인하지 않음. HTTP 페이지를 넘기는 동안 DB 트랜잭션을 열린 채 유지하지 않음.
+- **여러 요청 간 완결성:** `snapshotAt` 또는 `created_at<=snapshotAt`만으로는 안정된 전체 이력이 보장되지 않음. 과거 시각에 INSERT한 거래가 나중에 COMMIT될 수 있기 때문. 안정된 다중 페이지 내보내기는 본인 전용 불변 스냅샷 매니페스트(`snapshot_id`, 회원·상담, 원천 revision/건수, canonical 바이트 digest, 생성/만료, 익명화 세대)를 구체화하거나 검증된 커밋 순서 워터마크를 사용해야 함. 이 장치 전에는 페이지별 **현재 조회**로만 표시하고 전체 인증본으로 주장 금지. HMAC 커서에는 회원·상담·스냅샷 ID·필터·마지막 정렬키·만료·키 버전을 결합; 탈퇴·익명화·권한 해제·만료 시 409로 무효화하고 새로고침 안내. 동시 답변으로 인한 누락·중복을 조용히 허용하지 않음.
+- **다운로드 상한:** 메시지 10,000건·UTF-8 2MiB·30초를 HTTP 200 헤더 송신 **전** 검증. 초과하면 불완전 파일을 보내지 않고 413과 페이지 보기 안내. UTF-8 TXT는 버전·상담 ID·UTC 시각·순차번호·제어문자 이스케이프·`HISTORY_PARTIAL`·`REDACTED`를 포함. SHA-256은 반환 파일의 바이트 무결성만 뜻하며 외부 공증이나 과거 이력 완결성을 뜻하지 않음. 동일 불변 스냅샷 100회 재다운로드 시 동일 바이트/digest. 본문 로그·이메일·영구 공유 링크·CDN 캐시 금지. Next 동일 출처와 Android App API에서 snapshotId/digest/상태/401·404·409·413·429·503 계약 동등성 보장.
+
+### 회원·관리자·보안·모바일·배포
+- 기존 `/support` → `/support/transcripts/[threadId]`. 화면 상태 `LOADING/READY/HISTORY_PARTIAL/EXPORT_TOO_LARGE/REDACTED/STALE_SNAPSHOT/UNAVAILABLE`, 409 발생 시 `스냅샷 새로고침`, 서버가 다운로드 가능하다고 검증한 경우에만 `TXT 다운로드` 활성. 기존 상담·관리자 기능 하위 호환, 가짜 성공 금지. 모바일·키보드·포커스·live region·대비·터치 타깃 WCAG 2.2 AA. 본인 페이지 noindex/nofollow/no-store·사이트맵 제외.
+- 활성 회원·동의·세션·DB BOLA/BFLA, 변경 API CSRF, 회원 시간당 5회·서비스 분당 20회 내보내기 제한, ID 추측·과도한 스냅샷 생성 탐지. 관리자 통계는 k>=20 집계만, 본문/회원 식별자는 KPI 기록 금지. KPI: 스냅샷 성공률·p95·409·413·이력 불완전 비율·이벤트 누락/중복 0·타인 접근 누출 0·익명화 무효화 시간·`last_message_at` 역행 0.
+- **향후 테스트:** 동일 키 회원/관리자 답변 100개와 관리자 상태 요청 100개 경합 → 원래 영수증/실제 전이 1회, 23505 누출·중복 0. 먼저 생성된 메시지의 잠금 지연에도 `last_message_at` 역행 0. 타 회원 100회 누출 0. 10,001건·2MiB 초과 → 413, HTTP 200 부분 파일 0. 늦은 COMMIT·페이지 사이 신규 답변·삭제/익명화/세션 해제 → 스냅샷 고정 또는 명시적 409. 동일 스냅샷 100회 바이트/digest 동일. 실제 격리 PostgreSQL ACL 부정 테스트, Next/Android 회귀·정확 SHA Test·기능 OFF 롤백. **이번 기획에서 실행하지 않음.**
+- **운영:** 기본 `support_transcript_export_v1=OFF`. 번호 충돌 없는 forward-only 마이그레이션, 격리 DB 복원·권한 검증, 공식 정확 SHA CI/전체 보안 감사/금융 Test E2E/QA 승인 후 1%→10%→100% 점진 활성화. 문제 발생 시 스위치 OFF; 감사 대상 이력을 임의 삭제하여 롤백하지 않음. 이번 회차 런타임·DB·WLD·원장·Test·Production 변경 없음.
+
+### P0/P1 개발 인계
+| 우선순위 | ID | 수용 조건 |
+| --- | --- | --- |
+| P0 | ENV1282-01 | 루트 98% 용량 위험, 데이터 볼륨·격리 Test/DB·복원 증빙, 다른 작업자 보존. |
+| P0 | SEC1282-02 | 본인/관리자 SECURITY DEFINER, PUBLIC 권한 회수, 앱 최소권한, 익명화. |
+| P0 | REL1282-03 | 최신 QA v1275 FAILED/HOLD, Migration 266/280, 전체 감사, 인증 금융 E2E·롤백. |
+| P0 | SUP1282-04 | 실제 상태/시각 역행·23505·no-op 감사 위험, 버전형 API 하위 호환. |
+| P1 | SUP1282-05 | 고정 PoolClient 읽기 전용 REPEATABLE READ 및 불변 스냅샷/페이지 진실성. |
+| P1 | SUP1282-06 | 상담 잠금 순차번호·3개 쓰기 경로 원자적 전이·멱등 영수증·시각 역행 방지. |
+| P1 | SUP1282-07 | 버전형 NestJS·Next·Android 본인 API, 커서/409/413·비공개 헤더. |
+| P1 | SUP1282-08 | 상담 이력/스냅샷 CTA, 모바일 WCAG AA, 불완전/익명화/초과 상태·noindex. |
+| P1 | SUP1282-09 | 개인정보·보존·계정 병합, 관리자 k>=20, 악용 방지, KPI. |
+| P1 | SUP1282-10 | 격리 PG 동시성·지연 COMMIT·digest·BOLA·10,001건·정확 SHA·롤백. |
+
+- **최신 QA:** v1275(2026-10-25 20:24 KST) FAILED/HOLD. 정확 main build/typecheck/lint PASS, frontend 1,397 통과/6 실패, 전체·운영·봇 의존성 감사 FAIL, route-ledger 통합 inventory 누락, 개발 DB 권한/Migration 266 문제 지속. 공개 smoke 200이나 Test/Production SHA는 최신 main이 아님. 루트 98%(약 2.5GiB 여유). QA #1317 후보 PASS만으로 운영 승인 불가.
+- **외부 독립 레퍼런스 게이트:** 독립 발행 자료 10,000건의 중복 제거·출처·근거 적합성 분류 필수. 이번 회차 신규 최종 승인 **0건**, 누적 검증 **미확인**, 목표 10,000건, **BLOCKED / IN PROGRESS**. 내부 기획서는 외부 근거로 집계 금지.
+
+
 ## v2026.10.25.1280 — F675-127 회원 전용 상담 대화록 내보내기 및 상태 변경 이력 (기능 추가 / DRAFT / RELEASE HOLD)
 
 ### 기준 문서·실제 구현 확인·범위

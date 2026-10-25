@@ -1,5 +1,14 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.25.1282 — F675-127 Support Transcript Integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- **Cycle:** Previous Feature Addition v1280 → Current Feature Improvement v1282 → Next Feature Addition v1284 (provisional). Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid; AGENTS, README, canonical English/Korean plans; predecessor Draft #1324, engineering [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
+- **Source-confirmed:** migration 196 support replies set status and last_message_at unconditionally, pre-insert idempotency checks race on unique key, admin status function lacks request key and audits no-op, and timestamps may regress under thread lock contention. Generic Queryable calls do not share REPEATABLE READ. This is a design risk, not a confirmed Production incident.
+- **Improvement:** versioned status API; thread-row lock before sequence/time assignment, atomic status event + message + audit, idempotent original receipts, nondecreasing last_message_at. Export uses pinned read-only REPEATABLE READ client; cross-request complete export needs immutable owner-scoped snapshot or proven commit watermark (timestamp alone insufficient). No silent partial TXT: 10,000 messages/2MiB/30s → explicit 413. HMAC cursor/409 on stale/redacted, owner-only Next/Android, private SEO, WCAG AA, admin k>=20, abuse limits, feature-OFF rollback. Details in [integrated master](INTEGRATED_PLANNING_MASTER.md).
+- **P0:** ENV1282-01 SEC1282-02 REL1282-03 SUP1282-04. **P1:** SUP1282-05 SUP1282-06 SUP1282-07 SUP1282-08 SUP1282-09 SUP1282-10. QA v1275 FAILED/HOLD; frontend 1397 pass/6 fail, audits fail, dev DB ACL/migration/restore/finance Test unresolved, root 98%. No runtime tests or deployment.
+- **Independent external references:** newly approved 0, cumulative verified UNKNOWN, target 10,000, BLOCKED/IN PROGRESS. Planning docs only.
+- **Backlog IDs:** ENV1282-01 SEC1282-02 REL1282-03 SUP1282-04 SUP1282-05 SUP1282-06 SUP1282-07 SUP1282-08 SUP1282-09 SUP1282-10
+
+
 ## v2026.10.25.1280 — F675-127 Verified Support Transcript Export + Status Timeline (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1278 → Current Feature Addition v1280 → Next Feature Improvement v1282 (provisional). Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` rechecked start/mid; AGENTS.md, README.md and English canonical/Korean plan reviewed. Draft predecessor #1316 unmerged.
 - **Reproduced gap:** `/support` already has persistent conversations; current member list 50, member messages 200, admin messages 500 with no cursor; status writes replace current status and generic audit but no owner-visible old/new status history. No transcript export endpoint. Never claim pre-feature status completeness.

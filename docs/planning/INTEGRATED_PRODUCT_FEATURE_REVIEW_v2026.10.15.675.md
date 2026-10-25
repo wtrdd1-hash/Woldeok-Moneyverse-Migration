@@ -1,5 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1282 — F675-127 Status Race and Snapshot Truth (FEATURE IMPROVEMENT / HOLD)
+- Previous Addition v1280 → Current Improvement v1282 → Next Addition v1284; main `1c5b84a1`, Draft #1324, engineering #1323. Migration 196 risks: idempotency unique-key race, unconditional reply status updates, timestamp regression, no-op admin audit. Queryable pool cannot guarantee repeatable-read export. Proposal: versioned idempotent status API; thread-locked event seq, atomic reply/status/audit, GREATEST timestamp, pinned read-only REPEATABLE READ, immutable owner-scoped snapshot across requests or honest non-certified fresh pages. 10k/2MiB/30s → 413; HMAC cursor/409, Android parity, privacy/SEO/a11y, rollback.
+- P0 ENV1282-01 SEC1282-02 REL1282-03 SUP1282-04; P1 SUP1282-05 SUP1282-06 SUP1282-07 SUP1282-08 SUP1282-09 SUP1282-10. QA v1275 FAILED/HOLD, root 98%, audits/DB/migrations/Test gates unresolved. External new approved 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only.
+- **Backlog IDs:** ENV1282-01 SEC1282-02 REL1282-03 SUP1282-04 SUP1282-05 SUP1282-06 SUP1282-07 SUP1282-08 SUP1282-09 SUP1282-10
+
+
 ## v1280 — F675-127 Owner Support Transcript and Status Provenance (FEATURE ADDITION / HOLD)
 - Previous Improvement v1278 → Current Addition v1280 → Next Improvement v1282; main `1c5b84a1` start/mid, predecessor Draft #1316, engineering [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
 - Actual `/support` member threads/messages are capped at 50/200 without keyset pagination; migration 196 has no member-readable old/new status timeline, and controller has no transcript export. Product: owner-only paged history and TXT snapshot with explicit `HISTORY_PARTIAL`, never backfill unverified status events. New Next `/support/transcripts/[threadId]`, NestJS/Android owner API, append-only DB status events, `REPEATABLE READ` export, 10,000 messages/2MiB/30s limit, HMAC cursors, digest and 404 owner isolation; admin k>=20, private noindex/no-store, WCAG 2.2 AA, 1%→10%→100% gated rollout/flag rollback.
