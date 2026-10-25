@@ -23,17 +23,22 @@ const ITEM = {
   equipped_slot: 'frame',
   serial_number: 42,
   weekly_cost: '9007199254740993',
+  arrears_due: '9007199254740995',
+  arrears_cap: '9007199254740997',
+  unpaid_weeks: 2,
+  suspended: true,
+  effect_expires_at: null,
 };
 
 const request = (suffix = '') => new NextRequest('https://easy-scraping.com/api/shop/holdings/export' + suffix);
 
-describe('private complete inventory CSV export', () => {
+describe('private complete shop upkeep CSV export', () => {
   beforeEach(() => vi.resetAllMocks());
 
   it('escapes formula and invisible controls, and returns private complete snapshot', async () => {
-    apiMock.mockResolvedValue({ holdings: [ITEM], complete: true });
+    apiMock.mockResolvedValue({ upkeepHoldings: [ITEM], complete: true, generatedAt: '2026-10-26T04:25:00.000Z' });
     const response = await GET(request());
-    expect(apiMock).toHaveBeenCalledWith('/api/v1/shop/holdings/export-snapshot');
+    expect(apiMock).toHaveBeenCalledWith('/api/v1/shop/holdings/upkeep-snapshot');
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(response.headers.get('x-robots-tag')).toContain('noindex');
@@ -46,11 +51,14 @@ describe('private complete inventory CSV export', () => {
     expect(csv).not.toContain('\u200B');
     expect(csv).toContain('2026-10-26T01:00:00.000Z');
     expect(csv).toContain('9007199254740993');
+    expect(csv).toContain('9007199254740995');
+    expect(csv).toContain('9007199254740997');
+    expect(csv).toContain('2026-10-26T04:25:00.000Z');
     expect(csv.split('\r\n')).toHaveLength(2);
   });
 
   it('returns a header-only CSV for verified empty holdings', async () => {
-    apiMock.mockResolvedValue({ holdings: [], complete: true });
+    apiMock.mockResolvedValue({ upkeepHoldings: [], complete: true, generatedAt: '2026-10-26T04:25:00.000Z' });
     const response = await GET(request());
     expect(response.status).toBe(200);
     expect((await response.text()).split('\r\n')).toHaveLength(1);
@@ -71,14 +79,15 @@ describe('private complete inventory CSV export', () => {
   });
 
   it('fails closed on incomplete, oversized, malformed and unavailable snapshots', async () => {
-    apiMock.mockResolvedValueOnce({ holdings: [ITEM], complete: false })
-      .mockResolvedValueOnce({ holdings: Array.from({ length: 101 }, () => ITEM), complete: true })
-      .mockResolvedValueOnce({ holdings: [{ ...ITEM, quantity: 1.5 }], complete: true })
-      .mockResolvedValueOnce({ holdings: [{ ...ITEM, is_equipped: 'true' }], complete: true })
-      .mockResolvedValueOnce({ holdings: [{ ...ITEM, acquired_at: 'yesterday' }], complete: true })
-      .mockResolvedValueOnce({ holdings: [{ ...ITEM, weekly_cost: 9007199254740993 }], complete: true })
+    apiMock.mockResolvedValueOnce({ upkeepHoldings: [ITEM], complete: false, generatedAt: '2026-10-26T04:25:00.000Z' })
+      .mockResolvedValueOnce({ upkeepHoldings: Array.from({ length: 101 }, () => ITEM), complete: true, generatedAt: '2026-10-26T04:25:00.000Z' })
+      .mockResolvedValueOnce({ upkeepHoldings: [{ ...ITEM, quantity: 1.5 }], complete: true, generatedAt: '2026-10-26T04:25:00.000Z' })
+      .mockResolvedValueOnce({ upkeepHoldings: [{ ...ITEM, suspended: 'true' }], complete: true, generatedAt: '2026-10-26T04:25:00.000Z' })
+      .mockResolvedValueOnce({ upkeepHoldings: [{ ...ITEM, acquired_at: 'yesterday' }], complete: true, generatedAt: '2026-10-26T04:25:00.000Z' })
+      .mockResolvedValueOnce({ upkeepHoldings: [{ ...ITEM, weekly_cost: 2 }], complete: true, generatedAt: '2026-10-26T04:25:00.000Z' })
+      .mockResolvedValueOnce({ upkeepHoldings: [{ ...ITEM, arrears_due: undefined }], complete: true, generatedAt: '2026-10-26T04:25:00.000Z' })
       .mockRejectedValueOnce(new Error('DB down'));
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 8; i++) {
       const response = await GET(request());
       expect(response.status).toBe(503);
       expect(response.headers.get('content-disposition')).toBeNull();

@@ -155,21 +155,57 @@ export class ShopController {
     };
   }
 
-  @Get('holdings/export-snapshot')
+  @Get('holdings/upkeep-snapshot')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex, nofollow')
-  @ApiOperation({ summary: 'Complete bounded snapshot of the caller owned inventory' })
-  async exportSnapshot(@Req() request: RequestWithSession) {
+  @ApiOperation({ summary: 'Complete bounded snapshot of the caller owned shop upkeep exposure' })
+  async upkeepSnapshot(@Req() request: RequestWithSession) {
     const holdings = await this.guarded(
       () => this.repository().holdings(requireUserId(request)),
       'held items are unavailable',
     );
-    // A partial export would silently misrepresent the member's inventory.
-    if (holdings.length > 100) {
-      throw new ServiceUnavailableException('inventory export exceeds the verified snapshot limit');
+    const wld = /^(?:0|[1-9][0-9]*)$/;
+    const validWld = (value: unknown): value is string =>
+      typeof value === 'string' && value.length <= 19 && wld.test(value) &&
+      BigInt(value) <= 9223372036854775807n;
+    // Missing or malformed upkeep fields must not hide an outstanding obligation.
+    if (holdings.some((holding) =>
+      !validWld(holding.weekly_cost) || !validWld(holding.arrears_due) ||
+      !validWld(holding.arrears_cap) || typeof holding.suspended !== 'boolean' ||
+      typeof holding.unpaid_weeks !== 'number' ||
+      !Number.isSafeInteger(holding.unpaid_weeks) || holding.unpaid_weeks < 0
+    )) {
+      throw new ServiceUnavailableException('shop upkeep exposure is not verified');
     }
-    return { holdings, complete: true };
+    const upkeepHoldings = holdings.filter((holding) =>
+      BigInt(holding.weekly_cost!) > 0n ||
+      BigInt(holding.arrears_due!) > 0n ||
+      holding.suspended === true
+    );
+    // Returning a truncated set as complete would misrepresent a member's liabilities.
+    if (upkeepHoldings.length > 100) {
+      throw new ServiceUnavailableException('shop upkeep export exceeds the verified snapshot limit');
+    }
+    return {
+      upkeepHoldings: upkeepHoldings.map((holding) => ({
+        catalog_id: holding.catalog_id,
+        code: holding.code,
+        name: holding.name,
+        category: holding.category,
+        quantity: holding.quantity,
+        weekly_cost: holding.weekly_cost,
+        arrears_due: holding.arrears_due,
+        arrears_cap: holding.arrears_cap,
+        unpaid_weeks: holding.unpaid_weeks,
+        suspended: holding.suspended,
+        acquired_at: holding.acquired_at,
+        expires_at: holding.expires_at,
+        effect_expires_at: holding.effect_expires_at,
+      })),
+      complete: true,
+      generatedAt: new Date().toISOString(),
+    };
   }
 
   @Post('catalog/:id/purchases')

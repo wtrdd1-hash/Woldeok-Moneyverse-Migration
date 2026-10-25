@@ -50,11 +50,11 @@ export default async function InventoryPage() {
       {holdingsData ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4">
           <p className="text-sm text-muted-foreground">
-            <T korean="현재 보유 아이템 전체 기록을 CSV로 보관할 수 있어요. 최대 100종까지 지원해요." english="Save a complete current inventory CSV snapshot (up to 100 items)." />
+            <T korean="보유 아이템의 주간 유지비·연체금·사용 정지 현황을 CSV로 확인해요. 최대 100건까지 지원해요." english="Export current virtual item upkeep, arrears and suspension exposure (up to 100 items)." />
           </p>
-          <Link href="/api/shop/holdings/export" aria-label="현재 보유 아이템 전체 CSV 다운로드"
+          <Link href="/api/shop/holdings/upkeep-export" aria-label="내 아이템 유지비 및 연체 현황 CSV 다운로드"
             className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-            <T korean="보유 아이템 CSV 다운로드" english="Export inventory CSV" />
+            <T korean="유지비·연체 현황 CSV" english="Export upkeep CSV" />
           </Link>
         </div>
       ) : (

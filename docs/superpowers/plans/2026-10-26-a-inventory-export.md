@@ -1,14 +1,13 @@
-# A0425 — Private inventory CSV snapshot
+# A0425 — Verified shop upkeep and arrears CSV snapshot
 
-## Intent / constraints
-Members need a portable record of **current** held virtual cosmetic items, not a purchase history or financial receipt. Preserve member-only access and the DB's SECURITY DEFINER owner filter. Do not write to the financial ledger, alter applied migrations, or claim a complete export if the source exceeds a bounded cap.
+## Discovery and scope correction
+The initial generic inventory CSV idea was already implemented in **unmerged Draft PR #1299**. The initial recent-50 PR scan missed it; the full 217-PR audit caught the duplication before integration. Generic export code and tests were discarded. This work is now a distinct P1 **current shop maintenance exposure** export: weekly upkeep, arrears due/cap, unpaid weeks and suspension, not inventory ownership or purchase receipts. PR #1299 and C's inventory integrity PR #1176 are untouched.
 
 ## Design
-1. Backend: GET /api/v1/shop/holdings/export-snapshot, guarded by SessionGuard, AuthenticatedGuard, ConsentGuard. Reuse ShopCatalogRepository.holdings(actor), fail closed if >100, return { holdings, complete: true }. No actor parameter accepted. Existing PostgreSQL shop_my_items_v2(p_actor) remains the sole read boundary.
-2. Next.js: GET /api/shop/holdings/export, call the guarded backend path, validate every holding (UUID, canonical bounded quantity, nonempty bounded strings, valid UTC date, equip flag), reject malformed/oversized payload and upstream failure. Quote every cell and neutralize spreadsheet formulas and invisible controls. Response BOM, CRLF, attachment, private/no-store, nosniff, noindex.
-3. Inventory page: authenticated member download link and truthful unavailable state; no index. Android: existing app-api/v1 gateway proxies backend endpoint, forwards session, preserves no-store and denial; add contract tests.
-4. TDD: write failing tests first for guard, 100/101 boundary, CSV escaping, malformed data, authorization failure, Android proxy; then implement and rerun.
-5. Validate: focused tests, full build/typecheck/lint/tests, DB packages, real isolated PostgreSQL read-only ACL/owner check, audits, E2E and exact-SHA CI/Test; HOLD on any failure. Never deploy from feature branch.
+1. NestJS GET /api/v1/shop/holdings/upkeep-snapshot: SessionGuard + AuthenticatedGuard + ConsentGuard. Reuse existing PostgreSQL SECURITY DEFINER shop_my_items_v2(actor) via repository. Reject any malformed monetary, weeks or suspension field before filtering; include only holdings with positive weekly upkeep, positive arrears or suspension. Cap the **relevant** set at 100; reject overflow, never truncate. Return complete:true, server generatedAt and an explicit minimal column allowlist.
+2. Next same-origin GET /api/shop/holdings/upkeep-export: guarded internal API call, strict response and canonical bigint-string validation, UUID, bounded text, integer weeks/quantity and timestamps. No actor query, no mutation, no client-side amount inference. UTF-8 BOM, CRLF, quoted cells, invisible-control stripping and spreadsheet formula neutralization. Private/no-store, nosniff, noindex; 401/403/428 propagated, upstream failures 503.
+3. Member /inventory link only when source inventory was read; truthful unavailable state; noindex, accessible link. Android /app-api/v1/shop/holdings/upkeep-snapshot preserves member cookie and private cache response, does not invent data on auth failure.
+4. TDD RED→GREEN backend/frontend/Android and privacy whitelist. Real isolated PostgreSQL app role ACL + owner/foreign sample + transaction ROLLBACK; no migration, no ledger mutation. Full test/build/lint/typecheck/security/official Test exact-SHA release gates mandatory.
 
-## Rollback
-No schema/data migration. Disable download link/route by reverting feature commit after approval; never mutate balances or member inventory data.
+## Acceptance and rollback
+Complete current exposure is not a payment receipt, a debt settlement or a historical ledger. Missing source data must never be shown as zero obligations. If >100 relevant items or any malformed field, fail closed. Roll back only the source routes and UI if approved; no database or financial rollback required. HOLD on any failed release gate.
