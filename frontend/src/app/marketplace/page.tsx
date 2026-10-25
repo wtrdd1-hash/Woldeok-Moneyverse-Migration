@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
+import { EmptyState } from '@/components/empty-state';
+import { canonicalIntegerString } from '@/lib/money';
 import { TranslatedText as T } from '@/components/translated-text';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
@@ -14,7 +16,7 @@ export const metadata: Metadata = {
   description:
     '기획서(PLAYER_MARKETPLACE_CRAFTING_SPEC) 기반 플레이어 간 아이템 거래소 및 재료 조합 제작대',
   alternates: { canonical: canonicalUrl('/marketplace') },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 export default async function MarketplacePage() {
@@ -22,11 +24,19 @@ export default async function MarketplacePage() {
 
   const [holdingsData, walletData] = await Promise.all([
     apiOrNull<{ holdings: MarketplaceHolding[] }>('/api/v1/shop/holdings'),
-    apiOrNull<{ balance?: string; cash_balance?: string }>('/api/v1/wallet/summary'),
+    apiOrNull<{ balances?: { cash?: { availableAmount?: string } } }>('/api/v1/wallet'),
   ]);
 
-  const holdings = holdingsData?.holdings ?? [];
-  const userBalance = walletData?.cash_balance || walletData?.balance || '1000';
+  const holdings = holdingsData?.holdings;
+  const userBalance = canonicalIntegerString(walletData?.balances?.cash?.availableAmount);
+  // A failed private API request must not become an empty inventory or a made-up wallet balance.
+  if (!Array.isArray(holdings) || userBalance === null || userBalance.startsWith('-')) {
+    return (
+      <div data-page="marketplace" className="mv-page mv-page--finance" role="status">
+        <EmptyState title="마켓 자산 정보를 확인할 수 없습니다." description="인벤토리 또는 지갑 조회에 실패했습니다. 잠시 후 페이지를 새로고침해 주세요. 거래와 제작은 중단됩니다." />
+      </div>
+    );
+  }
 
   const categoriesList = [...new Set(holdings.map((item) => item.category))].sort((a, b) =>
     a.localeCompare(b, 'ko-KR'),

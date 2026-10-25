@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -102,12 +102,23 @@ export class CraftingService {
   }
 
   async executeCrafting(actor: string, recipeId: string, key: string): Promise<unknown> {
-    if (!this.pool) throw new Error('database pool unavailable');
-    const row = await queryOne<{ result: unknown }>(
-      this.pool,
-      `SELECT public.crafting_execute($1, $2, $3) AS result`,
-      [actor, recipeId, key],
-    );
-    return row?.result ?? null;
+    if (!this.pool) throw new ServiceUnavailableException('crafting ledger is unavailable');
+    try {
+      const row = await queryOne<{ result: unknown }>(
+        this.pool,
+        `SELECT public.crafting_execute($1, $2, $3) AS result`,
+        [actor, recipeId, key],
+      );
+      if (row?.result === null || row?.result === undefined) {
+        throw new ServiceUnavailableException('crafting ledger returned no receipt');
+      }
+      return row.result;
+    } catch (error: unknown) {
+      // 42883 means the required settlement function is not installed; it must not look like a successful craft.
+      if (error && typeof error === 'object' && 'code' in error && error.code === '42883') {
+        throw new ServiceUnavailableException('crafting ledger is unavailable');
+      }
+      throw error;
+    }
   }
 }

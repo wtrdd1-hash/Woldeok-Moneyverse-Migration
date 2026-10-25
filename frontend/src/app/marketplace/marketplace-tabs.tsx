@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import type { CraftingSnapshot } from './crafting-actions';
 import {
   ShoppingBag,
   Hammer,
@@ -29,7 +30,6 @@ import { AppraisalView } from './appraisal-view';
 import {
   INITIAL_MARKET_LISTINGS,
   P0_CRAFTING_RECIPES,
-  type CraftingRecipe,
   type MarketListing,
 } from './crafting-recipes';
 import type { MarketplaceHolding } from './marketplace';
@@ -58,43 +58,10 @@ export function MarketplaceTabs({
     .reduce((sum, item) => sum + BigInt(item.priceWld || '0'), 0n)
     .toString();
 
-  // Handle successful craft
-  const handleCraftSuccess = (recipe: CraftingRecipe) => {
-    // Deduct fee from balance
-    try {
-      const newBal = BigInt(currentBalance) - BigInt(recipe.feeWld);
-      setCurrentBalance(newBal > 0n ? newBal.toString() : '0');
-    } catch {
-      // Preserve the last authoritative balance when an amount is malformed.
-    }
-
-    // Add crafted item to holdings
-    const newItem: MarketplaceHolding = {
-      catalog_id: `crafted_${Date.now()}`,
-      code: recipe.resultItem.code,
-      name: recipe.resultItem.name,
-      description: recipe.resultItem.description,
-      category: recipe.resultItem.category,
-      quantity: 1,
-      acquired_at: new Date().toISOString(),
-      rarity: recipe.resultItem.rarity,
-      effect_kind: recipe.resultItem.effectKind,
-      is_equipped: false,
-      serial_number: Math.floor(Math.random() * 900) + 100,
-    };
-
-    // Deduct material quantities
-    setHoldings((prev) => {
-      const updated = prev.map((item) => {
-        const mat = recipe.materials.find((m) => m.code === item.code);
-        if (mat) {
-          const newQty = Math.max(0, item.quantity - mat.requiredQuantity);
-          return { ...item, quantity: newQty };
-        }
-        return item;
-      });
-      return [newItem, ...updated];
-    });
+  // A crafting mutation is not a receipt until the server re-reads the member's inventory and wallet.
+  const handleCraftSuccess = (snapshot: CraftingSnapshot) => {
+    setHoldings([...snapshot.holdings]);
+    setCurrentBalance(snapshot.cashBalanceWld);
   };
 
   // Handle successful buy

@@ -16,12 +16,12 @@ import {
 import { groupDigits } from '@/lib/money';
 import { P0_CRAFTING_RECIPES, type CraftingRecipe } from './crafting-recipes';
 import type { MarketplaceHolding } from './marketplace';
-import { executeCraftingAction } from './crafting-actions';
+import { executeCraftingAction, type CraftingSnapshot } from './crafting-actions';
 
 interface CraftingPanelProps {
   readonly holdings: readonly MarketplaceHolding[];
   readonly userBalanceWld: string;
-  readonly onCraftSuccess?: (recipe: CraftingRecipe) => void;
+  readonly onCraftSuccess?: (snapshot: CraftingSnapshot) => void;
 }
 
 export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: CraftingPanelProps) {
@@ -29,6 +29,7 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
   const [isCrafting, setIsCrafting] = useState(false);
   const [craftResult, setCraftResult] = useState<CraftingRecipe | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [settlementUnknown, setSettlementUnknown] = useState(false);
 
   // Helper to check user holding quantity of a material
   const getHeldQuantity = (code: string): number => {
@@ -51,25 +52,26 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
     setActiveRecipe(recipe);
     setCraftResult(null);
     setErrorMessage(null);
+    setSettlementUnknown(false);
   };
 
   const handleExecuteCraft = async () => {
-    if (!activeRecipe) return;
+    if (!activeRecipe || settlementUnknown || isCrafting) return;
     setIsCrafting(true);
     setErrorMessage(null);
 
     try {
       const res = await executeCraftingAction(activeRecipe.id);
-      if (res.status === 'ok') {
+      if (res.status === 'ok' && res.snapshot) {
+        onCraftSuccess?.(res.snapshot);
         setCraftResult(activeRecipe);
-        if (onCraftSuccess) {
-          onCraftSuccess(activeRecipe);
-        }
       } else {
-        setErrorMessage(res.message ?? '제작 요청에 실패했습니다.');
+        setErrorMessage(res.message ?? '제작 결과를 확인하지 못했습니다.');
+        setSettlementUnknown(res.settlementUnknown === true || res.status === 'ok');
       }
-    } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : '제작 요청 처리 중 오류가 발생했습니다.');
+    } catch {
+      setErrorMessage('제작 결과가 불확실합니다. 재요청 전에 새로고침하여 지갑과 인벤토리를 확인해 주세요.');
+      setSettlementUnknown(true);
     } finally {
       setIsCrafting(false);
     }
@@ -161,7 +163,7 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
                 <Button
                   onClick={() => handleStartCrafting(recipe)}
                   disabled={!canCraft}
-                  className="w-full"
+                  className="min-h-11 w-full"
                   variant={canCraft ? 'default' : 'outline'}
                 >
                   <Hammer className="mr-2 size-4" />
@@ -185,6 +187,7 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
             setActiveRecipe(null);
             setCraftResult(null);
             setErrorMessage(null);
+            setSettlementUnknown(false);
           }
         }}
       >
@@ -202,10 +205,16 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
           </DialogHeader>
 
           {errorMessage && (
-            <div className="rounded-lg bg-rose-500/10 border border-rose-500/30 p-3 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
+            <div role="alert" className="rounded-lg bg-rose-500/10 border border-rose-500/30 p-3 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
               <AlertCircle className="size-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
+          )}
+
+          {settlementUnknown && (
+            <Button type="button" variant="outline" className="min-h-11 w-full" onClick={() => window.location.reload()}>
+              지갑·인벤토리 다시 확인하기
+            </Button>
           )}
 
           {craftResult ? (
@@ -258,7 +267,7 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
 
           <DialogFooter className="gap-2 sm:gap-0">
             {craftResult ? (
-              <Button onClick={() => setActiveRecipe(null)} className="w-full">
+              <Button onClick={() => setActiveRecipe(null)} className="min-h-11 w-full">
                 확인
               </Button>
             ) : (
@@ -267,13 +276,14 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
                   variant="outline"
                   onClick={() => setActiveRecipe(null)}
                   disabled={isCrafting}
+                  className="min-h-11"
                 >
                   취소
                 </Button>
                 <Button
                   onClick={handleExecuteCraft}
-                  disabled={isCrafting}
-                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                  disabled={isCrafting || settlementUnknown}
+                  className="min-h-11 bg-amber-600 hover:bg-amber-700 text-white"
                 >
                   {isCrafting ? (
                     <>
