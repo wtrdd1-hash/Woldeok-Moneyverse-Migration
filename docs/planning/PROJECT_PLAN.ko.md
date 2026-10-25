@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1278 — F675-126 계산기 시나리오 재계산·승격 무결성 (기능 보완 / 초안 / 운영 보류)
+- **회차:** 이전 Feature Addition v1276 → 현재 Feature Improvement v1278 → 다음 Feature Addition v1280(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인, AGENTS·README·영문 PROJECT_PLAN 정본과 국문 대조. 선행 Draft #1310 미병합, 개발 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309). 문서만 변경.
+- **실제 코드:** 복리·대출 계산기가 `type:'stock'`으로 저장하고 대출 상환방식은 저장되지 않으며 지역화 숫자 문자열은 무손실 재계산을 보장하지 않는다. 제목/ticker 중복판정은 서로 다른 입력을 합치고, 승격 엔진은 실패에도 성공 플래그를 설정하며, 보관·알림·10,000 WLD 약속은 영수증이 없다. 계산기별 정규 입력/수식 어댑터, 동의형 미리보기 가져오기, 본인 불변 영수증·재조회, 미지원 legacy 차단, 로그아웃/교차 탭 보호를 설계한다.
+- **백로그 P0:** ENV1278-01 SEC1278-02 REL1278-03 CAL1278-04. **P1:** CAL1278-05 CAL1278-06 CAL1278-07 CAL1278-08 CAL1278-09 CAL1278-10. API/DB/트랜잭션/화면/관리자/보안/SEO/모바일/접근성/KPI/테스트/배포·롤백은 [통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 참조. QA v1273 FAILED/HOLD, 루트 98%(약 2.8GiB), 개발 DB DML 235/241, PUBLIC 은행 함수 3개, 감사 Critical2/High10·운영 High2, Migration266/280·정확 SHA Test/복원 BLOCKED. 신규 외부 승인 0, 누적 미확인/10,000 BLOCKED. 기능 OFF, 운영 RELEASE HOLD.
+- **전체 백로그 ID:** ENV1278-01 SEC1278-02 REL1278-03 CAL1278-04 CAL1278-05 CAL1278-06 CAL1278-07 CAL1278-08 CAL1278-09 CAL1278-10
+
+
 ## v2026.10.25.1276 — F675-126 회원 전용 검증형 계산기 시나리오 보관함 (기능 추가 / 초안 / 운영 보류)
 - **회차:** 이전 Feature Improvement v1274 → 현재 Feature Addition v1276 → 다음 Feature Improvement v1278(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, AGENTS·README·영문 정본/국문 대조·PR·QA 검토. 선행 Draft #1304 미병합. 개발 인계 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
 - **실증 결함:** CalculatorSaveAction은 localStorage wdmv_saved_scenarios에 최대 30건 저장하고 브라우저 로그인 추정·오류 시 저장 성공 표시·존재하지 않는 Next /api/portfolio/watchlist로 결과 미확인 호출을 한다. 영구 계정 동기화/알림/10,000 WLD 문구는 검증 영수증이 없다. 신규 F675-126은 본인 계산기 입력 보관이며 주식 관심종목·WLD·원장·보상·런타임 불변.

@@ -1,5 +1,12 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1278 — F675-126 Calculator Replay and Promotion Truth (FEATURE IMPROVEMENT / HOLD)
+- Previous Addition v1276 → Current Improvement v1278 → Next Addition v1280; main `1c5b84a1` start/mid, predecessor Draft #1310, engineering [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
+- Source: compound/loan saved as `stock`, loan repaymentType omitted, formatted inputs cannot be safely replayed; title/ticker dedup loses distinct scenarios; failed watchlist promotion still marks success; retention promises unverified alerts/10,000 WLD. Require explicit calculatorId/formula/schema adapters, preview-only legacy import, receipt/read-back success and no WLD/stock/alert side effects.
+- P0 ENV1278-01 SEC1278-02 REL1278-03 CAL1278-04; P1 CAL1278-05 CAL1278-06 CAL1278-07 CAL1278-08 CAL1278-09 CAL1278-10. QA v1273 FAILED/HOLD; root 98%, audits, ACL, migrations and exact-SHA Test/restore unresolved. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only, feature OFF, Production HOLD.
+- **Backlog IDs:** ENV1278-01 SEC1278-02 REL1278-03 CAL1278-04 CAL1278-05 CAL1278-06 CAL1278-07 CAL1278-08 CAL1278-09 CAL1278-10
+
+
 ## v1276 — F675-126 Verified Calculator Scenario Vault (FEATURE ADDITION / HOLD)
 - Previous Improvement v1274 → Current Addition v1276 → Next Improvement v1278. Main 1c5b84a1 verified start/mid, Draft #1304 unmerged; engineering [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
 - Actual CalculatorSaveAction localStorage-only drafts and nonexistent /api/portfolio/watchlist route do not establish permanent server saves; optimistic saved and 10,000 WLD/alerts promises are unsupported. New private scenario vault must require real owner/revision/digest receipt; safe opt-in local import, no stock/watchlist/WLD/ledger changes.

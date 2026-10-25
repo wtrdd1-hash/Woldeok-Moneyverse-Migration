@@ -1,5 +1,12 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1278 — F675-126 계산기 재계산·승격 사실성 (기능 보완 / 운영 보류)
+- 이전 Addition v1276 → 현재 Improvement v1278 → 다음 Addition v1280; main `1c5b84a1` 시작·중간 확인, 선행 Draft #1310, 개발 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
+- 복리·대출이 `stock`으로 저장되고 대출 상환방식이 누락되며 지역화 숫자로 정확한 재계산 불가. 제목/ticker 중복제거는 다른 시나리오를 유실하고 실패한 관심종목 승격도 성공 표시, 알림·10,000 WLD는 미검증. 계산기별 ID/스키마/수식 어댑터, 동의형 로컬 미리보기, 서버 영수증·재조회 검증, WLD/관심종목/알림 쓰기 0을 명세.
+- P0 ENV1278-01 SEC1278-02 REL1278-03 CAL1278-04; P1 CAL1278-05 CAL1278-06 CAL1278-07 CAL1278-08 CAL1278-09 CAL1278-10. QA v1273 FAILED/HOLD, 루트 98%, 보안감사·DB권한·Migration·정확 SHA Test/복원 차단. 신규 외부 승인 0, 누적 미확인/10,000 BLOCKED. 문서만 변경, 기능 OFF, 운영 HOLD.
+- **백로그 식별자:** ENV1278-01 SEC1278-02 REL1278-03 CAL1278-04 CAL1278-05 CAL1278-06 CAL1278-07 CAL1278-08 CAL1278-09 CAL1278-10
+
+
 ## v1276 — F675-126 검증형 계산기 시나리오 보관함 (기능 추가 / 보류)
 - 이전 Improvement v1274 → 현재 Addition v1276 → 다음 Improvement v1278. main 1c5b84a1 시작·중간 확인, Draft #1304 미병합, 개발 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
 - CalculatorSaveAction의 localStorage 임시 저장과 존재하지 않는 /api/portfolio/watchlist 호출은 서버 영구 저장 증거가 아니다. 오류 시 성공 표시 및 10,000 WLD/알림 약속은 미검증. 신규 본인 보관함은 실제 소유자·버전·입력 지문 영수증 필수, 로컬 초안 선택형 가져오기, 주식·WLD·원장 변경 없음.
