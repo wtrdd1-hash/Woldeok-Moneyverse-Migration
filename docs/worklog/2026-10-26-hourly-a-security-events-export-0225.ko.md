@@ -1,0 +1,11 @@
+# 개발 A — 2026-10-26 02:25 보안 활동 CSV 내보내기
+- 기준 main: `1c5b84a1c45baafcca83f375a6f99698121e9bb5`. 신규 분리 브랜치 `auto/hourly-a-security-events-export-20261026-0225`. 기능 코드 SHA `eadcf571031c116926e12a316810a722f76c09eb`.
+- 시작 시 Debian 13.6 미니PC 직접 연결, 주요 서비스 ACTIVE, PostgreSQL 연결 확인. 원격 브랜치 210개(비-main 209개), 열린 PR 206개, 충돌 PR #1143/#1110/#1107 보존. 루트 99%·데이터 68~69%.
+- 영어 정본 AGENTS/README/PROJECT_PLAN/통합기획서 및 한국어 계획, 최신 QA와 별도 기획 PR #1354 확인. B/C/QA/Gemini 작업과 분리.
+- TDD RED: Backend 조회 범위, Frontend CSV/게이트웨이, Android 비공개 SEO 헤더 실패 확인. GREEN: Backend 8 PASS, Frontend·Android 18 PASS.
+- 회원 세션·인증·동의로 본인 보안 활동만 조회. 기존 마이그레이션 214 SECURITY DEFINER 함수를 50건 제한으로 재사용. CSV 타입·시각 검증, 수식 주입 차단, 개인정보 필드 제외, private/no-store/noindex, Android 헤더 전달 및 44px 다운로드 링크. 원장·DB 쓰기 없음.
+- 전체 테스트: Backend 1,317 PASS/398 SKIP, Frontend 1,404 PASS/6 FAIL(기존 SEO 3, 로그인 1, 계산기 1, 관리자 1), DB 15 PASS/3 SKIP, Contract 38 PASS, Bot 8 PASS, app-api 계약 179 일치.
+- Typecheck PASS, Lint PASS(오류 0·경고 1,128), 표준 Build PASS. 최초 외부 node_modules 링크로 빌드 실패했으나 격리 의존성 복사 후 수정. 보안 감사: 운영 High 2, 전체 Critical 2/High 10, Bot Critical 1/High 5.
+- 격리 PostgreSQL 17 실제 앱 계정 읽기 전용 확인: 마이그레이션 281개, 본인 표본 3건/타 표본 0건, 원본 이벤트 테이블 직접 SELECT 및 원장 INSERT 차단, ROLLBACK. 기존 DB 함수의 actor UUID는 HTTP 가드가 보장하며 DB 자체 인증은 아님.
+- 공식 Test 실행 SHA `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`, Production SHA `6a989b5ac0c6155587d43426d64f6def6b62c917`: 후보와 다름. 정확 SHA 인증 E2E 및 전체 CI 미통과.
+- **PARTIAL/BLOCKED / RELEASE HOLD.** 병합·Test/Production 승격·운영 DB 쓰기·서비스 재시작·브랜치 삭제 0건. 종료 SHA/CI·브랜치 수는 Draft PR 기록에 갱신.
