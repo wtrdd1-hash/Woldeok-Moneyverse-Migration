@@ -43,17 +43,33 @@ export async function withdrawAction(_previous: ActionState, formData: FormData)
   }
 }
 
+/** The PostgreSQL function returns snake_case receipt fields, not a UI-generated claim. */
+function isVerifiedInterestReceipt(value: unknown): value is {
+  claimed_amount: string;
+  new_bank_balance: string;
+  transaction_id: string;
+} {
+  if (value === null || typeof value !== 'object') return false;
+  const receipt = value as Record<string, unknown>;
+  return typeof receipt.claimed_amount === 'string' && /^[1-9][0-9]*$/.test(receipt.claimed_amount)
+    && typeof receipt.new_bank_balance === 'string' && /^(0|[1-9][0-9]*)$/.test(receipt.new_bank_balance)
+    && typeof receipt.transaction_id === 'string' && UUID.test(receipt.transaction_id);
+}
+
 export async function claimInterestAction(_previous: ActionState): Promise<ActionState> {
   try {
-    const res = await mutate<{ claimedAmount: string; newBankBalance: string }>('/api/v1/banking/claim-interest', {
+    const receipt = await mutate<unknown>('/api/v1/banking/claim-interest', {
       body: { idempotencyKey: idempotencyKey() },
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
-    const claimed = res?.claimedAmount ? groupDigits(res.claimedAmount) : '';
+    if (!isVerifiedInterestReceipt(receipt)) {
+      // The write may have committed. Never issue a blind second request with a new key.
+      return { status: 'error', message: '정산 결과를 확인할 수 없습니다. 은행·지갑 거래 내역을 확인한 뒤 다시 시도해 주세요.' };
+    }
     return {
       status: 'ok',
-      message: claimed ? `${claimed} WLD의 복리 예금 이자가 원장에 정산되었습니다!` : '복리 이자가 정산되었습니다.',
+      message: `${groupDigits(receipt.claimed_amount)} WLD 이자가 원장에 정산되었습니다. 거래번호: ${receipt.transaction_id}`,
     };
   } catch (error) {
     return failure(error, '이자 정산 조건을 충족하지 않았거나 예치 기간이 부족합니다 (최소 30분 이상 경과 필요).');

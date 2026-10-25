@@ -5,7 +5,7 @@ import { Sparkles, ArrowDownToLine, ArrowUpFromLine, CheckCircle2, ShieldCheck, 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { groupDigits } from '@/lib/money';
+import { groupDigits, isPositiveWldInput } from '@/lib/money';
 import { playCoinCollectSound, playStockTickSound } from '@/lib/audio-effects';
 import { claimInterestAction, depositAction, withdrawAction } from './actions';
 import { IDLE } from '@/lib/action-state';
@@ -29,10 +29,7 @@ export function TossBankHeroCard({
   annualYieldPct,
   isEn = false,
 }: TossBankHeroCardProps) {
-  // 실시간 라이브 이자 카운팅 애니메이션 상태
-  const baseUnclaimed = Number.parseFloat(unclaimedInterest) || 0;
-  const bankNum = Number.parseFloat(bankBalance) || 0;
-  const [liveInterest, setLiveInterest] = useState<number>(baseUnclaimed);
+  // Only the authenticated banking standing can establish a claimable WLD amount.
   const [interestPopped, setInterestPopped] = useState(false);
 
   // 이자 수령 폼 액션
@@ -47,29 +44,19 @@ export function TossBankHeroCard({
   const [depositState, doDeposit] = useActionState(depositAction, IDLE);
   const [withdrawState, doWithdraw] = useActionState(withdrawAction, IDLE);
 
-  // 매 1초마다 실시간으로 누적 이자 수치 시각적 인크리먼트
-  useEffect(() => {
-    if (bankNum <= 0) return;
-    // 초당 이자 = 잔액 * (일일이율% / 100) / 86400
-    const perSecond = (bankNum * (dailyRatePct / 100)) / 86400;
-    const interval = setInterval(() => {
-      setLiveInterest((prev) => prev + perSecond);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [bankNum, dailyRatePct]);
-
   // 이자 수령 성공 시 사운드 및 피드백 애니메이션
   useEffect(() => {
     if (claimState.status === 'ok') {
       playCoinCollectSound();
       setInterestPopped(true);
-      setLiveInterest(0);
       const timer = setTimeout(() => setInterestPopped(false), 2000);
       return () => clearTimeout(timer);
     }
   }, [claimState.status]);
 
-  const canClaim = bankNum > 0 && liveInterest >= 1;
+  const canClaim = isPositiveWldInput(bankBalance)
+    && isPositiveWldInput(unclaimedInterest)
+    && claimState.status !== 'ok';
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-sky-500/20 bg-gradient-to-b from-[#131d33] via-[#0e1526] to-[#090d18] p-6 sm:p-8 shadow-2xl space-y-6 text-white">
@@ -91,7 +78,7 @@ export function TossBankHeroCard({
               </span>
             </h2>
             <p className="text-xs text-sky-200/60 font-mono">
-              {isEn ? 'Compound yield accrued in real-time' : '초 단위로 복리 이자가 붙는 통장'}
+              {isEn ? 'Ledger-verified virtual savings' : '원장 검증 기반 가상 예금 통장'}
             </p>
           </div>
         </div>
@@ -119,16 +106,16 @@ export function TossBankHeroCard({
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
             <Sparkles className="size-3.5 animate-pulse" />
-            <span>{isEn ? 'Accruing Interest Right Now' : '지금 실시간으로 쌓이는 이자'}</span>
+            <span>{isEn ? 'Server-verified unclaimed interest' : '서버에서 확인한 정산 대기 이자'}</span>
           </div>
           <div className="font-fintech text-2xl sm:text-3xl font-extrabold text-emerald-400 tabular-nums">
-            +{liveInterest.toFixed(2)}{' '}
+            +{groupDigits(unclaimedInterest)}{' '}
             <span className="text-sm font-semibold text-emerald-300/70">WLD</span>
           </div>
           <p className="text-[11px] text-white/50">
             {isEn
-              ? 'Minimum 1 WLD to claim. Added instantly to savings.'
-              : '1 WLD 이상 쌓이면 즉시 받아 복리 효과를 극대화할 수 있어요.'}
+              ? 'At least 1 verified WLD and 30 minutes of unchanged deposit balance are required.'
+              : '서버에서 확인된 이자가 1 WLD 이상이고 예금 잔액을 30분 이상 유지해야 정산할 수 있어요.'}
           </p>
         </div>
 
@@ -152,14 +139,14 @@ export function TossBankHeroCard({
 
       {/* 이자 수령 성공 토스트 배너 */}
       {interestPopped && (
-        <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 animate-bounce">
+        <div role="status" className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2">
           <CheckCircle2 className="size-4" />
-          <span>{isEn ? 'Interest claimed directly to your balance!' : '이자가 성공적으로 입금되었습니다!'}</span>
+          <span>{claimState.message}</span>
         </div>
       )}
 
       {claimState.status === 'error' && (
-        <div className="text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20">
+        <div role="alert" className="text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20">
           {claimState.message}
         </div>
       )}
@@ -232,7 +219,7 @@ export function TossBankHeroCard({
                     playStockTickSound();
                     setDepositAmount(preset);
                   }}
-                  className="h-9 text-xs font-mono font-bold"
+                  className="h-11 text-xs font-mono font-bold"
                 >
                   +{Number(preset) >= 10000 ? `${Number(preset) / 10000}만` : `${Number(preset) / 1000}천`}
                 </Button>
@@ -245,7 +232,7 @@ export function TossBankHeroCard({
                   playStockTickSound();
                   setDepositAmount(cashBalance);
                 }}
-                className="h-9 text-xs font-bold"
+                className="h-11 text-xs font-bold"
               >
                 {isEn ? 'MAX' : '전액'}
               </Button>
@@ -300,7 +287,7 @@ export function TossBankHeroCard({
                     playStockTickSound();
                     setWithdrawAmount(preset);
                   }}
-                  className="h-9 text-xs font-mono font-bold"
+                  className="h-11 text-xs font-mono font-bold"
                 >
                   +{Number(preset) >= 10000 ? `${Number(preset) / 10000}만` : `${Number(preset) / 1000}천`}
                 </Button>
@@ -313,7 +300,7 @@ export function TossBankHeroCard({
                   playStockTickSound();
                   setWithdrawAmount(bankBalance);
                 }}
-                className="h-9 text-xs font-bold"
+                className="h-11 text-xs font-bold"
               >
                 {isEn ? 'MAX' : '전액'}
               </Button>
