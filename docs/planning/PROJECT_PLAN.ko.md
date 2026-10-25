@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **GitHub 기획 검토:** [Draft PR #1349](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1349) (미병합 #1345 기반, 문서만); [개발 인계 #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v2026.10.26.1290 — F675-129 회원 찜 목록 가격·가용성·재시도 무결성 (기능 보완 / 초안 / 운영 보류)
 - **회차:** 이전 기능 추가 v1288 → 현재 기능 보완 v1290 → 다음 기능 추가 v1292(잠정). 원격 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인; AGENTS.md·README.md·영어 정본·한국어 대조본 검토. 미병합 Draft #1345 기반, 개발 #1344 별도, A/B/C·Gemini·QA와 런타임 변경 분리.

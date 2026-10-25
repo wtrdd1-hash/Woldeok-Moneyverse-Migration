@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **GitHub planning review:** [Draft PR #1349](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1349) (stacked on unmerged #1345, docs only); [engineering issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v2026.10.26.1290 — F675-129 Shop Wishlist Price and Availability Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 

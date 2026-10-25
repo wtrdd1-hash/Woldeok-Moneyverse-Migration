@@ -1,4 +1,5 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+- **GitHub 기획 검토:** [Draft PR #1349](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1349) (미병합 #1345 기반, 문서만); [개발 인계 #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v1290 / F675-129 — 회원 상점 찜 목록 무결성 (기능 보완 / 초안 / 보류)
 - **회차:** 이전 추가 v1288 → 현재 보완 v1290 → 다음 추가 v1292(잠정). 원격 main 1c5b84a1 시작·중간 동일, 미병합 기획 Draft #1345, 별도 개발 #1344. 문서만 변경, A/B/C·Gemini·QA 분리.

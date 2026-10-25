@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **GitHub planning review:** [Draft PR #1349](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1349) (stacked on unmerged #1345, docs only); [engineering issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v2026.10.26.1290 — F675-129 Shop Wishlist Price/Availability/Replay Integrity (Feature Improvement / DRAFT / HOLD)
 - **Cycle:** Previous Feature Addition v1288 → Current Feature Improvement v1290 → Next Feature Addition v1292 provisional. Verified remote main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid; AGENTS.md, README.md, canonical English plan and Korean counterpart. Stacked on unmerged Draft #1345, engineering #1344; docs only, A/B/C/Gemini/QA isolated.
