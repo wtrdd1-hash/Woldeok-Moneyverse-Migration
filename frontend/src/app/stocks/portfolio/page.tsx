@@ -14,12 +14,13 @@ import { requireMember } from '@/lib/session';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import dynamicImport from 'next/dynamic';
 import { analyzePortfolio, type PortfolioHoldingInput } from './analysis';
+import { portfolioValuationData, signedPercent } from './snapshot-data';
 import { PortfolioDonutChart } from './portfolio-donut-chart';
 import { SectorDiversificationCard } from '@/components/sector-diversification-card';
 import { PortfolioShareTrigger } from '@/components/portfolio-share-trigger';
 
-const WeeklyFinancialReceipt = dynamicImport(
-  () => import('@/components/weekly-financial-receipt').then((mod) => mod.WeeklyFinancialReceipt),
+const PortfolioValuationSnapshot = dynamicImport(
+  () => import('@/components/portfolio-valuation-snapshot').then((mod) => mod.PortfolioValuationSnapshot),
 );
 const TradeDialog = dynamicImport(
   () => import('../trade-dialog').then((mod) => mod.TradeDialog),
@@ -46,13 +47,6 @@ interface StockHaltReceipt {
   readonly refund_amount: string;
   readonly status: string;
   readonly created_at: string;
-}
-
-function signedPercent(bpsText: string): string {
-  const bps = Number(bpsText);
-  if (!Number.isSafeInteger(bps)) return '—';
-  const prefix = bps > 0 ? '+' : bps < 0 ? '−' : '';
-  return `${prefix}${(Math.abs(bps) / 100).toLocaleString('ko-KR', { maximumFractionDigits: 2 })}%`;
 }
 
 export default async function PortfolioAnalysisPage() {
@@ -364,38 +358,10 @@ export default async function PortfolioAnalysisPage() {
               </CardContent>
             </Card>
 
-            {/* 3.5. 주간 금융 결산 영수증 & 인포그래픽 카드 (Weekly Financial Digest) */}
-            {(() => {
-              const topHolding = analysis.holdings[0];
-              const gainBpsNum = Number(analysis.total_gain_loss_bps);
-              const returnPctStr = (gainBpsNum / 100).toFixed(1);
-              const topGainBps = topHolding ? Number(topHolding.gain_loss_bps) : 0;
-              const topReturnPct = (topGainBps / 100).toFixed(1);
-              return (
-                <WeeklyFinancialReceipt
-                  data={{
-                    weekNumber: 41,
-                    periodLabel: isEn
-                      ? `As of ${new Date().toISOString().slice(0, 10)}`
-                      : `${new Date().toLocaleDateString('ko-KR')} 실시간 보유 기준`,
-                    totalTurnoverWld: groupDigits(analysis.total_market_value),
-                    realizedGainWld: `${analysis.total_unrealized_gain_loss.startsWith('-') ? '' : '+'}${groupDigits(analysis.total_unrealized_gain_loss)}`,
-                    returnRatePct: `${gainBpsNum >= 0 ? '+' : ''}${returnPctStr}%`,
-                    topStockSymbol: topHolding?.symbol ?? 'WDG',
-                    topStockReturnPct: `${topGainBps >= 0 ? '+' : ''}${topReturnPct}%`,
-                    tradeCount: analysis.holdings.length,
-                    feeBurnContributionWld: groupDigits(
-                      String(Math.floor(Math.max(1, Number(analysis.total_market_value) * 0.002))),
-                    ),
-                    diversificationScore:
-                      analysis.holdings.length >= 3 ? 95 : analysis.holdings.length === 2 ? 80 : 60,
-                    traderPersona: isEn
-                      ? `Active Virtual Investor (${topHolding?.name ?? 'Diversified'})`
-                      : `가상 주식 투자자 (${topHolding?.name ?? '분산 포트폴리오'} 중심)`,
-                  }}
-                />
-              );
-            })()}
+            {/* Current authenticated holdings valuation only; no weekly trade, tax or burn claims. */}
+            <PortfolioValuationSnapshot
+              data={portfolioValuationData(analysis, `${new Date().toISOString()} (UTC, 조회 시각)`)}
+            />
 
             {/* 4. 거래정지 원가환급 영수증 (STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC) */}
             <HaltReceiptsCard receipts={haltReceipts} isEn={isEn} />
