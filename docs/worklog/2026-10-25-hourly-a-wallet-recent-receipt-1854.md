@@ -9,8 +9,15 @@
 - Red/green plan: add backend service/route tests and frontend receipt validation tests before implementation; implement GET `wallet/transactions/:id/receipt`, owner-scoped DB read using existing 50-row projection, private detail page and history link, regenerate Android app-api contract; verify ACL and full gates.
 - Explicit hold: shared dev/production database on port 5433 is unsafe for fixtures/writes; use isolated `wdmv_v761_test_acl` read-only. Exact-SHA Test and production promotion forbidden without independently attested PASS.
 
-## In progress — PENDING
-- [ ] RED tests and GREEN implementation.
+## In progress — CHECKPOINT 19:01 KST
+- [x] RED: service receipt absent (3 failures), frontend validator module absent (3 failures); additional incomplete-pocket RED assertion failed as intended.
+- [x] GREEN: owner-only recent-50 receipt endpoint, strict cash/bank/net precision, incomplete-pocket refusal, private no-store, member detail page, bounded history links.
+- [x] Backend focused 27 PASS, frontend focused 13 PASS, Android gateway 11 PASS; mobile contract now 180 endpoints.
+- [x] `pnpm typecheck` PASS after fixing test tuple inference; `pnpm lint` 0 errors/1128 warnings; backend build PASS.
+- [x] Midpoint `origin/main` remains `1c5b84a1c45baafcca83f375a6f99698121e9bb5`. All 176 non-main branches have unique ahead commits; no duplicate final Git trees, 3 conflicting PRs (#1143/#1110/#1107); none deleted.
+- [x] Real PostgreSQL 17.11 isolated `wdmv_v761_test_acl`: 281 migrations, app role can read ledger but cannot INSERT postings; READ ONLY / ROLLBACK. No transaction rows in sample, so positive authenticated financial E2E BLOCKED.
+- [ ] Full suite, frontend build, audits, exact-SHA Test and release gate.
+
 - [ ] Integration, real PostgreSQL read-only ACL, Android contract, accessibility/SEO, build/typecheck/lint/security/full suites.
 - [ ] Re-fetch latest main and mutable plans; check concurrent PR overlaps.
 

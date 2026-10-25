@@ -15108,6 +15108,224 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/app-api/v1/wallet/transactions/{id}/receipt",
+      "purpose": "최근 50건 내 본인 원장 거래 영수증 조회",
+      "callWhen": "지갑 최근 거래 기록에서 영수증 선택 시",
+      "authorization": "로그인 + 최신 동의; 본인 거래만 조회; read-only",
+      "afterSuccess": "조회 성공은 최근 50건에 포함된 원장 거래의 본인 계정 증감만 증명하며 전체 거래/상대방 지급 증명은 아님",
+      "backendRoute": "/api/wallet/transactions/:id/receipt",
+      "operationId": "WalletController_recentTransactionReceipt",
+      "backendOpenApiPath": "/wallet/transactions/{id}/receipt",
+      "summary": "Owner-only verified receipt from the most recent 50 wallet ledger transactions",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "scope",
+          "receipt"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "recent_50"
+          },
+          "receipt": {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "netAmount": {
+                "allOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "__wld": {
+                        "type": "object",
+                        "properties": {
+                          "description": {
+                            "oneOf": [
+                              {
+                                "type": "undefined"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "description"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "__wld"
+                    ]
+                  }
+                ]
+              },
+              "cashDelta": {
+                "oneOf": [
+                  {
+                    "type": "undefined"
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "__wld": {
+                            "type": "object",
+                            "properties": {
+                              "description": {
+                                "oneOf": [
+                                  {
+                                    "type": "undefined"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "description"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "__wld"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "bankDelta": {
+                "oneOf": [
+                  {
+                    "type": "undefined"
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "__wld": {
+                            "type": "object",
+                            "properties": {
+                              "description": {
+                                "oneOf": [
+                                  {
+                                    "type": "undefined"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "description"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "__wld"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "direction": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "const": "neutral"
+                  },
+                  {
+                    "type": "string",
+                    "const": "in"
+                  },
+                  {
+                    "type": "string",
+                    "const": "out"
+                  }
+                ]
+              },
+              "occurredAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "transactionId",
+              "type",
+              "label",
+              "netAmount",
+              "direction",
+              "occurredAt"
+            ]
+          }
+        },
+        "required": [
+          "scope",
+          "receipt"
+        ]
+      },
+      "errors": {
+        "400": "invalid transaction UUID",
+        "401": "unauthenticated",
+        "403": "consent required",
+        "404": "not in caller recent 50",
+        "503": "ledger read unavailable"
+      },
+      "privacy": {
+        "cacheControl": "private, no-store",
+        "noIndex": true
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
       "method": "POST",
       "path": "/app-api/v1/wallet/transfers",
       "purpose": "다른 사용자에게 WLD 송금",

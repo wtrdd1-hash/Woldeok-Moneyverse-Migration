@@ -23,6 +23,25 @@ afterEach(() => {
 });
 
 describe('app API route compatibility', () => {
+  it('proxies owner-only recent wallet receipts with private cache policy and exact integer strings', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const id = '33333333-3333-4333-8333-333333333333';
+    const amount = '900719925474099312345678901234567890';
+    let forwardedUrl = '';
+    const fetchSpy = vi.fn(async (url: RequestInfo | URL) => {
+      forwardedUrl = String(url);
+      return new Response(JSON.stringify({
+      scope: 'recent_50', receipt: { transactionId: id, netAmount: amount, cashDelta: amount, bankDelta: '0' },
+    }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' } });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request(`/app-api/v1/wallet/transactions/${id}/receipt`, { cookie: 'session=opaque' }), context('wallet', 'transactions', id, 'receipt'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect((await response.json()).receipt.netAmount).toBe(amount);
+    expect(forwardedUrl).toContain(`/wallet/transactions/${id}/receipt`);
+  });
+
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);

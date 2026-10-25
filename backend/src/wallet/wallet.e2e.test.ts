@@ -46,6 +46,7 @@ describe('wallet routes', () => {
 
   const ROUTES: readonly (readonly ['get' | 'post', string])[] = [
     ['get', '/api/v1/wallet'],
+    ['get', '/api/v1/wallet/transactions/33333333-3333-4333-8333-333333333333/receipt'],
     ['get', '/api/v1/bank/loans'],
     ['get', '/api/v1/rewards/availability'],
     ['post', '/api/v1/wallet/transfers'],

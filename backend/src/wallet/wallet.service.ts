@@ -133,6 +133,11 @@ export interface WalletTransactionView {
   readonly occurredAt: string;
 }
 
+export interface WalletRecentTransactionReceipt {
+  readonly scope: 'recent_50';
+  readonly receipt: WalletTransactionView;
+}
+
 export interface WalletOverview {
   /**
    * The caller's own Moneyverse id, which is what another member types to
@@ -364,6 +369,25 @@ export class WalletService {
     this.repository = repository;
     this.clock = clock;
     this.broadcast = broadcast;
+  }
+
+  /**
+   * An owner-only receipt for the existing 50-entry history window.
+   * An arbitrary ledger lookup would bypass that bounded, owner-filtered read.
+   */
+  async recentTransactionReceipt(
+    authenticatedUserId: string,
+    transactionId: string,
+  ): Promise<WalletRecentTransactionReceipt | null> {
+    const userId = requireUuid(authenticatedUserId, 'authenticated user id');
+    const id = requireUuid(transactionId, 'transaction id');
+    const rows = await this.repository.recentTransactionsForUser(userId, 50);
+    const receipt = normalizeTransactions(rows).find((row) => row.transactionId === id);
+    if (!receipt) return null;
+    if (receipt.cashDelta === undefined || receipt.bankDelta === undefined) {
+      throw new Error('ledger receipt pocket provenance is unavailable');
+    }
+    return { scope: 'recent_50', receipt };
   }
 
   async overview(

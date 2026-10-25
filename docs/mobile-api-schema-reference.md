@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4751,6 +4751,41 @@ _No request body._
 | recentTransactions[].bankDelta | false | undefined \| string & object |  |
 | recentTransactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
 | recentTransactions[].occurredAt | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/wallet/transactions/{id}/receipt` — Owner-only verified receipt from the most recent 50 wallet ledger transactions
+
+- Authorization: 로그인 + 최신 동의; 본인 거래만 조회; read-only
+- Success status: 200
+- Response mode: json
+- After success: 조회 성공은 최근 50건에 포함된 원장 거래의 본인 계정 증감만 증명하며 전체 거래/상대방 지급 증명은 아님
+- Operation ID: `WalletController_recentTransactionReceipt`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="recent_50" | const="recent_50" |
+| receipt | true | object |  |
+| receipt.transactionId | true | string |  |
+| receipt.type | true | string |  |
+| receipt.label | true | string |  |
+| receipt.netAmount | true | string & object |  |
+| receipt.cashDelta | false | undefined \| string & object |  |
+| receipt.bankDelta | false | undefined \| string & object |  |
+| receipt.direction | true | string="neutral" \| string="in" \| string="out" |  |
+| receipt.occurredAt | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

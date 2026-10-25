@@ -48,6 +48,7 @@ export default async function WalletActivityPage() {
         맞춘 금액을 보여 줍니다.
       </PageHeader>
 
+      <p className="text-sm text-muted-foreground">최근 최대 50건만 표시됩니다. 더 오래된 거래는 이 화면에서 조회할 수 없습니다.</p>
       <Card>
         <CardContent>
           {!wallet ? (
@@ -61,14 +62,18 @@ export default async function WalletActivityPage() {
             wallet.recentTransactions.map((entry) => {
               const { debit, credit } = sides(entry);
               return (
+                <div key={entry.transactionId} className="grid gap-2 border-b pb-3">
                 <PostingStrip
-                  key={entry.transactionId}
                   debit={debit}
                   credit={credit}
                   amount={entry.netAmount}
                   label={entry.label}
                   at={formatMoment(entry.occurredAt)}
                 />
+                <Button asChild size="sm" variant="outline" className="w-fit">
+                  <Link href={`/wallet/activity/${encodeURIComponent(entry.transactionId)}`} aria-label={`${entry.label} 거래 영수증 보기`}>거래 영수증 보기</Link>
+                </Button>
+                </div>
               );
             })
           )}
