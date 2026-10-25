@@ -8,9 +8,9 @@ import {
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, detectLocale, parseAcceptLanguage } from './locale';
 
 describe('SEO & i18n SSOT Route Integrity', () => {
-  it('enforces Korean product fallback and supports 4 languages', () => {
+  it('enforces Korean product fallback and supports 5 languages', () => {
     expect(DEFAULT_LOCALE).toBe('ko');
-    expect(SUPPORTED_LOCALES).toEqual(['ko', 'en', 'ja', 'zh']);
+    expect(SUPPORTED_LOCALES).toEqual(['ko', 'en', 'ja', 'zh', 'vi']);
   });
 
   it('correctly maps hybrid GeoIP and Accept-Language headers', () => {
