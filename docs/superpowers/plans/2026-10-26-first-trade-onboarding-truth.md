@@ -8,8 +8,10 @@
 
 **Tech Stack:** React/Next.js, Vitest/Testing Library, TypeScript.
 
-- [ ] Add failing regression for onboarding never calling nonexistent orders endpoint or writing holdings, even when fetch fails.
-- [ ] Replace fake execution and completed state with accessible link to `/stocks` and truthful guidance; no fake WLD grant.
-- [ ] Verify responsive touch targets, keyboard focus and no member page indexing change.
-- [ ] Run focused test, lint, typecheck, build, API contract, full tests, audit, real-PG CI, and exact-SHA Test when available.
-- [ ] Re-fetch main and plan, record blockers and do not merge/deploy unless all gates PASS.
+- [x] Add failing regression for onboarding never calling nonexistent orders endpoint or writing holdings, even when fetch fails.
+- [x] Replace fake execution and completed state with accessible link to `/stocks` and truthful guidance; no fake WLD grant.
+- [x] Verify responsive touch targets, keyboard focus and no member page indexing change.
+- [x] Run focused test, lint, typecheck, build, API contract, full tests, audit, real-PG CI, and exact-SHA Test when available.
+- [x] Re-fetch main and plan, record blockers and do not merge/deploy unless all gates PASS.
+
+**Gate outcome:** partial only. Full frontend tests and dependency security audits fail; official Test exact-SHA E2E blocked. No release.
