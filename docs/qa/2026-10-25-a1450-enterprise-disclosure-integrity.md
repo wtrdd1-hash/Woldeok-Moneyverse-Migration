@@ -27,3 +27,8 @@
 1. Implement and verify least-privilege public SOE SECURITY DEFINER read model in an approved non-conflicting forward migration (#1287), preserving app-role table access denial.
 2. Resolve all six full frontend failures, production/full/bot security findings, and any additional CI failures.
 3. Rebuild and verify the exact final SHA in isolated Test including anonymous public GET, DB/ACL and Android E2E; confirm release identity and required GitOps approvals. No PASS evidence means no merge or Production promotion.
+
+### Final preintegration snapshot
+- Latest main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`, merged into isolated candidate before the full recheck. Code/report test SHA `a45929d2138af4fb07a0ad6e97b65110b1d9d5a8`.
+- Remote heads 154 → 155; open PRs 150 → 151; new Draft #1288. No branch deletion. CI #40167713915 and Test Candidate #40167704222 were IN_PROGRESS, never treated as PASS.
+- The candidate remains unmerged and Production RELEASE HOLD. Any later documentation-only commit has its exact final head SHA in the PR, not in a self-referential file.
