@@ -17,6 +17,7 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['wallet', 'transfers'])).toBe('/api/v1/wallet/transfers');
     expect(appGatewayPath(['auth', 'session'])).toBe('/api/v1/auth/session');
     expect(appGatewayPath(['stocks'])).toBe('/api/v1/stocks');
+    expect(appGatewayPath(['shop', 'holdings', 'export'])).toBe('/api/v1/shop/holdings/export');
     expect(appGatewayPath(['developer'])).toBe('/api/v1/developer');
     expect(appGatewayPath(['newspaper', 'pulse'])).toBe('/api/v1/newspaper/pulse');
     expect(appGatewayPath(['crafting', 'recipes'])).toBe('/api/v1/crafting/recipes');

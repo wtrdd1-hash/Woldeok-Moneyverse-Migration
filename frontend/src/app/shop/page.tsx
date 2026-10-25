@@ -80,6 +80,19 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           />
         </PageHeader>
 
+        {loggedIn ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="outline">
+              <Link href="/shop/holdings.csv" prefetch={false}>
+                <T korean="내 보유 아이템 CSV 내려받기" english="Download my item holdings CSV" />
+              </Link>
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              서버에서 확인된 현재 보유 수량만 포함하며, 구매 영수증이나 WLD 지급 내역은 아닙니다.
+            </span>
+          </div>
+        ) : null}
+
         <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2" role="search">
           <input
             type="search"

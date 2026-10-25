@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   NotFoundException,
   Param,
@@ -151,6 +152,35 @@ export class ShopController {
         () => this.repository().holdings(requireUserId(request)),
         'held items are unavailable',
       ),
+    };
+  }
+
+  /** Owner-only bounded export of verified holdings; no financial writes or client-supplied actor. */
+  @Get('holdings/export')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Export the caller’s verified current item holdings (Android JSON)' })
+  async exportHoldings(@Req() request: RequestWithSession) {
+    const holdings = await this.guarded(
+      () => this.repository().holdings(requireUserId(request)),
+      'held items are unavailable',
+    );
+    if (holdings.length > 5000) {
+      throw new ServiceUnavailableException('holdings export exceeds the verified limit');
+    }
+    return {
+      holdings: holdings.map((holding) => ({
+        catalog_id: holding.catalog_id,
+        code: holding.code,
+        name: holding.name,
+        category: holding.category,
+        quantity: holding.quantity,
+        acquired_at: holding.acquired_at,
+        expires_at: holding.expires_at,
+        is_equipped: holding.is_equipped,
+        serial_number: holding.serial_number,
+      })),
     };
   }
 

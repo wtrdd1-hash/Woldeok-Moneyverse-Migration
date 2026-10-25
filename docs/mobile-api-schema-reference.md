@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -3852,6 +3852,40 @@ _No request body._
 | holdings[].arrears_due | false | string |  |
 | holdings[].arrears_cap | false | string |  |
 | holdings[].suspended | false | boolean |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/shop/holdings/export` — Export the caller’s verified current item holdings (Android JSON)
+
+- Authorization: 로그인 + 최신 동의 필요; 본인 소유만 조회
+- Success status: 200
+- Response mode: json
+- After success: 현재 보유 수량과 취득시각을 표시; WLD 지급/구매 영수증으로 간주 금지
+- Operation ID: `ShopController_exportHoldings`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| holdings[] | true | object[] |  |
+| holdings[] | true | object |  |
+| holdings[].catalog_id | true | string |  |
+| holdings[].code | true | string |  |
+| holdings[].name | true | string |  |
+| holdings[].category | true | string |  |
+| holdings[].quantity | true | number |  |
+| holdings[].acquired_at | true | string (date-time) |  |
+| holdings[].expires_at | true | null \| string (date-time) |  |
+| holdings[].is_equipped | true | boolean |  |
+| holdings[].serial_number | true | null \| number |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

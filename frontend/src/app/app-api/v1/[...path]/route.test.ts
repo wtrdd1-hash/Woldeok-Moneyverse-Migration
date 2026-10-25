@@ -81,6 +81,25 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
   });
 
+  it('routes Android owner-only shop holdings export to the guarded backend without forging success', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let target = '';
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      target = String(input);
+      return new Response(JSON.stringify({ status: 401, title: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store' },
+      });
+    }));
+    const response = await GET(
+      request('/app-api/v1/shop/holdings/export'),
+      context('shop', 'holdings', 'export'),
+    );
+    expect(target).toContain('/api/v1/shop/holdings/export');
+    expect(response.status).toBe(401);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     const fetchSpy = vi.fn();

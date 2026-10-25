@@ -11557,6 +11557,105 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/app-api/v1/shop/holdings/export",
+      "purpose": "본인 보유 아이템의 검증된 CSV 내보내기용 JSON 조회",
+      "callWhen": "회원이 현재 보유 아이템 목록을 내려받거나 Android에서 내보내기 직전",
+      "authorization": "로그인 + 최신 동의 필요; 본인 소유만 조회",
+      "afterSuccess": "현재 보유 수량과 취득시각을 표시; WLD 지급/구매 영수증으로 간주 금지",
+      "backendRoute": "/api/shop/holdings/export",
+      "operationId": "ShopController_exportHoldings",
+      "backendOpenApiPath": "/shop/holdings/export",
+      "summary": "Export the caller’s verified current item holdings (Android JSON)",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "holdings"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "holdings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "catalog_id": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "number"
+                },
+                "acquired_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "expires_at": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                },
+                "is_equipped": {
+                  "type": "boolean"
+                },
+                "serial_number": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "catalog_id",
+                "code",
+                "name",
+                "category",
+                "quantity",
+                "acquired_at",
+                "expires_at",
+                "is_equipped",
+                "serial_number"
+              ]
+            }
+          }
+        },
+        "required": [
+          "holdings"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
       "method": "POST",
       "path": "/app-api/v1/shop/holdings/:id/consumptions",
       "purpose": "보유 소모품 사용",

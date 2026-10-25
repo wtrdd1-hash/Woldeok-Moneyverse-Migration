@@ -46,6 +46,12 @@ describe('shop routes', () => {
     expect(['internal token required', 'shop service is unavailable', 'login required']).toContain(response.body.detail);
   });
 
+  it('keeps owner-only holdings export behind authentication', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/shop/holdings/export');
+    expect(response.status).not.toBe(404);
+    expect([401, 428, 503]).toContain(response.status);
+  });
+
   it('mounts the caller purchase list behind a session', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/shop/purchases');
     expect(response.status).not.toBe(404);
