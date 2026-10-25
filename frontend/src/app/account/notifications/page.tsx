@@ -17,6 +17,8 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
   await requireMember();
   const params = await searchParams;
   const board = await apiOrNull<{ notifications_enabled: boolean }>('/api/v1/engagement');
+  const archive = await apiOrNull<{ complete: boolean; notifications: unknown[] }>('/api/v1/notifications/archive-snapshot');
+  const archiveReady = archive?.complete === true && Array.isArray(archive.notifications) && archive.notifications.length <= 100;
   const enabled = board?.notifications_enabled === true;
   return <div data-page="account-notifications" className="mv-page mv-page--member grid gap-6">
     <PageHeader eyebrow="ACCOUNT · NOTIFICATIONS" title="알림 센터 & 설정">중요한 비즈니스 수급, 금융 이자, 목표와 소식을 확인하고 수신 여부를 직접 정할 수 있습니다.</PageHeader>
@@ -26,11 +28,11 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
     {/* 7대 카테고리 알림 탭 바 & 전체 읽음 처리 */}
     <NotificationTabsBar />
     <div className="flex flex-wrap items-center gap-3 rounded-xl border p-4">
-      <Button asChild variant="outline" className="min-h-11">
+      {archiveReady ? <Button asChild variant="outline" className="min-h-11">
         <Link href="/account/notifications/notifications.csv" aria-label="내 알림 보관 기록 CSV 다운로드">
           <Download className="size-4" aria-hidden="true" /> 내 알림 CSV 다운로드
         </Link>
-      </Button>
+      </Button> : <p role="status" className="text-sm text-muted-foreground">알림 보관 기록 다운로드를 현재 제공할 수 없습니다.</p>}
       <p className="text-sm text-muted-foreground">현재 보관된 알림이 100건 이하일 때만 전체 기록을 내려받을 수 있습니다. 보상 지급 영수증은 아닙니다.</p>
     </div>
 

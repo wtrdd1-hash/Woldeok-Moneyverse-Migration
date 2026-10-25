@@ -17,6 +17,12 @@ describe('account notification settings', () => {
     expect(page.match(/className="min-h-12 w-full"/g)).toHaveLength(2);
     expect(page).toContain('설정을 바꾸지 않았으니');
   });
+  it('only offers an archive download after the authoritative complete snapshot is available', () => {
+    expect(page).toContain("'/api/v1/notifications/archive-snapshot'");
+    expect(page).toContain('archive?.complete === true');
+    expect(page).toContain('archiveReady ? <Button');
+    expect(page).toContain('알림 보관 기록 다운로드를 현재 제공할 수 없습니다.');
+  });
   it('writes through the existing member preference API and refreshes quests', () => {
     expect(actions).toContain("'/api/v1/engagement/preferences'");
     expect(actions).toContain("method: 'PUT'");
