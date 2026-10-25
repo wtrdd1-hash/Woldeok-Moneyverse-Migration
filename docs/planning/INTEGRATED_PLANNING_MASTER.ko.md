@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v2026.10.25.1266 — F675-123 일정 원천 버전·만료·개인 ICS 신뢰성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+- Draft PR [#1274](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1274) OPEN/HOLD; 개발 이슈 [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267) 갱신, main 병합·운영승격 없음.
 
 ### 회차·실제 코드 근거
 - **이전 기능 추가 v1264 → 현재 기능 보완 v1266 → 다음 기능 추가 v1268(잠정).** 원격 main c9a868b1e622341e2daa8b936ddf0988eda9988e 시작·중간 재조회. main AGENTS.md/README.md/영문 정본 PROJECT_PLAN.md/국문 대조 확인. 선행 기획 Draft #1268은 미병합이며 개발 이슈 #1267로 이관. 이번 작업은 문서 기획이지 기능 구현·운영 반영이 아님.

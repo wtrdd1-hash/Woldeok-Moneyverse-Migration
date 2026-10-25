@@ -1,5 +1,7 @@
 # Planning v1266 — Calendar Source/ICS Integrity (Documentation Draft / HOLD)
 
+- Draft PR [#1274](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1274) OPEN/HOLD; engineering issue [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267) updated.
+
 2026-10-25 KST. Previous Feature Addition v1264 → Current Feature Improvement v1266 → Next Feature Addition v1268 provisional. Unmerged parent Draft #1268; engineering issue #1267.
 
 - Source-of-truth main c9a868b1e622341e2daa8b936ddf0988eda9988e, AGENTS.md, README.md, canonical English and Korean PROJECT_PLAN. Rechecked start/mid. Local Superpowers using-superpowers, brainstorming, using-git-worktrees, writing-plans, verification-before-completion applied; plugin skills unavailable.

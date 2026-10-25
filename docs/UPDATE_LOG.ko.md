@@ -1,6 +1,7 @@
 ## 2026-10-25 v1264 — F675-123 검증형 일정 관심 목록·ICS 내보내기 (기획만, HOLD)
 
 ## v2026.10.25.1266 — F675-123 일정 원천·ICS 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- Draft PR [#1274](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1274) OPEN/HOLD; 개발 이슈 [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267) 갱신, main 병합·운영승격 없음.
 - 이전 기능 추가 v1264 → 현재 기능 보완 v1266 → 다음 기능 추가 v1268(잠정). 원격 main c9a868b1e622341e2daa8b936ddf0988eda9988e 시작·중간 확인, main AGENTS/README 및 영문 정본·국문 대조 확인. 선행 Draft #1268 미병합, 개발 이슈 #1267, 문서만 변경.
 - 실제 main: 시즌 이벤트 ends_at은 상위 시즌 종료일이며 관리자 이벤트 수정에 단조 버전 없음; 상점 판매 종료일과 재고 이용 기간은 별개; 캘린더 헬퍼는 지난 시각도 파싱되면 포함. 개선: 서버 본인 권위 원천 해석기, 이벤트+시즌/상품+재고 복합 버전, 변경→원복(ABA) 감지, 만료·비활성·품절·불명 차단, 날짜 변경 시 회원 재확인.
 - ICS는 한 DB 트랜잭션의 최신 검증 미래 일정만 일회성 스냅샷으로 생성. 불투명 영속 UID·UTC DTSTART/DTSTAMP·RFC5545 이스케이프·UTF-8 75옥텟 접기·개인 no-store·제외 건수 명시. 허구 알림·구독 피드·취소 통보 금지. 버전 묘비/HMAC 멱등, 회원 우선 잠금/100건, Android JSON, 개인정보/관리자 k≥20/SEO/접근성/KPI/롤백 명세.

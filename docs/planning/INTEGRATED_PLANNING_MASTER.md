@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v2026.10.25.1266 — F675-123 Calendar Source Revision, Expiry and Private ICS Truth (FEATURE IMPROVEMENT / PLANNING DRAFT / RELEASE HOLD)
+- Draft PR [#1274](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1274) OPEN/HOLD; development issue [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267) updated; no main merge or runtime promotion.
 
 ### Cycle and verified source boundary
 - **Previous Feature Addition v1264 → Current Feature Improvement v1266 → Next Feature Addition v1268 (provisional).** Remote main c9a868b1e622341e2daa8b936ddf0988eda9988e verified at start and midpoint; main AGENTS.md, README.md, canonical English PROJECT_PLAN.md and Korean counterpart inspected. Unmerged planning Draft #1268 remains the parent; development issue #1267 remains the engineering handoff. This is a documentation-only correction, not a live implementation.
