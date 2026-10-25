@@ -17,7 +17,7 @@ describe('business supply-chain HTTP regression (isolated Nest app, no DB writes
 
   beforeAll(async () => {
     const allow = { canActivate: () => true };
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [BusinessController],
       providers: [{ provide: BusinessService, useValue: service }],
     })
@@ -26,7 +26,7 @@ describe('business supply-chain HTTP regression (isolated Nest app, no DB writes
       .overrideGuard(ConsentGuard).useValue(allow)
       .overrideGuard(CsrfGuard).useValue(allow)
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
 
