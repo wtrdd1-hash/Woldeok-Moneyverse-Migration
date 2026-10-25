@@ -1,5 +1,7 @@
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
+- 2026-10-25 Development C v1044 (HOLD): P2P direct-trade routes now fail closed with HTTP 503 pending ledger-certified atomic WLD/inventory settlement. Removed fabricated offers and client-side swap receipts; see docs/worklog/2026-10-25-hourly-c-v1044.md. No Production promotion.
+
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - Previous Addition v1208 / Current Improvement v1210 / Next Addition v1212 provisional. Main 54d5140d unchanged start/mid; QA v1213 FAILED/HOLD; predecessor #1087 unmerged. Fix proposed RESTRICT FK, unavailable-saved REMOVE, actual `#comments-title`, transaction lock order, original digest receipts, owner HMAC cursor, account switch and 500-vs-10,001 isolated fixture. P0 ENV1210-01 SEC1210-02 REL1210-03 BOARD1210-04; P1 BOARD1210-05 BOARD1210-06 BOARD1210-07 BOARD1210-08 BOARD1210-09 BOARD1210-10. New P0 #1088: candidate image build alone must not authorize merge without actual exact-SHA Test/authenticated finance E2E. Full EN/KO integrated design; no runtime or deployment.
 - External publishers 3 reviewed; newly approved 0, cumulative UNKNOWN / 10,000 BLOCKED. Shared DB/5433, broad DML, migration266, audits, Test, restore and disk 93% remain HOLD.

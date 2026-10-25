@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -152,53 +153,47 @@ export class MarketplaceController {
   }
 
   // --- P2P Direct Trades ---
-  @Get('trades')
-  @ApiOperation({ summary: 'List my P2P direct trades' })
-  listTrades(@Req() request: RequestWithSession) {
-    return this.guarded(
-      () => this.marketplaceService.listTrades(requireUserId(request)),
-      'failed to load trades',
+  // A direct SQL status update is not an escrow or a financial receipt.
+  // Keep the authenticated/CSRF-protected route surface explicit and closed.
+  private holdDirectTrade(request: RequestWithSession): never {
+    requireUserId(request);
+    throw new ServiceUnavailableException(
+      'P2P direct trades are unavailable until atomic ledger settlement is verified',
     );
+  }
+
+  @Get('trades')
+  @ApiOperation({ summary: 'P2P direct trades unavailable pending ledger certification' })
+  listTrades(@Req() request: RequestWithSession) {
+    return this.holdDirectTrade(request);
   }
 
   @Post('trades')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Propose a new P2P 1:1 direct trade' })
-  createTrade(@Req() request: RequestWithSession, @Body() body: CreateTradeDto) {
-    return this.guarded(
-      () => this.marketplaceService.createTrade(requireUserId(request), body),
-      'failed to create trade proposal',
-    );
+  @ApiOperation({ summary: 'P2P trade proposal unavailable pending ledger certification' })
+  createTrade(@Req() request: RequestWithSession, @Body() _body: CreateTradeDto) {
+    return this.holdDirectTrade(request);
   }
 
   @Post('trades/:id/accept')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Accept a P2P 1:1 direct trade proposal (first step)' })
-  acceptTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
-    return this.guarded(
-      () => this.marketplaceService.acceptTrade(requireUserId(request), tradeId),
-      'failed to accept trade proposal',
-    );
+  @ApiOperation({ summary: 'P2P acceptance unavailable pending ledger certification' })
+  acceptTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) _tradeId: string) {
+    return this.holdDirectTrade(request);
   }
 
   @Post('trades/:id/confirm')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Sign-off and execute dual atomic swap for P2P 1:1 trade' })
-  confirmTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
-    return this.guarded(
-      () => this.marketplaceService.confirmTrade(requireUserId(request), tradeId),
-      'failed to confirm trade',
-    );
+  @ApiOperation({ summary: 'P2P swap unavailable pending ledger certification' })
+  confirmTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) _tradeId: string) {
+    return this.holdDirectTrade(request);
   }
 
   @Post('trades/:id/cancel')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Cancel a P2P 1:1 direct trade' })
-  cancelTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
-    return this.guarded(
-      () => this.marketplaceService.cancelTrade(requireUserId(request), tradeId),
-      'failed to cancel trade',
-    );
+  @ApiOperation({ summary: 'P2P cancellation unavailable pending ledger certification' })
+  cancelTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) _tradeId: string) {
+    return this.holdDirectTrade(request);
   }
 
   // --- Appraisals ---

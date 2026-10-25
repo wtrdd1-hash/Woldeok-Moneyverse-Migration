@@ -80,21 +80,19 @@ describe('MarketplaceController', () => {
     );
   });
 
-  it('createTrade, acceptTrade, confirmTrade, cancelTrade work properly', async () => {
-    const createRes = await controller.createTrade(mockReq, {
-      recipientName: '무역상인_박',
-      offeredWld: '1000',
-    });
-    expect(createRes).toBe('trade-new');
-
-    const acceptRes = await controller.acceptTrade(mockReq, 'trade-1');
-    expect(acceptRes).toBe(true);
-
-    const confirmRes = await controller.confirmTrade(mockReq, 'trade-1');
-    expect(confirmRes).toBe(true);
-
-    const cancelRes = await controller.cancelTrade(mockReq, 'trade-1');
-    expect(cancelRes).toBe(true);
+  it('keeps unverified P2P trades unavailable even when service mocks return success', async () => {
+    await expect(Promise.resolve().then(() => controller.listTrades(mockReq)))
+      .rejects.toMatchObject({ status: 503 });
+    await expect(Promise.resolve().then(() => controller.createTrade(mockReq, {
+      recipientName: '무역상인_박', offeredWld: '1000',
+    }))).rejects.toMatchObject({ status: 503 });
+    for (const action of [
+      () => controller.acceptTrade(mockReq, '22222222-2222-4222-8222-222222222222'),
+      () => controller.confirmTrade(mockReq, '22222222-2222-4222-8222-222222222222'),
+      () => controller.cancelTrade(mockReq, '22222222-2222-4222-8222-222222222222'),
+    ]) {
+      await expect(Promise.resolve().then(action)).rejects.toMatchObject({ status: 503 });
+    }
   });
 
   it('listAppraisals and requestAppraisal work properly', async () => {

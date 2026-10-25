@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -301,25 +301,22 @@ export class MarketplaceService {
   }
 
   // --- Direct P2P Trades ---
-  async listTrades(actor: string): Promise<unknown[]> {
-    if (!this.pool) throw new Error('database pool unavailable');
-    return queryRows(
-      this.pool,
-      `SELECT id::text, sender_id::text AS "senderId", sender_name AS "senderName",
-              recipient_id::text AS "recipientId", recipient_name AS "recipientName",
-              offered_items AS "offeredItems", offered_wld::text AS "offeredWld",
-              requested_items AS "requestedItems", requested_wld::text AS "requestedWld",
-              status, created_at::text AS "createdAt"
-       FROM public.marketplace_p2p_trades
-       WHERE sender_id = $1::uuid OR recipient_id = $1::uuid
-       ORDER BY created_at DESC`,
-      [actor],
+  // HOLD: legacy trade SQL only changed the status column. It never moved
+  // escrowed items/WLD via the atomic ledger. Do not allow any caller to
+  // bypass the HTTP boundary and mistake that UPDATE for a completed swap.
+  private directTradeUnavailable(): never {
+    throw new ServiceUnavailableException(
+      'P2P direct trades are unavailable until atomic ledger settlement and owner-only reads are verified',
     );
   }
 
+  async listTrades(_actor: string): Promise<unknown[]> {
+    return this.directTradeUnavailable();
+  }
+
   async createTrade(
-    actor: string,
-    dto: {
+    _actor: string,
+    _dto: {
       recipientName: string;
       offeredItems?: Array<{ name: string; quantity: number; rarity?: string }>;
       offeredWld?: string;
@@ -327,83 +324,19 @@ export class MarketplaceService {
       requestedWld?: string;
     },
   ): Promise<string | null> {
-    if (!this.pool) throw new Error('database pool unavailable');
-    const senderRow = await queryOne<{ name: string }>(
-      this.pool,
-      `SELECT COALESCE(display_name, '시민') AS name FROM public.users WHERE id = $1::uuid`,
-      [actor],
-    );
-    const senderName = senderRow?.name ?? '시민';
-
-    const targetUser = await queryOne<{ id: string; name: string }>(
-      this.pool,
-      `SELECT id::text, COALESCE(display_name, username) AS name FROM public.users
-       WHERE display_name = $1 OR username = $1 LIMIT 1`,
-      [dto.recipientName],
-    );
-
-    const recipientId = targetUser?.id ?? actor; // Fallback to actor or target
-    const recipientName = targetUser?.name ?? dto.recipientName;
-
-    const row = await queryOne<{ id: string }>(
-      this.pool,
-      `INSERT INTO public.marketplace_p2p_trades (
-         sender_id, sender_name, recipient_id, recipient_name,
-         offered_items, offered_wld, requested_items, requested_wld, status
-       ) VALUES (
-         $1, $2, $3::uuid, $4, $5::jsonb, $6::numeric, $7::jsonb, $8::numeric, 'PROPOSED'
-       ) RETURNING id::text`,
-      [
-        actor,
-        senderName,
-        recipientId,
-        recipientName,
-        JSON.stringify(dto.offeredItems ?? []),
-        dto.offeredWld || '0',
-        JSON.stringify(dto.requestedItems ?? []),
-        dto.requestedWld || '0',
-      ],
-    );
-    return row?.id ?? null;
+    return this.directTradeUnavailable();
   }
 
-  async acceptTrade(actor: string, tradeId: string): Promise<boolean> {
-    if (!this.pool) throw new Error('database pool unavailable');
-    const row = await queryOne<{ id: string }>(
-      this.pool,
-      `UPDATE public.marketplace_p2p_trades
-       SET status = 'ACCEPTED_BY_PEER'
-       WHERE id = $1::uuid AND (recipient_id = $2::uuid OR sender_id = $2::uuid) AND status = 'PROPOSED'
-       RETURNING id::text`,
-      [tradeId, actor],
-    );
-    return !!row?.id;
+  async acceptTrade(_actor: string, _tradeId: string): Promise<boolean> {
+    return this.directTradeUnavailable();
   }
 
-  async confirmTrade(actor: string, tradeId: string): Promise<boolean> {
-    if (!this.pool) throw new Error('database pool unavailable');
-    const row = await queryOne<{ id: string }>(
-      this.pool,
-      `UPDATE public.marketplace_p2p_trades
-       SET status = 'COMPLETED', completed_at = clock_timestamp()
-       WHERE id = $1::uuid AND (sender_id = $2::uuid OR recipient_id = $2::uuid) AND status = 'ACCEPTED_BY_PEER'
-       RETURNING id::text`,
-      [tradeId, actor],
-    );
-    return !!row?.id;
+  async confirmTrade(_actor: string, _tradeId: string): Promise<boolean> {
+    return this.directTradeUnavailable();
   }
 
-  async cancelTrade(actor: string, tradeId: string): Promise<boolean> {
-    if (!this.pool) throw new Error('database pool unavailable');
-    const row = await queryOne<{ id: string }>(
-      this.pool,
-      `UPDATE public.marketplace_p2p_trades
-       SET status = 'CANCELLED', cancelled_at = clock_timestamp()
-       WHERE id = $1::uuid AND (sender_id = $2::uuid OR recipient_id = $2::uuid) AND status IN ('PROPOSED', 'ACCEPTED_BY_PEER')
-       RETURNING id::text`,
-      [tradeId, actor],
-    );
-    return !!row?.id;
+  async cancelTrade(_actor: string, _tradeId: string): Promise<boolean> {
+    return this.directTradeUnavailable();
   }
 
   // --- Appraisals ---
