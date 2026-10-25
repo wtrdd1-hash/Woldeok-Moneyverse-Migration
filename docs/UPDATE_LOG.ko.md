@@ -1,4 +1,7 @@
 ## 2026-10-26 — 기획 v1290 F675-129 상점 찜 목록 무결성 (기능 보완 / 초안 / 보류)
+## 2026-10-26 — 기획 v1294 F675-130 알림 무결성 (기능 보완 / DRAFT / HOLD)
+- 이전 추가 v1292 → 현재 보완 v1294 → 다음 추가 v1296. main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 재확인. 기존 NestJS CSRF 읽음 API 유지, 모의 알림·장마감 표시 차단, unreadOnly=false 변환 위험·모두 읽음 상한 경합·UUID 커서·분류 근거 보완. ENV1294-01 SEC1294-02 REL1294-03 NOT1294-04 NOT1294-05 NOT1294-06 NOT1294-07 NOT1294-08 NOT1294-09 NOT1294-10. 루트 99%/1.6GiB, 운영 HOLD. 외부 근거 신규 승인 0/누적 UNKNOWN·10,000 BLOCKED. 문서만 변경.
+
 - **GitHub v1292:** [기획 Draft PR #1354](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354) (미병합 #1349 기반); [개발 이슈 #1353](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353); [서버 용량 #1170 업데이트](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178). 문서만 수정, DRAFT / RELEASE HOLD.
 ## 2026-10-26 — 기획 v1292 F675-130 알림 수신 제어 (기능 추가 / DRAFT / HOLD)
 - 이전 보완 v1290 → 현재 추가 v1292 → 다음 보완 v1294 잠정. main 1c5b84a1 시작·중간 확인, 미병합 #1349 기반; 개발/QA 작업 격리.
