@@ -77,7 +77,7 @@ export class EnterpriseRepository {
         coalesce(sum(total_assets_wld), 0)::numeric::text AS total_assets,
         coalesce(sum(operating_revenue_hourly_wld), 0)::numeric::text AS total_revenue,
         coalesce(sum(net_profit_hourly_wld), 0)::numeric::text AS total_profit,
-        coalesce(sum(net_profit_hourly_wld * dividend_rate_bps / 10000), 0)::numeric::text AS total_dividends
+        floor(coalesce(sum(net_profit_hourly_wld * dividend_rate_bps / 10000), 0))::numeric(30,0)::text AS total_dividends
       FROM public.state_enterprises
       WHERE status = 'ACTIVE'
     `);

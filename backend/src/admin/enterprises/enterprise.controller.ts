@@ -7,6 +7,7 @@ import {
   Put,
   Query,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -81,18 +82,26 @@ export class PublicEnterpriseController {
   @Get('public')
   @ApiOperation({ summary: '대국민 알리오(ALIO) 공기업 경영정보 공개 공시' })
   async getPublicEnterprises() {
-    const [overview, soes, privateEnterprises] = await Promise.all([
-      this.service.getStateHoldingOverview(),
-      this.service.listStateEnterprises(),
-      this.service.listPrivateEnterprises(),
-    ]);
+    try {
+      const [overview, soes, privateEnterprises] = await Promise.all([
+        this.service.getStateHoldingOverview(),
+        this.service.listStateEnterprises(),
+        this.service.listPrivateEnterprises(),
+      ]);
 
-    return {
-      overview,
-      soes,
-      privateEnterprises,
-      disclosed_at: new Date().toISOString(),
-      standards: 'OECD 공기업 지배구조 가이드라인 및 대한민국 공운법 표준',
-    };
+      return {
+        source: 'DATABASE_SNAPSHOT' as const,
+        // Stored hourly estimates are not proof of a treasury ledger posting.
+        settlementStatus: 'NOT_VERIFIED' as const,
+        overview,
+        soes,
+        privateEnterprises,
+        disclosed_at: new Date().toISOString(),
+        standards: 'In-game virtual enterprise operating assumptions; no settlement attestation',
+      };
+    } catch {
+      // Do not expose SQL connection details or fabricate a public financial report.
+      throw new ServiceUnavailableException('enterprise disclosure unavailable');
+    }
   }
 }
