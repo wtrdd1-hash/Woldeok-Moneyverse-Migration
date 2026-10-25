@@ -2,66 +2,97 @@ import { getServerLocale } from '@/lib/locale-server';
 import { localeLabel } from '@/lib/locale';
 import React from 'react';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import Link from 'next/link';
-import { ArrowLeft, Coins, HelpCircle, Info, PieChart, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Coins } from 'lucide-react';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { DividendCalculatorClient } from './dividend-calculator-client';
 import { DividendCalendarWidget } from '@/components/dividend-calendar-widget';
+import { DomesticRegulationBanner } from '@/components/domestic-regulation-banner';
 
-import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
+type SupportedLocale = 'ko' | 'en' | 'ja' | 'zh' | 'vi';
 
-export const metadata: Metadata = {
-  title: '[무료/무로그인] 배당소득세 계산기 — 1초 만에 국내·미국 배당주 15.4% 세후 실수령액 & 2000만원 종합과세 즉시 산출 | 월덕 머니버스',
-  description: '[로그인 없이 1초 산출] 배당수익률(Dividend Yield)과 국내·미국 주식 15.4% 원천징수 후 순수령액, 2,000만원 초과 금융소득종합과세 해당 여부를 실시간으로 즉시 확인하세요!',
-  keywords: [
-    'dividend yield',
-    'dividend',
-    '배당소득세 계산기',
-    '배당금 세금',
-    '배당수익률 계산',
-    '미국 배당주 세금',
-    '금융소득종합과세 2000만원',
-    '배당 실수령액',
-    'ISA 계좌 배당 절세',
-  ],
-  alternates: {
-    canonical: canonicalUrl('/tools/dividend-tax-calculator'),
-    languages: {
-      'ko-KR': canonicalUrl('/tools/dividend-tax-calculator'),
-      'en-US': canonicalUrl('/en/tools/dividend-tax-calculator'),
-      'ja-JP': canonicalUrl('/ja/tools/dividend-tax-calculator'),
-      'zh-CN': canonicalUrl('/zh/tools/dividend-tax-calculator'),
-      'x-default': canonicalUrl('/tools/dividend-tax-calculator'),
+function getLocaleFromPath(pathname: string): SupportedLocale {
+  if (pathname.startsWith('/en')) return 'en';
+  if (pathname.startsWith('/ja')) return 'ja';
+  if (pathname.startsWith('/zh')) return 'zh';
+  if (pathname.startsWith('/vi')) return 'vi';
+  return 'ko';
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const headerList = await headers();
+  const pathname = headerList.get('x-pathname') || headerList.get('x-invoke-path') || '';
+  const locale = getLocaleFromPath(pathname);
+
+  const metaByLocale: Record<SupportedLocale, { title: string; description: string; canonical: string; keywords: string[] }> = {
+    ko: {
+      title: '[무료/무로그인] 배당소득세 계산기 — 1초 만에 국내·미국 배당주 15.4% 세후 실수령액 & 2000만원 종합과세 즉시 산출 | 월덕 머니버스',
+      description: '[로그인 없이 1초 산출] 배당수익률(Dividend Yield)과 국내·미국 주식 15.4% 원천징수 후 순수령액, 2,000만원 초과 금융소득종합과세 해당 여부를 실시간으로 즉시 확인하세요!',
+      canonical: 'https://easy-scraping.com/tools/dividend-tax-calculator',
+      keywords: ['배당소득세 계산기', '배당금 세금', '배당수익률 계산', '미국 배당주 세금', '금융소득종합과세 2000만원', '배당 실수령액', 'ISA 계좌 배당 절세'],
     },
-  },
-  openGraph: {
-    title: '[무료/무로그인] 배당소득세 & 2,000만원 금융종합과세 시뮬레이터 | 월덕 머니버스',
-    description: '배당수익률(Dividend Yield)과 원천징수 세금, 실수령 배당금 및 종합과세 해당 여부를 즉시 계산합니다.',
-    url: canonicalUrl('/tools/dividend-tax-calculator'),
-    type: 'website',
-    images: [
-      {
-        url: buildOgImageUrl({
-          title: '배당소득세 & Dividend Yield 계산기',
-          description: '국내·미국 배당주 15.4% 원천징수 및 2,000만원 금융종합과세',
-          badge: '무료/무로그인 1초 시뮬레이터',
-          type: 'default',
-        }),
-        width: 1200,
-        height: 630,
-        alt: '배당소득세 계산기',
+    en: {
+      title: 'Dividend Income Tax & Withholding Calculator | Free Dividend Yield Simulator | Woldeok Moneyverse',
+      description: 'Calculate net dividend payouts after 15.4% withholding tax for domestic and US stocks. Check 20M KRW comprehensive financial income tax thresholds in seconds.',
+      canonical: 'https://easy-scraping.com/en/tools/dividend-tax-calculator',
+      keywords: ['Dividend Tax Calculator', 'Dividend Yield Simulator', 'Withholding Tax Calculator', 'US Stock Dividend Tax', 'Post-Tax Dividend Calculator'],
+    },
+    ja: {
+      title: '配当所得税・源泉徴収計算機 | 無料シミュレーター | Woldeok Moneyverse',
+      description: '国内・米国株式の配当金源泉徴収（15.4％）後の実質手取り額と、2,000万ウォン金融所得総合課税基準を即時シミュレーション。',
+      canonical: 'https://easy-scraping.com/ja/tools/dividend-tax-calculator',
+      keywords: ['配当所得税 計算機', '配当金 手取り', '配当利回り シミュレーター', '米国株 配当 税金'],
+    },
+    zh: {
+      title: '股息红利所得税与到手收益计算器 | 免费股息模拟器 | Woldeok Moneyverse',
+      description: '精准计算国内与美股股息扣除 15.4% 预扣税后的税后实际到手金额，一秒判断是否超出 2000 万韩元综合课税门槛。',
+      canonical: 'https://easy-scraping.com/zh/tools/dividend-tax-calculator',
+      keywords: ['股息税计算器', '股息率模拟', '美股分红税', '股息实际到手计算'],
+    },
+    vi: {
+      title: 'Máy tính Thuế Thu nhập Cổ tức | Woldeok Moneyverse',
+      description: 'Tính toán số tiền cổ tức thực nhận sau thuế khấu trừ 15.4% cho cổ phiếu nội địa và chứng khoán Mỹ, cùng ngưỡng thuế tổng hợp.',
+      canonical: 'https://easy-scraping.com/vi/tools/dividend-tax-calculator',
+      keywords: ['Thuế cổ tức', 'Máy tính cổ tức', 'Thuế khấu trừ tại nguồn', 'Lợi suất cổ tức'],
+    },
+  };
+
+  const currentMeta = metaByLocale[locale] ?? metaByLocale['ko'];
+
+  return {
+    title: currentMeta.title,
+    description: currentMeta.description,
+    keywords: currentMeta.keywords,
+    alternates: {
+      canonical: currentMeta.canonical,
+      languages: {
+        'ko-KR': 'https://easy-scraping.com/tools/dividend-tax-calculator',
+        'en-US': 'https://easy-scraping.com/en/tools/dividend-tax-calculator',
+        'ja-JP': 'https://easy-scraping.com/ja/tools/dividend-tax-calculator',
+        'zh-CN': 'https://easy-scraping.com/zh/tools/dividend-tax-calculator',
+        'vi-VN': 'https://easy-scraping.com/vi/tools/dividend-tax-calculator',
+        'x-default': 'https://easy-scraping.com/tools/dividend-tax-calculator',
       },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: '[무료/무로그인] 배당소득세 & 2,000만원 금융종합과세 시뮬레이터 | 월덕 머니버스',
-    description: '배당수익률(Dividend Yield)과 원천징수 세금, 실수령 배당금 및 종합과세 해당 여부를 즉시 계산합니다.',
-  },
-};
+    },
+    openGraph: {
+      title: currentMeta.title,
+      description: currentMeta.description,
+      url: currentMeta.canonical,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: currentMeta.title,
+      description: currentMeta.description,
+    },
+  };
+}
 
 export default async function DividendTaxCalculatorPage() {
   const locale = await getServerLocale();
+  const isEn = locale !== 'ko';
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
@@ -69,41 +100,6 @@ export default async function DividendTaxCalculatorPage() {
     description: '배당수익률 및 국내/미국 주식 배당금 원천징수 세액, 2,000만원 금융소득종합과세 계산기',
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'All',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'KRW',
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '1190',
-      bestRating: '5',
-      worstRating: '1',
-    },
-  };
-
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: '배당소득이 연간 2,000만원을 넘으면 어떻게 과세되나요?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: '이자소득과 배당소득의 합계가 연간 2,000만원을 초과하면 금융소득종합과세 대상자가 되며, 2,000만원 초과분은 다른 종합소득(근로·사업소득 등)과 합산되어 6%~45%의 누진세율이 적용됩니다.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: '미국 배당주와 국내 배당주의 세금 차이는 무엇인가요?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: '국내 주식은 배당소득세 14% + 지방소득세 1.4% = 총 15.4%가 원천징수됩니다. 미국 주식은 한미 조세조약에 따라 미국 현지에서 15%가 원천징수되며, 국내 추가 원천징수는 없습니다. 단, 두 경우 모두 연 2,000만원 합산 한도에 포함됩니다.',
-        },
-      },
-    ],
   };
 
   return (
@@ -112,16 +108,19 @@ export default async function DividendTaxCalculatorPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 space-y-6">
+        {/* 한국 법제도 고유 계산기 글로벌 안내 배너 */}
+        <DomesticRegulationBanner
+          toolName="2026 대한민국 배당소득세 계산기 (South Korea Dividend Tax & 20M KRW Threshold Calculator)"
+          recommendedAlternativeUrl="/tools/stock-calculator"
+          recommendedAlternativeLabel={isEn ? 'Explore Global Stock DCA Calculator' : '글로벌 주식 물타기/DCA 계산기 보기'}
+        />
+
         {/* 상단 내비게이션 */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between">
           <Link
-            href="/tools"
+            href={locale === 'ko' ? '/tools' : `/${locale}/tools`}
             className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -131,10 +130,10 @@ export default async function DividendTaxCalculatorPage() {
         </div>
 
         {/* 헤더 */}
-        <div className="mb-8">
+        <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-3">
             <Coins className="w-3.5 h-3.5" />
-            <span>2026년 배당소득세 및 금융종합과세 기준</span>
+            <span>{isEn ? '2026 Dividend Tax & Comprehensive Taxation Benchmarks' : '2026년 배당소득세 및 금융종합과세 기준'}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
             {localeLabel(
@@ -147,82 +146,27 @@ export default async function DividendTaxCalculatorPage() {
             )}
           </h1>
           <p className="text-sm text-zinc-400 leading-relaxed">
-            원천징수 15.4% 세액과 통장에 입금되는 실수령 배당금, 2,000만원 초과 시 종합과세 부담을 즉시 계산합니다.
+            {isEn
+              ? 'Calculate post-tax net dividend income after 15.4% withholding tax and inspect the KRW 20,000,000 comprehensive financial income tax threshold in real time.'
+              : '원천징수 15.4% 세액과 통장에 입금되는 실수령 배당금, 2,000만원 초과 시 종합과세 부담을 즉시 계산합니다.'}
           </p>
         </div>
 
-        {/* 상단 고단가 인아티클 광고 */}
-        <div className="my-6">
-          <InArticleAdvertisement />
-        </div>
-
-        {/* 인터랙티브 배당 계산기 클라이언트 컴포넌트 */}
+        {/* 메인 계산기 클라이언트 */}
         <DividendCalculatorClient />
 
-        {/* 신규 배당 캘린더 인터랙티브 대시보드 위젯 */}
-        <div className="my-8">
+        {/* 배당 캘린더 위젯 */}
+        <div className="mt-8">
           <DividendCalendarWidget />
         </div>
 
-        {/* 중간 멀티플렉스 고단가 광고 */}
-
-        <div className="my-10">
-          <MultiplexAdvertisement />
+        {/* 인아티클 광고 */}
+        <div className="my-8">
+          <InArticleAdvertisement />
         </div>
 
-        {/* 절세 팁 가이드 */}
-        <div className="mt-12 space-y-6">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-            <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
-              <PieChart className="w-4 h-4 text-emerald-400" />
-              배당소득세 절세를 위한 3대 핵심 전략
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-zinc-400">
-              <div className="p-3.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-                <span className="font-semibold text-zinc-200 block mb-1">1. 중개형 ISA 계좌 활용</span>
-                배당소득에 대해 일반형 최대 200만원, 서민형 최대 400만원까지 비과세되며 초과분도 9.9% 분리과세로 종결됩니다.
-              </div>
-              <div className="p-3.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-                <span className="font-semibold text-zinc-200 block mb-1">2. 연금저축/IRP 연계</span>
-                배당금을 인출할 때까지 세금이 이연(과세이연)되며, 추후 연금 수령 시 3.3%~5.5%의 저율 연금소득세만 납부합니다.
-              </div>
-              <div className="p-3.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-                <span className="font-semibold text-zinc-200 block mb-1">3. 부부 증여 및 명의 분산</span>
-                금융소득종합과세 기준 2,000만원은 개인별로 산정되므로 배우자 증여(10년 6억원 공제)를 통해 자산을 분산합니다.
-              </div>
-            </div>
-          </div>
-
-          {/* 자주 묻는 질문 FAQ */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-            <h3 className="text-base font-semibold text-white mb-4 flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-emerald-400" />
-              자주 묻는 질문 (FAQ)
-            </h3>
-            <div className="space-y-4 text-xs">
-              <div>
-                <h4 className="font-semibold text-zinc-200 mb-1">Q. 배당락일과 배당금 지급일은 어떻게 다른가요?</h4>
-                <p className="text-zinc-400 leading-relaxed">
-                  배당기준일 2영업일 전까지 주식을 매수해야 배당을 받을 권리가 주어집니다. 권리가 사라지는 날이 배당락일이며, 실제 배당금이 증권계좌로 입금되는 날은 주주총회 결의 후 1~2개월 뒤 지급됩니다.
-                </p>
-              </div>
-              <div className="pt-3 border-t border-zinc-800">
-                <h4 className="font-semibold text-zinc-200 mb-1">Q. 건강보험료 피부양자 자격 탈락 기준은 얼마인가요?</h4>
-                <p className="text-zinc-400 leading-relaxed">
-                  연간 합산 금융소득(이자+배당)이 1,000만원을 초과하거나 종합소득이 2,000만원을 초과하는 경우 국민건강보험 피부양자 자격이 박탈되어 지역가입자로 전환될 수 있습니다.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 법적 고지 */}
-        <div className="mt-8 pt-4 border-t border-zinc-800 text-[11px] text-zinc-500 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-            <span>본 계산기는 모의 시뮬레이션용이며, 실제 세액은 개인별 타 소득 및 국세청 확정신고 기준에 따라 상이할 수 있습니다.</span>
-          </div>
-        </div>
+        {/* 하단 추천 광고 */}
+        <MultiplexAdvertisement className="mt-8" />
       </div>
     </div>
   );

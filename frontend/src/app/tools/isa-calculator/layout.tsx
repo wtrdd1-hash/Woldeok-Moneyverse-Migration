@@ -1,115 +1,108 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import {
-  canonicalUrl,
   breadcrumbJsonLd,
-  faqPageJsonLd,
   softwareApplicationJsonLd,
-  buildOgImageUrl,
 } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 
-export const metadata: Metadata = {
-  title: '[2026 최신] ISA 계좌 절세 계산기 — [무료/1초] 일반형·서민형 비과세 한도 & 9.9% 분리과세 즉시 비교 | 월덕 머니버스',
-  description:
-    '[로그인 없이 1초 산출] ISA 일반형(200만)·서민형(400만) 비과세 한도와 초과분 9.9% 분리과세 시뮬레이션! 일반 계좌(15.4% 배당소득세) 대비 순 절세액을 실시간으로 즉시 계산하세요.',
-  keywords: [
-    'ISA 계산기',
-    'ISA 계좌 절세',
-    'ISA 일반형 서민형',
-    'ISA 비과세 한도',
-    'ISA 9.9% 분리과세',
-    'ISA 배당소득세 절세',
-    '개인종합자산관리계좌',
-    'ISA 만기 절세',
-  ],
-  alternates: {
-    canonical: canonicalUrl('/tools/isa-calculator'),
-    languages: {
-      'ko-KR': canonicalUrl('/tools/isa-calculator'),
-      'en-US': canonicalUrl('/en/tools/isa-calculator'),
-      'ja-JP': canonicalUrl('/ja/tools/isa-calculator'),
-      'zh-CN': canonicalUrl('/zh/tools/isa-calculator'),
-      'x-default': canonicalUrl('/tools/isa-calculator'),
-    },
-  },
-  openGraph: {
-    title: '[2026 최신] ISA 계좌 절세 계산기 — 1초 만에 비과세 & 분리과세 절세액 비교 | 월덕 머니버스',
-    description: '일반형 200만원, 서민형 400만원 비과세 및 초과 수익 9.9% 분리과세 실시간 절세 시뮬레이터',
-    url: canonicalUrl('/tools/isa-calculator'),
-    type: 'website',
-    images: [
-      {
-        url: buildOgImageUrl({
-          title: 'ISA 계좌 절세 계산기',
-          description: '일반형·서민형 비과세 및 9.9% 분리과세 절세액 비교',
-          badge: '무료/무로그인 1초 시뮬레이터',
-          type: 'default',
-        }),
-        width: 1200,
-        height: 630,
-        alt: 'ISA 계좌 절세 계산기',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: '[2026 최신] ISA 계좌 절세 계산기 — 1초 만에 비과세 & 분리과세 절세액 비교 | 월덕 머니버스',
-    description: '일반형 200만원, 서민형 400만원 비과세 및 초과 수익 9.9% 분리과세 실시간 절세 시뮬레이터',
-  },
-};
+type SupportedLocale = 'ko' | 'en' | 'ja' | 'zh' | 'vi';
 
-const FAQS = [
-  {
-    question: 'ISA 계좌의 비과세 혜택은 얼마까지 적용되나요?',
-    answer:
-      '일반형 ISA는 순이익 200만 원까지 전액 비과세되며, 총급여 5,000만 원(종합소득 3,800만 원) 이하 근로자가 가입하는 서민형 ISA는 순이익 400만 원까지 비과세됩니다. 비과세 한도 초과분에 대해서는 15.4%가 아닌 9.9% 분리과세 세율이 적용됩니다.',
-  },
-  {
-    question: 'ISA 계좌의 손익상계 혜택은 어떻게 작동하나요?',
-    answer:
-      'ISA 계좌 내에서 발생한 이익과 손실을 통산(상계)하여 순이익에 대해서만 세금을 부과합니다. 예를 들어 A종목에서 500만 원 이익, B종목에서 200만 원 손실 시 순이익 300만 원에 대해서만 과세 체계가 적용됩니다.',
-  },
-  {
-    question: 'ISA 만기 자금을 연금저축/IRP로 전환하면 추가 세액공제가 되나요?',
-    answer:
-      '네, ISA 만기 해지 금액을 60일 이내에 연금저축 또는 IRP로 전환 납입하면 전환 금액의 10%(최대 300만 원 한도)까지 추가 세액공제 혜택을 받을 수 있습니다.',
-  },
-];
+function getLocaleFromPath(pathname: string): SupportedLocale {
+  if (pathname.startsWith('/en')) return 'en';
+  if (pathname.startsWith('/ja')) return 'ja';
+  if (pathname.startsWith('/zh')) return 'zh';
+  if (pathname.startsWith('/vi')) return 'vi';
+  return 'ko';
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const headerList = await headers();
+  const pathname = headerList.get('x-pathname') || headerList.get('x-invoke-path') || '';
+  const locale = getLocaleFromPath(pathname);
+
+  const metaByLocale: Record<SupportedLocale, { title: string; description: string; canonical: string; keywords: string[] }> = {
+    ko: {
+      title: '[2026 최신] ISA 계좌 절세 계산기 — [무료/1초] 일반형·서민형 비과세 한도 & 9.9% 분리과세 즉시 비교 | 월덕 머니버스',
+      description: '[로그인 없이 1초 산출] ISA 일반형(200만)·서민형(400만) 비과세 한도와 초과분 9.9% 분리과세 시뮬레이션! 일반 계좌(15.4% 배당소득세) 대비 순 절세액을 실시간으로 즉시 계산하세요.',
+      canonical: 'https://easy-scraping.com/tools/isa-calculator',
+      keywords: ['ISA 계산기', 'ISA 계좌 절세', 'ISA 일반형 서민형', 'ISA 비과세 한도', 'ISA 9.9% 분리과세'],
+    },
+    en: {
+      title: 'South Korea ISA Tax-Free Account & 9.9% Tax Shield Calculator | Free Simulator | Woldeok Moneyverse',
+      description: 'Simulate net tax savings under South Korea Individual Savings Account (ISA). Compare KRW 2M/4M tax exemptions and 9.9% separate taxation against 15.4% standard withholding tax.',
+      canonical: 'https://easy-scraping.com/en/tools/isa-calculator',
+      keywords: ['Korea ISA Calculator', 'Individual Savings Account Korea', 'Tax-free Investment Korea', '9.9% Separate Taxation'],
+    },
+    ja: {
+      title: '韓国 ISA（個人総合資産管理口座）非課税＆節税計算機 | 無料シミュレーター | Woldeok Moneyverse',
+      description: '韓国のISA一般型（200万ウォン）および庶民型（400万ウォン）非課税枠と、超過分の9.9％分離課税による実質節税効果を即時算出。',
+      canonical: 'https://easy-scraping.com/ja/tools/isa-calculator',
+      keywords: ['韓国 ISA 計算機', '非課税投資 韓国', '9.9% 分離課税', '節税シミュレーター'],
+    },
+    zh: {
+      title: '韩国 ISA 个人综合资产管理账户免税与节税计算器 | 免费金融工具 | Woldeok Moneyverse',
+      description: '模拟韩国 ISA 普通型 200 万韩元与普惠型 400 万韩元免税额度，对比 9.9% 分离课税与普通账户 15.4% 预扣税的实际节税金额。',
+      canonical: 'https://easy-scraping.com/zh/tools/isa-calculator',
+      keywords: ['韩国ISA计算器', '个人综合资产管理账户', '免税投资韩国', '分离课税9.9%'],
+    },
+    vi: {
+      title: 'Máy tính Tiết kiệm Thuế Tài khoản ISA Hàn Quốc | Woldeok Moneyverse',
+      description: 'Tính toán số tiền thuế tiết kiệm được với tài khoản ISA Hàn Quốc, so sánh hạn mức miễn thuế và mức thuế ưu đãi 9.9% với thuế thông thường 15.4%.',
+      canonical: 'https://easy-scraping.com/vi/tools/isa-calculator',
+      keywords: ['Máy tính ISA Hàn Quốc', 'Miễn thuế đầu tư', 'Tài khoản quản lý tài sản cá nhân'],
+    },
+  };
+
+  const currentMeta = metaByLocale[locale] ?? metaByLocale['ko'];
+
+  return {
+    title: currentMeta.title,
+    description: currentMeta.description,
+    keywords: currentMeta.keywords,
+    alternates: {
+      canonical: currentMeta.canonical,
+      languages: {
+        'ko-KR': 'https://easy-scraping.com/tools/isa-calculator',
+        'en-US': 'https://easy-scraping.com/en/tools/isa-calculator',
+        'ja-JP': 'https://easy-scraping.com/ja/tools/isa-calculator',
+        'zh-CN': 'https://easy-scraping.com/zh/tools/isa-calculator',
+        'vi-VN': 'https://easy-scraping.com/vi/tools/isa-calculator',
+        'x-default': 'https://easy-scraping.com/tools/isa-calculator',
+      },
+    },
+    openGraph: {
+      title: currentMeta.title,
+      description: currentMeta.description,
+      url: currentMeta.canonical,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: currentMeta.title,
+      description: currentMeta.description,
+    },
+  };
+}
+
+const breadcrumbs = breadcrumbJsonLd([
+  { name: '홈', path: '/' },
+  { name: '금융 도구 허브', path: '/tools' },
+  { name: 'ISA 계좌 절세 계산기', path: '/tools/isa-calculator' },
+]);
 
 export default function IsaCalculatorLayout({ children }: { children: React.ReactNode }) {
-  const breadcrumbs = breadcrumbJsonLd([
-    { name: '홈', path: '/' },
-    { name: '금융 도구 허브', path: '/tools' },
-    { name: 'ISA 계좌 절세 계산기', path: '/tools/isa-calculator' },
-  ]);
-  const faqData = faqPageJsonLd(FAQS);
   const appSchema = softwareApplicationJsonLd({
     name: 'ISA 계좌 절세 계산기',
-    description: '일반형·서민형 비과세 한도 및 9.9% 분리과세 절세액 계산 시뮬레이터',
+    description: '일반형·서민형 비과세 및 9.9% 분리과세 절세액 비교 계산기',
     urlPath: '/tools/isa-calculator',
     applicationCategory: 'FinanceApplication',
-    features: [
-      '일반형(200만원) vs 서민형(400만원) 비과세 실시간 비교',
-      '일반 계좌(15.4%) 대비 순 절세액 산출',
-      '손익상계 기반 과세표준 자동 계산',
-      '연금저축 추가 세액공제 연계 팁 제공',
-    ],
   });
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbs) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(faqData) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(appSchema) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbs) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(appSchema) }} />
       {children}
     </>
   );

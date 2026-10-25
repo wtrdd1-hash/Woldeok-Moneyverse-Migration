@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import { BookOpen, Calculator, Globe, Sparkles, TrendingUp, Layers, HelpCircle, ArrowRight, ShieldCheck, CheckCircle2, Zap, Coins } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BookOpen, Globe, Sparkles, CheckCircle2, Coins } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useLocale } from '@/components/locale-provider';
 
 interface FinancialTerm {
   readonly id: string;
@@ -15,51 +15,61 @@ interface FinancialTerm {
   readonly termEn: string;
   readonly category: 'stock' | 'banking' | 'macro';
   readonly formula?: string;
+  readonly formulaEn?: string;
   readonly explanationKo: string;
   readonly explanationEn: string;
   readonly realWorldExample: string;
+  readonly realWorldExampleEn: string;
 }
 
 const FINANCIAL_TERMS: readonly FinancialTerm[] = [
   {
     id: 'per',
     term: 'PER (주가수익비율)',
-    termEn: 'Price-to-Earnings Ratio',
+    termEn: 'PER (Price-to-Earnings Ratio)',
     category: 'stock',
     formula: '주가 ÷ 1주당 순이익(EPS)',
+    formulaEn: 'Stock Price ÷ Earnings Per Share (EPS)',
     explanationKo: '기업이 벌어들이는 순이익 대비 주가가 몇 배로 거래되고 있는지를 나타내는 대표적인 가치평가(밸류에이션) 지표입니다.',
-    explanationEn: 'Measures a company\'s current share price relative to its per-share earnings, indicating valuation level.',
+    explanationEn: 'Measures a company\'s current share price relative to its per-share earnings, indicating market valuation level.',
     realWorldExample: 'PER이 10배라면, 현재 순이익 수준이 10년 동안 유지될 때 투자 원금을 회수할 수 있다는 의미입니다.',
+    realWorldExampleEn: 'A P/E of 10 means it will take 10 years of current net earnings to recoup the initial capital invested.',
   },
   {
     id: 'rule72',
     term: '72의 법칙 (복리 배가 공식)',
-    termEn: 'The Rule of 72',
+    termEn: 'The Rule of 72 (Compound Doubling)',
     category: 'banking',
     formula: '원금 2배 달성 연수 = 72 ÷ 연 복리 수익률(%)',
+    formulaEn: 'Years to Double = 72 ÷ Annual Compound Rate (%)',
     explanationKo: '복리 투자를 진행할 때 내 자산 원금이 정확히 2배로 불어나는 데 걸리는 시간을 암산할 수 있는 수학 공식입니다.',
-    explanationEn: 'A simple mathematical shortcut to estimate the number of years required to double money at a fixed compound rate.',
+    explanationEn: 'A mental shortcut to estimate the number of years required to double invested money at a given compound rate.',
     realWorldExample: '연 7.2% 복리 예금에 1,000만 원을 넣어두면 10년(72 ÷ 7.2) 뒤 원금이 2,000만 원이 됩니다.',
+    realWorldExampleEn: 'At a 7.2% annual compound return, an initial investment doubles in exactly 10 years (72 ÷ 7.2).',
   },
   {
     id: 'dca',
     term: 'DCA (정액 분할 적립식 매수)',
-    termEn: 'Dollar-Cost Averaging',
+    termEn: 'DCA (Dollar-Cost Averaging)',
     category: 'stock',
     formula: '정기적으로 고정된 금액 매수',
+    formulaEn: 'Fixed dollar amount at regular intervals',
     explanationKo: '주가의 오르내림과 무관하게 매월 정해진 날짜에 동일한 금액을 기계적으로 매수하여 평단가를 안정화하는 전략입니다.',
     explanationEn: 'Investing equal monetary amounts at regular intervals regardless of asset price, smoothing market volatility.',
     realWorldExample: '주가가 폭락할 때는 더 많은 주식을 사고, 급등할 때는 적은 주식을 사서 장기적으로 평균 매입단가가 크게 낮아집니다.',
+    realWorldExampleEn: 'Automatically buys more shares when prices drop and fewer shares when prices peak, lowering your long-term average cost.',
   },
   {
     id: 'mdd',
     term: 'MDD (최대 낙폭)',
-    termEn: 'Maximum Drawdown',
+    termEn: 'MDD (Maximum Drawdown)',
     category: 'stock',
     formula: '(최저점 - 최고점) ÷ 최고점 × 100%',
+    formulaEn: '(Trough Value - Peak Value) ÷ Peak Value × 100%',
     explanationKo: '특정 투자 기간 동안 최고점에서 최저점까지 기록한 최대 손실률로, 멘탈과 리스크 관리의 핵심 지표입니다.',
     explanationEn: 'The maximum observed loss from a peak to a trough of a portfolio before a new peak is attained.',
     realWorldExample: '수익률이 높아도 MDD가 -50%라면 대부분의 일반 투자자는 패닉 셀(공포 매도)로 탈락하게 됩니다.',
+    realWorldExampleEn: 'Even if average returns are high, an MDD of -50% often forces retail investors into catastrophic panic selling.',
   },
   {
     id: 'real_interest',
@@ -67,28 +77,39 @@ const FINANCIAL_TERMS: readonly FinancialTerm[] = [
     termEn: 'Real Interest Rate',
     category: 'macro',
     formula: '명목금리 - 인플레이션(물가상승률)',
+    formulaEn: 'Nominal Interest Rate - Inflation Rate',
     explanationKo: '통장에 찍히는 이자율(명목금리)에서 물가 상승으로 인한 화폐 가치 하락분을 뺀 실제 구매력 기준의 이자율입니다.',
     explanationEn: 'The lending interest rate adjusted for inflation, representing true growth in purchasing power.',
     realWorldExample: '은행 예금 금리가 4%여도 물가가 3.5% 오르면 내 실제 자산 증식률은 0.5%에 불과합니다.',
+    realWorldExampleEn: 'If a bank deposit yields 4% while CPI inflation is 3.5%, your actual purchasing power only expands by 0.5%.',
   },
   {
     id: 'pbr',
     term: 'PBR (주가순자산비율)',
-    termEn: 'Price-to-Book Ratio',
+    termEn: 'PBR (Price-to-Book Ratio)',
     category: 'stock',
     formula: '주가 ÷ 1주당 순자산(BPS)',
+    formulaEn: 'Stock Price ÷ Book Value Per Share (BVPS)',
     explanationKo: '기업이 당장 모든 사업을 청산하고 빚을 갚았을 때 주주에게 돌아갈 순자산 가치 대비 주가 수준을 비교합니다.',
     explanationEn: 'Compares a company\'s market value to its book value, gauging asset-backed downside protection.',
     realWorldExample: 'PBR이 1배 미만이면 회사를 지금 당장 해산해서 주주들에게 나눠주는 돈보다 주가가 저평가되어 있다는 뜻입니다.',
+    realWorldExampleEn: 'A P/B below 1.0 indicates the stock is trading for less than the net liquidated value of its physical assets.',
   },
 ];
 
 export function FinancialKnowledgeHub() {
+  const { locale } = useLocale();
   const [wldInput, setWldInput] = useState<number>(10000);
-  const [activeLang, setActiveLang] = useState<'ko' | 'en'>('ko');
+  const [activeLang, setActiveLang] = useState<'ko' | 'en'>(locale === 'ko' ? 'ko' : 'en');
   const [mockModalOpen, setMockModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState('CHIPS');
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+
+  useEffect(() => {
+    setActiveLang(locale === 'ko' ? 'ko' : 'en');
+  }, [locale]);
+
+  const isEn = activeLang === 'en';
 
   const krw = wldInput * 100;
   const usd = Number(((wldInput * 100) / 1382.4).toFixed(2));
@@ -105,13 +126,15 @@ export function FinancialKnowledgeHub() {
             </div>
             <div>
               <CardTitle className="text-base sm:text-lg text-white flex items-center gap-2">
-                <span>실전 금융 & 경제 지식 아카데미</span>
+                <span>{isEn ? 'Practical Financial & Economic Literacy Academy' : '실전 금융 & 경제 지식 아카데미'}</span>
                 <Badge variant="outline" className="border-cyan-500/40 text-cyan-400 text-[10px]">
                   Global Financial Literacy
                 </Badge>
               </CardTitle>
               <CardDescription className="text-xs text-slate-400">
-                실제 투자와 자산 관리에 뼈와 살이 되는 국내외 금융 원리와 실시간 환율을 학습하세요.
+                {isEn
+                  ? 'Master real-world investing formulas, valuation indicators, and live currency rates for practical wealth building.'
+                  : '실제 투자와 자산 관리에 뼈와 살이 되는 국내외 금융 원리와 실시간 환율을 학습하세요.'}
               </CardDescription>
             </div>
           </div>
@@ -149,14 +172,16 @@ export function FinancialKnowledgeHub() {
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
               <Globe className="size-4 text-emerald-400" />
-              <span>글로벌 실시간 환율 변환기 (Global Currency Calculator)</span>
+              <span>{isEn ? 'Global Live Currency Converter' : '글로벌 실시간 환율 변환기 (Global Currency Calculator)'}</span>
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">기준 환율: $1 = 1,382.4원</span>
+            <span className="text-[10px] text-slate-500 font-mono">
+              {isEn ? 'Peg: $1 = 1,382.4 KRW' : '기준 환율: $1 = 1,382.4원'}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
             <div className="sm:col-span-2 space-y-1">
-              <span className="text-[11px] text-slate-400">가상 자산 입력 (WLD)</span>
+              <span className="text-[11px] text-slate-400">{isEn ? 'Virtual Asset Input (WLD)' : '가상 자산 입력 (WLD)'}</span>
               <div className="relative">
                 <Input
                   type="number"
@@ -171,19 +196,19 @@ export function FinancialKnowledgeHub() {
 
             <div className="sm:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 sm:pt-0">
               <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-center">
-                <span className="block text-[10px] text-slate-400">대한민국 (KRW)</span>
+                <span className="block text-[10px] text-slate-400">{isEn ? 'South Korea (KRW)' : '대한민국 (KRW)'}</span>
                 <span className="block font-mono text-xs font-bold text-white mt-0.5">₩{krw.toLocaleString()}</span>
               </div>
               <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-center">
-                <span className="block text-[10px] text-slate-400">미국 (USD)</span>
+                <span className="block text-[10px] text-slate-400">{isEn ? 'United States (USD)' : '미국 (USD)'}</span>
                 <span className="block font-mono text-xs font-bold text-emerald-400 mt-0.5">${usd.toLocaleString()}</span>
               </div>
               <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-center">
-                <span className="block text-[10px] text-slate-400">일본 (JPY)</span>
+                <span className="block text-[10px] text-slate-400">{isEn ? 'Japan (JPY)' : '일본 (JPY)'}</span>
                 <span className="block font-mono text-xs font-bold text-cyan-400 mt-0.5">¥{jpy.toLocaleString()}</span>
               </div>
               <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-center">
-                <span className="block text-[10px] text-slate-400">유럽 (EUR)</span>
+                <span className="block text-[10px] text-slate-400">{isEn ? 'Eurozone (EUR)' : '유럽 (EUR)'}</span>
                 <span className="block font-mono text-xs font-bold text-indigo-400 mt-0.5">€{eur.toLocaleString()}</span>
               </div>
             </div>
@@ -195,9 +220,11 @@ export function FinancialKnowledgeHub() {
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
               <Sparkles className="size-4 text-amber-400" />
-              <span>실전 투자 핵심 용어 & 공식 (Essential Financial Formulas)</span>
+              <span>{isEn ? 'Essential Financial Formulas & Valuation Ratios' : '실전 투자 핵심 용어 & 공식 (Essential Financial Formulas)'}</span>
             </span>
-            <span className="text-[10px] text-slate-500">초보자부터 실전 투자자까지 필수 마스터</span>
+            <span className="text-[10px] text-slate-500">
+              {isEn ? 'Must-master formulas from beginners to seasoned traders' : '초보자부터 실전 투자자까지 필수 마스터'}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -209,27 +236,29 @@ export function FinancialKnowledgeHub() {
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white">
-                      {activeLang === 'ko' ? item.term : item.termEn}
+                      {isEn ? item.termEn : item.term}
                     </span>
                     <Badge variant="outline" className="border-slate-700 text-[10px] text-slate-400">
                       {item.category.toUpperCase()}
                     </Badge>
                   </div>
 
-                  {item.formula && (
+                  {(item.formula || item.formulaEn) && (
                     <div className="mt-1.5 rounded bg-slate-900/80 px-2 py-1 border border-slate-800 text-[11px] font-mono font-semibold text-cyan-300">
-                      공식: {item.formula}
+                      {isEn ? `Formula: ${item.formulaEn || item.formula}` : `공식: ${item.formula}`}
                     </div>
                   )}
 
                   <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                    {activeLang === 'ko' ? item.explanationKo : item.explanationEn}
+                    {isEn ? item.explanationEn : item.explanationKo}
                   </p>
                 </div>
 
                 <div className="pt-2 border-t border-slate-800/80 text-[11px] text-emerald-400/90 bg-emerald-950/10 p-2 rounded-lg border border-emerald-500/20">
-                  <span className="font-semibold block text-[10px] text-emerald-500">실전 예시 (Example):</span>
-                  {item.realWorldExample}
+                  <span className="font-semibold block text-[10px] text-emerald-500">
+                    {isEn ? 'Practical Example:' : '실전 예시 (Example):'}
+                  </span>
+                  {isEn ? item.realWorldExampleEn : item.realWorldExample}
                 </div>
               </div>
             ))}
@@ -242,12 +271,16 @@ export function FinancialKnowledgeHub() {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  🎯 신규 온보딩 퀘스트
+                  {isEn ? '🎯 Onboarding Quest' : '🎯 신규 온보딩 퀘스트'}
                 </span>
-                <span className="text-xs font-bold text-white">저평가 우량주 모의 매수 체험</span>
+                <span className="text-xs font-bold text-white">
+                  {isEn ? 'Test Your Skills: 1-Second Paper Trade' : '저평가 우량주 모의 매수 체험'}
+                </span>
               </div>
               <p className="text-xs text-slate-300">
-                방금 배운 <strong className="text-cyan-300">PER 8.4배 · PBR 0.9배</strong> 저평가 우량주(CHIPS)를 10,000 WLD 무료 지원금으로 1초 모의 매수해 보세요.
+                {isEn
+                  ? 'Apply what you learned: paper-trade undervalued value stock (CHIPS, P/E 8.4x · P/B 0.9x) with your 10,000 WLD starter grant.'
+                  : '방금 배운 PER 8.4배 · PBR 0.9배 저평가 우량주(CHIPS)를 10,000 WLD 무료 지원금으로 1초 모의 매수해 보세요.'}
               </p>
             </div>
 
@@ -256,7 +289,7 @@ export function FinancialKnowledgeHub() {
               className="shrink-0 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 active:scale-95 cursor-pointer"
             >
               <Coins className="size-3.5 mr-1.5" />
-              10,000 WLD 모의 매수 시작
+              {isEn ? 'Start 10,000 WLD Paper Trade' : '10,000 WLD 모의 매수 시작'}
             </Button>
           </div>
         </div>
@@ -268,15 +301,19 @@ export function FinancialKnowledgeHub() {
           <DialogHeader>
             <div className="flex items-center justify-between">
               <Badge variant="outline" className="border-amber-500/40 text-amber-300 text-xs">
-                🎁 10,000 WLD 무료 지원금 제공
+                {isEn ? '🎁 10,000 WLD Free Starter Grant' : '🎁 10,000 WLD 무료 지원금 제공'}
               </Badge>
-              <span className="text-xs text-slate-400">온보딩 모의 퀘스트</span>
+              <span className="text-xs text-slate-400">
+                {isEn ? 'Onboarding Quest' : '온보딩 모의 퀘스트'}
+              </span>
             </div>
             <DialogTitle className="text-lg font-bold text-white mt-1">
-              저평가 가치주 모의 포트폴리오 첫 매수
+              {isEn ? 'First Purchase in Paper Portfolio' : '저평가 가치주 모의 포트폴리오 첫 매수'}
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-300">
-              배운 투자 지표(PER·PBR)를 적용하여 아래 우량 종목 중 하나를 골라 1초 만에 모의 매수를 체결하세요.
+              {isEn
+                ? 'Select an undervalued stock below using PER and PBR metrics, and execute your risk-free simulated order in seconds.'
+                : '배운 투자 지표(PER·PBR)를 적용하여 아래 우량 종목 중 하나를 골라 1초 만에 모의 매수를 체결하세요.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -288,11 +325,23 @@ export function FinancialKnowledgeHub() {
               <div className="space-y-1">
                 <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[11px] font-bold text-amber-300">
                   <Coins className="size-3" />
-                  <span>🎁 10,000 WLD 온보딩 퀘스트 보상 자동 청구 완료!</span>
+                  <span>
+                    {isEn ? '🎁 10,000 WLD Quest Reward Claimed!' : '🎁 10,000 WLD 온보딩 퀘스트 보상 자동 청구 완료!'}
+                  </span>
                 </div>
-                <h4 className="text-base font-bold text-white mt-1">모의 매수 체결 완료!</h4>
+                <h4 className="text-base font-bold text-white mt-1">
+                  {isEn ? 'Simulated Order Filled!' : '모의 매수 체결 완료!'}
+                </h4>
                 <p className="text-xs text-slate-300">
-                  <span className="text-amber-400 font-bold">{selectedStock}</span> 종목 10,000 WLD 매수가 완료되어 내 모의 포트폴리오에 등록되었습니다.
+                  {isEn ? (
+                    <>
+                      Bought 10,000 WLD of <span className="text-amber-400 font-bold">{selectedStock}</span> and added to your paper portfolio.
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-amber-400 font-bold">{selectedStock}</span> 종목 10,000 WLD 매수가 완료되어 내 모의 포트폴리오에 등록되었습니다.
+                    </>
+                  )}
                 </p>
               </div>
               <div className="pt-3 flex items-center gap-2">
@@ -306,7 +355,7 @@ export function FinancialKnowledgeHub() {
                   }}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer shadow-md shadow-emerald-500/20"
                 >
-                  내 포트폴리오 보러 가기
+                  {isEn ? 'View My Portfolio' : '내 포트폴리오 보러 가기'}
                 </Button>
                 <Button
                   variant="outline"
@@ -316,7 +365,7 @@ export function FinancialKnowledgeHub() {
                   }}
                   className="px-3 border-slate-700 text-slate-300 text-xs hover:bg-slate-800 cursor-pointer"
                 >
-                  닫기
+                  {isEn ? 'Close' : '닫기'}
                 </Button>
               </div>
             </div>
@@ -324,9 +373,27 @@ export function FinancialKnowledgeHub() {
             <div className="space-y-4 pt-2">
               <div className="space-y-2">
                 {[
-                  { symbol: 'CHIPS', name: '침팬지 반도체', per: '8.4배', pbr: '0.9배', desc: 'AI 칩셋 수혜 저평가 대표주' },
-                  { symbol: 'GOLD', name: '골든덕 홀딩스', per: '6.2배', pbr: '0.7배', desc: '자산 대비 극심한 저평가 지주사' },
-                  { symbol: 'DUCKS', name: '월덕 인더스트리', per: '9.1배', pbr: '1.0배', desc: '안정적 분기 배당 우량주' },
+                  {
+                    symbol: 'CHIPS',
+                    name: isEn ? 'Chimp Semi' : '침팬지 반도체',
+                    per: isEn ? '8.4x' : '8.4배',
+                    pbr: isEn ? '0.9x' : '0.9배',
+                    desc: isEn ? 'AI chipset pure-play, deep value' : 'AI 칩셋 수혜 저평가 대표주',
+                  },
+                  {
+                    symbol: 'GOLD',
+                    name: isEn ? 'Golden Duck Holdings' : '골든덕 홀딩스',
+                    per: isEn ? '6.2x' : '6.2배',
+                    pbr: isEn ? '0.7x' : '0.7배',
+                    desc: isEn ? 'Extreme asset discount conglomerate' : '자산 대비 극심한 저평가 지주사',
+                  },
+                  {
+                    symbol: 'DUCKS',
+                    name: isEn ? 'Woldeok Industries' : '월덕 인더스트리',
+                    per: isEn ? '9.1x' : '9.1배',
+                    pbr: isEn ? '1.0x' : '1.0배',
+                    desc: isEn ? 'Reliable quarterly dividend blue-chip' : '안정적 분기 배당 우량주',
+                  },
                 ].map((s) => (
                   <button
                     key={s.symbol}
@@ -354,12 +421,16 @@ export function FinancialKnowledgeHub() {
 
               <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-slate-300 space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">매수 주문 금액</span>
-                  <span className="font-mono font-bold text-amber-400">10,000 WLD (무료 지원)</span>
+                  <span className="text-slate-400">{isEn ? 'Order Value' : '매수 주문 금액'}</span>
+                  <span className="font-mono font-bold text-amber-400">
+                    {isEn ? '10,000 WLD (Free Grant)' : '10,000 WLD (무료 지원)'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">거래 수수료</span>
-                  <span className="font-mono text-emerald-400">0 WLD (신규 혜택)</span>
+                  <span className="text-slate-400">{isEn ? 'Trading Fee' : '거래 수수료'}</span>
+                  <span className="font-mono text-emerald-400">
+                    {isEn ? '0 WLD (Intro Benefit)' : '0 WLD (신규 혜택)'}
+                  </span>
                 </div>
               </div>
 
@@ -377,7 +448,7 @@ export function FinancialKnowledgeHub() {
                 }}
                 className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
               >
-                10,000 WLD 무료 지원금으로 즉시 체결하기
+                {isEn ? 'Fill Immediately with 10,000 WLD Grant' : '10,000 WLD 무료 지원금으로 즉시 체결하기'}
               </Button>
             </div>
           )}

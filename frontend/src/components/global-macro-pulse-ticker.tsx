@@ -8,7 +8,6 @@ import {
   HelpCircle,
   BookOpen,
   Calendar,
-  Clock,
   AlertCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +18,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { useLocale } from '@/components/locale-provider';
 
 export interface MacroIndicatorData {
   readonly id: string;
@@ -103,7 +103,7 @@ const FALLBACK_PULSE: MacroPulseData = {
     {
       id: 'usd_krw',
       name: '원/달러 환율 (USD/KRW)',
-      nameEn: 'USD/KRW',
+      nameEn: 'USD/KRW Rate',
       value: 1382.4,
       unit: '원',
       changeRate: 0,
@@ -134,7 +134,7 @@ const FALLBACK_PULSE: MacroPulseData = {
       unit: '%',
       changeRate: 0,
       description: '미국 연방준비제도(Fed)의 목표 정책금리',
-      descriptionEn: 'US Target Rate',
+      descriptionEn: 'US Target Policy Rate',
       educationalTip: '글로벌 자산 가격의 할인율이자 전 세계 투자 자금 흐름을 결정하는 핵심 기준입니다.',
       educationalTipEn: 'Primary benchmark discount rate for global capital flows.',
     },
@@ -158,7 +158,7 @@ const FALLBACK_PULSE: MacroPulseData = {
       unit: 'pt',
       changeRate: -0.17,
       description: '미국 시가총액 상위 500대 우량 상장기업 지수',
-      descriptionEn: 'US Large Cap Index',
+      descriptionEn: 'US Large Cap Benchmark',
       educationalTip: '장기 적립식 복리 투자의 대표 벤치마크로 미국 경제 전체의 성장성을 대변합니다.',
       educationalTipEn: 'Gold standard for long-term compounding index portfolios.',
     },
@@ -177,7 +177,7 @@ const FALLBACK_PULSE: MacroPulseData = {
     {
       id: 'us10y',
       name: '미국채 10년물 금리',
-      nameEn: 'US 10Y Yield',
+      nameEn: 'US 10Y Treasury Yield',
       value: 4.21,
       unit: '%',
       changeRate: 0.03,
@@ -199,75 +199,78 @@ const FALLBACK_PULSE: MacroPulseData = {
       titleEn: 'US September Consumer Price Index (CPI)',
       scheduledDate: '2026-10-08',
       scheduledTime: '21:30 KST',
-      dDay: 1,
+      dDay: -16,
       importance: 'HIGH',
       country: 'US',
       previousValue: '2.5% YoY',
       forecastValue: '2.3% YoY',
-      analysisKo: '물가 둔화세가 확고해지면 미 연준의 금리 인하 여력이 넓어져 주식 시장에 강력한 호재가 됩니다.',
-      analysisEn: 'Disinflation confirmation will boost Fed easing bets, favoring tech growth equities.',
-      marketImpactTipKo: '예측치(2.3%) 하회 시 ➡️ 기술주 급등, 달러 약세 / 예측치 상회 시 ➡️ 금리 재반등 및 변동성 확대',
-      marketImpactTipEn: 'Below forecast ➡️ Stock rally, weaker USD / Above forecast ➡️ Yield rise, risk-off',
+      analysisKo: '헤드라인 CPI가 2.3%로 둔화되며 연준의 11월 금리 인하 기대감을 크게 높인 핵심 지표입니다.',
+      analysisEn: 'Headline CPI eased to 2.3%, reinforcing expectations for further Federal Reserve rate cuts.',
+      marketImpactTipKo: '물가 둔화 확인 시 성장주 및 가상자산 등 위험자산에 강력한 유동성 모멘텀으로 작용합니다.',
+      marketImpactTipEn: 'Cooling inflation provides positive liquidity momentum for risk assets and tech equities.',
     },
     {
-      id: 'fomc-rate',
+      id: 'us-fomc',
       title: '미국 연준 FOMC 정례회의 기준금리 결정',
-      titleEn: 'FOMC Interest Rate Decision',
-      scheduledDate: '2026-10-10',
+      titleEn: 'US Federal Reserve FOMC Rate Decision',
+      scheduledDate: '2026-10-09',
       scheduledTime: '03:00 KST',
-      dDay: 3,
+      dDay: -15,
       importance: 'HIGH',
       country: 'US',
       previousValue: '5.00%',
       forecastValue: '4.75% (-25bp)',
-      analysisKo: '전 세계 금융 유동성의 분기점입니다. 파월 의장의 성명서 어조가 주식과 가상자산 변동성을 주도합니다.',
-      analysisEn: 'Pivotal for global liquidity. Powell press conference will dictate crypto & stock volatility.',
-      marketImpactTipKo: '인하 폭(25bp)은 선반영되어 있으므로 향후 연내 추가 인하 경로(점도표)에 시장이 즉각 반응합니다.',
-      marketImpactTipEn: '25bp cut is priced in. Forward guidance will drive subsequent equity movements.',
+      analysisKo: '연준이 지난 회의에서 25bp 추가 인하를 단행하며 글로벌 통화 완화 기조를 공식화했습니다.',
+      analysisEn: 'The Fed implemented an additional 25bp rate cut, reaffirming global monetary easing.',
+      marketImpactTipKo: '달러 약세 유도 및 신흥국 통화 가치 안정에 기여하며 글로벌 증시 상단을 견인합니다.',
+      marketImpactTipEn: 'Drives softer USD and stabilizes emerging currencies, supporting broader equity valuations.',
     },
     {
       id: 'us-nfp',
       title: '미국 비농업 고용보고서 (NFP) 및 실업률',
-      titleEn: 'US Non-Farm Payrolls',
-      scheduledDate: '2026-10-12',
+      titleEn: 'US Non-Farm Payrolls (NFP) & Unemployment Rate',
+      scheduledDate: '2026-10-04',
       scheduledTime: '21:30 KST',
-      dDay: 5,
+      dDay: -20,
       importance: 'HIGH',
       country: 'US',
       previousValue: '142K / 4.2%',
       forecastValue: '150K / 4.2%',
-      analysisKo: '고용 지표의 완만한 둔화는 경기 침체 없는 연착륙(Soft Landing) 시나리오의 핵심 검증대입니다.',
-      analysisEn: 'Measures labor cooling to gauge whether US economy achieves a soft landing.',
-      marketImpactTipKo: '적정 수준의 고용 증가와 임금 안정은 시장이 가장 선호하는 골디락스 장세를 형성합니다.',
-      marketImpactTipEn: 'Moderate job adds with cooling wages trigger ideal Goldilocks conditions.',
+      analysisKo: '고용 시장이 침체 없이 안정적인 연착륙(Soft Landing) 경로에 있음을 증명한 서프라이즈 보고서입니다.',
+      analysisEn: 'Proved the US labor market remains on a stable soft landing trajectory without sharp recession.',
+      marketImpactTipKo: '경기 침체(R-공포)를 일소하여 투자 심리를 위험 선호(Risk-on)로 즉각 전환시켰습니다.',
+      marketImpactTipEn: 'Eliminated hard recession fears, instantly pivoting market sentiment toward Risk-on.',
     },
     {
-      id: 'bok-rate',
+      id: 'bok-mpc',
       title: '한국은행 금통위 기준금리 피벗 결정',
-      titleEn: 'Bank of Korea Rate Decision',
-      scheduledDate: '2026-10-14',
+      titleEn: 'Bank of Korea MPC Interest Rate Pivot Decision',
+      scheduledDate: '2026-10-11',
       scheduledTime: '10:00 KST',
-      dDay: 7,
+      dDay: -13,
       importance: 'HIGH',
       country: 'KR',
       previousValue: '3.50%',
       forecastValue: '3.25% (-25bp)',
-      analysisKo: '물가 안정과 가계부채 추이를 검토하며 통화 긴축을 마무리하고 완화로 전환하는 첫 분기점입니다.',
-      analysisEn: 'Evaluating real estate and household debt, potential first easing cycle in 3+ years.',
-      marketImpactTipKo: '금리 인하 시작 시 예금 이율이 하락하며 시중 자금이 가상주식과 위험자산으로 이동할 유인이 커집니다.',
-      marketImpactTipEn: 'Rate cut lowers deposit rates, spurring capital migration into risk assets.',
+      analysisKo: '3년 2개월 만에 첫 기준금리 인하(3.25%)를 단행하여 본격적인 통화 완화 사이클에 진입했습니다.',
+      analysisEn: 'BOK delivered its first rate cut in 3 years and 2 months (to 3.25%), initiating an easing cycle.',
+      marketImpactTipKo: '국내 가계 대출 이자 부담을 줄이고 배당주 및 리츠 자산의 매력도를 상대적으로 강화합니다.',
+      marketImpactTipEn: 'Reduces domestic borrowing costs and enhances relative dividend yield appeal.',
     },
   ],
   marketSummary: {
     sentiment: 'RISK_OFF',
-    summaryKo: '글로벌 유동성 및 긴축 기조 관망세로 방어적 분산 투자 심리가 우세합니다.',
-    summaryEn: 'Defensive risk-off sentiment prevails amid macro caution.',
-    actionTipKo: '💡 실전 팁: 한미 기준금리 격차와 환율 추이를 종합하여 분산 포트폴리오를 유지하세요.',
-    actionTipEn: '💡 Pro Tip: The rate spread explains cross-border asset flows.',
+    summaryKo: '미 연준 및 한국은행의 금리 인하 사이클 진입과 물가 안정세가 확인되었으나, 지정학적 리스크와 환율 변동성으로 인해 선별적 방어 자산 배분이 유리한 국면입니다.',
+    summaryEn: 'Central bank easing cycles and disinflation continue, though FX volatility and macro factors warrant disciplined diversification.',
+    actionTipKo: '고배당 가치주 및 정액 분할 적립(DCA) 전략으로 변동성을 흡수하며 안정적인 캐시플로우를 확보하세요.',
+    actionTipEn: 'Utilize dollar-cost averaging (DCA) and high-dividend assets to maintain steady cash flow through market swings.',
   },
 };
 
 export function GlobalMacroPulseTicker() {
+  const { locale } = useLocale();
+  const isEn = locale !== 'ko';
+
   const [data, setData] = useState<MacroPulseData>(FALLBACK_PULSE);
   const [selectedItem, setSelectedItem] = useState<MacroIndicatorData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<EconomicCalendarEvent | null>(null);
@@ -295,20 +298,20 @@ export function GlobalMacroPulseTicker() {
 
   return (
     <div className="w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-slate-800/80 bg-[#0d131f] p-4 sm:p-5 shadow-xl backdrop-blur-md space-y-4">
-      {/* 1. 상단 상태 헤더 바 (텍스트 겹침 및 찌그러짐 원천 차단) */}
+      {/* 1. 상단 상태 헤더 바 */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
             <Globe className="size-3.5 animate-spin" style={{ animationDuration: '14s' }} />
-            <span>실시간 거시경제 지표 (Macro Pulse)</span>
+            <span>{isEn ? 'Live Macro Pulse Indicators' : '실시간 거시경제 지표 (Macro Pulse)'}</span>
           </div>
           <span className="text-[11px] font-mono text-slate-400 bg-slate-900/90 px-2 py-0.5 rounded-full border border-slate-800">
-            10분 자동 갱신
+            {isEn ? '10m Auto Refresh' : '10분 자동 갱신'}
           </span>
         </div>
 
         <div className="flex items-center gap-2 text-xs flex-wrap">
-          <span className="text-slate-400 font-medium">시장 심리:</span>
+          <span className="text-slate-400 font-medium">{isEn ? 'Sentiment:' : '시장 심리:'}</span>
           <Badge
             variant="outline"
             className={
@@ -317,17 +320,22 @@ export function GlobalMacroPulseTicker() {
                 : 'border-amber-500/40 text-amber-400 bg-amber-950/40 font-bold px-2.5 py-0.5'
             }
           >
-            {data.marketSummary.sentiment === 'RISK_ON' ? '📈 위험 선호 (Risk-On)' : '🛡️ 방어적 분산 (Risk-Off)'}
+            {data.marketSummary.sentiment === 'RISK_ON'
+              ? isEn ? '📈 Risk-On' : '📈 위험 선호 (Risk-On)'
+              : isEn ? '🛡️ Risk-Off' : '🛡️ 방어적 분산 (Risk-Off)'}
           </Badge>
-          <span className="text-[11px] text-slate-500 hidden md:inline">· 지표를 클릭하면 실전 경제 해설이 열립니다</span>
+          <span className="text-[11px] text-slate-500 hidden md:inline">
+            {isEn ? '· Click any metric for real-world insights' : '· 지표를 클릭하면 실전 경제 해설이 열립니다'}
+          </span>
         </div>
       </div>
 
-      {/* 2. 🔥 9개 지표 3x3 완벽 대칭형 벤토 카드 그리드 (너비 충분 확보로 텍스트 잘림 제로) */}
+      {/* 2. 9개 지표 3x3 그리드 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {allIndicators.map((item) => {
           const isUp = item.changeRate > 0;
           const isDown = item.changeRate < 0;
+          const itemName = isEn ? item.nameEn : item.name;
 
           return (
             <button
@@ -339,12 +347,12 @@ export function GlobalMacroPulseTicker() {
               {/* 상단: 지표명 및 안내 아이콘 */}
               <div className="flex items-center justify-between w-full gap-2">
                 <span className="text-xs sm:text-sm text-slate-200 font-bold truncate group-hover:text-emerald-300 transition-colors">
-                  {item.name}
+                  {itemName}
                 </span>
                 <HelpCircle className="size-3.5 text-slate-500 group-hover:text-emerald-400 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" />
               </div>
 
-              {/* 중단: 큼직하고 안정적인 모노스페이스 수치 (독립 행으로 줄바꿈 쪼개짐 원천 차단) */}
+              {/* 중단: 모노스페이스 수치 */}
               <div className="my-2 min-w-0">
                 <div className="font-mono text-base sm:text-lg font-black text-slate-100 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                   {item.value.toLocaleString()}
@@ -367,7 +375,7 @@ export function GlobalMacroPulseTicker() {
                   </span>
                 ) : (
                   <span className="text-xs font-mono font-medium text-slate-400 px-1 py-0.5">
-                    보합 (0.0%)
+                    {isEn ? 'Unchanged (0.0%)' : '보합 (0.0%)'}
                   </span>
                 )}
               </div>
@@ -382,7 +390,9 @@ export function GlobalMacroPulseTicker() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200">
               <Calendar className="size-3.5 text-amber-400" />
-              <span>주요 거시경제 캘린더 D-Day (FOMC · CPI · 금통위)</span>
+              <span>
+                {isEn ? 'Economic Calendar D-Day (FOMC · CPI · Central Banks)' : '주요 거시경제 캘린더 D-Day (FOMC · CPI · 금통위)'}
+              </span>
             </div>
 
             {/* 필터 바 */}
@@ -396,7 +406,7 @@ export function GlobalMacroPulseTicker() {
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                전체
+                {isEn ? 'All' : '전체'}
               </button>
               <button
                 type="button"
@@ -407,7 +417,7 @@ export function GlobalMacroPulseTicker() {
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                미국
+                {isEn ? 'US' : '미국'}
               </button>
               <button
                 type="button"
@@ -418,7 +428,7 @@ export function GlobalMacroPulseTicker() {
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                한국
+                {isEn ? 'KR' : '한국'}
               </button>
               <button
                 type="button"
@@ -429,7 +439,7 @@ export function GlobalMacroPulseTicker() {
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                유럽
+                {isEn ? 'EU' : '유럽'}
               </button>
               <button
                 type="button"
@@ -440,7 +450,7 @@ export function GlobalMacroPulseTicker() {
                     : 'border-slate-800 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                🔥 High만
+                {isEn ? '🔥 High Only' : '🔥 High만'}
               </button>
             </div>
           </div>
@@ -449,7 +459,7 @@ export function GlobalMacroPulseTicker() {
             {filteredEvents.map((evt) => {
               const isHigh = evt.importance === 'HIGH';
 
-              let dDayLabel = evt.dDay === 0 ? 'D-Day 오늘' : `D-${evt.dDay}`;
+              let dDayLabel = evt.dDay === 0 ? (isEn ? 'D-Day Today' : 'D-Day 오늘') : `D-${evt.dDay}`;
               let isPast = false;
               let isToday = false;
               try {
@@ -459,10 +469,10 @@ export function GlobalMacroPulseTicker() {
                 target.setHours(0, 0, 0, 0);
                 const diffDays = Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
                 if (diffDays < 0) {
-                  dDayLabel = '발표 완료';
+                  dDayLabel = isEn ? 'Released' : '발표 완료';
                   isPast = true;
                 } else if (diffDays === 0) {
-                  dDayLabel = 'D-Day 오늘';
+                  dDayLabel = isEn ? 'D-Day Today' : 'D-Day 오늘';
                   isToday = true;
                 } else {
                   dDayLabel = `D-${diffDays}`;
@@ -493,10 +503,12 @@ export function GlobalMacroPulseTicker() {
                   </span>
                   <div className="flex flex-col min-w-0">
                     <span className="text-xs font-bold text-slate-200 group-hover:text-amber-300 transition-colors truncate">
-                      {evt.title}
+                      {isEn ? evt.titleEn : evt.title}
                     </span>
                     <span className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      예측: <strong className="text-slate-300">{evt.forecastValue}</strong> (이전: {evt.previousValue})
+                      {isEn ? 'Forecast: ' : '예측: '}
+                      <strong className="text-slate-300">{evt.forecastValue}</strong>
+                      {' '}({isEn ? 'Prev: ' : '이전: '}{evt.previousValue})
                     </span>
                   </div>
                 </button>
@@ -514,33 +526,37 @@ export function GlobalMacroPulseTicker() {
               <DialogHeader>
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 text-xs">
-                    실전 경제 백과사전
+                    {isEn ? 'Economic Knowledge Base' : '실전 경제 백과사전'}
                   </Badge>
                   <span className="text-xs text-slate-400 font-mono">{selectedItem.nameEn}</span>
                 </div>
                 <DialogTitle className="text-lg font-bold text-slate-100 mt-1">
-                  {selectedItem.name} ({selectedItem.value}{selectedItem.unit})
+                  {isEn ? selectedItem.nameEn : selectedItem.name} ({selectedItem.value}{selectedItem.unit})
                 </DialogTitle>
                 <DialogDescription className="text-xs text-slate-300">
-                  {selectedItem.description}
+                  {isEn ? selectedItem.descriptionEn : selectedItem.description}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 space-y-2">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
                   <BookOpen className="size-4" />
-                  <span>실전 투자 및 경제 공부 팁</span>
+                  <span>{isEn ? 'Investor Takeaway & Practical Tip' : '실전 투자 및 경제 공부 팁'}</span>
                 </div>
                 <p className="text-xs text-slate-200 leading-relaxed">
-                  {selectedItem.educationalTip}
+                  {isEn ? selectedItem.educationalTipEn : selectedItem.educationalTip}
                 </p>
-                <p className="text-[11px] text-slate-400 italic pt-1 border-t border-slate-800">
-                  {selectedItem.educationalTipEn}
-                </p>
+                {!isEn && selectedItem.educationalTipEn && (
+                  <p className="text-[11px] text-slate-400 italic pt-1 border-t border-slate-800">
+                    {selectedItem.educationalTipEn}
+                  </p>
+                )}
               </div>
 
               <div className="text-[11px] text-slate-400 text-center">
-                월덕 머니버스의 가상 주식 및 금융 시뮬레이션은 실제 거시경제 논리를 그대로 반영합니다.
+                {isEn
+                  ? 'Woldeok Moneyverse stock simulation operates with real-world macroeconomic relationships.'
+                  : '월덕 머니버스의 가상 주식 및 금융 시뮬레이션은 실제 거시경제 논리를 그대로 반영합니다.'}
               </div>
             </div>
           )}
@@ -562,38 +578,52 @@ export function GlobalMacroPulseTicker() {
                         : 'border-amber-500/40 text-amber-300 bg-amber-950/30 font-bold'
                     }
                   >
-                    {selectedEvent.importance === 'HIGH' ? '🔥 초고위험 영향도 (HIGH)' : '⚡ 시장 변동성 주의 (MEDIUM)'}
+                    {selectedEvent.importance === 'HIGH'
+                      ? isEn ? '🔥 High Impact' : '🔥 초고위험 영향도 (HIGH)'
+                      : isEn ? '⚡ Medium Volatility' : '⚡ 시장 변동성 주의 (MEDIUM)'}
                   </Badge>
                   <span className="text-xs font-mono font-bold text-amber-400">
-                    {selectedEvent.dDay === 0 ? 'D-Day 오늘' : `D-${selectedEvent.dDay}`}
+                    {selectedEvent.dDay === 0
+                      ? isEn ? 'D-Day Today' : 'D-Day 오늘'
+                      : `D-${selectedEvent.dDay}`}
                   </span>
                 </div>
                 <DialogTitle className="text-lg font-bold text-slate-100 mt-2">
-                  {selectedEvent.title}
+                  {isEn ? selectedEvent.titleEn : selectedEvent.title}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-slate-400 font-mono">
-                  {selectedEvent.titleEn} · 예정 일시: {selectedEvent.scheduledDate} {selectedEvent.scheduledTime}
+                  {isEn
+                    ? `Scheduled: ${selectedEvent.scheduledDate} ${selectedEvent.scheduledTime}`
+                    : `${selectedEvent.titleEn} · 예정 일시: ${selectedEvent.scheduledDate} ${selectedEvent.scheduledTime}`}
                 </DialogDescription>
               </DialogHeader>
 
               {/* 3열 비교 그리드: 이전치 vs 예측치 vs 발표 결과 */}
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800 text-center">
-                  <span className="block text-[10px] text-slate-400 font-semibold">이전치</span>
+                  <span className="block text-[10px] text-slate-400 font-semibold">
+                    {isEn ? 'Previous' : '이전치'}
+                  </span>
                   <span className="block text-sm font-bold font-mono text-slate-200 mt-0.5">
                     {selectedEvent.previousValue}
                   </span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-center">
-                  <span className="block text-[10px] text-amber-400 font-semibold">예측치</span>
+                  <span className="block text-[10px] text-amber-400 font-semibold">
+                    {isEn ? 'Forecast' : '예측치'}
+                  </span>
                   <span className="block text-sm font-bold font-mono text-amber-300 mt-0.5">
                     {selectedEvent.forecastValue}
                   </span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-blue-500/10 border border-blue-500/30 text-center">
-                  <span className="block text-[10px] text-blue-400 font-semibold">결과</span>
+                  <span className="block text-[10px] text-blue-400 font-semibold">
+                    {isEn ? 'Status' : '결과'}
+                  </span>
                   <span className="block text-xs font-mono text-blue-300 font-medium mt-1">
-                    {selectedEvent.dDay === 0 ? '발표 대기' : '집계 대기'}
+                    {selectedEvent.dDay === 0
+                      ? isEn ? 'Awaiting Release' : '발표 대기'
+                      : isEn ? 'Pending' : '집계 대기'}
                   </span>
                 </div>
               </div>
@@ -601,20 +631,20 @@ export function GlobalMacroPulseTicker() {
               <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4 space-y-2">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200">
                   <AlertCircle className="size-4 text-amber-400" />
-                  <span>이벤트 심층 분석 및 경제적 배경</span>
+                  <span>{isEn ? 'Event Analysis & Background' : '이벤트 심층 분석 및 경제적 배경'}</span>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  {selectedEvent.analysisKo}
+                  {isEn ? selectedEvent.analysisEn : selectedEvent.analysisKo}
                 </p>
               </div>
 
               <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 space-y-1.5">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
                   <TrendingUp className="size-4" />
-                  <span>실전 투자 및 자산 배분 시사점</span>
+                  <span>{isEn ? 'Portfolio & Trading Takeaways' : '실전 투자 및 자산 배분 시사점'}</span>
                 </div>
                 <p className="text-xs text-slate-200 leading-relaxed">
-                  {selectedEvent.marketImpactTipKo}
+                  {isEn ? selectedEvent.marketImpactTipEn : selectedEvent.marketImpactTipKo}
                 </p>
               </div>
             </div>
