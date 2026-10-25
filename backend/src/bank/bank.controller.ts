@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -61,6 +62,16 @@ export class BankController {
     return this.guarded(
       () => this.repository().getStanding(requireUserId(request)),
       'failed to load bank standing',
+    );
+  }
+
+  @Get('bonds/holdings')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Owner-only verified current virtual bond holdings (not redemption history)' })
+  bondHoldings(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.repository().listBondHoldings(requireUserId(request)),
+      'failed to load current bond holdings',
     );
   }
 

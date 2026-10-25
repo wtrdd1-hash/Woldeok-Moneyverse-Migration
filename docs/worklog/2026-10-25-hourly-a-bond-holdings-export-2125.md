@@ -13,3 +13,10 @@
 
 ## Finished
 - Pending exact-SHA verification and gate evidence.
+
+### Midpoint checkpoint (2026-10-25 21:31 KST)
+- Re-fetched main and canonical EN/KO planning. No newer main than initial SHA at checkpoint.
+- TDD RED: backend 4 failures (missing method); frontend formatter and route import failures (missing files). Logs stored under `/srv/moneyverse-data/worktrees/hourly-a-bond-holdings-export-2125-red-*`.
+- GREEN: backend 4/4; frontend formatter/route/Android app-gateway 21/21. Real owner `bank_get_my_standing` function reused; no migrations or balance mutation.
+- Source changes: bank repository+controller, member banking link, private Next CSV route and validator; app-api/v1/banking/bonds/holdings uses the existing native proxy and session forwarding.
+- Next: full gates, isolated PostgreSQL, exact-SHA CI, and Test identity. Production HOLD until independently verified.

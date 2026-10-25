@@ -224,6 +224,16 @@ export default async function BankPage() {
 
           {/* KTB 기획재정국채 발행 창구 */}
           <VirtualBondsCard bonds={bonds} cashBalance={cash} />
+          <div className="flex flex-wrap items-center gap-3">
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href="/api/bank/bonds/holdings.csv">
+                {localeLabel(locale, '현재 보유 가상채권 CSV 다운로드', 'Export current virtual bond holdings CSV', '現在保有する仮想債券のCSV', '下载当前虚拟债券持仓CSV')}
+              </Link>
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              {localeLabel(locale, '현재 보유분만 포함하며 상환 내역이나 지급 확정 영수증이 아닙니다.', 'Current holdings only; not redemption history or a settlement receipt.', '現在の保有分のみ。償還履歴や決済証明ではありません。', '仅含当前持仓，并非赎回历史或结算凭证。')}
+            </p>
+          </div>
         </TabsContent>
 
         {/* 탭 3: 순자산 분석 & 건전성 (4대 지표 카드 + Kinked 점프 이자율 곡선) */}

@@ -73,6 +73,52 @@ export class BankRepository {
     };
   }
 
+  /** Read-only owner projection; redeemed bonds are deliberately absent. */
+  async listBondHoldings(actor: unknown): Promise<{
+    bonds: Array<{
+      id: string; bond_code: string; bond_name: string; principal_amount: string;
+      maturity_amount: string; yield_bps: number; purchased_at: string;
+      maturity_at: string; is_matured: boolean; status: 'holding';
+    }>;
+    scope: 'current_holdings_only';
+  }> {
+    const standing = await this.getStanding(actor);
+    if (!standing || typeof standing !== 'object' || Array.isArray(standing)) {
+      throw new Error('verified bank standing unavailable');
+    }
+    const bonds: unknown = (standing as Record<string, unknown>)['bonds'];
+    if (!Array.isArray(bonds) || bonds.length > 100) {
+      throw new Error('bounded bond holdings unavailable');
+    }
+    const amount = (value: unknown): value is string =>
+      typeof value === 'string' && /^(0|[1-9][0-9]{0,37})$/.test(value);
+    const timestamp = (value: unknown): value is string =>
+      typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value) &&
+      Number.isFinite(Date.parse(value));
+    const verified = bonds.map((value: unknown) => {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        throw new Error('invalid bond holding');
+      }
+      const b = value as Record<string, unknown>;
+      if (typeof b['id'] !== 'string' || !UUID.test(b['id']) ||
+          typeof b['bond_code'] !== 'string' || b['bond_code'].length < 1 || b['bond_code'].length > 40 ||
+          typeof b['bond_name'] !== 'string' || b['bond_name'].length < 1 || b['bond_name'].length > 200 ||
+          !amount(b['principal_amount']) || !amount(b['maturity_amount']) ||
+          !Number.isSafeInteger(b['yield_bps']) || (b['yield_bps'] as number) < 0 ||
+          !timestamp(b['purchased_at']) || !timestamp(b['maturity_at']) ||
+          typeof b['is_matured'] !== 'boolean' || b['status'] !== 'holding') {
+        throw new Error('invalid verified bond holding');
+      }
+      return {
+        id: b['id'], bond_code: b['bond_code'], bond_name: b['bond_name'],
+        principal_amount: b['principal_amount'], maturity_amount: b['maturity_amount'],
+        yield_bps: b['yield_bps'] as number, purchased_at: b['purchased_at'],
+        maturity_at: b['maturity_at'], is_matured: b['is_matured'], status: 'holding' as const,
+      };
+    });
+    return { bonds: verified, scope: 'current_holdings_only' };
+  }
+
   async moveBalance(
     key: unknown,
     actor: unknown,
