@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4493,6 +4493,40 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| holdings[] | true | object[] |  |
+| holdings[] | true | object |  |
+| holdings[].stock_id | true | string |  |
+| holdings[].symbol | true | string |  |
+| holdings[].name | true | string |  |
+| holdings[].quantity | true | string |  |
+| holdings[].average_cost | true | string & object |  |
+| holdings[].market_value | true | string & object |  |
+| holdings[].current_price | true | string & object |  |
+| holdings[].halt_status | false | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/stocks/portfolio/export` — Owner-only current virtual-stock holdings snapshot (not a trade receipt)
+
+- Authorization: 로그인 필요(기능에 따라 최신 동의 필요)
+- Success status: 200
+- Response mode: json
+- After success: Do not treat a position snapshot as a trade or settlement receipt
+- Operation ID: `StockController_portfolioExport`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="current_holdings_only" | const="current_holdings_only" |
 | holdings[] | true | object[] |  |
 | holdings[] | true | object |  |
 | holdings[].stock_id | true | string |  |

@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -25,6 +26,7 @@ import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
 import { StockInputError, isCandleInterval } from './stock.repository';
 import { StockService } from './stock.service';
+import { assertCurrentStockHoldings } from './stock-portfolio-export';
 
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 
@@ -94,6 +96,22 @@ export class StockController {
   @ApiOperation({ summary: 'Holdings of the caller' })
   async portfolio(@Req() request: RequestWithSession) {
     return { holdings: await this.service().portfolio(requireUserId(request)) };
+  }
+
+  @Get('portfolio/export')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @ApiOperation({ summary: 'Owner-only current virtual-stock holdings snapshot (not a trade receipt)' })
+  async portfolioExport(@Req() request: RequestWithSession) {
+    const actor = requireUserId(request);
+    try {
+      const holdings = await this.service().portfolio(actor);
+      assertCurrentStockHoldings(holdings);
+      return { scope: 'current_holdings_only' as const, holdings };
+    } catch {
+      throw new ServiceUnavailableException('verified stock holdings unavailable');
+    }
   }
 
   @Get('halt-receipts')

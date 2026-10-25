@@ -273,6 +273,7 @@ ERROR -> keep last successful state separate from transport/error state
 | `GET` | `/app-api/v1/stocks/history` | Trades made by the caller | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON keys: trades | 종목/포트폴리오/기록 중 관련 상태 재조회 |
 | `GET` | `/app-api/v1/stocks/market-events` | Market events currently in effect | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON keys: events | 종목/포트폴리오/기록 중 관련 상태 재조회 |
 | `GET` | `/app-api/v1/stocks/portfolio` | Holdings of the caller | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON keys: holdings | 종목/포트폴리오/기록 중 관련 상태 재조회 |
+| `GET` | `/app-api/v1/stocks/portfolio/export` | Export current owner-only virtual-stock holdings snapshot (not a settlement receipt) | Signed-in member + consent | None | `200` | JSON keys: scope, holdings | Show current positions only |
 | `GET` | `/app-api/v1/stocks/sparklines` | Recent prices for every listed stock | 로그인 필요(기능에 따라 최신 동의 필요) | params limit[query]:string* | `200` | JSON keys: series | 종목/포트폴리오/기록 중 관련 상태 재조회 |
 | `GET` | `/app-api/v1/stocks/watchlist` | Stocks watched by the caller | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON keys: stocks | 종목/포트폴리오/기록 중 관련 상태 재조회 |
 

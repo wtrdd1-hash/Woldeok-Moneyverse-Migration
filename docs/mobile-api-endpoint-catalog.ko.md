@@ -300,6 +300,7 @@ ERROR
 | `GET` | `/app-api/v1/stocks/history` | 내 주식 거래 기록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON 키: trades | 종목/포트폴리오/기록 중 관련 상태 재조회 |
 | `GET` | `/app-api/v1/stocks/market-events` | 주식 시장 이벤트 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON 키: events | 종목/포트폴리오/기록 중 관련 상태 재조회 |
 | `GET` | `/app-api/v1/stocks/portfolio` | 내 주식 보유량·평가 포트폴리오 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON 키: holdings | 종목/포트폴리오/기록 중 관련 상태 재조회 |
+| `GET` | `/app-api/v1/stocks/portfolio/export` | 본인 현재 가상 주식 보유 현황 내보내기(거래 영수증 아님) | 로그인 + 동의 | 없음 | `200` | JSON 키: scope, holdings | 현재 보유량만 표시 |
 | `GET` | `/app-api/v1/stocks/sparklines` | 종목별 미니 차트용 시세 데이터 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | params limit[query]:string* | `200` | JSON 키: series | 종목/포트폴리오/기록 중 관련 상태 재조회 |
 | `GET` | `/app-api/v1/stocks/watchlist` | 내 관심종목 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON 키: stocks | 종목/포트폴리오/기록 중 관련 상태 재조회 |
 

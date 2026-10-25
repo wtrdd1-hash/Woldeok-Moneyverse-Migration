@@ -98,6 +98,13 @@ export default async function PortfolioAnalysisPage() {
                   holdingCount={analysis.holdings.length}
                 />
               )}
+              {analysis && (
+                <Button asChild variant="outline" size="sm" className="min-h-11 text-xs font-semibold">
+                  <a href="/api/stocks/portfolio/holdings.csv" download aria-label={isEn ? 'Download my current virtual stock holdings as CSV' : '현재 보유 가상 주식 CSV 다운로드'}>
+                    {isEn ? 'Download holdings CSV' : '보유 주식 CSV 다운로드'}
+                  </a>
+                </Button>
+              )}
               <Button asChild variant="outline" size="sm" className="min-h-9 text-xs font-semibold">
                 <Link href="/stocks">
                   {isEn ? 'Browse market' : '거래소 종목 목록'}

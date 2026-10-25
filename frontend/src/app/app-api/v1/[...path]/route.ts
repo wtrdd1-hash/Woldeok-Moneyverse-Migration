@@ -167,7 +167,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
-  return proxy(request, (await context.params).path);
+  const parts = (await context.params).path;
+  const response = await proxy(request, parts);
+  // This is a member-only holdings snapshot; even failed responses are private.
+  if (parts.length === 3 && parts[0] === 'stocks' && parts[1] === 'portfolio' && parts[2] === 'export') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+  }
+  return response;
 }
 
 export const GET = handle;

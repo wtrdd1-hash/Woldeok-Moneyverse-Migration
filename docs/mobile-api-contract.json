@@ -14153,6 +14153,180 @@
     },
     {
       "method": "GET",
+      "path": "/app-api/v1/stocks/portfolio/export",
+      "purpose": "Download an owner-only current virtual-stock holdings snapshot (not a trade receipt)",
+      "callWhen": "On explicit member request to export current holdings",
+      "authorization": "로그인 필요(기능에 따라 최신 동의 필요)",
+      "afterSuccess": "Do not treat a position snapshot as a trade or settlement receipt",
+      "backendRoute": "/api/stocks/portfolio/export",
+      "operationId": "StockController_portfolioExport",
+      "backendOpenApiPath": "/stocks/portfolio/export",
+      "summary": "Owner-only current virtual-stock holdings snapshot (not a trade receipt)",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "scope",
+          "holdings"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "current_holdings_only"
+          },
+          "holdings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "stock_id": {
+                  "type": "string"
+                },
+                "symbol": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "string"
+                },
+                "average_cost": {
+                  "allOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "__wld": {
+                          "type": "object",
+                          "properties": {
+                            "description": {
+                              "oneOf": [
+                                {
+                                  "type": "undefined"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "__wld"
+                      ]
+                    }
+                  ]
+                },
+                "market_value": {
+                  "allOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "__wld": {
+                          "type": "object",
+                          "properties": {
+                            "description": {
+                              "oneOf": [
+                                {
+                                  "type": "undefined"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "__wld"
+                      ]
+                    }
+                  ]
+                },
+                "current_price": {
+                  "allOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "__wld": {
+                          "type": "object",
+                          "properties": {
+                            "description": {
+                              "oneOf": [
+                                {
+                                  "type": "undefined"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "__wld"
+                      ]
+                    }
+                  ]
+                },
+                "halt_status": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "stock_id",
+                "symbol",
+                "name",
+                "quantity",
+                "average_cost",
+                "market_value",
+                "current_price"
+              ]
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "holdings"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
       "path": "/app-api/v1/stocks/sparklines",
       "purpose": "종목별 미니 차트용 시세 데이터 조회",
       "callWhen": "해당 화면 진입/새로고침/관련 write 후",

@@ -121,6 +121,32 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
+  it('proxies owner-only current stock holdings to Android with cookie and private headers, including errors', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let forwarded = new Headers();
+    const fetchSpy = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toContain('/api/v1/stocks/portfolio/export');
+      forwarded = new Headers(init?.headers);
+      return new Response(JSON.stringify({ scope: 'current_holdings_only', holdings: [] }), {
+        status: 200, headers: { 'content-type': 'application/json' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/stocks/portfolio/export', { cookie: 'moneyverse_session=sample' }),
+      context('stocks', 'portfolio', 'export'),
+    );
+    expect(response.status).toBe(200);
+    expect(forwarded.get('cookie')).toContain('moneyverse_session=sample');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+    expect(await response.json()).toEqual({ scope: 'current_holdings_only', holdings: [] });
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('{}', { status: 401, headers: { 'content-type': 'application/json' } })));
+    const denied = await GET(request('/app-api/v1/stocks/portfolio/export'), context('stocks', 'portfolio', 'export'));
+    expect(denied.status).toBe(401);
+    expect(denied.headers.get('cache-control')).toContain('no-store');
+  });
+
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network down'); }));
