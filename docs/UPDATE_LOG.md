@@ -1,3 +1,7 @@
+## 2026-10-25 v1278 — F675-126 calculator replay/promotion integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- Previous Addition v1276 → Current Improvement v1278 → Next Addition v1280. Main `1c5b84a1` start/mid, predecessor Draft #1310, issue [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309). Verified compound/loan save type='stock', omitted loan repaymentType, lossy formatted details, title/ticker dedup, false promoted/saved/alerts/10,000 WLD success. Defined typed versioned adapters, opt-in legacy preview, receipt-bound idempotency/read-back, owner isolation, five-locale/mobile/a11y, DB and release gates.
+- P0 ENV1278-01 SEC1278-02 REL1278-03 CAL1278-04; P1 CAL1278-05 CAL1278-06 CAL1278-07 CAL1278-08 CAL1278-09 CAL1278-10. QA v1273 FAILED/HOLD, root 98%, dev ACL/audit/migration/exact-SHA Test/restore BLOCKED. New external approved 0, cumulative UNKNOWN/10,000 BLOCKED. Six bilingual planning docs and worklog updated; runtime/DB/Test/Production untouched.
+
 ## v2026.10.25.1268 — F675-124 Member Board Author Mutes and Private Feed (FEATURE ADDITION / DRAFT / HOLD)
 - GitHub handoff: [Draft PR #1310](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1310) OPEN stacked on #1304; [issue #1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309) updated. QA v1273 MID at 18:20 KST still shows root 97% (~3.0GiB), audit Critical2/High10, app DML 235/241, migration266, exact-SHA Test and restore HOLD; latest completed QA remains v1272 FAILED.
 
