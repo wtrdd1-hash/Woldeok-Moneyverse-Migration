@@ -1,6 +1,7 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
 ## v1286 / F675-128 — 마켓 검색 의미·소수 금액 무결성 (기능 보완 / 초안 / 보류)
+- **GitHub 기획 검토:** [초안 PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (기존 #1335 기반, 미병합); [개발 인계 #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 - 실제 코드: NUMERIC(20,4)와 BigInt/Number 정렬 충돌, ILIKE 와일드카드, 판매자명 UI/SQL 불일치, DTO 길이 제한 부재, OFFSET·비유일 정렬. 실제 운영 사고 증거는 아님.
 - 기존 회원 전용 20건 검색 보관함을 정규화 리터럴 필터 v2·정확 10진 문자열·서버 ACTIVE 선필터·키셋/HMAC 버전 커서·원자적 영수증·병합/탈퇴 차단·404 BOLA·Android/noindex/a11y로 보완. 모의 매물/구매/잔액 성공 표시 금지. 상세는 통합 마스터.
 - P0 ENV1286-01 SEC1286-02 REL1286-03 MKT1286-04; P1 MKT1286-05 MKT1286-06 MKT1286-07 MKT1286-08 MKT1286-09 MKT1286-10. QA v1276 FAILED/HOLD, v1277 원시 실패 증거, 루트 98%/2.2GiB, 운영 보류. 외부 승인 0건·누적 미확인/10,000 BLOCKED. 개발 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).

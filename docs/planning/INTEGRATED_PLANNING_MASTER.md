@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v2026.10.25.1286 — F675-128 Marketplace Saved-Search Semantic and Precision Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **GitHub planning review:** [Draft PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (stacked on #1335, unmerged); [development handoff #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 
 ### Authority, cycle and source evidence
 - **Cycle:** Previous Feature Addition v1284 → Current Feature Improvement v1286 → Next Feature Addition v1288 (provisional). Verified remote `main=1c5b84a1c45baafcca83f375a6f99698121e9bb5` at start and mid; checked `AGENTS.md`, `README.md`, English canonical `PROJECT_PLAN.md` and Korean counterpart. Stacked only on unmerged planning Draft [#1335](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1335), engineering [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334); no Development A/B/C, Gemini or QA runtime branch changes.

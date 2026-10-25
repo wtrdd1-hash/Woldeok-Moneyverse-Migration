@@ -1,4 +1,5 @@
 # 2026-10-25 Planning v1286 — Marketplace Saved Search Integrity / 마켓 검색 보관함 무결성
+- **GitHub planning review:** [Draft PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (stacked on #1335, unmerged); [development handoff #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 
 **Status:** PARTIAL / DRAFT / RELEASE HOLD. **Cycle:** Previous Addition v1284 → Current Improvement v1286 → Next Addition v1288 (provisional). **Authority:** remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; AGENTS.md, README.md, English canonical and Korean plan; stacked on unmerged planning Draft #1335.
 

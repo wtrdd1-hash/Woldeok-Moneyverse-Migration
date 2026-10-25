@@ -1,6 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.25.1286 — F675-128 검색 조건·금액 정밀도 보완 (기능 보완 / 초안 / 운영 보류)
+- **GitHub 기획 검토:** [초안 PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (기존 #1335 기반, 미병합); [개발 인계 #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 - 이전 추가 v1284 → 현재 보완 v1286 → 다음 추가 v1288(잠정). 최신 main `1c5b84a1` 시작·중간 재확인, 미병합 기획 #1335와 개발 이슈 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334) 분리.
 - 실제 소스: Migration 232 `NUMERIC(20,4)`와 UI `BigInt`/`Number(BigInt 차이)` 충돌 위험, ILIKE 와일드카드 미이스케이프, DTO 검색 길이 제한 부재, 판매자명 검색 UI/SQL 불일치, OFFSET·비유일 정렬. 모의 매물/구매/잔액 P0 유지. 운영 사고 입증 아님.
 - 리터럴 검색 정규화 필터 v2·정확한 금액 문자열·SQL 선필터/키셋 유일 정렬·본인/버전 서명 커서·20건 한도/원자적 영수증·계정 병합/탈퇴·404 BOLA·비공개 SEO·Android·접근성 명세. 세부 사항은 통합 마스터.

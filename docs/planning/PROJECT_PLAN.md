@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.25.1286 — F675-128 saved-search filter/decimal integrity (Improvement / DRAFT / HOLD)
+- **GitHub planning review:** [Draft PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (stacked on #1335, unmerged); [development handoff #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 - Previous Addition v1284 → Current Improvement v1286 → Next Addition v1288 provisional; latest main `1c5b84a1` checked start/mid. Draft #1335 is unmerged; engineering [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334) owns implementation.
 - Verified source: migration232 `price_wld NUMERIC(20,4)` vs UI `BigInt` and `Number(BigInt delta)`; unescaped ILIKE wildcards, unbounded DTO search/category, seller-name UI/SQL mismatch, OFFSET/non-unique sort; mock buy/balance truth gate remains P0. These are potential defects, not demonstrated Production incidents.
 - Improve literal normalized filter v2, exact decimal strings, SQL prefilter/keyset total ordering, signed owner+revision cursor, 20-search quota/atomic receipts, merge/erase policy, 404 BOLA, private noindex/Android parity, accessible failure states. Full specification and 10 concrete backlog tasks in integrated master.

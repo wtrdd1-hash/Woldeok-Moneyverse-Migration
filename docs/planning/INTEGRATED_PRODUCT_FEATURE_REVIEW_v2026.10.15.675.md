@@ -1,6 +1,7 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
 ## v1286 / F675-128 — Marketplace search semantics and decimal integrity (Improvement / DRAFT / HOLD)
+- **GitHub planning review:** [Draft PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (stacked on #1335, unmerged); [development handoff #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 - Source-confirmed contract mismatches: NUMERIC(20,4) versus UI BigInt/Number sorting, unescaped ILIKE wildcard, seller-name placeholder not supported by SQL, unbounded query DTO, OFFSET and missing unique sort; these are risks, not observed incidents.
 - Member-only saved searches retain 20-active limit and owner-bound receipt; filter v2 literal normalized keyword/category/max-price/allowlisted sort, exact decimal strings, server ACTIVE prefilter/keyset/HMAC revision cursor, 404 BOLA, merge/erase gate, Android/noindex/a11y. No fake listing, purchase or balance success. See integrated master.
 - P0 ENV1286-01 SEC1286-02 REL1286-03 MKT1286-04; P1 MKT1286-05 MKT1286-06 MKT1286-07 MKT1286-08 MKT1286-09 MKT1286-10. QA v1276 FAILED/HOLD, v1277 raw failing evidence, root 98%/2.2GiB, release BLOCKED. External approved 0, cumulative UNKNOWN/10,000 BLOCKED. Engineering [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).

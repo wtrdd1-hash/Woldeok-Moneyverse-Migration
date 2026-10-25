@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v2026.10.25.1286 — F675-128 회원 마켓 검색 조건 의미·금액 정밀도 보완 (기능 보완 / 초안 / 운영 보류)
+- **GitHub 기획 검토:** [초안 PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (기존 #1335 기반, 미병합); [개발 인계 #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 
 ### 기준·회차·실제 소스 근거
 - **회차:** 이전 기능 추가 v1284 → 현재 기능 보완 v1286 → 다음 기능 추가 v1288(잠정). 시작·중간 원격 `main=1c5b84a1c45baafcca83f375a6f99698121e9bb5` 확인, `AGENTS.md`·`README.md`·영문 정본 `PROJECT_PLAN.md`·한국어 대조본 재확인. 미병합 기획 Draft [#1335](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1335) 위에만 누적하며 개발 인계 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334)를 유지. 개발 A/B/C·Gemini·QA 브랜치는 수정하지 않음.

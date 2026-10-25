@@ -1,4 +1,5 @@
 ## 2026-10-25 — Planning v1286 F675-128 filter/decimal integrity (DRAFT / HOLD)
+- **GitHub planning review:** [Draft PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (stacked on #1335, unmerged); [development handoff #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 - Previous Addition v1284 → Current Improvement v1286 → Next Addition v1288 provisional; main `1c5b84a1` checked at start/mid, prior Draft #1335. Scope: planning docs only, no runtime/DB/WLD changes.
 - Source evidence: migration232 NUMERIC(20,4) versus UI BigInt, SQL ILIKE wildcard and seller-search mismatch, DTO unbounded inputs, unstable OFFSET. New normalized filter v2, exact decimal, SQL keyset, HMAC owner cursor, lifecycle/privacy and regression gate. 4 P0 / 6 P1 in canonical plan/master.
 - QA v1276 completed FAILED/HOLD, v1277 raw tests 1397 pass/6 fail and audits fail, root 98%/2.2GiB; Production blocked. Independent source corpus new approved 0, cumulative UNKNOWN/10,000 BLOCKED.
