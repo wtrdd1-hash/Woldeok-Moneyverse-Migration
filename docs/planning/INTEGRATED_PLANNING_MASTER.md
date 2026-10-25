@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **v1302 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384 (stacked on unmerged #1379; documentation only, DRAFT / RELEASE HOLD).
 
 ## v2026.10.26.1302 — F675-132 Session Nickname Contract, Revocation-Race and Trust-Boundary Hardening (Feature Improvement / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Addition v1300 → Current Feature Improvement v1302 → Next Feature Addition v1304 (provisional). Authoritative main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` verified at start and midpoint; predecessor Draft #1379 remains unmerged. No runtime/DB/member/WLD/ledger/Test/Production changes. This section supersedes conflicting proposed v1300 interface details; earlier entries are historical.

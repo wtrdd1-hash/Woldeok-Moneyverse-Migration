@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **v1302 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384 (stacked on unmerged #1379; documentation only, DRAFT / RELEASE HOLD).
 
 ## v2026.10.26.1302 — F675-132 Session Alias Contract and Revocation Race Hardening (Feature Improvement / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Addition v1300 / Current Improvement v1302 / Next Addition v1304 (provisional). Authoritative main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` start/mid unchanged; prior Draft #1379 unmerged, docs-only and separate from Gemini/development A/B/C/QA.

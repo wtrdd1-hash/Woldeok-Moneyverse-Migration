@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **v1302 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384 (stacked on unmerged #1379; documentation only, DRAFT / RELEASE HOLD).
 
 ## v2026.10.26.1302 — F675-132 세션 별칭 계약·철회 경합 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 - **회차:** 이전 기능 추가 v1300 / 현재 기능 보완 v1302 / 다음 기능 추가 v1304(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 동일, 선행 Draft #1379 미병합, Gemini/개발 A/B/C/QA와 분리한 문서 변경만 수행.

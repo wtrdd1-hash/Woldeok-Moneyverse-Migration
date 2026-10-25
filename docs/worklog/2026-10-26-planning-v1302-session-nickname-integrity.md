@@ -16,3 +16,6 @@
 
 ## RELEASE
 - PARTIAL / DRAFT / RELEASE HOLD; independent development branch, real isolated PostgreSQL, official exact-SHA authenticated Test E2E, security audit, independent backup restore and approved GitOps required before Production.
+
+## GITHUB HANDOFF
+- Draft PR #1384: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384 (base unmerged #1379); issue #1378 and root capacity #1170 updated. Main unchanged.

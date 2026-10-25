@@ -1,4 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- **v1302 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384 (stacked on unmerged #1379; documentation only, DRAFT / RELEASE HOLD).
 
 ## v2026.10.26.1302 — F675-132 로그인 세션 별칭 API·세션 철회 경합·신뢰 경계 보완 (기능 보완 / 초안 / 운영 보류)
 - **회차:** 이전 기능 추가 v1300 → 현재 기능 보완 v1302 → 다음 기능 추가 v1304(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재검증. 선행 Draft #1379 미병합. 이번 절은 v1300 제안 중 충돌하는 API 세부사항을 대체하며 과거 절은 이력으로 보존한다. 런타임·DB·회원·WLD·원장·Test·Production 변경 없음.
