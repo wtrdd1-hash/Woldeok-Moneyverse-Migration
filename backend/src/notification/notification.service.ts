@@ -27,6 +27,24 @@ export class NotificationService {
     );
   }
 
+  async archiveSnapshot(actor: string): Promise<{ notifications: unknown[]; complete: true }> {
+    if (!this.pool) throw new Error('database pool unavailable');
+    // The 101st row is a completeness sentinel, not an item to silently discard.
+    const rows = await queryRows(
+      this.pool,
+      `SELECT id::text, category, title, body, link, is_read, read_at, created_at
+       FROM public.in_app_notifications
+       WHERE user_id = $1
+       ORDER BY created_at DESC, id DESC
+       LIMIT $2`,
+      [actor, 101],
+    );
+    if (rows.length > 100) {
+      throw new ConflictException('Notification archive exceeds 100 records; export is unavailable.');
+    }
+    return { notifications: rows, complete: true };
+  }
+
   async unreadCount(actor: string): Promise<number> {
     if (!this.pool) throw new Error('database pool unavailable');
     const row = await queryOne<{ unread_count: number }>(

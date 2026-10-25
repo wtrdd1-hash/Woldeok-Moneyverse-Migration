@@ -1,6 +1,7 @@
 import {
   Controller,
   ForbiddenException,
+  Header,
   Get,
   Param,
   ParseUUIDPipe,
@@ -44,6 +45,14 @@ export class NotificationController {
     return this.guarded(() =>
       this.notificationService.listNotifications(requireUserId(request), query),
     );
+  }
+
+  @Get('archive-snapshot')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Export an owner-only complete snapshot of at most 100 retained notifications' })
+  archiveSnapshot(@Req() request: RequestWithSession) {
+    return this.guarded(() => this.notificationService.archiveSnapshot(requireUserId(request)));
   }
 
   @Get('unread-count')

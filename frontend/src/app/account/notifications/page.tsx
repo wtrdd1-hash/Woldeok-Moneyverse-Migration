@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BellRing, CheckCircle2, ChevronLeft, Goal, ShieldCheck } from 'lucide-react';
+import { BellRing, CheckCircle2, ChevronLeft, Download, Goal, ShieldCheck } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,14 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
 
     {/* 7대 카테고리 알림 탭 바 & 전체 읽음 처리 */}
     <NotificationTabsBar />
+    <div className="flex flex-wrap items-center gap-3 rounded-xl border p-4">
+      <Button asChild variant="outline" className="min-h-11">
+        <Link href="/account/notifications/notifications.csv" aria-label="내 알림 보관 기록 CSV 다운로드">
+          <Download className="size-4" aria-hidden="true" /> 내 알림 CSV 다운로드
+        </Link>
+      </Button>
+      <p className="text-sm text-muted-foreground">현재 보관된 알림이 100건 이하일 때만 전체 기록을 내려받을 수 있습니다. 보상 지급 영수증은 아닙니다.</p>
+    </div>
 
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <Card className="overflow-hidden">
