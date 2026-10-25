@@ -69,6 +69,7 @@ describe('verified global notice toast', () => {
     expect(screen.queryByRole('status')).toBeNull();
     await poll();
     expect(screen.getByRole('status').textContent).toContain('Verified new notice');
+    expect(screen.getByRole('status').parentElement).toBe(document.body);
     expect(screen.getByRole('link', { name: /Verified new notice/ }).getAttribute('href'))
       .toBe('/announcements/22222222-2222-4222-8222-222222222222');
     expect(screen.getByRole('button', { name: '공지 닫기' }).className).toContain('min-h-11');

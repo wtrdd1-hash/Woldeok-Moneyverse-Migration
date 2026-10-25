@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { createPortal } from 'react-dom';
 import { Bell, X } from 'lucide-react';
 
 interface PublishedNotice {
@@ -104,7 +105,7 @@ export function PublishedAnnouncementToast() {
 
   if (!current) return null;
 
-  return (
+  return createPortal(
     <aside
       role="status"
       aria-live="polite"
@@ -132,6 +133,7 @@ export function PublishedAnnouncementToast() {
           <X className="size-4" aria-hidden="true" />
         </button>
       </div>
-    </aside>
+    </aside>,
+    document.body,
   );
 }
