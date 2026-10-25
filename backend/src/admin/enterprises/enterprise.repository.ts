@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 
@@ -62,9 +62,33 @@ export interface StateHoldingOverview {
   governance_model: string;
 }
 
+export interface PublicEnterpriseDisclosure {
+  overview: StateHoldingOverview;
+  soes: StateEnterpriseRow[];
+  privateEnterprises: PrivateEnterpriseRow[];
+  financial_data_status: 'PROJECTION_ONLY_UNVERIFIED';
+  ledger_confirmed: false;
+}
+
 @Injectable()
 export class EnterpriseRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable) {}
+
+  async getPublicDisclosure(): Promise<PublicEnterpriseDisclosure> {
+    try {
+      const result = await this.pool.query<{ disclosure: PublicEnterpriseDisclosure }>(
+        'SELECT public.enterprise_public_disclosure() AS disclosure',
+      );
+      if (!result.rows[0]?.disclosure) {
+        throw new ServiceUnavailableException('Public enterprise disclosure unavailable');
+      }
+      return result.rows[0].disclosure;
+    } catch {
+      // Never leak SQL/connection details or broaden app table permissions.
+      // A missing migration, privilege denial, or DB outage all mean 503.
+      throw new ServiceUnavailableException('Public enterprise disclosure unavailable');
+    }
+  }
 
   async getStateHoldingOverview(): Promise<StateHoldingOverview> {
     const soeRes = await this.pool.query<{

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Param,
   Post,
   Put,
@@ -79,20 +80,16 @@ export class PublicEnterpriseController {
   constructor(private readonly service: EnterpriseService) {}
 
   @Get('public')
+  @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '대국민 알리오(ALIO) 공기업 경영정보 공개 공시' })
   async getPublicEnterprises() {
-    const [overview, soes, privateEnterprises] = await Promise.all([
-      this.service.getStateHoldingOverview(),
-      this.service.listStateEnterprises(),
-      this.service.listPrivateEnterprises(),
-    ]);
-
+    const disclosure = await this.service.getPublicDisclosure();
     return {
-      overview,
-      soes,
-      privateEnterprises,
+      ...disclosure,
+      source: 'DATABASE_SNAPSHOT' as const,
+      settlementStatus: 'NOT_VERIFIED' as const,
       disclosed_at: new Date().toISOString(),
-      standards: 'OECD 공기업 지배구조 가이드라인 및 대한민국 공운법 표준',
+      standards: 'In-game virtual enterprise operating assumptions; no settlement attestation',
     };
   }
 }
