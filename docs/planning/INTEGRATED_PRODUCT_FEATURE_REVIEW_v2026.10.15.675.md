@@ -1,5 +1,14 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v2026.10.25.1274 — F675-125 Monthly Statement Precision and Closure Integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- **Cycle:** Previous Addition v1272 → Current Improvement v1274 → Next Addition v1276 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked start/mid; AGENTS, README, EN canonical/KO comparison. Stacked on unmerged Draft #1296; engineering issue #1295. Planning only, no runtime/DB/Test/Production changes.
+- **Verified correction:** Migration 194 and read-only development DB metadata confirm ledger_postings.amount and account_balances.available_amount are unbounded NUMERIC, **not BIGINT**. Supersede v1272 draft statement BIGINT columns with exact NUMERIC integer CHECK, decimal-string API/CSV, no JS Number coercion; repeated postings grouped by transaction/account; debit-credit sign matches wallet repository.
+- **Closure:** transaction.created_at is the period key; corrections are new reversals (migration083), merge transfers are real postings (migration163). REPEATABLE READ/max timestamp alone cannot prove completeness against in-flight earlier-timestamp commits. VERIFIED requires all-writer source seal/commit-order watermark plus independent anchors, otherwise UNVERIFIABLE SOURCE_SEAL_UNAVAILABLE. Atomic complete immutable generation/HMAC/head, signed owner/session/generation cursor; merge source+target preflight and soft-delete privacy. No fabricated balances.
+- **Backlog P0:** ENV1274-01 SEC1274-02 REL1274-03 WAL1274-04. **P1:** WAL1274-05 WAL1274-06 WAL1274-07 WAL1274-08 WAL1274-09 WAL1274-10. Detailed schema, screens/API/admin/SEO/Android/a11y/KPI/100 concurrent/100 foreign/10,001 synthetic/large-number and late-commit regressions in EN/KO integrated master.
+- **QA:** latest completed v1271 FAILED/HOLD (frontend 5 failures, dependency Critical2/High10, dev app DML 235/241, PUBLIC bank EXECUTE 3, migration266/280, exact-SHA financial Test and restore missing). Root 95% used/~4.8GiB free at 17:08 KST. Feature OFF, RELEASE HOLD. External newly approved 0, cumulative UNKNOWN / 10,000 => BLOCKED/IN PROGRESS.
+- **Backlog IDs:** ENV1274-01 SEC1274-02 REL1274-03 WAL1274-04 WAL1274-05 WAL1274-06 WAL1274-07 WAL1274-08 WAL1274-09 WAL1274-10
+
+
 ## v1272 — F675-125 Verified Monthly WLD Statements (ADDITION / HOLD)
 - **GitHub:** [Draft PR #1296](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1296) OPEN/HOLD, [development issue #1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295) OPEN. Unmerged stacked documentation-only; runtime/DB/Test/Production untouched.
 - Previous Improvement v1270; current Addition v1272; next Improvement v1274. Verified main 1c5b84a1, prior Draft #1289 unmerged, issue [#1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295).

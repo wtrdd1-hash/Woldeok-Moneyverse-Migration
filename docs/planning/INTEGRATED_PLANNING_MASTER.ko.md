@@ -1,5 +1,34 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1274 — F675-125 월간 WLD 명세서 원천·정밀도·마감 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+
+### 회차·근거·실제 확인된 설계 오류
+- 이전 **기능 추가 v1272** → 현재 **기능 보완 v1274** → 다음 **기능 추가 v1276**(잠정). main SHA **1c5b84a1c45baafcca83f375a6f99698121e9bb5** 시작·중간 재확인, AGENTS.md·README.md·영문 PROJECT_PLAN 정본·국문 대조 확인. 미병합 Draft PR #1296 위 문서 전용 변경, 개발 이슈 #1295. 런타임·DB·Test·운영 배포와 원장 쓰기 없음.
+- **P0 설계 정정(실증):** Migration 194-wide-wld-numeric-storage.sql은 ledger_postings.amount와 account_balances.available_amount를 제한 없는 PostgreSQL NUMERIC으로 전환했다. 개발 DB information_schema에서도 두 열이 NUMERIC임을 확인했다. v1272의 월간 명세서 BIGINT 기초·기말 잔액 및 차변·대변·증감 보관안은 정상적인 큰 WLD 금액에서도 오버플로할 수 있다. **본 v1274의 NUMERIC 규격이 v1272 BIGINT 제안을 대체**한다. 과거 기획 기록은 삭제하지 않는다.
+- **원천 추가 확인:** init/001과 wallet.repository.ts에서 debit은 잔액 증가, credit은 잔액 감소다. Migration 083의 정정은 기존 거래를 바꾸지 않고 reverses_transaction_id로 연결된 신규 역거래를 작성한다. Migration 163 계정 병합은 기존 계좌·과거 원장 소유권을 남기고 ACCOUNT_MERGE_TRANSFER 신규 거래를 만든다. ledger_transactions.created_at과 ledger_postings.created_at은 별도 시각이다. 이는 코드 확인 결과이지 운영 명세서 오류 발생 증거가 아니다. 개발 DB와 운영 DB의 동등성을 주장하지 않는다.
+- 기존 WLD 잔액·원장·보상·Wallet API를 변경하지 않는 읽기 전용 기획이다. 개발 A의 최근 CSV PR #1213 및 개발 C의 P2P PR #1286과 변경 범위를 분리한다.
+
+### 수정된 정확 금액·원천 증거 DB 계약(미구현 제안)
+- 기초·기말 현금/은행·합계와 행의 차변·대변·증감은 모두 **PostgreSQL NUMERIC**을 사용한다. 정수 금액만 허용하는 CHECK(value = trunc(value))를 NULL 허용 여부에 맞게 적용하고 차변·대변은 0 이상, 증감은 차변-대변으로 검증한다. BIGINT 강제 변환, JS Number 부동소수점 변환, 64비트 DTO 강제 변환을 금지한다. API/CSV는 지수·소수점 없는 정규 10진 정수 문자열을 반환하며 검증 후 SQL NUMERIC 또는 JS BigInt로만 계산하고 BigInt 객체를 JSON에 직접 넣지 않는다. UNVERIFIABLE이면 금액 네 필드는 전부 NULL, 임의의 0 또는 부분 VERIFIED 금지.
+- v1272의 generation/head/row/receipt 4개 테이블 및 본인+월+세대 유일 제약, 불변 FK, generation+transaction+account 유일 제약, 단일 최신 head, 원천 건수는 유지한다. 각 행에는 원천 거래 ID·계좌 ID·거래 발생시각·계좌 유형·원천 전표 건수·정확 NUMERIC 합계·선택적 전표 ID 다이제스트를 둔다. 한 거래/계좌의 여러 전표는 먼저 집계한다. 계좌 ID는 변경 불가능한 원천 키이며 임의의 계정 병합 별칭으로 대체하지 않는다. VERIFIED에는 원천 세대 다이제스트·체크포인트 버전·seal ID·HMAC 키 버전을 필수화하고 비밀키는 노출하지 않는다. 상태·금액 무결성은 DTO뿐 아니라 DB CHECK로 강제한다.
+- **기간 판정:** 서울 기준 월초 00:00부터 다음 달 월초 00:00 미만을 UTC로 변환하고 ledger_transactions.created_at으로 거래 월을 결정한다. posting.created_at으로 거래를 다른 달로 나누지 않으며 감사용으로만 보존한다. 전표 누락·거래 불일치 시 VERIFIED 차단. 원천 다이제스트는 거래시각·거래 ID·계좌 ID·전표 ID의 안정적 순서로 계산한다. 서명 커서는 본인/세션/월/세대/마지막 정렬키/만료/키 버전에 결합한다. LIMIT는 집계 이후에만 적용한다.
+- **부호·정정:** 계좌 증감은 debit 합계 - credit 합계이며 현금↔은행 이동은 합계 증감 0이어도 각각의 계좌 행으로 표시한다. ADMIN_ADJUSTMENT 역거래는 실제 새 거래가 작성된 달에 포함하고 기존 월 기록을 소급 삭제·이동하지 않는다. 전체 거래의 차변·대변 균형과 본인 계좌 증감을 별도로 대사하고 균형 붕괴·미확인 계좌가 있으면 VERIFIED 금지.
+
+### 원천 마감 장벽·계정 병합·불변 발행
+- **스냅샷 격리만으로 과거 월 완결성을 보장하지 않는다.** REPEATABLE READ, MAX(created_at)/MAX(id), 건수, 24시간 유예만으로는 이전 시각으로 시작한 미완료 거래가 나중에 커밋하는 문제를 배제할 수 없다. VERIFIED는 모든 쓰기 경로(정정·관리자·계정 병합·과거 직접 잔액 조정 포함)가 준수하는 검증 가능한 단조 증가 원장 마감 seal/커밋 순서 워터마크, 전체 전표 대사, 독립적인 기초·기말 잔액 앵커가 필요하다. 프로토콜 미구현 또는 우회 쓰기가 존재하면 SOURCE_SEAL_UNAVAILABLE로 UNVERIFIABLE 처리한다. 시각 경과만으로 확정 금지.
+- 발행 작업은 본인+월 네임스페이스 잠금 → 일관된 스냅샷 → 모든 원천 작성자·seal·계좌 소유·상태 확인 → NUMERIC 대사 → 완전한 불변 세대·HMAC 영수증 삽입 → 단일 head 원자적 이동 순으로 처리한다. 커밋 전 seal·계정 상태 재검증, 변경 시 중단·재시도한다. 늦은 원천이 검증되면 완전한 새 세대를 발행하고 과거 행은 수정하지 않는다. 동일 본인/월/seal/digest 재시도는 기존 영수증 반환. 조회는 단일 head 세대를 고정하고 변경 시 커서 409로 처음부터 다시 조회한다.
+- Migration 163 병합 시 이전 회원의 과거 계좌와 원장이 그대로 남는다. 생존 회원의 과거 원장에 이전 회원의 거래를 자동 포함하거나 과거 기초잔액을 만들어서는 안 된다. 별도 승인된 개인정보 이전 규정 전까지 병합 원본·대상 중 어느 한쪽이라도 명세서 세대/head/영수증이 있으면 병합 사전 차단. 병합 이체는 실제 거래 달에 표시한다. Migration 010 탈퇴는 회원 행을 물리 삭제하지 않으므로 명세서·CSV·HMAC·백업의 보존/삭제 정책을 명시하고 접근을 즉시 차단한다. SECURITY DEFINER 함수는 search_path 고정·본인 범위 제한, 앱 직접 테이블 권한·PUBLIC EXECUTE 금지, 타인·다른 세션 접근 회귀 필수.
+- 상태: PENDING_SOURCE(미마감), NOT_ARCHIVED(기록 없음), UNVERIFIABLE 사유 SOURCE_SEAL_UNAVAILABLE / MISSING_OPENING_ANCHOR / FRACTIONAL_SOURCE / UNBALANCED_SOURCE / OWNER_AMBIGUOUS / CHECKPOINT_CHANGED / SOURCE_GAP; 완전한 검증만 VERIFIED/REVISED. DB 오류를 EMPTY_VERIFIED로 변환 금지. VERIFIED만 CSV, no-store/noindex, 수식 주입 방지, 비식별 관리자 통계 k≥20, 모바일 320px/200% 확대·키보드·상태 안내·Android app-api 동등성. KPI: 거짓 VERIFIED 0, 정밀도 손실 0, 타인 노출 0, 멱등 마감 중복 세대 0.
+
+### 갱신된 개발 백로그·운영 차단
+- **P0** ENV1274-01: 루트 디스크 95%·약 4.8GiB 여유(17:08 KST), 개발/Test/운영 DB 격리·백업 복원 검증. SEC1274-02: 개발 DB 앱 241개 중 235개 테이블 UPDATE+DELETE 및 PUBLIC 은행 함수 3개 권한 최소화·본인 격리. REL1274-03: Migration 266 체크섬·280 번호 충돌, QA v1271 프론트 5건 실패, 의존성 Critical2/High10, 정확 SHA 로그인 금융 Test E2E·독립 QA PASS. WAL1274-04: 전체 원장 쓰기 경로 목록, seal/마감 워터마크·독립 잔액 앵커 증명, 불가능하면 실패 폐쇄.
+- **P1** WAL1274-05: BIGINT 제안을 정확 NUMERIC 정수 제약·전표 사전 집계로 교체; WAL1274-06: 완전 세대 원자 발행·단조 seal 정정·HMAC 원본 재사용; WAL1274-07: NestJS 본인 전용 10진 문자열 목록/상세/행/CSV/영수증·세대 고정 커서; WAL1274-08: Next.js·Android·UNVERIFIABLE 사유·접근성; WAL1274-09: 계정 병합·탈퇴·개인정보·관리자 통계·SEO·KPI; WAL1274-10: 실제 격리 PG에서 2^63 초과 WLD, 중복 전표, 동시 마감 100건, 타인 조회 100건, 합성 10,001건, 다음 달 역거래, 과거시각 미커밋 거래, seal 누락, 병합 양쪽, 탈퇴, 정확 SHA CI·복원·롤백 검증.
+- v1272의 화면·CTA·API·관리자·배포 조건은 본 문서에서 명시적으로 교체한 부분 외 유지한다. 기능 기본 OFF, 문서 단계에서 Migration 번호 예약 금지. 별도 개발 브랜치·정확 SHA Test·독립 QA·승인된 무중단 카나리·기능 비활성 롤백 필수, 원장 롤백 금지. 최신 완료 QA **v1271 FAILED/HOLD**(프론트 1,398 PASS/5 FAIL, 감사 Critical2/High10, 앱 DML 235/241, PUBLIC 은행 3, Migration266/280, 금융 Test/복원 미확인). 운영 RELEASE HOLD.
+- 외부 독립 근거 **중복 제거·분류·승인 10,000건** 목표 유지. 이번 신규 승인 **0건**, 누적 승인 **미확인**, **BLOCKED / IN PROGRESS**. 소스 분석·공식 기술 문서는 승인된 외부 독립 레퍼런스 수량으로 집계하지 않는다.
+
+**백로그 ID:** ENV1274-01 SEC1274-02 REL1274-03 WAL1274-04 WAL1274-05 WAL1274-06 WAL1274-07 WAL1274-08 WAL1274-09 WAL1274-10
+
+
 ## v2026.10.25.1272 — F675-125 회원 전용 검증형 월간 WLD 거래 명세서 (기능 추가 / 기획 초안 / 운영 보류)
 - **GitHub:** [Draft PR #1296](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1296) OPEN/HOLD, [개발 이슈 #1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295) OPEN. 선행 기획 브랜치 위 미병합 문서 변경만 수행, 런타임/DB/Test/운영 변경 없음.
 

@@ -1,5 +1,14 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v2026.10.25.1274 — F675-125 월간 명세서 정밀도·마감 무결성 보완 (기능 보완 / 초안 / 보류)
+- **회차:** 이전 기능 추가 v1272 → 현재 기능 보완 v1274 → 다음 기능 추가 v1276(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, AGENTS·README·영문 정본/국문 대조. 미병합 Draft #1296 후속, 개발 이슈 #1295. 문서 기획만 수행, 런타임/DB/Test/운영 변경 없음.
+- **실증 정정:** Migration 194 및 개발 DB 메타데이터에서 ledger_postings.amount·account_balances.available_amount가 BIGINT가 아닌 제한 없는 NUMERIC임을 확인했다. v1272 명세서 BIGINT 제안을 정수 CHECK를 갖춘 NUMERIC으로 대체하고 API/CSV는 정확한 10진 문자열로 처리하며 JS Number 변환을 금지한다. 동일 거래/계좌의 중복 전표를 먼저 집계하고 차변-대변 부호를 기존 지갑과 일치시킨다.
+- **마감 검증:** 거래의 월 판정은 transaction.created_at, 정정은 새 역거래(Migration083), 계정 병합은 실제 이체(Migration163)로 처리한다. REPEATABLE READ·최대시각만으로 과거 시각 미커밋 거래의 누락을 막지 못하므로 전체 쓰기 경로의 seal/커밋 순서 워터마크와 독립 잔액 앵커 없이는 VERIFIED 금지, SOURCE_SEAL_UNAVAILABLE로 UNVERIFIABLE 처리. 완전 불변 세대·HMAC·head 원자 발행, 본인/세션/세대 서명 커서, 병합 원본·대상 사전 차단, 탈퇴 개인정보 처리.
+- **P0:** ENV1274-01 SEC1274-02 REL1274-03 WAL1274-04. **P1:** WAL1274-05 WAL1274-06 WAL1274-07 WAL1274-08 WAL1274-09 WAL1274-10. DB/API/화면·관리자/SEO/Android/a11y/KPI/동시 100건·타인 100건·합성 10,001건·큰 수·늦은 커밋 테스트는 국영문 통합 마스터에 상세 명세.
+- **QA:** 최신 완료 v1271 FAILED/HOLD(프론트 5건 실패, 의존성 Critical2/High10, 개발 DB 앱 DML 235/241, PUBLIC 은행 3개, Migration266/280, 정확 SHA 금융 Test/복원 미확인). 루트 95%·약 4.8GiB 여유(17:08 KST). 기능 OFF, 운영 보류. 외부 신규 승인 0건·누적 미확인/10,000 => BLOCKED/IN PROGRESS.
+- **백로그 ID:** ENV1274-01 SEC1274-02 REL1274-03 WAL1274-04 WAL1274-05 WAL1274-06 WAL1274-07 WAL1274-08 WAL1274-09 WAL1274-10
+
+
 ## v1272 — F675-125 회원 전용 검증형 월간 WLD 명세서 (추가 / 보류)
 - **GitHub:** [Draft PR #1296](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1296) OPEN/HOLD, [개발 이슈 #1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295) OPEN. 선행 기획 브랜치 위 미병합 문서 변경만 수행, 런타임/DB/Test/운영 변경 없음.
 - 이전 Improvement v1270, 현재 Addition v1272, 다음 Improvement v1274. main 1c5b84a1 확인, 선행 Draft #1289 미병합, 개발 이슈 [#1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295).
