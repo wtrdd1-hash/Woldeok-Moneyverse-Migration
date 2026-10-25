@@ -22,3 +22,8 @@ Planned isolated real-PG 100-way finalizer replay, 100 foreign receipts, 10,001 
 ## External evidence and operational boundaries
 - Independent external target: 10,000 deduplicated, approved, source-classified records. Reviewed publisher families: PostgreSQL/OWASP/W3C (3); newly accepted: 0; cumulative accepted: UNKNOWN; gate BLOCKED/IN PROGRESS.
 - No runtime code, DB, Test, Production, financial ledger, WLD, worker files, feature switch, or schedule modified. No merge or deployment. Records under `/srv/moneyverse-data/build-workspaces/planning-v1260-records/`.
+
+## GitHub handoff
+- Draft PR #1257 (base prior planning #1248): https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1257
+- Development issue #1256: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1256
+- Draft only; no main merge or runtime/Test/Production deployment.
