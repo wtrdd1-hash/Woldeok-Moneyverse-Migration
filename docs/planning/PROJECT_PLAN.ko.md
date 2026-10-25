@@ -1,4 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
+## v2026.10.26.1294 — F675-130 알림 출처·읽음 컷오프·커서 무결성 (기능 보완 / DRAFT / HOLD)
+- 이전 Feature Addition v1292 → 현재 Feature Improvement v1294 → 다음 Feature Addition v1296(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5·AGENTS/README·영문 정본/한국어 대조 재확인. 미병합 #1354 기반 문서 전용, A/B/C/Gemini/QA 분리.
+- 실제 NestJS GET /notifications/unread-count, CSRF POST /notifications/:id/read 및 /notifications/read-all은 존재, claim-all은 의도적으로 거부하므로 재사용. 고정 6개 모의 알림·localStorage 10초 지연 장마감·React 전용 읽음은 실제 사건 증거가 아님. DTO @Type(() => Boolean)의 unreadOnly=false 참 변환 가능성은 격리 검증 필요. 개발 DB UUID id/10개 컬럼, (user_id,created_at DESC) 인덱스에 id 없음, 알림 데이터 0건으로 실제 분류 미확인.
+- P0 ENV1294-01 SEC1294-02 REL1294-03 NOT1294-04; P1 NOT1294-05 NOT1294-06 NOT1294-07 NOT1294-08 NOT1294-09 NOT1294-10. 신규 도착을 읽지 않는 모두 읽음 상한, 명시적 false 파싱, 회원/세션/분류/컷오프 서명 키셋, 기존 API 호환, 실제 분류·출처, 기기 권한·방해금지·로그아웃 타이머, Android·비공개 SEO·WCAG, 동시 100/타인 100/동률 10,001/DST/롤백. 상세는 영문·국문 통합 마스터.
+- 루트 99%/1.6GiB, 프론트 후보 1,407 통과/6 실패, 보안·정확 SHA·복원 HOLD. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임/DB/WLD/원장/Test/운영 미변경, 플래그 기본 OFF.
+- **백로그 ID:** ENV1294-01 SEC1294-02 REL1294-03 NOT1294-04 NOT1294-05 NOT1294-06 NOT1294-07 NOT1294-08 NOT1294-09 NOT1294-10
+
 - **GitHub v1292:** [기획 Draft PR #1354](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354) (미병합 #1349 기반); [개발 이슈 #1353](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353); [서버 용량 #1170 업데이트](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178). 문서만 수정, DRAFT / RELEASE HOLD.
 ## v2026.10.26.1292 — F675-130 회원 검증형 알림 제어·방해금지 시간 (기능 추가 / DRAFT / HOLD)
 - **회차:** 이전 Feature Improvement v1290 → 현재 Feature Addition v1292 → 다음 Feature Improvement v1294(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재확인, AGENTS.md·README.md·영문 원본 기획서·한국어 대조 확인. 미병합 Draft #1349 기반 문서 브랜치, A/B/C/Gemini/QA와 격리.
