@@ -15,4 +15,6 @@
 - [x] Main re-fetched during implementation: unchanged `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; living EN/KO project and integrated plans re-read via SHA256; remote branch audit 174 total, 173 non-main with unique unmerged commits, 0 identical trees, 0 safe deletions; open PR 169, conflict #1107/#1110/#1143. No other branches changed.
 
 ## Finished
-- Pending. No merge or production release without all gates PASS.
+- Candidate code SHA `2e65d12c73df7bbf45da238334fd80575da4b764`; Draft PR #1311. Release reports EN primary / KO second language at `docs/releases/v2026.10.25.a1825*.md`; QA report `docs/qa/2026-10-25-a1825-stock-depth-availability.md`.
+- Final branch count 174, open PR count 170; unique unmerged branches preserved, deleted 0. Changed files: backend controller/module/test, frontend SSR/console/status/test, Android gateway test, QA/release/worklog/plan docs.
+- Final gate: PARTIAL/BLOCKED. No exact-SHA official Test auth/E2E, no Production rollout, no migrations, no WLD movement, no service restarts. Existing six frontend failures and security vulnerabilities require separate repair and full fresh gates. Rollback is candidate revert; do not re-enable fabricated depth.
