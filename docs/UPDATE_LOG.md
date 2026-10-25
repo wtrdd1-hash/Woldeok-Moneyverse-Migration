@@ -1,4 +1,9 @@
 ## 2026-10-26 — Planning v1290 F675-129 shop wishlist integrity (IMPROVEMENT / DRAFT / HOLD)
+## 2026-10-26 — Planning v1292 F675-130 notification controls (ADDITION / DRAFT / HOLD)
+- Previous Improvement v1290 → Current Addition v1292 → Next Improvement v1294 provisional. Main 1c5b84a1 checked start/mid, stacked on unmerged planning #1349; A/B/C/Gemini/QA work untouched.
+- Main source: notification-tabs-bar.tsx six synthetic events/browser-only read; stock-alert-push-engine.tsx localStorage simulation; /account/notifications only engagement goal toggle; backend NotificationService owner LIMIT/OFFSET. Proposed owner real inbox + optional foreground categories and quiet hours, without fake offline delivery or rewards.
+- ENV1292-01 SEC1292-02 REL1292-03 NOT1292-04 NOT1292-05 NOT1292-06 NOT1292-07 NOT1292-08 NOT1292-09 NOT1292-10. Root 99%/1.8GiB; dev app writable 239/241; PR #1350 candidate frontend 1407 PASS/6 FAIL, audits and exact-SHA Test/restore HOLD. External newly approved 0, cumulative UNKNOWN/10,000.
+
 - **GitHub planning review:** [Draft PR #1349](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1349) (stacked on unmerged #1345, docs only); [engineering issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 - Previous Addition v1288 → Current Improvement v1290 → Next Addition v1292 provisional; main 1c5b84a1 rechecked; stacked on Draft #1345 and development #1344, docs only, other workers untouched.
 - Migration 165 actor/Seoul-date discount and public/member price divergence; catalog zero stock/sale_ends_at mismatch with purchase gates; refine exact price strings, observation, checkout truth, inactive removal, auth-before-replay, immutable receipts, lock order and purge/cursor.

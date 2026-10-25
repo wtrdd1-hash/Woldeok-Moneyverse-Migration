@@ -1,4 +1,46 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.26.1292 — F675-130 회원 검증형 알림 수신 제어·방해금지 시간 (기능 추가 / 기획 초안 / 운영 보류)
+
+### 현행 근거와 목표
+- **회차:** 이전 Feature Improvement v1290 → 현재 Feature Addition v1292 → 다음 Feature Improvement v1294(잠정). 최신 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재조회, main AGENTS.md·README.md·영문 원본 PROJECT_PLAN.md·한국어 대조 확인. 미병합 Draft #1349 기반 독립 문서 브랜치, Gemini/개발 A/B/C/QA 변경과 격리.
+- **실제 소스:** /account/notifications는 목표/NPC용 notifications_enabled 설정만 /api/v1/engagement/preferences에 저장한다. notification-tabs-bar.tsx는 은행 이자·보안 세션 등을 포함한 고정 INITIAL_NOTIFICATIONS 6개를 렌더링하며 읽음 처리를 React 상태에서만 수행한다. stock-alert-push-engine.tsx는 localStorage 계산기 시나리오를 읽어 서버 근거 없는 가상 장마감 브라우저 알림을 지연 발송한다. NestJS NotificationService.listNotifications는 실제 in_app_notifications를 user_id로 제한하지만 created_at DESC + LIMIT/OFFSET으로 조회한다. 이는 코드상 신뢰성 위험이지 운영 사고 발생 증거는 아니다. 별도로 존재하는 정상 알림 모달의 서버 읽음 영수증은 보존한다.
+- **사용자 가치:** 로그인·동의 완료 회원이 선택적 *전경 브라우저 알림*의 분류별 수신 및 조용한 시간을 기기 간 동기화하고, 실제 원천이 확인된 본인 알림 이력을 조회한다. 오프라인 푸시·이메일·Discord DM·확정 전달·WLD 보상·실제 시세 알림을 약속하지 않는다. 보안/시스템 알림은 앱 내 기록과 열람이 계속 가능해야 한다.
+
+### 화면·상태·사용자 흐름
+- **진입:** 기존 /account/notifications와 종 모양 버튼 → 신규 /account/notifications/preferences, 기존 알림 센터의 실제 분류 필터·더 보기. 설정: IANA 시간대(기본 Asia/Seoul), 조용한 시간 기본 OFF, 시작/종료 HH:mm(같으면 오류), BUSINESS/BANK/SEASON/SPACE 등 실제 DB 원천에서 확인된 선택적 분류 토글. SECURITY/SYSTEM 앱 내 기록은 차단 불가; 화면 라벨과 DB 분류는 대조 후 확정.
+- **CTA:** 설정 저장, 기본값 복원, 상태 재확인, 알림 열기, 읽음 처리, 더 보기. 브라우저 권한은 사용자 직접 클릭 시에만 요청하며 기기별로 별도 관리한다. 전경 알림은 명시적 동의+권한 허용 전까지 OFF; 페이지가 닫혀 있으면 전달을 보장하지 않는다. 기존 목표/NPC 토글은 독립적으로 유지한다.
+- **상태:** LOADING, REAL_EMPTY, REAL_ITEMS, MORE_AVAILABLE, SAVING, VERIFIED_SAVED, UNCONFIRMED_TIMEOUT, STALE_REVISION, QUIET_ACTIVE, PERMISSION_DEFAULT, PERMISSION_DENIED, BROWSER_UNSUPPORTED, SESSION_EXPIRED, SOURCE_UNAVAILABLE, FEATURE_OFF. 서버 응답 유실 시 성공 알림 금지, 본인 GET 재조회로 확정. 가짜 알림·읽음·배당·WLD 지급 표시 금지.
+- **조용한 시간:** 검증된 IANA 시간대 기준 [시작,종료) 반개구간, 자정 넘김 및 DST 공백/중복은 실제 UTC 시각을 현지시각으로 변환하여 판정. 선택적 전경 알림만 조용히 처리하며 DB 알림 기록·미읽음 수는 유지한다. 기간 종료 후 오래된 알림을 한꺼번에 팝업으로 재발송하지 않는다.
+
+### API·DB·트랜잭션
+- **조회:** GET /api/v1/notifications/preferences → revision,timezone,quietEnabled,quietStart,quietEnd,categoryOptIns,updatedAt,observedAt. GET /api/v1/notifications/history?category=&cursor=&limit=1..50 → 실제 본인 알림, hasMore,nextCursor,sourceStatus. (created_at DESC,id DESC) 키셋, 회원·세션·필터·만료를 묶은 서명 커서; OFFSET 금지. 분류 레지스트리 검증 전 미확인 분류 거부. Android /app-api/v1 동일 계약, Next.js same-origin BFF, private no-store/noindex.
+- **저장:** PUT /api/v1/notifications/preferences는 유효한 로그인·동의·CSRF, If-Match revision, UUID idempotencyKey 필수. IANA 시간대/HH:mm/분류 허용목록 검증. DB 커밋된 receiptId·revision·savedAt·정규화 설정이 있어야 200 성공. 오류 400/422, 401, 404, 409, 429, 503; 이전 영수증 재생은 현재 설정 보장의 근거가 아님.
+- **전진형 스키마 제안:** member_notification_delivery_preferences(user_id UUID PK FK users, timezone VARCHAR(64), quiet_enabled BOOL, quiet_start TIME, quiet_end TIME, revision BIGINT CHECK >0, updated_at TIMESTAMPTZ); member_notification_category_optins(user_id UUID,category TEXT 허용목록,enabled BOOL,PK(user_id,category)); member_notification_preference_receipts(id UUID PK,user_id UUID,request_key UUID,payload_sha256 BYTEA,revision BIGINT,result_json JSONB,created_at TIMESTAMPTZ,UNIQUE(user_id,request_key)). 영수증에는 알림 본문·IP·토큰 저장 금지. in_app_notifications(user_id,created_at DESC,id DESC) 인덱스와 EXPLAIN 기반 선택 인덱스. 계정 탈퇴/병합 시 명시적 삭제·무효화 정책 필요.
+- **원자성:** 로그인·동의 재검증 → 회원/요청 advisory lock → 요청 해시 재생 검사 → users 행 잠금 → 설정 행 잠금 → revision CAS → 분류 검증 → 설정/토글 저장·revision 증가·불변 영수증 삽입을 단일 트랜잭션으로 처리. SECURITY DEFINER 고정 search_path, PUBLIC EXECUTE 회수, 앱에는 최소 EXECUTE만. 세션 전환 후 지연 응답 무시.
+- **진짜 알림:** DB 본인 행만 SECDEF 함수로 읽고 광범위 SELECT 권한을 새로 부여하지 않는다. DB 실제 category 목록 확인 후 UI 분류 연결. 기존 읽음/전체 읽음 영수증과 미읽음 수를 유지한다. 브라우저 알림은 실제 서버 소유 이벤트 ID·선택적 수신 동의·기기별 중복 방지가 모두 확인된 경우에만 발송한다.
+
+### 관리자·보안·접근성·지표·배포
+- 회원 간 조회 100회 음성검증(BOLA), 세션/동의/CSRF, 최초 분당 쓰기 5회·읽기 30회, 요청 해시 재사용 차단, 개인정보 분석 로그 제외, 검색엔진 비색인·캐시 금지. 잠금 화면에 민감 금융/보안 내용을 노출하지 않고 사용자 클릭 없는 권한 팝업 금지. 계정 병합/탈퇴는 커서·revision 무효화.
+- 관리자는 k>=20 비식별 집계(설정 채택률·원천 실패율)만 조회하며 개별 시간표·알림 본문·기기 식별자는 조회하지 않는다. 공개 SEO 설명은 서비스 내 가상 알림임을 명시하고 확정 수익/푸시를 약속하지 않는다. 모바일 44px 버튼, 키보드·포커스·스크린리더 상태 안내·동작 감소·WCAG 2.2 AA.
+- KPI: 서버 검증 설정 저장률, 허위 성공 0, 가짜 알림 0, 타 회원 정보 노출 0, 409/429/503, 전경 알림 적격·억제율, 인앱 이력 유지, GET/PUT p95, 옵트아웃률. 실제 개선 효과는 미측정.
+- notification_controls_v1 기본 OFF. 별도 개발 브랜치·전진형 마이그레이션·RED/GREEN·격리 실DB 테스트 후 정확 SHA Test 인증 사용자 흐름/금융 회귀, 보안 감사, 복구 검증, GitOps 승인 필요. 1%→10%→100% 단계 배포; OFF 롤백은 신규 UI/전경 알림만 중단하고 기존 수신함·목표 토글 유지. 기획 예약은 런타임 배포 금지.
+
+### P0/P1 구체 개발 백로그
+| 우선순위 | ID | 수용 조건 |
+| --- | --- | --- |
+| P0 | ENV1292-01 | 루트 99%·약 1.8GiB, 활성 작업물 보존, 격리 DB 복원 검증 및 85/90% 경보. |
+| P0 | SEC1292-02 | 개발 DB 앱 직접 쓰기 가능 239/241 재측정, 과도 DML/PUBLIC 함수 회수, 타 회원 접근 100회 차단. |
+| P0 | REL1292-03 | 최신 후보 PR #1350 프론트 1,407 통과/6 실패·감사 실패, migration 266/280 근거, 정확 SHA Test 인증 E2E/복구 게이트. |
+| P0 | NOT1292-04 | 하드코딩 가짜 알림 6개·시뮬레이션 장마감 푸시 차단, 서버 원천/읽음/지급 영수증 없는 성공 표시 금지. |
+| P1 | NOT1292-05 | 본인 설정/분류/불변 영수증 DB, 제약·인덱스·탈퇴/병합·SECDEF 최소권한. |
+| P1 | NOT1292-06 | CAS·멱등 원자 저장, 로그인 우선 재생검사, 시간대·자정·DST·100건 동시 요청. |
+| P1 | NOT1292-07 | 실제 알림 본인 조회·고유 키셋 커서·읽음/미읽음 일관성, 합성 10,001건. |
+| P1 | NOT1292-08 | NestJS/Next.js/Android API 동등성, 401/409/429/503·기기 권한·세션 경합. |
+| P1 | NOT1292-09 | 실제 알림 UI·접근성·개인정보·관리자 k>=20·SEO·KPI·오프라인 미보장 안내. |
+| P1 | NOT1292-10 | 격리 PostgreSQL 동시 100·타 회원 100·합성 10,001·DST·응답 유실·로그아웃·롤백 회귀. |
+
+**근거·운영 보류:** 최신 main 변경 없음; QA 후보와 읽기 전용 DB 측정은 최종 QA 승인 아님. 외부 독립 발행기관 W3C WCAG 2.2·OWASP API Top 10 2023은 후보 근거로 검토했으나 10,000건 중 새로 중복제거·분류·최종 승인한 근거 **0건**, 누적 승인 **미확인**, 게이트 **BLOCKED / IN PROGRESS**. 코드·DB·WLD·원장·Test·Production 변경 없음.
+
 - **GitHub 기획 검토:** [Draft PR #1349](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1349) (미병합 #1345 기반, 문서만); [개발 인계 #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v2026.10.26.1290 — F675-129 회원 상점 찜 목록 가격·구매 가능성·재시도 무결성 보완 (기능 보완 / 초안 / 운영 보류)

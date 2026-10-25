@@ -1,4 +1,12 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+## v2026.10.26.1292 — F675-130 회원 검증형 알림 제어·방해금지 시간 (기능 추가 / DRAFT / HOLD)
+- **회차:** 이전 Feature Improvement v1290 → 현재 Feature Addition v1292 → 다음 Feature Improvement v1294(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재확인, AGENTS.md·README.md·영문 원본 기획서·한국어 대조 확인. 미병합 Draft #1349 기반 문서 브랜치, A/B/C/Gemini/QA와 격리.
+- **실제 코드:** /account/notifications는 목표/NPC 설정만 저장한다. NotificationTabsBar의 은행/보안 등 6개 알림은 고정 모의 데이터이고 읽음도 브라우저만 변경한다. StockAlertPushEngine은 localStorage 기반 가상 장마감 브라우저 알림을 지연 발송한다. NestJS 실제 알림 조회는 회원 필터가 있지만 OFFSET과 created_at 단독 정렬이다. 개발 DB in_app_notifications는 10개 컬럼. 운영 사고가 확인됐다는 뜻은 아니다.
+- **기능:** /account/notifications/preferences에서 선택적 전경 브라우저 알림 분류·IANA 시간대·조용한 시간 관리. 실제 회원 알림 이력은 (created_at,id) 키셋과 서버 영수증으로 조회. 보안/시스템 알림은 앱 내 유지, 기존 목표 토글 보존, 오프라인 푸시/수익 지급 약속 금지. 동의·세션·CSRF, CAS·UUID 멱등·불변 영수증·SECDEF 회원 검증, Android 동등성, no-store/noindex, WCAG AA, 관리자 k>=20, 기본 OFF. 전체 명세는 통합 기획서 참조.
+- **P0:** ENV1292-01 루트 99%/1.8GiB, SEC1292-02 개발 DB 앱 쓰기 239/241 및 BOLA, REL1292-03 보안 감사·프론트 실패 6·정확 SHA Test·마이그레이션, NOT1292-04 가짜 알림/푸시 표시 제거. **P1:** NOT1292-05..10 스키마·원자성·키셋·웹/Android·개인정보/접근성·격리 실DB. 최신 후보 PR #1350 프론트 1,407 통과/6 실패, Test/복원 미검증. Production BLOCKED.
+- **독립 근거 게이트:** W3C·OWASP 후보 검토, 신규 중복 제거·분류·최종 승인 0건, 누적 미확인/10,000건, BLOCKED / IN PROGRESS. 문서만 수정, 런타임/DB/WLD/원장/Test/Production 변경 없음.
+- **백로그 ID:** ENV1292-01 SEC1292-02 REL1292-03 NOT1292-04 NOT1292-05 NOT1292-06 NOT1292-07 NOT1292-08 NOT1292-09 NOT1292-10
+
 - **GitHub 기획 검토:** [Draft PR #1349](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1349) (미병합 #1345 기반, 문서만); [개발 인계 #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v1290 / F675-129 — 회원 상점 찜 목록 무결성 (기능 보완 / 초안 / 보류)
