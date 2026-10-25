@@ -1,0 +1,18 @@
+export const realAuction = {
+  id: 'f5a80e7c-2e4d-4f52-a12c-7b27b0f5b312',
+  itemName: '검증된 경매 물품',
+  itemCode: 'REAL_ITEM',
+  category: 'display',
+  rarity: 'RARE',
+  sellerId: 'e6f80e7c-2e4d-4f52-a12c-7b27b0f5b313',
+  sellerName: '판매자',
+  startPriceWld: '9007199254740993',
+  currentBidWld: '9007199254740994',
+  highestBidderId: null,
+  highestBidderName: null,
+  bidCount: 0,
+  buyNowPriceWld: null,
+  endsAt: '2027-01-01T12:00:00.000Z',
+  isExtended: false,
+  description: '실제 DB 응답',
+};

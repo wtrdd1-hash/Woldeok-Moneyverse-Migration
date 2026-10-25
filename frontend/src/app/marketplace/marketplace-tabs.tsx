@@ -272,7 +272,7 @@ export function MarketplaceTabs({
         </TabsContent>
 
         <TabsContent value="auction" className="pt-4">
-          <AuctionView userBalanceWld={currentBalance} />
+          <AuctionView />
         </TabsContent>
 
         <TabsContent value="direct-trade" className="pt-4">
