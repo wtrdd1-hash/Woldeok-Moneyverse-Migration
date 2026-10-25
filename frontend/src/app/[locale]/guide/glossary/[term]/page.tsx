@@ -23,6 +23,19 @@ interface PageProps {
 
 const SUPPORTED_LOCALES: Locale[] = ['en', 'ja', 'zh'];
 
+const GLOSSARY_ALIASES: Record<string, string> = {
+  dca: 'dca-dollar-cost-averaging',
+  mdd: 'drawdown-mdd',
+  beta: 'beta-coefficient',
+  volatility: 'sharpe-ratio',
+  'water-down': 'water-down-dca',
+};
+
+function resolveGlossaryTerm(slug: string) {
+  const normalized = GLOSSARY_ALIASES[slug.toLowerCase()] || slug;
+  return GLOSSARY_TERMS.find((t) => t.slug === normalized);
+}
+
 export async function generateStaticParams() {
   const params: { locale: string; term: string }[] = [];
   for (const locale of SUPPORTED_LOCALES) {
@@ -30,6 +43,12 @@ export async function generateStaticParams() {
       params.push({
         locale,
         term: item.slug,
+      });
+    }
+    for (const alias of Object.keys(GLOSSARY_ALIASES)) {
+      params.push({
+        locale,
+        term: alias,
       });
     }
   }
@@ -42,7 +61,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
 
-  const item = GLOSSARY_TERMS.find((t) => t.slug === term);
+  const item = resolveGlossaryTerm(term);
   if (!item) {
     return { title: 'Term Not Found' };
   }
@@ -56,7 +75,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (locale === 'en') {
     termName = item.termEn;
     title = `${item.termEn} Definition, Formula & Guide | Finance Glossary`;
-    description = `${item.termEn} (${item.termKo}) explained simply. Formula: ${item.formula || 'N/A'}. Key takeaways, calculation principles, and practical investment strategy.`;
+    description = `${item.termEn} explained simply. Formula: ${item.formula || 'N/A'}. Key takeaways, calculation principles, and practical investment strategy.`;
   } else if (locale === 'ja') {
     termName = item.termJa;
     title = `${item.termJa}とは？ 計算式と実戦投資ガイド | 金融用語辞典`;
@@ -120,7 +139,7 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
     notFound();
   }
 
-  const item = GLOSSARY_TERMS.find((t) => t.slug === term);
+  const item = resolveGlossaryTerm(term);
   if (!item) {
     notFound();
   }
@@ -202,7 +221,7 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
               {localizedTermName}
             </h1>
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1 text-xs text-muted-foreground">
-              <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇰🇷 {item.termKo}</span>
+              {!isEn && <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇰🇷 {item.termKo}</span>}
               <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇺🇸 {item.termEn}</span>
               <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇯🇵 {item.termJa}</span>
               <span className="bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md font-medium shrink-0">🇨🇳 {item.termZh}</span>
@@ -245,10 +264,10 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
             {/* 교차 언어 참조 (KO / EN) */}
             <div className="mt-4 pt-4 border-t border-border/60">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                {isEn ? 'Original Korean Reference' : 'Global English Summary'}
+                {isEn ? 'Key Analytical Takeaway' : 'Global English Summary'}
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed italic">
-                &ldquo;{isEn ? item.descriptionKo : item.descriptionEn}&rdquo;
+                &ldquo;{isEn ? item.keyTakeawayEn : item.descriptionEn}&rdquo;
               </p>
             </div>
           </CardContent>
@@ -267,7 +286,7 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
               <div className="p-4 rounded-xl bg-zinc-900 text-zinc-100 font-mono text-sm sm:text-base border border-zinc-800 shadow-inner overflow-x-auto">
                 <code>{item.formula}</code>
               </div>
-              {item.formulaDescriptionKo && (
+              {!isEn && item.formulaDescriptionKo && (
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                   💡 {item.formulaDescriptionKo}
                 </p>
