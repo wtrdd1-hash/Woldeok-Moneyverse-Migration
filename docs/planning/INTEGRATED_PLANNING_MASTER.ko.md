@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v2026.10.25.1264 — F675-123 검증형 회원 일정 관심 목록·개인 ICS 내보내기 (기능 추가 / 기획 초안 / 운영 보류)
+- Draft PR [#1268](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1268) 및 개발 이슈 [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267)는 OPEN/HOLD; 미병합 #1261을 기반으로 한 문서 초안.
 
 ### 회차·실제 코드 근거·작업 경계
 - **이전 기능 보완 v1262 → 현재 기능 추가 v1264 → 다음 기능 보완 v1266(잠정).** 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재조회, main `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md`와 한국어 대조 검토. 미병합 Draft #1261 위에 쌓인 **문서 전용** 후속이며 기능은 배포되지 않음. 개발 이슈 [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267). 최신 완료 QA **v1265 FAILED/HOLD**; v1266 감사 산출물은 있으나 종합 릴리스 PASS는 확인되지 않음.

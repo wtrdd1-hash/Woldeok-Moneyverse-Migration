@@ -1,4 +1,5 @@
 # Planning v1264 — F675-123 verified calendar watchlist and private ICS export
+- Draft PR [#1268](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1268) OPEN/HOLD, engineering issue #1267 OPEN.
 
 **2026-10-25 KST — FEATURE ADDITION / DOCUMENTATION ONLY / DRAFT / RELEASE HOLD**
 

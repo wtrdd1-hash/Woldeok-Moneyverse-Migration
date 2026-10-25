@@ -1,4 +1,5 @@
 ## 2026-10-25 v1264 — F675-123 검증형 일정 관심 목록·ICS 내보내기 (기획만, HOLD)
+- Draft PR [#1268](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1268) OPEN/HOLD, 개발 이슈 #1267 OPEN.
 - 이전 기능 보완 v1262 / 현재 기능 추가 v1264 / 다음 기능 보완 v1266 잠정. main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 동일, 개발 이슈 [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267). 최신 완료 QA v1265 FAILED/HOLD; v1266 감사 산출물은 릴리스 PASS 아님.
 - 실제 캘린더의 시즌/상점 마감을 조사, 본인 관심 목록과 최신 원천 검증 RFC5545 스냅샷 내보내기 제안. 알림·WLD 변경 없음. P0 4/P1 6: ENV1264-01 SEC1264-02 REL1264-03 CAL1264-04..10. 국영문 통합 문서 갱신.
 - 루트 100%(약 349MiB), DB 권한·Migration266/280·프론트 6실패·정확 SHA Test/복원 HOLD. 외부 신규 승인 0, 누적 미확인/10,000 BLOCKED. 런타임·DB·WLD·Test·운영 미변경.
