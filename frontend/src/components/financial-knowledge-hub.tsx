@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Globe, Sparkles, CheckCircle2, Coins } from 'lucide-react';
+import { BookOpen, Sparkles, CheckCircle2, Coins } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import Link from 'next/link';
 import { useLocale } from '@/components/locale-provider';
 
 interface FinancialTerm {
@@ -99,7 +99,6 @@ const FINANCIAL_TERMS: readonly FinancialTerm[] = [
 
 export function FinancialKnowledgeHub() {
   const { locale } = useLocale();
-  const [wldInput, setWldInput] = useState<number>(10000);
   const [activeLang, setActiveLang] = useState<'ko' | 'en'>(locale === 'ko' ? 'ko' : 'en');
   const [mockModalOpen, setMockModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState('CHIPS');
@@ -111,10 +110,6 @@ export function FinancialKnowledgeHub() {
 
   const isEn = activeLang === 'en';
 
-  const krw = wldInput * 100;
-  const usd = Number(((wldInput * 100) / 1382.4).toFixed(2));
-  const jpy = Number((((wldInput * 100) / 1382.4) * 153.2).toFixed(1));
-  const eur = Number((((wldInput * 100) / 1382.4) * 0.92).toFixed(2));
 
   return (
     <Card className="border-slate-800 bg-slate-900/90 shadow-xl backdrop-blur-xl">
@@ -133,8 +128,8 @@ export function FinancialKnowledgeHub() {
               </CardTitle>
               <CardDescription className="text-xs text-slate-400">
                 {isEn
-                  ? 'Master real-world investing formulas, valuation indicators, and live currency rates for practical wealth building.'
-                  : '실제 투자와 자산 관리에 뼈와 살이 되는 국내외 금융 원리와 실시간 환율을 학습하세요.'}
+                  ? 'Learn investing formulas and valuation concepts with clearly fictional examples. No virtual WLD is redeemable for fiat.'
+                  : '가상의 예시를 통해 금융 원리와 투자 지표를 학습합니다. 게임 WLD는 실제 통화로 환전할 수 없습니다.'}
               </CardDescription>
             </div>
           </div>
@@ -167,55 +162,16 @@ export function FinancialKnowledgeHub() {
       </CardHeader>
 
       <CardContent className="pt-6 space-y-6">
-        {/* 파트 1: 글로벌 통화 실시간 변환기 */}
-        <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-              <Globe className="size-4 text-emerald-400" />
-              <span>{isEn ? 'Global Live Currency Converter' : '글로벌 실시간 환율 변환기 (Global Currency Calculator)'}</span>
-            </span>
-            <span className="text-[10px] text-slate-500 font-mono">
-              {isEn ? 'Peg: $1 = 1,382.4 KRW' : '기준 환율: $1 = 1,382.4원'}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
-            <div className="sm:col-span-2 space-y-1">
-              <span className="text-[11px] text-slate-400">{isEn ? 'Virtual Asset Input (WLD)' : '가상 자산 입력 (WLD)'}</span>
-              <div className="relative">
-                <Input
-                  type="number"
-                  min={1}
-                  value={wldInput}
-                  onChange={(e) => setWldInput(Math.max(1, Number(e.target.value) || 0))}
-                  className="bg-slate-900 border-slate-700 text-white font-mono font-bold text-sm pr-14"
-                />
-                <span className="absolute right-3 top-2.5 text-xs font-mono text-emerald-400 font-bold">WLD</span>
-              </div>
-            </div>
-
-            <div className="sm:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 sm:pt-0">
-              <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-center">
-                <span className="block text-[10px] text-slate-400">{isEn ? 'South Korea (KRW)' : '대한민국 (KRW)'}</span>
-                <span className="block font-mono text-xs font-bold text-white mt-0.5">₩{krw.toLocaleString()}</span>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-center">
-                <span className="block text-[10px] text-slate-400">{isEn ? 'United States (USD)' : '미국 (USD)'}</span>
-                <span className="block font-mono text-xs font-bold text-emerald-400 mt-0.5">${usd.toLocaleString()}</span>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-center">
-                <span className="block text-[10px] text-slate-400">{isEn ? 'Japan (JPY)' : '일본 (JPY)'}</span>
-                <span className="block font-mono text-xs font-bold text-cyan-400 mt-0.5">¥{jpy.toLocaleString()}</span>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-center">
-                <span className="block text-[10px] text-slate-400">{isEn ? 'Eurozone (EUR)' : '유럽 (EUR)'}</span>
-                <span className="block font-mono text-xs font-bold text-indigo-400 mt-0.5">€{eur.toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* This educational page never converts virtual WLD into fiat. */}
+        <section aria-label={isEn ? 'Virtual currency disclosure' : '가상 화폐 안내'} className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 text-sm text-slate-200">
+          <p className="font-semibold">{isEn ? 'WLD is not convertible to real-world currency.' : 'WLD는 실제 통화로 환전할 수 없습니다.'}</p>
+          <p className="mt-1 text-xs text-slate-400">
+            {isEn ? 'This is a virtual-economy learning exercise. No exchange rate, fiat value, grant, stock fill or account credit is offered here.' : '이곳은 가상 경제 학습 공간입니다. 실제 환율·현금 가치·지원금·주식 체결·계좌 입금을 제공하지 않습니다.'}
+          </p>
+        </section>
 
         {/* 파트 2: 금융 용어 백과사전 6대 카드 */}
+        <p className="text-xs text-slate-400">{isEn ? 'Examples and ratios below are educational illustrations, not verified quotes or recommendations.' : '아래 예시 수치와 투자 지표는 학습용 가정이며 실제 시세나 투자 권유가 아닙니다.'}</p>
         <div>
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
@@ -279,17 +235,17 @@ export function FinancialKnowledgeHub() {
               </div>
               <p className="text-xs text-slate-300">
                 {isEn
-                  ? 'Apply what you learned: paper-trade undervalued value stock (CHIPS, P/E 8.4x · P/B 0.9x) with your 10,000 WLD starter grant.'
-                  : '방금 배운 PER 8.4배 · PBR 0.9배 저평가 우량주(CHIPS)를 10,000 WLD 무료 지원금으로 1초 모의 매수해 보세요.'}
+                  ? 'Try a fictional stock-selection exercise with 10,000 practice points. No WLD or real stock is credited.'
+                  : '가상의 PER·PBR 수치로 연습용 종목을 선택해 보세요. 연습 포인트 10,000점은 WLD가 아니며 실제 지급되지 않습니다.'}
               </p>
             </div>
 
             <Button
               onClick={() => setMockModalOpen(true)}
-              className="shrink-0 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 active:scale-95 cursor-pointer"
+              className="min-h-11 shrink-0 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 active:scale-95 cursor-pointer"
             >
               <Coins className="size-3.5 mr-1.5" />
-              {isEn ? 'Start 10,000 WLD Paper Trade' : '10,000 WLD 모의 매수 시작'}
+              {isEn ? 'Start Stock Selection Practice' : '모의 매수 연습 시작'}
             </Button>
           </div>
         </div>
@@ -301,7 +257,7 @@ export function FinancialKnowledgeHub() {
           <DialogHeader>
             <div className="flex items-center justify-between">
               <Badge variant="outline" className="border-amber-500/40 text-amber-300 text-xs">
-                {isEn ? '🎁 10,000 WLD Free Starter Grant' : '🎁 10,000 WLD 무료 지원금 제공'}
+                {isEn ? '10,000 Practice Points (Not WLD)' : '연습 포인트 10,000점 (WLD 아님)'}
               </Badge>
               <span className="text-xs text-slate-400">
                 {isEn ? 'Onboarding Quest' : '온보딩 모의 퀘스트'}
@@ -312,13 +268,13 @@ export function FinancialKnowledgeHub() {
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-300">
               {isEn
-                ? 'Select an undervalued stock below using PER and PBR metrics, and execute your risk-free simulated order in seconds.'
-                : '배운 투자 지표(PER·PBR)를 적용하여 아래 우량 종목 중 하나를 골라 1초 만에 모의 매수를 체결하세요.'}
+                ? 'Select a fictional stock to practice reading valuation ratios. This does not place an order or alter any account.'
+                : '아래 연습용 가상 종목에서 PER·PBR을 비교해 선택해 보세요. 주문은 접수되지 않으며 계좌가 변경되지 않습니다.'}
             </DialogDescription>
           </DialogHeader>
 
           {purchaseSuccess ? (
-            <div className="py-6 text-center space-y-3">
+            <div role="status" aria-live="polite" className="py-6 text-center space-y-3">
               <div className="size-12 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="size-6" />
               </div>
@@ -326,36 +282,27 @@ export function FinancialKnowledgeHub() {
                 <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[11px] font-bold text-amber-300">
                   <Coins className="size-3" />
                   <span>
-                    {isEn ? '🎁 10,000 WLD Quest Reward Claimed!' : '🎁 10,000 WLD 온보딩 퀘스트 보상 자동 청구 완료!'}
+                    {isEn ? 'Practice complete — no reward issued' : '연습 완료 — 보상 지급 없음'}
                   </span>
                 </div>
                 <h4 className="text-base font-bold text-white mt-1">
-                  {isEn ? 'Simulated Order Filled!' : '모의 매수 체결 완료!'}
+                  {isEn ? 'Practice selection completed' : '연습 종목 선택 완료'}
                 </h4>
                 <p className="text-xs text-slate-300">
                   {isEn ? (
                     <>
-                      Bought 10,000 WLD of <span className="text-amber-400 font-bold">{selectedStock}</span> and added to your paper portfolio.
+                      Practiced selecting <span className="text-amber-400 font-bold">{selectedStock}</span>. No order was placed and no WLD was credited.
                     </>
                   ) : (
                     <>
-                      <span className="text-amber-400 font-bold">{selectedStock}</span> 종목 10,000 WLD 매수가 완료되어 내 모의 포트폴리오에 등록되었습니다.
+                      <span className="text-amber-400 font-bold">{selectedStock}</span> 종목을 연습으로 선택했습니다. 실제 WLD는 지급되지 않으며 주문·보유 내역은 변경되지 않습니다.
                     </>
                   )}
                 </p>
               </div>
               <div className="pt-3 flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    setPurchaseSuccess(false);
-                    setMockModalOpen(false);
-                    if (typeof window !== 'undefined') {
-                      window.location.href = '/stocks/portfolio';
-                    }
-                  }}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer shadow-md shadow-emerald-500/20"
-                >
-                  {isEn ? 'View My Portfolio' : '내 포트폴리오 보러 가기'}
+                <Button asChild className="flex-1 min-h-11 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs">
+                  <Link href="/stocks">{isEn ? 'View Real Virtual Stock Listings' : '실제 가상 주식 목록 보기'}</Link>
                 </Button>
                 <Button
                   variant="outline"
@@ -399,7 +346,7 @@ export function FinancialKnowledgeHub() {
                     key={s.symbol}
                     type="button"
                     onClick={() => setSelectedStock(s.symbol)}
-                    className={`w-full p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                    className={`w-full min-h-11 p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                       selectedStock === s.symbol
                         ? 'border-amber-500 bg-amber-500/10'
                         : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
@@ -421,34 +368,24 @@ export function FinancialKnowledgeHub() {
 
               <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-slate-300 space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">{isEn ? 'Order Value' : '매수 주문 금액'}</span>
+                  <span className="text-slate-400">{isEn ? 'Practice Budget' : '연습 예산'}</span>
                   <span className="font-mono font-bold text-amber-400">
-                    {isEn ? '10,000 WLD (Free Grant)' : '10,000 WLD (무료 지원)'}
+                    {isEn ? '10,000 practice points' : '연습 포인트 10,000점'}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">{isEn ? 'Trading Fee' : '거래 수수료'}</span>
+                  <span className="text-slate-400">{isEn ? 'Account Effect' : '계좌 반영'}</span>
                   <span className="font-mono text-emerald-400">
-                    {isEn ? '0 WLD (Intro Benefit)' : '0 WLD (신규 혜택)'}
+                    {isEn ? 'None (practice only)' : '없음 (연습 전용)'}
                   </span>
                 </div>
               </div>
 
               <Button
-                onClick={() => {
-                  try {
-                    localStorage.setItem('wdmv_mock_stock', selectedStock);
-                    localStorage.setItem('wdmv_mock_amount', '10000');
-                    localStorage.setItem('wdmv_mock_time', new Date().toISOString());
-                    localStorage.setItem('wdmv_quest_stock_mock', 'completed');
-                  } catch {
-                    // localStorage may be unavailable in restricted browser contexts.
-                  }
-                  setPurchaseSuccess(true);
-                }}
-                className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
+                onClick={() => setPurchaseSuccess(true)}
+                className="w-full min-h-11 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
               >
-                {isEn ? 'Fill Immediately with 10,000 WLD Grant' : '10,000 WLD 무료 지원금으로 즉시 체결하기'}
+                {isEn ? 'Complete Practice Selection' : '연습 주문 완료하기'}
               </Button>
             </div>
           )}
