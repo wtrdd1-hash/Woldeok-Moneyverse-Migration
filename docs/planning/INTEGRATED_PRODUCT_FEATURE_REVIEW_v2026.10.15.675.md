@@ -1,4 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+
+## Planning v1302 — F675-132 Session Nickname Contract Hardening (Improvement / DRAFT / HOLD)
+- Previous Addition v1300 → Current Improvement v1302 → Next Addition v1304 provisional. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` start/mid verified; predecessor Draft #1379 unmerged, no Gemini/A/B/C/QA code changes.
+- Source: Migration 213 seven-column account_active_sessions return cannot be extended in place; versioned v2/companion function preserves rollback. Security page's heuristic deviceLabel controls mobile icon and apiOrNull failure looks like zero sessions: keep alias display-only, badge/icon authoritative and distinct empty/unavailable states. Existing revoke UPDATE and app auth_sessions UPDATE grants demand row-lock race and DB actor-provenance review.
+- Proposed PUT JSON label and body-free DELETE both use If-Match/Idempotency-Key; 428/412/409/404/410/429/503, server-confirmed ETag, NULL revision tombstone, idempotency replay reauth, 100 rename/100 foreign/revoke race tests, Android headers, no-store/noindex, WCAG AA, k>=20 analytics. Full EN/KO spec in integrated master.
+- P0 ENV1302-01 SEC1302-02 REL1302-03 AUTH1302-04; P1 AUTH1302-05 AUTH1302-06 AUTH1302-07 AUTH1302-08 AUTH1302-09 AUTH1302-10. **Backlog IDs:** ENV1302-01 SEC1302-02 REL1302-03 AUTH1302-04 AUTH1302-05 AUTH1302-06 AUTH1302-07 AUTH1302-08 AUTH1302-09 AUTH1302-10. QA v1285 FAILED/HOLD, root 100%/~786MiB, frontend 1397 pass/6 fail, audits FAIL, exact-SHA Test/restore BLOCKED. Independent corpus 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED. Feature OFF; docs-only, no Production promotion.
+
 - **v1300 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1379 (stacked on unmerged #1371; docs only, DRAFT / RELEASE HOLD).
 ## Planning v1300 — F675-132 Verified Active-Session Nicknames (Addition / DRAFT / HOLD)
 - Previous Improvement v1298 / Current Addition v1300 / Next Improvement v1302 provisional. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid; prior planning Draft #1371 remains unmerged; engineering issue https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378. No overlapping A/B/C/Gemini/QA runtime changes.

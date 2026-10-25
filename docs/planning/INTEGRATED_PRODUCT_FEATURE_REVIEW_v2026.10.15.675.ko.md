@@ -1,4 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+
+## 기획 v1302 — F675-132 세션 별칭 계약 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 이전 기능 추가 v1300 → 현재 기능 보완 v1302 → 다음 기능 추가 v1304(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 확인, 선행 Draft #1379 미병합, Gemini/A/B/C/QA 코드 변경 없음.
+- Migration 213의 7열 account_active_sessions는 기존 반환형 직접 확장이 불가하므로 v2/보조 함수와 v1 롤백을 명세. 보안 화면의 추정 deviceLabel 아이콘과 API 실패의 허위 빈 목록을 바로잡도록 설계. 기존 세션 철회 UPDATE 및 auth_sessions 앱 UPDATE 권한을 고려해 행 잠금·행위자 신뢰 경계를 별도 검증.
+- PUT JSON 별칭/본문 없는 DELETE 모두 If-Match·Idempotency-Key, 428/412/409/404/410/429/503, 커밋 후 ETag, NULL 버전 묘비, 재시도 재인증, 동시 변경 100건·타 회원 100건·철회 경합 테스트, Android 헤더, no-store/noindex, WCAG AA, k≥20 관리자 집계. 영문·국문 통합 마스터에 전체 구현 조건 수록.
+- P0 ENV1302-01 SEC1302-02 REL1302-03 AUTH1302-04; P1 AUTH1302-05 AUTH1302-06 AUTH1302-07 AUTH1302-08 AUTH1302-09 AUTH1302-10. **백로그 ID:** ENV1302-01 SEC1302-02 REL1302-03 AUTH1302-04 AUTH1302-05 AUTH1302-06 AUTH1302-07 AUTH1302-08 AUTH1302-09 AUTH1302-10. QA v1285 FAILED/HOLD, 루트 100%/약 786MiB, 프론트 1397 통과/6 실패, 보안 감사 실패, 정확 SHA Test/복원 미검증. 외부 승인 신규 0건, 누적 UNKNOWN/10,000 BLOCKED. 기능 OFF·문서만 변경·운영 보류.
+
 - **v1300 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1379 (선행 #1371 미병합, 문서만 변경, 운영 승격 보류).
 ## 기획 v1300 — F675-132 회원 로그인 세션 별칭 (기능 추가 / DRAFT / HOLD)
 - 이전 보완 v1298 / 현재 추가 v1300 / 다음 보완 v1302(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 확인. 선행 기획 Draft #1371 미병합, 개발 이슈 https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378; A/B/C/Gemini/QA 코드 수정 없음.

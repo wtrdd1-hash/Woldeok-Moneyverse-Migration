@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+
+## v2026.10.26.1302 — F675-132 세션 별칭 계약·철회 경합 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- **회차:** 이전 기능 추가 v1300 / 현재 기능 보완 v1302 / 다음 기능 추가 v1304(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 동일, 선행 Draft #1379 미병합, Gemini/개발 A/B/C/QA와 분리한 문서 변경만 수행.
+- **실제 코드 근거:** Migration 213 `account_active_sessions(uuid,uuid)`는 7열 반환 함수로 `CREATE OR REPLACE`를 통한 반환 열 변경이 불가능하다. 기존 v1을 보존하고 v2/보조 함수를 추가한다. 보안 화면의 user-agent 추정 `deviceLabel` 모바일 아이콘·서버 배지를 회원 별칭과 분리하며 API 오류를 ‘기기 없음’으로 표시하지 않는다. 기존 세션 철회는 auth_sessions 직접 UPDATE이므로 별칭 잠금·철회 경합·데드락 재시도 테스트가 필요하다. 앱의 auth_sessions 직접 UPDATE 및 호출자 `p_user`는 DB 인증을 증명하지 않는다.
+- **요청 계약 보완:** v1300의 DELETE JSON 본문 대신 본문 없는 DELETE, PUT은 JSON `{label}`; 모두 `If-Match: "label-vN"`·`Idempotency-Key: UUID`. 조건 누락 428, 오래된 버전 412, 요청키 재사용 다른 내용 409, 타 회원 404, 소유 확인 만료·철회 410, 제한 429, 장애 503. 커밋 후에만 ETag·확정 응답. Reset NULL 묘비·증가 버전, 재시도 시 세션/소유권 재검증, NFC/40글자/160바이트 및 개인정보 조건 유지. 철회 먼저면 저장 거부, 저장 후 철회면 목록에서 제외. 데드락 부재 주장 금지.
+- **P0:** ENV1302-01 루트 100%/786MiB·복원, SEC1302-02 DB 권한·행위자 결합, REL1302-03 QA v1285 실패/보류(프론트 1397/6, 운영 High 2, 전체 Critical 2/High 10, 봇 Critical 1/High 5, Migration266/정확 SHA Test/복원), AUTH1302-04 허위 빈 목록·기기 오인·철회 경합. **P1:** AUTH1302-05 v2 스키마, AUTH1302-06 CAS/잠금/영수증, AUTH1302-07 HTTP 전송, AUTH1302-08 Next.js/Android/접근성, AUTH1302-09 개인정보/관리/SEO/KPI, AUTH1302-10 격리 PG 동시 100건·타 회원 100건·롤백.
+- **백로그 ID:** ENV1302-01 SEC1302-02 REL1302-03 AUTH1302-04 AUTH1302-05 AUTH1302-06 AUTH1302-07 AUTH1302-08 AUTH1302-09 AUTH1302-10. 전체 화면·API·DB·인덱스·트랜잭션·보안·관리자·모바일·분석·회귀·기능 OFF 롤백·정확 SHA Test 조건은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 참조. 외부 10,000건 신규 승인 0, 누적 UNKNOWN → BLOCKED / IN PROGRESS. 기능 OFF·운영 보류, 런타임/DB/WLD 변경 없음.
+
 - **v1300 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1379 (선행 #1371 미병합, 문서만 변경, 운영 승격 보류).
 ## v2026.10.26.1300 — F675-132 회원 로그인 세션 별칭 (기능 추가 / DRAFT / HOLD)
 - **회차:** 이전 기능 보완 v1298 → 현재 기능 추가 v1300 → 다음 기능 보완 v1302(잠정). 최신 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 확인, 미병합 기획 #1371 기반 문서만 수정, 개발 인계 https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378. Gemini/A/B/C/QA 변경과 분리.
