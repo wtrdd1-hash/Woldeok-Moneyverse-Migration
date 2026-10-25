@@ -16,12 +16,20 @@
 - No migration, ledger writes, production deployment without all gates.
 
 ## In progress
-- [ ] RED tests, implementation, GREEN
-- [ ] Mid-work fresh main and plan
-- [ ] Full validation, CI, final release HOLD decision
+- [x] RED tests, implementation, GREEN
+- [x] Mid-work fresh main and plan
+- [x] Full validation, CI audit, final release HOLD decision
 
-## Finished
-- Pending.
+## Finished (14:42 KST)
+- Code SHA 993779971fe4f20deb540b0d17aaecdd41fa5051 (main synchronized through 82ea48be); current remote main 91b60e506c41da7ce0e3e0b9369654e8eafdce6f checked before integration. Newer main only changed unrelated i18n tools copy. No merge because mandatory gates fail.
+- Draft PR #1284, P0 follow-up issue #1283. 18 changed paths before final QA/release docs; see PR for final changed-file list.
+- Focused backend 7 PASS, frontend/API 21 PASS; full backend 1320 PASS/398 SKIPPED, DB 15 PASS/3 SKIPPED, contract 38 PASS, frontend 1404 PASS/6 FAIL. Existing SEO3/login a11y1/registration1/admin M2 1 are unresolved; full exact final-doc SHA run remains pending.
+- Final code SHA typecheck PASS, lint PASS (0 errors/1116 warnings), backend and frontend build PASS. Production audit High2 FAIL; full audit Critical2/High10 FAIL; bot audit Critical1/High5 FAIL.
+- Isolated PostgreSQL v855 role-limited read-only SELECT and denied financial writes; ROLLBACK. Official Test exact-SHA auth/finance E2E BLOCKED; CI pending as of report.
+- Remote refs 152 -> 153, open PRs 147 -> 148. 151 unique unmerged non-main refs; no branch deleted. Other developers' PRs/worktrees untouched.
+- No Test promotion, main merge, Production deployment, GitOps, production DB write, service restart or financial rollback. RELEASE HOLD.
+- English QA: docs/qa/2026-10-25-a1425-lottery-round-truth.md; release English and Korean: docs/releases/v2026.10.25.a1425.md and .ko.md.
+
 
 ### Mid-work checkpoint (14:28–14:32 KST)
 - Re-fetched origin/main: advanced from 3a116b27 to 91babf77 (unrelated i18n/glossary/loan/dividend files). Re-read English and Korean canonical plans; no lottery conflict or competing open lottery PR.
