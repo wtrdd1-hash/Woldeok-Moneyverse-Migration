@@ -14,3 +14,9 @@
 
 ## In progress
 - Isolated worktree created from main; all other worker branches untouched.
+
+## In progress — TDD and midpoint
+- RED: frontend 4 failed (fake initial proposals and POST/PUT 200), backend import missing (new controller). GREEN: focused frontend 29/29; backend controller and real Nest HTTP routing 6/6 after importing AuthModule for guard dependencies.
+- Implemented fail-closed Next BFF GET/POST/PUT (503, no-store, no invented proposal/vote), accessible honest unavailable state, guarded Nest route, Android app-api allow-list limited to `treasury/citizen-proposals`, with regression tests.
+- Latest remote main and integrated plan re-fetched unchanged at `c9a868b1e622341e2daa8b936ddf0988eda9988e`. No production, DB, migration, other branch or Test writes.
+- Verified no authoritative citizen proposal/voter/settlement SQL table in inspected main/host; real feature remains unavailable until approved DB contract. Full gates and exact-SHA Test remain pending.

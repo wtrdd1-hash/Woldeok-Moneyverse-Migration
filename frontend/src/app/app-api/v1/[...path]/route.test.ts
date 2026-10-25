@@ -36,6 +36,19 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('passes through unverified treasury proposal status to Android without a fake receipt', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({
+      status: 503, verified: false, code: 'treasury_proposals_unverified',
+    }), { status: 503, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/treasury/citizen-proposals'), context('treasury', 'citizen-proposals'));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(await response.json()).toMatchObject({ verified: false, code: 'treasury_proposals_unverified' });
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

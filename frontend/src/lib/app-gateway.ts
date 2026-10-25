@@ -4,7 +4,7 @@ export const APP_API_CONTRACT_VERSION = 'v2026.09.22.359';
 export const APP_API_GROUPS = Object.freeze([
   'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
   'casino', 'chat', 'clubs', 'collections', 'content', 'crafting', 'developer', 'early-game', 'economy', 'engagement', 'enterprises', 'fx', 'kdic', 'marketplace', 'media', 'newspaper', 'notifications', 'pension', 'photos', 'privacy',
-  'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
+  'profile', 'progression', 'rewards', 'seasons', 'treasury', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
 ] as const);
 
 const APP_API_GROUP_SET = new Set<string>(APP_API_GROUPS);
@@ -50,6 +50,9 @@ export function appGatewayPath(parts: readonly string[]): string | null {
   const clean = parts.map((part) => part.trim());
   if (clean.some((part) => !part || part === '.' || part === '..' || part.includes('/'))) return null;
   if (!APP_API_GROUP_SET.has(clean[0]!)) return null;
+
+  // Only the fail-closed citizen-proposal contract is approved for mobile.
+  if (clean[0] === 'treasury' && (clean.length !== 2 || clean[1] !== 'citizen-proposals')) return null;
 
   if (clean[0] === 'media') {
     return `/${clean.map(encodeURIComponent).join('/')}`;

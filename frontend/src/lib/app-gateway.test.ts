@@ -15,6 +15,8 @@ import {
 describe('appGatewayPath', () => {
   it('allows member-facing API groups', () => {
     expect(appGatewayPath(['wallet', 'transfers'])).toBe('/api/v1/wallet/transfers');
+    expect(appGatewayPath(['treasury', 'citizen-proposals'])).toBe('/api/v1/treasury/citizen-proposals');
+    expect(appGatewayPath(['treasury', 'unverified-mutation'])).toBeNull();
     expect(appGatewayPath(['auth', 'session'])).toBe('/api/v1/auth/session');
     expect(appGatewayPath(['stocks'])).toBe('/api/v1/stocks');
     expect(appGatewayPath(['developer'])).toBe('/api/v1/developer');
@@ -64,7 +66,7 @@ describe('app API compatibility contract', () => {
     expect(APP_API_GROUPS).toEqual([
       'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
       'casino', 'chat', 'clubs', 'collections', 'content', 'crafting', 'developer', 'early-game', 'economy', 'engagement', 'enterprises', 'fx', 'kdic', 'marketplace', 'media', 'newspaper', 'notifications', 'pension', 'photos', 'privacy',
-      'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
+      'profile', 'progression', 'rewards', 'seasons', 'treasury', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
     ]);
   });
 
