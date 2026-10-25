@@ -54,18 +54,11 @@ export function MarketplaceTabs({
   const [holdings, setHoldings] = useState<MarketplaceHolding[]>([...initialHoldings]);
   const [listings, setListings] = useState<MarketListing[]>([...INITIAL_MARKET_LISTINGS]);
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
-  const [currentBalance, setCurrentBalance] = useState(userBalanceWld);
+  const currentBalance = userBalanceWld;
 
   // Handle successful craft
   const handleCraftSuccess = (recipe: CraftingRecipe) => {
-    // Deduct fee from balance
-    try {
-      const newBal = BigInt(currentBalance) - BigInt(recipe.feeWld);
-      setCurrentBalance(newBal > 0n ? newBal.toString() : '0');
-    } catch {
-      // Preserve the last authoritative balance when an amount is malformed.
-    }
-
+    // The displayed balance is the server read snapshot, never a local craft estimate.
     // Add crafted item to holdings
     const newItem: MarketplaceHolding = {
       catalog_id: `crafted_${Date.now()}`,
@@ -174,7 +167,7 @@ export function MarketplaceTabs({
         <Card className="border-border/60 bg-gradient-to-br from-sky-500/10 via-background to-muted/20">
           <CardContent className="p-4">
             <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-              <Coins className="size-3.5 text-sky-500" /> 내 WLD 잔액
+              <Coins className="size-3.5 text-sky-500" /> 조회 당시 WLD 잔액
             </span>
             <div className="mt-2 text-xl font-extrabold tabular-nums text-sky-600 dark:text-sky-400">
               {walletVerified ? <>{groupDigits(currentBalance)} <span className="text-xs font-normal text-muted-foreground">WLD</span></> : '조회 불가'}
