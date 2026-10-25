@@ -188,6 +188,11 @@ export async function safeFetch(urlInput: string | URL, init?: RequestInit): Pro
   let currentUrl = await assertSafeOutboundUrl(urlInput);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10_000);
+  // A caller's cancellation must not replace the mandatory outbound deadline.
+  // Reuse the composed signal for every redirect hop rather than resetting it.
+  const signal = init?.signal
+    ? AbortSignal.any([controller.signal, init.signal])
+    : controller.signal;
 
   try {
     let redirectsFollowed = 0;
@@ -195,7 +200,7 @@ export async function safeFetch(urlInput: string | URL, init?: RequestInit): Pro
       const response = await fetch(currentUrl.toString(), {
         ...init,
         redirect: 'manual',
-        signal: init?.signal ?? controller.signal,
+        signal,
       });
 
       // 3xx Redirect 감지 시 수동 추적 및 전 홉 검증

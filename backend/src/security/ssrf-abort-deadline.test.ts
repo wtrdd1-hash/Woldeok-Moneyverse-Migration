@@ -23,8 +23,9 @@ describe('safeFetch abort deadline', () => {
     vi.stubGlobal('fetch', mock);
     const caller = new AbortController();
     const request = safeFetch('https://1.1.1.1/slow', { signal: caller.signal });
+    const rejection = expect(request).rejects.toMatchObject({ name: 'AbortError' });
     await vi.advanceTimersByTimeAsync(10_001);
-    await expect(request).rejects.toMatchObject({ name: 'AbortError' });
+    await rejection;
     expect(mock).toHaveBeenCalledTimes(1);
     expect(caller.signal.aborted).toBe(false);
   });
@@ -49,8 +50,9 @@ describe('safeFetch abort deadline', () => {
     vi.stubGlobal('fetch', mock);
     const caller = new AbortController();
     const request = safeFetch('https://1.1.1.1/start', { signal: caller.signal });
+    const rejection = expect(request).rejects.toMatchObject({ name: 'AbortError' });
     await vi.advanceTimersByTimeAsync(10_001);
-    await expect(request).rejects.toMatchObject({ name: 'AbortError' });
+    await rejection;
     expect(mock).toHaveBeenCalledTimes(2);
   });
 });

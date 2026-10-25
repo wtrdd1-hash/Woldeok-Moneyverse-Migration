@@ -14,3 +14,5 @@
 ## Finished
 - Pending gates and release hold.
 - RED evidence at 08:36 KST: new 3-test suite reports 2 timeout failures (caller-signal bypass and redirected request), 1 caller-abort PASS. The failures reproduce the real 10-second deadline bypass before implementation.
+- GREEN at 08:37 KST: 16/16 SSRF focused tests PASS after combining `AbortController.signal` with caller cancellation via `AbortSignal.any`; same-origin redirect keeps one deadline. Fixed test harness to attach rejection assertions before advancing fake time, eliminating unhandled rejections.
+- Mid-run `origin/main` remains `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; English/Korean plans rechecked. No conflict with other open PRs.
