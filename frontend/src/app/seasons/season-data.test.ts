@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseCurrentSeason, parseHallOfFame } from './season-data';
+import { parseCurrentSeason, parseHallOfFame, canOfferSeasonClaim } from './season-data';
 
 describe('NestJS season response contract', () => {
   it('reads the currentSeason wrapper rather than assuming the response is a season', () => {
@@ -18,4 +18,14 @@ describe('NestJS season response contract', () => {
     expect(parseHallOfFame({ hallOfFame: [{ honorees: [{ rank: 1 }] }] })).toBeNull();
     expect(parseHallOfFame({})).toBeNull();
   });
+  it('does not offer projected rewards while the season is still active', () => {
+    const current = parseCurrentSeason({ currentSeason: {
+      seasonId: 's1', seasonName: 'Actual', myScore: 25, myTier: 'Gold', myRank: 1,
+      lifecycleState: 'active', tierRewardWld: 500, tierTrophy: 'gold',
+    } });
+    expect(canOfferSeasonClaim(current)).toBe(false);
+    expect(canOfferSeasonClaim(current && { ...current, lifecycleState: 'closed' })).toBe(true);
+    expect(canOfferSeasonClaim(null)).toBe(false);
+  });
+
 });

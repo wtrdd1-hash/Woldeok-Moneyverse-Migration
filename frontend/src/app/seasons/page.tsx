@@ -13,7 +13,7 @@ import { EnterButton } from './enter-button';
 import { SeasonHallOfFameTicker } from './hall-of-fame-ticker';
 import { SeasonRewardClaimBanner } from './season-reward-claim-banner';
 import { SeasonPassTrack } from './season-pass-track';
-import { parseCurrentSeason, parseHallOfFame } from './season-data';
+import { parseCurrentSeason, parseHallOfFame, canOfferSeasonClaim } from './season-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -101,7 +101,7 @@ export default async function SeasonsPage({
       </PageHeader>
 
       {/* 시즌 랭킹 최종 보상 수령 배너 (정산된 보상이 있는 경우 상단 노출) */}
-      {currentStatus?.lifecycleState === 'closed' && (
+      {canOfferSeasonClaim(currentStatus) && (
         <SeasonRewardClaimBanner
           seasonId={currentStatus.seasonId}
           seasonName={currentStatus.seasonName}

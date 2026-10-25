@@ -61,13 +61,29 @@ export async function claimSeasonRewardAction(
       },
     });
 
+    // A typed response is not proof of settlement; require a real matching receipt.
+    if (!result || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(result.claimId) ||
+        result.seasonId !== seasonId || !result.seasonName?.trim() || !result.tier?.trim() ||
+        !Number.isSafeInteger(result.rewardWld) || result.rewardWld < 0 ||
+        (result.rank !== null && (!Number.isSafeInteger(result.rank) || result.rank <= 0)) ||
+        (result.trophyCode !== null && typeof result.trophyCode !== 'string') ||
+        !result.claimedAt || Number.isNaN(Date.parse(String(result.claimedAt)))) {
+      throw new Error('unverified season reward receipt');
+    }
+
     revalidatePath('/seasons');
     revalidatePath('/wallet');
 
     const rankText = result.rank ? `${result.rank}위 (${result.tier})` : result.tier;
+    const rewards = [
+      result.rewardWld > 0 ? `${groupDigits(result.rewardWld)} WLD` : null,
+      result.trophyCode ? '명예 트로피' : null,
+    ].filter(Boolean).join(' 및 ');
     return {
       status: 'ok',
-      message: `${result.seasonName} ${rankText} 시즌 보상 ${groupDigits(result.rewardWld)} WLD와 명예 트로피를 성공적으로 수령했습니다!`,
+      message: rewards
+        ? `${result.seasonName} ${rankText} 시즌 보상 ${rewards} 수령을 서버 영수증으로 확인했습니다.`
+        : `${result.seasonName} ${rankText} 시즌 정산 기록을 확인했습니다.`,
     };
   } catch (error) {
     return failure(error, '시즌 보상 수령에 실패했습니다. 이미 수령했거나 수령 대상이 아닐 수 있습니다.');

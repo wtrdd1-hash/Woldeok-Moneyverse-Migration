@@ -71,3 +71,9 @@ export function parseHallOfFame(payload: unknown): readonly VerifiedHallSeason[]
   }
   return seasons;
 }
+
+/** The current season's projected tier reward is not a claimable settlement. */
+export function canOfferSeasonClaim(season: VerifiedCurrentSeason | null): boolean {
+  return season?.lifecycleState === 'closed' &&
+    (season.tierRewardWld > 0 || Boolean(season.tierTrophy));
+}
