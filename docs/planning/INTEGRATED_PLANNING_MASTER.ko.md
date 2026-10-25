@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v2026.10.25.1262 — F675-122 주간 퀘스트 이력의 일관된 발행·원천 완결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+- Draft PR #1261 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1261), 개발 이슈 #1256 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1256); OPEN/HOLD 유지.
 
 ### 회차 및 실제 근거
 - 이전 **기능 추가 v1260** → 현재 **기능 보완 v1262** → 다음 **기능 추가 v1264**(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재확인. main `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md`, 국문 대조 문서를 검토. 미병합 Draft #1257의 **문서 기획 후속**이며 실제 구현이 아님. 최신 완료 QA **v1265 FAILED/HOLD**(2026-10-25 10:20 KST).

@@ -1,6 +1,7 @@
 ## 2026-10-25 08:xx KST — Planning v1256 F675-121 (Feature Addition / Draft / HOLD)
 
 ## 2026-10-25 v1262 — F675-122 archive publication consistency (planning-only, HOLD)
+- Draft PR #1261 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1261), development issue #1256 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1256); both remain OPEN/HOLD.
 - Previous Addition v1260 / Current Improvement v1262 / Next Addition v1264 provisional. Remote main `c9a868b1e622341e2daa8b936ddf0988eda9988e`; QA v1265 FAILED/HOLD.
 - Reviewed migration101 bounded-week gaps and proposed per-goal heads; hardened to atomic full-week generations, per-source completeness proofs, correction history, owner/session-bound stable cursor and privacy-safe HMAC evidence.
 - P0 4/P1 6: ENV1262-01 SEC1262-02 REL1262-03 QUEST1262-04..10. External accepted +0, cumulative UNKNOWN/10,000 BLOCKED. Runtime/Test/Production unchanged; separate engineering exact-SHA gate required.

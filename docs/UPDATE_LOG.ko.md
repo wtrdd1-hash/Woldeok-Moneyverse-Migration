@@ -1,6 +1,7 @@
 ## 2026-10-25 08:xx KST — 기획 v1256 F675-121 (기능 추가 / 초안 / 운영 보류)
 
 ## 2026-10-25 v1262 — F675-122 주차 발행 일관성 보완(기획만, HOLD)
+- Draft PR #1261 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1261), 개발 이슈 #1256 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1256); OPEN/HOLD 유지.
 - 이전 기능 추가 v1260 / 현재 기능 보완 v1262 / 다음 기능 추가 v1264 잠정. 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e`, QA v1265 FAILED/HOLD.
 - Migration101의 주차 경계·직업 변경 위험과 기존 목표별 head 설계를 조사. 전체 주차 원자적 세대, 원천별 완결성 증명, 수정 이력, 본인/세션 결합 커서, 개인정보 안전 HMAC으로 보완.
 - P0 4/P1 6: ENV1262-01 SEC1262-02 REL1262-03 QUEST1262-04..10. 외부 신규 승인 0, 누적 미확인/10,000 BLOCKED. 런타임/Test/운영 미변경, 별도 개발 정확 SHA 게이트 필요.

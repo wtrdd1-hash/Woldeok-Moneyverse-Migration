@@ -1,6 +1,7 @@
 # Planning v1262 — F675-122 weekly archive coherent publication
 
 **2026-10-25 KST — documentation only / DRAFT / RELEASE HOLD**
+- Draft PR #1261 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1261), development issue #1256 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1256); both remain OPEN/HOLD.
 
 Previous Feature Addition v1260 → Current Feature Improvement v1262 → Next Feature Addition v1264 (provisional).
 
