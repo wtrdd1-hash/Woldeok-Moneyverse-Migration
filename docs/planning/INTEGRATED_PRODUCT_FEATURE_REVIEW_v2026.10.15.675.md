@@ -1,5 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v2026.10.25.1260 — F675-122 Weekly Quest History Product Review (FEATURE ADDITION / HOLD)
+- Current `/quests` uses migration101's current Seoul week only; no proven archive. Three week-window metrics are receipt/ledger based, whereas NPC affinity is lifetime/self-reported. Current job ranking changes, so recomputing historical job-task totals without provenance would fabricate past completion.
+- New opt-in navigation to private `/quests/history` and detail; server-finalized immutable weekly goal evidence, explicit NOT_ARCHIVED/PENDING_FINALIZATION/VERIFIED/CORRECTED/UNVERIFIABLE, no reward or member write, no invented historic backfill. Frozen catalog version, 24h+source watermark, correction-only revisions, actor-only DB functions, signed cursor, Android/a11y, anonymized admin lag and private SEO. Full specification in [English integrated master](INTEGRATED_PLANNING_MASTER.md).
+- P0 ENV1260-01 SEC1260-02 REL1260-03 QUEST1260-04; P1 QUEST1260-05 QUEST1260-06 QUEST1260-07 QUEST1260-08 QUEST1260-09 QUEST1260-10. QA v1264 FAILED/HOLD; root 100%, app DML 235/241, PUBLIC bank EXECUTE 3, migration266/280, exact-SHA Test/restore. Independent evidence new 0, cumulative UNKNOWN/10,000 BLOCKED. Docs-only, no runtime/finance change.
+
+
 ## v2026.10.25.1258 — F675-121 Board Follow Integrity Product Review (FEATURE IMPROVEMENT / HOLD)
 - Code-grounded risk: comment-create's same-key replay only verifies author, not post/body; deletion ignores request key and route postId. This can produce misleading success and mismatched delete routes. No observed exploitation claimed. Proposed payload-bound receipt and 409, deterministic post lock, cross-post 404, unique new-only outbox and notification generation fence.
 - User trust: only server-confirmed Follow/Unfollow; original comment receipt on retry; no phantom new-reply alert; after deletion retract or gate stale inbox source, without pretending prior reads never happened. Preserve existing C #1206 unmerged ownership; no WLD or ledger impact.

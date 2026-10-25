@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1260 — F675-122 검증형 주간 퀘스트 이력 (기능 추가 / 기획 초안 / 운영 보류)
+- 이전 기능 보완 v1258 → 현재 기능 추가 v1260 → 다음 기능 보완 v1262(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 확인, QA v1264 FAILED/HOLD. 미병합 #1248 위의 **문서 초안**이며 구현·운영 기능이 아니다.
+- 실제 main: `/quests`는 Migration101 `early_game_weekly_goals`의 이번 서울 주차만 조회, 종료 주차 보존 없음. 세 지표는 영수증·원장 기반, NPC는 평생 누적·자가 신고로 과거 주간 달성률 제외. 현재 직업 순위로 과거 직업 작업을 재구성할 수 없다. 본인 전용 `/quests/history`, 주차 종료 후 24시간+워터마크 불변 근거 스냅샷, 근거 없는 소급 금지, NOT_ARCHIVED/UNVERIFIABLE/CORRECTED, 서명 커서, Android 읽기 동등성, 관리자 비식별 집계, SEO·접근성·개인정보·롤백 설계.
+- P0 ENV1260-01 SEC1260-02 REL1260-03 QUEST1260-04; P1 QUEST1260-05 QUEST1260-06 QUEST1260-07 QUEST1260-08 QUEST1260-09 QUEST1260-10. 화면/CTA/API/DB/인덱스/트랜잭션/관리자/보안/모바일/SEO/KPI/100 동시성·10,001 합성 이력/정확 SHA Test/롤백 상세는 [한국어 통합 기획서](INTEGRATED_PLANNING_MASTER.ko.md), [영어 기준](INTEGRATED_PLANNING_MASTER.md)에 동등 반영.
+- QA v1264 루트 100%(약 375MiB), 개발 DB 앱 DML 235/241·PUBLIC 은행 함수 3개, Migration266·280, 기존 프론트 6건 실패·감사 Critical2/High10·봇 Critical1/High5, 정확 SHA Test·복원 보류. 외부 신규 승인 0건, 누적 미확인/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·Test·운영 변경 없음.
+
+
 ## v2026.10.25.1258 — F675-121 게시판 댓글 재시도·삭제·알림 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1256 → 현재 기능 보완 v1258 → 다음 기능 추가 v1260(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재조회, QA v1261 FAILED/HOLD, 미병합 Draft #1241 후속 문서 기획.
 - 실제 Migration 048 댓글 생성은 같은 키의 기존 작성자만 확인하고 글/본문은 비교하지 않으며 UNIQUE 동시성 경합 위험이 있다. 댓글 삭제는 요청 키를 사용하지 않고 Nest DELETE 경로의 글 ID는 무시한다. Migration 259는 삭제 댓글을 숨기며 개발 C 알림함 #1206은 미병합이다. 순방향 원본 결합 영수증/409, 글 우선 잠금, 경로 글 ID 일치, 신규 댓글만 outbox, 세대별 중복 방지 및 오래된 알림 철회·읽기 재검증으로 보완한다. 기존 204 호환, 새 200 JSON 영수증.

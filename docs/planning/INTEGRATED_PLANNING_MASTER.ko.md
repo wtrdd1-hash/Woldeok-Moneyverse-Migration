@@ -1,5 +1,51 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1260 — F675-122 검증형 주간 퀘스트 목표 이력·원천 근거 아카이브 (기능 추가 / 기획 초안 / 운영 보류)
+
+### 회차·코드 근거·기능 경계
+- 이전 **기능 보완 v1258** → 현재 **기능 추가 v1260** → 다음 **기능 보완 v1262**(잠정). 원격 최신 **main** `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작 시 확인, 중간·완료 재조회 예정. main의 `AGENTS.md`, `README.md`, 영어 기준 `PROJECT_PLAN.md` 및 한국어 `PROJECT_PLAN.ko.md`를 대조했다. 미병합 기획 Draft #1248 위에 쌓는 **문서 초안**이며 구현된 기능이 아니다. 최신 완료 QA **v1264 FAILED/HOLD**(2026-10-25 09:56 KST).
+- 실제 코드: `frontend/src/app/quests/page.tsx`는 `GET /api/v1/engagement/early-game`으로 이번 주 목표를 표시한다. `backend/src/engagement/engagement.controller.ts`와 Migration `101-early-game-progress.sql`의 `early_game_weekly_goals(p_actor)`는 **현재 서울 기준 월요일**을 계산하고 시간 조건이 **시작 경계만** 있으며 과거 주간 아카이브 API·마감 스냅샷이 없다. 세 목표는 작업 보상 영수증·원장 전표에서 계산하는 주간 지표이고 NPC 목표는 **평생 누적·자가 신고**이다. `user_job_progress`의 현재 직업 순위는 변하므로 과거 직업 작업을 현재 상태로 재계산하면 기록이 바뀔 수 있다. 이는 설계 공백이며 실제 데이터 유실 확인은 아니다.
+- 목적·대상: 로그인·동의가 유효한 활성 회원이 **지난주 이전의 목표 달성 내역**과 인정된 근거를 확인하고, 검증된 달성과 미확인 기록을 구분한다. 공개 순위·회원 간 이력 노출·새 WLD 보상·원장 변경은 범위 밖이다. 현재 주간 진행률의 권위는 기존 `/quests`에 둔다.
+
+### 회원 화면·권한·CTA·상태
+- 기존 `/quests` 주간 목표 아래 **지난주 기록 보기** → 비공개 `/quests/history` 주차 목록 → `/quests/history/[weekStart]` 상세. **현재 주로 돌아가기**, **인정 근거 보기**, **재시도** CTA. 비로그인 사용자는 기존 로그인 화면으로 이동하고 동일 출처 복귀 경로만 허용한다. 로그인 전 HTML에 개인 기록을 포함하지 않는다.
+- 주차 카드에는 서울 기준 `weekStart`, `weekEndExclusive`, 당시 목표 이름·기준치·단위, 문자열형 진행값, `sourceCutoff`, `revision`, `capturedAt`, `evidenceStatus`, `selfReported`를 표시한다. 상태: `NOT_ARCHIVED`(기록 미확보, **0회로 표시 금지**), `PENDING_FINALIZATION`, `VERIFIED`, `CORRECTED`, `UNVERIFIABLE`, `UNAVAILABLE`, `ERROR`. 마감 및 원천 검증 전에는 `VERIFIED` 금지, 수정 시 원본 영수증 보존과 수정 사유 표시. 현재 주는 `/quests`의 `IN_PROGRESS`이며 완료 이력에 포함하지 않는다.
+- `window_kind='week'`이고 `self_reported=false`인 **세 가지 목표만** 주간 검증 달성률에 포함한다. `weekly_npc_regular`은 평생 누적·자가 신고이므로 주간 완료 분자/분모에서 제외하고 별도 노출 시에도 자가 신고 표시를 유지한다. 당시 목표 정책·기준치·직업 배정 근거가 없으면 `UNVERIFIABLE`로 처리하고 임의 소급 산출 금지. 회원용 **완료/보상 받기/수정** 버튼을 새로 만들지 않는다.
+- 키보드·스크린리더 순서, 색상과 독립된 상태 텍스트, 수정 이력 접근성, 터치 44px, 화면 320px·확대 200%, TalkBack·VoiceOver, WCAG 2.2 AA를 준수한다.
+
+### 제안 API·Android 동등 계약(미구현)
+- `GET /api/v1/engagement/weekly-archive?limit=8&cursor=...` → `{items:[{weekStart,weekEndExclusive,status,verifiedGoals,eligibleGoals,revision,sourceCutoff}],nextCursor}`; 최대 12주/페이지, 회원·세션·정렬 기준·필터를 결합한 HMAC 서명 커서, 본인 전용, `Cache-Control: private, no-store`.
+- `GET /api/v1/engagement/weekly-archive/:weekStart` → `{weekStart,weekEndExclusive,status,goals:[{code,label,target,progress,unit,completed,sourceKind,evidenceStatus,selfReported,revision,receiptId}],capturedAt,sourceCutoff,correctionAvailable}`. 서울 기준 과거 월요일인 `YYYY-MM-DD`만 허용. 잘못된 날짜 400, 기록 없음 404, 원천 장애 503. WLD·bigint 수치는 모두 **10진 문자열**로 전달하고 JS Number 변환 금지.
+- `GET /api/v1/engagement/weekly-archive/receipts/:receiptId` → 본인 확인 후 `{weekStart,goalCode,revision,sourceCutoff,policyVersion,sourceFamily,finalizedAt,status}`만 반환. 원시 전표·타 회원·비밀 로그·개인 식별정보 노출 금지. 회원 쓰기 API는 **없다**. Next.js server-only 경계, 세션·동의 검증, Android `/app-api/v1/engagement/weekly-archive/...` 동일 읽기 계약, 오프라인 가짜 완료 표시 금지.
+- HTTP 401 비로그인, 403 이용 제한/동의, 404 타인·없는 영수증 구별 불가, 400 날짜·커서 오류, 429 남용, 503 DB·근거 장애. 로그아웃/계정 변경 시 응답·커서 폐기, 장애를 200 빈 `VERIFIED`로 변환 금지.
+
+### 제안 PostgreSQL·마감 트랜잭션·무결성
+- Migration 266/280 충돌 해결 전 **새 번호 할당 금지**. 불변 수정 이력 `member_weekly_goal_archive`의 복합 키 `(user_id uuid,week_start date,goal_code text,revision integer)`; 필드 `week_end_exclusive`, `catalog_version`, `source_cutoff`, `captured_at`, `source_family`, `source_digest`, `source_count bigint`, `target bigint`, `progress bigint`, `unit`, `completed`, `evidence_status`, `correction_reason_code`, `job_context_version`. 월요일·7일 간격·양수 목표·음수 아닌 진행/수정 번호·허용 상태·`self_reported=false` CHECK. 인덱스 `(user_id,week_start DESC,goal_code,revision DESC)` 및 복합 UNIQUE. `member_weekly_goal_archive_heads`가 승인된 최신 revision만 가리키고 과거 행 UPDATE 금지.
+- 별도 최소권한 마감 작업자가 서울 기준 주 종료 후 **최소 24시간 유예**와 원천 수집 워터마크 충족을 확인한다. 작업 advisory lock + head `FOR UPDATE`, 일관된 `sourceCutoff`, `(weekStart,goalCode,revision,sourceDigest)` 멱등 처리. 원천·스냅샷·head·감사/outbox를 하나의 트랜잭션으로 확정한다. 동일 digest 재실행은 최초 영수증, 변경 digest는 **감사된 새 revision**으로만 정정한다. 작업 중 실패 시 일부만 VERIFIED 금지.
+- Migration 101의 **허용 거래 유형**과 은행 입금-출금 순액 규칙을 그대로 사용하고, 과거 주차에는 시작·**종료 미포함** 시간 경계를 모두 적용한다. 영수증 시각·bigint 정밀도를 유지한다. 현재 `user_job_progress`만으로 당시 직업은 입증 불가하므로 주차별 직업 배정 원천/버전이 없으면 `weekly_job_tasks`는 `UNVERIFIABLE`. 과거 정책 부재·늦은 소급 전표·수정·은행 전표 모호성도 임의 0 처리 금지. 기능 시작 전 과거 주차의 자동 소급 생성은 기본 금지.
+- `moneyverse_app`·PUBLIC에 신규 테이블 직접 SELECT/DML 부여 금지; 회원 소유권을 DB 내부에서 확인하는 `SECURITY DEFINER` 조회 함수만 좁게 EXECUTE 허용. 마감자는 전용 최소권한 역할 사용, 회원 쓰기 함수 없음. 계정 soft delete/병합은 명시적 접근 차단·보존·삭제 승인, 과거 이력 임의 양도 금지. WLD·원장·은행 잔액·보상·NPC 친밀도 변경 없음.
+
+### 관리자·남용 방지·SEO·KPI·테스트·배포
+- 관리자 `/admin/engagement/weekly-archive`: 최근 성공 주차, 마감 지연, 워터마크 부족, 누락 스냅샷, 수정 건수, 실패 큐 및 **k≥20** 비식별 집계만 읽기 전용. 이름·원시 원장·수동 보상 지급·직접 수치 변경 금지. 수정은 별도 승인·감사된 관리자 작업에서만 수행한다.
+- 회원당 GET 30회/분, 최대 12주/페이지, 커서 길이 제한, 엄격한 날짜 파서, 동일 형태 404, 세션 연계 HMAC, 민감 로그 제거. 회원 이력 `noindex,nofollow`, `no-store`, sitemap/공개 JSON-LD 제외; 공개 `/quests` 메타데이터에 개인 정보 노출 금지.
+- KPI: 아카이브 대상 주차 대비 생성률, VERIFIED·UNVERIFIABLE 비율, 마감 지연 p95, 수정 건수·소요시간, 거짓 VERIFIED **0건**, 타 회원 유출 **0건**, 원장 변경 **0건**. 모든 대상 목표의 근거가 승인된 경우에만 주차 전체 VERIFIED로 집계한다.
+- **향후 격리된 실제 PostgreSQL 테스트**: 마감 작업 100건 동시 재시도→단일 revision/head, 타 회원·영수증 100건 접근 차단, 합성 이력 10,001건 커서 중복/누락 없음, 서울 월요일 경계, 정책 변경, 직업 순위 변동, 소급 원장 수정, 중간 실패, 근거 누락, 탈퇴·병합, 2^53 초과 bigint, Android·세션 전환, 320px 접근성. 원장·잔액·보상 동일성 검증. **현재 미실행**.
+- 기능 스위치 기본 OFF, 별도 개발 브랜치, Migration 266/280 및 DB 권한 선해결, 소급 복원 기본 OFF, 격리 Test에서 shadow 계산·101 현행 비교, 최종 **정확 SHA** 인증 E2E·보안·백업 복원·카나리·GitOps 승인 후 승격. 롤백은 UI·마감 작업만 OFF, 불변 감사/이력 보존, 금융 데이터 불변. QA v1264 **FAILED/HOLD**: 루트 100%(약 375MiB), 앱 DML 235/241, PUBLIC 은행 함수 3개, Migration266 체크섬·280 충돌, 기존 프론트 6건 실패, 감사 Critical2/High10·봇 Critical1/High5, 정확 SHA Test·복원 미검증.
+- 외부 독립 레퍼런스 **중복 제거·근거 분류·승인 10,000건** 목표 유지. 기존 검토 발행기관 PostgreSQL/OWASP/W3C **3곳**, 이번 신규 승인 **0건**, 누적 승인 **미확인** → **BLOCKED / IN PROGRESS**. 합성 테스트·중복 URL·발행기관 수를 승인 근거 건수로 세지 않는다.
+
+### 개발 예약 인계 P0/P1 백로그
+- **P0 ENV1260-01** — 타 작업 보호 저장 공간 복구, 운영·개발·Test DB 격리, 암호화 백업 독립 복원.
+- **P0 SEC1260-02** — 실제 PG 앱 최소권한·PUBLIC 은행 함수 3개 실행권한 회수, 본인 조회·관리자 개인정보 차단.
+- **P0 REL1260-03** — Migration 266/280, CI·보안·프론트 실패, 최종 정확 SHA 인증 금융 Test E2E, GitOps 승격 보류.
+- **P0 QUEST1260-04** — Migration101 지표 기간, 과거 직업 귀속·목표 정책 버전·소급 정정 근거 확인, 근거 없는 백필 거부.
+- **P1 QUEST1260-05** — 전진 전용 수정 이력/head DB·인덱스·원천 영수증·본인 조회 함수·권한 부정 테스트.
+- **P1 QUEST1260-06** — 24시간 유예·워터마크 마감 작업, 잠금·멱등·수정 revision·원자적 롤백.
+- **P1 QUEST1260-07** — NestJS 본인 목록·상세·영수증 API, 서명 키셋 커서·bigint 문자열.
+- **P1 QUEST1260-08** — Next.js 주간 이력 화면, 미확인·수정 상태, Android 동등성·접근성.
+- **P1 QUEST1260-09** — 개인정보·관리자 지연 집계·요청 제한·noindex/no-store·KPI.
+- **P1 QUEST1260-10** — 격리 PG 100 동시성·100 타인 접근·10,001 합성 이력·근거/정정/서울 경계 회귀·정확 SHA Test/카나리/롤백.
+
+
 ## v2026.10.25.1258 — F675-121 게시판 댓글 팔로우 재시도·삭제·알림 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
 
 ### 회차 및 실제 근거

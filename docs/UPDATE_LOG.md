@@ -1,4 +1,9 @@
 ## 2026-10-25 08:xx KST — Planning v1256 F675-121 (Feature Addition / Draft / HOLD)
+
+## 2026-10-25 10:xx KST — Planning v1260 F675-122 (Feature Addition / Draft / HOLD)
+- Previous Improvement v1258 / Current Addition v1260 / Next Improvement v1262 provisional. Exact main `c9a868b1e622341e2daa8b936ddf0988eda9988e` verified; QA v1264 FAILED/HOLD. Proposed verified closed-week quest archive with immutable evidence revisions, Seoul boundary/24h+watermark, policy/job provenance, owner-only API and no false backfill or NPC weekly claim. Detailed EN/KO parity in six existing planning docs; no runtime/DB/WLD/Test/Production changes.
+- P0 ENV1260-01 SEC1260-02 REL1260-03 QUEST1260-04; P1 QUEST1260-05 QUEST1260-06 QUEST1260-07 QUEST1260-08 QUEST1260-09 QUEST1260-10. Root 100%, app DML 235/241, PUBLIC bank funcs 3, migration266/280, exact-SHA Test/restore HOLD. Independent external accepted new 0, cumulative UNKNOWN/10,000 BLOCKED.
+
 - GitHub Draft PR #1248 OPEN (stacked on #1241); development issue #1240 updated (comment 6391229779); disk issue #1170 updated (comment 6391230670). Main unmerged, release HOLD.
 
 ## 2026-10-25 09:xx KST — Planning v1258 F675-121 (Feature Improvement / Draft / HOLD)
