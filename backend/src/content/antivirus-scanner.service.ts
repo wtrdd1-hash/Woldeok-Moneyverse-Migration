@@ -323,13 +323,13 @@ export class AntivirusScannerService {
         const match = /^stream:\s+(.+?)\s+FOUND$/.exec(reply);
         if (match) {
           settled = true;
-          resolve({ isClean: false, virusName: match[1] });
+          resolve({ isClean: false, virusName: match[1] ?? 'Unknown ClamAV Threat' });
           return;
         }
         fail();
       });
       socket.on('error', (err) => {
-        this.logger.warn(`Configured ClamAV scan unavailable: ${err.code ?? 'socket error'}`);
+        this.logger.warn(`Configured ClamAV scan unavailable: ${'code' in err ? String(err.code) : 'socket error'}`);
         fail();
       });
       socket.on('timeout', fail);
