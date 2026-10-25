@@ -153,7 +153,7 @@ export default function VenturesPage() {
           </div>
           <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
             <ShieldCheck className="size-3.5 text-emerald-500 shrink-0" />
-            <span>30% IPO 공모 & 매출 기반 주주 배당 분배 엔진</span>
+            <span>미리보기 전용 · 가상 IPO 및 배당 계산</span>
           </div>
         </div>
 
@@ -169,7 +169,7 @@ export default function VenturesPage() {
               </Badge>
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              AI 핀테크, 양자 컴퓨팅, 우주 로보틱스, 바이오 헬스케어, 친환경 스마트 그리드 법인을 설립하고 30% 지분 공모주 청약(IPO)을 통해 자금을 조달하세요. 주주는 매일 자정 기업 매출의 10%~50%를 WLD 배당금으로 수령합니다.
+              AI 핀테크, 양자 컴퓨팅, 우주 로보틱스, 바이오 헬스케어, 친환경 스마트 그리드 법인을 설립하고 30% 지분 공모주 청약(IPO)을 통해 자금을 조달하세요. 이 화면의 배당금은 계산 예시이며 실제 WLD 지급이나 정산이 이루어지지 않습니다.
             </p>
 
             {/* 4대 핵심 VC 지표 */}
@@ -211,7 +211,7 @@ export default function VenturesPage() {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-muted-foreground">내 투자 가용 WLD</span>
                 <Badge variant="secondary" className="font-mono text-[10px] bg-emerald-500/10 text-emerald-400 border-none">
-                  실시간 원장
+                  예시 잔액
                 </Badge>
               </div>
               <div className="mt-2 font-mono text-2xl sm:text-3xl font-black text-foreground">

@@ -6,9 +6,9 @@
 - Source finding: `backend/src/business/ventures.controller.ts` returns hardcoded pitches and another member-specific fictional WLD investment, claimed dividends, and 48,500 WLD unclaimed, while writes correctly return 503. The UI is labeled a simulation but still claims its hardcoded wallet balance is a live ledger.
 - Objective: fail closed on unverified venture financial reads; preserve existing authentication and write gates; distinguish example balances in the UI. No database migration or ledger mutation.
 - Safety: Production/dev DB may be shared; do not touch live DB. Release blocked on full CI, authenticated E2E, exact-SHA isolated Test, audits and GitOps approval.
-## In progress
-- [ ] Reproduce failing Backend and Frontend regressions (RED).
-- [ ] Implement smallest fail-closed API and truthful UI labels.
+## In progress — 05:40 KST
+- [x] Reproduce failing Backend and Frontend regressions (RED): Backend 2/2 RED; Frontend 1 RED after NODE_ENV=test. The first frontend run lacked NODE_ENV and failed for the wrong reason; rerun reproduced the exact misleading badge.
+- [x] Implement fail-closed 503 evidence code/no-store for both read routes and correct misleading live-ledger badge and dividend copy.
 - [ ] Run targeted tests, full checks, security audit, and inspect CI.
 - [ ] Re-fetch main/plan, document final SHA and blockers.
 ## Finished

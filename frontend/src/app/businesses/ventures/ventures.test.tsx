@@ -66,3 +66,11 @@ describe('가상 스타트업 VC 엔젤투자 & 크라우드펀딩 계약 및 �
     expect(screen.getByText(/내 보유 지분 & 엔젤 거버넌스/i)).toBeDefined();
   });
 });
+
+describe('venture preview financial truth', () => {
+  it('never labels the hardcoded example WLD wallet as a live ledger balance', () => {
+    render(<VenturesPage />);
+    expect(screen.getByText(/시뮬레이션 · 미리보기/)).toBeDefined();
+    expect(screen.queryByText('실시간 원장')).toBeNull();
+  });
+});

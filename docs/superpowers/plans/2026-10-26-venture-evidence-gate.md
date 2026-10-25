@@ -16,16 +16,16 @@
 - Existing session, authentication and consent guards remain.
 
 ## Task 1 — Backend evidence gate
-- [ ] Add RED tests for all three venture read routes, asserting 503 and stable evidence code, no-store.
-- [ ] Run RED tests and record failures.
-- [ ] Replace hardcoded read responses with a shared fail-closed helper.
-- [ ] Run GREEN tests and existing backend regression.
+- [x] Add RED tests for both venture read routes, asserting 503 and stable evidence code, no-store.
+- [x] Run RED tests and record failures.
+- [x] Replace hardcoded read responses with a shared fail-closed helper.
+- [x] Run GREEN tests and existing backend regression.
 
 ## Task 2 — Frontend truthfulness
-- [ ] Add RED test that sample wallet is not labeled live ledger.
-- [ ] Run RED test and record failure.
-- [ ] Relabel simulation figures without changing real financial state.
-- [ ] Run GREEN and frontend regression.
+- [x] Add RED test that sample wallet is not labeled live ledger.
+- [x] Run RED test and record failure.
+- [x] Relabel simulation figures without changing real financial state.
+- [x] Run GREEN and frontend regression.
 
 ## Task 3 — Verification and review
 - [ ] Verify build, typecheck, lint, API contracts, DB tests, audits and CI.
