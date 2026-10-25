@@ -11,10 +11,15 @@
 - Existing blocker: listing read uses direct table SELECT; app-role ACL may reject it. Do not claim official Test E2E or whole marketplace functionality without an independently verified least-privilege DB read contract.
 
 ## In progress
-- [ ] RED focused regression tests
-- [ ] GREEN minimal code change
+- [x] RED focused regression tests: 4/4 failed on main (source defect reproduced)
+- [x] GREEN minimal code change: 4/4 focused tests passed
 - [ ] build, lint, typecheck, unit, integration, security, API contract, real PG (isolated), CI
 - [ ] re-fetch latest main and planning, PR/QA conflict review
+
+### In-progress checkpoint — 2026-10-25 23:40 KST
+- Added focused tests for wildcard literal escaping, deterministic tie-break pagination, bounded search/category, bounded offset. RED 4/4; GREEN 4/4.
+- Code changes limited to `MarketplaceService.listListings`, `MarketplaceQueryDto`, and new test. No DB writes or migration.
+- Running broader validation next.
 
 ## Finished
 Pending.

@@ -51,11 +51,13 @@ export class MarketplaceQueryDto {
   @ApiPropertyOptional({ description: '카테고리 필터', example: 'frame' })
   @IsOptional()
   @IsString()
+  @MaxLength(64)
   category?: string;
 
   @ApiPropertyOptional({ description: '검색 키워드', example: '에메랄드' })
   @IsOptional()
   @IsString()
+  @MaxLength(120)
   search?: string;
 
   @ApiPropertyOptional({ description: '결과 제한 수', example: 50 })
@@ -71,6 +73,7 @@ export class MarketplaceQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(10000)
   offset?: number;
 }
 

@@ -17,7 +17,9 @@ export class MarketplaceService {
     const limit = query.limit ?? 50;
     const offset = query.offset ?? 0;
     const category = query.category || null;
-    const search = query.search ? `%${query.search}%` : null;
+    const search = query.search
+      ? `%${query.search.replace(/[\\%_]/g, (character) => `\\${character}`)}%`
+      : null;
 
     return queryRows(
       this.pool,
@@ -27,8 +29,8 @@ export class MarketplaceService {
        FROM public.marketplace_listings
        WHERE status = 'ACTIVE'
          AND ($1::text IS NULL OR category = $1)
-         AND ($2::text IS NULL OR item_name ILIKE $2 OR description ILIKE $2)
-       ORDER BY created_at DESC
+         AND ($2::text IS NULL OR item_name ILIKE $2 ESCAPE E'\\\\' OR description ILIKE $2 ESCAPE E'\\\\')
+       ORDER BY created_at DESC, id DESC
        LIMIT $3 OFFSET $4`,
       [category, search, limit, offset],
     );
