@@ -80,7 +80,7 @@ describe('MarketplaceController', () => {
     );
   });
 
-  it('createTrade, acceptTrade, confirmTrade, cancelTrade work properly', async () => {
+  it('delegates P2P operations to the mocked service (not settlement evidence)', async () => {
     const createRes = await controller.createTrade(mockReq, {
       recipientName: '무역상인_박',
       offeredWld: '1000',

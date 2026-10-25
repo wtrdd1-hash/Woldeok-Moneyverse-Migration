@@ -4,6 +4,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Param,
   ParseUUIDPipe,
   Post,
@@ -153,7 +154,8 @@ export class MarketplaceController {
 
   // --- P2P Direct Trades ---
   @Get('trades')
-  @ApiOperation({ summary: 'List my P2P direct trades' })
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'P2P trade history (503 until owner-scoped read is available)' })
   listTrades(@Req() request: RequestWithSession) {
     return this.guarded(
       () => this.marketplaceService.listTrades(requireUserId(request)),
@@ -163,7 +165,8 @@ export class MarketplaceController {
 
   @Post('trades')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Propose a new P2P 1:1 direct trade' })
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'P2P trade proposal (503 until atomic settlement is available)' })
   createTrade(@Req() request: RequestWithSession, @Body() body: CreateTradeDto) {
     return this.guarded(
       () => this.marketplaceService.createTrade(requireUserId(request), body),
@@ -173,7 +176,8 @@ export class MarketplaceController {
 
   @Post('trades/:id/accept')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Accept a P2P 1:1 direct trade proposal (first step)' })
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'P2P trade acceptance (503 until atomic settlement is available)' })
   acceptTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
     return this.guarded(
       () => this.marketplaceService.acceptTrade(requireUserId(request), tradeId),
@@ -183,7 +187,8 @@ export class MarketplaceController {
 
   @Post('trades/:id/confirm')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Sign-off and execute dual atomic swap for P2P 1:1 trade' })
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'P2P trade confirmation (503 until atomic settlement is available)' })
   confirmTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
     return this.guarded(
       () => this.marketplaceService.confirmTrade(requireUserId(request), tradeId),
@@ -193,7 +198,8 @@ export class MarketplaceController {
 
   @Post('trades/:id/cancel')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Cancel a P2P 1:1 direct trade' })
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'P2P trade cancellation (503 until atomic settlement is available)' })
   cancelTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
     return this.guarded(
       () => this.marketplaceService.cancelTrade(requireUserId(request), tradeId),
