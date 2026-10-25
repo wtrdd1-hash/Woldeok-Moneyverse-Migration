@@ -2,10 +2,12 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
 import { TranslatedText as T } from '@/components/translated-text';
 import { apiOrNull } from '@/lib/api';
+import { canonicalIntegerString } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { canonicalUrl } from '@/lib/seo';
 import { MarketplaceTabs } from './marketplace-tabs';
 import type { MarketplaceHolding } from './marketplace';
+import { parseMarketplaceAskingSnapshot } from './verified-asking-snapshot';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,19 +16,23 @@ export const metadata: Metadata = {
   description:
     '기획서(PLAYER_MARKETPLACE_CRAFTING_SPEC) 기반 플레이어 간 아이템 거래소 및 재료 조합 제작대',
   alternates: { canonical: canonicalUrl('/marketplace') },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 export default async function MarketplacePage() {
   await requireMember();
 
-  const [holdingsData, walletData] = await Promise.all([
+  const [holdingsData, walletData, askingRows] = await Promise.all([
     apiOrNull<{ holdings: MarketplaceHolding[] }>('/api/v1/shop/holdings'),
-    apiOrNull<{ balance?: string; cash_balance?: string }>('/api/v1/wallet/summary'),
+    apiOrNull<{ balances?: { cash?: { availableAmount?: unknown } } }>('/api/v1/wallet?recent=1'),
+    apiOrNull<unknown>('/api/v1/marketplace/listings?limit=50'),
   ]);
 
   const holdings = holdingsData?.holdings ?? [];
-  const userBalance = walletData?.cash_balance || walletData?.balance || '1000';
+  const verifiedCash = canonicalIntegerString(walletData?.balances?.cash?.availableAmount);
+  const walletVerified = verifiedCash !== null && !verifiedCash.startsWith('-');
+  const userBalance = walletVerified ? verifiedCash : '0';
+  const askingSnapshot = parseMarketplaceAskingSnapshot(askingRows);
 
   const categoriesList = [...new Set(holdings.map((item) => item.category))].sort((a, b) =>
     a.localeCompare(b, 'ko-KR'),
@@ -50,6 +56,8 @@ export default async function MarketplacePage() {
       <MarketplaceTabs
         initialHoldings={holdings}
         userBalanceWld={userBalance}
+        walletVerified={walletVerified}
+        askingSnapshot={askingSnapshot}
         categoriesList={categoriesList}
         rarities={rarities}
       />

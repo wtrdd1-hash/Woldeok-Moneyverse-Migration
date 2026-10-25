@@ -19,10 +19,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
 import { CraftingPanel } from './crafting-panel';
-import { MarketListingsView } from './market-listings-view';
 import { MyListingsView } from './my-listings-view';
 import { SellListingModal } from './sell-listing-modal';
-import { PriceDiscoveryChart } from './price-discovery-chart';
+import { VerifiedAskingSnapshot } from './verified-asking-snapshot-view';
+import type { MarketplaceAskingSnapshot } from './verified-asking-snapshot';
 import { AuctionView } from './auction-view';
 import { DirectTradeView } from './direct-trade-view';
 import { AppraisalView } from './appraisal-view';
@@ -37,6 +37,8 @@ import type { MarketplaceHolding } from './marketplace';
 interface MarketplaceTabsProps {
   readonly initialHoldings: readonly MarketplaceHolding[];
   readonly userBalanceWld: string;
+  readonly walletVerified: boolean;
+  readonly askingSnapshot: MarketplaceAskingSnapshot | null;
   readonly categoriesList: readonly string[];
   readonly rarities: readonly string[];
 }
@@ -44,6 +46,8 @@ interface MarketplaceTabsProps {
 export function MarketplaceTabs({
   initialHoldings,
   userBalanceWld,
+  walletVerified,
+  askingSnapshot,
   categoriesList: _categoriesList,
   rarities: _rarities,
 }: MarketplaceTabsProps) {
@@ -51,12 +55,6 @@ export function MarketplaceTabs({
   const [listings, setListings] = useState<MarketListing[]>([...INITIAL_MARKET_LISTINGS]);
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
   const [currentBalance, setCurrentBalance] = useState(userBalanceWld);
-
-  // Stats calculation
-  const activeListingsCount = listings.filter((l) => l.status === 'active').length;
-  const totalVolumeWld = listings
-    .reduce((sum, item) => sum + BigInt(item.priceWld || '0'), 0n)
-    .toString();
 
   // Handle successful craft
   const handleCraftSuccess = (recipe: CraftingRecipe) => {
@@ -95,39 +93,6 @@ export function MarketplaceTabs({
       });
       return [newItem, ...updated];
     });
-  };
-
-  // Handle successful buy
-  const handleBuyListing = (boughtItem: MarketListing) => {
-    // Deduct purchase price
-    try {
-      const newBal = BigInt(currentBalance) - BigInt(boughtItem.priceWld);
-      setCurrentBalance(newBal > 0n ? newBal.toString() : '0');
-    } catch {
-      // Preserve the last authoritative balance when an amount is malformed.
-    }
-
-    // Mark listing as settled
-    setListings((prev) =>
-      prev.map((l) => (l.id === boughtItem.id ? { ...l, status: 'settled' } : l)),
-    );
-
-    // Add purchased item to holdings
-    const purchasedHolding: MarketplaceHolding = {
-      catalog_id: `buy_${Date.now()}`,
-      code: boughtItem.itemCode,
-      name: boughtItem.itemName,
-      description: boughtItem.description,
-      category: boughtItem.category,
-      quantity: boughtItem.quantity,
-      acquired_at: new Date().toISOString(),
-      rarity: boughtItem.rarity,
-      effect_kind: 'trade',
-      is_equipped: false,
-      serial_number: boughtItem.serialNumber,
-    };
-
-    setHoldings((prev) => [purchasedHolding, ...prev]);
   };
 
   // Handle create new sell listing
@@ -173,36 +138,36 @@ export function MarketplaceTabs({
         <Card className="border-border/60 bg-gradient-to-br from-primary/10 via-background to-muted/20">
           <CardContent className="p-4">
             <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-              <ShoppingBag className="size-3.5 text-primary" /> 활성 거래 매물
+              <ShoppingBag className="size-3.5 text-primary" /> 조회한 활성 매물
             </span>
             <div className="mt-2 text-xl font-extrabold tabular-nums text-foreground">
-              {activeListingsCount} <span className="text-xs font-normal text-muted-foreground">건</span>
+              {askingSnapshot === null ? '조회 불가' : `${askingSnapshot.count}건`}
             </div>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">P0 에스크로 등록 물품</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">서버 최신 표본 최대 50건</p>
           </CardContent>
         </Card>
 
         <Card className="border-border/60 bg-gradient-to-br from-amber-500/10 via-background to-muted/20">
           <CardContent className="p-4">
             <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-              <Flame className="size-3.5 text-amber-500" /> 24h 시장 규모
+              <Flame className="size-3.5 text-amber-500" /> 등록 호가 범위
             </span>
-            <div className="mt-2 text-xl font-extrabold tabular-nums text-amber-600 dark:text-amber-400">
-              {groupDigits(totalVolumeWld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+            <div className="mt-2 break-all text-base font-extrabold tabular-nums text-amber-600 dark:text-amber-400">
+              {askingSnapshot === null ? '조회 불가' : askingSnapshot.minPriceWld === null ? '매물 없음' : `${askingSnapshot.minPriceWld} ~ ${askingSnapshot.maxPriceWld} WLD`}
             </div>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">1% HARD_SINK 소각 연동</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">체결 거래량이 아닌 등록 가격 표본</p>
           </CardContent>
         </Card>
 
         <Card className="border-border/60 bg-gradient-to-br from-emerald-500/10 via-background to-muted/20">
           <CardContent className="p-4">
             <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-              <Hammer className="size-3.5 text-emerald-500" /> 공식 제작 레시피
+              <Hammer className="size-3.5 text-emerald-500" /> 예시 제작 레시피
             </span>
             <div className="mt-2 text-xl font-extrabold tabular-nums text-emerald-600 dark:text-emerald-400">
               {P0_CRAFTING_RECIPES.length} <span className="text-xs font-normal text-muted-foreground">종</span>
             </div>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">변형·복원·각인·부스트</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">제작 가능 여부는 별도 검증 필요</p>
           </CardContent>
         </Card>
 
@@ -212,9 +177,9 @@ export function MarketplaceTabs({
               <Coins className="size-3.5 text-sky-500" /> 내 WLD 잔액
             </span>
             <div className="mt-2 text-xl font-extrabold tabular-nums text-sky-600 dark:text-sky-400">
-              {groupDigits(currentBalance)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+              {walletVerified ? <>{groupDigits(currentBalance)} <span className="text-xs font-normal text-muted-foreground">WLD</span></> : '조회 불가'}
             </div>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">거래 및 제작 즉시 사용 가능</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">서버 지갑 조회 기준 · 거래 가능 여부 별도 확인</p>
           </CardContent>
         </Card>
       </div>
@@ -223,25 +188,25 @@ export function MarketplaceTabs({
       <Tabs defaultValue="market" className="w-full">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b pb-3">
           <TabsList className="flex flex-wrap w-full sm:w-auto h-auto min-h-[44px] bg-muted/60 p-1 gap-1">
-            <TabsTrigger value="market" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+            <TabsTrigger value="market" className="text-xs sm:text-sm font-semibold flex min-h-11 items-center gap-1.5 px-3 py-1.5">
               <ShoppingBag className="size-4" /> 고정가 거래소
             </TabsTrigger>
-            <TabsTrigger value="auction" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+            <TabsTrigger value="auction" className="text-xs sm:text-sm font-semibold flex min-h-11 items-center gap-1.5 px-3 py-1.5">
               <Gavel className="size-4 text-amber-500" /> 실시간 경매장
             </TabsTrigger>
-            <TabsTrigger value="direct-trade" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+            <TabsTrigger value="direct-trade" className="text-xs sm:text-sm font-semibold flex min-h-11 items-center gap-1.5 px-3 py-1.5">
               <ArrowLeftRight className="size-4 text-blue-500" /> 1:1 직거래
             </TabsTrigger>
-            <TabsTrigger value="appraisal" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+            <TabsTrigger value="appraisal" className="text-xs sm:text-sm font-semibold flex min-h-11 items-center gap-1.5 px-3 py-1.5">
               <Award className="size-4 text-purple-500" /> 공인 감정소
             </TabsTrigger>
-            <TabsTrigger value="crafting" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+            <TabsTrigger value="crafting" className="text-xs sm:text-sm font-semibold flex min-h-11 items-center gap-1.5 px-3 py-1.5">
               <Hammer className="size-4 text-emerald-500" /> 제작대
             </TabsTrigger>
-            <TabsTrigger value="my-listings" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+            <TabsTrigger value="my-listings" className="text-xs sm:text-sm font-semibold flex min-h-11 items-center gap-1.5 px-3 py-1.5">
               <PackageOpen className="size-4" /> 내 등록
             </TabsTrigger>
-            <TabsTrigger value="holdings" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+            <TabsTrigger value="holdings" className="text-xs sm:text-sm font-semibold flex min-h-11 items-center gap-1.5 px-3 py-1.5">
               <Boxes className="size-4" /> 보관함
             </TabsTrigger>
           </TabsList>
@@ -249,26 +214,18 @@ export function MarketplaceTabs({
           <Button
             onClick={() => setIsSellModalOpen(true)}
             size="sm"
-            className="w-full sm:w-auto font-bold bg-primary hover:bg-primary/90"
+            className="min-h-11 w-full sm:w-auto font-bold bg-primary hover:bg-primary/90"
           >
             <PlusCircle className="mr-1.5 size-4" /> 내 물품 판매 등록
           </Button>
         </div>
 
         <TabsContent value="market" className="pt-4 space-y-6">
-          <PriceDiscoveryChart
-            rollingMedianWld="1320"
-            p25Wld="1180"
-            p75Wld="1450"
-            volume7dWld="28500"
-            volume30dWld="124000"
-          />
-          <MarketListingsView
-            listings={listings}
-            userBalanceWld={currentBalance}
-            onBuyListing={handleBuyListing}
-            onOpenSellModal={() => setIsSellModalOpen(true)}
-          />
+          <VerifiedAskingSnapshot snapshot={askingSnapshot} />
+          <div role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-relaxed">
+            기존 샘플 매물의 구매·체결은 실제 원장 거래가 아니므로 이 화면에서 제공하지 않습니다.
+            거래 기능은 서버 영수증 및 권한 검증을 완료한 후 별도로 제공됩니다.
+          </div>
         </TabsContent>
 
         <TabsContent value="auction" className="pt-4">
