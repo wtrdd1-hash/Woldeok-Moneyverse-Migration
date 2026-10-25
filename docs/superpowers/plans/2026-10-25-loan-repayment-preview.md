@@ -20,8 +20,8 @@
 
 ## 09:35 KST plan revision — Loan Maturity Deadline & Minimum Cash Readiness
 PR #1197 already implements the original repayment preview. Do **not** duplicate it. The previous tasks are superseded by these new, unique tasks:
-- [ ] 1. RED deterministic clock/validation/precision tests for `loan-deadline.ts`; GREEN pure calculation.
-- [ ] 2. RED/GREEN guarded `GET banking/loan-deadline` tests, using only owner-scoped bank standing.
-- [ ] 3. RED/GREEN private `/bank/loan-deadline` page and bank navigation, noindex/no-store, no misleading reminder/payout.
-- [ ] 4. Android app-api forwarding, contract generation, exact SHA, isolated real PostgreSQL ACL.
+- [x] 1. RED deterministic clock/validation/precision tests for `loan-deadline.ts`; GREEN pure calculation.
+- [x] 2. RED/GREEN guarded `GET banking/loan-deadline` tests, using only owner-scoped bank standing.
+- [x] 3. RED/GREEN private `/bank/loan-deadline` page and bank navigation, noindex/no-store, no misleading reminder/payout.
+- [x] 4. Android app-api forwarding, contract generation, exact SHA, isolated real PostgreSQL ACL.
 - [ ] 5. Mid/final main+plans+PR audit; full gates, QA release notes, Draft PR and HOLD until all PASS.
