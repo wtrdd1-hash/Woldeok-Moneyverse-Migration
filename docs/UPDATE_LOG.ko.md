@@ -1,4 +1,5 @@
 ## 2026-10-25 v1280 — F675-127 회원 상담 대화록·상태 이력 (기능 추가 / DRAFT / RELEASE HOLD)
+- **GitHub:** [Draft PR #1324](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1324) OPEN, stacked on Draft #1316; engineering [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
 - 이전 보완 v1278 → 현재 추가 v1280 → 다음 보완 v1282; main `1c5b84a1` 시작·중간, AGENTS/README/영문 원본/한국어 대조, 선행 Draft #1316 미병합, 개발 [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
 - 실제 `/support` 목록 50건/회원 메시지 200건 상한, 커서·내보내기 부재, Migration196에 본인 상태 변경 이력 부재 확인. 본인 전용 UTF-8 TXT·페이지 이력, `HISTORY_PARTIAL`, 원자적 불변 상태 이벤트, SECURITY DEFINER, Android 동등성, noindex/no-store, WCAG AA, KPI 및 정확 SHA 배포·롤백 설계. P0 ENV1280-01 SEC1280-02 REL1280-03 SUP1280-04; P1 SUP1280-05 SUP1280-06 SUP1280-07 SUP1280-08 SUP1280-09 SUP1280-10.
 - QA v1273 FAILED/HOLD, QA #1317 후보 DRAFT/HOLD, 시작 시 루트 98%, DB 권한·마이그레이션·보안·Test·복원 미해결. 외부 신규 승인 0, 누적 미확인/10,000 BLOCKED. runtime/DB/WLD/원장/Test/Production 변경 없음.

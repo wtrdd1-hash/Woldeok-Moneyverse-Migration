@@ -1,5 +1,7 @@
 # 2026-10-25 — Planning v1280 F675-127 Owner Support Transcript and Status Timeline
 
+**GitHub:** [Draft PR #1324](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1324) OPEN, stacked on Draft #1316; engineering [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
+
 **Cycle:** Previous Feature Improvement v1278 → Current Feature Addition v1280 → Next Feature Improvement v1282 (provisional). **Result:** DRAFT / RELEASE HOLD, planning only.
 
 ## Evidence and source of truth
