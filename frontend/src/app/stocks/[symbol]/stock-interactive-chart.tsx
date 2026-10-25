@@ -244,11 +244,13 @@ export function StockInteractiveChart({
     savePrefs(chartType, nextTf, indicators);
   };
 
-  const priceNum = Number.parseInt(currentPrice.replaceAll(',', '') || '1000', 10);
-  const openNum = Number.parseInt((dayOpenPrice ?? currentPrice).replaceAll(',', '') || '1000', 10);
+  const quotedPrice = Number.parseInt(currentPrice.replaceAll(',', ''), 10);
+  const quotedOpen = Number.parseInt((dayOpenPrice ?? currentPrice).replaceAll(',', ''), 10);
+  const priceNum = Number.isSafeInteger(quotedPrice) && quotedPrice > 0 ? quotedPrice : 0;
+  const openNum = Number.isSafeInteger(quotedOpen) && quotedOpen > 0 ? quotedOpen : 0;
   const diff = priceNum - openNum;
   const isUp = diff >= 0;
-  const changeRate = openNum > 0 ? ((diff / openNum) * 100).toFixed(2) : '0.00';
+  const changeRate = priceNum > 0 && openNum > 0 ? ((diff / openNum) * 100).toFixed(2) : null;
 
   // Timeframes match the actual PostgreSQL stock_candles supported widths.
   const intervalSeconds = useMemo(() => {
@@ -731,13 +733,17 @@ export function StockInteractiveChart({
                   📰 속보 {newsItems.length}
                 </span>
               )}
-              <Badge
-                variant={isUp ? 'default' : 'destructive'}
-                className="font-mono text-xs font-bold flex items-center gap-1 tabular-nums"
-              >
-                {isUp ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-                <span>{isUp ? '+' : ''}{changeRate}%</span>
-              </Badge>
+              {changeRate !== null ? (
+                <Badge
+                  variant={isUp ? 'default' : 'destructive'}
+                  className="font-mono text-xs font-bold flex items-center gap-1 tabular-nums"
+                >
+                  {isUp ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+                  <span>{isUp ? '+' : ''}{changeRate}%</span>
+                </Badge>
+              ) : (
+                <Badge variant="outline">시세 확인 중</Badge>
+              )}
 
               {/* 캔들스틱 / 라인 에어리어 듀얼 모드 토글 */}
               <div className="inline-flex rounded-lg border border-border/70 bg-muted/50 p-0.5 text-[11px] font-semibold ml-1">
@@ -850,9 +856,12 @@ export function StockInteractiveChart({
             </div>
 
             {/* 현재가 대형 표기 */}
-            <div className="flex items-baseline gap-2 mt-1">
+            <div className="flex flex-wrap items-baseline gap-2 mt-1">
+              <span className="text-xs font-semibold text-muted-foreground">
+                {activeCandle ? '기록된 종가' : priceNum > 0 ? '현재가' : '현재가 미확인'}
+              </span>
               <span className="text-2xl sm:text-3xl font-extrabold font-mono tabular-nums tracking-tight text-foreground">
-                {groupDigits((activeCandle ? activeCandle.close : priceNum).toString())}
+                {activeCandle ? groupDigits(activeCandle.close.toString()) : priceNum > 0 ? groupDigits(priceNum.toString()) : '—'}
               </span>
               <span className="text-xs font-semibold text-muted-foreground">WLD</span>
               {activeCandle && (
@@ -975,6 +984,8 @@ export function StockInteractiveChart({
           {hasVerifiedCandles ? (
           <svg
             ref={svgRef}
+            role="img"
+            aria-label={`${symbol} ${timeframe} 서버 확인 캔들 ${svgCandles.length}개`}
             viewBox={`0 0 ${width} ${height}`}
             className="w-full h-full overflow-visible touch-none cursor-crosshair select-none"
             preserveAspectRatio="none"
@@ -1240,7 +1251,7 @@ export function StockInteractiveChart({
                       setSubpanelTab('rsi');
                       savePrefs(chartType, timeframe, indicators, 'rsi');
                     }}
-                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded font-bold transition-all ${
+                    className={`min-h-11 flex items-center gap-1 px-1.5 py-0.5 rounded font-bold transition-all ${
                       subpanelTab === 'rsi'
                         ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40'
                         : 'text-muted-foreground/60 hover:text-muted-foreground'
@@ -1260,7 +1271,7 @@ export function StockInteractiveChart({
                       setSubpanelTab('macd');
                       savePrefs(chartType, timeframe, indicators, 'macd');
                     }}
-                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded font-bold transition-all ${
+                    className={`min-h-11 flex items-center gap-1 px-1.5 py-0.5 rounded font-bold transition-all ${
                       subpanelTab === 'macd'
                         ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40'
                         : 'text-muted-foreground/60 hover:text-muted-foreground'

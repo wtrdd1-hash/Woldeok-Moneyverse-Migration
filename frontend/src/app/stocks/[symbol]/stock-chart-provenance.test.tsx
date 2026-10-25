@@ -39,6 +39,19 @@ describe('stock chart verified candle provenance', () => {
     expect(screen.getByRole('status').textContent).toMatch(/서버/);
   });
 
+  it('labels a selected historical close as a candle close, not a live quote', async () => {
+    vi.mocked(fetch).mockResolvedValue(response(verified) as Response);
+    render(<StockInteractiveChart {...props} currentPrice="15999" />);
+    await waitFor(() => expect(screen.getAllByTestId('verified-candle')).toHaveLength(2));
+    expect(screen.getByText('기록된 종가')).toBeDefined();
+  });
+
+  it('does not invent a 1,000 WLD current quote from an empty price', () => {
+    render(<StockInteractiveChart symbol="WDG" currentPrice="" />);
+    expect(screen.queryByText('1,000')).toBeNull();
+    expect(screen.getByText('현재가 미확인')).toBeDefined();
+  });
+
   it('shows an empty state rather than synthetic OHLC when no trades were recorded', async () => {
     vi.mocked(fetch).mockResolvedValue(response([]) as Response);
     render(<StockInteractiveChart {...props} />);
