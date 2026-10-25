@@ -10,12 +10,17 @@
 ## IN PROGRESS
 - [x] System status, main and policy, QA/PR/branch/CI review.
 - [x] New branch/worktree and implementation plan.
-- [ ] RED/GREEN backend, web and Android tests.
-- [ ] Real isolated PostgreSQL read-only ACL and rollback.
-- [ ] Full gates and exact SHA CI.
+- [x] RED/GREEN backend, web and Android tests.
+- [x] Real isolated PostgreSQL read-only ACL and rollback.
+- [x] Local full gates run; official exact-SHA CI and Test remain blocked.
 
-## FINISHED
-- Pending. Production RELEASE HOLD; no DB migration, writes, deployment, branch cleanup or restart.
+## FINISHED — 20:10 KST, pre-final-SHA verification
+- Implemented server-recorded coin/dice CSV export (100 max) with owner-only DB function, strict bigint range, injection-resistant CSV, private no-store/noindex, Android limit forwarding, accessible UI. RED 2 additional bigint failures then GREEN.
+- Focused Backend 14 PASS; Frontend/Android 12 PASS. PostgreSQL 17 isolated app-role read-only query and privilege tests PASS; zero play fixture means positive authenticated E2E BLOCKED.
+- Typecheck PASS after test inference repair; lint PASS (0 errors/1128 warnings); build PASS; API contract 179 PASS; Bot 8 PASS after offline dependency installation.
+- First full suite: Backend 1326 PASS/398 SKIPPED; Frontend 1407 PASS/6 FAIL (SEO 3, login a11y 1, calculator CTA 1, admin M2 1). Post-repair full-suite rerun on final SHA required; security audit prod 2 High, full 2 Critical/10 High, bot 1 Critical/5 High.
+- Mid/pre-integration main remained 1c5b84a1c45baafcca83f375a6f99698121e9bb5; EN/KO living/integrated plans re-read. Latest remote branches 184, open PRs 179 before this candidate PR; conflict PRs #1107/#1110/#1143. Preserve all unmerged refs.
+- No DB migration, production-linked DB write, service restart, main merge, Test/Production deployment, GitOps promotion or branch deletion. Production RELEASE HOLD. Rollback = revert candidate feature commits; no schema/data rollback.
 
 ### Mid-work checkpoint — 20:01 KST
 - RED observed: backend 3 failures (parser absent, hardcoded SQL 20, no bound guard), frontend missing route/UI; Android initial expected alias corrected to match existing compatibility contract.

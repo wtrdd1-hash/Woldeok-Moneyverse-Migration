@@ -1,6 +1,14 @@
 const UUID = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 const INTEGER = /^-?(?:0|[1-9][0-9]*)$/;
 const GAMES = new Set(['coin', 'dice_parity', 'dice_number']);
+const MIN_BIGINT = -(1n << 63n);
+const MAX_BIGINT = (1n << 63n) - 1n;
+
+function isPgBigint(value: unknown): value is string {
+  if (typeof value !== 'string' || value.length > 20 || !INTEGER.test(value)) return false;
+  const parsed = BigInt(value);
+  return parsed >= MIN_BIGINT && parsed <= MAX_BIGINT;
+}
 
 interface CasinoHistoryRecord {
   readonly play_id: string;
@@ -21,11 +29,11 @@ function validRecord(value: unknown): value is CasinoHistoryRecord {
     typeof row.game === 'string' && GAMES.has(row.game) &&
     typeof row.choice === 'string' && row.choice.length <= 100 &&
     typeof row.outcome === 'string' && row.outcome.length <= 100 &&
-    typeof row.stake_amount === 'string' && INTEGER.test(row.stake_amount) &&
+    isPgBigint(row.stake_amount) &&
     !row.stake_amount.startsWith('-') &&
-    typeof row.net_amount === 'string' && INTEGER.test(row.net_amount) &&
+    isPgBigint(row.net_amount) &&
     typeof row.transaction_id === 'string' && UUID.test(row.transaction_id) &&
-    typeof row.played_at === 'string' && Number.isFinite(Date.parse(row.played_at))
+    typeof row.played_at === 'string' && row.played_at.length <= 40 && Number.isFinite(Date.parse(row.played_at))
   );
 }
 

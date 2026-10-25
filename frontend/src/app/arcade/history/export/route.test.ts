@@ -61,12 +61,15 @@ describe('private recorded coin/dice CSV export', () => {
     expect((await GET()).status).toBe(401);
   });
 
-  it.each([
-    [{ ...record, stake_amount: 9007199254740993 }],
+  const malformedResponses: unknown[] = [
+    [{ ...record, stake_amount: Number('9007199254740993') }],
     [{ ...record, transaction_id: null }],
     [{ ...record, played_at: 'invalid' }],
+    [{ ...record, stake_amount: '9'.repeat(1000) }],
+    [{ ...record, net_amount: '9223372036854775808' }],
     Array.from({ length: 101 }, () => record),
-  ])('refuses malformed or unbounded upstream history', async (value) => {
+  ];
+  it.each(malformedResponses.map((value) => ({ value })))('refuses malformed or unbounded upstream history', async ({ value }) => {
     vi.mocked(api).mockResolvedValue(value);
     const response = await GET();
     expect(response.status).toBe(503);
