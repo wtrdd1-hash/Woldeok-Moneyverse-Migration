@@ -1,5 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1272 — F675-125 회원 전용 검증형 월간 WLD 명세서 (추가 / 보류)
+- 이전 Improvement v1270, 현재 Addition v1272, 다음 Improvement v1274. main 1c5b84a1 확인, 선행 Draft #1289 미병합, 개발 이슈 [#1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295).
+- 기존 지갑 API·화면은 최근 50건으로 제한되고 CSV는 받은 50건만 포함한다. 신규 회원 전용 월간 명세서는 현금·은행별 거래와 원천 완결 체크포인트·기초/기말 잔액을 독립 검증하고 불변 세대·영수증으로 발행한다. 근거 없는 과거 잔액은 UNVERIFIABLE. /wallet/statements·YYYY-MM, 인증 Nest/Android, private/no-store/noindex, 안전한 CSV, 320px/WCAG, 관리자 비식별 통계. 상세 계약은 국영문 통합 마스터.
+- P0 ENV1272-01 SEC1272-02 REL1272-03 WAL1272-04; P1 WAL1272-05 WAL1272-06 WAL1272-07 WAL1272-08 WAL1272-09 WAL1272-10. QA v1270 FAILED/HOLD, Migration266/280·DB ACL·CI·Test·복원 게이트. 외부 승인 신규 0·누적 미확인/10,000 BLOCKED. 운영 승격 금지.
+
 ## v2026.10.25.1270 — F675-124 작성자 숨김 무결성 제품 검토 (기능 보완 / 초안 / 보류)
 - Draft PR [#1289](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1289) OPEN/HOLD, 개발 이슈 [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) 업데이트, 미병합·런타임/DB/Test/운영 변경 없음.
 - 이전 기능 추가 v1268 / 현재 기능 보완 v1270 / 다음 기능 추가 v1272(잠정), main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 Draft #1281 미병합, 개발 이슈 #1280. 구현·배포 아님.

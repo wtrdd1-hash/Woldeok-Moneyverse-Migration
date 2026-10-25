@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1272 — F675-125 회원 전용 검증형 월간 WLD 명세서 (기능 추가 / 초안 / 보류)
+- 이전 Improvement v1270 → 현재 Addition v1272 → 다음 Improvement v1274(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, AGENTS/README/영문 정본·국문 대조. 선행 Draft #1289 미병합, 개발 이슈 [#1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295).
+- 실제 Wallet API와 /wallet/activity는 최근 최대 50건, 브라우저 CSV도 받은 거래만 내보낸다. F675-125는 /wallet/statements·YYYY-MM 회원 전용 월간 명세서, 현금/은행별 원장 근거, 완결성·기초잔액 대사, 불변 세대/HMAC 영수증, VERIFIED에서만 CSV를 제공한다. 역사적 근거가 부족하면 UNVERIFIABLE로 표시하며 허위 잔액을 만들지 않는다. WLD/원장 불변.
+- P0 ENV1272-01 SEC1272-02 REL1272-03 WAL1272-04; P1 WAL1272-05 WAL1272-06 WAL1272-07 WAL1272-08 WAL1272-09 WAL1272-10. API·DB·인덱스·잠금·본인권한·관리자·SEO·Android·a11y·KPI·100건 동시·합성 10,001건·정확 SHA 배포 게이트는 영문/국문 통합 마스터 참조.
+- QA v1270 FAILED/HOLD: 루트 93%/7.4G, 앱 DML 235/241, PUBLIC 은행 EXECUTE 3, Migration266/280, Frontend 6건 실패, 보안 Critical2/High10, 로그인 금융 Test E2E·격리 복원 미확인. 신규 외부 승인 0건, 누적 승인 미확인/10,000 BLOCKED/IN PROGRESS. 기획만 수행, 기능 OFF, 런타임·DB·Test·운영 변경 없음.
+- 백로그 ID: ENV1272-01 SEC1272-02 REL1272-03 WAL1272-04 WAL1272-05 WAL1272-06 WAL1272-07 WAL1272-08 WAL1272-09 WAL1272-10
+
+
 ## v2026.10.25.1270 — F675-124 작성자 숨김·계정 병합·커서 무결성 (기능 보완 / 기획 초안 / 운영 보류)
 - Draft PR [#1289](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1289) OPEN/HOLD, 개발 이슈 [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) 업데이트, 미병합·런타임/DB/Test/운영 변경 없음.
 - 이전 기능 추가 v1268 → 현재 기능 보완 v1270 → 다음 기능 추가 v1272(잠정). 원격 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 Draft #1281 미병합. AGENTS/README/영문 PROJECT_PLAN 정본 및 국문 대조, 문서만 변경.

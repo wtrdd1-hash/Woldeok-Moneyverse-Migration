@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.25.1272 — F675-125 Verified Monthly WLD Statements (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1270 → Current Addition v1272 → Next Improvement v1274 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked start/mid; AGENTS/README/canonical EN/KO reviewed. Predecessor Draft #1289 unmerged. Engineering [#1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295).
+- Source: GET /wallet recent=1..50, /wallet/activity shows max 50; browser CSV exports those rows only. No complete monthly source-verified statement. F675-125 adds private /wallet/statements and YYYY-MM detail, owner-scoped month-complete ledger/pocket records, immutable generation/HMAC receipts, CSV only VERIFIED; missing opening anchor/source checkpoint => UNVERIFIABLE, no fake historical balances. No ledger/WLD changes.
+- P0 ENV1272-01 SEC1272-02 REL1272-03 WAL1272-04; P1 WAL1272-05 WAL1272-06 WAL1272-07 WAL1272-08 WAL1272-09 WAL1272-10. Detailed API/DB/index/locks/owner permissions/admin/SEO/Android/a11y/KPI/100-way/10,001 synthetic tests and exact-SHA release gate in integrated EN/KO masters.
+- QA v1270 FAILED/HOLD: root 93%/7.4G, app DML 235/241, PUBLIC bank EXECUTE 3, migration266/280, frontend six failures, audit Critical2/High10, authenticated Test finance E2E and isolated restore absent. External newly approved 0; cumulative approved UNKNOWN / 10,000 => BLOCKED/IN PROGRESS. Planning-only, feature OFF, no runtime/DB/Test/Production changes.
+- Backlog IDs: ENV1272-01 SEC1272-02 REL1272-03 WAL1272-04 WAL1272-05 WAL1272-06 WAL1272-07 WAL1272-08 WAL1272-09 WAL1272-10
+
+
 ## v2026.10.25.1270 — F675-124 Board Mute Identity/Merge/Cursor Integrity (FEATURE IMPROVEMENT / PLANNING DRAFT / RELEASE HOLD)
 - Draft PR [#1289](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1289) OPEN/HOLD; engineering issue [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) updated; unmerged, no runtime/DB/Test/Production changes.
 - Previous Addition v1268 → Current Improvement v1270 → Next Addition v1272 provisional. Remote main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked start/mid; prior Draft #1281 OPEN/unmerged. Canonical AGENTS/README/EN PROJECT_PLAN and KO parity reviewed; docs-only.

@@ -1,5 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1272 — F675-125 Verified Monthly WLD Statements (ADDITION / HOLD)
+- Previous Improvement v1270; current Addition v1272; next Improvement v1274. Verified main 1c5b84a1, prior Draft #1289 unmerged, issue [#1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295).
+- Real gap: wallet API and /wallet/activity cap at recent 50, client CSV exports only those 50; new owner-only closed-month statements require ledger-posting completeness, independently reconciled opening/closing per USER_CASH/USER_BANK and immutable generation receipts; no fabricated historic anchors. UI /wallet/statements and YYYY-MM, authenticated Nest + Android, private no-store/noindex, CSV formula safety, 320px/WCAG, admin aggregated-only. Full contract in EN/KO integrated master.
+- P0 ENV1272-01 SEC1272-02 REL1272-03 WAL1272-04; P1 WAL1272-05 WAL1272-06 WAL1272-07 WAL1272-08 WAL1272-09 WAL1272-10. QA v1270 FAILED/HOLD and migration266/280/DB ACL/CI/Test/restore gates; no Production. New approved external references 0, cumulative UNKNOWN / 10,000 BLOCKED.
+
 ## v2026.10.25.1270 — F675-124 Board Mute Integrity Product Review (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - Draft PR [#1289](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1289) OPEN/HOLD; engineering issue [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) updated; unmerged, no runtime/DB/Test/Production changes.
 - Previous Addition v1268 / Current Improvement v1270 / Next Addition v1272 provisional; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 verified start/mid; predecessor Draft #1281 unmerged, engineering issue #1280. No implementation.
