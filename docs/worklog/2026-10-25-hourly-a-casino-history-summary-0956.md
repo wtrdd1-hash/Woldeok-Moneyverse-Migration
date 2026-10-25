@@ -18,4 +18,9 @@
 
 
 ## After
-- Pending.
+- Feature SHA `7eb4afadaa7d8210db86483029c50d630877afd4`, Draft PR #1255. Source changes 12 files including generated mobile contract and test evidence. Remote CI 40149429531/Test Candidate 40149425562 initially IN_PROGRESS.
+- Full test FAIL: backend 1,318 PASS/398 SKIP; frontend 1,401 PASS/6 FAIL (locale1/SEO3/login a11y1/M2 1). Full contract 180 PASS, Typecheck/Lint/Build PASS; audits FAIL (production High2, full Critical2/High10/Moderate11/Low3, bot Critical1/High5).
+- Real isolated PG17 app-role read-only SELECT 0 actual plays; function privilege yes, ledger write no, ROLLBACK. Real authenticated finance E2E BLOCKED. `qa:route-ledger:check` requires external inventory and five-pass evidence: BLOCKED.
+- Final branch audit at 10:08 KST: remote heads 131->132, PRs 127->128, 130 starting non-main heads unmerged/unique; 0 same-head/tree/patch-ID duplicates; conflicting #1107/#1110/#1143; deleted 0. No overlap with A0925/B527/C1032/Gemini.
+- Root filesystem 100%, shared DB and exposed 5433 remain HOLD. Production/Test/GitOps/database writes/service restarts/rollback 0. Reports `docs/releases/v2026.10.25.a0956.md` and `.ko.md`.
+- Final report commit SHA and CI status to be appended to PR #1255 after push. The recurring schedule and all other automations remain unchanged.
