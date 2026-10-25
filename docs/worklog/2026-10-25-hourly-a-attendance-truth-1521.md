@@ -16,3 +16,7 @@
 
 ## Finished
 - Pending evidence. Production release hold.
+
+### RED checkpoint — 15:24 KST
+- Backend new tests: 3 failed / 1 passed; Frontend new tests: 7 failed / 1 passed, demonstrating fabricated status/claim and UI assertions.
+- Midpoint main re-fetched; plan EN/KO rechecked. Implementation follows in same isolated worktree.
