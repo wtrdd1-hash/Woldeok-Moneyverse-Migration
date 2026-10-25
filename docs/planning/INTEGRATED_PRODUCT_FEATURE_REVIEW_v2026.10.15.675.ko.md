@@ -1,4 +1,5 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+- **v1300 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1379 (선행 #1371 미병합, 문서만 변경, 운영 승격 보류).
 ## 기획 v1300 — F675-132 회원 로그인 세션 별칭 (기능 추가 / DRAFT / HOLD)
 - 이전 보완 v1298 / 현재 추가 v1300 / 다음 보완 v1302(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 확인. 선행 기획 Draft #1371 미병합, 개발 이슈 https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378; A/B/C/Gemini/QA 코드 수정 없음.
 - 실제 main의 `/account/security`는 이미 회원 세션/보안 이벤트 조회·CSRF/재인증 세션 철회를 제공한다. Migration 213의 `deviceLabel`은 UA 기반 **추정** 기기명이며 실제 기기 인증이 아니다. 직접 편집하는 회원 별칭 저장 API는 확인되지 않았다.

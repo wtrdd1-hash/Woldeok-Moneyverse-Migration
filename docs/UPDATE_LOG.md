@@ -1,3 +1,4 @@
+- v1300 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1379; engineering issue #1378; RELEASE HOLD.
 ## 2026-10-26 06:xx KST — Planning v1300 / F675-132 (Feature Addition / DRAFT / HOLD)
 - Previous Improvement v1298 → Current Addition v1300 → Next Improvement v1302 provisional. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` rechecked. QA v1284 FAILED/HOLD, root 99%. Existing account security sessions are server-backed; UA-derived deviceLabel is not attestation. New member-owned display-only session nickname proposed with guarded PUT/DELETE, CAS/tombstone, isolated DB tests, Android/a11y/privacy/SEO and flag-OFF rollback. Engineering https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378. P0/P1 4/6; independent corpus new 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime, database, WLD, Test or Production changes.
 

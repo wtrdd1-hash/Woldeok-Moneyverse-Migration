@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **v1300 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1379 (stacked on unmerged #1371; docs only, DRAFT / RELEASE HOLD).
 ## v2026.10.26.1300 — F675-132 Verified Member Session Nicknames (Feature Addition / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1298 → Current Feature Addition v1300 → Next Feature Improvement v1302 (provisional). Source-of-truth remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked at start/midpoint; prior unmerged planning Draft #1371 is the isolated documentation base. Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378. No Gemini/development A/B/C/QA source edits or deployment.
 

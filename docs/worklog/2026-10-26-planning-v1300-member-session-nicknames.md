@@ -16,4 +16,4 @@
 - External 10,000 reference gate: new independently deduplicated approved 0, cumulative UNKNOWN, BLOCKED/IN PROGRESS. No source code, Test/Production deployment, WLD/ledger or database changes.
 
 ## GITHUB HANDOFF
-- Engineering issue https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378; planning Draft PR to be linked after creation. Release HOLD, separate development branch/exact-SHA official Test and authorized GitOps required.
+- Engineering issue https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378; planning Draft PR #1379 opened on unmerged #1371. Release HOLD, separate development branch/exact-SHA official Test and authorized GitOps required.

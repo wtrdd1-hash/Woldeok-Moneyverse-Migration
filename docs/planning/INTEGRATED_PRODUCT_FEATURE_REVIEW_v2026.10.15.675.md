@@ -1,4 +1,5 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- **v1300 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1379 (stacked on unmerged #1371; docs only, DRAFT / RELEASE HOLD).
 ## Planning v1300 — F675-132 Verified Active-Session Nicknames (Addition / DRAFT / HOLD)
 - Previous Improvement v1298 / Current Addition v1300 / Next Improvement v1302 provisional. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid; prior planning Draft #1371 remains unmerged; engineering issue https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378. No overlapping A/B/C/Gemini/QA runtime changes.
 - Verified main already provides `/account/security`, owner GET sessions/events and CSRF+reauth session revocation. Migration 213 produces heuristic user-agent `deviceLabel`; it is **not** a trusted physical-device attestation. No editable nickname storage/API identified. Proposed member-only label is explicitly self-declared, not security authority.

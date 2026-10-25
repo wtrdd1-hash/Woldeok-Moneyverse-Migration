@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **v1300 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1379 (stacked on unmerged #1371; docs only, DRAFT / RELEASE HOLD).
 ## v2026.10.26.1300 — F675-132 Member Active-Session Nicknames (Feature Addition / DRAFT / HOLD)
 - **Cycle:** Previous Improvement v1298 → Current Addition v1300 → Next Improvement v1302 (provisional). Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` rechecked start/mid; stacked docs-only on unmerged Draft #1371, engineering https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378; separate from Gemini/A/B/C/QA.
 - **Source:** `/account/security` already lists sessions/events and supports CSRF+reauth-protected revocation. NestJS GET sessions maps migration 213 `account_active_sessions` UA-derived heuristic `deviceLabel`. No member-editable persisted nickname route found. This is not a confirmed Production incident. Do not duplicate list/revocation/security events or claim device identity verification.

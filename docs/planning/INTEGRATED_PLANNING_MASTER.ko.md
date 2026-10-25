@@ -1,4 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- **v1300 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1379 (선행 #1371 미병합, 문서만 변경, 운영 승격 보류).
 ## v2026.10.26.1300 — F675-132 회원 전용 로그인 세션 별칭 (기능 추가 / DRAFT / RELEASE HOLD)
 - **회차:** 이전 기능 보완 v1298 → 현재 기능 추가 v1300 → 다음 기능 보완 v1302(잠정). 최신 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인. 선행 미병합 기획 Draft #1371 기반 문서만 변경, 개발 A/B/C·Gemini·QA 작업과 분리. 개발 인계: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378.
 

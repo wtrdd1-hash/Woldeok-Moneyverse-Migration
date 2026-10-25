@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **v1300 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1379 (선행 #1371 미병합, 문서만 변경, 운영 승격 보류).
 ## v2026.10.26.1300 — F675-132 회원 로그인 세션 별칭 (기능 추가 / DRAFT / HOLD)
 - **회차:** 이전 기능 보완 v1298 → 현재 기능 추가 v1300 → 다음 기능 보완 v1302(잠정). 최신 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 확인, 미병합 기획 #1371 기반 문서만 수정, 개발 인계 https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1378. Gemini/A/B/C/QA 변경과 분리.
 - **실제 코드:** `/account/security`의 세션·보안 이벤트·세션 철회는 이미 구현. Migration 213의 기기명은 사용자 에이전트로 **추정**한 이름이다. 회원이 직접 수정·저장하는 별칭 API는 확인되지 않았다. 실제 운영 사고가 확인된 것은 아니며 기존 목록/로그아웃 중복 구현 금지.
