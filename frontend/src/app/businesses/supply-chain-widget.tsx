@@ -19,7 +19,7 @@ export async function SupplyChainWidget({ businessId, businessName, businessSymb
   const verified = businessId
     ? await apiOrNull<VerifiedSupplyChain>(`/api/v1/businesses/${encodeURIComponent(businessId)}/supply-chain`)
     : null;
-  const isOwned = verified?.ownershipId === businessId && verified?.businessSymbol === businessSymbol;
+  const isOwned = verified !== null && verified.ownershipId === businessId && verified.businessSymbol === businessSymbol;
 
   return (
     <section aria-labelledby="supply-chain-title" className="rounded-2xl border border-amber-500/30 bg-card p-4 sm:p-6 space-y-4">
