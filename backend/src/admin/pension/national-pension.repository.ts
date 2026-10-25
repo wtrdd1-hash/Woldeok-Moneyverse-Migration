@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
 import { requirePositiveWld } from '../../wallet/wallet.repository';
@@ -173,26 +173,19 @@ export class NationalPensionRepository {
     };
   }
 
-  async getOrCreateAccount(userId: string): Promise<NationalPensionAccountRow> {
-    const existing = await this.pool.query<NationalPensionAccountRow>(
-      `SELECT * FROM public.national_pension_accounts WHERE user_id = $1 LIMIT 1`,
+  async getAccount(userId: string): Promise<NationalPensionAccountRow> {
+    const res = await this.pool.query<NationalPensionAccountRow>(
+      `SELECT * FROM public.pension_member_account($1::uuid)`,
       [userId],
     );
-    if (existing.rows[0]) {
-      return existing.rows[0];
+    if (!res.rows[0]) {
+      // A GET must not create financial records, especially while settlement is paused.
+      throw new ServiceUnavailableException({
+        code: 'PENSION_ENROLLMENT_UNAVAILABLE',
+        message: 'Pension enrollment is paused pending ledger-certified settlement.',
+      });
     }
-
-    const created = await this.pool.query<NationalPensionAccountRow>(
-      `INSERT INTO public.national_pension_accounts (user_id, tier, status, hourly_payout_rate_bps)
-       VALUES ($1, 'TIER_1_YOUTH', 'ACCUMULATING', 8)
-       RETURNING *`,
-      [userId],
-    );
-    const acc = created.rows[0];
-    if (!acc) {
-      throw new Error('국민연금 계좌 개설에 실패했습니다.');
-    }
-    return acc;
+    return res.rows[0];
   }
 
   async contribute(userId: string, amountWld: string, note = '국민연금 기여금 납입') {
@@ -315,7 +308,7 @@ export class NationalPensionRepository {
 
   async toggleRetirement(userId: string): Promise<NationalPensionAccountRow> {
     this.assertLedgerSettlementCertified();
-    const acc = await this.getOrCreateAccount(userId);
+    const acc = await this.getAccount(userId);
     if (acc.status === 'LIQUIDATED') {
       throw new Error('해지된 계좌입니다. 새로 기여금을 납입하여 연금을 재개하십시오.');
     }
@@ -494,17 +487,25 @@ export class NationalPensionRepository {
     }
   }
 
+  private assertMemberHistoryLimit(limit: number): void {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new BadRequestException('Pension history limit must be an integer between 1 and 100.');
+    }
+  }
+
   async listContributions(userId: string, limit = 20): Promise<NationalPensionContributionRow[]> {
+    this.assertMemberHistoryLimit(limit);
     const res = await this.pool.query<NationalPensionContributionRow>(
-      `SELECT * FROM public.national_pension_contributions WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`,
+      `SELECT * FROM public.pension_member_contributions($1::uuid, $2::integer)`,
       [userId, limit],
     );
     return res.rows;
   }
 
   async listPayoutLogs(userId: string, limit = 20): Promise<NationalPensionPayoutLogRow[]> {
+    this.assertMemberHistoryLimit(limit);
     const res = await this.pool.query<NationalPensionPayoutLogRow>(
-      `SELECT * FROM public.national_pension_payout_logs WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`,
+      `SELECT * FROM public.pension_member_payouts($1::uuid, $2::integer)`,
       [userId, limit],
     );
     return res.rows;

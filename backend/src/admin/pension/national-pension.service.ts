@@ -23,7 +23,7 @@ export class NationalPensionService {
   }
 
   async getAccount(userId: string): Promise<NationalPensionAccountRow> {
-    return this.repository.getOrCreateAccount(userId);
+    return this.repository.getAccount(userId);
   }
 
   async contribute(userId: string, amountWld: string | number, note?: string) {
