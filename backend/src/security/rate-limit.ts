@@ -88,8 +88,10 @@ export function tierFor(pathname: string, method: string): RateLimitTier {
   return { name: 'read', limit: READ_LIMIT };
 }
 
+// Repeated edge identity headers are ambiguous: accepting the first value can
+// let a client-controlled duplicate split rate-limit and audit identities.
 const single = (value: string | string[] | undefined): string | undefined =>
-  (Array.isArray(value) ? value[0] : value)?.trim() || undefined;
+  (typeof value === 'string' ? value.trim() : '') || undefined;
 
 /**
  * Who to count a request against.
@@ -107,7 +109,22 @@ const single = (value: string | string[] | undefined): string | undefined =>
 function validIp(value: string | undefined): string | undefined {
   if (!value) return undefined;
   const candidate = value.trim();
-  return isIP(candidate) ? candidate : undefined;
+  const family = isIP(candidate);
+  if (family === 4) return candidate;
+  if (family !== 6) return undefined;
+
+  // The same IPv6 peer can be written with different case, zero padding and
+  // compression. Canonicalizing before rate limiting prevents a fresh budget
+  // from being allocated to each equivalent spelling.
+  const canonical = new URL(`http://[${candidate}]/`).hostname.slice(1, -1);
+  const mapped = /^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(canonical);
+  if (!mapped) return canonical;
+
+  // Node sockets commonly expose IPv4 peers as IPv4-mapped IPv6. Give those
+  // peers the same tracker identity as their dotted IPv4 representation.
+  const high = Number.parseInt(mapped[1]!, 16);
+  const low = Number.parseInt(mapped[2]!, 16);
+  return `${high >>> 8}.${high & 255}.${low >>> 8}.${low & 255}`;
 }
 
 export function requestClientKey(request: KeyableRequest, options: ClientKeyOptions): string {
