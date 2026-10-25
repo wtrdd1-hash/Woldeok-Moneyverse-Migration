@@ -1,5 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v2026.10.25.1258 — F675-121 Board Follow Integrity Product Review (FEATURE IMPROVEMENT / HOLD)
+- Code-grounded risk: comment-create's same-key replay only verifies author, not post/body; deletion ignores request key and route postId. This can produce misleading success and mismatched delete routes. No observed exploitation claimed. Proposed payload-bound receipt and 409, deterministic post lock, cross-post 404, unique new-only outbox and notification generation fence.
+- User trust: only server-confirmed Follow/Unfollow; original comment receipt on retry; no phantom new-reply alert; after deletion retract or gate stale inbox source, without pretending prior reads never happened. Preserve existing C #1206 unmerged ownership; no WLD or ledger impact.
+- P0 ENV1258-01 SEC1258-02 REL1258-03 BOARD1258-04; P1 BOARD1258-05 BOARD1258-06 BOARD1258-07 BOARD1258-08 BOARD1258-09 BOARD1258-10. QA v1261 HOLD, root 100%, frontend 6 failed, audits Critical2/High10 and bot Critical1/High5, ACL/migration266/280/Test/restore blocked. External accepted new 0, cumulative UNKNOWN/10,000. Draft only.
+
+
 ## v2026.10.25.1256 — F675-121 Board Reply Follow Product Review (FEATURE ADDITION / HOLD)
 - Problem: the public board supports real posts and comments but has no confirmed opt-in thread follow with verified reply alerts on main. This is distinct from reading-list bookmarking, board drafts, revision history and C's unmerged verified notification inbox #1206.
 - Value and trust: explicit Follow/Mute/Unfollow, private list, only newly committed and still-visible comments from other authors, no financial claim or reward. A 503 never becomes a success toast. Queue delivers once after generation and visibility checks; no stored private comment body or hidden title.

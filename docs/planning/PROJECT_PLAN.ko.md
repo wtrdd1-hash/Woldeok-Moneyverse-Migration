@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1258 — F675-121 게시판 댓글 재시도·삭제·알림 무결성 보완 (기획 초안 / 운영 보류)
+- 이전 기능 추가 v1256 → 현재 기능 보완 v1258 → 다음 기능 추가 v1260(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재조회, QA v1261 FAILED/HOLD, 미병합 Draft #1241 후속 문서 기획.
+- 실제 Migration 048 댓글 생성은 같은 키의 기존 작성자만 확인하고 글/본문은 비교하지 않으며 UNIQUE 동시성 경합 위험이 있다. 댓글 삭제는 요청 키를 사용하지 않고 Nest DELETE 경로의 글 ID는 무시한다. Migration 259는 삭제 댓글을 숨기며 개발 C 알림함 #1206은 미병합이다. 순방향 원본 결합 영수증/409, 글 우선 잠금, 경로 글 ID 일치, 신규 댓글만 outbox, 세대별 중복 방지 및 오래된 알림 철회·읽기 재검증으로 보완한다. 기존 204 호환, 새 200 JSON 영수증.
+- P0 ENV1258-01 SEC1258-02 REL1258-03 BOARD1258-04; P1 BOARD1258-05 BOARD1258-06 BOARD1258-07 BOARD1258-08 BOARD1258-09 BOARD1258-10. 화면·API·DB·제약/인덱스·트랜잭션·관리자·보안·SEO·Android·접근성·KPI·100건 동시성·롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 및 [영문 정본](INTEGRATED_PLANNING_MASTER.md).
+- QA v1261: 루트 100%(약 444MiB 여유), 프론트 6실패/1397통과, 의존성 Critical2/High10, 봇 Critical1/High5, DB 권한·Migration266/280·정확 SHA 인증 Test·복원 HOLD. 외부 신규 승인 0, 누적 미확인/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·Test·운영 미변경.
+
+
 ## v2026.10.25.1256 — F675-121 게시판 글 팔로우·검증형 새 댓글 알림 (기획 초안 / 운영 보류)
 - 이전 기능 보완 v1254 → 현재 기능 추가 v1256 → 다음 기능 보완 v1258(잠정). 시작·중간 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e`, QA v1259 FAILED/HOLD. Migration 048 댓글 확정·259 공개 조회·Nest 게시판 및 기존 알림 API 확인. main의 글별 팔로우 알림 미확인, 개발 C #1206 미병합 알림함 중복 구현 금지.
 - `/board/[postId]` 팔로우/알림 끄기/해제, 비공개 `/account/board-follows`, 실제 확정·공개 댓글만 알림, 본인 댓글 제외, 서버 영수증·본인 API, 글별 잠금 이벤트 순번·generation CAS·전달 중복 방지·삭제/제한 재검증, 활성 200개·분당 12회. Android 본문 requestId/version, 익명 관리자, noindex/no-store, WCAG AA, 합성 10,001 커서, 정확 SHA Test·기능 OFF 롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 참조. WLD/원장 불변.

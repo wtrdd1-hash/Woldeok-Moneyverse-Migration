@@ -1,4 +1,10 @@
 ## 2026-10-25 08:xx KST — 기획 v1256 F675-121 (기능 추가 / 초안 / 운영 보류)
+
+## 2026-10-25 09시 KST — 기획 v1258 F675-121 (기능 보완 / 초안 / 운영 보류)
+- 이전 기능 추가 v1256 / 현재 기능 보완 v1258 / 다음 기능 추가 v1260(잠정). main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 확인, QA v1261 FAILED/HOLD. Migration048 같은 키 재시도 글/본문 미비교, 댓글 삭제 키 미사용, Nest DELETE 글 ID 무시 확인; 원본 영수증/409, 글 우선 잠금, 신규 댓글 outbox·오래된 알림 철회 명세.
+- P0 ENV1258-01 SEC1258-02 REL1258-03 BOARD1258-04; P1 BOARD1258-05 BOARD1258-06 BOARD1258-07 BOARD1258-08 BOARD1258-09 BOARD1258-10. 기존 국영문 통합 문서 6개에 동등 반영; 런타임·DB·금융·Test·운영 변경 없음.
+- 루트 100%, 프론트 6건 실패, 감사 Critical2/High10·봇 Critical1/High5, DB 권한·Migration266/280·정확 SHA Test·복원 보류. 외부 신규 승인 0, 누적 미확인/10,000 BLOCKED.
+
 - 이전 기능 보완 v1254 / 현재 기능 추가 v1256 / 다음 기능 보완 v1258(잠정). 원격 main c9a868b1e622341e2daa8b936ddf0988eda9988e 시작·중간 확인, QA v1259 FAILED/HOLD. 회원 명시적 글 팔로우, 확정 댓글 이벤트 순번, generation/공개 상태 검증 후 기존 알림함 전달(C #1206 미병합), 가상 알림·WLD 변경 금지.
 - P0 ENV1256-01 SEC1256-02 REL1256-03 BOARD1256-04; P1 BOARD1256-05 BOARD1256-06 BOARD1256-07 BOARD1256-08 BOARD1256-09 BOARD1256-10. 기존 국영문 기획서 6개·업데이트 로그 2개·작업일지 1개 갱신. 루트 100%, 앱 DB 권한·Migration 266/280·CI/보안·정확 SHA Test/복원 차단. 외부 발행기관 3곳, 신규 승인 0건, 누적 미확인/10,000 BLOCKED. 런타임·DB·Test·운영 변경 없음.
 - GitHub Draft PR #1241 OPEN (v1254 기반), 개발 이슈 #1240 OPEN; main 미병합·운영 보류.

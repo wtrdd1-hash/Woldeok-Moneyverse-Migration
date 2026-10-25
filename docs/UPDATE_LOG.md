@@ -1,4 +1,10 @@
 ## 2026-10-25 08:xx KST — Planning v1256 F675-121 (Feature Addition / Draft / HOLD)
+
+## 2026-10-25 09:xx KST — Planning v1258 F675-121 (Feature Improvement / Draft / HOLD)
+- Previous Addition v1256 / Current Improvement v1258 / Next Addition v1260 provisional. Main `c9a868b1e622341e2daa8b936ddf0988eda9988e` start/mid; QA v1261 FAILED/HOLD. Found migration048 replay missing post/body binding, comment-delete unused key, backend DELETE ignored post ID; proposed 409/receipt, post-first locks, new-only outbox and stale-notice retraction.
+- P0 ENV1258-01 SEC1258-02 REL1258-03 BOARD1258-04; P1 BOARD1258-05 BOARD1258-06 BOARD1258-07 BOARD1258-08 BOARD1258-09 BOARD1258-10. English canonical/Korean parity in six integrated planning docs; documentation-only, no runtime/DB/finance/Test/Production.
+- Root 100%, frontend 6 failures, Critical2/High10 audit, bot Critical1/High5, ACL/migration266/280/exact-SHA Test/restore HOLD. Independent evidence newly accepted 0, cumulative UNKNOWN/10,000 BLOCKED.
+
 - Previous Improvement v1254 / Current Addition v1256 / Next Improvement v1258 provisional. Remote main c9a868b1e622341e2daa8b936ddf0988eda9988e checked start/mid, QA v1259 FAILED/HOLD. Source-backed proposal: opt-in board thread follows with committed comment event sequence, generation/visibility-fenced delivery through existing notification system (C #1206 still unmerged), no duplicate inbox or WLD effects.
 - P0 ENV1256-01 SEC1256-02 REL1256-03 BOARD1256-04; P1 BOARD1256-05 BOARD1256-06 BOARD1256-07 BOARD1256-08 BOARD1256-09 BOARD1256-10. English canonical/Korean parity updated in six existing planning docs and two update logs; one worklog. Root disk 100%, app ACL, migration266/280, CI/audits and exact-SHA Test/restore remain HOLD. External reviewed publishers 3, new approved 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime/DB/Test/Production change.
 - GitHub Draft PR #1241 OPEN (base planning/v1254), development issue #1240 OPEN; main unmerged, release HOLD.

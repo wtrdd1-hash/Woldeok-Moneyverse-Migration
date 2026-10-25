@@ -1,5 +1,34 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1258 — F675-121 게시판 댓글 팔로우 재시도·삭제·알림 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+
+### 회차 및 실제 근거
+- 이전 **Feature Addition v1256** → 현재 **Feature Improvement v1258** → 다음 **Feature Addition v1260**(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재확인, main AGENTS.md·README.md·PROJECT_PLAN.md(영어 정본)·PROJECT_PLAN.ko.md 대조. 미병합 Draft #1241 및 이슈 #1240 후속 **문서 전용** 기획이며 코드·DB·Test·운영 변경 없음.
+- 정확한 main 코드 확인: `packages/database/migrations/048-member-board-threads.sql`의 `member_board_comments.idempotency_key`는 전역 UNIQUE다. `member_board_comment_create(p_actor,p_post,p_body,p_key)`는 기존 키 재시도에서 **작성자만 비교**하고 원래 글 ID/본문을 비교하지 않아 같은 회원이 다른 본문/글에 키를 재사용하면 과거 댓글을 성공처럼 반환할 수 있다. 첫 삽입 동시성은 UNIQUE 충돌 가능성이 있고, 글 존재 검사는 삭제와 잠금 직렬화되지 않는다. `member_board_comment_delete(p_actor,p_comment,p_key)`는 **p_key를 사용하지 않고** boolean을 반환한다. `backend/src/board/board.controller.ts`의 DELETE `:id/comments/:commentId`는 경로의 글 ID를 무시한다. 이는 **코드로 확인한 설계 위험**이지 실제 악용·데이터 손실 입증은 아니다.
+- Migration 259의 공개·회원 댓글 조회는 소프트 삭제된 댓글·글을 제외한다. 기존 댓글 생성은 확정 댓글 이벤트/outbox를 기록하지 않는다. 개발 C의 실제 알림함 Draft #1206은 미병합이므로 중복 알림 저장소를 만들거나 main에 구현됐다고 주장하지 않는다.
+- QA v1261 정확 main 격리 감사: 프론트 Vitest **6건 실패/1,397건 통과**, 전체 감사 **Critical 2/High 10**, 봇 **Critical 1/High 5**, 루트 디스크 **100%(시작 시 여유 약 444MiB)**. 운영/개발 DB 경계, 앱 과도 DML/PUBLIC 은행 EXECUTE, Migration 266 체크섬/280 충돌, 공식 정확 SHA 인증 Test 금융 E2E 및 격리 복원은 계속 차단; QA **FAILED/HOLD**.
+
+### 보완된 기능·데이터 계약 (제안, 미구현)
+1. **댓글 생성 멱등성:** 순방향 신규 함수는 글 행을 잠그고 회원·공개 여부를 검증한 뒤 `(회원,글ID,정규화본문,요청ID,작업)`에 묶인 불변 영수증을 보존한다. 같은 요청은 최초 확정 댓글/영수증을 `newlyInserted=false`로 반환하고, 같은 키로 다른 글/본문/작업을 제출하면 **409**로 거부하며 이벤트를 생성하지 않는다. 첫 삽입 UNIQUE 경합은 충돌 후 원본 조회·내용 대조로 처리해 500/중복 알림을 방지한다. 적용된 Migration 048은 수정 금지.
+2. **글 삭제와 순서:** 신규 쓰기는 `글 FOR UPDATE → 댓글 행 → 팔로우/영수증/outbox` 순서로 잠그고 글 삭제도 같은 글 잠금을 따른다. 댓글 확정 뒤 글이 삭제되면 발송 직전 워커가 차단한다. 글 삭제 뒤 댓글 쓰기는 실패·이벤트 없음. 이미 전달·열람한 알림은 과거 노출 자체를 취소할 수 없으므로, 삭제 후 **알림 철회/본문 가림 또는 원천 상세 조회 재검증**을 요구하며 과거 노출이 전혀 없었다고 보장하지 않는다.
+3. **댓글 삭제 경로·영수증:** 경로 `:postId`와 실제 댓글의 글 ID를 잠금 안에서 비교한다. 다른 글 경로로 호출해도 다른 글 댓글이 삭제되지 않도록 동일한 비노출 오류로 거부한다. 삭제 `requestId`는 `(회원,글ID,댓글ID,DELETE)`에 결합하고 동일 재시도는 최초 영수증, 다른 내용 재사용은 409를 반환한다. 기존 HTTP 204 클라이언트는 전환 기간 호환을 유지하고 새 버전의 영수증 API는 **200 JSON**을 사용한다(204 본문 금지).
+4. **팔로우 세대·알림:** `(user_id,post_id)` 묘비의 `version/generation`을 단조 증가시킨다. 팔로우/알림 끄기/해제와 댓글 생성은 글 우선 잠금으로 직렬화한다. **신규 확정 댓글만** `comment_id` UNIQUE, `(post_id,event_seq)` UNIQUE인 트랜잭션 outbox 이벤트 1개를 만든다. 워커는 `(수신자,댓글ID,generation)` 고유키와 회원 활성·동의·세대·음소거·본인 댓글·글/댓글 공개 여부·기능 스위치를 재확인한 후 **#1206 계약 승인 뒤 기존 검증된 알림함**에 저장한다. 전달 후 상태 변경은 철회 또는 원천 상세 읽기 재검증으로 처리한다.
+5. **회원·관리·보안:** `/board/[postId]` 팔로우/알림 끄기/해제, `/account/board-follows` 본인 목록, PENDING/UNKNOWN_COMMIT/CONFLICT/UNAVAILABLE/OFFLINE 상태를 명확히 표시한다. 확정 영수증 없이는 성공 표시 금지. 회원/세션/필터 결합 서명 커서 20건, 활성 200개, 분당 12회, noindex/no-store, 내부 안전 링크, Android JSON `requestId/expectedVersion`, WCAG 2.2 AA 키보드·TalkBack·VoiceOver. 관리자는 k≥20 비식별 큐·철회 통계만 확인하고 차분 공격을 차단한다. 탈퇴·병합은 별도 순방향 사전검사 및 개인정보 보존·삭제 정책이 필요하며 FK CASCADE만 신뢰하지 않는다.
+
+### 개발 예약 이관 백로그 및 검증 (별도 브랜치)
+- **P0 ENV1258-01** — 타 작업자 보존형 승인된 디스크 복구, 운영/개발/Test DB 격리, 암호화 백업 복원 증빙.
+- **P0 SEC1258-02** — 순방향 앱 최소권한/PUBLIC EXECUTE 보완, 타 회원·다른 글 접근 차단 테스트.
+- **P0 REL1258-03** — QA v1261 실패·감사, Migration 266/280, 최종 SHA 공식 Test·보안·GitOps 게이트 해결.
+- **P0 BOARD1258-04** — Migration 048의 생성 재시도 원본 글/본문 결합, UNIQUE 경합, 글 잠금·삭제 경로 검증, 개발 C #1206 책임 경계 확정.
+- **P1 BOARD1258-05** — 생성·삭제 버전 영수증/충돌 매핑, 순방향 DB 함수, 앱 직접 DML 금지.
+- **P1 BOARD1258-06** — 글 잠금 신규 댓글 이벤트/outbox·세대별 중복 방지 워커·오래된 알림 철회.
+- **P1 BOARD1258-07** — NestJS/Next.js 버전별 409/412/404/503·영수증, 기존 204 호환, Android JSON 동등성.
+- **P1 BOARD1258-08** — 글 CTA/팔로우 목록, UNKNOWN_COMMIT 재조회, 20건 서명 커서·접근성·계정 전환.
+- **P1 BOARD1258-09** — 관리자 익명 통계·철회, 탈퇴/병합·남용 제한·SEO·개인정보 KPI.
+- **P1 BOARD1258-10** — 격리 실제 PG: 동일/상이 본문 같은 키 100건, 다른 글 삭제 100건, 댓글 생성·글 삭제·팔로우 재가입 경합, 합성 10,001건 커서, outbox 롤백/워커 재시도, 최종 SHA 공식 인증 Test E2E·카나리·롤백.
+- 운영승격: 기본 **OFF**, WLD·원장 변경 없음, Migration 266/280 해결 전 신규 번호 예약 금지, 모든 P0/QA/보안/Test/복원 통과 전 운영 배포 금지. 외부 독립 근거 목표 **10,000건 중복 제거·출처 분류·승인**: 검토 발행기관 PostgreSQL/OWASP/W3C 3계열, 이번 신규 승인 **0건**, 누적 승인 **미확인**, **BLOCKED / IN PROGRESS**.
+
+
 ## v2026.10.25.1256 — F675-121 회원 게시판 글 팔로우·검증형 새 댓글 알림 (기능 추가 / 기획 초안 / 운영 보류)
 
 ### 회차·근거·범위
