@@ -154,7 +154,7 @@ export function DividendCalendarWidget() {
           monthObj.totalKrw += perMonthKrw;
           monthObj.stocks.push({
             ticker: stockInfo.ticker,
-            name: stockInfo.nameKo,
+            name: locale === 'ko' ? stockInfo.nameKo : stockInfo.ticker,
             amountKrw: perMonthKrw,
           });
         }
@@ -188,7 +188,7 @@ export function DividendCalendarWidget() {
 
       items.push({
         ticker: stock.ticker,
-        name: stock.nameKo,
+        name: locale === 'ko' ? stock.nameKo : stock.ticker,
         daysLeft,
         exDateDesc: stock.exDividendDate,
         annualYield: stock.dividendYield,
@@ -416,7 +416,7 @@ export function DividendCalendarWidget() {
                 type="button"
                 onClick={() => addStock(ticker, 10)}
                 className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono font-medium rounded-lg border border-border/80 bg-background/60 hover:bg-emerald-50 hover:border-emerald-500/50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400 transition-colors min-h-[32px]"
-                title={`${stock.nameKo} 10주를 포트폴리오에 추가합니다`}
+                title={locale === 'ko' ? `${stock.nameKo} 10주를 포트폴리오에 추가합니다` : `Add 10 shares of ${stock.ticker} to portfolio`}
               >
                 <span>+{ticker}</span>
                 <span className="text-[10px] text-muted-foreground">({stock.dividendYield}%)</span>
@@ -442,7 +442,7 @@ export function DividendCalendarWidget() {
               >
                 {PSEO_DIVIDEND_STOCKS.map((s) => (
                   <option key={s.ticker} value={s.ticker}>
-                    {s.nameKo} ({s.ticker}) • {s.dividendYield}%
+                    {locale === 'ko' ? `${s.nameKo} (${s.ticker})` : s.ticker} • {s.dividendYield}%
                   </option>
                 ))}
               </select>
@@ -489,7 +489,7 @@ export function DividendCalendarWidget() {
                 >
                   <div className="min-w-0 pr-2">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-foreground truncate">{stock.nameKo}</span>
+                      <span className="font-bold text-foreground truncate">{locale === 'ko' ? stock.nameKo : stock.ticker}</span>
                       <Badge variant="outline" className="text-[9px] uppercase px-1 py-0 shrink-0">
                         {stock.ticker}
                       </Badge>
@@ -506,7 +506,7 @@ export function DividendCalendarWidget() {
                   <button
                     onClick={() => removeStock(item.ticker)}
                     className="p-1.5 text-zinc-400 hover:text-rose-500 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors shrink-0"
-                    aria-label={`${stock.nameKo} 삭제`}
+                    aria-label={locale === 'ko' ? `${stock.nameKo} 삭제` : `Remove ${stock.ticker}`}
                   >
                     <Trash2 className="size-4" />
                   </button>

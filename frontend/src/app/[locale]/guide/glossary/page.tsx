@@ -85,41 +85,66 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 
-function localizeFormula(formula?: string, locale?: string): string {
-  if (!formula) return '';
-  if (!locale || locale === 'ko') return formula;
 
-  let f = formula;
-  const replacements: [RegExp, string][] = [
-    [/현재 주가/g, 'Stock Price'],
-    [/주당순이익\(EPS\)/g, 'EPS'],
-    [/주당순자산가치\(BPS\)/g, 'BPS'],
-    [/당기순이익/g, 'Net Income'],
-    [/자기자본/g, 'Total Equity'],
-    [/배당기준일 1영업일 전 \(한국 D\+2 결제 기준\)/g, 'Record Date - 1 Business Day (T+2 Settlement)'],
-    [/배당락일/g, 'Ex-Div Date'],
-    [/배당기준일/g, 'Record Date'],
-    [/연간 주당 배당금/g, 'Annual Dividend Per Share'],
-    [/시가배당률/g, 'Dividend Yield'],
-    [/물타기 평단가/g, 'DCA Avg Price'],
-    [/기존/g, 'Initial'],
-    [/추가/g, 'Additional'],
-    [/매수액/g, 'Cost'],
-    [/매수수량/g, 'Shares'],
-    [/보유액/g, 'Value'],
-    [/원천징수/g, 'Withholding Tax'],
-    [/종합과세/g, 'Comprehensive Tax'],
-    [/세율/g, 'Rate'],
-    [/수수료/g, 'Fee'],
-    [/최고가/g, 'Peak'],
-    [/최저가/g, 'Trough'],
-  ];
+const ENGLISH_FORMULAS: Record<string, string> = {
+  per: 'P/E = Stock Price / EPS',
+  pbr: 'P/B = Stock Price / BPS',
+  roe: 'ROE = (Net Income / Total Equity) × 100 (%)',
+  'ex-dividend-date': 'Ex-Date = Record Date - 1 Business Day (T+2)',
+  'dividend-yield': 'Yield = (Annual Dividend / Stock Price) × 100 (%)',
+  'water-down-dca': 'New Avg Price = Total Cost / Total Shares',
+  'dividend-income-tax': 'Withholding Tax = Gross Dividend × 15.4%',
+  'comprehensive-financial-tax': 'Tax Base = Financial Income - KRW 20,000,000',
+  cagr: 'CAGR = (End Value / Start Value)^(1/Years) - 1',
+  eps: 'EPS = Net Income / Total Outstanding Shares',
+  bps: 'BPS = Total Equity / Total Outstanding Shares',
+  'short-selling': 'Borrow Shares -> Sell High -> Buy Low -> Return Shares',
+  'short-squeeze': 'Rapid Price Surge -> Forced Short Covering',
+  'stop-loss': 'Stop-Loss Price = Purchase Price × (1 - Loss Target %)',
+  'market-cap': 'Market Cap = Current Stock Price × Total Outstanding Shares',
+  ebitda: 'EBITDA = Operating Income + Depreciation + Amortization',
+  'ev-ebitda': 'EV/EBITDA = Enterprise Value / EBITDA',
+  'operating-margin': 'Operating Margin = (Operating Profit / Revenue) × 100 (%)',
+  'net-profit-margin': 'Net Profit Margin = (Net Income / Revenue) × 100 (%)',
+  'dividend-payout-ratio': 'Payout Ratio = (Total Dividends / Net Income) × 100 (%)',
+  'dividend-aristocrat': '25+ Consecutive Years of Dividend Growth',
+  'dividend-king': '50+ Consecutive Years of Dividend Growth',
+  'debt-to-equity-ratio': 'D/E Ratio = (Total Liabilities / Total Equity) × 100 (%)',
+  'current-ratio': 'Current Ratio = (Current Assets / Current Liabilities) × 100 (%)',
+  'operating-cash-flow': 'OCF = Net Income + Non-Cash Adjustments - Working Capital Δ',
+  'free-cash-flow': 'FCF = Operating Cash Flow - Capital Expenditures (CapEx)',
+  'dca-dollar-cost-averaging': 'Periodic Fixed Capital Investment across Intervals',
+  'market-order': 'Immediate Execution at Current Best Available Price',
+  'limit-order': 'Execution Only at Specified Target Price or Better',
+  'beta-coefficient': 'Beta = Covariance(Stock, Market) / Variance(Market)',
+  inflation: 'Inflation Rate = ((Current CPI - Prior CPI) / Prior CPI) × 100 (%)',
+  'fed-funds-rate': 'US Federal Open Market Committee (FOMC) Target Rate',
+  'isa-account': 'Tax-Exempt Allowance: KRW 2,000,000 - 4,000,000',
+  'split-buy': 'Staggered Tranche Bids (e.g. 30% / 30% / 40%)',
+  'split-sell': 'Staggered Take-Profit Scaling (e.g. 50% at Target, 50% Runner)',
+  'golden-cross': 'Short-Term Moving Average (50D) Crosses Above Long-Term (200D)',
+  'dead-cross': 'Short-Term Moving Average (50D) Crosses Below Long-Term (200D)',
+  'compound-interest': 'A = P × (1 + r/n)^(nt)',
+  'drip-dividend-reinvestment': 'Reinvesting Dividends to Purchase Fractional Shares',
+  'etf-exchange-traded-fund': 'Basket of Securities Traded on Public Stock Exchange',
+  'reit-real-estate-investment-trust': 'Income-Producing Commercial Real Estate Investment Trust',
+  'dividend-cut': 'Reduction or Suspension of Periodic Dividend Payouts',
+  'liquidity-trap': 'Zero/Low Interest Rates Fail to Stimulate Borrowing or Spending',
+  'share-buyback': 'Company Repurchases Its Own Shares to Cancel or Hold',
+  'circuit-breaker': 'Level 1: -8%, Level 2: -15%, Level 3: -20% (Trading Halt)',
+  sidecar: 'Futures Fluctuation > 5% Halts Program Buying/Selling for 5 Mins',
+  'yield-curve-inversion': '10-Year Treasury Yield < 2-Year Treasury Yield (Recession Signal)',
+  'drawdown-mdd': 'MDD = (Trough Value - Peak Value) / Peak Value × 100 (%)',
+  'sharpe-ratio': 'Sharpe = (Portfolio Return - Risk-Free Rate) / Standard Deviation',
+  'cagr-compound-annual-growth-rate': 'CAGR = (Ending Balance / Starting Balance)^(1/n) - 1',
+};
 
-  for (const [pattern, replacement] of replacements) {
-    f = f.replace(pattern, replacement);
-  }
-  return f;
+function getFormulaForLocale(slug: string, rawFormula?: string, locale?: string): string {
+  if (!rawFormula) return '';
+  if (!locale || locale === 'ko') return rawFormula;
+  return ENGLISH_FORMULAS[slug] || rawFormula.replace(/[가-힣]/g, '');
 }
+
 
 export default async function LocalizedGlossaryHubPage({ params }: PageProps) {
   const { locale } = await params;
@@ -145,7 +170,7 @@ export default async function LocalizedGlossaryHubPage({ params }: PageProps) {
       name: isEn ? item.termEn : isJa ? item.termJa : item.termZh,
       acceptedAnswer: {
         '@type': 'Answer',
-        text: `${isEn ? item.descriptionEn : isJa ? item.descriptionJa : item.descriptionZh} ${item.formula ? `Formula: ${localizeFormula(item.formula, locale)}` : ''}`,
+        text: `${isEn ? item.descriptionEn : isJa ? item.descriptionJa : item.descriptionZh} ${item.formula ? `Formula: ${getFormulaForLocale(item.slug, item.formula, locale)}` : ''}`,
       },
     })),
   };
@@ -264,7 +289,7 @@ export default async function LocalizedGlossaryHubPage({ params }: PageProps) {
 
                     {item.formula && (
                       <div className="mt-3 pt-2.5 border-t border-border/50 text-[11px] font-mono text-zinc-500 dark:text-zinc-400 line-clamp-1">
-                        {localizeFormula(item.formula, locale)}
+                        {getFormulaForLocale(item.slug, item.formula, locale)}
                       </div>
                     )}
                   </Link>
