@@ -1,5 +1,12 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1280 — F675-127 회원 상담 대화록·상태 출처 검증 (기능 추가 / HOLD)
+- 이전 보완 v1278 → 현재 추가 v1280 → 다음 보완 v1282; main `1c5b84a1` 시작·중간 확인, 선행 Draft #1316, 개발 [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
+- 실제 `/support` 회원 상담/메시지 상한 50/200건, 키셋 커서 부재. Migration 196에 본인 확인 가능 이전/이후 상태 이력이 없고 컨트롤러에 내보내기 API 없음. 본인 전용 페이지 조회·TXT 스냅샷, `HISTORY_PARTIAL` 명시 및 검증 불가 과거 이력 생성 금지. Next `/support/transcripts/[threadId]`, NestJS/Android 본인 API, DB 불변 상태 이벤트, `REPEATABLE READ` 스냅샷, 10,000건/2MiB/30초, HMAC 커서·digest·타인 404, 관리자 k>=20, noindex/no-store, WCAG 2.2 AA, 1%→10%→100% 승인 배포·스위치 롤백.
+- P0 ENV1280-01 SEC1280-02 REL1280-03 SUP1280-04; P1 SUP1280-05 SUP1280-06 SUP1280-07 SUP1280-08 SUP1280-09 SUP1280-10. QA v1273 FAILED/HOLD, QA #1317 후보 로컬 통과만으로 운영 승인 불가. 루트 98%, DB 권한·마이그레이션·정확 SHA Test·복원 미해결. 외부 신규 승인 0, 누적 미확인/10,000 BLOCKED. 문서 전용, 기능 OFF, Production HOLD.
+- **백로그 ID:** ENV1280-01 SEC1280-02 REL1280-03 SUP1280-04 SUP1280-05 SUP1280-06 SUP1280-07 SUP1280-08 SUP1280-09 SUP1280-10
+
+
 ## v1278 — F675-126 계산기 재계산·승격 사실성 (기능 보완 / 운영 보류)
 - 이전 Addition v1276 → 현재 Improvement v1278 → 다음 Addition v1280; main `1c5b84a1` 시작·중간 확인, 선행 Draft #1310, 개발 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
 - 복리·대출이 `stock`으로 저장되고 대출 상환방식이 누락되며 지역화 숫자로 정확한 재계산 불가. 제목/ticker 중복제거는 다른 시나리오를 유실하고 실패한 관심종목 승격도 성공 표시, 알림·10,000 WLD는 미검증. 계산기별 ID/스키마/수식 어댑터, 동의형 로컬 미리보기, 서버 영수증·재조회 검증, WLD/관심종목/알림 쓰기 0을 명세.

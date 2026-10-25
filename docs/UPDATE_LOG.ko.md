@@ -1,3 +1,8 @@
+## 2026-10-25 v1280 — F675-127 회원 상담 대화록·상태 이력 (기능 추가 / DRAFT / RELEASE HOLD)
+- 이전 보완 v1278 → 현재 추가 v1280 → 다음 보완 v1282; main `1c5b84a1` 시작·중간, AGENTS/README/영문 원본/한국어 대조, 선행 Draft #1316 미병합, 개발 [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
+- 실제 `/support` 목록 50건/회원 메시지 200건 상한, 커서·내보내기 부재, Migration196에 본인 상태 변경 이력 부재 확인. 본인 전용 UTF-8 TXT·페이지 이력, `HISTORY_PARTIAL`, 원자적 불변 상태 이벤트, SECURITY DEFINER, Android 동등성, noindex/no-store, WCAG AA, KPI 및 정확 SHA 배포·롤백 설계. P0 ENV1280-01 SEC1280-02 REL1280-03 SUP1280-04; P1 SUP1280-05 SUP1280-06 SUP1280-07 SUP1280-08 SUP1280-09 SUP1280-10.
+- QA v1273 FAILED/HOLD, QA #1317 후보 DRAFT/HOLD, 시작 시 루트 98%, DB 권한·마이그레이션·보안·Test·복원 미해결. 외부 신규 승인 0, 누적 미확인/10,000 BLOCKED. runtime/DB/WLD/원장/Test/Production 변경 없음.
+
 ## 2026-10-25 v1278 — F675-126 계산기 재계산·승격 무결성 (기능 보완 / 초안 / 운영 보류)
 - GitHub: [Draft PR #1316](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1316) OPEN(선행 #1310 기반), [개발 #1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309#issuecomment-6396349462)·[용량 #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6396349679) 갱신. main 병합·배포 없음.
 - 이전 Addition v1276 → 현재 Improvement v1278 → 다음 Addition v1280. main `1c5b84a1` 시작·중간 확인, 선행 Draft #1310, 이슈 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309). 복리/대출 stock 오표기, 대출 상환방식 누락, 지역화 문자열 손실, 제목/ticker 중복제거, 허위 저장·승격·알림·10,000 WLD 성공을 확인. 버전형 입력 어댑터·동의형 legacy 미리보기·멱등 영수증/재조회·본인 격리·5개 언어/모바일/접근성·DB/배포 게이트를 명세.

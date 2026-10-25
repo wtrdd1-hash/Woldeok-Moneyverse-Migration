@@ -1,5 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1280 — F675-127 본인 상담 대화록 및 상태 변경 이력 (기능 추가 / DRAFT / RELEASE HOLD)
+- **회차:** 이전 기능 보완 v1278 → 현재 기능 추가 v1280 → 다음 기능 보완 v1282(잠정). 시작·중간 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 확인; AGENTS.md, README.md, 영문 canonical/한국어 대조 검토. 선행 Draft #1316 미병합.
+- **실제 확인:** `/support` 상담은 이미 존재하지만 회원 상담 목록 50건, 메시지 200건, 관리자 메시지 500건 상한에 커서가 없음. 관리자 상태 변경은 현재 값과 일반 감사 기록만 남겨 본인이 볼 수 있는 이전/이후 상태 이력이 없음. 대화록 다운로드 API 없음. 도입 이전 이력은 완전하다고 표시 금지.
+- **신규 기능:** `/support` → `/support/transcripts/[threadId]`에서 본인 메시지 페이지 조회·기록된 상태 타임라인·인증된 UTF-8 TXT 다운로드. `HISTORY_PARTIAL`, `EXPORT_TOO_LARGE`, `REDACTED`를 구분하고 서버 확인 전 성공 표시 금지. NestJS·Android 본인 전용 API, SECURITY DEFINER, append-only 상태 이벤트, 스냅샷 digest, noindex/no-store, 관리자 k>=20, WCAG 2.2 AA, 기능 OFF 롤백은 [통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md)에 명세.
+- **P0:** ENV1280-01 SEC1280-02 REL1280-03 SUP1280-04. **P1:** SUP1280-05 SUP1280-06 SUP1280-07 SUP1280-08 SUP1280-09 SUP1280-10. 향후 검증: 타인 접근 100건, 상태 경합 100건, 합성 메시지 10,001건, UTF-8·2MiB, 정확 SHA Test. 이번 회차 실행 안 함. QA v1273 FAILED/HOLD, QA #1317 DRAFT/HOLD, 루트 98%, DB 권한·마이그레이션·감사·복원 미해결.
+- **외부 근거 게이트:** 신규 승인 0, 누적 승인 미확인 / 목표 10,000, BLOCKED/IN PROGRESS. 개발 [이슈 #1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323). 문서 전용, runtime/DB/WLD/원장/Test/Production 변경 없음.
+- **전체 백로그 ID:** ENV1280-01 SEC1280-02 REL1280-03 SUP1280-04 SUP1280-05 SUP1280-06 SUP1280-07 SUP1280-08 SUP1280-09 SUP1280-10
+
+
 ## v2026.10.25.1278 — F675-126 계산기 시나리오 재계산·승격 무결성 (기능 보완 / 초안 / 운영 보류)
 - **회차:** 이전 Feature Addition v1276 → 현재 Feature Improvement v1278 → 다음 Feature Addition v1280(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인, AGENTS·README·영문 PROJECT_PLAN 정본과 국문 대조. 선행 Draft #1310 미병합, 개발 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309). 문서만 변경.
 - **실제 코드:** 복리·대출 계산기가 `type:'stock'`으로 저장하고 대출 상환방식은 저장되지 않으며 지역화 숫자 문자열은 무손실 재계산을 보장하지 않는다. 제목/ticker 중복판정은 서로 다른 입력을 합치고, 승격 엔진은 실패에도 성공 플래그를 설정하며, 보관·알림·10,000 WLD 약속은 영수증이 없다. 계산기별 정규 입력/수식 어댑터, 동의형 미리보기 가져오기, 본인 불변 영수증·재조회, 미지원 legacy 차단, 로그아웃/교차 탭 보호를 설계한다.

@@ -1,5 +1,12 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1280 — F675-127 Owner Support Transcript and Status Provenance (FEATURE ADDITION / HOLD)
+- Previous Improvement v1278 → Current Addition v1280 → Next Improvement v1282; main `1c5b84a1` start/mid, predecessor Draft #1316, engineering [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
+- Actual `/support` member threads/messages are capped at 50/200 without keyset pagination; migration 196 has no member-readable old/new status timeline, and controller has no transcript export. Product: owner-only paged history and TXT snapshot with explicit `HISTORY_PARTIAL`, never backfill unverified status events. New Next `/support/transcripts/[threadId]`, NestJS/Android owner API, append-only DB status events, `REPEATABLE READ` export, 10,000 messages/2MiB/30s limit, HMAC cursors, digest and 404 owner isolation; admin k>=20, private noindex/no-store, WCAG 2.2 AA, 1%→10%→100% gated rollout/flag rollback.
+- P0 ENV1280-01 SEC1280-02 REL1280-03 SUP1280-04; P1 SUP1280-05 SUP1280-06 SUP1280-07 SUP1280-08 SUP1280-09 SUP1280-10. QA v1273 FAILED/HOLD; QA #1317 local candidate passes do not authorize release. Root 98%, DB grants/migrations/official Test/restore unresolved. External newly approved 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only, feature OFF, Production HOLD.
+- **Backlog IDs:** ENV1280-01 SEC1280-02 REL1280-03 SUP1280-04 SUP1280-05 SUP1280-06 SUP1280-07 SUP1280-08 SUP1280-09 SUP1280-10
+
+
 ## v1278 — F675-126 Calculator Replay and Promotion Truth (FEATURE IMPROVEMENT / HOLD)
 - Previous Addition v1276 → Current Improvement v1278 → Next Addition v1280; main `1c5b84a1` start/mid, predecessor Draft #1310, engineering [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
 - Source: compound/loan saved as `stock`, loan repaymentType omitted, formatted inputs cannot be safely replayed; title/ticker dedup loses distinct scenarios; failed watchlist promotion still marks success; retention promises unverified alerts/10,000 WLD. Require explicit calculatorId/formula/schema adapters, preview-only legacy import, receipt/read-back success and no WLD/stock/alert side effects.

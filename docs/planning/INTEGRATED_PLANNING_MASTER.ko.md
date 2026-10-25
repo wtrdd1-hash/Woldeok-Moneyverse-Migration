@@ -1,5 +1,53 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1280 — F675-127 회원 전용 상담 대화록 내보내기 및 상태 변경 이력 (기능 추가 / DRAFT / RELEASE HOLD)
+
+### 기준 문서·실제 구현 확인·범위
+- **회차:** 이전 기능 보완 v1278 → 현재 기능 추가 v1280 → 다음 기능 보완 v1282(잠정). 시작·중간에 `main` `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 재확인. `AGENTS.md`, `README.md`, 영문 원본 `PROJECT_PLAN.md`, 한국어 대조 문서 검토. 선행 Draft PR #1316 미병합. 이번 변경은 **기획 문서만** 수정하며 runtime/DB/WLD/원장/기능 스위치/Test/Production을 변경·배포하지 않음.
+- **실제 확인:** `frontend/src/app/support/page.tsx`에 회원 상담 목록·선택 대화·답장이 이미 존재함. `backend/src/support/support.repository.ts`는 회원 상담 목록 기본 50건, 메시지 200건(관리자 500건)으로 제한. `packages/database/migrations/196-user-admin-support-chat.sql`은 LIMIT만 사용하고 키셋 페이지네이션이 없음. `admin_support_set_status`는 현재 상태를 갱신하고 일반 관리자 감사 이벤트를 남기지만 회원이 확인할 수 있는 이전/이후 상태 이력은 없음. 현재 `support.controller.ts`에 본인 대화록 내보내기 API가 없음. 과거 메시지·상태 전체 복원이 가능하다고 주장하지 않음.
+- **경계:** 기존 1:1 상담·운영자 판단은 그대로 유지. 신규 기능은 본인 전용 UTF-8 TXT 대화록과 페이지별 메시지·상태 이력 조회. WLD 보상·거래·공개 공유·이메일 발송·첨부·알림 발송은 제외. 기존 API 하위 호환 유지. QA Draft #1317, 개발 A/B/C, Gemini의 변경과 분리.
+
+### 목적·대상·권한·진입점·화면
+- **목적:** 목록/메시지 조회 상한으로 일부가 보이지 않는 상황을 해소하고, 실제 기록된 상담 내용과 상태 변경만 회원에게 제공. 대상은 로그인·동의 완료·활성 회원. 관리자는 기존 관리자 권한 범위 내에서만 사건 조회; 신규 관리자 일괄 다운로드는 제공하지 않음.
+- **진입:** `/support`의 상담 카드에서 `전체 이력 보기`, `대화록 TXT 다운로드` CTA. 신규 `/support/transcripts/[threadId]`에서 제목, 기준 시각, 현재 상태, 기록된 상태 타임라인, 메시지 페이지네이션, 다운로드 버튼. 빈 목록/로딩/권한 없음/삭제됨/용량 초과/장애/이력 불완전/성공을 구분해 안내. 서버가 본인·상담 ID를 확인한 경우에만 다운로드 성공 표시.
+- **화면 상태:** `LOADING → READY | EMPTY | HISTORY_PARTIAL | EXPORT_TOO_LARGE | ACCESS_DENIED | UNAVAILABLE`, 다운로드 `IDLE → GENERATING → READY | FAILED`. 도입 이전 상태는 `HISTORY_PARTIAL`로 표기하며 임의로 과거 상태 변경을 만들어내지 않음.
+
+### API·앱 연동·내보내기 규약
+- 기존 `/api/v1/support/threads`, `POST /threads`, `/threads/:id/messages`, 관리자 답변·상태 API 유지. 신규 본인 전용 `GET /api/v1/support/threads/history?limit=20&cursor=...`, `GET /api/v1/support/threads/:id/transcript?limit=100&cursor=...`(메시지·상태 이력 별도 서명 커서, 이력 완결성), `GET /api/v1/support/threads/:id/transcript/export`(`text/plain; charset=utf-8`, attachment, private/no-store, nosniff, 스냅샷 지문). 미인증 401, 타 회원/없는 상담 구분 없이 404, 커서 만료 409, 용량 초과 413, 제한 429, 장애 503. UUID·조회 한도·서명 검증. 클라이언트의 SQL 필터를 신뢰하지 않음.
+- Next.js는 서버 전용 `frontend/src/lib/api.ts` 경로만 이용. 다운로드는 동일 출처의 인증된 Next Route Handler를 경유하고 `INTERNAL_API_TOKEN`을 브라우저에 노출하지 않음. 공개 캐시/CDN/영구 다운로드 URL/외부 리디렉션 금지. Android App API도 본인 확인, 메타데이터, 커서, 다운로드, 오류 상태를 동일하게 지원하도록 별도 계약 테스트 명세.
+- 키셋 커서는 회원·상담·필터·마지막 `(created_at,id)`·스냅샷 경계·만료·HMAC 키 버전을 포함하고 매 페이지마다 권한 재검증. 메시지는 `(created_at ASC,id ASC)`, 상태는 `(seq ASC,id ASC)` 정렬. 새 다운로드는 읽기 전용 `REPEATABLE READ` 트랜잭션의 단일 스냅샷으로 생성. `snapshotAt`, 실제 건수, 정규화한 TXT의 SHA-256을 제공하되 이는 **파일 바이트 무결성**이지 외부 공증이나 과거 완전성 보증이 아님. **최대 메시지 10,000건/2MiB/30초** 초과 시 413과 페이지 조회 안내; 잘라낸 파일을 완전본으로 표시 금지. UTF-8 한글 보존, CRLF→LF, 제어문자 이스케이프, 불완전한 상태 이력 경고 헤더. CSV/HTML 내보내기 금지.
+
+### DB 제약·인덱스·트랜잭션·관리자
+- 제안 테이블 `support_status_events(id uuid PK, thread_id uuid FK, actor_id uuid FK, seq bigint NOT NULL, old_status text NULL, new_status text NOT NULL, changed_at timestamptz NOT NULL, request_key uuid NOT NULL, origin text CHECK(origin IN ('recorded','initial_observation')))`; 상태 값은 `open/waiting_user/resolved`, `UNIQUE(thread_id,seq)`, `UNIQUE(request_key)`, 변경 불가 append-only, 인덱스 `(thread_id,seq,id)`. 회원 목록 인덱스 `(user_id,last_message_at DESC,id DESC)`는 기존 것을 재사용. `initial_observation`은 old_status NULL 및 `HISTORY_PARTIAL`만 허용, `recorded` 전이는 old_status 필수. 기존 과거 변경을 임의로 복원하지 않음. `moneyverse_app`에 테이블 DML 부여 금지; 소유자 검증 `SECURITY DEFINER` 함수, 고정 search_path, PUBLIC REVOKE와 함수 EXECUTE만 부여.
+- 향후 개발 시 `admin_support_set_status`에서 상담 행 `FOR UPDATE` 잠금 → DB 관리자 권한 확인 → 이전 상태 확인 → 새 상태·이벤트·관리자 감사 기록을 **단일 트랜잭션**으로 확정. 요청 키 멱등성(동일 재시도는 동일 영수증, 다른 페이로드 재사용 409), 상담별 seq 단조 증가. 답장으로 상태가 바뀌는 `support_add_message`, `admin_support_reply`도 같은 트랜잭션에 상태 이벤트 기록 필수. 변화가 없으면 허위 전이 기록 금지. 오래된 일반 감사 로그로 완전한 이력이라고 추정하지 않음.
+- 상담 본문은 민감정보 포함 가능. 본문 로그·검색 색인·외부 저장소·관리자 일괄 다운로드 금지. 승인된 탈퇴/보존 정책에 따라 익명화·삭제 시 `REDACTED`를 표시하고 로그에서 복구하지 않음. 계정 병합은 소유권 이전·이력 정책 승인 전까지 차단. 관리자는 식별 불가능한 k>=20 집계만 조회; 기존 관리자 역할 검증 유지.
+
+### 보안·SEO·모바일·접근성·지표·테스트·배포
+- 활성 회원·동의·세션 검증, DB 함수 내부 BOLA/BFLA, 향후 쓰기 CSRF, 내보내기 **회원당 시간당 5회 / 서비스 전체 분당 20회**(운영 조정), 타인 ID 추측 방지, MIME/no-store/CSP, 영구 공유 링크 금지. 관리자 쓰기는 기존 AdminGuard/AdminSessionGuard와 DB 권한 동시 확인. 분석 이벤트에는 본문·회원 식별자 미기록.
+- 반응형 화면, 키보드 조작, 포커스·상태 안내 live region, `TXT 다운로드` 명확한 CTA, 상태 이력 일부 누락 경고, UTC 원천 시각+현지화 표시, WCAG 2.2 AA. 개인 화면은 noindex/nofollow·사이트맵 제외·no-store.
+- KPI: 본인 인증 다운로드 성공률, `HISTORY_PARTIAL` 비율, 내보내기 p95, 413 비율, 타 회원 접근 차단률, 기능 도입 이후 상태 이벤트 누락 0건 목표. k<20 집계 비공개; 다운로드 횟수를 상담 해결로 간주 금지.
+- 검증 조건: 타 회원 조회 100회 정보 유출 0건, 관리자 상태·답변 동시 변경 100회 정확한 순차 이벤트, 합성 메시지 10,001건은 명시적 413 또는 누락 없는 페이지 조회, 한글/제어문자/2MiB/30초, 변경 없는 원천 100회 다운로드 동일 digest, 신규 메시지 후 새 스냅샷·digest, 탈퇴/병합/권한 변경/만료 커서/401·404·409·413·429·503. 실제 PostgreSQL 앱 계정 최소권한 부정 테스트, Android·Next 계약·회귀 테스트. **이번 기획에서 runtime 테스트는 실행하지 않음.**
+- 기본 기능 스위치 `support_transcript_export_v1` OFF. 격리 Test·백업 복원 확인 후 마이그레이션/권한/상태 기록 검증, 공식 exact-SHA CI·보안 감사·금융 E2E·DB ACL·Migration 266/280 정합성·QA 승인 후 1%→10%→100% 점진 활성화. 오류·지연 시 스위치 OFF로 롤백, 불변 상태 이력 삭제 금지. Production RELEASE HOLD.
+
+### P0/P1 실행 백로그 및 외부 근거 게이트
+| 우선순위 | ID | 수용 조건 |
+| --- | --- | --- |
+| P0 | ENV1280-01 | 루트 용량·격리 DB/Test·백업 복원 증빙. |
+| P0 | SEC1280-02 | DB 최소권한·본인 SECURITY DEFINER·관리자 역할·PUBLIC 권한 제거. |
+| P0 | REL1280-03 | 정확 SHA CI/보안/Test E2E·Migration 266/280·롤백 게이트. |
+| P0 | SUP1280-04 | 현재 50/200/500건 상한·과거 상태 출처 확인·HISTORY_PARTIAL 표시. |
+| P1 | SUP1280-05 | 본인 키셋 페이지·단일 스냅샷 TXT 10k/2MiB·digest. |
+| P1 | SUP1280-06 | 관리자 변경·답변의 원자적 불변 상태 이력. |
+| P1 | SUP1280-07 | NestJS API·Android App API 동등 계약·오류/스트림. |
+| P1 | SUP1280-08 | Next.js 상담/이력/다운로드 CTA·상태·모바일/a11y. |
+| P1 | SUP1280-09 | 개인정보·보존·관리자 k>=20·SEO·KPI. |
+| P1 | SUP1280-10 | 실DB 동시성/BOLA/10,001건/한글/exact-SHA Test/롤백 회귀. |
+
+- **QA/운영:** 최신 완료 QA v1273 FAILED/HOLD. QA Draft #1317 후보 SHA의 로컬 frontend 1404/1404 PASS 및 운영 의존성 감사 PASS는 확인되나 개발 의존성 감사 Critical 2/High 8, 공식 CI·정확 SHA Test·DB 복원 미확인. 실행 시작 시 루트 디스크 98%(여유 약 2.6GiB), 개발 DB 앱 계정 권한 과다 및 Migration 266/280 미해결. 운영 승인 불가.
+- **외부 독립 레퍼런스 10,000건 게이트:** 실제 독립 출처의 중복 제거·근거 분류·적합성 검증 필수. **신규 승인 0건, 누적 승인 수 미확인, 목표 10,000건, BLOCKED/IN PROGRESS**. 내부 기획 문서는 독립 외부 근거로 집계 금지.
+- **개발 인계:** [이슈 #1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323), 별도 개발 브랜치·정확 SHA Test 게이트. 이번 기획에서 병합·배포 없음.
+
+
 ## v2026.10.25.1278 — F675-126 계산기 시나리오 출처·재계산·승격 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 
 ### 회차·정본·실제 코드 검증
