@@ -119,6 +119,11 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '경제': 'Economy',
   '콘텐츠': 'Content',
   '감사 로그': 'Audit Logs',
+  '고래 카피트레이딩 리그': 'Whale Copy Trading League',
+  "AI 금융비서 '덕이'": "AI Advisor 'Deoki'",
+  '대출이자계산기': 'Loan Interest Calculator',
+  '배당소득세계산기': 'Dividend Tax Calculator',
+  '화면 설정': 'Display Settings',
 };
 
 const JAPANESE_LABELS: Readonly<Record<string, string>> = {
