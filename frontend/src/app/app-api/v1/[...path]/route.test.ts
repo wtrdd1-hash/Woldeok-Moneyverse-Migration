@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from './route';
+import { GET, POST } from './route';
 import { APP_API_CONTRACT_VERSION } from '@/lib/app-gateway';
 
 function request(path: string, headers: Record<string, string> = {}) {
@@ -139,6 +139,37 @@ describe('app API route compatibility', () => {
       request('/app-api/v1/marketplace/auctions', { cookie: 'mv_session=fixture' }),
       context('marketplace', 'auctions'),
     );
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ statusCode: 503 });
+    expect(upstream).toHaveBeenCalledOnce();
+  });
+
+  it('passes authenticated auction bid 503 and CSRF to Android without inventing an escrow success', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const upstream = vi.fn(async (_target: RequestInfo | URL, init?: RequestInit) => {
+      expect(init?.method).toBe('POST');
+      const headers = new Headers(init?.headers);
+      expect(headers.get('cookie')).toBe('mv_session=fixture');
+      expect(headers.get('x-csrf-token')).toBe('csrf-fixture');
+      return new Response(JSON.stringify({ statusCode: 503, message: 'auction ledger settlement is not certified' }), {
+        status: 503,
+        headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', upstream);
+    const response = await POST(new NextRequest(
+      'https://easy-scraping.com/app-api/v1/marketplace/auctions/22222222-2222-4222-8222-222222222222/bid',
+      {
+        method: 'POST',
+        headers: {
+          cookie: 'mv_session=fixture',
+          'x-csrf-token': 'csrf-fixture',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ bidAmountWld: '90071992547409930000' }),
+      },
+    ), context('marketplace', 'auctions', '22222222-2222-4222-8222-222222222222', 'bid'));
     expect(response.status).toBe(503);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(await response.json()).toMatchObject({ statusCode: 503 });

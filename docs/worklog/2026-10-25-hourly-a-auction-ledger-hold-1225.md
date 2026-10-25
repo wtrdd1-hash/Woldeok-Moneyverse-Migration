@@ -30,3 +30,20 @@
 - RED evidence: backend 3 FAIL/1 PASS, frontend 4 FAIL; GREEN backend 9/9 PASS and frontend/app-api 15/15 PASS. Typecheck PASS, diff --check PASS. Root disk remained critical; builds run on data volume.
 - PostgreSQL 17 isolated `moneyverse-test-db/woldeok_moneyverse_ci` read-only: 214 migrations, auction table and bid function MISSING, moneyverse_app ledger INSERT false, postings UPDATE false; transaction ROLLBACK. No real auction-bid DB E2E possible.
 - IMPORTANT residual risk: migration 232 defines a SECURITY DEFINER bid function that directly edits account_balances. This branch prevents app API access but cannot prove the function is inaccessible to other SQL principals in Production. Requires a reviewed forward-only revoke/ledger-first replacement, isolated full migration parity, and authenticated Test before release.
+
+### 12:42 KST — QA and release checkpoint
+- Focused Backend 10/10 PASS, Frontend/Android 16/16 PASS including authenticated controller and CSRF/cookie/503 forwarding tests.
+- Initial full: Backend 1,317 PASS/398 SKIPPED; Frontend 1,402 PASS/6 FAIL (SEO 3, locale 1, login a11y 1, admin M2 1); DB 15 PASS/3 SKIPPED; contract PASS; Bot 8 PASS after isolated npm ci; typecheck PASS; lint 0 errors/1,134 warnings; default Next build completed.
+- Security: pnpm prod 2 High FAIL; pnpm all 2 Critical/10 High/11 Moderate/3 Low FAIL; bot audit 1 Critical/5 High FAIL.
+- Official Test version 6f697e74b7bf0cd1e4521d36534cfd9c140f8010 differs from candidate. Real authenticated Test financial E2E BLOCKED.
+- P0 SQL-level auction settlement issue #1269 and Draft PR #1270 created.
+- Branch audit later 144 remote branches / 140 open PRs; 142 tracked non-main with unmerged unique commits; identical tree/last patch duplicates 0; conflicts #1107/#1110/#1143. No deletion.
+- English release report canonical, Korean secondary; both report failures and rollback constraints.
+
+## Finished — release decision
+- [x] RED→GREEN focused backend/frontend/Android and exact-amount tests.
+- [x] Main and integrated planning master checked start/mid/pre-release, unchanged.
+- [x] Real isolated PostgreSQL read-only ACL checks, no data writes.
+- [x] Full gate attempt, security and CI audit, explicit HOLD.
+- [x] Draft PR and P0 follow-up; no unsafe cleanup or promotion.
+- **PARTIAL / BLOCKED.** No Test/Production deployment, no rollback required. Preserve all unmerged branches and existing automations.
