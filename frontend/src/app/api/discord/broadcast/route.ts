@@ -1,22 +1,30 @@
 import { NextResponse } from 'next/server';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
 
 export const dynamic = 'force-dynamic';
 
 const BOT_BROADCAST_URL = process.env.DISCORD_BOT_BROADCAST_URL || 'http://127.0.0.1:3099/broadcast';
-const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET || process.env.CRON_SECRET || 'mv-internal-secure-key-2026';
+const noStore = { 'Cache-Control': 'private, no-store' } as const;
+
+function matchesSecret(presented: string | null, configured: string | undefined): boolean {
+  if (!configured || Buffer.byteLength(configured, 'utf8') < 32 || !presented || presented.length > 4096) return false;
+  return timingSafeEqual(
+    createHash('sha256').update(presented).digest(),
+    createHash('sha256').update(configured).digest(),
+  );
+}
 
 async function isAuthorized(req: Request): Promise<boolean> {
-  // 1. 내부 시스템 및 스케줄러 시크릿 검증
-  const secretHeader =
-    req.headers.get('x-internal-secret') ||
-    req.headers.get('x-cron-secret') ||
-    req.headers.get('authorization')?.replace('Bearer ', '');
-  if (secretHeader && secretHeader === INTERNAL_API_SECRET) {
-    return true;
-  }
+  const configured = process.env.INTERNAL_API_SECRET;
+  const presented = req.headers.get('x-internal-secret') || req.headers.get('x-cron-secret') ||
+    req.headers.get('authorization')?.match(/^Bearer (.+)$/)?.[1] || null;
+  if (matchesSecret(presented, configured)) return true;
 
-  // 2. 관리자 세션 검증
+  // Session cookies alone cannot authorize cross-site POSTs.
+  const origin = req.headers.get('origin');
+  const site = req.headers.get('sec-fetch-site');
+  if (origin !== new URL(req.url).origin || (site && site !== 'same-origin' && site !== 'none')) return false;
   const viewer = await currentViewer();
   return isAdministrator(viewer);
 }
@@ -28,7 +36,16 @@ export async function POST(req: Request) {
     if (!authorized) {
       return NextResponse.json(
         { ok: false, message: '디스코드 브로드캐스트 권한이 없습니다. (관리자 세션 또는 내부 시크릿 필수)' },
-        { status: 403 }
+        { status: 403, headers: noStore }
+      );
+    }
+
+    // Separate bot-to-bot credential; missing/weak configuration is a hard hold.
+    const broadcastSecret = process.env.DISCORD_BROADCAST_SECRET;
+    if (!broadcastSecret || Buffer.byteLength(broadcastSecret, 'utf8') < 32) {
+      return NextResponse.json(
+        { ok: false, code: 'BROADCAST_UNAVAILABLE', message: 'Broadcast transport is not configured' },
+        { status: 503, headers: noStore },
       );
     }
 
@@ -48,7 +65,7 @@ export async function POST(req: Request) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-internal-secret': INTERNAL_API_SECRET,
+          'x-internal-secret': broadcastSecret,
         },
         body: JSON.stringify({ title, description, fields, color, type, notifyAdminDm }),
         signal: AbortSignal.timeout(2500),
@@ -56,7 +73,7 @@ export async function POST(req: Request) {
 
       if (botRes.ok) {
         const data = await botRes.json().catch(() => ({ ok: true }));
-        return NextResponse.json({ ok: true, deliveredToBot: true, ...data });
+        return NextResponse.json({ ok: true, deliveredToBot: true, ...data }, { headers: noStore });
       }
 
       // R15 해결: 봇 응답이 비정상이면 가짜 큐 성공 대신 502 에러 반환

@@ -17,6 +17,7 @@ import {
 import http from 'node:http';
 import { MusicManager, MUSIC_COMMANDS } from './music.js';
 import { STOCK_SLASH_COMMANDS, handleStockInteraction } from './stock-commands.js';
+import { authorizeBroadcastRequest } from './broadcast-auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../backend/.env') });
@@ -325,6 +326,7 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
   }
 });
 
+
 // 실시간 금융 이벤트 브로드캐스트 로컬 HTTP 웹훅 서버 (포트 3099)
 const BROADCAST_PORT = Number(process.env.DISCORD_BROADCAST_PORT) || 3099;
 let webhookServer = null;
@@ -332,6 +334,17 @@ let webhookServer = null;
 try {
   webhookServer = http.createServer((req, res) => {
     if (req.method === 'POST' && req.url === '/broadcast') {
+      const broadcastSecret = process.env.DISCORD_BROADCAST_SECRET;
+      if (!broadcastSecret || Buffer.byteLength(broadcastSecret, 'utf8') < 32) {
+        res.writeHead(503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+        res.end(JSON.stringify({ ok: false, code: 'BROADCAST_UNAVAILABLE' }));
+        return;
+      }
+      if (!authorizeBroadcastRequest(req.headers['x-internal-secret'], broadcastSecret)) {
+        res.writeHead(403, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+        res.end(JSON.stringify({ ok: false, code: 'BROADCAST_FORBIDDEN' }));
+        return;
+      }
       let body = '';
       req.on('data', (chunk) => { body += chunk; });
       req.on('end', async () => {
