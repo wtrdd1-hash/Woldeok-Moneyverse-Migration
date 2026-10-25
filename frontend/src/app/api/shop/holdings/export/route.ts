@@ -4,7 +4,7 @@ import { api, ApiError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const WLD = /^(?:0|[1-9][0-9]*)$/;
 const MAX_WLD = 9223372036854775807n;
 const MAX_HOLDINGS = 100;

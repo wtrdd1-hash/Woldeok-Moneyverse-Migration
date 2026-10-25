@@ -22,6 +22,7 @@ const ITEM = {
   is_equipped: true,
   equipped_slot: 'frame',
   serial_number: 42,
+  weekly_cost: '9007199254740993',
 };
 
 const request = (suffix = '') => new NextRequest('https://easy-scraping.com/api/shop/holdings/export' + suffix);
@@ -44,6 +45,7 @@ describe('private complete inventory CSV export', () => {
     expect(csv).toContain("'=SUM(1,2)");
     expect(csv).not.toContain('\u200B');
     expect(csv).toContain('2026-10-26T01:00:00.000Z');
+    expect(csv).toContain('9007199254740993');
     expect(csv.split('\r\n')).toHaveLength(2);
   });
 
@@ -74,8 +76,9 @@ describe('private complete inventory CSV export', () => {
       .mockResolvedValueOnce({ holdings: [{ ...ITEM, quantity: 1.5 }], complete: true })
       .mockResolvedValueOnce({ holdings: [{ ...ITEM, is_equipped: 'true' }], complete: true })
       .mockResolvedValueOnce({ holdings: [{ ...ITEM, acquired_at: 'yesterday' }], complete: true })
+      .mockResolvedValueOnce({ holdings: [{ ...ITEM, weekly_cost: 9007199254740993 }], complete: true })
       .mockRejectedValueOnce(new Error('DB down'));
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 7; i++) {
       const response = await GET(request());
       expect(response.status).toBe(503);
       expect(response.headers.get('content-disposition')).toBeNull();

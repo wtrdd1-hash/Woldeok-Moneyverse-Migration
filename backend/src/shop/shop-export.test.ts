@@ -16,6 +16,13 @@ describe('private complete inventory export snapshot', () => {
     expect(holdings).toHaveBeenCalledExactlyOnceWith(ACTOR);
   });
 
+  it('accepts exactly 100 items without dropping a row', async () => {
+    const records = Array.from({ length: 100 }, () => sample);
+    const holdings = vi.fn().mockResolvedValue(records);
+    const controller = new ShopController(null, { holdings } as unknown as ShopCatalogRepository);
+    await expect(controller.exportSnapshot(session)).resolves.toEqual({ holdings: records, complete: true });
+  });
+
   it('never labels an over-cap inventory as a complete export', async () => {
     const holdings = vi.fn().mockResolvedValue(Array.from({ length: 101 }, () => sample));
     const controller = new ShopController(null, { holdings } as unknown as ShopCatalogRepository);
