@@ -171,3 +171,34 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('Android owner-only business holdings snapshot', () => {
+  it('forwards member session and never permits caching or indexing', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let upstreamCookie: string | null = null;
+    vi.stubGlobal('fetch', vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      upstreamCookie = new Headers(init?.headers).get('cookie');
+      return new Response(JSON.stringify({ scope: 'current_100_max', businesses: [] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow' },
+      });
+    }));
+    const response = await GET(
+      request('/app-api/v1/businesses/ownerships/export-data', { cookie: 'moneyverse_session=private' }),
+      context('businesses', 'ownerships', 'export-data'),
+    );
+    expect(response.status).toBe(200);
+    expect(upstreamCookie).toContain('moneyverse_session=private');
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+  });
+  it('preserves upstream authentication failure rather than claiming holdings', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('{"status":401}', {
+      status: 401, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store' },
+    })));
+    const response = await GET(request('/app-api/v1/businesses/ownerships/export-data'), context('businesses', 'ownerships', 'export-data'));
+    expect(response.status).toBe(401);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+  });
+});

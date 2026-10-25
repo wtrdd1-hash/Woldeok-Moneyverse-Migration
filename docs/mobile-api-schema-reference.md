@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -2279,6 +2279,45 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| businesses[] | true | object[] |  |
+| businesses[] | true | object |  |
+| businesses[].isSettledToday | true | boolean |  |
+| businesses[].boostActive | true | null \| object |  |
+| businesses[].status | true | string |  |
+| businesses[].ownershipId | true | string |  |
+| businesses[].businessTypeId | true | string |  |
+| businesses[].symbol | true | string |  |
+| businesses[].name | true | string |  |
+| businesses[].description | true | string |  |
+| businesses[].purchaseCost | true | string & object |  |
+| businesses[].dailyRevenue | true | string & object |  |
+| businesses[].dailyOperatingCost | true | string & object |  |
+| businesses[].purchasedAt | true | string |  |
+| businesses[].lastSettlementDate | true | null \| string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/businesses/ownerships/export-data` — Private current virtual business holdings snapshot (maximum 100)
+
+- Authorization: 회원 로그인 및 최신 동의 필수, 서버 세션의 본인 사업체만 조회
+- Success status: 200
+- Response mode: json
+- After success: 조회용 스냅샷 표시; 정산 또는 원장 영수증으로 표시 금지
+- Operation ID: `BusinessController_ownershipExport`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="current_100_max" | const="current_100_max" |
 | businesses[] | true | object[] |  |
 | businesses[] | true | object |  |
 | businesses[].isSettledToday | true | boolean |  |

@@ -4,6 +4,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -103,6 +104,20 @@ export class BusinessController {
   @ApiOperation({ summary: 'Enhanced businesses the caller owns with boosts and settlement status' })
   async mineV2(@Req() request: RequestWithSession) {
     return { businesses: await this.service().mineV2(requireUserId(request)) };
+  }
+
+  /** Read-only current holdings, not a ledger settlement receipt. */
+  @Get('businesses/ownerships/export-data')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({ summary: 'Private current virtual business holdings snapshot (maximum 100)' })
+  async ownershipExport(@Req() request: RequestWithSession) {
+    const businesses = await this.service().mineV2(requireUserId(request));
+    if (businesses.length > 100) {
+      throw new ServiceUnavailableException('business holdings exceed export limit');
+    }
+    return { scope: 'current_100_max' as const, businesses };
   }
 
   @Get('business-equity')

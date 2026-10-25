@@ -6833,6 +6833,216 @@
     },
     {
       "method": "GET",
+      "path": "/app-api/v1/businesses/ownerships/export-data",
+      "purpose": "내 가상 사업체 현재 보유 현황 최대 100건 조회용 스냅샷",
+      "callWhen": "로그인 후 내 사업체 보유 현황 내보내기",
+      "authorization": "회원 로그인 및 최신 동의 필수, 서버 세션의 본인 사업체만 조회",
+      "afterSuccess": "조회용 스냅샷 표시; 정산 또는 원장 영수증으로 표시 금지",
+      "backendRoute": "/api/businesses/ownerships/export-data",
+      "operationId": "BusinessController_ownershipExport",
+      "backendOpenApiPath": "/businesses/ownerships/export-data",
+      "summary": "Private current virtual business holdings snapshot (maximum 100)",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "scope",
+          "businesses"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "current_100_max"
+          },
+          "businesses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "isSettledToday": {
+                  "type": "boolean"
+                },
+                "boostActive": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "tsType": "Record<string, unknown>"
+                    }
+                  ]
+                },
+                "status": {
+                  "type": "string"
+                },
+                "ownershipId": {
+                  "type": "string"
+                },
+                "businessTypeId": {
+                  "type": "string"
+                },
+                "symbol": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "purchaseCost": {
+                  "allOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "__wld": {
+                          "type": "object",
+                          "properties": {
+                            "description": {
+                              "oneOf": [
+                                {
+                                  "type": "undefined"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "__wld"
+                      ]
+                    }
+                  ]
+                },
+                "dailyRevenue": {
+                  "allOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "__wld": {
+                          "type": "object",
+                          "properties": {
+                            "description": {
+                              "oneOf": [
+                                {
+                                  "type": "undefined"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "__wld"
+                      ]
+                    }
+                  ]
+                },
+                "dailyOperatingCost": {
+                  "allOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "__wld": {
+                          "type": "object",
+                          "properties": {
+                            "description": {
+                              "oneOf": [
+                                {
+                                  "type": "undefined"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "__wld"
+                      ]
+                    }
+                  ]
+                },
+                "purchasedAt": {
+                  "type": "string"
+                },
+                "lastSettlementDate": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "isSettledToday",
+                "boostActive",
+                "status",
+                "ownershipId",
+                "businessTypeId",
+                "symbol",
+                "name",
+                "description",
+                "purchaseCost",
+                "dailyRevenue",
+                "dailyOperatingCost",
+                "purchasedAt",
+                "lastSettlementDate"
+              ]
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "businesses"
+        ]
+      }
+    },
+    {
+      "method": "GET",
       "path": "/app-api/v1/casino/coin/fairness",
       "purpose": "동전게임 공정성 검증 정보 조회",
       "callWhen": "해당 화면 진입/새로고침/관련 write 후",

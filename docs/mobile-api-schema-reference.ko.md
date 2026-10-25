@@ -4,7 +4,7 @@
 
 업데이트 버전: **v2026.09.22.359**
 
-이 문서는 179개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
+이 문서는 180개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
 ## 공통 호환성 규칙
 
@@ -2279,6 +2279,45 @@ _요청 본문 없음._
 
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
+| businesses[] | true | object[] |  |
+| businesses[] | true | object |  |
+| businesses[].isSettledToday | true | boolean |  |
+| businesses[].boostActive | true | null \| object |  |
+| businesses[].status | true | string |  |
+| businesses[].ownershipId | true | string |  |
+| businesses[].businessTypeId | true | string |  |
+| businesses[].symbol | true | string |  |
+| businesses[].name | true | string |  |
+| businesses[].description | true | string |  |
+| businesses[].purchaseCost | true | string & object |  |
+| businesses[].dailyRevenue | true | string & object |  |
+| businesses[].dailyOperatingCost | true | string & object |  |
+| businesses[].purchasedAt | true | string |  |
+| businesses[].lastSettlementDate | true | null \| string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/businesses/ownerships/export-data` — 내 가상 사업체 현재 보유 현황 최대 100건 조회용 스냅샷
+
+- 인증/권한: 회원 로그인 및 최신 동의 필수, 서버 세션의 본인 사업체만 조회
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 조회용 스냅샷 표시; 정산 또는 원장 영수증으로 표시 금지
+- Operation ID: `BusinessController_ownershipExport`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| scope | true | string="current_100_max" | const="current_100_max" |
 | businesses[] | true | object[] |  |
 | businesses[] | true | object |  |
 | businesses[].isSettledToday | true | boolean |  |

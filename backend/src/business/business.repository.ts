@@ -121,7 +121,7 @@ export class PostgresBusinessRepository implements BusinessRepository {
       this.pool,
       `SELECT ownership_id::text, business_type_id::text, symbol, name, description,
               purchase_cost::text, daily_revenue::text, daily_operating_cost::text,
-              purchased_at, last_settlement_date, is_settled_today, boost_active, status
+              purchased_at, last_settlement_date::text, is_settled_today, boost_active, status
        FROM public.business_my_ownerships_v2($1)`,
       [actor],
     );

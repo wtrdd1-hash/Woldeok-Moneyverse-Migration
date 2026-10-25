@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   title: '가상 사업체 — 게임 내 비즈니스 운영',
   description: '월덕 머니버스 게임 안에서 다양한 가상 사업체를 설립·운영하고 정산 기록과 부스트 아이템을 확인합니다.',
   alternates: { canonical: canonicalUrl('/businesses') },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 interface BusinessType {
@@ -134,6 +134,17 @@ export default async function BusinessesPage() {
         상점에서 라이선스를 획득하여 사업체를 설립하고, 전문 소모품 부스트를 장착하여 일일 순수익을 극대화하세요.
         일일 매출은 SYSTEM_MINT에서 지급되며, 운영비는 SYSTEM_SINK로 소각되는 안전한 복식부기 가상 경제입니다.
       </PageHeader>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <a
+          href="/businesses/ownerships.csv"
+          className="inline-flex min-h-11 items-center rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          aria-label="내 가상 사업체 보유 현황 CSV 다운로드"
+        >
+          내 사업체 보유 현황 CSV 다운로드
+        </a>
+        <p className="text-xs text-muted-foreground">현재 보유 사업체 최대 100건의 조회용 스냅샷이며, 정산 완료 영수증이 아닙니다.</p>
+      </div>
 
       {/* Toss-style Business Executive Summary Card */}
       {businesses.length > 0 && (
