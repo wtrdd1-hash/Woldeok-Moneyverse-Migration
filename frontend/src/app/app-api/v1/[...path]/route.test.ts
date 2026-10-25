@@ -81,6 +81,28 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
   });
 
+  it('proxies the private bond holdings read with the member cookie and no-store response', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    let forwarded = new Headers();
+    let target = '';
+    vi.stubGlobal('fetch', vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      target = String(url);
+      forwarded = new Headers(init?.headers);
+      return new Response(JSON.stringify({ bonds: [], scope: 'current_holdings_only' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    }));
+    const response = await GET(
+      request('/app-api/v1/banking/bonds/holdings', { cookie: 'session=owner-only' }),
+      context('banking', 'bonds', 'holdings'),
+    );
+    expect(target).toContain('/api/v1/banking/bonds/holdings');
+    expect(forwarded.get('cookie')).toBe('session=owner-only');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ bonds: [], scope: 'current_holdings_only' });
+  });
+
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     const fetchSpy = vi.fn();

@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { BankRepository } from './bank.repository';
+import { BankController } from './bank.controller';
+import type { RequestWithSession } from '../auth/session.context';
 import type { Queryable } from '../core/db';
 
 const ACTOR = '11111111-1111-4111-8111-111111111111';
@@ -16,6 +18,14 @@ function repository(standing: unknown) {
 }
 
 describe('owner-only current bond holdings projection', () => {
+  it('takes the actor from the authenticated session, not a request-supplied user id', async () => {
+    const listBondHoldings = vi.fn().mockResolvedValue({ bonds: [], scope: 'current_holdings_only' });
+    const controller = new BankController({ listBondHoldings } as unknown as BankRepository);
+    const request = { session: { user_id: ACTOR } } as unknown as RequestWithSession;
+    await expect(controller.bondHoldings(request)).resolves.toEqual({ bonds: [], scope: 'current_holdings_only' });
+    expect(listBondHoldings).toHaveBeenCalledWith(ACTOR);
+  });
+
   it('uses the owner-scoped SECURITY DEFINER standing function and retains exact integer strings', async () => {
     const { repo, query } = repository({ bonds: [BOND] });
     const result = await repo.listBondHoldings(ACTOR);
