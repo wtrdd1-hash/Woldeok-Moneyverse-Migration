@@ -12,5 +12,6 @@
 - [x] Write backend controller and repository RED tests for unverified claim fail-closed; run RED.
 - [x] Write frontend RED test for no localStorage reward/streak and verified server status; run RED.
 - [x] Implement minimum backend and frontend changes; run GREEN tests.
-- [ ] Verify lint/typecheck/build/full tests/DB/security/contracts and official CI on exact SHA; record failures.
-- [ ] Re-fetch main and plan mid-run and before any merge; draft PR and keep release HOLD on incomplete gates.
+- [x] Verify local lint/typecheck/backend build/full tests/security/contracts; record failed and skipped gates.
+- [ ] Verify final exact-SHA CI and isolated PostgreSQL/Test (release HOLD if unavailable).
+- [x] Re-fetch main and plan mid-run and before PR; keep release HOLD on incomplete gates.
