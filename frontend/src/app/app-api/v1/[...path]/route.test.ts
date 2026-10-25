@@ -171,3 +171,22 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('private account security event export on Android app API', () => {
+  it('forwards the authenticated member request and private response headers', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const upstream = vi.fn(async (_url: URL | RequestInfo, init?: RequestInit) => {
+      expect(new Headers(init?.headers).get('cookie')).toBe('sid=member');
+      return new Response(JSON.stringify({ events: [], scope: 'recent-50' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow' },
+      });
+    });
+    vi.stubGlobal('fetch', upstream);
+    const response = await GET(request('/app-api/v1/account/security/events/export', { cookie: 'sid=member' }), context('account', 'security', 'events', 'export'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+    expect(await response.json()).toEqual({ events: [], scope: 'recent-50' });
+  });
+});

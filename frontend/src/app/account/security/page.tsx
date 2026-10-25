@@ -362,7 +362,14 @@ export default async function AccountSecurityPage({
       <Card className="border-border/80 bg-card/90 shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">최근 보안 활동</CardTitle>
-          <CardDescription className="text-xs">계정 접근 및 주요 보안 설정 변경 이력입니다.</CardDescription>
+          <CardDescription className="text-xs">계정 접근 및 주요 보안 설정 변경 이력입니다. 화면에는 최근 5건만 표시됩니다.</CardDescription>
+          {eventData !== null && events.length > 0 ? (
+            <Button asChild variant="outline" size="sm" className="mt-3 min-h-11 w-fit">
+              <a href="/api/account/security/events/export">
+                최근 보안 활동 CSV 다운로드 (최대 50건)
+              </a>
+            </Button>
+          ) : null}
         </CardHeader>
         <CardContent className="pt-0">
           {eventData === null ? (

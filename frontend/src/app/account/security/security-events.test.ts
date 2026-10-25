@@ -10,3 +10,12 @@ describe('account security events', () => {
     expect(page).not.toContain('event.metadata');
   });
 });
+
+describe('bounded account security event export CTA', () => {
+  it('exposes a member-only, accessible recent-50 CSV link without claiming full history', () => {
+    const source = readFileSync(new URL('./page.tsx', import.meta.url), 'utf8');
+    expect(source).toContain('<a href="/api/account/security/events/export">');
+    expect(source).toContain('최대 50건');
+    expect(source).toContain('eventData !== null && events.length > 0');
+  });
+});

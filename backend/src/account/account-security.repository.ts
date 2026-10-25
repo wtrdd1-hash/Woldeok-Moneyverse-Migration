@@ -63,11 +63,11 @@ export class AccountSecurityRepository {
     }));
   }
 
-  async recentEvents(userId: string): Promise<MemberSecurityEventView[]> {
+  async recentEvents(userId: string, limit: 20 | 50 = 20): Promise<MemberSecurityEventView[]> {
     const rows = await queryRows<SecurityEventRow>(
       this.pool,
-      `SELECT event_type, created_at FROM account_recent_security_events($1::uuid, 20)`,
-      [userId],
+      `SELECT event_type, created_at FROM account_recent_security_events($1::uuid, $2::integer)`,
+      [userId, limit],
     );
     return rows.map((row) => ({ type: row.event_type, createdAt: row.created_at.toISOString() }));
   }

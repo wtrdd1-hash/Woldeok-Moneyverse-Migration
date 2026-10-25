@@ -77,3 +77,20 @@ describe('AccountSecurityRepository recent events', () => {
     await expect(repository.recentEvents('user')).resolves.toEqual([{ type: 'local_login_succeeded', createdAt: '2026-09-19T10:00:00.000Z' }]);
   });
 });
+
+describe('AccountSecurityRepository bounded export', () => {
+  it('reads at most the 50 owner-scoped security events via the existing SECDEF function', async () => {
+    let observedSql = '';
+    let observedValues: readonly unknown[] = [];
+    const repository = new AccountSecurityRepository(db((sql, values) => {
+      observedSql = sql;
+      observedValues = values;
+      return [{ event_type: 'local_login_succeeded', created_at: new Date('2026-10-26T00:00:00Z') }];
+    }));
+    const events = await repository.recentEvents('00000000-0000-4000-8000-000000000001', 50);
+    expect(observedSql).toContain('account_recent_security_events');
+    expect(observedSql).not.toMatch(/FROM\s+auth_security_events/i);
+    expect(observedValues).toEqual(['00000000-0000-4000-8000-000000000001', 50]);
+    expect(events).toEqual([{ type: 'local_login_succeeded', createdAt: '2026-10-26T00:00:00.000Z' }]);
+  });
+});

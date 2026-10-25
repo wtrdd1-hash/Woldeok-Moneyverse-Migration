@@ -2,6 +2,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -49,6 +50,17 @@ export class AccountSecurityController {
   @ApiOperation({ summary: 'Recent security events belonging to the caller' })
   async events(@Req() request: RequestWithSession) {
     return { events: await this.repository().recentEvents(requireUserId(request)) };
+  }
+
+  @Get('events/export')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Export up to 50 owner-only security events (no IP, token or device identifiers)' })
+  async exportEvents(@Req() request: RequestWithSession) {
+    return {
+      events: await this.repository().recentEvents(requireUserId(request), 50),
+      scope: 'recent-50' as const,
+    };
   }
 
   @Delete('sessions/:id')
