@@ -217,7 +217,7 @@ export default async function LocalizedGlossaryHubPage({ params }: PageProps) {
                           {termName}
                         </h4>
                         <p className="text-xs text-muted-foreground font-mono mt-0.5">
-                          {item.slug.toUpperCase()} • {item.termKo}
+                          {isEn ? item.slug.toUpperCase() : isJa ? `${item.slug.toUpperCase()} • ${item.termJa}` : isZh ? `${item.slug.toUpperCase()} • ${item.termZh}` : `${item.slug.toUpperCase()} • ${item.termKo}`}
                         </p>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
