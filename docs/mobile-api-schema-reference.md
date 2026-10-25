@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -3457,6 +3457,39 @@ _No request body._
 | ladder[].term_days | true | number |  |
 | ladder[].minimum_repayment | true | string |  |
 | ladder[].held | true | boolean |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/progression/credit/loans/statement-data` — Private recent-20 virtual loan history data
+
+- Authorization: 로그인 + 최신 동의 필수, 본인 세션에서만 actor 결정
+- Success status: 200
+- Response mode: json
+- After success: 최근 20건 제한과 이전 기록 가능성을 표시, 금융 정산 영수증으로 취급하지 않음
+- Operation ID: `ProgressionController_loanStatement`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="recent_20_only" | const="recent_20_only" |
+| loans[] | true | object[] |  |
+| loans[] | true | object |  |
+| loans[].loan_id | true | string |  |
+| loans[].principal_amount | true | string |  |
+| loans[].interest_amount | true | string |  |
+| loans[].outstanding_amount | true | string |  |
+| loans[].status | true | string |  |
+| loans[].issued_at | true | string (date-time) |  |
+| loans[].repaid_at | true | null \| string (date-time) |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

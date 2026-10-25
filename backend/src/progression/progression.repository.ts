@@ -181,6 +181,35 @@ export class ProgressionRepository {
     );
   }
 
+  /**
+   * Read-only bounded owner loan history. The SECURITY DEFINER bank_my_loans
+   * filters by p_actor but does NOT authenticate it; the controller must derive
+   * p_actor from the guarded session, never a caller-controlled query/body.
+   * The function itself returns at most 20 rows, so older history is unknown.
+   */
+  async loanStatement(actor: unknown): Promise<{
+    readonly scope: 'recent_20_only';
+    readonly loans: CreditLoanRow[];
+  }> {
+    assertUuid(actor, 'actor');
+    const rows = await queryRows<CreditLoanRow>(
+      this.pool,
+      `SELECT loan.loan_id::text AS loan_id,
+              loan.principal_amount::text AS principal_amount,
+              loan.interest_amount::text AS interest_amount,
+              loan.outstanding_amount::text AS outstanding_amount,
+              loan.status, loan.issued_at, loan.repaid_at
+       FROM public.bank_my_loans($1) AS loan
+       ORDER BY loan.issued_at DESC, loan.loan_id DESC
+       LIMIT 20`,
+      [actor],
+    );
+    return {
+      scope: 'recent_20_only',
+      loans: rows.slice(0, 20),
+    };
+  }
+
   async loans(actor: unknown): Promise<CreditLoanRow[]> {
     assertUuid(actor, 'actor');
     return queryRows<CreditLoanRow>(

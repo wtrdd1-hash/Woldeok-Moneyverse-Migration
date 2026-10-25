@@ -44,6 +44,12 @@ describe('progression routes', () => {
     expect([401, 428, 503]).toContain(response.status);
   });
 
+  it('protects the bounded loan statement endpoint with the member session', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/progression/credit/loans/statement-data');
+    expect(response.status).not.toBe(404);
+    expect([401, 428, 503]).toContain(response.status);
+  });
+
   it('mounts the credit standing behind a session', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/progression/credit');
     expect(response.status).not.toBe(404);

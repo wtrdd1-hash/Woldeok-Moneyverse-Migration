@@ -171,3 +171,40 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('Android virtual loan statement privacy and session forwarding', () => {
+  it('forwards the cookie to the guarded backend and forces private noindex response headers', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let upstreamCookie: string | null = null;
+    vi.stubGlobal('fetch', vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      upstreamCookie = new Headers(init?.headers).get('cookie');
+      return new Response(JSON.stringify({ scope: 'recent_20_only', loans: [] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+      });
+    }));
+    const response = await GET(
+      request('/app-api/v1/progression/credit/loans/statement-data', { cookie: 'moneyverse_session=private' }),
+      context('progression', 'credit', 'loans', 'statement-data'),
+    );
+    expect(response.status).toBe(200);
+    expect(upstreamCookie).toContain('moneyverse_session=private');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+    expect(await response.json()).toMatchObject({ scope: 'recent_20_only', loans: [] });
+  });
+
+  it('preserves backend authorization denial without claiming a statement', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ title: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'content-type': 'application/problem+json' },
+    })));
+    const response = await GET(
+      request('/app-api/v1/progression/credit/loans/statement-data'),
+      context('progression', 'credit', 'loans', 'statement-data'),
+    );
+    expect(response.status).toBe(401);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+  });
+});

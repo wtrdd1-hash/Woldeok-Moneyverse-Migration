@@ -126,6 +126,15 @@ export class ProgressionController {
    * any screen quoting them would have been describing a policy the database
    * did not keep.
    */
+  @Get('credit/loans/statement-data')
+  @ApiOperation({ summary: 'Private recent-20 virtual loan history data' })
+  async loanStatement(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.repository().loanStatement(requireUserId(request)),
+      'the virtual loan statement is unavailable',
+    );
+  }
+
   @Get('credit')
   @ApiOperation({ summary: 'The caller’s credit grade, what each grade buys, and their loans' })
   async credit(@Req() request: RequestWithSession) {

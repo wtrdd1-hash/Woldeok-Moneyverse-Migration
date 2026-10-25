@@ -270,6 +270,17 @@ export default async function ProgressionPage() {
                 })}
               </div>
 
+              <div className="mt-4 border-t pt-4">
+                <Link
+                  href="/progression/credit/loans/statement.csv"
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border px-4 text-sm font-semibold text-foreground hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  가상 대출 기록 CSV 다운로드 (최근 최대 20건)
+                </Link>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  본인 가상 대출의 최근 최대 20건만 포함합니다. 더 오래된 기록은 제외될 수 있으며 정산 완료 영수증은 아닙니다.
+                </p>
+              </div>
               {loans.length > 0 && (
                 <div className="mt-4 pt-4 border-t">
                   <LoanBoard loans={loans} />
