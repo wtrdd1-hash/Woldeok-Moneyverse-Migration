@@ -1,4 +1,8 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+## 기획 v1294 — F675-130 알림 무결성 보완 (DRAFT/HOLD)
+- 이전 기능 추가 v1292 / 현재 기능 보완 v1294 / 다음 기능 추가 v1296. 기존 NestJS 회원 읽음/모두 읽음 API를 재사용하고 고정 6개 모의 알림·localStorage 장마감 알림은 실제 사건과 분리. unreadOnly=false 파싱, 신규 도착 제외 모두 읽음 상한, UUID 동률 키셋, 실제 분류(개발 DB 0건으로 미확인), 동의·방해금지·세션, Android/SEO/WCAG 및 격리 100경합/10,001건 검증.
+- P0: ENV1294-01, SEC1294-02, REL1294-03, NOT1294-04. P1: NOT1294-05, NOT1294-06, NOT1294-07, NOT1294-08, NOT1294-09, NOT1294-10. 루트 99%, 보안·프론트·정확 SHA·복원 HOLD, 기본 OFF·문서만. 독립 외부 근거 신규 승인 0/누적 UNKNOWN·10,000 BLOCKED.
+
 - **GitHub v1292:** [기획 Draft PR #1354](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354) (미병합 #1349 기반); [개발 이슈 #1353](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353); [서버 용량 #1170 업데이트](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178). 문서만 수정, DRAFT / RELEASE HOLD.
 ## v2026.10.26.1292 — F675-130 회원 검증형 알림 제어·방해금지 시간 (기능 추가 / DRAFT / HOLD)
 - **회차:** 이전 Feature Improvement v1290 → 현재 Feature Addition v1292 → 다음 Feature Improvement v1294(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재확인, AGENTS.md·README.md·영문 원본 기획서·한국어 대조 확인. 미병합 Draft #1349 기반 문서 브랜치, A/B/C/Gemini/QA와 격리.
