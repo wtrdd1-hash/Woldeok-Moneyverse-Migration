@@ -108,7 +108,7 @@ export default function FxPortalPage() {
                   <th scope="col" className="p-3">WLD / 가상 USD</th>
                   <th scope="col" className="p-3">등락률</th>
                 </tr></thead>
-                <tbody>{snapshot.history.slice(0, 12).map((point) => (
+                <tbody>{snapshot.history.slice(-12).reverse().map((point) => (
                   <tr key={point.id} className="border-b border-slate-800">
                     <td className="p-3"><time dateTime={point.createdAt}>{new Date(point.createdAt).toLocaleString('ko-KR')}</time></td>
                     <td className="p-3 tabular-nums">{point.rate.toLocaleString('ko-KR')}</td>

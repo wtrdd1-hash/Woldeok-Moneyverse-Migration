@@ -16,6 +16,7 @@ describe('FX portal finance truth and accessibility', () => {
     expect(page).toContain('role="status"');
     expect(page).toContain('aria-live="polite"');
     expect(page).toContain('min-h-[44px]');
+    expect(page).toContain('snapshot.history.slice(-12).reverse()');
     expect(page).toContain('거래 중단');
   });
 
