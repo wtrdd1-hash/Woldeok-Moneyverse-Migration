@@ -7608,6 +7608,158 @@
     },
     {
       "method": "GET",
+      "path": "/app-api/v1/casino/history/summary",
+      "purpose": "내 최근 최대 20판 카지노 도전액·순손익 및 원장 ID 확인",
+      "callWhen": "아케이드 기록·손익 화면 진입 또는 새로고침",
+      "authorization": "로그인 필요(기능에 따라 최신 동의 필요)",
+      "afterSuccess": "마지막 20판 표본으로만 표시; 전체 기간 손익으로 확대 해석 금지",
+      "backendRoute": "/api/casino/history/summary",
+      "operationId": "CasinoController_historySummary",
+      "backendOpenApiPath": "/casino/history/summary",
+      "summary": "Read exact stakes and net outcomes for the current member last 20 casino plays",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "scope",
+          "sampleLimit",
+          "playCount",
+          "totalStakeWld",
+          "netWld",
+          "winCount",
+          "lossCount",
+          "evenCount",
+          "plays"
+        ],
+        "note": "All WLD amounts are signed/unsigned integer strings. The sample is at most 20 plays, not a lifetime summary."
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "last_20_recorded_plays"
+          },
+          "sampleLimit": {
+            "type": "number",
+            "const": 20
+          },
+          "playCount": {
+            "type": "number"
+          },
+          "totalStakeWld": {
+            "type": "string"
+          },
+          "netWld": {
+            "type": "string"
+          },
+          "winCount": {
+            "type": "number"
+          },
+          "lossCount": {
+            "type": "number"
+          },
+          "evenCount": {
+            "type": "number"
+          },
+          "plays": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "play_id": {
+                  "type": "string"
+                },
+                "game": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "const": "coin"
+                    },
+                    {
+                      "type": "string",
+                      "const": "dice_parity"
+                    },
+                    {
+                      "type": "string",
+                      "const": "dice_number"
+                    },
+                    {
+                      "type": "string",
+                      "const": "hilo_20"
+                    },
+                    {
+                      "type": "string",
+                      "const": "treasure_4"
+                    },
+                    {
+                      "type": "string",
+                      "const": "gem_5"
+                    },
+                    {
+                      "type": "string",
+                      "const": "wheel_20"
+                    }
+                  ]
+                },
+                "choice": {
+                  "type": "string"
+                },
+                "outcome": {
+                  "type": "string"
+                },
+                "stake_amount": {
+                  "type": "string"
+                },
+                "net_amount": {
+                  "type": "string"
+                },
+                "transaction_id": {
+                  "type": "string"
+                },
+                "played_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "play_id",
+                "game",
+                "choice",
+                "outcome",
+                "stake_amount",
+                "net_amount",
+                "transaction_id",
+                "played_at"
+              ]
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "sampleLimit",
+          "playCount",
+          "totalStakeWld",
+          "netWld",
+          "winCount",
+          "lossCount",
+          "evenCount",
+          "plays"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
       "path": "/app-api/v1/casino/self-limit",
       "purpose": "내 카지노 자기제한 조회",
       "callWhen": "해당 화면 진입/새로고침/관련 write 후",

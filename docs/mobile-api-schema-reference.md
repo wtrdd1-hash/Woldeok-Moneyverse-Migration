@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -2508,6 +2508,47 @@ _No request body._
 ### Success response fields
 
 _None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/casino/history/summary` — Read exact stakes and net outcomes for the current member last 20 casino plays
+
+- Authorization: 로그인 필요(기능에 따라 최신 동의 필요)
+- Success status: 200
+- Response mode: json
+- After success: 마지막 20판 표본으로만 표시; 전체 기간 손익으로 확대 해석 금지
+- Operation ID: `CasinoController_historySummary`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="last_20_recorded_plays" | const="last_20_recorded_plays" |
+| sampleLimit | true | number=20 | const=20 |
+| playCount | true | number |  |
+| totalStakeWld | true | string |  |
+| netWld | true | string |  |
+| winCount | true | number |  |
+| lossCount | true | number |  |
+| evenCount | true | number |  |
+| plays[] | true | object[] |  |
+| plays[] | true | object |  |
+| plays[].play_id | true | string |  |
+| plays[].game | true | string="coin" \| string="dice_parity" \| string="dice_number" \| string="hilo_20" \| string="treasure_4" \| string="gem_5" \| string="wheel_20" |  |
+| plays[].choice | true | string |  |
+| plays[].outcome | true | string |  |
+| plays[].stake_amount | true | string |  |
+| plays[].net_amount | true | string |  |
+| plays[].transaction_id | true | string |  |
+| plays[].played_at | true | string (date-time) |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

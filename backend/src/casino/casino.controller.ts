@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   HttpException,
   Inject,
   Post,
@@ -29,6 +30,7 @@ import {
   CasinoThemePlayDto,
 } from './casino.dto';
 import { CASINO_OPEN, CasinoInputError, CasinoRepository } from './casino.repository';
+import { summarizeCasinoHistory } from './casino-history-summary';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 
 /**
@@ -417,6 +419,19 @@ export class CasinoController {
   async history(@Req() request: RequestWithSession) {
     return this.guarded(() => this.repository().history(requireUserId(request)), {
       conflict: 'the casino history is unavailable',
+      forbidden: 'an active membership is required to read casino history',
+    });
+  }
+
+  @Get('history/summary')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Read exact stakes and net outcomes for the current member last 20 casino plays' })
+  async historySummary(@Req() request: RequestWithSession) {
+    return this.guarded(async () => {
+      const plays = await this.repository().history(requireUserId(request));
+      return summarizeCasinoHistory(plays);
+    }, {
+      conflict: 'the casino history summary is unavailable',
       forbidden: 'an active membership is required to read casino history',
     });
   }

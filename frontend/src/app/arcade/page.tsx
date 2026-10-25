@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { canonicalUrl } from '@/lib/seo';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -761,6 +762,12 @@ export default async function CasinoPage() {
           <SelfLimitForm />
         </CardContent>
       </Card>
+
+      <div className="flex justify-end">
+        <Link href="/arcade/history" className="text-sm font-semibold text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+          최근 20판 순손익 및 원장 거래 ID 확인하기
+        </Link>
+      </div>
 
       {/* 최근 게임 기록 카드 */}
       <Card className="rounded-2xl border-border/80 shadow-sm">

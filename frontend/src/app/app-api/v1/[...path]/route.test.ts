@@ -121,6 +121,25 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
+  it('forwards authenticated casino history summary without rounding WLD or caching private records', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const forwarded = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      expect(new Headers(init?.headers).get('cookie')).toContain('session=abc');
+      return new Response(JSON.stringify({ scope: 'last_20_recorded_plays', netWld: '-900719925474099312345' }), {
+        status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', forwarded);
+    const response = await GET(
+      request('/app-api/v1/casino/history/summary', { cookie: 'session=abc' }),
+      context('casino', 'history', 'summary'),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect((await response.json()).netWld).toBe('-900719925474099312345');
+    expect(forwarded).toHaveBeenCalledOnce();
+  });
+
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network down'); }));
