@@ -18,6 +18,11 @@ describe('attendance integrity gate', () => {
     expect(repo.getAttendanceStatus).toHaveBeenCalledWith(actor.session!.user_id);
   });
 
+  it('maps unavailable database reads to a safe 503 without exposing SQL details', async () => {
+    const repo = { getAttendanceStatus: vi.fn().mockRejectedValue(new Error('permission denied for sensitive_table')) } as unknown as DopamineRepository;
+    await expect(new DopamineController(repo).getAttendanceStatus(actor)).rejects.toBeInstanceOf(ServiceUnavailableException);
+  });
+
   it('refuses reward claims before non-atomic attendance and ledger writes for any idempotency key', async () => {
     const repo = { claimAttendanceSpin: vi.fn() } as unknown as DopamineRepository;
     await expect(new DopamineController(repo).claimAttendanceSpin(actor, { idempotencyKey: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' }))

@@ -271,7 +271,14 @@ export class DopamineController {
         message: 'Verified attendance status is temporarily unavailable',
       });
     }
-    return this.repository.getAttendanceStatus(userId);
+    try {
+      return await this.repository.getAttendanceStatus(userId);
+    } catch {
+      throw new ServiceUnavailableException({
+        code: 'ATTENDANCE_STATUS_UNAVAILABLE',
+        message: 'Verified attendance status is temporarily unavailable',
+      });
+    }
   }
 
   @Post('attendance/spin')

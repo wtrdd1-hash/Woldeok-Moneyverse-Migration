@@ -28,3 +28,19 @@
 - RED/GREEN: backend 7 focused PASS; frontend + Android 20 focused PASS; Android RED previously 2 failed, then both green.
 - Isolated PostgreSQL `wdmv_v761_test_acl` (281 applied migrations): `moneyverse_app` SELECT ledger/postings/outbox/accounts permitted; ledger INSERT denied; exact status SQL executed under app role with 0 rows and `ROLLBACK`; no production-linked 5433 writes.
 - Midpoint main SHA unchanged; release gate remains HOLD pending full tests, security and official Test exact SHA.
+
+### Verification checkpoint — 15:34 KST
+- Full Backend 1,321 PASS / 398 SKIPPED; full Frontend 1,407 PASS / 6 FAIL (SEO 3, login a11y, calculator registration link, admin M2). Database 15 PASS / 3 SKIPPED; contract 38 PASS; Android 179 endpoint contract PASS.
+- Typecheck PASS, Lint PASS (0 errors / 1,124 warnings), Backend build PASS. Initial Frontend build BLOCKED by external symlinked node_modules; corrected with offline local install and final Frontend build PASS.
+- Security audit: production High 2 FAIL; full Critical 2 / High 10 FAIL; bot Critical 1 / High 5 FAIL.
+- Exact isolated PostgreSQL app-role SQL/ACL PASS for nonexistent actor, no fixture and no Production-linked 5433 write. Full authenticated finance E2E remains BLOCKED.
+- Issue #1291 opened for atomic daily attendance settlement. Final main re-fetched and remains 1c5b84a1c45baafcca83f375a6f99698121e9bb5.
+- Remote heads 158, open PRs 153, conflicts #1143/#1110/#1107. No branch deletion; unmerged work preserved.
+
+## Finished — release gate HOLD
+- [x] RED regression tests
+- [x] Backend/API/frontend/app-api changes
+- [x] Isolated real-PostgreSQL read/ACL test (zero-row fixture; no paid receipt)
+- [x] Build, typecheck, lint, unit/integration, accessibility/SEO test execution, security scans
+- [ ] Full Frontend PASS, security PASS, exact-SHA Test authentication/finance E2E, authorized GitOps — BLOCKED
+- Main, official Test and Production unchanged. No Production rollback required. Never delete other workers' branches or disable scheduled development.
