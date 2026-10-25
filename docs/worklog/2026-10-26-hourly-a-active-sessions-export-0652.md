@@ -13,3 +13,8 @@
 
 ## Finished
 - Pending; never treat docs-only or focused tests as release success.
+
+## In-progress checkpoint (06:57 KST)
+- Fresh main rechecked unchanged; integrated EN/KO planning masters remain main-only, other agent Drafts unmerged.
+- TDD RED reproduced: backend 3/3 failing because export methods absent; frontend 2 files failing module resolution because serializer/route absent. Logs stored on data volume at a0652-red-{backend,frontend}.log.
+- Dependencies installed offline in this isolated worktree using data-volume pnpm store; no main worktree mutation.
