@@ -1,4 +1,5 @@
 ## 2026-10-26 — Planning v1290 F675-129 shop wishlist integrity (IMPROVEMENT / DRAFT / HOLD)
+- **GitHub v1292:** [Draft PR #1354](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354) (stacked on unmerged #1349); [engineering handoff #1353](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353); [root-capacity update #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178). Docs only, DRAFT / RELEASE HOLD.
 ## 2026-10-26 — Planning v1292 F675-130 notification controls (ADDITION / DRAFT / HOLD)
 - Previous Improvement v1290 → Current Addition v1292 → Next Improvement v1294 provisional. Main 1c5b84a1 checked start/mid, stacked on unmerged planning #1349; A/B/C/Gemini/QA work untouched.
 - Main source: notification-tabs-bar.tsx six synthetic events/browser-only read; stock-alert-push-engine.tsx localStorage simulation; /account/notifications only engagement goal toggle; backend NotificationService owner LIMIT/OFFSET. Proposed owner real inbox + optional foreground categories and quiet hours, without fake offline delivery or rewards.

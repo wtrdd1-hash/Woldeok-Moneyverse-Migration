@@ -1,4 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- **GitHub v1292:** [기획 Draft PR #1354](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354) (미병합 #1349 기반); [개발 이슈 #1353](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353); [서버 용량 #1170 업데이트](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178). 문서만 수정, DRAFT / RELEASE HOLD.
 ## v2026.10.26.1292 — F675-130 회원 검증형 알림 수신 제어·방해금지 시간 (기능 추가 / 기획 초안 / 운영 보류)
 
 ### 현행 근거와 목표

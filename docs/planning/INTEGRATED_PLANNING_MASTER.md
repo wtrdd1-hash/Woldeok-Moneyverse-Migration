@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **GitHub v1292:** [Draft PR #1354](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354) (stacked on unmerged #1349); [engineering handoff #1353](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353); [root-capacity update #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178). Docs only, DRAFT / RELEASE HOLD.
 ## v2026.10.26.1292 — F675-130 Verified Member Notification Controls and Quiet Hours (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 ### Source truth and product purpose

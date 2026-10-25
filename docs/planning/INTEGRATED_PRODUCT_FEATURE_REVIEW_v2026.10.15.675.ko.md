@@ -1,4 +1,5 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+- **GitHub v1292:** [기획 Draft PR #1354](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354) (미병합 #1349 기반); [개발 이슈 #1353](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353); [서버 용량 #1170 업데이트](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178). 문서만 수정, DRAFT / RELEASE HOLD.
 ## v2026.10.26.1292 — F675-130 회원 검증형 알림 제어·방해금지 시간 (기능 추가 / DRAFT / HOLD)
 - **회차:** 이전 Feature Improvement v1290 → 현재 Feature Addition v1292 → 다음 Feature Improvement v1294(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재확인, AGENTS.md·README.md·영문 원본 기획서·한국어 대조 확인. 미병합 Draft #1349 기반 문서 브랜치, A/B/C/Gemini/QA와 격리.
 - **실제 코드:** /account/notifications는 목표/NPC 설정만 저장한다. NotificationTabsBar의 은행/보안 등 6개 알림은 고정 모의 데이터이고 읽음도 브라우저만 변경한다. StockAlertPushEngine은 localStorage 기반 가상 장마감 브라우저 알림을 지연 발송한다. NestJS 실제 알림 조회는 회원 필터가 있지만 OFFSET과 created_at 단독 정렬이다. 개발 DB in_app_notifications는 10개 컬럼. 운영 사고가 확인됐다는 뜻은 아니다.

@@ -14,3 +14,7 @@
 ## DELIVERY AND RELEASE GATE
 - Full feature/API/DB/permissions/UX/a11y/SEO/KPI/QA/rollout/rollback and 4 P0 + 6 P1 IDs recorded in existing six EN/KO integrated planning documents. New file here is a worklog only; no distributed planning spec created.
 - Documentation Draft / RELEASE HOLD. Separate engineering branch, reviewed forward-only migration, isolated real PostgreSQL tests, full QA, exact-SHA authenticated Test and GitOps sign-off required before runtime rollout. No WLD/ledger, DB, feature switch, Test or Production mutations.
+
+## CLOSEOUT — GitHub handoff
+- Draft planning PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354 (base: unmerged planning #1349). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353. Capacity issue comment: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178.
+- Two docs-only commits planned; no main merge, runtime/DB/feature-switch/Test/Production changes. Exact-SHA release gate remains BLOCKED.

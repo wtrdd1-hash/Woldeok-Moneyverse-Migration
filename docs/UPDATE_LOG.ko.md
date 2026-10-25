@@ -1,4 +1,5 @@
 ## 2026-10-26 — 기획 v1290 F675-129 상점 찜 목록 무결성 (기능 보완 / 초안 / 보류)
+- **GitHub v1292:** [기획 Draft PR #1354](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354) (미병합 #1349 기반); [개발 이슈 #1353](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353); [서버 용량 #1170 업데이트](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178). 문서만 수정, DRAFT / RELEASE HOLD.
 ## 2026-10-26 — 기획 v1292 F675-130 알림 수신 제어 (기능 추가 / DRAFT / HOLD)
 - 이전 보완 v1290 → 현재 추가 v1292 → 다음 보완 v1294 잠정. main 1c5b84a1 시작·중간 확인, 미병합 #1349 기반; 개발/QA 작업 격리.
 - 실제 소스: 알림 탭 모의 6건·브라우저 읽음, localStorage 기반 가상 장마감 알림, 목표 알림 토글만 존재, 실제 NestJS는 회원 필터 + OFFSET. 회원별 실제 알림 이력·선택적 전경 알림/조용한 시간 제안, 오프라인 전달·보상 약속 금지.
