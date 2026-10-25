@@ -1358,3 +1358,4 @@
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
 - 2026-10-25 v1270 기능 보완 기획 F675-124: 실제 게시판 종목·작성자 LIMIT 이전 필터, 계정 병합·탈퇴 소유권, HMAC 영수증·서명 커서, P0/P1 10건; QA v1269 FAILED/HOLD, 외부 근거 신규 승인 0/누적 미확인/목표 10,000. #1281 후속 문서 Draft, 런타임·DB·Test·운영 변경 없음.
+- v1270 Draft PR #1289 OPEN/HOLD, 개발 이슈 #1280 업데이트, main 미병합.

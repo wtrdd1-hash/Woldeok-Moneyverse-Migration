@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v2026.10.25.1270 — F675-124 Board Author Mute Identity, Merge and Cursor Integrity (FEATURE IMPROVEMENT / PLANNING DRAFT / RELEASE HOLD)
+- Draft PR [#1289](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1289) OPEN/HOLD; engineering issue [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) updated; unmerged, no runtime/DB/Test/Production changes.
 
 ### Authority, cycle and verified source
 - Previous **Feature Addition v1268** → Current **Feature Improvement v1270** → Next **Feature Addition v1272** (provisional). Authoritative remote main **1c5b84a1c45baafcca83f375a6f99698121e9bb5** verified at start and midpoint, with AGENTS.md, README.md and canonical English/Korean PROJECT_PLAN consulted. Predecessor Draft PR #1281 is OPEN/unmerged; this is a documentation-only successor. Latest completed QA v1269 FAILED/HOLD; do not equate successful local selected tests with release approval.

@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v2026.10.25.1270 — F675-124 게시판 작성자 숨김·계정 병합·커서 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+- Draft PR [#1289](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1289) OPEN/HOLD, 개발 이슈 [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) 업데이트, 미병합·런타임/DB/Test/운영 변경 없음.
 
 ### 기준, 회차 및 실제 소스
 - 이전 **Feature Addition v1268** → 현재 **Feature Improvement v1270** → 다음 **Feature Addition v1272**(잠정). 원격 main **1c5b84a1c45baafcca83f375a6f99698121e9bb5** 시작·중간 확인, AGENTS.md/README.md/영문 PROJECT_PLAN 정본 및 국문 대조 완료. 선행 Draft PR #1281은 미병합 OPEN. 이번 작업은 기획 문서만 변경한다. 최신 완료 QA v1269 FAILED/HOLD.

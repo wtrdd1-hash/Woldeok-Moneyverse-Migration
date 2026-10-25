@@ -1,6 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.25.1270 — F675-124 작성자 숨김·계정 병합·커서 무결성 (기능 보완 / 기획 초안 / 운영 보류)
+- Draft PR [#1289](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1289) OPEN/HOLD, 개발 이슈 [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) 업데이트, 미병합·런타임/DB/Test/운영 변경 없음.
 - 이전 기능 추가 v1268 → 현재 기능 보완 v1270 → 다음 기능 추가 v1272(잠정). 원격 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 Draft #1281 미병합. AGENTS/README/영문 PROJECT_PLAN 정본 및 국문 대조, 문서만 변경.
 - 실제 Migration175 공개 글은 50건 먼저 제한, Migration181 종목 필터는 그 이후 적용, Migration259 상세에 작성자 UUID 존재. Migration163 계정 병합은 향후 숨김 소유·대상·영수증을 검사하지 않으며 Migration010 탈퇴는 회원 행을 남긴다. 본인 전용 SQL에서 작성자·종목을 LIMIT 전에 필터링하고 작성자 UUID 불변·병합 사전 차단·개인정보 보존 정책·회원 우선 잠금·HMAC 원본 영수증·본인/세션/세대/종목 결합 커서를 명세. 공개 캐시·SEO·운영 제재·DM·알림·WLD·원장 불변.
 - P0 ENV1270-01 SEC1270-02 REL1270-03 BOARD1270-04, P1 BOARD1270-05 BOARD1270-06 BOARD1270-07 BOARD1270-08 BOARD1270-09 BOARD1270-10. 화면·CTA·상태·API·DB·인덱스·트랜잭션·관리자·보안·SEO·Android·접근성·KPI·100건 경합/합성 10,001건·정확 SHA Test/롤백은 국영문 통합 마스터에 명세. QA v1269 FAILED/HOLD: 프론트 6 실패, 감사 Critical2/High10, 앱 DML 235/241, PUBLIC 은행 3개, Migration266/280, Test/복원 미검증; 시작 루트 92%. 외부 신규 승인 0, 누적 승인 미확인 / 10,000 BLOCKED/IN PROGRESS. 런타임·DB·Test·운영 변경 없음.

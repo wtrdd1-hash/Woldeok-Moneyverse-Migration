@@ -1,6 +1,7 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
 ## v2026.10.25.1270 — F675-124 작성자 숨김 무결성 제품 검토 (기능 보완 / 초안 / 보류)
+- Draft PR [#1289](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1289) OPEN/HOLD, 개발 이슈 [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) 업데이트, 미병합·런타임/DB/Test/운영 변경 없음.
 - 이전 기능 추가 v1268 / 현재 기능 보완 v1270 / 다음 기능 추가 v1272(잠정), main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 Draft #1281 미병합, 개발 이슈 #1280. 구현·배포 아님.
 - 공개 top-50 및 LIMIT 뒤 종목 필터를 개인 피드에 재사용 금지. SQL에서 작성자·종목을 LIMIT 이전 필터링, 본인/세션/세대/필터 결합 서명 커서, 원본 작성자 불변, 계정 병합 사전 차단, 소프트 탈퇴 보존·삭제 정책, HMAC 원본 영수증, 200명 한도·12회/분. 공개 SEO/DM/알림 불변, 관리자 20명 미만 비식별, Android 본문 CAS, WCAG AA. 상세 화면·API·DB·트랜잭션·KPI·보안·롤백은 국영문 통합 마스터.
 - P0 ENV1270-01 SEC1270-02 REL1270-03 BOARD1270-04; P1 BOARD1270-05 BOARD1270-06 BOARD1270-07 BOARD1270-08 BOARD1270-09 BOARD1270-10. QA v1269 FAILED/HOLD: 프론트 6 실패, Critical2/High10, 앱 DML 235/241, PUBLIC 은행 3개, Migration266/280, 정확 SHA Test·복원 미검증, 시작 루트 92%. 독립 근거 신규 승인 0/누적 미확인/목표 10,000 BLOCKED. 문서만 변경.
