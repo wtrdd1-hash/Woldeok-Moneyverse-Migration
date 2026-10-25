@@ -3,9 +3,11 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Inject,
   Post,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -107,61 +109,28 @@ export class StockLeagueController {
   }
 
   @Post('copy-trade/subscribe')
+  @Header('Cache-Control', 'no-store')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
-  @ApiOperation({ summary: '상위 고래 트레이더 카피 트레이딩 구독' })
-  async subscribeCopyTrading(@Req() req: RequestWithSession, @Body() body: SubscribeCopyTradingDto) {
-    if (!this.repository) {
-      throw new BadRequestException('주식 챔피언십 리그 시스템이 현재 점검 중입니다.');
-    }
-    const userId = requireUserId(req);
-    const userName = '구독자';
-
-    if (!body.whaleId) {
-      throw new BadRequestException('구독할 고래 트레이더 ID가 필요합니다.');
-    }
-    if (!body.allocatedBudget || body.allocatedBudget < 10000) {
-      throw new BadRequestException('최소 10,000 WLD 이상의 자본금을 할당해야 합니다.');
-    }
-
-    try {
-      const subscription = await this.repository.subscribeCopyTrading(
-        userId,
-        userName,
-        body.whaleId,
-        body.whaleName || '고래 트레이더',
-        body.allocatedBudget,
-        body.copyRatio ?? 1.0
-      );
-      return {
-        success: true,
-        subscription,
-        message: `${body.whaleName || '고래'} 트레이더의 실전 카피 트레이딩이 활성화되었습니다!`,
-      };
-    } catch (err: any) {
-      if (err instanceof StockLeagueInputError) {
-        throw new BadRequestException(err.message);
-      }
-      throw err;
-    }
+  @ApiOperation({ summary: '카피 트레이딩 구독 (원장 정산 검증 전 중단)' })
+  async subscribeCopyTrading(@Req() req: RequestWithSession, @Body() _body: SubscribeCopyTradingDto) {
+    requireUserId(req);
+    // Explicit HTTP 503, not a fabricated active subscription or an unjournaled hold.
+    throw new ServiceUnavailableException({
+      code: 'COPY_TRADING_SETTLEMENT_UNAVAILABLE',
+      message: '검증된 원장 정산 및 예치 계약이 마련될 때까지 카피 트레이딩을 이용할 수 없습니다.',
+    });
   }
 
   @Post('copy-trade/cancel')
+  @Header('Cache-Control', 'no-store')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
-  @ApiOperation({ summary: '고래 트레이더 카피 트레이딩 구독 해제' })
-  async cancelCopyTrading(@Req() req: RequestWithSession, @Body() body: CancelCopyTradingDto) {
-    if (!this.repository) {
-      throw new BadRequestException('주식 챔피언십 리그 시스템이 현재 점검 중입니다.');
-    }
-    const userId = requireUserId(req);
-    if (!body.whaleId) {
-      throw new BadRequestException('해제할 고래 트레이더 ID가 필요합니다.');
-    }
-
-    const cancelled = await this.repository.cancelCopyTrading(userId, body.whaleId);
-    return {
-      success: true,
-      cancelled,
-      message: cancelled ? '카피 트레이딩 구독이 안전하게 해제되었습니다.' : '구독 내역을 찾을 수 없습니다.',
-    };
+  @ApiOperation({ summary: '카피 트레이딩 구독 해제 (원자적 정산 검증 전 중단)' })
+  async cancelCopyTrading(@Req() req: RequestWithSession, @Body() _body: CancelCopyTradingDto) {
+    requireUserId(req);
+    // Do not claim cancellation succeeded when no atomic owner-scoped transition exists.
+    throw new ServiceUnavailableException({
+      code: 'COPY_TRADING_SETTLEMENT_UNAVAILABLE',
+      message: '검증된 구독 해제 및 정산 계약이 마련될 때까지 카피 트레이딩을 이용할 수 없습니다.',
+    });
   }
 }
