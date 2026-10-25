@@ -7,6 +7,9 @@ import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 
 export interface BackupFileInfo {
   readonly fileName: string;
@@ -19,8 +22,8 @@ export interface BackupFileInfo {
 export interface BackupStatusResponse {
   readonly backupDir: string;
   readonly r2Configured: boolean;
-  readonly r2Bucket: string;
-  readonly retentionDays: number;
+  readonly r2Bucket: string | null;
+  readonly retentionDays: number | null;
   readonly totalBackups: number;
   readonly totalSizeBytes: number;
   readonly totalSizeMb: number;
@@ -30,7 +33,7 @@ export interface BackupStatusResponse {
 
 @ApiTags('admin')
 @Controller('admin/backups')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
 export class AdminBackupController {
   private getBackupDir(): string {
     const defaultProd = '/srv/moneyverse-data/backups/daily';
@@ -52,8 +55,8 @@ export class AdminBackupController {
   @ApiOperation({ summary: 'Get list of automated and manual database backups and R2 storage status' })
   async getBackupStatus(): Promise<BackupStatusResponse> {
     const backupDir = this.getBackupDir();
-    const r2Bucket = process.env.R2_BUCKET || 'moneyverse-backup';
-    const r2Configured = Boolean(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY);
+    const r2Configured = Boolean(process.env.R2_BUCKET && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY);
+    const r2Bucket = r2Configured ? process.env.R2_BUCKET! : null;
 
     let files: BackupFileInfo[] = [];
     let totalSizeBytes = 0;
@@ -71,7 +74,8 @@ export class AdminBackupController {
               sizeBytes: stat.size,
               sizeMb: Math.round((stat.size / (1024 * 1024)) * 100) / 100,
               createdAt: stat.mtime.toISOString(),
-              status: 'VERIFIED' as const,
+              // File presence alone cannot establish checksum or restore validity.
+              status: 'PENDING' as const,
             };
           })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -84,7 +88,7 @@ export class AdminBackupController {
       backupDir,
       r2Configured,
       r2Bucket,
-      retentionDays: 30,
+      retentionDays: process.env.BACKUP_RETENTION_DAYS && Number.isInteger(Number(process.env.BACKUP_RETENTION_DAYS)) && Number(process.env.BACKUP_RETENTION_DAYS) > 0 ? Number(process.env.BACKUP_RETENTION_DAYS) : null,
       totalBackups: files.length,
       totalSizeBytes,
       totalSizeMb: Math.round((totalSizeBytes / (1024 * 1024)) * 100) / 100,
@@ -94,6 +98,7 @@ export class AdminBackupController {
   }
 
   @Post('trigger')
+  @UseGuards(ReauthGuard)
   @ApiOperation({ summary: 'Manually trigger database dump and Cloudflare R2 backup pipeline' })
   async triggerBackup(): Promise<{ message: string; scriptPath: string; triggeredAt: string }> {
     const prodScript = '/srv/moneyverse-data/releases/production-current/scripts/backup/backup-r2-free.sh';
@@ -115,7 +120,7 @@ export class AdminBackupController {
       child.unref();
 
       return {
-        message: 'Backup pipeline triggered successfully in background',
+        message: 'Backup process launch requested; completion and restore not verified',
         scriptPath: targetScript,
         triggeredAt: new Date().toISOString(),
       };
