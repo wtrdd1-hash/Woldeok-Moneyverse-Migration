@@ -87,7 +87,6 @@ export function AdminBlogClient({ initialPosts }: Props) {
           relatedCalculatorHref: '/tools/compound-calculator',
           relatedCalculatorName: '복리 수익 계산기',
           isAiGenerated: true,
-          views: 1,
           country: selectedCountry,
           status: 'PUBLISHED',
         };
