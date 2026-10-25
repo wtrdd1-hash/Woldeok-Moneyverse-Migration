@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+- **v1296 engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363 (implementation separately gated; no merge/deploy).
+## v2026.10.26.1296 — F675-131 검증형 회원 알림 보관함 검색·CSV 내보내기 (기능 추가 / DRAFT / HOLD)
+- **회차:** 이전 기능 보완 v1294 → 현재 기능 추가 v1296 → 다음 기능 보완 v1298(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5·AGENTS.md·README.md·영문 정본·국문 대조 재확인. 미병합 기획 Draft #1359 위에 별도 문서 브랜치, A/B/C/Gemini/QA 변경 격리. 기존 알림 조회는 본인 user_id 제한이 있지만 OFFSET·created_at 단독 정렬이고 Next.js 프록시는 보관함 검색·내보내기가 없다. 개발 DB UUID id 포함 10개 컬럼·알림 0건, 실제 전달/분류 확정 증거는 없다.
+- **신규 기능:** /account/notifications/archive에서 기간·분류·읽음 검색, 회원·세션 결합 HMAC 커서, 단일 READ ONLY REPEATABLE READ 트랜잭션의 완전한 UTF-8 CSV와 실제 바이트 SHA-256. 최대 5,000건/2MiB/30초, 초과 시 부분 파일 없이 413, RFC4180 이스케이프·CSV 수식 공격 방지, 내부 dedupe_key·타 회원 데이터 제외. 본인 GET·CSRF POST·Next.js·Android 동등성, k>=20 관리자 집계, no-store/noindex, WCAG 2.2 AA, 제한·상태·KPI·롤백 명세. 여러 페이지 조회는 MVCC 증명 없으면 불변 스냅샷이라 주장하지 않는다. 상세 화면·API·DB·트랜잭션·보안·시험·배포는 국문 통합 마스터 참조.
+- **P0:** ENV1296-01 SEC1296-02 REL1296-03 ARC1296-04. **P1:** ARC1296-05 ARC1296-06 ARC1296-07 ARC1296-08 ARC1296-09 ARC1296-10. 기존 페이지네이션 수정은 개발 B Draft #1356과 분리. 루트 99%(약 1.4GiB), 프론트 6건 실패·보안 감사 HOLD, 정확 SHA Test/복원 미검증. 기능 기본 OFF, 별도 개발·GitOps 게이트; 런타임·DB·WLD·Test·운영 변경 없음.
+- **외부 근거:** 신규 승인 0건, 누적 실제 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS.
+- **백로그 ID:** ENV1296-01 SEC1296-02 REL1296-03 ARC1296-04 ARC1296-05 ARC1296-06 ARC1296-07 ARC1296-08 ARC1296-09 ARC1296-10.
+
 ## v2026.10.26.1294 — F675-130 알림 출처·읽음 컷오프·커서 무결성 (기능 보완 / DRAFT / HOLD)
 - 이전 Feature Addition v1292 → 현재 Feature Improvement v1294 → 다음 Feature Addition v1296(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5·AGENTS/README·영문 정본/한국어 대조 재확인. 미병합 #1354 기반 문서 전용, A/B/C/Gemini/QA 분리.
 - 실제 NestJS GET /notifications/unread-count, CSRF POST /notifications/:id/read 및 /notifications/read-all은 존재, claim-all은 의도적으로 거부하므로 재사용. 고정 6개 모의 알림·localStorage 10초 지연 장마감·React 전용 읽음은 실제 사건 증거가 아님. DTO @Type(() => Boolean)의 unreadOnly=false 참 변환 가능성은 격리 검증 필요. 개발 DB UUID id/10개 컬럼, (user_id,created_at DESC) 인덱스에 id 없음, 알림 데이터 0건으로 실제 분류 미확인.

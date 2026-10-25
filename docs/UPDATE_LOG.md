@@ -1,4 +1,8 @@
 ## 2026-10-26 — Planning v1290 F675-129 shop wishlist integrity (IMPROVEMENT / DRAFT / HOLD)
+- **v1296 engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363 (implementation separately gated; no merge/deploy).
+## 2026-10-26 v1296 — F675-131 Verified Notification Archive (Feature Addition / DRAFT / HOLD)
+- Previous Improvement v1294; Current Addition v1296; Next Improvement v1298 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5. Docs-only stacked on #1359; source owner notifications, dev DB 10 columns/0 rows, root 99%/1.4GiB. Full P0/P1 in canonical plan; English/Korean master parity including missing v1294 Korean summary restored. QA/security/exact-SHA Test/restore BLOCKED. External corpus 0 newly accepted/UNKNOWN cumulative of 10,000. No runtime, DB, WLD, Test or Production changes.
+
 ## 2026-10-26 — Planning v1294 F675-130 notification integrity (Feature Improvement / DRAFT / HOLD)
 - Previous Addition v1292 → Current Improvement v1294 → Next Addition v1296. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 rechecked. Existing NestJS read/read-all with CSRF preserved; synthetic inbox/stock notices flagged; unreadOnly=false coercion risk, mark-all cutoff race, UUID-tie cursor and source-category provenance specified. ENV1294-01 SEC1294-02 REL1294-03 NOT1294-04 NOT1294-05 NOT1294-06 NOT1294-07 NOT1294-08 NOT1294-09 NOT1294-10. Root 99%/1.6GiB, Production HOLD. External evidence 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED. Docs only; no runtime/DB/ledger/Test/Production changes.
 

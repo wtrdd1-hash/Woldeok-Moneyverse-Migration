@@ -1,4 +1,46 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.26.1296 — F675-131 회원 전용 검증형 알림 보관함 검색·CSV 내보내기 (기능 추가 / DRAFT / RELEASE HOLD)
+
+### 실제 근거·목적·대상
+- **회차:** 이전 Feature Improvement v1294 → 현재 Feature Addition v1296 → 다음 Feature Improvement v1298(잠정). 최신 main SHA 1c5b84a1c45baafcca83f375a6f99698121e9bb5, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조 확인. 미병합 기획 Draft #1359 위에 별도 문서 브랜치로 적층하며 Gemini/개발 A/B/C/QA 작업은 건드리지 않는다.
+- **확인된 사실:** main의 NestJS 알림 API는 회원 인증 기반 GET /api/v1/notifications·unread-count 및 CSRF 보호 읽음/전체 읽음 API를 제공한다. NotificationService는 user_id로 제한하지만 created_at DESC + OFFSET 조회다. Next.js /api/notifications는 limit/unreadOnly만 전달한다. 개발 DB public.in_app_notifications는 UUID id·user_id, category/title/body/link/dedupe_key/is_read/read_at/created_at의 10개 컬럼이며 현재 0건이다. (user_id,created_at DESC) 인덱스에는 UUID 순서 보조키가 없다. 이는 기능 공백에 대한 근거이지 운영 사고나 실제 내보낼 알림이 존재한다는 증거가 아니다.
+- **사용자 가치:** 로그인·동의 완료 회원이 **DB에 실제 기록된** 본인 앱 내 알림만 기간·분류·읽음 상태로 검색하고, 내용과 SHA-256 무결성을 검증할 수 있는 UTF-8 CSV로 내려받는다. 모의 알림 6건, localStorage 가상 장마감 알림, 보상 수령, WLD·원장 변경, 오프라인 푸시, 과거 보존기간 보장, 확인되지 않은 분류 매핑은 포함하지 않는다. 알림 저장은 브라우저 전달 성공의 증거가 아니다. 개발 B의 미병합 PR #1356(기존 조회 필터·페이지네이션 수정)과 구현 범위를 분리하고 정확 SHA 검토 후 연계한다.
+
+### 화면·CTA·상태·접근성
+- 기존 /account/notifications → 신규 비공개 /account/notifications/archive. 검색: UTC 시작 포함/종료 미포함 기간, DB 근거로 확인된 분류, 전체/읽음/안읽음, 초기화, 검색, 더 보기, CSV 내보내기, 재시도, 안전한 동일 출처 알림 열기. 기본 최근 30일 검색(실제 데이터 보존 보장 아님), 선택 기간 최대 90일, 서버 컷오프·표시 시간대 명시.
+- SIGN_IN_REQUIRED, CONSENT_REQUIRED, LOADING, EMPTY_VERIFIED, READY, EXPORTING, EXPORT_COMPLETE_VERIFIED, LIMIT_EXCEEDED, SNAPSHOT_EXPIRED, SOURCE_UNAVAILABLE, FORBIDDEN 상태를 분리한다. 타임아웃·해시 불일치 시 성공을 표시하지 않는다. 로그아웃·계정 전환 시 개인 캐시 폐기와 지연 응답 차단.
+- 320px 모바일, 최소 44×44px 터치 대상, 키보드 전용 조작, 스크린리더 라벨·오류 후 포커스·과도하지 않은 결과 수 안내, WCAG 2.2 AA·동작 감소 지원. 회원 페이지 noindex, sitemap 제외, private/no-store 및 X-Robots-Tag noindex.
+
+### API·DB·트랜잭션·보안
+- NestJS GET /api/v1/notifications/archive?from&to&category&readState&limit&cursor: 기본 50/최대 100건, 회원 ID는 인증 세션에서만 결정, ISO UTC·enum 엄격 검증, 400 잘못된 입력, 401 비인증, 403 동의 미완료, 404 타인 데이터, 429 제한, 503 DB 오류. 응답 items/nextCursor/snapshotCutoff/filterHash. Next.js 동일 출처 비캐시 프록시와 Android app-api 동등 계약. moneyverse_app 직접 테이블 SELECT 권한을 새로 주지 않는다.
+- POST /api/v1/notifications/archive/export: CSRF·세션·동의 검사, 회원당 시간당 최대 3회, 한 번의 내보내기 최대 5,000건·UTF-8 2MiB·30초. 초과 시 파일 일부를 보내지 않고 HTTP 413. 응답은 다운로드 헤더, no-store/no-sniff, **실제 바이트의 SHA-256**, rowCount, snapshotCutoff, 필터 지문 포함. CSV 컬럼 id/category/title/body/안전한 link/is_read/read_at_utc/created_at_utc. 내부 dedupe_key·세션 비밀·IP·이메일·타 회원 내용은 제외. RFC 4180 인용·줄바꿈 이스케이프, 선행 공백/제어문자 뒤의 = + - @ 수식 삽입 무력화. 스프레드시트 열기 자체는 무결성 증거가 아니다.
+- 승인된 전진 전용 마이그레이션에서 필요할 때 (user_id,created_at DESC,id DESC) 인덱스를 추가하며 분류 복합 인덱스는 격리 EXPLAIN 이후 결정. SECURITY DEFINER 조회 함수는 search_path 고정·본인 검사·최소 EXECUTE 권한. 기존 알림 행은 수정하거나 백필하지 않는다. CSV는 **단일 PostgreSQL 연결의 REPEATABLE READ READ ONLY 트랜잭션**에서 권한·건수·크기·행·해시를 일관되게 검증하고 완전 생성 후에만 응답한다. 읽기 전용 내보내기에 중복 지급 영수증을 만들지 않는다. 재다운로드는 새로운 스냅샷이며 메타데이터 영수증만으로 동일 파일 재생을 약속하지 않는다. 선택적 감사 메타데이터는 회원·필터 지문·건수·해시·시각만 단기 보관하고 원문 CSV는 저장하지 않는다. 바이트 전송 직전 세션·동의를 재확인한다.
+- 커서는 회원·세션 epoch·필터 지문·UTC 컷오프·마지막 (created_at,id)·만료·스키마 버전을 HMAC 서명하고 오류/타 회원 재사용은 400/410으로 거부한다. 동일 시각 UUID 보조키로 안정 정렬한다. 단순 컷오프는 여러 HTTP 요청의 MVCC 일관성을 보장하지 않으므로 불변 원본 또는 유효한 서버 스냅샷이 없으면 화면 페이징을 BEST_EFFORT로 명시하고 **단일 트랜잭션 CSV만 COMPLETE**로 표시한다. 읽음 변경과 경합하는 경우도 시험한다.
+- 관리자는 k>=20 비식별 내보내기 성공·실패·크기·지연 통계만 조회하며 원문·회원 링크·타인 파일은 볼 수 없다. 회원/IP 속도 제한, 안전 링크 allowlist, 범위/용량/시간 제한, 개인 데이터 없는 분석, 거부 감사 기록 적용.
+
+### KPI·시험·무중단 배포
+- 검증된 서버 이벤트만으로 내보내기 시도/해시 검증 완료/413·429·503/빈 결과/p95 지연/재시도율 측정. 클릭을 성공으로 세지 않고 알림 본문은 분석에 수집하지 않는다.
+- 격리 PostgreSQL에서 동시 내보내기·읽음 변경 100건, 타 회원 접근 100건, 동일 시각 10,001건 합성 알림, UTC/DST 경계, 세션 교체, 동의 해제, CSV 수식 공격, 5,001건·2MiB 초과, 중단 응답, SHA 재계산, 413 부분 파일 없음, ACL·Android·모바일/키보드/스크린리더·기존 알림 회귀를 검증한다. 합성 데이터는 트랜잭션 롤백. **이번 회차 런타임 시험 미수행.**
+- 기능 플래그 notification_archive_export_v1 기본 OFF. 별도 개발 브랜치, 전진 마이그레이션 검토, 정확 후보 SHA 공식 CI·전체 보안 감사·격리 DB 역할 거부 시험·공식 Test 인증 E2E·백업 복원·GitOps 승인 후 1%→10%→100% 순차 배포. 이상 시 플래그 OFF, 계약 호환성 확인 후 앱 라우트 롤백. 자동 운영승격 금지. QA #1317의 프론트 1,404건/운영 감사 PASS는 **미병합 후보**의 결과일 뿐이며 다른 최신 개발 후보는 프론트 6건 실패 및 보안 감사 HOLD. 루트 디스크 99%(약 1.4GiB 여유), 운영 BLOCKED.
+- **외부 독립 근거 10,000건 게이트:** RFC 4180·OWASP API Security Top 10·W3C WCAG 2.2는 승인 전 후보일 뿐. 신규 중복 제거·분류·승인 **0건**, 누적 실제 승인 **UNKNOWN / 10,000**으로 BLOCKED / IN PROGRESS. 근거 충족 주장 금지.
+
+### 실행 가능한 P0/P1 백로그
+- **P0 ENV1296-01:** 타인 작업물 삭제 없이 루트 99% 용량 확보·환경 분리·격리 복원 증명.
+- **P0 SEC1296-02:** 최소권한·본인 BOLA·CSRF·동의·세션 차단·원문 유출 방지.
+- **P0 REL1296-03:** 프론트 6건 실패·보안 감사·Migration 266/280·정확 SHA Test·백업 복원·GitOps 보류 해결.
+- **P0 ARC1296-04:** 모의 알림과 실제 DB 알림의 구분·허위 성공 차단, 개발 B #1356 코드 중복 변경 금지.
+- **P1 ARC1296-05:** 실제 분류 출처·기간/읽음 검색 검증·안전 링크.
+- **P1 ARC1296-06:** 회원 UUID 커서·서명·인덱스·일관성 라벨.
+- **P1 ARC1296-07:** 단일 트랜잭션 CSV·413 완전 차단·수식 공격 방어·SHA-256.
+- **P1 ARC1296-08:** NestJS·Next.js·Android·접근성 동등 구현.
+- **P1 ARC1296-09:** 개인정보·제한·관리자 집계·SEO·KPI.
+- **P1 ARC1296-10:** 격리 실DB 동시성·ACL·10,001건·회귀·정확 SHA 배포/롤백.
+- **백로그 ID:** ENV1296-01 SEC1296-02 REL1296-03 ARC1296-04 ARC1296-05 ARC1296-06 ARC1296-07 ARC1296-08 ARC1296-09 ARC1296-10.
+- **판정:** PARTIAL / DRAFT / RELEASE HOLD. 기획 문서만 수정, 런타임 코드·마이그레이션·DB·WLD·원장·Test·Production 변경 없음.
+
+## v2026.10.26.1294 — F675-130 알림 출처·읽음 컷오프·커서 무결성 (기능 보완 / DRAFT / HOLD)
+- 이전 추가 v1292 → 현재 보완 v1294 → 다음 추가 v1296. 기존 인증·CSRF 읽음/전체 읽음 API를 재사용하며 새 알림 도착 후의 전체 읽음 오인, unreadOnly=false 파싱, UUID 보조 정렬 및 회원·세션 결합 서명 커서를 개선 대상으로 지정한다. 모의 알림과 localStorage 가상 장마감 알림은 실제 이벤트가 아니다. 개발 DB 알림 0건·분류 출처 미확인, 루트 99%, 외부 근거 신규 승인 0/누적 UNKNOWN, 정확 SHA Test·보안 감사·복원 HOLD. P0 ENV1294-01 SEC1294-02 REL1294-03 NOT1294-04, P1 NOT1294-05 NOT1294-06 NOT1294-07 NOT1294-08 NOT1294-09 NOT1294-10. 문서만 변경, 운영 승격 금지.
+
 - **GitHub v1292:** [기획 Draft PR #1354](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354) (미병합 #1349 기반); [개발 이슈 #1353](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353); [서버 용량 #1170 업데이트](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178). 문서만 수정, DRAFT / RELEASE HOLD.
 ## v2026.10.26.1292 — F675-130 회원 검증형 알림 수신 제어·방해금지 시간 (기능 추가 / 기획 초안 / 운영 보류)
 

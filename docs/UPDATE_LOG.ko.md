@@ -1,4 +1,8 @@
 ## 2026-10-26 — 기획 v1290 F675-129 상점 찜 목록 무결성 (기능 보완 / 초안 / 보류)
+- **v1296 engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363 (implementation separately gated; no merge/deploy).
+## 2026-10-26 v1296 — F675-131 회원 알림 보관함 (기능 추가 / DRAFT / HOLD)
+- 이전 보완 v1294 / 현재 추가 v1296 / 다음 보완 v1298(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5. 미병합 #1359 위 문서 전용; 실제 회원 알림 API·개발 DB 10컬럼/0건, 루트 99%/1.4GiB. 영문 정본·한국어 통합 마스터 동등성 및 누락된 v1294 한국어 요약 보강. QA·보안·정확 SHA Test·복원 BLOCKED. 외부 근거 신규 승인 0/누적 UNKNOWN/10,000. 런타임·DB·WLD·Test·운영 변경 없음.
+
 ## 2026-10-26 — 기획 v1294 F675-130 알림 무결성 (기능 보완 / DRAFT / HOLD)
 - 이전 추가 v1292 → 현재 보완 v1294 → 다음 추가 v1296. main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 재확인. 기존 NestJS CSRF 읽음 API 유지, 모의 알림·장마감 표시 차단, unreadOnly=false 변환 위험·모두 읽음 상한 경합·UUID 커서·분류 근거 보완. ENV1294-01 SEC1294-02 REL1294-03 NOT1294-04 NOT1294-05 NOT1294-06 NOT1294-07 NOT1294-08 NOT1294-09 NOT1294-10. 루트 99%/1.6GiB, 운영 HOLD. 외부 근거 신규 승인 0/누적 UNKNOWN·10,000 BLOCKED. 문서만 변경.
 
