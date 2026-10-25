@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { TreasuryReserveGauge } from './treasury-reserve-gauge';
 import { TreasuryProgramCard } from './treasury-program-card';
@@ -95,7 +95,7 @@ describe('National Treasury Portal & 5 Core Expenditure Programs Suite', () => {
     expect(handleClaim).toHaveBeenCalledWith('CITIZEN_DIVIDEND');
   });
 
-  it('renders TreasuryPortalClient with 5 core programs, category tabs, and public ledger stream', () => {
+  it('renders TreasuryPortalClient with 5 core programs, category tabs, and public ledger stream', async () => {
     render(
       <TreasuryPortalClient
         initialOverview={mockOverview}
@@ -131,7 +131,8 @@ describe('National Treasury Portal & 5 Core Expenditure Programs Suite', () => {
     expect(screen.getByPlaceholderText(/예: 델타 트레이딩 랩스/i)).toBeDefined();
 
     // 주민참여예산 거버넌스 섹션 검증
-    expect(screen.getByText('시민 참여형 주민참여예산 투표제')).toBeDefined();
-    expect(screen.getByText(/월덕거래소 주식 매매 수수료 전액 국고 대납 지원/i)).toBeDefined();
+    expect(screen.getByText('시민 주민참여예산 제안')).toBeDefined();
+    await waitFor(() => expect(screen.getByText(/공공사업 제안·투표 기록을 국고 원장과 검증할 수 없습니다/)).toBeDefined());
+    expect(screen.queryByText(/월덕거래소 주식 매매 수수료 전액 국고 대납 지원/i)).toBeNull();
   });
 });

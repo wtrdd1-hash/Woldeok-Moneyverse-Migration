@@ -28,6 +28,7 @@ describe('treasury proposal HTTP boundary', () => {
   it('GET is mounted and refuses invented proposal counts', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/treasury/citizen-proposals');
     expect(response.status).toBe(503);
+    expect(response.headers['cache-control']).toContain('no-store');
     expect(response.body).toMatchObject({ status: 503 });
     expect(JSON.stringify(response.body)).not.toContain('prop-101');
   });

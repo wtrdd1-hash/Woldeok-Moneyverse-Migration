@@ -23,6 +23,20 @@ describe('treasury citizen proposals require authoritative ledger-backed records
     expect(JSON.stringify(body)).not.toContain('prop-101');
   });
 
+  it('does not trust an upstream HTTP 200 with invented vote counts', async () => {
+    vi.mocked(api).mockResolvedValue({ verified: true, proposals: [{ id: 'prop-101', votesCount: 842 }] });
+    const response = await GET();
+    expect(response.status).toBe(503);
+    expect((await response.json()).proposals).toEqual([]);
+  });
+
+  it('requires a signed-in member even for disabled proposal mutations', async () => {
+    vi.mocked(isLoggedInMember).mockResolvedValue(false);
+    const response = await POST(new Request('https://easy-scraping.com/api/treasury/proposals', { method: 'POST' }));
+    expect(response.status).toBe(401);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+  });
+
   it.each(['POST', 'PUT'] as const)('%s never records an unverified proposal or vote', async (method) => {
     const request = new Request('https://easy-scraping.com/api/treasury/proposals', {
       method,
