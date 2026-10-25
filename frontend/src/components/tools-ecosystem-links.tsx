@@ -81,19 +81,19 @@ export function ToolsEcosystemLinks() {
           <div className="grid grid-cols-2 gap-2 text-xs">
             <Link href="/stocks/CHIPS" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
               <span className="font-bold text-foreground">CHIPS</span>
-              <span className="text-[11px] text-muted-foreground">치무 초전도</span>
+              <span className="text-[11px] text-muted-foreground">{localeLabel(locale, '치무 초전도', 'Chimu Semi', 'チム超伝導', '奇武超导')}</span>
             </Link>
             <Link href="/stocks/DUCK" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
               <span className="font-bold text-foreground">DUCK</span>
-              <span className="text-[11px] text-muted-foreground">덕덕 물산</span>
+              <span className="text-[11px] text-muted-foreground">{localeLabel(locale, '덕덕 물산', 'Duck Duck Corp', 'ダックダック物産', '鸭鸭物产')}</span>
             </Link>
             <Link href="/stocks/SPACE" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
               <span className="font-bold text-foreground">SPACE</span>
-              <span className="text-[11px] text-muted-foreground">월덱 우주항공</span>
+              <span className="text-[11px] text-muted-foreground">{localeLabel(locale, '월덱 우주항공', 'Woldeok Aero', 'ウォルドック航空宇宙', '月德航天')}</span>
             </Link>
             <Link href="/stocks/WFIN" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
               <span className="font-bold text-foreground">WFIN</span>
-              <span className="text-[11px] text-muted-foreground">월덱 파이낸셜</span>
+              <span className="text-[11px] text-muted-foreground">{localeLabel(locale, '월덱 파이낸셜', 'Woldeok Fin.', 'ウォルドックフィナンシャル', '月德金融')}</span>
             </Link>
           </div>
         </div>
@@ -111,20 +111,20 @@ export function ToolsEcosystemLinks() {
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
             <Link href="/tools/loan-interest-calculator" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
-              <span className="font-bold text-foreground">대출이자 계산기</span>
-              <span className="text-[11px] text-muted-foreground">원리금 vs 체증식</span>
+              <span className="font-bold text-foreground">{localeLabel(locale, '대출이자 계산기', 'Loan Calculator', 'ローン計算機', '贷款计算器')}</span>
+              <span className="text-[11px] text-muted-foreground">{localeLabel(locale, '원리금 vs 체증식', 'P&I vs Bullet', '元利 vs 一括', '等额本息 vs 先息')}</span>
             </Link>
             <Link href="/tools/dividend-tax-calculator" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
-              <span className="font-bold text-foreground">배당소득세 계산기</span>
-              <span className="text-[11px] text-muted-foreground">15.4% 원천징수</span>
+              <span className="font-bold text-foreground">{localeLabel(locale, '배당소득세 계산기', 'Dividend Tax', '配当所得税', '股息所得税')}</span>
+              <span className="text-[11px] text-muted-foreground">{localeLabel(locale, '15.4% 원천징수', '15.4% Withholding', '15.4% 源泉徴収', '15.4% 预扣税')}</span>
             </Link>
             <Link href="/tools/isa-calculator" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
-              <span className="font-bold text-foreground">ISA 비과세 계산기</span>
-              <span className="text-[11px] text-muted-foreground">200만~400만 한도</span>
+              <span className="font-bold text-foreground">{localeLabel(locale, 'ISA 비과세 계산기', 'Tax-Free Account', '非課税口座', '免税账户')}</span>
+              <span className="text-[11px] text-muted-foreground">{localeLabel(locale, '비과세 절세 한도', 'Tax-Exempt Limits', '非課税限度枠', '免税节税额度')}</span>
             </Link>
             <Link href="/tools/compound-calculator" className="p-2.5 rounded-lg bg-muted/40 hover:bg-muted transition-colors flex flex-col gap-0.5">
-              <span className="font-bold text-foreground">복리 예적금 계산기</span>
-              <span className="text-[11px] text-muted-foreground">월적립 복리 효과</span>
+              <span className="font-bold text-foreground">{localeLabel(locale, '복리 예적금 계산기', 'Compound Calculator', '複利計算機', '复利计算器')}</span>
+              <span className="text-[11px] text-muted-foreground">{localeLabel(locale, '월적립 복리 효과', 'Monthly Compounding', '積立複利効果', '定投复利效应')}</span>
             </Link>
           </div>
         </div>
@@ -142,15 +142,15 @@ export function ToolsEcosystemLinks() {
           </div>
           <div className="flex flex-col gap-1.5 text-xs">
             <Link href="/guide/stock-trading" className="p-2 rounded-lg bg-muted/30 hover:bg-muted transition-colors flex items-center justify-between">
-              <span className="font-medium text-foreground">가상 주식 실전 매매 가이드</span>
+              <span className="font-medium text-foreground">{localeLabel(locale, '가상 주식 실전 매매 가이드', 'Stock Trading Strategy Guide', '株式取引実践ガイド', '股票实战交易指南')}</span>
               <ArrowUpRight className="size-3 text-muted-foreground" />
             </Link>
             <Link href="/guide/virtual-banking" className="p-2 rounded-lg bg-muted/30 hover:bg-muted transition-colors flex items-center justify-between">
-              <span className="font-medium text-foreground">복리 예금 & 이자 파밍 노하우</span>
+              <span className="font-medium text-foreground">{localeLabel(locale, '복리 예금 & 이자 파밍 노하우', 'Compound Savings & Farming Manual', '複利預金・利息ファーミング', '复利储蓄与利息搬砖指南')}</span>
               <ArrowUpRight className="size-3 text-muted-foreground" />
             </Link>
             <Link href="/guide/career-mastery" className="p-2 rounded-lg bg-muted/30 hover:bg-muted transition-colors flex items-center justify-between">
-              <span className="font-medium text-foreground">직업 8대 티어 일일 급여 파밍</span>
+              <span className="font-medium text-foreground">{localeLabel(locale, '직업 8대 티어 일일 급여 파밍', 'Career Tier & Salary Guide', '職業ティア別 給与ファーミング', '职业层级与每日薪资指南')}</span>
               <ArrowUpRight className="size-3 text-muted-foreground" />
             </Link>
           </div>
