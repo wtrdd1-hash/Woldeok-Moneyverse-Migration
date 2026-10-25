@@ -7,13 +7,14 @@
 - Priority: requestClientKey accepts equivalent IPv6 and IPv4-mapped IPv6 spellings as distinct tracker keys, allowing budget fragmentation for a single peer. Duplicate CF-Connecting-IP header arrays are silently first-picked rather than rejected.
 - Scope: backend security identity normalization and regression tests only; no API/DB schema or finance changes.
 - Safety: no shared DB writes, migrations, existing worker branch changes, or production release. Root filesystem 100% (under 1 GiB free); build on data volume only.
-- [ ] Reproduce with RED tests.
+- [x] Reproduce with RED tests (4 failed / 24 passed, 2026-10-26 06:36 KST).
 - [ ] Implement minimal canonical identity normalization and fail-closed ambiguous header handling.
 - [ ] GREEN focused test; backend/full required checks; real PostgreSQL if applicable; official Test exact-SHA if eligible.
 - [ ] Re-fetch main/plans, PR/CI review, final release HOLD and logs.
 
 ## In progress
-- Not yet started.
+- RED: four security assertions failed as expected (expanded IPv6, mapped IPv4, trusted-edge canonicalization, ambiguous CF header array).
+- Existing 24 tests passed; no source implementation changes at this checkpoint.
 
 ## Finished
 - Pending.

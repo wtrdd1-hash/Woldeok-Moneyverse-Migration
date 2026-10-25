@@ -165,3 +165,28 @@ describe('requestPath', () => {
     expect(requestPath({})).toBe('/');
   });
 });
+
+describe('canonical client identity security', () => {
+  it('uses one tracker key for equivalent IPv6 textual forms', () => {
+    const expanded = { headers: {}, socket: { remoteAddress: '2001:0DB8:0000:0:0:0:0:0001' } };
+    const compressed = { headers: {}, socket: { remoteAddress: '2001:db8::1' } };
+    expect(requestClientKey(expanded, { trustForwardedFor: false })).toBe('2001:db8::1');
+    expect(requestClientKey(compressed, { trustForwardedFor: false })).toBe('2001:db8::1');
+  });
+
+  it('uses the same tracker key for IPv4 and its mapped IPv6 representations', () => {
+    for (const peer of ['::ffff:203.0.113.9', '::ffff:cb00:7109', '203.0.113.9']) {
+      expect(requestClientKey({ headers: {}, socket: { remoteAddress: peer } }, { trustForwardedFor: false })).toBe('203.0.113.9');
+    }
+  });
+
+  it('normalizes a trusted edge identity before consuming the shared auth budget', () => {
+    const request = { headers: { 'cf-connecting-ip': '2001:0DB8:0000:0:0:0:0:0001' }, socket: { remoteAddress: '127.0.0.1' } };
+    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('2001:db8::1');
+  });
+
+  it('rejects ambiguous repeated trusted edge headers instead of trusting the first value', () => {
+    const request = { headers: { 'cf-connecting-ip': ['203.0.113.9', '198.51.100.7'] }, socket: { remoteAddress: '127.0.0.1' } };
+    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('127.0.0.1');
+  });
+});
