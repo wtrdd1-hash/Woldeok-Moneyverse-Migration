@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const requireMember = vi.fn();
-const api = vi.fn();
+const { requireMember, api } = vi.hoisted(() => ({ requireMember: vi.fn(), api: vi.fn() }));
 vi.mock('@/lib/session', () => ({ requireMember }));
 vi.mock('@/lib/api', () => ({ api }));
 

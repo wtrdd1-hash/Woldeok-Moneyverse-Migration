@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -105,9 +106,14 @@ export class StockController {
 
   @Get('history')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
   @ApiOperation({ summary: 'Trades made by the caller' })
-  async history(@Req() request: RequestWithSession) {
-    return { trades: await this.service().history(requireUserId(request)) };
+  async history(@Req() request: RequestWithSession, @Query('limit') limit?: string) {
+    if (limit !== undefined && (typeof limit !== 'string' || !/^(?:[1-9]|[1-9][0-9]|100)$/.test(limit))) {
+      throw new BadRequestException('limit must be a whole number between 1 and 100');
+    }
+    return { trades: await this.service().history(requireUserId(request), limit === undefined ? 50 : Number(limit)) };
   }
 
   /**

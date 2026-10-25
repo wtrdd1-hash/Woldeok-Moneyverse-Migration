@@ -14,3 +14,11 @@
 
 ## Finished
 - Pending.
+
+### Mid-task checkpoint
+- RED backend 10/10 expected failures (missing bounded history), frontend import failures for missing serializer/route; recorded in `/srv/moneyverse-data/a1725-{backend,frontend}-red.log`.
+- GREEN backend **10 PASS**, frontend/API/Android **17 PASS**. Bounded 1..100 history, server-authenticated CSV, spreadsheet formula shielding, exact integer strings, private app-api and attachment headers. Source DB function `stock_my_trades(actor,limit)` unchanged.
+- Main and living English master re-fetched; no new main SHA. No migration or WLD writes.
+- [x] TDD RED tests for backend bound/auth, CSV exact precision and injection, private app-api.
+- [x] Implement backend query, web CSV export and app-api privacy headers.
+- [ ] Run focused, full and real-PG/CI gates; capture exact SHA and release blockers.
