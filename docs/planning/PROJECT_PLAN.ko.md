@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **v1296 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1364 (base: unmerged #1359; RELEASE HOLD).
 - **v1296 engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363 (implementation separately gated; no merge/deploy).
 ## v2026.10.26.1296 — F675-131 검증형 회원 알림 보관함 검색·CSV 내보내기 (기능 추가 / DRAFT / HOLD)
 - **회차:** 이전 기능 보완 v1294 → 현재 기능 추가 v1296 → 다음 기능 보완 v1298(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5·AGENTS.md·README.md·영문 정본·국문 대조 재확인. 미병합 기획 Draft #1359 위에 별도 문서 브랜치, A/B/C/Gemini/QA 변경 격리. 기존 알림 조회는 본인 user_id 제한이 있지만 OFFSET·created_at 단독 정렬이고 Next.js 프록시는 보관함 검색·내보내기가 없다. 개발 DB UUID id 포함 10개 컬럼·알림 0건, 실제 전달/분류 확정 증거는 없다.

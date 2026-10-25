@@ -17,3 +17,4 @@
 - DRAFT / RELEASE HOLD; GitHub PR/issue identifiers and final SHA to be added in completion record after remote verification.
 
 - Development issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363
+- Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1364 (base: unmerged #1359; no deployment).

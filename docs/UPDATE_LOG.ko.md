@@ -1,4 +1,5 @@
 ## 2026-10-26 — 기획 v1290 F675-129 상점 찜 목록 무결성 (기능 보완 / 초안 / 보류)
+- **v1296 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1364 (base: unmerged #1359; RELEASE HOLD).
 - **v1296 engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363 (implementation separately gated; no merge/deploy).
 ## 2026-10-26 v1296 — F675-131 회원 알림 보관함 (기능 추가 / DRAFT / HOLD)
 - 이전 보완 v1294 / 현재 추가 v1296 / 다음 보완 v1298(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5. 미병합 #1359 위 문서 전용; 실제 회원 알림 API·개발 DB 10컬럼/0건, 루트 99%/1.4GiB. 영문 정본·한국어 통합 마스터 동등성 및 누락된 v1294 한국어 요약 보강. QA·보안·정확 SHA Test·복원 BLOCKED. 외부 근거 신규 승인 0/누적 UNKNOWN/10,000. 런타임·DB·WLD·Test·운영 변경 없음.

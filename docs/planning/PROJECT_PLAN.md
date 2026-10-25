@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **v1296 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1364 (base: unmerged #1359; RELEASE HOLD).
 - **v1296 engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363 (implementation separately gated; no merge/deploy).
 ## v2026.10.26.1296 — F675-131 Verified Notification Archive Search & CSV Export (Feature Addition / DRAFT / HOLD)
 - **Cycle:** Previous Feature Improvement v1294 → Current Feature Addition v1296 → Next Feature Improvement v1298 (provisional). Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 rechecked; AGENTS.md/README.md/English canonical/Korean plan reviewed; stacked on unmerged planning Draft #1359, separate from A/B/C/Gemini/QA. Source: owner GET notifications exists but OFFSET and created_at-only ordering; Next.js proxy lacks archive filters/export. Development in_app_notifications UUID id, 10 columns, zero rows; no proof of Production delivery or category taxonomy.

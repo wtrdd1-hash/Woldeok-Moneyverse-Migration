@@ -1,4 +1,5 @@
 ## 2026-10-26 — Planning v1290 F675-129 shop wishlist integrity (IMPROVEMENT / DRAFT / HOLD)
+- **v1296 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1364 (base: unmerged #1359; RELEASE HOLD).
 - **v1296 engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363 (implementation separately gated; no merge/deploy).
 ## 2026-10-26 v1296 — F675-131 Verified Notification Archive (Feature Addition / DRAFT / HOLD)
 - Previous Improvement v1294; Current Addition v1296; Next Improvement v1298 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5. Docs-only stacked on #1359; source owner notifications, dev DB 10 columns/0 rows, root 99%/1.4GiB. Full P0/P1 in canonical plan; English/Korean master parity including missing v1294 Korean summary restored. QA/security/exact-SHA Test/restore BLOCKED. External corpus 0 newly accepted/UNKNOWN cumulative of 10,000. No runtime, DB, WLD, Test or Production changes.
