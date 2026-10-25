@@ -20,3 +20,10 @@
 - Implemented fail-closed Next BFF GET/POST/PUT (503, no-store, no invented proposal/vote), accessible honest unavailable state, guarded Nest route, Android app-api allow-list limited to `treasury/citizen-proposals`, with regression tests.
 - Latest remote main and integrated plan re-fetched unchanged at `c9a868b1e622341e2daa8b936ddf0988eda9988e`. No production, DB, migration, other branch or Test writes.
 - Verified no authoritative citizen proposal/voter/settlement SQL table in inspected main/host; real feature remains unavailable until approved DB contract. Full gates and exact-SHA Test remain pending.
+
+## Finished — QA and release HOLD
+- Product SHA `d5a1b4ced9e3d2a1cc6c46063fcd54cb84aab917`. Draft PR #1264; follow-up P0 #1263. Final report commit SHA and CI will be appended to PR comment to avoid a self-referential commit hash.
+- Focused frontend 34 PASS, backend 6 PASS; full backend 1319 PASS/398 SKIP, frontend 1402 PASS/6 FAIL, database 15 PASS/3 SKIP, contract 38 PASS. Typecheck, lint, Nest build, hermetic default Next build and Android contract 179 PASS. Full audit Critical2/High10; production High2 FAIL.
+- Read-only isolated PostgreSQL 17.11: 214 migrations, zero citizen proposal tables, unrelated proposal-hash function only, app ledger INSERT and posting UPDATE denied, ROLLBACK.
+- Test `/api/version` is `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`, not candidate; exact-SHA authenticated E2E BLOCKED. No main merge, Test/Production promotion, restart, rollback, migration, DB/ledger write, or branch deletion.
+- Branch audit: 138 unique non-main refs, 3 conflicts (#1143/#1110/#1107), no safe deletions; other workers untouched. CI #40155178095 in progress, candidate #40155167993 queued at inspection. Production RELEASE HOLD.
