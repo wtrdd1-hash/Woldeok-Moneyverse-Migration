@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Param,
   Post,
   Put,
@@ -42,6 +43,7 @@ export class CentralBankController {
   }
 
   @Get('monetary-aggregates')
+  @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: 'M0(본원통화), M1(협의통화), M2(광의통화) 거시경제 통화량 및 통화승수 조회' })
   async getMonetaryAggregates() {
     return this.centralBankService.getMonetaryAggregates();

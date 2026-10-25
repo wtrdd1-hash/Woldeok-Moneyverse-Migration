@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Optional } from '@nestjs/common';
+import { BadRequestException, Injectable, Optional, ServiceUnavailableException } from '@nestjs/common';
 import { MintService } from '../mint/mint.service';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 import { calculateKinkedInterestRate } from '../bank/kinked-interest';
@@ -27,7 +27,7 @@ export interface ReserveRequirementRecord {
 @Injectable()
 export class CentralBankService {
   constructor(
-    private readonly mintService: MintService,
+    _mintService: MintService,
     @Optional() private readonly discordAlertService?: DiscordAlertService,
   ) {}
 
@@ -48,76 +48,21 @@ export class CentralBankService {
   };
 
   /**
-   * 조폐국 주조 화폐 인수 및 국고 방출 승인 (2단계 상호 견제)
-   * 조폐국이 주조한 M0 화폐를 중앙은행이 심사 후 인수 승인해야만 국고/시장에 유통됨
+   * Acceptance and derived supply figures must not certify process-local mint
+   * records or synthetic deposit multipliers as authoritative monetary facts.
    */
-  async acceptMintBatch(batchId: string, dto: AcceptMintBatchDto, acceptedBy: string) {
-    const batch = await this.mintService.getBatchById(batchId);
-    if (batch.status !== 'PENDING_CENTRAL_BANK_ACCEPTANCE') {
-      throw new BadRequestException(`배치 상태가 중앙은행 인수 대기 상태가 아닙니다 (${batch.status})`);
-    }
-
-    const centralBankTxId = `CB-ACCEPT-${Date.now()}`;
-    const updatedBatch = await this.mintService.markBatchAccepted(batchId, centralBankTxId);
-
-    // 디스코드 관제 웹훅 알림 발송 (비동기 논블로킹)
-    this.discordAlertService?.sendDiscordEmbed({
-      title: '🏦 [국가중앙은행] 조폐국 M0 주조 화폐 공식 인수 및 국고 방출 승인',
-      description: `국가중앙은행 총재 결재를 통해 조폐국 주조 본원통화의 국고 배정 및 시중 유통이 최종 승인되었습니다.`,
-      color: 0x10b981, // Emerald
-      fields: [
-        { name: '승인 트랜잭션 ID', value: `\`${centralBankTxId}\``, inline: true },
-        { name: '승인 배치 ID', value: `\`${batchId}\``, inline: true },
-        { name: '인수 승인액', value: `**+${Number(updatedBatch.amountWld).toLocaleString()} WLD**`, inline: true },
-        { name: '배정 금고', value: dto.targetVaultAllocation || 'TREASURY_MAIN', inline: true },
-        { name: '인수 결재 사유', value: dto.acceptanceReason, inline: false },
-        { name: '승인 책임자', value: acceptedBy, inline: true },
-      ],
-      footer: { text: 'Woldeok Central Bank Monetary Policy Bureau' },
-    }).catch(() => {});
-
-    return {
-      message: '국가조폐국 주조 화폐가 국가중앙은행에 의해 공식 인수 및 유통 승인되었습니다.',
-      centralBankTxId,
-      acceptedBy,
-      targetVaultAllocation: dto.targetVaultAllocation || 'TREASURY_MAIN',
-      acceptanceReason: dto.acceptanceReason,
-      batch: updatedBatch,
-      acceptedAt: new Date().toISOString(),
-    };
+  async acceptMintBatch(_batchId: string, _dto: AcceptMintBatchDto, _acceptedBy: string) {
+    throw new ServiceUnavailableException({
+      code: 'MINT_LEDGER_EVIDENCE_UNAVAILABLE',
+      message: 'Central-bank mint acceptance requires verified ledger settlement.',
+    });
   }
 
-  /**
-   * M0(본원통화), M1(협의통화), M2(광의통화) 거시경제 통화량 지표 산출
-   */
   async getMonetaryAggregates() {
-    const seigniorageLedger = await this.mintService.getSeigniorageLedger();
-    const m0BaseMoney = BigInt(seigniorageLedger.totalMintedM0Wld) - BigInt(seigniorageLedger.totalBurnedDestroyedWld);
-
-    // M1: M0(시중 현금 통화) + 요구불 예금 (대략 M0의 약 1.8배)
-    const demandDeposits = (m0BaseMoney * BigInt(80)) / BigInt(100);
-    const m1NarrowMoney = m0BaseMoney + demandDeposits;
-
-    // M2: M1 + 정기예적금 + 시장형 금융상품 (대략 M1의 약 2.4배)
-    const timeDepositsAndBonds = (m1NarrowMoney * BigInt(140)) / BigInt(100);
-    const m2BroadMoney = m1NarrowMoney + timeDepositsAndBonds;
-
-    // 통화승수 (Money Multiplier = M2 / M0)
-    const moneyMultiplier = m0BaseMoney > BigInt(0)
-      ? (Number(m2BroadMoney) / Number(m0BaseMoney)).toFixed(2)
-      : '1.00';
-
-    return {
-      centralBankAuthority: '대한민국 국가중앙은행 (Woldeok Central Bank)',
-      m0BaseMoneyWld: m0BaseMoney.toString(),
-      m1NarrowMoneyWld: m1NarrowMoney.toString(),
-      m2BroadMoneyWld: m2BroadMoney.toString(),
-      moneyMultiplier,
-      currentBaseRatePercent: this.currentBaseRate.ratePercent,
-      reserveRequirementRatioPercent: this.currentReserveRequirement.ratioPercent,
-      inflationTargetPercent: this.currentBaseRate.targetInflationPercent,
-      calculatedAt: new Date().toISOString(),
-    };
+    throw new ServiceUnavailableException({
+      code: 'MINT_LEDGER_EVIDENCE_UNAVAILABLE',
+      message: 'M0/M1/M2 monetary aggregates require authoritative ledger-backed sources.',
+    });
   }
 
   async getBaseRate(): Promise<BaseRateDecision> {
