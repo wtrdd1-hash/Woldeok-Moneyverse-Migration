@@ -102,10 +102,13 @@ export class PublicKdicController {
           updatedAt: data.fund.updatedAt,
         },
         institutions: data.institutions.map(i => ({
+          id: i.id,
           institutionName: i.institutionName,
           institutionType: i.institutionType,
           bisRatioPct: i.bisRatioPct,
           soundnessGrade: i.soundnessGrade,
+          totalDepositsWld: i.totalDepositsWld,
+          premiumRatePct: i.premiumRatePct,
           status: i.status,
         })),
         summary: data.summary,
