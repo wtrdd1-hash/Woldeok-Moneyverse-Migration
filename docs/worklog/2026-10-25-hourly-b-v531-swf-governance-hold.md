@@ -13,7 +13,7 @@
 - [x] RED regression for direct service invocation, including runtime-enabled bypass and no DB or Discord side effects.
 - [x] Minimal fail-closed service implementation.
 - [x] Focused and required validation, mid-run main and plans refresh.
-- [ ] Draft PR, CI evidence and release HOLD.
+- [x] Draft PR #1277 opened; final-SHA CI pending, release HOLD.
 
 ### RED evidence
 - Pre-change focused Vitest: 9 tests, 7 passed, 2 failed as expected; both runtime-flag variants call the unsafe DB path rather than returning 503. See internal `mv-b-v531-logs/red-test.log`.
@@ -27,3 +27,8 @@
 - No isolated real PostgreSQL app-role integration, authenticated E2E, official Test exact-SHA, GitOps release gate or Production smoke. These remain BLOCKED. Shared Production/dev database MUST NOT be used for destructive integration tests.
 - Mid-run main `c9a868b1e622341e2daa8b936ddf0988eda9988e` unchanged, EN/KO plan re-read; related Draft #1271 runtime CI failed. This change overlaps SWF service file with #1265 and #1271; preserve both modifications during future integration.
 - No merge, Test deployment, Production deployment, branch cleanup or other worker worktree changes. Production HOLD.
+
+## GitHub and deployment evidence
+- Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1277. CI initiated, final PASS not yet established.
+- Official Test backend `/api/version`: `6f697e74b7bf0cd1e4521d36534cfd9c140f8010` (HTTP 200); Production: `6a989b5ac0c6155587d43426d64f6def6b62c917` (HTTP 200). Neither is this candidate.
+- No authorization for merge or GitOps promotion; keep Draft and HOLD. No branch deletion.
