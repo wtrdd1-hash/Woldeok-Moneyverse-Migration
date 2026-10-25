@@ -10,6 +10,7 @@ import {
   InternalServerErrorException,
   Post,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -325,50 +326,17 @@ export class DopamineController {
         throw new InternalServerErrorException(msg);
       }
     }
-    return { claimedQuests: {}, allClearClaimed: false, totalEarnedToday: 0 };
+    throw new ServiceUnavailableException('Daily quest ledger status is unavailable');
   }
 
   @Post('daily-quest/claim')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim official daily quest reward into authoritative ledger (DEF-004 fix)' })
+  @ApiOperation({ summary: 'Daily quest payout is unavailable pending ledger settlement certification' })
   async claimDailyQuest(
     @Req() request: RequestWithSession,
-    @Body() body: DailyQuestClaimDto,
-  ) {
-    const userId = requireUserId(request);
-    if (!body?.questId) {
-      throw new BadRequestException('questId is required');
-    }
-    const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
-      ? body.idempotencyKey
-      : randomUUID();
-
-    if (this.repository) {
-      try {
-        return await this.repository.claimDailyQuest({
-          actorUserId: userId,
-          idempotencyKey: key,
-          questId: body.questId,
-        });
-      } catch (error: unknown) {
-        if (error instanceof DopamineInputError) {
-          throw new BadRequestException(error.message);
-        }
-        const msg = error instanceof Error ? error.message : String(error);
-        throw new InternalServerErrorException(msg);
-      }
-    }
-
-    return {
-      success: true,
-      userId,
-      questId: body.questId,
-      transactionId: randomUUID(),
-      rewardAmount: 500,
-      newBalance: '1000',
-      claimedAt: new Date().toISOString(),
-    };
+    @Body() _body: DailyQuestClaimDto,
+  ): Promise<never> {
+    requireUserId(request);
+    throw new ServiceUnavailableException('Daily quest reward settlement is unavailable');
   }
 }
-
-
