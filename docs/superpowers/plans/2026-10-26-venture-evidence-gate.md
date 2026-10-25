@@ -28,6 +28,6 @@
 - [x] Run GREEN and frontend regression.
 
 ## Task 3 — Verification and review
-- [ ] Verify build, typecheck, lint, API contracts, DB tests, audits and CI.
-- [ ] Refresh main and planning; record all release blockers.
-- [ ] Create Draft PR; do not merge or deploy until full gates pass.
+- [x] Verify build, typecheck, lint, API contracts, DB tests, audits and CI.
+- [x] Refresh main and planning; record all release blockers.
+- [x] Create Draft PR; do not merge or deploy until full gates pass.
