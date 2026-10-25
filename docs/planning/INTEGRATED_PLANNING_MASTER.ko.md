@@ -1,4 +1,50 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
+
+## v2026.10.26.1304 — F675-133 구형·Store 2.0 구매 영수증 통합 조회 (기능 추가 / 기획 초안 / 운영 보류)
+
+**회차:** 이전 기능 보완 v1302 → 현재 기능 추가 v1304 → 다음 기능 보완 v1306(잠정). 시작·중간 원격 `main` `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 동일. 선행 기획 Draft #1384는 미병합이며 이번 작업은 **문서만 변경하는 누적 Draft**이다. Gemini·개발 A/B/C·QA의 코드 및 PR과 분리한다.
+
+### 확인된 코드와 사용자 가치
+- 최신 main의 `frontend/src/app/shop/my-receipts.tsx`는 존재하지만 `frontend/src/app/shop/page.tsx`에서 렌더링하지 않는다. 이 컴포넌트는 요청 실패를 빈 목록으로 바꾸고 `frontend/src/app/api/shop/purchases/route.ts`도 upstream 오류를 HTTP 200 `{purchases:[]}`로 변환한다. 이를 실제 구매 없음으로 표현하면 안 된다.
+- NestJS `GET /api/v1/shop/purchases`는 Migration 009의 `shop_list_my_purchases(actor,30)`을 사용하여 **구형** `public.purchases`만 조회한다. Migration 071의 Store 2.0 `public.shop_purchases`는 별도이며 `id,user_id,catalog_id,quantity,unit_price,transaction_id,purchased_at`을 가진다. Migration 072는 Store 2.0 구매 처리다. 상품명은 나중에 바뀔 수 있으므로 현재 이름을 과거 이름이라고 주장하지 않는다. 구매 행과 거래 FK는 기록된 연결 근거이지 원장 금액 전체 대사 증거가 아니다.
+- 개발 A의 미병합 Draft #1258은 구형 구매 이력의 오류 시 안전한 처리다. 이번 F675-133은 **구형+Store 2.0을 함께 조회**하는 별도 확장이며 해당 PR을 덮어쓰거나 배포됐다고 주장하지 않는다. 구매·환불·WLD·재고·원장 변경은 범위 밖이다.
+
+### 회원 화면·CTA·상태
+- 대상은 로그인·동의 완료한 회원 본인. `/shop`의 **모든 구매 영수증 보기** CTA → 비공개 `/account/shop/purchases`. **전체/구형/Store 2.0** 탭, 기간 필터(기본 90일·조회 최대 366일), **필터 적용**, **이전 구매 더 보기**, **영수증 상세**, **다시 시도** 제공.
+- 영수증은 출처 배지, UUID, **현재 상품명** 표시, UTC 구매 시각의 현지 표시, 실제 기록된 수량·단가·지급 WLD 정수 문자열·원장 거래 UUID·`기록 확인` 상태를 보여준다. 구형 영수증에 수량·단가가 없으면 null/미기록으로 표시하고 1개로 만들어내지 않는다. 별도 원장 대사가 없으면 정산 완료·환불 상태를 단정하지 않는다.
+- LOADING, VERIFIED_EMPTY(권위 있는 API 200/0건), READY, PARTIAL_UNVERIFIED(금액/출처 이상), SOURCE_UNAVAILABLE(오류·잘못된 응답), SESSION_EXPIRED, FILTER_INVALID, CURSOR_EXPIRED, RETRYING을 구분한다. 로그아웃·계정 변경 시 민감한 클라이언트 상태를 폐기한다. 허위 빈 목록·가상 영수증·가짜 총액 금지.
+- 공개 `/shop` 카탈로그의 색인은 유지하되 개인 페이지/BFF/Android 응답은 `noindex`, `private, no-store`. 기능 스위치 `SHOP_UNIFIED_RECEIPTS_ENABLED` 기본 OFF.
+
+### API·권한·응답
+- NestJS `GET /api/v1/shop/purchases/history?source=ALL|LEGACY|CATALOG&from=ISO8601&to=ISO8601&limit=1..50&cursor=opaque` 및 `GET /api/v1/shop/purchases/history/:source/:receiptId` 제안. SessionGuard/AuthenticatedGuard/ConsentGuard 필수; actor는 검증된 세션에서만 추출하며 쿼리나 본문에서 받지 않는다. Next BFF `GET /api/shop/purchases/history`, Android `GET /app-api/v1/shop/purchases/history`가 상태코드와 비공개 헤더를 그대로 전달한다. `apiOrNull`의 실패→빈 목록 변환을 재사용하지 않는다. 쓰기 API·CSRF 예외 없음.
+- 성공 `200 {receipts:[{source,receiptId,productId,itemNameCurrent,nameIsHistorical:false,quantity:null|integer,unitPriceWld:null|string,totalPaidWld:null|string,amountStatus:'RECORDED'|'UNVERIFIED',transactionId,purchasedAt}],nextCursor:null|string,asOf}`. 금액은 JS Number가 아닌 정확한 10진 정수 문자열. 구형 수량/단가는 실제 저장 근거가 없으면 null. Store 2.0 `unit_price*quantity`의 BIGINT 범위 초과나 원장 증거 불일치 시 UNVERIFIED 및 추정 총액 표시 금지.
+- 필터/커서 오류 400, 세션 만료 401, 동의 부족 403, 타인/미존재 상세 동일 404, 커서 만료 410, 회원당 분당 30회 제한 429, DB·upstream 장애 503. 장애 시 `200 []` 금지. 타임아웃·응답 크기 상한 및 민감한 영수증 ID·커서 로그 금지.
+
+### DB·인덱스·트랜잭션·보안·배포
+- 기존 함수는 그대로 유지하고 **추가형 버전 함수** `public.shop_purchase_history_v1(p_actor uuid,p_source text,p_from timestamptz,p_to timestamptz,p_after_at timestamptz,p_after_source_rank smallint,p_after_id uuid,p_limit integer,p_cutoff timestamptz)`를 설계한다. DB 함수 내부에서 두 구매 테이블 모두 회원 소유권 검증, 상품 LEFT JOIN으로 비활성·이름 변경 상품도 기록 유지, 원장 거래 FK 확인, UNION ALL 후 `(purchased_at DESC,source_rank DESC,receipt_id DESC)` 정렬(카탈로그 2/구형 1). 기존 009 함수·API 변경 금지. 280번 이상 Migration 충돌·체크섬 이력 해결 전 신규 번호 예약 금지.
+- Store 2.0 기존 PK/FK/수량·단가 양수 제약 유지. 양쪽 테이블 `(user_id,purchased_at DESC,id DESC)` 후보 인덱스는 EXPLAIN·디스크·락 비용을 확인한 뒤 승인한다. 신규 테이블 **없음**. PUBLIC 및 app 직접 구매 테이블 SELECT/DML 금지, 검토된 SECURITY DEFINER 함수 EXECUTE만 허용. 세션 actor 위조 및 #993 광범위 DML은 별도 P0.
+- 여러 읽기가 필요할 때 단일 페이지 쿼리는 READ ONLY REPEATABLE READ 트랜잭션. 페이지 간 서명 커서는 actor·세션 세대·필터·cutoff·마지막 정렬키와 결합하고 TTL 15분. 신규 구매는 새로고침 전까지 제외한다. **페이지 간 동일 MVCC 스냅샷을 보장하는 설계는 아님**을 명시하고 과거 날짜 백필에 대한 검증·안내를 추가한다. 금융 행 잠금·원장 쓰기·GET 멱등키 없음.
+- 관리자는 `/admin/shop`에서 20명 이상 집계된 출처별 적용률·오류율·불일치 건수만 본다. 개인 영수증 열람은 별도 승인 없이는 금지. 엄격한 UUID/기간/열거형 검증, 파라미터 SQL, 소유권 404, 30/min 남용 방지, 개인정보 최소화, 법정/원장 보존 정책 유지. 개인 UI 숨김으로 금융 원본을 삭제하지 않는다.
+- Next.js/Android 동일 계약, 320px·200% 확대·키보드·스크린리더 상태 알림·WCAG 2.2 AA, 권장 44×44px 터치 CTA. KPI는 실제 빈 목록과 장애 구분 정확성, 구형/신형 포함률, 상세 오류율, p95 <800ms(격리 Test 목표), 커서 안정성. 분석 이벤트에 회원·영수증 식별자 미포함.
+- 테스트: 격리 실제 PostgreSQL의 양쪽 출처, 동일 시각·출처별 동일 UUID, 합성 10,001건, 타 회원 접근 100건, 구형 30건 경계, 상품명 변경·비활성, 신규 구매/백필 경합, BIGINT 오버플로·원장 연결 불일치, 실제 0건 vs 503, 위변조/만료 커서, 로그아웃, Android 계약, 320px·200% 접근성. 정확 SHA 공식 Test 인증 E2E, 프론트·백·DB·app-api 전체 CI, 보안 감사, 백업 복원, 승인된 GitOps 전에는 배포 금지. 롤백은 기능 OFF 또는 읽기 전용 코드 되돌리기; 함수·인덱스는 의존성·잠금 검토 후 철회한다.
+
+### P0/P1 개발 인계
+| 우선순위 | ID | 검증 가능한 산출물 |
+| --- | --- | --- |
+| P0 | ENV1304-01 | 루트 100%(약 737MiB 여유) 안전한 용량 확보·격리 DB·백업 복원, 타 작업자 파일 보호. |
+| P0 | SEC1304-02 | app 역할 최소권한·PUBLIC 은행 함수·인증 actor 결합 부정 테스트, 실 DB 쓰기 금지. |
+| P0 | REL1304-03 | QA v1286 테스트/감사 FAIL, Migration 266/280 이력, 정확 SHA 공식 Test 및 승격 차단. |
+| P0 | SHP1304-04 | 구매 API 실패의 허위 빈 목록 제거, 구형만 조회한 결과를 전체 내역으로 표시 금지; 미병합 A #1258과 조율. |
+| P1 | SHP1304-05 | 양쪽 구매 출처 소유자 전용 SECURITY DEFINER 조회·안정 정렬·EXPLAIN 인덱스. |
+| P1 | SHP1304-06 | 금액/출처 스키마·불변 영수증 식별·오버플로·불일치 대응. |
+| P1 | SHP1304-07 | NestJS 필터·상세·actor/세션 서명 커서·읽기 전용 트랜잭션. |
+| P1 | SHP1304-08 | Next.js 비공개 페이지·BFF·Android 동등성·정확한 오류/빈 목록 UI. |
+| P1 | SHP1304-09 | 관리자 비식별 통계·개인정보·SEO·접근성·요청 제한·KPI. |
+| P1 | SHP1304-10 | 격리 PG 소유권·ACL·경합·10,001건 회귀·정확 SHA E2E·기능 OFF 롤백. |
+
+**근거/출시 게이트:** QA v1286(07:26 KST)에서 main 타입검사·린트·빌드 PASS, 프론트 6건 FAIL, 운영·전체·봇 감사 FAIL, 공식 정확 SHA 인증 Test·격리 복원 미검증; 루트 100%. 외부 독립 발행기관 PostgreSQL/OWASP/W3C 3곳 검토, **신규 중복 제거 승인 0건·누적 승인 UNKNOWN/10,000 → BLOCKED / IN PROGRESS**. 런타임·DB·원장·WLD·Test·Production·기능 스위치 변경 없음.
+
 - **v1302 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384 (stacked on unmerged #1379; documentation only, DRAFT / RELEASE HOLD).
 
 ## v2026.10.26.1302 — F675-132 로그인 세션 별칭 API·세션 철회 경합·신뢰 경계 보완 (기능 보완 / 초안 / 운영 보류)

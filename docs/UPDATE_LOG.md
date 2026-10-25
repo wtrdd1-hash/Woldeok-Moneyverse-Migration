@@ -1,4 +1,10 @@
 - v1302 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384; issue #1378, root capacity #1170; RELEASE HOLD.
+- v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
+
+## 2026-10-26 08:xx KST — Planning v1304 / F675-133 (Feature Addition / DRAFT / RELEASE HOLD)
+- Previous Improvement v1302 → Current Addition v1304 → Next Improvement v1306 provisional; main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` start/mid unchanged. Source: unmounted `MyReceipts`, Next purchase BFF false-empty on upstream failure, legacy 30-only `shop_list_my_purchases`, distinct Store 2.0 `shop_purchases`. Proposed owner-only unified history with source-specific immutable receipt identity, exact historical amount strings, current-name disclaimer, fail-closed states, signed cursor and Android parity. Coordinate unmerged A #1258; avoid other worker changes.
+- P0 ENV1304-01 SEC1304-02 REL1304-03 SHP1304-04; P1 SHP1304-05 SHP1304-06 SHP1304-07 SHP1304-08 SHP1304-09 SHP1304-10. QA v1286 frontend 6 FAIL/audits FAIL, root 100% ~737MiB, Test exact-SHA/restore HOLD. 3 independent publisher families reviewed, 0 newly accepted, cumulative UNKNOWN/10,000 BLOCKED. Documentation only; no runtime/DB/ledger/WLD/Test/Production writes.
+
 ## 2026-10-26 07:xx KST — Planning v1302 / F675-132 (Feature Improvement / DRAFT / RELEASE HOLD)
 - Previous Addition v1300 → Current Improvement v1302 → Next Addition v1304 provisional; main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` start/mid verified, predecessor Draft #1379 unmerged. Corrected in-place PostgreSQL function return-shape assumption (Migration 213), false-empty sessions on API failure, spoofable device-label icon, DELETE body portability and revocation-vs-alias lock races. Proposed versioned read function, body-free DELETE with If-Match/Idempotency-Key, ETag/412/428, owner revalidation, CAS tombstone, deadlock tests and flag-off rollback. QA v1285 FAILED/HOLD, root 100% (~786MiB), release gates blocked. P0/P1 4/6; external corpus 0 new, cumulative UNKNOWN/10,000 BLOCKED. No runtime, DB, WLD, Test or Production writes.
 

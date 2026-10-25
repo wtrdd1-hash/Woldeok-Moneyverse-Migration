@@ -1,4 +1,10 @@
 - v1302 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384; issue #1378, root capacity #1170; RELEASE HOLD.
+- v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
+
+## 2026-10-26 08:xx KST — 기획 v1304 / F675-133 (기능 추가 / 초안 / 운영 보류)
+- 이전 보완 v1302 → 현재 추가 v1304 → 다음 보완 v1306(잠정); main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 동일. main의 미연결 `MyReceipts`, Next 구매 BFF의 장애→빈 목록, 구형 30건 함수, 별개 Store 2.0 구매 테이블 확인. 소유자 전용 통합 이력, 출처별 불변 영수증 키, 정확한 과거 금액 문자열, 현재 상품명 주의 표시, 안전한 오류 상태, 서명 커서, Android 동등성 설계. 개발 A 미병합 #1258과 분리.
+- P0 ENV1304-01 SEC1304-02 REL1304-03 SHP1304-04; P1 SHP1304-05 SHP1304-06 SHP1304-07 SHP1304-08 SHP1304-09 SHP1304-10. QA v1286 프론트 6건 실패·보안 감사 실패, 루트 100% 약 737MiB, 정확 SHA Test·복원 보류. 외부 발행기관 3곳 검토, 신규 승인 0건·누적 UNKNOWN/10,000 BLOCKED. 문서 외 런타임·DB·원장·WLD·Test·Production 변경 없음.
+
 ## 2026-10-26 07시 KST — 기획 v1302 / F675-132 (기능 보완 / 초안 / 운영 보류)
 - 이전 추가 v1300 → 현재 보완 v1302 → 다음 추가 v1304(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 동일, 선행 Draft #1379 미병합. Migration 213 반환형 직접 변경 불가, API 실패의 허위 빈 세션 목록, 별칭을 이용한 기기 아이콘 오인, DELETE 본문 호환성, 철회와 별칭 잠금 경합을 보완. 버전형 조회 함수, 본문 없는 DELETE/If-Match/Idempotency-Key, ETag/412/428, 소유권 재검증·CAS 묘비·데드락 회귀·기능 OFF 롤백을 설계. QA v1285 실패/보류, 루트 100%(~786MiB), 운영승격 차단. P0/P1 4/6, 외부 신규 승인 0건·누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·WLD·Test·Production 변경 없음.
 

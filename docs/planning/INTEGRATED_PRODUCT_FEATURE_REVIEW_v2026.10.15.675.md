@@ -1,4 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
+
+## Planning v1304 — F675-133 Cross-Generation Verified Shop Purchase History (Addition / DRAFT / HOLD)
+- Previous Improvement v1302 → Current Addition v1304 → Next Improvement v1306 (provisional). Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` start/mid unchanged; prior Draft #1384 unmerged. Planning only, no runtime/DB/ledger/WLD/Test/Production change.
+- Main `MyReceipts` is not mounted on `/shop`, legacy `GET /api/v1/shop/purchases` returns only `public.purchases` latest 30 and Next BFF masks upstream errors as 200/empty; Store 2.0 `shop_purchases` is separate. Proposed owner-only dual-source history `/account/shop/purchases`, exact amount strings, source badges, truthful error/empty, signed stable cursor and detail; current item names are not historical snapshots. Coordinate A's unmerged legacy-history Draft #1258.
+- P0 ENV1304-01 SEC1304-02 REL1304-03 SHP1304-04; P1 SHP1304-05 SHP1304-06 SHP1304-07 SHP1304-08 SHP1304-09 SHP1304-10. Implementable UX/API/DB/security/SEO/Android/a11y/KPI/isolated-PG/rollback in [integrated English master](INTEGRATED_PLANNING_MASTER.md), Korean parity in .ko.md. QA v1286 FAIL/HOLD (six frontend tests and dependency audits), root 100% ~737MiB; exact-SHA Test/restore/DB ACL remain blocked. External publishers reviewed 3; 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED.
+
 - **v1302 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384 (stacked on unmerged #1379; documentation only, DRAFT / RELEASE HOLD).
 
 ## Planning v1302 — F675-132 Session Nickname Contract Hardening (Improvement / DRAFT / HOLD)

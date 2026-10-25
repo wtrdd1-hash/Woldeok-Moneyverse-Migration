@@ -1,4 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
+- v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
+
+## 기획 v1304 — F675-133 구형·Store 2.0 구매 영수증 통합 조회 (기능 추가 / 초안 / 보류)
+- 이전 보완 v1302 → 현재 추가 v1304 → 다음 보완 v1306(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 동일, 선행 Draft #1384 미병합. 문서 기획만 진행하며 런타임·DB·원장·WLD·Test·Production 변경 없음.
+- main의 `MyReceipts`는 `/shop`에 연결되지 않았고 구형 `/api/v1/shop/purchases`는 `public.purchases` 최신 30건만 조회하며 Next BFF는 오류를 200/빈 목록으로 숨긴다. Store 2.0 `shop_purchases`는 별개. 회원 전용 `/account/shop/purchases` 양쪽 출처, 정확한 금액 문자열, 출처 표시, 진실한 빈 목록/장애, 서명 커서·상세를 설계한다. 현재 상품명은 과거 이름이 아니다. 개발 A 미병합 구형 이력 Draft #1258과 조율.
+- P0 ENV1304-01 SEC1304-02 REL1304-03 SHP1304-04; P1 SHP1304-05 SHP1304-06 SHP1304-07 SHP1304-08 SHP1304-09 SHP1304-10. UI/API/DB/보안/SEO/Android/접근성/KPI/격리 PG/롤백은 영문 통합 마스터와 동등한 한국어 마스터에 상세 명세. QA v1286 실패/보류(프론트 6건, 보안 감사), 루트 100% 약 737MiB; 정확 SHA Test·복원·DB 권한 검증 차단. 외부 발행기관 3곳 검토, 신규 승인 0건·누적 UNKNOWN/10,000 BLOCKED.
+
 - **v1302 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384 (stacked on unmerged #1379; documentation only, DRAFT / RELEASE HOLD).
 
 ## v2026.10.26.1302 — F675-132 세션 별칭 계약·철회 경합 무결성 보완 (기능 보완 / 초안 / 운영 보류)
