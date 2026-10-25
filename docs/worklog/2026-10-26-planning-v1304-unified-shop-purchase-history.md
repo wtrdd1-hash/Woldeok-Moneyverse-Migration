@@ -1,4 +1,5 @@
 # Planning v1304 — F675-133 Unified Shop Purchase History (2026-10-26, DRAFT / RELEASE HOLD)
+- v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
 
 **Cycle:** Previous Feature Improvement v1302; Current Feature Addition v1304; Next Feature Improvement v1306 provisional.
@@ -15,3 +16,9 @@
 - User flow, owner-only read API, dual-source SECURITY DEFINER union, stable keyset, 15-minute signed cursor, precise amount semantics, admin anonymized metrics, Android, SEO, WCAG 2.2 AA, Test exact-SHA, feature-OFF rollback in integrated masters.
 - External independent references reviewed (PostgreSQL transaction isolation, OWASP API object authorization, W3C WCAG 2.2): three publisher families, **zero** newly verified/approved deduplicated evidence records; cumulative accepted **UNKNOWN/10,000**, BLOCKED/IN PROGRESS. Review is not approval or acquisition of 10,000 records.
 - No runtime, database, WLD, ledger, Test, Production or feature switch changes. No merge or deployment; draft PR only.
+
+## Reference review (not approved corpus records)
+- PostgreSQL: https://www.postgresql.org/docs/current/transaction-iso.html
+- OWASP: https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/
+- W3C: https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum
+- These are reference publishers only, not 10,000 independently acquired and deduplicated evidence records.

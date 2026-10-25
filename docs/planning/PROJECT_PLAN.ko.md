@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
 
 ## 기획 v1304 — F675-133 구형·Store 2.0 구매 영수증 통합 조회 (기능 추가 / 초안 / 보류)

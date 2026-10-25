@@ -1,4 +1,5 @@
 - v1302 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384; issue #1378, root capacity #1170; RELEASE HOLD.
+- v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
 
 ## 2026-10-26 08:xx KST — Planning v1304 / F675-133 (Feature Addition / DRAFT / RELEASE HOLD)

@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
 
 ## v2026.10.26.1304 — F675-133 Verified Cross-Generation Shop Purchase History (Feature Addition / PLANNING DRAFT / RELEASE HOLD)

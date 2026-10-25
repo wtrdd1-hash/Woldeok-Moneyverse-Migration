@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
 
 ## Planning v1304 — F675-133 Cross-Generation Verified Shop Purchase History (Addition / DRAFT / HOLD)
