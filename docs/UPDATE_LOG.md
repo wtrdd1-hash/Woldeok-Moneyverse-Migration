@@ -1,3 +1,8 @@
+## 2026-10-26 — Planning v1288 F675-129 verified shop wishlist (ADDITION / DRAFT / HOLD)
+- Previous Improvement v1286 → Current Addition v1288 → Next Improvement v1290 provisional; remote main `1c5b84a1` start/mid; stacked Draft #1340, engineering [#1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344); docs-only, no runtime/DB/WLD/ledger/Test/Production changes.
+- Main shop catalog and purchase routes inspected, no owner wishlist CRUD found. New 30-item owner wishlist, verified receipts, live stock/price BIGINT string, atomic idempotency, DB owner privilege, privacy, mobile/a11y/SEO, feature OFF/rollback. P0 4 + P1 6 in EN/KO integrated plans.
+- QA v1278 raw frontend 1397 pass/6 fail/test timeout, audits fail, root 98%/~2.1GiB, Production HOLD. Independent approved new 0, cumulative UNKNOWN/10,000 BLOCKED.
+
 ## 2026-10-25 — Planning v1286 F675-128 filter/decimal integrity (DRAFT / HOLD)
 - **GitHub planning review:** [Draft PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (stacked on #1335, unmerged); [development handoff #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 - Previous Addition v1284 → Current Improvement v1286 → Next Addition v1288 provisional; main `1c5b84a1` checked at start/mid, prior Draft #1335. Scope: planning docs only, no runtime/DB/WLD changes.

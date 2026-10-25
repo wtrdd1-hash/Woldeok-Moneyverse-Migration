@@ -1,5 +1,13 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1288 / F675-129 — Verified member shop wishlist (Addition / DRAFT / HOLD)
+- Main `1c5b84a1` start/mid; previous Improvement v1286 → Addition v1288 → next Improvement v1290 provisional; unmerged planning Draft #1340 and separate engineering [#1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344). No overlap with A/B/C/Gemini/QA runtime changes.
+- Source-verified: shop catalog UUID/code/BIGINT price and existing public/member catalog, holdings and purchase APIs; owner wishlist CRUD not identified. 30 active saves/member, server-confirmed receipts, live availability and exact integer-WLD strings, no price lock, reservation, auto purchase, rewards or fake settlement.
+- Owner-only Next/Nest/Android CRUD, atomic 30-quota/UUID idempotency/revision CAS, DB SECDEF+least privilege, merge/erasure, signed keyset, admin k>=20, private SEO and WCAG AA. Full acceptance and rollback in integrated master.
+- P0 ENV1288-01 SEC1288-02 REL1288-03 SHP1288-04; P1 SHP1288-05 SHP1288-06 SHP1288-07 SHP1288-08 SHP1288-09 SHP1288-10. QA v1278 raw 1397 pass/6 fail/test timeout/audits fail; root 98%, Production HOLD. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED.
+- **Backlog IDs:** ENV1288-01 SEC1288-02 REL1288-03 SHP1288-04 SHP1288-05 SHP1288-06 SHP1288-07 SHP1288-08 SHP1288-09 SHP1288-10
+
+
 ## v1286 / F675-128 — Marketplace search semantics and decimal integrity (Improvement / DRAFT / HOLD)
 - **GitHub planning review:** [Draft PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (stacked on #1335, unmerged); [development handoff #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 - Source-confirmed contract mismatches: NUMERIC(20,4) versus UI BigInt/Number sorting, unescaped ILIKE wildcard, seller-name placeholder not supported by SQL, unbounded query DTO, OFFSET and missing unique sort; these are risks, not observed incidents.

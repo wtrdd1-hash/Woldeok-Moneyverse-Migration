@@ -1,5 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.26.1288 — F675-129 회원 전용 검증형 상점 찜 목록 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1286 → 현재 기능 추가 v1288 → 다음 기능 보완 v1290(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인; AGENTS.md·README.md·영어 canonical 기획서 및 한국어 대조본 검토. 미병합 Draft #1340 위 문서 브랜치, 별도 개발 [#1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344); A/B/C·Gemini·QA와 변경 분리.
+- **실제 코드:** 상점 공개/회원 카탈로그·보유·구매 API는 존재하나 확인한 main에서 본인 찜 목록 CRUD는 미확인. Migration 071의 상품 UUID/고유 코드/BIGINT 정수 WLD 가격/활성·재고와 075의 조회 함수를 근거로 설계. 찜은 재고 예약·구매·소유·가격 고정·WLD/원장 변경이 아니다. 운영 사고 단정 금지.
+- **신규 회원 흐름:** `/shop` 찜하기/해제 → 서버 영수증 검증 → `/account/shop-wishlist`에서 상점에서 보기/제거. 회원당 활성 30개, 실시간 가용성·정확 정수 WLD 문자열·품절 상태, 허위 성공 금지. 인증·동의·변경 CSRF, 본인 GET/POST/DELETE, UUID 멱등성, 버전 CAS, 타 회원 404, 409/429/503, Android 동등·개인 noindex/no-store.
+- **DB/보안:** 순방향 찜·불변 영수증 테이블, 회원+상품 UNIQUE, 활성 인덱스, 원자적 30개 상한·재시도, DB SECURITY DEFINER 본인 검사·최소권한. 탈퇴·병합 개인정보 정책, 관리자 k>=20 비식별 통계, BIGINT 문자열·모바일 WCAG AA·검증 KPI·기능 기본 OFF. 전체 화면·API·제약·테스트·롤백은 [통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- **P0:** ENV1288-01 SEC1288-02 REL1288-03 SHP1288-04. **P1:** SHP1288-05 SHP1288-06 SHP1288-07 SHP1288-08 SHP1288-09 SHP1288-10. 완료 QA v1276 FAILED/HOLD; v1278 원시 결과 1397 통과/6 실패, test 종료 124, 감사 실패, 루트 98%/2.1GiB. 정확 SHA 금융 Test·격리 복원 미검증, 운영 BLOCKED.
+- 외부 독립 근거 신규 승인 0, 누적 중복 제거·분류·승인 미확인 / 목표 10,000, BLOCKED / IN PROGRESS. 기획 문서만 변경, 런타임/DB/Test/Production 미배포.
+- **Backlog IDs:** ENV1288-01 SEC1288-02 REL1288-03 SHP1288-04 SHP1288-05 SHP1288-06 SHP1288-07 SHP1288-08 SHP1288-09 SHP1288-10
+
+
 ## v2026.10.25.1286 — F675-128 검색 조건·금액 정밀도 보완 (기능 보완 / 초안 / 운영 보류)
 - **GitHub 기획 검토:** [초안 PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (기존 #1335 기반, 미병합); [개발 인계 #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 - 이전 추가 v1284 → 현재 보완 v1286 → 다음 추가 v1288(잠정). 최신 main `1c5b84a1` 시작·중간 재확인, 미병합 기획 #1335와 개발 이슈 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334) 분리.

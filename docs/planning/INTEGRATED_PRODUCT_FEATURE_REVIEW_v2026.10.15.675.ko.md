@@ -1,5 +1,13 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1288 / F675-129 — 회원 전용 검증형 상점 찜 목록 (기능 추가 / 초안 / 보류)
+- main `1c5b84a1` 시작·중간, 이전 보완 v1286 → 현재 추가 v1288 → 다음 보완 v1290(잠정). 미병합 기획 Draft #1340, 별도 개발 [#1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344); A/B/C·Gemini·QA 런타임과 분리.
+- 실제 카탈로그 UUID/코드/BIGINT 가격, 공개·회원 카탈로그·보유·구매 API 확인; 본인 찜 CRUD 미확인. 회원당 30건·서버 영수증·현재 재고·정수 WLD 문자열; 가격 고정·예약·자동 구매·보상·허위 정산 없음.
+- Nest/Next/Android 본인 CRUD, 원자적 상한·UUID 멱등성·버전 CAS, DB SECDEF 최소권한, 병합/삭제, 서명 커서, 관리자 k>=20, 개인 noindex, WCAG AA. 상세는 통합 마스터.
+- P0 ENV1288-01 SEC1288-02 REL1288-03 SHP1288-04; P1 SHP1288-05 SHP1288-06 SHP1288-07 SHP1288-08 SHP1288-09 SHP1288-10. QA v1278 원시 1397 통과/6 실패·시간초과·감사 실패, 루트 98%, 운영 보류. 외부 신규 승인 0·누적 미확인/10,000 BLOCKED.
+- **Backlog IDs:** ENV1288-01 SEC1288-02 REL1288-03 SHP1288-04 SHP1288-05 SHP1288-06 SHP1288-07 SHP1288-08 SHP1288-09 SHP1288-10
+
+
 ## v1286 / F675-128 — 마켓 검색 의미·소수 금액 무결성 (기능 보완 / 초안 / 보류)
 - **GitHub 기획 검토:** [초안 PR #1340](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1340) (기존 #1335 기반, 미병합); [개발 인계 #1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334).
 - 실제 코드: NUMERIC(20,4)와 BigInt/Number 정렬 충돌, ILIKE 와일드카드, 판매자명 UI/SQL 불일치, DTO 길이 제한 부재, OFFSET·비유일 정렬. 실제 운영 사고 증거는 아님.
