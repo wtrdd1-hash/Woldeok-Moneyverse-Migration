@@ -31,31 +31,7 @@ export class PostgresCollectionRepository {
     return this.pool;
   }
 
-  // Ensure default seed pieces exist for user
-  async ensureSeedPieces(userId: string): Promise<void> {
-    const existing = await queryOne<{ count: string }>(
-      this.client,
-      `SELECT count(*)::text AS count FROM public.user_collections WHERE user_id = $1::uuid;`,
-      [userId],
-    );
-
-    if (!existing || Number.parseInt(existing.count, 10) === 0) {
-      await queryOne(
-        this.client,
-        `INSERT INTO public.user_collections (user_id, code, name, category, rarity, provenance, icon, is_favorite, user_note, acquired_at)
-         VALUES
-         ($1::uuid, 'FIRST_CAPITAL_BADGE', '최초의 수도 개척 훈장', 'SEASON', 'LEGENDARY', '시즌 1 First Capital 오픈 주간 공공 기여 및 수도 건설 참여 회원에게 수여된 불멸의 훈장', '🏛️', true, '첫 시즌의 수도 건설을 함께한 기념비적인 조각.', '2026-08-15'::timestamptz),
-         ($1::uuid, 'ANTIQUE_SAFE_KEY', '골든 헤리티지 금고 열쇠', 'BANKING', 'EPIC', '초기 가상 은행 신용 등급 우수 회원에게 배정된 프라이빗 아카이브 인증 키', '🔑', false, '신용 관리 1등급 달성 기념.', '2026-08-28'::timestamptz),
-         ($1::uuid, 'NEO_CYBER_CASINO_CHIP', '월덕 카지노 리미티드 칩', 'CASINO', 'RARE', '카지노 7대 게임 정규 그랜드 오픈 이벤트 참여 한정 소장용 기념 칩', '🎲', false, '', '2026-09-05'::timestamptz),
-         ($1::uuid, 'SMART_LOGISTICS_PERMIT', '스마트 운송 물류 허가서', 'BUSINESS', 'RARE', '가상 사업체 B2B 공급망 개척 및 물류센터 가동 인가 공문서', '📜', true, '물류 사업 흑자 전환 기념.', '2026-09-18'::timestamptz)
-         ON CONFLICT (user_id, code) DO NOTHING;`,
-        [userId],
-      );
-    }
-  }
-
   async listCollections(userId: string): Promise<CollectionPieceRow[]> {
-    await this.ensureSeedPieces(userId);
     return queryRows<CollectionPieceRow>(
       this.client,
       `SELECT id::text, code, name, category, rarity, provenance, icon,
@@ -99,26 +75,14 @@ export class PostgresCollectionRepository {
     return !!row?.id;
   }
 
-  async getCurationStatus(userId: string): Promise<CurationStatusRow> {
-    const existing = await queryOne<CurationStatusRow>(
+  async getCurationStatus(userId: string): Promise<CurationStatusRow | null> {
+    return queryOne<CurationStatusRow>(
       this.client,
       `SELECT ladder_step AS "ladderStep", timeline_day AS "timelineDay", updated_at::text AS "updatedAt"
        FROM public.user_curation_progress
        WHERE user_id = $1::uuid;`,
       [userId],
     );
-
-    if (existing) return existing;
-
-    const inserted = await queryOne<CurationStatusRow>(
-      this.client,
-      `INSERT INTO public.user_curation_progress (user_id, ladder_step, timeline_day)
-       VALUES ($1::uuid, 1, 'D7')
-       ON CONFLICT (user_id) DO UPDATE SET updated_at = clock_timestamp()
-       RETURNING ladder_step AS "ladderStep", timeline_day AS "timelineDay", updated_at::text AS "updatedAt";`,
-      [userId],
-    );
-    return inserted ?? { ladderStep: 1, timelineDay: 'D7', updatedAt: new Date().toISOString() };
   }
 
   async advanceCuration(
@@ -127,8 +91,8 @@ export class PostgresCollectionRepository {
     timelineDay?: string,
   ): Promise<CurationStatusRow> {
     const current = await this.getCurationStatus(userId);
-    const nextStep = targetStep !== undefined ? targetStep : Math.min(7, current.ladderStep + 1);
-    const nextDay = timelineDay ?? current.timelineDay;
+    const nextStep = targetStep !== undefined ? targetStep : Math.min(7, (current?.ladderStep ?? 0) + 1);
+    const nextDay = timelineDay ?? current?.timelineDay ?? 'D7';
 
     const updated = await queryOne<CurationStatusRow>(
       this.client,
