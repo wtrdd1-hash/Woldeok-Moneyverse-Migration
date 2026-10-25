@@ -16,3 +16,9 @@
 
 ## Finished
 - Pending. No main/Test/Production action authorized by this log.
+
+### 12:33 KST — RED checkpoint
+- RED backend: 3 expected failures (auction create, bid, environment bypass) and 1 read-only SELECT baseline PASS. Verified with NODE_ENV=test (initial run also exposed a test regex typo, fixed before authoritative RED).
+- RED frontend: 4 expected failures — invented starter listings, missing failure alert, no verified-only listing, malformed payload not rejected. First attempt without NODE_ENV=test failed in React act setup, corrected environment before authoritative RED.
+- Android existing gateway test to extend with hold-status propagation; no product code changed at this checkpoint.
+- Re-fetched main and integrated English planning master; C #1238 edits auction ticker, not marketplace/auction-view or backend marketplace service.

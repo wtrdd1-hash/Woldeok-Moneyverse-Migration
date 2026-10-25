@@ -121,6 +121,30 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
+  it('preserves auction financial hold 503, no-store and session headers for Android clients', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const upstream = vi.fn(async (_target: RequestInfo | URL, init?: RequestInit) => {
+      const headers = new Headers(init?.headers);
+      expect(headers.get('cookie')).toBe('mv_session=fixture');
+      return new Response(JSON.stringify({
+        statusCode: 503,
+        message: 'auction ledger settlement is not certified',
+      }), {
+        status: 503,
+        headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', upstream);
+    const response = await GET(
+      request('/app-api/v1/marketplace/auctions', { cookie: 'mv_session=fixture' }),
+      context('marketplace', 'auctions'),
+    );
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ statusCode: 503 });
+    expect(upstream).toHaveBeenCalledOnce();
+  });
+
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network down'); }));
