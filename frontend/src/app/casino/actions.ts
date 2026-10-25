@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import type { CasinoPlayState } from './casino-state';
+import { parseVerifiedSlotsReceipt } from './slots-receipt';
 import { canonicalIntegerString, groupDigits } from '@/lib/money';
 import { failure, idempotencyKey, mutate, wholeNumber } from '@/lib/mutate';
 import {
@@ -429,25 +430,18 @@ export async function playSlots(
   }
 
   try {
-    const receipt = await mutate<DiceReceipt>('/api/v1/casino/dice/plays', {
+    const response = await mutate<unknown>('/api/v1/casino/dice/plays', {
       body: { game: 'dice_number', choice, stake, idempotencyKey: idempotencyKey() },
     });
+    const receipt = parseVerifiedSlotsReceipt(response);
     revalidatePath('/casino');
 
-    const outcomeFace =
-      Number.isInteger(receipt.outcome_face) &&
-      receipt.outcome_face >= 1 &&
-      receipt.outcome_face <= 6
-        ? receipt.outcome_face
-        : null;
-
-    const netAmount = canonicalIntegerString(receipt.net_amount);
-    if (netAmount === null)
-      throw new TypeError('casino slots receipt returned an invalid net amount');
+    const outcomeFace = receipt.outcomeFace;
+    const netAmount = receipt.netAmount;
     const amount = groupDigits(absAmount(netAmount));
     const result = resultOf(netAmount);
 
-    const symDesc = outcomeFace ? (SLOT_FACE_DESCRIPTIONS[outcomeFace] ?? `릴 ${outcomeFace}`) : '슬롯 릴';
+    const symDesc = SLOT_FACE_DESCRIPTIONS[outcomeFace];
 
     const outcome =
       result === 'win'
@@ -463,12 +457,14 @@ export async function playSlots(
       result,
       netAmount,
       replayed: receipt.replayed,
-      ...(outcomeFace === null ? {} : { outcomeFace }),
+      playId: receipt.playId,
+      transactionId: receipt.transactionId,
+      outcomeFace,
     };
   } catch (error) {
     return closedOr(
       error,
-      '이번 스핀은 처리되지 않았어요. 잔액과 오늘 남은 한도, 내가 건 잠금을 다시 확인해 주세요.',
+      '스핀 정산 결과를 확인하지 못했습니다. 중복 베팅하지 말고 거래 내역을 먼저 확인해 주세요.',
     );
   }
 }

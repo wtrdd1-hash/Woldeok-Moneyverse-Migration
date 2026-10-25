@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Scale,
   Sparkles,
@@ -130,9 +131,9 @@ export function LuckySlotsGame({
         : false;
 
       // 서버 반환 outcomeFace에 따른 릴 최종 심볼 결정
-      const targetFace = state.outcomeFace && FACE_TO_SYMBOLS_MAP[state.outcomeFace]
-        ? state.outcomeFace
-        : (isWon ? 6 : 1);
+      // A missing outcome is not a license to invent a jackpot animation.
+      const targetFace = state.outcomeFace;
+      if (!targetFace || !FACE_TO_SYMBOLS_MAP[targetFace]) return;
 
       const targetReels = FACE_TO_SYMBOLS_MAP[targetFace]!;
 
@@ -418,6 +419,29 @@ export function LuckySlotsGame({
                 <span>{state.message}</span>
               )}
             </div>
+            {state.transactionId && (
+              <p className="mt-2 break-all text-xs font-normal" aria-label="서버 확인 원장 거래번호">
+                원장 거래번호: <code>{state.transactionId}</code>
+              </p>
+            )}
+            <Link
+              href="/wallet/activity"
+              className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-current/30 px-4 text-xs font-semibold underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              실제 거래 내역 확인
+            </Link>
+          </div>
+        )}
+
+        {playMode === 'real' && state.status === 'error' && (
+          <div role="alert" aria-live="assertive" className="rounded-xl border border-amber-500/50 bg-amber-500/10 p-4 text-sm text-foreground">
+            <p className="flex items-start gap-2"><AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{state.message}</p>
+            <Link
+              href="/wallet/activity"
+              className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-amber-500/40 px-4 font-semibold underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              중복 베팅 전 거래 내역 확인
+            </Link>
           </div>
         )}
 

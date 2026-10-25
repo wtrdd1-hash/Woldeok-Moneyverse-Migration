@@ -6,6 +6,8 @@ export interface CasinoPlayState extends ActionState {
   readonly netAmount?: string;
   readonly replayed?: boolean;
   readonly outcomeFace?: number;
+  readonly playId?: string;
+  readonly transactionId?: string;
   readonly coinOutcome?: string;
   readonly themeOutcome?: string;
 }
