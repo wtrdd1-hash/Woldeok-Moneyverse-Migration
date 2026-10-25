@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Sparkles, ArrowRight, X, Coins } from 'lucide-react';
-import { useLocale, localeLabel } from '@/lib/locale';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 
 export function ToolsGuestConversionBar() {
-  const locale = useLocale();
+  const { locale } = useLocale();
   const [mounted, setMounted] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
