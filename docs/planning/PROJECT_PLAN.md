@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.25.1268 — F675-124 Private Board Author Mutes (FEATURE ADDITION / PLANNING DRAFT / RELEASE HOLD)
+- Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD; engineering issue #1280 OPEN; main unmerged, runtime/Test/Production unchanged.
 - Previous Improvement v1266 → Current Addition v1268 → Next Improvement v1270 (provisional). Authoritative main eb27f5590e80bb71462e3888d052106a068e661a checked start/mid, AGENTS/README/English canonical/Korean counterpart read. Stacked on unmerged planning Draft #1274; engineering handoff [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280). Documentation only, no code/DB/runtime/Production changes.
 - Source: public /board canonical/indexable and cached 60s; public list caps 50 and lacks authorUserId; detail migration259 exposes authorUserId; deleted_at visibility in migrations044/048/175. New F675-124 gives members **personal** /board/personal with SQL-side pre-LIMIT author exclusion, /account/board-muted-authors and post-derived Hide/Unmute. Does not alter public SEO/ISR, moderation, DM, notifications, WLD or ledger.
 - Owner-only Nest GET personal/mutes/state/receipts, POST mute by postId, DELETE by muteId; session/consent/CSRF, Android JSON parity. Proposed unique owner+author durable tombstone, generation, immutable HMAC receipts, actor-first lock/CAS, max 200 active mutes, 12 writes/min, signed keyset cursor, 404 foreign, 409 conflict, no fake success. Feature OFF until approved.

@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v2026.10.25.1268 — F675-124 회원별 게시판 작성자 숨김 및 개인 피드 (기능 추가 / 기획 초안 / 운영 보류)
+- Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD, 개발 이슈 #1280 OPEN, main 미병합·런타임/Test/운영 변경 없음.
 - **개발 인계:** [GitHub 이슈 #1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) OPEN/HOLD, 선행 기획 Draft #1274 미병합. 런타임 변경이 아니다.
 
 ### 회차·목적·대안·실제 코드 근거

@@ -1,4 +1,5 @@
 # 2026-10-25 — Planning v1268 F675-124 Member Board Author Mutes (DRAFT / HOLD)
+- Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD; engineering issue #1280 OPEN; main unmerged, runtime/Test/Production unchanged.
 
 ## Scope and cycle
 Previous Feature Improvement v1266 → Current Feature Addition v1268 → Next Feature Improvement v1270 (provisional). This is a documentation-only successor to unmerged Draft #1274, on an isolated planning branch. Development issue [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280). Authoritative main eb27f5590e80bb71462e3888d052106a068e661a rechecked start and midpoint; canonical AGENTS/README/English PROJECT_PLAN/Korean parity inspected.

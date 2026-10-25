@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v2026.10.25.1268 — F675-124 Member-controlled Board Author Mutes and Private Feed (FEATURE ADDITION / PLANNING DRAFT / RELEASE HOLD)
+- Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD; engineering issue #1280 OPEN; main unmerged, runtime/Test/Production unchanged.
 - **Engineering handoff:** [GitHub issue #1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) OPEN/HOLD; predecessor planning Draft #1274 unmerged. This is not a runtime change.
 
 ### Cycle, intent, alternatives and source truth

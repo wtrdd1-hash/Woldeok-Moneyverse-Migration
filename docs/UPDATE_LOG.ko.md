@@ -1,4 +1,5 @@
 ## v2026.10.25.1268 — F675-124 게시판 작성자 숨김·개인 피드 (기능 추가 / 초안 / 운영 보류)
+- Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD, 개발 이슈 #1280 OPEN, main 미병합·런타임/Test/운영 변경 없음.
 - 이전 기능 보완 v1266 → 현재 기능 추가 v1268 → 다음 기능 보완 v1270(잠정); main eb27f5590e80bb71462e3888d052106a068e661a 시작·중간 확인, 미병합 Draft #1274 후속, 개발 [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280).
 - 공개 /board 60초 캐시·색인·작성자 ID 없는 50건 목록, Migration259 상세의 작성자 UUID 확인. 본인 SQL 필터 /board/personal, 글 상세 숨김, /account/board-muted-authors, 활성 200명·묘비/세대/HMAC 영수증·서명 커서·Android 동등. 공개 SEO·DM·알림·WLD 불변.
 - P0 ENV1268-01 SEC1268-02 REL1268-03 BOARD1268-04; P1 BOARD1268-05 BOARD1268-06 BOARD1268-07 BOARD1268-08 BOARD1268-09 BOARD1268-10. 영문/국문 통합 정본 상세, 런타임·마이그레이션 구현 없음.

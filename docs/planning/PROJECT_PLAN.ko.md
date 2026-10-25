@@ -1,6 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.25.1268 — F675-124 회원별 게시판 작성자 숨김·개인 피드 (기능 추가 / 기획 초안 / 운영 보류)
+- Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD, 개발 이슈 #1280 OPEN, main 미병합·런타임/Test/운영 변경 없음.
 - 이전 기능 보완 v1266 → 현재 기능 추가 v1268 → 다음 기능 보완 v1270(잠정). 원격 main eb27f5590e80bb71462e3888d052106a068e661a 시작·중간 확인, AGENTS/README·영문 정본·국문 대조 완료. 미병합 Draft #1274 후속 문서 기획, 개발 인계 [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280). 코드·DB·운영 변경 없음.
 - 실제 /board는 canonical/indexable 공개 60초 캐시, 공개 목록 50건 제한 및 authorUserId 미포함, Migration259 상세는 작성자 UUID 제공, Migration044/048/175는 deleted_at 공개 조건. F675-124는 **개인** /board/personal에서 DB LIMIT 이전 작성자 숨김, /account/board-muted-authors 및 글 상세 숨김/해제를 제공한다. 공개 SEO/ISR·운영 제재·DM·알림·WLD·원장 변경 없음.
 - 본인 Nest GET 개인피드/숨김목록/상태/영수증, POST 글 ID 기반 숨김, DELETE muteId 기반 해제; 세션·동의·CSRF·Android JSON 동등. 본인+작성자 유니크 묘비·단조 세대·불변 HMAC 영수증·회원 우선 잠금/CAS·활성 최대 200명·분당 쓰기 12회·서명 키셋 커서·타인 404·충돌 409·거짓 성공 금지. 스위치 기본 OFF.

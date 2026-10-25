@@ -1,6 +1,7 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
 ## v2026.10.25.1268 — F675-124 본인 전용 게시판 작성자 숨김 (기능 추가 / 초안 / 운영 보류)
+- Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD, 개발 이슈 #1280 OPEN, main 미병합·런타임/Test/운영 변경 없음.
 - 이전 기능 보완 v1266 → 현재 기능 추가 v1268 → 다음 기능 보완 v1270(잠정). main eb27f5590e80bb71462e3888d052106a068e661a 시작·중간 및 영문 정본·국문 대조 확인. 개발 이슈 [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280), 미병합 #1274 후속 문서만 변경.
 - 공개 게시판은 60초 캐시·검색 색인·목록 최대 50건/authorUserId 없음, Migration259 상세는 작성자 UUID 있음. 브라우저 사후 필터·전역 차단 대신 DB LIMIT 이전 개인 피드 필터, 본인 숨김·해제만 설계. 공개 SEO·운영 제재·DM·알림·원장 변경 없음.
 - 본인 검증 SECURITY DEFINER, 활성 200명 한도, 회원+작성자 유니크 묘비/버전·세대·HMAC 영수증, 회원/세션/세대 결합 커서, 동의/CSRF·Android 동등·개인 no-store/noindex·관리자 k>=20·WCAG2.2 AA. 상세는 영문/국문 통합 정본 참조.

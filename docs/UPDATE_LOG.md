@@ -1,4 +1,5 @@
 ## v2026.10.25.1268 — F675-124 Member Board Author Mutes and Private Feed (FEATURE ADDITION / DRAFT / HOLD)
+- Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD; engineering issue #1280 OPEN; main unmerged, runtime/Test/Production unchanged.
 - Previous Improvement v1266 → Current Addition v1268 → Next Improvement v1270 provisional; remote main eb27f5590e80bb71462e3888d052106a068e661a start/mid; stacked after unmerged Draft #1274; development [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280).
 - Verified public /board 60s indexable cache and 50-row author-ID-less list, post detail authorUserId via migration259. Proposed owner-only SQL-filtered /board/personal, post-derived Hide, /account/board-muted-authors, durable 200-cap mute/tombstone, generation/HMAC receipts, signed cursor, Android parity; public SEO/DM/notifications/WLD untouched.
 - Backlog P0 ENV1268-01 SEC1268-02 REL1268-03 BOARD1268-04; P1 BOARD1268-05 BOARD1268-06 BOARD1268-07 BOARD1268-08 BOARD1268-09 BOARD1268-10. Full spec in existing EN/KO integrated masters. No runtime or migration implementation.

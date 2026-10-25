@@ -1,6 +1,7 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
 ## v2026.10.25.1268 — F675-124 Owner-only Board Author Mutes (FEATURE ADDITION / DRAFT / HOLD)
+- Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD; engineering issue #1280 OPEN; main unmerged, runtime/Test/Production unchanged.
 - Previous Improvement v1266 → Current Addition v1268 → Next Improvement v1270 provisional. Main eb27f5590e80bb71462e3888d052106a068e661a checked start/mid, canonical EN/KO plan reviewed. Development issue [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280); stacked after unmerged #1274, docs-only.
 - Evidence: public board is 60s-cached/indexable and lists only 50 posts without authorUserId; post detail after migration259 has authorUserId. Reject client-side filtering and global block. Personal feed excludes muted authors in SQL before LIMIT; owner-only Hide/Unmute, no public SEO, moderation, DM, notifications or ledger effects.
 - Proposed actor-checked SECDEF functions, 200 active mutes, owner+author tombstone/version, generation, HMAC replay receipts, cursor bound to owner/session/generation, consent/CSRF, Android parity, private no-store/noindex, admin k>=20 and WCAG2.2 AA. Full details in integrated EN/KO master.
