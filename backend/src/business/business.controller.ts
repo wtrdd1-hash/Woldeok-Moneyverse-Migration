@@ -208,38 +208,25 @@ export class BusinessController {
 
   @Post('businesses/:id/procure')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Procure raw materials for business with WLD payment' })
+  @ApiOperation({ summary: 'Procurement unavailable until ledger-backed WLD settlement and inventory receipts exist' })
   procureMaterials(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) ownershipId: string,
-    @Body() body: { materialCode: string; quantity: number; idempotencyKey: string },
-  ) {
-    return this.guarded(
-      () => this.service().procureMaterials(requireUserId(request), {
-        ownershipId,
-        materialCode: body.materialCode,
-        quantity: body.quantity,
-        idempotencyKey: body.idempotencyKey,
-      }),
-      'failed to procure raw materials',
-    );
+    @Req() _request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) _ownershipId: string,
+    @Body() _body: { materialCode: string; quantity: number; idempotencyKey: string },
+  ): never {
+    throw new ServiceUnavailableException('원장으로 검증되는 조달 및 입고 기능은 아직 지원되지 않습니다.');
   }
 
   @Post('businesses/:id/storage/upgrade')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Upgrade business storage capacity' })
+  @ApiOperation({ summary: 'Storage upgrade unavailable until ledger-backed settlement exists' })
   upgradeStorage(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) ownershipId: string,
-    @Body() body: IdempotentDto,
-  ) {
-    return this.guarded(
-      () => this.service().upgradeStorage(requireUserId(request), {
-        ownershipId,
-        idempotencyKey: body.idempotencyKey,
-      }),
-      'failed to upgrade storage capacity',
-    );
+    @Req() _request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) _ownershipId: string,
+    @Body() _body: IdempotentDto,
+  ): never {
+    throw new ServiceUnavailableException('원장으로 검증되는 창고 업그레이드는 아직 지원되지 않습니다.');
   }
+
 }
 
