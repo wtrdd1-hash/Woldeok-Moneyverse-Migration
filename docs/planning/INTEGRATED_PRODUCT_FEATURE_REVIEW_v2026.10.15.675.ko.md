@@ -1,4 +1,13 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+
+## v1290 / F675-129 — 회원 상점 찜 목록 무결성 (기능 보완 / 초안 / 보류)
+- **회차:** 이전 추가 v1288 → 현재 보완 v1290 → 다음 추가 v1292(잠정). 원격 main 1c5b84a1 시작·중간 동일, 미병합 기획 Draft #1345, 별도 개발 #1344. 문서만 변경, A/B/C·Gemini·QA 분리.
+- **금액:** Migration 165는 회원별·서울 당일 market_sale·starter_tools 할인 GREATEST(1,base_price*9/10)을 적용한다. 공개/회원 가격은 다를 수 있어 회원 실효 BIGINT 정수 문자열과 조회 시각만 표시하고 가격 고정·할인 보장 금지. 서울 자정·이벤트 변경 시 재조회.
+- **구매 조건:** shop_catalog_list_v2는 재고 0도 반환하며 sale_ends_at을 강제하지 않는다. 구매는 재고·회원/계좌·한도를 별도로 검증하지만 sale_ends_at/진행도 강제는 미확인. 찜 목록은 구매 가능 확정/Buy CTA 금지. 가격×수량 BIGINT 오버플로 검증 필요.
+- **무결성:** 비활성 찜 제거 가능, 인증·동의 후 멱등 영수증 재시도, 불변 지문 영수증·30개 상한·회원→찜→상품 잠금·세대 HMAC 커서·하드 삭제 처리. 본인 GET/POST/DELETE·Next.js/Android 동등·no-store/noindex·관리자 k>=20·WCAG 2.2 AA·탈퇴/병합·실측 KPI. 기본 OFF.
+- **P0:** ENV1290-01 SEC1290-02 REL1290-03 SHP1290-04. **P1:** SHP1290-05 SHP1290-06 SHP1290-07 SHP1290-08 SHP1290-09 SHP1290-10. QA v1279 프론트 1397/6·감사 FAIL·경로 검사 인자 오류, 루트 98%/2.0GiB, 개발 DB 앱 직접 쓰기 235/241, PUBLIC 은행 함수 0 재검증 필요, Migration 266 불일치·정확 SHA Test/복원 BLOCKED. 외부 신규 승인 0·누적 UNKNOWN/10,000.
+- **백로그 식별자:** ENV1290-01 SEC1290-02 REL1290-03 SHP1290-04 SHP1290-05 SHP1290-06 SHP1290-07 SHP1290-08 SHP1290-09 SHP1290-10
+
 - **GitHub 기획 검토:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v1288 / F675-129 — 회원 전용 검증형 상점 찜 목록 (기능 추가 / 초안 / 보류)

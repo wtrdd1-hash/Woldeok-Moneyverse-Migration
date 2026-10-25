@@ -1,4 +1,43 @@
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v2026.10.26.1290 — F675-129 회원 상점 찜 목록 가격·구매 가능성·재시도 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+
+### 기준·실제 코드 검증
+- **회차:** 이전 기능 추가 v1288 → 현재 기능 보완 v1290 → 다음 기능 추가 v1292(잠정). 원격 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재확인, main AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조본 확인. 미병합 기획 Draft #1345 기반, 개발 인계 #1344와 분리. Gemini·개발 A/B/C·QA 코드/마이그레이션/배포는 변경하지 않는다.
+- **회원별 가격(실제 Migration 165):** shop_effective_unit_price(p_actor,p_catalog)는 회원이 **현재 서울 날짜**의 market_sale 이벤트를 수령하고 starter_tools 대상 상품이면 GREATEST(1,(base_price*9)/10)의 정수 WLD 가격을 반환한다. shop_catalog_list_v2(p_actor)와 shop_purchase_catalog가 함께 사용하며 공개 p_actor=NULL은 기본가다. v1288의 일반적인 ‘현재 가격’을 **회원 본인 실효가**로 정정해야 한다. 서울 자정·수령 조건 변경으로 결제 시 달라질 수 있다. 운영 사고 발생을 입증한 것은 아니다.
+- **열람과 구매 구분:** v165 카탈로그는 활성 여부·재고 starts_at/ends_at만 필터하고 **재고 0이나 sale_ends_at은 제외하지 않는다**. 구매 함수는 재고·활성 회원/계좌·shop_assert_purchase_limit를 별도로 검증하지만 sale_ends_at·required_progression_code 강제 조건은 확인되지 않았다. 정책 불일치는 개발 검토 대상으로 남기고 찜 기능이 임의로 구매 정책을 바꾸거나 ‘열람 가능=구매 가능’이라고 표시해서는 안 된다. 기존 BIGINT v_price*수량(최대 100) 오버플로 경계도 테스트한다.
+
+### 사용자 흐름·화면·정확한 금액
+- **목적 유지:** 로그인·동의한 활성 회원이 /shop에서 최대 30개 UUID 상품을 찜하고 /account/shop-wishlist에서 ‘상점에서 확인·제거·다시 시도’를 이용한다. 찜은 구매·재고 예약·가격 확정·알림·보상·WLD/원장 이동이 아니다. **찜 목록에는 활성 구매 CTA를 제공하지 않는다.** 비로그인 이용자는 공개 가격을 보고 저장 시 로그인한다.
+- **금액:** 회원 본인 shop_effective_unit_price 결과를 effectiveUnitPriceWld의 정확한 양의 **정수 문자열**, priceObservedAt ISO 시각, priceStatus CURRENT|UNAVAILABLE로 반환한다. 공개 기본가를 회원 가격으로 재사용하지 않고 JS Number 변환이나 찜/영수증 가격 저장을 금지한다. ‘새로고침 당시 가격, 결제 시 확정’으로 안내하며 원천 장애 시 0/추정가를 표시하지 않는다.
+- **가용성:** BROWSEABLE은 열람 가능만 의미, 재고 0은 OUT_OF_STOCK, 확인된 비활성/판매 기간 외는 INACTIVE_OR_OUT_OF_WINDOW, 구매 한도·계좌·진행도·판매종료 정책이 확정되지 않으면 CHECK_AT_CHECKOUT, DB 오류는 SOURCE_UNAVAILABLE, 하드 삭제는 REMOVED. 카탈로그 노출이나 sale_ends_at만으로 purchasable=true 금지. 만료된 sale_ends_at이 실제 구매에서 차단되지 않는 정책 불일치는 별도 개발 검토로 인계한다.
+- **화면 상태:** LOADING/EMPTY/SAVED/ALREADY_SAVED/REMOVED/LIMIT_REACHED/UNAVAILABLE_SAVED/CHECK_AT_CHECKOUT/UNCONFIRMED/STALE_REVISION/SESSION_EXPIRED/SOURCE_UNAVAILABLE/FEATURE_OFF. 로그아웃·계정 전환 시 세션 세대별 오래된 응답을 차단하고 응답 유실 시 본인 재조회 전 성공 토스트 금지. 비활성·없는 상품 신규 저장은 구별 불가능한 404, **이미 찜한 비활성·기간 종료 상품은 판매 가능 여부와 무관하게 제거 가능**해야 한다.
+
+### API·DB·트랜잭션·개인정보
+- **본인 API:** GET /api/v1/shop/wishlist?cursor=&limit=30 → items의 catalogId,revision,savedAt,effectiveUnitPriceWld,priceObservedAt,priceStatus,availabilityState 및 nextCursor,wishlistGeneration. POST /api/v1/shop/wishlist {catalogId,idempotencyKey}, DELETE /api/v1/shop/wishlist/:catalogId {idempotencyKey,expectedRevision}. 불변 영수증 receiptId,operation,resultRevision,replayed는 **과거 결과**이지 현재 저장 상태 보장이 아니다. 세션 회원 ID만 사용, 활성 회원·동의·쓰기 CSRF, Next.js 동일 출처/Android /app-api/v1 동등. 400/422 입력, 401 세션, 404 타인/없음, 409 키·버전 충돌, 429 한도, 503 장애. 개인 no-store/noindex·교차 회원 캐시 금지.
+- **순방향 스키마:** 회원+상품 UNIQUE, removed_at 소프트 제거, 양의 BIGINT revision, 활성 인덱스, 30건 상한 유지. UNIQUE(user_id,request_key) 영수증은 작업/상품/예상 버전 포함 SHA-256 정규화 지문·원 결과/버전/시각을 보관하며 일반 UPDATE/DELETE 권한·불변 트리거로 수정 금지, 적법한 삭제는 별도 승인 경로. 가격·상품명·IP·토큰은 복제하지 않는다. 상품 하드 삭제 FK CASCADE 후 과거 영수증 재시도로 상품을 부활시키지 않는다. 회원 소프트 탈퇴는 FK 연쇄 삭제가 아니다.
+- **잠금 순서:** 세션 인증·활성 회원·동의를 **멱등 영수증 재조회보다 먼저** 확인 → 회원+요청키 트랜잭션 잠금 → 원 지문 비교 → users 회원 행 FOR UPDATE → 찜 행 FOR UPDATE → SAVE에 한해 상품 FOR KEY SHARE/저장 정책 → 30건 한도·CAS·UNIQUE·변경·불변 영수증·wishlistGeneration 증가를 한 트랜잭션에 확정. REMOVE는 현재 판매 조건과 무관하다. Migration 163 계정 병합과 잠금 역전 방지, Advisory 해시보다 UNIQUE가 최종 방어. 상품 하드 삭제 연쇄 시 커서 세대 무효화 트리거 또는 단일 페이지 재조회 필요.
+- **커서:** HMAC 회원·세션 세대·찜 세대·saved_at+UUID·키 버전·15분 만료, 수정/삭제/로그아웃/병합 시 무효화. 운영 30건 상한 유지, 10,001건은 **격리 성능 테스트용 합성 데이터**다. 조회 중 가격·재고 변동이 가능하므로 구매 확정 스냅샷으로 주장하지 않는다.
+- **보안·관리자·접근성/KPI:** 승인된 탈퇴 삭제·병합 정책 전에는 찜/영수증 계정 병합 차단, 세션/커서 무효화. 고정 search_path SECURITY DEFINER·본인 검증·PUBLIC EXECUTE 회수·앱 광범위 직접 DML 금지, 타 회원 100건 부정 검증, 초기 쓰기 5/읽기 30회/분. 관리자는 k>=20 집계만, 개인 찜·할인 수령 정보 비노출. 개인 SEO 비색인/사이트맵 제외, 모바일 44px·키보드·포커스·상태 알림·동작 감소·WCAG 2.2 AA. 검증된 저장/제거·가격 조회 실패·자정 할인 불일치·p95·409/429/503·허위 성공 0·BOLA 유출 0만 측정하고 수익 향상은 가설로 남긴다.
+
+### P0/P1 개발 백로그 및 수용 기준
+| 우선순위 | ID | 산출물·수용 기준 |
+| --- | --- | --- |
+| P0 | ENV1290-01 | 루트 98%/약 2.0GiB 여유, 독립 DB·복원·용량 경보, 다른 작업자 파일/볼륨 보존. |
+| P0 | SEC1290-02 | QA v1279 개발 DB 앱 직접 UPDATE/DELETE 235/241, PUBLIC 은행 함수 0건 재실측·최소권한, 본인/동의 SECDEF·타 회원 100건 부정 검증. |
+| P0 | REL1290-03 | QA v1279 프론트 1,397 통과/6 실패·경로 검사 명령 인자 오류·감사 실패, Migration 266 체크섬/280 출처, 정확 SHA 금융 Test E2E·격리 복원·롤백. |
+| P0 | SHP1290-04 | v165 회원별 실효가, 재고 0, sale_ends_at/진행도 정책 불일치, BIGINT×수량 오버플로를 구매 진실과 대조, 허위 구매 가능/할인 보장 금지. |
+| P1 | SHP1290-05 | 불변 본인 찜/영수증·하드 삭제 역사·정확한 문자열 실효가·가격 스냅샷 금지·30개 상한. |
+| P1 | SHP1290-06 | 인증 후 재시도·회원/키 지문·회원→찜→상품 잠금·비활성 제거·CAS·세대 무효화·동시 100건. |
+| P1 | SHP1290-07 | 회원별 DB 가격 조인·열람/품절/결제 시 확인 상태·서울 자정 관측 시각·HMAC 커서. |
+| P1 | SHP1290-08 | NestJS/Next.js/Android API·오류·영수증 동등·세션 전환 방어·no-store·찜 구매 CTA 금지·접근 가능한 재시도. |
+| P1 | SHP1290-09 | 탈퇴/병합·관리자 k>=20·SEO·WCAG 2.2 AA·실측 KPI·개인 할인 수령 정보 비노출. |
+| P1 | SHP1290-10 | 격리 PostgreSQL 동시 100/타 회원 100/합성 10,001, 자정 할인·1 WLD 반올림·BIGINT×100 오버플로·판매종료 정책·하드 삭제/재시도·정확 SHA Test·OFF 롤백. |
+
+- **QA/승격:** 2026-10-26 00:32 KST v1279 원시 결과 프론트 1,397 통과/6 실패, 린트·타입·빌드·백엔드·DB·계약 PASS, 경로 검증은 --inventory 인자 누락으로 FAIL(실제 경로 누락 증거 아님), 운영/전체/봇 의존성 감사 FAIL. 개발 DB PUBLIC 은행 함수 0건(과거 3건과 달라 보안 승인 전 재검증), 앱 직접 쓰기 235/241, Migration 266 DB 기록 SHA와 파일 SHA 불일치. 루트 98%/약 2.0GiB, 별도 볼륨 62GiB. 정확 SHA 금융 Test E2E·격리 복원·전체 QA 승인 미확인으로 운영 BLOCKED.
+- **배포·롤백:** 문서만 수정. 개발 담당 별도 브랜치·순방향 마이그레이션, shop_wishlist_v1=OFF 기본 → 실 DB 권한/가격/구매·지갑·원장 회귀 → CI/감사 → 공식 정확 SHA 로그인 Test E2E·복원·QA/GitOps 승인 → 1%/10%/100%. 허위 성공·가격 불일치 시 OFF, 상품/재고/구매 영수증/WLD/원장 변경 금지.
+- **외부 독립 근거 10,000건 게이트:** 신규 승인 0, 누적 독립 확보·중복 제거·근거 분류·승인 수량 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 코드 검토·링크는 승인 건수로 자동 집계하지 않는다.
+
 - **GitHub 기획 검토:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v2026.10.26.1288 — F675-129 회원 전용 검증형 상점 찜 목록 (기능 추가 / 초안 / 운영 보류)

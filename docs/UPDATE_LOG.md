@@ -1,3 +1,9 @@
+## 2026-10-26 — Planning v1290 F675-129 shop wishlist integrity (IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1288 → Current Improvement v1290 → Next Addition v1292 provisional; main 1c5b84a1 rechecked; stacked on Draft #1345 and development #1344, docs only, other workers untouched.
+- Migration 165 actor/Seoul-date discount and public/member price divergence; catalog zero stock/sale_ends_at mismatch with purchase gates; refine exact price strings, observation, checkout truth, inactive removal, auth-before-replay, immutable receipts, lock order and purge/cursor.
+- P0 ENV1290-01 SEC1290-02 REL1290-03 SHP1290-04; P1 SHP1290-05 SHP1290-06 SHP1290-07 SHP1290-08 SHP1290-09 SHP1290-10. Full EN/KO integrated specs and tests.
+- QA v1279 frontend 1397 pass/6 fail, audits fail, root 98%/~2.0GiB, dev app writable 235/241, PUBLIC bank 0 needs certification, migration 266 mismatch, exact-SHA Test/restore BLOCKED. External new approved 0, cumulative UNKNOWN/10,000 BLOCKED.
+
 ## 2026-10-26 — Planning v1288 F675-129 verified shop wishlist (ADDITION / DRAFT / HOLD)
 - **GitHub planning review:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 - Previous Improvement v1286 → Current Addition v1288 → Next Improvement v1290 provisional; remote main `1c5b84a1` start/mid; stacked Draft #1340, engineering [#1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344); docs-only, no runtime/DB/WLD/ledger/Test/Production changes.

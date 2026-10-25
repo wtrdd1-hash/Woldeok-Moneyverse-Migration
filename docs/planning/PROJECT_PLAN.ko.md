@@ -1,4 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
+
+## v2026.10.26.1290 — F675-129 회원 찜 목록 가격·가용성·재시도 무결성 (기능 보완 / 초안 / 운영 보류)
+- **회차:** 이전 기능 추가 v1288 → 현재 기능 보완 v1290 → 다음 기능 추가 v1292(잠정). 원격 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인; AGENTS.md·README.md·영어 정본·한국어 대조본 검토. 미병합 Draft #1345 기반, 개발 #1344 별도, A/B/C·Gemini·QA와 런타임 변경 분리.
+- **실제 코드에 따른 보완:** Migration 165의 shop_effective_unit_price는 회원·서울 당일 market_sale 수령·starter_tools 조건에서 GREATEST(1,(base_price*9)/10)의 정수 10% 할인, 회원 카탈로그와 구매가 같은 함수를 사용한다. 공개 기본가와 회원 실효가는 다를 수 있으므로 현재 회원 가격을 정확한 BIGINT 문자열과 priceObservedAt으로 표시하고 가격 고정·할인 보장 금지. 서울 자정 변경 검증. shop_catalog_list_v2는 재고 0을 포함하고 sale_ends_at을 강제하지 않으며 실제 구매는 별도 재고·회원/계좌·구매 한도를 검증하되 sale_ends_at/진행도 강제는 미확인. 열람=구매 가능 아님, 찜 구매 CTA 금지. BIGINT×수량 오버플로도 별도 검증.
+- **본인 UX/API/DB:** /shop 찜/제거 → /account/shop-wishlist 확인/제거/재시도, 활성 UUID 30개, 본인 GET/POST/DELETE·로그인/동의·쓰기 CSRF·Next.js/Android 동등. 응답 유실 UNCONFIRMED, 세션 전환 응답 차단, 비활성 찜 제거 허용. 본인 SECDEF 실효가 조인과 BROWSEABLE/OUT_OF_STOCK/CHECK_AT_CHECKOUT/SOURCE_UNAVAILABLE 구분, 개인 no-store/noindex. 불변 영수증 재시도는 과거 결과일 뿐 현재 저장 상태 보장 아님. 인증 후 영수증 조회, 요청→회원→찜→SAVE만 상품 잠금, 상한/CAS/UNIQUE, HMAC 세대 커서, 하드 삭제 후 부활 방지. 탈퇴/병합 삭제 정책·관리자 k>=20·WCAG 2.2 AA·실측 KPI.
+- **P0:** ENV1290-01 용량/독립 복원; SEC1290-02 최소권한/본인 BOLA; REL1290-03 QA·마이그레이션·정확 SHA Test; SHP1290-04 회원별 실효가·재고·판매종료 정책·오버플로. **P1:** SHP1290-05 불변 스키마/가격; SHP1290-06 재시도/잠금/상한; SHP1290-07 회원 조회/자정/커서; SHP1290-08 NestJS·Next.js·Android; SHP1290-09 개인정보·관리자·SEO·접근성·KPI; SHP1290-10 격리 PostgreSQL 동시 100·타 회원 100·합성 10,001·자정·오버플로·삭제/롤백.
+- **QA v1279 원시:** 프론트 1,397 통과/6 실패, 타입·린트·빌드·백엔드·DB·계약 PASS; 경로 검사는 --inventory 인자 누락, 운영/전체/봇 감사 FAIL; 개발 DB PUBLIC 은행 함수 0(보안 최종 인증 아님), 앱 직접 쓰기 235/241, Migration 266 체크섬 불일치. 루트 98%/약 2.0GiB, 정확 SHA 금융 Test/독립 복원 미검증, 운영 BLOCKED. shop_wishlist_v1 기본 OFF, 별도 개발·Test/QA/GitOps 후 활성화, OFF 롤백. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- **백로그 식별자:** ENV1290-01 SEC1290-02 REL1290-03 SHP1290-04 SHP1290-05 SHP1290-06 SHP1290-07 SHP1290-08 SHP1290-09 SHP1290-10
+
 - **GitHub 기획 검토:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v2026.10.26.1288 — F675-129 회원 전용 검증형 상점 찜 목록 (기능 추가 / 초안 / 운영 보류)

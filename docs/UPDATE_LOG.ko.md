@@ -1,3 +1,9 @@
+## 2026-10-26 — 기획 v1290 F675-129 상점 찜 목록 무결성 (기능 보완 / 초안 / 보류)
+- 이전 추가 v1288 → 현재 보완 v1290 → 다음 추가 v1292(잠정), main 1c5b84a1 재확인, 미병합 Draft #1345 기반·개발 #1344 별도, 다른 작업자·런타임 미변경.
+- Migration 165 회원/서울 당일 할인과 공개·회원 가격 차이, 카탈로그 재고 0/sale_ends_at과 구매 검증 불일치. 정확한 가격 문자열·관측 시각·결제 진실·비활성 제거·인증 후 재시도·불변 영수증·잠금 순서·하드 삭제/커서 보완.
+- P0 ENV1290-01 SEC1290-02 REL1290-03 SHP1290-04; P1 SHP1290-05 SHP1290-06 SHP1290-07 SHP1290-08 SHP1290-09 SHP1290-10. 영문·국문 통합 명세와 테스트 조건.
+- QA v1279 프론트 1397 통과/6 실패·감사 FAIL, 루트 98%/약 2.0GiB, 개발 DB 앱 직접 쓰기 235/241, PUBLIC 은행 0 재검증 필요, Migration 266 불일치, 정확 SHA Test/복원 BLOCKED. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED.
+
 ## 2026-10-26 — 기획 v1288 F675-129 회원 상점 찜 목록 (기능 추가 / 초안 / 보류)
 - **GitHub 기획 검토:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 - 이전 보완 v1286 → 현재 추가 v1288 → 다음 보완 v1290(잠정); 원격 main `1c5b84a1` 시작·중간 확인, 기존 Draft #1340 기반, 개발 [#1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344). 기획 문서만 변경, 런타임/DB/WLD/원장/Test/운영 미변경.

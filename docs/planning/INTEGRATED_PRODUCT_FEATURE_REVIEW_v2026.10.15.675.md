@@ -1,4 +1,13 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+
+## v1290 / F675-129 — Verified member shop wishlist integrity (Improvement / DRAFT / HOLD)
+- **Cycle:** Previous Addition v1288 → Current Improvement v1290 → Next Addition v1292 provisional. Remote main 1c5b84a1 unchanged at start/mid; unmerged planning Draft #1345, separate development #1344. Docs only, no A/B/C/Gemini/QA overlap.
+- **Price:** migration 165 applies actor-specific, Seoul-date market_sale starter_tools discount (GREATEST(1,base_price*9/10)); public and member prices differ. Use member-effective BIGINT integer string at observation time, never cached/guaranteed. Seoul midnight and event changes require refresh.
+- **Eligibility:** shop_catalog_list_v2 returns zero-stock items and does not check sale_ends_at; purchase separately checks stock/member/accounts/limits but does not visibly enforce sale_ends_at/progression. Wishlist cannot claim purchasable; no Buy CTA. Price×quantity BIGINT overflow is a test boundary.
+- **Integrity:** inactive saved items removable; auth/consent before historical idempotent replay; append-only digest-bound receipts, 30 quota, owner→wishlist→catalog lock order, generation HMAC cursor and hard-purge handling. Owner API GET/POST/DELETE, Next.js/Android parity, no-store/noindex, admin k>=20, WCAG 2.2 AA, privacy merge/erase, verified KPI. Production flag OFF.
+- **P0:** ENV1290-01 SEC1290-02 REL1290-03 SHP1290-04. **P1:** SHP1290-05 SHP1290-06 SHP1290-07 SHP1290-08 SHP1290-09 SHP1290-10. QA v1279 frontend 1397/6, audits FAIL, route-ledger CLI argument error; root 98%/2.0GiB, dev app writes 235/241, PUBLIC bank functions 0 unverified, migration 266 mismatch; exact-SHA Test/restore BLOCKED. Independent evidence 0 new, cumulative UNKNOWN/10,000 BLOCKED.
+- **Backlog IDs:** ENV1290-01 SEC1290-02 REL1290-03 SHP1290-04 SHP1290-05 SHP1290-06 SHP1290-07 SHP1290-08 SHP1290-09 SHP1290-10
+
 - **GitHub planning review:** [Draft PR #1345](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1345) (stacked on unmerged #1340, review-only); [development issue #1344](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1344).
 
 ## v1288 / F675-129 — Verified member shop wishlist (Addition / DRAFT / HOLD)
