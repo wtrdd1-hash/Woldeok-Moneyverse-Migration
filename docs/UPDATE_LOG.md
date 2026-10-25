@@ -1,4 +1,7 @@
 ## 2026-10-26 — Planning v1290 F675-129 shop wishlist integrity (IMPROVEMENT / DRAFT / HOLD)
+## 2026-10-26 — Planning v1294 F675-130 notification integrity (Feature Improvement / DRAFT / HOLD)
+- Previous Addition v1292 → Current Improvement v1294 → Next Addition v1296. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 rechecked. Existing NestJS read/read-all with CSRF preserved; synthetic inbox/stock notices flagged; unreadOnly=false coercion risk, mark-all cutoff race, UUID-tie cursor and source-category provenance specified. ENV1294-01 SEC1294-02 REL1294-03 NOT1294-04 NOT1294-05 NOT1294-06 NOT1294-07 NOT1294-08 NOT1294-09 NOT1294-10. Root 99%/1.6GiB, Production HOLD. External evidence 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED. Docs only; no runtime/DB/ledger/Test/Production changes.
+
 - **GitHub v1292:** [Draft PR #1354](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1354) (stacked on unmerged #1349); [engineering handoff #1353](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1353); [root-capacity update #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6400649178). Docs only, DRAFT / RELEASE HOLD.
 ## 2026-10-26 — Planning v1292 F675-130 notification controls (ADDITION / DRAFT / HOLD)
 - Previous Improvement v1290 → Current Addition v1292 → Next Improvement v1294 provisional. Main 1c5b84a1 checked start/mid, stacked on unmerged planning #1349; A/B/C/Gemini/QA work untouched.
