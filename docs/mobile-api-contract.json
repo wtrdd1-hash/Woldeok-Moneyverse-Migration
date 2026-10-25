@@ -9984,7 +9984,83 @@
       "successStatuses": [
         200
       ],
-      "responseMode": "json"
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "notifications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "link": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "is_read": {
+                  "type": "boolean"
+                },
+                "read_at": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "category",
+                "title",
+                "body",
+                "link",
+                "is_read",
+                "read_at",
+                "created_at"
+              ]
+            }
+          },
+          "complete": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "notifications",
+          "complete"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
     },
     {
       "method": "POST",

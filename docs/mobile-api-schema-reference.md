@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -1360,6 +1360,138 @@ _None._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
+## `GET` `/app-api/v1/banking/pockets` — List all saving pockets for current user
+
+- Authorization: 로그인 + 최신 동의
+- Success status: 200
+- Response mode: json
+- After success: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `PocketController_listPockets`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/banking/pockets` — Create a new saving pocket
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 저금통 목록을 다시 조회
+- Operation ID: `PocketController_createPocket`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `CreatePocketDto`
+
+_None._
+
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `PUT` `/app-api/v1/banking/pockets/:id` — Customize saving pocket appearance and theme
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 200
+- Response mode: json
+- After success: 저금통 목록 갱신
+- Operation ID: `PocketController_customizePocket`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `CustomizePocketDto`
+
+_None._
+
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/banking/pockets/:id/archive` — Archive saving pocket and recover all funds to cash balance
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 저금통 및 본계좌 잔액 갱신
+- Operation ID: `PocketController_archivePocket`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `ArchivePocketDto`
+
+_None._
+
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/banking/pockets/:id/transfer` — Transfer funds between main bank balance and saving pocket
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 저금통 및 은행 잔액 갱신
+- Operation ID: `PocketController_transferPocket`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `TransferPocketDto`
+
+_None._
+
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
 ## `POST` `/app-api/v1/banking/repay` — Repay active bank loan
 
 - Authorization: 로그인 + 최신 동의 + CSRF(변경 요청)
@@ -2665,6 +2797,54 @@ _No request body._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
+## `POST` `/app-api/v1/crafting/execute` — Execute crafting recipe: consume materials and WLD fee to mint crafted item
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 인벤토리 및 잔액 갱신
+- Operation ID: `CraftingController_executeCrafting`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `ExecuteCraftingDto`
+
+_None._
+
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/crafting/recipes` — List all official crafting recipes with required materials and fees
+
+- Authorization: 로그인 + 최신 동의
+- Success status: 200
+- Response mode: json
+- After success: 레시피 목록 렌더링
+- Operation ID: `CraftingController_listRecipes`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
 ## `POST` `/app-api/v1/early-game/claims` — Claim today’s event, once
 
 - Authorization: 로그인 + 최신 동의 + CSRF(변경 요청)
@@ -2937,6 +3117,133 @@ _No request body._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
+## `GET` `/app-api/v1/marketplace/listings` — List active player marketplace listings with filter and search
+
+- Authorization: 로그인 + 최신 동의
+- Success status: 200
+- Response mode: json
+- After success: 마켓 목록 렌더링
+- Operation ID: `MarketplaceController_listListings`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| category | query | false | string |  |
+| search | query | false | string |  |
+| limit | query | false | integer |  |
+| offset | query | false | integer |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/marketplace/listings` — List an item for sale in player marketplace with escrow lock
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 인벤토리 및 내 판매 목록 갱신
+- Operation ID: `MarketplaceController_createListing`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `CreateListingDto`
+
+_None._
+
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/marketplace/listings/:id/buy` — Buy a marketplace listing item with 1% burn fee and 99% seller settlement
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 잔액 및 인벤토리 갱신
+- Operation ID: `MarketplaceController_buyListing`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `BuyListingDto`
+
+_None._
+
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/marketplace/listings/:id/cancel` — Cancel active marketplace listing and recover item to inventory
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 인벤토리 및 내 리스팅 갱신
+- Operation ID: `MarketplaceController_cancelListing`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/marketplace/my-listings` — List current user marketplace listings and trade history
+
+- Authorization: 로그인 + 최신 동의
+- Success status: 200
+- Response mode: json
+- After success: 내 리스팅 목록 렌더링
+- Operation ID: `MarketplaceController_listMyListings`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
 ## `GET` `/app-api/v1/media/:key` — Bytes of a published gallery photo
 
 - Authorization: 공개: 로그인 불필요
@@ -2980,6 +3287,269 @@ _No request body._
 ### Success response fields
 
 _Binary body. Do not JSON-decode._
+
+## `GET` `/app-api/v1/newspaper/lore` — Get weekly financial education lore articles
+
+- Authorization: 공개: 로그인 불필요
+- Success status: 200
+- Response mode: json
+- After success: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getFinancialLore`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| success | true | boolean |  |
+| data[] | true | object[] |  |
+| data[] | true | object |  |
+| data[].id | true | string |  |
+| data[].category | true | string |  |
+| data[].title | true | string |  |
+| data[].summary | true | string |  |
+| data[].readTimeMinutes | true | number |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/newspaper/poll` — Get weekly market sentiment opinion poll status
+
+- Authorization: 공개: 로그인 불필요
+- Success status: 200
+- Response mode: json
+- After success: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getWeeklyPoll`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.id | true | string |  |
+| data.question | true | string |  |
+| data.options[] | true | object[] |  |
+| data.options[] | true | object |  |
+| data.options[].id | true | string |  |
+| data.options[].label | true | string |  |
+| data.options[].votes | true | number |  |
+| data.options[].percentage | true | number |  |
+| data.totalVotes | true | number |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/newspaper/poll/vote` — Cast vote on weekly market outlook poll
+
+- Authorization: 로그인 + 최신 동의 + CSRF(변경 요청)
+- Success status: 201
+- Response mode: json
+- After success: 관련 GET을 다시 호출해 서버 상태와 동기화
+- Operation ID: `NewspaperController_voteWeeklyPoll`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+- Content-Type: `undefined`
+
+_None._
+
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.id | true | string |  |
+| data.question | true | string |  |
+| data.options[] | true | object[] |  |
+| data.options[] | true | object |  |
+| data.options[].id | true | string |  |
+| data.options[].label | true | string |  |
+| data.options[].votes | true | number |  |
+| data.options[].percentage | true | number |  |
+| data.totalVotes | true | number |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/newspaper/pulse` — Get live market sentiment index and lead scenario summary
+
+- Authorization: 공개: 로그인 불필요
+- Success status: 200
+- Response mode: json
+- After success: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getMarketPulse`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.sentimentScore | true | number |  |
+| data.sentimentLabel | true | string="VERY_BULLISH" \| string="BULLISH" \| string="NEUTRAL" \| string="BEARISH" \| string="VERY_BEARISH" |  |
+| data.activeEventsCount | true | number |  |
+| data.leadHeadline | true | string |  |
+| data.leadSummary | true | string |  |
+| data.updatedAt | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/notifications` — List in-app notifications for current user with unread filter and pagination
+
+- Authorization: 로그인 + 최신 동의
+- Success status: 200
+- Response mode: json
+- After success: 알림 피드 렌더링
+- Operation ID: `NotificationController_listNotifications`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| unreadOnly | query | false | boolean |  |
+| limit | query | false | integer |  |
+| offset | query | false | integer |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/notifications/:id/read` — Mark a specific in-app notification as read
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 알림 상태 및 배지 갱신
+- Operation ID: `NotificationController_markRead`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/notifications/archive-snapshot` — Export an owner-only complete snapshot of at most 100 retained notifications
+
+- Authorization: 로그인 + 최신 동의, 회원 ID는 서버 세션에서 결정
+- Success status: 200
+- Response mode: json
+- After success: complete=true인 전체 알림 스냅샷만 CSV로 처리; 보상 지급 증빙 아님
+- Operation ID: `NotificationController_archiveSnapshot`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| notifications[] | true | object[] |  |
+| notifications[] | true | object |  |
+| notifications[].id | true | string |  |
+| notifications[].category | true | string |  |
+| notifications[].title | true | string |  |
+| notifications[].body | true | string |  |
+| notifications[].link | true | null \| string |  |
+| notifications[].is_read | true | boolean |  |
+| notifications[].read_at | true | null \| string (date-time) |  |
+| notifications[].created_at | true | string (date-time) |  |
+| complete | true | boolean=true | const=true |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/notifications/read-all` — Mark all in-app notifications as read for current user
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 알림 목록 및 배지 0으로 갱신
+- Operation ID: `NotificationController_markAllRead`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/notifications/unread-count` — Get total unread in-app notification count for current user
+
+- Authorization: 로그인 + 최신 동의
+- Success status: 200
+- Response mode: json
+- After success: 헤더 배지 숫자 반영
+- Operation ID: `NotificationController_unreadCount`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| unreadCount | true | number |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
 ## `GET` `/app-api/v1/photos` — Published gallery photos
 
@@ -5077,542 +5647,6 @@ _No request body._
 |---|---|---|---|
 | idempotencyKey | true | string (uuid) |  |
 
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `GET` `/app-api/v1/newspaper/pulse` — Get live market sentiment index and lead scenario summary
-
-- Authorization: 공개: 로그인 불필요
-- Success status: 200
-- Response mode: json
-- After success: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `NewspaperController_getMarketPulse`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| success | true | boolean |  |
-| data | true | object |  |
-| data.sentimentScore | true | number |  |
-| data.sentimentLabel | true | string="VERY_BULLISH" \| string="BULLISH" \| string="NEUTRAL" \| string="BEARISH" \| string="VERY_BEARISH" |  |
-| data.activeEventsCount | true | number |  |
-| data.leadHeadline | true | string |  |
-| data.leadSummary | true | string |  |
-| data.updatedAt | true | string |  |
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `GET` `/app-api/v1/newspaper/poll` — Get weekly market sentiment opinion poll status
-
-- Authorization: 공개: 로그인 불필요
-- Success status: 200
-- Response mode: json
-- After success: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `NewspaperController_getWeeklyPoll`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| success | true | boolean |  |
-| data | true | object |  |
-| data.id | true | string |  |
-| data.question | true | string |  |
-| data.options[] | true | object[] |  |
-| data.options[] | true | object |  |
-| data.options[].id | true | string |  |
-| data.options[].label | true | string |  |
-| data.options[].votes | true | number |  |
-| data.options[].percentage | true | number |  |
-| data.totalVotes | true | number |  |
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `POST` `/app-api/v1/newspaper/poll/vote` — Cast vote on weekly market outlook poll
-
-- Authorization: 로그인 + 최신 동의 + CSRF(변경 요청)
-- Success status: 201
-- Response mode: json
-- After success: 관련 GET을 다시 호출해 서버 상태와 동기화
-- Operation ID: `NewspaperController_voteWeeklyPoll`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-- Content-Type: `undefined`
-
-_None._
-
-
-### Success response fields
-
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| success | true | boolean |  |
-| data | true | object |  |
-| data.id | true | string |  |
-| data.question | true | string |  |
-| data.options[] | true | object[] |  |
-| data.options[] | true | object |  |
-| data.options[].id | true | string |  |
-| data.options[].label | true | string |  |
-| data.options[].votes | true | number |  |
-| data.options[].percentage | true | number |  |
-| data.totalVotes | true | number |  |
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `GET` `/app-api/v1/newspaper/lore` — Get weekly financial education lore articles
-
-- Authorization: 공개: 로그인 불필요
-- Success status: 200
-- Response mode: json
-- After success: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `NewspaperController_getFinancialLore`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| success | true | boolean |  |
-| data[] | true | object[] |  |
-| data[] | true | object |  |
-| data[].id | true | string |  |
-| data[].category | true | string |  |
-| data[].title | true | string |  |
-| data[].summary | true | string |  |
-| data[].readTimeMinutes | true | number |  |
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `GET` `/app-api/v1/banking/pockets` — List all saving pockets for current user
-
-- Authorization: 로그인 + 최신 동의
-- Success status: 200
-- Response mode: json
-- After success: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `PocketController_listPockets`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `POST` `/app-api/v1/banking/pockets` — Create a new saving pocket
-
-- Authorization: 로그인 + 최신 동의 + CSRF
-- Success status: 201
-- Response mode: json
-- After success: 저금통 목록을 다시 조회
-- Operation ID: `PocketController_createPocket`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-- Content-Type: `application/json`
-- DTO: `CreatePocketDto`
-
-_None._
-
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `POST` `/app-api/v1/banking/pockets/:id/transfer` — Transfer funds between main bank balance and saving pocket
-
-- Authorization: 로그인 + 최신 동의 + CSRF
-- Success status: 201
-- Response mode: json
-- After success: 저금통 및 은행 잔액 갱신
-- Operation ID: `PocketController_transferPocket`
-
-### Path/query parameters
-
-| Name | In | Required | Type | Constraints |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### Request body
-
-- Content-Type: `application/json`
-- DTO: `TransferPocketDto`
-
-_None._
-
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `PUT` `/app-api/v1/banking/pockets/:id` — Customize saving pocket appearance and theme
-
-- Authorization: 로그인 + 최신 동의 + CSRF
-- Success status: 200
-- Response mode: json
-- After success: 저금통 목록 갱신
-- Operation ID: `PocketController_customizePocket`
-
-### Path/query parameters
-
-| Name | In | Required | Type | Constraints |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### Request body
-
-- Content-Type: `application/json`
-- DTO: `CustomizePocketDto`
-
-_None._
-
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `POST` `/app-api/v1/banking/pockets/:id/archive` — Archive saving pocket and recover all funds to cash balance
-
-- Authorization: 로그인 + 최신 동의 + CSRF
-- Success status: 201
-- Response mode: json
-- After success: 저금통 및 본계좌 잔액 갱신
-- Operation ID: `PocketController_archivePocket`
-
-### Path/query parameters
-
-| Name | In | Required | Type | Constraints |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### Request body
-
-- Content-Type: `application/json`
-- DTO: `ArchivePocketDto`
-
-_None._
-
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `GET` `/app-api/v1/crafting/recipes` — List all official crafting recipes with required materials and fees
-
-- Authorization: 로그인 + 최신 동의
-- Success status: 200
-- Response mode: json
-- After success: 레시피 목록 렌더링
-- Operation ID: `CraftingController_listRecipes`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `POST` `/app-api/v1/crafting/execute` — Execute crafting recipe: consume materials and WLD fee to mint crafted item
-
-- Authorization: 로그인 + 최신 동의 + CSRF
-- Success status: 201
-- Response mode: json
-- After success: 인벤토리 및 잔액 갱신
-- Operation ID: `CraftingController_executeCrafting`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-- Content-Type: `application/json`
-- DTO: `ExecuteCraftingDto`
-
-_None._
-
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `GET` `/app-api/v1/marketplace/listings` — List active player marketplace listings with filter and search
-
-- Authorization: 로그인 + 최신 동의
-- Success status: 200
-- Response mode: json
-- After success: 마켓 목록 렌더링
-- Operation ID: `MarketplaceController_listListings`
-
-### Path/query parameters
-
-| Name | In | Required | Type | Constraints |
-|---|---|---|---|---|
-| category | query | false | string |  |
-| search | query | false | string |  |
-| limit | query | false | integer |  |
-| offset | query | false | integer |  |
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `GET` `/app-api/v1/marketplace/my-listings` — List current user marketplace listings and trade history
-
-- Authorization: 로그인 + 최신 동의
-- Success status: 200
-- Response mode: json
-- After success: 내 리스팅 목록 렌더링
-- Operation ID: `MarketplaceController_listMyListings`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `POST` `/app-api/v1/marketplace/listings` — List an item for sale in player marketplace with escrow lock
-
-- Authorization: 로그인 + 최신 동의 + CSRF
-- Success status: 201
-- Response mode: json
-- After success: 인벤토리 및 내 판매 목록 갱신
-- Operation ID: `MarketplaceController_createListing`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-- Content-Type: `application/json`
-- DTO: `CreateListingDto`
-
-_None._
-
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `POST` `/app-api/v1/marketplace/listings/:id/buy` — Buy a marketplace listing item with 1% burn fee and 99% seller settlement
-
-- Authorization: 로그인 + 최신 동의 + CSRF
-- Success status: 201
-- Response mode: json
-- After success: 잔액 및 인벤토리 갱신
-- Operation ID: `MarketplaceController_buyListing`
-
-### Path/query parameters
-
-| Name | In | Required | Type | Constraints |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### Request body
-
-- Content-Type: `application/json`
-- DTO: `BuyListingDto`
-
-_None._
-
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `POST` `/app-api/v1/marketplace/listings/:id/cancel` — Cancel active marketplace listing and recover item to inventory
-
-- Authorization: 로그인 + 최신 동의 + CSRF
-- Success status: 201
-- Response mode: json
-- After success: 인벤토리 및 내 리스팅 갱신
-- Operation ID: `MarketplaceController_cancelListing`
-
-### Path/query parameters
-
-| Name | In | Required | Type | Constraints |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `GET` `/app-api/v1/notifications` — List in-app notifications for current user with unread filter and pagination
-
-- Authorization: 로그인 + 최신 동의
-- Success status: 200
-- Response mode: json
-- After success: 알림 피드 렌더링
-- Operation ID: `NotificationController_listNotifications`
-
-### Path/query parameters
-
-| Name | In | Required | Type | Constraints |
-|---|---|---|---|---|
-| unreadOnly | query | false | boolean |  |
-| limit | query | false | integer |  |
-| offset | query | false | integer |  |
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `GET` `/app-api/v1/notifications/unread-count` — Get total unread in-app notification count for current user
-
-- Authorization: 로그인 + 최신 동의
-- Success status: 200
-- Response mode: json
-- After success: 헤더 배지 숫자 반영
-- Operation ID: `NotificationController_unreadCount`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| unreadCount | true | number |  |
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `POST` `/app-api/v1/notifications/:id/read` — Mark a specific in-app notification as read
-
-- Authorization: 로그인 + 최신 동의 + CSRF
-- Success status: 201
-- Response mode: json
-- After success: 알림 상태 및 배지 갱신
-- Operation ID: `NotificationController_markRead`
-
-### Path/query parameters
-
-| Name | In | Required | Type | Constraints |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-_None._
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `POST` `/app-api/v1/notifications/read-all` — Mark all in-app notifications as read for current user
-
-- Authorization: 로그인 + 최신 동의 + CSRF
-- Success status: 201
-- Response mode: json
-- After success: 알림 목록 및 배지 0으로 갱신
-- Operation ID: `NotificationController_markAllRead`
-
-### Path/query parameters
-
-_None._
-
-### Request body
-
-_No request body._
 
 ### Success response fields
 
