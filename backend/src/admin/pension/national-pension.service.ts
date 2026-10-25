@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { requirePositiveWld } from '../../wallet/wallet.repository';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
 import {
@@ -106,8 +106,20 @@ export class NationalPensionService {
     return this.repository.listContributions(userId, limit);
   }
 
-  async listPayoutLogs(userId: string, limit = 20): Promise<NationalPensionPayoutLogRow[]> {
-    return this.repository.listPayoutLogs(userId, limit);
+  async listPayoutLogs(userId: string, limit = 20): Promise<(NationalPensionPayoutLogRow & { ledgerVerification: 'UNVERIFIED_LEDGER'; ledgerTransactionId: null })[]> {
+    try {
+      const rows = await this.repository.listPayoutLogs(userId, limit);
+      // Legacy payout rows have no canonical transaction ID and must not imply money was posted.
+      return rows.map((row) => ({ ...row, ledgerVerification: 'UNVERIFIED_LEDGER' as const, ledgerTransactionId: null }));
+    } catch (error) {
+      if ((error as { code?: string } | null)?.code === '42501') {
+        throw new ServiceUnavailableException({
+          code: 'PENSION_PAYOUT_READ_UNAVAILABLE',
+          message: 'Historical pension payout records are temporarily unavailable.',
+        });
+      }
+      throw error;
+    }
   }
 
   async listRecentPayoutLogs(limit = 20): Promise<NationalPensionPayoutLogRow[]> {

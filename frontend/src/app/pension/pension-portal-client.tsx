@@ -74,6 +74,8 @@ export interface PayoutLog {
   payout_amount_wld: string;
   snapshot_accumulated_wld: string;
   created_at: string;
+  ledgerVerification: 'UNVERIFIED_LEDGER';
+  ledgerTransactionId: null;
 }
 
 interface PensionPortalClientProps {
@@ -83,6 +85,10 @@ interface PensionPortalClientProps {
   payouts: PayoutLog[];
   userCashBalance: string;
   isLoggedIn: boolean;
+  payoutHistoryUnavailable?: boolean;
+  contributionHistoryUnavailable?: boolean;
+  accountUnavailable?: boolean;
+  walletBalanceUnavailable?: boolean;
 }
 
 export function PensionPortalClient({
@@ -92,6 +98,10 @@ export function PensionPortalClient({
   payouts: initialPayouts,
   userCashBalance: initialCashBalance,
   isLoggedIn,
+  payoutHistoryUnavailable = false,
+  contributionHistoryUnavailable = false,
+  accountUnavailable = false,
+  walletBalanceUnavailable = false,
 }: PensionPortalClientProps) {
   const [account, setAccount] = useState<MyPensionAccount | null>(initialAccount);
   const [contributions, setContributions] = useState<ContributionLog[]>(initialContributions);
@@ -242,6 +252,17 @@ export function PensionPortalClient({
   const simDaily = simHourly * 24;
   const simMonthly = simDaily * 30;
 
+  if (accountUnavailable) {
+    return (
+      <section className="mx-auto max-w-4xl p-6">
+        <h1 className="text-2xl font-bold">국민연금 기록 조회</h1>
+        <div role="alert" className="mt-4 rounded-lg border border-amber-500/40 p-4">
+          연금 계좌를 확인할 수 없습니다. 서버 조회 실패는 로그아웃이나 0 WLD 잔액을 의미하지 않습니다. 잠시 후 다시 조회해 주세요.
+        </div>
+      </section>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-16">
       {/* 상단 헤더 */}
@@ -312,7 +333,7 @@ export function PensionPortalClient({
         <div className="rounded-xl border border-border/60 p-4 bg-card/60 backdrop-blur">
           <div className="text-xs text-muted-foreground flex items-center gap-1.5">
             <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
-            누적 지급 기초연금
+            기록상 누적 지급액 (원장 미검증)
           </div>
           <div className="text-xl font-bold mt-1 text-foreground">
             {groupDigits(overview.totalPensionPaidWld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
@@ -366,7 +387,7 @@ export function PensionPortalClient({
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">누적 수령 총액</div>
+                  <div className="text-xs text-muted-foreground">기록상 누적 지급액 (원장 미검증)</div>
                   <div className="text-lg font-bold text-blue-400 mt-0.5">
                     {groupDigits(account?.total_payout_received_wld || '0')}{' '}
                     <span className="text-xs font-normal text-muted-foreground">WLD</span>
@@ -443,7 +464,7 @@ export function PensionPortalClient({
               <div className="text-xs text-muted-foreground flex justify-between">
                 <span>내 지갑 가용 잔액:</span>
                 <span className="font-mono font-semibold text-foreground">
-                  {groupDigits(cashBalance)} WLD
+                  {walletBalanceUnavailable ? '조회 불가' : `${groupDigits(cashBalance)} WLD`}
                 </span>
               </div>
 
@@ -498,6 +519,7 @@ export function PensionPortalClient({
                     size="sm"
                     className="text-xs h-7"
                     onClick={() => setContributeAmount(cashBalance.toString())}
+                    disabled={walletBalanceUnavailable}
                   >
                     전액
                   </Button>
@@ -530,11 +552,11 @@ export function PensionPortalClient({
           </TabsTrigger>
           <TabsTrigger value="contributions" className="gap-1.5">
             <History className="h-4 w-4" />
-            내 기여금 납입 이력 ({contributions.length})
+            기록상 기여금 내역 ({contributions.length})
           </TabsTrigger>
           <TabsTrigger value="payouts" className="gap-1.5">
             <Clock className="h-4 w-4" />
-            기초연금 수령 내역 ({payouts.length})
+            기초연금 지급 기록 ({payouts.length})
           </TabsTrigger>
         </TabsList>
 
@@ -613,7 +635,11 @@ export function PensionPortalClient({
         <TabsContent value="contributions">
           <Card className="border-border/60 bg-card/60">
             <CardContent className="pt-6">
-              {contributions.length === 0 ? (
+              {contributionHistoryUnavailable ? (
+                <div role="alert" className="rounded-lg border border-amber-500/40 p-4 text-sm">
+                  기여금 기록을 불러오지 못했습니다. 기록이 없다는 의미가 아닙니다.
+                </div>
+              ) : contributions.length === 0 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground">
                   아직 기여금 납입 내역이 없습니다.
                 </div>
@@ -651,16 +677,20 @@ export function PensionPortalClient({
         <TabsContent value="payouts">
           <Card className="border-border/60 bg-card/60">
             <CardContent className="pt-6">
-              {payouts.length === 0 ? (
+              {payoutHistoryUnavailable ? (
+                <div role="alert" className="rounded-lg border border-amber-500/40 p-4 text-sm">
+                  수령 기록을 불러오지 못했습니다. 기록이 없다는 의미가 아닙니다. 잠시 후 다시 조회해 주세요.
+                </div>
+              ) : payouts.length === 0 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground">
-                  아직 기초연금 수령 내역이 없습니다.
+                  조회된 기초연금 지급 기록이 없습니다.
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>수령 일시</TableHead>
-                      <TableHead>수령 연금액</TableHead>
+                      <TableHead>기록 일시</TableHead>
+                      <TableHead>기록상 지급액 (원장 미검증)</TableHead>
                       <TableHead>당시 적립 원금</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -671,7 +701,8 @@ export function PensionPortalClient({
                           {new Date(p.created_at).toLocaleString('ko-KR')}
                         </TableCell>
                         <TableCell className="font-semibold text-emerald-400">
-                          +{groupDigits(p.payout_amount_wld)} WLD
+                          {groupDigits(p.payout_amount_wld)} WLD
+                          <span className="block text-xs text-amber-400">원장 미검증 · 지급 확정 아님</span>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           {groupDigits(p.snapshot_accumulated_wld)} WLD

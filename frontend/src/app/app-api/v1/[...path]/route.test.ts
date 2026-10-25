@@ -171,3 +171,31 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('pension receipt Android app-api parity', () => {
+  it('preserves unverified ledger state and owner session when proxying payout history', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let forwarded = new Headers();
+    vi.stubGlobal('fetch', vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      forwarded = new Headers(init?.headers);
+      return new Response(JSON.stringify([{ id: 'p1', payout_amount_wld: '900719925474099312345', ledgerVerification: 'UNVERIFIED_LEDGER', ledgerTransactionId: null }]), {
+        status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    }));
+    const response = await GET(request('/app-api/v1/pension/my-payouts', { cookie: 'session=test-session' }), context('pension', 'my-payouts'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(forwarded.get('cookie')).toBe('session=test-session');
+    expect(await response.json()).toMatchObject([{ payout_amount_wld: '900719925474099312345', ledgerVerification: 'UNVERIFIED_LEDGER', ledgerTransactionId: null }]);
+  });
+});
+
+describe('private pension mobile receipt privacy', () => {
+  it('forces private no-store even when the upstream omits cache policy', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('[]', { status: 200, headers: { 'content-type': 'application/json' } })));
+    const response = await GET(request('/app-api/v1/pension/my-payouts'), context('pension', 'my-payouts'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+});
