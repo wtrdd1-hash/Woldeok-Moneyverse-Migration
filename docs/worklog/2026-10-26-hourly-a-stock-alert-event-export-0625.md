@@ -28,3 +28,9 @@
 
 ## FINISHED
 - Pending final QA/release/CI/branch audit.
+
+## FINISHED CHECKPOINT — 06:42 KST / RELEASE HOLD
+- Canonical build with correct Next 16.4.2 worktree dependencies PASS; typecheck PASS, lint PASS 0 errors/1128 warnings, API contract PASS 180, bot 8 PASS; isolated PG owner/foreign/ACL/rollback PASS.
+- Full frontend FAIL 6 existing regressions (1409 PASS); backend 1317 PASS/398 SKIP; DB 15 PASS/3 SKIP; contract 38 PASS. Security FAIL: prod High 2, full Critical 2/High 10, bot Critical 1/High 5. Candidate Test #40236038750 Runtime FAIL. Official Test and Production SHA do not match candidate. Root disk 100%.
+- Draft PR #1381; QA `docs/qa/2026-10-26-a0625-stock-alert-events-export.md`, release EN/KO `docs/releases/v2026.10.26.a0625[.ko].md`. Other contributors untouched; no main merge, DB write, service restart, Test or Production promotion, branch deletion.
+- Final docs SHA CI/security/full suite will be checked again and recorded in PR comment; Production RELEASE HOLD regardless of local focus passes.
