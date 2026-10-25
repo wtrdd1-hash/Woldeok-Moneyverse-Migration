@@ -1,5 +1,6 @@
 # 월덕 머니버스 — Living Project Plan
 ## v2026.10.26.1298 — F675-131 알림 보관함 CSV 무결성 보완 (기능 보완 / DRAFT / HOLD)
+- **v1298 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1371; **개발 인계:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363; DRAFT / RELEASE HOLD.
 - **회차:** 이전 기능 추가 v1296 → 현재 기능 보완 v1298 → 다음 기능 추가 v1300(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`, 영문 정본·한국어 동등 문서. Draft #1364 기반 문서만 수정, 개발 A/B/C/Gemini/QA 런타임 변경 금지.
 - **main 근거:** 알림 회원 필터 직접 SELECT가 OFFSET/생성시각 단독 정렬·dedupe_key 반환·불리언 변환을 사용하며 CSV API는 미구현. 개발 B #1356 페이징 수정과 분리, 운영 사고 단정 금지.
 - **계약 보완:** 5,000행/2MiB/30초 CSV를 **HTTP 헤더 전** 완성·검증하고 초과 시 부분 바이트 없이 413. 0건 헤더만, 고정 열/CRLF/BOM 없는 UTF-8/UTC/NULL, 정확 전송 바이트 SHA-256·크기. 셀 단위 수식 방어를 RFC4180 직렬화 전 수행, 변환 셀 수와 원문 비동등성 고지. SHA는 DB 진실을 보증하는 서명이 아니다. 단일 연결 READ ONLY REPEATABLE READ 내보내기, 여러 페이지는 BEST_EFFORT. 세션·동의·CSRF·최소권한·BOLA, no-store/noindex, Android/WCAG AA, 관리자 k>=20, 회원당 시간당 3회.

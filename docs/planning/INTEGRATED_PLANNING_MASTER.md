@@ -1,5 +1,6 @@
 # Woldeok Moneyverse — Integrated Planning Master
 ## v2026.10.26.1298 — F675-131 Notification Archive Export Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
+- **v1298 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1371; **engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363; DRAFT / RELEASE HOLD.
 
 ### Evidence, scope, ownership and cycle
 - **Cycle:** Previous Feature Addition v1296 → Current Feature Improvement v1298 → Next Feature Addition v1300 (provisional). Rechecked remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` and canonical AGENTS.md, README.md, PROJECT_PLAN.md and Korean parity. This docs-only change stacks on unmerged planning Draft #1364; do not touch Gemini, development A/B/C or QA code/branches.

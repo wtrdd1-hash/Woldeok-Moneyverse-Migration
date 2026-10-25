@@ -1,5 +1,6 @@
 # 월덕 머니버스 — 통합 기획 마스터
 ## v2026.10.26.1298 — F675-131 알림 보관함 CSV 내보내기 무결성 보완 (기능 보완 / DRAFT / RELEASE HOLD)
+- **v1298 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1371; **개발 인계:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363; DRAFT / RELEASE HOLD.
 
 ### 확인 근거·범위·회차
 - **회차:** 이전 Feature Addition v1296 → 현재 Feature Improvement v1298 → 다음 Feature Addition v1300(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 및 AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조를 재확인. 미병합 기획 Draft #1364 위에 문서만 적층하며 Gemini/개발 A/B/C/QA 브랜치·코드를 수정하지 않는다.

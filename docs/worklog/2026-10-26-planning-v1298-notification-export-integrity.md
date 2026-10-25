@@ -14,3 +14,7 @@
 - Bounded 5000 rows/2MiB/30s before HTTP 200; 413 zero partial bytes. Single-client REPEATABLE READ snapshot; cross-request browsing BEST_EFFORT. Fixed UTF-8 no BOM, CRLF, CSV formula mitigation with disclosed transformedCellCount; SHA-256 exact bytes is not an independent signature. Session/consent/CSRF, DB privilege/BOLA, Android/a11y/SEO, aggregate admin KPI and feature flag OFF.
 - P0: ENV1298-01 SEC1298-02 REL1298-03 ARC1298-04. P1: ARC1298-05 ARC1298-06 ARC1298-07 ARC1298-08 ARC1298-09 ARC1298-10.
 - Documentation-only. No runtime code, migrations, DB data, WLD/ledger, Test or Production changes. DRAFT / RELEASE HOLD.
+
+## GITHUB HANDOFF
+- Draft PR #1371 on unmerged planning #1364; development issue #1363 comment 6402550719, root-capacity #1170 comment 6402551083. Both preserve RELEASE HOLD.
+- Main SHA unchanged. Docs-only branch; no runtime/DB/Test/Production mutation.
