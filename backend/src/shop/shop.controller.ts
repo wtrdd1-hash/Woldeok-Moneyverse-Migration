@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   NotFoundException,
   Param,
@@ -152,6 +153,23 @@ export class ShopController {
         'held items are unavailable',
       ),
     };
+  }
+
+  @Get('holdings/export-snapshot')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Complete bounded snapshot of the caller owned inventory' })
+  async exportSnapshot(@Req() request: RequestWithSession) {
+    const holdings = await this.guarded(
+      () => this.repository().holdings(requireUserId(request)),
+      'held items are unavailable',
+    );
+    // A partial export would silently misrepresent the member's inventory.
+    if (holdings.length > 100) {
+      throw new ServiceUnavailableException('inventory export exceeds the verified snapshot limit');
+    }
+    return { holdings, complete: true };
   }
 
   @Post('catalog/:id/purchases')

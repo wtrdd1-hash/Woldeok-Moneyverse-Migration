@@ -10,8 +10,8 @@
 - Release policy: all full gates, isolated real PostgreSQL owner/ACL and exact-SHA authenticated official Test E2E required before merge or Production. Any failure => HOLD.
 
 ## IN PROGRESS
-- [ ] RED tests for bounded backend snapshot, private CSV and Android gateway.
-- [ ] Backend/Frontend/Android feature implementation.
+- [x] RED tests: backend 3 failed (missing exportSnapshot), frontend module import failed (missing route). Evidence /srv/moneyverse-data/reports/a0425-{backend,frontend}-red.log.
+- [x] Initial backend guarded snapshot, Next CSV BFF, inventory UI and Android gateway regression tests implemented; GREEN verification pending.
 - [ ] Mid-work origin/main + integrated plan reread, QA/security regression and DB ACL.
 - [ ] Final branch audit, exact SHA gates, PR and release evidence.
 

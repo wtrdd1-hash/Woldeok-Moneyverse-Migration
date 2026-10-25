@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { PageHeader } from '@/components/page-header';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Accent } from '@/components/page-header';
@@ -11,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: '내 보관함 · 인벤토리',
   description: '보유한 아이템 및 아바타 프레임, 배경, 효과, 칭호 치장 관리',
+  robots: { index: false, follow: false },
 };
 
 export default async function InventoryPage() {
@@ -44,6 +46,22 @@ export default async function InventoryPage() {
           english="Store all items acquired and customize your avatar with frames, effects, backgrounds, and badges."
         />
       </PageHeader>
+
+      {holdingsData ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4">
+          <p className="text-sm text-muted-foreground">
+            <T korean="현재 보유 아이템 전체 기록을 CSV로 보관할 수 있어요. 최대 100종까지 지원해요." english="Save a complete current inventory CSV snapshot (up to 100 items)." />
+          </p>
+          <Link href="/api/shop/holdings/export" aria-label="현재 보유 아이템 전체 CSV 다운로드"
+            className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+            <T korean="보유 아이템 CSV 다운로드" english="Export inventory CSV" />
+          </Link>
+        </div>
+      ) : (
+        <p role="status" className="rounded-xl border border-border p-4 text-sm text-muted-foreground">
+          <T korean="현재 보유 아이템을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요." english="Your inventory is temporarily unavailable. Please retry." />
+        </p>
+      )}
 
       <InventoryView
         holdings={holdings}

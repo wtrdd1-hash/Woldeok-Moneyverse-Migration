@@ -95,6 +95,13 @@ describe('shop routes', () => {
     );
   });
 
+  it('mounts private complete inventory snapshot behind session and consent guards', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/shop/holdings/export-snapshot');
+    expect(response.status).not.toBe(404);
+    expect([401, 428, 503]).toContain(response.status);
+    expect(response.body).not.toHaveProperty('holdings');
+  });
+
   it('mounts the catalogue purchase command behind a session', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/shop/catalog/00000000-0000-4000-8000-000000000000/purchases')
