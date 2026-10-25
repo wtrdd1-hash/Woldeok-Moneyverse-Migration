@@ -20,5 +20,11 @@
 - Initial `pnpm api:contract:check` reports drift against HEAD by design until generated artifacts are committed; rerun on committed code SHA.
 
 
+## VALIDATION / REPAIR — 06:33 KST
+- Initial exact-code-SHA full gates: Typecheck PASS; lint FAIL **1 introduced error** (`no-loss-of-precision` on a deliberately unsafe test number literal) and 1,128 pre-existing warnings; full tests FAIL **6 pre-existing frontend assertions**, frontend 1,409 PASS / 6 FAIL, backend 1,317 PASS / 398 SKIP, DB 15 PASS / 3 SKIP, contract 38 PASS.
+- Initial build FAIL due to **workspace dependency symlink pointing outside Turbopack filesystem root** (test setup, not product source). Repair: replace only this worktree's dependency symlinks with local copies from the installed baseline, on the data disk. No other worktrees changed. Change unsafe test literal to `Number(string)` to preserve the intended rejection test without an ESLint error.
+- Audits FAIL: production 2 HIGH, full 2 CRITICAL / 10 HIGH, bot 1 CRITICAL / 5 HIGH. Existing QA Draft #1317 addresses some frontend/HTTP advisories, but is unmerged and not release-approved; do not duplicate.
+- Repeat **all mandatory gates at new commit SHA**, including build, before claiming local success.
+
 ## FINISHED
 - Pending final QA/release/CI/branch audit.

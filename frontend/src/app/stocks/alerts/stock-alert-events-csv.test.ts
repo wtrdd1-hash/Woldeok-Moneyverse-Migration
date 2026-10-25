@@ -30,7 +30,7 @@ describe('stock alert event CSV: all-or-nothing private snapshot', () => {
     expect(() => stockAlertEventsCsv({ scope: 'all_history', events: [row] })).toThrow();
     expect(() => stockAlertEventsCsv(snapshot(Array.from({ length: 101 }, () => row)))).toThrow();
     expect(() => stockAlertEventsCsv(snapshot([row, row]))).toThrow();
-    expect(() => stockAlertEventsCsv(snapshot([{ ...row, trigger_price: 9007199254740995 }]))).toThrow();
+    expect(() => stockAlertEventsCsv(snapshot([{ ...row, trigger_price: Number('9007199254740995') }]))).toThrow();
     expect(() => stockAlertEventsCsv(snapshot([{ ...row, trigger_price: '01' }]))).toThrow();
   });
   it('rejects mismatched condition thresholds and invalid timestamps', () => {
