@@ -21,4 +21,16 @@ describe('Golden Duck read-only ledger evidence', () => {
     await expect(repository.goldenDuckLedgerStatus('11111111-2222-4333-8444-555555555555')).resolves.toEqual({ claimedToday: false, transactionId: null });
     expect(query.mock.calls[0]![0]).toMatch(/^SELECT/);
   });
+  it('cannot invoke the legacy non-atomic mint path even from another backend caller', async () => {
+    const query = vi.fn();
+    const repository = new DopamineRepository({ query } as unknown as Queryable);
+    await expect(repository.claimGoldenDuck({
+      actorUserId: '11111111-2222-4333-8444-555555555555',
+      idempotencyKey: 'a1b2c3d4-e5f6-4a1b-8c2d-3e4f5a6b7c8d',
+      clickCount: 200,
+      comboMultiplier: 2,
+    })).rejects.toThrow(/unavailable/i);
+    expect(query).not.toHaveBeenCalled();
+  });
+
 });

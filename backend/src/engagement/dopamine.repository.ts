@@ -93,124 +93,14 @@ export class DopamineRepository {
     return { claimedToday: Boolean(row), transactionId: row?.transaction_id ?? null };
   }
 
-  /**
-   * 황금 오리 광클 피버 보상 원장 기록 및 지갑(USER_CASH) 입금
-   * 1일 1회 제한 및 세션당 최대 1,000 WLD 경제 밸런스 보호
+  /** Legacy entrypoint retained only to refuse accidental internal calls.
+   * No code may mint from a client-reported tap count without a new atomic
+   * SECURITY DEFINER settlement and verified idempotent receipt.
    */
-  async claimGoldenDuck(input: GoldenDuckClaimInput): Promise<GoldenDuckClaimRecord> {
-    assertUuid(input.actorUserId, 'actorUserId');
-    assertUuid(input.idempotencyKey, 'idempotencyKey');
-
-    // 0. 1일 1회 참여 제한 (Daily Cap: 1)
-    const todayClaim = await queryOne<{ id: string }>(
-      this.pool,
-      `SELECT id::text
-       FROM public.ledger_transactions
-       WHERE actor_user_id = $1::uuid
-         AND policy_version = 'game.dopamine.golden_duck'
-         AND created_at >= CURRENT_DATE
-       LIMIT 1`,
-      [input.actorUserId],
-    );
-
-    if (todayClaim?.id) {
-      throw new DopamineInputError('오늘의 황금 오리 피버 타임 보상을 이미 수령하셨습니다. (내일 다시 참여 가능)');
-    }
-
-    const validClicks = Math.min(Math.max(1, Math.floor(input.clickCount || 1)), 200);
-    const validMultiplier = Math.min(Math.max(1.0, Number(input.comboMultiplier || 1.0)), 2.0);
-    const rewardAmount = Math.min(1000, Math.floor(validClicks * 10 * validMultiplier));
-
-    // 1. 유저 USER_CASH 계좌 조회
-    const userCashRow = await queryOne<{ id: string }>(
-      this.pool,
-      `SELECT account.id::text AS id
-       FROM public.accounts AS account
-       JOIN public.users AS user_row ON user_row.id = account.owner_user_id
-       WHERE account.owner_user_id = $1::uuid
-         AND account.account_type = 'USER_CASH'::public.account_type
-         AND account.status = 'active'::public.account_status
-         AND user_row.status = 'active'::public.user_status`,
-      [input.actorUserId],
-    );
-
-    if (!userCashRow?.id) {
-      throw new DopamineInputError('active cash account not found for user');
-    }
-
-    // 2. MINT 시스템 계좌 조회
-    const mintRow = await queryOne<{ id: string }>(
-      this.pool,
-      `SELECT account.id::text AS id
-       FROM public.accounts AS account
-       WHERE account.system_key = 'mint'
-         AND account.account_type = 'MINT'::public.account_type
-         AND account.status = 'active'::public.account_status`,
-    );
-
-    if (!mintRow?.id) {
-      throw new Error('mint account unavailable');
-    }
-
-    // 3. economy_post_transaction으로 원장 트랜잭션 기록 및 잔고 원자적 증가
-    const txRow = await queryOne<{ transaction_id: string }>(
-      this.pool,
-      `SELECT public.economy_post_transaction(
-         $1::uuid,
-         'MINT_TO_USER',
-         $2::uuid,
-         NULL,
-         jsonb_build_array(
-           jsonb_build_object('accountId', $3::uuid, 'amount', $4::numeric, 'direction', 'credit'),
-           jsonb_build_object('accountId', $5::uuid, 'amount', $4::numeric, 'direction', 'debit')
-         ),
-         'game.dopamine.golden_duck',
-         jsonb_build_object(
-           'userId', $2::uuid,
-           'amount', $4::numeric,
-           'clicks', $6::integer,
-           'multiplier', $7::numeric
-         )
-       )::text AS transaction_id`,
-      [
-        input.idempotencyKey,
-        input.actorUserId,
-        mintRow.id,
-        rewardAmount,
-        userCashRow.id,
-        validClicks,
-        validMultiplier,
-      ],
-    );
-
-    if (!txRow?.transaction_id) {
-      throw new Error('failed to post ledger transaction for golden duck reward');
-    }
-
-    // 4. 최신 USER_CASH 잔고 조회
-    const balanceRow = await queryOne<{ available_amount: string }>(
-      this.pool,
-      `SELECT balance.available_amount::text AS available_amount
-       FROM public.account_balances AS balance
-       WHERE balance.account_id = $1::uuid`,
-      [userCashRow.id],
-    );
-
-    return {
-      success: true,
-      userId: input.actorUserId,
-      transactionId: txRow.transaction_id,
-      rewardAmount,
-      newBalance: balanceRow?.available_amount ?? '0',
-      clicks: validClicks,
-      multiplier: validMultiplier,
-      claimedAt: new Date().toISOString(),
-    };
+  async claimGoldenDuck(_input: GoldenDuckClaimInput): Promise<GoldenDuckClaimRecord> {
+    throw new DopamineInputError('Golden Duck settlement unavailable');
   }
 
-  /**
-   * 출석 체크 및 스트릭 상태 조회
-   */
   async getAttendanceStatus(userId: string) {
     assertUuid(userId, 'userId');
 
