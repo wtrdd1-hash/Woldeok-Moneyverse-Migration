@@ -22,3 +22,10 @@
 - GREEN: frontend 4 PASS, backend 2 PASS, Android route 2 PASS. Backend controller now reports DATABASE_SNAPSHOT/NOT_VERIFIED, returns sanitized 503 on read failure; UI no longer invents WLD/enterprise rows and labels all hourly values as projections. Repository projection rounded down to integer string. No migration or financial writes.
 - Isolated PostgreSQL `moneyverse_audit_v855`: `moneyverse_app` lacks SELECT on `state_enterprises` and `private_enterprises`; real public read therefore remains 503 pending approved SECURITY DEFINER migration (none introduced due overlapping unmerged migration 280 proposals). `ledger_postings UPDATE` also denied. This is an explicit release blocker, not an end-to-end PASS.
 - Typecheck backend/frontend and contract build PASS; focused lint 0 errors, warning addressed. Midpoint main advanced from `54702642` to `8d80d36c`; refresh/merge required before final verification.
+
+### Verification checkpoint (15:03 KST)
+- Full backend 1315 PASS / 398 SKIPPED; frontend 1403 PASS / 6 FAIL (SEO3, calculator registration1, login touch target1, admin M2 1). DB 15 PASS / 3 SKIPPED; contract 38 PASS; bot 8 PASS; Android contract PASS.
+- Workspace build/typecheck/lint PASS (0 errors, 1127 warnings). Dependency security FAIL: prod High2, all Critical2/High10, bot Critical1/High5.
+- Isolated PG v855 positive public rows: 3 SOEs, 365000000 WLD stored assets, 108000 WLD *estimated* hourly dividends; app-role SELECT denied, app DML denied, ledger UPDATE denied. All transactions READ ONLY / ROLLBACK. P0 follow-up #1287 created.
+- Official Test `/api/version` SHA `6f697e74b7bf0cd1e4521d36534cfd9c140f8010` differs from candidate; `/app-api/v1/enterprises/public` returned 500. No Test/Production promotion.
+- Main advanced repeatedly (`54702642` → `8d80d36c` → `669d1b85` → `1c5b84a1`); must resync again before final integration check. No other branch deleted, changed, or merged.
