@@ -51,6 +51,12 @@ describe('engagement routes', () => {
     expect([401, 428, 503]).toContain(response.status);
   });
 
+  it('mounts the owner-only current-week quest snapshot behind a session', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/engagement/early-game/weekly-snapshot');
+    expect(response.status).not.toBe(404);
+    expect([401, 428, 503]).toContain(response.status);
+  });
+
   // The whole point of 101's goals is that a member cannot report progress
   // against them: they are computed from work receipts, shop purchases and
   // ledger postings. A write route here would be the hole the progress route

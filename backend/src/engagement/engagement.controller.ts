@@ -168,6 +168,24 @@ export class EngagementController {
    * postings -- which is why there is no write route beside this read and must
    * not be one.
    */
+  /**
+   * Current-week snapshot only. Historical weekly archives and payout receipts
+   * cannot be inferred from this function. Actor comes exclusively from the
+   * verified session, never a query/body supplied UUID.
+   */
+  @Get('early-game/weekly-snapshot')
+  @ApiOperation({ summary: 'Owner-only current-week quest progress snapshot (read-only)' })
+  async weeklySnapshot(@Req() request: RequestWithSession) {
+    const goals = await this.guarded(
+      () => this.earlyGameRepository().weeklyGoals(requireUserId(request)),
+      'the weekly quest snapshot is unavailable',
+    );
+    if (!Array.isArray(goals) || goals.length > 12) {
+      throw new ServiceUnavailableException('the weekly quest snapshot is unavailable');
+    }
+    return { scope: 'current_week_only', goals };
+  }
+
   @Get('early-game')
   @ApiOperation({ summary: 'The early-game weekly goals and collection books' })
   async earlyGame(@Req() request: RequestWithSession) {

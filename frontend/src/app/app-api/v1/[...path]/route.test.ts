@@ -36,6 +36,25 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('keeps a member weekly quest snapshot private through Android gateway', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let forwarded = new Headers();
+    vi.stubGlobal('fetch', vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      forwarded = new Headers(init?.headers);
+      return new Response(JSON.stringify({ scope: 'current_week_only', goals: [] }), {
+        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' },
+      });
+    }));
+    const response = await GET(
+      request('/app-api/v1/engagement/early-game/weekly-snapshot', { cookie: 'moneyverse_session=private' }),
+      context('engagement', 'early-game', 'weekly-snapshot'),
+    );
+    expect(response.status).toBe(200);
+    expect(forwarded.get('cookie')).toContain('moneyverse_session');
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

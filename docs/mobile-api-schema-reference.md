@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -2837,6 +2837,43 @@ _No request body._
 | collections[].entries[].label | true | string |  |
 | collections[].entries[].unlocked | true | boolean |  |
 | collections[].entries[].unlocked_at | true | null \| string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/engagement/early-game/weekly-snapshot` — Owner-only current-week quest progress snapshot (read-only)
+
+- Authorization: 로그인 + 최신 동의 필수, 회원 세션으로 본인만 조회
+- Success status: 200
+- Response mode: json
+- After success: 현재 주간 목표 스냅샷을 표시하며 NPC 자가 기록과 실제 활동 집계를 구분
+- Operation ID: `EngagementController_weeklySnapshot`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string |  |
+| goals[] | true | object[] |  |
+| goals[] | true | object |  |
+| goals[].goal_code | true | string |  |
+| goals[].goal_label | true | string |  |
+| goals[].goal_detail | true | string |  |
+| goals[].goal_metric | true | string |  |
+| goals[].goal_window | true | string |  |
+| goals[].goal_target | true | string |  |
+| goals[].goal_progress | true | string |  |
+| goals[].goal_unit | true | string |  |
+| goals[].goal_self_reported | true | boolean |  |
+| goals[].goal_completed | true | boolean |  |
+| goals[].week_start | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

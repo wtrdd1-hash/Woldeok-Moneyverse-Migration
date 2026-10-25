@@ -186,9 +186,19 @@ export default async function QuestsPage() {
           These four are counted from work receipts, shop purchases and ledger
           postings, so each one carries a target and a real figure. */}
       <section aria-labelledby="weekly-title" className="grid gap-3">
-        <h2 id="weekly-title" className="text-lg">
-          이번 주 목표
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="weekly-title" className="text-lg">이번 주 목표</h2>
+          <Link
+            href="/quests/weekly.csv"
+            prefetch={false}
+            className="rounded-md border px-3 py-2 text-sm underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            현재 목표 CSV 내려받기
+          </Link>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          이번 주 현황만 저장합니다. NPC 주문 진행은 직접 기록한 수치이며 보상 지급 증빙이 아닙니다.
+        </p>
         <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
           주간 목표는 월요일마다 새로 시작하고, 따로 기록하지 않아도 작업·구매·저축 기록에서
           자동으로 계산돼요. 지난주에 쌓은 진행은 이번 주로 넘어오지 않아요.

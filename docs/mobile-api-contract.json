@@ -8657,6 +8657,102 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/app-api/v1/engagement/early-game/weekly-snapshot",
+      "purpose": "현재 주간 퀘스트 진행 상태 읽기 전용 조회(과거 기록/지급 영수증 아님)",
+      "callWhen": "회원이 현재 주간 목표 CSV를 내려받거나 새로고침할 때",
+      "authorization": "로그인 + 최신 동의 필수, 회원 세션으로 본인만 조회",
+      "afterSuccess": "현재 주간 목표 스냅샷을 표시하며 NPC 자가 기록과 실제 활동 집계를 구분",
+      "backendRoute": "/api/engagement/early-game/weekly-snapshot",
+      "operationId": "EngagementController_weeklySnapshot",
+      "backendOpenApiPath": "/engagement/early-game/weekly-snapshot",
+      "summary": "Owner-only current-week quest progress snapshot (read-only)",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "scope",
+          "goals"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string"
+          },
+          "goals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "goal_code": {
+                  "type": "string"
+                },
+                "goal_label": {
+                  "type": "string"
+                },
+                "goal_detail": {
+                  "type": "string"
+                },
+                "goal_metric": {
+                  "type": "string"
+                },
+                "goal_window": {
+                  "type": "string"
+                },
+                "goal_target": {
+                  "type": "string"
+                },
+                "goal_progress": {
+                  "type": "string"
+                },
+                "goal_unit": {
+                  "type": "string"
+                },
+                "goal_self_reported": {
+                  "type": "boolean"
+                },
+                "goal_completed": {
+                  "type": "boolean"
+                },
+                "week_start": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "goal_code",
+                "goal_label",
+                "goal_detail",
+                "goal_metric",
+                "goal_window",
+                "goal_target",
+                "goal_progress",
+                "goal_unit",
+                "goal_self_reported",
+                "goal_completed",
+                "week_start"
+              ]
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "goals"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
       "method": "POST",
       "path": "/app-api/v1/engagement/npcs/:code/orders",
       "purpose": "NPC 주문/상호작용 실행",

@@ -144,6 +144,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     const value = response.headers.get(name);
     if (value) headers.set(name, value);
   }
+  // A member quest snapshot is private even if the upstream cache header is wrong.
+  if (path === '/api/v1/engagement/early-game/weekly-snapshot') {
+    headers.set('cache-control', 'private, no-store');
+    headers.set('x-robots-tag', 'noindex, nofollow');
+    headers.set('x-content-type-options', 'nosniff');
+  }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
