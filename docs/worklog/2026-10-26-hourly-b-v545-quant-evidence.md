@@ -14,10 +14,29 @@
 4. Run focused tests, backend full, contract/DB, typecheck, lint, build, frontend tests, audits, CI; re-fetch main/plans, report all failed gates. No Test/Production promotion without exact-SHA attestation and GitOps approval.
 
 ## In progress
-- [ ] TDD RED and GREEN
-- [ ] Contract/frontend truth alignment
+- [x] TDD RED: backend 4 failing / 1 passing; frontend 2 failing. GREEN: backend 10/10 focused, frontend 2/2 focused.
+- [x] Contract/frontend truth: backend GET strategies/logs and POST backtest 503 + no-store; existing POST create/toggle 503; public quant studio remains sample-only with truthful SEO and result badge.
 - [ ] Full validation and independent review
 - [ ] Mid/end main and plan refresh
 
 ## Finished
 - PENDING. No merge, Test deployment, Production deployment or branch cleanup permitted before gates pass.
+
+## In-progress verification — 2026-10-26 03:37–03:47 KST
+- RED: quant controller 4 failed / 1 passed; quant public metadata 2 failed. GREEN focused backend 10/10 and frontend 2/2. Backend no longer fabricates 2 active strategies, a fixed 18.75%/42-trade backtest or two synthetic execution logs.
+- API contract: `GET /quant/strategies`, `GET /quant/strategies/:id/logs`, `POST /quant/backtest` now return HTTP 503 `{code: QUANT_EVIDENCE_UNAVAILABLE, message: ...}` and `Cache-Control: no-store`; class-level session/auth/consent guards remain. `POST /quant/strategies` and `POST /quant/strategies/:id/toggle` remain 503. No DB migration, SQL, ledger posting, WLD or stored strategy changes.
+- Public `/tools/quant-studio` stays a local educational simulator with hard-coded sample prices. Its metadata/FAQ and result badge no longer assert verified historic ticks, real orders or verified PnL. There is no frontend API call to quant endpoints; this is not an operational trading or server-verified backtest feature.
+- Backend Vitest **1318 PASS / 398 SKIPPED**; DB package **15 PASS / 3 SKIPPED**; contract package **38 PASS**; API contract **179 endpoints PASS**; typecheck **PASS**; backend build **PASS**; ESLint **0 errors / 1125 warnings**; repository security, control bytes, Prisma mutation policy and security baseline **PASS**; bot **8 PASS** after correcting worktree dependency link (initial missing-module test was an environment error).
+- Frontend Vitest **1399 PASS / 6 FAIL** (existing SEO 3, login mobile 1, calculator registration 1, admin M2 1). Default Turbopack build **FAIL** due cross-worktree symlink resolution; alternative Webpack production build **PASS** with 1536MiB heap. These failures are not waived.
+- Production dependency audit **FAIL: High 2**; full dependency audit **FAIL: Critical 2, High 10** (26 total). QA Draft #1317 addresses some pre-existing failures but is not main. No false security-pass claim.
+- Real isolated PostgreSQL role/migration/E2E and official authenticated Test exact-SHA **NOT VERIFIED**; no DB mutation or production-connected DB test. Existing test baseline cannot be substituted for official release attestation.
+- Mid-run fresh `origin/main` and English/Korean plans: `1c5b84a1c45baafcca83f375a6f99698121e9bb5`, unchanged. New A PR #1360, C/QA/planning branches untouched; no quant overlap.
+- Public read-only `/api/version`: Test `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; Production `6a989b5ac0c6155587d43426d64f6def6b62c917` — neither equals this candidate.
+
+## Finished — candidate submitted, release blocked
+- [x] TDD RED and GREEN; regression/API and public truth alignment.
+- [x] Local backend, contract, frontend, lint, build and security checks executed with precise PASS/FAIL evidence.
+- [x] Mid-run main and plans refreshed; isolated branch and worktree preserved.
+- [ ] Required full frontend tests, default build, supply-chain audits, real PostgreSQL app-role negatives, official exact-SHA authenticated Test, release gates: BLOCKED.
+- [ ] Main merge: NONE. Official Test promotion: NONE. Production promotion: NONE. Branch cleanup: NONE.
+- Final PR SHA and CI run IDs are recorded in the Draft PR; no integration approval requested until all gates pass.
