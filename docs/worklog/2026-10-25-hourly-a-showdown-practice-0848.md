@@ -24,3 +24,11 @@
 - GREEN focused: backend new 2 PASS; frontend new + legacy 7 PASS; backend auth E2E 13 PASS; Android gateway + server action 3 PASS; initial workspace typecheck PASS.
 - Corrected accidental overwrite of existing arcade action file **before any commit** by restoring the main file and adding a dedicated isolated server action module. Existing casino coin/dice actions preserved.
 - No migration, DB write, main change, Test/Production promotion or other-worker deletion. Root disk still 100%, data volume 96 GiB free.
+
+### Finish checkpoint — 2026-10-25 09:02 KST
+- Code SHA `e582f098b388ebc15593d2109b51613cc05d4733`; PR #1247 Draft. 18 changed files before final release docs, 20 expected after adding EN/KO reports. No conflict resolution attempted; no branch deleted.
+- Main re-fetched unchanged at `c9a868b1e622341e2daa8b936ddf0988eda9988e` before PR. Test Candidate #40144705309 FAIL runtime-check; newer CI in progress. Do not infer PASS.
+- Full code gates: lint 0 errors/1,135 warnings; typecheck PASS; backend 1,316 PASS/398 SKIPPED; frontend 1,405 PASS/6 FAIL; backend and default frontend builds PASS; contract 38 PASS; database 15 PASS/3 SKIPPED; production audit 2 High; full audit 2 Critical/10 High.
+- Isolated real PostgreSQL 17.11 `woldeok_moneyverse_ci`: auth_sessions SELECT permitted, ledger INSERT/posting UPDATE denied, 214 migrations, read-only ROLLBACK. Official Test SHA `6f697e74b7bf0cd1e4521d36534cfd9c140f8010` differs, exact-SHA authenticated E2E BLOCKED.
+- Root disk 100% and shared/wildcard-bound Production/dev DB 5433 P0 remain. No source code changes to other workers, no Production writes/restarts, no main merge, no GitOps release or rollback.
+- Detailed release gate and rollback: `docs/releases/v2026.10.25.a0848.md` and `.ko.md`. Final documentation commit SHA and final CI evidence will be posted to PR #1247.
