@@ -50,7 +50,6 @@ export interface BlogPost {
   readonly relatedCalculatorName: string;
   readonly relatedStockTicker?: string | undefined;
   readonly isAiGenerated: boolean;
-  readonly views: number;
   readonly heroImage?: string | undefined;
   readonly infographicType?: 'COMPOUND_CURVE' | 'MACRO_RADAR' | 'TAX_WATERFALL' | 'DCA_BENCHMARK' | undefined;
   readonly country?: BlogCountry | undefined;

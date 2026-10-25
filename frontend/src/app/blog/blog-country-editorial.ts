@@ -158,6 +158,6 @@ export function createCountryBlogPost(topic: CountryBlogTopic): BlogPost {
     publishedAt: date.toISOString(), updatedAt: date.toISOString(), readTimeMinutes: 4,
     tags: definition.editions.ko.tags,
     relatedCalculatorHref: definition.calculatorHref, relatedCalculatorName: definition.calculatorName,
-    isAiGenerated: false, views: 0, translations,
+    isAiGenerated: false, translations,
   };
 }

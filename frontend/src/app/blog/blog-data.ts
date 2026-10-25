@@ -469,7 +469,6 @@ const INITIAL_POSTS: BlogPost[] = [
     relatedCalculatorName: '복리 수익 계산기',
     relatedStockTicker: 'CHIPS',
     isAiGenerated: true,
-    views: 3840,
     heroImage: '/images/blog/compound-interest-72-rule.svg',
     infographicType: 'COMPOUND_CURVE',
     translations: EXPANDED_COMPOUND_TRANSLATIONS,
@@ -490,7 +489,6 @@ const INITIAL_POSTS: BlogPost[] = [
     relatedCalculatorName: '복리 수익 계산기',
     relatedStockTicker: 'CHIPS',
     isAiGenerated: true,
-    views: 3840,
     heroImage: '/images/blog/compound-interest-72-rule.svg',
     infographicType: 'COMPOUND_CURVE',
     translations: EXPANDED_COMPOUND_TRANSLATIONS,
@@ -532,7 +530,6 @@ const INITIAL_POSTS: BlogPost[] = [
     relatedCalculatorName: '배당소득세 계산기',
     relatedStockTicker: 'WFIN',
     isAiGenerated: true,
-    views: 980,
   },
   {
     slug: '2026-10-12-virtual-stock-value-investing-guide',
@@ -579,7 +576,6 @@ const INITIAL_POSTS: BlogPost[] = [
     relatedCalculatorName: '주식 평단가·수익률 계산기',
     relatedStockTicker: 'CHIPS',
     isAiGenerated: true,
-    views: 1840,
   },
 ];
 
@@ -1045,7 +1041,6 @@ ${template.references.map((ref, i) => `[${i + 1}] ${ref}`).join('\n')}
     relatedCalculatorName: template.calculatorName,
     relatedStockTicker: template.stockTicker,
     isAiGenerated: true,
-    views: Math.floor(Math.random() * 80) + 20,
     country: targetCountry,
     status: 'PUBLISHED',
     academicReferences: template.academicReferences,

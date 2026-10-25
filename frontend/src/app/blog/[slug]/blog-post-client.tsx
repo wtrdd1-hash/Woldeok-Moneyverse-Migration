@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   Calendar,
   Clock,
-  Eye,
   Share2,
   Check,
   Tag,
@@ -32,10 +31,10 @@ interface Props {
 }
 
 const LABELS = {
-  ko: { back:'블로그 목록으로 돌아가기', share:'글 공유하기', copied:'복사 완료', minutes:'완독 약', unit:'분', views:'조회', viewUnit:'회', tags:'관련 검색 키워드', illustration:'금융 교육용 삽화' },
-  en: { back:'Back to articles', share:'Share article', copied:'Copied', minutes:'Read time', unit:'min', views:'Views', viewUnit:'', tags:'Related topics', illustration:'Educational illustration' },
-  ja: { back:'記事一覧に戻る', share:'記事を共有', copied:'コピー済み', minutes:'読了目安', unit:'分', views:'閲覧', viewUnit:'回', tags:'関連キーワード', illustration:'教育用イラスト' },
-  zh: { back:'返回文章列表', share:'分享文章', copied:'已复制', minutes:'阅读时间', unit:'分钟', views:'浏览', viewUnit:'次', tags:'相关主题', illustration:'教学插图' },
+  ko: { back:'블로그 목록으로 돌아가기', share:'글 공유하기', copied:'복사 완료', minutes:'완독 약', unit:'분', tags:'관련 검색 키워드', illustration:'금융 교육용 삽화' },
+  en: { back:'Back to articles', share:'Share article', copied:'Copied', minutes:'Read time', unit:'min', tags:'Related topics', illustration:'Educational illustration' },
+  ja: { back:'記事一覧に戻る', share:'記事を共有', copied:'コピー済み', minutes:'読了目安', unit:'分', tags:'関連キーワード', illustration:'教育用イラスト' },
+  zh: { back:'返回文章列表', share:'分享文章', copied:'已复制', minutes:'阅读时间', unit:'分钟', tags:'相关主题', illustration:'教学插图' },
 } as const;
 
 export function BlogPostClient({ post, locale }: Props) {
@@ -128,10 +127,6 @@ export function BlogPostClient({ post, locale }: Props) {
           <span className="text-xs text-muted-foreground font-mono">·</span>
           <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
             <Clock className="size-3" /> {labels.minutes} {post.readTimeMinutes}{labels.unit}
-          </span>
-          <span className="text-xs text-muted-foreground font-mono">·</span>
-          <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-            <Eye className="size-3" /> {labels.views} {post.views.toLocaleString()} {labels.viewUnit}
           </span>
         </div>
 

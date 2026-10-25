@@ -9,7 +9,6 @@ import {
   Clock,
   ArrowRight,
   Calculator,
-  Eye,
   Flame,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,7 +29,7 @@ const BLOG_LABELS: Record<BlogLocale, {
   zh: { all:'全部',search:'搜索主题或关键词...',featured:'精选文章',latest:'家庭金融文章',count:'共',read:'阅读',minutes:'阅读时间',noResults:'未找到符合条件的文章。',categories:{COMPOUND:'储蓄与复利',TAX:'税收与制度',STOCKS:'股票与ETF',WEALTH:'家庭规划',MACRO:'物价与经济'} },
 };
 
-export type BlogHubSummary = Pick<BlogPost, 'slug' | 'title' | 'excerpt' | 'category' | 'categoryLabel' | 'publishedAt' | 'readTimeMinutes' | 'tags' | 'views' | 'author' | 'heroImage' | 'relatedCalculatorHref' | 'relatedCalculatorName'>;
+export type BlogHubSummary = Pick<BlogPost, 'slug' | 'title' | 'excerpt' | 'category' | 'categoryLabel' | 'publishedAt' | 'readTimeMinutes' | 'tags' | 'author' | 'heroImage' | 'relatedCalculatorHref' | 'relatedCalculatorName'>;
 
 interface Props {
   readonly initialPosts: readonly BlogHubSummary[];
@@ -145,10 +144,6 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
               <span className="font-semibold text-foreground">{featuredPost.author.name}</span>
               <span>·</span>
               <span className="font-mono">{new Date(featuredPost.publishedAt).toLocaleDateString('ko-KR')}</span>
-              <span>·</span>
-              <span className="font-mono flex items-center gap-1">
-                <Eye className="size-3" /> {featuredPost.views.toLocaleString()}회
-              </span>
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">

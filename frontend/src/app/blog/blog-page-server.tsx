@@ -72,8 +72,8 @@ export function metadataForArticle(slug: string, locale: BlogLocale): Metadata {
 }
 
 export function summarizeBlogPost(post: BlogPost) {
-  const { slug, title, excerpt, category, categoryLabel, publishedAt, readTimeMinutes, tags, views, author, heroImage, relatedCalculatorHref, relatedCalculatorName } = post;
-  return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,author,heroImage:safeHeroImage(heroImage),relatedCalculatorHref,relatedCalculatorName};
+  const { slug, title, excerpt, category, categoryLabel, publishedAt, readTimeMinutes, tags, author, heroImage, relatedCalculatorHref, relatedCalculatorName } = post;
+  return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,author,heroImage:safeHeroImage(heroImage),relatedCalculatorHref,relatedCalculatorName};
 }
 export function renderBlogHub(locale: BlogLocale) {
   const posts = countryBlogPosts(getAllBlogPosts().filter(isBlogDiscoverable), locale);
