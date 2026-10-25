@@ -7,8 +7,8 @@
 - Do not modify others' worktrees, reservations, Test, or Production.
 
 ## In progress
-- [ ] Add failing DTO and service query tests (RED).
-- [ ] Implement strict boolean parsing and stable timestamp/UUID ordering.
+- [x] Add failing DTO and service query tests (RED: 3 failed / 2 passed).
+- [x] Implement strict boolean parsing and stable timestamp/UUID ordering (focused GREEN).
 - [ ] Run focused tests, backend tests, typecheck, build, lint, CI/security and assess blocked official gates.
 
 ## Finished

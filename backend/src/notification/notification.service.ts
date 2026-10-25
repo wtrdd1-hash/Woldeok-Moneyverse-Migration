@@ -21,7 +21,7 @@ export class NotificationService {
        FROM public.in_app_notifications
        WHERE user_id = $1
          AND ($2::boolean IS NULL OR is_read = FALSE)
-       ORDER BY created_at DESC
+       ORDER BY created_at DESC, id DESC
        LIMIT $3 OFFSET $4`,
       [actor, unreadOnly, limit, offset],
     );
