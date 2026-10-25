@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { BankRepository } from './bank.repository';
 import { BankController } from './bank.controller';
 import type { RequestWithSession } from '../auth/session.context';
@@ -24,6 +25,14 @@ describe('owner-only current bond holdings projection', () => {
     const request = { session: { user_id: ACTOR } } as unknown as RequestWithSession;
     await expect(controller.bondHoldings(request)).resolves.toEqual({ bonds: [], scope: 'current_holdings_only' });
     expect(listBondHoldings).toHaveBeenCalledWith(ACTOR);
+  });
+
+  it('returns HTTP 503 when verified holdings cannot be read, not a false empty portfolio', async () => {
+    const controller = new BankController({
+      listBondHoldings: vi.fn().mockRejectedValue(new Error('database unavailable')),
+    } as unknown as BankRepository);
+    const request = { session: { user_id: ACTOR } } as unknown as RequestWithSession;
+    await expect(controller.bondHoldings(request)).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 
   it('uses the owner-scoped SECURITY DEFINER standing function and retains exact integer strings', async () => {

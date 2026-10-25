@@ -69,10 +69,15 @@ export class BankController {
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Owner-only verified current virtual bond holdings (not redemption history)' })
   bondHoldings(@Req() request: RequestWithSession) {
-    return this.guarded(
-      () => this.repository().listBondHoldings(requireUserId(request)),
-      'failed to load current bond holdings',
-    );
+    return this.guarded(async () => {
+      const actor = requireUserId(request);
+      try {
+        return await this.repository().listBondHoldings(actor);
+      } catch (error: unknown) {
+        if (error instanceof BankInputError || isAuthorizationFailure(error)) throw error;
+        throw new ServiceUnavailableException('verified bond holdings unavailable');
+      }
+    }, 'failed to load current bond holdings');
   }
 
   @Post('deposit')
