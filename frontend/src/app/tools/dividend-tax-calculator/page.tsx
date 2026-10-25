@@ -22,8 +22,10 @@ function getLocaleFromPath(pathname: string): SupportedLocale {
 
 export async function generateMetadata(): Promise<Metadata> {
   const headerList = await headers();
+  const serverLoc = await getServerLocale();
   const pathname = headerList.get('x-pathname') || headerList.get('x-invoke-path') || '';
-  const locale = getLocaleFromPath(pathname);
+  const pathLoc = getLocaleFromPath(pathname);
+  const locale: SupportedLocale = (serverLoc !== 'ko' ? serverLoc : pathLoc) as SupportedLocale;
 
   const metaByLocale: Record<SupportedLocale, { title: string; description: string; canonical: string; keywords: string[] }> = {
     ko: {
