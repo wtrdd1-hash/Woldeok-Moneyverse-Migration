@@ -36,6 +36,47 @@ describe('EncryptionService', () => {
     expect(service.decrypt('')).toBe('');
   });
 
+  it('rejects malformed encrypted envelopes rather than returning ciphertext', () => {
+    for (const malformed of [
+      'enc:v1:rnd:not-hex:00:aa',
+      'enc:v1:det:abcd:abcd:abcd',
+      'enc:v1:other:000000000000000000000000:00000000000000000000000000000000:aa',
+      'enc:v1:rnd:000000000000000000000000:00000000000000000000000000000000:aa:extra',
+    ]) {
+      expect(() => service.decrypt(malformed)).toThrow('encrypted value could not be authenticated');
+    }
+  });
+
+  it('rejects ciphertext with a modified authentication tag', () => {
+    const valid = service.encrypt('private profile data')!;
+    const parts = valid.split(':');
+    parts[4] = `${parts[4]![0] === 'a' ? 'b' : 'a'}${parts[4]!.slice(1)}`;
+    expect(() => service.decrypt(parts.join(':'))).toThrow('encrypted value could not be authenticated');
+  });
+
+  it('rejects ciphertext from an unconfigured encryption key', () => {
+    const previousKey = process.env.DATA_ENCRYPTION_KEY;
+    const previousLegacy = process.env.LEGACY_DATA_ENCRYPTION_KEYS;
+    try {
+      process.env.DATA_ENCRYPTION_KEY = 'encryption-test-key-one';
+      delete process.env.LEGACY_DATA_ENCRYPTION_KEYS;
+      const ciphertext = new EncryptionService().encrypt('confidential');
+      process.env.DATA_ENCRYPTION_KEY = 'encryption-test-key-two';
+      expect(() => new EncryptionService().decrypt(ciphertext)).toThrow('encrypted value could not be authenticated');
+    } finally {
+      if (previousKey === undefined) delete process.env.DATA_ENCRYPTION_KEY;
+      else process.env.DATA_ENCRYPTION_KEY = previousKey;
+      if (previousLegacy === undefined) delete process.env.LEGACY_DATA_ENCRYPTION_KEYS;
+      else process.env.LEGACY_DATA_ENCRYPTION_KEYS = previousLegacy;
+    }
+  });
+
+  it('does not accept forged encrypted prefixes as already-authenticated inputs', () => {
+    const forged = 'enc:v1:rnd:000000000000000000000000:00000000000000000000000000000000:aa';
+    expect(() => service.encrypt(forged)).toThrow('encrypted value could not be authenticated');
+    expect(() => service.encryptDeterministic(forged)).toThrow('encrypted value could not be authenticated');
+  });
+
   it('returns plaintext if not encrypted with enc:v1:', () => {
     const raw = 'legacy-unencrypted-string';
     expect(service.decrypt(raw)).toBe(raw);
