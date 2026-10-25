@@ -1,4 +1,5 @@
 ## 2026-10-25 08:xx KST — Planning v1256 F675-121 (Feature Addition / Draft / HOLD)
+- GitHub Draft PR #1248 OPEN (stacked on #1241); development issue #1240 updated (comment 6391229779); disk issue #1170 updated (comment 6391230670). Main unmerged, release HOLD.
 
 ## 2026-10-25 09:xx KST — Planning v1258 F675-121 (Feature Improvement / Draft / HOLD)
 - Previous Addition v1256 / Current Improvement v1258 / Next Addition v1260 provisional. Main `c9a868b1e622341e2daa8b936ddf0988eda9988e` start/mid; QA v1261 FAILED/HOLD. Found migration048 replay missing post/body binding, comment-delete unused key, backend DELETE ignored post ID; proposed 409/receipt, post-first locks, new-only outbox and stale-notice retraction.
