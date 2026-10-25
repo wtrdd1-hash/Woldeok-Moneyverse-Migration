@@ -1,0 +1,16 @@
+# Backend B v543 — X publisher receipt and CSRF integrity
+
+## Before work (2026-10-26 01:35 KST)
+- Base main: `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; isolated branch `auto/hourly-b-twitter-publication-truth-v543-20261026-0135`.
+- Read `AGENTS.md`, `README.md`, both `PROJECT_PLAN` files, open PRs/branches, QA v1280, CI, and relevant Superpowers skills.
+- Scope: P1 security/integrity. Admin X test-tweet endpoint lacks CSRF guard; X HTTP 2xx with no publication receipt is reported as success and propagates into daily digest. No other current A/C/QA PR targets this endpoint.
+- Guardrails: no DB or ledger writes, no migrations, no Test/Production promotion; do not modify other worktrees or reservations.
+
+## In progress
+- [ ] Reproduce CSRF and false-success with regression tests (RED).
+- [ ] Add CSRF guard and require validated publication ID (GREEN).
+- [ ] Run focused, backend, typecheck, build, lint, security, app-api, CI gates.
+- [ ] Re-fetch main and plans; review independent change and conflicts.
+
+## Finished
+- Pending validation; Draft/HOLD until all mandatory release gates pass.
