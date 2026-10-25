@@ -1,4 +1,5 @@
 ## 2026-10-25 v1278 — F675-126 계산기 재계산·승격 무결성 (기능 보완 / 초안 / 운영 보류)
+- GitHub: [Draft PR #1316](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1316) OPEN(선행 #1310 기반), [개발 #1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309#issuecomment-6396349462)·[용량 #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6396349679) 갱신. main 병합·배포 없음.
 - 이전 Addition v1276 → 현재 Improvement v1278 → 다음 Addition v1280. main `1c5b84a1` 시작·중간 확인, 선행 Draft #1310, 이슈 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309). 복리/대출 stock 오표기, 대출 상환방식 누락, 지역화 문자열 손실, 제목/ticker 중복제거, 허위 저장·승격·알림·10,000 WLD 성공을 확인. 버전형 입력 어댑터·동의형 legacy 미리보기·멱등 영수증/재조회·본인 격리·5개 언어/모바일/접근성·DB/배포 게이트를 명세.
 - P0 ENV1278-01 SEC1278-02 REL1278-03 CAL1278-04; P1 CAL1278-05 CAL1278-06 CAL1278-07 CAL1278-08 CAL1278-09 CAL1278-10. QA v1273 FAILED/HOLD, 루트 98%, 개발 DB 권한·감사·Migration·정확 SHA Test/복원 BLOCKED. 신규 외부 승인 0, 누적 미확인/10,000 BLOCKED. 국영문 기획 문서 6개와 작업일지 갱신; 런타임·DB·Test·운영 미변경.
 
