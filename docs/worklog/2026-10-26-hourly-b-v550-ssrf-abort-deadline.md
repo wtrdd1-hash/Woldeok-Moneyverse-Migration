@@ -13,3 +13,4 @@
 
 ## Finished
 - Pending gates and release hold.
+- RED evidence at 08:36 KST: new 3-test suite reports 2 timeout failures (caller-signal bypass and redirected request), 1 caller-abort PASS. The failures reproduce the real 10-second deadline bypass before implementation.
