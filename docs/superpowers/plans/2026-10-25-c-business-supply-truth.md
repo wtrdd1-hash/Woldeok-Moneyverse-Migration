@@ -11,8 +11,8 @@
 **Spec:** docs/planning/PROJECT_PLAN.md and AGENTS.md.
 
 ## Tasks
-- [ ] Add RED backend tests for no invented inventory/price and no outbox writes, ownership guard and 503 responses.
-- [ ] Add RED frontend source/interaction regression tests forbidding fake receipt/metrics and requiring a verified business link.
-- [ ] Implement minimum fail-closed backend and truthful frontend.
-- [ ] Run GREEN focused tests, lint, typecheck, build, contract, isolated real-PG, security, E2E and CI on exact SHA.
-- [ ] Recheck main/plan and record HOLD or integrate only after every required gate passes.
+- [x] Add RED backend tests for no invented inventory/price and no outbox writes, ownership guard and 503 responses.
+- [x] Add RED frontend source/interaction regression tests forbidding fake receipt/metrics and requiring a verified business link.
+- [x] Implement minimum fail-closed backend and truthful frontend.
+- [x] Run GREEN focused (full gates attempted; blocked) tests, lint, typecheck, build, contract, isolated real-PG, security, E2E and CI on exact SHA.
+- [x] Recheck main (HOLD)/plan and record HOLD or integrate only after every required gate passes.
