@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.25.1272 — F675-125 Verified Monthly WLD Statements (FEATURE ADDITION / DRAFT / HOLD)
+- **GitHub:** [Draft PR #1296](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1296) OPEN/HOLD, [development issue #1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295) OPEN. Unmerged stacked documentation-only; runtime/DB/Test/Production untouched.
 - Previous Improvement v1270 → Current Addition v1272 → Next Improvement v1274 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked start/mid; AGENTS/README/canonical EN/KO reviewed. Predecessor Draft #1289 unmerged. Engineering [#1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295).
 - Source: GET /wallet recent=1..50, /wallet/activity shows max 50; browser CSV exports those rows only. No complete monthly source-verified statement. F675-125 adds private /wallet/statements and YYYY-MM detail, owner-scoped month-complete ledger/pocket records, immutable generation/HMAC receipts, CSV only VERIFIED; missing opening anchor/source checkpoint => UNVERIFIABLE, no fake historical balances. No ledger/WLD changes.
 - P0 ENV1272-01 SEC1272-02 REL1272-03 WAL1272-04; P1 WAL1272-05 WAL1272-06 WAL1272-07 WAL1272-08 WAL1272-09 WAL1272-10. Detailed API/DB/index/locks/owner permissions/admin/SEO/Android/a11y/KPI/100-way/10,001 synthetic tests and exact-SHA release gate in integrated EN/KO masters.

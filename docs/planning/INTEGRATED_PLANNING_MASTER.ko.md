@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v2026.10.25.1272 — F675-125 회원 전용 검증형 월간 WLD 거래 명세서 (기능 추가 / 기획 초안 / 운영 보류)
+- **GitHub:** [Draft PR #1296](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1296) OPEN/HOLD, [개발 이슈 #1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295) OPEN. 선행 기획 브랜치 위 미병합 문서 변경만 수행, 런타임/DB/Test/운영 변경 없음.
 
 ### 기준·실제 코드·범위
 - **회차:** 이전 Feature Improvement v1270 → 현재 Feature Addition v1272 → 다음 Feature Improvement v1274(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 확인, AGENTS.md·README.md·영문 PROJECT_PLAN 정본과 국문 대조. 선행 Draft #1289 미병합, 개발 인계 [#1295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1295). 기획 문서만 변경하며 런타임·DB·WLD·원장·Test·운영은 변경하지 않는다.
