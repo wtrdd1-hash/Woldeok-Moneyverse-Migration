@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import Link from 'next/link';
 import {
   Calendar,
@@ -37,6 +39,7 @@ const DEFAULT_PORTFOLIO: PortfolioItem[] = [
 const POPULAR_QUICK_STOCKS = ['SCHD', 'JEPI', 'O', 'JEPQ', 'MAIN', '005930'] as const;
 
 export function DividendCalendarWidget() {
+  const { locale } = useLocale();
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>(DEFAULT_PORTFOLIO);
   const [selectedStock, setSelectedStock] = useState<string>('JEPI');
   const [inputShares, setInputShares] = useState<number>(20);
@@ -256,11 +259,11 @@ export function DividendCalendarWidget() {
             <div className="flex items-center gap-2">
               <Calendar className="size-5 text-emerald-600 dark:text-emerald-400" />
               <CardTitle className="text-lg sm:text-xl font-bold text-foreground">
-                월별 배당 캘린더 &amp; 현금흐름 대시보드
+                {localeLabel(locale, '월별 배당 캘린더 & 현금흐름 대시보드', 'Monthly Dividend Calendar & Cash Flow Dashboard', '月別配当カレンダー＆キャッシュフロー', '月度分红日历与现金流看板')}
               </CardTitle>
             </div>
             <CardDescription className="text-xs text-muted-foreground">
-              보유 주식 수에 따른 1월~12월 세후 실수령 배당금 타임라인 시뮬레이터 (15.4% 배당세 반영)
+              {localeLabel(locale, '보유 주식 수에 따른 1월~12월 세후 실수령 배당금 타임라인 시뮬레이터 (15.4% 배당세 반영)', 'Jan-Dec after-tax dividend timeline simulator based on portfolio shares (15.4% tax applied)', '保有株数に応じた1月〜12月の税引後手取り配当タイムラインシミュレーター', '基于持股数量测算1月至12月税后实际到手分红时间线（已扣除15.4%税）')}
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -276,7 +279,7 @@ export function DividendCalendarWidget() {
               title="다가오는 배당락일 D-Day 알림을 받습니다"
             >
               <Bell className="size-3.5" />
-              <span>{isAlertSubscribed ? '알림 켜짐' : '배당락일 알림'}</span>
+              <span>{isAlertSubscribed ? localeLabel(locale, '알림 켜짐', 'Alert On', '通知ON', '已开启提醒') : localeLabel(locale, '배당락일 알림', 'Ex-Date Alerts', '配当落ち通知', '除息提醒')}</span>
             </Button>
 
             <Button
@@ -287,7 +290,7 @@ export function DividendCalendarWidget() {
               title="1~12월 배당금 일정을 Excel 호환 CSV 파일로 다운로드합니다"
             >
               <Download className="size-3.5" />
-              <span>CSV 내보내기</span>
+              <span>{localeLabel(locale, 'CSV 내보내기', 'Export CSV', 'CSV出力', '导出CSV')}</span>
             </Button>
             <Badge variant="outline" className="text-xs font-mono uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
               Interactive
@@ -304,10 +307,10 @@ export function DividendCalendarWidget() {
               <Clock className="size-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
               <div>
                 <span className="font-extrabold text-amber-950 dark:text-amber-200">
-                  ⚡ 다가오는 배당락일 브로드캐스트:
+                  {localeLabel(locale, '⚡ 다가오는 배당락일 브로드캐스트:', '⚡ Upcoming Ex-Dividend Dates:', '⚡ 直近の配当落ちスケジュール:', '⚡ 即将到来的除息日:')}
                 </span>
                 <span className="text-muted-foreground ml-1.5">
-                  배당락일(Ex-Date) 전일까지 매수 체결해야 당월 배당금을 수령할 수 있습니다.
+                  {localeLabel(locale, '배당락일(Ex-Date) 전일까지 매수 체결해야 당월 배당금을 수령할 수 있습니다.', 'Shares must be purchased before the ex-dividend date to receive this payout.', '権利付き最終日までに買い付けることで配当金を受け取れます。', '必须在除息日之前完成买入方可享受当期派息。')}
                 </span>
               </div>
             </div>
@@ -334,21 +337,21 @@ export function DividendCalendarWidget() {
         {/* 상단 3대 핵심 메트릭 카드 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-4 rounded-xl border border-border/80 bg-background/50">
-            <span className="text-xs text-muted-foreground font-medium">연간 총 세후 배당금</span>
+            <span className="text-xs text-muted-foreground font-medium">{localeLabel(locale, '연간 총 세후 배당금', 'Annual Net Dividends', '年間税引後配当総額', '年度税后分红总额')}</span>
             <div className="text-xl sm:text-2xl font-mono tabular-nums font-bold text-foreground mt-1 text-emerald-600 dark:text-emerald-400">
               ₩{annualTotalNet.toLocaleString()}
             </div>
           </div>
           <div className="p-4 rounded-xl border border-border/80 bg-background/50">
-            <span className="text-xs text-muted-foreground font-medium">월평균 현금 흐름</span>
+            <span className="text-xs text-muted-foreground font-medium">{localeLabel(locale, '월평균 현금 흐름', 'Monthly Average Flow', '月平均キャッシュフロー', '月均分红现金流')}</span>
             <div className="text-xl sm:text-2xl font-mono tabular-nums font-bold text-foreground mt-1">
               ₩{monthlyAverage.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">/월</span>
             </div>
           </div>
           <div className="p-4 rounded-xl border border-border/80 bg-background/50">
-            <span className="text-xs text-muted-foreground font-medium">편입 배당 종목 수</span>
+            <span className="text-xs text-muted-foreground font-medium">{localeLabel(locale, '편입 배당 종목 수', 'Dividend Holdings', '保有配当銘柄数', '入选分红股票数')}</span>
             <div className="text-xl sm:text-2xl font-mono tabular-nums font-bold text-foreground mt-1">
-              {portfolio.length}개 종목
+              {portfolio.length} {localeLabel(locale, '개 종목', 'Stocks', '銘柄', '只股票')}
             </div>
           </div>
         </div>
@@ -356,7 +359,7 @@ export function DividendCalendarWidget() {
         {/* 1월~12월 월별 배당금 타임라인 바 차트 */}
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>월별 세후 수령액 (KRW)</span>
+            <span>{localeLabel(locale, '월별 세후 수령액 (KRW)', 'Monthly Net Payout (KRW)', '月別税引後手取り額 (KRW)', '月度税后实得金额 (KRW)')}</span>
             <span>최고 수령월: ₩{maxMonthly.toLocaleString()}</span>
           </div>
 
