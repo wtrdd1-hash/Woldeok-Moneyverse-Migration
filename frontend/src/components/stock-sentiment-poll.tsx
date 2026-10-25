@@ -1,175 +1,99 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import { Flame, Snowflake, Users, TrendingUp, TrendingDown, CheckCircle2 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Activity, Info, Newspaper } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { SocialShareBar } from '@/components/social-share-bar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TranslatedText as T } from '@/components/translated-text';
+
+/** A market-wide index derived from PostgreSQL active events, never member votes. */
+export interface MarketEventPulse {
+  readonly sentimentScore: number;
+  readonly sentimentLabel: 'VERY_BULLISH' | 'BULLISH' | 'NEUTRAL' | 'BEARISH' | 'VERY_BEARISH';
+  readonly activeEventsCount: number;
+  readonly leadHeadline: string;
+  readonly leadSummary: string;
+  /** Timestamp of the newest active event, not the time of this HTTP response. */
+  readonly updatedAt: string;
+}
+
+const LABELS: Record<MarketEventPulse['sentimentLabel'], { ko: string; en: string }> = {
+  VERY_BULLISH: { ko: '상승 압력 매우 높음', en: 'Very strong upward pressure' },
+  BULLISH: { ko: '상승 압력', en: 'Upward pressure' },
+  NEUTRAL: { ko: '중립', en: 'Neutral' },
+  BEARISH: { ko: '하락 압력', en: 'Downward pressure' },
+  VERY_BEARISH: { ko: '하락 압력 매우 높음', en: 'Very strong downward pressure' },
+};
+
+function verifiedPulse(value: MarketEventPulse | null | undefined): value is MarketEventPulse {
+  return Boolean(value &&
+    Number.isInteger(value.sentimentScore) && value.sentimentScore >= 0 && value.sentimentScore <= 100 &&
+    Number.isInteger(value.activeEventsCount) && value.activeEventsCount >= 0 && value.activeEventsCount <= 100 &&
+    Object.prototype.hasOwnProperty.call(LABELS, value.sentimentLabel) &&
+    typeof value.leadHeadline === 'string' && typeof value.leadSummary === 'string' &&
+    typeof value.updatedAt === 'string' && Number.isFinite(Date.parse(value.updatedAt)));
+}
 
 interface StockSentimentPollProps {
   readonly symbol: string;
   readonly name: string;
+  readonly pulse?: MarketEventPulse | null;
 }
 
-export function StockSentimentPoll({ symbol, name }: StockSentimentPollProps) {
-  const [voted, setVoted] = useState<'bull' | 'bear' | null>(null);
-  const [bullCount, setBullCount] = useState<number>(142);
-  const [bearCount, setBearCount] = useState<number>(58);
-
-  useEffect(() => {
-    // 종목 심볼 기반 결정론적 기본 투표 수
-    let hash = 0;
-    for (let i = 0; i < symbol.length; i++) {
-      hash = (hash << 5) - hash + symbol.charCodeAt(i);
-      hash |= 0;
-    }
-    const baseBull = 120 + Math.abs(hash % 90);
-    const baseBear = 50 + Math.abs(hash % 45);
-
-    try {
-      const saved = localStorage.getItem(`wdmv_poll_${symbol}`);
-      if (saved === 'bull') {
-        setVoted('bull');
-        setBullCount(baseBull + 1);
-        setBearCount(baseBear);
-      } else if (saved === 'bear') {
-        setVoted('bear');
-        setBullCount(baseBull);
-        setBearCount(baseBear + 1);
-      } else {
-        setBullCount(baseBull);
-        setBearCount(baseBear);
-      }
-    } catch {
-      setBullCount(baseBull);
-      setBearCount(baseBear);
-    }
-  }, [symbol]);
-
-  const totalVotes = bullCount + bearCount;
-  const bullPercent = totalVotes > 0 ? Math.round((bullCount / totalVotes) * 100) : 50;
-  const bearPercent = 100 - bullPercent;
-
-  const handleVote = (choice: 'bull' | 'bear') => {
-    if (voted) return;
-    setVoted(choice);
-    if (choice === 'bull') {
-      setBullCount((prev) => prev + 1);
-    } else {
-      setBearCount((prev) => prev + 1);
-    }
-
-    try {
-      localStorage.setItem(`wdmv_poll_${symbol}`, choice);
-    } catch {
-      // ignore
-    }
-  };
-
-  const shareTitle = voted === 'bull'
-    ? `[월덕 머니버스] ${name}(${symbol}) 상승(BULL 🔥)에 투표했습니다! (${bullPercent}%의 투자자가 상승 예측 중)`
-    : `[월덕 머니버스] ${name}(${symbol}) 하락(BEAR ❄️)에 투표했습니다! 당신의 시장 전망은?`;
+/** Legacy export name retained for the stock page; there is no client-side poll. */
+export function StockSentimentPoll({ symbol, name, pulse }: StockSentimentPollProps) {
+  const verified = verifiedPulse(pulse);
+  const hasEvents = verified && pulse.activeEventsCount > 0;
+  const label = verified ? LABELS[pulse.sentimentLabel] : null;
 
   return (
-    <Card className="rounded-2xl border border-zinc-800/80 bg-card/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md overflow-hidden">
-      <CardHeader className="pb-3 border-b border-border/60">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-500">
-              <Users className="size-4" />
-            </div>
-            <div>
-              <CardTitle className="text-sm sm:text-base font-bold text-foreground flex items-center gap-1.5">
-                <T korean="실시간 커뮤니티 심리 투표" english="Live Community Sentiment Poll" japanese="リアルタイムコミュニティ心理投票" chinese="实时社区多空情绪投票" />
-                <Badge variant="outline" className="text-[10px] font-mono text-amber-400 border-amber-500/30">
-                  {symbol}
-                </Badge>
-              </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                <T korean="내일 이 종목의 주가는 어디로 갈까요? 투자자들의 실시간 여론을 확인하세요." english="Where is the price heading tomorrow? Vote to see community consensus." japanese="明日の株価はどう動く？投資家のリアルタイム世論を確認しましょう。" chinese="明日股价走势如何？参与投票查看实时市场多空共识。" />
-              </CardDescription>
-            </div>
-          </div>
-
-          <div className="text-xs font-mono text-muted-foreground flex items-center gap-1">
-            <span>총 {totalVotes.toLocaleString()}명 참여</span>
-          </div>
+    <Card className="overflow-hidden rounded-2xl border-border/80 bg-card/95">
+      <CardHeader className="border-b border-border/60 pb-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Activity className="size-4 text-primary" aria-hidden="true" />
+          <CardTitle className="text-sm sm:text-base">
+            <T korean="전체 시장 이벤트 압력" english="Market-wide event pressure" japanese="市場全体のイベント圧力" chinese="全市场事件压力" />
+          </CardTitle>
+          <Badge variant="outline">MARKET-WIDE</Badge>
         </div>
+        <CardDescription className="text-xs leading-relaxed">
+          <T korean="PostgreSQL에 기록된 진행 중인 시장 이벤트를 바탕으로 계산한 지표입니다. 회원 투표나 해당 종목의 매매 신호가 아닙니다." english="Calculated from active PostgreSQL market events. Not member votes, a stock-specific forecast, or a trading signal." japanese="進行中の市場イベントに基づく全市場指標です。会員投票や個別銘柄の売買シグナルではありません。" chinese="根据进行中的市场事件计算，不代表用户投票、个股预测或交易信号。" />
+        </CardDescription>
       </CardHeader>
-
-      <CardContent className="pt-4 space-y-4">
-        {/* 투표 버튼 2구 그리드 */}
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            variant="outline"
-            disabled={voted !== null}
-            onClick={() => handleVote('bull')}
-            className={`min-h-[52px] rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
-              voted === 'bull'
-                ? 'border-rose-500 bg-rose-500/15 text-rose-400 shadow-sm ring-1 ring-rose-500'
-                : 'border-border/70 hover:border-rose-500/50 hover:bg-rose-500/10 text-foreground'
-            }`}
-          >
-            <Flame className="size-4 text-rose-500 fill-rose-500" />
-            <div className="text-left">
-              <span className="block text-xs sm:text-sm font-extrabold">상승 전망 (BULL)</span>
-              <span className="block text-[10px] text-muted-foreground font-mono">{bullCount}표</span>
+      <CardContent className="space-y-3 p-4">
+        {!verified ? (
+          <p role="status" className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
+            <T korean="시장 이벤트 지표를 확인할 수 없습니다. 잠시 후 다시 확인해 주세요." english="Market event data is unavailable. Please try again later." japanese="市場イベント情報を確認できません。後ほど再試行してください。" chinese="无法验证市场事件数据，请稍后重试。" />
+          </p>
+        ) : !hasEvents ? (
+          <p role="status" className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
+            <T korean="현재 진행 중인 시장 이벤트가 없습니다. 참여자 수나 상승·하락 투표를 추정하지 않습니다." english="There are no active market events. No participant counts or votes are inferred." japanese="進行中の市場イベントはありません。投票数は推定しません。" chinese="当前没有进行中的市场事件，不推测投票或参与人数。" />
+          </p>
+        ) : (
+          <div className="space-y-3" aria-label="Verified market events">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-sm font-semibold"><T korean={label!.ko} english={label!.en} /></span>
+              <span className="font-mono text-lg font-bold tabular-nums">{pulse.sentimentScore}/100</span>
             </div>
-          </Button>
-
-          <Button
-            variant="outline"
-            disabled={voted !== null}
-            onClick={() => handleVote('bear')}
-            className={`min-h-[52px] rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
-              voted === 'bear'
-                ? 'border-blue-500 bg-blue-500/15 text-blue-400 shadow-sm ring-1 ring-blue-500'
-                : 'border-border/70 hover:border-blue-500/50 hover:bg-blue-500/10 text-foreground'
-            }`}
-          >
-            <Snowflake className="size-4 text-blue-500" />
-            <div className="text-left">
-              <span className="block text-xs sm:text-sm font-extrabold">하락 전망 (BEAR)</span>
-              <span className="block text-[10px] text-muted-foreground font-mono">{bearCount}표</span>
+            <meter min={0} max={100} value={pulse.sentimentScore} className="h-3 w-full" aria-label="Market event pressure index" />
+            <p className="text-xs text-muted-foreground">
+              <T korean="검증된 진행 중 이벤트" english="Verified active events" />: {pulse.activeEventsCount}건
+            </p>
+            <div className="rounded-lg border border-border/70 bg-muted/20 p-3">
+              <p className="break-words text-sm font-semibold">{pulse.leadHeadline.slice(0, 160)}</p>
+              <p className="mt-1 break-words text-xs text-muted-foreground">{pulse.leadSummary.slice(0, 500)}</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                <T korean="가장 최근 이벤트 시각 (UTC)" english="Latest event timestamp (UTC)" />: {new Date(pulse.updatedAt).toISOString().slice(0, 16).replace('T', ' ')}
+              </p>
             </div>
-          </Button>
-        </div>
-
-        {/* 롱/숏 비율 바 */}
-        <div className="space-y-1.5 font-mono text-xs">
-          <div className="flex justify-between items-center font-bold">
-            <span className="text-rose-400 flex items-center gap-1">
-              <TrendingUp className="size-3.5" /> 상승 {bullPercent}%
-            </span>
-            <span className="text-blue-400 flex items-center gap-1">
-              하락 {bearPercent}% <TrendingDown className="size-3.5" />
-            </span>
-          </div>
-
-          <div className="h-3 w-full rounded-full bg-blue-500/30 overflow-hidden flex">
-            <div
-              style={{ width: `${bullPercent}%` }}
-              className="h-full bg-rose-500 transition-all duration-700 ease-out"
-            />
-            <div
-              style={{ width: `${bearPercent}%` }}
-              className="h-full bg-blue-500 transition-all duration-700 ease-out"
-            />
-          </div>
-        </div>
-
-        {/* 투표 완료 시 바이럴 공유 바 표출 */}
-        {voted && (
-          <div className="pt-2 border-t border-border/50 animate-in fade-in duration-300">
-            <SocialShareBar
-              title={shareTitle}
-              url={`https://easy-scraping.com/stocks/${symbol}`}
-              description={`${name}(${symbol}) 커뮤니티 투표 결과: ${bullPercent}% 상승 vs ${bearPercent}% 하락`}
-            />
           </div>
         )}
+        <p className="flex items-start gap-2 text-xs text-muted-foreground">
+          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+          <span>{name} ({symbol}) <T korean="상세 화면에 표시되는 전체 시장 공통 지표입니다." english="shows this market-wide indicator, not a symbol-specific vote." /></span>
+        </p>
+        <Link href="/newspaper" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Newspaper className="size-4" aria-hidden="true" />
+          <T korean="시장 소식 확인" english="View market news" japanese="市場ニュースを見る" chinese="查看市场新闻" />
+        </Link>
       </CardContent>
     </Card>
   );

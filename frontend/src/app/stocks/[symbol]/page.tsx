@@ -32,7 +32,7 @@ import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockTradingConsole } from './stock-trading-console';
 import { StockMarketToast } from './stock-market-toast';
 import { QuickOrderbookSimulator } from '@/components/quick-orderbook-simulator';
-import { StockSentimentPoll } from '@/components/stock-sentiment-poll';
+import { StockSentimentPoll, type MarketEventPulse } from '@/components/stock-sentiment-poll';
 import { StockHaltBanner } from './stock-halt-banner';
 import { StockTickerSwitcher } from './stock-ticker-switcher';
 import { SocialShareToolbar } from '@/components/social-share-toolbar';
@@ -163,7 +163,7 @@ export default async function StockHubPage({
     apiOrNull<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts?stock=${encodedSymbol}`),
     apiOrNull<{ alerts: StockAlertRule[] }>('/api/v1/stocks/alerts'),
     apiOrNull<{ receipts: StockHaltReceipt[] }>('/api/v1/stocks/halt-receipts'),
-    apiOrNull<{ success: boolean; data: { leadHeadline: string; updatedAt: string } }>('/api/v1/newspaper/pulse'),
+    apiOrNull<{ success: boolean; data: MarketEventPulse }>('/api/v1/newspaper/pulse'),
   ]);
   const holding = findHoldingForStock(portfolio?.holdings ?? [], stock.id);
   const watching = (watchlist?.stocks ?? []).some((row) => row.stock_id === stock.id);
@@ -573,6 +573,7 @@ export default async function StockHubPage({
             <StockSentimentPoll
               symbol={stock.symbol}
               name={stock.name}
+              pulse={pulseResult?.success === true ? pulseResult.data : null}
             />
           </div>
 
