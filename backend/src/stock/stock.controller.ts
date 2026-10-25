@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -71,6 +72,28 @@ export class StockController {
   @ApiOperation({ summary: 'Stocks watched by the caller' })
   async watchlist(@Req() request: RequestWithSession) {
     return { stocks: await this.service().watchlist(requireUserId(request)) };
+  }
+
+  @Get('watchlist/export')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Bounded owner-only watchlist snapshot for CSV and Android export' })
+  async watchlistExport(@Req() request: RequestWithSession) {
+    const rows = await this.service().watchlist(requireUserId(request));
+    if (!Array.isArray(rows) || rows.length > 100) {
+      throw new ConflictException('watchlist exceeds the verified export limit of 100 stocks');
+    }
+    return {
+      stocks: rows.map((row) => ({
+        stock_id: row.stock_id,
+        symbol: row.symbol,
+        name: row.name,
+        current_price: row.current_price,
+        day_open_price: row.day_open_price,
+        created_at: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+      })),
+    };
   }
 
   @Post(':id/watchlist')

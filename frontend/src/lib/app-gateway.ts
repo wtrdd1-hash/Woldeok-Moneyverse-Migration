@@ -39,6 +39,7 @@ export const APP_API_RESPONSE_HEADERS = Object.freeze([
   'accept-ranges',
   'content-range',
   'content-disposition',
+  'x-robots-tag',
   'x-request-id',
   'x-ratelimit-limit',
   'x-ratelimit-remaining',

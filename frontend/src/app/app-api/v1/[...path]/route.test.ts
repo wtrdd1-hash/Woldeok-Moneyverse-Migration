@@ -171,3 +171,20 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('member watchlist export Android gateway', () => {
+  it('forwards the authenticated cookie to the bounded JSON snapshot and keeps it private', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ stocks: [{ current_price: '9007199254740993' }] }), {
+      headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/stocks/watchlist/export', { cookie: 'mv_session=member' }), context('stocks', 'watchlist', 'export'));
+    const [target, init] = fetchSpy.mock.calls[0] as unknown as [URL, RequestInit];
+    expect(String(target)).toContain('/api/v1/stocks/watchlist/export');
+    expect(new Headers(init.headers).get('cookie')).toBe('mv_session=member');
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+    expect((await response.json()).stocks[0].current_price).toBe('9007199254740993');
+  });
+});

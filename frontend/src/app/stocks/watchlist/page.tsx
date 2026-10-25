@@ -88,7 +88,7 @@ export default async function StockWatchlistPage({ searchParams }: { readonly se
           </form>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 id="watchlist-title" className="text-lg">{isEn ? `${visibleStocks.length} of ${watchlist.stocks.length} watched stocks` : `관심 종목 ${watchlist.stocks.length}개 중 ${visibleStocks.length}개`}</h2>
-            <Button asChild variant="outline"><Link href="/stocks">{isEn ? 'Find more stocks' : '종목 더 찾기'}</Link></Button>
+            <div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link href="/stocks/watchlist/export">{isEn ? 'Download watchlist CSV' : '관심 종목 CSV 다운로드'}</Link></Button><Button asChild variant="outline"><Link href="/stocks">{isEn ? 'Find more stocks' : '종목 더 찾기'}</Link></Button></div>
           </div>
           {visibleStocks.length === 0 ? (
             <EmptyState title={isEn ? 'No saved stocks match your search.' : '검색 조건에 맞는 관심 종목이 없습니다.'} description={isEn ? 'Try another symbol or name, or clear the filters.' : '다른 종목 코드나 이름으로 검색하거나 조건을 초기화해 보세요.'}>

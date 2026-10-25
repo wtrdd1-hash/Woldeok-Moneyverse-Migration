@@ -10,3 +10,7 @@
 
 ## In progress
 - Created independent worktree from origin/main. Do not touch Gemini/B/C/QA branches.
+
+- RED tests added for owner scoping, overflow rejection, CSV injection/precision, auth failures and Android cookie passthrough.
+- 03:32 KST: RED reproduced (2 backend missing endpoint, frontend missing route). GREEN focused backend 2/2 and frontend/Android 14/14 after correcting the BOM test to inspect raw bytes; source endpoint guards and export shape verified.
+- Midpoint main re-fetched: unchanged `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; integrated plan rechecked; C #1308 watchlist persistence is not merged and was not touched.
