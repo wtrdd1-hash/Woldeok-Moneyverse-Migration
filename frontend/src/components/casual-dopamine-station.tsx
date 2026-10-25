@@ -160,6 +160,12 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
           role="button"
           tabIndex={0}
           onClick={() => setActiveModal('showdown')}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              setActiveModal('showdown');
+            }
+          }}
           className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-950/60 p-4 transition-all duration-200 hover:border-indigo-500/50 hover:bg-slate-950/90 hover:scale-[1.02] cursor-pointer"
         >
           <div className="flex items-start justify-between">

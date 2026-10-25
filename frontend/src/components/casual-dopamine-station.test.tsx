@@ -46,6 +46,16 @@ describe('CasualDopamineStation', () => {
     expect(screen.getByText(/스타 드롭/)).toBeDefined();
   });
 
+  it('opens practice showdown by keyboard without promising a WLD payout', () => {
+    renderKo(<CasualDopamineStation />);
+    const card = screen.getAllByText(/1:1 주사위 쇼다운/)[0]!.closest('[role="button"]');
+    expect(card).not.toBeNull();
+    fireEvent.keyDown(card!, { key: 'Enter' });
+    expect(screen.getByRole('dialog', { name: /주사위 미니 결투/ })).toBeDefined();
+    expect(screen.getByText(/연습 전용/)).toBeDefined();
+    expect(screen.queryByText(/190 WLD/)).toBeNull();
+  });
+
   it('opens mini showdown modal when showdown card is clicked', () => {
     renderKo(<CasualDopamineStation />);
 
