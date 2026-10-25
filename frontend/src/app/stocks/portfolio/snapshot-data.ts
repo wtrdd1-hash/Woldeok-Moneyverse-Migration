@@ -15,7 +15,7 @@ export function portfolioValuationData(analysis: PortfolioAnalysis, asOfLabel: s
   return {
     asOfLabel,
     marketValueWld: groupDigits(analysis.total_market_value),
-    unrealizedGainWld: `${analysis.total_unrealized_gain_loss.startsWith('-') ? '' : '+'}${groupDigits(analysis.total_unrealized_gain_loss)}`,
+    unrealizedGainWld: `${BigInt(analysis.total_unrealized_gain_loss) > 0n ? '+' : ''}${groupDigits(analysis.total_unrealized_gain_loss)}`,
     unrealizedReturnPct: signedPercent(analysis.total_gain_loss_bps),
     largestHoldingSymbol: largest?.symbol ?? '—',
     largestHoldingReturnPct: signedPercent(largest?.gain_loss_bps ?? '0'),

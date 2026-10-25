@@ -12,7 +12,7 @@ describe('portfolioValuationData', () => {
     expect(snapshot).toEqual({
       asOfLabel: '2026-10-25T02:50:00.000Z',
       marketValueWld: '2,000',
-      unrealizedGainWld: '+0',
+      unrealizedGainWld: '0',
       unrealizedReturnPct: '0%',
       largestHoldingSymbol: 'AAA',
       largestHoldingReturnPct: '+20%',
