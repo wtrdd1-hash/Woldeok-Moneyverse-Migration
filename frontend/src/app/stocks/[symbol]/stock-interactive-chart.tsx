@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { TrendingUp, TrendingDown, Clock, BarChart2, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { groupDigits } from '@/lib/money';
 import { playStockTickSound } from '@/lib/audio-effects';
 import { StockChartDrawingToolbar } from './stock-chart-drawing-toolbar';
@@ -41,7 +42,6 @@ export interface CandlePoint {
   readonly high: number;
   readonly low: number;
   readonly close: number;
-  readonly volume: number;
   readonly label: string;
   readonly isUp: boolean;
   readonly ma5?: number | undefined;
@@ -71,6 +71,47 @@ interface ApiCandleItem {
 }
 
 const STORAGE_KEY = 'wdmv_stock_chart_prefs_v1';
+const EMPTY_CANDLES: readonly CandlePoint[] = [];
+
+// PostgreSQL stock_candles returns OHLC only. A malformed or missing point is
+// not permission to synthesize market history from the latest quoted price.
+function parseVerifiedCandles(payload: unknown, timeframe: Timeframe): CandlePoint[] | null {
+  if (!payload || typeof payload !== 'object' || !('candles' in payload)) return null;
+  const rawCandles = payload.candles;
+  if (!Array.isArray(rawCandles) || rawCandles.length > 400) return null;
+
+  const points: CandlePoint[] = [];
+  let previousTime = -Infinity;
+  for (const raw of rawCandles) {
+    if (!raw || typeof raw !== 'object') return null;
+    const item = raw as Partial<Record<keyof ApiCandleItem, unknown>>;
+    const prices = [item.open_price, item.high_price, item.low_price, item.close_price];
+    if (prices.some((value) => typeof value !== 'string' || !/^[1-9]\d*$/.test(value))) return null;
+    const open = Number(item.open_price);
+    const high = Number(item.high_price);
+    const low = Number(item.low_price);
+    const close = Number(item.close_price);
+    if (
+      !Number.isSafeInteger(open) || !Number.isSafeInteger(high) ||
+      !Number.isSafeInteger(low) || !Number.isSafeInteger(close) ||
+      high < Math.max(open, close) || low > Math.min(open, close)
+    ) return null;
+    if (typeof item.bucket_at !== 'string') return null;
+    const time = Date.parse(item.bucket_at);
+    if (!Number.isFinite(time) || time <= previousTime) return null;
+    previousTime = time;
+    const d = new Date(time);
+    const label = timeframe === '1D'
+      ? `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+      : timeframe === '1W'
+        ? `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}시`
+        : timeframe === '1M'
+          ? `${d.getMonth() + 1}/${d.getDate()}`
+          : `${d.getFullYear().toString().slice(2)}/${d.getMonth() + 1}`;
+    points.push({ index: points.length, open, high, low, close, label, isUp: close >= open });
+  }
+  return points;
+}
 
 export function StockInteractiveChart({
   currentPrice,
@@ -93,7 +134,12 @@ export function StockInteractiveChart({
     sr: true,
   });
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-  const [realCandles, setRealCandles] = useState<CandlePoint[] | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
+  const [candleResponse, setCandleResponse] = useState<{
+    readonly key: string;
+    readonly status: 'ready' | 'empty' | 'error';
+    readonly candles: readonly CandlePoint[];
+  } | null>(null);
 
   // 트레이딩뷰 스타일 인터랙티브 드로잉 툴킷 상태
   const [drawingTool, setDrawingTool] = useState<DrawingToolType>('cursor');
@@ -204,10 +250,10 @@ export function StockInteractiveChart({
   const isUp = diff >= 0;
   const changeRate = openNum > 0 ? ((diff / openNum) * 100).toFixed(2) : '0.00';
 
-  // 타임프레임별 백엔드 인터벌 초 매핑 (1D: 15분, 1W: 1시간, 1M: 1일, 1Y: 1주)
+  // Timeframes match the actual PostgreSQL stock_candles supported widths.
   const intervalSeconds = useMemo(() => {
     switch (timeframe) {
-      case '1D': return 900;
+      case '1D': return 1800;
       case '1W': return 3600;
       case '1M': return 86400;
       case '1Y': return 604800;
@@ -215,147 +261,40 @@ export function StockInteractiveChart({
     }
   }, [timeframe]);
 
-  // 백엔드 실데이터 캔들 API 비동기 조회 (장애/비로그인 시 자동 Fallback)
+  const candleQueryKey = stockId ? `${stockId}:${intervalSeconds}` : null;
+  const matchingResponse = candleQueryKey && candleResponse?.key === candleQueryKey
+    ? candleResponse : null;
+  const chartStatus = !stockId ? 'unavailable' : matchingResponse?.status ?? 'loading';
+  const verifiedCandles = chartStatus === 'ready' && matchingResponse
+    ? matchingResponse.candles : EMPTY_CANDLES;
+
   useEffect(() => {
     if (!stockId) return;
-    let isCancelled = false;
+    let cancelled = false;
+    const key = `${stockId}:${intervalSeconds}`;
 
-    fetch(`/api/stocks/${encodeURIComponent(stockId)}/candles?interval=${intervalSeconds}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { candles?: ApiCandleItem[] } | null) => {
-        if (isCancelled || !data?.candles || data.candles.length === 0) return;
-        const mapped: CandlePoint[] = data.candles.map((c, i) => {
-          const o = Number.parseInt(c.open_price, 10) || priceNum;
-          const h = Number.parseInt(c.high_price, 10) || priceNum;
-          const l = Number.parseInt(c.low_price, 10) || priceNum;
-          const cl = Number.parseInt(c.close_price, 10) || priceNum;
-          const d = new Date(c.bucket_at);
-          let label = '';
-          if (timeframe === '1D') {
-            label = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-          } else if (timeframe === '1W') {
-            label = `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}시`;
-          } else if (timeframe === '1M') {
-            label = `${d.getMonth() + 1}/${d.getDate()}`;
-          } else {
-            label = `${d.getFullYear().toString().slice(2)}/${d.getMonth() + 1}`;
-          }
-          return {
-            index: i,
-            open: o,
-            high: h,
-            low: l,
-            close: cl,
-            volume: 200 + (i % 5) * 60,
-            label,
-            isUp: cl >= o,
-          };
+    fetch(`/api/stocks/${encodeURIComponent(stockId)}/candles?interval=${intervalSeconds}`, {
+      cache: 'no-store',
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('candle request failed');
+        const candles = parseVerifiedCandles(await response.json(), timeframe);
+        if (candles === null) throw new Error('invalid candle response');
+        if (!cancelled) setCandleResponse({
+          key, status: candles.length ? 'ready' : 'empty', candles,
         });
-        if (mapped.length >= 5) {
-          setRealCandles(mapped);
-        }
       })
       .catch(() => {
-        // Fallback 유지
+        if (!cancelled) setCandleResponse({ key, status: 'error', candles: EMPTY_CANDLES });
       });
 
-    return () => {
-      isCancelled = true;
-    };
-  }, [stockId, intervalSeconds, priceNum, timeframe]);
+    return () => { cancelled = true; };
+  }, [stockId, intervalSeconds, timeframe, retryNonce]);
 
-  // 1. 종목 심볼과 타임프레임 기반 OHLC + Volume 데이터 시계열 생성 (실데이터 우선 + Fallback 브라운 브리지)
+  // Indicators are derived only from actual PostgreSQL OHLC observations.
   const candleSeries = useMemo<CandlePoint[]>(() => {
-    let points: CandlePoint[] = [];
-    let closes: number[] = [];
-
-    if (realCandles && realCandles.length >= 5) {
-      points = realCandles;
-      closes = realCandles.map((c) => c.close);
-    } else {
-      const count = timeframe === '1D' ? 24 : timeframe === '1W' ? 28 : timeframe === '1M' ? 30 : 36;
-      const base = openNum;
-      const target = priceNum;
-      const diffSpread = Math.max(base * 0.04, Math.abs(target - base) * 0.45);
-
-      // 결정론적 시드 PRNG
-      let seed = 2166136261 >>> 0;
-      const seedInput = `${symbol}:${timeframe}:${base}:${target}:v2`;
-      for (let c = 0; c < seedInput.length; c++) {
-        seed = Math.imul(seed ^ seedInput.charCodeAt(c), 16777619);
-      }
-      const rng = () => {
-        seed += 0x6d2b79f5;
-        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      };
-
-      // 브라운 브리지 난수 궤적
-      let currentWalk = 0;
-      const rawWalks: number[] = [0];
-      for (let i = 1; i < count - 1; i++) {
-        const shock = (rng() + rng() + rng() - 1.5) * 0.8;
-        currentWalk += shock * diffSpread * 0.4;
-        rawWalks.push(currentWalk);
-      }
-      rawWalks.push(0);
-
-      // 종가 시계열 계산
-      for (let i = 0; i < count; i++) {
-        const bridge = rawWalks[i] ?? 0;
-        const trend = base + ((target - base) * i) / (count - 1);
-        const val = Math.max(1, Math.round(trend + bridge));
-        closes.push(val);
-      }
-      if (closes.length > 0) {
-        closes[closes.length - 1] = target;
-      }
-
-      // 캔들스틱 OHLC 및 Volume 생성
-      let prevClose = base;
-      for (let i = 0; i < count; i++) {
-        const open = i === 0 ? base : prevClose;
-        const finalClose = closes[i] ?? base;
-        const isCandleUp = finalClose >= open;
-
-        const noiseH = (rng() * 0.4 + 0.1) * diffSpread;
-        const noiseL = (rng() * 0.4 + 0.1) * diffSpread;
-
-        const high = Math.round(Math.max(open, finalClose) + noiseH);
-        const low = Math.max(1, Math.round(Math.min(open, finalClose) - noiseL));
-
-        const volFactor = 100 + Math.round(rng() * 400);
-        const spreadAbs = Math.abs(finalClose - open) + 1;
-        const volume = Math.round(volFactor * spreadAbs * (1 + rng() * 0.5));
-
-        let label = '';
-        if (timeframe === '1D') {
-          const hour = (9 + Math.floor((i * 6.5) / count)).toString().padStart(2, '0');
-          const min = Math.floor((i % 4) * 15).toString().padStart(2, '0');
-          label = `${hour}:${min}`;
-        } else if (timeframe === '1W') {
-          label = `${count - i}일 전`;
-        } else if (timeframe === '1M') {
-          label = `${Math.floor(i * 1.1) + 1}일`;
-        } else {
-          label = `${Math.floor(i / 3) + 1}월`;
-        }
-
-        points.push({
-          index: i,
-          open,
-          high,
-          low,
-          close: finalClose,
-          volume,
-          label,
-          isUp: isCandleUp,
-        });
-
-        prevClose = finalClose;
-      }
-    }
+    const points = verifiedCandles;
+    const closes = points.map((point) => point.close);
 
     // MACD(12, 26, 9) 지수이동평균(EMA) 시계열 산출
     const k12 = 2 / (12 + 1);
@@ -439,39 +378,35 @@ export function StockInteractiveChart({
 
       return { ...pt, ma5, ma20, bbUpper, bbLower, rsi, macd, signal, hist };
     });
-  }, [timeframe, openNum, priceNum, symbol, realCandles]);
+  }, [verifiedCandles]);
 
   // 2. SVG 렌더링 좌표계 계산
   const width = 640;
   const height = 240;
   const paddingX = 24;
   const paddingTop = 20;
-  const paddingBottom = 48; // 하단 거래량 공간 확보
+  const paddingBottom = 20;
   const chartHeight = height - paddingTop - paddingBottom;
-  const volumeHeight = 36;
-  const volumeYBase = height - 12;
 
   const minPrice = useMemo(() => {
+    if (candleSeries.length === 0) return Math.max(1, Math.floor(priceNum * 0.95));
     let min = Math.min(...candleSeries.map((c) => c.low));
     candleSeries.forEach((c) => {
       if (c.bbLower && c.bbLower < min) min = c.bbLower;
     });
     return Math.floor(min * 0.995);
-  }, [candleSeries]);
+  }, [candleSeries, priceNum]);
 
   const maxPrice = useMemo(() => {
+    if (candleSeries.length === 0) return Math.max(2, Math.ceil(priceNum * 1.05));
     let max = Math.max(...candleSeries.map((c) => c.high));
     candleSeries.forEach((c) => {
       if (c.bbUpper && c.bbUpper > max) max = c.bbUpper;
     });
     return Math.ceil(max * 1.005);
-  }, [candleSeries]);
+  }, [candleSeries, priceNum]);
 
   const priceRange = Math.max(1, maxPrice - minPrice);
-
-  const maxVolume = useMemo(() => {
-    return Math.max(1, ...candleSeries.map((c) => c.volume));
-  }, [candleSeries]);
 
   const getY = (val: number) => {
     const ratio = (val - minPrice) / priceRange;
@@ -492,12 +427,6 @@ export function StockInteractiveChart({
   const resistanceY = getY(resistancePrice);
   const supportY = getY(supportPrice);
 
-  const getVolY = (vol: number) => {
-    const ratio = vol / maxVolume;
-    const h = ratio * volumeHeight;
-    return { y: volumeYBase - h, h };
-  };
-
   // 캔들별 SVG 렌더링 파라미터 계산
   const svgCandles = useMemo(() => {
     const len = candleSeries.length;
@@ -511,7 +440,6 @@ export function StockInteractiveChart({
       const yLow = getY(c.low);
       const bodyTop = Math.min(yOpen, yClose);
       const bodyHeight = Math.max(1.5, Math.abs(yClose - yOpen));
-      const { y: volY, h: volH } = getVolY(c.volume);
 
       let yMa5: number | null = null;
       if (c.ma5 !== undefined) yMa5 = getY(c.ma5);
@@ -533,15 +461,13 @@ export function StockInteractiveChart({
         yLow,
         bodyTop,
         bodyHeight,
-        volY,
-        volH,
         yMa5,
         yMa20,
         yBbUpper,
         yBbLower,
       };
     });
-  }, [candleSeries, minPrice, priceRange, maxVolume]);
+  }, [candleSeries, minPrice, priceRange]);
 
   const candleWidth = Math.max(3, Math.min(14, (width - paddingX * 2) / candleSeries.length * 0.65));
 
@@ -785,6 +711,7 @@ export function StockInteractiveChart({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const hasVerifiedCandles = svgCandles.length > 0;
   const activeCandle = hoveredIdx !== null && svgCandles[hoveredIdx]
     ? svgCandles[hoveredIdx]
     : svgCandles[svgCandles.length - 1];
@@ -817,7 +744,7 @@ export function StockInteractiveChart({
                 <button
                   type="button"
                   onClick={() => handleSetChartType('candle')}
-                  className={`rounded px-2 py-0.5 transition-all flex items-center gap-1 ${
+                  className={`min-h-11 rounded px-2 py-0.5 transition-all flex items-center gap-1 ${
                     chartType === 'candle'
                       ? 'bg-primary text-primary-foreground font-bold shadow-xs'
                       : 'text-muted-foreground hover:text-foreground'
@@ -830,7 +757,7 @@ export function StockInteractiveChart({
                 <button
                   type="button"
                   onClick={() => handleSetChartType('line')}
-                  className={`rounded px-2 py-0.5 transition-all flex items-center gap-1 ${
+                  className={`min-h-11 rounded px-2 py-0.5 transition-all flex items-center gap-1 ${
                     chartType === 'line'
                       ? 'bg-primary text-primary-foreground font-bold shadow-xs'
                       : 'text-muted-foreground hover:text-foreground'
@@ -847,7 +774,7 @@ export function StockInteractiveChart({
                 <button
                   type="button"
                   onClick={() => handleToggleIndicator('ma')}
-                  className={`rounded px-1.5 py-0.5 transition-all ${
+                  className={`min-h-11 rounded px-1.5 py-0.5 transition-all ${
                     indicators.ma
                       ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
                       : 'text-muted-foreground/60 hover:text-muted-foreground'
@@ -859,7 +786,7 @@ export function StockInteractiveChart({
                 <button
                   type="button"
                   onClick={() => handleToggleIndicator('bb')}
-                  className={`rounded px-1.5 py-0.5 transition-all ${
+                  className={`min-h-11 rounded px-1.5 py-0.5 transition-all ${
                     indicators.bb
                       ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/40'
                       : 'text-muted-foreground/60 hover:text-muted-foreground'
@@ -871,7 +798,7 @@ export function StockInteractiveChart({
                 <button
                   type="button"
                   onClick={() => handleToggleIndicator('rsi')}
-                  className={`rounded px-1.5 py-0.5 transition-all ${
+                  className={`min-h-11 rounded px-1.5 py-0.5 transition-all ${
                     indicators.rsi
                       ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40'
                       : 'text-muted-foreground/60 hover:text-muted-foreground'
@@ -886,7 +813,7 @@ export function StockInteractiveChart({
                     handleToggleIndicator('macd');
                     if (!indicators.macd) setSubpanelTab('macd');
                   }}
-                  className={`rounded px-1.5 py-0.5 transition-all ${
+                  className={`min-h-11 rounded px-1.5 py-0.5 transition-all ${
                     indicators.macd
                       ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40'
                       : 'text-muted-foreground/60 hover:text-muted-foreground'
@@ -898,7 +825,7 @@ export function StockInteractiveChart({
                 <button
                   type="button"
                   onClick={() => handleToggleIndicator('sr')}
-                  className={`rounded px-1.5 py-0.5 transition-all ${
+                  className={`min-h-11 rounded px-1.5 py-0.5 transition-all ${
                     indicators.sr
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                       : 'text-muted-foreground/60 hover:text-muted-foreground'
@@ -950,7 +877,7 @@ export function StockInteractiveChart({
                   type="button"
                   onClick={() => handleSetTimeframe(tf)}
                   aria-pressed={isSelected}
-                  className={`rounded-lg px-2.5 sm:px-3 py-1 text-xs font-bold transition-all ${
+                  className={`min-h-11 rounded-lg px-2.5 sm:px-3 py-1 text-xs font-bold transition-all ${
                     isSelected
                       ? 'bg-primary text-primary-foreground shadow-xs'
                       : 'text-muted-foreground hover:text-foreground'
@@ -984,10 +911,6 @@ export function StockInteractiveChart({
                 {groupDigits(activeCandle.close.toString())}
               </span>
             </span>
-            <span className="flex items-center gap-1">
-              <span className="text-muted-foreground/70">Vol</span>
-              <span className="font-semibold text-foreground">{groupDigits(activeCandle.volume.toString())}</span>
-            </span>
             {indicators.ma && activeCandle.ma5 && (
               <span className="flex items-center gap-1 text-amber-500 hidden sm:inline-flex">
                 <span>MA5</span>
@@ -1019,8 +942,37 @@ export function StockInteractiveChart({
       </CardHeader>
 
       <CardContent className="p-2 sm:p-4 pt-1 space-y-2">
+        <div role="status" aria-live="polite" className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/70 bg-muted/30 p-3 text-xs text-muted-foreground">
+          <span>
+          {chartStatus === 'ready'
+            ? '서버에서 확인된 실제 OHLC 캔들 기록입니다. 거래량 데이터는 제공되지 않습니다.'
+            : chartStatus === 'loading'
+              ? '서버 캔들 기록을 불러오는 중입니다.'
+              : chartStatus === 'empty'
+                ? '이 기간에 확인된 캔들 기록이 없습니다.'
+                : chartStatus === 'unavailable'
+                  ? '서버 캔들 기록을 조회할 종목 ID가 없습니다.'
+                  : '차트 기록을 불러오지 못했습니다. 다시 시도해 주세요.'}
+          </span>
+          {chartStatus === 'error' && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="min-h-11"
+              aria-label="차트 다시 시도"
+              onClick={() => {
+                setCandleResponse(null);
+                setRetryNonce((value) => value + 1);
+              }}
+            >
+              다시 시도
+            </Button>
+          )}
+        </div>
         {/* SVG 인터랙티브 메인 차트 캔버스 */}
-        <div className="relative w-full h-[200px] sm:h-[240px]">
+        <div className="relative w-full min-h-[200px] sm:min-h-[240px]">
+          {hasVerifiedCandles ? (
           <svg
             ref={svgRef}
             viewBox={`0 0 ${width} ${height}`}
@@ -1078,20 +1030,6 @@ export function StockInteractiveChart({
               </g>
             )}
 
-            {/* 하단 거래량(Volume) 히스토그램 */}
-            {svgCandles.map((c) => (
-              <rect
-                key={`vol-${c.index}`}
-                x={c.x - candleWidth / 2}
-                y={c.volY}
-                width={candleWidth}
-                height={Math.max(1, c.volH)}
-                fill={c.isUp ? 'rgba(16, 185, 129, 0.45)' : 'rgba(244, 63, 94, 0.45)'}
-                rx={1}
-                pointerEvents="none"
-              />
-            ))}
-
             {/* 모드 1: 캔들스틱 차트 */}
             {chartType === 'candle' && (
               <g pointerEvents="none">
@@ -1110,6 +1048,7 @@ export function StockInteractiveChart({
                       />
                       {/* 시가-종가 몸통 (Body) */}
                       <rect
+                        data-testid="verified-candle"
                         x={c.x - candleWidth / 2}
                         y={c.bodyTop}
                         width={candleWidth}
@@ -1281,6 +1220,11 @@ export function StockInteractiveChart({
               onDeleteItem={handleRemoveDrawing}
             />
           </svg>
+          ) : (
+            <div aria-hidden="true" className="flex h-[200px] items-center justify-center rounded-lg border border-dashed border-border/70 bg-muted/20 text-sm text-muted-foreground sm:h-[240px]">
+              —
+            </div>
+          )}
         </div>
 
         {/* 보조지표 서브패널 (RSI vs MACD 탭 전환기 탑재) */}

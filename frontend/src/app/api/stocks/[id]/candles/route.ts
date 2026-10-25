@@ -5,16 +5,22 @@ export const dynamic = 'force-dynamic';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function normalizeInterval(val: string | null): string {
-  if (!val) return '86400';
-  if (/^\d+$/.test(val)) return val;
-  const lower = val.toLowerCase();
-  if (lower === '1m' || lower === 'm1') return '60';
-  if (lower === '5m' || lower === 'm5') return '300';
-  if (lower === '15m' || lower === 'm15') return '900';
-  if (lower === '1h' || lower === 'h1' || lower === '60m') return '3600';
-  if (lower === '1d' || lower === 'd1') return '86400';
-  return '86400';
+// Mirror stock_candles' actual supported widths rather than silently sending
+// 900-second requests that the PostgreSQL function rejects.
+const SUPPORTED_INTERVALS = new Set(['60', '300', '1800', '3600', '7200', '14400', '86400', '604800']);
+const CANDLE_HEADERS = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow' };
+
+function normalizeInterval(value: string | null): string | null {
+  if (!value) return '86400';
+  const lower = value.toLowerCase();
+  const aliases: Readonly<Record<string, string>> = {
+    '1m': '60', m1: '60', '5m': '300', m5: '300',
+    '30m': '1800', m30: '1800', '1h': '3600', h1: '3600',
+    '60m': '3600', '2h': '7200', '4h': '14400',
+    '1d': '86400', d1: '86400', '1w': '604800',
+  };
+  const interval = aliases[lower] ?? lower;
+  return SUPPORTED_INTERVALS.has(interval) ? interval : null;
 }
 
 export async function GET(
@@ -24,6 +30,11 @@ export async function GET(
   const { id } = await context.params;
   const intervalParam = new URL(request.url).searchParams.get('interval');
   const normalizedInterval = normalizeInterval(intervalParam);
+  if (normalizedInterval === null) {
+    return NextResponse.json({ detail: 'unsupported candle interval' }, {
+      status: 400, headers: CANDLE_HEADERS,
+    });
+  }
   const query = `?interval=${normalizedInterval}`;
 
   let targetId = id;
@@ -48,9 +59,9 @@ export async function GET(
   if (!data) {
     return NextResponse.json(
       { detail: 'candles unavailable' },
-      { status: 503, headers: { 'cache-control': 'private, no-store' } },
+      { status: 503, headers: CANDLE_HEADERS },
     );
   }
 
-  return NextResponse.json(data, { headers: { 'cache-control': 'private, no-store' } });
+  return NextResponse.json(data, { headers: CANDLE_HEADERS });
 }
