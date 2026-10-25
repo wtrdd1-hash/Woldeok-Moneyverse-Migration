@@ -4,6 +4,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Param,
   ParseUUIDPipe,
   Post,
@@ -119,7 +120,8 @@ export class MarketplaceController {
 
   // --- Auctions ---
   @Get('auctions')
-  @ApiOperation({ summary: 'List active live English auctions' })
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Read-only list of server-recorded auction listings; bidding paused' })
   listAuctions() {
     return this.guarded(
       () => this.marketplaceService.listAuctions(),
@@ -129,7 +131,7 @@ export class MarketplaceController {
 
   @Post('auctions')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Create a new live English auction' })
+  @ApiOperation({ summary: 'Auction creation unavailable until ledger settlement is certified' })
   createAuction(@Req() request: RequestWithSession, @Body() body: CreateAuctionDto) {
     return this.guarded(
       () => this.marketplaceService.createAuction(requireUserId(request), body),
@@ -139,7 +141,7 @@ export class MarketplaceController {
 
   @Post('auctions/:id/bid')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Bid on a live English auction with escrow and anti-sniping extension' })
+  @ApiOperation({ summary: 'Auction bids unavailable until ledger settlement is certified' })
   bidAuction(
     @Req() request: RequestWithSession,
     @Param('id', ParseUUIDPipe) auctionId: string,

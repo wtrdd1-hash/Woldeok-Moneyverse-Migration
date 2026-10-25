@@ -7,22 +7,13 @@ const AUCTION = '22222222-2222-4222-8222-222222222222';
 
 function setup() {
   const query = vi.fn().mockResolvedValue({ rows: [] });
-  const gateway = {
-    broadcastBid: vi.fn(),
-    broadcastOutbid: vi.fn(),
-    broadcastAntiSnipingExtended: vi.fn(),
-    broadcastProxyBid: vi.fn(),
-  };
-  const service = new MarketplaceService(
-    { query } as unknown as Queryable,
-    gateway as never,
-  );
-  return { service, query, gateway };
+  const service = new MarketplaceService({ query } as unknown as Queryable);
+  return { service, query };
 }
 
 describe('marketplace auction ledger integrity hold', () => {
   it('refuses auction creation before any SQL or broadcast', async () => {
-    const { service, query, gateway } = setup();
+    const { service, query } = setup();
     await expect(service.createAuction(ACTOR, {
       itemCode: 'ITEM_TEST',
       itemName: 'Test',
@@ -31,16 +22,13 @@ describe('marketplace auction ledger integrity hold', () => {
       startPriceWld: '1000',
     })).rejects.toMatchObject({ status: 503 });
     expect(query).not.toHaveBeenCalled();
-    expect(gateway.broadcastBid).not.toHaveBeenCalled();
   });
 
   it('refuses manual and proxy bids before SQL, deadline changes or websocket', async () => {
-    const { service, query, gateway } = setup();
+    const { service, query } = setup();
     await expect(service.bidAuction(ACTOR, AUCTION, '90071992547409930000', '90071992547409940000'))
       .rejects.toMatchObject({ status: 503 });
     expect(query).not.toHaveBeenCalled();
-    expect(gateway.broadcastBid).not.toHaveBeenCalled();
-    expect(gateway.broadcastProxyBid).not.toHaveBeenCalled();
   });
 
   it('cannot bypass the ledger hold with an environment flag', async () => {
