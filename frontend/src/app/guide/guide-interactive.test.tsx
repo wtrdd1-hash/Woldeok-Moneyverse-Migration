@@ -54,7 +54,7 @@ describe('Interactive Guide Components Suite', () => {
 
     it('renders 6 essential onboarding quests and allows toggling', () => {
       renderKo(<OnboardingChecklist />);
-      expect(screen.getByText('입문 6대 온보딩 퀘스트 & 뱃지')).toBeDefined();
+      expect(screen.getByText('입문 6대 학습 체크리스트')).toBeDefined();
       expect(screen.getByText('계정 로그인 & 약관 동의')).toBeDefined();
       expect(screen.getByText('첫 출석 체크 & 일일 퀘스트')).toBeDefined();
       expect(screen.getByText('8대 직업 선택 & 첫 일거리 완수')).toBeDefined();
@@ -66,7 +66,7 @@ describe('Interactive Guide Components Suite', () => {
       const markAllBtn = screen.getByText('전체 완료 표시');
       fireEvent.click(markAllBtn);
       expect(screen.getByText(/6 \/ 6/)).toBeDefined();
-      expect(screen.getByText(/모든 퀘스트 완료/)).toBeDefined();
+      expect(screen.getByText(/내 체크리스트 완료/)).toBeDefined();
     });
   });
 

@@ -26,7 +26,7 @@ interface ChecklistItem {
   descEn: string;
   link: string;
   linkLabel: string;
-  rewardText: string;
+  learningText: string;
 }
 
 const CHECKLIST_ITEMS: ChecklistItem[] = [
@@ -38,17 +38,17 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
     descEn: 'Sign in with Discord/Google and unlock your double-entry wallet ledger.',
     link: '/login',
     linkLabel: '로그인하기',
-    rewardText: '지갑 원장 개설',
+    learningText: '로그인 경로 확인',
   },
   {
     id: 'task_quest',
     title: '첫 출석 체크 & 일일 퀘스트',
     titleEn: 'Daily Check-in & First Quest',
-    desc: '퀘스트 메뉴에서 오늘의 출석 체크를 마치고 시드 WLD를 수령합니다.',
-    descEn: 'Fulfill your first check-in quest and collect seed WLD.',
+    desc: '퀘스트 메뉴에서 출석 및 보상 상태를 직접 확인합니다. 이 체크리스트는 WLD를 지급하지 않습니다.',
+    descEn: 'Review your check-in and reward status in Quests. This checklist never grants WLD.',
     link: '/quests',
     linkLabel: '퀘스트 가기',
-    rewardText: '+1,000 WLD',
+    learningText: '출석·퀘스트 이용 방법 학습',
   },
   {
     id: 'task_work',
@@ -58,7 +58,7 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
     descEn: 'Choose a profession on the Work Board and claim your wage and EXP.',
     link: '/work',
     linkLabel: '잡보드 가기',
-    rewardText: '직업 EXP & 급여',
+    learningText: '직업 활동 경로 학습',
   },
   {
     id: 'task_bank',
@@ -68,7 +68,7 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
     descEn: 'Deposit WLD to start earning daily compounding interest.',
     link: '/bank',
     linkLabel: '은행 가기',
-    rewardText: '일복리 이자 가동',
+    learningText: '예금 화면 학습',
   },
   {
     id: 'task_stocks',
@@ -78,7 +78,7 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
     descEn: 'Analyze real-time candlestick charts and 10-depth orderbooks.',
     link: '/stocks',
     linkLabel: '거래소 가기',
-    rewardText: '시장 분석 지식',
+    learningText: '시세 화면 학습',
   },
   {
     id: 'task_glossary',
@@ -88,7 +88,7 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
     descEn: 'Learn essential terms like double-entry, idempotency, and spreads.',
     link: '/guide/glossary',
     linkLabel: '용어사전 보기',
-    rewardText: '온보딩 지식 습득',
+    learningText: '금융 용어 학습',
   },
 ];
 
@@ -102,7 +102,14 @@ export function OnboardingChecklist() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        setCompletedTasks(JSON.parse(saved));
+        const parsed: unknown = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          const safe: Record<string, boolean> = {};
+          for (const item of CHECKLIST_ITEMS) {
+            if ((parsed as Record<string, unknown>)[item.id] === true) safe[item.id] = true;
+          }
+          setCompletedTasks(safe);
+        }
       }
     } catch {
       // Ignore storage errors
@@ -151,24 +158,24 @@ export function OnboardingChecklist() {
             <span>INTERACTIVE ONBOARDING CHECKLIST</span>
           </div>
           <h2 id="checklist-heading" className="text-2xl font-black tracking-tight sm:text-3xl">
-            <T korean="입문 6대 온보딩 퀘스트 & 뱃지" english="6 Essential Onboarding Quests" />
+            <T korean="입문 6대 학습 체크리스트" english="6 Onboarding Learning Steps" />
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1 [word-break:keep-all]">
             <T
-              korean="하나씩 직접 완료하며 체크해 보세요. 6개 항목을 모두 완수하면 '머니버스 입문 마스터' 명예 뱃지가 활성화됩니다."
-              english="Check off each task as you complete it. Complete all 6 to unlock the 'Moneyverse Master' badge."
+              korean="6개 학습 항목을 직접 체크하세요. 이 기기의 개인 학습 기록이며, 서버 활동·보상 지급·공식 뱃지 획득을 증명하지 않습니다."
+              english="Mark learning steps yourself. Progress is stored on this device only; it does not verify server activity, award WLD or unlock an official badge."
             />
           </p>
         </div>
 
-        {/* Progress & Badge Indicator */}
+        {/* Local progress indicator: never a server-awarded badge. */}
         <div className="flex items-center gap-3 self-start sm:self-auto">
-          <div className="text-right">
+          <div className="text-right" aria-live="polite" aria-atomic="true">
             <div className="font-mono text-sm font-black text-foreground">
               {completedCount} / {CHECKLIST_ITEMS.length} ({progressPercent}%)
             </div>
             <div className="text-[11px] text-muted-foreground">
-              {isAllCompleted ? '🎉 모든 퀘스트 완료!' : '진행 중'}
+              {isAllCompleted ? '내 체크리스트 완료 (수동 기록)' : '수동 학습 기록 중'}
             </div>
           </div>
           <div
@@ -178,7 +185,7 @@ export function OnboardingChecklist() {
                 ? 'border-amber-400 bg-amber-400/20 text-amber-400 shadow-[0_0_15px_rgba(248,198,92,0.4)] animate-pulse'
                 : 'border-border/70 bg-muted/50 text-muted-foreground',
             )}
-            title={isAllCompleted ? '머니버스 입문 마스터 뱃지 획득!' : '6개 모두 완료 시 뱃지 해금'}
+            title={isAllCompleted ? '이 기기의 수동 체크리스트 완료' : '수동 학습 체크리스트'}
           >
             <Trophy className="size-6" />
           </div>
@@ -187,7 +194,7 @@ export function OnboardingChecklist() {
 
       {/* Progress Bar */}
       <div className="pt-4 pb-2">
-        <Progress value={progressPercent} className="h-2.5 bg-muted" />
+        <Progress value={progressPercent} aria-label="수동 학습 체크리스트 진행률" className="h-2.5 bg-muted" />
       </div>
 
       {/* Checklist Grid */}
@@ -209,7 +216,8 @@ export function OnboardingChecklist() {
                   <button
                     type="button"
                     onClick={() => toggleTask(item.id)}
-                    className="flex items-center gap-2.5 text-left outline-none"
+                    className="flex min-h-11 items-center gap-2.5 rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-pressed={isDone}
                     aria-label={`완료 토글: ${item.title}`}
                   >
                     {isDone ? (
@@ -238,9 +246,9 @@ export function OnboardingChecklist() {
 
               <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3 pl-7">
                 <span className="text-[11px] font-bold text-amber-500 dark:text-amber-400">
-                  🎁 {item.rewardText}
+                  학습 항목: {item.learningText}
                 </span>
-                <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs font-semibold text-primary hover:text-primary">
+                <Button asChild variant="ghost" size="sm" className="min-h-11 px-2 text-xs font-semibold text-primary hover:text-primary">
                   <Link href={item.link}>
                     <span>{item.linkLabel}</span>
                     <ArrowRight className="ml-1 size-3" />
@@ -256,7 +264,7 @@ export function OnboardingChecklist() {
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs">
         <div className="flex items-center gap-2 text-muted-foreground">
           <ShieldCheck className="size-4 text-emerald-500" />
-          <span>체크 상태는 브라우저 로컬 저장소에 자동 보존됩니다.</span>
+          <span>체크 상태는 이 기기의 브라우저에만 저장되며 계정·원장과 연동되지 않습니다.</span>
         </div>
         <div className="flex items-center gap-2">
           {!isAllCompleted ? (
@@ -264,7 +272,7 @@ export function OnboardingChecklist() {
               variant="outline"
               size="sm"
               onClick={() => markAll(true)}
-              className="text-xs font-semibold"
+              className="min-h-11 text-xs font-semibold"
             >
               <CheckCheck className="mr-1.5 size-3.5" />
               <span>전체 완료 표시</span>
@@ -274,7 +282,7 @@ export function OnboardingChecklist() {
               variant="outline"
               size="sm"
               onClick={() => markAll(false)}
-              className="text-xs font-semibold text-muted-foreground"
+              className="min-h-11 text-xs font-semibold text-muted-foreground"
             >
               <RotateCcw className="mr-1.5 size-3.5" />
               <span>체크리스트 초기화</span>
