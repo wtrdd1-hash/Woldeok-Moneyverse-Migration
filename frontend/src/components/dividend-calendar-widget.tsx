@@ -276,7 +276,7 @@ export function DividendCalendarWidget() {
                   ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
                   : 'hover:bg-muted/80'
               }`}
-              title="다가오는 배당락일 D-Day 알림을 받습니다"
+              title={localeLabel(locale, '다가오는 배당락일 D-Day 알림을 받습니다', 'Receive upcoming ex-dividend D-Day alerts', '配当落ち日カウントダウン通知を受け取ります', '接收除息日倒计时提醒')}
             >
               <Bell className="size-3.5" />
               <span>{isAlertSubscribed ? localeLabel(locale, '알림 켜짐', 'Alert On', '通知ON', '已开启提醒') : localeLabel(locale, '배당락일 알림', 'Ex-Date Alerts', '配当落ち通知', '除息提醒')}</span>
@@ -287,7 +287,7 @@ export function DividendCalendarWidget() {
               size="sm"
               onClick={exportToCsv}
               className="h-8 min-h-[36px] gap-1.5 text-xs font-semibold hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400 border-border/80 shadow-xs"
-              title="1~12월 배당금 일정을 Excel 호환 CSV 파일로 다운로드합니다"
+              title={localeLabel(locale, '1~12월 배당금 일정을 Excel 호환 CSV 파일로 다운로드합니다', 'Download Jan-Dec dividend schedule as Excel-compatible CSV', '1〜12月の配当金スケジュールをCSV形式で保存します', '以Excel兼容CSV格式导出1~12月分红日程')}
             >
               <Download className="size-3.5" />
               <span>{localeLabel(locale, 'CSV 내보내기', 'Export CSV', 'CSV出力', '导出CSV')}</span>
@@ -345,7 +345,7 @@ export function DividendCalendarWidget() {
           <div className="p-4 rounded-xl border border-border/80 bg-background/50">
             <span className="text-xs text-muted-foreground font-medium">{localeLabel(locale, '월평균 현금 흐름', 'Monthly Average Flow', '月平均キャッシュフロー', '月均分红现金流')}</span>
             <div className="text-xl sm:text-2xl font-mono tabular-nums font-bold text-foreground mt-1">
-              ₩{monthlyAverage.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">/월</span>
+              ₩{monthlyAverage.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{localeLabel(locale, '/월', '/mo', '/月', '/月')}</span>
             </div>
           </div>
           <div className="p-4 rounded-xl border border-border/80 bg-background/50">
@@ -360,7 +360,7 @@ export function DividendCalendarWidget() {
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
             <span>{localeLabel(locale, '월별 세후 수령액 (KRW)', 'Monthly Net Payout (KRW)', '月別税引後手取り額 (KRW)', '月度税后实得金额 (KRW)')}</span>
-            <span>최고 수령월: ₩{maxMonthly.toLocaleString()}</span>
+            <span>{localeLabel(locale, '최고 수령월: ₩', 'Peak Month: ₩', '最高受取月: ₩', '最高发放月: ₩')}{maxMonthly.toLocaleString()}</span>
           </div>
 
           <div className="grid grid-cols-6 sm:grid-cols-12 gap-1 sm:gap-2">
@@ -463,7 +463,7 @@ export function DividendCalendarWidget() {
 
                 <Button size="sm" onClick={() => addStock()} className="h-10 sm:h-9 min-h-[44px] sm:min-h-[36px] gap-1 font-semibold px-4 shrink-0">
                   <Plus className="size-3.5" />
-                  추가
+                  {localeLabel(locale, '추가', 'Add', '追加', '添加')}
                 </Button>
               </div>
             </div>

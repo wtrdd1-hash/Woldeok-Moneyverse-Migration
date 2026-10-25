@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Sparkles, ArrowRight, X, Coins } from 'lucide-react';
+import { useLocale, localeLabel } from '@/lib/locale';
 
 export function ToolsGuestConversionBar() {
+  const locale = useLocale();
   const [mounted, setMounted] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -55,7 +57,7 @@ export function ToolsGuestConversionBar() {
   return (
     <aside
       className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-emerald-500/40 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] transition-all duration-300 transform translate-y-0"
-      aria-label="계정 저장 가능 여부와 로그인 안내"
+      aria-label={localeLabel(locale, '계정 저장 가능 여부와 로그인 안내', 'Account save features and sign-in info', 'アカウント保存機能とログイン案内', '账户保存功能与登录说明')}
     >
       <div className="max-w-6xl mx-auto px-4 py-2.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* 안내 카피 */}
@@ -66,14 +68,20 @@ export function ToolsGuestConversionBar() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono">
-                가입 없이 무료 체험
+                {localeLabel(locale, '가입 없이 무료 체험', 'Free Guest Trial', '登録不要 無料体験', '无需注册 免费体验')}
               </span>
               <span className="text-xs sm:text-sm font-bold text-zinc-100 tracking-tight">
-                계산 후 계정 저장 가능 여부를 확인해 보세요
+                {localeLabel(locale, '계산 후 계정 저장 가능 여부를 확인해 보세요', 'Calculate and verify account saving options', '計算後に保存機能をご確認ください', '计算后可查看账户保存选项')}
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 line-clamp-1">
-              WLD는 게임 재화입니다. 로그인해도 저장·보상은 서버 확인 전까지 보장되지 않습니다.
+              {localeLabel(
+                locale,
+                'WLD는 게임 재화입니다. 로그인해도 저장·보상은 서버 확인 전까지 보장되지 않습니다.',
+                'WLD is in-game virtual currency. Data is subject to server synchronization.',
+                'WLDはゲーム内通貨です。データはサーバー検証後に反映されます。',
+                'WLD为游戏虚拟积分。计算数据以服务器最终校验同步为准。'
+              )}
             </p>
           </div>
         </div>
@@ -85,7 +93,7 @@ export function ToolsGuestConversionBar() {
             className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs sm:text-sm shadow-md shadow-emerald-950 transition-all duration-150 active:scale-95 min-h-[44px]"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>로그인해 저장 기능 확인</span>
+            <span>{localeLabel(locale, '로그인해 저장 기능 확인', 'Sign in to Check Save', 'ログインして保存機能を確認', '登录查看保存功能')}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
 
@@ -93,8 +101,8 @@ export function ToolsGuestConversionBar() {
             type="button"
             onClick={handleDismiss}
             className="p-2 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/80 transition-colors shrink-0"
-            aria-label="오늘 하루 닫기"
-            title="오늘 하루 닫기"
+            aria-label={localeLabel(locale, '오늘 하루 닫기', 'Close for today', '今日一日閉じる', '今日关闭')}
+            title={localeLabel(locale, '오늘 하루 닫기', 'Close for today', '今日一日閉じる', '今日关闭')}
           >
             <X className="w-4 h-4" />
           </button>
