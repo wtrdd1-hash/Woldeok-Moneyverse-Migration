@@ -1,5 +1,13 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1276 — F675-126 검증형 계산기 시나리오 보관함 (기능 추가 / 보류)
+- 이전 Improvement v1274 → 현재 Addition v1276 → 다음 Improvement v1278. main 1c5b84a1 시작·중간 확인, Draft #1304 미병합, 개발 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
+- CalculatorSaveAction의 localStorage 임시 저장과 존재하지 않는 /api/portfolio/watchlist 호출은 서버 영구 저장 증거가 아니다. 오류 시 성공 표시 및 10,000 WLD/알림 약속은 미검증. 신규 본인 보관함은 실제 소유자·버전·입력 지문 영수증 필수, 로컬 초안 선택형 가져오기, 주식·WLD·원장 변경 없음.
+- /tools 및 /account/calculator-scenarios 화면, NestJS 본인 CRUD·Android, 버전형 허용 목록/100건/8KiB, SECDEF DB·CAS·불변 영수증, 401/403/404/409/422/429/503, 개인정보/noindex, 관리자 k>=20, WCAG AA, 영수증 KPI/롤백은 국영문 통합 마스터에 상세화.
+- P0 ENV1276-01 SEC1276-02 REL1276-03 CAL1276-04; P1 CAL1276-05 CAL1276-06 CAL1276-07 CAL1276-08 CAL1276-09 CAL1276-10. QA v1272 FAILED/HOLD, 공식 CI 실패, 루트 97%, Migration266/280, DB 권한, 정확 SHA Test/복원 BLOCKED. 외부 신규 승인 0·누적 미확인/10,000 BLOCKED. 기획 문서만 변경.
+- **백로그 ID 전체:** ENV1276-01 SEC1276-02 REL1276-03 CAL1276-04 CAL1276-05 CAL1276-06 CAL1276-07 CAL1276-08 CAL1276-09 CAL1276-10
+
+
 ## v2026.10.25.1274 — F675-125 월간 명세서 정밀도·마감 무결성 보완 (기능 보완 / 초안 / 보류)
 - **회차:** 이전 기능 추가 v1272 → 현재 기능 보완 v1274 → 다음 기능 추가 v1276(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, AGENTS·README·영문 정본/국문 대조. 미병합 Draft #1296 후속, 개발 이슈 #1295. 문서 기획만 수행, 런타임/DB/Test/운영 변경 없음.
 - **실증 정정:** Migration 194 및 개발 DB 메타데이터에서 ledger_postings.amount·account_balances.available_amount가 BIGINT가 아닌 제한 없는 NUMERIC임을 확인했다. v1272 명세서 BIGINT 제안을 정수 CHECK를 갖춘 NUMERIC으로 대체하고 API/CSV는 정확한 10진 문자열로 처리하며 JS Number 변환을 금지한다. 동일 거래/계좌의 중복 전표를 먼저 집계하고 차변-대변 부호를 기존 지갑과 일치시킨다.

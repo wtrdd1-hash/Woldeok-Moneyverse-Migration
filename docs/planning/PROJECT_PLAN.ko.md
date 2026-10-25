@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1276 — F675-126 회원 전용 검증형 계산기 시나리오 보관함 (기능 추가 / 초안 / 운영 보류)
+- **회차:** 이전 Feature Improvement v1274 → 현재 Feature Addition v1276 → 다음 Feature Improvement v1278(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, AGENTS·README·영문 정본/국문 대조·PR·QA 검토. 선행 Draft #1304 미병합. 개발 인계 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
+- **실증 결함:** CalculatorSaveAction은 localStorage wdmv_saved_scenarios에 최대 30건 저장하고 브라우저 로그인 추정·오류 시 저장 성공 표시·존재하지 않는 Next /api/portfolio/watchlist로 결과 미확인 호출을 한다. 영구 계정 동기화/알림/10,000 WLD 문구는 검증 영수증이 없다. 신규 F675-126은 본인 계산기 입력 보관이며 주식 관심종목·WLD·원장·보상·런타임 불변.
+- **기능:** /tools '내 계정에 저장' → /account/calculator-scenarios 목록 → 상세/재계산/이름 변경/삭제, 로컬 초안 건별 미리보기 동의 가져오기. LOCAL_ONLY/SAVING/SYNCED_VERIFIED/UNCONFIRMED/CONFLICT/STALE_VERSION 구분, 본인+버전+입력 지문 서버 영수증 확인 시에만 성공. NestJS 본인 CRUD·Android 동등성·버전형 허용 입력·PostgreSQL SECDEF·활성 100건·8KiB·불변 멱등 영수증·CAS/순서 잠금. 개인 noindex/no-store, 관리자 k>=20 집계, 320px/WCAG AA, 클릭이 아닌 영수증 기준 KPI. 세부 DB/API/트랜잭션/테스트/배포는 국영문 통합 마스터 참조.
+- **P0:** ENV1276-01 SEC1276-02 REL1276-03 CAL1276-04. **P1:** CAL1276-05 CAL1276-06 CAL1276-07 CAL1276-08 CAL1276-09 CAL1276-10. QA v1272 FAILED/HOLD, 공식 CI 의존성 감사 실패, DB 권한, Migration266/280, 정확 SHA Test/복원 미검증, 루트 97%(약 3.1GiB). 기본 OFF·운영 보류. 외부 신규 승인 0, 누적 미확인/10,000 BLOCKED/IN PROGRESS.
+- **백로그 ID 전체:** ENV1276-01 SEC1276-02 REL1276-03 CAL1276-04 CAL1276-05 CAL1276-06 CAL1276-07 CAL1276-08 CAL1276-09 CAL1276-10
+
+
 ## v2026.10.25.1274 — F675-125 월간 명세서 정밀도·마감 무결성 보완 (기능 보완 / 초안 / 보류)
 - **회차:** 이전 기능 추가 v1272 → 현재 기능 보완 v1274 → 다음 기능 추가 v1276(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, AGENTS·README·영문 정본/국문 대조. 미병합 Draft #1296 후속, 개발 이슈 #1295. 문서 기획만 수행, 런타임/DB/Test/운영 변경 없음.
 - **실증 정정:** Migration 194 및 개발 DB 메타데이터에서 ledger_postings.amount·account_balances.available_amount가 BIGINT가 아닌 제한 없는 NUMERIC임을 확인했다. v1272 명세서 BIGINT 제안을 정수 CHECK를 갖춘 NUMERIC으로 대체하고 API/CSV는 정확한 10진 문자열로 처리하며 JS Number 변환을 금지한다. 동일 거래/계좌의 중복 전표를 먼저 집계하고 차변-대변 부호를 기존 지갑과 일치시킨다.

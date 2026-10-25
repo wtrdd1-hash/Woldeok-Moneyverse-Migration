@@ -1,5 +1,11 @@
 ## v2026.10.25.1268 — F675-124 게시판 작성자 숨김·개인 피드 (기능 추가 / 초안 / 운영 보류)
 
+## 2026-10-25 v1276 — F675-126 검증형 계산기 시나리오 보관함 (기능 추가 / 초안 / 운영 보류)
+- 이전 Improvement v1274 → 현재 Addition v1276 → 다음 Improvement v1278, main 1c5b84a1 시작·중간 확인, 선행 Draft #1304, 개발 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
+- main CalculatorSaveAction은 localStorage·브라우저 로그인 추정·낙관적 성공·존재하지 않는 /api/portfolio/watchlist 호출을 사용하므로 영구 동기화/알림/10,000 WLD 문구는 영수증 미검증. 회원 전용 버전형 시나리오 보관함·선택형 로컬 가져오기·NestJS/Android CRUD·SECDEF DB/CAS/멱등 영수증·관리자 개인정보·SEO·WCAG·KPI·롤백 명세. 백로그 ENV1276-01 SEC1276-02 REL1276-03 CAL1276-04 CAL1276-05 CAL1276-06 CAL1276-07 CAL1276-08 CAL1276-09 CAL1276-10.
+- QA v1272 FAILED/HOLD(공식 CI 감사 실패, Migration266/280, DB 권한, 정확 SHA Test·복원 미검증), 시작 루트 97%. 외부 신규 승인 0·누적 미확인/10,000 BLOCKED. 기획 문서만 변경, 런타임·DB·WLD·원장·Test·운영 배포 없음.
+
+
 ## 2026-10-25 v1274 — F675-125 월간 명세서 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 - 이전 추가 v1272 → 현재 보완 v1274 → 다음 추가 v1276(잠정); main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 Draft #1296, 개발 이슈 #1295.
 - Migration194·개발 DB 확인에 따라 BIGINT 보관안을 정확 NUMERIC으로 정정. 거래시각 월 판정, 차변·대변 부호, 새 역거래, 계정 병합 소유권, 전체 쓰기 경로 seal·완결성 실패 폐쇄, 불변 세대·영수증·큰 수/동시성/늦은 커밋 테스트를 추가. P0/P1 10개 ENV1274-01 SEC1274-02 REL1274-03 WAL1274-04..10.

@@ -1,5 +1,32 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1276 — F675-126 회원 전용 검증형 계산기 시나리오 보관함 (기능 추가 / 초안 / 운영 보류)
+
+### 회차 및 실증 근거
+- 이전 Feature Improvement v1274 → 현재 Feature Addition v1276 → 다음 Feature Improvement v1278(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재확인, AGENTS.md·README.md·영문 PROJECT_PLAN 정본/국문 대조·실제 소스·열린 PR·QA v1272 검토. 선행 Draft #1304 미병합, 개발 인계 [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309). 문서만 변경하며 런타임·DB·WLD·원장·Test·운영은 불변.
+- **실제 확인된 결함:** frontend/src/components/calculator-save-action.tsx는 wdmv_saved_scenarios를 브라우저 localStorage에 최대 30건 저장하고, 브라우저 쿠키/저장소로 로그인을 추정하며, 오류에도 저장 성공을 표시하고 POST /api/portfolio/watchlist를 결과 확인 없이 호출한다. main에 대응 Next 라우트가 없다. 영구 동기화·알림·가입 10,000 WLD 보상 약속은 서버 영수증이 없는 미검증 문구이며 구현/승인된 기능으로 간주하지 않는다. calculator-retention-funnel.tsx와 watchlist-promotion-engine.tsx도 로컬 초안을 소비하므로 연계 교체가 필요하다.
+- **목적·대상:** 인증 회원이 버전이 있는 개인 계산기 입력 시나리오를 기기 간 저장·재열기·이름 변경·삭제한다. 비회원은 브라우저 임시 저장임을 명시한다. 복리·대출이자·은퇴 계산기부터 실제 입력 스키마 확인 후 적용한다. 주식 관심종목·WLD·원장·보상은 변경하지 않는다. QA 계산기 링크 #1306, 개발 C 주식 관심종목 #1308, A/B·Gemini와 작업 영역 분리.
+
+### 회원 흐름·화면·상태
+- 기존 /tools 계산기와 CalculatorSaveAction에서 진입, 개인 목록 /account/calculator-scenarios, 상세 /account/calculator-scenarios/[scenarioId]. CTA: '내 계정에 저장', '저장한 시나리오', '다시 계산', '이름 변경', '삭제', '로컬 초안 가져오기'.
+- 상태 LOCAL_ONLY, AUTH_REQUIRED, SAVING, SYNCED_VERIFIED, CONFLICT, STALE_CALCULATOR_VERSION, VALIDATION_FAILED, OFFLINE_UNCONFIRMED, DELETED, UNAVAILABLE. 서버 영수증의 소유자·ID·버전·정규 입력 지문이 일치할 때만 SYNCED_VERIFIED. 통신 불명확 시 UNCONFIRMED 및 안전한 재시도, 낙관적 성공 금지. 미검증 보상/알림 약속 금지.
+- 로컬 초안은 건별 미리보기와 명시적 동의 후 가져온다. localStorage는 불신 입력이며 소유권·서버 저장 증거가 아니다. 손상/과대 JSON, 미지원 계산기·스키마, 범위 밖 단위/숫자, 스크립트 주입, 신원정보, 중복 키 거부. 로그인 시 자동 업로드 금지. 미지원 계산기는 '로컬 전용'으로 명시한다.
+
+### API·DB·트랜잭션·보안
+- NestJS 본인 API: GET /api/v1/account/calculator-scenarios?cursor&limit (1..50), GET /api/v1/account/calculator-scenarios/:id, POST /api/v1/account/calculator-scenarios, PATCH /api/v1/account/calculator-scenarios/:id, DELETE /api/v1/account/calculator-scenarios/:id. 본문 calculatorType 열거형, schemaVersion 양의 정수, 제목 1..80자, 허용 입력, idempotencyKey UUID; 수정/삭제 expectedRevision 필수. 영수증 id·소유 버전·정규 입력 지문·receiptId·savedAt·state. Android App API 동등성, actor는 서버 세션에서만 도출하고 쓰기 Consent/CSRF Guard 필수.
+- 오류 401 미인증, 403 동의/CSRF/권한, 404 타인/미존재, 409 버전/키-본문 충돌, 413 8KiB 초과, 422 잘못된/구버전 스키마, 429 한도, 503 DB 장애. 회원·세션·필터·버전·만료에 묶인 서명 키셋 커서와 (updated_at DESC,id DESC) 정렬. 실제 확인되지 않은 개수 표시 금지.
+- 번호 충돌 없는 추가형 Migration 제안: calculator_scenarios(id UUID PK, user_id UUID FK, calculator_type 허용 CHECK, schema_version 양의 int, title varchar(80), inputs jsonb 검증/8KiB 제한, revision 양의 bigint, input_digest bytea, created_at, updated_at, deleted_at); 인덱스 (user_id,deleted_at,updated_at DESC,id DESC), (user_id,id). calculator_scenario_receipts(id UUID PK, user_id FK, scenario_id FK, request_key UUID, request_fingerprint bytea, operation enum, revision bigint, canonical_digest bytea, created_at, UNIQUE(user_id,request_key)). 불변 영수증, 원본 민감 입력 복제 금지. 회원 활성 최대 100건, 회당 가져오기 최대 30건.
+- SECURITY DEFINER 본인 검증 함수, 앱 역할 직접 테이블 DML 및 PUBLIC EXECUTE 철회. 회원 한도 행→시나리오 행 순서 잠금, expectedRevision CAS, 요청 키+본문 지문 확인. 같은 키·같은 본문은 최초 영수증 반환, 다른 본문은 409. 변경과 영수증 원자적 커밋, 실패 시 성공 영수증 없음. 계정 병합/soft-delete는 별도 사전 검증 및 개인정보 삭제 절차 적용.
+- 입력 숫자 범위·단위·정밀도·수식 버전 허용 목록. 계좌번호·주소·식별번호·비밀번호·급여명세서·자유형 PII 저장 금지. 재무 입력도 개인정보이므로 승인된 암호화·보존·삭제 정책, 요청 본문 로그/분석 금지. 재열기 시 현재 계산 엔진으로 재계산하고 수식 버전·가정일·추정치 표시. 스키마 불일치 시 STALE_CALCULATOR_VERSION으로 표시하며 자동 강제 변환/현재 금융 견적 주장 금지.
+
+### 관리자·SEO·접근성·KPI·배포
+- 관리자 비식별 집계(저장 실패·한도·버전 오류·삭제 지연)만, k<20 집단 숨김; 개인 입력 열람·로그·문의 복제 금지. 공개 /tools canonical/색인 유지, 개인 목록·상세는 인증·noindex·no-store·사이트맵 제외·OpenGraph 유출 금지. 320px 반응형, 44px 이상 터치, WCAG 2.2 AA, 명확한 포커스/단위, aria-live 영수증, 키보드 가져오기/충돌 해결, 동작 감소, 5개 언어.
+- 악용 방지: 회원별 분당 쓰기 12회, 회당 가져오기 30건, 활성 100건, 8KiB, CSRF/BOLA/BFLA, XSS 안전 제목, 재사용 요청 지문. 비회원 로컬 저장 서버 추적 금지. KPI 영수증 확인 저장률, 기기 간 재열기 성공률, 7일 재방문, 409/422/503, 가져오기 거부율, 삭제 SLA, 접근성 회귀. 로컬 클릭을 서버 저장으로 계산 금지.
+- **P0** ENV1276-01 루트 용량·DB 격리·백업; SEC1276-02 최소권한·BOLA; REL1276-03 CI/감사/Migration/정확 SHA Test/복원; CAL1276-04 허위 브라우저 동기화·저장·보상 문구 정정. **P1** CAL1276-05 버전형 스키마/DB/영수증; CAL1276-06 원자적 CAS/멱등성/한도; CAL1276-07 NestJS·Android API; CAL1276-08 Next.js 개인 보관함·선택형 가져오기; CAL1276-09 개인정보·관리자·SEO·접근성·KPI; CAL1276-10 실DB 회귀·배포·롤백.
+- 수용: 동일 요청 100건 동시 처리→영수증 1건, 타 회원 조회 100건→누출 0, 합성 10,001건→커서 누락/중복 0; 한도 경합·악성 로컬 초안·재사용 키·버전 충돌·병합/탈퇴·5개 언어·320px·키보드/스크린리더. WLD/원장/주식 관심종목/알림 쓰기 0. 기본 기능 OFF, 전진 추가형 DB, 호환 이중 읽기, 승인 게이트 후 <1%→5%→25%→100% 단계 배포. 롤백은 UI/쓰기 비활성화, 영수증/데이터 삭제·되감기 금지. QA v1272 FAILED/HOLD: 공식 CI 의존성 감사 실패, Migration266/280, DB 권한, 보안 감사, 정확 SHA Test 금융 E2E·격리 복원 미검증, 18:12 KST 루트 97%(약 3.1GiB). 운영 RELEASE HOLD.
+- **외부 독립 근거 10,000건 게이트:** 정규 URL·독립 발행·중복 제거·실제 검토·근거 분류 후 승인된 수만 인정. 신규 승인 0건, 누적 승인 미확인, BLOCKED/IN PROGRESS. 후보 표준은 승인 수량에 포함하지 않는다. 신규 분산기획 파일 생성 금지.
+
+
 ## v2026.10.25.1274 — F675-125 월간 WLD 명세서 원천·정밀도·마감 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
 
 ### 회차·근거·실제 확인된 설계 오류

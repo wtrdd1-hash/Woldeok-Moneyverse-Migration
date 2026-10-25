@@ -1,5 +1,13 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1276 — F675-126 Verified Calculator Scenario Vault (FEATURE ADDITION / HOLD)
+- Previous Improvement v1274 → Current Addition v1276 → Next Improvement v1278. Main 1c5b84a1 verified start/mid, Draft #1304 unmerged; engineering [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
+- Actual CalculatorSaveAction localStorage-only drafts and nonexistent /api/portfolio/watchlist route do not establish permanent server saves; optimistic saved and 10,000 WLD/alerts promises are unsupported. New private scenario vault must require real owner/revision/digest receipt; safe opt-in local import, no stock/watchlist/WLD/ledger changes.
+- Screens /tools and /account/calculator-scenarios, owner NestJS CRUD + Android, versioned allowlist/100 cap/8KiB, SECDEF PostgreSQL/CAS/immutable receipts, 401/403/404/409/422/429/503, privacy/noindex, admin k>=20, WCAG AA, verified-save KPI and rollback in integrated EN/KO master.
+- P0 ENV1276-01 SEC1276-02 REL1276-03 CAL1276-04; P1 CAL1276-05 CAL1276-06 CAL1276-07 CAL1276-08 CAL1276-09 CAL1276-10. QA v1272 FAILED/HOLD, official CI failed, root 97%, migration266/280, DB ACL, exact-SHA Test/restore BLOCKED. Independent new approved 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only.
+- **Backlog IDs:** ENV1276-01 SEC1276-02 REL1276-03 CAL1276-04 CAL1276-05 CAL1276-06 CAL1276-07 CAL1276-08 CAL1276-09 CAL1276-10
+
+
 ## v2026.10.25.1274 — F675-125 Monthly Statement Precision and Closure Integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - **Cycle:** Previous Addition v1272 → Current Improvement v1274 → Next Addition v1276 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked start/mid; AGENTS, README, EN canonical/KO comparison. Stacked on unmerged Draft #1296; engineering issue #1295. Planning only, no runtime/DB/Test/Production changes.
 - **Verified correction:** Migration 194 and read-only development DB metadata confirm ledger_postings.amount and account_balances.available_amount are unbounded NUMERIC, **not BIGINT**. Supersede v1272 draft statement BIGINT columns with exact NUMERIC integer CHECK, decimal-string API/CSV, no JS Number coercion; repeated postings grouped by transaction/account; debit-credit sign matches wallet repository.

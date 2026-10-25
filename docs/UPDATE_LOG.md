@@ -1,5 +1,11 @@
 ## v2026.10.25.1268 — F675-124 Member Board Author Mutes and Private Feed (FEATURE ADDITION / DRAFT / HOLD)
 
+## 2026-10-25 v1276 — F675-126 verified calculator scenario vault (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- Previous Improvement v1274 → Current Addition v1276 → Next Improvement v1278; main 1c5b84a1 start/mid, predecessor Draft #1304, engineering [#1309](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1309).
+- Verified main CalculatorSaveAction uses localStorage only, browser-auth heuristic, optimistic saved state and nonexistent /api/portfolio/watchlist; permanent sync/alerts/10,000 WLD claims are not backed by receipts. Designed private owner-only versioned scenario vault, opt-in untrusted-local import, NestJS+Android CRUD, SECDEF DB/CAS/idempotent receipts, admin privacy, SEO, WCAG, KPI, rollback. Backlog ENV1276-01 SEC1276-02 REL1276-03 CAL1276-04 CAL1276-05 CAL1276-06 CAL1276-07 CAL1276-08 CAL1276-09 CAL1276-10.
+- QA v1272 FAILED/HOLD (official CI audit failure, migration266/280, app DB privileges, exact-SHA Test and restore unverified), root 97% at start. External approved 0 newly, cumulative UNKNOWN vs 10,000 BLOCKED. Documentation only, no runtime/DB/WLD/ledger/Test/Production deployment.
+
+
 ## 2026-10-25 v1274 — F675-125 monthly statement integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - Previous Addition v1272 → Current Improvement v1274 → Next Addition v1276 provisional; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid; predecessor Draft #1296; issue #1295.
 - Corrected proposed archive BIGINT to exact NUMERIC after verifying migration194 and dev DB; added transaction-timestamp month membership, debit/credit sign, reversal-as-new-transaction, merge ownership, writer-coordinated source seal and fail-closed completeness, atomic generation/receipt, precision/concurrency/late-commit regressions. Ten P0/P1 IDs ENV1274-01 SEC1274-02 REL1274-03 WAL1274-04..10.
