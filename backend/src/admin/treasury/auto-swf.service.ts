@@ -1,5 +1,5 @@
 import type { Pool } from 'pg';
-import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
@@ -669,44 +669,13 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     }
   }
 
-  async updateConfig(params: Partial<SwfConfig>): Promise<SwfConfig> {
-    await queryRows(
-      this.pool,
-      `UPDATE public.treasury_swf_configs
-       SET is_enabled = COALESCE($1, is_enabled),
-           safe_reserve_wld = COALESCE($2, safe_reserve_wld),
-           max_single_investment_wld = COALESCE($3, max_single_investment_wld),
-           reinvestment_ratio_pct = COALESCE($4, reinvestment_ratio_pct),
-           max_investment_ratio_pct = COALESCE($5, max_investment_ratio_pct),
-           updated_at = clock_timestamp()
-       WHERE id = 'current'`,
-      [
-        params.is_enabled,
-        params.safe_reserve_wld,
-        params.max_single_investment_wld,
-        params.reinvestment_ratio_pct,
-        params.max_investment_ratio_pct,
-      ],
-    );
-
-    // 변경 감사 이벤트 등록
-    await queryRows(
-      this.pool,
-      `INSERT INTO public.treasury_swf_events (event_type, amount_wld, summary, metadata)
-       VALUES (
-          'GOVERNANCE_CONFIG_UPDATED', 0,
-          '관리자가 국고 자금 거버넌스 정책(투자비율 ' || COALESCE($1, 15) || '%, 투자상한 ' || COALESCE($2, 20) || '%, 안전보존금 ' || COALESCE($3, 25000000) || ' WLD)을 변경하였습니다.',
-          $4
-       )`,
-      [
-        params.reinvestment_ratio_pct,
-        params.max_investment_ratio_pct,
-        params.safe_reserve_wld,
-        JSON.stringify(params),
-      ],
-    ).catch(() => {});
-
-    return this.getConfig();
+  async updateConfig(_params: Partial<SwfConfig>): Promise<SwfConfig> {
+    // An internal caller must not bypass the HTTP hold and change a financial
+    // policy without an atomic, DB-owned governance command and audit receipt.
+    throw new ServiceUnavailableException({
+      code: 'SWF_GOVERNANCE_WRITE_UNAVAILABLE',
+      message: 'SWF governance writes are unavailable until audited settlement is verified.',
+    });
   }
 
   /**
