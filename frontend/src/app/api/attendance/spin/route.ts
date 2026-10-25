@@ -1,31 +1,21 @@
 import { NextResponse } from 'next/server';
-import { api } from '@/lib/api';
 import { viewerOrUnknown } from '@/lib/viewer';
-import { randomUUID } from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
+const PRIVATE_HEADERS = { 'cache-control': 'private, no-store' };
+
 export async function POST(): Promise<NextResponse> {
   const viewer = await viewerOrUnknown();
-
-  if (!viewer || !viewer.signedIn) {
-    return NextResponse.json({ error: '로그인이 필요한 서비스입니다.' }, { status: 401 });
+  if (!viewer?.signedIn) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401, headers: PRIVATE_HEADERS });
   }
 
-  try {
-    const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
-    const idempotencyKey = randomUUID();
-    const result = await api('/api/v1/engagement/dopamine/attendance/spin', {
-      method: 'POST',
-      csrfToken,
-      body: { idempotencyKey },
-    });
-
-    return NextResponse.json(result);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || '출석 룰렛 참여에 실패했습니다.' },
-      { status: error?.status || 400 },
-    );
-  }
+  // The database-backed legacy handler writes attendance and ledger in separate
+  // transactions. No WLD claim may be forwarded until an atomic receipt exists.
+  return NextResponse.json({
+    ok: false,
+    code: 'ATTENDANCE_SETTLEMENT_UNVERIFIED',
+    error: 'Attendance reward settlement is temporarily unavailable',
+  }, { status: 503, headers: PRIVATE_HEADERS });
 }

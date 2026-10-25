@@ -66,6 +66,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  if (path === '/api/v1/engagement/dopamine/attendance/spin' && request.method === 'POST') {
+    // Keep Android on the same fail-closed settlement policy as web, even if
+    // a previous backend deployment still accepts non-atomic attendance writes.
+    const response = gatewayProblem(503, 'Service Unavailable', 'ATTENDANCE_SETTLEMENT_UNVERIFIED', 'attendance ledger settlement is on hold');
+    response.headers.set('cache-control', 'private, no-store');
+    return response;
+  }
+
   const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
   if (minimumVersionRaw) {
     const minimumVersion = parseAppVersion(minimumVersionRaw);
@@ -145,6 +153,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
+  if (path === '/api/v1/engagement/dopamine/attendance/status') headers.set('cache-control', 'private, no-store');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

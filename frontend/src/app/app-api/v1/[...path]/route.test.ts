@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from './route';
+import { GET, POST } from './route';
 import { APP_API_CONTRACT_VERSION } from '@/lib/app-gateway';
 
 function request(path: string, headers: Record<string, string> = {}) {
@@ -170,4 +170,33 @@ describe('app API route compatibility', () => {
     expect(JSON.stringify(body)).not.toContain('attacker.example');
   });
 
+});
+
+
+describe('Android attendance integrity parity', () => {
+  it('returns a stable 503 and never forwards unsafe WLD spin claims', async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await POST(new NextRequest('https://easy-scraping.com/app-api/v1/engagement/dopamine/attendance/spin', {
+      method: 'POST',
+      headers: { host: 'easy-scraping.com', 'x-forwarded-proto': 'https', 'x-csrf-token': 'test' },
+      body: '{}',
+    }), context('engagement', 'dopamine', 'attendance', 'spin'));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
+    expect(await response.json()).toMatchObject({ code: 'ATTENDANCE_SETTLEMENT_UNVERIFIED' });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('forces private no-store for the owner attendance status even when upstream omits it', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ checkedInToday: true, streakDays: 2 }), {
+      status: 200,
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300' },
+    })));
+    const response = await GET(request('/app-api/v1/engagement/dopamine/attendance/status'), context('engagement', 'dopamine', 'attendance', 'status'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
 });

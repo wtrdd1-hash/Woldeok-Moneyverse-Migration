@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Inject,
   InternalServerErrorException,
+  ServiceUnavailableException,
   Post,
   Req,
   UseGuards,
@@ -261,53 +262,32 @@ export class DopamineController {
   }
 
   @Get('attendance/status')
-  @ApiOperation({ summary: 'Get daily attendance streak and lucky roulette status' })
+  @ApiOperation({ summary: 'Read authenticated attendance streak from database; reward settlement remains on hold' })
   async getAttendanceStatus(@Req() request: RequestWithSession) {
     const userId = requireUserId(request);
-    if (this.repository) {
-      return await this.repository.getAttendanceStatus(userId);
+    if (!this.repository) {
+      throw new ServiceUnavailableException({
+        code: 'ATTENDANCE_STATUS_UNAVAILABLE',
+        message: 'Verified attendance status is temporarily unavailable',
+      });
     }
-    return {
-      checkedInToday: false,
-      streakDays: 1,
-      lastAttendedDate: null,
-      nextRewardPreview: 50,
-      isJackpotEligible: false,
-    };
+    return this.repository.getAttendanceStatus(userId);
   }
 
   @Post('attendance/spin')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim daily attendance reward and spin the lucky dopamine roulette' })
+  @ApiOperation({ summary: 'Attendance reward settlement suspended pending atomic ledger verification' })
   async claimAttendanceSpin(
     @Req() request: RequestWithSession,
-    @Body() body: { idempotencyKey?: string },
+    @Body() _body: { idempotencyKey?: string },
   ) {
-    const userId = requireUserId(request);
-    const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
-      ? body.idempotencyKey
-      : randomUUID();
-
-    if (this.repository) {
-      try {
-        return await this.repository.claimAttendanceSpin(userId, key);
-      } catch (error: unknown) {
-        if (error instanceof DopamineInputError) {
-          throw new BadRequestException(error.message);
-        }
-        const msg = error instanceof Error ? error.message : String(error);
-        throw new InternalServerErrorException(msg);
-      }
-    }
-
-    return {
-      success: true,
-      rewardAmount: 50,
-      streakDays: 1,
-      isJackpot: false,
-      newBalance: '1000',
-      claimedAt: new Date().toISOString(),
-    };
+    requireUserId(request);
+    // The legacy path wrote attendance before posting WLD, without one atomic
+    // transaction; it must not be called until DB-owned settlement is verified.
+    throw new ServiceUnavailableException({
+      code: 'ATTENDANCE_SETTLEMENT_UNVERIFIED',
+      message: 'Attendance reward settlement is unavailable until ledger verification',
+    });
   }
 
   @Get('daily-quest/status')

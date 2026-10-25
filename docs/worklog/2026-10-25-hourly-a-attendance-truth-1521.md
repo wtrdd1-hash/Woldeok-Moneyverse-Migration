@@ -20,3 +20,11 @@
 ### RED checkpoint — 15:24 KST
 - Backend new tests: 3 failed / 1 passed; Frontend new tests: 7 failed / 1 passed, demonstrating fabricated status/claim and UI assertions.
 - Midpoint main re-fetched; plan EN/KO rechecked. Implementation follows in same isolated worktree.
+
+### Implementation checkpoint — 15:28 KST
+- Backend attendance reward POST and web/Android gateways now return 503 before any unsafe legacy settlement; absent DB repository never produces a fake success.
+- `/tools` shows only verified read-only attendance status and explicitly states WLD payout is suspended; fabricated 1M–100M WLD prizes and client-generated streak removed.
+- Backend status now derives from actual owner `MINT_TO_USER` ledger postings and matching attendance outbox events, not the absent `daily_attendance_logs` table.
+- RED/GREEN: backend 7 focused PASS; frontend + Android 20 focused PASS; Android RED previously 2 failed, then both green.
+- Isolated PostgreSQL `wdmv_v761_test_acl` (281 applied migrations): `moneyverse_app` SELECT ledger/postings/outbox/accounts permitted; ledger INSERT denied; exact status SQL executed under app role with 0 rows and `ROLLBACK`; no production-linked 5433 writes.
+- Midpoint main SHA unchanged; release gate remains HOLD pending full tests, security and official Test exact SHA.

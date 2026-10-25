@@ -184,52 +184,51 @@ export class DopamineRepository {
     };
   }
 
-  /**
-   * 출석 체크 및 스트릭 상태 조회
-   */
+  /** Verified attendance uses committed owner ledger postings, never an unverified check-in row. */
   async getAttendanceStatus(userId: string) {
     assertUuid(userId, 'userId');
-
-    // 1. 최근 출석 기록 조회
-    const historyRows = await queryOne<{
-      checked_in_today: boolean;
-      streak_days: number;
-      last_date: string | null;
-    }>(
+    const records = await queryRows<{ attended_date: string }>(
       this.pool,
-      `WITH latest AS (
-         SELECT attended_date, streak_count
-         FROM public.daily_attendance_logs
-         WHERE user_id = $1::uuid
-         ORDER BY attended_date DESC
-         LIMIT 1
-       )
-       SELECT
-         EXISTS(SELECT 1 FROM latest WHERE attended_date = CURRENT_DATE) AS checked_in_today,
-         COALESCE(
-           (SELECT CASE 
-             WHEN attended_date = CURRENT_DATE THEN streak_count
-             WHEN attended_date = CURRENT_DATE - INTERVAL '1 day' THEN streak_count
-             ELSE 0
-           END FROM latest),
-           0
-         )::integer AS streak_days,
-         (SELECT attended_date::text FROM latest) AS last_date`,
+      `SELECT DISTINCT (transaction.created_at AT TIME ZONE 'Asia/Seoul')::date::text AS attended_date
+       FROM public.ledger_transactions AS transaction
+       JOIN public.outbox_events AS event
+         ON event.aggregate_id = transaction.id
+        AND event.type = 'game.dopamine.attendance_spin'
+       JOIN public.ledger_postings AS posting
+         ON posting.transaction_id = transaction.id
+        AND posting.direction = 'debit'::public.posting_direction
+        AND posting.amount > 0
+       JOIN public.accounts AS account
+         ON account.id = posting.account_id
+        AND account.owner_user_id = $1::uuid
+        AND account.account_type = 'USER_CASH'::public.account_type
+       WHERE transaction.actor_user_id = $1::uuid
+         AND transaction.type = 'MINT_TO_USER'
+       ORDER BY attended_date DESC
+       LIMIT 8`,
       [userId],
     );
 
-    const checkedInToday = historyRows?.checked_in_today ?? false;
-    const currentStreak = historyRows?.streak_days ?? 0;
-    const nextStreak = checkedInToday ? currentStreak : currentStreak + 1;
-    const isJackpotEligible = nextStreak >= 7;
-    const nextRewardPreview = isJackpotEligible ? 500 : Math.min(100, 10 * Math.max(1, nextStreak));
-
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).formatToParts(new Date());
+    const part = (type: string) => parts.find((item) => item.type === type)?.value ?? '';
+    const today = `${part('year')}-${part('month')}-${part('day')}`;
+    const dates = new Set(records.map((record) => record.attended_date).filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date) && date <= today));
+    const checkedInToday = dates.has(today);
+    let cursor = new Date(`${today}T00:00:00Z`);
+    if (!checkedInToday) cursor = new Date(cursor.getTime() - 86400000);
+    let streakDays = 0;
+    while (streakDays < 7 && dates.has(cursor.toISOString().slice(0, 10))) {
+      streakDays += 1;
+      cursor = new Date(cursor.getTime() - 86400000);
+    }
     return {
       checkedInToday,
-      streakDays: currentStreak,
-      lastAttendedDate: historyRows?.last_date ?? null,
-      nextRewardPreview,
-      isJackpotEligible,
+      streakDays,
+      lastAttendedDate: [...dates].sort().at(-1) ?? null,
+      nextRewardPreview: 0,
+      isJackpotEligible: false,
     };
   }
 
