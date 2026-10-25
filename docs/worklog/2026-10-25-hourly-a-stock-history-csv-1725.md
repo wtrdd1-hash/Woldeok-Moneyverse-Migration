@@ -10,10 +10,16 @@
 ## In progress
 - [ ] TDD RED tests for backend bound/auth, CSV exact precision and injection, private app-api.
 - [ ] Implement backend query, web CSV export and app-api privacy headers.
-- [ ] Run focused, full and real-PG/CI gates; capture exact SHA and release blockers.
+- [x] Run focused, full and real-PG/CI gates; capture exact SHA and release blockers (overall FAIL/HOLD).
 
 ## Finished
-- Pending.
+- Final code SHA `2c4d9709c1ff59ef42cd6fd8c4a269a97265f10f`; exact SHA `pnpm typecheck` PASS, `pnpm lint` PASS (0 errors/1128 warnings), `pnpm build` PASS, API contract PASS (179), focused backend 10 PASS + frontend/Android 17 PASS.
+- Full test FAIL: backend 1323 PASS/398 skipped, frontend 1404 PASS/6 FAIL, database 15 PASS/3 skipped, contract 38 PASS. Security FAIL: prod 2 High, full 2 Critical/10 High, bot 1 Critical/5 High.
+- Isolated PostgreSQL `wdmv_v761_test_acl` as `moneyverse_app` READ ONLY: `stock_my_trades` executable for unknown actor (0 rows), direct stock SELECT false, ledger INSERT false; ROLLBACK. No fixture and no authenticated real-trade E2E.
+- Test `/api/version` SHA `6f697e74b7bf0cd1e4521d36534cfd9c140f8010` differs from candidate; exact-SHA Test E2E BLOCKED. CI runtime pending/failed; no all-green evidence.
+- Final branch audit 170 remote branches / 166 open PRs; 169 non-main unique unmerged tips, 0 duplicates/0 deleted. Conflict PRs #1107/#1110/#1143 preserved; other worker branches untouched. Main SHA `1c5b84a1c45baafcca83f375a6f99698121e9bb5` rechecked.
+- Production RELEASE HOLD: no main merge, Test/Production promotion, GitOps change, DB writes, migrations, restarts or branch deletion. Rollback: keep Draft PR #1305 unmerged; if later merged, revert UI/route/query only. See QA and EN/KO release reports.
+
 
 ### Mid-task checkpoint
 - RED backend 10/10 expected failures (missing bounded history), frontend import failures for missing serializer/route; recorded in `/srv/moneyverse-data/a1725-{backend,frontend}-red.log`.
@@ -21,4 +27,4 @@
 - Main and living English master re-fetched; no new main SHA. No migration or WLD writes.
 - [x] TDD RED tests for backend bound/auth, CSV exact precision and injection, private app-api.
 - [x] Implement backend query, web CSV export and app-api privacy headers.
-- [ ] Run focused, full and real-PG/CI gates; capture exact SHA and release blockers.
+- [x] Run focused, full and real-PG/CI gates; capture exact SHA and release blockers (overall FAIL/HOLD).
