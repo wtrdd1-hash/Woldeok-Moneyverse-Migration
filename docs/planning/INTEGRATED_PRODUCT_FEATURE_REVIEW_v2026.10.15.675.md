@@ -1,5 +1,12 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v2026.10.25.1270 — F675-124 Board Mute Integrity Product Review (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1268 / Current Improvement v1270 / Next Addition v1272 provisional; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 verified start/mid; predecessor Draft #1281 unmerged, engineering issue #1280. No implementation.
+- Product correction: never reuse top-50 public board or post-LIMIT stock filter for owner feed. SQL author and stock filters before LIMIT with signed owner/session/generation/filter cursor. Immutable source author identity, fail-closed account merge, explicit soft-delete/retention, durable HMAC original receipts, 200 cap, 12 writes/min and public SEO/DM/notifications unchanged. Admin k>=20, Android body CAS, WCAG AA. Full UX/API/DB/transaction/KPI/security/rollback in integrated master.
+- P0 ENV1270-01 SEC1270-02 REL1270-03 BOARD1270-04; P1 BOARD1270-05 BOARD1270-06 BOARD1270-07 BOARD1270-08 BOARD1270-09 BOARD1270-10. QA v1269 FAILED/HOLD: 6 frontend failures, Critical2/High10, 235/241 app DML, 3 PUBLIC bank functions, migration266/280, exact-SHA Test and restore unverified; root 92% at start. Independent evidence newly approved 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only.
+- Full backlog IDs: ENV1270-01 SEC1270-02 REL1270-03 BOARD1270-04 BOARD1270-05 BOARD1270-06 BOARD1270-07 BOARD1270-08 BOARD1270-09 BOARD1270-10
+
+
 ## v2026.10.25.1268 — F675-124 Owner-only Board Author Mutes (FEATURE ADDITION / DRAFT / HOLD)
 - Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD; engineering issue #1280 OPEN; main unmerged, runtime/Test/Production unchanged.
 - Previous Improvement v1266 → Current Addition v1268 → Next Improvement v1270 provisional. Main eb27f5590e80bb71462e3888d052106a068e661a checked start/mid, canonical EN/KO plan reviewed. Development issue [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280); stacked after unmerged #1274, docs-only.

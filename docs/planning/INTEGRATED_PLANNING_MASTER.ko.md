@@ -1,5 +1,36 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1270 — F675-124 게시판 작성자 숨김·계정 병합·커서 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+
+### 기준, 회차 및 실제 소스
+- 이전 **Feature Addition v1268** → 현재 **Feature Improvement v1270** → 다음 **Feature Addition v1272**(잠정). 원격 main **1c5b84a1c45baafcca83f375a6f99698121e9bb5** 시작·중간 확인, AGENTS.md/README.md/영문 PROJECT_PLAN 정본 및 국문 대조 완료. 선행 Draft PR #1281은 미병합 OPEN. 이번 작업은 기획 문서만 변경한다. 최신 완료 QA v1269 FAILED/HOLD.
+- 실제 근거: Migration 175의 공개 게시판 목록은 작성자 UUID 없이 최신 50개를 먼저 반환한다. Migration 259의 게시글 상세에는 author_user_id가 있다. Migration 181의 종목 연동 공개 목록은 먼저 50개를 선택하고 이후 stock-community.service에서 종목을 필터링한다. 따라서 개인 피드가 기존 공개 목록을 재사용하면 종목 필터·작성자 숨김에서 누락/빈 페이지가 발생할 수 있다. Migration 163의 계정 병합은 작성 글·댓글을 검사하지만 아직 존재하지 않는 숨김 소유권/대상/영수증을 검사하지 않는다. Migration 010의 account_soft_delete는 회원 행을 삭제하지 않고 상태 변경·세션 취소만 수행한다. 이는 **설계상 위험**이지 확인된 운영 사고가 아니다.
+- 대안 비교: 공개 최신 50건을 클라이언트에서 제거하는 방식은 기각(편향·캐시 유출), 기존 종목 공개 함수 재사용도 기각(종목 필터가 LIMIT 뒤에 있음), 병합 시 작성자 UUID나 영수증을 자동 이전하는 방식도 기각(개인정보·충돌). 채택안은 회원 본인 전용 SECURITY DEFINER 조회에서 작성자·종목 조건을 LIMIT 전에 적용하고, 원본 작성자 UUID와 요청 영수증을 불변으로 유지하는 방식이다. 공개 게시판, 검색 색인, 운영 제재, 메시지, 알림, WLD·원장은 변경하지 않는다.
+
+### 대상·권한·진입점·화면·상태
+- 최신 동의가 있는 활성 로그인 회원만 개인 피드/숨김을 이용한다. 비회원은 공개 /board만 읽는다. 공개 /board/[postId]에서 현재 공개 상태의 타인 글에만 **내 피드에서 이 작성자 숨기기** 버튼을 표시하고 postId만 전송한다. 자기 글, 탈퇴·식별 불가 작성자, 로그인 실패 상황에서는 버튼을 표시하지 않는다. 안내문은 '개인 피드만 변경되며 공개 글·댓글·메시지·알림에는 영향 없음'으로 명확히 한다.
+- /board/personal은 전체/종목 필터, 글 제목·작성자 공개 표시명·작성일·댓글 수·종목 배지와 글 보기/숨김 관리/공개 게시판/새로고침 CTA를 제공한다. /account/board-muted-authors는 본인 숨김 목록을 표시하며, 원글 삭제·작성자 탈퇴 후에도 숨김 해제가 가능하도록 불가용 작성자 이름을 익명화한다. 이것은 신고·차단·운영 제재가 아니다.
+- 상태: SIGNED_OUT, LOADING, READY, EMPTY, MUTING, MUTED_CONFIRMED, UNMUTING, UNMUTED_CONFIRMED, AUTHOR_UNAVAILABLE, CONFLICT_REFRESH, CURSOR_EXPIRED, UNKNOWN_COMMIT, RATE_LIMITED, FEATURE_UNAVAILABLE, ERROR. 확정 영수증 없이 성공 토스트 금지, 서버 오류를 EMPTY로 위장 금지, 계정 전환·로그아웃 때 이전 응답·커서·캐시 폐기. 키보드·스크린리더 상태 알림·포커스 복귀·320px/200% 확대·WCAG 2.2 AA를 준수한다.
+
+### 제안 API·Android·비공개 처리 (미구현)
+- GET /api/v1/board/personal?limit=20&stock=SYMBOL&cursor=TOKEN: 1~50건, 종목은 허용 ASCII 1~16자 대문자 정규화. 응답 {posts,nextCursor,muteGeneration,asOf,filter}. 종목·작성자 숨김은 **SQL에서 LIMIT 이전**에 처리하고 공개 top-50/종목 함수를 재사용하지 않는다.
+- GET /api/v1/board/mutes?limit=20&cursor=TOKEN, GET /api/v1/board/mutes/state?postId=UUID, POST /api/v1/board/mutes {postId,requestId,expectedVersion}, DELETE /api/v1/board/mutes/:muteId {requestId,expectedVersion}, GET /api/v1/board/mutes/receipts/:requestId. POST 작성자는 서버가 공개 원글에서 추출하고 임의 author UUID 입력은 받지 않는다. DELETE는 원글 삭제 후에도 불투명 muteId로 본인 확인 후 가능하다. 200 JSON 원본 영수증 {requestId,muteId,version,muteGeneration,muted,replayed} 제공; 동일 키·다른 본문은 409, 타인/미존재는 동일 404, 인증·동의·충돌·형식·과다 요청·서비스 장애는 401/403/409/422/429/503을 구분한다.
+- SessionGuard·AuthenticatedGuard·ConsentGuard, 웹 변경 CSRF/동일 출처, 회원별 12회/분 제한. Android app-api는 board 그룹과 DELETE JSON 본문을 전달하지만 If-Match/Idempotency-Key 헤더는 전달하지 않으므로 본문 expectedVersion/requestId를 검증한다. User-Agent는 인증 수단이 아니다. 개인 응답은 private,no-store 및 noindex/nofollow; 공개 HTML·사이트맵·메타데이터·CDN·로그에 신규 숨김 관계 또는 추가 작성자 식별자 노출 금지(기존 공개 게시글 상세 authorUserId 동작은 변경하지 않음).
+
+### 제안 DB·잠금·계정 생명주기
+- Migration 266 원본 체크섬과 다중 280 번호 충돌 해결 후 충돌 없는 순방향 마이그레이션을 별도 개발 예약에서 수행한다. member_board_author_mutes(mute_id PK,owner_user_id,author_user_id,muted,version>=1,created_at,updated_at, UNIQUE(owner_user_id,author_user_id),CHECK(owner<>author)); member_board_mute_states(owner_user_id PK,generation>=0); member_board_mute_receipts(owner_user_id,request_id,operation,target_mute_id,request_hmac,original_response_json,created_at, UNIQUE(owner_user_id,request_id)). 묘비·버전·원본 영수증 보존, 영수증에 글 본문·표시명·IP·토큰 저장 금지. 활성 숨김(owner,author) 부분 인덱스, 본인 목록(owner,updated_at DESC,mute_id DESC), 공개 글(created_at DESC,id DESC) 부분 인덱스, 종목(stock_id,post_id) 인덱스는 EXPLAIN으로 검증한다. 앱 테이블 직접 DML/SELECT 또는 PUBLIC 함수 EXECUTE를 부여하지 않고 고정 search_path의 SECURITY DEFINER 함수만 허용한다.
+- 변경 트랜잭션: 입력 검증 → (회원,requestId) 단위 트랜잭션 advisory lock → 원본 영수증 조회·HMAC 비교 순서(AGENTS.md/Migration045 준수)로 같은 요청의 중복 삽입을 먼저 차단한다. 탈퇴 회원은 원본 재시도도 거절한다. 신규 POST는 먼저 공개 글에서 작성자 UUID를 잠금 없는 임시 값으로 읽고, 회원·작성자 users 행을 UUID 오름차순 FOR UPDATE로 잠근 뒤 원글 FOR SHARE로 작성자·공개 상태·두 회원의 활성 상태를 다시 검증한다. 그다음 본인 상태 행 FOR UPDATE → 숨김 행 순서로 잠근다. DELETE도 요청 키 advisory lock과 영수증 조회 후 회원 행 → 상태 행 → 숨김 행 순서다. Migration163의 두 회원 UUID 순서 잠금과 일치시켜 교착을 방지하며, 브라우저 작성자 UUID는 신뢰하지 않는다. 본인 상태 행이 없으면 INSERT ... ON CONFLICT DO NOTHING으로 생성한 뒤 잠근다. 회원당 활성 200명 한도는 상태 행 잠금으로 직렬화한다. 신규 행 예상 버전 0, 기존 행 CAS expectedVersion, 변경 시만 generation 증가, 원본 HMAC 본문 결합 영수증 원자적 저장. 같은 요청 재시도는 원본 영수증만 반환, 내용 다른 재사용/오래된 버전은 409. 네트워크 불명확 상태는 영수증 조회 후 현재 상태 재조회한다.
+- 계정 병합: Migration 163은 두 회원을 UUID 순서대로 잠그지만 숨김 기록을 알지 못한다. 출시 전에 병합 대상 계정의 숨김 상태·묘비·영수증 또는 타 회원이 병합 대상자를 숨긴 참조가 있으면 **병합을 사전 거절**하는 명시적 정책을 추가한다. 사용자 잠금 순서를 병합·탈퇴와 통일하고 병합-숨김 100건 경합을 검증한다. 자동 이전·영수증 소유권 변경·조용한 삭제는 금지하며, 향후 이전 정책은 개인정보 승인 필요.
+- 탈퇴: Migration 010은 소프트 삭제이므로 FK CASCADE로 개인정보가 지워진다고 주장하지 않는다. 탈퇴 즉시 개인 조회·변경 차단, 세션 결합 커서 폐기, 탈퇴한 작성자 표시명 익명화, 보존기간·삭제·백업·개인정보 요청 절차를 명시한다. 작성자 UUID는 과거 글에서 불변이고, 탈퇴 작성자의 숨김 해제는 muteId로 계속 가능해야 한다.
+- 목록: 하나의 일관된 DB 스냅샷에서 회원 상태·muteGeneration·공개 글·종목 조건·활성 숨김 제외를 평가하고 (created_at,id) 키셋 및 LIMIT+1을 사용한다. 최초 페이지의 상한 튜플을 보존한다. HMAC 커서는 본인·세션·세대·정규화 종목·limit·상한·마지막 튜플·15분 만료·키 버전을 결합한다. 세대/세션/필터 변경과 만료는 409 재시작, 변조는 422. 조회 중 삭제·운영 제한으로 글이 사라질 수 있으며 **완전한 과거 스냅샷 보존을 약속하지 않는다**. OFFSET/수정 가능한 updated_at 정렬 금지.
+
+### 관리자·KPI·테스트·승격·근거 게이트
+- 관리자에는 20명 미만 셀을 숨기는 비식별 이용률·오류·커서 재시작률·p95 지연만 제공하고 개인 숨김 그래프를 노출하지 않는다. KPI 목표: 개인 피드 성공률 >=99.9%, 타인 정보 유출 0, 중복 재시도 추가 변경 0, 커서 일관성 오류 0, 합성 게시글 10,001건에서 p95 <300ms, 활성 200명 한도 위반 0, 핵심 접근성 오류 0. 승인된 분석만 사용한다.
+- **P0 4개:** ENV1270-01(용량·DB 분리·복원), SEC1270-02(앱 최소권한·PUBLIC 은행 함수), REL1270-03(전체 CI·보안·266/280·정확 SHA Test), BOARD1270-04(작성자 원천·병합·탈퇴 권한). **P1 6개:** BOARD1270-05(DB·묘비·HMAC 영수증), BOARD1270-06(원자적 등록/해제·CAS·한도), BOARD1270-07(종목/작성자 선필터·서명 키셋), BOARD1270-08(NestJS/Next.js/Android·세션), BOARD1270-09(개인정보·관리자·SEO·접근성·KPI), BOARD1270-10(격리 PG 100건 경합/타인 접근, 합성 10,001건·회귀·롤백).
+- 격리 PostgreSQL 앱 권한 부정 테스트, 실제 세션·동의·CSRF·Android, 동일/충돌 요청 각 100건, 200명 한도 동시 경쟁, 병합/탈퇴 경합 100건, 타인 접근 100건, 종목 선필터 합성 10,001건, 커서 위변조·만료·세대 변경, 공개 60초 캐시/SEO 무변경, 원장/WLD 미변경을 검증한다. 개발은 별도 브랜치·기능 기본 OFF, 순방향 스키마, 격리 백업 복원, 보안/CI/QA PASS, 공식 Test 정확 SHA 인증 E2E, 카나리·모니터링, 승인 GitOps 운영승격 및 OFF 롤백을 요구한다. P0 해결 전 병합·배포 금지.
+- QA v1269 FAILED/HOLD: 프론트 1,397 통과/6 실패, 전체 감사 Critical 2/High 10 및 운영 감사 High 2, 개발 앱 241개 중 235개 UPDATE+DELETE, PUBLIC 은행 함수 3개, Migration 266 체크섬·280 번호 충돌, 정확 SHA Test 금융 E2E 및 격리 복원 미검증. 시작 실측 루트 디스크 92% 사용(과거 100%에서 개선됐으나 원인 불명). 외부 독립 근거 목표 10,000건, **신규 승인 0건, 누적 중복 제거 승인 미확인, BLOCKED / IN PROGRESS**. OWASP/PostgreSQL/W3C는 설계 참고 발행기관이지 승인 10,000건이 아니다. 런타임·DB·WLD·원장·Test·운영 변경 없음.
+
+
 ## v2026.10.25.1268 — F675-124 회원별 게시판 작성자 숨김 및 개인 피드 (기능 추가 / 기획 초안 / 운영 보류)
 - Draft PR [#1281](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1281) OPEN/HOLD, 개발 이슈 #1280 OPEN, main 미병합·런타임/Test/운영 변경 없음.
 - **개발 인계:** [GitHub 이슈 #1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) OPEN/HOLD, 선행 기획 Draft #1274 미병합. 런타임 변경이 아니다.

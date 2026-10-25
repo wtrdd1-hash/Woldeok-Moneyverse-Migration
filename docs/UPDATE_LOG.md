@@ -1304,3 +1304,4 @@
 - Branch: .
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
+- 2026-10-25 v1270 planning improvement F675-124: source-verified board author mute stock pre-LIMIT filtering, merge/deletion identity integrity, HMAC receipts and signed cursor; 10 P0/P1 handoffs; QA v1269 FAILED/HOLD, external 0 new approved / cumulative UNKNOWN of 10,000. Docs-only Draft stacked on #1281, no runtime/DB/Test/Production changes.
