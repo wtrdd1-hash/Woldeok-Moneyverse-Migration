@@ -4,6 +4,17 @@ import { queryOne, queryRows } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import type { NotificationQueryDto } from './notification.dto';
 
+export interface NotificationArchiveRow {
+  readonly id: string;
+  readonly category: string;
+  readonly title: string;
+  readonly body: string;
+  readonly link: string | null;
+  readonly is_read: boolean;
+  readonly read_at: Date | null;
+  readonly created_at: Date;
+}
+
 @Injectable()
 export class NotificationService {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable | null) {}
@@ -27,10 +38,10 @@ export class NotificationService {
     );
   }
 
-  async archiveSnapshot(actor: string): Promise<{ notifications: unknown[]; complete: true }> {
+  async archiveSnapshot(actor: string): Promise<{ notifications: NotificationArchiveRow[]; complete: true }> {
     if (!this.pool) throw new Error('database pool unavailable');
     // The 101st row is a completeness sentinel, not an item to silently discard.
-    const rows = await queryRows(
+    const rows = await queryRows<NotificationArchiveRow>(
       this.pool,
       `SELECT id::text, category, title, body, link, is_read, read_at, created_at
        FROM public.in_app_notifications
