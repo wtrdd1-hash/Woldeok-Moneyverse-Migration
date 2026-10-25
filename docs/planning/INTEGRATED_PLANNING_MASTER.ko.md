@@ -1,5 +1,40 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1266 — F675-123 일정 원천 버전·만료·개인 ICS 신뢰성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+
+### 회차·실제 코드 근거
+- **이전 기능 추가 v1264 → 현재 기능 보완 v1266 → 다음 기능 추가 v1268(잠정).** 원격 main c9a868b1e622341e2daa8b936ddf0988eda9988e 시작·중간 재조회. main AGENTS.md/README.md/영문 정본 PROJECT_PLAN.md/국문 대조 확인. 선행 기획 Draft #1268은 미병합이며 개발 이슈 #1267로 이관. 이번 작업은 문서 기획이지 기능 구현·운영 반영이 아님.
+- **실제 main 확인:** Migration 037 season_active_events()의 ends_at은 개별 이벤트 마감이 아닌 **소속 시즌의 종료일**이다. Migration 038 season_event_admin_update()는 제목·활성 상태를 변경하지만 updated_at·revision이 없다. Migration 165 shop_catalog_list_v2()는 **카탈로그 sale_ends_at**을 반환하면서 별도로 **재고 starts_at/ends_at**을 필터링한다. calendar/shop-deadlines.ts는 파싱 가능한 종료 시각이면 **이미 지난 날짜도** 포함한다. 현행 목록은 변경·취소 이력을 보증하지 않으므로 저장된 시각만으로 유효한 미래 일정을 확정할 수 없다.
+- **회원 목적/범위:** /calendar에서 자발적으로 관심 등록·해제, 본인 전용 /account/calendar-watchlist에서 **원천 열기**, **최신 검증**, **삭제**, **검증된 .ics 다운로드**. 푸시·이메일·상시 공개 구독 피드·계산형 주간/당일 이벤트·WLD/원장/보상 변경 금지. 비회원은 로그인, 정지/동의 만료 계정은 접근 차단. 저장 유무보다 현재 원천 검증이 내보내기 여부를 결정한다.
+
+### 원천 식별·버전·시간 무결성(P0)
+1. **서버 권위 원천 해석기:** 좁게 EXECUTE를 허용한 SECURITY DEFINER 함수가 (본인,종류,원천ID)의 안정된 식별자·복합 버전·UTC 마감·유효 상태·사유를 반환한다. SEASON_END는 이벤트·시즌 활성, 시즌 시작<=검증 시각<시즌 종료를 확인하고 마감 명칭을 **시즌 종료**로 명시한다. SHOP_SALE_END는 상품·재고 활성 기간과 미래 sale_ends_at을 모두 검증한다. 재고가 판매 종료보다 먼저 종료되면 더 이른 날짜를 임의 판매 종료로 바꾸지 않고 **이용 불가**로 표시한다. 만료·비활성·삭제·품절·원천 불명은 유효한 미래 마감으로 내보내지 않는다. 품절은 복구 가능하므로 취소와 구분한다.
+2. **단조 증가 원천 버전 필수:** 현재 main에는 신뢰할 수 있는 변경 버전이 없다. 충돌 중인 280을 재사용하지 않는 향후 순방향 마이그레이션으로 이벤트+상위 시즌, 카탈로그+재고의 revision/changed_at 또는 변경 이력 원장을 추가한다. 관리자 수정·기간 변경·재고 상태 변경과 같은 트랜잭션에서 버전을 증가시키고 관련 행의 복합 버전을 생성한다. 현재 값 해시만으로는 변경 후 원복(ABA)을 검출할 수 없으므로 **버전·격리 회귀 검증 전 VERIFIED 확정 금지**. 앱 계정 테이블 직접 권한·PUBLIC 실행 권한 금지.
+3. **시간·잠금 일관성:** 회원 행 → 관심 행 → 원천 이벤트/시즌 또는 카탈로그/재고 행을 결정적 UUID 순서로 잠그고 단일 DB 스냅샷·서버 검증 시각을 사용한다. 관리자 변경과 경합하면 충돌·재검증 또는 제한된 재시도, 오래된 마감 확정 금지. 저장 버전과 원천 버전이 달라지면 CHANGED_RECONFIRM, 원천 소실은 UNAVAILABLE_SAVED(제목 비식별, 삭제 가능). 로그아웃·계정 전환 후 이전 응답 폐기.
+4. **영속 저장·멱등 영수증:** member_calendar_watches의 (user_id,source_kind,source_id) UNIQUE, watch.version/generation 단조 증가 및 active 묘비. member_calendar_watch_receipts의 (user_id,request_id) UNIQUE와 본인+동작+종류+원천+기대 버전+원천 버전 HMAC 결합. 같은 요청 재전송은 최초 확정 영수증, 같은 키로 다른 내용은 409. 회원 행 잠금 아래 활성 100건 한도 계산(동시 100건 초과 불가). 해제 후 재등록해도 버전·불투명 ICS UID 초기화 금지. 소프트 탈퇴·계정 병합은 별도 정리/보존 심사 필요, ON DELETE CASCADE만으로 해결 불가.
+
+### 화면·API·ICS·관리·배포 수용 조건
+5. **회원 상태/CTA:** LOADING, AVAILABLE, WATCHING, SAVED_CONFIRMED, CHANGED_RECONFIRM, EXPIRED, SOLD_OUT, UNAVAILABLE_SAVED, UNVERIFIABLE, CONFLICT, UNKNOWN_COMMIT, ERROR, SIGNED_OUT. verifiedAt/원천 버전·종류·사유 표시. 날짜 변경 시 **변경된 일정 확인**으로 검증·동의 후 반영; 삭제된 원천도 **목록에서 제거** 가능. 오래된 날짜를 현재 날짜처럼 표시하지 않고 오류를 빈 목록 성공으로 바꾸지 않는다. 320px/200% 확대, 키보드/스크린리더 안내, 색상 외 텍스트, WCAG 2.2 AA.
+6. **Nest 본인 API 제안:** GET /api/v1/calendar/watchlist?limit=20&cursor= (본인·세션·필터·스냅샷 HMAC, created_at/id 키셋, 최대 50); PUT/DELETE /api/v1/calendar/watchlist/:kind/:sourceId JSON {requestId,expectedVersion,expectedSourceRevision}; GET /api/v1/calendar/watchlist/receipts/:requestId; GET /api/v1/calendar/watchlist/export-preview는 검증·제외 건수와 검증 시각만 본인에게 제공. 비회원 401, 계정/동의 403, 타인/미존재 동일 404, 버전/중복 충돌 409, 남용 429, 원천 실패 503. 세션·CSRF·동의, no-store 필수. Android는 허용 경로 검증 후 JSON 동등 계약만 제공(게이트웨이는 임의 멱등 헤더를 전달하지 않으므로 본문 필드 사용), 바이너리 ICS는 1차 웹 전용.
+7. **단일 스냅샷 내보내기:** 동일 출처·인증 GET /account/calendar-watchlist/export.ics는 **일회성 파일**이며 공개 구독 URL이 아니다. 모든 관심 원천을 **하나의 일관된 DB 읽기 트랜잭션**에서 재검증해 verifiedAt/복합 버전과 함께 확정한 결과만 렌더링한다. 개별 HTTP 목록을 이어 붙이거나 이전 미리보기·부분 장애를 신뢰하지 않는다. 미리보기/실제 다운로드 제외 건수를 명시하고 둘 사이 원천 변경 가능성을 설명한다. 유효 0건은 명시적으로 안내하며 임의 일정을 만들지 않는다.
+8. **RFC 5545·삽입 공격 방어:** VEVENT마다 회원 식별자가 없는 영속 불투명 UID, UTC DTSTAMP, 실제 마감 시각 UTC DTSTART, 안전하게 이스케이프한 SUMMARY 사용. 임의 지속시간·주최자·참석자·알림·RRULE·취소 갱신을 생성하지 않는다. 신뢰 가능한 단조 버전/시각 없이는 SEQUENCE/LAST-MODIFIED를 주장하지 않는다. 다운로드한 스냅샷은 이전 외부 캘린더 가져오기를 자동 갱신하지 않는다. CRLF, 역슬래시/쉼표/세미콜론/개행 TEXT 이스케이프, UTF-8 문자 중간을 자르지 않는 **75옥텟** 접기, 제어문자 차단, 100건/256KiB 제한 및 실제 파서 왕복 검증. text/calendar; charset=utf-8, 고정 안전 파일명 attachment, private,no-store, nosniff. URL·UID·파일명·로그·분석에 회원 ID 노출 금지.
+9. **관리자·개인정보·KPI:** 관리자에게는 k≥20 비식별 통계·차분 공격 억제만 제공, 개인 관심 목록 조회/수정 금지. 탈퇴·병합·보존 정책 승인, ICS 본문·제목 로그 저장 금지. 개인 화면 noindex/nofollow/no-store, 사이트맵·구조화 데이터 제외. 분당 쓰기 12회·시간당 내보내기 6회, UUID/열거형/커서 엄격 검증. 목표: **검증 안 된 마감 내보내기 0, 타 회원 노출 0, WLD/원장 변경 0**; 버전 지연 p95, 변경 확인률, 제외 사유, ICS 파서 성공률, 429/503 지표.
+10. **격리 QA·운영승격:** 폐기 가능한 PostgreSQL에서 동일/상이 요청 100건, 타인 100건, 한도 경합 100건, 합성 커서 10,001건(실제 한도 100), 시즌 비활성·이름/종료 변경, 상품 판매일 변경·재고 조기 종료/품절/재입고, 변경→원복(ABA), 관리자 취소와 ICS 동시 실행, 서울 시간대, UTF-8 75옥텟/CRLF/삽입/파서 왕복, 로그아웃·병합·소프트 탈퇴·원천 부분 장애를 검증. 개발 별도 브랜치·기능 기본 OFF·266/280 해결 후 순방향 마이그레이션·정확 최종 SHA 공식 Test 금융 E2E·격리 암호화 복원·보안/권한/롤백·승인 GitOps 전 운영승격 금지. 기능 OFF 롤백은 진입점·내보내기만 숨기고 승인 보존 정책에 따라 기록 유지.
+
+### P0/P1 개발 이관 — 독립 검증 가능한 10건
+- **P0 ENV1266-01** — 타 작업자 삭제 없이 루트 용량 확보(13:02 KST 100%, 여유 181MiB, 데이터 볼륨 91GiB), 운영/개발/Test DB 분리·암호화 복원.
+- **P0 SEC1266-02** — 개발 앱 계정 UPDATE/DELETE 235/241 테이블·PUBLIC 은행 함수 3개 권한 정리, SECURITY DEFINER 본인·동의 검증 및 타인 접근 음성 테스트.
+- **P0 REL1266-03** — QA v1267 FAILED/HOLD, Migration266 체크섬/280 충돌, 프론트 6건 실패, 기존 보안 감사 Critical2/High10, 정확 SHA Test/복원/CI·승인 GitOps 차단.
+- **P0 CAL1266-04** — 시즌 상위 종료/상점 재고 상태를 결합한 권위 원천 해석기, 단조 복합 버전, 허구 마감 차단.
+- **P1 CAL1266-05** — 순방향 버전/변경 이력·관심 묘비/UID/영수증 DB UNIQUE/CHECK/인덱스·보존/병합, 마이그레이션 번호 충돌 해결 후 지정.
+- **P1 CAL1266-06** — 회원 우선 잠금·버전 CAS·100건 한도·HMAC 멱등/409·관리자 원천 변경→원복 경합.
+- **P1 CAL1266-07** — Nest 본인 목록/미리보기/영수증·BFF 단일 스냅샷 ICS·503 실패 차단·안전 헤더/제외 건수.
+- **P1 CAL1266-08** — Next 화면 변경 확인 CTA·접근성·Android JSON 게이트웨이 동등성·세션 무효화.
+- **P1 CAL1266-09** — 탈퇴/병합/보존·k-익명 관리자·SEO/no-store·남용 제한·KPI.
+- **P1 CAL1266-10** — 격리 PG 동시 100건/합성 10,001건/ABA/원천 취소/ICS 파서 회귀·정확 SHA Test·카나리/롤백 검증.
+
+**근거 게이트·안전:** RFC Editor RFC5545, OWASP API1:2023, PostgreSQL 잠금, W3C WCAG 2.2 지침 계열 검토. **이번 회차 신규 독립 중복 제거·승인 근거 0건, 누적 승인 수량 미확인 / 목표 10,000건 → BLOCKED / IN PROGRESS.** QA v1267 FAILED/HOLD. 기획 문서만 변경; 런타임·DB·WLD·원장·기능 스위치·Test·운영 변경 없음.
+
 ## v2026.10.25.1264 — F675-123 검증형 회원 일정 관심 목록·개인 ICS 내보내기 (기능 추가 / 기획 초안 / 운영 보류)
 - Draft PR [#1268](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1268) 및 개발 이슈 [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267)는 OPEN/HOLD; 미병합 #1261을 기반으로 한 문서 초안.
 
