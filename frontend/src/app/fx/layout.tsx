@@ -2,32 +2,17 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: '서울외환시장 (FX) 실시간 환전 & 외환보유액 포털 | 월덕 통화안전망',
-  description:
-    '한국은행 중앙은행 공식 연동 서울외환시장 포털. 기축통화(USD) ↔ 원화(WLD) 1초 즉시 환전, 실시간 환율 궤적 차트, 연 4.5% 외화정기예금 및 외환보유액 모니터링.',
-  alternates: {
-    canonical: 'https://easy-scraping.com/fx',
-    languages: {
-      'ko-KR': 'https://easy-scraping.com/fx',
-      'en-US': 'https://easy-scraping.com/en/fx',
-      'ja-JP': 'https://easy-scraping.com/ja/fx',
-      'zh-CN': 'https://easy-scraping.com/zh/fx',
-      'x-default': 'https://easy-scraping.com/fx',
-    },
-  },
+  title: '가상 외환시장(FX) 현황 및 거래 중단 안내 | 월덕 머니버스',
+  description: '월덕 머니버스의 서비스 내부 가상 FX 기준환율과 검증된 시장 기록을 확인합니다. WLD 환전과 선물환 체결은 안전한 원장 정산 검증 전까지 중단됩니다. 실제 외환 거래나 은행 서비스가 아닙니다.',
+  alternates: { canonical: 'https://easy-scraping.com/fx' },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: '서울외환시장 (FX) 실시간 환전 & 외환보유액 포털',
-    description:
-      'USD ↔ WLD 즉시 환전, 실시간 환율 궤적, 연 4.5% 외화예금 및 중앙은행 외환보유액 모니터링.',
+    title: '월덕 머니버스 가상 외환시장 현황',
+    description: '가상 FX 서버 확인 시세와 거래 중단 상태를 투명하게 안내합니다.',
     url: 'https://easy-scraping.com/fx',
     siteName: '월덕 머니버스 (Woldeok Moneyverse)',
     locale: 'ko_KR',
     type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: '서울외환시장 (FX) 실시간 환전 & 외환보유액 포털',
-    description: 'USD ↔ WLD 1초 즉시 환전 및 중앙은행 외환보유액 모니터링.',
   },
 };
 

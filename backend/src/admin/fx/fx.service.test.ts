@@ -55,17 +55,19 @@ describe('FxService', () => {
     expect(res.currentRate).toBe(1352.5);
   });
 
-  it('최소 금액(1,000 WLD) 미만 환전 시도시 예외를 던진다', async () => {
-    await expect(service.swapWldToUsd('user-1', 500)).rejects.toThrow(
-      '최소 환전 금액은 1,000 WLD 이상이어야 합니다.'
-    );
+  it('rejects even small FX swaps before touching the repository', async () => {
+    await expect(service.swapWldToUsd('user-1', 500)).rejects.toMatchObject({ status: 503 });
+    expect(mockRepo.swapWldToUsd).not.toHaveBeenCalled();
   });
 
-  it('정상 WLD ➡️ USD 환전을 수행한다', async () => {
-    const res = await service.swapWldToUsd('user-1', 100000);
-    expect(res.usdCredited).toBe(73.78);
-    expect(res.feeWld).toBe(200);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalled();
+  it('refuses WLD to USD without a ledger-backed settlement contract', async () => {
+    await expect(service.swapWldToUsd('user-1', 100000)).rejects.toMatchObject({ status: 503 });
+    expect(mockRepo.swapWldToUsd).not.toHaveBeenCalled();
+  });
+
+  it('refuses USD to WLD without a ledger-backed settlement contract', async () => {
+    await expect(service.swapUsdToWld('user-1', 100)).rejects.toMatchObject({ status: 503 });
+    expect(mockRepo.swapUsdToWld).not.toHaveBeenCalled();
   });
 
   it('스무딩 오퍼레이션 시장개입을 집행하고 관리자 DM 알림을 발송한다', async () => {
@@ -125,7 +127,7 @@ describe('FxService', () => {
     expect(result.rates['6M'].forwardRate).toBeLessThan(result.rates['3M'].forwardRate);
   });
 
-  it('선물환 환헤지 계약을 체결하고 증거금을 기록한다', async () => {
+  it('refuses forward margin contracts without a ledger-backed settlement contract', async () => {
     mockRepo.getLatestRate = vi.fn().mockResolvedValue(1350.0);
     mockRepo.createForwardContract = vi.fn().mockResolvedValue({
       id: 'contract-uuid',
@@ -140,11 +142,8 @@ describe('FxService', () => {
       status: 'ACTIVE',
     });
 
-    const contract = await service.createForwardContract('user-1', 'BUY_USD', '3M', 2000);
-    expect(contract.position).toBe('BUY_USD');
-    expect(contract.tenor).toBe('3M');
-    expect(contract.marginWld).toBe(268830);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalled();
+    await expect(service.createForwardContract('user-1', 'BUY_USD', '3M', 2000)).rejects.toMatchObject({ status: 503 });
+    expect(mockRepo.createForwardContract).not.toHaveBeenCalled();
   });
 
   it('EWS 외환위기 조기경보 지표를 정확히 산출한다', async () => {

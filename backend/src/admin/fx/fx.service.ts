@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { FxRepository, FxReserveStatus, FxRatePoint, FxWallet, FxTransaction } from './fx.repository';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
 
@@ -43,54 +43,20 @@ export class FxService {
     return res;
   }
 
+  // The legacy FX repository changes cash balances without a balanced ledger posting.
+  // Do not permit member settlement until an idempotent SECURITY DEFINER contract exists.
   async swapWldToUsd(
-    userId: string,
-    wldAmount: number
+    _userId: string,
+    _wldAmount: number,
   ): Promise<{ usdCredited: number; feeWld: number; appliedRate: number }> {
-    if (wldAmount < 1000) {
-      throw new Error('최소 환전 금액은 1,000 WLD 이상이어야 합니다.');
-    }
-    const result = await this.repo.swapWldToUsd(userId, wldAmount);
-
-    if (this.discordAlertService && wldAmount >= 50000) {
-      await this.discordAlertService.sendAdminDirectMessage({
-        title: '대규모 외환 환전 감지 (WLD ➡️ USD)',
-        description: `국민(유저)의 달러 매수 환전이 체결되었습니다.\n\n` +
-          `• **유저 식별자**: ${userId}\n` +
-          `• **환전 WLD**: ${wldAmount.toLocaleString()} WLD\n` +
-          `• **지급 USD**: $${result.usdCredited.toLocaleString()}\n` +
-          `• **적용 환율**: 1 USD = ${result.appliedRate.toLocaleString()} WLD\n` +
-          `• **국고 세수 귀속**: ${result.feeWld.toLocaleString()} WLD`,
-        color: 0x3b82f6,
-      }).catch((err) => this.logger.warn(`Failed to send DM: ${err.message}`));
-    }
-
-    return result;
+    throw new ServiceUnavailableException('FX ledger settlement is not available');
   }
 
   async swapUsdToWld(
-    userId: string,
-    usdAmount: number
+    _userId: string,
+    _usdAmount: number,
   ): Promise<{ wldCredited: number; feeWld: number; appliedRate: number }> {
-    if (usdAmount < 1) {
-      throw new Error('최소 환전 금액은 $1 이상이어야 합니다.');
-    }
-    const result = await this.repo.swapUsdToWld(userId, usdAmount);
-
-    if (this.discordAlertService && usdAmount >= 50) {
-      await this.discordAlertService.sendAdminDirectMessage({
-        title: '대규모 외환 환전 감지 (USD ➡️ WLD)',
-        description: `국민(유저)의 원화 환전이 체결되었습니다.\n\n` +
-          `• **유저 식별자**: ${userId}\n` +
-          `• **환전 USD**: $${usdAmount.toLocaleString()}\n` +
-          `• **지급 WLD**: ${result.wldCredited.toLocaleString()} WLD\n` +
-          `• **적용 환율**: 1 USD = ${result.appliedRate.toLocaleString()} WLD\n` +
-          `• **국고 세수 귀속**: ${result.feeWld.toLocaleString()} WLD`,
-        color: 0x10b981,
-      }).catch((err) => this.logger.warn(`Failed to send DM: ${err.message}`));
-    }
-
-    return result;
+    throw new ServiceUnavailableException('FX ledger settlement is not available');
   }
 
   async executeSmoothingIntervention(
@@ -185,44 +151,13 @@ export class FxService {
   }
 
   async createForwardContract(
-    userId: string,
-    position: 'BUY_USD' | 'SELL_USD',
-    tenor: '1M' | '3M' | '6M',
-    contractAmountUsd: number
-  ) {
-    if (contractAmountUsd < 10) {
-      throw new Error('최소 선물환 계약금액은 $10 USD 이상이어야 합니다.');
-    }
-    const forwardRates = await this.getForwardRates();
-    const rateInfo = forwardRates.rates[tenor];
-    if (!rateInfo) {
-      throw new Error('유효하지 않은 만기 구분입니다.');
-    }
-
-    const contract = await this.repo.createForwardContract(
-      userId,
-      position,
-      tenor,
-      contractAmountUsd,
-      rateInfo.forwardRate,
-      forwardRates.spotRate
-    );
-
-    if (this.discordAlertService && contractAmountUsd >= 1000) {
-      await this.discordAlertService.sendAdminDirectMessage({
-        title: '대규모 선물환(Forward) 환헤지 계약 체결',
-        description: `국민(유저)의 환위험 헤지 계약이 체결되었습니다.\n\n` +
-          `• **유저 식별자**: ${userId}\n` +
-          `• **포지션**: ${position === 'BUY_USD' ? '달러 매수 헤지 (달러 상승 방어)' : '달러 매도 헤지 (달러 하락 방어)'}\n` +
-          `• **만기**: ${tenor} (${rateInfo.days}일)\n` +
-          `• **계약금액**: $${contractAmountUsd.toLocaleString()} USD\n` +
-          `• **약정 선물환율**: 1 USD = ${rateInfo.forwardRate.toLocaleString()} WLD (스왑포인트: ${rateInfo.swapPoint}p)\n` +
-          `• **예치 증거금**: ${contract.marginWld.toLocaleString()} WLD (10%)`,
-        color: 0x6366f1,
-      }).catch((err) => this.logger.warn(`Failed to send DM: ${err.message}`));
-    }
-
-    return contract;
+    _userId: string,
+    _position: 'BUY_USD' | 'SELL_USD',
+    _tenor: '1M' | '3M' | '6M',
+    _contractAmountUsd: number,
+  ): Promise<Awaited<ReturnType<FxRepository['createForwardContract']>>> {
+    // The legacy margin path is not tied to a durable WLD ledger receipt.
+    throw new ServiceUnavailableException('FX forward settlement is not available');
   }
 
   async getUserForwardContracts(userId: string) {
