@@ -283,36 +283,27 @@ describe('AutoSovereignWealthFundService', () => {
     expect(config.is_enabled).toBe(false);
   });
 
-  it('updates governance configuration correctly', async () => {
-    mockPool.query = vi.fn().mockResolvedValue({ rows: [] });
-    const getConfigSpy = vi.spyOn(service, 'getConfig').mockResolvedValue({
-      id: 'current',
+  it.each([false, true])('refuses direct SWF policy writes when runtime execution enabled=%s', async (enabled) => {
+    if (enabled) {
+      process.env.MONEYVERSE_SWF_EXECUTION_ENABLED = 'true';
+    } else {
+      delete process.env.MONEYVERSE_SWF_EXECUTION_ENABLED;
+    }
+
+    await expect(service.updateConfig({
       is_enabled: true,
-      safe_reserve_wld: '30000000',
-      max_single_investment_wld: '5000000',
-      reinvestment_ratio_pct: 10,
-      max_investment_ratio_pct: 15,
-      equity_ratio_pct: 60,
-      bond_ratio_pct: 30,
-      dividend_ratio_pct: 10,
-      auto_harvest_enabled: true,
-      auto_tax_enabled: true,
-      auto_growth_yield_bps: 150,
-      target_anchor_wld: '30000000',
-      rebalance_interval_hours: 1,
-      last_executed_at: null,
+      reinvestment_ratio_pct: 50,
+      max_investment_ratio_pct: 50,
+      safe_reserve_wld: '0',
+    })).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'SWF_GOVERNANCE_WRITE_UNAVAILABLE' },
     });
 
-    const updated = await service.updateConfig({
-      reinvestment_ratio_pct: 10,
-      max_investment_ratio_pct: 15,
-      safe_reserve_wld: '30000000',
-    });
-
-    expect(updated.reinvestment_ratio_pct).toBe(10);
-    expect(updated.max_investment_ratio_pct).toBe(15);
-    expect(updated.safe_reserve_wld).toBe('30000000');
-    expect(mockPool.query).toHaveBeenCalled();
-    getConfigSpy.mockRestore();
+    expect(mockPool.query).not.toHaveBeenCalled();
+    expect(mockPool.connect).not.toHaveBeenCalled();
+    expect(mockDiscordAlert.sendAdminDirectMessage).not.toHaveBeenCalled();
+    expect(mockDiscordAlert.sendDiscordEmbed).not.toHaveBeenCalled();
   });
+
 });

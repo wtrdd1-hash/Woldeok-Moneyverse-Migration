@@ -10,10 +10,13 @@
 - Release blockers: shared Production/dev DB, root filesystem 100% (~177MiB free), official Test exact-SHA, real PostgreSQL and security gates. Production HOLD.
 
 ## In progress
-- [ ] RED regression for direct service invocation, including runtime-enabled bypass and no DB or Discord side effects.
+- [x] RED regression for direct service invocation, including runtime-enabled bypass and no DB or Discord side effects.
 - [ ] Minimal fail-closed service implementation.
 - [ ] Focused and required validation, mid-run main and plans refresh.
 - [ ] Draft PR, CI evidence and release HOLD.
+
+### RED evidence
+- Pre-change focused Vitest: 9 tests, 7 passed, 2 failed as expected; both runtime-flag variants call the unsafe DB path rather than returning 503. See internal `mv-b-v531-logs/red-test.log`.
 
 ## Finished
 - Pending.
