@@ -15,13 +15,13 @@
 ## Task 2 — GREEN
 - [x] Add `CsrfGuard` to the controller's `@UseGuards` chain.
 - [x] Validate publication receipt and return `success:false` without claiming publication if missing; avoid sensitive response leakage.
-- [ ] Run focused tests, backend tests, lint, typecheck, builds, security checks.
+- [x] Run focused tests, backend tests, lint, typecheck, builds, security checks (block on failed gates).
 
 ## Task 3 — Next.js BFF RED/GREEN
 - [x] Reproduce cross-site/missing-Origin and locked-console BFF calls, plus false success without post ID (RED 3/4).
 - [x] Reuse `verifySeoWriteOrigin` and `verifySeoOperator` and require verified `tweetId` before success (GREEN 4/4).
-- [ ] Run complete frontend tests, typecheck, and builds; compare existing failures.
+- [x] Run complete frontend tests, typecheck, and builds; compare existing failures (6 frontend test failures, default build failure, Webpack OOM).
 
 ## Task 4 — review and hold
-- [ ] Compare latest main, QA and concurrent PRs, run required gates, commit code and log on branch, push Draft PR.
-- [ ] Never merge or deploy unless every mandated exact-SHA gate passes.
+- [x] Compare latest main, QA and concurrent PRs, run required gates, commit code and log on branch, push Draft PR (release HOLD).
+- [x] Never merge or deploy unless every mandated exact-SHA gate passes (not passed; no merge/deploy).
