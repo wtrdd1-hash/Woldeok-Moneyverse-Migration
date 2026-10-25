@@ -12,4 +12,4 @@
 1. [x] Write regression tests proving published and generated posts lack `views`, public `/api/blog` does not return it, and blog hub/detail do not render fake counts. Run tests RED.
 2. [x] Update blog types, seed/editorial/generated posts and UI. Run tests GREEN; verify localized article header, 320px responsive header, focusable navigation and public SEO metadata remain intact.
 3. [x] Run lint, typecheck, targeted and full tests, build, API contract, security, isolated PostgreSQL/backend gates. Record precise failures and skipped gates.
-4. [ ] Re-fetch main/plan, integrate semantic changes if advanced, verify final HEAD, create Draft PR and attach evidence; merge/deploy only on complete required PASS.
+4. [x] Re-fetch main/plan, integrate semantic changes if advanced, verify final HEAD, create Draft PR and attach evidence; merge/deploy only on complete required PASS.
