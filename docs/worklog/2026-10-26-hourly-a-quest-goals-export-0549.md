@@ -15,3 +15,9 @@
 - Code SHA f553b210b8cb3d6ae44aab8422beecdecfbee10b; changed source: engagement controller + two backend tests, quests page + CSV helper/test + route/test, app-api route/test; mobile API machine contract and EN/KO schema docs; design plan, QA/release/worklog.
 - Branch audit: 227 remote branches / 223 open PRs, zero identical tip SHA, 3 known conflicts, **zero deleted**. All other branches preserved due unverified unique commits; no branch cleanup.
 - Test/Production unchanged and different from candidate SHA; exact-SHA authenticated Test E2E BLOCKED. Rollback: do not merge; no DB or runtime changes to undo.
+
+## END / GitHub candidate and release hold
+- Draft PR #1377 created on GitHub; no merge. Remote branch count after push: 228 (including main); open PRs: 224. Net change from audit: +1 branch/+1 PR. No branch deletion.
+- Main remains 1c5b84a1c45baafcca83f375a6f99698121e9bb5. Production release symlink points to prod-v2026.10.22.1106-seo-6a989b5ac0c6; Test release symlink to test-v2026.10.21.1023-9f39f041. Neither is this candidate's SHA. Official exact-SHA Test authenticated E2E BLOCKED.
+- Final local SHA after QA docs (43c773adfaa1ea3201111849512bc908aace6c5a) was retested: backend 1316 PASS/398 SKIP; frontend 1405 PASS/6 FAIL; database 15 PASS/3 SKIP; contract 38 PASS; bot 8 PASS; typecheck/lint/build/API contract PASS. Security audits FAIL. New worklog-only commit after this entry must be treated as a distinct SHA and rechecked before any merge.
+- GitHub CI and Test Candidate queued/running at first post-push observation; remote checks must complete PASS on exact final SHA before reconsidering integration. No Test/Production promotion, DB mutation, service restart or WLD write. Rollback remains branch not merged.
