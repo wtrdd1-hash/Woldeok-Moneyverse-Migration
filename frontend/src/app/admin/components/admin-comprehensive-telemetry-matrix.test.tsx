@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { AdminComprehensiveTelemetryMatrix } from './admin-comprehensive-telemetry-matrix';
@@ -123,12 +123,16 @@ describe('AdminComprehensiveTelemetryMatrix', () => {
     expect(screen.getByText(/사용자 참여도 \(DAU\/MAU 리텐션\)/)).toBeDefined();
   });
 
-  it('switches to monetary tab and displays correct M0, M1, M2 values', () => {
+  it('distinguishes ledger-reported M2 circulating supply from private wealth', () => {
+    const monetaryHealth: ReconciliationHealth = {
+      ...mockHealth,
+      supply: { ...mockHealth.supply!, m2Amount: '119000000' },
+    };
     render(
       <AdminComprehensiveTelemetryMatrix
         users={mockUsers}
         stocks={mockStocks}
-        health={mockHealth}
+        health={monetaryHealth}
         controls={mockControls}
       />
     );
@@ -138,7 +142,12 @@ describe('AdminComprehensiveTelemetryMatrix', () => {
 
     expect(screen.getByText(/M0 \(협의 통화 \/ 유동 현금\)/)).toBeDefined();
     expect(screen.getByText(/M1 \(요구불 예금 포함 통화\)/)).toBeDefined();
-    expect(screen.getByText(/M2 \(광의 통화 \/ 총 순자산\)/)).toBeDefined();
+    const m2Row = screen.getByText('M2 (광의 통화 / 시중 유통 통화)').closest('tr');
+    const wealthRow = screen.getByText('민간 총자산 평가액 (Private Wealth)').closest('tr');
+    expect(m2Row).not.toBeNull();
+    expect(wealthRow).not.toBeNull();
+    expect(within(m2Row as HTMLElement).getByText('₩119,000,000')).toBeDefined();
+    expect(within(wealthRow as HTMLElement).getByText('₩122,000,000')).toBeDefined();
     expect(screen.getByText(/정상 일치/)).toBeDefined();
   });
 
