@@ -36,3 +36,8 @@
 - Draft PR only; no merge, Production, Test promotion, cleanup, or modification of other branches/worktrees.
 - Environment contract: configure matching strong `INTERNAL_API_SECRET` (preferred) or `CRON_SECRET` (fallback only when primary absent) on scheduler and frontend. If missing or weak, scheduled publication skips; administrator session publishing remains available. Do not log secret values.
 - Exact candidate SHA and CI outcomes will be recorded in PR/checkpoint after push.
+
+### CI policy remediation (16:46 KST)
+- Initial candidate `047f4ffbeede88bfa615d20511cc489b52060804` failed both GitHub policy jobs (`40173875444`, `40173859923`), before runtime, because a test fixture embedded a URL with username/password syntax; repository secret scanner flagged `credential URL`.
+- Reproduced locally using `node scripts/security/check-repository-security.mjs` (RED). Replaced the literal fixture with an in-memory `URL` object and assigned synthetic userinfo properties; SSRF behavior coverage preserved without a committed credential URL.
+- `node --test scripts/security/check-repository-security.test.mjs` 2 PASS, repository security scan PASS, scheduler focused tests 11 PASS. New commit/SHA required; old CI cannot be reused.

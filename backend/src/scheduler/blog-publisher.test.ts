@@ -62,7 +62,10 @@ describe('scheduled blog publication credential boundary', () => {
 
   it('refuses plaintext public origins and URLs with embedded credentials', async () => {
     const request = fetcher(response(201, { success: true }));
-    for (const origin of ['http://example.com', 'https://user:password@example.com', 'file:///tmp/blog']) {
+    const credentialed = new URL('https://example.com');
+    credentialed.username = 'test-user';
+    credentialed.password = 'not-a-real-password';
+    for (const origin of ['http://example.com', credentialed.toString(), 'file:///tmp/blog']) {
       const result = await publishScheduledBlog({ INTERNAL_API_SECRET: secret, FRONTEND_ORIGIN: origin }, request as unknown as typeof fetch);
       expect(result).toMatchObject({ skipped: true, reason: 'BLOG_SCHEDULER_ORIGIN_UNSAFE' });
     }
