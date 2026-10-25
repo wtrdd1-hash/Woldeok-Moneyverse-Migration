@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { PageHeader } from '@/components/page-header';
 import { Target, Landmark, ClipboardList } from 'lucide-react';
 import { TruncatedList } from '@/components/truncated-list';
@@ -18,6 +19,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { ClaimButton, JobSwitchButton, SubmitTaskButton } from './work-forms';
 import { CareerTasksBoard } from './career-tasks-board';
+import type { VerifiedWorkEarnings } from './work-earnings-view';
 import { CareerQualificationsCard } from './career-qualifications-card';
 import { CareerMasteryCard } from './career-mastery-card';
 import { WorkQuotaDashboard } from './work-quota-card';
@@ -28,7 +30,6 @@ import type {
   JobQualificationItem,
   QualificationCatalogItem,
   WorkAssignment,
-  WorkReceipt,
   WorkSummary,
   WorkTask,
 } from './work';
@@ -45,6 +46,7 @@ import {
   secondsUntilSubmittable,
   workQuotaBlock,
   statusLabel,
+  workReceiptAmountLabel,
 } from './work';
 
 export const dynamic = 'force-dynamic';
@@ -65,7 +67,7 @@ export default async function WorkPage() {
   const [board, assignments, receipts, profile, summary, qualificationsRes] = await Promise.all([
     apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks'),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
-    apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
+    apiOrNull<VerifiedWorkEarnings>('/api/v1/work/earnings'),
     apiOrNull<JobProfileResponse>('/api/v1/work/profile'),
     apiOrNull<WorkSummary>('/api/v1/work'),
     apiOrNull<{
@@ -189,6 +191,10 @@ export default async function WorkPage() {
           </CardContent>
         </Card>
       )}
+
+      <Link href="/work/earnings" className="inline-flex min-h-11 w-fit items-center rounded-lg border px-4 py-2 text-sm font-semibold text-primary hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+        {isEn ? 'Review ledger-verified work payouts' : '원장 확인된 업무 보상 내역 보기'}
+      </Link>
 
       {/* 2. 8대 직업 탐색 및 즉시 전직 카드 그리드 */}
       <section aria-labelledby="careers-grid-title" className="grid w-full max-w-full min-w-0 gap-3 sm:gap-4 overflow-hidden">
@@ -372,14 +378,15 @@ export default async function WorkPage() {
         </section>
       )}
 
-      {/* 5. 최근 수령 영수증 */}
+      {/* 5. 최근 원장 검증 영수증 */}
+      {!receipts && <p role="alert" className="text-sm text-muted-foreground">{isEn ? 'Work reward verification is unavailable; no payment is assumed.' : '업무 보상 원장 확인이 불가능하여 지급액을 추정하지 않습니다.'}</p>}
       {paid.length > 0 && (
         <section aria-labelledby="receipts-title" className="grid w-full max-w-full min-w-0 gap-3 overflow-hidden">
           <h2 id="receipts-title" className="text-base sm:text-lg font-semibold">
-            {isEn ? 'Recent Rewards Claimed' : '최근 수령한 보상'}
+            {isEn ? 'Recent Work Receipts (ledger checked)' : '최근 업무 영수증 (원장 확인)'}
           </h2>
           <TruncatedList
-            title={isEn ? 'Recent Rewards Claimed' : '최근 수령한 보상'}
+            title={isEn ? 'Recent Work Receipts (ledger checked)' : '최근 업무 영수증 (원장 확인)'}
             visibleCount={RECEIPTS_ON_WORK}
             listClassName="grid gap-2 w-full min-w-0"
             rows={paid.map((receipt) => (
@@ -394,7 +401,7 @@ export default async function WorkPage() {
                   </p>
                 </div>
                 <div className="text-right font-mono shrink-0">
-                  <span className="font-bold text-emerald-700 dark:text-emerald-300">+{receipt.reward_amount} WLD</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-300">{workReceiptAmountLabel(receipt.settlement_status, receipt.reward_amount, isEn)}</span>
                   <span className="text-[11px] sm:text-xs text-muted-foreground ml-1.5 sm:ml-2">
                     +{receipt.experience_amount} EXP
                   </span>

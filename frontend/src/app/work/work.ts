@@ -1,4 +1,5 @@
 import type { Locale } from '@/lib/locale';
+import { groupDigits } from '@/lib/money';
 
 export interface WorkTask {
   readonly task_id: string;
@@ -397,4 +398,15 @@ export function boardOrder(
 
     return left.code.localeCompare(right.code);
   });
+}
+
+/** A receipt without a matching owner-ledger posting must never be called paid. */
+export function workReceiptAmountLabel(
+  status: 'VERIFIED' | 'EXP_ONLY' | 'UNVERIFIED',
+  amount: string,
+  isEn: boolean,
+): string {
+  if (status === 'VERIFIED') return `+${groupDigits(amount)} WLD`;
+  if (status === 'EXP_ONLY') return isEn ? 'EXP only · no WLD paid' : 'EXP 전용 · WLD 지급 없음';
+  return isEn ? 'WLD unverified · excluded from total' : 'WLD 미확인 · 합계 제외';
 }

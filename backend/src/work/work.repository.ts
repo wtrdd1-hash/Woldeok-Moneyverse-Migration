@@ -76,6 +76,22 @@ export interface WorkReceiptRow {
   created_at: Date;
 }
 
+export type WorkSettlementStatus = 'VERIFIED' | 'EXP_ONLY' | 'UNVERIFIED';
+
+export interface WorkVerifiedReceiptRow extends WorkReceiptRow {
+  settlement_status: WorkSettlementStatus;
+}
+
+export interface WorkVerifiedEarningsResponse {
+  window: 'RECENT_20';
+  limit: 20;
+  verified_wld: string;
+  verified_count: number;
+  exp_only_count: number;
+  unverified_count: number;
+  receipts: WorkVerifiedReceiptRow[];
+}
+
 export interface WorkDashboardRow {
   daily_paid: string;
   daily_cap: string;
@@ -260,6 +276,77 @@ export class WorkRepository {
        FROM public.work_my_receipts($1) AS receipt`,
       [actor],
     );
+  }
+
+  async verifiedEarnings(actor: unknown): Promise<WorkVerifiedEarningsResponse> {
+    assertUuid(actor, 'actor');
+    // A work receipt is not proof of a WLD transfer: a capped reward can
+    // legitimately have no transaction. Only a matching owner ledger credit
+    // with the expected work transaction type counts as confirmed WLD.
+    const receipts = await queryRows<WorkVerifiedReceiptRow>(
+      this.pool,
+      `WITH recent AS (
+         SELECT receipt.receipt_id, receipt.assignment_id, receipt.code, receipt.name,
+                receipt.reward_amount, receipt.experience_amount,
+                receipt.transaction_id, receipt.created_at
+         FROM public.work_my_receipts($1) AS receipt
+       ), owner_ledger AS (
+         SELECT posting.transaction_id,
+                SUM(CASE WHEN posting.direction = 'debit'::public.posting_direction
+                         THEN posting.amount ELSE -posting.amount END) AS owner_delta
+         FROM public.ledger_postings AS posting
+         JOIN public.accounts AS account ON account.id = posting.account_id
+         JOIN public.ledger_transactions AS tx ON tx.id = posting.transaction_id
+         WHERE account.owner_user_id = $1
+           AND account.account_type IN ('USER_CASH'::public.account_type, 'USER_BANK'::public.account_type)
+           AND tx.actor_user_id = $1
+           AND tx.type = 'WORK_TASK_REWARD'
+           AND posting.transaction_id IN (SELECT transaction_id FROM recent WHERE transaction_id IS NOT NULL)
+         GROUP BY posting.transaction_id
+       )
+       SELECT recent.receipt_id::text, recent.assignment_id::text,
+              recent.code, recent.name, recent.reward_amount::text,
+              recent.experience_amount::text, recent.transaction_id::text,
+              recent.created_at,
+              CASE
+                WHEN recent.reward_amount > 0 AND recent.transaction_id IS NOT NULL
+                  AND owner_ledger.owner_delta = recent.reward_amount THEN 'VERIFIED'
+                WHEN recent.reward_amount = 0 AND recent.transaction_id IS NULL THEN 'EXP_ONLY'
+                ELSE 'UNVERIFIED'
+              END AS settlement_status
+       FROM recent
+       LEFT JOIN owner_ledger ON owner_ledger.transaction_id = recent.transaction_id
+       ORDER BY recent.created_at DESC, recent.receipt_id DESC`,
+      [actor],
+    );
+    if (receipts.length > 20) throw new Error('work receipt window exceeded');
+    let verifiedWld = 0n;
+    let verifiedCount = 0;
+    let expOnlyCount = 0;
+    let unverifiedCount = 0;
+    for (const receipt of receipts) {
+      if (!/^(0|[1-9][0-9]*)$/.test(receipt.reward_amount) ||
+          !/^(0|[1-9][0-9]*)$/.test(receipt.experience_amount)) {
+        throw new Error('invalid work receipt amount');
+      }
+      if (receipt.settlement_status === 'VERIFIED' &&
+          receipt.transaction_id !== null && BigInt(receipt.reward_amount) > 0n) {
+        verifiedWld += BigInt(receipt.reward_amount);
+        verifiedCount += 1;
+      } else if (receipt.settlement_status === 'EXP_ONLY' &&
+                 receipt.transaction_id === null && receipt.reward_amount === '0') {
+        expOnlyCount += 1;
+      } else if (receipt.settlement_status === 'UNVERIFIED') {
+        unverifiedCount += 1;
+      } else {
+        throw new Error('invalid work receipt settlement state');
+      }
+    }
+    return {
+      window: 'RECENT_20', limit: 20, verified_wld: verifiedWld.toString(),
+      verified_count: verifiedCount, exp_only_count: expOnlyCount,
+      unverified_count: unverifiedCount, receipts,
+    };
   }
 
   assignments(actor: unknown): Promise<unknown[]> {

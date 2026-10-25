@@ -166,6 +166,7 @@ export function appApiContract(origin: string) {
       neverRenderLiteralNull: true,
       neverReplaceSuccessfulStateWithNullOnTransportFailure: true,
     },
+    memberEndpoints: { verifiedWorkEarnings: '/work/earnings' },
     groups: [...APP_API_GROUPS],
   } as const;
 }

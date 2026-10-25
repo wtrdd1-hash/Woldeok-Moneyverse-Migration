@@ -20,3 +20,13 @@
 
 ## Finished
 - Pending. No integration or Production promotion without exact-SHA complete PASS.
+
+### In-progress checkpoint v2026.10.25.a1325.1
+- RED: backend missing `verifiedEarnings` (3 tests), frontend missing view (1), mobile contract metadata missing (1), payout label missing (1). Backend route test initially needed contract build.
+- GREEN: backend focused 33 PASS; frontend + Android focused 28 PASS. All new work uses existing `work_my_receipts` (max 20) and owner ledger SELECT; no migration and no WLD writes.
+- Full local Backend: 1319 PASS / 398 SKIP. Frontend: 1401 PASS / 6 FAIL (locale 1, SEO 3, login touch target 1, admin M2 1); database 15 PASS / 3 SKIP; contract 38 PASS; Android app-api check PASS.
+- Typecheck PASS; Lint PASS (0 errors / 1137 warnings); Backend build PASS; Next Turbopack build PASS including dynamic `/work/earnings`.
+- Security audit FAIL: all Critical2/High10/Moderate11/Low3; production High2. No gate bypass.
+- Isolated PostgreSQL 17.11 `woldeok_moneyverse_ci`: `SET LOCAL ROLE moneyverse_app` + `BEGIN READ ONLY` executed the exact new SQL for an absent actor (0 rows), direct receipt INSERT and posting UPDATE both denied, `ROLLBACK` confirmed. No real paid work receipt exists in this DB (0 rows); positive real-DB payment E2E remains BLOCKED. A proposed synthetic rollback fixture was blocked by environment safety checks; it was not run and must not be reported as PASS.
+- Remote main at mid: `c9a868b1e622341e2daa8b936ddf0988eda9988e`, EN/KO integrated plan blobs unchanged (`a4c95ae9` / `bf75dbe3`).
+- Production/dev shared DB 5433 untouched; no service restart, branch deletion, feature switch or deployment.

@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -133,6 +134,16 @@ export class WorkController {
         'work receipts are unavailable',
       ),
     };
+  }
+
+  @Get('earnings')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Recent 20 work receipts with owner-ledger-verified WLD earnings' })
+  async earnings(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.repository().verifiedEarnings(requireUserId(request)),
+      'work earnings verification is unavailable',
+    );
   }
 
   @Get('assignments')

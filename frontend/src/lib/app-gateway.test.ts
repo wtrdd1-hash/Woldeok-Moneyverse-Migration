@@ -90,6 +90,7 @@ describe('app API compatibility contract', () => {
     expect(contract.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
     expect(contract.auth.persistentCookieJarRequired).toBe(true);
     expect(contract.auth.csrfHeader).toBe('x-csrf-token');
+    expect(contract.memberEndpoints.verifiedWorkEarnings).toBe('/work/earnings');
     expect(contract.errors.mediaType).toBe('application/problem+json');
     expect(contract.nullHandling.neverRenderLiteralNull).toBe(true);
     expect(JSON.stringify(contract)).not.toContain('INTERNAL_API_TOKEN');
