@@ -1,3 +1,8 @@
+## 2026-10-25 v1264 — F675-123 Verified Calendar Watchlist and ICS Export (planning-only, HOLD)
+- Previous Improvement v1262 / Current Addition v1264 / Next Improvement v1266 provisional. Main `c9a868b1e622341e2daa8b936ddf0988eda9988e` unchanged start/mid; issue [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267). Latest completed QA v1265 FAILED/HOLD; v1266 audit artifacts not release PASS.
+- Main calendar season/shop deadlines verified; plan owner watchlist and authenticated fresh-source RFC5545 snapshot export, no push/email or WLD. P0 4/P1 6: ENV1264-01 SEC1264-02 REL1264-03 CAL1264-04..10. English/Korean integrated planning updated.
+- Root 100% (~349MiB), dev DB privileges, migration266/280, frontend six failures, exact-SHA Test/restore HOLD. External new approved 0; cumulative UNKNOWN/10,000 BLOCKED. No runtime, DB, WLD, Test or Production change.
+
 ## 2026-10-25 08:xx KST — Planning v1256 F675-121 (Feature Addition / Draft / HOLD)
 
 ## 2026-10-25 v1262 — F675-122 archive publication consistency (planning-only, HOLD)

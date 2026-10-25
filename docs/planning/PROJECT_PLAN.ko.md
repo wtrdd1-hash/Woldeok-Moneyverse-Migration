@@ -1,5 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1264 — F675-123 검증형 회원 일정 관심 목록·개인 ICS 내보내기 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1262 → 현재 기능 추가 v1264 → 다음 기능 보완 v1266(잠정). 원격 main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재확인, main AGENTS/README·영문 정본 PROJECT_PLAN/국문 대조 검토. 미병합 #1261 후속 문서, 개발 이슈 [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267). 최신 완료 QA v1265 FAILED/HOLD, v1266 감사 산출물은 종합 PASS 아님.
+- 실제 main `/calendar`는 시즌 `event_id/ends_at`, 상점 `catalog_id/sale_ends_at`, 계산형 주간 갱신·오늘 사건을 표시하나 본인 관심 목록·ICS 내보내기는 확인되지 않음. F675-123은 검증된 미래 시즌/상점 마감만 회원 자발적 등록·해제, 원천 최신 상태 재검증, 본인 불변 영수증, 100건 한도·분당 12회, 삭제된 원천의 비식별 해제, 인증 RFC5545 **일회성 스냅샷** 내보내기를 제안. 영구 공개 피드·푸시·이메일·WLD/원장 변경 금지. Android JSON 동등성.
+- P0 ENV1264-01 SEC1264-02 REL1264-03 CAL1264-04; P1 CAL1264-05 CAL1264-06 CAL1264-07 CAL1264-08 CAL1264-09 CAL1264-10. 목적·권한·화면·CTA·상태·API·DB 제약/인덱스·트랜잭션·관리자·보안·SEO·모바일·접근성·KPI·100건 경합·합성 10,001건·롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 및 [영문 정본](INTEGRATED_PLANNING_MASTER.md)에 동등 명세.
+- QA v1265 HOLD, 루트 100%(약 349MiB), 개발 앱 DML 235/241, PUBLIC 은행 EXECUTE 3, Migration266/280, 프론트 6건 실패, v1266 감사 Critical2/High10; 정확 SHA Test/복원 HOLD. RFC/OWASP/W3C는 설계 참고로 검토, 신규 승인 0·누적 미확인/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·Test·운영 미변경.
+
 ## v2026.10.25.1262 — F675-122 주간 이력 원자적 발행·원천 완결성 보완 (기능 보완 / 초안 / 운영 보류)
 - 이전 기능 추가 v1260 → 현재 기능 보완 v1262 → 다음 기능 추가 v1264(잠정). main `c9a868b1e622341e2daa8b936ddf0988eda9988e` 시작·중간 재확인, main AGENTS/README·영문 정본 PROJECT_PLAN/국문 대조 검토. 미병합 #1257의 문서 후속, QA v1265 FAILED/HOLD.
 - 실제 Migration101은 주간 `created_at` 하한만 사용하고 현재 직업 순위가 변동 가능하며 과거 주차 완결성 체크포인트가 없음. v1260 목표별 head는 혼합 버전 위험, 24시간 유예만으로 원천 수집 완결성 증명 불가. 불변 주차 전체 세대+단일 원자적 head, 원천별 연속 체크포인트, 근거 없는 VERIFIED 금지, HMAC 근거 지문, 본인 API·Android의 세대 일관 서명 커서 및 변경 시 409 재시작으로 보완. 수정 시 주차 전체 새 세대 추가, 임의 소급 생성·NPC 평생 지표의 주간 검증 포함·WLD/원장 변경 금지.
