@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
 import { generateDailyAiBlogPost, publishBlogPost } from '@/app/blog/blog-data';
@@ -6,6 +7,15 @@ import type { BlogCountry, BlogCategory } from '@/app/blog/blog.types';
 export const dynamic = 'force-dynamic';
 
 const headers = { 'Cache-Control': 'no-store' } as const;
+
+function isValidSchedulerCredential(configured: string | undefined, presented: string | undefined): boolean {
+  if (!configured || !presented || /\s/.test(configured) || Buffer.byteLength(configured, 'utf8') < 32
+    || configured === 'moneyverse-cron-internal-key-2026'
+    || configured === 'mv-internal-secure-key-2026') return false;
+  const expected = Buffer.from(configured);
+  const actual = Buffer.from(presented);
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
+}
 
 export async function GET(req: Request) {
   const viewer = await currentViewer();
@@ -29,7 +39,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const configuredSecret = process.env.INTERNAL_API_SECRET || process.env.CRON_SECRET;
+  const configuredSecret = process.env.INTERNAL_API_SECRET !== undefined
+    ? process.env.INTERNAL_API_SECRET
+    : process.env.CRON_SECRET;
   const presented = req.headers.get('x-cron-secret')
     || req.headers.get('x-internal-secret')
     || req.headers.get('authorization')?.replace(/^Bearer /, '');
@@ -37,7 +49,7 @@ export async function POST(req: Request) {
   let isAuthorized = false;
 
   // 1. Cron or internal scheduler credential check
-  if (configuredSecret && presented && presented === configuredSecret) {
+  if (isValidSchedulerCredential(configuredSecret, presented ?? undefined)) {
     isAuthorized = true;
   }
 

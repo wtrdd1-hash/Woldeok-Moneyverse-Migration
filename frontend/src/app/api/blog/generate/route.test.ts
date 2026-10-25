@@ -33,9 +33,18 @@ describe('AI blog editorial publication engine with multi-country & tech support
     expect(res.headers.get('cache-control')).toBe('no-store');
   });
 
+  it('rejects weak or known scheduler credentials even when configured', async () => {
+    for (const credential of ['short-key', ' '.repeat(40), 'moneyverse-cron-internal-key-2026']) {
+      process.env.INTERNAL_API_SECRET = credential;
+      const res = await POST(request({ 'x-cron-secret': credential }));
+      expect(res.status).toBe(403);
+      expect((await res.json()).code).toBe('BLOG_PUBLISH_FORBIDDEN');
+    }
+  });
+
   it('allows publication when authenticated with valid scheduler credential', async () => {
-    process.env.INTERNAL_API_SECRET = 'valid-test-secret';
-    const res = await POST(request({ 'x-cron-secret': 'valid-test-secret' }));
+    process.env.INTERNAL_API_SECRET = 'valid-test-secret-with-at-least-32-bytes';
+    const res = await POST(request({ 'x-cron-secret': 'valid-test-secret-with-at-least-32-bytes' }));
     expect(res.status).toBe(201);
     const data = await res.json();
     expect(data.success).toBe(true);

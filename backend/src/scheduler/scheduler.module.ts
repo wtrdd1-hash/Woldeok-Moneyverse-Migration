@@ -11,6 +11,7 @@ import { OperationsRepository } from '../admin/operations.repository';
 import { sealingKeyFrom } from '../auth/totp';
 import { sendDirectAdminAlert } from '../discord/discord-direct-alert';
 import { Scheduler } from './scheduler';
+import { publishScheduledBlog } from './blog-publisher';
 
 /**
  * Starts the schedule, if this deployment has a database.
@@ -94,25 +95,7 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
               }
               return result;
             },
-            'blog.daily_publish': async () => {
-              if (process.env.BLOG_AUTO_PUBLISH_ENABLED === 'false') return { skipped: true, reason: 'disabled' };
-              try {
-                const secret = process.env.INTERNAL_API_SECRET || process.env.CRON_SECRET || 'moneyverse-cron-internal-key-2026';
-                const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://127.0.0.1:3234';
-                const res = await fetch(`${frontendOrigin}/api/blog/generate`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'x-internal-secret': secret,
-                  },
-                  body: JSON.stringify({ action: 'publish' }),
-                });
-                const data = (await res.json()) as Record<string, unknown>;
-                return { success: res.ok, status: res.status, ...data };
-              } catch (err: any) {
-                return { success: false, error: err?.message || 'unknown' };
-              }
-            },
+            'blog.daily_publish': () => publishScheduledBlog(process.env),
             'work.auto_tune_policy': async () => {
               if (process.env.WORK_AUTOTUNE_ENABLED === 'false') {
                 return { skipped: true, reason: 'disabled' };
