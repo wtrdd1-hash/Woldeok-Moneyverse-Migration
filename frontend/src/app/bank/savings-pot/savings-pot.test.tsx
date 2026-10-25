@@ -1,42 +1,29 @@
 import React from 'react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, fireEvent, cleanup } from '@testing-library/react';
-import SavingsChallengePotPage from './page';
+import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { SavingsChallengePlanner } from './savings-challenge-planner';
 
-describe('SavingsChallengePotPage Component', () => {
-  afterEach(() => {
-    cleanup();
+describe('Verified savings challenge planner', () => {
+  afterEach(cleanup);
+
+  it('shows only owner-verified bank and cash balances, no fabricated social deposits or rewards', () => {
+    render(<SavingsChallengePlanner bankBalance="100000" cashBalance="50000" />);
+    expect(screen.getByText('100,000 WLD')).toBeDefined();
+    expect(screen.getByText('50,000 WLD')).toBeDefined();
+    expect(screen.getByText(/42,858 WLD/)).toBeDefined();
+    expect(screen.getByRole('link', { name: /실제 은행에서 입출금하기/ }).getAttribute('href')).toBe('/bank');
+    for (const claim of ['파이낸스덕', '월가고래', '확정 가산', '원천 소각', '입금 시뮬레이션 완료', '친구 찌르기']) {
+      expect(document.body.textContent).not.toContain(claim);
+    }
+    expect(screen.queryByRole('button', { name: /입금|매수|보상 수령/ })).toBeNull();
   });
 
-  it('renders co-savings pot header, target amount, and 4 members', () => {
-    const { container } = render(<SavingsChallengePotPage />);
-
-    expect(container.textContent).toContain('4인 공동 저축 챌린지 팟');
-    expect(container.textContent).toContain('모의 체험 모드');
-    expect(container.textContent).toContain('+5.0%p 확정 가산');
-    expect(container.textContent).toContain('40만 WLD 목표 공동 저축 팟');
-    expect(container.textContent).toContain('파이낸스덕');
-    expect(container.textContent).toContain('월가고래');
-  });
-
-  it('handles daily deposit and updates user status', () => {
-    const { container, getByRole } = render(<SavingsChallengePotPage />);
-
-    const depositBtn = getByRole('button', { name: /오늘치 14,285 WLD 저축 입금하기/i });
-    fireEvent.click(depositBtn);
-
-    expect(container.textContent).toContain('오늘의 챌린지 저축 (14,285 WLD) 입금 시뮬레이션 완료!');
-    expect(container.textContent).toContain('오늘 저축 완료됨');
-  });
-
-  it('handles friend nudge and displays reminder notification', () => {
-    const { container, getAllByRole } = render(<SavingsChallengePotPage />);
-
-    const nudgeButtons = getAllByRole('button', { name: /친구 찌르기/i });
-    const firstNudge = nudgeButtons[0];
-    if (!firstNudge) throw new Error('Nudge button not found');
-    fireEvent.click(firstNudge);
-
-    expect(container.textContent).toContain('찌르기 시뮬레이션 알림이 표시되었습니다.');
+  it('allows keyboard-accessible 7/30 day target planning without a ledger mutation', () => {
+    render(<SavingsChallengePlanner bankBalance="100000" cashBalance="50000" />);
+    fireEvent.change(screen.getByRole('combobox', { name: /계획 기간/ }), { target: { value: '30' } });
+    expect(screen.getByText(/10,000 WLD/)).toBeDefined();
+    fireEvent.change(screen.getByRole('textbox', { name: /가상 저축 목표/ }), { target: { value: 'abc' } });
+    expect(screen.getByRole('alert').textContent).toMatch(/유효한 WLD/);
+    expect(screen.queryByText(/하루에 필요한 추가 저축/)).toBeNull();
   });
 });
