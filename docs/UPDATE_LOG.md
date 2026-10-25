@@ -1,4 +1,5 @@
 ## 2026-10-26 — Planning v1290 F675-129 shop wishlist integrity (IMPROVEMENT / DRAFT / HOLD)
+- 2026-10-26 v1298 F675-131 Improvement: bounded no-partial CSV, spreadsheet formula caveat, single-transaction snapshot, session/role gate, QA v1283 HOLD. Docs only; P0/P1 backlog 10, external corpus 0 new/UNKNOWN cumulative.
 - **v1296 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1364 (base: unmerged #1359; RELEASE HOLD).
 - **v1296 engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363 (implementation separately gated; no merge/deploy).
 ## 2026-10-26 v1296 — F675-131 Verified Notification Archive (Feature Addition / DRAFT / HOLD)

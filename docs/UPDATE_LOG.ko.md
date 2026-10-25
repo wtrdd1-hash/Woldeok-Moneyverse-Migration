@@ -1,4 +1,5 @@
 ## 2026-10-26 — 기획 v1290 F675-129 상점 찜 목록 무결성 (기능 보완 / 초안 / 보류)
+- 2026-10-26 v1298 F675-131 기능 보완: 부분 파일 없는 제한 CSV·수식 방어 한계·단일 트랜잭션·세션/권한 게이트·QA v1283 HOLD. 문서만 수정, P0/P1 10개, 외부 근거 신규 0/누적 UNKNOWN.
 - **v1296 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1364 (base: unmerged #1359; RELEASE HOLD).
 - **v1296 engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363 (implementation separately gated; no merge/deploy).
 ## 2026-10-26 v1296 — F675-131 회원 알림 보관함 (기능 추가 / DRAFT / HOLD)

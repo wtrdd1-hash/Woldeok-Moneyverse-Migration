@@ -1,4 +1,12 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+## v2026.10.26.1298 — F675-131 알림 보관함 CSV 무결성 보완 (기능 보완 / DRAFT / HOLD)
+- **회차:** 이전 기능 추가 v1296 → 현재 기능 보완 v1298 → 다음 기능 추가 v1300(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`, 영문 정본·한국어 동등 문서. Draft #1364 기반 문서만 수정, 개발 A/B/C/Gemini/QA 런타임 변경 금지.
+- **main 근거:** 알림 회원 필터 직접 SELECT가 OFFSET/생성시각 단독 정렬·dedupe_key 반환·불리언 변환을 사용하며 CSV API는 미구현. 개발 B #1356 페이징 수정과 분리, 운영 사고 단정 금지.
+- **계약 보완:** 5,000행/2MiB/30초 CSV를 **HTTP 헤더 전** 완성·검증하고 초과 시 부분 바이트 없이 413. 0건 헤더만, 고정 열/CRLF/BOM 없는 UTF-8/UTC/NULL, 정확 전송 바이트 SHA-256·크기. 셀 단위 수식 방어를 RFC4180 직렬화 전 수행, 변환 셀 수와 원문 비동등성 고지. SHA는 DB 진실을 보증하는 서명이 아니다. 단일 연결 READ ONLY REPEATABLE READ 내보내기, 여러 페이지는 BEST_EFFORT. 세션·동의·CSRF·최소권한·BOLA, no-store/noindex, Android/WCAG AA, 관리자 k>=20, 회원당 시간당 3회.
+- **P0:** ENV1298-01 용량/복원; SEC1298-02 권한/본인/CSRF; REL1298-03 QA/정확 SHA Test; ARC1298-04 실제 출처/허위 성공/부분 응답 방지.
+- **P1:** ARC1298-05 필터/CSV; ARC1298-06 MVCC/커서; ARC1298-07 제한 바이트/수식/해시; ARC1298-08 API·웹·Android·접근성; ARC1298-09 개인정보·관리자·SEO·KPI; ARC1298-10 격리 DB 100경합/100타인/10,001행·413/중단/롤백.
+- **백로그 ID:** ENV1298-01 SEC1298-02 REL1298-03 ARC1298-04 ARC1298-05 ARC1298-06 ARC1298-07 ARC1298-08 ARC1298-09 ARC1298-10.
+- **QA v1283:** 프론트 1,397통과/6실패, 전체 감사 Critical 2/High 10, 운영 High 2, 루트 99%/1.2GiB. 정확 SHA Test·복원 미입증, 승격 HOLD. 외부 근거 신규 승인 0/누적 UNKNOWN·10,000 BLOCKED. 스위치 OFF·배포 없음.
 ## 기획 v1296 — F675-131 신규 기능: 검증형 알림 보관함 검색·CSV (DRAFT/HOLD)
 - 본인 DB 원본 알림만 기간·분류·읽음 검색, UUID 안정 커서와 정직한 일관성 표시, 단일 트랜잭션 CSV·정확 바이트 SHA-256. 5,000건/2MiB/30초 초과 시 부분 파일 없이 413, RFC4180·수식 삽입 방어. 모의 알림/localStorage 알림 제외, 개발 DB 현재 0건·분류/전달 증거 없음. 개발 B #1356 기존 페이징 수정과 분리, A/C/QA 미변경.
 - P0 ENV1296-01 SEC1296-02 REL1296-03 ARC1296-04; P1 ARC1296-05 ARC1296-06 ARC1296-07 ARC1296-08 ARC1296-09 ARC1296-10. 본인·동의·CSRF, Next.js/Android, no-store/noindex, 관리자 k>=20, WCAG AA, 격리 실DB 100 경합/100 타인/10,001 합성, 기본 OFF·정확 SHA Test/GitOps. 루트 99%/1.4GiB, 감사·프론트·Test·복원 HOLD, 외부 근거 신규 승인 0/누적 UNKNOWN/10,000 BLOCKED.

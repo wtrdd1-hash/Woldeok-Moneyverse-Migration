@@ -1,4 +1,37 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.26.1298 — F675-131 알림 보관함 CSV 내보내기 무결성 보완 (기능 보완 / DRAFT / RELEASE HOLD)
+
+### 확인 근거·범위·회차
+- **회차:** 이전 Feature Addition v1296 → 현재 Feature Improvement v1298 → 다음 Feature Addition v1300(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 및 AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조를 재확인. 미병합 기획 Draft #1364 위에 문서만 적층하며 Gemini/개발 A/B/C/QA 브랜치·코드를 수정하지 않는다.
+- **실제 main 근거:** `backend/src/notification/notification.service.ts`는 현재 `public.in_app_notifications`를 회원 조건 `user_id=$1`, `created_at DESC LIMIT/OFFSET`로 직접 조회하고 `dedupe_key`도 반환한다. `notification.dto.ts`는 `unreadOnly`에 `@Type(() => Boolean)`을 사용한다. 기존 읽음/모두 읽음 SQL 함수는 내보내기와 별개이며 **알림 CSV 내보내기 API는 main에 미구현**. 이는 코드상 위험이지 실제 운영 사고 증거가 아니다. 기존 페이징/불리언 수정은 개발 B #1356 담당이므로 중복 구현하지 않는다.
+- **최신 QA v1283 원시자료(2026-10-26 약 04:25 KST):** 프론트 1,397 통과/6 실패, 백엔드 1,313 통과/398 건너뜀, DB 15 통과/3 건너뜀. 타입검사·린트·빌드는 통과했지만 전체 보안감사 Critical 2/High 10, 운영 감사 High 2; 인증된 정확 SHA Test E2E·격리 백업 복원 미입증. 루트 99%·여유 약 1.2GiB, 데이터 볼륨 약 56GiB. 운영 승격 BLOCKED.
+
+### 사용자 계약 및 보안·정합성 결정
+- **목적/대상:** 로그인·동의를 완료한 회원이 **실제로 DB에 저장된 본인 알림**만 검색·CSV 다운로드한다. 모의 UI 알림, 브라우저 시뮬레이션, 지급/원장 증빙 및 과거 전달 성공 보장은 제외. `/account/notifications/archive`에서 검색→CSV 내보내기→검증 완료; Android app-api 동일 계약. LOADING, EMPTY_VERIFIED, EXPORTING, VERIFIED, SOURCE_UNAVAILABLE, LIMIT_EXCEEDED, CONSENT_REQUIRED, SESSION_EXPIRED, UNCONFIRMED_TRANSFER 상태를 명시하며 응답 유실 시 성공 표시 금지.
+- **부분 파일 금지:** 5,000행·UTF-8 출력 2MiB·30초 상한을 **HTTP 200 헤더나 본문 전송 전에** 확인한다. 제한된 크기의 완성 버퍼(또는 비공개 제한 임시파일)를 구성한 후 행 수·인코딩 바이트 수·마감시간을 검사하고, 초과 시 413(행/크기), 소스 장애 503, 시간초과 명시 오류를 반환한다. 일부 CSV를 스트리밍한 뒤 413으로 바꾸는 방식과 묵시적 잘라내기는 금지. 실제 0건이면 헤더만 포함하고 rowCount=0.
+- **정확 바이트:** 열은 `id,category,title,body,link,is_read,read_at_utc,created_at_utc` 고정. `created_at DESC,id DESC` 정렬, **BOM 없는 UTF-8**, CRLF 레코드 구분, RFC 4180 따옴표 두 배 이스케이프·전체 필드 인용, UTC ISO-8601, NULL 규칙 명시. 파일명은 고정 ASCII. `text/csv; charset=utf-8`, `Content-Disposition: attachment`, `Cache-Control: private, no-store`, `X-Content-Type-Options: nosniff`; 최종 전송 바이트의 SHA-256, byteLength/rowCount/schemaVersion/sanitizationVersion 메타데이터. 사용자 입력 파일명 및 공개 CDN 캐시 금지.
+- **스프레드시트 수식 삽입:** 제목·본문·분류·링크의 쉼표·따옴표·CR/LF·탭·선행 공백/제로폭/BOM·전각 수식문자까지 공격 입력으로 취급. **RFC 직렬화 이전**에 버전이 있는 셀 단위 방어 변환을 적용하고 Excel 등 지원 뷰어에서 저장·재열기 회귀 검증. OWASP는 모든 스프레드시트에 통용되는 완전한 CSV 방어가 없고 재저장 시 수식이 재활성화될 수 있다고 명시한다. 따라서 CSV는 사람이 읽기 위한 **변환된 출력**으로 고지하고 DB 원문과 바이트 동일하다고 주장하지 않는다. transformedCellCount 표시. 무손실 기계용 포맷은 별도 승인 후 설계. SHA-256은 제공된 파일 바이트의 비교값일 뿐 DB 진실을 독립 인증하는 전자서명이 아니다.
+- **스냅샷:** 하나의 PostgreSQL 전용 연결에서 `BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY`로 회원 권한·필터·개수·데이터·스냅샷 시각을 일관되게 확인한 뒤 전송 전에 커밋/롤백한다. `snapshotCutoff`만으로 여러 HTTP 페이지의 MVCC 스냅샷을 보증할 수 없다. 읽음 상태·보존기간·삭제가 변할 수 있는 목록은 BEST_EFFORT로 표시하고, 완성된 단일 트랜잭션 CSV에만 스냅샷 일관성을 주장한다.
+- **인증/개인정보:** 회원 식별자는 검증된 세션에서만 획득, 동의·CSRF 검사, 바이트 전송 직전 세션 epoch·동의 재검증. 로그아웃·계정 전환 시 다운로드 취소 및 캐시 삭제. `moneyverse_app`의 직접 테이블 SELECT/DML 확대 금지, 고정 search_path·PUBLIC EXECUTE 회수·역할 음성 테스트를 갖춘 좁은 SECURITY DEFINER 조회 함수 설계. 임의 UUID 인자만으로 DB 차원의 사용자 인증이 되는 것은 아니므로 호출자 위조 위협도 검토. 회원당 시간당 3회/IP 제한, 본문·제목·링크·dedupe_key 로그/분석/관리자 노출 금지. 안전한 동일 출처 링크만 내보내고 나머지는 빈 값. 탈퇴·병합·보존 만료 시 커서·다운로드 권한 무효화.
+- **API/DB:** NestJS `GET /api/v1/notifications/archive`, CSRF 보호 `POST /api/v1/notifications/archive/export`를 Next.js BFF로 연결하고 Android 계약 동등성 유지. UTC 시작 포함·끝 제외(최대 90일), 실제 소스 분류 allowlist, 읽음 3상태, owner/session/filter/version/만료 HMAC 커서. 클라이언트 user_id 입력 금지. `(user_id,created_at DESC,id DESC)` 인덱스는 격리 EXPLAIN과 순방향 마이그레이션 검토 후 추가. 과거 이벤트·전달 성공을 임의 생성/역산하지 않는다.
+- **관리/SEO/접근성/KPI:** 개인 화면 no-store·noindex·사이트맵 제외, 320px·44px 터치·키보드·스크린리더·WCAG 2.2 AA. 관리자는 k>=20 비식별 시도/실패/크기·지연 집계만 조회. 버튼 클릭은 다운로드 완료 KPI가 아니며 전체 응답·선택적 클라이언트 해시 검증 후만 완료 집계. 허위 성공=0, 타 회원 데이터 누출=0을 강제 게이트로 둔다.
+- **검증/배포:** 격리 실 PostgreSQL에서 동시 요청 100건·타 회원 100건·동일 시각 UUID 10,001건·5,001행/2MiB+1·30초·잘못된 UTC·동의/세션 만료·0행·유니코드/CRLF/수식 공격·스프레드시트 재저장·해시 재계산·네트워크 중단·413 부분 바이트 0·Android·DB 권한 회귀를 검증한다. 기능 스위치 `notification_archive_export_v1` 기본 OFF, 개발 별도 브랜치/정확 SHA 공식 CI·Test E2E/보안 감사/복원/GitOps 승인 후 1%→10%→100% 단계 배포. OFF 롤백 시 기존 알림과 DB 원본 보존. 기획은 런타임·DB를 변경하지 않는다.
+
+### P0/P1 개발 인계
+- **P0 ENV1298-01:** 루트 99%·1.2GiB, 타 작업물 보호, 승인된 오래된 파일만 분류·이동, 격리 복원 및 환경 분리.
+- **P0 SEC1298-02:** 최소권한·SECDEF 호출자 신원·BOLA/동의/CSRF·계정 전환 차단·PII 비노출.
+- **P0 REL1298-03:** QA v1283 프론트 6실패·전체 Critical 2/High 10·운영 High 2, migration 266/280·정확 SHA Test·복원·GitOps HOLD.
+- **P0 ARC1298-04:** 모의 알림·보상 증빙 CSV 배제, 전체 검증 전 성공 금지, 413에서 부분 200 바이트 금지.
+- **P1 ARC1298-05:** 실제 분류·읽음·기간·링크 검증, 날짜/NULL/CSV 스키마 확정.
+- **P1 ARC1298-06:** 단일 연결 REPEATABLE READ, 여러 페이지 BEST_EFFORT 정직 표시, UUID 동률 커서.
+- **P1 ARC1298-07:** 제한 버퍼·헤더 전 413·정확 바이트 SHA·변환 셀 버전/수식 방어.
+- **P1 ARC1298-08:** NestJS·Next.js·Android 계약, 세션 epoch, 접근 가능한 개인 다운로드 상태.
+- **P1 ARC1298-09:** k>=20 관리자 통계, 악용 제한, noindex/no-store, 완료 KPI·개인정보 생명주기.
+- **P1 ARC1298-10:** 격리 실DB 경합/BOLA/수식 삽입/크기·중단 회귀, 정확 SHA Test, 스위치 OFF 롤백.
+- **백로그 ID:** ENV1298-01 SEC1298-02 REL1298-03 ARC1298-04 ARC1298-05 ARC1298-06 ARC1298-07 ARC1298-08 ARC1298-09 ARC1298-10.
+- **외부 독립 근거 10,000건 게이트:** 이번 신규 승인·중복 제거 0건, 누적 실검증 UNKNOWN/10,000 → BLOCKED / IN PROGRESS. RFC 4180·OWASP CSV Injection은 후보 1차 출처일 뿐 승인 수량에 포함하지 않는다.
+- **상태:** PARTIAL / DRAFT / RELEASE HOLD. 문서만 수정하며 런타임·마이그레이션·회원 데이터·WLD·원장·Test·Production 변경 없음.
+
 ## v2026.10.26.1296 — F675-131 회원 전용 검증형 알림 보관함 검색·CSV 내보내기 (기능 추가 / DRAFT / RELEASE HOLD)
 
 ### 실제 근거·목적·대상

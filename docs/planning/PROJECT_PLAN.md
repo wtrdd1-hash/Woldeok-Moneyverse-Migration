@@ -1,4 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
+## v2026.10.26.1298 — F675-131 Notification Archive CSV Integrity (Feature Improvement / DRAFT / HOLD)
+- **Cycle:** Previous Addition v1296 → Current Improvement v1298 → Next Addition v1300 (provisional); main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`. Full design in INTEGRATED_PLANNING_MASTER.md; Korean parity in .ko.md. Docs-only stacked on Draft #1364, no A/B/C/Gemini/QA runtime changes.
+- **Verified main:** owner-filtered notification direct SELECT currently OFFSET/created_at-only, returns dedupe_key, unreadOnly boolean coercion; no archive CSV endpoint. Distinguish existing B #1356 pagination work. No Production incident asserted.
+- **Contract refinement:** buffer/validate complete 5,000-row/2MiB/30s CSV **before headers**; 413 with zero partial bytes, empty header-only CSV; fixed columns/CRLF/UTF-8 no BOM/UTC/null rules, exact transmitted SHA-256 and length. Per-cell versioned formula mitigation before RFC4180 escaping, disclose transformedCellCount and non-lossless CSV; SHA is not DB attestation. Single-client READ ONLY REPEATABLE READ export only; multi-page browsing BEST_EFFORT. Session+consent+CSRF, role/BOLA negatives, no direct app-role table grants, no-store/noindex, Android parity, WCAG AA, k>=20 admin stats and 3 exports/hour/member.
+- **P0:** ENV1298-01 capacity/restore; SEC1298-02 privilege/owner/CSRF; REL1298-03 QA/exact-SHA/Test/restore; ARC1298-04 source/false-success/no-partial response.
+- **P1:** ARC1298-05 filter/CSV schema; ARC1298-06 MVCC/keyset; ARC1298-07 bounded bytes/injection/digest; ARC1298-08 API/web/Android/a11y; ARC1298-09 privacy/admin/SEO/KPI; ARC1298-10 isolated PG 100 races/100 foreign/10,001 rows, 413/abort/rollback.
+- **Backlog IDs:** ENV1298-01 SEC1298-02 REL1298-03 ARC1298-04 ARC1298-05 ARC1298-06 ARC1298-07 ARC1298-08 ARC1298-09 ARC1298-10.
+- **QA v1283:** frontend 1,397 pass/6 fail; full audit Critical 2/High 10, prod audit High 2, root 99%/1.2GiB. Official exact-SHA Test/restore not proven; release HOLD. External corpus newly approved 0, cumulative UNKNOWN/10,000 BLOCKED. Flag OFF; no deployment.
 - **v1296 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1364 (base: unmerged #1359; RELEASE HOLD).
 - **v1296 engineering handoff:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1363 (implementation separately gated; no merge/deploy).
 ## v2026.10.26.1296 — F675-131 Verified Notification Archive Search & CSV Export (Feature Addition / DRAFT / HOLD)
