@@ -16,5 +16,10 @@
 - Added Android machine contract endpoint; 180 endpoint references generated. Contract check expected to compare against committed tree; commit then rerun.
 
 
-## After
-- Pending.
+## After (pre-PR)
+- Feature commit `ba34408ba59999533fc4e78324e8bc14b70ff5bd`, 17 changed files. Final QA/release/worklog commit will have a new SHA; PR is Draft until all gates pass.
+- Full `pnpm test` FAIL: backend 1316 PASS / 398 SKIPPED, frontend 1403 PASS / 6 FAIL (3 SEO/i18n, login a11y, calculator registration link, admin M2). Database 15 PASS / 3 SKIPPED, contract 38 PASS; bot 8 PASS after isolated dependency restoration.
+- Security: prod 2 High; full 2 Critical/10 High/11 Moderate/3 Low; bot 1 Critical/5 High. No unrelated B/C security repairs attempted.
+- Branch audit: initial 201 remote heads/197 open PRs; midpoint 202 heads (201 non-main), 201 unmerged unique tips, no duplicate tip/tree/last patch; known conflicts #1107/#1110/#1143 preserved. No branch deleted.
+- Official Test API SHA `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; Production `6a989b5ac0c6155587d43426d64f6def6b62c917`; candidate mismatch. Exact-SHA authenticated Test E2E, full CI/security/SEO/a11y and GitOps gate not PASS. No merge, Test/Production promotion, restart, Production DB write, or deletion.
+- Rollback: before merge abandon Draft PR; after future authorized merge revert endpoint, CSV link/route, Android privacy route and contract together. No migration rollback. Final PR/SHA/CI inventory follows in GitHub evidence.
