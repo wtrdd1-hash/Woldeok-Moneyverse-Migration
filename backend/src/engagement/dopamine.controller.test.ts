@@ -71,3 +71,30 @@ describe('DopamineController - Golden Duck Fever', () => {
     expect(result.newBalance).toBe('50000');
   });
 });
+
+describe('DopamineController - VIP chest ledger integrity', () => {
+  const request = {
+    session: { user_id: '11111111-2222-4333-8444-555555555555' },
+  } as unknown as RequestWithSession;
+
+  it('does not invent Plus entitlement, a claim receipt, or next cooldown', async () => {
+    const controller = new DopamineController(null);
+    const result = await controller.getVipChestStatus(request);
+    expect(result).toEqual({
+      available: false,
+      entitlementVerified: false,
+      ledgerReceiptVerified: false,
+      reason: 'LEDGER_RECEIPT_UNAVAILABLE',
+    });
+    expect(JSON.stringify(result)).not.toMatch(/claimedToday|rewardAmount|diceAwarded|isPlusUser|nextAvailableAt/);
+  });
+
+  it('rejects a claim without a verified DB posting even with an injected repository', async () => {
+    const repository = { claimGoldenDuck: vi.fn() } as unknown as DopamineRepository;
+    const controller = new DopamineController(repository);
+    await expect(controller.claimVipChest(request)).rejects.toMatchObject({
+      status: 503,
+    });
+    expect(repository.claimGoldenDuck).not.toHaveBeenCalled();
+  });
+});

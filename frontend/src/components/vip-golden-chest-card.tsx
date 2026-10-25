@@ -1,157 +1,42 @@
-'use client';
-
-import React, { useState } from 'react';
 import Link from 'next/link';
-import {
-  Sparkles,
-  Gift,
-  Crown,
-  CheckCircle2,
-  Clock,
-  ArrowRight,
-  Dices,
-  Coins,
-} from 'lucide-react';
+import { Gift, ShieldAlert, Wallet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/cn';
 
-interface VipGoldenChestCardProps {
-  readonly isPlusUser?: boolean;
-  readonly initialClaimed?: boolean;
+export interface VipChestStatus {
+  readonly available: false;
+  readonly entitlementVerified: false;
+  readonly ledgerReceiptVerified: false;
+  readonly reason: 'LEDGER_RECEIPT_UNAVAILABLE';
 }
 
-export function VipGoldenChestCard({
-  isPlusUser = true,
-  initialClaimed = false,
-}: VipGoldenChestCardProps) {
-  const [claimed, setClaimed] = useState(initialClaimed);
-  const [isClaiming, setIsClaiming] = useState(false);
-  const [rewardFeedback, setRewardFeedback] = useState<string | null>(null);
-
-  const handleClaimChest = async () => {
-    if (claimed || isClaiming) return;
-    setIsClaiming(true);
-    setRewardFeedback(null);
-
-    try {
-      // Direct client fetch to dopamine/vip-chest endpoint
-      const res = await fetch('/api/v1/engagement/dopamine/vip-chest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      }).catch(() => null);
-
-      if (res && res.ok) {
-        setClaimed(true);
-        setRewardFeedback('🎉 2,000 WLD와 VIP 럭키 다이스 1개가 지갑으로 입금되었습니다!');
-      } else {
-        // Fallback smooth claim for simulation
-        setClaimed(true);
-        setRewardFeedback('🎉 [Moneyverse Plus VIP] 일일 2,000 WLD + 럭키 다이스 1개 수령 완료!');
-      }
-    } catch {
-      setClaimed(true);
-      setRewardFeedback('🎉 [Moneyverse Plus VIP] 일일 2,000 WLD + 럭키 다이스 1개 수령 완료!');
-    } finally {
-      setIsClaiming(false);
-    }
-  };
-
+/** Only a server-confirmed ledger receipt may turn a virtual payout into success. */
+export function VipGoldenChestCard({ status }: { readonly status: VipChestStatus | null }) {
   return (
-    <Card className="relative overflow-hidden border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-card shadow-lg shadow-amber-500/5">
-      {/* Decorative ambient background glow */}
-      <div className="pointer-events-none absolute -right-12 -top-12 size-48 rounded-full bg-amber-500/15 blur-3xl" />
-
-      <CardContent className="p-5 sm:p-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          {/* Left Hero Info */}
-          <div className="flex items-start gap-4">
-            <div className="relative flex size-14 shrink-0 items-center justify-center rounded-2xl border border-amber-500/50 bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 shadow-md shadow-amber-500/30">
-              <Gift className="size-7 animate-bounce" />
-              <div className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-slate-950 text-amber-400 shadow">
-                <Crown className="size-3" />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge
-                  variant="outline"
-                  className="border-amber-500/50 bg-amber-500/20 px-2 py-0.5 font-mono text-[11px] font-extrabold text-amber-500 dark:text-amber-300"
-                >
-                  <Crown className="mr-1 size-3 text-amber-500 dark:text-amber-300" />
-                  VIP PLUS EXCLUSIVE
-                </Badge>
-                <span className="text-xs font-semibold text-muted-foreground">
-                  자정(00:00 KST) 갱신
-                </span>
-              </div>
-
-              <h3 className="text-base font-black text-foreground sm:text-lg">
-                Moneyverse Plus 전용 일일 VIP 황금 상자
-              </h3>
-
-              <p className="text-xs text-muted-foreground">
-                매일 접속 시 <span className="font-mono font-bold text-amber-600 dark:text-amber-300">2,000 WLD</span> 즉시 입금 및{' '}
-                <span className="font-semibold text-foreground">VIP 럭키 다이스 1개</span> 자동 지급
-              </p>
-            </div>
-          </div>
-
-          {/* Right Action / Status */}
-          <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-            {isPlusUser ? (
-              claimed ? (
-                <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="size-4" />
-                  <span>오늘 보상 수령 완료 (자정 갱신)</span>
-                </div>
-              ) : (
-                <Button
-                  onClick={handleClaimChest}
-                  disabled={isClaiming}
-                  className="relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-black text-slate-950 shadow-md shadow-amber-500/25 transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <Sparkles className="size-4" />
-                  {isClaiming ? '황금 상자 개봉 중...' : '황금 상자 열기 (2,000 WLD)'}
-                </Button>
-              )
-            ) : (
-              <Button
-                asChild
-                variant="outline"
-                className="flex items-center gap-1.5 border-amber-500/40 bg-amber-500/10 text-xs font-bold text-amber-600 hover:bg-amber-500/20 dark:text-amber-300"
-              >
-                <Link href="/shop">
-                  <span>Plus 멤버십 업그레이드</span>
-                  <ArrowRight className="size-3.5" />
-                </Link>
-              </Button>
-            )}
-
-            {/* Quick Reward Pill Badges */}
-            <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-              <span className="flex items-center gap-1 font-mono font-semibold text-foreground">
-                <Coins className="size-3 text-amber-500" />
-                +2,000 WLD
+    <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-card">
+      <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="flex min-w-0 items-start gap-3">
+          <Gift className="mt-1 size-6 shrink-0 text-amber-500" aria-hidden="true" />
+          <div className="min-w-0 space-y-2">
+            <h2 className="text-base font-bold text-foreground sm:text-lg">
+              Moneyverse Plus 전용 일일 VIP 황금 상자
+            </h2>
+            <p role="status" aria-live="polite" className="flex items-start gap-2 text-sm leading-relaxed text-muted-foreground">
+              <ShieldAlert className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden="true" />
+              <span>
+                {status === null
+                  ? '황금 상자 상태를 확인할 수 없습니다. 보상 수령은 진행되지 않았습니다.'
+                  : '실제 원장 지급 영수증이 없어 지급 기능을 안전하게 중단했습니다. 보상은 지급되지 않았습니다.'}
               </span>
-              <span>•</span>
-              <span className="flex items-center gap-1 font-semibold text-foreground">
-                <Dices className="size-3 text-purple-400" />
-                럭키 다이스 x1
-              </span>
-            </div>
+            </p>
           </div>
         </div>
-
-        {/* Success Feedback Banner */}
-        {rewardFeedback && (
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 p-3 text-xs font-bold text-emerald-600 dark:text-emerald-300">
-            <CheckCircle2 className="size-4 shrink-0" />
-            <span>{rewardFeedback}</span>
-          </div>
-        )}
+        <Link
+          href="/wallet"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-amber-500/40 px-4 py-2 text-sm font-semibold text-foreground hover:bg-amber-500/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+        >
+          <Wallet className="size-4" aria-hidden="true" />
+          지갑 기록 확인
+        </Link>
       </CardContent>
     </Card>
   );

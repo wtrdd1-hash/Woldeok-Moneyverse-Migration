@@ -10,6 +10,7 @@ import {
   InternalServerErrorException,
   Post,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -221,43 +222,27 @@ export class DopamineController {
   }
 
   @Get('vip-chest/status')
-  @ApiOperation({ summary: 'Get Moneyverse Plus VIP Golden Chest claim status and cooldown' })
+  @ApiOperation({ summary: 'VIP chest availability (requires verified entitlement and ledger receipt)' })
   async getVipChestStatus(@Req() request: RequestWithSession) {
-    const userId = requireUserId(request);
-    const now = new Date();
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-
+    requireUserId(request);
+    // There is no VIP entitlement or dice inventory authority, and no
+    // idempotent ledger-backed chest claim. Do not invent eligibility or a cooldown.
     return {
-      userId,
-      isPlusUser: true, // Supported via Moneyverse Plus tier
-      claimedToday: false,
-      rewardAmount: 2000,
-      diceAwarded: 1,
-      nextAvailableAt: midnight.toISOString(),
-      currentServerTime: now.toISOString(),
+      available: false,
+      entitlementVerified: false,
+      ledgerReceiptVerified: false,
+      reason: 'LEDGER_RECEIPT_UNAVAILABLE' as const,
     };
   }
 
   @Post('vip-chest')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim Moneyverse Plus VIP Golden Chest (2,000 WLD + 1 Lucky Dice)' })
-  async claimVipChest(@Req() request: RequestWithSession) {
-    const userId = requireUserId(request);
-    const now = new Date();
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-
-    return {
-      success: true,
-      userId,
-      isPlusUser: true,
-      rewardAmount: 2000,
-      diceAwarded: 1,
-      claimedAt: now.toISOString(),
-      nextAvailableAt: midnight.toISOString(),
-      message: 'Moneyverse Plus VIP 일일 황금 상자 수령 완료 (2,000 WLD + VIP 럭키 다이스 1개 지급)',
-    };
+  @ApiOperation({ summary: 'VIP chest claim (held until a ledger-backed receipt exists)' })
+  async claimVipChest(@Req() request: RequestWithSession): Promise<never> {
+    requireUserId(request);
+    // A 2xx here would be a false financial receipt: no WLD posting or dice grant
+    // is performed by this endpoint. Keep the server boundary closed.
+    throw new ServiceUnavailableException('VIP chest payout is not ledger-backed');
   }
 
   @Get('attendance/status')

@@ -1,43 +1,33 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import { VipGoldenChestCard } from './vip-golden-chest-card';
 
-describe('VipGoldenChestCard', () => {
+describe('VipGoldenChestCard - verified reward boundary', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
   });
 
-  it('renders VIP Golden Chest banner and reward elements for Plus users', () => {
-    render(<VipGoldenChestCard isPlusUser={true} initialClaimed={false} />);
-
-    expect(screen.getByText('VIP PLUS EXCLUSIVE')).toBeTruthy();
-    expect(screen.getByText('Moneyverse Plus 전용 일일 VIP 황금 상자')).toBeTruthy();
-    expect(screen.getByText('+2,000 WLD')).toBeTruthy();
-    expect(screen.getByText('럭키 다이스 x1')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /황금 상자 열기/i })).toBeTruthy();
-  });
-
-  it('renders Upgrade button for non-Plus users', () => {
-    render(<VipGoldenChestCard isPlusUser={false} initialClaimed={false} />);
-
-    expect(screen.getByText(/Plus 멤버십 업그레이드/i)).toBeTruthy();
+  it('disables the chest when the backend cannot verify an entitlement or ledger receipt', () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    render(<VipGoldenChestCard status={{
+      available: false,
+      entitlementVerified: false,
+      ledgerReceiptVerified: false,
+      reason: 'LEDGER_RECEIPT_UNAVAILABLE',
+    }} />);
+    expect(screen.getByRole('status').textContent).toMatch(/지급 기능.*중단/);
     expect(screen.queryByRole('button', { name: /황금 상자 열기/i })).toBeNull();
+    expect(screen.queryByText(/수령 완료|입금되었습니다|럭키 다이스 x1/i)).toBeNull();
+    expect(fetchSpy).not.toHaveBeenCalled();
+    const walletLink = screen.getByRole('link', { name: /지갑 기록 확인/i });
+    expect(walletLink.getAttribute('href')).toBe('/wallet');
+    expect(walletLink.className).toMatch(/min-h-11|focus-visible/);
   });
 
-  it('handles claim button click with reward animation feedback', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ success: true, rewardAmount: 2000, diceAwarded: 1 }),
-    });
-
-    render(<VipGoldenChestCard isPlusUser={true} initialClaimed={false} />);
-
-    const claimBtn = screen.getByRole('button', { name: /황금 상자 열기/i });
-    fireEvent.click(claimBtn);
-
-    await waitFor(() => {
-      expect(screen.getByText(/오늘 보상 수령 완료/i)).toBeTruthy();
-    });
+  it('shows a distinct unknown state when the private status API is unavailable', () => {
+    render(<VipGoldenChestCard status={null} />);
+    expect(screen.getByRole('status').textContent).toMatch(/상태를 확인할 수 없습니다/);
+    expect(screen.queryByRole('button')).toBeNull();
   });
 });

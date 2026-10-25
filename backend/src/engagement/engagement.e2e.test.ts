@@ -39,6 +39,18 @@ describe('engagement routes', () => {
     process.env = { ...ORIGINAL_ENV };
   });
 
+  it('does not disclose VIP chest eligibility or allow a claim without authentication', async () => {
+    const status = await request(app.getHttpServer()).get('/api/v1/engagement/dopamine/vip-chest/status');
+    const claim = await request(app.getHttpServer())
+      .post('/api/v1/engagement/dopamine/vip-chest')
+      .send({});
+    expect(status.status).not.toBe(404);
+    expect(claim.status).not.toBe(404);
+    expect(status.status).toBeGreaterThanOrEqual(400);
+    expect(claim.status).toBeGreaterThanOrEqual(400);
+    expect(JSON.stringify(claim.body)).not.toMatch(/transactionId|diceAwarded|rewardAmount/);
+  });
+
   it('mounts the engagement summary behind a session', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/engagement');
     expect(response.status).not.toBe(404);
