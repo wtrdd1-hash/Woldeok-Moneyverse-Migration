@@ -1,5 +1,5 @@
 import { getServerLocale } from '@/lib/locale-server';
-import { localeLabel } from '@/lib/locale';
+import { type Locale, localeLabel } from '@/lib/locale';
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -7,292 +7,125 @@ import { ArrowLeft, Landmark, Info, HelpCircle, ShieldCheck } from 'lucide-react
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 import { LoanCalculatorClient } from './loan-calculator-client';
-
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
+import { t } from '@/lib/translations';
 
-export const metadata: Metadata = {
-  title: '[무료/무로그인] 대출이자 계산기 — 1초 만에 2억·3억 대출 원리금균등 월 납입금 & 총이자 즉시 비교 | 월덕 머니버스',
-  description: '[로그인 없이 1초 산출] 1억·2억·3억·5억 주택담보대출 및 신용대출 30년 상환 시 월 납입금과 총 대출이자 정밀 산출! 원리금균등, 원금균등, 만기일시 상환방식별 총 이자와 월 상환액을 한눈에 즉시 비교하세요.',
-  keywords: [
-    '2억 대출 30년 상환',
-    '대출이자 계산기',
-    '원리금균등상환',
-    '원금균등상환',
-    '주택담보대출 이자',
-    '신용대출 이자',
-    '30년 상환 대출이자',
-    '만기일시상환',
-    '주담대 2억 이자',
-    '대출상환 계산기',
-  ],
-  alternates: {
-    canonical: canonicalUrl('/tools/loan-interest-calculator'),
-    languages: {
-      'ko-KR': canonicalUrl('/tools/loan-interest-calculator'),
-      'en-US': canonicalUrl('/en/tools/loan-interest-calculator'),
-      'ja-JP': canonicalUrl('/ja/tools/loan-interest-calculator'),
-      'zh-CN': canonicalUrl('/zh/tools/loan-interest-calculator'),
-      'x-default': canonicalUrl('/tools/loan-interest-calculator'),
-    },
+const META_BY_LOCALE: Record<Locale, { title: string; description: string; canonical: string }> = {
+  ko: {
+    title: '[무료/무로그인] 대출이자 계산기 — 1초 만에 2억·3억 대출 원리금균등 월 납입금 & 총이자 즉시 비교 | 월덕 머니버스',
+    description: '[로그인 없이 1초 산출] 1억·2억·3억·5억 주택담보대출 및 신용대출 30년 상환 시 월 납입금과 총 대출이자 정밀 산출! 원리금균등, 원금균등, 만기일시 상환방식별 총 이자와 월 상환액을 한눈에 즉시 비교하세요.',
+    canonical: '/tools/loan-interest-calculator',
   },
-  openGraph: {
-    title: '[무료/무로그인] 대출이자 계산기 — 2억 대출 30년 상환 월 납입금 & 원리금균등 비교 | 월덕 머니버스',
-    description: '2억 대출 30년 상환(연 4.0% 기준 월 95만원) 및 대출 금액·금리·기간별 총 대출이자와 월별 상환 스케줄을 실시간으로 확인하세요.',
-    url: canonicalUrl('/tools/loan-interest-calculator'),
-    type: 'website',
-    images: [
-      {
-        url: buildOgImageUrl({
-          title: '대출이자 계산기 - 2억 대출 30년 상환',
-          description: '원리금균등 · 원금균등 · 만기일시 상환방식별 월 상환액 비교',
-          badge: '무료/무로그인 1초 시뮬레이터',
-          type: 'default',
-        }),
-        width: 1200,
-        height: 630,
-        alt: '대출이자 계산기',
-      },
-    ],
+  en: {
+    title: 'Loan Interest & Amortization Calculator | Free Mortgage & Credit Loan Simulator | Woldeok Moneyverse',
+    description: 'Calculate monthly loan repayments and total interest for mortgages and personal loans across equal principal & interest, equal principal, and balloon repayment schedules in 1 second. Free and login-free.',
+    canonical: '/en/tools/loan-interest-calculator',
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: '[무료/무로그인] 대출이자 계산기 — 2억 대출 30년 상환 월 납입금 & 원리금균등 비교 | 월덕 머니버스',
-    description: '2억 대출 30년 상환(연 4.0% 기준 월 95만원) 및 대출 금액·금리·기간별 총 대출이자와 월별 상환 스케줄을 실시간으로 확인하세요.',
+  ja: {
+    title: 'ローン利息・元利均等返済計算機 | 住宅ローン＆信用融資シミュレーター | ウォルドクマネーバース',
+    description: '住宅ローンや信用借入の月々返済額と総支払利息を即座に試算。元利均等返済・元金均等返済・一括返済の比較を1秒で確認できます。',
+    canonical: '/ja/tools/loan-interest-calculator',
+  },
+  zh: {
+    title: '贷款利息与等额本息还款计算器 | 房贷与消费贷月供试算 | 沃尔德克金融元宇宙',
+    description: '一键精确测算房贷与信用贷款在等额本息、等额本金及先息后本模式下的每月还款额与累计总利息。无须登录，免费即用。',
+    canonical: '/zh/tools/loan-interest-calculator',
+  },
+  vi: {
+    title: 'Máy tính Lãi suất & Trả nợ Khoản vay | Mô phỏng Vay Mua nhà & Tín chấp | Woldeok Moneyverse',
+    description: 'Tính toán số tiền trả góp hàng tháng và tổng lãi vay theo phương thức trả gốc và lãi đều hoặc gốc đều hoàn toàn miễn phí.',
+    canonical: '/vi/tools/loan-interest-calculator',
   },
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const meta = META_BY_LOCALE[locale] ?? META_BY_LOCALE.en;
+
+  return {
+    title: meta.title,
+    description: meta.description,
+    keywords: [
+      '대출이자 계산기',
+      '원리금균등상환',
+      'Loan Amortization Calculator',
+      'Mortgage Repayment Calculator',
+      'ローン返済計算機',
+      '等额本息计算器',
+    ],
+    alternates: {
+      canonical: canonicalUrl(meta.canonical),
+      languages: {
+        'ko-KR': canonicalUrl('/tools/loan-interest-calculator'),
+        'en-US': canonicalUrl('/en/tools/loan-interest-calculator'),
+        'ja-JP': canonicalUrl('/ja/tools/loan-interest-calculator'),
+        'zh-CN': canonicalUrl('/zh/tools/loan-interest-calculator'),
+        'vi-VN': canonicalUrl('/vi/tools/loan-interest-calculator'),
+        'x-default': canonicalUrl('/tools/loan-interest-calculator'),
+      },
+    },
+    openGraph: {
+      title: meta.title,
+      description: meta.description,
+      url: canonicalUrl(meta.canonical),
+      type: 'website',
+      images: [
+        {
+          url: buildOgImageUrl({
+            title: localeLabel(locale, '대출이자 계산기', 'Loan Interest Calculator', 'ローン利息計算機', '贷款利息计算器', 'Máy tính Lãi suất Vay'),
+            description: meta.description,
+            badge: localeLabel(locale, '무료 대출 시뮬레이터', 'Free Loan Simulator', '無料ローン試算', '免费贷款测算', 'Mô phỏng Khoản vay'),
+            type: 'default',
+          }),
+          width: 1200,
+          height: 630,
+          alt: meta.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: meta.title,
+      description: meta.description,
+    },
+  };
+}
+
 export default async function LoanInterestCalculatorPage() {
   const locale = await getServerLocale();
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: '대출이자 계산기 - 2억 대출 30년 상환 시뮬레이터',
-    description: '2억 대출 30년 상환 및 원리금균등, 원금균등, 만기일시 상환 방식별 대출 이자 및 월 상환액 계산 시뮬레이터',
-    applicationCategory: 'FinanceApplication',
-    operatingSystem: 'All',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'KRW',
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '1350',
-      bestRating: '5',
-      worstRating: '1',
-    },
-  };
-
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: '2억 대출 30년 상환 시 월 납입금과 총 이자는 얼마인가요?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: '연 4.0% 금리 기준 2억 원을 30년(360개월) 원리금균등상환할 경우 매월 상환하는 원리금은 약 954,830원이며 30년간 총 대출이자는 약 1억 4,374만 원입니다. 동일 조건으로 원금균등상환 시 첫 달 상환액은 약 1,222,222원으로 높지만 총 이자는 약 1억 2,033만 원으로 약 2,341만 원의 이자를 절약할 수 있습니다.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: '원리금균등상환과 원금균등상환 중 어느 것이 더 유리한가요?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: '총 대출 이자만 비교하면 매월 원금을 더 많이 갚아나가는 원금균등상환이 가장 유리합니다. 하지만 초기 월 상환액 부담이 크므로, 매달 일정한 지출 관리를 원하신다면 원리금균등상환이 적합합니다.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: '중도상환수수료는 언제까지 발생하나요?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: '대부분의 시중은행 주택담보대출 및 신용대출은 대출 실행 후 3년이 지나면 중도상환수수료가 전액 면제됩니다.',
-        },
-      },
-    ],
-  };
+  const toolsHubPath = locale === 'ko' ? '/tools' : `/${locale}/tools`;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-20">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8">
-        {/* 상단 내비게이션 */}
-        <div className="flex items-center justify-between mb-6">
-          <Link
-            href="/tools"
-            className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>{localeLabel(locale, '금융 계산기 목록으로', 'Back to Tools Hub', '計算機一覧へ戻る', '返回金融工具列表', 'Quay lại danh sách máy tính')}</span>
-          </Link>
-          <span className="text-xs text-zinc-500 font-mono">FIN-CALC-LOAN-V1</span>
-        </div>
-
-        {/* 헤더 */}
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-3">
-            <Landmark className="w-3.5 h-3.5" />
-            <span>{localeLabel(locale, '2026년 최신 은행 기준 금리 완벽 반영', '2026 Updated Benchmark Rate Engine', '2026年最新銀行基準金利反映', '2026最新基准利率计算', 'Cập nhật lãi suất chuẩn ngân hàng 2026')}</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
-            {localeLabel(
-              locale,
-              '대출이자 계산기 (원리금균등 · 원금균등)',
-              'Loan Interest Calculator (Amortization & Equal Principal)',
-              'ローン金利計算機（元利均等・元金均等）',
-              '贷款利息计算器（等额本息 · 等额本金）',
-              'Máy tính Lãi suất Vay (Gốc & Lãi Đều)'
-            )}
-          </h1>
-          <p className="text-sm text-zinc-400 leading-relaxed">
-            {localeLabel(
-              locale,
-              '대출 금액, 연 금리, 상환 기간에 따른 월별 상환금액과 총 이자를 즉시 비교 계산합니다.',
-              'Instantly calculate monthly repayments and total interest across principal, interest rates, and loan terms.',
-              '借入元金、年利、返済期間に応じた毎月の返済額と総支払利息を瞬時に試算します。',
-              '根据贷款金额、年利率和还款期限，即时测算各月还款额与累计总利息。',
-              'Tính toán ngay lập tức khoản trả góp hàng tháng và tổng lãi suất theo số tiền vay và kỳ hạn.'
-            )}
-          </p>
-        </div>
-
-        {/* 상단 고단가 인아티클 광고 */}
-        <div className="my-6">
-          <InArticleAdvertisement />
-        </div>
-
-        {/* 인터랙티브 계산기 클라이언트 컴포넌트 */}
-        <LoanCalculatorClient />
-
-        {/* 중간 멀티플렉스 고단가 광고 */}
-        <div className="my-10">
-          <MultiplexAdvertisement />
-        </div>
-
-        {/* 안내 및 절세 가이드 */}
-        <div className="mt-12 space-y-6">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-            <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
-              <Info className="w-4 h-4 text-emerald-400" />
-              {localeLabel(locale, '대출 상환 방식 3가지 핵심 비교', '3 Core Loan Repayment Methods Compared', 'ローン返済方式3大比較', '三大主流还款方式核心对比', 'So sánh 3 phương thức trả góp chính')}
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-zinc-400">
-              <div className="p-3.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-                <span className="font-semibold text-zinc-200 block mb-1">
-                  {localeLabel(locale, '1. 원리금균등상환', '1. Equal Amortization', '1. 元利均等返済', '1. 等额本息还款', '1. Gốc & Lãi đều')}
-                </span>
-                {localeLabel(
-                  locale,
-                  '매달 납부하는 원금과 이자의 합계가 동일합니다. 매월 일정한 지출 예산 관리가 가능해 가장 많이 선택합니다.',
-                  'Monthly total payment remains identical. Best for predictable budgeting with steady monthly outlays.',
-                  '毎月の返済総額（元金＋利息）が一定です。家計管理がしやすく最も広く利用されています。',
-                  '每月偿还本息总额固定不变。便于规划日常收支预算，受众最广。',
-                  'Tổng số tiền trả góp hàng tháng cố định, giúp quản lý chi tiêu dễ dàng.'
-                )}
-              </div>
-              <div className="p-3.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-                <span className="font-semibold text-zinc-200 block mb-1">
-                  {localeLabel(locale, '2. 원금균등상환', '2. Equal Principal', '2. 元金均等返済', '2. 等额本金还款', '2. Gốc đều giảm dần')}
-                </span>
-                {localeLabel(
-                  locale,
-                  '매달 원금을 똑같이 나누어 갚으므로, 시간이 지날수록 이자가 줄어듭니다. 총 대출 이자가 가장 적습니다.',
-                  'Principal is repaid evenly each month, causing interest to decline over time. Results in lowest total interest.',
-                  '元金を均等に返済するため、利息は毎月減少します。総支払利息を最も抑えられます。',
-                  '每月偿还相同数额本金，利息随本金减少递减。累计总利息支出最低。',
-                  'Tiền gốc được chia đều trả mỗi tháng, tiền lãi giảm dần theo thời gian. Tổng lãi vay thấp nhất.'
-                )}
-              </div>
-              <div className="p-3.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-                <span className="font-semibold text-zinc-200 block mb-1">
-                  {localeLabel(locale, '3. 만기일시상환', '3. Balloon / Interest-Only', '3. 期日一括返済', '3. 先息后本还款', '3. Trả lãi định kỳ, gốc cuối kỳ')}
-                </span>
-                {localeLabel(
-                  locale,
-                  '대출 기간 동안 이자만 납부하다 만기에 원금을 전액 상환합니다. 초기 부담은 적으나 총 이자가 가장 많습니다.',
-                  'Pay only interest during the term, repaying full principal upon maturity. Low initial cost but highest cumulative interest.',
-                  '期間中は利息のみを支払い、満期時に元金を一括返済します。初期負担は軽いですが総利息は最大となります。',
-                  '借款期间仅按期付息，到期一次性偿还全部本金。前期压力小但总利息最高。',
-                  'Trong kỳ chỉ trả lãi, đến hạn thanh toán toàn bộ tiền gốc. Chi phí ban đầu thấp nhưng tổng lãi cao nhất.'
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* 자주 묻는 질문 FAQ */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-            <h3 className="text-base font-semibold text-white mb-4 flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-emerald-400" />
-              {localeLabel(locale, '자주 묻는 질문 (FAQ)', 'Frequently Asked Questions (FAQ)', 'よくある質問 (FAQ)', '常见问题 (FAQ)', 'Câu hỏi thường gặp (FAQ)')}
-            </h3>
-            <div className="space-y-4 text-xs">
-              <div>
-                <h4 className="font-semibold text-zinc-200 mb-1">
-                  {localeLabel(
-                    locale,
-                    'Q. 주택담보대출 이자 소득공제 혜택은 어떻게 되나요?',
-                    'Q. How does the mortgage interest tax deduction work?',
-                    'Q. 住宅ローン利息控除（減税）の仕組みは？',
-                    'Q. 房贷利息税前专项扣除政策是什么？',
-                    'Q. Chính sách giảm trừ thuế đối với lãi vay mua nhà như thế nào?'
-                  )}
-                </h4>
-                <p className="text-zinc-400 leading-relaxed">
-                  {localeLabel(
-                    locale,
-                    '무주택 또는 1주택 세대주가 취득 당시 기준시가 6억원 이하의 주택을 구입하기 위해 만기 15년 이상의 장기주택저당차입금을 이용하는 경우, 상환 방식에 따라 연간 최대 2,000만원 한도로 이자 상환액 전액을 근로소득에서 공제받을 수 있습니다.',
-                    'Eligible homeowners with long-term mortgages over 15 years may qualify for annual income tax deductions up to statutory caps on interest paid.',
-                    '一定要件を満たす長期住宅ローンを組んでいる場合、年間支払利息に応じて所得税控除を受けることができます。',
-                    '符合特定条件的长期住房按揭贷款借款人，可在个人所得税申报中按规定享受利息专项附加扣除。',
-                    'Người vay mua nhà dài hạn đáp ứng các tiêu chuẩn có thể được hưởng chính sách khấu trừ thuế trên số tiền lãi đã trả.'
-                  )}
-                </p>
-              </div>
-              <div className="pt-3 border-t border-zinc-800">
-                <h4 className="font-semibold text-zinc-200 mb-1">
-                  {localeLabel(
-                    locale,
-                    'Q. 금리인하요구권은 언제 신청할 수 있나요?',
-                    'Q. When can I apply for an interest rate reduction?',
-                    'Q. 金利引き下げ要求権はいつ申請できますか？',
-                    'Q. 什么时候可以申请调降贷款利率？',
-                    'Q. Khi nào tôi có thể yêu cầu giảm lãi suất vay?'
-                  )}
-                </h4>
-                <p className="text-zinc-400 leading-relaxed">
-                  {localeLabel(
-                    locale,
-                    '취업, 승진, 급여 인상, 신용점수 상승, 부채 감소 등 신용 상태가 개선된 경우 은행에 언제든 금리 인하를 요구할 수 있습니다.',
-                    'You may request a rate cut from lenders whenever your credit rating improves, such as via salary raises, promotions, or debt reduction.',
-                    '就職、昇進、年収増加、クレジットスコアの上昇など信用状態が改善された場合、いつでも金融機関に金利引き下げを請求できます。',
-                    '当个人信用状况明显改善（如晋升提薪、信用分提升、还清大额债务）时，可随时向金融机构申请调降贷款利息。',
-                    'Bất cứ khi nào điểm tín dụng được cải thiện (tăng lương, trả bớt nợ), bạn đều có quyền yêu cầu ngân hàng xem xét giảm lãi suất.'
-                  )}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 법적 고지 */}
-        <div className="mt-8 pt-4 border-t border-zinc-800 text-[11px] text-zinc-500 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-            <span>{localeLabel(locale, '본 계산기는 모의 시뮬레이션용이며, 실제 금융기관의 대출 실행 시점 및 세부 약정에 따라 차이가 발생할 수 있습니다.', 'This tool provides estimates for simulation purposes. Actual loan terms depend on financial institution agreements.', '本ツールは試算用シミュレーションであり、実際の金融機関の審査結果や契約条件により異なる場合があります。', '本计算器仅供测算参考，实际贷款审批利率与月供以金融机构正式签署合同为准。', 'Công cụ này dùng cho mục đích ước tính. Điều khoản thực tế phụ thuộc vào ngân hàng cho vay.')}</span>
-          </div>
+    <div className="container max-w-5xl py-8 space-y-8">
+      {/* Navigation & Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
+        <Link
+          href={toolsHubPath}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="size-4" />
+          <span>{t('tools.back_to_hub', locale)}</span>
+        </Link>
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+          <Landmark className="size-3.5" />
+          <span>{t('loan_calc.badge', locale)}</span>
         </div>
       </div>
+
+      <div className="space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
+          <Landmark className="size-7 text-primary" />
+          <span>{t('loan_calc.title', locale)}</span>
+        </h1>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {t('loan_calc.desc', locale)}
+        </p>
+      </div>
+
+      {/* Main Interactive Client Calculator */}
+      <LoanCalculatorClient />
+
+      <InArticleAdvertisement />
     </div>
   );
 }

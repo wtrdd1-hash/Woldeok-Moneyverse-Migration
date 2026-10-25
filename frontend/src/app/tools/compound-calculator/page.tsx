@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
+import { t, getCurrencyConfig } from '@/lib/translations';
 import Link from 'next/link';
 import { Landmark, ArrowLeft, RotateCcw, TrendingUp, Sparkles, HelpCircle, CheckCircle2, Share2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -17,6 +20,8 @@ import { FinancialKnowledgeHub } from '@/components/financial-knowledge-hub';
 import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 export default function CompoundCalculatorPage() {
+  const { locale } = useLocale();
+  const curr = getCurrencyConfig(locale);
   const [principal, setPrincipal] = useState<number>(100000);
   const [monthlyDeposit, setMonthlyDeposit] = useState<number>(10000);
   const [annualRate, setAnnualRate] = useState<number>(8.5);
@@ -126,26 +131,26 @@ export default function CompoundCalculatorPage() {
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="size-4" />
-          <span>도구 허브로 돌아가기</span>
+          <span>{t('tools.back_to_hub', locale)}</span>
         </Link>
         <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-500">
           <Sparkles className="size-3.5" />
-          <span>실시간 복리 시뮬레이터</span>
+          <span>{t('compound_calc.badge', locale)}</span>
         </div>
       </div>
 
       <div className="space-y-2">
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
           <Landmark className="size-7 text-amber-500" />
-          <span>복리·CAGR 계산기 (연평균 복리수익률 & DCA 시뮬레이터)</span>
+          <span>{t('compound_calc.title', locale)}</span>
         </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          초기 예치 원금과 매월 적립액(DCA), 연평균 복리 수익률(CAGR), 투자 기간을 입력하여 만기 시 수령액과 복리 효과를 정밀 시뮬레이션하세요.
+          {t('compound_calc.desc', locale)}
         </p>
 
         {/* 롱테일 인기 프리셋 칩 목록 */}
         <div className="pt-2 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-muted-foreground">인기 검색 프리셋:</span>
+          <span className="text-xs font-semibold text-muted-foreground">{t('tools.popular_presets', locale)}:</span>
           <button
             type="button"
             onClick={() => {

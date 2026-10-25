@@ -1,12 +1,17 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
+import { t, getCurrencyConfig } from '@/lib/translations';
 import { Calculator, ArrowRight, DollarSign, Calendar, Percent, Check, HelpCircle } from 'lucide-react';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 
 type RepaymentType = 'EQUAL_PI' | 'EQUAL_P' | 'BULLET';
 
 export function LoanCalculatorClient() {
+  const { locale } = useLocale();
+  const curr = getCurrencyConfig(locale);
   const [loanAmount, setLoanAmount] = useState<number>(300000000); // 3억원 기본
   const [annualRate, setAnnualRate] = useState<number>(4.2); // 4.2% 기본
   const [termYears, setTermYears] = useState<number>(30); // 30년 기본
@@ -118,7 +123,7 @@ export function LoanCalculatorClient() {
       {/* 1위 검색 유입 추천 시나리오 퀵 프리셋 */}
       <div className="flex flex-wrap items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
         <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
-          <span>🔥</span> 실시간 인기 검색 시나리오:
+          <span>🔥</span> {localeLabel(locale, '실시간 인기 검색 시나리오:', 'Popular Scenarios:', 'リアルタイム人気シナリオ:', '热门测算场景:')}
         </span>
         <button
           type="button"

@@ -131,7 +131,13 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
 
   const localizedTermName = isEn ? item.termEn : isJa ? item.termJa : item.termZh;
   const localizedDescription = isEn ? item.descriptionEn : isJa ? item.descriptionJa : item.descriptionZh;
-  const localizedKeyTakeaway = isEn ? item.keyTakeawayEn : item.keyTakeawayKo;
+  const localizedKeyTakeaway = isEn
+    ? item.keyTakeawayEn
+    : isJa
+    ? ((item as any).keyTakeawayJa || item.descriptionJa || item.keyTakeawayEn)
+    : isZh
+    ? ((item as any).keyTakeawayZh || item.descriptionZh || item.keyTakeawayEn)
+    : item.keyTakeawayKo;
 
   const breadcrumbs = breadcrumbJsonLd([
     { name: isEn ? 'Home' : isJa ? 'ホーム' : '首页', path: `/${locale}` },
@@ -278,7 +284,7 @@ export default async function LocalizedGlossaryDetailPage({ params }: PageProps)
                 {isEn ? 'Interactive Simulation' : isJa ? 'シミュレーターで試す' : '直接进行在线试算'}
               </span>
               <h4 className="text-base font-bold text-foreground">
-                {item.relatedCalculatorLabelKo || 'Financial Calculator Tool'}
+                {isEn ? 'Interactive Financial Calculator Tool' : isJa ? '実戦金融シミュレーション計算機' : isZh ? '在线金融试算工具' : (item.relatedCalculatorLabelKo || 'Financial Calculator Tool')}
               </h4>
               <p className="text-xs text-muted-foreground">
                 {isEn

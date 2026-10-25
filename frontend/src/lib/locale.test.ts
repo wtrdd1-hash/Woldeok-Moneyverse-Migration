@@ -13,7 +13,7 @@ describe('locale detection', () => {
     expect(detectLocale('GB', null)).toBe('en');
     expect(detectLocale('DE', null)).toBe('en');
     expect(detectLocale('FR', null)).toBe('en');
-    expect(detectLocale('VN', null)).toBe('en');
+    expect(detectLocale('VN', null)).toBe('vi');
     expect(detectLocale('BR', null)).toBe('en');
     expect(detectLocale('AU', null)).toBe('en');
   });

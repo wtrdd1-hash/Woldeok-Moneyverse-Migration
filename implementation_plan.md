@@ -1,4 +1,4 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v242)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v243)
 
 - **v235**: [공식 실전 이용 가이드(/guide, /guide/stock-trading, /guide/virtual-banking) 2026 최신 기획 전면 개편: 토스형 3분 입문 로드맵, 보유 주식 확인 및 원클릭 매도 방법, 월덕뱅크 단일 통장 원카드 및 실시간 복리이자 가이드 구축] (+120, -0)
 
@@ -3570,3 +3570,37 @@ flowchart LR
 - **HTTP 엔드포인트 헬스체크**:
   - `http://127.0.0.1:3354/`: 200 OK
   - 국고/중앙은행 텔레메트리/주간신문 유통 통화량 0 노출 결함 완전 소멸.
+
+---
+## 🚀 [v243 Specification] 글로벌 다국어(EN/JA/ZH) 한글 잔존 페이지(26/39) 쇄신 및 핵심 금융 계산기/용어집 전수 번역 아키텍처
+
+### 1. 배경 및 문제 분석
+- **문제 현상**: GPT 및 크롤러 분석 결과, 영어/일본어/중국어 URL(총 39개) 중 26개(66%)에서 한글이 100자 이상 잔존하고, 23개 페이지에서 `<h1>` 제목 자체가 한국어로 노출되는 현상 확인.
+- **근본 원인**:
+  1. `proxy.ts`에서 `/en/tools/stock-calculator`, `/ja/tools/loan-interest-calculator` 등의 요청을 물리적 다국어 라우트가 없다는 이유로 한국어 전용 기본 라우트로 내부 rewrite 실행.
+  2. 주요 계산기(`stock-calculator`, `loan-interest-calculator`, `salary-calculator`, `fire-calculator`, `dividend-tax-calculator` 등) 내부 컴포넌트가 `locale`을 구독하지 않거나, 번역 사전(`translations.ts`)에 해당 UI 키가 미등록되어 한국어 텍스트가 하드코딩 렌더링됨.
+  3. 금융 용어사전(`[term]/page.tsx`)에서 `keyTakeaway`의 일본어/중국어 필드가 누락되어 `item.keyTakeawayKo`로 폴백되는 현상 존재.
+  4. 한국 세법/제도 고유 계산기(청년도약계좌, ISA 등)에 다국어 안내 배너 부재.
+
+### 2. 단계별 구현 및 개선 명세
+1. **[Core Translations Dictionary] `src/lib/translations.ts` 확장**:
+   - 계산기 공통 레이아웃, 도구 허브 복귀 버튼, 통화 단위 표기($/¥/元/₩), 결과 배지, 거시경제 지표 펄스 번역 키 탑재.
+   - 6대 핵심 글로벌 금융 계산기(주식 물타기/DCA, 대출 원리금 상환, 복리/CAGR, 조기은퇴 FIRE, 연봉 실수령, 배당소득) 전용 i18n 사전 구축.
+2. **[Dynamic Localization] 핵심 계산기 컴포넌트 `useLocale()` 바인딩**:
+   - H1 헤더, 서브타이틀, 입력 폼 라벨(원금, 금리, 기간, 수수료), 계산 결과 및 비교 차트 텍스트를 현재 언어에 맞춰 100% 동적 렌더링.
+3. **[Domestic Guard] 한국 고유 제도 계산기 글로벌 안내 배너**:
+   - 청년도약계좌, ISA 등 한국 세법 계산기 접근 시 상단에 영문/일문/중문 안내 뱃지 및 글로벌 대체 도구 추천 링크 제공.
+4. **[Glossary Perfection] 금융 용어집 일본어/중국어 핵심 요약 보강**:
+   - `pseo-glossary.config.ts`의 `keyTakeawayJa`, `keyTakeawayZh` 지원 및 폴백 정규화.
+5. **[Verification] 실서버 배포 및 크롤러 실측**:
+   - 빌드(593개 라우트) 통과 및 실서버 curl 테스트로 영/일/중 페이지 H1 한글 0건, 잔존 한글 0건 검증.
+
+### 3. [2차 심화 결정] 다중 통화 동적 전환 ($/¥/元/₩) 체계 구축
+- **언어별 기본 통화 심볼 & 라벨 매핑**:
+  - `en` (영어): 심볼 `$` (USD), 금액 포맷팅 `$1,000,000`
+  - `ja` (일본어): 심볼 `¥` (JPY), 금액 포맷팅 `¥1,000,000`
+  - `zh` (중국어): 심볼 `¥ / 元` (CNY), 금액 포맷팅 `¥1,000,000`
+  - `vi` (베트남어): 심볼 `₫` (VND), 금액 포맷팅 `1.000.000₫`
+  - `ko` (한국어): 심볼 `₩` (KRW), 금액 포맷팅 `₩1,000,000`
+- **실전 금융 계산기 금액 입력 컴포넌트 연동**:
+  - `stock-calculator`, `loan-interest-calculator`, `compound-calculator`, `fire-calculator`, `salary-calculator`, `dividend-tax-calculator`의 통화 라벨과 입력 접두사/접미사에 `useLocale()` 및 통화 유틸리티를 바인딩하여 자동 전환.
