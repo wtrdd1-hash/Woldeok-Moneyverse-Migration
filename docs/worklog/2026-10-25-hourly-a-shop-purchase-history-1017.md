@@ -26,5 +26,10 @@
 - Security FAIL: production pnpm audit High 2; all dependencies 26 vulnerabilities (Critical 2 / High 10); bot production 6 (Critical 1 / High 5). Do not merge or deploy.
 - Build in progress. Official Test exact-SHA authenticated purchase flow unavailable; no Test or Production changes.
 
-## Finished
-- PENDING final CI/build report; release remains HOLD.
+## Finished (10:31 KST)
+- Feature code commit `6035f2819602e4658882a301ac17a575a4def9cc` pushed to origin; Draft PR #1258 opened, base main unchanged. Changed 10 files in feature commit (4 product files, 4 regression test files including app-api/DB, 2 planning/worklog); final EN/KO QA reports are in a follow-up documentation commit.
+- Default Backend+Turbopack build PASS; 179-endpoint Android contract PASS; Bot 8 PASS after isolated dependency installation. Focused regression 26 PASS and real isolated PG 2 PASS. Full frontend six failures, security audits and route ledger gate remain FAIL/BLOCKED.
+- Official Test exact-SHA read-only identity check BLOCKED: public version `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`, internal Test generation `9f39f041c336b59f41e9a8c43ea14dc1d29a2586`, candidate `6035f2819602e4658882a301ac17a575a4def9cc`.
+- End remote branches 134 (133 non-main); open PRs 130. No branch deletion, no main merge, no Test/Production promotion, no service restart, no DB write and no rollback. Every unmerged unique branch remains protected.
+- GitHub CI #40150811755 and Test Candidate #40150797914 still running at report checkpoint; no PASS asserted. Final docs commit must be tracked separately.
+- Status PARTIAL/BLOCKED — Production RELEASE HOLD. Reports: `docs/releases/v2026.10.25.a1017.md` and `.ko.md`.

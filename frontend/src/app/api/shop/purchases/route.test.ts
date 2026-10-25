@@ -27,6 +27,7 @@ describe('private shop purchase receipts gateway', () => {
     const response = await GET();
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
     expect(await response.json()).toEqual({ purchases: [purchase] });
     expect(api).toHaveBeenCalledWith('/api/v1/shop/purchases');
   });
