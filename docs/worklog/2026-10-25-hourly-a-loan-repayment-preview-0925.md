@@ -20,3 +20,9 @@
 - Use only `bank_get_my_standing(actor)` read function. Quote reflects `bank_repay` semantics: `payable=min(requested,outstanding)`; projected cash/outstanding computed with BigInt, and insufficiency flagged rather than hidden. A failed/null/malformed DB snapshot is an error, not fabricated zero balances.
 - Private `/bank/repay-preview` page with noindex/no-store and bank navigation; Android app-api GET mirrors same API. No write endpoint or auto-submit.
 - Exact SHA official Test and GitOps release required before any production promotion. Existing security/CI/DB isolation issues are independent release blockers.
+
+## 09:35 KST duplicate audit / scope correction
+- GitHub PR #1197 already implements an unmerged, full-stack loan repayment *amount preview* (A0020). The initial 12 backend + 16 frontend/mobile focused tests developed in this isolated branch reproduced overlapping behavior; those uncommitted files were discarded before push, without touching PR #1197 or any other worker's branch.
+- **Revised unique P1 scope:** loan *maturity deadline and minimum-cash readiness* dashboard, not repayment amount calculation, repayment receipts or loan history. Existing PR #1199 covers aggregate obligations; #1163 covers single loan detail; neither supplies the dedicated due-soon/overdue time-window + cash-coverage status endpoint. Search of open PR titles found no loan deadline equivalent. No scheduled reminders or actual financial mutation.
+- New contract: `GET /api/v1/banking/loan-deadline` -> guarded owner-only `bank_get_my_standing(actor)` -> validated status/maturity, server timestamp and deterministic 7-day due-soon/overdue window; exact integer-string WLD; `/bank/loan-deadline` private noindex page; Android app-api proxy.
+- Worktree branch name retains its originally assigned timestamp to avoid deleting an unmerged branch; PR title and implementation reflect corrected scope. Original plan below superseded by the appended revision.
