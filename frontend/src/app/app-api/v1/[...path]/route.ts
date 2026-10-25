@@ -145,6 +145,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
+  // A member's ledger receipts are private even if an upstream cache header regresses.
+  if (parts.length === 2 && parts[0] === 'banking' && parts[1] === 'movements') {
+    headers.set('cache-control', 'private, no-store, max-age=0');
+    headers.set('x-robots-tag', 'noindex, nofollow');
+  }
+
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

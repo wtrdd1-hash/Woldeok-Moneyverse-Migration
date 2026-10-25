@@ -26,6 +26,76 @@ function assertAmount(value: unknown, field: string): bigint {
 export class BankRepository {
   constructor(private readonly pool: Queryable) {}
 
+  /** Read-only owner-scoped bank transfers proven by balanced ledger postings. */
+  async recentMovements(actor: unknown, limit: number): Promise<{
+    transactionId: string;
+    type: 'BANK_DEPOSIT' | 'BANK_WITHDRAW';
+    occurredAt: string;
+    amountWld: string;
+    cashDeltaWld: string;
+    bankDeltaWld: string;
+    verification: 'LEDGER_VERIFIED';
+  }[]> {
+    assertUuid(actor, 'actor');
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 50) {
+      throw new BankInputError('limit must be an integer between 1 and 50');
+    }
+    const rows = await queryRows<{
+      transaction_id: string;
+      type: string;
+      created_at: Date | string;
+      cash_delta: string | null;
+      bank_delta: string | null;
+    }>(
+      this.pool,
+      `SELECT ledger_transaction.id::text AS transaction_id,
+              ledger_transaction.type::text AS type,
+              ledger_transaction.created_at,
+              COALESCE(SUM(CASE WHEN account.account_type = 'USER_CASH'::public.account_type
+                THEN CASE posting.direction WHEN 'debit'::public.posting_direction
+                  THEN posting.amount ELSE -posting.amount END ELSE 0 END), 0)::text AS cash_delta,
+              COALESCE(SUM(CASE WHEN account.account_type = 'USER_BANK'::public.account_type
+                THEN CASE posting.direction WHEN 'debit'::public.posting_direction
+                  THEN posting.amount ELSE -posting.amount END ELSE 0 END), 0)::text AS bank_delta
+       FROM public.ledger_transactions AS ledger_transaction
+       JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
+       JOIN public.accounts AS account ON account.id = posting.account_id
+       WHERE account.owner_user_id = $1
+         AND account.account_type IN ('USER_CASH'::public.account_type, 'USER_BANK'::public.account_type)
+         AND ledger_transaction.type IN ('BANK_DEPOSIT', 'BANK_WITHDRAW')
+       GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
+       ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
+       LIMIT $2`,
+      [actor, limit],
+    );
+    return rows.map((row) => {
+      if (!UUID.test(row.transaction_id) ||
+          (row.type !== 'BANK_DEPOSIT' && row.type !== 'BANK_WITHDRAW') ||
+          typeof row.cash_delta !== 'string' || !/^-?(?:0|[1-9][0-9]*)$/.test(row.cash_delta) ||
+          typeof row.bank_delta !== 'string' || !/^-?(?:0|[1-9][0-9]*)$/.test(row.bank_delta)) {
+        throw new Error('bank ledger proof is incomplete');
+      }
+      const cash = BigInt(row.cash_delta);
+      const bank = BigInt(row.bank_delta);
+      if (cash + bank !== 0n ||
+          (row.type === 'BANK_DEPOSIT' && (cash >= 0n || bank <= 0n)) ||
+          (row.type === 'BANK_WITHDRAW' && (cash <= 0n || bank >= 0n))) {
+        throw new Error('bank ledger proof is inconsistent');
+      }
+      const occurredAt = new Date(row.created_at);
+      if (Number.isNaN(occurredAt.getTime())) throw new Error('bank ledger timestamp is invalid');
+      return {
+        transactionId: row.transaction_id,
+        type: row.type,
+        occurredAt: occurredAt.toISOString(),
+        amountWld: (bank < 0n ? -bank : bank).toString(),
+        cashDeltaWld: cash.toString(),
+        bankDeltaWld: bank.toString(),
+        verification: 'LEDGER_VERIFIED' as const,
+      };
+    });
+  }
+
   async getStanding(actor: unknown): Promise<unknown> {
     assertUuid(actor, 'actor');
     const row = await queryOne<{ standing: unknown }>(

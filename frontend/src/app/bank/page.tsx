@@ -126,6 +126,12 @@ export default async function BankPage() {
         </Link>
       </div>
 
+      <Link href="/bank/movements" className="inline-flex min-h-11 items-center gap-2 rounded-lg border px-4 text-sm font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2">
+        <ShieldCheck className="size-4" aria-hidden="true" />
+        {localeLabel(locale, '검증된 은행 입출금 기록', 'Verified bank movements', '検証済み銀行取引', '已验证银行交易')}
+        <ArrowRight className="size-4" aria-hidden="true" />
+      </Link>
+
       {/* 3. 3대 핵심 서브 탭 UI (저축/모으기, 대출/신용, 통계/자산분석) */}
       <Tabs defaultValue="savings" className="space-y-6">
         <TabsList className="grid grid-cols-3 max-w-md w-full h-11 p-1 bg-muted/60 rounded-xl">

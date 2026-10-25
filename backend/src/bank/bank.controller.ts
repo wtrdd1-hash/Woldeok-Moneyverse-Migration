@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Query,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -52,6 +53,23 @@ export class BankController {
         throw new ConflictException(msg);
       }
       throw error;
+    }
+  }
+
+  @Get('movements')
+  @ApiOperation({ summary: 'Verified recent bank deposit/withdraw ledger movements for signed-in owner' })
+  async movements(@Req() request: RequestWithSession, @Query('limit') limit?: string) {
+    const actor = requireUserId(request);
+    if (limit !== undefined && !/^(?:[1-9]|[1-4][0-9]|50)$/.test(limit)) {
+      throw new BadRequestException('limit must be an integer between 1 and 50');
+    }
+    try {
+      const movements = await this.repository().recentMovements(actor, limit === undefined ? 20 : Number(limit));
+      return { movements, count: movements.length, limit: limit === undefined ? 20 : Number(limit), source: 'LEDGER_POSTINGS' as const };
+    } catch (error) {
+      if (error instanceof BankInputError) throw new BadRequestException(error.message);
+      if (error instanceof ServiceUnavailableException) throw error;
+      throw new ServiceUnavailableException('verified bank movements are unavailable');
     }
   }
 
