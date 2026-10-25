@@ -167,7 +167,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
-  return proxy(request, (await context.params).path);
+  const parts = (await context.params).path;
+  const response = await proxy(request, parts);
+  if (parts.length === 3 && parts[0] === 'work' && parts[1] === 'receipts' && parts[2] === 'export') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('x-content-type-options', 'nosniff');
+  }
+  return response;
 }
 
 export const GET = handle;

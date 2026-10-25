@@ -22,6 +22,25 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+describe('work receipt export app-api boundary', () => {
+  it('forwards member cookies and never invents a reward on upstream failure', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const spy = vi.fn(async (_target: RequestInfo | URL, init?: RequestInit) => {
+      expect(new Headers(init?.headers).get('cookie')).toBe('session=member');
+      return new Response(JSON.stringify({ scope: 'recent_20', limit: 20, receipts: [] }), {
+        status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', spy);
+    const response = await GET(request('/app-api/v1/work/receipts/export', { cookie: 'session=member' }), context('work', 'receipts', 'export'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(await response.json()).toMatchObject({ scope: 'recent_20', limit: 20, receipts: [] });
+    expect(spy).toHaveBeenCalledOnce();
+  });
+});
+
 describe('app API route compatibility', () => {
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();

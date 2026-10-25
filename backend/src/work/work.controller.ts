@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -133,6 +134,22 @@ export class WorkController {
         'work receipts are unavailable',
       ),
     };
+  }
+
+  @Get('receipts/export')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({ summary: 'Owner-only 20 most recent work reward receipts; not lifetime history or settlement proof' })
+  async receiptsExport(@Req() request: RequestWithSession) {
+    const receipts = await this.guarded(
+      () => this.repository().receipts(requireUserId(request)),
+      'work receipt export is unavailable',
+    );
+    if (!Array.isArray(receipts) || receipts.length > 20) {
+      throw new ServiceUnavailableException('work receipt export is unavailable');
+    }
+    return { scope: 'recent_20' as const, limit: 20, receipts };
   }
 
   @Get('assignments')

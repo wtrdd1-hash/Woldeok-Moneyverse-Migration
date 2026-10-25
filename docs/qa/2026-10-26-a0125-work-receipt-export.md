@@ -1,0 +1,26 @@
+# QA — A0125 Recent Work Reward Receipt CSV (2026-10-26; RELEASE HOLD)
+
+## Scope and boundaries
+- Debian 13.6 miniPC MCP system status and shell checked directly; backend/frontend/Discord/MCP/Nginx/Docker active; PostgreSQL connected. Root filesystem 98% used (~1.9 GiB free), data disk 68% used. No service restart.
+- Starting authoritative main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` rechecked before coding, mid-run and before release decision. Read AGENTS, README, canonical EN + secondary KO `docs/planning/PROJECT_PLAN*` and `INTEGRATED_PLANNING_MASTER*`, previous A0025 QA, recent B/C/planning PRs and CI. No other agent's branch or worktree modified.
+- New isolated worktree `/srv/moneyverse-data/worktrees/hourly-a-work-reward-receipts-export-20261026-0125`, branch `auto/hourly-a-work-reward-receipts-export-20261026-0125` from main. Existing migration `095-work-task-board.sql` is immutable and already applied. This feature is READ ONLY, latest 20 only, not all-time history and not independent settlement verification.
+
+## End-to-end implementation
+- Backend `GET /api/v1/work/receipts/export`: Session/Authenticated/Consent/CSRF class guards, actor derived from server session; existing `WorkRepository.receipts` calls PostgreSQL SECURITY DEFINER `work_my_receipts(p_actor)` (owner-scoped, ordered and `LIMIT 20`). Returns `{scope:'recent_20',limit:20,receipts}`; fails closed on unavailable/oversized result; private/no-store/noindex/nosniff.
+- Web `GET /api/work/receipts/export`: no caller-selected actor/limit; strict schema, UUID, timestamp and canonical bigint-string validation, CSV injection/control/format neutralization, UTF-8 BOM and private download; 401/403/428 retained, invalid/upstream/unknown -> 503, never fake success. `/work` has keyboard-focusable bilingual link and explicit 20-most-recent/ledger-reference disclaimer.
+- Android app-api `/app-api/v1/work/receipts/export`: session cookie forwarded through existing `work` group; JSON and `private,no-store`/`noindex` response even on error; mobile EN/KO endpoint catalog, contract JSON and generated EN/KO schema references updated (180 endpoints). No native APK source in this repository.
+- No new DB migration, role grant, direct financial table access, WLD write or ledger mutation.
+
+## Tests and real PostgreSQL
+- TDD RED: backend two expected missing-handler failures; frontend new route import missing; GREEN backend focused work controller/E2E **32 PASS**, frontend CSV+app-api **20 PASS**. After lint correction focused frontend **9 PASS**.
+- Full `pnpm test`: contract **38 PASS**, DB package **15 PASS / 3 SKIPPED**, backend **1,318 PASS / 398 SKIPPED**, frontend **1,407 PASS / 6 FAIL** (SEO/i18n 3; login 44px accessibility 1; calculator registration link 1; admin M2 telemetry 1). Bot initially failed missing isolated dependency; after referencing existing dependency tree **8 PASS**. Skipped tests are not PASS.
+- Typecheck **PASS**; Lint **PASS (0 errors, 1,128 warnings)** after fixing an unsafe numeric test literal; Backend Build **PASS**; Frontend Build **PASS**. Mobile contract generator **180 endpoints**; `api:contract:check` detects newly generated artifacts until committed to HEAD, so rerun after commit. Focused accessibility/SEO assertions PASS, global SEO/a11y suite FAIL.
+- Security **FAIL**: production audit **2 High**; full workspace **2 Critical / 10 High / 11 Moderate / 3 Low**; bot **1 Critical / 5 High**. Not waived.
+- Real isolated `moneyverse-test-db` PostgreSQL 17.11 `wdmv_v761_test_acl`, 281 applied migrations; baseline work receipts 0. In a single transaction, migrator inserted one synthetic work assignment and zero-WLD/one-EXP receipt; `SET LOCAL ROLE moneyverse_app`: owner read **1** and precise values true; other user read **0**; EXECUTE work_my_receipts **true**, direct SELECT work_reward_receipts **false**, ledger_postings INSERT **false**. `ROLLBACK` left **0** receipts. Production DB writes **0**. Official Test authenticated exact-SHA E2E **NOT PASS**.
+
+## Repository audit and release decision
+- Start remote heads **205** (204 non-main); open PRs **201** (199 draft). All 204 non-main tips locally available and have unique commits not in main; duplicate SHA tips **0**, duplicate Git trees **0**, duplicate last patch-ID groups **0** (two empty last patches). Known conflicting PRs #1107/#1110/#1143 retained. **Deleted 0 branches**; all other agents' unique changes protected.
+- Public Test `/api/version` returned `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; Production `6a989b5ac0c6155587d43426d64f6def6b62c917`, both different from new candidate. Exact-SHA authenticated Test user flow, security PASS and full frontend regression absent. No merge, Test promotion, Production release, GitOps promotion or service restart.
+- **ROLLBACK** (if ever authorized for release): revert the new backend endpoint, CSV route and work-page link, Android contract entry/gateway privacy wrapper as a unit. No DB migration or financial data to roll back. After any future approved deployment verify signed-in owner/foreign, 20-limit, private cache, login, version, DB permissions and release health.
+
+**Final: PARTIAL / BLOCKED — code implemented and isolated SQL verified, integration and Production prohibited.**

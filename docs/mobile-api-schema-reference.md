@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4993,6 +4993,41 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| receipts[] | true | object[] |  |
+| receipts[] | true | object |  |
+| receipts[].receipt_id | true | string |  |
+| receipts[].assignment_id | true | string |  |
+| receipts[].code | true | string |  |
+| receipts[].name | true | string |  |
+| receipts[].reward_amount | true | string |  |
+| receipts[].experience_amount | true | string |  |
+| receipts[].transaction_id | true | null \| string |  |
+| receipts[].created_at | true | string (date-time) |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/work/receipts/export` — Owner-only 20 most recent work reward receipts; not lifetime history or settlement proof
+
+- Authorization: 로그인 필요(기능에 따라 최신 동의 필요)
+- Success status: 200
+- Response mode: json
+- After success: Show only recent 20; null transaction ID means no ledger transaction recorded; non-null ID is an unverified reference
+- Operation ID: `WorkController_receiptsExport`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="recent_20" | const="recent_20" |
+| limit | true | number |  |
 | receipts[] | true | object[] |  |
 | receipts[] | true | object |  |
 | receipts[].receipt_id | true | string |  |

@@ -15754,6 +15754,104 @@
     },
     {
       "method": "GET",
+      "path": "/app-api/v1/work/receipts/export",
+      "purpose": "Export the 20 most recent owner-only work reward receipts (not full history or independent ledger proof)",
+      "callWhen": "Only on explicit member request to export recent work reward receipts",
+      "authorization": "로그인 필요(기능에 따라 최신 동의 필요)",
+      "afterSuccess": "Show only recent 20; null transaction ID means no ledger transaction recorded; non-null ID is an unverified reference",
+      "backendRoute": "/api/work/receipts/export",
+      "operationId": "WorkController_receiptsExport",
+      "backendOpenApiPath": "/work/receipts/export",
+      "summary": "Owner-only 20 most recent work reward receipts; not lifetime history or settlement proof",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "scope",
+          "limit",
+          "receipts"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "recent_20"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "receipt_id": {
+                  "type": "string"
+                },
+                "assignment_id": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "reward_amount": {
+                  "type": "string"
+                },
+                "experience_amount": {
+                  "type": "string"
+                },
+                "transaction_id": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "receipt_id",
+                "assignment_id",
+                "code",
+                "name",
+                "reward_amount",
+                "experience_amount",
+                "transaction_id",
+                "created_at"
+              ]
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "limit",
+          "receipts"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
       "path": "/app-api/v1/work/tasks",
       "purpose": "현재 수행 가능한 근무 작업 조회",
       "callWhen": "해당 화면 진입/새로고침/관련 write 후",

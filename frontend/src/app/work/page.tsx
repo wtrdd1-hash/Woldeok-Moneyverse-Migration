@@ -372,6 +372,17 @@ export default async function WorkPage() {
         </section>
       )}
 
+      <section aria-label={isEn ? 'Work reward receipt export' : '업무 보상 영수증 다운로드'} className="rounded-xl border border-border/60 bg-card/70 p-4 text-sm">
+        <a href="/api/work/receipts/export" download className="font-semibold text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+          {isEn ? 'Download recent work reward receipts (CSV)' : '최근 업무 보상 영수증 CSV 다운로드'}
+        </a>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {isEn
+            ? 'Only the latest 20 receipts. A ledger transaction ID is a reference, not independent proof of settlement; zero-reward receipts may have no transaction.'
+            : '최근 20건만 제공됩니다. 원장 거래 ID는 참조 정보이며 독립적인 정산 완료 증명이 아닙니다. 보상 0 WLD에는 거래 ID가 없을 수 있습니다.'}
+        </p>
+      </section>
+
       {/* 5. 최근 수령 영수증 */}
       {paid.length > 0 && (
         <section aria-labelledby="receipts-title" className="grid w-full max-w-full min-w-0 gap-3 overflow-hidden">
