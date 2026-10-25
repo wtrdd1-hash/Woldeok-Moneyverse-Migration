@@ -1,5 +1,12 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1284 / F675-128 — Verified marketplace saved-search vault (Addition / DRAFT / HOLD)
+- **Engineering handoff / 개발 인계:** [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334); planning-only and independent of runtime work.
+- **Evidence:** existing `MarketplaceTabs` uses synthetic initial listings, browser-only purchase success and fallback WLD balance; real NestJS ACTIVE listings API has OFFSET and no unique sort; price NUMERIC(20,4). Saved-search CRUD absent from checked main. Do not certify synthetic marketplace results.
+- **Member flow:** save/reopen/edit/delete validated fixed-price search (20/member); `/marketplace` → `/account/marketplace-searches`; owner-only DB and immutable idempotency receipt; signed live-results cursor, no automated alerts or settlement promises.
+- **Delivery:** P0 ENV1284-01 SEC1284-02 REL1284-03 MKT1284-04; P1 MKT1284-05 MKT1284-06 MKT1284-07 MKT1284-08 MKT1284-09 MKT1284-10. Detail in integrated master; feature OFF, QA v1276 FAILED/HOLD, Production BLOCKED. New approved independent references 0, cumulative UNKNOWN/10,000.
+
+
 ## v1282 — F675-127 Status Race and Snapshot Truth (FEATURE IMPROVEMENT / HOLD)
 - Previous Addition v1280 → Current Improvement v1282 → Next Addition v1284; main `1c5b84a1`, Draft #1324, engineering #1323. Migration 196 risks: idempotency unique-key race, unconditional reply status updates, timestamp regression, no-op admin audit. Queryable pool cannot guarantee repeatable-read export. Proposal: versioned idempotent status API; thread-locked event seq, atomic reply/status/audit, GREATEST timestamp, pinned read-only REPEATABLE READ, immutable owner-scoped snapshot across requests or honest non-certified fresh pages. 10k/2MiB/30s → 413; HMAC cursor/409, Android parity, privacy/SEO/a11y, rollback.
 - P0 ENV1282-01 SEC1282-02 REL1282-03 SUP1282-04; P1 SUP1282-05 SUP1282-06 SUP1282-07 SUP1282-08 SUP1282-09 SUP1282-10. QA v1275 FAILED/HOLD, root 98%, audits/DB/migrations/Test gates unresolved. External new approved 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only.

@@ -1,5 +1,12 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1284 / F675-128 — 검증형 마켓 검색 조건 보관함 (기능 추가 / 초안 / 운영 보류)
+- **Engineering handoff / 개발 인계:** [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334); planning-only and independent of runtime work.
+- **근거:** `MarketplaceTabs`의 모의 매물, 브라우저 단독 구매 성공·임의 WLD 잔액, NestJS 실제 ACTIVE 조회의 OFFSET·유일 정렬 누락, NUMERIC(20,4) 가격 확인. main의 저장 검색 CRUD는 미확인. 모의 거래를 실제로 인증하지 않는다.
+- **회원 동선:** 고정가 검색 조건 저장/재실행/수정/삭제(20건), `/marketplace` → `/account/marketplace-searches`; 본인 DB·불변 멱등 영수증·서명된 실시간 결과 커서. 자동 알림·정산 보장 없음.
+- **인계:** P0 ENV1284-01 SEC1284-02 REL1284-03 MKT1284-04, P1 MKT1284-05 MKT1284-06 MKT1284-07 MKT1284-08 MKT1284-09 MKT1284-10. 세부 내용은 국문 통합 마스터; 기본 OFF, QA v1276 FAILED/HOLD, 운영 BLOCKED. 외부 승인 신규 0건, 누적 미확인/10,000.
+
+
 ## v1282 — F675-127 상담 상태 경합·스냅샷 진실성 (기능 보완 / HOLD)
 - 이전 추가 v1280 → 현재 보완 v1282 → 다음 추가 v1284; main `1c5b84a1`, Draft #1324, 개발 #1323. Migration196 멱등키 중복 경합, 답변의 무조건 상태 갱신, 시각 역행, 관리자 동일 상태 감사 위험. 일반 Queryable 풀은 REPEATABLE READ 보장 불가. 버전형 멱등 상태 API·상담 행 선잠금 순차번호·메시지/상태/감사 원자성·GREATEST 시각, 고정 읽기 전용 REPEATABLE READ·다중 페이지 불변 스냅샷 또는 비인증 현재 조회. 10k/2MiB/30초 413, HMAC 커서/409, Android·개인정보·SEO·접근성·롤백.
 - P0 ENV1282-01 SEC1282-02 REL1282-03 SUP1282-04; P1 SUP1282-05 SUP1282-06 SUP1282-07 SUP1282-08 SUP1282-09 SUP1282-10. QA v1275 FAILED/HOLD, 루트 98%, 감사/DB/마이그레이션/Test 미해결. 외부 신규 0, 누적 미확인/10,000 BLOCKED. 문서 전용.

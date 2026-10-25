@@ -1,5 +1,46 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1284 — F675-128 회원 전용 검증형 마켓 검색 조건 보관함 (기능 추가 / 초안 / 운영 보류)
+
+### 정본·범위·근거
+- **회차:** 이전 기능 보완 v1282 → 현재 기능 추가 v1284 → 다음 기능 보완 v1286(잠정). 시작 기준 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md` 및 국문 대조본을 확인. 미병합 기획 Draft #1329 위에 별도 적층, 개발 인계 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334). 개발 A/B/C·Gemini·QA의 변경 및 마이그레이션 번호와 분리. **이번 회차는 기획 문서만 변경.**
+- **소스에서 확인한 빈틈(운영 사고 입증 아님):** `marketplace-tabs.tsx`는 서버 조회가 아닌 `INITIAL_MARKET_LISTINGS`로 매물을 채우고 구매 후 브라우저에서 보유 아이템·잔액을 수정한다. `market-listings-view.tsx`는 실제 정산 영수증 없이 `setTimeout` 후 구매 성공을 표시한다. `/marketplace/page.tsx`는 지갑 API 실패 시 임의의 `1000` WLD를 표시한다. 실제 `GET /api/v1/marketplace/listings`는 `marketplace_listings`를 조회하지만 `created_at DESC LIMIT/OFFSET`으로 동률 정렬 기준이 없다. Migration 232의 가격은 `NUMERIC(20,4)`이며 정수/JS Number로 가정할 수 없다. 확인한 main에는 회원 저장 검색 CRUD가 없다. P2P 정산 이슈 #1314는 별도 개발 범위다.
+
+### 목적·대상·권한·회원 동선
+- **목적:** 로그인·동의 완료 회원이 실제 `ACTIVE` 고정가 매물의 **검증된 검색 조건**을 저장하고 기기 간 재사용. 검색 보관함은 읽기 전용 탐색이며 가격 예약, 알림 자동 발송, 에스크로, 구매, 아이템/WLD 지급 기능이 아니다. 회원당 활성 **20개**. 검색은 이름(1~80자)과 버전형 `{query,category,maxPriceWld,sort}`로 구성. 카테고리는 실제 승인된 목록으로 검증하고 UI 하드코딩 목록을 신뢰하지 않는다. 검색어 NFKC 정규화·공백 제거·80자 제한, LIKE 특수문자 이스케이프; 최고가는 `NUMERIC(20,4)`에 맞는 정확한 양수 10진 문자열; 정렬은 `newest|price_asc|price_desc`만 허용.
+- **진입점:** `/marketplace` 고정가 탭 → 필터 → **이 검색 저장** CTA → 이름 확인 → 서버 저장 영수증 확인 → **저장됨** 및 `/account/marketplace-searches` 링크. 계정 화면에서 **검색 실행/이름 수정/조건 수정/삭제**(확인 대화상자). 저장된 검색을 열면 `/marketplace?savedSearch=<본인 소유 불투명 ID>`로 이동하고 서버 조건으로 실제 매물을 조회한다. `LOADING / EMPTY / SAVED / DUPLICATE / LIMIT_REACHED / STALE_REVISION / SESSION_EXPIRED / DATA_UNAVAILABLE / FEATURE_OFF` 상태 제공. 실패 시 저장·구매 성공을 표시하지 않으며 임의 잔액도 노출하지 않는다. 종료·취소된 매물은 `NO_LONGER_AVAILABLE`이며 구매 CTA를 숨긴다. 저장 없이 검색하는 동선은 유지한다.
+- **범위:** 고정가 `ACTIVE` 매물만. 경매·P2P·암시장 제외. 회원의 검색 조건과 결과 조회는 비공개. 저장 조건은 **결과 스냅샷이 아니며**, 판매·취소로 결과가 바뀔 수 있다. 검색 저장 영수증을 거래 정산 영수증과 혼동하지 않는다.
+
+### API·DB·트랜잭션·페이지네이션
+- **NestJS 인증·동의·변경 시 CSRF:** `GET /api/v1/marketplace/saved-searches?cursor=&limit=20`, `POST /api/v1/marketplace/saved-searches`(`idempotencyKey:UUID,label,filters,filterSchemaVersion=1`), `PATCH /api/v1/marketplace/saved-searches/:id`(`expectedRevision`, 키), `DELETE /api/v1/marketplace/saved-searches/:id`(버전·키), `GET /api/v1/marketplace/saved-searches/:id/results?cursor=&limit=50`. 응답 `id,revision,normalizedFilters,receiptId,updatedAt` 또는 `items,nextCursor,liveAsOf`. 오류 400/401/403/404(타인·미존재 구별 방지)/409(중복·버전·키 충돌)/429/503. 회원 ID는 요청에서 받지 않고 서버 세션에서만 추출. Next.js 동일 출처와 Android `/app-api/v1/*`가 세션·CSRF·오류 계약을 동일하게 지킨다.
+- **제안 DB(마이그레이션 번호는 개발 예약이 별도 확정):** `member_market_saved_searches(id uuid PK,user_id uuid FK users,label text,filter_schema_version smallint CHECK(=1),normalized_filters jsonb CHECK(object),filter_fingerprint bytea,revision bigint CHECK(>0),deleted_at,created_at,updated_at)`; 활성 행 부분 UNIQUE `(user_id,filter_fingerprint) WHERE deleted_at IS NULL`; 본인 목록 인덱스 `(user_id,updated_at DESC,id DESC) WHERE deleted_at IS NULL`. 불변 `member_market_saved_search_receipts(id uuid PK,user_id,search_id,request_key uuid,payload_digest bytea,result_revision bigint,result_kind text,created_at)` 및 UNIQUE `(user_id,request_key)`. 계정 탈퇴·병합·보존 정책에 맞춰 FK·소프트 삭제 검토. 매물 스냅샷이나 판매자 개인정보를 저장하지 않는다.
+- **원자성·잠금 순서(AGENTS.md Migration 045):** 입력 검증 → **영수증 조회 전에** 멱등 UUID에 대한 트랜잭션 advisory lock 획득 → 원본 본문 지문·소유자 검증 → 회원 `users` 행 `FOR UPDATE`로 활성 20건 한도 직렬화 → 저장 검색 행 잠금·본인/기대 버전 재검증 → 버전형 JSON 지문·부분 UNIQUE 검사 및 변경·불변 영수증을 한 트랜잭션으로 확정. 동일 키·동일 본문 재시도는 최초 영수증 반환, 동일 키·다른 본문은 409. 삭제는 묘비 처리, 재등록은 새 요청 키. SECURITY DEFINER 함수는 `search_path` 고정, PUBLIC EXECUTE 회수, 앱 역할 광범위 직접 DML 금지. 기존 마켓 매물·원장·WLD·에스크로·보유 아이템을 수정하지 않는다.
+- **실제 매물 검색:** `status='ACTIVE'`, 검증된 카테고리·문자열·정확한 NUMERIC 가격 조건을 SQL에서 **먼저** 적용. 최신순 `created_at DESC,id DESC`, 가격순 `price_wld ASC|DESC,created_at DESC,id DESC`. `(status,created_at DESC,id DESC)` 및 `(status,category,price_wld,id)` 등 인덱스는 실측 EXPLAIN·분포 검토 후 확정. HMAC 커서에 회원·검색 ID·필터 지문·정렬·전체 마지막 튜플·15분 만료·키 버전·원천 세대를 결합. 필터·버전 변경 시 409 후 재조회. **실시간 결과**라 동시 판매·취소 시 페이지 간 전체 스냅샷 완전성을 보장하지 않으며 별도 불변 매니페스트 검증 없이는 완전하다고 주장하지 않는다. 동일 시각·동일 가격·10,001행 테스트 필수.
+
+### 관리자·보안·SEO·모바일·지표
+- **관리자:** 활성 검색 수, 한도 실패, 검색 오류율 등 비식별 통계만(k>=20 미만 숨김). 회원 키워드·ID·검색 이력을 관리자 화면/분석 로그에 노출하거나 관리자가 임의 수정하지 않는다. 탈퇴·병합·보존·삭제는 명시적으로 감사하며 FK CASCADE만으로 완료했다고 주장하지 않는다.
+- **보안/악용:** API·DB 양쪽 소유권(BOLA) 검증, user_id 입력 금지, SQL 파라미터·LIKE 이스케이프·쿼리 비용 제한, 회원당 20건, 변경 5회/분·검색 30회/분(초기 테스트 목표), 페이지 최대 50, 키워드 비로그, CSRF, XSS 이스케이프, 외부 URL 요청 없음. 본인 데이터 `Cache-Control: private,no-store`, `noindex,nofollow`, 사이트맵 제외; 공개 매물 SEO 유지. 판매자 비공개 정보 미노출.
+- **모바일/a11y:** 키보드로 조작 가능한 필터·대화상자, 44px 터치 영역, 초점 표시, 입력 오류 요약, 로딩/빈 목록/실시간 상태 알림, 모션 감소, 1열 모바일 재배치 및 WCAG 2.2 AA. Android 앱 API에서 버전·커서·가격 문자열·409/429/503 동일. KPI는 검증 저장률, D7/D30 재방문, 검색 p95, 허위 성공 0, 한도/409/503, 삭제율, **실제 정산 영수증 확인 후에만** 탐색→구매 전환. 매출/유지율 상승은 관측 전 `HYPOTHESIS`.
+- **배포·롤백:** `marketplace_saved_searches_v1=OFF` 기본. P0 모의 매물·허위 잔액·구매 성공 표시 정정 전 회원 노출 금지. 별도 개발 브랜치·순방향 마이그레이션·격리 DB 권한/원장 회귀·전체 CI/감사·정확 SHA Test 인증 금융 E2E·독립 복원 검증 후 1%→10%→100% 단계적 승격. 장애 시 기능 OFF·CTA 숨김, 승인된 보존 정책에 따라 회원 검색 메타데이터 유지; 매물·원장 롤백/삭제 금지. 기획 회차에서는 런타임·운영 변경 없음.
+
+### P0/P1 개발 인계 및 수용 조건
+| 우선순위 | ID | 구체적 완료 조건 |
+| --- | --- | --- |
+| P0 | ENV1284-01 | 루트 98%/2.3GiB 공간, 격리 DB·복원 검증; 다른 작업자 파일 삭제 금지. |
+| P0 | SEC1284-02 | DB 앱 최소권한·PUBLIC 함수 회수·본인 검증 및 타 회원 100건 부정 테스트. |
+| P0 | REL1284-03 | QA v1276 FAILED/HOLD, 감사·Migration 266/280·경로 원장·정확 SHA Test/롤백 게이트. |
+| P0 | MKT1284-04 | `INITIAL_MARKET_LISTINGS`·임의 `1000` WLD·타이머 구매 성공 제거/차단 및 실제 영수증 검증. |
+| P1 | MKT1284-05 | 버전형 검증 검색 DB, 20건 한도, 정규화 지문·부분 UNIQUE·본인 인덱스. |
+| P1 | MKT1284-06 | 원자적 저장/수정/삭제, 잠금 순서, 불변 영수증·버전 CAS·멱등 409. |
+| P1 | MKT1284-07 | 서버 ACTIVE 선필터·정확한 가격·유일 정렬·서명된 실시간 커서. |
+| P1 | MKT1284-08 | NestJS/Next.js/Android API 계약·인증·CSRF·오류·비캐시 동등성. |
+| P1 | MKT1284-09 | 회원 UX·관리자 k>=20·개인정보/SEO/WCAG 2.2 AA·관측 기반 KPI. |
+| P1 | MKT1284-10 | 동시 저장 100건·BOLA 100건·동률 10,001건·허위 구매 방지·Test/롤백. |
+
+- **최신 QA:** v1276(2026-10-25 21:27 KST) FAILED/HOLD. 정확 main 빌드·타입검사·린트 PASS, 프론트 1,397 통과/6 실패, 운영/전체/봇 의존성 감사 FAIL, 개발 DB 241개 중 235개 앱 직접 쓰기 가능·PUBLIC 은행 함수 3개, Migration 266 체크섬 불일치, 루트 98%/2.3GiB, 정확 SHA 인증 금융 Test E2E·독립 복원 미검증. 운영 DB 권한이나 실제 마켓 사고로 일반화 금지.
+- **외부 근거 게이트:** PostgreSQL(LIMIT/OFFSET), OWASP(API BOLA), W3C(WCAG 2.2) 발행기관 3곳 자료 검토; **신규 최종 승인 0건**, 중복 제거 누적 승인 **미확인**, 목표 **10,000건**, **BLOCKED / IN PROGRESS**. 검토≠승인. 공식 링크: https://www.postgresql.org/docs/current/queries-limit.html ; https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/ ; https://www.w3.org/TR/WCAG22/ .
+
+
 ## v2026.10.25.1282 — F675-127 상담 대화록 스냅샷·상태 변경 무결성 보완 (기능 보완 / DRAFT / RELEASE HOLD)
 
 ### 기준·실제 코드 확인

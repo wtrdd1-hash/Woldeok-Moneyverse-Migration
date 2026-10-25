@@ -1,5 +1,14 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.25.1284 — F675-128 Marketplace Saved Searches (Feature Addition / DRAFT / HOLD)
+- Previous Improvement v1282 → Current Addition v1284 → Next Improvement v1286 (provisional); main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` verified; predecessor Draft #1329, engineering [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334). Docs only.
+- Source gap: `MarketplaceTabs` seeds synthetic `INITIAL_MARKET_LISTINGS`, purchase UI reports success after a timeout and changes browser-only holdings, `/marketplace` defaults missing balance to `1000` WLD. Actual NestJS `GET /marketplace/listings` uses `ACTIVE` + OFFSET and nonunique created_at order; Migration 232 price NUMERIC(20,4). No owner saved-search CRUD on main. **Never mistake fake offers or browser success for a settled trade.**
+- New owner-only fixed-price search vault (20 active/member), `/marketplace` Save this search → `/account/marketplace-searches` manage/reopen. Validated query/category/NUMERIC max price/sort, immutable idempotency receipts, revision CAS, 15m HMAC keyset cursor, live results (not snapshot), read-only to WLD/listings/escrow. NestJS/Next.js/Android parity, 401/403/404/409/429/503, admin k>=20, private noindex/no-store, WCAG AA, staged feature OFF.
+- **P0:** ENV1284-01 SEC1284-02 REL1284-03 MKT1284-04. **P1:** MKT1284-05 MKT1284-06 MKT1284-07 MKT1284-08 MKT1284-09 MKT1284-10. Detailed screens, schema, transactions, security, KPI, test/rollback: [Integrated Planning Master](INTEGRATED_PLANNING_MASTER.md).
+- QA v1276 FAILED/HOLD (frontend 1397 pass/6 fail; dependency audits fail; DB ACL and migration 266 unresolved; root 98%, 2.3GiB; exact-SHA Test finance/restore unverified). Independent external refs newly approved **0**, cumulative **UNKNOWN** / 10,000 → **BLOCKED / IN PROGRESS**. No runtime/DB/ledger/Test/Production change.
+- **Backlog IDs:** ENV1284-01 SEC1284-02 REL1284-03 MKT1284-04 MKT1284-05 MKT1284-06 MKT1284-07 MKT1284-08 MKT1284-09 MKT1284-10
+
+
 ## v2026.10.25.1282 — F675-127 Support Transcript Integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - **Cycle:** Previous Feature Addition v1280 → Current Feature Improvement v1282 → Next Feature Addition v1284 (provisional). Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid; AGENTS, README, canonical English/Korean plans; predecessor Draft #1324, engineering [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
 - **Source-confirmed:** migration 196 support replies set status and last_message_at unconditionally, pre-insert idempotency checks race on unique key, admin status function lacks request key and audits no-op, and timestamps may regress under thread lock contention. Generic Queryable calls do not share REPEATABLE READ. This is a design risk, not a confirmed Production incident.

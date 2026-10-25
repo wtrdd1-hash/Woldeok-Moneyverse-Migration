@@ -1,5 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.25.1284 — F675-128 회원 마켓 검색 조건 보관함 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1282 → 현재 기능 추가 v1284 → 다음 기능 보완 v1286(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 확인; 선행 Draft #1329, 개발 이슈 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334). 문서만 변경.
+- 실제 소스의 `INITIAL_MARKET_LISTINGS` 모의 매물, 타이머 후 구매 성공·브라우저 보유량 변경, 지갑 실패 시 임의 `1000` WLD 표시를 확인. NestJS 실제 ACTIVE 목록은 OFFSET·동률 정렬 누락, Migration 232 가격은 NUMERIC(20,4). main에는 회원 저장 검색 CRUD 미확인. **모의 매물·브라우저 성공을 실제 정산으로 표시 금지.**
+- 회원당 활성 20개, `/marketplace` **이 검색 저장** → `/account/marketplace-searches` 관리·재조회. 검색어·카테고리·정확 가격·정렬 검증, 불변 멱등 영수증, 버전 CAS, 15분 HMAC 키셋 커서, 실시간 결과(스냅샷 아님). WLD·매물·에스크로 읽기 전용. NestJS/Next.js/Android 동등성, 401/403/404/409/429/503, 관리자 k>=20, noindex/no-store, WCAG AA, 기본 OFF.
+- **P0:** ENV1284-01 SEC1284-02 REL1284-03 MKT1284-04. **P1:** MKT1284-05 MKT1284-06 MKT1284-07 MKT1284-08 MKT1284-09 MKT1284-10. 화면·DB·트랜잭션·보안·KPI·테스트·롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- QA v1276 FAILED/HOLD(프론트 1,397 통과/6 실패, 감사 FAIL, DB 권한·Migration 266 미해결, 루트 98%/2.3GiB, 정확 SHA 금융 Test/복원 미검증). 외부 독립 근거 신규 승인 **0건**, 누적 **미확인**/10,000 → **BLOCKED / IN PROGRESS**. 런타임·DB·원장·Test·운영 변경 없음.
+- **Backlog IDs:** ENV1284-01 SEC1284-02 REL1284-03 MKT1284-04 MKT1284-05 MKT1284-06 MKT1284-07 MKT1284-08 MKT1284-09 MKT1284-10
+
+
 ## v2026.10.25.1282 — F675-127 상담 대화록 무결성 보완 (기능 보완 / DRAFT / HOLD)
 - **회차:** 이전 기능 추가 v1280 → 현재 기능 보완 v1282 → 다음 기능 추가 v1284(잠정). 시작·중간 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 확인; AGENTS/README/영문 원본·한국어 대조, 선행 Draft #1324, 개발 [#1323](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1323).
 - **실제 확인:** Migration 196 답변은 상태와 last_message_at을 무조건 변경, INSERT 전 멱등키 조회는 동시 요청 고유 제약 경합 위험, 관리자 상태 함수에 요청 키가 없고 상태 동일해도 감사 기록 생성, 상담 행 잠금 경합으로 시각 역행 가능. 일반 Queryable 조회는 REPEATABLE READ 단일 스냅샷을 보장하지 않음. 운영 사고 확정 아님.

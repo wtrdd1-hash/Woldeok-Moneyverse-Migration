@@ -1,3 +1,6 @@
+## 2026-10-25 v1284 — F675-128 회원 마켓 검색 조건 보관함 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1282 → 현재 기능 추가 v1284 → 다음 기능 보완 v1286(잠정), main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 확인. 실제 마켓 UI 모의 데이터·허위 구매 성공·임의 잔액 및 서버 목록 OFFSET을 근거로 P0 4개/P1 6개 국영문 통합 문서 반영. 개발 이슈 [#1334](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1334). QA v1276 FAILED/HOLD, 외부 신규 승인 0/누적 미확인/10,000 BLOCKED. 문서만 변경, 런타임·DB·WLD·Test·운영 미변경.
+
 ## 2026-10-25 v1282 — F675-127 상담 상태·스냅샷 무결성 (기능 보완 / DRAFT / HOLD)
 - 이전 추가 v1280 → 현재 보완 v1282 → 다음 추가 v1284; main `1c5b84a1` 시작·중간, 선행 Draft #1324, 개발 #1323. Migration196 경합 및 Queryable 트랜잭션 범위 검토: 버전형 상태 영수증, 상담 행 잠금·순차 이벤트/시각, 고정 REPEATABLE READ, 다중 페이지 불변 스냅샷, 부분 200 금지, 본인 HMAC 커서, 개인정보/Android/접근성/정확 SHA 게이트.
 - **GitHub 인계:** 선행 #1324 기반 Draft [#1329](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1329), 이슈 #1323·#1170 갱신; 병합·배포 없음.
