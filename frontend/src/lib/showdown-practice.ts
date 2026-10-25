@@ -25,4 +25,3 @@ export function verifiedPracticeRound(value: unknown): PracticeShowdownRound | n
   if (row.outcome !== outcome || typeof row.resolvedAt !== 'string' || !Number.isFinite(Date.parse(row.resolvedAt))) return null;
   return row as unknown as PracticeShowdownRound;
 }
-
