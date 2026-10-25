@@ -73,6 +73,8 @@ describe('verified marketplace asking-price snapshot', () => {
 
     const tabs = readFileSync(join(process.cwd(), 'src/app/marketplace/marketplace-tabs.tsx'), 'utf8');
     expect(tabs).not.toMatch(/rollingMedianWld="1320"|volume7dWld="28500"|24h 시장 규모/);
+    expect(tabs).not.toContain('<MarketListingsView');
+    expect(tabs).toContain('min-h-11');
     const page = readFileSync(join(process.cwd(), 'src/app/marketplace/page.tsx'), 'utf8');
     expect(page).toContain('/api/v1/marketplace/listings?limit=50');
     expect(page).toContain('/api/v1/wallet?recent=1');
