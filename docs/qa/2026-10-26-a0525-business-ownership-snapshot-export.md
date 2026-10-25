@@ -21,3 +21,9 @@
 - Root disk 99% (1.2 GiB free), data mount 71%; avoid destructive cleanup.
 - Rollback: read-only feature; do not deploy/merge until gates PASS. If eventually released, revert route/link/backend export in reviewed commit, preserve immutable migrations and ledger. No DB rollback needed.
 - Branch safety: 224 remote branches / 220 open PRs at start; conflicts #1107/#1110/#1143 preserved; no branch deletion or other worker branch edits. Exact ending counts and CI results in PR evidence.
+
+## Integration-precheck and branch audit (05:39 KST)
+- Code+contract+QA commit: `62b1d37e7d2a1e9e560b8ecb49d968c41ac92931`; Draft PR #1373, mergeable but **not approved**. CI #40231742835 and Test Candidate #40231738281 initially IN_PROGRESS; not PASS.
+- Final observed remote branch count 226 (start 224); open PR 221 (start 220); other worker concurrently added branch(es). 225 non-main branch tips; 0 duplicate final SHA across remote heads. Three known conflicting PRs #1107/#1110/#1143 remain. All branches retained because unintegrated uniqueness was not disproven. Deletions: 0.
+- Changed tracked files: 19 (backend controller/repository/test, frontend BFF/CSV/SEO/gateway/test, 3 Android contract artifacts, plan/QA/worklog/release EN+KO). No applied migration or schema changes.
+- Final post-documentation SHA and CI conclusions will be attached to PR #1373 without rewriting committed QA history.

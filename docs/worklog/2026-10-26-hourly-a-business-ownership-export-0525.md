@@ -17,3 +17,8 @@
 ## After
 - Candidate Draft PR/CI/final SHA evidence will be appended after push. Production RELEASE HOLD: no merge, Test promotion, deployment, service restart, live DB write or branch deletion.
 - Exact official Test candidate E2E blocked by SHA mismatch and full regression/security failures. Preserve other workers' unique branches.
+
+## PR and integration-precheck
+- Source commit `62b1d37e7d2a1e9e560b8ecb49d968c41ac92931`, Draft PR #1373. Pre-push main unchanged at `1c5b84a1c45baafcca83f375a6f99698121e9bb5`.
+- Remote branches 224→226, open PRs 220→221; zero duplicate branch-tip SHA, three known conflicts preserved, zero branch deletions. No auto-merge, Test or Production promotion.
+- First CI #40231742835 and Test Candidate #40231738281 started; not evidence of PASS. Full 6 frontend failures and dependency audits remain HOLD.
