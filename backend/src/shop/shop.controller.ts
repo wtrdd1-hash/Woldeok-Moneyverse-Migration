@@ -90,8 +90,15 @@ export class ShopController {
   @Get('purchases')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Purchases made by the caller' })
-  async purchases(@Req() request: RequestWithSession) {
-    return { purchases: await this.service().myPurchases(requireUserId(request)) };
+  async purchases(@Req() request: RequestWithSession, @Query('limit') limit?: string) {
+    // Reject noncanonical query strings rather than accepting parseInt truncation.
+    if (limit !== undefined && !/^(?:[1-9]|[1-9][0-9]|100)$/.test(limit)) {
+      throw new BadRequestException('purchase limit must be an integer between 1 and 100');
+    }
+    const purchaseLimit = limit === undefined ? 30 : Number(limit);
+    return {
+      purchases: await this.service().myPurchases(requireUserId(request), { limit: purchaseLimit }),
+    };
   }
 
   @Post('items/:id/purchases')

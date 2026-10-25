@@ -12,3 +12,9 @@ Pending implementation and evidence.
 
 ## FINISHED
 Pending final SHA/CI/Test/Production/rollback and branch audit.
+
+## IN PROGRESS (20:30–20:34 KST)
+- RED backend 12 tests failed as expected before limit implementation; RED frontend route import failed before route creation. Initial backend harness lacked built contract dist; built contract and reran to distinguish setup from feature failures.
+- GREEN backend 12/12 tests for strict 1..100 limit and session-sourced user ID. Frontend CSV route 12/12; Android gateway existing+new 12/12. A first CSV test caught BOM/escape mismatch; corrected UTF-8 BOM, actual CRLF, and control-character stripping. Query refuses duplicate/invalid limit; upstream errors fail closed; formula-leading names neutralized; WLD values remain strings.
+- Web `/shop` adds authenticated-only download CTA. NestJS GET uses existing owner-scoped `shop_list_my_purchases` read function and defaults to original 30 for unchanged callers; export requests up to 100. No migrations, financial writes, or service restarts.
+- Midpoint main re-fetched and English/Korean plan pair rechecked. QA/CI/security/exact-SHA Test still pending; no release assertion.

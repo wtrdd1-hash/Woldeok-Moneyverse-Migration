@@ -118,6 +118,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           </ul>
           {loggedIn ? (
             <Button asChild size="sm" variant="outline">
+              <Link href="/api/shop/purchases/export" aria-label="내 구매 기록 CSV 다운로드, 최근 최대 100건">
+                <T korean="내 구매 기록 CSV 다운로드" english="Export my recent purchases (CSV)" />
+              </Link>
+            </Button>
+          ) : null}
+          {loggedIn ? (
+            <Button asChild size="sm" variant="outline">
               <Link href="/marketplace">
                 <T korean="플레이어 마켓 작업대" english="Marketplace workbench" />
               </Link>

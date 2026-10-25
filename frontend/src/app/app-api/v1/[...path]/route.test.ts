@@ -171,3 +171,36 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('Android private shop purchase query contract', () => {
+  it('forwards bounded purchase history query and member session without caching', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let target = '';
+    let forwarded = new Headers();
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      target = String(input);
+      forwarded = new Headers(init?.headers);
+      return new Response(JSON.stringify({ purchases: [] }), {
+        status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    }));
+    const response = await GET(request('/app-api/v1/shop/purchases?limit=100', {
+      cookie: 'session=test-value',
+    }), context('shop', 'purchases'));
+    expect(response.status).toBe(200);
+    expect(target).toContain('/api/v1/shop/purchases?limit=100');
+    expect(forwarded.get('cookie')).toBe('session=test-value');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('preserves backend authentication refusal without inventing records', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(
+      JSON.stringify({ status: 401, code: 'unauthorized' }),
+      { status: 401, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store' } },
+    )));
+    const response = await GET(request('/app-api/v1/shop/purchases?limit=100'), context('shop', 'purchases'));
+    expect(response.status).toBe(401);
+    expect((await response.json())).not.toHaveProperty('purchases');
+  });
+});
