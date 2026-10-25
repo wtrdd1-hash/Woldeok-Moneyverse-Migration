@@ -9,11 +9,16 @@
 - Scope: session-bound Nest snapshot GET, existing PostgreSQL SECDEF read, same-origin Next CSV with full response validation/formula escaping/precision, keyboard link and truthful bilingual text, Android app-api private/noindex parity, regression tests and schema reference. No DB migration or ledger write.
 - RED→GREEN tests first. All gates mandatory, including exact-SHA official Test; never merge or deploy on partial evidence. Rollback: discard unmerged branch; later deployment would revert read-only endpoint and UI via reviewed commit.
 
-## IN PROGRESS
-- [ ] TDD RED: backend owner/scope and frontend CSV, guest/privacy, Android tests.
-- [ ] GREEN: implement API/Next/Android contract/UI.
-- [ ] Recheck main, planning, open PRs and other agents.
-- [ ] Validate isolated real PostgreSQL ACL and full test gates.
+## IN PROGRESS — 06:27 KST
+- [x] RED: backend snapshot 3 tests fail because endpoint absent; frontend serializer/route imports fail; Android privacy test fails due absent no-store. GREEN: backend 4 PASS (including mounted guarded Nest route), frontend 20 PASS, UI accessibility SSR 2 PASS.
+- [x] Implemented `GET /api/v1/stocks/alerts/events/snapshot` with session-derived actor and hard 100 bound, CSV all-or-nothing validation with exact bigint strings and formula defense, private Next download, Android gateway session/response privacy, EN/KO UI link and mobile contract (180 endpoints).
+- [x] Rechecked remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` unchanged and EN/KO main planning SHA unchanged; reviewed QA v1285 (6 baseline frontend FAIL, prod audit 2 HIGH, root 100%/928MiB free) and overlapping Draft #1317. No other agents' files modified.
+- [x] Isolated PG17.11 `wdmv_v761_test_acl` (281 migrations) transaction fixture: owner 1 / foreign 0, exact 9007199254740995 WLD, function EXECUTE allowed, alert table SELECT and ledger INSERT denied, rollback left 0 rows. **Not Production.**
+- [ ] Full gates, exact SHA CI, official Test and final audit.
+
+## CHECKPOINT
+- Initial `pnpm api:contract:check` reports drift against HEAD by design until generated artifacts are committed; rerun on committed code SHA.
+
 
 ## FINISHED
 - Pending final QA/release/CI/branch audit.

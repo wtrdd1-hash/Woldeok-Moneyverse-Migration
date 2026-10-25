@@ -65,6 +65,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+  const privateAlertEvents = parts.length === 4 &&
+    parts[0] === 'stocks' && parts[1] === 'alerts' &&
+    parts[2] === 'events' && parts[3] === 'snapshot';
+  const protectPrivate = (response: NextResponse): NextResponse => {
+    if (privateAlertEvents) {
+      response.headers.set('cache-control', 'private, no-store');
+      response.headers.set('x-robots-tag', 'noindex, nofollow');
+    }
+    return response;
+  };
 
   const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
   if (minimumVersionRaw) {
@@ -134,9 +144,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   } catch (error: unknown) {
     const name = error instanceof Error ? error.name : '';
     if (name === 'TimeoutError' || name === 'AbortError') {
-      return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
+      return protectPrivate(gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds'));
     }
-    return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+    return protectPrivate(gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached'));
   }
 
   const headers = appendAppContractHeaders(new Headers());
@@ -145,6 +155,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
+  if (privateAlertEvents) {
+    headers.set('cache-control', 'private, no-store');
+    headers.set('x-robots-tag', 'noindex, nofollow');
+  }
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

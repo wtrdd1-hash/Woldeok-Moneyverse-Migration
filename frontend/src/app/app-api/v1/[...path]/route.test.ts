@@ -171,3 +171,35 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('private stock alert event snapshot app-api contract', () => {
+  it('forwards member session and forces private no-store/noindex even without upstream cache headers', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const spy = vi.fn(async (_url: unknown, init?: RequestInit) => {
+      expect(new Headers(init?.headers).get('cookie')).toBe('session=private');
+      return new Response(JSON.stringify({ scope: 'recent_100_max', events: [] }), {
+        status: 200, headers: { 'content-type': 'application/json' },
+      });
+    });
+    vi.stubGlobal('fetch', spy);
+    const response = await GET(
+      request('/app-api/v1/stocks/alerts/events/snapshot', { cookie: 'session=private' }),
+      context('stocks', 'alerts', 'events', 'snapshot'),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+    expect(await response.json()).toMatchObject({ scope: 'recent_100_max', events: [] });
+  });
+});
+
+describe('private stock alert gateway error isolation', () => {
+  it('does not cache or index a failed private snapshot request', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network unavailable'); }));
+    const response = await GET(request('/app-api/v1/stocks/alerts/events/snapshot'), context('stocks', 'alerts', 'events', 'snapshot'));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+  });
+});

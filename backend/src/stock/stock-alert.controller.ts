@@ -22,6 +22,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { StockAlertInputError, StockAlertRepository } from './stock-alert.repository';
+import type { StockAlertEventRow } from './stock-alert.repository';
 
 const CONDITIONS = [
   'price_at_or_above', 'price_at_or_below',
@@ -81,6 +82,22 @@ export class StockAlertController {
     const parsed = limit === undefined ? 20 : Number(limit);
     if (!Number.isSafeInteger(parsed)) throw new BadRequestException('limit must be a whole number');
     return { events: await this.repository().events(requireUserId(request), parsed) };
+  }
+
+  /** A recent snapshot, not a complete historical archive or executed trade receipt. */
+  @Get('events/snapshot')
+  @ApiOperation({ summary: 'Owner-only latest 100 virtual-stock alert trigger events' })
+  async eventsSnapshot(@Req() request: RequestWithSession): Promise<{ readonly scope: 'recent_100_max'; readonly events: readonly StockAlertEventRow[] }> {
+    const actor = requireUserId(request);
+    try {
+      const events = await this.repository().events(actor, 100);
+      if (!Array.isArray(events) || events.length > 100) {
+        throw new Error('invalid stock alert snapshot');
+      }
+      return { scope: 'recent_100_max', events };
+    } catch {
+      throw new ServiceUnavailableException('stock alert trigger history is unavailable');
+    }
   }
 
   @Post()

@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4388,6 +4388,43 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| events[] | true | object[] |  |
+| events[] | true | object |  |
+| events[].event_id | true | string |  |
+| events[].alert_id | true | string |  |
+| events[].stock_id | true | string |  |
+| events[].symbol | true | string |  |
+| events[].name | true | string |  |
+| events[].condition_kind | true | string |  |
+| events[].threshold_amount | true | null \| string |  |
+| events[].threshold_bps | true | null \| number |  |
+| events[].trigger_price | true | string |  |
+| events[].trigger_day_change_bps | true | number |  |
+| events[].triggered_at | true | string (date-time) |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/stocks/alerts/events/snapshot` — Owner-only latest 100 virtual-stock alert trigger events
+
+- Authorization: 로그인 필요(기능에 따라 최신 동의 필요)
+- Success status: 200
+- Response mode: json
+- After success: 종목/포트폴리오/기록 중 관련 상태 재조회
+- Operation ID: `StockAlertController_eventsSnapshot`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="recent_100_max" | const="recent_100_max" |
 | events[] | true | object[] |  |
 | events[] | true | object |  |
 | events[].event_id | true | string |  |

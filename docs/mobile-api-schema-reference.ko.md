@@ -4,7 +4,7 @@
 
 업데이트 버전: **v2026.09.22.359**
 
-이 문서는 179개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
+이 문서는 180개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
 ## 공통 호환성 규칙
 
@@ -4388,6 +4388,43 @@ _요청 본문 없음._
 
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
+| events[] | true | object[] |  |
+| events[] | true | object |  |
+| events[].event_id | true | string |  |
+| events[].alert_id | true | string |  |
+| events[].stock_id | true | string |  |
+| events[].symbol | true | string |  |
+| events[].name | true | string |  |
+| events[].condition_kind | true | string |  |
+| events[].threshold_amount | true | null \| string |  |
+| events[].threshold_bps | true | null \| number |  |
+| events[].trigger_price | true | string |  |
+| events[].trigger_day_change_bps | true | number |  |
+| events[].triggered_at | true | string (date-time) |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/stocks/alerts/events/snapshot` — 회원 본인 가상 주식 조건부 알림 최근 최대 100건 조회(전체 이력 아님)
+
+- 인증/권한: 로그인 필요(기능에 따라 최신 동의 필요)
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 종목/포트폴리오/기록 중 관련 상태 재조회
+- Operation ID: `StockAlertController_eventsSnapshot`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| scope | true | string="recent_100_max" | const="recent_100_max" |
 | events[] | true | object[] |  |
 | events[] | true | object |  |
 | events[].event_id | true | string |  |
