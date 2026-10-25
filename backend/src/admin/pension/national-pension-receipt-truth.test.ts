@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { NationalPensionRepository } from './national-pension.repository';
+import { NationalPensionRepository } from './national-pension.repository';
 import { NationalPensionService } from './national-pension.service';
 
 const row = {
@@ -26,5 +26,12 @@ describe('national pension historical payout receipts', () => {
     const error = Object.assign(new Error('permission denied for table national_pension_payout_logs'), { code: '42501' });
     const service = new NationalPensionService({ listPayoutLogs: vi.fn().mockRejectedValue(error) } as unknown as NationalPensionRepository);
     await expect(service.listPayoutLogs('owner-1')).rejects.toMatchObject({ status: 503 });
+  });
+  it('uses a bounded owner predicate for historical payouts without writes', async () => {
+    const query = vi.fn().mockResolvedValue({ rows: [row] });
+    const repo = new NationalPensionRepository({ query } as never);
+    expect(await repo.listPayoutLogs('owner-1', 20)).toEqual([row]);
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('WHERE user_id = $1'), ['owner-1', 20]);
+    expect(query).toHaveBeenCalledTimes(1);
   });
 });

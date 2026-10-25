@@ -36,7 +36,7 @@ import { calculatePensionForecast } from '@/lib/pension-money';
 
 // Must match the unconditional backend P0 settlement hold. Reading existing receipts remains available.
 export const PENSION_LEDGER_SETTLEMENT_PAUSED = true;
-const PENSION_HOLD_NOTICE = '원장 정산 검증 중입니다. 국민연금 납입·해지·은퇴 전환·정기 지급이 일시 중단되었습니다. 기존 내역 조회는 가능합니다.';
+const PENSION_HOLD_NOTICE = '원장 정산 검증 중입니다. 국민연금 납입·해지·은퇴 전환·정기 지급이 일시 중단되었습니다. 기존 기록도 조회 권한 검증이 완료되지 않아 일시적으로 조회되지 않을 수 있습니다.';
 
 export interface NationalPensionOverview {
   totalAumWld: string;

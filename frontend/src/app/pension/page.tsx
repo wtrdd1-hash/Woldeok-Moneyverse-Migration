@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '국가 국민연금공단 (NPS) 대국민 포털 | 평생 기초연금 적립 & 수령',
-  description: '중앙 국고(VAULT_MAIN)와 연동되어 국부펀드의 복리 운용 레버리지로 평생 시간당 기초연금을 확정 지급하는 월덱 국민연금 공식 포털입니다.',
+  description: '월덕 가상경제 국민연금 기록 조회 포털입니다. 지급 정산은 검증 중이며 과거 지급 기록은 금융 원장으로 확정되지 않았습니다.',
 };
 
 export default async function PublicPensionPage() {

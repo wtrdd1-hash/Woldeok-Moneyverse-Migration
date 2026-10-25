@@ -23,3 +23,16 @@
 - Member portal no longer fabricates public vault fallback, distinguishes account/API failures from logout or zero balances, and labels historical payout entries and aggregates as **ledger unverified**, never confirmed transfers. API preserves original exact WLD strings and returns 503 on the observed app-role read denial. Android app-api preserves status, session and private no-store/noindex.
 - Mid-task origin/main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` unchanged; canonical EN/KO and integrated planning reread. Full typecheck PASS.
 - Unrelated worker PRs/branches and applied migrations untouched. No release, merge or Production writes.
+
+## Finished — 2026-10-25 17:11 KST
+- [x] Focused RED/GREEN TDD: backend 4 PASS, frontend/mobile 16 PASS; exact integer strings and owner-bound query verified.
+- [x] Root README and pension EN/KO specifications updated; API/backend, web and Android app-api changed; release EN/KO and QA evidence recorded.
+- [x] Full workspace typecheck PASS, ESLint 0 errors / 1128 warnings, build PASS after local offline dependency install (initial Turbopack symlink error fixed without touching another worktree).
+- [x] Full tests measured: contract 38 PASS, DB 15 PASS/3 SKIPPED, backend 1316 PASS/398 SKIPPED, frontend 1403 PASS/6 FAIL, bot 8 PASS. Full audit Critical2/High10, prod audit High2, bot audit Critical1/High5 => HOLD.
+- [x] Real isolated PostgreSQL `wdmv_v761_test_acl` role negative: pension accounts/payout SELECT denied; owner payout query SQLSTATE 42501. No write/fixture; backend full authenticated E2E blocked. P0 #1302 filed.
+- [x] Host Test exact SHA preflight failed: Test manifest `9f39f041...`, public API `6f697e74...`, candidate `2d33e8b3...`. No Test promotion or Production release.
+- [x] Remote audit: start 165 heads/161 PRs; later 167 heads/163 PRs; 166 non-main heads all retain unique unmerged changes; no identical head/tree; conflict PR #1107/#1110/#1143 preserved. Deleted 0; other workers/Gemini protected.
+- [x] Draft PR #1303 created; branch pushed. Main remained `1c5b84a1c45baafcca83f375a6f99698121e9bb5` on start/mid; final pre-integration fetch required. GitHub CI was pending/failing at report time, no PASS claim.
+- [x] Test: unchanged. Production: unchanged. No financial writes, migration application, restart, feature-switch edit, branch deletion, main merge or GitOps promotion. Rollback: close/revert unmerged PR, preserve ledger and pension settlement hold.
+
+**Final outcome:** PARTIAL / BLOCKED — Production RELEASE HOLD. Not a docs-only change; application code and focused regressions were committed. Required release gates not met.
