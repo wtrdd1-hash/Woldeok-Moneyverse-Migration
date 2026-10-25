@@ -14651,6 +14651,101 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/app-api/v1/support/threads/:id/transcript",
+      "purpose": "내 문의 대화 기록을 최대 500건까지 본인 확인 후 조회",
+      "callWhen": "본인 문의 대화 기록을 내보내거나 확인할 때",
+      "authorization": "로그인 + 최신 동의 + 본인 대화 소유권 확인",
+      "afterSuccess": "limit=500, truncated=true는 전체 기록이 아닐 수 있음을 표시하고 CSV 수식 삽입을 차단",
+      "backendRoute": "/api/v1/support/threads/:id/transcript",
+      "operationId": "SupportController_transcript",
+      "backendOpenApiPath": "/support/threads/{id}/transcript",
+      "summary": "Owner-only bounded support conversation transcript for private export",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "messages",
+          "limit",
+          "truncated"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message_id": {
+                  "type": "string"
+                },
+                "sender_kind": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "const": "user"
+                    },
+                    {
+                      "type": "string",
+                      "const": "admin"
+                    }
+                  ]
+                },
+                "sender_user_id": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "message_id",
+                "sender_kind",
+                "body",
+                "created_at"
+              ]
+            }
+          },
+          "limit": {
+            "type": "number"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "messages",
+          "limit",
+          "truncated"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
       "method": "POST",
       "path": "/app-api/v1/support/threads/:id/messages",
       "purpose": "내 문의에 추가 메시지 전송",

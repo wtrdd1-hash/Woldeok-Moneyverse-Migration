@@ -15,6 +15,7 @@ describe('Android support transcript gateway', () => {
     const response = await GET(request, { params: Promise.resolve({ path: ['support', 'threads', thread, 'transcript'] }) });
     expect(response.status).toBe(403);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
     expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('cookie')).toBe('sid=opaque');
     expect(String(fetchSpy.mock.calls[0]?.[0])).toContain(`/api/v1/support/threads/${thread}/transcript`);
   });
