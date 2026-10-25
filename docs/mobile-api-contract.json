@@ -3776,6 +3776,168 @@
     },
     {
       "method": "GET",
+      "path": "/app-api/v1/banking/loan-deadline",
+      "purpose": "내 가상 대출 만기·최소 상환 현금 충당 현황 조회",
+      "callWhen": "은행 대출 화면에서 만기 현황 진입 또는 새로고침",
+      "authorization": "로그인 + 최신 동의(본인 전용)",
+      "afterSuccess": "조회 전용; WLD 이동/상환/알림 예약 없음",
+      "backendRoute": "/api/banking/loan-deadline",
+      "operationId": "BankController_loanDeadline",
+      "backendOpenApiPath": "/banking/loan-deadline",
+      "summary": "Owner-scoped read-only virtual loan deadline and minimum cash readiness",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [],
+        "note": "Controller returns the service/repository result directly; use documented field names and preserve unknown additive fields."
+      },
+      "responseSchema": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "hasActiveLoan": {
+                "type": "boolean",
+                "const": false
+              },
+              "observedAt": {
+                "type": "string"
+              },
+              "quoteOnly": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "hasActiveLoan",
+              "observedAt",
+              "quoteOnly"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "hasActiveLoan": {
+                "type": "boolean",
+                "const": true
+              },
+              "quoteOnly": {
+                "type": "boolean",
+                "const": true
+              },
+              "observedAt": {
+                "type": "string"
+              },
+              "loanId": {
+                "type": "string"
+              },
+              "loanStatus": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "const": "active"
+                  },
+                  {
+                    "type": "string",
+                    "const": "overdue"
+                  }
+                ]
+              },
+              "maturityAt": {
+                "type": "string"
+              },
+              "dueState": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "const": "overdue"
+                  },
+                  {
+                    "type": "string",
+                    "const": "scheduled"
+                  },
+                  {
+                    "type": "string",
+                    "const": "due_soon"
+                  }
+                ]
+              },
+              "daysUntilDue": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "overdueDays": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "outstandingAmount": {
+                "type": "string"
+              },
+              "minimumRepayment": {
+                "type": "string"
+              },
+              "cashBalance": {
+                "type": "string"
+              },
+              "canCoverMinimum": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  {
+                    "type": "boolean",
+                    "const": true
+                  }
+                ]
+              }
+            },
+            "required": [
+              "hasActiveLoan",
+              "quoteOnly",
+              "observedAt",
+              "loanId",
+              "loanStatus",
+              "maturityAt",
+              "dueState",
+              "daysUntilDue",
+              "overdueDays",
+              "outstandingAmount",
+              "minimumRepayment",
+              "cashBalance",
+              "canCoverMinimum"
+            ]
+          }
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
       "path": "/app-api/v1/banking/standing",
       "purpose": "은행 잔액·대출·신용 상태 조회",
       "callWhen": "해당 화면 진입/새로고침/관련 write 후",

@@ -23,6 +23,26 @@ afterEach(() => {
 });
 
 describe('app API route compatibility', () => {
+  it('forwards owner-private bank loan deadline to Android app-api without caching', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_target: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({hasActiveLoan: true, quoteOnly: true, outstandingAmount: '90071992547409931234567890'}), {
+      status: 200, headers: {'content-type': 'application/json', 'cache-control': 'private, no-store'},
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/banking/loan-deadline', {cookie: 'session=opaque'}),
+      context('banking', 'loan-deadline'),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({outstandingAmount: '90071992547409931234567890', quoteOnly: true});
+    const [target, init] = fetchSpy.mock.calls[0]!;
+    expect(String(target)).toContain('/api/v1/banking/loan-deadline');
+    expect(new Headers(init?.headers).get('cookie')).toBe('session=opaque');
+    expect(new Headers(init?.headers).get('x-internal-token')).toHaveLength(32);
+    expect(init?.cache).toBe('no-store');
+  });
+
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);

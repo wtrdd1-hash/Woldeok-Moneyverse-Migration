@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -29,6 +30,7 @@ import {
   IdempotentDto,
 } from './bank.dto';
 import { BankInputError, BankRepository } from './bank.repository';
+import { loanDeadlineSnapshot, LoanDeadlineDataError } from './loan-deadline';
 
 @ApiTags('banking')
 @Controller('banking')
@@ -62,6 +64,24 @@ export class BankController {
       () => this.repository().getStanding(requireUserId(request)),
       'failed to load bank standing',
     );
+  }
+
+  @Get('loan-deadline')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Owner-scoped read-only virtual loan deadline and minimum cash readiness' })
+  async loanDeadline(@Req() request: RequestWithSession) {
+    const actor = requireUserId(request);
+    const standing = await this.guarded(
+      () => this.repository().getStanding(actor),
+      'failed to load loan deadline standing',
+    );
+    try {
+      return loanDeadlineSnapshot(standing);
+    } catch (error: unknown) {
+      if (error instanceof LoanDeadlineDataError) throw new ServiceUnavailableException(error.message);
+      throw error;
+    }
   }
 
   @Post('deposit')

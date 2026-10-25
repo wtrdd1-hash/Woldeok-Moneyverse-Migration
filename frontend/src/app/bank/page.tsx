@@ -200,6 +200,13 @@ export default async function BankPage() {
             </div>
           )}
 
+          {activeLoan && (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-4 text-sm">
+              <p className="flex-1">{isEn ? 'Check your loan maturity and minimum cash readiness.' : '현재 대출 만기일과 최소 상환액의 현금 충당 여부를 확인하세요.'}</p>
+              <Button asChild variant="outline"><Link href="/bank/loan-deadline">{isEn ? 'Loan maturity status' : '대출 만기·상환 준비 확인'}</Link></Button>
+            </div>
+          )}
+
           {/* 스마트 가상 대출 카드 */}
           <SmartLoanCard
             creditLimit={creditLimit}
