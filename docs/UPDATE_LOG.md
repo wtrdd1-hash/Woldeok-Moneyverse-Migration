@@ -1,3 +1,10 @@
+## v2026.10.25.1268 — F675-124 Member Board Author Mutes and Private Feed (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1266 → Current Addition v1268 → Next Improvement v1270 provisional; remote main eb27f5590e80bb71462e3888d052106a068e661a start/mid; stacked after unmerged Draft #1274; development [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280).
+- Verified public /board 60s indexable cache and 50-row author-ID-less list, post detail authorUserId via migration259. Proposed owner-only SQL-filtered /board/personal, post-derived Hide, /account/board-muted-authors, durable 200-cap mute/tombstone, generation/HMAC receipts, signed cursor, Android parity; public SEO/DM/notifications/WLD untouched.
+- Backlog P0 ENV1268-01 SEC1268-02 REL1268-03 BOARD1268-04; P1 BOARD1268-05 BOARD1268-06 BOARD1268-07 BOARD1268-08 BOARD1268-09 BOARD1268-10. Full spec in existing EN/KO integrated masters. No runtime or migration implementation.
+- QA v1268 FAILED/HOLD; live root 89%/11G free (older QA 100%/177MiB), dev app DML 235/241, PUBLIC bank functions 3, migration266/280, frontend six failures, Critical2/High10, finance/exact-SHA Test/restore BLOCKED. New approved independent references 0; cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- Full backlog IDs: ENV1268-01 SEC1268-02 REL1268-03 BOARD1268-04 BOARD1268-05 BOARD1268-06 BOARD1268-07 BOARD1268-08 BOARD1268-09 BOARD1268-10
+
 ## 2026-10-25 v1264 — F675-123 Verified Calendar Watchlist and ICS Export (planning-only, HOLD)
 
 ## v2026.10.25.1266 — F675-123 Calendar Source/ICS Integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)

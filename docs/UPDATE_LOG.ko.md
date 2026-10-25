@@ -1,3 +1,10 @@
+## v2026.10.25.1268 — F675-124 게시판 작성자 숨김·개인 피드 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1266 → 현재 기능 추가 v1268 → 다음 기능 보완 v1270(잠정); main eb27f5590e80bb71462e3888d052106a068e661a 시작·중간 확인, 미병합 Draft #1274 후속, 개발 [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280).
+- 공개 /board 60초 캐시·색인·작성자 ID 없는 50건 목록, Migration259 상세의 작성자 UUID 확인. 본인 SQL 필터 /board/personal, 글 상세 숨김, /account/board-muted-authors, 활성 200명·묘비/세대/HMAC 영수증·서명 커서·Android 동등. 공개 SEO·DM·알림·WLD 불변.
+- P0 ENV1268-01 SEC1268-02 REL1268-03 BOARD1268-04; P1 BOARD1268-05 BOARD1268-06 BOARD1268-07 BOARD1268-08 BOARD1268-09 BOARD1268-10. 영문/국문 통합 정본 상세, 런타임·마이그레이션 구현 없음.
+- QA v1268 FAILED/HOLD, 실측 루트 89%/11G 여유(과거 QA 100%/177MiB), 앱 DML 235/241·PUBLIC 3·Migration266/280·Frontend 6건 실패·Critical2/High10·금융/정확 SHA Test/복원 차단. 신규 외부 승인 0·누적 미확인/10,000 BLOCKED/IN PROGRESS.
+- 전체 백로그 ID: ENV1268-01 SEC1268-02 REL1268-03 BOARD1268-04 BOARD1268-05 BOARD1268-06 BOARD1268-07 BOARD1268-08 BOARD1268-09 BOARD1268-10
+
 ## 2026-10-25 v1264 — F675-123 검증형 일정 관심 목록·ICS 내보내기 (기획만, HOLD)
 
 ## v2026.10.25.1266 — F675-123 일정 원천·ICS 무결성 보완 (기능 보완 / 초안 / 운영 보류)

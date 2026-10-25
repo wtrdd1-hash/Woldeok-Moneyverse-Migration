@@ -1,5 +1,14 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v2026.10.25.1268 — F675-124 본인 전용 게시판 작성자 숨김 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1266 → 현재 기능 추가 v1268 → 다음 기능 보완 v1270(잠정). main eb27f5590e80bb71462e3888d052106a068e661a 시작·중간 및 영문 정본·국문 대조 확인. 개발 이슈 [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280), 미병합 #1274 후속 문서만 변경.
+- 공개 게시판은 60초 캐시·검색 색인·목록 최대 50건/authorUserId 없음, Migration259 상세는 작성자 UUID 있음. 브라우저 사후 필터·전역 차단 대신 DB LIMIT 이전 개인 피드 필터, 본인 숨김·해제만 설계. 공개 SEO·운영 제재·DM·알림·원장 변경 없음.
+- 본인 검증 SECURITY DEFINER, 활성 200명 한도, 회원+작성자 유니크 묘비/버전·세대·HMAC 영수증, 회원/세션/세대 결합 커서, 동의/CSRF·Android 동등·개인 no-store/noindex·관리자 k>=20·WCAG2.2 AA. 상세는 영문/국문 통합 정본 참조.
+- P0 ENV1268-01 SEC1268-02 REL1268-03 BOARD1268-04; P1 BOARD1268-05 BOARD1268-06 BOARD1268-07 BOARD1268-08 BOARD1268-09 BOARD1268-10. 검증: 동시 100건·타인 100건·합성 글 10,001건·공개 캐시 누출 0·정확 SHA Test 및 독립 QA PASS 전 운영 금지.
+- QA v1268 FAILED/HOLD, 루트 실측 89%/11G 여유지만 DB ACL 235/241·PUBLIC 3·Migration266/280·Frontend 6건 실패·Critical2/High10·금융·복원/Test 차단 지속. 외부 신규 승인 0·누적 미확인/10,000 BLOCKED. 런타임/Test/운영 변경 없음.
+- 전체 백로그 ID: ENV1268-01 SEC1268-02 REL1268-03 BOARD1268-04 BOARD1268-05 BOARD1268-06 BOARD1268-07 BOARD1268-08 BOARD1268-09 BOARD1268-10
+
+
 ## v2026.10.25.1266 — F675-123 일정 원천·ICS 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 - Draft PR [#1274](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1274) OPEN/HOLD; 개발 이슈 [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267) 갱신, main 병합·운영승격 없음.
 - 이전 기능 추가 v1264 → 현재 기능 보완 v1266 → 다음 기능 추가 v1268(잠정). 원격 main c9a868b1e622341e2daa8b936ddf0988eda9988e 시작·중간 확인, main AGENTS/README 및 영문 정본·국문 대조 확인. 선행 Draft #1268 미병합, 개발 이슈 #1267, 문서만 변경.

@@ -1,5 +1,14 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v2026.10.25.1268 — F675-124 Owner-only Board Author Mutes (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1266 → Current Addition v1268 → Next Improvement v1270 provisional. Main eb27f5590e80bb71462e3888d052106a068e661a checked start/mid, canonical EN/KO plan reviewed. Development issue [#1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280); stacked after unmerged #1274, docs-only.
+- Evidence: public board is 60s-cached/indexable and lists only 50 posts without authorUserId; post detail after migration259 has authorUserId. Reject client-side filtering and global block. Personal feed excludes muted authors in SQL before LIMIT; owner-only Hide/Unmute, no public SEO, moderation, DM, notifications or ledger effects.
+- Proposed actor-checked SECDEF functions, 200 active mutes, owner+author tombstone/version, generation, HMAC replay receipts, cursor bound to owner/session/generation, consent/CSRF, Android parity, private no-store/noindex, admin k>=20 and WCAG2.2 AA. Full details in integrated EN/KO master.
+- P0 ENV1268-01 SEC1268-02 REL1268-03 BOARD1268-04; P1 BOARD1268-05 BOARD1268-06 BOARD1268-07 BOARD1268-08 BOARD1268-09 BOARD1268-10. Acceptance: 100 concurrent requests, 100 foreign probes, 10,001 synthetic posts, no public cache leakage, exact-SHA Test + independent QA PASS before promotion.
+- QA v1268 FAILED/HOLD; root now 89%/11G free but DB ACL 235/241 + PUBLIC 3, migration266/280, frontend six failures, Critical2/High10, finance and restore/Test gates BLOCKED. New approved external evidence 0, cumulative UNKNOWN/10,000 BLOCKED. Runtime/Test/Production unchanged.
+- Full backlog IDs: ENV1268-01 SEC1268-02 REL1268-03 BOARD1268-04 BOARD1268-05 BOARD1268-06 BOARD1268-07 BOARD1268-08 BOARD1268-09 BOARD1268-10
+
+
 ## v2026.10.25.1266 — F675-123 Calendar Source/ICS Integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - Draft PR [#1274](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1274) OPEN/HOLD; development issue [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267) updated; no main merge or runtime promotion.
 - Previous Feature Addition v1264 → Current Feature Improvement v1266 → Next Feature Addition v1268 provisional. Main c9a868b1e622341e2daa8b936ddf0988eda9988e checked start/mid; main AGENTS/README and English canonical/Korean planning verified. Unmerged Draft #1268 and issue #1267; docs-only, no runtime implementation.

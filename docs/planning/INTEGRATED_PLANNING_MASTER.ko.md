@@ -1,5 +1,55 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.25.1268 — F675-124 회원별 게시판 작성자 숨김 및 개인 피드 (기능 추가 / 기획 초안 / 운영 보류)
+- **개발 인계:** [GitHub 이슈 #1280](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1280) OPEN/HOLD, 선행 기획 Draft #1274 미병합. 런타임 변경이 아니다.
+
+### 회차·목적·대안·실제 코드 근거
+- **이전 Feature Improvement v1266 → 현재 Feature Addition v1268 → 다음 Feature Improvement v1270(잠정).** 최신 원격 main eb27f5590e80bb71462e3888d052106a068e661a를 시작·중간 재확인하고 AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 국문 대조를 읽었다. 선행 기획 Draft #1274는 미병합 OPEN이다. 본 회차는 문서 기획이며 런타임 구현 승인이 아니다.
+- **목적/대상:** 로그인하고 현재 동의를 유지한 활성 회원이 개인 피드에서 원하지 않는 작성자의 공개 게시글만 숨기도록 한다. 공개 게시판, 타 회원, 관리자 조치, 메시지, 알림 전달, WLD·원장은 변경하지 않는다. 비회원은 기존 공개 게시판을 본다. 대안 A인 공개 상위 50건을 브라우저에서 사후 필터링하는 방식은 빈 페이지·편향 및 캐시 오염으로 기각한다. 대안 B인 전역 작성자 차단은 공개 SEO·운영·DM 의미를 바꾸므로 기각한다. **채택:** 별도 본인 전용 피드, DB LIMIT 이전 필터링, 명시적 숨김/해제와 관리 화면.
+- **최신 main 실증:** frontend/src/app/board/page.tsx는 canonical/indexable 공개 화면이며 publicApi 캐시 60초이다. backend/src/board/public-board.service.ts 및 Migration 175의 공개 목록은 작성자 이름은 반환하지만 authorUserId는 없고 최대 50건이다. frontend/src/app/board/[postId]/page.tsx 및 Migration 259의 상세는 authorUserId를 제공한다. Migration 044/048의 목록은 deleted_at IS NULL을 기준으로 created_at/id 순서로 조회한다. 작성자별 개인 숨김 테이블/기능은 확인되지 않았다. App API 게이트웨이는 board 그룹과 JSON DELETE 본문을 지원한다. 공개 글 ID만으로 회원 소유권을 추정하지 않는다.
+- **업무 분리:** F675-109 읽기 목록, F675-110 비공개 초안, F675-116 수정 이력, F675-121 게시글 팔로우·댓글 알림, 개발 C의 게시판/알림 작업과 분리한다. 신규 알림·DM 차단·괴롭힘 제재·게시글 삭제·크롤러별 차별 출력·보상·WLD·주식·원장 변경은 범위 밖이다. 분산 기획 파일을 만들지 않고 이 통합 정본에 흡수한다.
+
+### 사용자 동선·권한·화면 상태
+1. **진입:** 공개 /board와 /board/[postId]는 비회원·검색엔진에 그대로 제공한다. 로그인 상태에서 실제 공개 글의 본인 아닌 authorUserId가 검증되면 보조 CTA **이 작성자의 글을 내 피드에서 숨기기**를 제공하고 "내 피드만 바뀌며 공개 글은 계속 볼 수 있습니다"라고 설명한다. 로그인 회원에게 /board/personal, /account/board-muted-authors 링크를 제공한다. 작성자 정보 없음·본인 글·접근 불가 글에는 숨김 버튼을 표시하지 않는다.
+2. **개인 피드:** /board/personal은 본인 인증·noindex/nofollow·private/no-store를 적용한 서버 조회 화면이다. 카드에는 실제 제목, 공개 작성자명, 작성 시각, 댓글 수, 글 열기를 표시한다. CTA는 **숨긴 작성자 관리**, **전체 공개 게시판 보기**, **새로고침**이다. 숨김 활성 작성자의 글을 **DB LIMIT 이전**에 제외한다. 공개 원문은 기존 공개·운영 정책 범위에서 계속 열람 가능하며 /board canonical 및 공개 상세는 변경하지 않는다.
+3. **관리:** /account/board-muted-authors에는 본인 숨김 기록만 보인다. 탈퇴·이름 조회 불가 작성자는 **이용할 수 없는 회원**으로 익명화하고 **숨김 해제**는 가능해야 한다. 본인 자신, 임의 UUID, 타인의 목록은 숨기거나 열람할 수 없다. 관리자 제재·법적 삭제·플랫폼 안전 조치가 우선한다. 개인 숨김은 신고·차단 기능이 아니다.
+4. **상태:** SIGNED_OUT, LOADING, READY, EMPTY_FEED, EMPTY_MUTES, MUTING, MUTED_CONFIRMED, UNMUTING, UNMUTED_CONFIRMED, AUTHOR_UNAVAILABLE, CONFLICT_REFRESH, UNKNOWN_COMMIT, RATE_LIMITED, ERROR, FEATURE_UNAVAILABLE. 저장된 영수증 전 성공 토스트 금지. 커밋 결과 불명 시 영수증 조회→현재 상태 재조회. 로그아웃·계정 전환 시 이전 응답을 폐기한다. 조회 오류를 글 없음으로 표시하지 않는다.
+
+### NestJS·Next.js·Android API 계약(제안)
+5. **본인 API:** GET /api/v1/board/personal?limit=20&cursor= (최대 50, posts/nextCursor/muteGeneration/asOf), GET /api/v1/board/mutes?limit=20&cursor= (최대 50), GET /api/v1/board/mutes/state?postId=UUID (CTA용 본인 숨김 상태·버전, 접근 불가 글 404), POST /api/v1/board/mutes 본문 {postId:UUID,requestId:UUID,expectedVersion:0이상 정수}, DELETE /api/v1/board/mutes/:muteId 본문 {requestId:UUID,expectedVersion:양의 정수}, GET /api/v1/board/mutes/receipts/:requestId. POST는 **서버가 현재 공개 가능한 글의 작성자를 확인**한다. 요청 본문에서 작성자 UUID를 받지 않는다. DELETE는 본인+불투명 muteId를 SQL에서 확인하며 타인/없는 기록 모두 404다. 기존 공개 API와 /board 캐시 의미는 유지한다.
+6. **인가/오류:** 모든 본인 API에 SessionGuard·AuthenticatedGuard·ConsentGuard, 브라우저 변경 요청에 CsrfGuard·동일 출처 검증, 엄격한 JSON 스키마 적용. 회원당 쓰기 분당 12회·읽기 분당 60회, 본문 4KiB 이하, 기본 20/최대 50. 비로그인 401, 정지·동의 불충족 403, 접근 불가 글/숨김 404(존재 유추 불가), 구버전·세대 변경·영수증 충돌 409, 본인 숨김·잘못된 대상 422, 과다 호출 429, DB/기능 원천 불능 503. 네트워크 시간 초과를 성공으로 처리하지 않는다. 오류에 타인의 UUID·이름·숨김 정보 노출 금지.
+7. **Android:** /app-api/v1/board/...에서 JSON 조회·숨김·해제·영수증 동등 계약을 제공하되 App API 경로 맵 및 최소 버전 검증을 먼저 통과한다. 현재 게이트웨이는 POST/DELETE 본문을 전달하므로 전달되지 않는 임의 헤더 대신 본문 requestId/expectedVersion을 사용한다. 앱 전송 방식별 세션·토큰·CSRF 정책, 계정 전환, 401/403/409/503을 검증한다. 모바일 전용 가짜 로컬 상태 금지.
+
+### PostgreSQL 테이블·제약·인덱스·원자성
+8. **정방향 마이그레이션 제안(번호 미배정; 266/280 해결 후):** member_board_author_mutes(id UUID PK, owner_user_id UUID users FK, muted_author_user_id UUID users FK, active BOOL, version BIGINT>=1, created_at, updated_at, UNIQUE(owner_user_id,muted_author_user_id), CHECK owner<>muted); member_board_mute_states(owner_user_id UUID PK users FK, generation BIGINT>=0); member_board_author_mute_receipts(owner_user_id,request_id UUID, operation enum, request_hmac BYTEA, mute_id, result_version, resulting_generation, committed_at, PRIMARY KEY(owner_user_id,request_id)). 원시 테이블은 PUBLIC·moneyverse_app의 직접 SELECT/DML 권한을 회수하고 본인 검증 SECURITY DEFINER 함수에만 제한적 EXECUTE를 허용한다. 무제한 작성자 UUID 검색 함수 금지.
+9. **인덱스/한도:** 활성 숨김 부분 인덱스 (owner_user_id,created_at DESC,id DESC) WHERE active; UNIQUE(owner,author)로 묘비 포함 중복 방지; 영수증 PK owner+request; 공개 글 기존 (created_at DESC,id DESC) 인덱스 활용, 추가 author/visibility 인덱스는 격리 EXPLAIN 근거가 있을 때만 도입한다. 회원당 **활성 숨김 최대 200명**, 회원·상태 행 잠금으로 동시 한도 초과 방지. 합성 게시글 페이지네이션 10,001건은 운영 숨김 한도와 무관하다. 해제 후 재숨김에도 버전 단조 증가·묘비 보존.
+10. **원자적 쓰기:** 트랜잭션 시작→활성 users 회원 행 잠금→본인 mute state 잠금→숨김 등록 시 공개 글 FOR SHARE 검증→기존 mute 행을 안정적인 UUID 순서로 잠금→대상 활성·본인 여부·한도·expectedVersion·중복 키 검사→active/묘비 및 version·generation 증가→불변 영수증 INSERT→한 번에 COMMIT. 동일 회원+requestId+정규화된 작업/글 또는 muteId/expectedVersion HMAC은 최초 영수증 반환, 다른 본문으로 같은 키 재사용은 409. 글 삭제·회원 탈퇴·숨김 변경과 경합하면 재검증/실패 처리하고 오래된 작성자에 대해 성공을 확정하지 않는다. HMAC 키 버전 교체·보존 기간 명시, 영수증에 이름·글 본문 미저장.
+11. **개인 피드 조회:** DB 소유 함수 member_board_personal_list(actor,limit,cursor)가 공개 가능 글을 본인 활성 숨김과 NOT EXISTS로 조인하고 **LIMIT 이전 필터링**, (created_at DESC,post_id DESC) 키셋 순서로 반환한다. 인증된 응답에서만 authorUserId를 제공한다. 커서는 HMAC으로 본인·세션 식별자 해시·필터·숨김 generation·상한 워터마크·마지막(created_at,postId)·15분 이내 만료를 결합한다. 위조/타 계정/만료 커서는 정보 노출 없이 400/409. 숨김 generation 변경 시 Refresh를 요구하여 혼합 페이지를 막는다. 신규 글은 새로고침 때 표시하고 삭제 글은 사라질 수 있으며 과거 완전 스냅샷을 보장하지 않는다. OFFSET 및 공개 캐시 혼합 금지. 공개 사이트맵·구조화 데이터는 기존 공개 조회만 사용한다.
+12. **개인정보 생명주기:** 탈퇴는 소프트 삭제이므로 즉시 읽기·쓰기 차단 후 본인 숨김·상태·영수증·백업 보존/삭제 기간을 개인정보 검토로 확정한다. ON DELETE CASCADE만으로 삭제 보장 불가. 숨김 기록이 있는 계정 병합은 명시적 이전 정책과 테스트 전 차단하며 임의 이전·타인 숨김 관계 노출 금지. 삭제된 작성자 이름 익명화. 관리자는 개인별 숨김 목록 열람·수정 권한이 없고 k>=20 및 차분 공격 억제를 적용한 비식별 통계만 제공한다.
+
+### 보안·SEO·접근성·지표·검증·배포
+13. **보안/악용방지:** BOLA/BFLA, CSRF, 타인 영수증·커서 재사용, UUID 열거, DELETE IDOR, 본인 숨김, 작성자명 XSS, 요청 폭주, 무제한 페이지네이션, 공개 캐시 누출을 차단한다. DB 함수에서도 회원 활성·동의를 검증한다. 직접 테이블 권한 확대 금지. 운영 제재·섀도밴·DM 차단·알림·공개 소셜 그래프와 혼동 금지. 감사 로그에는 회원 식별자/작업/결과만 최소화하고 작성자 이름·본문·토큰·쿠키·HMAC 키를 남기지 않는다.
+14. **접근성/SEO/모바일:** WCAG 2.2 AA 키보드·포커스 복원·aria-live 상태 안내·해제 버튼, 320px/200% 확대, reduced motion, 주요 터치 버튼 44px(제품 목표; WCAG AA 법정 최소와 혼동 금지). 개인 피드·설정은 noindex/nofollow·사이트맵 제외·private no-store 및 적절한 세션 Vary. 공개 /board는 기존 indexable·60초 재검증·canonical 유지. 공개 ISR 캐시에 회원별 HTML을 저장하지 않으며 봇 감지로 인가를 대체하지 않는다.
+15. **분석/KPI:** 개인 정보 없이 숨김 의도→확정 영수증 전환, 해제율, 개인 피드 D7 재방문, 게시글 열람률, 빈 피드/오류/409 비율, 작성자 이용 불가율, 피드 p95 지연을 측정한다. **타인 정보 누출 0, 공개 글 억제 0, WLD/원장 변경 0, 거짓 성공 0, 검증 없는 상태 확정 0**은 배포 불변 조건이지 관측 실적이 아니다. 집계 코호트 k>=20, 작성자 타깃 식별자 분석 수집 금지. 사업효과·목표치는 실제 측정 전 HYPOTHESIS로 표시.
+16. **테스트/회귀:** 폐기 가능한 실제 PostgreSQL에서 동일 요청 100건 동시 재시도, 서로 다른 본문 동일 키 100건, 타 회원 조회·삭제 100건, 200명 경계 한도 경합 100건, 합성 공개 글 10,001건 키셋, 글 삭제 대 숨김 경합, 본인 숨김, 탈퇴/병합, 계정 전환, 공개 SEO·캐시 불변, 빈 피드·부분 장애, 서명 커서 세대 무효화, XSS 이름, Android POST/DELETE, 키보드·320px·스크린리더를 검증한다. 영수증 불변·중복 활성 0·정렬/중복 없음·권한 확대 없음·WLD/원장 변경 없음. 미인가 또는 허위 성공 한 건이라도 실패.
+17. **무중단 배포/롤백:** 기능 스위치 기본 OFF. P0 ENV/SEC/REL과 266/280 마이그레이션 충돌 해결 후 별도 개발 브랜치·설계/구현 계획 사람 검토, 격리 PG RED/GREEN, lint/typecheck/unit/integration/app-api/Android/security/SEO/a11y, **최종 정확 SHA** 공식 인증 Test(API/DB/세션/사용자 흐름/회귀), 독립 QA PASS, 백업 복원, GitOps 사람 승인, 1%→10%→100% 카나리 및 롤백. 롤백은 스위치 OFF와 기존 경로 복원, 테이블·묘비·영수증 보존, 파괴적 마이그레이션/공개 글 필터 변경 금지. 기획 PR만으로 운영승격 금지.
+18. **외부 근거 10,000건 게이트:** OWASP API Top 10 (https://api-security.owasp.org/editions/2023/en/0x11-t10/), W3C WCAG 2.2 (https://www.w3.org/TR/wcag/), PostgreSQL SELECT 잠금 문서 (https://www.postgresql.org/docs/18/sql-select.html) 공식 발행기관 3곳을 설계 참고로 검토했다. 신규 **최종 승인** 독립·중복제거·실제 근거 분류 기록 **0건**, 누적 검증 수량 **미확인 / 목표 10,000건**. **BLOCKED / IN PROGRESS**, 달성 주장 금지.
+
+### P0/P1 개발 인계 — 독립 검증 가능한 10개 작업
+- **P0 ENV1268-01** — miniPC 실측 루트 89%/11G 여유(14:06 KST; QA v1268의 과거 100%/177MiB보다 개선), 안전한 용량 감시·운영/개발/Test DB 격리·암호화 백업의 독립 복원; 타 작업자 Worktree 보존.
+- **P0 SEC1268-02** — 개발 DB 241개 중 235개 테이블 앱 직접 UPDATE/DELETE, PUBLIC 은행 함수 3개 실행권한; 정방향 최소권한·본인/동의 부정 테스트, 운영 DB 임의 권한 변경 금지.
+- **P0 REL1268-03** — QA v1268 FAILED/HOLD, Migration266 체크섬·280 4중 충돌, Frontend 6건 실패, 전체 감사 Critical2/High10, SWF·경매 원장 위험, 정확 SHA Test 금융 E2E·GitOps·복원 미통과.
+- **P0 BOARD1268-04** — 공개/회원 작성자 식별·deleted_at·운영 노출 조건 실증, 개인 전용 필터 경계와 공개 ISR/SEO 불변, 삭제 경합.
+- **P1 BOARD1268-05** — 본인/대상 유니크 묘비, 200명 한도, 단조 세대, HMAC 영수증, 인덱스·ACL·계정 생명주기 격리 DB 설계.
+- **P1 BOARD1268-06** — 게시글에서 작성자 추출하는 원자적 숨김/해제, 회원 우선 잠금·버전 CAS·동일 키 재생·다른 본문 409·100건 경합·영수증 확인.
+- **P1 BOARD1268-07** — SQL LIMIT 이전 필터·본인/세션/세대 서명 커서·합성 10,001글 페이지네이션·사후 필터 금지.
+- **P1 BOARD1268-08** — NestJS 인가 API, Next.js /board/personal 및 /account/board-muted-authors, 글 상세 CTA, Android app-api 계약.
+- **P1 BOARD1268-09** — 탈퇴/병합·익명화·관리자 k>=20 통계·noindex/no-store·WCAG 2.2 AA·안전 지표·남용 제한.
+- **P1 BOARD1268-10** — 정확 SHA 격리 DB·보안·CI·Android·SEO·접근성·QA, 무중단 기능 스위치 롤아웃 및 OFF 롤백, 전 게이트 PASS 전 운영 금지.
+
+**판정: DRAFT / HOLD.** 기획 문서만 작성하며 실제 기능 구현·운영 테스트·main 병합·배포는 수행하지 않는다.
+
+
 ## v2026.10.25.1266 — F675-123 일정 원천 버전·만료·개인 ICS 신뢰성 보완 (기능 보완 / 기획 초안 / 운영 보류)
 - Draft PR [#1274](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1274) OPEN/HOLD; 개발 이슈 [#1267](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1267) 갱신, main 병합·운영승격 없음.
 
