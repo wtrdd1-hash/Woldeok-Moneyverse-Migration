@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Get, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
+  Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
   Put, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -12,6 +12,7 @@ import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
+import { pgErrorCode } from '../core/pg-error';
 import { SupportRepository } from './support.repository';
 
 class NewThreadDto {
@@ -37,6 +38,23 @@ export class SupportController {
 
   @Get('threads') @ApiOperation({ summary: 'My administrator support conversations' })
   async threads(@Req() req: RequestWithSession) { return { threads: await this.repo().myThreads(requireUserId(req)) }; }
+
+  @Get('threads/:id/transcript')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Owner-only bounded support conversation transcript for private export' })
+  async transcript(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string) {
+    try {
+      const messages = await this.repo().messages(requireUserId(req), id, 500);
+      // The database caps reads at 500, so a full page cannot prove completion.
+      return { messages, limit: 500, truncated: messages.length >= 500 };
+    } catch (error: unknown) {
+      if (pgErrorCode(error) === '42501' && error instanceof Error && error.message === 'support thread not available') {
+        throw new NotFoundException('support thread not found');
+      }
+      throw error;
+    }
+  }
 
   @Post('threads') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Open an administrator support conversation' })
   async create(@Req() req: RequestWithSession, @Body() body: NewThreadDto) {

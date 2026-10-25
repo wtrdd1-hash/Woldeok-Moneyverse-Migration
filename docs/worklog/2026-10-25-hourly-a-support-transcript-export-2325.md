@@ -9,9 +9,14 @@
 - Release HOLD unless all required full gates, isolated real PostgreSQL and exact-SHA Test E2E PASS.
 
 ## In progress
-- [ ] TDD RED tests for API owner boundary, CSV serialization and Android session forwarding.
-- [ ] Backend transcript read endpoint; frontend private CSV route + member download link; app-api tests.
-- [ ] Isolated real PostgreSQL ACL/rollback and full verification.
+- [x] TDD RED: Backend 3 missing-method failures; Frontend 2 missing-module failures.
+- [x] Backend 500-message owner-bound read endpoint, frontend CSV route and accessible link, app-api privacy headers and tests.
+- [ ] Isolated real PostgreSQL ACL/rollback and full verification (in progress).
 
 ## Finished
 - Pending. No merge, deployment, deletion or DB write authorized without gates.
+
+## Midpoint (23:31 KST)
+- Focused Backend 4/4 PASS; Frontend/Android 7/7 PASS after correcting an erroneous mock class in test.
+- First typecheck found TypeScript-only mock tuple typing; corrected test signature, pending fresh rerun. Changed-file lint 0 errors.
+- origin/main re-fetched at midpoint: `1c5b84a1c45baafcca83f375a6f99698121e9bb5` unchanged.

@@ -32,6 +32,10 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
     </section>
     <section className="flex min-h-[60vh] flex-col rounded-2xl border bg-card p-4">
       {!selected ? <p className="m-auto text-muted-foreground">새 문의를 작성하면 관리자와 대화를 시작할 수 있습니다.</p> : <>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+          <a href={`/support/threads/${encodeURIComponent(selected)}/export`} download className="inline-flex min-h-11 items-center rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" aria-describedby="support-export-limit">대화 기록 CSV 다운로드</a>
+          <p id="support-export-limit" className="text-xs text-muted-foreground">처음 최대 500개 메시지까지 포함합니다. 500개에 도달하면 전체 기록인지 확인되지 않습니다.</p>
+        </div>
         <div className="flex-1 space-y-3 overflow-y-auto">{messages.map(m => <div key={m.message_id} className={`max-w-[85%] rounded-2xl p-3 ${m.sender_kind==='admin'?'bg-primary text-primary-foreground':'ml-auto bg-muted'}`}>
           <div className="mb-1 text-xs font-bold">{m.sender_kind==='admin'?'관리자':'나'}</div><p className="whitespace-pre-wrap break-words">{m.body}</p>
         </div>)}</div>
