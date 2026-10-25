@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { canonicalUrl } from '@/lib/seo';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -770,7 +771,15 @@ export default async function CasinoPage() {
           </CardTitle>
           <CardDescription>
             다른 지갑 거래와 관계없이 서버에 기록된 최근 {RECENT_GAMES}판을 보여줍니다.
+            CSV에는 원장 거래 참조가 있는 코인·주사위 기록만 최대 100건 포함됩니다.
           </CardDescription>
+          <Link
+            href="/arcade/history/export"
+            aria-label="본인 코인·주사위 게임 기록 CSV 다운로드"
+            className="inline-flex w-fit rounded-md border border-border px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            게임 기록 CSV ↓
+          </Link>
         </CardHeader>
         <CardContent>
           {history === null ? (

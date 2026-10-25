@@ -9,6 +9,7 @@ import {
   Inject,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
@@ -30,6 +31,15 @@ import {
 } from './casino.dto';
 import { CASINO_OPEN, CasinoInputError, CasinoRepository } from './casino.repository';
 import { DiscordAlertService } from '../discord/discord-alert.service';
+
+/** Reject ambiguous, fractional and unbounded history ranges before touching PostgreSQL. */
+export function parseCasinoHistoryLimit(value: unknown): number {
+  if (value === undefined) return 20;
+  if (typeof value !== 'string' || !/^(?:[1-9]|[1-9][0-9]|100)$/.test(value)) {
+    throw new BadRequestException('casino history limit must be an integer from 1 to 100');
+  }
+  return Number(value);
+}
 
 /**
  * What a member is told when the casino's switch is not 'enabled'.
@@ -414,8 +424,9 @@ export class CasinoController {
 
   @Get('history')
   @ApiOperation({ summary: "Read the current member's recent casino plays" })
-  async history(@Req() request: RequestWithSession) {
-    return this.guarded(() => this.repository().history(requireUserId(request)), {
+  async history(@Req() request: RequestWithSession, @Query('limit') limit?: string) {
+    const boundedLimit = parseCasinoHistoryLimit(limit);
+    return this.guarded(() => this.repository().history(requireUserId(request), boundedLimit), {
       conflict: 'the casino history is unavailable',
       forbidden: 'an active membership is required to read casino history',
     });

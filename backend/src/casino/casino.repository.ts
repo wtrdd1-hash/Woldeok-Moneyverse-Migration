@@ -602,8 +602,11 @@ export class CasinoRepository {
   }
 
   /** The member's actual recent plays, independent of unrelated wallet rows. */
-  async history(actor: unknown): Promise<CasinoHistoryRow[]> {
+  async history(actor: unknown, limit = 20): Promise<CasinoHistoryRow[]> {
     assertUuid(actor, 'actor');
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+      throw new CasinoInputError('casino history limit must be between 1 and 100');
+    }
     return queryRows<CasinoHistoryRow>(
       this.pool,
       `SELECT history.play_id::text AS play_id,
@@ -614,8 +617,8 @@ export class CasinoRepository {
               history.net_amount::text AS net_amount,
               history.transaction_id::text AS transaction_id,
               history.played_at
-       FROM public.member_casino_history($1::uuid, 20) AS history`,
-      [actor],
+       FROM public.member_casino_history($1::uuid, $2::integer) AS history`,
+      [actor, limit],
     );
   }
 
