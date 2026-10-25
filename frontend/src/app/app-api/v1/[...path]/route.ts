@@ -140,6 +140,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
   const headers = appendAppContractHeaders(new Headers());
+  if (parts[0] === 'notifications' && parts[1] === 'archive-snapshot') {
+    headers.set('cache-control', 'private, no-store');
+    headers.set('x-robots-tag', 'noindex, nofollow');
+  }
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
     if (value) headers.set(name, value);

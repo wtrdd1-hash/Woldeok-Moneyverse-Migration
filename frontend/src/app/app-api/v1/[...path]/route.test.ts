@@ -36,6 +36,22 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('proxies the owner notification archive only through the authenticated app gateway with private headers', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let forwarded = new Headers();
+    vi.stubGlobal('fetch', vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(url)).toContain('/api/v1/notifications/archive-snapshot');
+      forwarded = new Headers(init?.headers);
+      return new Response(JSON.stringify({ notifications: [], complete: true }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }));
+    const response = await GET(request('/app-api/v1/notifications/archive-snapshot', { cookie: 'session=opaque' }), context('notifications', 'archive-snapshot'));
+    expect(response.status).toBe(200);
+    expect(forwarded.get('cookie')).toBe('session=opaque');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(await response.json()).toMatchObject({ notifications: [], complete: true });
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

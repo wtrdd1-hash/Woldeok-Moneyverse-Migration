@@ -14,3 +14,9 @@
 
 ## Finished
 - Pending.
+
+### Midpoint — 08:01 KST
+- RED: backend 3 failures (missing service/controller method), frontend module resolution failure; GREEN after implementation backend 3 PASS, frontend CSV 4 PASS.
+- Rechecked remote main: `1c5b84a1c45baafcca83f375a6f99698121e9bb5` unchanged. Android proxy contract and private-header regression added.
+- **P0 finding (isolated PG 17):** `wdmv_v761_test_acl` does NOT contain `public.in_app_notifications` or any `notification_%` functions. Main migrations through 279 also contain no definition. The pre-existing notification service references this missing relation. Consequently the proposed archive cannot be real-PG/E2E verified or deployed. Do not invent data, grant direct access or edit applied migrations. Requires independently reviewed additive migration/architecture decision in a separate safe sequence; main already has competing unmerged migrations 280/281.
+- P0 host root remains 100% (741 MiB free); no deletions performed to preserve other worktrees and live service data.
