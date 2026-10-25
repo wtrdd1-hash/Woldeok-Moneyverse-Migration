@@ -14,3 +14,16 @@
 - RED tests added for owner scoping, overflow rejection, CSV injection/precision, auth failures and Android cookie passthrough.
 - 03:32 KST: RED reproduced (2 backend missing endpoint, frontend missing route). GREEN focused backend 2/2 and frontend/Android 14/14 after correcting the BOM test to inspect raw bytes; source endpoint guards and export shape verified.
 - Midpoint main re-fetched: unchanged `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; integrated plan rechecked; C #1308 watchlist persistence is not merged and was not touched.
+
+## Validation and release checkpoint (03:40 KST)
+- [x] RED-GREEN-REFACTOR: backend 2, frontend/Android 14, additional SEO 1 (15 total) focused tests green.
+- [x] Typecheck 0 errors; lint 0 errors, 1,128 warnings; full frontend 6 failures remain; full security audit Critical2/High10, production audit High2, bot audit Critical1/High5.
+- [x] First Turbopack build failed from temporary external node_modules symlink. Corrected only this worktree with offline pnpm install; standard build passed.
+- [x] Isolated PostgreSQL 17.11 (281 migrations) owner 1, other owner 0, least privilege and rollback verified; Production DB writes 0.
+- [x] 215 remote branches/214 non-main, all with unmerged commits; duplicate tip/tree groups 0. 210 open PRs (208 draft) before our new PR; conflicting #1107/#1110/#1143 preserved. Branch deletion 0.
+- [ ] Full regression/security PASS, exact-SHA official Test authenticated E2E, release gate, main merge, GitOps Production: **BLOCKED**.
+- Official Test SHA `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; Production SHA `6a989b5ac0c6155587d43426d64f6def6b62c917`. Neither is the feature SHA. No Test or Production promotion.
+- Root disk 99% / data disk 69%; do not delete any unmerged branch/worktree.
+
+## Finished state
+- Candidate code and QA/release EN+KO documented. Final SHA and post-document validation/CI evidence to be attached to PR. No Production rollback necessary because no release was performed.
