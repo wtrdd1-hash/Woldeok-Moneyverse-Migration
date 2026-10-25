@@ -22,6 +22,34 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+describe('stock depth availability Android gateway', () => {
+  it('passes through an authoritative unavailable-depth response without fabricating orders', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const payload = { stockId: '11111111-1111-4111-8111-111111111111', status: 'UNAVAILABLE', source: 'NO_VERIFIED_OPEN_ORDERS', bids: [], asks: [] };
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify(payload), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/stocks/11111111-1111-4111-8111-111111111111/depth'), context('stocks', '11111111-1111-4111-8111-111111111111', 'depth'));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject(payload);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+});
+
+describe('stock depth availability Android gateway', () => {
+  it('passes through an authoritative unavailable-depth response without fabricating orders', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const payload = { stockId: '11111111-1111-4111-8111-111111111111', status: 'UNAVAILABLE', source: 'NO_VERIFIED_OPEN_ORDERS', bids: [], asks: [] };
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify(payload), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/stocks/11111111-1111-4111-8111-111111111111/depth'), context('stocks', '11111111-1111-4111-8111-111111111111', 'depth'));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject(payload);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+});
+
 describe('app API route compatibility', () => {
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();

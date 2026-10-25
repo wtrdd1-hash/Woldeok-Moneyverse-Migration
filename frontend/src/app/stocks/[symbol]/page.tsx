@@ -31,7 +31,7 @@ import { StockDiscussionSection } from './stock-discussion-section';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockTradingConsole } from './stock-trading-console';
 import { StockMarketToast } from './stock-market-toast';
-import { QuickOrderbookSimulator } from '@/components/quick-orderbook-simulator';
+import type { StockDepthAvailability } from './verified-stock-depth';
 import { StockSentimentPoll } from '@/components/stock-sentiment-poll';
 import { StockHaltBanner } from './stock-halt-banner';
 import { StockTickerSwitcher } from './stock-ticker-switcher';
@@ -114,14 +114,14 @@ export async function generateMetadata({
 
   return {
     title: `${stock.symbol} ${stock.name} — 실시간 가상 주식 시세 & 차트`,
-    description: `${stock.name}(${stock.symbol})의 월덕 머니버스 실시간 가상 시세, 10-Depth 호가창, 차트 및 커뮤니티 토론. 실제 금융상품이 아닌 게임 가상재화입니다.`,
+    description: `${stock.name}(${stock.symbol})의 월덕 머니버스 실시간 가상 시세, 검증된 주문 호가 제공 상태, 차트 및 커뮤니티 토론. 실제 금융상품이 아닌 게임 가상재화입니다.`,
     keywords: [
       `${stock.name}`,
       `${stock.symbol}`,
       `${stock.name} 주가`,
       `${stock.name} 시세`,
       '가상 주식',
-      '호가창',
+      '가상 주식 시세',
       '모의투자',
       '월덕 머니버스',
     ],
@@ -131,7 +131,7 @@ export async function generateMetadata({
     robots: { index: true, follow: true },
     openGraph: {
       title: `${stock.name} (${stock.symbol}) — 가상 주식 시세 & 차트`,
-      description: `${stock.name}의 실시간 가상 주식 호가 및 차트`,
+      description: `${stock.name}의 가상 주식 시세 및 차트`,
       url: stockUrl,
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
@@ -157,13 +157,14 @@ export default async function StockHubPage({
   if (!stock) notFound();
 
   const encodedSymbol = encodeURIComponent(stock.symbol);
-  const [portfolio, watchlist, discussion, alertResult, receiptsResult, pulseResult] = await Promise.all([
+  const [portfolio, watchlist, discussion, alertResult, receiptsResult, pulseResult, depthStatus] = await Promise.all([
     apiOrNull<{ holdings: HubHolding[] }>('/api/v1/stocks/portfolio'),
     apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist'),
     apiOrNull<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts?stock=${encodedSymbol}`),
     apiOrNull<{ alerts: StockAlertRule[] }>('/api/v1/stocks/alerts'),
     apiOrNull<{ receipts: StockHaltReceipt[] }>('/api/v1/stocks/halt-receipts'),
     apiOrNull<{ success: boolean; data: { leadHeadline: string; updatedAt: string } }>('/api/v1/newspaper/pulse'),
+    apiOrNull<StockDepthAvailability>(`/api/v1/stocks/${encodeURIComponent(stock.id)}/depth`),
   ]);
   const holding = findHoldingForStock(portfolio?.holdings ?? [], stock.id);
   const watching = (watchlist?.stocks ?? []).some((row) => row.stock_id === stock.id);
@@ -197,7 +198,7 @@ export default async function StockHubPage({
     '@context': 'https://schema.org',
     '@type': 'FinancialProduct',
     name: `${stock.name} (${stock.symbol})`,
-    description: stock.description || `${stock.name} 가상 주식 시세 및 호가창`,
+    description: stock.description || `${stock.name} 가상 주식 시세 및 차트`,
     category: 'Virtual Stock',
     offers: {
       '@type': 'Offer',
@@ -347,7 +348,7 @@ export default async function StockHubPage({
           </TabsTrigger>
         </TabsList>
 
-        {/* 탭 1: 차트 및 실시간 호가/주문 */}
+        {/* 탭 1: 차트 및 검증된 주문 상태 */}
         <TabsContent value="trading" className="space-y-6 focus-visible:outline-none">
           {/* 인터랙티브 차트 (1D/1W/1M/1Y/캔들/라인) */}
           <div className="toss-card p-4 sm:p-6 overflow-hidden">
@@ -363,7 +364,7 @@ export default async function StockHubPage({
             />
           </div>
 
-          {/* 10-Depth 호가창 및 트레이딩 패널 */}
+          {/* 검증된 호가 제공 상태 및 트레이딩 패널 */}
           <StockTradingConsole
             stockId={stock.id}
             symbol={stock.symbol}
@@ -375,15 +376,9 @@ export default async function StockHubPage({
             isHalted={isHalted}
             isEn={isEn}
             receipt={stockReceipt}
+            depthStatus={depthStatus}
           />
 
-          {/* 1-Tap 퀵 호가 체결 시뮬레이터 */}
-          <div className="toss-card p-5">
-            <QuickOrderbookSimulator
-              currentPrice={Number.parseInt(stock.current_price, 10) || 1450}
-              symbol={stock.symbol}
-            />
-          </div>
         </TabsContent>
 
         {/* 탭 2: 내 보유 현황 & 종목 스냅샷 */}

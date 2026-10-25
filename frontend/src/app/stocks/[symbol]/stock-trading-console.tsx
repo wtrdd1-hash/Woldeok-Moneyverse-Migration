@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { StockOrderbook } from './stock-orderbook';
+import { VerifiedStockDepth, type StockDepthAvailability } from './verified-stock-depth';
 import { StockOrderPanel } from './stock-order-panel';
 import { StockMicroPortfolio } from './stock-micro-portfolio';
 import { StockConditionalOrders } from './stock-conditional-orders';
@@ -27,6 +27,7 @@ interface StockTradingConsoleProps {
   readonly isHalted?: boolean | undefined;
   readonly isEn?: boolean | undefined;
   readonly receipt?: StockHaltReceiptData | null | undefined;
+  readonly depthStatus?: StockDepthAvailability | null | undefined;
 }
 
 export function StockTradingConsole({
@@ -34,23 +35,17 @@ export function StockTradingConsole({
   symbol,
   name,
   currentPrice,
-  dayOpenPrice,
   availableShares,
   holdingQuantity,
   isHalted = false,
   isEn = false,
   receipt,
+  depthStatus = null,
 }: StockTradingConsoleProps) {
-  const [selectedPrice, setSelectedPrice] = useState<string>(currentPrice);
+  const selectedPrice = currentPrice;
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
   const [tradingTab, setTradingTab] = useState<'order' | 'conditional'>('order');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
-
-  // 호가창에서 특정 호가 클릭 시 단가 및 매수/매도 탭 자동 연동
-  const handleSelectPrice = (price: string, targetSide: 'buy' | 'sell') => {
-    setSelectedPrice(price);
-    setSide(targetSide);
-  };
 
   const handleOpenMobileOrder = (orderSide: 'buy' | 'sell') => {
     setSide(orderSide);
@@ -68,7 +63,7 @@ export function StockTradingConsole({
             : 'text-muted-foreground hover:text-foreground'
         }`}
       >
-        {isEn ? 'Manual Order' : '호가 주문'}
+        {isEn ? 'Manual Order' : '직접 주문'}
       </button>
       <button
         type="button"
@@ -86,16 +81,14 @@ export function StockTradingConsole({
 
   return (
     <div className="space-y-6">
-      {/* 본문 2열 트레이딩 그리드 (좌측: 호가창, 우측: 주문패널) */}
+      {/* 본문 2열 트레이딩 그리드 (좌측: 검증 상태, 우측: 주문패널) */}
       <div className="grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
-        {/* 좌측 호가창 (웹소켓 실시간 틱 & 플래시 펄스 애니메이션 연동) */}
+        {/* 검증된 주문 잔량이 없으면 허위 매수/매도 잔량을 표시하지 않는다 */}
         <div>
-          <StockOrderbook
-            stockId={stockId}
+          <VerifiedStockDepth
             currentPrice={currentPrice}
-            dayOpenPrice={dayOpenPrice}
+            status={depthStatus}
             isEn={isEn}
-            onSelectPrice={handleSelectPrice}
           />
         </div>
 

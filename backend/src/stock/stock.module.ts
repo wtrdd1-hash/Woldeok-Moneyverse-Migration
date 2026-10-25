@@ -7,6 +7,7 @@ import { NewspaperController } from './newspaper.controller';
 import { StockAlertController } from './stock-alert.controller';
 import { StockAlertRepository } from './stock-alert.repository';
 import { StockController } from './stock.controller';
+import { StockDepthController } from './stock-depth.controller';
 import { StockService } from './stock.service';
 import { PostgresStockRepository } from './stock.repository';
 import { MarketBroadcast } from './market-broadcast';
@@ -17,6 +18,7 @@ import { StockLeagueRepository } from './stock-league.repository';
   imports: [AuthModule],
   controllers: [
     StockController,
+    StockDepthController,
     StockAlertController,
     NewspaperController,
     DerivativesController,
