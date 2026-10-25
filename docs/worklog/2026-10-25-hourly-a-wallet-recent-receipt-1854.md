@@ -21,5 +21,13 @@
 - [ ] Integration, real PostgreSQL read-only ACL, Android contract, accessibility/SEO, build/typecheck/lint/security/full suites.
 - [ ] Re-fetch latest main and mutable plans; check concurrent PR overlaps.
 
-## Finished — PENDING
+## Finished — RELEASE HOLD / QA evidence 19:08 KST
+- [x] Draft PR #1315 opened from feature/test SHA `97d3ba5eb654a283a3401f6f887cb7cafaf3eb84`; QA report and EN/KO release notes added. No merge.
+- [x] Build frontend/backend PASS, typecheck PASS, lint PASS (0 errors/1128 warnings), Android 180-endpoint contract PASS, backend full 1319 PASS/398 SKIPPED, frontend full 1401 PASS/6 FAIL (before 3 page tests), database 15 PASS/3 SKIPPED, shared contract 38 PASS, bot 8 PASS after isolated dependency install.
+- [x] Security FAIL: production 2 High, full 2 Critical/10 High, bot 1 Critical/5 High. Frontend six unrelated-but-mandatory failures remain. Real isolated PG owner read-only ACL verified, 0 sample ledger transactions => positive financial E2E BLOCKED.
+- [x] Exact-head Test identity preflight with read-only sudo FAILED: public `6f697e74...`, manifest/backend/frontend `9f39f041...` != candidate; Test and Production release BLOCKED. Rollback: no schema or runtime changes; drop draft/revert code only after authorization.
+- [x] Midpoint remote branch audit: all 176 non-main tips have ahead commits, zero duplicate final trees, conflicts #1143/#1110/#1107 preserved. Initial 175 remote heads/171 open PRs; later 177 remote heads/173 open PRs. No branch deletion (0); no other worker modifications.
+- [x] GitHub changes: worklog initial checkpoint `567a7bbb`, code+tests `9735c81a`, page regression `97d3ba5e`, PR #1315; final documentation commit and CI outcomes to be recorded in PR audit comment.
+- [ ] Mandatory complete CI/security and isolated Test exact-SHA authenticated financial E2E — BLOCKED, no Production promotion.
+
 - Branch/commit SHA, file changes, QA, release, blockers, PR, preserved branches and rollback evidence to follow.
