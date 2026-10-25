@@ -204,7 +204,7 @@ export class SeoController {
 
   @Post('twitter/test-tweet')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Publish a manual test tweet for SEO and social backlink' })
   async sendTestTweet(@Body() body: TestTweetDto) {
     const text = body.text || `📰 [월덕 머니버스] 실시간 가상 주식 및 금융 시뮬레이터 안내\nhttps://easy-scraping.com/newspaper\n#월덕머니버스 #모의투자 #금융계산기`;

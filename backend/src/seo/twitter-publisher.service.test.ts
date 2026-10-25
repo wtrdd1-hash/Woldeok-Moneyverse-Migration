@@ -1,11 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TwitterPublisherService } from './twitter-publisher.service';
+import { safeFetch } from '../security/ssrf-defense';
+
+vi.mock('../security/ssrf-defense', () => ({ safeFetch: vi.fn() }));
 
 describe('TwitterPublisherService', () => {
   let service: TwitterPublisherService;
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.mocked(safeFetch).mockReset();
     delete process.env.TWITTER_API_KEY;
     delete process.env.TWITTER_API_SECRET;
     delete process.env.TWITTER_ACCESS_TOKEN;
@@ -56,4 +60,58 @@ describe('TwitterPublisherService', () => {
     expect(result.configured).toBe(true);
     expect(result.error).toBe('EMPTY_TWEET_TEXT');
   });
+
+  function configurePublisher() {
+    process.env.TWITTER_API_KEY = 'test_api_key';
+    process.env.TWITTER_API_SECRET = 'test_api_secret';
+    process.env.TWITTER_ACCESS_TOKEN = 'test_token';
+    process.env.TWITTER_ACCESS_SECRET = 'test_secret';
+  }
+
+  it('does not claim publication when X returns HTTP 200 without a tweet receipt', async () => {
+    configurePublisher();
+    vi.mocked(safeFetch).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockResolvedValue({ data: {} }),
+    } as unknown as Response);
+
+    const result = await service.publishTweet('A verified virtual-economy update');
+    expect(result).toMatchObject({
+      success: false,
+      configured: true,
+      error: 'TWITTER_PUBLICATION_RECEIPT_MISSING',
+    });
+    expect(result.tweetId).toBeUndefined();
+  });
+
+  it('rejects malformed X publication identifiers rather than issuing false receipts', async () => {
+    configurePublisher();
+    vi.mocked(safeFetch).mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: vi.fn().mockResolvedValue({ data: { id: 'not-a-tweet-id' } }),
+    } as unknown as Response);
+
+    const result = await service.publishTweet('A verified virtual-economy update');
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('TWITTER_PUBLICATION_RECEIPT_MISSING');
+  });
+
+  it('returns success only when X supplies a valid publication identifier', async () => {
+    configurePublisher();
+    vi.mocked(safeFetch).mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: vi.fn().mockResolvedValue({ data: { id: '1900000000000000000', text: 'Published' } }),
+    } as unknown as Response);
+
+    const result = await service.publishTweet('A verified virtual-economy update');
+    expect(result).toMatchObject({
+      success: true,
+      configured: true,
+      tweetId: '1900000000000000000',
+    });
+  });
+
 });

@@ -96,7 +96,16 @@ export class TwitterPublisherService {
       }
 
       const json = (await response.json()) as { data?: { id?: string; text?: string } };
-      const tweetId = json.data?.id;
+      const tweetId = json?.data?.id;
+      // An HTTP success is not evidence that X created a post; require its receipt.
+      if (typeof tweetId !== 'string' || !/^[1-9]\d{0,19}$/.test(tweetId)) {
+        this.logger.warn('X publisher returned a successful HTTP response without a valid post receipt');
+        return {
+          success: false,
+          configured: true,
+          error: 'TWITTER_PUBLICATION_RECEIPT_MISSING',
+        };
+      }
       this.logger.log(`Tweet published successfully [ID: ${tweetId}]: "${trimmedText.slice(0, 40)}..."`);
 
       return {

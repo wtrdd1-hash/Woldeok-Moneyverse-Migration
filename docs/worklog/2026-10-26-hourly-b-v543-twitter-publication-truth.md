@@ -7,10 +7,14 @@
 - Guardrails: no DB or ledger writes, no migrations, no Test/Production promotion; do not modify other worktrees or reservations.
 
 ## In progress
-- [ ] Reproduce CSRF and false-success with regression tests (RED).
-- [ ] Add CSRF guard and require validated publication ID (GREEN).
+- [x] Reproduce CSRF and false-success with regression tests (RED: 3 failed / 10 passed).
+- [x] Add CSRF guard and require validated publication ID (GREEN: 13/13 passed).
 - [ ] Run focused, backend, typecheck, build, lint, security, app-api, CI gates.
 - [ ] Re-fetch main and plans; review independent change and conflicts.
 
 ## Finished
 - Pending validation; Draft/HOLD until all mandatory release gates pass.
+
+### Mid-run evidence (01:37 KST)
+- RED: missing CSRF guard, HTTP 200 empty X receipt and malformed X ID produced three test failures. GREEN: 13/13 focused tests passed.
+- Re-fetched main and English/Korean plans; baseline unchanged. No DB/API route additions, no financial effects.
