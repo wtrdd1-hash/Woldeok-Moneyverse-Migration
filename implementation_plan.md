@@ -1,4 +1,4 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v243)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v249)
 
 - **v235**: [공식 실전 이용 가이드(/guide, /guide/stock-trading, /guide/virtual-banking) 2026 최신 기획 전면 개편: 토스형 3분 입문 로드맵, 보유 주식 확인 및 원클릭 매도 방법, 월덕뱅크 단일 통장 원카드 및 실시간 복리이자 가이드 구축] (+120, -0)
 
@@ -9,6 +9,8 @@
 - **v208**: [대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 (기본배당, 창업그랜트, 긴급구호금, 바이백소각, 국채부스터) 구축] (+85, -0)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v249**: [전수 브랜치 통합 및 운영 DB·전체 금융 기능 심층 검증 완료 (main 배포)] (+42, -0)
+
 - **v233**: [Phase 4(계산기 10종 허브 & 블로그 리딩 뷰) 및 Phase 5(관리자 관제탑 콕핏) 토스 2026 전면 백지 리빌드 완료 & 전역 5대 Phase 배포 및 실측 완료] (+125, -0)
 - **v232**: [Phase 3: 가상 은행(/bank) 및 지갑(/wallet) 토스뱅크 2026 원카드 아키텍처 및 실시간 복리 이자 라이브 수령 백지 리빌드 완료 & Phase 4 착수 사양] (+95, -0)
 - **v231**: [Phase 2: 가상 주식 거래소 목록(/stocks) 및 10-Depth 호가창(/stocks/[symbol]) 토스형 백지 리빌드 완료 & Phase 3(가상 은행/지갑/송금) 착수 사양] (+95, -0)
@@ -3604,3 +3606,21 @@ flowchart LR
   - `ko` (한국어): 심볼 `₩` (KRW), 금액 포맷팅 `₩1,000,000`
 - **실전 금융 계산기 금액 입력 컴포넌트 연동**:
   - `stock-calculator`, `loan-interest-calculator`, `compound-calculator`, `fire-calculator`, `salary-calculator`, `dividend-tax-calculator`의 통화 라벨과 입력 접두사/접미사에 `useLocale()` 및 통화 유틸리티를 바인딩하여 자동 전환.
+
+
+---
+## 🏁 [v249 Specification] 전수 브랜치 통합 및 운영 DB·전체 금융 기능 심층 검증 완료 (main 배포)
+- **적용 일시**: 2026-10-26
+- **통합 브랜치**: `release/v2026.10.26-integrated-all` -> `main` (커밋: `8c2ddc24`)
+- **통합된 브랜치 내역**:
+  1. `origin/qa/v1292-integration-20261026-1315` (M2 통화량 분리, Rate Limit 매칭, 계산기 CTA 복원, HTTP advisory floor)
+  2. `origin/auto/hourly-b-copy-trading-ledger-hold-v561-20261026-1935` (카피트레이딩 복식부기 원장 홀드 보증)
+  3. `origin/auto/hourly-c-retirement-eligibility-v1072-20261026-1945` (퇴직금 1년 미만 수급권 차단 및 계산기 수치 정밀화)
+  4. `origin/auto/hourly-c-auction-bid-receipt-v1072-20261026-1945` (경매 입찰 영수증 증빙)
+  5. `origin/auto/hourly-c-bonds-market-truth-v1071-20261026-1845` (국채 시장 진위 검증 및 마켓 인티그리티)
+- **주요 검증 결과**:
+  1. **운영 DB 복식부기 원장 대사**: `account_balances` 전체 40개 계정 합산 정확히 0 WLD (대차 불일치 0건). 조폐국 발행액(-5,060,810 WLD)과 민간 유통/소각 합계(+5,060,810 WLD) 1원 단위 완전 일치.
+  2. **12대 금융 계산기 수치 정밀도**: KRW/WLD 정수 절사(`Math.floor`), USD 소수점 2자리, 1금융권 표준 대출이자 공식(원리금/원금균등/만기일시), 배당소득세(15.4%/15%/ISA/2,000만 한도) 및 증여세 누진공제 공식 100% 무결.
+  3. **가상 주식 거래소 & 블로그 AI 엔진**: 9개 상장사 실시간 시세 및 10단 호가창/캔들 API 정상, AI 블로그 발행 및 2단계 영구 삭제 E2E 무결.
+  4. **테스트 및 빌드 스위트**: Backend Vitest 167개 파일, 1,279개 테스트 전수 통과 (1,279/1,279 PASS, exit code 0). Frontend Next.js Turbopack 608개 라우트 빌드 성공.
+  5. **원격 GitHub main 반영**: GitHub `wtrdd1-hash/Woldeok-Moneyverse-Migration:main`에 머지 및 푸시 완료.
