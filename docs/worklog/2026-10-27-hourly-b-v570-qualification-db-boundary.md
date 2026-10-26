@@ -8,8 +8,10 @@
 - RED/GREEN: add SQL source regression tests first; then implement migration; verify in isolated PostgreSQL as moneyverse_app and privileged caller, plus repository gates.
 - Release gates: CI, audit, actual Test exact-SHA, finance E2E and migration drift remediation remain mandatory; never merge/deploy without all PASS.
 
-## In progress
-- Pending test-first implementation.
+## In progress — 2026-10-27 03:36 KST
+- RED: 3/3 new regression assertions failed before migration 280 existed (log: `mv-b-v570-logs/red.txt`).
+- Implemented additive migration 280: replace unjournaled SECURITY DEFINER body with unconditional SQLSTATE 55000 refusal; revoke PUBLIC/app EXECUTE; revoke direct app qualification INSERT/UPDATE/DELETE while preserving SELECT.
+- Pending GREEN, isolated PostgreSQL app-role and privileged-role probes, repository gates and GitHub CI.
 
 ## Finished
 - Pending.
