@@ -12,10 +12,16 @@
 - [x] Verify miniPC and latest main; read instructions, plans, QA/PR/CI
 - [x] Create independent worktree and write initial log
 - [x] RED: reproduce unsafe controller/repository certification invocation
-- [ ] GREEN: fail closed with stable API code, preserve read paths
+- [x] GREEN: fail closed with stable API code, preserve read paths
 - [ ] Verify final SHA tests, build, lint/typecheck, security, PostgreSQL where feasible
 - [ ] Re-fetch main/plans and record release HOLD, push Draft PR
 
 ## RED checkpoint — 2026-10-27 02:35 KST
 - Added `backend/src/work/work-qualification-ledger-hold.test.ts` (four tests).
 - Executed `pnpm --filter @moneyverse/backend exec vitest run src/work/work-qualification-ledger-hold.test.ts` on main-derived branch: **3 FAILED / 1 PASSED**, as expected. Controller still invokes repository, null repository emits a generic 503 without ledger code, repository attempts feature SQL. Evidence: internal `v569-logs/red-test.log`.
+
+## GREEN checkpoint — 2026-10-27 02:36 KST
+- Added shared `refuseUnjournaledQualification` 503 with `WORK_QUALIFICATION_LEDGER_UNAVAILABLE`.
+- Controller refuses certification before repository access, while keeping session/auth/consent/CSRF guards. Repository refuses direct calls before feature lookup or SQL. GET qualification catalogue and other work routes remain unchanged.
+- `pnpm --filter @moneyverse/backend exec vitest run src/work/work-qualification-ledger-hold.test.ts`: **4/4 PASS**. Evidence: internal `v569-logs/green-test.log`.
+- This is **NOT** a DB boundary fix: app role still has EXECUTE on the applied function. Existing credentials or direct DB callers can bypass API/repository containment; a forward-only migration and exact-SHA rollout remain required.
