@@ -1,4 +1,5 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- **v1316 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (stacked on unmerged #1411; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## v1316 — F675-136 Member Support Reply Attention (Feature Addition / DRAFT / HOLD)
 - Previous Improvement v1314 / Current Addition v1316 / Next Improvement v1318 provisional. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid, predecessor Draft #1411 unmerged; documentation only.
 - Source: support migration196, support page, NestJS controller/repository and admin console have threads/messages/status but no member seen watermark. Distinct from F675-127 transcript export. New owner-only known admin-reply attention and explicit rendered-message acknowledgement; historic seen status remains UNKNOWN, GET/prefetch never marks read.

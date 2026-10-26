@@ -1,4 +1,5 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+- **v1316 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (선행 #1411 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## v1316 — F675-136 회원 관리자 답변 확인 표시 (기능 추가 / DRAFT / HOLD)
 - 이전 기능 보완 v1314 / 현재 기능 추가 v1316 / 다음 기능 보완 v1318(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인, 선행 Draft #1411 미병합. 문서만 변경.
 - Migration196·문의 화면·NestJS·관리자 콘솔은 문의/메시지/상태만 제공하며 회원 읽음 기준점이 없다. F675-127 대화록과 분리. 실제 저장된 새 관리자 답변만 표시하고, 과거 확인 상태는 UNKNOWN; GET/프리페치 자동 확인 금지.

@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **v1316 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (선행 #1411 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## 기획 v1316 — F675-136 회원 관리자 답변 확인 표시 (기능 추가 / DRAFT / RELEASE HOLD)
 - **회차:** 이전 기능 보완 v1314 → 현재 기능 추가 v1316 → 다음 기능 보완 v1318(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인; 선행 Draft #1411 미병합, AGENTS.md·README.md·영문 정본·국문 대조 준수. 문서만 변경.
 - **실제 누락:** Migration196의 문의·메시지·회원/관리자 함수에는 회원별 읽음 기준점이 없다. /support에는 읽지 않은 관리자 답변 표시가 없고 컨트롤러에 확인 API도 없다. F675-127 대화록·상태 이력은 별도 미병합 기획이며 과거 실제 읽음 여부는 알 수 없다.

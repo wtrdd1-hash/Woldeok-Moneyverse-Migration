@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **v1316 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (stacked on unmerged #1411; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## v2026.10.26.1316 — F675-136 Verified Member Support Reply Attention and Read Watermarks (Feature Addition / DRAFT / RELEASE HOLD)
 
 **Authority and cycle:** Previous Feature Improvement v1314 → Current Feature Addition v1316 → Next Feature Improvement v1318 (provisional). Remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` rechecked at start and midpoint; predecessor Draft #1411 unmerged. Main AGENTS.md, README.md, English PROJECT_PLAN.md and Korean parity are authoritative; this is an isolated docs-only proposal, not implemented behavior. Engineering issue [#1415](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415).

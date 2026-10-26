@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **v1316 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (stacked on unmerged #1411; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## Planning v1316 — F675-136 Verified Support Reply Attention (Feature Addition / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1314 → Current Feature Addition v1316 → Next Feature Improvement v1318 (provisional). Remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid; predecessor Draft #1411 unmerged; AGENTS.md/README.md/English canonical plan/Korean parity reviewed. This is documentation only.
 - **Main gap:** Migration196 support_threads/support_messages and owner/admin functions have no member read watermark. Existing /support renders thread/message list with no unread indication; support controller has no seen endpoint. F675-127 transcript/status timeline remains a separate unmerged proposal; never infer historic human reading from current message lists.
