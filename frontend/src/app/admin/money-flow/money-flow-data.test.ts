@@ -42,7 +42,7 @@ describe('admin money-flow API evidence', () => {
     expect(validateMoneyFlowResponse({ ...valid, summary: { ...valid.summary, active_users_24h: -1 } })).toBeNull();
   });
   it('rejects malformed ledger rows and unsafe numeric amounts', () => {
-    expect(validateMoneyFlowResponse({ ...valid, items: [{ ...valid.items[0], amount: 9007199254740993 }] })).toBeNull();
+    expect(validateMoneyFlowResponse({ ...valid, items: [{ ...valid.items[0], amount: Number('9007199254740993') }] })).toBeNull();
     expect(validateMoneyFlowResponse({ ...valid, items: [{ ...valid.items[0], user_id: null }] })).toBeNull();
     expect(validateMoneyFlowResponse({ ...valid, items: [{ ...valid.items[0], direction: 'incoming' }] })).toBeNull();
   });
