@@ -18,7 +18,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../../admin-back';
-import type { OutboxEvent } from '../../types';
+import { parseDeliveryEvidence } from './delivery-evidence';
 import { LogsSubNav } from '../logs-sub-nav';
 
 export const dynamic = 'force-dynamic';
@@ -30,9 +30,10 @@ export const metadata: Metadata = {
 
 export default async function AdminDeliveryLogsPage() {
   await requireAdminConsole('/admin/logs/delivery');
-  const outbox = await apiOrNull<{ events: OutboxEvent[] }>(
+  const response = await apiOrNull<unknown>(
     '/api/v1/admin/discord-outbox-events',
   );
+  const outbox = parseDeliveryEvidence(response);
   const events = outbox?.events ?? [];
   const delivered = events.filter((event) => event.delivery_status === 'delivered').length;
   const pending = events.filter((event) => event.delivery_status !== 'delivered').length;
@@ -42,20 +43,20 @@ export default async function AdminDeliveryLogsPage() {
     <div data-page="admin-logs-delivery" className="mv-page mv-page--admin grid gap-5">
       <AdminBack href="/admin/logs" label="감사 로그로" />
       <PageHeader eyebrow="DELIVERY LOG" title="Discord 전달 로그">
-        감사 기록과 분리해 알림 전달 성공 여부와 재시도 상태만 빠르게 확인합니다.
+        감사 기록과 분리해 최근 최대 30건의 알림 전달 상태만 확인합니다. 전체 기간의 전달률이나 서비스 가동률은 아닙니다.
       </PageHeader>
 
       {/* Navigation Sub-Tabs */}
       <LogsSubNav current="delivery" />
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <DeliverySummary icon={Send} label="최근 기록" value={`${events.length}건`} />
-        <DeliverySummary icon={CheckCircle2} label="전달 완료" value={`${delivered}건`} />
+        <DeliverySummary icon={Send} label="최근 기록" value={outbox === null ? '조회 불가' : `${events.length}건`} />
+        <DeliverySummary icon={CheckCircle2} label="전달 완료" value={outbox === null ? '조회 불가' : `${delivered}건`} />
         <DeliverySummary
           icon={pending > 0 ? TriangleAlert : RotateCcw}
           label="미완료 · 재시도"
-          value={`${pending}건 · ${retried}건`}
-          attention={pending > 0}
+          value={outbox === null ? '조회 불가' : `${pending}건 · ${retried}건`}
+          attention={outbox !== null && pending > 0}
         />
       </div>
 
@@ -63,19 +64,24 @@ export default async function AdminDeliveryLogsPage() {
         <CardHeader>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <CardTitle className="text-base">전달 내역</CardTitle>
+              <CardTitle className="text-base">최근 최대 30건 전달 내역</CardTitle>
               <CardDescription className="mt-1">
-                원장 사건이 Discord 알림으로 전달된 상태입니다. 감사 사슬과는 별도 기록입니다.
+                PostgreSQL의 최근 이벤트 상태입니다. 전체 전달 내역이나 실제 Discord 수신 확인을 보증하지 않습니다.
               </CardDescription>
             </div>
-            <Button asChild variant="outline" size="sm" className="min-h-10">
+            <Button asChild variant="outline" size="sm" className="min-h-11">
               <Link href="/admin/discord">전달 경로 설정 보기</Link>
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {outbox === null ? (
-            <EmptyState title="Discord 전달 현황을 불러오지 못했어요." />
+            <div role="alert" aria-live="polite" className="grid gap-3">
+              <EmptyState title="Discord 전달 현황 조회 불가" description="API 응답을 확인할 수 없어 전달 건수와 상태를 표시하지 않습니다." />
+              <Button asChild variant="outline" className="min-h-11 w-full sm:w-fit">
+                <Link href="/admin/logs/delivery">다시 조회</Link>
+              </Button>
+            </div>
           ) : events.length === 0 ? (
             <EmptyState title="전달 기록이 없습니다." />
           ) : (
