@@ -22,6 +22,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { cn } from '@/lib/cn';
+import { groupDigits } from '@/lib/money';
+import { validateMoneyFlowResponse } from './money-flow-data';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
@@ -34,32 +36,6 @@ export const metadata: Metadata = {
   title: AREA.title,
   robots: { index: false, follow: false },
 };
-
-interface UserMoneyFlowItem {
-  readonly transaction_id: string;
-  readonly type: string;
-  readonly user_id: string;
-  readonly display_name: string;
-  readonly account_type: string;
-  readonly direction: 'debit' | 'credit';
-  readonly amount: string;
-  readonly created_at: string;
-}
-
-interface UserMoneyFlowResponse {
-  readonly items: readonly UserMoneyFlowItem[];
-  readonly summary: {
-    readonly total_volume_24h: string;
-    readonly total_transactions_24h: number;
-    readonly active_users_24h: number;
-    readonly total_inflow_24h: string;
-    readonly total_outflow_24h: string;
-    readonly all_time_transactions?: number;
-    readonly all_time_users?: number;
-    readonly last_transaction_at?: string | null;
-  };
-  readonly next_cursor: string | null;
-}
 
 interface PageProps {
   readonly searchParams: Promise<{
@@ -109,10 +85,11 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
   if (direction) queryParams.set('direction', direction);
   if (cursor) queryParams.set('cursor', cursor);
 
-  const res = await apiOrNull<UserMoneyFlowResponse>(
+  const rawResponse = await apiOrNull<unknown>(
     `/api/v1/admin/treasury/user-money-flows?${queryParams.toString()}`
   );
 
+  const res = validateMoneyFlowResponse(rawResponse);
   const items = res?.items ?? [];
   const summary = res?.summary ?? {
     total_volume_24h: '0',
@@ -140,22 +117,22 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-3">
         <AdminBack />
         <div className="flex flex-wrap items-center gap-1.5">
-          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold">
+          <Button asChild variant="outline" size="sm" className="min-h-11 text-xs font-semibold">
             <Link href="/admin">
               마스터 콘솔
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold">
+          <Button asChild variant="outline" size="sm" className="min-h-11 text-xs font-semibold">
             <Link href="/admin/treasury">
               국고 관리
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold">
+          <Button asChild variant="outline" size="sm" className="min-h-11 text-xs font-semibold">
             <Link href="/admin/economy">
               원장 점검
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold">
+          <Button asChild variant="outline" size="sm" className="min-h-11 text-xs font-semibold">
             <Link href="/admin/users">
               회원 목록
             </Link>
@@ -167,18 +144,25 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
         {AREA.summary}
       </PageHeader>
 
+      {!res && (
+        <div role="alert" className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-300">
+          원장 조회에 실패했거나 응답을 검증할 수 없습니다. 거래 0건으로 판단하지 마세요.
+          <Link href="/admin/money-flow" className="ml-3 inline-flex min-h-11 items-center underline underline-offset-4">다시 조회</Link>
+        </div>
+      )}
+
       {/* Ledger Integrity & All-time Stats Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border border-border/70 bg-card/60 text-xs">
+      {res && <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border border-border/70 bg-card/60 text-xs">
         <div className="flex items-center gap-2 flex-wrap">
           <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 flex items-center gap-1 font-semibold">
             <CheckCircle2 className="size-3.5" />
-            <span>복식부기 원장 무결성 100% 검증</span>
+            <span>PostgreSQL 원장 조회 결과 · 무결성 별도 확인 필요</span>
           </Badge>
           <span className="text-muted-foreground font-mono">
-            누적 원장 트랜잭션: <strong className="text-foreground">{summary.all_time_transactions ?? 831}건</strong>
+            누적 원장 트랜잭션: <strong className="text-foreground">{summary.all_time_transactions?.toLocaleString('ko-KR') ?? '—'}건</strong>
           </span>
           <span className="text-muted-foreground font-mono">
-            · 누적 거래 유저: <strong className="text-foreground">{summary.all_time_users ?? 13}명</strong>
+            · 누적 거래 유저: <strong className="text-foreground">{summary.all_time_users?.toLocaleString('ko-KR') ?? '—'}명</strong>
           </span>
         </div>
         {summary.last_transaction_at ? (
@@ -191,20 +175,20 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
         ) : (
           <span className="text-muted-foreground font-mono text-[11px]">신규 거래 대기 중</span>
         )}
-      </div>
+      </div>}
 
       {/* 24-Hour No Activity Notice Banner */}
-      {summary.total_transactions_24h === 0 && (
+      {res && summary.total_transactions_24h === 0 && (
         <div className="flex items-center gap-2.5 p-3 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-300 text-xs">
           <Receipt className="size-4 shrink-0 text-blue-400" />
           <span>
-            최근 24시간 동안 신규 체결된 거래가 없습니다. 아래 실시간 원장 내역 테이블에서 이전 전체 트랜잭션({summary.all_time_transactions ?? 831}건)을 정상적으로 열람 및 필터링할 수 있습니다.
+            최근 24시간 동안 신규 체결된 거래가 없습니다. 아래 실시간 원장 내역 테이블에서 이전 전체 트랜잭션({summary.all_time_transactions?.toLocaleString('ko-KR') ?? '—'}건)을 정상적으로 열람 및 필터링할 수 있습니다.
           </span>
         </div>
       )}
 
       {/* 24-Hour Stat Metric Cards */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {res && <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border-zinc-800 bg-card/90">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold text-muted-foreground">
@@ -214,10 +198,10 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-xl font-bold font-mono text-foreground">
-              {Number(summary.total_volume_24h).toLocaleString()} <span className="text-xs text-muted-foreground font-sans">WLD</span>
+              {groupDigits(summary.total_volume_24h)} <span className="text-xs text-muted-foreground font-sans">WLD</span>
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
-              최근 24시간 체결액 (전체 {summary.all_time_transactions ?? 831}건 보존)
+              최근 24시간 체결액 (전체 {summary.all_time_transactions?.toLocaleString('ko-KR') ?? '—'}건 보존)
             </p>
           </CardContent>
         </Card>
@@ -234,7 +218,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
               {summary.total_transactions_24h.toLocaleString()} <span className="text-xs text-muted-foreground font-sans">건</span>
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
-              24시간 내 체결 (전체 누적: {summary.all_time_transactions ?? 831}건)
+              24시간 내 체결 (전체 누적: {summary.all_time_transactions?.toLocaleString('ko-KR') ?? '—'}건)
             </p>
           </CardContent>
         </Card>
@@ -251,7 +235,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
               {summary.active_users_24h.toLocaleString()} <span className="text-xs text-muted-foreground font-sans">명</span>
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
-              24시간 활동자 (전체 등록 유저: {summary.all_time_users ?? 13}명)
+              24시간 활동자 (전체 등록 유저: {summary.all_time_users?.toLocaleString('ko-KR') ?? '—'}명)
             </p>
           </CardContent>
         </Card>
@@ -266,17 +250,17 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
           <CardContent>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold font-mono text-emerald-400">
-                +{Number(summary.total_inflow_24h).toLocaleString()}
+                +{groupDigits(summary.total_inflow_24h)}
               </span>
               <span className="text-xs text-muted-foreground">/</span>
               <span className="text-sm font-bold font-mono text-rose-400">
-                -{Number(summary.total_outflow_24h).toLocaleString()}
+                -{groupDigits(summary.total_outflow_24h)}
               </span>
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">최근 24시간 유저 현금 계좌 기준 변동</p>
           </CardContent>
         </Card>
-      </div>
+      </div>}
 
       {/* Filter and Search Bar */}
       <Card className="border-zinc-800 bg-card/90">
@@ -289,6 +273,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
               <div className="relative">
                 <Search className="size-3.5 absolute left-3 top-3 text-muted-foreground" />
                 <input
+                  aria-label="유저 검색 (닉네임 또는 UUID)"
                   type="text"
                   name="search"
                   defaultValue={search}
@@ -339,7 +324,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
                 검색
               </Button>
               <Button asChild variant="outline" size="sm" className="min-h-[44px] px-3">
-                <Link href="/admin/money-flow">
+                <Link href="/admin/money-flow" aria-label="검색 필터 초기화">
                   <RotateCcw className="size-3.5" />
                 </Link>
               </Button>
@@ -391,14 +376,16 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
             </CardDescription>
           </div>
 
-          <Badge variant="outline" className="text-xs font-mono font-bold text-emerald-400 border-emerald-500/30 bg-emerald-500/5">
+          <Badge variant="outline" className="text-xs font-mono font-bold text-muted-foreground border-border/60">
             <CheckCircle2 className="size-3 mr-1" />
-            100% 실시간 원장 대사 중
+            원장 조회 · 대사 별도 확인
           </Badge>
         </CardHeader>
 
         <CardContent className="pt-4">
-          {items.length === 0 ? (
+          {!res ? (
+            <EmptyState title="원장 내역을 확인할 수 없습니다." description="조회 실패 또는 잘못된 API 응답입니다. 잠시 후 다시 조회해 주세요." />
+          ) : items.length === 0 ? (
             <EmptyState
               title="해당 조건의 유저 자금 흐름 기록이 없습니다."
               description="검색어나 필터 조건을 변경하여 다시 조회해 보세요."
@@ -420,7 +407,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
                   {items.map((item, idx) => {
                     const typeBadge = formatTypeLabel(item.type);
                     const isDebit = item.direction === 'debit';
-                    const amountNum = Number(item.amount);
+                    
 
                     return (
                       <tr key={`${item.transaction_id}_${idx}`} className="hover:bg-muted/20 transition-colors">
@@ -477,7 +464,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
                         <td className="py-3 px-3 text-right font-mono font-bold whitespace-nowrap tabular-nums">
                           <span className={`inline-flex items-center gap-0.5 ${isDebit ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {isDebit ? '+' : '-'}
-                            {amountNum.toLocaleString()} WLD
+                            {groupDigits(item.amount)} WLD
                           </span>
                         </td>
 
@@ -495,7 +482,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
           {/* Pagination Cursor */}
           {res?.next_cursor && (
             <div className="mt-4 pt-3 border-t border-border/50 flex justify-end">
-              <Button asChild variant="outline" size="sm" className="text-xs font-bold">
+              <Button asChild variant="outline" size="sm" className="text-xs font-bold min-h-11">
                 <Link
                   href={`/admin/money-flow?${new URLSearchParams({
                     ...(search ? { search } : {}),
