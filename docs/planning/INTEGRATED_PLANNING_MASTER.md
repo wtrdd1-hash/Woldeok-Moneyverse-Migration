@@ -1,4 +1,52 @@
 # Woldeok Moneyverse — Integrated Planning Master
+
+## v2026.10.26.1318 — F675-136 Support Reply Attention: Pagination and Read Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
+
+**Cycle:** Previous Feature Addition v1316 → Current Feature Improvement v1318 → Next Feature Addition v1320 provisional. Remote main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 and canonical EN/KO checked at start/midpoint. Previous Draft #1416 remains unmerged. Documentation only.
+
+### Verified source gap and user outcome
+- Migration 196 `support_thread_messages` orders `created_at ASC,id ASC` and returns the **oldest 200 messages** by default (max 500); `backend/src/support/support.repository.ts` requests 200 and `frontend/src/app/support/page.tsx` renders that truncated slice. New administrator replies may be marked unread yet not appear in the member pane. `support_my_threads` defaults to 50 threads (max 100), so its list is not a global unread total.
+- Read-only development DB: 3 threads, 6 messages, 2 administrator replies, zero threads >200 messages. This is a **code-boundary risk**, not a reproduced production incident. Test 201/501/10,001 synthetic messages. Legacy human read state is UNKNOWN.
+- Goal: authenticated consented member on web/Android sees recorded **post-activation** administrator replies and explicitly acknowledges only a consecutive interval actually returned to the visible pane. A token cannot prove human reading, DOM paint or external delivery. F675-127 transcript/export and A/B/C/Gemini/QA changes remain separate.
+
+### Member flow, CTA, state, mobile and SEO
+- Existing `/support`: `View more threads`, `New recorded admin reply` badge, `Unread new replies` filter, `Load older/newer messages` and `Mark displayed replies viewed` CTA. Versioned owner-only message pages show newest messages rather than only legacy oldest 200; history display keyset `(created_at,id)` preserves PostgreSQL microseconds, but read ordering uses authoritative per-thread admin reply `seq`, never timestamps/UUID.
+- Return consecutive post-activation events from `last_seen_seq+1` ascending, default20/max50, paired with actual message bodies. Sign **exact consecutive interval** and message-ID digest. Enable CTA only when that interval is presented in the active pane and member explicitly acts. Missing older page, offscreen/preloaded event or newer concurrent reply must not be marked read. GET/SSR/prefetch/background refresh never writes receipts.
+- States `LEGACY_UNKNOWN`, `KNOWN_UNREAD`, `PARTIAL_HISTORY`, `CONTIGUOUS_READY`, `ACK_PENDING`, `ACKED_POST_ACTIVATION`, `STALE_VERSION`, `STALE_PROOF`, `STALE_LIST`, `AUTH_REQUIRED`, `UNAVAILABLE`, `FEATURE_OFF`. If only old capped endpoint works, warn of partial history and disable CTA. Failure/503 is not empty; 50 threads cannot justify global zero.
+- Thread list cursor uses immutable `(thread.created_at,thread.id)` with fixed creation cutoff, not mutable last-message ordering. Unread filter changes across HTTP pages: include owner attention revision in signed cursor; if changed, 409 `STALE_LIST` and restart. No multi-request PostgreSQL snapshot claim. Full owner aggregate required for global unread zero. WCAG 2.2 AA, keyboard/ARIA live feedback, 44px targets, 320px/200% zoom, localized dates; `private,no-store`, `noindex,nofollow`, no sitemap/PII analytics.
+
+### API, security and Android parity
+- Preserve existing GET `/api/v1/support/threads` and GET `/api/v1/support/threads/:id/messages` signatures. Proposed owner GET `/api/v1/support/threads?view=attention&limit=20&cursor=...`, GET `/api/v1/support/threads/:id/messages-v2?limit=50&cursor=...`, GET `/api/v1/support/threads/:id/attention?fromSeq=...&limit=50`, POST `/api/v1/support/threads/:id/seen` JSON `{displayProof,idempotencyKey:uuid,expectedVersion:bigint}`. Route-map/contract review before implementation; Android member endpoints equivalent, no admin mutation endpoints.
+- 600-second HMAC proof binds key version, member, live session fingerprint, thread, base seen seq, contiguous inclusive target seq, canonical message-ID digest, nonce and expiry. POST verifies session/consent/CSRF, owner, signature, committed contiguous events and CAS. Do not accept client-supplied max seq, put token in URL or log it. 401 expired session, 404 foreign/nonexistent indistinguishable, 409 key reuse with different payload/stale list, 412 CAS, 428 missing proof/version, 429 quota, 503 storage unavailable; 410 proof expiry only if consistently specified. Rate 20/member/hour, 60 global/min, page max50.
+
+### PostgreSQL schema, concurrency and rollback
+- Migration196 and existing function return types immutable. Add unique `support_admin_reply_events(thread_id,seq,message_id,committed_at)` with `UNIQUE(thread_id,seq)` and `UNIQUE(thread_id,message_id)`, seq>0; owner `support_member_read_watermarks(user_id,thread_id,last_seen_seq>=0,version>=0,updated_at)`; immutable `support_member_seen_receipts(user_id,idempotency_key,payload_hash,thread_id,from_seq,to_seq,committed_version,created_at)`; owner attention revision for filtered-list drift. Index `(thread_id,seq ASC) INCLUDE(message_id)` and `(user_id,thread_id)`, enforce FKs/retention, no bodies in receipts.
+- New versioned `support_member_message_page_v2`, `support_member_reply_attention_v2`, `support_member_seen_v2` and `admin_support_reply_v2` are SECURITY DEFINER with fixed `search_path=pg_catalog,pg_temp`, PUBLIC EXECUTE revoked, minimal app EXECUTE and **no new direct app table grants**. Caller-supplied actor UUID is not independent DB authentication: bind to real server session, treat compromised shared DB role as unresolved P0.
+- V2 admin reply locks thread `FOR UPDATE`, validates admin session, checks global idempotency key + canonical payload, then commits message, one contiguous seq event, status and audit atomically. Same-key race must serialize or roll back/re-read committed receipt after uniqueness conflict; different payload 409. Replay/audit failure must not increment seq. Legacy v1 reply path stays active while flag OFF; pre-v2 messages remain `LEGACY_UNKNOWN`, not retroactively unread.
+- Seen transaction locks owner watermark, verifies all seq in `(currentSeen,target]` were returned consecutively and committed, checks expectedVersion, writes immutable receipt and monotonic watermark atomically. Same-key same-payload replay returns original receipt without rewinding after later ack; different payload 409. New concurrent reply stays unread. Thread `waiting_user` status is independent of read state.
+- Additive schema and online indexes → shadow reads → isolated PostgreSQL tests → feature `support_reply_attention_v1` default OFF → v2 writer only after atomicity/legacy regression. Approved rollback switches OFF to unchanged v1 and hides badges, preserving receipts. While ON never silently lose an event: fail v2 transaction/alert. No destructive down migration or planning-run deploy.
+
+### Admin, KPI, acceptance, release gate
+- Admin keeps existing reply/status, may see only k>=20 anonymized coverage/error metrics; no member-level read surveillance. Privacy retention approval required. KPIs newest reply visibility, partial-history share, unknown-legacy ratio, false zero target 0, proof reject, 409/412/503 and p95 latency.
+- Isolated real PostgreSQL: 201/501/10,001 synthetic messages and 10,001 events no gaps/duplicates; 100 distinct concurrent replies unique contiguous seq, 100 same-key retries one event, 100 foreign-owner probes no leaks; missing-page/prefetch/offscreen proof rejected, two-session CAS no rewind, 599/600/601s expiry, microsecond ties, 50/100 thread limits and stale list restart, audit/insert failure rollback, old functions unchanged, Android/a11y.
+- QA v1293 **FAILED/HOLD**: main frontend 1,397 pass/6 fail, full audit 2 Critical/10 High, prod audit 2 High. Draft #1412 exact-SHA CI SUCCESS does not certify Test. Dev app DML 235/241, PUBLIC bank EXECUTE 3, migration266 checksum mismatch; authenticated exact-SHA Test/finance E2E and isolated restore missing. Root 97%/~3.4GiB free, data 84%/~31GiB. Production HOLD.
+
+### P0/P1 developer backlog (4 P0 + 6 P1)
+| Priority | ID | Acceptance |
+| --- | --- | --- |
+| P0 | ENV1318-01 | Root/data disk budget, collaborator preservation, isolated backup restore before migration. |
+| P0 | SEC1318-02 | Session-bound actor, negative app ACL/PUBLIC tests, 100 foreign-owner/impersonation probes. |
+| P0 | REL1318-03 | QA v1293 main regressions/audits/migration266, exact-SHA Test and GitOps release gate. |
+| P0 | SUP1318-04 | No false read/zero from oldest 200/500 messages or 50/100 threads; failures != empty. |
+| P1 | SUP1318-05 | Versioned owner message/event keysets, cursor, 10,001-row indexes and no gaps. |
+| P1 | SUP1318-06 | Thread-locked v2 admin reply/event/status/audit, race-safe idempotency. |
+| P1 | SUP1318-07 | Signed contiguous interval, CAS, immutable receipt, replay/cross-session checks. |
+| P1 | SUP1318-08 | Next.js CTA, Android parity, responsive WCAG and no auto-read. |
+| P1 | SUP1318-09 | Owner privacy/retention, admin k>=20, noindex/no-store, quotas and KPI. |
+| P1 | SUP1318-10 | Real PG 201/501/10,001 and 100-way BOLA/concurrency, old API/rollback/Test. |
+
+**10,000 independent-source gate:** new approved **0**, cumulative deduplicated/classified approved **UNKNOWN/10,000**, **BLOCKED / IN PROGRESS**. Consulted standards do not count as accepted records. No runtime/DB/WLD/ledger/Test/Production/automation changes.
+
 - **v1316 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (stacked on unmerged #1411; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## v2026.10.26.1316 — F675-136 Verified Member Support Reply Attention and Read Watermarks (Feature Addition / DRAFT / RELEASE HOLD)
 

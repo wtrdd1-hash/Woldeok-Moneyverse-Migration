@@ -1,4 +1,52 @@
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v2026.10.26.1318 — F675-136 관리자 답변 확인 목록·커서·읽음 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
+
+**회차:** 이전 기능 추가 v1316 → 현재 기능 보완 v1318 → 다음 기능 추가 v1320(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 및 영문 정본·국문 대조 시작·중간 확인, 선행 Draft #1416 미병합. 문서만 변경.
+
+### 실제 코드 문제와 목적
+- Migration196 `support_thread_messages`는 `created_at ASC,id ASC`로 **오래된 메시지 200건** 기본 반환(최대500), `backend/src/support/support.repository.ts`도 200건을 요청하며 `frontend/src/app/support/page.tsx`가 이 잘린 목록을 표시한다. 새 관리자 답변을 읽지 않음으로 표시해도 본문은 보이지 않을 수 있다. `support_my_threads`는 기본 문의50개(최대100개)로 전체 읽지 않음 0건 집계 불가.
+- 개발 DB **읽기 전용**: 문의3·메시지6·관리자 답변2·메시지200건 초과 문의0. 이는 **코드상 경계 위험**이지 운영 장애 재현은 아니다. 합성 201/501/10,001건 테스트 필수. 과거 읽음은 UNKNOWN.
+- 목적: 로그인·동의 회원 웹/Android에서 활성화 이후 기록된 관리자 답변 중 **연속 반환되어 현재 화면에 표시된 범위**만 명시적으로 확인. 실제 사람의 독서·DOM 표시·외부 전달은 증명하지 않는다. F675-127 대화록/내보내기와 개발 A/B/C·Gemini·QA 변경 분리.
+
+### 회원 화면·CTA·상태·접근성
+- `/support`에 `문의 더 보기`, `새 관리자 답변` 배지, `읽지 않은 새 답변` 필터, `이전/새 메시지 불러오기`, `표시된 답변 여기까지 확인` CTA. 구형 오래된200건 대신 본인 전용 최신 메시지 v2 키셋 제공. 일반 메시지 표시는 PostgreSQL 마이크로초 `(created_at,id)`, **읽음 순서 판정은 관리자 답변 seq**로만 한다. 문의 목록은 변경되는 마지막 메시지 시각 대신 불변 `(thread.created_at,thread.id)`와 생성 상한 사용.
+- `last_seen_seq+1`부터 연속 커밋된 관리자 답변 이벤트(기본20/최대50)와 실제 본문 반환. 정확한 연속 범위·메시지 ID 해시를 서명하고 현재 화면에 표시된 후 회원 CTA가 있을 때만 제출. 이전 페이지 누락·프리페치·숨긴 탭·화면 밖·조회 중 새 답변은 자동 읽음 금지. 증명은 서버 반환 범위의 증거이지 DOM 표시/실제 독서를 증명하지 않으므로 CTA 필수.
+- 상태 `LEGACY_UNKNOWN`, `KNOWN_UNREAD`, `PARTIAL_HISTORY`, `CONTIGUOUS_READY`, `ACK_PENDING`, `ACKED_POST_ACTIVATION`, `STALE_VERSION`, `STALE_PROOF`, `STALE_LIST`, `AUTH_REQUIRED`, `UNAVAILABLE`, `FEATURE_OFF`. 구형 200건만 가능하면 부분 이력 경고·CTA 비활성화. GET/SSR/프리페치/백그라운드 조회는 읽음 기록 금지. 장애/503≠빈 목록, 최근50개 문의≠전체 0건.
+- 읽지 않음 필터의 회원별 revision이 HTTP 페이지 사이 바뀌면 서명된 커서에서 `STALE_LIST`(409)로 첫 페이지 재조회. 여러 요청에 걸친 DB 스냅샷 주장 금지. 전체 0건은 본인 전체 집계 성공 시에만 표시. WCAG 2.2 AA, 키보드·ARIA 상태·44px 터치·320px/200% 확대·한국어 시간, `private,no-store`·`noindex,nofollow`·사이트맵/분석 개인정보 제외.
+
+### API·보안·Android
+- 기존 GET `/api/v1/support/threads` 및 GET `/api/v1/support/threads/:id/messages` 하위 호환. 제안: 본인 GET `/api/v1/support/threads?view=attention&limit=20&cursor=...`, GET `/api/v1/support/threads/:id/messages-v2?limit=50&cursor=...`, GET `/api/v1/support/threads/:id/attention?fromSeq=...&limit=50`, POST `/api/v1/support/threads/:id/seen` JSON `{displayProof,idempotencyKey:uuid,expectedVersion:bigint}`. 구현 전 route-map·API 계약 검토, Android 회원 기능 동등성.
+- 600초 HMAC 증명에 키 버전·회원·활성 세션 지문·문의·기존 seq·**연속 포함 범위**·메시지 ID 해시·nonce·만료 결합. POST 세션/동의/CSRF·소유권·서명·커밋된 연속 이벤트·CAS 검증. 클라이언트 최대 seq만 신뢰 금지, 토큰 URL/로그 기록 금지. 401 세션, 404 타인/없는 문의 동일, 409 다른 본문 멱등 키/목록 변경, 412 CAS, 428 증명/버전 누락, 429 제한, 503 저장소 장애, 증명 만료 410은 계약 통일 시 사용. 회원 시간당20·전체 분당60건, 최대50건 페이지.
+
+### 순방향 DB·트랜잭션·롤백
+- Migration196 함수 반환형 유지. 고유 `support_admin_reply_events(thread_id,seq,message_id,committed_at)` + `UNIQUE(thread_id,seq)`, `UNIQUE(thread_id,message_id)`, seq>0; 회원 `support_member_read_watermarks(user_id,thread_id,last_seen_seq>=0,version>=0,updated_at)`, 불변 `support_member_seen_receipts(user_id,idempotency_key,payload_hash,thread_id,from_seq,to_seq,committed_version,created_at)`, 필터 목록 변경 감지용 회원별 revision. `(thread_id,seq ASC) INCLUDE(message_id)`, `(user_id,thread_id)` 인덱스, FK·보존/삭제 정책, 영수증에 본문 저장 금지.
+- 버전형 `support_member_message_page_v2`·`support_member_reply_attention_v2`·`support_member_seen_v2`·`admin_support_reply_v2`는 SECURITY DEFINER·고정 `search_path=pg_catalog,pg_temp`·PUBLIC EXECUTE 회수·앱 최소 실행권, 테이블 직접 DML/SELECT 추가 금지. `p_actor` UUID는 독립 DB 인증이 아니므로 서버 실제 세션 결합과 공유 DB 계정 침해 위험 P0.
+- 관리자 v2 답변: 문의 행 `FOR UPDATE` 잠금→관리자 세션·권한→전역 멱등 키/정규화 본문 비교→메시지·**유일 연속 seq 이벤트**·문의 상태·감사 원자 커밋. 동일 키 동시 경합은 키별 직렬화 또는 충돌 롤백 후 커밋 영수증 재조회, 다른 본문 409. 재시도·감사 실패 시 seq 증가 금지. 기능 OFF에서는 기존 v1, 활성화 이전 답변은 `LEGACY_UNKNOWN`이며 소급 읽지 않음 금지.
+- 읽음 트랜잭션: 회원 기준점 행 잠금→세션·소유권·증명·`(currentSeen,target]` 모든 연속 커밋 이벤트 검증→CAS 버전 비교→불변 영수증과 단조 증가 기준점 원자 커밋. 동일 키·본문 재시도는 기존 영수증 반환하고 이후 역행 금지, 다른 본문 409. 동시 새 답변은 과거 증명으로 읽음 불가. 문의 `waiting_user`와 읽음 상태 독립.
+- 순방향 스키마·온라인 인덱스·섀도 조회→격리 PG 검증→`support_reply_attention_v1` 기본 OFF→원자성/구형 회귀 통과 후 v2 쓰기 전환. 승인 롤백은 OFF·구형 v1·배지 숨김·기존 영수증 보존. ON 상태 이벤트 실패를 성공으로 위장 금지(트랜잭션 실패·경보). 파괴적 다운마이그레이션/기획 직접 배포 금지.
+
+### 관리자·KPI·검증·운영 게이트
+- 관리자 기존 답변/상태 유지, 회원별 읽음 감시 금지, k>=20 비식별 통계만 허용. 보존/삭제 정책 승인 필요. KPI 최신 답변 표시 정확성·부분 이력·과거 미상·허위0건(목표0)·서명 거부·409/412/503·p95.
+- 격리 실제 PostgreSQL: 합성 메시지 201/501/10,001·이벤트10,001 무누락, 관리자 동시100건 고유 연속 seq, 동일 키100회 이벤트1, 타 회원100회 유출0, 페이지 누락/프리페치/화면 밖 증명 거부, 두 세션 CAS 역행0, 599/600/601초 만료, 마이크로초 동률, 문의50/100개 경계·필터 변경, 감사/삽입 실패 전체 롤백, 기존 함수·Android·접근성.
+- QA v1293 **FAILED/HOLD**: main 프론트1,397통과/6실패, 전체 감사 Critical2/High10·운영 High2. Draft #1412 정확 SHA CI 성공도 공식 Test 아님. 개발 DB 앱 직접 DML 235/241, PUBLIC 은행 함수3, Migration266 체크섬 불일치, 인증 정확 SHA Test/금융 E2E·격리 복원 미완료. 루트97%/약3.4GiB·데이터84%/약31GiB. 운영승격 보류.
+
+### P0/P1 개발 백로그 (P0 4건 + P1 6건)
+| 우선순위 | ID | 수용 기준 |
+| --- | --- | --- |
+| P0 | ENV1318-01 | 루트/데이터 용량 예산·타 작업자 보존·격리 복원 후 마이그레이션. |
+| P0 | SEC1318-02 | 실제 세션 본인 결합·앱 DML/PUBLIC 권한 음성 테스트·타인/위조100회. |
+| P0 | REL1318-03 | QA v1293 실패/감사/Migration266·정확 SHA Test·GitOps 보류. |
+| P0 | SUP1318-04 | 메시지200/500·문의50/100 누락 시 허위 읽음/0건 금지, 장애≠빈 목록. |
+| P1 | SUP1318-05 | 본인 v2 메시지/이벤트 키셋·10,001건 무누락·인덱스. |
+| P1 | SUP1318-06 | 문의 행 잠금 v2 답변/이벤트/상태/감사 원자성·멱등 경합. |
+| P1 | SUP1318-07 | 연속 범위 서명·CAS·불변 영수증·재시도/교차 세션 거부. |
+| P1 | SUP1318-08 | Next.js CTA·Android 동등성·WCAG·자동 읽음 금지. |
+| P1 | SUP1318-09 | 회원 개인정보·보존·관리자 k>=20·SEO·제한·KPI. |
+| P1 | SUP1318-10 | 격리 실제 PG 201/501/10,001·100동시/BOLA·구형 회귀·롤백/Test. |
+
+**외부 독립 근거 10,000건:** 신규 승인 **0건**, 누적 중복 제거·분류 승인 **UNKNOWN/10,000**, **BLOCKED / IN PROGRESS**. 참고 표준은 승인 실적이 아니다. 런타임·DB·WLD·원장·Test·운영·예약 변경 없음.
+
 - **v1316 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (선행 #1411 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## v2026.10.26.1316 — F675-136 회원 관리자 답변 확인 표시 및 읽음 기준점 (기능 추가 / DRAFT / RELEASE HOLD)
 

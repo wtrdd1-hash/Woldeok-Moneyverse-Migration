@@ -1,4 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+
+## v1318 — F675-136 관리자 답변 확인 무결성 (기능 보완 / DRAFT / HOLD)
+- 이전 추가 v1316 / 현재 보완 v1318 / 다음 추가 v1320, main 1c5b84a1c45baafcca83f375a6f99698121e9bb5·선행 Draft #1416. Migration196 오래된 메시지200/최대500·문의50/최대100으로 `/support` 누락. 개발 DB 문의3·메시지6·관리자 답변2·200건 초과0, 운영 장애 확증 아님.
+- 본인 v2 최신 메시지+활성화 이후 연속 관리자 seq, 명시적 CTA·600초 세션 HMAC·CAS 불변 영수증, 과거 UNKNOWN·프리페치 자동 읽음 금지·부분/503≠0·필터 변경 재조회. 문의 행 잠금 v2 답변/이벤트/상태/감사 원자성·기능 OFF 구형 복귀, SECURITY DEFINER/PUBLIC 회수, Android/WCAG/noindex/no-store·관리자 k>=20.
+- P0/P1 ID: ENV1318-01 SEC1318-02 REL1318-03 SUP1318-04 SUP1318-05 SUP1318-06 SUP1318-07 SUP1318-08 SUP1318-09 SUP1318-10. 합성 201/501/10,001·100동시/BOLA·599/600/601초·롤백. QA v1293 실패/보류 main 프론트6실패·감사·앱 DML235/241·PUBLIC 은행3·Migration266·Test/복원 미완료·루트97%. 외부 10k 신규0·누적 UNKNOWN, BLOCKED/IN PROGRESS. 배포 없음.
+
 - **v1316 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (선행 #1411 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## v1316 — F675-136 회원 관리자 답변 확인 표시 (기능 추가 / DRAFT / HOLD)
 - 이전 기능 보완 v1314 / 현재 기능 추가 v1316 / 다음 기능 보완 v1318(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인, 선행 Draft #1411 미병합. 문서만 변경.

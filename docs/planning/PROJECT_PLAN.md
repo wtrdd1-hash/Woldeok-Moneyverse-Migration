@@ -1,4 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## Planning v1318 — F675-136 Support Reply Attention Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
+- Cycle Previous Addition v1316 / Current Improvement v1318 / Next Addition v1320 provisional; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked start/mid, Draft #1416 unmerged. Docs only.
+- Migration196 oldest-first default200/max500 support messages, default50/max100 threads, and `/support` rendering a truncated slice can hide newest replies or falsely imply zero. Dev DB read-only 3 threads/6 messages/2 admin replies, none >200: source-boundary risk, not production incident.
+- Versioned owner newest-message keyset + consecutive post-activation reply seq, explicit CTA only for fully returned interval, 600s member/session/thread HMAC, CAS immutable receipt. Legacy UNKNOWN, no GET/prefetch auto-read, partial/503 not zero, stale unread-filter cursor restarts. V2 thread-locked atomic admin reply/event/status/audit and idempotent replay, preserve old Migration196 signatures, PUBLIC revoke, no app direct grants. Android/WCAG, noindex/no-store, admin k>=20, feature OFF/v1 fallback. API 401/404/409/412/428/429/503.
+- P0 4/P1 6: ENV1318-01 SEC1318-02 REL1318-03 SUP1318-04 SUP1318-05 SUP1318-06 SUP1318-07 SUP1318-08 SUP1318-09 SUP1318-10. Isolated PG 201/501/10,001 and 100-way concurrency/BOLA, 599/600/601s and rollback. QA v1293 FAILED/HOLD: main frontend6 fails, full audit Critical2/High10, prod High2, dev app DML235/241, PUBLIC bank3, migration266, Test/restore missing; root97%/~3.4GiB. Draft #1412 exact-SHA CI success not Test approval.
+- Independent 10,000 source gate new accepted0, cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS. Engineering #1415.
+
 - **v1316 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (stacked on unmerged #1411; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## Planning v1316 — F675-136 Verified Support Reply Attention (Feature Addition / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1314 → Current Feature Addition v1316 → Next Feature Improvement v1318 (provisional). Remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid; predecessor Draft #1411 unmerged; AGENTS.md/README.md/English canonical plan/Korean parity reviewed. This is documentation only.
@@ -803,7 +811,7 @@ The CI migration test failed at immutable migration 266 (`ALTER DATABASE woldeok
 
 - **Integrated ledger:** this cycle is appended to [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md); G368-02, G368-03, G368-04, and G368-05 are formally resolved and closed.
 - **Exact baseline:** following full main integration of 23 Step-Up/security/economy PRs (#644~#684) and Discord bot integration (#685), exact commit is `bb832b69ee56b9ab247eda24b7b20f76ea44ffb4`.
-- **G368-02 (retired admin TOTP reconciled with deployed controls) closed:** following the retirement of admin TOTP in migration 197, legacy TOTP/SecondFactorGuard text across §1.3, §5, §8 and detailed security specs (`AUTHENTICATION_SECURITY_PRIORITY_SPEC`, `COMMUNITY_MARKET_INTEGRITY_SPEC`) has been fully reconciled with active runtime controls: `AdminSessionGuard`, `ReauthGuard` (Step-Up 2FA re-authentication), browser CSRF guards, server-side role/actor checks, required idempotency, and append-only audit.
+- **G368-02 (retired admin TOTP reconciled with deployed controls) closed:** following the retirement of admin TOTP in migration 197, legacy TOTP/SecondFactorGuard text across `1.3, `5, `8 and detailed security specs (`AUTHENTICATION_SECURITY_PRIORITY_SPEC`, `COMMUNITY_MARKET_INTEGRITY_SPEC`) has been fully reconciled with active runtime controls: `AdminSessionGuard`, `ReauthGuard` (Step-Up 2FA re-authentication), browser CSRF guards, server-side role/actor checks, required idempotency, and append-only audit.
 - **G368-03 (mobile/API contract version and 335 endpoint spec sync) closed:** `docs/mobile-api-complete-spec.md` and `.ko.md` have been updated to v2026.09.23.388, incorporating 4 new domains (5 saving pockets, 2 crafting, 5 marketplace, 4 in-app notification endpoints) for a total of 57 backend controllers and 335 endpoints (179 mobile contract endpoints), with contract determinism validated by `pnpm api:contract:check`.
 - **G368-04 (admin shop step-up and 23 unmerged PRs integrated) closed:** all 23 outstanding PRs including `#672` and `#668` were cleanly merged into `main`, verified through 974 backend unit/E2E tests and Turbopack production build, and promoted with zero downtime to Test and Production.
 - **G368-05 (production session continuity and zero-downtime evidence verified) closed:** 1,061 active PostgreSQL user sessions were 100% preserved through promotion, with zero Nginx errors and verified 200 OK responses on the notification BFF route and 401 on the protected chat API.
@@ -2256,7 +2264,7 @@ Every current or planned feature records all of: purpose/user problem; target ac
 | Advertising/sponsorship | `IMPLEMENTED/PARTIAL reviewed placements` | Approved substantial public surfaces only; Test ads off; ad/sponsor visually separate from product action. | Invalid traffic/click encouragement/youth/privacy targeting/tracker leak/sponsor confusion. | Ads never justify thin pages. Net ad contribution subtracts churn/session/support/privacy/fraud cost. | Route allowlist, Test ads off, CLS/CWV, ad exit, invalid traffic/policy/privacy. |
 | SEO backend | `PARTIAL` | Configured-origin canonical, public metadata read model, sitemap shards, robots, redirect map, structured-data serializer, updatedAt, images, crawler/GSC/Naver observation. | Private leakage, Host injection, cache poison, PII in sitemap/JSON-LD. | KPI organic→signup→activation→D7/D30→retained net value/CAC saving. | sitemap privacy, canonical injection, redirect loops, SSR, GSC/Naver, CWV. |
 | Incident/status/operations | `PARTIAL + OPS-107-01 P0` | Public-safe status separated from internal telemetry; server freshness, collector heartbeat, snapshot age, incident lifecycle and rollback/postmortem explicit. | false green, forged writer, stale monitoring, topology leak, admin abuse, alert fatigue. | Trust/support/MTTR feature, not acquisition bait; `/status` noindex. | stopped collector/source, cache/API/DB outage, mixed states, stale threshold, alerting, exact-SHA smoke. |
-| CI/Test/GitOps/Production promotion | `PARTIAL + REL-110-01 P0` | §3 state machine is authoritative; desired-state merge never equals applied/runtime proof. | stale candidate, supply-chain substitution, wrong image/routing, evidence replay. | indirect value through lower failure/rollback/support cost. | source→CI→image→Flux→Pod→public version lineage must be exact and fresh. |
+| CI/Test/GitOps/Production promotion | `PARTIAL + REL-110-01 P0` | `3 state machine is authoritative; desired-state merge never equals applied/runtime proof. | stale candidate, supply-chain substitution, wrong image/routing, evidence replay. | indirect value through lower failure/rollback/support cost. | source→CI→image→Flux→Pod→public version lineage must be exact and fresh. |
 
 ## 6. Local first-party authentication detailed contract
 
@@ -2309,7 +2317,7 @@ Impressions/clicks/CTR are diagnostic. Business funnel is `organic visit → qua
 | Upload/UGC | HIGH | decoded type, isolated storage, output encoding/CSP, metadata minimization/moderation | polyglot/malformed/XSS/link/unauthorized delivery |
 | Analytics/ad/SEO leakage | MEDIUM/HIGH | outbound allowlist/minimization; no token/balance/debt/security in URL/structured data | payload/schema/sitemap/JSON-LD scan; HIGH leak blocks |
 | Supply chain | MEDIUM/HIGH | immutable action/image refs, dependency audit, SBOM/provenance | workflow/dependency/provenance regression follows severity gate |
-| Candidate lineage mismatch | HIGH | §3 evidence chain, image digest, Flux revision, Pod/public version probes | any desired/applied/workload/public mismatch blocks merge/promotion |
+| Candidate lineage mismatch | HIGH | `3 evidence chain, image digest, Flux revision, Pod/public version probes | any desired/applied/workload/public mismatch blocks merge/promotion |
 | Release-evidence bypass | HIGH | immutable SHA, signed/machine-readable fail-closed evidence, no skip-pass | break each prerequisite intentionally; Production-ready must not emit |
 | Backup/key compromise | HIGH | encryption, key separation, independent medium, least privilege, access audit | unauthorized key/plaintext test; HIGH leak blocks |
 | Wrong-environment restore | CRITICAL/HIGH | source/target identity, isolated DB/namespace, separate credentials/outbound sinks | wrong target/Production credential simulation; possible prod write blocks |
@@ -2344,7 +2352,7 @@ Destructive/schema-changing work requires current evidence: candidate SHA, backu
 
 ### 11.1 Candidate sequence
 
-Use §3 exactly. Test uses isolated namespace/DB, indexing off and real ads off. Test/recovery cannot send Production email/Discord/webhooks or mutate Production data. A successful CI or image build never substitutes for applied/runtime proof.
+Use `3 exactly. Test uses isolated namespace/DB, indexing off and real ads off. Test/recovery cannot send Production email/Discord/webhooks or mutate Production data. A successful CI or image build never substitutes for applied/runtime proof.
 
 ### 11.2 Monitoring
 

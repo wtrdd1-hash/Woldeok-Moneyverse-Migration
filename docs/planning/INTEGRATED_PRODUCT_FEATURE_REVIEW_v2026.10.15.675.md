@@ -1,4 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+
+## v1318 — F675-136 Support Attention Integrity (Improvement / DRAFT / HOLD)
+- Previous Addition v1316 / Current Improvement v1318 / Next Addition v1320; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5, prior Draft #1416. Migration196 oldest200/max500 messages and 50/max100 threads truncate `/support`. Dev DB read-only 3 threads/6 messages/2 admin replies, no >200; production incident not proven.
+- Owner v2 newest messages + consecutive post-activation admin seq, explicit CTA, 600s session HMAC, CAS immutable receipt; legacy UNKNOWN, no prefetch auto-read, 503/partial not zero, stale list restart. Thread-locked atomic v2 admin reply/event/status/audit, legacy v1 OFF fallback, SECURITY DEFINER/PUBLIC revoke, Android/WCAG/noindex/no-store, admin k>=20.
+- P0/P1 IDs: ENV1318-01 SEC1318-02 REL1318-03 SUP1318-04 SUP1318-05 SUP1318-06 SUP1318-07 SUP1318-08 SUP1318-09 SUP1318-10. Synthetic 201/501/10,001, 100-way/BOLA, 599/600/601s and rollback. QA v1293 FAILED/HOLD main six frontend fails, audits, dev app DML235/241, PUBLIC bank3, migration266, Test/restore missing, root97%. External 10k new0/cumulative UNKNOWN, BLOCKED/IN PROGRESS. No deployment.
+
 - **v1316 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (stacked on unmerged #1411; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## v1316 — F675-136 Member Support Reply Attention (Feature Addition / DRAFT / HOLD)
 - Previous Improvement v1314 / Current Addition v1316 / Next Improvement v1318 provisional. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid, predecessor Draft #1411 unmerged; documentation only.

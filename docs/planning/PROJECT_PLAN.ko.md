@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+
+## 기획 v1318 — F675-136 관리자 답변 확인 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
+- 이전 추가 v1316 / 현재 보완 v1318 / 다음 추가 v1320(잠정), main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, Draft #1416 미병합. 문서만 변경.
+- Migration196 오래된 메시지 기본200/최대500·문의 기본50/최대100, `/support`의 잘린 목록으로 최신 답변 미노출/허위0건 위험. 개발 DB 읽기 전용 문의3·메시지6·관리자 답변2·200건 초과0: 코드 경계 위험, 운영 장애 확증 아님.
+- 본인 v2 최신 메시지 키셋+활성화 이후 연속 seq, 실제 반환 범위만 명시적 CTA, 600초 회원/세션/문의 HMAC·CAS 불변 영수증. 과거 UNKNOWN·GET/프리페치 자동 읽음 금지·부분/503≠0·필터 변경 시 재조회. 문의 행 잠금 v2 답변/이벤트/상태/감사 원자성·멱등, Migration196 반환형 유지·PUBLIC 회수·앱 직접 권한 추가 금지. Android/WCAG·noindex/no-store·관리자 k>=20·기능 OFF/v1 복귀, API 401/404/409/412/428/429/503.
+- P0 4/P1 6: ENV1318-01 SEC1318-02 REL1318-03 SUP1318-04 SUP1318-05 SUP1318-06 SUP1318-07 SUP1318-08 SUP1318-09 SUP1318-10. 격리 PG 201/501/10,001·100동시/BOLA·599/600/601초·롤백. QA v1293 실패/보류: main 프론트6실패, 전체 Critical2/High10·운영 High2, 개발 앱 DML235/241·PUBLIC 은행3·Migration266·Test/복원 미완료, 루트97%/약3.4GiB. Draft #1412 CI 성공은 Test 승인 아님.
+- 외부 독립 10,000건 신규 승인0·누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 개발 이슈 #1415.
+
 - **v1316 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (선행 #1411 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 ## 기획 v1316 — F675-136 회원 관리자 답변 확인 표시 (기능 추가 / DRAFT / RELEASE HOLD)
 - **회차:** 이전 기능 보완 v1314 → 현재 기능 추가 v1316 → 다음 기능 보완 v1318(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인; 선행 Draft #1411 미병합, AGENTS.md·README.md·영문 정본·국문 대조 준수. 문서만 변경.
@@ -819,7 +827,7 @@ CI에서 `ALTER DATABASE woldeok_moneyverse_dev`를 실행하는 적용 이력 2
 
 - **통합 원장:** 이번 회차를 [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)에 기록했으며, G368-02, G368-03, G368-04, G368-05 이슈를 공식 해결 및 종결(Closed) 처리했다.
 - **정확한 기준:** 23개 미병합 Step-Up/보안/경제 PR(#644~#684) 및 디스코드 봇 통합(#685)이 `main`에 완전 통합된 기준 커밋은 `bb832b69ee56b9ab247eda24b7b20f76ea44ffb4`다.
-- **G368-02 (폐기된 관리자 TOTP의 기획서 실증 통제 정합화) 완료:** migration 197에서 관리자 TOTP가 폐기된 사실에 부합하도록, 기획서(§1.3, §5, §8) 및 관련 보안 명세서(`AUTHENTICATION_SECURITY_PRIORITY_SPEC`, `COMMUNITY_MARKET_INTEGRITY_SPEC`) 내의 구형 TOTP/SecondFactorGuard 표기를 현재 런타임에 실제 구현·배포된 `AdminSessionGuard`, `ReauthGuard`(Step-Up 2FA 비밀번호/세션 재인증), 브라우저 CSRF 가드, 서버 role/actor 검사, 멱등성 및 append-only audit로 완전 정합화했다.
+- **G368-02 (폐기된 관리자 TOTP의 기획서 실증 통제 정합화) 완료:** migration 197에서 관리자 TOTP가 폐기된 사실에 부합하도록, 기획서(`1.3, `5, `8) 및 관련 보안 명세서(`AUTHENTICATION_SECURITY_PRIORITY_SPEC`, `COMMUNITY_MARKET_INTEGRITY_SPEC`) 내의 구형 TOTP/SecondFactorGuard 표기를 현재 런타임에 실제 구현·배포된 `AdminSessionGuard`, `ReauthGuard`(Step-Up 2FA 비밀번호/세션 재인증), 브라우저 CSRF 가드, 서버 role/actor 검사, 멱등성 및 append-only audit로 완전 정합화했다.
 - **G368-03 (모바일/API 계약 버전 및 335개 엔드포인트 명세 동기화) 완료:** `docs/mobile-api-complete-spec.ko.md` 및 영문 문서를 v2026.09.23.388로 최신화하고, 신규 4대 도메인 16개 엔드포인트(저축 포켓 5개, 제작 2개, 마켓플레이스 5개, 인앱 알림 4개)를 포함하여 백엔드 총 57개 컨트롤러, 335개 엔드포인트(모바일 계약 179개) 전수 정합화를 검증(`pnpm api:contract:check`) 완료했다.
 - **G368-04 (관리자 상점 Step-Up 및 23개 PR 통합) 완료:** `#672`, `#668`을 포함한 23개 보안·Step-Up PR이 충돌 없이 `main`에 병합되었으며, 백엔드 테스트(974 pass), 프론트엔드 테스트(3 pass) 및 Turbopack 빌드 검증을 거쳐 테스트서버와 운영서버에 무중단 승격 완료되었다.
 - **G368-05 (운영 세션 연속성 및 무중단 승격 실측 증명) 완료:** 운영 서버 배포 중 PostgreSQL 활성 사용자 세션 1,061개가 100% 무손실 보존되었으며, Nginx 에러 0건 및 BFF 알림/채팅 엔드포인트 응답(200 OK / 401)을 실측 검증했다.
@@ -2266,7 +2274,7 @@ OWASP ASVS 5.0.0과 OWASP API Security Top 10을 검증 기준으로 사용하�
 | advertising/sponsorship | `IMPLEMENTED/PARTIAL reviewed placements` | 승인된 충분한 public surface만, Test ads off, ad/sponsor와 product action 분리. | invalid traffic/click encouragement/youth/privacy tracking/leak/confusion. | 광고 때문에 thin page 만들지 않음, churn/session/support/privacy/fraud 차감. | route allowlist, Test ads off, CLS/CWV, ad exit, invalid traffic/policy/privacy. |
 | SEO backend | `PARTIAL` | configured-origin canonical, public metadata read model, sitemap, robots, redirect, structured data, updatedAt, images, crawler/GSC/Naver. | private leak, Host injection, cache poison, PII sitemap/JSON-LD. | organic→signup→activation→D7/D30→retained net value/CAC saving. | sitemap privacy, canonical injection, redirect loops, SSR, GSC/Naver, CWV. |
 | incident/status/operations | `PARTIAL + OPS-107-01 P0` | public-safe status와 internal telemetry 분리, server freshness, collector heartbeat/snapshot age/incident/rollback/postmortem. | false green/forged writer/stale monitor/topology/admin abuse/alert fatigue. | trust/support/MTTR, `/status` noindex. | collector/source stop, cache/API/DB outage, mixed state, stale threshold, alert, exact-SHA smoke. |
-| CI/Test/GitOps/Production promotion | `PARTIAL + REL-110-01 P0` | §3 state machine 권위, desired-state merge는 applied/runtime proof 아님. | stale candidate/supply-chain substitution/wrong image-routing/evidence replay. | 실패·rollback·support 비용 절감의 간접가치. | source→CI→image→Flux→Pod→public version lineage exact/fresh. |
+| CI/Test/GitOps/Production promotion | `PARTIAL + REL-110-01 P0` | `3 state machine 권위, desired-state merge는 applied/runtime proof 아님. | stale candidate/supply-chain substitution/wrong image-routing/evidence replay. | 실패·rollback·support 비용 절감의 간접가치. | source→CI→image→Flux→Pod→public version lineage exact/fresh. |
 
 ## 6. Local first-party authentication 상세계약
 
@@ -2319,7 +2327,7 @@ impressions/clicks/CTR는 진단지표다. 사업 funnel은 `organic visit → q
 | upload/UGC | HIGH | decoded type, isolated storage, encoding/CSP, metadata minimization/moderation | polyglot/malformed/XSS/link/unauthorized delivery |
 | analytics/ad/SEO leakage | MEDIUM/HIGH | outbound allowlist/minimization, URL/structured data에 token/balance/debt/security 금지 | payload/schema/sitemap/JSON-LD scan, HIGH leak 차단 |
 | supply chain | MEDIUM/HIGH | immutable action/image ref, dependency audit, SBOM/provenance | workflow/dependency/provenance regression severity gate |
-| candidate lineage mismatch | HIGH | §3 chain, image digest, Flux revision, Pod/public version probe | desired/applied/workload/public mismatch 시 merge/promotion 차단 |
+| candidate lineage mismatch | HIGH | `3 chain, image digest, Flux revision, Pod/public version probe | desired/applied/workload/public mismatch 시 merge/promotion 차단 |
 | release evidence bypass | HIGH | immutable SHA, machine-readable fail-closed evidence, skip-pass 금지 | 각 prerequisite fault injection, Production-ready emission 차단 |
 | backup/key compromise | HIGH | encryption/key separation/independent medium/least privilege/audit | unauthorized key/plaintext test, HIGH leak 차단 |
 | wrong-environment restore | CRITICAL/HIGH | source/target identity, isolated DB/namespace, separate creds/outbound sink | wrong target/Production credential simulation, prod write 가능성 차단 |
@@ -2354,7 +2362,7 @@ primary host/storage/failure domain 또는 online credential을 공유하는 rep
 
 ### 11.1 candidate sequence
 
-§3 state machine을 그대로 사용한다. Test는 isolated namespace/DB, indexing off, real ads off다. Test/recovery는 Production email/Discord/webhook을 보내거나 Production data를 변경할 수 없다. CI 성공 또는 image build 성공은 applied/runtime proof를 대체하지 않는다.
+`3 state machine을 그대로 사용한다. Test는 isolated namespace/DB, indexing off, real ads off다. Test/recovery는 Production email/Discord/webhook을 보내거나 Production data를 변경할 수 없다. CI 성공 또는 image build 성공은 applied/runtime proof를 대체하지 않는다.
 
 ### 11.2 monitoring
 
