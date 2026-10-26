@@ -1,3 +1,10 @@
+## 기획 v1332 — F675-140 회원 문의 이력 검색 (기능 추가 / 초안 / 운영 보류)
+- 이전 Feature Improvement v1330 → 현재 Feature Addition v1332 → 다음 Feature Improvement v1334(잠정). main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재확인, AGENTS·README·영어 정본·한국어 대조. 개발 이슈 [#1467](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1467). 미병합 v1330 Draft #1461(#1457 선행)에 적층, main 독립 병합 금지, 문서 기획만 수행.
+- 실제 코드: `/support`는 반환 목록만 표시하고 검색·필터·커서가 없으며 Migration196 `support_my_threads`는 기본 50/최대 100건. 과거 문의를 못 찾을 가능성은 있으나 운영 장애 확정 아님. 신규 기능은 **제목 문자 그대로 검색**·상태/생성일 필터·생성일 키셋 20건(최대 50) 페이지, 메시지 본문 검색·검색 이력 저장 제외.
+- `/support` 검색/초기화/더보기·빈 결과/오류/커서 만료 구분; GET `/api/v1/support/threads/search` 본인 세션·동의, 회원/세션/필터 결합 15분 서명 커서, 유니코드/LIKE 와일드카드 이스케이프, 400/401/403/409/422/429/503, GET 쓰기 0건. 전진 SECDEF `support_my_threads_search_v1`, search_path 고정, PUBLIC 회수, 앱 EXECUTE만, (user_id,created_at DESC,id DESC) 인덱스, 앱 테이블 직접 권한 추가 금지. Android/WCAG 2.2 AA/noindex/no-store/관리자 k>=20 익명 집계.
+- P0: ENV1332-01 SEC1332-02 REL1332-03 SUP1332-04. P1: SUP1332-05 SUP1332-06 SUP1332-07 SUP1332-08 SUP1332-09 SUP1332-10. 격리 PG 합성 10,001건, 타 회원 100회, 한글/LIKE 특수문자, 커서 변조/만료, 상태 경합, GET 쓰기 0건, 기본 OFF/롤백, 정확 SHA Test·복원 필수.
+- QA v1302 프론트 1,423건 PASS, 타입/린트/빌드/API PASS, 전체 감사 Critical2/High8·봇 감사·라우트-원장 FAIL. 개발 DB 앱 DML 235/241·PUBLIC 은행 SECDEF 3·Migration266 불일치, 루트 99%(1.3GiB), 데이터 91%. 공식 Test·운영 DB 권한·복원 미검증으로 RELEASE HOLD. 외부 독립 10,000건 신규 승인 0·누적 UNKNOWN, BLOCKED/IN PROGRESS. 런타임·DB·원장·Test·운영 미변경.
+
 ## 기획 v1330 — F675-139 문의 임시글 전송 의도 무결성 (기능 보완 / 초안 / 운영 보류)
 - 교대: 이전 기능 추가 v1328 / 현재 기능 보완 v1330 / 다음 기능 추가 v1332(잠정). 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재조회, AGENTS·README·영문 정본 PROJECT_PLAN 및 국문 대조. v1328 Draft #1457은 v1326 #1452에 적층되어 미병합.
 - 근거: support/actions.ts·플로팅 위젯이 전송마다 새 UUID를 생성; Migration 196 support_create_thread의 동일 create_key 재사용은 회원만 확인하고 **제목·본문 동일성 미검증**; support_add_message SELECT→INSERT 동시성 경합에서 23505 가능. 실제 운영 사고 확정 아님. 임시글은 텍스트 전용, 기존 이미지 첨부 보존.

@@ -1,3 +1,50 @@
+## 기획 v1332 — F675-140 회원 문의 이력 제목 검색·상태/기간 필터·본인 한정 페이지네이션 (기능 추가 / 초안 / 운영 보류)
+
+**사이클:** 이전 Feature Improvement v1330 → 현재 Feature Addition v1332 → 다음 Feature Improvement v1334(잠정). 원격 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인, AGENTS.md·README.md·영어 정본 PROJECT_PLAN.md·한국어 대조. 개발 이슈 [#1467](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1467). 이전 기획 Draft #1461은 미병합 #1457에 적층되어 있으므로 현재 문서 브랜치도 main에 독립 병합 금지. **문서 기획만 수행**하며 구현은 별도 승인·개발 브랜치가 필요함.
+
+### 실제 코드 근거와 범위
+- 최신 main의 `frontend/src/app/support/page.tsx`는 GET `/api/v1/support/threads` 결과만 표시하고 `thread` 선택 외에 검색·상태/기간 필터·커서·더 보기가 없음. `SupportController.threads` → `SupportRepository.myThreads` → Migration 196 `support_my_threads`는 최근 50건 기본·최대 100건만 반환함. 과거 문의가 목록에서 누락될 **가능성**은 코드로 확인했으나 실제 운영 누락 사고는 확인하지 않음.
+- `support_thread_messages`는 오래된 메시지부터 200/500건을 반환하지만 이번 검색은 **문의 제목만** 대상으로 함. 메시지 본문 검색/메시지 페이지네이션은 범위 밖(F675-136 연계). F675-139 임시저장, F675-138 해결 확인, F675-136 답변 읽음 기능과 중복 구현하지 않음. 기존 관리자 상태 필터도 유지.
+- 설계 선택: 제목의 문자 그대로 부분 일치 검색 + 상태/문의 생성일 필터 + 생성시각 기준 키셋 페이지네이션. 메시지 본문 색인, 의미 검색, 외부 검색 서비스, 검토되지 않은 `pg_trgm` 확장은 사용하지 않음. 최근 답장시각 정렬은 중간 갱신으로 페이지 중복·누락 가능하므로 생성시각 내림차순 정렬임을 화면에 명시. 상태 변경으로 필터 결과가 바뀔 수 있어 고정 스냅샷이라 주장하지 않음.
+
+### 목적·대상·진입점·화면·상태
+- 목적: 회원이 과거 관리자 문의를 다시 찾아 동일 문의 반복과 고객지원 비용을 줄임. 대상은 로그인·동의 완료·활성 회원, 관리자는 비식별 집계만 조회. 지갑·WLD·원장 변경 없음.
+- 진입점 `/support`: **문의 제목 검색**, 상태(전체/관리자 답변 대기/내 답변 대기/처리 완료), 생성일 시작·종료, **검색**, **초기화**, **더 보기**, 문의 상세 링크. 제목·상태·생성일·최근 답변일을 표시하며 상세 선택은 기존 `?thread=<uuid>`를 유지. 기능 OFF 시 기존 새 문의/답장/플로팅 위젯 동작 보존.
+- 상태 `IDLE/LOADING/RESULTS/NO_MATCH/EMPTY_ACCOUNT/MORE_AVAILABLE/END_OF_RESULTS/CURSOR_EXPIRED/FILTER_CHANGED/SESSION_EXPIRED/UNAVAILABLE`. 검색 결과 0건과 문의 자체 0건, 서버 장애를 구분. 서버가 `hasMore=false`를 확정한 경우에만 마지막 페이지라고 표시하며 50건 조회나 타임아웃으로 전체 완료라 주장하지 않음. 원문 검색어를 localStorage에 저장하지 않음.
+- q는 앞뒤 공백 제거·NFC 정규화 후 비어 있거나 2~80 Unicode 코드포인트. 비어 있으면 제목 조건 없음. 문자 그대로 부분일치, 대소문자 무시 여부는 DB 로케일 실측 후 결정; `%`·`_`·역슬래시는 와일드카드가 되지 않도록 이스케이프, 제어문자 거부. 로컬 날짜는 명시적 UTC 반열림 구간으로 변환, `from<to`, 요청당 최대 1년 구간(인접 구간 반복 가능).
+- 320px 모바일, 키보드 포커스, 200% 확대, 동작 축소, 스크린리더 상태 알림, 보이는 입력 라벨, 권장 44px 터치 영역, WCAG 2.2 AA. 오류 상태에서도 타 회원 제목·존재 여부 노출 금지.
+
+### API·커서·권한
+- `GET /api/v1/support/threads/search?q=&status=all|open|waiting_user|resolved&from=&to=&cursor=&limit=20` 기본 20/최대 50. `{items:[{threadId,subject,status,createdAt,lastMessageAt}],nextCursor,hasMore,order:'created_desc'}` 반환. 별도 검증된 정확한 총합이 없으면 `totalCount` 미제공. GET에서 DB 쓰기·읽음 처리 0건.
+- 서버 검증 세션에서만 actor 추출(SessionGuard·AuthenticatedGuard·ConsentGuard), 클라이언트 actor ID 불신. Next.js server-only API와 Android `/app-api/v1/` 경로 동일 계약. 401 세션, 403 동의, 400/422 필터 오류, 409 커서 만료/불일치, 429 과호출, 503 장애. 읽기 GET에 변경용 CSRF 불필요; POST/PUT CSRF 유지. `Cache-Control: private,no-store`, CDN·로그에 검색어 금지.
+- 커서는 서버 서명, 회원·세션 세대·필터 digest·`(created_at,id)`·15분 이하 만료에 결합. 원문 검색어는 커서에 포함하지 않음. 서명·필터 검증 실패 시 409 및 재검색 CTA. `(created_at,id)<(cursor.created,cursor.id)`, `ORDER BY created_at DESC,id DESC`, `limit+1`로 `hasMore` 판정. OFFSET·가짜 스냅샷 금지; 새 문의는 새로고침으로 반영, 상태 변경으로 결과 집합은 달라질 수 있음. 로그아웃·계정 전환 후 커서 재사용 불가.
+- 상세 메시지는 기존 본인 전용 API 유지. 타인/삭제 문의 ID는 기존 권한 정책에 맞춘 동일한 403/404 처리, 제목·검색어 반사 금지. 검색 이후 삭제·상태 변경된 항목은 안전하게 재검색 안내.
+
+### DB·인덱스·트랜잭션·보안
+- 기존 Migration 196을 수정하지 않고 전진 전용 `support_my_threads_search_v1(p_actor uuid,p_q text,p_status text,p_from timestamptz,p_to timestamptz,p_before_created timestamptz,p_before_id uuid,p_limit int)` 신규 SECURITY DEFINER 함수 설계. `SET search_path=pg_catalog,pg_temp`, SQL 내부 `t.user_id=p_actor` 강제, PUBLIC EXECUTE 명시 회수, 앱 역할 EXECUTE만 허용. support 테이블 직접 SELECT/DML 권한 추가 금지. 전달된 actor UUID 자체가 DB 인증은 아니므로 실제 서버 세션 결합과 기존 DB 최소권한 P0 해소가 선행.
+- 기존 PK/FK/status CHECK/create_key UNIQUE 유지. 후보 인덱스 `(user_id,created_at DESC,id DESC)`, EXPLAIN에서 필요하면 `(user_id,status,created_at DESC,id DESC)`. 기존 `(user_id,last_message_at DESC,id DESC)`는 생성일 정렬용이 아님. 격리 합성 데이터로 `EXPLAIN (ANALYZE, BUFFERS)` 측정 후 결정. 문자열은 바인딩하고 LIKE 특수문자 이스케이프를 테스트. 기획 단계에서 실제 DB 인덱스·확장 설치 없음.
+- 조회는 쓰기 트랜잭션·행 잠금·원장 변경 없이 단일 SQL 문 스냅샷만 사용. 요청별 장기 고정 스냅샷을 약속하지 않음. 회원·IP별 호출 제한과 실행시간·메모리 상한. 검색어·제목·본문을 관리자 분석/로그/외부 제공하지 않음. 관리자는 k>=20 익명 집계만 조회, 기존 보존정책 유지.
+- SEO: 회원 비공개 검색 `noindex,nofollow`, 사이트맵 제외, robots는 권한 통제가 아님. 검색어를 canonical/OG/분석에 포함하지 않음. 웹·Android 동일 오류/상태 계약.
+
+### P0/P1 실행 가능 개발 백로그(별도 브랜치)
+- **P0 `ENV1332-01`** — 루트 용량 경보·소유자 승인 후 검증된 아카이브, 암호화 백업·격리 복원·여유 공간 증거. 타 작업자 Worktree·Docker 자료 삭제 금지.
+- **P0 `SEC1332-02`** — 개발/승인된 운영 DB 최소권한 실측, 앱 직접 DML·PUBLIC SECDEF 회수 전진 마이그레이션 검토, 실제 DB 음성 권한 테스트·세션 본인 검증, Migration 266 불변성.
+- **P0 `REL1332-03`** — 최신 main/후보 정확 SHA CI·전체 감사·인증된 Test 회원/관리자 검색·금융 회귀·격리 복원·GitOps 무중단 롤백 증명. 빌드 성공만으로 승격 금지.
+- **P0 `SUP1332-04`** — 타인 검색 누출, 와일드카드/SQL 인젝션, 만료/불일치 커서, 부분 결과를 전체로 표시, 장애를 0건으로 오인하는 상황 차단.
+- **P1 `SUP1332-05`** — 전진 인덱스 마이그레이션, EXPLAIN·회원 10,001건 성능 기준; Migration 196 변경 금지.
+- **P1 `SUP1332-06`** — SECDEF 본인 검색·문자 그대로 제목 검색·생성일 키셋·상태/날짜 검증·limit+1·GET 쓰기 0건.
+- **P1 `SUP1332-07`** — NestJS DTO/가드/저장소·서명 커서·400/401/403/409/422/429/503·호출 제한·no-store.
+- **P1 `SUP1332-08`** — Next.js 검색/필터/더보기, 플로팅 위젯 기존 유지, Android App API, 접근성/다국어.
+- **P1 `SUP1332-09`** — 원문 미수집 개인정보 KPI, 관리자 k>=20 집계, 보존·SEO 검토.
+- **P1 `SUP1332-10`** — 격리 PostgreSQL 실제 역할 합성 10,001건·타 회원 100회·상태 변경 경합·와일드카드/유니코드/인젝션/시간대/커서 만료·320px 회귀·롤백.
+
+### KPI·수용 조건·배포 게이트
+- KPI는 관측 실적이 아닌 **TEST TARGET**: 과거 문의 검색 후 열람 성공률, 검색→열람 완료율, 동일 문의 반복률, 합성 회원 10,001건에서 p95 <250ms(실측으로 재조정), BOLA 유출 0, GET 쓰기 0, 고정 데이터에서 커서 중복 0, 접근성 회귀 0. 실제 운영 검색량·매출 상승을 임의 주장하지 않음.
+- 0/1/50/51/100/101/10,001건 계정, 상태 3종, UTC/일광절약 시간대 경계, 한글 NFC/NFD·이모지·결합문자, `%`·`_`·역슬래시·따옴표·SQL 인젝션, 타 회원 100회, 동시 조회/상태 변경 100회, 변조·만료 커서, 로그아웃·계정 전환, DB 장애, 기능 OFF를 검증. 메시지 본문 색인 없음, 검색어 로그 없음 확인.
+- 기본 OFF → 격리 Test 정확 SHA/마이그레이션 정합성/DB 음성 권한/백업 복원/금융 E2E → 소수 opt-in 카나리 → 모든 게이트 PASS 후 승인된 GitOps 무중단 승격. 5xx/지연/BOLA 이상 시 기능 즉시 OFF, 기존 GET /threads 유지, 이미지 롤백은 불변 이미지로, 추가 DB 스키마는 휴면 유지. 회원 데이터 파괴적 롤백 금지.
+- **QA v1302:** 프론트 1,423/1,423 PASS, 타입/린트/빌드/API PASS, 전체 감사 Critical 2/High 8 FAIL, 봇 감사 FAIL, 라우트-원장 게이트 FAIL. 개발 DB 앱 직접 DML 235/241, PUBLIC 은행 SECDEF 3, Migration 266 체크섬 불일치. 루트 99%(약 1.3GiB), 데이터 91%(약 18~19GiB). 운영 DB 권한·정확 SHA 공식 Test/복원 미검증으로 **PARTIAL / DRAFT / RELEASE HOLD**.
+- 외부 독립 레퍼런스 10,000건: 신규 중복 제거·최종 승인 0, 누적 검증 UNKNOWN, **BLOCKED / IN PROGRESS**. OWASP API1 BOLA·PostgreSQL 복합 인덱스·W3C WCAG 2.2 공식 자료는 설계 참고일 뿐 출처·중복 검증 완료 코퍼스로 산입하지 않음. 런타임/DB/WLD/원장/Test/운영 미변경.
+
 ## 기획 v1330 — F675-139 문의 임시글의 전송 의도·내용 결합 멱등성 및 동시 전송 무결성 (기능 보완 / 초안 / 운영 보류)
 
 **교대:** 이전 기능 추가 v1328 → 현재 기능 보완 v1330 → 다음 기능 추가 v1332(잠정). 시작·중간 기준 최신 원격 main `0fe614b2ca1a7bc0df540514e54db78130479e2a`; AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조. v1328 Draft #1457은 미병합 v1326 #1452 위에 적층되어 있으므로 v1330도 main에 독립 병합 금지. 최신 QA v1301: 프론트엔드 1,423건 통과, 타입·린트·빌드·API 계약 통과, 운영 의존성 알려진 취약점 0, **전체 감사 실패(Critical 2/High 8)**. 공식 정확 SHA Test 로그인·복원 증빙 없음. 개발 DB 읽기 전용: 앱 역할 241개 중 235개 테이블 직접 DML, PUBLIC 은행 SECURITY DEFINER 함수 3개, Migration 266 체크섬 불일치. 운영 DB 권한은 미검증. 루트 98%(약 2.0GiB), 데이터 볼륨 90%(약 20GiB). 운영 승격 보류.

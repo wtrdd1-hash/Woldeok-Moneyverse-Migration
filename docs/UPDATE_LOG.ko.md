@@ -1,3 +1,8 @@
+## 2026-10-27 — 기획 v1332 (F675-140 기능 추가 / 초안 / 운영 보류)
+- 이전 보완 v1330 / 현재 추가 v1332 / 다음 보완 v1334. main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재확인, 영문 정본/한국어 대조, 개발 이슈 [#1467](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1467). 미병합 v1330 #1461에 적층, 문서만 변경.
+- 실제 /support에는 검색/필터/더보기 없고 Migration196 회원 목록은 기본 50/최대100건. 본인 제목 검색·상태/기간 필터·생성일 키셋·15분 서명 커서·SECDEF·앱 직접 권한 금지·Android/WCAG/noindex/no-store·오류 구분 설계. P0 ENV1332-01 SEC1332-02 REL1332-03 SUP1332-04; P1 SUP1332-05 SUP1332-06 SUP1332-07 SUP1332-08 SUP1332-09 SUP1332-10.
+- QA v1302 프론트 1,423건 PASS이나 전체 감사 Critical2/High8·봇/라우트-원장 FAIL, 개발 DB 권한 235/241·PUBLIC 은행 3·Migration266 불일치, 루트99%. 정확 SHA Test/복원 BLOCKED. 외부 독립 10,000건 신규 승인 0·누적 UNKNOWN. 런타임/DB/Test/운영 변경 없음.
+
 ## 2026-10-26 — 기획 v1330 (F675-139 기능 보완 / 초안 / 운영 보류)
 - 이전 추가 v1328, 현재 보완 v1330, 다음 추가 v1332. 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인. Draft #1457은 #1452에 적층; 문서 변경만 수행.
 - 실제 코드: 문의 액션·위젯 전송마다 UUID 신규 생성, Migration196 문의 생성 동일 키 재시도 내용 검증 누락, 답장 SELECT/INSERT 경합 23505 가능. 서버 보존 전송 의도·내용 digest·원자적 영수증·응답 불명 상태·본인/CAS/CSRF·첨부 경계·Android·개인정보/관리자/SEO/접근성·격리 DB 검증·기본 OFF 롤백 설계. 백로그 ENV1330-01 SEC1330-02 REL1330-03 SUP1330-04 SUP1330-05 SUP1330-06 SUP1330-07 SUP1330-08 SUP1330-09 SUP1330-10.

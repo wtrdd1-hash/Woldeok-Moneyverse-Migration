@@ -1,3 +1,9 @@
+## v1332 — F675-140 회원 문의 이력 검색 (기능 추가, 초안/HOLD)
+- 이전 보완 v1330 → 현재 추가 v1332 → 다음 보완 v1334, main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인, 개발 이슈 [#1467](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1467), 미병합 v1330 #1461 기반.
+- 실제 /support에는 검색·더보기 없고 Migration196 회원 목록 기본 50/최대 100건. 본인만 **제목 문자 그대로 검색**, 상태/기간 필터, 생성일 키셋 20/최대50, 본문 색인 제외; 세션/동의·SECDEF·GET 쓰기 0·noindex/no-store·Android/접근성·관리자 k>=20 집계. 운영 장애 확정 아님.
+- P0 ENV1332-01 SEC1332-02 REL1332-03 SUP1332-04; P1 SUP1332-05 SUP1332-06 SUP1332-07 SUP1332-08 SUP1332-09 SUP1332-10. 격리 PG 10,001건, 타 회원 100회, 한글/와일드카드/커서 검증, 정확 SHA Test/롤백.
+- QA v1302 1,423건 통과, 전체 감사 Critical2/High8·봇/라우트-원장 FAIL, 개발 DB 권한 235/241·PUBLIC 은행 3·Migration266 불일치, 루트 99%, RELEASE HOLD. 외부 10,000건 신규 승인 0·누적 UNKNOWN/BLOCKED. 영문·국문 통합 기획서에 상세 명세.
+
 ## v1330 — F675-139 문의 임시글 전송 의도 무결성 (기능 보완, 초안/HOLD)
 - 이전 추가 v1328 → 현재 보완 v1330 → 다음 추가 v1332. 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인; v1328 Draft #1457은 #1452 위 적층, 런타임 변경 없음.
 - 근거: Next.js 문의 액션·위젯은 매 전송 새 UUID, Migration196 기존 문의 생성 재시도는 원래 내용 일치 미확인, 답장 SELECT/INSERT 경합에서 23505 가능. 명시적 서버 임시글, 안정적 전송 의도·서버 내용 digest, 본인 API·CAS/ETag, SECDEF 메시지·영수증·tombstone 원자성, 동일 의도 안전 재조회, 내용 변경 시 충돌, 웹/위젯 텍스트 전용/Android, WCAG·개인정보·SEO·관리자 k>=20, 기본 OFF.
