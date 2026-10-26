@@ -19,3 +19,7 @@
 
 ## Finished
 - Pending.
+
+### 23:38 KST — RED
+- Added six deterministic tests before implementation. Initial unittest discovery FAILED (FileNotFoundError for the not-yet-created validator). This is expected RED, not a passing security gate.
+- Inspected actual PostgreSQL catalog in a READ ONLY transaction: legacy text bank overloads retain PUBLIC EXECUTE while UUID overloads do not; default ACL grants app table DML, sequence write, and function EXECUTE. Isolated `wdmv_v761_test_acl` lacks the bank overloads, so missing schema must be UNKNOWN, never PASS.
