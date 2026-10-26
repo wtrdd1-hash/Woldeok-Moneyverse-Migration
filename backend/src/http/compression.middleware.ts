@@ -13,6 +13,38 @@ const COMPRESSIBLE_TYPES = [
   'image/svg+xml',
 ];
 
+
+// Explicit q=0 refusals take precedence over wildcard preferences. A substring
+// check would compress for clients that explicitly cannot decode the result.
+function acceptedQuality(header: string, coding: string): number {
+  let explicit: number | undefined;
+  let wildcard: number | undefined;
+  for (const entry of header.split(',')) {
+    const [rawName, ...parameters] = entry.trim().split(';');
+    const name = rawName?.trim().toLowerCase();
+    if (name !== coding && name !== '*') continue;
+
+    let quality = 1;
+    for (const parameter of parameters) {
+      const match = /^q\s*=\s*(0(?:\.\d{0,3})?|1(?:\.0{0,3})?)$/i.exec(parameter.trim());
+      if (!match) { quality = 0; break; }
+      quality = Number(match[1]);
+    }
+    // Conflicting duplicate entries fail toward the least permissive value.
+    if (name === coding) explicit = Math.min(explicit ?? 1, quality);
+    else wildcard = Math.min(wildcard ?? 1, quality);
+  }
+  return explicit ?? wildcard ?? 0;
+}
+
+function varyOnEncoding(response: Response): void {
+  const existing = response.getHeader('Vary');
+  const current = Array.isArray(existing) ? existing.join(', ') : String(existing ?? '');
+  const tokens = current.split(',').map((token) => token.trim());
+  if (tokens.some((token) => token === '*' || token.toLowerCase() === 'accept-encoding')) return;
+  response.setHeader('Vary', current ? `${current}, Accept-Encoding` : 'Accept-Encoding');
+}
+
 /**
  * High-performance, zero-external-dependency HTTP Response Compression Middleware.
  * Compresses JSON, text, and SVG payloads > 1KB using Node.js standard zlib.
@@ -24,10 +56,10 @@ export function responseCompression() {
       return next();
     }
 
-    const acceptsGzip = acceptEncoding.includes('gzip');
-    const acceptsDeflate = acceptEncoding.includes('deflate');
+    const gzipQuality = acceptedQuality(acceptEncoding, 'gzip');
+    const deflateQuality = acceptedQuality(acceptEncoding, 'deflate');
 
-    if (!acceptsGzip && !acceptsDeflate) {
+    if (gzipQuality <= 0 && deflateQuality <= 0) {
       return next();
     }
 
@@ -70,16 +102,16 @@ export function responseCompression() {
       }
 
       try {
-        if (acceptsGzip) {
+        if (gzipQuality > 0 && gzipQuality >= deflateQuality) {
           const compressed = gzipSync(buffer, { level: 6 });
           res.setHeader('Content-Encoding', 'gzip');
-          res.setHeader('Vary', 'Accept-Encoding');
+          varyOnEncoding(res);
           res.removeHeader('Content-Length');
           return originalSend(compressed);
-        } else if (acceptsDeflate) {
+        } else if (deflateQuality > 0) {
           const compressed = deflateSync(buffer, { level: 6 });
           res.setHeader('Content-Encoding', 'deflate');
-          res.setHeader('Vary', 'Accept-Encoding');
+          varyOnEncoding(res);
           res.removeHeader('Content-Length');
           return originalSend(compressed);
         }

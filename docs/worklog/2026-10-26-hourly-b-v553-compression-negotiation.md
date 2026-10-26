@@ -9,9 +9,9 @@
 - Plan: RED test forbidden gzip/deflate and Vary preservation; implement minimal parser and header merge; GREEN focused suite; verify typecheck/build/lint/test/CI; keep merge/Production HOLD on failed gates.
 
 ## In progress
-- [ ] Reproduce failing regression tests.
-- [ ] Implement and verify compression negotiation / Vary fix.
+- [x] Reproduce failing regression tests: 5/5 RED (11:35 KST).
+- [x] Implement q-weighted negotiation, explicit refusal and Vary merge; focused 13/13 GREEN (11:36 KST).
 - [ ] Re-fetch main and planning; run project gates and record SHA.
 
 ## Finished
-- Pending.
+- Pending full verification and CI.
