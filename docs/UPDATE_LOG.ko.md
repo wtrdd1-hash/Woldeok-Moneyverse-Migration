@@ -1,4 +1,5 @@
 ## 2026-10-27 — 기획 v1340 (F675-142 기능 추가 / 초안 / 운영 보류)
+- Draft planning PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1484 (stacked on #1480; not independently mergeable; RELEASE HOLD).
 - Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1483. Draft PR pending; docs-only and release HOLD.
 - 이전 보완 v1338 / 현재 추가 v1340 / 다음 보완 v1342. 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작/중간 확인, 미병합 Draft #1480 위 적층. Migration196·문의 UI의 주제/담당 배정 부재를 확인했으며 운영 사고 증거는 아님. 개발 DB 읽기 전용 문의 3·메시지 6건.
 - 회원 6주제, 현재 적격 관리자 배정·CAS 버전·불변 멱등 감사, 거짓 SLA 금지·과거 UNKNOWN; 전진형 SECDEF DB, 권한 보호 API/Next/Android/WCAG, 플래그 OFF. P0 ENV1340-01 SEC1340-02 REL1340-03 SUP1340-04; P1 SUP1340-05 SUP1340-06 SUP1340-07 SUP1340-08 SUP1340-09 SUP1340-10.

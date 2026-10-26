@@ -18,3 +18,5 @@
 - Documentation-only branch; validation, GitHub issue, Draft PR and final SHA to be recorded after independent checks. No runtime, DB, WLD, ledger, flags, Test or Production changes. Automation schedule unchanged.
 
 - GitHub engineering issue created: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1483. Draft PR to follow after verification.
+
+- GitHub Draft PR #1484 created: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1484, base docs/planning-v1338-support-evidence-integrity; engineering issue #1483; server capacity #1170 updated. No merge or deploy.
