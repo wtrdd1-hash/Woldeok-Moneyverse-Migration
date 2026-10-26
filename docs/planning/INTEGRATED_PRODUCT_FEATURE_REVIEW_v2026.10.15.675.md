@@ -1,4 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+
+## v1314 — F675-135 Privacy Case Integrity Improvement (DRAFT / HOLD)
+- Previous Feature Addition v1312 / Current Feature Improvement v1314 / Next Feature Addition v1316 provisional. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid; stacked on unmerged Draft #1407, documentation only.
+- Main's admin_role enum lacks privacy_officer; Migration057 retires generic two-person approval; AdminGuard any-role and ReauthGuard 900s do not satisfy privacy-specific dual control and <=600s disposition. Shared app DB role + caller UUID is not DB-authenticated identity. P0: independent grants, session binding, actor impersonation negatives.
+- Preserve migration015 received-only original receipt. Trigger for new inserts + <=500-row idempotent historical backfill, anti-join gap count 0 before flag ON; case missing means RECEIVED_NOT_TRIAGED, 503 never empty. Distinct two-person evidence-verified outcomes, CAS/idempotency/audit atomicity, typed owner/admin/Android APIs, HMAC cursor, SEO/no-store, WCAG/KPI and rollback specified in integrated EN/KO masters.
+- Backlog P0 4 / P1 6: ENV1314-01 SEC1314-02 REL1314-03 PRIV1314-04 PRIV1314-05 PRIV1314-06 PRIV1314-07 PRIV1314-08 PRIV1314-09 PRIV1314-10. QA v1291 main FAILED/HOLD (frontend 1,397 pass/6 fail, prod audit High2, full Critical2/High10, exact-main CI failed); root 95%/~4.8GiB, data 83%/~33GiB. 10,000 external independent references: newly approved 0, cumulative UNKNOWN; BLOCKED/IN PROGRESS. No runtime/DB/Test/Production modification.
+
 - **v1312 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (stacked on unmerged #1402, RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## F675-135 — v1312 verified privacy request triage (Addition / DRAFT / HOLD)

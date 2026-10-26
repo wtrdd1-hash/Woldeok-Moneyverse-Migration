@@ -1,4 +1,8 @@
 - **v1312 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (미병합 #1402 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
+
+## 2026-10-26 — 기획 v1314 (기능 보완, F675-135, DRAFT/HOLD)
+- 이전 추가 v1312 → 현재 보완 v1314 → 다음 추가 v1316(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재확인. 개인정보 담당자 역할 부재·일반 2인 승인 폐기·900초 재인증과 600초 처분 요건 불일치·Migration015 접수 전용·회원 최근30건 제한 확인. 독립 전담자 권한, 신규 접수 트리거/최대500건 무누락 소급 생성, 앱 DB 계정 위조 차단 게이트, 독립 증빙 승인, 감사/CAS/회원·관리자·모바일/롤백 명세. QA v1291 실패/보류, 루트 95%. 백로그: ENV1314-01 SEC1314-02 REL1314-03 PRIV1314-04 PRIV1314-05 PRIV1314-06 PRIV1314-07 PRIV1314-08 PRIV1314-09 PRIV1314-10. 외부 신규 승인0/누적 UNKNOWN/10,000 BLOCKED. 문서만 변경, 런타임·DB·운영 변경 없음.
+
 ## 2026-10-26 — 기획 v1312 (F675-135, 기능 추가, DRAFT/HOLD)
 - main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 v1310 Draft #1402 미병합. 국영문 통합 마스터·프로젝트 계획·기능 검토 동등 반영. Migration015는 received 접수만 보관하며 관리자 이행 절차 없음. 개인정보 담당자 전용 사건 처리·2인 증빙 승인·본인 진행 현황·CAS/영수증·개인정보/Android/SEO/접근성·정확 SHA Test 게이트 기획, 런타임/DB 배포 없음.
 - P0/P1 식별자: ENV1312-01 SEC1312-02 REL1312-03 PRIV1312-04 PRIV1312-05 PRIV1312-06 PRIV1312-07 PRIV1312-08 PRIV1312-09 PRIV1312-10. QA v1290 FAILED/HOLD, 루트 95%/약 5.3GiB. 외부 독립 근거 10,000건 게이트 신규 승인 0, 누적 UNKNOWN, BLOCKED / IN PROGRESS.

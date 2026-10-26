@@ -1,0 +1,9 @@
+# Moneyverse Planning v1314 — Privacy Case Integrity (2026-10-26)
+- Cycle: Previous Feature Addition v1312 → Current Feature Improvement v1314 → Next Feature Addition v1316 (provisional).
+- Scope: documentation-only F675-135 follow-up stacked on unmerged Draft #1407. Remote main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked start/mid; authoritative AGENTS.md/README.md/PROJECT_PLAN.md and .ko.md reviewed. Superpowers using-superpowers/brainstorming/writing-plans/worktrees/verification read from installed miniPC skill (skills connector returned no available URI).
+- Main source evidence: migrations 003/057 show no privacy_officer and retired generic dual approval; migration015 only received with owner receipt and audit; existing AdminGuard any-role, ReauthGuard 900s, Next apiOrNull and latest30 owner list. No production code changes.
+- Improvement: independent revocable privacy grants and two distinct human approvers; <=600s disposition-only reauth; shared app-role UUID impersonation gate; short-lock new-insert trigger, <=500-row idempotent historical backfill, anti-join 0 gaps before flag ON; truthful missing-case/error/empty states, append-only CAS/idempotent audit and evidence, owner/admin/Android/SEO/WCAG/KPI, isolated PG regression and forward-only rollback.
+- Backlog: ENV1314-01 SEC1314-02 REL1314-03 PRIV1314-04 PRIV1314-05 PRIV1314-06 PRIV1314-07 PRIV1314-08 PRIV1314-09 PRIV1314-10 (4 P0, 6 P1).
+- QA v1291 evidence (2026-10-26): frontend 1397 pass/6 fail, prod audit 2 High, full audit 2 Critical/10 High, main exact CI failure. Root 95% (~4.8GiB), data 83% (~33GiB). ACL/Migration266/exact-SHA authenticated Test/isolated restore remain RELEASE HOLD.
+- External evidence gate: new accepted 0; cumulative verified deduplicated accepted UNKNOWN/10,000; BLOCKED/IN PROGRESS. Publisher references not counted as approved corpus entries.
+- No runtime, database, WLD, ledger, Test, Production, flag, automation or other-worker files changed.

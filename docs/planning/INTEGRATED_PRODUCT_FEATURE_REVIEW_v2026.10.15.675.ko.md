@@ -1,4 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+
+## v1314 — F675-135 개인정보 사건 무결성 보완 (DRAFT / HOLD)
+- 이전 기능 추가 v1312 / 현재 기능 보완 v1314 / 다음 기능 추가 v1316(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 확인; 미병합 Draft #1407 후속 문서 전용.
+- main의 admin_role에는 privacy_officer가 없고 Migration057은 일반 2인 승인 기능을 폐기했다. AdminGuard의 임의 역할 및 ReauthGuard 900초는 전담자 독립 승인·민감 처분 600초 요건을 충족하지 않는다. 앱 DB 계정이 넘긴 UUID는 DB 인증 신원이 아니므로 P0 권한/세션 결합·위조 거부 검증 필요.
+- Migration015 원본 received 영수증 보존. 신규 접수 트리거 + 최대500건 멱등 소급 배치, 기능 ON 전 anti-join 누락 0; 사건 미생성은 RECEIVED_NOT_TRIAGED, 503은 빈 목록 아님. 실제 증빙·서로 다른 2인 승인, CAS/멱등/감사 원자성, 회원/관리자/Android API, HMAC 커서, SEO/no-store, WCAG/KPI·롤백은 국영문 통합 마스터 명세.
+- P0 4/P1 6: ENV1314-01 SEC1314-02 REL1314-03 PRIV1314-04 PRIV1314-05 PRIV1314-06 PRIV1314-07 PRIV1314-08 PRIV1314-09 PRIV1314-10. QA v1291 main 실패/보류(프론트 1,397 통과/6 실패, 운영 High2, 전체 Critical2/High10, main CI 실패), 루트 95%/약4.8GiB, 데이터 83%/약33GiB. 독립 외부 근거 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·Test·운영 변경 없음.
+
 - **v1312 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (미병합 #1402 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## F675-135 — v1312 개인정보 요청 검토·진행 현황 (기능 추가 / DRAFT / HOLD)

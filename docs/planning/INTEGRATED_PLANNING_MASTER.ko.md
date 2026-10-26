@@ -1,4 +1,45 @@
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v2026.10.26.1314 — F675-135 개인정보 요청 사건 생성·독립 권한·이행 증빙 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
+
+**회차·근거:** 이전 기능 추가 v1312 → 현재 기능 보완 v1314 → 다음 기능 추가 v1316(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`, AGENTS.md, README.md, 영문 PROJECT_PLAN.md 정본과 한국어 대조를 시작·중간 재확인. 선행 Draft #1407 미병합. F675-135의 보완 기획이며 새 기능이나 구현이 아니다. 런타임·DB·WLD·원장·Test·운영 쓰기 없음.
+
+### 실제 코드 불일치와 위협 모델
+- `003-mvp-features.sql`의 admin_role은 operator/approver/server_operator이며 후속 superadmin은 기존 역할을 부여한다. **privacy_officer 전용 권한은 존재하지 않는다.** `057-superadmin-authority-and-admin-sessions.sql`은 기존 일반 2인 승인 기능을 SQLSTATE 55000으로 폐기했다. AdminGuard는 관리자 역할 하나만 있어도 통과하므로 개인정보 처리 담당 권한이 아니다. 기존 승인 함수, operator/approver/superadmin을 개인정보 심사 권한으로 재사용하지 않는다.
+- Migration015의 회원 접수는 소유자별 멱등 `received` 영수증과 같은 트랜잭션의 감사 기록을 생성하며 `privacy_list_my_requests(actor,limit)`는 최대100건, 컨트롤러는 기본30건을 표시한다. main에는 사건 테이블이 없다. 원본 상태·함수 시그니처·감사 이력 보존. Next `/account/privacy`의 apiOrNull 실패는 정상 빈 목록이 아니며 30건 밖의 과거 접수도 누락되면 안 된다.
+- 기존 ReauthGuard 900초는 제안한 사건 완료·거부 처분의 **600초 이내 재인증**을 충족하지 않는다. 개인정보 처분 전용 서버 시계 기준 가드와 커밋 직전 재검증을 별도로 설계한다. 599/600/601초, 관리자 세션 철회·만료, 심사 도중 권한 회수를 음성 테스트한다.
+- SECURITY DEFINER 함수의 `p_actor uuid`는 DB가 인증한 신원이 아니다. 공유 앱 DB 계정이 침해되면 타인 UUID를 넘길 수 있다. 개인정보 전용 최소권한 DB 연결/서비스 경계, 서버 검증 관리자 세션과 별도 전담자 권한, PUBLIC EXECUTE·직접 DML 금지, 실제 앱 계정 위조 음성 테스트가 **P0**이다. 호출자가 설정 가능한 커스텀 GUC만으로 인증을 증명하지 않는다. 검토된 신원 결합 설계가 통과하기 전 배포 금지.
+
+### 과거 접수 무누락 전환, 사용자 흐름, 독립 승인
+- 기존 원본 요청을 보존하고 `privacy_request_cases`, `privacy_request_case_events`, `privacy_request_case_receipts`, `privacy_officer_grants`(담당자, 검토/승인 권한, 부여자, 부여·회수 시각, 버전)를 추가한다. 전담자 권한은 별도 승인된 관리자 절차로만 부여·회수하며 서로 다른 **실제 사람 2명**의 활성 승인 이력을 확인한다. 슈퍼관리자 한 명의 자기 승인·역할 중복은 허용하지 않는다. 사건 행이 없으면 원본 접수로 확인된 `RECEIVED_NOT_TRIAGED`이지 완료나 미존재가 아니다.
+- 무중단 순방향 전환: (1) 짧은 트랜잭션·`lock_timeout`·재시도/롤백으로 사건 스키마와 신규 접수 AFTER INSERT 트리거 설치, 신규 원본 접수와 사건 최초 행을 **같은 트랜잭션**에서 생성; (2) 기존 접수를 **배치당 최대 500건** `INSERT ... ON CONFLICT DO NOTHING`으로 멱등 소급 생성하고 진행 체크포인트 기록; (3) 원본 LEFT JOIN 사건 누락 `count(*)=0`, 고아 행·이벤트 버전·소유자 일치 대조를 안정된 검증 구간에서 확인; (4) 완료·복원·격리 QA 전 기능 OFF 유지. 중간 실패 시 기존 접수 UI 유지, 대기열 공개 중단, 누락 은폐 금지. 트리거 선설치로 신규 접수 경합 누락을 방지하고 대규모 소급 작업을 단일 장기 잠금으로 실행하지 않는다. **트리거 오류는 기존 v1 접수 트랜잭션까지 롤백한다.** 활성화 전 장애 주입·원본 접수 회복 테스트와 승인된 순방향 트리거 비활성화/수선 절차가 필요하다. 기능 스위치 OFF만으로 PostgreSQL 트리거가 꺼지지 않으므로 운영 롤백에 반드시 포함한다.
+- 회원 `/account/privacy` → **처리 현황 보기** → `/account/privacy/requests/[requestId]`, **새로고침/뒤로/새 요청**. 원본 접수·검증된 사건 상태를 별도로 표시; LOADING, RECEIVED_NOT_TRIAGED, VERIFIED_CASE, AUTH_REQUIRED, NOT_FOUND(타인/미존재 동일), SOURCE_UNAVAILABLE(503), STALE_VERSION. 관리자 `/admin/privacy/requests`는 **배정/검토/추가 정보 요청/증빙 해시 등록/독립 승인 요청/승인·반려/미이행 종료** CTA, 필터·커서·오류 상태. 기존 GET/POST 접수 API 유지, 최근30건 제한을 넘는 본인 내역은 별도 서명 커서 조회. 실제 성공한 200/0건만 정상 빈 목록이다.
+- `AWAITING_APPROVAL`에서 `COMPLETED_VERIFIED`로 전환하려면 **최초 검토자와 다른 활성 2차 담당자**, 각각 유효한 관리자 세션·독립 권한, 실제 수행 확인에 연결된 증빙 유형·SHA-256 해시, 승인 기록과 불변 감사가 필요하다. 해시 자체가 실제 삭제/정정 수행 증명은 아니므로 법률·운영 심사를 따로 요구한다. 자동 열람 패키지·삭제·정정·동의 철회·계정 제한·WLD 변경은 금지하고 법정 기한 준수를 주장하지 않는다.
+
+### API·DB·동시성·보안·회귀 수용 기준
+- 기존 `GET/POST /api/v1/privacy/requests` 불변. 신규 회원 `GET /api/v1/privacy/requests/:requestId/case`, `GET /api/v1/privacy/requests/history?limit&cursor`; 관리자 `GET /api/v1/admin/privacy/requests?state&type&limit&cursor`, `GET /:id`, `POST /:id/transitions`, 별도 권한 부여·회수 API. 요청 본문에서 행위자/역할을 받지 않는다. `If-Match: "case-vN"`·UUID `Idempotency-Key`; 428 사전조건 누락, 412 버전 충돌, 409 멱등 충돌/금지 전이, 403 전담 권한 없음, 404 타인/미존재, 401 재인증·세션, 429 Retry-After, 503 저장소·감사 장애. 관리자 대기열에는 원문 자유입력 상세를 공개하지 않는다.
+- 사건 테이블은 request_id PK/FK RESTRICT, 상태, version bigint>=0, 담당자, updated_at; 불변 이벤트는 (request_id,version) UNIQUE, 행위자·이벤트·사유 코드·증빙 유형/해시; 멱등 영수증은 (request_id,idempotency_key) PK, 요청 해시, 확정 버전. 전담자 권한은 별도 회수 가능한 테이블. 대기열 (state,updated_at DESC,request_id DESC), 사건 이벤트 (request_id,version DESC), 원본 회원 인덱스 재사용. 버전형 SECURITY DEFINER, search_path=pg_catalog,pg_temp, 완전 수식별, migrator 소유, PUBLIC·앱 직접 DML 차단, 최소 EXECUTE.
+- 단일 전이 트랜잭션에서 실제 신원·관리자 세션·전담자 권한·600초 재인증 검증, 원본→사건→멱등 영수증 일정 순서 잠금, If-Match/CAS·허용 전이 확인, 독립 2차 심사와 증빙 검증, 불변 이벤트·버전 갱신·멱등 영수증·비식별 감사 추가 후 COMMIT 성공. 하나라도 실패하면 전부 ROLLBACK. 동일 키·동일 본문은 원본 확정 영수증만 재반환, 같은 키·다른 본문은 409, 커밋 전 권한 회수 시 실패. UUID 행 잠금만으로 권한을 보장하지 않는다. HMAC 대기열 커서는 PostgreSQL 마이크로초 (updated_at,id), 역할/필터/세션/TTL<=15분 결합; HTTP 페이지 간 단일 MVCC 스냅샷은 주장하지 않는다.
+- 개인정보/SEO/모바일: 관리자 자유입력 메모·증빙 원본·IP/이메일/토큰/UA·회원 ID 분석 전송 금지, `Cache-Control: private,no-store`, noindex/nofollow, 사이트맵 제외, CSP. Android는 회원 조회·오류 동등성만(관리자 API 없음), 320px·200% 확대·키보드·라이브 영역·WCAG 2.2 AA. 관리자 집계는 서로 다른 회원 20명 이상만 공개. KPI 접수→검토 p50/p95, 소급 누락 수, 독립 승인 위반, 401/403/409/412/503, 감사 실패; 72시간은 내부 목표일 뿐 법정 기한 아님. 보존 기간·법적 근거·탈퇴 회원의 외부 처리 절차는 개인정보 담당 검토가 필요하다.
+- 격리 PostgreSQL 검증: 타 회원 100건, 동시 전이 100건, 합성 접수·사건 10,001건 동률 커서, 기존 30건 초과, 501건 경계/배치 중단·재시작, 트리거 설치 중 신규 접수, anti-join 0, 권한 회수, 한 명의 2역할/슈퍼관리자 단독 거부, 599/600/601초, 앱 계정 행위자 위조, 감사 실패 롤백, DB 최소권한·불변 증빙, 503/빈 목록 구분, Android/접근성, 원장·계정 무변경. 기존 Migration015 시그니처·체크섬 유지. 격리 복원·보안/CI·정확 통합 SHA 인증 Test 이후 승인 GitOps 1%→10%→100%; 위반 시 기능 OFF, 이력 삭제 없이 순방향 수선.
+
+### P0/P1 개발 백로그 (P0 4 / P1 6)
+| 우선순위 | ID | 독립 수용 기준 |
+| --- | --- | --- |
+| P0 | ENV1314-01 | 루트 95%/약4.8GiB, 데이터 83%/약33GiB; 타 작업자 보존·디스크 예산·격리 복원 확인. |
+| P0 | SEC1314-02 | 별도 전담자 권한 부여·회수, 서로 다른 실제 담당자 2인, 일반 관리자/슈퍼관리자 단독·앱 계정 행위자 위조 거부. |
+| P0 | REL1314-03 | QA v1291 실패/보류: 프론트 1,397/6, 전체 Critical2/High10, 운영 High2, main CI 실패; Migration266·ACL·정확 SHA Test·복원 보류. |
+| P0 | PRIV1314-04 | 원본 접수/사건 미생성/503/이행 검증 상태 구분, 처분 전용 600초 재인증·독립 승인·실제 증빙 없이는 완료 금지. |
+| P1 | PRIV1314-05 | 신규 접수 트리거·최대500건 멱등 소급 배치·누락0 대조, 순방향 스키마/SECDEF/롤백. |
+| P1 | PRIV1314-06 | CAS·일정 잠금·불변 이벤트/감사/영수증·동일 재시도·100건 동시성. |
+| P1 | PRIV1314-07 | 회원 이력 커서·사건 상세, 관리자 대기열/전이/권한 API, 401/403/404/409/412/428/429/503. |
+| P1 | PRIV1314-08 | Next 회원/관리자·Android 회원 API, 320px/200% WCAG AA, 세션·역할 변경 중 UI 폐기/no-store. |
+| P1 | PRIV1314-09 | 증빙 보존·법무 검토, 권한 변경 감사, 20명 이상 집계, noindex·민감 분석 금지. |
+| P1 | PRIV1314-10 | 격리 PG 소급 경합/501건/10,001 커서/타인100/동시100/599·600·601초, 정확 SHA Test/복원/롤백. |
+**백로그 식별자:** ENV1314-01 SEC1314-02 REL1314-03 PRIV1314-04 PRIV1314-05 PRIV1314-06 PRIV1314-07 PRIV1314-08 PRIV1314-09 PRIV1314-10.
+
+**운영·외부 근거 게이트:** main QA v1291 FAILED/HOLD, 기존 DB ACL·Migration266·정확 SHA 인증 Test·격리 복원 미해결. 독립 외부 근거 신규 최종 승인 **0건**, 누적 중복 제거·분류 승인 **UNKNOWN/10,000**, **BLOCKED / IN PROGRESS**. 기능 OFF, 문서 기획만 진행하며 런타임·DB·WLD·원장·Test·운영 변경 없음.
+
 - **v1312 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (미병합 #1402 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## v2026.10.26.1312 — F675-135 개인정보 요청 심사·처리상태 확인 및 관리자 사건 관리 (기능 추가 / DRAFT / RELEASE HOLD)

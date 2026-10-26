@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+
+## 기획 v1314 — F675-135 개인정보 사건 생성·독립 권한·처리 결과 무결성 보완 (기능 보완 / DRAFT / RELEASE HOLD)
+- 회차: 이전 기능 추가 v1312 → 현재 기능 보완 v1314 → 다음 기능 추가 v1316(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인, 선행 Draft #1407 미병합. 문서만 변경, 런타임·DB·원장·Test·운영 변경 없음.
+- 실제 main: Migration015는 원본 접수 `received`만 저장; admin_role enum은 operator/approver/server_operator(후속 superadmin 포함)이며 **privacy_officer 역할이 없다**. Migration057은 기존 일반 2인 승인을 명시적으로 폐기했으므로 AdminGuard나 기존 승인 기능을 재활용할 수 없다. ReauthGuard 900초는 제안한 민감한 사건 처분 600초를 충족하지 않는다. Next 개인정보 화면의 apiOrNull 및 최근 30건 제한은 오류·오래된 접수를 미존재/처리 완료로 해석하면 안 된다.
+- 보완: 별도 승인·회수 가능한 개인정보 담당자/독립 2차 심사 권한, 매 요청 활성 계정·관리자 세션 확인, 슈퍼관리자 자동 예외 금지. 짧은 잠금의 신규 접수 트리거와 500건 이하 멱등 배치 소급 사건 생성, 누락 0건 대조 후 기능 ON, 원본 접수/기존 함수 유지. 서버 확인 신원·세션과 앱 계정 위조 위험 검토, 처분 전용 600초 재인증, 서로 다른 2인·이행 증빙·불변 감사·CAS/멱등 원자 처리. 상세 API·화면·관리자·Android·SEO·접근성·KPI·회귀·롤백은 국영문 통합 마스터 참조.
+- P0 4건/P1 6건: ENV1314-01 SEC1314-02 REL1314-03 PRIV1314-04 PRIV1314-05 PRIV1314-06 PRIV1314-07 PRIV1314-08 PRIV1314-09 PRIV1314-10. 최신 QA v1291 FAILED/HOLD: 프론트 1,397 통과/6 실패, 운영 감사 High 2, 전체 Critical 2/High 10, main 정확 SHA CI 실패. 루트 95%(약4.8GiB), 데이터 83%(약33GiB); DB ACL/Migration266/격리 복원/인증 Test 미해결. `privacy_case_workflow_v1` 기본 OFF, 정확 SHA Test 및 승인 GitOps 전 승격 금지.
+- 외부 독립 근거 10,000건: 신규 최종 승인 0, 누적 중복 제거·분류 승인 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 참고 발행기관 자료를 승인 건수로 계산하지 않음.
+
 - **v1312 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (미병합 #1402 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## 기획 v1312 — F675-135 개인정보 요청 사건 검토 및 회원 처리 현황 (기능 추가 / DRAFT / RELEASE HOLD)
