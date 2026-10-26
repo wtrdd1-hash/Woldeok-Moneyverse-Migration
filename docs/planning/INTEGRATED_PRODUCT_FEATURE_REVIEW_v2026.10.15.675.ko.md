@@ -1,4 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+## v1316 — F675-136 회원 관리자 답변 확인 표시 (기능 추가 / DRAFT / HOLD)
+- 이전 기능 보완 v1314 / 현재 기능 추가 v1316 / 다음 기능 보완 v1318(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인, 선행 Draft #1411 미병합. 문서만 변경.
+- Migration196·문의 화면·NestJS·관리자 콘솔은 문의/메시지/상태만 제공하며 회원 읽음 기준점이 없다. F675-127 대화록과 분리. 실제 저장된 새 관리자 답변만 표시하고, 과거 확인 상태는 UNKNOWN; GET/프리페치 자동 확인 금지.
+- 본인 GET 목록·상세/POST 확인, 10분 서명 표시 증명·CSRF·세션·동의·단조 증가 CAS/멱등, 401/404/409/412/428/429/503, Android 동등성. 추가형 관리자 답변 이벤트·기준점·불변 영수증·원자 커밋, PUBLIC/직접 테이블 권한 금지. 관리자 k>=20·SEO·접근성·KPI·격리 100동시/10,001행·기본 OFF 상세는 국영문 마스터.
+- P0/P1: ENV1316-01 SEC1316-02 REL1316-03 SUP1316-04 SUP1316-05 SUP1316-06 SUP1316-07 SUP1316-08 SUP1316-09 SUP1316-10. QA v1292 FAILED/HOLD, 루트 96%, DB 권한·Migration266·프론트6 실패·보안 감사·정확 SHA Test/복원 미해결. 외부 신규 승인0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 개발 #1415.
+
 - **v1314 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (미병합 #1407 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## v1314 — F675-135 개인정보 사건 무결성 보완 (DRAFT / HOLD)

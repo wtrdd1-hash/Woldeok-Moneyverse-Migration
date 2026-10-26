@@ -1,4 +1,5 @@
 - **v1312 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (stacked on unmerged #1402, RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
+- 2026-10-26 14:05 KST | Planning v1316 F675-136 member support reply attention (Addition; Draft/HOLD): main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`, QA v1292 FAILED, P0/P1 4+6, English/Korean canonical+integrated review, issue #1415; no runtime/DB/Test/Production change; external accepted 0, cumulative UNKNOWN/10,000.
 - **v1314 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (stacked on unmerged #1407; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## 2026-10-26 — Planning v1314 (Feature Improvement, F675-135, DRAFT/HOLD)

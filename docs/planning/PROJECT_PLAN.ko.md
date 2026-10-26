@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+## 기획 v1316 — F675-136 회원 관리자 답변 확인 표시 (기능 추가 / DRAFT / RELEASE HOLD)
+- **회차:** 이전 기능 보완 v1314 → 현재 기능 추가 v1316 → 다음 기능 보완 v1318(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인; 선행 Draft #1411 미병합, AGENTS.md·README.md·영문 정본·국문 대조 준수. 문서만 변경.
+- **실제 누락:** Migration196의 문의·메시지·회원/관리자 함수에는 회원별 읽음 기준점이 없다. /support에는 읽지 않은 관리자 답변 표시가 없고 컨트롤러에 확인 API도 없다. F675-127 대화록·상태 이력은 별도 미병합 기획이며 과거 실제 읽음 여부는 알 수 없다.
+- **기능:** 회원 본인 /support의 새 관리자 답변 배지·읽지 않은 답변 필터·실제 표시 후 `여기까지 확인` CTA. 과거 미상/새 답변/활성화 이후 확인/버전 충돌/세션 만료/장애를 구분하고 GET·프리페치 자동 읽음·허위 0건 표시 금지. 회원 GET 목록·상세, POST 확인(10분 서명 증명·CSRF·세션·동의·UUID 멱등·CAS), Android 동등성, noindex/no-store, WCAG AA, 관리자 k>=20 비식별 통계.
+- **DB:** 추가형 관리자 답변 이벤트 seq·회원 기준점·불변 영수증; 문의 행 잠금으로 답변·이벤트·감사 원자 커밋, 재시도 중복 이벤트 금지. Migration196 함수 호환, 버전형 소유자 SECURITY DEFINER·고정 search_path·PUBLIC 실행 금지·직접 테이블 권한 금지. actor UUID 단독은 DB 인증이 아님. 상세 API·DB 제약·인덱스·트랜잭션·KPI·100동시·10,001행 검증은 영문/국문 통합 마스터.
+- **백로그:** P0 4건/P1 6건: ENV1316-01 SEC1316-02 REL1316-03 SUP1316-04 SUP1316-05 SUP1316-06 SUP1316-07 SUP1316-08 SUP1316-09 SUP1316-10. QA v1292 실패/보류: main 프론트 1,397 통과/6 실패, 전체 감사 Critical2/High10, 운영 High2, 앱 DML 235/241, PUBLIC 은행 함수 3개, Migration266 불일치, 루트 96%/약4.2GiB, 데이터 84%/약32GiB. 정확 SHA 인증 Test·격리 복원 미검증. `support_reply_attention_v1` 기본 OFF, 별도 개발 브랜치·승인 GitOps 전 승격 금지. 런타임·DB·WLD·Test·운영 변경 없음.
+- **외부 근거:** 독립 10,000건 목표, 신규 최종 승인 0건, 누적 중복 제거·분류 승인 UNKNOWN, BLOCKED / IN PROGRESS. [개발 이슈 #1415](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415).
+
 - **v1314 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (미병합 #1407 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## 기획 v1314 — F675-135 개인정보 사건 생성·독립 권한·처리 결과 무결성 보완 (기능 보완 / DRAFT / RELEASE HOLD)

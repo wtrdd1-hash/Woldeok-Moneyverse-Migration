@@ -1,4 +1,49 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.26.1316 — F675-136 회원 관리자 답변 확인 표시 및 읽음 기준점 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**정본·회차:** 이전 기능 보완 v1314 → 현재 기능 추가 v1316 → 다음 기능 보완 v1318(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인, 선행 Draft #1411 미병합. AGENTS.md·README.md·영문 PROJECT_PLAN.md 정본·한국어 대조 준수. [개발 이슈 #1415](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415). 이번 변경은 문서 기획만이며 기능 구현·배포가 아니다.
+
+### 실제 근거·목적·대상·제외 범위
+- main의 `frontend/src/app/support/page.tsx`는 문의 목록·선택 메시지·답장을 제공하지만 읽지 않은 관리자 답변 표시가 없다. `backend/src/support/support.controller.ts`에도 읽음 기록 API가 없다. Migration196은 문의·메시지 테이블, 회원 최근50건/메시지200건 조회를 제공하나 회원별 읽음 기준점은 없다. 기존 F675-127 문의 대화록·상태 이력 Draft는 **미병합**이며 중복 개발하지 않는다.
+- 목적: 로그인·동의 완료 회원이 **실제로 기록된 새 관리자 답변**을 확인하고 화면에 표시한 범위까지만 명시적으로 확인 처리. Android 회원도 대상. 사람의 실제 독서, 이메일·푸시 전송, 과거 읽음 상태를 증명한다고 주장하지 않는다. WLD·원장·보상·자동 문의 종결·계정 수정 없음.
+
+### 화면·CTA·상태·접근성
+- 기존 `/support` 문의 목록에 `새 관리자 답변` 배지·`읽지 않은 답변` 필터를 추가하고, 메시지 표시 후 `여기까지 확인` CTA 제공. GET/SSR/프리페치/백그라운드 폴링/오프스크린 탭은 읽음으로 자동 처리하지 않는다. 서버가 기록한 기능 활성화 이후 관리자 답변만 `knownNewReplies`로 표시한다.
+- `LOADING`, `UNTRACKED_LEGACY`(과거 확인 여부 미상), `KNOWN_UNREAD`, `ACK_PENDING`, `VIEWED_SINCE_ACTIVATION`, `STALE_VERSION`, `SESSION_EXPIRED`, `UNAVAILABLE`, `FEATURE_OFF` 구분. 서버 503/과거 기록 미상은 읽지 않음 0건으로 표시하지 않는다. 타임아웃 후 본인 서버 상태 재조회 전 성공 표시 금지.
+- 320px 반응형, 키보드 포커스·상태 안내 라이브 영역·충분한 터치 영역·200% 확대·WCAG 2.2 AA. 회원 페이지 noindex/nofollow, no-store, 사이트맵 제외, URL/분석에 개인정보 금지.
+
+### API·권한·Android
+- `GET /api/v1/support/attention?filter=all|unread&limit=20&cursor=...`: 본인 문의만 `threadId,subject,status,knownNewReplies,historyCoverage,readVersion,lastReplyAt,nextCursor`. HMAC 커서는 회원·세션·필터·스냅샷 상한·마지막 `(last_message_at,thread_id)` 마이크로초 정밀도·키 버전·만료 결합. 여러 HTTP 페이지가 동일 DB 트랜잭션이라는 주장은 금지.
+- `GET /api/v1/support/threads/:id/attention`: 실제 반환되어 화면에 표시 가능한 관리자 답변의 최대 seq에 대해 회원·세션·문의·seq·10분 만료를 결합한 `displayProof` 발급. 이벤트가 없으면 seq=0의 기준점 토큰 허용. GET이나 토큰 발급은 읽음 처리가 아니다.
+- `POST /api/v1/support/threads/:id/seen`: `{displayProof,idempotencyKey:uuid,expectedVersion:integer}` + 세션·활성 계정·동의·CSRF. 토큰 서명·만료·소유권·실제 커밋된 이벤트 확인 후 CAS로 `max(기존,증명 seq)`만 저장. 동일 요청키·동일 본문은 기존 영수증, 키 재사용·다른 본문은 409. 401 미인증, 404 타인/미존재, 409 재사용, 412 버전 충돌, 428 버전 누락, 429 제한, 503 장애; no-store. Android `/app-api/v1`도 같은 계약·오류를 지원하고 URL에 인증 토큰 금지. 기존 지원 API 시그니처 유지.
+
+### DB 제약·인덱스·트랜잭션·악용방지
+- 추가 전용 `support_admin_reply_events(id PK,thread_id FK,message_id UNIQUE,seq BIGINT>0,committed_at,UNIQUE(thread_id,seq))` 및 `(thread_id,seq DESC)` 인덱스. `support_member_read_watermarks(user_id,thread_id,last_seen_seq>=0,version>=0,updated_at,PRIMARY KEY(user_id,thread_id))`, `support_seen_receipts(user_id,thread_id,request_key UNIQUE,request_digest,committed_seen_seq,version,created_at)` 추가. 과거 읽음 이벤트 소급 생성 금지, `historyCoverage=partial`.
+- 별도 개발용 순방향 마이그레이션에서 기존 Migration196 함수 반환 형식 보존. `admin_support_reply`는 문의 행 `FOR UPDATE` 잠금 후 관리자 메시지·상태·감사·답변 이벤트를 한 트랜잭션으로 커밋하고, 새 메시지마다 `seq=COALESCE(MAX(seq),0)+1`을 직렬 배정. 동일 멱등 요청 재시도는 새 이벤트를 만들지 않으며 다른 작성자/본문 재사용 거부. 이벤트·감사 저장 실패 시 전체 롤백. 회원 답변·관리자 상태 변경만으로 관리자 답변 seq 증가 금지.
+- `SECURITY DEFINER` 버전형 함수, 고정 search_path, PUBLIC EXECUTE 회수, 앱 EXECUTE 최소권한, 테이블 직접 DML/SELECT 신규 허용 금지. 앱이 전달한 actor UUID만으로 DB 신원 증명 불가하므로 서버 세션 결합과 최소권한 음성 검증 P0. 매 읽기·쓰기마다 회원 소유권 확인, 이벤트 존재 여부 유출 금지. 읽음 행 잠금·CAS·단조 증가·영수증 원자성 및 10,001건 인덱스 실행계획 검증.
+- 회원 읽음 처리 시간당 20건·서비스 전체 분당 60건(조정 가능), 기본 20건·최대 50건 페이지, 토큰 10분. 보관·삭제·계정 병합 정책 검증 전 소유권 이전 금지. 관리자에게는 k>=20 비식별 오류율·지연 통계만 허용하며 회원별 읽음 감시 금지.
+
+### KPI·테스트·무중단 배포·롤백
+- KPI: 새 답변 탐지 범위, 명시적 확인 성공률, 버전 충돌률, 목록 p95 지연, 과거 미확인 비율, 타 회원 접근 차단. 확인 CTA는 실제 독서·문의 해결의 증거가 아니다.
+- 격리 PostgreSQL 테스트: 관리자 동시 답변 100건은 커밋된 각 새 메시지마다 고유·연속 seq, 동일 키 100회 재시도는 이벤트 1건, 타인 문의 100회 접근 정보 유출 0건, 합성 10,001건 페이지 누락·중복 0건, 다중 세션 읽음 seq 역행 0건, 토큰 599/600/601초 경계, SSR/프리페치 무변경, 401/404/409/412/428/429/503, 삭제·세션 철회·불명확 커밋 재시도, Android·WCAG 회귀. **이번 기획에서 런타임 테스트는 수행하지 않음.**
+- `support_reply_attention_v1` 기본 OFF. F675-127 및 개발 A/B/C/Gemini/QA와 분리한 개발 브랜치, DB 직접 쓰기 235/241·PUBLIC 은행 함수 3개·Migration266 체크섬·QA v1292 프론트6 실패·보안 감사·루트 용량·격리 복원·정확 SHA 공식 CI·인증 Test 금융 E2E 해결 전 활성화/운영승격 금지. 승인 GitOps 후 1%→10%→100% 단계 적용. 이상 시 플래그 OFF·이전 API/UI 복구, 기록된 이벤트 임의 삭제 금지.
+
+### P0/P1 개발 백로그(4+6)
+| 우선순위 | ID | 개발 수용 기준 |
+| --- | --- | --- |
+| P0 | ENV1316-01 | 루트·데이터 용량 예산, 타 작업자 파일 보존, 격리 DB 백업 복원 검증. |
+| P0 | SEC1316-02 | 실제 세션과 actor 결합, 타인/위조 100건 거부, 순방향 DB 최소권한 검증. |
+| P0 | REL1316-03 | QA v1292·감사·Migration266·정확 SHA CI·인증 Test E2E·GitOps 보류 게이트. |
+| P0 | SUP1316-04 | 과거 미상/오류/정상0 구분, GET/프리페치 자동 읽음 및 허위 이력 금지. |
+| P1 | SUP1316-05 | 추가형 이벤트·기준점·멱등 영수증·버전형 함수·인덱스. |
+| P1 | SUP1316-06 | 관리자 답변/이벤트/감사 원자 커밋과 멱등 재시도·롤백. |
+| P1 | SUP1316-07 | 서명된 화면 표시 증명, 단조 증가 CAS, 소유자 커서·오류 계약. |
+| P1 | SUP1316-08 | Next 회원 CTA·Android 동등성·모바일 키보드·접근성. |
+| P1 | SUP1316-09 | 개인정보·보관·관리자 k>=20·SEO·남용 제한·KPI. |
+| P1 | SUP1316-10 | 격리 실제 PG 100동시/10,001행/타인 접근/회귀·Test·롤백. |
+
+**외부 독립 근거 10,000건 게이트:** OWASP·PostgreSQL·W3C 참고 자료는 개별 검증 승인 근거로 집계하지 않음. 신규 승인 **0건**, 누적 중복 제거·분류·승인 **UNKNOWN/10,000건**, **BLOCKED / IN PROGRESS**. 런타임·DB·WLD·원장·Test·운영·예약 변경 없음.
+
 - **v1314 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (미병합 #1407 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## v2026.10.26.1314 — F675-135 개인정보 요청 사건 생성·독립 권한·이행 증빙 무결성 (기능 보완 / DRAFT / RELEASE HOLD)

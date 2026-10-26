@@ -1,4 +1,5 @@
 - **v1312 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (미병합 #1402 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
+- 2026-10-26 14:05 KST | 기획 v1316 F675-136 회원 관리자 답변 확인 표시(기능 추가; 초안/운영 보류): main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`, QA v1292 실패, P0/P1 4+6, 영문 정본·국문 통합문서·리뷰, 이슈 #1415; 런타임·DB·Test·운영 변경 없음; 외부 승인 0, 누적 UNKNOWN/10,000.
 - **v1314 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (미병합 #1407 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## 2026-10-26 — 기획 v1314 (기능 보완, F675-135, DRAFT/HOLD)

@@ -1,4 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+## v1316 — F675-136 Member Support Reply Attention (Feature Addition / DRAFT / HOLD)
+- Previous Improvement v1314 / Current Addition v1316 / Next Improvement v1318 provisional. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid, predecessor Draft #1411 unmerged; documentation only.
+- Source: support migration196, support page, NestJS controller/repository and admin console have threads/messages/status but no member seen watermark. Distinct from F675-127 transcript export. New owner-only known admin-reply attention and explicit rendered-message acknowledgement; historic seen status remains UNKNOWN, GET/prefetch never marks read.
+- API: owner attention GET and POST seen, signed 10-minute display proof, CSRF, session/consent, monotonic CAS/idempotency, 401/404/409/412/428/429/503, Android parity. DB: additive per-thread ordered admin reply events, owner watermarks, immutable receipts, transactional reply/event/audit, no PUBLIC/direct grants; no financial mutation. UX, admin k>=20, SEO/no-store, WCAG/KPI, isolated 100-way/10,001-row tests and flag OFF in integrated EN/KO master.
+- P0/P1 IDs: ENV1316-01 SEC1316-02 REL1316-03 SUP1316-04 SUP1316-05 SUP1316-06 SUP1316-07 SUP1316-08 SUP1316-09 SUP1316-10. QA v1292 FAILED/HOLD; root 96%, dev DB ACL and migration266, frontend 6 failures, audits and exact-SHA Test/restore remain blocked. Evidence new accepted 0, cumulative UNKNOWN/10,000; BLOCKED/IN PROGRESS. Engineering #1415.
+
 - **v1314 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (stacked on unmerged #1407; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## v1314 — F675-135 Privacy Case Integrity Improvement (DRAFT / HOLD)
