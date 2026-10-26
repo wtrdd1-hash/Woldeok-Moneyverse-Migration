@@ -11,7 +11,11 @@
 ## Checklist
 - [x] Verify miniPC and latest main; read instructions, plans, QA/PR/CI
 - [x] Create independent worktree and write initial log
-- [ ] RED: reproduce unsafe controller/repository certification invocation
+- [x] RED: reproduce unsafe controller/repository certification invocation
 - [ ] GREEN: fail closed with stable API code, preserve read paths
 - [ ] Verify final SHA tests, build, lint/typecheck, security, PostgreSQL where feasible
 - [ ] Re-fetch main/plans and record release HOLD, push Draft PR
+
+## RED checkpoint — 2026-10-27 02:35 KST
+- Added `backend/src/work/work-qualification-ledger-hold.test.ts` (four tests).
+- Executed `pnpm --filter @moneyverse/backend exec vitest run src/work/work-qualification-ledger-hold.test.ts` on main-derived branch: **3 FAILED / 1 PASSED**, as expected. Controller still invokes repository, null repository emits a generic 503 without ledger code, repository attempts feature SQL. Evidence: internal `v569-logs/red-test.log`.
