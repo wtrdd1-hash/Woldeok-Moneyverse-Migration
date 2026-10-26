@@ -1,4 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
+
+## 기획 v1308 — F675-134 회원 보안 활동 보관함 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1306 / 현재 기능 추가 v1308 / 다음 기능 보완 v1310(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 동일, 선행 Draft #1394 미병합. 문서만 변경.
+- UI 5/백엔드 20, migration214 최대50·UUID 없음, 개발 DB 읽기 전용 41건/3명으로 전체 인증 이력 아님. 본인 /account/security/activity 필터·정직한 출처/오류·재인증+CSRF CSV 5,000/2MiB/30초·마이크로초 HMAC 커서·SECDEF 읽기·metadata 제외; Android·접근성·관리자·SEO·KPI·롤백은 영문/국문 통합문서.
+- P0 ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04; P1 AUTH1308-05~10. ID: ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04 AUTH1308-05 AUTH1308-06 AUTH1308-07 AUTH1308-08 AUTH1308-09 AUTH1308-10. QA v1288 실패/보류, 루트 100% 약 466MiB, 프론트 6 실패·보안 감사·앱 DML 235/241·PUBLIC 은행 함수 3·migration266 불일치·정확 SHA Test/복원 보류. 플래그 OFF, 운영 HOLD.
+- 외부 발행기관 4곳 검토, 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED. F675-132/F675-131·Gemini/A/B/C/QA와 분리.
+
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
 - v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 

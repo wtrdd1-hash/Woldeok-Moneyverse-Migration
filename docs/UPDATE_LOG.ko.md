@@ -1,4 +1,9 @@
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394; issue #1389; root-capacity #1170; DRAFT / RELEASE HOLD.
+
+## 2026-10-26 10:12 KST — 기획 v1308 / F675-134 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1306 / 현재 기능 추가 v1308 / 다음 기능 보완 v1310; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 재확인. UI 5/20, migration214 최대50·UUID 없음, 개발 DB 41건/3명. 기록된 보안 활동 보관함·재인증+CSRF CSV, 전체 로그인 이력 주장 금지.
+- P0 ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04; P1 AUTH1308-05~10. ID: ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04 AUTH1308-05 AUTH1308-06 AUTH1308-07 AUTH1308-08 AUTH1308-09 AUTH1308-10. QA v1288 실패/보류, 루트 100% 약 466MiB, 정확 SHA Test/복원 차단. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·Test·운영 미변경.
+
 ## 2026-10-26 09:13 KST — 기획 v1306 / F675-133 (기능 보완 / 초안 / 운영 보류)
 - 이전 추가 v1304 → 현재 보완 v1306 → 다음 추가 v1308(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 동일, 선행 Draft #1390 미병합. 구형 INNER JOIN·NULL 금액, 신규 할인 당시 단가, 원장 NUMERIC/소문자 방향, 장애→빈 목록, 마이크로초 커서·페이지 간 cutoff 한계, DB 행위자 신뢰 경계를 보완. 개발 DB 표본 구형 0·신규 6·분개 일치 6건(운영 증빙 아님).
 - P0 ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04; P1 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10. QA v1287 FAILED/HOLD, 루트 100% 608MiB, 정확 SHA/복원 보류, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서만 변경.

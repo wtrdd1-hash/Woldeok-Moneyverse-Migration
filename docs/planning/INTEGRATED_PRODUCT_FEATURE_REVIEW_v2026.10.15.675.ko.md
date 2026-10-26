@@ -1,4 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+
+## F675-134 / v1308 — 회원 보안 활동 보관함 (기능 추가 / 초안 / 보류)
+- 이전 기능 보완 v1306 / 현재 기능 추가 v1308 / 다음 기능 보완 v1310. main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 동일. UI 5/20, migration214 최대50·UUID 없음, 개발 DB 41건/3명, 전체 인증 이력 아님. 본인 필터·재인증+CSRF CSV·마이크로초 서명 커서·정상 빈 결과/503 구분·SECDEF·metadata 제외·Android·접근성. F675-132/F675-131과 분리.
+- P0 ENV1308-01 용량, SEC1308-02 행위자/권한, REL1308-03 정확 SHA QA, AUTH1308-04 출처 정직성. P1 AUTH1308-05 DB, AUTH1308-06 커서, AUTH1308-07 CSV, AUTH1308-08 웹/모바일, AUTH1308-09 개인정보·관리자·SEO·KPI, AUTH1308-10 격리 회귀. ID: ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04 AUTH1308-05 AUTH1308-06 AUTH1308-07 AUTH1308-08 AUTH1308-09 AUTH1308-10.
+- QA v1288 실패/보류, 루트 100% 약 466MiB, 프론트 6 실패·감사·앱 DML 235/241·PUBLIC 은행 함수 3·migration266 불일치·Test/복원 차단. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED. 문서만, 플래그 OFF.
+
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
 - v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 

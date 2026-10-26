@@ -1,4 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## Planning v1308 — F675-134 Verified Security Activity Archive (Addition / DRAFT / HOLD)
+- Previous Improvement v1306 / Current Addition v1308 / Next Improvement v1310 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid unchanged; prior Draft #1394 unmerged. Docs only.
+- Source: UI 5 of backend 20, migration214 cap50/no UUID; dev DB read-only 41 events/3 members, not all auth events. Owner-only /account/security/activity filters, truthful coverage and error/empty, reauth+CSRF CSV 5,000/2MiB/30s, microsecond HMAC cursor, SECDEF read, no metadata; Android, a11y, admin, SEO, KPI, rollback in integrated EN/KO.
+- P0 ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04; P1 AUTH1308-05..10. IDs: ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04 AUTH1308-05 AUTH1308-06 AUTH1308-07 AUTH1308-08 AUTH1308-09 AUTH1308-10. QA v1288 FAILED/HOLD; root 100% ~466MiB, six frontend failures, audits, dev app DML 235/241, 3 PUBLIC bank functions, migration266 mismatch, exact-SHA Test/restore blocked. Feature OFF, Production HOLD.
+- External 4 publishers reviewed, newly approved 0, cumulative deduplicated UNKNOWN/10,000 BLOCKED. Separate from F675-132/F675-131 and Gemini/A/B/C/QA.
+
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
 - v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 

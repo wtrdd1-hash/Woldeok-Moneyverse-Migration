@@ -1,4 +1,52 @@
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v2026.10.26.1308 — F675-134 회원 전용 검증형 보안 활동 보관함·안전한 CSV 내보내기 (기능 추가 / 초안 / 운영 보류)
+
+**회차:** 이전 기능 보완 v1306 / 현재 기능 추가 v1308 / 다음 기능 보완 v1310(잠정). 원격 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, AGENTS.md, README.md, 영문 PROJECT_PLAN 정본·국문 동등 문서. 선행 v1306 Draft #1394 미병합. 문서 전용 격리 브랜치, 런타임·DB·Test·운영 변경 없음.
+
+### 실제 코드·DB 근거 및 목적
+- main 보안 화면 /account/security는 API 최근 20건을 조회하지만 events.slice(0,5)만 표시한다. Migration 214 account_recent_security_events(actor,20)는 최대 50건, event_type/created_at만 반환하고 UUID가 없다. 기존 API·5건 미리보기 유지.
+- Migration 180 auth_security_events: UUID PK, nullable user_id, event_type, metadata JSONB, created_at, (user_id,created_at DESC) 인덱스. 2026-10-26 10:10 KST 개발 DB 읽기 전용 41건/3명, local_login_succeeded 39건, local_registration_completed 2건. 전체 로그인/OAuth/로그아웃/기기 이력 또는 운영 보안 사고의 증거 아님. metadata/IP/이메일/UA/비밀값 노출 금지.
+- 목적: 회원이 실제 기록된 보안 활동을 기존 5건 밖에서 기간·유형으로 조회하고 본인 검토용 CSV를 안전하게 준비. 허위 이벤트·WLD·원장·계정·세션 변경 없음. F675-132 기기 별칭 및 F675-131 알림 보관함과 구별.
+
+### 회원 화면·CTA·상태·권한·접근성
+- 기존 /account/security 카드에 '기록된 보안 활동 보기' CTA → 신규 /account/security/activity. 인증·동의 회원만. '기록된 보안 활동 — 전체 로그인 기록은 아님' 명시. 기본 90일, 최대 365일, UTC 원본·현지 시각, 서버 분류 ALL/SIGN_IN/CREDENTIAL/ACCOUNT_CHANGE/OTHER, 적용·초기화·다음·CSV 다운로드. metadata 자유 검색 금지.
+- LOADING, VERIFIED_ROWS, VERIFIED_EMPTY(정상 0건), FILTER_NO_MATCH, SOURCE_UNAVAILABLE(503·타임아웃, 빈 목록 금지), AUTH_REQUIRED, REAUTH_REQUIRED, EXPORT_PREPARING, EXPORT_READY(서버 준비 확인, 사용자 저장 증명 아님), EXPORT_TOO_LARGE, RATE_LIMITED 구분. 미분류 유형은 기타 보안 활동, 기기·위치 인증 추정 금지. 320px 모바일, 키보드·스크린리더, 상태 알림, 동작 감소, WCAG 2.2 AA, 터치 44px 권장.
+
+### API·커서·Android App API
+- 신규 GET /api/v1/account/security/events/history?from&to&category&limit&cursor. 회원 ID는 서버 검증 세션에서만 취득, 기본 25/최대 50건. 응답 items[{id,type,category,occurredAt}],nextCursor,hasMore,coverage{source:auth_security_events,complete:false,earliestAvailableAt:null-or-ISO}. 전체 출처 검증 전 complete:false 유지. metadata·user_id·IP·UA·이메일·토큰 제외.
+- PostgreSQL (created_at DESC,id DESC) 마이크로초 정밀도 HMAC 키셋, 회원·세션·필터·high-water·마지막 시각+UUID·키 버전·15분 만료 결합. 위조·필터 불일치 400, 미인증 401, 동의 거부 403, 과다 요청 429, 장애 503. JS 밀리초만으로 exclusive cursor 생성 금지. HTTP 페이지 간 MVCC 스냅샷 공유 불가, 과거 시각 지연 삽입 가능; 고정 스냅샷 주장 금지.
+- 신규 POST /api/v1/account/security/events/export, JSON {from,to,category}; 로그인·동의·CSRF·10분 이내 재인증. UTF-8 CSV 고정 열 event_id,event_type,event_category,occurred_at_utc, metadata 제외. 5,000건/2MiB/30초, 회원당 하루 3회·동시 1회. 전체 바이트를 메모리에서 검증한 뒤 헤더·본문 전송, 초과 413·장애/감사 실패 503, 부분 정상 CSV 금지. attachment/private no-store/nosniff, 실제 바이트 SHA-256, 게이트웨이 검증 시 Digest. 모든 셀 이스케이프 및 =,+,-,@,탭,CR,LF·구분자·따옴표 수식 삽입 방어, 모든 스프레드시트 완전 안전 주장 금지. 루트 디스크 임시파일 금지.
+- 선택적 준비 감사는 다운로드 완료 증명이 아니다. CSV 스냅샷·버퍼 완료 후 별도 트랜잭션에 준비 건수·해시만 기록, 감사 실패 시 본문 전송 전 503. 파일 불변 저장 없이 동일 재시도 바이트 일치 보장 금지. Next BFF는 장애를 빈 목록으로 변환하지 않고 Android는 동일 권한·DTO·오류 및 안전한 모바일 다운로드, 브라우저 쿠키 무단 복제 금지.
+
+### DB·인덱스·트랜잭션·보안·관리자
+- 기존 migration214 함수 반환 변경 없이 신규 SECURITY DEFINER account_security_event_history_v1(p_actor uuid,p_from timestamptz,p_to timestamptz,p_categories text[],p_before_at timestamptz,p_before_id uuid,p_limit int), 반환 event_id,event_type,created_at. user_id=p_actor, from<=created_at<to, (created_at,id) 키셋, LIMIT limit+1, 유형 허용 목록·기간 검증. public 명시, search_path pg_catalog,pg_temp, 소유자 moneyverse_migrator, PUBLIC REVOKE, 앱 EXECUTE만 허용, 직접 SELECT/DML 금지. NULL 회원 이벤트 제외.
+- 격리 PG EXPLAIN·합성 10,001건으로 (user_id,created_at DESC,id DESC) WHERE user_id IS NOT NULL 인덱스 검증 후 필요 시 순방향 CREATE INDEX CONCURRENTLY(트랜잭션 외부) 및 invalid index 복구. 과거 migration180/214/266 수정 금지. CSV READ ONLY REPEATABLE READ 스냅샷과 별도 감사 쓰기 분리.
+- **P0 행위자 경계:** p_actor UUID 인자만으로 DB 인증 주체가 되지 않는다. SessionGuard/requireUserId가 있어도 앱 계정 탈취 시 DB 수준 타인 접근 방어는 자동 보장되지 않는다. 세션-행위자 바인딩·DB 최소권한 검증 전 운영승격 금지. 개발·운영 API가 공유 가능한 5433에 fixture·migration·테스트 쓰기 금지.
+- 관리자는 20명 이상 비식별 집계·오류·지연·악용 지표만, 회원 원문·CSV 금지. 기존 감사·개인정보 보존/삭제 정책 유지, 보존기간 묵시 연장 금지. noindex/no-store, sitemap 제외, 분석에 회원·UUID·원본 시각·metadata 전송 금지.
+
+### KPI·회귀·무중단 배포·롤백
+- KPI 합성 10,001건 p95 300ms 미만 목표, 타 회원 노출 0, 허위 전체 이력/부분 CSV 성공 0, 준비 성공률 및 413/429/503. 격리 PG·Nest·Next·Android 테스트: 타인 100건, 동시 100건, 동일 시각·마이크로초 10,001건, NULL 소유자, 미등록 유형, 커서 위조/필터 변경, 세션 만료·철회, 정상 0건/503, 동의·재인증·CSRF, 5,001건/2MiB+1/30초, CSV 수식·따옴표·CRLF, 감사 실패, 개인정보 삭제, 320px·접근성, 플래그 OFF, 기존 API 회귀.
+- 별도 개발 브랜치, 기능 스위치 기본 OFF, 순방향 migration, 정확 통합 main SHA 전체 CI·보안 PASS, 격리 DB 권한, 인증된 공식 Test E2E, 독립 QA, 백업 복원, 승인 GitOps 후에만 운영승격. 문제 시 플래그 OFF/신규 API 비활성화, 기존 카드·이벤트 유지. **Production RELEASE HOLD**.
+- QA v1288 FAILED/HOLD: 루트 100%(현재 약 466MiB, QA 약 601MiB), 프론트 1,397 통과/6 실패, 전체 감사 Critical2/High10, 운영 High2, 봇 Critical1/High5, 개발 DB 앱 직접 쓰기 235/241, PUBLIC 은행 함수 3, migration266 체크섬 불일치, 정확 SHA Test·복원 미검증. 타 작업자 Worktree·Docker 자산 보존.
+
+### P0/P1 개발 백로그
+- P0 ENV1308-01: 담당자 승인 후 되돌릴 수 있는 용량 복구·격리 Test/복원·브랜치 보존.
+- P0 SEC1308-02: 세션-행위자·DB ACL/PUBLIC 함수 권한·metadata 보호.
+- P0 REL1308-03: QA v1288 프론트·보안·migration266·정확 SHA Test/복원/GitOps.
+- P0 AUTH1308-04: 실제 보안 이벤트 범위·허위 빈 결과/CSV 성공 방지.
+- P1 AUTH1308-05: 버전형 SECDEF 소유자 조회·인덱스·NULL 처리.
+- P1 AUTH1308-06: 마이크로초 HMAC 키셋·필터·세션 결합.
+- P1 AUTH1308-07: 재인증+CSRF 제한 CSV·해시·부분 응답 금지·준비 감사.
+- P1 AUTH1308-08: Next.js UI/BFF·Android App API·WCAG.
+- P1 AUTH1308-09: 개인정보·보존기간·비식별 관리자·SEO·KPI·악용방지.
+- P1 AUTH1308-10: 격리 PG 100/10,001·경합·CSV·롤백 회귀.
+- **백로그 ID:** ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04 AUTH1308-05 AUTH1308-06 AUTH1308-07 AUTH1308-08 AUTH1308-09 AUTH1308-10.
+
+### 외부 10,000건 독립 근거 게이트·중복 방지
+- OWASP CSV Injection https://owasp.org/www-community/attacks/CSV_Injection ; W3C WCAG 2.2 https://www.w3.org/TR/WCAG22/ ; PostgreSQL 격리 https://www.postgresql.org/docs/current/transaction-iso.html ; NIST SP 800-63B https://pages.nist.gov/800-63-4/sp800-63b.html 검토. 독립 발행기관 4곳, 신규 최종 승인 0건, 누적 중복 제거 승인 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 승인 건수 임의 생성 금지.
+- Gemini/개발 A/B/C/QA와 분리된 문서 기획. F675-132 기기 별칭·F675-131 알림 보관함·관리자 감사 중복 구현 금지. 기존 통합문서만 수정, 분산 기획 파일 신규 생성 금지.
+
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
 - v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 

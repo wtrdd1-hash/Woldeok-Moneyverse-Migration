@@ -1,4 +1,52 @@
 # Woldeok Moneyverse — Integrated Planning Master
+
+## v2026.10.26.1308 — F675-134 Verified Member Security Activity Archive and Safe CSV Export (Feature Addition / DRAFT / RELEASE HOLD)
+
+**Cycle:** Previous Improvement v1306 / Current Addition v1308 / Next Improvement v1310 provisional. Remote main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked start/mid, canonical AGENTS.md, README.md, PROJECT_PLAN.md and Korean parity. Predecessor v1306 Draft #1394 unmerged; docs-only isolated branch.
+
+### Evidence, purpose and truthful scope
+- Actual main: /account/security calls GET /api/v1/account/security/events; backend AccountSecurityRepository.recentEvents calls migration 214 account_recent_security_events(actor,20), but UI displays only events.slice(0,5). Function caps 50 and returns event_type,created_at, not UUID. Preserve existing endpoint/card.
+- Migration 180 auth_security_events: UUID id PK, nullable user_id, event_type, metadata JSONB, created_at, index (user_id,created_at DESC). Dev PostgreSQL READ ONLY at 2026-10-26 10:10 KST: 41 rows/3 users, 39 local_login_succeeded, 2 local_registration_completed. NOT proof of all logins, OAuth, logout, device events or Production security incident. No metadata/IP/email/UA/secrets in output.
+- Goal: members can browse/filter actual recorded account-security events beyond the five-card preview and safely prepare a private CSV. No synthetic events, WLD, ledger, account or session mutation. Distinct from F675-132 session aliases and F675-131 notification archive.
+
+### Member experience, roles, states and accessibility
+- Existing /account/security card gains View recorded activity CTA to new /account/security/activity, only for authenticated consented member. Headline says Recorded security activity — not a complete sign-in history. Date range default 90 days, max 365, UTC source and locale display. Server categories ALL, SIGN_IN, CREDENTIAL, ACCOUNT_CHANGE, OTHER; Apply/Clear/Next/Download CSV CTAs. No free-text search of metadata.
+- States LOADING, VERIFIED_ROWS, VERIFIED_EMPTY (successful zero), FILTER_NO_MATCH, SOURCE_UNAVAILABLE (503/timeout, never empty), AUTH_REQUIRED, REAUTH_REQUIRED, EXPORT_PREPARING, EXPORT_READY (server bytes prepared, NOT user-saved), EXPORT_TOO_LARGE, RATE_LIMITED. Unknown type generic; no inferred device/location trust. 320px mobile, keyboard, screen reader/live status, reduced motion, WCAG 2.2 AA, 44px preferred touch targets.
+
+### API, cursor, Android
+- New GET /api/v1/account/security/events/history?from&to&category&limit&cursor. Actor from verified server session only. Default 25/max 50. Response items[{id,type,category,occurredAt}],nextCursor,hasMore,coverage{source:auth_security_events,complete:false,earliestAvailableAt:null-or-ISO}. complete:false until independently audited coverage. Exclude user_id, metadata, IP, UA, email, token.
+- Keyset ORDER BY created_at DESC,id DESC with PostgreSQL microseconds; HMAC cursor binds actor, session, filters, high-water, last (timestamp,UUID), key version, <=15 min expiry. Reject tampered/filter mismatch 400; unauthenticated 401, consent 403, throttled 429, source failure 503. No JS millisecond exclusive cursor. HTTP pages do not share MVCC snapshot; late backdated inserts may appear, so no frozen snapshot promise.
+- New POST /api/v1/account/security/events/export with JSON {from,to,category}, authenticated/consented + CSRF + reauth <=10min. UTF-8 CSV columns event_id,event_type,event_category,occurred_at_utc; 5,000 rows, 2MiB, 30s hard limits, 3 preparations/day/member, 1 concurrent. Buffer full validated bytes in bounded memory BEFORE headers/body, else 413/503 with no partial success. attachment/private no-store/nosniff; SHA-256 exact transmitted bytes, Digest header only if gateway verified. Quote/escape CSV and defend formula injection (=,+,-,@,TAB,CR,LF, separators/quotes); do not claim universal spreadsheet safety. No root disk spool.
+- Optional prepared-only audit AFTER CSV snapshot and complete buffer, separate transaction; record count/hash without sensitive metadata, fail 503 before bytes if audit commit fails. Prepared != downloaded; no identical-retry guarantee without immutable file. Next.js BFF must preserve errors, not convert 503 to empty. Android App API same member/session DTO, errors and secure native download, not copied browser cookies.
+
+### PostgreSQL, security, administrator
+- New versioned SECURITY DEFINER account_security_event_history_v1(p_actor uuid,p_from timestamptz,p_to timestamptz,p_categories text[],p_before_at timestamptz,p_before_id uuid,p_limit int) returns event_id,event_type,created_at. Preserve existing migration 214 return type. WHERE user_id=p_actor AND created_at>=from AND created_at<to with (created_at,id) keyset, LIMIT limit+1, whitelist and bounds; NULL owner excluded. Explicit public schema, fixed search_path pg_catalog,pg_temp, owner moneyverse_migrator; revoke PUBLIC, app EXECUTE only, no direct app SELECT/DML.
+- Benchmark additive index (user_id,created_at DESC,id DESC) WHERE user_id IS NOT NULL in isolated PG using EXPLAIN and 10,001 synthetic rows. If necessary forward-only CREATE INDEX CONCURRENTLY outside transaction with invalid-index recovery; do not edit old migrations 180/214/266. Export snapshot one READ ONLY REPEATABLE READ transaction, audit write separate.
+- **P0 actor boundary:** passing p_actor UUID is NOT a DB-authenticated identity. SessionGuard/requireUserId is API protection but compromised app role can still spoof actor unless independently constrained. Prove session-to-actor binding and least-privilege before release; no false SECURITY DEFINER guarantees. Shared dev/Production-connected 5433: NO fixtures/migrations/tests/writes.
+- Admin only anonymized aggregate groups >=20 members, errors/latency/abuse; no member-level export. Respect audit retention/erasure; no silent extension. SEO noindex/no-store/sitemap exclusion, analytics without IDs/raw timestamps/metadata.
+
+### KPI, QA, rollout and rollback
+- KPI p95 <300ms for 10,001 synthetic rows, zero cross-owner exposure, zero fake complete-history or partial CSV success, export preparation success and 413/429/503 rates. Isolated real PG, Nest, Next and Android tests: 100 cross-owner, 100 concurrent, 10,001 equal-time/microsecond rows, NULL owner, unknown type, tampered/filter cursor, session expiry/revocation, zero vs 503, consent/reauth/CSRF, 5,001/2MiB+1/30s, CSV formula/quote/CRLF, audit failure, privacy deletion, 320px a11y, flag-OFF and existing preview regression.
+- Engineering separate branch only, flag OFF by default, additive migrations; exact integrated-main SHA full CI/security PASS, isolated DB ACL proof, authenticated official Test E2E, independent QA, backup restore and authorized GitOps before Production. Rollback flag OFF/disable new API while preserving original card/events. RELEASE HOLD.
+- QA v1288 FAILED/HOLD: root 100% (~466MiB now, QA ~601MiB), frontend 1397 PASS/6 FAIL, production audit 2 High, full audit 2 Critical/10 High, bot 1 Critical/5 High, dev app direct write 235/241 tables, 3 PUBLIC bank functions, migration 266 checksum mismatch, exact-SHA Test/restore unverified. Preserve other workers' worktrees and Docker volumes.
+
+### P0/P1 development backlog
+- P0 ENV1308-01: owner-approved reversible capacity recovery, isolated Test/restore, preserve branches.
+- P0 SEC1308-02: session-actor/DB ACL/PUBLIC function boundary and metadata privacy.
+- P0 REL1308-03: QA v1288 six failures, audits, migration266, exact-SHA Test/restore/GitOps.
+- P0 AUTH1308-04: truthful recorded-event coverage and no false empty/export success.
+- P1 AUTH1308-05: versioned owner SECDEF/index and NULL-owner.
+- P1 AUTH1308-06: signed microsecond keyset, filters, expiry/session.
+- P1 AUTH1308-07: reauth+CSRF bounded CSV/digest/partial-response/audit.
+- P1 AUTH1308-08: Next.js BFF/activity UX, Android parity, WCAG.
+- P1 AUTH1308-09: privacy/retention, aggregate admin, SEO/KPI/abuse.
+- P1 AUTH1308-10: isolated PG 100/10,001/race/CSV/rollback regression.
+- **Backlog IDs:** ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04 AUTH1308-05 AUTH1308-06 AUTH1308-07 AUTH1308-08 AUTH1308-09 AUTH1308-10.
+
+### External independent evidence gate / non-overlap
+- Four publisher families consulted, not approved into 10,000 corpus: OWASP CSV Injection https://owasp.org/www-community/attacks/CSV_Injection ; W3C WCAG 2.2 https://www.w3.org/TR/WCAG22/ ; PostgreSQL transaction isolation https://www.postgresql.org/docs/current/transaction-iso.html ; NIST SP 800-63B https://pages.nist.gov/800-63-4/sp800-63b.html . Newly approved 0; cumulative independently deduplicated approved UNKNOWN/10,000, BLOCKED / IN PROGRESS. Do not invent counts.
+- Docs-only separate from Gemini/developers A/B/C/QA; no F675-132 session alias, F675-131 notification export or admin audit implementation; no new scattered planning documents.
+
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
 - v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 

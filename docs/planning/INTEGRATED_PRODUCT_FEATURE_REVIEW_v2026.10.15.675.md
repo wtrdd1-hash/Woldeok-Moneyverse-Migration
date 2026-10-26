@@ -1,4 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+
+## F675-134 / v1308 — Security Activity Archive (Addition / DRAFT / HOLD)
+- Previous Improvement v1306 / Current Addition v1308 / Next Improvement v1310. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid. UI 5/20, migration214 cap50/no UUID, dev DB 41 events/3 users, not complete auth. Owner-only filtered activity and bounded reauth+CSRF CSV, signed microsecond cursor, honest empty/503, SECDEF, no metadata, Android/a11y. No F675-132/F675-131 overlap.
+- P0 ENV1308-01 capacity, SEC1308-02 actor/ACL, REL1308-03 exact-SHA QA, AUTH1308-04 source truth. P1 AUTH1308-05 DB, AUTH1308-06 cursor, AUTH1308-07 CSV, AUTH1308-08 UI/mobile, AUTH1308-09 privacy/admin/SEO/KPI, AUTH1308-10 isolated tests. IDs: ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04 AUTH1308-05 AUTH1308-06 AUTH1308-07 AUTH1308-08 AUTH1308-09 AUTH1308-10.
+- QA v1288 FAILED/HOLD, root 100% ~466MiB, frontend 6 failures, audits, app DML 235/241, 3 PUBLIC bank functions, migration266 mismatch, Test/restore blocked. External new approved 0, cumulative UNKNOWN/10,000 BLOCKED; docs only, flag OFF.
+
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
 - v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 

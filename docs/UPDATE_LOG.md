@@ -1,4 +1,9 @@
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394; issue #1389; root-capacity #1170; DRAFT / RELEASE HOLD.
+
+## 2026-10-26 10:12 KST — Planning v1308 / F675-134 (Addition / DRAFT / HOLD)
+- Previous Improvement v1306 / Current Addition v1308 / Next Improvement v1310; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid. Security UI 5/20, migration214 max50/no UUID, dev DB 41 events/3 users. Recorded-only archive, bounded reauth+CSRF CSV; no complete-login-history claim.
+- P0 ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04; P1 AUTH1308-05..10. IDs: ENV1308-01 SEC1308-02 REL1308-03 AUTH1308-04 AUTH1308-05 AUTH1308-06 AUTH1308-07 AUTH1308-08 AUTH1308-09 AUTH1308-10. QA v1288 FAILED/HOLD, root 100% ~466MiB, exact-SHA Test/restore blocked; external newly approved 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime/DB/Test/Production changes.
+
 ## 2026-10-26 09:13 KST — Planning v1306 / F675-133 (Feature Improvement / DRAFT / HOLD)
 - Previous Addition v1304 → Current Improvement v1306 → Next Addition v1308 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 unchanged start/mid; prior Draft #1390 unmerged. Corrected legacy INNER JOIN/nullable paid amount, discount-aware catalog price, ledger NUMERIC/lowercase direction, false-empty UI, microsecond-safe cursor, cross-page cutoff limits and DB actor trust. Read-only dev sample 0 legacy/6 catalog with 6 matching ledger postings; not Production proof.
 - P0 ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04; P1 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10. QA v1287 FAILED/HOLD, root 100% 608MiB, exact-SHA/restore HOLD; external accepted new 0, cumulative UNKNOWN/10,000 BLOCKED. Docs-only, no runtime/DB/ledger/WLD/Test/Production changes.
