@@ -1,0 +1,16 @@
+# A2325 QA — PostgreSQL 권한 읽기 전용 증거 게이트 (운영 보류)
+
+기준 main: `0fe614b2ca1a7bc0df540514e54db78130479e2a`. 별도 브랜치 `auto/hourly-a-repair-privilege-gate-20261026-2325`.
+
+- 실제 코드는 **읽기 전용 SQL 카탈로그 점검 + 실패 시 차단하는 Python 검증기 + 단위 테스트 7건**이다. 신규 사용자 Full-stack 기능 구현이나 DB 권한 수정 완료가 아니다.
+- RED: 검증기 구현 전 테스트 탐색 실패. GREEN: 단위 테스트 7/7 통과, Python 구문 검사 및 Git 공백 검사 통과.
+- 운영 연결 가능성이 있는 개발 DB는 **읽기 전용** 검사 결과 **FAIL**: 보호 테이블 직접 DML, 기본 앱 권한, 은행 함수 PUBLIC EXECUTE.
+- 격리 DB `wdmv_v761_test_acl`도 읽기 전용 검사: 은행 함수 스키마가 없어 **UNKNOWN**, PASS 아님.
+- 실제 마이그레이션, 권한 변경, 데이터 쓰기, 운영 서비스 재시작, Test/Production 배포 없음.
+- 전체 빌드/린트/타입/보안/계약/인증 E2E/백업복원/마이그레이션 패리티/정확 SHA 검증은 미완료. 병합 금지.
+- 시작: 원격 브랜치 293개, 열린 PR 286개(Draft 271개), 충돌 9개, 실패/취소 체크 PR 204개, 중복 Head 0건. 비-main 292개 중 미통합 280개, main 포함 2개, Git 객체 미확보 10개 모두 보존. 삭제 0개.
+- 기존 280번 마이그레이션 제안이 여러 미통합 PR에 존재하므로 임의 번호 사용 금지. 최신 기획 v1330도 Draft/HOLD.
+- 공식 Test SHA `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`, Production SHA `6a989b5ac0c6155587d43426d64f6def6b62c917`로 후보 SHA와 불일치.
+- 루트 디스크 98%, 데이터 디스크 91%. 타 개발 예약의 Worktree/브랜치 삭제 없음.
+
+**최종: PARTIAL / BLOCKED, Production RELEASE HOLD.** 순방향 최소권한 마이그레이션의 승인 및 번호 충돌 해결, 격리 PostgreSQL 긍정/거부 테스트, 전체 필수 게이트, 공식 Test 인증 E2E, 승인 GitOps가 필요하다. 운영 변경이 없으므로 현재 롤백 대상은 없다.

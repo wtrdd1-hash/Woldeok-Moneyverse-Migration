@@ -31,3 +31,18 @@
 - Isolated `wdmv_v761_test_acl`: UNKNOWN because all required legacy bank functions are absent; never mislabel it PASS.
 - Revised SQL to handle missing app role without raising and include global as well as schema-scoped default ACL.
 - No DB mutation, migration, service restart, or production deployment.
+
+### 23:43 KST — Reverification
+- Final SQL snapshot rerun: development DB FAIL (three P0 findings), isolated Test DB UNKNOWN (bank overloads missing); each query explicitly `BEGIN READ ONLY` and `ROLLBACK`.
+- Validator unit tests 7/7 PASS, `python3 -m py_compile` PASS, `git diff --check` PASS.
+- Main `0fe614b2ca1a7bc0df540514e54db78130479e2a` unchanged; latest planning v1330 remains unmerged Draft.
+- Official Test/Production public SHA mismatch confirmed; authenticated exact-SHA E2E blocked. No broad full-stack gate claims.
+
+## Finished — 2026-10-26 23:43 KST
+- [x] Write RED validator tests, observe failure.
+- [x] Implement read-only SQL snapshot, fail-closed validator and 7 passing unit tests.
+- [x] Execute real read-only PostgreSQL checks with truthful FAIL / UNKNOWN verdicts.
+- [x] Recheck main/planning; write English/Korean QA and release notes.
+- [ ] Remediate live ACL (blocked by security review, competing migration 280 proposals, parity-correct isolated DB and full release gates).
+- [ ] Complete P0/P1 user feature across web/backend/API/DB/Android (not accomplished this run).
+- Production/Test: NO CHANGE; rollback: not applicable. Preserve all branches; delete 0.
