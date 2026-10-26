@@ -115,6 +115,25 @@ describe('TreasuryView & isTreasuryOutflow Outflow Accounting Logic', () => {
     expect(injectAmounts.length).toBeGreaterThan(0);
   });
 
+  it('shows unverified reconciliation without a false green success or zero discrepancy', () => {
+    const unverified = {
+      ...mockOverview,
+      reconciliation: {
+        status: 'UNVERIFIED',
+        total_vaults_balance_wld: '10000000',
+        total_ledger_net_flow_wld: null,
+        discrepancy_amount_wld: null,
+        last_reconciled_at: null,
+      },
+    } as unknown as AdminTreasuryOverview;
+    render(<TreasuryView overview={unverified} ledger={[]} />);
+    expect(screen.getByText('대사 검증 미완료')).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toContain('일치 여부는 미확인');
+    expect(screen.queryByText('대사 완료 (일치)')).toBeNull();
+    expect(screen.queryByText(/정상 0/)).toBeNull();
+    expect(screen.queryByText(/Invalid Date/)).toBeNull();
+  });
+
   it('filters ledger entries by filter chips', () => {
     render(<TreasuryView overview={mockOverview} ledger={mockLedger} />);
 
