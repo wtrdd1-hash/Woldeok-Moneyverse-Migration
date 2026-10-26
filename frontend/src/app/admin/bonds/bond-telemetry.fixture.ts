@@ -1,0 +1,40 @@
+export const validTelemetry = {
+  overview: {
+    totalBondsActive: 1,
+    totalFundedWld: '9007199254740993',
+    totalHoldersCount: 2,
+    totalCouponsPaidWld: '0',
+    totalRepoLoansWld: '0',
+    benchmark1YYield: '4.50%',
+    benchmark3YYield: '—',
+    benchmark5YYield: '—',
+  },
+  bonds: [
+    {
+      id: '11111111-1111-4111-8111-111111111111',
+      symbol: 'KTB-01Y',
+      name: 'Virtual bond',
+      maturity_hours: 8760,
+      annual_coupon_rate_bps: 450,
+      hourly_coupon_rate_bps: 1,
+      par_value_wld: '1000',
+      total_issued_units: '500',
+      available_units: '499',
+      total_funded_wld: '1000',
+      status: 'OPEN_SUBSCRIPTION',
+      description: 'Game only',
+    },
+  ],
+  couponLogs: [
+    {
+      id: '22222222-2222-4222-8222-222222222222',
+      holding_id: null,
+      user_id: '33333333-3333-4333-8333-333333333333',
+      bond_symbol: 'KTB-01Y',
+      bond_name: 'Virtual bond',
+      event_type: 'COUPON_INTEREST',
+      amount_wld: '1',
+      created_at: '2026-10-26T12:00:00.000Z',
+    },
+  ],
+};
