@@ -26,3 +26,14 @@
 - On latest main, `pnpm api:contract:check` failed because the prior Draft manually recorded response `limit` as OpenAPI `integer const=100`, while the authoritative generator emits `number`. The backend and Next handler both enforce exactly 100 at runtime; do not invent unsupported OpenAPI const metadata.
 - Regenerated all three Android contract/schema reference artifacts (3 lines added, 4 removed) from the current 180-endpoint generator. This is a concrete repair, not a docs-only completion.
 - `pnpm typecheck` PASS; `pnpm lint` PASS (0 errors, 1131 warnings). Root `pnpm test` stopped at the same contract drift before test suites; full tests must be rerun after this fix.
+
+### Gate results (22:54–22:58 KST)
+- `pnpm api:contract:check` PASS after canonical generation; 180 routes / 639 methods.
+- `pnpm test` PASS: contract 38; database 15 PASS/3 SKIP; backend 1329 PASS/398 SKIP; frontend 1431 PASS. DB skips are not treated as passing.
+- `pnpm build` PASS; production dependency audit PASS; full audit FAIL (2 critical/8 high/11 moderate/3 low), bot audit FAIL (1 critical/5 high).
+- Isolated real PostgreSQL 101/0 actor separation, exact 9007199254740993, direct SELECT and ledger INSERT denied, ROLLBACK 0 PASS. Isolated scratch restored from test DB; 281 applied migrations versus 278 SQL files in main means parity not certified.
+- Official Test public/manifest runtime SHA differs from candidate; exact-SHA gate FAIL. Production release prohibited.
+
+## Finished — local candidate (release HOLD)
+- New repair branch contains the existing P1 feature plus generated contract drift repair, tests and bilingual QA/release evidence. No main merge, production writes, migrations or cleanup.
+- Final commit SHA, PR URL, latest main, end branch/PR counts and CI outcomes to be appended after remote push. All other workers' branches remain untouched.
