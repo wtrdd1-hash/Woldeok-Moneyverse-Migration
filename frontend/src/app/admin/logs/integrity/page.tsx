@@ -23,6 +23,7 @@ import type {
   AuditRetentionCategory,
   ChainVerificationHistory,
 } from '../../types';
+import { parseAuditDispositions, parseAuditRetention, parseAuditVerifications } from './integrity-evidence';
 import {
   DispositionForm,
   RetentionPolicyDialog,
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
 export default async function AdminAuditIntegrityPage() {
   await requireAdminConsole(AREA.href);
 
-  const [verifications, retention, dispositions] = await Promise.all([
+  const [rawVerifications, rawRetention, rawDispositions] = await Promise.all([
     apiOrNull<{ verifications: ChainVerificationHistory[] }>(
       '/api/v1/admin/audit/verifications',
     ),
@@ -50,7 +51,10 @@ export default async function AdminAuditIntegrityPage() {
     apiOrNull<{ dispositions: AuditDisposition[] }>('/api/v1/admin/audit/dispositions'),
   ]);
 
-  const categories = retention?.categories.map((entry) => entry.category) ?? [];
+  const verifications = parseAuditVerifications(rawVerifications);
+  const retention = parseAuditRetention(rawRetention);
+  const dispositions = parseAuditDispositions(rawDispositions);
+  const categories = retention?.map((entry) => entry.category) ?? [];
 
   return (
     <div data-page="admin-logs-integrity" className="mv-page mv-page--admin grid gap-5">
@@ -82,8 +86,8 @@ export default async function AdminAuditIntegrityPage() {
         </CardHeader>
         <CardContent>
           {verifications === null ? (
-            <EmptyState title="검증 이력을 불러오지 못했어요." />
-          ) : verifications.verifications.length === 0 ? (
+            <EvidenceUnavailable title="검증 이력" />
+          ) : verifications.length === 0 ? (
             <EmptyState title="아직 실행한 검증이 없습니다." />
           ) : (
             <div className="overflow-x-auto">
@@ -100,7 +104,7 @@ export default async function AdminAuditIntegrityPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {verifications.verifications.map((row) => (
+                  {verifications.map((row) => (
                     <TableRow key={row.verification_id}>
                       <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                         {formatMoment(row.completed_at)}
@@ -136,13 +140,13 @@ export default async function AdminAuditIntegrityPage() {
             <CardTitle className="text-base">보존 정책 현황</CardTitle>
             <CardDescription>
               공개된 개인정보처리방침이 약속하는 기간과 같아야 합니다. 인증·권한 거부 기록은
-              90일, 관리자·경제 감사 기록은 1년으로 065가 심어 둔 값입니다.
+              정책의 실제 기간은 아래에서 검증된 서버 응답으로만 확인합니다.
             </CardDescription>
           </CardHeader>
           <CardContent>
             {retention === null ? (
-              <EmptyState title="보존 정책을 불러오지 못했어요." />
-            ) : retention.categories.length === 0 ? (
+              <EvidenceUnavailable title="보존 정책" />
+            ) : retention.length === 0 ? (
               <EmptyState title="등록된 보존 정책이 없습니다." />
             ) : (
               <div className="overflow-x-auto">
@@ -160,7 +164,7 @@ export default async function AdminAuditIntegrityPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {retention.categories.map((row) => (
+                    {retention.map((row) => (
                       <TableRow key={row.category}>
                         <TableCell className="font-mono text-xs">{row.category}</TableCell>
                         <TableCell className="tabular text-right">{row.retention_days}일</TableCell>
@@ -204,8 +208,8 @@ export default async function AdminAuditIntegrityPage() {
           </CardHeader>
           <CardContent>
             {dispositions === null ? (
-              <EmptyState title="처리 기록을 불러오지 못했어요." />
-            ) : dispositions.dispositions.length === 0 ? (
+              <EvidenceUnavailable title="파기·보관 기록" />
+            ) : dispositions.length === 0 ? (
               <EmptyState title="아직 남긴 처리 기록이 없습니다." />
             ) : (
               <div className="overflow-x-auto">
@@ -222,7 +226,7 @@ export default async function AdminAuditIntegrityPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {dispositions.dispositions.map((row) => (
+                    {dispositions.map((row) => (
                       <TableRow key={row.record_id}>
                         <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                           {formatMoment(row.performed_at)}
@@ -258,7 +262,7 @@ export default async function AdminAuditIntegrityPage() {
           </CardHeader>
           <CardContent>
             {categories.length === 0 ? (
-              <EmptyState title="보존 정책을 먼저 불러와야 처리 기록을 남길 수 있어요." />
+              <EmptyState title="검증된 보존 정책이 없어 처리 기록을 남길 수 없습니다." />
             ) : (
               <DispositionForm categories={categories} />
             )}
@@ -276,5 +280,18 @@ function Alarms({ row }: { readonly row: ChainVerificationHistory }) {
     <span className={raised ? 'font-bold text-destructive' : 'text-muted-foreground'}>
       {row.link_break_count} / {row.mismatch_count} / {row.column_drift_count}
     </span>
+  );
+}
+
+function EvidenceUnavailable({ title }: { readonly title: string }) {
+  return (
+    <div role="alert" className="grid gap-3 rounded-lg border border-destructive/40 p-4">
+      <p className="text-sm text-destructive">
+        {title}을 확인하지 못했습니다. 조회 실패 또는 응답 무결성 오류입니다. 정상·0건으로 판단하지 마세요.
+      </p>
+      <Button asChild variant="outline" className="min-h-11 w-fit">
+        <Link href="/admin/logs/integrity">다시 조회</Link>
+      </Button>
+    </div>
   );
 }
