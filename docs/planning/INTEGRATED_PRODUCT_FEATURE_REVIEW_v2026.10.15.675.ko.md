@@ -1,4 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+
+## F675-139 / v1328 — 회원 문의 임시저장 복구·안전 전송 검토 (초안 / 운영 보류)
+- 이전 보완 v1326 → 현재 추가 v1328 → 다음 보완 v1330(잠정). 최신 main 0fe614b2ca1a7bc0df540514e54db78130479e2a가 변경되어 이전 main QA v1299를 새 SHA 승인 근거로 사용 금지. 실제 /support 즉시 전송과 Migration196에 임시글 보관 기능 없음.
+- 회원 본인 명시적 저장/삭제/전송만 허용, 자동저장·허위 전송 표시 금지. NEW/REPLY 본인 임시글, CAS/묘비/불변 전송 영수증, 계정 간 캐시 차단. NestJS API/SECURITY DEFINER DB, 제안 보관 30일·20개 상한, 동시 100건·합성 10,001건, Android·WCAG·개인정보·관리자 k>=20·SEO noindex·기본 OFF·롤백. 세부 계약은 국영문 통합 마스터.
+- P0 4/P1 6: ENV1328-01 SEC1328-02 REL1328-03 SUP1328-04 SUP1328-05 SUP1328-06 SUP1328-07 SUP1328-08 SUP1328-09 SUP1328-10. v1326 PR #1452 미병합·최신 main 분기, 문서만 적층. QA/DB 권한/Migration266/공식 Test/복원 차단. 외부 신규 승인 0건, 누적 UNKNOWN/10,000; 구현·운영승격 승인 아님.
+
 - **v1326 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1452 (선행 #1449 미병합 기반; DRAFT / RELEASE HOLD). **개발:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## v1326 — F675-138 문의 종료·최신 답변 표시 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
 - 이전 추가 v1324 → 현재 보완 v1326 → 다음 추가 v1328(잠정), main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 재확인, 선행 Draft #1449 미병합. Migration196 오래된 순 메시지200건과 반복 resolved UPDATE는 최신 답변 누락·종료 이벤트 중복 위험이지만 운영 장애 확증은 아님.

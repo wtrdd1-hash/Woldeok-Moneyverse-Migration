@@ -1,4 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
+- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+
+## 기획 v1328 — F675-139 문의 임시글 복구·검증 전송 (기능 추가 / 초안 / 운영 보류)
+- 교대: 이전 기능 보완 v1326 / 현재 기능 추가 v1328 / 다음 기능 보완 v1330(잠정). 최신 main 0fe614b2ca1a7bc0df540514e54db78130479e2a를 시작·중간 재조회했으며 v1326보다 갱신됨. main AGENTS.md·README.md·영어 정본 PROJECT_PLAN.md·한국어 대조 확인. v1326 PR #1452 미병합, 이번 문서 PR은 해당 브랜치에 적층되므로 **변경된 main에 독립 병합 금지**. QA v1299는 이전 main 결과라 새 정확 SHA 검증 아님.
+- main /support는 새 문의/답장 즉시 POST, NestJS 및 Migration196에는 서버 임시저장 없음. 회원 본인 명시적 저장/삭제/전송, 자동저장·localStorage·허위 전송 성공 금지. 본인 GET/PUT/DELETE와 원자적 POST /api/v1/support/drafts/send, 버전/CAS·멱등 영수증·CSRF/세션/동의·중복 전송 방지. 보관 30일·20개는 검토 전 제안. 전진형 SECURITY DEFINER·묘비 유니크·관리자 k>=20 비식별 집계·noindex/no-store·Android/WCAG/KPI·기본 OFF. 세부 구현은 영문/국문 통합 마스터에 명세.
+- P0 4개/P1 6개: ENV1328-01 SEC1328-02 REL1328-03 SUP1328-04 SUP1328-05 SUP1328-06 SUP1328-07 SUP1328-08 SUP1328-09 SUP1328-10. 루트 98%/약 2.4GiB, 데이터 약 90%; 이전 QA v1299 FAIL/HOLD, 새 main 정확 SHA 공식 Test·격리 복원 미검증, DB ACL/Migration266 재확인 필요. Production BLOCKED. 외부 독립 근거 10,000건: 신규 승인 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 런타임·DB·WLD·원장·Test·운영 변경 없음.
+
 - **v1326 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1452 (선행 #1449 미병합 기반; DRAFT / RELEASE HOLD). **개발:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## 기획 v1326 — F675-138 문의 종료 회차·최신 답변 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
 - 이전 기능 추가 v1324 / 현재 기능 보완 v1326 / 다음 기능 추가 v1328(잠정). 최신 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 AGENTS.md/README.md/영문 정본·국문 대조 확인. 선행 Draft #1449 OPEN, #1432 미병합 기반. 기획 문서만 변경.

@@ -1,3 +1,8 @@
+## 2026-10-26 — 자동 기획 v1328 (기능 추가 / F675-139 / 초안 / 운영 보류)
+- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- 이전 v1326 기능 보완 → 현재 v1328 기능 추가 → 다음 v1330 기능 보완(잠정). 최신 main 0fe614b2ca1a7bc0df540514e54db78130479e2a가 v1326 이후 갱신되어 이전 main QA v1299를 새 main 인증 근거로 사용 금지. 실제 /support 즉시 전송·Migration196 임시글 없음 확인.
+- 회원 본인 명시적 임시저장/삭제/전송, CAS 묘비와 불변 원자적 전송 영수증 제안. 기능 OFF, 자동저장·코드/DB/Test/운영 변경 없음. P0 4/P1 6: ENV1328-01 SEC1328-02 REL1328-03 SUP1328-04 SUP1328-05 SUP1328-06 SUP1328-07 SUP1328-08 SUP1328-09 SUP1328-10. 루트 98%/2.4GiB, 데이터 90%; 정확 SHA Test/권한/Migration266/복원 HOLD. 외부 독립 근거 10,000건 신규 승인 0·누적 UNKNOWN, BLOCKED/IN PROGRESS. 미병합 v1326 PR #1452 기반, main 직접 병합 불가.
+
 - **v1326 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1452 (선행 #1449 미병합 기반; DRAFT / RELEASE HOLD). **개발:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## 2026-10-26 — 기획 v1326 (기능 보완 / DRAFT / RELEASE HOLD)
 - 이전 v1324 기능 추가 → 현재 v1326 기능 보완 → 다음 v1328 기능 추가(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 Draft #1449 OPEN. F675-138 문의 종료 회차와 마지막 관리자 답변 표시 증명 강화: 오래된 200건만으로 자동 해결 확인 금지, 반복 resolved 종료 이벤트 금지, 문의 행 우선 잠금·잠금 후 멱등 재검증, 회원/세션 HMAC 600초 이하, 구회차/과거/503 실패 폐쇄.

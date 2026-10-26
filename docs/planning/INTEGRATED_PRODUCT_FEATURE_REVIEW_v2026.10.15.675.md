@@ -1,4 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+
+## F675-139 / v1328 — Member Support Draft Recovery: new feature review (DRAFT / RELEASE HOLD)
+- Previous Improvement v1326 → Current Addition v1328 → Next Improvement v1330 provisional. Main 0fe614b2ca1a7bc0df540514e54db78130479e2a advanced since v1326; old-main QA v1299 cannot certify it. Source: main /support immediate-submit actions and Migration196 lack draft persistence.
+- Explicit Save/Discard/Send only; owner-scoped NEW/REPLY draft, no passive save or phantom sent status; CAS/tombstone/immutable send receipt, no cross-account cache. NestJS API and DB SECURITY DEFINER owner functions, 30-day proposed expiry, 20-draft proposed cap, 100-way concurrency and 10,001 synthetic paging, Android parity, WCAG AA, privacy/admin k>=20, SEO noindex, feature OFF, rollback. Full contract in integrated master.
+- P0 4 / P1 6: ENV1328-01 SEC1328-02 REL1328-03 SUP1328-04 SUP1328-05 SUP1328-06 SUP1328-07 SUP1328-08 SUP1328-09 SUP1328-10. v1326 Draft #1452 unmerged and new main diverged; stacked docs only. QA/DB ACL/Migration266/Test/restore BLOCKED. External new accepted 0 / cumulative UNKNOWN of 10,000; no implementation or Production approval.
+
 - **v1326 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1452 (stacked on unmerged #1449; DRAFT / RELEASE HOLD). **Engineering:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## v1326 — F675-138 Support Resolution Evidence Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
 - Previous Addition v1324 → Current Improvement v1326 → Next Addition v1328 provisional; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 rechecked, predecessor Draft #1449 unmerged. Actual Migration196 oldest-first 200 messages and repeated resolved UPDATE create last-reply omission/duplicate-epoch risks, not a verified Production incident.

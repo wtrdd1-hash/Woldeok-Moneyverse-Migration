@@ -1,4 +1,42 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+
+## 기획 v1328 — F675-139 회원 문의 임시저장 복구 및 검증된 전송 (기능 추가 / 초안 / 운영 보류)
+
+### 기준·교대·대안·실제 코드 근거
+- 이전 **기능 보완 v1326** → 현재 **기능 추가 v1328** → 다음 **기능 보완 v1330**(잠정). 최신 원격 main은 0fe614b2ca1a7bc0df540514e54db78130479e2a(20:51 KST 갱신)로, v1326에서 검증한 1c5b84a1...과 다름. AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md, 한국어 대조 및 실제 main 코드를 확인함. v1326 PR #1452는 미병합이며 본 문서 PR은 해당 기획 브랜치 위에만 적층; 변경된 main에 직접 병합할 수 없음. 최신 완료 QA v1299는 이전 main 검증이므로 새 main의 정확 SHA QA로 인정하지 않음. 런타임/DB/Test/운영 변경 없음.
+- main의 frontend/src/app/support/page.tsx는 새 문의·답장 폼을 제공하며 actions.ts는 곧바로 POST 전송. support.controller.ts에는 임시저장 API가 없고 Migration196에는 support_threads/support_messages만 있음. 서버 저장 임시글·임시글 전송 영수증은 확인되지 않음. 운영 중 실제 글 유실 건수는 UNKNOWN이며 사고 발생을 단정하지 않음.
+- 대안 A 브라우저 자동저장(공용기기 개인정보 유출 위험), B 서버 자동저장(동의 없는 민감내용 수집), C **회원이 명시적으로 저장/삭제/전송하는 서버 임시저장** 채택. 기능 기본 OFF. 자동 키입력 추적·첨부파일·AI 요약·알림·금전 효과 없음.
+
+### 대상·권한·진입점·화면·CTA·상태
+- 대상: 로그인·필수 동의 완료 회원 본인. /support의 새 문의 및 기존 문의 답장 폼에 **임시 저장**, **임시글 삭제**, **전송** 버튼 제공. 새 문의 제목 최대 120자/본문 2,000자, 답장 본문 2,000자, threadId는 본인 소유 UUID만 허용. NFC 정규화·공백 처리·전송 시 빈 본문 거절, 첨부파일 없음. (회원, 새 문의) 1개 및 (회원, 문의 UUID) 1개씩 보관; 회원별 활성 임시글 최대 20개, 보존 30일은 개인정보 검토 전 **제안값**.
+- 상태: NONE, EDITING_UNSAVED, SAVING, SAVED_CONFIRMED(버전·시간), SYNC_CONFLICT, EXPIRED, SEND_PENDING, SENT_CONFIRMED(실제 메시지 영수증), UNKNOWN_COMMIT, DISCARDED, SIGNED_OUT, UNAVAILABLE. 조회·포커스·화면 이탈·네트워크 재접속만으로 저장/전송 금지. 서버 확인 없이 저장됨·전송됨 표시 금지. 불명확한 전송 결과는 **보낸 메시지 확인** 후 원래 영수증을 재조회하며 새 키로 무작정 재전송 금지. 계정 변경/로그아웃/동의 철회 시 브라우저 상태 폐기, 늦게 도착한 응답 무시. 본문을 localStorage·URL·분석·로그에 저장 금지.
+- 키보드·스크린리더 성공 알림·삭제 확인·320px/200% 확대·44px 터치·움직임 줄이기·WCAG 2.2 AA. 한국어·영어에서 임시저장과 실제 전송 구분. 비공개 화면 noindex/nofollow, no-store; Android App API에서 동일한 명시적 저장/조회/삭제/전송과 로그아웃 보호.
+
+### 제안 API·오류·DB·트랜잭션
+- GET /api/v1/support/drafts?threadId=<uuid|null>: 회원 본인 임시글/버전/ETag/만료 반환, GET DB 쓰기 0. PUT /api/v1/support/drafts: {threadId,subject?,body,expectedVersion,idempotencyKey}와 If-Match/CAS, 신규 expectedVersion=null만 허용. DELETE 동일 스코프·버전·키로 삭제 묘비 영수증 반환. POST /api/v1/support/drafts/send: {threadId,expectedVersion,idempotencyKey}로 저장된 **그 버전의 본문만** 기존 support_create_thread/support_add_message를 통해 한 트랜잭션에서 전송하고 불변 영수증·묘비·감사를 함께 커밋. 클라이언트가 userId/타인 수신자/별도 전송 본문을 선택하지 못함. 기존 직접 전송 API는 기능 OFF 시 유지.
+- 401 세션 없음, 403 동의/CSRF, 404 타인 소유·없는 문의(존재 여부 은닉), 409 멱등 지문/20개 제한, 410 만료, 412 버전 충돌, 422 유효성, 428 전제조건 없음, 429 속도 제한, 503 장애·커밋 불명. 회원당 임시글 변경 시간당 30회·전송 분당 5회는 **제안 한도**. 서버 세션·동의·CSRF·본인 소유 확인 필수, NestJS API를 인터넷에 직접 노출 금지.
+- 전진형 DB: support_member_drafts(draft_id PK,user_id FK,thread_id nullable FK,subject,body,version>=1,saved_at,expires_at,deleted_at,send_receipt_id); 새 문의는 UNIQUE(user_id) WHERE thread_id IS NULL, 답장은 UNIQUE(user_id,thread_id) WHERE thread_id IS NOT NULL, **삭제 조건을 UNIQUE에서 제외**하여 묘비·버전 유지(ABA 방지). owner·시간 인덱스와 만료 인덱스, 길이·상태 CHECK. support_draft_requests의 UNIQUE(user_id,idempotency_key)/32바이트 지문/불변 응답과 support_draft_send_receipts의 UNIQUE(draft_id,version)/실제 thread/message FK·감사 기록. 삭제 후 원문 제거, 비식별 영수증 90일 보존은 법적 검토 전 제안값.
+- DB는 고정 search_path의 검토된 SECURITY DEFINER 함수만, PUBLIC EXECUTE 회수, 앱 계정 직접 DML 금지. **SQL actor UUID만으로 인증되지 않음**. 저장·삭제는 임시글 행 CAS; 답장 전송은 문의 행→임시글 행, 새 문의 전송은 회원→임시글 행 잠금 후 기존 제한 함수 호출. 동일 키·지문 재시도는 동일 최초 영수증, 다른 지문 409, 100건 동시 전송에도 실제 메시지 1건. 감사 실패 시 메시지/묘비 전체 롤백. v1326 문의 상태 변경 잠금 순서와 개발 시 조정.
+- 관리자는 임시글 원문/제목을 조회·대리 전송할 수 없음. k>=20 비식별 집계 및 삭제 작업 상태만. 개인정보센터 열람·삭제·내보내기와 보존·암호화 키관리 실제 검증 필요(암호화 완료 단정 금지). KPI는 실제 확인된 저장률, 기기간 복원 성공률, 영수증 오류·중복 전송 0건, 충돌/만료/삭제·문의 이탈률; 수치 목표는 가설/TEST TARGET이며 운영 실측 아님.
+
+### P0/P1 개발 백로그·시험·배포 보류
+- **P0 ENV1328-01:** 루트 98%/약 2.4GiB, 데이터 볼륨 90%/21~22GiB 잔여; 타 작업자 파일 보존하며 용량·격리 백업 복원·DB 분리 증빙.
+- **P0 SEC1328-02:** 앱 계정 과도한 DML/PUBLIC 함수 권한 정리, 본인 소유·세션·동의·CSRF와 타 회원 접근 100건 거부 검증.
+- **P0 REL1328-03:** 변경된 0fe614b2ca1a7bc0df540514e54db78130479e2a에 대한 새로운 정확 SHA QA·CI·보안 감사·Migration266·격리 DB/백업 복원·공식 인증 Test·GitOps 승격 증빙; 이전 main QA v1299 재사용 금지.
+- **P0 SUP1328-04:** 의도치 않은 전송·허위 저장 성공·타 계정 노출·네트워크 불명 시 중복 전송 방지.
+- **P1 SUP1328-05:** 임시글/묘비/전송 영수증 스키마·제약·인덱스·만료·무중단 마이그레이션.
+- **P1 SUP1328-06:** SECURITY DEFINER 원자적 저장·삭제·전송, CAS·멱등성·잠금 순서.
+- **P1 SUP1328-07:** NestJS DTO/API·오류 계약·기존 문의 전송과 호환.
+- **P1 SUP1328-08:** Next.js·Android 동등 UX·접근성·국제화·로그아웃 경계.
+- **P1 SUP1328-09:** 개인정보 보존·열람·삭제·관리자 집계·SEO·내용 비수집 KPI.
+- **P1 SUP1328-10:** 격리 PostgreSQL 실제 권한, 동시 저장/전송 100건, 타인 접근 100건, 합성 10,001건 페이지 검증(운영 보관 상한과 구분), 만료·재시도·CSRF·접근성·기능 OFF 롤백.
+- 기능 기본 OFF → 별도 개발 브랜치·검토 → 정확 SHA CI/격리 PG → 공식 Test 로그인 웹/Android E2E·백업 복원 → 승인된 GitOps 단계적 운영승격 → 실패 시 OFF 롤백. 런타임/DB/WLD/원장/Test/Production은 기획 회차에서 변경하지 않음. Gemini/개발 A/B/C/QA 변경과 분리.
+- 외부 독립 근거 10,000건 수집·중복 제거·출처 분류 승인 게이트: **이번 신규 승인 0건, 누적 승인 UNKNOWN/10,000, BLOCKED/IN PROGRESS**. 일반 기술 문서 조회를 근거 1건으로 부풀리지 않음.
+
+**P0 4개/P1 6개 식별자:** ENV1328-01 SEC1328-02 REL1328-03 SUP1328-04 SUP1328-05 SUP1328-06 SUP1328-07 SUP1328-08 SUP1328-09 SUP1328-10
+
+
 - **v1326 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1452 (선행 #1449 미병합 기반; DRAFT / RELEASE HOLD). **개발:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## v2026.10.26.1326 — F675-138 문의 종료 회차·최신 답변 표시 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
 
