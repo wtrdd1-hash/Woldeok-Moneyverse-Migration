@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PageHeader } from '@/components/page-header';
@@ -14,9 +14,14 @@ export default function NewClubPage() {
   const [joinMode, setJoinMode] = useState('public');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [outcomeUnknown, setOutcomeUnknown] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const inFlight = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // A timed-out charter debit must never be replayed without checking the ledger.
+    if (inFlight.current || outcomeUnknown || submitted) return;
     setError(null);
 
     const cleanTag = tag.toUpperCase().trim();
@@ -34,8 +39,10 @@ export default function NewClubPage() {
     );
     if (!confirmed) return;
 
+    inFlight.current = true;
     setLoading(true);
     try {
+      const idempotencyKey = crypto.randomUUID();
       const res = await fetch('/api/v1/clubs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,18 +52,40 @@ export default function NewClubPage() {
           description: description.trim(),
           charter: charter.trim(),
           joinMode,
+          idempotencyKey,
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || '클럽 창설에 실패했습니다.');
+      const data: unknown = await res.json().catch(() => null);
+      if (!res.ok && res.status >= 400 && res.status < 500) {
+        const message =
+          data && typeof data === 'object' && 'message' in data
+            ? (data as { message: unknown }).message
+            : null;
+        setError(typeof message === 'string' ? message : '클럽 창설 요청이 거부되었습니다.');
+        return;
       }
-
+      if (
+        !res.ok ||
+        !data ||
+        typeof data !== 'object' ||
+        !('club_id' in data) ||
+        typeof data.club_id !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          data.club_id,
+        )
+      ) {
+        throw new Error('unverified charter receipt');
+      }
+      setSubmitted(true);
       router.push(`/clubs/${data.club_id}`);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err));
+    } catch {
+      setOutcomeUnknown(true);
+      setError(
+        '클럽 창설 결과를 확인할 수 없습니다. 중복 소각을 방지하기 위해 다시 제출하지 마세요. 클럽 목록과 지갑 거래 내역을 먼저 확인해 주세요.',
+      );
     } finally {
+      inFlight.current = false;
       setLoading(false);
     }
   };
@@ -64,39 +93,49 @@ export default function NewClubPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl space-y-8">
       <PageHeader eyebrow="새 클럽 창설" title="새 클럽·협동조합 창설">
-        <p>
-          고유한 클럽 태그와 헌장을 선포하고, 첫 번째 협동 프로젝트 거점을 마련하세요.
-        </p>
+        <p>고유한 클럽 태그와 헌장을 선포하고, 첫 번째 협동 프로젝트 거점을 마련하세요.</p>
       </PageHeader>
 
       <div className="bg-card border border-border rounded-xl p-6 sm:p-8 space-y-6 shadow-sm">
         {/* WLD 소각 안내 경고 배너 */}
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
-          
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-amber-500">
               클럽 헌장 등록비: 10,000 WLD 영구 소각 (Hard Sink)
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
               클럽 창설 시 10,000 WLD가 즉시 계좌에서 차감되어 머니버스 소각 계정으로 이동합니다.
-              Pay-to-Win 요소는 철저히 배제되며, 순수한 커뮤니티 거점 개척과 소셜 명예를 위해 사용됩니다.
+              Pay-to-Win 요소는 철저히 배제되며, 순수한 커뮤니티 거점 개척과 소셜 명예를 위해
+              사용됩니다.
             </p>
           </div>
         </div>
 
         {error && (
-          <div className="bg-destructive/15 border border-destructive/30 text-destructive text-sm rounded-lg p-3">
+          <div
+            role="alert"
+            className="bg-destructive/15 border border-destructive/30 text-destructive text-sm rounded-lg p-3"
+          >
             {error}
+            {outcomeUnknown && (
+              <Link
+                href="/clubs"
+                className="mt-2 inline-flex min-h-11 items-center underline underline-offset-2"
+              >
+                클럽 목록 확인
+              </Link>
+            )}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} aria-busy={loading} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1 sm:col-span-1">
-              <label className="text-xs font-semibold text-foreground">
+              <label htmlFor="club-tag" className="text-xs font-semibold text-foreground">
                 클럽 태그 <span className="text-destructive">*</span>
               </label>
               <input
+                id="club-tag"
                 type="text"
                 value={tag}
                 onChange={(e) => setTag(e.target.value.toUpperCase())}
@@ -109,10 +148,11 @@ export default function NewClubPage() {
             </div>
 
             <div className="space-y-1 sm:col-span-2">
-              <label className="text-xs font-semibold text-foreground">
+              <label htmlFor="club-name" className="text-xs font-semibold text-foreground">
                 클럽 이름 <span className="text-destructive">*</span>
               </label>
               <input
+                id="club-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -126,8 +166,11 @@ export default function NewClubPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-foreground">클럽 소개글</label>
+            <label htmlFor="club-description" className="text-xs font-semibold text-foreground">
+              클럽 소개글
+            </label>
             <input
+              id="club-description"
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -138,8 +181,11 @@ export default function NewClubPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-foreground">클럽 헌장 및 운영 규칙</label>
+            <label htmlFor="club-charter" className="text-xs font-semibold text-foreground">
+              클럽 헌장 및 운영 규칙
+            </label>
             <textarea
+              id="club-charter"
               rows={4}
               value={charter}
               onChange={(e) => setCharter(e.target.value)}
@@ -150,8 +196,11 @@ export default function NewClubPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-foreground">가입 방식</label>
+            <label htmlFor="club-join-mode" className="text-xs font-semibold text-foreground">
+              가입 방식
+            </label>
             <select
+              id="club-join-mode"
               value={joinMode}
               onChange={(e) => setJoinMode(e.target.value)}
               className="w-full bg-muted/50 border border-input rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -165,14 +214,14 @@ export default function NewClubPage() {
           <div className="pt-4 border-t border-border flex items-center justify-end gap-3">
             <Link
               href="/clubs"
-              className="px-4 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted font-medium transition-colors"
+              className="inline-flex min-h-11 items-center px-4 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted font-medium transition-colors"
             >
               취소
             </Link>
             <button
               type="submit"
-              disabled={loading}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors shadow-sm"
+              disabled={loading || outcomeUnknown || submitted}
+              className="min-h-11 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors shadow-sm"
             >
               {loading ? '창설 및 소각 처리 중...' : '10,000 WLD 소각하고 클럽 창설'}
             </button>
