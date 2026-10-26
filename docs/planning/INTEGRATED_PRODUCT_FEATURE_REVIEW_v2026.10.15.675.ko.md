@@ -1,3 +1,8 @@
+### F675-141 v1338 — 비공개 증빙 조회 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1336 → 현재 보완 v1338 → 다음 추가 v1340(잠정), 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a, 미병합 Draft #1476 적층, 개발 #1475. 실제 범용 미디어 GET은 소유권 가드 없음/public immutable, 일반 채팅과 공용 업로드, URL 새 창 렌더러, App API 보안 헤더 전달 누락. 운영 개인정보 사고 확정 아님.
+- evidenceId 기반 회원/관리자 실시간 인증 바이너리, HEAD/Range/304 검증, no-store/CORP/nosniff/referrer/vary, 메모리 Blob URL 폐기, 기존 URL LEGACY_UNVERIFIED/과거 캐시 회수 보장 금지/일반 채팅 호환. 검사·EXIF·영수증·잠금·GC·암호화 복원, Android/WCAG/SEO/KPI·기본 OFF. 상세는 INTEGRATED_PLANNING_MASTER.ko.md.
+- P0 ENV1338-01 SEC1338-02 REL1338-03 SUP1338-04; P1 SUP1338-05 SUP1338-06 SUP1338-07 SUP1338-08 SUP1338-09 SUP1338-10. QA v1305 FAILED/HOLD(잘못된 DB 역할 59 실패/증거 미충족 967), 원장 #1477·마이그레이션 #1469·용량 #1170. 외부 10,000건 신규 승인0·누적 UNKNOWN/BLOCKED, 운영 미배포.
+
 ## v1336 — F675-141 회원 문의 비공개 증빙 이미지 (기능 추가 / 초안 / 보류)
 - 이전 보완 v1334 → 현재 추가 v1336 → 다음 보완 v1338. main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간, 미병합 선행 #1472, 개발 #1475. 런타임·운영 변경 없음.
 - 실제 회원/관리자 문의 화면은 범용 이미지 업로드 URL을 본문에 삽입하고, 범용 미디어 GET은 인증 가드가 없고 public/immutable 캐시를 반환하며 Migration196에는 소유권 관계가 없음. 운영 사고/공개 노출 확정은 아님. 신규 문의 전용 스크린샷 1개(5MiB/1,200만 픽셀) 검사·EXIF 제거·24시간 임시저장·회원/의도/문의 결합 영수증·본인/권한 관리자 no-store 조회. 과거 URL은 LEGACY_UNVERIFIED, 자동 비공개 승격 금지.

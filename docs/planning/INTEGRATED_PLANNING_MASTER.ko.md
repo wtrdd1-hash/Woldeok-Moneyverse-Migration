@@ -1,3 +1,47 @@
+## 기획 v1338 — F675-141 회원 문의 비공개 증빙 조회·기존 이미지 무결성 개선 (기능 보완 / 초안 / 운영 보류)
+
+**교대·근거:** 이전 기능 추가 v1336 → 현재 기능 보완 v1338 → 다음 기능 추가 v1340(잠정). 최신 원격 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 재조회, main AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md 및 한국어 대조 확인. 미병합 v1336 Draft PR #1476에 적층, 개발 이슈 #1475. 기획 문서만 변경하며 선행 PR 없이 main 독립 병합 불가.
+
+### 실제 코드 확인과 기존 기획의 보완
+- `backend/src/content/chat-upload.controller.ts` 업로드 POST에는 세션·동의·CSRF 가드가 있지만 `GET content/chat/media/:key`에는 회원·소유권 가드가 없고 `public, max-age=86400, immutable` 캐시를 반환한다. `ChatImageStorage`는 무작위 키·URL만 저장하여 문의 소유권을 연결하지 않는다. 회원 문의 위젯과 관리자 문의 화면은 해당 URL을 메시지 본문에 넣는다. **일반 1:1 채팅** `frontend/src/app/chat/chat-room.tsx`도 같은 업로드를 사용하므로 범용 GET을 무작정 차단하면 채팅 회귀 위험이 있다.
+- `frontend/src/components/chat-message-renderer.tsx`는 본문 이미지 URL을 추출하여 `<img src>`·확대보기·새 창 링크로 노출한다. URL 패턴이나 무작위 키는 본인 인증 근거가 아니다. 신규 비공개 증빙은 본문 URL 파싱을 사용하지 않고 **메시지와 연결된 구조화 evidenceId**와 전용 권한 검사 뷰어로 표시한다.
+- Next.js `/app-api/v1/[...path]`는 바이너리 스트리밍과 cache-control/content-disposition 전달을 지원하지만 `APP_API_RESPONSE_HEADERS`에 nosniff·referrer-policy·vary·CORP·CSP가 없다. 백엔드 헤더만 설정했다고 Android 경유 응답까지 안전하다고 주장하지 않으며 게이트웨이 헤더 전달·합성 테스트를 추가한다.
+- 이는 **소스 코드상 위험**이다. 실제 운영 경로의 외부 접근 가능성·캐시된 개인정보·사고 발생은 확인되지 않았다. 운영 회원 이미지를 익명 GET으로 시험하지 않고 합성 격리 환경에서 Nginx·엣지·App API·CDN을 검증한다.
+
+### 회원·관리자 화면, 상태, 개인정보
+- 대상은 로그인 문의 소유 회원과 현재 권한을 가진 고객지원 관리자, Android App API. 진입은 `/support`, 플로팅 위젯, `/admin/support`. CTA: **스크린샷 첨부·제거·전송·비공개 보기·재시도·증빙 오류 신고**. 메시지당 PNG/JPEG/WebP 1개, 5MiB 이하, 1,200만 픽셀 이하, 본문 1~2,000자 필수, 제목 120자 기존 제약 유지. 기능 OFF일 때 텍스트 문의·일반 채팅을 변경하지 않는다.
+- `SELECTED → UPLOADING → SCANNING → READY → SENDING → ATTACHED`; `REJECTED/SCANNER_UNAVAILABLE/QUOTA/EXPIRED/SESSION_EXPIRED/REVOKED/MISSING_BYTES/UNAVAILABLE/LEGACY_UNVERIFIED` 구분. 파일 저장만으로 ATTACHED 아님; DB 커밋 영수증만 성공 근거. 응답 불명은 동일 전송 의도 영수증을 재조회하고 입력 텍스트를 보존한다. 404·503·타임아웃을 빈 파일/성공으로 표시하지 않는다.
+- 전용 뷰어는 매 조회마다 회원 세션·관리자 현재 권한 확인 후 동일 출처 인증 fetch로 바이너리를 받아 메모리 Blob URL을 생성하고 닫기·언마운트·로그아웃·권한 변경 시 revoke한다. URL·이미지·스토리지 키를 메시지 본문·localStorage·Service Worker·외부 이미지 최적화·새 창·OG·분석에 저장하지 않는다. 브라우저 `<img>`에는 임의 인증 헤더를 넣을 수 없으므로 fetch+Blob 계약을 명시한다. 키보드·포커스 복귀·스크린리더·320px·200% 확대·동작 감소·WCAG 2.2 AA, Android 공개 갤러리 저장 금지.
+- 과거 본문 URL은 `LEGACY_UNVERIFIED`로 분류한다. 승인된 읽기 전용 참조·엣지·캐시·보존 정책 조사 전에는 비공개 보장, 자동 전환, 일괄 삭제를 주장하지 않는다. CDN purge도 과거 브라우저 캐시·스크린샷 회수는 못 한다. 사고·고지 여부는 독립 증거와 승인된 개인정보 절차에 따른다.
+
+### API·권한·캐시·오류 계약 (모두 미구현 제안)
+- v1336의 회원 `POST /api/v1/support/evidence/stage`(multipart file, stable intentId/idempotencyKey, optional threadId; Session/Authenticated/Consent/CSRF), 관리자 전용 AdminGuard/AdminSessionGuard+CSRF 유지. 201 `{evidenceId,state:"READY",expiresAt,mimeType,byteSize}`, URL·storageKey 미반환. 같은 회원·의도·입력 바이트 재시도만 동일 영수증; 다른 바이트/회원/문의는 409. 백신 실패·타임아웃은 503으로 fail-closed, 미검사 READY 금지.
+- 기존 문의 생성·답장 POST에 선택 evidenceId+intentId를 추가하되 회원·문의·정규화 본문·증빙·전송 의도 digest를 서버가 결합한다. DB 커밋 이후에만 `{messageId,evidenceId,receiptId,state:"ATTACHED"}` 반환. 미전송 24시간 만료, 소모·취소·만료된 증빙 재연결 금지.
+- 회원 `GET /api/v1/support/threads/:threadId/evidence/:evidenceId`, 관리자 대응 경로는 **매 요청** 현재 세션·동의·문의 소유권·메시지 연결·관리자 역할을 NestJS 및 제한된 SECDEF 함수에서 확인한다. 클라이언트 actor UUID·난수 키는 권한 아님. 타인/미연결/철회/없는 증빙 404 비노출, 세션 만료 401, 동의·관리자 거부 403, 저장소 장애 503. GET/HEAD/Range/조건부 요청도 같은 권한 게이트; MVP에서 HEAD·Range·If-None-Match는 일관되게 거부 가능하나 인증 없는 206/304 금지. 비공개 바이너리·JSON·오류 응답 모두 `Cache-Control: private, no-store, max-age=0`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, `Cross-Origin-Resource-Policy: same-origin`, `Vary: Cookie`, 고정 안전 inline Content-Disposition; ETag/Last-Modified·공개 CDN 캐시·객체 저장소 리다이렉트 금지.
+- App API는 정확한 바이너리 상태·content-type/cache-control/referrer-policy/CORP/nosniff/vary/content-disposition을 보존해야 한다. 브라우저·Android 실제 경유 테스트 필요. 변이 요청 CSRF, 회원/세션/신뢰 엣지 IP 기준 빈도·바이트·검사 할당량, 개인정보·파일명·키·본문·해시·세션 토큰 로그 금지. 문의/관리자 화면 noindex/nofollow, 사이트맵/OG 사적 미리보기 금지.
+
+### DB·동시성·파일 정리·배포
+- #1469 적용 마이그레이션 5개 SHA 불일치 및 미병합 Migration 280 충돌을 해결한 뒤 **고유 번호 전진형** 마이그레이션만 제안한다. 적용 Migration196·체크섬 변경 금지. v1336 `support_evidence`와 `support_message_evidence` UUID PK/FK·회원/의도 UNIQUE·스토리지 위치 UNIQUE·MIME/용량/픽셀 CHECK·(owner,created_at DESC)·(state,expires_at) 부분 인덱스·메시지당 증빙 1개를 유지하고 staged_by·세션·문의·본문 digest·불변 영수증 결합. SECDEF 고정 search_path, PUBLIC EXECUTE 회수, 앱 최소 EXECUTE만 허용; 앱 직접 DML 권한 추가 금지.
+- 파일은 비공개 격리 위치(디렉터리 0700/파일 0600) → AV·매직바이트·디코더·재인코딩·EXIF 제거 → atomic rename/fsync → DB READY. 전송은 의도별 advisory transaction lock 후 문의 행·증빙 행 고정 순서 잠금, 회원/역할/READY/만료/검사 버전/실제 바이트 확인 후 메시지·증빙 연결·영수증·감사를 **단일 DB 트랜잭션**으로 처리. 재시도는 잠금 후 영수증과 digest 비교. GC는 미연결 만료 행만 `FOR UPDATE SKIP LOCKED`로 선점, 잠금 내 연결·lease 재확인 및 tombstone 후 바이트 삭제. DB+파일시스템은 단일 ACID 아님; 고아 파일·누락 바이트는 멱등 재조정, 장애 시 UNAVAILABLE+경보. 암호화 키·비공개 파일·메타데이터 포함 격리 백업 복원 필요.
+- 관리자 접근은 현재 역할을 매번 확인하고 evidenceId·행위·역할·시간·결과만 감사(본문/파일 내용 제외). 보존 기간은 승인된 정책을 따르며 법적 보존·삭제 우선순위 명세, 임의 기간 단정 금지. 기능 기본 OFF, 별도 개발 브랜치·정확 SHA Test 인증 E2E·보안·격리 복원·GitOps 승인·단계적 카나리 후에만 승격; 즉시 OFF 롤백 시 연결된 증빙을 임의 삭제하지 않는다.
+
+### 개발 백로그 및 검증
+- **P0 ENV1338-01:** 루트 99%(약 1.8GiB), 데이터 92%(약 16GiB), 타 작업자 보존·승인된 용량 정리·암호화 격리 복원 (#1170).
+- **P0 SEC1338-02:** 개발 앱 직접 UPDATE/DELETE 235/241, PUBLIC 은행 함수 3개, 적용 마이그레이션 5개 SHA 불일치(#1469), 신규 **자격 인증 비용 이중 원장 우회** #1477 조사·과거 원장 독립 대조·전진형 최소권한 수정. 실제 금전 손실 단정 금지.
+- **P0 REL1338-03:** QA v1305 FAILED/HOLD. 전체 감사 Critical2/High8, 봇 Critical1/High5, 라우트 증거 **미충족 967개**(관측 장애 967개 아님), 격리 DB 테스트 59건 FAIL은 **migrator 계정으로 잘못 실행**해 제품 결함으로 판정 불가. 올바른 app 계정 재실행·정확 SHA 인증 Test·복원·GitOps 미검증.
+- **P0 SUP1338-04:** 기존 공개 캐시 URL·소유권 없는 GET·새 창 이미지·게이트웨이 보안 헤더 누락·타인 접근/역할 철회/HEAD/Range 게이트. 일반 채팅 호환 보존.
+- **P1 SUP1338-05:** URL 본문 대신 구조화 증빙 ID, 기존 자료 읽기 전용 분류, 승인된 엣지·캐시 보완.
+- **P1 SUP1338-06:** 회원/관리자 인증 바이너리 API, NestJS/Next.js/App API 헤더, Blob 생명주기·Android 오류 계약.
+- **P1 SUP1338-07:** 회원·의도·digest·잠금·원자적 영수증, GC/연결 경합, 누락 파일·감사 실패 롤백.
+- **P1 SUP1338-08:** AV/디코딩/재인코딩/EXIF 제거·용량/픽셀/할당량·암호화 백업 복원.
+- **P1 SUP1338-09:** 회원/위젯/관리자 UX·WCAG AA·noindex/no-store·k>=20 비식별 KPI·보존.
+- **P1 SUP1338-10:** 격리 PostgreSQL 10,001건, 타 회원/관리자 철회 100건, 동시 의도 100건, 5MiB±1·12MP±1·다중형식·EXIF·AV 타임아웃·15초 게이트웨이·ENOSPC·커밋 후 응답 유실·24시간 만료/GC·HEAD/Range/304/404/503/캐시·직접 채팅 회귀·기능 OFF·격리 복원/롤백.
+- **KPI:** 무권한 바이트 0건, 미검사 READY 0건, 중복 영수증 0건, 합성 Test 엣지 비공개 바이트 캐시 0건, 로그 개인정보 0건; 첨부→전송 전환율·p95 업로드 <10초·GC 지연·누락 파일·404/503 분리. 운영 사고나 배포 완료 주장 금지.
+- **외부 독립 레퍼런스 10,000건:** 신규 승인 **0건**, 누적 중복 제거·근거 분류 승인 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. OWASP·MDN·W3C 문서는 설계 참고일 뿐 승인 건수에 미포함.
+
+**전체 백로그 ID:** ENV1338-01 SEC1338-02 REL1338-03 SUP1338-04 SUP1338-05 SUP1338-06 SUP1338-07 SUP1338-08 SUP1338-09 SUP1338-10.
+
+
 ## 기획 v1336 — F675-141 회원 문의 비공개 증빙 이미지 첨부 (기능 추가 / 초안 / 운영 보류)
 
 **교대:** 이전 Feature Improvement v1334 → 현재 Feature Addition v1336 → 다음 Feature Improvement v1338(잠정). 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재조회, AGENTS.md·README.md·PROJECT_PLAN.md(영어 정본)·PROJECT_PLAN.ko.md 대조. 미병합 v1334 Draft PR #1472 위에 적층한 미승인 설계 초안이며 실제 구현·배포 아님. 개발 이슈 #1475. Gemini/개발 A/B/C/QA 영역 미수정.

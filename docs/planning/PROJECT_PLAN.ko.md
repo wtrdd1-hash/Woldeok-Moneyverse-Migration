@@ -1,3 +1,13 @@
+## 기획 v1338 — F675-141 문의 비공개 증빙 조회·기존 이미지 무결성 (기능 보완 / 초안 / 운영 보류)
+- 이전 기능 추가 v1336 → 현재 기능 보완 v1338 → 다음 기능 추가 v1340(잠정). 최신 원격 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재조회, main AGENTS·README·영어 PROJECT_PLAN 정본·국문 대조. 선행 미병합 Draft #1476, 개발 #1475; 문서 기획만, main 독립 병합 불가.
+- 실제 범용 이미지 GET은 본인 가드 없이 public/immutable 캐시, 문의와 **일반 채팅**이 공용 업로드 사용. ChatMessageRenderer는 본문 URL로 이미지·새 창을 표시; 신규 증빙은 구조화 evidenceId+매 요청 본인/관리자 권한 검사+인증 Blob 뷰어. App API 바이너리 헤더 allowlist에서 nosniff/referrer-policy/vary/CORP 누락. 이는 코드상 위험이며 운영 개인정보 노출 확정 아님.
+- 회원·관리자 세션/역할 철회, HEAD/Range/304, 404 비노출/503 저장소 장애, 모든 경유 no-store/no-referrer/CORP/nosniff/vary, 직접 공개 URL 금지. 기존 URL은 LEGACY_UNVERIFIED로 읽기 전용 조사, 과거 캐시 삭제 보장·자동 비공개 전환·일반 채팅 중단 금지.
+- PNG/JPEG/WebP 5MiB/1,200만 픽셀, 텍스트 필수, AV fail-closed·재인코딩·EXIF 제거·24시간 임시 만료·안정 의도/영수증·DB 원자적 연결·GC/전송 경합·암호화 복원·기본 OFF. Android/WCAG AA/noindex/k>=20 익명 KPI. API·DB·트랜잭션·오류·롤백 상세는 기존 영문/국문 통합 마스터.
+- P0 ENV1338-01 루트99%/데이터92%·복원(#1170), SEC1338-02 앱 DML235/241·PUBLIC 은행3·마이그레이션5개 불일치(#1469)·신규 원장 우회 #1477, REL1338-03 QA v1305 FAIL/HOLD(59건은 잘못된 DB 역할로 실행된 실패, 967건은 증거 미충족), SUP1338-04 기존 공개 캐시/소유권/헤더 위험. P1 SUP1338-05~10 구조화 증빙·바이너리·잠금/GC·검사/백업·화면/접근성·격리 회귀/롤백.
+- QA v1305 프론트 1,423 PASS, 백엔드 DB 제외 1,326 PASS/398 SKIP, 전체 감사 Critical2/High8·봇 Critical1/High5 FAIL; 정확 SHA 공식 Test 인증 E2E·격리 복원 미검증. 런타임/DB/WLD/원장/플래그/Test/운영 미변경. 외부 독립 10,000건 신규 승인 0, 누적 승인 UNKNOWN/10,000 => BLOCKED/IN PROGRESS.
+- 전체 백로그 ID: ENV1338-01 SEC1338-02 REL1338-03 SUP1338-04 SUP1338-05 SUP1338-06 SUP1338-07 SUP1338-08 SUP1338-09 SUP1338-10.
+
+
 ## 기획 v1336 — F675-141 회원 문의 비공개 증빙 첨부 (기능 추가 / 초안 / 운영 보류)
 - 교대: 이전 Feature Improvement v1334 → 현재 Feature Addition v1336 → 다음 Feature Improvement v1338(잠정). 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인, AGENTS/README/PROJECT_PLAN 영어 정본·한국어 대조. 미병합 v1334 Draft #1472 기반, 개발 이슈 #1475. 문서 기획만 수행.
 - 실제 코드: 회원 위젯·관리자 문의 화면이 범용 이미지 업로드 후 URL을 문의 본문에 삽입하며, 범용 `GET content/chat/media/:key`는 회원 가드 없이 public/immutable 캐시를 반환. Migration196에는 첨부의 회원·문의 소유권 연결이 없음. 소스 위험이지 운영 공개 노출/사고 확정 아님. 신규 기능은 메시지당 PNG/JPEG/WebP 1개(5MiB/1,200만 픽셀), 검사·EXIF 제거·비공개 저장, 회원/의도 결합 임시 영수증, 24시간 미전송 만료, 실제 메시지 DB 연결, 본인/권한 관리자만 no-store 다운로드. 공개 URL 금지·기본 OFF·기존 텍스트 호환.
