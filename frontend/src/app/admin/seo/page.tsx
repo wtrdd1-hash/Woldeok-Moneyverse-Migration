@@ -15,14 +15,66 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-async function fetchSeoData(): Promise<SeoInitialData | null> {
+async function fetchSeoData(): Promise<SeoInitialData> {
   try {
     const data = await api<SeoInitialData>('/api/v1/seo/status/admin');
-    return { ...data, provenance: {
-      source: 'seo-status-api', observedAt: new Date().toISOString(),
-      freshness: 'fresh', status: 'operational',
-    } };
-  } catch { return null; }
+    return {
+      ...data,
+      provenance: {
+        source: 'seo-status-api',
+        observedAt: new Date().toISOString(),
+        freshness: 'fresh',
+        status: 'operational',
+      },
+    };
+  } catch (adminErr) {
+    console.warn('[AdminSeoPage] Failed to fetch /api/v1/seo/status/admin, attempting public status fallback:', adminErr);
+  }
+
+  try {
+    const publicData = await api<Partial<SeoInitialData>>('/api/v1/seo/status');
+    return {
+      totalHits24h: publicData.totalHits24h ?? 0,
+      totalHits7d: publicData.totalHits7d ?? 0,
+      avgDurationMs: publicData.avgDurationMs ?? 0,
+      botDistribution: publicData.botDistribution ?? {},
+      statusDistribution: publicData.statusDistribution ?? {},
+      stockCoverage: publicData.stockCoverage ?? { indexed: 0, total: 10 },
+      guideCoverage: publicData.guideCoverage ?? { indexed: 0, total: 18 },
+      targetUrls: publicData.targetUrls ?? [],
+      recentLogs: publicData.recentLogs ?? [],
+      indexNowKey: publicData.indexNowKey ?? 'moneyverse-indexnow-key-2026',
+      sitemapUrl: publicData.sitemapUrl ?? 'https://easy-scraping.com/sitemap.xml',
+      provenance: {
+        source: 'fallback',
+        observedAt: new Date().toISOString(),
+        freshness: 'fresh',
+        status: 'operational',
+      },
+    };
+  } catch (publicErr) {
+    console.warn('[AdminSeoPage] Failed to fetch /api/v1/seo/status fallback:', publicErr);
+  }
+
+  return {
+    totalHits24h: 0,
+    totalHits7d: 0,
+    avgDurationMs: 0,
+    botDistribution: {},
+    statusDistribution: {},
+    stockCoverage: { indexed: 0, total: 10 },
+    guideCoverage: { indexed: 0, total: 18 },
+    targetUrls: [],
+    recentLogs: [],
+    indexNowKey: 'moneyverse-indexnow-key-2026',
+    sitemapUrl: 'https://easy-scraping.com/sitemap.xml',
+    provenance: {
+      source: 'fallback',
+      observedAt: new Date().toISOString(),
+      freshness: 'unknown',
+      status: 'unavailable',
+    },
+  };
 }
 
 export default async function AdminSeoPage() {
