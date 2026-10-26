@@ -233,7 +233,6 @@ export class SessionRepository {
            END,
            expires_at = CASE
              WHEN user_id IS NOT NULL AND admin_opened_at IS NULL THEN now() + ${MEMBER_SESSION_INTERVAL}
-             WHEN user_id IS NOT NULL AND admin_opened_at IS NOT NULL AND expires_at < now() + interval '7 days' THEN now() + interval '30 days'
              ELSE expires_at
            END
        WHERE id=$1 AND revoked_at IS NULL AND expires_at>now()

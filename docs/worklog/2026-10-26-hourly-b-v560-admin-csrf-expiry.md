@@ -10,9 +10,15 @@
 ## In progress — 2026-10-26 18:44 KST
 - Confirmed migration 057 issues a separate 30-minute console session; the current `rotateCsrf` CASE extends it to 30 days. Existing test asserted only the member branch and ELSE, missing this case.
 
-- [x] RED reproduced: 1 failing test / 34 passing (18:44 KST); code fix next
-- [ ] Focused and broader verification
-- [ ] Main/plan refresh and CI/PR
+- [x] RED reproduced: 1 failing test / 34 passing (18:44 KST); minimal SQL CASE fix applied; GREEN 35/35 (17 DB tests skipped)
+- [x] Focused 35/35 PASS; isolated PostgreSQL 17.11 exact repository UPDATE SQL PASS (admin absolute expiry unchanged, member slides, expired/revoked unchanged); backend full test in progress; typecheck/lint/API contract/database unit checks passed (pending final summary)
+- [x] Mid-run origin/main and both plans refreshed: main unchanged at `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; QA PR #1412 reviewed.
+- [ ] Final CI/PR and official Test release gates
 
 ## Finished
 - Pending.
+
+## Code/API/DB contract
+- One-line removal of privileged session expiry extension in `SessionRepository.rotateCsrf`. Existing API routes/DTO, cookie/CSRF token behavior, DB schema/migrations, ledger, and WLD unchanged.
+- `auth_sessions.expires_at`: member sessions continue 180-day sliding; admin sessions preserve migration 057 absolute 30-minute expiry.
+- RED/GREEN evidence: `mv-b-v560-logs/red.log`, `green.log`; isolated real PostgreSQL evidence `isolated-pg.log`.
