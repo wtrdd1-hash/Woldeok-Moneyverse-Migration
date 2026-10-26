@@ -61,3 +61,36 @@ describe('NewspaperController', () => {
     expect(result.data[2].id).toBe('money-velocity');
   });
 });
+
+describe('Verified weekly newspaper snapshot', () => {
+  it('reports only a read-only source-backed cash and bank balance snapshot without invented weekly metrics', async () => {
+    const sqlStatements: string[] = [];
+    const controller = new NewspaperController({ query: async (sql: string) => {
+      sqlStatements.push(sql);
+      return { rows: [{ balance_wld: '12345678901234567890' }] };
+    } } as never);
+    const result = await controller.getWeeklyBrief();
+    expect(sqlStatements).toHaveLength(1);
+    expect(sqlStatements[0]).toContain('public.account_balances');
+    expect(sqlStatements[0]).toContain("'USER_CASH'");
+    expect(sqlStatements[0]).toContain("'USER_BANK'");
+    expect(result.success).toBe(true);
+    expect(result.data).toMatchObject({
+      balanceSnapshotWld: '12345678901234567890',
+      source: 'user_cash_and_bank_balances',
+    });
+    expect(Date.parse(result.data.asOf)).not.toBeNaN();
+    expect(JSON.stringify(result)).not.toMatch(/CHIPS|SPACE|BIO|inflationRate|weeklyLeaders|weeklySinkAmount|m0Supply/);
+  });
+
+  it('reports actual zero rather than imposing a fictional minimum', async () => {
+    const controller = new NewspaperController({ query: async () => ({ rows: [{ balance_wld: '0' }] }) } as never);
+    expect((await controller.getWeeklyBrief()).data.balanceSnapshotWld).toBe('0');
+  });
+
+  it('fails closed when database is unavailable, throws, or returns invalid balance', async () => {
+    await expect(new NewspaperController().getWeeklyBrief()).rejects.toMatchObject({ status: 503 });
+    await expect(new NewspaperController({ query: async () => { throw new Error('database unavailable'); } } as never).getWeeklyBrief()).rejects.toMatchObject({ status: 503 });
+    await expect(new NewspaperController({ query: async () => ({ rows: [{ balance_wld: '-100' }] }) } as never).getWeeklyBrief()).rejects.toMatchObject({ status: 503 });
+  });
+});
