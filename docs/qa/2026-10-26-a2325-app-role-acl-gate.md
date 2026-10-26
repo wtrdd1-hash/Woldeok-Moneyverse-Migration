@@ -20,3 +20,9 @@
 
 ## Release decision
 **BLOCKED / Production RELEASE HOLD.** A reviewed forward-only ACL remediation, unique migration number, isolated parity-correct real-PostgreSQL negative and positive tests, full security and CI, backup/restore, official Test exact-SHA authenticated E2E and approved GitOps gate are all required. Rollback: no runtime or DB change occurred; simply close/revert this unmerged diagnostic PR if superseded. Existing live systems remain unchanged.
+
+## Final repository delta (23:41 KST)
+- Remote branches **293 → 294**; open PRs **286 → 287** (new Draft #1464). Eight changed repository files; no branch deletion.
+- The two main-ancestor branches and ten unavailable Git-object branches remain preserved because other automations may reference them; 280 locally verifiable unique unmerged branches also preserved.
+- SQL catalog counts: 241 public base tables, 235 app-writable; 3 legacy PUBLIC bank overloads; app default ACL entries 8 table / 3 sequence / 1 function.
+- Exact branch SHA and CI evidence are tracked in Draft PR #1464; any new commit requires revalidation.

@@ -46,3 +46,9 @@
 - [ ] Remediate live ACL (blocked by security review, competing migration 280 proposals, parity-correct isolated DB and full release gates).
 - [ ] Complete P0/P1 user feature across web/backend/API/DB/Android (not accomplished this run).
 - Production/Test: NO CHANGE; rollback: not applicable. Preserve all branches; delete 0.
+
+### 23:41 KST — GitHub checkpoint
+- Draft PR #1464 created; P0 issue #993 and PR comments updated with exact READ ONLY PostgreSQL findings.
+- Remote branches 293→294; open PRs 286→287; 8 changed files; deleted 0. Two main-ancestor, ten unavailable, and 280 unmerged unique-commit branches preserved due cross-agent references and safety.
+- SQL catalog: 241 public tables, 235 app-writable, 3 PUBLIC bank overloads; default app ACL entries 8 table / 3 sequence / 1 function.
+- PR CI is asynchronous and cannot be considered PASS until a final-SHA result is observed.
