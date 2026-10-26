@@ -1,4 +1,6 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
+- v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 
 ## v2026.10.26.1308 — F675-134 회원 전용 검증형 보안 활동 보관함·안전한 CSV 내보내기 (기능 추가 / 초안 / 운영 보류)
 

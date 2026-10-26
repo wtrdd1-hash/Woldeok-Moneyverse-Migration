@@ -7,3 +7,4 @@
 - EN canonical/KO equivalent integrated masters, project plans, feature reviews and update logs; no scattered planning files.
 - External publisher families 4, new approved 0, cumulative deduplicated UNKNOWN/10,000 BLOCKED.
 - Docs-only, separate from Gemini/development A/B/C/QA; GitHub PR/issue handoff pending.
+- GitHub Draft PR #1399, engineering issue #1398, root-capacity issue #1170 updated; main unmerged and Production HOLD.

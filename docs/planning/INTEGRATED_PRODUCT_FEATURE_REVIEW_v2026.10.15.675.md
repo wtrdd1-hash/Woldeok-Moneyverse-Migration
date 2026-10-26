@@ -1,4 +1,6 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
+- v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 
 ## F675-134 / v1308 — Security Activity Archive (Addition / DRAFT / HOLD)
 - Previous Improvement v1306 / Current Addition v1308 / Next Improvement v1310. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid. UI 5/20, migration214 cap50/no UUID, dev DB 41 events/3 users, not complete auth. Owner-only filtered activity and bounded reauth+CSRF CSV, signed microsecond cursor, honest empty/503, SECDEF, no metadata, Android/a11y. No F675-132/F675-131 overlap.

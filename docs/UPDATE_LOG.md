@@ -1,4 +1,6 @@
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394; issue #1389; root-capacity #1170; DRAFT / RELEASE HOLD.
+- v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
+- v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 
 ## 2026-10-26 10:12 KST — Planning v1308 / F675-134 (Addition / DRAFT / HOLD)
 - Previous Improvement v1306 / Current Addition v1308 / Next Improvement v1310; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid. Security UI 5/20, migration214 max50/no UUID, dev DB 41 events/3 users. Recorded-only archive, bounded reauth+CSRF CSV; no complete-login-history claim.

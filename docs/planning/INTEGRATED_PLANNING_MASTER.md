@@ -1,4 +1,6 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
+- v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 
 ## v2026.10.26.1308 — F675-134 Verified Member Security Activity Archive and Safe CSV Export (Feature Addition / DRAFT / RELEASE HOLD)
 

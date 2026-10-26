@@ -1,4 +1,6 @@
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394; issue #1389; root-capacity #1170; DRAFT / RELEASE HOLD.
+- v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
+- v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 
 ## 2026-10-26 10:12 KST — 기획 v1308 / F675-134 (기능 추가 / 초안 / 운영 보류)
 - 이전 기능 보완 v1306 / 현재 기능 추가 v1308 / 다음 기능 보완 v1310; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 재확인. UI 5/20, migration214 최대50·UUID 없음, 개발 DB 41건/3명. 기록된 보안 활동 보관함·재인증+CSRF CSV, 전체 로그인 이력 주장 금지.
