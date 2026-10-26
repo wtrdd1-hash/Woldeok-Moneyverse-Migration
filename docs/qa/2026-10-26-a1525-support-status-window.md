@@ -1,0 +1,23 @@
+# QA A1525 — Recent Member Support Status Window (DRAFT / RELEASE HOLD)
+
+**Date:** 2026-10-26 KST. **Baseline main:** 1c5b84a1c45baafcca83f375a6f99698121e9bb5. **Feature code commit:** 33bcced78357e01bc706051c9e49c8cb73329a24. **Branch:** auto/hourly-a-support-status-window-20261026-1525. Final branch head and CI evidence are recorded in PR, not inferred from this earlier code commit.
+
+## User-visible change and scope
+The authenticated /support page now filters **the most recent at most 100 owner-scoped conversations** by All, Waiting for admin, Waiting for member, or Resolved. It shows a truthful bounded-window disclaimer and empty state, keeps explicit deep links through the existing owner-verified message API, and preserves noindex/dynamic rendering. Backend GET /api/v1/support/threads now asks existing public.support_my_threads(session_actor,100) and returns windowLimit=100. Android app-api schema artifacts include windowLimit on the existing route; endpoint count stays 179. No new DB migration, app-role grants, ledger mutation, WLD movement, user notification or unread/read receipt. The separate planned support attention/read-watermark system (#1415) is **not** implemented here.
+
+## TDD and exact code-SHA verification
+- Backend RED (1 failed / 1 passed) -> GREEN **2/2 PASS**. Frontend RED missing helpers/components -> GREEN **6/6 PASS**; admin support CSRF guard **2/2 PASS**.
+- Root pnpm test **FAIL**: contract **38 PASS**, DB package **15 PASS / 3 SKIP**, backend **1,315 PASS / 398 SKIP**, frontend **1,403 PASS / 6 FAIL**. Frontend failures: SEO/i18n 3, login touch target 1, calculator registration link 1, admin M2 telemetry 1. QA-owned #1412 has separate remediation; do not duplicate/cherry-pick unverified changes.
+- pnpm lint **PASS** (0 errors / 1,128 warnings); pnpm typecheck **PASS**; pnpm build **PASS** (native Turbopack); pnpm api:contract:check **PASS** (179 endpoints) after committing generated contract. Bot npm test **8/8 PASS** after isolated npm ci; initial missing-module failure was a worktree dependency setup issue.
+- pnpm audit --prod --audit-level high **FAIL: 2 High**; full pnpm audit **FAIL: 2 Critical / 10 High / 11 Moderate / 3 Low**; bot npm audit **FAIL: 1 Critical / 5 High**. No claim of full security PASS.
+- Source tests cover status allowlist, order preservation, explicit 100-bound, empty-state truthfulness, deep-link URL encoding, aria-current, session-derived actor, and backend failure propagation. Browser-driven authenticated E2E and full WCAG audit are **NOT VERIFIED**.
+
+## Real PostgreSQL 17.11, isolated only
+The isolated Test container moneyverse-test-db binds **127.0.0.1:5580/5585**, database wdmv_v761_test_acl, 281 applied migrations. In a single transaction, the schema owner inserted **101** owner threads and **1** other-owner thread; SET LOCAL ROLE moneyverse_app called the existing SECURITY DEFINER function. Owner LIMIT 100 returned **100**, default returned **50**, other-member records visible to owner **0**, status distribution in the 100-window **33 open / 34 waiting_user / 33 resolved**. Direct table SELECT was denied. **ROLLBACK** left **0** test threads. No query or write was directed to production-linked port 5433. The existing DB's separate support-message oldest-200 truncation is not fixed by this feature; #1415 addresses the planned repair.
+
+## Branch, concurrency and release safety
+At start: **264** remote branches, **260** open PRs (258 Draft), no duplicate PR/branch head SHA; 260 locally available non-main heads have unmerged commits and 3 other heads lack local objects. Conflicts #1107/#1110/#1143. Four Draft PRs #1105/#1117/#1139/#1143 independently claim migration 280 (#1147). No branch deleted, no other agent worktree touched. QA #1412 is a distinct unmerged candidate with three CI checks PASS but not complete release authorization.
+
+**HOLD:** main frontend regression, full dependency audits, isolated backup/restore, official exact-SHA deployed Test backend/API/DB/authenticated support and finance E2E, approved GitOps, and production smoke/version/rollback gates are incomplete. Public Test /api/version 6f697e74b7bf0cd1e4521d36534cfd9c140f8010 and Production 6a989b5ac0c6155587d43426d64f6def6b62c917 do not match this candidate. **No main merge, Test promotion, Production deployment, production DB writes, service restarts, or branch deletion.**
+
+**Rollback:** Since this is an additive read-only UI/API response with no schema change, revert the candidate commit before any release; existing support thread/message storage remains untouched. Preserve all unmerged branches until fully integrated and proven redundant.
