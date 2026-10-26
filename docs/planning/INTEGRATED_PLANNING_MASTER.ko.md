@@ -1,4 +1,6 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
+- v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 
 ## v2026.10.26.1306 — F675-133 구형·Store 2.0 구매 영수증 출처·금액·커서 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
 

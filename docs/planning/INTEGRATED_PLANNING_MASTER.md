@@ -1,4 +1,6 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
+- v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 
 ## v2026.10.26.1306 — F675-133 Cross-Generation Receipt Provenance, Money and Cursor Integrity (Feature Improvement / PLANNING DRAFT / RELEASE HOLD)
 

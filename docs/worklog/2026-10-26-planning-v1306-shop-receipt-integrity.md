@@ -22,3 +22,9 @@
 
 ## Verification
 - Git diff --check and six-document backlog parity required before commit; report actual command exit codes. Draft PR and GitHub issue update only after verified docs. Root disk emergency remains P0.
+
+## GitHub handoff
+- Draft PR #1394: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on #1390; unmerged).
+- Development issue #1389 comment: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389#issuecomment-6405355387
+- Capacity issue #1170 comment: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6405355861
+- Source code, DB, ledger, Test, Production and feature switches unchanged; QA/release HOLD.

@@ -1,4 +1,6 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
+- v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 
 ## F675-133 / v1306 — Cross-generation purchase receipt integrity review (Feature Improvement / DRAFT / HOLD)
 - Cycle: Previous Addition v1304 / Current Improvement v1306 / Next Addition v1308 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid unchanged; prior Draft #1390 unmerged; engineering ownership stays with developers.

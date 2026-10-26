@@ -1,4 +1,6 @@
 # Woldeok Moneyverse — Living Project Plan
+- v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
+- v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 
 ## Planning v1306 — F675-133 Purchase Receipt Integrity (Improvement / DRAFT / HOLD)
 - Previous Addition v1304 → Current Improvement v1306 → Next Addition v1308 (provisional); main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked at start/mid. v1304 Draft #1390 remains unmerged; docs-only stacked worktree.

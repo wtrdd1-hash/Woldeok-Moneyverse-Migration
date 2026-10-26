@@ -1,3 +1,4 @@
+- v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394; issue #1389; root-capacity #1170; DRAFT / RELEASE HOLD.
 ## 2026-10-26 09:13 KST — 기획 v1306 / F675-133 (기능 보완 / 초안 / 운영 보류)
 - 이전 추가 v1304 → 현재 보완 v1306 → 다음 추가 v1308(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 동일, 선행 Draft #1390 미병합. 구형 INNER JOIN·NULL 금액, 신규 할인 당시 단가, 원장 NUMERIC/소문자 방향, 장애→빈 목록, 마이크로초 커서·페이지 간 cutoff 한계, DB 행위자 신뢰 경계를 보완. 개발 DB 표본 구형 0·신규 6·분개 일치 6건(운영 증빙 아님).
 - P0 ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04; P1 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10. QA v1287 FAILED/HOLD, 루트 100% 608MiB, 정확 SHA/복원 보류, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서만 변경.

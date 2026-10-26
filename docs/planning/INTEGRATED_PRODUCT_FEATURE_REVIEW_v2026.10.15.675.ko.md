@@ -1,4 +1,6 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+- v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394 (stacked on unmerged #1390; RELEASE HOLD).
+- v1306 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389 (comment 6405355387).
 
 ## F675-133 / v1306 — 구형·신규 구매 영수증 무결성 검토 (기능 보완 / 초안 / 보류)
 - 이전 추가 v1304 / 현재 보완 v1306 / 다음 추가 v1308(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 동일, 선행 Draft #1390 미병합, 개발 구현과 분리.
