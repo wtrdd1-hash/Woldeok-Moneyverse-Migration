@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { calculateRetirementEligibility } from '@/lib/retirement-estimate';
 import RetirementCalculatorPage from './page';
+import RetirementCalculatorLayout, { metadata } from './layout';
 
 vi.mock('@/components/locale-provider', () => ({ useLocale: () => ({ locale: 'ko' }) }));
 vi.mock('@/components/public-advertisement', () => ({
@@ -41,6 +42,18 @@ describe('Retirement calculator UI and SEO', () => {
     fireEvent.change(months, { target: { value: '11' } });
     expect(screen.getByRole('status', { name: '퇴직급여 지급 자격 안내' }).textContent).toContain('1년 미만');
     expect(screen.getByText('세전 퇴직금').parentElement?.textContent).toContain('0 원');
+  });
+  it('keeps mobile input targets at least 44px and keyboard reachable', () => {
+    render(<RetirementCalculatorPage />);
+    expect(screen.getByLabelText('근속연수 (년 / 개월)').className).toContain('min-h-11');
+    expect(screen.getByLabelText('근속 개월 수').className).toContain('min-h-11');
+  });
+  it('has severance-specific canonical SEO rather than unrelated NPS/FIRE promises', () => {
+    expect(metadata.title).toContain('퇴직금');
+    expect(metadata.description).toContain('근속');
+    const { container } = render(<RetirementCalculatorLayout><div>Page</div></RetirementCalculatorLayout>);
+    expect(container.textContent).not.toContain('aggregateRating');
+    expect(container.querySelectorAll('script[type="application/ld+json"]')[2]?.textContent).not.toContain('aggregateRating');
   });
   it('does not emit fabricated rating metadata or promise a virtual WLD grant', () => {
     const { container } = render(<RetirementCalculatorPage />);

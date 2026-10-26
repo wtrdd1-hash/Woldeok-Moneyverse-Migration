@@ -199,7 +199,7 @@ export default function RetirementCalculatorPage() {
                     max={40}
                     value={years}
                     onChange={(e) => setYears(Number.isFinite(Number(e.target.value)) ? Math.min(40, Math.max(0, Math.trunc(Number(e.target.value)))) : 0)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full min-h-11 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
                   />
                   <span className="absolute right-3 top-2 text-xs text-zinc-400">년</span>
                 </div>
@@ -212,7 +212,7 @@ export default function RetirementCalculatorPage() {
                     max={11}
                     value={months}
                     onChange={(e) => setMonths(Number.isFinite(Number(e.target.value)) ? Math.min(11, Math.max(0, Math.trunc(Number(e.target.value)))) : 0)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full min-h-11 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
                   />
                   <span className="absolute right-3 top-2 text-xs text-zinc-400">개월</span>
                 </div>
@@ -236,7 +236,7 @@ export default function RetirementCalculatorPage() {
                   step={100000}
                   value={monthlySalary}
                   onChange={(e) => setMonthlySalary(Number.isFinite(Number(e.target.value)) ? Math.min(1_000_000_000_000, Math.max(0, Number(e.target.value))) : 0)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full min-h-11 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
                 />
                 <span className="absolute right-3 top-2 text-xs text-zinc-400">원</span>
               </div>
@@ -256,7 +256,7 @@ export default function RetirementCalculatorPage() {
                   step={500000}
                   value={annualBonus}
                   onChange={(e) => setAnnualBonus(Number.isFinite(Number(e.target.value)) ? Math.min(1_000_000_000_000, Math.max(0, Number(e.target.value))) : 0)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full min-h-11 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
                 />
                 <span className="absolute right-3 top-2 text-xs text-zinc-400">원</span>
               </div>
@@ -367,14 +367,14 @@ export default function RetirementCalculatorPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/bank"
-                className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/40 transition-colors"
+                className="flex-1 min-h-11 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/40 transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 가상 은행 기능 살펴보기
               </Link>
               <Link
                 href="/register"
-                className="py-2 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition-colors"
+                className="min-h-11 py-2 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition-colors"
               >
                 회원가입 안내
               </Link>
@@ -414,7 +414,7 @@ export default function RetirementCalculatorPage() {
                   setMonths(0);
                   setMonthlySalary(sc.monthlySalary);
                 }}
-                className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 self-start"
+                className="min-h-11 text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 self-start"
               >
                 이 조건으로 계산하기 <ArrowRight className="w-3 h-3" />
               </button>

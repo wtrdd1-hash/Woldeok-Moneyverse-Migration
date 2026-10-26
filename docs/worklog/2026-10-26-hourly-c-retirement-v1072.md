@@ -25,3 +25,8 @@ Pending.
 - RED 5 failing behavior tests + 1 pre-existing passing; GREEN 6/6 on same isolated worktree.
 - Implemented strict nonnegative bounded tenure/pay inputs, 12-month threshold, fractional severance, integer tax tenure, explicit under-one-year status, unverified WLD grant removal and fabricated SEO review removal.
 - Pure calculator; no API/DB/schema mutation. Next: full gates, CI, exact SHA status.
+
+## Pre-PR checkpoint — 2026-10-26 19:59 KST
+- Second RED/GREEN: SEO layout was for unrelated NPS/FIRE and default shared helper inserted fake review ratings. New tests RED 2, then GREEN 8/8. Updated canonical metadata/OG/FAQ/schema to actual severance calculator, without fabricated reviews. Inputs/CTAs meet 44px minimum.
+- Local initial HEAD: lint PASS (0 errors/1,128 warnings); typecheck PASS; frontend full 1,403 PASS/6 FAIL (existing SEO3, login1, registration1, admin M2 1); app-api 179 PASS; production audit FAIL (2 high), full audit FAIL (26: 2 critical/10 high). Webpack build failed with 1GiB Node heap OOM; rerun with larger heap or remote CI required.
+- Origin/main and EN/KO canonical plans re-fetched, unchanged. No main merge, DB writes or deployment. Release gates remain CLOSED.

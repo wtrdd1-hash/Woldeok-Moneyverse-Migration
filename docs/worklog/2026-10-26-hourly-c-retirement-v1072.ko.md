@@ -23,3 +23,8 @@
 - origin/main 재조회 후 동일 SHA, 국영문 통합기획 해시 불변. 퇴직금 계산기 중복 PR 없음.
 - TDD RED 5건 실패 확인 후 GREEN 6/6. 1년 미만 0원·입력값 경계·1년 이상 월할 계산·자격 안내·허위 WLD 지급 문구·SEO 가상 평점 제거.
 - API/DB/금융 원장 변경 없음. A/B/QA/Gemini 보존.
+
+## PR 전 — 19:59 KST
+- 기존 레이아웃 SEO가 실제 퇴직금 계산기가 아닌 국민연금/FIRE 계산기를 설명하고, 공통 도우미가 가상 평점을 추가하는 문제 확인. 추가 RED 2건→GREEN 총 8/8. 메타/OG/FAQ/구조화 데이터 실제 기능으로 수정, 44px 터치 영역 보완.
+- 초기 HEAD: Lint 오류 0/경고 1128, Typecheck PASS, Frontend 전체 1403 PASS/6 FAIL(기존), app-api 179 PASS. 운영 보안 2 High, 전체 26건 FAIL. 1GiB 힙 제한 로컬 Webpack Build OOM으로 재검증 필요.
+- main·기획 재조회 불변. DB/운영 배포 변경 없음.
