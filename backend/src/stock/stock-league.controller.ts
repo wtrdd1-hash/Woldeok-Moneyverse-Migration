@@ -6,9 +6,10 @@ import {
   Inject,
   Post,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -108,41 +109,14 @@ export class StockLeagueController {
 
   @Post('copy-trade/subscribe')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
-  @ApiOperation({ summary: '상위 고래 트레이더 카피 트레이딩 구독' })
-  async subscribeCopyTrading(@Req() req: RequestWithSession, @Body() body: SubscribeCopyTradingDto) {
-    if (!this.repository) {
-      throw new BadRequestException('주식 챔피언십 리그 시스템이 현재 점검 중입니다.');
-    }
-    const userId = requireUserId(req);
-    const userName = '구독자';
-
-    if (!body.whaleId) {
-      throw new BadRequestException('구독할 고래 트레이더 ID가 필요합니다.');
-    }
-    if (!body.allocatedBudget || body.allocatedBudget < 10000) {
-      throw new BadRequestException('최소 10,000 WLD 이상의 자본금을 할당해야 합니다.');
-    }
-
-    try {
-      const subscription = await this.repository.subscribeCopyTrading(
-        userId,
-        userName,
-        body.whaleId,
-        body.whaleName || '고래 트레이더',
-        body.allocatedBudget,
-        body.copyRatio ?? 1.0
-      );
-      return {
-        success: true,
-        subscription,
-        message: `${body.whaleName || '고래'} 트레이더의 실전 카피 트레이딩이 활성화되었습니다!`,
-      };
-    } catch (err: any) {
-      if (err instanceof StockLeagueInputError) {
-        throw new BadRequestException(err.message);
-      }
-      throw err;
-    }
+  @ApiOperation({ summary: '상위 고래 트레이더 카피 트레이딩 구독 (원장 정산 검증 전 중단)' })
+  @ApiResponse({ status: 503, description: 'Copy-trading subscriptions require verified ledger settlement.' })
+  async subscribeCopyTrading(@Req() _req: RequestWithSession, @Body() _body: SubscribeCopyTradingDto) {
+    // Do not expose a successful subscription without ledger-backed budget reservation.
+    throw new ServiceUnavailableException({
+      code: 'COPY_TRADING_LEDGER_UNAVAILABLE',
+      message: 'Copy-trading subscriptions are unavailable pending verified ledger settlement.',
+    });
   }
 
   @Post('copy-trade/cancel')
