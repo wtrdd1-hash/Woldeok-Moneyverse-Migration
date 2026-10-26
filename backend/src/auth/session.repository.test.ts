@@ -165,6 +165,19 @@ describe('SessionRepository.rotateCsrf', () => {
     );
   });
 
+  it('never extends an administrator session during CSRF rotation', async () => {
+    // Migration 057 opens a console session for exactly 30 minutes. A CSRF
+    // refresh must not convert that absolute limit into a sliding lifetime.
+    const { pool, queries } = recordingPool(() => [{ id: 'session-id' }]);
+    await new SessionRepository(pool).rotateCsrf('session-id');
+    const expiryCase = queries[0]?.text.match(/expires_at\s*=\s*CASE([\s\S]*?)\bEND\b/i)?.[1];
+    expect(expiryCase).toBeDefined();
+    expect(expiryCase).not.toMatch(/admin_opened_at\s+IS\s+NOT\s+NULL/i);
+    expect(expiryCase).toMatch(/WHEN user_id IS NOT NULL AND admin_opened_at IS NULL THEN now\(\) \+ interval '180 days'/);
+    expect(expiryCase).toMatch(/ELSE expires_at/);
+    expect(queries[0]?.text).toMatch(/WHERE id=\$1 AND revoked_at IS NULL AND expires_at>now\(\)/);
+  });
+
   it('slides a member session but leaves a console session its thirty minutes', async () => {
     // The bug this pins: sliding every signed-in session on each rotation
     // turned the console's thirty-minute life (057) into thirty days, because
