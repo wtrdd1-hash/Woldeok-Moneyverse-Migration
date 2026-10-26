@@ -80,3 +80,41 @@ describe('requestActivityTrail', () => {
     expect(recordRequest).not.toHaveBeenCalled();
   });
 });
+
+describe('requestActivityTrail country provenance', () => {
+  async function recordedCountry(
+    headers: Record<string, string>,
+    trustProxyForwardedFor: boolean,
+  ): Promise<string | null> {
+    const recordRequest = vi.fn().mockResolvedValue(undefined);
+    const request = {
+      method: 'GET',
+      originalUrl: '/api/v1/wallet',
+      headers,
+      socket: { remoteAddress: '10.0.0.4' },
+    } as unknown as Request;
+    const reply = response();
+    requestActivityTrail({
+      activity: { recordRequest } as never,
+      sessions: null,
+      config: { ...config, trustProxyForwardedFor } as AppConfig,
+    })(request, reply, vi.fn());
+    reply.emit('finish');
+    await vi.waitFor(() => expect(recordRequest).toHaveBeenCalledOnce());
+    return recordRequest.mock.calls[0]![0].country as string | null;
+  }
+
+  it('does not trust a visitor-supplied Cloudflare country when the proxy is untrusted', async () => {
+    expect(await recordedCountry({ 'cf-ipcountry': 'US' }, false)).toBeNull();
+  });
+
+  it('does not accept a Vercel country header on the Cloudflare trust boundary', async () => {
+    expect(await recordedCountry({ 'x-vercel-ip-country': 'US' }, true)).toBeNull();
+  });
+
+  it('does not fall back to a spoofable country after an invalid trusted edge header', async () => {
+    expect(
+      await recordedCountry({ 'cf-ipcountry': 'not-a-country', 'x-vercel-ip-country': 'US' }, true),
+    ).toBeNull();
+  });
+});

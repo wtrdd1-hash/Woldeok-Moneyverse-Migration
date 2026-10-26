@@ -31,9 +31,11 @@ export function requestActivityTrail({
     }
 
     const startedAt = Date.now();
-    const countryHeader = String(
-      request.headers['cf-ipcountry'] ?? request.headers['x-vercel-ip-country'] ?? '',
-    ).toUpperCase();
+    // Country is audit metadata, not a claim a visitor may supply. Only the
+    // configured trusted Cloudflare edge overwrites CF-IPCountry; the Vercel
+    // header is not authenticated on this deployment and must not be a fallback.
+    const edgeCountry = config.trustProxyForwardedFor ? request.headers['cf-ipcountry'] : null;
+    const countryHeader = typeof edgeCountry === 'string' ? edgeCountry.trim().toUpperCase() : '';
     const country = /^[A-Z]{2}$/.test(countryHeader) ? countryHeader : null;
     const token = sessionToken(request.headers, config);
     const actor =
