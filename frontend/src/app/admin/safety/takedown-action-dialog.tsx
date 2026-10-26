@@ -41,7 +41,7 @@ export function TakedownActionDialog({ item }: { readonly item: TakedownItem }) 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant={item.status === 'SUBMITTED' ? 'default' : 'outline'} className="text-xs">
+        <Button size="sm" variant={item.status === 'SUBMITTED' ? 'default' : 'outline'} className="min-h-11 text-xs">
           조치 처리
         </Button>
       </DialogTrigger>

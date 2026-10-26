@@ -43,7 +43,7 @@ export function ChatReportActionDialog({ item }: { item: ChatReportItem }) {
         <Button
           variant={isClosed ? 'outline' : 'default'}
           size="sm"
-          className="h-8 text-xs font-semibold"
+          className="min-h-11 text-xs font-semibold"
         >
           {isClosed ? '조치 변경' : '심사 및 조치'}
         </Button>

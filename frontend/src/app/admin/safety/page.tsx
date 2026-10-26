@@ -213,12 +213,12 @@ export default async function AdminSafetyPage({
 
       {/* 2대 안전 큐 탭 인터페이스 */}
       <Tabs key={selectedView} defaultValue={selectedView} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md h-10 mb-2">
-          <TabsTrigger value="chat-reports" className="text-xs font-semibold gap-1.5">
+        <TabsList className="grid h-auto min-h-11 w-full max-w-md grid-cols-2 mb-2">
+          <TabsTrigger value="chat-reports" className="min-h-11 whitespace-normal break-words px-1 text-center text-xs font-semibold gap-1.5">
             <MessageSquareWarning className="size-3.5" />
             1:1 채팅 신고 심사 ({pendingChatReports === null ? '확인 불가' : pendingChatReports})
           </TabsTrigger>
-          <TabsTrigger value="takedowns" className="text-xs font-semibold gap-1.5">
+          <TabsTrigger value="takedowns" className="min-h-11 whitespace-normal break-words px-1 text-center text-xs font-semibold gap-1.5">
             <FileText className="size-3.5" />
             긴급 콘텐츠 삭제 ({pendingTakedowns === null ? '확인 불가' : pendingTakedowns})
           </TabsTrigger>
@@ -248,7 +248,7 @@ export default async function AdminSafetyPage({
               ) : chatReports.length === 0 ? (
                 <EmptyState
                   title="현재 조회 페이지에 1:1 채팅 신고가 없습니다."
-                  description="신규 신고가 접수되면 증거 스냅샷과 함께 실시간으로 큐에 노출됩니다."
+                  description="새로 접수된 신고는 다시 조회할 때 확인할 수 있습니다."
                 />
               ) : (
                 <div className="overflow-x-auto">
@@ -330,7 +330,7 @@ export default async function AdminSafetyPage({
               ) : takedowns.length === 0 ? (
                 <EmptyState
                   title="현재 조회 페이지에 긴급 삭제 요청이 없습니다."
-                  description="접수된 신규 요청이 들어오면 실시간으로 큐에 노출됩니다."
+                  description="새로 접수된 요청은 다시 조회할 때 확인할 수 있습니다."
                 />
               ) : (
                 <div className="overflow-x-auto">

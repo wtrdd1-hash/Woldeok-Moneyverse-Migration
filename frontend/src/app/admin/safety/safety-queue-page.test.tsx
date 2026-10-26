@@ -53,6 +53,8 @@ describe('admin moderation queue server-rendered integration', () => {
     expect(fetchQueue).toHaveBeenCalledWith('/api/v1/admin/safety/takedowns?limit=50&offset=100');
     expect(rendered).toContain('다음 50건 확인');
     expect(rendered).toContain('전체 건수 아님');
+    expect(rendered).toContain('min-h-11');
+    expect(rendered).not.toContain('실시간으로 큐에 노출됩니다');
     expect(rendered).toContain('chatOffset=100');
     expect(rendered).toContain('takedownOffset=100');
   });
