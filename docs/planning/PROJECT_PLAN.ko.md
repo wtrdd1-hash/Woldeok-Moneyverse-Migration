@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+
+## 기획 v1322 — F675-137 수집품·큐레이션 진실성 보완 (기능 보완 / DRAFT / RELEASE HOLD)
+- 이전 추가 v1320 / 현재 보완 v1322 / 다음 추가 v1324(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 재확인, 선행 Draft #1427 미병합. 런타임·DB·Test·운영 배포 없음.
+- 프론트 예시 NEO_CYBER_ARCADE_TOKEN과 서버 시드 NEO_CYBER_CASINO_CHIP 불일치(자동 동일시·VERIFIED 금지). listCollections GET은 예시 소유품을 삽입하고 getCurationStatus GET은 진척을 삽입하거나 갱신 시각을 바꾼다. advanceCuration은 임의 1~7단계·D1/D3/D7을 허용하며 UI 낙관 저장/로컬 캐시는 실제 소유 증거가 아니다. Migration232 원천 사건·revision 부재. 개발 DB 읽기 전용 8개/회원2명, 진척 2행 모두 1단계/D7(실제 7일 경과·발급 증명 아님).
+- 본인 전용 v2 목록·진척 GET은 완전한 읽기 전용, 장애 시 허위 빈 목록 금지. LEGACY_UNKNOWN·비소유 예시 분리, 자동 시드 금지. 명시적 CAS·멱등 단계/메모 변경, D1/D3/D7 보기 옵션 분리, 회원 ID·코드 ID 임의 지정 금지. 코드 매핑은 독립 증빙·불변 감사 필요. DB 버전형 SECURITY DEFINER·PUBLIC 회수·최소권한·행 잠금·추가형 마이그레이션. 상세 API·DB·관리자·SEO·Android·접근성·KPI·테스트·롤백은 영문/국문 통합 마스터 참조.
+- P0 4/P1 6: ENV1322-01 SEC1322-02 REL1322-03 COL1322-04 COL1322-05 COL1322-06 COL1322-07 COL1322-08 COL1322-09 COL1322-10. QA v1297 진행 중이며 main/후보 게이트 실패, 루트98%/약2.7GiB, 정확 SHA Test·격리 복원 미검증, 운영 BLOCKED. 외부 근거 신규 승인0·누적 중복 제거/분류 승인 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 개발 이슈 #1426.
+
+
 - **v1320 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (stacked on unmerged #1420; HOLD). Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
 
 ## 기획 v1320 — F675-137 수집품 획득 근거·불변 영수증 (기능 추가 / DRAFT / RELEASE HOLD)

@@ -1,4 +1,11 @@
 # 통합 기획 재검토 v2026.09.22.348
+
+## v1322 재검토 — 수집품 큐레이션 조회/쓰기·코드 무결성 (2026-10-26; DRAFT/HOLD)
+- main 근거: 프론트 NEO_CYBER_ARCADE_TOKEN과 서버 NEO_CYBER_CASINO_CHIP 불일치; GET 목록에서 예시4개 삽입, GET 진척에서 삽입/갱신, POST 임의 targetStep 및 D1/D3/D7, UI 실패 응답 미확인. 개발 DB 읽기 전용 수집품8/회원2·진척2(1단계/D7); 운영 데이터로 확대 해석 금지.
+- v2: 과거 UNKNOWN 보존, 별칭/캐시 자동 검증 금지, GET 쓰기0, 명시적 버전 CAS·멱등 진척/메모, 보기 일자 분리, 불변 근거·관리자 증빙 매핑. P0 4/P1 6: ENV1322-01 SEC1322-02 REL1322-03 COL1322-04 COL1322-05 COL1322-06 COL1322-07 COL1322-08 COL1322-09 COL1322-10.
+- QA v1297 진행 중·게이트 실패, 루트98%, 정확 SHA Test/격리 복원 미완료, 운영 보류. 독립 10,000건 신규 승인0·누적 UNKNOWN, BLOCKED/IN PROGRESS. 런타임 배포 없음.
+
+
 - **v1320 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (stacked on unmerged #1420; HOLD). Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
 
 ## v1320 재검토 — 수집품 획득 진실성 게이트 (2026-10-26; DRAFT/HOLD)

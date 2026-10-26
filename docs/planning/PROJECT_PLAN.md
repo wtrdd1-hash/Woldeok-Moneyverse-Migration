@@ -1,4 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## Planning v1322 — F675-137 Collection and Curation Truth Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
+- Previous Addition v1320 / Current Improvement v1322 / Next Addition v1324 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked; predecessor Draft #1427 unmerged. No runtime/DB/Test/Production deployment.
+- Main client example NEO_CYBER_ARCADE_TOKEN conflicts with backend seed NEO_CYBER_CASINO_CHIP; do not auto-alias/verify. listCollections GET inserts sample ownership; getCurationStatus GET inserts or updates progress timestamp; advanceCuration accepts arbitrary targetStep 1..7 and D1/D3/D7; UI optimistic saves may fail silently and localStorage is not ownership proof. Migration232 lacks grant event and progress revision. Dev READ ONLY: 8 collections/2 owners; 2 curation rows both step1/D7, not seven elapsed days or proven grants.
+- v2 owner-only GET list/status must be pure reads and fail closed on unavailable; preserve LEGACY_UNKNOWN and non-owned demo, no implicit seed. Explicit versioned CAS/idempotent curation advance and note/favorite writes, separate day display preference, no client-supplied owner/code-as-ID; independent evidence review for code mapping, append-only audit. DB versioned SECURITY DEFINER, PUBLIC revoke, minimal grants, row locks, forward-only migrations and indexes. Full API/DB/admin/SEO/Android/a11y/KPI/tests/rollback contract in Integrated Planning Master.
+- P0 4 / P1 6: ENV1322-01 SEC1322-02 REL1322-03 COL1322-04 COL1322-05 COL1322-06 COL1322-07 COL1322-08 COL1322-09 COL1322-10. QA v1297 IN PROGRESS with failed main/candidate gates, root98% (~2.7GiB free), Test exact-SHA and isolated restore missing, Production BLOCKED. External source gate new approved 0; cumulative deduplicated/classified approved UNKNOWN / 10,000, BLOCKED / IN PROGRESS. Engineering issue #1426.
+
+
 - **v1320 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (stacked on unmerged #1420; HOLD). Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
 
 ## Planning v1320 — F675-137 Verified Collection Acquisition Evidence (Feature Addition / DRAFT / RELEASE HOLD)

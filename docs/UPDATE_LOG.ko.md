@@ -1,3 +1,4 @@
+- 2026-10-26 18:44 KST | 기획 v1322 F675-137 수집품/큐레이션 무결성(기능 보완; DRAFT/HOLD): main 프론트·서버 코드 불일치, GET 시드/진척 DB 쓰기, 임의 단계 변경·낙관 캐시 확인. 개발 DB 읽기 전용 수집품8/회원2, 진척2 모두 1단계/D7. v2 GET 쓰기0·CAS/멱등 쓰기·일자 선호 분리·근거 심사 별칭 명세. P0 4/P1 6: ENV1322-01 SEC1322-02 REL1322-03 COL1322-04 COL1322-05 COL1322-06 COL1322-07 COL1322-08 COL1322-09 COL1322-10. QA v1297 진행 중/게이트 실패, 루트98%, 운영 차단, 외부 10k 신규0·누적 UNKNOWN. 문서만 변경, 개발 #1426.
 - v1320 기획 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (선행 #1420 기반, 운영 보류). 개발 #1426.
 - 2026-10-26 16:18 KST | 기획 v1320 F675-137 수집품 획득 근거 영수증(기능 추가; DRAFT/HOLD): main 예시 소유권 초기값·DB 시드 및 개발 앱 직접 DML, 개발 8행/회원2명(원천 미상), 본인 불변 영수증/LEGACY_UNKNOWN, P0 4/P1 6, QA v1294 FAILED/HOLD, 런타임/DB 배포 없음, 독립 10,000건 신규 승인0·누적 UNKNOWN. 개발 #1426.
 - **v1318 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (stacked on #1416; HOLD). **Engineering #1415** updated.

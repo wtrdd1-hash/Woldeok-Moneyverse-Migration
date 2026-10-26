@@ -1,4 +1,40 @@
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v2026.10.26.1322 — F675-137 수집품 획득 근거·큐레이션 무결성 보완 (Feature Improvement / DRAFT / RELEASE HOLD)
+
+**회차:** 이전 기능 추가 v1320 → 현재 기능 보완 v1322 → 다음 기능 추가 v1324(잠정). 진실 기준 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5의 AGENTS.md·README.md·영문 PROJECT_PLAN.md와 국문 PROJECT_PLAN.ko.md. 선행 Draft #1427 미병합. Gemini/개발 A·B·C/QA와 분리한 문서 작업으로 런타임·DB·WLD·원장·기능 스위치·Test·Production 미변경.
+
+### 실제 코드 경계 및 결정
+- 프론트엔드 frontend/src/app/collections/curation-retention-flow.tsx 예시 코드 NEO_CYBER_ARCADE_TOKEN과 백엔드 backend/src/collection/collection.repository.ts 시드 코드 NEO_CYBER_CASINO_CHIP가 다르다. 문자열 유사성만으로 두 수집품을 동일한 발급으로 간주하거나 소유권을 인증할 수 없다.
+- listCollections GET은 ensureSeedPieces를 호출해 빈 계정에 예시 4개를 삽입한다. getCurationStatus GET도 기록이 없으면 행을 삽입하고 충돌 시 updated_at을 갱신한다. 조회만으로 DB가 변경되며 동시 요청 시 진척 저장과 경합할 수 있다.
+- advanceCuration POST는 임의 targetStep 1~7 및 독립 D1/D3/D7 변경을 받는다. UI는 HTTP 응답 성공 여부 확인 없이 선택 일자를 먼저 바꾼다. updatePiece PUT은 UUID 문자열 또는 코드로 행을 지정하며 브라우저는 저장 실패에도 즐겨찾기/메모를 공용 localStorage 키에 낙관 저장한다.
+- Migration232 user_collections에는 원천 발급 사건 FK가 없고 user_curation_progress에는 revision이 없다. 개발 DB 읽기 전용 집계: 수집품 8행/회원 2명, FIRST_CAPITAL_BADGE·ANTIQUE_SAFE_KEY·NEO_CYBER_CASINO_CHIP·SMART_LOGISTICS_PERMIT 각 2행; 진척 2행 모두 ladder_step=1/timeline_day=D7. 개별 발급 진위·실제 7일 경과·운영 데이터는 검증되지 않았다.
+- 대안 A 시드 유지+배지(허위 소유권 위험), B 과거 행 삭제·코드 강제 변경(이력 훼손), C 예시 분리·과거 UNKNOWN 보존·읽기 순수화·버전형 쓰기(채택). 코드·날짜·캐시·설명문·수동 별칭만으로 VERIFIED 금지.
+
+### 회원 흐름·권한·상태·CTA
+- 인증·동의 회원이 비공개 /collections에 진입해 검증된 소장품 / 과거 근거 미상 / 비소유 예시 / 나의 큐레이션을 분리해 본다. /collections/[pieceId]/evidence 영수증 상세는 v1320 설계를 유지한다. 실제 획득 증빙이 있어야 VERIFIED, 그렇지 않으면 LEGACY_UNKNOWN·UNVERIFIED·REVOKED·UNAVAILABLE. 빈 목록과 서버 장애 503은 별도. 예시는 DEMO_NOT_OWNED이며 소유권 공유 금지.
+- CTA: 획득 근거 보기·불일치 신고·재시도·메모 수정·즐겨찾기·큐레이션 시작·다음 편집 단계·D1/D3/D7 보기 선택. 저장 중/서버 확정 버전/충돌 후 새로고침/오프라인 임시 초안 상태를 분리하며 HTTP 2xx+서버 revision 전에는 저장 완료 표시 금지. D7은 화면 보기 옵션일 뿐 7일 경과·획득일 증명이 아니다. 큐레이션 단계는 자기보고 편집 활동이지 보상·권리가 아니며 1단계 '소유' 확정에는 VERIFIED 영수증 필수. LEGACY_UNKNOWN 기록의 개인 메모는 허용하되 검증 배지는 부여하지 않는다.
+- DEFAULT_PIECES를 실제 보유 상태로 초기 렌더링하지 않는다. 로딩→완전한 본인 조회→진짜 빈 목록/장애로 분기한다. localStorage는 계정별 미동기화 메모 초안만 허용하고 로그아웃·계정 전환 시 삭제, 소유권 복구 근거로 사용 금지. Android App API 동등성, WCAG 2.2 AA, 320px/200% 확대, 키보드/ARIA 상태, 44px 터치, 색상 외 상태 표식.
+
+### API·DB 제약·트랜잭션·보안
+- 플래그 OFF에서는 기존 v1 유지. 신규 GET /api/v1/collections/v2 및 GET /api/v1/collections/v2/curation/status는 updated_at 포함 DB 쓰기 0건. 미초기화는 {state:UNINITIALIZED,revision:0,selectedDay:null}을 반환하고 가짜 D7 저장 금지. 본인 PATCH /api/v1/collections/v2/:uuid/curation-note는 If-Match·Idempotency-Key; POST /api/v1/collections/v2/curation/advance는 expectedRevision과 정확히 다음 단계(current+1)만, 최초 시작은 VERIFIED 영수증 확인. PUT /api/v1/collections/v2/preferences/day는 독립 화면 보기 선호로 분리. 임의 단계 건너뛰기·후퇴·클라이언트 userId·v2 코드 ID 금지. 메모 최대 500자, 커서/페이지 제한. Next.js 동일 출처·OpenAPI·Android 응답/오류 동등.
+- SessionGuard·AuthenticatedGuard·ConsentGuard와 서버 유래 회원 신원, 변경 요청 CSRF·속도 제한(예: 회원당 시간 20회). 401 비로그인, 403 동의 없음, 404 타인/부재 동일 응답, 409 멱등 충돌, 412 버전 충돌, 428 조건 누락, 429 제한, 503 장애. 조회 private,no-store 및 장애를 200 빈 목록으로 변환 금지. SECURITY DEFINER의 인자로 전달된 actor UUID만으로 DB 수준 신원이 인증되지는 않으므로 앱 DB 계정 침해 위협 검증 필수.
+- Migration232·266 원본은 수정하지 않고 새 마이그레이션에 revision bigint NOT NULL DEFAULT 0, 선택적 검증 영수증 연결을 추가한다. 별도 curation_day_preferences(user_id PK/FK, selected_day CHECK D1/D3/D7, revision>=0)로 보기 선택과 실제 편집 이력 분리. 불변 curation_action_receipts(UUID PK, owner FK, expected/new revision, action kind, payload digest, idempotency key, committed_at), UNIQUE(owner_id,idempotency_key), UNIQUE(owner_id,new_revision), CHECK(new_revision>expected_revision). 1~7 단계의 단조 증가와 최초 VERIFIED 검증은 트랜잭션 안에서 강제. 기존 UNIQUE(user_id,code) 보존, 자동 별칭 발급 금지. 조회 인덱스 user_collections(user_id,id), 영수증(owner_id,issued_at DESC,id DESC), 이벤트(owner_id,committed_at DESC,id DESC); CONCURRENTLY 인덱스는 배포 방식 및 격리 DB에서 확인 후 사용.
+- 버전형 SECURITY DEFINER 함수 collection_owner_list_v2, collection_curation_status_v2, collection_curation_advance_v2, collection_note_update_v2. 고정 search_path=pg_catalog,pg_temp·객체 스키마 명시·PUBLIC EXECUTE 회수·필요한 앱 EXECUTE만 허용. 호환성 검증 후 수집품/진척/영수증 직접 앱 DML 제거. 쓰기 트랜잭션은 회원 진척/권리 행을 일관된 순서로 잠그고 소유권·원천·revision·멱등 해시 확인 후 상태/불변 영수증/감사/outbox를 원자 커밋. 동일 키·동일 본문은 원본 결과 재생, 다른 본문은 409. 경합 시 최신 진척 덮어쓰기·임시 초안 확정 표시 금지.
+- NEO_CYBER_ARCADE_TOKEN과 NEO_CYBER_CASINO_CHIP는 별도 증거 심사 전에는 서로 다른 코드다. 관리자 이중 근거 검토 후 매핑이 승인되더라도 원본 코드·회원·획득일·설명을 보존하고 서명된 매핑 결정 사건만 추가한다. 일괄 UPDATE·무증거 병합·VERIFIED 자동 전환 금지. 관리자 변경 권한과 감사는 별도, 통계는 k>=20 집계만.
+
+### 개인정보·SEO·KPI·테스트·배포
+- 비공개 수집품·영수증·큐레이션은 noindex,nofollow, sitemap 제외, no-store. 공개 전시는 별도 명시적 동의·검증된 수집품의 최소 정보만. 분석에 회원 UUID·메모·원천 본문·멱등키 금지. KPI: 근거 없는 VERIFIED 0, GET DB 쓰기 0, 메모 저장 손실 0, 타 회원 유출 0, 승인된 코드 매핑 후 UI/서버 코드 불일치 0, 409/412/503, LEGACY_UNKNOWN 비율, Test p95 조회 500ms 미만.
+- 격리 PostgreSQL에서 개발 DB 모양 8행/2회원·합성 10,001행, 동시 최초 GET 100회 신규 소유/진척 0건, GET 상태 조회 후 updated_at 불변, CAS 진척 동시 100회 건너뛰기/후퇴 0, 타 회원 100회 조회 차단, 동일/다른 멱등 요청, 별칭 충돌, 철회 원천, 메모 500/501자, 계정 전환·오프라인·HTTP 500, D7 표시와 실제 경과 분리, 진짜 빈 목록 vs 503, Android/접근성 회귀. 기존 v1 함수·회원 메모 보존 확인.
+- 시작 시 루트 98%/약2.7GiB 여유, 데이터 87%/약26GiB 여유. QA v1297 진행 중이며 main·후보 테스트/보안 게이트 실패, v1296 후보 전체 감사·봇 실패. main 프론트 1,397 통과/6 실패, 개발 앱 DML 235/241 테이블, PUBLIC 은행 EXECUTE 3개, Migration266 체크섬 불일치, 정확 SHA 인증 Test E2E·격리 백업 복원 미검증. Production BLOCKED. collection_verified_receipts_v1 기본 OFF, shadow read→격리 DB·권한 부정 테스트→정확 SHA Test·복원→승인 GitOps 1%→10%→100%. 허위 VERIFIED·GET 쓰기·타 회원 유출·원천 불일치·진척 후퇴 시 즉시 중단, 플래그 OFF·v1 복귀, 기존 과거 기록과 불변 영수증 보존. 기획 예약은 배포 금지.
+- 외부 독립 레퍼런스 10,000건 게이트 신규 최종 승인 0, 누적 중복 제거·실증 분류 승인 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 기존 W3C/OWASP/PostgreSQL 자료는 설계 참고일 뿐 승인 실적으로 미산입. 개발 이슈 #1426.
+
+**P0 4 / P1 6 개발 백로그:**
+- P0 ENV1322-01 서버 용량·격리 복원; SEC1322-02 앱 DB 권한·실제 세션 신원; REL1322-03 QA·정확 SHA·보안·GitOps; COL1322-04 GET 시드 및 허위 소유권 제거.
+- P1 COL1322-05 코드 불일치·과거 매핑 근거; COL1322-06 읽기 전용 큐레이션·추가형 스키마; COL1322-07 단조 증가 CAS·멱등 쓰기; COL1322-08 Next.js·Android·오프라인·접근성; COL1322-09 관리자·개인정보·SEO·KPI; COL1322-10 격리 PostgreSQL·동시성·회귀·롤백.
+- 검증용 식별자: ENV1322-01 SEC1322-02 REL1322-03 COL1322-04 COL1322-05 COL1322-06 COL1322-07 COL1322-08 COL1322-09 COL1322-10.
+
+
 - **v1320 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (stacked on unmerged #1420; HOLD). Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
 
 ## v2026.10.26.1320 — F675-137 수집품 획득 근거 검증·영수증 (기능 추가 / DRAFT / RELEASE HOLD)

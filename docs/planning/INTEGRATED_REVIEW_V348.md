@@ -1,4 +1,11 @@
 # Integrated Planning Re-review v2026.09.22.348
+
+## v1322 Re-review — Collection curation read/write and canonical code integrity (2026-10-26; DRAFT/HOLD)
+- Main source evidence: frontend NEO_CYBER_ARCADE_TOKEN vs backend NEO_CYBER_CASINO_CHIP; GET listCollections inserts four samples; GET getCurationStatus inserts/updates progress; POST accepts arbitrary targetStep and independent D1/D3/D7; UI ignores failed optimistic mutations. Dev read-only: 8 collection rows/2 owners and 2 progress rows step1/D7; no Production inference.
+- Chosen v2: preserve unknown legacy, never certify alias or cache, pure GET with zero DB writes, explicit versioned CAS/idempotent progress and notes, separate day preference, immutable evidence and admin-reviewed alias mapping. P0 4/P1 6: ENV1322-01 SEC1322-02 REL1322-03 COL1322-04 COL1322-05 COL1322-06 COL1322-07 COL1322-08 COL1322-09 COL1322-10.
+- QA v1297 IN PROGRESS with failed gates; root98%, exact-SHA Test/restore unverified, Production HOLD. External independent 10k newly approved0, cumulative UNKNOWN, BLOCKED/IN PROGRESS. No runtime deployment.
+
+
 - **v1320 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (stacked on unmerged #1420; HOLD). Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
 
 ## v1320 Re-review — Collection provenance truth gate (2026-10-26; DRAFT/HOLD)
