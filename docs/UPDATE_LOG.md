@@ -1,3 +1,7 @@
+## Planning v1348 — F675-144 Operator-Approved Support Reply Templates (DRAFT/HOLD)
+- Previous Improvement v1346; Current Addition v1348; Next Improvement v1350. Main 0fe614b2ca1a7bc0df540514e54db78130479e2a. Draft #1497 predecessor, issue #1500. Approved human-reviewed insertion only, no auto-send. QA v1309 HOLD, exact-SHA Test/restore BLOCKED. External new accepted 0, cumulative UNKNOWN/10,000.
+- P0 ENV1348-01 SEC1348-02 REL1348-03 SUP1348-04; P1 SUP1348-05 SUP1348-06 SUP1348-07 SUP1348-08 SUP1348-09 SUP1348-10. Full: ENV1348-01 SEC1348-02 REL1348-03 SUP1348-04 SUP1348-05 SUP1348-06 SUP1348-07 SUP1348-08 SUP1348-09 SUP1348-10.
+
 ## Planning v1346 — F675-143 internal support notes integrity (Feature Improvement / DRAFT / RELEASE HOLD)
 - Previous Addition v1344 → Current Improvement v1346 → Next Addition v1348 provisional; main 0fe614b2ca1a7bc0df540514e54db78130479e2a rechecked start/mid; stacked unmerged Draft #1494 and engineering #1493.
 - Source-verified: AdminGuard accepts any admin role, AdminSessionGuard touches session, migration196 has public support messages only, migration062 append-only audit writes. v1344 GET-zero-writes vs every-decrypt-audited contradiction resolved: GET changes zero business rows but appends one durable access-attempt audit record before authorized KMS decrypt; no audit ⇒ 503 and no plaintext. Actor UUID alone is not authenticated session proof; operator+real session binding required in DB.
