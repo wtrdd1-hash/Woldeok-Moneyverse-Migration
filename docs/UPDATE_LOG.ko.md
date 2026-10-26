@@ -1,4 +1,9 @@
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394; issue #1389; root-capacity #1170; DRAFT / RELEASE HOLD.
+
+## 2026-10-26 11시 KST — 기획 v1310 / F675-134 (기능 보완 / 초안 / 운영 보류)
+- 이전 기능 추가 v1308 → 현재 기능 보완 v1310 → 다음 기능 추가 v1312(잠정), main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 동일, Draft #1399 미병합. 실제 공통 재인증 900초와 CSV 600초 불일치, Migration214 반환 호환성, apiOrNull 장애의 허위 빈 목록, 로컬 이메일 중심 이벤트 범위, 마이크로초 커서·전량 준비 CSV·세션 철회 경합 보완.
+- P0 ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04; P1 AUTH1310-05~10. ID: ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04 AUTH1310-05 AUTH1310-06 AUTH1310-07 AUTH1310-08 AUTH1310-09 AUTH1310-10. QA v1289 실패/보류, 루트 94%/약6.5GiB(외부 작업으로 회복), 감사 및 정확 SHA Test/복원 BLOCKED. 외부 신규 승인 0·누적 중복 제거 승인 UNKNOWN/10,000. 문서만 변경, 런타임/DB/WLD/원장/Test/Production 변경 없음.
+
 - v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
 - v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 

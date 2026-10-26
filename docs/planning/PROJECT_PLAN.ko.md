@@ -1,4 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
+
+## 기획 v1310 — F675-134 보안 활동 보관함 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 이전 기능 추가 v1308 → 현재 기능 보완 v1310 → 다음 기능 추가 v1312(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 Draft #1399 미병합. 문서 전용, 런타임·DB·원장·Test·Production 변경 없음.
+- 실제 ReauthGuard 900초와 v1308 CSV 600초 요구 불일치: 내보내기 전용 600초 가드 및 응답 직전 재검증. Migration214 반환 2컬럼/최대50건은 직접 교체 금지, 버전형 SECDEF 추가. Next apiOrNull의 503을 정상 빈 목록으로 바꾸지 않는다. 로컬 이메일 중심 기록은 OAuth/로그아웃 전체 이력이 아니므로 complete:false. PG 마이크로초 HMAC 커서, 5천건/2MiB/30초 전체 준비 CSV·SHA-256·CSRF·세션 철회·개인정보·Android·SEO·관리자·롤백 명세.
+- P0 ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04; P1 AUTH1310-05~10. ID: ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04 AUTH1310-05 AUTH1310-06 AUTH1310-07 AUTH1310-08 AUTH1310-09 AUTH1310-10. QA v1289 실패/보류(프론트 6실패, 감사 실패, 앱 DML 235/241, PUBLIC 은행 EXECUTE 3, migration266 불일치, 정확 SHA Test/복원 미검증). 루트 94%/약6.5GiB 여유로 개선됐으나 P0 유지. 상세 수용 기준은 영문·국문 통합 마스터.
+- 외부 독립 근거 10,000건: 신규 승인 0, 누적 중복 제거·최종 승인 UNKNOWN, BLOCKED/IN PROGRESS. 개발은 별도 브랜치·플래그 OFF·정확 통합 SHA 및 승인 GitOps 전 승격 금지.
+
 - v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
 - v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 

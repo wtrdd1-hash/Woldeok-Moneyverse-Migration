@@ -1,4 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## Planning v1310 — F675-134 Security Archive Integrity (Improvement / DRAFT / RELEASE HOLD)
+- Previous Addition v1308 → Current Improvement v1310 → Next Addition v1312 (provisional). Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked at start/mid; predecessor unmerged Draft #1399. Documentation-only, no runtime/DB/ledger/Test/Production changes.
+- Main ReauthGuard=900s but v1308 CSV requires <=600s: dedicated export-only guard and recheck before buffered response. Migration214 2-column/50-row read cannot change return shape in-place; additive versioned SECDEF. Main Next apiOrNull fallback must not turn 503 into VERIFIED_EMPTY. Events recorded primarily for local-email auth; complete:false, no fake OAuth/logout history. PG microsecond HMAC cursor, 5k/2MiB/30s fully buffered CSV with SHA-256, CSRF, session revocation, privacy/Android/SEO/admin/rollback.
+- P0 ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04; P1 AUTH1310-05..10. IDs: ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04 AUTH1310-05 AUTH1310-06 AUTH1310-07 AUTH1310-08 AUTH1310-09 AUTH1310-10. QA v1289 FAILED/HOLD (frontend six failed, audits failed, app DML 235/241, PUBLIC bank EXECUTE 3, migration266 mismatch, exact-SHA Test/restore missing); current root 94%/~6.5GiB available after external recovery, still P0. Full acceptance in integrated EN/KO master.
+- Independent external 10,000 evidence gate: 0 newly approved; cumulative deduplicated approved UNKNOWN, BLOCKED/IN PROGRESS. Separate engineering branch/flag OFF, exact integrated SHA gates and approved GitOps required.
+
 - v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
 - v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 

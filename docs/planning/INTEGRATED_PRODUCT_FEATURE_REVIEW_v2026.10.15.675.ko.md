@@ -1,4 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+
+## F675-134 / v1310 — 보안 활동 보관함 무결성 (기능 보완 / 초안 / 보류)
+- Backlog IDs / 백로그 ID: ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04 AUTH1310-05 AUTH1310-06 AUTH1310-07 AUTH1310-08 AUTH1310-09 AUTH1310-10
+- 이전 기능 추가 v1308 / 현재 기능 보완 v1310 / 다음 기능 추가 v1312(잠정); main 1c5b84a1c45baafcca83f375a6f99698121e9bb5, Draft #1399 기반, 문서만 변경.
+- 실제 공통 ReauthGuard 900초와 CSV 600초 요구 불일치: 내보내기 전용 600초 검사·응답 직전 재확인·세션/CSRF 경합 음성 테스트. Migration214 반환 type/time·최대50건 유지, 새 버전형 읽기 함수. UI apiOrNull 장애는 정상 빈 목록이 아니다. 로컬 이메일 기록은 OAuth/전체 로그인·로그아웃 증거가 아니며 합성·metadata 노출 금지.
+- API: PG 마이크로초 HMAC 서명 커서(세션/필터/15분), POST CSV 5천/2MiB/30초·헤더 전 완성·실제 바이트 SHA-256·재인증 600초·감사 실패 폐기. P0 ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04, P1 AUTH1310-05~10. 세부 명세 영문·국문 통합 마스터. QA v1289 실패/보류, 루트 94%/6.5GiB로 회복 중이나 P0, 정확 SHA Test/복원 미검증. 외부 신규 승인0·누적 UNKNOWN/10,000 BLOCKED.
+
 - v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
 - v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 

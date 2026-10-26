@@ -1,4 +1,47 @@
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v2026.10.26.1310 — F675-134 회원 보안 활동 보관함·CSV 본인확인 및 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**회차:** 이전 기능 추가 v1308 → 현재 기능 보완 v1310 → 다음 기능 추가 v1312(잠정). 최신 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; AGENTS.md, README.md, PROJECT_PLAN.md(영어 원본) 및 PROJECT_PLAN.ko.md 대조. 미병합 v1308 Draft #1399를 기반으로 하는 **문서 전용** 작업.
+
+### 실제 코드에서 검증한 불일치와 수정 방향
+- main `backend/src/auth/guards/reauth.guard.ts`의 공통 `ReauthGuard`는 **900초(15분)**를 허용하지만 v1308 CSV 내보내기 명세는 **600초(10분) 이내** 재인증을 요구한다. 공통 가드를 그대로 재사용하면 정책 위반이므로 **내보내기 전용 600초 정책**을 별도로 구현·테스트하고 기존 다른 민감 작업의 900초 가드를 임의 변경하지 않는다. 서버 시간으로 허가 시점과 CSV 응답 직전에 재확인한다. 준비 중 세션 철회·만료·재인증 600초 초과 시 버퍼를 폐기하고 401 `reauthentication_required` 또는 `session_expired`를 반환하며 일부 CSV를 보내지 않는다. 기존 CSRF 검사도 통과해야 한다. HTTP 성공은 사용자 저장 완료의 증거가 아니다.
+- 현재 NestJS `account-security.controller.ts`는 SessionGuard/AuthenticatedGuard/ConsentGuard를 사용하며 `GET events`가 존재한다. Repository는 `account_recent_security_events($1,20)`을 호출한다. Migration 214 함수 반환값은 event_type,created_at 두 컬럼뿐이고 최대 50건이다. PostgreSQL에서 CREATE OR REPLACE로 반환 컬럼 구조를 바꿀 수 없으므로 **새 버전형 `account_security_event_history_v1` 읽기 함수**를 추가하고 기존 함수를 보존한다.
+- 현재 Next `/account/security/page.tsx`는 `apiOrNull`과 `eventData?.events ?? []`을 사용하고 5건만 표시하지만 `eventData===null`일 때 조회 실패 안내도 존재한다. 신규 보관함/BFF는 401/403/410/413/429/503을 정확히 유지하고 오류를 VERIFIED_EMPTY로 바꾸지 않는다. 기존 5건 미리보기는 유지한다.
+- Migration 180 `auth_security_events`는 UUID PK, 탈퇴 시 NULL이 되는 user_id, event_type, metadata JSONB, created_at을 보유한다. Migration 180/183/209/212/215의 이벤트 기록은 주로 **로컬 이메일 가입·로그인·비밀번호·이메일 변경**이다. 모든 OAuth 로그인·로그아웃·세션 철회·의심 로그인 시도를 기록한다는 근거가 없다. 따라서 `coverage.complete=false`와 '기록된 로컬 계정 보안 활동(확인 가능한 범위)'을 명시한다. 없는 이벤트 생성 및 metadata/IP/UA/email 노출 금지. 이전 읽기 전용 개발 DB 41건/3명은 Production 증거가 아니다.
+
+### 회원 흐름, 권한, CTA와 상태
+- 로그인·동의 회원의 기존 /account/security → '기록된 활동 보기' → /account/security/activity. UTC 기준 from 포함/to 제외, ALL/SIGN_IN/CREDENTIAL/ACCOUNT_CHANGE/OTHER 분류, 기본 90일·최대 365일, 페이지 기본 25·최대 50. 적용·초기화·다음·CSV 준비·재인증·재시도 CTA, metadata 자유검색 없음.
+- LOADING → VERIFIED_ROWS | VERIFIED_EMPTY | FILTER_NO_MATCH; 별도 SOURCE_UNAVAILABLE, AUTH_REQUIRED, CONSENT_REQUIRED, REAUTH_REQUIRED, EXPORT_PREPARING, EXPORT_READY_SERVER_PREPARED, EXPORT_TOO_LARGE, RATE_LIMITED, SESSION_CHANGED 상태. **서버 200 + 실제 0건**만 VERIFIED_EMPTY; 503·시간초과·잘못된 응답은 장애. 내보내기 준비 성공과 기기 저장 성공을 구별한다. 로그아웃·계정 전환 시 진행 중 응답을 무효화하고 커서·CSV 버퍼·개인 기록을 삭제한다.
+- 320px/200% 확대, 키보드·스크린리더 라이브 상태, 권장 44px 터치, WCAG 2.2 AA. 비색인·비추적·no-store·사이트맵 제외. Android App API는 앱 자체 인증 전송과 동일 오류 계약을 사용하고 웹 쿠키 복사 및 공용 저장소 CSV 보관을 금지한다.
+
+### API, 커서, DB, 트랜잭션 및 보안
+- `GET /api/v1/account/security/events/history?from&to&category&limit&cursor`: 검증된 서버 세션에서 회원·세션 식별, 클라이언트 actor 파라미터 금지. `{items:[{id,type,category,occurredAt}],nextCursor,hasMore,coverage:{source:'auth_security_events',complete:false}}`. userId·metadata·IP·UA·email 제외. 잘못된 필터·커서 400, 만료 세션 401, 동의 거절 403, 커서 만료/철회 410, 제한 429, DB 장애 503. BFF도 상태 유지, private/no-store.
+- `(created_at DESC,id DESC)` 키셋은 **PostgreSQL 마이크로초 원본 정밀도**로 만들고 JS Date.toISOString() 밀리초 반올림값을 커서 원본으로 사용하지 않는다. HMAC에 키 버전·회원·세션 epoch·정규화 필터 해시·마지막 튜플·상한·최대 15분 만료를 묶고 상수 시간 서명 검증 및 교차 계정·세션·필터 재사용 차단. limit+1, 동일 시각 UUID, 격리 합성 10,001건 테스트. HTTP 페이지 사이에 동일 MVCC 스냅샷이 없으므로 이전 시각으로 늦게 들어온 기록은 나타날 수 있다. '완전한 고정 이력' 보장 금지, 변경 시 새로고침 정책 명시.
+- 버전형 SECURITY DEFINER `account_security_event_history_v1`: 명시적 public 스키마, 고정 search_path, moneyverse_migrator 소유, PUBLIC EXECUTE 회수, 필요한 앱 역할에만 EXECUTE, `user_id=p_actor` 및 NULL 회원 제외. 격리 PG EXPLAIN 후 필요할 때만 `(user_id,created_at DESC,id DESC)` 인덱스를 전진형 마이그레이션으로 추가하고 적용된 180/214/266 수정 금지. **p_actor UUID는 DB가 인증한 사용자 신원이 아니다.** API 세션 검증과 타 회원 차단 테스트만으로 앱 역할 침해를 막았다고 주장하지 않는다. 개발 DB 앱 DML 235/241·PUBLIC 은행 함수 3개 최소권한 위험은 P0; 공유 개발/운영 DB 변경 금지.
+- `POST /api/v1/account/security/events/export` 본문 `{from,to,category}`, 본인 세션·동의·CSRF·**전용 600초 재인증**, 회원당 하루 3회·동시 1회. READ ONLY REPEATABLE READ 단일 스냅샷에서 고정 CSV 컬럼 `event_id,event_type,event_category,occurred_at_utc`를 메모리 내에서 **응답 헤더 전에 전부** 생성·검증한다. 최대 5,000건/정확한 인코딩 바이트 2MiB/게이트웨이 포함 30초, 루트 디스크 임시파일 금지. =,+,-,@,탭·CR·LF 수식 주입 방어 및 올바른 CSV 인용·이스케이프(모든 스프레드시트에 대한 절대 보안 보장 금지). 초과 413, 소스/시간/감사 장애 503으로 부분 성공 없이 종료. 실제 전송 바이트 SHA-256 검증, Digest 헤더는 전체 전송 경로의 동일 바이트 검증 시에만; attachment/nosniff/no-store. 민감 데이터 없는 준비 감사(건수·해시·시각)를 별도 트랜잭션으로 응답 전 커밋, 실패하면 버퍼 폐기. 동일 POST 재시도는 불변 멱등 영수증 설계 없으면 신규 준비로 취급한다.
+- 관리자: 서로 다른 회원 20명 이상 코호트 비식별 집계만 허용, 회원별 CSV 열람 금지. 보존·탈퇴 정책 연장 금지. KPI: 준비 시도/성공/실패, 413/429/503, 격리 합성 10,001건 p95 조회 <300ms, 타 회원 노출 0건. 개인정보 식별자·원시 시각·CSV 본문을 분석 로그에 저장하지 않는다. 검증: 타 회원 100회·동시 준비 100회·동일 마이크로초/UUID 10,001건·NULL 회원·599/600/601초 경계·세션 철회 경합·CSRF/동의·5,001건·2MiB+1·30초 초과·CSV 수식/인용/개행·감사 실패·503 대 빈 목록·모바일·로그아웃·기능 OFF·기존 5건 미리보기.
+
+### P0/P1 개발 백로그 (P0 4개 / P1 6개)
+| 우선순위 | ID | 완료 조건 |
+| --- | --- | --- |
+| P0 | ENV1310-01 | 루트 94%/약6.5GiB 여유(직전 QA 100%/약467MiB) 원인·담당 확인, 지속 여유 및 독립 백업 복원, 다른 작업자 Worktree 보존. 한 번의 회복 수치만으로 종결 금지. |
+| P0 | SEC1310-02 | 세션·actor 경계, 개발 DB 앱 DML 235/241·PUBLIC 은행 함수 3개 최소권한, 타 회원/NULL 차단 및 메타데이터 비노출. |
+| P0 | REL1310-03 | main QA v1289 FAILED/HOLD, 프론트 6실패·운영/전체/봇 감사·migration266 불일치·정확 SHA CI/Test 인증 E2E·복원·GitOps. |
+| P0 | AUTH1310-04 | 기존 900초 공통 가드와 CSV 600초 요구 불일치 해소, 철회/CSRF 경합·허위 성공·불완전한 이벤트 범위·503 대 빈 기록 차단. |
+| P1 | AUTH1310-05 | 하위 호환 버전형 SECDEF 읽기 함수, 격리 PG 인덱스 검증·NULL 회원 제외. |
+| P1 | AUTH1310-06 | 마이크로초 HMAC 커서·세션/필터/만료/상한·지연 삽입 안내·10,001건. |
+| P1 | AUTH1310-07 | 헤더 전 완성 CSV·정확 SHA-256·5천/2MiB/30초·감사 실패·수식 방어. |
+| P1 | AUTH1310-08 | Nest/Next/Android 오류 동등성·320px 접근성·로그아웃/계정전환 응답 무효화·no-store. |
+| P1 | AUTH1310-09 | 기록 범위 분류·보존/탈퇴·20명 이상 관리자 집계·SEO/KPI·악용 방지. |
+| P1 | AUTH1310-10 | 격리 PG 타 회원100·동시100·커서10,001·경계/회귀/롤백·정확 통합 SHA 게이트. |
+**백로그 ID:** ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04 AUTH1310-05 AUTH1310-06 AUTH1310-07 AUTH1310-08 AUTH1310-09 AUTH1310-10.
+
+### QA·배포·외부 근거
+- 2026-10-26 QA v1289 main FAILED/HOLD: 프론트 1,397 통과/6 실패, 운영 감사 High2, 전체 Critical2/High10, 봇 Critical1/High5, 개발 DB 앱 DML 235/241·PUBLIC 은행 EXECUTE 3개, migration266 체크섬 차이, 정확 SHA 인증 Test/복원 미검증. QA Draft #1317의 후보 SHA e71f93b...는 프론트 1,404/0 및 운영 감사 통과했으나 전체 감사 실패이며 **main/Production에 병합·승격된 상태가 아니다**. QA 종료 루트 93%/7.2GiB, 이번 확인 94%/6.5GiB; 개선 원인을 기획 작업으로 돌리지 않는다.
+- 새 코드는 별도 개발 브랜치에서만, 플래그 기본 OFF. 정확 통합 main SHA CI/보안·격리 PG 권한·공식 Test 인증 보안/금융 E2E·독립 QA·백업 복원·승인 GitOps 전 병합/운영승격 금지. 롤백은 플래그 OFF, 기존 /account/security 미리보기와 Migration214 함수 보존. 이번 회차 런타임/DB/WLD/원장/Test/Production 변경 없음.
+- 외부 독립 근거 10,000건: OWASP CSV Injection, W3C WCAG2.2, PostgreSQL 트랜잭션 격리, NIST SP800-63B 발행기관 참고는 최종 승인 근거 수량과 별개. **신규 승인 0건, 누적 중복 제거·최종 승인 UNKNOWN/10,000, BLOCKED/IN PROGRESS**. Gemini/개발 A/B/C/QA 및 F675-132 세션 별칭·F675-131 알림 CSV와 변경 분리.
+
 - v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
 - v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 

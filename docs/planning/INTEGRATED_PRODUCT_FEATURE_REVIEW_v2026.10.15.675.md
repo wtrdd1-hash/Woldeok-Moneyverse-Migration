@@ -1,4 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+
+## F675-134 / v1310 — Security Archive Integrity (Improvement / DRAFT / HOLD)
+- Backlog IDs / 백로그 ID: ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04 AUTH1310-05 AUTH1310-06 AUTH1310-07 AUTH1310-08 AUTH1310-09 AUTH1310-10
+- Previous Addition v1308 / Current Improvement v1310 / Next Addition v1312 provisional; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5, stacked on Draft #1399, docs only.
+- Source correction: main ReauthGuard allows 900s, export spec requires <=600s; add export-only policy with pre-send recheck and session/CSRF race negatives. Existing Migration214 returns only type/time and caps 50; add versioned read function. Current UI apiOrNull error != VERIFIED_EMPTY. Recorded local-email events are not complete OAuth/login/logout coverage; no synthetic events or raw metadata.
+- API: GET history with signed PG-microsecond cursor/session/filter/15m TTL; POST bounded CSV <=5k/2MiB/30s, fully prepared before headers, SHA-256 exact bytes, reauth <=600s, audit-failure abort. P0 ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04; P1 AUTH1310-05..10. Detailed EN/KO integrated master. QA v1289 FAILED/HOLD, root 94%/~6.5GiB now but capacity still P0, exact-SHA Test/restore blocked. External 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED.
+
 - v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
 - v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 

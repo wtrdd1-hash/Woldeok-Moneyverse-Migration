@@ -1,4 +1,9 @@
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394; issue #1389; root-capacity #1170; DRAFT / RELEASE HOLD.
+
+## 2026-10-26 11:xx KST — Planning v1310 / F675-134 (Improvement / DRAFT / HOLD)
+- Previous Addition v1308 → Current Improvement v1310 → Next Addition v1312 provisional; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid unchanged; predecessor Draft #1399 unmerged. Corrected ReauthGuard 900s vs export 600s, migration214 return compatibility, apiOrNull false-empty risk, local-email-only event coverage, microsecond cursor, bounded all-or-nothing CSV and session-revocation races.
+- P0 ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04; P1 AUTH1310-05..10. IDs: ENV1310-01 SEC1310-02 REL1310-03 AUTH1310-04 AUTH1310-05 AUTH1310-06 AUTH1310-07 AUTH1310-08 AUTH1310-09 AUTH1310-10. QA v1289 FAILED/HOLD, root now 94%/~6.5GiB (recovered externally), audits and exact-SHA Test/restore BLOCKED. External newly approved 0, cumulative deduplicated approved UNKNOWN/10,000. Docs-only; no runtime/DB/WLD/ledger/Test/Production changes.
+
 - v1308 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1399 (stacked on unmerged #1394; RELEASE HOLD).
 - v1308 engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398; capacity #1170.
 

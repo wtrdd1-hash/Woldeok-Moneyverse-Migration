@@ -16,3 +16,9 @@
 - Root capacity improved to 94% / ~6.5GiB free after QA v1289, but cause/sustainability unknown; P0 remains. Main QA FAILED/HOLD, exact-SHA official Test and isolated restore unverified.
 - External independent corpus target 10,000; newly accepted 0, deduplicated approved cumulative UNKNOWN, BLOCKED/IN PROGRESS.
 - No modifications to shared DB, runtime, ledger/WLD, feature flags, Test/Production or other contributors' worktrees/branches.
+
+## Midpoint — 2026-10-26 11 KST
+- [x] Rechecked remote main and EN/KO canonical plan. SHA unchanged; main plan still starts v1210 (newer proposals are stacked Draft, not merged).
+- [x] Updated eight EN/KO integrated planning/update documents. Ten v1310 backlog IDs validated in six integrated docs and both logs; diff --check PASS.
+- [x] QA v1289 reviewed, Draft QA #1317 candidate-only success distinguished from main/release. Root free 6.5GiB, not proven sustainable.
+- [ ] Create Draft PR, update engineering handoff #1398 and storage #1170, verify final head and records.
