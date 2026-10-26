@@ -1,3 +1,10 @@
+## 기획 v1348 — F675-144 승인형 고객지원 답변 템플릿 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1346 → 현재 기능 추가 v1348 → 다음 기능 보완 v1350(잠정). 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인, AGENTS.md·README.md·영문 정본·국문 대조. 선행 Draft #1497 미병합, 개발 이슈 #1500.
+- support.controller.ts에는 수동 관리자 답장만 있고 Migration196에는 템플릿·승인 버전·사용 영수증이 없다. 현재 operator만 승인된 원문을 입력창에 삽입하고 사람 검토 후 기존 API로 전송; 별도 approver가 승인/폐기, 자기 승인·자동 전송·미검증 변수 치환 금지. 불변 버전·승인 감사·정확 본문 지문·멱등 영수증, SECURITY DEFINER 최소권한·세션·CSRF·CAS·동시성, 관리자 UI/Android 회원 접근 차단/WCAG 2.2 AA/noindex/no-store/KPI는 국문 통합 마스터에 상세 명세. 기본 OFF.
+- P0 ENV1348-01 용량/복원, SEC1348-02 DB 최소권한/역할, REL1348-03 QA/정확 SHA, SUP1348-04 무권한 전송·주입·오래된 버전 방지. P1 SUP1348-05 스키마, SUP1348-06 승인/감사/멱등, SUP1348-07 NestJS API, SUP1348-08 관리자 UI·모바일 접근성, SUP1348-09 개인정보·SEO·KPI, SUP1348-10 격리 PostgreSQL 10,001/100/100 회귀·롤백.
+- QA v1309 FAILED/HOLD, 루트 반올림 100% 여유 약 783MiB, 데이터 약 11GiB, 전체 감사 Critical2/High8·봇 Critical1/High5 실패, 공식 Test 정확 SHA·격리 복원 미검증, Production BLOCKED. 외부 독립 근거 신규 승인 0, 누적 중복 제거 승인 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·원장·Test·운영 변경 없음.
+- 전체 백로그: ENV1348-01 SEC1348-02 REL1348-03 SUP1348-04 SUP1348-05 SUP1348-06 SUP1348-07 SUP1348-08 SUP1348-09 SUP1348-10
+
 ## 기획 v1346 — F675-143 고객지원 내부 메모 접근 증명·감사·가림처리 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 **회차:** 이전 기능 추가 v1344 → 현재 기능 보완 v1346 → 다음 기능 추가 v1348(잠정). **기준:** 원격 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재확인, AGENTS.md, README.md, 영문 PROJECT_PLAN.md 원본 및 한국어 대조. **의존:** 미병합 Draft PR #1494(상위 #1489, #1484), 개발 이슈 #1493. 이번 내용은 문서상 보안 설계이며 사고 발생이나 구현 완료를 의미하지 않음.
 
