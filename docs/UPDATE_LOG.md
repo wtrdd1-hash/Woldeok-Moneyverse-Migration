@@ -1,3 +1,7 @@
+## 2026-10-26 — Planning v1312 (F675-135, Addition, DRAFT/HOLD)
+- Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid verified; prior v1310 Draft #1402 unmerged. EN canonical/Korean parity updated in integrated master, project plan, feature review. Original privacy request migration 015 is receipt-only (received), no admin fulfillment. Planned role-verified case triage, dual-control evidence-gated outcomes, owner timeline, CAS/receipts, privacy/Android/SEO/a11y and exact-SHA Test gates; no runtime or DB deployment.
+- P0/P1 IDs: ENV1312-01 SEC1312-02 REL1312-03 PRIV1312-04 PRIV1312-05 PRIV1312-06 PRIV1312-07 PRIV1312-08 PRIV1312-09 PRIV1312-10. QA v1290 FAILED/HOLD, root 95%/~5.3GiB. External independent 10,000 gate: newly accepted 0, cumulative UNKNOWN, BLOCKED / IN PROGRESS.
+
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394; issue #1389; root-capacity #1170; DRAFT / RELEASE HOLD.
 - v1310 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1402 (stacked on unmerged #1399; RELEASE HOLD). Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398#issuecomment-6406659364 ; capacity: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6406659793 .
 

@@ -1,4 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+
+## F675-135 — v1312 verified privacy request triage (Addition / DRAFT / HOLD)
+- Source: main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 migration015 records submission only (received), privacy controller GET/POST for owner, no staff queue; generic AdminGuard is insufficient privacy-officer authorization. No evidence of fulfillment or legal compliance.
+- Proposal: owner-only case status timeline, role-verified privacy-officer queue, dual-approval evidence-gated completion, append-only case events/receipts, CAS/CSRF/reauth, fail-closed 503 vs empty, signed microsecond cursor, mobile/a11y/SEO/admin metrics, forward-only DB and exact-SHA Test/rollback. Full English/Korean spec in integrated master; feature OFF.
+- Backlog 4 P0 + 6 P1: ENV1312-01 SEC1312-02 REL1312-03 PRIV1312-04 PRIV1312-05 PRIV1312-06 PRIV1312-07 PRIV1312-08 PRIV1312-09 PRIV1312-10. QA v1290 FAILED/HOLD; root 95%, six frontend failures, security audit failures, DB ACL/migration266/restore gates. External new approved 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime/DB/ledger changes.
+
 - v1310 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1402 (stacked on unmerged #1399; RELEASE HOLD). Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398#issuecomment-6406659364 ; capacity: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6406659793 .
 
 ## F675-134 / v1310 — Security Archive Integrity (Improvement / DRAFT / HOLD)

@@ -1,4 +1,48 @@
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v2026.10.26.1312 — F675-135 개인정보 요청 심사·처리상태 확인 및 관리자 사건 관리 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**회차·근거:** 이전 기능 보완 v1310 → 현재 기능 추가 v1312 → 다음 기능 보완 v1314(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재조회; main의 AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md, 국문 대조본 및 동일 SHA의 실제 프론트엔드·백엔드·DB 코드를 확인. 미병합 v1310 Draft #1402 위에 누적한 **문서 전용 기획**으로 Gemini·개발 A/B/C·QA와 범위를 분리하며 운영 배포가 아니다.
+
+### 확인된 공백·목적·범위
+- main `frontend/src/app/account/privacy/page.tsx`는 개인정보 요청 작성과 최근 접수 기록을 표시하고 `apiOrNull`로 `/api/v1/privacy/requests`를 조회한다. `backend/src/privacy/privacy.controller.ts`는 회원 GET 및 CSRF 보호 POST만 제공한다. `packages/database/migrations/015-privacy-data-subject-requests.sql`은 `status CHECK(status='received')`, 본인 접수·조회 함수만 있으며 **관리자 처리 대기열이나 실제 이행 절차가 없다**고 명시한다. 따라서 요청 접수는 검토·이행·법적 준수 완료의 증거가 아니다. 현재 `AdminGuard`는 관리자 역할이 하나라도 있으면 통과하므로 개인정보 전담 권한을 보장하지 않는다.
+- **목적:** 기존 접수 건에 대해 명시적으로 권한을 받은 개인정보 담당자가 검토·처리 근거를 남기고, 회원은 개인정보를 노출하지 않는 진실한 진행상태를 확인한다. **대상:** 요청 회원, 개인정보 담당자, 별도 승인 담당자, 감사 운영자. v1에서 자동 정보 추출·정정·삭제·동의 철회·계정 정지·WLD/원장 변경·외부 이메일 발송·법정 기한 충족 보장은 하지 않는다. 실제 권리 이행은 별도의 법무·운영 승인 절차가 필요하다.
+- **호환성:** 원본 요청의 `received`는 변경하지 않고 새 사건(case) 상태와 버전형 본인 조회를 추가한다. 기존 GET의 '접수됨'은 제출 영수증 상태일 뿐 현재 처리 결과가 아니다. 새 화면에서만 검증된 별도 진행상태 배지를 표시하며 기존 DB 함수 서명을 보존한다.
+
+### 회원·관리자 흐름, 권한, CTA, 상태
+- 회원 `/account/privacy` → 요청 행 → **처리 현황 보기** → `/account/privacy/requests/[requestId]`. 접수 일시·유형·불투명 영수증 ID·검증된 사건 상태·공개 가능한 사건 시각 및 사유 분류만 노출하고 내부 메모·증빙 원문은 제외. **새로고침**, **개인정보 센터로**, **새 요청 접수** CTA. 사건이 아직 없으면 **접수됨/검토 전**이지 완료가 아니다. 법정 기한이나 알림 제공을 약속하지 않는다.
+- 관리자 `/admin/privacy/requests` → **사건 열기**, **내게 배정**, **검토 시작**, **추가 정보 요청**(안전한 사유 코드만), **이행 검증 기록**, **미이행 종료 및 사유**, **상위 담당자 이관**. 모든 변경은 확인 대화상자·CSRF·버전 조건을 요구한다. **이행 검증 완료는 서로 다른 두 개인정보 담당자의 승인** 및 외부 절차에서 확인된 증빙 해시가 있어야 하며 자기 승인은 금지한다. 상태·유형·경과시간 필터, 기본 25/최대 50건; 검색은 정확한 불투명 요청 UUID만 허용한다.
+- 회원 상태: LOADING → VERIFIED_RECEIPT_ONLY | VERIFIED_IN_REVIEW | VERIFIED_NEEDS_INFO | VERIFIED_COMPLETED | VERIFIED_CLOSED_UNFULFILLED; 별도로 AUTH_REQUIRED, CONSENT_REQUIRED, NOT_FOUND, SOURCE_UNAVAILABLE, STALE_VERSION. 관리자 상태: QUEUE_LOADING, QUEUE_EMPTY, QUEUE_ROWS, CLAIM_CONFLICT, APPROVAL_PENDING, ROLE_DENIED, SERVICE_UNAVAILABLE. 본인 범위 조회의 정상 200만 빈 목록의 근거가 된다. 401/403/404/409/412/428/429/503 및 응답 오류를 빈 목록·성공으로 바꾸지 않는다. 로그아웃·계정 전환 시 커서·비공개 화면·미완료 요청을 무효화한다.
+- 사건 전이: RECEIVED → IN_REVIEW | NEEDS_INFORMATION; NEEDS_INFORMATION → IN_REVIEW | CLOSED_UNFULFILLED; IN_REVIEW → NEEDS_INFORMATION | AWAITING_APPROVAL | CLOSED_UNFULFILLED; AWAITING_APPROVAL → COMPLETED_VERIFIED(별도 승인·증빙) | IN_REVIEW(반려). 종료 상태는 종결이며 재요청은 별도 접수로 처리한다. `COMPLETED_VERIFIED`는 **외부 실제 이행을 사람이 검증한 결과**로, 버튼 클릭만으로 이행 완료를 주장하지 않는다.
+
+### API·DB·트랜잭션·보안 명세
+- 기존 `GET/POST /api/v1/privacy/requests` 유지. 새 회원 `GET /api/v1/privacy/requests/:requestId/case` 응답 `{requestId,submissionStatus:'received',caseState,version,updatedAt,publicEvents:[{state,occurredAt,reasonCategory}]}`; 타인·없는 요청 모두 404, DB 장애 503. 관리자 `GET /api/v1/admin/privacy/requests?state&type&limit&cursor`, `GET /api/v1/admin/privacy/requests/:id`, `POST /api/v1/admin/privacy/requests/:id/transitions` 본문 `{action,reasonCode,evidenceDigest?,idempotencyKey}`, 헤더 `If-Match: "case-vN"`. 사용자·권한은 서버 인증 세션에서 도출하고 클라이언트가 지정하는 actor/role을 신뢰하지 않는다. 버전 누락 428, 오래된 버전 412, 다른 내용으로 같은 요청키 재사용/잘못된 전이 409, 권한·승인 실패 403, 타인 건 숨김 404, 제한 429, 장애 503. 일반 관리자는 요청 자유서술 `detail`을 볼 수 없다.
+- 신규 **순방향 마이그레이션**: `privacy_request_cases(request_id uuid PK REFERENCES privacy_data_subject_requests(id) ON DELETE RESTRICT, state text CHECK enum, version bigint DEFAULT 0 CHECK >=0, assignee_user_id uuid NULL, updated_at timestamptz)`; `privacy_request_case_events(id uuid PK, request_id FK, version bigint, actor_user_id uuid, event_code enum, reason_code enum NULL, evidence_sha256 bytea NULL CHECK 32, created_at timestamptz, UNIQUE(request_id,version))`; `privacy_request_case_receipts(request_id,idempotency_key UUID,command_hash bytea CHECK 32,committed_version bigint,PRIMARY KEY(request_id,idempotency_key))`. 원본 증빙 파일·비밀번호·토큰·이메일·IP·자유서술 관리자 메모 저장 금지. 대기열 인덱스 `(state,updated_at DESC,request_id DESC)`, 이벤트 `(request_id,version DESC)`; 격리 PG에서 EXPLAIN으로 검증 후 승인.
+- 기존 Migration 015 함수는 그대로 두고 본인 조회·담당자 대기열·상세·전이용 **버전형 SECURITY DEFINER** 함수 추가. `search_path=pg_catalog,pg_temp`, 스키마 정규화, migrator 소유, PUBLIC 실행 및 직접 테이블 권한 REVOKE, 최소 EXECUTE만 부여. **P0 경계:** 함수 인자로 전달된 UUID는 DB가 인증한 신원이 아니며 `AdminGuard`의 임의 관리자 역할만으로 부족하다. DB 검증 개인정보 전담 권한, 활성 관리자 세션, 별도 승인자 검증 및 앱 계정 탈취 가정을 독립적으로 테스트한다. 앱 계정에 광범위한 DML/SELECT 권한을 추가하지 않는다.
+- 단일 트랜잭션: 세션·담당자 권한 확인 → 요청·사건 행을 일관된 순서로 잠금 → `If-Match`·상태 검증 → 요청키/페이로드 해시 검사 → 승인자 상이성 및 이행 증빙 확인 → 사건 이벤트 추가 → 버전 증가 → 멱등 영수증·민감정보 없는 관리자 감사 로그 → COMMIT 후 성공. 감사 기록 실패 시 전체 롤백. 동일 요청키·동일 내용은 원본 결과 재생, 다른 내용은 409. 동시 100건에서 하나의 유효 전이와 누락 없는 버전 증가를 확인. 원본 `status='received'` 불변.
+- 관리자 커서는 `(updated_at,id)`의 PostgreSQL 마이크로초 정밀도 HMAC 서명, 권한·필터·세션 세대·만료와 결합, `limit+1`, 최대 50건, 유효기간 15분. HTTP 페이지 사이 동일 MVCC 스냅샷은 보장하지 않는다. 권한 철회·세션 만료 시 무효화. 담당자 변경 시간당 20건, 회원 새로고침 시간당 60건 제한 및 429 Retry-After. CSRF·관리자 콘솔 세션, 종료/이행 판정에 **600초 이내 재인증**, 2인 승인 및 감사 기록 필수.
+
+### 개인정보·접근성·KPI·검증·배포
+- 회원·관리자 페이지 noindex/nofollow, `Cache-Control: private,no-store`, 사이트맵 제외, CSP 및 민감정보 없는 텔레메트리. 회원은 본인 건만, 관리자 집계는 회원 20명 이상 집단만 표시. 보존·파기·법적 처리 기한은 **별도 개인정보·법무 검토**로 확정해야 하며 기능만으로 법적 의무 충족을 주장하지 않는다. 탈퇴 회원의 접근은 기존 활성계정 경계를 완화하지 않고 별도 심사 절차로 다룬다.
+- 웹: 명확한 국문 상태·키보드 포커스·접근 가능한 확인 창·320px/200% 확대·WCAG 2.2 AA. Android App API는 본인 사건 상세와 동일 오류 계약만 제공하며 관리자 기능은 제외. KPI: 접수→검토 착수 p50/p95, 내부 운영 목표 72시간 초과 대기(법정 기한 아님), 실제 이행 증빙 비율, 403/409/412/503 및 개인정보 사고 건수; 원본 요청 내용·사용자 ID는 분석에 전송하지 않는다.
+- 격리 실제 PG 테스트: 기존 Migration 015 무변경, 타인 조회·관리자 권한 100건, 사건 미생성·탈퇴, 동시 전이 100건, 동일/변경 멱등 요청, 구버전, 역할 철회, 자기 승인 금지, 증빙 누락, 감사 실패 롤백, 합성 10,001건의 동일 시각·마이크로초 커서, SQL 삽입, 비공개 데이터 차단, no-store/noindex, Android 동등성, CSRF·재인증 599/600/601초, 타임아웃·503와 빈 목록 구분. WLD·원장·계정 삭제가 변경되지 않음을 검증한다.
+- `privacy_case_workflow_v1` 기능 스위치 **기본 OFF**. 별도 개발 브랜치·순방향 DB 변경 심사·격리 복원·권한 부정 테스트·보안 감사/프론트 회귀 PASS·정확 통합 SHA 공식 Test 인증 E2E·백업 복원·승인 GitOps 이후 1%→10%→100% 단계적 적용. 스위치 OFF는 신규 화면/쓰기를 중지하되 기존 사건 기록을 삭제하지 않는다. DB 롤백은 파괴적 다운마이그레이션 대신 호환성 유지 순방향 수정. 기획 PR에서 운영승격 금지.
+
+### P0/P1 개발 백로그 (P0 4개 + P1 6개)
+| 우선순위 | ID | 독립 수용 기준 |
+| --- | --- | --- |
+| P0 | ENV1312-01 | 루트 95%/약 5.3GiB, 데이터 볼륨 82%/약 34GiB; 소유자 협의 가역적 조치·작업트리 보존·격리 백업 복원·디스크 예산 확인. |
+| P0 | SEC1312-02 | 앱 DML/PUBLIC 은행 함수 최소권한, 활성 세션·개인정보 담당자 전용 역할(임의 AdminGuard 불가), 본인 격리·2인 승인 및 타인 접근 100건. |
+| P0 | REL1312-03 | QA v1290 FAILED/HOLD: 프론트 1,397 PASS/6 FAIL, 운영 감사 High 2, 전체 Critical 2/High 10, Migration266·정확 SHA Test·복원·GitOps 차단. |
+| P0 | PRIV1312-04 | 접수 상태를 이행 완료로 오인하지 않음, 원본 received 불변, 장애를 빈 목록/성공으로 표시하지 않음, 증빙 없는 완료 차단. |
+| P1 | PRIV1312-05 | 순방향 사건·이벤트·영수증 테이블, 제약·인덱스, Migration015 함수 호환 및 최소 SECDEF 실행 권한. |
+| P1 | PRIV1312-06 | CAS·잠금 순서·멱등 영수증·2인 승인·동시 100건·감사 원자적 롤백. |
+| P1 | PRIV1312-07 | 회원 v2 상세·관리자 목록/상세/전이 DTO, 428/412/409/403/404/429/503 및 HMAC 커서. |
+| P1 | PRIV1312-08 | Next 회원·관리자 UX, Android 회원 App API, 320px/200%/WCAG AA, 장애/빈 상태 분리. |
+| P1 | PRIV1312-09 | 보존·법무 검토, 20명 이상 집계, SEO/no-store, 권한 철회 및 민감정보 없는 KPI. |
+| P1 | PRIV1312-10 | 격리 PG·합성 10,001건·타인 100건·동시 100건·재인증 경계·기능 OFF·복원·롤백 검증. |
+
+**QA·운영 게이트:** 최신 확인 QA v1290 FAILED/HOLD; 빌드·타입검사 PASS만으로 승격 불가. 루트 사용률 95%는 일시적 복구 이후에도 P0. 외부 독립 근거 목표 10,000건 **미달**: 신규 승인·중복 제거·분류 완료 **0건**, 누적 검증 수량 **UNKNOWN**, **BLOCKED / IN PROGRESS**. PostgreSQL·OWASP·국내 개인정보보호 당국 자료는 설계 참고일 뿐 승인된 개별 10,000건으로 계산하지 않는다. 런타임·DB·WLD·원장·Test·Production·예약 설정 변경 없음.
 - v1310 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1402 (stacked on unmerged #1399; RELEASE HOLD). Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398#issuecomment-6406659364 ; capacity: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6406659793 .
 
 ## v2026.10.26.1310 — F675-134 회원 보안 활동 보관함·CSV 본인확인 및 무결성 보완 (기능 보완 / 초안 / 운영 보류)

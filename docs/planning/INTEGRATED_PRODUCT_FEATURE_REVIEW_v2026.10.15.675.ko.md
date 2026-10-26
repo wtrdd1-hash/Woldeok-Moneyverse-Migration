@@ -1,4 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+
+## F675-135 — v1312 개인정보 요청 검토·진행 현황 (기능 추가 / DRAFT / HOLD)
+- 근거: main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 Migration015는 received 접수 상태만 저장, 회원 GET/POST만 제공하고 관리자 대기열이 없다. 일반 AdminGuard만으로 개인정보 담당 권한을 증명하지 못한다. 접수는 실제 이행·법적 준수 증거가 아니다.
+- 제안: 본인 사건 타임라인, 개인정보 담당자 전용 대기열, 서로 다른 2인의 증빙 기반 이행 승인, 추가형 이벤트·멱등 영수증, CAS/CSRF/재인증, 503와 빈 목록 구분, 서명 마이크로초 커서, Android/접근성/SEO/관리자 집계, 순방향 DB·정확 SHA Test·롤백. 상세 국영문 통합 마스터 참조, 기능 OFF.
+- 백로그 P0 4/P1 6: ENV1312-01 SEC1312-02 REL1312-03 PRIV1312-04 PRIV1312-05 PRIV1312-06 PRIV1312-07 PRIV1312-08 PRIV1312-09 PRIV1312-10. QA v1290 FAILED/HOLD, 루트 95%, 프론트 6건 실패, 보안 감사·DB ACL·Migration266·복원 차단. 신규 외부 승인 0건, 누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·원장 변경 없음.
+
 - v1310 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1402 (stacked on unmerged #1399; RELEASE HOLD). Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398#issuecomment-6406659364 ; capacity: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6406659793 .
 
 ## F675-134 / v1310 — 보안 활동 보관함 무결성 (기능 보완 / 초안 / 보류)

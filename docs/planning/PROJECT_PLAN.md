@@ -1,4 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## Planning v1312 — F675-135 Verified Privacy Request Case Triage & Member Timeline (Feature Addition / DRAFT / RELEASE HOLD)
+- Cycle: Previous Feature Improvement v1310 → Current Feature Addition v1312 → Next Feature Improvement v1314 (provisional). Remote main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 rechecked start/mid; predecessor Draft #1402 unmerged. Docs only; no runtime/DB/WLD/ledger/Test/Production changes.
+- Verified main: Migration 015 privacy_data_subject_requests status is constrained to received; owner create/list only, no staff workflow; NestJS privacy controller owner GET/POST; Next privacy page shows submissions. AdminGuard any-admin-role is insufficient privacy-officer authorization. Submission does not prove review or fulfillment.
+- Proposal: F675-135 separate versioned privacy cases/events/immutable command receipts, owner-only case timeline, privacy-officer-only queue, CAS transitions, distinct second approver and evidence prerequisite for verified completion; no automatic data export/erasure or legal compliance claim. Additive SECDEF functions preserve migration015 signatures; actor/role boundary P0. Typed errors, CSRF/reauth, Android parity, WCAG AA, noindex/no-store, anonymized admin KPI, isolated PG 100 concurrency/100 foreign/10,001 cursor and exact-SHA Test/rollback acceptance in integrated English master and Korean parity.
+- Backlog (4 P0/6 P1): ENV1312-01 SEC1312-02 REL1312-03 PRIV1312-04 PRIV1312-05 PRIV1312-06 PRIV1312-07 PRIV1312-08 PRIV1312-09 PRIV1312-10. QA v1290 FAILED/HOLD: frontend 1,397 pass/6 fail, prod audit 2 High, full audit 2 Critical/10 High; root 95%/~5.3GiB free, data volume 82%/~34GiB; migration266, DB ACL, authenticated exact-SHA Test and isolated restore unresolved. Feature privacy_case_workflow_v1 OFF; separate engineering branch, approval and GitOps mandatory.
+- Independent 10,000 evidence gate: newly approved/deduplicated/classified 0, cumulative approved UNKNOWN / 10,000; BLOCKED / IN PROGRESS. Publisher guidance is not counted as individually approved corpus evidence.
+
 - v1310 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1402 (stacked on unmerged #1399; RELEASE HOLD). Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398#issuecomment-6406659364 ; capacity: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6406659793 .
 
 ## Planning v1310 — F675-134 Security Archive Integrity (Improvement / DRAFT / RELEASE HOLD)

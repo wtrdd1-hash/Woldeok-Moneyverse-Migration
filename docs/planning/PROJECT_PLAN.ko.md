@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+
+## 기획 v1312 — F675-135 개인정보 요청 사건 검토 및 회원 처리 현황 (기능 추가 / DRAFT / RELEASE HOLD)
+- 회차: 이전 기능 보완 v1310 → 현재 기능 추가 v1312 → 다음 기능 보완 v1314(잠정). 원격 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재확인; 선행 Draft #1402 미병합. 문서만 변경하며 런타임·DB·WLD·원장·Test·운영은 변경하지 않는다.
+- 실제 main: Migration 015 요청 상태는 received만 허용하며 회원 본인 접수·조회 함수만 있고 관리자 검토 절차가 없다. NestJS 개인정보 컨트롤러도 회원 GET/POST만 제공하며 Next 개인정보 센터는 접수 기록을 표시한다. AdminGuard의 임의 관리자 역할은 전담 개인정보 처리 권한이 아니다. 접수는 검토·이행 완료가 아니다.
+- 신규 기획: F675-135는 원본 접수 상태를 보존하면서 별도 사건·이벤트·멱등 영수증, 본인 진행 현황, 전담 관리자 대기열, CAS 전이, 서로 다른 2인 승인 및 실제 이행 증빙 후 완료 표시를 추가한다. 자동 정보 추출·삭제나 법적 준수 완료를 주장하지 않는다. Migration015 함수 호환, 버전형 SECDEF·권한 경계, 타입별 오류·CSRF·재인증, Android 회원 API, WCAG AA, noindex/no-store, 비식별 KPI, 격리 PG 100 동시/100 타인/10,001 커서 및 정확 SHA Test·롤백 조건은 국문 통합 마스터에 명세.
+- 백로그(P0 4/P1 6): ENV1312-01 SEC1312-02 REL1312-03 PRIV1312-04 PRIV1312-05 PRIV1312-06 PRIV1312-07 PRIV1312-08 PRIV1312-09 PRIV1312-10. QA v1290 FAILED/HOLD: 프론트 1,397 통과/6 실패, 운영 감사 High 2, 전체 Critical 2/High 10; 루트 95%/약 5.3GiB, 데이터 볼륨 82%/약 34GiB; Migration266·DB ACL·정확 SHA Test·격리 복원 미해결. privacy_case_workflow_v1 기본 OFF, 별도 개발 브랜치·승인 GitOps 필수.
+- 외부 독립 근거 10,000건 게이트: 신규 검증 승인 0건, 누적 중복 제거 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 참고 문헌을 승인 개별 건수로 계산하지 않는다.
+
 - v1310 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1402 (stacked on unmerged #1399; RELEASE HOLD). Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398#issuecomment-6406659364 ; capacity: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6406659793 .
 
 ## 기획 v1310 — F675-134 보안 활동 보관함 무결성 보완 (기능 보완 / 초안 / 운영 보류)
