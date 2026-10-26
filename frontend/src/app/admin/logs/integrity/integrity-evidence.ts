@@ -59,7 +59,7 @@ function validVerification(value: unknown): boolean {
   const from = BigInt(value.from_sequence as string);
   const to = BigInt(value.to_sequence as string);
   const checked = BigInt(value.checked_count as string);
-  if (from > to || BigInt(value.verified_count as string) > checked
+  if ((from > to && value.status !== 'empty') || BigInt(value.verified_count as string) > checked
     || numeric.slice(4).some((key) => BigInt(value[key] as string) > checked)) return false;
   if (value.first_bad_sequence !== null
     && (!count(value.first_bad_sequence)

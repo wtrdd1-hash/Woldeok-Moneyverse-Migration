@@ -64,6 +64,17 @@ describe('privileged audit integrity evidence', () => {
     expect(parseAuditDispositions({ dispositions: 'none' })).toBeNull();
   });
 
+  it('accepts the database empty-range sentinel and a real failed verification', () => {
+    expect(parseAuditVerifications({ verifications: [{
+      ...verification, from_sequence: '100', to_sequence: '50', checked_count: '0',
+      verified_count: '0', status: 'empty',
+    }] })?.[0]?.status).toBe('empty');
+    expect(parseAuditVerifications({ verifications: [{
+      ...verification, mismatch_count: '1', verified_count: '1',
+      first_bad_sequence: '1', status: 'failed',
+    }] })?.[0]?.status).toBe('failed');
+  });
+
   it('rejects contradictory verification success and counts', () => {
     expect(parseAuditVerifications({ verifications: [{ ...verification, mismatch_count: '1' }] })).toBeNull();
     expect(parseAuditVerifications({ verifications: [{ ...verification, verified_count: '3' }] })).toBeNull();
