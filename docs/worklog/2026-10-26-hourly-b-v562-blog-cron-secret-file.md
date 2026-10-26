@@ -10,14 +10,22 @@
 - Other A/C/Gemini/QA branches and worktrees are not to be touched. No live crontab or credential changes before review.
 
 ## In progress
-- [ ] Reproduce unsafe caller contract in a failing test (no actual secret read).
-- [ ] Implement a protected-file curl runner with secret delivered on stdin, not argv or env.
-- [ ] Prove file permission/owner and input-validation failures, no-network test isolation.
-- [ ] Run full required gates where capacity allows; log each PASS/FAIL/BLOCKED separately.
-- [ ] Refresh main and planning; create Draft PR only, preserve all reservations.
+- [x] Reproduce unsafe caller contract in a failing test (no actual secret read).
+- [x] Implement a protected-file curl runner with secret delivered on stdin, not argv or env.
+- [x] Prove file permission/owner and input-validation failures, no-network test isolation.
+- [x] Run full required gates where capacity allows; log each PASS/FAIL/BLOCKED separately.
+- [x] Refresh main and planning; create Draft PR only, preserve all reservations (PR number recorded separately).
 
-## Finished
-- Pending.
+## Finished — candidate only / RELEASE HOLD
+- Latest main advanced to `8c2ddc24da950a19e763e2105c164fa9b1527f24` during work. Rebased and preserved the merged QA test repairs, updated dependency security overrides, and HTTP advisory gate; both project-plan languages rechecked.
+- Changed runtime/operations code: `scripts/security/run-blog-cron.sh` (protected credential file, fixed HTTPS POST, curl config via stdin, no secret in argv/env/logs); added 9 regressions and actual loopback curl syntax test; root `pnpm test` invokes these tests. Added an operations rollout guide. No Backend API/DB contract or migration change.
+- **Rebased exact candidate:** lint PASS (0 errors / 1,131 warnings); typecheck PASS; full build PASS; `pnpm test` PASS (root policy 29, contract 38, DB 15 PASS/3 SKIPPED, Backend 1,326 PASS/398 SKIPPED, Frontend 1,423 PASS); mobile API 179 PASS; bot 8 PASS; repository secret/control-byte/Prisma policy PASS.
+- **Security audit:** production dependency audit PASS (no known vulnerabilities). Full dev dependency audit FAIL: Critical 2, High 8, Moderate 11, Low 3. All findings remain subject to security review; no bypasses added.
+- **Database:** no DB changes; real isolated PostgreSQL full auth/finance integration not run and remains a release prerequisite. Authenticated Test exact-SHA, backup/restore, GitOps release gate: BLOCKED. Test and Production runtime versions remain on older SHA (read-only GET), no deploy.
+- **P1 #1137 remains open**: the live Debian cron still contains a credential in its command. This PR supplies a safer caller but does not alter live crontab, rotate a credential, restart services or assert remediation of the running schedule. Coordinated rollout is required.
+- Root disk at final check 98% (~2.4 GiB free); data disk 89% (~22 GiB free). All work done on data volume. Other workers' worktrees/branches/reservations untouched. Only this run's scratch temp files were cleaned; evidence retained at `/srv/moneyverse-data/build-workspaces/mv-b-v562-logs/gates`.
+- PR: Draft/HOLD only; no main merge, no Production deployment, no branch cleanup.
+
 
 ### Intermediate evidence (before latest-main resync)
 - RED: 4/6 new runner tests failed before implementation; GREEN: 9/9 including actual local-loopback curl config parsing.
