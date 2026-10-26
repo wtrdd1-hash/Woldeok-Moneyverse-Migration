@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { MessageSquare, Archive, Search, ArrowLeft, Clock, CheckCheck, User, UserPlus, BellOff, RotateCw, X, PenSquare } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { MessageSquare, Archive, Search, UserPlus, BellOff, RotateCw, X, PenSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +13,7 @@ import { localeLabel } from '@/lib/locale';
 import type { ChatConversation, ChatMessage } from './actions';
 import { ChatRoom } from './chat-room';
 import { ComposeMessageDialog } from './compose-message-dialog';
+import { useRecipientSearch } from './use-recipient-search';
 
 interface ChatViewProps {
   readonly initialConversations: readonly ChatConversation[];
@@ -30,39 +30,13 @@ export function ChatView({
   isAdmin = false,
 }: ChatViewProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { locale } = useLocale();
   const [conversations] = useState<ChatConversation[]>([...initialConversations]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'active' | 'archived'>('active');
   const [isComposeOpen, setIsComposeOpen] = useState(false);
-  const [searchedUsers, setSearchedUsers] = useState<readonly { user_id: string; display_name: string }[]>([]);
-  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const { users: searchedUsers, isSearching: isSearchingUsers, error: searchError } = useRecipientSearch(searchQuery, 6);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-
-  // 신규 회원 검색 디바운스
-  useEffect(() => {
-    const query = searchQuery.trim();
-    if (!query) {
-      setSearchedUsers([]);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      setIsSearchingUsers(true);
-      try {
-        const res = await fetch(`/app-api/v1/chat/search-users?query=${encodeURIComponent(query)}&limit=6`);
-        if (res.ok) {
-          const data = await res.json();
-          setSearchedUsers(data.users ?? []);
-        }
-      } catch {
-        // ignore
-      } finally {
-        setIsSearchingUsers(false);
-      }
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   // Filter conversations
   const filteredList = conversations.filter((c) => {
@@ -111,13 +85,15 @@ export function ChatView({
               )}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-8 h-9 text-sm"
+              aria-label="회원 또는 메시지 검색"
+              className="pl-9 pr-8 min-h-11 text-sm"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+                aria-label="검색어 지우기"
+                className="absolute right-1 top-1/2 -translate-y-1/2 min-h-11 min-w-11 flex items-center justify-center rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
               >
                 <X className="size-3.5" />
               </button>
@@ -173,7 +149,7 @@ export function ChatView({
                     onClick={() => {
                       router.push(`/chat?peer=${encodeURIComponent(u.user_id)}`);
                     }}
-                    className="w-full p-2 rounded-lg border border-primary/20 bg-card hover:bg-primary/10 transition-all text-left flex items-center justify-between gap-2 shadow-2xs group"
+                    className="w-full min-h-11 p-2 rounded-lg border border-primary/20 bg-card hover:bg-primary/10 transition-all text-left flex items-center justify-between gap-2 shadow-2xs group"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="size-7 rounded-full bg-primary/20 text-primary flex items-center justify-center font-black text-xs shrink-0">
@@ -189,6 +165,10 @@ export function ChatView({
                   </button>
                 ))}
               </div>
+            ) : searchError ? (
+              <p role="alert" className="text-[11px] text-destructive px-1 py-0.5">
+                {localeLabel(locale, '회원 검색에 실패했습니다. 다시 입력해 주세요.', 'Member search failed. Please retry.', '会員検索に失敗しました。再試行してください。', '会员搜索失败，请重试。')}
+              </p>
             ) : !isSearchingUsers ? (
               <p className="text-[11px] text-muted-foreground px-1 py-0.5 italic">
                 {localeLabel(locale, '일치하는 회원이 없습니다.', 'No members found.', '一致する会員がいません。', '无匹配会员。')}

@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Send,
   Search,
-  User,
   ShieldCheck,
   RotateCw,
-  Sparkles,
   PenSquare,
   AlertCircle,
   CheckCircle2,
@@ -27,11 +25,9 @@ import { Badge } from '@/components/ui/badge';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 import { sendAdminDirectMessage } from '@/app/admin/actions';
+import { useRecipientSearch, type RecipientSearchUser } from './use-recipient-search';
 
-interface SearchedUser {
-  readonly user_id: string;
-  readonly display_name: string;
-}
+type SearchedUser = RecipientSearchUser;
 
 interface ComposeMessageDialogProps {
   readonly isAdmin?: boolean;
@@ -73,14 +69,14 @@ export function ComposeMessageDialog({
   const setIsOpen = controlledOnOpenChange ?? setUncontrolledOpen;
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchedUsers, setSearchedUsers] = useState<readonly SearchedUser[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState<SearchedUser | null>(
     defaultPeerUserId
       ? { user_id: defaultPeerUserId, display_name: defaultPeerDisplayName ?? defaultPeerUserId }
       : null,
   );
+
+  const { users: searchedUsers, isSearching, error: searchError } = useRecipientSearch(isOpen && !selectedUser ? searchQuery : '', 8);
 
   const [messageBody, setMessageBody] = useState('');
   const [isOfficialAdmin, setIsOfficialAdmin] = useState(isAdmin);
@@ -89,36 +85,9 @@ export function ComposeMessageDialog({
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // 실시간 회원 검색 (디바운스 250ms)
-  useEffect(() => {
-    const query = searchQuery.trim();
-    if (!query) {
-      setSearchedUsers([]);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        const res = await fetch(`/app-api/v1/chat/search-users?query=${encodeURIComponent(query)}&limit=8`);
-        if (res.ok) {
-          const data = await res.json();
-          setSearchedUsers(data.users ?? []);
-        }
-      } catch {
-        // 무시
-      } finally {
-        setIsSearching(false);
-      }
-    }, 250);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
   const handleSelectUser = (u: SearchedUser) => {
     setSelectedUser(u);
     setSearchQuery('');
-    setSearchedUsers([]);
     setStatusMessage(null);
   };
 
@@ -272,7 +241,8 @@ export function ComposeMessageDialog({
                     )}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 pr-8 h-9 text-sm"
+                    aria-label="받는 회원 검색"
+                    className="pl-9 pr-8 min-h-11 text-sm"
                     autoFocus
                   />
                   {isSearching && (
@@ -289,7 +259,7 @@ export function ComposeMessageDialog({
                           key={u.user_id}
                           type="button"
                           onClick={() => handleSelectUser(u)}
-                          className="w-full p-2 rounded-lg hover:bg-muted/80 text-left flex items-center justify-between gap-2 transition-colors group"
+                          className="w-full min-h-11 p-2 rounded-lg hover:bg-muted/80 text-left flex items-center justify-between gap-2 transition-colors group"
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <div className="size-6 rounded-full bg-muted text-foreground flex items-center justify-center font-bold text-[11px] shrink-0">
@@ -304,6 +274,10 @@ export function ComposeMessageDialog({
                           </span>
                         </button>
                       ))
+                    ) : searchError ? (
+                      <p role="alert" className="text-xs text-destructive text-center py-4">
+                        {localeLabel(locale, '회원 검색에 실패했습니다. 다시 입력해 주세요.', 'Member search failed. Please retry.', '会員検索に失敗しました。再試行してください。', '会员搜索失败，请重试。')}
+                      </p>
                     ) : !isSearching ? (
                       <p className="text-xs text-muted-foreground text-center py-4">
                         {localeLabel(locale, '검색 결과가 없습니다.', 'No members found.', '結果が見つかりません。', '无搜索结果。')}
