@@ -35,7 +35,7 @@ export const READ_LIMIT = 12000;
  *
  * The trailing slash is required, so `/api/v1/authors` is not an auth route.
  */
-const AUTH_PATH = /^(?:\/api\/v\d+)?\/auth\//;
+const AUTH_PATH = /^(?:\/api\/v\d+)?\/auth\//i;
 
 /**
  * The two auth routes that are not auth work.
@@ -54,7 +54,7 @@ const AUTH_PATH = /^(?:\/api\/v\d+)?\/auth\//;
  * offered them a login button — while their session cookie was untouched and
  * their socket carried on chatting.
  */
-const CHEAP_AUTH_READ = /^(?:\/api\/v\d+)?\/auth\/(?:viewer|session|policy|providers)\/?$/;
+const CHEAP_AUTH_READ = /^(?:\/api\/v\d+)?\/auth\/(?:viewer|session|policy|providers)\/?$/i;
 
 /**
  * The path a tier is decided from, without the query string.
@@ -82,7 +82,7 @@ export function tierFor(pathname: string, method: string): RateLimitTier {
     return { name: 'read', limit: READ_LIMIT };
   }
   if (AUTH_PATH.test(pathname)) return { name: 'auth', limit: AUTH_LIMIT };
-  if (pathname.startsWith('/api/') && method !== 'GET') {
+  if (/^\/api\//i.test(pathname) && method !== 'GET') {
     return { name: 'sensitive', limit: SENSITIVE_LIMIT };
   }
   return { name: 'read', limit: READ_LIMIT };

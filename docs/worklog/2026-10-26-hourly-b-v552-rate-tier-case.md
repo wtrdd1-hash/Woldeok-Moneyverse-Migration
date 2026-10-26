@@ -9,8 +9,8 @@
 - Plan: write failing unit regression tests for mixed-case auth, cheap auth read, and API writes; confirm RED; apply minimal case-insensitive matching; confirm GREEN; run workspace checks and CI; keep Draft/HOLD until full gates.
 
 ## In progress
-- [ ] TDD RED verified
-- [ ] Minimal backend fix + regression tests
+- [x] TDD RED verified: 3 failing tests, 25 passing (Express 5.1.0 uppercase route matches)
+- [x] Minimal backend fix + regression tests: 28/28 PASS; AUTH_PATH, CHEAP_AUTH_READ and API write prefix match case-insensitively
 - [ ] Build, typecheck, lint, unit, integration/security/contract checks
 - [ ] Mid-run main/plan refresh and other PR collision check
 - [ ] Draft PR and CI evidence
