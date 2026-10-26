@@ -15,3 +15,7 @@
 ## Completion / 완료
 - Pending final docs parity/diff verification, GitHub push and Draft PR. No runtime, shared DB, WLD, ledger, flags, Test or Production changes. Existing automation remains active.
 
+
+## Verified GitHub handoff / GitHub 검증 인계
+- Docs-only commit 35a7b70d17fdb53edfa7ec8baf85e42eafffe248 pushed; GitHub connector created Draft PR #1489 against predecessor branch docs/planning-v1340-support-triage, 9 documentation files / 127 additions / 0 deletions; engineering issue #1483 and capacity issue #1170 updated. Main not merged.
+- Six bilingual planning documents each contain exactly ten identical P0/P1 IDs; git diff --check passed. Release HOLD: no runtime test or exact-SHA Test certification claimed; no Production deployment.
