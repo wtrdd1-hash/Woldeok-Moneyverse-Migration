@@ -14,3 +14,11 @@
 - GREEN candidate: removed fabricated repository snapshot/status and made both service methods reject with structured HTTP 503 before repository invocation. Existing API routes and admin guards remain unchanged.
 - Focused GREEN: 22/22 (4 new boundary tests + 18 existing service tests). Prior test asserting fabricated success replaced with fail-closed contract. No DB operations in new boundary tests.
 - Midpoint main and both planning documents rechecked; main remains `0fe614b2ca1a7bc0df540514e54db78130479e2a`.
+
+### Validation checkpoint (04:43 KST)
+- P1 tracking issue: #1486.
+- Focused Vitest 22/22 PASS. Isolated disposable PostgreSQL 17.11 test 1/1 PASS, container removed; this verifies refusal with a real PG pool and unchanged synthetic table, **not** a real provider backup or restore.
+- Full `pnpm typecheck` PASS, `pnpm lint` PASS (0 errors / 1,131 warnings), `pnpm test` PASS (backend 1,330 PASS / 398 SKIPPED before the new opt-in PG test; frontend 1,423 PASS), `pnpm build` PASS.
+- Bot test initially failed due to absent optional `bot/node_modules` in new worktree, not a code defect. After isolated `npm --prefix bot ci --ignore-scripts`, bot tests 8/8 PASS.
+- Production-only pnpm audit PASS (0 known); full pnpm audit FAIL (2 Critical / 8 High / 11 Moderate / 3 Low); bot audit FAIL (1 Critical / 5 High). Mandatory security gate BLOCKED.
+- Official Test exact-SHA, authenticated admin backup flow, independently verified provider upload and restore, release approval: BLOCKED. No Production/Test promotion.
