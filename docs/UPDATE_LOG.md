@@ -1,3 +1,8 @@
+## 2026-10-27 — Planning v1342 (F675-142 Improvement / DRAFT / RELEASE HOLD)
+- Previous Addition v1340 → Current Improvement v1342 → Next Addition v1344 provisional. Main 0fe614b2ca1a7bc0df540514e54db78130479e2a, canonical AGENTS/README/English PROJECT_PLAN/Korean parity checked start/mid; successor to unmerged Draft #1484, engineering #1483.
+- Verified Migration003 admin roles operator/approver/server_operator, Migration007 admin_current_roles returns any role; Migration196 admin inbox default100/max250, mutable status/last-message sort; Next.js five-second poll suppresses fetch failures and page-only counters look global. Proposed operator-only triage at controller+SQL, truthful 20/50 stable created_at/id cursor and UNKNOWN totals, polling generation/backoff/hidden-tab, lock/CAS/idempotent audit and revoked-assignee denial. No Production incident asserted.
+- Backlog P0 ENV1342-01 SEC1342-02 REL1342-03 SUP1342-04; P1 SUP1342-05 SUP1342-06 SUP1342-07 SUP1342-08 SUP1342-09 SUP1342-10. Isolated PG 10,001 synthetic, 100 concurrent, 100 BOLA/BFLA, 0 GET writes, audit rollback, Android/WCAG/SEO/KPI and feature OFF. QA v1306 FAILED/HOLD, root99% data93%, Test exact-SHA/restore BLOCKED. Independent references newly approved 0, cumulative UNKNOWN/10,000. Documentation only; no runtime, DB, WLD, ledger, Test, Production or automation changes.
+
 ## 2026-10-27 — Planning v1340 (F675-142 Addition / DRAFT / RELEASE HOLD)
 - Draft planning PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1484 (stacked on #1480; not independently mergeable; RELEASE HOLD).
 - Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1483. Draft PR pending; docs-only and release HOLD.

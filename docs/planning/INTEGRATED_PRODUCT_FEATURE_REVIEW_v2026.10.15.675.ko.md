@@ -1,3 +1,8 @@
+### F675-142 v1342 — 고객지원 담당 권한·큐 무결성 (개선; DRAFT / RELEASE HOLD)
+- 이전 Addition v1340 → 현재 Improvement v1342 → 다음 Addition v1344; main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작·중간, 미병합 선행 Draft #1484·개발 #1483. 실제 Migration003 역할 operator/approver/server_operator, admin_current_roles/AdminGuard는 아무 역할이나 허용하므로 신규 분류는 컨트롤러+SECDEF operator 전용이어야 한다. 관리자 큐 기본 100건(최대250)만 로드·집계, 5초 폴링 오류 은폐. 운영 사고는 미확인.
+- 서버 20/50 created_at/id 키셋, 15분 서명된 행위자+콘솔 세션+필터+워터마크, 전체 UNKNOWN·페이지별 진실한 건수, 상태 필터 변동·과거 LEFT JOIN. 잠금 안에서 operator 행위자·대상 검증, CAS·멱등 digest·불변 영수증·감사 실패 롤백; 401/403/404/409/412/422/429/503. Next.js 늦은 응답 폐기·숨김 탭 일시정지, Android/WCAG/noindex/no-store, k>=20 KPI, 플래그 OFF.
+- P0 ENV1342-01 SEC1342-02 REL1342-03 SUP1342-04; P1 SUP1342-05 SUP1342-06 SUP1342-07 SUP1342-08 SUP1342-09 SUP1342-10. 격리 PostgreSQL 합성 10,001/동시 100/BOLA+BFLA 100, 250건 초과 페이지, 역할 철회, GET 쓰기 0, 롤백. QA v1306 FAILED/HOLD, 루트99%/데이터93%, 정확 SHA Test·복원 미검증, Production BLOCKED. 외부 독립 레퍼런스 신규 0, 누적 승인 UNKNOWN/10,000. 런타임 변경 없음.
+
 ### F675-142 v1340 — 회원 문의 주제·관리자 배정 검증 (기능 추가; 초안/운영 보류)
 - 이전 보완 v1338 → 현재 추가 v1340 → 다음 보완 v1342. main 0fe614b2ca1a7bc0df540514e54db78130479e2a, 미병합 #1480 위 적층. Migration196·회원/관리자 문의에는 영속 주제·담당자 없음. 개발 DB 읽기 전용 문의 3·메시지 6건, 운영 SLA 주장 금지.
 - 회원 명시적 6주제·과거 UNKNOWN, 관리자 미배정/내 담당 큐·현재 역할 재검증·재배정·불변 이력, 기존 open/waiting_user/resolved 유지. 문의+주제 원자 생성, 행 잠금 CAS·멱등·감사, SECDEF·고정 search_path·PUBLIC 철회, 비공개 App API·Android/WCAG AA/noindex/no-store·k>=20 집계.

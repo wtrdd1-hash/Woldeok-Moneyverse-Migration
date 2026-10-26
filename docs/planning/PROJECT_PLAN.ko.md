@@ -1,3 +1,10 @@
+## 기획 v1342 — F675-142 고객지원 분류 무결성 (Feature Improvement / DRAFT / RELEASE HOLD)
+- 회차: 이전 Feature Addition v1340 → 현재 Feature Improvement v1342 → 다음 Feature Addition v1344(잠정). 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a, AGENTS/README/영문 원본 PROJECT_PLAN/한국어 대조본 시작·중간 확인. 미병합 Draft #1484 기반, 개발 #1483, 문서 전용·독립 병합 불가.
+- 실제 main: Migration003 관리자 역할 operator/approver/server_operator; Migration007 admin_current_roles 및 AdminGuard는 **모든 종류 역할**을 허용하므로 신규 분류는 컨트롤러·SECURITY DEFINER 모두 operator 전용이어야 한다. Migration196 관리자 목록 기본100/최대250, 상태·최근활동 정렬; 프론트 5초 폴링은 오류를 숨기고 로드된 일부만 집계한다. 운영 사고는 미확인.
+- 개선: operator 전용 담당자 목록/변경, 페이지 건수만 표시·전체 UNKNOWN, created_at DESC/id DESC 고정 HMAC 15분 행위자/세션/필터 커서(상태 변경으로 필터 결과 변동), 과거 기록 LEFT JOIN, 페이지20/최대50. UI 세대·AbortController·백오프·숨김 탭·오류 배너, 허위 0건 금지. 문의→분류 행 잠금, 행위자·대상 자격 재검증, CAS·digest·멱등 영수증·원자적 감사; 401/403/404/409/412/422/429/503. 기존 회원 문의·상태 API 유지. App API/Android, WCAG 2.2 AA, noindex/no-store, k>=20 KPI, 플래그 OFF.
+- P0 ENV1342-01 용량/복원; SEC1342-02 DB 권한/마이그레이션/원장; REL1342-03 QA/정확 SHA; SUP1342-04 최소권한/허위 집계/폴링. P1 SUP1342-05 스키마/SECDEF; SUP1342-06 커서/페이지; SUP1342-07 트랜잭션/API; SUP1342-08 웹/Android/접근성; SUP1342-09 개인정보/KPI; SUP1342-10 격리 PostgreSQL 10,001/100/100·권한 우회·롤백.
+- 최신 직접 확인 완료 QA v1306 FAILED/HOLD(프론트1423 PASS, 백엔드1326 PASS/398 SKIP, 전체 감사 Critical2/High8 FAIL, 봇 Critical1/High5 FAIL, 라우트 증거 967개 미충족, DB 전체 검증 미완료). 루트99% 여유 약1.2GiB, 데이터93% 여유 약14GiB; 공식 Test 정확 SHA·독립 복원·Production BLOCKED. 외부 독립 레퍼런스 신규 승인 0, 누적 승인 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 런타임/DB/원장/Test/Production 변경 없음.
+
 ## 기획 v1340 — F675-142 회원 문의 주제 분류·관리자 담당 배정 검증 (기능 추가 / 초안 / 운영 보류)
 - 교대: 이전 기능 보완 v1338 → 현재 기능 추가 v1340 → 다음 기능 보완 v1342(잠정). 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a 및 AGENTS/README/영문 PROJECT_PLAN 정본·한국어 대조 시작/중간 확인, 미병합 Draft #1480 위 적층. 런타임·DB·Test·운영 변경 없음.
 - 실제 Migration196의 문의·메시지와 관리자 큐에 주제·담당자·분류 버전이 없다. 관리자 화면은 상태 필터와 준비된 답변만, 회원 /support·위젯은 주제 선택 없음. 개발 DB 읽기 전용 문의 3건·메시지 6건; 운영 사고·SLA 달성 추정 금지.

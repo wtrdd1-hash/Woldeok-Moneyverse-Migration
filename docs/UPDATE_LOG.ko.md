@@ -1,3 +1,8 @@
+## 2026-10-27 — 기획 v1342 (F675-142 개선 / DRAFT / RELEASE HOLD)
+- 이전 Addition v1340 → 현재 Improvement v1342 → 다음 Addition v1344(잠정). main 0fe614b2ca1a7bc0df540514e54db78130479e2a 및 AGENTS/README/영문 원본 PROJECT_PLAN/한국어 대조본 시작·중간 확인. 미병합 Draft #1484 후속, 개발 #1483.
+- Migration003 역할 operator/approver/server_operator, Migration007 모든 관리자 역할 허용, Migration196 관리자 목록 기본100/최대250 및 변경 가능한 상태/최근활동 정렬, Next.js 5초 폴링 오류 은폐·부분 집계 확인. 신규 분류 operator 전용 컨트롤러+SQL, 20/50 고정 created_at/id 커서·전체 UNKNOWN, 폴링 세대/백오프/숨김 탭, 잠금/CAS/멱등 감사·담당자 권한 철회 차단을 설계. 운영 사고로 단정하지 않음.
+- P0 ENV1342-01 SEC1342-02 REL1342-03 SUP1342-04; P1 SUP1342-05 SUP1342-06 SUP1342-07 SUP1342-08 SUP1342-09 SUP1342-10. 격리 PostgreSQL 10,001건, 동시100, BOLA/BFLA100, GET 쓰기0, 감사 실패 롤백, Android/WCAG/SEO/KPI 및 기능 OFF. QA v1306 FAILED/HOLD, 루트99% 데이터93%, Test 정확 SHA/복원 BLOCKED. 외부 레퍼런스 신규 승인0, 누적 UNKNOWN/10,000. 문서 전용; 런타임/DB/WLD/원장/Test/Production/예약 변경 없음.
+
 ## 2026-10-27 — 기획 v1340 (F675-142 기능 추가 / 초안 / 운영 보류)
 - Draft planning PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1484 (stacked on #1480; not independently mergeable; RELEASE HOLD).
 - Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1483. Draft PR pending; docs-only and release HOLD.

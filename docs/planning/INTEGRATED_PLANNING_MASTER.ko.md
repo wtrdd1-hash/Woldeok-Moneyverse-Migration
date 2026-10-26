@@ -1,3 +1,41 @@
+## 기획 v1342 — F675-142 고객지원 분류 큐의 진실성·최소권한 담당 배정·폴링 무결성 (Feature Improvement / DRAFT / RELEASE HOLD)
+
+**회차/기준:** 이전 Feature Addition v1340 → 현재 Feature Improvement v1342 → 다음 Feature Addition v1344(잠정). 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a 및 AGENTS.md, README.md, 영문 PROJECT_PLAN.md 원본과 PROJECT_PLAN.ko.md 대조본을 시작·중간에 재검증했다. 미병합 Draft #1484(선행 #1480 기반)에 쌓인 문서 전용 후속 변경으로 독립 병합 불가. 개발 이슈 #1483. 런타임·DB·원장·Test·Production 변경 없음.
+
+### 실제 코드 근거 및 v1340 설계 정정
+- Migration 003의 admin_role은 **operator, approver, server_operator**이다. Migration 007의 admin_current_roles는 활성 사용자의 **모든 종류 관리자 역할**을 반환한다. 현재 AdminGuard는 역할 하나만 있어도 통과시키고 AdminSessionGuard는 관리자 콘솔 세션을 검증한다. Migration 196의 admin_support SQL도 아무 관리자 역할이나 인정한다. 따라서 v1340의 포괄적인 '현재 관리자' 조건만으로는 문의 담당 배정 권한이 충분히 제한되지 않는다. approver 단독 또는 server_operator 단독 사용자의 배정 권한 확대는 **설계상 위험**이며 운영 권한 오남용이 발생했다는 증거는 아니다.
+- Migration 196의 admin_support_threads는 상태 우선순위와 last_message_at DESC/id DESC로 정렬하고 기본 100건·최대 250건만 반환한다. 관리자 UI는 **가져온 일부 목록**만 검색·집계하면서 전체 건수처럼 표시할 수 있다. 5초 자동 폴링은 HTTP 오류·예외를 조용히 무시하고 이전 응답이 나중에 도착해 최신 화면을 덮을 가능성이 있다. 운영 장애나 실제 누락 사례는 확인되지 않았다.
+- v1340은 created_at/id 키셋을 제안했으나 기존 상태/최근활동 정렬과의 차이, 부분 목록의 허위 집계, 역할별 권한, 폴링 역전 문제를 명확히 하지 않았다. 이번 회차는 이 **기획 결함**을 수정하며 기존 회원 문의·답장·상태 API와 다른 개발자 작업은 유지한다.
+
+### 권한·사용자 경험·상태
+- 신규 분류 목록·담당자 목록·이력·변경 권한은 **operator 역할**에 한정한다. DB SECURITY DEFINER 내부에서 public.admin_role_holder(actor,'operator'::public.admin_role)로 현재 역할을 확인하고, NestJS의 AdminGuard·AdminSessionGuard·ConsentGuard와 쓰기 요청 CSRF도 유지한다. approver만 있거나 server_operator만 있는 계정은 신규 분류 API에 403; operator를 함께 보유한 복수 역할 계정은 허용한다. 이는 **신규 API에 한정한 제안**이며 기존 관리자 문의 API의 권한을 소급 변경하지 않는다. 배정 대상도 활성 operator만 허용하고 잠금 트랜잭션 내부에서 행위자와 대상 자격을 다시 확인한다. 관리자 세션은 NestJS에서 검증하며 DB가 세션까지 독립적으로 증명했다고 주장하지 않는다.
+- /admin/support 진입점에서 미배정·내 담당·담당자 자격 상실·주제·상태 필터, 내게 배정·재배정·해제·주제 수정·새로고침·감사 이력 CTA를 제공한다. LOADING/READY/EMPTY_VERIFIED/PARTIAL_PAGE/STALE/FILTER_CHANGED/CONFLICT/FORBIDDEN/SESSION_EXPIRED/UNAVAILABLE을 구분한다. 401/403/503은 '0건'이 아니다. 별도 정확한 전체 집계가 없으면 '이 페이지 N건'으로 표시하고 전체 건수는 UNKNOWN/null이다. 첫 페이지만으로 '미배정 0건'이나 응답시간 SLA 달성을 주장하지 않는다. 권한 철회 시 관리 버튼과 캐시를 즉시 무효화하되 GET으로 자동 재배정하지 않는다.
+- 회원 /support·플로팅 위젯은 6개 명시적 주제, 제목 1~120자, 본문 1~2000자, 기존 기록 LEGACY_UNCATEGORIZED를 유지한다. 내부 담당자·임의 우선순위를 노출하지 않는다. Android App API는 동일 코드·오류 계약. 비공개 화면 noindex/no-store, 터치 대상 44px 이상, 키보드 포커스 복귀·aria-live·WCAG 2.2 AA; 메시지·제목·담당자 개인정보를 분석에 넣지 않는다.
+
+### 조회 API·정렬·커서·폴링
+- GET /api/v1/admin/support/triage?status=&topic=&assignment=&cursor=&limit=20은 {items:[{threadId,topicCode,assignmentState,assignedAdminId,triageRevision,threadStatus,createdAt,lastMessageAt}],page:{limit,hasMore,nextCursor,asOf,complete:false,totalCount:null}} 계약이다. 1~50건, **created_at DESC,id DESC** 고정 키셋을 사용하며 기존 Migration 196의 변경 가능한 status/last_message_at 순서를 커서에 섞지 않는다. 상태·주제·담당 필터는 현재값이므로 페이지 사이 상태 변경 시 결과 집합이 달라질 수 있다. HMAC 커서는 15분 이내 유효하고 관리자 ID, 실제 콘솔 세션 ID, 정규화 필터, 생성일/id 위치, 상한 워터마크, 키 버전을 결합한다. 변조·세션 변경·필터 불일치는 409/422와 다시 검색 안내로 처리하며 빈 결과로 위장하지 않는다. 상한 워터마크는 새 문의 유입만 제한하고 **상태·담당 변경을 고정하지 못함**을 표시한다. 향후 활동순 정렬이 필요하면 버전 있는 스냅샷 읽기 모델을 따로 설계한다.
+- 조회 SQL은 SECURITY DEFINER, 고정 search_path, 스키마 명시, PUBLIC EXECUTE 회수, moneyverse_app에 제한적 EXECUTE만 부여하며 테이블 직접 SELECT/UPDATE를 열지 않는다. support_threads와 triage LEFT JOIN으로 미분류 과거 문의를 누락하지 않는다. support_threads(created_at DESC,id DESC), triage(assigned_admin_id,thread_id), triage(topic_code,thread_id) 인덱스를 합성 10,001건의 격리 PostgreSQL EXPLAIN ANALYZE로 검증한다. GET은 DB 쓰기 0건, 자동 담당 배정 0건. 모든 관리자 조회에서 SQL 자체가 operator 권한을 검사한다.
+- 관리자 UI는 현재 페이지·필터만 갱신한다. AbortController 또는 단조 증가 요청 세대로 늦게 도착한 과거 응답을 폐기하고 같은 키의 동시 요청을 막는다. 숨김 탭에서는 폴링을 멈추고 429/503은 제한적 백오프와 마지막 성공 시각·오류 배너로 표시한다. 확정된 배정 영수증 이후에는 해당 revision만 갱신하고 재조회하며 과거 폴링으로 덮지 않는다. 직접 링크는 목록 필터와 독립적으로 현재 권한을 재검증하고 다른 문의를 인덱스로 자동 선택하지 않는다. 첫 페이지의 실제 0건과 서버 오류를 구분하며 숨김 탭에서 비공개 메시지를 반복 요청하지 않는다.
+
+### 변경 트랜잭션·멱등성·감사
+- POST /api/v1/admin/support/threads/:id/triage: {action:ASSIGN_SELF|REASSIGN|UNASSIGN|SET_TOPIC,assignedAdminId?,topicCode?,expectedRevision,idempotencyKey,reason?}. 한 요청에 정확히 하나의 동작만 허용한다. operator 행위자, 현재 관리자 세션, CSRF, 속도 제한, 활성 operator 배정 대상을 확인한다. 401 콘솔 만료, 403 역할 없음, 404 문의 없음, 409 버전 충돌/키 재사용, 412 대상 권한 철회, 422 잘못된 동작/주제, 429 과다 요청, 503 서버 장애. 타임아웃을 성공으로 표시하지 않는다.
+- support_threads FOR UPDATE → triage FOR UPDATE 순으로 잠근 후 행위자·대상 operator 및 활성 사용자 상태를 다시 확인한다. expectedRevision과 actor+thread+intent에 연결된 기존 영수증을 검증한다. payload digest는 actor/thread/action/target/topic/reason/expectedRevision을 포함한다. **현재 권한 확인 이후** 동일 요청 재전송에만 같은 불변 영수증을 반환하며 이벤트를 재생성하지 않는다. 같은 키의 다른 본문은 409, 동시 23505는 잠금 뒤 확정 영수증을 확인한다. triage revision·불변 사건·admin_append_audit_event를 단일 트랜잭션에 기록하고 감사 실패 시 전부 롤백한다. 과거 성공 후 역할이 철회된 사용자는 이력 보존만 하며 재시도로 보호 데이터를 열람할 수 없다. 문의 상태(open/waiting_user/resolved)와 담당 배정은 독립; 답장/상태 변경이 자동 배정하지 않는다. 기존 Migration 196 및 체크섬은 수정 금지, #1469와 Migration 280 번호 충돌 정리 후 전진형 신규 마이그레이션만 사용한다.
+- 이력 조회는 제한된 크기·권한 검사·개인정보 제거. 사유 원문·문의 본문은 텔레메트리에 저장하지 않는다. 관리자별 시간당 변경 30건 이하(설정 가능한 시험 목표), 무권한 100건 BOLA/BFLA, 잘못된 UUID·커서 변조 시험. 관리자 KPI는 k>=20 집계와 UNKNOWN 표시. p95 목록 지연 <500ms(격리 DB 시험 목표), 오래된 폴링 폐기율, 허위 0건(목표 0), 실제 배정 성공, 재배정 빈도, 실제 첫 답장 시간, 조회 오류를 측정하며 수익·SLA 성과를 창작하지 않는다.
+
+### P0/P1 백로그·검증·운영승격
+- P0 ENV1342-01: 루트 99%(여유 약 1.2GiB), 데이터 93%(여유 약 14GiB) 용량과 독립 암호화 백업 복원 검증 #1170. 다른 작업자 파일 정리 금지.
+- P0 SEC1342-02: 앱 직접 DML 235/241, PUBLIC 은행 SECDEF 3개, 적용 마이그레이션 체크섬 5개 #1469, 원장 우회 #1477, Migration 280 충돌. 전진형 수정과 올바른 DB 역할 권한 음성 테스트.
+- P0 REL1342-03: QA v1306 FAILED/HOLD, 전체·봇 감사, 라우트 증거, 올바른 계정 격리 PostgreSQL, 공식 Test 정확 SHA와 롤백 증거 확보 전 운영 금지.
+- P0 SUP1342-04: 컨트롤러+SQL operator 전용, 행위자/대상 권한 철회, 부분 목록 허위 건수, 오래된 폴링 응답 차단.
+- P1 SUP1342-05: 신규 전진형 operator-검증 SECDEF 조회/변경 함수·제약·인덱스·과거 문의 LEFT JOIN, 기존 문의 API 유지.
+- P1 SUP1342-06: created_at/id HMAC 키셋, 행위자·세션·필터 결합, 20/50 상한, 변경 가능한 필터 결과와 전체 건수 UNKNOWN 계약.
+- P1 SUP1342-07: 동작별 DTO, 행 잠금/CAS/영수증/감사/재시도, CSRF·속도 제한·401/403/404/409/412/422/429/503.
+- P1 SUP1342-08: Next.js 관리자 큐, 5초 폴링 세대 검증·백오프·숨김 탭, 직접 링크 권한, Android 동등성, WCAG 2.2 AA.
+- P1 SUP1342-09: 개인정보·보존, noindex/no-store, 역할별 이력, k>=20 KPI, 허위 SLA/전체 건수 방지.
+- P1 SUP1342-10: 격리 실물 PostgreSQL 합성 문의 10,001건, 동시 배정/재시도 100건, BOLA/BFLA 100건, 역할 철회, 250건 초과 큐, 상태/담당 경합, 폴링 응답 역전, GET 쓰기 0건, 감사 실패 전체 롤백, 기능 OFF·구형 클라이언트 회귀·카나리/롤백.
+- 배포: support_triage_v1 기본 OFF. 기획 회차는 코드 배포 금지. 개발 별도 브랜치에서 TDD·정확 SHA CI·격리 PostgreSQL·보안 감사·Android/App API·공식 Test 인증 E2E·독립 복원·승인된 GitOps 무중단 카나리를 모두 통과해야 운영 승격. 롤백은 플래그 OFF, 불변 이력과 기존 회원 문의는 보존, 파괴적 down migration 금지.
+- 근거: 최근 직접 확인한 완료 QA v1306 FAILED/HOLD(프론트 1,423 PASS, 백엔드 1,326 PASS/398 SKIP, 전체 감사 Critical 2/High 8 FAIL, 봇 Critical 1/High 5 FAIL, 라우트 증거 967개 미충족은 실제 결함 967건이 아님). 더 최근 완료 QA를 확인했다고 주장하지 않는다. 외부 독립 레퍼런스 신규 승인 0건, 누적 개별 검증·중복 제거 승인 수 UNKNOWN/10,000, BLOCKED / IN PROGRESS. OWASP·PostgreSQL·W3C 규범은 설계 참고일 뿐 승인된 UI 독립 레퍼런스 수량에 포함하지 않는다.
+
 ## 기획 v1340 — F675-142 회원 문의 주제 분류·관리자 담당 배정 검증 시스템 (기능 추가 / 초안 / 운영 보류)
 
 **교대·기술 정본:** 이전 Feature Improvement v1338 → 현재 Feature Addition v1340 → 다음 Feature Improvement v1342(잠정). 최신 원격 main AGENTS.md, README.md, docs/planning/PROJECT_PLAN.md(영어 정본)와 PROJECT_PLAN.ko.md(대조)를 시작·중간에 확인했고 SHA는 0fe614b2ca1a7bc0df540514e54db78130479e2a이다. 이번 문서 변경은 미병합 Draft #1480에 적층되어 main에 독립 병합 불가. 런타임·공유 DB·WLD·원장·플래그·Test·Production·타 작업자 브랜치는 변경하지 않는다.
