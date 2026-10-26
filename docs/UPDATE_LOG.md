@@ -1,5 +1,6 @@
 ## 2026-10-27 — Planning v1338 (F675-141 Improvement / DRAFT / RELEASE HOLD)
 - Previous Addition v1336 / Current Improvement v1338 / Next Addition v1340. Remote main `0fe614b2ca1a7bc0df540514e54db78130479e2a` start/mid. Stacked on unmerged Draft #1476; engineering #1475.
+- GitHub Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1480 (stacked on #1476, not independently mergeable into main).
 - Source: generic public-cache unguarded GET, direct-chat shared upload, raw-URL renderer/new-tab, App API missing private security-header forwarding. Corrected typed evidenceId/authorized Blob viewer, live admin revocation, HEAD/Range/304, no-store headers, legacy LEGACY_UNVERIFIED and non-retroactive cache handling. No confirmed Production exposure.
 - P0 ENV1338-01 SEC1338-02 REL1338-03 SUP1338-04; P1 SUP1338-05..10. QA v1305 FAILED/HOLD, role-misconfigured DB test 59 not accepted as product defects, route evidence 967 unmet, ledger-bypass issue #1477, migration #1469, root99%. New verified independent references 0, cumulative UNKNOWN/10,000 BLOCKED. Docs-only, no runtime/DB/WLD/ledger/Test/Production changes.
 

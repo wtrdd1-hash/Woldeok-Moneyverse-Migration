@@ -1,5 +1,6 @@
 ## 2026-10-27 — 기획 v1338 (F675-141 기능 보완 / 초안 / 운영 보류)
 - 이전 추가 v1336 / 현재 보완 v1338 / 다음 추가 v1340, 최신 원격 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재확인. 선행 미병합 Draft #1476, 개발 #1475.
+- GitHub Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1480 (stacked on #1476, not independently mergeable into main).
 - 범용 GET 무권한/public 캐시, 일반 채팅 공용 업로드, 본문 URL 새 창, App API 보안 헤더 누락 확인. 구조화 evidenceId·인증 Blob 뷰어·관리자 역할 철회·HEAD/Range/304·no-store 헤더·LEGACY_UNVERIFIED 및 과거 캐시 회수 불가를 명세. 운영 노출 사고 확정 아님.
 - P0 ENV1338-01 SEC1338-02 REL1338-03 SUP1338-04; P1 SUP1338-05~10. QA v1305 FAILED/HOLD, 잘못된 DB 역할 59 실패는 제품 결함 미확정, 라우트 967 증거 미충족, 원장 우회 #1477·마이그레이션 #1469·루트99%. 외부 독립 근거 신규 승인0·누적 UNKNOWN/10,000 BLOCKED. 문서만 변경.
 
