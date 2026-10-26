@@ -1,3 +1,10 @@
+## 기획 v1346 — F675-143 내부 메모 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1344 → 현재 보완 v1346 → 다음 추가 v1348(잠정). 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작·중간 재확인. 미병합 Draft #1494 의존, 개발 이슈 #1493.
+- 실제 코드의 AdminGuard 관리자 전체 역할 허용, AdminSessionGuard 세션 touch, Migration196 공개 문의만 제공, Migration062 감사 행 삽입을 근거로 v1344 'GET 쓰기 0'과 '모든 복호화 감사' 모순을 수정. GET 업무 데이터 쓰기 0, 허가된 복호화 시도 감사 1건을 영속 기록 후 KMS 복호화; 감사 실패 시 503·평문 0. actor UUID 단독 신뢰 금지, DB의 실제 operator·세션 증명 필수.
+- AEAD AAD/메모별 키 교체·복원, 불변 가림 tombstone, 법적 보존·개인정보 열람 청구 개별 검토(일괄 면제 주장 금지), 회원/Android/내보내기 유출 차단, 커서·권한 철회·실패 상태 강화. P0/P1: ENV1346-01 SEC1346-02 REL1346-03 SUP1346-04 SUP1346-05 SUP1346-06 SUP1346-07 SUP1346-08 SUP1346-09 SUP1346-10.
+- 최신 QA v1309: 프론트 1,423·백엔드 1,326 PASS/398 SKIP, 전체 보안 감사 Critical2/High8 FAIL, 봇 Critical1/High5 FAIL. 루트 100%(약 791MiB), 정확 SHA Test 및 키/백업 복원 미검증. 외부 근거 신규 승인 0, 누적 중복 제거 승인 UNKNOWN/10,000 => BLOCKED/IN PROGRESS. 문서만 수정, 운영 변경 없음.
+
+
 ## 기획 v1344 — F675-143 운영자 전용 비공개 고객지원 내부 메모 (기능 추가 / 초안 / 운영 보류)
 - 이전 기능 보완 v1342 → 현재 기능 추가 v1344 → 다음 기능 보완 v1346(잠정). 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작·중간 재조회, AGENTS/README/영문 PROJECT_PLAN 원본·국문 대조. 미병합 Draft #1489(상위 #1484), 개발 #1493. 문서만 변경.
 - 실제 Migration196 문의·메시지는 user/admin만 있으며 내부 메모 없음. 관리자 API와 /admin/support는 공개 답변·상태만 지원. AdminGuard는 모든 관리자 역할 허용하므로 새 메모는 NestJS와 SECURITY DEFINER SQL 모두 현재 operator 권한 필수. 기존 F675-136 답변 읽음(#1415) 중복 제외. 운영 사고 확인 아님.
