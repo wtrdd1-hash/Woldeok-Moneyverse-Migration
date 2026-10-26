@@ -1,5 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
-- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 
 ## 기획 v1328 — F675-139 문의 임시글 복구·검증 전송 (기능 추가 / 초안 / 운영 보류)
 - 교대: 이전 기능 보완 v1326 / 현재 기능 추가 v1328 / 다음 기능 보완 v1330(잠정). 최신 main 0fe614b2ca1a7bc0df540514e54db78130479e2a를 시작·중간 재조회했으며 v1326보다 갱신됨. main AGENTS.md·README.md·영어 정본 PROJECT_PLAN.md·한국어 대조 확인. v1326 PR #1452 미병합, 이번 문서 PR은 해당 브랜치에 적층되므로 **변경된 main에 독립 병합 금지**. QA v1299는 이전 main 결과라 새 정확 SHA 검증 아님.

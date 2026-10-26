@@ -1,5 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
-- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 
 ## 기획 v1328 — F675-139 회원 문의 임시저장 복구 및 검증된 전송 (기능 추가 / 초안 / 운영 보류)
 

@@ -1,5 +1,5 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
-- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 
 ## F675-139 / v1328 — 회원 문의 임시저장 복구·안전 전송 검토 (초안 / 운영 보류)
 - 이전 보완 v1326 → 현재 추가 v1328 → 다음 보완 v1330(잠정). 최신 main 0fe614b2ca1a7bc0df540514e54db78130479e2a가 변경되어 이전 main QA v1299를 새 SHA 승인 근거로 사용 금지. 실제 /support 즉시 전송과 Migration196에 임시글 보관 기능 없음.

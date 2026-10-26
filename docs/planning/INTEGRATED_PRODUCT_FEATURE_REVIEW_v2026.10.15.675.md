@@ -1,5 +1,5 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
-- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 
 ## F675-139 / v1328 — Member Support Draft Recovery: new feature review (DRAFT / RELEASE HOLD)
 - Previous Improvement v1326 → Current Addition v1328 → Next Improvement v1330 provisional. Main 0fe614b2ca1a7bc0df540514e54db78130479e2a advanced since v1326; old-main QA v1299 cannot certify it. Source: main /support immediate-submit actions and Migration196 lack draft persistence.

@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
-- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 
 ## Planning v1328 — F675-139 Explicit Member Support Draft Recovery and Verified Send (Feature Addition / DRAFT / RELEASE HOLD)
 

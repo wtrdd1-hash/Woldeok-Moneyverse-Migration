@@ -1,5 +1,5 @@
 # Planning v1328 — F675-139 Member Support Draft Recovery
-- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 
 - 2026-10-26 21:10–21:xx KST; Previous Improvement v1326 / Current Addition v1328 / Next Improvement v1330 provisional.
 - Main 0fe614b2ca1a7bc0df540514e54db78130479e2a changed after v1326; reviewed main AGENTS.md, README.md, English canonical and Korean PROJECT_PLAN, support/page.tsx, support/actions.ts, support.controller.ts and Migration196. Draft PR #1452 unmerged. New v1328 docs branch stacked on it; latest main reconciliation and independent merge remain BLOCKED.

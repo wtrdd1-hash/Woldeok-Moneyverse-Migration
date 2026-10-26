@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
-- Engineering handoff / 개발 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 
 ## Planning v1328 — F675-139 Explicit Support Draft Recovery (Feature Addition / DRAFT / RELEASE HOLD)
 - Cycle: Previous Feature Improvement v1326 / Current Feature Addition v1328 / Next Feature Improvement v1330 provisional. Latest main 0fe614b2ca1a7bc0df540514e54db78130479e2a rechecked start/mid; changed since v1326. Read main AGENTS.md, README.md, canonical PROJECT_PLAN.md and Korean parity. v1326 PR #1452 unmerged; this docs-only proposal is stacked on that branch, **not ready to merge directly to newly advanced main**. Latest QA v1299 is for old main; exact-SHA new-main QA UNKNOWN.
