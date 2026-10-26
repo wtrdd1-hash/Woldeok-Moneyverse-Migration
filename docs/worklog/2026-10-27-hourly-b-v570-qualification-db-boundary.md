@@ -15,3 +15,8 @@
 
 ## Finished
 - Pending.
+
+### Midpoint verification — 2026-10-27 03:38 KST
+- GREEN: 3/3 new Vitest assertions passed on implementation commit `184919b23604287701eadf577d4f4eb9a30d7029`.
+- Isolated PostgreSQL 17.11-alpine, `--network none`, tmpfs DB: migration 280 applied twice successfully. App EXECUTE revoked (42501), privileged invocation unconditionally rejected (55000), app qualification INSERT/UPDATE/DELETE revoked, SELECT retained, unrelated work function callable, no balance mutation or new qualification rows. Fixture was synthetic and did not apply the full 001–279 migration history. Container removed.
+- Current main and both language plans rechecked. Integration dependency: Draft #1478 HTTP 503 containment must land before this SQL boundary to avoid changing an active route to generic 42501/500. Existing migration parity drift #1469 remains unresolved.
