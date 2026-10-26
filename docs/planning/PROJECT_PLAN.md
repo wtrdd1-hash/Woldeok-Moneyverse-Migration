@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **v1322 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1432 (stacked on unmerged #1427; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426.
 
 ## Planning v1322 — F675-137 Collection and Curation Truth Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
 - Previous Addition v1320 / Current Improvement v1322 / Next Addition v1324 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked; predecessor Draft #1427 unmerged. No runtime/DB/Test/Production deployment.

@@ -1,4 +1,5 @@
 # Integrated Planning Re-review v2026.09.22.348
+- **v1322 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1432 (stacked on unmerged #1427; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426.
 
 ## v1322 Re-review — Collection curation read/write and canonical code integrity (2026-10-26; DRAFT/HOLD)
 - Main source evidence: frontend NEO_CYBER_ARCADE_TOKEN vs backend NEO_CYBER_CASINO_CHIP; GET listCollections inserts four samples; GET getCurationStatus inserts/updates progress; POST accepts arbitrary targetStep and independent D1/D3/D7; UI ignores failed optimistic mutations. Dev read-only: 8 collection rows/2 owners and 2 progress rows step1/D7; no Production inference.
