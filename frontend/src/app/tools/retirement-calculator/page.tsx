@@ -20,6 +20,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { RETIREMENT_SCENARIOS } from '@/config/pseo-tax-retirement.config';
+import { calculateRetirementEligibility } from '@/lib/retirement-estimate';
 import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 import { CalculatorSaveAction } from '@/components/calculator-save-action';
 import { SocialShareBar } from '@/components/social-share-bar';
@@ -34,34 +35,28 @@ export default function RetirementCalculatorPage() {
   const [months, setMonths] = useState<number>(0);
   const [monthlySalary, setMonthlySalary] = useState<number>(3800000);
   const [annualBonus, setAnnualBonus] = useState<number>(4000000);
-  const [isWldClaimed, setIsWldClaimed] = useState(false);
 
-  // 총 근속연수 (소수점)
-  const totalYears = years + months / 12;
-
-  // 3개월 평균임금 산정 (월급 + 상여금의 3/12)
-  const threeMonthsBonusPortion = annualBonus / 4;
-  const averageMonthlyWage = monthlySalary + threeMonthsBonusPortion / 3;
-
-  // 법정 퇴직금 = 3개월 평균임금 * 근속연수
-  const estimatedSeverance = Math.round(averageMonthlyWage * Math.max(1, totalYears));
+  // The one-year statutory threshold must not be replaced with a fabricated year.
+  const { eligible, taxServiceYears, estimatedSeverance } = calculateRetirementEligibility(
+    years, months, monthlySalary, annualBonus,
+  );
 
   // 근속연수 공제 계산 (개정 세법 기준)
   let serviceDeduction = 0;
-  if (years <= 5) {
-    serviceDeduction = years * 1000000;
-  } else if (years <= 10) {
-    serviceDeduction = 5000000 + (years - 5) * 2000000;
-  } else if (years <= 20) {
-    serviceDeduction = 15000000 + (years - 10) * 2500000;
+  if (taxServiceYears <= 5) {
+    serviceDeduction = taxServiceYears * 1000000;
+  } else if (taxServiceYears <= 10) {
+    serviceDeduction = 5000000 + (taxServiceYears - 5) * 2000000;
+  } else if (taxServiceYears <= 20) {
+    serviceDeduction = 15000000 + (taxServiceYears - 10) * 2500000;
   } else {
-    serviceDeduction = 40000000 + (years - 20) * 3000000;
+    serviceDeduction = 40000000 + (taxServiceYears - 20) * 3000000;
   }
 
   // 과세표준 및 환산급여 계산
   const taxableIncome = Math.max(0, estimatedSeverance - serviceDeduction);
   // 환산급여 = (과세표준 / 근속연수) * 12
-  const convertedSalary = years > 0 ? (taxableIncome / years) * 12 : 0;
+  const convertedSalary = taxServiceYears > 0 ? (taxableIncome / taxServiceYears) * 12 : 0;
 
   // 환산급여별 세액공제
   let convertedDeduction = 0;
@@ -100,7 +95,7 @@ export default function RetirementCalculatorPage() {
 
   const calculatedTax = Math.max(0, convertedTaxBase * baseTaxRate - taxDeduction);
   // 최종 퇴직소득세 = (환산 산출세액 / 12) * 근속연수 * 지방소득세 1.1
-  const finalTax = Math.round(((calculatedTax / 12) * years) * 1.1);
+  const finalTax = Math.round(((calculatedTax / 12) * taxServiceYears) * 1.1);
   const netSeverance = Math.max(0, estimatedSeverance - finalTax);
   const effectiveTaxRate = estimatedSeverance > 0 ? ((finalTax / estimatedSeverance) * 100).toFixed(1) : '0.0';
 
@@ -110,7 +105,7 @@ export default function RetirementCalculatorPage() {
   // Schema.org 구조화 데이터
   const jsonLdData = {
     '@context': 'https://schema.org',
-    '@type': ['SoftwareApplication', 'FinancialProduct'],
+    '@type': 'SoftwareApplication',
     name: '2026 직장인 퇴직금 실수령액 및 IRP 절세 계산기',
     description: '근속연수와 3개월 평균임금 기준 세후 퇴직금 실수령액 및 IRP 계좌 이체 시 절세 효과를 정밀 역산하는 무료 금융 도구입니다.',
     operatingSystem: 'All',
@@ -119,11 +114,6 @@ export default function RetirementCalculatorPage() {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'KRW',
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '158',
     },
   };
 
@@ -166,7 +156,7 @@ export default function RetirementCalculatorPage() {
       <div className="space-y-3 text-center sm:text-left border-b border-border/80 pb-6">
         <div className="flex flex-wrap items-center gap-2">
           <span className="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            2026 최신 세법 개정 반영
+            2026 예상 계산 · 실제 지급액 별도 확인
           </span>
           <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-zinc-800 text-zinc-300">
             실효세율 & IRP 절세 비교
@@ -205,10 +195,10 @@ export default function RetirementCalculatorPage() {
                   <input
                     id={yearsId}
                     type="number"
-                    min={1}
+                    min={0}
                     max={40}
                     value={years}
-                    onChange={(e) => setYears(Math.max(1, Number(e.target.value)))}
+                    onChange={(e) => setYears(Number.isFinite(Number(e.target.value)) ? Math.min(40, Math.max(0, Math.trunc(Number(e.target.value)))) : 0)}
                     className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus:outline-none focus:border-emerald-500"
                   />
                   <span className="absolute right-3 top-2 text-xs text-zinc-400">년</span>
@@ -216,16 +206,23 @@ export default function RetirementCalculatorPage() {
                 <div className="relative">
                   <input
                     id={monthsId}
+                    aria-label="근속 개월 수"
                     type="number"
                     min={0}
                     max={11}
                     value={months}
-                    onChange={(e) => setMonths(Math.min(11, Math.max(0, Number(e.target.value))))}
+                    onChange={(e) => setMonths(Number.isFinite(Number(e.target.value)) ? Math.min(11, Math.max(0, Math.trunc(Number(e.target.value)))) : 0)}
                     className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus:outline-none focus:border-emerald-500"
                   />
                   <span className="absolute right-3 top-2 text-xs text-zinc-400">개월</span>
                 </div>
               </div>
+              {!eligible && (
+                <p role="status" aria-label="퇴직급여 지급 자격 안내" className="mt-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-200">
+                  계속 근로기간 1년 미만은 원칙적으로 법정 퇴직급여 지급 대상이 아니므로 예상 퇴직금은 0원입니다.
+                </p>
+              )}
+              <p className="mt-2 text-xs text-zinc-400">퇴직급여는 계속 근로기간 1년 이상과 4주 평균 주 15시간 이상 등 법정 요건을 충족해야 합니다. 이 계산기는 근로시간을 확인하지 않으며 실제 지급액·세액은 달라질 수 있습니다.</p>
             </div>
 
             <div>
@@ -238,7 +235,7 @@ export default function RetirementCalculatorPage() {
                   type="number"
                   step={100000}
                   value={monthlySalary}
-                  onChange={(e) => setMonthlySalary(Number(e.target.value))}
+                  onChange={(e) => setMonthlySalary(Number.isFinite(Number(e.target.value)) ? Math.min(1_000_000_000_000, Math.max(0, Number(e.target.value))) : 0)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus:outline-none focus:border-emerald-500"
                 />
                 <span className="absolute right-3 top-2 text-xs text-zinc-400">원</span>
@@ -258,7 +255,7 @@ export default function RetirementCalculatorPage() {
                   type="number"
                   step={500000}
                   value={annualBonus}
-                  onChange={(e) => setAnnualBonus(Number(e.target.value))}
+                  onChange={(e) => setAnnualBonus(Number.isFinite(Number(e.target.value)) ? Math.min(1_000_000_000_000, Math.max(0, Number(e.target.value))) : 0)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono text-zinc-100 focus:outline-none focus:border-emerald-500"
                 />
                 <span className="absolute right-3 top-2 text-xs text-zinc-400">원</span>
@@ -284,7 +281,7 @@ export default function RetirementCalculatorPage() {
                 <CalculatorSaveAction
                   scenario={{
                     type: 'retirement',
-                    title: `근속 ${years}년 퇴직금 ${netSeverance.toLocaleString()}원`,
+                    title: `근속 ${years}년 ${months}개월 퇴직금 ${netSeverance.toLocaleString()}원`,
                     badge: `실효세율 ${effectiveTaxRate}%`,
                     primaryMetric: {
                       label: '세후 실수령액',
@@ -361,33 +358,32 @@ export default function RetirementCalculatorPage() {
                 </span>
               </div>
               <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-400">
-                무료 10,000 WLD
+                가상 은행 안내
               </span>
             </div>
             <p className="text-xs text-zinc-400">
-              퇴직금으로 고민할 필요 없이, 머니버스 가상 은행에서 지원금 10,000 WLD로 일일 복리 이자 파밍을 지금 바로 무료 체험해 보세요.
+              퇴직금으로 고민할 필요 없이, 머니버스 가상 은행에서 서비스 내 가상 은행 기능을 살펴보세요. 이 계산 결과만으로 WLD가 지급되거나 예치되지는 않습니다.
             </p>
             <div className="flex items-center gap-2">
               <Link
-                href="/register"
-                onClick={() => setIsWldClaimed(true)}
+                href="/bank"
                 className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/40 transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                {isWldClaimed ? '10,000 WLD 지급 예약됨' : '10,000 WLD 지원금 받고 IRP 체험'}
+                가상 은행 기능 살펴보기
               </Link>
               <Link
-                href="/bank"
+                href="/register"
                 className="py-2 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition-colors"
               >
-                가상 은행 둘러보기
+                회원가입 안내
               </Link>
             </div>
           </div>
 
           <SocialShareBar
             title="2026 직장인 퇴직금 실수령액 & IRP 절세 계산기"
-            description={`근속 ${years}년 기준 예상 퇴직금 ${estimatedSeverance.toLocaleString()}원 (실효세율 ${effectiveTaxRate}%) 계산 결과를 확인해보세요.`}
+            description={`근속 ${years}년 ${months}개월 기준 예상 퇴직금 ${estimatedSeverance.toLocaleString()}원 (실효세율 ${effectiveTaxRate}%) 계산 결과를 확인해보세요.`}
             hashtags={['퇴직금계산기', 'IRP절세', '직장인재테크', '머니버스']}
           />
         </div>

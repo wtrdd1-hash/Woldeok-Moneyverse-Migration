@@ -19,3 +19,9 @@ Pending.
 
 ## End
 Pending.
+
+## Midpoint — 2026-10-26 19:54 KST
+- Re-fetched origin/main, unchanged `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; canonical EN/KO plan hash unchanged (`51683ec3`, `ba7d055f`). No retirement-calculator PR in active queue; A/B/QA/Gemini work preserved.
+- RED 5 failing behavior tests + 1 pre-existing passing; GREEN 6/6 on same isolated worktree.
+- Implemented strict nonnegative bounded tenure/pay inputs, 12-month threshold, fractional severance, integer tax tenure, explicit under-one-year status, unverified WLD grant removal and fabricated SEO review removal.
+- Pure calculator; no API/DB/schema mutation. Next: full gates, CI, exact SHA status.
