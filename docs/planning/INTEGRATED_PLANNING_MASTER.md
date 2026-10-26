@@ -1,5 +1,6 @@
 # Woldeok Moneyverse — Integrated Planning Master
 - Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- Main source addendum: frontend/src/components/floating-support-chat-widget.tsx also sends via /app-api/v1/support/threads and replies; its reply text is cleared before fetch and restored on handled errors, so unknown-commit/unmount loss needs explicit recovery. The widget supports image-URL attachments; v1328 drafts are TEXT-ONLY and must not silently strip, save or claim to restore attachments. Expose Save only for eligible text-only drafts (or link to /support); preserve existing attachment send behavior. Its localStorage mute preference is not draft storage. Test both /support and floating widget, plus Android parity.
 
 ## Planning v1328 — F675-139 Explicit Member Support Draft Recovery and Verified Send (Feature Addition / DRAFT / RELEASE HOLD)
 

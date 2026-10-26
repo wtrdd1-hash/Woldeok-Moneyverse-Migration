@@ -1,5 +1,6 @@
 # 월덕 머니버스 — Living Project Plan
 - Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- 최신 main 추가 근거: frontend/src/components/floating-support-chat-widget.tsx도 /app-api/v1/support/threads 및 답장을 전송하며, 답장 텍스트를 fetch 전에 지우고 처리된 오류에서만 복구하므로 응답 불명/창 닫힘 시 유실 위험을 설계에 반영. 위젯에는 이미지 URL 첨부가 있으나 v1328 임시글은 **텍스트 전용**으로, 첨부를 몰래 제거·저장·복구한 척하지 않음. 텍스트만 저장 CTA 제공(또는 /support 안내), 기존 첨부 전송은 보존. localStorage 음소거 설정은 임시글 보관이 아님. /support·플로팅 위젯·Android 모두 회귀 검증.
 
 ## 기획 v1328 — F675-139 문의 임시글 복구·검증 전송 (기능 추가 / 초안 / 운영 보류)
 - 교대: 이전 기능 보완 v1326 / 현재 기능 추가 v1328 / 다음 기능 보완 v1330(잠정). 최신 main 0fe614b2ca1a7bc0df540514e54db78130479e2a를 시작·중간 재조회했으며 v1326보다 갱신됨. main AGENTS.md·README.md·영어 정본 PROJECT_PLAN.md·한국어 대조 확인. v1326 PR #1452 미병합, 이번 문서 PR은 해당 브랜치에 적층되므로 **변경된 main에 독립 병합 금지**. QA v1299는 이전 main 결과라 새 정확 SHA 검증 아님.

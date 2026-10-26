@@ -1,5 +1,6 @@
 # 월덕 머니버스 — 통합 기획 마스터
 - Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- 최신 main 추가 근거: frontend/src/components/floating-support-chat-widget.tsx도 /app-api/v1/support/threads 및 답장을 전송하며, 답장 텍스트를 fetch 전에 지우고 처리된 오류에서만 복구하므로 응답 불명/창 닫힘 시 유실 위험을 설계에 반영. 위젯에는 이미지 URL 첨부가 있으나 v1328 임시글은 **텍스트 전용**으로, 첨부를 몰래 제거·저장·복구한 척하지 않음. 텍스트만 저장 CTA 제공(또는 /support 안내), 기존 첨부 전송은 보존. localStorage 음소거 설정은 임시글 보관이 아님. /support·플로팅 위젯·Android 모두 회귀 검증.
 
 ## 기획 v1328 — F675-139 회원 문의 임시저장 복구 및 검증된 전송 (기능 추가 / 초안 / 운영 보류)
 

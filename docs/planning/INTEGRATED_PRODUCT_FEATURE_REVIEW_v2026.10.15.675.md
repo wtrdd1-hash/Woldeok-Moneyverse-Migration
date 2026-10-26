@@ -1,5 +1,6 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 - Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
+- Main source addendum: frontend/src/components/floating-support-chat-widget.tsx also sends via /app-api/v1/support/threads and replies; its reply text is cleared before fetch and restored on handled errors, so unknown-commit/unmount loss needs explicit recovery. The widget supports image-URL attachments; v1328 drafts are TEXT-ONLY and must not silently strip, save or claim to restore attachments. Expose Save only for eligible text-only drafts (or link to /support); preserve existing attachment send behavior. Its localStorage mute preference is not draft storage. Test both /support and floating widget, plus Android parity.
 
 ## F675-139 / v1328 — Member Support Draft Recovery: new feature review (DRAFT / RELEASE HOLD)
 - Previous Improvement v1326 → Current Addition v1328 → Next Improvement v1330 provisional. Main 0fe614b2ca1a7bc0df540514e54db78130479e2a advanced since v1326; old-main QA v1299 cannot certify it. Source: main /support immediate-submit actions and Migration196 lack draft persistence.
