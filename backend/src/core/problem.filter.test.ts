@@ -71,6 +71,49 @@ describe('ProblemFilter', () => {
     expect(JSON.stringify(json.mock.calls[0])).not.toContain('hunter2');
   });
 
+  it('redacts internal 503 HttpException details and validation arrays in production', () => {
+    const { host, json } = hostFor();
+    new ProblemFilter(true).catch(
+      new HttpException({
+        message: 'upstream request failed: password=private-db-password',
+        errors: ['secret token was rejected'],
+        code: 'UPSTREAM_UNAVAILABLE',
+      }, 503),
+      host,
+    );
+    const [document] = json.mock.calls[0] as [Record<string, unknown>];
+    expect(document).toMatchObject({ status: 503, code: 'UPSTREAM_UNAVAILABLE', detail: 'service temporarily unavailable' });
+    expect('errors' in document).toBe(false);
+    expect(JSON.stringify(document)).not.toContain('private-db-password');
+    expect(JSON.stringify(document)).not.toContain('secret token');
+  });
+
+  it('redacts explicit 500 HttpException detail while retaining safe 4xx diagnostics', () => {
+    const internal = hostFor();
+    new ProblemFilter(true).catch(new HttpException('query failed: password=secret', 500), internal.host);
+    expect(JSON.stringify(internal.json.mock.calls[0])).not.toContain('password=secret');
+    const client = hostFor();
+    new ProblemFilter(true).catch(new BadRequestException('invalid amount'), client.host);
+    expect(client.json).toHaveBeenCalledWith(expect.objectContaining({ detail: 'invalid amount' }));
+  });
+
+  it('rejects malformed 5xx machine codes that could carry raw upstream text', () => {
+    const { host, json } = hostFor();
+    new ProblemFilter(true).catch(
+      new HttpException({ message: 'provider failed', code: 'database password=secret' }, 503),
+      host,
+    );
+    const [document] = json.mock.calls[0] as [Record<string, unknown>];
+    expect('code' in document).toBe(false);
+    expect(JSON.stringify(document)).not.toContain('password=secret');
+  });
+
+  it('retains explicit 5xx diagnostics for isolated development debugging', () => {
+    const { host, json } = hostFor();
+    new ProblemFilter(false).catch(new HttpException('development query detail', 503), host);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ detail: 'development query detail' }));
+  });
+
   it('does describe an unrecognised error outside production', () => {
     const { host, json } = hostFor();
     new ProblemFilter(false).catch(new Error('a useful development message'), host);

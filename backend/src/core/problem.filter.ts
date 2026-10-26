@@ -83,15 +83,24 @@ export class ProblemFilter implements ExceptionFilter {
     const detail = detailOf(payload);
     const code = codeOf(payload);
     const errors = errorsOf(payload);
+    // An explicit 5xx HttpException is still a server failure. Some callers
+    // wrap upstream/driver errors in it, so production must not publish those
+    // messages or validation arrays just because the error has an HTTP status.
+    const hideInternal = this.production && status >= 500 && status < 600;
+    const publicCode = hideInternal && code !== undefined && !/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(code)
+      ? undefined
+      : code;
     return {
       type: 'about:blank',
       title: titleFor(status),
       status,
       // Spread rather than assign undefined: exactOptionalPropertyTypes is on,
       // and an explicit `detail: undefined` would also serialise the key.
-      ...(detail === undefined ? {} : { detail }),
-      ...(code === undefined ? {} : { code }),
-      ...(errors === undefined ? {} : { errors }),
+      ...(hideInternal
+        ? { detail: status === 503 ? 'service temporarily unavailable' : 'internal server error' }
+        : detail === undefined ? {} : { detail }),
+      ...(publicCode === undefined ? {} : { code: publicCode }),
+      ...(!hideInternal && errors !== undefined ? { errors } : {}),
     };
   }
 
