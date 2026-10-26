@@ -1,4 +1,5 @@
 ## 2026-10-27 — Planning v1334 (F675-140 Improvement / DRAFT / RELEASE HOLD)
+**QA snapshot 01:16 KST:** QA v1304 IN PROGRESS (only install gate completed at observation); QA v1303 remains latest completed evidence; do not infer v1304 PASS.
 - Previous Addition v1332 / Current Improvement v1334 / Next Addition v1336. Main 0fe614b2ca1a7bc0df540514e54db78130479e2a start/mid; stacked on unmerged Draft #1468. Engineering #1467.
 - Corrected v1332 proposed GET q URL leak to read-only CSRF-protected POST JSON, preserved GET fallback; actual AuthSessionRow.id cursor binding, NFC/ASCII literal search, timezone date bounds, signed upper-watermark keyset and live status races, deep-link selection independence, SQL owner isolation, Android/a11y/noindex/admin k>=20.
 - P0 ENV1334-01 SEC1334-02 REL1334-03 SUP1334-04; P1 SUP1334-05 SUP1334-06 SUP1334-07 SUP1334-08 SUP1334-09 SUP1334-10. QA v1303 full/bot audits and route-ledger FAIL, #1469 five checksum drifts, root98%, Test/Production HOLD. 10,000 evidence gate 0 new, cumulative UNKNOWN/BLOCKED. Docs only; no runtime/DB/WLD/ledger/feature flag/deploy.

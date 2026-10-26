@@ -1,4 +1,5 @@
 ## 기획 v1334 — F675-140 문의 검색 전송·정규화·커서 무결성 개선 (기능 보완 / 초안 / 운영 보류)
+**QA 확인 01:16 KST:** QA v1304 진행 중(확인 시 install 게이트만 완료); v1303이 최신 완료 근거이며 v1304 PASS 추정 금지.
 
 **주기:** 이전 Feature Addition v1332 → 현재 Feature Improvement v1334 → 다음 Feature Addition v1336(잠정). GitHub main 시작·중간 0fe614b2ca1a7bc0df540514e54db78130479e2a 확인, main AGENTS.md·README.md·PROJECT_PLAN.md(영어 정본)·PROJECT_PLAN.ko.md 대조. 미병합 v1332 Draft #1468에 적층된 문서 초안으로 main 구현·배포 아님. 개발 #1467, 보안 #993, 마이그레이션 불일치 #1469, 용량 #1170. Gemini/A/B/C/QA 작업 변경 없음.
 

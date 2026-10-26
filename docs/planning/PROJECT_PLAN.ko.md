@@ -1,4 +1,5 @@
 ## 기획 v1334 — F675-140 문의 검색 개인정보·커서 무결성 개선 (기능 보완 / 초안 / 운영 보류)
+**QA 확인 01:16 KST:** QA v1304 진행 중(확인 시 install 게이트만 완료); v1303이 최신 완료 근거이며 v1304 PASS 추정 금지.
 - 이전 Feature Addition v1332 → 현재 Feature Improvement v1334 → 다음 Feature Addition v1336(잠정). main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작·중간 확인, AGENTS/README/영어 정본/한국어 대조. 미병합 v1332 Draft #1468에 적층된 문서 기획. 개발 #1467, P0 #993/#1469/#1170.
 - 실제 /support는 GET /threads와 ?thread 선택만 있으며 Migration196 목록 기본50/최대100, 마지막 메시지 역순; 상태 open/waiting_user/resolved, 검색 미구현. v1332 GET q URL 개인정보 누출 위험을 수정하여 **CSRF 보호 읽기 전용 POST /api/v1/support/threads/search** JSON q/status/from/to/cursor/limit 제안, 기존 GET 유지, 검색어 URL/Referer/로그 금지.
 - 제목 NFC 정규화·영문 ASCII만 대소문자 무시·역슬래시/%/_ 문자 그대로 SQL 바인딩·2~80 코드포인트, Asia/Seoul 포함 날짜→UTC 반열림 구간. 생성일/id 키셋+상한 튜플, 실제 AuthSessionRow.id/회원/필터 결합 15분 서명 커서와 키 교체, 상태 경합은 실시간 결과(고정 스냅샷 아님). ?thread 직접 링크는 필터와 독립 본인 검증, 필터 첫 항목 자동 선택 금지, 검색 DB 쓰기 0.

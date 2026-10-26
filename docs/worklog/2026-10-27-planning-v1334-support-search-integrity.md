@@ -1,4 +1,5 @@
 # Planning v1334 — Support Search Privacy, Normalization and Cursor Integrity
+**QA snapshot 01:16 KST:** QA v1304 IN PROGRESS (only install gate completed at observation); QA v1303 remains latest completed evidence; do not infer v1304 PASS.
 2026-10-27 KST · Feature Improvement · DRAFT / RELEASE HOLD
 
 ## Cycle and authority

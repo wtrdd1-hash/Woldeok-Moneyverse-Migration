@@ -1,4 +1,5 @@
 ## Planning v1334 — F675-140 Search Transport, Normalization and Cursor Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
+**QA snapshot 01:16 KST:** QA v1304 IN PROGRESS (only install gate completed at observation); QA v1303 remains latest completed evidence; do not infer v1304 PASS.
 
 **Cycle:** Previous Feature Addition v1332 → Current Feature Improvement v1334 → Next Feature Addition v1336 (provisional). GitHub main at start/mid: 0fe614b2ca1a7bc0df540514e54db78130479e2a; main AGENTS.md, README.md, PROJECT_PLAN.md (English canonical) and PROJECT_PLAN.ko.md inspected. This docs-only successor is stacked on unmerged v1332 Draft #1468, not a main feature or deployment. Engineering #1467; security #993; migration drift #1469; capacity #1170. No overlap edits to Gemini/A/B/C/QA.
 
