@@ -24,3 +24,14 @@
 - [x] RED tests and GREEN implementation.
 - [x] Real-PG owner isolation and rollback.
 - [ ] Final complete gates, CI, Test and release decision.
+
+## Finished — development candidate only (14:41 KST)
+- [x] TDD RED/GREEN; focused backend 8 PASS, frontend gateway/paging 14 PASS.
+- [x] Exact actor predicate verified on isolated PostgreSQL with 26 temporary memberships: owner 26/1, foreign 0, rollback 0. No new DB grants or migration.
+- [x] API contract generated (180 endpoints), typecheck/lint PASS, default Turbopack build PASS after A-owned worktree dependency isolation, bot tests 8 PASS.
+- [x] Full suite run: backend 1,317 PASS/398 SKIP, frontend 1,401 PASS/6 FAIL (existing main failures), DB 15 PASS/3 SKIP, contract 38 PASS.
+- [x] Audits: production 2 High FAIL; full 2 Critical/10 High FAIL; bot 1 Critical/5 High FAIL.
+- [ ] Official exact-SHA Test/authenticated user E2E, backup/restore, CI full PASS and authorized release: BLOCKED. Test/Production public SHAs differ from candidate.
+- [x] No merge, deploy, restart, live DB write or branch deletion. Existing A/B/C/Gemini/QA unique changes preserved. Rollback is code-only revert.
+- Final QA: `docs/qa/2026-10-26-a1425-club-members.md` (+ Korean); candidate release: `docs/releases/v2026.10.26.a1425.md` (+ Korean).
+- `docs-only` is not a success claim: runtime feature implemented, but mandatory release gates remain RED. Final status PARTIAL/BLOCKED.

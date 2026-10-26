@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageHeader } from '@/components/page-header';
-import { api, apiOrNull } from '@/lib/api';
+import { api } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { clubMembershipPageHref, formatClubExperience, parseMembershipOffset } from './my-clubs-pagination';
 
@@ -41,9 +41,9 @@ export default async function ClubsPage({
 
   const myOffset = parseMembershipOffset(params.myOffset);
   const [result, memberships] = await Promise.all([
-    apiOrNull<{ clubs: ClubItem[] }>(
+    api<{ clubs: ClubItem[] }>(
       `/api/v1/clubs${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ''}`,
-    ),
+    ).catch(() => null),
     api<{ clubs: ClubItem[]; has_more: boolean; next_offset: number | null }>(
       `/api/v1/clubs/mine?offset=${myOffset}`,
     ).catch(() => null),
@@ -52,7 +52,8 @@ export default async function ClubsPage({
   const membershipReady = memberships !== null && Array.isArray(memberships.clubs)
     && typeof memberships.has_more === 'boolean';
   const myClubs = membershipReady ? memberships.clubs : [];
-  const clubs = result?.clubs ?? [];
+  const publicReady = result !== null && Array.isArray(result.clubs);
+  const clubs = publicReady ? result.clubs : [];
   const otherClubs = clubs.filter((c) => !c.is_my_club);
 
   return (
@@ -141,7 +142,11 @@ export default async function ClubsPage({
           </span>
         </div>
 
-        {otherClubs.length === 0 ? (
+        {!publicReady ? (
+          <p role="alert" className="rounded-lg border border-destructive p-4 text-sm">
+            전체 클럽 목록을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.
+          </p>
+        ) : otherClubs.length === 0 ? (
           <div className="text-center py-16 bg-card border border-dashed border-border rounded-xl space-y-3">
             
             <p className="text-muted-foreground font-medium">
