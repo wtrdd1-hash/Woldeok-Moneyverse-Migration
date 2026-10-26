@@ -225,6 +225,9 @@ export class ApiHealthController {
       uptimeSeconds: Math.floor(process.uptime()),
       dbLatencyMs: measuredDbLatency,
       isLiveTelemetry: true,
+      // Only the system/DB probe is measured; domain values below are configured examples.
+      domainMetricsMeasured: false,
+      domainMetricsSource: 'CONFIGURED_ENDPOINT_INVENTORY' as const,
       systemTelemetry,
       totalDomains: domains.length,
       totalEndpoints,

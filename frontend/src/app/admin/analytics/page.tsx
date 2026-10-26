@@ -6,6 +6,7 @@ import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import { AnalyticsClientView } from './analytics-client-view';
 import type { SeoInitialData } from '../seo/seo-client-view';
+import type { ApiHealthResponse } from '../api-health/api-health-dashboard';
 import type {
   AdminStock,
   AdminUser,
@@ -22,57 +23,36 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
+function validSeoStatus(value: unknown): value is SeoInitialData {
+  if (!value || typeof value !== 'object') return false;
+  const data = value as Partial<SeoInitialData>;
+  return [data.totalHits24h, data.totalHits7d, data.avgDurationMs].every(
+    (n) => typeof n === 'number' && Number.isFinite(n) && n >= 0,
+  ) && !!data.stockCoverage && !!data.guideCoverage &&
+    typeof data.stockCoverage.indexed === 'number' &&
+    typeof data.stockCoverage.total === 'number' &&
+    typeof data.guideCoverage.indexed === 'number' &&
+    typeof data.guideCoverage.total === 'number' &&
+    !!data.botDistribution && !!data.statusDistribution &&
+    Array.isArray(data.targetUrls) && Array.isArray(data.recentLogs);
+}
 
-async function fetchSeoData(): Promise<SeoInitialData> {
-  try {
-    const res = await fetch(`${API_ORIGIN}/api/v1/seo/status`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    });
-    if (res.ok) {
-      return await res.json();
-    }
-  } catch {
-    // Graceful fallback
-  }
-
-  return {
-    totalHits24h: 0,
-    totalHits7d: 0,
-    avgDurationMs: 0,
-    botDistribution: { Googlebot: 0, 'Naver Yeti': 0, Bingbot: 0, Others: 0 },
-    statusDistribution: { '200': 0, '304': 0, '404': 0 },
-    stockCoverage: { indexed: 0, total: 10 },
-    guideCoverage: { indexed: 0, total: 5 },
-    targetUrls: [
-      { path: '/stocks/CHIPS', category: 'stock', name: '침팬지 반도체 (CHIPS)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/DUCKS', category: 'stock', name: '월덕 인더스트리 (DUCKS)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/COIN', category: 'stock', name: '도지 밈 파이낸스 (COIN)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/SPACE', category: 'stock', name: '덕스페이스 로켓 (SPACE)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks/CYBER', category: 'stock', name: '네오사이버 시큐리티 (CYBER)', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/guide/stock-trading', category: 'guide', name: '가상 주식 실전 매매 가이드', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/guide/virtual-banking', category: 'guide', name: '가상 금융 & 복리 예금 가이드', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/', category: 'hub', name: '월덕 머니버스 메인 포털', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/stocks', category: 'hub', name: '가상 주식 거래소 종합 허브', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-      { path: '/announcements', category: 'hub', name: '공식 공지사항 허브', lastVisitedAt: null, lastBot: null, lastStatusCode: null, healthStatus: 'unindexed' },
-    ],
-    recentLogs: [],
-    indexNowKey: 'moneyverse-indexnow-key-2026',
-    sitemapUrl: 'https://easy-scraping.com/sitemap.xml',
-  };
+async function fetchSeoData(): Promise<SeoInitialData | null> {
+  // The authenticated admin endpoint, not an unauthenticated raw network fetch.
+  const response = await apiOrNull<SeoInitialData>('/api/v1/seo/status/admin');
+  return validSeoStatus(response) ? response : null;
 }
 
 export default async function AdminAnalyticsPage() {
   await requireAdminConsole(AREA.href);
 
-  const [usersRes, stocksRes, healthRes, controlsRes, seoData] = await Promise.all([
+  const [usersRes, stocksRes, healthRes, controlsRes, seoData, domainHealth] = await Promise.all([
     apiOrNull<{ readonly users: readonly AdminUser[] }>('/api/v1/admin/users'),
     apiOrNull<{ readonly stocks: readonly AdminStock[] }>('/api/v1/admin/stocks'),
     apiOrNull<ReconciliationHealth>('/api/v1/admin/economy/reconciliation'),
     apiOrNull<{ readonly featureSwitches: readonly FeatureSwitch[] }>('/api/v1/admin/controls'),
     fetchSeoData(),
+    apiOrNull<ApiHealthResponse>('/api/v1/admin/api-health/status'),
   ]);
 
   const allUsers = usersRes?.users ?? [];
@@ -93,6 +73,7 @@ export default async function AdminAnalyticsPage() {
         health={health}
         controls={controls}
         seoData={seoData}
+        domainHealth={domainHealth}
       />
     </div>
   );

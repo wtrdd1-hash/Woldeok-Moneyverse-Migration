@@ -39,12 +39,26 @@ import type { AdminUser, AdminStock, ReconciliationHealth, FeatureSwitch } from 
 import type { SeoInitialData } from '../seo/seo-client-view';
 import { AdminComprehensiveTelemetryMatrix } from '../components/admin-comprehensive-telemetry-matrix';
 
+export interface AnalyticsDomainHealth {
+  readonly domainMetricsMeasured?: boolean;
+  readonly domainMetricsSource?: string;
+  readonly serverTime?: string;
+  readonly domains?: readonly {
+    readonly id: string;
+    readonly name: string;
+    readonly latencyMs: number;
+    readonly successRate: number;
+    readonly status: string;
+  }[];
+}
+
 export interface AnalyticsClientViewProps {
   users?: readonly AdminUser[];
   stocks?: readonly AdminStock[];
   health?: ReconciliationHealth | null;
   controls?: readonly FeatureSwitch[];
   seoData?: SeoInitialData | null;
+  domainHealth?: AnalyticsDomainHealth | null;
 }
 
 type AnalyticsCategory = 'all' | 'user_economy' | 'seo_crawlers' | 'traffic_sources' | 'api_health';
@@ -55,6 +69,7 @@ export function AnalyticsClientView({
   health = null,
   controls = [],
   seoData = null,
+  domainHealth = null,
 }: AnalyticsClientViewProps) {
   const [selectedRange, setSelectedRange] = useState<'realtime' | 'daily' | 'monthly'>('realtime');
   const [activeCategory, setActiveCategory] = useState<AnalyticsCategory>('all');
@@ -211,23 +226,27 @@ export function AnalyticsClientView({
     return list.slice(0, 5);
   }, [stocks]);
 
-  // 5. 14대 도메인 API 헬스체크 & 지연시간 데이터
-  const domainHealthList = useMemo(() => [
-    { id: 'auth', name: '인증 및 세션', latency: 12, rate: '100.0%', status: '정상' },
-    { id: 'wallet', name: '지갑 & 자산 원장', latency: 8, rate: '100.0%', status: '정상' },
-    { id: 'bank', name: '가상 은행 & 예금', latency: 9, rate: '100.0%', status: '정상' },
-    { id: 'stocks', name: '가상 주식 거래소', latency: 14, rate: '100.0%', status: '정상' },
-    { id: 'casino', name: '아케이드 & 엔터테인먼트', latency: 16, rate: '100.0%', status: '정상' },
-    { id: 'shop', name: '상점 & 소모품', latency: 11, rate: '100.0%', status: '정상' },
-    { id: 'work', name: '직업 & 퀘스트 파밍', latency: 10, rate: '100.0%', status: '정상' },
-    { id: 'clubs', name: '클럽 & 커뮤니티', latency: 13, rate: '100.0%', status: '정상' },
-    { id: 'admin', name: '관리자 통제 타워', latency: 15, rate: '100.0%', status: '정상' },
-    { id: 'seo', name: 'SEO & 인덱싱 API', latency: 7, rate: '100.0%', status: '정상' },
-    { id: 'feed', name: '신문 & AI 시장 뉴스', latency: 18, rate: '100.0%', status: '정상' },
-    { id: 'inventory', name: '인벤토리 & 가방', latency: 10, rate: '100.0%', status: '정상' },
-    { id: 'support', name: '고객 지원 & 티켓', latency: 12, rate: '100.0%', status: '정상' },
-    { id: 'audit', name: '보안 감사 로그 체인', latency: 9, rate: '100.0%', status: '정상' },
-  ], []);
+  // Backend explicitly marks the current domain inventory as unmeasured.
+  // Never turn configured example values into an operator health assertion.
+  const domainHealthList = useMemo(() => {
+    if (domainHealth?.domainMetricsMeasured !== true || !domainHealth.serverTime ||
+        !Array.isArray(domainHealth.domains)) return [];
+    const age = Date.now() - Date.parse(domainHealth.serverTime);
+    if (!Number.isFinite(age) || age < 0 || age > 5 * 60_000) return [];
+    if (!domainHealth.domains.every((d) =>
+      typeof d.id === 'string' && typeof d.name === 'string' &&
+      Number.isFinite(d.latencyMs) && d.latencyMs >= 0 &&
+      Number.isFinite(d.successRate) && d.successRate >= 0 && d.successRate <= 100 &&
+      ['OPERATIONAL', 'DEGRADED', 'MAINTENANCE'].includes(d.status)
+    )) return [];
+    return domainHealth.domains.map((d) => ({
+      id: d.id,
+      name: d.name,
+      latency: d.latencyMs,
+      rate: `${d.successRate.toFixed(1)}%`,
+      status: d.status,
+    }));
+  }, [domainHealth]);
 
   // 6. CSV 파일 다운로드 내보내기 핸들러 (SEO 및 도메인 지표 종합 확장)
   const handleExportCsv = () => {
@@ -260,14 +279,15 @@ export function AnalyticsClientView({
     });
     lines.push('');
     lines.push('=== SEO & SEARCH ENGINE CRAWLER METRICS ===');
-    lines.push(`24h Bot Hits,${seoData?.totalHits24h ?? 124}`);
-    lines.push(`7d Bot Hits,${seoData?.totalHits7d ?? 842}`);
-    lines.push(`Average Crawler Latency (ms),${seoData?.avgDurationMs ?? 42}ms`);
-    lines.push(`Stock Pages Indexed,${seoData?.stockCoverage.indexed ?? 10}/${seoData?.stockCoverage.total ?? 10}`);
-    lines.push(`Guide Pages Indexed,${seoData?.guideCoverage.indexed ?? 5}/${seoData?.guideCoverage.total ?? 5}`);
+    lines.push(`24h Bot Hits,${seoData?.totalHits24h ?? 'UNAVAILABLE'}`);
+    lines.push(`7d Bot Hits,${seoData?.totalHits7d ?? 'UNAVAILABLE'}`);
+    lines.push(`Average Crawler Latency (ms),${seoData?.avgDurationMs ?? 'UNAVAILABLE'}`);
+    lines.push(`Stock Pages Indexed,${seoData?.stockCoverage.indexed ?? 'UNAVAILABLE'}/${seoData?.stockCoverage.total ?? 'UNAVAILABLE'}`);
+    lines.push(`Guide Pages Indexed,${seoData?.guideCoverage.indexed ?? 'UNAVAILABLE'}/${seoData?.guideCoverage.total ?? 'UNAVAILABLE'}`);
     lines.push('');
     lines.push('=== 14 DOMAINS SYSTEM HEALTH & LATENCY ===');
     lines.push('Domain ID,Domain Name,Latency (ms),Success Rate,Status');
+    if (domainHealthList.length === 0) lines.push('UNAVAILABLE,No measured domain metrics,,,');
     domainHealthList.forEach((d) => {
       lines.push(`${d.id},${d.name},${d.latency}ms,${d.rate},${d.status}`);
     });
@@ -293,7 +313,7 @@ export function AnalyticsClientView({
               통합 텔레메트리 & 전방위 통계 관제실 (All-in-One Analytics)
             </h2>
             <Badge variant="outline" className="border-cyan-500/40 text-cyan-400 text-xs">
-              Live Realtime 60fps
+              조회 시점 기준
             </Badge>
             {excludeAdmin && (
               <Badge variant="outline" className="border-emerald-500/50 bg-emerald-950/60 text-emerald-300 text-xs">
@@ -302,7 +322,7 @@ export function AnalyticsClientView({
             )}
           </div>
           <p className="mt-1 text-xs text-slate-400">
-            유저 코호트, 가상 경제 통화량, 주식 시총, SEO 검색 크롤러, 트래픽 유입 경로 및 14대 도메인 헬스까지 전 시스템 실시간 관제
+            유저 코호트, 가상 경제 통화량, 주식 시총, SEO 검색 크롤러, 트래픽 유입 경로 및 14대 도메인 헬스까지 서버 응답 기반 관제
           </p>
         </div>
 
@@ -722,6 +742,11 @@ export function AnalyticsClientView({
             </Button>
           </div>
 
+          {!seoData && (
+            <p role="status" aria-label="SEO 조회 불가" className="rounded-lg border border-amber-500/40 p-3 text-sm text-amber-200">
+              SEO 데이터를 확인할 수 없습니다. 서버 상태와 관리자 권한을 확인해 주세요. 표시된 값은 실제 0건을 의미하지 않습니다.
+            </p>
+          )}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* SEO 핵심 KPI 카드 1 */}
             <Card className="border-slate-800 bg-slate-900/80 shadow-xl backdrop-blur-xl">
@@ -731,16 +756,16 @@ export function AnalyticsClientView({
                   <Bot className="size-4 text-emerald-400" />
                 </CardTitle>
                 <div className="text-2xl font-bold font-mono text-white mt-1">
-                  {seoData?.totalHits24h ?? 0}회
+                  {seoData?.totalHits24h ?? '—'}회
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-emerald-400 flex items-center gap-1">
-                  <CheckCircle2 className="size-3.5" /> 7일 누적: {seoData?.totalHits7d ?? 0}회 방문
+                  <CheckCircle2 className="size-3.5" /> 7일 누적: {seoData?.totalHits7d ?? '—'}회 방문
                 </p>
                 <div className="mt-3 pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-400">
                   <span>평균 응답 지연</span>
-                  <span className="font-mono text-white">{seoData?.avgDurationMs ?? 0}ms</span>
+                  <span className="font-mono text-white">{seoData?.avgDurationMs ?? '—'}ms</span>
                 </div>
               </CardContent>
             </Card>
@@ -753,16 +778,16 @@ export function AnalyticsClientView({
                   <Globe className="size-4 text-blue-400" />
                 </CardTitle>
                 <div className="text-2xl font-bold font-mono text-white mt-1">
-                  {seoData?.stockCoverage?.indexed ?? 0} / {seoData?.stockCoverage?.total ?? 10} ({Math.round(((seoData?.stockCoverage?.indexed ?? 0) / Math.max(1, seoData?.stockCoverage?.total ?? 10)) * 100)}%)
+                  {seoData ? `${seoData.stockCoverage.indexed} / ${seoData.stockCoverage.total} (${Math.round((seoData.stockCoverage.indexed / Math.max(1, seoData.stockCoverage.total)) * 100)}%)` : '—'}
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-blue-400 flex items-center gap-1">
-                  <CheckCircle2 className="size-3.5" /> {(seoData?.stockCoverage?.indexed ?? 0) > 0 ? `${seoData?.stockCoverage?.indexed}개 종목 색인 확인` : '검색엔진 크롤러 방문 대기 중'}
+                  <CheckCircle2 className="size-3.5" /> {(seoData?.stockCoverage?.indexed ?? 0) > 0 ? `${seoData?.stockCoverage?.indexed}개 종목 색인 확인` : seoData ? '검색엔진 크롤러 방문 대기 중' : '조회 불가'}
                 </p>
                 <div className="mt-3 pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-400">
                   <span>가이드 문서 색인율</span>
-                  <span className="font-mono text-white">{seoData?.guideCoverage?.indexed ?? 0} / {seoData?.guideCoverage?.total ?? 5} ({Math.round(((seoData?.guideCoverage?.indexed ?? 0) / Math.max(1, seoData?.guideCoverage?.total ?? 5)) * 100)}%)</span>
+                  <span className="font-mono text-white">{seoData ? `${seoData.guideCoverage.indexed} / ${seoData.guideCoverage.total} (${Math.round((seoData.guideCoverage.indexed / Math.max(1, seoData.guideCoverage.total)) * 100)}%)` : '—'}</span>
                 </div>
               </CardContent>
             </Card>
@@ -775,16 +800,16 @@ export function AnalyticsClientView({
                   <Zap className="size-4 text-cyan-400" />
                 </CardTitle>
                 <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
-                  ONLINE 정상
+                  제출 상태 미검증
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-slate-400">
-                  Bing, Naver Search Advisor 즉시 반영 파이프라인
+                  설정 조회만으로 실제 검색엔진 제출 성공을 확인할 수 없습니다.
                 </p>
                 <div className="mt-3 pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-400">
                   <span>키 페어 검증</span>
-                  <span className="font-mono text-cyan-400 truncate max-w-[150px]">{seoData?.indexNowKey ?? 'ACTIVE'}</span>
+                  <span className="font-mono text-cyan-400 truncate max-w-[150px]">{seoData?.indexNowKey ? '설정 정보 있음' : '상태 미확인'}</span>
                 </div>
               </CardContent>
             </Card>
@@ -806,30 +831,30 @@ export function AnalyticsClientView({
                 <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800">
                   <span className="text-[11px] text-slate-400">Googlebot</span>
                   <p className="text-lg font-bold font-mono text-white mt-0.5">
-                    {seoData?.botDistribution?.Googlebot ?? 0}회
+                    {seoData?.botDistribution?.Googlebot ?? '—'}회
                   </p>
                   <p className="text-[10px] text-slate-400">구글 검색 색인</p>
                 </div>
                 <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800">
                   <span className="text-[11px] text-slate-400">Naver Yeti</span>
                   <p className="text-lg font-bold font-mono text-white mt-0.5">
-                    {seoData?.botDistribution?.['Naver Yeti'] ?? 0}회
+                    {seoData?.botDistribution?.['Naver Yeti'] ?? '—'}회
                   </p>
                   <p className="text-[10px] text-slate-400">네이버 서치어드바이저</p>
                 </div>
                 <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800">
                   <span className="text-[11px] text-slate-400">Bingbot</span>
                   <p className="text-lg font-bold font-mono text-white mt-0.5">
-                    {seoData?.botDistribution?.Bingbot ?? 0}회
+                    {seoData?.botDistribution?.Bingbot ?? '—'}회
                   </p>
                   <p className="text-[10px] text-slate-400">Bing 웹마스터 & IndexNow</p>
                 </div>
                 <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800">
                   <span className="text-[11px] text-slate-400">HTTP 200 정상 응답</span>
                   <p className="text-lg font-bold font-mono text-emerald-400 mt-0.5">
-                    {seoData?.statusDistribution?.['200'] ?? 0}건
+                    {seoData?.statusDistribution?.['200'] ?? '—'}건
                   </p>
-                  <p className="text-[10px] text-slate-400">304 캐시: {seoData?.statusDistribution?.['304'] ?? 0}건</p>
+                  <p className="text-[10px] text-slate-400">304 캐시: {seoData?.statusDistribution?.['304'] ?? '—'}건</p>
                 </div>
               </div>
             </CardContent>
@@ -983,24 +1008,29 @@ export function AnalyticsClientView({
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base text-white flex items-center gap-2">
                   <Server className="size-4 text-amber-400" />
-                  전 시스템 300+개 엔드포인트 가동 현황 매트릭스
+                  도메인별 검증된 응답 현황
                 </CardTitle>
                 <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 text-xs">
-                  Uptime 99.99%
+                  {domainHealthList.length > 0 ? '실측 자료' : '미측정'}
                 </Badge>
               </div>
               <CardDescription className="text-xs text-slate-400">
-                인하우스 API 게이트웨이 및 내부 라우팅 핑 벤치마크 기준 가동 현황
+                서버가 실제로 측정했다고 명시한 도메인 지표만 표시합니다. 미측정 구성 목록은 정상 가동 증거가 아닙니다.
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {domainHealthList.length === 0 && (
+                <p role="status" aria-label="도메인 상태 미측정" className="rounded-lg border border-amber-500/40 p-3 text-sm text-amber-200">
+                  도메인별 실측 정보가 없습니다. API 상태를 정상으로 단정할 수 없습니다.
+                </p>
+              )}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
                 {domainHealthList.map((d) => (
                   <div key={d.id} className="rounded-xl bg-slate-950/70 p-3 border border-slate-800 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between text-[11px] text-slate-400">
                         <span className="truncate">{d.name}</span>
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className={`h-2 w-2 rounded-full ${d.status === 'OPERATIONAL' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
                       </div>
                       <p className="text-base font-bold font-mono text-white mt-1">
                         {d.latency}ms

@@ -109,7 +109,7 @@ describe('AnalyticsClientView', () => {
     expect(screen.getByText(/5분위 자산 계층 분배율 & 양극화 곡선/)).toBeDefined();
     expect(screen.getByText(/상위 상장 종목 시가총액 & 체결 랭킹/)).toBeDefined();
     expect(screen.getByText(/SEO 검색엔진 크롤러 색인 관제/)).toBeDefined();
-    expect(screen.getByText(/전 시스템 300\+개 엔드포인트 가동 현황 매트릭스/)).toBeDefined();
+    expect(screen.getByText(/도메인별 검증된 응답 현황/)).toBeDefined();
   });
 
   it('triggers CSV download without error when clicking export button', () => {
@@ -165,5 +165,65 @@ describe('AnalyticsClientView', () => {
     // 토글 클릭하여 관리자 포함으로 전환
     fireEvent.click(toggleBtn);
     expect(screen.getByRole('button', { name: /관리자 포함/ })).toBeDefined();
+  });
+});
+
+describe('analytics provenance regression', () => {
+  it('does not show fabricated healthy domains or SEO totals when the APIs are unavailable', () => {
+    render(<AnalyticsClientView seoData={null} domainHealth={null} />);
+    expect(screen.getByRole('status', { name: /도메인 상태 미측정/ })).toBeTruthy();
+    expect(screen.getByRole('status', { name: /SEO 조회 불가/ })).toBeTruthy();
+    expect(screen.queryByText('Uptime 99.99%')).toBeNull();
+    expect(screen.queryByText('ONLINE 정상')).toBeNull();
+  });
+
+  it('does not trust a domain inventory with synthetic metrics', () => {
+    render(<AnalyticsClientView domainHealth={{
+      domainMetricsMeasured: false,
+      domainMetricsSource: 'CONFIGURED_ENDPOINT_INVENTORY',
+      serverTime: new Date().toISOString(),
+      domains: [{ id: 'wallet', name: '지갑', latencyMs: 8, successRate: 100, status: 'OPERATIONAL' }],
+    }} />);
+    expect(screen.getByRole('status', { name: /도메인 상태 미측정/ })).toBeTruthy();
+    expect(screen.queryByText('8ms')).toBeNull();
+  });
+});
+
+describe('analytics CSV evidence', () => {
+  it('exports unavailable rather than invented SEO and domain metrics', () => {
+    let exported = '';
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      exported = decodeURI(this.href);
+    });
+    render(<AnalyticsClientView seoData={null} domainHealth={null} />);
+    fireEvent.click(screen.getByRole('button', { name: /CSV 리포트 내보내기/ }));
+    expect(exported).toContain('24h Bot Hits,UNAVAILABLE');
+    expect(exported).toContain('UNAVAILABLE,No measured domain metrics');
+    expect(exported).not.toContain('24h Bot Hits,124');
+    expect(exported).not.toContain('wallet,지갑,8ms,100.0%');
+    clickSpy.mockRestore();
+  });
+});
+
+describe('measured analytics presentation', () => {
+  it('shows fresh explicitly measured domain values, not inventory guesses', () => {
+    render(<AnalyticsClientView domainHealth={{
+      domainMetricsMeasured: true,
+      serverTime: new Date().toISOString(),
+      domains: [{ id: 'wallet', name: '지갑', latencyMs: 19, successRate: 92.5, status: 'DEGRADED' }],
+    }} />);
+    expect(screen.getByText('19ms')).toBeTruthy();
+    expect(screen.getByText('92.5%')).toBeTruthy();
+    expect(screen.queryByRole('status', { name: /도메인 상태 미측정/ })).toBeNull();
+  });
+
+  it('rejects stale measurements even if a server claims they were measured', () => {
+    render(<AnalyticsClientView domainHealth={{
+      domainMetricsMeasured: true,
+      serverTime: new Date(Date.now() - 15 * 60_000).toISOString(),
+      domains: [{ id: 'wallet', name: '지갑', latencyMs: 19, successRate: 92.5, status: 'DEGRADED' }],
+    }} />);
+    expect(screen.getByRole('status', { name: /도메인 상태 미측정/ })).toBeTruthy();
+    expect(screen.queryByText('19ms')).toBeNull();
   });
 });
