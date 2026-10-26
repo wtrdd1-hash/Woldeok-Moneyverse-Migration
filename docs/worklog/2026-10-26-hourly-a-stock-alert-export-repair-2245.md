@@ -15,3 +15,9 @@
 
 ## Finished
 - Pending evidence. No merge, deployment, migration, branch cleanup or production writes.
+
+### Mid-work checkpoint (22:46 KST)
+- Original #1425 four commits cherry-picked cleanly onto current main; no existing worker branches modified. Candidate `194106ec79130249addcae3d7da1e6d90252cdef` before checkpoint.
+- Fresh offline dependencies installed on the data disk. Focused backend 3/3 PASS; frontend+app-api 18/18 PASS; contract build PASS.
+- Separate PostgreSQL scratch database `wdmv_a2245_test` restored from an isolated test DB using a consistent pg_dump snapshot; no source test sessions terminated and no production DB touched. Scratch has 281 applied migrations; current main has 278 migration SQL files (not parity).
+- Main rechecked unchanged `0fe614b2ca1a7bc0df540514e54db78130479e2a`. Full tests, security and exact-SHA release gates pending.
