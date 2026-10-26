@@ -1,0 +1,2 @@
+# Planning v1348 — F675-144
+Feature Addition; DRAFT / RELEASE HOLD. Main 0fe614b2ca1a7bc0df540514e54db78130479e2a; predecessor #1497. Engineering issue #1500. Human-approved support reply templates, no automatic send, feature OFF. QA v1309 FAIL/HOLD, root ~783MiB free, security audits FAIL, exact-SHA Test/restore unverified. External references new 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime/DB/WLD/Test/Production changes.
