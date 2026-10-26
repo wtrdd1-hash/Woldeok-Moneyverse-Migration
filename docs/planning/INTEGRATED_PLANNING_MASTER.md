@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **v1318 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (stacked on unmerged #1416; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 
 ## v2026.10.26.1318 — F675-136 Support Reply Attention: Pagination and Read Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
 

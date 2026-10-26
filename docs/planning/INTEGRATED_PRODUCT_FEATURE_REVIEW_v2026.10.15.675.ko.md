@@ -1,4 +1,5 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+- **v1318 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (선행 #1416 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 
 ## v1318 — F675-136 관리자 답변 확인 무결성 (기능 보완 / DRAFT / HOLD)
 - 이전 추가 v1316 / 현재 보완 v1318 / 다음 추가 v1320, main 1c5b84a1c45baafcca83f375a6f99698121e9bb5·선행 Draft #1416. Migration196 오래된 메시지200/최대500·문의50/최대100으로 `/support` 누락. 개발 DB 문의3·메시지6·관리자 답변2·200건 초과0, 운영 장애 확증 아님.

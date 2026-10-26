@@ -1,4 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- **v1318 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (선행 #1416 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 
 ## v2026.10.26.1318 — F675-136 관리자 답변 확인 목록·커서·읽음 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
 

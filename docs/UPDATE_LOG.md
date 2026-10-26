@@ -1,3 +1,4 @@
+- **v1318 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (stacked on #1416; HOLD). **Engineering #1415** updated.
 - 2026-10-26 15:21 KST | Planning v1318 F675-136 support attention integrity (Improvement, Draft/HOLD): oldest200/500 messages and 50/100 threads, contiguous v2 HMAC/CAS, 4 P0+6 P1; QA v1293 FAILED, no runtime/DB deploy; external 10k new0/cumulative UNKNOWN.
 - **v1312 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (stacked on unmerged #1402, RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 - **v1316 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (stacked on unmerged #1411; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.

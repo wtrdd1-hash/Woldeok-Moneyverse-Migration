@@ -1,4 +1,5 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- **v1318 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (stacked on unmerged #1416; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 
 ## v1318 — F675-136 Support Attention Integrity (Improvement / DRAFT / HOLD)
 - Previous Addition v1316 / Current Improvement v1318 / Next Addition v1320; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5, prior Draft #1416. Migration196 oldest200/max500 messages and 50/max100 threads truncate `/support`. Dev DB read-only 3 threads/6 messages/2 admin replies, no >200; production incident not proven.

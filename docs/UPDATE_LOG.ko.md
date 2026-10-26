@@ -1,3 +1,4 @@
+- **v1318 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (stacked on #1416; HOLD). **Engineering #1415** updated.
 - 2026-10-26 15:21 KST | 기획 v1318 F675-136 관리자 답변 확인 무결성(기능 보완, 초안/운영 보류): 오래된 메시지200/500·문의50/100, 연속 v2 HMAC/CAS, P0 4/P1 6; QA v1293 실패, 런타임/DB 배포 없음; 외부 10k 신규0·누적 UNKNOWN.
 - **v1312 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (미병합 #1402 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 - **v1316 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1416 (선행 #1411 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
