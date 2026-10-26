@@ -15,6 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { IDLE } from '@/lib/action-state';
 import { actionTakedown } from './actions';
+import { safeTargetHref } from './moderation-queue';
 
 export interface TakedownItem {
   readonly id: string;
@@ -33,6 +34,7 @@ export interface TakedownItem {
 
 export function TakedownActionDialog({ item }: { readonly item: TakedownItem }) {
   const [open, setOpen] = useState(false);
+  const safeHref = safeTargetHref(item.target_content_url);
   const [state, formAction] = useActionState(actionTakedown, IDLE);
   const [selectedStatus, setSelectedStatus] = useState<string>('ACTIONED_REMOVED');
 
@@ -62,14 +64,13 @@ export function TakedownActionDialog({ item }: { readonly item: TakedownItem }) 
               </div>
               <div className="truncate">
                 <span className="text-muted-foreground">대상 URL: </span>
-                <a
-                  href={item.target_content_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary underline"
-                >
-                  {item.target_content_url}
-                </a>
+                {safeHref ? (
+                  <a href={safeHref} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                    {item.target_content_url}
+                  </a>
+                ) : (
+                  <span className="break-all text-muted-foreground">{item.target_content_url}</span>
+                )}
               </div>
               <div className="pt-1 border-t text-muted-foreground">
                 <span className="block font-medium text-foreground mb-0.5">상세 내용:</span>
