@@ -1,4 +1,9 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+## v1326 — F675-138 Support Resolution Evidence Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
+- Previous Addition v1324 → Current Improvement v1326 → Next Addition v1328 provisional; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 rechecked, predecessor Draft #1449 unmerged. Actual Migration196 oldest-first 200 messages and repeated resolved UPDATE create last-reply omission/duplicate-epoch risks, not a verified Production incident.
+- Explicit owner acknowledgment requires server-delivered latest relevant admin reply or clearly labeled no-reply closure; HMAC <=600s actor/session/thread/event/revision/last-reply proof is eligibility only, not human reading. Partial/legacy/503/stale cannot be called confirmed. One event per real closure transition, no-op repeated resolved, reopen→re-resolve new epoch; shared thread-first lock, post-lock digest/idempotency replay, atomic audit, additive v1-compatible SECDEF and minimal grants.
+- P0 4/P1 6: ENV1326-01 SEC1326-02 REL1326-03 SUP1326-04 SUP1326-05 SUP1326-06 SUP1326-07 SUP1326-08 SUP1326-09 SUP1326-10. Owner GET/POST, keyset, Android/SEO/WCAG, admin fixed cohorts k>=20, 201/501/10,001/100-way PG races and feature OFF rollback in integrated master. QA1299 IN PROGRESS main frontend6 failures/audits FAIL, root99%, DB ACL/Migration266/Test/restore HOLD. External 10k new0/cumulative UNKNOWN; no runtime or deployment. Engineering #1448.
+
 - **v1318 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (stacked on unmerged #1416; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 
 ## v1318 — F675-136 Support Attention Integrity (Improvement / DRAFT / HOLD)

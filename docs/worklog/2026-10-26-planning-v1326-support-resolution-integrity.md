@@ -10,14 +10,18 @@
 
 ## CHECKLIST
 - [x] START record, remote main, source-of-truth and independent worktree
-- [ ] Compare last feature contract against exact source and concurrent closure/reopen semantics
-- [ ] Define member display-proof and immutable closure-epoch design, API/DB/admin/Android/SEO/KPI/test/rollback
-- [ ] Update six EN/KO integrated plan/review documents, two update logs and this worklog
+- [x] Compare last feature contract against exact source and concurrent closure/reopen semantics
+- [x] Define member display-proof and immutable closure-epoch design, API/DB/admin/Android/SEO/KPI/test/rollback
+- [x] Update six EN/KO integrated plan/review documents, two update logs and this worklog
 - [ ] Re-fetch main/QA, validate parity/backlog/diff, commit and push, open Draft PR
 - [ ] GitHub development and disk issue updates, complete records, no runtime changes
 
-## IN PROGRESS
-Pending.
+## IN PROGRESS — 2026-10-26 20:22 KST
+- Verified main and canonical English/Korean plans unchanged at midpoint. QA1299 evidence currently main test 1,397 pass/6 fail; main production/full audits fail; candidate tests and production audit pass but full audit fails. QA verdict still IN PROGRESS/HOLD, not a release approval.
+- Read-only development PostgreSQL via Docker: support threads resolved=2, waiting_user=1; messages admin=2, user=4. No personal records extracted. The sample does not reproduce 201+ truncation, which is a code-boundary risk.
+- Inspected frontend/src/app/app-api/v1/[...path]/route.ts and frontend/src/lib/app-gateway.ts: support group already routed, cookie/CSRF forwarded; gateway allowlist does not prove object authorization. Existing admin server action accepts status without expected revision; proposed v2 must prevent stale closure epochs.
+- Updated 3 English/3 Korean integrated documents plus EN/KO update logs, preserving the existing integrated plan files. Verified external official PostgreSQL/OWASP guidance as design context only; independent 10,000-source gate still 0 newly approved/UNKNOWN cumulative.
+- Next: validate exact nine-file diff, EN/KO backlog parity and no runtime writes, commit/push, Draft PR, engineering/disk issue logs.
 
 ## FINISHED
 Pending verification.

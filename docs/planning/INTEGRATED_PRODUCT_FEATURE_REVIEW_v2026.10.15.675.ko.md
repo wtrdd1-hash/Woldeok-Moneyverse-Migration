@@ -1,4 +1,9 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+## v1326 — F675-138 문의 종료·최신 답변 표시 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
+- 이전 추가 v1324 → 현재 보완 v1326 → 다음 추가 v1328(잠정), main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 재확인, 선행 Draft #1449 미병합. Migration196 오래된 순 메시지200건과 반복 resolved UPDATE는 최신 답변 누락·종료 이벤트 중복 위험이지만 운영 장애 확증은 아님.
+- 본인 명시적 확인은 최신 관리자 답변 또는 명시적인 답변 없는 종료 카드가 서버에서 전달된 경우에만 가능. 600초 이하 회원/세션/문의/이벤트/revision/마지막 답변 HMAC은 표시 자격 증명이지 사람의 읽음 증거가 아님. 부분·과거·503·구회차를 확인 완료로 표시 금지. 실제 종료 전환만 이벤트1건, 반복 resolved no-op, 재개·재종료 신규 회차; 문의 행 우선 잠금·잠금 후 멱등 해시·감사 원자성·추가형 구함수 호환 SECDEF 최소권한.
+- P0 4/P1 6: ENV1326-01 SEC1326-02 REL1326-03 SUP1326-04 SUP1326-05 SUP1326-06 SUP1326-07 SUP1326-08 SUP1326-09 SUP1326-10. 본인 GET/POST·키셋·Android/SEO/WCAG·관리자 고정 코호트 k>=20·격리 PG 201/501/10,001·100동시·기능 OFF 롤백은 국영문 통합 마스터. QA1299 진행 중 main 프론트6 실패·감사 FAIL, 루트99%, DB 권한/Migration266/Test/복원 HOLD. 외부10k 신규0·누적 UNKNOWN. 런타임·배포 없음, 개발 #1448.
+
 - **v1318 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (선행 #1416 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 
 ## v1318 — F675-136 관리자 답변 확인 무결성 (기능 보완 / DRAFT / HOLD)

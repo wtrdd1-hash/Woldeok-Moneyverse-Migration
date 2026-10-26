@@ -1,4 +1,52 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.26.1326 — F675-138 문의 종료 회차·최신 답변 표시 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
+
+**회차:** 이전 Feature Addition v1324 → 현재 Feature Improvement v1326 → 다음 Feature Addition v1328(잠정). 진실 기준 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인, 선행 기획 Draft #1449 OPEN 및 미병합 #1432 기반. 기획 문서만 변경하며 런타임·DB·WLD·원장·기능 스위치·Test·운영 환경 변경 없음.
+
+### 실제 소스와 v1324 전제 보완
+- `196-user-admin-support-chat.sql`의 회원 메시지 조회는 `created_at ASC,id ASC`의 **오래된 순 200건(최대 500건)**이고 `/support/page.tsx`는 잘림 표시 없이 반환 목록을 렌더링한다. 최신 관리자 답변·처리 완료가 존재해도 예전 200건만 보일 수 있다. v1324의 회원 해결 확인은 `resolved` 상태만으로 활성화하면 안 되며, 종료 시점과 연결된 마지막 관리자 답변을 실제 서버 응답에 포함하거나 관리자 답변 없이 종료됐음을 명시해야 한다.
+- 현재 `admin_support_set_status`는 `resolved→resolved`도 UPDATE한다. 회원 `support_add_message`는 `open`, 관리자 `admin_support_reply`는 `waiting_user`로 바꾼다. Migration196에는 종료 이벤트·상태 revision이 없다. 단순 UPDATE 트리거는 동일 종료 중복 이벤트를 만들고, 재개·재종료 이후 오래된 화면이 이전 회차에 피드백을 보낼 위험이 있다. **소스상 설계 경계 위험**이지 운영 장애 확증은 아니다.
+- 개발 DB 읽기 전용 집계 재확인: 처리 완료 문의2·회원 답변 대기1, 관리자 메시지2·회원 메시지4(총6). 표본에는 200건 초과 문의가 없으며 운영 증거가 아니다.
+- NestJS controller는 세션·동의·변경 요청 CSRF를 적용하고 repository는 SECURITY DEFINER 함수를 호출한다. 외부 공개 API 우회나 요청 본문의 회원 UUID 신뢰 금지. v1316/v1318의 관리자 답변 읽음과 v1324의 해결 확인은 기능별 책임을 분리하되 동일한 문의 행 잠금·순번·revision 규칙을 공유하고 경쟁 트리거를 만들지 않는다.
+
+### 회원 흐름·화면·CTA·상태
+- 기존 회원 전용 `/support?thread=<uuid>` 유지. 화면에 **관리자가 처리 완료로 지정**한 사실과 **회원이 명시적으로 해결 확인**한 사실을 별도로 표시한다. `최신 관리자 답변 보기`로 최신 순 키셋 메시지를 가져오고, 실제 종료 카드 및 그 종료와 관련된 마지막 관리자 답변이 포함되면 `문제가 해결됐어요`를 활성화한다. 201건 이상에서는 오래된 대화가 일부 생략됐음을 `OLDER_HISTORY_PARTIAL`로 표시하되 마지막 답변 포함은 별도로 검증한다.
+- 관리자 답변 없이 종료했다면 `관리자 답변 없이 종료됨`과 실제 종료 시간을 표시한다. 종료 카드를 확인한 회원에게 자발적 해결 확인을 허용할 수 있으나 답변이나 실제 읽음 사실을 생성하지 않는다. 서명 증명은 **서버가 확인 가능한 내용을 제공했다는 자격 증명**이지 사람이 실제 읽었다는 증거가 아니다. `추가 도움이 필요해요`는 기존 회원 답장 경로로 미해결 회차를 시작한다. `도움이 되지 않았어요` 평가는 자동 재개를 유발하지 않는다.
+- 상태 `ELIGIBLE_CURRENT`, `NO_ADMIN_REPLY`, `OLDER_HISTORY_PARTIAL`, `LEGACY_UNKNOWN`, `STALE_EPOCH`, `PROOF_EXPIRED`, `ALREADY_ACKNOWLEDGED`, `UNAVAILABLE`, `SESSION_EXPIRED`, `RATE_LIMITED`를 구분한다. 404·503·부분 조회를 빈 기록·확인 완료로 표시 금지. GET·렌더링·프리페치·이동·새로고침은 쓰기 금지. 320px·200% 확대·44px 터치·키보드·ARIA live·동작 감소·Android 동등성을 충족한다.
+
+### API·신원·서명·멱등 계약
+- 본인 GET `/api/v1/support/threads/:threadId/resolution-feedback`: `{threadId,status,statusRevision,resolutionEventId,resolvedAt,lastAdminMessageId,lastMessageId,replyCoverage,memberAcknowledged,helpful,responseAt,displayProof,proofExpiresAt}`. null은 미확인이며 false로 바꾸지 않는다. 과거/상태 불일치/마지막 답변 누락/장애면 `displayProof=null`. 읽기 전용·본인 검증·`Cache-Control: private,no-store`.
+- 최신 메시지 GET은 PostgreSQL 마이크로초 정밀도 `(created_at,id)` 기반 불투명 서명 키셋, 페이지당 최대 100건, `lastReturnedMessageId`·조회 범위 증명을 제공한다. 서버가 종료 이벤트의 권위 있는 `last_admin_message_id`가 반환된 최신 묶음에 실제 포함됐는지 확인한다. 단순 건수로 완전성을 추정하지 않으며 과거 일부 생략은 별도 표시한다. 종료 이벤트에 마지막 관리자 메시지 및 전체 마지막 메시지 스냅샷을 동일 문의 행 잠금 안에서 기록한다.
+- HMAC-SHA256 표시 증명은 키 ID, 목적 `support-resolution-ack-v1`, 회원·세션 결합, 문의·종료 이벤트·revision·마지막 관리자 메시지 스냅샷, 발급·만료(최대 600초)를 포함한다. 키 교체 검증 기간을 제한하고 다른 세션·문의에서 재사용 불가, 로그에 토큰 기록 금지. POST는 `resolutionEventId`, `statusRevision`, `displayProof`, UUID `idempotencyKey`, `acknowledged:true`, 선택형 helpful/note(최대 500자)를 요구한다. 회원 신원은 세션에서 도출한다. 증명 없음 428, 만료·재개·재종료·구버전 412, 다른 페이로드/이미 제출 409, 잘못된 입력 422, 인증 401·동의 403·타인/없는 문의 404·과다 429·장애 503. DB 커밋 전 성공 표시 금지.
+- Android `/app-api/v1/[...path]`는 이미 `support` 그룹을 `appGatewayPath`로 전달하며 쿠키·CSRF 헤더를 전달한다. 신규 GET/POST에서 `Cache-Control: private,no-store`·타입 오류·앱 버전 정책·응답 헤더 동등성을 유지한다. 그룹 허용 목록은 NestJS 본인 권한 검증을 대체하지 않으며 백엔드 직접 공개 경로나 구형 원본 route-map 신규 항목을 만들지 않는다.
+- 변경 요청에 CSRF·동의·회원/문의/세션별 제한 적용. 첫 저장 201, 동일 요청의 확정 영수증 재전송 200. 정규화 페이로드 해시는 이벤트·revision·acknowledged·helpful·note(유니코드 정규화, null과 false 구분)와 키를 결합하며 Next/NestJS/DB 길이 검증을 일치시킨다. 종료 회차가 나중에 재개돼도 **현재 유효한 본인 세션 및 원래 소유권 확인 후** 동일 키·해시만 원본 영수증 반환; 다른 값은 덮어쓰기 금지.
+
+### PostgreSQL 트랜잭션·호환성
+- 적용된 Migration196/266은 수정하지 않는다. 신규 마이그레이션에서 `support_threads`를 `SELECT ... FOR UPDATE`로 잠근 뒤 실제 상태 변화에만 `status_revision`을 단조 증가시킨다. 진짜 비종료→종료마다 관리자 행위자·마지막 답변 스냅샷·감사와 함께 불변 `support_resolution_events` 한 건 생성. `UNIQUE(thread_id,sequence)`, `UNIQUE(thread_id,status_revision)`; `resolved→resolved`는 이벤트·revision·종료 시간 모두 변화 없는 no-op. `resolved→open/waiting_user→resolved`는 새로운 종료 회차. 메시지 쓰기와 상태 변경은 동일 문의 행 잠금 순서를 따른다.
+- 기존 `admin_support_set_status`, `support_add_message`, `admin_support_reply` 함수 서명은 유지하되, 추가 마이그레이션에서 검토된 버전형 공통 전환 로직으로 위임한다. 클라이언트가 바꿀 수 있는 세션 변수로 트리거에서 관리자 신원을 추측하지 않는다. 하나라도 구형 쓰기 경로가 종료 이벤트/revision/감사를 우회하면 기능 스위치를 OFF로 유지하고 `LEGACY_UNKNOWN` 처리한다. 격리 PostgreSQL에서 기존 함수·권한 호환을 검증한 뒤 활성화한다.
+- 잠금 순서 **문의 행 → 현재 종료 이벤트 → 피드백 영수증**. 잠금 후 상태·revision·이벤트·마지막 답변을 재조회한다. 멱등 영수증 조회도 **문의 행 잠금 후** 수행해야 동일 키 동시 100요청이 모두 사전 조회에 실패하고 UNIQUE 충돌하는 경쟁을 막는다. 동일 키·동일 해시는 원본 영수증, 동일 키·다른 해시는 409, 다른 키로 동일 이벤트 재제출도 기존 기록 보존 및 409. `UNIQUE(resolution_event_id,user_id)`, `UNIQUE(user_id,idempotency_key)`, 32바이트 digest CHECK, FK 소유권, `(thread_id,resolved_at DESC,id DESC)`·`(user_id,created_at DESC,id DESC)` 인덱스. SECURITY DEFINER 고정 search_path·PUBLIC EXECUTE 회수·앱 함수 실행권한 최소화·감사 원자성. 호출자가 준 actor UUID 자체는 DB 인증이 아니며 개발 DB 과도 권한은 P0다.
+- 배포 전 실제 v2 상태 전환과 종료 이벤트 수를 그림자 비교한다. 이전 `resolved` 행에 확실한 종료 이벤트가 없으면 `LEGACY_UNKNOWN`으로 두고 시간값으로 임의 소급 생성하지 않는다. OFF에서는 기존 화면·API가 계속 동작해야 한다. 감사 기록 실패 시 상태 변경 전체 롤백, 종료 상태만 남기는 부분 커밋 금지.
+
+### 관리자·개인정보·SEO·KPI·테스트·롤백
+- 관리자 화면은 관리자 종료/회원 자발적 확인/피드백 미응답을 분리하고 직원 순위·보상·공개 식별자 노출 금지. 서로 겹치지 않는 고정 기간·코호트에서 대상 20건 이상만 집계하며 작은 셀 및 필터·기간 차분 공격을 차단한다. 원문 메모는 별도 승인된 개인정보 권한·감사 사유가 있어야 접근, 분석·로그에 메모·증명 토큰 저장 금지. 보존·삭제는 개인정보 담당자 승인. 회원·관리자 페이지 `noindex`/사이트맵 제외·SSR/Android `no-store`, 공개 구조화 데이터 제외.
+- KPI: 적격 표시 증명 전달, 명시적 해결 확인 수, 현재 적격 종료 대비 확인율, 과거 미확인 비중, `stale_epoch_412`, `proof_expired_412`, `missing_last_reply_block`, 멱등 충돌, 감사 롤백, GET/POST p95, 7일 내 재문의. 분모·코호트 버전을 고정하고 실제 효과 미측정은 HYPOTHESIS로 표시. 타인 확인 0, 허위 종료 이벤트 0, 최신 답변 누락을 완전으로 표시 0을 목표로 한다.
+- 격리 실제 PostgreSQL 검증: 메시지 200/201/500/501/10,001건, 마지막 관리자 답변이 최신 페이지에 있고 과거만 일부 누락, 관리자 답변 없는 종료, 반복 resolved no-op, 종료→답변→재종료, 상태·답변·확인 동시 100건, 동일 키 동시 100건, 다른 해시, 타 회원 100건, 증명 599/600/601초, 세션 교체·철회, 감사 실패 전체 롤백, 동일 시각 UUID 순서, 404/503, 유니코드 500/501자, XSS, 관리자 소규모 집계, Android·WCAG. 문서 검사/CI만으로 정확 SHA 공식 Test 인증 E2E·독립 백업 복원 통과 주장 금지.
+- `support_resolution_feedback_v1` 기본 OFF. 추가형 DB·버전형 API, 정확 SHA CI·보안 감사·실제 DB ACL·복원·공식 Test·승인 GitOps 후 1%→10%→100% 단계 확대. 실패 시 OFF 및 호환 구버전 복귀, 불변 기록 보존, WLD·원장·이력 삭제 금지. QA v1299 **IN PROGRESS**(main 프론트 1,397 통과/6 실패·운영/전체 감사 FAIL; 후보 테스트·운영 감사 PASS이나 후보 전체 감사 FAIL), 루트99% 약1.7GiB·데이터 약24GiB, 앱 DB 권한/Migration266/공식 Test/복원 미해결. Production BLOCKED.
+
+### 구체적 개발 백로그 — P0 4 / P1 6
+- **P0 ENV1326-01:** 루트99%·데이터 볼륨 여유 점검, 다른 작업자 Worktree 보존, 소유자 승인 비파괴 용량 회복 및 독립 암호화 백업 격리 복원.
+- **P0 SEC1326-02:** 앱 DML/PUBLIC EXECUTE 실권한(이전 235/241·은행3), 세션 유래 본인 신원·BOLA/BFLA·HMAC·CSRF 검증, 직접 테이블 권한 확대 금지.
+- **P0 REL1326-03:** QA1299 테스트/감사·Migration266, 정확 HEAD CI·실제 DB ACL·공식 Test 인증 정확 SHA·GitOps/복원 승인 전 운영 차단.
+- **P0 SUP1326-04:** 최신 관리자 답변 또는 답변 없음 종료 카드가 실제 전달되지 않으면 해결 확인 비활성; 부분·과거·503·구회차를 회원 확인으로 표시 금지.
+- **P1 SUP1326-05:** 추가형 문의 상태 revision·종료 이벤트·마지막 관리자 답변 스냅샷, 구형 함수 호환 전환, 중복 resolved 이벤트 방지.
+- **P1 SUP1326-06:** 문의 행 우선 잠금·잠금 후 멱등 해시 재조회·종료 회차 CAS·감사 원자 롤백의 버전형 SECDEF.
+- **P1 SUP1326-07:** 최신 키셋·GET 범위 증명·600초 HMAC·NestJS POST 오류 계약·OpenAPI/경로 목록·제한.
+- **P1 SUP1326-08:** Next.js 명시적 확인/부분/만료 UI·Android App API 동등성·WCAG 2.2 AA·세션 전환 응답 무효화.
+- **P1 SUP1326-09:** 관리자 고정 코호트 개인정보 보호, 보존·권한·SEO noindex/no-store·KPI 정의.
+- **P1 SUP1326-10:** 격리 실제 PG 201/501/10,001건·100동시/재시도/BOLA/감사 실패·기능 OFF 롤백·정확 SHA Test 증명.
+
+**외부 독립 레퍼런스 게이트:** [PostgreSQL 행 잠금](https://www.postgresql.org/docs/current/explicit-locking.html)·[OWASP API Security Top 10](https://api-security.owasp.org/editions/2023/en/0x11-t10/) 공식 문서는 설계 참고로만 검토, 신규 개별 승인·중복 제거·근거 분류 **0건**, 누적 승인 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 10,000건 달성 주장 금지. 개발 연계 이슈 #1448, 용량 #1170. Gemini·개발 A/B/C·QA 변경과 분리.
+
 - **v1324 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1449 (stacked on unmerged #1432; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## v2026.10.26.1324 — F675-138 회원 문의 처리 완료 확인 및 선택형 만족도 피드백 (기능 추가 / DRAFT / RELEASE HOLD)
 
