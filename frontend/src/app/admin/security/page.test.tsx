@@ -42,6 +42,8 @@ describe('administrator IP-block inventory', () => {
     const output = await html();
     expect(output).toContain('차단 기록을 확인할 수 없습니다.');
     expect(output).toContain('다시 조회');
+    expect(output).toContain('action="/admin/security"');
+    expect(output).toContain('method="get"');
     expect(output).not.toContain('차단 기록이 없습니다.');
     expect(output).not.toContain('IP/CIDR 차단</button>');
   });

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { IpBlockDialog, LiftIpBlockDialog } from '../security-abuse-forms';
 import { AdminBack } from '../admin-back';
 import { PageHeader } from '@/components/page-header';
@@ -40,9 +39,9 @@ export default async function AdminSecurityPage() {
             <div role="alert" className="grid gap-3 rounded-xl border border-destructive/40 p-4 text-sm">
               <p className="font-semibold">차단 기록을 확인할 수 없습니다.</p>
               <p className="text-muted-foreground">서버 응답을 확인하지 못했습니다. 차단 현황을 조회한 뒤 작업해 주세요.</p>
-              <Button asChild variant="outline" className="min-h-11 w-full sm:w-fit">
-                <Link href="/admin/security">다시 조회</Link>
-              </Button>
+              <form action="/admin/security" method="get">
+                <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-fit">다시 조회</Button>
+              </form>
             </div>
           ) : blocks.length === 0 ? (
             <p role="status" className="text-sm text-muted-foreground">차단 기록이 없습니다.</p>
