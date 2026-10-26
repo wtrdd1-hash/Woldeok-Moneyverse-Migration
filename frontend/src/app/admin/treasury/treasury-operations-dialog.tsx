@@ -1,22 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   ShieldAlert,
-  ShieldCheck,
   KeyRound,
   Coins,
-  FileCheck2,
   AlertTriangle,
   RotateCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { injectTreasuryFunds, absorbTreasuryFunds } from '../actions';
 import { StepUpField } from '../step-up-field';
 import type { AdminTreasuryVault } from '../types';
 import { groupDigits } from '@/lib/money';
+import { addTreasuryPreset, isValidTreasuryAmount } from './treasury-amount';
 
 interface Props {
   readonly vaults: readonly AdminTreasuryVault[];
@@ -61,9 +58,9 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
   const [amount, setAmount] = useState<string>('');
   const [reasonCode, setReasonCode] = useState<string>(REASON_CODES[0]!.code);
   const [detailReason, setDetailReason] = useState<string>(REASON_CODES[0]!.defaultDetail);
-  const [idempotencyKey, setIdempotencyKey] = useState<string>(() =>
-    `mv-treasury-op-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
-  );
+  // The treasury API has no idempotency-key contract. Never imply one exists.
+  const [requiresLedgerReview, setRequiresLedgerReview] = useState(false);
+  const pendingRef = useRef(false);
   const [isPending, setIsPending] = useState<boolean>(false);
   const [message, setMessage] = useState<{ status: 'ok' | 'error'; text: string } | null>(null);
 
@@ -75,14 +72,24 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
     }
   };
 
-  const handleQuickAdd = (add: number) => {
-    const cur = Number.parseInt(amount.replace(/[^0-9]/g, '') || '0', 10);
-    const next = cur + add;
-    setAmount(next.toString());
+  const handleQuickAdd = (add: string) => {
+    const next = addTreasuryPreset(amount, add);
+    if (next === null) {
+      setMessage({ status: 'error', text: '금액을 확인해 주세요. 1~30자리의 정확한 양의 정수 WLD만 처리할 수 있습니다.' });
+      return;
+    }
+    setMessage(null);
+    setAmount(next);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (pendingRef.current || requiresLedgerReview) return;
+    if (!isValidTreasuryAmount(amount) || !vaults.some((v) => v.code === selectedVault)) {
+      setMessage({ status: 'error', text: '대상 금고와 1~30자리 양의 정수 WLD를 확인해 주세요.' });
+      return;
+    }
+    pendingRef.current = true;
     setIsPending(true);
     setMessage(null);
 
@@ -93,7 +100,6 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
     // [사유코드] 상세 사유 형태로 조합하여 백엔드 감사 로그 및 10자 이상 조건 충족
     const fullReason = `[${reasonCode}] ${detailReason.trim()}`;
     formData.set('reason', fullReason);
-    formData.set('idempotencyKey', idempotencyKey);
 
     try {
       const res =
@@ -104,15 +110,17 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
       if (res.status === 'ok') {
         setMessage({ status: 'ok', text: res.message ?? '국고 자금 처리가 완료되었습니다.' });
         setAmount('');
-        // 멱등성 키 갱신
-        setIdempotencyKey(`mv-treasury-op-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`);
+        setRequiresLedgerReview(false);
       } else {
-        setMessage({ status: 'error', text: res.message ?? '오류가 발생했습니다.' });
+        setRequiresLedgerReview(true);
+        setMessage({ status: 'error', text: `${res.message ?? '오류가 발생했습니다.'} 재실행 전에 국고 거래 내역을 확인하세요.` });
       }
     } catch (err: unknown) {
       const errText = err instanceof Error ? err.message : '작업 처리 중 오류가 발생했습니다.';
-      setMessage({ status: 'error', text: errText });
+      setRequiresLedgerReview(true);
+      setMessage({ status: 'error', text: `${errText} 요청 처리 여부가 불확실할 수 있습니다. 재실행 전에 국고 거래 내역을 확인하세요.` });
     } finally {
+      pendingRef.current = false;
       setIsPending(false);
     }
   };
@@ -122,11 +130,11 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
       <Button
         variant="default"
         size="sm"
-        className="gap-1.5 text-xs h-9 bg-amber-600 hover:bg-amber-700 text-white"
+        className="gap-1.5 text-xs min-h-11 bg-amber-600 hover:bg-amber-700 text-white"
         onClick={() => setIsOpen(true)}
       >
         <KeyRound className="h-3.5 w-3.5" />
-        자금 긴급 제어 (Step-Up)
+        국고 자금 관리
       </Button>
 
       {isOpen && (
@@ -144,17 +152,19 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
                 </div>
                 <div>
                   <h2 id="treasury-op-title" className="text-lg font-bold">
-                    국고 자금 긴급 제어 타워 (Step-Up Guard)
+                    국고 자금 관리 · 관리자 권한 확인
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    국고 자금의 주입 및 영구 소각은 불변 회계 감사 원장에 영구 기록되며, 2단계 인증(TOTP)이 강제됩니다.
+                    국고 변경은 관리자 세션·서버 권한 검증을 거칩니다. 별도의 TOTP 및 서버 멱등 처리 기능은 제공되지 않습니다.
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="text-muted-foreground hover:text-foreground text-sm font-semibold p-1"
+                className="min-h-11 min-w-11 text-muted-foreground hover:text-foreground text-sm font-semibold p-2"
+                aria-label="국고 자금 관리 창 닫기"
+                disabled={isPending}
               >
                 ✕
               </button>
@@ -165,7 +175,7 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
                 <button
                   type="button"
                   onClick={() => setMode('inject')}
-                  className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${
+                  className={`rounded-lg min-h-11 px-4 py-2 text-xs font-bold transition-all ${
                     mode === 'inject'
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
@@ -176,7 +186,7 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
                 <button
                   type="button"
                   onClick={() => setMode('absorb')}
-                  className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${
+                  className={`rounded-lg min-h-11 px-4 py-2 text-xs font-bold transition-all ${
                     mode === 'absorb'
                       ? 'bg-destructive text-destructive-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
@@ -188,7 +198,6 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
             </div>
 
             <form onSubmit={handleSubmit} className="mt-5 grid gap-5">
-              <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
 
               {/* 1. 금고 및 금액 설정 */}
               <div className="grid gap-4 sm:grid-cols-2">
@@ -227,38 +236,43 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
                     pattern="[0-9]*"
                     placeholder="예: 1000000"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                    onChange={(e) => setAmount(e.target.value)}
+                    inputMode="numeric"
+                    maxLength={30}
+                    aria-invalid={amount !== '' && !isValidTreasuryAmount(amount)}
+                    aria-describedby="treasury-amount-help"
                     required
                     className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm font-mono font-bold shadow-xs focus:ring-1 focus:ring-ring"
                   />
 
+                  <p id="treasury-amount-help" className="mt-1 text-xs text-muted-foreground">정수 WLD만 입력하세요. 0 및 앞자리 0은 허용되지 않습니다.</p>
                   {/* 금액 퀵 프리셋 버튼 */}
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     <button
                       type="button"
-                      onClick={() => handleQuickAdd(1000000)}
-                      className="px-2.5 py-1 text-[11px] font-semibold rounded-lg border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors"
+                      onClick={() => handleQuickAdd('1000000')}
+                      className="min-h-11 px-3 py-2 text-xs font-semibold rounded-lg border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors"
                     >
                       +100만
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleQuickAdd(5000000)}
-                      className="px-2.5 py-1 text-[11px] font-semibold rounded-lg border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors"
+                      onClick={() => handleQuickAdd('5000000')}
+                      className="min-h-11 px-3 py-2 text-xs font-semibold rounded-lg border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors"
                     >
                       +500만
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleQuickAdd(10000000)}
-                      className="px-2.5 py-1 text-[11px] font-semibold rounded-lg border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors"
+                      onClick={() => handleQuickAdd('10000000')}
+                      className="min-h-11 px-3 py-2 text-xs font-semibold rounded-lg border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors"
                     >
                       +1,000만
                     </button>
                     <button
                       type="button"
                       onClick={() => setAmount('')}
-                      className="px-2.5 py-1 text-[11px] font-semibold rounded-lg border border-border bg-muted/40 hover:bg-muted text-muted-foreground transition-colors"
+                      className="min-h-11 px-3 py-2 text-xs font-semibold rounded-lg border border-border bg-muted/40 hover:bg-muted text-muted-foreground transition-colors"
                     >
                       초기화
                     </button>
@@ -303,24 +317,33 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-                  <span>멱등성 트랜잭션 키: {idempotencyKey}</span>
+                  <span>중복 실행 방지 키 미지원 · 오류 시 원장 조회 후 재시도</span>
                   <span className={detailReason.trim().length >= 10 ? 'text-emerald-500 font-bold' : 'text-rose-500 font-bold'}>
                     {detailReason.trim().length}/10자 충족
                   </span>
                 </div>
               </div>
 
-              {/* 3. Step-Up 2단계 보안 인증 필드 */}
+              {/* 3. Actual authorization boundary: admin session, CSRF, role and database permissions. */}
               <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-2">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300">
                   <ShieldAlert className="size-4" />
-                  <span>Step-Up 관리자 2단계 인증 승인</span>
+                  <span>관리자 권한·감사 사유 확인</span>
                 </div>
                 <StepUpField id="treasury-operation" undo="국고 반대 거래(주입 시 소각, 소각 시 주입)를 역분개로 실행" />
               </div>
 
+              {requiresLedgerReview && (
+                <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs">
+                  <p>이전 요청의 처리 여부를 국고 거래 내역에서 확인하기 전에는 재실행할 수 없습니다.</p>
+                  <Button type="button" variant="outline" className="mt-2 min-h-11" onClick={() => { setRequiresLedgerReview(false); setMessage(null); }}>
+                    거래 내역 확인 완료 · 다시 입력
+                  </Button>
+                </div>
+              )}
               {message && (
                 <div
+                  role={message.status === 'error' ? 'alert' : 'status'}
                   className={`rounded-xl p-3.5 text-xs font-medium ${
                     message.status === 'ok'
                       ? 'border border-emerald-500/40 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
@@ -337,15 +360,17 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsOpen(false)}
+                  disabled={isPending}
+                  className="min-h-11"
                 >
                   취소
                 </Button>
 
                 <Button
                   type="submit"
-                  disabled={isPending || amount.length === 0 || detailReason.trim().length < 10}
+                  disabled={isPending || requiresLedgerReview || !isValidTreasuryAmount(amount) || !vaults.some((v) => v.code === selectedVault) || detailReason.trim().length < 10}
                   variant={mode === 'inject' ? 'default' : 'destructive'}
-                  className="min-h-10 px-6 text-xs sm:text-sm font-bold rounded-xl shadow-md gap-2"
+                  className="min-h-11 px-6 text-xs sm:text-sm font-bold rounded-xl shadow-md gap-2"
                 >
                   {isPending ? (
                     <>
