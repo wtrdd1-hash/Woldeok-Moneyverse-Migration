@@ -1,3 +1,9 @@
+## 2026-10-26 — 기획 v1330 (F675-139 기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1328, 현재 보완 v1330, 다음 추가 v1332. 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인. Draft #1457은 #1452에 적층; 문서 변경만 수행.
+- 실제 코드: 문의 액션·위젯 전송마다 UUID 신규 생성, Migration196 문의 생성 동일 키 재시도 내용 검증 누락, 답장 SELECT/INSERT 경합 23505 가능. 서버 보존 전송 의도·내용 digest·원자적 영수증·응답 불명 상태·본인/CAS/CSRF·첨부 경계·Android·개인정보/관리자/SEO/접근성·격리 DB 검증·기본 OFF 롤백 설계. 백로그 ENV1330-01 SEC1330-02 REL1330-03 SUP1330-04 SUP1330-05 SUP1330-06 SUP1330-07 SUP1330-08 SUP1330-09 SUP1330-10.
+- QA v1301 프론트 1,423건 통과, 전체 감사 Critical2/High8 실패, DB 앱 DML 235/241·PUBLIC 은행 3·Migration266 불일치, 루트 98%. 정확 SHA Test/복원 미검증, 운영 BLOCKED. 외부 10,000건 신규 승인 0·누적 UNKNOWN. 런타임·DB·Test·운영 미변경.
+
+
 ## 2026-10-26 — 자동 기획 v1328 (기능 추가 / F675-139 / 초안 / 운영 보류)
 - Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 - 최신 main 추가 근거: frontend/src/components/floating-support-chat-widget.tsx도 /app-api/v1/support/threads 및 답장을 전송하며, 답장 텍스트를 fetch 전에 지우고 처리된 오류에서만 복구하므로 응답 불명/창 닫힘 시 유실 위험을 설계에 반영. 위젯에는 이미지 URL 첨부가 있으나 v1328 임시글은 **텍스트 전용**으로, 첨부를 몰래 제거·저장·복구한 척하지 않음. 텍스트만 저장 CTA 제공(또는 /support 안내), 기존 첨부 전송은 보존. localStorage 음소거 설정은 임시글 보관이 아님. /support·플로팅 위젯·Android 모두 회귀 검증.

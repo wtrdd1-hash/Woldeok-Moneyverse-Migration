@@ -1,3 +1,61 @@
+## 기획 v1330 — F675-139 문의 임시글의 전송 의도·내용 결합 멱등성 및 동시 전송 무결성 (기능 보완 / 초안 / 운영 보류)
+
+**교대:** 이전 기능 추가 v1328 → 현재 기능 보완 v1330 → 다음 기능 추가 v1332(잠정). 시작·중간 기준 최신 원격 main `0fe614b2ca1a7bc0df540514e54db78130479e2a`; AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조. v1328 Draft #1457은 미병합 v1326 #1452 위에 적층되어 있으므로 v1330도 main에 독립 병합 금지. 최신 QA v1301: 프론트엔드 1,423건 통과, 타입·린트·빌드·API 계약 통과, 운영 의존성 알려진 취약점 0, **전체 감사 실패(Critical 2/High 8)**. 공식 정확 SHA Test 로그인·복원 증빙 없음. 개발 DB 읽기 전용: 앱 역할 241개 중 235개 테이블 직접 DML, PUBLIC 은행 SECURITY DEFINER 함수 3개, Migration 266 체크섬 불일치. 운영 DB 권한은 미검증. 루트 98%(약 2.0GiB), 데이터 볼륨 90%(약 20GiB). 운영 승격 보류.
+
+### 실제 코드 근거와 범위
+
+- `frontend/src/app/support/actions.ts`는 새 문의·답장 서버 액션을 호출할 때마다 `randomUUID()`를 생성하고, `frontend/src/components/floating-support-chat-widget.tsx`도 매 전송에 `crypto.randomUUID()`를 생성한다. 응답 불명 이후 다시 누르면 동일 요청 재시도가 아니라 새 전송이 될 수 있다. **실제 운영 중복 발송 사고가 확인된 것은 아니다.**
+- Migration 196의 `support_create_thread`는 동일 create_key 재사용 시 회원 소유만 확인하고 **원래 제목·본문과 새 요청의 동일성을 비교하지 않는다**. `support_add_message`는 순차 재시도에서 본문을 비교하지만 SELECT 후 INSERT 사이 동시 요청 경합으로 SQLSTATE 23505가 발생할 수 있다. 둘 다 코드에서 확인한 잠재적 위험이다.
+- 기존 메시지 조회는 오래된 순서의 200/500건 제한이 있으며 최신 답변 노출을 보증하지 않는다. 플로팅 위젯은 이미지 URL 첨부를 지원하나 임시글 기획은 **텍스트 전용**이다. 첨부를 저장·복구한 척하거나 조용히 버리지 않는다. Migration 196과 다른 개발자의 런타임은 변경하지 않는다.
+
+### 목적·대상·진입점·화면·CTA·상태
+
+- 로그인·동의한 활성 회원의 `/support` 새 문의(NEW) 또는 기존 문의 답장(REPLY)이 대상이다. 위젯에는 텍스트 전용 **임시 저장** 또는 `/support` 이동을 제공하며 Android App API도 동일한 복구를 지원한다. 비로그인 임시글, 자동 저장, localStorage/sessionStorage/쿠키의 본문 저장, WLD 연동은 금지한다.
+- CTA: **임시 저장**, **임시글 삭제**, **메시지 전송**, 응답 불명 시 **전송 결과 확인**. 상태 `UNSAVED/SAVING/SAVED(version,timestamp)/EDIT_CONFLICT/OFFLINE_UNSAVED/SENDING/CHECKING_DELIVERY/SENT(receipt)/FAILED_RETRYABLE/DISCARDED/EXPIRED`를 구분한다. 로딩·타임아웃·위젯 닫힘은 전송 완료 증명이 아니다. 로그아웃·계정 변경·세션 철회 시 이전 계정 화면을 지우고 서버 본인 데이터를 다시 조회한다.
+- 명시적 저장만 수행한다. 회원당 NEW 활성 임시글 1개, 문의별 REPLY 활성 임시글 1개, 회원당 활성 최대 20개, 만료 30일(개인정보 검토 후 확정). NEW 제목 1~120자, 본문 1~2,000자. 서버 커밋 이후에만 저장 시각·버전 표시. 충돌은 원격 편집본과 현재 편집본을 안내하며 덮어쓰지 않는다. 320px·200% 확대·44px 터치·키보드·포커스·라이브 리전·WCAG 2.2 AA 및 한영일중 현지화.
+- 이미지 URL이 포함된 위젯 작성물에는 임시 저장 비활성 사유를 명시하거나 텍스트 전용 화면으로 안내한다. 기존 첨부 전송 동작은 유지한다.
+
+### 제안 API와 오류 계약(기본 기능 OFF)
+
+- `GET /api/v1/support/drafts?kind=new|reply&threadId=<uuid>`: 세션 본인 전용 읽기, 본문·버전·만료·상태 반환, GET에서 DB 쓰기 0건, `Cache-Control: private,no-store`/noindex. 타 회원·없는 임시글은 구별되지 않는 404.
+- 최초 명시적 저장은 `POST /api/v1/support/drafts`, 수정은 `PUT /api/v1/support/drafts/:draftId`에 `{version,kind,threadId?,subject?,body,idempotencyKey}` 사용. CSRF·세션·동의 필수, CAS 버전·ETag 응답, 충돌 409, 입력 오류 422, 인증·동의 401/403, 서버 장애 503. 클라이언트 임의 actor UUID는 받지 않는다.
+- `DELETE /api/v1/support/drafts/:draftId`: 버전·CSRF 검증 후 tombstone, 동일 회원의 반복 삭제는 멱등, 이미 전송된 임시글 삭제 충돌은 409. 만료 작업은 기존 문의 메시지를 삭제하지 않는다.
+- `POST /api/v1/support/drafts/:draftId/send`의 `{expectedVersion,sendIntentId,canonicalPayloadDigest}`는 실제 DB 단일 트랜잭션 커밋 이후에만 `SENT` 영수증(문의·메시지 ID, 의도 ID, 커밋 시각, 영수증 버전)을 반환한다. 다른 내용·회원·대상에 같은 의도 재사용은 `409 INTENT_CONFLICT`; 오래된 버전은 `409 EDIT_CONFLICT`. 네트워크 불명은 `CHECKING_DELIVERY`로 유지한다.
+- `GET /api/v1/support/drafts/:draftId/send-receipts/:sendIntentId`는 본인 전용 읽기이며 `SENT/NOT_FOUND/PENDING/UNAVAILABLE` 구분, 본문 재노출 금지. 첫 트랜잭션 진행 중의 NOT_FOUND를 미전송 확정으로 해석하지 않는다. Android `/app-api/v1/` 프록시 동등성, 사용자·세션·IP별 속도 제한과 입력 크기 제한을 적용한다.
+
+### DB 제약·인덱스·트랜잭션·권한
+
+- 기존 Migration 196을 수정하지 않고 전진형 추가 마이그레이션으로 `support_member_drafts(id,user_id,kind,thread_id,subject,body,version,state,expires_at,updated_at)` 및 `support_draft_send_receipts(id,draft_id,user_id,send_intent_id,request_digest,thread_id,message_id,committed_at)`, 불변 사건·종료 tombstone을 설계한다. NEW는 thread_id NULL, REPLY는 소유한 thread_id 필수. 활성 NEW는 회원당 유일, 활성 REPLY는 (회원,문의)당 유일, `(user_id,send_intent_id)` 유일. `(user_id,state,updated_at DESC,id)`, 만료 시각, `(draft_id,committed_at DESC)` 인덱스. 관리자·분석 로그에 본문/제목 기록 금지.
+- 서버가 회원·임시글·유형·문의·버전·정확한 제목·본문을 포함하는 버전형 정규화 UTF-8/NFC digest를 **직접 재계산**한다. JS `trim`과 PostgreSQL `btrim`의 차이를 계약으로 통일하고 내용이 달라지는 숨은 변형을 금지한다. 클라이언트 digest를 신뢰하지 않는다.
+- 단일 트랜잭션 잠금 순서 **임시글 행 → 문의 행(REPLY) → 메시지·영수증**. 활성 회원·소유권·버전·digest 확인, 동일 sendIntent 예약, 안전할 때만 기존 support_create_thread/support_add_message 호출, 메시지·불변 영수증·임시글 SENT tombstone을 원자적 기록. 첫 전송 23505 경합 시 잠금 하에서 영수증을 다시 읽어 회원·대상·원문 digest가 모두 일치할 때만 재응답. 전송 완료 후 다른 의도는 거부. 실 PostgreSQL 동시성 시험 전에는 '정확히 한 번' 보장 주장 금지.
+- SECURITY DEFINER는 고정 `search_path=pg_catalog,pg_temp`, 완전 수식 테이블, PUBLIC EXECUTE 철회, moneyverse_app 함수 실행 최소권한, 앱 직접 DML 불허. 세션 실제 신원과 DB 소유권 모두 검증; BOLA/IDOR·CSRF·권한 철회·타 회원 키 충돌·내용 변경 재전송·오래된 ETag·대용량 악용을 거부한다. 감사 기록 실패 시 전체 트랜잭션 롤백. 관리자는 본문을 열람하지 않고 k>=20 비식별 집계만 이용한다.
+- 개인정보 보존·열람·삭제·법적 보존 근거를 정책과 대조한다. 수집품·잔액·원장·주식·국고에 영향 없음. 기능 OFF 시 기존 문의 경로 그대로 유지.
+
+### 관리자·SEO·모바일·지표·시험·배포·롤백
+
+- 관리자 통계: 저장 성공률, `CHECKING_DELIVERY` 해결률, 동일 의도 재시도, 충돌·만료·포기율, 권한 거부 건수 등 내용 없는 집계(k>=20). 개인별 본문·제목을 KPI에 넣지 않는다. 비공개 화면 noindex/no-store.
+- 격리된 실제 PostgreSQL에서 동일 의도 동시 100회 => 문의·메시지·영수증 각 1건, 다른 의도 100회 경합 => 커밋 최대 1회, 동일 키·다른 제목/본문 => `INTENT_CONFLICT`, 23505 강제 재시도, 타 회원 100회 접근 차단, 합성 10,001건 페이지네이션·만료 검증(운영 최대치 아님). 세션 철회, 계정 변경, CSRF, 커밋 후 응답 유실, 감사 실패 전체 롤백, UTF-8 정규화, 첨부 기존 동작, Android·접근성 회귀.
+- 스키마 선반영 후 기능 OFF, 격리 DB 최소권한·체크섬·복원 증빙, 후보 정확 SHA 전체 CI·보안 감사, 실제 Test 웹/Android 인증 전송·재시도 E2E, 운영 담당자의 GitOps 카나리·롤백 승인 필수. 실패 시 기능 OFF·기존 API 복귀, 영수증/tombstone 보존, 파괴적 다운 마이그레이션 금지. 빌드 성공·Draft 병합 가능은 Test 증빙이 아니다. Production 계속 BLOCKED.
+- **외부 독립 근거 10,000건 게이트:** 이번 승인 0건, 누적 중복 제거·승인 실수량 UNKNOWN, `BLOCKED / IN PROGRESS`. 향후 PostgreSQL 공식 트랜잭션 문서, OWASP ASVS/CSRF, W3C WCAG 2.2 등 독립 출처를 실제 수집·분류·중복 제거해야 한다. 목표 달성 주장 금지.
+
+### 우선순위 개발 백로그(기획만)
+
+| 우선순위 | ID | 수용 조건 |
+|---|---|---|
+| P0 | ENV1330-01 | 루트·데이터 용량, 격리 DB·백업 복원, 타 작업자 파일 보존 |
+| P0 | SEC1330-02 | 앱 역할 235/241 DML·PUBLIC 은행 함수 3개 최소권한 개선 및 실제 세션 본인 확인 |
+| P0 | REL1330-03 | QA v1301 전체 감사, Migration266, 정확 SHA Test/금융 인증 E2E, 빌드만으로 자동 병합하는 #1088 게이트 |
+| P0 | SUP1330-04 | 거짓 SAVED/SENT·내용 다른 키 재사용·응답 불명 중복 전송·타 회원 유출 차단 |
+| P1 | SUP1330-05 | 추가 스키마·유일 제약·인덱스·만료·tombstone |
+| P1 | SUP1330-06 | 단일 트랜잭션 SECDEF·안정적 전송 의도·digest·23505 재조회·CAS |
+| P1 | SUP1330-07 | NestJS 본인 API·DTO·CSRF·영수증 상태·오류 계약 |
+| P1 | SUP1330-08 | Next.js 액션·위젯·Android App API·접근성·다국어 |
+| P1 | SUP1330-09 | 개인정보·관리자 k>=20·SEO·남용 방지·KPI |
+| P1 | SUP1330-10 | 격리 PostgreSQL 경합·권한 부정 시험·롤백·정확 SHA 단계적 배포 |
+
+**개발 인계:** 별도 개발 브랜치에서 승인·검증 후 구현. 이번 v1330은 런타임 코드, DB, WLD, 원장, Test, Production을 변경하지 않는다. Gemini/개발 A·B·C/QA의 변경을 보존하고 v1326→v1328→v1330 적층 기획을 main 변경과 재조정한다.
+
+
 # 월덕 머니버스 — 통합 기획 마스터
 - Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 - 최신 main 추가 근거: frontend/src/components/floating-support-chat-widget.tsx도 /app-api/v1/support/threads 및 답장을 전송하며, 답장 텍스트를 fetch 전에 지우고 처리된 오류에서만 복구하므로 응답 불명/창 닫힘 시 유실 위험을 설계에 반영. 위젯에는 이미지 URL 첨부가 있으나 v1328 임시글은 **텍스트 전용**으로, 첨부를 몰래 제거·저장·복구한 척하지 않음. 텍스트만 저장 CTA 제공(또는 /support 안내), 기존 첨부 전송은 보존. localStorage 음소거 설정은 임시글 보관이 아님. /support·플로팅 위젯·Android 모두 회귀 검증.

@@ -1,3 +1,11 @@
+## 기획 v1330 — F675-139 문의 임시글 전송 의도 무결성 (기능 보완 / 초안 / 운영 보류)
+- 교대: 이전 기능 추가 v1328 / 현재 기능 보완 v1330 / 다음 기능 추가 v1332(잠정). 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재조회, AGENTS·README·영문 정본 PROJECT_PLAN 및 국문 대조. v1328 Draft #1457은 v1326 #1452에 적층되어 미병합.
+- 근거: support/actions.ts·플로팅 위젯이 전송마다 새 UUID를 생성; Migration 196 support_create_thread의 동일 create_key 재사용은 회원만 확인하고 **제목·본문 동일성 미검증**; support_add_message SELECT→INSERT 동시성 경합에서 23505 가능. 실제 운영 사고 확정 아님. 임시글은 텍스트 전용, 기존 이미지 첨부 보존.
+- 개선: 명시적 저장/삭제/전송/전송 결과 확인, 서버 영속 sendIntentId·버전·내용 digest, `SAVED/SENDING/CHECKING_DELIVERY/SENT` 영수증, 다른 내용 재사용 409, 세션·본인·CSRF, 임시글→문의·메시지→불변 영수증·tombstone 원자적 처리, 경합 재조회, 거짓 완료 금지, localStorage 개인정보 금지. 추가 SECDEF·유일 제약·인덱스, 앱 DML/PUBLIC 권한 금지, Android·WCAG AA·noindex/no-store·개인정보·관리자 k>=20 지표, 기능 기본 OFF·롤백.
+- P0: ENV1330-01, SEC1330-02, REL1330-03, SUP1330-04. P1: SUP1330-05, SUP1330-06, SUP1330-07, SUP1330-08, SUP1330-09, SUP1330-10. 격리 PostgreSQL 동일 의도 동시 100건·서로 다른 의도 100건·다른 내용 재사용·23505·타 회원 100건·합성 10,001건·로그아웃·응답 유실·감사 실패·정확 SHA Test/복원 검증.
+- QA v1301 프론트 1,423건 PASS·타입/린트/빌드/API PASS, 전체 감사 FAIL Critical2/High8. 앱 DML 235/241, PUBLIC 은행 함수 3개, Migration266 불일치, 루트 98%(약 2GiB), 데이터 90%. 정확 SHA 공식 Test 미검증, Production BLOCKED. 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 문서만 변경; 런타임·DB·Test·운영 미변경. 상세 계약은 [영문 통합 정본](INTEGRATED_PLANNING_MASTER.md) 및 한국어 동등 문서 참조.
+
+
 # 월덕 머니버스 — Living Project Plan
 - Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 - 최신 main 추가 근거: frontend/src/components/floating-support-chat-widget.tsx도 /app-api/v1/support/threads 및 답장을 전송하며, 답장 텍스트를 fetch 전에 지우고 처리된 오류에서만 복구하므로 응답 불명/창 닫힘 시 유실 위험을 설계에 반영. 위젯에는 이미지 URL 첨부가 있으나 v1328 임시글은 **텍스트 전용**으로, 첨부를 몰래 제거·저장·복구한 척하지 않음. 텍스트만 저장 CTA 제공(또는 /support 안내), 기존 첨부 전송은 보존. localStorage 음소거 설정은 임시글 보관이 아님. /support·플로팅 위젯·Android 모두 회귀 검증.
