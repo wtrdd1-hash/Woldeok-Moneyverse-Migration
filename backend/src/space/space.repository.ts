@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 
@@ -26,6 +26,16 @@ export class SpaceInputError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'SpaceInputError';
+  }
+}
+
+/** Until all three space-economy SQL functions settle via the canonical double-entry ledger. */
+export class SpaceFinanceLedgerHoldError extends ServiceUnavailableException {
+  constructor() {
+    super({
+      code: 'SPACE_LEDGER_SETTLEMENT_UNAVAILABLE',
+      message: 'Space purchases, project contributions and property tax payments are paused pending verified ledger settlement.',
+    });
   }
 }
 
@@ -109,23 +119,14 @@ export interface DelinquentSpaceRow {
 export class PostgresSpaceRepository {
   constructor(private readonly client: Queryable) {}
 
+  /** The legacy space_purchase SQL directly debits balances without ledger postings. */
   async purchaseSpace(
-    actorUserId: string,
-    spaceType: string,
-    name: string,
-    idempotencyKey: string,
+    _actorUserId: string,
+    _spaceType: string,
+    _name: string,
+    _idempotencyKey: string,
   ): Promise<PurchaseSpaceResult> {
-    if (!UUID_REGEX.test(actorUserId)) throw new SpaceInputError('actorUserId must be a valid UUID');
-    if (!UUID_REGEX.test(idempotencyKey)) throw new SpaceInputError('idempotencyKey must be a valid UUID');
-
-    const row = await queryOne<PurchaseSpaceResult>(
-      this.client,
-      `SELECT space_id, space_type, name, created_at
-       FROM public.space_purchase($1::uuid, $2::text, $3::text, $4::uuid);`,
-      [actorUserId, spaceType, name.trim(), idempotencyKey],
-    );
-    if (!row) throw new Error('failed to purchase space');
-    return row;
+    throw new SpaceFinanceLedgerHoldError();
   }
 
   async listUserSpaces(actorUserId: string): Promise<UserSpaceRow[]> {
@@ -199,25 +200,14 @@ export class PostgresSpaceRepository {
     );
   }
 
+  /** The legacy city_project_contribute SQL cannot prove balanced, exactly-once debits. */
   async contributeCityProject(
-    actorUserId: string,
-    projectId: string,
-    amountWld: number,
-    idempotencyKey: string,
+    _actorUserId: string,
+    _projectId: string,
+    _amountWld: number,
+    _idempotencyKey: string,
   ): Promise<ContributeCityProjectResult> {
-    if (!UUID_REGEX.test(actorUserId)) throw new SpaceInputError('actorUserId must be a valid UUID');
-    if (!UUID_REGEX.test(projectId)) throw new SpaceInputError('projectId must be a valid UUID');
-    if (!UUID_REGEX.test(idempotencyKey)) throw new SpaceInputError('idempotencyKey must be a valid UUID');
-    if (amountWld <= 0) throw new SpaceInputError('amountWld must be positive');
-
-    const row = await queryOne<ContributeCityProjectResult>(
-      this.client,
-      `SELECT contribution_id, accepted_amount::text, project_current_wld, project_status
-       FROM public.city_project_contribute($1::uuid, $2::uuid, $3::numeric, $4::uuid);`,
-      [actorUserId, projectId, amountWld, idempotencyKey],
-    );
-    if (!row) throw new Error('failed to contribute to city project');
-    return row;
+    throw new SpaceFinanceLedgerHoldError();
   }
 
   async getSpaceTaxStatus(spaceId: string): Promise<SpaceTaxStatusResult> {
@@ -267,44 +257,14 @@ export class PostgresSpaceRepository {
     };
   }
 
+  /** The legacy space_pay_property_tax SQL writes unposted balances. */
   async payPropertyTax(
-    actorUserId: string,
-    spaceId: string,
-    days: number,
-    idempotencyKey: string,
+    _actorUserId: string,
+    _spaceId: string,
+    _days: number,
+    _idempotencyKey: string,
   ): Promise<PayPropertyTaxResult> {
-    if (!UUID_REGEX.test(actorUserId)) throw new SpaceInputError('actorUserId must be a valid UUID');
-    if (!UUID_REGEX.test(spaceId)) throw new SpaceInputError('spaceId must be a valid UUID');
-    if (!UUID_REGEX.test(idempotencyKey)) throw new SpaceInputError('idempotencyKey must be a valid UUID');
-    if (!Number.isSafeInteger(days) || days < 1 || days > 30) {
-      throw new SpaceInputError('days must be an integer between 1 and 30');
-    }
-
-    const row = await queryOne<{
-      receipt_id: string;
-      space_id: string;
-      days_paid: number;
-      total_wld: string;
-      new_paid_until: Date;
-      paid_at: Date;
-    }>(
-      this.client,
-      `SELECT receipt_id, space_id, days_paid, total_wld, new_paid_until, paid_at
-       FROM public.space_pay_property_tax($1::uuid, $2::uuid, $3::integer, $4::uuid);`,
-      [actorUserId, spaceId, days, idempotencyKey],
-    );
-
-    if (!row) throw new Error('failed to pay property tax');
-
-    return {
-      receiptId: row.receipt_id,
-      spaceId: row.space_id,
-      daysPaid: row.days_paid,
-      totalWld: Number(row.total_wld),
-      newPaidUntil: row.new_paid_until,
-      paidAt: row.paid_at,
-      burnCode: 'SINK_PROPERTY_TAX',
-    };
+    throw new SpaceFinanceLedgerHoldError();
   }
 
   async listDelinquencies(): Promise<DelinquentSpaceRow[]> {
