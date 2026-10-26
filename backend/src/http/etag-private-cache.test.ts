@@ -35,8 +35,8 @@ function execute(options: {
 }
 
 describe('dynamic ETag private response isolation', () => {
-  it.each(['no-store', 'max-age=0, NO-STORE', 'private, max-age=60'])
-  ('never converts Cache-Control: %s to a bodyless 304', (cacheControl) => {
+  it.each(['no-store', 'max-age=0, NO-STORE', 'private, max-age=60'])(
+    'never converts Cache-Control: %s to a bodyless 304', (cacheControl) => {
     const result = execute({
       requestHeaders: { 'if-none-match': '*' },
       responseHeaders: { 'Cache-Control': cacheControl },
@@ -45,7 +45,8 @@ describe('dynamic ETag private response isolation', () => {
     expect(result.sent).toHaveBeenCalledWith('private response');
     expect(result.end).not.toHaveBeenCalled();
     expect(result.headers.has('etag')).toBe(false);
-  });
+    },
+  );
 
   it.each(['cookie', 'authorization'])('does not create a shared validator for %s requests', (header) => {
     const result = execute({ requestHeaders: { [header]: 'sensitive-value', 'if-none-match': '*' } });
