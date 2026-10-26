@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **v1312 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (stacked on unmerged #1402, RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## Planning v1312 — F675-135 Verified Privacy Request Case Triage & Member Timeline (Feature Addition / DRAFT / RELEASE HOLD)
 - Cycle: Previous Feature Improvement v1310 → Current Feature Addition v1312 → Next Feature Improvement v1314 (provisional). Remote main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 rechecked start/mid; predecessor Draft #1402 unmerged. Docs only; no runtime/DB/WLD/ledger/Test/Production changes.

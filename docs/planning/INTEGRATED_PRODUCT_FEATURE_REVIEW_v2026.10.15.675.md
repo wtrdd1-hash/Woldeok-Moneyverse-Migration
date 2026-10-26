@@ -1,4 +1,5 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- **v1312 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (stacked on unmerged #1402, RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## F675-135 — v1312 verified privacy request triage (Addition / DRAFT / HOLD)
 - Source: main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 migration015 records submission only (received), privacy controller GET/POST for owner, no staff queue; generic AdminGuard is insufficient privacy-officer authorization. No evidence of fulfillment or legal compliance.

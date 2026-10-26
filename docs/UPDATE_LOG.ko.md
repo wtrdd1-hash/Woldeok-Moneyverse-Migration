@@ -1,3 +1,4 @@
+- **v1312 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (미병합 #1402 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 ## 2026-10-26 — 기획 v1312 (F675-135, 기능 추가, DRAFT/HOLD)
 - main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 v1310 Draft #1402 미병합. 국영문 통합 마스터·프로젝트 계획·기능 검토 동등 반영. Migration015는 received 접수만 보관하며 관리자 이행 절차 없음. 개인정보 담당자 전용 사건 처리·2인 증빙 승인·본인 진행 현황·CAS/영수증·개인정보/Android/SEO/접근성·정확 SHA Test 게이트 기획, 런타임/DB 배포 없음.
 - P0/P1 식별자: ENV1312-01 SEC1312-02 REL1312-03 PRIV1312-04 PRIV1312-05 PRIV1312-06 PRIV1312-07 PRIV1312-08 PRIV1312-09 PRIV1312-10. QA v1290 FAILED/HOLD, 루트 95%/약 5.3GiB. 외부 독립 근거 10,000건 게이트 신규 승인 0, 누적 UNKNOWN, BLOCKED / IN PROGRESS.

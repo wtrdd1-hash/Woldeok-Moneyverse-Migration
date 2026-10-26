@@ -1,4 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- **v1312 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (미병합 #1402 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## v2026.10.26.1312 — F675-135 개인정보 요청 심사·처리상태 확인 및 관리자 사건 관리 (기능 추가 / DRAFT / RELEASE HOLD)
 

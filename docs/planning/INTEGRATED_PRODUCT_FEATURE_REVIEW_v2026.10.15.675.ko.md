@@ -1,4 +1,5 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+- **v1312 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (미병합 #1402 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## F675-135 — v1312 개인정보 요청 검토·진행 현황 (기능 추가 / DRAFT / HOLD)
 - 근거: main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 Migration015는 received 접수 상태만 저장, 회원 GET/POST만 제공하고 관리자 대기열이 없다. 일반 AdminGuard만으로 개인정보 담당 권한을 증명하지 못한다. 접수는 실제 이행·법적 준수 증거가 아니다.

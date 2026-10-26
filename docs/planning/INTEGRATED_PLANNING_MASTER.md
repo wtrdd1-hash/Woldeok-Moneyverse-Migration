@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **v1312 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (stacked on unmerged #1402, RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## v2026.10.26.1312 — F675-135 Verified Privacy Request Case Triage & Member Status Timeline (Feature Addition / DRAFT / RELEASE HOLD)
 

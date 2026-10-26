@@ -1,4 +1,5 @@
 # Planning v1312 — F675-135 Verified Privacy Case Triage (2026-10-26 KST)
+- **v1312 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1407 (stacked on unmerged #1402, RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 - Previous Improvement v1310 → Current Addition v1312 → Next Improvement v1314 (provisional).
 - Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked start/mid; AGENTS.md/README.md/PROJECT_PLAN.md EN canonical and KO parity read; predecessor Draft #1402 unmerged. Isolated docs-only worktree.
