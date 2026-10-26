@@ -10,4 +10,4 @@
 - QA v1293 main six frontend failures, audits, dev app DML235/241 and PUBLIC bank3, migration266 mismatch, authenticated Test/isolated restore missing; root97%/~3.4GiB free, data84%/~31GiB.
 
 ## COMPLETE — 2026-10-26 15:22 KST
-- Documentation only. Draft PR #1420 OPEN stacked on #1416; issue #1415 and disk issue #1170 updated; checkpoint commit a917ce2570eb63db2af9d93b85664d5b0332d937, final link commit to follow. All six EN/KO spec docs have ten backlog IDs; git diff --check and nine-doc-only scope passed. Runtime tests not run. External independent 10k new approved 0, cumulative UNKNOWN, BLOCKED/IN PROGRESS.
+- Documentation only. Draft PR #1420 OPEN stacked on #1416; issue #1415 and disk issue #1170 updated; checkpoint commit a917ce2570eb63db2af9d93b85664d5b0332d937; subsequent link and canonical-body preservation commits published; authoritative final SHA is PR #1420 head and external completion record. All six EN/KO spec docs have ten backlog IDs; git diff --check and nine-doc-only scope passed. Runtime tests not run. External independent 10k new approved 0, cumulative UNKNOWN, BLOCKED/IN PROGRESS.
