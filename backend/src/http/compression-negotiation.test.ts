@@ -2,6 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { inflateSync, gunzipSync } from 'node:zlib';
 import type { Request, Response } from 'express';
 import { responseCompression } from './compression.middleware';
+import { dynamicEtag } from './etag.middleware';
+import express from 'express';
+import request from 'supertest';
 
 function exercise(acceptEncoding: string, vary?: string) {
   const headers = new Map<string, string>([['content-type', 'application/json']]);
@@ -66,6 +69,25 @@ describe('HTTP response compression negotiation and cache variation', () => {
     const { headers, sent, original } = exercise('gzip;q=9, deflate;q=0');
     expect(headers.get('content-encoding')).toBeUndefined();
     expect(sent).toBe(original);
+  });
+
+
+  it('preserves CORS variation and honors encoding quality through real Express middleware', async () => {
+    const app = express();
+    app.use(responseCompression());
+    app.use(dynamicEtag());
+    app.use((_req, res, next) => { res.vary('Origin'); next(); });
+    app.get('/private', (_req, res) => res.json({ data: 'x'.repeat(2000) }));
+
+    const response = await request(app)
+      .get('/private')
+      .set('Origin', 'https://example.org')
+      .set('Accept-Encoding', 'gzip;q=0, deflate;q=1');
+
+    expect(response.status).toBe(200);
+    expect(response.headers['content-encoding']).toBe('deflate');
+    expect(response.headers.vary).toBe('Origin, Accept-Encoding');
+    expect(response.body.data).toHaveLength(2000);
   });
 
 });
