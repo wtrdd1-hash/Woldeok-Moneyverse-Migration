@@ -200,7 +200,7 @@ export class ClubController {
     return { projects };
   }
 
-  @ApiOperation({ summary: '협동 프로젝트 WLD 펀딩 기여 (영구 소각)' })
+  @ApiOperation({ summary: '협동 프로젝트 WLD 펀딩 (금융 원장 검증 전 일시 중단)' })
   @Post(':id/projects/:projectId/contributions')
   async contributeToProject(
     @Req() req: RequestWithSession,

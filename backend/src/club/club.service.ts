@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { ClubInputError, PostgresClubRepository } from './club.repository';
 
 export interface CreateClubInput {
@@ -110,21 +110,19 @@ export class ClubService {
   }
 
   async contributeToProject(
-    actorUserId: string,
-    clubId: string,
-    projectId: string,
-    amountWld: number,
-    idempotencyKey: string,
+    _actorUserId: string,
+    _clubId: string,
+    _projectId: string,
+    _amountWld: number,
+    _idempotencyKey: string,
   ) {
-    try {
-      return await this.repo.contributeToProject(actorUserId, clubId, projectId, amountWld, idempotencyKey);
-    } catch (err: unknown) {
-      if (err instanceof ClubInputError) throw new BadRequestException(err.message);
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes('not a member')) throw new ForbiddenException('클럽 회원만 프로젝트에 기여할 수 있습니다.');
-      if (msg.includes('insufficient')) throw new BadRequestException('WLD 잔액이 부족합니다.');
-      throw err;
-    }
+    // Migration 222 changes balances without balanced ledger postings or a
+    // replay receipt. Never invoke it until a certified ledger-first replacement
+    // and the official release gates are available (P0 issue #1423).
+    throw new ServiceUnavailableException({
+      code: 'CLUB_PROJECT_LEDGER_UNAVAILABLE',
+      message: '클럽 프로젝트 펀딩은 금융 원장 검증 완료 전까지 일시 중단됩니다.',
+    });
   }
 
   async listClubFeed(clubId: string, limit = 50) {

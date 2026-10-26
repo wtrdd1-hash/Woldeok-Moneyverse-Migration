@@ -320,26 +320,15 @@ export class PostgresClubRepository {
   }
 
   async contributeToProject(
-    actorUserId: string,
-    clubId: string,
-    projectId: string,
-    amountWld: number,
-    idempotencyKey: string,
+    _actorUserId: string,
+    _clubId: string,
+    _projectId: string,
+    _amountWld: number,
+    _idempotencyKey: string,
   ): Promise<ContributeProjectResult> {
-    if (!UUID_REGEX.test(actorUserId)) throw new ClubInputError('actorUserId must be a valid UUID');
-    if (!UUID_REGEX.test(clubId)) throw new ClubInputError('clubId must be a valid UUID');
-    if (!UUID_REGEX.test(projectId)) throw new ClubInputError('projectId must be a valid UUID');
-    if (!UUID_REGEX.test(idempotencyKey)) throw new ClubInputError('idempotencyKey must be a valid UUID');
-    if (amountWld <= 0) throw new ClubInputError('amountWld must be positive');
-
-    const row = await queryOne<ContributeProjectResult>(
-      this.client,
-      `SELECT contribution_id, accepted_amount::text, project_current_wld, project_status
-       FROM public.club_contribute_project($1::uuid, $2::uuid, $3::uuid, $4::numeric, $5::uuid);`,
-      [actorUserId, clubId, projectId, amountWld, idempotencyKey],
-    );
-    if (!row) throw new Error('failed to contribute to project');
-    return row;
+    // Defence in depth: callers bypassing ClubService must not reach the
+    // unsafe migration-222 function. Re-enable only with ledger-first SQL.
+    throw new Error('CLUB_PROJECT_LEDGER_UNAVAILABLE');
   }
 
   async listClubFeed(clubId: string, limit = 50): Promise<ClubFeedPostRow[]> {

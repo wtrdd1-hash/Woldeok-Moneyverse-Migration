@@ -59,22 +59,17 @@ describe('ClubService', () => {
     await expect(service.getClubById(clubId)).rejects.toThrow(NotFoundException);
   });
 
-  it('successfully contributes WLD to a cooperative project', async () => {
+  it('holds project contributions while ledger settlement is uncertified', async () => {
     const actorUserId = '11111111-1111-1111-1111-111111111111';
     const clubId = '22222222-2222-2222-2222-222222222222';
     const projectId = '33333333-3333-3333-3333-333333333333';
     const key = '44444444-4444-4444-4444-444444444444';
-
-    vi.mocked(mockRepo.contributeToProject).mockResolvedValueOnce({
-      contribution_id: '55555555-5555-5555-5555-555555555555',
-      accepted_amount: '1000',
-      project_current_wld: '1000',
-      project_status: 'active',
+    vi.mocked(mockRepo.contributeToProject).mockClear();
+    await expect(service.contributeToProject(actorUserId, clubId, projectId, 1000, key)).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'CLUB_PROJECT_LEDGER_UNAVAILABLE' },
     });
-
-    const result = await service.contributeToProject(actorUserId, clubId, projectId, 1000, key);
-    expect(result.accepted_amount).toBe('1000');
-    expect(result.project_status).toBe('active');
+    expect(mockRepo.contributeToProject).not.toHaveBeenCalled();
   });
 
   it('successfully retrieves and updates club canvas layout', async () => {
