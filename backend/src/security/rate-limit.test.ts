@@ -33,6 +33,30 @@ describe('tierFor', () => {
   });
 });
 
+describe('tierFor, case-insensitive Express routing', () => {
+  it('keeps mixed-case authentication endpoints on the auth budget', () => {
+    for (const path of ['/API/V1/AUTH/discord/authorize', '/api/v1/Auth/google/callback', '/AUTH/login']) {
+      expect(tierFor(path, 'GET')).toEqual({ name: 'auth', limit: 20 });
+    }
+  });
+
+  it('preserves cheap session reads even when the route case differs', () => {
+    expect(tierFor('/API/V1/AUTH/VIEWER', 'GET')).toEqual({ name: 'read', limit: 12000 });
+    expect(tierFor('/api/v1/Auth/SESSION', 'GET')).toEqual({ name: 'read', limit: 12000 });
+    expect(tierFor('/API/V1/AUTH/SESSION', 'DELETE')).toEqual({ name: 'auth', limit: 20 });
+  });
+
+  it('does not downgrade mixed-case API writes to the read budget', () => {
+    for (const method of ['POST', 'PATCH', 'DELETE']) {
+      expect(tierFor('/API/V1/WALLET/transfers', method)).toEqual({ name: 'sensitive', limit: 60 });
+    }
+  });
+
+  it('does not mistake a similarly named non-API path for an API write', () => {
+    expect(tierFor('/API-v1/wallet/transfers', 'POST')).toEqual({ name: 'read', limit: 12000 });
+  });
+});
+
 describe('requestClientKey', () => {
   // The security-relevant case. Honouring a client-supplied X-Forwarded-For
   // without a proxy that rewrites it lets any client forge a fresh identity
