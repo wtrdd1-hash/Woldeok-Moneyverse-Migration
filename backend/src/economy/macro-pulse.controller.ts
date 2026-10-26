@@ -11,7 +11,7 @@ export class MacroPulseController {
   @Get()
   @SkipInternalToken()
   @ApiOperation({
-    summary: 'Get real-time domestic & global macroeconomic indicators and educational insights',
+    summary: 'Get deterministic educational macroeconomic scenarios (not live market data)',
   })
   getMacroPulse(): MacroPulsePayload {
     return this.macroPulseService.getMacroPulse();

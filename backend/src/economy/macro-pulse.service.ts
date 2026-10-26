@@ -39,6 +39,8 @@ export interface EconomicCalendarEvent {
 }
 
 export interface MacroPulsePayload {
+  readonly dataMode: 'SIMULATED_EDUCATIONAL';
+  readonly source: 'INTERNAL_DETERMINISTIC_SCENARIO';
   readonly updatedAt: string;
   readonly nextUpdateAt: string;
   readonly domestic: readonly MacroIndicator[];
@@ -66,7 +68,7 @@ export class MacroPulseService {
     if (!this.cachedPulse || now - this.lastGeneratedTime > 10 * 60 * 1000) {
       this.cachedPulse = this.generateDynamicPulse(now);
       this.lastGeneratedTime = now;
-      this.logger.log(`Macro economy pulse auto-refreshed at ${new Date(now).toISOString()}`);
+      this.logger.log(`Educational macro scenario regenerated at ${new Date(now).toISOString()}`);
     }
     return this.cachedPulse;
   }
@@ -202,7 +204,7 @@ export class MacroPulseService {
       },
     ];
 
-    // 1 WLD 기준 실제 통화 환산 가치 (1 WLD = 100 KRW = $0.0723 USD)
+    // Hypothetical WLD conversion examples, never real-world exchange or redeemable value.
     const exchangeRates: GlobalCurrencyRate[] = [
       {
         code: 'KRW',
@@ -338,6 +340,8 @@ export class MacroPulseService {
     };
 
     return {
+      dataMode: 'SIMULATED_EDUCATIONAL',
+      source: 'INTERNAL_DETERMINISTIC_SCENARIO',
       updatedAt: new Date(timestamp).toISOString(),
       nextUpdateAt: new Date(timestamp + 10 * 60 * 1000).toISOString(),
       domestic,

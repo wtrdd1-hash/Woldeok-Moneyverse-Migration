@@ -51,6 +51,8 @@ export interface EconomicCalendarEvent {
 }
 
 export interface MacroPulseData {
+  readonly dataMode: 'SIMULATED_EDUCATIONAL';
+  readonly source: 'INTERNAL_DETERMINISTIC_SCENARIO';
   readonly updatedAt: string;
   readonly nextUpdateAt: string;
   readonly domestic: readonly MacroIndicatorData[];
@@ -72,224 +74,107 @@ export interface MacroPulseData {
   };
 }
 
-const FALLBACK_PULSE: MacroPulseData = {
-  updatedAt: new Date().toISOString(),
-  nextUpdateAt: new Date(Date.now() + 600000).toISOString(),
-  domestic: [
-    {
-      id: 'bok_rate',
-      name: '한국은행 기준금리',
-      nameEn: 'BOK Base Rate',
-      value: 3.25,
-      unit: '%',
-      changeRate: 0,
-      description: '한국은행 금융통화위원회가 결정하는 정책 기준금리',
-      descriptionEn: 'Central Bank Policy Rate',
-      educationalTip: '기준금리가 오르면 저축 이자가 늘고 주식 시장 유동성은 줄어듭니다.',
-      educationalTipEn: 'Higher rates boost bank interest while curbing equity liquidity.',
-    },
-    {
-      id: 'kospi',
-      name: 'KOSPI 코스피 종합지수',
-      nameEn: 'KOSPI Index',
-      value: 2628,
-      unit: 'pt',
-      changeRate: -0.47,
-      description: '대한민국 유가증권시장 대표 종합주가지수',
-      descriptionEn: 'Korea Benchmark Index',
-      educationalTip: '반도체와 2차전지 등 수출 대형주 비중이 높아 글로벌 경기 및 환율에 민감합니다.',
-      educationalTipEn: 'Sensitive to FX swings due to heavy semiconductor exports.',
-    },
-    {
-      id: 'usd_krw',
-      name: '원/달러 환율 (USD/KRW)',
-      nameEn: 'USD/KRW Rate',
-      value: 1382.4,
-      unit: '원',
-      changeRate: 0,
-      description: '1 미국 달러당 원화 교환 비율',
-      descriptionEn: 'Exchange Rate',
-      educationalTip: '환율 상승 시 수출주의 실적은 개선되지만 수입 원자재 가격이 올라 물가 부담이 커집니다.',
-      educationalTipEn: 'Boosts export margins but imports inflation pressure.',
-    },
-    {
-      id: 'kr_cpi',
-      name: '소비자물가상승률 (CPI YoY)',
-      nameEn: 'Consumer Price Inflation',
-      value: 2.1,
-      unit: '%',
-      changeRate: -0.1,
-      description: '전년 동월 대비 소비자 물가 변동률',
-      descriptionEn: 'YoY Inflation Rate',
-      educationalTip: '물가가 안정 목표(2.0%)에 근접할수록 중앙은행의 금리 인하 여력이 넓어집니다.',
-      educationalTipEn: 'Target inflation allows central banks to ease monetary policy.',
-    },
-  ],
-  global: [
-    {
-      id: 'fed_funds',
-      name: '미국 연준(Fed) 기준금리',
-      nameEn: 'Fed Funds Rate',
-      value: 4.75,
-      unit: '%',
-      changeRate: 0,
-      description: '미국 연방준비제도(Fed)의 목표 정책금리',
-      descriptionEn: 'US Target Policy Rate',
-      educationalTip: '글로벌 자산 가격의 할인율이자 전 세계 투자 자금 흐름을 결정하는 핵심 기준입니다.',
-      educationalTipEn: 'Primary benchmark discount rate for global capital flows.',
-    },
-    {
-      id: 'nasdaq',
-      name: 'NASDAQ 나스닥 종합지수',
-      nameEn: 'NASDAQ Composite',
-      value: 18211.6,
-      unit: 'pt',
-      changeRate: -0.22,
-      description: '글로벌 빅테크 및 기술 성장주 중심 지수',
-      descriptionEn: 'Tech Innovation Index',
-      educationalTip: '금리 하락기나 AI 신기술 모멘텀 시기에 가장 탄력적으로 상승하는 성장형 지수입니다.',
-      educationalTipEn: 'Outperforms during rate cuts due to lower discount rates.',
-    },
-    {
-      id: 'sp500',
-      name: 'S&P 500 종합지수',
-      nameEn: 'S&P 500 Index',
-      value: 5770.4,
-      unit: 'pt',
-      changeRate: -0.17,
-      description: '미국 시가총액 상위 500대 우량 상장기업 지수',
-      descriptionEn: 'US Large Cap Benchmark',
-      educationalTip: '장기 적립식 복리 투자의 대표 벤치마크로 미국 경제 전체의 성장성을 대변합니다.',
-      educationalTipEn: 'Gold standard for long-term compounding index portfolios.',
-    },
-    {
-      id: 'dxy',
-      name: '달러 인덱스 (DXY)',
-      nameEn: 'US Dollar Index',
-      value: 103.62,
-      unit: 'pt',
-      changeRate: 0.17,
-      description: '주요 6개국 통화 대비 달러 가치',
-      descriptionEn: 'DXY Currency Index',
-      educationalTip: '달러 인덱스가 강세를 보이면 신흥국 증시에서 외국인 자금이 유출되는 경향이 있습니다.',
-      educationalTipEn: 'Strong USD typically triggers capital outflows from emerging markets.',
-    },
-    {
-      id: 'us10y',
-      name: '미국채 10년물 금리',
-      nameEn: 'US 10Y Treasury Yield',
-      value: 4.21,
-      unit: '%',
-      changeRate: 0.03,
-      description: '글로벌 무위험 채권 수익률의 기준 지표',
-      descriptionEn: '10-Year Benchmark Treasury Yield',
-      educationalTip: '10년물 금리가 급등하면 성장주의 미래 이익에 대한 할인율이 커져 주가 조정을 받습니다.',
-      educationalTipEn: 'Higher 10Y yields compress equity valuation multiples.',
-    },
-  ],
-  exchangeRates: [
-    { code: 'KRW', name: '원화', symbol: '₩', ratePerWld: 100, formatted: '100원' },
-    { code: 'USD', name: '달러', symbol: '$', ratePerWld: 0.0723, formatted: '$0.0723' },
-    { code: 'JPY', name: '엔화', symbol: '¥', ratePerWld: 11.08, formatted: '¥11.08' },
-  ],
-  economicCalendar: [
-    {
-      id: 'us-cpi',
-      title: '미국 9월 소비자물가지수 (CPI) 발표',
-      titleEn: 'US September Consumer Price Index (CPI)',
-      scheduledDate: '2026-10-08',
-      scheduledTime: '21:30 KST',
-      dDay: -16,
-      importance: 'HIGH',
-      country: 'US',
-      previousValue: '2.5% YoY',
-      forecastValue: '2.3% YoY',
-      analysisKo: '헤드라인 CPI가 2.3%로 둔화되며 연준의 11월 금리 인하 기대감을 크게 높인 핵심 지표입니다.',
-      analysisEn: 'Headline CPI eased to 2.3%, reinforcing expectations for further Federal Reserve rate cuts.',
-      marketImpactTipKo: '물가 둔화 확인 시 성장주 및 가상자산 등 위험자산에 강력한 유동성 모멘텀으로 작용합니다.',
-      marketImpactTipEn: 'Cooling inflation provides positive liquidity momentum for risk assets and tech equities.',
-    },
-    {
-      id: 'us-fomc',
-      title: '미국 연준 FOMC 정례회의 기준금리 결정',
-      titleEn: 'US Federal Reserve FOMC Rate Decision',
-      scheduledDate: '2026-10-09',
-      scheduledTime: '03:00 KST',
-      dDay: -15,
-      importance: 'HIGH',
-      country: 'US',
-      previousValue: '5.00%',
-      forecastValue: '4.75% (-25bp)',
-      analysisKo: '연준이 지난 회의에서 25bp 추가 인하를 단행하며 글로벌 통화 완화 기조를 공식화했습니다.',
-      analysisEn: 'The Fed implemented an additional 25bp rate cut, reaffirming global monetary easing.',
-      marketImpactTipKo: '달러 약세 유도 및 신흥국 통화 가치 안정에 기여하며 글로벌 증시 상단을 견인합니다.',
-      marketImpactTipEn: 'Drives softer USD and stabilizes emerging currencies, supporting broader equity valuations.',
-    },
-    {
-      id: 'us-nfp',
-      title: '미국 비농업 고용보고서 (NFP) 및 실업률',
-      titleEn: 'US Non-Farm Payrolls (NFP) & Unemployment Rate',
-      scheduledDate: '2026-10-04',
-      scheduledTime: '21:30 KST',
-      dDay: -20,
-      importance: 'HIGH',
-      country: 'US',
-      previousValue: '142K / 4.2%',
-      forecastValue: '150K / 4.2%',
-      analysisKo: '고용 시장이 침체 없이 안정적인 연착륙(Soft Landing) 경로에 있음을 증명한 서프라이즈 보고서입니다.',
-      analysisEn: 'Proved the US labor market remains on a stable soft landing trajectory without sharp recession.',
-      marketImpactTipKo: '경기 침체(R-공포)를 일소하여 투자 심리를 위험 선호(Risk-on)로 즉각 전환시켰습니다.',
-      marketImpactTipEn: 'Eliminated hard recession fears, instantly pivoting market sentiment toward Risk-on.',
-    },
-    {
-      id: 'bok-mpc',
-      title: '한국은행 금통위 기준금리 피벗 결정',
-      titleEn: 'Bank of Korea MPC Interest Rate Pivot Decision',
-      scheduledDate: '2026-10-11',
-      scheduledTime: '10:00 KST',
-      dDay: -13,
-      importance: 'HIGH',
-      country: 'KR',
-      previousValue: '3.50%',
-      forecastValue: '3.25% (-25bp)',
-      analysisKo: '3년 2개월 만에 첫 기준금리 인하(3.25%)를 단행하여 본격적인 통화 완화 사이클에 진입했습니다.',
-      analysisEn: 'BOK delivered its first rate cut in 3 years and 2 months (to 3.25%), initiating an easing cycle.',
-      marketImpactTipKo: '국내 가계 대출 이자 부담을 줄이고 배당주 및 리츠 자산의 매력도를 상대적으로 강화합니다.',
-      marketImpactTipEn: 'Reduces domestic borrowing costs and enhances relative dividend yield appeal.',
-    },
-  ],
-  marketSummary: {
-    sentiment: 'RISK_OFF',
-    summaryKo: '미 연준 및 한국은행의 금리 인하 사이클 진입과 물가 안정세가 확인되었으나, 지정학적 리스크와 환율 변동성으로 인해 선별적 방어 자산 배분이 유리한 국면입니다.',
-    summaryEn: 'Central bank easing cycles and disinflation continue, though FX volatility and macro factors warrant disciplined diversification.',
-    actionTipKo: '고배당 가치주 및 정액 분할 적립(DCA) 전략으로 변동성을 흡수하며 안정적인 캐시플로우를 확보하세요.',
-    actionTipEn: 'Utilize dollar-cost averaging (DCA) and high-dividend assets to maintain steady cash flow through market swings.',
-  },
-};
+// The upstream service emits deterministic examples, not a real-market data feed.
+// Fail closed if provenance or the shape changes; never synthesize a plausible quote.
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isNonemptyString = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim().length > 0;
+
+const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
+const isIndicator = (value: unknown): boolean =>
+  isRecord(value) &&
+  ['id', 'name', 'nameEn', 'unit', 'description', 'descriptionEn', 'educationalTip', 'educationalTipEn']
+    .every((key) => isNonemptyString(value[key])) &&
+  isFiniteNumber(value.value) && isFiniteNumber(value.changeRate);
+
+const isCalendarEvent = (value: unknown): boolean =>
+  isRecord(value) &&
+  ['id', 'title', 'titleEn', 'scheduledDate', 'scheduledTime', 'previousValue', 'forecastValue',
+    'analysisKo', 'analysisEn', 'marketImpactTipKo', 'marketImpactTipEn']
+    .every((key) => isNonemptyString(value[key])) &&
+  isFiniteNumber(value.dDay) &&
+  ['HIGH', 'MEDIUM', 'LOW'].includes(String(value.importance)) &&
+  ['KR', 'US', 'EU'].includes(String(value.country));
+
+export function parseMacroPulse(value: unknown): MacroPulseData | null {
+  if (!isRecord(value) ||
+      value.dataMode !== 'SIMULATED_EDUCATIONAL' ||
+      value.source !== 'INTERNAL_DETERMINISTIC_SCENARIO' ||
+      !isNonemptyString(value.updatedAt) ||
+      !isNonemptyString(value.nextUpdateAt) ||
+      !Number.isFinite(Date.parse(value.updatedAt)) ||
+      !Number.isFinite(Date.parse(value.nextUpdateAt)) ||
+      Date.parse(value.updatedAt) > Date.now() + 60_000 ||
+      Date.now() - Date.parse(value.updatedAt) > 30 * 60_000 ||
+      !Array.isArray(value.domestic) || !value.domestic.every(isIndicator) ||
+      !Array.isArray(value.global) || !value.global.every(isIndicator) ||
+      !Array.isArray(value.economicCalendar) || !value.economicCalendar.every(isCalendarEvent) ||
+      !Array.isArray(value.exchangeRates) || !value.exchangeRates.every((rate: unknown) =>
+        isRecord(rate) && ['code', 'name', 'symbol', 'formatted'].every((key) => isNonemptyString(rate[key])) &&
+        isFiniteNumber(rate.ratePerWld)) ||
+      !isRecord(value.marketSummary) ||
+      !['RISK_ON', 'NEUTRAL', 'RISK_OFF'].includes(String(value.marketSummary.sentiment)) ||
+      !['summaryKo', 'summaryEn', 'actionTipKo', 'actionTipEn'].every((key) => isNonemptyString(value.marketSummary[key]))) {
+    return null;
+  }
+  return value as unknown as MacroPulseData;
+}
 
 export function GlobalMacroPulseTicker() {
   const { locale } = useLocale();
   const isEn = locale !== 'ko';
 
-  const [data, setData] = useState<MacroPulseData>(FALLBACK_PULSE);
+  const [data, setData] = useState<MacroPulseData | null>(null);
+  const [refreshIndex, setRefreshIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<MacroIndicatorData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<EconomicCalendarEvent | null>(null);
   const [filterCountry, setFilterCountry] = useState<'ALL' | 'US' | 'KR' | 'EU'>('ALL');
   const [highImpactOnly, setHighImpactOnly] = useState(false);
 
   useEffect(() => {
-    fetch('/app-api/v1/economy/macro-pulse')
-      .then((res) => (res.ok ? res.json() : FALLBACK_PULSE))
-      .then((json) => {
-        if (json?.domestic && json?.global) {
-          setData(json);
-        }
-      })
-      .catch(() => {});
-  }, []);
+    let cancelled = false;
+    const load = async () => {
+      if (!cancelled) setLoading(true);
+      try {
+        const response = await fetch('/app-api/v1/economy/macro-pulse', { cache: 'no-store' });
+        if (!response.ok) throw new Error('Macro scenario unavailable');
+        const parsed = parseMacroPulse(await response.json());
+        if (!parsed) throw new Error('Invalid macro scenario provenance');
+        if (!cancelled) setData(parsed);
+      } catch {
+        if (!cancelled) setData(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    void load();
+    const interval = window.setInterval(() => void load(), 10 * 60_000);
+    return () => { cancelled = true; window.clearInterval(interval); };
+  }, [refreshIndex]);
+
+  if (!data) {
+    return (
+      <section className="w-full rounded-2xl border border-slate-700 bg-[#0d131f] p-4 sm:p-5 text-slate-200" aria-busy={loading}>
+        <p role="status" className="text-sm" aria-live="polite">
+          {loading
+            ? (isEn ? 'Loading educational macro scenarios…' : '교육용 거시경제 지표를 불러오는 중입니다…')
+            : (isEn ? 'Macro indicators are unavailable. No example values are shown as live data.' : '지표를 불러올 수 없습니다. 임의 수치를 실시간 데이터로 표시하지 않습니다.')}
+        </p>
+        {!loading && <button type="button" onClick={() => setRefreshIndex((value) => value + 1)}
+          className="mt-3 min-h-11 rounded-lg border border-slate-500 px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
+          {isEn ? 'Retry' : '다시 시도'}
+        </button>}
+      </section>
+    );
+  }
 
   const allIndicators = [...data.domestic, ...data.global];
-  const calendarEvents = data.economicCalendar || FALLBACK_PULSE.economicCalendar || [];
+  const calendarEvents = data.economicCalendar;
   const filteredEvents = calendarEvents.filter((evt) => {
     if (filterCountry !== 'ALL' && evt.country !== filterCountry) return false;
     if (highImpactOnly && evt.importance !== 'HIGH') return false;
@@ -303,10 +188,10 @@ export function GlobalMacroPulseTicker() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
             <Globe className="size-3.5 animate-spin" style={{ animationDuration: '14s' }} />
-            <span>{isEn ? 'Live Macro Pulse Indicators' : '실시간 거시경제 지표 (Macro Pulse)'}</span>
+            <span>{isEn ? 'Educational macro simulation' : '교육용 시뮬레이션 · 거시경제 예시'}</span>
           </div>
           <span className="text-[11px] font-mono text-slate-400 bg-slate-900/90 px-2 py-0.5 rounded-full border border-slate-800">
-            {isEn ? '10m Auto Refresh' : '10분 자동 갱신'}
+            {isEn ? 'Example scenarios · refresh every 10m' : '예시 수치 · 10분마다 재조회'}
           </span>
         </div>
 
@@ -322,13 +207,22 @@ export function GlobalMacroPulseTicker() {
           >
             {data.marketSummary.sentiment === 'RISK_ON'
               ? isEn ? '📈 Risk-On' : '📈 위험 선호 (Risk-On)'
-              : isEn ? '🛡️ Risk-Off' : '🛡️ 방어적 분산 (Risk-Off)'}
+              : data.marketSummary.sentiment === 'RISK_OFF'
+                ? (isEn ? '🛡️ Scenario Risk-Off' : '🛡️ 예시: 위험 회피')
+                : (isEn ? 'Scenario Neutral' : '예시: 중립')}
           </Badge>
           <span className="text-[11px] text-slate-500 hidden md:inline">
-            {isEn ? '· Click any metric for real-world insights' : '· 지표를 클릭하면 실전 경제 해설이 열립니다'}
+            {isEn ? '· Explore the learning scenario' : '· 학습용 시나리오를 살펴보세요'}
           </span>
         </div>
       </div>
+
+      <p className="text-xs text-amber-300" role="note">
+        {isEn
+          ? 'Internally generated learning examples, not live central bank rates, market prices, real FX conversion or investment signals.'
+          : '내부에서 생성한 학습용 예시입니다. 실제 기준금리·주가지수·환율·WLD 환전 가치 또는 투자 신호가 아닙니다.'}
+        <span className="ml-2 text-slate-400">{isEn ? 'Scenario generated:' : '예시 생성:'} {new Date(data.updatedAt).toLocaleString(isEn ? 'en-US' : 'ko-KR')}</span>
+      </p>
 
       {/* 2. 9개 지표 3x3 그리드 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -391,7 +285,7 @@ export function GlobalMacroPulseTicker() {
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200">
               <Calendar className="size-3.5 text-amber-400" />
               <span>
-                {isEn ? 'Economic Calendar D-Day (FOMC · CPI · Central Banks)' : '주요 거시경제 캘린더 D-Day (FOMC · CPI · 금통위)'}
+                {isEn ? 'Illustrative economic calendar (not verified dates)' : '교육용 경제 일정 예시 (실제 일정 미검증)'}
               </span>
             </div>
 
@@ -400,7 +294,7 @@ export function GlobalMacroPulseTicker() {
               <button
                 type="button"
                 onClick={() => setFilterCountry('ALL')}
-                className={`px-2 py-0.5 rounded-lg cursor-pointer transition-colors ${
+                className={`min-h-11 px-3 py-1 rounded-lg cursor-pointer transition-colors ${
                   filterCountry === 'ALL'
                     ? 'bg-slate-700 text-slate-100 font-bold'
                     : 'text-slate-400 hover:text-slate-200'
@@ -411,7 +305,7 @@ export function GlobalMacroPulseTicker() {
               <button
                 type="button"
                 onClick={() => setFilterCountry('US')}
-                className={`px-2 py-0.5 rounded-lg cursor-pointer transition-colors ${
+                className={`min-h-11 px-3 py-1 rounded-lg cursor-pointer transition-colors ${
                   filterCountry === 'US'
                     ? 'bg-blue-600 text-slate-100 font-bold'
                     : 'text-slate-400 hover:text-slate-200'
@@ -422,7 +316,7 @@ export function GlobalMacroPulseTicker() {
               <button
                 type="button"
                 onClick={() => setFilterCountry('KR')}
-                className={`px-2 py-0.5 rounded-lg cursor-pointer transition-colors ${
+                className={`min-h-11 px-3 py-1 rounded-lg cursor-pointer transition-colors ${
                   filterCountry === 'KR'
                     ? 'bg-rose-600 text-slate-100 font-bold'
                     : 'text-slate-400 hover:text-slate-200'
@@ -433,7 +327,7 @@ export function GlobalMacroPulseTicker() {
               <button
                 type="button"
                 onClick={() => setFilterCountry('EU')}
-                className={`px-2 py-0.5 rounded-lg cursor-pointer transition-colors ${
+                className={`min-h-11 px-3 py-1 rounded-lg cursor-pointer transition-colors ${
                   filterCountry === 'EU'
                     ? 'bg-amber-600 text-slate-100 font-bold'
                     : 'text-slate-400 hover:text-slate-200'
@@ -444,7 +338,7 @@ export function GlobalMacroPulseTicker() {
               <button
                 type="button"
                 onClick={() => setHighImpactOnly(!highImpactOnly)}
-                className={`ml-1 px-2 py-0.5 rounded-lg border cursor-pointer transition-colors ${
+                className={`ml-1 min-h-11 px-3 py-1 rounded-lg border cursor-pointer transition-colors ${
                   highImpactOnly
                     ? 'border-rose-500 bg-rose-950/50 text-rose-300 font-bold'
                     : 'border-slate-800 text-slate-400 hover:text-slate-200'
@@ -555,8 +449,8 @@ export function GlobalMacroPulseTicker() {
 
               <div className="text-[11px] text-slate-400 text-center">
                 {isEn
-                  ? 'Woldeok Moneyverse stock simulation operates with real-world macroeconomic relationships.'
-                  : '월덕 머니버스의 가상 주식 및 금융 시뮬레이션은 실제 거시경제 논리를 그대로 반영합니다.'}
+                  ? 'Illustrative figures are generated internally and are not real-time economic observations.'
+                  : '이 수치는 내부에서 생성한 교육용 예시이며 실제 거시경제 관측치가 아닙니다.'}
               </div>
             </div>
           )}
