@@ -1,4 +1,10 @@
 # Integrated Planning Re-review v2026.09.22.348
+## v1324 Re-review — Member-confirmed vs administrator-closed support truth (2026-10-26; DRAFT/HOLD)
+- Verified main Migration196 allows admin status resolved without member acknowledgment; /support labels it “처리 완료”. Dev read-only: resolved2, waiting_user1, messages6; not Production or satisfaction evidence. Existing source, support transcript, support reply-attention v1316/v1318 and support evidence attachments are distinct; no overlap with their implementation branches.
+- Decision: opt-in owner feedback per immutable new resolution event; no automatic confirmation from GET/notification, no retroactive legacy proof. Explicit acknowledgment and optional helpful/note; existing member reply reopens independently. Current event/version and idempotency required.
+- Proposed owner GET/POST + additive SQL event/feedback, admin resolved-transition/audit atomicity, row locks, SECDEF and PUBLIC revoke, privacy k>=20, noindex/no-store, Android/WCAG, fail-closed error states. P0 4/P1 6: ENV1324-01 SEC1324-02 REL1324-03 SUP1324-04 SUP1324-05 SUP1324-06 SUP1324-07 SUP1324-08 SUP1324-09 SUP1324-10.
+- QA v1297 FAILED/HOLD, root98% ~2.0GiB, security/ACL/migration/Test/restore blockers. External 10k newly approved 0, cumulative UNKNOWN; BLOCKED/IN PROGRESS. No runtime deployment or user data writes.
+
 - **v1322 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1432 (stacked on unmerged #1427; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426.
 
 ## v1322 Re-review — Collection curation read/write and canonical code integrity (2026-10-26; DRAFT/HOLD)

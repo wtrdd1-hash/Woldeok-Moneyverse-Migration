@@ -1,4 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
+## 기획 v1324 — F675-138 회원 검증형 문의 처리 완료 확인·만족도 피드백 (기능 추가 / DRAFT / RELEASE HOLD)
+- 회차: 이전 기능 보완 v1322 / 현재 기능 추가 v1324 / 다음 기능 보완 v1326(잠정). 최신 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 확인, 선행 Draft #1432 미병합, 개발 이슈 #1448. 런타임·DB·Test·운영 변경 없음.
+- 실제 근거: /support는 관리자 지정 resolved를 표시하며 Migration196은 open/waiting_user/resolved만 저장, 회원 확인·만족도 사건은 없다. 개발 DB 읽기 전용 집계 resolved 2건/waiting_user 1건/메시지 6건, 운영 사실은 미확인.
+- 신규: 회원이 현재 검증된 완료 사건에 “문제가 해결됐어요”를 명시적으로 제출, 선택형 도움됨 예/아니오와 500자 이하 메모. “추가 도움이 필요해요”는 기존 답장 경로. 과거 사건 없는 resolved는 LEGACY_UNKNOWN, GET 자동 확인·허위 회원 동의 금지, 새 완료 사건마다 별도 응답.
+- 본인 전용 GET/POST /api/v1/support/threads/:id/resolution-feedback, 세션·동의·CSRF·사건 버전·멱등 다이제스트·401/403/404/409/412/422/429/503, 전진 사건/피드백 FK·UNIQUE·인덱스, SECDEF 고정 search_path/PUBLIC 회수, 관리자 완료 전환·감사 및 회원 CAS 원자성, noindex/no-store, Android/WCAG, 관리자 n>=20 집계, 기본 OFF·정확 SHA Test/롤백.
+- P0 4/P1 6: ENV1324-01 SEC1324-02 REL1324-03 SUP1324-04 SUP1324-05 SUP1324-06 SUP1324-07 SUP1324-08 SUP1324-09 SUP1324-10. QA v1297 FAILED/HOLD, 루트98% 약2.0GiB, 개발 DB 권한/Migration266 불일치, 보안 감사 실패, Test/격리 복원 미검증, Production BLOCKED. 외부 독립 근거 신규 승인0·누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 상세 영문·국문 계약은 통합 기획 마스터 참조.
+
 - **v1322 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1432 (stacked on unmerged #1427; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426.
 
 ## 기획 v1322 — F675-137 수집품·큐레이션 진실성 보완 (기능 보완 / DRAFT / RELEASE HOLD)

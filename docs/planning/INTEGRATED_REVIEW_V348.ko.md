@@ -1,4 +1,10 @@
 # 통합 기획 재검토 v2026.09.22.348
+## v1324 재검토 — 회원이 확인한 해결과 관리자가 종료한 문의 구분 (2026-10-26; DRAFT/HOLD)
+- main Migration196은 회원 확인 없이 관리자 resolved 설정 가능하며 /support는 이를 처리 완료로 표시한다. 개발 DB 읽기 전용 resolved2/waiting_user1/메시지6, 운영·만족도 증거 아님. 기존 지원 답변 확인 v1316/v1318·문의 증빙 첨부 기획과 별도 범위.
+- 결정: 신규 불변 완료 사건당 본인 선택형 확인 1건, GET·알림 조회 자동 동의 금지, 과거 기록 소급 확인 금지. 명시적 확인·선택형 도움됨/메모, 추가 문의는 기존 답장 기능. 현재 사건 버전·멱등성 필수.
+- 본인 GET/POST·추가 SQL 사건/피드백, 관리자 완료 전환/감사 원자성, 행 잠금, SECDEF/PUBLIC 회수, 개인정보 n>=20, noindex/no-store, Android/WCAG, 장애 상태 명확화. P0 4/P1 6: ENV1324-01 SEC1324-02 REL1324-03 SUP1324-04 SUP1324-05 SUP1324-06 SUP1324-07 SUP1324-08 SUP1324-09 SUP1324-10.
+- QA v1297 FAILED/HOLD, 루트98% 약2.0GiB, 보안·권한·마이그레이션·Test·격리 복원 차단. 독립 10,000건 신규 승인0·누적 UNKNOWN, BLOCKED/IN PROGRESS. 런타임 배포·회원 데이터 쓰기 없음.
+
 - **v1322 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1432 (stacked on unmerged #1427; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426.
 
 ## v1322 재검토 — 수집품 큐레이션 조회/쓰기·코드 무결성 (2026-10-26; DRAFT/HOLD)

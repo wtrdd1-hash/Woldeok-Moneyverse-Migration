@@ -1,4 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
+## Planning v1324 — F675-138 Member-Verified Support Resolution Feedback (Feature Addition / DRAFT / RELEASE HOLD)
+- Cycle: Previous Improvement v1322 / Current Addition v1324 / Next Improvement v1326 provisional. Latest main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked; prior Draft #1432 unmerged; engineering issue #1448. No runtime/DB/Test/Production change.
+- Source gap: /support shows administrator-set resolved, Migration196 stores only open/waiting_user/resolved, no member-confirmed resolution or satisfaction event. Development DB read-only: 2 resolved, 1 waiting_user, 6 messages; Production truth unknown.
+- Add explicit member “This resolved my question” acknowledgment, optional helpful yes/no and <=500-character note on current verifiable resolution event; “I still need help” uses existing reply workflow. Legacy resolved without event is LEGACY_UNKNOWN; no GET auto-confirm, no invented member acceptance. New event allows new feedback.
+- Proposed owner-only GET/POST /api/v1/support/threads/:id/resolution-feedback, session+consent+CSRF, expected event, idempotency digest, 401/403/404/409/412/422/429/503; additive event/feedback FK+UNIQUE+indexes, SECDEF fixed search_path, PUBLIC revoke, atomic admin resolution transition+audit and member CAS; private noindex/no-store, Android/WCAG, admin aggregate n>=20, flag OFF, exact-SHA Test/rollback.
+- P0 4 / P1 6: ENV1324-01 SEC1324-02 REL1324-03 SUP1324-04 SUP1324-05 SUP1324-06 SUP1324-07 SUP1324-08 SUP1324-09 SUP1324-10. QA v1297 FAILED/HOLD, root98% ~2.0GiB, dev ACL and migration266 drift, security audit fail, Test/restore missing; Production BLOCKED. Independent references newly approved 0, cumulative verified UNKNOWN/10,000, BLOCKED/IN PROGRESS. Full detailed contract in Integrated Planning Master.
+
 - **v1322 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1432 (stacked on unmerged #1427; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426.
 
 ## Planning v1322 — F675-137 Collection and Curation Truth Integrity (Feature Improvement / DRAFT / RELEASE HOLD)

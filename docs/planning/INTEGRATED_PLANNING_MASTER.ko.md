@@ -1,4 +1,51 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.26.1324 — F675-138 회원 문의 처리 완료 확인 및 선택형 만족도 피드백 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**회차:** 이전 기능 보완 v1322 → 현재 기능 추가 v1324 → 다음 기능 보완 v1326(잠정). 진실 기준 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5의 AGENTS.md, README.md, 영문 canonical PROJECT_PLAN.md와 한국어 대조 문서. 선행 기획 Draft PR #1432 미병합, 개발 이슈 #1448. 런타임·DB·Test·운영 변경 없음.
+
+### 실제 근거, 목적, 대상 및 범위
+- main frontend/src/app/support/page.tsx는 open/waiting_user/resolved 서버 상태를 표시하지만 회원의 명시적인 처리 완료 확인이나 만족도 제출은 없다. backend/src/support/support.controller.ts는 회원 문의/메시지와 관리자 상태 변경을 제공하고 Migration196의 support_threads.status는 세 상태만 허용한다. 관리자가 resolved로 변경해도 회원이 해결됐다고 확인한 사실은 아니다. 개발 DB 읽기 전용 집계: resolved 2건, waiting_user 1건, 메시지 6건. 운영 환경이나 회원 만족도를 증명하지 않는다.
+- **문제:** 관리자 처리 완료가 회원이 인정한 해결로 오인될 수 있고 회원 관점의 결과를 측정할 수 없다. **대상:** 로그인·필수 동의가 완료된 문의 소유 회원, 익명 집계만 보는 권한 있는 지원 관리자. **목표:** 관리자 완료와 회원 확인을 구분하고 검증 가능한 완료 사건당 자발적 응답 1건을 기록한다. WLD·원장·보상·공개 후기·관리자 성과 순위와 무관하다.
+- 대안 검토: 화면 조회만으로 확인 처리(허위 동의라 기각), support_threads에 boolean만 추가(과거 이력·동시성 손실로 기각), 완료 사건과 피드백을 불변 기록으로 분리(선택). 증명 가능한 완료 사건이 없는 과거 resolved는 LEGACY_UNKNOWN으로 두며 소급 확인하지 않는다.
+
+### 회원 흐름·화면·CTA·상태
+- 기존 /support 문의 선택 화면에 “관리자가 처리 완료로 표시했습니다”와 시각·설명을 표시한다. 비공개 링크 /support?thread=<UUID>&resolution=1. CTA: “문제가 해결됐어요”(명시적 확인), 선택형 “도움이 됐어요 / 도움이 되지 않았어요”, 메모(0~500자), “추가 도움이 필요해요”(기존 회원 답장 양식으로 이동, 기존 support_add_message가 권위 있게 재개방), “평가 건너뛰기”, “다시 시도”. 부정 평가만으로 자동 재개방하지 않는다.
+- 상태: NOT_ELIGIBLE(open/waiting_user), ELIGIBLE(현재 완료 사건 존재), SUBMITTED, LEGACY_UNKNOWN(완료 사건 없는 과거 resolved), STALE_RESOLUTION(제출 중 상태 변경), UNAVAILABLE(DB 장애), SESSION_EXPIRED, RATE_LIMITED. GET·프리페치·화면 표시·링크 열기·로그아웃·실패 POST는 절대 자동 확인하지 않는다. 새 완료 사건이 실제로 발생한 경우에만 새 응답을 허용하고 과거 응답은 불변 보존한다.
+- /admin/support는 n>=20 집단의 응답 건수와 도움됨 비율만 표시, 그 미만은 표본 부족. 회원 식별정보·메모 원문·성과 순위 공개 금지. 원문은 별도 승인된 개인정보/지원 권한과 감사 기록이 있어야 열람한다. 문의 상태는 여전히 관리자 업무 상태이며 회원 확인과 별개다.
+
+### API·신원·권한·오류
+- 신규 NestJS GET /api/v1/support/threads/:threadId/resolution-feedback: 본인 인증 전용, {threadId,status,resolutionEventId,resolvedAt,eligibility,memberAcknowledged,helpful,responseAt} 반환. 불명확하면 null, GET 쓰기 0건, 오류를 허위 빈 응답으로 변환하지 않음. 미인증 401, 동의 미완료 403, 타인/없는 문의 404, DB 장애 503, Cache-Control private,no-store.
+- 신규 POST 동일 경로: {resolutionEventId:UUID,idempotencyKey:UUID,acknowledged:true,helpful?:boolean,note?:string}; 세션·동의·CSRF·동일 출처 필수, 사용자 UUID는 클라이언트가 아니라 세션에서 도출. 최초 201, 동일 요청 재시도 200, 다른 본문 중복 409, 상태/사건 변경 412, 잘못된 입력 422, 속도 제한 429, 장애 503. 정규화 요청 본문의 SHA-256 다이제스트로 멱등성 검증, 타 회원 존재 노출 금지. 추가 도움이 필요하면 기존 회원 답장 API를 사용한다.
+- Android App API는 동일한 소유권·상태·오류 계약을 사용하고 승인된 앱 인증/CSRF 대응 방식만 허용한다. route-map·OpenAPI 동등성 검증, 모바일 우회 권한 금지.
+
+### PostgreSQL 전진 마이그레이션·트랜잭션
+- 전진 마이그레이션에서 support_threads.status_revision bigint NOT NULL DEFAULT 0 추가, 회원/관리자 답장 포함 실제 상태 변경 때만 검토된 DB 트리거로 증가(Mig196 원본 수정 금지). support_resolution_events(id uuid PK, thread_id uuid FK support_threads(id) ON DELETE RESTRICT, sequence bigint CHECK >0, resolved_by uuid NOT NULL, resolved_at timestamptz, status_revision bigint, created_at timestamptz, UNIQUE(thread_id,sequence), UNIQUE(thread_id,status_revision)); 인덱스 (thread_id,resolved_at DESC,id DESC). 과거 resolved 상태·updated_at만으로 사건을 만들어내지 않는다.
+- support_resolution_feedback(id uuid PK, resolution_event_id uuid FK, thread_id uuid FK, user_id uuid FK, acknowledged boolean CHECK true, helpful boolean NULL, note text NULL CHECK char_length<=500, idempotency_key uuid, request_digest bytea CHECK octet_length=32, created_at timestamptz, UNIQUE(resolution_event_id,user_id), UNIQUE(user_id,idempotency_key)); 인덱스 (user_id,created_at DESC,id DESC). 사건·문의·회원 일치 여부는 클라이언트가 아닌 DB 함수가 행 잠금 하에서 확인한다.
+- Migration196 파일과 공개 함수 시그니처를 변경하지 않는다. 별도 전진 마이그레이션에서 관리자 상태 변경 함수를 검토하여 실제 비완료→resolved 전환 시에만 같은 트랜잭션으로 불변 완료 사건을 기록한다. 이미 resolved→resolved 재호출은 사건 생성 금지. 사건/감사 저장 실패 시 상태 변경 전체 롤백. 사용자 신원은 실제 인증된 관리자에서만 도출한다.
+- 버전형 SECURITY DEFINER 함수는 고정 search_path, DB 내부 본인/활성 회원 검증, PUBLIC EXECUTE 회수, moneyverse_app 최소 EXECUTE만 허용. 먼저 기존 멱등키·동일 다이제스트를 검사하여 이후 문의가 재개방되었더라도 원래 저장 결과를 반환한다. 새 요청만 문의 행→현재 완료 사건 순서로 잠금, 사건 ID·상태 버전 CAS, 피드백·감사 원자적 기록. UNIQUE·다이제스트로 동시 100회 동일 재시도는 1건, 다른 본문은 충돌. 개발 DB 241개 중 235개 테이블 직접 DML 권한은 미해결 P0이며 새 광범위 권한을 정당화하지 않는다.
+- 과거 완료 사건 없는 문의는 LEGACY_UNKNOWN을 유지하고 기존 답장은 가능하다. 기능 OFF 시 기존 /support 정상 유지. 금융·잔액·원장·정산 변경 없음.
+
+### 보안·개인정보·SEO·모바일·관측·배포
+- 위협: 타 회원 BOLA/BFLA, 행위자·사건 위조, 관리자 가장, 재개방 경합, CSRF, 멱등키 재사용, 남용 요청, 메모 XSS, 403/404 정보 노출, 원문 과다 보존. 세션·동의·CSRF, DB 최소권한, 타인 404 동일 응답, 출력 인코딩, 원문 분석/로그 금지, 회원·문의별 속도 제한, 보상 유도 금지. 보존·삭제 정책은 개인정보 담당자 승인 전 활성화 금지.
+- 회원 화면 noindex/nofollow·no-store, 공개 구조화 데이터 금지. 320px 모바일·44px 터치·폼 레이블·키보드 포커스·ARIA 상태 안내·reduced motion·WCAG 2.2 AA. 장애 시 해결 확인으로 표시하지 않는다.
+- 집계 KPI: 완료 사건 수, 자발적 응답 수, 회원 확인율(응답/실제 완료 사건), 도움됨 비율(응답 중 유효 yes), 7일 이내 재문의, 오류율, POST p95, 멱등 충돌. n>=20 집계·개인정보 정책 준수. 현재 수치나 인과적 개선 효과는 주장하지 않는다.
+- 테스트: 격리 실 PostgreSQL 마이그레이션/권한 음성, 타 회원 100회, 동일 멱등키 동시 100회, 합성 완료 사건 10,001건, 동일/변경 본문 재시도, 완료→재개방 경합, 관리자 동일 상태 재호출 사건0, 감사 실패 전체 롤백, 과거 사건 없음, 세션/CSRF/동의, 429/503, 메모 XSS, Android API·접근성·프론트/백엔드 회귀. 새 런타임 테스트 수행 주장 금지.
+- 배포: 기획 브랜치만 수정, 구현은 별도 개발 브랜치. 기능 기본 OFF, 추가형 마이그레이션·구 API 호환, 격리 복원·정확 SHA CI/보안 감사·공식 Test 로그인 E2E 후 1%→10%→100% 단계 활성화. 무단 접근·중복 사건 시 중단, 스위치 OFF 및 기존 바이너리 롤백, 불변 사건 보존. GitOps 승인 없는 Production 승격 금지.
+
+### 실행 가능한 P0 4건 / P1 6건
+- **P0 ENV1324-01:** 루트 98%·약 2.0GiB 문제를 소유자 승인 하 비파괴적으로 완화, 독립 암호화 백업 격리 복원 검증, 다른 개발자 Worktree 보존.
+- **P0 SEC1324-02:** 개발 DB 앱 역할 직접 DML 235/241·PUBLIC 은행 함수 등 실제 권한 검토, 전진 최소권한 및 타 회원/행위자 음성 테스트.
+- **P0 REL1324-03:** 정확 HEAD 전체 CI·보안 감사·실 PG/권한·공식 Test 정확 SHA·격리 복원·GitOps 승인 전 운영 차단.
+- **P0 SUP1324-04:** 관리자 resolved를 회원 확인으로 오인 금지, 과거 UNKNOWN·503·동시성 상태에서 허위 완료 방지.
+- **P1 SUP1324-05:** 완료 사건/피드백 추가 스키마·FK·UNIQUE·CHECK·인덱스·관리자 상태 전환 원자적 출처 기록.
+- **P1 SUP1324-06:** SECDEF 회원 제출·행 잠금/CAS·멱등키/다이제스트·감사 원자성·동시 100회.
+- **P1 SUP1324-07:** NestJS 본인 전용 GET/POST·입력 검증·오류 계약·속도 제한·OpenAPI/route-map.
+- **P1 SUP1324-08:** Next.js /support 확인 CTA·Android App API 동등성·모바일/키보드 WCAG 회귀.
+- **P1 SUP1324-09:** 관리자 n>=20 집계·원문 개인정보·보존/삭제 승인·noindex/no-store·선택형 KPI.
+- **P1 SUP1324-10:** 격리 PG 10,001건/타인/경합/과거/감사 실패 테스트, 마이그레이션 호환·스위치 OFF 롤백·Test 정확 SHA 근거.
+
+**현재 QA/운영:** QA v1297 FAILED/HOLD, main 프론트 6건 실패, 전체 보안 감사 실패, Migration266 체크섬 불일치, 개발 DB 앱 권한/PUBLIC 은행 함수 미해결, 공식 정확 SHA Test·격리 복원 미검증. 루트 98%·약 2.0GiB 여유. Production BLOCKED. 외부 독립 레퍼런스 10,000건: 신규 최종 승인 0건, 누적 중복 제거·근거 분류 승인 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 달성 주장 금지.
+
 - **v1322 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1432 (stacked on unmerged #1427; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426.
 
 ## v2026.10.26.1322 — F675-137 수집품 획득 근거·큐레이션 무결성 보완 (Feature Improvement / DRAFT / RELEASE HOLD)
