@@ -8,6 +8,13 @@ export class StockLeagueInputError extends Error {
   }
 }
 
+export class StockLeagueCopyTradingUnavailableError extends Error {
+  constructor() {
+    super('Copy-trading subscription is unavailable until ledger-backed settlement is implemented.');
+    this.name = 'StockLeagueCopyTradingUnavailableError';
+  }
+}
+
 export interface StockLeagueSeason {
   readonly id: string;
   readonly seasonNumber: number;
@@ -269,90 +276,43 @@ export class StockLeagueRepository {
   }
 
   async subscribeCopyTrading(
-    followerId: string,
-    followerName: string,
-    whaleId: string,
-    whaleName: string,
-    allocatedBudget: number,
-    copyRatio = 1.0
+    _followerId: string,
+    _followerName: string,
+    _whaleId: string,
+    _whaleName: string,
+    _allocatedBudget: number,
+    _copyRatio = 1.0
   ): Promise<CopyTradingSubscription> {
-    if (followerId === whaleId) {
+    if (_followerId === _whaleId) {
       throw new StockLeagueInputError('자기 자신을 카피 트레이딩할 수 없습니다.');
     }
-    if (allocatedBudget < 10000) {
+    if (_allocatedBudget < 10000) {
       throw new StockLeagueInputError('카피 트레이딩 최소 할당 자본금은 10,000 WLD입니다.');
     }
-
-    return this.withTransaction(async (client) => {
-      // 구독자 잔고 검증
-      const accRes = await client.query(
-        `SELECT ab.available_amount as balance
-         FROM public.accounts a
-         JOIN public.account_balances ab ON ab.account_id = a.id
-         WHERE a.owner_user_id = $1 AND a.account_type = 'USER_CASH'`,
-        [followerId]
-      );
-      if (accRes.rows.length === 0 || Number(accRes.rows[0]?.balance) < allocatedBudget) {
-        throw new StockLeagueInputError(`카피 트레이딩 할당 잔액(${allocatedBudget.toLocaleString()} WLD)이 부족합니다.`);
-      }
-
-      const res = await client.query(
-        `INSERT INTO public.copy_trading_subscriptions (
-           follower_id, follower_name, whale_id, whale_name, allocated_budget, copy_ratio, status
-         ) VALUES ($1, $2, $3, $4, $5, $6, 'active')
-         ON CONFLICT (follower_id, whale_id) DO UPDATE
-         SET allocated_budget = EXCLUDED.allocated_budget,
-             copy_ratio = EXCLUDED.copy_ratio,
-             status = 'active',
-             updated_at = clock_timestamp()
-         RETURNING id, follower_id, follower_name, whale_id, whale_name, allocated_budget, used_budget, copy_ratio, total_profit_shared, status, created_at`,
-        [followerId, followerName, whaleId, whaleName, allocatedBudget, copyRatio]
-      );
-
-      // 고래 팔로워 수 증가
-      await client.query(
-        `UPDATE public.stock_league_participants
-         SET follower_count = follower_count + 1, is_whale = TRUE
-         WHERE user_id = $1`,
-        [whaleId]
-      );
-
-      const row = res.rows[0];
-      return {
-        id: row.id,
-        followerId: row.follower_id,
-        followerName: row.follower_name,
-        whaleId: row.whale_id,
-        whaleName: row.whale_name,
-        allocatedBudget: Number(row.allocated_budget),
-        usedBudget: Number(row.used_budget),
-        copyRatio: Number(row.copy_ratio),
-        totalProfitShared: Number(row.total_profit_shared),
-        status: row.status,
-        createdAt: row.created_at,
-      };
-    });
+    // A balance check and a subscription row do not reserve funds or prove copied executions.
+    throw new StockLeagueCopyTradingUnavailableError();
   }
 
   async cancelCopyTrading(followerId: string, whaleId: string): Promise<boolean> {
+    // Keep existing members able to opt out, without double-decrementing on replay.
+    // The writable CTE is one atomic statement even when a caller lacks a Pool transaction.
     const res = await this.db.query(
-      `UPDATE public.copy_trading_subscriptions
-       SET status = 'cancelled', updated_at = clock_timestamp()
-       WHERE follower_id = $1 AND whale_id = $2
-       RETURNING id`,
+      `WITH cancelled AS (
+         UPDATE public.copy_trading_subscriptions
+         SET status = 'cancelled', updated_at = clock_timestamp()
+         WHERE follower_id = $1 AND whale_id = $2 AND status = 'active'
+         RETURNING whale_id
+       ), follower_adjustment AS (
+         UPDATE public.stock_league_participants
+         SET follower_count = GREATEST(0, follower_count - 1)
+         WHERE user_id IN (SELECT whale_id FROM cancelled)
+         RETURNING id
+       )
+       SELECT EXISTS (SELECT 1 FROM cancelled) AS cancelled,
+              (SELECT COUNT(*) FROM follower_adjustment) AS adjusted`,
       [followerId, whaleId]
     );
-
-    if (res.rows.length > 0) {
-      await this.db.query(
-        `UPDATE public.stock_league_participants
-         SET follower_count = GREATEST(0, follower_count - 1)
-         WHERE user_id = $1`,
-        [whaleId]
-      );
-      return true;
-    }
-    return false;
+    return res.rows[0]?.cancelled === true;
   }
 
   async getMySubscriptions(followerId: string): Promise<CopyTradingSubscription[]> {
