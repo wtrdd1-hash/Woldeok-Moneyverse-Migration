@@ -1,3 +1,10 @@
+### F675-143 v1344 — F675-143 운영자 전용 비공개 고객지원 내부 메모 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1342 → 현재 기능 추가 v1344 → 다음 기능 보완 v1346(잠정). 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작·중간 재조회, AGENTS/README/영문 PROJECT_PLAN 원본·국문 대조. 미병합 Draft #1489(상위 #1484), 개발 #1493. 문서만 변경.
+- 실제 Migration196 문의·메시지는 user/admin만 있으며 내부 메모 없음. 관리자 API와 /admin/support는 공개 답변·상태만 지원. AdminGuard는 모든 관리자 역할 허용하므로 새 메모는 NestJS와 SECURITY DEFINER SQL 모두 현재 operator 권한 필수. 기존 F675-136 답변 읽음(#1415) 중복 제외. 운영 사고 확인 아님.
+- operator 전용 내부 메모 탭: 추가·이력·사유 있는 가림, 일반 텍스트 1~2000자, 감사 가능한 불변 가림 이벤트, 첨부/자동 발송 없음, LOADING/EMPTY/ERROR/CONFLICT/REDACTED 구분. 관리자 비공개 GET/POST API는 세션·CSRF·operator, 20/50 HMAC 커서, CAS/멱등성, 401/403/404/409/412/422/429/503. 암호화된 메모/이벤트 전진형 DB, SECDEF 고정 경로·PUBLIC 회수, 문의→메모 잠금·원자적 감사; KMS/복원 검증 전 OFF. 회원 API, F675-127 대화 내보내기, F675-107 개인정보 사본, 알림, Android 회원 API, SEO, 로그·분석에 노출 금지. 관리자 모바일·WCAG2.2 AA, k>=20 KPI.
+- P0 ENV1344-01 SEC1344-02 REL1344-03 SUP1344-04; P1 SUP1344-05 SUP1344-06 SUP1344-07 SUP1344-08 SUP1344-09 SUP1344-10. 격리 PG 합성 10,001건·동시 100건·무권한 100건·KMS 장애·감사 롤백·회원/내보내기 유출 0, 정확 SHA Test·암호화 복원 후 승인 카나리. QA v1306 FAILED/HOLD(프론트1423 PASS, 백엔드1326 PASS/398 SKIP, 전체/봇 감사 FAIL, 라우트 증거 967개 미충족), 루트99% 약1.1GiB·데이터94% 약13GiB, 운영 BLOCKED. 독립 근거 10,000건: 신규 승인 0, 누적 중복제거 승인 UNKNOWN, BLOCKED/IN PROGRESS. 런타임/DB/원장/Test/운영 변경 없음.
+- 전체 백로그 식별자: ENV1344-01 SEC1344-02 REL1344-03 SUP1344-04 SUP1344-05 SUP1344-06 SUP1344-07 SUP1344-08 SUP1344-09 SUP1344-10.
+
 ### F675-142 v1342 — 고객지원 담당 권한·큐 무결성 (개선; DRAFT / RELEASE HOLD)
 - 이전 Addition v1340 → 현재 Improvement v1342 → 다음 Addition v1344; main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작·중간, 미병합 선행 Draft #1484·개발 #1483. 실제 Migration003 역할 operator/approver/server_operator, admin_current_roles/AdminGuard는 아무 역할이나 허용하므로 신규 분류는 컨트롤러+SECDEF operator 전용이어야 한다. 관리자 큐 기본 100건(최대250)만 로드·집계, 5초 폴링 오류 은폐. 운영 사고는 미확인.
 - 서버 20/50 created_at/id 키셋, 15분 서명된 행위자+콘솔 세션+필터+워터마크, 전체 UNKNOWN·페이지별 진실한 건수, 상태 필터 변동·과거 LEFT JOIN. 잠금 안에서 operator 행위자·대상 검증, CAS·멱등 digest·불변 영수증·감사 실패 롤백; 401/403/404/409/412/422/429/503. Next.js 늦은 응답 폐기·숨김 탭 일시정지, Android/WCAG/noindex/no-store, k>=20 KPI, 플래그 OFF.

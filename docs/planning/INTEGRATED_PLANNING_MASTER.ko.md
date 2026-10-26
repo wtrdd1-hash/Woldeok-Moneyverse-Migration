@@ -1,3 +1,32 @@
+## F675-143 / v1344 — 운영자 전용 비공개 고객지원 내부 메모 (기능 추가; 기획 초안 / 운영 보류)
+**회차:** 이전 기능 보완 v1342 → 현재 기능 추가 v1344 → 다음 기능 보완 v1346(잠정). **근거:** 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a, AGENTS.md, README.md, 영문 PROJECT_PLAN.md(원본) 및 국문 대조; 2026-10-27 시작·중간 확인. **의존성:** 미병합 Draft PR #1489(상위 #1484), 개발 이슈 #1493. 런타임 구현·DB 수정·기능 활성화·배포 없음.
+
+### 실제 코드로 확인한 신규 필요성 및 중복 방지
+- main Migration 196에는 support_threads/support_messages와 sender_kind=user/admin만 있고, 비공개 메모·감사·가림처리 모델이 없다. NestJS 관리자 지원 API는 목록/메시지/답변/상태만 제공하며, /admin/support의 정형 답변은 회원에게 공개되는 답변용이다. AdminGuard는 여러 관리자 역할을 허용하므로 신규 메모는 NestJS와 SECURITY DEFINER SQL 양쪽에서 **현재 operator 역할**을 검증해야 한다. 실제 운영 유출 사고가 확인됐다는 의미는 아니다.
+- 기존 F675-127 대화 내보내기, F675-136 답변 알림·읽음 확인(#1415), F675-138 해결 확인, F675-140 검색, F675-141 증빙, F675-142 분류·배정과 별개다. 특히 내부 메모는 F675-127 대화 내보내기와 F675-107 개인정보 사본에 유출되지 않아야 한다. 최초 검토한 F675-136 유사 아이디어는 중복으로 판정해 제외했다.
+
+### 목적·대상·권한·진입점·화면 상태
+- 목적: 회원에게 보내는 답변과 분리된 운영자 조사 메모를 감사 가능한 형태로 안전하게 보관한다. 대상은 현재 operator 역할을 가진 관리자만이며 일반 회원, approver 전용, server_operator 전용 관리자는 읽기·쓰기 불가다. 문의 상태나 WLD/원장에 영향이 없다.
+- 진입: /admin/support?thread=<uuid>의 독립된 **내부 메모** 탭, 분리된 경계선과 내부 전용 표시, 회원에게 보이지 않는다는 안내. 주요 CTA 내부 메모 추가, 보조 CTA 이력 보기·사유 입력 후 가림처리. 수정·삭제로 이력을 덮어쓰지 않고 별도 감사 이벤트를 기록한다. v1은 첨부파일과 링크 미리보기를 제공하지 않는다. 본문 공백 제거 후 1~2000 유니코드 문자, 가림 사유 10~500자; 가림처리 전 확인.
+- 상태: LOADING → EMPTY/READY → SAVING/SAVED 또는 REDACTING/REDACTED, 별도 ERROR/CONFLICT/FORBIDDEN/UNAVAILABLE. 조회 실패를 빈 목록이나 0건으로 표현하지 않는다. 전송 실패 시 미전송 입력 보존, 결과 불명확 시 같은 멱등성 키로 영수증 조회 후 재시도. 문의 전환 시 이전 응답 무효화. 가림처리 후 본문 대신 불투명한 삭제 표시와 시각만 표시.
+- 모바일 관리자 웹은 단일 열, 44px 터치, 키보드/스크린리더, 비공개 본문을 낭독하지 않는 상태 알림, reduced motion, WCAG 2.2 AA를 준수한다. Android 회원 App API에서는 메모 경로를 제공하지 않으며 접근 탐색을 거절한다. 별도 관리자 앱은 승인된 보안 모델 전까지 범위 밖이다.
+
+### API·DB·트랜잭션 계약
+- GET /api/v1/admin/support/threads/:threadId/internal-notes?limit=20&cursor=...: 권한 있는 운영자에게만 메모 ID, 허용된 작성자 식별자, 작성/가림 시각, revision, 비가림 본문을 제공한다. 최대 50건, 15분 이하 서명 커서는 운영자·실제 관리자 세션·문의·필터·생성 상한·키 버전을 결합하고 본문은 포함하지 않는다. Cache-Control private,no-store, Vary Cookie, GET DB 쓰기 0건.
+- POST /api/v1/admin/support/threads/:threadId/internal-notes: {body,idempotencyKey UUID,expectedVersion} → {noteId,revision,receiptId,createdAt}. POST /api/v1/admin/support/threads/:threadId/internal-notes/:noteId/redact: {reason,idempotencyKey UUID,expectedVersion} → {noteId,redactedAt,revision,receiptId}. 세션·인증·동의·AdminGuard·AdminSessionGuard·현재 operator 역할 확인, 쓰기 CSRF, 잠금 이후 SQL에서 권한 재검증. 401 비인증/403 무권한/404 숨김/409 경합/412 구버전/422 유효성/429 할당량/503 DB·KMS·감사 실패. 오류에 원문을 담지 않는다.
+- 기존 회원 문의 GET/답변/상태, 직접 대화, 알림, App API 게이트웨이 및 내보내기 계약은 그대로 유지한다. 회원 DTO에 메모 필드를 넣지 않으며 알 수 없는 필드를 그대로 반환하지 않는다. API 목록과 부정 권한 테스트를 갱신한다.
+- 적용된 SQL 체크섬(#1469) 및 Migration 280 번호 충돌을 먼저 해결한 뒤 새로운 전진형 마이그레이션을 배정한다. support_internal_notes(id UUID PK, thread_id FK, author_user_id FK, ciphertext BYTEA, nonce BYTEA, key_version TEXT, ciphertext_digest BYTEA, revision BIGINT, created_at, redacted_at, redacted_by), support_internal_note_events(id UUID PK, note_id FK, thread_id FK, actor_id, kind CREATE/REDACT, idempotency_key UUID, request_digest, revision, occurred_at, audit_hash), 필요 시 문의별 revision 행. (actor_id,idempotency_key) 고유, (thread_id,revision) 고유, (thread_id,created_at DESC,id DESC), (note_id,occurred_at) 인덱스, revision/이벤트/가림 메타데이터 CHECK 및 FK를 정의한다. 최종 SQL 이름과 제약은 실제 적용 상태와 재대조한다.
+- 승인된 관리형 키·봉투 암호화(AES-256-GCM, 매 메모 고유 nonce, threadId/noteId/keyVersion 인증 문맥)로 본문을 암호화한다. KMS 준비·회전·복원·권한철회는 활성화 선행조건이며 기존에 있다고 주장하지 않는다. 백엔드가 암호화 전 길이를 검사하고 DB는 암호문 메타데이터/권한을 검증한다. KMS 실패 시 DB에 기록하지 않는다. 가림처리는 영구 물리 삭제와 다르며 보존 기간·법적 보존은 개인정보 책임자 검토 후 결정한다.
+- SECURITY DEFINER 고정 search_path, PUBLIC EXECUTE 회수, moneyverse_app 최소 EXECUTE만 허용, 테이블 직접 DML 금지. support_threads 행 → 메모/revision 행 순서로 잠그고 expectedVersion·요청 digest를 비교한다. 동일 키·동일 내용은 동일 불변 영수증, 변경 내용 재사용은 충돌. 메모·가림 이벤트·감사를 한 PostgreSQL 트랜잭션으로 커밋하며 감사 실패 시 전부 롤백한다. 가림 이벤트는 수정 불가다.
+
+### 개인정보·악용방지·SEO·관리·KPI·배포 검증
+- 회원 API, 대화 내보내기, 개인정보 사본, 채팅, 알림, 검색, 사이트맵, URL, 로그, 오류 텔레메트리, 분석, 푸시/메일에 메모 본문·개수·작성자·ID를 절대 포함하지 않는다. 관리자 화면은 noindex/noarchive, private/no-store; 메모는 HTML/Markdown 해석 없이 일반 텍스트 이스케이프. 공개 답변 입력란으로 자동 복사하지 않는다. 열람 감사에는 본문을 넣지 않는다.
+- 제안 제한: 운영자당 분당 신규 메모 10건, 문의당 시간당 60건(관측 후 조정). 가림 사유·명시적 확인 필수, 정책에 따라 추가 승인. 민감정보 경고는 입력을 기록하지 않는다. KPI는 k>=20 비식별 메모 활용률·가림 오류율·재문의율·503 비율, 분모가 없으면 UNKNOWN; 운영자 개인 생산성 순위와 미검증 SLA 개선 주장 금지.
+- P0: ENV1344-01 서버 용량·격리 복원(#1170), SEC1344-02 앱 직접 DML/PUBLIC 함수/마이그레이션 5건 불일치·원장(#828/#1469/#1477), REL1344-03 보안·QA·정확 SHA 공식 Test, SUP1344-04 operator 권한·회원/내보내기 정보 유출 방지.
+- P1: SUP1344-05 암호화 스키마·인덱스·SECDEF, SUP1344-06 원자적 추가·가림·멱등성·감사, SUP1344-07 NestJS API·세션·커서·KMS 오류, SUP1344-08 관리자 웹·모바일 접근성·Android 접근 거절, SUP1344-09 개인정보·보존·SEO·KPI, SUP1344-10 격리 PostgreSQL 회귀·롤백·카나리.
+- 격리된 실제 PostgreSQL에서 합성 메모 10,001건, 동시 생성/재시도/가림 100건, 회원·approver·server_operator·권한 철회 BOLA/BFLA 100건, 문의 교차 접근, 가림 중 페이지 이동, 커서 변조·만료, KMS 장애, 감사 실패 전체 롤백, 키 회전 후 복원, GET 쓰기 0, 회원/내보내기 노출 0, 기존 고객지원/채팅/Android 회귀를 검증한다. 전체 pnpm/bot 보안 감사, 마이그레이션·최소권한 부정 테스트, 정확 SHA 공식 Test 인증 E2E, 독립 암호화 백업 복원, 승인된 GitOps 무중단 카나리·롤백이 모두 필요하다. support_internal_notes_v1 기본 OFF; 이번 회차는 기획만.
+- 2026-10-27 06:09 KST 기준 Debian13 서비스 ACTIVE, 개발 DB 연결; 루트 99%(약 1.1GiB), 데이터 94%(약 13GiB). 직접 확인된 최신 완료 QA v1306 FAILED/HOLD: 프론트 1,423 PASS, 백엔드 1,326 PASS/398 SKIP, 전체 감사 Critical2/High8, 봇 Critical1/High5 FAIL, 라우트 증거 요건 967개 미충족(실제 결함 967건 의미 아님); 격리 DB 전체 테스트·정확 SHA 공식 Test·독립 복원 미검증, 운영 BLOCKED. 외부 독립 근거 목표 10,000건: 신규 승인 0건, 누적 검증·중복 제거 승인 UNKNOWN, BLOCKED / IN PROGRESS.
+
 ## 기획 v1342 — F675-142 고객지원 분류 큐의 진실성·최소권한 담당 배정·폴링 무결성 (Feature Improvement / DRAFT / RELEASE HOLD)
 
 **회차/기준:** 이전 Feature Addition v1340 → 현재 Feature Improvement v1342 → 다음 Feature Addition v1344(잠정). 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a 및 AGENTS.md, README.md, 영문 PROJECT_PLAN.md 원본과 PROJECT_PLAN.ko.md 대조본을 시작·중간에 재검증했다. 미병합 Draft #1484(선행 #1480 기반)에 쌓인 문서 전용 후속 변경으로 독립 병합 불가. 개발 이슈 #1483. 런타임·DB·원장·Test·Production 변경 없음.
