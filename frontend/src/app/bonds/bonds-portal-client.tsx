@@ -105,6 +105,10 @@ export function BondsPortalClient({
 
   const handleSubscribe = async () => {
     if (!selectedBond) return;
+    if (selectedBond.status !== 'OPEN_SUBSCRIPTION' || BigInt(selectedBond.available_units) === BigInt(0)) {
+      toast.error('현재 청약 가능한 가상 채권 상품이 아닙니다.');
+      return;
+    }
     if (!isLoggedIn) {
       toast.error('국채 청약은 로그인 후 이용하실 수 있습니다.');
       return;
@@ -222,21 +226,21 @@ export function BondsPortalClient({
         <div className="max-w-3xl space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <Badge className="bg-sky-600 text-white font-mono text-xs px-2.5 py-0.5">
-              SOVEREIGN AAA GUARANTEE
+              IN-SERVICE VIRTUAL BONDS
             </Badge>
             <Badge variant="outline" className="border-sky-500/40 text-sky-700 dark:text-sky-300 font-mono text-xs">
-              KOREA TREASURY BONDS (KTB)
+              WLD GAME BOND MARKET
             </Badge>
             <Badge variant="outline" className="border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-mono text-xs">
-              REPO FINANCING 80% LTV
+              VIRTUAL REPO SIMULATION
             </Badge>
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
             월덱 기획재정국채 (KTB) 통합 거래소
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            중앙 국고(VAULT_MAIN)가 원리금을 100% 보증하는 국가 공인 무위험 확정 이자 채권입니다. 
-            매시간 확정 쿠폰 이자가 지갑으로 자동 입금되며, 긴급 자금이 필요할 때 보유 국채를 담보로 액면가 80%까지 초저리(연 2.5%) 즉시 대출(Repo)을 이용할 수 있습니다.
+            이 화면의 상품은 머니버스 게임 내 가상 채권이며 실제 대한민국 국채나 국가 보증 금융상품이 아닙니다.
+            금리와 청약 가능 수량은 서버가 확인한 가상 상품 정보입니다. WLD는 현금으로 교환되는 통화가 아닙니다.
           </p>
         </div>
 
@@ -251,7 +255,7 @@ export function BondsPortalClient({
               <div className="text-lg font-mono font-bold text-sky-600 dark:text-sky-400">
                 {overview.benchmark1YYield}
               </div>
-              <div className="text-[11px] text-muted-foreground font-mono">시간당 0.05%</div>
+              <div className="text-[11px] text-muted-foreground font-mono">실제 등록 상품 기준</div>
             </div>
           </div>
 
@@ -264,7 +268,7 @@ export function BondsPortalClient({
               <div className="text-lg font-mono font-bold text-indigo-600 dark:text-indigo-400">
                 {overview.benchmark3YYield}
               </div>
-              <div className="text-[11px] text-muted-foreground font-mono">시간당 0.06%</div>
+              <div className="text-[11px] text-muted-foreground font-mono">실제 등록 상품 기준</div>
             </div>
           </div>
 
@@ -277,7 +281,7 @@ export function BondsPortalClient({
               <div className="text-lg font-mono font-bold text-emerald-600 dark:text-emerald-400">
                 {overview.benchmark5YYield}
               </div>
-              <div className="text-[11px] text-muted-foreground font-mono">시간당 0.08%</div>
+              <div className="text-[11px] text-muted-foreground font-mono">실제 등록 상품 기준</div>
             </div>
           </div>
         </div>
@@ -293,11 +297,12 @@ export function BondsPortalClient({
             </p>
           </div>
           <Badge variant="outline" className="font-mono text-xs">
-            3 ACTIVE BONDS
+            {bonds.filter((bond) => bond.status === 'OPEN_SUBSCRIPTION' || bond.status === 'TRADING').length} ACTIVE VIRTUAL BONDS
           </Badge>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {bonds.length === 0 && <p className="text-sm text-muted-foreground" role="status">현재 서버에 등록된 가상 채권 상품이 없습니다.</p>}
           {bonds.map((bond) => {
             const available = BigInt(bond.available_units);
             const total = BigInt(bond.total_issued_units);
@@ -365,10 +370,11 @@ export function BondsPortalClient({
 
                   <Button
                     onClick={() => setSelectedBond(bond)}
-                    className="w-full bg-sky-600 hover:bg-sky-700 text-white font-medium gap-1.5 mt-2"
+                    disabled={bond.status !== 'OPEN_SUBSCRIPTION' || available === BigInt(0)}
+                    className="min-h-11 w-full bg-sky-600 hover:bg-sky-700 text-white font-medium gap-1.5 mt-2"
                   >
                     <Coins className="h-4 w-4" />
-                    국채 청약하기
+                    {bond.status === 'OPEN_SUBSCRIPTION' && available > BigInt(0) ? '가상 채권 청약하기' : '현재 청약 불가'}
                   </Button>
                 </CardContent>
               </Card>
@@ -568,7 +574,7 @@ export function BondsPortalClient({
             <div>
               <h3 className="text-lg font-bold text-foreground">국채 담보 레포(Repo) 대출 센터</h3>
               <p className="text-xs text-muted-foreground">
-                보유한 무위험 국채를 담보로 액면가의 80% 한도까지 초저리(연 2.5%)로 대출을 받아 즉시 유동성을 확보할 수 있습니다.
+                보유한 게임 내 가상 채권을 담보로 WLD 대출을 신청하는 시뮬레이션입니다. 실제 금융 대출이 아니며 적용 조건은 서버 응답을 확인하세요.
               </p>
             </div>
           </div>
@@ -639,7 +645,7 @@ export function BondsPortalClient({
                           size="sm"
                           disabled={isProcessingLoan}
                           onClick={() => handleRepayRepo(loan.id)}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-8"
+                          className="min-h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs"
                         >
                           원리금 전액 상환 및 담보 해제
                         </Button>
@@ -658,17 +664,17 @@ export function BondsPortalClient({
             <CardHeader>
               <CardTitle className="text-base font-bold">월덱 기획재정국채 (KTB) 및 금융 레포 제도 안내</CardTitle>
               <CardDescription className="text-xs">
-                대한민국 국채법 및 글로벌 표준 국가 채권 발행 체계
+                머니버스 내부 가상 채권의 청약·담보대출·만기 규칙 안내
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
               <div className="p-3.5 rounded-xl bg-muted/40 border border-border/60 space-y-2">
                 <h4 className="font-semibold text-foreground flex items-center gap-1.5">
                   <ShieldCheck className="h-4 w-4 text-sky-500" />
-                  1. AAA 국가 원리금 전액 보증
+                  1. 게임 내 가상 채권 · 국가 보증 없음
                 </h4>
                 <p>
-                  월덱 기획재정국채는 민간 기업의 파산 위험이 있는 회사채와 달리, 중앙 국고(VAULT_MAIN)의 재정 준비금으로 원금과 이자를 100% 무조건 보증합니다.
+                  WLD 가상 채권은 실제 대한민국 국채나 금융투자상품이 아닙니다. 국가 신용등급·예금자 보호·원리금 보증이 적용되지 않으며, 게임 내 지급은 서버의 거래 및 정산 기록에 따릅니다.
                 </p>
               </div>
 
@@ -678,7 +684,7 @@ export function BondsPortalClient({
                   2. 80% LTV 초저리 레포(Repo) 담보 대출
                 </h4>
                 <p>
-                  국채를 만기까지 해지하지 않고도, 보유 채권의 80%에 달하는 금액을 연 2.5%의 초저금리로 즉시 대출받아 다른 투자 기회나 사업 자금으로 활용할 수 있습니다.
+                  게임 내 가상 채권 보유분을 담보로 WLD 레포 대출을 신청할 수 있습니다. 실제 승인 여부와 금리·한도는 서버에서 확인한 계약을 따릅니다.
                 </p>
               </div>
 
@@ -688,7 +694,7 @@ export function BondsPortalClient({
                   3. 자동 롤오버(Auto-Rollover) 복리 재투자
                 </h4>
                 <p>
-                  자동 재투자(ON)를 활성화하면 채권 만기 도달 시 원금을 환급받는 대신 동일 만기 신규 국채로 원금이 자동 재투자되어 복리 수익을 극대화합니다.
+                  자동 재투자 설정은 게임 내 채권의 만기 처리에만 적용됩니다. 실제 지급·재투자 여부는 서버 거래 내역에서 확인하세요.
                 </p>
               </div>
             </CardContent>

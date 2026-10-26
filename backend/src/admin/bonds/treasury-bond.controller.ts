@@ -72,7 +72,7 @@ export class PublicTreasuryBondController {
 
   @Get('markets')
   @SkipInternalToken()
-  @ApiOperation({ summary: '대국민 국채 상품 목록 및 실시간 수익률/잔여좌수 공시' })
+  @ApiOperation({ summary: '게임 내 가상 WLD 채권 상품 및 서버 조회 시점 금리/잔여좌수' })
   async getMarkets() {
     const [overview, bonds] = await Promise.all([
       this.service.getOverview(),
@@ -82,7 +82,7 @@ export class PublicTreasuryBondController {
     return {
       overview,
       bonds,
-      guarantor: '월덱 중앙재정국고 (VAULT_MAIN) 원리금 100% 지급보증 (AAA Sovereign)',
+      guarantor: '게임 내 가상 WLD 채권이며 실제 국가채권이나 금융상품이 아닙니다. 국가 신용등급 및 원리금 보증이 적용되지 않습니다.',
       disclosed_at: new Date().toISOString(),
     };
   }
