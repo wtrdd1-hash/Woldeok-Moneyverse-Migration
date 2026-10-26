@@ -9,8 +9,8 @@
 **Tech Stack:** Next.js server component, NestJS read contract, PostgreSQL security-definer list function, Vitest React SSR.
 
 ## Tasks
-- [ ] Create failing parser/SSR regression tests for `block_id`, malformed response, API outage, empty valid list, and accessible retry.
-- [ ] Run tests RED and record output.
-- [ ] Implement strict inventory validation and fail-closed server page with correct block identifier.
-- [ ] Run tests GREEN, full frontend suite, lint, typecheck, build, contract and security checks.
+- [x] Create failing parser/SSR regression tests for `block_id`, malformed response, API outage, empty valid list, and accessible retry.
+- [x] Run tests RED and record output.
+- [x] Implement strict inventory validation and fail-closed server page with correct block identifier.
+- [x] Run tests GREEN, full frontend suite, lint, typecheck, build, contract and security checks.
 - [ ] Run real PostgreSQL/CI candidate gates, verify SHA and latest main, record blockers; merge/deploy only if all gates PASS.
