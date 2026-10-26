@@ -64,7 +64,7 @@ export interface MacroPulseData {
     readonly ratePerWld: number;
     readonly formatted: string;
   }[];
-  readonly economicCalendar?: readonly EconomicCalendarEvent[];
+  readonly economicCalendar: readonly EconomicCalendarEvent[];
   readonly marketSummary: {
     readonly sentiment: 'RISK_ON' | 'NEUTRAL' | 'RISK_OFF';
     readonly summaryKo: string;
@@ -101,7 +101,9 @@ const isCalendarEvent = (value: unknown): boolean =>
   ['KR', 'US', 'EU'].includes(String(value.country));
 
 export function parseMacroPulse(value: unknown): MacroPulseData | null {
-  if (!isRecord(value) ||
+  if (!isRecord(value)) return null;
+  const summary = isRecord(value.marketSummary) ? value.marketSummary : null;
+  if (
       value.dataMode !== 'SIMULATED_EDUCATIONAL' ||
       value.source !== 'INTERNAL_DETERMINISTIC_SCENARIO' ||
       !isNonemptyString(value.updatedAt) ||
@@ -116,9 +118,9 @@ export function parseMacroPulse(value: unknown): MacroPulseData | null {
       !Array.isArray(value.exchangeRates) || !value.exchangeRates.every((rate: unknown) =>
         isRecord(rate) && ['code', 'name', 'symbol', 'formatted'].every((key) => isNonemptyString(rate[key])) &&
         isFiniteNumber(rate.ratePerWld)) ||
-      !isRecord(value.marketSummary) ||
-      !['RISK_ON', 'NEUTRAL', 'RISK_OFF'].includes(String(value.marketSummary.sentiment)) ||
-      !['summaryKo', 'summaryEn', 'actionTipKo', 'actionTipEn'].every((key) => isNonemptyString(value.marketSummary[key]))) {
+      !summary ||
+      !['RISK_ON', 'NEUTRAL', 'RISK_OFF'].includes(String(summary.sentiment)) ||
+      !['summaryKo', 'summaryEn', 'actionTipKo', 'actionTipEn'].every((key) => isNonemptyString(summary[key]))) {
     return null;
   }
   return value as unknown as MacroPulseData;
@@ -228,7 +230,6 @@ export function GlobalMacroPulseTicker() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {allIndicators.map((item) => {
           const isUp = item.changeRate > 0;
-          const isDown = item.changeRate < 0;
           const itemName = isEn ? item.nameEn : item.name;
 
           return (
