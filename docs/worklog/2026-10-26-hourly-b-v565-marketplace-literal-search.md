@@ -11,7 +11,9 @@
 
 ## In progress
 - 23:02 KST RED: 10/10 focused tests fail against origin/main (literal %, _, backslash, Unicode, trim, whitespace, stable pagination, overlong input/DTO). Baseline query uses ILIKE wildcard matching and unbounded search; failures are expected.
-- Next: implement minimal literal substring query and bounded DTO/service validation, then rerun tests.
+- GREEN: replaced wildcard-sensitive ILIKE with parameterized literal case-insensitive strpos, trimmed search, 64-character service and DTO caps, deterministic id tie-breaker. Focused 15/15 PASS.
+- Isolated PostgreSQL 17.11, network none, no published ports, synthetic data, source-extracted SQL: 7/7 PASS (%, _, backslash, Korean, category, pagination, description). Container removed; not full migrations or official Test.
+- Mid-work origin/main and EN/KO plans refreshed: 0fe614b2ca1a7bc0df540514e54db78130479e2a unchanged. No other agent branch/worktree touched.
 
 ## Finished
 - Pending. Production HOLD unless all required independent release gates pass.

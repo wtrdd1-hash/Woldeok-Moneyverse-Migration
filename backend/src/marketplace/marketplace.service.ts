@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Optional } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -17,7 +17,10 @@ export class MarketplaceService {
     const limit = query.limit ?? 50;
     const offset = query.offset ?? 0;
     const category = query.category || null;
-    const search = query.search ? `%${query.search}%` : null;
+    const search = query.search?.trim() || null;
+    if (search && search.length > 64) {
+      throw new BadRequestException('search must be 64 characters or fewer');
+    }
 
     return queryRows(
       this.pool,
@@ -27,8 +30,9 @@ export class MarketplaceService {
        FROM public.marketplace_listings
        WHERE status = 'ACTIVE'
          AND ($1::text IS NULL OR category = $1)
-         AND ($2::text IS NULL OR item_name ILIKE $2 OR description ILIKE $2)
-       ORDER BY created_at DESC
+         AND ($2::text IS NULL OR strpos(lower(item_name), lower($2::text)) > 0
+           OR strpos(lower(COALESCE(description, '')), lower($2::text)) > 0)
+       ORDER BY created_at DESC, id DESC
        LIMIT $3 OFFSET $4`,
       [category, search, limit, offset],
     );
