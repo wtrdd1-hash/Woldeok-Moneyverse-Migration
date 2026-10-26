@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 
@@ -1183,7 +1183,31 @@ export class TreasuryRepository {
     };
     next_cursor: string | null;
   }> {
-    const safeLimit = Math.min(Math.max(1, Number(limit) || 50), 200);
+    // Query parameters arrive as strings at runtime, despite the TypeScript signature.
+    // Fail closed on malformed audit filters instead of silently broadening results.
+    const parsedLimit = typeof limit === 'number' ? limit
+      : typeof limit === 'string' && /^[0-9]+$/.test(limit) ? Number(limit) : NaN;
+    if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > 200) {
+      throw new BadRequestException('limit must be an integer from 1 to 200');
+    }
+    if (search !== undefined && typeof search !== 'string') {
+      throw new BadRequestException('search must be text');
+    }
+    const normalizedSearch = search?.trim() ?? '';
+    if ([...normalizedSearch].length > 64 || /[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/.test(normalizedSearch)) {
+      throw new BadRequestException('search must be at most 64 safe characters');
+    }
+    if (type !== undefined && typeof type !== 'string') {
+      throw new BadRequestException('type must be text');
+    }
+    const normalizedType = type?.trim() ?? '';
+    if (normalizedType.length > 64 || /[\u0000-\u001f\u007f-\u009f]/.test(normalizedType)) {
+      throw new BadRequestException('type must be at most 64 safe characters');
+    }
+    if (direction !== undefined && direction !== '' && direction !== 'debit' && direction !== 'credit') {
+      throw new BadRequestException('direction must be debit or credit');
+    }
+    const safeLimit = parsedLimit;
     const conditions: string[] = ['a.owner_user_id IS NOT NULL'];
     const params: unknown[] = [];
 
@@ -1192,14 +1216,15 @@ export class TreasuryRepository {
       conditions.push(`t.created_at < $${params.length}`);
     }
 
-    if (search && search.trim()) {
-      params.push(`%${search.trim()}%`);
+    if (normalizedSearch) {
+      params.push(normalizedSearch);
       const searchParamIdx = params.length;
-      conditions.push(`(p.display_name ILIKE $${searchParamIdx} OR a.owner_user_id::text ILIKE $${searchParamIdx})`);
+      // strpos treats %, _ and backslash literally, unlike SQL LIKE patterns.
+      conditions.push(`(strpos(lower(COALESCE(p.display_name, '')), lower($${searchParamIdx}::text)) > 0 OR strpos(a.owner_user_id::text, lower($${searchParamIdx}::text)) > 0)`);
     }
 
-    if (type && type.trim()) {
-      params.push(type.trim());
+    if (normalizedType) {
+      params.push(normalizedType);
       conditions.push(`t.type = $${params.length}`);
     }
 
