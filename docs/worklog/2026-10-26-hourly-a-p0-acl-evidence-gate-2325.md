@@ -23,3 +23,11 @@
 ### 23:38 KST — RED
 - Added six deterministic tests before implementation. Initial unittest discovery FAILED (FileNotFoundError for the not-yet-created validator). This is expected RED, not a passing security gate.
 - Inspected actual PostgreSQL catalog in a READ ONLY transaction: legacy text bank overloads retain PUBLIC EXECUTE while UUID overloads do not; default ACL grants app table DML, sequence write, and function EXECUTE. Isolated `wdmv_v761_test_acl` lacks the bank overloads, so missing schema must be UNKNOWN, never PASS.
+
+### 23:40 KST — GREEN (validator unit), real PostgreSQL still RED
+- Added `scripts/check-app-role-acl.py` and `packages/database/verify/app-role-acl-snapshot.sql`; SQL is wrapped in `BEGIN READ ONLY` / `ROLLBACK`.
+- Python unittest: 7/7 PASS; Python syntax check PASS.
+- Real development DB: FAIL with PROTECTED_DIRECT_DML, UNSCOPED_DEFAULT_APP_GRANTS, PUBLIC_BANK_EXECUTE. This is an intentionally failing security gate, not a test regression to waive.
+- Isolated `wdmv_v761_test_acl`: UNKNOWN because all required legacy bank functions are absent; never mislabel it PASS.
+- Revised SQL to handle missing app role without raising and include global as well as schema-scoped default ACL.
+- No DB mutation, migration, service restart, or production deployment.
