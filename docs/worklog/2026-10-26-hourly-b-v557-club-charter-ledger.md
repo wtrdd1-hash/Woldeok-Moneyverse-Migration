@@ -15,3 +15,9 @@
 
 ## Finished
 - Pending.
+
+### In progress checkpoint (2026-10-26 15:39 KST)
+- RED: absent migration failed new Vitest regression suite; GREEN: 3 static ledger/replay/ACL tests passed.
+- New forward-only migration 280 adds actor/payload-bound immutable receipt, key advisory lock before replay, balanced canonical ledger posting and transactional club creation. Legacy unposted keys refuse reuse. Unposted club project contributions fail closed (no false successful funding).
+- Isolated PostgreSQL 17.11: all 279 SQL migrations (002..280) applied; 236 public tables. Synthetic app-role replay/role/rollback fixture passed after correcting its expected SQLSTATE and legacy hash. 100 concurrent requests using pgbench (20 clients, 5 calls each) all passed, exactly 1 club, 1 ledger transaction, 2 postings and 10,000 WLD debited once. Re-testing final bytes after additional sink/rollback assertions pending.
+- Main mid-run fetch unchanged. No shared DB writes, no other worktree modifications.
