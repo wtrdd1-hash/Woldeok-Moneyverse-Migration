@@ -20,11 +20,11 @@
 ## Finished
 - Pending.
 
-### 23:38 KST — RED
+### 23:36 KST — RED
 - Added six deterministic tests before implementation. Initial unittest discovery FAILED (FileNotFoundError for the not-yet-created validator). This is expected RED, not a passing security gate.
 - Inspected actual PostgreSQL catalog in a READ ONLY transaction: legacy text bank overloads retain PUBLIC EXECUTE while UUID overloads do not; default ACL grants app table DML, sequence write, and function EXECUTE. Isolated `wdmv_v761_test_acl` lacks the bank overloads, so missing schema must be UNKNOWN, never PASS.
 
-### 23:40 KST — GREEN (validator unit), real PostgreSQL still RED
+### 23:37 KST — GREEN (validator unit), real PostgreSQL still RED
 - Added `scripts/check-app-role-acl.py` and `packages/database/verify/app-role-acl-snapshot.sql`; SQL is wrapped in `BEGIN READ ONLY` / `ROLLBACK`.
 - Python unittest: 7/7 PASS; Python syntax check PASS.
 - Real development DB: FAIL with PROTECTED_DIRECT_DML, UNSCOPED_DEFAULT_APP_GRANTS, PUBLIC_BANK_EXECUTE. This is an intentionally failing security gate, not a test regression to waive.
@@ -32,13 +32,13 @@
 - Revised SQL to handle missing app role without raising and include global as well as schema-scoped default ACL.
 - No DB mutation, migration, service restart, or production deployment.
 
-### 23:43 KST — Reverification
+### 23:39 KST — Reverification
 - Final SQL snapshot rerun: development DB FAIL (three P0 findings), isolated Test DB UNKNOWN (bank overloads missing); each query explicitly `BEGIN READ ONLY` and `ROLLBACK`.
 - Validator unit tests 7/7 PASS, `python3 -m py_compile` PASS, `git diff --check` PASS.
 - Main `0fe614b2ca1a7bc0df540514e54db78130479e2a` unchanged; latest planning v1330 remains unmerged Draft.
 - Official Test/Production public SHA mismatch confirmed; authenticated exact-SHA E2E blocked. No broad full-stack gate claims.
 
-## Finished — 2026-10-26 23:43 KST
+## Finished — 2026-10-26 23:39 KST
 - [x] Write RED validator tests, observe failure.
 - [x] Implement read-only SQL snapshot, fail-closed validator and 7 passing unit tests.
 - [x] Execute real read-only PostgreSQL checks with truthful FAIL / UNKNOWN verdicts.
