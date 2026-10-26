@@ -2,7 +2,7 @@
 - 이전 보완 v1334 / 현재 추가 v1336 / 다음 보완 v1338. main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인, 미병합 Draft #1472 위 적층, 개발 이슈 #1475.
 - 회원/관리자 문의 이미지가 범용 업로드 URL로 본문에 삽입되며 범용 미디어 GET은 인증 가드 없고 공개 캐시인 소스 위험 확인(운영 노출 확정 아님). 신규 문의 전용 비공개 스크린샷·백신/재인코딩/EXIF 제거·본인/세션/의도 영수증·DB 메시지 원자 연결·본인/관리자 no-store 다운로드·기존 URL LEGACY_UNVERIFIED·Android/WCAG/SEO/KPI·기능 기본 OFF 설계.
 - P0 ENV1336-01 SEC1336-02 REL1336-03 SUP1336-04; P1 SUP1336-05 SUP1336-06 SUP1336-07 SUP1336-08 SUP1336-09 SUP1336-10. QA v1304 프론트 1,423 PASS이나 전체/봇 감사·경로 원장 FAIL, 개발 DML235/241·PUBLIC 은행3·마이그레이션5건 불일치·루트99%, 정확 SHA Test/복원 HOLD. 외부 근거 10,000건 신규 승인0·누적 UNKNOWN/BLOCKED. 문서만 변경.
-- GitHub 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1475. Draft PR: PENDING.
+- GitHub 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1475. Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1476.
 
 ## 2026-10-27 — 기획 v1334 (F675-140 기능 보완 / 초안 / 운영 보류)
 **QA 확인 01:16 KST:** QA v1304 진행 중(확인 시 install 게이트만 완료); v1303이 최신 완료 근거이며 v1304 PASS 추정 금지.
