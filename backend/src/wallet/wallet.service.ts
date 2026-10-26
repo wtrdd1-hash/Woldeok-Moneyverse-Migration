@@ -60,6 +60,8 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   STOCK_LEAGUE_ENTRY: '주식 챔피언십 참가비',
   MARKETPLACE_APPRAISAL: '마켓 감정서 발급 수수료',
   SHOP_MAINTENANCE: '주간 유지비',
+  SINK_CLUB_CHARTER: '클럽 헌장 등록비',
+  SINK_CLUB_PROJECT: '클럽 협동 프로젝트 기여',
   // 024 composes the type as 'VIRTUAL_STOCK_' || upper(side).
   VIRTUAL_STOCK_BUY: '주식 매수',
   VIRTUAL_STOCK_SELL: '주식 매도',

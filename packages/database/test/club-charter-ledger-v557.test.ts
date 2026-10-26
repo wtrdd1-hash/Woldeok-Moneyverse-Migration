@@ -21,6 +21,8 @@ describe('P0 club charter ledger and replay contract', () => {
   });
   it('revokes direct receipt writes and fails closed for unposted project funding', () => {
     expect(sql).toMatch(/REVOKE ALL ON TABLE public\.club_charter_receipts FROM PUBLIC, moneyverse_app/);
+    expect(sql).toMatch(/REVOKE INSERT, UPDATE, DELETE ON TABLE public\.clubs FROM moneyverse_app/);
+    expect(sql).toMatch(/GRANT UPDATE\(member_count\) ON TABLE public\.clubs TO moneyverse_app/);
     expect(sql).toMatch(/REVOKE ALL ON FUNCTION public\.club_create\(uuid, text, text, text, text, text, uuid\) FROM PUBLIC/);
     expect(sql).toMatch(/club project contribution is disabled until ledger settlement is verified/);
   });

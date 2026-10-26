@@ -47,6 +47,13 @@ BEGIN
   IF v_cash<>15000 OR v_sink<>current_setting('mv.sink_before')::numeric+10000 THEN
     RAISE EXCEPTION 'club charter charged incorrect amount';
   END IF;
+  IF has_table_privilege('moneyverse_app','public.clubs','INSERT')
+    OR has_column_privilege('moneyverse_app','public.clubs','charter_fee_paid','UPDATE')
+    OR NOT has_column_privilege('moneyverse_app','public.clubs','member_count','UPDATE')
+    OR has_table_privilege('moneyverse_app','public.club_project_contributions','INSERT')
+    OR has_table_privilege('moneyverse_app','public.club_projects','UPDATE') THEN
+    RAISE EXCEPTION 'club write privileges bypass ledger or break member counts';
+  END IF;
   IF has_table_privilege('moneyverse_app','public.club_charter_receipts','INSERT')
     OR has_table_privilege('moneyverse_app','public.club_charter_receipts','UPDATE')
     OR has_table_privilege('moneyverse_app','public.club_charter_receipts','SELECT') THEN

@@ -26,6 +26,14 @@ CREATE TRIGGER club_charter_receipt_immutable
   FOR EACH ROW EXECUTE FUNCTION public.club_charter_receipt_immutable();
 REVOKE ALL ON TABLE public.club_charter_receipts FROM PUBLIC, moneyverse_app;
 
+-- Migration 222 also granted the web role direct club creation and project
+-- funding writes. Those paths bypass the charter ledger function entirely.
+-- Preserve only the member-count maintenance used by join/leave routes.
+REVOKE INSERT, UPDATE, DELETE ON TABLE public.clubs FROM moneyverse_app;
+GRANT UPDATE(member_count) ON TABLE public.clubs TO moneyverse_app;
+REVOKE INSERT, UPDATE, DELETE ON TABLE public.club_projects,
+  public.club_project_contributions FROM moneyverse_app;
+
 CREATE OR REPLACE FUNCTION public.club_create(
   p_actor uuid, p_tag text, p_name text, p_description text,
   p_charter text, p_join_mode text, p_idempotency_key uuid
