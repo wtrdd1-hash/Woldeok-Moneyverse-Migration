@@ -1,5 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
-- **v1320 Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
+- **v1320 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (stacked on unmerged #1420; HOLD). Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
 
 ## 기획 v1320 — F675-137 수집품 획득 근거·불변 영수증 (기능 추가 / DRAFT / RELEASE HOLD)
 - 이전 보완 v1318 / 현재 추가 v1320 / 다음 보완 v1322(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재확인, 선행 Draft #1420 미병합, 문서만 변경. 개발 이슈 #1426.

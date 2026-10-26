@@ -1,5 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
-- **v1320 Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
+- **v1320 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (stacked on unmerged #1420; HOLD). Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
 
 ## v2026.10.26.1320 — F675-137 수집품 획득 근거 검증·영수증 (기능 추가 / DRAFT / RELEASE HOLD)
 

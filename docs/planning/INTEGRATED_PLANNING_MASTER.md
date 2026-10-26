@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
-- **v1320 Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
+- **v1320 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (stacked on unmerged #1420; HOLD). Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
 
 ## v2026.10.26.1320 — F675-137 Verified Collection Acquisition Evidence & Receipts (Feature Addition / DRAFT / RELEASE HOLD)
 

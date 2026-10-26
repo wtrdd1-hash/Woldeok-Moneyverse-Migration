@@ -1,5 +1,5 @@
 # Integrated Planning Re-review v2026.09.22.348
-- **v1320 Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
+- **v1320 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (stacked on unmerged #1420; HOLD). Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
 
 ## v1320 Re-review — Collection provenance truth gate (2026-10-26; DRAFT/HOLD)
 - Canonical source: main 1c5b84a1; frontend collections DEFAULT_PIECES/localStorage fallback, backend ensureSeedPieces, Migration232 descriptive provenance, dev DB 8 rows/2 owners/8 seed-code matches and direct app DML. No individual historical grant or Production provenance certified.

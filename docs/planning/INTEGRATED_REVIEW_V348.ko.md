@@ -1,5 +1,5 @@
 # 통합 기획 재검토 v2026.09.22.348
-- **v1320 Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
+- **v1320 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1427 (stacked on unmerged #1420; HOLD). Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
 
 ## v1320 재검토 — 수집품 획득 진실성 게이트 (2026-10-26; DRAFT/HOLD)
 - 정본 근거: main 1c5b84a1의 컬렉션 DEFAULT_PIECES/localStorage 오류 복원, 서버 ensureSeedPieces, Migration232 설명형 provenance, 개발 DB 8행/회원2명/시드 코드 일치8행과 앱 직접 DML. 개별 과거 발급·운영 소유권은 검증되지 않음.
