@@ -8,6 +8,11 @@
 - QA v1294 FAILED/HOLD: main frontend 6 failed, main full audit Critical2/High10, prod High2; candidate #1412 frontend 1404 PASS and prod audit clean but full audit still Critical2/High8, bot Critical1/High5, exact-SHA Test and isolated restore absent. Root 97%, ~3.3GiB free.
 - External 10,000 independent evidence gate: new accepted 0, cumulative approved UNKNOWN, BLOCKED / IN PROGRESS.
 
-## IN PROGRESS — pending
+## IN PROGRESS — 2026-10-26 16:19 KST
+- Main and EN/KO canonical hashes rechecked unchanged: 1c5b84a1, EN c1b6cfd5, KO 73f90946. GitHub engineering issue #1426 created.
+- Updated six EN/KO canonical/master/review docs and two update logs. Ten backlog IDs agree across all six docs (P0 four, P1 six). Exact owner GET/list/detail, immutable source receipt, DB uniqueness/transaction/CAS, trusted actor, admin review, Android/WCAG, SEO, analytics, rollout and rollback documented.
+- Independent reference candidates W3C PROV-O, OWASP Authorization, PostgreSQL function privilege guide reviewed but NOT accepted toward 10,000 gate. New accepted 0, cumulative UNKNOWN.
+- Verification: document scope only, git diff --check PASS; no product code, DB writes or Test/Production promotion. QA v1294 FAILED/HOLD.
+
 
 ## COMPLETE — pending

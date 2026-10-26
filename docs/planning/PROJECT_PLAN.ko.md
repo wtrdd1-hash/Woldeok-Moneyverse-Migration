@@ -1,4 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
+- **v1320 Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
+
+## 기획 v1320 — F675-137 수집품 획득 근거·불변 영수증 (기능 추가 / DRAFT / RELEASE HOLD)
+- 이전 보완 v1318 / 현재 추가 v1320 / 다음 보완 v1322(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 재확인, 선행 Draft #1420 미병합, 문서만 변경. 개발 이슈 #1426.
+- main /collections 클라이언트는 예시 DEFAULT_PIECES 4개를 초기 소유품처럼 표시하고 API 오류 시 localStorage를 복원한다. 저장소 ensureSeedPieces는 기록이 없으면 예시 소유품 4개를 삽입한다. Migration232의 자유 설명 provenance는 실제 원천 사건 증명이 아니다. 개발 DB 읽기 전용 8행/회원2명/시드 코드 일치8건, 앱 역할 직접 DML 권한 확인. 과거 발급 원인·운영 수치는 미상.
+- 회원 본인 /collections/[pieceId]/evidence에 획득 근거 보기·불일치 신고·재시도. VERIFIED는 원천+회원+불변 영수증+미철회 일치일 때만, LEGACY_UNKNOWN/UNVERIFIED/REVOKED/UNAVAILABLE/정상0건 구분. 예시/캐시 소유권 검증 금지. 본인 GET v2 목록·상세, 서명 키셋, 조회 시 쓰기 금지, Android/WCAG, noindex/no-store, 안전한 동의형 공개 전시.
+- 기존 마이그레이션 수정 없는 추가형 영수증·사건·멱등 테이블, 원천 검증 어댑터, 고유 제약/회원 인덱스. 수여/원천/영수증/감사 원자성·CAS·행 잠금·중복 방지, SECURITY DEFINER·PUBLIC 권한 회수·앱 직접 DML 제한, WLD/원장 미변경. 관리자 독립 근거 심사, 기본 OFF·정확 SHA Test·격리 PG·롤백.
+- P0 4/P1 6: ENV1320-01 SEC1320-02 REL1320-03 COL1320-04 COL1320-05 COL1320-06 COL1320-07 COL1320-08 COL1320-09 COL1320-10. QA v1294 FAILED/HOLD: main 프론트6실패, 전체 Critical2/High10·운영 High2; 후보 #1412 프론트1404통과·운영 감사0이나 전체 Critical2/High8·봇 Critical1/High5. 루트97%/약3.3GiB, 앱 DML235/241, PUBLIC 은행3, Migration266, Test/복원 미검증. 운영 승격 차단.
+- 외부 독립 레퍼런스 신규 승인0·누적 중복제거/분류 승인 UNKNOWN/10,000, BLOCKED / IN PROGRESS. W3C/OWASP/PostgreSQL 검토 후보는 미산입. 상세 영문/국문 통합 마스터. https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 .
+
 - **v1318 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (선행 #1416 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 
 ## 기획 v1318 — F675-136 관리자 답변 확인 무결성 (기능 보완 / DRAFT / RELEASE HOLD)

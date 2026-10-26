@@ -1,4 +1,45 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- **v1320 Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
+
+## v2026.10.26.1320 — F675-137 수집품 획득 근거 검증·영수증 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**회차:** 이전 기능 보완 v1318 → 현재 기능 추가 v1320 → 다음 기능 보완 v1322(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 및 영문 정본·국문 대조를 시작·중간에 재확인. 선행 Draft #1420 미병합, A/B/C·Gemini·QA와 분리한 문서 기획. 개발 이슈 #1426.
+
+### 실제 코드 경계·회원 목적·대안
+- 목적: 회원이 실제로 부여된 수집품과 화면의 예시를 구분하고, 타인의 비공개 활동을 노출하지 않으면서 획득의 권위 있는 원천 사건을 확인한다. 근거 없는 VERIFIED 0건, 타 회원 영수증 노출 0건, 불일치 복구 가능이 성공 조건이다.
+- main frontend/src/app/collections/curation-retention-flow.tsx는 네 개 DEFAULT_PIECES를 실제 소장품처럼 초기 표시하며 API 오류 시 localStorage를 복원한다. backend/src/collection/collection.repository.ts의 ensureSeedPieces는 수집품이 없는 회원에게 네 개의 역사적 소장품을 DB에 삽입한다. Migration232 user_collections의 provenance는 자유 텍스트이고 획득 사건 FK/영수증이 없다. 이 코드 경로가 과거 개별 행의 허위 발급을 입증하는 것은 아니다.
+- 개발 PostgreSQL 읽기 전용 조사: 8행·회원2명·네 가지 시드 코드와 일치하는 행8건. 개발 moneyverse_app은 해당 테이블 SELECT/INSERT/UPDATE/DELETE 권한을 보유한다. 운영 데이터 건수·권한과 동일하다고 추정하지 않는다.
+- 대안 (A) 시드 유지+경고문(소유권 오인 잔존), (B) 과거 행 일괄 삭제(정당한 기록 훼손), (C) 불변 획득 근거 추가+과거 미상 표기(채택). 코드·날짜·설명·브라우저 캐시만으로 획득을 검증했다고 주장하지 않는다.
+
+### 회원 화면·CTA·상태
+- 기존 비공개 /collections에서 근거가 있는 소장품과 과거/미검증 기록을 구분하며 신규 /collections/[pieceId]/evidence 상세 제공. 명칭·코드·상태·원천 유형·검증된 획득 시각·확인 가능한 사건 참조를 표시하되 잔액·가치·희소성 보장 문구는 배제. CTA: 획득 근거 보기, 기록 불일치 신고(로그인 /support 초안에 불투명 ID만), 재검증, 예시 전시 보기(실제 소유 목록·공유에서 분리).
+- VERIFIED=회원/권위 원천/불변 영수증/미철회 부여 모두 일치, LEGACY_UNKNOWN=과거 행이나 독립 근거 없음, UNVERIFIED=영수증·원천 불일치, REVOKED=권위 있는 철회, UNAVAILABLE=원천·네트워크 장애, EMPTY_VERIFIED=본인 전체 조회 성공·검증 소장품 0, LOADING/AUTH_REQUIRED/FEATURE_OFF. 오류는 빈 목록으로 변환하지 않으며 localStorage/DEFAULT_PIECES는 VERIFIED를 만들지 못한다.
+- 검증됨/확인 필요/철회됨 필터, 철회 이력은 보존하되 활성 소장품과 분리. VERIFIED가 아닌 항목은 공개 공유 불가. 공유는 명시적 동의·개인 메모/잔액/구매 내역/회원 식별자 제거 후 별도 안전 투영만. 과거 행은 조용히 삭제하거나 VERIFIED로 재분류하지 않는다.
+
+### API·App API 계약
+- NestJS 회원 본인 GET /api/v1/collections/v2?state=&limit=&cursor= (기본20/최대50), GET /api/v1/collections/v2/:pieceId/evidence; Next 동일 출처 /app-api/v1 프록시 및 Android OpenAPI/App API 동등성. 회원 ID를 클라이언트에서 받지 않고 SessionGuard·AuthenticatedGuard·ConsentGuard와 서버 세션 매핑·DB 소유권 검사를 결합. 기존 v1 목록/큐레이션 함수는 검증된 전환까지 유지.
+- 응답 {items:[{id,code,name,evidenceState,sourceType?,acquiredAt?,receiptId?,verifiedAt?,version}],nextCursor?,snapshotCutoff,hasMore,completeness:'COMPLETE'|'PARTIAL'}. HMAC 커서는 회원·필터·상한·600초 만료에 결합; 불변 (acquired_at,id) 키셋 및 PostgreSQL 마이크로초 보존. HTTP 여러 페이지가 하나의 DB 스냅샷을 공유한다고 주장하지 않고 상한 이후 신규 사건은 새로고침 시 반영. 오류 401, 403(동의), 404(타 회원/없음), 409(커서 변경), 429, 503; 의존성 장애에 200 빈 목록 금지. private,no-store, 내부 DB 키·원본 원천 페이로드 노출 금지.
+- 회원에게 근거 생성/검증 POST는 제공하지 않는다. 향후 권한 있는 획득 어댑터·관리자 처리 POST는 별도 인가, Idempotency-Key, If-Match/버전, CSRF를 적용하고 동일 요청 재시도는 기존 확정 영수증을 반환한다.
+
+### DB 제약·트랜잭션·신뢰 경계
+- 기존 Migration232를 수정하지 않는 추가형 전진 마이그레이션: collection_acquisition_receipts(UUID PK, owner_id UUID FK, collection_id UUID FK, item_code, source_kind, source_event_id UUID, source_event_version bigint, receipt_version bigint, issued_at timestamptz, source_digest bytea, created_at), collection_receipt_events(UUID PK, receipt_id FK, event_kind GRANTED|REVOKED|CORRECTED, seq bigint, actor_kind, created_at), collection_idempotency(owner_id,operation,key,request_digest,receipt_id,created_at). UNIQUE(source_kind,source_event_id,owner_id), UNIQUE(receipt_id,seq), UNIQUE(owner_id,operation,key), INDEX(owner_id,issued_at DESC,id DESC), INDEX(owner_id,item_code), INDEX(receipt_id,created_at), 유효 코드·참조 CHECK, 단조 증가 버전. 자유 텍스트는 증거가 아니다.
+- 상점 구매/퀘스트 지급/이벤트 수여/독립 승인 관리자 수여 중 **실제 권위 원천이 존재하는 어댑터**만 활성화한다. 원천 존재·회원·아이템 코드·커밋·철회 여부를 검증한다. 단순 다형 UUID 참조 대신 유형별 검증과 원천 등록부 사용. 근거 없음=LEGACY_UNKNOWN, 불일치=UNVERIFIED, 철회=REVOKED. 시드 행을 자유 설명만으로 소급 승인하지 않는다.
+- 신규 수여는 권위 원천 사건·소유권·영수증·감사·outbox를 **단일 DB 트랜잭션**에서 커밋 또는 전체 롤백한다. 회원/아이템/원천 행 안정적 순서 잠금, CAS 버전·멱등 키+요청 해시 UNIQUE, 다른 내용 재사용 거부, 철회는 삭제가 아닌 불변 이벤트 추가. 회원에게 읽기만 제공하며 WLD 발행·원장/잔액 변경은 이 기능의 범위 밖이다.
+- 회원 범위 버전형 SECURITY DEFINER, SET search_path=pg_catalog,pg_temp, 테이블 스키마 명시, PUBLIC EXECUTE 회수 후 필요한 앱 역할만 허용(같은 마이그레이션 트랜잭션). 수집품/영수증 테이블 직접 앱 DML 회수는 기존 기능 호환 어댑터와 실제 PostgreSQL 권한 거부 테스트 후 진행; 타 작업자 권한 일괄 회수 금지. API가 전달한 actor UUID만으로 DB 인증이 성립하지 않으므로 서버 세션·실행 권한·위조 공격 검증 필수. 기존 232/266 마이그레이션 수정 금지.
+
+### 관리자·보안·SEO·모바일·KPI
+- 관리자 불일치 대기열에서 영수증·원천·회원·버전을 대조하며 임의 boolean 변경으로 VERIFIED 지정 불가. 수동 수여는 독립 승인·책임자·불변 감사가 있어야 한다. BOLA/IDOR·ID 추측·커서 위변조·CSRF·회원 읽기 분당20회·불일치 신고 일5회·공유 스크래핑·원천 장애를 실패 폐쇄로 처리.
+- 회원 화면/API는 noindex,nofollow·private,no-store·사이트맵 제외. 공개 전시는 별도 명시적 동의와 최소 정보만 제공, 비공개 소장품 자동 색인 금지. WCAG 2.2 AA, 320px/200% 확대, 키보드·aria-live·44px 터치·동작 감소·현지화 시간, Android 다섯 근거 상태 동등 구현.
+- KPI: 잘못된 VERIFIED 0건, 타 회원 노출 0건, 불일치 원인별 건수, VERIFIED/LEGACY_UNKNOWN 비율(적격 모수 명시), 통제된 Test에서 GET p95 500ms 미만, 장애 조회율, 신고 해결시간 중앙값. 관리자 집계 k>=20, 회원 ID/메모/원천 원문 분석 금지.
+- 격리 PG 합성 10,001건, 동시 중복 수여·철회100건, 타 회원 공격100건, 같은/다른 해시 재시도, 원천 소실/철회, 시드 8행, 마이크로초 커서, Android·확대, 장애503/정상 빈 목록, 공개 투영, 직접 DML 거부/함수 허용을 검증. 이번 기획에서는 런타임 테스트 미수행.
+- 배포: collection_verified_receipts_v1 기본 OFF → 추가형 마이그레이션/그림자 조회 → 원천 어댑터 감사 → 격리 PG 거부 테스트 → Test 정확 SHA 인증 E2E/복구 연습 → 승인된 GitOps 1%→10%→100%. 허위 VERIFIED·BOLA·원천 불일치 발생 즉시 중단. 롤백은 기능 OFF와 불변 영수증 보존, 파괴적 DB 역마이그레이션 금지. 기획 예약 직접 배포 금지.
+
+### P0/P1 백로그·현재 차단
+- P0 ENV1320-01 루트 용량/격리 복원, SEC1320-02 앱 DML·actor 신뢰, REL1320-03 정확 SHA Test/보안/GitOps, COL1320-04 예시 소유권·허위 성공 제거.
+- P1 COL1320-05 스키마·원천 등록부, COL1320-06 수여/철회 원자성·멱등, COL1320-07 회원 API·커서·오류, COL1320-08 Next.js/Android/접근성, COL1320-09 개인정보·관리자·SEO·KPI, COL1320-10 격리 PG·롤백.
+- QA v1294 FAILED/HOLD: main 프론트 1,397 통과/6 실패, 전체 감사 Critical2/High10·운영 High2. 후보 PR #1412는 프론트 1,404 통과·운영 감사0이지만 전체 Critical2/High8·봇 Critical1/High5; main 미병합. 개발 앱 DML235/241·PUBLIC 은행 함수3·Migration266 체크섬 불일치, 정확 SHA 인증 Test·격리 복원 미검증. 루트97%/약3.3GiB. RELEASE HOLD.
+- 외부 독립 10,000건: W3C PROV-O, OWASP Authorization, PostgreSQL 공식 함수 권한 문서를 설계 후보로 검토했으나 독립 중복제거·분류 승인 10,000건 집합에 **미산입**. 신규 승인0, 누적 승인 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 과거 화면 스크린샷 합산은 독립 검증 근거 10,000건으로 간주하지 않는다. https://www.w3.org/TR/prov-o/ ; https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html ; https://www.postgresql.org/docs/current/sql-createfunction.html . 개발: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 .
+
 - **v1318 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (선행 #1416 미병합 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 
 ## v2026.10.26.1318 — F675-136 관리자 답변 확인 목록·커서·읽음 무결성 (기능 보완 / DRAFT / RELEASE HOLD)

@@ -1,4 +1,11 @@
 # 통합 기획 재검토 v2026.09.22.348
+- **v1320 Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
+
+## v1320 재검토 — 수집품 획득 진실성 게이트 (2026-10-26; DRAFT/HOLD)
+- 정본 근거: main 1c5b84a1의 컬렉션 DEFAULT_PIECES/localStorage 오류 복원, 서버 ensureSeedPieces, Migration232 설명형 provenance, 개발 DB 8행/회원2명/시드 코드 일치8행과 앱 직접 DML. 개별 과거 발급·운영 소유권은 검증되지 않음.
+- F675-137은 과거 행 삭제/예시 검증 오인 대신 본인 전용 획득 근거 영수증을 추가한다. 회원·API·DB·UX·Android·관리자·개인정보·SEO·KPI·롤백은 영문/국문 통합 마스터에 동등 명세. P0 4/P1 6: ENV1320-01 SEC1320-02 REL1320-03 COL1320-04 COL1320-05 COL1320-06 COL1320-07 COL1320-08 COL1320-09 COL1320-10.
+- QA v1294 FAILED/HOLD, 루트97%/약3.3GiB, 정확 SHA Test·격리 PG/복원·보안 게이트 미완료. 과거 UI 스크린샷 합산은 독립 중복 제거·승인 10,000건 근거가 아님. 신규 승인0·누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 런타임 배포 없음.
+
 
 일자: 2026-09-22
 권위: `PROJECT_PLAN.ko.md`의 상세 보조 문서이며 표현이 충돌하면 PROJECT_PLAN의 통합 요약이 우선한다.

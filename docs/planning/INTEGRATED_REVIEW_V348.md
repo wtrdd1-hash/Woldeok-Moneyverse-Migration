@@ -1,4 +1,11 @@
 # Integrated Planning Re-review v2026.09.22.348
+- **v1320 Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
+
+## v1320 Re-review — Collection provenance truth gate (2026-10-26; DRAFT/HOLD)
+- Canonical source: main 1c5b84a1; frontend collections DEFAULT_PIECES/localStorage fallback, backend ensureSeedPieces, Migration232 descriptive provenance, dev DB 8 rows/2 owners/8 seed-code matches and direct app DML. No individual historical grant or Production provenance certified.
+- F675-137 adds member evidence receipts rather than erasing legacy rows or falsely validating samples; full owner/API/DB/UX/Android/admin/privacy/SEO/KPI/rollback contract in Integrated Planning Master. 4 P0 + 6 P1: ENV1320-01 SEC1320-02 REL1320-03 COL1320-04 COL1320-05 COL1320-06 COL1320-07 COL1320-08 COL1320-09 COL1320-10.
+- QA v1294 FAILED/HOLD; root97%/~3.3GiB; exact-SHA Test, isolated PG/restore, security gates pending. Existing screenshot-corpus aggregate is NOT 10,000 independently deduplicated, approved references. New accepted0; cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS. No runtime deployment.
+
 
 Date: 2026-09-22
 Authority: companion detail to `PROJECT_PLAN.md`; if wording diverges, the integrated summary in PROJECT_PLAN is authoritative.

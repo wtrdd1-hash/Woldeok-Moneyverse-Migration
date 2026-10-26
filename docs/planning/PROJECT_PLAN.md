@@ -1,4 +1,14 @@
 # Woldeok Moneyverse — Living Project Plan
+- **v1320 Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 (Draft/RELEASE HOLD; predecessor #1420 unmerged).
+
+## Planning v1320 — F675-137 Verified Collection Acquisition Evidence (Feature Addition / DRAFT / RELEASE HOLD)
+- Cycle Previous Improvement v1318 / Current Addition v1320 / Next Improvement v1322 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 verified start/mid, predecessor Draft #1420 unmerged, docs only; engineering #1426.
+- Main /collections client initializes four sample DEFAULT_PIECES and restores localStorage after API failure; collection repository ensureSeedPieces writes four sample ownership rows when empty. Migration232 user_collections has descriptive provenance, not a verified source event. Dev DB READ ONLY: 8 rows/2 owners/8 seed-code matches; app role has direct DML on that table. Historical provenance and Production data are UNKNOWN.
+- New member-only /collections/[pieceId]/evidence: View acquisition evidence, Report discrepancy, Retry; VERIFIED requires source+owner+immutable receipt+non-revoked match; LEGACY_UNKNOWN, UNVERIFIED, REVOKED, UNAVAILABLE and true empty remain distinct. No demo/cache item may appear verified. GET v2 owner list/detail, signed keyset, no GET writes, Android/WCAG, noindex/no-store and opt-in public-safe shares.
+- Forward-only receipt/event/idempotency tables with source adapters, uniqueness and owner indexes; atomic grant/source/receipt/audit, CAS/lock/replay protection, SECURITY DEFINER and PUBLIC revoke, no app direct DML, no WLD/ledger mutations. Admin discrepancy review requires independent evidence; rollout feature OFF, exact-SHA Test + isolated PG + rollback.
+- Backlog P0 4 / P1 6: ENV1320-01 SEC1320-02 REL1320-03 COL1320-04 COL1320-05 COL1320-06 COL1320-07 COL1320-08 COL1320-09 COL1320-10. QA v1294 FAILED/HOLD: main frontend6 fail, full audit Critical2/High10, prod High2; candidate #1412 1404 frontend PASS/prod audit0 but full Critical2/High8 and bot Critical1/High5. Root97%/~3.3GiB, app DML235/241, PUBLIC bank3, migration266, Test/restore unverified. Production BLOCKED.
+- External independent reference gate: newly approved 0, cumulative deduplicated/classified approved UNKNOWN / 10,000, BLOCKED / IN PROGRESS. W3C/OWASP/PostgreSQL candidates are NOT counted. Details in Integrated Planning Master. Issue https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1426 .
+
 - **v1318 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1420 (stacked on unmerged #1416; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1415.
 
 ## Planning v1318 — F675-136 Support Reply Attention Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
