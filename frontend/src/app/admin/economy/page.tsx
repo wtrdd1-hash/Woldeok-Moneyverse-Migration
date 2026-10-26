@@ -156,7 +156,7 @@ export default async function AdminEconomyPage({
   ] = await Promise.all([
     apiOrNull<FaucetSinkStats>('/api/v1/admin/economy/stats'),
     apiOrNull<MonetaryVelocityTelemetry>('/api/v1/admin/economy/velocity'),
-    apiOrNull<{ debate: CouncilDebateData }>('/api/v1/admin/economy/council-debate'),
+    section<{ evidenceStatus: 'NOT_EVALUATED' | 'VERIFIED'; debate: CouncilDebateData | null }>('/api/v1/admin/economy/council-debate'),
     apiOrNull<MonetaryTelemetryData>('/api/v1/admin/economy/monetary/telemetry'),
     apiOrNull<{ orders: MonetaryPolicyOrderItem[] }>('/api/v1/admin/economy/monetary/policy-orders'),
     apiOrNull<{ mints: MintCertificateItem[] }>('/api/v1/admin/economy/monetary/mint-certificates'),
@@ -202,7 +202,18 @@ export default async function AdminEconomyPage({
         <Card><CardContent className="pt-6"><EmptyState title={problem(aiStatus, 'AI 상태를 불러오지 못했어요.') ?? 'AI 상태를 불러오지 못했어요.'} /></CardContent></Card>
       )}
 
-      <CouncilDebateCard initialData={councilDebate?.debate} />
+      <CouncilDebateCard
+        initialData={councilDebate.ok && councilDebate.data.evidenceStatus === 'VERIFIED' ? councilDebate.data.debate : null}
+        unavailableReason={
+          councilDebate.ok
+            ? councilDebate.data.evidenceStatus === 'NOT_EVALUATED'
+              ? '검증된 경제 위원회 토론 기록이 없습니다. 정책 승인 여부를 판단할 수 없습니다.'
+              : councilDebate.data.evidenceStatus === 'VERIFIED'
+                ? null
+                : '토론 근거 상태를 검증할 수 없습니다.'
+            : problem(councilDebate, '토론 기록을 불러오지 못했어요.')
+        }
+      />
 
       <MonetaryBureauCard
         initialTelemetry={monetaryTelemetry}

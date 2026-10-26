@@ -72,9 +72,31 @@ const categoryBadges: Record<string, { label: string; color: string }> = {
   JUDGE_AGENT: { label: '판정', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' },
 };
 
-export function CouncilDebateCard({ initialData }: { readonly initialData?: CouncilDebateData | undefined }) {
+export function CouncilDebateCard({
+  initialData,
+  unavailableReason,
+}: {
+  readonly initialData?: CouncilDebateData | null | undefined;
+  readonly unavailableReason?: string | null | undefined;
+}) {
   const [selectedRound, setSelectedRound] = useState<1 | 2 | 3>(3);
-  const data = initialData ?? fallbackData;
+  const data = initialData;
+
+  if (!data) {
+    return (
+      <Card className="border border-border/80 bg-background/95 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-base font-bold">경제 위원회 토론 근거</CardTitle>
+          <CardDescription>검증된 정책 심의 기록만 표시합니다.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p role="status" aria-live="polite" className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-foreground">
+            {unavailableReason ?? '검증된 경제 위원회 토론 기록이 없습니다. 정책 승인 여부를 판단할 수 없습니다.'}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const currentRound = data.rounds.find((r) => r.round === selectedRound) ?? data.rounds[0];
 
@@ -137,16 +159,16 @@ export function CouncilDebateCard({ initialData }: { readonly initialData?: Coun
         </div>
 
         {/* 3-Round Step Navigation */}
-        <div className="flex items-center justify-between border-b border-border/50 pb-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2">
           <span className="text-xs font-semibold text-muted-foreground">토론 단계 (Debate Rounds)</span>
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             {[1, 2, 3].map((r) => (
               <Button
                 key={r}
                 size="sm"
                 variant={selectedRound === r ? 'default' : 'outline'}
                 onClick={() => setSelectedRound(r as 1 | 2 | 3)}
-                className="h-7 text-xs px-2.5"
+                className="min-h-11 text-xs px-3"
               >
                 {r}단계 {r === 1 ? '독립 제안' : r === 2 ? '적대적 비판' : '반론·최종 집계'}
               </Button>
@@ -209,57 +231,3 @@ export function CouncilDebateCard({ initialData }: { readonly initialData?: Coun
     </Card>
   );
 }
-
-const fallbackData: CouncilDebateData = {
-  proposalId: 'prop_fallback_01',
-  evaluatedAt: new Date().toISOString(),
-  rounds: [
-    {
-      round: 1,
-      name: '1단계: 독립 제안',
-      roundSummary: '14개 전문 에이전트의 독립적 제안 산출 완료.',
-      votes: Object.keys(roleNamesKo).map((role) => ({
-        role,
-        decision: 'agree',
-        confidence: 0.88,
-        rationale: `${roleNamesKo[role]}: 기본 정책 정합성 및 위험 임계치 통과를 확인하였습니다.`,
-        risks: [],
-      })),
-    },
-    {
-      round: 2,
-      name: '2단계: 적대적 교차 비판',
-      roundSummary: '상호 적대적 비판 및 스트레스 테스트 진행 완료.',
-      votes: Object.keys(roleNamesKo).map((role) => ({
-        role,
-        decision: 'agree',
-        confidence: 0.86,
-        rationale: `${roleNamesKo[role]}: 상호 교차 비판을 통해 2차 파급 효과를 검증하였습니다.`,
-        risks: [],
-      })),
-    },
-    {
-      round: 3,
-      name: '3단계: 반론 및 최종 집계',
-      roundSummary: '최종 반론 반영 및 정족수 집계 완료.',
-      votes: Object.keys(roleNamesKo).map((role) => ({
-        role,
-        decision: 'agree',
-        confidence: 0.89,
-        rationale: `${roleNamesKo[role]}: 최종 투표 확정 및 정책 적용 지지.`,
-        risks: [],
-      })),
-    },
-  ],
-  finalDecision: 'agree',
-  aggregateConfidence: 0.89,
-  disagreementScore: 0.08,
-  isHighDisagreement: false,
-  recommendedMode: 'BOUNDED_AUTO',
-  criticalVetoes: [],
-  agreeCount: 14,
-  vetoCount: 0,
-  abstainCount: 0,
-  consensusRationale: '14개 전문 에이전트 전원 합의로 안전 정책 적용이 승인되었습니다.',
-  topRisks: [],
-};
