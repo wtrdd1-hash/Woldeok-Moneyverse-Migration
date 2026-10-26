@@ -1,4 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- **v1324 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1449 (stacked on unmerged #1432; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## v2026.10.26.1324 — F675-138 회원 문의 처리 완료 확인 및 선택형 만족도 피드백 (기능 추가 / DRAFT / RELEASE HOLD)
 
 **회차:** 이전 기능 보완 v1322 → 현재 기능 추가 v1324 → 다음 기능 보완 v1326(잠정). 진실 기준 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5의 AGENTS.md, README.md, 영문 canonical PROJECT_PLAN.md와 한국어 대조 문서. 선행 기획 Draft PR #1432 미병합, 개발 이슈 #1448. 런타임·DB·Test·운영 변경 없음.

@@ -1,3 +1,4 @@
+- v1324 Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1449 (stacked on unmerged #1432; RELEASE HOLD). Engineering #1448.
 ## 2026-10-26 — 자동 기획 v1324 (기능 추가 / DRAFT / RELEASE HOLD)
 - 이전 v1322 보완 → 현재 v1324 추가 → 다음 v1326 보완(잠정), main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 확인, 미병합 선행 Draft #1432 기반.
 - 신규 F675-138 회원 문의 처리 완료 확인·선택형 도움됨 평가. 관리자 resolved는 회원 확인이 아님. 개발 DB 읽기 전용 완료2/회원대기1/메시지6, 과거 증명 불가 기록 UNKNOWN 유지. 개발 이슈 #1448.

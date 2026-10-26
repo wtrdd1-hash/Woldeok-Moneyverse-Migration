@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **v1324 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1449 (stacked on unmerged #1432; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## 기획 v1324 — F675-138 회원 검증형 문의 처리 완료 확인·만족도 피드백 (기능 추가 / DRAFT / RELEASE HOLD)
 - 회차: 이전 기능 보완 v1322 / 현재 기능 추가 v1324 / 다음 기능 보완 v1326(잠정). 최신 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 확인, 선행 Draft #1432 미병합, 개발 이슈 #1448. 런타임·DB·Test·운영 변경 없음.
 - 실제 근거: /support는 관리자 지정 resolved를 표시하며 Migration196은 open/waiting_user/resolved만 저장, 회원 확인·만족도 사건은 없다. 개발 DB 읽기 전용 집계 resolved 2건/waiting_user 1건/메시지 6건, 운영 사실은 미확인.

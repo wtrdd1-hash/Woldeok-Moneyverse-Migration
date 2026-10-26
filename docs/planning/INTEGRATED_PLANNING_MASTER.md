@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **v1324 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1449 (stacked on unmerged #1432; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## v2026.10.26.1324 — F675-138 Verified Member Support Resolution Acknowledgment and Feedback (Feature Addition / DRAFT / RELEASE HOLD)
 
 **Cycle:** Previous Feature Improvement v1322 → Current Feature Addition v1324 → Next Feature Improvement v1326 (provisional). Source of truth: main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 AGENTS.md, README.md, English canonical PROJECT_PLAN.md, Korean parity. Predecessor planning Draft PR #1432 is unmerged; engineering issue #1448. No runtime, database, Test or Production change.

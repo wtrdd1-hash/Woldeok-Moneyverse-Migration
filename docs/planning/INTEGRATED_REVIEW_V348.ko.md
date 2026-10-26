@@ -1,4 +1,5 @@
 # 통합 기획 재검토 v2026.09.22.348
+- **v1324 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1449 (stacked on unmerged #1432; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## v1324 재검토 — 회원이 확인한 해결과 관리자가 종료한 문의 구분 (2026-10-26; DRAFT/HOLD)
 - main Migration196은 회원 확인 없이 관리자 resolved 설정 가능하며 /support는 이를 처리 완료로 표시한다. 개발 DB 읽기 전용 resolved2/waiting_user1/메시지6, 운영·만족도 증거 아님. 기존 지원 답변 확인 v1316/v1318·문의 증빙 첨부 기획과 별도 범위.
 - 결정: 신규 불변 완료 사건당 본인 선택형 확인 1건, GET·알림 조회 자동 동의 금지, 과거 기록 소급 확인 금지. 명시적 확인·선택형 도움됨/메모, 추가 문의는 기존 답장 기능. 현재 사건 버전·멱등성 필수.

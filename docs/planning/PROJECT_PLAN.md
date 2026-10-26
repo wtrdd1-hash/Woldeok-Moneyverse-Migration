@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **v1324 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1449 (stacked on unmerged #1432; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## Planning v1324 — F675-138 Member-Verified Support Resolution Feedback (Feature Addition / DRAFT / RELEASE HOLD)
 - Cycle: Previous Improvement v1322 / Current Addition v1324 / Next Improvement v1326 provisional. Latest main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked; prior Draft #1432 unmerged; engineering issue #1448. No runtime/DB/Test/Production change.
 - Source gap: /support shows administrator-set resolved, Migration196 stores only open/waiting_user/resolved, no member-confirmed resolution or satisfaction event. Development DB read-only: 2 resolved, 1 waiting_user, 6 messages; Production truth unknown.
