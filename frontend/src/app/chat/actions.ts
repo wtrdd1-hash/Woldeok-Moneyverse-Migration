@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
+import { parseChatSequence } from './chat-sequence';
 
 export interface ChatConversation {
   readonly conversation_id: string;
@@ -87,8 +88,8 @@ export async function sendMessageAction(
   }
 }
 
-export async function markAsReadAction(conversationId: string, sequence: number): Promise<boolean> {
-  if (!conversationId || sequence < 0) return false;
+export async function markAsReadAction(conversationId: string, sequence: string): Promise<boolean> {
+  if (!conversationId || parseChatSequence(sequence) === null) return false;
   try {
     await mutate(`/api/v1/chat/conversations/${encodeURIComponent(conversationId)}/read`, {
       body: { sequence },

@@ -66,7 +66,7 @@ export class ChatService {
     }
   }
 
-  async markAsRead(actorUserId: string, conversationId: string, sequence: number): Promise<{ lastReadSequence: string }> {
+  async markAsRead(actorUserId: string, conversationId: string, sequence: string | number): Promise<{ lastReadSequence: string }> {
     try {
       const lastReadSequence = await this.repo.markAsRead(actorUserId, conversationId, sequence);
       return { lastReadSequence };
@@ -97,7 +97,7 @@ export class ChatService {
     actorUserId: string,
     conversationId: string,
     limit = 50,
-    beforeSequence?: number,
+    beforeSequence?: string | number,
   ): Promise<MessageRow[]> {
     try {
       const messages = await this.repo.listMessages(actorUserId, conversationId, limit, beforeSequence);
@@ -114,7 +114,7 @@ export class ChatService {
   async syncMessages(
     actorUserId: string,
     conversationId: string,
-    sinceSequence = 0,
+    sinceSequence: string | number = '0',
     limit = 100,
   ): Promise<MessageRow[]> {
     try {

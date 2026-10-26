@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -12,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
+import { IsBoolean, IsDefined, IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { randomUUID } from 'node:crypto';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -20,6 +21,13 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { ChatService } from './chat.service';
+import { canonicalChatSequence } from './chat-sequence';
+
+function requireChatSequence(value: unknown, field: string): string {
+  const sequence = canonicalChatSequence(value);
+  if (sequence === null) throw new BadRequestException(`${field} must be a canonical non-negative bigint`);
+  return sequence;
+}
 
 export class OpenConversationDto {
   @ApiProperty({ format: 'uuid', description: '상대방 회원 ID' })
@@ -41,10 +49,9 @@ export class SendMessageDto {
 }
 
 export class MarkReadDto {
-  @ApiProperty({ description: '읽은 마지막 메시지 시퀀스 번호' })
-  @IsInt()
-  @Min(0)
-  readonly sequence!: number;
+  @ApiProperty({ description: '읽은 마지막 메시지 시퀀스 (정확한 64비트 정수 문자열; 안전한 기존 JSON 정수도 허용)', oneOf: [{ type: 'string', pattern: '^(0|[1-9][0-9]*)$' }, { type: 'integer', minimum: 0 }] })
+  @IsDefined()
+  readonly sequence!: string | number;
 }
 
 export class ArchiveConversationDto {
@@ -131,7 +138,7 @@ export class ChatController {
   ) {
     const actorUserId = requireUserId(req);
     const parsedLimit = limit ? Number.parseInt(limit, 10) : 50;
-    const parsedBefore = beforeSequence ? Number.parseInt(beforeSequence, 10) : undefined;
+    const parsedBefore = beforeSequence === undefined ? undefined : requireChatSequence(beforeSequence, 'beforeSequence');
     const messages = await this.chat.listMessages(actorUserId, conversationId, parsedLimit, parsedBefore);
     return { messages };
   }
@@ -145,7 +152,7 @@ export class ChatController {
     @Query('limit') limit?: string,
   ) {
     const actorUserId = requireUserId(req);
-    const parsedSince = sinceSequence ? Number.parseInt(sinceSequence, 10) : 0;
+    const parsedSince = sinceSequence === undefined ? '0' : requireChatSequence(sinceSequence, 'sinceSequence');
     const parsedLimit = limit ? Number.parseInt(limit, 10) : 100;
     const messages = await this.chat.syncMessages(actorUserId, conversationId, parsedSince, parsedLimit);
     return { messages };
@@ -171,7 +178,7 @@ export class ChatController {
     @Body() dto: MarkReadDto,
   ) {
     const actorUserId = requireUserId(req);
-    return this.chat.markAsRead(actorUserId, conversationId, dto.sequence);
+    return this.chat.markAsRead(actorUserId, conversationId, requireChatSequence(dto?.sequence, 'sequence'));
   }
 
   @ApiOperation({ summary: '대화방 보관 또는 보관 해제' })

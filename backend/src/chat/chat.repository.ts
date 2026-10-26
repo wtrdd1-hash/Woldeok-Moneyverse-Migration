@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import { canonicalChatSequence } from './chat-sequence';
+
+function requireChatSequence(value: unknown): string {
+  const sequence = canonicalChatSequence(value);
+  if (sequence === null) throw new ChatInputError('sequence must be a canonical non-negative bigint');
+  return sequence;
+}
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -86,17 +93,17 @@ export class PostgresChatRepository {
     return row;
   }
 
-  async markAsRead(actorUserId: string, conversationId: string, sequence: number): Promise<string> {
+  async markAsRead(actorUserId: string, conversationId: string, sequence: string | number): Promise<string> {
     if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
-    if (sequence < 0) throw new ChatInputError('sequence must be non-negative');
+    const exactSequence = requireChatSequence(sequence);
 
     const row = await queryOne<{ last_read_sequence: string }>(
       this.client,
       `SELECT public.private_chat_read($1::uuid, $2::uuid, $3::bigint)::text AS last_read_sequence;`,
-      [actorUserId, conversationId, sequence],
+      [actorUserId, conversationId, exactSequence],
     );
-    return row?.last_read_sequence ?? sequence.toString();
+    return row?.last_read_sequence ?? exactSequence;
   }
 
   async listConversations(actorUserId: string, limit = 50): Promise<ConversationRow[]> {
@@ -144,11 +151,12 @@ export class PostgresChatRepository {
     actorUserId: string,
     conversationId: string,
     limit = 50,
-    beforeSequence?: number,
+    beforeSequence?: string | number,
   ): Promise<MessageRow[]> {
     if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
     const safeLimit = Math.min(Math.max(1, limit), 100);
+    const exactBefore = beforeSequence === undefined ? null : requireChatSequence(beforeSequence);
 
     return queryRows<MessageRow>(
       this.client,
@@ -167,19 +175,20 @@ export class PostgresChatRepository {
          AND ($3::bigint IS NULL OR m.sequence < $3::bigint)
        ORDER BY m.sequence DESC
        LIMIT $4;`,
-      [actorUserId, conversationId, beforeSequence ?? null, safeLimit],
+      [actorUserId, conversationId, exactBefore, safeLimit],
     );
   }
 
   async syncMessages(
     actorUserId: string,
     conversationId: string,
-    sinceSequence = 0,
+    sinceSequence: string | number = '0',
     limit = 100,
   ): Promise<MessageRow[]> {
     if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
     const safeLimit = Math.min(Math.max(1, limit), 200);
+    const exactSince = requireChatSequence(sinceSequence);
 
     return queryRows<MessageRow>(
       this.client,
@@ -198,7 +207,7 @@ export class PostgresChatRepository {
          AND m.sequence > $3::bigint
        ORDER BY m.sequence ASC
        LIMIT $4;`,
-      [actorUserId, conversationId, sinceSequence, safeLimit],
+      [actorUserId, conversationId, exactSince, safeLimit],
     );
   }
 

@@ -43,6 +43,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 import type { ChatConversation, ChatMessage } from './actions';
+import { maxChatSequence, nextChatSequence, parseChatSequence } from './chat-sequence';
 import {
   sendMessageAction,
   markAsReadAction,
@@ -187,8 +188,8 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
 
   const loadPreviousMessages = async () => {
     if (isLoadingMore || !hasMore || messages.length === 0) return;
-    const oldestSeq = Number.parseInt(messages[0]?.sequence ?? '0', 10);
-    if (!oldestSeq || oldestSeq <= 1) {
+    const oldestSeq = parseChatSequence(messages[0]?.sequence ?? '0');
+    if (oldestSeq === null || oldestSeq <= 1n) {
       setHasMore(false);
       return;
     }
@@ -244,10 +245,10 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
   useEffect(() => {
     scrollToBottom();
     // Mark as read if there are unread incoming messages
-    const latestSeq = Number.parseInt(conversation.latest_sequence, 10) || 0;
-    const lastRead = Number.parseInt(conversation.last_read_sequence, 10) || 0;
+    const latestSeq = parseChatSequence(conversation.latest_sequence) ?? 0n;
+    const lastRead = parseChatSequence(conversation.last_read_sequence) ?? 0n;
     if (latestSeq > lastRead) {
-      markAsReadAction(conversation.conversation_id, latestSeq);
+      markAsReadAction(conversation.conversation_id, latestSeq.toString());
     }
   }, [conversation.conversation_id, conversation.latest_sequence, conversation.last_read_sequence, messages.length]);
 
@@ -255,11 +256,9 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
   useEffect(() => {
     const fetchLatestOrSync = async () => {
       try {
-        const latestLocalSeq = messages.length > 0
-          ? Math.max(...messages.map((m) => Number.parseInt(m.sequence, 10) || 0))
-          : 0;
+        const latestLocalSeq = maxChatSequence(messages.map((m) => m.sequence));
 
-        if (latestLocalSeq > 0) {
+        if (latestLocalSeq !== '0') {
           const res = await fetch(
             `/app-api/v1/chat/conversations/${encodeURIComponent(conversation.conversation_id)}/sync?sinceSequence=${latestLocalSeq}`,
           );
@@ -309,7 +308,7 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
       id: tempId,
       conversation_id: conversation.conversation_id,
       sender_id: 'me',
-      sequence: (Number.parseInt(conversation.latest_sequence, 10) + 1).toString(),
+      sequence: nextChatSequence(conversation.latest_sequence),
       body: finalBody,
       created_at: new Date().toISOString(),
       is_mine: true,
