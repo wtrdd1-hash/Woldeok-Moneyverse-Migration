@@ -9,14 +9,14 @@
 - Plan: add strict normalized backend snapshot endpoint; private web CSV download and CTA; Android gateway parity; no migration, ledger mutation or extra DB grants; red-green tests, real isolated PostgreSQL ACL, full gates and exact-SHA Test release HOLD until verified.
 
 ## In progress
-- [ ] TDD: backend snapshot normalization and route guards
-- [ ] TDD: frontend CSV and authenticated private download
-- [ ] Android gateway privacy and contract parity
-- [ ] Real isolated PostgreSQL / ACL / rollback
-- [ ] Full CI, build, lint, typecheck, security, accessibility, SEO, app-api and exact SHA checks
+- [x] TDD: backend snapshot normalization and route guards
+- [x] TDD: frontend CSV and authenticated private download
+- [x] Android gateway privacy and contract parity
+- [x] Real isolated PostgreSQL / ACL / rollback
+- [x] Full candidate gates executed; failures and blocked exact-SHA checks recorded (not PASS)
 
 ## Finished
-- PENDING. No integration or Production deployment without full release gates.
+- Candidate code implemented; **PARTIAL/BLOCKED** pending full gates and official Test. No integration or Production deployment.
 
 ## In progress — 12:27 KST checkpoint
 - Re-fetched canonical origin/main mid-work: still 1c5b84a1c45baafcca83f375a6f99698121e9bb5. Reviewed mutable draft planning PR #1407 and integrated EN/KO plans; planning is not deployed.
@@ -24,3 +24,9 @@
 - TDD red confirmed missing modules; backend 45 PASS, frontend 23 PASS. Frontend TypeScript error in new test corrected, typecheck PASS.
 - Isolated PostgreSQL wdmv_v761_test_acl verified owner 1/foreign 0/least privilege/rollback. No Production DB writes.
 - Existing A #1403 and QA #1317 kept untouched; no branch deletion. Full gates to follow.
+
+## In progress — 12:34 KST validation
+- Full candidate run: contract PASS; lint PASS (0 errors/1,128 warnings); typecheck PASS; backend 1,331 PASS/398 skipped; frontend 1,410 PASS/6 FAIL (pre-existing unmerged QA fixes); database 15 PASS/3 skipped; contract 38 PASS; bot 8 PASS.
+- Default Turbopack build FAIL due to worktree node_modules symlink outside Turbopack filesystem root. Explicit webpack production build PASS. Prod audit FAIL 2 High; full audit FAIL 2 Critical/10 High/11 Moderate/3 Low; bot audit FAIL 1 Critical/5 High.
+- Official Test exact-SHA identity FAIL (public 6f697e74..., host manifest/backend/frontend 9f39f041..., candidate 9e00fdbc...); Production public 6a989b5a... . No deploy.
+- 253 remote branches, 248 open PRs, 3 known conflicts; 250 known non-main tips unmerged and 2 not locally available. Zero deletions. Existing A/B/C/Gemini/QA branches preserved.
