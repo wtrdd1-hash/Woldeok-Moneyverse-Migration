@@ -22,3 +22,13 @@
 - Bot test initially failed due to absent optional `bot/node_modules` in new worktree, not a code defect. After isolated `npm --prefix bot ci --ignore-scripts`, bot tests 8/8 PASS.
 - Production-only pnpm audit PASS (0 known); full pnpm audit FAIL (2 Critical / 8 High / 11 Moderate / 3 Low); bot audit FAIL (1 Critical / 5 High). Mandatory security gate BLOCKED.
 - Official Test exact-SHA, authenticated admin backup flow, independently verified provider upload and restore, release approval: BLOCKED. No Production/Test promotion.
+
+## FINISHED (2026-10-27 04:45 KST) — PARTIAL / BLOCKED
+- Start/mid/final observed `origin/main`: `0fe614b2ca1a7bc0df540514e54db78130479e2a`; no main integration.
+- Independent branch: `auto/hourly-b-treasury-backup-evidence-v571-20261027-0435`; Draft + `hold` PR #1487; tracking issue #1486. Code candidate before this final log: `fc7182137f214d3bbabfbb1f7dbd625dcf483358`.
+- Actual changes: repository and service fail-closed backup snapshot/status; regression tests including isolated PG. Existing routes, admin guards and all financial/DB schema contracts unchanged. No provider backup functionality claimed.
+- Final local gates to be rerun at final SHA; previous run: full typecheck/lint/test/build PASS, bot 8/8 PASS, prod-only audit PASS; full pnpm audit FAIL (2 Critical/8 High), bot audit FAIL (1 Critical/5 High). Skipped backend DB tests are not PASS.
+- GitHub CI: classify/policy PASS, runtime-check pending at final log checkpoint; later final SHA CI must be verified independently.
+- Official Test exact-SHA read-only preflight FAIL: public Test `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; Test release/backend/frontend/build `9f39f041c336b59f41e9a8c43ea14dc1d29a2586`, neither equals branch candidate. Production public `6a989b5ac0c6155587d43426d64f6def6b62c917`.
+- Blockers: full security audits, final CI, actual Test exact-SHA, authenticated admin and independent cloud backup/restore E2E, release approvals. **No merge, no Production/Test rollout, no live DB migration or balance change.** No branch cleanup; no A/C/Gemini/QA worktree or automation changes.
+- Host storage: root 99% (~1.5 GiB free), data volume 93% (~14 GiB free); no deletion of other workers' data.
