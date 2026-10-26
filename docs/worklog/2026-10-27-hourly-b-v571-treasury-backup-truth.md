@@ -8,3 +8,9 @@
 
 ## IN PROGRESS
 - Planned HTTP contract: both `POST /api/v1/admin/treasury/backup/snapshot` and `GET /api/v1/admin/treasury/backup/status` must return 503 `TREASURY_BACKUP_EVIDENCE_UNAVAILABLE` until durable, verified storage and restore evidence are implemented. Direct repository callers must also fail closed. Existing `admin/backups` path is distinct and not modified.
+
+### TDD checkpoint (04:37 KST)
+- RED: 4/4 new tests failed against main; fabricated snapshot/status and service pass-through reproduced.
+- GREEN candidate: removed fabricated repository snapshot/status and made both service methods reject with structured HTTP 503 before repository invocation. Existing API routes and admin guards remain unchanged.
+- Focused GREEN: 22/22 (4 new boundary tests + 18 existing service tests). Prior test asserting fabricated success replaced with fail-closed contract. No DB operations in new boundary tests.
+- Midpoint main and both planning documents rechecked; main remains `0fe614b2ca1a7bc0df540514e54db78130479e2a`.

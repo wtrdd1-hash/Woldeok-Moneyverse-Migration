@@ -227,39 +227,20 @@ describe('TreasuryService', () => {
     expect(mockRepo.getWealthTaxAssessments).toHaveBeenCalled();
   });
 
-  it('delegates createBackupSnapshot to repository', async () => {
-    const mockSnapshot = {
-      snapshot_id: 'SNAP-20261001-ABCD1234',
-      merkle_root_hash: 'abcdef1234567890',
-      provider: 'CLOUDFLARE_R2_FREE',
-      free_tier_status: 'FREE_TIER_COMPLIANT_ZERO_COST',
-      payload_bytes: 1024,
-      vault_balances: {},
-      total_m0_wld: '1000000',
-      created_at: '2026-10-01T00:00:00.000Z',
-    };
-    vi.mocked(mockRepo.createImmutableBackupSnapshot).mockResolvedValueOnce(mockSnapshot);
-
-    const res = await service.createBackupSnapshot('00000000-0000-0000-0000-000000000001', 'CLOUDFLARE_R2_FREE');
-    expect(res).toEqual(mockSnapshot);
-    expect(mockRepo.createImmutableBackupSnapshot).toHaveBeenCalledWith(
-      '00000000-0000-0000-0000-000000000001',
-      'CLOUDFLARE_R2_FREE',
-    );
+  it('never acknowledges a snapshot that has not been persisted and restored', async () => {
+    await expect(service.createBackupSnapshot('00000000-0000-0000-0000-000000000001', 'CLOUDFLARE_R2_FREE'))
+      .rejects.toMatchObject({
+        status: 503,
+        response: { code: 'TREASURY_BACKUP_EVIDENCE_UNAVAILABLE' },
+      });
+    expect(mockRepo.createImmutableBackupSnapshot).not.toHaveBeenCalled();
   });
 
-  it('delegates getBackupStatus to repository', async () => {
-    const mockStatus = {
-      latest_snapshot_id: 'SNAP-20261001-IMMUTABLE-LEDGER',
-      provider: 'Cloudflare R2 & Google Drive Free Tier',
-      free_tier_quota: '10.0 GB 무료 제공 중 1.2 MB 사용',
-      stored_snapshots_count: 54,
-      last_verified_at: '2026-10-01T00:00:00.000Z',
-    };
-    vi.mocked(mockRepo.getBackupStatus).mockResolvedValueOnce(mockStatus);
-
-    const res = await service.getBackupStatus();
-    expect(res).toEqual(mockStatus);
-    expect(mockRepo.getBackupStatus).toHaveBeenCalled();
+  it('never reports an unverified backup inventory', async () => {
+    await expect(service.getBackupStatus()).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'TREASURY_BACKUP_EVIDENCE_UNAVAILABLE' },
+    });
+    expect(mockRepo.getBackupStatus).not.toHaveBeenCalled();
   });
 });

@@ -1094,64 +1094,14 @@ export class TreasuryRepository {
     return res.rows;
   }
 
-  async createImmutableBackupSnapshot(adminId: string, targetProvider = 'CLOUDFLARE_R2_FREE'): Promise<{
-    snapshot_id: string;
-    merkle_root_hash: string;
-    provider: string;
-    free_tier_status: string;
-    payload_bytes: number;
-    vault_balances: Record<string, string>;
-    total_m0_wld: string;
-    created_at: string;
-  }> {
-    const crypto = await import('crypto');
-    const overview = await this.getOverview();
-    const reconciliation = await this.getReconciliation();
-
-    const snapshotPayload = {
-      snapshot_version: 'v54-immutable-ledger',
-      network: 'woldeok-moneyverse-production',
-      generated_by_admin: adminId,
-      timestamp: new Date().toISOString(),
-      overview,
-      reconciliation,
-    };
-
-    const payloadJson = JSON.stringify(snapshotPayload);
-    const merkleHash = crypto.createHash('sha256').update(payloadJson).digest('hex');
-    const snapshotId = `SNAP-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${merkleHash.slice(0, 8).toUpperCase()}`;
-
-    const vaultBalances: Record<string, string> = {};
-    for (const v of overview.vaults) {
-      vaultBalances[v.code] = v.balance_wld;
-    }
-
-    return {
-      snapshot_id: snapshotId,
-      merkle_root_hash: merkleHash,
-      provider: targetProvider,
-      free_tier_status: 'FREE_TIER_COMPLIANT_ZERO_COST (Cloudflare R2 10GB/Google Drive 15GB)',
-      payload_bytes: Buffer.byteLength(payloadJson, 'utf8'),
-      vault_balances: vaultBalances,
-      total_m0_wld: overview.total_treasury_wld,
-      created_at: new Date().toISOString(),
-    };
+  async createImmutableBackupSnapshot(_adminId: string, _targetProvider = 'CLOUDFLARE_R2_FREE'): Promise<never> {
+    // A local hash is not an immutable remote backup or a restore-verified receipt.
+    throw new Error('TREASURY_BACKUP_EVIDENCE_UNAVAILABLE');
   }
 
-  async getBackupStatus(): Promise<{
-    latest_snapshot_id: string;
-    provider: string;
-    free_tier_quota: string;
-    stored_snapshots_count: number;
-    last_verified_at: string;
-  }> {
-    return {
-      latest_snapshot_id: 'SNAP-20261001-IMMUTABLE-LEDGER',
-      provider: 'Cloudflare R2 & Google Drive Free Tier',
-      free_tier_quota: '10.0 GB 무료 제공 중 1.2 MB 사용 (0.01% 소진, 과금 리스크 0%)',
-      stored_snapshots_count: 54,
-      last_verified_at: new Date().toISOString(),
-    };
+  async getBackupStatus(): Promise<never> {
+    // No durable provider inventory or verified restore receipt is available here.
+    throw new Error('TREASURY_BACKUP_EVIDENCE_UNAVAILABLE');
   }
 
   async getUserMoneyFlows(
