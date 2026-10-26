@@ -117,8 +117,18 @@ export class PostgresClubRepository {
     limit = 50,
     offset = 0,
   ): Promise<ClubSummaryRow[]> {
+    if (search !== undefined && typeof search !== 'string') {
+      throw new ClubInputError('search must be text');
+    }
+    const normalizedSearch = search?.trim() || null;
+    if (normalizedSearch && normalizedSearch.length > 64) {
+      throw new ClubInputError('search must be at most 64 characters');
+    }
+    if (!Number.isSafeInteger(limit) || limit < 0 || !Number.isSafeInteger(offset) || offset < 0) {
+      throw new ClubInputError('limit and offset must be non-negative safe integers');
+    }
     const safeLimit = Math.min(Math.max(1, limit), 100);
-    const safeOffset = Math.max(0, offset);
+    const safeOffset = offset;
 
     return queryRows<ClubSummaryRow>(
       this.client,
@@ -141,10 +151,10 @@ export class PostgresClubRepository {
        JOIN public.users u ON u.id = c.owner_id
        LEFT JOIN public.club_members cm_actor ON cm_actor.club_id = c.id AND cm_actor.user_id = $1::uuid
        WHERE c.status = 'active'
-         AND ($2::text IS NULL OR c.name ILIKE ('%' || $2::text || '%') OR c.tag ILIKE ('%' || $2::text || '%'))
-       ORDER BY c.level DESC, c.member_count DESC, c.created_at DESC
+         AND ($2::text IS NULL OR strpos(lower(c.name), lower($2::text)) > 0 OR strpos(lower(c.tag), lower($2::text)) > 0)
+       ORDER BY c.level DESC, c.member_count DESC, c.created_at DESC, c.id DESC
        LIMIT $3 OFFSET $4;`,
-      [actorUserId ?? null, search ? search.trim() : null, safeLimit, safeOffset],
+      [actorUserId ?? null, normalizedSearch, safeLimit, safeOffset],
     );
   }
 

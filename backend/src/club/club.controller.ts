@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -104,6 +105,18 @@ export class UpdateClubCanvasDto {
   readonly totalScore!: number;
 }
 
+function parseClubListPage(raw: string | undefined, fallback: number, name: string): number {
+  if (raw === undefined) return fallback;
+  if (typeof raw !== 'string' || !/^[0-9]+$/.test(raw)) {
+    throw new BadRequestException(`${name} must be a non-negative integer`);
+  }
+  const value = Number(raw);
+  if (!Number.isSafeInteger(value)) {
+    throw new BadRequestException(`${name} must be a safe integer`);
+  }
+  return value;
+}
+
 @ApiTags('clubs')
 @Controller('clubs')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
@@ -119,8 +132,8 @@ export class ClubController {
     @Query('offset') offset?: string,
   ) {
     const actorUserId = requireUserId(req);
-    const parsedLimit = limit ? Number.parseInt(limit, 10) : 50;
-    const parsedOffset = offset ? Number.parseInt(offset, 10) : 0;
+    const parsedLimit = parseClubListPage(limit, 50, 'limit');
+    const parsedOffset = parseClubListPage(offset, 0, 'offset');
     const clubs = await this.clubService.listClubs(actorUserId, search, parsedLimit, parsedOffset);
     return { clubs };
   }

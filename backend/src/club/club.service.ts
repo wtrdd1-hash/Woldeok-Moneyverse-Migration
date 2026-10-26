@@ -42,7 +42,12 @@ export class ClubService {
   }
 
   async listClubs(actorUserId?: string, search?: string, limit = 50, offset = 0) {
-    return this.repo.listClubs(actorUserId, search, limit, offset);
+    try {
+      return await this.repo.listClubs(actorUserId, search, limit, offset);
+    } catch (err: unknown) {
+      if (err instanceof ClubInputError) throw new BadRequestException(err.message);
+      throw err;
+    }
   }
 
   async getClubById(clubId: string, actorUserId?: string) {
