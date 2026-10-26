@@ -17,4 +17,4 @@ GitHub main at start/mid: 0fe614b2ca1a7bc0df540514e54db78130479e2a. Read canonic
 - Search body privacy, NFC/ASCII literal SQL matching, Seoul calendar bounds, 15min signed actual-session-ID cursor with upper watermark, status-race disclosure, selected-thread independent authorization, admin k>=20, Android/WCAG/SEO, 10,001 synthetic and 100 BOLA/concurrency acceptance, forward-only DB migration, OFF rollback.
 - External 10,000 independent evidence gate: newly approved 0; cumulative verified/deduplicated UNKNOWN, BLOCKED/IN PROGRESS.
 - No runtime, DB data/migration, WLD, ledger, Test, Production, flags or other worker worktrees changed. Exact-SHA engineering/QA and backup-restore remain release prerequisites.
-- Draft PR: PLANNING_PR_PENDING.
+- Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1472.
