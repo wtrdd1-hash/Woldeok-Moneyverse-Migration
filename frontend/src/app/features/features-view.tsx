@@ -351,6 +351,14 @@ export function FeaturesView() {
 
   return (
     <div className="space-y-16 py-6 sm:py-10">
+      <p role="note" className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+        {t(
+          '안내: 아래 예시 금액과 화면은 실제 계정·원장 데이터가 아닙니다. 그림 속 버튼은 작동하지 않으며, 각 섹션의 이동 링크에서 실제 서비스의 지원 여부와 본인 정보를 확인할 수 있습니다.',
+          'Illustrative examples only: amounts and screens below are not live account or ledger data. Mockup controls do not operate; use each section link to check actual service availability and your own data.',
+          '以下の金額と画面は説明用の例であり、実際の口座・台帳データではありません。操作はできません。各リンクから実際の機能をご確認ください。',
+          '以下金额与画面仅为示例，并非真实账户或账本数据。示意按钮不可操作，请通过各功能链接查看实际服务。'
+        )}
+      </p>
       {/* 1. 히어로 섹션 */}
       <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900/90 via-zinc-950 to-zinc-950 p-6 sm:p-10 shadow-2xl">
         <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
@@ -412,8 +420,10 @@ export function FeaturesView() {
         <div className="mt-8 border-t border-zinc-800/80 pt-6 space-y-3">
           <div className="relative max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+            <label htmlFor="feature-guide-search" className="sr-only">{t('기능 가이드 검색', 'Search feature guide', '機能ガイドを検索', '搜索功能指南')}</label>
             <input
-              type="text"
+              id="feature-guide-search"
+              type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t(
@@ -427,7 +437,8 @@ export function FeaturesView() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+                aria-label={t('검색어 지우기', 'Clear search', '検索を消去', '清除搜索')}
+                className="absolute right-1 top-1/2 -translate-y-1/2 flex size-11 items-center justify-center text-zinc-500 hover:text-white"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -490,7 +501,7 @@ export function FeaturesView() {
 
                 <Button
                   asChild
-                  className="shrink-0 bg-zinc-900 hover:bg-zinc-800 text-emerald-400 border border-emerald-500/30 font-semibold h-10 px-4"
+                  className="shrink-0 bg-zinc-900 hover:bg-zinc-800 text-emerald-400 border border-emerald-500/30 font-semibold min-h-11 px-4"
                 >
                   <Link href={feature.livePath}>
                     {feature.ctaLabel}
@@ -515,7 +526,7 @@ export function FeaturesView() {
                         </span>
                       </div>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">
-                        LIVE PREVIEW
+                        STATIC EXAMPLE
                       </span>
                     </div>
 
@@ -563,12 +574,12 @@ export function FeaturesView() {
 
                         {/* 퀵 주문 바 */}
                         <div className="flex gap-2 pt-1">
-                          <button className="flex-1 bg-emerald-600/90 text-white font-bold py-2 rounded-lg text-center text-xs">
+                          <span aria-hidden="true" className="flex-1 bg-emerald-600/90 text-white font-bold py-2 rounded-lg text-center inline-flex items-center justify-center text-xs">
                             지정가 매수 (74,200)
-                          </button>
-                          <button className="flex-1 bg-rose-600/90 text-white font-bold py-2 rounded-lg text-center text-xs">
+                          </span>
+                          <span aria-hidden="true" className="flex-1 bg-rose-600/90 text-white font-bold py-2 rounded-lg text-center inline-flex items-center justify-center text-xs">
                             지정가 매도
-                          </button>
+                          </span>
                         </div>
                       </div>
                     )}
@@ -600,9 +611,9 @@ export function FeaturesView() {
                           </div>
                         </div>
 
-                        <button className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-lg text-center text-xs">
+                        <span aria-hidden="true" className="w-full bg-cyan-600 text-white font-bold py-2 rounded-lg text-center inline-flex items-center justify-center text-xs">
                           일일 복리 이자 즉시 수령 (+29,589 WLD)
-                        </button>
+                        </span>
                       </div>
                     )}
 
@@ -630,9 +641,9 @@ export function FeaturesView() {
                           </div>
                         </div>
 
-                        <button className="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg text-center text-xs">
+                        <span aria-hidden="true" className="w-full bg-amber-600 text-white font-bold py-2 rounded-lg text-center inline-flex items-center justify-center text-xs">
                           업무 완료 & 급여 일괄 수령
-                        </button>
+                        </span>
                       </div>
                     )}
 
@@ -661,9 +672,9 @@ export function FeaturesView() {
                           </div>
                         </div>
 
-                        <button className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-lg text-center text-xs">
+                        <span aria-hidden="true" className="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-center inline-flex items-center justify-center text-xs">
                           오늘의 임대료 수령하기 (+65,000 WLD)
-                        </button>
+                        </span>
                       </div>
                     )}
 
@@ -689,9 +700,9 @@ export function FeaturesView() {
                           </div>
                         </div>
 
-                        <button className="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 rounded-lg text-center text-xs flex items-center justify-center gap-1.5">
+                        <span aria-hidden="true" className="w-full bg-rose-600 text-white font-bold py-2 rounded-lg text-center inline-flex items-center justify-center text-xs flex items-center justify-center gap-1.5">
                           <span>카카오톡/디스코드 진단서 1초 공유</span>
-                        </button>
+                        </span>
                       </div>
                     )}
 
@@ -710,12 +721,12 @@ export function FeaturesView() {
                         </div>
 
                         <div className="flex gap-2">
-                          <button className="flex-1 bg-amber-600 text-white font-bold py-2 rounded-lg text-center text-xs">
+                          <span aria-hidden="true" className="flex-1 bg-amber-600 text-white font-bold py-2 rounded-lg text-center inline-flex items-center justify-center text-xs">
                             스핀 돌리기 (1,000 WLD)
-                          </button>
-                          <button className="px-3 bg-zinc-800 text-zinc-300 font-bold py-2 rounded-lg text-xs">
+                          </span>
+                          <span aria-hidden="true" className="px-3 bg-zinc-800 text-zinc-300 font-bold py-2 rounded-lg text-xs">
                             사운드 ON
-                          </button>
+                          </span>
                         </div>
                       </div>
                     )}

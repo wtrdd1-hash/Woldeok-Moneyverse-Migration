@@ -50,6 +50,28 @@ describe('FeaturesPage & FeaturesView', () => {
     expect(screen.getByText(/View 3-Stage Roadmap/i)).toBeDefined();
   }, 15000);
 
+  it('clearly identifies all six illustrated mockups as examples, never as live previews', () => {
+    render(<LocaleProvider initialLocale="ko"><FeaturesView /></LocaleProvider>);
+    expect(screen.getAllByText('STATIC EXAMPLE')).toHaveLength(6);
+    expect(screen.queryByText('LIVE PREVIEW')).toBeNull();
+    expect(screen.getByText(/예시 금액과 화면은 실제 계정·원장 데이터가 아닙니다/)).toBeDefined();
+  }, 15000);
+
+  it('does not expose fake order, payout, spin or share actions as operable buttons', () => {
+    render(<LocaleProvider initialLocale="ko"><FeaturesView /></LocaleProvider>);
+    for (const name of ['지정가 매수 (74,200)', '지정가 매도', '일일 복리 이자 즉시 수령 (+29,589 WLD)', '업무 완료 & 급여 일괄 수령', '오늘의 임대료 수령하기 (+65,000 WLD)', '스핀 돌리기 (1,000 WLD)']) {
+      expect(screen.queryByRole('button', { name })).toBeNull();
+    }
+    expect(screen.getByRole('link', { name: /주식 거래소 입장하기/ }).getAttribute('href')).toBe('/stocks');
+    expect(screen.getByRole('link', { name: /중앙은행 금고 열기/ }).getAttribute('href')).toBe('/bank');
+  }, 15000);
+
+  it('marks mockups as examples in English and does not claim guaranteed payouts in SEO', () => {
+    render(<LocaleProvider initialLocale="en"><FeaturesView /></LocaleProvider>);
+    expect(screen.getByText(/illustrative examples only/i)).toBeDefined();
+    expect(metadata.description).toContain('예시');
+  }, 15000);
+
   it('renders FAQ section for user troubleshooting', () => {
     render(
       <LocaleProvider initialLocale="ko">
