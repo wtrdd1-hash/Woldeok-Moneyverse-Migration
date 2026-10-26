@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- v1310 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1402 (stacked on unmerged #1399; RELEASE HOLD). Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398#issuecomment-6406659364 ; capacity: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6406659793 .
 
 ## Planning v1310 — F675-134 Security Archive Integrity (Improvement / DRAFT / RELEASE HOLD)
 - Previous Addition v1308 → Current Improvement v1310 → Next Addition v1312 (provisional). Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked at start/mid; predecessor unmerged Draft #1399. Documentation-only, no runtime/DB/ledger/Test/Production changes.

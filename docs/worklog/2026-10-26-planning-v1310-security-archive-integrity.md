@@ -6,9 +6,9 @@
 - [x] Read installed Superpowers using-superpowers and applicable brainstorming, worktree, planning, verification skills (skills connector list empty).
 - [x] Connect Debian 13.6 miniPC, verify services/DB, remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`, read main AGENTS/README/PROJECT_PLAN EN/KO and predecessor #1399; isolated sparse worktree from v1308, no runtime changes.
 - [x] Inspect actual main migration 180/214, security controller/repository, Next page, reauthentication/CSRF guards; QA v1289, PR #1317, new B/C PRs.
-- [ ] Update six integrated EN/KO planning docs, two EN/KO update logs and this worklog with source-backed P0/P1 backlog and exact release gates.
-- [ ] Re-read main/plan midpoint and before final push; verify doc parity and no runtime diff.
-- [ ] Push Draft PR, engineering handoff and capacity issue update; write internal start/mid/end records.
+- [x] Update six integrated EN/KO planning docs, two EN/KO update logs and this worklog with source-backed P0/P1 backlog and exact release gates.
+- [x] Re-read main/plan midpoint and before final push; verify doc parity and no runtime diff.
+- [x] Push Draft PR, engineering handoff and capacity issue update; write internal start/mid/end records.
 
 ## Safety and evidence
 - Existing global `ReauthGuard` checks **900 seconds**, while v1308 export design requires **<=600 seconds**; must use a dedicated, tested export reauth policy rather than silently relying on 15-minute guard.
@@ -21,4 +21,10 @@
 - [x] Rechecked remote main and EN/KO canonical plan. SHA unchanged; main plan still starts v1210 (newer proposals are stacked Draft, not merged).
 - [x] Updated eight EN/KO integrated planning/update documents. Ten v1310 backlog IDs validated in six integrated docs and both logs; diff --check PASS.
 - [x] QA v1289 reviewed, Draft QA #1317 candidate-only success distinguished from main/release. Root free 6.5GiB, not proven sustainable.
-- [ ] Create Draft PR, update engineering handoff #1398 and storage #1170, verify final head and records.
+- [x] Create Draft PR #1402, update engineering handoff #1398 and storage #1170; final head/records verified after push.
+
+## Completion checkpoint — 2026-10-26 11 KST
+- [x] Draft PR #1402 OPEN on predecessor v1308 branch, main not merged; issue #1398 comment 6406659364 and capacity #1170 comment 6406659793 posted.
+- [x] Eight EN/KO integrated documents + this worklog; all ten P0/P1 IDs in six planning docs and two update logs. Only docs changed; diff --check PASS.
+- [x] Remote main unchanged at 1c5b84a1c45baafcca83f375a6f99698121e9bb5 at start, midpoint and pre-push. QA v1289 FAILED/HOLD, Production BLOCKED; external corpus 0 newly approved, cumulative UNKNOWN/10,000.
+- [x] No merge, runtime code, migration, shared DB, WLD, ledger, feature switch, Test, Production, other worktrees or automation changed.

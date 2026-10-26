@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- v1310 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1402 (stacked on unmerged #1399; RELEASE HOLD). Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398#issuecomment-6406659364 ; capacity: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6406659793 .
 
 ## v2026.10.26.1310 — F675-134 Security Activity Archive Trust and Export Reauthentication Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
 

@@ -1,4 +1,5 @@
 - v1306 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1394; issue #1389; root-capacity #1170; DRAFT / RELEASE HOLD.
+- v1310 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1402 (stacked on unmerged #1399; RELEASE HOLD). Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398#issuecomment-6406659364 ; capacity: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6406659793 .
 
 ## 2026-10-26 11:xx KST — Planning v1310 / F675-134 (Improvement / DRAFT / HOLD)
 - Previous Addition v1308 → Current Improvement v1310 → Next Addition v1312 provisional; main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid unchanged; predecessor Draft #1399 unmerged. Corrected ReauthGuard 900s vs export 600s, migration214 return compatibility, apiOrNull false-empty risk, local-email-only event coverage, microsecond cursor, bounded all-or-nothing CSV and session-revocation races.

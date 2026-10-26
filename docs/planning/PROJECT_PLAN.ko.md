@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- v1310 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1402 (stacked on unmerged #1399; RELEASE HOLD). Engineering handoff: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1398#issuecomment-6406659364 ; capacity: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170#issuecomment-6406659793 .
 
 ## 기획 v1310 — F675-134 보안 활동 보관함 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 - 이전 기능 추가 v1308 → 현재 기능 보완 v1310 → 다음 기능 추가 v1312(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 Draft #1399 미병합. 문서 전용, 런타임·DB·원장·Test·Production 변경 없음.
