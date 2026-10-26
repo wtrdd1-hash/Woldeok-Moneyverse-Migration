@@ -4596,6 +4596,7 @@ _No request body._
 | threads[].last_message_at | false | string (date-time) |  |
 | threads[].user_id | false | string |  |
 | threads[].display_name | false | string |  |
+| windowLimit | true | number |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

@@ -14447,10 +14447,14 @@
                 "created_at"
               ]
             }
+          },
+          "windowLimit": {
+            "type": "number"
           }
         },
         "required": [
-          "threads"
+          "threads",
+          "windowLimit"
         ]
       },
       "responseCompatibility": {
