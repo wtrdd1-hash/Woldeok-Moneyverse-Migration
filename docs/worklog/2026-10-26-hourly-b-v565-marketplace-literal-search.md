@@ -10,7 +10,8 @@
 - Checklist: [ ] RED regression; [ ] GREEN code; [ ] focused and full tests; [ ] isolated PostgreSQL; [ ] mid-work main/plan refresh; [ ] PR and final log; [ ] release gates.
 
 ## In progress
-- Pending.
+- 23:02 KST RED: 10/10 focused tests fail against origin/main (literal %, _, backslash, Unicode, trim, whitespace, stable pagination, overlong input/DTO). Baseline query uses ILIKE wildcard matching and unbounded search; failures are expected.
+- Next: implement minimal literal substring query and bounded DTO/service validation, then rerun tests.
 
 ## Finished
 - Pending. Production HOLD unless all required independent release gates pass.
