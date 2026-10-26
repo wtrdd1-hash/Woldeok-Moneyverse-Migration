@@ -1,0 +1,17 @@
+# A1425 — Owner-scoped club memberships, independent pagination
+
+## Before work (2026-10-26 14:25 KST)
+- Debian 13.6 miniPC services active; root 96%, data 84%. Remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5`.
+- 260 remote heads and 256 open PRs; preserve all unique work. #1107/#1110/#1143 remain conflicts. Latest QA #1412 is DRAFT/HOLD; six main frontend regressions and security gates remain.
+- Read AGENTS.md, README.md, main PROJECT_PLAN.md/.ko.md and newer planning v1316 Draft #1416; feature not yet implemented. Main `/clubs` derives "my clubs" by filtering the global top 50; memberships outside that page are hidden. No duplicate club-membership pagination PR found.
+- P1 slice: separate authenticated `GET /api/v1/clubs/mine?offset=N`, fixed 25-item owner-scoped active-membership page, next/has-more, no-store/noindex, web pagination, Android app-api contract parity. No new grants, migrations, ledger writes, or deployment.
+- Security: actor comes exclusively from session; SQL applies membership filter before LIMIT, with stable ordering. Do not imply the response is an immutable snapshot; no fabricated zero on backend error. Existing club tables have broad legacy grants, tracked separately as P0.
+- RED/GREEN TDD, focused regression, typecheck/lint/build/full tests, isolated PostgreSQL ACL, exact-SHA Test and CI required. No merge or release without all gates PASS.
+
+## In progress
+- [ ] RED tests first for owner-bound paging and error cases.
+- [ ] Implement backend/DB read, Next UI, Android route contract.
+- [ ] Verify mid-work remote main and planning.
+
+## Finished
+- Pending.
