@@ -1,11 +1,11 @@
 /**
- * Aave v3 / Compound III 스타일 Kinked Jump Interest Rate Model & 바젤 III 20% 법정 준비금
+ * Aave-style Kinked Jump Interest Rate educational model with a hypothetical 20% buffer
  * 기준: docs/planning/deltas/v2026.09.23.406.ko.md Flaw G406-06
  *
  * 공식:
  * - U <= 80%: Borrow Rate = 3% + (U / 0.8) * 5% (완만한 3% ~ 8%)
  * - U > 80%: Borrow Rate = 8% + ((U - 0.8) / 0.2) * 40% (최대 48% 점프 페널티)
- * - 법정 지급준비금: 총 예금의 20% 동결 (뱅크런 방지 및 인출 보장)
+ * - Model assumption: reserve buffer = 20% of supplied deposits (not actual frozen funds or a withdrawal guarantee)
  * - Supply Rate = Borrow Rate * U * (1 - 0.20)
  */
 
