@@ -23,6 +23,7 @@ const ROUTES = [
   ['post', `/api/v1/work/tasks/${SAMPLE_ID}/complete`],
   ['get', '/api/v1/work/receipts'],
   ['get', '/api/v1/work/assignments'],
+  ['get', '/api/v1/work/assignments/snapshot'],
   ['post', '/api/v1/work/assignments'],
   ['post', `/api/v1/work/assignments/${SAMPLE_ID}/completions`],
   ['post', `/api/v1/work/assignments/${SAMPLE_ID}/verify`],
@@ -85,7 +86,7 @@ describe('work routes', () => {
     }
   });
 
-  it.each(['dashboard', 'tasks', 'completeTask', 'receipts', 'assignments', 'assign', 'submit', 'verify'] as const)(
+  it.each(['dashboard', 'tasks', 'completeTask', 'receipts', 'assignments', 'assignmentSnapshot', 'assign', 'submit', 'verify'] as const)(
     'leaves the class stack in place on %s',
     (handler) => {
       const own: unknown = Reflect.getMetadata(GUARDS_METADATA, WorkController.prototype[handler]);

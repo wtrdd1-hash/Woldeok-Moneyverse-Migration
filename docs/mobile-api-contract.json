@@ -15359,6 +15359,130 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/app-api/v1/work/assignments/snapshot",
+      "purpose": "Private recent-50 work assignment status snapshot",
+      "callWhen": "Member opens work assignment history or requests an export",
+      "authorization": "Authenticated member + current consent; session-bound owner read",
+      "afterSuccess": "Refresh GET /app-api/v1/work/assignments when current status is needed",
+      "backendRoute": "/api/work/assignments/snapshot",
+      "operationId": "WorkController_assignmentSnapshot",
+      "backendOpenApiPath": "/work/assignments/snapshot",
+      "summary": "Owner-only most recent 50 work assignments, not complete history or payment proof",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "scope",
+          "source",
+          "limit",
+          "generatedAt",
+          "assignments"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "recent_50_assignments_only"
+          },
+          "source": {
+            "type": "string",
+            "const": "work_my_assignments"
+          },
+          "limit": {
+            "type": "number",
+            "const": 50
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "assignmentId": {
+                  "type": "string"
+                },
+                "taskId": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "jobType": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "assignedAt": {
+                  "type": "string"
+                },
+                "expiresAt": {
+                  "type": "string"
+                },
+                "rewardAmountWld": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "experienceAmount": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "assignmentId",
+                "taskId",
+                "code",
+                "name",
+                "jobType",
+                "status",
+                "assignedAt",
+                "expiresAt",
+                "rewardAmountWld",
+                "experienceAmount"
+              ]
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "source",
+          "limit",
+          "generatedAt",
+          "assignments"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
       "method": "POST",
       "path": "/app-api/v1/work/assignments",
       "purpose": "새 근무 과제 배정/시작",

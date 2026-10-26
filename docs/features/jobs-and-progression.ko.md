@@ -51,3 +51,8 @@ UI는 제출 준비, 요청 진행 중, 응답 지연, 성공 완료, 사유가 
 - `/profile`
 
 [퀘스트](quests.ko.md)와 [요청 흐름](../architecture/request-flow.ko.md)도 참고하세요.
+
+### 비공개 최근 업무 배정 CSV (A1225 후보, 미출시)
+- 로그인 회원은 /work/assignments.csv에서 **최근 업무 배정 최대 50건**을 다운로드할 수 있습니다. Backend /api/v1/work/assignments/snapshot 및 Android /app-api/v1/work/assignments/snapshot은 기존 PostgreSQL 본인 전용 work_my_assignments(actor) 함수를 사용합니다.
+- 업무·과제 ID, 이름·코드, 직업, 상태, 배정·만료 시각, 기록된 보상·EXP(존재하는 경우)를 제공합니다. **전체 업무 이력이나 원장 지급 완료 증명은 아닙니다.** 지급 여부는 별도 검증된 보상 영수증으로 확인합니다.
+- 회원 인증·동의, no-store/noindex, 정수 문자열 정밀도, CSV 수식 공격 방지, 잘못된 데이터 차단을 적용합니다. 신규 마이그레이션·직접 테이블 권한·WLD 쓰기는 없습니다. **전체 게이트와 정확 SHA Test 검증 전 출시 보류**입니다.

@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4857,6 +4857,45 @@ _No request body._
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
 | assignments[] | true | unknown[] |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/work/assignments/snapshot` — Owner-only most recent 50 work assignments, not complete history or payment proof
+
+- Authorization: Authenticated member + current consent; session-bound owner read
+- Success status: 200
+- Response mode: json
+- After success: Refresh GET /app-api/v1/work/assignments when current status is needed
+- Operation ID: `WorkController_assignmentSnapshot`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="recent_50_assignments_only" | const="recent_50_assignments_only" |
+| source | true | string="work_my_assignments" | const="work_my_assignments" |
+| limit | true | number=50 | const=50 |
+| generatedAt | true | string |  |
+| assignments[] | true | object[] |  |
+| assignments[] | true | object |  |
+| assignments[].assignmentId | true | string |  |
+| assignments[].taskId | true | string |  |
+| assignments[].code | true | string |  |
+| assignments[].name | true | string |  |
+| assignments[].jobType | true | string |  |
+| assignments[].status | true | string |  |
+| assignments[].assignedAt | true | string |  |
+| assignments[].expiresAt | true | string |  |
+| assignments[].rewardAmountWld | true | null \| string |  |
+| assignments[].experienceAmount | true | null \| string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

@@ -17,3 +17,10 @@
 
 ## Finished
 - PENDING. No integration or Production deployment without full release gates.
+
+## In progress — 12:27 KST checkpoint
+- Re-fetched canonical origin/main mid-work: still 1c5b84a1c45baafcca83f375a6f99698121e9bb5. Reviewed mutable draft planning PR #1407 and integrated EN/KO plans; planning is not deployed.
+- Backend owner-only snapshot, bounded CSV web route, Android app-api privacy headers, and generated 180-endpoint mobile contract implemented. Work screen bilingual CTA and honest scope notice.
+- TDD red confirmed missing modules; backend 45 PASS, frontend 23 PASS. Frontend TypeScript error in new test corrected, typecheck PASS.
+- Isolated PostgreSQL wdmv_v761_test_acl verified owner 1/foreign 0/least privilege/rollback. No Production DB writes.
+- Existing A #1403 and QA #1317 kept untouched; no branch deletion. Full gates to follow.

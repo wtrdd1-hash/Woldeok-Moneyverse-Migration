@@ -149,6 +149,28 @@ describe('app API route compatibility', () => {
     });
   });
 
+  it('protects owner work assignment snapshots through the Android gateway', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({
+      scope: 'recent_50_assignments_only',
+      source: 'work_my_assignments',
+      limit: 50,
+      generatedAt: '2026-10-26T03:00:00.000Z',
+      assignments: [],
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/work/assignments/snapshot', { cookie: 'session=private' }),
+      context('work', 'assignments', 'snapshot'),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/work/assignments/snapshot');
+    expect(await response.json()).toMatchObject({ scope: 'recent_50_assignments_only' });
+  });
+
   it('does not transform binary media bodies', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {

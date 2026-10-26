@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -30,6 +31,7 @@ import {
   WorkDashboardResponseDto,
 } from './work.dto';
 import { WorkInputError, WorkRepository } from './work.repository';
+import { toWorkAssignmentSnapshot } from './work-assignment-snapshot';
 
 @ApiTags('work')
 @Controller('work')
@@ -144,6 +146,20 @@ export class WorkController {
         'assignments are unavailable',
       ),
     };
+  }
+
+  @Get('assignments/snapshot')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({ summary: 'Owner-only most recent 50 work assignments, not complete history or payment proof' })
+  async assignmentSnapshot(@Req() request: RequestWithSession) {
+    const actor = requireUserId(request);
+    const rows = await this.guarded(
+      () => this.repository().assignments(actor),
+      'work assignment snapshot unavailable',
+    );
+    return toWorkAssignmentSnapshot(rows, new Date());
   }
 
   @Post('assignments')

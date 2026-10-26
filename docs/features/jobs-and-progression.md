@@ -64,3 +64,8 @@ Career level is derived consistently from cumulative career EXP. Legacy paths th
 - `/profile`
 
 See also [Quests](quests.md) and [Request Flow](../architecture/request-flow.md).
+
+### Private recent work-assignment CSV (A1225 candidate; not released)
+- /work/assignments.csv downloads at most the latest **50** work assignments for the signed-in member. Backend /api/v1/work/assignments/snapshot and Android /app-api/v1/work/assignments/snapshot use the existing owner-scoped PostgreSQL function work_my_assignments(actor).
+- Includes assignment/task identifiers, task name/code, career, status, assigned/expiry times, and recorded reward/EXP when present. These are **not** a complete work history or proof of ledger payment. The independent verified reward receipt endpoint remains authoritative for payments.
+- Session authentication, current consent, no-store/noindex, strict decimal-string precision, CSV formula neutralization, and invalid-data fail-closed handling are required. Read-only: no new migration, direct table grants, or WLD writes. **Release HOLD** until all gates and exact-SHA Test pass.

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { PageHeader } from '@/components/page-header';
 import { Target, Landmark, ClipboardList } from 'lucide-react';
 import { TruncatedList } from '@/components/truncated-list';
@@ -106,6 +107,16 @@ export default async function WorkPage() {
 
       {/* 실시간 직업 핫타임 부스트 배너 */}
       <LiveHotTimeBanner domainFilter="work" />
+      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3">
+        <Link href="/work/assignments.csv" className="inline-flex min-h-11 items-center rounded-md border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+          {isEn ? 'Download recent assignments (CSV)' : '최근 업무 배정 기록 CSV 다운로드'}
+        </Link>
+        <p className="text-xs text-muted-foreground">
+          {isEn
+            ? 'Latest 50 assignments only. Not a complete history or proof of WLD payment.'
+            : '최근 업무 배정 최대 50건만 제공하며, 전체 이력 또는 WLD 지급 증빙이 아닙니다.'}
+        </p>
+      </div>
 
       {/* 1. 활성 직업 및 숙련도 게이지 섹션 */}
       <section aria-labelledby="active-job-title" className="grid w-full max-w-full min-w-0 gap-3 sm:gap-4 overflow-hidden">
