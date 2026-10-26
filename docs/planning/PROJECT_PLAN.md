@@ -1,4 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## Planning v1306 — F675-133 Purchase Receipt Integrity (Improvement / DRAFT / HOLD)
+- Previous Addition v1304 → Current Improvement v1306 → Next Addition v1308 (provisional); main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 checked at start/mid. v1304 Draft #1390 remains unmerged; docs-only stacked worktree.
+- Corrected main source assumptions: legacy Migration 009 INNER JOIN and active-account filter, nullable legacy paid_amount; Store 2.0 Migration 165 persists discount-aware unit_price; ledger_postings NUMERIC and lowercase debit/credit. Read-only dev sample: legacy 0, catalog 6, 6/6 matching amount/actor/type and balanced postings, **not Production reconciliation**. Current Next BFF/UI falsely convert errors to empty; coordinate developer A Draft #1258.
+- Require fail-closed 503 vs VERIFIED_EMPTY, source-qualified IDs, current-name disclaimer, nullable legacy amount, exact NUMERIC multiplication/overflow, ledgerProofStatus only after actual posting/account proof, microsecond-safe HMAC keyset and explicit non-snapshot backfill caveat. Actor UUID alone is not DB-authenticated identity. Full UX/API/DB/Android/SEO/a11y/KPI/rollback in [English integrated master](INTEGRATED_PLANNING_MASTER.md), [Korean parity](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04; P1 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10. QA v1287 FAILED/HOLD, root 100% 608MiB, audits FAIL, migration266 mismatch, exact-SHA Test/restore BLOCKED. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. No runtime/DB/WLD/ledger/Test/Production changes.
+- Backlog IDs: ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10
+
 - v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
 

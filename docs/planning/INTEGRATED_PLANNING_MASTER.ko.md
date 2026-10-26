@@ -1,4 +1,50 @@
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v2026.10.26.1306 — F675-133 구형·Store 2.0 구매 영수증 출처·금액·커서 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+
+**회차:** 이전 기능 추가 v1304 → 현재 기능 보완 v1306 → 다음 기능 추가 v1308(잠정). 시작·중간 원격 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 동일. 선행 기획 Draft #1390은 미병합이며 이번 문서 작업은 그 브랜치에 누적한다. Gemini·개발 A/B/C·QA 변경과 분리하고 런타임·DB·원장·WLD·Test·Production은 변경하지 않는다. 이 절은 충돌하는 v1304 제안보다 우선한다.
+
+### 새로 확인한 코드·DB 근거 및 수정 사항
+- main Migration 009의 구형 shop_list_my_purchases(uuid,integer)는 **shop_items와 users를 INNER JOIN**하고 active 회원만 조회하며 최대 100건(현행 컨트롤러는 30건)으로 제한한다. 이 함수만 늘려서는 완전한 통합 이력이 아니다. 새 읽기 모델은 상품 정보를 LEFT JOIN하여 이름을 찾지 못해도 구매 행을 보존하고, 비활성 계정 거부를 '구매 내역 없음'과 구분한다.
+- Migration 071의 Store 2.0 shop_purchases에는 구매 당시 quantity INTEGER·unit_price BIGINT·transaction_id FK·purchased_at이 있다. Migration 165의 할인 반영 구매 함수는 **실제 적용 단가를 unit_price에 저장**한다. 현재 shop_catalog.base_price를 과거 구매가격으로 사용하지 않는다. 구형 purchases.paid_amount는 NULL 가능하고 구매 수량은 기록되지 않는다.
+- ledger_postings.amount는 NUMERIC이고 direction enum은 **소문자 debit/credit**이다. PostgreSQL NUMERIC으로 정확하게 비교하고 JS Number 변환을 금지한다. 거래 FK만으로 정산 증명을 주장하지 않는다. 거래 type·actor_user_id·회원 USER_CASH 차변·SINK 대변과 실제 금액을 확인한 경우에만 강화된 증빙을 제공한다. reverses_transaction_id만으로 환불을 확정하지 않는다.
+- 2026-10-26 09:09 KST 개발 DB 읽기 전용 집계: 구형 구매 0건, Store 2.0 구매 6건·서로 다른 거래 6건. 6건 모두 분개 2개, 차·대변 합계 일치, 기록 단가×수량 일치, 거래 유형·행위자 일치. **개발 환경의 일부 표본일 뿐 운영 대사 완료 근거가 아니다.**
+- Next 구매 BFF는 apiOrNull 실패를 HTTP 200 빈 목록으로 바꾸며 MyReceipts도 네트워크·비정상 응답을 빈 목록으로 처리한다. 개발 A의 미병합 Draft #1258이 구형 경로를 다루므로 중복 코드를 만들지 않고 계약만 조율한다.
+- PostgreSQL timestamptz의 마이크로초가 JavaScript Date 직렬화에서 밀리초로 잘릴 수 있다. 동일 밀리초 안의 서로 다른 구매를 커서로 넘길 때 중복·누락되지 않도록 DB 원래 정밀도와 UTC 마이크로초 문자열을 유지한다.
+
+### 회원 화면·상태·API
+- v1304의 /shop 진입점, /account/shop/purchases 개인 화면, ALL/LEGACY/CATALOG, 기본 90일·최대 366일 검색, 1~50건, 상세·재시도·새로고침 CTA를 유지한다. 기간은 시작 포함·종료 미포함 UTC로 정규화한다. 영수증 고유키는 (출처, UUID) 조합이다. 상품명은 **현재 표시명(구매 당시 이름 아님)**으로 표기하고 상품 메타데이터가 없으면 구매 기록은 유지한 채 '상품명 확인 불가'를 표시한다.
+- 목록은 DB에 기록된 구매 사실만 표시한다. amountStatus=RECORDED|UNKNOWN_LEGACY|OUT_OF_RANGE|MISMATCH, ledgerProofStatus=NOT_CHECKED|MATCHED|MISMATCH|UNAVAILABLE를 구분한다. 실제 원장 계좌·유형·행위자·분개를 검사하지 않은 목록은 기본 NOT_CHECKED이다. 상세 조회에서 검증이 끝났을 때만 MATCHED로 표시한다. 환불·취소·정산 완료는 별도 증거와 승인된 정책 없이는 표시하지 않는다.
+- Store 2.0 합계는 NUMERIC(unit_price)×NUMERIC(quantity)로 계산하고 양수 BIGINT 상한 9223372036854775807을 넘으면 OUT_OF_RANGE와 NULL 합계로 응답한다. 구형 paid_amount NULL은 UNKNOWN_LEGACY이며 0으로 채우지 않는다. 구형 quantity·unitPrice는 NULL, 모든 WLD 금액은 정확한 정수 문자열 또는 NULL이다.
+- NestJS GET /api/v1/shop/purchases/history 및 상세, Next 동일 출처 /api/shop/purchases/history, Android /app-api/v1/shop/purchases/history의 인증·상태·no-store 동등성을 요구한다. 400 입력/커서 오류, 401 세션 만료, 403 동의·비활성 계정, 404 타인·없는 상세, 410 커서 만료, 429 제한, 503 원천 장애. 오류를 HTTP 200 빈 목록으로 바꾸지 않는다. 로그아웃·계정 전환 시 기존 응답과 커서를 무효화한다. 일부 원천 실패는 SOURCE_UNAVAILABLE/PARTIAL_UNVERIFIED, 성공적인 0건만 VERIFIED_EMPTY이다.
+
+### DB·정렬·트랜잭션·보안
+- 기존 함수/적용된 마이그레이션을 덮어쓰지 않고 추가형 shop_purchase_history_v2를 제안한다. 구형+Store 2.0 UNION ALL, 상품 LEFT JOIN, 출처별 고유키, 회원 소유 제한, 소스 순위 CATALOG=2·LEGACY=1. 서비스가 전달한 p_actor UUID만으로 **DB 수준 인증이 증명되는 것은 아니다.** 서버의 검증된 세션·동의·계정 상태와 DB 최소권한을 각각 음성 테스트한다.
+- 정렬 (purchased_at DESC, source_rank DESC, receipt_id DESC), 다음 페이지는 마지막 키보다 작은 튜플만 조회한다. HMAC 커서는 회원·세션 epoch·정규화 필터·cutoff·마이크로초 전체 마지막 키·15분 만료에 결합한다. limit+1로 다음 페이지 여부를 계산하고 OFFSET을 사용하지 않는다. 동일 밀리초의 서로 다른 마이크로초, 두 출처의 동일 UUID, 변조·계정 전환을 테스트한다.
+- READ ONLY REPEATABLE READ는 **단일 요청 내** 여러 조회의 일관성만 제공한다. HTTP 페이지 간 동일 MVCC 스냅샷을 보장하지 않는다. cutoff 이후 새 구매는 제외할 수 있으나 과거 시각으로 늦게 입력된 행은 나타날 수 있다. 이를 사용자에게 새로고침/결과 변경으로 안내하고 회귀 테스트한다. 완전 고정 이력이 필요하면 별도 지속 스냅샷/삽입 순서 설계 승인 전 보장하지 않는다.
+- 강화된 원장 증빙은 ledger_transactions·ledger_postings·accounts의 거래 유형·행위자·회원 USER_CASH 차변·시스템 SINK 대변·정확한 NUMERIC 합계를 검사한다. 무제한 N+1 대신 상세 요청 또는 검증된 비동기 대사를 사용한다. 환불 상태는 연결된 역거래의 별도 정책 검증 전 NOT_CHECKED이다.
+- 신규 SECURITY DEFINER는 고정 search_path·스키마 한정 SQL·PUBLIC EXECUTE 철회·최소 EXECUTE 부여를 요구하며, 앱 계정에 구매/원장 직접 DML 권한을 추가하지 않는다. 구형 (user_id,created_at DESC,id DESC), 신규 (user_id,purchased_at DESC,id DESC) 인덱스는 격리 EXPLAIN·잠금·용량 검증 후 검토한다. 현재 마이그레이션 충돌·266 이력 문제 해결 전 번호를 예약하지 않는다. 개인 화면 noindex/nofollow/no-store, 관리자 k≥20 비식별 집계, 회원당 30회/분, 민감 식별자 분석 제외, 320px·200% 확대·키보드·스크린리더·WCAG 2.2 AA 준수.
+
+### P0/P1 개발 백로그·검증·운영 보류
+| 우선순위 | ID | 수용 기준 |
+| --- | --- | --- |
+| P0 | ENV1306-01 | 루트 100%·608MiB 여유; 타 작업물 보호, 소유자 조율 후 가역적 공간 확보·격리 백업 복원. |
+| P0 | SEC1306-02 | 개발 DB 앱 권한 235/241 테이블 광범위 수정·삭제, PUBLIC 은행 함수 3개; 타인 접근·세션 행위자 결합·실제 PG 권한 음성 검증. |
+| P0 | REL1306-03 | QA v1287 프론트 6건 실패, 운영/전체/봇 감사 실패, Migration 266 이력 불일치; 정확 SHA 인증 Test·복원 미검증. |
+| P0 | SHP1306-04 | 구매 BFF/UI·비활성 계정의 허위 빈 목록 및 할인·원장·환불 허위 성공 차단, 개발 A #1258과 계약 조율. |
+| P1 | SHP1306-05 | 추가형 v2 통합 소유자 읽기·LEFT JOIN·실제 권한·EXPLAIN 인덱스. |
+| P1 | SHP1306-06 | NUMERIC·할인 단가·구형 NULL·원장 유형/행위자/계좌/분개 검증 및 상태 구분. |
+| P1 | SHP1306-07 | 마이크로초 보존 서명 커서·출처별 키·cutoff/backfill 정직한 안내·15분 TTL. |
+| P1 | SHP1306-08 | NestJS/Next.js/Android 오류·상태 동등성, 로그아웃 응답 무효화, 참 빈 목록 UI. |
+| P1 | SHP1306-09 | 개인정보·noindex/no-store·관리자 k≥20·접근성·비식별 KPI. |
+| P1 | SHP1306-10 | 격리 PG 합성 10,001건, 타 회원 100건, 동일 밀리초/다른 마이크로초, 출처 간 UUID 충돌, 할인·구형 NULL·64비트 초과·원장 유형/행위자/방향 불일치·backfill·비활성 계정·503/빈 목록·Android·롤백. |
+
+**승격:** SHOP_UNIFIED_RECEIPTS_ENABLED 기본 OFF. 별도 개발 브랜치·추가형 마이그레이션 검토·격리 실제 PG 권한 테스트·정확 SHA 공식 CI·인증 Test 상점/금융 회귀·보안 감사·독립 복원·승인 GitOps를 모두 통과해야 1%→10%→100% 단계 승격. 문제 발생 시 먼저 기능 OFF. 이번 회차는 런타임·DB·WLD·원장·기능 스위치·Test·Production 변경 없음.
+
+**외부 근거 게이트:** PostgreSQL 트랜잭션 격리, OWASP 객체 수준 권한, W3C WCAG 2.2의 독립 발행기관 3곳 검토. 신규 독립 획득·중복 제거·승인 근거 **0건**, 누적 승인 **UNKNOWN/10,000**으로 BLOCKED / IN PROGRESS. 자료 링크 검토를 10,000건 확보로 주장하지 않는다.
+
+**백로그 ID:** ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10.
+
 - v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
 

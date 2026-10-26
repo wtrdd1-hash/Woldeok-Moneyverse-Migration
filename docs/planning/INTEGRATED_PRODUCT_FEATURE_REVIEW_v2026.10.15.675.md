@@ -1,4 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+
+## F675-133 / v1306 — Cross-generation purchase receipt integrity review (Feature Improvement / DRAFT / HOLD)
+- Cycle: Previous Addition v1304 / Current Improvement v1306 / Next Addition v1308 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 start/mid unchanged; prior Draft #1390 unmerged; engineering ownership stays with developers.
+- **P0:** ENV1306-01 root 100%/608MiB, SEC1306-02 dev DB app DML 235/241 and 3 PUBLIC bank functions, REL1306-03 QA v1287 failed/financial Test exact-SHA and restore unverified, SHP1306-04 false-empty/fake ledger and discount claims. **P1:** SHP1306-05 owner-only dual-source LEFT JOIN; SHP1306-06 numeric money/ledger proof; SHP1306-07 microsecond-safe signed cursor and backfill honesty; SHP1306-08 Nest/Next/Android parity; SHP1306-09 privacy/a11y/admin/SEO/KPI; SHP1306-10 isolated PG regression/rollback.
+- Main evidence: legacy INNER JOIN and nullable amount, discount-adjusted Store 2.0 historical unit price, ledger NUMERIC/lowercase direction, dev sample 0 legacy/6 catalog with six amount/actor/type matches; no Production certification. Do not equate transaction FK with ledger proof, DB p_actor with authentication, or HTTP cutoff with cross-page snapshot. Full specification in integrated EN/KO masters. New accepted independent evidence 0, cumulative UNKNOWN/10,000 BLOCKED. Feature OFF and no runtime writes.
+- Backlog IDs: ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10
+
 - v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
 

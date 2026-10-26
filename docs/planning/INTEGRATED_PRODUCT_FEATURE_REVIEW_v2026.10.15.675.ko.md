@@ -1,4 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+
+## F675-133 / v1306 — 구형·신규 구매 영수증 무결성 검토 (기능 보완 / 초안 / 보류)
+- 이전 추가 v1304 / 현재 보완 v1306 / 다음 추가 v1308(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 동일, 선행 Draft #1390 미병합, 개발 구현과 분리.
+- **P0:** ENV1306-01 루트 100%·608MiB, SEC1306-02 개발 DB 앱 DML 235/241·PUBLIC 은행 함수 3개, REL1306-03 QA v1287 실패·정확 SHA Test/복원 미검증, SHP1306-04 허위 빈 목록·원장/할인 오인 차단. **P1:** SHP1306-05 본인 통합 LEFT JOIN, SHP1306-06 NUMERIC 금액·원장 증빙, SHP1306-07 마이크로초 커서·backfill 안내, SHP1306-08 Nest/Next/Android, SHP1306-09 개인정보/접근성/관리/SEO/KPI, SHP1306-10 격리 PG 회귀·롤백.
+- 근거: 구형 INNER JOIN·nullable 금액, Store 2.0 할인 반영 단가, 원장 NUMERIC·소문자 방향, 개발 DB 구형 0/신규 6·6건 금액/행위자/유형 일치(운영 검증 아님). 거래 FK만으로 원장 대사 완료, p_actor만으로 DB 인증, cutoff만으로 페이지 간 동일 스냅샷을 주장하지 않는다. 영문·국문 통합 마스터에 상세 명세. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED, 기능 기본 OFF·런타임 변경 없음.
+- 백로그 ID: ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10
+
 - v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
 

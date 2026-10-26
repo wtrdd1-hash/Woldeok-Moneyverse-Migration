@@ -1,3 +1,8 @@
+## 2026-10-26 09:13 KST — Planning v1306 / F675-133 (Feature Improvement / DRAFT / HOLD)
+- Previous Addition v1304 → Current Improvement v1306 → Next Addition v1308 provisional. Main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 unchanged start/mid; prior Draft #1390 unmerged. Corrected legacy INNER JOIN/nullable paid amount, discount-aware catalog price, ledger NUMERIC/lowercase direction, false-empty UI, microsecond-safe cursor, cross-page cutoff limits and DB actor trust. Read-only dev sample 0 legacy/6 catalog with 6 matching ledger postings; not Production proof.
+- P0 ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04; P1 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10. QA v1287 FAILED/HOLD, root 100% 608MiB, exact-SHA/restore HOLD; external accepted new 0, cumulative UNKNOWN/10,000 BLOCKED. Docs-only, no runtime/DB/ledger/WLD/Test/Production changes.
+- Backlog IDs: ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10
+
 - v1302 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1384; issue #1378, root capacity #1170; RELEASE HOLD.
 - v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
@@ -121,7 +126,7 @@
 
 - GitHub Draft PR #1248 OPEN (stacked on #1241); development issue #1240 updated (comment 6391229779); disk issue #1170 updated (comment 6391230670). Main unmerged, release HOLD.
 
-## 2026-10-25 09:xx KST — Planning v1258 F675-121 (Feature Improvement / Draft / HOLD)
+## 2026-10-25 09:13 KST — Planning v1258 F675-121 (Feature Improvement / Draft / HOLD)
 - Previous Addition v1256 / Current Improvement v1258 / Next Addition v1260 provisional. Main `c9a868b1e622341e2daa8b936ddf0988eda9988e` start/mid; QA v1261 FAILED/HOLD. Found migration048 replay missing post/body binding, comment-delete unused key, backend DELETE ignored post ID; proposed 409/receipt, post-first locks, new-only outbox and stale-notice retraction.
 - P0 ENV1258-01 SEC1258-02 REL1258-03 BOARD1258-04; P1 BOARD1258-05 BOARD1258-06 BOARD1258-07 BOARD1258-08 BOARD1258-09 BOARD1258-10. English canonical/Korean parity in six integrated planning docs; documentation-only, no runtime/DB/finance/Test/Production.
 - Root 100%, frontend 6 failures, Critical2/High10 audit, bot Critical1/High5, ACL/migration266/280/exact-SHA Test/restore HOLD. Independent evidence newly accepted 0, cumulative UNKNOWN/10,000 BLOCKED.

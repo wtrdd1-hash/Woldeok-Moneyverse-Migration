@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+
+## 기획 v1306 — F675-133 구매 영수증 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1304 → 현재 보완 v1306 → 다음 추가 v1308(잠정). 시작·중간 main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 확인, 선행 Draft #1390 미병합. 독립 문서 작업만 수행.
+- Migration 009 구형 INNER JOIN·활성 계정 필터·nullable paid_amount, Migration 165 할인 적용 당시 단가 저장, 원장 NUMERIC·소문자 debit/credit 확인. 개발 DB 읽기 전용 표본은 구형 0·신규 6, 6/6 거래 유형/행위자/분개/금액 일치(운영 대사 근거 아님). Next BFF/UI의 장애→빈 목록 문제는 개발 A 미병합 #1258과 조율.
+- 허위 빈 목록 차단, 출처+UUID 식별, 현재 상품명 주의, 구형 NULL, NUMERIC 오버플로, 실제 원장 검증 후에만 MATCHED, 마이크로초 보존 HMAC 커서·페이지 간 스냅샷 미보장/backfill 안내. p_actor UUID만으로 DB 인증이 보장되지 않는다. 전체 화면/API/DB/Android/SEO/접근성/KPI/롤백은 [영문 마스터](INTEGRATED_PLANNING_MASTER.md)와 [국문 동등 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04; P1 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10. QA v1287 FAILED/HOLD, 루트 100% 608MiB, 보안 감사 실패, Migration266 이력 차이, 정확 SHA Test·복원 BLOCKED. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·원장·Test·Production 변경 없음.
+- 백로그 ID: ENV1306-01 SEC1306-02 REL1306-03 SHP1306-04 SHP1306-05 SHP1306-06 SHP1306-07 SHP1306-08 SHP1306-09 SHP1306-10
+
 - v1304 planning Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1390 (stacked on unmerged #1384; DRAFT / RELEASE HOLD).
 - v1304 engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1389
 
