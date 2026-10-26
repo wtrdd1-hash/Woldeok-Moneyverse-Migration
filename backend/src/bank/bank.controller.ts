@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -29,6 +30,7 @@ import {
   IdempotentDto,
 } from './bank.dto';
 import { BankInputError, BankRepository } from './bank.repository';
+import { toBankStandingSnapshot } from './bank-standing-snapshot';
 
 @ApiTags('banking')
 @Controller('banking')
@@ -62,6 +64,16 @@ export class BankController {
       () => this.repository().getStanding(requireUserId(request)),
       'failed to load bank standing',
     );
+  }
+
+  @Get('standing/snapshot')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({ summary: 'Private current virtual cash/deposit snapshot; not a settlement receipt' })
+  async standingSnapshot(@Req() request: RequestWithSession) {
+    const standing = await this.repository().getStanding(requireUserId(request));
+    return toBankStandingSnapshot(standing, new Date());
   }
 
   @Post('deposit')

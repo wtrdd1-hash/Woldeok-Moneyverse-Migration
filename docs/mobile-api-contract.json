@@ -3806,6 +3806,74 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/app-api/v1/banking/standing/snapshot",
+      "purpose": "본인 현재 게임 내 현금·예금 잔액과 미수령 이자 추정치의 읽기 전용 스냅샷 조회",
+      "callWhen": "회원이 현재 잔액 스냅샷을 명시적으로 요청할 때",
+      "authorization": "로그인 + 최신 동의, 세션의 회원 ID로만 조회",
+      "afterSuccess": "읽기 전용; 거래나 정산 완료로 표시하지 말 것",
+      "backendRoute": "/api/banking/standing/snapshot",
+      "operationId": "BankController_standingSnapshot",
+      "backendOpenApiPath": "/banking/standing/snapshot",
+      "summary": "Private current virtual cash/deposit snapshot; not a settlement receipt",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "scope",
+          "source",
+          "generatedAt",
+          "cashBalanceWld",
+          "depositBalanceWld",
+          "unclaimedInterestEstimateWld"
+        ],
+        "note": "Only current virtual cash/deposit balances; estimated unclaimed interest is not paid. Never convert WLD strings to floating-point."
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "current_virtual_cash_deposit_only"
+          },
+          "source": {
+            "type": "string",
+            "const": "bank_get_my_standing"
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "cashBalanceWld": {
+            "type": "string"
+          },
+          "depositBalanceWld": {
+            "type": "string"
+          },
+          "unclaimedInterestEstimateWld": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "source",
+          "generatedAt",
+          "cashBalanceWld",
+          "depositBalanceWld",
+          "unclaimedInterestEstimateWld"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
       "method": "POST",
       "path": "/app-api/v1/banking/withdraw",
       "purpose": "은행 예금 출금",

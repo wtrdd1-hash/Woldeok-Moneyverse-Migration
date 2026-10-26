@@ -126,6 +126,19 @@ export default async function BankPage() {
         </Link>
       </div>
 
+      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <Button asChild variant="outline" size="sm" className="min-h-11">
+          <Link href="/bank/standing.csv" download>
+            {localeLabel(locale, '현재 가상 현금·예금 CSV 저장', 'Download current virtual cash/deposit CSV', '現在の仮想現金・預金CSVを保存', '下载当前虚拟现金及存款CSV')}
+          </Link>
+        </Button>
+        <span>{localeLabel(locale,
+          '현재 잔액 참고용입니다. 미수령 이자는 예상치이며 거래 영수증이나 은행 증명서가 아닙니다.',
+          'Current balances only. Unclaimed interest is estimated; not a transaction receipt or bank certificate.',
+          '現在の残高のみ。未受領利息は推定値であり、取引領収書や銀行証明書ではありません。',
+          '仅供参考当前余额。未领取利息为估算值，并非交易收据或银行证明。')}</span>
+      </div>
+
       {/* 3. 3대 핵심 서브 탭 UI (저축/모으기, 대출/신용, 통계/자산분석) */}
       <Tabs defaultValue="savings" className="space-y-6">
         <TabsList className="grid grid-cols-3 max-w-md w-full h-11 p-1 bg-muted/60 rounded-xl">

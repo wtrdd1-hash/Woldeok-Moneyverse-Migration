@@ -39,6 +39,10 @@ Existing bonds are likewise not retroactively rewritten by a later policy releas
 
 All balance, loan, bond and interest amounts must remain canonical integer strings across the API. Use `BigInt` only for exact arithmetic in code paths that need it.
 
+## Private current cash/deposit snapshot (candidate only)
+
+A signed-in member can request `/bank/standing.csv`, which obtains `GET /api/v1/banking/standing/snapshot` from the owner-scoped PostgreSQL `bank_get_my_standing` read function. Android uses `GET /app-api/v1/banking/standing/snapshot` with the same session/consent policy. The response is private and non-cacheable. Cash, deposits and **estimated, unclaimed** interest remain exact integer strings; the export excludes loans, bonds, transaction history and third-party data. It is not a bank certificate, paid-interest receipt, ledger settlement or full net-worth statement. Failed authentication/DB/validation produces no CSV. This is an unmerged feature candidate; release remains on hold.
+
 ## Related surfaces
 
 - `/bank`

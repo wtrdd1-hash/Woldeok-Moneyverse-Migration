@@ -159,6 +159,19 @@ describe('app API route compatibility', () => {
     expect([...new Uint8Array(await response.arrayBuffer())]).toEqual([1, 2, 3]);
   });
 
+  it('keeps bank standing snapshots private even if upstream forgets privacy headers', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ scope: 'current_virtual_cash_deposit_only' }), {
+      status: 200, headers: { 'content-type': 'application/json' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/banking/standing/snapshot', { cookie: 'mv_session=opaque' }), context('banking', 'standing', 'snapshot'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toContain('noindex');
+    expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('cookie')).toContain('mv_session=opaque');
+  });
+
   it('does not reflect a spoofed forwarded host into contract metadata', async () => {
     const response = await GET(
       request('/app-api/v1/meta/contract', { 'x-forwarded-host': 'attacker.example', 'x-forwarded-proto': 'http' }),

@@ -196,6 +196,25 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('balanced banking gameplay contract', ()
     });
   });
 
+  it('returns exact owner-selected virtual cash/deposit strings under app role and denies private table reads', async () => {
+    await rolledBack(async (client) => {
+      const wide = BigInt('9007199254740993');
+      const { actor } = await memberWithBalances(client, wide, 275n);
+      await client.query('SET LOCAL ROLE moneyverse_app');
+      const result = (await client.query<{ standing: Record<string, unknown> }>(
+        'SELECT public.bank_get_my_standing($1) AS standing', [actor],
+      )).rows[0]?.standing;
+      expect(result?.cash_balance).toBe(wide.toString());
+      expect(result?.bank_balance).toBe('275');
+      expect(typeof result?.unclaimed_interest).toBe('string');
+      const invalidActor = await rejected(client, 'SELECT public.bank_get_my_standing($1)', [randomUUID()]);
+      expect(code(invalidActor)).toBe('28000');
+      const privateRead = await rejected(client, 'SELECT * FROM public.virtual_bank_deposit_trackers');
+      expect(code(privateRead)).toBe('42501');
+      await client.query('RESET ROLE');
+    });
+  });
+
   it('reports the same effective deposit rate the claim function uses', async () => {
     await rolledBack(async (client) => {
       const { actor } = await memberWithBalances(client, 1000n, 1000n);

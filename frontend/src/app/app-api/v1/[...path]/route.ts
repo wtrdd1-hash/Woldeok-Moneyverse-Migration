@@ -144,6 +144,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     const value = response.headers.get(name);
     if (value) headers.set(name, value);
   }
+  if (parts[0] === 'banking' && parts[1] === 'standing' && parts[2] === 'snapshot' && parts.length === 3) {
+    headers.set('cache-control', 'private, no-store');
+    headers.set('x-robots-tag', 'noindex, nofollow');
+    headers.set('x-content-type-options', 'nosniff');
+  }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
