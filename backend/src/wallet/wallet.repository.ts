@@ -394,17 +394,19 @@ export class PostgresWalletRepository {
 
   async searchRecipients(query: string, currentUserId: string): Promise<{ userId: string; displayName: string }[]> {
     const q = (query || '').trim();
-    if (!q) return [];
+    // Literal substring matching avoids allowing % or _ to enumerate unrelated profiles.
+    if (!q || q.length > 64) return [];
     return queryRows<{ userId: string; displayName: string }>(
       this.pool,
       `SELECT profile.user_id::text AS "userId", profile.display_name AS "displayName"
        FROM public.member_profiles AS profile
        JOIN public.users AS u ON u.id = profile.user_id
-       WHERE profile.display_name ILIKE $1
+       WHERE strpos(lower(profile.display_name), lower($1::text)) > 0
          AND profile.user_id != $2::uuid
          AND u.status = 'active'::public.user_status
+       ORDER BY lower(profile.display_name), profile.user_id
        LIMIT 10`,
-      [`%${q}%`, currentUserId],
+      [q, currentUserId],
     );
   }
 
