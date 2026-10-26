@@ -1,3 +1,12 @@
+## 기획 v1334 — F675-140 문의 검색 개인정보·커서 무결성 개선 (기능 보완 / 초안 / 운영 보류)
+- 이전 Feature Addition v1332 → 현재 Feature Improvement v1334 → 다음 Feature Addition v1336(잠정). main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작·중간 확인, AGENTS/README/영어 정본/한국어 대조. 미병합 v1332 Draft #1468에 적층된 문서 기획. 개발 #1467, P0 #993/#1469/#1170.
+- 실제 /support는 GET /threads와 ?thread 선택만 있으며 Migration196 목록 기본50/최대100, 마지막 메시지 역순; 상태 open/waiting_user/resolved, 검색 미구현. v1332 GET q URL 개인정보 누출 위험을 수정하여 **CSRF 보호 읽기 전용 POST /api/v1/support/threads/search** JSON q/status/from/to/cursor/limit 제안, 기존 GET 유지, 검색어 URL/Referer/로그 금지.
+- 제목 NFC 정규화·영문 ASCII만 대소문자 무시·역슬래시/%/_ 문자 그대로 SQL 바인딩·2~80 코드포인트, Asia/Seoul 포함 날짜→UTC 반열림 구간. 생성일/id 키셋+상한 튜플, 실제 AuthSessionRow.id/회원/필터 결합 15분 서명 커서와 키 교체, 상태 경합은 실시간 결과(고정 스냅샷 아님). ?thread 직접 링크는 필터와 독립 본인 검증, 필터 첫 항목 자동 선택 금지, 검색 DB 쓰기 0.
+- P0 ENV1334-01 SEC1334-02 REL1334-03 SUP1334-04; P1 SUP1334-05 SUP1334-06 SUP1334-07 SUP1334-08 SUP1334-09 SUP1334-10. SECDEF 고정 search_path/PUBLIC 회수/본인 SQL 조건/앱 직접 DML 금지, 20/최대50, 격리 10,001건·동시/타인100건, WCAG/Android/SEO/관리자 익명 KPI, 플래그 OFF·롤백. 화면/API/DB/트랜잭션/오류/검증 상세는 기존 영문·국문 통합 기획서.
+- QA v1303 프론트 1,423 PASS, typecheck/lint/build PASS; 전체 감사 Critical2/High8 FAIL, 봇 감사 Critical1/High5 FAIL, 경로·원장 FAIL. 개발 DB 앱 DML 235/241, PUBLIC 은행 SECDEF 3, #1469 적용 마이그레이션 5개 SHA 불일치; 루트98%/2.1GiB, 데이터91%/18GiB. 정확 SHA Test·격리 복원·운영 승격 BLOCKED. 외부 근거 신규 승인 0, 누적 중복 제거 승인 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임/DB/WLD/원장/Test/운영 변경 없음.
+- 전체 백로그 식별자: ENV1334-01 SEC1334-02 REL1334-03 SUP1334-04 SUP1334-05 SUP1334-06 SUP1334-07 SUP1334-08 SUP1334-09 SUP1334-10.
+
+
 ## 기획 v1332 — F675-140 회원 문의 이력 검색 (기능 추가 / 초안 / 운영 보류)
 - 이전 Feature Improvement v1330 → 현재 Feature Addition v1332 → 다음 Feature Improvement v1334(잠정). main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재확인, AGENTS·README·영어 정본·한국어 대조. 개발 이슈 [#1467](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1467). 미병합 v1330 Draft #1461(#1457 선행)에 적층, main 독립 병합 금지, 문서 기획만 수행.
 - 실제 코드: `/support`는 반환 목록만 표시하고 검색·필터·커서가 없으며 Migration196 `support_my_threads`는 기본 50/최대 100건. 과거 문의를 못 찾을 가능성은 있으나 운영 장애 확정 아님. 신규 기능은 **제목 문자 그대로 검색**·상태/생성일 필터·생성일 키셋 20건(최대 50) 페이지, 메시지 본문 검색·검색 이력 저장 제외.

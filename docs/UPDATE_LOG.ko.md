@@ -1,3 +1,10 @@
+## 2026-10-27 — 기획 v1334 (F675-140 기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1332 / 현재 보완 v1334 / 다음 추가 v1336. main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작·중간 확인, 미병합 Draft #1468에 적층. 개발 #1467.
+- v1332 GET 검색어 URL 누출 설계를 읽기 전용 CSRF 보호 POST JSON으로 수정, 기존 GET 유지; 실제 AuthSessionRow.id 결합 커서, NFC/ASCII 문자 그대로 검색, 한국 날짜 경계, 서명 상한 키셋·상태 경합, 상세 직접 링크 독립 검증, SQL 본인 격리, Android/접근성/noindex/관리자 k>=20.
+- P0 ENV1334-01 SEC1334-02 REL1334-03 SUP1334-04; P1 SUP1334-05 SUP1334-06 SUP1334-07 SUP1334-08 SUP1334-09 SUP1334-10. QA v1303 전체/봇 감사·경로 원장 FAIL, #1469 체크섬 5건 불일치, 루트98%, Test/운영 HOLD. 외부 근거 10,000건 게이트 신규0·누적 UNKNOWN/BLOCKED. 문서만 변경, 런타임/DB/WLD/원장/플래그/배포 변경 없음.
+- GitHub Draft PR: PLANNING_PR_PENDING.
+
+
 ## 2026-10-27 — 기획 v1332 (F675-140 기능 추가 / 초안 / 운영 보류)
 - 이전 보완 v1330 / 현재 추가 v1332 / 다음 보완 v1334. main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재확인, 영문 정본/한국어 대조, 개발 이슈 [#1467](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1467). 미병합 v1330 #1461에 적층, 문서만 변경.
 - 실제 /support에는 검색/필터/더보기 없고 Migration196 회원 목록은 기본 50/최대100건. 본인 제목 검색·상태/기간 필터·생성일 키셋·15분 서명 커서·SECDEF·앱 직접 권한 금지·Android/WCAG/noindex/no-store·오류 구분 설계. P0 ENV1332-01 SEC1332-02 REL1332-03 SUP1332-04; P1 SUP1332-05 SUP1332-06 SUP1332-07 SUP1332-08 SUP1332-09 SUP1332-10.

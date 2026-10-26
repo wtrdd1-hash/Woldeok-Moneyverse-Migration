@@ -1,3 +1,9 @@
+## v1334 — F675-140 Support Search Privacy and Cursor Integrity (Improvement / DRAFT / HOLD)
+- Previous Addition v1332 → Current Improvement v1334 → Next Addition v1336; main 0fe614b2ca1a7bc0df540514e54db78130479e2a start/mid. v1332 #1468 unmerged; no runtime change.
+- Correct unimplemented GET q-in-URL proposal to CSRF-protected read-only POST search with JSON body, preserve GET list. Actual session field is id, not session_generation. NFC literal title matching, ASCII-only casefold, escaped SQL LIKE wildcards, Asia/Seoul calendar to UTC half-open; 15min signed owner/session/filter/upper-watermark keyset, live status changes documented, independent owner-scoped ?thread deep links.
+- P0 ENV1334-01 SEC1334-02 REL1334-03 SUP1334-04; P1 SUP1334-05 SUP1334-06 SUP1334-07 SUP1334-08 SUP1334-09 SUP1334-10. QA v1303 audit-full/bot/route-ledger FAIL; dev DB app DML 235/241, PUBLIC SECDEF 3, #1469 five migration checksum mismatches, root98%. 10,001 synthetic/100 BOLA, no DB writes, Android/WCAG/SEO/admin k>=20, exact-SHA Test and rollback. External evidence 0 new, cumulative UNKNOWN/10,000 BLOCKED. Details in integrated master.
+
+
 ## v1332 — F675-140 Member Support History Search (Addition, DRAFT/HOLD)
 - Previous Improvement v1330 → Current Addition v1332 → Next Improvement v1334; main `0fe614b2ca1a7bc0df540514e54db78130479e2a` start/mid; engineering [#1467](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1467); stacked on unmerged v1330 #1461.
 - Verified source: /support list no search or Load more; Migration196 member thread list default 50/max 100. Proposed member-only literal **subject** search, status/date filters, stable created-at keyset cursor, 20/50 limit, no body indexing; owner SECDEF, session/consent, no GET writes, noindex/no-store, Android/a11y/admin k>=20. No confirmed Production issue.

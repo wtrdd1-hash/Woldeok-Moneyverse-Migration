@@ -1,3 +1,42 @@
+## 기획 v1334 — F675-140 문의 검색 전송·정규화·커서 무결성 개선 (기능 보완 / 초안 / 운영 보류)
+
+**주기:** 이전 Feature Addition v1332 → 현재 Feature Improvement v1334 → 다음 Feature Addition v1336(잠정). GitHub main 시작·중간 0fe614b2ca1a7bc0df540514e54db78130479e2a 확인, main AGENTS.md·README.md·PROJECT_PLAN.md(영어 정본)·PROJECT_PLAN.ko.md 대조. 미병합 v1332 Draft #1468에 적층된 문서 초안으로 main 구현·배포 아님. 개발 #1467, 보안 #993, 마이그레이션 불일치 #1469, 용량 #1170. Gemini/A/B/C/QA 작업 변경 없음.
+
+### 실제 코드, 목적, v1332 대비 수정
+- 실제 frontend/src/app/support/page.tsx는 GET /api/v1/support/threads를 사용하고 첫 반환 문의를 자동 선택하며 ?thread=uuid를 받음. 검색·필터·더 보기 미구현. SupportController.threads는 SessionGuard/AuthenticatedGuard/ConsentGuard와 SupportRepository.myThreads를 사용하며 Migration 196 support_my_threads는 last_message_at 역순 기본50/최대100. 상태는 open/waiting_user/resolved. created_at/id는 존재하나 인덱스는 user_id,last_message_at,id 기준. Android /app-api/v1 프록시는 POST 지원. AuthSessionRow에는 id/user_id가 있지만 session_generation 필드는 없음. 이는 코드 확인 사실이며 운영 사고 확인은 아님.
+- v1332 설계의 개인정보 위험 수정: GET /threads/search?q=...는 no-store여도 브라우저·프록시·엣지 로그·Referer에 검색어가 남을 수 있음. **미구현 신규 검색 GET 대신 CSRF 보호 POST /api/v1/support/threads/search + JSON 본문**으로 변경. 검색은 POST여도 DB 읽기 전용이며 상태 변경 금지. 기존 GET /api/v1/support/threads는 변경 없이 보존. 브라우저 주소·기록·분석·엣지 로그·Referer·canonical·OG에 원문 검색어 금지.
+- 대상은 로그인한 활성 회원의 과거 문의 찾기. 관리자 개별 검색 불가, 메시지 본문 검색 없음, 공개 색인 없음, WLD·원장 영향 없음. F675-136 읽음, F675-138 해결 확인, F675-139 임시글과 구현 범위 분리. 기능 플래그 기본 OFF.
+
+### 화면·CTA·상태·권한·개인정보
+- /support에 제목 검색(공백 제거·NFC 후 2~80 유니코드 코드포인트), 상태(전체/open/waiting_user/resolved), 생성일 시작·종료, **검색**, **초기화**, **더 보기**, **검색 다시 시작**, **문의 열기** 제공. 같은 출처 POST/서버 액션 사용, 필터는 일시적 폼/컴포넌트 상태에만 보유하며 localStorage·URL·영구 서버 검색 기록에 저장 금지. 기존 ?thread=uuid는 상세 직접 링크로 유지; 선택 문의는 필터 결과에 포함되지 않아도 독립적으로 본인 권한 검증 후 조회. 필터 첫 결과를 자동 선택하지 않음. 타인/삭제/잘못된 ID는 비노출 이용불가 처리. 결과 링크에는 검색어 대신 문의 UUID만 사용.
+- 상태 IDLE/LOADING/RESULTS/NO_MATCH/EMPTY_ACCOUNT/MORE_AVAILABLE/END_OF_RESULTS/CURSOR_EXPIRED/FILTER_CHANGED/SESSION_EXPIRED/UNAVAILABLE/SELECTED_OUTSIDE_FILTER. 성공한 서버 응답 hasMore=false에서만 종료 표시, 503·시간 초과를 빈 결과로 처리 금지. 필터 변경 시 커서/결과 초기화, 이전 지연 응답은 요청 세대 번호와 AbortController로 폐기. 더 보기 중복 클릭 차단, threadId 중복 제거하되 상태 스냅샷 보장 주장 금지.
+- 검색 의미: 입력 q와 저장 제목 양쪽을 NFC 정규화(PostgreSQL UTF-8 normalize() 실제 격리 DB 지원 확인), 제어문자 거부, 2~80 코드포인트, SQL 바인딩과 명시적 ESCAPE로 역슬래시·%·_를 와일드카드 아닌 문자 그대로 처리. 영문 A–Z만 명시적 ASCII translate로 대소문자 무시, 한글은 NFC 후 문자 그대로 비교. 전체 유니코드 case folding 보장 금지. q 생략/빈 문자열은 제목 필터 없음, 비어 있지 않은 한 글자는 422. 화면에 제목만 검색한다는 범위 명시.
+- 회원에게 보이는 날짜는 Asia/Seoul 달력 기준, 시작일 포함·종료일 포함을 서버에서 UTC [시작일 자정, 종료 다음날 자정)으로 한 번 변환; 단순 24시간 더하기 금지. from<=to, 양쪽 제공 시 최대 366달력일, 한쪽 생략 가능. 정규화된 상태·기간·q로 필터 digest 생성. 본문·첨부·원문 검색어·회원 제목은 관리자 통계에서 제외.
+
+### API·커서·DB·트랜잭션
+- **POST /api/v1/support/threads/search**에 SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard 적용. JSON {q?,status?,from?,to?,cursor?,limit?}, 기본20/최대50. 응답 {items:[{threadId,subject,status,createdAt,lastMessageAt}],nextCursor:string|null,hasMore:boolean,order:"created_desc",consistency:"live_status"}. 오류 400 형식, 401 세션, 403 동의/CSRF, 409 만료/불일치 커서와 다시 시작, 422 입력, 429 속도 제한, 503 DB 장애. POST이지만 DB 쓰기 0·읽음 상태 변경 0, private/no-store·Referrer-Policy no-referrer. 플래그 OFF/롤백 시 기존 GET 목록 유지.
+- 첫 페이지에 생성일 상한 튜플(created_at,id)과 키셋 경계 기록. 후속 페이지는 (created_at,id)<=상한 및 (created_at,id)<직전 튜플, ORDER BY created_at DESC,id DESC LIMIT limit+1. 15분 이내 HMAC 서명 불투명 커서는 실제 AuthSessionRow.id(없는 session_generation 사용 금지), 서버 검증 actor UUID, 정규화 필터 digest, 상한·마지막 튜플, 발급·만료, 키 ID에 결합. 상수 시간 MAC 검증, 키 교체 중첩은 최대 토큰 TTL, 크기 <=2KB. 로그에 커서·세션 ID·q 금지, 로그아웃·계정 변경·필터 변경·변조·만료는 조회 전에 거부. 여러 HTTP 요청에 걸친 DB 스냅샷은 아님: 상태 변경 시 결과 포함 여부가 달라질 수 있음을 알리고 새로 검색하도록 안내. 중복 ID·거짓 종료 방지. 생성일 불변성은 승인된 향후 최소권한/스키마 강화에서 검증; Migration196 직접 수정 금지.
+- 새 전진형 SECURITY DEFINER support_my_threads_search_v1 함수에 actor, 문자 그대로 q, 상태, UTC 기간, 상한/직전 튜플, limit 명시. search_path=pg_catalog,pg_temp, SQL 내부 t.user_id=p_actor 조건, 서버 세션·동의 검증 필수. PUBLIC EXECUTE 회수, 실제 권한 음성 테스트 후 moneyverse_app만 EXECUTE; 앱 테이블 직접 DML 권한 부여 금지. actor UUID 인수 자체는 DB 인증 아님. 후보 인덱스 (user_id,created_at DESC,id DESC), 필요 시 (user_id,status,created_at DESC,id DESC)는 격리 PostgreSQL EXPLAIN/BUFFERS 근거 후만 채택. SQL 파라미터 바인딩·statement_timeout·상한 필수; pg_trgm/외부 검색 서비스 기본 미도입. 기획 중 DB 변경 없음.
+- 성능/악용 방지: 본인 10,001건·100명 편중 합성 fixture, 교차 회원 스캔/제목 노출 금지, 격리 DB p95 <=300ms와 메모리 상한 측정, 동시 페이지 100건, 회원+신뢰 엣지 IP 기준 제한, 최대50건/커서2KB, 확인되지 않은 totalCount 금지. DB 장애는 503으로 실패 폐쇄, 잘린 목록을 완전한 이력으로 표시 금지. 금융·원장·백그라운드 작업 영향 없음.
+- 관리자에게는 k>=20인 익명 성공률·오류율·지연 집계만. 비공개 noindex,nofollow, 사이트맵/공개 canonical/OG 검색어 금지. WCAG 2.2 AA, 입력 레이블·키보드/포커스·320px·200% 확대·동작 감소·스크린리더 결과 안내. Android App API POST·CSRF·세션·409 재시작 동등성.
+
+### P0/P1 개발 백로그 — 별도 개발 브랜치·정확 SHA 필수
+- **P0 ENV1334-01:** 루트 98%/약2.1GiB, 데이터 91%/약18GiB; 담당자 승인 후 Worktree 소유권·체크섬 확인, 암호화 격리 백업·복원, 무손실 여유 공간 검증. Gemini/A/B/C/QA 보존.
+- **P0 SEC1334-02:** 개발 moneyverse_app 직접 DML 235/241 및 PUBLIC 은행 SECDEF 3건을 전진형 최소권한으로 해결, 런타임 계정 확인, GitHub #1469 적용 SQL 체크섬 5개(219,220,221,234,266) 및 280 충돌 조사; 적용 SQL/체크섬 수정 금지.
+- **P0 REL1334-03:** QA v1303 전체 감사 Critical2/High8, 봇 감사 Critical1/High5, 경로·원장 검증 FAIL; 정확 main/후보 SHA CI, 인증 Test E2E, DB 권한 음성 테스트, 백업·복원, 금융 대사, GitOps 승인 전 운영 금지.
+- **P0 SUP1334-04:** URL/Referer/로그 검색어 누출, 타인 문의 열거, 허위 빈 결과/종료 방지; CSRF·세션·동의·SQL 본인 필터 및 음성 테스트 전 출시 차단.
+- **P1 SUP1334-05:** POST JSON 검색, 플래그 OFF 기존 GET 폴백, 서버 액션·Android App API POST/CSRF 동등성.
+- **P1 SUP1334-06:** NFC·ASCII 대소문자·LIKE 문자 이스케이프·UTC 날짜 경계·422 실제 PG 테스트.
+- **P1 SUP1334-07:** 세션 ID 결합 서명 커서, 상한 튜플, 키 회전·무효화·상태 경합 안내.
+- **P1 SUP1334-08:** 전진형 SECDEF, 본인/생성일 인덱스, 쿼리 계획·성능 검증, 기존 마이그레이션 불변.
+- **P1 SUP1334-09:** /support 선택 독립 직접 링크, 오류/빈 상태, 모바일/접근성, Android, 관리자 익명 KPI.
+- **P1 SUP1334-10:** 격리 PostgreSQL 10,001건, 동시100·타 회원 접근100, 유니코드/와일드카드, UTC 날짜 경계, 로그아웃·계정 변경·CSRF 오류, 페이지 간 상태 변경, 검색 쓰기0, 플래그 OFF·롤백 회귀.
+- **배포:** 지금은 문서만. 별도 개발 브랜치·전진형 마이그레이션·기본 OFF, 정확 SHA Test/격리 DB 복원·인증 금융/개인정보 E2E, 단계적 카나리 및 기존 GET 복귀 가능한 롤백 후에만 승격. 기획 PR 직접 병합/운영 적용 금지.
+- **외부 근거 게이트:** 독립 출처 10,000건 실제 수집·중복 제거·분류·승인 필요. 이번 신규 승인 0, 누적 승인 UNKNOWN, BLOCKED/IN PROGRESS. 기존 OWASP/PostgreSQL/W3C 자료는 배경 참고이며 독립 승인 수량에 미포함.
+
+**전체 백로그 식별자:** ENV1334-01 SEC1334-02 REL1334-03 SUP1334-04 SUP1334-05 SUP1334-06 SUP1334-07 SUP1334-08 SUP1334-09 SUP1334-10.
+
+
 ## 기획 v1332 — F675-140 회원 문의 이력 제목 검색·상태/기간 필터·본인 한정 페이지네이션 (기능 추가 / 초안 / 운영 보류)
 
 **사이클:** 이전 Feature Improvement v1330 → 현재 Feature Addition v1332 → 다음 Feature Improvement v1334(잠정). 원격 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인, AGENTS.md·README.md·영어 정본 PROJECT_PLAN.md·한국어 대조. 개발 이슈 [#1467](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1467). 이전 기획 Draft #1461은 미병합 #1457에 적층되어 있으므로 현재 문서 브랜치도 main에 독립 병합 금지. **문서 기획만 수행**하며 구현은 별도 승인·개발 브랜치가 필요함.
