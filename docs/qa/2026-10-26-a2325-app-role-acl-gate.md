@@ -3,10 +3,10 @@
 **Candidate:** `auto/hourly-a-repair-privilege-gate-20261026-2325`, based on main `0fe614b2ca1a7bc0df540514e54db78130479e2a`.
 
 ## Scope and validation
-- Added a **read-only** SQL catalog snapshot and fail-closed Python validator, with seven unit tests. This is a security diagnostic, **not a completed full-stack member feature or an ACL fix**.
-- TDD RED: validator absent, test discovery failed as expected. GREEN: 7/7 Python unit tests pass; Python syntax check and Git whitespace check pass.
-- Actual production-connected development DB, READ ONLY: **FAIL** (`PROTECTED_DIRECT_DML`, `UNSCOPED_DEFAULT_APP_GRANTS`, `PUBLIC_BANK_EXECUTE`). These are security failures, not waived checks.
-- Isolated PostgreSQL `wdmv_v761_test_acl`, READ ONLY: **UNKNOWN** (`MISSING_BANK_FUNCTIONS`). This isolated schema is insufficient to certify the bank ACL boundary.
+- Added a **read-only** SQL catalog snapshot and fail-closed Python validator, with eight unit tests. This is a security diagnostic, **not a completed full-stack member feature or an ACL fix**.
+- TDD RED: validator absent, test discovery failed as expected. GREEN: 8/8 Python unit tests pass; Python syntax check and Git whitespace check pass.
+- Actual production-connected development DB, READ ONLY: **FAIL** (`PROTECTED_DIRECT_DML`, `UNREVIEWED_APP_DML`, `UNSCOPED_DEFAULT_APP_GRANTS`, `PUBLIC_BANK_EXECUTE`). These are security failures, not waived checks.
+- Isolated PostgreSQL `wdmv_v761_test_acl`, READ ONLY: **FAIL** (`UNREVIEWED_APP_DML`) with **incomplete coverage** (`MISSING_BANK_FUNCTIONS`). This isolated schema is insufficient to certify the bank ACL boundary.
 - No schema migration, DML, privilege mutation, fixture, application runtime, service restart, or Production write was executed.
 - No full build/lint/typecheck/contract/authenticated E2E/backup-restore/migration parity/official Test exact-SHA release certification for this candidate. **Do not merge.**
 
@@ -26,3 +26,5 @@
 - The two main-ancestor branches and ten unavailable Git-object branches remain preserved because other automations may reference them; 280 locally verifiable unique unmerged branches also preserved.
 - SQL catalog counts: 241 public base tables, 235 app-writable; 3 legacy PUBLIC bank overloads; app default ACL entries 8 table / 3 sequence / 1 function.
 - Exact branch SHA and CI evidence are tracked in Draft PR #1464; any new commit requires revalidation.
+
+- Conservative allowlist: only documented direct-write session tables `auth_sessions` and `oauth_challenges` are exempt from `UNREVIEWED_APP_DML`; any other direct DML requires explicit owner review. The isolated database also has unreviewed writes and is missing bank functions.

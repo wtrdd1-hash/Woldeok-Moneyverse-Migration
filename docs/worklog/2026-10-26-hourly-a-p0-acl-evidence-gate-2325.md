@@ -52,3 +52,9 @@
 - Remote branches 293→294; open PRs 286→287; 8 changed files; deleted 0. Two main-ancestor, ten unavailable, and 280 unmerged unique-commit branches preserved due cross-agent references and safety.
 - SQL catalog: 241 public tables, 235 app-writable, 3 PUBLIC bank overloads; default app ACL entries 8 table / 3 sequence / 1 function.
 - PR CI is asynchronous and cannot be considered PASS until a final-SHA result is observed.
+
+### 23:42 KST — Extended least-privilege gate (RED→GREEN)
+- Added eighth RED test: nonfinancial direct table writes outside the documented session exceptions must not yield a false PASS. Observed test FAIL, then implemented conservative unreviewed-DML detection; 8/8 unit PASS.
+- Real development DB READ ONLY: FAIL (PROTECTED_DIRECT_DML, UNREVIEWED_APP_DML, UNSCOPED_DEFAULT_APP_GRANTS, PUBLIC_BANK_EXECUTE).
+- Isolated Test DB READ ONLY: FAIL (UNREVIEWED_APP_DML), with MISSING_BANK_FUNCTIONS indicating incomplete bank ACL coverage.
+- Earlier 7/7 and isolated UNKNOWN checkpoints are historical, superseded by these final findings. No SQL mutation or migration.

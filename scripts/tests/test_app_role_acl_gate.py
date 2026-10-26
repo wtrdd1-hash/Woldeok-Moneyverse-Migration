@@ -16,6 +16,7 @@ def baseline():
         "required_tables_missing": [],
         "bank_overload_count": 6,
         "protected_direct_dml": [],
+        "unreviewed_direct_dml": [],
         "default_app_grants": [],
         "public_bank_overloads": [],
     }
@@ -31,6 +32,11 @@ class AppRoleAclGateTests(unittest.TestCase):
         status, findings = gate.evaluate(data)
         self.assertEqual(status, "FAIL")
         self.assertIn("PROTECTED_DIRECT_DML", findings)
+
+    def test_unreviewed_app_table_writes_fail_even_if_financial_tables_are_clean(self):
+        data = baseline()
+        data["unreviewed_direct_dml"] = [{"table": "member_board_posts", "privilege": "UPDATE"}]
+        self.assertEqual(gate.evaluate(data), ("FAIL", ["UNREVIEWED_APP_DML"]))
 
     def test_future_default_grants_fail(self):
         data = baseline()

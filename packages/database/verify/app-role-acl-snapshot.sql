@@ -26,6 +26,17 @@ direct_dml AS (
   CROSS JOIN LATERAL (VALUES ('INSERT'), ('UPDATE'), ('DELETE')) v(privilege)
   WHERE pg_catalog.has_table_privilege(pg_catalog.to_regrole('moneyverse_app'), p.oid, v.privilege)
 ),
+unreviewed_dml AS (
+  SELECT p.relname, v.privilege
+  FROM protected p
+  CROSS JOIN LATERAL (VALUES ('INSERT'), ('UPDATE'), ('DELETE')) v(privilege)
+  -- These two session tables are explicitly documented direct-write exceptions.
+  -- Other direct writers need an individually reviewed allowlist entry.
+  WHERE p.relname NOT IN ('auth_sessions', 'oauth_challenges')
+    AND pg_catalog.has_table_privilege(
+      pg_catalog.to_regrole('moneyverse_app'), p.oid, v.privilege
+    )
+),
 default_app AS (
   SELECT d.defaclobjtype, a.privilege_type
   FROM pg_catalog.pg_default_acl d
@@ -66,6 +77,11 @@ SELECT pg_catalog.jsonb_build_object(
       pg_catalog.jsonb_build_object('table', relname, 'privilege', privilege)
       ORDER BY relname, privilege
     ) FROM direct_dml), '[]'::jsonb),
+  'unreviewed_direct_dml',
+    COALESCE((SELECT pg_catalog.jsonb_agg(
+      pg_catalog.jsonb_build_object('table', relname, 'privilege', privilege)
+      ORDER BY relname, privilege
+    ) FROM unreviewed_dml), '[]'::jsonb),
   'default_app_grants',
     COALESCE((SELECT pg_catalog.jsonb_agg(
       pg_catalog.jsonb_build_object('object', defaclobjtype, 'privilege', privilege_type)

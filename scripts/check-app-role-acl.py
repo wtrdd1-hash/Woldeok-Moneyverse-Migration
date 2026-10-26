@@ -11,6 +11,7 @@ FIELDS = (
     "required_tables_missing",
     "bank_overload_count",
     "protected_direct_dml",
+    "unreviewed_direct_dml",
     "default_app_grants",
     "public_bank_overloads",
 )
@@ -41,6 +42,7 @@ def evaluate(snapshot):
     failures = []
     for field, reason in (
         ("protected_direct_dml", "PROTECTED_DIRECT_DML"),
+        ("unreviewed_direct_dml", "UNREVIEWED_APP_DML"),
         ("default_app_grants", "UNSCOPED_DEFAULT_APP_GRANTS"),
         ("public_bank_overloads", "PUBLIC_BANK_EXECUTE"),
     ):
