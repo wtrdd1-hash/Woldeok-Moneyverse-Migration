@@ -89,6 +89,18 @@ export interface TreasuryBondsOverview {
   benchmark5YYield: string;
 }
 
+/** Missing or inactive virtual bonds have no published benchmark yield. */
+export function bondBenchmarkYield(
+  bonds: readonly Pick<TreasuryBondRow, 'symbol' | 'annual_coupon_rate_bps' | 'status'>[],
+  symbol: string,
+): string {
+  const match = bonds.find((bond) => bond.symbol === symbol &&
+    (bond.status === 'OPEN_SUBSCRIPTION' || bond.status === 'TRADING'));
+  return match && Number.isSafeInteger(match.annual_coupon_rate_bps) && match.annual_coupon_rate_bps >= 0
+    ? `${(match.annual_coupon_rate_bps / 100).toFixed(2)}%`
+    : '—';
+}
+
 @Injectable()
 export class TreasuryBondRepository {
   private readonly logger = new Logger(TreasuryBondRepository.name);
@@ -176,9 +188,6 @@ export class TreasuryBondRepository {
     ]);
 
     const bonds = await this.listBonds();
-    const b1Y = bonds.find(b => b.symbol === 'KTB-01Y')?.annual_coupon_rate_bps ?? 450;
-    const b3Y = bonds.find(b => b.symbol === 'KTB-03Y')?.annual_coupon_rate_bps ?? 520;
-    const b5Y = bonds.find(b => b.symbol === 'KTB-05Y')?.annual_coupon_rate_bps ?? 650;
 
     return {
       totalBondsActive: Number(bondsRes.rows[0]?.count ?? '0'),
@@ -186,9 +195,9 @@ export class TreasuryBondRepository {
       totalHoldersCount: Number(holdingsRes.rows[0]?.count ?? '0'),
       totalCouponsPaidWld: couponsRes.rows[0]?.total ?? '0',
       totalRepoLoansWld: repoRes.rows[0]?.total ?? '0',
-      benchmark1YYield: `${(b1Y / 100).toFixed(2)}%`,
-      benchmark3YYield: `${(b3Y / 100).toFixed(2)}%`,
-      benchmark5YYield: `${(b5Y / 100).toFixed(2)}%`,
+      benchmark1YYield: bondBenchmarkYield(bonds, 'KTB-01Y'),
+      benchmark3YYield: bondBenchmarkYield(bonds, 'KTB-03Y'),
+      benchmark5YYield: bondBenchmarkYield(bonds, 'KTB-05Y'),
     };
   }
 

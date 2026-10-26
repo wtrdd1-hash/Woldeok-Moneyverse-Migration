@@ -3,6 +3,7 @@
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 
+import Link from 'next/link';
 import React, { useState } from 'react';
 import { 
   FileText 
@@ -196,6 +197,32 @@ export default function IsaCalculatorPage() {
           </div>
         </div>
       </div>
+
+      <section className="rounded-2xl border border-border bg-muted/30 p-4 sm:p-5">
+        <p className="text-sm text-muted-foreground">
+          {localeLabel(
+            locale,
+            '이 계산기는 회원가입 없이 이용할 수 있습니다. 머니버스 가입은 실제 금융상품 가입과 무관합니다.',
+            'This calculator works without signing up. A Moneyverse account is not a real financial product application.',
+            'この計算機は登録せずに利用できます。Moneyverseへの登録は実際の金融商品への申込みではありません。',
+            '无需注册即可使用此计算器。注册 Moneyverse 不等于申请真实金融产品。',
+            'Bạn có thể dùng máy tính mà không cần đăng ký. Tài khoản Moneyverse không phải đơn đăng ký sản phẩm tài chính thực tế.'
+          )}
+        </p>
+        <Link
+          href="/register"
+          className="mt-3 inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+        >
+          {localeLabel(
+            locale,
+            '머니버스 계정 만들기 (선택)',
+            'Create a Moneyverse account (optional)',
+            'Moneyverseのアカウントを作成（任意）',
+            '创建 Moneyverse 账户（可选）',
+            'Tạo tài khoản Moneyverse (không bắt buộc)'
+          )}
+        </Link>
+      </section>
 
       <InArticleAdvertisement className="my-6" />
       <MultiplexAdvertisement className="my-8" />

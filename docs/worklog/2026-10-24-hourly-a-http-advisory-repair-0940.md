@@ -1,0 +1,3 @@
+# A0940 — HTTP dependency security repair (DRAFT / HOLD)
+
+Baseline main `58eb4459c5b0aecef10cb5c0b56fcc64eeae00ed`. Isolated dependency-only repair branch, independent of wallet feature PR #1096 and other agents. PR #1096 CI Test Candidate runtime-check failed after all tests because `pnpm audit --prod --audit-level=high` reported `body-parser@2.3.0` and `multer@2.4.0` high DoS advisories. Main root pnpm override `multer >=2.4.0` was insufficient; body-parser had no override. Plan: write failing lockfile advisory-floor test; raise overrides to patched versions; regenerate lockfile; verify full gates and exact-SHA CI. No DB, ledger, API, authentication, Test/Production mutation. HOLD if any gate fails.
