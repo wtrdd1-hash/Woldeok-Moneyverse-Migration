@@ -4303,7 +4303,7 @@ _No request body._
 | rules[].last_evaluated_at | true | null \| string (date-time) |  |
 | rules[].last_triggered_at | true | null \| string (date-time) |  |
 | rules[].created_at | true | string (date-time) |  |
-| limit | true | integer=100 | const=100 |
+| limit | true | number |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

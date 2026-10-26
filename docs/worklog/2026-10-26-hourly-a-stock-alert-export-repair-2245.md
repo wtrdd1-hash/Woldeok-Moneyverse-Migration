@@ -21,3 +21,8 @@
 - Fresh offline dependencies installed on the data disk. Focused backend 3/3 PASS; frontend+app-api 18/18 PASS; contract build PASS.
 - Separate PostgreSQL scratch database `wdmv_a2245_test` restored from an isolated test DB using a consistent pg_dump snapshot; no source test sessions terminated and no production DB touched. Scratch has 281 applied migrations; current main has 278 migration SQL files (not parity).
 - Main rechecked unchanged `0fe614b2ca1a7bc0df540514e54db78130479e2a`. Full tests, security and exact-SHA release gates pending.
+
+### Contract drift repair (22:49 KST)
+- On latest main, `pnpm api:contract:check` failed because the prior Draft manually recorded response `limit` as OpenAPI `integer const=100`, while the authoritative generator emits `number`. The backend and Next handler both enforce exactly 100 at runtime; do not invent unsupported OpenAPI const metadata.
+- Regenerated all three Android contract/schema reference artifacts (3 lines added, 4 removed) from the current 180-endpoint generator. This is a concrete repair, not a docs-only completion.
+- `pnpm typecheck` PASS; `pnpm lint` PASS (0 errors, 1131 warnings). Root `pnpm test` stopped at the same contract drift before test suites; full tests must be rerun after this fix.

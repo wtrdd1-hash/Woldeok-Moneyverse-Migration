@@ -13435,8 +13435,7 @@
             }
           },
           "limit": {
-            "type": "integer",
-            "const": 100
+            "type": "number"
           }
         },
         "required": [
