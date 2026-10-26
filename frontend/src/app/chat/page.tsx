@@ -11,6 +11,9 @@ import type { ChatConversation, ChatMessage } from './actions';
 import { ChatView } from './chat-view';
 import { ComposeMessageDialog } from './compose-message-dialog';
 
+// Match the UUID contract enforced by OpenConversationDto before sending a write.
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -48,19 +51,30 @@ export default async function ChatPage({
   const conversations = listResult?.conversations ?? [];
   let selectedId = params.conversationId;
 
-  // 2. If peer query param is passed, find or open conversation
+  // 2. If peer query param is passed, find or open conversation.
+  let peerOpenError: string | null = null;
   if (params.peer) {
-    const existing = conversations.find((c) => c.peer_user_id === params.peer);
-    if (existing) {
-      selectedId = existing.conversation_id;
+    if (!UUID_PATTERN.test(params.peer)) {
+      peerOpenError = '대화 상대방 정보를 확인할 수 없어요.';
     } else {
-      try {
-        const opened = await mutate<{ conversation_id: string }>('/api/v1/chat/conversations', {
-          body: { peerUserId: params.peer },
-        });
-        redirect(`/chat?conversationId=${encodeURIComponent(opened.conversation_id)}`);
-      } catch {
-        // If peer open fails (e.g. self chat or blocked), proceed
+      const existing = conversations.find((c) => c.peer_user_id === params.peer);
+      if (existing) {
+        selectedId = existing.conversation_id;
+      } else {
+        let openedId: string | null = null;
+        try {
+          const opened = await mutate<{ conversation_id: string }>('/api/v1/chat/conversations', {
+            body: { peerUserId: params.peer },
+          });
+          if (!UUID_PATTERN.test(opened?.conversation_id ?? '')) {
+            throw new Error('Invalid conversation receipt');
+          }
+          openedId = opened.conversation_id;
+        } catch {
+          peerOpenError = '대화방을 열 수 없어요. 잠시 후 다시 시도해 주세요.';
+        }
+        // Next.js redirect throws; catching it would silently discard a successful open.
+        if (openedId) redirect(`/chat?conversationId=${encodeURIComponent(openedId)}`);
       }
     }
   }
@@ -97,6 +111,11 @@ export default async function ChatPage({
         )}
       </PageHeader>
 
+      {peerOpenError && (
+        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground">
+          {peerOpenError}
+        </p>
+      )}
       <ChatView
         initialConversations={conversations}
         activeConversation={activeConversation}
