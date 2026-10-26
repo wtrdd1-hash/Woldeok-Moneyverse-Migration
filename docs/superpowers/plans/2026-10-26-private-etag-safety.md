@@ -31,6 +31,6 @@
 - [x] Re-run focused Vitest and record GREEN.
 
 ## Task 3: Verification and handoff
-- [ ] Run backend and repository gates, capture exact outcomes.
-- [ ] Refresh main/planning and record overlap status.
-- [ ] Commit, push and open Draft PR only. Keep Production HOLD on any unverified gate.
+- [x] Run backend and repository gates, capture exact outcomes (mandatory failures recorded).
+- [x] Refresh main/planning and record overlap status.
+- [x] Commit, push and open Draft PR only. Keep Production HOLD on unverified gates.
