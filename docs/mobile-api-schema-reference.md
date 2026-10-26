@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -5617,6 +5617,49 @@ _No request body._
 ### Success response fields
 
 _None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/clubs/mine` — List the caller own active club memberships with bounded pagination
+
+- Authorization: 로그인 + 최신 동의; 서버 세션 회원만 조회; private no-store
+- Success status: 200
+- Response mode: json
+- After success: has_more와 next_offset을 확인하여 명시적으로 다음 페이지 요청
+- Operation ID: `ClubController_listMyClubs`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| offset | query | false | integer | minimum=0; maximum=1000000 |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| clubs[] | true | object[] |  |
+| clubs[] | true | object |  |
+| clubs[].id | true | string |  |
+| clubs[].tag | true | string |  |
+| clubs[].name | true | string |  |
+| clubs[].description | true | string |  |
+| clubs[].owner_id | true | string |  |
+| clubs[].owner_name | true | string |  |
+| clubs[].join_mode | true | string |  |
+| clubs[].status | true | string |  |
+| clubs[].level | true | number |  |
+| clubs[].experience | true | string |  |
+| clubs[].member_count | true | number |  |
+| clubs[].created_at | true | string (date-time) |  |
+| clubs[].is_my_club | true | boolean |  |
+| clubs[].my_role | true | null \| string |  |
+| has_more | true | boolean |  |
+| next_offset | true | null \| number |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

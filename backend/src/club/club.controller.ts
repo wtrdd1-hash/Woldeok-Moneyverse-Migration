@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -130,6 +132,18 @@ export class ClubController {
   async createClub(@Req() req: RequestWithSession, @Body() dto: CreateClubDto) {
     const actorUserId = requireUserId(req);
     return this.clubService.createClub(actorUserId, dto, dto.idempotencyKey);
+  }
+
+  @ApiOperation({ summary: '로그인 회원 본인의 활성 클럽 목록 (25개씩)' })
+  @Get('mine')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  async listMyClubs(@Req() req: RequestWithSession, @Query('offset') offset?: string) {
+    const actorUserId = requireUserId(req);
+    if (offset !== undefined && (!/^(0|[1-9]\d{0,6})$/.test(offset) || Number(offset) > 1_000_000)) {
+      throw new BadRequestException('invalid membership offset');
+    }
+    return this.clubService.listMyClubs(actorUserId, offset ? Number(offset) : 0);
   }
 
   @ApiOperation({ summary: '클럽 상세 정보 조회' })

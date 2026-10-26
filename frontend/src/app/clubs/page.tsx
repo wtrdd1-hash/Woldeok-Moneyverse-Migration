@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageHeader } from '@/components/page-header';
-import { apiOrNull } from '@/lib/api';
+import { api, apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
+import { clubMembershipPageHref, formatClubExperience, parseMembershipOffset } from './my-clubs-pagination';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,17 +33,26 @@ export interface ClubItem {
 export default async function ClubsPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly search?: string }>;
+  readonly searchParams: Promise<{ readonly search?: string; readonly myOffset?: string }>;
 }) {
   await requireMember();
   const params = await searchParams;
   const searchQuery = params.search?.trim() || '';
 
-  const result = await apiOrNull<{ clubs: ClubItem[] }>(
-    `/api/v1/clubs${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ''}`,
-  );
+  const myOffset = parseMembershipOffset(params.myOffset);
+  const [result, memberships] = await Promise.all([
+    apiOrNull<{ clubs: ClubItem[] }>(
+      `/api/v1/clubs${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ''}`,
+    ),
+    api<{ clubs: ClubItem[]; has_more: boolean; next_offset: number | null }>(
+      `/api/v1/clubs/mine?offset=${myOffset}`,
+    ).catch(() => null),
+  ]);
+  // An unavailable private membership read must not be misrepresented as zero memberships.
+  const membershipReady = memberships !== null && Array.isArray(memberships.clubs)
+    && typeof memberships.has_more === 'boolean';
+  const myClubs = membershipReady ? memberships.clubs : [];
   const clubs = result?.clubs ?? [];
-  const myClubs = clubs.filter((c) => c.is_my_club);
   const otherClubs = clubs.filter((c) => !c.is_my_club);
 
   return (
@@ -81,13 +91,18 @@ export default async function ClubsPage({
       </div>
 
       {/* 내가 소속된 클럽 섹션 */}
-      {myClubs.length > 0 && (
+      {!membershipReady && (
+        <p role="alert" className="rounded-lg border border-destructive p-4 text-sm">
+          내 클럽 목록을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.
+        </p>
+      )}
+      {membershipReady && (
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             
             <h2 className="text-xl font-bold tracking-tight">내가 소속된 클럽</h2>
             <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-semibold">
-              {myClubs.length}개
+              이 페이지 {myClubs.length}개
             </span>
           </div>
 
@@ -96,6 +111,19 @@ export default async function ClubsPage({
               <ClubCard key={club.id} club={club} />
             ))}
           </div>
+          <nav aria-label="내 클럽 페이지" className="flex items-center gap-4 text-sm">
+            {myOffset > 0 && (
+              <Link className="underline" href={clubMembershipPageHref(Math.max(0, myOffset - 25), searchQuery)}>
+                이전 내 클럽 25개
+              </Link>
+            )}
+            {memberships?.has_more && memberships.next_offset !== null && (
+              <Link className="underline" href={clubMembershipPageHref(memberships.next_offset, searchQuery)}>
+                다음 내 클럽 25개
+              </Link>
+            )}
+            {myClubs.length === 0 && <p>현재 페이지에 활성 클럽 가입 내역이 없습니다.</p>}
+          </nav>
         </section>
       )}
 
@@ -109,7 +137,7 @@ export default async function ClubsPage({
             </h2>
           </div>
           <span className="text-sm text-muted-foreground">
-            총 {otherClubs.length}개의 클럽 활성 중
+            현재 목록 {otherClubs.length}개 표시 중
           </span>
         </div>
 
@@ -148,7 +176,7 @@ function ClubCard({ club }: { readonly club: ClubItem }) {
               {club.name}
             </h3>
           </div>
-          <p className="text-xs text-muted-foreground">클럽장: {club.owner_name}</p>
+          <p className="text-xs text-muted-foreground">클럽장: {club.owner_name || '비공개'}</p>
         </div>
 
         <div className="text-right">
@@ -165,7 +193,7 @@ function ClubCard({ club }: { readonly club: ClubItem }) {
       <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
         <div className="flex items-center gap-3">
           <span>{club.member_count.toLocaleString()}명</span>
-          <span>⭐ {Number(club.experience).toLocaleString()} EXP</span>
+          <span>⭐ {formatClubExperience(club.experience)} EXP</span>
         </div>
 
         {club.is_my_club ? (

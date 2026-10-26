@@ -15,3 +15,12 @@
 
 ## Finished
 - Pending.
+
+## In progress (14:34 KST)
+- RED observed: backend 4 failing tests, frontend module missing. GREEN: backend focused 8 PASS, frontend gateway+pagination 14 PASS; typecheck both packages PASS.
+- Implemented session-bound `GET /api/v1/clubs/mine`, stable 25-row page + next cursor, Android contract endpoint 180, Next `/clubs` independent owner paging, privacy response headers, integer-string EXP rendering and explicit unavailable state.
+- Isolated PostgreSQL 17.11 `wdmv_v761_test_acl` (281 migrations): owner 1 / foreign 0 / ROLLBACK 0. First real query exposed `moneyverse_app` cannot SELECT users; removed unnecessary users join, do not add grants. This is a concrete real-DB ACL regression prevented.
+- Mid-work remote main and planning v1316 checked unchanged; no overlapping open club-membership pagination PR. No production DB writes.
+- [x] RED tests and GREEN implementation.
+- [x] Real-PG owner isolation and rollback.
+- [ ] Final complete gates, CI, Test and release decision.

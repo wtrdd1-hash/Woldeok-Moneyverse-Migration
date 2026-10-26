@@ -81,6 +81,33 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
   });
 
+  it('proxies the owner-only club membership page without caching or indexing private results', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    let forwardedPath = '';
+    let forwardedCookie = '';
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      forwardedPath = String(input);
+      forwardedCookie = new Headers(init?.headers).get('cookie') ?? '';
+      return new Response(JSON.stringify({ clubs: [], has_more: false, next_offset: null }), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+          'cache-control': 'private, no-store',
+          'x-robots-tag': 'noindex, nofollow',
+        },
+      });
+    }));
+    const response = await GET(
+      request('/app-api/v1/clubs/mine?offset=25', { cookie: 'session=opaque' }),
+      context('clubs', 'mine'),
+    );
+    expect(forwardedPath).toContain('/api/v1/clubs/mine?offset=25');
+    expect(forwardedCookie).toBe('session=opaque');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(await response.json()).toMatchObject({ clubs: [], has_more: false, hasMore: false });
+  });
+
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     const fetchSpy = vi.fn();

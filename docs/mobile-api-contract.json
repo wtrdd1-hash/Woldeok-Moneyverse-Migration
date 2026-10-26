@@ -17067,6 +17067,147 @@
         "legacySnakeCasePreserved": true,
         "camelCaseAliasesAddedRecursively": true
       }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/clubs/mine",
+      "purpose": "본인 활성 클럽 25건씩 조회 (전체 탐색 목록과 별도)",
+      "callWhen": "내 클럽 페이지 진입 또는 다음/이전 페이지 선택",
+      "authorization": "로그인 + 최신 동의; 서버 세션 회원만 조회; private no-store",
+      "afterSuccess": "has_more와 next_offset을 확인하여 명시적으로 다음 페이지 요청",
+      "backendRoute": "/api/v1/clubs/mine",
+      "operationId": "ClubController_listMyClubs",
+      "backendOpenApiPath": "/clubs/mine",
+      "summary": "List the caller own active club memberships with bounded pagination",
+      "parameters": [
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000,
+            "default": 0
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "clubs",
+          "has_more",
+          "next_offset"
+        ],
+        "note": "Only active memberships. Offset paging is not a stable historical snapshot; do not infer a zero count when unavailable."
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "clubs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "tag": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "owner_id": {
+                  "type": "string"
+                },
+                "owner_name": {
+                  "type": "string"
+                },
+                "join_mode": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "number"
+                },
+                "experience": {
+                  "type": "string"
+                },
+                "member_count": {
+                  "type": "number"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "is_my_club": {
+                  "type": "boolean"
+                },
+                "my_role": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "tag",
+                "name",
+                "description",
+                "owner_id",
+                "owner_name",
+                "join_mode",
+                "status",
+                "level",
+                "experience",
+                "member_count",
+                "created_at",
+                "is_my_club",
+                "my_role"
+              ]
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "next_offset": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          }
+        },
+        "required": [
+          "clubs",
+          "has_more",
+          "next_offset"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
     }
   ],
   "compatibility": {

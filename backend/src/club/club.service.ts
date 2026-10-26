@@ -45,6 +45,17 @@ export class ClubService {
     return this.repo.listClubs(actorUserId, search, limit, offset);
   }
 
+  async listMyClubs(actorUserId: string, offset = 0) {
+    const pageSize = 25;
+    const rows = await this.repo.listMyClubs(actorUserId, pageSize, offset);
+    const hasMore = rows.length > pageSize;
+    return {
+      clubs: rows.slice(0, pageSize),
+      has_more: hasMore,
+      next_offset: hasMore ? offset + pageSize : null,
+    };
+  }
+
   async getClubById(clubId: string, actorUserId?: string) {
     try {
       const club = await this.repo.getClubById(clubId, actorUserId);

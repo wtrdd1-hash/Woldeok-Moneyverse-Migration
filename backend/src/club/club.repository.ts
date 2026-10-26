@@ -148,6 +148,29 @@ export class PostgresClubRepository {
     );
   }
 
+  async listMyClubs(actorUserId: string, limit = 25, offset = 0): Promise<ClubSummaryRow[]> {
+    if (!UUID_REGEX.test(actorUserId)) throw new ClubInputError('actorUserId must be a valid UUID');
+    if (!Number.isSafeInteger(offset) || offset < 0 || offset > 1_000_000) throw new ClubInputError('invalid offset');
+    const safeLimit = Math.min(Math.max(1, limit), 25);
+
+    // Membership is constrained inside SQL before pagination, not after global top-N results.
+    return queryRows<ClubSummaryRow>(
+      this.client,
+      `SELECT
+         c.id, c.tag, c.name, c.description, c.owner_id,
+         ''::text AS owner_name,
+         c.join_mode, c.status, c.level, c.experience::text AS experience,
+         c.member_count, c.created_at,
+         true AS is_my_club, cm_actor.role AS my_role
+       FROM public.clubs c
+       JOIN public.club_members cm_actor ON cm_actor.club_id = c.id AND cm_actor.user_id = $1::uuid
+       WHERE c.status = 'active'
+       ORDER BY c.created_at DESC, c.id DESC
+       LIMIT $2 OFFSET $3;`,
+      [actorUserId, safeLimit + 1, offset],
+    );
+  }
+
   async getClubById(clubId: string, actorUserId?: string): Promise<ClubDetailRow | null> {
     if (!UUID_REGEX.test(clubId)) throw new ClubInputError('clubId must be a valid UUID');
 

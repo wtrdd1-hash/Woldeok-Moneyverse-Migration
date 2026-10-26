@@ -31,6 +31,7 @@ export const APP_API_REQUEST_HEADERS = Object.freeze([
 export const APP_API_RESPONSE_HEADERS = Object.freeze([
   'content-type',
   'cache-control',
+  'x-robots-tag',
   'location',
   'retry-after',
   'www-authenticate',
