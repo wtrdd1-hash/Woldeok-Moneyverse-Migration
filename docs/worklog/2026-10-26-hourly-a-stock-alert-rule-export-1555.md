@@ -9,3 +9,10 @@
 
 ## In progress
 Pending implementation. Official Test exact-SHA and Production gates BLOCKED until independently verified.
+
+## In progress — 2026-10-26 16:00 KST
+- TDD RED: backend 2 failures (missing export method/controller), frontend missing CSV helper. GREEN: backend 3 focused tests, CSV 3, private route 3, accessibility CTA 1, app gateway 11 including new session/cookie test.
+- Implemented bounded `GET /api/v1/stocks/alerts/rules-export`, owner-supplied from guarded session only, PostgreSQL existing `stock_alert_rules_list` with deterministic 101-row overflow probe, HTTP 409 on overflow; no new migration or direct table grant.
+- Implemented same-origin private CSV endpoint and member alert manager CTA, CSV injection mitigation, 64-bit integer-string validation, no-store/noindex. Android app-api contract now includes 180th route and EN/KO schema docs regenerated.
+- Isolated PostgreSQL 17.11 `wdmv_v761_test_acl`: transaction-inserted 101 synthetic active rules; owner 101, foreign 0, 101-row cap observed, `moneyverse_app` direct alert SELECT denied and ledger INSERT denied, rollback left 0. Production-linked port 5433 untouched.
+- Midpoint remote main still `1c5b84a1c45baafcca83f375a6f99698121e9bb5`; latest unmerged planning Draft #1420 reviewed. Release remains HOLD.

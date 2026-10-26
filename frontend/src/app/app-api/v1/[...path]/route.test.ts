@@ -81,6 +81,26 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
   });
 
+  it('proxies the owner-only stock alert rule export to the backend with the member cookie and no-store', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    let forwarded = new Headers();
+    const fetchSpy = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      forwarded = new Headers(init?.headers);
+      return new Response(JSON.stringify({ rules: [], limit: 100 }), {
+        status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/stocks/alerts/rules-export', {
+      cookie: 'mv_session=opaque', 'x-moneyverse-client': 'android',
+    }), context('stocks', 'alerts', 'rules-export'));
+    expect(response.status).toBe(200);
+    expect(forwarded.get('cookie')).toBe('mv_session=opaque');
+    expect(forwarded.get('x-internal-token')).toHaveLength(32);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(await response.json()).toMatchObject({ rules: [], limit: 100 });
+  });
+
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     const fetchSpy = vi.fn();

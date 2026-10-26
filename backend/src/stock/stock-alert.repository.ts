@@ -74,6 +74,21 @@ export class StockAlertRepository {
     );
   }
 
+  exportRules(userId: unknown): Promise<readonly StockAlertRuleRow[]> {
+    const actor = uuid(userId, 'user id');
+    return queryRows<StockAlertRuleRow>(
+      this.pool,
+      `SELECT alert_id::text, stock_id::text, symbol, name, condition_kind,
+        threshold_amount::text, threshold_bps, cooldown_seconds,
+        current_price::text, day_open_price::text, current_day_change_bps,
+        condition_met, last_evaluated_at, last_triggered_at, created_at
+       FROM public.stock_alert_rules_list($1)
+       ORDER BY created_at DESC, alert_id
+       LIMIT 101`,
+      [actor],
+    );
+  }
+
   events(userId: unknown, limit: unknown = 20): Promise<readonly StockAlertEventRow[]> {
     const actor = uuid(userId, 'user id');
     const requested = typeof limit === 'number' && Number.isSafeInteger(limit) ? limit : 20;

@@ -2,8 +2,10 @@ import {
   BadRequestException,
   Body,
   Controller,
+  ConflictException,
   Delete,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -73,6 +75,17 @@ export class StockAlertController {
   @ApiOperation({ summary: 'Conditional virtual-stock alerts belonging to the caller' })
   async list(@Req() request: RequestWithSession) {
     return { alerts: await this.repository().list(requireUserId(request)) };
+  }
+
+  @Get('rules-export')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Complete bounded active virtual-stock alert rules snapshot for the caller' })
+  async exportRules(@Req() request: RequestWithSession) {
+    const rules = await this.repository().exportRules(requireUserId(request));
+    if (rules.length > 100) {
+      throw new ConflictException('More than 100 active alerts: export is unavailable without complete pagination');
+    }
+    return { rules, limit: 100 };
   }
 
   @Get('events')

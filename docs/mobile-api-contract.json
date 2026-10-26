@@ -13308,6 +13308,150 @@
     },
     {
       "method": "GET",
+      "path": "/app-api/v1/stocks/alerts/rules-export",
+      "purpose": "내 활성 가상 주식 조건부 알림 설정 최대 100건 전체 CSV 원본 데이터 조회",
+      "callWhen": "회원이 알림 설정 스냅샷을 내려받거나 Android 앱에서 조회할 때",
+      "authorization": "로그인 필요(기능에 따라 최신 동의 필요)",
+      "afterSuccess": "활성 알림 설정 JSON을 사용자 기기에서 CSV로 변환할 수 있음. 삭제 이력이나 발생 이벤트 아님.",
+      "backendRoute": "/api/stocks/alerts/rules-export",
+      "operationId": "StockAlertController_exportRules",
+      "backendOpenApiPath": "/stocks/alerts/rules-export",
+      "summary": "Complete bounded active virtual-stock alert rules snapshot for the caller",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "rules",
+          "limit"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "alert_id": {
+                  "type": "string"
+                },
+                "stock_id": {
+                  "type": "string"
+                },
+                "symbol": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "condition_kind": {
+                  "type": "string"
+                },
+                "threshold_amount": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "threshold_bps": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "cooldown_seconds": {
+                  "type": "number"
+                },
+                "current_price": {
+                  "type": "string"
+                },
+                "day_open_price": {
+                  "type": "string"
+                },
+                "current_day_change_bps": {
+                  "type": "number"
+                },
+                "condition_met": {
+                  "type": "boolean"
+                },
+                "last_evaluated_at": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                },
+                "last_triggered_at": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "alert_id",
+                "stock_id",
+                "symbol",
+                "name",
+                "condition_kind",
+                "threshold_amount",
+                "threshold_bps",
+                "cooldown_seconds",
+                "current_price",
+                "day_open_price",
+                "current_day_change_bps",
+                "condition_met",
+                "last_evaluated_at",
+                "last_triggered_at",
+                "created_at"
+              ]
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "const": 100
+          }
+        },
+        "required": [
+          "rules",
+          "limit"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
       "path": "/app-api/v1/stocks/alerts",
       "purpose": "내 주가 알림 목록 조회",
       "callWhen": "해당 화면 진입/새로고침/관련 write 후",
