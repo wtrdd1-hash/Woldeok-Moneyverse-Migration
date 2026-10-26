@@ -1,3 +1,8 @@
+### F675-142 v1340 — 회원 문의 주제·관리자 배정 검증 (기능 추가; 초안/운영 보류)
+- 이전 보완 v1338 → 현재 추가 v1340 → 다음 보완 v1342. main 0fe614b2ca1a7bc0df540514e54db78130479e2a, 미병합 #1480 위 적층. Migration196·회원/관리자 문의에는 영속 주제·담당자 없음. 개발 DB 읽기 전용 문의 3·메시지 6건, 운영 SLA 주장 금지.
+- 회원 명시적 6주제·과거 UNKNOWN, 관리자 미배정/내 담당 큐·현재 역할 재검증·재배정·불변 이력, 기존 open/waiting_user/resolved 유지. 문의+주제 원자 생성, 행 잠금 CAS·멱등·감사, SECDEF·고정 search_path·PUBLIC 철회, 비공개 App API·Android/WCAG AA/noindex/no-store·k>=20 집계.
+- P0 ENV1340-01 SEC1340-02 REL1340-03 SUP1340-04; P1 SUP1340-05 SUP1340-06 SUP1340-07 SUP1340-08 SUP1340-09 SUP1340-10. 격리 합성 10,001건, 동시/재실행 100건, BOLA 100건, 감사 실패 롤백, GET 쓰기 0, 기본 OFF 카나리. QA v1306 FAILED/HOLD(전체/봇 감사·라우트 증거 967요건 미충족, 실제 PG 전체 미검증), 루트99%, Test/운영 BLOCKED. 독립 10,000 근거 신규 승인0·누적 UNKNOWN/BLOCKED.
+
 ### F675-141 v1338 — 비공개 증빙 조회 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 - 이전 추가 v1336 → 현재 보완 v1338 → 다음 추가 v1340(잠정), 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a, 미병합 Draft #1476 적층, 개발 #1475. 실제 범용 미디어 GET은 소유권 가드 없음/public immutable, 일반 채팅과 공용 업로드, URL 새 창 렌더러, App API 보안 헤더 전달 누락. 운영 개인정보 사고 확정 아님.
 - evidenceId 기반 회원/관리자 실시간 인증 바이너리, HEAD/Range/304 검증, no-store/CORP/nosniff/referrer/vary, 메모리 Blob URL 폐기, 기존 URL LEGACY_UNVERIFIED/과거 캐시 회수 보장 금지/일반 채팅 호환. 검사·EXIF·영수증·잠금·GC·암호화 복원, Android/WCAG/SEO/KPI·기본 OFF. 상세는 INTEGRATED_PLANNING_MASTER.ko.md.

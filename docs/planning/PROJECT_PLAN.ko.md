@@ -1,3 +1,11 @@
+## 기획 v1340 — F675-142 회원 문의 주제 분류·관리자 담당 배정 검증 (기능 추가 / 초안 / 운영 보류)
+- 교대: 이전 기능 보완 v1338 → 현재 기능 추가 v1340 → 다음 기능 보완 v1342(잠정). 원격 main 0fe614b2ca1a7bc0df540514e54db78130479e2a 및 AGENTS/README/영문 PROJECT_PLAN 정본·한국어 대조 시작/중간 확인, 미병합 Draft #1480 위 적층. 런타임·DB·Test·운영 변경 없음.
+- 실제 Migration196의 문의·메시지와 관리자 큐에 주제·담당자·분류 버전이 없다. 관리자 화면은 상태 필터와 준비된 답변만, 회원 /support·위젯은 주제 선택 없음. 개발 DB 읽기 전용 문의 3건·메시지 6건; 운영 사고·SLA 달성 추정 금지.
+- F675-142: 회원 ACCOUNT/WALLET/SHOP/COMMUNITY/TECHNICAL/OTHER 선택, 과거 기록 UNKNOWN; 관리자 미배정/내 담당 필터, 내게 배정/담당 변경/분류 변경/배정 해제/이력. 현재 적격 관리자 재검증, 버전 CAS, 불변 멱등·감사 영수증, AI 자동 긴급도·SLA 약속 없음.
+- 기존 문의 생성에 topicCode 선택 필드, 본인용 주제 표시, 관리자 목록/담당자/이력/POST, CSRF·15분 서명 키셋, 401/403/404/409/412/422/429/503, App API·Android 동등성. SECDEF·고정 search_path·PUBLIC 회수·앱 직접 DML 금지, #1469/미병합 280 번호 해결 후 전진형 마이그레이션.
+- P0 ENV1340-01 용량/복원, SEC1340-02 권한/체크섬/원장, REL1340-03 QA/정확 SHA, SUP1340-04 허위/무권한 배정. P1 SUP1340-05 DB, SUP1340-06 트랜잭션/재실행, SUP1340-07 API, SUP1340-08 웹/Android/a11y, SUP1340-09 개인정보/SEO/KPI, SUP1340-10 격리 PG/롤백.
+- QA v1306 FAILED/HOLD: 프론트 1,423 PASS, 백엔드 1,326 PASS/398 SKIP, 전체 감사 Critical2/High8·봇 Critical1/High5, 라우트 증거 967요건 미충족, 실제 DB 전체 테스트 미검증, 루트99%·데이터93%. 정확 SHA Test·격리 복원·운영 BLOCKED, support_triage_v1 기본 OFF. 외부 독립 10,000건 신규 승인 0·누적 승인 UNKNOWN, BLOCKED/IN PROGRESS.
+
 ## 기획 v1338 — F675-141 문의 비공개 증빙 조회·기존 이미지 무결성 (기능 보완 / 초안 / 운영 보류)
 - 이전 기능 추가 v1336 → 현재 기능 보완 v1338 → 다음 기능 추가 v1340(잠정). 최신 원격 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재조회, main AGENTS·README·영어 PROJECT_PLAN 정본·국문 대조. 선행 미병합 Draft #1476, 개발 #1475; 문서 기획만, main 독립 병합 불가.
 - 실제 범용 이미지 GET은 본인 가드 없이 public/immutable 캐시, 문의와 **일반 채팅**이 공용 업로드 사용. ChatMessageRenderer는 본문 URL로 이미지·새 창을 표시; 신규 증빙은 구조화 evidenceId+매 요청 본인/관리자 권한 검사+인증 Blob 뷰어. App API 바이너리 헤더 allowlist에서 nosniff/referrer-policy/vary/CORP 누락. 이는 코드상 위험이며 운영 개인정보 노출 확정 아님.

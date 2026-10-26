@@ -1,3 +1,53 @@
+## 기획 v1340 — F675-142 회원 문의 주제 분류·관리자 담당 배정 검증 시스템 (기능 추가 / 초안 / 운영 보류)
+
+**교대·기술 정본:** 이전 Feature Improvement v1338 → 현재 Feature Addition v1340 → 다음 Feature Improvement v1342(잠정). 최신 원격 main AGENTS.md, README.md, docs/planning/PROJECT_PLAN.md(영어 정본)와 PROJECT_PLAN.ko.md(대조)를 시작·중간에 확인했고 SHA는 0fe614b2ca1a7bc0df540514e54db78130479e2a이다. 이번 문서 변경은 미병합 Draft #1480에 적층되어 main에 독립 병합 불가. 런타임·공유 DB·WLD·원장·플래그·Test·Production·타 작업자 브랜치는 변경하지 않는다.
+
+### 실제 근거·목적·대안
+- Migration 196의 support_threads는 회원·제목·상태·시간만, support_messages는 본문·발신자만 저장한다. **문의 주제, 관리자 담당자, 분류 이벤트, 담당 변경 버전이 없다.** SupportController는 생성·답장·목록·상태 변경을 제공하고 관리자 목록은 상태만 필터링한다. 관리자 화면에 준비된 답변 3종은 있지만 분류·담당 배정은 아니다. 회원 /support와 플로팅 위젯의 새 문의는 제목·본문만 받는다. 실제 소스에서 확인한 기능 공백이지 운영 배정 사고의 증거는 아니다.
+- 2026-10-27 04:07 KST 개발 DB 읽기 전용 표본: 문의 3건(완료 2·회원 답변 대기 1), 메시지 6건(관리자 2·회원 4). 운영 SLA, 실제 문의 적체나 상담 품질을 추론하기에 부족하다.
+- 대안 A: 본문 AI 자동 분류(민감정보 처리·오분류 위험으로 제외), B: 브라우저 태그만 부착(영속성·감사 부재로 제외), C: 회원의 명시적 주제 선택 + 서버 검증 관리자 담당 배정(선택). 자동 긴급도 판단·확정 응답 시간 약속은 하지 않는다.
+- 목표는 회원이 문의 유형을 명확히 선택하고 적격 관리자가 책임 있게 배정·변경하되 내부 담당자 신원이나 검증되지 않은 처리시간을 회원에게 노출하지 않는 것이다. 대상은 로그인 회원, 현재 적격 고객지원 관리자, Android App API 사용자이며 금융 원장 변경은 없다.
+
+### 회원·관리자 UX와 상태
+- 회원 진입 /support 새 문의, 플로팅 문의 위젯. 필수 **문의 유형** 셀렉트에 ACCOUNT, WALLET, SHOP, COMMUNITY, TECHNICAL, OTHER 여섯 서버 허용 코드를 사용하고 OTHER 기본값을 화면에 명시한다. CTA **문의 시작**은 기존 제목 1~120자·본문 1~2000자를 유지한다. 기존 클라이언트의 topicCode 생략은 기능 플래그 ON일 때 OTHER로 호환 처리한다. 회원에게는 선택 주제와 기존 문의 상태만 표시하고 관리자 배정자·내부 우선순위·미검증 SLA는 표시하지 않는다. 과거 분류 데이터 없는 문의는 **LEGACY_UNCATEGORIZED**로 명확히 표시하며 GET으로 자동 채우지 않는다.
+- 관리자 진입 /admin/support. 필터 **미배정·내 담당·주제·기존 상태**, CTA **내게 배정·담당자 변경·분류 변경·미배정으로 전환·이력 보기**. 담당자 후보는 현재 권한이 유효한 관리자만 표시하며 저장 시 역할을 재검증한다. 기존 open/waiting_user/resolved 상태와 별개로 UNASSIGNED, ASSIGNED, STALE_ASSIGNEE, LEGACY_UNCATEGORIZED, CONFLICT, UNAVAILABLE, SESSION_EXPIRED 상태를 구분한다. 권한이 철회된 기존 담당자는 STALE_ASSIGNEE로 읽기 전용 표시하고 조회 중 자동 재배정하지 않는다. 분류 변경 사유는 200자 이내로 받고 문의 본문을 복사하지 않는다. 완료 문의의 담당자 변경은 완료 상태를 바꾸지 않으며 답장·상태 변경이 담당자를 암묵적으로 지정하지 않는다.
+- 로딩/빈 목록/오류/401·403·404·409·412·429·503, 세션 만료·충돌·네트워크 결과 불명 상태를 분리한다. DB 커밋 영수증 전에는 ASSIGNED로 낙관 표시하지 않는다. 응답 유실 시 동일 멱등성 키로 영수증을 조회한 후 재시도한다. '긴급 처리 보장'이나 'WLD 환급 확정' 같은 문구를 금지한다.
+
+### API·권한·BFF 계약(제안이며 미구현)
+- GET /api/v1/support/topics: 로그인 회원용 활성 코드 목록, 버전별 번역 라벨, private/no-store. 기존 POST /api/v1/support/threads DTO에 topicCode 선택 필드 추가, 서버 enum 검증; 기존 앱 호환 유지. 회원 GET /api/v1/support/threads에는 topicCode 또는 LEGACY_UNCATEGORIZED만 추가하고 내부 담당자·우선순위·사유를 숨긴다.
+- GET /api/v1/admin/support/triage?status=&topic=&assignment=&cursor=&limit=: Session·Authenticated·Consent·AdminGuard·AdminSessionGuard, 기본 20/최대 50, created_at/id 키셋과 상한 워터마크, 관리자·세션·필터에 묶인 15분 HMAC 커서. GET /api/v1/admin/support/assignees는 적격 관리자 최소 ID·표시명만, GET /api/v1/admin/support/threads/:id/triage는 버전·담당자·최소 감사 이력만 반환한다.
+- POST /api/v1/admin/support/threads/:id/triage: 위 관리자 가드와 CSRF, 본문 {topicCode,assignedAdminId|null,expectedRevision,idempotencyKey,reason?}; 한 요청에 한 명시적 변경, UUID 키, revision>=0, 사유<=200자. 성공 {threadId,topicCode,assignmentState,revision,receiptId,committedAt}. 오류 401 세션, 403 관리자, 404 대상 비노출, 409 버전 충돌/키 다른 페이로드, 412 담당자 자격 상실, 422 코드 오류, 429 과도 요청, 503 DB 장애. 서버 세션에서 얻은 actor UUID 자체는 DB의 독립 인증이 아니므로 DB EXECUTE·감사 접근을 제한한다. Next.js 동일 출처 App API 및 Android에서 CSRF/오류/캐시 헤더 동등 적용, INTERNAL_API_TOKEN 노출 금지.
+
+### DB·트랜잭션·인덱스·동시성
+- #1469 기존 적용 마이그레이션 체크섬 및 미병합 Migration 280 번호 충돌을 먼저 조정한 후 고유 번호 **전진형 마이그레이션**을 제안한다. Migration196과 적용 체크섬은 수정 금지. support_topic_catalog(code PK,enabled,sort_order,version), support_thread_triage(thread_id UUID PK/FK, topic_code FK, assigned_admin_id UUID nullable/FK users, priority normal/review CHECK, revision BIGINT >=1, created_at,updated_at), support_triage_events(id UUID PK,thread_id FK,revision,actor_id,action CHECK,old/new topic·담당자,reason<=200,idempotency_key UNIQUE,payload_digest,created_at). UNIQUE(thread_id,revision)으로 중복 이벤트 차단, 이벤트는 커밋 후 불변.
+- 인덱스 support_threads(created_at DESC,id DESC)로 안정적인 큐 키셋을 보장하고, triage(topic_code,assigned_admin_id,thread_id), triage(assigned_admin_id,thread_id), 이벤트 (thread_id,revision DESC), 회원 조회는 기존 support_threads user 인덱스 사용. 10,001건 합성 데이터로 EXPLAIN ANALYZE 확인한다. 우선순위는 관리자 전용이며 회원이 긴급을 임의 지정하지 못한다.
+- 기능 ON 신규 문의는 기존 support_create_thread의 문의·첫 메시지·topic triage를 **한 트랜잭션**에 저장하고 기존 create 키 재요청은 동일 결과를 반환한다. 과거 문의는 GET으로 변경하지 않으며 관리자 명시적 분류 때만 triage 생성. 배정은 support_threads 행 FOR UPDATE → triage 행 잠금 순서 고정, 현재 관리자·대상 적격성 확인, expectedRevision CAS, 잠금 후 멱등 영수증·payload_digest 확인, 정확히 1회 버전 증가·이벤트·관리자 감사 기록을 원자적 커밋한다. 감사 실패면 전체 롤백, 같은 키·같은 내용은 같은 영수증, 같은 키·다른 내용은 409. 23505 경합은 커밋 영수증 재조회로 해소하며 새 배정을 중복 발급하지 않는다.
+- 모든 함수 SECURITY DEFINER, 고정 search_path, 스키마 명시, PUBLIC EXECUTE 철회, moneyverse_app에는 제한된 함수 EXECUTE만 부여한다. 테이블 직접 SELECT/DML 확장 금지. 회원 읽기는 함수 내부 user_id 소유권 검사, 관리자 역할 철회는 쓰기 순간 다시 검사. GET은 DB 쓰기 0건이며 last_message_at만으로 응답 SLA를 계산하지 않는다.
+
+### 보안·개인정보·SEO·접근성·분석
+- 세션·동의·CSRF·관리자 권한·소유권을 각 경계에서 확인한다. 타 회원 조회(BOLA), UUID 추측, 커서 위변조, 동시 재시도, XSS, 대량 배정, 사용 중지 코드, 관리자 권한 철회, 요청 제한(예: 관리자당 시간당 30건 설정 가능)을 검증한다. 로그에 회원 본문·제목·변경 사유를 남기지 않고 감사에는 최소 식별자·행위·전후 코드·시각만 보존한다. 공개 통계에 개별 회원·담당자 활동을 노출하지 않고 관리자 집계도 k>=20 표본에서만 표시한다.
+- /support와 /admin/support는 noindex/no-store 유지, sitemap/robots에 개인 문의 링크 포함 금지. 모바일 재배치, 주 CTA 터치 44px 이상, 키보드 포커스 복구, 의미 있는 레이블·라이브 오류, WCAG 2.2 AA, Android App API enum·버전·409/412/503 동일 처리.
+- KPI는 **가설**로 주제 선택 완료율, 배정까지 시간 중앙값, 미배정 체류시간, 실제 관리자 메시지로 확인한 첫 답변시간, 재배정 비율, 반복 문의, 오분류 신고, 목록 p95, 관리자 처리시간을 측정한다. 직접 매출 증대는 가정하지 않는다. 권한 누출 0·모든 배정 감사 100%·거짓 SLA 0과 실제 처리시간 개선이 동시에 확인될 때만 확대, 사용성 악화 시 수정, 보안·무결성 문제 시 중단/롤백. 개발 DB 3건으로 SLA 달성을 주장하지 않는다.
+
+### QA·무중단 배포·롤백
+- 단위/API 계약: 기존 topic 없는 앱, 여섯 유효 코드, 비활성/오류 코드, 다국어, 기존 답장·상태 호환, 세션 만료, 관리자 역할 철회, 401/403/404/409/412/422/429/503 및 no-store. 격리 실제 PostgreSQL: 합성 문의 10,001건, 동일 키 동시 재요청 100건, 경쟁 배정 100건, 타 회원/권한 우회 100건, 담당자 철회 100건; 커밋당 버전·이벤트·감사 정확히 1개, 감사 실패 전체 롤백, GET 쓰기 0, 앱 역할 직접 DML·PUBLIC EXECUTE 부정 검증, 마이그레이션 재실행·구버전 읽기. 공유 개발/운영 데이터로 부하 시험 금지.
+- 배포 순서: #1469 체크섬·#993 앱 권한·#1477 원장 우회 해결, #1170 디스크 여유·격리 백업 복원, QA v1306 전체/봇 감사·라우트 증거·올바른 역할 실제 PG 테스트 통과 → 적층 기획 PR 충돌 해소 → 별도 개발 브랜치 TDD → 후보 정확 SHA 격리 PostgreSQL·웹/백엔드/App API/Android/a11y·보안 테스트 → 인증된 Test 정확 SHA E2E·독립 복원·승인된 GitOps → support_triage_v1 기본 OFF에서 소규모 관리자 카나리, 관찰 후 단계 확대. 기획 예약은 코드를 배포하지 않는다. 롤백은 플래그 OFF, 기존 분류·감사 이력은 읽기 전용 보존하며 파괴적 다운 마이그레이션 금지.
+- 외부 독립 레퍼런스 10,000건은 개별 실근거 검증·중복 제거·분류 완료가 필수. 이번 신규 승인 0건, 누적 최종 승인 UNKNOWN, 게이트 BLOCKED / IN PROGRESS. 기존 후보 11,749건은 10,000건 승인 달성의 증거가 아니다. OWASP API1 BOLA·PostgreSQL 17 행 잠금·W3C WCAG 2.2 공식 문서는 기술 참고자료일 뿐 승인된 독립 제품 사례 수량에 넣지 않는다. 참고: https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/ ; https://www.postgresql.org/docs/17/explicit-locking.html ; https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum .
+
+### P0/P1 실행 가능한 개발 백로그(10개; 이번에는 코드 변경 없음)
+- **P0 ENV1340-01:** 루트·데이터 용량 회복 및 암호화 백업 격리 복원(#1170); 다른 작업자 Worktree 삭제 금지.
+- **P0 SEC1340-02:** 앱 DML 235/241, PUBLIC 은행 함수, #1469 적용 SHA 불일치, #1477 자격 인증 원장 우회 조사·전진형 수정·권한 부정 테스트.
+- **P0 REL1340-03:** QA v1306 전체/봇 감사·라우트 증거, 올바른 역할 실제 PG, 정확 SHA 인증 Test·GitOps 게이트 전부 PASS 전까지 HOLD.
+- **P0 SUP1340-04:** 무권한/허위 담당 배정·가짜 긴급도·SLA 약속 방지, 과거 기록 UNKNOWN과 영수증 실패 폐쇄.
+- **P1 SUP1340-05:** 주제·담당·불변 이벤트 DB/제약·인덱스·SECDEF·마이그레이션/기존 앱 호환.
+- **P1 SUP1340-06:** 문의+분류 원자 생성, 버전 CAS 배정·재배정·멱등 재실행·감사 롤백·철회 관리자 거부.
+- **P1 SUP1340-07:** NestJS 회원/관리자 DTO·목록·커서·오류, Next App API·Android, CSRF·속도 제한.
+- **P1 SUP1340-08:** /support·위젯 유형 선택, /admin/support 배정 큐·이력, 다국어·모바일·키보드·WCAG 상태.
+- **P1 SUP1340-09:** 개인정보·보존·noindex/no-store·감사 접근·k>=20 집계·KPI·SLA 비보장 문구.
+- **P1 SUP1340-10:** 격리 PG 10,001/100/100 회귀·권한 부정·정확 SHA Test E2E·기본 OFF 롤백·무중단 카나리 검증.
+
+**최신 QA·용량:** QA v1306(2026-10-27 03:29 KST) FAILED/HOLD. 프론트 1,423 PASS, 백엔드 1,326 PASS/398 SKIP, 전체 감사 Critical 2/High 8, 봇 Critical 1/High 5, 라우트 증거 967요건 미충족(실제 결함 967건 아님), 실제 DB 기반 전체 테스트는 원격 명령 정책으로 미검증, 격리 DB 마이그레이션만 PASS. 04:04 루트99% 약1.7GiB·데이터93% 약15GiB. 앱 권한·체크섬 불일치 미해결, 정확 SHA Test/격리 복원/운영승격 BLOCKED.
+
 ## 기획 v1338 — F675-141 회원 문의 비공개 증빙 조회·기존 이미지 무결성 개선 (기능 보완 / 초안 / 운영 보류)
 
 **교대·근거:** 이전 기능 추가 v1336 → 현재 기능 보완 v1338 → 다음 기능 추가 v1340(잠정). 최신 원격 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 재조회, main AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md 및 한국어 대조 확인. 미병합 v1336 Draft PR #1476에 적층, 개발 이슈 #1475. 기획 문서만 변경하며 선행 PR 없이 main 독립 병합 불가.
