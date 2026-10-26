@@ -9,11 +9,11 @@ import {
   Clock,
   RefreshCw,
   AlertTriangle,
-  Play,
   Users,
   Award,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { parsePensionOverview, parsePensionPayoutLogs } from './pension-evidence';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -46,52 +46,43 @@ export interface PayoutLogItem {
 }
 
 interface PensionControlTowerProps {
-  initialOverview: NationalPensionOverview;
-  initialPayoutLogs: PayoutLogItem[];
+  initialOverview: NationalPensionOverview | null;
+  initialPayoutLogs: PayoutLogItem[] | null;
 }
 
 export function PensionControlTower({
   initialOverview,
   initialPayoutLogs,
 }: PensionControlTowerProps) {
-  const [overview, setOverview] = useState<NationalPensionOverview>(initialOverview);
-  const [payoutLogs, setPayoutLogs] = useState<PayoutLogItem[]>(initialPayoutLogs);
+  const [overview, setOverview] = useState<NationalPensionOverview | null>(initialOverview);
+  const [payoutLogs, setPayoutLogs] = useState<PayoutLogItem[] | null>(initialPayoutLogs);
   const [loading, setLoading] = useState(false);
-  const [distributing, setDistributing] = useState(false);
 
   const refreshData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/pension/overview');
-      if (res.ok) {
-        const data = await res.json();
-        setOverview(data);
+      const [overviewResponse, payoutResponse] = await Promise.all([
+        fetch('/api/admin/pension/overview', { cache: 'no-store' }),
+        fetch('/api/admin/pension/recent-payouts', { cache: 'no-store' }),
+      ]);
+      const [rawOverview, rawPayouts] = await Promise.all([
+        overviewResponse.ok ? overviewResponse.json() : Promise.resolve(null),
+        payoutResponse.ok ? payoutResponse.json() : Promise.resolve(null),
+      ]);
+      const verifiedOverview = parsePensionOverview(rawOverview);
+      const verifiedPayouts = parsePensionPayoutLogs(rawPayouts);
+      setOverview(verifiedOverview);
+      setPayoutLogs(verifiedPayouts);
+      if (verifiedOverview === null || verifiedPayouts === null) {
+        toast.error('일부 연금 관제 데이터를 확인할 수 없습니다.');
       }
     } catch {
+      // A failed refresh must never leave stale figures appearing current.
+      setOverview(null);
+      setPayoutLogs(null);
       toast.error('국민연금 관제 데이터 갱신에 실패했습니다.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDistributePayouts = async () => {
-    if (!confirm('현재 은퇴 수령 중인 모든 국민에게 1시간 주기 기초연금을 즉시 일괄 지급하시겠습니까? (국고 차감 -> 개인 계좌 입금)')) {
-      return;
-    }
-    setDistributing(true);
-    try {
-      const res = await fetch('/api/admin/pension/distribute', { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '연금 지급 실패');
-
-      toast.success(
-        `기초연금 지급 집행 완료: 총 ${groupDigits(data.totalPayoutAmount ?? '0')} WLD (수령자: ${data.pensionersCount || 0}명)`,
-      );
-      await refreshData();
-    } catch (err: any) {
-      toast.error(err.message || '연금 지급 집행 중 오류가 발생했습니다.');
-    } finally {
-      setDistributing(false);
     }
   };
 
@@ -110,7 +101,7 @@ export function PensionControlTower({
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            국민 기여금 적립 총액(AUM), 은퇴자 기초연금 수령 현황, 중앙 국고(VAULT_MAIN) 편입 및 복리 운용 레버리지를 실시간 관제합니다.
+            국민 기여금 적립 총액(AUM), 은퇴자 기초연금 수령 현황, 중앙 국고(VAULT_MAIN) 편입 및 복리 운용 레버리지를 조회된 자료만 표시합니다. 데이터 장애는 실제 0건과 구분합니다.
           </p>
         </div>
 
@@ -120,26 +111,34 @@ export function PensionControlTower({
             size="sm"
             onClick={refreshData}
             disabled={loading}
-            className="h-9 gap-1.5"
+            className="min-h-11 min-w-11 gap-1.5"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             새로고침
           </Button>
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
-            onClick={handleDistributePayouts}
-            disabled={distributing}
-            className="h-9 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
+            disabled
+            aria-describedby="pension-payout-hold"
+            className="min-h-11 min-w-11 gap-1.5"
           >
-            <Play className={`h-4 w-4 ${distributing ? 'animate-spin' : ''}`} />
-            기초연금 즉시 일괄 지급
+            <AlertTriangle className="h-4 w-4" />
+            기초연금 즉시 일괄 지급 (중단)
           </Button>
         </div>
       </div>
 
-      {/* 4대 핵심 지표 카드 */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <p id="pension-payout-hold" role="status" className="text-sm text-amber-600 dark:text-amber-400">
+        현재 Backend는 원장 인증이 완료되지 않은 연금 일괄 지급을 HTTP 503으로 차단합니다. 검증 전에는 수동 지급을 실행할 수 없습니다.
+      </p>
+      {overview === null && (
+        <div role="alert" className="rounded-lg border border-destructive/40 p-4 text-sm text-destructive">
+          연금 관제 데이터를 확인할 수 없습니다. API 연결 또는 응답 형식을 확인하고 새로고침해 주세요. 실제 기금이 0원이라는 의미가 아닙니다.
+        </div>
+      )}
+            {/* 4대 핵심 지표 카드 */}
+      {overview !== null && <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border-border/60 bg-card/60 backdrop-blur">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-medium text-muted-foreground">
@@ -210,11 +209,11 @@ export function PensionControlTower({
               {groupDigits(overview.vaultMainBalanceWld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              기금 100% 국가 재정 지급 보증 (AAA)
+              서비스 내 가상 기금 잔액이며 실제 국가 보증이나 신용등급이 아닙니다.
             </p>
           </CardContent>
         </Card>
-      </div>
+      </div>}
 
       {/* 5단계 연금 가입 티어 안내 */}
       <Card className="border-border/60 bg-card/60">
@@ -271,11 +270,15 @@ export function PensionControlTower({
             최근 기초연금 지급 내역 (Payout Audit Logs)
           </CardTitle>
           <CardDescription>
-            1시간 주기 복리 엔진에 의해 은퇴 수령자에게 지급된 기초연금 실시간 로그입니다.
+            인증된 Backend에서 조회한 최근 최대 30건의 가상 연금 지급 기록입니다. 실시간 집행 보증이 아닙니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {payoutLogs.length === 0 ? (
+          {payoutLogs === null ? (
+            <div role="status" className="py-8 text-center text-sm text-destructive">
+              지급 내역을 확인할 수 없습니다. API 연결 상태를 확인하고 새로고침해 주세요.
+            </div>
+          ) : payoutLogs.length === 0 ? (
             <div className="text-center py-8 text-sm text-muted-foreground">
               아직 집행된 기초연금 지급 기록이 없습니다.
             </div>
@@ -299,10 +302,10 @@ export function PensionControlTower({
                       {log.user_id.slice(0, 10)}...
                     </TableCell>
                     <TableCell className="font-semibold text-emerald-400">
-                      +{Number(log.payout_amount_wld).toLocaleString()} WLD
+                      +{groupDigits(log.payout_amount_wld)} WLD
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {Number(log.snapshot_accumulated_wld).toLocaleString()} WLD
+                      {groupDigits(log.snapshot_accumulated_wld)} WLD
                     </TableCell>
                   </TableRow>
                 ))}
