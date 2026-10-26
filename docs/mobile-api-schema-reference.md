@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.22.359**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4263,6 +4263,47 @@ _No request body._
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
 | watching | true | boolean |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/stocks/alerts/rules-export` — Complete bounded active virtual-stock alert rules snapshot for the caller
+
+- Authorization: 로그인 필요(기능에 따라 최신 동의 필요)
+- Success status: 200
+- Response mode: json
+- After success: 활성 알림 설정 JSON을 사용자 기기에서 CSV로 변환할 수 있음. 삭제 이력이나 발생 이벤트 아님.
+- Operation ID: `StockAlertController_exportRules`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| rules[] | true | object[] |  |
+| rules[] | true | object |  |
+| rules[].alert_id | true | string |  |
+| rules[].stock_id | true | string |  |
+| rules[].symbol | true | string |  |
+| rules[].name | true | string |  |
+| rules[].condition_kind | true | string |  |
+| rules[].threshold_amount | true | null \| string |  |
+| rules[].threshold_bps | true | null \| number |  |
+| rules[].cooldown_seconds | true | number |  |
+| rules[].current_price | true | string |  |
+| rules[].day_open_price | true | string |  |
+| rules[].current_day_change_bps | true | number |  |
+| rules[].condition_met | true | boolean |  |
+| rules[].last_evaluated_at | true | null \| string (date-time) |  |
+| rules[].last_triggered_at | true | null \| string (date-time) |  |
+| rules[].created_at | true | string (date-time) |  |
+| limit | true | integer=100 | const=100 |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
