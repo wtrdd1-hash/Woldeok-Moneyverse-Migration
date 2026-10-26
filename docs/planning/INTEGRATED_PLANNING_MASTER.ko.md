@@ -1,3 +1,44 @@
+## 기획 v1336 — F675-141 회원 문의 비공개 증빙 이미지 첨부 (기능 추가 / 초안 / 운영 보류)
+
+**교대:** 이전 Feature Improvement v1334 → 현재 Feature Addition v1336 → 다음 Feature Improvement v1338(잠정). 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재조회, AGENTS.md·README.md·PROJECT_PLAN.md(영어 정본)·PROJECT_PLAN.ko.md 대조. 미병합 v1334 Draft PR #1472 위에 적층한 미승인 설계 초안이며 실제 구현·배포 아님. 개발 이슈 #1475. Gemini/개발 A/B/C/QA 영역 미수정.
+
+### 실제 코드 근거·목적·대상
+- `floating-support-chat-widget.tsx` 및 `admin-support-view.tsx`는 범용 `/app-api/v1/content/chat/upload`에 이미지를 올린 뒤 반환된 `/api/v1/content/chat/media/<key>` URL을 문의 메시지 본문에 붙임. `ChatMessageRenderer`가 URL을 이미지로 렌더링. 본래 `/support` 페이지는 텍스트만 지원함.
+- `chat-upload.controller.ts`의 업로드 POST에는 세션·인증·동의·CSRF 가드가 있지만, `GET content/chat/media/:key`에는 회원 가드가 없고 `Cache-Control: public, max-age=86400, immutable`을 반환함. `ChatImageStorage`의 랜덤 저장 키에는 문의·회원 소유권이 결합되지 않으며 Migration 196은 텍스트 메시지만 보존함. **소스 코드상 접근 통제 위험**이지 외부 라우팅·실제 노출·운영 사고가 검증되었다는 뜻은 아님. 엣지/앱 API의 실제 접근 가능성은 별도 점검 필요.
+- 목적은 로그인 회원이 본인 문의에 문제 화면 스크린샷 1개를 비공개로 첨부하고, 본인과 현재 권한을 가진 관리자만 열람하며, 검사를 통과한 파일이 실제 메시지에 연결되었다는 영수증을 받는 것. WLD·원장·보상·공개 채팅·일반 사진 서비스와 분리. 새 기능은 기본 OFF.
+- 대안 검토: 범용 공개 캐시 이미지 URL 재사용은 본인 권한 검증 부재로 기각, 본문 base64 삽입은 개인정보 전파·DB/로그 팽창으로 기각. **문의 전용 비공개 저장소 + 본인 한정 SECDEF 관계/영수증**을 선택하되 개발 전 승인 필요.
+
+### 사용자 흐름·화면·CTA·상태
+- 진입: `/support` 신규 문의·답장, 플로팅 문의 위젯, `/admin/support` 관리자 답변, Android App API. **스크린샷 첨부**, **첨부 제거**, **문의/답장 전송**, **안전하게 보기**, **업로드 재시도**, **첨부 오류 신고**. 메시지당 이미지 1개. **MVP에서는 이미지가 있어도 본문 1~2,000자가 필수**: 적용된 Migration 196의 메시지 본문 비어 있지 않음 제약 때문. 이미지만 보내기는 별도 승인된 전진형 제약 변경 전까지 범위 제외. 제목 120자 유지.
+- 파일 선택 후 기기 내부 미리보기, 크기·형식 안내, `SELECTED → UPLOADING → SCANNING → READY → SENDING → ATTACHED` 상태. `INVALID_TYPE / TOO_LARGE / MALWARE / SCANNER_UNAVAILABLE / QUOTA / EXPIRED / SESSION_EXPIRED / UNAVAILABLE` 오류를 구분하고 실패를 성공으로 표시하지 않음. 전송 실패 시 본문·첨부 ID·동일 전송 의도 UUID 유지, 서버 커밋 영수증으로만 ATTACHED 확정. 결과 불명 시 새 전송 대신 기존 영수증 조회. 저장 파일 소실은 UNAVAILABLE 표시.
+- 신규 문의는 스레드 생성 전 회원·세션·전송 의도 UUID에 임시 결합하고, 답장은 기존 문의 UUID까지 결합. 실제 메시지 생성과 첨부 연결은 DB 트랜잭션 하나로 처리. 관리자는 본인 권한이 있는 문의에만 첨부 가능, 권한 회수 후 조회 차단. 임의 URL을 비공개 첨부로 승격 금지.
+- 접근성: 파일 선택 레이블, 크기/형식 설명, aria-live 상태, 키보드 제거/재시도/보기, 320px·200% 확대·초점/대비, 원본 파일명 대신 일반 대체 텍스트. localStorage에 이미지·키·본문 저장 금지. Android는 선택 파일에 한해 일시적 content URI 권한 사용.
+
+### API 및 App API 계약(미구현)
+- `POST /api/v1/support/evidence/stage`: multipart `file`, `intentId:uuid`, `idempotencyKey:uuid`, 선택적 `threadId:uuid`; SessionGuard·AuthenticatedGuard·ConsentGuard·CsrfGuard 적용. 201 `{evidenceId,state:"READY",mimeType,byteSize,expiresAt}`만 반환하며 공개 URL·storageKey·원본 SHA 비노출. PNG/JPEG/WebP만 허용, 최대 5MiB·1,200만 픽셀, 매직바이트/디코딩/백신/재인코딩으로 EXIF 제거. 현재 App API 15초 타임아웃 내 스캔 10초 제한; 검사 장애는 503으로 닫힘. 동일 키·동일 파일 재시도는 기존 영수증, 내용/의도 변경은 409.
+- 기존 `POST /api/v1/support/threads`, `POST /api/v1/support/threads/:id/messages`는 기능 ON일 때 선택적 `evidenceId`·안정적 `intentId` 허용, 기존 텍스트 요청 호환 유지. 관리자 `POST /api/v1/admin/support/threads/:id/evidence/stage`와 답장 POST는 AdminGuard·AdminSessionGuard·CSRF·재시도 검증. DB 커밋 후에만 `{messageId,evidenceId?,receiptId,state:"ATTACHED"}` 반환. 파일시스템과 DB 전체가 ACID라는 잘못된 보장 금지.
+- `GET /api/v1/support/threads/:id/evidence/:evidenceId`: 세션·동의·문의 소유권·실제 메시지 연결 확인. 관리자용 `GET /api/v1/admin/support/threads/:id/evidence/:evidenceId`는 현재 관리자 역할·세션 확인. 타인·없는 파일·미연결·권한 철회는 존재 노출 없는 404, 저장소 장애는 503. MIME 검증, `Cache-Control: private, no-store`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, 고정 안전 파일명 Content-Disposition 사용; public/immutable/리다이렉트/서명된 외부 공개 URL 금지. `GET /api/v1/support/evidence/:id/receipt`는 본인 상태 확인 전용. GET 요청은 DB 쓰기 0.
+- 오류: 400 잘못된 요청, 401 세션, 403 동의/CSRF/관리자, 404 비노출, 409 키·본문 변경/중복 소비, 413 용량, 415 MIME, 422 손상 파일, 429 할당량, 503 백신/저장소/DB. 민감 JSON/오류 응답 no-store. 기존 `/app-api/v1/[...path]` 프록시의 multipart·바이너리·Cache-Control/Content-Disposition 전달과 경로 허용을 검증하고 NestJS 직접 외부 공개 금지.
+
+### DB 제약·트랜잭션·저장·보존
+- 적용된 Migration 196 및 체크섬 불일치 219/220/221/234/266은 절대 수정하지 않고 새로운 연속 번호의 전진형 마이그레이션만 제안. `support_evidence`: UUID PK, owner_user_id FK, staged_by, intended_thread_id nullable FK, intent_id, upload_key UNIQUE, storage_locator UNIQUE, input_sha256 64자리 hex(원본 업로드 멱등 재시도 비교), file_sha256 64자리 hex(재인코딩 저장본), MIME enum, byte_size 1..5242880, width/height 각각 1..10000 및 bigint 곱<=12000000, 상태 STAGED/READY/ATTACHED/QUARANTINED/EXPIRED/UNAVAILABLE, scan_version, expires_at/created_at/attached_at. 회원+intent UNIQUE로 1장 제한, 동일 upload_key 재시도 시 input_sha256 검증·해시 응답 비노출, 회원·문의·만료 인덱스. `support_message_evidence`: evidence_id UNIQUE FK, message_id UNIQUE FK, thread_id FK, linked_at. 소유권·스레드 일치는 SECDEF 잠금 검증 및 DB 제약으로 보강. 앱 직접 테이블 DML 권한 추가 금지.
+- `support_evidence_stage_v1`, `support_create_thread_with_evidence_v1`, `support_add_message_with_evidence_v1`, `admin_support_reply_with_evidence_v1`, `support_evidence_read_v1`, `admin_support_evidence_read_v1`은 SECURITY DEFINER, `search_path=pg_catalog,pg_temp`, 소유자 moneyverse_migrator, PUBLIC/app EXECUTE 회수 후 앱에 필요한 EXECUTE만 허용. actor는 서버 세션에서만 취득. 회원별 임시 첨부 최대 3개, 하루 30회/50MiB, 서버에서 동시성 잠금·불변 시도 카운터로 제한.
+- 순서: 본인·의도·이미지 검증 → 멱등성 키 advisory xact lock → 기존 영수증과 제목/본문/문의/이미지 SHA 실제 값 비교(클라이언트 digest 불신) → 문의·첨부 행 FOR UPDATE 일정 순서 잠금 → READY·미만료·미사용·백신 버전·실제 파일 확인 → 메시지/첨부 관계/감사 영수증 동일 DB 트랜잭션 → ATTACHED → 커밋. 감사 기록 실패는 전체 DB 롤백.
+- 파일은 웹 루트 밖 격리 디렉터리 0700/0600에 저장, 백신·재인코딩·관리 키 기반 암호화·원자적 rename/fsync 후 DB READY 처리. DB/파일시스템은 단일 ACID가 아니므로 DB 실패 시 고아 파일 GC, DB 성공 후 파일 유실 시 UNAVAILABLE·경고·조정 작업이 필요. 암호화 키 교체·백업 복원은 기능 활성 전 입증.
+- 미전송 임시 파일은 24시간 후 EXPIRED 및 안전한 GC. 전송된 파일은 **승인된 고객지원 기록 보존 정책**을 따르며 임의의 보존 기간 단정 금지. 파기 이력/감사/법적 보존 정책 필요. 기존 본문 속 범용 이미지 URL은 `LEGACY_UNVERIFIED`로 취급, 승인 없는 자동 복사·삭제·URL 재작성·비공개 보장 금지. 엣지 경로·캐시·접근 가능성 별도 조사.
+
+### 관리자·보안·SEO·모바일·KPI·테스트·배포
+- 관리자는 허가된 문의에서만 열람하며 감사에는 첨부 ID·역할·시간만 기록(원본 파일명/이미지/URL/본문/해시 금지). 악용 신고는 사유·상태만, k>=20 익명 집계. SVG/HTML/PDF/ZIP/다중형식/압축폭탄·과도한 해상도·EXIF/GPS 차단, CSRF·세션 회수·BOLA·속도 제한 필수. 랜덤 키/서명 URL 자체는 권한이 아님.
+- `/support`, `/admin/support` noindex/no-store, 비공개 이미지 no-store/no-referrer, OG·검색·분석에 이미지 미노출. Android App API 업로드/다운로드 및 401/403/404/413/415/429/503 계약 동등, WCAG 2.2 AA 검증. KPI: 권한 없는 다운로드 0, 미검사 READY 0, 업로드→첨부 전환율, 악성 파일 거부, 고아 바이트·정리 지연, 업로드 p95 목표 10초 미만, 문의 해결 품질. 개인 파일 분석 수집 금지.
+- 격리 PostgreSQL 합성 메타데이터 10,001건, 타 회원/문의/관리자 권한 회수 100건, 동일 의도 동시 전송 100건, 다른 본문 재사용, 5MiB·1,200만 픽셀 경계, 악성/폴리글롯/손상/EXIF/GIF, 백신 타임아웃, 디스크 ENOSPC, 커밋 직후 응답 유실, 고아 파일 정리, 백업 복원, 바이너리 헤더, 접근성·noindex·기능 OFF 회귀를 검증. 실제 세션·CSRF 기반 정확 SHA Test 통과 전 운영승격 금지.
+- **P0:** ENV1336-01 서버 용량·격리 복원(#1170), SEC1336-02 개발 DB 앱 DML 235/241·PUBLIC 은행 함수 3개·마이그레이션 5개 SHA 불일치(#993/#1469), REL1336-03 QA v1304 전체/봇 감사 및 경로 원장 FAIL·정확 SHA Test/GitOps, SUP1336-04 기존 공개 캐시 URL의 허위 비공개 표시·무권한 첨부 접근 차단.
+- **P1:** SUP1336-05 비공개 저장·백신·재인코딩·할당량, SUP1336-06 전진형 DB/SECDEF/인덱스, SUP1336-07 메시지 원자 연결·멱등성·고아 파일, SUP1336-08 NestJS/App API·바이너리 계약, SUP1336-09 웹·관리자·Android·접근성·개인정보·SEO·KPI, SUP1336-10 격리 PG·회귀·복원·롤백.
+- QA v1304: 프론트 1,423 PASS, 타입/린트/빌드/API PASS, 전체 감사 Critical2/High8 FAIL, 봇 감사 Critical1/High5 FAIL, 경로 원장 ok=false, 실제 PG 마이그레이션 첫 실패 후 재시도 0·DB 테스트 0(운영 승인 근거 아님). 개발 DB 권한·5개 체크섬 불일치, 루트 99%(1.9GiB), 데이터 92%(17GiB). 공식 Test 정확 SHA·격리 복원·Production 승격 BLOCKED. 런타임·DB 데이터·원장·WLD·기능 스위치·Test·운영 변경 없음.
+- 외부 독립 근거 10,000건 게이트: OWASP 파일 업로드·권한 회귀, MDN 캐시, W3C WCAG 공식 자료는 **설계 참고**일 뿐 승인 근거 건수로 세지 않음. 신규 최종 승인 0건, 누적 중복 제거·승인 수량 UNKNOWN / 10,000, BLOCKED / IN PROGRESS.
+- 참고: https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html ; https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Regression_Testing_Cheat_Sheet.html ; https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control ; https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html .
+
+**전체 백로그 식별자:** ENV1336-01 SEC1336-02 REL1336-03 SUP1336-04 SUP1336-05 SUP1336-06 SUP1336-07 SUP1336-08 SUP1336-09 SUP1336-10.
+
 ## 기획 v1334 — F675-140 문의 검색 전송·정규화·커서 무결성 개선 (기능 보완 / 초안 / 운영 보류)
 **QA 확인 01:16 KST:** QA v1304 진행 중(확인 시 install 게이트만 완료); v1303이 최신 완료 근거이며 v1304 PASS 추정 금지.
 

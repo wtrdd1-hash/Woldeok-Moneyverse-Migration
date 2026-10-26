@@ -1,3 +1,11 @@
+## 기획 v1336 — F675-141 회원 문의 비공개 증빙 첨부 (기능 추가 / 초안 / 운영 보류)
+- 교대: 이전 Feature Improvement v1334 → 현재 Feature Addition v1336 → 다음 Feature Improvement v1338(잠정). 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인, AGENTS/README/PROJECT_PLAN 영어 정본·한국어 대조. 미병합 v1334 Draft #1472 기반, 개발 이슈 #1475. 문서 기획만 수행.
+- 실제 코드: 회원 위젯·관리자 문의 화면이 범용 이미지 업로드 후 URL을 문의 본문에 삽입하며, 범용 `GET content/chat/media/:key`는 회원 가드 없이 public/immutable 캐시를 반환. Migration196에는 첨부의 회원·문의 소유권 연결이 없음. 소스 위험이지 운영 공개 노출/사고 확정 아님. 신규 기능은 메시지당 PNG/JPEG/WebP 1개(5MiB/1,200만 픽셀), 검사·EXIF 제거·비공개 저장, 회원/의도 결합 임시 영수증, 24시간 미전송 만료, 실제 메시지 DB 연결, 본인/권한 관리자만 no-store 다운로드. 공개 URL 금지·기본 OFF·기존 텍스트 호환.
+- /support·위젯·관리자·Android에서 스크린샷 첨부/제거/전송/안전하게 보기; SELECTED/UPLOADING/SCANNING/READY/SENDING/ATTACHED/REJECTED/EXPIRED/UNAVAILABLE. 결과 불명 시 안정적 의도·영수증 재확인. CSRF multipart POST /api/v1/support/evidence/stage, 기존 메시지 전송에 선택 evidenceId, 본인 GET /api/v1/support/threads/:id/evidence/:evidenceId 및 관리자 전용 경로. 새로운 전진형 support_evidence/support_message_evidence, SECDEF·인덱스·키 잠금·행 잠금·DB 원자적 연결·파일 고아 정리, 앱 직접 DML 추가 금지.
+- P0 ENV1336-01 용량/격리 복원(#1170), SEC1336-02 앱 DML 235/241·PUBLIC 은행 3개·마이그레이션 5개 SHA 불일치(#993/#1469), REL1336-03 QA·정확 SHA Test, SUP1336-04 기존 URL의 허위 비공개 보장/무권한 접근 방지. P1 SUP1336-05 비공개 저장/백신/할당량, SUP1336-06 DB/SECDEF, SUP1336-07 영수증/고아 파일, SUP1336-08 API/App API, SUP1336-09 웹/관리자/Android/WCAG/SEO/KPI, SUP1336-10 격리 PG/복원/롤백. 합성 10,001건, 타인 100건, 동시성 100건, 악성·다중형식·EXIF·용량·ENOSPC·커밋 후 응답 유실·바이너리 헤더 검증. 상세 계약은 기존 INTEGRATED_PLANNING_MASTER.md 및 .ko.md.
+- QA v1304 프론트 1,423 PASS·타입/린트/빌드/API PASS, 전체 감사 Critical2/High8 FAIL·봇 Critical1/High5 FAIL·경로 원장 ok=false, 루트99%(1.9GiB)·데이터92%(17GiB). 정확 SHA 인증 Test·격리 복원·운영승격 BLOCKED. 외부 독립 근거 신규 승인 0, 누적 중복 제거 승인 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 런타임·DB·WLD·원장·Test·운영 변경 없음.
+- 전체 백로그 식별자: ENV1336-01 SEC1336-02 REL1336-03 SUP1336-04 SUP1336-05 SUP1336-06 SUP1336-07 SUP1336-08 SUP1336-09 SUP1336-10.
+
 ## 기획 v1334 — F675-140 문의 검색 개인정보·커서 무결성 개선 (기능 보완 / 초안 / 운영 보류)
 **QA 확인 01:16 KST:** QA v1304 진행 중(확인 시 install 게이트만 완료); v1303이 최신 완료 근거이며 v1304 PASS 추정 금지.
 - 이전 Feature Addition v1332 → 현재 Feature Improvement v1334 → 다음 Feature Addition v1336(잠정). main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작·중간 확인, AGENTS/README/영어 정본/한국어 대조. 미병합 v1332 Draft #1468에 적층된 문서 기획. 개발 #1467, P0 #993/#1469/#1170.

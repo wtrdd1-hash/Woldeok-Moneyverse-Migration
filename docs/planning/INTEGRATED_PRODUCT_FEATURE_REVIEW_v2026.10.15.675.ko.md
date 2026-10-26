@@ -1,3 +1,10 @@
+## v1336 — F675-141 회원 문의 비공개 증빙 이미지 (기능 추가 / 초안 / 보류)
+- 이전 보완 v1334 → 현재 추가 v1336 → 다음 보완 v1338. main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간, 미병합 선행 #1472, 개발 #1475. 런타임·운영 변경 없음.
+- 실제 회원/관리자 문의 화면은 범용 이미지 업로드 URL을 본문에 삽입하고, 범용 미디어 GET은 인증 가드가 없고 public/immutable 캐시를 반환하며 Migration196에는 소유권 관계가 없음. 운영 사고/공개 노출 확정은 아님. 신규 문의 전용 스크린샷 1개(5MiB/1,200만 픽셀) 검사·EXIF 제거·24시간 임시저장·회원/의도/문의 결합 영수증·본인/권한 관리자 no-store 조회. 과거 URL은 LEGACY_UNVERIFIED, 자동 비공개 승격 금지.
+- /support·위젯·관리자·Android에서 첨부/제거/전송/보기, READY/ATTACHED/REJECTED/EXPIRED/UNAVAILABLE 구분. CSRF multipart 임시저장, 멱등 전송, 권한 검증 다운로드; 전진형 support_evidence/메시지 관계, SECDEF·잠금·DB 원자 연결·파일 고아 정리, 공개 URL/앱 직접 DML 금지. WCAG 2.2 AA·noindex/no-store·관리자 k>=20·할당량·백신. API/DB/트랜잭션/롤백 상세는 통합 영문·국문 정본.
+- P0 ENV1336-01 SEC1336-02 REL1336-03 SUP1336-04; P1 SUP1336-05 SUP1336-06 SUP1336-07 SUP1336-08 SUP1336-09 SUP1336-10. QA v1304 프론트 1,423 PASS이나 전체 감사 Critical2/High8·봇 Critical1/High5·경로 원장 FAIL; 개발 DML235/241·PUBLIC 은행3·마이그레이션 5건 불일치·루트99%. 정확 SHA Test/격리 복원 미검증, RELEASE HOLD. 합성 10,001·타인100·동시100·백신/EXIF/ENOSPC/고아 검증. 외부 10,000건 신규 승인0·누적 UNKNOWN/BLOCKED.
+- 전체 백로그 식별자: ENV1336-01 SEC1336-02 REL1336-03 SUP1336-04 SUP1336-05 SUP1336-06 SUP1336-07 SUP1336-08 SUP1336-09 SUP1336-10.
+
 ## v1334 — F675-140 문의 검색 개인정보·커서 무결성 (기능 보완 / 초안 / 보류)
 **QA 확인 01:16 KST:** QA v1304 진행 중(확인 시 install 게이트만 완료); v1303이 최신 완료 근거이며 v1304 PASS 추정 금지.
 - 이전 추가 v1332 → 현재 보완 v1334 → 다음 추가 v1336, main 0fe614b2ca1a7bc0df540514e54db78130479e2a 시작·중간 확인. v1332 #1468 미병합, 런타임 변경 없음.

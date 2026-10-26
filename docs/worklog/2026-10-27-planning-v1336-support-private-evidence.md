@@ -12,9 +12,9 @@ Canonical GitHub main at start: `0fe614b2ca1a7bc0df540514e54db78130479e2a`; read
 - Independent external 10,000 reference gate: newly accepted 0, cumulative approved/deduplicated UNKNOWN, BLOCKED / IN PROGRESS. Existing user-owned/worker worktrees, files, Docker volumes and runtime untouched.
 
 ## In progress — planned deliverables
-- [ ] Inspect source and update official EN/KO project plan, integrated master, product feature review, and integrated review; preserve existing details and no new dispersed feature specs.
-- [ ] Define owner-scoped private evidence staging, AV/metadata stripping, atomic DB message link, orphan handling, safe binary retrieval, Android/admin UX, WCAG/SEO/KPI, tests/rollback.
-- [ ] Re-fetch main and canonical plan mid-run; verify no drift, record QA changes and external evidence count.
+- [x] Inspect source and update official EN/KO project plan, integrated master, product feature review, and integrated review; preserve existing details and no new dispersed feature specs.
+- [x] Define owner-scoped private evidence staging, AV/metadata stripping, atomic DB message link, orphan handling, safe binary retrieval, Android/admin UX, WCAG/SEO/KPI, tests/rollback.
+- [x] Re-fetch main and canonical plan mid-run; verify no drift, record QA changes and external evidence count.
 - [ ] Create draft PR, verify docs-only delta, append final evidence and GitHub/internal logs.
 
 ## GitHub task
@@ -23,3 +23,8 @@ Canonical GitHub main at start: `0fe614b2ca1a7bc0df540514e54db78130479e2a`; read
 
 ## Release restrictions
 No runtime code, SQL migration execution, DB rows, WLD/ledger, feature switches, Test/Production or other Gemini/A/B/C/QA files are changed. Any implementation needs its own branch, reviewed spec, isolated PostgreSQL negative authorization tests, exact-SHA Test E2E, backup restore and authorized GitOps release. New functionality remains OFF.
+
+## Midpoint — 2026-10-27T02:12:23.824340+09:00
+- Re-fetched main, SHA unchanged; canonical EN/KO plan headings rechecked. QA v1304 gate results read, full/bot audits failed and route-ledger report not green.
+- Six existing EN/KO planning/review documents and two update logs amended, detailed authoritative implementation-ready proposal in existing integrated EN/KO master; all ten backlog IDs synchronized.
+- OWASP, MDN, W3C sources consulted but no independently deduplicated accepted evidence records added.

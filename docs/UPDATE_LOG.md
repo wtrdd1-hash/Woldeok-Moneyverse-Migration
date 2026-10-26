@@ -1,3 +1,9 @@
+## 2026-10-27 — Planning v1336 (F675-141 Addition / DRAFT / RELEASE HOLD)
+- Previous Improvement v1334 / Current Addition v1336 / Next Improvement v1338. Main `0fe614b2ca1a7bc0df540514e54db78130479e2a` start/mid, unmerged parent Draft #1472, engineering #1475.
+- Verified generic support image upload URL-in-body and unauthenticated public-cache generic media GET; source-code risk only, no confirmed Production exposure. Proposed support-only private screenshot staging, AV/re-encode/EXIF strip, owner/session/intent receipt, atomic DB message link, no-store member/admin binary GET, legacy LEGACY_UNVERIFIED, Android/WCAG/SEO/KPI and flag OFF.
+- P0 ENV1336-01 SEC1336-02 REL1336-03 SUP1336-04; P1 SUP1336-05 SUP1336-06 SUP1336-07 SUP1336-08 SUP1336-09 SUP1336-10. QA v1304 1,423 frontend PASS but full/bot audits and route-ledger FAIL, dev DML235/241, PUBLIC bank3, migration drift5, root99%, exact-SHA Test/restore HOLD. 10,000 external evidence new 0, cumulative UNKNOWN/BLOCKED. Docs only; no runtime/DB/WLD/ledger/flags/deploy.
+- GitHub issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1475. Draft PR: PENDING.
+
 ## 2026-10-27 — Planning v1334 (F675-140 Improvement / DRAFT / RELEASE HOLD)
 **QA snapshot 01:16 KST:** QA v1304 IN PROGRESS (only install gate completed at observation); QA v1303 remains latest completed evidence; do not infer v1304 PASS.
 - Previous Addition v1332 / Current Improvement v1334 / Next Addition v1336. Main 0fe614b2ca1a7bc0df540514e54db78130479e2a start/mid; stacked on unmerged Draft #1468. Engineering #1467.
