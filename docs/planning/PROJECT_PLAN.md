@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **v1314 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (stacked on unmerged #1407; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## Planning v1314 — F675-135 Privacy Case Materialization, Independent Authorization and Outcome Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
 - Cycle: Previous Feature Addition v1312 → Current Feature Improvement v1314 → Next Feature Addition v1316 (provisional). Remote main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` rechecked start/mid; prior v1312 Draft #1407 unmerged. Documentation-only, no runtime, database, ledger, Test or Production changes.

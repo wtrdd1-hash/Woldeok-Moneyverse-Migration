@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **v1314 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (stacked on unmerged #1407; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## v2026.10.26.1314 — F675-135 Privacy Case Materialization, Independent Authority and Evidence Integrity (Feature Improvement / DRAFT / RELEASE HOLD)
 

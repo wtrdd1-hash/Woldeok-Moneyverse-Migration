@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **v1314 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (미병합 #1407 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## 기획 v1314 — F675-135 개인정보 사건 생성·독립 권한·처리 결과 무결성 보완 (기능 보완 / DRAFT / RELEASE HOLD)
 - 회차: 이전 기능 추가 v1312 → 현재 기능 보완 v1314 → 다음 기능 추가 v1316(잠정). 원격 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 재확인, 선행 Draft #1407 미병합. 문서만 변경, 런타임·DB·원장·Test·운영 변경 없음.

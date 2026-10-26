@@ -1,4 +1,5 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+- **v1314 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (미병합 #1407 기반, 운영 보류). **개발 이슈:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## v1314 — F675-135 개인정보 사건 무결성 보완 (DRAFT / HOLD)
 - 이전 기능 추가 v1312 / 현재 기능 보완 v1314 / 다음 기능 추가 v1316(잠정). main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 확인; 미병합 Draft #1407 후속 문서 전용.

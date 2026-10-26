@@ -1,4 +1,5 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- **v1314 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1411 (stacked on unmerged #1407; RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1406.
 
 ## v1314 — F675-135 Privacy Case Integrity Improvement (DRAFT / HOLD)
 - Previous Feature Addition v1312 / Current Feature Improvement v1314 / Next Feature Addition v1316 provisional. Main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` checked start/mid; stacked on unmerged Draft #1407, documentation only.
