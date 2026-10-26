@@ -1,4 +1,4 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v249)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v250)
 
 - **v235**: [공식 실전 이용 가이드(/guide, /guide/stock-trading, /guide/virtual-banking) 2026 최신 기획 전면 개편: 토스형 3분 입문 로드맵, 보유 주식 확인 및 원클릭 매도 방법, 월덕뱅크 단일 통장 원카드 및 실시간 복리이자 가이드 구축] (+120, -0)
 
@@ -9,6 +9,8 @@
 - **v208**: [대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 (기본배당, 창업그랜트, 긴급구호금, 바이백소각, 국채부스터) 구축] (+85, -0)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v250**: [관리자 SEO 관제 타워 404 에러 원인 규명 및 프로덕션 백엔드 최신화·다계층 회복성 폴백 배포] (+38, -0)
+
 - **v249**: [전수 브랜치 통합 및 운영 DB·전체 금융 기능 심층 검증 완료 (main 배포)] (+42, -0)
 
 - **v233**: [Phase 4(계산기 10종 허브 & 블로그 리딩 뷰) 및 Phase 5(관리자 관제탑 콕핏) 토스 2026 전면 백지 리빌드 완료 & 전역 5대 Phase 배포 및 실측 완료] (+125, -0)
@@ -3624,3 +3626,15 @@ flowchart LR
   3. **가상 주식 거래소 & 블로그 AI 엔진**: 9개 상장사 실시간 시세 및 10단 호가창/캔들 API 정상, AI 블로그 발행 및 2단계 영구 삭제 E2E 무결.
   4. **테스트 및 빌드 스위트**: Backend Vitest 167개 파일, 1,279개 테스트 전수 통과 (1,279/1,279 PASS, exit code 0). Frontend Next.js Turbopack 608개 라우트 빌드 성공.
   5. **원격 GitHub main 반영**: GitHub `wtrdd1-hash/Woldeok-Moneyverse-Migration:main`에 머지 및 푸시 완료.
+
+
+---
+## 🎯 [v250 Specification] 관리자 SEO 관제 타워 404/503 에러 원인 규명 및 프로덕션 백엔드 최신화·다계층 회복성 폴백 배포
+- **적용 일시**: 2026-10-27
+- **원인 분석**:
+  1. `/etc/systemd/system/moneyverse-backend.service.d/zz-v697-rollback.conf`에 구버전 백엔드(`prod-v2026.10.21.1055-0d12f99bab2f/backend`) 고정 설정이 남아 있어 최신 컨트롤러(`/api/v1/seo/status/admin`)가 로드되지 않고 404 Not Found 반환.
+  2. 프론트엔드 SSR (`frontend/src/app/admin/seo/page.tsx`)에서 404 수신 시 `catch { return null; }`로 떨어져 화면 하단에 *"관리자 SEO 데이터를 불러올 수 없습니다. 권한 및 서버 연결을 확인해 주세요."* 에러 박스 발생.
+- **조치 내역**:
+  1. **백엔드 서비스 최신화**: `zz-v697-rollback.conf`를 최신 머지 경로(`/srv/moneyverse-data/releases/prod-v2026.10.22.toss-redesign/backend`)로 수정 후 백엔드 빌드(`nest build`) 및 무중단 재기동 완료. `/api/v1/seo/status` (200 OK) 및 `/api/v1/seo/status/admin` (401 인증 가드 정상 동작) 실측 검증.
+  2. **프론트엔드 3계층 회복성 폴백 적용**: `frontend/src/app/admin/seo/page.tsx`의 `fetchSeoData()`에 1차(관리자 상세) ➔ 2차(공개 집계 `/api/v1/seo/status`) ➔ 3차(구조적 기본값) 다계층 폴백 구조 장착.
+  3. **프로덕션 프론트엔드 608개 라우트 빌드 및 재기동**: 원격 서버 `main` 브랜치 최신화 및 Next.js Turbopack 빌드 성공, 서비스 재기동 완료.
