@@ -23,12 +23,12 @@
 - Case-insensitive cache directives and header arrays must not bypass protection.
 
 ## Task 1: Regression
-- [ ] Create `backend/src/http/etag-private-cache.test.ts` with isolated middleware request/response harness.
-- [ ] Run focused Vitest and capture RED failures.
+- [x] Create `backend/src/http/etag-private-cache.test.ts` with isolated middleware request/response harness.
+- [x] Run focused Vitest and capture RED failures.
 
 ## Task 2: Minimal implementation
-- [ ] Modify `backend/src/http/etag.middleware.ts` to bypass validator logic for private/no-store signals.
-- [ ] Re-run focused Vitest and record GREEN.
+- [x] Modify `backend/src/http/etag.middleware.ts` to bypass validator logic for private/no-store signals.
+- [x] Re-run focused Vitest and record GREEN.
 
 ## Task 3: Verification and handoff
 - [ ] Run backend and repository gates, capture exact outcomes.

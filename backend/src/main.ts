@@ -25,7 +25,7 @@ import { securityHeaders } from './security/security-headers.middleware';
 import { requestActivityTrail } from './activity/request-activity.middleware';
 import { AuctionGateway } from './marketplace/auction.gateway';
 import { responseCompression } from './http/compression.middleware';
-import { dynamicEtag } from './http/etag.middleware';
+import { registerDynamicEtag } from './http/etag.middleware';
 import { corsPolicy } from './security/cors-policy';
 
 async function bootstrap(): Promise<void> {
@@ -44,7 +44,7 @@ async function bootstrap(): Promise<void> {
   app.use(responseCompression());
 
   // Dynamic ETag & 304 Not Modified Caching for GET/HEAD
-  app.use(dynamicEtag());
+  registerDynamicEtag(app.getHttpAdapter().getInstance());
 
   // HTTP Keep-Alive optimization middleware
   app.use((_req: Request, res: Response, next: NextFunction) => {

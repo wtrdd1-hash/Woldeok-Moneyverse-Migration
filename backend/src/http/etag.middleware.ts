@@ -1,5 +1,16 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { Application, NextFunction, Request, Response } from 'express';
 import { createHash } from 'crypto';
+
+// A private response must not be validated against a representation cached
+// under a previous identity, nor may no-store responses acquire validators.
+function isPrivateResponse(req: Request, res: Response): boolean {
+  const cacheControl = String(res.getHeader('Cache-Control') ?? '');
+  const privateCacheDirective = /(?:^|,)\s*(?:no-store|private)(?:\s*(?:,|;|=|$))/i;
+  return privateCacheDirective.test(cacheControl)
+    || Boolean(res.getHeader('Set-Cookie'))
+    || Boolean(req.headers.cookie)
+    || Boolean(req.headers.authorization);
+}
 
 /**
  * Dynamic ETag & HTTP 304 Not Modified Caching Middleware.
@@ -17,7 +28,7 @@ export function dynamicEtag() {
     res.send = (body?: unknown): Response => {
       res.send = originalSend;
 
-      if (!body || res.statusCode !== 200) {
+      if (!body || res.statusCode !== 200 || isPrivateResponse(req, res)) {
         return originalSend(body);
       }
 
@@ -57,4 +68,10 @@ export function dynamicEtag() {
 
     next();
   };
+}
+
+/** Express also generates weak validators in res.send; disable that fallback. */
+export function registerDynamicEtag(app: Pick<Application, 'disable' | 'use'>): void {
+  app.disable('etag');
+  app.use(dynamicEtag());
 }
