@@ -1,3 +1,4 @@
+- **v1326 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1452 (선행 #1449 미병합 기반; DRAFT / RELEASE HOLD). **개발:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## 2026-10-26 — 기획 v1326 (기능 보완 / DRAFT / RELEASE HOLD)
 - 이전 v1324 기능 추가 → 현재 v1326 기능 보완 → 다음 v1328 기능 추가(잠정). main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 시작·중간 확인, 선행 Draft #1449 OPEN. F675-138 문의 종료 회차와 마지막 관리자 답변 표시 증명 강화: 오래된 200건만으로 자동 해결 확인 금지, 반복 resolved 종료 이벤트 금지, 문의 행 우선 잠금·잠금 후 멱등 재검증, 회원/세션 HMAC 600초 이하, 구회차/과거/503 실패 폐쇄.
 - 국영문 통합 프로젝트·마스터·기능 재검토 갱신, P0 4/P1 6: ENV1326-01 SEC1326-02 REL1326-03 SUP1326-04 SUP1326-05 SUP1326-06 SUP1326-07 SUP1326-08 SUP1326-09 SUP1326-10. 개발 #1448·용량 #1170. QA1299 진행 중 main 1,397 통과/6 실패·감사 FAIL, 루트99% 약1.7GiB, 공식 Test/복원/권한/Migration266 HOLD. 외부10k 신규승인0·누적 UNKNOWN. 문서만 변경, Production BLOCKED.

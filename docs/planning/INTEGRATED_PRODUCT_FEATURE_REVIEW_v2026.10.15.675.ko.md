@@ -1,4 +1,5 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
+- **v1326 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1452 (선행 #1449 미병합 기반; DRAFT / RELEASE HOLD). **개발:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## v1326 — F675-138 문의 종료·최신 답변 표시 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
 - 이전 추가 v1324 → 현재 보완 v1326 → 다음 추가 v1328(잠정), main 1c5b84a1c45baafcca83f375a6f99698121e9bb5 재확인, 선행 Draft #1449 미병합. Migration196 오래된 순 메시지200건과 반복 resolved UPDATE는 최신 답변 누락·종료 이벤트 중복 위험이지만 운영 장애 확증은 아님.
 - 본인 명시적 확인은 최신 관리자 답변 또는 명시적인 답변 없는 종료 카드가 서버에서 전달된 경우에만 가능. 600초 이하 회원/세션/문의/이벤트/revision/마지막 답변 HMAC은 표시 자격 증명이지 사람의 읽음 증거가 아님. 부분·과거·503·구회차를 확인 완료로 표시 금지. 실제 종료 전환만 이벤트1건, 반복 resolved no-op, 재개·재종료 신규 회차; 문의 행 우선 잠금·잠금 후 멱등 해시·감사 원자성·추가형 구함수 호환 SECDEF 최소권한.

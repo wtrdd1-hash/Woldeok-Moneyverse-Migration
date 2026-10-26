@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **v1326 기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1452 (선행 #1449 미병합 기반; DRAFT / RELEASE HOLD). **개발:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## 기획 v1326 — F675-138 문의 종료 회차·최신 답변 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
 - 이전 기능 추가 v1324 / 현재 기능 보완 v1326 / 다음 기능 추가 v1328(잠정). 최신 main `1c5b84a1c45baafcca83f375a6f99698121e9bb5` 시작·중간 AGENTS.md/README.md/영문 정본·국문 대조 확인. 선행 Draft #1449 OPEN, #1432 미병합 기반. 기획 문서만 변경.
 - Migration196은 오래된 순 200건 메시지를 반환해 /support에서 최신 관리자 답변을 누락할 수 있고 admin_support_set_status는 resolved→resolved에도 UPDATE한다. 회원·관리자 답변은 상태를 바꾼다. v1324의 회원 해결 확인은 단순 상태나 GET이 아닌 실제 종료 회차·마지막 관리자 답변에 결합해야 한다. 최신 답변 또는 답변 없는 종료 카드가 서버에서 전달된 후에만 최대 600초 회원/세션/문의/이벤트/revision/마지막 답변 HMAC 증명 발급; 실제 사람이 읽었다는 증거는 아님. 부분·과거·503 구분, 오래된 회차 412·증명 없음 428.
