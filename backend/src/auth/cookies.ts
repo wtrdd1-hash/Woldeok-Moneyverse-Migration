@@ -30,14 +30,22 @@ export function authCookieName(config: CookieSecurity): string {
 
 export function parseCookies(header: string | undefined): Record<string, string> {
   const parsed: Record<string, string> = {};
+  const seen = new Set<string>();
   for (const part of (header ?? '').split(';')) {
     const separator = part.indexOf('=');
     if (separator < 1) continue;
     const key = part.slice(0, separator).trim();
+    // A duplicate name can originate from a different Path/Domain cookie.
+    // Never choose the first or last session credential arbitrarily.
+    if (seen.has(key)) {
+      delete parsed[key];
+      continue;
+    }
+    seen.add(key);
     try {
       parsed[key] = decodeURIComponent(part.slice(separator + 1).trim());
     } catch {
-      /* Ignore malformed cookies. */
+      /* Ignore malformed cookies, including subsequent duplicate values. */
     }
   }
   return parsed;
@@ -52,8 +60,20 @@ export function parseCookies(header: string | undefined): Record<string, string>
  * read-only compatibility shim.
  */
 export function sessionToken(headers: HeaderBearing, config: CookieSecurity): string | undefined {
+  const preferredName = authCookieName(config);
+  const acceptedNames = new Set([preferredName, AUTH_COOKIE]);
+  const seen = new Set<string>();
+  for (const part of (headers.cookie ?? '').split(';')) {
+    const separator = part.indexOf('=');
+    if (separator < 1) continue;
+    const name = part.slice(0, separator).trim();
+    if (!acceptedNames.has(name)) continue;
+    // A duplicated preferred cookie must not downgrade to the legacy token.
+    if (seen.has(name)) return undefined;
+    seen.add(name);
+  }
   const parsed = parseCookies(headers.cookie);
-  return parsed[authCookieName(config)] ?? parsed[AUTH_COOKIE];
+  return seen.has(preferredName) ? parsed[preferredName] : parsed[AUTH_COOKIE];
 }
 
 export function sessionCookie(token: string, config: CookieSecurity): string {

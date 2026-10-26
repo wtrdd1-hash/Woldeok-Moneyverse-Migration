@@ -40,6 +40,14 @@ describe('parseCookies', () => {
   it('returns an empty object for a missing header', () => {
     expect(parseCookies(undefined)).toEqual({});
   });
+
+  it('rejects a duplicated cookie name instead of accepting the last value', () => {
+    expect(parseCookies('mv_session=first; mv_session=second')).not.toHaveProperty(AUTH_COOKIE);
+  });
+
+  it('does not recover a duplicated cookie after an invalid encoded value', () => {
+    expect(parseCookies('mv_session=%E0%A4%A; mv_session=second')).not.toHaveProperty(AUTH_COOKIE);
+  });
 });
 
 describe('sessionToken', () => {
@@ -63,6 +71,31 @@ describe('sessionToken', () => {
 
   it('returns undefined with no cookie header', () => {
     expect(sessionToken({}, SECURE)).toBeUndefined();
+  });
+
+  it('rejects ambiguous duplicate host-prefixed session cookies', () => {
+    const cookie = `${HOST_PREFIXED_AUTH_COOKIE}=first; ${HOST_PREFIXED_AUTH_COOKIE}=second`;
+    expect(sessionToken({ cookie }, SECURE)).toBeUndefined();
+  });
+
+  it('rejects ambiguous duplicate legacy sessions when no prefixed cookie exists', () => {
+    const cookie = `${AUTH_COOKIE}=first; ${AUTH_COOKIE}=second`;
+    expect(sessionToken({ cookie }, SECURE)).toBeUndefined();
+  });
+
+  it('never falls back to a legacy session when the preferred name is duplicated', () => {
+    const cookie = `${AUTH_COOKIE}=legacy; ${HOST_PREFIXED_AUTH_COOKIE}=first; ${HOST_PREFIXED_AUTH_COOKIE}=second`;
+    expect(sessionToken({ cookie }, SECURE)).toBeUndefined();
+  });
+
+  it('does not downgrade to a legacy session when the preferred cookie is malformed', () => {
+    const cookie = `${AUTH_COOKIE}=legacy; ${HOST_PREFIXED_AUTH_COOKIE}=%E0%A4%A`;
+    expect(sessionToken({ cookie }, SECURE)).toBeUndefined();
+  });
+
+  it('still prefers one unambiguous host-prefixed cookie over the legacy name', () => {
+    const cookie = `${AUTH_COOKIE}=old; ${HOST_PREFIXED_AUTH_COOKIE}=new`;
+    expect(sessionToken({ cookie }, SECURE)).toBe('new');
   });
 });
 
