@@ -8,9 +8,10 @@
 - No live DB writes, feature switch changes, existing worktree modifications, merge or deployment.
 
 ## In progress
-- [ ] RED: prove validated DNS address not bound to outbound socket.
-- [ ] GREEN: pin validated address for each hop, fail closed on mixed/private answers and preserve hostname TLS/Host.
+- [x] RED: prove validated DNS address not bound to outbound socket.
+- [x] GREEN: pin validated address for each hop, fail closed on mixed/private answers and preserve hostname TLS/Host.
 - [ ] Tests: focused, typecheck, lint, build, integration/security, full CI, isolated PostgreSQL and Test exact-SHA as feasible.
 
 ## Finished
-- Pending.
+- Pending full gates. RED 3/4 initial tests failed as expected. GREEN 18/18 focused SSRF and redirect tests passed. Typecheck backend passed after contract build. New dependency `undici@7.16.0` for per-request pinned DNS connector. No API/DB schema changes.
+- Risk: overlapping PR #1368 (IPv4-mapped classification) and #1392 (abort deadline); reconcile before merge. No deploy authorized.

@@ -1,5 +1,7 @@
 import dns from 'node:dns/promises';
-import { isIP } from 'node:net';
+import { BlockList, isIP } from 'node:net';
+import type { LookupFunction } from 'node:net';
+import { Agent } from 'undici';
 
 export class SsrffSecurityError extends Error {
   constructor(message: string) {
@@ -81,6 +83,11 @@ function isPrivateIPv6(ip: string): boolean {
   return false;
 }
 
+const mappedIpv4Range = new BlockList();
+mappedIpv4Range.addSubnet('::ffff:0:0', 96, 'ipv6');
+// IPv4-compatible addresses are deprecated and can be interpreted inconsistently.
+mappedIpv4Range.addSubnet('::', 96, 'ipv6');
+
 /**
  * Validates if an IP address (v4 or v6) is private or reserved.
  */
@@ -107,7 +114,9 @@ const BLOCKED_HOSTNAMES = new Set([
  *
  * @throws SsrffSecurityError if the URL is unsafe or points to a private network.
  */
-export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL> {
+type SafeDestination = { url: URL; addresses: Array<{ address: string; family: 4 | 6 }> };
+
+async function resolveSafeDestination(urlInput: string | URL): Promise<SafeDestination> {
   let parsed: URL;
   try {
     parsed = typeof urlInput === 'string' ? new URL(urlInput) : urlInput;
@@ -134,11 +143,13 @@ export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL
   }
 
   // 3. If hostname is a direct IP address, inspect it immediately
-  if (isIP(hostname)) {
-    if (isPrivateIp(hostname)) {
+  const ipLiteral = hostname.startsWith('[') && hostname.endsWith(']') ? hostname.slice(1, -1) : hostname;
+  const ipFamily = isIP(ipLiteral);
+  if (ipFamily) {
+    if (isPrivateIp(ipLiteral) || (ipFamily === 6 && mappedIpv4Range.check(ipLiteral, 'ipv6'))) {
       throw new SsrffSecurityError(`Blocked outbound destination: IP ${hostname} belongs to a private/reserved address space.`);
     }
-    return parsed;
+    return { url: parsed, addresses: [{ address: ipLiteral, family: ipFamily as 4 | 6 }] };
   }
 
   // 4. Perform Anti-DNS Rebinding verification: resolve all A & AAAA records
@@ -149,18 +160,44 @@ export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL
     }
 
     for (const record of addresses) {
-      if (isPrivateIp(record.address)) {
+      if (isPrivateIp(record.address) || (record.family === 6 && mappedIpv4Range.check(record.address, 'ipv6'))) {
         throw new SsrffSecurityError(
           `SSRF Security Violation: Host ${hostname} resolved to private/internal IP ${record.address}`,
         );
       }
     }
+    return { url: parsed, addresses: addresses.map((record) => ({ address: record.address, family: record.family as 4 | 6 })) };
   } catch (error) {
     if (error instanceof SsrffSecurityError) throw error;
     throw new SsrffSecurityError(`DNS resolution failure for host ${hostname}: ${(error as Error).message}`);
   }
+}
 
-  return parsed;
+export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL> {
+  return (await resolveSafeDestination(urlInput)).url;
+}
+
+// The HTTP connector must not perform a second DNS resolution after validation.
+function pinnedAgent(destination: SafeDestination): Agent {
+  const expectedHost = destination.url.hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  const pinned = destination.addresses;
+  const lookup: LookupFunction = (hostname, options, callback) => {
+    if (hostname.toLowerCase() !== expectedHost) {
+      callback(new Error('SSRF socket hostname differs from validated hostname'), '');
+      return;
+    }
+    const eligible = pinned.filter((entry) => !options.family || options.family === entry.family);
+    if (eligible.length === 0) {
+      callback(new Error('No validated DNS address matches the requested address family'), '');
+      return;
+    }
+    if (options.all) {
+      callback(null, eligible);
+    } else {
+      callback(null, eligible[0]!.address, eligible[0]!.family);
+    }
+  };
+  return new Agent({ connect: { lookup }, connections: 1, pipelining: 1 });
 }
 
 const MAX_REDIRECTS = 3;
@@ -185,23 +222,32 @@ function carriesSensitiveOutboundState(init?: RequestInit): boolean {
  * Inspects all 3xx redirect locations to prevent DNS rebinding or redirect-based SSRF bypass.
  */
 export async function safeFetch(urlInput: string | URL, init?: RequestInit): Promise<Response> {
-  let currentUrl = await assertSafeOutboundUrl(urlInput);
+  let destination = await resolveSafeDestination(urlInput);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10_000);
 
   try {
     let redirectsFollowed = 0;
     while (true) {
-      const response = await fetch(currentUrl.toString(), {
-        ...init,
-        redirect: 'manual',
-        signal: init?.signal ?? controller.signal,
-      });
+      const agent = pinnedAgent(destination);
+      let response: Response;
+      try {
+        response = await fetch(destination.url.toString(), {
+          ...init,
+          redirect: 'manual',
+          signal: init?.signal ? AbortSignal.any([init.signal, controller.signal]) : controller.signal,
+          dispatcher: agent,
+        } as unknown as RequestInit);
+      } finally {
+        // close() waits for the returned Response body to finish without aborting it.
+        void agent.close().catch(() => undefined);
+      }
 
       // 3xx Redirect 감지 시 수동 추적 및 전 홉 검증
       if ([301, 302, 303, 307, 308].includes(response.status)) {
         redirectsFollowed += 1;
         if (redirectsFollowed > MAX_REDIRECTS) {
+          await response.body?.cancel();
           throw new SsrffSecurityError(`Maximum redirect limit (${MAX_REDIRECTS}) exceeded during outbound request`);
         }
 
@@ -210,17 +256,18 @@ export async function safeFetch(urlInput: string | URL, init?: RequestInit): Pro
           return response; // Location 헤더가 없으면 그대로 반환
         }
 
+        await response.body?.cancel();
         // 상대 경로 및 절대 경로 모두 처리
-        const nextUrl = new URL(location, currentUrl);
+        const nextUrl = new URL(location, destination.url);
         // Never forward bearer keys, cookies, or request bodies to a new origin.
         // Public, credential-free GET redirects remain supported.
-        if (nextUrl.origin !== currentUrl.origin && carriesSensitiveOutboundState(init)) {
+        if (nextUrl.origin !== destination.url.origin && carriesSensitiveOutboundState(init)) {
           throw new SsrffSecurityError(
             'Cross-origin redirect refused for credentialed or body-bearing outbound request',
           );
         }
         // Revalidate the destination of every redirect, including URL userinfo.
-        currentUrl = await assertSafeOutboundUrl(nextUrl);
+        destination = await resolveSafeDestination(nextUrl);
         continue;
       }
 
