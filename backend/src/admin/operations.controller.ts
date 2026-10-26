@@ -156,7 +156,9 @@ export class AdminWorkOperationsController {
 
   @Post('auto-tune')
   @UseGuards(CsrfGuard, ReauthGuard)
-  @ApiOperation({ summary: 'Automatically calculate and tune daily reward cap based on economy health' })
+  @ApiOperation({
+    summary: 'Automatically calculate and tune daily reward cap based on economy health',
+  })
   async autoTune(@Req() request: RequestWithSession) {
     const actor = requireUserId(request);
     const repository = required(this.operations);
@@ -170,10 +172,7 @@ export class AdminWorkOperationsController {
   @Put('policy')
   @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Update work reward policy daily cap, weekly cap, and repeat decay' })
-  async updatePolicy(
-    @Req() request: RequestWithSession,
-    @Body() body: UpdateWorkPolicyDto,
-  ) {
+  async updatePolicy(@Req() request: RequestWithSession, @Body() body: UpdateWorkPolicyDto) {
     const actor = requireUserId(request);
     const repository = required(this.operations);
     const policy = await guarded(
@@ -185,7 +184,9 @@ export class AdminWorkOperationsController {
 
   @Patch('tasks/:id')
   @UseGuards(CsrfGuard, ReauthGuard)
-  @ApiOperation({ summary: 'Update base reward, duration, daily limit, and active state of a work task' })
+  @ApiOperation({
+    summary: 'Update base reward, duration, daily limit, and active state of a work task',
+  })
   async updateTask(
     @Req() request: RequestWithSession,
     @Param('id', ParseUUIDPipe) taskId: string,
@@ -265,85 +266,63 @@ export class AdminDiscordOperationsController {
       'the delivery console could not be read',
     );
     const adminAlertInfo = {
-      adminUserId: this.discordAlert ? this.discordAlert.getAdminUserId() : '886478189520637992',
-      configured: !!process.env.DISCORD_BOT_TOKEN,
+      adminUserId: process.env.DISCORD_ADMIN_ALERT_USER_ID ?? '',
+      configured: Boolean(
+        this.discordAlert &&
+        process.env.DISCORD_BOT_TOKEN &&
+        /^\d{17,20}$/.test(process.env.DISCORD_ADMIN_ALERT_USER_ID ?? ''),
+      ),
     };
     return { outbox, routes, adminAlertInfo };
   }
 
   @Post('test-dm')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Send test direct message to configured admin user with preset support' })
-  async testDm(
-    @Req() request: RequestWithSession,
-    @Body() body?: { preset?: string },
-  ) {
+  @ApiOperation({
+    summary: 'Send test direct message to configured admin user with preset support',
+  })
+  async testDm(@Req() request: RequestWithSession, @Body() body?: { preset?: string }) {
     const actor = requireUserId(request);
-    if (!this.discordAlert) {
-      throw new ServiceUnavailableException('Discord alert service is not available');
+    if (
+      !this.discordAlert ||
+      !process.env.DISCORD_BOT_TOKEN ||
+      !/^\d{17,20}$/.test(process.env.DISCORD_ADMIN_ALERT_USER_ID ?? '')
+    ) {
+      throw new ServiceUnavailableException(
+        'Discord DM test requires an explicitly configured bot and recipient',
+      );
     }
     const adminUserId = this.discordAlert.getAdminUserId();
-    const preset = body?.preset ?? 'default';
-
-    let result: { success: boolean; channelId?: string; error?: string };
-
-    switch (preset) {
-      case 'whale':
-        result = await this.discordAlert.alertWhaleMovement({
-          txId: `tx-whale-${Date.now().toString(36)}`,
-          sender: 'acc-whale-kr-0089',
-          receiver: 'acc-exchange-cold-vault',
-          amount: '85000000',
-          asset: 'WLD',
-        });
-        break;
-      case 'jackpot':
-        result = await this.discordAlert.alertCasinoMegaJackpot({
-          game: '메가 드래곤 777 슬롯머신',
-          userId: actor,
-          betAmount: '500000',
-          winAmount: '120000000',
-          multiplier: 240,
-        });
-        break;
-      case 'treasury':
-        result = await this.discordAlert.alertTreasuryReserveLow({
-          currentBalance: '840000000',
-          threshold: '1000000000',
-          reserveRatio: '14.2%',
-        });
-        break;
-      case 'killswitch':
-        result = await this.discordAlert.alertKillSwitchActivated({
-          controlName: '가상 주식 거래소 체결 엔진',
-          activatedBy: actor,
-          reason: '긴급 시스템 이상 감지 및 시장 안정화 조치',
-          action: 'HALTED',
-        });
-        break;
-      case 'bank_delinquency':
-        result = await this.discordAlert.alertBankDelinquencySpike({
-          delinquentRatio: '8.7% (경보 구간)',
-          defaultedCount: 14,
-          affectedAmount: '42,500,000',
-        });
-        break;
-      case 'default':
-      default:
-        result = await this.discordAlert.sendAdminDirectMessage({
-          title: '🔔 [관리자 DM 연동 확인] 월덕 머니버스 중요 정보 다이렉트 알림',
-          description: '디스코드 봇을 통한 중요 정보(원장 불일치, 음수 잔액, 감사 체인 변조 등) 1:1 전송 파이프라인이 정상 연동되었습니다.',
-          color: 0x10b981,
-          fields: [
-            { name: '수신 관리자 ID', value: `\`${adminUserId}\``, inline: true },
-            { name: '테스트 요청자', value: `\`${actor.slice(0, 8)}...\``, inline: true },
-            { name: '감시 항목', value: '원장 대사 무결성, 계좌 잔액 안전성, 감사 체인 변조, 긴급 관리자 경보', inline: false },
-          ],
-        });
-        break;
+    const preset = body?.preset === undefined ? 'default' : body.preset;
+    const labels: Record<string, string> = {
+      default: '기본 DM 연결 확인',
+      whale: '대규모 자금 이동',
+      jackpot: '카지노 잭팟',
+      treasury: '국고 준비금',
+      killswitch: '비상 거래 중단',
+      bank_delinquency: '대출 연체',
+    };
+    const label = typeof preset === 'string' ? labels[preset] : undefined;
+    if (typeof preset !== 'string' || !Object.hasOwn(labels, preset) || typeof label !== 'string') {
+      throw new BadRequestException('unknown Discord test preset');
     }
+
+    // Test traffic must NEVER invoke the production alert helpers: they
+    // generate realistic emergency messages and may trigger operator response.
+    // The single transport below sends a plainly marked, non-operational DM.
+    const result = await this.discordAlert.sendAdminDirectMessage({
+      title: `🧪 [TEST ONLY / 모의 알림] ${label}`,
+      description:
+        '관리자 DM 전송 경로를 점검하기 위한 모의 테스트입니다. 실제 경보 발생 또는 조치가 아닙니다. 실제 거래, 원장 변경, 정책 실행도 수행되지 않았습니다.',
+      color: 0x64748b,
+      fields: [
+        { name: '유형', value: label, inline: true },
+        { name: '요청자', value: `\`${actor.slice(0, 8)}...\``, inline: true },
+        { name: '상태', value: 'TEST ONLY — 운영 이벤트가 아닙니다.', inline: false },
+      ],
+      footer: { text: 'TEST ONLY / 모의 알림 — 실제 사건 아님' },
+    });
 
     return { ...result, targetUserId: adminUserId, preset };
   }
 }
-
