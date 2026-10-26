@@ -25,6 +25,26 @@ import { failure, mutate } from '@/lib/mutate';
 /** Four megabytes, the cap the API applies to the same route. */
 const IMAGE_MAX_BYTES = 4 * 1024 * 1024;
 const CAPTION_MAX = 300;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const STORAGE_KEY = /^[0-9a-f-]{36}\.(png|jpg|webp)$/;
+
+interface PhotoReceipt {
+  readonly photo_id: string;
+  readonly submitted_at: string;
+  readonly replayed: boolean;
+}
+
+function isPhotoReceipt(value: unknown): value is PhotoReceipt {
+  if (!value || typeof value !== 'object') return false;
+  const receipt = value as Partial<PhotoReceipt>;
+  return typeof receipt.photo_id === 'string' && UUID.test(receipt.photo_id)
+    && typeof receipt.submitted_at === 'string'
+    && Number.isFinite(Date.parse(receipt.submitted_at))
+    && typeof receipt.replayed === 'boolean';
+}
+
+const UNCERTAIN_SUBMISSION =
+  '사진 제출 결과를 확인하지 못했어요. 다시 보내기 전에 아래 ‘내가 보낸 사진’ 목록을 확인해 주세요.';
 
 export async function submitPhoto(
   _previous: ActionState,
@@ -51,15 +71,25 @@ export async function submitPhoto(
 
   try {
     const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
-    const { storageKey } = await apiBytes<{ storageKey: string }>(
+    const upload = await apiBytes<{ storageKey: unknown }>(
       '/api/v1/photos/uploads',
       await file.arrayBuffer(),
       { contentType: file.type || 'application/octet-stream', csrfToken },
     );
 
-    const receipt = await mutate<{ replayed: boolean }>('/api/v1/photos', {
+    const storageKey = upload?.storageKey;
+    if (typeof storageKey !== 'string' || !STORAGE_KEY.test(storageKey)) {
+      return { status: 'error', message: UNCERTAIN_SUBMISSION };
+    }
+
+    const receipt = await mutate<unknown>('/api/v1/photos', {
       body: { storageKey, altText, idempotencyKey: randomUUID() },
     });
+
+    // A successful HTTP status alone cannot prove the moderation draft exists.
+    if (!isPhotoReceipt(receipt)) {
+      return { status: 'error', message: UNCERTAIN_SUBMISSION };
+    }
 
     revalidatePath('/gallery/submit');
     return {
