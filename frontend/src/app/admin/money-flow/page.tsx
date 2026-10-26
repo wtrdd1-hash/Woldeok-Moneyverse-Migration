@@ -289,6 +289,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
               </label>
               <select
                 name="type"
+                aria-label="거래 유형 필터"
                 defaultValue={type}
                 className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground focus:outline-none focus:ring-1 focus:ring-primary min-h-[44px]"
               >
@@ -311,6 +312,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
                 </label>
                 <select
                   name="direction"
+                  aria-label="입출금 방향 필터"
                   defaultValue={direction}
                   className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-700 bg-zinc-900 text-foreground focus:outline-none focus:ring-1 focus:ring-primary min-h-[44px]"
                 >
@@ -393,6 +395,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
           ) : (
             <div className="w-full max-w-full min-w-0 overflow-x-auto rounded-lg border border-border/50 mv-table-wrapper">
               <table className="w-full min-w-[700px] text-left text-xs">
+                <caption className="sr-only">검증된 회원 자금 흐름 원장 거래 내역</caption>
                 <thead>
                   <tr className="border-b border-border/60 text-muted-foreground">
                     <th className="py-2.5 px-3 font-semibold">일시</th>
