@@ -16,3 +16,11 @@
 - 격리 PostgreSQL 17.11에서 100회 동시 차단, SQLSTATE·권한·금고 잔액 및 원장 불변 확인.
 - 공용 국고 테이블의 DML 권한은 은행·연금·환전·SWF 의존성 때문에 이번 변경에서 제거하지 않음. 별도 보안 작업 필요.
 - 기존 283 중복 및 285/286 선행 병합 전 287 적용 금지.
+
+## 작업 후 — PARTIAL / 배포 보류
+- 287번 신규 SQL 마이그레이션으로 주식 거래정지 정산과 국고 조달 함수 모두 SQLSTATE 55000 차단. PUBLIC 및 앱 실행권한 회수, 정산 영수증 직접 DML 회수. 조회 계약 유지.
+- 회귀 4건 PASS, 격리 PostgreSQL 17.11 동시 100회 차단 PASS. Backend 1,688 PASS/430 SKIPPED, Frontend 1,681 PASS, Typecheck·Build·180 API 계약·Discord Bot 8건 PASS.
+- 전체 Lint는 기존 블로그 오류 2건, 전체 DB/Root 테스트는 마이그레이션 283 중복 및 285/286 누락, 전체 의존성 감사는 취약점으로 FAIL. 원격 CI FAIL.
+- QA #1610 + B #1627 + 본 변경의 임시 통합에서 마이그레이션 연속성은 통과. 단 QA의 283→285 이름 변경에 맞춰 기존 SQL 회귀 테스트 경로도 변경해야 함. 임시 수정 후 DB 37 PASS/3 SKIPPED, Lint 오류 0. 실제 QA 브랜치는 변경하지 않음.
+- 실제 서비스 DB/원장/잔액 변경 없음. 공식 Test exact-SHA 인증 E2E 및 GitOps 게이트 미완료. main 병합 및 Production 배포 금지.
+- 완전한 원자적 정산과 중복 지급 방지는 아직 미구현. 이번 회차는 DB 경계 안전 차단에 한정.
