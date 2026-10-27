@@ -16,7 +16,7 @@ describe('wallet owner-scoped rolling ledger periods', () => {
     expect(sql).toContain('account.owner_user_id = $1');
     expect(sql).toMatch(/ledger_transaction\.created_at\s*>=/);
     expect(sql.indexOf('ledger_transaction.created_at >=')).toBeLessThan(sql.indexOf('LIMIT $2'));
-    expect(params).toEqual([ACTOR, 50, 7]);
+    expect(params).toEqual([ACTOR, 51, 7]); // one bounded lookahead proves whether results are complete
   });
 
   it('rejects unbounded or malformed periods before any database query', async () => {
@@ -36,6 +36,39 @@ describe('wallet owner-scoped rolling ledger periods', () => {
     expect(overview).not.toHaveBeenCalled();
     controller.overview(request, '50', '7d');
     expect(overview).toHaveBeenCalledWith(ACTOR, { recentLimit: 50, periodDays: 7 });
+  });
+
+  it('returns at most 50 owner entries and reports whether a 51st ledger entry exists', async () => {
+    const row = (index: number) => ({
+      transaction_id: `00000000-0000-4000-8000-${String(index).padStart(12, '0')}`,
+      type: 'USER_TO_USER',
+      created_at: new Date('2026-10-27T00:00:00Z'),
+      net_amount: '-900719925474099312345',
+      cash_delta: '-900719925474099312345',
+      bank_delta: '0',
+    });
+    const rows = Array.from({ length: 51 }, (_, index) => row(index + 1));
+    const query = vi.fn(async () => ({ rows }));
+    const repository = new PostgresWalletRepository({ query } as unknown as Queryable);
+    const balancesForUser = vi.spyOn(repository, 'balancesForUser').mockResolvedValue([
+      { account_type: 'USER_CASH', available_amount: '900719925474099312345', updated_at: new Date('2026-10-27T00:00:00Z') },
+      { account_type: 'USER_BANK', available_amount: '0', updated_at: new Date('2026-10-27T00:00:00Z') },
+    ]);
+    const service = new WalletService(repository);
+    const overLimit = await service.overview(ACTOR, { recentLimit: 50, periodDays: 7 });
+    expect(overLimit.recentTransactions).toHaveLength(50);
+    expect(overLimit.recentTransactionsHasMore).toBe(true);
+    expect(overLimit.recentTransactions[0]?.netAmount).toBe('-900719925474099312345');
+    expect(query.mock.calls[0]?.[1]).toEqual([ACTOR, 51, 7]);
+    expect(balancesForUser).toHaveBeenCalledWith(ACTOR);
+
+    query.mockResolvedValueOnce({ rows: rows.slice(0, 50) });
+    const exactLimit = await service.overview(ACTOR, { recentLimit: 50 });
+    expect(exactLimit.recentTransactions).toHaveLength(50);
+    expect(exactLimit.recentTransactionsHasMore).toBe(false);
+    query.mockResolvedValueOnce({ rows: [] });
+    const empty = await service.overview(ACTOR, { recentLimit: 50 });
+    expect(empty.recentTransactionsHasMore).toBe(false);
   });
 
   it('passes a 30-day filter through service without changing WLD balances', async () => {

@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { activityPeriod, activityPeriodUrl } from './period';
+import { activityPeriod, activityPeriodUrl, activityCompletenessNotice } from './period';
 
 describe('wallet activity rolling periods', () => {
+  it('distinguishes verified truncated, complete and unknown results without guessing', () => {
+    expect(activityCompletenessNotice(true)).toContain('50건을 초과');
+    expect(activityCompletenessNotice(false)).toBeNull();
+    expect(activityCompletenessNotice(undefined)).toContain('확인할 수 없');
+  });
+
   it('accepts only all, 7d and 30d and never reflects arbitrary query strings', () => {
     expect(activityPeriod('7d')).toBe('7d');
     expect(activityPeriod('30d')).toBe('30d');

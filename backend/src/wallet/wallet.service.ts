@@ -143,6 +143,7 @@ export interface WalletOverview {
   readonly userId: string;
   readonly balances: WalletBalancesView;
   readonly recentTransactions: WalletTransactionView[];
+  readonly recentTransactionsHasMore: boolean;
 }
 
 export interface WalletTransferReceipt {
@@ -381,7 +382,8 @@ export class WalletService {
     return {
       userId,
       balances: normalizeBalances(balances),
-      recentTransactions: normalizeTransactions(transactions),
+      recentTransactions: normalizeTransactions(transactions.slice(0, limit)),
+      recentTransactionsHasMore: transactions.length > limit,
     };
   }
 

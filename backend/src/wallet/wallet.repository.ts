@@ -231,7 +231,7 @@ export class PostgresWalletRepository {
        GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
        ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
        LIMIT $2`,
-      [ownerUserId, recentLimit, periodDays ?? null],
+      [ownerUserId, recentLimit + 1, periodDays ?? null],
     );
   }
 

@@ -8,3 +8,10 @@ export function activityPeriod(value: string | undefined): ActivityPeriod {
 export function activityPeriodUrl(period: ActivityPeriod): string {
   return period === 'all' ? '/wallet/activity' : `/wallet/activity?period=${period}`;
 }
+
+/** Only a server-proven lookahead can certify whether the bounded list is complete. */
+export function activityCompletenessNotice(hasMore: boolean | undefined): string | null {
+  if (hasMore === true) return '선택한 기간의 기록이 50건을 초과하여 최신 50건만 표시합니다. 이전 기록은 이 화면에서 조회할 수 없습니다.';
+  if (hasMore === false) return null;
+  return '기록이 모두 표시되었는지 확인할 수 없습니다. 잠시 후 다시 확인하세요.';
+}

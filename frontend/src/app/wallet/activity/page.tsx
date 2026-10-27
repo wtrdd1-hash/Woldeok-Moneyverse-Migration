@@ -11,7 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
-import { activityPeriod, activityPeriodUrl } from './period';
+import { activityPeriod, activityPeriodUrl, activityCompletenessNotice } from './period';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,6 +68,11 @@ export default async function WalletActivityPage({
         ))}
       </nav>
       <p className="text-sm text-muted-foreground">최대 50건의 확정된 원장 기록을 표시합니다. 기간 필터는 서버에서 적용됩니다.</p>
+      {wallet && activityCompletenessNotice(wallet.recentTransactionsHasMore) && (
+        <p role="status" className="text-sm text-amber-700 dark:text-amber-300">
+          {activityCompletenessNotice(wallet.recentTransactionsHasMore)}
+        </p>
+      )}
       <Card>
         <CardContent>
           {!wallet ? (
