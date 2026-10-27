@@ -10,6 +10,7 @@ import { requireMember } from '@/lib/session';
 import { PrivacyRequestForm } from '../account-forms';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 export const metadata: Metadata = {
   title: '개인정보 센터',

@@ -12,11 +12,19 @@
 - Scope: privacy request receipt cache boundary across Backend/Next/Android API with existing PostgreSQL owner functions, without financial/DB migration writes.
 
 ## In progress
-- [ ] RED tests
-- [ ] GREEN implementation
+- [x] RED tests
+- [x] GREEN implementation
 - [ ] Isolated PostgreSQL and full regression
-- [ ] Midpoint main/planning refresh
+- [x] Midpoint main/planning refresh
 - [ ] GitHub PR and CI
 
 ## Finished
 - Pending evidence. Production RELEASE HOLD.
+
+### Midpoint checkpoint — 03:31 KST
+- RED confirmed: Backend header metadata 2 failures; Android gateway/privacy page 7 failures; middleware-before-guard 1 failure. GREEN: backend 4 PASS; frontend 25 PASS.
+- Backend privacy controller adds private/no-store and noindex; module middleware runs before guards to protect 401/403; Next privacy page explicitly disables fetch caching; Android gateway overrides upstream public cache for privacy, and all generated gateway problems are no-store/noindex.
+- Isolated PostgreSQL 17 applied original migration 015. Synthetic owner A list 1, owner B list 0, app-role direct-table SELECT denied: PASS. **Privacy create fails with SQL ambiguous created_at**, independent baseline blocker, not fixed by this HTTP cache change. No applied migration modified.
+- QA #1610 handles migration lineage/blog lint, not migration 015 privacy function; preserve and do not duplicate its SQL. PR #1386 overlaps privacy frontend/controller and requires reconciliation.
+- Main and integrated EN/KO plans re-fetched; main remains b1cd54fda1123fb07ca81b6e5b3ead70f59f556c.
+- All Test/Production writes, deployments, financial changes and branch deletion remain forbidden.

@@ -14,6 +14,7 @@ describe('account privacy center', () => {
 
   it('binds request history and the existing authoritative request form', () => {
     expect(page).toContain("apiOrNull<{ requests: PrivacyRequest[] }>('/api/v1/privacy/requests')");
+    expect(page).toContain("export const fetchCache = 'force-no-store'");
     expect(page).toContain('<PrivacyRequestForm />');
     expect(page).toContain('privacyData.requests.map');
   });
