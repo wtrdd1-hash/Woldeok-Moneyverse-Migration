@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const sqlPath = resolve(process.cwd(), 'migrations/283-space-finance-ledger-boundary-hold.sql');
+const sqlPath = resolve(process.cwd(), 'migrations/285-space-finance-ledger-boundary-hold.sql');
 
-describe('P0 #1502 space/city/property tax SQL boundary v283', () => {
+describe('P0 #1502 space/city/property tax SQL boundary v285', () => {
   const readSql = () => readFileSync(sqlPath, 'utf8');
 
   it.each([

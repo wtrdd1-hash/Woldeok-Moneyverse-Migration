@@ -1,4 +1,4 @@
--- 283-space-finance-ledger-boundary-hold.sql
+-- 285-space-finance-ledger-boundary-hold.sql
 -- P0 #1502: legacy 223/231 space purchase, project contributions and property
 -- tax directly update account_balances without balanced ledger_postings.
 -- Suspend SQL mutations (including SECURITY DEFINER owner invocations) until
