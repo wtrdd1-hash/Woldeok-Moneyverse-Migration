@@ -6,3 +6,7 @@ Status: IN PROGRESS / RELEASE HOLD.
 - [ ] GREEN minimal fix, focused regression and real isolated PostgreSQL check.
 - [ ] Full gates, latest main recheck, CI/PR, exact-SHA Test, release HOLD assessment.
 No migration or ledger changes planned; other agent branches and reservations protected.
+
+## RED checkpoint
+- HTTP malformed/duplicate limit and canonical boundary tests added before implementation.
+- Baseline vitest exit: 1; see /tmp/mv-b-v599-red.log (expected failing cases).
