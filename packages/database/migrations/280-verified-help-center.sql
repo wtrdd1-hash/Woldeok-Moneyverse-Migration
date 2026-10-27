@@ -106,7 +106,7 @@ CREATE FUNCTION public.help_admin_create_draft(
   p_actor uuid,p_session uuid,p_key uuid,p_locale text,p_slug text,p_category text,
   p_title text,p_summary text,p_body text,p_source_url text,p_source_sha text,p_reviewed_until timestamptz
 ) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
-DECLARE v_id uuid; v_revision uuid; v_digest text; v_existing public.help_article_events%ROWTYPE;
+DECLARE v_id uuid; v_revision uuid; v_digest text; v_state text; v_existing public.help_article_events%ROWTYPE;
 BEGIN
   PERFORM public.help_admin_check(p_actor,p_session,'operator');
   IF p_key IS NULL OR p_locale NOT IN ('ko','en') OR p_slug !~ '^[a-z0-9]+(-[a-z0-9]+)*$'
@@ -127,6 +127,11 @@ BEGIN
   SELECT * INTO v_existing FROM public.help_article_events WHERE request_key=p_key;
   IF FOUND THEN
     IF v_existing.actor_id=p_actor AND v_existing.event_kind='draft_created' AND v_existing.request_digest=v_digest THEN
+      -- The receipt is historical: never claim a fresh draft after publish/retract.
+      SELECT state INTO v_state FROM public.help_articles WHERE id=v_existing.article_id FOR UPDATE;
+      IF v_state IS DISTINCT FROM 'draft' THEN
+        RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='help draft replay is stale';
+      END IF;
       RETURN v_existing.article_id;
     END IF;
     RAISE EXCEPTION USING ERRCODE='23505', MESSAGE='help idempotency payload mismatch';
@@ -149,7 +154,7 @@ CREATE FUNCTION public.help_admin_publish(
   p_actor uuid,p_session uuid,p_key uuid,p_article uuid,p_expected_version bigint
 ) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE v_article public.help_articles%ROWTYPE; v_revision public.help_article_revisions%ROWTYPE;
-  v_existing public.help_article_events%ROWTYPE; v_digest text;
+  v_existing public.help_article_events%ROWTYPE; v_digest text; v_state text;
 BEGIN
   PERFORM public.help_admin_check(p_actor,p_session,'approver');
   IF p_key IS NULL OR p_article IS NULL OR p_expected_version IS NULL OR p_expected_version<1 THEN
@@ -161,6 +166,11 @@ BEGIN
   IF FOUND THEN
     IF v_existing.actor_id=p_actor AND v_existing.article_id=p_article AND
       v_existing.event_kind='published' AND v_existing.request_digest=v_digest THEN
+      -- A retracted article cannot be reported as newly published on retry.
+      SELECT state INTO v_state FROM public.help_articles WHERE id=v_existing.article_id FOR UPDATE;
+      IF v_state IS DISTINCT FROM 'published' THEN
+        RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='help publication replay is stale';
+      END IF;
       RETURN v_existing.article_id;
     END IF;
     RAISE EXCEPTION USING ERRCODE='23505', MESSAGE='help idempotency payload mismatch';

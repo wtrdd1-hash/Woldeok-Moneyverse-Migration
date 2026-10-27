@@ -53,6 +53,21 @@ BEGIN
   END IF;
   v_replay := public.help_admin_retract(v_approver,v_approver_session,v_retract_key,v_id,2);
   IF v_replay IS DISTINCT FROM v_id THEN RAISE EXCEPTION 'retraction replay changed receipt'; END IF;
+  -- A replay receipt must not claim 'published' after the publication was retracted.
+  BEGIN
+    PERFORM public.help_admin_publish(v_approver,v_approver_session,v_publish_key,v_id,1);
+    RAISE EXCEPTION 'stale publication replay falsely returned published';
+  EXCEPTION WHEN serialization_failure THEN
+    RAISE NOTICE 'PASS stale publication replay rejected';
+  END;
+  -- Likewise, the draft creation receipt cannot claim draft after publication/retraction.
+  BEGIN
+    PERFORM public.help_admin_create_draft(v_actor,v_author_session,v_create_key,
+      'ko','test-safe-help','account','검증 안내','검증 요약','검증 본문','https://example.org/source',repeat('b',64),v_reviewed);
+    RAISE EXCEPTION 'stale draft replay falsely returned draft';
+  EXCEPTION WHEN serialization_failure THEN
+    RAISE NOTICE 'PASS stale draft replay rejected';
+  END;
   RAISE NOTICE 'PASS operator draft, independent publication, original replay, retraction and no public leak';
 END $$;
 RESET ROLE;
