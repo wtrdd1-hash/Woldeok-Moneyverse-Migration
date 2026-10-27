@@ -10,3 +10,9 @@
 **검증:** TDD RED 23건, GREEN 집중 35/35; 격리 PostgreSQL 17.11 3/3, 읽기 전용 UPDATE 차단 42501. Backend 1,577 PASS / 415 SKIPPED, Frontend 1,485 PASS, 계약 38 PASS, Typecheck PASS, Lint 오류 0/기존 경고 1,122, 기본 Build PASS, Bot 8/8 PASS. 전체 필수 테스트는 main의 마이그레이션 280 중복/282 누락으로 FAIL. 의존성 감사 Critical 2·High 8 포함 총 24건 FAIL, Bot 감사 Critical 1·High 5 FAIL.
 
 **운영 보호:** 다른 A/C/Gemini/QA 작업과 예약을 변경하지 않았습니다. 공식 Test 정확 SHA·인증 E2E 및 보안/CI가 전부 PASS하기 전까지 Draft/HOLD, 병합·Production 배포 금지.
+
+## 23:50~23:58 KST 동시 개발 통합 및 재검증
+- 최신 main은 시작 `59cdc2e0`에서 `cf56520b`를 거쳐 `773771ade1502bb000d1922adb493cd73c9e0f59`로 변경됨. B #1556의 공기업 배당금 지급 차단과 이번 읽기 전용 조회 범위 검증을 모두 보존하여 rebase함.
+- 재기준화 SHA `ab3b4927`에서 집중 33/33, 격리 PG 3/3, Typecheck PASS, Lint 오류 0/경고 1,108, 기본 Build PASS, Backend 1,721 PASS/433 SKIPPED, Frontend 1,681 PASS. 전체 `pnpm test`는 **283번 마이그레이션 중복**(은행 대출 ACL/공간 금융 SQL) 및 285번 누락으로 FAIL. 기존 마이그레이션을 임의 수정하지 않음.
+- 이전 SHA `c8500225` GitHub CI #40524367534는 280번 중복으로 FAIL, 후보 빌드 #40524322234는 Turbopack 폰트 해결 오류로 FAIL. 최신 SHA의 CI 통과 증거로 사용하지 않음.
+- 최신 main `773771ad`로 다시 rebase했으며 공식 Test 정확 SHA·인증 E2E·전체 보안 게이트는 미완료. 병합 및 Production 배포 금지 유지.
