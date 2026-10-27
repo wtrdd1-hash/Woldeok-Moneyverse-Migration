@@ -1,5 +1,7 @@
 # 📚 Woldeok Moneyverse Official Master Documentation Index
 
+Branch register v2026.10.27.3: [EN](audits/2026-10-27-current-branches-v2026.10.27.3.md) / [KO](audits/2026-10-27-current-branches-v2026.10.27.3.ko.md), documentation-only, no deployed changes.
+
 **English canonical** | [한국어](INDEX.ko.md)
 
 > **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)

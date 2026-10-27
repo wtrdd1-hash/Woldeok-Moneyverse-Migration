@@ -1,5 +1,7 @@
 # 📚 월덕 머니버스(Woldeok Moneyverse) 공식 마스터 문서 인덱스
 
+Branch register v2026.10.27.3: [EN](audits/2026-10-27-current-branches-v2026.10.27.3.md) / [KO](audits/2026-10-27-current-branches-v2026.10.27.3.ko.md), documentation-only, no deployed changes.
+
 ## F675-06 GSC 실제 색인·검색 증거 기획 — v2026.10.15.688
 
 - [한국어 상세기획](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) · [영문](planning/F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) · [작업기록](worklog/2026-10-15-f67506-search-evidence-v688.ko.md). 문서/기획만, 색인/운영 합격 아님.

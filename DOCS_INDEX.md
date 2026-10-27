@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.27.3 — Existing branch summary (documentation only)
+- [EN full report](docs/audits/2026-10-27-current-branches-v2026.10.27.3.md) / [KO](docs/audits/2026-10-27-current-branches-v2026.10.27.3.ko.md) / [CSV](docs/audits/2026-10-27-current-branches-v2026.10.27.3.csv) · [version status](docs/releases/v2026.10.27.3.md). Web/backend 351, Android 7; Git history evidence only, no Test/Production deployment.
+
+
 ## v2026.10.22.1111 — honest homepage regression repair (source, Test/Production pending)
 - [EN worklog](docs/worklog/2026-10-22-home-truthfulness-v1111.md) / [KO](docs/worklog/2026-10-22-home-truthfulness-v1111.ko.md), [GitHub EN](docs/updates/v2026.10.22.1111-ui-github.md) / [KO](docs/updates/v2026.10.22.1111-ui-github.ko.md). Dynamic authenticated wallet truth replaces bogus sample member balance; unavailable stock feed is acknowledged; three-button accessible mobile/home and canonical calculator links; six old CI cases repaired without hiding tests. Frontend all 1356 PASS (`NODE_ENV=test`); no live site release yet.
 
