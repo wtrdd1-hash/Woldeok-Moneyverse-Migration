@@ -34,6 +34,12 @@ const job: SchedulerJob = {
 };
 
 describe('the scheduler', () => {
+  it('registers every-two-hours blog editorial windows, not the legacy daily writer', () => {
+    expect(SCHEDULER_JOBS.find((candidate) => candidate.job === 'blog.rotation_2h'))
+      .toMatchObject({ cadence: 'hourly', notBefore: 0, connection: 'app' });
+    expect(SCHEDULER_JOBS.some((candidate) => candidate.job === 'blog.daily_publish')).toBe(false);
+  });
+
   it('schedules non-authoritative AI shadow health daily after the metric snapshot window opens', () => {
     const shadow = SCHEDULER_JOBS.find((candidate) => candidate.job === 'economy.ai_shadow_health');
     expect(shadow).toMatchObject({

@@ -108,9 +108,12 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
     connection: 'app',
   },
   {
-    // Automated AI financial blog publication at 06:00 KST daily.
-    job: 'blog.daily_publish',
-    cadence: 'daily',
+    // Owner v1405: 12 slots/day, every two hours from 04:00 KST,
+    // four countries and three independent editorial topics.
+    // The handler skips odd hourly windows and, until a verified DB publisher
+    // exists, skips all publication; NEVER revive legacy JSON writer.
+    job: 'blog.rotation_2h',
+    cadence: 'hourly',
     notBefore: 0,
     connection: 'app',
   },
