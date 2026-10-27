@@ -1,5 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { GUARDS_METADATA } from '@nestjs/common/constants';
+import { SessionGuard } from '../auth/guards/session.guard';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import type { Response } from 'express';
 import { ChatUploadController } from './chat-upload.controller';
 import { AntivirusThreatError } from './antivirus-scanner.service';
@@ -86,4 +89,25 @@ describe('ChatUploadController', () => {
 
     await expect(controller.getChatMedia('non_existent.png', mockRes)).rejects.toThrow(NotFoundException);
   });
+
+  it('requires session and authenticated identity before serving a chat image', () => {
+    const guards = Reflect.getMetadata(
+      GUARDS_METADATA,
+      ChatUploadController.prototype.getChatMedia,
+    );
+    expect(guards).toEqual([SessionGuard, AuthenticatedGuard]);
+  });
+
+  it('does not permit shared caches to retain authenticated chat media', async () => {
+    const buffer = Buffer.from('private-image');
+    vi.mocked(mockStorage.read!).mockResolvedValue({ buffer, mimeType: 'image/png' });
+    const response = { setHeader: vi.fn(), end: vi.fn() } as unknown as Response;
+
+    await controller.getChatMedia('chat_123.png', response);
+
+    expect(response.setHeader).toHaveBeenCalledWith('cache-control', 'private, no-store');
+    expect(response.setHeader).toHaveBeenCalledWith('x-content-type-options', 'nosniff');
+    expect(response.end).toHaveBeenCalledWith(buffer);
+  });
+
 });

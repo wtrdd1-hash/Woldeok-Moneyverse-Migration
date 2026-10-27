@@ -16,11 +16,11 @@
 - Preserve other agents' branches and pending PRs; Draft+hold only.
 
 ## Task 1 — RED
-- [ ] Add tests to backend/src/content/chat-upload.controller.test.ts for route guard metadata and authenticated response cache headers.
-- [ ] Run targeted Vitest; observe expected failures on baseline.
+- [x] Add tests to backend/src/content/chat-upload.controller.test.ts for route guard metadata and authenticated response cache headers.
+- [x] Run targeted Vitest; observed 2 expected failures.
 
 ## Task 2 — GREEN
-- [ ] Add existing session/auth guards to GET media and private/no-store response cache policy.
+- [x] Add existing session/auth guards to GET media and private/no-store response cache policy.
 - [ ] Run targeted tests; verify pass.
 
 ## Task 3 — Verification and review
