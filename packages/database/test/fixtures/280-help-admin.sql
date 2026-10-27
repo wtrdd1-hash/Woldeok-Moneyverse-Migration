@@ -91,3 +91,49 @@ DO $$ BEGIN
     RAISE NOTICE 'PASS immutable revision content';
   END;
 END $$;
+
+-- Regression: a historical receipt must not advertise valid evidence after expiry.
+-- A published row becomes invisible when reviewed_until elapses; retries must say so.
+SET ROLE moneyverse_app;
+DO $$
+DECLARE
+  v_author uuid := '00000000-0000-0000-0000-000000000001';
+  v_reviewer uuid := '00000000-0000-0000-0000-000000000002';
+  v_author_session uuid := '00000000-0000-0000-0000-000000000010';
+  v_reviewer_session uuid := '00000000-0000-0000-0000-000000000020';
+  v_until timestamptz := clock_timestamp() + interval '3 seconds';
+  v_draft uuid;
+  v_published uuid;
+BEGIN
+  v_draft := public.help_admin_create_draft(v_author,v_author_session,
+    '00000000-0000-0000-0000-000000000201',
+    'en','expiring-draft','support','Expiring draft','Review expiring','Body',
+    'https://example.org/expiry',repeat('c',64),v_until);
+  v_published := public.help_admin_create_draft(v_author,v_author_session,
+    '00000000-0000-0000-0000-000000000202',
+    'en','expiring-publication','support','Expiring published','Review expiring','Body',
+    'https://example.org/expiry',repeat('c',64),v_until);
+  PERFORM public.help_admin_publish(v_reviewer,v_reviewer_session,
+    '00000000-0000-0000-0000-000000000203',v_published,1);
+  PERFORM pg_sleep(4);
+  IF (SELECT count(*) FROM public.help_public_article('en','expiring-publication')) <> 0 THEN
+    RAISE EXCEPTION 'expired publication was still visible';
+  END IF;
+  BEGIN
+    PERFORM public.help_admin_create_draft(v_author,v_author_session,
+      '00000000-0000-0000-0000-000000000201',
+      'en','expiring-draft','support','Expiring draft','Review expiring','Body',
+      'https://example.org/expiry',repeat('c',64),v_until);
+    RAISE EXCEPTION 'expired draft replay returned false success';
+  EXCEPTION WHEN invalid_parameter_value THEN
+    RAISE NOTICE 'PASS expired draft replay denied';
+  END;
+  BEGIN
+    PERFORM public.help_admin_publish(v_reviewer,v_reviewer_session,
+      '00000000-0000-0000-0000-000000000203',v_published,1);
+    RAISE EXCEPTION 'expired publication replay returned false success';
+  EXCEPTION WHEN invalid_parameter_value THEN
+    RAISE NOTICE 'PASS expired publication replay denied';
+  END;
+END $$;
+RESET ROLE;

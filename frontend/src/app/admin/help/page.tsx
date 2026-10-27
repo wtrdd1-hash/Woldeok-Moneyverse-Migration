@@ -10,7 +10,8 @@ export const metadata: Metadata = { title: '도움말 검증 · 관리자', robo
 
 type Draft = { article_id: string; locale: string; slug: string; category: string; title: string;
   body_plain: string; source_url: string; source_sha256: string; reviewed_until: string;
-  state: string; version: string; author_id: string; canApprove: boolean; canRetract: boolean };
+  state: string; version: string; author_id: string; evidenceExpired: boolean;
+  canApprove: boolean; canRetract: boolean };
 
 export default async function AdminHelpPage() {
   await requireAdminConsole('/admin/help');
@@ -38,6 +39,7 @@ export default async function AdminHelpPage() {
       {articles.length === 0 && <p>조회에 성공했으며 검토할 항목이 없습니다.</p>}
       {articles.map(article => <article key={article.article_id} className="grid gap-3 rounded-xl border p-4">
         <h3 className="font-bold">{article.title}</h3><p>{article.locale} / {article.category} / {article.state} / v{article.version}</p>
+        {article.evidenceExpired && <p role="status" className="text-sm font-semibold text-destructive">근거 검토 기한이 만료되었습니다. 이 도움말은 공개 조회에서 제외되며 새 검증 없이 게시할 수 없습니다.</p>}
         <details><summary className="cursor-pointer underline">본문과 근거 검토</summary>
           <pre className="mt-2 whitespace-pre-wrap break-words">{article.body_plain}</pre>
           <p className="break-all text-sm">근거: {article.source_url} / SHA-256: {article.source_sha256}</p>
