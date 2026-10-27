@@ -24,4 +24,8 @@
 - RED HTTP/controller 3 failures, web app-api 2 failures; GREEN backend 16 tests and app-api 18 tests.
 - Added migration 286 with registry and owner/sender-verified recipient access; app role has no direct table privileges. Actual ephemeral PostgreSQL 17.11 applied SQL successfully and passed owner, legitimate peer, forged sender, support admin, stranger, legacy-key and least-privilege assertions. Container `mv-a-0225-pg` removed.
 - Existing main migration 283 collision / missing 285 and unmerged QA repair #1610 remain integration blockers. No shared/live DB writes.
-- Caveats: legacy unregistered images fail closed; admin console session proof is not enforced in this initial candidate; app-role SQL spoofing risk remains while wider DB least-privilege issue #993 is unresolved. HOLD, not a release-ready fix.
+- Caveats: legacy unregistered images fail closed; admin console session proof is now enforced using admin_session_touch for support-admin reads; app-role SQL spoofing risk remains while wider DB least-privilege issue #993 is unresolved. HOLD, not a release-ready fix.
+
+## Admin-session hardening (02:34 KST)
+- Added the actual session UUID to the SQL authorization decision. Support admin reads require admin role AND `admin_session_touch` returning `open`; ordinary member login or locked/expired admin console cannot authorize a support image.
+- RED repository contract failed, GREEN 16 backend tests. Isolated PostgreSQL 17.11 synthetic fixtures with no shared DB access passed open-admin vs missing-admin-session, forged sender, owner, peer, outsider, legacy and direct-table-privilege checks. Ephemeral container removed.

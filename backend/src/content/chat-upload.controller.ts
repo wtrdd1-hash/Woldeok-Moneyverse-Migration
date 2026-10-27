@@ -119,7 +119,7 @@ export class ChatUploadController {
     @Res() res: Response,
   ): Promise<void> {
     if (!this.mediaRepository) throw new ServiceUnavailableException('chat media access unavailable');
-    if (!(await this.mediaRepository.visibleTo(requireUserId(req), key))) {
+    if (!(await this.mediaRepository.visibleTo(requireUserId(req), key, req.session?.id))) {
       throw new NotFoundException('요청한 이미지를 찾을 수 없습니다.');
     }
     const result = await this.chatStorage.read(key);

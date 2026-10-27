@@ -20,13 +20,13 @@ export class ChatMediaRepository {
     }
   }
 
-  async visibleTo(actorUserId: string, storageKey: string): Promise<boolean> {
+  async visibleTo(actorUserId: string, storageKey: string, sessionId?: string): Promise<boolean> {
     if (!this.pool) throw new ServiceUnavailableException('chat media access unavailable');
     try {
       const row = await queryOne<{ visible: boolean }>(
         this.pool,
-        'SELECT public.chat_media_visible($1::uuid, $2::text) AS visible',
-        [actorUserId, storageKey],
+        'SELECT public.chat_media_visible($1::uuid, $2::text, $3::uuid) AS visible',
+        [actorUserId, storageKey, sessionId ?? null],
       );
       return row?.visible === true;
     } catch {

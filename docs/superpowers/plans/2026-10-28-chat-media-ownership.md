@@ -4,7 +4,7 @@
 
 **Goal:** Prevent an authenticated but unauthorized member from downloading another member's chat media by knowing the storage key.
 
-**Architecture:** Register scanned image keys with their uploading member in a private PostgreSQL table using a SECURITY DEFINER function. Permit reads only to the uploader or verified participants of a message authored by that uploader and containing the exact media URL; support admins can view support-thread attachments only with an active admin role. All unregistered legacy keys fail closed. Backend checks DB before reading bytes. Frontend/Android keep same URL contract and no-store response policy.
+**Architecture:** Register scanned image keys with their uploading member in a private PostgreSQL table using a SECURITY DEFINER function. Permit reads only to the uploader or verified participants of a message authored by that uploader and containing the exact media URL; support admins can view support-thread attachments only with an active admin role and a verified open administrator console session. All unregistered legacy keys fail closed. Backend checks DB before reading bytes. Frontend/Android keep same URL contract and no-store response policy.
 
 **Tech Stack:** NestJS, PostgreSQL 17, Vitest, Next.js.
 

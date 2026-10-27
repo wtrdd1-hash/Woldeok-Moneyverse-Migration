@@ -33,40 +33,57 @@ END $$;
 
 -- A sender may share only an image registered to that same sender. A stranger
 -- cannot obtain access by pasting a leaked key into a conversation of their own.
-CREATE FUNCTION public.chat_media_visible(p_actor uuid, p_key text)
+-- Support operators must also hold a live, unlocked administrator console
+-- session; a member login with an admin role is not sufficient.
+CREATE FUNCTION public.chat_media_visible(p_actor uuid, p_key text, p_session uuid)
 RETURNS boolean
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.chat_media_registry r
-    WHERE r.storage_key = p_key
-      AND p_actor IS NOT NULL
-      AND EXISTS (SELECT 1 FROM public.users u WHERE u.id = p_actor AND u.status = 'active'::public.user_status)
-      AND (
-        r.owner_user_id = p_actor
-        OR EXISTS (
-          SELECT 1 FROM public.private_chat_messages m
-          JOIN public.private_chat_conversations c ON c.id = m.conversation_id
-          WHERE m.sender_id = r.owner_user_id
-            AND p_actor IN (c.participant_a_id, c.participant_b_id)
-            AND c.state <> 'closed'
-            AND pg_catalog.strpos(m.body, '/api/v1/content/chat/media/' || r.storage_key) > 0
-        )
-        OR EXISTS (
-          SELECT 1 FROM public.support_messages m
-          JOIN public.support_threads t ON t.id = m.thread_id
-          WHERE m.sender_user_id = r.owner_user_id
-            AND pg_catalog.strpos(m.body, '/api/v1/content/chat/media/' || r.storage_key) > 0
-            AND (
-              t.user_id = p_actor
-              OR EXISTS (SELECT 1 FROM public.admin_current_roles(p_actor))
-            )
-        )
-      )
-  );
-$$;
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+  v_owner uuid;
+  v_admin_state text;
+BEGIN
+  IF p_actor IS NULL OR p_key IS NULL
+     OR NOT EXISTS (SELECT 1 FROM public.users u WHERE u.id = p_actor AND u.status = 'active'::public.user_status)
+  THEN RETURN false; END IF;
+
+  SELECT r.owner_user_id INTO v_owner
+  FROM public.chat_media_registry r WHERE r.storage_key = p_key;
+  IF NOT FOUND THEN RETURN false; END IF;
+  IF v_owner = p_actor THEN RETURN true; END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.private_chat_messages m
+    JOIN public.private_chat_conversations c ON c.id = m.conversation_id
+    WHERE m.sender_id = v_owner
+      AND p_actor IN (c.participant_a_id, c.participant_b_id)
+      AND c.state <> 'closed'
+      AND pg_catalog.strpos(m.body, '/api/v1/content/chat/media/' || p_key) > 0
+  ) THEN RETURN true; END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.support_messages m
+    JOIN public.support_threads t ON t.id = m.thread_id
+    WHERE m.sender_user_id = v_owner
+      AND t.user_id = p_actor
+      AND pg_catalog.strpos(m.body, '/api/v1/content/chat/media/' || p_key) > 0
+  ) THEN RETURN true; END IF;
+
+  IF p_session IS NOT NULL
+     AND EXISTS (SELECT 1 FROM public.admin_current_roles(p_actor))
+     AND EXISTS (
+       SELECT 1 FROM public.support_messages m
+       WHERE m.sender_user_id = v_owner
+         AND pg_catalog.strpos(m.body, '/api/v1/content/chat/media/' || p_key) > 0
+     )
+  THEN
+    SELECT state INTO v_admin_state FROM public.admin_session_touch(p_session, p_actor);
+    RETURN v_admin_state = 'open';
+  END IF;
+  RETURN false;
+END $$;
 
 ALTER FUNCTION public.chat_media_register(uuid,text) OWNER TO moneyverse_migrator;
-ALTER FUNCTION public.chat_media_visible(uuid,text) OWNER TO moneyverse_migrator;
-REVOKE ALL ON FUNCTION public.chat_media_register(uuid,text), public.chat_media_visible(uuid,text) FROM PUBLIC, moneyverse_app;
-GRANT EXECUTE ON FUNCTION public.chat_media_register(uuid,text), public.chat_media_visible(uuid,text) TO moneyverse_app;
+ALTER FUNCTION public.chat_media_visible(uuid,text,uuid) OWNER TO moneyverse_migrator;
+REVOKE ALL ON FUNCTION public.chat_media_register(uuid,text), public.chat_media_visible(uuid,text,uuid) FROM PUBLIC, moneyverse_app;
+GRANT EXECUTE ON FUNCTION public.chat_media_register(uuid,text), public.chat_media_visible(uuid,text,uuid) TO moneyverse_app;
 COMMIT;

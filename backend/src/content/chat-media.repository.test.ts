@@ -28,11 +28,11 @@ describe('ChatMediaRepository', () => {
   it('uses owner-scoped SQL to deny unknown or foreign keys', async () => {
     const query = vi.fn().mockResolvedValueOnce({ rows: [{ visible: false }] }).mockResolvedValueOnce({ rows: [{ visible: true }] });
     const repo = new ChatMediaRepository({ query } as unknown as Queryable);
-    expect(await repo.visibleTo(actor, key)).toBe(false);
+    expect(await repo.visibleTo(actor, key, '99999999-9999-4999-8999-999999999999')).toBe(false);
     expect(await repo.visibleTo(actor, key)).toBe(true);
     expect(query).toHaveBeenCalledWith(
-      'SELECT public.chat_media_visible($1::uuid, $2::text) AS visible',
-      [actor, key],
+      'SELECT public.chat_media_visible($1::uuid, $2::text, $3::uuid) AS visible',
+      [actor, key, '99999999-9999-4999-8999-999999999999'],
     );
   });
 
