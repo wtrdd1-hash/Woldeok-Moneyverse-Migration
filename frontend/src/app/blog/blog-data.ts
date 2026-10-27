@@ -1210,7 +1210,7 @@ ETF 및 우량 배당주에서 분기마다 입금되는 분배금(배당금)은
   const generatedContent = `## 1. 2026년 변화하는 글로벌 금융 환경과 실시간 시장 펄스 분석
 
 최근 전 세계적인 고금리 장기화와 유동성 재편, 그리고 인공지능 기반 금융 자동화 시대가 도래하면서 단순한 근로소득의 저축만으로는 가파른 실질 인플레이션을 방어하기 불가능해졌습니다.
-오늘 **월덕 금융연구소 수석 AI 애널리스트 덕이(Deoki)**가 공인 금융 데이터와 학술적 근거를 바탕으로 분석할 핵심 주제는 바로 **\"${template.titleSuffix}\"**입니다.
+오늘 **월덕 금융연구소 수석 AI 애널리스트 덕이(Deoki)**가 공인 금융 데이터와 학술적 근거를 바탕으로 분석할 핵심 주제는 바로 **"${template.titleSuffix}"**입니다.
 
 ### 🌐 실시간 거시경제 펄스 벤치마크 (기준: ${new Date(macro.updatedAt).toLocaleDateString('ko-KR')} ${macro.dataSource === 'LIVE_API' ? '실시간 라이브 API' : '공인 최신 실측치'})
 ${liveMacroTable}
