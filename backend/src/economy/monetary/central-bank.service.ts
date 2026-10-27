@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
+import { requireMonetaryHistoryLimit } from './monetary-history-limit';
 import { PG_POOL } from '../../core/pool.provider';
 import type {
   MonetaryOrderType,
@@ -153,7 +154,7 @@ export class CentralBankService {
   async listPolicyOrders(limit = 20): Promise<MonetaryPolicyOrder[]> {
     const res = await this.pool.query<MonetaryPolicyOrder>(
       `SELECT * FROM public.monetary_policy_orders ORDER BY created_at DESC LIMIT $1`,
-      [Math.max(1, Math.min(limit, 50))],
+      [requireMonetaryHistoryLimit(limit)],
     );
     return res.rows;
   }

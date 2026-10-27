@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
+import { requireMonetaryHistoryLimit } from './monetary-history-limit';
 import { PG_POOL } from '../../core/pool.provider';
 import { CentralBankService } from './central-bank.service';
 import type {
@@ -102,7 +103,7 @@ export class AutoMonetaryRegulationService implements OnModuleInit, OnModuleDest
       ORDER BY created_at DESC
       LIMIT $1
     `,
-      [limit],
+      [requireMonetaryHistoryLimit(limit)],
     );
     return res.rows.map((row) => ({
       ...row,

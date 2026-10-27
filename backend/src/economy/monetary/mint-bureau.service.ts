@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
+import { requireMonetaryHistoryLimit } from './monetary-history-limit';
 import { PG_POOL } from '../../core/pool.provider';
 import type { MintCertificate, MonetaryPolicyOrder, RetirementCertificate } from './monetary.types';
 
@@ -113,7 +114,7 @@ export class MintBureauService {
   async listMintCertificates(limit = 20): Promise<MintCertificate[]> {
     const res = await this.pool.query<MintCertificate>(
       `SELECT * FROM public.mint_certificates ORDER BY created_at DESC LIMIT $1`,
-      [Math.max(1, Math.min(limit, 50))],
+      [requireMonetaryHistoryLimit(limit)],
     );
     return res.rows;
   }
@@ -121,7 +122,7 @@ export class MintBureauService {
   async listRetirementCertificates(limit = 20): Promise<RetirementCertificate[]> {
     const res = await this.pool.query<RetirementCertificate>(
       `SELECT * FROM public.retirement_certificates ORDER BY created_at DESC LIMIT $1`,
-      [Math.max(1, Math.min(limit, 50))],
+      [requireMonetaryHistoryLimit(limit)],
     );
     return res.rows;
   }

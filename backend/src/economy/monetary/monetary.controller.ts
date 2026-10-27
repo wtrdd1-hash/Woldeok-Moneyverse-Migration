@@ -10,6 +10,7 @@ import { CentralBankService } from './central-bank.service';
 import { MintBureauService } from './mint-bureau.service';
 import { AutoMonetaryRegulationService } from './auto-monetary-regulation.service';
 import type { MonetaryOrderType, MonetaryTargetEnvelope } from './monetary.types';
+import { parseMonetaryHistoryLimit } from './monetary-history-limit';
 
 @ApiTags('Admin Monetary & Central Bank')
 @ApiBearerAuth()
@@ -61,8 +62,8 @@ export class MonetaryController {
 
   @Get('auto-regulation/events')
   @ApiOperation({ summary: '화폐량 자동 조절 집행 타임라인 로그 목록' })
-  async getAutoRegulationEvents(@Query('limit') limit?: number) {
-    return this.autoRegulation.getRecentEvents(limit ? Number(limit) : 20);
+  async getAutoRegulationEvents(@Query('limit') limit?: string) {
+    return this.autoRegulation.getRecentEvents(parseMonetaryHistoryLimit(limit));
   }
 
   @Get('ai-council/recommendation')
@@ -87,14 +88,14 @@ export class MonetaryController {
 
   @Get('orders')
   @ApiOperation({ summary: '중앙은행 통화정책 명령서 목록 조회' })
-  async listOrders(@Query('limit') limit?: number) {
-    return this.centralBank.listPolicyOrders(limit ? Number(limit) : 20);
+  async listOrders(@Query('limit') limit?: string) {
+    return this.centralBank.listPolicyOrders(parseMonetaryHistoryLimit(limit));
   }
 
   @Get('policy-orders')
   @ApiOperation({ summary: '중앙은행 통화정책 명령서 목록 조회 (호환성 별칭)' })
-  async listPolicyOrdersAlias(@Query('limit') limit?: number) {
-    return this.centralBank.listPolicyOrders(limit ? Number(limit) : 20);
+  async listPolicyOrdersAlias(@Query('limit') limit?: string) {
+    return this.centralBank.listPolicyOrders(parseMonetaryHistoryLimit(limit));
   }
 
   @Post('orders/propose')
@@ -144,20 +145,20 @@ export class MonetaryController {
 
   @Get('certificates/mints')
   @ApiOperation({ summary: '조폐국 정식 발행 인증서 목록 조회' })
-  async listMints(@Query('limit') limit?: number) {
-    return this.mintBureau.listMintCertificates(limit ? Number(limit) : 20);
+  async listMints(@Query('limit') limit?: string) {
+    return this.mintBureau.listMintCertificates(parseMonetaryHistoryLimit(limit));
   }
 
   @Get('mint-certificates')
   @ApiOperation({ summary: '조폐국 정식 발행 인증서 목록 조회 (호환성 별칭)' })
-  async listMintCertificatesAlias(@Query('limit') limit?: number) {
-    return this.mintBureau.listMintCertificates(limit ? Number(limit) : 20);
+  async listMintCertificatesAlias(@Query('limit') limit?: string) {
+    return this.mintBureau.listMintCertificates(parseMonetaryHistoryLimit(limit));
   }
 
   @Get('certificates/retirements')
   @ApiOperation({ summary: '조폐국 정식 소각 인증서 목록 조회' })
-  async listRetirements(@Query('limit') limit?: number) {
-    return this.mintBureau.listRetirementCertificates(limit ? Number(limit) : 20);
+  async listRetirements(@Query('limit') limit?: string) {
+    return this.mintBureau.listRetirementCertificates(parseMonetaryHistoryLimit(limit));
   }
 
   @Post('execute-mint')
