@@ -117,6 +117,19 @@ async function guarded<T>(work: () => Promise<T>, message: string): Promise<T> {
   }
 }
 
+// A bank dashboard is an indivisible financial read model: a failed query
+// must not be turned into a healthy-looking zero or an empty portfolio.
+// Preserve deliberate DB role/input refusals, but never expose DB error text.
+async function guardedBankRead<T>(work: () => Promise<T>): Promise<T> {
+  try {
+    return await work();
+  } catch (error: unknown) {
+    if (isRoleRefusal(error)) throw new ForbiddenException('this screen needs a higher role');
+    if (isMalformedInput(error)) throw new BadRequestException('the bank console could not be read');
+    throw new ServiceUnavailableException('the bank console could not be read');
+  }
+}
+
 @ApiTags('admin')
 @Controller('admin/work')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
@@ -218,29 +231,17 @@ export class AdminBankOperationsController {
     }
     const actor = requireUserId(request);
     const repository = required(this.operations);
-    const overviewFallback = {
-      deposit_amount: '0',
-      depositor_count: '0',
-      open_loan_count: '0',
-      outstanding_amount: '0',
-      overdue_loan_count: '0',
-      overdue_amount: '0',
-      maturing_7d_count: '0',
-      issued_24h_count: '0',
-      issued_24h_amount: '0',
-      repaid_24h_amount: '0',
-      borrower_count: '0',
-    };
-    const [overview, grades, loans] = await guarded(
+    // All three reads form one authoritative financial view. A failed query
+    // must never masquerade as a zero balance or an empty loan portfolio.
+    const [overview, grades, loans] = await guardedBankRead(
       () =>
         Promise.all([
-          repository.bankOverview(actor).catch(() => overviewFallback),
-          repository.creditGrades(actor).catch(() => []),
+          repository.bankOverview(actor),
+          repository.creditGrades(actor),
           requested === undefined
-            ? repository.loanBook(actor).catch(() => [])
-            : repository.loanBook(actor, requested).catch(() => []),
+            ? repository.loanBook(actor)
+            : repository.loanBook(actor, requested),
         ]),
-      'the bank console could not be read',
     );
     return { overview, grades, loans };
   }
