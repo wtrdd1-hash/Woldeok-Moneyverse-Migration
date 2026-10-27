@@ -12,3 +12,10 @@
 
 ## Finished
 - Pending.
+
+### Implementation checkpoint
+- RED: four Vitest regressions failed on missing migration (source baseline).
+- GREEN: four focused regressions pass after forward-only 287 SQL hold.
+- Real isolated PostgreSQL 17.11: legacy grant baseline, SQL replacement and replay-safe failure, app/PUBLIC EXECUTE revocation, receipt DML revocation, reapply, 100 concurrent denied owner calls and unchanged synthetic vault/ledger/receipts all PASS.
+- The migration intentionally does NOT revoke shared treasury vault/ledger DML: other backend banking, pension, FX and SWF consumers still directly write them. This separate P0 security debt must not be concealed.
+- Work remains HOLD because main has duplicate 283, missing 285/286, existing QA and B PRs are not merged, and no exact-SHA Test validation is available.
