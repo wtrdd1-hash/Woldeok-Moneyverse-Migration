@@ -9,7 +9,7 @@ import { formatMoment } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
-import type { AdminRoleAssignment, EconomyPolicyVersion, FeatureSwitch } from '../types';
+import { parseControlsOverview, parsePublishedPolicy } from './controls-evidence';
 import {
   ActivateDuePoliciesForm,
   FeatureSwitchDialog,
@@ -31,12 +31,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-interface ControlsOverview {
-  readonly featureSwitches: FeatureSwitch[];
-  readonly policies: EconomyPolicyVersion[];
-  readonly roles: AdminRoleAssignment[];
-}
-
 /**
  * What used to be the approval queue.
  *
@@ -52,12 +46,15 @@ interface ControlsOverview {
  * so they are in front of whoever is about to flip the switch.
  */
 export default async function AdminControlsPage() {
-  await requireAdminConsole(AREA.href);
-  const [overview, policy] = await Promise.all([
-    apiOrNull<ControlsOverview>('/api/v1/admin/controls'),
-    apiOrNull<{ termsVersion: string; privacyVersion: string }>('/auth/policy'),
+  const admin = await requireAdminConsole(AREA.href);
+  const isSuperadmin = admin.roles.includes('superadmin');
+  const [rawOverview, rawPolicy] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/admin/controls'),
+    apiOrNull<unknown>('/auth/policy'),
   ]);
 
+  const overview = parseControlsOverview(rawOverview);
+  const policy = parsePublishedPolicy(rawPolicy);
   const active = overview?.policies.find((p) => p.status === 'active') ?? null;
   const previous =
     overview?.policies.find(
@@ -71,17 +68,23 @@ export default async function AdminControlsPage() {
         {AREA.summary}
       </PageHeader>
 
-      <EmergencyKillSwitchCard />
+      <EmergencyKillSwitchCard featureSwitches={overview?.featureSwitches ?? null} />
 
-      <PolicyVersionCard
-        currentTermsVersion={policy?.termsVersion ?? '2026-09-02'}
-        currentPrivacyVersion={policy?.privacyVersion ?? '2026-09-02'}
-        isSuperadmin={true}
-      />
+      {policy === null ? (
+        <p role="alert" className="rounded-md border border-destructive/40 p-4 text-sm text-destructive">
+          현재 게시된 약관·개인정보처리방침 버전을 확인할 수 없습니다. 버전 발행을 중단합니다.
+        </p>
+      ) : (
+        <PolicyVersionCard
+          currentTermsVersion={policy.termsVersion}
+          currentPrivacyVersion={policy.privacyVersion}
+          isSuperadmin={isSuperadmin}
+        />
+      )}
 
       <HotTimeManagementCard />
 
-      <Card>
+      <Card id="feature-switches">
         <CardHeader>
           <CardTitle className="text-base">기능 스위치</CardTitle>
           <CardDescription>
@@ -157,7 +160,7 @@ export default async function AdminControlsPage() {
                 previousVersion={previous?.version ?? null}
               />
             </div>
-            <ActivateDuePoliciesForm />
+            {overview !== null && <ActivateDuePoliciesForm />}
           </CardContent>
         </Card>
 
@@ -166,7 +169,11 @@ export default async function AdminControlsPage() {
             <CardTitle className="text-base">새 버전</CardTitle>
           </CardHeader>
           <CardContent>
-            <NewPolicyVersionForm activeVersion={active?.version ?? null} />
+            {overview !== null ? (
+              <NewPolicyVersionForm activeVersion={active?.version ?? null} />
+            ) : (
+              <p role="alert" className="text-sm text-destructive">정책 상태 확인 실패: 새 버전 생성을 중단합니다.</p>
+            )}
           </CardContent>
         </Card>
 
@@ -275,6 +282,7 @@ export default async function AdminControlsPage() {
           </CardContent>
         </Card>
 
+        {isSuperadmin && overview !== null && (
         <div className="grid gap-3 md:grid-cols-2">
           <Card>
             <CardHeader>
@@ -293,6 +301,7 @@ export default async function AdminControlsPage() {
             </CardContent>
           </Card>
         </div>
+        )}
       </section>
     </div>
   );
