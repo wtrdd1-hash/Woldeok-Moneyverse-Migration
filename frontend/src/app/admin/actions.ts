@@ -1,6 +1,11 @@
 'use server';
 
 import { groupDigits } from '@/lib/money';
+import { apiOrNull } from '@/lib/api';
+import {
+  businessStateConfirmed, catalogUuid, changedCatalogReceipt, createdCatalogId,
+  createdEventConfirmed, eventStateConfirmed,
+} from './catalog/catalog-mutation-evidence';
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
@@ -302,20 +307,37 @@ export async function cancelMarketEvent(
   }
 }
 
+const CATALOG_NOT_CHANGED: ActionState = {
+  status: 'error',
+  message: '대상이 없거나 변경이 적용되지 않았어요. 목록을 다시 조회해 주세요.',
+};
+const CATALOG_UNVERIFIED: ActionState = {
+  status: 'error',
+  message: '요청은 전송됐지만 실제 적용 결과를 확인하지 못했어요. 목록을 다시 조회하고 중복 실행은 피하세요.',
+};
+
 export async function setBusinessActive(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const businessId = text(formData.get('businessId'));
-  const active = formData.get('active') === 'true';
-  if (businessId === '') return { status: 'error', message: '사업을 확인할 수 없어요.' };
+  const rawActive = formData.get('active');
+  if (!catalogUuid(businessId) || (rawActive !== 'true' && rawActive !== 'false')) {
+    return { status: 'error', message: '사업과 변경할 상태를 확인할 수 없어요.' };
+  }
+  const active = rawActive === 'true';
 
   try {
-    await mutate(`/api/v1/admin/business-types/${encodeURIComponent(businessId)}`, {
+    const receipt = await mutate<unknown>(`/api/v1/admin/business-types/${encodeURIComponent(businessId)}`, {
       method: 'PATCH',
       body: { active },
     });
+    if (!changedCatalogReceipt(receipt)) return CATALOG_NOT_CHANGED;
     revalidatePath('/admin');
+    revalidatePath('/admin/catalog');
+    // A successful HTTP status is not proof that the database row now has the requested state.
+    const latest = await apiOrNull<unknown>('/api/v1/admin/business-types');
+    if (!businessStateConfirmed(latest, businessId, active)) return CATALOG_UNVERIFIED;
     return { status: 'ok', message: active ? '판매를 재개했어요.' : '판매를 중지했어요.' };
   } catch (error) {
     return failure(error, '사업 상태를 바꾸지 못했어요.');
@@ -340,10 +362,17 @@ export async function createSeasonEvent(
   }
 
   try {
-    await mutate('/api/v1/admin/season-events', {
+    const receipt = await mutate<unknown>('/api/v1/admin/season-events', {
       body: { title, costWld, pointsPerEntry, ...(description === '' ? {} : { description }) },
     });
     revalidatePath('/admin');
+    revalidatePath('/admin/catalog');
+    const eventId = createdCatalogId(receipt);
+    if (eventId === null) return CATALOG_UNVERIFIED;
+    const latest = await apiOrNull<unknown>('/api/v1/admin/season-events');
+    if (!createdEventConfirmed(latest, eventId, { title, costWld, pointsPerEntry })) {
+      return CATALOG_UNVERIFIED;
+    }
     return { status: 'ok', message: '시즌 이벤트를 등록했어요.' };
   } catch (error) {
     return failure(error, '시즌 이벤트를 등록하지 못했어요.');
@@ -355,21 +384,27 @@ export async function setSeasonEventActive(
   formData: FormData,
 ): Promise<ActionState> {
   const eventId = text(formData.get('eventId'));
-  const active = formData.get('active') === 'true';
-  if (eventId === '') return { status: 'error', message: '이벤트를 확인할 수 없어요.' };
+  const rawActive = formData.get('active');
+  if (!catalogUuid(eventId) || (rawActive !== 'true' && rawActive !== 'false')) {
+    return { status: 'error', message: '이벤트와 변경할 상태를 확인할 수 없어요.' };
+  }
+  const active = rawActive === 'true';
 
   try {
-    await mutate(`/api/v1/admin/season-events/${encodeURIComponent(eventId)}`, {
+    const receipt = await mutate<unknown>(`/api/v1/admin/season-events/${encodeURIComponent(eventId)}`, {
       method: 'PATCH',
       body: { active },
     });
+    if (!changedCatalogReceipt(receipt)) return CATALOG_NOT_CHANGED;
     revalidatePath('/admin');
+    revalidatePath('/admin/catalog');
+    const latest = await apiOrNull<unknown>('/api/v1/admin/season-events');
+    if (!eventStateConfirmed(latest, eventId, active)) return CATALOG_UNVERIFIED;
     return { status: 'ok', message: active ? '이벤트를 재개했어요.' : '이벤트를 중지했어요.' };
   } catch (error) {
     return failure(error, '이벤트 상태를 바꾸지 못했어요.');
   }
 }
-
 
 export async function payoutToUser(
   _previous: ActionState,
