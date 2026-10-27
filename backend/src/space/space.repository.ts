@@ -170,13 +170,12 @@ export class PostgresSpaceRepository {
     if (!space) throw new SpaceInputError('space not found');
     if (space.user_id !== actorUserId) throw new SpaceInputError('not your space');
 
-    await this.client.query(
-      `UPDATE public.user_spaces
-       SET layout = $2::jsonb, updated_at = pg_catalog.clock_timestamp()
-       WHERE id = $1::uuid AND user_id = $3::uuid;`,
-      [spaceId, JSON.stringify(layout), actorUserId],
+    const updated = await queryOne<{ updated: boolean }>(
+      this.client,
+      `SELECT public.space_update_layout($1::uuid, $2::uuid, $3::jsonb) AS updated;`,
+      [actorUserId, spaceId, JSON.stringify(layout)],
     );
-    return true;
+    return updated?.updated === true;
   }
 
   async listCityProjects(): Promise<CityProjectRow[]> {
