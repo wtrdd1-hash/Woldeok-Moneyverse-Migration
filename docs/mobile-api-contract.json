@@ -1,5 +1,5 @@
 {
-  "contractVersion": "v2026.10.27.1925",
+  "contractVersion": "v2026.10.28.0425",
   "apiVersion": "v2026.10.27.1925",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
@@ -11266,6 +11266,142 @@
         },
         "required": [
           "catalogItems"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/shop/compare",
+      "purpose": "회원별 실제 상점 가격 및 주간 유지비 2개 상품 비교",
+      "callWhen": "회원이 상점에서 서로 다른 상품 2개를 선택했을 때 (읽기 전용)",
+      "authorization": "로그인 + 최신 동의 필요 (읽기 전용, CSRF 불필요)",
+      "afterSuccess": "비교 결과는 구매 영수증이 아님; 구매 전 최신 카탈로그/잔액 재조회",
+      "backendRoute": "/api/shop/compare",
+      "operationId": "ShopController_compare",
+      "backendOpenApiPath": "/shop/compare",
+      "summary": "Compare two current catalogue prices for the authenticated member",
+      "parameters": [
+        {
+          "name": "ids",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "Exactly two distinct UUIDs separated by a comma, maximum 80 characters"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "source",
+          "items",
+          "cheaperCatalogId",
+          "priceDifference",
+          "weeklyUpkeepDifference"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "const": "shop_catalog_list_v2"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "catalog_id": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "string"
+                },
+                "maintenance_cost": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "purchase_limit": {
+                  "type": "string"
+                },
+                "sale_ends_at": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "catalog_id",
+                "code",
+                "name",
+                "category",
+                "price",
+                "maintenance_cost",
+                "quantity",
+                "purchase_limit",
+                "sale_ends_at"
+              ]
+            }
+          },
+          "cheaperCatalogId": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "priceDifference": {
+            "type": "string"
+          },
+          "weeklyUpkeepDifference": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "items",
+          "cheaperCatalogId",
+          "priceDifference",
+          "weeklyUpkeepDifference"
         ]
       },
       "responseCompatibility": {

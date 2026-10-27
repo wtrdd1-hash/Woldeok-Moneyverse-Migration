@@ -3,6 +3,7 @@ import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { databaseUrl, isMissingGrant, rejectionOf } from '../testing/database';
 import { ShopCatalogRepository } from './shop.repository';
+import { compareShopCatalog } from './shop-compare';
 
 /**
  * Migrations 071-075, executed.
@@ -74,6 +75,18 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
       // rounds silently once the economy grows past a safe integer.
       expect(typeof gloves?.price, 'price must survive as a string').toBe('string');
       expect(BigInt(gloves?.price ?? '0') > 0n).toBe(true);
+    });
+
+    it('compares two real app-role read-model prices without table grants or float conversion', async () => {
+      const rows = await catalogue().catalog(UNKNOWN_MEMBER);
+      expect(rows.length).toBeGreaterThanOrEqual(2);
+      const first = rows[0]!;
+      const second = rows[1]!;
+      const receipt = compareShopCatalog(rows, [first.catalog_id, second.catalog_id]);
+      expect(receipt.source).toBe('shop_catalog_list_v2');
+      expect(receipt.items.map((item) => item.catalog_id)).toEqual([first.catalog_id, second.catalog_id]);
+      expect(receipt.priceDifference).toMatch(/^(0|[1-9][0-9]*)$/);
+      expect(receipt.weeklyUpkeepDifference).toMatch(/^(0|[1-9][0-9]*)$/);
     });
 
     it('carries the weekly upkeep 075 attaches to a vehicle', async () => {

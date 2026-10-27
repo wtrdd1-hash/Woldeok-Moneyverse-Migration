@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.10.27.1925**
+Update version: **v2026.10.28.0425**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 181 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -3747,6 +3747,46 @@ _No request body._
 | catalogItems[].is_limited | true | boolean |  |
 | catalogItems[].user_owned_quantity | true | number |  |
 | catalogItems[].user_is_equipped | true | boolean |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/shop/compare` — Compare two current catalogue prices for the authenticated member
+
+- Authorization: 로그인 + 최신 동의 필요 (읽기 전용, CSRF 불필요)
+- Success status: 200
+- Response mode: json
+- After success: 비교 결과는 구매 영수증이 아님; 구매 전 최신 카탈로그/잔액 재조회
+- Operation ID: `ShopController_compare`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| ids | query | true | string | description="Exactly two distinct UUIDs separated by a comma, maximum 80 characters" |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| source | true | string="shop_catalog_list_v2" | const="shop_catalog_list_v2" |
+| items[] | true | object[] |  |
+| items[] | true | object |  |
+| items[].catalog_id | true | string |  |
+| items[].code | true | string |  |
+| items[].name | true | string |  |
+| items[].category | true | string |  |
+| items[].price | true | string |  |
+| items[].maintenance_cost | true | string |  |
+| items[].quantity | true | null \| number |  |
+| items[].purchase_limit | true | string |  |
+| items[].sale_ends_at | true | null \| string (date-time) |  |
+| cheaperCatalogId | true | null \| string |  |
+| priceDifference | true | string |  |
+| weeklyUpkeepDifference | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
