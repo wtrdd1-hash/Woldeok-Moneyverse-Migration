@@ -1,5 +1,5 @@
 ## 2026-10-28 v1388 — F675-153 가상 WLD 현금 지갑 잔액 임계치 자발적 알림 (기능 추가 / DRAFT / RELEASE HOLD)
-- 이전 보완 v1386 → 현재 추가 v1388 → 다음 보완 v1390(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; AGENTS·README·영문 정본 기획 및 국문 대조. 미병합 #1611 후속 Draft, 개발 이슈 #1619, 독립 main 병합 금지. 런타임·DB·원장·Test·운영 변경 없음.
+- 이전 보완 v1386 → 현재 추가 v1388 → 다음 보완 v1390(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; AGENTS·README·영문 정본 기획 및 국문 대조. 미병합 #1611 후속 Draft, 개발 이슈 #1619, Draft PR #1620, 독립 main 병합 금지. 런타임·DB·원장·Test·운영 변경 없음.
 - 기존 지갑은 USER_CASH와 USER_BANK를 구분하지만 본인 임계치 알림 API는 없다. 가상 WLD 현금 지갑 하나를 자발적으로 설정하여 검증된 관측 >=→<일 때 세대당 한 번 안내, 최초 미만·출처 불명은 가짜 알림 금지, 실시간/금융 보호·마케팅 약속 금지, WLD 변경 없음. F675-149 알림함 선행. 화면·CTA·API·DB·작업자·권한·접근성·SEO·KPI 상세는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
 - P0 ENV1388-01 SEC1388-02 REL1388-03 CASH1388-04; P1 CASH1388-05 CASH1388-06 CASH1388-07 CASH1388-08 CASH1388-09 CASH1388-10. QA v1329: 개발 앱 직접 DML 235/241(잔액·국고 포함), 마이그레이션 283 중복, Test 배포 링크 대상 누락. 봇 후보 감사 0건은 main 승인 아님. 정확 SHA 공식 Test·금융 E2E·복원 BLOCKED. 합성 10,001/100/100 미실행. 외부 근거 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED / IN PROGRESS. 기능 OFF, 운영 HOLD.
 

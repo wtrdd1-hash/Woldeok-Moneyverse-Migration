@@ -1,5 +1,5 @@
 ## 2026-10-28 — Planning v1388 / F675-153 Cash Watch (Feature Addition / DRAFT / RELEASE HOLD)
-- Previous Improvement v1386 → Current Addition v1388 → Next Improvement v1390 provisional; start/mid main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, stacked on unmerged #1611, issue #1619. English canonical and Korean equivalent plans, integrated master/review and worklog updated; no runtime/DB/finance/Test/Production changes.
+- Previous Improvement v1386 → Current Addition v1388 → Next Improvement v1390 provisional; start/mid main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, stacked on unmerged #1611, issue #1619, Draft PR #1620. English canonical and Korean equivalent plans, integrated master/review and worklog updated; no runtime/DB/finance/Test/Production changes.
 - Actual wallet source USER_CASH vs USER_BANK, canonical string WLD and no existing cash-watch; one voluntary owner-only observed threshold crossing, no marketing/real-time guarantee/ledger mutation. P0 ENV1388-01 SEC1388-02 REL1388-03 CASH1388-04; P1 CASH1388-05 CASH1388-06 CASH1388-07 CASH1388-08 CASH1388-09 CASH1388-10. QA v1329 release HOLD; synthetic tests NOT RUN; external accepted 0, cumulative UNKNOWN/10,000 BLOCKED.
 
 ## 2026-10-28 — Planning v1386 / F675-152 (Feature Improvement / DRAFT / RELEASE HOLD)

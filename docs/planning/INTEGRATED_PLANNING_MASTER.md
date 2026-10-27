@@ -1,4 +1,4 @@
-## v1388 / F675-153 — Verified Opt-in Virtual WLD Cash-Balance Watch (Feature Addition / DRAFT / RELEASE HOLD) — Issue #1619
+## v1388 / F675-153 — Verified Opt-in Virtual WLD Cash-Balance Watch (Feature Addition / DRAFT / RELEASE HOLD) — Draft PR #1620, Issue #1619
 
 **Cycle / authority.** Previous Feature Improvement v1386 → Current Feature Addition v1388 → Next Feature Improvement v1390 (provisional). At start/midpoint main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; canonical `AGENTS.md`, `README.md`, `docs/planning/PROJECT_PLAN.md` (English) and `PROJECT_PLAN.ko.md` checked. This documentation branch stacks on unmerged Draft #1611, not on main. Separate Gemini/A/B/C/QA ownership; **no runtime, DB, Test, Production, feature-switch, WLD or ledger changes authorized**.
 

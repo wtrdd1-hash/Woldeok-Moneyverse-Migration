@@ -1,4 +1,4 @@
-## v1388 / F675-153 — 검증된 가상 WLD 현금 지갑 잔액 임계치 자발적 알림 (기능 추가 / DRAFT / RELEASE HOLD) — 이슈 #1619
+## v1388 / F675-153 — 검증된 가상 WLD 현금 지갑 잔액 임계치 자발적 알림 (기능 추가 / DRAFT / RELEASE HOLD) — Draft PR #1620, 이슈 #1619
 
 **회차·정본:** 이전 기능 보완 v1386 → 현재 기능 추가 v1388 → 다음 기능 보완 v1390(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md 및 한국어 대조본 확인. 이 문서는 미병합 Draft #1611 후속 스택이며 main에 독립 병합할 수 없다. Gemini/개발 A·B·C/QA의 런타임·배포 담당 영역은 변경하지 않는다. **런타임·DB·Test·운영·기능 스위치·WLD·원장 변경 금지.**
 

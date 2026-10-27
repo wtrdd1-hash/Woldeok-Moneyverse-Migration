@@ -6,7 +6,7 @@
 - [x] SOURCE: latest main AGENTS.md, README.md, canonical EN PROJECT_PLAN and KO parity; existing wallet UI, wallet service/repository, notification API, main migrations, issue/PR and QA v1329 checked.
 - [x] NONDUPLICATION: checked integrated F675-125, F675-134, F675-149, F675-151; discarded duplicate privacy-case idea because F675-135 already covers it. Main has no cash-watch endpoint, schema or owner UI.
 - [x] MID: main and project-plan blob SHAs rechecked; independent issue #1619 opened, bilingual integrated specification and 10 P0/P1 IDs drafted.
-- [ ] FINAL: recheck main, verify EN/KO backlog parity, diff/check and clean branch, push exact SHA, create stacked Draft PR, update issue and final records.
+- [x] FINAL: main and canonical plans rechecked; six EN/KO planning/review documents 10/10 P0/P1 IDs, 9 docs-only files, diff check and initial remote SHA verified; stacked Draft PR #1620 created and issue #1619 linked. Final remote SHA and clean status checked in external completion records.
 
 Previous Cycle: Feature Improvement v1386. Current Cycle: Feature Addition v1388. Next Cycle: Feature Improvement v1390 (provisional). This is a planning-only new feature, NOT runtime implementation or Production approval.
 
@@ -19,4 +19,10 @@ Previous Cycle: Feature Improvement v1386. Current Cycle: Feature Addition v1388
 - Scope: EN/KO integrated master/review, EN/KO PROJECT_PLAN, EN/KO UPDATE_LOG, this worklog. No new distributed planning spec. P0 ENV1388-01 SEC1388-02 REL1388-03 CASH1388-04; P1 CASH1388-05 CASH1388-06 CASH1388-07 CASH1388-08 CASH1388-09 CASH1388-10. External newly approved 0, cumulative deduplicated approved UNKNOWN/10,000 — BLOCKED / IN PROGRESS.
 - No finance/ledger, member DB rows, runtime code, Test/Production, feature switch, other workers' branches or automation settings changed.
 
-## FINAL — pending verification
+## FINAL — 2026-10-28 KST / PARTIAL / DRAFT / RELEASE HOLD
+
+- New feature F675-153 design and engineering handoff completed **as documentation**, not runtime implementation. GitHub Draft PR #1620 is OPEN and stacked on unmerged Draft #1611; engineering issue #1619 OPEN. No main merge.
+- Main was rechecked start/mid/final; canonical AGENTS/README/EN/KO project plan source respected, with no change to main. Existing wallet and notification source distinguished from proposed cash watch. No false real-time, guaranteed financial safety or 10,000 evidence claim.
+- EN/KO integrated master/review/project plan and update logs plus this worklog (9 files) contain matching 10 P0/P1 IDs; docs-only diff/check and GitHub SHA verification performed. The 10,001/100/100 acceptance scenarios are specifications, **NOT RUN**.
+- QA v1329 financial release readiness BLOCKED: broad development DB financial DML, main duplicate migration 283, missing Test exact-SHA release identity and independent backup restore; candidate bot audit improvement is not whole-system approval. No Production promotion.
+- New independently approved external references 0; cumulative deduplicated/approved UNKNOWN / 10,000, BLOCKED / IN PROGRESS. Feature OFF. No runtime, DB, WLD, ledger, Test, Production, automation or other workers' changes.
