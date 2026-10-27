@@ -1,7 +1,6 @@
 'use client';
 
-import { useActionState, useState, useEffect } from 'react';
-import { ActionAlert, SubmitButton } from '@/components/action-form';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,73 +12,33 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
-import { StepUpField } from '../step-up-field';
-import { haltStockAndSettle, retryHaltSettlement } from '../actions';
 import type { AdminStock, AdminStockHaltSettlement } from '../types';
 
 export function HaltStockDialog({ stock }: { readonly stock: AdminStock }) {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useActionState(haltStockAndSettle, IDLE);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="outline"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
-          title="종목 거래정지 및 매수원가 자동정산"
-        >
+        <Button size="sm" variant="outline" title="거래정지 정산 안전 보류 사유 확인">
           거래정지 (Halt)
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <span>종목 거래정지 & 매수원가 자동정산</span>
-            <Badge variant="destructive" className="font-mono text-xs">
-              {stock.symbol}
-            </Badge>
-          </DialogTitle>
-          <DialogDescription className="space-y-2 pt-2 text-left">
-            <span className="block font-medium text-foreground">
-              {stock.name} ({stock.symbol}) 종목의 거래를 정지하고 보유분을 전량 정산합니다.
-            </span>
-            <span className="block text-xs text-muted-foreground leading-relaxed">
-              기획 명세(STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC)에 따라, 모든 사용자 보유분은
-              현재 시장가가 아닌 <strong>서버 권위 매수원가(Cost Basis) WLD</strong>로 즉시
-              자동정산되며 매매수수료와 세금은 전액 면제됩니다.
-            </span>
-            <div className="mt-3 rounded-lg border border-border/70 bg-muted/30 p-2.5 text-xs grid grid-cols-2 gap-2">
-              <div>
-                <span className="text-muted-foreground block">현재 시장가:</span>
-                <span className="font-mono font-semibold">{groupDigits(stock.current_price)} WLD</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground block">영향 보유자:</span>
-                <span className="font-mono font-semibold">{stock.holders}명</span>
-              </div>
-            </div>
+          <DialogTitle>{stock.symbol} 거래정지 정산 안전 보류</DialogTitle>
+          <DialogDescription>
+            원장 환급과 국고 차감이 단일 원자적 거래 및 멱등 영수증으로 검증되기 전까지
+            거래정지와 자동정산을 실행할 수 없습니다.
           </DialogDescription>
         </DialogHeader>
-
-        <form action={formAction} className="space-y-4">
-          <input type="hidden" name="stockId" value={stock.id} />
-          <ActionAlert state={state} />
-          <StepUpField
-            id={`stock-halt-${stock.id}`}
-            undo="정산 완료 후에는 복구할 수 없으며 보존 후 삭제만 가능합니다."
-          />
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              취소
-            </Button>
-            <SubmitButton variant="destructive">거래정지 및 원가정산 확정</SubmitButton>
-          </DialogFooter>
-        </form>
+        <p role="alert" className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 text-sm">
+          금융 원장 보호를 위해 신규 정산 및 재처리를 중지했습니다. 기존 정산 현황은 읽기 전용으로 확인할 수 있습니다.
+        </p>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>닫기</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -89,7 +48,6 @@ export function HaltSettlementStatusDialog({ stock }: { readonly stock: AdminSto
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<AdminStockHaltSettlement | null>(null);
   const [loading, setLoading] = useState(false);
-  const [retryState, retryAction] = useActionState(retryHaltSettlement, IDLE);
 
   useEffect(() => {
     if (!open) return;
@@ -101,7 +59,7 @@ export function HaltSettlementStatusDialog({ stock }: { readonly stock: AdminSto
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [open, stock.id, retryState]);
+  }, [open, stock.id]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -172,19 +130,19 @@ export function HaltSettlementStatusDialog({ stock }: { readonly stock: AdminSto
                 </div>
               </div>
 
+              <p role="note" className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 text-xs">
+                위 숫자는 기존 원장 정산 기록입니다. 별도의 국고 차감 및 재처리 멱등 영수증은 검증되지 않았으며
+                전체 금융 정산 완료를 의미하지 않습니다.
+              </p>
               {Number(data.quarantined_count) > 0 || Number(data.pending_holdings_count) > 0 ? (
-                <form action={retryAction} className="pt-2">
-                  <input type="hidden" name="stockId" value={stock.id} />
-                  <ActionAlert state={retryState} />
-                  <div className="flex justify-end pt-2">
-                    <SubmitButton variant="outline">실패/격리 건 멱등 재처리</SubmitButton>
-                  </div>
-                </form>
+                <p role="alert" className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 text-xs">
+                  미정산 또는 격리 항목이 남아 있습니다. 원장·국고 정산의 원자성과 멱등성이 검증되기 전까지 재처리는 차단됩니다.
+                </p>
               ) : null}
             </div>
           ) : (
             <div className="rounded-lg border border-border/60 bg-muted/20 p-3 text-xs text-muted-foreground">
-              정산 완료 상태이며, 상세 영수증이 원장에 안전 보관되었습니다.
+              정산 현황을 확인할 수 없습니다. 실제 영수증과 원장 증빙을 확인하기 전에는 완료로 간주하지 마세요.
             </div>
           )}
         </div>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
@@ -785,34 +785,23 @@ export class PostgresStockRepository {
   }
 
   /**
-   * Halts a stock and auto-settles all user holdings into authoritative cost-basis WLD.
-   * See STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.ko.md (v2026.09.21.315).
+   * Financial safety hold: migrations 221 and 224 have separate, non-idempotent
+   * settlement and treasury funding functions. The previous two autocommit
+   * calls could refund WLD and then silently fail to fund the treasury, or
+   * debit the treasury again when a completed halt was retried. Refuse before
+   * touching either function until a single ledger-atomic, replay-safe SQL
+   * boundary and an immutable funding receipt are available.
    */
   async halt(
     actorUserId: unknown,
     stockId: unknown,
-    haltEventId: unknown = randomUUID(),
+    _haltEventId?: unknown,
   ): Promise<StockHaltResultRow> {
     uuid(actorUserId, 'actor user id');
     uuid(stockId, 'stock id');
-    const eventId = typeof haltEventId === 'string' && UUID.test(haltEventId) ? haltEventId : randomUUID();
-    const row = await queryOne<StockHaltResultRow>(
-      this.pool,
-      'SELECT settled_count::text, total_refund_amount::text, quarantined_count::text, halt_status FROM public.stock_halt_and_settle($1, $2, $3)',
-      [actorUserId, stockId, eventId],
+    throw new ServiceUnavailableException(
+      'stock halt settlement is unavailable pending atomic treasury funding and replay verification',
     );
-    if (!row) throw new Error('failed to halt stock settlement');
-
-    // 국고 비축금 우선 충당 모델 연동 (Treasury Reserve Funding)
-    if (row.total_refund_amount && BigInt(row.total_refund_amount) > BigInt(0)) {
-      try {
-        await this.pool.query('SELECT public.treasury_fund_stock_halt($1, $2)', [stockId, row.total_refund_amount]);
-      } catch {
-        // 국고 연동 비차단 safe fallback
-      }
-    }
-
-    return row;
   }
 
   /**
