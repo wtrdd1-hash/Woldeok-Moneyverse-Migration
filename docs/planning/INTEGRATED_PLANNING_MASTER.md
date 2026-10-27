@@ -1,4 +1,4 @@
-## v1374 / F675-150 — Incident Evidence Integrity and Recovery Truth (Feature Improvement / DRAFT / RELEASE HOLD)
+## v1374 / F675-150 — Incident Evidence Integrity and Recovery Truth (Feature Improvement / DRAFT / RELEASE HOLD) — Draft PR #1578
 
 **Cycle and authority.** Previous Feature Addition v1372 → Current Feature Improvement v1374 → Next Feature Addition v1376 (provisional). Continue the unmerged incident-timeline Draft PR #1573 and Issue #1572, without touching A/B/C/Gemini/QA runtime changes. Main at start/mid: 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c. Canonical source: main AGENTS.md, README.md, PROJECT_PLAN.md (English), checked against PROJECT_PLAN.ko.md. This is a docs-only proposal, NOT deployed functionality.
 

@@ -2,7 +2,7 @@
 
 Date: 2026-10-27 KST. Previous: Feature Addition v1372. Current: Feature Improvement v1374. Next: Feature Addition v1376 (provisional).
 Repository: wtrdd1-hash/Woldeok-Moneyverse-Migration. Main at start/mid: 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c.
-Issue: #1572. Predecessor: unmerged Draft PR #1573. Branch: docs/planning-v1374-incident-evidence-integrity. **DRAFT / RELEASE HOLD**.
+Draft PR: #1578 (stacked on #1573). Issue: #1572. Predecessor: unmerged Draft PR #1573. Branch: docs/planning-v1374-incident-evidence-integrity. **DRAFT / RELEASE HOLD**.
 
 ## Evidence and decisions
 - Local Debian 13.6 miniPC service health: backend/frontend/bot/nginx active; DEV DB connected. Root 42% and data 54% used at start; /srv/moneyverse points to missing prod-v600. This does not establish an active outage.
