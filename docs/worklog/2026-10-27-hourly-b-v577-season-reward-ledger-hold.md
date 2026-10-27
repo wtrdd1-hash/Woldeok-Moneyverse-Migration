@@ -30,6 +30,10 @@ Independent read-only DEV query confirmed `moneyverse_app` EXECUTE=true, direct 
 - Production-only dependency audit PASS (0 known vulnerabilities). Full pnpm audit FAIL: 24 vulnerabilities (2 critical, 8 high, 11 moderate, 3 low). Bot npm audit FAIL: 6 (1 critical, 5 high). Bot test 8/8 PASS after restoring missing isolated-worktree bot dependencies.
 - Official Test public `/api/version` is `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; Production is `6a989b5ac0c6155587d43426d64f6def6b62c917`. Candidate is not deployed; official Test exact-SHA authenticated finance E2E and GitOps release gate BLOCKED.
 
+## CI regression discovered and corrected
+
+The first exact-head GitHub CI runs (#40428766863 and #40428761308) **FAILED** in the real-PostgreSQL `database-boundary.db.test.ts` privilege snapshot: the expected list still included the two `season_reward_claims` DML grants intentionally revoked by migration 281. The application SQL boundary was stricter than the stale test expectation. Updated the expected grant inventory and added explicit app EXECUTE/DML-denied and SELECT-retained assertions. A new SHA and all required gates must be re-run; the failed CI is not counted as PASS.
+
 ## Release and cleanup policy
 
 PR Draft + hold. Do not merge until 280 dependency resolved, all CI/security gates PASS, full migration parity/ACL and authenticated official Test exact-SHA verified. Do not promote Production or run financial writes. Other workers' worktrees and automations untouched; only this run's disposable PostgreSQL container may be removed. Root filesystem ~100% and data volume ~97%; storage risk remains P0 #1170.
