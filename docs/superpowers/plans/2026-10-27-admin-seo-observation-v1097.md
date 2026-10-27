@@ -9,15 +9,15 @@
 **Tech Stack:** Next.js 16, React 19, Vitest, existing NestJS/PostgreSQL API.
 
 ### Task 1: Validate the SEO observation contract
-- [ ] Add failing tests for numeric counts, distributions, URL/visit fields, duplicate records, partial payloads and a valid backend-shaped response.
-- [ ] Implement a focused pure parser with bounded arrays, safe counters and internal consistency checks.
-- [ ] Run targeted tests GREEN.
+- [x] Add failing tests for numeric counts, distributions, URL/visit fields, duplicate records, partial payloads and a valid backend-shaped response.
+- [x] Implement a focused pure parser with bounded arrays, safe counters and internal consistency checks.
+- [x] Run targeted tests GREEN.
 
 ### Task 2: Fail closed on initial and refreshed observations
-- [ ] Add failing SSR test: no public fallback, no invented metrics, no operational status when administrator endpoint errors.
-- [ ] Add failing client tests: refresh rejects bad JSON/HTTP failure, reports error accessibly, masks stale values; successful retry restores observations.
-- [ ] Wire parser into SSR and refresh. Keep responsive buttons, private API, noindex.
-- [ ] Run targeted tests GREEN and existing SEO tests.
+- [x] Add failing SSR test: no public fallback, no invented metrics, no operational status when administrator endpoint errors.
+- [x] Add failing client tests: refresh rejects bad JSON/HTTP failure, reports error accessibly, masks stale values; successful retry restores observations.
+- [x] Wire parser into SSR and refresh. Keep responsive buttons, private API, noindex.
+- [x] Run targeted tests GREEN and existing SEO tests.
 
 ### Task 3: Verify and release decision
 - [ ] Re-fetch main and canonical EN/KO planning; rebase if advanced.
