@@ -51,14 +51,14 @@ export interface MonetaryTelemetryData {
   readonly m_total: string;
   readonly m_circulating: string;
   readonly m_treasury: string;
-  readonly m_bank_liquidity: string;
-  readonly m_locked: string;
+  readonly m_bank_liquidity: string | null;
+  readonly m_locked: string | null;
   readonly is_issuance_frozen: boolean;
   readonly active_policy_orders_count: number;
   readonly total_mint_certificates_count: number;
   readonly total_retirement_certificates_count: number;
   readonly verified_invariant: boolean;
-  readonly last_reconciled_at: string;
+  readonly last_reconciled_at: string | null;
 }
 
 export interface MonetaryPolicyOrderItem {
@@ -179,6 +179,8 @@ export function MonetaryBureauCard({
   );
 
   const refreshData = async () => {
+    // A failed refresh invalidates old financial evidence rather than leaving stale numbers.
+    setTelemetry(null);
     try {
       const [tRes, oRes, mRes, rRes, aRes] = await Promise.all([
         fetch('/api/v1/admin/economy/monetary/telemetry'),
@@ -197,7 +199,7 @@ export function MonetaryBureauCard({
         if (aData.events) setAutoEvents(aData.events);
       }
     } catch {
-      // ignore
+      setTelemetry(null);
     }
   };
 
@@ -412,7 +414,7 @@ export function MonetaryBureauCard({
               variant={telemetry?.is_issuance_frozen ? 'destructive' : 'outline'}
               size="sm"
               onClick={handleToggleFreeze}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !telemetry}
               className="text-xs h-8"
             >
               {telemetry?.is_issuance_frozen ? (
@@ -437,10 +439,10 @@ export function MonetaryBureauCard({
               <Coins className="size-3.5 text-primary" /> M_total (본원 통화량)
             </div>
             <div className="text-lg font-bold font-mono mt-1 text-foreground">
-              {groupDigits(telemetry?.m_total ?? '59928020')} <span className="text-xs font-normal">WLD</span>
+              {telemetry ? groupDigits(telemetry.m_total) : '조회 불가'} {telemetry && <span className="text-xs font-normal">WLD</span>}
             </div>
-            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center gap-0.5">
-              <CheckCircle2 className="size-3" /> 불변식 검증 일치
+            <div className={telemetry?.verified_invariant ? "text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center gap-0.5" : "text-[10px] text-amber-700 dark:text-amber-400 mt-0.5 flex items-center gap-0.5"}>
+              {telemetry?.verified_invariant ? <CheckCircle2 className="size-3" /> : <AlertTriangle className="size-3" />} {telemetry?.verified_invariant ? '불변식 검증 일치' : '불변식 미검증'}
             </div>
           </div>
 
@@ -449,7 +451,7 @@ export function MonetaryBureauCard({
               <TrendingUp className="size-3.5 text-blue-500" /> M_circulating (유통 잔액)
             </div>
             <div className="text-lg font-bold font-mono mt-1 text-foreground">
-              {groupDigits(telemetry?.m_circulating ?? '31503')} <span className="text-xs font-normal">WLD</span>
+              {telemetry ? groupDigits(telemetry.m_circulating) : '조회 불가'} {telemetry && <span className="text-xs font-normal">WLD</span>}
             </div>
             <div className="text-[10px] text-muted-foreground mt-0.5">활동 유저/계정 가용액</div>
           </div>
@@ -459,7 +461,7 @@ export function MonetaryBureauCard({
               <Building2 className="size-3.5 text-purple-500" /> M_treasury (국고 보유고)
             </div>
             <div className="text-lg font-bold font-mono mt-1 text-foreground">
-              {groupDigits(telemetry?.m_treasury ?? '59896517')} <span className="text-xs font-normal">WLD</span>
+              {telemetry ? groupDigits(telemetry.m_treasury) : '조회 불가'} {telemetry && <span className="text-xs font-normal">WLD</span>}
             </div>
             <div className="text-[10px] text-muted-foreground mt-0.5">5대 재정 금고 통합액</div>
           </div>
