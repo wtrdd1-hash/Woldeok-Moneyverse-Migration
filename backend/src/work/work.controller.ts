@@ -14,7 +14,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -30,6 +30,7 @@ import {
   WorkDashboardResponseDto,
 } from './work.dto';
 import { WorkInputError, WorkRepository } from './work.repository';
+import { refuseUnjournaledQualification } from './work-qualification-hold';
 
 @ApiTags('work')
 @Controller('work')
@@ -200,14 +201,14 @@ export class WorkController {
   }
 
   @Post('qualifications/certify')
-  @ApiOperation({ summary: 'Certify a career qualification with level validation and treasury sink' })
+  @ApiOperation({ summary: 'Career qualification purchase (paused pending ledger-backed settlement)' })
+  @ApiResponse({ status: 503, description: 'Qualification fees require verified double-entry ledger settlement.' })
   certify(
-    @Req() request: RequestWithSession,
-    @Body() body: CertifyQualificationDto,
-  ) {
-    return this.guarded(
-      () => this.repository().certifyQualification(requireUserId(request), body.jobType, body.qualificationCode),
-      'failed to certify qualification',
-    );
+    @Req() _request: RequestWithSession,
+    @Body() _body: CertifyQualificationDto,
+  ): never {
+    // Authentication, consent and CSRF guards remain active on this route.
+    // Refuse before any repository call can execute migration 234's unsafe fee path.
+    return refuseUnjournaledQualification();
   }
 }

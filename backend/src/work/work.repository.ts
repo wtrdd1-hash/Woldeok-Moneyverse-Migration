@@ -1,5 +1,6 @@
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import { refuseUnjournaledQualification } from './work-qualification-hold';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -356,20 +357,10 @@ export class WorkRepository {
     };
   }
 
-  async certifyQualification(actor: unknown, jobType: string, qualificationCode: string) {
-    assertUuid(actor, 'actor');
-    await this.requireEnabled();
-    try {
-      const res = await queryOne<{ result: unknown }>(
-        this.pool,
-        `SELECT public.job_certify_qualification($1, $2, $3) AS result`,
-        [actor, jobType, qualificationCode],
-      );
-      return res?.result;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new WorkInputError(msg);
-    }
+  async certifyQualification(_actor: unknown, _jobType: string, _qualificationCode: string): Promise<never> {
+    // Defense in depth for direct repository callers. No feature flag or SQL
+    // may re-enable the unjournaled migration 234 charge path.
+    return refuseUnjournaledQualification();
   }
 
   async switchActiveJob(actor: unknown, jobType: string): Promise<unknown> {
