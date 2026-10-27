@@ -5,6 +5,15 @@ import { HelpRepository } from './help.repository';
 
 const LOCALES = ['ko','en'] as const;
 const CATEGORIES = ['account','wallet','shop','community','support'] as const;
+
+// PostgreSQL filters on clock_timestamp() at read time. Recheck before emitting
+// a response because evidence may expire during DB/network latency. The same
+// NestJS boundary serves web and Android app-api clients.
+function reviewIsCurrent(value: unknown, nowMs: number): boolean {
+  if (!(value instanceof Date) && typeof value !== 'string') return false;
+  const timestamp = new Date(value).getTime();
+  return Number.isFinite(timestamp) && timestamp > nowMs;
+}
 class SearchHelpDto {
   @IsIn(LOCALES) readonly locale!: 'ko' | 'en';
   @IsOptional() @IsIn(CATEGORIES) readonly category?: typeof CATEGORIES[number];
@@ -35,7 +44,9 @@ export class HelpController {
       !Number.isInteger(body.limit ?? 20) || (body.limit ?? 20) < 1 || (body.limit ?? 20) > 50) {
       throw new BadRequestException('invalid help search parameters');
     }
-    return { articles: await repo.search(body.locale, body.category ?? null, body.query ?? '', body.limit ?? 20) };
+    const articles = await repo.search(body.locale, body.category ?? null, body.query ?? '', body.limit ?? 20);
+    const nowMs = Date.now();
+    return { articles: articles.filter(row => reviewIsCurrent(row.reviewed_until, nowMs)) };
   }
   @Get('articles/:locale/:slug') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Read a verified public help article' })
   async article(@Param('locale') locale: string, @Param('slug') slug: string) {
@@ -44,7 +55,7 @@ export class HelpController {
       throw new NotFoundException('help article not found');
     }
     const article = await repo.article(locale, slug);
-    if (!article) throw new NotFoundException('help article not found');
+    if (!article || !reviewIsCurrent(article.reviewed_until, Date.now())) throw new NotFoundException('help article not found');
     return { article };
   }
 }
