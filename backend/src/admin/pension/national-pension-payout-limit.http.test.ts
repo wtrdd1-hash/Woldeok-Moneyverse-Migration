@@ -14,7 +14,7 @@ describe('Admin pension payout history HTTP boundary', () => {
   let app: INestApplication;
   const listRecentPayoutLogs = vi.fn().mockResolvedValue([]);
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [AdminNationalPensionController],
       providers: [{ provide: NationalPensionService, useValue: { listRecentPayoutLogs } }],
     })
@@ -24,7 +24,7 @@ describe('Admin pension payout history HTTP boundary', () => {
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminSessionGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
   afterAll(async () => { await app?.close(); });
