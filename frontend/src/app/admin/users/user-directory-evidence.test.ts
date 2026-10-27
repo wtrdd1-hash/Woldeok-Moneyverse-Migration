@@ -13,6 +13,12 @@ describe('admin member snapshot evidence', () => {
   it('accepts a verified 50-member bounded snapshot with exact integer strings', () => {
     expect(parseAdminUserSnapshot({ users: [user], scope })).toEqual({ users: [user], scope });
   });
+  it('accepts a full 50-row snapshot with a confirmed additional member', () => {
+    const users = Array.from({ length: 50 }, (_, i) => ({
+      ...user, user_id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
+    }));
+    expect(parseAdminUserSnapshot({ users, scope: { ...scope, hasMore: true } })?.users).toHaveLength(50);
+  });
   it('refuses a truncated claim with fewer than 50 records', () => {
     expect(parseAdminUserSnapshot({ users: [user], scope: { ...scope, hasMore: true } })).toBeNull();
   });

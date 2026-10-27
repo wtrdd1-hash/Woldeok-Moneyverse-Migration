@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
+import { GUARDS_METADATA } from '@nestjs/common/constants';
+import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import type { AdminService } from './admin.service';
 import { AdminController } from './admin.controller';
@@ -8,6 +11,12 @@ const request = { session: { user_id: actor } } as RequestWithSession;
 const sample = Array.from({ length: 51 }, (_, index) => ({ user_id: String(index) }));
 
 describe('admin member directory evidence contract', () => {
+  it('preserves both administrator and elevated-console guards', () => {
+    const controllerGuards = Reflect.getMetadata(GUARDS_METADATA, AdminController) as unknown[];
+    const methodGuards = Reflect.getMetadata(GUARDS_METADATA, AdminController.prototype.users) as unknown[];
+    expect(controllerGuards).toContain(AdminGuard);
+    expect(methodGuards).toContain(AdminSessionGuard);
+  });
   it('uses a bounded lookahead and does not represent the first 50 as the full membership', async () => {
     const users = vi.fn().mockResolvedValue(sample);
     const controller = new AdminController({ users } as unknown as AdminService, null);
