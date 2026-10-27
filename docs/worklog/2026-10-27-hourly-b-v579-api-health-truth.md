@@ -10,7 +10,7 @@
 ## In progress
 - [x] Reproduce QA finding with failing tests.
 - [x] Implement backend/frontend truthfulness contract.
-- [ ] Validate focused and full tests, build, lint, typecheck, audits and isolated PG.
+- [x] Validate focused and full tests, build, lint, typecheck, audits and isolated PG.
 
 ## Finished
 - Pending.
@@ -27,3 +27,11 @@
 - Isolated PostgreSQL 17.11-alpine PASS: SELECT 1, pg_stat_activity, pg_stat_database with read-only role; forbidden CREATE rejected. Container removed.
 - Security: full pnpm audit FAIL (2 Critical, 8 High, 11 Moderate, 3 Low); production pnpm audit PASS; bot npm audit FAIL (1 Critical, 5 High). Bot test initially blocked by missing local youtube-dl-exec dependency, not an application assertion failure.
 - Main advanced during validation from 58881764 to 584f01a9 (admin market reauth, session, planning). Rebase on latest main required before final gates and PR. No overlapping changed files detected.
+
+## Finished — 2026-10-27 11:56 KST
+- Main advanced mid-run to `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c`; rebased own three commits and verified branch merge-base equals latest main again before PR. No merge conflict or changes to A/C/Gemini/QA worktrees.
+- Post-rebase exact-source validation: `pnpm build` PASS, `pnpm lint` PASS (0 errors, 1,129 existing warnings), `pnpm typecheck` PASS, `pnpm test` PASS: backend 1,331 PASS / 398 SKIPPED, frontend 1,430 PASS, contract 38 PASS, DB package 15 PASS / 3 SKIPPED. `npm --prefix bot test` PASS 8/8 after temporarily linking pre-existing local dependencies; link removed afterward. Full pnpm audit FAIL (2 Critical, 8 High, 11 Moderate, 3 Low), production pnpm audit PASS, bot audit FAIL (1 Critical, 5 High).
+- API contract: existing GET `/api/v1/admin/api-health/status` path/guards unchanged. `status` can be UNKNOWN/DEGRADED; domain `latencyMs`/`successRate` and global aggregate become nullable; `measurementSource`/`measuredAt` and `dbProbe` explicitly separate route evidence from read-only DB probe. Next admin page/dashboard handles null and refresh failure without false live-success claims. No migration, money, ledger, auth grants or production data changed.
+- Isolated PostgreSQL 17.11-alpine (network disabled) read-only SELECT 1/statistics PASS, write denied; container removed. This does not replace authenticated official Test exact-SHA E2E.
+- Official Test public SHA `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`, Production SHA `6a989b5ac0c6155587d43426d64f6def6b62c917` (read-only); neither is candidate. Official Test exact-SHA and approved GitOps release gate BLOCKED; Production HOLD.
+- Draft PR / CI: see PR discussion and CI checks; no main merge, Test promotion or Production release. No branch cleanup (unique unmerged changes remain). Follow-up: add authenticated privacy-safe route-level SLI probes before displaying actual global success rate; clear security/release gates.
