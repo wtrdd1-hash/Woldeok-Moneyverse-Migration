@@ -9,7 +9,7 @@ const record = (value: unknown): value is Record<string, unknown> =>
 const string = (value: unknown): value is string => typeof value === 'string';
 const nonempty = (value: unknown): value is string => string(value) && value.trim().length > 0;
 const date = (value: unknown): value is string =>
-  string(value) && /^\d{4}-\d\d-\d\dT/.test(value) && Number.isFinite(Date.parse(value));
+  string(value) && /^\d{4}-\d\d-\d\d[T ]/.test(value) && Number.isFinite(Date.parse(value));
 const uuid = (value: unknown): value is string => string(value) && UUID.test(value);
 const photoUrl = (value: unknown): value is string =>
   nonempty(value) && ((value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\')) ||

@@ -29,6 +29,11 @@ describe('authenticated admin content evidence', () => {
     expect(parseAdminAnnouncements([announcement])).toEqual([announcement]);
     expect(parseAdminAnnouncements({ announcements: [announcement] })).toEqual([announcement]);
   });
+  it('accepts PostgreSQL timestamptz text returned by the existing photo read functions', () => {
+    const dbPhoto = { ...photo, submitted_at: '2026-10-27 08:00:00.000+00' };
+    expect(parsePendingPhotos([dbPhoto])).toEqual([dbPhoto]);
+    expect(parseAdminPhotos([{ ...dbPhoto, content_state: 'published', published_at: '2026-10-27 08:30:00+00' }])).toHaveLength(1);
+  });
   it('rejects null, non-arrays, partial objects and malformed IDs rather than inventing empty lists', () => {
     expect(parsePendingPhotos(null)).toBeNull();
     expect(parsePendingPhotos({ photos: [] })).toBeNull();
