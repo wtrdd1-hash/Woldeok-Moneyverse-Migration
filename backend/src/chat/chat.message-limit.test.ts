@@ -41,12 +41,12 @@ describe('private chat message history page limit', () => {
 describe('private chat delta sync page limit', () => {
   it('uses default 100 only when limit is absent', async () => {
     await expect(controller.syncMessages(request, conversationId)).resolves.toEqual({ messages: [] });
-    expect(service.syncMessages).toHaveBeenCalledWith(actorId, conversationId, 0, 100);
+    expect(service.syncMessages).toHaveBeenCalledWith(actorId, conversationId, '0', 100);
   });
 
   it.each(['1', '100', '200'])('accepts canonical sync limit %s', async (raw) => {
     await controller.syncMessages(request, conversationId, undefined, raw);
-    expect(service.syncMessages).toHaveBeenCalledWith(actorId, conversationId, 0, Number(raw));
+    expect(service.syncMessages).toHaveBeenCalledWith(actorId, conversationId, '0', Number(raw));
   });
 
   it.each(['', '0', '-1', '+1', '01', '2junk', '1e2', '1.5', ' 2', '2 ', '201', '9007199254740993', ['1', '2'], { x: 1 }])(
@@ -68,6 +68,71 @@ describe('repository direct-call limit guard', () => {
   it.each([0, -1, 201, 1.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1])(
     'rejects invalid sync limit %s without issuing SQL', async (limit) => {
       await expect(repo.syncMessages(actorId, conversationId, 0, limit)).rejects.toBeInstanceOf(ChatInputError);
+      expect(query).not.toHaveBeenCalled();
+    },
+  );
+});
+
+describe('private chat bigint cursor integrity', () => {
+  it('preserves history cursor beyond JavaScript safe integer without rounding', async () => {
+    await controller.listMessages(request, conversationId, '50', '9007199254740993');
+    expect(service.listMessages).toHaveBeenCalledWith(actorId, conversationId, 50, '9007199254740993');
+  });
+
+  it('preserves the maximum PostgreSQL bigint delta cursor', async () => {
+    await controller.syncMessages(request, conversationId, '9223372036854775807', '100');
+    expect(service.syncMessages).toHaveBeenCalledWith(actorId, conversationId, '9223372036854775807', 100);
+  });
+
+  it.each(['', '0', '-1', '+1', '01', '2junk', '1e2', '1.5', ' 2', '2 ', '9223372036854775808', ['1', '2']])(
+    'rejects malformed history cursor %j before service or database access', async (raw) => {
+      await expect(controller.listMessages(request, conversationId, '50', raw as string)).rejects.toBeInstanceOf(BadRequestException);
+      expect(service.listMessages).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['', '-1', '+1', '01', '2junk', '1e2', '1.5', ' 2', '2 ', '9223372036854775808', ['1', '2']])(
+    'rejects malformed sync cursor %j before service or database access', async (raw) => {
+      await expect(controller.syncMessages(request, conversationId, raw as string, '100')).rejects.toBeInstanceOf(BadRequestException);
+      expect(service.syncMessages).not.toHaveBeenCalled();
+    },
+  );
+
+  it('accepts canonical zero as a sync cursor', async () => {
+    await controller.syncMessages(request, conversationId, '0', '100');
+    expect(service.syncMessages).toHaveBeenCalledWith(actorId, conversationId, '0', 100);
+  });
+
+  it('passes exact bigint strings to PostgreSQL query bindings', async () => {
+    await repo.listMessages(actorId, conversationId, 50, '9007199254740993');
+    expect(query).toHaveBeenLastCalledWith(expect.stringContaining('m.sequence < $3::bigint'),
+      [actorId, conversationId, '9007199254740993', 50]);
+    await repo.syncMessages(actorId, conversationId, '9007199254740993', 100);
+    expect(query).toHaveBeenLastCalledWith(expect.stringContaining('m.sequence > $3::bigint'),
+      [actorId, conversationId, '9007199254740993', 100]);
+  });
+});
+
+
+describe('repository direct-call cursor validation', () => {
+  it('rejects unsafe numeric read receipts before SQL', async () => {
+    await expect(repo.markAsRead(actorId, conversationId, Number('9007199254740993')))
+      .rejects.toBeInstanceOf(ChatInputError);
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it.each(['0', '01', '2junk', '9223372036854775808'])(
+    'rejects invalid history cursor %s before SQL', async (raw) => {
+      await expect(repo.listMessages(actorId, conversationId, 50, raw))
+        .rejects.toBeInstanceOf(ChatInputError);
+      expect(query).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['01', '2junk', '9223372036854775808'])(
+    'rejects invalid delta cursor %s before SQL', async (raw) => {
+      await expect(repo.syncMessages(actorId, conversationId, raw, 100))
+        .rejects.toBeInstanceOf(ChatInputError);
       expect(query).not.toHaveBeenCalled();
     },
   );

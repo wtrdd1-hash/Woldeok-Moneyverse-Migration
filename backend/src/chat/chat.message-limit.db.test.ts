@@ -7,6 +7,7 @@ const connectionString = process.env.MONEYVERSE_CHAT_PAGING_PG_URL;
 const actor = '11111111-1111-4111-8111-111111111111';
 const outsider = '33333333-3333-4333-8333-333333333333';
 const conversation = '22222222-2222-4222-8222-222222222222';
+const largeConversation = '44444444-4444-4444-8444-444444444444';
 
 (connectionString ? describe : describe.skip)('isolated PostgreSQL private chat paging', () => {
   let pool: Pool;
@@ -32,6 +33,14 @@ const conversation = '22222222-2222-4222-8222-222222222222';
   it('does not disclose a conversation to an outsider', async () => {
     expect(await repo.listMessages(outsider, conversation, 100)).toEqual([]);
     expect(await repo.syncMessages(outsider, conversation, 0, 200)).toEqual([]);
+  });
+
+  it('round-trips bigint cursors above 2^53 without precision loss', async () => {
+    const history = await repo.listMessages(actor, largeConversation, 2, '9007199254740995');
+    expect(history.map((row) => row.sequence)).toEqual(['9007199254740994', '9007199254740993']);
+    const delta = await repo.syncMessages(actor, largeConversation, '9007199254740993', 2);
+    expect(delta.map((row) => row.sequence)).toEqual(['9007199254740994']);
+    expect(await repo.listMessages(outsider, largeConversation, 2)).toEqual([]);
   });
 
   it('keeps the application reader unable to change chat messages', async () => {

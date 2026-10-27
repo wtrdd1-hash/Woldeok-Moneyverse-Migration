@@ -54,6 +54,78 @@ describe('private chat history and sync pagination HTTP contract', () => {
     await request(app.getHttpServer()).get(base + '201').expect(400);
     expect(syncMessages).not.toHaveBeenCalled();
     await request(app.getHttpServer()).get(base + '200').expect(200);
-    expect(syncMessages).toHaveBeenLastCalledWith(actor, conversationId, 0, 200);
+    expect(syncMessages).toHaveBeenLastCalledWith(actor, conversationId, '0', 200);
+  });
+});
+
+describe('private chat exact bigint cursor HTTP regression', () => {
+  let app: INestApplication;
+  const listMessages = vi.fn().mockResolvedValue([]);
+  const syncMessages = vi.fn().mockResolvedValue([]);
+
+  beforeAll(async () => {
+    const testingModule = await Test.createTestingModule({
+      controllers: [ChatController],
+      providers: [{ provide: ChatService, useValue: { listMessages, syncMessages } }],
+    })
+      .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
+      .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
+      .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .compile();
+    app = testingModule.createNestApplication();
+    app.use((req: { session?: unknown }, _res: unknown, next: () => void) => {
+      req.session = { user_id: actor };
+      next();
+    });
+    await app.init();
+  });
+  afterAll(async () => { await app?.close(); });
+
+  it('preserves exact history and sync cursor values through HTTP', async () => {
+    await request(app.getHttpServer()).get(`/chat/conversations/${conversationId}/messages?beforeSequence=9007199254740993`).expect(200);
+    expect(listMessages).toHaveBeenLastCalledWith(actor, conversationId, 50, '9007199254740993');
+    await request(app.getHttpServer()).get(`/chat/conversations/${conversationId}/sync?sinceSequence=9007199254740993`).expect(200);
+    expect(syncMessages).toHaveBeenLastCalledWith(actor, conversationId, '9007199254740993', 100);
+  });
+
+  it('rejects partial, duplicate and overflow cursor values', async () => {
+    listMessages.mockClear();
+    syncMessages.mockClear();
+    await request(app.getHttpServer()).get(`/chat/conversations/${conversationId}/messages?beforeSequence=2junk`).expect(400);
+    await request(app.getHttpServer()).get(`/chat/conversations/${conversationId}/messages?beforeSequence=1&beforeSequence=2`).expect(400);
+    await request(app.getHttpServer()).get(`/chat/conversations/${conversationId}/sync?sinceSequence=9223372036854775808`).expect(400);
+    expect(listMessages).not.toHaveBeenCalled();
+    expect(syncMessages).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('private chat read receipt exact bigint HTTP contract', () => {
+  let app: INestApplication;
+  const markAsRead = vi.fn().mockResolvedValue({ lastReadSequence: '9007199254740993' });
+  beforeAll(async () => {
+    const testingModule = await Test.createTestingModule({
+      controllers: [ChatController],
+      providers: [{ provide: ChatService, useValue: { markAsRead } }],
+    })
+      .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
+      .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
+      .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .compile();
+    app = testingModule.createNestApplication();
+    app.use((req: { session?: unknown }, _res: unknown, next: () => void) => { req.session = { user_id: actor }; next(); });
+    await app.init();
+  });
+  afterAll(async () => { await app?.close(); });
+  it('accepts an exact string receipt and legacy safe integer, but refuses unsafe numeric JSON', async () => {
+    const url = `/chat/conversations/${conversationId}/read`;
+    await request(app.getHttpServer()).post(url).send({ sequence: '9007199254740993' }).expect(201);
+    expect(markAsRead).toHaveBeenLastCalledWith(actor, conversationId, '9007199254740993');
+    await request(app.getHttpServer()).post(url).send({ sequence: 5 }).expect(201);
+    expect(markAsRead).toHaveBeenLastCalledWith(actor, conversationId, '5');
+    markAsRead.mockClear();
+    await request(app.getHttpServer()).post(url).send({ sequence: Number('9007199254740993') }).expect(400);
+    await request(app.getHttpServer()).post(url).send({ sequence: '2junk' }).expect(400);
+    expect(markAsRead).not.toHaveBeenCalled();
   });
 });

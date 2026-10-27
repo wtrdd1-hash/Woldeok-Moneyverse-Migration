@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import { parsePgChatSequence } from './chat-sequence';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -86,17 +87,19 @@ export class PostgresChatRepository {
     return row;
   }
 
-  async markAsRead(actorUserId: string, conversationId: string, sequence: number): Promise<string> {
+  async markAsRead(actorUserId: string, conversationId: string, sequence: string | number): Promise<string> {
     if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
-    if (sequence < 0) throw new ChatInputError('sequence must be non-negative');
+    let exactSequence: string;
+    try { exactSequence = parsePgChatSequence(sequence, true); }
+    catch { throw new ChatInputError('sequence must be a canonical PostgreSQL bigint'); }
 
     const row = await queryOne<{ last_read_sequence: string }>(
       this.client,
       `SELECT public.private_chat_read($1::uuid, $2::uuid, $3::bigint)::text AS last_read_sequence;`,
-      [actorUserId, conversationId, sequence],
+      [actorUserId, conversationId, exactSequence],
     );
-    return row?.last_read_sequence ?? sequence.toString();
+    return row?.last_read_sequence ?? exactSequence;
   }
 
   async listConversations(actorUserId: string, limit = 50): Promise<ConversationRow[]> {
@@ -144,12 +147,18 @@ export class PostgresChatRepository {
     actorUserId: string,
     conversationId: string,
     limit = 50,
-    beforeSequence?: number,
+    beforeSequence?: string,
   ): Promise<MessageRow[]> {
     if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
       throw new ChatInputError('limit must be an integer between 1 and 100');
+    }
+
+    let exactBefore: string | null = null;
+    if (beforeSequence !== undefined) {
+      try { exactBefore = parsePgChatSequence(beforeSequence); }
+      catch { throw new ChatInputError('invalid history cursor'); }
     }
 
     return queryRows<MessageRow>(
@@ -169,14 +178,14 @@ export class PostgresChatRepository {
          AND ($3::bigint IS NULL OR m.sequence < $3::bigint)
        ORDER BY m.sequence DESC
        LIMIT $4;`,
-      [actorUserId, conversationId, beforeSequence ?? null, limit],
+      [actorUserId, conversationId, exactBefore, limit],
     );
   }
 
   async syncMessages(
     actorUserId: string,
     conversationId: string,
-    sinceSequence = 0,
+    sinceSequence: string | number = '0',
     limit = 100,
   ): Promise<MessageRow[]> {
     if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
@@ -184,6 +193,10 @@ export class PostgresChatRepository {
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 200) {
       throw new ChatInputError('limit must be an integer between 1 and 200');
     }
+
+    let exactSince: string;
+    try { exactSince = parsePgChatSequence(sinceSequence, true); }
+    catch { throw new ChatInputError('invalid delta cursor'); }
 
     return queryRows<MessageRow>(
       this.client,
@@ -202,7 +215,7 @@ export class PostgresChatRepository {
          AND m.sequence > $3::bigint
        ORDER BY m.sequence ASC
        LIMIT $4;`,
-      [actorUserId, conversationId, sinceSequence, limit],
+      [actorUserId, conversationId, exactSince, limit],
     );
   }
 
