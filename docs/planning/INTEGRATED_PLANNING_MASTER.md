@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.27.1317 — Scheduled HTTP smoke QA and bounded disk hygiene (OPS BRANCH CANDIDATE)
+
+- At 2026-10-27 14:00 KST systemd hourly QA completed 26 HTTP route probes without failures. This is **HTTP smoke only**, not logged-in banking/admin/browser/mobile interaction or mandatory five-pass full-route QA. The old runner was absent in origin/main despite still being executed on the host.
+- Dedicated ops branch reintroduces the tracked runner, requires HTTP 200 rather than treating redirects as passes, checks the read-only session query, and runs storage hygiene on QA exit (including failure). Completion marker, current-UID ownership, no symlinks, 72-hour retention and bounded scope restrict removal to QA-owned temporary scratch artifacts. A disk check is not a license to remove active releases, PostgreSQL/WAL, backups, uploads, retained QA evidence, or other agents' workspaces.
+- This is an operational QA candidate; automated unit/syntax tests and systemd evidence govern its status. It does not establish any full-functional-QA, app Test, or Production promotion. [Internal/GitHub notes](../updates/2026-10-27-scheduled-qa-disk-cleanup-v1317-github.md).
+
 ## v2026.10.27.2 — Market-event recent-auth recovery and retired administrator TOTP copy (ENGINEERING FIX CANDIDATE)
 
 - Evidence: audit issue #1515; root cause is backend `ReauthGuard` on both `POST` and `DELETE /api/v1/admin/stocks/market-events` (15-minute verified-identity window) while the market dialog lacks a recovery link. Actual Production/Test revisions also have this mismatch. This is not a remaining administrator TOTP challenge: migration 197 retired the independent OTP credential, trusted device and recovery flows.
