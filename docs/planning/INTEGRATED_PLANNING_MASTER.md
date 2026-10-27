@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.27.2 — Market-event recent-auth recovery and retired administrator TOTP copy (ENGINEERING FIX CANDIDATE)
+
+- Evidence: audit issue #1515; root cause is backend `ReauthGuard` on both `POST` and `DELETE /api/v1/admin/stocks/market-events` (15-minute verified-identity window) while the market dialog lacks a recovery link. Actual Production/Test revisions also have this mismatch. This is not a remaining administrator TOTP challenge: migration 197 retired the independent OTP credential, trusted device and recovery flows.
+- Migration 246 supersedes the older console-open lifetime: entry uses an authenticated administrator session (30-day lifetime, 24-hour idle window), but sensitive operation endpoints can still enforce a separate 15-minute `ReauthGuard`. Older 30-minute/10-minute console copy is historical, not current DB truth.
+- Decision unchanged: `AdminSessionGuard`, role and actor checks, CSRF, recent verified identity for price-changing admin writes, audit and SQL idempotency remain in effect. UI remediation adds a typed `reauthentication_required` state and a direct `/account/security` link, only after that exact rejection, to both Publish and End actions; opens in a separate tab to retain an unsent draft. No code field, guard removal, arbitrary return URL or bypass.
+- Reconcile obsolete admin Treasury forced-TOTP description, admin Audit auth-code 401 handling and the Korean historical `GAP-AUTH-01` status. Do not delete cryptographic utilities used to seal unrelated AI secrets. Tests must include typed error classification, both action entry points, stale/invalid/expired authorization negatives, accessibility and mobile layouts.
+- Release status: **feature-branch candidate only**. Do not claim merged, Test, or Production until exact-SHA CI, independently verified Test backend/API/DB/auth-session state and zero-downtime gates in `docs/RELEASING.md` pass. This version does not modify schema or economic authority.
+
 ## v2026.10.24.1210 — F675-109 Board Reading List Hardening: Deletion, Idempotency, Cursor and Resume (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
 ### Cycle, verified baseline and explicit corrections

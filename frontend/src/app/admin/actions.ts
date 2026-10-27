@@ -262,9 +262,9 @@ export async function applyCorporateAction(
 /**
  * Publishes a market event: news that leans the market (124).
  *
- * Not a step-up act. It moves no money and takes nothing from anybody; what
- * it can do to prices is bounded by the function's own vocabulary of three
- * strengths, and it is audited like every other console write.
+ * Price-impacting writes require a recent verified administrator session,
+ * in addition to CSRF, authorization and audited SQL actor checks. The retired
+ * TOTP authenticator must not be requested from an operator.
  */
 export async function publishMarketEvent(
   _previous: ActionState,

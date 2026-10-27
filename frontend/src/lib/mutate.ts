@@ -43,15 +43,13 @@ export async function mutate<T>(
  */
 export function failure(error: unknown, fallback: string): ActionState {
   if (error instanceof ApiError) {
-    // Two of this API's 401s are told to somebody who IS signed in: a
-    // step-up that has expired is not a session that has. Telling them to log
-    // in sends them to a page they are already past, and the thing they
-    // actually have to do -- confirm who they are, or enter a code -- is not
-    // mentioned anywhere in the sentence.
+    // An expired recent identity proof is distinct from a login failure.
+    // Only the stable API error code may trigger a verification recovery link.
     if (error.code === 'reauthentication_required') {
       return {
         status: 'error',
-        message: '추가 보안 확인이 필요한 작업입니다. 계정 보안 설정에서 재인증한 뒤 다시 시도해 주세요.',
+        errorCode: 'reauthentication_required',
+        message: '최근 본인 확인이 필요합니다. 계정 보안 설정에서 확인한 뒤 다시 시도해 주세요.',
       };
     }
     if (error.code === 'second_factor_required') {

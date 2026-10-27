@@ -19,6 +19,7 @@ import { IDLE } from '@/lib/action-state';
 import { cancelMarketEvent, publishMarketEvent } from '../actions';
 import type { AdminStock } from '../types';
 import { STRENGTHS } from './strengths';
+import { MarketEventReauthenticationHelp } from './market-event-reauth-help';
 
 
 /**
@@ -127,6 +128,7 @@ export function PublishMarketEventDialog({ stocks }: { readonly stocks: readonly
           </Field>
 
           <ActionAlert state={state} />
+          <MarketEventReauthenticationHelp state={state} />
           <DialogFooter>
             <SubmitButton>소식 내기</SubmitButton>
           </DialogFooter>
@@ -147,6 +149,7 @@ export function CancelMarketEventButton({ eventId }: { readonly eventId: string 
         </SubmitButton>
       </form>
       <ActionAlert state={state} />
+      <MarketEventReauthenticationHelp state={state} />
     </div>
   );
 }

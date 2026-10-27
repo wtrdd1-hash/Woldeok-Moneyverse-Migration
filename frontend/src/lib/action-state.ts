@@ -9,6 +9,8 @@
 export interface ActionState {
   readonly status: 'idle' | 'ok' | 'error';
   readonly message?: string;
+  /** Machine-readable reason for actionable recovery; never infer this from translated copy. */
+  readonly errorCode?: 'reauthentication_required';
   /** Optional semantic tone for a successfully processed outcome. */
   readonly tone?: 'success' | 'neutral' | 'negative';
 }
