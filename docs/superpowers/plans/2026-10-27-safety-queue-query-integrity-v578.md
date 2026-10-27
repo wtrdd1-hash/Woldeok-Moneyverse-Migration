@@ -10,9 +10,9 @@
 
 **Spec:** docs/worklog/2026-10-27-hourly-b-v578-safety-queue-query.md
 
-- [ ] Add controller unit tests: invalid status, fractional/negative/NaN/oversized/unsafe offset, valid default and boundary cases; verify zero service calls on invalid.
-- [ ] Run RED focused Vitest, record failure count.
-- [ ] Implement shared strict pagination Zod schema in safety.dto.ts, validate both controller handlers; reject malformed queries with BadRequestException.
-- [ ] Run GREEN focused and existing guard tests; review API contract and role protections.
+- [x] Add controller unit tests: invalid status, fractional/negative/NaN/oversized/unsafe offset, valid default and boundary cases; verify zero service calls on invalid.
+- [x] Run RED focused Vitest, record failure count.
+- [x] Implement shared strict pagination Zod schema in safety.dto.ts, validate both controller handlers; reject malformed queries with BadRequestException.
+- [x] Run GREEN focused and existing guard tests; review API contract and role protections.
 - [ ] Run full lint/typecheck/test/build/security checks, isolated PG read-only probe if safe.
 - [ ] Commit and push exact SHA, open Draft/HOLD PR, verify CI, record Test/Production hold and coordination.

@@ -19,6 +19,7 @@ import {
   AdminTakedownActionSchema,
   AdminChatReportActionSchema,
   AdminChatReportQuerySchema,
+  AdminTakedownQuerySchema,
 } from './safety.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
@@ -75,9 +76,13 @@ export class SafetyController {
     @Query('offset') offset = '0',
   ) {
     const actorUserId = requireUserId(req);
-    const limitNum = Math.min(Math.max(1, parseInt(limit, 10) || 50), 100);
-    const offsetNum = Math.max(0, parseInt(offset, 10) || 0);
-    return this.safetyService.adminListTakedowns(actorUserId, status, limitNum, offsetNum);
+    const parsed = AdminTakedownQuerySchema.safeParse({ status, limit, offset });
+    if (!parsed.success) {
+      throw new BadRequestException('관리자 삭제 요청 목록 필터 또는 페이지 값이 올바르지 않습니다.');
+    }
+    return this.safetyService.adminListTakedowns(
+      actorUserId, parsed.data.status, parsed.data.limit, parsed.data.offset,
+    );
   }
 
   /**
@@ -113,12 +118,14 @@ export class SafetyController {
   ) {
     const actorUserId = requireUserId(req);
     const parsed = AdminChatReportQuerySchema.safeParse({ status, limit, offset });
-    const query = parsed.success ? parsed.data : { status: undefined, limit: 50, offset: 0 };
+    if (!parsed.success) {
+      throw new BadRequestException('관리자 채팅 신고 목록 필터 또는 페이지 값이 올바르지 않습니다.');
+    }
     return this.safetyService.adminListChatReports(
       actorUserId,
-      query.status,
-      query.limit,
-      query.offset,
+      parsed.data.status,
+      parsed.data.limit,
+      parsed.data.offset,
     );
   }
 
