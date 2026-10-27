@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import type { BlogPost, BlogCategory, BlogCountry, AcademicReference } from './blog.types';
+import { ENGINEERING_ARTICLES, type EngineeringTopic } from './engineering-articles';
 import { COUNTRY_EDITION_TOPICS, createCountryBlogPost } from './blog-country-editorial';
 import { canonicalBlogSlug, isCanonicalBlogSlug } from './blog-seo';
 import { type MacroMarketSnapshot, DEFAULT_MACRO_SNAPSHOT } from './macro-market-data';
@@ -12,6 +13,8 @@ export const BLOG_AUTHOR_DEOKI = {
   role: '월덕 금융연구소 수석 AI 애널리스트',
   badge: 'AI Analyst',
 } as const;
+
+export const BLOG_AUTHOR_ENGINEER = { name: '덕이 (Deoki)', role: '월덕 소프트웨어 아키텍처 기술 편집', badge: 'Engineering Editor' } as const;
 
 const EXPANDED_COMPOUND_CONTENT_KO = `## 1. 2026년 고금리·인플레이션 충격과 실시간 거시경제 펄스
 
@@ -708,6 +711,7 @@ interface TopicTemplateDef {
   category: BlogCategory;
   categoryLabel: string;
   titleSuffix: string;
+  engineeringTopic?: EngineeringTopic;
   excerpt: string;
   tags: string[];
   calculatorHref: string;
@@ -725,19 +729,16 @@ const TOPIC_TEMPLATES: TopicTemplateDef[] = [
   {
     category: 'TECH',
     categoryLabel: '핀테크 & 소프트웨어 공학',
-    titleSuffix: '분산 원장 무결성과 BigInt 정수 회계 아키텍처: 부동소수점 오차 제로화 설계',
-    excerpt: '금융 결제 및 거래소 시스템에서 IEEE 754 부동소수점 연산이 유발하는 1원 오차 누적을 원천 차단하고, 복식부기(Double-Entry) 트랜잭션과 무손실 BigInt 정수 원장을 구현한 핀테크 아키텍처를 심층 분석합니다.',
+    engineeringTopic: 'BIGINT_LEDGER',
+    titleSuffix: 'BigInt 정수 회계와 복식부기 설계: 금액 표현·원장 무결성 검증',
+    excerpt: 'IEEE 754 부동소수점과 BigInt 정수 표현의 차이, 복식부기 트랜잭션과 멱등성·동시성 검증 방법을 재현 가능한 TypeScript/SQL 예제로 설명합니다.',
     tags: ['핀테크엔지니어링', '분산원장', 'BigInt', '복식부기', '소프트웨어아키텍처', 'IEEE754'],
-    calculatorHref: '/tools/compound-calculator',
-    calculatorName: '복리 수익 계산기',
+    calculatorHref: '/blog',
+    calculatorName: '기술 글 목록',
     stockTicker: 'CHIPS',
-    academicTheory: 'ACM Transactions on Computer Systems(Goldberg, 1991)의 부동소수점 수치해석 연구에 따르면, 이진 부동소수점(Binary Floating Point) 연산은 0.1 등의 십진 분수를 표현할 때 유한 비트 절삭 오차(Truncation Error)를 필연적으로 유발합니다. 금융 원장 시스템은 모든 화폐 단위를 서브센트(Sub-cent) 정수형(BigInt)으로 관리하고 대차평형의 원리(Debit-Credit Parity)를 원자적 트랜잭션(ACID)으로 강제해야 합니다.',
-    keyStats: '100만 건의 초당 금융 트랜잭션 시뮬레이션 결과, Number(64비트 실수) 사용 시 0.0000000000000002원의 미세 잔차가 누적되어 최종 합계에서 42.8원의 불일치가 발생했으나, BigInt 기반 복식부기 엔진 적용 시 1조 회 트랜잭션에서도 원장 오차 0.000000원을 완벽하게 증명했습니다.',
-    tableData: `| 처리 엔진 | 연산 데이터 타입 | 복식부기 무결성 검증 | 100만 건 누적 잔차 | 시스템 안정성 |
-| :--- | :---: | :---: | :---: | :---: |
-| 레거시 부동소수점 | IEEE 754 Float64 | 미검증 단일 장부 | +42.82 원 (오차 발생) | 위험 (금융 사고) |
-| 고정소수점 (Decimal.js) | 가변 임의 정밀도 | 소프트웨어 래퍼 | 0.0000 원 | 보통 (연산 속도 저하) |
-| **머니버스 하이퍼 코어** | **네이티브 BigInt 정수** | **원자적 대차평형 (ACID)** | **0.0000 원 (완전 무결)** | **최고 (엔터프라이즈급)** |`,
+    academicTheory: '검토된 engineering-articles.ts의 재현 가능한 기술 본문을 사용합니다.',
+    keyStats: '검토된 engineering-articles.ts의 재현 가능한 기술 본문을 사용합니다.',
+    tableData: '',
     references: [
       'Goldberg, D. (1991). "What Every Computer Scientist Should Know About Floating-Point Arithmetic." ACM Computing Surveys, 23(1), 5–48.',
       'Lamport, L. (1998). "The Part-Time Parliament." ACM Transactions on Computer Systems, 16(2), 133–169.',
@@ -752,26 +753,23 @@ const TOPIC_TEMPLATES: TopicTemplateDef[] = [
   {
     category: 'TECH',
     categoryLabel: '핀테크 & 소프트웨어 공학',
-    titleSuffix: '초저지연 호가창(Order Book) 실시간 렌더링: 가상 DOM 오버헤드와 제로 카피 스트리밍',
-    excerpt: '초당 120프레임으로 쏟아지는 주식 시장 틱(Tick) 데이터를 브라우저 메인 스레드 멈춤 없이 60fps로 매끄럽게 시각화하는 Canvas 더블 버퍼링과 바이너리 웹소켓 최적화 엔지니어링을 해설합니다.',
+    engineeringTopic: 'ORDER_BOOK_STREAM',
+    titleSuffix: '호가창(Order Book) 웹 렌더링 설계: WebSocket 시퀀스와 Canvas 성능 검증',
+    excerpt: 'WebSocket 호가 데이터의 시퀀스 정합성, requestAnimationFrame 배치, DOM·Canvas 대안과 재현 가능한 성능 측정 방법을 설명합니다.',
     tags: ['웹성능최적화', '호가창', 'WebSocket', 'Canvas', '더블버퍼링', 'Nextjs'],
-    calculatorHref: '/tools/stock-calculator',
-    calculatorName: '주식 평단가·수익률 계산기',
+    calculatorHref: '/blog',
+    calculatorName: '기술 글 목록',
     stockTicker: 'WDX',
-    academicTheory: 'SIGCOMM 및 웹 렌더링 파이프라인 연구에 따르면, React 등의 전통적인 VDOM Diffing 알고리즘은 수천 개의 DOM 노드가 밀집된 10단계 호가창이 밀리초 단위로 갱신될 때 레이아웃 스래싱(Layout Thrashing)과 가비지 컬렉션(GC Pause)을 유발합니다. 고성능 핀테크 UI는 OffscreenCanvas와 바이너리 ArrayBuffer 디코딩을 결합해 메인 스레드를 온전히 보존해야 합니다.',
-    keyStats: '기존 DOM 테이블 렌더링 방식 대비 HTML5 Canvas 가속 렌더러 적용 시 CPU 점유율은 78%에서 11%로 급감했으며, 프레임 드랍(Dropped Frames)은 0.02% 미만으로 억제되어 320px 모바일 환경에서도 지연 없는 실시간 체결창을 실현했습니다.',
-    tableData: `| 렌더링 방식 | 1초당 갱신 한도 | 모바일 CPU 점유율 | 프레임 유지율 (60fps) | 메모리 누수 위험 |
-| :--- | :---: | :---: | :---: | :---: |
-| React 표준 DOM 테이블 | 초당 ~30회 | 78.4% (발열 유발) | 38.2 fps (끊김 심함) | 가비지 컬렉션 급증 |
-| 가상화 리스트 (Virtualizer) | 초당 ~80회 | 42.1% | 51.4 fps | 보통 |
-| **머니버스 Canvas 엔진** | **초당 240회+** | **11.2% (초경량)** | **59.8 fps (완벽 매끄러움)** | **Zero-Leak 보장** |`,
+    academicTheory: '검토된 engineering-articles.ts의 재현 가능한 기술 본문을 사용합니다.',
+    keyStats: '검토된 engineering-articles.ts의 재현 가능한 기술 본문을 사용합니다.',
+    tableData: '',
     references: [
-      'SIGCOMM (2023). "High-Throughput Low-Latency Financial Streaming Protocols."',
-      'W3C (2024). "WebAssembly and OffscreenCanvas High Performance Graphics Specification."',
-      'Google Chrome Team (2025). "Rendering Performance & Minimizing Main Thread Work."',
+      'MDN Web Docs. WebSocket and requestAnimationFrame references.',
+      'MDN Web Docs. OffscreenCanvas API reference.',
+      'web.dev. Rendering performance guidance.',
     ],
     academicReferences: [
-      { title: "High-Throughput Low-Latency Financial Streaming Protocols", authors: "SIGCOMM Research Group", institution: "ACM SIGCOMM", year: 2023 }
+      { title: 'OffscreenCanvas', authors: 'MDN Web Docs', institution: 'MDN', year: 2024, doiOrUrl: 'https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas' }
     ]
   },
   {
@@ -952,7 +950,8 @@ export function generateDailyAiBlogPost(options?: DailyAiBlogOptions | MacroMark
   // 2. 국가 순환 결정: KR -> US -> JP -> VN
   const countries: BlogCountry[] = ['KR', 'US', 'JP', 'VN'];
   const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
-  const targetCountry: BlogCountry = opts.country || countries[dayOfYear % countries.length]!;
+  if (targetCategory === 'TECH' && opts.country && opts.country !== 'KR') throw new Error('TECH_LOCALIZATION_REVIEW_REQUIRED');
+  const targetCountry: BlogCountry = targetCategory === 'TECH' ? 'KR' : (opts.country || countries[dayOfYear % countries.length]!);
   const countryProfile = COUNTRY_MARKET_PROFILES[targetCountry];
 
   // 3. 카테고리에 맞는 템플릿 필터링 후 선택
@@ -962,7 +961,9 @@ export function generateDailyAiBlogPost(options?: DailyAiBlogOptions | MacroMark
 
   const slug = `${dateStr}-${targetCountry.toLowerCase()}-${template.category.toLowerCase()}-${timeStr}`;
   const categoryPrefix = template.category === 'TECH' ? '[AI 테크칼럼]' : '[AI 금융칼럼]';
-  const title = `${categoryPrefix} ${countryProfile.flag} ${template.titleSuffix} (${countryProfile.name} 에디션)`;
+  const title = targetCategory === 'TECH'
+    ? `${categoryPrefix} ${template.titleSuffix}`
+    : `${categoryPrefix} ${countryProfile.flag} ${template.titleSuffix} (${countryProfile.name} 에디션)`;
 
   const liveMacroTable = `| 실시간 시장 지표 | 최신 실측 수치 | 벤치마크 및 통화정책 기준 | 데이터 출처 |
 | :--- | :---: | :---: | :--- |
@@ -1207,10 +1208,16 @@ ETF 및 우량 배당주에서 분기마다 입금되는 분배금(배당금)은
   const currentFaq = currentDeepDive.faqItems;
   const renderedFaq = currentFaq.map((item, i) => "### Q" + (i + 1) + ". " + item.q + "\n**A.** " + item.a).join("\n\n");
   const renderedReferences = template.references.map((ref, i) => "[" + (i + 1) + "] " + ref).join("\n");
-  const generatedContent = `## 1. 2026년 변화하는 글로벌 금융 환경과 실시간 시장 펄스 분석
+  if (targetCategory === 'TECH' && !template.engineeringTopic) {
+    throw new Error('TECH_EDITORIAL_REVIEW_REQUIRED');
+  }
+
+  const generatedContent = targetCategory === 'TECH' && template.engineeringTopic
+    ? ENGINEERING_ARTICLES[template.engineeringTopic]
+    : `## 1. 2026년 변화하는 글로벌 금융 환경과 실시간 시장 펄스 분석
 
 최근 전 세계적인 고금리 장기화와 유동성 재편, 그리고 인공지능 기반 금융 자동화 시대가 도래하면서 단순한 근로소득의 저축만으로는 가파른 실질 인플레이션을 방어하기 불가능해졌습니다.
-오늘 **월덕 금융연구소 수석 AI 애널리스트 덕이(Deoki)**가 공인 금융 데이터와 학술적 근거를 바탕으로 분석할 핵심 주제는 바로 **\"${template.titleSuffix}\"**입니다.
+오늘 **월덕 금융연구소 수석 AI 애널리스트 덕이(Deoki)**가 공인 금융 데이터와 학술적 근거를 바탕으로 분석할 핵심 주제는 바로 **"${template.titleSuffix}"**입니다.
 
 ### 🌐 실시간 거시경제 펄스 벤치마크 (기준: ${new Date(macro.updatedAt).toLocaleDateString('ko-KR')} ${macro.dataSource === 'LIVE_API' ? '실시간 라이브 API' : '공인 최신 실측치'})
 ${liveMacroTable}
@@ -1310,19 +1317,19 @@ ${renderedReferences}
     content: generatedContent,
     category: template.category,
     categoryLabel: template.categoryLabel,
-    author: BLOG_AUTHOR_DEOKI,
+    author: targetCategory === 'TECH' ? BLOG_AUTHOR_ENGINEER : BLOG_AUTHOR_DEOKI,
     publishedAt: now.toISOString(),
     updatedAt: now.toISOString(),
-    readTimeMinutes: 10,
-    tags: [...template.tags, countryProfile.name, targetCountry],
+    readTimeMinutes: Math.max(1, Math.ceil(generatedContent.length / 450)),
+    tags: targetCategory === 'TECH' ? template.tags : [...template.tags, countryProfile.name, targetCountry],
     relatedCalculatorHref: template.calculatorHref,
     relatedCalculatorName: template.calculatorName,
-    relatedStockTicker: template.stockTicker,
+    relatedStockTicker: targetCategory === 'TECH' ? undefined : template.stockTicker,
     isAiGenerated: true,
-    views: Math.floor(Math.random() * 80) + 20,
+    views: 0, // Synthetic readership is not an acceptable publication metric.
     country: targetCountry,
     status: 'PUBLISHED',
-    academicReferences: template.academicReferences,
+    academicReferences: targetCategory === 'TECH' ? undefined : template.academicReferences,
   };
 
   return newPost;

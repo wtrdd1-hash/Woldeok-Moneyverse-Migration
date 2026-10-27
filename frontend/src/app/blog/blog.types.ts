@@ -51,6 +51,8 @@ export interface BlogPost {
   readonly relatedStockTicker?: string | undefined;
   readonly isAiGenerated: boolean;
   readonly views: number;
+  /** Supplied only by verified analytics, not by the article generator. */
+  readonly viewCountVerified?: boolean | undefined;
   readonly heroImage?: string | undefined;
   readonly infographicType?: 'COMPOUND_CURVE' | 'MACRO_RADAR' | 'TAX_WATERFALL' | 'DCA_BENCHMARK' | undefined;
   readonly country?: BlogCountry | undefined;

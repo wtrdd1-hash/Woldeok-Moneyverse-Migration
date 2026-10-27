@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.28.1403 — TECH article source remediation (BRANCH CANDIDATE)
+- [EN worklog](docs/worklog/2026-10-28-blog-tech-relevance-v1403.md) / [KO](docs/worklog/2026-10-28-blog-tech-relevance-v1403.ko.md) · [Internal](docs/updates/v2026.10.28.1403-blog-tech-internal.md) / [KO](docs/updates/v2026.10.28.1403-blog-tech-internal.ko.md) · [GitHub](docs/updates/v2026.10.28.1403-blog-tech-github.md) / [KO](docs/updates/v2026.10.28.1403-blog-tech-github.ko.md). Safe engineering article drafts and relevant widgets only; 1,686 frontend tests and Next build passed. No verified official Test, public article correction or Production deployment yet.
+
+
 ## v2026.10.27.3 — Existing branch summary (documentation only)
 - [EN full report](docs/audits/2026-10-27-current-branches-v2026.10.27.3.md) / [KO](docs/audits/2026-10-27-current-branches-v2026.10.27.3.ko.md) / [CSV](docs/audits/2026-10-27-current-branches-v2026.10.27.3.csv) · [version status](docs/releases/v2026.10.27.3.md). Web/backend 351, Android 7; Git history evidence only, no Test/Production deployment.
 

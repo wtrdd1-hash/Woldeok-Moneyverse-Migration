@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.28.1403 — Engineering blog relevance and evidence remediation (BRANCH CANDIDATE)
+
+- Scope: reported BigInt ledger engineering article incorrectly inherited compound interest simulator, finance/market prose, unrelated citations and fabricated benchmark-like numbers. New TECH-only, reproducible engineering drafts cover BigInt accounting and WebSocket/Canvas order book rendering; HTML article, hub CTA and source generator no longer insert compound/banking/stock widgets in TECH content. Finance COMPOUND retains relevant calculator.
+- Prevent unsupported TECH template fallback into finance copy, country-label duplication, randomized views and unverified visit counts. The merged legacy editorial 503 guard and v1108 ban on automatic withdrawal remain intact. New reviewed engineering examples are **draft source**, not released public posts.
+- Isolated branch v1403 source validation: 328 frontend test files / 1,686 PASS, targeted blog 20 PASS, TypeScript and changed-file ESLint PASS, contract+Next production build PASS. Formal exact-SHA Test, authenticated backend/API/DB QA, Production finance gate and zero-downtime promotion **not established**; existing persisted flawed posts require manual authorized correction.
+- [EN worklog](../worklog/2026-10-28-blog-tech-relevance-v1403.md) / [KO](../worklog/2026-10-28-blog-tech-relevance-v1403.ko.md) · [Internal](../updates/v2026.10.28.1403-blog-tech-internal.md) / [KO](../updates/v2026.10.28.1403-blog-tech-internal.ko.md) · [GitHub](../updates/v2026.10.28.1403-blog-tech-github.md) / [KO](../updates/v2026.10.28.1403-blog-tech-github.ko.md).
+
+
 ## v2026.10.27.1318 — Scheduled QA rollout confirmation (OPS PRODUCTION_VERIFIED)
 
 - The v1317 hourly HTTP smoke and scoped QA scratch cleaner were merged via PR #1542 at main `0da3b886`, then staged as immutable QA-only operations release. Systemd service drop-in references the immutable runner, while original unit remained available for rollback. No application or DB deployment occurred.
