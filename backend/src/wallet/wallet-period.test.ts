@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Queryable } from '../core/db';
 import { PostgresWalletRepository } from './wallet.repository';
 import { WalletService, type WalletRepositoryLike } from './wallet.service';
+import { WalletController } from './wallet.controller';
+import type { RequestWithSession } from '../auth/session.context';
 
 const ACTOR = '11111111-1111-4111-8111-111111111111';
 
@@ -24,6 +26,16 @@ describe('wallet owner-scoped rolling ledger periods', () => {
       await expect(repository.recentTransactionsForUser(ACTOR, 50, days)).rejects.toThrow();
     }
     expect(query).not.toHaveBeenCalled();
+  });
+
+  it('rejects invalid period strings before invoking wallet service', () => {
+    const overview = vi.fn();
+    const controller = new WalletController({ overview } as unknown as WalletService);
+    const request = { session: { user_id: ACTOR } } as unknown as RequestWithSession;
+    expect(() => controller.overview(request, '50', 'yesterday')).toThrow('period must be all, 7d or 30d');
+    expect(overview).not.toHaveBeenCalled();
+    controller.overview(request, '50', '7d');
+    expect(overview).toHaveBeenCalledWith(ACTOR, { recentLimit: 50, periodDays: 7 });
   });
 
   it('passes a 30-day filter through service without changing WLD balances', async () => {

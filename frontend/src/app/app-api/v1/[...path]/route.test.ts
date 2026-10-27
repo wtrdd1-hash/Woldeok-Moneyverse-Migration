@@ -93,6 +93,7 @@ describe('app API route compatibility', () => {
     expect(target.pathname).toBe('/api/v1/wallet');
     expect(target.searchParams.get('recent')).toBe('50');
     expect(target.searchParams.get('period')).toBe('7d');
+    expect(response.headers.get('cache-control')).toContain('no-store');
   });
 
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
