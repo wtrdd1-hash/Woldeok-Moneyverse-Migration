@@ -1,17 +1,10 @@
 import { NextResponse } from 'next/server';
-import { api } from '@/lib/api';
 
+// Manual bond settlement is not certified as ledger-backed or idempotent.
+// Keep the web gateway closed even if a caller bypasses the disabled UI.
 export async function POST() {
-  try {
-    const data = await api('/api/v1/admin/bonds/distribute-coupons', {
-      method: 'POST',
-      body: {},
-    });
-    return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || '국채 쿠폰 이자 일괄 지급에 실패했습니다.' },
-      { status: error?.status || 500 },
-    );
-  }
+  return NextResponse.json(
+    { error: '국채 수동 이자 지급은 원장 검증 완료 전까지 보류됩니다.' },
+    { status: 503, headers: { 'Cache-Control': 'private, no-store' } },
+  );
 }
