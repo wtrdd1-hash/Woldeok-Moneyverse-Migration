@@ -158,8 +158,8 @@ export default async function AdminEconomyPage({
     apiOrNull<MonetaryVelocityTelemetry>('/api/v1/admin/economy/velocity'),
     apiOrNull<{ debate: CouncilDebateData }>('/api/v1/admin/economy/council-debate'),
     apiOrNull<MonetaryTelemetryData>('/api/v1/admin/economy/monetary/telemetry'),
-    apiOrNull<{ orders: MonetaryPolicyOrderItem[] }>('/api/v1/admin/economy/monetary/policy-orders'),
-    apiOrNull<{ mints: MintCertificateItem[] }>('/api/v1/admin/economy/monetary/mint-certificates'),
+    apiOrNull<{ orders: MonetaryPolicyOrderItem[] }>('/api/v1/admin/economy/monetary/orders'),
+    apiOrNull<{ mints: MintCertificateItem[] }>('/api/v1/admin/economy/monetary/certificates/mints'),
     apiOrNull<{ retirements: RetirementCertificateItem[] }>('/api/v1/admin/economy/monetary/certificates/retirements'),
     apiOrNull<{
       config: MonetaryAutoRegulationConfigData;

@@ -91,6 +91,12 @@ export class MonetaryController {
     return this.centralBank.listPolicyOrders(limit ? Number(limit) : 20);
   }
 
+  @Get('policy-orders')
+  @ApiOperation({ summary: '중앙은행 통화정책 명령서 목록 조회 (호환성 별칭)' })
+  async listPolicyOrdersAlias(@Query('limit') limit?: number) {
+    return this.centralBank.listPolicyOrders(limit ? Number(limit) : 20);
+  }
+
   @Post('orders/propose')
   @ApiOperation({ summary: '신규 통화정책 명령서 발의 (PROPOSED)' })
   async proposeOrder(
@@ -139,6 +145,12 @@ export class MonetaryController {
   @Get('certificates/mints')
   @ApiOperation({ summary: '조폐국 정식 발행 인증서 목록 조회' })
   async listMints(@Query('limit') limit?: number) {
+    return this.mintBureau.listMintCertificates(limit ? Number(limit) : 20);
+  }
+
+  @Get('mint-certificates')
+  @ApiOperation({ summary: '조폐국 정식 발행 인증서 목록 조회 (호환성 별칭)' })
+  async listMintCertificatesAlias(@Query('limit') limit?: number) {
     return this.mintBureau.listMintCertificates(limit ? Number(limit) : 20);
   }
 

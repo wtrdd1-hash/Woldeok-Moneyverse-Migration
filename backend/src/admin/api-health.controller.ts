@@ -1,9 +1,9 @@
 import os from 'node:os';
 import { Controller, Get, Inject, Optional, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AdminGuard } from '../auth/guards/admin.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
-import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { Queryable } from '../core/db';
 import { queryOne } from '../core/db';
@@ -22,7 +22,7 @@ export interface DomainHealthSummary {
 
 @ApiTags('admin')
 @Controller('admin/api-health')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
 export class ApiHealthController {
   constructor(@Optional() @Inject(PG_POOL) private readonly pool: Queryable | null = null) {}
 

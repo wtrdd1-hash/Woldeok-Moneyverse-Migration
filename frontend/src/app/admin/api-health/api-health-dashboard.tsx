@@ -96,7 +96,7 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
   const fetchTelemetry = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch('/api/v1/admin/api-health/status');
+      const res = await fetch('/api/admin/api-health/status');
       if (res.ok) {
         const json: ApiHealthResponse = await res.json();
         setData(json);
