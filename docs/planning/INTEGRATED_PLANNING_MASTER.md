@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- [English v1410.5 worklog](../worklog/2026-10-28-blog-full-release-v1410.md): CI 보안 테스트를 v285 권한 축소에 맞게 강화하고, 운영 금융 권한 직접 DML 3건을 순방향 v286 소스 migration으로 회수하도록 설계. **DB·Test·운영 미적용**.
 
 ## v2026.10.28.1410 — Combined TECH and two-hour blog release candidate (NOT DEPLOYED)
 - Source combines v1403 TECH correction + v1405 2h rotation. Reordered previously unapplied duplicate migration 283-space to 285 after read-only Production/Test history check. Frontend 1686/backend 1695 tests PASS, lint/type/build PASS; verified AI author+publisher missing, exact-SHA Test identity and Production financial DML gates BLOCKED. [Worklog](../worklog/2026-10-28-blog-full-release-v1410.ko.md). Preserve v1406 owner-withdrawn posts.

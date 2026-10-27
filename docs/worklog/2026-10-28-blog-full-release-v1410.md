@@ -1,0 +1,20 @@
+# v2026.10.28.1410–1410.5 — Combined blog release / exact-source worklog (EN)
+
+## Before work
+On 2026-10-28 KST the owner repeatedly ordered **complete Production promotion**, not merely document planning. Read bilingual integrated masters, v1403 TECH blog source fix, v1405 two-hour country/topic plan, v1406 owner-authorized withdrawal of 199 old posts, AGENTS.md and docs/RELEASING.md. Created isolated worktree `/srv/moneyverse-data/tasks/blog-all-release-v1410-wt` from main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, preserving concurrent contributors' branches and Production state.
+
+## Midpoint
+Cherry-picked v1403 engineering article fix and v1405 Seoul KST 2-hour schedule with explicit reconciliation of both canonical EN/KO planning sections. No republishing of owner's previously withdrawn 199 legacy posts. Local focused/full validation: frontend 1,686/1,686 PASS (328 files), backend 1,695 PASS (430 DB-dependent SKIPPED), workspace TypeScript and ESLint 0 errors, Next/Nest builds PASS.
+
+## CI migration sequence fix
+CI duplicate 283 issue was independently verified in *both* actual Production and official Test using read-only schema_migrations history: Production 266 applied, no 283; Test 281 applied, no 283. Renumbered **only the previously unapplied** `283-space-finance-ledger-boundary-hold.sql` to `285-space-finance-ledger-boundary-hold.sql` (header and test reference), preserving SQL action statements, applied migration history and all ledger/balance data. Migration parity/space SQL tests 10 PASS.
+
+## v1410.5 — Actual CI #3859 failure diagnosis and safe correction
+GitHub CI #3859 passed classify, policy, lint, typecheck, build and migrations but failed **one** DB security test: `backend/src/security/database-boundary.db.test.ts` had stale expected raw app DML for the same space/project/property-tax tables intentionally revoked by v285. Instead of re-granting dangerous privileges, removed those stale expected rows and explicitly asserted the four tables have **no direct DML** by the application.
+
+Production read-only finance readiness was still BLOCKED by exactly three direct app financial DML grants on `account_balances`, `accounts` and `system_treasury_vaults`. Financial counts themselves were balanced (40 projection rows, 0 unexplained accounts/deltas, 0 unbalanced transactions, 0 orphan transactions). A forward-only `286-financial-core-app-dml-boundary.sql` revokes only the app role's INSERT, UPDATE, DELETE from those three tables and checks all nine denied privileges inside its transaction. No DML or balance changes; never run against Production without official Test upgrade/authorization and rollback. Migration parity 6 + space hold 4 + new financial SQL safety 2 = 12 focused PASS. Workspace lint/typecheck still PASS.
+
+GitHub branch `release/blog-all-v1410-20261028`, Draft PR #1644, updated candidate `5032ba4414a629daa2a76dd15b27e4bbd65e110b`, GitHub CI #3866 awaited at recording. All changes in isolated branch; no Test or Production service, release symlink, Cron, financial DB permissions or live article content changed.
+
+## Release blockers and closeout
+**NOT PROMOTED.** The v1405 scheduler only selects the country/locale/topic slot and returns `VERIFIED_PUBLISHER_NOT_IMPLEMENTED`; a certified original four-language AI writer, source verification, idempotent DB/outbox publisher and admin-authenticated edit/private/delete flow do not yet exist. Local Ollama `llama3.2:3b` and `gemma3:1b` respond, but a sample Korean result mixed Chinese characters, so model connectivity is not quality acceptance. Old unverified JSON write route remains 503; no auto-generated articles published. Official Test `test-current` symlink target is missing and exact-SHA signed-in Test E2E has not passed. Direct app financial grants remain on Production until separately validated migration; finance gate still BLOCKED. All zero-downtime production requirements remain mandatory. Honest status: **source candidate and CI repairs complete, official Test/Production not deployed**.

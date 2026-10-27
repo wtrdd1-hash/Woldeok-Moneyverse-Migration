@@ -1,4 +1,5 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
+- [EN worklog](docs/worklog/2026-10-28-blog-full-release-v1410.md) · [KO](docs/worklog/2026-10-28-blog-full-release-v1410.ko.md) · [internal EN](docs/updates/v2026.10.28.1410-blog-release-internal.md) / [KO](docs/updates/v2026.10.28.1410-blog-release-internal.ko.md) · [GitHub KO](docs/updates/v2026.10.28.1410-blog-release-github.ko.md) / [EN](docs/updates/v2026.10.28.1410-blog-release-github.md). v1410.5 financial core DML revocation is source-only, not applied.
 
 ## v2026.10.28.1410 — Blog combined release attempt
 - [Worklog](docs/worklog/2026-10-28-blog-full-release-v1410.ko.md) · [Internal](docs/updates/v2026.10.28.1410-blog-release-internal.ko.md) · [GitHub](docs/updates/v2026.10.28.1410-blog-release-github.md). Integrated source passes local tests/build, but real AI publisher and official Test/finance release gates remain blocked; no operation deployed.
