@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.27.1318 — Scheduled QA rollout confirmation (OPS PRODUCTION_VERIFIED)
+
+- The v1317 hourly HTTP smoke and scoped QA scratch cleaner were merged via PR #1542 at main `0da3b886`, then staged as immutable QA-only operations release. Systemd service drop-in references the immutable runner, while original unit remained available for rollback. No application or DB deployment occurred.
+- 2026-10-27 15:14 KST systemd QA exit 0: 24 HTTP 200, two explicit expected login redirects (not authenticated feature passes), zero unexpected failures; DB session-count probe 410. The QA EXIT cleanup removed a 262,153-byte synthetic, completed, older-than-72-hour QA-exclusive canary; it did not delete any unrelated data. Root disk 76%, data disk 69%; main services and isolated Test backend health OK. Timer remains enabled, next scheduled run 16:00 KST at recording time.
+- Status is only `QA_SCHEDULER=PRODUCTION_VERIFIED` and `QA_DISK_HYGIENE=PRODUCTION_VERIFIED`. Full authenticated finance/admin/mobile/browser interactions and mandated five-pass QA remain **NOT VERIFIED**. Source: [v1318 worklog](../worklog/2026-10-27-scheduled-qa-runtime-v1318.md).
+
 ## v2026.10.27.1317 — Scheduled HTTP smoke QA and bounded disk hygiene (OPS BRANCH CANDIDATE)
 
 - At 2026-10-27 14:00 KST systemd hourly QA completed 26 HTTP route probes without failures. This is **HTTP smoke only**, not logged-in banking/admin/browser/mobile interaction or mandatory five-pass full-route QA. The old runner was absent in origin/main despite still being executed on the host.
