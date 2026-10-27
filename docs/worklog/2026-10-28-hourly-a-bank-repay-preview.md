@@ -14,3 +14,10 @@
 
 ## IN PROGRESS
 - Started independent implementation; no shared environment mutation.
+
+## IN PROGRESS — v3 / 06:30 KST
+- RED observed: backend 6/6 failed due to missing preview symbols; frontend 3/3 failed due to missing action.
+- GREEN: backend 6/6, frontend action 3/3, Android gateway existing bank no-store coverage 17/17, preview component 2/2 PASS under `NODE_ENV=test`. First UI test invocation without NODE_ENV=test loaded React production act and failed; corrected test invocation, not code.
+- Typecheck PASS; changed-file lint PASS; `git diff --check` PASS. Midpoint origin/main re-fetched and unchanged (`b1cd54f...`).
+- Implementation: strict amount string, actor-bound single existing SECDEF SQL call, exact BigInt, nonbinding receipt, CSRF, no-store, web CTA, Android proxy contract; no migrations or ledger writes.
+- Remaining: full gates, independent PG fixture, GitHub CI, Test/Production exact SHA and release HOLD documentation.

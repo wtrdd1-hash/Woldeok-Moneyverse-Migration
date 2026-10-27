@@ -20,6 +20,7 @@ import { TranslatedText as T } from '@/components/translated-text';
 import { IDLE } from '@/lib/action-state';
 import { compareAmounts, groupDigits } from '@/lib/money';
 import type { BankBond, BankLoan } from './types';
+import { RepayImpactPreview } from './repay-impact-preview';
 import {
   borrowAction,
   claimInterestAction,
@@ -425,7 +426,8 @@ export function SmartLoanCard({
                   <AmountInput
                     id="repay-amount"
                     name="amount"
-                    defaultValue={repayAmountStr}
+                    value={repayAmountStr}
+                    onChange={setRepayAmountStr}
                     placeholder={`최대 ${groupDigits(outstanding)}`}
                     required
                   />
@@ -451,6 +453,12 @@ export function SmartLoanCard({
                   전액 상환 (Full)
                 </Button>
               </div>
+              <RepayImpactPreview
+                key={`${activeLoan.loan_id}:${repayAmountStr}`}
+                loanId={activeLoan.loan_id}
+                amount={repayAmountStr}
+                repayComplete={repayState.status === 'ok'}
+              />
               <SubmitButton className="w-full font-bold">
                 <T korean="대출금 상환하기" english="Repay Loan" />
               </SubmitButton>

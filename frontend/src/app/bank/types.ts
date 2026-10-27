@@ -1,3 +1,18 @@
+export interface BankRepayPreview {
+  readonly loanId: string;
+  readonly requestedAmount: string;
+  readonly payableAmount: string;
+  readonly cashBefore: string;
+  readonly cashAfter: string | null;
+  readonly debtBefore: string;
+  readonly debtAfter: string;
+  readonly adjustmentAmount: string;
+  readonly eligible: boolean;
+  readonly reason: 'ready' | 'insufficient_cash';
+  readonly observedAt: string;
+  readonly nonbinding: true;
+}
+
 export interface BankLoan {
   readonly loan_id: string;
   readonly principal_amount: string;

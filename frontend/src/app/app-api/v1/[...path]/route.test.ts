@@ -193,6 +193,7 @@ describe('Android owner-scoped banking cache privacy', () => {
   it.each([
     ['loan history', ['bank', 'loans']],
     ['banking standing', ['banking', 'standing']],
+    ['repayment preview', ['banking', 'repay-preview']],
   ])('never forwards public cache policy for %s', async (_label, parts) => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ loans: [] }), {

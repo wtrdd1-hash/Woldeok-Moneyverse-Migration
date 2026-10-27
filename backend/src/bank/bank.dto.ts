@@ -51,6 +51,18 @@ export class BankRepayDto {
   readonly idempotencyKey!: string;
 }
 
+/** Strict string input avoids losing precision before the request reaches PostgreSQL. */
+export class BankRepayPreviewDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  readonly loanId!: string;
+
+  @ApiProperty({ example: '900719925474099312345678', type: String })
+  @IsString()
+  @Matches(/^[1-9][0-9]{0,77}$/, { message: 'amount must be a positive integer string (max 78 digits)' })
+  readonly amount!: string;
+}
+
 export class BankBondPurchaseDto {
   @ApiProperty({ enum: ['BOND_7D', 'BOND_30D'], example: 'BOND_7D' })
   @IsIn(['BOND_7D', 'BOND_30D'])
