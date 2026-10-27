@@ -14,3 +14,8 @@
 - [x] Source and baseline reviewed. [ ] EN/KO master + review + project plan + update logs. [ ] 10 backlog IDs parity. [ ] GitHub issue/PR updates. [ ] Final verification and release HOLD.
 
 ## FINISHED — pending
+
+## IN PROGRESS — documentation verification
+- Eight existing EN/KO master, review, project-plan and update-log files updated; 10 backlog IDs present in each of eight sections; no distributed planning file added. English master is the canonical technical specification, Korean master has equivalent scope and blockers.
+- `git diff --check` and document parity script PASS; code, migrations, database, WLD and runtime untouched. New worklog is the sole new tracked file.
+- Source conflicts documented as **proposed vs candidate**, not misreported as implemented. Candidate A's local unit evidence and official release gates remain distinct.

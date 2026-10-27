@@ -1,3 +1,9 @@
+## 2026-10-28 — Planning v1394 F675-154 (Feature Improvement, DRAFT / RELEASE HOLD)
+- Previous Addition v1392 → Current Improvement v1394 → Next Addition v1396 provisional. Verified main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` start/mid; stacked on unmerged planning #1630. Reviewed A #1631 actual candidate: two-item `/shop` GET compare and Android GET; v1392 POST/three-item/horizon remain **proposals, not implemented**.
+- Added bilingual acceptance for accurate upfront-vs-upkeep labeling, sold-out/expired prices, session/cache/GET log safety, full-catalog 10,001-row profiling, BigInt, 100 concurrent/100 forged, QA isolated PG, release exact-SHA/restore. Backlog ENV1394-01 SEC1394-02 REL1394-03 SHOP1394-04 SHOP1394-05 SHOP1394-06 SHOP1394-07 SHOP1394-08 SHOP1394-09 SHOP1394-10.
+- A local tests reported PASS but root test/lint/bot audit and PG migration 020 setup FAIL; app ACL 235/241, migration 283/checksums, official Test/restore BLOCKED. No runtime/DB/WLD/ledger/Test/Production change. External newly approved 0; cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
+
 ## 2026-10-28 v1392 — Planning F675-154 Shop Comparison (DRAFT / HOLD)
 - Previous Improvement v1390 → Current Addition v1392 → Next Improvement v1394. Read main AGENTS/README/English canonical plan/Korean parity; main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` start/mid. Isolated planning worktree based on unmerged v1390 Draft #1624 (new Draft PR #1630, issue #1629); no Gemini/A/B/C/QA overlap.
 - Verified source: `/shop/catalog` shows price/upkeep but no 2–3 comparison; NestJS `shop_catalog_list_v2(actor)`, migration 165 claimed-event price; proposed read-only 0/1/4-week cost estimate is not a purchase quote. Full UI/CTA/error/API/DB/index/transaction/admin/security/SEO/Android/a11y/KPI/tests/rollback in bilingual integrated master.

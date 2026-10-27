@@ -1,3 +1,10 @@
+## F675-154 / v1394 — 구현 후보와 기획의 API·가격 표시 차이 보완 (기능 보완 / DRAFT / HOLD)
+- **개발 A #1631 미병합 후보:** `/shop` 2개 인라인 비교, `GET /api/v1/shop/compare?ids=...`·Android GET, `shop_catalog_list_v2(actor)` 전체 목록 읽기, BigInt 구매가/유지비 차이. 3개·0/1/4주 총액·POST·관측 시각·불변 영수증은 **미구현**. 읽기 GET은 CSRF 필수 아님.
+- **신뢰성:** '더 저렴한 상품'은 **구매 단가** 기준으로만 표시하고 총비용 우승으로 오해시키지 않는다. 품절 상품의 최저가 판정·할인 종료·유지비 우위 역전·로그아웃·계정 전환·응답 no-store·GET 로그 UUID 노출을 수용시험에 포함한다.
+- **담당/차단:** A 웹/API/Android·접근성, B SQL/권한·10,001행 성능, C 비식별 관리자/KPI, QA 격리 PG 10,001/100/100·전체 감사·원장 회귀·정확 SHA Test·복원·롤백. 개발 DB 앱 DML 235/241, shop_catalog SELECT, migration 283/체크섬 5건, 격리 PG migration 020, 루트 test/lint/봇 감사, 배포 경로 미해결. 로컬 PASS는 운영승인 아님.
+- **P0/P1:** ENV1394-01 SEC1394-02 REL1394-03 SHOP1394-04 SHOP1394-05 SHOP1394-06 SHOP1394-07 SHOP1394-08 SHOP1394-09 SHOP1394-10. 상세는 영문·국문 통합 기획서 참조. 신규 외부 승인 0, 누적 승인 UNKNOWN/10,000, BLOCKED. main 병합·런타임 배포 없음.
+
+
 ## F675-154 / v1392 — 상점 아이템 비용 비교 미리보기 (기능 추가 / DRAFT / HOLD)
 - **확인된 공백:** 회원 `/shop/catalog`에는 가격·주간 관리비·구매 폼은 있지만 2~3개 나란히 비교는 없다. NestJS 목록은 `shop_catalog_list_v2(actor)`를 사용하며 Migration 165에서 회원별 이벤트 할인을 반영한다. 새 설계이지 운영 장애 확인이 아니다.
 - **화면·API:** 2~3개 선택, 0/1/4주 예시 관리비, 다시 계산/상점에서 보기/제거/지우기. 인증·동의·CSRF `POST /api/v1/shop/compare-preview`, WLD 정수 문자열·비확정 총액만 제공. 구매·예약·원장·영구 저장 없음. 만료·품절 가격 추측 금지.

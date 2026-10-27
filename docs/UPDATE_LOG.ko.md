@@ -1,3 +1,9 @@
+## 2026-10-28 — 기획 v1394 F675-154 (기능 보완, DRAFT / RELEASE HOLD)
+- 이전 기능 추가 v1392 → 현재 기능 보완 v1394 → 다음 기능 추가 v1396(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, 미병합 기획 #1630 기반. 개발 A #1631의 실제 후보는 `/shop` 2개 GET 비교·Android GET이며 v1392의 POST/3개/기간별 총액은 **제안 상태**다.
+- 구매가·유지비 라벨, 품절·할인 만료, 세션/캐시/GET 로그 보호, 전체 카탈로그 10,001행 성능, BigInt·동시 100·위조 100, 격리 PG·정확 SHA Test·복원 수용조건을 영문·국문으로 보완. 백로그 ENV1394-01 SEC1394-02 REL1394-03 SHOP1394-04 SHOP1394-05 SHOP1394-06 SHOP1394-07 SHOP1394-08 SHOP1394-09 SHOP1394-10.
+- A 로컬 테스트 일부 PASS, 루트 test/lint/봇 감사 및 격리 PG migration 020 실패, DB 앱 권한 235/241·migration 283/체크섬·공식 Test/복원 차단. 코드·DB·WLD·원장·Test·운영 변경 없음. 외부 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
+
 ## 2026-10-28 v1392 — F675-154 상점 비교 기획 (DRAFT / HOLD)
 - 이전 보완 v1390 → 현재 추가 v1392 → 다음 보완 v1394. main AGENTS/README/영문 정본 계획·국문 대조 확인, 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`. 미병합 v1390 Draft #1624 (new Draft PR #1630, issue #1629) 기반 별도 작업 폴더, Gemini·개발 A/B/C·QA와 분리.
 - 실제 `/shop/catalog`는 가격·관리비를 보여 주지만 2~3개 비교 기능 없음. NestJS `shop_catalog_list_v2(actor)`, Migration 165 회원별 할인 확인. 0/1/4주 읽기 전용 예시 비용이며 구매 견적 아님. 화면/CTA/오류/API/DB·인덱스/트랜잭션/관리자/보안/SEO/Android/a11y/KPI/테스트/롤백은 국영문 통합 마스터.

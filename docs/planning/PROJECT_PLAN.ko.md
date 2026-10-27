@@ -1,3 +1,11 @@
+## v1394 — F675-154 상점 비용 비교 계약·품절·신뢰성 보완 (기능 보완 / DRAFT / HOLD)
+- 이전 기능 추가 v1392 → 현재 기능 보완 v1394 → 다음 기능 추가 v1396(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`. 기획 #1630 미병합, 개발 A #1631 SHA `db018d11fe7f2ef0dae79e3fe3b6e88e8b3b7365` 역시 **Draft 후보**이며 운영 기능이 아니다.
+- v1392의 2~3개·POST·0/1/4주 예시와 달리 개발 후보는 `/shop`에서 **2개**, 인증된 GET `/api/v1/shop/compare?ids=...` 및 Android GET, **구매가 차이/주간 유지비 차이**만 구현. 3개·기간별 총액·POST·관측 시각 구현 주장 금지. 읽기 전용 GET에 CSRF 필수 아님.
+- P0: 품절·할인 종료·타인 가격·캐시 오염·총비용 최저 오표시 방지; 개발 DB 235/241 앱 DML, shop_catalog 직접 SELECT, migration 283/체크섬 5건, 배포 링크, 전체 QA·공식 Test 정확 SHA·독립 복원. A 로컬 단위 테스트 일부 PASS이나 격리 PG migration 020 실패, 루트 테스트/lint/봇 감사 FAIL, 운영승격 HOLD.
+- P1: 전체 목록 10,001행 성능, BigInt·동가·유지비 역전, GET/Android·속도 제한, 인라인 초기화/재시도·세션 변경·접근성, 비식별 KPI/SEO, 동시 100·위조 100, 구매/원장 회귀. 기획은 코드·DB·원장·Test·운영 변경 없음.
+- 백로그: ENV1394-01 SEC1394-02 REL1394-03 SHOP1394-04 SHOP1394-05 SHOP1394-06 SHOP1394-07 SHOP1394-08 SHOP1394-09 SHOP1394-10. 상세 화면·API·DB·트랜잭션·관리자·보안·SEO·모바일·접근성·KPI·롤백은 영문 통합 정본 및 한국어 동등 문서에 기재. 신규 승인 외부 근거 0, 누적 중복 제거 승인 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
+
 ## 2026-10-28 v1392 — F675-154 상점 아이템 비용 비교 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
 - 이전 보완 v1390 → 현재 추가 v1392 → 다음 보완 v1394(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; AGENTS/README/영문 정본 계획·국문 대조 확인. 미병합 v1390 PR #1624 (new Draft PR #1630, issue #1629) 기반 문서 Draft, 단독 병합·런타임/DB/WLD/원장/Test/운영 변경 금지.
 - 실제 회원 상점은 목록·보유를 따로 표시하고 비교 기능이 없다. NestJS 목록은 `shop_catalog_list_v2(actor)`, Migration 165는 회원 이벤트 할인 적용. 2~3개·0/1/4주 관리비 비교는 비확정 예시로 구매·잔액 조회·예약 아님. 인증/동의/CSRF POST compare-preview, 단일 SQL 읽기·WLD bigint 정수 문자열·영구 테이블 없음·세션 actor. noindex/no-store·Android BFF·WCAG 2.2 AA·관리자 비식별 집계/KPI·롤백 상세는 통합 마스터 EN/KO.
