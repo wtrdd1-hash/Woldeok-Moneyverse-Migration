@@ -1,4 +1,4 @@
-## v1376 / F675-151 — Opt-in Verified Incident Watch and Truthful In-App Updates (Feature Addition / DRAFT / RELEASE HOLD)
+## v1376 / F675-151 — Opt-in Verified Incident Watch and Truthful In-App Updates (Feature Addition / DRAFT / RELEASE HOLD) — Draft PR #1584
 
 **Cycle and authority.** Previous Feature Improvement v1374 → Current Feature Addition v1376 → Next Feature Improvement v1378 (provisional). Issue #1583; predecessor unmerged Draft PR #1578, itself stacked on #1573. Start/mid main `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`. Read main `AGENTS.md`, `README.md`, English canonical `PROJECT_PLAN.md` and Korean parity. This is a design proposal only; no runtime/DB/Test/Production changes. Product intent: let a member follow a *verified and independently approved* public service incident, without inventing incidents or delivering unsolicited alerts.
 

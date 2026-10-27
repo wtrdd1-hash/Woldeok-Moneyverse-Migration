@@ -7,3 +7,5 @@
 **QA evidence:** v1324 21:28 KST main root FAIL due migration 280 duplicate, DB 19 PASS/1 FAIL/3 SKIP; full audit Critical 2/High 8, bot Critical 1/High 5. Test and Production symlinks dangling; active services do not prove official release identity. Exact-SHA official Test and independent restore NOT VERIFIED; Production BLOCKED. Root 44%/data 55% at start. Proposed 10,001 synthetic/100 concurrent/100 forged tests NOT RUN. External newly accepted 0, cumulative deduplicated approved UNKNOWN/10,000, BLOCKED/IN PROGRESS.
 
 **Backlog:** P0 ENV1376-01 SEC1376-02 REL1376-03 WATCH1376-04; P1 WATCH1376-05 WATCH1376-06 WATCH1376-07 WATCH1376-08 WATCH1376-09 WATCH1376-10. Acceptance and rollback defined in integrated master EN/KO. **Verification:** diff check, six-doc EN/KO backlog parity, clean worktree after commit, remote SHA/PR checks required. Release HOLD.
+
+**GitHub:** Issue #1583 OPEN; stacked Draft PR #1584 OPEN, base #1578, do not merge independently.

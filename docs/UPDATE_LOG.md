@@ -1,4 +1,4 @@
-## 2026-10-27 — Planning v1376 / F675-151 (Feature Addition, DRAFT/HOLD)
+## 2026-10-27 — Planning v1376 / F675-151 (Feature Addition, DRAFT/HOLD) — Draft PR #1584
 - Previous Improvement v1374 → Current Addition v1376 → Next Improvement v1378 (provisional); Issue #1583, stacked on unmerged #1578. Canonical main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c checked start/mid. Added opt-in verified incident watch with consent, per-incident CTA, owner-only API/Android, forward-only DB/outbox/CAS receipts, suppression after revoke/withdraw, admin aggregate privacy, no-store/SEO/a11y, exact-SHA Test and rollback gates. P0 ENV1376-01 SEC1376-02 REL1376-03 WATCH1376-04; P1 WATCH1376-05 WATCH1376-06 WATCH1376-07 WATCH1376-08 WATCH1376-09 WATCH1376-10. QA v1324 root FAIL/security FAIL, release pointers dangling; external accepted 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime or Production changes.
 
 ## 2026-10-27 — Planning v1374 F675-150 (Feature Improvement; DRAFT/HOLD) — Draft PR #1578
