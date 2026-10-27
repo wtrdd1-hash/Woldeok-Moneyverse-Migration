@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/table';
 import { compareAmounts, groupDigits } from '@/lib/money';
 import type { AdminUser } from '../types';
+import type { AdminMemberSnapshotScope } from './user-directory-evidence';
 import { AdminTelemetryMetricsTable } from '../components/admin-telemetry-metrics-table';
 import { AdminComprehensiveTelemetryMatrix } from '../components/admin-comprehensive-telemetry-matrix';
 import { AdminDirectMessageDialog } from '../admin-forms';
@@ -58,11 +59,12 @@ function accessTime(value: string | null | undefined): string {
   });
 }
 
-export function UserDirectory({ users }: { readonly users: readonly AdminUser[] }) {
+export function UserDirectory({ users, scope = null }: { readonly users: readonly AdminUser[]; readonly scope?: AdminMemberSnapshotScope | null }) {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<SortOption>('wealth');
 
+  const isComplete = scope?.hasMore === false;
   const restrictedCount = users.filter((user) => user.restricted_at !== null).length;
   const activeCount = users.length - restrictedCount;
 
@@ -120,6 +122,11 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
 
   return (
     <div className="grid gap-6">
+      <div role="status" aria-live="polite" className="rounded-lg border border-amber-500/40 bg-amber-500/5 px-4 py-3 text-sm text-foreground">
+        {isComplete
+          ? `조회 시점에 추가 회원 행이 확인되지 않았습니다 (${users.length}명). 검색은 조회된 목록을 대상으로 합니다.`
+          : `정렬된 회원 최대 ${scope?.limit ?? 50}명만 표시합니다. 검색은 조회된 목록으로 제한되며, 아래 숫자는 전체 회원 통계가 아닙니다.`}
+      </div>
       {/* 상단 통계 요약 카드 4종 */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* 전체 회원 수 */}
@@ -129,7 +136,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
               <UsersRound className="size-5" />
             </span>
             <div className="grid gap-0.5">
-              <span className="text-xs text-muted-foreground font-medium">전체 회원</span>
+              <span className="text-xs text-muted-foreground font-medium">조회된 회원</span>
               <strong className="text-2xl font-bold tracking-tight">{users.length}명</strong>
             </div>
           </CardContent>
@@ -142,7 +149,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
               <UserRoundCheck className="size-5" />
             </span>
             <div className="grid gap-0.5">
-              <span className="text-xs text-muted-foreground font-medium">정상 이용</span>
+              <span className="text-xs text-muted-foreground font-medium">조회된 정상 이용</span>
               <strong className="text-2xl font-bold tracking-tight">{activeCount}명</strong>
             </div>
           </CardContent>
@@ -155,7 +162,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
               <ShieldAlert className="size-5" />
             </span>
             <div className="grid gap-0.5">
-              <span className="text-xs text-muted-foreground font-medium">이용 제한</span>
+              <span className="text-xs text-muted-foreground font-medium">조회된 이용 제한</span>
               <strong className={`text-2xl font-bold tracking-tight ${restrictedCount > 0 ? 'text-destructive' : ''}`}>
                 {restrictedCount}명
               </strong>
@@ -170,7 +177,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
               <Coins className="size-5" />
             </span>
             <div className="grid gap-0.5">
-              <span className="text-xs text-muted-foreground font-medium">전체 회원 총 순자산</span>
+              <span className="text-xs text-muted-foreground font-medium">조회된 회원 순자산 합계</span>
               <strong className="text-xl font-bold tracking-tight font-mono text-amber-600 dark:text-amber-400">
                 {groupDigits(totalNetWorth)}
                 <span className="text-xs font-normal text-muted-foreground ml-1">WLD</span>
@@ -181,10 +188,12 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
       </div>
 
       {/* 종합 운영 텔레메트리 매트릭스 표 (코호트, 통화, 주식, 5분위 분배율) */}
-      <AdminComprehensiveTelemetryMatrix users={[...users]} />
-
-      {/* MAU / WAU / DAU 및 유저 리텐션 분석 표 연동 */}
-      <AdminTelemetryMetricsTable users={users} showDetailsLink={false} />
+      {isComplete && (
+        <div data-testid="population-telemetry" className="grid gap-6">
+          <AdminComprehensiveTelemetryMatrix users={[...users]} />
+          <AdminTelemetryMetricsTable users={users} showDetailsLink={false} />
+        </div>
+      )}
 
       {/* 부자 랭킹 및 회원 관리 메인 카드 */}
       <Card className="border-border shadow-xs">
@@ -209,7 +218,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 size="xs"
                 variant={sort === 'wealth' ? 'default' : 'ghost'}
                 onClick={() => setSort('wealth')}
-                className="h-7 text-xs font-medium shrink-0"
+                className="min-h-[44px] text-xs font-medium shrink-0"
               >
                 🏆 부자 순위 순
               </Button>
@@ -218,7 +227,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 size="xs"
                 variant={sort === 'cash' ? 'default' : 'ghost'}
                 onClick={() => setSort('cash')}
-                className="h-7 text-xs font-medium shrink-0"
+                className="min-h-[44px] text-xs font-medium shrink-0"
               >
                 💵 현금 많은 순
               </Button>
@@ -227,7 +236,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 size="xs"
                 variant={sort === 'stock' ? 'default' : 'ghost'}
                 onClick={() => setSort('stock')}
-                className="h-7 text-xs font-medium shrink-0"
+                className="min-h-[44px] text-xs font-medium shrink-0"
               >
                 📈 주식 자산 순
               </Button>
@@ -236,7 +245,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 size="xs"
                 variant={sort === 'lastSeen' ? 'default' : 'ghost'}
                 onClick={() => setSort('lastSeen')}
-                className="h-7 text-xs font-medium shrink-0"
+                className="min-h-[44px] text-xs font-medium shrink-0"
               >
                 최근 접속 순
               </Button>
@@ -245,7 +254,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 size="xs"
                 variant={sort === 'created' ? 'default' : 'ghost'}
                 onClick={() => setSort('created')}
-                className="h-7 text-xs font-medium shrink-0"
+                className="min-h-[44px] text-xs font-medium shrink-0"
               >
                 최근 가입 순
               </Button>
@@ -262,7 +271,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="닉네임 또는 사용자 UUID 검색..."
-                className="h-10 pl-9 text-sm"
+                className="min-h-[44px] pl-9 text-sm"
               />
             </label>
 
@@ -279,7 +288,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                   variant={status === value ? 'default' : 'outline'}
                   onClick={() => setStatus(value)}
                   aria-pressed={status === value}
-                  className="h-9 text-xs"
+                  className="min-h-[44px] text-xs"
                 >
                   {label}
                 </Button>
@@ -299,7 +308,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
           {filtered.length === 0 ? (
             <div className="grid place-items-center gap-2 rounded-xl border border-dashed p-10 text-center text-muted-foreground">
               <UsersRound className="size-8 opacity-40" />
-              <p className="text-sm font-medium">검색 조건과 일치하는 회원이 없습니다.</p>
+              <p className="text-sm font-medium">{isComplete ? '검색 조건과 일치하는 회원이 없습니다.' : '조회된 목록에서는 검색 조건과 일치하는 회원이 없습니다.'}</p>
               <p className="text-xs">검색어를 수정하거나 상태 필터를 변경해 보세요.</p>
             </div>
           ) : (

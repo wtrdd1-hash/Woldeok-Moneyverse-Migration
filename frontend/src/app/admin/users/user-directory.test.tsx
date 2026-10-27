@@ -68,3 +68,16 @@ describe('UserDirectory', () => {
     );
   });
 });
+
+describe('bounded member directory truthfulness', () => {
+  it('labels truncated membership as a limited snapshot and withholds population-wide analytics', () => {
+    render(<UserDirectory users={USERS} scope={{ kind: 'WEALTH_ORDERED_SNAPSHOT', limit: 50, hasMore: true }} />);
+    expect(screen.getByRole('status').textContent).toMatch(/50명.*검색.*제한/);
+    expect(screen.queryByTestId('population-telemetry')).toBeNull();
+    expect(screen.getByText('조회된 회원').textContent).toContain('조회된 회원');
+  });
+  it('renders population-wide analytics only when the backend confirms a complete snapshot', () => {
+    render(<UserDirectory users={USERS} scope={{ kind: 'WEALTH_ORDERED_SNAPSHOT', limit: 50, hasMore: false }} />);
+    expect(screen.getByTestId('population-telemetry')).toBeDefined();
+  });
+});
