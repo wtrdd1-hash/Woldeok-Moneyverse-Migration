@@ -39,10 +39,11 @@ export function RepayImpactPreview({ loanId, amount, repayComplete }: {
         {visible?.status === 'ok' && (
           <>
             <p>실제 차감 예상: <strong>{groupDigits(visible.preview.payableAmount)} WLD</strong></p>
-            <p>현금 잔액: {groupDigits(visible.preview.cashBefore)} → {visible.preview.cashAfter === null ? '상환 불가' : groupDigits(visible.preview.cashAfter)} WLD</p>
+            <p>현금 잔액: {groupDigits(visible.preview.cashBefore)} WLD → {visible.preview.cashAfter === null ? '상환 불가' : `${groupDigits(visible.preview.cashAfter)} WLD`}</p>
             <p>대출 잔액: {groupDigits(visible.preview.debtBefore)} → {groupDigits(visible.preview.debtAfter)} WLD</p>
             {visible.preview.adjustmentAmount !== '0' && <p>초과 입력 조정: {groupDigits(visible.preview.adjustmentAmount)} WLD</p>}
             {!visible.preview.eligible && <p role="alert" className="text-destructive">보유 현금이 부족해 현재 상환할 수 없습니다.</p>}
+            <p>조회 시각: {Number.isFinite(Date.parse(visible.preview.observedAt)) ? new Date(visible.preview.observedAt).toLocaleString('ko-KR') : '확인 불가'}</p>
             <p className="text-muted-foreground">읽기 전용 예상 결과입니다. 실제 상환은 별도로 실행되며 최신 잔액과 대출 상태를 다시 검사합니다.</p>
           </>
         )}
