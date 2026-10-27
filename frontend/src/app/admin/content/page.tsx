@@ -11,11 +11,9 @@ import {
   PhotoReviewQueue,
   AnnouncementManagementTable,
   PhotoManagementGrid,
-  type PendingPhotoItem,
-  type AdminAnnouncementItem,
-  type AdminPhotoItem,
 } from './content-forms';
 import { apiOrNull } from '@/lib/api';
+import { parseAdminAnnouncements, parseAdminPhotos, parsePendingPhotos } from './content-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,20 +22,32 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+function ContentListUnavailable({ title }: { readonly title: string }) {
+  return (
+    <Alert role="alert" aria-live="polite" className="grid gap-2">
+      <AlertTitle>{title}을 확인할 수 없습니다.</AlertTitle>
+      <AlertDescription className="grid gap-2">
+        조회에 실패했거나 응답을 검증하지 못했습니다. 0건으로 판단하거나 검토 완료로 처리하지 마세요.
+        <Link href="/admin/content" className="inline-flex min-h-11 w-fit items-center rounded-md border px-4 py-2 font-medium text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+          다시 조회
+        </Link>
+      </AlertDescription>
+    </Alert>
+  );
+}
+
 export default async function ContentAdminPage() {
   await requireAdminConsole('/admin/content');
   const [pendingPhotosRes, announcementsData, allPhotosRes] = await Promise.all([
-    apiOrNull<PendingPhotoItem[]>('/api/v1/admin/photos/submissions'),
-    apiOrNull<AdminAnnouncementItem[] | { announcements: AdminAnnouncementItem[] }>(
+    apiOrNull<unknown>('/api/v1/admin/photos/submissions'),
+    apiOrNull<unknown>(
       '/api/v1/admin/announcements',
     ),
-    apiOrNull<AdminPhotoItem[]>('/api/v1/admin/photos'),
+    apiOrNull<unknown>('/api/v1/admin/photos'),
   ]);
-  const pendingPhotos = pendingPhotosRes ?? [];
-  const announcements = Array.isArray(announcementsData)
-    ? announcementsData
-    : (announcementsData?.announcements ?? []);
-  const allPhotos = allPhotosRes ?? [];
+  const pendingPhotos = parsePendingPhotos(pendingPhotosRes);
+  const announcements = parseAdminAnnouncements(announcementsData);
+  const allPhotos = parseAdminPhotos(allPhotosRes);
 
   return (
     <div data-page="admin-content" className="mv-page mv-page--admin grid gap-6">
@@ -64,7 +74,7 @@ export default async function ContentAdminPage() {
                 </CardDescription>
                 <CardTitle className="text-lg flex items-center gap-2">
                   공지사항 목록 및 간편 삭제 관리
-                  {announcements.length > 0 && (
+                  {announcements !== null && announcements.length > 0 && (
                     <span className="rounded-full bg-primary/20 text-primary px-2 py-0.5 text-xs font-bold">
                       {announcements.length}개
                     </span>
@@ -73,12 +83,16 @@ export default async function ContentAdminPage() {
               </div>
             </div>
             <CardDescription>
-              사이트에 등록된 모든 공지사항을 한눈에 확인하고, 불필요한 공지를 즉시 삭제하거나
+              조회된 공지사항을 확인하고, 불필요한 공지를 삭제하거나
               공개/비공개로 전환하세요.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <AnnouncementManagementTable items={announcements} />
+            {announcements === null ? (
+              <ContentListUnavailable title="공지사항 목록" />
+            ) : (
+              <AnnouncementManagementTable items={announcements} />
+            )}
           </CardContent>
         </Card>
       </section>
@@ -90,10 +104,14 @@ export default async function ContentAdminPage() {
             <CardTitle id="photo-manage-title" className="text-lg">
               전체 사진 공개·비공개·삭제
             </CardTitle>
-            <CardDescription>대기 중이거나 이미 공개된 사진을 모두 관리합니다.</CardDescription>
+            <CardDescription>조회된 최근 최대 100개 사진을 관리합니다. 전체 누적 건수는 아닙니다.</CardDescription>
           </CardHeader>
           <CardContent>
-            <PhotoManagementGrid items={allPhotos} />
+            {allPhotos === null ? (
+              <ContentListUnavailable title="사진 목록" />
+            ) : (
+              <PhotoManagementGrid items={allPhotos} />
+            )}
           </CardContent>
         </Card>
       </section>
@@ -108,7 +126,7 @@ export default async function ContentAdminPage() {
                 </CardDescription>
                 <CardTitle className="text-lg flex items-center gap-2">
                   회원 제출 사진 검토 대기열
-                  {pendingPhotos.length > 0 && (
+                  {pendingPhotos !== null && pendingPhotos.length > 0 && (
                     <span className="rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-xs font-bold">
                       {pendingPhotos.length}
                     </span>
@@ -117,12 +135,16 @@ export default async function ContentAdminPage() {
               </div>
             </div>
             <CardDescription>
-              회원들이 사진 게시판에 제출한 사진들입니다. 사진 내용과 설명을 확인한 후 승인하면 즉시
+              최근 최대 50건의 제출 사진입니다. 사진 내용과 설명을 확인한 후 승인하면 즉시
               전체 갤러리에 공개됩니다.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <PhotoReviewQueue items={pendingPhotos} />
+            {pendingPhotos === null ? (
+              <ContentListUnavailable title="사진 검토 대기열" />
+            ) : (
+              <PhotoReviewQueue items={pendingPhotos} />
+            )}
           </CardContent>
         </Card>
       </section>
