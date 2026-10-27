@@ -11,10 +11,16 @@ type Thread = { thread_id: string; subject: string; status: string; created_at: 
 type Message = { message_id: string; sender_kind: 'user'|'admin'; body: string; created_at: string };
 const label: Record<string,string> = { open: '관리자 답변 대기', waiting_user: '내 답변 대기', resolved: '처리 완료' };
 
-export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string }> }) {
+export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string; q?: string }> }) {
   await requireMember();
-  const { threads } = await api<{ threads: Thread[] }>('/api/v1/support/threads');
-  const selected = (await searchParams).thread ?? threads[0]?.thread_id;
+  const params = await searchParams;
+  const query = typeof params.q === 'string' ? params.q.trim().slice(0, 80) : '';
+  const path = query ? `/api/v1/support/threads?q=${encodeURIComponent(query)}` : '/api/v1/support/threads';
+  const { threads } = await api<{ threads: Thread[] }>(path, {});
+  // A filtered deep link cannot select a thread outside the visible result set.
+  const selected = query
+    ? (threads.some((thread) => thread.thread_id === params.thread) ? params.thread : threads[0]?.thread_id)
+    : params.thread ?? threads[0]?.thread_id;
   const messages = selected
     ? (await api<{ messages: Message[] }>(`/api/v1/support/threads/${encodeURIComponent(selected)}/messages`)).messages
     : [];
@@ -26,9 +32,14 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
         <textarea name="body" maxLength={2000} required placeholder="문의 내용을 적어 주세요." className="min-h-28 rounded-xl border bg-background p-3" />
         <button className="rounded-xl bg-primary px-4 py-3 font-bold text-primary-foreground">문의 시작</button>
       </form>
-      <div className="grid gap-2">{threads.map(t => <Link key={t.thread_id} href={`/support?thread=${t.thread_id}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
+      <form method="GET" action="/support" role="search" className="grid gap-2 rounded-xl border bg-card p-3">
+        <label htmlFor="support-search" className="text-sm font-semibold">문의 제목 검색</label>
+        <div className="flex gap-2"><input id="support-search" name="q" type="search" maxLength={80} defaultValue={query} placeholder="문의 제목" className="min-w-0 flex-1 rounded-lg border bg-background p-2"/><button type="submit" className="rounded-lg bg-primary px-3 font-bold text-primary-foreground">검색</button></div>
+        <p className="text-xs text-muted-foreground">검색은 내 최근 100건의 문의 제목에서만 수행됩니다. 이전 기록은 검색 결과에 포함되지 않을 수 있습니다.</p>
+      </form>
+      <div className="grid gap-2">{threads.map(t => <Link key={t.thread_id} href={`/support?${new URLSearchParams({ ...(query ? { q: query } : {}), thread: t.thread_id }).toString()}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
         <div className="font-bold">{t.subject}</div><div className="text-xs text-muted-foreground">{label[t.status] ?? t.status}</div>
-      </Link>)}</div>
+      </Link>)}{threads.length === 0 && query && <p role="status" className="rounded-xl border p-3 text-sm text-muted-foreground">검색 결과가 없습니다. 다른 제목으로 검색해 보세요.</p>}</div>
     </section>
     <section className="flex min-h-[60vh] flex-col rounded-2xl border bg-card p-4">
       {!selected ? <p className="m-auto text-muted-foreground">새 문의를 작성하면 관리자와 대화를 시작할 수 있습니다.</p> : <>
