@@ -7,8 +7,8 @@ const userDetail = readFileSync('src/app/admin/users/[id]/page.tsx', 'utf8');
 
 describe('admin member log routing', () => {
   it('passes the selected member UUID into the activity telemetry API', () => {
-    expect(activity).toContain("const userId = typeof params.userId === 'string'");
-    expect(activity).toContain("query.set('userId', userId)");
+    expect(activity).toContain('resolveActivityMember(rawUser, usersResponse?.users ?? null)');
+    expect(activity).toContain("query.set('userId', resolvedUserId)");
     expect(activity).toContain('name="userId"');
   });
 
