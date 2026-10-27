@@ -18,7 +18,7 @@ describe('chat media HTTP privacy boundary', () => {
   );
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [ChatUploadController],
       providers: [
         { provide: ChatImageStorage, useValue: { read, save: vi.fn() } },
@@ -26,7 +26,7 @@ describe('chat media HTTP privacy boundary', () => {
         { provide: CONFIG, useValue: { cookieSecure: false } },
       ],
     }).compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     app.setGlobalPrefix('api');
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
     await app.init();
