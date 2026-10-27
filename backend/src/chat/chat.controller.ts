@@ -4,6 +4,8 @@ import {
   Controller,
   Delete,
   Get,
+  type CanActivate,
+  type ExecutionContext,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -15,6 +17,7 @@ import {
 import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
 import { randomUUID } from 'node:crypto';
+import type { Response } from 'express';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
@@ -91,9 +94,17 @@ function parseChatListLimit(raw: unknown, defaultLimit: number, maxLimit: number
   return parsed;
 }
 
+// Chat content is member-scoped and must never survive a logout/account switch in HTTP caches.
+class ChatNoStoreGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    context.switchToHttp().getResponse<Response>().setHeader('cache-control', 'private, no-store');
+    return true;
+  }
+}
+
 @ApiTags('chat')
 @Controller('chat')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+@UseGuards(ChatNoStoreGuard, SessionGuard, AuthenticatedGuard, ConsentGuard)
 export class ChatController {
   constructor(@Inject(ChatService) private readonly chat: ChatService) {}
 

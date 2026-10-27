@@ -37,7 +37,7 @@ export function ChatHeaderButton() {
       }
 
       try {
-        const res = await fetch('/app-api/v1/chat/unread-count');
+        const res = await fetch('/app-api/v1/chat/unread-count', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           const count = Number(data.totalUnread ?? data.unreadCount ?? data.unread_count ?? 0) || 0;

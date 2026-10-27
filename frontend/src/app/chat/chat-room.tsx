@@ -197,6 +197,7 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
     try {
       const res = await fetch(
         `/app-api/v1/chat/conversations/${encodeURIComponent(conversation.conversation_id)}/messages?limit=50&beforeSequence=${oldestSeq}`,
+      { cache: 'no-store' },
       );
       if (res.ok) {
         const data = await res.json();
@@ -262,6 +263,7 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
         if (latestLocalSeq > 0) {
           const res = await fetch(
             `/app-api/v1/chat/conversations/${encodeURIComponent(conversation.conversation_id)}/sync?sinceSequence=${latestLocalSeq}`,
+          { cache: 'no-store' },
           );
           if (res.ok) {
             const data = await res.json();
@@ -278,7 +280,7 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
           }
         }
 
-        const res = await fetch(`/app-api/v1/chat/conversations/${encodeURIComponent(conversation.conversation_id)}/messages?limit=50`);
+        const res = await fetch(`/app-api/v1/chat/conversations/${encodeURIComponent(conversation.conversation_id)}/messages?limit=50`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data.messages)) {
