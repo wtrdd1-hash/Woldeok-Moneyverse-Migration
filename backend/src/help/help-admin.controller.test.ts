@@ -32,6 +32,15 @@ describe('help management trust boundary', () => {
     await expect(controller.publish(req(['operator']), article, { idempotencyKey: key, expectedVersion: '1' })).rejects.toThrow('help administrator role required');
     expect(adminPublish).not.toHaveBeenCalled();
   });
+  it('reports stale idempotent publication replay as HTTP 409, never a new success', async () => {
+    vi.stubEnv('VERIFIED_HELP_CENTER_V1','true');
+    const stale = Object.assign(new Error('help publication replay is stale'), { code: '40001' });
+    const adminPublish = vi.fn().mockRejectedValue(stale);
+    const controller = new AdminHelpController({ adminPublish } as unknown as HelpRepository);
+    await expect(controller.publish(req(['approver']), article, { idempotencyKey: key, expectedVersion: '1' }))
+      .rejects.toMatchObject({ status: 409 });
+    expect(adminPublish).toHaveBeenCalledOnce();
+  });
   it('requires a committed DB receipt before reporting publication', async () => {
     vi.stubEnv('VERIFIED_HELP_CENTER_V1','true');
     const adminPublish = vi.fn().mockResolvedValue(null);
