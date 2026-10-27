@@ -1,10 +1,18 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const sql = readFileSync(join(__dirname, '../migrations/280-verified-help-center.sql'), 'utf8');
+const sql = readFileSync(join(__dirname, '../migrations/282-verified-help-center.sql'), 'utf8');
 
 describe('help center migration boundary', () => {
+  it('does not collide with qualification 280 or season 281', () => {
+    const files = readdirSync(join(__dirname, '../migrations'));
+    expect(files.filter(name => /^28[012]-/.test(name)).sort()).toEqual([
+      '280-qualification-ledger-settlement-hold.sql',
+      '281-season-reward-ledger-settlement-hold.sql',
+      '282-verified-help-center.sql',
+    ]);
+  });
   it('restricts reads to published unexpired revisions and grants no table DML', () => {
     expect(sql).toMatch(/help_public_search/);
     expect(sql).toMatch(/reviewed_until\s*>\s*(?:clock_timestamp|now)\(/i);
