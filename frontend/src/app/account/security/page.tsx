@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
+import { parseSecuritySessions, parseLinkedIdentities, parseSecurityEvents } from './account-security-evidence';
 import {
   beginSecurityReauthentication,
   terminateOtherSessions,
@@ -25,26 +26,6 @@ export const metadata: Metadata = {
   title: '로그인 기기 및 보안 관리',
   robots: { index: false, follow: false },
 };
-
-interface SecuritySession {
-  readonly sessionId: string;
-  readonly createdAt: string;
-  readonly expiresAt: string;
-  readonly reauthenticatedAt: string | null;
-  readonly current: boolean;
-  readonly administratorSession: boolean;
-  readonly lastSeenAt: string;
-  readonly deviceLabel: string;
-}
-
-interface SecurityEvent {
-  readonly type: string;
-  readonly createdAt: string;
-}
-
-interface Identity {
-  readonly provider: string;
-}
 
 const SECURITY_EVENT_LABEL: Readonly<Record<string, string>> = {
   local_registration_completed: '이메일 계정 가입 완료',
@@ -68,16 +49,19 @@ export default async function AccountSecurityPage({
 }) {
   await requireMember();
   const params = await searchParams;
-  const [sessionData, identityData, eventData] = await Promise.all([
-    apiOrNull<{ sessions: SecuritySession[] }>('/api/v1/account/security/sessions'),
-    apiOrNull<{ identities: Identity[] }>('/api/v1/account/identities'),
-    apiOrNull<{ events: SecurityEvent[] }>('/api/v1/account/security/events'),
+  const [rawSessions, rawIdentities, rawEvents] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/account/security/sessions'),
+    apiOrNull<unknown>('/api/v1/account/identities'),
+    apiOrNull<unknown>('/api/v1/account/security/events'),
   ]);
-  const sessions = sessionData?.sessions ?? [];
-  const identities = identityData?.identities ?? [];
+  const sessionData = parseSecuritySessions(rawSessions);
+  const identityData = parseLinkedIdentities(rawIdentities);
+  const eventData = parseSecurityEvents(rawEvents);
+  const sessions = sessionData ?? [];
+  const identities = identityData ?? [];
   const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
   const oauthIdentities = identities.filter((identity) => identity.provider !== 'local_email');
-  const events = eventData?.events ?? [];
+  const events = eventData ?? [];
   const otherCount = sessions.filter((session) => !session.current).length;
   const error = typeof params.error === 'string' ? params.error : null;
   const revoked = typeof params.revoked === 'string' ? params.revoked : null;
@@ -173,7 +157,7 @@ export default async function AccountSecurityPage({
         </CardHeader>
         <CardContent className="space-y-3 pt-0">
           {sessionData === null ? (
-            <p className="py-6 text-center text-xs text-muted-foreground">세션 정보를 불러오지 못했습니다.</p>
+            <p className="py-6 text-center text-xs text-muted-foreground">세션 정보를 확인할 수 없습니다. 새로고침 후 다시 시도해 주세요.</p>
           ) : sessions.length === 0 ? (
             <p className="py-6 text-center text-xs text-muted-foreground">활성 세션이 없습니다.</p>
           ) : (
@@ -243,12 +227,16 @@ export default async function AccountSecurityPage({
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            <form action={terminateOtherSessions} className="w-full sm:w-auto">
-              <Button type="submit" variant="destructive" disabled={otherCount === 0} className="min-h-11 w-full sm:w-auto">
-                <LogOut className="mr-1.5 size-4" />
-                다른 세션 {otherCount}개 종료
-              </Button>
-            </form>
+            {sessionData === null ? (
+              <p role="alert" className="text-sm text-destructive">기기 목록을 확인할 수 없어 다른 세션 종료를 제공하지 않습니다.</p>
+            ) : (
+              <form action={terminateOtherSessions} className="w-full sm:w-auto">
+                <Button type="submit" variant="destructive" disabled={otherCount === 0} className="min-h-11 w-full sm:w-auto">
+                  <LogOut className="mr-1.5 size-4" />
+                  다른 세션 {otherCount}개 종료
+                </Button>
+              </form>
+            )}
           </CardContent>
         </Card>
 
@@ -278,6 +266,11 @@ export default async function AccountSecurityPage({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
+          {identityData === null && (
+            <p role="alert" className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive">
+              로그인 수단을 확인할 수 없습니다. 계정에 연결된 수단이 없다는 뜻이 아닙니다. 다시 조회해 주세요.
+            </p>
+          )}
           <div className="flex flex-wrap gap-2.5">
             {oauthIdentities.map((identity) => (
               <form action={beginSecurityReauthentication} key={identity.provider} className="w-full sm:w-auto">
@@ -366,7 +359,7 @@ export default async function AccountSecurityPage({
         </CardHeader>
         <CardContent className="pt-0">
           {eventData === null ? (
-            <p className="py-3 text-xs text-muted-foreground">보안 활동을 불러오지 못했습니다.</p>
+            <p className="py-3 text-xs text-muted-foreground">보안 활동을 확인할 수 없습니다. 다시 조회해 주세요.</p>
           ) : events.length === 0 ? (
             <p className="py-3 text-xs text-muted-foreground">최근 보안 활동이 없습니다.</p>
           ) : (

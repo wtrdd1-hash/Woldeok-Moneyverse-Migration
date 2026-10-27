@@ -10,9 +10,12 @@
 - TDD: RED on invalid session/identity/event payload and unsafe UI, GREEN minimal parser + page gating, then fresh exact-SHA tests/CI, isolated real PostgreSQL ACL read where feasible. No Test/Production promotion without all gates.
 
 ## IN PROGRESS
-- [ ] RED regression reproduced
-- [ ] GREEN code/tests
+- [x] RED regression reproduced (4/5 behavioral tests failed on original main; parser import also failed before implementation)
+- [x] GREEN focused 10/10 tests; read-only parser and member security UI fail-closed changes
 - [ ] Re-fetch main/planning and full release gates
+
+## MIDPOINT — 2026-10-28 KST
+- Re-fetched `origin/main` and bilingual plans; focused tests 10/10 PASS, no DB/ledger change. Next: full exact-SHA verification, CI and isolated PG ACL evidence.
 
 ## FINISHED
 - Pending; Draft/HOLD until all gates pass.
