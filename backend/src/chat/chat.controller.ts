@@ -76,7 +76,7 @@ export class ReportConversationDto {
 }
 
 /**
- * Chat list/search limits must be exact decimal query values, not parseInt prefixes.
+ * Chat pagination limits must be exact decimal query values, not parseInt prefixes.
  * Never silently broaden a member-scoped query after malformed input.
  */
 function parseChatListLimit(raw: unknown, defaultLimit: number, maxLimit: number): number {
@@ -147,7 +147,7 @@ export class ChatController {
     @Query('beforeSequence') beforeSequence?: string,
   ) {
     const actorUserId = requireUserId(req);
-    const parsedLimit = limit ? Number.parseInt(limit, 10) : 50;
+    const parsedLimit = parseChatListLimit(limit, 50, 100);
     const parsedBefore = beforeSequence ? Number.parseInt(beforeSequence, 10) : undefined;
     const messages = await this.chat.listMessages(actorUserId, conversationId, parsedLimit, parsedBefore);
     return { messages };
@@ -163,7 +163,7 @@ export class ChatController {
   ) {
     const actorUserId = requireUserId(req);
     const parsedSince = sinceSequence ? Number.parseInt(sinceSequence, 10) : 0;
-    const parsedLimit = limit ? Number.parseInt(limit, 10) : 100;
+    const parsedLimit = parseChatListLimit(limit, 100, 200);
     const messages = await this.chat.syncMessages(actorUserId, conversationId, parsedSince, parsedLimit);
     return { messages };
   }
