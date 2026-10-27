@@ -82,7 +82,7 @@ export function PolicyVersionCard({
                 setPrivacyInput(currentPrivacyVersion);
                 setOpen(true);
               }}
-              className="text-xs font-semibold h-9 shrink-0"
+              className="min-h-11 text-xs font-semibold shrink-0"
             >
               새 버전 개정
             </Button>
@@ -105,35 +105,38 @@ export function PolicyVersionCard({
           <form action={formAction} className="mt-4 space-y-4 text-xs">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="font-medium text-foreground">이용약관 버전</label>
+                <label htmlFor="consent-terms-version" className="font-medium text-foreground">이용약관 버전</label>
                 <input
+                  id="consent-terms-version"
                   name="termsVersion"
                   type="text"
                   value={termsInput}
                   onChange={(e) => setTermsInput(e.target.value)}
                   placeholder="예: 2026-09-22"
                   required
-                  className="w-full h-9 rounded-lg border border-border bg-background px-3 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full min-h-11 rounded-lg border border-border bg-background px-3 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-medium text-foreground">개인정보처리방침 버전</label>
+                <label htmlFor="consent-privacy-version" className="font-medium text-foreground">개인정보처리방침 버전</label>
                 <input
+                  id="consent-privacy-version"
                   name="privacyVersion"
                   type="text"
                   value={privacyInput}
                   onChange={(e) => setPrivacyInput(e.target.value)}
                   placeholder="예: 2026-09-22"
                   required
-                  className="w-full h-9 rounded-lg border border-border bg-background px-3 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full min-h-11 rounded-lg border border-border bg-background px-3 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="font-medium text-foreground">개정 사유 (최소 10자 이상, 감사 로그에 영구 기록)</label>
+              <label htmlFor="consent-reason" className="font-medium text-foreground">개정 사유 (최소 10자 이상, 감사 로그에 영구 기록)</label>
               <textarea
+                id="consent-reason"
                 name="reason"
                 value={reasonInput}
                 onChange={(e) => setReasonInput(e.target.value)}
@@ -145,25 +148,26 @@ export function PolicyVersionCard({
             </div>
 
             <div className="space-y-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-300">
-              <label className="font-semibold block text-[11px]">
+              <label htmlFor="consent-confirm" className="font-semibold block text-[11px]">
                 2단계 확인 문구: 아래 텍스트를 정확히 입력하세요.
               </label>
               <div className="font-mono font-bold select-all bg-background/80 px-2 py-1 rounded border border-border text-[11px]">
                 {REQUIRED_CONFIRM_TEXT}
               </div>
               <input
+                id="consent-confirm"
                 name="confirmText"
                 type="text"
                 value={confirmInput}
                 onChange={(e) => setConfirmInput(e.target.value)}
                 placeholder="위 문구를 그대로 입력"
                 required
-                className="w-full h-8 rounded border border-border bg-background px-2.5 font-mono text-xs mt-1"
+                className="w-full min-h-11 rounded border border-border bg-background px-2.5 font-mono text-xs mt-1"
               />
             </div>
 
             {state.status === 'error' && (
-              <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-2.5 text-xs text-destructive">
+              <div role="alert" className="flex items-center gap-2 rounded-lg bg-destructive/10 p-2.5 text-xs text-destructive">
                 <AlertCircle className="size-4 shrink-0" />
                 <span>{state.message}</span>
               </div>
@@ -175,6 +179,7 @@ export function PolicyVersionCard({
                 variant="ghost"
                 size="sm"
                 onClick={() => setOpen(false)}
+                className="min-h-11"
                 disabled={isPending}
               >
                 취소
@@ -183,7 +188,7 @@ export function PolicyVersionCard({
                 type="submit"
                 size="sm"
                 disabled={isPending || confirmInput !== REQUIRED_CONFIRM_TEXT}
-                className="font-bold"
+                className="min-h-11 font-bold"
               >
                 {isPending ? '발행 중...' : '새 버전 즉시 발행'}
               </Button>

@@ -19,6 +19,7 @@ import {
   SwitchStateBadge,
 } from './controls-forms';
 import { PolicyVersionCard } from './policy-version-card';
+import { canPublishConsentPolicy, parseConsentPolicyEvidence } from './consent-policy-evidence';
 import { HotTimeManagementCard } from './hot-time-management-card';
 import { EmergencyKillSwitchCard } from './emergency-kill-switch-card';
 
@@ -52,12 +53,13 @@ interface ControlsOverview {
  * so they are in front of whoever is about to flip the switch.
  */
 export default async function AdminControlsPage() {
-  await requireAdminConsole(AREA.href);
-  const [overview, policy] = await Promise.all([
+  const adminSession = await requireAdminConsole(AREA.href);
+  const [overview, rawPolicy] = await Promise.all([
     apiOrNull<ControlsOverview>('/api/v1/admin/controls'),
-    apiOrNull<{ termsVersion: string; privacyVersion: string }>('/auth/policy'),
+    apiOrNull<unknown>('/auth/policy'),
   ]);
 
+  const policy = parseConsentPolicyEvidence(rawPolicy);
   const active = overview?.policies.find((p) => p.status === 'active') ?? null;
   const previous =
     overview?.policies.find(
@@ -73,11 +75,18 @@ export default async function AdminControlsPage() {
 
       <EmergencyKillSwitchCard />
 
-      <PolicyVersionCard
-        currentTermsVersion={policy?.termsVersion ?? '2026-09-02'}
-        currentPrivacyVersion={policy?.privacyVersion ?? '2026-09-02'}
-        isSuperadmin={true}
-      />
+      {policy === null ? (
+        <div role="alert" className="rounded-xl border border-destructive/40 bg-card p-5 text-sm">
+          현재 이용약관 및 개인정보처리방침 버전을 확인할 수 없습니다.
+          잘못된 버전을 발행하지 않도록 개정 기능을 중단했습니다. 잠시 후 새로고침해 주세요.
+        </div>
+      ) : (
+        <PolicyVersionCard
+          currentTermsVersion={policy.termsVersion}
+          currentPrivacyVersion={policy.privacyVersion}
+          isSuperadmin={canPublishConsentPolicy(adminSession.roles, policy)}
+        />
+      )}
 
       <HotTimeManagementCard />
 
