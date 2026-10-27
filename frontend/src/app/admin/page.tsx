@@ -11,7 +11,6 @@ import {
   Briefcase,
   Building,
   Building2,
-  CheckCircle2,
   Coins,
   Cpu,
   Flame,
@@ -28,7 +27,6 @@ import {
   ShieldCheck,
   ShoppingBag,
   Sliders,
-  Sparkles,
   TrendingUp,
   UserCheck,
   Users,
@@ -39,14 +37,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { apiOrNull } from '@/lib/api';
-import { compareAmounts, formatMoment, groupDigits } from '@/lib/money';
+import { formatMoment, groupDigits } from '@/lib/money';
+import { getCockpitEvidence } from './admin-cockpit-evidence';
 import { adminConsole } from '@/lib/session';
 import { ADMIN_AREAS, adminAreaFor, consoleReturnPath } from './areas';
 import { AdminQuickUserSearch } from './admin-quick-search';
 import { CloseConsole, OpenConsole } from './console-gate';
 import { TelemetryPulse } from './components/telemetry-pulse';
 import { AdminTelemetryMetricsTable } from './components/admin-telemetry-metrics-table';
-import { AdminComprehensiveTelemetryMatrix } from './components/admin-comprehensive-telemetry-matrix';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type {
   AdminBusiness,
@@ -165,20 +163,9 @@ export default async function AdminPage({
     apiOrNull<ReconciliationHealth>('/api/v1/admin/economy/reconciliations/latest'),
   ]);
 
-  const allUsers = users?.users ?? [];
-  const topUsers = allUsers
-    .filter((u) => !u.is_admin && !u.last_admin_at)
-    .slice()
-    .sort((a, b) => compareAmounts(b.total_net_worth ?? '0', a.total_net_worth ?? '0'))
-    .slice(0, 5);
-
-  const held =
-    controls?.featureSwitches.filter((feature) => feature.state !== 'enabled').length ?? 0;
-  const totalSwitches = controls?.featureSwitches.length ?? 0;
-  const integrityOk = health?.integrity?.ok;
-  const stocksList = stocks?.stocks ?? [];
-  const activeStocks = stocksList.filter((s) => s.active && s.halt_status !== 'halted').length;
-  const haltedStocks = stocksList.filter((s) => !s.active || s.halt_status === 'halted').length;
+  const evidence = getCockpitEvidence({ controls, stocks, users, health });
+  const allUsers = evidence.members.state === 'verified' ? users!.users : [];
+  const topUsers = evidence.members.state === 'verified' ? evidence.members.top : [];
 
   return (
     <div className="w-full max-w-full min-w-0 space-y-6 pb-20">
@@ -194,16 +181,16 @@ export default async function AdminPage({
                 <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
                   운영 마스터 관제탑
                 </h1>
-                <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px] font-bold px-2 py-0.5">
-                  <span className="size-1.5 rounded-full bg-emerald-400 animate-ping mr-1.5 inline-block" />
-                  실시간 관제 정상
+                <Badge className={`${evidence.allVerified ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border-amber-500/30'} text-[10px] font-bold px-2 py-0.5`}>
+                  <span aria-hidden="true" className={`size-1.5 rounded-full mr-1.5 inline-block ${evidence.allVerified ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                  {evidence.allVerified ? '핵심 지표 조회 완료' : '일부 지표 확인 불가'}
                 </Badge>
                 <Badge variant="outline" className="font-fintech text-[10px]">
-                  14대 API 온라인
+                  API 전체 가동률 미측정
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                가상 경제 복식부기 원장, 긴급 킬스위치, 이상 거래 탐지 및 통화량 유동성을 24시간 실시간 제어합니다.
+                실제 관리자 API에서 조회한 일부 관제 지표입니다. 조회 실패와 정상 0건을 구분하며 전체 시스템 가동률을 의미하지 않습니다.
               </p>
             </div>
           </div>
@@ -212,7 +199,7 @@ export default async function AdminPage({
             <Button asChild size="sm" className="h-10 rounded-xl btn-toss text-xs font-bold gap-1.5 shadow-sm">
               <Link href="/admin/controls">
                 <Sliders className="size-3.5" />
-                <span>킬스위치 즉시 제어</span>
+                <span>제어 상태 확인</span>
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm" className="h-10 rounded-xl text-xs font-bold gap-1.5">
@@ -231,8 +218,12 @@ export default async function AdminPage({
             <AdminQuickUserSearch />
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground font-fintech shrink-0">
-            <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-              <CheckCircle2 className="size-3.5" /> SHA-256 원장 체인 무결성 확인
+            <span role="status" className="flex items-center gap-1 font-semibold">
+              {evidence.ledger.state === 'verified'
+                ? `원장 정합성 보고 ${formatMoment(evidence.ledger.calculatedAt)} (체인 해시 별도)`
+                : evidence.ledger.state === 'mismatch'
+                  ? `원장 정합성 이상 ${formatMoment(evidence.ledger.calculatedAt)} — 조사 필요`
+                  : '원장 정합성 확인 불가 — 재조회 필요'}
             </span>
           </div>
         </div>
@@ -249,10 +240,12 @@ export default async function AdminPage({
             </div>
           </div>
           <div>
-            <div className="text-xl sm:text-2xl font-black font-fintech text-emerald-400">
-              {integrityOk ? '0건 오차 (정합)' : '불일치 감지'}
+            <div className={`text-xl sm:text-2xl font-black font-fintech ${evidence.ledger.state === 'verified' ? 'text-emerald-400' : 'text-amber-400'}`}>
+              {evidence.ledger.state === 'verified'
+                ? '보고된 원장 정합'
+                : evidence.ledger.state === 'mismatch' ? '불일치 보고' : '검증 불가'}
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">자산 = 부채 + 자본 균형</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">DB 정합성 마지막 보고 · 실시간 체인 증명 아님</p>
           </div>
         </Link>
 
@@ -266,9 +259,13 @@ export default async function AdminPage({
           </div>
           <div>
             <div className="text-xl sm:text-2xl font-black font-fintech text-foreground">
-              {held > 0 ? `${held}개 제어 중` : '전 기능 정상 가동'}
+              {evidence.controls.state !== 'verified' ? '상태 확인 불가'
+                : evidence.controls.total === 0 ? '등록 스위치 없음'
+                  : evidence.controls.held > 0 ? `${evidence.controls.held}개 제어 중` : '조회된 스위치 정상'}
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">총 {totalSwitches}개 스위치</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {evidence.controls.state === 'verified' ? `조회 ${evidence.controls.total}개 스위치` : '서버 응답 미확인'}
+            </p>
           </div>
         </Link>
 
@@ -282,25 +279,28 @@ export default async function AdminPage({
           </div>
           <div>
             <div className="text-xl sm:text-2xl font-black font-fintech text-sky-400">
-              {activeStocks}종목 정상 매매
+              {evidence.stocks.state === 'verified' ? `${evidence.stocks.active}종목 조회 활성` : '상태 확인 불가'}
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">정지 {haltedStocks}종목</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {evidence.stocks.state === 'verified' ? `조회된 비활성/정지 ${evidence.stocks.halted}종목` : '서버 응답 미확인'}
+            </p>
           </div>
         </Link>
 
         {/* KPI 4: 회원 인구 */}
         <Link href="/admin/users" className="toss-card p-5 space-y-2 group hover:border-indigo-500/50 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-muted-foreground">시민 인구</span>
+            <span className="text-xs font-bold text-muted-foreground">조회된 회원</span>
             <div className="size-8 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center">
               <Users className="size-4" />
             </div>
           </div>
           <div>
             <div className="text-xl sm:text-2xl font-black font-fintech text-indigo-400">
-              {allUsers.length.toLocaleString()}명
+              {evidence.members.state === 'verified'
+                ? `${evidence.members.sampledCount.toLocaleString()}명 조회` : '조회 불가'}
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">경제 활동 유저 통계</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">최대 100명 조회 · 전체 인구 아님</p>
           </div>
         </Link>
       </div>
@@ -367,17 +367,22 @@ export default async function AdminPage({
               <div className="flex items-center justify-between pb-3 border-b border-border/40">
                 <div className="flex items-center gap-2">
                   <Flame className="size-4 text-rose-400" />
-                  <h2 className="text-sm font-bold text-foreground">최고 자산 보유 시민</h2>
+                  <h2 className="text-sm font-bold text-foreground">조회된 회원 자산 순위</h2>
                 </div>
-                <span className="text-xs text-muted-foreground font-mono">TOP 5</span>
+                <span className="text-xs text-muted-foreground font-mono">조회 범위 TOP 5</span>
               </div>
 
               <div className="space-y-2.5">
+                {evidence.members.state === 'unavailable' ? (
+                  <p role="status" className="text-sm text-muted-foreground">회원 자산 순위를 확인할 수 없습니다.</p>
+                ) : topUsers.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">조회 범위에 표시할 회원이 없습니다.</p>
+                ) : null}
                 {topUsers.map((u, idx) => (
                   <Link
                     key={u.user_id}
                     href={`/admin/users/${u.user_id}`}
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-muted/20 hover:bg-muted/40 transition-all text-xs"
+                    className="flex min-h-11 items-center justify-between p-2.5 rounded-xl bg-muted/20 hover:bg-muted/40 transition-all text-xs focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-mono font-bold text-muted-foreground w-4">#{idx + 1}</span>
@@ -432,8 +437,13 @@ export default async function AdminPage({
         {/* 탭 3: 텔레메트리 펄스 및 메트릭스 매트릭스 */}
         <TabsContent value="telemetry" className="space-y-6 focus-visible:outline-none">
           <TelemetryPulse />
-          <AdminTelemetryMetricsTable users={allUsers} />
-          <AdminComprehensiveTelemetryMatrix />
+          {evidence.members.state === 'verified'
+            ? <AdminTelemetryMetricsTable users={allUsers} sampled />
+            : <p role="status" className="rounded-xl border p-4 text-sm text-muted-foreground">회원 텔레메트리를 확인할 수 없습니다. 서버 조회를 다시 시도하세요.</p>}
+          <div role="status" className="rounded-xl border p-4 text-sm text-muted-foreground">
+            전수 경제·회원 통계는 이 화면에서 검증되지 않았습니다. 한정된 회원 목록을 전체 인구·총자산으로 표시하지 않습니다.
+            <Link href="/admin/analytics" className="ml-2 inline-flex min-h-11 items-center font-semibold underline underline-offset-2">별도 통계 화면 확인</Link>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
