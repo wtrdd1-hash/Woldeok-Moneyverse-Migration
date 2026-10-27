@@ -18,6 +18,12 @@ BEGIN
   IF (SELECT count(*) FROM public.help_public_search('ko',NULL,'%',20)) <> 0 THEN
     RAISE EXCEPTION 'SQL wildcard was interpreted as pattern';
   END IF;
+  IF (SELECT bool_and(reviewed_until > clock_timestamp()) FROM public.help_public_search('ko',NULL,'로그인',20)) IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'search review deadline missing or expired';
+  END IF;
+  IF (SELECT bool_and(reviewed_until > clock_timestamp()) FROM public.help_public_article('ko','account-login')) IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'article review deadline missing or expired';
+  END IF;
   IF (SELECT count(*) FROM public.help_public_article('ko','account-login')) <> 1 THEN
     RAISE EXCEPTION 'approved public article not visible';
   END IF;
