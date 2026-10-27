@@ -35,7 +35,7 @@ describe('admin work console PostgreSQL evidence boundary', () => {
     expect(parseAdminWorkConsole(value)).toBeNull();
   });
   it.each([
-    { ...task, task_id: 'not-a-uuid' }, { ...task, base_reward: 9007199254740993 },
+    { ...task, task_id: 'not-a-uuid' }, { ...task, base_reward: Number.MAX_SAFE_INTEGER + 2 },
     { ...task, paid_24h: '1e5' }, { ...task, open_assignment_count: '-1' },
     { ...task, daily_limit: -1 }, { ...task, minimum_duration_seconds: Number.NaN },
     { ...task, active: 'true' }, { ...task, last_assigned_at: 'not-a-date' },
