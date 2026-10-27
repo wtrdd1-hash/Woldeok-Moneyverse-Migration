@@ -1,4 +1,4 @@
-import { Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 
@@ -147,6 +147,10 @@ export class EnterpriseRepository {
   }
 
   async listRecentDividendLogs(limit = 20): Promise<StateEnterpriseDividendLogRow[]> {
+    // Defense in depth for callers that bypass the HTTP controller.
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new BadRequestException('limit must be an integer from 1 to 100');
+    }
     const res = await this.pool.query<StateEnterpriseDividendLogRow>(`
       SELECT
         l.id, l.enterprise_id,
