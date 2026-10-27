@@ -10,10 +10,10 @@
 
 ## In progress
 
-- [ ] Confirm immutable candidate copies and static bundle completeness.
-- [ ] Start separate replacement frontend and validate CSS response, administrator document and API compatibility.
-- [ ] Implement a repeatable static asset drift verification guard in the task branch.
-- [ ] Re-fetch main before integration and run relevant automated gates.
+- [x] Confirm candidate copies and static bundle completeness (3384).
+- [x] Start separate replacement frontend; validate HTML/CSS HTTP 200 and public navigation only; authenticated API checks remain unverified.
+- [x] Implement and merge a static asset drift verification guard (PR #1593).
+- [x] Re-fetch advanced main and run the policy tests (5/5 pass; PR merged).
 - [ ] Carry out zero-downtime promotion only after authenticated Test/rollback readiness gates.
 
 
@@ -26,4 +26,11 @@
 
 ## Finished
 
-Pending actual verification and cutover; no deployment is claimed yet.
+### Outcome: code merged; Test and production not promoted
+
+- PR #1593 merged into `main` at `773771ade1502bb000d1922adb493cd73c9e0f59`. GitHub policy checks passed; runtime build checks were skipped for this operations-only change.
+- Isolated replacement on 3384 serves `/admin` with 5/5 healthy CSS files. Existing live production upstream remains at 3354 and continues failing on missing stylesheet `07n3_vyoxfswp.css`.
+- Public Test site returned HTTP 500 for **all 5** linked CSS files. Its frontend process on port 3364 had a deleted working directory (`/srv/moneyverse-data/releases/test-v2026.10.22.1110-6f697e74b7bf/frontend (deleted)`). Test backend readiness returned OK.
+- An attempted isolated Test service configuration was rejected by the execution safety gate before files/services were changed. No bypass or alternate privileged mutation was attempted. Test/production cutover, authenticated admin flow and session continuity remain **BLOCKED/NOT VERIFIED**.
+- No production Nginx, account, DB, authentication or financial data changes were performed. Preserve the existing production upstream and rollback path until the approved Test repair is executed. The isolated candidate remains available on 3384.
+
