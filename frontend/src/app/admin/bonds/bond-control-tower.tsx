@@ -5,8 +5,6 @@ import {
   FileText,
   Coins,
   TrendingUp,
-  Percent,
-  Clock,
   ShieldCheck,
   RefreshCw,
 } from 'lucide-react';

@@ -14,6 +14,13 @@ describe('bond admin fail-closed console', () => {
     expect(screen.queryByText('쿠폰 이자 즉시 일괄 지급')).toBeNull();
     expect(screen.getByRole('button', { name: /새로고침/ })).toBeDefined();
   });
+  it('rejects a successful HTTP response containing invalid financial data', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ overview: { totalBondsActive: 3 }, bonds: [], couponLogs: [] }) }));
+    render(<BondControlTower initialOverview={{ totalBondsActive: 0, totalFundedWld: '0', totalHoldersCount: 0, totalCouponsPaidWld: '0', benchmark1YYield: '0.00%', benchmark3YYield: '0.00%', benchmark5YYield: '0.00%' }} initialBonds={[]} initialLogs={[]} />);
+    fireEvent.click(screen.getByRole('button', { name: /새로고침/ }));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('조회'));
+    vi.unstubAllGlobals();
+  });
   it('does not claim a failed refresh succeeded or keep stale financial evidence', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 503 });
     vi.stubGlobal('fetch', fetchMock);

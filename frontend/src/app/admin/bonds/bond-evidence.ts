@@ -85,6 +85,10 @@ export function parseBondEvidence(value: unknown): BondEvidence {
     };
   }, (b) => b.id);
 
+  if (overview.totalBondsActive !== bonds.filter((b) => b.status === 'OPEN_SUBSCRIPTION' || b.status === 'TRADING').length) {
+    throw new Error('Inconsistent active bond count');
+  }
+
   const couponLogs = list(root.couponLogs, 30, (entry): CouponLogItem => {
     const log = record(entry);
     if (log.event_type !== 'COUPON_INTEREST' && log.event_type !== 'MATURITY_REDEMPTION') {
