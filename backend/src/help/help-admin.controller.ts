@@ -66,7 +66,13 @@ export class AdminHelpController {
     const canApprove = req.adminRoles?.includes('approver') === true;
     return {
       canDraft: req.adminRoles?.includes('operator') === true,
-      articles: rows.map(row => ({ ...row, canApprove: canApprove && row.author_id !== requireUserId(req), canRetract: canApprove })),
+      articles: rows.map(row => {
+        const evidenceExpired = !Number.isFinite(new Date(row.reviewed_until).getTime()) ||
+          new Date(row.reviewed_until).getTime() <= Date.now();
+        return { ...row, evidenceExpired,
+          canApprove: canApprove && row.state === 'draft' && !evidenceExpired && row.author_id !== requireUserId(req),
+          canRetract: canApprove && row.state === 'published' };
+      }),
     };
   }
   @Post('articles') @UseGuards(CsrfGuard) @Header('Cache-Control','private, no-store')
