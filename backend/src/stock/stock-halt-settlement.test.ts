@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { PostgresStockRepository, StockInputError } from './stock.repository';
+import { StockService } from './stock.service';
+import { GameCatalogController } from '../admin/game-catalog.controller';
+import type { RequestWithSession } from '../auth/session.context';
 
 interface RecordedQuery {
   readonly text: string;
@@ -27,27 +31,20 @@ const STOCK = '22222222-2222-4222-8222-222222222222';
 const EVENT_KEY = '33333333-3333-4333-8333-333333333333';
 
 describe('PostgresStockRepository.halt', () => {
-  it('calls public.stock_halt_and_settle with actor, stock and event UUIDs', async () => {
-    const { pool, queries } = recordingPool(() => [
-      {
-        settled_count: '5',
-        total_refund_amount: '12500',
-        quarantined_count: '0',
-        halt_status: 'HALTED_SETTLED',
-      },
-    ]);
-
-    const repo = new PostgresStockRepository(pool);
-    const result = await repo.halt(ACTOR, STOCK, EVENT_KEY);
-
-    expect(queries[0]?.text).toContain('public.stock_halt_and_settle($1, $2, $3)');
-    expect(queries[0]?.values).toEqual([ACTOR, STOCK, EVENT_KEY]);
-    expect(result).toEqual({
+  it.each([
+    ['new halt', EVENT_KEY],
+    ['retry with a different event', '44444444-4444-4444-8444-444444444444'],
+    ['retry without an event', undefined],
+  ])('fails closed before any SQL on %s while treasury funding is non-atomic', async (_label, event) => {
+    const { pool, queries } = recordingPool(() => [{
       settled_count: '5',
       total_refund_amount: '12500',
       quarantined_count: '0',
       halt_status: 'HALTED_SETTLED',
-    });
+    }]);
+    const repo = new PostgresStockRepository(pool);
+    await expect(repo.halt(ACTOR, STOCK, event)).rejects.toThrow(ServiceUnavailableException);
+    expect(queries).toHaveLength(0);
   });
 
   it('rejects invalid UUIDs synchronously or via rejected promise', async () => {
@@ -55,6 +52,22 @@ describe('PostgresStockRepository.halt', () => {
     const repo = new PostgresStockRepository(pool);
     await expect(repo.halt('bad-actor', STOCK)).rejects.toThrow('must be a UUID');
     await expect(repo.halt(ACTOR, 'bad-stock')).rejects.toThrow('must be a UUID');
+  });
+});
+
+describe('Admin stock halt HTTP contract', () => {
+  it.each(['halt', 'retry'] as const)('returns 503 on %s without writing SQL', async (action) => {
+    const { pool, queries } = recordingPool(() => []);
+    const controller = new GameCatalogController(
+      new StockService(new PostgresStockRepository(pool)),
+      null,
+    );
+    const request = { session: { user_id: ACTOR } } as RequestWithSession;
+    const operation = action === 'halt'
+      ? controller.haltStock(request, STOCK, { haltEventId: EVENT_KEY })
+      : controller.retryHaltSettlement(request, STOCK);
+    await expect(operation).rejects.toMatchObject({ status: 503 });
+    expect(queries).toHaveLength(0);
   });
 });
 

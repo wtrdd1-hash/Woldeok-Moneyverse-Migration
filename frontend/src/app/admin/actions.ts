@@ -162,54 +162,26 @@ export async function deleteStock(
   }
 }
 
+/** Financial safety hold: no server action may claim success or call the unsafe halt endpoint. */
 export async function haltStockAndSettle(
   _previous: ActionState,
-  formData: FormData,
+  _formData: FormData,
 ): Promise<ActionState> {
-  const stockId = text(formData.get('stockId'));
-  if (stockId === '') return { status: 'error', message: '종목을 확인할 수 없어요.' };
-  const code = text(formData.get('code'));
-  if (!STEP_UP_CODE.test(code)) return CODE_REQUIRED;
-
-  try {
-    await spendSecondFactorCode(code);
-    const res = await mutate<{ settled_count: string; total_refund_amount: string; halt_status: string }>(
-      `/api/v1/admin/stocks/${encodeURIComponent(stockId)}/halt`,
-      { method: 'POST', body: {} },
-    );
-    revalidatePath('/admin/market');
-    revalidatePath('/stocks');
-    return {
-      status: 'ok',
-      message: `거래정지 및 자동정산을 완료했어요. (정산 계정: ${res?.settled_count ?? 0}명, 환급액: ${groupDigits(res?.total_refund_amount ?? '0')} WLD)`,
-    };
-  } catch (error) {
-    return failure(error, '거래정지 및 원가정산을 실행하지 못했어요.');
-  }
+  return {
+    status: 'error',
+    message: '원장 환급과 국고 차감의 원자적 정산 및 멱등 영수증 검증 전까지 거래정지를 실행할 수 없습니다.',
+  };
 }
 
 export async function retryHaltSettlement(
   _previous: ActionState,
-  formData: FormData,
+  _formData: FormData,
 ): Promise<ActionState> {
-  const stockId = text(formData.get('stockId'));
-  if (stockId === '') return { status: 'error', message: '종목을 확인할 수 없어요.' };
-
-  try {
-    const res = await mutate<{ settled_count: string; total_refund_amount: string }>(
-      `/api/v1/admin/stocks/${encodeURIComponent(stockId)}/halt-settlement/retry`,
-      { method: 'POST', body: {} },
-    );
-    revalidatePath('/admin/market');
-    return {
-      status: 'ok',
-      message: `정산 재처리를 완료했어요. (처리 계정: ${res?.settled_count ?? 0}명)`,
-    };
-  } catch (error) {
-    return failure(error, '정산 재처리를 실패했어요.');
-  }
+  return {
+    status: 'error',
+    message: '금융 원장 보호를 위해 정산 재처리를 중지했습니다. 검증된 원자적 정산 구현이 필요합니다.',
+  };
 }
-
 
 export async function setStockActive(
   _previous: ActionState,
