@@ -186,3 +186,44 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+
+describe('Android owner-scoped banking cache privacy', () => {
+  it.each([
+    ['loan history', ['bank', 'loans']],
+    ['banking standing', ['banking', 'standing']],
+  ])('never forwards public cache policy for %s', async (_label, parts) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ loans: [] }), {
+      status: 200,
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    })));
+    const response = await GET(request(`/app-api/v1/${parts.join('/')}`), context(...parts));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('never caches a bank loan gateway failure', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('unavailable'); }));
+    const response = await GET(request('/app-api/v1/bank/loans'), context('bank', 'loans'));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('never caches a bank loan app-version denial', async () => {
+    vi.stubEnv('APP_API_MIN_VERSION', '9.0.0');
+    const response = await GET(
+      request('/app-api/v1/bank/loans', { 'x-moneyverse-app-version': '1.0.0' }),
+      context('bank', 'loans'),
+    );
+    expect(response.status).toBe(426);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('keeps public contract metadata cacheable', async () => {
+    const response = await GET(request('/app-api/v1/meta/contract'), context('meta', 'contract'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('public, max-age=300');
+  });
+});

@@ -170,7 +170,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
-  return proxy(request, (await context.params).path);
+  const parts = (await context.params).path;
+  const response = await proxy(request, parts);
+  // Bank loan and standing data belong to the viewer, including error paths.
+  // Never trust an upstream cache policy after a session or account change.
+  if (parts[0] === 'bank' || parts[0] === 'banking') {
+    response.headers.set('cache-control', 'private, no-store');
+  }
+  return response;
 }
 
 export const GET = handle;

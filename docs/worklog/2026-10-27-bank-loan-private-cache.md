@@ -15,3 +15,10 @@
 
 ## Finished
 - Pending.
+
+### Mid-work checkpoint (21:30 KST)
+- Fresh main recheck: `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c` unchanged. Integrated planning EN/KO SHA256 unchanged (`506c291f...`, `630a8293...`).
+- RED backend loan cache metadata **1 FAIL**; RED Android bank/banking cache cases **4 FAIL / 12 PASS**. Failures are missing no-store headers, not environment failures.
+- GREEN backend focused **2 PASS**, including real Nest HTTP 200 with exact integer-string outstanding amount `9007199254740993` and private no-store; Android gateway focused **16 PASS** (bank loan, banking standing, 502, 426 and public contract metadata unaffected).
+- Minimal implementation: `@Header('Cache-Control', 'private, no-store')` on authenticated Nest bank loans GET; Android gateway always overrides bank/banking response cache headers after proxy, including early errors. Existing SQL owner-scoped function, session guards, amount representation and public contract unchanged.
+- Broad gates and isolated DB authorization still pending; no release/merge authority claimed.
