@@ -62,6 +62,11 @@ describe('admin activity UI-to-authenticated-API contract', () => {
     expect(html).toContain('활동 로그 조회 실패');
     expect(html).not.toContain('기록된 활동 로그가 없습니다');
   });
+  it('does not broaden a rejected event type into all activity', async () => {
+    const html = await visit({ eventType: 'unexpected' });
+    expect(mocks.api).not.toHaveBeenCalled();
+    expect(html).toContain('허용되지 않은 이벤트');
+  });
   it('normalizes invalid pagination before calling the database API', async () => {
     await visit({ page: '1e99', limit: '1000000' });
     expect(mocks.api).toHaveBeenCalledWith(expect.stringContaining('limit=50&offset=0'));

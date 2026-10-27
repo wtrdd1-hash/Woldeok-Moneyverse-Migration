@@ -82,7 +82,7 @@ export default async function AdminActivityLogsPage({
     loadProblem = memberFilter.status === 'ambiguous'
       ? '여러 회원이 검색어와 일치합니다. 정확한 닉네임 또는 회원 UUID를 입력해 주세요.'
       : memberFilter.status === 'unavailable'
-        ? '회원 목록을 확인할 수 없습니다. UUID로 조회하거나 잠시 후 다시 시도해 주세요.'
+        ? '회원 목록을 완전하게 확인할 수 없습니다. 회원 UUID로 조회하거나 잠시 후 다시 시도해 주세요.'
         : '회원 목록에서 일치하는 사용자를 찾지 못했습니다. UUID 또는 정확한 닉네임을 확인해 주세요.';
   }
   if (!loadProblem) {
@@ -157,7 +157,7 @@ export default async function AdminActivityLogsPage({
               </Badge>
             )}
           </div>
-          <CardDescription>이벤트 종류와 회원 UUID로 기록을 조회합니다. 닉네임은 현재 관리자 회원 목록에서 확인된 경우에만 검색됩니다.</CardDescription>
+          <CardDescription>이벤트 종류와 회원 UUID로 기록을 조회합니다. 닉네임 검색은 회원 목록이 50명 미만일 때만 가능하며, 그 외에는 UUID로 조회해 주세요.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form method="GET" className="flex flex-wrap items-center gap-4">

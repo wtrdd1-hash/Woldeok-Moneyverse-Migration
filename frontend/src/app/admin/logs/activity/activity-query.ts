@@ -52,6 +52,8 @@ export function resolveActivityMember(raw: string, directory: unknown): MemberFi
   if (!input) return { status: 'all' };
   if (UUID.test(input)) return { status: 'resolved', userId: input.toLowerCase() };
   if (input.length > 80 || !Array.isArray(directory)) return { status: 'unavailable' };
+  // The admin directory endpoint returns at most 50 members; uniqueness cannot be inferred at the cap.
+  if (directory.length >= 50) return { status: 'unavailable' };
   if (!directory.every((u): u is Member => record(u) &&
     typeof u.display_name === 'string' && typeof u.user_id === 'string' && UUID.test(u.user_id))) {
     return { status: 'unavailable' };

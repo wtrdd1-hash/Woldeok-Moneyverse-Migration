@@ -45,6 +45,14 @@ describe('verified member resolution for authenticated backend UUID contract', (
     expect(resolveActivityMember('nobody', members)).toEqual({ status: 'not_found' });
     expect(resolveActivityMember('Alice', [{ display_name: 'Alice', user_id: 'not-uuid' }])).toEqual({ status: 'unavailable' });
   });
+  it('does not claim a nickname is unique when the backend directory may be truncated at 50', () => {
+    const firstFifty = Array.from({ length: 50 }, (_, i) => ({
+      user_id: `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`,
+      display_name: i === 0 ? 'Alice' : `Other${i}`,
+    }));
+    expect(resolveActivityMember('Alice', firstFifty)).toEqual({ status: 'unavailable' });
+    expect(resolveActivityMember(alice, firstFifty)).toEqual({ status: 'resolved', userId: alice });
+  });
   it('keeps unfiltered queries explicit', () => {
     expect(resolveActivityMember('', null)).toEqual({ status: 'all' });
   });
