@@ -5,14 +5,8 @@ import {
   FileText,
   Coins,
   TrendingUp,
-  Percent,
-  Clock,
   ShieldCheck,
   RefreshCw,
-  CheckCircle2,
-  AlertTriangle,
-  Play,
-  Send,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
+import { parseBondEvidence } from './bond-evidence';
 
 export interface TreasuryBondItem {
   id: string;
@@ -65,7 +60,7 @@ export interface TreasuryBondsOverview {
 }
 
 interface BondControlTowerProps {
-  initialOverview: TreasuryBondsOverview;
+  initialOverview: TreasuryBondsOverview | null;
   initialBonds: TreasuryBondItem[];
   initialLogs: CouponLogItem[];
 }
@@ -75,48 +70,44 @@ export function BondControlTower({
   initialBonds,
   initialLogs,
 }: BondControlTowerProps) {
-  const [overview, setOverview] = useState<TreasuryBondsOverview>(initialOverview);
+  const [overview, setOverview] = useState<TreasuryBondsOverview | null>(initialOverview);
   const [bonds, setBonds] = useState<TreasuryBondItem[]>(initialBonds);
   const [logs, setLogs] = useState<CouponLogItem[]>(initialLogs);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isDistributing, setIsDistributing] = useState(false);
 
   const refreshData = async () => {
     setIsRefreshing(true);
     try {
       const res = await fetch('/api/admin/bonds/overview');
       if (!res.ok) throw new Error('데이터 갱신 실패');
-      const data = await res.json();
+      const data = parseBondEvidence(await res.json());
       setOverview(data.overview);
       setBonds(data.bonds);
       setLogs(data.couponLogs);
       toast.success('국채 관제 데이터가 최신으로 동기화되었습니다.');
     } catch {
+      setOverview(null);
+      setBonds([]);
+      setLogs([]);
       toast.error('국채 관제 데이터를 불러오는데 실패했습니다.');
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  const handleDistributeCoupons = async () => {
-    setIsDistributing(true);
-    try {
-      const res = await fetch('/api/admin/bonds/distribute-coupons', {
-        method: 'POST',
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '이자 지급 실패');
-
-      toast.success(
-        `국채 쿠폰 이자 ${groupDigits(data.couponsDistributedWld)} WLD 정산 완료! (관리자 Discord DM 발송됨)`,
-      );
-      await refreshData();
-    } catch (err: any) {
-      toast.error(err.message || '쿠폰 이자 일괄 지급에 실패했습니다.');
-    } finally {
-      setIsDistributing(false);
-    }
-  };
+  if (overview === null) {
+    return (
+      <section className="space-y-4" aria-labelledby="bond-console-error">
+        <h1 id="bond-console-error" className="text-2xl font-bold">가상 국채 관제</h1>
+        <div role="alert" className="rounded-lg border border-destructive/50 p-4 text-sm">
+          국채 관제 조회 결과를 검증할 수 없습니다. 실제 기록 0건을 의미하지 않습니다.
+        </div>
+        <Button type="button" onClick={refreshData} disabled={isRefreshing} className="min-h-11">
+          <RefreshCw aria-hidden="true" className="size-4" /> 새로고침
+        </Button>
+      </section>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -125,17 +116,17 @@ export function BondControlTower({
         <div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="border-sky-500/30 text-sky-600 dark:text-sky-400 font-mono text-xs">
-              SOVEREIGN DEBT TRADING DESK
+              VIRTUAL BOND CONSOLE
             </Badge>
             <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-mono text-xs">
-              AAA RATED
+              READ-ONLY EVIDENCE
             </Badge>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground mt-1">
             기획재정국채 (KTB) 통합 관제 타워
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            기획재정부 국채 1/3/5년물 발행, 표면금리 조정, 시간당 쿠폰 이자 정산 및 국고 자금 조달을 총괄 관제합니다.
+            서버가 반환한 가상 국채 목록과 정산 기록을 조회합니다. 원장 인증이 완료되기 전까지 수동 지급은 보류됩니다.
           </p>
         </div>
 
@@ -145,21 +136,12 @@ export function BondControlTower({
             size="sm"
             onClick={refreshData}
             disabled={isRefreshing}
-            className="gap-1.5"
+            className="gap-1.5 min-h-11"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             새로고침
           </Button>
 
-          <Button
-            size="sm"
-            onClick={handleDistributeCoupons}
-            disabled={isDistributing}
-            className="gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-medium"
-          >
-            <Play className="h-4 w-4" />
-            쿠폰 이자 즉시 일괄 지급
-          </Button>
         </div>
       </div>
 
@@ -178,7 +160,7 @@ export function BondControlTower({
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              1년물(단기), 3년물(벤치마크), 5년물(장기)
+              현재 서버에서 확인된 활성 국채 수
             </p>
           </CardContent>
         </Card>
@@ -214,7 +196,7 @@ export function BondControlTower({
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              국가가 원리금 100% 지급 보증 (AAA)
+              가상 경제 데이터이며 실제 국가 보증 상품이 아닙니다.
             </p>
           </CardContent>
         </Card>
@@ -232,33 +214,15 @@ export function BondControlTower({
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              1시간 단위 자동 복리 정산 파이프라인
+              조회된 정산 기록의 합계이며 실제 지급 인증은 별도 확인이 필요합니다.
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* 3. Discord Real-time Alert Status */}
-      <Card className="border-border/80 bg-gradient-to-r from-sky-500/5 to-indigo-500/5">
-        <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 mt-0.5">
-              <Send className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">
-                디스코드 관리자 1:1 DM 실시간 알림 연동 중 (ID: 886478189520637992)
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                신규 국채 청약 자금 조달 및 매시간 쿠폰 이자/만기 상환 집행 시 관리자 DM으로 즉시 전송됩니다.
-              </p>
-            </div>
-          </div>
-          <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-mono text-xs px-2.5 py-1">
-            ACTIVE PIPELINE
-          </Badge>
-        </CardContent>
-      </Card>
+      <div role="status" className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
+        국채 수동 쿠폰 지급은 원장 무결성 인증 전까지 보류됩니다. Discord 관리자 DM 전달 상태는 이 화면에서 검증되지 않았습니다.
+      </div>
 
       {/* 4. Sovereign Bond Products Table */}
       <Card className="border-border/80 shadow-sm">
@@ -267,11 +231,11 @@ export function BondControlTower({
             <div>
               <CardTitle className="text-base font-semibold">발행 국채 종목 및 표면금리 현황</CardTitle>
               <CardDescription className="text-xs">
-                대한민국 국채법 및 미국 재무부 TreasuryDirect 표준 상품 포트폴리오
+                서버에서 확인한 가상 국채 상품 목록
               </CardDescription>
             </div>
             <Badge variant="outline" className="font-mono text-xs">
-              3 ACTIVE OFFERINGS
+              {bonds.length} LISTED BONDS
             </Badge>
           </div>
         </CardHeader>
@@ -371,7 +335,7 @@ export function BondControlTower({
                 {logs.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground text-sm">
-                      아직 정산된 국채 이자 로그가 없습니다. 상단의 '쿠폰 이자 즉시 일괄 지급' 버튼을 눌러 테스트할 수 있습니다.
+                      최근 30건 범위에 조회된 정산 기록이 없습니다. 수동 지급 테스트는 제공되지 않습니다.
                     </TableCell>
                   </TableRow>
                 ) : (

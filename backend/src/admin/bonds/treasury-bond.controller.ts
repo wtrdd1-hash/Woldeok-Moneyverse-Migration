@@ -7,6 +7,7 @@ import {
   Put,
   Query,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -47,7 +48,8 @@ export class AdminTreasuryBondController {
   @Post('distribute-coupons')
   @ApiOperation({ summary: '전체 유저 보유 국채 쿠폰 이자 즉시 일괄 정산 집행' })
   async distributeCoupons() {
-    return this.service.processHourlyCouponsAndMaturities();
+    // Manual payouts must not bypass the uncertified ledger and idempotency gates.
+    throw new ServiceUnavailableException('Manual bond settlement is on hold pending ledger certification');
   }
 
   @Put(':id/status')
