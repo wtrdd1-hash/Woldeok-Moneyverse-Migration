@@ -1,3 +1,32 @@
+## v1372 / F675-150 — 검증된 서비스 장애 이력 및 점검 변경 기록 (기능 추가 / 초안 / 배포 보류)
+
+**회차 및 기준:** 이전 기능 보완 v1370 → 현재 기능 추가 v1372 → 다음 기능 보완 v1374(잠정). 개발 이슈 #1572, 선행 미병합 Draft PR #1568. 시작·중간 main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c. 영문 PROJECT_PLAN.md가 정본이며 이 한국어 명세는 동등한 계약을 제공한다. **실제 구현·배포가 아닌 기획 초안**으로 런타임·DB·금융·Test·Production 변경은 없다.
+
+### 문제, 대상, 기존 코드 증거
+- 방문자와 회원은 /status에서 최신 수집 상태를 보고, /announcements에서 일반 공지를 확인할 수 있지만, 조사한 화면·API에는 별도의 승인된 장애 생애주기와 불변 업데이트 이력이 없다. /status는 30초 재검증, 60초 신선도 경고를 사용하며, 단일 상태 스냅샷으로 장애 시작·종료, 과거 가동률, SLA 또는 관리자 승인 여부를 증명할 수 없다. backend/src/content/status-collector.ts는 실제 점검을 content_record_server_status로 기록한다. 마이그레이션 013의 content_status_sources/content_status_snapshots와 별도 수집자 권한은 **관측 근거**이지 게시 승인 권한이 아니다.
+- 목적: 최신 관측값과 검증·승인된 장애 보고를 분리해 방문자에게 사실에 기반한 영향·시간·업데이트·점검 내역을 보여준다. 대상은 비회원·회원·운영 담당자·독립 게시 승인자·Android 사용자다. 단일 점검 실패로 자동 장애 선언, 가짜 과거 장애/100% 가동률/SLA, 내부 호스트·취약점·개인정보·직원 신원 공개, WLD/원장/상점/고객지원 기록 변경은 제외한다.
+- **근거 완결성:** 최신 스냅샷만으로 과거 장애를 소급 생성하거나 일반 공지를 장애 증거로 자동 간주하지 않는다. 근거가 없거나 만료·충돌하면 UNKNOWN/UNVERIFIED를 명시하고 RESOLVED/OPERATIONAL로 추정하지 않는다. 기존 /status 실시간 관측을 신규 사건 설명이 덮어쓰지 않는다.
+
+### 이용 흐름, 화면 및 상태
+- /status에 **검증된 장애 이력** CTA를 추가하고 /status/incidents 목록과 /status/incidents/[id] 상세로 이동한다. 목록은 승인된 기록만 최신 공개 업데이트순으로 제공하며 구성 요소·상태 필터와 서명 커서를 사용한다. 빈 상태 문구는 '확인된 게시 기록 없음'이지 '장애가 없었음'이 아니다. 상세는 구성 요소, 관측 시각과 운영자 확인 시각을 구분하고 영향·공개 업데이트·정정/철회·근거 신선도를 표시하며 /status 및 별도 승인된 공지로 연결한다.
+- 운영자 /admin/status/incidents: **초안 작성 → 근거 연결 → 공개 문안 미리보기 → 독립 승인 요청**. 작성자와 다른 현재 유효 권한자가 **승인·게시/반려/수정 요청**한다. 운영자는 업데이트·해결 제안·정정/철회를 요청한다. 예정 점검은 Asia/Seoul 기준 미래 시작·종료를 명시하지만 실제 복구 완료는 별도 관측과 승인을 요구한다.
+- 상태: DRAFT → IN_REVIEW → PUBLISH_PENDING → PUBLISHED_CONFIRMED → MONITORING → RESOLVED, 분기 REJECTED/CORRECTION_PENDING/WITHDRAWN/UNKNOWN_EVIDENCE/PUBLISH_FAILED. 승인 대기는 공개 완료가 아니다. 녹색 점검 1건으로 자동 해결하지 않는다. 해결된 기록은 이력으로 남기고, 철회 시 공개 내용은 차단하며 감사 이력과 적절한 공개 철회 표시는 유지한다. 정정은 불변 후속 개정으로 기록한다.
+
+### API 및 DB 계약
+- 공개 GET /api/v1/status/incidents?sourceKey=&state=&limit=20&cursor=, GET /api/v1/status/incidents/:id, GET /api/v1/status/incidents/:id/updates?limit=50&cursor=. 승인된 공개용 개정만 반환하고 source provenance, effectiveAt, observedAt, verifiedAt, lastPublishedAt, version, status, evidenceFreshness를 구분한다. 미공개·철회 상세는 404 또는 별도 안전한 철회 표시 계약을 사용하며, '정상'이라는 가짜 빈 성공을 반환하지 않는다.
+- 관리자 POST /api/v1/admin/status/incidents, POST /:id/evidence, PUT /:id/draft, POST /:id/submit, POST /:id/approve, POST /:id/updates, POST /:id/resolve, POST /:id/withdraw, GET /:id/receipts/:intentId. 모든 쓰기는 세션에서 actor 파생, 현재 역할·독립 승인·관리자 재인증·CSRF·expectedVersion·intentId·본문 지문 검증. 같은 의도/같은 본문은 기존 영수증 반환, 다른 본문은 409. 미인증 401, 권한 부족 403, 비공개 ID 404, 충돌 409, 근거 만료 412, 시각 오류 422, 제한 429, 감사·캐시 장애 503. Android는 공개 읽기만 허용한다.
+- **중복 280 및 체크섬 불일치 해소 후** 전진 전용 마이그레이션으로 status_incidents(UUID PK, source_key FK, kind CHECK incident|maintenance, lifecycle, public_generation, version, started_at, ended_at, verified_at, created_by, 시각 CHECK), status_incident_revisions(사건+버전 UNIQUE, 공개문안·SHA-256), status_incident_evidence(사건·개정·신뢰 가능한 스냅샷 FK·관측 시각·내용 해시·검증방법·만료), status_incident_updates(사건+seq UNIQUE, 승인자·승인시각), status_incident_intents(행위자+intent UNIQUE, 지문·영수증), append-only 감사 및 게시 outbox/영수증을 설계한다. 서버 함수가 근거·시각 일관성과 다른 구성 요소 스냅샷 대체를 검사한다. 인덱스 (publication_state,last_public_at DESC,id DESC), (source_key,publication_state,last_public_at DESC,id DESC), (incident_id,seq), (evidence_expiry,incident_id), (outbox_state,next_retry_at,id). 목록은 출처·상태·카탈로그 세대에 결합된 짧은 TTL 서명 keyset 커서, 한도 1~50, OFFSET 금지.
+- 단일 트랜잭션에서 사건 행 잠금→현재 권한/작성자·승인자 분리→CAS/멱등성→근거 만료·해시 검증→불변 개정·감사·outbox·대기 영수증을 기록한다. 게시 작업자는 캐시 제거 영수증 확보 후 2차 트랜잭션에서 세대·근거·승인을 재검사하고 PUBLISHED_CONFIRMED로 전환한다. 철회는 DB 공개 차단과 세대 증가가 먼저이며 캐시 제거는 그 다음이다. 이전 작업자/304/ETag/SWR로 철회 기록을 재노출하지 않는다. 감사·outbox 실패 시 전체 롤백. 앱 계정과 PUBLIC의 직접 DML 및 특권 함수 EXECUTE는 금지하고 수집자 전용 권한은 유지한다.
+
+### 보안·SEO·모바일·KPI·검증·롤백
+- 운영자 호출 제한, 본문 길이·업데이트 수 제한, 허용 구성 요소, 일반 텍스트 정화, 스냅샷 소유 출처 검증, 임의 URL SSRF 차단, CSP, 내부 호스트·회원 정보 없는 감사 상관관계 적용. 회원의 직접 장애 게시 불허. 관리자 화면은 private/no-store/noindex 및 사이트맵 제외. 공개 장애 이력도 기존 /status와 같이 초기 noindex이며 별도 SEO 승인 전 가동률 구조화 데이터 생성 금지. 활동 중인 사건은 no-store 또는 명시적 짧은 유효기간; 관측 시각 표시. 320px, 200% 확대, 키보드·스크린리더, 색상 외 상태 텍스트, 움직임 감소, 한국어·영어, Android 읽기 동등성, WCAG 2.2 AA.
+- KPI는 **검증된 게시 영수증** 기반 근거 커버리지·게시 지연·정정률·만료 근거 차단·철회 캐시 노출·커서 실패·접근성 오류·승인 소요시간이다. 근거/분모가 없으면 UNKNOWN; 가짜 100% 성공률·가동률 계산 금지. 원시 방문자 식별 추적 없이 집계한다.
+- **아직 실행하지 않은 수용시험:** 합성 사건·업데이트 10,001건, 게시·철회·재시도 동시 요청 100건, 위조 권한·근거 요청 100건, Asia/Seoul 날짜·윤년·관측 역순·수집 중단·근거 만료·304 캐시 재생·동일 승인자·부분 DB/outbox 실패·대용량·Android·스크린리더·롤백. 독립 PostgreSQL 복원, 전체 CI/보안, 후보 정확 SHA의 공식 Test에서 회원/관리자/금융 인증 E2E 및 복구 증거가 필수. 기능 스위치 status_incident_timeline_v1 기본 OFF, 정식 승인 후 1%→10%→100% 단계 적용. 기획에서는 런타임/DB/WLD/원장/Test/Production 변경 없음.
+- **최신 QA v1322(19:27):** main root pnpm test 중복 마이그레이션 280으로 FAIL(1 실패/19 성공/3 제외); Draft PR #1564 합성 병합 DB 21 성공/3 제외는 배포 승인이 아니다. 백엔드 1,544 성공, 프론트엔드 1,485 성공, 계약 38 성공. 전체 감사 Critical 2/High 8, 봇 Critical 1/High 5. 개발 DB 241개 테이블 중 235개 앱 직접 쓰기, PUBLIC 은행 함수 3개, 체크섬 불일치 5개, 시즌 보상 차단 281 미적용. 실제 손실 확인 아님. 19시 HTTP 24 성공/인증 2 미검증, 독립 복원·정확 SHA Test 미검증. 20:07 루트 42%·데이터 52% 사용, /srv/moneyverse는 없는 prod-v600 대상. RELEASE HOLD.
+- **P0:** ENV1372-01 서버 용량·배포 링크·독립 복원; SEC1372-02 DB 권한·280 중복·체크섬·원장 차단; REL1372-03 전체 QA·보안·정확 SHA Test; INCIDENT1372-04 허위 장애·무권한 게시·철회 캐시 재노출 방지. **P1:** INCIDENT1372-05 DB 제약·인덱스; INCIDENT1372-06 승인·원자적 outbox·감사; INCIDENT1372-07 NestJS·Android API; INCIDENT1372-08 Next.js·관리자·모바일·접근성; INCIDENT1372-09 개인정보·SEO·KPI; INCIDENT1372-10 격리 PG·동시100·위조100·합성10,001·롤백. Gemini/개발 A/B/C/QA 작업과 런타임 변경을 분리한다.
+- 외부 독립 근거 신규 최종 승인 **0건**, 누적 중복 제거·근거 분류 승인 수 **UNKNOWN/10,000**, **BLOCKED / IN PROGRESS**. 참고한 기술 표준을 확보 실적으로 계산하지 않는다.
+
+
 # F675-149 — 고객지원 답변 알림 무결성 보완 (기획 v1370 / 기능 보완 / 초안 / 운영 보류)
 **주기:** 이전 기능 추가 v1368 → 현재 기능 보완 v1370 → 다음 기능 추가 v1372(잠정). **이슈 #1562, 선행 미병합 Draft PR #1563.** main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c 시작·중간 확인, AGENTS.md·README.md·영어 정본 PROJECT_PLAN.md·국문 대조. 기획 문서만 수정, 런타임/DB/WLD/원장/Test/운영 변경 없음.
 
