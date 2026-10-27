@@ -14,6 +14,7 @@ import type { AdminUser, AuditSearchRow } from '../types';
 import { AuditLogsFilterForm, type AuditFilters } from './audit-logs-filter-form';
 import { AuditLogsView, type AuditUserInfo } from './audit-logs-view';
 import { LogsSubNav } from './logs-sub-nav';
+import { parseAuditSearchResponse, resolveAuditIdentity, type AuditIdentity } from './audit-search-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ const OUTCOMES: readonly { readonly value: string; readonly label: string }[] = 
 const LIMITS: readonly string[] = ['30', '50', '100'];
 const DEFAULT_LIMIT = '30';
 
-const SEQUENCE = /^\d{1,18}$/;
+const SEQUENCE = /^[1-9][0-9]{0,18}$/;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type SearchResult =
@@ -42,8 +43,15 @@ type SearchResult =
   | { readonly problem: string };
 
 function one(value: string | string[] | undefined): string {
-  const first = Array.isArray(value) ? value[0] : value;
-  return first?.trim() ?? '';
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function identityProblem(identity: AuditIdentity, label: string): string | null {
+  if (identity.status === 'all' || identity.status === 'resolved') return null;
+  if (identity.status === 'unavailable') return `${label} 닉네임은 제한된 회원 목록에서 확인할 수 없습니다. 정확한 회원 UUID로 조회해 주세요.`;
+  if (identity.status === 'ambiguous') return `${label} 닉네임이 여러 회원과 일치합니다. 회원 UUID를 입력해 주세요.`;
+  if (identity.status === 'invalid') return `${label} 검색어 형식이 올바르지 않습니다. UUID 또는 80자 이내의 정확한 닉네임을 입력해 주세요.`;
+  return `${label} 닉네임과 일치하는 회원이 없습니다. 회원 UUID를 확인해 주세요.`;
 }
 
 function searchQuery(filters: AuditFilters, cursor?: string): string {
@@ -56,33 +64,20 @@ function searchQuery(filters: AuditFilters, cursor?: string): string {
   return text === '' ? '' : `?${text}`;
 }
 
-async function searchEvents(path: string): Promise<SearchResult> {
+async function searchEvents(path: string, limit: number, beforeCursor?: string): Promise<SearchResult> {
   try {
-    return await api<{ events: AuditSearchRow[]; nextCursor: string | null }>(path);
+    const response = await api<unknown>(path);
+    const verified = parseAuditSearchResponse(response, limit, beforeCursor);
+    return verified ?? { problem: '감사 검색 API 응답의 원장 항목이나 페이지 순서를 검증하지 못했습니다. 다시 조회해 주세요.' };
   } catch (error) {
     if (error instanceof ApiError && error.status === 400) {
       return {
         problem:
-          '검색 조건을 다시 확인해 주세요. 관리자·회원·요청·거래 ID는 올바른 닉네임 또는 UUID여야 하고, IP는 주소 형식이어야 합니다.',
+          '검색 조건을 다시 확인해 주세요. 관리자·회원·요청·거래 ID는 올바른 UUID여야 하고, IP는 주소 형식이어야 합니다.',
       };
     }
     return { problem: '감사 기록을 불러오지 못했어요.' };
   }
-}
-
-/**
- * 사용자가 입력한 문자열이 UUID인지 판별하고, 닉네임일 경우 유저 목록에서 UUID를 조회
- */
-function resolveUserId(input: string, userList: readonly AdminUser[]): string | null {
-  if (!input) return null;
-  if (UUID_REGEX.test(input)) return input;
-
-  const target = input.toLowerCase();
-  const matched = userList.find((u) => u.display_name.toLowerCase() === target);
-  if (matched) return matched.user_id;
-
-  const partial = userList.find((u) => u.display_name.toLowerCase().includes(target));
-  return partial?.user_id ?? null;
 }
 
 export default async function AdminLogsPage({
@@ -94,8 +89,11 @@ export default async function AdminLogsPage({
   const params = await searchParams;
 
   // 전체 관리자/회원 목록 조회하여 닉네임 매핑 테이블 구성
-  const usersResponse = await apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users');
-  const userList = usersResponse?.users ?? [];
+  const usersResponse = await apiOrNull<{ users: AdminUser[]; scope: { kind: string; limit: number; hasMore: boolean } }>('/api/v1/admin/users');
+  const userList = Array.isArray(usersResponse?.users)
+    ? usersResponse.users.filter((u) => u !== null && typeof u === 'object' && UUID_REGEX.test(u.user_id) && typeof u.display_name === 'string')
+    : [];
+  const directoryComplete = usersResponse?.scope?.kind === 'WEALTH_ORDERED_SNAPSHOT' && usersResponse.scope.hasMore === false && usersResponse.scope.limit === 50;
   const userMap: Record<string, AuditUserInfo> = {};
   for (const u of userList) {
     userMap[u.user_id] = {
@@ -123,30 +121,35 @@ export default async function AdminLogsPage({
     limit: LIMITS.includes(limit) ? limit : DEFAULT_LIMIT,
   };
 
-  // 닉네임 또는 UUID를 실제 백엔드 쿼리용 UUID로 해석
-  const resolvedAdminId = rawAdmin ? resolveUserId(rawAdmin, userList) : null;
-  const resolvedMemberId = rawMember ? resolveUserId(rawMember, userList) : null;
-
-  // 닉네임을 입력했으나 일치하는 사용자가 없는 경우
-  const isInvalidUserSearch =
-    (rawAdmin !== '' && resolvedAdminId === null) ||
-    (rawMember !== '' && resolvedMemberId === null);
+  // Only exact UUIDs bypass the capped directory; a partial nickname must not select another member.
+  const adminIdentity = resolveAuditIdentity(rawAdmin, usersResponse);
+  const memberIdentity = resolveAuditIdentity(rawMember, usersResponse);
+  const resolvedAdminId = adminIdentity.status === 'resolved' ? adminIdentity.userId : null;
+  const resolvedMemberId = memberIdentity.status === 'resolved' ? memberIdentity.userId : null;
+  const identityError = identityProblem(adminIdentity, '관리자') ?? identityProblem(memberIdentity, '대상 회원');
 
   const cursor = one(params.cursor);
-  const paged = SEQUENCE.test(cursor);
+  const paged = cursor !== '';
+  const validCursor = !paged || (SEQUENCE.test(cursor) && BigInt(cursor) <= 9223372036854775807n);
+  const duplicateQueryValues = Object.values(params).some(Array.isArray);
 
-  // 백엔드 전달용 필터 (UUID로 치환)
   const backendFilters: AuditFilters = {
     ...filters,
     administrator: resolvedAdminId ?? '',
     member: resolvedMemberId ?? '',
   };
 
-  const search: SearchResult = isInvalidUserSearch
-    ? { events: [], nextCursor: null }
-    : await searchEvents(
-        `/api/v1/admin/audit/events${searchQuery(backendFilters, paged ? cursor : undefined)}`,
-      );
+  const search: SearchResult = duplicateQueryValues
+    ? { problem: '중복된 검색 조건은 허용되지 않습니다. 필터를 하나씩 지정해 주세요.' }
+    : identityError !== null
+      ? { problem: identityError }
+      : !validCursor
+        ? { problem: '감사 기록 페이지 순서가 올바르지 않습니다. 처음부터 다시 조회해 주세요.' }
+        : await searchEvents(
+            `/api/v1/admin/audit/events${searchQuery(backendFilters, paged ? cursor : undefined)}`,
+            Number(filters.limit),
+            paged ? cursor : undefined,
+          );
 
   const events = 'problem' in search ? [] : search.events;
   const pageSize = Number(filters.limit);
@@ -166,7 +169,7 @@ export default async function AdminLogsPage({
       <LogsSubNav current="audit" />
 
       {/* 스마트 조건 검색 아코디언 폼 */}
-      <AuditLogsFilterForm filters={filters} users={userList} />
+      <AuditLogsFilterForm filters={filters} users={directoryComplete ? userList : []} />
 
       {/* 운영 감사 로그 결과 카드 */}
       <Card>
@@ -187,9 +190,12 @@ export default async function AdminLogsPage({
         </CardHeader>
         <CardContent className="grid gap-4">
           {'problem' in search ? (
-            <div className="grid place-items-center gap-3 py-8">
+            <div role="alert" aria-live="polite" className="grid place-items-center gap-3 py-8">
               <EmptyState title={search.problem} />
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="min-h-11">
+                <Link href={`/admin/logs${searchQuery(filters, paged ? cursor : undefined)}`}>같은 조건으로 다시 조회</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="min-h-11">
                 <Link href="/admin/logs">조건 초기화 후 전체 목록 보기</Link>
               </Button>
             </div>
@@ -219,12 +225,9 @@ export default async function AdminLogsPage({
                       <Badge variant="outline" className="font-mono text-xs">
                         {resolvedMemberId}
                       </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        보안 제재 이력 없음 (정상 회원)
-                      </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      해당 회원을 대상으로 한 관리자 권한 변경, 제재(Ban/Restrict), 강제 세션 만료 등의 <strong>운영 감사 조치 기록은 0건</strong>입니다.
+                      현재 검색 조건에 일치하는 관리자 조치 기록이 없습니다. 전체 기간의 제재 이력 부재나 회원 정상 상태를 보증하지 않습니다.
                     </p>
                     <p className="text-xs text-muted-foreground leading-relaxed">
                       회원의 <strong>실시간 웹 접속, 페이지별 체류 시간, 버튼 클릭, API 요청</strong> 등의 실제 활동 기록은 <strong>사용자 접속·활동 로그</strong>에서 즉시 조회하실 수 있습니다.
@@ -281,13 +284,7 @@ export default async function AdminLogsPage({
               <div className="grid place-items-center gap-3 py-8">
                 <EmptyState
                   title="조건에 맞는 감사 기록이 없습니다."
-                  description={
-                    isInvalidUserSearch
-                      ? `'${rawAdmin || rawMember}' 닉네임과 일치하는 회원을 찾을 수 없습니다.`
-                      : paged
-                        ? '마지막 쪽까지 도달했거나, 검색 조건이 너무 좁습니다.'
-                        : '필터 조건을 변경하거나 조건 초기화를 눌러 전체 감사 로그를 확인해 보세요.'
-                  }
+                  description={paged ? '마지막 쪽까지 도달했거나, 검색 조건이 너무 좁습니다.' : '필터 조건을 변경하거나 조건 초기화를 눌러 전체 감사 로그를 확인해 보세요.'}
                 />
                 <Button asChild variant="default" size="sm" className="min-h-10 px-4">
                   <Link href="/admin/logs">전체 최신 감사 로그 조회하기</Link>

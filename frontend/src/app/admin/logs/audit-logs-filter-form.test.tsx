@@ -63,9 +63,10 @@ describe('AuditLogsFilterForm', () => {
     render(<AuditLogsFilterForm filters={mockFilters} users={mockUsers} />);
 
     const trigger = screen.getByText('감사 로그 조건 검색');
-    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole('button', { name: /필터 열기/ }));
 
     expect(screen.getByText('필터 접기')).toBeDefined();
+    expect(screen.getByRole('button', { name: /필터 접기/ }).getAttribute('aria-expanded')).toBe('true');
     expect(screen.getByLabelText(/관리자/)).toBeDefined();
     expect(screen.getByLabelText(/대상 회원/)).toBeDefined();
     expect(screen.getByLabelText(/기능/)).toBeDefined();
@@ -82,6 +83,7 @@ describe('AuditLogsFilterForm', () => {
 
     expect(screen.getByText('2개 필터 적용 중')).toBeDefined();
     expect(screen.getByText('필터 접기')).toBeDefined();
+    expect(screen.getByRole('button', { name: /필터 접기/ }).getAttribute('aria-expanded')).toBe('true');
   });
 });
 
