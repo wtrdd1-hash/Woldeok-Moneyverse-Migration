@@ -356,14 +356,19 @@ export async function createSeasonEvent(
   if (title === '' || title.length > 100) {
     return { status: 'error', message: '제목을 1~100자로 입력해 주세요.' };
   }
-  if (costWld === null) return { status: 'error', message: '참가비는 1 이상 정수여야 해요.' };
-  if (pointsPerEntry === null) {
-    return { status: 'error', message: '회당 점수는 1 이상 정수여야 해요.' };
+  // NestJS deliberately disables implicit string-to-number conversion; SQL caps both fields.
+  const costWldNumber = costWld === null ? null : Number(costWld);
+  const pointsNumber = pointsPerEntry === null ? null : Number(pointsPerEntry);
+  if (costWldNumber === null || !Number.isSafeInteger(costWldNumber) || costWldNumber < 1 || costWldNumber > 100000) {
+    return { status: 'error', message: '참가비는 1~100000 WLD 정수여야 해요.' };
+  }
+  if (pointsNumber === null || !Number.isSafeInteger(pointsNumber) || pointsNumber < 1 || pointsNumber > 10000) {
+    return { status: 'error', message: '회당 점수는 1~10000 정수여야 해요.' };
   }
 
   try {
     const receipt = await mutate<unknown>('/api/v1/admin/season-events', {
-      body: { title, costWld, pointsPerEntry, ...(description === '' ? {} : { description }) },
+      body: { title, costWld: costWldNumber, pointsPerEntry: pointsNumber, ...(description === '' ? {} : { description }) },
     });
     revalidatePath('/admin');
     revalidatePath('/admin/catalog');

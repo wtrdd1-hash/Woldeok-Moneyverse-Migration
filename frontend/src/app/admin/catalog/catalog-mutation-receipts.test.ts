@@ -104,6 +104,25 @@ describe('admin catalog mutation receipts backed by authoritative read models', 
     expect(invalidate).toHaveBeenCalledWith('/admin/catalog');
   });
 
+  it('sends finite numeric DTO fields to NestJS without implicit conversion', async () => {
+    write.mockResolvedValue({ id: EVENT_ID });
+    readback.mockResolvedValue({ events: [event] });
+    await createSeasonEvent(previous, createForm());
+    expect(write).toHaveBeenCalledWith('/api/v1/admin/season-events', {
+      body: { title: 'Festival', costWld: 100, pointsPerEntry: 5 },
+    });
+  });
+
+  it('rejects values beyond the PostgreSQL event bounds before writing', async () => {
+    const form = createForm();
+    form.set('costWld', '9007199254740993');
+    expect((await createSeasonEvent(previous, form)).status).toBe('error');
+    form.set('costWld', '100');
+    form.set('pointsPerEntry', '10001');
+    expect((await createSeasonEvent(previous, form)).status).toBe('error');
+    expect(write).not.toHaveBeenCalled();
+  });
+
   it('confirms a newly created event only with matching title, cost and points', async () => {
     write.mockResolvedValue({ id: EVENT_ID });
     readback.mockResolvedValue({ events: [event] });
