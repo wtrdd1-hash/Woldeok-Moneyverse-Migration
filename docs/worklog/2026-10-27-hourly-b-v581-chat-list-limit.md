@@ -10,11 +10,16 @@
 
 ## Checklist
 - [x] Inspect live miniPC and latest source/QA/PR/CI, select independent issue.
-- [ ] RED: add controller regression tests and prove failure before implementation.
-- [ ] GREEN: strictly validate decimal page sizes (1..100 conversations, 1..20 search), reject malformed/multiple/unsafe values before any read.
+- [x] RED: add controller regression tests and prove failure before implementation.
+- [x] GREEN: strictly validate decimal page sizes (1..100 conversations, 1..20 search), reject malformed/multiple/unsafe values before any read.
 - [ ] Verify focused/full tests, lint, typecheck, build, app-api, security, real isolated PostgreSQL and CI exact SHA.
 - [ ] Refresh main and plans at midpoint and before any merge; no merge or deploy without all gates.
 - [ ] Record internal and GitHub final result and protect other agents' work.
 ## RED checkpoint (12:32 KST)
 - 38 new focused tests executed against main-based controller: 30 RED, 8 GREEN (expected pre-fix). No database reads performed in rejected-input expectations.
 - Mid-work main and English/Korean planning hashes refreshed; no other branch modified.
+
+## GREEN checkpoint (12:32 KST)
+- Added strict canonical decimal `limit` parser to the two member-scoped chat list/search routes, with 1..100 and 1..20 bounds respectively; no repository, DB schema, ledger, auth or frontend change.
+- Focused regression: 38/38 PASS after 30 pre-fix RED; invalid/multiple/unsafe limits return HTTP 400 before any chat service read. Defaults 50/10 and valid integer limits remain unchanged.
+- Exact-SHA full repository checks, real PostgreSQL and GitHub CI still pending; Draft/HOLD, no merge or release.

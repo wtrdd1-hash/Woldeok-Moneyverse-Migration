@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -74,6 +75,22 @@ export class ReportConversationDto {
   readonly details!: string;
 }
 
+/**
+ * Chat list/search limits must be exact decimal query values, not parseInt prefixes.
+ * Never silently broaden a member-scoped query after malformed input.
+ */
+function parseChatListLimit(raw: unknown, defaultLimit: number, maxLimit: number): number {
+  if (raw === undefined) return defaultLimit;
+  if (typeof raw !== 'string' || !/^[1-9][0-9]*$/.test(raw)) {
+    throw new BadRequestException(`limit must be a decimal integer between 1 and ${maxLimit}`);
+  }
+  const parsed = Number(raw);
+  if (!Number.isSafeInteger(parsed) || parsed > maxLimit) {
+    throw new BadRequestException(`limit must be a decimal integer between 1 and ${maxLimit}`);
+  }
+  return parsed;
+}
+
 @ApiTags('chat')
 @Controller('chat')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
@@ -94,7 +111,7 @@ export class ChatController {
     @Query('limit') limit?: string,
   ) {
     const actorUserId = requireUserId(req);
-    const parsedLimit = limit ? Number.parseInt(limit, 10) : 50;
+    const parsedLimit = parseChatListLimit(limit, 50, 100);
     const conversations = await this.chat.listConversations(actorUserId, parsedLimit);
     const totalUnread = await this.chat.totalUnreadCount(actorUserId);
     return { conversations, totalUnread };
@@ -116,7 +133,7 @@ export class ChatController {
     @Query('limit') limit?: string,
   ) {
     const actorUserId = requireUserId(req);
-    const parsedLimit = limit ? Number.parseInt(limit, 10) : 10;
+    const parsedLimit = parseChatListLimit(limit, 10, 20);
     const users = await this.chat.searchActiveUsers(actorUserId, query ?? '', parsedLimit);
     return { users };
   }
