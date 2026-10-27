@@ -1,3 +1,9 @@
+## 2026-10-28 — Planning v1396 F675-155 (Feature Addition, DRAFT / RELEASE HOLD)
+- Previous Improvement v1394 → Current Addition v1396 → Next Improvement v1398 provisional. Main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c checked start/mid; unmerged predecessor #1634, issue #1639. Verified bank controller, repository, SmartLoanCard, migrations 194/211, QA v1333 #1635 and open A/B/C/QA PRs.
+- Added bilingual owner-verified read-only loan repayment impact preview: POST API/Android, single actor-scoped SECDEF snapshot, BigInt, over-request/insufficient cash, nonbinding display, distinct actual repayment, privacy/admin/SEO/a11y/KPI, exact-SHA/restore gates. Backlog ENV1396-01 SEC1396-02 REL1396-03 LOAN1396-04 LOAN1396-05 LOAN1396-06 LOAN1396-07 LOAN1396-08 LOAN1396-09 LOAN1396-10; synthetic 10,001/100/100 tests NOT RUN.
+- QA v1333 isolated candidate exact-head CI PASS but main migration 283, dev ACL 235/241, PUBLIC bank functions, five checksums, release links, official Test and restore BLOCKED. New independent external approved 0, dedup cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. No runtime/DB/WLD/ledger/Test/Production mutation.
+
+
 ## 2026-10-28 — Planning v1394 F675-154 (Feature Improvement, DRAFT / RELEASE HOLD)
 - Previous Addition v1392 → Current Improvement v1394 → Next Addition v1396 provisional. Verified main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` start/mid; stacked on unmerged planning #1630. Reviewed A #1631 actual candidate: two-item `/shop` GET compare and Android GET; v1392 POST/three-item/horizon remain **proposals, not implemented**.
 - Added bilingual acceptance for accurate upfront-vs-upkeep labeling, sold-out/expired prices, session/cache/GET log safety, full-catalog 10,001-row profiling, BigInt, 100 concurrent/100 forged, QA isolated PG, release exact-SHA/restore. Backlog ENV1394-01 SEC1394-02 REL1394-03 SHOP1394-04 SHOP1394-05 SHOP1394-06 SHOP1394-07 SHOP1394-08 SHOP1394-09 SHOP1394-10.

@@ -1,3 +1,9 @@
+## v1396 Review — F675-155 Bank Repayment Preview (Addition / DRAFT / HOLD)
+- Read-only evidence: main /bank SmartLoanCard has immediate repay but no server-side impact preview; bank_repay is a mutating ledger command and MUST NOT be used to simulate. Proposed owner-only POST + SECDEF one-snapshot read with no writes; current cash/debt and capped payable are estimates, not quotes.
+- Separate real repayment and replay receipt; reject owner forgery, stale session, insufficient cash, oversized integer, unavailable loan, private caching. Admin aggregate only, noindex, Android parity, WCAG AA, 10,001/100/100 unrun.
+- P0/P1 ENV1396-01 SEC1396-02 REL1396-03 LOAN1396-04 LOAN1396-05 LOAN1396-06 LOAN1396-07 LOAN1396-08 LOAN1396-09 LOAN1396-10. QA v1333 candidate #1635 CI PASS ≠ main/Test; dev ACL 235/241, three PUBLIC bank functions, migration 283/five checksums, dangling links, exact-SHA Test/restore BLOCKED. External approved new 0, cumulative UNKNOWN/10,000.
+
+
 # Integrated Planning Re-review v2026.09.22.348
 - **v1324 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1449 (stacked on unmerged #1432; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## v1324 Re-review — Member-confirmed vs administrator-closed support truth (2026-10-26; DRAFT/HOLD)

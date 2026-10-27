@@ -1,3 +1,50 @@
+## v1396 / F675-155 — 가상 WLD 은행 대출 상환 영향 미리보기 (기능 추가 / DRAFT / RELEASE HOLD) — 이슈 #1639
+
+**주기·기준:** 이전 기능 보완 v1394 → 현재 기능 추가 v1396 → 다음 기능 보완 v1398(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c. main의 AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조 문서 확인. 미병합 기획 #1634 위에 쌓는 문서 전용 Draft이며 개발 A/B/C/QA/Gemini의 런타임 작업은 수정하지 않는다.
+
+### 실제 코드 확인 및 설계 선택
+- 현재 frontend/src/app/bank/bank-forms.tsx의 SmartLoanCard는 상환액 입력·반액/전액 버튼과 즉시 상환 액션만 제공한다. backend/src/bank/bank.controller.ts는 GET banking/standing, POST banking/repay를 제공하나 **서버 검증 상환 영향 미리보기는 없다**. 운영 상환 오류가 발견되었다는 의미는 아니다.
+- Migration 194의 bank_repay는 실제 차감액을 LEAST(요청액, 미상환액)으로 제한하고 대출·USER_CASH 계정을 잠근 뒤 복식부기 원장을 기록한다. Migration 211은 실제 명령의 멱등성 영수증을 처리한다. 미리보기에서 이 쓰기 함수를 호출하면 안 된다.
+- 브라우저 단순 산술은 DB 동일 시점·소유권을 보증하지 못하며, 영구 견적/예약은 과도한 상태·잠금과 허위 보장을 만든다. **선택안:** 소유권을 검증하는 읽기 전용 SECURITY DEFINER 함수 + NestJS API, 기능 기본 OFF.
+
+### 대상·화면·CTA·상태
+- 대상은 로그인·필수 동의를 마친 가상 은행 회원이다. /bank → 대출 탭 → 활성/연체 대출 → 금액 입력 → **상환 영향 미리보기**. 요청액, 실제 예상 차감액=min(요청액, 잔여 대출액), 현재 현금, 차감 후 예상 현금, 현재 미상환액, 상환 후 예상 미상환액을 **가상 WLD 정수 문자열**로 보여준다. 요청액이 미상환액을 초과하면 자동 상한 적용을 명시한다.
+- CTA는 금액 수정 / 영향 미리보기 / 다시 계산 / 상환 화면 복귀 / **별도의 기존 대출 상환**이다. 미리보기 자체는 상환하지 않는다. 실제 상환 시 DB가 현재 대출 소유권·상태·현금·원장·멱등성을 다시 검증한다. 미리보기는 예약·확정 견적·이자 절약 약속이 아니다.
+- 상태는 입력 전·입력 오류·로딩·정상·현금 부족·요청액 상한 조정·오래된 결과·대출 없음·권한 없음·세션 만료·서버 오류·재시도다. 0/음수/소수/지수/너무 긴 입력은 거절한다. 연체 상태에서 추가 이자·면제·상환 일정 등 확인되지 않은 계산을 생성하지 않는다.
+- 로그아웃, 계정/대출/금액 변경, 페이지 이동 시 이전 응답과 진행 중 요청을 무효화한다. 개인정보를 로컬스토리지·브라우저 기록·공개 SSR에 남기지 않는다. 한영 문구를 동등하게 유지한다.
+
+### API·DB·트랜잭션·보안
+- **제안(미구현):** POST /api/v1/banking/repay-preview 및 Android POST /app-api/v1/banking/repay-preview. 본문 loanId(UUID), amount(양의 표준 십진 정수 문자열)만 허용하며 actor/잔액은 세션·서버에서 결정한다. SessionGuard·AuthenticatedGuard·ConsentGuard·CsrfGuard, 요청 크기·빈도 제한. POST는 읽기 전용이지만 대출 ID를 URL 로그에 노출하지 않으며 기존 POST 정책에 따라 CSRF를 검사한다.
+- 응답 필드 loanId, requestedAmount, payableAmount, currentCash, projectedCash, currentOutstanding, projectedOutstanding, adjustedToOutstanding, eligible, observedAt, source, binding:false. WLD는 PostgreSQL NUMERIC/BigInt를 사용하며 JS Number 금지. 응답은 보장 견적이 아니고 출처 검증이 실패하면 임의 0 또는 계산값으로 대체하지 않는다.
+- 400 잘못된 값, 401 미인증, 403 동의/소유권, 404 해당 본인 대출 없음, 409 상태 변경, 429 속도 제한, 503 DB 장애. 타인의 대출 존재 여부가 노출되지 않도록 403/404 세부 메시지를 통일할 수 있다. 성공·오류 모두 Cache-Control private,no-store, Android 오류·스키마 동등성.
+- 별도 개발 브랜치에서 전진형 마이그레이션으로 bank_repay_preview_v1(actor,loan,amount) SECURITY DEFINER, 고정 search_path, migrator 소유, PUBLIC EXECUTE 철회, 앱 역할 최소 EXECUTE만 허용한다. 대출 소유자·활성/연체 상태·유효 USER_CASH 계정·원장 기준 잔액·숫자 상한을 DB 내부에서 검증하고 단일 MVCC 관측을 반환한다. 기존 적용 SQL 수정·테이블 직접 GRANT·원장/Outbox/상환 내역/영구 미리보기 저장·락·잔액 변경 금지.
+- 인덱스는 virtual_bank_loans(id,user_id,status), accounts(owner_user_id,account_type,status)를 EXPLAIN으로 확인한 뒤 실제 필요할 때만 추가한다. 미리보기 직후 실제 상환·출금·대출 상태가 바뀔 수 있으므로 최종 상환 명령의 행 잠금·원장 검증이 유일한 진실 기준이다. 실제 상환 응답이 유실되면 기존 경제 명령 영수증으로 재확인하고 임의 재상환 금지.
+
+### 관리자·개인정보·SEO·모바일·접근성·KPI
+- 관리자는 비식별 집계 요청 수·오류율·p95만 조회하고 표본 k<20은 비공개. 회원/대출 ID, 금액, 잔액, 본문을 로그·분석·관리자 CSV에 포함하지 않는다. 권한 위조·열거·과다 호출 방지, 감사 기록도 비식별 처리. 회원 화면 noindex·사이트맵 제외·공개 캐시 금지.
+- 320/390/768px, 확대 200%, 키보드·스크린리더 상태 알림, 44px 터치 목표, 포커스·대비·동작 감소, WCAG 2.2 AA. Android BFF 인증·동의·CSRF·응답/오류·no-store 동등성. KPI: 미리보기→실제 상환 비율(비식별), p95, 실패율, 타인 데이터 0, 미리보기 금융 쓰기 0.
+
+### 수용시험·최신 QA·배포/롤백
+- **기획 회차에서 미실행:** 격리 PostgreSQL 17에서 합성 대출/관측 10,001건, 실제 상환·출금·미리보기 경합 100건, 타인 actor/대출/세션/CSRF 위조 100건. 0·부족·동일·초과 현금, 0·음수·지수·정수 범위 초과, 활성·연체·상환 완료, 중간 계정 전환·삭제, 429/503, 모든 응답 no-store, Android·접근성·p95·EXPLAIN을 확인한다. **미리보기 원장/대출/Outbox/멱등성 변경 0건**, 실제 상환 복식부기·재시도 영수증 정상 확인.
+- QA v1333 미병합 통합 후보 #1635 SHA efb7f93a71e868fc4a0bdf27c54fda898afa2cf9는 격리 PG 17.11 마이그레이션 285건, 루트 테스트/lint/typecheck/build PASS, 백엔드 2,274 PASS/60 SKIP, 프론트 1,681 PASS, DB 38 PASS/3 SKIP, 봇 감사 취약점 0건, 해당 정확 SHA CI 성공을 보고했다. **현재 main/공식 Test/운영 검증이 아니다.** main의 Migration 283 충돌, 개발 앱 241개 중 235개 테이블 DML, PUBLIC 실행 가능 기존 은행 함수 3개, 적용 체크섬 불일치 5건, Test/운영 배포 링크 대상 누락, 독립 복원 미검증은 계속 차단 조건이다.
+- 기능 기본 OFF. 개발 A는 회원 UI/API, B는 DB 권한·읽기 함수, C는 관리자 비식별 KPI, QA는 격리 PG·보안·금융 E2E·공식 Test 정확 SHA·독립 복원을 담당한다. 전부 PASS 및 승인된 GitOps 승격 전 운영 배포 금지. 롤백은 미리보기 UI/API만 OFF하고 이미 적용된 마이그레이션/원장/WLD는 변경하지 않는다.
+- 외부 독립 근거 신규 승인 **0건**, 누적 중복 제거·실제 근거 승인 **UNKNOWN/10,000건**, 게이트 **BLOCKED / IN PROGRESS**.
+
+### P0/P1 개발 백로그 (미완료)
+| 우선순위 | ID | 담당·수용 기준 |
+|---|---|---|
+| P0 | ENV1396-01 | Ops/QA: Test/운영 배포 링크·실행 SHA·독립 백업 복원 확인 |
+| P0 | SEC1396-02 | B/QA: 개발 앱 DML 235/241·PUBLIC 은행 함수·Migration 283·체크섬 5건 해결 |
+| P0 | REL1396-03 | QA/A: 전체 CI·격리 PG·보안·금융 E2E·공식 Test exact-SHA·GitOps 승인 전 HOLD |
+| P0 | LOAN1396-04 | A/B: 타인 대출 조회·허위 현금/상환 가능·미리보기 금융 쓰기 차단 |
+| P1 | LOAN1396-05 | B: 소유권 검증 SECDEF 읽기 함수·최소권한·단일 관측·인덱스 증명 |
+| P1 | LOAN1396-06 | B/A: NUMERIC/BigInt 정확 계산·초과 요청·동시성·오래된 응답 처리 |
+| P1 | LOAN1396-07 | A: NestJS/Android POST 계약·DTO·CSRF·429·모든 상태 no-store |
+| P1 | LOAN1396-08 | A: 회원 UI·별도 상환 확인·로그아웃 무효화·한영 WCAG |
+| P1 | LOAN1396-09 | C: 비식별 관리자 집계·개인정보·SEO·KPI·보관 정책 |
+| P1 | LOAN1396-10 | QA: 10,001/100/100 격리 PG·원장 회귀·독립 복원·롤백 |
+
+
 ## v1394 / F675-154 — 상점 비용 비교 계약·재고·표시 신뢰성 보완 (기능 보완 / DRAFT / RELEASE HOLD) — 개발 A Draft #1631, 선행 기획 #1630
 
 **회차 및 정본:** 이전 **기능 추가 v1392** → 현재 **기능 보완 v1394** → 다음 **기능 추가 v1396**(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; main의 `AGENTS.md`, `README.md`, 영어 정본 `PROJECT_PLAN.md`, 한국어 대조본 확인. 미병합 기획 Draft #1630을 기반으로 한 **문서 전용** 후속안이며 main·운영 구현이 아니다. Gemini·개발 A/B/C·QA 브랜치와 분리하고 런타임·DB·WLD·원장·스위치·Test·운영을 변경하지 않는다.

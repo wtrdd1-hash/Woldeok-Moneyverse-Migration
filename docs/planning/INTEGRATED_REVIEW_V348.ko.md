@@ -1,3 +1,9 @@
+## v1396 재검토 — F675-155 은행 상환 영향 미리보기 (추가 / DRAFT / HOLD)
+- main의 /bank SmartLoanCard는 바로 상환하나 서버 검증 영향 미리보기가 없다. 실제 bank_repay는 원장을 변경하므로 미리보기 호출 금지. 본인 전용 POST + SECDEF 단일 읽기 관측으로 현재/예상 현금·대출·상한 적용액을 표시하며 확정 견적은 아니다.
+- 실제 상환·멱등 영수증은 분리하고 타인 대출·세션 변경·현금 부족·과대 정수·비공개 캐시를 차단. 관리자 비식별 집계, noindex, Android 동등성, WCAG AA, 10,001/100/100 미실행.
+- P0/P1 ENV1396-01 SEC1396-02 REL1396-03 LOAN1396-04 LOAN1396-05 LOAN1396-06 LOAN1396-07 LOAN1396-08 LOAN1396-09 LOAN1396-10. QA v1333 후보 #1635 CI PASS는 main/Test가 아님. DML 235/241·PUBLIC 은행 함수 3개·Migration 283/체크섬 5건·배포 링크·Test exact-SHA·복원 BLOCKED. 외부 신규 승인 0, 누적 UNKNOWN/10,000.
+
+
 # 통합 기획 재검토 v2026.09.22.348
 - **v1324 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1449 (stacked on unmerged #1432; DRAFT / RELEASE HOLD). **Engineering issue:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1448.
 ## v1324 재검토 — 회원이 확인한 해결과 관리자가 종료한 문의 구분 (2026-10-26; DRAFT/HOLD)

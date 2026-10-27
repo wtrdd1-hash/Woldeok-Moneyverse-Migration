@@ -1,3 +1,9 @@
+## 2026-10-28 — 기획 v1396 F675-155 (기능 추가, DRAFT / RELEASE HOLD)
+- 이전 보완 v1394 → 현재 추가 v1396 → 다음 보완 v1398(잠정). main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c 시작·중간 확인; 선행 미병합 #1634, 이슈 #1639. 은행 컨트롤러·저장소·SmartLoanCard·Migration 194/211·QA v1333 #1635·개발 PR 확인.
+- 한영 통합 문서에 본인 검증 읽기 전용 상환 영향 미리보기, POST/Android, 단일 SECDEF 관측, BigInt·초과 요청·현금 부족, 실제 상환 분리, 개인정보·관리자·SEO·접근성·KPI·exact-SHA·복원 명세. 백로그 ENV1396-01 SEC1396-02 REL1396-03 LOAN1396-04 LOAN1396-05 LOAN1396-06 LOAN1396-07 LOAN1396-08 LOAN1396-09 LOAN1396-10, 합성 10,001/100/100 미실행.
+- QA v1333 격리 후보 정확 SHA CI PASS는 main/공식 Test가 아님. Migration 283·앱 DML 235/241·PUBLIC 은행 함수·체크섬 5건·배포 링크·복원 BLOCKED. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임/DB/WLD/원장/Test/운영 변경 없음.
+
+
 ## 2026-10-28 — 기획 v1394 F675-154 (기능 보완, DRAFT / RELEASE HOLD)
 - 이전 기능 추가 v1392 → 현재 기능 보완 v1394 → 다음 기능 추가 v1396(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, 미병합 기획 #1630 기반. 개발 A #1631의 실제 후보는 `/shop` 2개 GET 비교·Android GET이며 v1392의 POST/3개/기간별 총액은 **제안 상태**다.
 - 구매가·유지비 라벨, 품절·할인 만료, 세션/캐시/GET 로그 보호, 전체 카탈로그 10,001행 성능, BigInt·동시 100·위조 100, 격리 PG·정확 SHA Test·복원 수용조건을 영문·국문으로 보완. 백로그 ENV1394-01 SEC1394-02 REL1394-03 SHOP1394-04 SHOP1394-05 SHOP1394-06 SHOP1394-07 SHOP1394-08 SHOP1394-09 SHOP1394-10.

@@ -1,3 +1,9 @@
+## F675-155 / v1396 — 본인 검증 가상 은행 대출 상환 영향 미리보기 (기능 추가 / DRAFT / HOLD)
+- **확인된 코드:** /bank 대출 화면에는 상환 실행은 있으나 서버 검증 미리보기는 없다. Migration 194의 실제 상환액 상한/원장과 Migration 211 멱등 명령을 확인했다. 운영 오류 확인 아님.
+- **제안:** 로그인 회원이 /bank에서 상환액 입력→영향 미리보기로 현재/예상 현금·대출 잔액, 초과 요청·현금 부족을 확인하고 별도로 실제 상환. NestJS/Android POST, 소유권 검증 읽기 전용 SECURITY DEFINER 단일 관측, NUMERIC/BigInt, 원장 변경·확정 견적·직접 테이블 GRANT·공개 캐시 금지. 관리자 비식별 집계 k>=20, noindex, WCAG 2.2 AA.
+- **개발 연계:** A 화면/API/Android, B DB·권한, C 개인정보/관리자, QA 격리 PG 10,001/100/100·금융 회귀·공식 Test exact-SHA·독립 복원. ENV1396-01 SEC1396-02 REL1396-03 LOAN1396-04 LOAN1396-05 LOAN1396-06 LOAN1396-07 LOAN1396-08 LOAN1396-09 LOAN1396-10. QA v1333 #1635 후보 CI PASS는 main이 아님; DML 235/241·PUBLIC 은행 함수 3개·Migration 283/체크섬 5건·배포 링크·복원 차단. 외부 승인 0, 누적 UNKNOWN/10,000, 기능 OFF·운영 HOLD.
+
+
 ## F675-154 / v1394 — 구현 후보와 기획의 API·가격 표시 차이 보완 (기능 보완 / DRAFT / HOLD)
 - **개발 A #1631 미병합 후보:** `/shop` 2개 인라인 비교, `GET /api/v1/shop/compare?ids=...`·Android GET, `shop_catalog_list_v2(actor)` 전체 목록 읽기, BigInt 구매가/유지비 차이. 3개·0/1/4주 총액·POST·관측 시각·불변 영수증은 **미구현**. 읽기 GET은 CSRF 필수 아님.
 - **신뢰성:** '더 저렴한 상품'은 **구매 단가** 기준으로만 표시하고 총비용 우승으로 오해시키지 않는다. 품절 상품의 최저가 판정·할인 종료·유지비 우위 역전·로그아웃·계정 전환·응답 no-store·GET 로그 UUID 노출을 수용시험에 포함한다.

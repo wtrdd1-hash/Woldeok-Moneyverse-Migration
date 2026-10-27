@@ -1,3 +1,9 @@
+## v1396 — F675-155 가상 은행 대출 상환 영향 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
+- 이전 보완 v1394 → 현재 추가 v1396 → 다음 보완 v1398(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c, 선행 미병합 기획 #1634, 개발 이슈 #1639. 기존 대출 화면은 상환액 입력 후 즉시 상환하며 검증된 영향 미리보기가 없다. Migration 194 실제 차감 상한과 Migration 211 멱등 영수증을 확인했다. 운영 장애 확인 아님.
+- /bank 대출 탭에서 본인 현금·대출 잔액의 **확정되지 않은 읽기 전용 예상 변화**를 표시. 제안 POST /api/v1/banking/repay-preview, Android 동등성, 소유권 검증 SECDEF 단일 DB 관측, NUMERIC/BigInt, 초과 요청·현금 부족·세션 변경 처리. 금융 원장/잔액 변경·예약·이자 절약 보장·직접 GRANT 금지. 화면/CTA/상태/API/DB/트랜잭션/관리자/보안/SEO/모바일/접근성/KPI/테스트/롤백은 한영 통합 마스터 참조.
+- 백로그 ENV1396-01 SEC1396-02 REL1396-03 LOAN1396-04 LOAN1396-05 LOAN1396-06 LOAN1396-07 LOAN1396-08 LOAN1396-09 LOAN1396-10. QA v1333 미병합 후보 #1635 정확 SHA CI PASS는 main/공식 Test가 아님. main Migration 283, 개발 앱 DML 235/241, PUBLIC 은행 함수 3개, 체크섬 5건, 배포 링크, 공식 Test exact-SHA·독립 복원 차단. 합성 10,001/100/100 미실행. 외부 신규 승인 0, 누적 중복 제거 승인 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 기능 OFF·운영 HOLD, 런타임/DB/WLD/원장/Test/운영 변경 없음.
+
+
 ## v1394 — F675-154 상점 비용 비교 계약·품절·신뢰성 보완 (기능 보완 / DRAFT / HOLD)
 - 이전 기능 추가 v1392 → 현재 기능 보완 v1394 → 다음 기능 추가 v1396(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`. 기획 #1630 미병합, 개발 A #1631 SHA `db018d11fe7f2ef0dae79e3fe3b6e88e8b3b7365` 역시 **Draft 후보**이며 운영 기능이 아니다.
 - v1392의 2~3개·POST·0/1/4주 예시와 달리 개발 후보는 `/shop`에서 **2개**, 인증된 GET `/api/v1/shop/compare?ids=...` 및 Android GET, **구매가 차이/주간 유지비 차이**만 구현. 3개·기간별 총액·POST·관측 시각 구현 주장 금지. 읽기 전용 GET에 CSRF 필수 아님.
