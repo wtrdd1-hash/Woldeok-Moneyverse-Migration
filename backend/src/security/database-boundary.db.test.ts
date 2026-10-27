@@ -103,18 +103,16 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
            AND grant_row.privilege_type IN ('INSERT', 'UPDATE', 'DELETE')
          ORDER BY grant_row.table_name, grant_row.privilege_type`,
       );
+      // v285 revokes direct app DML on all space/project/property-tax tables.
+      // These rows must be absent: do not re-grant unsafe writes to satisfy CI.
+      expect(result.rows.some((row) => ['city_project_contributions', 'city_projects',
+        'space_property_tax_payments', 'user_spaces'].includes(row.table_name))).toBe(false);
       expect(result.rows).toEqual([
         { table_name: 'account_age_policy_state', privilege_type: 'DELETE' },
         { table_name: 'account_age_policy_state', privilege_type: 'INSERT' },
         { table_name: 'account_age_policy_state', privilege_type: 'UPDATE' },
         { table_name: 'auth_sessions', privilege_type: 'INSERT' },
         { table_name: 'auth_sessions', privilege_type: 'UPDATE' },
-        { table_name: 'city_project_contributions', privilege_type: 'DELETE' },
-        { table_name: 'city_project_contributions', privilege_type: 'INSERT' },
-        { table_name: 'city_project_contributions', privilege_type: 'UPDATE' },
-        { table_name: 'city_projects', privilege_type: 'DELETE' },
-        { table_name: 'city_projects', privilege_type: 'INSERT' },
-        { table_name: 'city_projects', privilege_type: 'UPDATE' },
         { table_name: 'club_feed_posts', privilege_type: 'DELETE' },
         { table_name: 'club_feed_posts', privilege_type: 'INSERT' },
         { table_name: 'club_feed_posts', privilege_type: 'UPDATE' },
@@ -137,11 +135,6 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
         { table_name: 'oauth_challenges', privilege_type: 'UPDATE' },
         { table_name: 'season_hall_of_fame', privilege_type: 'INSERT' },
         { table_name: 'season_hall_of_fame', privilege_type: 'UPDATE' },
-        { table_name: 'space_property_tax_payments', privilege_type: 'INSERT' },
-        { table_name: 'space_property_tax_payments', privilege_type: 'UPDATE' },
-        { table_name: 'user_spaces', privilege_type: 'DELETE' },
-        { table_name: 'user_spaces', privilege_type: 'INSERT' },
-        { table_name: 'user_spaces', privilege_type: 'UPDATE' },
       ]);
     });
   },
