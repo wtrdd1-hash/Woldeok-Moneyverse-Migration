@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.28.1405 — Blog rotation every 2h, no mandatory reviewer / 자동 발행 최신 결정
+- [EN specification](docs/planning/BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.md) / [한국어](docs/planning/BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.ko.md) · [Korean worklog](docs/worklog/2026-10-28-blog-rotation-v1405.ko.md). User-approved plan: native KR/US/JP/CN × economy/coding/computer at 2h intervals, no mandatory human review, absolutely no timed automatic unpublishing, owner-only later correction/hide/delete, independent factual/evidence checks, distinct Google AdSense curation. Scheduler/policy source candidate, no new native AI writer, no live publication or Test/Production deployment.
+
+
 ## v2026.10.27.3 — Existing branch summary (documentation only)
 - [EN full report](docs/audits/2026-10-27-current-branches-v2026.10.27.3.md) / [KO](docs/audits/2026-10-27-current-branches-v2026.10.27.3.ko.md) / [CSV](docs/audits/2026-10-27-current-branches-v2026.10.27.3.csv) · [version status](docs/releases/v2026.10.27.3.md). Web/backend 351, Android 7; Git history evidence only, no Test/Production deployment.
 

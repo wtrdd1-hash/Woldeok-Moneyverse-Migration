@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.28.1405 — Blog two-hour multilingual publishing directive (SOURCE CANDIDATE)
+- Latest owner policy overrides mandatory human review. Two-hour KST country×topic rotation, four native languages and ECONOMY/CODING/COMPUTER. Automated independent quality validation gates publication; no verified article auto-unpublishes; administrator may optionally edit/private/delete later. Unverifiable finance/AI claims skipped (not sent for mandatory human review).
+- [Full EN spec](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.md) / [KO](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.ko.md). Pure rotation, scheduler and policy code only, not live writer. No official Test, production or DB content modifications. Google-served ads cannot be placed on uncurated auto-generated pages; ads and public visibility have separate policies.
+
+
 ## v2026.10.24.1210 — F675-109 Reading List Deletion/Cursor/Resume Hardening (PLANNING DRAFT / RELEASE HOLD)
 - Cycle: Previous Addition v1208; Current Improvement v1210; Next Addition v1212 provisional. Authoritative main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` unchanged start/mid; predecessor Draft #1087 unmerged. QA v1213 FAILED/HOLD; new P0 release gate #1088. Docs only.
 - Source: board public functions in migrations 175/259 only expose `deleted_at IS NULL` posts; post page's comments anchor is `#comments-title`. Fix v1208's proposed RESTRICT FK blocking authorized hard purge, allow redacted owner REMOVE of saved-but-unavailable post, lock actor→post FOR SHARE→saved row, immutable digest-bound receipts and tombstone re-save, owner/session-bound HMAC snapshot cursor, logout response fencing. Keep production 500 saved cap; 10,001-item pagination test only in isolated synthetic fixture.
