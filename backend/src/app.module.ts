@@ -4,6 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { CoreModule } from './core/core.module';
 import { HealthModule } from './health/health.module';
+import { HelpModule } from './help/help.module';
 import { AccountModule } from './account/account.module';
 import { AdminModule } from './admin/admin.module';
 import { AdminEconomyModule } from './admin/economy.module';
@@ -56,6 +57,7 @@ const ONE_MINUTE_MS = 60_000;
     GameClockModule,
     AuthModule,
     HealthModule,
+    HelpModule,
     SeoModule,
     WalletModule,
     WorkModule,
