@@ -1,19 +1,14 @@
 'use client';
 
-import Link from 'next/link';
 import { useActionState } from 'react';
 import { searchVerifiedHelp, type HelpSearchState } from './actions';
-import { helpArticleHref, helpReviewDeadline, normalizeHelpLocale, type HelpLocale } from './locale';
+import type { HelpLocale } from './locale';
+import { HelpResults } from './help-results';
 
 const initial: HelpSearchState = { status: 'initial', articles: [] };
 export function HelpSearch({ initialLocale = 'ko' }: { initialLocale?: HelpLocale }) {
   const [state, action, pending] = useActionState(searchVerifiedHelp, initial);
   const locale = state.locale ?? initialLocale;
-  // An open result list must not keep showing a verified badge after expiry.
-  const currentArticles = state.articles.flatMap(article => {
-    const review = helpReviewDeadline(article.reviewed_until, normalizeHelpLocale(article.locale));
-    return review ? [{ article, review }] : [];
-  });
   return <section className="grid gap-5">
     <form action={action} className="grid gap-3 rounded-xl border p-4">
       <label htmlFor="help-locale">Language / 언어</label>
@@ -35,24 +30,6 @@ export function HelpSearch({ initialLocale = 'ko' }: { initialLocale?: HelpLocal
         {pending ? (locale === 'en' ? 'Searching…' : '검색 중…') : (locale === 'en' ? 'Search' : '검색')}
       </button>
     </form>
-    <div aria-live="polite" aria-atomic="true">
-      {(state.status === 'empty' || (state.status === 'results' && currentArticles.length === 0)) &&
-        <p>{locale === 'en' ? 'No currently verified results.' : '검증된 검색 결과가 없습니다.'}</p>}
-      {state.status === 'invalid' && <p role="alert">{locale === 'en' ? 'Search terms must be 100 characters or fewer.' : '검색어는 100자 이내여야 합니다.'}</p>}
-      {state.status === 'unavailable' && <p role="alert">{locale === 'en' ? 'Verified help is temporarily unavailable. Please try again.' : '현재 검증된 도움말을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.'}</p>}
-      {state.status === 'results' && currentArticles.length > 0 &&
-        <p>{locale === 'en' ? `${currentArticles.length} verified articles` : `${currentArticles.length}개의 검증된 도움말`}</p>}
-    </div>
-    {state.status === 'results' && currentArticles.length > 0 &&
-      <ul className="grid gap-3">{currentArticles.map(({ article, review }) =>
-        <li key={article.article_id} className="rounded-xl border p-4">
-          <Link className="font-semibold underline underline-offset-4" href={helpArticleHref(article.slug, normalizeHelpLocale(article.locale))}>{article.title}</Link>
-          <p className="mt-2 text-sm">{article.summary}</p>
-          <p className="mt-2 text-sm">
-            {normalizeHelpLocale(article.locale) === 'en' ? 'Evidence reviewed until: ' : '근거 검증 유효기한: '}
-            <time dateTime={review.dateTime}>{review.label}</time>
-          </p>
-        </li>
-      )}</ul>}
+    <HelpResults state={state} locale={locale} />
   </section>;
 }
