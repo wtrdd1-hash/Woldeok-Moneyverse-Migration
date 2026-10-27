@@ -25,6 +25,7 @@ import { BlogInlineCalculator } from '@/components/blog/blog-inline-calculator';
 import { BlogRelatedEcosystem } from '@/components/blog/blog-related-ecosystem';
 import { BlogConversionBanner } from '@/components/blog/blog-conversion-banner';
 import { BlogInfographicCard } from '@/components/blog/blog-infographic-card';
+import { shouldShowCompoundInlineCalculator, shouldShowFinancialPromotions, shouldShowReadership } from '../blog-presentation-policy';
 
 interface Props {
   readonly post: BlogPost;
@@ -129,13 +130,15 @@ export function BlogPostClient({ post, locale }: Props) {
           <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
             <Clock className="size-3" /> {labels.minutes} {post.readTimeMinutes}{labels.unit}
           </span>
-          <span className="text-xs text-muted-foreground font-mono">·</span>
-          <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-            <Eye className="size-3" /> {labels.views} {post.views.toLocaleString()} {labels.viewUnit}
-          </span>
+          {shouldShowReadership(post) && <>
+            <span className="text-xs text-muted-foreground font-mono">·</span>
+            <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
+              <Eye className="size-3" /> {labels.views} {post.views.toLocaleString()} {labels.viewUnit}
+            </span>
+          </>}
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight leading-tight">
+        <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight leading-tight break-words">
           {activeTitle}
         </h1>
 
@@ -187,7 +190,7 @@ export function BlogPostClient({ post, locale }: Props) {
         {blocks.map((block, idx) => (
           <React.Fragment key={'block-' + idx}>
             {block}
-            {idx === 1 && (
+            {idx === 1 && shouldShowCompoundInlineCalculator(post) && (
               <BlogInlineCalculator
                 fullCalculatorHref={post.relatedCalculatorHref}
                 fullCalculatorName={post.relatedCalculatorName}
@@ -216,15 +219,15 @@ export function BlogPostClient({ post, locale }: Props) {
       </div>
 
       {/* 3. 본문 맞춤형 머니버스 생태계 3대 도구 및 가상 주식 퀵 큐레이션 */}
-      <BlogRelatedEcosystem
+      {shouldShowFinancialPromotions(post) && <BlogRelatedEcosystem
         relatedCalculatorHref={post.relatedCalculatorHref}
         relatedCalculatorName={post.relatedCalculatorName}
         relatedStockTicker={post.relatedStockTicker}
         category={post.category}
-      />
+      />}
 
       {/* 4. 신규 가입 웰컴 지원금(10,000 WLD + 복권) 및 AI 어드바이저 덕이 진단실 고전환 락인 배너 */}
-      <BlogConversionBanner />
+      {shouldShowFinancialPromotions(post) && <BlogConversionBanner />}
     </article>
   );
 }
