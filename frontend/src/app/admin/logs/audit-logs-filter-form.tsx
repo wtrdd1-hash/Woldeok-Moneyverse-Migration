@@ -90,7 +90,7 @@ export function AuditLogsFilterForm({ filters, users = [] }: AuditLogsFilterForm
 
   return (
     <Card className="border-border/80 shadow-xs transition-all">
-      <CardHeader className="cursor-pointer pb-3 select-none" onClick={() => setIsOpen(!isOpen)}>
+      <CardHeader className="pb-3 select-none">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Filter className="size-4 text-primary" />
@@ -109,7 +109,10 @@ export function AuditLogsFilterForm({ filters, users = [] }: AuditLogsFilterForm
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 gap-1 text-xs text-muted-foreground hover:text-foreground"
+            onClick={() => setIsOpen((previous) => !previous)}
+            aria-expanded={isOpen}
+            aria-controls="audit-filter-panel"
+            className="min-h-11 gap-1 text-xs text-muted-foreground hover:text-foreground"
           >
             {isOpen ? (
               <>
@@ -127,12 +130,12 @@ export function AuditLogsFilterForm({ filters, users = [] }: AuditLogsFilterForm
         <CardDescription className="text-xs">
           {isOpen
             ? '닉네임 또는 UUID, 기능, IP 주소로 정밀 필터링합니다. 비어 있는 항목은 조건을 걸지 않습니다.'
-            : '클릭하여 닉네임, IP, 액션, 기간별 검색 필터를 전개할 수 있습니다.'}
+            : '필터 열기 버튼으로 닉네임, IP, 액션, 기간별 검색 조건을 펼칠 수 있습니다.'}
         </CardDescription>
       </CardHeader>
 
       {isOpen && (
-        <CardContent className="pt-1">
+        <CardContent id="audit-filter-panel" className="pt-1">
           {/* 유저 자동완성 데이터리스트 */}
           {users.length > 0 && (
             <datalist id="audit-user-suggestions">
@@ -151,28 +154,28 @@ export function AuditLogsFilterForm({ filters, users = [] }: AuditLogsFilterForm
               <button
                 type="button"
                 onClick={() => handleDatePreset('today')}
-                className="px-2.5 py-1 text-xs font-medium rounded-lg border border-border/80 bg-muted/40 hover:bg-muted text-foreground transition-colors"
+                className="min-h-11 px-2.5 py-1 text-xs font-medium rounded-lg border border-border/80 bg-muted/40 hover:bg-muted text-foreground transition-colors"
               >
                 오늘
               </button>
               <button
                 type="button"
                 onClick={() => handleDatePreset(7)}
-                className="px-2.5 py-1 text-xs font-medium rounded-lg border border-border/80 bg-muted/40 hover:bg-muted text-foreground transition-colors"
+                className="min-h-11 px-2.5 py-1 text-xs font-medium rounded-lg border border-border/80 bg-muted/40 hover:bg-muted text-foreground transition-colors"
               >
                 최근 7일
               </button>
               <button
                 type="button"
                 onClick={() => handleDatePreset(30)}
-                className="px-2.5 py-1 text-xs font-medium rounded-lg border border-border/80 bg-muted/40 hover:bg-muted text-foreground transition-colors"
+                className="min-h-11 px-2.5 py-1 text-xs font-medium rounded-lg border border-border/80 bg-muted/40 hover:bg-muted text-foreground transition-colors"
               >
                 최근 30일
               </button>
               <button
                 type="button"
                 onClick={() => handleDatePreset('all')}
-                className="px-2.5 py-1 text-xs font-medium rounded-lg border border-border/80 bg-muted/40 hover:bg-muted text-muted-foreground transition-colors"
+                className="min-h-11 px-2.5 py-1 text-xs font-medium rounded-lg border border-border/80 bg-muted/40 hover:bg-muted text-muted-foreground transition-colors"
               >
                 전체 기간
               </button>
@@ -187,7 +190,7 @@ export function AuditLogsFilterForm({ filters, users = [] }: AuditLogsFilterForm
                   type="datetime-local"
                   value={fromDate}
                   onChange={(e) => setFromDate(e.target.value)}
-                  className="h-9 text-xs"
+                  className="min-h-11 text-xs"
                 />
               </label>
               <label className="grid gap-1.5">
@@ -197,7 +200,7 @@ export function AuditLogsFilterForm({ filters, users = [] }: AuditLogsFilterForm
                   type="datetime-local"
                   value={toDate}
                   onChange={(e) => setToDate(e.target.value)}
-                  className="h-9 text-xs"
+                  className="min-h-11 text-xs"
                 />
               </label>
 
@@ -285,24 +288,24 @@ export function AuditLogsFilterForm({ filters, users = [] }: AuditLogsFilterForm
 
             {/* 하단 액션 버튼 그룹 */}
             <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
-              <Button type="submit" className="min-h-10 px-5 gap-1.5 font-bold shadow-xs">
+              <Button type="submit" className="min-h-11 px-5 gap-1.5 font-bold shadow-xs">
                 <Search className="size-4" />
                 검색 실행
               </Button>
-              <Button asChild variant="ghost" className="min-h-10 gap-1 text-muted-foreground hover:text-foreground">
+              <Button asChild variant="ghost" className="min-h-11 gap-1 text-muted-foreground hover:text-foreground">
                 <Link href="/admin/logs">
                   <RotateCcw className="size-3.5" />
                   조건 초기화
                 </Link>
               </Button>
               <div className="ml-auto flex flex-wrap gap-2">
-                <Button asChild variant="outline" size="sm" className="min-h-10 text-xs">
+                <Button asChild variant="outline" size="sm" className="min-h-11 text-xs">
                   <Link href="/admin/logs/integrity">
                     <ShieldCheck className="size-3.5 mr-1 text-emerald-500" />
                     무결성 검증 →
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="sm" className="min-h-10 text-xs">
+                <Button asChild variant="outline" size="sm" className="min-h-11 text-xs">
                   <Link href="/admin/logs/delivery">Discord 전달 로그 →</Link>
                 </Button>
               </div>
@@ -341,7 +344,7 @@ function FilterField({
         autoComplete="off"
         {...(list ? { list } : {})}
         placeholder={placeholder}
-        className="h-9 text-xs placeholder:text-muted-foreground/40"
+        className="min-h-11 text-xs placeholder:text-muted-foreground/40"
       />
       {hint && <span className="text-[0.68rem] text-muted-foreground/80">{hint}</span>}
     </label>
@@ -365,7 +368,7 @@ function FilterSelect({
       <select
         name={name}
         defaultValue={value}
-        className="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-xs shadow-2xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="min-h-11 w-full rounded-md border border-input bg-card px-3 py-1 text-xs shadow-2xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         {children}
       </select>
