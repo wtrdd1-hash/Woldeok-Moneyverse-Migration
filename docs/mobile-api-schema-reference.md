@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.09.22.359**
+Update version: **v2026.10.27.1925**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 179 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -5617,6 +5617,31 @@ _No request body._
 ### Success response fields
 
 _None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/notifications/read-all-receipt` — Mark all owner notifications read and observe remaining unread count
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: remainingUnreadCount를 표시하고 /notifications/unread-count 및 알림 목록을 다시 조회
+- Operation ID: `NotificationController_markAllReadWithReceipt`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| updatedCount | true | number |  |
+| remainingUnreadCount | true | number |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

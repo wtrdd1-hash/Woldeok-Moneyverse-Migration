@@ -22,6 +22,7 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['crafting', 'recipes'])).toBe('/api/v1/crafting/recipes');
     expect(appGatewayPath(['marketplace', 'listings'])).toBe('/api/v1/marketplace/listings');
     expect(appGatewayPath(['notifications', 'unread-count'])).toBe('/api/v1/notifications/unread-count');
+    expect(appGatewayPath(['notifications', 'read-all-receipt'])).toBe('/api/v1/notifications/read-all-receipt');
     expect(appGatewayPath(['media', 'profile', 'avatar.webp'])).toBe('/media/profile/avatar.webp');
     expect(appGatewayPath(['auth', 'google', 'authorize'])).toBe('/auth/google/authorize');
     expect(appGatewayPath(['auth', 'discord', 'callback'])).toBe('/auth/discord/callback');

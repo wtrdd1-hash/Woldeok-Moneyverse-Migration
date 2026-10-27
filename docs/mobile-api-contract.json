@@ -1,6 +1,6 @@
 {
-  "contractVersion": "v2026.09.22.359",
-  "apiVersion": "v2026.09.22.359",
+  "contractVersion": "v2026.10.27.1925",
+  "apiVersion": "v2026.10.27.1925",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
     "primary": "en",
@@ -17061,6 +17061,44 @@
       "responseMode": "json",
       "responseSchema": {
         "type": "number"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/notifications/read-all-receipt",
+      "purpose": "서버 검증형 전체 알림 읽음 처리 및 남은 미확인 개수 조회",
+      "callWhen": "읽음 처리 후 새 알림 유입 여부까지 확인해야 할 때",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "remainingUnreadCount를 표시하고 /notifications/unread-count 및 알림 목록을 다시 조회",
+      "backendRoute": "/api/v1/notifications/read-all-receipt",
+      "operationId": "NotificationController_markAllReadWithReceipt",
+      "backendOpenApiPath": "/notifications/read-all-receipt",
+      "summary": "Mark all owner notifications read and observe remaining unread count",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "updatedCount": {
+            "type": "number"
+          },
+          "remainingUnreadCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "updatedCount",
+          "remainingUnreadCount"
+        ]
       },
       "responseCompatibility": {
         "preferredFieldNaming": "camelCase",
