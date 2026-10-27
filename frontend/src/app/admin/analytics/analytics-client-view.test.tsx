@@ -5,6 +5,22 @@ import { AnalyticsClientView } from './analytics-client-view';
 import type { AdminUser, AdminStock, ReconciliationHealth, FeatureSwitch } from '../types';
 
 describe('AnalyticsClientView', () => {
+  it('does not claim route uptime, successful IndexNow delivery or real-time refresh without evidence', () => {
+    render(<AnalyticsClientView usersAvailable={false} apiDomains={null} seoData={null} />);
+    expect(screen.queryByText(/99\.99%/)).toBeNull();
+    expect(screen.queryByText(/Live Realtime 60fps/)).toBeNull();
+    expect(screen.queryByText(/ONLINE 정상/)).toBeNull();
+    expect(screen.queryByText(/Datadog, Stripe, Toss Admin/)).toBeNull();
+    expect(screen.getByText(/API 상태 증거를 조회하거나 검증하지 못했습니다/)).toBeDefined();
+    expect(screen.getByText(/회원 자료 조회 실패/)).toBeDefined();
+    expect(screen.queryByText(/조회 표본 잔액 구성 비율/)).toBeNull();
+  });
+
+  it('renders backend route evidence as unmeasured and never invents a success rate', () => {
+    render(<AnalyticsClientView apiDomains={[{ id: 'auth', name: '인증', endpointCount: 2, status: 'UNKNOWN', latencyMs: null, successRate: null }]} />);
+    expect(screen.getAllByText('미측정').length).toBeGreaterThanOrEqual(2);
+    expect(screen.queryByText('100.0%')).toBeNull();
+  });
   const mockUsers: AdminUser[] = [
     {
       user_id: 'user-1',
@@ -105,11 +121,11 @@ describe('AnalyticsClientView', () => {
 
     expect(screen.getByText(/통합 텔레메트리 & 전방위 통계 관제실/)).toBeDefined();
     expect(screen.getByText(/유저 활성도 & 코호트 텔레메트리 그래프/)).toBeDefined();
-    expect(screen.getByText(/M0\/M1\/M2 가상 통화량 유동성 구성 비율/)).toBeDefined();
+    expect(screen.getByText(/조회 표본 잔액 구성 비율/)).toBeDefined();
     expect(screen.getByText(/5분위 자산 계층 분배율 & 양극화 곡선/)).toBeDefined();
     expect(screen.getByText(/상위 상장 종목 시가총액 & 체결 랭킹/)).toBeDefined();
-    expect(screen.getByText(/SEO 검색엔진 크롤러 색인 관제/)).toBeDefined();
-    expect(screen.getByText(/전 시스템 300\+개 엔드포인트 가동 현황 매트릭스/)).toBeDefined();
+    expect(screen.getByText(/SEO 관측 자료를 불러오지 못했습니다/)).toBeDefined();
+    expect(screen.getByText(/도메인별 API 관측 상태/)).toBeDefined();
   });
 
   it('triggers CSV download without error when clicking export button', () => {

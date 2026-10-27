@@ -4,32 +4,20 @@ import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   Activity,
-  ArrowDownToLine,
-  BarChart3,
   Bot,
-  Calendar,
   CheckCircle2,
   ChevronRight,
-  CircleAlert,
-  Coins,
   Compass,
   Crown,
   Download,
   Eye,
-  Flame,
   Globe,
-  Landmark,
-  Layers,
   PieChart,
-  RefreshCw,
   Search,
   Server,
   ShieldCheck,
-  Sliders,
   TrendingUp,
-  UserCheck,
   Users,
-  Wallet,
   Zap,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { AdminUser, AdminStock, ReconciliationHealth, FeatureSwitch } from '../types';
 import type { SeoInitialData } from '../seo/seo-client-view';
-import { AdminComprehensiveTelemetryMatrix } from '../components/admin-comprehensive-telemetry-matrix';
+import type { AnalyticsDomainEvidence } from './analytics-evidence';
 
 export interface AnalyticsClientViewProps {
   users?: readonly AdminUser[];
@@ -45,6 +33,8 @@ export interface AnalyticsClientViewProps {
   health?: ReconciliationHealth | null;
   controls?: readonly FeatureSwitch[];
   seoData?: SeoInitialData | null;
+  apiDomains?: readonly AnalyticsDomainEvidence[] | null;
+  usersAvailable?: boolean;
 }
 
 type AnalyticsCategory = 'all' | 'user_economy' | 'seo_crawlers' | 'traffic_sources' | 'api_health';
@@ -52,11 +42,10 @@ type AnalyticsCategory = 'all' | 'user_economy' | 'seo_crawlers' | 'traffic_sour
 export function AnalyticsClientView({
   users = [],
   stocks = [],
-  health = null,
-  controls = [],
   seoData = null,
+  apiDomains = null,
+  usersAvailable = true,
 }: AnalyticsClientViewProps) {
-  const [selectedRange, setSelectedRange] = useState<'realtime' | 'daily' | 'monthly'>('realtime');
   const [activeCategory, setActiveCategory] = useState<AnalyticsCategory>('all');
   const [excludeAdmin, setExcludeAdmin] = useState(true);
 
@@ -211,65 +200,49 @@ export function AnalyticsClientView({
     return list.slice(0, 5);
   }, [stocks]);
 
-  // 5. 14대 도메인 API 헬스체크 & 지연시간 데이터
-  const domainHealthList = useMemo(() => [
-    { id: 'auth', name: '인증 및 세션', latency: 12, rate: '100.0%', status: '정상' },
-    { id: 'wallet', name: '지갑 & 자산 원장', latency: 8, rate: '100.0%', status: '정상' },
-    { id: 'bank', name: '가상 은행 & 예금', latency: 9, rate: '100.0%', status: '정상' },
-    { id: 'stocks', name: '가상 주식 거래소', latency: 14, rate: '100.0%', status: '정상' },
-    { id: 'casino', name: '아케이드 & 엔터테인먼트', latency: 16, rate: '100.0%', status: '정상' },
-    { id: 'shop', name: '상점 & 소모품', latency: 11, rate: '100.0%', status: '정상' },
-    { id: 'work', name: '직업 & 퀘스트 파밍', latency: 10, rate: '100.0%', status: '정상' },
-    { id: 'clubs', name: '클럽 & 커뮤니티', latency: 13, rate: '100.0%', status: '정상' },
-    { id: 'admin', name: '관리자 통제 타워', latency: 15, rate: '100.0%', status: '정상' },
-    { id: 'seo', name: 'SEO & 인덱싱 API', latency: 7, rate: '100.0%', status: '정상' },
-    { id: 'feed', name: '신문 & AI 시장 뉴스', latency: 18, rate: '100.0%', status: '정상' },
-    { id: 'inventory', name: '인벤토리 & 가방', latency: 10, rate: '100.0%', status: '정상' },
-    { id: 'support', name: '고객 지원 & 티켓', latency: 12, rate: '100.0%', status: '정상' },
-    { id: 'audit', name: '보안 감사 로그 체인', latency: 9, rate: '100.0%', status: '정상' },
-  ], []);
-
-  // 6. CSV 파일 다운로드 내보내기 핸들러 (SEO 및 도메인 지표 종합 확장)
+  // 5. CSV exports must carry the same evidence scope and unavailable states as the screen.
   const handleExportCsv = () => {
     const lines: string[] = [];
     lines.push('=== WOLDEOK MONEYVERSE COMPREHENSIVE ALL-IN-ONE ANALYTICS REPORT ===');
     lines.push(`Exported At,${new Date().toISOString()}`);
     lines.push(`Admin Traffic Excluded,${excludeAdmin ? 'YES' : 'NO'}`);
     lines.push(`Excluded Admin Accounts Count,${excludedAdminCount}`);
-    lines.push(`Total Clean Users,${cohortStats.total}`);
-    lines.push(`HAU (1h),${cohortStats.hau}`);
-    lines.push(`DAU (24h),${cohortStats.dau}`);
-    lines.push(`WAU (7d),${cohortStats.wau}`);
-    lines.push(`MAU (30d),${cohortStats.mau}`);
-    lines.push(`Stickiness (%),${cohortStats.stickiness}%`);
-    lines.push(`New Users (24h),${cohortStats.newUsersToday}`);
-    lines.push(`Dormant Users,${cohortStats.dormant}`);
+    lines.push(`Member Scope,${usersAvailable ? 'BOUNDED_ADMIN_LIST_NOT_ALL_MEMBERS' : 'UNAVAILABLE'}`);
+    lines.push(`Total Sampled Users,${usersAvailable ? cohortStats.total : 'UNAVAILABLE'}`);
+    lines.push(`HAU (1h),${usersAvailable ? cohortStats.hau : 'UNAVAILABLE'}`);
+    lines.push(`DAU (24h),${usersAvailable ? cohortStats.dau : 'UNAVAILABLE'}`);
+    lines.push(`WAU (7d),${usersAvailable ? cohortStats.wau : 'UNAVAILABLE'}`);
+    lines.push(`MAU (30d),${usersAvailable ? cohortStats.mau : 'UNAVAILABLE'}`);
+    lines.push(`Stickiness (%),${usersAvailable ? cohortStats.stickiness : 'UNAVAILABLE'}%`);
+    lines.push(`New Users (24h),${usersAvailable ? cohortStats.newUsersToday : 'UNAVAILABLE'}`);
+    lines.push(`Dormant Users,${usersAvailable ? cohortStats.dormant : 'UNAVAILABLE'}`);
     lines.push('');
-    lines.push('=== MONETARY AGGREGATES ===');
-    lines.push(`M0 Cash,${monetaryStats.m0}`);
-    lines.push(`Bank Deposits,${monetaryStats.bank}`);
-    lines.push(`M1 Total,${monetaryStats.m1}`);
-    lines.push(`Treasury Bonds,${monetaryStats.bond}`);
-    lines.push(`Stock Evaluation,${monetaryStats.stockEval}`);
-    lines.push(`M2 Broad Money,${monetaryStats.m2}`);
+    lines.push('=== BOUNDED USER SAMPLE BALANCES (NOT GLOBAL MONEY SUPPLY) ===');
+    lines.push(`Sample Cash,${usersAvailable ? monetaryStats.m0 : 'UNAVAILABLE'}`);
+    lines.push(`Sample Bank Deposits,${usersAvailable ? monetaryStats.bank : 'UNAVAILABLE'}`);
+    lines.push(`Sample M1 Proxy,${usersAvailable ? monetaryStats.m1 : 'UNAVAILABLE'}`);
+    lines.push(`Sample Bonds,${usersAvailable ? monetaryStats.bond : 'UNAVAILABLE'}`);
+    lines.push(`Sample Stock Evaluation,${usersAvailable ? monetaryStats.stockEval : 'UNAVAILABLE'}`);
+    lines.push(`Sample Asset Sum Proxy,${usersAvailable ? monetaryStats.m2 : 'UNAVAILABLE'}`);
     lines.push('');
-    lines.push('=== 5-QUINTILE WEALTH DISTRIBUTION ===');
+    lines.push('=== BOUNDED SAMPLE WEALTH DISTRIBUTION (NOT GLOBAL) ===');
     lines.push('Quintile,User Count,Total Wealth,Average Wealth,Share Ratio (%)');
-    quintileStats.forEach((q) => {
+    (usersAvailable ? quintileStats : []).forEach((q) => {
       lines.push(`${q.label},${q.count},${q.totalWealth},${Math.round(q.avgWealth)},${q.ratio}%`);
     });
     lines.push('');
     lines.push('=== SEO & SEARCH ENGINE CRAWLER METRICS ===');
-    lines.push(`24h Bot Hits,${seoData?.totalHits24h ?? 124}`);
-    lines.push(`7d Bot Hits,${seoData?.totalHits7d ?? 842}`);
-    lines.push(`Average Crawler Latency (ms),${seoData?.avgDurationMs ?? 42}ms`);
-    lines.push(`Stock Pages Indexed,${seoData?.stockCoverage.indexed ?? 10}/${seoData?.stockCoverage.total ?? 10}`);
-    lines.push(`Guide Pages Indexed,${seoData?.guideCoverage.indexed ?? 5}/${seoData?.guideCoverage.total ?? 5}`);
+    lines.push(`24h Bot Hits,${seoData?.totalHits24h ?? 'UNAVAILABLE'}`);
+    lines.push(`7d Bot Hits,${seoData?.totalHits7d ?? 'UNAVAILABLE'}`);
+    lines.push(`Average Crawler Latency (ms),${seoData?.avgDurationMs ?? 'UNAVAILABLE'}`);
+    lines.push(`Stock Pages Indexed,${seoData ? `${seoData.stockCoverage.indexed}/${seoData.stockCoverage.total}` : 'UNAVAILABLE'}`);
+    lines.push(`Guide Pages Indexed,${seoData ? `${seoData.guideCoverage.indexed}/${seoData.guideCoverage.total}` : 'UNAVAILABLE'}`);
     lines.push('');
     lines.push('=== 14 DOMAINS SYSTEM HEALTH & LATENCY ===');
     lines.push('Domain ID,Domain Name,Latency (ms),Success Rate,Status');
-    domainHealthList.forEach((d) => {
-      lines.push(`${d.id},${d.name},${d.latency}ms,${d.rate},${d.status}`);
+    if (!apiDomains) lines.push('UNAVAILABLE,API evidence unavailable,UNMEASURED,UNMEASURED,UNKNOWN');
+    apiDomains?.forEach((d) => {
+      lines.push(`${d.id},${d.name},${d.latencyMs ?? 'UNMEASURED'},${d.successRate ?? 'UNMEASURED'},${d.status}`);
     });
 
     const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + lines.join('\n');
@@ -293,7 +266,7 @@ export function AnalyticsClientView({
               통합 텔레메트리 & 전방위 통계 관제실 (All-in-One Analytics)
             </h2>
             <Badge variant="outline" className="border-cyan-500/40 text-cyan-400 text-xs">
-              Live Realtime 60fps
+              조회 시점 스냅샷 · 실측 여부 표시
             </Badge>
             {excludeAdmin && (
               <Badge variant="outline" className="border-emerald-500/50 bg-emerald-950/60 text-emerald-300 text-xs">
@@ -302,7 +275,7 @@ export function AnalyticsClientView({
             )}
           </div>
           <p className="mt-1 text-xs text-slate-400">
-            유저 코호트, 가상 경제 통화량, 주식 시총, SEO 검색 크롤러, 트래픽 유입 경로 및 14대 도메인 헬스까지 전 시스템 실시간 관제
+            제한된 관리자 조회 표본과 검증된 API 관측 자료를 구분합니다. 미측정 항목은 정상으로 간주하지 않습니다.
           </p>
         </div>
 
@@ -322,42 +295,9 @@ export function AnalyticsClientView({
             {excludeAdmin ? `관리자 제외 (${excludedAdminCount}명)` : '관리자 포함'}
           </button>
 
-          {/* 기간 필터 버튼 */}
-          <div className="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800">
-            <button
-              type="button"
-              onClick={() => setSelectedRange('realtime')}
-              className={`min-h-[44px] sm:min-h-9 px-3 text-xs font-semibold rounded-lg transition-all ${
-                selectedRange === 'realtime'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              실시간
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedRange('daily')}
-              className={`min-h-[44px] sm:min-h-9 px-3 text-xs font-semibold rounded-lg transition-all ${
-                selectedRange === 'daily'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              일간
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedRange('monthly')}
-              className={`min-h-[44px] sm:min-h-9 px-3 text-xs font-semibold rounded-lg transition-all ${
-                selectedRange === 'monthly'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              월간
-            </button>
-          </div>
+          <span className="rounded-lg border border-amber-500/30 px-3 py-2 text-xs text-amber-200">
+            기간별 비교 미측정 · 조회 시점 스냅샷
+          </span>
 
           {/* 종합 CSV 리포트 내보내기 버튼 */}
           <Button
@@ -371,6 +311,11 @@ export function AnalyticsClientView({
           </Button>
         </div>
       </div>
+
+      <p role="status" className="text-xs text-amber-300">
+        회원·경제 지표는 관리자 목록 조회 표본(최대 100명) 기반이며 전체 회원·총 통화 공급량이 아닙니다.
+        {!usersAvailable && ' 회원 자료 조회 실패 — 회원 통계는 검증되지 않았습니다.'}
+      </p>
 
       {/* 통계 도메인 원클릭 카테고리 전환 탭 바 (모바일 가로 스크롤 및 flex 축소 텍스트 겹침 방지) */}
       <div className="w-full max-w-full overflow-x-auto no-scrollbar rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-md touch-pan-x overscroll-x-contain scroll-smooth" aria-label="분석 범주">
@@ -441,7 +386,7 @@ export function AnalyticsClientView({
       {/* ========================================================================= */}
       {/* SECTION 1: 유저 활동 & 코호트 텔레메트리 (User Cohort & Retention) */}
       {/* ========================================================================= */}
-      {(activeCategory === 'all' || activeCategory === 'user_economy') && (
+      {(activeCategory === 'all' || activeCategory === 'user_economy') && usersAvailable && (
         <div className="space-y-6">
           <div className="flex items-center gap-2 px-1">
             <Users className="size-5 text-blue-400" />
@@ -466,7 +411,7 @@ export function AnalyticsClientView({
                   </Badge>
                 </div>
                 <CardDescription className="text-xs text-slate-400">
-                  HAU(1시간), DAU(24시간), WAU(7일), MAU(30일) 활성 유저 추이 및 신규/휴면 비율
+                  최대 100명 조회 표본 내 마지막 접속 기록 기준 활성도. 전체 회원의 HAU/DAU/WAU/MAU가 아닙니다.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -525,7 +470,7 @@ export function AnalyticsClientView({
                 {/* 하단 요약 지표 */}
                 <div className="grid grid-cols-3 gap-2 pt-1 text-center">
                   <div className="rounded-lg bg-slate-950/60 p-2 border border-slate-800">
-                    <p className="text-[10px] text-slate-400">일반 회원 수 (관리자 제외)</p>
+                    <p className="text-[10px] text-slate-400">조회된 일반 회원 표본</p>
                     <p className="text-sm font-bold font-mono text-white">{cohortStats.total}명</p>
                   </div>
                   <div className="rounded-lg bg-slate-950/60 p-2 border border-slate-800">
@@ -547,15 +492,15 @@ export function AnalyticsClientView({
                   <div className="flex items-center gap-2">
                     <PieChart className="size-4 text-emerald-400" />
                     <CardTitle className="text-base text-white">
-                      M0/M1/M2 가상 통화량 유동성 구성 비율
+                      조회 표본 잔액 구성 비율 (전수 통화량 아님)
                     </CardTitle>
                   </div>
                   <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 text-xs">
-                    M2 100% 비중
+                    표본 내 비중
                   </Badge>
                 </div>
                 <CardDescription className="text-xs text-slate-400">
-                  총 통화 공급량 대비 현금(M0), 은행 예금(M1), 국채, 주식 평가액 스택 분포
+                  조회 표본 회원의 잔액 구성 비율입니다. 전체 통화 공급량 또는 원장 대사 증거가 아닙니다.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -706,7 +651,12 @@ export function AnalyticsClientView({
       {/* ========================================================================= */}
       {/* SECTION 2: SEO 및 검색엔진 크롤러 색인 관제 (SEO Crawlers & Indexing) */}
       {/* ========================================================================= */}
-      {(activeCategory === 'all' || activeCategory === 'seo_crawlers') && (
+      {(activeCategory === 'all' || activeCategory === 'seo_crawlers') && !seoData && (
+        <div role="status" className="rounded-lg border border-amber-500/40 p-4 text-sm text-amber-200">
+          SEO 관측 자료를 불러오지 못했습니다. 크롤러 요청 0건이나 색인 정상으로 해석할 수 없습니다.
+        </div>
+      )}
+      {(activeCategory === 'all' || activeCategory === 'seo_crawlers') && seoData && (
         <div className="space-y-6 pt-2">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
@@ -727,7 +677,7 @@ export function AnalyticsClientView({
             <Card className="border-slate-800 bg-slate-900/80 shadow-xl backdrop-blur-xl">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs text-slate-400 flex items-center justify-between">
-                  <span>24시간 크롤러 요청수</span>
+                  <span>최근 수집 로그 내 24시간 크롤러 요청수</span>
                   <Bot className="size-4 text-emerald-400" />
                 </CardTitle>
                 <div className="text-2xl font-bold font-mono text-white mt-1">
@@ -749,7 +699,7 @@ export function AnalyticsClientView({
             <Card className="border-slate-800 bg-slate-900/80 shadow-xl backdrop-blur-xl">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs text-slate-400 flex items-center justify-between">
-                  <span>가상 주식 종목 색인율</span>
+                  <span>가상 주식 페이지 크롤러 관측 비율</span>
                   <Globe className="size-4 text-blue-400" />
                 </CardTitle>
                 <div className="text-2xl font-bold font-mono text-white mt-1">
@@ -758,10 +708,10 @@ export function AnalyticsClientView({
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-blue-400 flex items-center gap-1">
-                  <CheckCircle2 className="size-3.5" /> {(seoData?.stockCoverage?.indexed ?? 0) > 0 ? `${seoData?.stockCoverage?.indexed}개 종목 색인 확인` : '검색엔진 크롤러 방문 대기 중'}
+                  <CheckCircle2 className="size-3.5" /> {(seoData?.stockCoverage?.indexed ?? 0) > 0 ? `${seoData?.stockCoverage?.indexed}개 종목 크롤러 방문 관측` : '검색엔진 크롤러 방문 미관측'}
                 </p>
                 <div className="mt-3 pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-400">
-                  <span>가이드 문서 색인율</span>
+                  <span>가이드 문서 크롤러 관측 비율</span>
                   <span className="font-mono text-white">{seoData?.guideCoverage?.indexed ?? 0} / {seoData?.guideCoverage?.total ?? 5} ({Math.round(((seoData?.guideCoverage?.indexed ?? 0) / Math.max(1, seoData?.guideCoverage?.total ?? 5)) * 100)}%)</span>
                 </div>
               </CardContent>
@@ -775,16 +725,16 @@ export function AnalyticsClientView({
                   <Zap className="size-4 text-cyan-400" />
                 </CardTitle>
                 <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
-                  ONLINE 정상
+                  전송 상태 미검증
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-slate-400">
-                  Bing, Naver Search Advisor 즉시 반영 파이프라인
+                  크롤러 관측 자료는 IndexNow 제출 성공 증거가 아닙니다.
                 </p>
                 <div className="mt-3 pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-400">
-                  <span>키 페어 검증</span>
-                  <span className="font-mono text-cyan-400 truncate max-w-[150px]">{seoData?.indexNowKey ?? 'ACTIVE'}</span>
+                  <span>제출 성공 증거</span>
+                  <span className="font-mono text-cyan-400 truncate max-w-[150px]">키 상태 미검증</span>
                 </div>
               </CardContent>
             </Card>
@@ -795,10 +745,10 @@ export function AnalyticsClientView({
             <CardHeader className="pb-3">
               <CardTitle className="text-base text-white flex items-center gap-2">
                 <Bot className="size-4 text-emerald-400" />
-                검색엔진 크롤러 점유율 및 HTTP 응답 상태 분포
+                최근 크롤러 로그 점유율 및 HTTP 응답 상태 분포
               </CardTitle>
               <CardDescription className="text-xs text-slate-400">
-                Googlebot, Naver Yeti, Bingbot의 실시간 방문 비율과 200/304 성공률 모니터링
+                최근 최대 500건 로그에서 관측된 Googlebot, Naver Yeti, Bingbot 요청 분포
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -983,32 +933,33 @@ export function AnalyticsClientView({
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base text-white flex items-center gap-2">
                   <Server className="size-4 text-amber-400" />
-                  전 시스템 300+개 엔드포인트 가동 현황 매트릭스
+  도메인별 API 관측 상태 (미측정 구분)
                 </CardTitle>
                 <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 text-xs">
-                  Uptime 99.99%
+가동률 미측정
                 </Badge>
               </div>
               <CardDescription className="text-xs text-slate-400">
-                인하우스 API 게이트웨이 및 내부 라우팅 핑 벤치마크 기준 가동 현황
+관리자 API-health 조회 증빙. DB 상태 검사는 경로별 성공률·응답 지연 증명이 아닙니다.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-                {domainHealthList.map((d) => (
+                {!apiDomains && <p role="status" className="col-span-full text-sm text-amber-300">API 상태 증거를 조회하거나 검증하지 못했습니다.</p>}
+                {apiDomains?.map((d) => (
                   <div key={d.id} className="rounded-xl bg-slate-950/70 p-3 border border-slate-800 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between text-[11px] text-slate-400">
                         <span className="truncate">{d.name}</span>
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className={`w-2 h-2 rounded-full ${d.status === 'OPERATIONAL' ? 'bg-emerald-400' : 'bg-amber-400'}`} aria-hidden="true" />
                       </div>
                       <p className="text-base font-bold font-mono text-white mt-1">
-                        {d.latency}ms
+                        {d.latencyMs === null ? '미측정' : `${d.latencyMs}ms`}
                       </p>
                     </div>
                     <div className="mt-2 pt-2 border-t border-slate-800/80 flex justify-between text-[10px]">
                       <span className="text-slate-400">성공률</span>
-                      <span className="font-mono text-emerald-400 font-bold">{d.rate}</span>
+                      <span className="font-mono text-amber-300 font-bold">{d.successRate === null ? '미측정' : `${d.successRate}%`}</span>
                     </div>
                   </div>
                 ))}
@@ -1018,15 +969,11 @@ export function AnalyticsClientView({
         </div>
       )}
 
-      {/* 하단 종합 운영 텔레메트리 매트릭스 테이블 */}
-      <div className="pt-2">
-        <AdminComprehensiveTelemetryMatrix
-          users={effectiveUsers}
-          stocks={stocks}
-          health={health}
-          controls={controls}
-        />
-      </div>
+      <p className="rounded-lg border border-amber-500/30 p-4 text-sm text-amber-200" role="status">
+        전수 회원·금융 원장·시장 데이터가 검증되지 않아 기존 종합 운영 매트릭스는 표시하지 않습니다.
+        원장 대사 상태는 관리자 원장 점검에서 별도로 확인하세요.
+        <Link className="ml-2 underline underline-offset-2" href="/admin/economy">원장 점검</Link>
+      </p>
     </div>
   );
 }
