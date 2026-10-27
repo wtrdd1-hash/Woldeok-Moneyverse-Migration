@@ -32,6 +32,15 @@ describe('GameCatalogController mutation guards', () => {
     },
   );
 
+  it.each(['createSeasonEvent', 'updateSeasonEvent'] as const)(
+    'requires CSRF and recent reauthentication for WLD-fee season mutation %s',
+    (method) => {
+      const guards = guardsOn(method);
+      expect(guards).toContain(CsrfGuard);
+      expect(guards).toContain(ReauthGuard);
+    },
+  );
+
   it('keeps deletion of an untraded stock behind CSRF without requiring a code', () => {
     const guards = guardsOn('deleteStock');
     expect(guards).toContain(CsrfGuard);
