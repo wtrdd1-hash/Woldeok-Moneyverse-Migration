@@ -18,7 +18,7 @@ describe('SeasonRewardClaimBanner', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders celebratory banner with rank, reward WLD and claim button', () => {
+  it('shows earned reward while withholding unjournaled payout CTA', () => {
     render(
       <SeasonRewardClaimBanner
         seasonId="season-1"
@@ -33,6 +33,7 @@ describe('SeasonRewardClaimBanner', () => {
     expect(screen.getByText(/시즌 1: First Capital 시즌 랭킹 최종 보상/i)).toBeDefined();
     expect(screen.getByText(/1위 · CHALLENGER/i)).toBeDefined();
     expect(screen.getByText(/\+50,000 WLD/i)).toBeDefined();
-    expect(screen.getByText(/시즌 보상 수령하기/i)).toBeDefined();
+    expect(screen.queryByText(/시즌 보상 수령하기/i)).toBeNull();
+    expect(screen.getByText(/시즌 보상 지급이 일시 중단/i)).toBeDefined();
   });
 });
