@@ -4,7 +4,9 @@
 -- Suspend SQL mutations (including SECURITY DEFINER owner invocations) until
 -- atomic economy_post_transaction settlement and replay receipts are certified.
 -- Forward-only: never rewrite applied migrations 223/231 or historical balances.
--- Depends on migration 282 (PR #1564); do not deploy out of sequence.
+-- Depends on migration 282 (PR #1564), after independently ordered
+-- 283-bank-loan and 284-bank-pocket; not applied in official Test/Production
+-- at 2026-10-28 read-only verification. Do not deploy out of sequence.
 BEGIN;
 
 CREATE OR REPLACE FUNCTION public.space_purchase(

@@ -1,5 +1,22 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.28.1410 — Combined TECH and two-hour blog release candidate (NOT DEPLOYED)
+- Source combines v1403 TECH correction + v1405 2h rotation. Reordered previously unapplied duplicate migration 283-space to 285 after read-only Production/Test history check. Frontend 1686/backend 1695 tests PASS, lint/type/build PASS; verified AI author+publisher missing, exact-SHA Test identity and Production financial DML gates BLOCKED. [Worklog](../worklog/2026-10-28-blog-full-release-v1410.ko.md). Preserve v1406 owner-withdrawn posts.
+
+
+## v2026.10.28.1405 — Owner changes blog schedule and removes mandatory human review (SOURCE CANDIDATE ONLY)
+- [EN policy](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.md) / [KO](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.ko.md). Latest owner override: every two hours, 12 potential Asia/Seoul slots per editorial day; independently original KR/US/JP/CN language and ECONOMY/CODING/COMPUTER rotation; automatically publish only independently validated, useful material. **No mandatory human preapproval or 24h post-review. Never auto-unpublish published pages.** Owner may optionally edit/hide/delete later with authenticated auditable intent. Overrides prior human-review conditions in v975/v1107/v1108, NOT independent facts, rights, originality, duplicates, risk/exceptions, financial safety or release identity.
+- Candidate backend: deterministic KST-country-topic slots, scheduler job `blog.rotation_2h` replacing old `blog.daily_publish`, and pure publish/Google-ad eligibility helpers. No 4-language native AI writer, official-source verification, idempotent DB publisher or admin delete API yet; fail-closed 503 on legacy route remains. Google policy disallows ads on auto-generated content without manual review/curation, so unattended public articles default to **no Google-served ads** ([source](https://support.google.com/publisherpolicies/answer/11112688?hl=en)). No claim of new public posts.
+- Release state: CI/exact-SHA official Test, finance controls and production promotion unverified; no mutation of Production content or old cron. [Worklog](../worklog/2026-10-28-blog-rotation-v1405.ko.md), separate v1403 TECH draft PR #1602.
+
+## v2026.10.28.1403 — Engineering blog relevance and evidence remediation (BRANCH CANDIDATE)
+
+- Scope: reported BigInt ledger engineering article incorrectly inherited compound interest simulator, finance/market prose, unrelated citations and fabricated benchmark-like numbers. New TECH-only, reproducible engineering drafts cover BigInt accounting and WebSocket/Canvas order book rendering; HTML article, hub CTA and source generator no longer insert compound/banking/stock widgets in TECH content. Finance COMPOUND retains relevant calculator.
+- Prevent unsupported TECH template fallback into finance copy, country-label duplication, randomized views and unverified visit counts. The merged legacy editorial 503 guard and v1108 ban on automatic withdrawal remain intact. New reviewed engineering examples are **draft source**, not released public posts.
+- Isolated branch v1403 source validation: 328 frontend test files / 1,686 PASS, targeted blog 20 PASS, TypeScript and changed-file ESLint PASS, contract+Next production build PASS. Formal exact-SHA Test, authenticated backend/API/DB QA, Production finance gate and zero-downtime promotion **not established**; existing persisted flawed posts require manual authorized correction.
+- [EN worklog](../worklog/2026-10-28-blog-tech-relevance-v1403.md) / [KO](../worklog/2026-10-28-blog-tech-relevance-v1403.ko.md) · [Internal](../updates/v2026.10.28.1403-blog-tech-internal.md) / [KO](../updates/v2026.10.28.1403-blog-tech-internal.ko.md) · [GitHub](../updates/v2026.10.28.1403-blog-tech-github.md) / [KO](../updates/v2026.10.28.1403-blog-tech-github.ko.md).
+
+
 ## v2026.10.27.1318 — Scheduled QA rollout confirmation (OPS PRODUCTION_VERIFIED)
 
 - The v1317 hourly HTTP smoke and scoped QA scratch cleaner were merged via PR #1542 at main `0da3b886`, then staged as immutable QA-only operations release. Systemd service drop-in references the immutable runner, while original unit remained available for rollback. No application or DB deployment occurred.

@@ -1,5 +1,7 @@
 'use client';
 
+import { shouldShowReadership } from './blog-presentation-policy';
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
@@ -30,7 +32,7 @@ const BLOG_LABELS: Record<BlogLocale, {
   zh: { all:'全部',search:'搜索主题或关键词...',featured:'精选文章',latest:'家庭金融文章',count:'共',read:'阅读',minutes:'阅读时间',noResults:'未找到符合条件的文章。',categories:{COMPOUND:'储蓄与复利',TAX:'税收与制度',STOCKS:'股票与ETF',WEALTH:'家庭规划',MACRO:'物价与经济'} },
 };
 
-export type BlogHubSummary = Pick<BlogPost, 'slug' | 'title' | 'excerpt' | 'category' | 'categoryLabel' | 'publishedAt' | 'readTimeMinutes' | 'tags' | 'views' | 'author' | 'heroImage' | 'relatedCalculatorHref' | 'relatedCalculatorName'>;
+export type BlogHubSummary = Pick<BlogPost, 'slug' | 'title' | 'excerpt' | 'category' | 'categoryLabel' | 'publishedAt' | 'readTimeMinutes' | 'tags' | 'views' | 'author' | 'heroImage' | 'relatedCalculatorHref' | 'relatedCalculatorName' | 'viewCountVerified'>;
 
 interface Props {
   readonly initialPosts: readonly BlogHubSummary[];
@@ -145,20 +147,22 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
               <span className="font-semibold text-foreground">{featuredPost.author.name}</span>
               <span>·</span>
               <span className="font-mono">{new Date(featuredPost.publishedAt).toLocaleDateString('ko-KR')}</span>
-              <span>·</span>
-              <span className="font-mono flex items-center gap-1">
-                <Eye className="size-3" /> {featuredPost.views.toLocaleString()}회
-              </span>
+              {shouldShowReadership(featuredPost) && <>
+                <span>·</span>
+                <span className="font-mono flex items-center gap-1">
+                  <Eye className="size-3" /> {featuredPost.views.toLocaleString()}회
+                </span>
+              </>}
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Link
+              {featuredPost.category !== 'TECH' && <Link
                 href={featuredPost.relatedCalculatorHref}
                 className="text-[11px] font-semibold text-indigo-400 hover:underline flex items-center gap-1 bg-indigo-500/10 px-2.5 py-1.5 rounded-md border border-indigo-500/20"
               >
                 <Calculator className="size-3" />
                 <span>{featuredPost.relatedCalculatorName}</span>
-              </Link>
+              </Link>}
               <Button asChild size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-8">
                 <Link href={blogUrl(featuredPost.slug,locale).replace("https://easy-scraping.com","")}>
                   칼럼 전문 {labels.read} <ArrowRight className="size-3.5 ml-1" />
