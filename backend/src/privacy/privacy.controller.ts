@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Inject,
   Post,
   Req,
@@ -57,12 +58,16 @@ export class PrivacyController {
   }
 
   @Get()
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Data subject requests the caller has made' })
   async list(@Req() request: RequestWithSession) {
     return { requests: await this.service().myRequests(requireUserId(request)) };
   }
 
   @Post()
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Raise a data subject request' })
   async create(@Req() request: RequestWithSession, @Body() body: CreatePrivacyRequestDto) {
