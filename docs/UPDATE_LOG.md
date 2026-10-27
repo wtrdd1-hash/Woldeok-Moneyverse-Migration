@@ -1,5 +1,6 @@
 ## 2026-10-28 — Planning v1398 F675-155 (Feature Improvement / DRAFT / RELEASE HOLD)
 - Previous Addition v1396 → Current Improvement v1398 → Next Addition v1400 provisional. Reconciled A unmerged #1641 SHA 153491e2eaf5c5bb39933d9e2a5634b49a45c44b: existing SECDEF conditional reuse, actor spoof #993, absent cash row=0, API-clock observedAt, actual response schema, session fencing, 429/no-store error parity and Android. QA v1334 main lint/test FAIL, legacy backup cron failed, independent restore NOT VERIFIED. Backlog ENV1398-01 SEC1398-02 REL1398-03 LOAN1398-04 LOAN1398-05 LOAN1398-06 LOAN1398-07 LOAN1398-08 LOAN1398-09 LOAN1398-10. Synthetic 10,001/100/100 NOT RUN; external new approved 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. No runtime/DB/WLD/ledger/Test/Production change.
+- GitHub handoff: Draft PR #1645 stacked on unmerged planning #1640; issue #1639 and A #1641 updated. Initial commit 61a6428419894eb33ee16bbc3c1e23eaa6da5d41; final SHA in miniPC complete.log. No independent main merge.
 
 ## 2026-10-28 — Planning v1396 F675-155 (Feature Addition, DRAFT / RELEASE HOLD)
 - GitHub handoff: Draft PR #1640 (stacked on unmerged planning #1634) and engineering issue #1639; initial documentation commit 6c8c682521360ed3b589ac913bea4247370e8d4b. Draft not merged; exact-head CI pending verification.
