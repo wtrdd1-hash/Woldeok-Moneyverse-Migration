@@ -1,3 +1,10 @@
+## v1368 / F675-149 — 검증된 고객지원 답변 알림과 실제 회원 알림함 (기능 추가 / 초안 / 운영 보류)
+- 이전 v1366 기능 보완 → 현재 v1368 기능 추가 → 다음 v1370 기능 보완(잠정). 최신 main c2a9306ddc0424438bc0ab297ea9543bb167aee6 시작·중간 확인, 선행 미병합 Draft #1555, 이슈 #1562. 문서만 변경, 런타임·DB·WLD·Test·운영 변경 금지.
+- 실제 근거: 회원 알림 탭은 예시 데이터와 로컬 읽음 상태를 사용한다. Next/NestJS 인증 알림 API는 존재하지만 추적 SQL에 in_app_notifications CREATE TABLE을 찾지 못했으므로 격리 DB에서 실체 확인 필수. Migration 196은 관리자 답변을 저장하지만 알림 outbox는 없다. 회원 고객지원 탭, 본인 /support 연결, 앱 내 선호 설정, 서버 영수증, 관리자 비식별 집계를 제안한다. 가짜 알림·외부 전송 금지.
+- 계약: 기존 알림 API에 호환 가능한 카테고리·커서, Migration 280 충돌 해결 후 순방향 스키마, 답변/outbox/감사 원자성, 수신자·원본별 유일성, 제한 재시도, SECURITY DEFINER 소유권·최소권한. private no-store/noindex, 한국어·영어·Android·WCAG 2.2 AA, KPI, 기능 OFF 롤백. 상세 명세는 INTEGRATED_PLANNING_MASTER.ko.md.
+- P0 ENV1368-01 SEC1368-02 REL1368-03 NOTIF1368-04; P1 NOTIF1368-05 NOTIF1368-06 NOTIF1368-07 NOTIF1368-08 NOTIF1368-09 NOTIF1368-10. 10,001/100/100 시험 미실행. QA #1558 CI 제한은 개발 B Draft #1560과 분리. 전체 보안·정확 SHA Test·독립 복원 HOLD. 외부 근거 신규 승인 0, 누적 UNKNOWN/10,000: BLOCKED/IN PROGRESS.
+
+
 ## F675-148 / v1366 — 고객지원 운영시간 무결성 검토 (기능 보완 / 초안·운영 보류)
 - 실제 main 회원 문의·NestJS·Migration 196에는 검증된 상담 인력 시간표가 없다. 앱 게이트웨이의 `support` 분류는 공개 운영시간 API 구현 증거가 아니다. 실제 근무·SLA 추정 금지. v1364의 임의 `?at`, 겹침을 못 막는 slot_index 유일성, sourceId 단독 신뢰, 오래된 캐시 작업자 문제 보완.
 - 흐름: 공개 `/support/availability`는 서버 시각과 검증된 자료만, 30일 미리보기는 OPEN_NOW 보장 금지. 회원 `/support` 문의 연결에서 자동 로그인 복귀 허위 약속 금지. operator 초안/독립 승인자 게시·철회, 출처 증거·CAS·세대 차단, DB 철회 우선, CDN/304 실패 시 비공개. 시간대·답변 보장 없음 고지.

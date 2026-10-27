@@ -1,3 +1,8 @@
+## 2026-10-27 — Planning v1368 / F675-149 (Feature Addition; DRAFT/HOLD)
+- Previous v1366 Improvement, current v1368 Addition, next v1370 Improvement. MiniPC Debian 13 services active, root 81% and data 72% used; deployment symlink target missing. Main c2a9306ddc0424438bc0ab297ea9543bb167aee6 stable at start/mid; predecessor Draft #1555, issue #1562.
+- Documented support alerts, atomic outbox, preferences, member API, privacy, SEO, accessibility, tests and release hold in EN/KO integrated docs. QA #1558 is separately owned by Development B #1560. Tests NOT RUN; external newly approved 0, cumulative UNKNOWN/10,000. No runtime/DB/Production changes.
+
+
 ## 2026-10-27 — Planning v1366 / F675-148 (Feature Improvement; DRAFT / RELEASE HOLD)
 - Previous Addition v1364 → Current Improvement v1366 → Next Addition v1368 provisional; issue #1548; stacked predecessor #1549. Main `c2a9306ddc0424438bc0ab297ea9543bb167aee6` checked start/mid, authoritative EN plan and KO parity read. Corrected untrusted `?at`, interval overlap, source evidence and stale cache-worker revocation with bounded preview, DB exclusion, generation fence, fail-closed public reads; full UX/API/DB/security/SEO/mobile/KPI in integrated master. P0/P1 ENV1366-01 SEC1366-02 REL1366-03 HOURS1366-04 HOURS1366-05 HOURS1366-06 HOURS1366-07 HOURS1366-08 HOURS1366-09 HOURS1366-10. QA v1318 scheduler-only; full release HOLD. 10,000 external approved new 0, cumulative UNKNOWN/BLOCKED. Docs only; no runtime, DB, WLD or release changes.
 

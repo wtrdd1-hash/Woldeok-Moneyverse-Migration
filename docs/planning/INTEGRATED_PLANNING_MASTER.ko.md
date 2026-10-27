@@ -1,3 +1,37 @@
+# F675-149 / 기획 v1368 — 검증된 고객지원 답변 알림과 실제 회원 알림함 (기능 추가 / 초안 / 운영 보류)
+**회차:** 이전 기능 보완 v1366 → 현재 기능 추가 v1368 → 다음 기능 보완 v1370(잠정). 개발 이슈 #1562. 선행 미병합 Draft PR #1555에 누적하는 문서 기획이며 main이나 출시 기능이 아니다. 최신 main c2a9306ddc0424438bc0ab297ea9543bb167aee6의 AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조본을 시작·중간에 확인했다. 코드·DB·WLD·원장·기능 스위치·Test·운영 변경 없음. 개발 착수 전 사람의 기획 검토 필요.
+## 실제 근거·목적·범위
+회원 알림 설정의 notification-tabs-bar.tsx에는 INITIAL_NOTIFICATIONS 예시 6건과 브라우저 로컬 읽음 상태가 있다. 이를 실제 회원 알림으로 오인하게 해서는 안 된다. Next.js /api/notifications 및 NestJS notification.controller/service에는 인증된 조회·읽음 API가 이미 있으므로 중복 시스템을 만들지 않는다. NotificationService는 public.in_app_notifications를 직접 조회하지만 현재 추적 SQL에서 해당 CREATE TABLE을 찾지 못했다. 실제 격리 DB의 테이블·권한을 확인하기 전 운영 DB에도 없다고 단정하지 않는다. Migration 196은 관리자 답변·문의 상태·감사를 저장하지만 고객지원 답변 알림 이벤트는 만들지 않는다. 이는 코드상 공백이며 운영 사고나 수요를 증명하지 않는다.
+목적은 회원이 실제로 저장된 관리자 답변을 알림으로 확인하고 자기 문의로 이동하는 것이다. v1은 앱 내 알림만 제공하며 이메일·문자·푸시·자동 답변·WLD 보상·금융 변경은 제외한다. support_reply_inbox_v1 기본 OFF.
+## 회원·관리자·Android 화면
+회원 /account/notifications에 실제 서버 데이터 기반 고객지원 탭과 미확인 개수를 제공한다. 실제 관리자 답변에만 중립적 제목, 서버 시각, 문의 확인 CTA → /support?thread=<UUID>를 표시한다. 답변 본문·문의 제목·개인정보는 알림에 포함하지 않는다. /support에는 답변 알림 보기 링크를 제공하고, 문의를 열 때마다 소유권을 검증한다. 삭제·이관·권한 상실 시 UNAVAILABLE 처리한다. 로그인 후 자동 복귀를 약속하지 않는다.
+앱 내 고객지원 답변 알림은 활성화 이후 기본 ON, 회원은 향후 선택 알림을 OFF로 바꿀 수 있다. OFF여도 /support에서 답변을 볼 수 있고 ON으로 복귀해도 과거 억제 알림을 소급 전송하지 않는다. 회원 상태 LOADING|EMPTY|UNREAD|READ|PAUSED|UNAVAILABLE|ERROR|SESSION_EXPIRED. API 장애 시 예시 알림 대체 금지. 관리자 /admin/support는 PENDING|DELIVERED|SUPPRESSED|RETRY_PENDING|FAILED 집계만 보고 본문·회원 이름·제목을 보지 않는다. 재전송은 별도 작업자만 수행한다.
+한국어·영어, 키보드·포커스, 스크린리더, 320px·200% 확대·44px 터치 목표 및 WCAG 2.2 AA 검증. Android는 실제 회원 권한·조회 계약으로 동등성 입증.
+## API 계약
+기존 GET /api/v1/notifications에 category=SUPPORT, limit 1..50, 소유자 결합 불투명 cursor를 추가한다. 기존 배열·offset 사용자를 위한 호환성을 유지하고 Next 프록시의 배열 응답 가정도 검증한다. unread-count, mark-read, read-all은 서버 기준으로 멱등 처리한다. 회원 알림 선호 설정 GET/PUT는 supportReplyEnabled, expectedVersion, intentId 및 서버 영수증을 사용한다.
+현재 로그인 세션·CSRF·CAS·의도 영수증을 검증한다. 401 미로그인, 403 권한, 404 접근 불가, 409 충돌, 422 입력 오류, 429 속도 제한, 503 DB 장애를 구분한다. private no-store 및 실패 시 예시 데이터 대체 금지. Android는 실제 /app-api/v1/notifications 경로와 회원 소유권·권한을 시험하고 관리자 변경 API 접근을 차단한다.
+## DB 및 트랜잭션
+현재 main 마이그레이션 상한 279, 격리 PostgreSQL의 실제 알림 테이블·함수·권한·체크섬을 먼저 대조한다. 추적 SQL에서 CREATE TABLE을 찾지 못한 사실은 운영 DB 부재 증명이 아니다. Migration 280 충돌 #1147 해결 후 새로운 순방향 번호를 할당하고 기존 적용 파일은 수정하지 않는다.
+제안 support_reply_notification_outbox: UUID PK, source_message_id, recipient_user_id, 고정 event_type=SUPPORT_ADMIN_REPLY, PENDING|DELIVERED|SUPPRESSED|RETRY_PENDING|FAILED 상태, 시도 횟수·다음 시도 시각·내용 해시·생성/전달 시각. UNIQUE(recipient_user_id,source_message_id,event_type), 인덱스 (status,next_attempt_at,id), (recipient_user_id,created_at DESC,id DESC). 기존 알림 테이블에 소유자/카테고리/원본 메시지 유일성 및 읽지 않음 인덱스를 보장한다. 회원 선호 설정은 user_id PK, enabled, version>0; 의도 영수증 UNIQUE(user_id,intent_id).
+DB의 admin_support_reply 트랜잭션에서 관리자 답변·문의 상태·불변 감사·outbox를 전부 원자적으로 저장한다. 같은 멱등 키·본문은 기존 영수증, 다른 본문은 충돌 처리. 작업자는 FOR UPDATE SKIP LOCKED·제한 재시도·중복 삽입 방지·영속 행 재조회 후 DELIVERED 처리한다. 응답 유실 시 새 답변 생성 대신 원본 영수증 재조회. 알림 OFF는 SUPPRESSED이며 이후 ON에서도 소급 발송 금지. 회원 본인 메시지는 알리지 않는다.
+고정 search_path의 SECURITY DEFINER 함수와 최소 EXECUTE, PUBLIC·moneyverse_app 직접 DML 금지. 실제 현재 역할과 소유권을 DB에서도 검증한다. 회원 A는 B의 알림·문의 조회/읽음 불가. 관리자는 임의 수신자를 위조할 수 없다. 알림 영수증은 금융 정산이나 문의 해결 증거가 아니다.
+## 개인정보·SEO·KPI·시험·배포
+회원/관리자 페이지·API는 noindex, private no-store, 사이트맵 제외. 선택 알림 보존기간 90일은 법률 검토 전 잠정안이며 현재 정책이라고 주장하지 않는다. 통계에는 회원 ID·본문·문의 제목·개인 링크를 남기지 않는다. 목표 지표(실측 아님): 가짜 알림 0, 소유권 침해 0, 중복 행 0, 답변 저장 후 outbox 누락 0, 미확인 개수 일치 100%, 격리 시험 전달 지연 p95 60초 이내, CTA 전환 및 수신 거부율.
+미실행 시험: 합성 10,001건, 동시 답변·작업자 100건, 무권한·CSRF 100건, 세션 만료, 선호 설정 경합, 응답 유실, DB 오류, 23505/40001, 삭제된 문의, 기존 Next 호환성, Android, 한국어·영어, 320px/200% 접근성, 격리 DB 권한·복원·롤백. GitHub CI API 403 이슈 #1558은 개발 B Draft #1560이 담당하므로 변경 중복 금지. 별도 개발 브랜치·RED/GREEN·정확 SHA 공식 Test·인증 E2E·독립 백업 복원·승인 GitOps 전까지 RELEASE HOLD. 기능 OFF 롤백 시 실제 문의·감사 기록 보존, 적용 마이그레이션 역행 금지.
+외부 독립 근거 신규 승인 0건, 누적 중복 제거·실제 근거 분류 승인 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 기술 참고 후보는 승인 수량에 포함하지 않는다.
+## P0/P1 개발 백로그 (기획만)
+P0 ENV1368-01: 루트 81%·데이터 72%, 깨진 배포 링크, 실제 런타임·독립 백업 복원.
+P0 SEC1368-02: 알림 스키마·DB 권한, Migration 280 충돌, app/PUBLIC 권한·원장 격리.
+P0 REL1368-03: 전체 QA·보안, #1558 CI 문제, 정확 SHA Test·승격 승인.
+P0 NOTIF1368-04: 예시를 실제처럼 표시·타인 알림 유출·답변/outbox 부분 커밋·중복 전달 방지.
+P1 NOTIF1368-05: 순방향 DB 스키마·제약·인덱스.
+P1 NOTIF1368-06: 원자적 outbox·영수증·재시도.
+P1 NOTIF1368-07: NestJS·Next 호환성·Android 동등성.
+P1 NOTIF1368-08: 회원·관리자 UX·접근성.
+P1 NOTIF1368-09: 개인정보·SEO·KPI·악용 방지.
+P1 NOTIF1368-10: 격리 PostgreSQL 10,001/100/100·회귀·롤백.
+
+
 # F675-148 / 기획 v1366 — 고객지원 운영시간의 시각·출처·철회 무결성 (기능 보완 / 초안·운영 보류)
 **회차:** 이전 기능 추가 v1364 → 현재 기능 보완 v1366 → 다음 기능 추가 v1368(잠정). **이슈:** #1548. **선행:** 미병합 Draft PR #1549(상위 #1541), 독립 병합 금지. **시작·중간 main:** `c2a9306ddc0424438bc0ab297ea9543bb167aee6`; 최신 main의 AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 국문 대조 확인. 문서만 변경, 런타임·DB·원장·WLD·Test·Production 변경 금지.
 
