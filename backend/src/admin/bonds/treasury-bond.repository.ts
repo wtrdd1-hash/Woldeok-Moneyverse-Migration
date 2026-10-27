@@ -245,6 +245,9 @@ export class TreasuryBondRepository {
   }
 
   async listRecentCouponLogs(limit = 20): Promise<BondCouponLogRow[]> {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new BadRequestException('limit must be an integer between 1 and 100');
+    }
     const res = await this.pool.query<BondCouponLogRow>(`
       SELECT
         l.id, l.holding_id, l.user_id,
