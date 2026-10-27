@@ -11,7 +11,7 @@ import { ConsentGuard } from './guards/consent.guard';
 import { CsrfGuard } from './guards/csrf.guard';
 import { InternalTokenGuard } from './guards/internal-token.guard';
 import { ReauthGuard } from './guards/reauth.guard';
-import { SessionGuard } from './guards/session.guard';
+import { OptionalSessionGuard, SessionGuard } from './guards/session.guard';
 import { AccountModule } from '../account/account.module';
 import { AuthBootstrapController } from './bootstrap.controller';
 import { AuthController } from './auth.controller';
@@ -24,6 +24,7 @@ import { DualKeyRotationService } from './dual-key-rotation';
 
 const GUARDS = [
   SessionGuard,
+  OptionalSessionGuard,
   AuthenticatedGuard,
   ConsentGuard,
   CsrfGuard,

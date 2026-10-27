@@ -31,3 +31,29 @@ export class SessionGuard implements CanActivate {
     return true;
   }
 }
+
+/**
+ * Public endpoints may include caller-private fields without requiring login.
+ * Missing cookie is a guest; a presented but invalid cookie is NOT a guest.
+ * Reuse SessionGuard's authoritative DB lookup and fail-closed semantics.
+ */
+@Injectable()
+export class OptionalSessionGuard extends SessionGuard {
+  constructor(
+    @Inject(SessionRepository) sessions: SessionRepository | null,
+    @Inject(CONFIG) config: AppConfig,
+  ) {
+    super(sessions, config);
+    this.optionalConfig = config;
+  }
+
+  private readonly optionalConfig: AppConfig;
+
+  override canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<RequestWithSession>();
+    if (!request.session && !sessionToken(request.headers, this.optionalConfig)) {
+      return Promise.resolve(true);
+    }
+    return super.canActivate(context);
+  }
+}

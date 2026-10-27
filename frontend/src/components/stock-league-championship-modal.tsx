@@ -1,5 +1,7 @@
 'use client';
 
+import { canOfferStockLeagueJoin, formatStockLeagueRank } from './stock-league-rank';
+
 import React, { useState, useEffect } from 'react';
 import {
   Trophy,
@@ -71,6 +73,7 @@ const TIER_COLORS: Record<string, string> = {
 export function StockLeagueChampionshipModal({ isOpen, onClose, onSuccess }: StockLeagueModalProps) {
   const [activeTab, setActiveTab] = useState<'leaderboard' | 'whales' | 'my'>('leaderboard');
   const [loading, setLoading] = useState(false);
+  const [enrollmentLoaded, setEnrollmentLoaded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -86,15 +89,21 @@ export function StockLeagueChampionshipModal({ isOpen, onClose, onSuccess }: Sto
 
   const fetchData = async () => {
     setLoading(true);
+    setEnrollmentLoaded(false);
+    setMyParticipation(null);
+    setSeason(null);
     try {
       const res = await fetch('/api/stocks/league');
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         setSeason(data.season);
         setLeaderboard(data.leaderboard || []);
         setWhales(data.whales || []);
         setMyParticipation(data.myParticipation || null);
         setMySubscriptions(data.mySubscriptions || []);
+        setEnrollmentLoaded(true);
+      } else {
+        throw new Error('league enrollment status unavailable');
       }
     } catch {
       setMessage({ type: 'error', text: '리그 데이터를 불러오는데 실패했습니다.' });
@@ -253,17 +262,19 @@ export function StockLeagueChampionshipModal({ isOpen, onClose, onSuccess }: Sto
                     {myParticipation.tier}
                   </span>
                   <span className="text-xs text-zinc-300 truncate font-mono">
-                    내 순위: <strong className="text-amber-400">{myParticipation.rankPosition}위</strong> (수익률 {myParticipation.roiRate >= 0 ? '+' : ''}{myParticipation.roiRate}%)
+                    내 순위: <strong className="text-amber-400">{formatStockLeagueRank(myParticipation.rankPosition)}</strong> (수익률 {myParticipation.roiRate >= 0 ? '+' : ''}{myParticipation.roiRate}%)
                   </span>
                 </>
               ) : (
                 <span className="text-xs text-zinc-400 flex items-center gap-1.5 truncate">
                   <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  현재 시즌에 아직 참가하지 않았습니다. 참가 시 실시간 랭킹에 등록됩니다.
+                  {enrollmentLoaded && season
+                    ? '현재 시즌에 아직 참가하지 않았습니다. 참가 시 실시간 랭킹에 등록됩니다.'
+                    : loading ? '참가 상태를 확인하고 있습니다.' : '참가 상태를 확인할 수 없습니다.'}
                 </span>
               )}
             </div>
-            {!myParticipation && (
+            {canOfferStockLeagueJoin(enrollmentLoaded, Boolean(season), Boolean(myParticipation)) && (
               <button
                 onClick={handleJoinLeague}
                 disabled={submitting}

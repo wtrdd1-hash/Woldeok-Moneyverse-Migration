@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import type { Queryable } from '../core/db';
 
@@ -143,6 +144,47 @@ export class StockLeagueRepository {
       followerCount: Number(row.follower_count),
       createdAt: row.created_at,
     }));
+  }
+
+  /**
+   * A member's enrollment is not limited to the public top-20 leaderboard.
+   * Bind the lookup to the session-derived user id and current season.
+   */
+  async getMyParticipation(seasonId: string, userId: string): Promise<StockLeagueParticipant | null> {
+    const res = await this.db.query(
+      `SELECT id, season_id, user_id, user_name, initial_asset, current_asset,
+              roi_rate, rank_position, tier, is_whale, follower_count, created_at
+       FROM public.stock_league_participants
+       WHERE season_id = $1::uuid AND user_id = $2::uuid
+       LIMIT 1`,
+      [seasonId, userId],
+    );
+    const row = res.rows[0];
+    if (!row) return null;
+    const initialAsset = Number(row.initial_asset);
+    const currentAsset = Number(row.current_asset);
+    if (![initialAsset, currentAsset].every((value) =>
+      Number.isFinite(value) && Math.abs(value) <= Number.MAX_SAFE_INTEGER
+    )) {
+      throw new ServiceUnavailableException({
+        code: 'STOCK_LEAGUE_ASSET_PRECISION_UNAVAILABLE',
+        message: 'league assets exceed safe precision',
+      });
+    }
+    return {
+      id: row.id,
+      seasonId: row.season_id,
+      userId: row.user_id,
+      userName: row.user_name,
+      initialAsset,
+      currentAsset,
+      roiRate: Number(row.roi_rate),
+      rankPosition: Number(row.rank_position ?? 0),
+      tier: row.tier,
+      isWhale: Boolean(row.is_whale),
+      followerCount: Number(row.follower_count),
+      createdAt: row.created_at,
+    };
   }
 
   async getWhales(limit = 10): Promise<StockLeagueParticipant[]> {
