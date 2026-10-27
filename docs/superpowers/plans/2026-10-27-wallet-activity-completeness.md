@@ -22,5 +22,5 @@
 2. [x] Write RED web complete/truncated/unknown tests; prove missing helper fails.
 3. [x] Change bounded PostgreSQL read to fetch limit+1 and service to return `recentTransactionsHasMore`, slicing to the requested limit; verify focused tests GREEN.
 4. [x] Show truthful status in web and fix misleading “all history” link; preserve Android gateway boolean and generate mobile API schema.
-5. [ ] Run full typecheck/test/lint/build, security, isolated PostgreSQL and app-api contract checks; document failures without weakening guards.
-6. [ ] Re-fetch main, check branch/PR conflicts, create HOLD PR and record rollback and exact-SHA Test/Production release block.
+5. [x] Run full typecheck/test/lint/build, security, isolated PostgreSQL and app-api contract checks; document failures without weakening guards.
+6. [x] Re-fetch main, check branch/PR conflicts, create HOLD PR and record rollback and exact-SHA Test/Production release block.
