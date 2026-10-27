@@ -39,3 +39,7 @@
 
 ## QA / release truth
 QA #1646 v1335: isolated PostgreSQL 17.11 285 migrations and exact candidate SHA CI PASS; backend 2,281 PASS/60 SKIP, frontend 1,686 PASS, DB 38 PASS/3 SKIP, contract 38 PASS, bot 11 PASS and audit 0; main lint/migration parity FAIL. **Candidate CI is not main/official Test/Production approval**. Dev DB app writable tables 235/241, three PUBLIC bank functions, five historical checksums; broken immutable Test pointer, missing production release target, no independent restore. Final status PARTIAL / DRAFT / RELEASE HOLD.
+
+## GitHub handoff / post-review state
+- Draft PR **#1651** stacked on unmerged planning Draft **#1645**, not main; development issue **#1650** opened. Do not merge independently. Initial commit `a00845afc3c726439f4fefb2efa5670dcd8146a2`.
+- English/Korean 10-document backlog ID parity and `git diff --check` passed; documentation-only review is not application QA. Final remote SHA recorded in miniPC `planning-v1400-records/complete.log` after push.
