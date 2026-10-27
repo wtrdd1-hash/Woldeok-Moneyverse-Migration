@@ -1,3 +1,12 @@
+## 2026-10-28 — Planning v1384 / F675-152 Verified Account Security Event Alerts (DRAFT / RELEASE HOLD)
+- Cycle Previous Improvement v1378 → Current Addition v1384 → Next Improvement v1386 (provisional); v1380/v1382 already allocated to parallel blog planning. Main `656a89947f2261c12de20d4612e88f251ba6c6a6` start; stacked on Draft #1588; Issue #1597.
+- Read miniPC Debian status, canonical main AGENTS/README/PROJECT_PLAN EN/KO, actual account-security frontend/NestJS/DB migration 180/214, notification service, QA v1326, and parallel PRs. Discovered pull-only security event history and a source-level arbitrary-UUID SECURITY DEFINER least-privilege concern; no exploit asserted.
+- Added owner-only committed security alerts, event/outbox atomicity, idempotent receipts, Android parity, privacy-safe admin, SEO/no-store, KO/EN a11y, analytics, P0 ENV1384-01 SEC1384-02 REL1384-03 AUTH1384-04 and P1 AUTH1384-05..10. Proposed 10,001/100/100 acceptance NOT RUN; full security/exact-SHA Test/restore BLOCKED. New external approved 0; cumulative UNKNOWN/10,000.
+- Documentation-only branch/worktree, no runtime/DB/WLD/ledger/Test/Production or automation changes. GitHub and internal start/done records kept; separate from A/B/C/Gemini/QA.
+
+
+**Midpoint main recheck:** f3d7a3fb4d693f75a14a8edbacb0af20321fb9c4; AGENTS.md, README.md and both canonical project-plan blob SHAs unchanged. No rebase or runtime changes.
+
 ## 2026-10-27 — Planning v1378 F675-151 (Feature Improvement, DRAFT/HOLD) — Draft PR #1588
 - Previous Addition v1376 → Current Improvement v1378 → Next Addition v1380 (provisional); Issue #1583; predecessor Draft #1584 stacked on #1578. Main start/mid `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`; English canonical/Korean equivalent. Corrected publish-subscribe ordering, revocation linearization, bounded outbox fanout, retry receipts and historical alert semantics. No runtime/DB/WLD/Test/Production changes.
 - Backlog: ENV1378-01 SEC1378-02 REL1378-03 WATCH1378-04 WATCH1378-05 WATCH1378-06 WATCH1378-07 WATCH1378-08 WATCH1378-09 WATCH1378-10. QA v1324 main root FAIL duplicate migration 280; full audit Critical 2/High 8, bot Critical 1/High 5; official Test/restore HOLD. 10,001/100/100 NOT RUN. External newly accepted 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.

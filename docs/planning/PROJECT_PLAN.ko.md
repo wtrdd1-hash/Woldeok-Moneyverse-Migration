@@ -1,3 +1,14 @@
+## v2026.10.28.1384 — F675-152 검증된 계정 보안 사건 알림 (기능 추가 / 기획 초안 / 운영승격 보류)
+
+- 회차: 이전 기능 보완 v1378 / 현재 기능 추가 v1384 / 다음 기능 보완 v1386(잠정). v1380·v1382는 병렬 블로그 기획 PR #1592/#1595에서 사용하므로 분리. main `656a89947f2261c12de20d4612e88f251ba6c6a6` 시작 확인, AGENTS.md/README.md/영어 정본/국문 대조. 미병합 #1588 위의 Draft, 이슈 #1597, 독립 병합 금지.
+- 소스: /account/security는 GET /api/v1/account/security/events로 auth_security_events 최근 20건을 조회하지만 확정 사건의 앱 내 전달 영수증은 없다. Migration 214 SECURITY DEFINER 함수는 임의 사용자 UUID 인자를 함수 내부에서 세션 소유권 확인하지 않는 소스 수준 위험(운영 악용 입증 아님). 알림 목록 OFFSET·시각 단독 정렬, F675-149 본인 전용 알림함 미병합 선행조건, OAuth 사건 포괄성 미검증.
+- 기능: 회원 /account/security·/account/notifications?category=security의 커밋된 로그인/비밀번호/이메일 알림, 보안 활동 확인/검토 완료/기기 확인, UNKNOWN_COMMIT 원본 영수증, 본인 바인딩 커서·Android 동등성, 관리자 비식별 집계. 외부 메시지·가짜 위치·자동 세션 종료·WLD 변경·마케팅 설정에 의한 보안 알림 차단 금지. 기본 OFF.
+- P0 ENV1384-01 SEC1384-02 REL1384-03 AUTH1384-04: 배포 링크/복원, Migration280/DB ACL/SECDEF·금융 격리, 전체 보안/CI/정확 SHA Test, 위조 사건·타인 소유권·부분 커밋 차단. P1 AUTH1384-05 AUTH1384-06 AUTH1384-07 AUTH1384-08 AUTH1384-09 AUTH1384-10: DB 제약·인덱스·보존, 원자적 Outbox·작업자·영수증, NestJS/Next/Android, 국영문 접근성 UI, 개인정보/SEO/KPI/관리자, 격리 PG 10,001/100/100·회귀·롤백.
+- 최신 QA v1326 root FAIL(Migration280 중복), 보안 감사 Critical 2/High 8 및 봇 감사 FAIL, 공식 정확 SHA 인증 Test·독립 복원 미검증. 수용시험 미실행. 외부 신규 최종 승인 0건·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 상세 API·DB·트랜잭션·보안·접근성·분석·배포는 국영문 INTEGRATED_PLANNING_MASTER. 기획 문서만 수정, 런타임/DB/WLD/원장/Test/운영/예약 미변경.
+
+
+**중간 main 재조회:** f3d7a3fb4d693f75a14a8edbacb0af20321fb9c4; AGENTS.md·README.md·국영문 공식 기획서 blob SHA 동일. 재배치·런타임 변경 없음.
+
 ## v1378 / F675-151 — 장애 구독 철회·팬아웃 무결성 (기능 보완 / 초안 / 운영 보류) — Draft PR #1588
 - 이전 추가 v1376 → 현재 보완 v1378 → 다음 추가 v1380(잠정). 시작·중간 main `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`; main AGENTS/README/영문 정본/국문 대조 확인. 이슈 #1583, 선행 미병합 Draft #1584(그 이전 #1578); 런타임 배포 없음.
 - 실제 상태 화면은 캐시된 수집 스냅샷이며 공식 장애 구독이 아니다. 알림 인증·CSRF 컨트롤러 및 OFFSET 조회는 존재하지만 승인 사건 개정과 소유자 전용 Outbox는 미병합 선행조건. 구독 대 게시 직렬화, 과거 알림 소급 발송을 막는 개정 워터마크, 철회 대 작업자 행 잠금, 불변 intent 영수증, at-least-once 재시도+고유 보이는 알림을 명세. 이미 커밋된 과거 알림은 소급 철회 불가.

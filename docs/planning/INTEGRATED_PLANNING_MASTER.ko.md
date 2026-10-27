@@ -1,3 +1,51 @@
+## v1384 / F675-152 — 검증된 계정 보안 이벤트 알림 및 본인 전용 영수증 (기능 추가 / 기획 초안 / 운영승격 보류) — 이슈 #1597
+
+**회차 및 기준.** 이전 기능 보완 v1378 → 현재 기능 추가 v1384 → 다음 기능 보완 v1386(잠정). v1380/v1382 번호는 병렬 블로그 기획 PR #1592/#1595에서 이미 사용하므로 충돌 없이 분리한다. 시작 main `656a89947f2261c12de20d4612e88f251ba6c6a6`; AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md 및 한국어 대조 문서 확인. 미병합 #1588 위의 독립 Draft 문서 작업이며 독립 main 병합 금지. Gemini/개발 A·B·C/QA의 코드·배포 소유권 유지.
+
+### 기존 구현과 추가 목적
+- main의 `frontend/src/app/account/security/page.tsx`는 로그인 세션과 최근 20개 보안 사건을 `GET /api/v1/account/security/events`로 조회한다. `backend/src/account/account-security.repository.ts`는 `account_recent_security_events($1::uuid,20)`를 호출한다. 이는 사용자가 직접 열람하는 **과거 기록**이지 사전 검증된 실시간 앱 내 알림·확인 영수증이 아니다.
+- Migration 180은 `auth_security_events(id,user_id,event_type,metadata,created_at)`를 생성하고 183/209/212/215는 가입·로그인·재설정·비밀번호·이메일 변경을 기록한다. Migration 214의 SECURITY DEFINER `account_recent_security_events(p_user_id,p_limit)`는 `moneyverse_app`에 EXECUTE가 허용되지만 **함수 내부에서 입력한 사용자 UUID의 세션 소유권을 검증하지 않는다**. 컨트롤러는 인증된 회원 ID를 전달하지만 DB 함수 직접 호출의 최소권한 우려가 있으므로 격리 PostgreSQL에서 부정 테스트가 필요하다. 실제 운영 유출이 확인된 것은 아니다.
+- 알림 서비스는 `in_app_notifications` 직접 SELECT, OFFSET·시각 단독 정렬을 사용한다. F675-149/#1562의 본인 전용 알림함·Outbox는 미병합 선행조건이다. 기존 게임/마케팅 알림 설정을 보안 알림 차단 설정으로 오인하지 않는다. OAuth 공급자별 사건 기록 범위도 별도 검증 전에는 전체 로그인 알림을 보장하지 않는다.
+- QA v1326(2026-10-27 23:14~23:26 KST): 마이그레이션 280 중복으로 DB parity/root FAIL, 전체 의존성 감사 Critical 2/High 8, 봇 감사 실패. 일부 프론트·백엔드·타입·린트·빌드 개별 통과가 전체 승인을 뜻하지 않는다. 정확 SHA 공식 Test·독립 복원·Production 승격은 미검증/차단.
+
+### 대상·화면·CTA·상태
+- 로그인한 회원은 `/account/security`, `/account/notifications?category=security`에서 **보안 활동 확인**, **검토 완료**, **로그인 기기 확인**을 사용한다. 사건 상세·영수증은 서버가 본인 소유권을 재확인하며 임의 외부 링크를 허용하지 않는다. 비로그인 사용자는 로그인 안내. `/admin/security`는 20명 이상 고정 집계만 표시하고 회원별 보안 사건·구독자·원본 메타데이터는 제공하지 않는다. Android app-api에 동등한 회원 읽기·검토·영수증 계약 적용.
+- 상태: LOADING, VERIFIED_UNREAD, REVIEWING, REVIEWED, LOGIN_REQUIRED, SESSION_EXPIRED, UNAVAILABLE, SOURCE_UNVERIFIED, UNKNOWN_COMMIT, STALE_EVENT, REAUTH_REQUIRED, RATE_LIMITED, FORBIDDEN, RETENTION_EXPIRED. 응답 유실 시 성공을 추정하지 않고 같은 intentId의 서버 영수증을 조회한다. 알림 검토 상태와 원본 보안 사건 기록은 독립적이며 알림 검토가 세션을 자동 종료하지 않는다.
+- 검증된 **커밋 완료** 이벤트만 허용: `local_login_succeeded`, `local_password_changed`, `local_password_reset_completed`, `local_email_changed`. OAuth 로그인은 해당 인증 트랜잭션에서 기록된 사건이 검증된 이후 별도 포함한다. 재설정 **요청**을 완료로, 실패 로그인이나 로그 한 줄을 실제 보안 변경으로 표시하지 않는다. 보안 필수 앱 내 알림은 게임/마케팅 선택 설정과 분리한다. 이메일·SMS·푸시·WLD 보상은 범위 밖이며 앱 내 알림만으로 계정 안전을 보장하지 않는다.
+
+### API·인증·권한
+- 제안 NestJS: `GET /api/v1/account/security/alerts?limit=1..50&cursor=`, `GET /api/v1/account/security/alerts/:opaqueId`, `POST /api/v1/account/security/alerts/:opaqueId/review`(UUID intentId, expectedVersion), `GET /api/v1/account/security/alerts/receipts/:intentId`. 기존 `GET /api/v1/account/security/events` 및 세션 종료 API 호환성 유지. Next BFF 서버 전용 세션 전달·쓰기 CSRF, Android 동일 소유권 검증. 본문 userId·role·eventType을 신뢰하지 않는다.
+- 응답: 200 확정 영수증, 401 미인증, 404 타인/미존재 구분 불가, 409 버전 충돌·동일 키 다른 본문, 410 보존기간 만료, 423 선행조건 중지, 429 과도한 요청, 503 장애. `Cache-Control: private, no-store`, `Vary: Cookie`, 캐시 가능한 ETag/서비스워커/CDN/분석 전송 금지. HMAC 본인 바인딩·만료·키 회전을 갖춘 `(created_at,id)` 커서. 응답 유실 후 같은 intentId의 확정 결과만 복원.
+- **P0 DB 권한:** `account_recent_security_events`, `account_active_sessions`, 알림 함수 및 앱 역할 권한 전수조사. 사용자 UUID 입력이나 임의 설정 가능한 DB GUC만으로 본인 확인을 주장하지 않는다. 검증된 세션/권한 문맥을 함수에서 강제하고 위조·재생·앱 역할 침해 위협을 별도 모델링한다. PRIVATE 테이블 직접 SELECT/DML 및 PUBLIC EXECUTE 금지, 고정 search_path·최소 EXECUTE·부정 테스트. 금융 원장 보호 정책 유지.
+
+### DB·트랜잭션·재시도
+- 중복 Migration 280·체크섬을 정리한 뒤 **새로운 고유 번호의 순방향 마이그레이션**만 허용. 원본 `auth_security_events`는 불변. `account_security_alerts(id,user_id,source_event_id,event_kind,created_at,reviewed_at,version)`에 원본 FK, `UNIQUE(user_id,source_event_id)`, 허용 이벤트·버전 CHECK, `(user_id,created_at DESC,id DESC)` 및 미확인 부분 인덱스. `account_security_alert_intents`는 UNIQUE(user_id,intent_id)·본문 해시·결과·커밋 시각. `security_alert_outbox`는 UNIQUE(source_event_id,kind), 상태·재시도 시각·리스·시도 횟수, 불변 감사 영수증. 보존기간·계정 삭제 FK 정책은 격리 DB에서 검증한다. 알림에 IP·이메일·기기 지문·원본 메타데이터를 넣지 않는다.
+- 기존 인증 함수에 순방향 추가 또는 검증된 AFTER INSERT 트리거를 통해 **보안 사건과 Outbox를 같은 트랜잭션**에서 기록한다. 인증 커밋 전 알림 금지, 롤백 시 둘 다 없음. 작업자는 `FOR UPDATE SKIP LOCKED`로 제한된 배치를 선점하고 현재 회원·원본 자격을 확인한 뒤 `ON CONFLICT` 멱등 단일 알림과 전달 영수증을 원자적으로 저장한다. 저장 후 ACK 유실에도 기존 결과 재사용. 과거 사건을 소급 자동 발송하지 않는다.
+- 검토 요청은 본인 알림 행 잠금, intentId+정규화 본문 해시, expectedVersion, 본인 확인 후 검토 상태·불변 영수증을 한 트랜잭션에 커밋한다. 동일 요청 재전송은 기존 영수증, 동일 키 다른 본문은 409. 원본 사건은 삭제되지 않으며 세션 종료의 최근 재인증 조건도 우회하지 못한다. 전달 처리는 적어도 한 번+보이는 행 멱등성이지 네트워크 정확히 한 번 보장이 아니다.
+
+### 관리자·보안·SEO·접근성·분석·배포
+- 관리자는 집계된 전달 지연·대기·실패 건수와 비식별 오류 분류만 조회한다. 고정 비중첩 코호트 최소 20명 및 보완 셀 억제, 개인 원본 내보내기 금지. 임시 한도: 알림 조회 분당 30건, 검토 20건/회원, 제한된 작업자 리스·재시도·큐 깊이; 부하 시험 후 확정. 로그에 토큰·IP·기기 식별자·이메일 금지.
+- 회원/관리자 보안 화면 및 API noindex/no-store, 개인 사건 ID의 사이트맵·리퍼러·분석 노출 금지. 한국어/영어, 320px, 200% 확대, 키보드/초점, 스크린리더 실시간 상태, 44px 터치, 움직임 감소, WCAG 2.2 AA. Android 잠금화면 푸시는 범위 밖.
+- KPI는 커밋된 원본 사건·Outbox·표시 알림·검토 영수증을 기준으로 적격 사건 수, 누락·중복, p95 지연, 재시도, 부정 권한 거부, 개인정보 사고 0건을 측정한다. 큐 ACK를 회원 열람으로 간주하지 않는다.
+- **수용시험 계획(미실행):** 합성 사건 10,001건, 동시 인증/작업자/검토/ACK 유실 100건, 타인 UUID·세션·커서·CSRF·intent 위조 100건, 인증 롤백, 이벤트 중복, OAuth 미지원, 계정 삭제, 의존성 OFF, 보존기간, 작업자 종료·재시도, 캐시·Android·접근성 회귀. 공식 Test 정확 SHA 인증 검증 5회(제안), 전체 보안·DB/API·복원·GitOps 승인 후에만 운영승격. 기본 OFF, 롤백은 새 이벤트 방출·작업자 중지하되 이미 확정된 사건·영수증 보존. 이번 회차 런타임/DB/WLD/원장/Test/Production 변경 없음.
+
+### 개발 예약 연계 P0/P1 백로그
+- **P0 ENV1384-01:** 운영·Test 배포 링크, 디스크, 독립 암호화 복원 및 정확 SHA 경로 검증.
+- **P0 SEC1384-02:** Migration 280/체크섬 및 앱/PUBLIC 최소권한, 임의 UUID 보안 사건 조회·금융 함수 권한 격리 PG 부정 시험.
+- **P0 REL1384-03:** 전체 QA·보안 감사·CI·정확 SHA 인증 Test·복원·롤백 승인 전 Production 차단.
+- **P0 AUTH1384-04:** 위조 보안 사건·타인 알림·미검증 인증 공급자·사건/Outbox 부분 커밋 차단.
+- **P1 AUTH1384-05:** 순방향 DB 스키마·제약·인덱스·보존·ACL.
+- **P1 AUTH1384-06:** 원자적 사건→Outbox·멱등 작업자·리스 복구.
+- **P1 AUTH1384-07:** NestJS·Next BFF·Android 본인 전용 조회/검토/영수증 및 기존 API 호환.
+- **P1 AUTH1384-08:** 계정 보안·알림함 UI, 정확한 상태, 국영문 모바일/접근성.
+- **P1 AUTH1384-09:** 관리자 집계, 개인정보·SEO·악용방지·분석 KPI.
+- **P1 AUTH1384-10:** 격리 PostgreSQL 10,001/100/100·회귀·정확 SHA Test·기능 OFF 롤백.
+
+**외부 독립 근거 게이트:** 이번 신규 최종 승인·중복 제거·실제 근거 분류 **0건**, 누적 승인 **UNKNOWN/10,000건**. BLOCKED / IN PROGRESS. 기존 가치 있는 세부기획은 국영문 통합 마스터에 흡수하며 새로운 분산 기능기획 파일은 생성하지 않는다. **DRAFT / RELEASE HOLD**.
+
+
+**중간 main 재조회:** f3d7a3fb4d693f75a14a8edbacb0af20321fb9c4; AGENTS.md·README.md·국영문 공식 기획서 blob SHA 동일. 재배치·런타임 변경 없음.
+
 ## v1378 / F675-151 — 장애 구독·게시·철회 경합 및 전달 무결성 (기능 보완 / 초안 / 운영 보류) — 이슈 #1583 — Draft PR #1588
 
 **주기·근거.** 이전 기능 추가 v1376 → 현재 기능 보완 v1378 → 다음 기능 추가 v1380(잠정). 시작·중간 최신 main `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`; main의 `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md` 및 국문 대조 확인. 미병합 Draft #1584(선행 #1578, #1573) 위에만 누적하며 독립 병합 금지. 기획 문서만 수정하고 런타임·DB·WLD·원장·기능 스위치·예약 변경 금지. 개발 A/B/C/Gemini/QA의 구현·승격 업무와 분리.

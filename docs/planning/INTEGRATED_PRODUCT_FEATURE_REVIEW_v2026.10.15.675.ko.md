@@ -1,3 +1,18 @@
+## v1384 — F675-152 계정 보안 이벤트 알림 / 기능 추가 / 기획 초안·운영승격 보류
+
+**이전:** 기능 보완 v1378. **현재:** 기능 추가 v1384. **다음:** 기능 보완 v1386(잠정). v1380/v1382는 병렬 블로그 기획 #1592/#1595에서 사용하므로 충돌 회피. 시작 main `656a89947f2261c12de20d4612e88f251ba6c6a6`, 미병합 #1588 후속 Draft, 이슈 #1597. 문서 기획만 수행.
+
+**확인된 소스 공백:** /account/security에는 활성 세션과 최근 20개 사건의 GET /api/v1/account/security/events 조회가 있지만, 확정된 사건의 앱 내 선제 알림·검토 영수증은 없다. Migration 180은 auth_security_events를 저장하고 Migration 214의 `account_recent_security_events(p_user_id)` SECURITY DEFINER는 앱 역할에 EXECUTE가 허용되나 함수 내부에서 입력 UUID의 세션 소유권을 확인하지 않는다. 격리 PG에서 검증해야 할 최소권한 위험이며 실제 침해 입증은 아니다. 기존 알림 서비스는 OFFSET·시각 단독 정렬 직접 조회. F675-149 본인 전용 알림함은 미병합 선행조건. OAuth 전체 로그인 사건 기록도 미검증.
+
+**신규 기능:** 회원 /account/security, /account/notifications?category=security에서 커밋된 로그인·비밀번호·이메일 변경 사건만 표시. 보안 활동 확인, 검토 완료, 로그인 기기 확인 CTA. 알림 검토는 자동 로그아웃이 아님. 응답 유실 UNKNOWN_COMMIT/원본 영수증, 본인 바인딩 커서, CSRF·민감 작업 재인증, Android 동등성. 비회원 로그인 안내, 관리자 비식별 집계만. 예시 알림·추정 위치·재설정 요청의 완료 오표시·이메일/SMS/푸시·WLD 보상 금지.
+
+**DB/보안:** Migration 280 해결 후 고유 순방향 번호. 원본 보안 사건+Outbox 원자적 기록, UNIQUE(user_id,source_event_id) 표시 행, 불변 멱등 영수증, 본인 권한/SECDEF 부정 테스트, SKIP LOCKED 제한 배치와 ACK 유실 재시도, 과거 소급 알림 금지. private/no-store/noindex, 국영문 WCAG 2.2 AA·320px·200% 확대·44px, KPI는 확정 사건→표시 지연·중복·타인 접근 거부. 기본 OFF, 롤백에도 확정 사건 보존.
+
+**P0:** ENV1384-01, SEC1384-02, REL1384-03, AUTH1384-04. **P1:** AUTH1384-05, AUTH1384-06, AUTH1384-07, AUTH1384-08, AUTH1384-09, AUTH1384-10. 격리 PG 합성 10,001건/경합 100건/권한 위조 100건 미실행. 최신 QA v1326 root FAIL(Migration 280 중복), 전체 감사 Critical 2/High 8, 봇 감사 FAIL, 공식 정확 SHA Test·복원 미검증. RELEASE HOLD. 외부 신규 승인 0건·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. API·DB·트랜잭션·권한·관리자·악용방지·SEO·모바일·접근성·분석·배포·롤백 세부사항은 국영문 통합 마스터 참조.
+
+
+**중간 main 재조회:** f3d7a3fb4d693f75a14a8edbacb0af20321fb9c4; AGENTS.md·README.md·국영문 공식 기획서 blob SHA 동일. 재배치·런타임 변경 없음.
+
 ## v1378 / F675-151 — 장애 구독 철회·팬아웃 무결성 (기능 보완 / 초안 / 운영 보류) — Draft PR #1588
 - 이전 추가 v1376 → 현재 보완 v1378 → 다음 추가 v1380(잠정). 시작·중간 main `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`; main AGENTS/README/영문 정본/국문 대조 확인. 이슈 #1583, 선행 미병합 Draft #1584(그 이전 #1578); 런타임 배포 없음.
 - 실제 상태 화면은 캐시된 수집 스냅샷이며 공식 장애 구독이 아니다. 알림 인증·CSRF 컨트롤러 및 OFFSET 조회는 존재하지만 승인 사건 개정과 소유자 전용 Outbox는 미병합 선행조건. 구독 대 게시 직렬화, 과거 알림 소급 발송을 막는 개정 워터마크, 철회 대 작업자 행 잠금, 불변 intent 영수증, at-least-once 재시도+고유 보이는 알림을 명세. 이미 커밋된 과거 알림은 소급 철회 불가.

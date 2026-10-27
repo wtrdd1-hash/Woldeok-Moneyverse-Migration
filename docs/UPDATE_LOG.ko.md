@@ -1,3 +1,12 @@
+## 2026-10-28 — 기획 v1384 / F675-152 계정 보안 사건 알림 (기획 초안 / 운영승격 보류)
+- 회차 이전 기능 보완 v1378 → 현재 기능 추가 v1384 → 다음 기능 보완 v1386(잠정). 병렬 블로그 기획 v1380/v1382와 분리. 시작 main `656a89947f2261c12de20d4612e88f251ba6c6a6`, 미병합 Draft #1588 후속, 이슈 #1597.
+- miniPC Debian 상태, 최신 main AGENTS/README/국영문 PROJECT_PLAN, 계정 보안 프론트/NestJS/DB Migration180/214, 알림 서비스, QA v1326, 병렬 PR 확인. 보안 사건은 과거 조회만 제공하고 SECURITY DEFINER 임의 UUID 인자의 최소권한 우려가 있음을 발견했으나 실제 침해는 주장하지 않음.
+- 본인 전용 확정 보안 사건 알림, 사건·Outbox 원자성, 멱등 영수증, Android, 관리자 비식별 집계, SEO/no-store, 국영문 접근성, KPI 및 P0 ENV1384-01 SEC1384-02 REL1384-03 AUTH1384-04 / P1 AUTH1384-05~10 명세. 합성 10,001/경합 100/위조 100건 미실행, 보안·정확 SHA Test·복원 차단. 외부 신규 승인 0·누적 UNKNOWN/10,000.
+- 문서 전용 별도 브랜치/작업 폴더, 런타임·DB·WLD·원장·Test·Production·예약 미변경. 시작·완료 및 GitHub 기록, 개발 A/B/C·Gemini·QA 작업과 분리.
+
+
+**중간 main 재조회:** f3d7a3fb4d693f75a14a8edbacb0af20321fb9c4; AGENTS.md·README.md·국영문 공식 기획서 blob SHA 동일. 재배치·런타임 변경 없음.
+
 ## 2026-10-27 — 기획 v1378 F675-151 (기능 보완, 초안/운영 보류) — Draft PR #1588
 - 이전 추가 v1376 → 현재 보완 v1378 → 다음 추가 v1380(잠정); 이슈 #1583, 선행 Draft #1584 및 #1578. 시작·중간 main `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`; 영문 정본·국문 동등. 게시·구독 순서, 철회 직렬화, 제한된 Outbox 팬아웃, 재시도 영수증, 과거 알림의 정확한 의미를 보완. 런타임·DB·WLD·Test·운영 변경 없음.
 - 백로그: ENV1378-01 SEC1378-02 REL1378-03 WATCH1378-04 WATCH1378-05 WATCH1378-06 WATCH1378-07 WATCH1378-08 WATCH1378-09 WATCH1378-10. QA v1324 main 루트 FAIL(280 중복), 전체 감사 Critical 2/High 8·봇 Critical 1/High 5; 공식 Test/복원 보류. 10,001/100/100 시험 미실행. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
