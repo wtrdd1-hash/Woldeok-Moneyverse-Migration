@@ -90,9 +90,23 @@ jobs:
             return 0
           }
 
-          mapfile -t branches < <(
-            gh api --paginate "repos/${REPO}/pulls?state=open&base=main&per_page=100" --jq '.[] | select(.head.repo.full_name == .base.repo.full_name) | .head.ref' | sort -u
-          )
+          # Paginate once. A failed/partial API snapshot is a hard BLOCKED gate,
+          # not an empty candidate list (process substitution masked this error).
+          snapshot="$(mktemp)"
+          candidates="$(mktemp)"
+          trap 'rm -f "$snapshot" "$candidates"' EXIT
+          if ! gh api --paginate "repos/${REPO}/pulls?state=open&base=main&per_page=100" > "$snapshot"; then
+            echo '::error::BLOCKED: failed to enumerate all open PRs (possible GitHub API rate limit); no branch processing or promotion'
+            exit 1
+          fi
+          if ! jq -r -f scripts/release/select-integration-prs.jq "$snapshot" | sort -u > "$candidates"; then
+            echo '::error::BLOCKED: open PR snapshot is invalid; no branch processing or promotion'
+            exit 1
+          fi
+          mapfile -t branches < "$candidates"
+          open_pr_count="$(jq -s '[.[][]] | length' "$snapshot")"
+          draft_filtered_count="$(jq -s '[.[][] | select(.draft != false)] | length' "$snapshot")"
+          echo "open PRs=${open_pr_count}, drafts/unknown excluded=${draft_filtered_count}, eligible ready heads=${#branches[@]}"
 
           for branch in "${branches[@]}"; do
             case "$branch" in
@@ -125,9 +139,16 @@ jobs:
             fi
 
             pr_json="$(gh api "repos/${REPO}/pulls/${pr}")"
-            draft="$(jq -r '.draft // false' <<<"$pr_json")"
+            draft="$(jq -r '.draft != false' <<<"$pr_json")"
             blocked_label="$(jq -r '[.labels[].name | ascii_downcase] | any(. == "wip" or . == "work-in-progress" or . == "work in progress" or . == "do-not-merge" or . == "do not merge" or . == "hold" or . == "merge-blocked" or . == "in-progress")' <<<"$pr_json")"
             title_blocked="$(jq -r '(.title // "" | ascii_downcase) as $t | ($t | startswith("wip")) or ($t | startswith("draft")) or ($t | startswith("work in progress")) or ($t | startswith("작업중"))' <<<"$pr_json")"
+
+            pr_head="$(jq -r '.head.sha // empty' <<<"$pr_json")"
+            pr_state="$(jq -r '.state // "unknown"' <<<"$pr_json")"
+            if [[ "$pr_head" != "$branch_sha" || "$pr_state" != "open" ]]; then
+              echo "skip PR #${pr}: head/state changed after snapshot (no cleanup or merge)"
+              continue
+            fi
 
             if [[ "$draft" == "true" || "$blocked_label" == "true" || "$title_blocked" == "true" ]]; then
               work_in_progress_skipped_count=$((work_in_progress_skipped_count + 1))
@@ -187,9 +208,16 @@ jobs:
             done
 
             if [[ "$mergeable" == "true" && "$merge_state" =~ ^(clean|unstable|has_hooks)$ ]]; then
-              current_head="$(gh api "repos/${REPO}/pulls/${pr}" --jq '.head.sha')"
-              if [[ "$current_head" != "$branch_sha" ]]; then
-                echo "skip PR #${pr}: head moved from ${branch_sha} to ${current_head}"
+              # A ready PR may become draft/held after enumeration. Recheck
+              # eligibility and exact head immediately before any merge.
+              fresh_pr_json="$(gh api "repos/${REPO}/pulls/${pr}")"
+              current_head="$(jq -r '.head.sha // empty' <<<"$fresh_pr_json")"
+              fresh_draft="$(jq -r '.draft != false' <<<"$fresh_pr_json")"
+              fresh_blocked_label="$(jq -r '[.labels[].name | ascii_downcase] | any(. == "wip" or . == "work-in-progress" or . == "work in progress" or . == "do-not-merge" or . == "do not merge" or . == "hold" or . == "merge-blocked" or . == "in-progress")' <<<"$fresh_pr_json")"
+              fresh_title_blocked="$(jq -r '(.title // "" | ascii_downcase) as $t | ($t | startswith("wip")) or ($t | startswith("draft")) or ($t | startswith("work in progress")) or ($t | startswith("작업중"))' <<<"$fresh_pr_json")"
+              fresh_state="$(jq -r '.state // "unknown"' <<<"$fresh_pr_json")"
+              if [[ "$current_head" != "$branch_sha" || "$fresh_state" != "open" || "$fresh_draft" == "true" || "$fresh_blocked_label" == "true" || "$fresh_title_blocked" == "true" ]]; then
+                echo "skip PR #${pr}: head, state or readiness changed before merge"
                 continue
               fi
 
@@ -223,7 +251,10 @@ jobs:
             echo "- clean branches merged: ${merged_count}"
             echo "- contained/redundant branches deleted: ${contained_deleted_count}"
             echo "- conflicted PRs encountered: ${conflict_count}"
-            echo "- work-in-progress branches/PRs skipped: ${work_in_progress_skipped_count}"
+            echo "- open PRs in snapshot: ${open_pr_count}"
+            echo "- draft/unknown PRs filtered before per-branch REST: ${draft_filtered_count}"
+            echo "- eligible ready heads from snapshot: ${#branches[@]}"
+            echo "- later work-in-progress PRs skipped: ${work_in_progress_skipped_count}"
             echo
             echo 'Every reconciled branch head is explicitly revalidated by workflow_dispatch before merge; no reconciled SHA bypasses Build Test Candidate.'
           } >> "$GITHUB_STEP_SUMMARY"
