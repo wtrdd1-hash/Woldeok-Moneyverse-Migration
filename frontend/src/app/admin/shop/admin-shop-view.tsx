@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { updateShopItem } from './actions';
-import { Save, Search, CheckCircle, XCircle, ShoppingBag, Package, Sparkles } from 'lucide-react';
+import { Save, Search, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { groupDigits } from '@/lib/money';
 
@@ -28,9 +27,7 @@ interface AdminShopViewProps {
 }
 
 export function AdminShopView({ items }: AdminShopViewProps) {
-  const router = useRouter();
   const [localItems, setLocalItems] = useState(items);
-  useEffect(() => setLocalItems(items), [items]);
   const [saving, setSaving] = useState(false);
   const [needsReauth, setNeedsReauth] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,7 +75,6 @@ export function AdminShopView({ items }: AdminShopViewProps) {
       setLocalItems((previous) => previous.map((item) => item.id === id ? verifiedItem : item));
       setEditingId(null);
       setStatusMsg(result.message ?? '서버 변경이 확인됐습니다.');
-      router.refresh();
     } catch {
       setStatusMsg('상품 변경을 확인하지 못했습니다. 다시 조회해 주세요.');
     } finally {

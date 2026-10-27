@@ -3,9 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AdminShopView } from './admin-shop-view';
 
 const update = vi.fn();
-const refresh = vi.fn();
 vi.mock('./actions', () => ({ updateShopItem: (...args: unknown[]) => update(...args) }));
-vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
 vi.mock('next/link', () => ({ default: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => <a href={href} {...props}>{children}</a> }));
 
 const item = {
@@ -14,7 +12,7 @@ const item = {
   max_stock: 10, current_stock: 5, is_limited: true, active: true, purchase_limit: '1',
 };
 
-beforeEach(() => { update.mockReset(); refresh.mockReset(); });
+beforeEach(() => { update.mockReset(); });
 
 describe('admin shop mobile and keyboard mutation flow', () => {
   it('shows a keyboard accessible search and edit action with no direct browser API write', () => {
@@ -32,16 +30,14 @@ describe('admin shop mobile and keyboard mutation flow', () => {
     await waitFor(() => expect(screen.getByRole('status').textContent).toContain('Verification required'));
     expect(screen.getByRole('link', { name: /본인 확인/ }).getAttribute('href')).toBe('/account/security');
     expect((screen.getAllByRole('textbox', { name: /가격 WLD/ })[0] as HTMLInputElement).value).toBe('100');
-    expect(refresh).not.toHaveBeenCalled();
   });
 
-  it('shows only server-confirmed price and refreshes after a successful mutation', async () => {
+  it('shows only server-confirmed price after a successful mutation', async () => {
     update.mockResolvedValue({ status: 'ok', message: 'Verified', item: { ...item, base_price: '200' } });
     render(<AdminShopView items={[item]} />);
     fireEvent.click(screen.getByRole('button', { name: '아이템 설정 수정' }));
     fireEvent.click(screen.getByRole('button', { name: '저장 완료' }));
     await waitFor(() => expect(screen.getByRole('status').textContent).toContain('Verified'));
     expect(screen.getAllByText('200 WLD').length).toBeGreaterThan(0);
-    expect(refresh).toHaveBeenCalledOnce();
   });
 });

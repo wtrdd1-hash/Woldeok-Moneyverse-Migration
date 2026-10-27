@@ -23,7 +23,7 @@ describe('admin shop verified catalog', () => {
   it('rejects malformed, duplicate, unsafe and contradictory financial evidence', () => {
     expect(parseShopCatalog(null)).toBeNull();
     expect(parseShopCatalog({ items: null })).toBeNull();
-    expect(parseShopCatalog({ items: [{ ...validItem, base_price: 9007199254740993 }] })).toBeNull();
+    expect(parseShopCatalog({ items: [{ ...validItem, base_price: Number('9007199254740993') }] })).toBeNull();
     expect(parseShopCatalog({ items: [{ ...validItem, base_price: '-1' }] })).toBeNull();
     expect(parseShopCatalog({ items: [{ ...validItem, current_stock: 11 }] })).toBeNull();
     expect(parseShopCatalog({ items: [validItem, validItem] })).toBeNull();
