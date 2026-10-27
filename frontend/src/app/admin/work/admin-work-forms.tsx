@@ -304,7 +304,7 @@ function WorkTaskRow({ task }: { readonly task: AdminWorkTask }) {
             <span className="text-xs text-muted-foreground whitespace-nowrap">초</span>
           </div>
 
-          <label className="flex items-center gap-1.5 cursor-pointer text-xs pr-1">
+          <label className="flex min-h-11 items-center gap-1.5 cursor-pointer text-xs pr-1">
             <input
               type="checkbox"
               name="active"
