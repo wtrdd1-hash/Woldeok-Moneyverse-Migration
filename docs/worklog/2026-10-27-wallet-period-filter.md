@@ -30,3 +30,12 @@ No migration or financial write: uses existing owner-scoped ledger read SQL and 
 - Dependency audit full FAIL (2 critical, 8 high, 11 moderate, 3 low); production dependency audit PASS; bot audit FAIL (1 critical, 5 high). No dependency changes attempted in this feature branch.
 - Privacy regression added RED->GREEN: Android app-api wallet responses enforce `Cache-Control: private, no-store` even if upstream omits it. Strict invalid period query regression added.
 - Exact-SHA official Test auth E2E, CI, GitOps release, backup/restore and Production smoke NOT RUN / BLOCKED. No merge or Production changes allowed.
+
+## Final integration review — 2026-10-27 11:46 KST
+- Full `pnpm test` PASS at `84507f3f`: backend 1330 PASS / 398 SKIP, frontend 1426 PASS, database 15 PASS / 3 SKIP, contract checks PASS. Separate bot 8 PASS after using existing bot dependencies.
+- Isolated PostgreSQL 17.11 on `84507f3f`: 278 forward migrations (through 279) PASS; wallet repository + controller + E2E 37 PASS. Container and ephemeral data removed after tests.
+- `pnpm typecheck`, `pnpm lint` PASS (1131 existing warnings); backend build PASS; `next build --webpack` PASS. Default Turbopack build FAIL only because temporary worktree symlinked dependencies resolve outside its filesystem root. Full audit FAIL 2 Critical / 8 High; bot audit FAIL 1 Critical / 5 High; prod dependency audit PASS.
+- During final review, main advanced from `58881764` to `584f01a9` via merged admin recent-auth PR #1518. Rebase this owned branch onto latest main and rerun exact-SHA gates; do not overwrite or clean any other worker's branch.
+- Official Test API `/api/version` = `6f697e74...`, Production = `6a989b5a...` (HTTP 200); neither matches current main or candidate. No authenticated official Test E2E, GitOps approval, rollback drill, deployment or database write. Release HOLD. Keep Draft PR unmerged.
+- Existing category-filter PR #1160 is not merged; coordinate its overlap with wallet controller/repository/service/page before any integration.
+- Rollback: no runtime change to undo; reverting this branch's two feature commits removes period UI/API/cache override, no schema or ledger rollback. No branch deletion.
