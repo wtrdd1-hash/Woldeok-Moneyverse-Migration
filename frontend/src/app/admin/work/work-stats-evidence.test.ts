@@ -39,7 +39,7 @@ describe("admin work statistics evidence contract", () => {
     { recommended_daily_cap: -500 },
     { recommended_decay_percent: 101 },
     { total_paid_24h: "9007199254740993.5" },
-    { total_paid_24h: 9007199254740993 },
+    { total_paid_24h: Number.MAX_SAFE_INTEGER + 2 },
     { current_daily_cap: "-1" },
     { capped_users_count: 2 },
   ])("rejects unsafe or inconsistent policy evidence %#", (change) => {
