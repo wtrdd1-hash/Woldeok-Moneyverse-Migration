@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const sql = readFileSync(join(__dirname, '../migrations/282-verified-help-center.sql'), 'utf8');
+const sql = readFileSync(join(__dirname, '../migrations/280-verified-help-center.sql'), 'utf8');
 
 describe('help center migration boundary', () => {
   it('restricts reads to published unexpired revisions and grants no table DML', () => {
