@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
+import { IsBoolean, IsDefined, IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { randomUUID } from 'node:crypto';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -21,6 +21,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { ChatService } from './chat.service';
+import { parsePgChatSequence } from './chat-sequence';
 
 export class OpenConversationDto {
   @ApiProperty({ format: 'uuid', description: '상대방 회원 ID' })
@@ -42,10 +43,9 @@ export class SendMessageDto {
 }
 
 export class MarkReadDto {
-  @ApiProperty({ description: '읽은 마지막 메시지 시퀀스 번호' })
-  @IsInt()
-  @Min(0)
-  readonly sequence!: number;
+  @ApiProperty({ description: '읽은 마지막 메시지 시퀀스 (정확한 64-bit 정수 문자열, 구형 앱의 안전한 정수도 허용)', oneOf: [{ type: 'string' }, { type: 'integer' }] })
+  @IsDefined()
+  readonly sequence!: string | number;
 }
 
 export class ArchiveConversationDto {
@@ -79,6 +79,14 @@ export class ReportConversationDto {
  * Chat pagination limits must be exact decimal query values, not parseInt prefixes.
  * Never silently broaden a member-scoped query after malformed input.
  */
+function parseChatCursor(raw: unknown, allowZero: boolean): string {
+  try {
+    return parsePgChatSequence(raw, allowZero);
+  } catch {
+    throw new BadRequestException('chat sequence must be a canonical PostgreSQL bigint');
+  }
+}
+
 function parseChatListLimit(raw: unknown, defaultLimit: number, maxLimit: number): number {
   if (raw === undefined) return defaultLimit;
   if (typeof raw !== 'string' || !/^[1-9][0-9]*$/.test(raw)) {
@@ -148,7 +156,7 @@ export class ChatController {
   ) {
     const actorUserId = requireUserId(req);
     const parsedLimit = parseChatListLimit(limit, 50, 100);
-    const parsedBefore = beforeSequence ? Number.parseInt(beforeSequence, 10) : undefined;
+    const parsedBefore = beforeSequence === undefined ? undefined : parseChatCursor(beforeSequence, false);
     const messages = await this.chat.listMessages(actorUserId, conversationId, parsedLimit, parsedBefore);
     return { messages };
   }
@@ -162,7 +170,7 @@ export class ChatController {
     @Query('limit') limit?: string,
   ) {
     const actorUserId = requireUserId(req);
-    const parsedSince = sinceSequence ? Number.parseInt(sinceSequence, 10) : 0;
+    const parsedSince = sinceSequence === undefined ? '0' : parseChatCursor(sinceSequence, true);
     const parsedLimit = parseChatListLimit(limit, 100, 200);
     const messages = await this.chat.syncMessages(actorUserId, conversationId, parsedSince, parsedLimit);
     return { messages };
@@ -188,7 +196,7 @@ export class ChatController {
     @Body() dto: MarkReadDto,
   ) {
     const actorUserId = requireUserId(req);
-    return this.chat.markAsRead(actorUserId, conversationId, dto.sequence);
+    return this.chat.markAsRead(actorUserId, conversationId, parseChatCursor(dto.sequence, true));
   }
 
   @ApiOperation({ summary: '대화방 보관 또는 보관 해제' })
