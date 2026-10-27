@@ -14,5 +14,10 @@
 - Backend 1,552 PASS/412 SKIP, Frontend 1,492 PASS(마지막 테스트 2개 추가 전), 타입 검사·린트·Backend 및 Webpack 빌드·app-api 계약 PASS. 실제 격리 PostgreSQL 17.11에서 소유자 조회/타인 거부/직접 테이블 접근 차단 PASS.
 - 전체 루트 테스트는 기존 Migration 280 중복으로 FAIL. 보안 감사 Critical 2/High 8, Bot Critical 1/High 5 FAIL. Bot 단위 테스트는 격리 작업공간의 별도 의존성 누락으로 BLOCKED. 공식 Test 정확 SHA·인증 E2E·운영 승격 차단.
 
-## 작업 종료
-- 최종 SHA·PR·CI 점검 후 기록 예정.
+## 작업 종료 — 2026-10-27 20:47 KST
+- 구현·검증 SHA `5258040650dedec7682e9c49ef8280676738ed88`, 기준 main `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`, Draft/HOLD PR #1575, 변경 파일 11개. 시작·중간·통합 직전 main과 영문/국문 통합기획서 재확인.
+- 정확한 구현 SHA: Typecheck PASS, Lint PASS(오류 0/경고 1,122), Backend 1,552 PASS/412 SKIP, Frontend 1,494 PASS, Backend/Webpack 빌드 PASS, app-api 179개 계약 PASS, Bot 8 PASS(동일 lockfile 의존성 읽기 전용 사용 후 연결 제거). 실제 격리 PostgreSQL 17.11 소유자 조회/타인 SQLSTATE 42501/직접 DML 거부 PASS.
+- 기존 main의 마이그레이션 280 중복으로 루트 테스트 및 PR #1575 CI FAIL. PR #1564와의 로컬 합성 병합에서 DB 23 PASS/3 SKIP 및 지원 기능 Frontend 20 PASS. 합성 결과는 운영 통합·공식 Test 검증이 아님.
+- 보안 감사 전체 Critical 2/High 8, Bot Critical 1/High 5 FAIL. 공식 Test 불변 릴리스 경로가 없어 정확 SHA 신원 확인 FAIL. 인증 E2E, 전체 브라우저 접근성/SEO, 독립 복원 및 GitOps 승인 차단.
+- 종료 비-main 366개(고유 259, 충돌 94, main 앞선 9, 완전 병합 4), PR 356개(Draft 341), 충돌 PR 65개, 실패/취소 검사 PR 212개. 브랜치 삭제 0개: 다른 예약 소유 가능성으로 병합된 브랜치도 보존.
+- main 병합, 운영 DB/원장 변경, Test/Production 배포, 롤백 모두 0건. 병합 전 롤백은 Draft PR 종료이며 스키마 변경 없음. **PARTIAL/BLOCKED, 운영 RELEASE HOLD**. 기존 예약은 계속 활성.
