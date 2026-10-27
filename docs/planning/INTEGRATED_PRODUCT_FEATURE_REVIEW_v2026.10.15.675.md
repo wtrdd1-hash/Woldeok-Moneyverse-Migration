@@ -1,4 +1,5 @@
 ## v1384 — F675-152 Account Security Event Alerts / Feature Addition / DRAFT-HOLD
+- **GitHub:** Draft PR #1598 (base #1588, DRAFT/HOLD), implementation issue #1597; no independent merge, exact-SHA Test/Production blocked.
 
 **Previous:** Feature Improvement v1378. **Current:** Feature Addition v1384. **Next:** Feature Improvement v1386 provisional. The v1380/v1382 numbers belong to parallel blog planning (#1592/#1595), not this automation's incident-watch line. Main source SHA at start: `656a89947f2261c12de20d4612e88f251ba6c6a6`. Planning-only, stacked on #1588; Issue #1597.
 

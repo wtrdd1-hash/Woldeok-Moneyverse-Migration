@@ -1,4 +1,5 @@
 ## v1384 / F675-152 — Verified Account Security Event Alerts and Durable Owner Receipts (Feature Addition / DRAFT / RELEASE HOLD) — Issue #1597
+- **GitHub:** Draft PR #1598 (base #1588, DRAFT/HOLD), implementation issue #1597; no independent merge, exact-SHA Test/Production blocked.
 
 **Cycle and source of truth.** Previous Feature Improvement v1378 → Current Feature Addition v1384 → Next Feature Improvement v1386 (provisional). v1380/v1382 labels are already used by separate blog editorial planning PRs #1592/#1595; do not overwrite or combine those branches. Main at start `656a89947f2261c12de20d4612e88f251ba6c6a6`; main AGENTS.md, README.md, English canonical PROJECT_PLAN.md and Korean parity checked. This planning-only branch stacks on unmerged #1588; never merge independently or imply that F675-149/150/151 is deployed. Gemini, Development A/B/C and QA own code and release.
 

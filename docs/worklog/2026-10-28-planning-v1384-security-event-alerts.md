@@ -14,3 +14,5 @@
 
 
 **MID RECHECK:** main advanced from 656a89947f2261c12de20d4612e88f251ba6c6a6 to f3d7a3fb4d693f75a14a8edbacb0af20321fb9c4; canonical AGENTS/README/PROJECT_PLAN EN/KO blob SHAs unchanged.
+
+**DONE (documentation):** GitHub Draft PR #1598 on #1588, issue #1597, bilingual integrated master/project plan/review/update log and worklog. Document diff/backlog verification PASS; runtime/DB/Test/Production unchanged. Final remote SHA in miniPC records.

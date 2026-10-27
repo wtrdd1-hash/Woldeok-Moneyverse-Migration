@@ -1,4 +1,5 @@
 ## v2026.10.28.1384 — F675-152 Verified Account Security Event Alerts (Feature Addition / DRAFT / RELEASE HOLD)
+- **GitHub:** Draft PR #1598 (base #1588, DRAFT/HOLD), implementation issue #1597; no independent merge, exact-SHA Test/Production blocked.
 
 - Cycle: Previous Feature Improvement v1378 / Current Feature Addition v1384 / Next Feature Improvement v1386 provisional. v1380 and v1382 labels used by independent blog planning PRs #1592/#1595; do not overwrite. Main `656a89947f2261c12de20d4612e88f251ba6c6a6` checked start, AGENTS.md, README.md, canonical English project plan and Korean parity. Stacked Draft on #1588; issue #1597; no independent merge.
 - Source: /account/security shows sessions and recent 20 auth_security_events via GET /api/v1/account/security/events; no committed security-event in-app delivery receipt. Migration 214 SECURITY DEFINER account_recent_security_events takes arbitrary user UUID without internal session ownership check (source-level risk, not proven exploit); app notification list uses OFFSET and created_at-only order. F675-149 owner-safe inbox/outbox is unmerged prerequisite. OAuth event completeness unverified.
