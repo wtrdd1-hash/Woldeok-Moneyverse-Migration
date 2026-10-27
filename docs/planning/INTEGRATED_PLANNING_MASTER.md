@@ -1,4 +1,4 @@
-## v1378 / F675-151 — Incident Watch Subscribe/Publish/Withdraw Race and Delivery Integrity (Feature Improvement / DRAFT / RELEASE HOLD) — Issue #1583
+## v1378 / F675-151 — Incident Watch Subscribe/Publish/Withdraw Race and Delivery Integrity (Feature Improvement / DRAFT / RELEASE HOLD) — Issue #1583 — Draft PR #1588
 
 **Cycle / authority.** Previous Feature Addition v1376 → Current Feature Improvement v1378 → Next Feature Addition v1380 (provisional). Canonical main at start/mid `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`; main `AGENTS.md`, `README.md`, `docs/planning/PROJECT_PLAN.md` and Korean parity inspected. Stack on unmerged Draft #1584 (itself on #1578 and #1573); never merge independently. Planning only; do not deploy or change runtime/DB/WLD/ledger/feature flags/automations. A/B/C/Gemini/QA retain code and release ownership.
 

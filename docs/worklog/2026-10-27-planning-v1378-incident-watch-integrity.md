@@ -9,3 +9,5 @@
 **Backlog:** P0 ENV1378-01 SEC1378-02 REL1378-03 WATCH1378-04; P1 WATCH1378-05 WATCH1378-06 WATCH1378-07 WATCH1378-08 WATCH1378-09 WATCH1378-10. QA latest reviewed v1324 main root FAIL duplicate migration 280, full audit Critical 2/High 8, bot Critical 1/High 5, exact-SHA Test/independent restore unverified; Test and Production symlinks dangling. Root 45% used, data 57% used. Proposed 10,001/100/100 tests NOT RUN. External newly accepted 0, cumulative deduped approved UNKNOWN/10,000 BLOCKED/IN PROGRESS. Release HOLD.
 
 **Verification and GitHub:** verify diff, EN/KO six-doc parity, source-only docs, remote SHA, stacked Draft PR and issue updates. No independent merge.
+
+**GitHub:** stacked Draft PR #1588 (base #1584), commit and remote SHA verified; issue #1583 update recorded.
