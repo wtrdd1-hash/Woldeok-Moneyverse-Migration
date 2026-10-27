@@ -57,6 +57,26 @@ export class NotificationService {
     return row?.affected_count ?? 0;
   }
 
+  /** A receipt observes unread rows after the mutation; new arrivals are not silently counted as read. */
+  async markAllReadWithReceipt(actor: string): Promise<{ updatedCount: number; remainingUnreadCount: number }> {
+    if (!this.pool) throw new Error('database pool unavailable');
+    const updated = await queryOne<{ affected_count: number }>(
+      this.pool,
+      'SELECT public.notification_mark_all_read($1) AS affected_count',
+      [actor],
+    );
+    const remaining = await queryOne<{ unread_count: number }>(
+      this.pool,
+      'SELECT public.notification_unread_count($1) AS unread_count',
+      [actor],
+    );
+    if (!Number.isSafeInteger(updated?.affected_count) || (updated?.affected_count ?? -1) < 0 ||
+        !Number.isSafeInteger(remaining?.unread_count) || (remaining?.unread_count ?? -1) < 0) {
+      throw new Error('notification read-all receipt unavailable');
+    }
+    return { updatedCount: updated!.affected_count, remainingUnreadCount: remaining!.unread_count };
+  }
+
   /**
    * A notification is not a reward ledger entry. Until an atomic, auditable
    * reward-settlement operation exists, claiming must never mark notifications
