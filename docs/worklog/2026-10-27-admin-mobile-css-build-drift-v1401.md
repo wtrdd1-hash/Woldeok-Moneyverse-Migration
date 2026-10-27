@@ -16,6 +16,14 @@
 - [ ] Re-fetch main before integration and run relevant automated gates.
 - [ ] Carry out zero-downtime promotion only after authenticated Test/rollback readiness gates.
 
+
+### Checkpoint 1 — replacement and verification
+
+- A separate source-matched, read-only candidate copy was created at `/srv/moneyverse-data/releases/repair-v1401-admin-css-candidate` (1.2 GB, without build cache or Git history); no live files were edited.
+- The replacement process runs on 3384, while production remains on 3354. The replacement document links all 5 present CSS chunks; `verify-next-static-assets.mjs` passed, and the broken old port failed with CSS HTTP 500.
+- Five automated negative/positive regression tests passed (5/5). Candidate HTTP `/`, `/admin` and `/admin/blog` all returned 200; no authenticated admin activity is claimed.
+- `origin/main` advanced from `59cdc2e0` to `cf56520b` during work; the task branch must be rebased without clobbering concurrent contributions.
+
 ## Finished
 
 Pending actual verification and cutover; no deployment is claimed yet.
