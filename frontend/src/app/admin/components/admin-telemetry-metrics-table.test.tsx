@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import React from 'react';
 import { AdminTelemetryMetricsTable } from './admin-telemetry-metrics-table';
 import type { AdminUser } from '../types';
@@ -52,18 +52,28 @@ describe('AdminTelemetryMetricsTable unit tests', () => {
     },
   ];
 
+  it('labels a bounded read as a sample and does not invent MAU for dormant users', () => {
+    const dormant = [{ ...mockUsers[0]!, created_at: '2025-01-01T00:00:00Z', last_seen_at: null, last_login_at: null }];
+    const markup = renderToStaticMarkup(<AdminTelemetryMetricsTable users={dormant} sampled />);
+    expect(markup).toContain('조회된 회원 1명');
+    expect(markup).not.toContain('등록된 전체 회원');
+    expect(markup).not.toContain('실시간 집계 새로고침');
+    expect(markup).toContain('MAU (월간 활성)');
+    expect(markup).toMatch(/MAU \(월간 활성\)[\s\S]*?0명/);
+  });
+
   it('renders MAU, WAU, and DAU metrics correctly based on timestamps', () => {
-    render(<AdminTelemetryMetricsTable users={mockUsers} showDetailsLink={true} />);
+    const markup = renderToStaticMarkup(<AdminTelemetryMetricsTable users={mockUsers} showDetailsLink={true} />);
 
     // Header & Badge
-    expect(screen.getByText(/실시간 활성 사용자\(MAU\/WAU\/DAU\) 및 유저 리텐션 분석/i)).toBeTruthy();
-    expect(screen.getByText(/실측 데이터 연동/i)).toBeTruthy();
+    expect(markup).toContain('실시간 활성 사용자(MAU/WAU/DAU) 및 유저 리텐션 분석');
+    expect(markup).toContain('실측 데이터 연동');
 
     // Table metric labels
-    expect(screen.getByText(/월간 활성 유저 \(MAU\)/i)).toBeTruthy();
-    expect(screen.getByText(/주간 활성 유저 \(WAU\)/i)).toBeTruthy();
-    expect(screen.getByText(/일간 활성 유저 \(DAU\)/i)).toBeTruthy();
-    expect(screen.getByText(/회원 1인당 평균 순자산/i)).toBeTruthy();
-    expect(screen.getByText(/상위 10% 순자산 집중도/i)).toBeTruthy();
+    expect(markup).toContain('월간 활성 유저 (MAU)');
+    expect(markup).toContain('주간 활성 유저 (WAU)');
+    expect(markup).toContain('일간 활성 유저 (DAU)');
+    expect(markup).toContain('회원 1인당 평균 순자산');
+    expect(markup).toContain('상위 10% 순자산 집중도');
   });
 });

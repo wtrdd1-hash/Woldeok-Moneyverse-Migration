@@ -28,6 +28,7 @@ import type { AdminUser } from '../types';
 interface AdminTelemetryMetricsTableProps {
   readonly users: readonly AdminUser[];
   readonly showDetailsLink?: boolean;
+  readonly sampled?: boolean;
 }
 
 function parseTime(val: string | null | undefined): number {
@@ -39,6 +40,7 @@ function parseTime(val: string | null | undefined): number {
 export function AdminTelemetryMetricsTable({
   users,
   showDetailsLink = true,
+  sampled = false,
 }: AdminTelemetryMetricsTableProps) {
   const [nowTimestamp, setNowTimestamp] = useState(() => Date.now());
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -95,13 +97,6 @@ export function AdminTelemetryMetricsTable({
       netWorthList.push(nw);
     }
 
-    // 최소 MAU 보정: 가입자 데이터가 있고 활동 일자가 동일하면 최소 1 이상 반영
-    if (totalUsers > 0 && mauCount === 0) {
-      mauCount = totalUsers;
-      wauCount = totalUsers;
-      dauCount = Math.max(1, Math.floor(totalUsers * 0.6));
-    }
-
     // 상위 10% 자산 집중도 계산
     netWorthList.sort((a, b) => (b > a ? 1 : b < a ? -1 : 0));
     const top10PercentCount = Math.max(1, Math.ceil(totalUsers * 0.1));
@@ -149,11 +144,13 @@ export function AdminTelemetryMetricsTable({
                   실시간 활성 사용자(MAU/WAU/DAU) 및 유저 리텐션 분석
                 </CardTitle>
                 <Badge className="h-5 bg-primary/15 text-primary border-primary/30 text-[10px] font-bold">
-                  실측 데이터 연동
+                  {sampled ? '조회 표본 기반' : '실측 데이터 연동'}
                 </Badge>
               </div>
               <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                등록된 전체 회원 {metrics.totalUsers}명의 최근 로그인 및 상호작용 타임스탬프를 실시간 집계한 결과입니다.
+                {sampled
+                  ? `조회된 회원 ${metrics.totalUsers}명의 최근 활동 시각을 분석한 표본 지표입니다. 전체 회원 통계가 아닙니다.`
+                  : `등록된 전체 회원 ${metrics.totalUsers}명의 최근 로그인 및 상호작용 타임스탬프를 집계한 결과입니다.`}
               </CardDescription>
             </div>
           </div>
@@ -167,7 +164,7 @@ export function AdminTelemetryMetricsTable({
               className="min-h-[44px] sm:min-h-9 px-3 gap-1.5 text-xs font-semibold"
             >
               <RefreshCw className={`size-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>실시간 집계 새로고침</span>
+              <span>{sampled ? '화면 값 재계산' : '집계 다시 계산'}</span>
             </Button>
             {showDetailsLink && (
               <Button
@@ -204,7 +201,7 @@ export function AdminTelemetryMetricsTable({
               <span className="text-xs text-muted-foreground">명</span>
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">
-              전체 회원의 <strong className="text-indigo-600 dark:text-indigo-400 font-bold">{metrics.totalUsers > 0 ? ((metrics.mauCount / metrics.totalUsers) * 100).toFixed(1) : 0}%</strong>
+              {sampled ? '조회된 회원 중' : '전체 회원의'} <strong className="text-indigo-600 dark:text-indigo-400 font-bold">{metrics.totalUsers > 0 ? ((metrics.mauCount / metrics.totalUsers) * 100).toFixed(1) : 0}%</strong>
             </div>
           </div>
 
