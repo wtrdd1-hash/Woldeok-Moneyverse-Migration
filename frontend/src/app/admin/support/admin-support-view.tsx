@@ -287,14 +287,14 @@ export function AdminSupportView({
 
       await adminSupportReply(formData);
       synthSound.playMessageSent();
-      toast.success('관리자 답장이 회원에게 전송되었습니다.');
+      toast.success('관리자 답장이 서버에 저장되었습니다.');
       setReplyText('');
       setAttachedImg(null);
       await fetchMessagesForThread(selectedThreadId);
       await fetchAllThreads(false);
       router.refresh();
     } catch (err: unknown) {
-      toast.error('답장 전송 중 네트워크 오류가 발생했습니다.');
+      toast.error('서버에서 답장 저장을 확인하지 못했습니다. 다시 확인해 주세요.');
     } finally {
       setIsSending(false);
     }
