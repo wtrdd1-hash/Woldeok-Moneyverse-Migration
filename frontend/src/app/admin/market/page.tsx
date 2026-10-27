@@ -19,12 +19,12 @@ import { groupDigits } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
-import type { AdminMarketEvent, AdminStock, AdminStockDynamics } from '../types';
 import { formatMoment } from '@/lib/money';
 import { cn } from '@/lib/cn';
 import { eventScope } from '@/app/stocks/market-news';
 import { CancelMarketEventButton, PublishMarketEventDialog } from './market-events';
 import { strengthLabel } from './strengths';
+import { parseMarketStocks, parseMarketDynamics, parseMarketEvents } from './market-evidence';
 import { HaltStockDialog, HaltSettlementStatusDialog } from './admin-market-halt-dialog';
 import { LimitPolicyGuardCard } from './limit-policy-guard-card';
 import {
@@ -62,11 +62,18 @@ function gapPercent(price: string, fair: string): string {
 
 export default async function AdminMarketPage() {
   await requireAdminConsole(AREA.href);
-  const [stocks, dynamics, events] = await Promise.all([
-    apiOrNull<{ stocks: AdminStock[] }>('/api/v1/admin/stocks'),
-    apiOrNull<{ stocks: AdminStockDynamics[] }>('/api/v1/admin/stocks/dynamics'),
-    apiOrNull<{ events: AdminMarketEvent[] }>('/api/v1/admin/stocks/market-events'),
+  const [rawStocks, rawDynamics, rawEvents] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/admin/stocks'),
+    apiOrNull<unknown>('/api/v1/admin/stocks/dynamics'),
+    apiOrNull<unknown>('/api/v1/admin/stocks/market-events'),
   ]);
+  const stockRows = parseMarketStocks(rawStocks);
+  const dynamicRows = parseMarketDynamics(rawDynamics);
+  const eventRows = parseMarketEvents(rawEvents);
+  const stocks = stockRows === null ? null : { stocks: stockRows };
+  const dynamics = dynamicRows === null ? null : { stocks: dynamicRows };
+  const events = eventRows === null ? null : { events: eventRows };
+  const marketEvidenceReady = stocks !== null && dynamics !== null && events !== null;
   const marketTrend = dynamics?.stocks[0]?.market_trend_bps ?? null;
 
   return (
@@ -140,6 +147,14 @@ export default async function AdminMarketPage() {
         </CardContent>
       </Card>
 
+      {!marketEvidenceReady && (
+        <div role="alert" aria-live="polite" className="grid gap-3 rounded-xl border border-destructive/40 p-4 text-sm">
+          <p>주식시장 API 증빙을 모두 확인하지 못했습니다. 미확인 금융정보와 관리자 변경 기능을 표시하지 않습니다.</p>
+          <Button asChild variant="outline" className="min-h-11 w-full sm:w-fit">
+            <Link href="/admin/market">다시 조회</Link>
+          </Button>
+        </div>
+      )}
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
           <div className="grid gap-1">
@@ -152,7 +167,7 @@ export default async function AdminMarketPage() {
             <Button asChild variant="outline" className="min-h-11">
               <Link href="/admin/market/ai-news">AI 시나리오 →</Link>
             </Button>
-            <PublishMarketEventDialog stocks={stocks?.stocks ?? []} />
+            {marketEvidenceReady && <PublishMarketEventDialog stocks={stocks.stocks} />}
           </div>
         </CardHeader>
         <CardContent>
@@ -196,7 +211,7 @@ export default async function AdminMarketPage() {
                       <p className="text-sm text-muted-foreground [word-break:keep-all]">{event.body}</p>
                     )}
                   </div>
-                  {event.live && <CancelMarketEventButton eventId={event.id} />}
+                  {marketEvidenceReady && event.live && <CancelMarketEventButton eventId={event.id} />}
                 </li>
               ))}
             </ul>
@@ -208,8 +223,8 @@ export default async function AdminMarketPage() {
             <CardTitle className="text-base">가상 주식 종목 관리</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6">
-            <NewStockForm />
-            {stocks === null ? (
+            {marketEvidenceReady && <NewStockForm />}
+            {!marketEvidenceReady ? (
               <EmptyState title="등록된 종목을 불러오지 못했어요." />
             ) : stocks.stocks.length === 0 ? (
               <EmptyState title="등록된 종목이 없습니다." />
