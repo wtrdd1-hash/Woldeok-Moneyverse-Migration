@@ -34,7 +34,7 @@ export function OpenConsole({
       </form>
       <ActionAlert state={state} />
       <FieldDescription>
-        콘솔 세션은 30분 뒤 또는 10분간 조작이 없으면 잠깁니다.
+        콘솔 세션은 최대 30일 유지되며, 24시간 사용하지 않으면 잠깁니다.
       </FieldDescription>
     </div>
   );

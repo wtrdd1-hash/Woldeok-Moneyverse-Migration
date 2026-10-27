@@ -7,3 +7,5 @@
 - Retired TOTP instructions in treasury, audit and the Korean planning ledger have been corrected; backend recent-reauthentication guard and DB-level operator enforcement are unchanged.
 - Scope excludes schema migrations and actual market-event execution.
 - QA/CI/Test/Production acceptance: see `docs/worklog/2026-10-27-admin-market-reauth-guidance-v2026.10.27.2.md`.
+
+- The administrator-console TTL display now matches migration 246: 30 days total, 24-hour idle lock, not historical 30 minutes/10 minutes.

@@ -19,7 +19,7 @@
 - Added typed failure classification and one reusable safe account-security recovery panel, wired to both market event forms.
 - Corrected obsolete TOTP directions in Treasury, Audit and Korean project ledger; English/Korean integrated plans, changelog, GitHub update files synchronized.
 - No middleware/CSRF/role/DB authorization bypass; no migrations or production data mutations.
-- Rechecked migration 246: current console session opens without separate recent reauth and uses 30-day/24-hour lifecycle (outdated 30-minute/10-minute copy identified, kept for follow-up). Individual market actions still require recent verified identity.
+- Rechecked migration 246: current console session opens without separate recent reauth and uses 30-day/24-hour lifecycle (outdated 30-minute/10-minute user-visible copy and source comments corrected). Individual market actions still require recent verified identity.
 
 ## Test checkpoint (2026-10-27 KST)
 - `NODE_ENV=test pnpm --dir frontend exec vitest run src/lib/mutate.test.ts src/app/admin/market/market-event-reauth-help.test.tsx src/app/admin/step-up-field.test.tsx`: **PASS 5/5**.

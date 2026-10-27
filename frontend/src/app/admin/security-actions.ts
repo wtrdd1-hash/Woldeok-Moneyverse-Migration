@@ -61,7 +61,7 @@ export async function openConsole(
   if (next) redirect(next);
   return {
     status: 'ok',
-    message: '운영 콘솔을 열었어요. 30분 뒤, 또는 10분간 조작이 없으면 잠깁니다.',
+    message: '운영 콘솔을 열었어요. 세션은 최대 30일 유지되며, 24시간 사용하지 않으면 잠깁니다.',
   };
 }
 
