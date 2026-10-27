@@ -1,4 +1,4 @@
-import type { LookupAddress } from 'node:dns';
+﻿import type { LookupAddress } from 'node:dns';
 import { Agent } from 'undici';
 
 // The transport must never resolve a validated hostname again. Using the
@@ -65,7 +65,7 @@ export async function fetchPinnedUrl(
     connections: 1,
     pipelining: 1,
     connect: {
-      lookup: (
+      lookup: ((
         hostname: string,
         options: { all?: boolean },
         callback: (err: Error | null, addressOrAddresses?: any, family?: number) => void,
@@ -79,7 +79,7 @@ export async function fetchPinnedUrl(
         } else {
           callback(null, chosen.address, chosen.family);
         }
-      },
+      }) as any,
     },
   });
 
