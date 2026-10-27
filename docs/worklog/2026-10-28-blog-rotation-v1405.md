@@ -26,3 +26,18 @@ Update with final branch SHA/PR and any CI after creating PR. Scope is **source 
 - Main remained 4f5efd1f at start and midpoint. v1403 TECH PR #1602 is separate, code changes do not overwrite its files.
 - This PR implements a **pure rotation and fail-closed scheduler placeholder**, not a working auto-generated 4-language publication engine. Legacy generation remains 503, existing published articles and Production crontab/DB/ads unchanged. Source candidate is not on official Test or Production; migration 283 parity #1605, official Test identity and financial direct-DML gates remain blocked.
 - **Final classification: SOURCE CANDIDATE ONLY / DRAFT PR / CI PENDING / TEST & PRODUCTION NOT DEPLOYED.**
+
+
+## v1405.1 — Explicit Production-promotion request and evidence-based hold (2026-10-28 KST)
+
+**Before:** Owner directly instructed Production promotion. Rechecked main, Draft PR #1612, exact CI, official Test identity, Production financial gate and owner-authorized v1406 withdrawal. No production changes were attempted without minimum release evidence.
+
+**Midpoint:** Latest main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` contains v1406 documentation confirming manual withdrawal of all 199 old blog JSON records. Public Production and Test `/api/blog` report **zero active posts**. Do not reverse the owner-ordered withdrawal; it does not cancel future auto-publication instructions.
+
+**CI:** PR #1612 commit `d520922572624cc9a3cd1280401f232901afa66a`, [workflow #3817](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/actions/runs/40538566560) ended FAILURE. Runtime `pnpm lint` stopped on two pre-existing `no-useless-escape` errors in main `frontend/src/app/blog/blog-data.ts`:1213, separately tracked #1600 and overlapping TECH PR #1602. The branch's local 17 focused and 1,695 backend tests, typecheck, changed-file lint and build passed; this is not full CI success.
+
+**Test/Production gates:** Test exact-SHA release identity fails (dangling `/srv/moneyverse-data/releases/test-current` target). Production financial safety checker with actual runtime env returns BLOCKED on direct app-role financial DML for `account_balances`, `accounts` and `system_treasury_vaults`. Main has duplicate migration prefix 283 (#1605). No authenticated official Test release, financial DB/backup/rollback certification or zero-downtime promotion occurred.
+
+**Hard functionality gate:** The proposed scheduler merely rotates intent and always returns `VERIFIED_PUBLISHER_NOT_ENABLED` or `VERIFIED_PUBLISHER_NOT_IMPLEMENTED`, even when its flag is enabled. It would **not** auto-publish two-hour native-language posts if promoted. The verified AI research/writer, independent claim/locale/rights gating, idempotent DB receipts/outbox and authenticated owner manual withdrawal remain absent (#983). Never re-enable old JSON writer to satisfy a cosmetic deployment.
+
+**Final:** `PROMOTION_BLOCKED / NO OFFICIAL TEST OR PRODUCTION CHANGES`; owner instructions remain recorded. Restore release gates and build actual publisher before promoting functionality, avoiding co-workers' v1403 TECH PR files.

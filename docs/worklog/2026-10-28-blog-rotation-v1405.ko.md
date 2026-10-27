@@ -25,3 +25,20 @@
 - **서버 작업 사실:** 신규 AI 원어 글 작성기/DB 인증 발행/관리자 수동 삭제 API 미구현. 새 2시간 스케줄 후보는 실제 발행 기능이 없어 안전하게 SKIP. 구형 /api/blog/generate 503, 운영 04시 cron, 운영 글·광고 설정·DB·서비스 포인터는 **미변경**. 사용자 지시를 제품 정책으로 채택한 것이 실운영 자동발행 성공을 뜻하지 않음.
 - GitHub main 갱신 여부 중간 확인: 작업 시작/중간 origin/main `4f5efd1f48615f0112701feec25a9b0fc67d9719`. v1403 TECH 글 PR #1602 별도이며 충돌 변경 없음. DB migration 283 중복 #1605, 공식 Test 미인증, 금융 직접 DML 권한 차단 유지.
 - **종료 상태: SOURCE_CANDIDATE_COMPLETE / DRAFT_PR / CI_PENDING / VERIFIED_PUBLISHER_NOT_IMPLEMENTED / TEST_NOT_PROMOTED / PRODUCTION_NOT_DEPLOYED.**
+
+
+## v1405.1 — 운영 승격 직접 지시 재검증 (2026-10-28 06:44 KST 이후)
+
+**승격 작업 전:** 사용자가 `운영승격`을 다시 직접 지시. 최신 origin/main, PR #1612, GitHub CI, v1405 구현, 공식 Test 신원 게이트, 운영 금융 DB 권한, v1406 운영 글 삭제 기록을 읽기 전용으로 확인하며, 증거 없는 운영 승격 표기를 금지.
+
+**최신 메인:** `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`. v1406 관리자 지시로 기존 운영 JSON 글 199건 공개 철회(현재 공개 API 글 0건). 이는 새 AI 글 자동 발행 요구 자체를 취소한 것이 아니며 기존 글 무단 복원 금지.
+
+**CI 중간 확인:** PR #1612의 source SHA `d520922572624cc9a3cd1280401f232901afa66a`, GitHub [CI #3817](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/actions/runs/40538566560) `completed/failure`. classify·policy 통과, runtime-check `pnpm lint` 단계 실패. 기존 main `frontend/src/app/blog/blog-data.ts` 1213행 불필요한 이스케이프 문자 2개 (`no-useless-escape`), 추적 이슈 #1600 및 다른 TECH 편집 브랜치 #1602와 파일 겹침. 이번 백엔드 스케줄 브랜치의 코드 테스트(17/17, 백엔드 1,695 PASS/430 SKIP, 빌드·타입·변경린트)는 별도로 통과했지만 GitHub CI 통과로 표시할 수 없음.
+
+**공식 Test 게이트:** `verify-host-runtime-identity.mjs --channel test --sha d5209225...` 종료 1, `test-current` 대상 경로 없음. 양쪽 서비스 systemd active/HTTP 200은 후보 SHA 검증이나 로그인·API·DB E2E가 아님.
+
+**금융 운영 사전검사:** 실효 백엔드 설정을 사용한 `verify-financial-readiness.mjs` 종료코드 2/`BLOCKED`, 운영 앱 역할의 `account_balances`·`accounts`·`system_treasury_vaults` 직접 DML 3건. 데이터나 GRANT를 임의로 수정하지 않음. 코드 main에는 서로 다른 `283` 번호의 마이그레이션 파일 2개 존재, 이력 안전성 이슈 [#1605](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1605).
+
+**핵심 기능 출고 판정:** v1405 `blog.rotation_2h` 핸들러는 `VERIFIED_PUBLISHER_NOT_ENABLED` 또는 `VERIFIED_PUBLISHER_NOT_IMPLEMENTED`를 반환할 뿐 실제 발행 코드가 없다. 원어 AI 작성·검증된 출처·원자 DB 게시 영수증/Outbox·관리자 수동 삭제가 미구현이므로 이 SHA를 배포하면 `2시간 자동 게시 성공`을 달성할 수 없음. 구형 API 503도 해제 금지. 이전 v1406 공개 철회 글을 임의 복원하지 않는다.
+
+**작업 종료 판정:** `PROMOTION_BLOCKED`, 공식 Test 미승격/운영 미승격. 기존 운영 서비스·스케줄러·비밀키·데이터·릴리스 심볼릭링크/DB 권한에 **아무 변경도 가하지 않음**. 선행 구현 #983, 필수 릴리스 차단 #1600/#1605, 공식 Test 포인터/금융 권한 복구가 필요. 사용자 지시를 실제 운영 적용 완료로 표현하지 않는다.
