@@ -145,9 +145,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
-  // Owner-scoped financial and support data must not inherit cacheable upstream
-  // headers, including on Android clients and upstream error responses.
-  if (parts[0] === 'wallet' || parts[0] === 'support') headers.set('cache-control', 'private, no-store');
+  // Wallet balances must never inherit a cacheable upstream response.
+  if (parts[0] === 'wallet') headers.set('cache-control', 'private, no-store');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -170,7 +169,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
-  return proxy(request, (await context.params).path);
+  const parts = (await context.params).path;
+  const response = await proxy(request, parts);
+  // The boundary also covers early version, auth and upstream failures.
+  if (parts[0] === 'support') response.headers.set('cache-control', 'private, no-store');
+  return response;
 }
 
 export const GET = handle;

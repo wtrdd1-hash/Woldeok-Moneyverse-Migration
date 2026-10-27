@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const migration = readFileSync(join(import.meta.dirname, '../migrations/196-user-admin-support-chat.sql'), 'utf8');
+const migration = readFileSync(join(process.cwd(), 'migrations/196-user-admin-support-chat.sql'), 'utf8');
 
 describe('support owner-scoped database contract', () => {
   it('filters the member thread list by actor and denies foreign thread messages', () => {

@@ -9,5 +9,10 @@
 ## 작업 중
 - RED→GREEN 확인: Frontend 16건+화면 통합 2건, Backend 10건, DB 권한 계약 2건 통과. 전체 검증·GitHub 기록 진행 중.
 
+## 중간 점검
+- 실제 원격 비-main 365개(고유 259, 충돌 94, 앞선 브랜치 8, 완전 병합 4), PR 355개(Draft 340개), 삭제 0건. stale 로컬 추적 참조를 제외해 집계함.
+- Backend 1,552 PASS/412 SKIP, Frontend 1,492 PASS(마지막 테스트 2개 추가 전), 타입 검사·린트·Backend 및 Webpack 빌드·app-api 계약 PASS. 실제 격리 PostgreSQL 17.11에서 소유자 조회/타인 거부/직접 테이블 접근 차단 PASS.
+- 전체 루트 테스트는 기존 Migration 280 중복으로 FAIL. 보안 감사 Critical 2/High 8, Bot Critical 1/High 5 FAIL. Bot 단위 테스트는 격리 작업공간의 별도 의존성 누락으로 BLOCKED. 공식 Test 정확 SHA·인증 E2E·운영 승격 차단.
+
 ## 작업 종료
-- 검증 후 기록 예정.
+- 최종 SHA·PR·CI 점검 후 기록 예정.
