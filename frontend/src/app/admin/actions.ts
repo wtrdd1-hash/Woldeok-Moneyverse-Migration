@@ -262,9 +262,9 @@ export async function applyCorporateAction(
 /**
  * Publishes a market event: news that leans the market (124).
  *
- * Not a step-up act. It moves no money and takes nothing from anybody; what
- * it can do to prices is bounded by the function's own vocabulary of three
- * strengths, and it is audited like every other console write.
+ * Market events affect synthetic share prices. The API requires recent
+ * reauthentication as well as CSRF and an administrator console session;
+ * the form must provide a recovery path when that check expires.
  */
 export async function publishMarketEvent(
   _previous: ActionState,

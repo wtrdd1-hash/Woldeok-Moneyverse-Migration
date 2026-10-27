@@ -11,6 +11,8 @@ export interface ActionState {
   readonly message?: string;
   /** Optional semantic tone for a successfully processed outcome. */
   readonly tone?: 'success' | 'neutral' | 'negative';
+  /** Stable server refusal signal; never infer identity state from localized copy. */
+  readonly reauthenticationRequired?: boolean;
 }
 
 export const IDLE: ActionState = { status: 'idle' };

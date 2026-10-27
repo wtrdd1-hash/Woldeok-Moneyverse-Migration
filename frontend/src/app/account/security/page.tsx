@@ -270,11 +270,11 @@ export default async function AccountSecurityPage({
       </div>
 
       {/* Security Reauthentication Card */}
-      <Card className="border-border/80 bg-card/90 shadow-sm">
+      <Card id="reauthentication" className="border-border/80 bg-card/90 shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold">민감한 작업 본인 확인</CardTitle>
           <CardDescription className="text-xs">
-            다른 세션 종료는 최근 본인 확인 후에만 허용됩니다. 연결된 이메일·비밀번호 또는 OAuth 로그인 수단으로 확인할 수 있습니다.
+            다른 세션 종료와 일부 관리자 작업에는 최근 본인 확인이 필요합니다. 연결된 이메일·비밀번호 또는 OAuth 로그인 수단으로 확인할 수 있습니다.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-0">

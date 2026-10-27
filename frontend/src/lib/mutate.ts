@@ -51,6 +51,7 @@ export function failure(error: unknown, fallback: string): ActionState {
     if (error.code === 'reauthentication_required') {
       return {
         status: 'error',
+        reauthenticationRequired: true,
         message: '추가 보안 확인이 필요한 작업입니다. 계정 보안 설정에서 재인증한 뒤 다시 시도해 주세요.',
       };
     }
