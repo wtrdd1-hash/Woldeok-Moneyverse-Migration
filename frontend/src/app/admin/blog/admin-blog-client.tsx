@@ -8,7 +8,6 @@ import {
   Sparkles,
   CheckCircle2,
   AlertCircle,
-  Loader2,
   Trash2,
   EyeOff,
   Globe2,
@@ -18,7 +17,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import type { BlogPost, BlogCountry, BlogCategory } from '@/app/blog/blog.types';
+import type { BlogPost, BlogCountry } from '@/app/blog/blog.types';
 
 interface Props {
   readonly initialPosts: readonly BlogPost[];
@@ -49,59 +48,8 @@ export function AdminBlogClient({ initialPosts }: Props) {
   const [posts, setPosts] = useState<readonly BlogPost[]>(initialPosts);
   const [selectedCountry, setSelectedCountry] = useState<BlogCountry>('KR');
   const [selectedCategory, setSelectedCategory] = useState<'ECONOMY' | 'TECH'>('ECONOMY');
-  const [loading, setLoading] = useState(false);
   const [actionSlug, setActionSlug] = useState<string | null>(null);
   const [result, setResult] = useState<PublishResult | null>(null);
-
-  // AI 블로그 발행 트리거
-  const handleGenerate = async () => {
-    setLoading(true);
-    setResult(null);
-    try {
-      const targetCategory: BlogCategory =
-        selectedCategory === 'TECH' ? 'TECH' : 'WEALTH';
-
-      const res = await fetch('/api/blog/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          country: selectedCountry,
-          category: targetCategory,
-        }),
-      });
-      const data = (await res.json()) as PublishResult;
-      setResult(data);
-      if (res.ok && data.success && data.post) {
-        const newPost: BlogPost = {
-          slug: data.post.slug,
-          title: data.post.title,
-          excerpt: data.post.title,
-          content: '',
-          category: data.post.category as any,
-          categoryLabel: data.post.categoryLabel,
-          author: { name: '덕이 (Deoki)', role: '월덕 금융연구소 수석 AI 애널리스트', badge: 'AI Analyst' },
-          publishedAt: data.post.publishedAt,
-          updatedAt: data.post.publishedAt,
-          readTimeMinutes: 6,
-          tags: ['AI칼럼', data.post.categoryLabel, selectedCountry],
-          relatedCalculatorHref: '/tools/compound-calculator',
-          relatedCalculatorName: '복리 수익 계산기',
-          isAiGenerated: true,
-          views: 1,
-          country: selectedCountry,
-          status: 'PUBLISHED',
-        };
-        setPosts((prev) => [newPost, ...prev]);
-      }
-    } catch (err: unknown) {
-      setResult({
-        success: false,
-        message: err instanceof Error ? err.message : '네트워크 요청 실패',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // 관리자 삭제 및 철회 (소프트 삭제 vs 영구 소거)
   const handleDelete = async (slug: string, purge: boolean) => {
@@ -152,34 +100,28 @@ export function AdminBlogClient({ initialPosts }: Props) {
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-sky-400" aria-hidden="true" />
                 <CardTitle className="text-lg">AI 블로그 발행 엔진 관제</CardTitle>
-                <Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/10 text-emerald-400">
-                  발행 엔진 활성화됨
+                <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-300">
+                  편집 검토 대기
                 </Badge>
               </div>
               <CardDescription className="text-sm mt-1 text-slate-300">
-                국가별 제도와 실시간 거시경제 및 최신 컴퓨터공학 연구자료(NBER, ArXiv, IEEE, BOK)를 바탕으로 전문 칼럼을 자동 생성합니다.
+                생성형 콘텐츠의 출처·사실관계·편집 승인을 확인할 수 없어 자동 발행을 중단했습니다. 기존 발행 기록 조회와 철회는 별도로 유지됩니다.
               </CardDescription>
             </div>
             <Button
-              onClick={handleGenerate}
-              disabled={loading}
-              className="shrink-0 bg-sky-600 hover:bg-sky-500 text-white font-semibold gap-2 shadow-sm"
+              disabled
+              aria-describedby="blog-editorial-hold"
+              className="shrink-0 min-h-11 bg-slate-700 text-slate-200 font-semibold gap-2"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  AI 분석 및 맞춤 작성 중...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  AI 블로그 즉시 생성 및 발행
-                </>
-              )}
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              AI 블로그 즉시 생성 및 발행
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
+          <p id="blog-editorial-hold" role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">
+            발행 승인 검증 전: 편집 검토 및 승인 증빙이 없으므로 관리자·자동 스케줄러의 신규 발행이 중단되었습니다.
+          </p>
           {/* 타겟 국가 & 주제 선택 컨트롤 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 rounded-lg border border-border/50 bg-card/60 text-xs">
             {/* 국가 선택 */}
@@ -193,6 +135,8 @@ export function AdminBlogClient({ initialPosts }: Props) {
                     key={c.id}
                     type="button"
                     onClick={() => setSelectedCountry(c.id)}
+                    disabled
+                    aria-describedby="blog-editorial-hold"
                     className={`px-2.5 py-1 rounded text-xs transition-colors border ${
                       selectedCountry === c.id
                         ? 'bg-sky-500/20 border-sky-400 text-sky-200 font-bold'
@@ -214,6 +158,8 @@ export function AdminBlogClient({ initialPosts }: Props) {
                 <button
                   type="button"
                   onClick={() => setSelectedCategory('ECONOMY')}
+                  disabled
+                  aria-describedby="blog-editorial-hold"
                   className={`flex-1 py-1 px-3 rounded text-xs transition-colors border flex items-center justify-center gap-1.5 ${
                     selectedCategory === 'ECONOMY'
                       ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200 font-bold'
@@ -225,6 +171,8 @@ export function AdminBlogClient({ initialPosts }: Props) {
                 <button
                   type="button"
                   onClick={() => setSelectedCategory('TECH')}
+                  disabled
+                  aria-describedby="blog-editorial-hold"
                   className={`flex-1 py-1 px-3 rounded text-xs transition-colors border flex items-center justify-center gap-1.5 ${
                     selectedCategory === 'TECH'
                       ? 'bg-indigo-500/20 border-indigo-400 text-indigo-200 font-bold'
@@ -271,9 +219,9 @@ export function AdminBlogClient({ initialPosts }: Props) {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs text-muted-foreground border-t border-border/40">
-            <div>• 품질 게이트: <strong>GREEN 자동 검증</strong></div>
-            <div>• 연구 DB: <strong>ArXiv, NBER, IEEE</strong></div>
-            <div>• 자동 주기: <strong>매일 04:00 KST</strong></div>
+            <div>• 품질 게이트: <strong>편집 승인 미검증 · 발행 보류</strong></div>
+            <div>• 출처 검증: <strong>미확인</strong></div>
+            <div>• 자동 발행: <strong>중단</strong></div>
             <div>• 삭제 정책: <strong>2단계 안전 제어</strong></div>
           </div>
         </CardContent>
