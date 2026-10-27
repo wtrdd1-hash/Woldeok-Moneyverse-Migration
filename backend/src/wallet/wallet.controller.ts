@@ -82,13 +82,23 @@ export class WalletController {
    */
   @Get('wallet')
   @ApiOperation({ summary: 'Balances and recent ledger entries for the caller' })
-  overview(@Req() request: RequestWithSession, @Query('recent') recent?: string) {
-    if (recent === undefined) return this.service().overview(requireUserId(request));
+  overview(
+    @Req() request: RequestWithSession,
+    @Query('recent') recent?: string,
+    @Query('period') period?: string,
+  ) {
+    if (period !== undefined && period !== 'all' && period !== '7d' && period !== '30d') {
+      throw new BadRequestException('period must be all, 7d or 30d');
+    }
+    const periodDays: 7 | 30 | undefined = period === '7d' ? 7 : period === '30d' ? 30 : undefined;
+    if (recent === undefined) {
+      return this.service().overview(requireUserId(request), periodDays ? { periodDays } : {});
+    }
     const parsed = Number(recent);
     if (!Number.isSafeInteger(parsed)) {
       throw new BadRequestException('recent must be a whole number');
     }
-    return this.service().overview(requireUserId(request), { recentLimit: parsed });
+    return this.service().overview(requireUserId(request), { recentLimit: parsed, ...(periodDays ? { periodDays } : {}) });
   }
 
   @Get('wallet/recipients/search')
