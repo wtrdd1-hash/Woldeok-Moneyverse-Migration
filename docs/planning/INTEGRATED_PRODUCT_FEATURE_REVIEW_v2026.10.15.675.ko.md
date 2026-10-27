@@ -1,3 +1,9 @@
+## F675-153 / v1390 — 현금 알림 원천 증명·관측 순서·복구 무결성 (기능 보완 / DRAFT / HOLD)
+**실제 위험이지 사고 확정은 아님:** wallet.service.overview는 잔액과 최근 원장을 Promise.all로 별도 조회하며 account_balances.updated_at과 원장 created_at은 커밋 순서 증명이 아니다. 개발 DB moneyverse_app은 account_balances UPDATE 가능, QA #1507은 원장 전표 없는 시즌 보상 직접 현금 갱신 경로를 보고했다. 실제 과거 유출·손실은 확인되지 않았다. 지갑 개요나 잔액 해시를 검증 원천으로 사용하지 않는다.
+**보완:** 금융 담당자가 검증한 USER_CASH별 커밋 직렬화 source_version·원장 대사 영수증 필수. 오래됨·중복·상충 증거는 알림 중단/격리. 임계치 변경·재활성화·장애·복구 후 새로운 검증 기준값 요구, UNKNOWN 공백을 이어붙여 허위 하락을 만들지 않는다. 은행 이동은 총액이 같아도 현금이 줄 수 있다. 해제 커밋 이후 발송은 세대로 차단한다.
+**화면/API/DB:** 본인 /wallet/cash-watch·알림 이력, sourceStatus/관측·점검 시각/경과/사유, no-store/noindex, 미검증 활성화 503, 장애 중 해제와 UNKNOWN_COMMIT 영수증 복구. 순방향 원천 증명 필드·단조 CAS·고유 outbox·SECURITY DEFINER 최소권한 및 실제 PostgreSQL 음성 시험, Android/국영문 WCAG 2.2 AA. 관리자는 k>=20 집계만; 개인정보·SEO·KPI·롤백은 국문 통합 마스터에 상세 명세.
+**백로그:** P0 ENV1390-01 SEC1390-02 REL1390-03 CASH1390-04; P1 CASH1390-05 CASH1390-06 CASH1390-07 CASH1390-08 CASH1390-09 CASH1390-10. QA v1329, main 마이그레이션 283 중복, 개발 DB 권한, 공식 정확 SHA Test/복원 BLOCKED. 합성 10,001/동시 100/위조 100 미실행; 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 이전 추가 v1388 → 현재 보완 v1390 → 다음 추가 v1392. #1620 후속 Draft, 이슈 #1619; 런타임·DB·WLD·원장·Test·운영 변경 없음.
+
 ## F675-153 / v1388 — 검증된 가상 WLD 현금 잔액 자발적 알림 (기능 추가 / DRAFT / RELEASE HOLD)
 **실제 공백:** main `/wallet`은 `/api/v1/wallet?recent=50`을 조회하고 `USER_CASH`·`USER_BANK` 및 정규 정수 문자열을 구분하지만, 회원 설정형 현금 임계치 알림 API·UI·DB는 확인되지 않았다. F675-149 본인 알림함은 미병합 선행 조건이다. 실시간 잔액 하락 탐지가 구현됐다는 근거 없음.
 **제품 계약:** 회원이 가상 현금 지갑만 선택적으로 설정; 최초 미만은 하락 알림 아님; 검증된 관측값 >=→< 변화만 세대당 앱 내 알림 1회, 다시 >= 확인 후 재무장. 관측 시각·UNKNOWN 상태를 정확히 표기하고 손실·사기·실물 금융 보호 약속 금지. 외부 문자·이메일·푸시, WLD·원장 변경 없음. 회원 `/wallet/cash-watch`, 비공개 알림 연결, 관리자 총계만.

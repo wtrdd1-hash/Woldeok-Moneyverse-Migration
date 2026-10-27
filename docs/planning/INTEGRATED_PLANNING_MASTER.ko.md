@@ -1,3 +1,41 @@
+## v1390 / F675-153 — 현금 지갑 알림의 원천 증명·순서 보장·안전한 복구 (기능 보완 / DRAFT / RELEASE HOLD) — 이슈 #1619, Draft PR 생성 대기
+
+**회차·정본.** 이전 기능 추가 v1388 → 현재 기능 보완 v1390 → 다음 기능 추가 v1392(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c. main AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md와 한국어 대조본 확인. 미병합 v1388 Draft #1620을 기반으로 하는 문서 전용 후속 PR이며 단독 병합 금지. Gemini·개발 A/B/C·QA 작업과 분리하고 런타임·DB·잔액·원장·기능 스위치·Test·운영은 변경하지 않는다.
+
+### 실제 코드·DB 근거와 위험 구분
+- backend/src/wallet/wallet.service.ts의 overview()는 balancesForUser와 recentTransactionsForUser를 Promise.all로 호출한다. repository는 accounts/account_balances 및 ledger_transactions/ledger_postings를 **서로 다른 쿼리**로 읽는다. 따라서 현재 지갑 조회 및 최근 50건은 원자적·원장 대사 완료·커밋 순서가 보장된 잔액 관측 증거가 아니다. 이를 알림 원천으로 재사용하지 않는다. 이는 통합 시 위험이지 이미 알림이 오작동했다는 증거가 아니다.
+- account_balances.updated_at은 시간 기록일 뿐 커밋 순서를 증명하는 단조 증가 버전이 아니다. ledger_transactions.created_at 역시 동시 커밋 순서 증명이 아니며 시간 동률·재시도·늦은 작업을 구분할 수 없다. 검증되지 않은 잔액값을 해시해도 원장 무결성은 증명되지 않는다.
+- 개발 DB 읽기 전용 확인: USER_CASH 계정 19개(집계), account_balances.updated_at 존재, moneyverse_app의 account_balances UPDATE 유효 권한 TRUE. 이는 **개발 DB의 최소권한 위험**으로 운영 권한 확인이나 실제 공격 성공을 뜻하지 않는다. QA P0 #1507은 season_claim_reward가 균형 잡힌 원장 전표 없이 현금을 갱신할 수 있는 구조를 발견했지만 과거 실제 손실은 확인하지 못했다. #1502에도 원장 우회 갱신 경로가 보고됐다. 따라서 v1388의 잔액 관측이 자동으로 원장 검증을 통과한다는 전제는 아직 성립하지 않는다.
+- 기존 화면은 USER_CASH와 USER_BANK를 분리한다. 은행 이체로 총액이 같아도 현금 지갑 잔액은 바뀐다. totalAvailableAmount, 주식 가치, 최근 거래 50건, 브라우저 표시값, 캐시를 알림 근거로 삼지 않는다. 현금 알림 API/작업자 배포는 확인되지 않았다.
+
+### 선택한 개선안과 검증 가능한 원천 계약
+- **선택:** 금융 도메인 소유자가 보증하는 회원별 커밋 완료 현금 관측 + 명시적 단조 증가 원천 버전 + 독립적인 원장 대사 증명. 대안 A(/wallet 폴링+updated_at)는 원자성·순서 보장 부족으로 제외, 대안 B(모든 잔액 갱신에 즉시 알림)는 모든 원장·비원장 갱신자 감사 전에는 제외한다. 필요한 금융 원천 함수는 개발 담당자가 별도 브랜치·새 순방향 마이그레이션·실제 PostgreSQL 시험을 거쳐 구현하며 기획 예약은 구현하지 않는다.
+- 내부 관측 증거 필드: owner_id, USER_CASH account_id, 부호 있는 정규 WLD NUMERIC(38,0), 해당 계정에서 엄격히 증가하는 source_version BIGINT, source_committed_at, captured_at, ledger_reconciled, ledger_proof_id, source_schema_version, evidence_id. source_version은 **현금 변동과 동일한 커밋 직렬화 경계**에서만 부여한다. 별도 시계·독립 시퀀스·updated_at·xmin·거래 생성 시각·최근 원장·클라이언트 입력은 순서 증명으로 인정하지 않는다. 승인된 원천 버전이 없으면 UNVERIFIED이며 알림을 발행하지 않는다.
+- 금융 담당자는 송금·은행 이체·보상·청구·국고·주식·세금·시즌·관리자 함수 등 모든 현금 갱신자를 목록화하고 균형 전표, 멱등 커밋 영수증, 앱 계정의 직접 UPDATE 금지를 입증한다. #1507/#1502는 수리와 독립 시험 전 P0이다. 증명 우회 직접 UPDATE가 남으면 알림 커버리지를 인정하지 않는다. 과거 잔액에 임의 source_version을 붙이거나 과거 하락을 소급 알리지 않는다.
+- **일관성:** 명세된 잠금 순서의 단일 DB 트랜잭션에서 회원·현금 계정·원천 버전·원장 대사 영수증·현재 구독 세대를 검증한다. source_version은 마지막으로 수락한 버전보다 커야 한다. 기존 금융 계정 잠금과 교착이 없도록 순서를 금융 담당자와 검토하고 lock_timeout·지수 백오프를 제한한다. 별개 잔액/원장 읽기 두 번으로 증명을 대체하지 않는다. 단일 트랜잭션 금융 원천 함수 또는 불변 금융 outbox를 우선한다. SERIALIZABLE 격리만으로 기존 원장 우회 갱신이 해결된다고 주장하지 않는다.
+- **안전 중단:** 현금 계정 누락·불일치, 오래된 관측, 비정규·범위 초과 값, 원장 증명 누락, 중복·역행 source_version, 회원 삭제, 원천 스키마 변경, 지연 작업, 부분 커밋, 원장 불일치 ⇒ SOURCE_UNVERIFIED/STALE/RECONCILIATION_HOLD. 마지막 검증 상태를 보존하고 하락 알림을 생성하지 않는다. 오래된 작업은 새로운 관측으로 재무장하거나 상태를 덮어쓸 수 없다. 동일 버전+동일 증거 재전송은 기존 영수증 반환, 동일 버전+서로 다른 증거는 보안 충돌로 격리한다.
+- **초기값·복구:** 최초 활성화·임계치 수정·재활성화·원장 복구·원천 단절·장시간 장애 시 반드시 새로 검증된 기준 관측을 취득한다. 이미 기준 이하이면 BASELINE_BELOW이며 허위 하락 알림을 만들지 않는다. 이후 더 새로운 검증값이 임계치 이상일 때만 ARMED, 그보다 새로운 검증값이 미만일 때 한 세대에 한 번 알림. 관측 공백 이전의 '높음'을 계속 유효한 상태로 간주해 알리지 않는다. 관측 사이의 짧은 하락은 놓칠 수 있음을 고지한다. 알림은 WLD 발행·송금·동결을 하지 않는다.
+
+### 회원 화면·CTA·상태·API
+- 로그인 회원 /wallet 현금 영역 → Manage cash watch → /wallet/cash-watch; 기본 OFF. 활성화·임계치 저장·비활성화·검증 상태 새로고침·알림 이력 보기 CTA. OFF/SAVING/ARMED/BASELINE_BELOW/BELOW_NOTIFIED/SOURCE_UNVERIFIED/STALE/RECONCILIATION_HOLD/CONFLICT/DISABLED/SESSION_EXPIRED 상태 제공. 실제 검증 관측 시각과 서버 점검 시각을 구분하며 실시간 보장이나 미검증 잔액 0을 표시하지 않는다. 가상 WLD의 USER_CASH만 대상으로 한다. 원천 장애가 있어도 인증된 DB 쓰기가 가능하면 구독 해제를 허용한다.
+- v1388의 본인 전용 GET/PUT/DELETE /api/v1/wallet/cash-watch 및 GET events 유지. 조회 응답에 sourceStatus, lastVerifiedSourceVersion(문자열), sourceObservedAt, sourceCheckedAt, sourceAgeSeconds, stateReason, nullable receiptId 추가. 기존 설정 조회는 원천 불가 시 200+UNKNOWN/STALE을 명시하고, 신규 활성화 시 검증 기준값을 확보하지 못하면 503. PUT 입력 enabled, thresholdWld(1~18자리 양의 정규 정수 문자열), expectedVersion, idempotencyKey UUID만 허용하며 미정의 필드 거부, 세션·동의·CSRF·호출량 제한 적용. DELETE는 expectedVersion/idempotencyKey로 버전 보호하고 원천 장애 중에도 실행할 수 있어야 하며 재시도는 동일 불변 영수증을 반환한다. 409 충돌, 401/403 세션·권한, 410 철회, 429 제한, 503 원천 불가, 커밋 불명확 시 UNKNOWN_COMMIT+영수증 재조회. 타인 데이터와 없는 자원은 동일한 404.
+- 알림 링크는 본인 이력으로만 이동하고 URL·로그에 잔액/기준값을 넣지 않는다. private,no-store/noindex. Android app-api는 본인 인증·동의·변경 요청 보호·정수 문자열·오류·영수증·원천 상태를 동등하게 제공한다. 금융 보호나 실시간 감시 보장 표현 금지.
+
+### PostgreSQL·경합·전달·철회
+- **미구현 v1388 제안 스키마**에 last_source_version BIGINT, source_evidence_id, source_proof_state, source_schema_version, last_source_checked_at을 추가 명세한다. source_version >0, 마지막 수락 버전 단조 증가, 필요한 owner/account/version/evidence 유일성, (watch_id,generation,transition_seq) UNIQUE, 사용자 FK, 보존 정책, enabled+next_check_at+id 및 watch_id+source_version DESC+id 인덱스를 정의한다. 마이그레이션 283 중복 해결·등록부 검증 전 신규 번호를 임의 확정하지 않는다. 기존 원장·적용된 마이그레이션 불변, 매 관측마다 전체 원장을 훑는 비효율적인 방식 금지.
+- PUT/DELETE/작업자는 회원별 구독 세대의 단일 직렬화 순서를 지킨다. 구독 행 잠금·본인 및 expectedVersion 확인·금융 증명 관측의 검증된 잠금 순서·CAS 세대/source_version·상태 전이+불변 증거 영수증+outbox 원자 저장. 해제 커밋 뒤 신규 알림 삽입 금지; 전달 트랜잭션에서 세대와 enabled를 재검증한다. 이미 전달된 알림은 과거 기록으로 유지한다. 제한된 작업자 리스·재시도·격리 큐와 알림 유일 키로 중복 방지하며 outbox 등록만으로 전달 성공을 주장하지 않는다.
+- DB가 검증한 세션/작업자 주체를 사용하고 클라이언트 UUID/GUC만으로 본인 인증하지 않는다. PUBLIC EXECUTE 및 앱 계정의 금융·알림 직접 DML 금지, 범위 제한 SECURITY DEFINER, 불변 감사, 실제 PostgreSQL 권한 음성 시험 필수. 개발 DB 광범위 권한과 기존 원장 우회 함수는 배포 후 과제가 아닌 선행 차단 조건이다.
+
+### 관리자·개인정보·SEO·접근성·KPI·검증·배포
+- 관리자는 opt-in·검증·보류·오래된 관측·전달 집계만 조회하며 k>=20과 차분 공격 방지, 회원별 잔액·임계치·원천 증거 공개 금지. 역할 검증·접근 감사. 금액·수신자 정보는 공개 로그/URL/분석/알림 미리보기/이메일·문자·푸시·Discord/구조화 데이터/사이트맵 제외. 비공개 경로 noindex,nofollow,noarchive, private,no-store. 영수증 보존·삭제 법적 검토.
+- 한국어·영어 및 Android 동등, WCAG 2.2 AA, 320~414px, 확대 200%, 키보드·스크린리더 상태 안내, 색상 외 상태 표시, 44px 조작 영역. KPI: 모든 현금 갱신자의 검증 원천 커버리지(기능 ON 전 100%), 원천 공백·지연, 대사 실패 차단, 세대별 중복 알림 목표 0, 허위 알림 목표 0, 해제 반영 지연, 복구 성공, 개인정보 사고. 기준 측정값 UNKNOWN.
+- **P0 ENV1390-01:** 운영·Test 끊어진 릴리스 경로, DB 환경 분리, 독립 백업 복원. **SEC1390-02:** 개발 DB 235/241 광범위 DML 및 현금 UPDATE, #1507/#1502 원장 우회, 283 중복, 모든 현금 갱신자 감사. **REL1390-03:** 전체 CI·보안·실제 공식 Test 정확 SHA의 프론트/백엔드/app-api·로그인 금융 E2E·격리 PostgreSQL·승인 GitOps. **CASH1390-04:** 오래됨·역순·원장 불일치 허위 하락, 기준 수정·해제 경합 방지.
+- **P1 CASH1390-05:** 순방향 원천 증명 및 DB 제약·인덱스. **CASH1390-06:** 단조 관측 CAS·기준값/재무장/보류·원자적 outbox·작업자. **CASH1390-07:** NestJS·Next.js·Android 본인/CSRF/오류/영수증. **CASH1390-08:** 반응형 국영문 회원 UI·관리자 집계·접근성. **CASH1390-09:** 개인정보·SEO·보존·KPI·악용 방지. **CASH1390-10:** 격리 PostgreSQL 합성 10,001건, 동시 변경/해제/작업자 100건, 위조 소유자/CSRF 100건, 시간 역전·중복 버전·원장 우회·은행 이체 총액 동일·중단/복구/롤백 및 5개 기기 회귀. **모든 수용시험 미실행.**
+- wallet_cash_watch_v1 기본 OFF. 기획 예약은 코드·DB·운영 배포하지 않는다. 개발은 별도 브랜치·정확 SHA Test 이후 승인된 카나리·롤백으로 승격. OFF 롤백은 신규 관측·발송만 중단하고 금융 원장과 과거 영수증을 삭제하지 않는다. 끊어진 Test/운영 경로, main 283 중복, 개발 DB 권한, 공식 검증은 **BLOCKED**.
+- **외부 독립 근거:** 신규 최종 승인 0건, 누적 중복 제거·승인 수량 UNKNOWN / 10,000 ⇒ BLOCKED / IN PROGRESS. 일반 기술 문서나 합성 테스트를 승인된 외부 근거로 계산하지 않는다.
+
+---
+
 ## v1388 / F675-153 — 검증된 가상 WLD 현금 지갑 잔액 임계치 자발적 알림 (기능 추가 / DRAFT / RELEASE HOLD) — Draft PR #1620, 이슈 #1619
 
 **회차·정본:** 이전 기능 보완 v1386 → 현재 기능 추가 v1388 → 다음 기능 보완 v1390(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md 및 한국어 대조본 확인. 이 문서는 미병합 Draft #1611 후속 스택이며 main에 독립 병합할 수 없다. Gemini/개발 A·B·C/QA의 런타임·배포 담당 영역은 변경하지 않는다. **런타임·DB·Test·운영·기능 스위치·WLD·원장 변경 금지.**
