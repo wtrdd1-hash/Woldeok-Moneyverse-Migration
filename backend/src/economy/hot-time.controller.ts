@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Header, Patch, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 import { SessionGuard } from '../auth/guards/session.guard';
@@ -17,6 +17,7 @@ export class HotTimeController {
   constructor(private readonly hotTimeService: HotTimeService) {}
 
   @Get('active')
+  @Header('Cache-Control', 'no-store')
   @SkipInternalToken()
   @ApiOperation({
     summary: 'Get all currently active live economic hot-time buffs with countdowns',
