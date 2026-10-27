@@ -1,3 +1,9 @@
+## 기획 v1350 — F675-144 고객지원 승인 답변의 안전한 전송 무결성 (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1348 → 현재 보완 v1350 → 다음 추가 v1352(잠정). 정본 main 133c73b40d51b151523b8374508099f3d349415e 시작·중간 재확인, AGENTS.md·README.md·영문/국문 기획 대조. 선행 미병합 Draft #1501, 개발 이슈 #1500.
+- 실제 Next.js adminSupportReply는 호출마다 randomUUID를 만들고 UTF-16 2,000단위로 조용히 자른다. Migration196 admin_support_reply의 동시 요청은 23505 경합 가능. 문의·본문별 고정 전송 의도, DB 영수증 조회, 불명 응답 성공 오판 금지, 무절단 422, UTF-8 지문, 수정/폐기 템플릿 사용 실적 제외, 현재 operator 전송과 독립 approver 승인 및 실제 세션 검증을 설계.
+- QA v1311 증거: 프론트 1,423건·격리 realPG 38건 통과, 전체 의존성 감사 Critical2/High8·봇 Critical1/High5 실패. 루트 여유 약 682MiB, 앱 직접 DML 235/241, PUBLIC 은행 EXECUTE 3, 정확 SHA 공식 Test·복원 미검증. 기능 기본 OFF, 런타임/DB/WLD/운영 변경 없음. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED.
+- P0/P1: ENV1350-01 SEC1350-02 REL1350-03 SUP1350-04 SUP1350-05 SUP1350-06 SUP1350-07 SUP1350-08 SUP1350-09 SUP1350-10. 화면·CTA·상태·API·DB·인덱스·트랜잭션·역할·SEO·Android·WCAG·KPI·테스트·롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 참조.
+
 ## 기획 v1348 — F675-144 승인형 고객지원 답변 템플릿 (기능 추가 / 초안 / 운영 보류)
 - 이전 기능 보완 v1346 → 현재 기능 추가 v1348 → 다음 기능 보완 v1350(잠정). 최신 main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 확인, AGENTS.md·README.md·영문 정본·국문 대조. 선행 Draft #1497 미병합, 개발 이슈 #1500.
 - support.controller.ts에는 수동 관리자 답장만 있고 Migration196에는 템플릿·승인 버전·사용 영수증이 없다. 현재 operator만 승인된 원문을 입력창에 삽입하고 사람 검토 후 기존 API로 전송; 별도 approver가 승인/폐기, 자기 승인·자동 전송·미검증 변수 치환 금지. 불변 버전·승인 감사·정확 본문 지문·멱등 영수증, SECURITY DEFINER 최소권한·세션·CSRF·CAS·동시성, 관리자 UI/Android 회원 접근 차단/WCAG 2.2 AA/noindex/no-store/KPI는 국문 통합 마스터에 상세 명세. 기본 OFF.

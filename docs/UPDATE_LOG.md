@@ -1,3 +1,7 @@
+## Planning v1350 — F675-144 Safe Send and Approval Integrity (DRAFT / RELEASE HOLD)
+- Previous Addition v1348; Current Improvement v1350; Next Addition v1352 provisional. Main 133c73b40d51b151523b8374508099f3d349415e start/mid; stacked Draft #1501, engineering issue #1500. Stable send-intent/receipt, no silent body truncation, DB canonical digest, operator/approver separation, no false template-use credit; source-observed risks only.
+- QA v1311 frontend 1,423 PASS, isolated realPG 38 PASS; full audit Critical2/High8 and bot Critical1/High5 FAIL; root ~682MiB, exact-SHA Test/restore BLOCKED. ENV1350-01 SEC1350-02 REL1350-03 SUP1350-04 SUP1350-05 SUP1350-06 SUP1350-07 SUP1350-08 SUP1350-09 SUP1350-10. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED. Docs-only, feature OFF, no runtime/DB/WLD/Test/Production changes.
+
 ## Planning v1348 — F675-144 Operator-Approved Support Reply Templates (DRAFT/HOLD)
 - Previous Improvement v1346; Current Addition v1348; Next Improvement v1350. Main 0fe614b2ca1a7bc0df540514e54db78130479e2a. Draft #1497 predecessor, issue #1500. Approved human-reviewed insertion only, no auto-send. QA v1309 HOLD, exact-SHA Test/restore BLOCKED. External new accepted 0, cumulative UNKNOWN/10,000.
 - P0 ENV1348-01 SEC1348-02 REL1348-03 SUP1348-04; P1 SUP1348-05 SUP1348-06 SUP1348-07 SUP1348-08 SUP1348-09 SUP1348-10. Full: ENV1348-01 SEC1348-02 REL1348-03 SUP1348-04 SUP1348-05 SUP1348-06 SUP1348-07 SUP1348-08 SUP1348-09 SUP1348-10.

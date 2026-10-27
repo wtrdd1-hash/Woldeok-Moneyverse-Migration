@@ -1,3 +1,33 @@
+## 기획 v1350 — F675-144 승인형 고객지원 답변 템플릿의 안전한 전송·승인 무결성 (기능 보완 / 초안 / 운영승격 보류)
+**회차:** 이전 기능 추가 v1348 → 현재 기능 보완 v1350 → 다음 기능 추가 v1352(잠정). **정본:** 최신 main 133c73b40d51b151523b8374508099f3d349415e, AGENTS.md·README.md·영문 PROJECT_PLAN.md 및 국문 대조를 시작·중간 확인. 이전 0fe614b2 이후 main 변경은 관리자 SEO 화면과 implementation_plan.md이며 고객지원 템플릿 구현은 확인되지 않음. **의존:** 미병합 v1348 Draft #1501(#1497/#1494/#1489/#1484 위에 누적), 개발 이슈 #1500. 실제 운영 사고나 구현 완료를 뜻하지 않는 코드 근거 기반 기획임.
+
+### 확인된 결함 가능성과 목적
+- 현재 frontend/src/app/admin/support/actions.ts는 서버 액션 호출마다 randomUUID를 새로 만들고 답변 본문을 2,000 UTF-16 코드 단위로 조용히 자른다. admin-support-view.tsx는 전송 실패를 일반 네트워크 오류로 표시하고 재시도용 고정 전송 의도를 보관하지 않는다. 응답 유실 후 다시 보내면 중복 답변 가능성이 있다. Migration 196의 admin_support_reply는 INSERT 전 멱등 키를 조회하지만 동일 키 동시 경합에서 UNIQUE 위반 23505와 원본 영수증 조회 계약이 미정이다. 이는 소스에서 확인한 잠재 위험이지 중복 사고 확인이 아니다.
+- AdminGuard는 현재 관리자 역할 중 하나만 있으면 통과하며 AdminSessionGuard는 콘솔 세션을 확인한다. Migration 196의 SQL 함수도 관리자 역할 존재만 검사한다. 신규 템플릿은 API와 SECURITY DEFINER 경계 모두에서 operator만 전송하고 별도 approver만 승인하도록 검증해야 한다. 호출자가 제출한 관리자 UUID만으로 인증된 세션이라고 간주하지 않는다.
+- **목적:** 사람의 최종 검토와 기존 수동 답변 호환성을 유지하면서 승인 템플릿 출처, 재시도, Unicode 길이, 승인 철회 경합을 정확하게 처리한다. 자동 발송·일괄 답변·자동 WLD/환불·AI 약속·회원에게 내부 템플릿 노출·이번 기획의 런타임 변경은 제외한다.
+
+### 대상·진입점·화면 상태
+- 현재 operator: /admin/support → 실제 회원 문의 선택 → 승인 답변 삽입 → 비공개 주제/제목 검색 → 불변 승인 버전 미리보기 → 입력창에 삽입(기존 초안이 있으면 덮어쓰기 확인) → 수신 문의·본문·첨부 검토 → 직접 답변 전송. 별도 approver: /admin/support/templates → 초안 → 승인 요청 → 독립 승인/폐기. 작성자 본인 승인은 두 역할을 모두 갖더라도 금지하며 approver 전용·server_operator 전용 계정은 전송 불가.
+- **상태:** LOADING, VERIFIED_EMPTY, DRAFT, APPROVAL_PENDING, APPROVED, RETIRED, INSERTED_UNSENT, EDITED_MANUAL, STALE_APPROVAL, SENDING, CHECKING_RECEIPT, SENT_CONFIRMED, NOT_SENT_VERIFIED, UNKNOWN_COMMIT, FORBIDDEN, UNAVAILABLE. 삽입 자체는 전송이 아니다. 문의 변경·로그아웃·관리자 세션 만료·역할 철회·늦은 응답은 이전 미리보기와 전송 의도를 무효화하고 다른 회원 문의로의 전송을 차단한다. UNKNOWN_COMMIT 상태에서 성공을 표시하거나 새로운 키로 재전송하지 않는다. 확정 영수증을 확인한 후에만 입력창을 비운다.
+- **문자 계약:** Next.js에서 본문을 조용히 자르지 않고 PostgreSQL char_length(최종 저장 텍스트)가 1~2,000자 범위를 벗어나면 422를 반환한다. Unicode 정규화(NFKC/NFC)·개행을 임의 변경하지 않는다. JS trim/UTF-16 길이와 PostgreSQL btrim/char_length 차이를 반영해 V1 정규화는 Migration 196과 정확히 일치하도록 PostgreSQL pg_catalog.btrim(coalesce(p_body,'')) 결과를 저장 본문으로 삼고, 그 결과에 PostgreSQL char_length를 적용하며, 관리자에게 실제 저장될 본문을 전송 전 미리 보여준다. Next.js는 JS trim/slice 없이 원문을 전달하고 정규화 후 저장 UTF-8 바이트의 SHA-256을 계산한다. 수정되거나 이미지 URL이 추가된 본문은 승인 템플릿 그대로 사용한 것으로 집계하지 않는다. 본문은 실행되지 않는 일반 텍스트로 표시하고 제어 구문·위험 링크/HTML·잔액/계정/세션 변수 치환을 금지한다.
+
+### API·DB·트랜잭션 명세(제안이며 미구현)
+- 검색: POST /api/v1/admin/support/reply-templates/search, JSON {category?,query?,cursor?,limit?}; CSRF·현재 operator/approver 세션, 검색 100코드포인트 이하, 기본 20/최대 50, 관리자+세션+역할+필터+승인 버전에 결합한 서명 커서(10분 이내). 민감한 검색어를 URL·Referrer·접근 로그에 남기지 않는다. GET은 불투명 ID로 정확한 불변 승인 버전만 조회한다. 조회 실패와 검증된 0건을 구분한다. 초안/제출/승인/폐기는 별도 API, DB 트랜잭션에서 실제 권한과 독립 승인자를 재검증한다.
+- 전송: 기존 POST /api/v1/admin/support/threads/:id/messages를 유지하고 선택적 templateVersionId·clientPreviewDigest는 신뢰하지 않는 참고값으로만 받는다. **관리자·세션·문의·정확한 저장 본문이 같은 단일 전송 의도당 UUID 멱등 키 하나**를 만들고 결과 확정까지 재사용한다. 값이 달라지면 명시적 경고 후 새로운 의도를 만든다. 기존 템플릿 정보 없는 호출자도 유지한다. 서버는 실제 저장 UTF-8 본문·관리자·문의·전송 키를 묶은 SHA-256을 계산한다.
+- 영수증: 제안 GET /api/v1/admin/support/threads/:id/messages/receipts/:idempotencyKey는 관리자 세션과 operator 권한에 결합하고 no-store 적용. 원본 메시지 ID와 요청 지문이 맞으면 SENT_CONFIRMED, DB의 권위 있는 조회로 미전송을 확인했을 때만 NOT_SENT_VERIFIED, 불확실하면 UNKNOWN_COMMIT/503. 동일 키·동일 내용 재시도는 원본 영수증 반환, 다른 관리자·문의·본문·템플릿 정보로 재사용하면 409. GET 업무 데이터 쓰기 금지.
+- SQL: 적용된 Migration 196 수정 금지, 새 전진형 래퍼와 마이그레이션만 허용. 기존 support_messages.idempotency_key 전역 UNIQUE 유지. 신규 템플릿 사용 영수증은 UNIQUE(message_id), UNIQUE(operator_id,request_key), 승인된 불변 버전 FK·본문 지문·생성 시각을 갖는다. 승인 버전은 UNIQUE(template_id,version), 승인 후 본문 불변, 활성 버전 포인터/CAS 및 작성자≠승인자를 DB 잠금 아래 보장. SECURITY DEFINER 함수는 고정 search_path, REVOKE PUBLIC, moneyverse_app에 좁은 EXECUTE만 허용. SQL 경계에서 현재 콘솔 세션·operator/approver 권한을 검증하고 관리자 UUID만 믿지 않는다. 앱 역할의 직접 DML 부정 테스트 필수.
+- 트랜잭션: 문의 → 템플릿 활성 포인터/버전 → 기존 멱등 메시지/영수증 → 감사/아웃박스 순서로 잠그고 타임아웃을 정의한다. 잠금 안에서 승인 유효성·역할을 재확인한다. 승인된 본문과 완전히 일치할 때만 메시지·사용 영수증·감사·아웃박스를 원자적으로 기록한다. 수정/폐기/구버전은 별도 수동 전송 확인 후 템플릿 사용 실적으로 집계하지 않는다. 23505 충돌 시 커밋된 원본을 관리자·문의·지문으로 재조회해 원본 반환 또는 409, 무처리 500이나 중복 발송 금지. 감사/아웃박스 실패 시 메시지·영수증 전체 롤백. DB 잠금 중 외부 네트워크 호출 금지.
+- 보안: operator·approver 분리, 현재 관리자 콘솔 세션과 CSRF, 관리자/세션/문의별 요청 제한, 자기 승인 금지, IDOR 차단, 템플릿 원문 로그·분석 저장 금지, 링크/마크업 실행 금지, 회원 및 Android App API에서 관리 API 접근 차단. 회원의 기존 문의 답변 API는 유지하고 관리자 경로는 noindex/no-store.
+
+### 접근성·검증·배포·백로그
+- 관리자 화면 320px·200% 확대·키보드/포커스·접근성 상태 알림·44px 터치·WCAG 2.2 AA. 일시 오류 시 작성 중 본문 보존, CHECKING_RECEIPT 안내. Android 회원 API는 템플릿 ID·승인 상태 추측 불가. 관리자 감사와 집계 KPI만 제공: 확정 전송률, 응답 불명 회복률, 중복 방지 수, 수동 수정 비율, 승인 소요, 재문의율(실측 시), 집계 최소 k>=20. 개선 효과를 임의 수치로 주장하지 않는다.
+- 격리된 실제 PostgreSQL에서 합성 승인 버전 10,001건 키셋 완주, 동일 키 동시 전송 100건→메시지·영수증·감사 집합 각 1개, 위조 역할·관리자·세션·CSRF·IDOR 100건 차단, 권한 철회/승인 폐기 경합, 이모지·공백 경계 1,999/2,000/2,001 PostgreSQL 문자, 23505 복구, 첨부 변경, 지연·중복·역순 HTTP 응답, URL 검색어 유출 없음, 기존 답변 회귀 및 앱 직접 DML 0건을 실제 테스트해야 한다. 테스트 예정과 통과를 혼동하지 않는다.
+- **P0:** ENV1350-01 — 루트 100%(반올림, 여유 약 682MiB), 데이터 여유 약 9.8GiB, 안전한 공간 확보·격리 복원; SEC1350-02 — 앱 직접 DML 241개 중 235개, PUBLIC 은행 함수 3개, 세션 결합 역할 분리·마이그레이션 정합성; REL1350-03 — QA v1311 증거상 프론트 1,423건 및 격리 realPG 38건 통과, 전체 감사 Critical 2/High 8·봇 Critical 1/High 5 실패, 정확 SHA 공식 Test·복원 미검증; SUP1350-04 — 고정 전송 의도·불명 커밋 차단·다른 문의/폐기 버전 전송·허위 사용 집계 방지.
+- **P1:** SUP1350-05 — UTF-8/Unicode 길이·무절단 검증; SUP1350-06 — 승인 CAS·세션/역할·전진형 DB 제약; SUP1350-07 — API 영수증·23505 경합 복구·기존 호환; SUP1350-08 — 관리자 응답 순서·Android 차단·접근성; SUP1350-09 — 개인정보·SEO·악용 방지·실측 KPI; SUP1350-10 — 격리 PG 동시성·Unicode·권한 우회·정확 SHA Test·롤백 테스트.
+- **운영 게이트:** support_reply_templates_v1 기본 OFF. 개발은 별도 브랜치에서 TDD, 마이그레이션 검토, 격리 DB 권한/백업 복원, 보안 감사, 정확 SHA 공식 Test 인증 E2E, 승인된 GitOps 카나리 및 롤백을 통과해야 한다. 기획은 배포하지 않는다. OFF 롤백 시 영수증·감사 보존 및 기존 수동 답변 유지, 파괴적 다운 마이그레이션 금지. 외부 독립 자료 신규 최종 승인 **0건**, 누적 획득·중복 제거·분류 승인 **UNKNOWN / 10,000건** → BLOCKED / IN PROGRESS. OWASP/PostgreSQL/W3C 일반 지침은 집계 제외. 런타임·DB·WLD·원장·Test·운영 변경 없음.
+
+**전체 백로그 식별자:** ENV1350-01 SEC1350-02 REL1350-03 SUP1350-04 SUP1350-05 SUP1350-06 SUP1350-07 SUP1350-08 SUP1350-09 SUP1350-10
+
 ## 기획 v1348 — F675-144 승인형 고객지원 답변 템플릿 (기능 추가 / 초안 / 운영승격 보류)
 **회차:** 이전 기능 보완 v1346 → 현재 기능 추가 v1348 → 다음 기능 보완 v1350(잠정). **기술 기준:** main `0fe614b2ca1a7bc0df540514e54db78130479e2a` 시작·중간 재확인, AGENTS.md·README.md·영문 PROJECT_PLAN.md 정본 및 국문 대조. 미병합 선행 Draft #1497(#1494/#1489/#1484에 종속), 개발 이슈 #1500. 다른 Gemini/개발 A/B/C/QA 작업과 분리된 문서 기획이며 실제 구현이나 사고 확인이 아니다.
 
