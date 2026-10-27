@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Building2,
   Coins,
@@ -93,30 +94,60 @@ interface Props {
 function getGradeBadge(grade: string) {
   switch (grade) {
     case 'S':
-      return <Badge className="bg-purple-600 hover:bg-purple-700 text-white font-mono font-bold text-xs">S등급 (최우수)</Badge>;
+      return (
+        <Badge className="bg-purple-600 hover:bg-purple-700 text-white font-mono font-bold text-xs">
+          S등급 (최우수)
+        </Badge>
+      );
     case 'A':
-      return <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs">A등급 (우수)</Badge>;
+      return (
+        <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs">
+          A등급 (우수)
+        </Badge>
+      );
     case 'B':
-      return <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-mono text-xs">B등급 (보통)</Badge>;
+      return (
+        <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-mono text-xs">
+          B등급 (보통)
+        </Badge>
+      );
     case 'C':
-      return <Badge className="bg-amber-600 hover:bg-amber-700 text-white font-mono text-xs">C등급 (개선권고)</Badge>;
+      return (
+        <Badge className="bg-amber-600 hover:bg-amber-700 text-white font-mono text-xs">
+          C등급 (개선권고)
+        </Badge>
+      );
     case 'D':
-      return <Badge className="bg-orange-600 hover:bg-orange-700 text-white font-mono text-xs">D등급 (경고)</Badge>;
+      return (
+        <Badge className="bg-orange-600 hover:bg-orange-700 text-white font-mono text-xs">
+          D등급 (경고)
+        </Badge>
+      );
     default:
-      return <Badge className="bg-rose-600 hover:bg-rose-700 text-white font-mono text-xs">E등급 (비상)</Badge>;
+      return (
+        <Badge className="bg-rose-600 hover:bg-rose-700 text-white font-mono text-xs">
+          E등급 (비상)
+        </Badge>
+      );
   }
 }
 
 function getStageBadge(stage: string) {
   switch (stage) {
     case 'IPO_LISTED':
-      return <Badge className="bg-emerald-600/90 text-white text-[11px] font-mono">📈 WDX 상장</Badge>;
+      return (
+        <Badge className="bg-emerald-600/90 text-white text-[11px] font-mono">📈 WDX 상장</Badge>
+      );
     case 'SERIES_B':
       return <Badge className="bg-blue-600/90 text-white text-[11px] font-mono">스케일업 B</Badge>;
     case 'SERIES_A':
       return <Badge className="bg-teal-600/90 text-white text-[11px] font-mono">시리즈 A</Badge>;
     default:
-      return <Badge variant="outline" className="text-[11px] font-mono">초기 시드</Badge>;
+      return (
+        <Badge variant="outline" className="text-[11px] font-mono">
+          초기 시드
+        </Badge>
+      );
   }
 }
 
@@ -126,10 +157,11 @@ export function EnterpriseControlTower({
   initialPrivate,
   initialDividendLogs,
 }: Props) {
-  const [overview] = useState<StateHoldingOverviewItem>(initialOverview);
-  const [soes, setSoes] = useState<StateEnterpriseItem[]>(initialSoes);
-  const [privateEnterprises] = useState<PrivateEnterpriseItem[]>(initialPrivate);
-  const [dividendLogs, setDividendLogs] = useState<DividendLogItem[]>(initialDividendLogs);
+  const router = useRouter();
+  const overview = initialOverview;
+  const soes = initialSoes;
+  const privateEnterprises = initialPrivate;
+  const dividendLogs = initialDividendLogs;
   const [isHarvesting, setIsHarvesting] = useState(false);
   const [loadingCode, setLoadingCode] = useState<string | null>(null);
 
@@ -140,23 +172,18 @@ export function EnterpriseControlTower({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '배당 수취 실패');
 
-      toast.success(
-        `🏛️ 공기업 법정 배당금 수취 완료: +${Number(data.total_dividends_collected).toLocaleString('ko-KR')} WLD (국고 잔액: ${Number(data.treasury_balance_after).toLocaleString('ko-KR')} WLD)`,
-      );
-
-      // 즉시 로그 갱신
-      const updatedLogs: DividendLogItem[] = soes.map((s) => ({
-        id: crypto.randomUUID(),
-        enterprise_id: s.id,
-        enterprise_code: s.code,
-        enterprise_name: s.name,
-        dividend_amount_wld: ((BigInt(s.net_profit_hourly_wld) * BigInt(s.dividend_rate_bps)) / BigInt(10000)).toString(),
-        revenue_wld: s.operating_revenue_hourly_wld,
-        net_profit_wld: s.net_profit_hourly_wld,
-        eval_grade: s.eval_grade,
-        created_at: new Date().toISOString(),
-      }));
-      setDividendLogs((prev) => [...updatedLogs, ...prev].slice(0, 20));
+      if (
+        typeof data?.total_dividends_collected !== 'string' ||
+        !/^(0|[1-9][0-9]*)$/.test(data.total_dividends_collected) ||
+        typeof data?.treasury_balance_after !== 'string' ||
+        !/^(0|[1-9][0-9]*)$/.test(data.treasury_balance_after) ||
+        !Number.isSafeInteger(data?.enterprises_processed) ||
+        data.enterprises_processed < 0
+      ) {
+        throw new Error('배당 응답을 검증할 수 없습니다.');
+      }
+      router.refresh();
+      toast.info('서버가 배당 수취 요청을 처리했습니다. 실제 국고 및 배당 이력을 다시 조회합니다.');
     } catch (err: any) {
       toast.error(err.message || '공기업 배당금 수취 중 오류가 발생했습니다.');
     } finally {
@@ -176,10 +203,11 @@ export function EnterpriseControlTower({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '상태 변경 실패');
 
-      setSoes((prev) =>
-        prev.map((item) => (item.code === soe.code ? { ...item, status: nextStatus } : item)),
-      );
-      toast.success(`${soe.name} 상태가 [${nextStatus}]로 변경되었습니다.`);
+      if (data?.success !== true || data.code !== soe.code || data.status !== nextStatus) {
+        throw new Error('서버의 상태 변경 확인 응답이 올바르지 않습니다.');
+      }
+      router.refresh();
+      toast.info('서버가 상태 변경을 확인했습니다. 최신 공기업 상태를 다시 조회합니다.');
     } catch (err: any) {
       toast.error(err.message || '상태 변경 중 오류가 발생했습니다.');
     } finally {
@@ -195,22 +223,28 @@ export function EnterpriseControlTower({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className="font-mono text-[11px] text-primary border-primary/30">
+                <Badge
+                  variant="outline"
+                  className="font-mono text-[11px] text-primary border-primary/30"
+                >
                   {overview.holding_code}
                 </Badge>
                 <CardTitle className="text-lg font-bold tracking-tight">
                   {overview.holding_name}
                 </CardTitle>
-                <Badge className="bg-emerald-600 text-white text-[11px]">테마섹 하이브리드 모델</Badge>
+                <Badge className="bg-emerald-600 text-white text-[11px]">
+                  테마섹 하이브리드 모델
+                </Badge>
               </div>
               <CardDescription className="text-xs text-muted-foreground mt-1">
-                정부 지분 100% 보유 국가투자공사가 공기업 및 전략 지분을 전문 경영하며, 정치적 개입 없이 배당 수익을 극대화하여 국고와 시민에게 환원합니다.
+                정부 지분 100% 보유 국가투자공사가 공기업 및 전략 지분을 전문 경영하며, 정치적 개입
+                없이 배당 수익을 극대화하여 국고와 시민에게 환원합니다.
               </CardDescription>
             </div>
             <div className="shrink-0 flex items-center gap-2">
               <Button
                 size="sm"
-                className="gap-1.5 text-xs h-9 bg-primary text-primary-foreground font-semibold"
+                className="gap-1.5 text-xs min-h-11 bg-primary text-primary-foreground font-semibold"
                 onClick={handleHarvestDividends}
                 disabled={isHarvesting}
               >
@@ -225,25 +259,29 @@ export function EnterpriseControlTower({
             <div className="rounded-lg border bg-muted/20 p-3">
               <div className="text-muted-foreground text-[11px]">공기업 총 운용 자산</div>
               <div className="mt-1 font-mono font-bold text-base text-foreground">
-                {groupDigits(overview.total_soe_assets_wld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+                {groupDigits(overview.total_soe_assets_wld)}{' '}
+                <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </div>
             </div>
             <div className="rounded-lg border bg-muted/20 p-3">
               <div className="text-muted-foreground text-[11px]">시간당 공기업 순이익</div>
               <div className="mt-1 font-mono font-bold text-base text-emerald-600">
-                +{groupDigits(overview.hourly_soe_profit_wld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+                +{groupDigits(overview.hourly_soe_profit_wld)}{' '}
+                <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </div>
             </div>
             <div className="rounded-lg border bg-muted/20 p-3">
               <div className="text-muted-foreground text-[11px]">시간당 국고 배당 납입 (30%)</div>
               <div className="mt-1 font-mono font-bold text-base text-primary">
-                +{groupDigits(overview.hourly_soe_dividends_wld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+                +{groupDigits(overview.hourly_soe_dividends_wld)}{' '}
+                <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </div>
             </div>
             <div className="rounded-lg border bg-muted/20 p-3">
               <div className="text-muted-foreground text-[11px]">민간 기업 법인세 (15%)</div>
               <div className="mt-1 font-mono font-bold text-base text-blue-600">
-                +{groupDigits(overview.hourly_corporate_tax_wld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+                +{groupDigits(overview.hourly_corporate_tax_wld)}{' '}
+                <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </div>
             </div>
           </div>
@@ -254,24 +292,33 @@ export function EnterpriseControlTower({
       <div>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="text-base font-semibold tracking-tight">3대 국가 기간 공기업 (Core State-Owned Enterprises)</h3>
+            <h3 className="text-base font-semibold tracking-tight">
+              3대 국가 기간 공기업 (Core State-Owned Enterprises)
+            </h3>
             <p className="text-xs text-muted-foreground">
-              국가 인프라를 책임지는 에너지, 통신망, 국책은행 3대 공기업의 실시간 경영 지표 및 경영평가 현황
+              국가 인프라를 책임지는 에너지, 통신망, 국책은행 3대 공기업의 실시간 경영 지표 및
+              경영평가 현황
             </p>
           </div>
           <Badge variant="outline" className="text-xs font-mono">
-            {soes.length}개 공기업 가동 중
+            {soes.length}개 공기업 조회됨
           </Badge>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           {soes.map((soe) => {
-            const hourlyDividend = (BigInt(soe.net_profit_hourly_wld) * BigInt(soe.dividend_rate_bps)) / BigInt(10000);
+            const hourlyDividend =
+              (BigInt(soe.net_profit_hourly_wld) * BigInt(soe.dividend_rate_bps)) / BigInt(10000);
             return (
-              <Card key={soe.code} className="border shadow-xs bg-card flex flex-col justify-between">
+              <Card
+                key={soe.code}
+                className="border shadow-xs bg-card flex flex-col justify-between"
+              >
                 <CardHeader className="p-4 pb-2">
                   <div className="flex items-center justify-between gap-1 mb-1">
-                    <span className="text-[11px] font-mono font-medium text-muted-foreground">{soe.code}</span>
+                    <span className="text-[11px] font-mono font-medium text-muted-foreground">
+                      {soe.code}
+                    </span>
                     {getGradeBadge(soe.eval_grade)}
                   </div>
                   <CardTitle className="text-base font-bold flex items-center gap-1.5">
@@ -293,18 +340,22 @@ export function EnterpriseControlTower({
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">총 자산 규모</span>
-                      <span className="font-mono font-semibold text-foreground">{groupDigits(soe.total_assets_wld)} WLD</span>
+                      <span className="font-mono font-semibold text-foreground">
+                        {groupDigits(soe.total_assets_wld)} WLD
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">시간당 매출 / 순익</span>
                       <span className="font-mono text-emerald-600 font-semibold">
-                        +{groupDigits(soe.operating_revenue_hourly_wld)} / +{groupDigits(soe.net_profit_hourly_wld)}
+                        +{groupDigits(soe.operating_revenue_hourly_wld)} / +
+                        {groupDigits(soe.net_profit_hourly_wld)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center pt-1 border-t border-border/40">
                       <span className="text-muted-foreground">법정 국고 배당률</span>
                       <span className="font-mono font-bold text-primary">
-                        {(soe.dividend_rate_bps / 100).toFixed(1)}% (+{groupDigits(hourlyDividend.toString())} WLD)
+                        {(soe.dividend_rate_bps / 100).toFixed(1)}% (+
+                        {groupDigits(hourlyDividend.toString())} WLD)
                       </span>
                     </div>
                   </div>
@@ -323,7 +374,7 @@ export function EnterpriseControlTower({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 px-2.5 gap-1"
+                      className="text-xs min-h-11 px-2.5 gap-1"
                       onClick={() => handleToggleStatus(soe)}
                       disabled={loadingCode === soe.code}
                     >
@@ -343,14 +394,17 @@ export function EnterpriseControlTower({
         <CardHeader className="p-4 sm:p-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <CardTitle className="text-base font-semibold">민간 기업 및 벤처 스케일업 생태계 (Private Enterprises)</CardTitle>
+              <CardTitle className="text-base font-semibold">
+                민간 기업 및 벤처 스케일업 생태계 (Private Enterprises)
+              </CardTitle>
               <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                AI 및 유저 창업가가 설립한 스타트업들이 성장하여 WDX 거래소에 자동 상장(IPO)되고, 법인세를 국고에 성실 납부합니다.
+                AI 및 유저 창업가가 설립한 스타트업들이 성장하여 WDX 거래소에 자동 상장(IPO)되고,
+                법인세를 국고에 성실 납부합니다.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <Badge variant="outline" className="font-mono">
-                총 {privateEnterprises.length}개 기업 활동 중
+                조회된 기업 {privateEnterprises.length}개
               </Badge>
             </div>
           </div>
@@ -375,9 +429,7 @@ export function EnterpriseControlTower({
                     <TableCell className="font-mono text-xs font-bold text-foreground">
                       {item.symbol}
                     </TableCell>
-                    <TableCell className="text-xs font-medium">
-                      {item.name}
-                    </TableCell>
+                    <TableCell className="text-xs font-medium">{item.name}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-[10px] font-mono">
                         {item.sector}
@@ -404,9 +456,11 @@ export function EnterpriseControlTower({
       {/* 4. 최근 공기업 법정 배당 국고 귀속 이력 */}
       <Card className="border shadow-xs">
         <CardHeader className="p-4 sm:p-5">
-          <CardTitle className="text-base font-semibold">공기업 법정 배당 국고 귀속 감사 이력 (Authoritative Dividend Logs)</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            공기업 법정 배당 국고 귀속 감사 이력 (Authoritative Dividend Logs)
+          </CardTitle>
           <CardDescription className="text-xs text-muted-foreground mt-0.5">
-            3대 공기업이 당기순이익의 30%를 국가 중앙 금고(VAULT_MAIN)로 실시간 납입한 불변 이력 명세
+            서버에서 조회한 최근 최대 20건의 배당 이력입니다. 전체 기간의 납입 증명이 아닙니다.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 sm:p-5 sm:pt-0">
@@ -425,14 +479,19 @@ export function EnterpriseControlTower({
               <TableBody>
                 {dividendLogs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">
+                    <TableCell
+                      colSpan={6}
+                      className="text-center py-6 text-xs text-muted-foreground"
+                    >
                       기록된 공기업 배당 이력이 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
                   dividendLogs.map((log) => (
                     <TableRow key={log.id}>
-                      <TableCell className="font-mono text-xs font-semibold">{log.enterprise_code}</TableCell>
+                      <TableCell className="font-mono text-xs font-semibold">
+                        {log.enterprise_code}
+                      </TableCell>
                       <TableCell className="text-xs font-medium">{log.enterprise_name}</TableCell>
                       <TableCell>{getGradeBadge(log.eval_grade)}</TableCell>
                       <TableCell className="text-right font-mono text-xs text-muted-foreground">

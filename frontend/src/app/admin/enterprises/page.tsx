@@ -5,15 +5,11 @@ import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
-import {
-  EnterpriseControlTower,
-  type DividendLogItem,
-  type PrivateEnterpriseItem,
-  type StateEnterpriseItem,
-  type StateHoldingOverviewItem,
-} from './enterprise-control-tower';
+import { EnterpriseControlTower } from './enterprise-control-tower';
+import { parseEnterpriseEvidence } from './enterprise-evidence';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 const AREA = adminArea('/admin/enterprises');
 
@@ -26,11 +22,13 @@ export default async function AdminEnterprisesPage() {
   await requireAdminConsole(AREA.href);
 
   const [overview, soes, privateEnterprises, dividendLogs] = await Promise.all([
-    apiOrNull<StateHoldingOverviewItem>('/api/v1/admin/enterprises/overview'),
-    apiOrNull<StateEnterpriseItem[]>('/api/v1/admin/enterprises/soes'),
-    apiOrNull<PrivateEnterpriseItem[]>('/api/v1/admin/enterprises/private'),
-    apiOrNull<DividendLogItem[]>('/api/v1/admin/enterprises/dividend-logs'),
+    apiOrNull<unknown>('/api/v1/admin/enterprises/overview'),
+    apiOrNull<unknown>('/api/v1/admin/enterprises/soes'),
+    apiOrNull<unknown>('/api/v1/admin/enterprises/private'),
+    apiOrNull<unknown>('/api/v1/admin/enterprises/dividend-logs'),
   ]);
+
+  const verified = parseEnterpriseEvidence(overview, soes, privateEnterprises, dividendLogs);
 
   return (
     <div data-page="admin-enterprises" className="mv-page mv-page--admin grid gap-6">
@@ -39,17 +37,25 @@ export default async function AdminEnterprisesPage() {
         {AREA.summary}
       </PageHeader>
 
-      {overview === null ? (
-        <EmptyState
-          title="국가지주회사 및 공기업 데이터를 불러오지 못했습니다."
-          description="월덱 국가투자공사(WSHC) 데이터베이스 연결 상태를 확인해 주세요."
-        />
+      {verified === null ? (
+        <div role="alert" aria-live="assertive" className="grid gap-3">
+          <EmptyState
+            title="국가지주회사 및 공기업 데이터를 불러오지 못했습니다."
+            description="조회에 실패했거나 검증할 수 없는 데이터입니다. 실제 기록 0건과 구분합니다."
+          />
+          <a
+            href="/admin/enterprises"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-md border px-4 py-2 text-sm font-medium sm:w-fit"
+          >
+            다시 조회
+          </a>
+        </div>
       ) : (
         <EnterpriseControlTower
-          initialOverview={overview}
-          initialSoes={soes ?? []}
-          initialPrivate={privateEnterprises ?? []}
-          initialDividendLogs={dividendLogs ?? []}
+          initialOverview={verified.overview}
+          initialSoes={verified.soes}
+          initialPrivate={verified.privateEnterprises}
+          initialDividendLogs={verified.dividendLogs}
         />
       )}
     </div>
