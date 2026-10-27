@@ -1,4 +1,4 @@
-## v1390 / F675-153 — 현금 지갑 알림의 원천 증명·순서 보장·안전한 복구 (기능 보완 / DRAFT / RELEASE HOLD) — 이슈 #1619, Draft PR 생성 대기
+## v1390 / F675-153 — 현금 지갑 알림의 원천 증명·순서 보장·안전한 복구 (기능 보완 / DRAFT / RELEASE HOLD) — 이슈 #1619, Draft PR #1624
 
 **회차·정본.** 이전 기능 추가 v1388 → 현재 기능 보완 v1390 → 다음 기능 추가 v1392(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c. main AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md와 한국어 대조본 확인. 미병합 v1388 Draft #1620을 기반으로 하는 문서 전용 후속 PR이며 단독 병합 금지. Gemini·개발 A/B/C·QA 작업과 분리하고 런타임·DB·잔액·원장·기능 스위치·Test·운영은 변경하지 않는다.
 

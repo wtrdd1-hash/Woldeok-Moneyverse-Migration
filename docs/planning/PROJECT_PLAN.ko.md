@@ -1,5 +1,5 @@
 ## 2026-10-28 v1390 — F675-153 현금 알림 원천 증명·관측 순서 (기능 보완 / DRAFT / RELEASE HOLD)
-- 이전 추가 v1388 → 현재 보완 v1390 → 다음 추가 v1392(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c, main AGENTS/README/영문 정본 기획/국문 대조 확인. 미병합 #1620 후속 Draft, 이슈 #1619, 독립 병합·런타임/DB/금융/Test/운영 변경 금지.
+- 이전 추가 v1388 → 현재 보완 v1390 → 다음 추가 v1392(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c, main AGENTS/README/영문 정본 기획/국문 대조 확인. Draft PR #1624는 미병합 #1620 후속, 이슈 #1619, 독립 병합·런타임/DB/금융/Test/운영 변경 금지.
 - 실제 지갑 개요는 잔액·최근 원장을 Promise.all의 별도 쿼리로 읽으므로 원자적 대사 완료 커밋 관측이 아니다. updated_at/created_at은 커밋 순서 증명 불가. 개발 DB 앱 계정의 account_balances UPDATE TRUE, QA #1507 원장 전표 없는 시즌 현금 갱신 위험(과거 손실 확인 아님). 총 현금+은행·캐시·시각·해시를 원천으로 신뢰하지 않고 금융 담당자가 보증한 USER_CASH 단조 커밋 버전·회원별 대사 영수증·공백 보류·새 기준값·해제 세대 차단을 요구한다. 화면/CTA/상태/API/DB·인덱스/트랜잭션/관리자/보안/SEO/Android·접근성/KPI/회귀/롤백 상세는 국영문 통합 마스터.
 - P0 ENV1390-01 SEC1390-02 REL1390-03 CASH1390-04; P1 CASH1390-05 CASH1390-06 CASH1390-07 CASH1390-08 CASH1390-09 CASH1390-10. QA v1329, main 283 중복, 개발 DB 광범위 DML, Test·운영 심볼릭 링크 대상 누락, 공식 정확 SHA Test/독립 복원 BLOCKED. 합성 10,001/동시 100/위조 100 미실행. 외부 신규 승인 0, 누적 중복 제거·승인 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 기능 OFF·운영승격 HOLD.
 

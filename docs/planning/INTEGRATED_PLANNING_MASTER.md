@@ -1,4 +1,4 @@
-## v1390 / F675-153 — Cash Watch Source Attestation, Ordering and Fail-Closed Recovery (Feature Improvement / DRAFT / RELEASE HOLD) — Issue #1619, Draft PR PENDING
+## v1390 / F675-153 — Cash Watch Source Attestation, Ordering and Fail-Closed Recovery (Feature Improvement / DRAFT / RELEASE HOLD) — Issue #1619, Draft PR #1624
 
 **Cycle / authority.** Previous Feature Addition v1388 → Current Feature Improvement v1390 → Next Feature Addition v1392 (provisional). Main at start/midpoint: b1cd54fda1123fb07ca81b6e5b3ead70f59f556c. Read main AGENTS.md, README.md, English canonical PROJECT_PLAN.md and Korean counterpart. This is a documentation-only stacked Draft on unmerged v1388 PR #1620; no independent merge. Gemini, A/B/C and QA branches untouched. No runtime, database, financial balance, ledger, feature flag, Test or Production mutation.
 

@@ -8,4 +8,4 @@
 - Backlog P0: ENV1390-01, SEC1390-02, REL1390-03, CASH1390-04. P1: CASH1390-05, CASH1390-06, CASH1390-07, CASH1390-08, CASH1390-09, CASH1390-10.
 - QA v1329 reviewed; main migration 283 duplicate, DEV broad DML, missing Test/Production release targets; exact-SHA official Test and independent restore not verified. Synthetic 10,001/100/100 tests NOT RUN.
 - External evidence newly approved 0; cumulative independently deduplicated accepted UNKNOWN/10,000; BLOCKED/IN PROGRESS.
-- Release HOLD, feature OFF, no merge or deployment; GitHub PR and final SHA to be added after push.
+- Release HOLD, feature OFF, no merge or deployment; GitHub Draft PR #1624 opened; final SHA recorded in miniPC completion log.
