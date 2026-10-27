@@ -1,3 +1,39 @@
+# F675-149 — 고객지원 답변 알림 무결성 보완 (기획 v1370 / 기능 보완 / 초안 / 운영 보류)
+**주기:** 이전 기능 추가 v1368 → 현재 기능 보완 v1370 → 다음 기능 추가 v1372(잠정). **이슈 #1562, 선행 미병합 Draft PR #1563.** main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c 시작·중간 확인, AGENTS.md·README.md·영어 정본 PROJECT_PLAN.md·국문 대조. 기획 문서만 수정, 런타임/DB/WLD/원장/Test/운영 변경 없음.
+
+## 실제 코드 및 개발 DB 읽기 전용 근거
+- frontend/src/app/account/notifications/notification-tabs-bar.tsx는 예시 알림 6건과 로컬 읽음 상태를 사용하지만, 별도의 notification-center-modal.tsx는 실제 인증 /api/notifications 및 unread-count를 조회함. 모든 알림 화면이 가짜라고 단정하지 않고 장애 시 예시를 실제 데이터로 대체하지 않음.
+- backend/src/notification/notification.service.ts는 public.in_app_notifications를 created_at DESC, LIMIT/OFFSET으로 조회. **개발 PostgreSQL 카탈로그 읽기 전용 검증**으로 테이블과 알림 함수 3개가 실제 존재함. 열: id, user_id, category, title, body, link, dedupe_key, is_read, read_at, created_at; PK, dedupe_key 부분 UNIQUE, 회원/읽음 인덱스 존재. 추적 마이그레이션 SQL에 CREATE TABLE은 찾지 못했으므로 스키마 출처 대조 필요. 운영 DB 테이블 부재를 뜻하지 않음.
+- 개발 DB moneyverse_app에 해당 테이블 INSERT/SELECT/UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER가 허용됨. SECURITY DEFINER 함수 3개는 사용자 UUID 인자를 받고 search_path public,pg_temp, 앱 EXECUTE를 허용하며 명시적 ACL에는 PUBLIC 허용이 없음. 직접 DML 권한은 P0 보안 경계 위험이나 악용 사고로 단정하지 않음.
+- notification_mark_all_read는 실제 변경 건수만 반환, Next API는 updatedCount만 전달하는데 벨 모달은 미확인 건수를 무조건 0으로 설정함. 동시 신규 알림이 있으면 잘못된 0 표시 가능. 피드 파서는 link를 버려 대화 보기 CTA가 연결되지 않음. DTO @Type(() => Boolean)의 문자열 false 회귀 필요. OFFSET/created_at 단독 정렬은 동시 삽입 시 중복·누락 가능.
+- Migration 196 admin_support_reply는 답변·스레드 상태·감사만 저장하고 outbox 없음. 동일 요청 재시도는 outbox 이전에 기존 메시지를 반환. 신규 알림은 미구현. 최신 main에 migration 280 파일 두 개가 있어 개발 Draft #1564와 충돌 조정 후 고유 번호 지정.
+
+## 회원·관리자 흐름과 권한
+/account/notifications와 기존 벨 모달에서 서버가 검증한 SUPPORT_ADMIN_REPLY만 실제 고객지원 탭에 표시. 상태 LOADING, EMPTY_VERIFIED, UNREAD, READ, VERIFYING_READ, UNKNOWN_COMMIT, PAUSED, UNAVAILABLE, FORBIDDEN, SESSION_EXPIRED. **대화 보기**는 현재 세션 회원 소유를 재검증한 동일 출처 /support 스레드만 허용, 타인/삭제 스레드는 동일한 비공개 오류. 알림 미리보기·로그·분석에 답변 본문, 문의 제목, 잔액, 개인정보 금지. 기존 engagement.notifications_enabled는 목표/NPC 설정으로 유지. 별도 supportReplyEnabled, 버전/CAS, 의도 영수증, ON/OFF 제공. OFF는 미래 선택형 알림만 억제하고 기존 답변/알림은 보존; ON은 소급 발송 금지. 관리자 /admin/support에는 PENDING/DELIVERED/SUPPRESSED/FAILED 집계만. 로그아웃·계정/탭/필터 전환·모달 종료 시 이전 응답 무효화. Android는 App API 실제 등록과 소유권 검증 필요.
+
+## API·DB·트랜잭션 계약
+- 기존 GET /api/v1/notifications 배열·OFFSET·limit<=100, unread-count, POST :id/read, read-all 정수 계약을 유지. 신규 GET /api/v1/notifications/feed-v2?category=SUPPORT&limit=1..50&cursor=...는 {items,nextCursor,snapshotAt,unreadCount,checkedAt} 반환. 세션 회원 확정, (created_at DESC,id DESC) 안정 정렬과 스냅샷 상한. 짧은 TTL HMAC 커서는 회원·세션 세대·카테고리·unreadOnly·상한·마지막 튜플 결합. 위조/만료 422/409, 장애를 빈 목록으로 위장 금지. unreadOnly는 문자 true/false만 파싱, 나머지 422. 카테고리 허용 목록.
+- 신규 POST /api/v1/notifications/read-all-v2는 안정 intentId, 선택 카테고리, 서버 발행 워터마크를 사용. 한 트랜잭션에서 본인 워터마크 이하 알림만 읽음 처리하고 불변 {intentId,updatedCount,remainingUnreadCount,watermark,committedAt} 영수증 저장. 동일 의도/본문은 원본 영수증, 다른 본문은 409. 기존 read-all 정수 계약 유지. UI는 updatedCount로 미확인 0을 추정하지 않고 서버 카운트 재조회·세대 비교; 응답 유실은 VERIFYING/UNKNOWN_COMMIT 후 영수증 조회. 이전 요청 결과가 최신 상태를 덮지 못하게 차단. 개별 읽음도 소유권·멱등성.
+- 답변 이벤트 UNIQUE(recipient_user_id,source_message_id,event_type SUPPORT_ADMIN_REPLY), 본문 없는 불변 지문. outbox PENDING|SUPPRESSED|RETRY_PENDING|DELIVERED|FAILED, 시도 수, 다음 시도, 임대 세대. **새 고유 번호 순방향 마이그레이션**에서 admin_support_reply의 메시지·스레드·감사·outbox를 단일 커밋하고 기존 idempotencyKey·역할·소유권 검증 유지. 재시도는 원본 영수증/이벤트 상태만 반환, 중복 발송 금지. 기존 과거 답변 소급 발송은 별도 승인·출처 검증 전 금지. 작업자는 FOR UPDATE SKIP LOCKED, 제한된 재시도·지터, 고유 INSERT, 저장 재조회·임대 세대 검증. 수신 OFF는 DELIVERED가 아닌 SUPPRESSED.
+- 기존 개발 DB 테이블/함수와 추적 SQL·권한·체크섬을 대조하고 운영 스키마는 승인된 담당자의 **읽기 전용** 검증 전 UNKNOWN. DROP/재생성 또는 IF NOT EXISTS로 차이 은폐 금지. 앱/PUBLIC 직접 DML 회수, 좁은 SECURITY DEFINER, search_path pg_catalog,pg_temp 및 정규화된 테이블 이름, 신뢰 가능한 세션/DB 경계의 사용자 증명, 관리자 역할/문의 소유권 트랜잭션 재검증. 임의 UUID 인자만 신뢰 금지. 인덱스: (user_id,created_at DESC,id DESC), 읽지 않음 부분 인덱스, 답변 이벤트 UNIQUE, (outbox_status,next_attempt_at,id), (user_id,intent_id). WLD·지갑·원장 불변.
+
+## 보안·SEO·모바일·접근성·분석·시험·롤백
+회원 세션/동의, 변경 CSRF, 401/403/404/409/422/429/503, 회원별 속도 제한, private no-store, 회원/관리자/API noindex·사이트맵 제외. 저장된 link는 신뢰하지 않고 소유권 검증 뒤 동일 출처 /support 링크만 생성; 외부 리다이렉트·HTML 삽입 차단. 로그/분석에 토큰·비공개 URL·식별자·본문 금지. 관리자 집계는 고정 기간/최소 20건 및 차분 조회 방지. 90일 보존은 개인정보·법무·백업 정책 검토 전 **잠정안**. KO/EN, WCAG 2.2 AA, 320px, 200% 확대, 키보드/초점/스크린리더, 44px 터치; Android 오프라인·계정 전환 응답 무효화. KPI는 실측 아닌 목표: 가짜 알림 0, 타인 열람 0, 중복 outbox 0, 답변만 커밋 0, 잘못된 미확인 0 표시 0, 안전 CTA 100%, 격리 시험 p95 60초 이내.
+수용시험 **미실행**: 합성 10,001건(동일 시각·커서), 동시 답변/읽음/작업자 100건, 권한/CSRF/세션 100건, 읽음 중 신규 알림, false 문자열, 악성 링크, 23505/40001, 새 DB 테이블 누락, 권한 회수, 작업자 중단, 응답 유실, 설정 경합, 로그아웃, Android/SEO/개인정보/접근성, 실제 인증 Test E2E 및 암호화 백업 독립 복원. support_reply_inbox_v1 기본 OFF. 별도 개발 브랜치·TDD·격리 실제 PG·전체/봇 보안 감사·정확 SHA 공식 Test 인증 금융 E2E·서명 라우트 증거·승인 GitOps 카나리 후 승격. 롤백 기능 OFF+작업자 중단+신규 이벤트 차단, 기존 메시지/감사·적용 마이그레이션 보존. **운영승격 BLOCKED**.
+외부 독립 근거 신규 최종 승인 0, 누적 중복 제거·분류 수량 UNKNOWN / 10,000 = BLOCKED / IN PROGRESS; 기술 표준 후보는 승인 실적에 미포함.
+
+## P0/P1 개발 백로그 — 기획 전용
+- P0 ENV1370-01: 루트 41%/57GiB 여유, 데이터 50%/95GiB 여유, 끊어진 /srv/moneyverse 링크, 실제 버전·독립 복원, 타 작업자 보존.
+- P0 SEC1370-02: 개발 DB 알림 스키마 출처, 앱 직접 DML, 사용자/역할 증명, migration 280 중복, 금융 ACL·체크섬.
+- P0 REL1370-03: 전체 QA/보안, 라우트 원본 증거 #1078, 운영 게이트 #1088, 정확 SHA Test·복원·GitOps.
+- P0 NOTIF1370-04: 예시의 실제 표시, 미확인 0 오표시, 타인 링크, 답변/outbox 부분 커밋, 중복 발송, 위조 영수증 차단.
+- P1 NOTIF1370-05: 순방향 스키마 대조·고유키/인덱스·불변 영수증·보존.
+- P1 NOTIF1370-06: 답변/outbox 원자성, 작업자 임대·재시도, 읽음 워터마크, 설정 CAS.
+- P1 NOTIF1370-07: NestJS v2 피드/영수증, 불리언 명시 파싱, 기존 Next 호환, Android 실제 등록.
+- P1 NOTIF1370-08: 실제 탭/모달·소유권 CTA·KO/EN·모바일 접근성·세션 응답 차단.
+- P1 NOTIF1370-09: 개인정보·SEO·KPI·속도 제한·외부 리다이렉트·최소 20건 관리자 집계.
+- P1 NOTIF1370-10: 격리 실제 PG 10,001/100/100, 동시성/권한/회귀·복원·기능 OFF 롤백.
+
 # F675-149 / 기획 v1368 — 검증된 고객지원 답변 알림과 실제 회원 알림함 (기능 추가 / 초안 / 운영 보류)
 **회차:** 이전 기능 보완 v1366 → 현재 기능 추가 v1368 → 다음 기능 보완 v1370(잠정). 개발 이슈 #1562. 선행 미병합 Draft PR #1555에 누적하는 문서 기획이며 main이나 출시 기능이 아니다. 최신 main c2a9306ddc0424438bc0ab297ea9543bb167aee6의 AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조본을 시작·중간에 확인했다. 코드·DB·WLD·원장·기능 스위치·Test·운영 변경 없음. 개발 착수 전 사람의 기획 검토 필요.
 ## 실제 근거·목적·범위

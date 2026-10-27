@@ -1,3 +1,7 @@
+## 2026-10-27 — Planning v1370 F675-149 (Feature Improvement; DRAFT/HOLD)
+- Previous Addition v1368 → Current Improvement v1370 → Next Addition v1372. Read-only DEV catalog proves notification table/functions exist with broad app DML; tracked CREATE TABLE absent. Actual bell modal vs demo account tabs distinguished; mark-all false-zero, unsafe link contract, OFFSET ordering and Boolean coercion documented. Main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c start/mid; predecessor #1563; issue #1562.
+- Backlog ENV1370-01 SEC1370-02 REL1370-03 NOTIF1370-04 NOTIF1370-05 NOTIF1370-06 NOTIF1370-07 NOTIF1370-08 NOTIF1370-09 NOTIF1370-10. Root 41%/data 50%, broken symlink, migration 280 collision, QA/security/Test/restore HOLD. 10,001/100/100 NOT RUN; external accepted new 0, cumulative UNKNOWN/10,000. Docs only, no runtime/DB/WLD/Production changes.
+
 ## 2026-10-27 — Planning v1368 / F675-149 (Feature Addition; DRAFT/HOLD)
 - Previous v1366 Improvement, current v1368 Addition, next v1370 Improvement. MiniPC Debian 13 services active, root 81% and data 72% used; deployment symlink target missing. Main c2a9306ddc0424438bc0ab297ea9543bb167aee6 stable at start/mid; predecessor Draft #1555, issue #1562.
 - Documented support alerts, atomic outbox, preferences, member API, privacy, SEO, accessibility, tests and release hold in EN/KO integrated docs. QA #1558 is separately owned by Development B #1560. Tests NOT RUN; external newly approved 0, cumulative UNKNOWN/10,000. No runtime/DB/Production changes.
