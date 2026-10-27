@@ -99,6 +99,7 @@ export class ChatUploadController {
   }
 
   @Get('media/:key')
+  @UseGuards(SessionGuard, AuthenticatedGuard)
   @ApiOperation({ summary: 'Serve uploaded chat image bytes' })
   async getChatMedia(@Param('key') key: string, @Res() res: Response): Promise<void> {
     const result = await this.chatStorage.read(key);
@@ -108,7 +109,8 @@ export class ChatUploadController {
 
     res.setHeader('content-type', result.mimeType);
     res.setHeader('content-length', result.buffer.length);
-    res.setHeader('cache-control', 'public, max-age=86400, immutable');
+    // Upload keys can appear in private messages and support cases. Never let a shared cache retain their bytes.
+    res.setHeader('cache-control', 'private, no-store');
     res.setHeader('x-content-type-options', 'nosniff');
     res.end(result.buffer);
   }
