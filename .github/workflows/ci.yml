@@ -208,3 +208,9 @@ jobs:
 
       - name: Audit production dependencies
         run: pnpm audit --prod --audit-level=high
+
+      - name: Verify and audit separately locked Discord bot
+        run: |
+          npm --prefix bot ci --no-audit --no-fund
+          npm --prefix bot test
+          npm --prefix bot audit --omit=dev --audit-level=high

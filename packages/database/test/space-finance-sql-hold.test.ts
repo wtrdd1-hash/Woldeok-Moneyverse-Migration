@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const sqlPath = resolve(process.cwd(), 'migrations/283-space-finance-ledger-boundary-hold.sql');
+const sqlPath = resolve(process.cwd(), 'migrations/285-space-finance-ledger-boundary-hold.sql');
 
-describe('P0 #1502 space/city/property tax SQL boundary v283', () => {
+describe('P0 #1502 space/city/property tax SQL boundary v285', () => {
   const readSql = () => readFileSync(sqlPath, 'utf8');
 
   it.each([
@@ -16,6 +16,18 @@ describe('P0 #1502 space/city/property tax SQL boundary v283', () => {
     expect(sql).toMatch(new RegExp('CREATE OR REPLACE FUNCTION public\\.' + name + '\\s*\\(', 'i'));
     expect(sql).toMatch(new RegExp('REVOKE EXECUTE ON FUNCTION public\\.' + name + '\\(' + signature.replace(/, /g, ',\\s*') + '\\) FROM PUBLIC, moneyverse_app', 'i'));
     expect(sql).toMatch(/MESSAGE\s*=\s*'[^']*ledger[^']*unavailable'/i);
+  });
+
+  it('keeps the backend positive-DML privilege fixture aligned with the v285 revocations', () => {
+    const boundaryTest = readFileSync(
+      resolve(process.cwd(), '../../backend/src/security/database-boundary.db.test.ts'),
+      'utf8',
+    );
+    const expectedGrants = boundaryTest.split('expect(result.rows).toEqual([').at(-1)?.split(']);')[0];
+    expect(expectedGrants).toBeDefined();
+    for (const table of ['user_spaces', 'city_projects', 'city_project_contributions', 'space_property_tax_payments']) {
+      expect(expectedGrants).not.toContain(`table_name: '${table}'`);
+    }
   });
 
   it('fails closed without balance/ledger writes or broad grants', () => {
