@@ -29,7 +29,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { apiOrNull } from '@/lib/api';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
-import type { AdminUser, AuditSearchRow } from '../../types';
+import type { AuditSearchRow } from '../../types';
+import { resolveAdminMemberDetail } from './member-detail-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,20 +52,21 @@ export default async function AdminUserDetailPage({
 
   if (!UUID.test(userId)) return <InvalidUser />;
 
-  const [directory, activity] = await Promise.all([
-    apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users'),
+  const [directory, portfolio, activity] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/admin/users'),
+    apiOrNull<unknown>(`/api/v1/admin/users/${encodeURIComponent(userId)}/portfolio`),
     apiOrNull<{ events: AuditSearchRow[]; nextCursor: string | null }>(
       `/api/v1/admin/audit/events?member=${encodeURIComponent(userId)}&limit=50`,
     ),
   ]);
-  const user = directory?.users.find((entry) => entry.user_id === userId);
+  const user = resolveAdminMemberDetail(userId, portfolio, directory);
 
   if (!user) {
     return (
       <div data-page="admin-users-id" className="mv-page mv-page--admin grid gap-5">
         <AdminBack href="/admin/users" label="사용자 관리로" />
-        <PageHeader eyebrow="USER SAFETY" title="사용자를 찾을 수 없습니다">
-          삭제됐거나 현재 관리자에게 표시되지 않는 사용자입니다.
+        <PageHeader eyebrow="USER SAFETY" title="회원 상세 정보를 확인할 수 없습니다">
+          회원별 데이터베이스 조회가 실패했거나 응답을 검증할 수 없습니다. 회원이 삭제되었다는 의미는 아닙니다. 잠시 후 다시 시도해 주세요.
         </PageHeader>
       </div>
     );
@@ -75,12 +77,11 @@ export default async function AdminUserDetailPage({
   const auditLogLink = `/admin/logs?member=${encodeURIComponent(user.user_id)}&limit=50`;
   const activityLogLink = `/admin/logs/activity?userId=${encodeURIComponent(user.user_id)}&limit=50`;
 
-  const netWorth = user.total_net_worth ?? '0';
-  const cash = user.cash_balance ?? '0';
-  const bank = user.bank_balance ?? '0';
-  const bond = user.bond_balance ?? '0';
-  const stock = user.stock_eval ?? '0';
-  const rank = user.wealth_rank ?? '—';
+  const netWorth = user.total_net_worth ?? null;
+  const cash = user.cash_balance ?? null;
+  const bank = user.bank_balance ?? null;
+  const bond = user.bond_balance ?? null;
+  const stock = user.stock_eval ?? null;
 
   const directMessageEvents = events.filter((e) => e.action === 'admin_send_direct_message');
 
@@ -100,6 +101,10 @@ export default async function AdminUserDetailPage({
       <PageHeader eyebrow="USER DETAIL" title={user.display_name}>
         사용자 상태와 자산 현황, 관련 활동 기록을 한곳에서 확인하고 필요한 조치를 실행합니다.
       </PageHeader>
+      <p className="text-sm text-muted-foreground" role="status">
+        회원 신원은 개별 관리자 API로 확인했습니다. 자산 금액은 최대 100건의 회원 목록에서
+        동일 회원의 정확한 WLD 정수 문자열이 검증된 경우에만 표시하며, 미확인 금액은 —로 표시합니다.
+      </p>
 
       {/* 기본 정보 및 빠른 관리 */}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.7fr)]">
@@ -270,7 +275,9 @@ export default async function AdminUserDetailPage({
           </div>
         </CardHeader>
         <CardContent>
-          {directMessageEvents.length === 0 ? (
+          {activity === null ? (
+            <EmptyState title="공식 쪽지 감사 기록을 확인할 수 없습니다." />
+          ) : directMessageEvents.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border/80 p-5 text-center text-xs text-muted-foreground">
               이 회원에게 발송된 관리자 공식 쪽지 이력이 아직 없습니다. 우측 상단의 <strong className="text-emerald-400">[새 공식 쪽지 작성]</strong> 버튼을 통해 첫 쪽지를 발송해 보세요.
             </div>
