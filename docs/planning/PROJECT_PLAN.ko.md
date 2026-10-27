@@ -1,3 +1,10 @@
+## 기획 v1352 — F675-145 검증된 셀프서비스 도움말 센터·안전한 문의 연결 (기능 추가 / 초안 / 운영 보류)
+- 이전 보완 v1350 → 현재 추가 v1352 → 다음 보완 v1354(잠정). 최신 main 5888176454648f51d5f986be60a22847bd234777 시작·중간 재확인, AGENTS.md·README.md·영문 정본·국문 대조. 선행 미병합 Draft #1505, 개발 이슈 #1513.
+- 현재 /support는 로그인 문의/답변만 있고 controller·Migration196에는 검증된 공개 도움말 API·테이블이 없으며 /help·/admin/help도 없다. 방문자/회원의 승인 문서 검색·읽기와 명시적 문의 연결, operator 작성/독립 approver 승인·철회, 출처 SHA·유효 기한·불변 버전/영수증·캐시 철회 무결성을 설계. 자동 답변·허위 정책·WLD 변경·기존 F675-139~144 중복 금지.
+- P0: ENV1352-01 서버 용량·격리 복원 #1170, SEC1352-02 앱 DML 235/241·PUBLIC 은행 3·체크섬 #1469·금융 #1507/#1502, REL1352-03 QA v1312·정확 SHA 공식 Test, HELP1352-04 무권한·만료·캐시 잔존 공개 차단. P1: HELP1352-05 스키마/출처/인덱스, HELP1352-06 독립 승인/CAS/감사/outbox, HELP1352-07 공개 API/검색/커서, HELP1352-08 웹/관리자/Android/WCAG, HELP1352-09 개인정보/SEO/KPI/악용, HELP1352-10 격리 PG 10,001/100/100·롤백. 화면·API·DB·트랜잭션·보안·테스트 상세는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- QA v1312 pnpm test 종료코드 0·프론트 1,423건 통과, 전체 보안 감사 Critical2/High8·봇 Critical1/High5 실패; 루트 100%(여유 약 706MiB), 데이터 97%(약 6.4GiB). 정확 main SHA 공식 Test 금융 E2E·독립 복원 미검증, 운영 HOLD. verified_help_center_v1 기본 OFF. 외부 신규 승인 0건·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 변경.
+- 전체 백로그: ENV1352-01 SEC1352-02 REL1352-03 HELP1352-04 HELP1352-05 HELP1352-06 HELP1352-07 HELP1352-08 HELP1352-09 HELP1352-10
+
 ## 기획 v1350 — F675-144 고객지원 승인 답변의 안전한 전송 무결성 (기능 보완 / 초안 / 운영 보류)
 - 이전 추가 v1348 → 현재 보완 v1350 → 다음 추가 v1352(잠정). 정본 main 133c73b40d51b151523b8374508099f3d349415e 시작·중간 재확인, AGENTS.md·README.md·영문/국문 기획 대조. 선행 미병합 Draft #1501, 개발 이슈 #1500.
 - 실제 Next.js adminSupportReply는 호출마다 randomUUID를 만들고 UTF-16 2,000단위로 조용히 자른다. Migration196 admin_support_reply의 동시 요청은 23505 경합 가능. 문의·본문별 고정 전송 의도, DB 영수증 조회, 불명 응답 성공 오판 금지, 무절단 422, UTF-8 지문, 수정/폐기 템플릿 사용 실적 제외, 현재 operator 전송과 독립 approver 승인 및 실제 세션 검증을 설계.
