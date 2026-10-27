@@ -25,3 +25,29 @@ describe('public verified help controller', () => {
     expect(search).toHaveBeenCalledWith('ko', null, '', 20);
   });
 });
+
+describe('verified help response-time expiry fence (Android and web share this API)', () => {
+  it('never emits an article that expired after the SQL read but before response', async () => {
+    vi.stubEnv('VERIFIED_HELP_CENTER_V1', 'true');
+    const article = vi.fn().mockResolvedValue({
+      article_id: 'article-id', reviewed_until: new Date('2020-01-01T00:00:00Z'),
+      title: 'stale response',
+    });
+    const controller = new HelpController({ article } as unknown as HelpRepository);
+    await expect(controller.article('ko', 'stale-response')).rejects.toThrow('not found');
+    expect(article).toHaveBeenCalledOnce();
+  });
+
+  it('drops expired or malformed search results rather than marking them verified', async () => {
+    vi.stubEnv('VERIFIED_HELP_CENTER_V1', 'true');
+    const future = new Date(Date.now() + 3600_000);
+    const search = vi.fn().mockResolvedValue([
+      { article_id: 'expired', reviewed_until: new Date('2020-01-01T00:00:00Z') },
+      { article_id: 'malformed', reviewed_until: 'garbled' },
+      { article_id: 'valid', reviewed_until: future },
+    ]);
+    const controller = new HelpController({ search } as unknown as HelpRepository);
+    const result = await controller.search({ locale: 'en', query: '' });
+    expect(result.articles.map(row => row.article_id)).toEqual(['valid']);
+  });
+});
