@@ -2,7 +2,17 @@ import type { ChatReportItem } from './chat-report-evidence-dialog';
 import type { TakedownItem } from './takedown-action-dialog';
 
 export const MODERATION_PAGE_SIZE = 50;
-export const MODERATION_MAX_OFFSET = 100_000;
+export const MODERATION_MAX_OFFSET = 10_000; // Matches NestJS AdminTakedownQuerySchema and AdminChatReportQuerySchema.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const CASE_ID = /^TKD-[0-9]{8}-[0-9A-F]{6}$/;
+const ISO_TIMESTAMP = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/;
+function uuid(value: unknown): value is string {
+  return typeof value === 'string' && UUID.test(value);
+}
+function nullableUuid(value: unknown): boolean { return value === null || uuid(value); }
+function memberOf(value: unknown, choices: readonly string[]): boolean {
+  return typeof value === 'string' && choices.includes(value);
+}
 
 type Queue<T> = { readonly items: T[]; readonly count: number };
 
@@ -15,8 +25,10 @@ function nonempty(value: unknown): value is string {
 }
 
 function timestamp(value: unknown): value is string {
-  return nonempty(value) && Number.isFinite(Date.parse(value));
+  return nonempty(value) && ISO_TIMESTAMP.test(value) && Number.isFinite(Date.parse(value));
 }
+
+function nullableTimestamp(value: unknown): boolean { return value === null || timestamp(value); }
 
 function optionalText(value: unknown): boolean {
   return value === null || typeof value === 'string';
@@ -37,25 +49,34 @@ function parseQueue<T>(
 
 function isChatReport(value: unknown): value is ChatReportItem {
   if (!record(value)) return false;
-  return ['report_id', 'reporter_id', 'reporter_username', 'reporter_nickname',
-    'reported_user_id', 'reported_username', 'reported_nickname', 'conversation_id',
-    'reason'].every((key) => nonempty(value[key])) &&
+  return ['report_id', 'reporter_id', 'reported_user_id', 'conversation_id']
+    .every((key) => uuid(value[key])) &&
+    ['reporter_username', 'reporter_nickname', 'reported_username', 'reported_nickname']
+      .every((key) => nonempty(value[key])) &&
+    memberOf(value.reason, ['spam_promotional', 'fraud_scam', 'abuse_harassment', 'other']) &&
     typeof value.details === 'string' &&
     Number.isSafeInteger(value.evidence_count) && (value.evidence_count as number) >= 0 &&
     (value.evidence_count as number) <= 10 &&
     ['SUBMITTED', 'ACTIONED_BLOCKED', 'ACTIONED_WARNED', 'REJECTED'].includes(String(value.status)) &&
-    timestamp(value.created_at) && optionalText(value.actioned_at) &&
-    optionalText(value.actioned_by) && optionalText(value.actioner_nickname);
+    timestamp(value.created_at) && nullableTimestamp(value.actioned_at) &&
+    nullableUuid(value.actioned_by) && optionalText(value.actioner_nickname);
 }
 
 function isTakedown(value: unknown): value is TakedownItem {
   if (!record(value)) return false;
-  return ['id', 'case_id', 'requester_email', 'requester_type', 'reason_category',
-    'target_content_url', 'target_content_type'].every((key) => nonempty(value[key])) &&
+  return uuid(value.id) && typeof value.case_id === 'string' && CASE_ID.test(value.case_id) &&
+    nonempty(value.requester_email) && value.requester_email.includes('@') &&
+    memberOf(value.requester_type, ['victim_self', 'legal_guardian', 'authorized_rep', 'third_party']) &&
+    memberOf(value.reason_category, ['non_consensual_private_image', 'underage_harmful_content',
+      'doxxing_credible_threat', 'impersonation_account_takeover', 'harassment_stalking', 'illegal_content']) &&
+    memberOf(value.target_content_type, ['board_post', 'board_comment', 'gallery_photo',
+      'chat_message', 'profile_bio', 'other']) &&
+    typeof value.target_content_url === 'string' && value.target_content_url.length <= 1024 &&
+    safeTargetHref(value.target_content_url) !== null &&
     typeof value.description === 'string' &&
     ['SUBMITTED', 'TRIAGED', 'ACTIONED_REMOVED', 'ACTIONED_RESTRICTED', 'REJECTED', 'APPEALED'].includes(String(value.status)) &&
     timestamp(value.created_at) && optionalText(value.admin_notes) &&
-    optionalText(value.actioned_at);
+    nullableTimestamp(value.actioned_at);
 }
 
 export function parseChatQueue(raw: unknown): Queue<ChatReportItem> | null {
@@ -63,7 +84,9 @@ export function parseChatQueue(raw: unknown): Queue<ChatReportItem> | null {
 }
 
 export function parseTakedownQueue(raw: unknown): Queue<TakedownItem> | null {
-  return parseQueue(raw, isTakedown, (item) => item.id);
+  const result = parseQueue(raw, isTakedown, (item) => item.id);
+  if (!result || new Set(result.items.map((item) => item.case_id)).size !== result.items.length) return null;
+  return result;
 }
 
 export function readModerationOffset(raw: string | string[] | undefined): number {
