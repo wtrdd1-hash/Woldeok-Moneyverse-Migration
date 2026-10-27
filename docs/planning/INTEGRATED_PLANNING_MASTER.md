@@ -1,4 +1,4 @@
-## v1392 / F675-154 — Verified Read-only Shop Item Cost Comparison (Feature Addition / DRAFT / RELEASE HOLD) — Issue #1629, Draft PR TBD
+## v1392 / F675-154 — Verified Read-only Shop Item Cost Comparison (Feature Addition / DRAFT / RELEASE HOLD) — Issue #1629, Draft PR #1630
 
 **Cycle and authority:** Previous Feature Improvement v1390 → Current Feature Addition v1392 → Next Feature Improvement v1394 (provisional). Main at start/midpoint `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; authoritative main AGENTS.md, README.md, PROJECT_PLAN.md (English canonical), PROJECT_PLAN.ko.md (parity) consulted. Documentation-only stacked Draft based on unmerged v1390 PR #1624; not independently mergeable. No Gemini/A/B/C/QA code or runtime, database, WLD, ledger, flags, Test or Production changes.
 

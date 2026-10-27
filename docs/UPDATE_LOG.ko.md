@@ -1,5 +1,5 @@
 ## 2026-10-28 v1392 — F675-154 상점 비교 기획 (DRAFT / HOLD)
-- 이전 보완 v1390 → 현재 추가 v1392 → 다음 보완 v1394. main AGENTS/README/영문 정본 계획·국문 대조 확인, 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`. 미병합 v1390 Draft #1624 기반 별도 작업 폴더, Gemini·개발 A/B/C·QA와 분리.
+- 이전 보완 v1390 → 현재 추가 v1392 → 다음 보완 v1394. main AGENTS/README/영문 정본 계획·국문 대조 확인, 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`. 미병합 v1390 Draft #1624 (new Draft PR #1630, issue #1629) 기반 별도 작업 폴더, Gemini·개발 A/B/C·QA와 분리.
 - 실제 `/shop/catalog`는 가격·관리비를 보여 주지만 2~3개 비교 기능 없음. NestJS `shop_catalog_list_v2(actor)`, Migration 165 회원별 할인 확인. 0/1/4주 읽기 전용 예시 비용이며 구매 견적 아님. 화면/CTA/오류/API/DB·인덱스/트랜잭션/관리자/보안/SEO/Android/a11y/KPI/테스트/롤백은 국영문 통합 마스터.
 - P0 ENV1392-01 SEC1392-02 REL1392-03 SHOP1392-04; P1 SHOP1392-05~SHOP1392-10. QA v1331 test/lint/audit FAIL, 개발 DB 235/241 DML, 체크섬 5건 불일치; 공식 Test exact-SHA·복원 미검증. 합성 10,001/동시 100/위조 100 미실행. 외부 신규 승인 0, 누적 승인 중복 제거 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
 - 문서만 변경, 런타임·DB·원장·WLD·Test·운영·예약 설정 불변. PR·이슈 링크는 GitHub 생성 후 내부 기록에 반영.

@@ -1,5 +1,5 @@
 ## 2026-10-28 v1392 — F675-154 상점 아이템 비용 비교 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
-- 이전 보완 v1390 → 현재 추가 v1392 → 다음 보완 v1394(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; AGENTS/README/영문 정본 계획·국문 대조 확인. 미병합 v1390 PR #1624 기반 문서 Draft, 단독 병합·런타임/DB/WLD/원장/Test/운영 변경 금지.
+- 이전 보완 v1390 → 현재 추가 v1392 → 다음 보완 v1394(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; AGENTS/README/영문 정본 계획·국문 대조 확인. 미병합 v1390 PR #1624 (new Draft PR #1630, issue #1629) 기반 문서 Draft, 단독 병합·런타임/DB/WLD/원장/Test/운영 변경 금지.
 - 실제 회원 상점은 목록·보유를 따로 표시하고 비교 기능이 없다. NestJS 목록은 `shop_catalog_list_v2(actor)`, Migration 165는 회원 이벤트 할인 적용. 2~3개·0/1/4주 관리비 비교는 비확정 예시로 구매·잔액 조회·예약 아님. 인증/동의/CSRF POST compare-preview, 단일 SQL 읽기·WLD bigint 정수 문자열·영구 테이블 없음·세션 actor. noindex/no-store·Android BFF·WCAG 2.2 AA·관리자 비식별 집계/KPI·롤백 상세는 통합 마스터 EN/KO.
 - P0 ENV1392-01 SEC1392-02 REL1392-03 SHOP1392-04; P1 SHOP1392-05 SHOP1392-06 SHOP1392-07 SHOP1392-08 SHOP1392-09 SHOP1392-10. QA v1331 루트 test/lint/audit FAIL, 개발 DB 235/241 앱 DML, 적용 체크섬 5건 불일치, 공식 Test 정확 SHA·독립 복원 미검증. 합성 10,001/동시 100/위조 100 **미실행**. 외부 신규 승인 0, 누적 중복 제거·승인 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 기능 OFF·운영승격 HOLD.
 

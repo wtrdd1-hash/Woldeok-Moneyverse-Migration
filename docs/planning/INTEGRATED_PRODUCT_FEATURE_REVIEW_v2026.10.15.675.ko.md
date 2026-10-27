@@ -2,7 +2,7 @@
 - **확인된 공백:** 회원 `/shop/catalog`에는 가격·주간 관리비·구매 폼은 있지만 2~3개 나란히 비교는 없다. NestJS 목록은 `shop_catalog_list_v2(actor)`를 사용하며 Migration 165에서 회원별 이벤트 할인을 반영한다. 새 설계이지 운영 장애 확인이 아니다.
 - **화면·API:** 2~3개 선택, 0/1/4주 예시 관리비, 다시 계산/상점에서 보기/제거/지우기. 인증·동의·CSRF `POST /api/v1/shop/compare-preview`, WLD 정수 문자열·비확정 총액만 제공. 구매·예약·원장·영구 저장 없음. 만료·품절 가격 추측 금지.
 - **DB·보안:** 단일 제한 SQL MVCC 읽기, 기존 PK/FK/인덱스 확인, 신규 테이블·직접 DML 없음. actor는 세션에서만, no-store·속도 제한·Android BFF·noindex·WCAG 2.2 AA·관리자 집계. QA v1331 test/lint/audit FAIL, 개발 DB 235/241 DML, 체크섬 5건 불일치로 P0 운영승격 HOLD.
-- **백로그:** P0 ENV1392-01 SEC1392-02 REL1392-03 SHOP1392-04; P1 SHOP1392-05 SHOP1392-06 SHOP1392-07 SHOP1392-08 SHOP1392-09 SHOP1392-10. 합성 10,001/동시 100/위조 100 **미실행**. 외부 신규 승인 0, 누적 중복 제거·승인 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 미병합 v1390 Draft #1624 기반, 독립 병합 금지.
+- **백로그:** P0 ENV1392-01 SEC1392-02 REL1392-03 SHOP1392-04; P1 SHOP1392-05 SHOP1392-06 SHOP1392-07 SHOP1392-08 SHOP1392-09 SHOP1392-10. 합성 10,001/동시 100/위조 100 **미실행**. 외부 신규 승인 0, 누적 중복 제거·승인 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 미병합 v1390 Draft #1624 (new Draft PR #1630, issue #1629) 기반, 독립 병합 금지.
 
 
 ## F675-153 / v1390 — 현금 알림 원천 증명·관측 순서·복구 무결성 (기능 보완 / DRAFT / HOLD)
