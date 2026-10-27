@@ -18,6 +18,18 @@ describe('P0 #1502 space/city/property tax SQL boundary v285', () => {
     expect(sql).toMatch(/MESSAGE\s*=\s*'[^']*ledger[^']*unavailable'/i);
   });
 
+  it('keeps the backend positive-DML privilege fixture aligned with the v285 revocations', () => {
+    const boundaryTest = readFileSync(
+      resolve(process.cwd(), '../../backend/src/security/database-boundary.db.test.ts'),
+      'utf8',
+    );
+    const expectedGrants = boundaryTest.split('expect(result.rows).toEqual([').at(-1)?.split(']);')[0];
+    expect(expectedGrants).toBeDefined();
+    for (const table of ['user_spaces', 'city_projects', 'city_project_contributions', 'space_property_tax_payments']) {
+      expect(expectedGrants).not.toContain(`table_name: '${table}'`);
+    }
+  });
+
   it('fails closed without balance/ledger writes or broad grants', () => {
     const sql = readSql();
     expect(sql).toMatch(/BEGIN;[\s\S]*COMMIT;\s*$/);
