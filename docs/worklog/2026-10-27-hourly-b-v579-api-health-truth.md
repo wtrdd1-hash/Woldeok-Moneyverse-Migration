@@ -20,3 +20,10 @@
 - RED evidence: backend 3/4 failed before fix; frontend 2/2 failed. Additional missing-DB-ping RED 1/5.
 - GREEN evidence: backend 5/5; frontend 2/2. All route-level status, success, latency unmeasured; measured DB probe remains separate. No schema, ledger, or WLD changes.
 - Remaining: full repository gates, isolated PG, security audits, CI, official Test exact-SHA and release holds.
+
+### Validation checkpoint — 2026-10-27 11:51 KST
+- Before main advanced: full `pnpm test` PASS (backend 1,331 PASS / 398 SKIPPED; frontend 1,426 PASS; contract 38 PASS; DB package 15 PASS / 3 SKIPPED); `pnpm build`, `pnpm lint` (0 errors / 1,129 warnings), `pnpm typecheck` PASS.
+- TDD additional page copy RED 1/1 then GREEN 1/1; removed misleading live/verified page description.
+- Isolated PostgreSQL 17.11-alpine PASS: SELECT 1, pg_stat_activity, pg_stat_database with read-only role; forbidden CREATE rejected. Container removed.
+- Security: full pnpm audit FAIL (2 Critical, 8 High, 11 Moderate, 3 Low); production pnpm audit PASS; bot npm audit FAIL (1 Critical, 5 High). Bot test initially blocked by missing local youtube-dl-exec dependency, not an application assertion failure.
+- Main advanced during validation from 58881764 to 584f01a9 (admin market reauth, session, planning). Rebase on latest main required before final gates and PR. No overlapping changed files detected.
