@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -41,8 +42,16 @@ export class AdminTreasuryBondController {
 
   @Get('coupon-logs')
   @ApiOperation({ summary: '국채 이자 지급 및 만기 상환 이력 조회' })
-  async listCouponLogs(@Query('limit') limit?: number) {
-    return this.service.listRecentCouponLogs(limit ? Number(limit) : 20);
+  async listCouponLogs(@Query('limit') limit?: string) {
+    if (limit === undefined) return this.service.listRecentCouponLogs(20);
+    if (typeof limit !== 'string' || !/^[1-9][0-9]*$/.test(limit)) {
+      throw new BadRequestException('limit must be a decimal integer between 1 and 100');
+    }
+    const parsed = Number(limit);
+    if (!Number.isSafeInteger(parsed) || parsed > 100) {
+      throw new BadRequestException('limit must be a decimal integer between 1 and 100');
+    }
+    return this.service.listRecentCouponLogs(parsed);
   }
 
   @Post('distribute-coupons')
