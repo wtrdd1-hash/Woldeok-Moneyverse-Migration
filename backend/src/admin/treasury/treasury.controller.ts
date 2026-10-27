@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -270,8 +271,15 @@ export class AdminTreasuryController {
 
   @Get('donations/top')
   @ApiOperation({ summary: '국고 기부 명예의 전당 랭킹 조회' })
-  async getTopDonors(@Query('limit') limit?: number) {
-    return this.service.getTopDonors(limit ? Number(limit) : 10);
+  async getTopDonors(@Query('limit') limit?: string) {
+    if (limit !== undefined && (typeof limit !== 'string' || !/^[1-9][0-9]*$/.test(limit))) {
+      throw new BadRequestException('limit must be a decimal integer between 1 and 100');
+    }
+    const parsed = limit === undefined ? 10 : Number(limit);
+    if (!Number.isSafeInteger(parsed) || parsed < 1 || parsed > 100) {
+      throw new BadRequestException('limit must be a decimal integer between 1 and 100');
+    }
+    return this.service.getTopDonors(parsed);
   }
 
   @Post('disburse/grant')

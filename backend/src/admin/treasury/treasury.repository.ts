@@ -846,6 +846,9 @@ export class TreasuryRepository {
   }
 
   async getTopDonors(limit = 10): Promise<any[]> {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new BadRequestException('limit must be an integer between 1 and 100');
+    }
     const res = await this.pool.query(
       `SELECT u.id AS user_id, u.username, u.nickname,
               sum(d.amount_wld)::bigint::text AS total_donated_wld,
@@ -855,7 +858,7 @@ export class TreasuryRepository {
        FROM public.treasury_donations d
        JOIN public.users u ON u.id = d.user_id
        GROUP BY u.id, u.username, u.nickname
-       ORDER BY sum(d.amount_wld) DESC
+       ORDER BY sum(d.amount_wld) DESC, u.id ASC
        LIMIT $1`,
       [limit],
     );
