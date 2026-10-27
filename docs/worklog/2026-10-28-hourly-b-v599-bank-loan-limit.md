@@ -10,3 +10,8 @@ No migration or ledger changes planned; other agent branches and reservations pr
 ## RED checkpoint
 - HTTP malformed/duplicate limit and canonical boundary tests added before implementation.
 - Baseline vitest exit: 1; see /tmp/mv-b-v599-red.log (expected failing cases).
+
+## GREEN checkpoint
+- Controller rejects malformed or out-of-range wire values before all bank reads; canonical 1..200 remains accepted.
+- No API response shape, database schema, authorization, ledger or WLD mutation.
+- Focused HTTP and authoritative evidence tests passed. See /tmp/mv-b-v599-green.log.

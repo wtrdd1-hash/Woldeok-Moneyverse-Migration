@@ -225,9 +225,17 @@ export class AdminBankOperationsController {
   @Get()
   @ApiOperation({ summary: 'Deposits and the loan book, with the credit ladder behind it' })
   async overview(@Req() request: RequestWithSession, @Query('limit') limit?: string) {
-    const requested = limit === undefined ? undefined : Number(limit);
-    if (requested !== undefined && !Number.isSafeInteger(requested)) {
-      throw new BadRequestException('limit must be a whole number');
+    // Reject non-canonical wire values before any of the three financial reads.
+    // Number() would otherwise accept whitespace, exponent notation, hex and
+    // empty strings, which do not satisfy the documented 1..200 SQL contract.
+    const requested =
+      limit === undefined
+        ? undefined
+        : typeof limit === 'string' && /^[1-9][0-9]{0,2}$/.test(limit)
+          ? Number(limit)
+          : NaN;
+    if (requested !== undefined && (!Number.isSafeInteger(requested) || requested > 200)) {
+      throw new BadRequestException('limit must be a decimal integer between 1 and 200');
     }
     const actor = requireUserId(request);
     const repository = required(this.operations);
