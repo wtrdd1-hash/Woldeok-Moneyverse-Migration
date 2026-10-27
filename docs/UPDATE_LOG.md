@@ -1,3 +1,10 @@
+## 2026-10-28 v1392 — Planning F675-154 Shop Comparison (DRAFT / HOLD)
+- Previous Improvement v1390 → Current Addition v1392 → Next Improvement v1394. Read main AGENTS/README/English canonical plan/Korean parity; main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` start/mid. Isolated planning worktree based on unmerged v1390 Draft #1624; no Gemini/A/B/C/QA overlap.
+- Verified source: `/shop/catalog` shows price/upkeep but no 2–3 comparison; NestJS `shop_catalog_list_v2(actor)`, migration 165 claimed-event price; proposed read-only 0/1/4-week cost estimate is not a purchase quote. Full UI/CTA/error/API/DB/index/transaction/admin/security/SEO/Android/a11y/KPI/tests/rollback in bilingual integrated master.
+- P0 ENV1392-01 SEC1392-02 REL1392-03 SHOP1392-04; P1 SHOP1392-05..SHOP1392-10. QA v1331 root test/lint/audit FAIL, 235/241 DEV DML, 5 checksum mismatches; official Test exact-SHA and restore not verified. Planned 10,001/100/100 tests NOT RUN. New independent external accepted 0, cumulative approved dedup UNKNOWN/10,000; BLOCKED/IN PROGRESS.
+- Documentation only; no runtime, database, ledger, WLD, Test/Production or automation setting changes. Draft PR/issue references to be added to records after GitHub creation.
+
+
 ## 2026-10-28 — Planning v1390 / F675-153 Cash Source Attestation (Feature Improvement / DRAFT / RELEASE HOLD)
 - Previous Addition v1388 → Current Improvement v1390 → Next Addition v1392. Main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c start/mid; predecessor Draft #1620, current Draft PR #1624, issue #1619. English canonical and Korean parity, integrated review and worklog updated. No runtime, DB, finance, Test or Production change.
 - Found independent wallet balance/ledger reads, timestamps without commit order, DEV account_balances UPDATE grant and QA #1507 unbalanced writer risk; no observed false notification or historical loss claimed. Planned finance-attested monotonic USER_CASH version, reconciliation hold, fresh baseline, duplicate/late source rejection, owner-safe API, generation-fenced delivery, admin aggregate, privacy/a11y/Android/SEO and exact-SHA rollback gate.

@@ -1,3 +1,10 @@
+## F675-154 / v1392 — 상점 아이템 비용 비교 미리보기 (기능 추가 / DRAFT / HOLD)
+- **확인된 공백:** 회원 `/shop/catalog`에는 가격·주간 관리비·구매 폼은 있지만 2~3개 나란히 비교는 없다. NestJS 목록은 `shop_catalog_list_v2(actor)`를 사용하며 Migration 165에서 회원별 이벤트 할인을 반영한다. 새 설계이지 운영 장애 확인이 아니다.
+- **화면·API:** 2~3개 선택, 0/1/4주 예시 관리비, 다시 계산/상점에서 보기/제거/지우기. 인증·동의·CSRF `POST /api/v1/shop/compare-preview`, WLD 정수 문자열·비확정 총액만 제공. 구매·예약·원장·영구 저장 없음. 만료·품절 가격 추측 금지.
+- **DB·보안:** 단일 제한 SQL MVCC 읽기, 기존 PK/FK/인덱스 확인, 신규 테이블·직접 DML 없음. actor는 세션에서만, no-store·속도 제한·Android BFF·noindex·WCAG 2.2 AA·관리자 집계. QA v1331 test/lint/audit FAIL, 개발 DB 235/241 DML, 체크섬 5건 불일치로 P0 운영승격 HOLD.
+- **백로그:** P0 ENV1392-01 SEC1392-02 REL1392-03 SHOP1392-04; P1 SHOP1392-05 SHOP1392-06 SHOP1392-07 SHOP1392-08 SHOP1392-09 SHOP1392-10. 합성 10,001/동시 100/위조 100 **미실행**. 외부 신규 승인 0, 누적 중복 제거·승인 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 미병합 v1390 Draft #1624 기반, 독립 병합 금지.
+
+
 ## F675-153 / v1390 — 현금 알림 원천 증명·관측 순서·복구 무결성 (기능 보완 / DRAFT / HOLD)
 **실제 위험이지 사고 확정은 아님:** wallet.service.overview는 잔액과 최근 원장을 Promise.all로 별도 조회하며 account_balances.updated_at과 원장 created_at은 커밋 순서 증명이 아니다. 개발 DB moneyverse_app은 account_balances UPDATE 가능, QA #1507은 원장 전표 없는 시즌 보상 직접 현금 갱신 경로를 보고했다. 실제 과거 유출·손실은 확인되지 않았다. 지갑 개요나 잔액 해시를 검증 원천으로 사용하지 않는다.
 **보완:** 금융 담당자가 검증한 USER_CASH별 커밋 직렬화 source_version·원장 대사 영수증 필수. 오래됨·중복·상충 증거는 알림 중단/격리. 임계치 변경·재활성화·장애·복구 후 새로운 검증 기준값 요구, UNKNOWN 공백을 이어붙여 허위 하락을 만들지 않는다. 은행 이동은 총액이 같아도 현금이 줄 수 있다. 해제 커밋 이후 발송은 세대로 차단한다.

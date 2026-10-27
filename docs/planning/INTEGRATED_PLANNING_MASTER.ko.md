@@ -1,3 +1,38 @@
+## v1392 / F675-154 — 검증 가능한 상점 아이템 비용 비교 미리보기 (기능 추가 / DRAFT / RELEASE HOLD) — 이슈 #1629, Draft PR TBD
+
+**회차·정본:** 이전 기능 보완 v1390 → 현재 기능 추가 v1392 → 다음 기능 보완 v1394(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; main AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md 및 한국어 대조본 확인. 미병합 v1390 Draft #1624 기반 문서 전용 후속 PR이며 단독 병합 금지. Gemini·개발 A/B/C·QA와 변경 분리, 런타임·DB·WLD·원장·기능 스위치·Test·운영 변경 없음.
+
+### 확인 근거 및 범위
+- 실제 `frontend/src/app/shop/catalog/page.tsx`는 회원 상점·보유 아이템을 별도 조회하고 WLD 가격·주간 관리비·구매 CTA를 표시하지만 **2~3개 아이템 나란히 비교 UI는 없다**. `backend/src/shop/shop.controller.ts`에는 회원 `GET /shop/catalog`, `GET /shop/holdings`, 구매 API가 있으나 비교 API는 없다. `backend/src/shop/shop.repository.ts:231-255`의 `shop_catalog_list_v2(actor)`는 회원별 할인 적용 `price`, `maintenance_cost`, `quantity`, `sale_ends_at`, `user_owned_quantity`를 반환한다. Migration 165의 `shop_effective_unit_price(actor,catalog)`는 서울 날짜 기준 이벤트 수령 회원의 일부 상품에 할인을 적용한다. 이는 **새 기획이지 기존 운영 장애의 증거가 아니다**.
+- 목록 SQL의 `clock_timestamp()` 시간 조건과 할인·재고는 구매 시점까지 보장되지 않는다. `quantity=NULL`은 재고 상한 미설정이지 무제한 재고 보증이 아니다. 캐시된 공개 가격·사용자 입력 금액·별도 지갑 조회값으로 확정 견적을 만들지 않는다.
+- **목적:** 회원이 현재 보이는 상점 아이템 **서로 다른 2~3개**를 나란히 놓고 가상 WLD 구매가와 주간 관리비를 비교한다. 정보성 계산일 뿐 결제·금융 자문·재고 예약·장바구니·찜 목록·자동 청구가 아니다. 구매·원장·잔액·알림·영구 비교 저장은 전혀 발생하지 않는다.
+- **대상·진입·CTA:** 활성 회원·유효 세션·동의 필요. `/shop/catalog` 카드에서 키보드로 **비교 선택/해제**, 2~3개 선택 시 **비교하기(2~3)** 버튼, 패널에서 **제거·다시 계산·상점에서 보기·모두 지우기**. 기존 구매 버튼은 유일한 구매 경로이며 비교 API에서 호출하지 않는다. 선택 상태는 현재 브라우저 컴포넌트 메모리에서만 유지하고 로그아웃·페이지 이동 시 삭제, URL/localStorage에 저장하지 않는다.
+- **화면 상태:** 0개(2개 선택 안내), 1개(비교 버튼 비활성), 2~3개(가능), 4번째 선택(3개 상한 안내), 로딩(aria-busy), 성공(서버 관측 시각·비확정 안내), 품절·숨김(가격 추측 금지), 할인 종료·새로고침 필요, 400 잘못된 요청, 401 로그인, 403 동의, 404 상품 없음, 429 제한, 503 근거 조회 불가. 사라진 상품은 일반적인 이용 불가 카드와 제거 CTA만 표시하고 다른 상품으로 대체하지 않는다.
+- **API 명세(제안):** `POST /api/v1/shop/compare-preview`, 요청 `{catalogIds:[UUID,UUID,(UUID)],horizonWeeks:0|1|4}`. 세션·인증·동의·CSRF 검증, 서로 다른 UUID 2~3개, 8KiB 요청 제한, 회원/IP별 속도 제한. actor/가격 입력 금지. 응답 `200 {observedAt,horizonWeeks,estimateOnly:true,items:[{catalogId,name,category,unitPriceWld,weeklyUpkeepWld,illustrativeTotalWld,quantity,availability,saleEndsAt}],warningCode,sourceStatus}`. WLD는 **정수 10진 문자열**, BigInt/SQL bigint로 계산하고 범위 초과 차단. 관리비 대상 내구 아이템에만 `예시 합계=현재 단가+주간 관리비×선택 주수`; 대상 아닌 상품은 관리비 0. 과거 미납금·향후 할인·보유 수량·은행 이자·구매 한도·미래 재고는 포함하지 않는다. `observedAt`은 조회 시각이지 구매 확정 가격이나 커밋 순서 증거가 아니다. 오류 응답은 타인 보유 정보 노출 금지.
+- **DB·제약·인덱스:** 일시적 비교이므로 **신규 영구 테이블·마이그레이션 불필요**. 인증된 회원 ID로 `shop_catalog_list_v2`를 **하나의 제한된 SQL 문장**에서 조회하고 요청 UUID만 선별, 중복·누락·판매 중지·모순된 재고는 실패 처리한다. 목록·보유를 독립 `Promise.all`로 결합하지 않는다. 기존 catalog UUID PK, inventory FK, user_items `(user_id,catalog_id)` 접근 경로와 실제 인덱스를 격리 PostgreSQL에서 확인하며 `EXPLAIN (ANALYZE, BUFFERS)`로 필요성이 증명되지 않으면 새 인덱스를 추가하지 않는다. 기존 적용 SQL 수정·앱 계정 직접 DML 권한 확대 금지. 기존 함수의 actor 권한 경계나 시간 경계가 불충분하면 API는 차단하고 개발팀이 전진형 최소권한 함수를 별도 검증 후 도입한다.
+- **트랜잭션·동시성:** 읽기 전용 단일 SQL 문장 MVCC 스냅샷, 락·차감·Outbox·쓰기 트랜잭션·멱등 영수증·영구 상태 없음. 시간·재고·할인 변경에 따라 재조회 결과가 달라질 수 있음을 안내. 실제 구매는 별도 기존 DB 거래에서 가격·재고를 다시 확인한다. 사용자 UUID는 세션에서만 추출, 회원별 응답 캐시 금지, `Cache-Control: private, no-store`.
+- **관리자·보안·악용 방지:** 관리자는 비교 요청·오류·상점 이동 **집계**만 열람하며 회원별 상품 선택·잔액은 보지 못한다. UUID·개수·크기·CSRF·세션·동의·속도 제한·계정 전환 시 결과 무효화·개인정보 없는 로그. `shop_effective_unit_price(p_actor,...)`의 다른 회원 할인 추측 경로를 신규 API로 열지 않는다. QA v1331의 개발 DB 241개 중 235개 테이블 앱 DML, 적용 마이그레이션 체크섬 5개 불일치, 루트 test/lint/audit FAIL은 **P0 선행 해결**이다.
+- **SEO·모바일·접근성:** 회원 전용 비교 패널 `noindex,nofollow`, 사이트맵·공개 정적 캐시 제외. Android는 `/app-api/v1/shop/compare-preview` BFF로 동일 세션·동의·CSRF·응답을 사용하며 비밀키 내장 금지. WCAG 2.2 AA: 최소 44px 터치, 보이는 포커스, 다이얼로그 포커스 관리/복귀, ESC 닫기, 키보드 토글, 비교표 제목·행/열 머리글, 스크린리더 결과 알림, 모션 감소. 한국어 우선·영문 오류 동등성.
+- **분석·KPI:** `compare_open`, `compare_refresh`, `compare_to_catalog`, 조회 실패·검증 오류의 비식별 집계. 이벤트에 상품 ID·잔액·회원 ID 금지. 비교→상점 이동률, p95 조회 지연, 오류율, 무권한 노출 0건·금융 쓰기 0건. 보존기간·샘플링 개인정보 검토 필요; 근거 없는 전환 효과 주장 금지.
+- **테스트·회귀·배포:** 합성 카탈로그 10,001건(실제 요청은 2~3개 제한), 재고·가격 변경 중 동시 조회 100건, 위조 actor/세션/CSRF 100건, UUID 중복·상품 누락·세일 만료·NULL 재고·bigint 경계·0/1/4주·계정 전환·로그아웃·Android 동등성·320/390/768 화면·키보드/스크린리더. **모두 미실행 명세**. 격리 PostgreSQL 권한·쿼리 플랜·기존 구매/원장 회귀, 공식 Test exact-SHA, 독립 백업 복원 후 기능 기본 OFF→Test→운영. 롤백은 비교 UI/API만 비활성화, 금융 상태 복구 필요 없음.
+
+### 개발 백로그
+| 우선순위 | ID | 완료 기준 |
+|---|---|---|
+| P0 | ENV1392-01 | Test·운영 배포 대상 경로 복구, 백업 동일성 및 독립 복원 검증. |
+| P0 | SEC1392-02 | 개발 DB 과도한 앱 DML·마이그레이션 체크섬 5건 해소, 적용 SQL 수정 금지, catalog 함수 권한·원장 보호. |
+| P0 | REL1392-03 | QA v1331 루트 test/lint/audit 및 공식 Test 정확 SHA·보안·Android·구매/원장 회귀 통과 전 배포 HOLD. |
+| P0 | SHOP1392-04 | 허위 가격·재고, 타인 할인·보유 노출, 캐시 혼합 및 비교에서 구매 발생 방지. |
+| P1 | SHOP1392-05 | 기존 카탈로그·재고·보유 PK/FK/인덱스 검증, 단일 문장 읽기 모델, 불필요한 스키마 변경 금지. |
+| P1 | SHOP1392-06 | 정수 문자열 계산·0/1/4주·판매 시간 경계·동시 업데이트의 읽기 전용 계산. |
+| P1 | SHOP1392-07 | NestJS 인증 비교 API와 Next.js·Android BFF 동등성, 상태 코드·no-store·속도 제한. |
+| P1 | SHOP1392-08 | 회원 비교 선택·패널·재조회·오류·상점에서 보기·WCAG 2.2 AA, 구매 CTA와 분리. |
+| P1 | SHOP1392-09 | 집계 전용 관리자 분석, 비식별 KPI, SEO 차단, 번역·악용 방지. |
+| P1 | SHOP1392-10 | 격리 PG 합성 10,001/동시 100/위조 100, 구매·원장 회귀, Test exact-SHA·복원·OFF 롤백. |
+
+**외부 독립 근거 게이트:** 신규 최종 승인 **0건**, 누적 중복 제거·승인 **UNKNOWN / 10,000건**. **BLOCKED / IN PROGRESS** 유지, 달성 주장 금지. **DRAFT / RELEASE HOLD**, 구현은 별도 개발 브랜치·공식 검증 후에만. 기획 예약은 배포하지 않는다.
+
+
 ## v1390 / F675-153 — 현금 지갑 알림의 원천 증명·순서 보장·안전한 복구 (기능 보완 / DRAFT / RELEASE HOLD) — 이슈 #1619, Draft PR #1624
 
 **회차·정본.** 이전 기능 추가 v1388 → 현재 기능 보완 v1390 → 다음 기능 추가 v1392(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c. main AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md와 한국어 대조본 확인. 미병합 v1388 Draft #1620을 기반으로 하는 문서 전용 후속 PR이며 단독 병합 금지. Gemini·개발 A/B/C·QA 작업과 분리하고 런타임·DB·잔액·원장·기능 스위치·Test·운영은 변경하지 않는다.

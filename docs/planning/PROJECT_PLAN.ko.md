@@ -1,3 +1,9 @@
+## 2026-10-28 v1392 — F675-154 상점 아이템 비용 비교 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
+- 이전 보완 v1390 → 현재 추가 v1392 → 다음 보완 v1394(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; AGENTS/README/영문 정본 계획·국문 대조 확인. 미병합 v1390 PR #1624 기반 문서 Draft, 단독 병합·런타임/DB/WLD/원장/Test/운영 변경 금지.
+- 실제 회원 상점은 목록·보유를 따로 표시하고 비교 기능이 없다. NestJS 목록은 `shop_catalog_list_v2(actor)`, Migration 165는 회원 이벤트 할인 적용. 2~3개·0/1/4주 관리비 비교는 비확정 예시로 구매·잔액 조회·예약 아님. 인증/동의/CSRF POST compare-preview, 단일 SQL 읽기·WLD bigint 정수 문자열·영구 테이블 없음·세션 actor. noindex/no-store·Android BFF·WCAG 2.2 AA·관리자 비식별 집계/KPI·롤백 상세는 통합 마스터 EN/KO.
+- P0 ENV1392-01 SEC1392-02 REL1392-03 SHOP1392-04; P1 SHOP1392-05 SHOP1392-06 SHOP1392-07 SHOP1392-08 SHOP1392-09 SHOP1392-10. QA v1331 루트 test/lint/audit FAIL, 개발 DB 235/241 앱 DML, 적용 체크섬 5건 불일치, 공식 Test 정확 SHA·독립 복원 미검증. 합성 10,001/동시 100/위조 100 **미실행**. 외부 신규 승인 0, 누적 중복 제거·승인 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 기능 OFF·운영승격 HOLD.
+
+
 ## 2026-10-28 v1390 — F675-153 현금 알림 원천 증명·관측 순서 (기능 보완 / DRAFT / RELEASE HOLD)
 - 이전 추가 v1388 → 현재 보완 v1390 → 다음 추가 v1392(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c, main AGENTS/README/영문 정본 기획/국문 대조 확인. Draft PR #1624는 미병합 #1620 후속, 이슈 #1619, 독립 병합·런타임/DB/금융/Test/운영 변경 금지.
 - 실제 지갑 개요는 잔액·최근 원장을 Promise.all의 별도 쿼리로 읽으므로 원자적 대사 완료 커밋 관측이 아니다. updated_at/created_at은 커밋 순서 증명 불가. 개발 DB 앱 계정의 account_balances UPDATE TRUE, QA #1507 원장 전표 없는 시즌 현금 갱신 위험(과거 손실 확인 아님). 총 현금+은행·캐시·시각·해시를 원천으로 신뢰하지 않고 금융 담당자가 보증한 USER_CASH 단조 커밋 버전·회원별 대사 영수증·공백 보류·새 기준값·해제 세대 차단을 요구한다. 화면/CTA/상태/API/DB·인덱스/트랜잭션/관리자/보안/SEO/Android·접근성/KPI/회귀/롤백 상세는 국영문 통합 마스터.
