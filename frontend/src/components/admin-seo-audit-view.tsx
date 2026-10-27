@@ -6,51 +6,31 @@ import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-type Telemetry = {
-  totalHits24h: number;
-  totalHits7d: number;
-  avgDurationMs: number;
-  botDistribution: Record<string, number>;
-  recentLogs: unknown[];
-};
-
-type Audit = {
-  timestamp: string;
-  candidateUrlCount: number;
-  telemetry: Telemetry | null;
-  telemetryStatus: 'observed' | 'unavailable';
-  indexingStatus: 'not_measured';
-  schemaValidationStatus: 'not_measured';
-};
-
-type Submission = {
-  ok: boolean;
-  submittedCount?: number;
-  status?: number;
-  indexingConfirmed?: boolean;
-};
+import { parseIndexNowReceipt, parseSeoAuditSnapshot, type SeoAuditSnapshot } from '@/lib/admin-seo-audit-evidence';
 
 const formatNumber = (value: number | undefined) =>
   value === undefined || !Number.isFinite(value) ? '확인 불가' : value.toLocaleString('ko-KR');
 
 export function AdminSeoAuditView() {
-  const [audit, setAudit] = useState<Audit | null>(null);
+  const [audit, setAudit] = useState<SeoAuditSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [submission, setSubmission] = useState<Submission | null>(null);
+  const [submission, setSubmission] = useState<ReturnType<typeof parseIndexNowReceipt>>(null);
 
   const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setError(null);
+    setAudit(null);
+    setSubmission(null);
     try {
       const response = await fetch('/api/admin/seo-audit', {
         credentials: 'same-origin', cache: 'no-store', ...(signal ? { signal } : {}),
       });
       if (!response.ok) throw new Error(response.status === 401 || response.status === 403
         ? '관리자 콘솔 인증이 필요합니다.' : '수집 감사 정보를 가져오지 못했습니다.');
-      const data = (await response.json()) as Audit;
+      const data = parseSeoAuditSnapshot(await response.json());
+      if (!data) throw new Error('수집 감사 응답을 검증할 수 없습니다.');
       if (!signal?.aborted) setAudit(data);
     } catch (cause) {
       if (!signal?.aborted) {
@@ -76,8 +56,8 @@ export function AdminSeoAuditView() {
       const response = await fetch('/api/admin/seo-audit', {
         method: 'POST', credentials: 'same-origin', cache: 'no-store',
       });
-      const result = (await response.json()) as Submission;
-      if (!response.ok || !result.ok) throw new Error('IndexNow 요청이 승인되지 않았습니다.');
+      const result = parseIndexNowReceipt(await response.json());
+      if (!response.ok || !result) throw new Error('IndexNow 접수 결과를 검증할 수 없습니다.');
       setSubmission(result);
       toast.success(`${formatNumber(result.submittedCount)}개 URL의 IndexNow 요청이 접수되었습니다. 색인 완료는 별도 확인이 필요합니다.`);
     } catch (cause) {
@@ -104,13 +84,13 @@ export function AdminSeoAuditView() {
           <h1 className="text-2xl font-bold">검색엔진 수집 감사</h1>
           <p className="max-w-2xl text-sm text-muted-foreground">수집 로그는 서버 관측치입니다. 실제 검색 색인과 구조화 데이터 유효성은 별도 검증이 필요합니다.</p>
         </div>
-        <Button type="button" onClick={() => void submit()} disabled={submitting || loading || !audit} className="min-h-11 max-w-full whitespace-normal text-left">
+        <Button type="button" onClick={() => void submit()} disabled={submitting || loading || !audit || audit.candidateUrlCount === 0} className="min-h-11 max-w-full whitespace-normal text-left">
           <RefreshCw aria-hidden="true" className={submitting ? 'mr-2 size-4 animate-spin' : 'mr-2 size-4'} />
           {submitting ? 'IndexNow 전송 중' : 'IndexNow URL 제출'}
         </Button>
       </div>
       <div role="status" aria-live="polite" className="text-sm text-muted-foreground">
-        {loading ? '감사 정보 불러오는 중…' : error ?? (audit ? `관측 기준: ${new Date(audit.timestamp).toLocaleString('ko-KR')}` : '정보 없음')}
+        {loading ? '감사 정보 불러오는 중…' : error ?? (audit ? `응답 시각: ${new Date(audit.timestamp).toLocaleString('ko-KR')} (개별 크롤러 측정 시각 아님)` : '정보 없음')}
       </div>
       {error && <Button type="button" variant="outline" onClick={() => void load()} className="min-h-11">다시 시도</Button>}
       {audit && <>

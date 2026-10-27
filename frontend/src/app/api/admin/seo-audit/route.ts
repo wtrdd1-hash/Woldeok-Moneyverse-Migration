@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ApiError, api } from '@/lib/api';
 import { getAllPublicUrlsForIndexNow, submitToIndexNow } from '@/lib/indexnow';
+import { parseIndexNowReceipt, parseSeoTelemetry } from '@/lib/admin-seo-audit-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,8 +23,8 @@ async function authorize(): Promise<NextResponse | null> {
 export async function GET() {
   const denied = await authorize();
   if (denied) return denied;
-  let telemetry: unknown = null;
-  try { telemetry = await api('/api/v1/seo/status'); } catch { /* unknown, not healthy */ }
+  let telemetry = null;
+  try { telemetry = parseSeoTelemetry(await api('/api/v1/seo/status')); } catch { /* unknown, not healthy */ }
   return reply({
     timestamp: new Date().toISOString(),
     candidateUrlCount: getAllPublicUrlsForIndexNow().length,
@@ -50,10 +51,11 @@ export async function POST(request: Request) {
       upstreamStatus: result.status,
       indexingConfirmed: false,
     }, 502);
-    return reply({
-      ok: true, submittedCount: result.submittedCount, status: result.status,
-      indexingConfirmed: false, timestamp: new Date().toISOString(),
-    }, result.status === 202 ? 202 : 200);
+    const receipt = parseIndexNowReceipt({
+      ok: true, submittedCount: result.submittedCount, status: result.status, indexingConfirmed: false,
+    });
+    if (!receipt) return reply({ ok: false, error: 'invalid_indexnow_receipt', indexingConfirmed: false }, 502);
+    return reply({ ...receipt, timestamp: new Date().toISOString() }, receipt.status);
   } catch {
     return reply({ ok: false, error: 'indexnow_unavailable', indexingConfirmed: false }, 502);
   }
