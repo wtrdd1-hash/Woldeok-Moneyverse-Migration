@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { updateShopItem } from './actions';
 import { Save, Search, CheckCircle, XCircle, ShoppingBag, Package, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { groupDigits } from '@/lib/money';
@@ -25,7 +28,11 @@ interface AdminShopViewProps {
 }
 
 export function AdminShopView({ items }: AdminShopViewProps) {
+  const router = useRouter();
   const [localItems, setLocalItems] = useState(items);
+  useEffect(() => setLocalItems(items), [items]);
+  const [saving, setSaving] = useState(false);
+  const [needsReauth, setNeedsReauth] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState<string>('');
@@ -48,40 +55,34 @@ export function AdminShopView({ items }: AdminShopViewProps) {
   };
 
   const handleSave = async (id: string) => {
-    setStatusMsg('저장 중...');
+    if (saving) return;
+    setSaving(true);
+    setNeedsReauth(false);
+    setStatusMsg('서버에서 변경을 확인하는 중...');
     try {
-      const res = await fetch(`/api/v1/admin/shop/items/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          base_price: editPrice,
-          active: editActive,
-          current_stock: editStock ? Number(editStock) : null,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('저장에 실패했습니다.');
+      const stockText = editStock.trim();
+      if (stockText && (!/^(0|[1-9]\d*)$/.test(stockText) || Number(stockText) > 2147483647)) {
+        setStatusMsg('재고는 0 이상 2,147,483,647 이하 정수 또는 빈칸으로 입력해 주세요.');
+        return;
       }
-
-      setLocalItems((prev) =>
-        prev.map((it) =>
-          it.id === id
-            ? {
-                ...it,
-                base_price: editPrice,
-                active: editActive,
-                current_stock: editStock ? Number(editStock) : null,
-              }
-            : it,
-        ),
-      );
+      const result = await updateShopItem({
+        id, basePrice: editPrice.trim(), active: editActive,
+        currentStock: stockText ? Number(stockText) : null,
+      });
+      if (result.status !== 'ok' || !result.item) {
+        setStatusMsg(result.message ?? '서버에서 변경을 확인하지 못했습니다.');
+        setNeedsReauth(result.errorCode === 'reauthentication_required');
+        return;
+      }
+      const verifiedItem = result.item;
+      setLocalItems((previous) => previous.map((item) => item.id === id ? verifiedItem : item));
       setEditingId(null);
-      setStatusMsg('성공적으로 저장되었습니다.');
-      setTimeout(() => setStatusMsg(null), 3000);
-    } catch (error: unknown) {
-      setStatusMsg(error instanceof Error ? error.message : '오류가 발생했습니다.');
-      setTimeout(() => setStatusMsg(null), 3000);
+      setStatusMsg(result.message ?? '서버 변경이 확인됐습니다.');
+      router.refresh();
+    } catch {
+      setStatusMsg('상품 변경을 확인하지 못했습니다. 다시 조회해 주세요.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -96,16 +97,22 @@ export function AdminShopView({ items }: AdminShopViewProps) {
             placeholder="아이템명, 코드, 카테고리 검색..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-card border border-border/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="상품 이름, 코드 또는 카테고리로 검색"
+            className="min-h-11 w-full pl-9 pr-4 py-2 bg-card border border-border/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
         {statusMsg && (
-          <div className="text-xs font-bold text-primary animate-fade-in px-3 py-1.5 bg-primary/10 rounded-lg shrink-0">
+          <div role="status" aria-live="polite" className="text-xs font-bold text-primary px-3 py-1.5 bg-primary/10 rounded-lg shrink-0">
             {statusMsg}
           </div>
         )}
       </div>
 
+      {needsReauth && (
+        <div role="note" className="rounded-lg border border-amber-500/50 p-3 text-sm">
+          최근 본인 확인이 필요합니다. <Link href="/account/security" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center underline underline-offset-4">계정 보안에서 본인 확인 (새 탭)</Link>
+        </div>
+      )}
       {/* 1. 모바일 뷰: 스택형 카드 뷰 (md:hidden) */}
       <div className="grid gap-3 md:hidden">
         {filtered.map((item) => {
@@ -176,9 +183,10 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                   {isEditing ? (
                     <input
                       type="text"
+                      aria-label={`${item.name} 가격 WLD`}
                       value={editPrice}
                       onChange={(e) => setEditPrice(e.target.value)}
-                      className="w-full px-2.5 py-1.5 bg-surface border border-border/80 rounded-lg text-xs font-mono font-bold"
+                      className="min-h-11 w-full px-2.5 py-1.5 bg-surface border border-border/80 rounded-lg text-xs font-mono font-bold"
                     />
                   ) : (
                     <span className="font-mono font-bold text-foreground text-sm">
@@ -192,10 +200,11 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                   {isEditing ? (
                     <input
                       type="number"
+                      aria-label={`${item.name} 재고 수량`}
                       value={editStock}
                       onChange={(e) => setEditStock(e.target.value)}
                       placeholder="무제한"
-                      className="w-full px-2.5 py-1.5 bg-surface border border-border/80 rounded-lg text-xs font-mono"
+                      className="min-h-11 w-full px-2.5 py-1.5 bg-surface border border-border/80 rounded-lg text-xs font-mono"
                     />
                   ) : (
                     <span className="font-mono font-medium text-foreground text-xs">
@@ -214,12 +223,14 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                 {isEditing ? (
                   <div className="flex items-center gap-2">
                     <button
+                      disabled={saving}
                       onClick={() => handleSave(item.id)}
                       className="flex-1 flex items-center justify-center gap-1.5 h-10 min-h-[44px] rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-sm active:scale-[0.98] transition-transform"
                     >
                       <Save className="size-4" /> 저장 완료
                     </button>
                     <button
+                      disabled={saving}
                       onClick={() => setEditingId(null)}
                       className="px-4 h-10 min-h-[44px] rounded-xl border border-border/80 text-muted-foreground text-xs font-bold hover:text-foreground active:scale-[0.98] transition-transform"
                     >
@@ -281,9 +292,10 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                       {isEditing ? (
                         <input
                           type="text"
+                          aria-label={`${item.name} 가격 WLD`}
                           value={editPrice}
                           onChange={(e) => setEditPrice(e.target.value)}
-                          className="w-24 px-2 py-1 bg-surface border border-border/80 rounded text-xs font-mono font-bold"
+                          className="min-h-11 w-24 px-2 py-1 bg-surface border border-border/80 rounded text-xs font-mono font-bold"
                         />
                       ) : (
                         <span>{groupDigits(item.base_price)} WLD</span>
@@ -293,10 +305,11 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                       {isEditing ? (
                         <input
                           type="number"
+                          aria-label={`${item.name} 재고 수량`}
                           value={editStock}
                           onChange={(e) => setEditStock(e.target.value)}
                           placeholder="무제한"
-                          className="w-20 px-2 py-1 bg-surface border border-border/80 rounded text-xs font-mono"
+                          className="min-h-11 w-20 px-2 py-1 bg-surface border border-border/80 rounded text-xs font-mono"
                         />
                       ) : (
                         <span>
@@ -340,23 +353,27 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                       {isEditing ? (
                         <div className="flex items-center justify-end gap-1.5">
                           <button
+                            disabled={saving}
                             onClick={() => handleSave(item.id)}
-                            className="p-1.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold"
+                            aria-label={`${item.name} 변경 저장`}
+                            className="min-h-11 min-w-11 p-1.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold"
                             title="저장"
                           >
                             <Save className="size-3.5" />
                           </button>
                           <button
+                            disabled={saving}
                             onClick={() => setEditingId(null)}
-                            className="p-1.5 rounded-lg border border-border/50 text-muted-foreground text-xs"
+                            className="min-h-11 p-1.5 rounded-lg border border-border/50 text-muted-foreground text-xs"
                           >
                             취소
                           </button>
                         </div>
                       ) : (
                         <button
+                          disabled={saving}
                           onClick={() => startEdit(item)}
-                          className="px-2.5 py-1 rounded-lg border border-border/50 text-[11px] font-bold text-muted-foreground hover:text-foreground hover:bg-surface transition-colors"
+                          className="min-h-11 px-2.5 py-1 rounded-lg border border-border/50 text-[11px] font-bold text-muted-foreground hover:text-foreground hover:bg-surface transition-colors"
                         >
                           수정
                         </button>
