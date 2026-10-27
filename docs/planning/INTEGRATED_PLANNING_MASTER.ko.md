@@ -1,3 +1,33 @@
+## v1400 / F675-156 — 검증된 활성 NPC 주문 목록 (기능 추가 / DRAFT / RELEASE HOLD) — 이슈 #1650
+
+**주기:** 이전 기능 보완 v1398 → 현재 기능 추가 v1400 → 다음 기능 보완 v1402(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조본 확인. 미병합 기획 Draft #1645 위에 쌓는 문서 전용 변경이며 Gemini/A/B/C/QA 코드·WLD·원장·DB·스위치·Test·운영 변경 없음.
+
+### 실제 코드 근거와 회원 흐름
+- `frontend/src/app/quests/quests.ts`는 NPC 코드 두 개를 하드코딩하고 `/quests`에서 항상 주문 버튼을 노출한다. Migration 081은 `npc_profiles` 직접 접근을 철회했고 082는 주문 시에만 `active`를 확인한다. NestJS 컨트롤러도 NPC 목록 API 부재를 명시한다. **구현·데이터 출처 불일치**이며 실제 운영 장애로 확정하지 않는다.
+- 대상: 로그인·동의 회원. 진입 `/quests` NPC 주문 영역. CTA **주문 받기·다시 시도·더 보기**. 로딩/활성 목록/빈 목록/출처 장애/세션 만료/조회 후 비활성화/주문 성공·실패 상태. 오류 시 정적 NPC를 가짜 정상 목록으로 표시하지 않는다. MVP에서 WLD·원장·친밀도 내역·관리자 활성화 기능 변경 금지.
+- API `GET /api/v1/engagement/npcs?after=<code>&limit=<1..50>`(기본 20), Android `GET /app-api/v1/engagement/npcs` 동등. 200 `{items:[{code,name,role}],nextCursor,observedAt,nonbinding:true}`; after 정규식 `^[a-z0-9_]{3,64}$`, 커서 최대 64바이트. 400 입력 오류, 401 미인증, 403 동의·권한, 429 호출 제한, 503 출처 장애. 서버 세션으로만 인증, 클라이언트 actor UUID 금지. GET CSRF 불필요, 기존 주문 POST는 CSRF·멱등성 유지. 성공·오류 전체 private/no-store, 계정 전환 시 늦은 응답 폐기.
+- DB: 전진형 `SECURITY DEFINER` 읽기 함수, `SET search_path = pg_catalog, pg_temp`, `WHERE active`, 코드 정렬·키셋 페이지네이션 `limit+1`, `code,name,card->>'role'`만 허용하고 JSON 형식·길이 검증. 사용자/관계/친밀도 필드 반환 금지. PUBLIC EXECUTE 철회, `moneyverse_app` EXECUTE만 허용, NPC 테이블 직접 GRANT 금지. 기존 UNIQUE(code) 인덱스를 10,001건 EXPLAIN으로 확인 후 필요할 때만 부분 인덱스. 읽기 트랜잭션의 DB·원장·Outbox 쓰기 0건. 기존 082 주문 함수는 `active`를 먼저 조회하지만 NPC 행 잠금이 없어 비활성화 경합이 가능하다. B가 행 잠금·원자적 재검증과 잠금 순서를 추가하여 비활성화 확정 뒤 주문은 거부하고 보상 0건을 증명해야 한다. 현재 경합 안전성 보장 주장 금지.
+- UI·관리·SEO: 한국어/영어 동등, 로딩·빈 목록·오류·재시도·더 보기, 키보드 포커스·`aria-live`, WCAG 2.2 AA, 320/390/768px·200% 확대. 번역 코드가 활성 목록의 진실 기준이 되어서는 안 된다. 회원 화면 noindex·사이트맵 제외, 공개 메타는 일반 설명만. 관리자는 별도 권한으로 비식별 집계만 확인, 신규 활성화 조작 없음, k<20 억제. KPI는 목록 성공률·p95·오류율·비활성 주문 거부율·CTA 전환율, 회원 ID/친밀도 로그 금지.
+- 수용시험 **명세만 작성·미실행**: 격리 PostgreSQL 17.11 합성 NPC 10,001건, 동시 조회·비활성화 100건, 위조·미인증 100건, PUBLIC/앱 직접 권한 차단, 페이지 누락 없음, 오류 no-store, Android·기존 주문 멱등성 회귀. 기능 기본 OFF, 개발 별도 브랜치·CI·공식 Test exact-SHA·금융/인증/API/DB/Android QA·승인된 GitOps 운영승격. 롤백은 UI/API 스위치만 OFF, 적용 마이그레이션 역수정·영수증 변경 금지.
+
+### P0/P1 개발 백로그
+| 우선순위 | ID | 담당·수용 조건 |
+|---|---|---|
+| P0 | ENV1400-01 | Ops/QA: Test·운영 불변 릴리스 포인터, 백업 cron 및 독립 복원 증명 |
+| P0 | SEC1400-02 | B/QA: 앱 DML 235/241, PUBLIC 은행 함수 3개, 체크섬 불일치 5건, 마이그레이션·actor 위조 #993 |
+| P0 | REL1400-03 | QA: main lint/test/보안/PG, 공식 Test exact-SHA, GitOps 승인 전 운영 보류 |
+| P0 | NPC1400-04 | A/B: 비활성·가짜 NPC 버튼, 타인 정보, 이전 세션 응답, 비활성 주문 보상 방지 |
+| P1 | NPC1400-05 | B: 전진형 범위 제한 SECDEF, 권한 철회/부여, 인덱스·EXPLAIN |
+| P1 | NPC1400-06 | B: 결정적 키셋·카드 필드 검증·쓰기 0·비활성화 경합 |
+| P1 | NPC1400-07 | A: NestJS/Android GET·인증/동의·429·전체 오류 no-store |
+| P1 | NPC1400-08 | A/C: /quests UI·한영·모바일/a11y·빈 목록/오류 |
+| P1 | NPC1400-09 | C/QA: 관리자 비식별 집계·SEO/noindex·KPI·k<20 |
+| P1 | NPC1400-10 | QA: 격리 PG 10,001·경합 100·위조 100·Android·회귀·롤백 |
+
+### QA·외부 근거 게이트
+- QA #1646 v1335는 **미병합 후보** 정확 SHA CI 및 격리 PG 285 마이그레이션 PASS, 현재 main lint·마이그레이션 parity FAIL. 공식 Test 포인터·운영 대상 누락, 개발 DB 광범위 권한·체크섬 5건, 독립 백업 복원 미검증. **PARTIAL / DRAFT / RELEASE HOLD**.
+- 신규 승인 외부 독립 근거 **0건**, 누적 중복 제거·검증 승인 **UNKNOWN / 10,000건**. **BLOCKED / IN PROGRESS**. 달성 주장 금지. 이슈 #1650, 작업일지 `docs/worklog/2026-10-28-planning-v1400-live-npc-directory.md`.
+
 ## v1398 / F675-155 — 대출 상환 미리보기 구현 후보 계약·출처 검증 보완 (기능 보완 / DRAFT / RELEASE HOLD) — 이슈 #1639
 
 **주기:** 이전 기능 추가 v1396 → 현재 기능 보완 v1398 → 다음 기능 추가 v1400(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c 확인, main AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조본 확인. 미병합 기획 Draft #1640 위에 쌓는 문서 전용 작업으로 개발 A/B/C/QA/Gemini 코드·WLD·원장·DB·기능 스위치·Test·운영 변경 없음.

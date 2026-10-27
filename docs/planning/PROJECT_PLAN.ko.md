@@ -1,3 +1,8 @@
+## 2026-10-28 — 기획 v1400 / F675-156 (기능 추가 / DRAFT / RELEASE HOLD)
+- 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` 확인. 이전 기능 보완 v1398 → 현재 기능 추가 v1400 → 다음 기능 보완 v1402(잠정). **이슈 #1650.**
+- `/quests`의 정적 NPC 버튼은 DB `npc_profiles.active`와 불일치 가능. 인증 회원용 읽기 전용 GET `/api/v1/engagement/npcs`·Android 동등 API, 범위 제한 SECDEF 함수·코드 키셋·안전한 카드 필드·직접 테이블 권한 금지·금융 쓰기 0건을 설계. 기존 주문 POST는 `active` 조회에 NPC 행 잠금이 없으므로 B가 비활성화 경합을 보완한 뒤 최종 거부를 보장해야 한다.
+- P0: ENV1400-01, SEC1400-02, REL1400-03, NPC1400-04. P1: NPC1400-05, NPC1400-06, NPC1400-07, NPC1400-08, NPC1400-09, NPC1400-10. QA #1646 후보 CI PASS, main lint/parity FAIL, 공식 Test·독립 복원 미검증. 합성 10,001/100/100 **미실행**. 신규 외부 승인 0, 누적 중복 제거·승인 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 전체 명세: `docs/planning/INTEGRATED_PLANNING_MASTER.ko.md`. 코드/DB/원장/WLD/Test/운영 변경 없음.
+
 ## v1398 — F675-155 대출 상환 미리보기 후보 계약·출처 검증 보완 (기능 보완 / DRAFT / RELEASE HOLD)
 - 이전 추가 v1396 → 현재 보완 v1398 → 다음 추가 v1400(잠정). main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c 시작·중간 확인. A 미병합 #1641 SHA 153491e2eaf5c5bb39933d9e2a5634b49a45c44b는 신규 함수 대신 기존 bank_get_my_standing(actor) SECDEF 재사용. 조건부 수용: DB 앱 역할 actor 위조 #993, USER_CASH 행 누락 시 0 처리, API 시각 observedAt, 세션 세대 응답 차단 미검증. 실제 후보 필드는 cashBefore/cashAfter/debtBefore/debtAfter/adjustmentAmount/nonbinding:true로 v1396 제안과 다름.
 - P0/P1 백로그: ENV1398-01 SEC1398-02 REL1398-03 LOAN1398-04 LOAN1398-05 LOAN1398-06 LOAN1398-07 LOAN1398-08 LOAN1398-09 LOAN1398-10. QA v1334 main lint/test FAIL·typecheck/build PASS, 앱 DML 235/241·PUBLIC 은행 함수 3개·체크섬 5건, 기존 백업 cron 실패·독립 복원 미검증. QA #1635 미병합 후보 CI PASS는 main/공식 Test가 아님. 합성 10,001/100/100 미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 기능 OFF·운영 HOLD, 런타임/DB/WLD/원장 변경 없음. 화면/CTA/상태/API/DB/트랜잭션/관리자/개인정보/SEO/모바일/접근성/KPI/롤백은 한영 통합 마스터 참조.

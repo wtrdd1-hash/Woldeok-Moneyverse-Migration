@@ -1,3 +1,8 @@
+## 2026-10-28 — 기획 v1400 / F675-156 (기능 추가 / DRAFT / RELEASE HOLD)
+- 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` 확인. 이전 기능 보완 v1398 → 현재 기능 추가 v1400 → 다음 기능 보완 v1402(잠정). **이슈 #1650.**
+- `/quests`의 정적 NPC 버튼은 DB `npc_profiles.active`와 불일치 가능. 인증 회원용 읽기 전용 GET `/api/v1/engagement/npcs`·Android 동등 API, 범위 제한 SECDEF 함수·코드 키셋·안전한 카드 필드·직접 테이블 권한 금지·금융 쓰기 0건을 설계. 기존 주문 POST는 `active` 조회에 NPC 행 잠금이 없으므로 B가 비활성화 경합을 보완한 뒤 최종 거부를 보장해야 한다.
+- P0: ENV1400-01, SEC1400-02, REL1400-03, NPC1400-04. P1: NPC1400-05, NPC1400-06, NPC1400-07, NPC1400-08, NPC1400-09, NPC1400-10. QA #1646 후보 CI PASS, main lint/parity FAIL, 공식 Test·독립 복원 미검증. 합성 10,001/100/100 **미실행**. 신규 외부 승인 0, 누적 중복 제거·승인 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 전체 명세: `docs/planning/INTEGRATED_PLANNING_MASTER.ko.md`. 코드/DB/원장/WLD/Test/운영 변경 없음.
+
 ## v1398 통합 재검토 — F675-155 구현 후보/출처 계약 (DRAFT / HOLD)
 - 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c 동일, A 미병합 #1641 SHA 153491e2eaf5c5bb39933d9e2a5634b49a45c44b. 신규 SECDEF 제안과 기존 조회 함수 재사용 대조, 앱 역할 actor 위조·현금 행 누락 0 처리·API 시각 observedAt·세션 변경 뒤 응답 문제 보완. QA v1334 main lint/test FAIL, 기존 백업 cron 실패, 독립 복원 미검증. 백로그 ENV1398-01 SEC1398-02 REL1398-03 LOAN1398-04 LOAN1398-05 LOAN1398-06 LOAN1398-07 LOAN1398-08 LOAN1398-09 LOAN1398-10. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. OFF/HOLD.
 

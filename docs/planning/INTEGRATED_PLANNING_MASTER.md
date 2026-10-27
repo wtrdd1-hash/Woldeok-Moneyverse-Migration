@@ -1,3 +1,33 @@
+## v1400 / F675-156 — Verified Live NPC Order Directory (Feature Addition / DRAFT / RELEASE HOLD) — Issue #1650
+
+**Cycle:** Previous Feature Improvement v1398 → Current Feature Addition v1400 → Next Feature Improvement v1402 (provisional). Main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` rechecked at start/midpoint; canonical main AGENTS.md, README.md, PROJECT_PLAN.md and Korean counterpart checked. This documentation-only branch stacks on unmerged planning Draft #1645; no changes to Gemini/A/B/C/QA code, WLD, ledger, DB, flags, Test or Production.
+
+### Source-grounded gap and member flow
+- `frontend/src/app/quests/quests.ts` hardcodes two NPC codes; `/quests` always renders order buttons and its current metadata sets `robots.index=true` despite member gating, while migration 081 revokes `npc_profiles` and migration 082 validates `npc_profiles.active` only when recording an order. NestJS engagement controller explicitly notes the missing NPC directory. This is a verified UI/source-of-truth gap, **not a confirmed production incident**.
+- Target: authenticated, consented quest members. Entry `/quests` NPC section. CTA **Take order**, **Retry**, **Load more**. States loading, active list, no active NPC, source failure, invalid/expired session, stale availability after deactivation, successful order and retry. Never fabricate availability or use hardcoded NPC codes as source of existence. No financial writes, affinity history or admin activation in MVP.
+- API `GET /api/v1/engagement/npcs?after=<code>&limit=<1..50>` (default 20); Android `GET /app-api/v1/engagement/npcs` same contract. 200 `{items:[{code,name,role}],nextCursor,observedAt,nonbinding:true}`; after must match `^[a-z0-9_]{3,64}$`, keyset cursor bounded 64 bytes. 400 invalid, 401 no session, 403 no consent, 429 limited, 503 source unavailable. Session/consent guard, no client actor UUID; GET no CSRF, existing order POST retains CSRF/idempotency. All responses including errors private/no-store; session generation fences late replies.
+- DB: forward-only `SECURITY DEFINER` read function, `SET search_path = pg_catalog, pg_temp`, `WHERE active`, deterministic code-ordered keyset `limit+1`, bounded output, whitelist only `code,name,card->>'role'` after JSON type/length validation; no relationship/affinity/user fields. `REVOKE EXECUTE FROM PUBLIC`, `GRANT EXECUTE TO moneyverse_app`, **no direct NPC table grants**. Existing UNIQUE(code) index candidate; prove EXPLAIN/ANALYZE on 10,001 rows before any partial index. Read path has 0 DB/ledger/outbox writes. Migration 082 currently reads `active` without locking the NPC row; B must serialize deactivation/order or atomically recheck active at the write boundary, so a completed deactivation prevents progress and stale click visibly fails. Do not claim current code is race-safe.
+- UI/operations: KO/EN labels with authoritative API availability, skeleton/empty/error/expired/stale/Load more, keyboard focus, `aria-live`, WCAG 2.2 AA, 320/390/768px and 200% zoom. Private member route noindex/sitemap; only generic public metadata. Admin aggregates only, no activation control in MVP, k<20 suppression. Privacy-safe KPI: load success, p95, source failure, stale-order rejection, CTA conversion; no member IDs/affinity in analytics.
+- Tests **specified, not executed**: isolated PostgreSQL 17.11 10,001 synthetic NPC rows, 100 concurrent read/deactivation cases, 100 unauthorized/forged requests, no PUBLIC/app SELECT or write privilege expansion, keyset completeness, error/no-store parity, Android and quest/order idempotency regressions. Default OFF, separate implementation branches and exact-SHA CI→official Test→finance/auth/API/DB/Android QA→approved GitOps Production; rollback switch only, no reverse migration or receipt mutation.
+
+### P0/P1 engineering backlog
+| Priority | ID | Owner / acceptance |
+|---|---|---|
+| P0 | ENV1400-01 | Ops/QA: restore immutable Test/Production pointers, backup cron and independent restore proof |
+| P0 | SEC1400-02 | B/QA: app DML 235/241, 3 PUBLIC bank functions, five historical checksum mismatches, migration parity and actor spoof #993 |
+| P0 | REL1400-03 | QA: full main lint/test/security/PG, exact-SHA official Test, GitOps approval before production |
+| P0 | NPC1400-04 | A/B: prevent inactive/fabricated NPC CTA, unauthorized disclosure, stale-session reply and stale-order progress grant |
+| P1 | NPC1400-05 | B: forward-only bounded SECDEF reader, revoke/grant and index/EXPLAIN evidence |
+| P1 | NPC1400-06 | B: deterministic keyset snapshot, safe role projection, zero writes, deactivation race |
+| P1 | NPC1400-07 | A: NestJS/Android GET parity, auth/consent, rate limit, private/no-store errors |
+| P1 | NPC1400-08 | A/C: /quests UI, KO/EN, mobile/a11y and stale/empty/error states |
+| P1 | NPC1400-09 | C/QA: admin aggregate, SEO/noindex, privacy-safe KPI and k<20 suppression |
+| P1 | NPC1400-10 | QA: isolated PG 10,001, concurrency 100, forged 100, Android/regression/rollback |
+
+### Release and external-evidence gate
+- QA #1646 v1335: exact **candidate** CI PASS and isolated PG 285 migrations PASS, but main lint/parity FAIL; official Test pointer/Production release target missing, dev DB privilege exposure and five checksum mismatches remain; independent backup restore NOT VERIFIED. **PARTIAL / DRAFT / RELEASE HOLD**.
+- External independent references newly approved **0**, cumulative verified deduplicated **UNKNOWN / 10,000**; gate **BLOCKED / IN PROGRESS**. No claim of attainment. Issue #1650; worklog `docs/worklog/2026-10-28-planning-v1400-live-npc-directory.md`.
+
 ## v1398 / F675-155 — Bank Repayment Preview Candidate Contract and Source Hardening (Feature Improvement / DRAFT / RELEASE HOLD) — Issue #1639
 
 **Cycle:** Previous Feature Addition v1396 → Current Feature Improvement v1398 → Next Feature Addition v1400 (provisional). Main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c verified start/midpoint; main AGENTS.md, README.md, canonical PROJECT_PLAN.md and Korean counterpart checked. Documentation-only stacked on unmerged Draft #1640; no changes to A/B/C/QA/Gemini code, WLD, ledger, DB, flags, Test or Production.

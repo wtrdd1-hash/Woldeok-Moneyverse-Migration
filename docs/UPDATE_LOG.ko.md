@@ -1,3 +1,6 @@
+## 2026-10-28 — 기획 v1400 F675-156 (기능 추가 / DRAFT / RELEASE HOLD)
+- 이전 기능 보완 v1398 → 현재 기능 추가 v1400 → 다음 기능 보완 v1402. DB 활성 상태가 검증된 NPC 목록·회원/Android GET·키셋·직접 권한 금지·금융 쓰기 0건. 이슈 #1650; 백로그 ENV1400-01 SEC1400-02 REL1400-03 NPC1400-04 NPC1400-05 NPC1400-06 NPC1400-07 NPC1400-08 NPC1400-09 NPC1400-10. QA #1646 후보 CI PASS는 main/공식 Test 승인 아님; 운영 HOLD. 합성 10,001/100/100 미실행, 신규 외부 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 코드/DB/WLD/원장/Test/운영 변경 없음.
+
 ## 2026-10-28 — 기획 v1398 F675-155 (기능 보완 / DRAFT / RELEASE HOLD)
 - 이전 추가 v1396 → 현재 보완 v1398 → 다음 추가 v1400 잠정. A 미병합 #1641 SHA 153491e2eaf5c5bb39933d9e2a5634b49a45c44b와 v1396 대조: 기존 SECDEF 조건부 재사용, actor 위조 #993, 현금 행 누락 0 처리, API 시각, 실제 응답 필드, 세션 변경 응답 차단, 429/오류 no-store·Android 검증. QA v1334 main lint/test FAIL, 기존 백업 cron 실패, 독립 복원 미검증. 백로그 ENV1398-01 SEC1398-02 REL1398-03 LOAN1398-04 LOAN1398-05 LOAN1398-06 LOAN1398-07 LOAN1398-08 LOAN1398-09 LOAN1398-10. 합성 10,001/100/100 미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임/DB/WLD/원장/Test/운영 변경 없음.
 - GitHub 전달: 미병합 기획 #1640 위 Draft PR #1645, 이슈 #1639·A PR #1641 업데이트. 최초 커밋 61a6428419894eb33ee16bbc3c1e23eaa6da5d41, 최종 SHA는 miniPC complete.log. main 독립 병합 금지.
