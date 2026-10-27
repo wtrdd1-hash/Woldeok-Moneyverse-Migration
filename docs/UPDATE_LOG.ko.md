@@ -1,3 +1,7 @@
+## 2026-10-27 — 자동 기획 v1374 F675-150 (기능 보완; 초안/운영 보류)
+- 이전 추가 v1372 → 현재 보완 v1374 → 다음 추가 v1376(잠정). main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c 시작·중간, 이슈 #1572, 선행 Draft #1573. status-collector.ts의 점검 예외 outage 기록은 사용자 영향이 확인된 장애 증거가 아니며, 마이그레이션 013의 observed_at/received_at 및 오래된 공개 시각 NULL 처리와 구분해야 한다. 출처 결합 근거·독립 확인·복구 영수증·캐시 우회·안전 철회·관리자 승인·API/DB/SEO/모바일/접근성/KPI/롤백을 영문·국문 통합 기획에 반영.
+- 백로그 ENV1374-01 SEC1374-02 REL1374-03 INCIDENT1374-04 INCIDENT1374-05 INCIDENT1374-06 INCIDENT1374-07 INCIDENT1374-08 INCIDENT1374-09 INCIDENT1374-10. QA v1323 main root FAIL(280 중복), 보안 감사 FAIL, #1564 로컬 후보 운영 승인 아님; 정확 SHA Test·독립 복원 보류, 배포 링크 대상 없음. 루트 42%/데이터 54%; 10,001/100/100 시험 미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서만 변경, 런타임·금융 데이터 변경 없음.
+
 ## 2026-10-27 — 자동 기획 v1372 F675-150 (기능 추가; 초안/배포 보류)
 - 이전 보완 v1370 → 현재 추가 v1372 → 다음 보완 v1374. main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c 시작·중간 확인, 이슈 #1572, 선행 Draft #1568. /status는 30초 캐시 최신 관측, /announcements는 일반 공지이며 별도 검증된 장애 이력은 확인되지 않음. 근거 기반 독립 승인·불변 이력·공개/관리자/Android API·DB 제약·CAS/outbox·철회 캐시 차단·SEO/noindex·접근성·KPI를 영문/국문 통합 문서에 기획.
 - 백로그 ENV1372-01 SEC1372-02 REL1372-03 INCIDENT1372-04 INCIDENT1372-05 INCIDENT1372-06 INCIDENT1372-07 INCIDENT1372-08 INCIDENT1372-09 INCIDENT1372-10. QA v1322 root 테스트 마이그레이션 280 중복 FAIL, 보안 감사 FAIL, 개발 DB 권한/281 미해결, 정확 SHA 공식 Test·독립 복원 보류. 루트 42%/데이터 52%, 링크 대상 누락. 합성 10,001/동시 100/위조 100 미실행, 외부 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서만 변경, 런타임/DB/WLD/운영 변경 없음.

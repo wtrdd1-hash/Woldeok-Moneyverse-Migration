@@ -1,3 +1,35 @@
+## v1374 / F675-150 — 장애 관측 근거·복구 판정·게시 무결성 보완 (기능 보완 / 초안 / 배포 보류)
+
+**회차 및 정본.** 이전 기능 추가 v1372 → 현재 기능 보완 v1374 → 다음 기능 추가 v1376(잠정). 미병합 장애 이력 Draft PR #1573과 이슈 #1572를 계승하며 개발 A/B/C·Gemini·QA 런타임 변경과 분리한다. 시작·중간 main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c. 최신 main AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md와 국문 대조 확인. 실제 구현·배포가 아닌 문서 기획이다.
+
+### v1372 기획에서 보완한 실제 코드 근거
+
+1. **점검 실패는 확인된 서비스 장애가 아니다.** backend/src/content/status-collector.ts는 점검 예외를 잡아 state=outage, detail='확인에 실패했습니다.'로 기록하고, HTTP 오류도 outage로 기록한다. 이는 실제 사용자 영향이나 정확한 장애 시작을 증명하지 않는다. 마이그레이션 013의 content_status_snapshots에는 source_key/state/detail/observed_at/received_at이 있으나 구조화된 실패 원인·독립 확인·사건 식별자는 없다. 한국어 detail 문자열을 파싱해 기계적 장애 근거로 사용하지 않는다. 과거 구조화되지 않은 기록은 UNCLASSIFIED로 두고 허위 장애를 소급 생성하지 않는다. 향후 신뢰 수집자만 기록하는 근거 봉투(probe_id,source_key,snapshot_id,probe_kind,outcome_kind=SUCCESS|HTTP_ERROR|TRANSPORT_ERROR|PROBE_EXCEPTION|WRITE_FAILURE,HTTP 상태군,observed_at,received_at,collector_generation,evidence_digest)를 제안한다. 저장 실패는 근거 공백이지 정상이나 장애 증거가 아니다.
+2. **시각과 관측 범위 분리.** 마이그레이션 013은 observed_at이 현재 기준 과거 10분~미래 1분 범위에 들도록 허용하고 received_at을 별도로 저장한다. 공개 최신 상태 함수는 오래된 기록의 observed_at을 NULL로 반환하므로 과거 근거 조회에 사용하지 않는다. 최소 권한 SECURITY DEFINER 전용 근거 조회로 불변 snapshot ID·출처 소유권을 확인한다. 게시 시 출처의 active/public 설정, (snapshot_id,source_key) 복합 일치, 수신 시각 감사, 정책 버전별 시계 오차(제안 60초 이내, 초과 시 수동 검증)를 검사한다. 관측 중단·순서 역전·출처 폐기·누락 구간은 UNKNOWN이며 마지막 스냅샷으로 가동률이나 SLA를 보간하지 않는다.
+3. **관측·공식 발표·복구를 분리한 상태.** DRAFT → EVIDENCE_PENDING → IN_REVIEW → PUBLISH_PENDING → PUBLISHED_CONFIRMED → MONITORING → RECOVERY_PROPOSED → RESOLVED, 예외 EVIDENCE_CONFLICT/SOURCE_STALE/REJECTED/CORRECTION_PENDING/PUBLISH_FAILED/WITHDRAWN. 단일 실패는 내부 조사 개시만 가능하다. 공식 장애 발표는 수집 주기 30초 이상 떨어진 두 관측과 별도 운영 확인 또는 제2 감시 근거를 제안 기준 5분 안에 대조해야 한다. 예외적 발표는 별도 승인과 불확실성 표시가 필수다. 복구는 마지막 실패 이후 새로운 정상 관측 두 건, 독립 검증, 현재 별도 승인권자 확인을 요구한다. 미충족 시 RECOVERY_UNCONFIRMED. 이는 향후 수용 기준이며 현재 구현 완료 주장이 아니다. 예정 점검의 종료 예정 시각은 복구 완료 증명이 아니다.
+4. **공개 시각의 의미 명시.** first_observed_at/last_observed_at/received_at/operator_confirmed_at/publication_confirmed_at/effective_at을 분리하고 근거 confidence=VERIFIED|PARTIAL|UNVERIFIED와 coverage를 표시한다. 관측 최초 시각을 검증 없는 '장애 시작'으로 표현하지 않는다. 임의 복구 시각·100% 가동률·과거 관측 범위 생성 금지. 정정은 이유를 포함한 불변 개정으로 추가하고 감사 기록을 보존한다. 공개 확정된 이력 철회는 안전한 묘비 410만 허용하고 이전 문안을 노출하지 않는다. 비공개 ID는 404로 처리한다.
+5. **캐시를 통한 철회 내용 재노출 방지.** 기존 /status는 30초 revalidate와 publicApi('/api/v1/status',30)를 유지한다. 신규 /status/incidents 목록·상세·업데이트는 별도 dynamic no-store 서버 조회이며 Next ISR/SWR/캐시된 fallback HTML/숫자 TTL을 금지한다. NestJS의 성공·오류 응답은 Cache-Control: no-store, 사건 콘텐츠는 304 비허용, CDN·프록시는 경로별 저장 우회가 필수다. 행 잠금·CAS·public_generation·불변 개정·감사·outbox·대기 영수증을 한 트랜잭션으로 기록하고 세대 재검증 후 공개를 확정한다. 철회는 DB 공개 자격 차단과 세대 증가가 먼저다. 이전 작업자·커서·캐시가 되살리지 못하도록 실측 검증한다. 우회/삭제 검증 실패 시 기능 OFF; RFC 9111의 no-store만으로 개인정보 보호가 보장된다고 주장하지 않는다.
+6. **화면·CTA·API·오류 계약.** v1372의 공개 GET 목록·상세·업데이트와 관리자 초안/근거/제출/승인/복구/철회/영수증 API를 유지한다. 응답에 observationKind,firstObservedAt,lastObservedAt,verifiedAt,publishedAt,evidenceCoverage,evidenceConfidence,incidentGeneration,revision,nextCursor를 명시한다. 근거 UNKNOWN을 정상 빈 200으로 치환하지 않는다. 관리자 근거는 허용된 내부 snapshot ID 또는 별도 서명·검증된 영수증만 허용하며 임의 URL 금지. 출처 불일치·비활성·근거 만료 412, 시각 역전 422, 이전 버전/재전송 409, 세션·역할 401/403/404, 본문 과다 413, 호출 한도 429, 감사·게시 실패 503. Android는 공개 읽기만 허용한다. 방문자는 /status → 검증된 장애 이력 → 목록/상세 → 현재 상태로 이동하며 빈 화면은 '확인된 게시 기록 없음'이라고 안내한다. 운영자는 초안 → 근거 검토 → 독립 승인 → 영수증 확인 → 게시 확정, 복구·철회도 별도 검증한다.
+7. **전진 전용 DB·최소권한.** 중복 마이그레이션 280 및 적용 체크섬 불일치 해결 후에만 새 근거 메타데이터·불변 사건 영수증을 추가한다. 기존 013·050·적용 SQL 수정 금지. (snapshot_id,source_key) 복합 UNIQUE/FK 또는 잠금 검증 함수, 버전·세대 음수 금지, 사건+개정 UNIQUE, 행위자+의도 UNIQUE, 불변 감사, PUBLIC·앱 계정의 직접 DML/특권 EXECUTE 금지. 공개 함수는 승인된 안전 필드만 반환하며 서명 keyset 커서를 출처·필터·세대에 결합한다. 인덱스 (publication_state,last_public_at DESC,id DESC), (source_key,publication_state,last_public_at DESC,id DESC), (incident_id,revision), (source_key,observed_at DESC,id DESC), (outbox_state,next_retry_at,id). 금융 원장·WLD 변경 금지.
+8. **관리자·SEO·접근성·지표·배포.** 작성자와 독립 승인자를 분리하고 매 변경마다 현재 세션·권한·CSRF를 검증한다. 문안은 정화하고 내부 호스트·IP·토큰·회원 정보 노출을 금지한다. 공개 이력 초기 noindex/사이트맵 제외, 관리자 no-store/noindex. 한국어·영어, 상태 알림 role=status, 320px·200% 확대·키보드·색상 외 텍스트·움직임 감소, Android 읽기 동등성, WCAG 2.2 AA. 검증 영수증 기준으로 근거 충족률·분류 불가 점검·관측 공백·확정 지연 p50/p95·거짓 복구 차단·철회 노출 회귀를 측정하며 분모 없으면 UNKNOWN. 기능 status_incident_timeline_v1 기본 OFF, 공식 Test 정확 SHA 및 독립 승인 후 1%→10%→100% 승격, 실패 시 OFF·감사 기록 보존.
+
+### 우선순위 개발 백로그 (실행하지 않음)
+
+- **P0 ENV1374-01:** 배포 링크·저장 공간·암호화 백업 독립 복원 검증; 타 작업자의 디렉터리·볼륨 보호.
+- **P0 SEC1374-02:** 마이그레이션 280·체크섬·앱/PUBLIC 과다 권한·금융 원장·수집자 전용 권한 해결.
+- **P0 REL1374-03:** 전체 보안 감사·루트 테스트·인증 5-pass QA·공식 Test 정확 SHA·롤백 증명.
+- **P0 INCIDENT1374-04:** 점검 예외를 공식 장애로 오분류, 근거 만료·복구 허위 확정, 철회 캐시 재노출 차단.
+- **P1 INCIDENT1374-05:** 구조화된 점검 근거·출처/스냅샷 복합 무결성·시각 제약·인덱스.
+- **P1 INCIDENT1374-06:** 독립 승인·CAS·불변 감사·영수증·세대 결합 outbox·철회 트랜잭션.
+- **P1 INCIDENT1374-07:** NestJS 공개/관리자·Android 공개 전용 API, 서명 커서·오류 코드.
+- **P1 INCIDENT1374-08:** Next.js dynamic no-store 목록/상세/관리자, 한국어·영어·모바일·접근성.
+- **P1 INCIDENT1374-09:** 개인정보·noindex·캐시 우회 실증·영수증 KPI·악용 제한.
+- **P1 INCIDENT1374-10:** 격리 PostgreSQL·공식 Test 정확 SHA에서 합성 10,001건, 동시 승인/철회/재전송 100건, 위조 출처/행위자 100건, 2회 관측·복구·시계 오차·출처 폐기·304/HEAD/CDN 재노출·Android·접근성·백업/롤백 회귀. **모두 미실행.**
+
+**최신 QA·운영 보류.** QA v1323(20:16~20:33 KST) 기준 main 루트 테스트는 중복 280으로 FAIL(DB 19 PASS/1 FAIL/3 SKIP), 전체 감사 Critical 2/High 8, 봇 Critical 1/High 5. Draft #1564를 main과 로컬에서만 합친 격리 PostgreSQL 후보는 루트 테스트 통과했지만 공식 배포 승인 증거가 아니다. 개발 DB 권한·원장·체크섬 위험, 공식 Test/Production SHA 불일치, 정확 SHA 인증 E2E·독립 복원 미검증. 시작 측정 루트 42%/데이터 54%, /srv/moneyverse 링크는 없는 prod-v600을 가리킨다. 운영 RELEASE HOLD. 문서만 수정하며 런타임·DB·WLD·원장·Test·Production 변경 없음.
+
+**외부 독립 근거 10,000건 게이트.** 신규 최종 승인 0건, 누적 중복 제거·분류 승인 UNKNOWN/10,000, BLOCKED / IN PROGRESS. RFC 9111·PostgreSQL·W3C WCAG 2.2는 설계 참고 자료일 뿐 승인된 독립 자료 실적에 포함하지 않는다.
+
 ## v1372 / F675-150 — 검증된 서비스 장애 이력 및 점검 변경 기록 (기능 추가 / 초안 / 배포 보류)
 
 **회차 및 기준:** 이전 기능 보완 v1370 → 현재 기능 추가 v1372 → 다음 기능 보완 v1374(잠정). 개발 이슈 #1572, 선행 미병합 Draft PR #1568. 시작·중간 main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c. 영문 PROJECT_PLAN.md가 정본이며 이 한국어 명세는 동등한 계약을 제공한다. **실제 구현·배포가 아닌 기획 초안**으로 런타임·DB·금융·Test·Production 변경은 없다.
