@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
+import { decodeMoneyFlowCursor, encodeMoneyFlowCursor, moneyFlowFilterFingerprint } from './treasury-moneyflow-cursor';
 
 export interface TreasuryVaultRow {
   id: string;
@@ -1191,10 +1192,12 @@ export class TreasuryRepository {
     const safeLimit = Math.min(Math.max(1, Number(limit) || 50), 200);
     const conditions: string[] = ['a.owner_user_id IS NOT NULL'];
     const params: unknown[] = [];
+    const filterFingerprint = moneyFlowFilterFingerprint(search, type, direction);
 
     if (cursor) {
-      params.push(cursor);
-      conditions.push(`t.created_at < $${params.length}`);
+      const position = decodeMoneyFlowCursor(cursor, filterFingerprint);
+      params.push(position.at, position.tx, position.posting);
+      conditions.push(`(t.created_at, t.id, post.id) < ($${params.length - 2}::timestamptz, $${params.length - 1}::uuid, $${params.length}::uuid)`);
     }
 
     if (search && search.trim()) {
@@ -1220,6 +1223,8 @@ export class TreasuryRepository {
     const rowsRes = await (this.pool as any).query(
       `SELECT 
         t.id::text AS transaction_id,
+        post.id::text AS posting_id,
+        t.created_at::text AS cursor_created_at,
         t.type,
         a.owner_user_id::text AS user_id,
         COALESCE(p.display_name, '익명 유저') AS display_name,
@@ -1232,7 +1237,7 @@ export class TreasuryRepository {
       JOIN public.accounts a ON a.id = post.account_id
       LEFT JOIN public.member_profiles p ON p.user_id = a.owner_user_id
       WHERE ${whereClause}
-      ORDER BY t.created_at DESC
+      ORDER BY t.created_at DESC, t.id DESC, post.id DESC
       LIMIT $${limitParamIdx}`,
       params,
     );
@@ -1249,7 +1254,12 @@ export class TreasuryRepository {
       created_at: new Date(r.created_at).toISOString(),
     }));
 
-    const next_cursor = hasMore && items.length > 0 ? items[items.length - 1].created_at : null;
+    const lastRow = hasMore ? rowsRes.rows[safeLimit - 1] : null;
+    const next_cursor = lastRow ? encodeMoneyFlowCursor({
+      at: lastRow.cursor_created_at,
+      tx: lastRow.transaction_id,
+      posting: lastRow.posting_id,
+    }, filterFingerprint) : null;
 
     const summaryRes = await (this.pool as any).query(
       `SELECT 
