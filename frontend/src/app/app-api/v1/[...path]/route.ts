@@ -172,9 +172,9 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
-  // Bank loan and standing data belong to the viewer, including error paths.
+  // Wallet activity and bank data belong to the viewer, including error paths.
   // Never trust an upstream cache policy after a session or account change.
-  if (parts[0] === 'bank' || parts[0] === 'banking') {
+  if (parts[0] === 'wallet' || parts[0] === 'bank' || parts[0] === 'banking') {
     response.headers.set('cache-control', 'private, no-store');
   }
   return response;

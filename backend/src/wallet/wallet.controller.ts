@@ -26,7 +26,7 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
 import { WalletInputError } from './wallet.repository';
-import { WalletRecipientError, WalletService } from './wallet.service';
+import { WalletRecipientError, WalletService, type WalletOverviewOptions } from './wallet.service';
 
 /**
  * Guard order is semantic, not cosmetic. SessionGuard resolves the session
@@ -82,24 +82,34 @@ export class WalletController {
    * an unbounded query.
    */
   @Get('wallet')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Balances and recent ledger entries for the caller' })
   overview(
     @Req() request: RequestWithSession,
     @Query('recent') recent?: string,
     @Query('period') period?: string,
+    @Query('direction') direction?: string,
   ) {
+    if (direction !== undefined && direction !== 'all' && direction !== 'in' && direction !== 'out' && direction !== 'neutral') {
+      throw new BadRequestException('direction must be all, in, out or neutral');
+    }
+    const filteredDirection = direction === 'in' ? 'in' : direction === 'out' ? 'out' : direction === 'neutral' ? 'neutral' : undefined;
     if (period !== undefined && period !== 'all' && period !== '7d' && period !== '30d') {
       throw new BadRequestException('period must be all, 7d or 30d');
     }
     const periodDays: 7 | 30 | undefined = period === '7d' ? 7 : period === '30d' ? 30 : undefined;
+    const filters: WalletOverviewOptions = {
+      ...(periodDays ? { periodDays } : {}),
+      ...(filteredDirection ? { direction: filteredDirection } : {}),
+    };
     if (recent === undefined) {
-      return this.service().overview(requireUserId(request), periodDays ? { periodDays } : {});
+      return this.service().overview(requireUserId(request), filters);
     }
     const parsed = Number(recent);
     if (!Number.isSafeInteger(parsed)) {
       throw new BadRequestException('recent must be a whole number');
     }
-    return this.service().overview(requireUserId(request), { recentLimit: parsed, ...(periodDays ? { periodDays } : {}) });
+    return this.service().overview(requireUserId(request), { recentLimit: parsed, ...filters });
   }
 
   @Get('wallet/recipients/search')
