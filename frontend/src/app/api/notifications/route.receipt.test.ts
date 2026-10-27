@@ -25,6 +25,7 @@ describe('notification mark-all verified receipt', () => {
     mutate.mockResolvedValue({ updatedCount: 3 });
     const response = await POST(request());
     expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(await response.json()).not.toHaveProperty('remainingUnreadCount', 0);
   });
 });
