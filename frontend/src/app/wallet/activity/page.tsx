@@ -11,6 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
+import { activityPeriod, activityPeriodUrl } from './period';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +29,16 @@ export const metadata: Metadata = {
  * the top of the screen to make room for it was the wrong trade — so the rest
  * of it lives here.
  */
-export default async function WalletActivityPage() {
+export default async function WalletActivityPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ period?: string }>;
+}) {
   await requireMember();
-  // 50 is the API's ceiling for this list, so this page shows everything it
-  // will give rather than a page size chosen here.
-  const wallet = await apiOrNull<Overview>('/api/v1/wallet?recent=50');
+  const period = activityPeriod((await searchParams)?.period);
+  // Filtering happens in PostgreSQL before the 50-entry cap, never on a
+  // truncated client-side list. The default remains the existing 50 entries.
+  const wallet = await apiOrNull<Overview>(`/api/v1/wallet?recent=50${period === 'all' ? '' : `&period=${period}`}`);
 
   return (
     <div data-page="wallet-activity" className="mv-page mv-page--finance grid gap-5">
@@ -48,6 +54,20 @@ export default async function WalletActivityPage() {
         맞춘 금액을 보여 줍니다.
       </PageHeader>
 
+      <nav aria-label="지갑 기록 기간" className="flex flex-wrap gap-2">
+        {([
+          ['all', '최근 50건'],
+          ['7d', '최근 7일'],
+          ['30d', '최근 30일'],
+        ] as const).map(([value, label]) => (
+          <Button key={value} asChild variant={period === value ? 'default' : 'outline'} size="sm">
+            <Link href={activityPeriodUrl(value)} aria-current={period === value ? 'page' : undefined}>
+              {label}
+            </Link>
+          </Button>
+        ))}
+      </nav>
+      <p className="text-sm text-muted-foreground">최대 50건의 확정된 원장 기록을 표시합니다. 기간 필터는 서버에서 적용됩니다.</p>
       <Card>
         <CardContent>
           {!wallet ? (

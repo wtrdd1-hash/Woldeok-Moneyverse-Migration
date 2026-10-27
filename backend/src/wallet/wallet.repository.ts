@@ -183,9 +183,12 @@ export class PostgresWalletRepository {
     );
   }
 
-  async recentTransactionsForUser(userId: string, limit: number): Promise<WalletTransactionRow[]> {
+  async recentTransactionsForUser(userId: string, limit: number, periodDays?: number): Promise<WalletTransactionRow[]> {
     const ownerUserId = requireUuid(userId, 'authenticated user id');
     const recentLimit = requireRecentLimit(limit);
+    if (periodDays !== undefined && periodDays !== 7 && periodDays !== 30) {
+      throw new WalletInputError('wallet activity period must be 7 or 30 days');
+    }
     return queryRows<WalletTransactionRow>(
       this.pool,
       `SELECT
@@ -224,10 +227,11 @@ export class PostgresWalletRepository {
            'USER_CASH'::public.account_type,
            'USER_BANK'::public.account_type
          )
+         AND ($3::integer IS NULL OR ledger_transaction.created_at >= CURRENT_TIMESTAMP - ($3::integer * INTERVAL '1 day'))
        GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
        ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
        LIMIT $2`,
-      [ownerUserId, recentLimit],
+      [ownerUserId, recentLimit, periodDays ?? null],
     );
   }
 
