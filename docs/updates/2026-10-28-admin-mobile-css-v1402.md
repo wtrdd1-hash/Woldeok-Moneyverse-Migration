@@ -1,0 +1,3 @@
+# v2026.10.28.1402 — Administrator mobile style recovery (GitHub release note)
+
+Production and isolated Test now serve a consistent Next.js stylesheet set for `/admin`. The missing-CSS incident that rendered the logo oversized and navigation as browser-default links was resolved by rolling both frontend origins over to independently started, persistent, matching-build processes. Both public sites serve all five referenced CSS files successfully. The backend, customer accounts and financial ledger were unchanged. The pre-deployment CSS integrity regression guard is already merged via PR #1593. Authenticated-session and full mobile-browser QA remain tracked as outstanding verification, not claimed complete.
