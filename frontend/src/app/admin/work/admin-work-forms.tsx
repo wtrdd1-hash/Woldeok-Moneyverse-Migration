@@ -258,7 +258,7 @@ function WorkTaskRow({ task }: { readonly task: AdminWorkTask }) {
             <span className="text-xs text-muted-foreground whitespace-nowrap">보상:</span>
             <Input
               name="base_reward"
-              aria-label={`${task.name} base reward in WLD`}
+              aria-label={`${task.name} 기본 보상 (WLD)`}
               type="number"
               min={1}
               max={1000000}
@@ -274,7 +274,7 @@ function WorkTaskRow({ task }: { readonly task: AdminWorkTask }) {
             <span className="text-xs text-muted-foreground whitespace-nowrap">일일한도:</span>
             <Input
               name="daily_limit"
-              aria-label={`${task.name} daily task limit`}
+              aria-label={`${task.name} 일일 작업 한도`}
               type="number"
               min={0}
               max={1000}
@@ -292,7 +292,7 @@ function WorkTaskRow({ task }: { readonly task: AdminWorkTask }) {
             <span className="text-xs text-muted-foreground whitespace-nowrap">소요:</span>
             <Input
               name="minimum_duration_seconds"
-              aria-label={`${task.name} minimum duration in seconds`}
+              aria-label={`${task.name} 최소 수행 시간 (초)`}
               type="number"
               min={5}
               max={86400}
