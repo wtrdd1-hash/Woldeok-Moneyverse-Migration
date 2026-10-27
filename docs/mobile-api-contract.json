@@ -1521,10 +1521,31 @@
             "items": {
               "type": "unknown"
             }
+          },
+          "scope": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "WEALTH_ORDERED_SNAPSHOT"
+              },
+              "limit": {
+                "type": "number"
+              },
+              "hasMore": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "kind",
+              "limit",
+              "hasMore"
+            ]
           }
         },
         "required": [
-          "users"
+          "users",
+          "scope"
         ]
       },
       "responseCompatibility": {

@@ -175,7 +175,12 @@ export class AdminController {
   @UseGuards(AdminSessionGuard)
   @ApiOperation({ summary: 'Members and their status' })
   async users(@Req() request: RequestWithSession) {
-    return { users: await this.service().users(requireUserId(request)) };
+    // The 51st row proves truncation without disclosing additional member data.
+    const lookahead = await this.service().users(requireUserId(request), { limit: 51 });
+    return {
+      users: lookahead.slice(0, 50),
+      scope: { kind: 'WEALTH_ORDERED_SNAPSHOT' as const, limit: 50, hasMore: lookahead.length > 50 },
+    };
   }
 
   @Get('users/:id/portfolio')

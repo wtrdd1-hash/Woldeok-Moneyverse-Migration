@@ -577,6 +577,10 @@ _No request body._
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
 | users[] | true | unknown[] |  |
+| scope | true | object |  |
+| scope.kind | true | string="WEALTH_ORDERED_SNAPSHOT" | const="WEALTH_ORDERED_SNAPSHOT" |
+| scope.limit | true | number |  |
+| scope.hasMore | true | boolean |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

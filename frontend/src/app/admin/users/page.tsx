@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { adminArea } from '../areas';
-import type { AdminUser } from '../types';
+import { parseAdminUserSnapshot } from './user-directory-evidence';
 import { UserDirectory } from './user-directory';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 export default async function AdminUsersPage() {
   await requireAdminConsole(AREA.href);
-  const users = await apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users');
+  const users = parseAdminUserSnapshot(await apiOrNull<unknown>('/api/v1/admin/users'));
 
   return (
     <div data-page="admin-users" className="mv-page mv-page--admin grid gap-5">
@@ -44,7 +44,7 @@ export default async function AdminUsersPage() {
           </CardContent>
         </Card>
       ) : (
-        <UserDirectory users={users.users} />
+        <UserDirectory users={users.users} scope={users.scope} />
       )}
     </div>
   );
