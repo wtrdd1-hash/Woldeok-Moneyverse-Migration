@@ -208,7 +208,7 @@ export function AuditLogsFilterForm({ filters, users = [] }: AuditLogsFilterForm
                 value={filters.administrator}
                 placeholder="예: admin 또는 UUID"
                 list={users.length > 0 ? 'audit-user-suggestions' : undefined}
-                hint="닉네임을 입력하면 해당 회원의 UUID로 자동 변환 검색됩니다."
+                hint="완전한 회원 목록에서 정확히 일치하는 닉네임만 변환됩니다. 목록이 제한된 경우 UUID를 입력해 주세요."
               />
 
               {/* 대상 회원 ID / 닉네임 */}
@@ -218,7 +218,7 @@ export function AuditLogsFilterForm({ filters, users = [] }: AuditLogsFilterForm
                 value={filters.member}
                 placeholder="예: 홍길동 또는 UUID"
                 list={users.length > 0 ? 'audit-user-suggestions' : undefined}
-                hint="대상/주체로 기록된 회원 로그를 함께 찾습니다."
+                hint="정확한 UUID를 권장합니다. 대상 회원으로 기록된 운영 감사 기록만 조회합니다."
               />
 
               {/* 주요 기능 셀렉트 */}
