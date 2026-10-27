@@ -9,8 +9,8 @@
 - Acceptance: RED→GREEN web link selection tests, backend cache contract tests, Android success/error no-store tests, database SQL owner-scope/privilege contract test, typecheck/lint/build/unit/contract/app-api and isolated PostgreSQL if safe. Official Test exact-SHA/authenticated E2E and Production remain blocked unless all gates pass.
 
 ## IN PROGRESS
-- [ ] RED tests for unknown support link and private response caching.
-- [ ] Minimal implementation in web, NestJS, Android gateway; DB boundary preserved.
+- [x] RED tests for unknown support link and private response caching. Frontend RED exit 1, backend RED exit 1; integration test verified RED on reverted selector.
+- [x] Minimal implementation in web, NestJS, Android gateway; DB boundary preserved. GREEN: frontend targeted 16 + page 2, backend 10, DB static contract 2.
 - [ ] Full validation, main re-fetch, PR/CI, security and release gate audit.
 
 ## FINISHED

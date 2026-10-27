@@ -96,6 +96,21 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('cache-control')).toContain('no-store');
   });
 
+  it.each([200, 403])('never caches private support responses even when upstream says public (%i)', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ messages: [] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/support/threads/11111111-1111-4111-8111-111111111111/messages'),
+      context('support', 'threads', '11111111-1111-4111-8111-111111111111', 'messages'),
+    );
+    expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     const fetchSpy = vi.fn();

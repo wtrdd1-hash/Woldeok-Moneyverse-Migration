@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Get, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
+  Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
   Put, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -35,22 +35,22 @@ export class SupportController {
   constructor(@Inject(SupportRepository) private readonly support: SupportRepository | null) {}
   private repo() { if (!this.support) throw new ServiceUnavailableException('support is unavailable'); return this.support; }
 
-  @Get('threads') @ApiOperation({ summary: 'My administrator support conversations' })
+  @Get('threads') @Header('Cache-Control', 'private, no-store') @ApiOperation({ summary: 'My administrator support conversations' })
   async threads(@Req() req: RequestWithSession) { return { threads: await this.repo().myThreads(requireUserId(req)) }; }
 
-  @Post('threads') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Open an administrator support conversation' })
+  @Post('threads') @Header('Cache-Control', 'private, no-store') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Open an administrator support conversation' })
   async create(@Req() req: RequestWithSession, @Body() body: NewThreadDto) {
     const thread = await this.repo().createThread(requireUserId(req), body.idempotencyKey, body.subject, body.body);
     if (!thread) throw new ServiceUnavailableException('support thread was not created');
     return { thread };
   }
 
-  @Get('threads/:id/messages') @ApiOperation({ summary: 'Messages in my support conversation' })
+  @Get('threads/:id/messages') @Header('Cache-Control', 'private, no-store') @ApiOperation({ summary: 'Messages in my support conversation' })
   async messages(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string) {
     return { messages: await this.repo().messages(requireUserId(req), id) };
   }
 
-  @Post('threads/:id/messages') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Reply to my support conversation' })
+  @Post('threads/:id/messages') @Header('Cache-Control', 'private, no-store') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Reply to my support conversation' })
   async reply(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string, @Body() body: NewMessageDto) {
     const message = await this.repo().addMessage(requireUserId(req), body.idempotencyKey, id, body.body);
     if (!message) throw new ServiceUnavailableException('support message was not created');
@@ -65,25 +65,25 @@ export class AdminSupportController {
   constructor(@Inject(SupportRepository) private readonly support: SupportRepository | null) {}
   private repo() { if (!this.support) throw new ServiceUnavailableException('support is unavailable'); return this.support; }
 
-  @Get('threads') @ApiOperation({ summary: 'Administrator support inbox' })
+  @Get('threads') @Header('Cache-Control', 'private, no-store') @ApiOperation({ summary: 'Administrator support inbox' })
   async threads(@Req() req: RequestWithSession, @Query('status') status?: string) {
     const safe = status && ['open','waiting_user','resolved'].includes(status) ? status : null;
     return { threads: await this.repo().adminThreads(requireUserId(req), safe) };
   }
 
-  @Get('threads/:id/messages') @ApiOperation({ summary: 'Read a support conversation as administrator' })
+  @Get('threads/:id/messages') @Header('Cache-Control', 'private, no-store') @ApiOperation({ summary: 'Read a support conversation as administrator' })
   async messages(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string) {
     return { messages: await this.repo().adminMessages(requireUserId(req), id) };
   }
 
-  @Post('threads/:id/messages') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Reply to a member support conversation' })
+  @Post('threads/:id/messages') @Header('Cache-Control', 'private, no-store') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Reply to a member support conversation' })
   async reply(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string, @Body() body: NewMessageDto) {
     const message = await this.repo().adminReply(requireUserId(req), body.idempotencyKey, id, body.body);
     if (!message) throw new ServiceUnavailableException('support reply was not created');
     return { message };
   }
 
-  @Put('threads/:id/status') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Change support conversation status' })
+  @Put('threads/:id/status') @Header('Cache-Control', 'private, no-store') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Change support conversation status' })
   async status(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string, @Body() body: StatusDto) {
     const changed = await this.repo().adminSetStatus(requireUserId(req), id, body.status);
     if (!changed) throw new NotFoundException('support thread not found');

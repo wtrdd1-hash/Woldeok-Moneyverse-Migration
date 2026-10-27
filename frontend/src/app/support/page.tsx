@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { api } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { createSupportThread, replySupportThread } from './actions';
+import { selectSupportThread } from './select-thread';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '관리자 문의', robots: { index: false, follow: false } };
@@ -11,15 +12,16 @@ type Thread = { thread_id: string; subject: string; status: string; created_at: 
 type Message = { message_id: string; sender_kind: 'user'|'admin'; body: string; created_at: string };
 const label: Record<string,string> = { open: '관리자 답변 대기', waiting_user: '내 답변 대기', resolved: '처리 완료' };
 
-export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string }> }) {
+export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string | string[] }> }) {
   await requireMember();
   const { threads } = await api<{ threads: Thread[] }>('/api/v1/support/threads');
-  const selected = (await searchParams).thread ?? threads[0]?.thread_id;
+  const { selected, unavailable } = selectSupportThread(threads, (await searchParams).thread);
   const messages = selected
     ? (await api<{ messages: Message[] }>(`/api/v1/support/threads/${encodeURIComponent(selected)}/messages`)).messages
     : [];
   return <main data-page="support" className="mv-page mv-page--community mx-auto grid w-full max-w-5xl gap-5 p-4 md:grid-cols-[320px_1fr]">
     <section className="grid content-start gap-4">
+      {unavailable && <p role="status" className="rounded-xl border p-3 text-sm text-muted-foreground">요청한 문의를 확인할 수 없어 내 문의 목록을 표시합니다.</p>}
       <div><h1 className="text-2xl font-black">관리자 문의</h1><p className="text-sm text-muted-foreground">관리자와 1:1로 대화합니다. 문의 내용과 답변은 처리 기록으로 저장됩니다.</p></div>
       <form action={createSupportThread} className="grid gap-2 rounded-2xl border bg-card p-4">
         <strong>새 문의</strong><input name="subject" maxLength={120} required placeholder="문의 제목" className="rounded-xl border bg-background p-3" />
