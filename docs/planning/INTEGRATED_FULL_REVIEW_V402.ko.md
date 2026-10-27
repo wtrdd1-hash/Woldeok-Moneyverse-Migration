@@ -1,3 +1,6 @@
+## v1398 통합 재검토 — F675-155 구현 후보/출처 계약 (DRAFT / HOLD)
+- 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c 동일, A 미병합 #1641 SHA 153491e2eaf5c5bb39933d9e2a5634b49a45c44b. 신규 SECDEF 제안과 기존 조회 함수 재사용 대조, 앱 역할 actor 위조·현금 행 누락 0 처리·API 시각 observedAt·세션 변경 뒤 응답 문제 보완. QA v1334 main lint/test FAIL, 기존 백업 cron 실패, 독립 복원 미검증. 백로그 ENV1398-01 SEC1398-02 REL1398-03 LOAN1398-04 LOAN1398-05 LOAN1398-06 LOAN1398-07 LOAN1398-08 LOAN1398-09 LOAN1398-10. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. OFF/HOLD.
+
 # 월덕 머니버스 — 통합 기획 전면 재검토 v2026.09.23.402
 
 > 상태: 전면 재검토 진행 / 1단계 권위·계약 감사

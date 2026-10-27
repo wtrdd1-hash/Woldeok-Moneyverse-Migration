@@ -1,3 +1,7 @@
+## v1398 — F675-155 대출 상환 미리보기 후보 계약·출처 검증 보완 (기능 보완 / DRAFT / RELEASE HOLD)
+- 이전 추가 v1396 → 현재 보완 v1398 → 다음 추가 v1400(잠정). main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c 시작·중간 확인. A 미병합 #1641 SHA 153491e2eaf5c5bb39933d9e2a5634b49a45c44b는 신규 함수 대신 기존 bank_get_my_standing(actor) SECDEF 재사용. 조건부 수용: DB 앱 역할 actor 위조 #993, USER_CASH 행 누락 시 0 처리, API 시각 observedAt, 세션 세대 응답 차단 미검증. 실제 후보 필드는 cashBefore/cashAfter/debtBefore/debtAfter/adjustmentAmount/nonbinding:true로 v1396 제안과 다름.
+- P0/P1 백로그: ENV1398-01 SEC1398-02 REL1398-03 LOAN1398-04 LOAN1398-05 LOAN1398-06 LOAN1398-07 LOAN1398-08 LOAN1398-09 LOAN1398-10. QA v1334 main lint/test FAIL·typecheck/build PASS, 앱 DML 235/241·PUBLIC 은행 함수 3개·체크섬 5건, 기존 백업 cron 실패·독립 복원 미검증. QA #1635 미병합 후보 CI PASS는 main/공식 Test가 아님. 합성 10,001/100/100 미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 기능 OFF·운영 HOLD, 런타임/DB/WLD/원장 변경 없음. 화면/CTA/상태/API/DB/트랜잭션/관리자/개인정보/SEO/모바일/접근성/KPI/롤백은 한영 통합 마스터 참조.
+
 ## v1396 — F675-155 가상 은행 대출 상환 영향 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
 - 이전 보완 v1394 → 현재 추가 v1396 → 다음 보완 v1398(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c, 선행 미병합 기획 #1634, 개발 이슈 #1639. 기존 대출 화면은 상환액 입력 후 즉시 상환하며 검증된 영향 미리보기가 없다. Migration 194 실제 차감 상한과 Migration 211 멱등 영수증을 확인했다. 운영 장애 확인 아님.
 - /bank 대출 탭에서 본인 현금·대출 잔액의 **확정되지 않은 읽기 전용 예상 변화**를 표시. 제안 POST /api/v1/banking/repay-preview, Android 동등성, 소유권 검증 SECDEF 단일 DB 관측, NUMERIC/BigInt, 초과 요청·현금 부족·세션 변경 처리. 금융 원장/잔액 변경·예약·이자 절약 보장·직접 GRANT 금지. 화면/CTA/상태/API/DB/트랜잭션/관리자/보안/SEO/모바일/접근성/KPI/테스트/롤백은 한영 통합 마스터 참조.

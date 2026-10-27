@@ -1,3 +1,7 @@
+## F675-155 / v1398 — 대출 상환 미리보기 후보 계약 대조 (기능 보완 / DRAFT / HOLD)
+- A 미병합 #1641 SHA 153491e2eaf5c5bb39933d9e2a5634b49a45c44b는 신규 SECDEF 대신 기존 bank_get_my_standing(actor) 재사용. 앱 역할 actor 위조 #993·현금 행 누락 0 처리·PUBLIC/앱 권한·실제 PG 출처 검증 전 조건부 MVP다. 실제 필드 cashBefore/cashAfter/debtBefore/debtAfter/adjustmentAmount/nonbinding:true; observedAt은 API 시각이다. 세션 세대 응답 차단·전체 오류 no-store·429·Android 동등성 증명 필요.
+- 이전 추가 v1396 → 현재 보완 v1398 → 다음 추가 v1400 잠정. 백로그 ENV1398-01 SEC1398-02 REL1398-03 LOAN1398-04 LOAN1398-05 LOAN1398-06 LOAN1398-07 LOAN1398-08 LOAN1398-09 LOAN1398-10. QA v1334 main lint/test FAIL·typecheck/build PASS, 앱 DML 235/241·PUBLIC 은행 3개·체크섬 5건·기존 백업 cron 실패·독립 복원 미검증. 합성 10,001/100/100 미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 기능 OFF·운영 HOLD, 상세는 한영 통합 마스터.
+
 ## F675-155 / v1396 — 본인 검증 가상 은행 대출 상환 영향 미리보기 (기능 추가 / DRAFT / HOLD)
 - **확인된 코드:** /bank 대출 화면에는 상환 실행은 있으나 서버 검증 미리보기는 없다. Migration 194의 실제 상환액 상한/원장과 Migration 211 멱등 명령을 확인했다. 운영 오류 확인 아님.
 - **제안:** 로그인 회원이 /bank에서 상환액 입력→영향 미리보기로 현재/예상 현금·대출 잔액, 초과 요청·현금 부족을 확인하고 별도로 실제 상환. NestJS/Android POST, 소유권 검증 읽기 전용 SECURITY DEFINER 단일 관측, NUMERIC/BigInt, 원장 변경·확정 견적·직접 테이블 GRANT·공개 캐시 금지. 관리자 비식별 집계 k>=20, noindex, WCAG 2.2 AA.

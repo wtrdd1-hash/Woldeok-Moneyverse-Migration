@@ -1,3 +1,41 @@
+## v1398 / F675-155 — 대출 상환 미리보기 구현 후보 계약·출처 검증 보완 (기능 보완 / DRAFT / RELEASE HOLD) — 이슈 #1639
+
+**주기:** 이전 기능 추가 v1396 → 현재 기능 보완 v1398 → 다음 기능 추가 v1400(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c 확인, main AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조본 확인. 미병합 기획 Draft #1640 위에 쌓는 문서 전용 작업으로 개발 A/B/C/QA/Gemini 코드·WLD·원장·DB·기능 스위치·Test·운영 변경 없음.
+
+### v1396 기획과 실제 후보 대조 — 배포 완료로 오인 금지
+- 개발 A 미병합 Draft #1641, SHA 153491e2eaf5c5bb39933d9e2a5634b49a45c44b는 POST /api/v1/banking/repay-preview, Android BFF, 정수 문자열·세션/인증/동의/CSRF, private/no-store 헤더, 웹 미리보기 CTA, BigInt 계산을 추가했다. main·공식 Test·운영에는 없다. 집중 테스트 통과는 운영 승인이 아니다.
+- v1396의 신규 bank_repay_preview_v1 대신 기존 STABLE SECURITY DEFINER bank_get_my_standing(actor)를 사용한다. 한 번의 SQL 호출로 현금·최신 활성/연체 대출을 반환하므로 새 마이그레이션 없는 **조건부 MVP 후보**이나 실제 PG 권한·출처·금융 검증이 선행돼야 한다. SQL은 p_actor UUID를 DB 인증 세션에 연결하지 않아 앱 역할 침해 시 타인 actor 위조 위험이 남는다. **P0 #993 미해결**, DB 본인 인증 완료 주장 금지.
+- Migration 194의 bank_get_my_standing은 USER_CASH 계정/잔액 행이 없어도 cash_balance=0으로 반환한다. A 후보는 이를 실제 현금 0으로 취급한다. 계정 존재·유일성·상태·잔액 행 출처를 검증하고 증명 불가 시 **실패 폐쇄** 또는 B의 전진형 본인 검증 읽기 함수를 요구한다. 출처 불명 0을 정상 잔액으로 표시 금지.
+- A의 observedAt은 SQL 실행 뒤 API 서버의 new Date() 시각이므로 DB 관측 시각·커밋 순서 증명이 아니다. responseGeneratedAt으로 구분하거나 DB 출처 시각을 명시한다. 실제 후보 필드는 cashBefore, cashAfter, debtBefore, debtAfter, adjustmentAmount, nonbinding:true이며 v1396 제안의 currentCash/projectedCash/currentOutstanding/projectedOutstanding/binding:false와 다르다. MVP·Android 계약은 실제 후보 필드로 검증한다.
+- React useTransition과 key=loanId:amount는 금액/대출 변경 시 컴포넌트를 새로 만들지만 명시적 세션 세대·계정 변경 응답 차단 및 AbortController는 확인되지 않았다. 로그아웃·세션/계정/대출 변경·이동·상환 완료 시 늦은 응답 폐기, 비공개 localStorage·SSR·교차 계정 캐시 금지.
+- 후보의 기능 스위치 및 기본 OFF 강제도 독립 검증되지 않았으므로 확인 전 배포 금지. 컨트롤러 성공 응답 private/no-store만으로 401/403/404/429/5xx·예외 필터·Android BFF·프록시까지 캐시 차단됐다고 단정할 수 없다. 회원/IP 호출 제한·본문 상한도 미검증이다.
+
+### 회원 흐름·API·DB·동시성·개인정보
+- 로그인·동의 회원이 /bank 대출 카드에서 표준 양의 WLD 정수 입력 → **상환 후 잔액 미리보기** → 요청액, 예상 차감액=min(요청액,대출잔액), 초과 조정, 현금·대출 전후, 현금 부족, 미확정 경고 확인 → 수정/다시 계산 → 별도 **대출금 상환하기**. 초기/입력 오류/로딩/정상/상한 조정/현금 부족/대출 없음/계정 변경/세션 만료/출처 오류/재시도 상태. 미리보기는 이자·수수료 견적, 예약, 상환 승인 또는 실제 상환이 아니다.
+- 후보 POST /api/v1/banking/repay-preview 및 /app-api/v1/banking/repay-preview, 본문 loanId UUID·amount 양의 표준 정수 문자열(후보 78자리, DB NUMERIC 상한 검증 전 조건부), actor는 서버 세션에서만 결정. 실제 200 필드 loanId,requestedAmount,payableAmount,cashBefore,cashAfter(부족하면 null),debtBefore,debtAfter,adjustmentAmount,eligible,reason,observedAt,nonbinding:true. BigInt만 사용, payable<=debt, debtAfter=debt-payable, adjustment=requested-payable. 400 입력 오류, 401 미인증, 타인/대출 없음 403/404 통일, 409 변경, 429 호출 제한, 503 출처 장애. 장애를 임의 현금 0으로 대체하지 않는다.
+- 기존 bank_get_my_standing은 actor 행만 조회하지만 DB 인증 세션과 결합하지 않는다. PUBLIC/앱 역할 권한, 현금 계정 누락·중복, 다중 활성 대출, 인덱스/EXPLAIN을 실제 마이그레이션을 적용한 격리 PG에서 검증한다. 적용된 Migration 194/211 수정·앱 직접 테이블 권한 확대 금지. B가 필요한 전진형 SECURITY DEFINER 보완 담당. 미리보기는 잠금·원장·잔액·대출·Outbox·멱등 영수증 쓰기 0건, 실제 bank_repay가 최신 소유권·잔액·복식부기·멱등성을 독립 재검증한다.
+- 상환/출금과 동시 조회 100건, 타인 actor/대출/세션/CSRF 위조 100건, 늦은 응답이 새로운 계정/금액 결과를 덮어쓰지 않도록 차단. 성공·오류 전체 private/no-store, 회원/IP 속도 제한, 관리자에는 비식별 요청·오류·p95 집계만 제공(k<20 억제), 회원/대출 ID·잔액·금액·본문을 로그/분석/CSV에 저장 금지. 회원 화면 noindex·사이트맵 제외, 한영 동등성, WCAG 2.2 AA, 320/390/768px·200% 확대·키보드·스크린리더·동작 감소. KPI는 비식별 미리보기→상환·p95·오류율·타인 정보 0·금융 쓰기 0.
+
+### QA·배포·롤백 — 기획 회차 미실행
+- 격리 PostgreSQL 17 합성 대출/계정 10,001건, 경합 100건, 위조 100건, 실제 현금 0과 출처 누락 구분, 다중 계정/대출, 큰 정수, API/DB 시각 차이, 세션 변경, 모든 401/403/404/429/503 no-store, Android 동등성, 미리보기 쓰기 0건과 실제 상환 원장/멱등성 회귀를 요구한다. **기획에서는 미실행.**
+- QA v1334(06:20~06:24 KST) main lint FAIL·root test FAIL, typecheck/build PASS. 개발 DB 앱 DML 235/241, PUBLIC 기존 은행 함수 3개, 적용 체크섬 [219,220,221,234,266] 불일치, 기존 04:00 백업 cron 권한 오류. 별도 암호화 systemd 백업 체크섬은 확인했지만 **독립 복원 미검증**. QA #1635 미병합 후보 정확 SHA CI PASS는 main/공식 Test가 아니다. 기능 기본 OFF, 전체 CI/보안/금융·권한/공식 Test exact-SHA/독립 복원/승인된 GitOps 전 운영 HOLD. 롤백은 미리보기 UI/API만 OFF하며 원장·WLD·적용된 마이그레이션 변경 금지.
+
+### P0/P1 개발 백로그
+| 우선순위 | ID | 담당·수용 조건 |
+|---|---|---|
+| P0 | ENV1398-01 | Ops/QA: 배포 링크·실행 SHA·기존 백업 cron 오류 복구 및 암호화 백업 독립 복원 증명 |
+| P0 | SEC1398-02 | B/QA: actor 위조 #993·앱 DML 235/241·PUBLIC 은행 3개·체크섬 5건·마이그레이션 충돌 해결 |
+| P0 | REL1398-03 | QA: main lint/test/보안·격리 PG·공식 Test exact-SHA·복원·GitOps 승인 전 운영 HOLD |
+| P0 | LOAN1398-04 | A/B: 현금 출처 누락·타인 대출·세션 변경 응답·허위 상환 가능·미리보기 금융 쓰기 차단 |
+| P1 | LOAN1398-05 | B: 조회 함수 소유권·출처·계정 유일성·권한/인덱스 검증 및 필요 시 전진형 SECDEF |
+| P1 | LOAN1398-06 | A/B: 후보 BigInt·78자리 계약, DB 관측 시각과 API 응답 시각 구분 |
+| P1 | LOAN1398-07 | A: NestJS/Android POST·인증/CSRF·429·본문 상한·전체 상태 no-store |
+| P1 | LOAN1398-08 | A: 한영 UI·세션 세대·늦은 응답 폐기·키보드/접근성·별도 실제 상환 |
+| P1 | LOAN1398-09 | C: 비식별 관리자/KPI·개인정보 로그·보관·noindex·p95/오류율 |
+| P1 | LOAN1398-10 | QA: 격리 PG 10,001/100/100·미리보기 쓰기 0·원장/멱등성·Test exact-SHA·OFF 롤백 |
+
+**외부 독립 근거:** 신규 승인 0건, 누적 중복 제거·승인 UNKNOWN/10,000건, BLOCKED / IN PROGRESS. 합성 데이터는 외부 근거에 포함하지 않는다. 문서 전용 DRAFT / RELEASE HOLD.
+
 ## v1396 / F675-155 — 가상 WLD 은행 대출 상환 영향 미리보기 (기능 추가 / DRAFT / RELEASE HOLD) — 이슈 #1639
 
 **주기·기준:** 이전 기능 보완 v1394 → 현재 기능 추가 v1396 → 다음 기능 보완 v1398(잠정). 시작·중간 main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c. main의 AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조 문서 확인. 미병합 기획 #1634 위에 쌓는 문서 전용 Draft이며 개발 A/B/C/QA/Gemini의 런타임 작업은 수정하지 않는다.

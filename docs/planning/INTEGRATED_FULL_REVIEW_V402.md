@@ -1,3 +1,6 @@
+## v1398 integrated re-review — F675-155 candidate/source contract (DRAFT / HOLD)
+- Main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c unchanged start/mid; A #1641 unmerged SHA 153491e2eaf5c5bb39933d9e2a5634b49a45c44b. Reconcile proposed new SECDEF vs standing-function reuse; app-role actor spoof, missing cash-row=0, API-clock observedAt and stale session results remain open. QA v1334 main lint/test FAIL, legacy backup cron failure, independent restore NOT VERIFIED. Backlog ENV1398-01 SEC1398-02 REL1398-03 LOAN1398-04 LOAN1398-05 LOAN1398-06 LOAN1398-07 LOAN1398-08 LOAN1398-09 LOAN1398-10. External new approved 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. OFF/HOLD.
+
 # Woldeok Moneyverse — Integrated Full Planning Re-review v2026.09.23.402
 
 > Status: active full re-review / phase 1 authority and contract audit
