@@ -5,7 +5,7 @@
 - [x] 전작업: 사용자 직접 지시 및 GitHub 문서/이슈/커밋 교차검증. 2026-10-22 v1107 승인, v1108 자동 비공개 금지, 2026-10-27 v1102 503 편집 게이트 확인.
 - [x] 작업 중: 안전한 순환 슬롯 결정기·실제 스케줄 정의·회귀 테스트·영문/국문 통합 기획·내부/GitHub 기록 작성.
 - [x] 중간 기록: origin/main 재조회 및 v1403 코드 후보/타 개발자 파일 충돌 방지.
-- [ ] 종료: 테스트/CI/PR, Test/Production 배포 게이트 및 미완료 사항 명시.
+- [x] 종료: 테스트/CI/PR, Test/Production 배포 게이트 및 미완료 사항 명시.
 
 **최소 출판 안전정책:** 사람 검토를 필수로 하지 않음. 그렇다고 허위 경제 수치·무출처 투자 조언·타국 복붙 글을 자동 발행하지도 않음. 검증 불가 원고는 공개가 아닌 작성 실패로 처리; 이미 공개된 글은 어떤 TTL/기한에도 자동 비공개하지 않음. 2시간 창이 도래해도 DB 멱등 발행 영수증과 독립 출처검증을 구현하기 전에는 새 API를 무단 활성화하지 않음.
 
@@ -14,3 +14,14 @@
 최신 origin/main은 4f5efd1f 유지. 다른 개발자의 v1403 TECH 수정 PR #1602와 파일 충돌 없이 백엔드 스케줄/새 정책만 변경. 4국가×3주제 순수 슬롯 설계, 사람의 필수 검토 제거/자동 비공개 금지, AdSense 사람 큐레이션 자격을 영문/국문 통합마스터·PROJECT_PLAN에 연결. 17개 집중 테스트 통과, 전체 백엔드 218개 파일 1695통과/430생략, TypeScript·린트·Nest/계약빌드 통과.
 
 **출판 사실:** 여전히 실제 AI 작성·국가별 출처수집·DB 멱등 발행기·관리자 수동 삭제 기능 부재. 새 스케줄러는 발행하지 않고 사유를 기록하므로 운영 글 생성 건수=0. 운영 crontab/Test/Production/DB는 미변경. #983/1137/1605 및 v1403 PR #1602 선행. Google 광고는 수동 큐레이션 없는 자동 생성 글에 배치 불가.
+
+
+## 작업 종료 (2026-10-28 KST)
+
+- 독립 소스 브랜치 `feat/blog-2hour-rotation-v1405-20261028`, 기능 개발 PR [#1612](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1612) **DRAFT**.
+- 사용자가 요구한 사람 검토 의무 폐지, 자동 비공개 금지, 2시간마다 국가·원어·주제 순환을 v1405 공식 영/한 통합기획과 프로젝트 계획 및 별도 상세 명세에 추가. [기존 자동발행 이슈 #983](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/983)에 2026-10-28 최신 변경 사실을 주석으로 남김.
+- 개발 검증: 17개 스케줄·광고/자동발행 정책 테스트 통과, 백엔드 전체 1,695 PASS/430 SKIP, 계약 및 Nest 빌드·TypeScript·변경 린트·문서 링크/공백 검사 통과.
+- CI [run #3815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/actions/runs/40538356046) 확인 시점 **진행 중**, 완료/성공으로 표시하지 않음.
+- **서버 작업 사실:** 신규 AI 원어 글 작성기/DB 인증 발행/관리자 수동 삭제 API 미구현. 새 2시간 스케줄 후보는 실제 발행 기능이 없어 안전하게 SKIP. 구형 /api/blog/generate 503, 운영 04시 cron, 운영 글·광고 설정·DB·서비스 포인터는 **미변경**. 사용자 지시를 제품 정책으로 채택한 것이 실운영 자동발행 성공을 뜻하지 않음.
+- GitHub main 갱신 여부 중간 확인: 작업 시작/중간 origin/main `4f5efd1f48615f0112701feec25a9b0fc67d9719`. v1403 TECH 글 PR #1602 별도이며 충돌 변경 없음. DB migration 283 중복 #1605, 공식 Test 미인증, 금융 직접 DML 권한 차단 유지.
+- **종료 상태: SOURCE_CANDIDATE_COMPLETE / DRAFT_PR / CI_PENDING / VERIFIED_PUBLISHER_NOT_IMPLEMENTED / TEST_NOT_PROMOTED / PRODUCTION_NOT_DEPLOYED.**
