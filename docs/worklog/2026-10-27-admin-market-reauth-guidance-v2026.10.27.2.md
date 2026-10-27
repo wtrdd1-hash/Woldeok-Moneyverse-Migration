@@ -28,5 +28,12 @@
 - First Vitest invocation inherited host `NODE_ENV=production` and failed with missing React.act, including the unchanged baseline StepUpField test. Re-run with explicit `NODE_ENV=test` PASS; not an app defect.
 - "/health" anonymous on Production and Test was 200; not proof of authenticated Test backend/API, DB or action E2E. No materialized exact-SHA test artifact yet. Root remains 100% used and data disk ~98% used; release verification must not be bypassed.
 
-## Finished
-- Pending: CI/PR, exact-SHA isolated Test backend & authenticated E2E, Production promotion. Do not report deployed ahead of these gates.
+## Finished — engineering work; release pending (2026-10-27 KST)
+- Implementation and source verification are complete on dedicated branch `fix/admin-market-reauth-guidance-v2026.10.27.2`. GitHub PR #1518 is open and linked to incident #1515. Local main and other agents' branches were not modified.
+- **Full frontend suite:** `NODE_ENV=test pnpm --dir frontend test` completed exit 0: **268 test files and 1,427 tests passed** (`mv-task` evidence `admin-market-reauth-v2026-10-27-full-frontend`, 2026-10-27 11:03:21 KST).
+- **Backend targeted authorization and guard tests:** 39/39 PASS. Frontend typecheck PASS, targeted ESLint 0 errors (9 preexisting warnings in affected older files). `git diff --check` PASS.
+- Re-fetched `origin/main` before and during implementation, still `5888176454648f51d5f986be60a22847bd234777` as of this checkpoint. Re-fetch again before eventual merge.
+- **CI status at record time:** PR #1518 `policy`, `classify`, `verify / policy`, `verify / classify`, `release-input` PASS; `runtime-check` and `verify / runtime-check` IN_PROGRESS, **not yet full PASS**.
+- **Test/Production:** NOT DEPLOYED. Currently public Test `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; Production `6a989b5ac0c6155587d43426d64f6def6b62c917`. No exact-branch Test deployment, authenticated E2E, financial/database readiness evidence, session continuity, canary or rollback acceptance; therefore do not merge/promote yet.
+- Capacity blocked for safe sequential Test+Production artifact staging: host root 100% full (~694 MB free) and data volume 98% used (~4.6 GB free); each existing immutable Test/Prod release consumes roughly 1.8/1.5 GB. Do not remove another worker's files or rollback generations to force deployment.
+- Follow-up gated actions: get exact-head CI PASS, safely free capacity through documented retention controls, stage immutable Test SHA and verify live backend/API/DB/security E2E, reconcile changed main, integrate after those gates, re-test exact main and perform controlled zero-downtime Production promotion plus smoke/session/rollback proofs. This worklog is a truthful engineering completion record, **not** a deployment certificate.
