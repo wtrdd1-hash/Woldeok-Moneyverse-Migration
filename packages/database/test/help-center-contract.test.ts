@@ -28,3 +28,10 @@ describe('independent publication boundary', () => {
     expect(sql).toMatch(/CREATE FUNCTION public\.help_admin_retract/);
   });
 });
+
+describe('published evidence freshness transparency', () => {
+  it('projects a review deadline in BOTH public SQL read contracts', () => {
+    expect(sql).toMatch(/RETURNS TABLE\(article_id uuid, locale text, slug text, category text, title text, summary text, published_at timestamptz, reviewed_until timestamptz\)/i);
+    expect(sql).toMatch(/RETURNS TABLE\(article_id uuid, locale text, slug text, category text, title text, summary text, body_plain text, source_url text, published_at timestamptz, reviewed_until timestamptz\)/i);
+  });
+});
