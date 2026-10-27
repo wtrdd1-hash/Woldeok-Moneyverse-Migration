@@ -170,7 +170,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
-  return proxy(request, (await context.params).path);
+  const parts = (await context.params).path;
+  const response = await proxy(request, parts);
+  // A chat image can contain private support or direct-message content.
+  // Override even a stale upstream public cache policy on every response.
+  if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'media') {
+    response.headers.set('cache-control', 'private, no-store');
+  }
+  return response;
 }
 
 export const GET = handle;

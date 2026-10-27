@@ -99,8 +99,10 @@ export class ChatUploadController {
   }
 
   @Get('media/:key')
+  @UseGuards(SessionGuard, AuthenticatedGuard)
   @ApiOperation({ summary: 'Serve uploaded chat image bytes' })
   async getChatMedia(@Param('key') key: string, @Res() res: Response): Promise<void> {
+    res.setHeader('cache-control', 'private, no-store');
     const result = await this.chatStorage.read(key);
     if (!result) {
       throw new NotFoundException('요청한 이미지를 찾을 수 없습니다.');
@@ -108,7 +110,6 @@ export class ChatUploadController {
 
     res.setHeader('content-type', result.mimeType);
     res.setHeader('content-length', result.buffer.length);
-    res.setHeader('cache-control', 'public, max-age=86400, immutable');
     res.setHeader('x-content-type-options', 'nosniff');
     res.end(result.buffer);
   }
