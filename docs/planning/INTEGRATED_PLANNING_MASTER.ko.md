@@ -1,3 +1,48 @@
+## v1376 / F675-151 — 검증된 장애 이력의 자발적 구독·앱 내 알림 (기능 추가 / 초안 / 배포 보류)
+
+**회차·정본.** 이전 기능 보완 v1374 → 현재 기능 추가 v1376 → 다음 기능 보완 v1378(잠정). 개발 이슈 #1583, 선행 미병합 Draft PR #1578(그 선행 #1573). 시작·중간 main `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`. 최신 main의 AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md 및 한국어 대조 문서 확인. 이번 회차는 기획 초안이며 런타임·DB·Test·Production 변경이 아니다. **독립 승인된 실제 장애 이력에 한해 회원이 명시적으로 구독하고 검증된 공개 업데이트만 알림받도록 한다.**
+
+### 코드 근거·선행조건·제외 범위
+- `frontend/src/app/status/page.tsx`는 수집기의 30초 캐시 스냅샷과 일반 공지 링크만 제공하며 구독 CTA는 없다. `backend/src/content/status-collector.ts`는 점검 예외를 outage로 기록하지만 이것만으로 실제 장애를 입증할 수 없다. 마이그레이션 013은 상태 출처와 관측 스냅샷을 저장한다. 승인된 장애 게시·구독 기능은 이번 기획에서 배포하지 않는다.
+- `backend/src/notification/notification.controller.ts`에는 인증·동의·CSRF 기반 알림 조회·읽음 API가 있고 서비스는 `in_app_notifications`를 OFFSET 조회한다. F675-149/#1568은 실제 알림함·Outbox의 미병합 개선안이다. `frontend/src/app/account/notifications/page.tsx`의 기존 게임 목표 알림 설정은 장애 구독 동의가 아니다.
+- **필수 선행 게이트:** F675-150의 독립 승인·게시 영수증과 F675-149의 소유자 보호·중복 방지 알림/Outbox가 모두 공식 Test 정확 SHA로 검증돼야 한다. 미충족 시 구독 CTA/쓰기/작업자를 OFF, '아직 이용할 수 없음'으로 표시한다. 비회원은 공개 이력을 읽을 수 있으나 구독할 수 없다. 이메일·문자·푸시·디스코드·자동 가입·WLD 보상은 제외한다. 단순 점검 실패, 미승인 초안, 잠정 복구, 반려 수정, 내부 사건은 절대 알림을 발행하지 않는다.
+
+### 대상·화면·CTA·상태
+- 비회원: `/status` → `/status/incidents` → `/status/incidents/[id]`에서 검증된 게시 이력 확인, 회원 전용 구독 CTA에는 로그인 안내. 회원: **검증된 업데이트 받기 / 구독 해제 / 알림 기록 보기**(`/account/notifications?category=incident`). 기본값 OFF, 사전 선택 금지, 사건 ID 하나에만 구독 적용. 별도 출처 전체 자동 구독은 v1 범위 밖이다. 승인된 예정 점검도 동일한 검증 규칙에서만 선택적으로 포함한다.
+- 상태: LOADING, LOGIN_REQUIRED, VERIFIED_AVAILABLE, WATCHING, UNWATCHED, SAVING, UNKNOWN_COMMIT, WITHDRAWN, INCIDENT_UNVERIFIED, DEPENDENCY_PAUSED, SESSION_EXPIRED, FORBIDDEN, UNAVAILABLE. 응답 유실 시 기존 `intentId`로 서버 영수증 재조회 후에만 성공 표시. 구독 해제는 이후 알림을 즉시 차단한다. 이미 수신한 기록은 비공개 알림함에 남을 수 있지만 철회된 사건의 본문/링크는 다시 공개하지 않는다.
+- 관리자 `/admin/status/incidents/[id]`: 구독자 수·발행 가능 개정·전달 대기/억제/실패·지연을 **20명 이상 집계 및 보완 셀 억제** 조건에서만 표시. 개인 구독자 명단/내보내기/개인 읽음 영수증은 금지. 사건 게시 승인 권한은 F675-150의 독립 승인 절차를 유지한다.
+
+### API·권한·오류
+- 회원 GET `/api/v1/status/incident-watches?limit=1..50&cursor=`는 본인의 활성 구독만 `{incidentId,publicRevisionId,subscribedAt,lastDeliveredAt,watchGeneration,nextCursor}`로 반환(기본 20, 서명 키셋 커서). GET `/api/v1/status/incidents/:id/watch`는 `{watching,generation,currentPublicRevisionId,checkedAt,availability}` 반환. POST `/api/v1/status/incidents/:id/watch`는 `{intentId:UUID,expectedPublicRevisionId:UUID}`; DELETE 동일 경로는 `{intentId:UUID,expectedWatchGeneration:integer}`; 응답 `{intentId,status:COMMITTED|ALREADY_APPLIED|SUPPRESSED,watchGeneration,committedAt,receiptId}`. GET `/api/v1/status/incident-watches/receipts/:intentId`로 UNKNOWN_COMMIT 확인. 행위자는 세션에서만 얻고 동의·CSRF를 강제한다. Android App API도 동등한 인증·소유권·요청 위조 방어를 갖추며 클라이언트 userId는 신뢰하지 않는다.
+- 오류: 400 입력 오류/과다, 401 미인증, 403 동의·세션 거부, 404 미게시/타인 소유 은닉, 409 오래된 버전·다른 본문 동일 intent, 410 철회, 423 선행 기능 중지, 429 과다 요청, 503 DB/Outbox 불가. 회원 화면/API는 `private,no-store`, 민감 응답 304/ETag 금지. 신규 공개 사건 이력은 F675-150의 동적 no-store를 따르고 기존 `/status`의 30초 캐시는 유지한다.
+
+### DB 제약·트랜잭션·보안
+- 중복 마이그레이션 280·체크섬 문제 해결 **이후** 고유한 신규 번호의 전진 전용 마이그레이션을 설계한다. `status_incident_watches`에는 UUID PK, user_id/incident_id FK, active, watch_generation/version 양수 CHECK, subscribed_at/revoked_at, UNIQUE(user_id,incident_id). `status_incident_watch_intents`에는 UNIQUE(user_id,intent_id), 32바이트 요청 해시·명령·영수증. 불변 영수증 테이블과 `status_incident_watch_delivery`에는 UNIQUE(user_id,incident_id,public_revision_id,kind), 구독 세대·전달 상태·시도·재시도 시각·영수증을 둔다. 실제 승인 사건/개정 스키마는 개발 시 재확인하고 미배포 테이블을 기정사실로 가정하지 않는다.
+- 인덱스: `(user_id,active,subscribed_at DESC,id DESC)`, `(incident_id,active,watch_generation)`, 대기/재시도 `(delivery_state,next_attempt_at,id)` 부분 인덱스, 영수증 `(user_id,created_at DESC,id DESC)`. 공개 개정 FK·불변 해시·게시 세대 무결성 검증. 보존기간/삭제는 법률·개인정보 검토 후 확정하며 임의 법정기간을 주장하지 않는다.
+- 구독/해제는 SECURITY DEFINER 함수에서 세션 행위자·고정 intentId를 검증하고 `(user_id,incident_id)`를 일관된 순서로 잠가 공개 개정/버전을 재확인한다. CAS로 구독 세대를 증가시키고 구독·불변 영수증·감사를 한 트랜잭션으로 기록한다. 동일 intent/본문은 원래 영수증을 반환하고 다른 본문은 409. `moneyverse_app` 테이블 직접 DML 및 PUBLIC EXECUTE를 허용하지 않으며 권한 거부·search_path 고정 테스트를 필수화한다.
+- 승인된 공개 개정이 확정되는 **F675-150 게시 트랜잭션과 같은 트랜잭션**에서 세대 결합 Outbox를 기록한다. 작업자는 제한된 배치/리스로 처리하고 알림 INSERT 직전 공개 세대·현재 구독 세대·명시적 동의·기능 스위치·철회를 재검증한다. 해제 시 세대 증가 및 대기 알림 억제를 원자적으로 수행해 늦은 작업자가 재활성화하지 못하게 한다. 네트워크 정확히 1회 전송을 보장한다고 주장하지 않으며 재시도+고유 알림 키로 **사용자에게 보이는 중복**을 방지한다. 사건 철회 시 미전송 억제, 기존 알림 링크/미리보기 안전화. Outbox·선행 스키마가 없으면 기능 OFF.
+- 악용 방지: 회원당 분당 구독 변경 10회, 활성 구독 100건(초기 **시험 목표값**, 설정 가능), 승인 개정 1건당 알림 1건, 작업자 큐/팬아웃 제한, 임의 URL/SSRF·XSS 방지, 불투명 ID, 세션/CSRF·소유권 검증. 20명 미만 집계 및 중첩 필터 역추적 차단.
+
+### 모바일·접근성·SEO·KPI·검증·롤백
+- 한국어/영어, 키보드·스크린리더의 성공/오류/응답 유실 안내, 44px 터치 영역, 320px/200% 확대, 포커스 복귀, 동작 줄이기, WCAG 2.2 AA. 회원·관리자 noindex/no-store, 공개 장애 페이지도 독립 SEO 검증 전 noindex. 개인 구독 수를 구조화 데이터·사이트맵에 노출하지 않는다. Android 딥링크도 소유권을 검증하고 철회 시 안전한 안내로 이동한다.
+- **서버 확정 영수증 기준 KPI:** 검증된 게시 개정 수, 확인된 상세 조회 대비 구독 전환, 해제율, 중복 억제, 전달 성공률/지연 p95, 해제 후 억제, 개인정보 노출(목표 0), 큐 대기시간, 알림 클릭률. 분모 없으면 UNKNOWN으로 표기하고 100% 성공을 추정하지 않는다.
+- **수용시험 계획(미실행):** 격리 PostgreSQL 합성 구독/개정 10,001건, 동시 구독/해제/게시/철회 100건, 위조 세션·소유권·CSRF 100건, intent 동일/충돌, 역순 개정, Outbox 작업자 크래시, 오래된 세대 리스, 선행 기능 미구현, 권한 거부, 304/CDN 재노출, Next.js/Android 계약·접근성, OFF/롤백. 기본 스위치 OFF, 전진 전용 DB 호환, OFF 시 신규 구독·전달만 중단하고 기존 지원·상태 기능은 유지. 개발 별도 브랜치 → 리뷰된 마이그레이션 → 전체 보안·루트 QA → 공식 Test 정확 후보 SHA 및 인증 5회 E2E·독립 백업 복원 → 운영 승인/스모크/롤백.
+
+### 개발 우선순위 (이번 기획에서 실행하지 않음)
+- **P0 ENV1376-01:** 끊어진 `/srv/moneyverse`와 Test `test-current` 배포 포인터의 실제 릴리스 근거 확인·복구, 용량·독립 암호화 백업 복원 검증. 다른 작업자 Worktree/볼륨 삭제 금지.
+- **P0 SEC1376-02:** 마이그레이션 280 중복·체크섬, 개발 앱 역할 241개 중 235개 테이블 변경 권한, PUBLIC 은행 함수 실행 권한, 금융 원장 우회 경로 해결.
+- **P0 REL1376-03:** main 루트 테스트·전체 감사·공식 Test 정확 SHA·인증 웹/Android/라우트 5회 E2E·롤백 증명. 문서 변경만으로 자동 운영승격 금지.
+- **P0 WATCH1376-04:** F675-150·F675-149 미검증 상태의 구독·발송 차단, 철회/오래된 개정·타인 조회·해제 후 재전송 차단.
+- **P1 WATCH1376-05:** 구독/intent/전달 DB 스키마·유니크/FK/제약/인덱스·보존 정책·권한 거부 테스트.
+- **P1 WATCH1376-06:** SECURITY DEFINER CAS/영수증, 게시 Outbox·재시도·세대 차단·원자적 구독 해제.
+- **P1 WATCH1376-07:** NestJS 회원 API·기존 알림 호환·Android App API·서명 커서·인증/CSRF/소유권/오류 계약.
+- **P1 WATCH1376-08:** Next.js 공개 상세/회원 구독 CTA·알림함, 관리자 집계 전용, 한국어/영어 모바일·접근성·정직한 상태.
+- **P1 WATCH1376-09:** 개인정보·보존·no-store/noindex·악용 제한·안전 딥링크·영수증 KPI·소규모 집계 보호.
+- **P1 WATCH1376-10:** 격리 PG 10,001/100/100 회귀, 정확 SHA Test·보안·304/CDN·독립 복원·OFF/롤백 실증.
+
+**최신 QA v1324(2026-10-27 21:28 KST).** main `pnpm test`는 중복 280으로 FAIL(DB 19 PASS/1 FAIL/3 SKIP), 백엔드 1,544 PASS/412 SKIP, 프론트 1,485 PASS. 전체 감사 Critical 2/High 8/Moderate 11/Low 3, 봇 Critical 1/High 5. PR #1564 로컬 합성 병합의 루트 통과는 공식 Test 승인이 아니다. 열린 PR 360개(초안 345/준비 15). Test `test-current` 및 운영 `/srv/moneyverse` 링크 대상 없음, 서비스 프로세스는 ACTIVE. 개발 DB 241개 중 235개 테이블에 앱 역할 변경 권한 및 금융 원장 위험이 남아 있다. 공식 Test 정확 SHA·독립 복원 미검증, 운영승격 BLOCKED.
+
+**외부 독립 근거 10,000건 게이트.** 이번 신규 승인·중복 제거·실제 근거 분류 0건, 누적 승인 **UNKNOWN/10,000**, BLOCKED / IN PROGRESS. 기술 표준·내부 코드 관찰은 외부 독립 레퍼런스 실적으로 계산하지 않는다.
 ## v1374 / F675-150 — 장애 관측 근거·복구 판정·게시 무결성 보완 (기능 보완 / 초안 / 배포 보류) — Draft PR #1578
 
 **회차 및 정본.** 이전 기능 추가 v1372 → 현재 기능 보완 v1374 → 다음 기능 추가 v1376(잠정). 미병합 장애 이력 Draft PR #1573과 이슈 #1572를 계승하며 개발 A/B/C·Gemini·QA 런타임 변경과 분리한다. 시작·중간 main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c. 최신 main AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md와 국문 대조 확인. 실제 구현·배포가 아닌 문서 기획이다.

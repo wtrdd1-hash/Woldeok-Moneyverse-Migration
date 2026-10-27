@@ -1,3 +1,8 @@
+## v1376 / F675-151 — 검증된 장애 구독·알림 (기능 추가 / 초안 / 배포 보류) — 이슈 #1583
+- 이전 기능 보완 v1374 → 현재 기능 추가 v1376 → 다음 기능 보완 v1378(잠정). 시작·중간 main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c. 구독·승인 장애 이력은 아직 배포되지 않았다. 미병합 F675-150/#1578 및 F675-149/#1568의 공식 Test 정확 SHA 검증이 선행되어야 한다. 사건별 회원의 명시적 구독만 허용하고 점검 실패 자동 알림·푸시/문자/이메일·관리자 개인 명단·WLD 지급은 제외한다.
+- 공개 /status/incidents/[id]의 검증된 사건 구독 CTA, 회원 /account/notifications 알림, 관리자 20건 이상 집계 전용. NestJS/Android 인증·소유권 GET/POST/DELETE/영수증, 고정 intentId, 409 충돌·UNKNOWN_COMMIT 재확인·410 철회, no-store/noindex, 한국어/영어·WCAG 2.2 AA. 전진 전용 DB UNIQUE/FK/SECURITY DEFINER, 게시 트랜잭션 Outbox, 구독 세대 CAS, 해제 후 대기 알림 억제·중복 방지·OFF 롤백. 전체 명세는 영문 통합문서 및 한국어 동등 문서 참조.
+- P0 ENV1376-01 SEC1376-02 REL1376-03 WATCH1376-04; P1 WATCH1376-05 WATCH1376-06 WATCH1376-07 WATCH1376-08 WATCH1376-09 WATCH1376-10. QA v1324 main 루트 FAIL(마이그레이션 280 중복), 감사 Critical 2/High 8. Test/운영 배포 링크 대상 누락, 정확 SHA Test·독립 복원 미검증. 합성 10,001/동시 100/위조 100 시험 미실행. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 변경, 운영승격 보류.
+
 ## v1374 / F675-150 — 검증된 장애 근거·복구·게시 무결성 (기능 보완 / 초안·배포 보류) — Draft PR #1578
 - 이전 기능 추가 v1372 → 현재 기능 보완 v1374 → 다음 기능 추가 v1376(잠정). 이슈 #1572와 미병합 선행 Draft #1573 계승. 시작·중간 main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c, main AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·국문 대조 확인. 현재 상태 수집기는 점검 예외를 outage로 기록하지만 공식 장애 확정 근거는 아니다. 마이그레이션 013은 observed_at/received_at을 분리하며 공개 최신 상태는 오래된 시각을 NULL로 숨기므로 과거 이력 근거로 사용하면 안 된다.
 - 개선: 구조화된 점검 실패/실제 영향 근거, 출처·스냅샷 소유권, 시계 오차·관측 공백, 관측 2회+독립 확인에 의한 발표·복구, 제안/승인/게시/복구 분리, 불변 개정·감사·410 안전 철회 묘비·CAS/세대 outbox. 신규 장애 목록·상세는 dynamic no-store/304 금지/CDN 재노출 차단, 기존 /status 30초 캐시는 유지. 사용자/관리자/Android API, 전진 DB·제약·인덱스, 개인정보·SEO·WCAG 2.2 AA·KPI·정확 SHA Test·기능 OFF 롤백 상세는 영문/국문 통합 마스터에 명세.
