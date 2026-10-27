@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
 import { requirePositiveWld } from '../../wallet/wallet.repository';
@@ -511,6 +511,9 @@ export class NationalPensionRepository {
   }
 
   async listRecentPayoutLogs(limit = 20): Promise<NationalPensionPayoutLogRow[]> {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new BadRequestException('limit must be an integer between 1 and 100');
+    }
     const res = await this.pool.query<NationalPensionPayoutLogRow>(
       `SELECT * FROM public.national_pension_payout_logs ORDER BY created_at DESC LIMIT $1`,
       [limit],

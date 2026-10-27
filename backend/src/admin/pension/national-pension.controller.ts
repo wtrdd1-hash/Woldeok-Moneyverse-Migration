@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -32,8 +33,12 @@ export class AdminNationalPensionController {
 
   @Get('recent-payouts')
   @ApiOperation({ summary: '최근 정기 기초연금 지급 로그 조회' })
-  async getRecentPayouts(@Query('limit') limit?: number) {
-    return this.service.listRecentPayoutLogs(limit ? Number(limit) : 20);
+  async getRecentPayouts(@Query('limit') limit?: string) {
+    if (limit === undefined) return this.service.listRecentPayoutLogs(20);
+    if (typeof limit !== 'string' || !/^(?:[1-9]|[1-9][0-9]|100)$/.test(limit)) {
+      throw new BadRequestException('limit must be an integer between 1 and 100');
+    }
+    return this.service.listRecentPayoutLogs(Number(limit));
   }
 
   @Post('distribute-payouts')
