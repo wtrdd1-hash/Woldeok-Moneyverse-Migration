@@ -1,3 +1,7 @@
+## v1356 F675-146 — Consent-only support diagnostic snapshot (DRAFT / HOLD)
+- New voluntary member support diagnostic preview/review/attach/withdraw with strict five-enum allowlist, per-snapshot consent, owner-only receipt and operator-only admin read. No auto-collection or secret-bearing payload. Not deployed; feature OFF.
+- Exact technical contract: [integrated English master](INTEGRATED_PLANNING_MASTER.md), backlog ENV1356-01 SEC1356-02 REL1356-03 DIAG1356-04 DIAG1356-05 DIAG1356-06 DIAG1356-07 DIAG1356-08 DIAG1356-09 DIAG1356-10. QA v1313 HOLD, main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c`, independent external accepted 0, cumulative UNKNOWN/10,000 BLOCKED.
+
 ## F675-145 / Planning v1354 — Help Publication and Handoff Integrity (IMPROVEMENT / DRAFT / HOLD)
 - Main 5888176454648f51d5f986be60a22847bd234777, previous Addition v1352/current Improvement v1354/next Addition v1356; stacked Draft #1514 and engineering #1513. Verified login `next` ignored and login redirects `/`, `publicApi` SWR and static sitemap/hourly robots. Fix guest CTA truth and avoid cached withdrawn articles.
 - Strict PUBLISH_PENDING (nonpublic) → PUBLISHED_CONFIRMED after signed purge receipt and revalidation; DB-first retract, per-read expiry, no-store dynamic route, deny stale 304, epoch-bound search cursor, safe 404/410, dynamic sitemap. Distinguish third-party crawler retention; no instant global erasure claim. Independent operator/approver, source captured-content digest and SSRF protections, Android/SEO/a11y/KPI. Full bilingual specification in integrated masters.

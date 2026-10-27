@@ -1,3 +1,8 @@
+## 2026-10-27 Planning v1356 — F675-146 consent-only support diagnostics (DRAFT/HOLD)
+- Full backlog IDs: ENV1356-01 SEC1356-02 REL1356-03 DIAG1356-04 DIAG1356-05 DIAG1356-06 DIAG1356-07 DIAG1356-08 DIAG1356-09 DIAG1356-10
+
+- Main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c` checked twice; predecessor #1519 unmerged; separate from help development #1522. New feature is not implemented. QA v1313 audit failures and capacity P0 persist; external gate 0 new/UNKNOWN cumulative. EN/KO master, project plan, feature review and worklog updated. No runtime, DB, WLD, Test or Production change.
+
 ## Planning v1354 — F675-145 Help Publication/Cache/Handoff Integrity (DRAFT / RELEASE HOLD)
 - Previous Addition v1352 / Current Improvement v1354 / Next Addition v1356. Main 5888176454648f51d5f986be60a22847bd234777 start/mid; predecessor Draft #1514, issue #1513. Corrected unimplemented `/login?next=/support` promise, publicApi SWR risk, static sitemap/robots freshness, two-phase publication, DB-first retract, 304/ETag and cursor epoch; full bilingual integrated masters.
 - QA v1313 frontend 1,423 PASS, isolated PG migration/test exit 0; full audit Critical2/High8, bot Critical1/High5 and route evidence FAIL. Root ~691MiB, data ~5.6GiB; official exact-SHA Test and restore BLOCKED. ENV1354-01 SEC1354-02 REL1354-03 HELP1354-04 HELP1354-05 HELP1354-06 HELP1354-07 HELP1354-08 HELP1354-09 HELP1354-10. External new approved 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only, flag OFF, no runtime/DB/WLD/ledger/Test/Production changes.

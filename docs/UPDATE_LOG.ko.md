@@ -1,3 +1,8 @@
+## 2026-10-27 기획 v1356 — F675-146 동의 기반 고객지원 진단 (초안/보류)
+- Full backlog IDs: ENV1356-01 SEC1356-02 REL1356-03 DIAG1356-04 DIAG1356-05 DIAG1356-06 DIAG1356-07 DIAG1356-08 DIAG1356-09 DIAG1356-10
+
+- main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c` 2회 확인, 선행 #1519 미병합, 도움말 개발 #1522와 분리. 기능 미구현. QA v1313 보안 감사 및 공간 P0 유지, 외부 근거 신규 0/누적 UNKNOWN. 국영문 통합 마스터·기획·기능검토·작업일지 반영. 런타임/DB/WLD/Test/운영 변경 없음.
+
 ## 기획 v1354 — F675-145 도움말 게시·캐시·문의 연결 무결성 (초안 / 운영 보류)
 - 이전 추가 v1352 / 현재 보완 v1354 / 다음 추가 v1356. main 5888176454648f51d5f986be60a22847bd234777 시작·중간 확인, 선행 Draft #1514·개발 #1513. 미구현 `/login?next=/support` 복귀 안내 정정, publicApi SWR·정적 사이트맵/robots 위험, 2단계 게시·DB 우선 철회·304/ETag·epoch 커서를 국영문 통합 마스터에 명세.
 - QA v1313 프론트 1,423·격리 PG migration/test 종료 0, 전체 감사 Critical2/High8·봇 Critical1/High5·라우트 증거 실패. 루트 약 691MiB·데이터 약 5.6GiB, 정확 SHA Test·복원 보류. ENV1354-01 SEC1354-02 REL1354-03 HELP1354-04 HELP1354-05 HELP1354-06 HELP1354-07 HELP1354-08 HELP1354-09 HELP1354-10. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서만 변경, 기능 OFF, 런타임/DB/WLD/원장/Test/Production 변경 없음.

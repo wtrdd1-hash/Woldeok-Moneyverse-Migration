@@ -1,3 +1,37 @@
+## 기획 v1356 — F675-146 (engineering issue #1524) 명시적 동의 기반 고객지원 진단 스냅샷 (기능 추가 / 초안 / 운영 보류)
+
+**주기:** 이전 기능 보완 v1354 → 현재 기능 추가 v1356 → 다음 기능 보완 v1358(잠정). **기준:** 원격 main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c` 시작·중간 재확인, main AGENTS.md·README.md·영문 PROJECT_PLAN.md 및 국문 대조. 선행 미병합 기획 PR #1519 기반이며 도움말 개발 PR #1522와 변경을 겹치지 않음. QA v1313은 실제 테스트 증거, QA v1314는 브랜치 감사에 한정. 문서 기획만 수행, 기능 OFF, 운영승격 보류.
+
+### 목적과 실제 구현 공백
+회원이 문의를 해결하는 데 필요한 **제한된 환경 정보**를 기존 문의에 안전하게 첨부할 수 있는 기능이 없다. 실제 `frontend/src/app/support/page.tsx`에는 제목·본문·답장만 있고, `backend/src/support/support.controller.ts`는 문의/메시지 API만 제공한다. Migration `196-user-admin-support-chat.sql`에는 support_threads/support_messages만 있고 진단 영수증이 없다. 현재 구현된 기능이라고 주장하지 않는다. 목표는 비밀정보 노출 없이 상담 재질문을 줄이는 것. 대상은 명시적으로 동의한 로그인 회원과 해당 문의를 조회할 현재 operator 관리자. F675-141 이미지 증빙, 142 배정, 143 내부 메모, 144 답변 템플릿, 145 도움말 및 개발 PR #1522와 독립.
+
+### 회원 화면·CTA·상태·동의
+진입 `/support?thread=<uuid>` → 기존 문의 → **선택형 진단 스냅샷** 카드. CTA **안전한 항목 미리보기**, **전송할 내용 직접 확인**, **이 문의에 첨부**, **취소**, **스냅샷 삭제**. 페이지 열기·로그인·채팅 전송·도움말 열람만으로 자동 수집 금지. 미리보기는 클라이언트 로컬에서만 생성·수정. 허용 필드: 브라우저 계열 enum(Chromium/Firefox/WebKit/Other), 기기 분류(데스크톱/모바일/태블릿/기타), 화면 너비 구간(소/중/대, 정확한 픽셀 금지), 서버 승인 릴리스 목록의 웹 앱 버전, 회원이 직접 고른 문제 영역(로그인/지갑/상점/커뮤니티/기타). 매 스냅샷마다 체크하지 않은 상태의 동의 체크박스와 고지 버전 확인. IP, 위치, 전체 URL/쿼리/해시, 쿠키, 인증 헤더, 토큰, 세션 ID, 원시 User-Agent, 로컬스토리지, 계정·지갑 잔액, 개인 메시지, 스크린샷, 스택트레이스, 기기 지문, 임의 자유문구·요청 헤더, 자동 오류 로그는 절대 전송하지 않음. 추정 불가능한 브라우저 항목은 UNKNOWN으로 표시.
+상태 CLOSED, PREVIEW_LOCAL, CONSENT_REQUIRED, REVIEW_READY, SUBMITTING, VERIFYING_RECEIPT, ATTACHED, UNKNOWN_COMMIT, EXPIRED, REMOVED, FORBIDDEN, OFFLINE, ERROR. 서버 영수증을 검증한 경우만 ATTACHED. 문의 전환·로그아웃·계정 변경·동의 철회 시 미리보기 폐기 및 오래된 응답 차단. 키보드·스크린리더·320px·400% 확대·WCAG 2.2 AA, 포커스와 오류 요약, 라이브 영역에 진단 원문 노출 금지. Android는 자체 허용 목록·명시적 동의가 필수이며 OS 식별자를 전달하지 않음.
+
+### API·DB·트랜잭션(미구현 개발 제안)
+회원 `POST /api/v1/support/threads/:id/diagnostics` (CSRF·세션·동의·본인 소유), `GET /api/v1/support/threads/:id/diagnostics?cursor=`, `DELETE /api/v1/support/threads/:id/diagnostics/:snapshotId` (철회·삭제); 관리자 `GET /api/v1/admin/support/threads/:id/diagnostics`는 현재 operator 역할 및 관리자 세션 검증. approver 전용/server_operator 전용 역할은 거부. App API도 동일한 본인 식별·응답 계약을 지키며 관리자 경로 미노출. 요청 `{idempotencyKey:uuid, policyVersion:known_enum, acknowledged:true, snapshot:{browserFamily,platformClass,viewportBucket,appRelease,issueArea}}`; 허용되지 않은 키·중첩·자유문구·enum·정책 버전·4,096 UTF-8바이트 초과는 422. 응답 `{snapshotId,threadId,createdAt,expiresAt,state,receiptId,contentDigest}`; 지문은 기기 식별자가 아닌 서버 정규화 허용 필드 SHA-256. GET은 본인 전용 최대 50건, 회원/문의/필터/스냅샷/유효시간 결합 HMAC 커서. 오류를 빈 목록으로 위장하지 않음.
+추가 테이블 `support_diagnostic_snapshots`: UUID PK, thread_id FK ON DELETE CASCADE, owner_user_id FK, policy_version, 허용 JSONB, payload_sha256, idempotency_key, 상태 ACTIVE/REMOVED/EXPIRED, version bigint, created_at/expires_at/removed_at. 불변 이벤트 `support_diagnostic_events`: id, snapshot_id, actor_id, event_kind, event_at, receipt_digest. UNIQUE(owner_user_id,idempotency_key), JSON 객체·정확한 키·enum CHECK, 원문 불변; 부분 인덱스 `(thread_id,created_at DESC,id DESC) WHERE state='ACTIVE'`, 만료 인덱스 `(expires_at,id) WHERE state='ACTIVE'`. 보존 목표 **30일은 개인정보·법무 검토 전 잠정값**, 만료 처리 및 감사 묘비, 암호화 백업 보존기간 별도 검증. 임의 기기 식별자 생성 금지.
+최소권한 SECURITY DEFINER, 고정 search_path, PUBLIC EXECUTE 철회, moneyverse_app 테이블 직접 DML 금지. 요청 UUID/GUC를 본인 인증 증명으로 신뢰하지 않고 실제 세션·현재 문의 소유권·operator 권한을 DB 경계에서 재확인. 잠금 순서 문의→스냅샷→영수증, 잠금 후 권한 재검증. 동일 키·동일 본문 지문은 기존 영수증, 동일 키·다른 지문은 409; 동시 UNIQUE 충돌은 재조회 복구. 스냅샷·불변 이벤트·영수증은 PostgreSQL 단일 트랜잭션, 감사 실패 시 전체 롤백. DELETE는 멱등 묘비. 문의 메시지, WLD, 원장, 기능 스위치를 변경하지 않음. 응답 유실 시 UNKNOWN_COMMIT → 영수증 재조회. 401 세션 만료, 403 권한, 404 타인 문의, 409 키 충돌, 422 검증, 429 제한, 503 DB/감사 장애. `Cache-Control: private, no-store`, `Vary: Cookie`, CDN·검색 색인 금지.
+
+### 관리자·보안·SEO·지표·승격
+`/admin/support`의 **회원 동의 진단 정보** 영역은 정확한 허용 필드, 동의 시각, 만료일, 삭제 상태만 조회; 기본적으로 내보내기·대량 다운로드·타 문의 검색·공개 답변 복사 금지. 모든 항목을 신뢰하지 않는 텍스트로 취급, 이스케이프/CSP, 회원·문의·일당 10건 및 분당 3건 제한, 크기/저장량 제한. 로그는 행위·상태·영수증 ID만, 원문 저장 금지. 개인정보 열람·삭제·제공 및 고지 문구 법무 검토 전 활성화 금지. 관리자 내부 메모는 회원 진단 정보로 노출 금지. 익명 집계 KPI(미리보기→동의→첨부 성공, 만료, 실패)만 사용, 집계 그룹 20명 미만 비공개. 고객지원/진단 경로 noindex/nofollow, 사이트맵 제외. 모바일 움직임 줄이기·다국어·오프라인 재시도·스크린리더 지원.
+격리 PostgreSQL 합성 10,001건 페이지네이션/만료, 동일 키 100건 동시 전송, 위조 소유자·관리자·만료 세션 100건, 동의 OFF, 잘못된 입력, 미승인 릴리스, 키 재사용, 감사 실패 전체 롤백, DB/HTTP 응답 유실, 삭제·조회 경합, 만료 기록 복원, Android 동등성 시험. 공개 도움말/채팅/SEO/로그로 유출 0, WLD·원장 변화 0 검증. 배포: `support_diagnostic_snapshot_v1` 기본 OFF → 격리 마이그레이션/ACL → 정확 커밋 SHA 공식 Test·금융 E2E·보안·접근성·성능 → 독립 암호화 백업 복원 → 승인 GitOps 카나리 → 점진 활성화. 롤백은 기능 OFF·쓰기 차단, 감사 묘비 보존, 파괴적 역마이그레이션 금지. 감사·ACL·동의·법무 검증 실패 시 계속 OFF.
+
+### P0/P1 개발 백로그 (모두 초안)
+- **P0 ENV1356-01:** 루트 여유 616MiB/데이터 여유 3.4GiB, 공간 확보·독립 암호화 백업 복원 검증 (#1170).
+- **P0 SEC1356-02:** 앱 직접 DML 235/241, PUBLIC 은행 EXECUTE 3개, 마이그레이션 체크섬 #1469, 원장 우회 #1507/#1502 개선.
+- **P0 REL1356-03:** QA v1313 전체 감사 Critical2/High8·봇 Critical1/High5·라우트 증거 실패, 정확 SHA 공식 Test/금융 E2E/복원 미검증, #1088 빌드만으로 병합 금지.
+- **P0 DIAG1356-04:** 무단 자동 수집·타 회원/무권한 관리자 조회·비밀 필드·허위 ATTACHED 방지.
+- **P1 DIAG1356-05:** 허용 스키마, FK/CHECK/UNIQUE/부분·만료 인덱스, 보존·개인정보 검토.
+- **P1 DIAG1356-06:** 본인/역할 SECDEF, 불변 동의·감사 영수증, 멱등성·동시 잠금.
+- **P1 DIAG1356-07:** NestJS 회원·관리자 API, App API 동등성, 401/403/404/409/422/429/503 및 영수증 복구.
+- **P1 DIAG1356-08:** Next.js 미리보기·동의·철회, 관리자 읽기 UI, Android·접근성·오프라인.
+- **P1 DIAG1356-09:** 개인정보보호법 검토, 30일 잠정 보존, 악용 방지, SEO/no-store, 집계 KPI.
+- **P1 DIAG1356-10:** 격리 PG 10,001/100/100, 개인정보 부정 시험·복원, 정확 SHA 승격·롤백 게이트.
+
+**외부 근거 게이트:** 신규 독립 수집·중복 제거·출처 분류 승인 **0건**, 누적 **UNKNOWN/10,000** → **BLOCKED / IN PROGRESS**. 확보했다고 허위 주장하지 않음. 문서만 변경, 런타임/DB/WLD/원장/Test/Production 변경 없음.
+
 ## 기획 v1354 — F675-145 도움말 게시·캐시·문의 연결 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 **회차:** 이전 기능 추가 v1352 → 현재 기능 보완 v1354 → 다음 기능 추가 v1356(잠정). **정본:** main `5888176454648f51d5f986be60a22847bd234777` 시작·중간 재확인, AGENTS.md·README.md·영문 PROJECT_PLAN.md·국문 대조 및 실제 코드 검토. 선행 미병합 Draft #1514, 개발 이슈 #1513. 이번 내용은 기획 개선이지 구현 완료나 실제 유출 확인이 아님.
 

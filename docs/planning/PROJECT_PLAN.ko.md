@@ -1,3 +1,10 @@
+## 기획 v1356 — F675-146 (engineering issue #1524) 동의 기반 고객지원 진단 스냅샷 (기능 추가 / 초안 / 운영 보류)
+- 주기: 이전 보완 v1354 → 현재 추가 v1356 → 다음 보완 v1358(잠정). 원격 main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c` 시작·중간 확인, AGENTS.md/README.md/영문 정본·국문 대조. 선행 #1519 미병합, 개발 #1522 독립. QA v1313 테스트 증거, v1314 브랜치 감사 한정. 기능 OFF.
+- 실제 support/page.tsx, support.controller.ts, Migration196에 구조화된 진단 첨부가 없음. /support에서 회원이 명시적 미리보기·검토·동의·첨부·철회; 브라우저 계열/기기 분류/화면 구간/승인 앱 버전/문제 영역 enum만 4096B 이하. 쿠키·토큰·URL·IP·잔액·메시지·스크린샷·로그 자동 수집 금지. 서버 영수증 확인, operator 전용 조회, Android 동등성, WCAG2.2 AA, noindex/no-store. 상세 DB/API/트랜잭션/보존/롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 ENV1356-01 공간·복원 (#1170), SEC1356-02 앱 DML 235/241·PUBLIC 은행 3·체크섬 #1469·금융 #1507/#1502, REL1356-03 QA v1313 전체 감사 Critical2/High8·봇 Critical1/High5·라우트/정확 SHA Test/복원 HOLD, DIAG1356-04 무단/자동 수집 차단. P1 DIAG1356-05..10 JSONB/FK/인덱스, SECDEF/감사/멱등성, NestJS/App API, 웹/관리자/Android/접근성, 개인정보/SEO/KPI, 격리 PG 10,001/100/100·롤백. 런타임/DB/WLD/Test/Production 변경 없음.
+- 외부 독립 수집·중복 제거·근거 분류 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED / IN PROGRESS. 운영승격 보류.
+- Full backlog IDs: ENV1356-01 SEC1356-02 REL1356-03 DIAG1356-04 DIAG1356-05 DIAG1356-06 DIAG1356-07 DIAG1356-08 DIAG1356-09 DIAG1356-10
+
 ## 기획 v1354 — F675-145 도움말 게시·캐시·문의 연결 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 - 이전 추가 v1352 → 현재 보완 v1354 → 다음 추가 v1356(잠정). main 5888176454648f51d5f986be60a22847bd234777 시작·중간 확인, AGENTS.md·README.md·영문 정본·국문 대조. 선행 미병합 Draft #1514, 개발 이슈 #1513.
 - 코드 근거: login/page.tsx는 `next`를 처리하지 않고 login/actions.ts는 로그인 성공 후 `/`로 이동하므로 기존 `/login?next=/support` 자동 복귀는 구현되지 않았다. 방문자 CTA는 `/login?error=login_required`와 로그인 후 직접 `/support` 재방문을 안내한다. publicApi()는 SWR 캐시를 사용하고 정적 사이트맵·1시간 robots 캐시는 게시 상태를 증명하지 못한다. 실제 도움말 구현·유출 사고 확인 아님.
