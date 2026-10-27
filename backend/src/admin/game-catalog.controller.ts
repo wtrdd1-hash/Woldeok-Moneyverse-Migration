@@ -452,7 +452,7 @@ export class GameCatalogController {
   }
 
   @Post('season-events')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Create a season event in the active season' })
   createSeasonEvent(@Req() request: RequestWithSession, @Body() body: CreateSeasonEventDto) {
     return this.guarded(
@@ -462,7 +462,7 @@ export class GameCatalogController {
   }
 
   @Patch('season-events/:id')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Retitle, redescribe or deactivate a season event' })
   updateSeasonEvent(
     @Req() request: RequestWithSession,

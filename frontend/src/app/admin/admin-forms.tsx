@@ -24,6 +24,7 @@ import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import { forceLogout } from './security-actions';
 import { StepUpField } from './step-up-field';
+import { SeasonEventReauthenticationHelp } from './catalog/season-event-reauth-help';
 import {
   applyCorporateAction,
   createSeasonEvent,
@@ -240,6 +241,7 @@ export function ToggleActive({
           {active ? handler.off : handler.on}
         </SubmitButton>
       </form>
+      {kind === 'season' && <SeasonEventReauthenticationHelp state={state} />}
       <ActionAlert state={state} />
     </div>
   );
@@ -356,6 +358,7 @@ export function NewSeasonEventForm() {
       </div>
       <div className="sm:col-span-2">
         <ActionAlert state={state} />
+        <SeasonEventReauthenticationHelp state={state} />
       </div>
     </form>
   );
