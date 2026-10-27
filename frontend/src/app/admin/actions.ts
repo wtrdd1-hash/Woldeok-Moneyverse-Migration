@@ -375,7 +375,7 @@ export async function createSeasonEvent(
     const eventId = createdCatalogId(receipt);
     if (eventId === null) return CATALOG_UNVERIFIED;
     const latest = await apiOrNull<unknown>('/api/v1/admin/season-events');
-    if (!createdEventConfirmed(latest, eventId, { title, costWld, pointsPerEntry })) {
+    if (!createdEventConfirmed(latest, eventId, { title, costWld: String(costWldNumber), pointsPerEntry: String(pointsNumber) })) {
       return CATALOG_UNVERIFIED;
     }
     return { status: 'ok', message: '시즌 이벤트를 등록했어요.' };
