@@ -5,7 +5,7 @@ const { read, gate } = vi.hoisted(() => ({ read: vi.fn(), gate: vi.fn() }));
 vi.mock("@/lib/api", () => ({ apiOrNull: read }));
 vi.mock("@/lib/session", () => ({ requireAdminConsole: gate }));
 vi.mock("./admin-work-forms", () => ({ WorkPolicyTuningCard: () => <div data-testid="policy-write">Policy</div>, WorkTaskTuningTable: () => <div data-testid="task-write">Tasks</div> }));
-vi.mock("./admin-work-stats", () => ({ WorkStatsDashboard: () => <div data-testid="verified-work-stats">Verified stats</div> }));
+vi.mock("./admin-work-stats", () => ({ WorkStatsDashboard: ({ allowTuning }: { allowTuning?: boolean }) => <div data-testid="verified-work-stats" data-allow-tuning={String(allowTuning)}>Verified stats</div> }));
 vi.mock("../economy/economy-parts", () => ({ Figure: () => null }));
 
 import Page from "./page";
@@ -58,6 +58,7 @@ describe("admin work page evidence integration", () => {
     read.mockResolvedValueOnce({ ...overview, policy: emptyPolicy }).mockResolvedValueOnce({ stats });
     const html = renderToStaticMarkup(await Page());
     expect(html).toContain('적용 중인 보상 정책이 확인되지 않아');
+    expect(html).toContain('data-allow-tuning="false"');
     expect(html).not.toContain('data-testid="policy-write"');
     expect(html).not.toContain('data-testid="task-write"');
   });
@@ -65,6 +66,7 @@ describe("admin work page evidence integration", () => {
     read.mockResolvedValueOnce(overview).mockResolvedValueOnce({ stats });
     const html = renderToStaticMarkup(await Page());
     expect(html).toContain("verified-work-stats");
+    expect(html).toContain('data-allow-tuning="true"');
     expect(html).toContain('data-testid="policy-write"');
     expect(html).toContain('data-testid="task-write"');
     expect(html).not.toContain("통계를 검증하지 못했습니다");

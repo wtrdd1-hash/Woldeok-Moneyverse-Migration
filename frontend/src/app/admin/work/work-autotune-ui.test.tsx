@@ -10,6 +10,11 @@ const stats = {
 };
 
 describe("work auto-tune authenticated UI", () => {
+  it("withholds automatic reward policy mutation when no active policy is verified", () => {
+    const html = renderToStaticMarkup(<WorkAutoTuneCard stats={stats} allowTuning={false} />);
+    expect(html).toContain("자동 정책 변경을 보류합니다");
+    expect(html).not.toContain('type="submit"');
+  });
   it("shows an accessible verification path before the real protected policy action", () => {
     const html = renderToStaticMarkup(<WorkAutoTuneCard stats={stats} />);
     expect(html).toContain("/account/security");

@@ -96,7 +96,7 @@ export default async function AdminWorkPage() {
                 title="직업 수행 통계 시각화 및 자동 밸런싱"
                 id="work-stats-dashboard"
               />
-              <WorkStatsDashboard stats={stats} />
+              <WorkStatsDashboard stats={stats} allowTuning={console_.policy.policy_id !== null} />
             </section>
           )}
 
