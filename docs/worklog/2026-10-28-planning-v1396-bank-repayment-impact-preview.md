@@ -11,3 +11,6 @@ ENV1396-01 SEC1396-02 REL1396-03 LOAN1396-04 LOAN1396-05 LOAN1396-06 LOAN1396-07
 
 ## Change boundary
 Existing bilingual integrated master, feature review, project plan, integrated review and update logs updated, plus this worklog. No runtime code, live DB, balances, ledger, feature flags, Test or Production changes. No main merge. Final SHA, PR, and verification recorded in internal planning-v1396-records.
+
+## GitHub handoff
+Draft PR #1640, stacked on unmerged #1634; engineering issue #1639. First documentation commit 6c8c682521360ed3b589ac913bea4247370e8d4b. Final remote SHA and CI classification are recorded in the internal completion log. No main merge or release.

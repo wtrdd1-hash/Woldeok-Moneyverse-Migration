@@ -1,4 +1,5 @@
 ## 2026-10-28 — 기획 v1396 F675-155 (기능 추가, DRAFT / RELEASE HOLD)
+- GitHub 연계: 미병합 기획 #1634 기반 Draft PR #1640, 개발 이슈 #1639, 최초 문서 커밋 6c8c682521360ed3b589ac913bea4247370e8d4b. 미병합이며 정확 SHA CI 확인 대기.
 - 이전 보완 v1394 → 현재 추가 v1396 → 다음 보완 v1398(잠정). main b1cd54fda1123fb07ca81b6e5b3ead70f59f556c 시작·중간 확인; 선행 미병합 #1634, 이슈 #1639. 은행 컨트롤러·저장소·SmartLoanCard·Migration 194/211·QA v1333 #1635·개발 PR 확인.
 - 한영 통합 문서에 본인 검증 읽기 전용 상환 영향 미리보기, POST/Android, 단일 SECDEF 관측, BigInt·초과 요청·현금 부족, 실제 상환 분리, 개인정보·관리자·SEO·접근성·KPI·exact-SHA·복원 명세. 백로그 ENV1396-01 SEC1396-02 REL1396-03 LOAN1396-04 LOAN1396-05 LOAN1396-06 LOAN1396-07 LOAN1396-08 LOAN1396-09 LOAN1396-10, 합성 10,001/100/100 미실행.
 - QA v1333 격리 후보 정확 SHA CI PASS는 main/공식 Test가 아님. Migration 283·앱 DML 235/241·PUBLIC 은행 함수·체크섬 5건·배포 링크·복원 BLOCKED. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임/DB/WLD/원장/Test/운영 변경 없음.
