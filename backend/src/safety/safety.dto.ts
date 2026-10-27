@@ -47,10 +47,31 @@ export const AdminChatReportActionSchema = z.object({
 
 export type AdminChatReportActionDto = z.infer<typeof AdminChatReportActionSchema>;
 
-export const AdminChatReportQuerySchema = z.object({
+// Admin queue queries are URL strings. Do not coerce partial, scientific or
+// unsafe integer inputs into another page or an unfiltered sensitive queue.
+const adminQueueLimit = z.string()
+  .regex(/^[1-9][0-9]*$/)
+  .transform(Number)
+  .pipe(z.number().int().safe().min(1).max(100));
+const adminQueueOffset = z.string()
+  .regex(/^(0|[1-9][0-9]*)$/)
+  .transform(Number)
+  .pipe(z.number().int().safe().min(0).max(10_000));
+
+const adminQueuePage = z.object({
+  limit: adminQueueLimit,
+  offset: adminQueueOffset,
+});
+
+export const AdminTakedownQuerySchema = adminQueuePage.extend({
+  status: z.enum([
+    'SUBMITTED', 'TRIAGED', 'ACTIONED_REMOVED',
+    'ACTIONED_RESTRICTED', 'REJECTED', 'APPEALED',
+  ]).optional(),
+});
+
+export const AdminChatReportQuerySchema = adminQueuePage.extend({
   status: z.enum(['SUBMITTED', 'ACTIONED_BLOCKED', 'ACTIONED_WARNED', 'REJECTED']).optional(),
-  limit: z.coerce.number().min(1).max(100).default(50),
-  offset: z.coerce.number().min(0).default(0),
 });
 
 export type AdminChatReportQueryDto = z.infer<typeof AdminChatReportQuerySchema>;
