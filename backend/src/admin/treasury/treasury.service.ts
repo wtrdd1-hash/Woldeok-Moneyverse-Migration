@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { TreasuryOverview, TreasuryRepository } from './treasury.repository';
 
 export class TreasuryInputError extends BadRequestException {}
@@ -242,11 +242,19 @@ export class TreasuryService {
     return this.repository.getWealthTaxAssessments();
   }
 
-  async createBackupSnapshot(adminId: string, provider?: string) {
-    return this.repository.createImmutableBackupSnapshot(adminId, provider);
+  async createBackupSnapshot(_adminId: string, _provider?: string): Promise<never> {
+    // No backup is persisted, signed or restore-tested by this API yet.
+    throw new ServiceUnavailableException({
+      code: 'TREASURY_BACKUP_EVIDENCE_UNAVAILABLE',
+      message: 'Verified backup persistence and restore evidence are unavailable.',
+    });
   }
 
-  async getBackupStatus() {
-    return this.repository.getBackupStatus();
+  async getBackupStatus(): Promise<never> {
+    throw new ServiceUnavailableException({
+      code: 'TREASURY_BACKUP_EVIDENCE_UNAVAILABLE',
+      message: 'Verified backup persistence and restore evidence are unavailable.',
+    });
   }
+
 }
