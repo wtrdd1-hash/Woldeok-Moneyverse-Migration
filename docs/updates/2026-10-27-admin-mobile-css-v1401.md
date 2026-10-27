@@ -7,3 +7,5 @@ An administrator-page stylesheet mismatch was found during mobile QA. Production
 This change adds `scripts/release/verify-next-static-assets.mjs` and five Node regression tests. The guard fetches the live page and **every CSS file actually linked from its HTML**, checks HTTP success, `text/css` and nonempty styles, and asserts the expected compact-brand Tailwind utility. It must run against the candidate serving port before switching Nginx to a new release generation. A restored, isolated candidate on port 3384 passed all five stylesheet checks; the old production port 3354 failed on the deleted CSS path.
 
 Application database schema, balances, administrator roles and authentication policies are unchanged. Production and Test rollout status must be recorded separately in the paired worklog: code committed to GitHub is not proof of a live promotion.
+
+**Release status update:** PR #1593 is merged. Isolated candidate passes, but Test CSS is failing (5/5 HTTP 500) due to its deleted runtime directory; the Test configuration change was blocked by an execution safety gate. No production cutover has occurred.
