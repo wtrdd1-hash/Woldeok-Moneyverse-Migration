@@ -231,8 +231,12 @@ export class PostgresClubRepository {
     offset = 0,
   ): Promise<ClubMemberRow[]> {
     if (!UUID_REGEX.test(clubId)) throw new ClubInputError('clubId must be a valid UUID');
-    const safeLimit = Math.min(Math.max(1, limit), 100);
-    const safeOffset = Math.max(0, offset);
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new ClubInputError('limit must be an integer between 1 and 100');
+    }
+    if (!Number.isSafeInteger(offset) || offset < 0 || offset > 10000) {
+      throw new ClubInputError('offset must be an integer between 0 and 10000');
+    }
 
     return queryRows<ClubMemberRow>(
       this.client,
@@ -257,7 +261,7 @@ export class PostgresClubRepository {
          END ASC,
          cm.joined_at ASC
        LIMIT $3 OFFSET $4;`,
-      [clubId, actorUserId ?? null, safeLimit, safeOffset],
+      [clubId, actorUserId ?? null, limit, offset],
     );
   }
 
@@ -344,7 +348,9 @@ export class PostgresClubRepository {
 
   async listClubFeed(clubId: string, limit = 50): Promise<ClubFeedPostRow[]> {
     if (!UUID_REGEX.test(clubId)) throw new ClubInputError('clubId must be a valid UUID');
-    const safeLimit = Math.min(Math.max(1, limit), 100);
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new ClubInputError('limit must be an integer between 1 and 100');
+    }
 
     return queryRows<ClubFeedPostRow>(
       this.client,
@@ -362,7 +368,7 @@ export class PostgresClubRepository {
        WHERE f.club_id = $1::uuid
        ORDER BY f.is_announcement DESC, f.created_at DESC
        LIMIT $2;`,
-      [clubId, safeLimit],
+      [clubId, limit],
     );
   }
 

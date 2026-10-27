@@ -24,7 +24,7 @@
 - Existing member page requesting `limit=100` remains valid.
 
 ## Tasks
-- [ ] Add controller and repository failing tests; execute RED.
-- [ ] Implement strict input validation; execute GREEN.
-- [ ] Execute full gates and record exact results, CI and Test limitations.
-- [ ] Re-fetch latest main/plans; commit, push and open Draft/HOLD PR without merging.
+- [x] Add controller and repository failing tests; execute RED.
+- [x] Implement strict input validation; execute GREEN.
+- [x] Execute full gates and record exact results, CI and Test limitations.
+- [x] Re-fetch latest main/plans; commit, push and open Draft/HOLD PR without merging.

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -104,6 +105,18 @@ export class UpdateClubCanvasDto {
   readonly totalScore!: number;
 }
 
+function parseClubPagingNumber(raw: unknown, fallback: number, min: number, max: number, field: string): number {
+  if (raw === undefined) return fallback;
+  if (typeof raw !== 'string' || !/^(0|[1-9][0-9]*)$/.test(raw)) {
+    throw new BadRequestException(`${field} must be a decimal integer between ${min} and ${max}`);
+  }
+  const parsed = Number(raw);
+  if (!Number.isSafeInteger(parsed) || parsed < min || parsed > max) {
+    throw new BadRequestException(`${field} must be a decimal integer between ${min} and ${max}`);
+  }
+  return parsed;
+}
+
 @ApiTags('clubs')
 @Controller('clubs')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
@@ -174,8 +187,8 @@ export class ClubController {
     @Query('offset') offset?: string,
   ) {
     const actorUserId = requireUserId(req);
-    const parsedLimit = limit ? Number.parseInt(limit, 10) : 50;
-    const parsedOffset = offset ? Number.parseInt(offset, 10) : 0;
+    const parsedLimit = parseClubPagingNumber(limit, 50, 1, 100, 'limit');
+    const parsedOffset = parseClubPagingNumber(offset, 0, 0, 10000, 'offset');
     const members = await this.clubService.listClubMembers(clubId, actorUserId, parsedLimit, parsedOffset);
     return { members };
   }
@@ -224,7 +237,7 @@ export class ClubController {
     @Param('id', ParseUUIDPipe) clubId: string,
     @Query('limit') limit?: string,
   ) {
-    const parsedLimit = limit ? Number.parseInt(limit, 10) : 50;
+    const parsedLimit = parseClubPagingNumber(limit, 50, 1, 100, 'limit');
     const posts = await this.clubService.listClubFeed(clubId, parsedLimit);
     return { posts };
   }
