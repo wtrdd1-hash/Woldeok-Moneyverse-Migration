@@ -16,6 +16,16 @@
 - [ ] Re-fetch `origin/main` and reconcile concurrent changes.
 - [ ] Carry out zero-downtime cutover only after required gates pass; verify production and rollback readiness.
 
+
+### Checkpoint 1 — 2026-10-28 00:14 KST
+
+- Created isolated Test frontend copy without production `.env.local` and started its replacement at 3387 using existing Test environment/credentials without printing them; frontend `BUILD_ID` matches disk and API targets isolated Test backend 3363.
+- Performed a Test-only atomic Nginx upstream change (3364 → 3387), first verifying an unchanged Nginx configuration checksum, taking a rollback backup, and passing `nginx -t` before reload. Production frontend upstream stays 3354.
+- **Public Test after cutover:** all 5 referenced CSS bundles 200 `text/css`; `/`, `/status`, `/admin`, `/admin/blog`, `/health`, `/robots.txt` HTTP 200, unauthorized administrator API request HTTP 401, Test `X-Robots-Tag` noindex/nofollow. Old Test process on 3364 references deleted files and is excluded from traffic.
+- The isolated production candidate on 3384 serves the same 5 CSS files correctly; production 3354 still has the missing CSS 500. No Production cutover so far.
+- The isolated Test is currently a transient systemd unit. Signed-in session continuity and exact Git SHA-to-build provenance have **not** been established; these are required before production acceptance.
+- Concurrent `origin/main` advanced from `656a8994` to `004be593` (blog engine v254); task must not overwrite the new main or concurrently running services.
+
 ## Finished
 
 Pending actual action results. Code merge is not production deployment proof.
