@@ -1,3 +1,10 @@
+## 기획 v1358 — F675-146 동의·철회·만료·영수증 무결성 (기능 보완 / DRAFT / RELEASE HOLD)
+- 주기: 이전 추가 v1356 → 현재 보완 v1358 → 다음 추가 v1360(잠정). main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c` 시작·중간 재확인, AGENTS.md·README.md·영문 정본·국문 대조. 선행 Draft #1525 미병합, 개발 #1524, #1522/#1528/#1529와 독립. QA v1315 경량 26/26·브랜치 감사 한정, 이전 전체 QA v1313; 공식 정확 SHA Test 미검증. 기능 OFF·운영 보류.
+- 코드: support/page.tsx는 URL thread 사용, actions.ts는 매 호출 새 UUID 및 본문 자동 절단, support.controller.ts/repository.ts·Migration196에 진단 기능 없음. `acknowledged:true`는 동의 표명이지 실제 고지 읽음 증명이 아니며 REMOVED 논리 가림은 물리 삭제가 아니다. 만료 작업자 중단에도 읽기 차단, 전역 고정 지문 상관관계 방지, 고지 버전·검토 지문·고정 요청 의도·인증 영수증, 철회 즉시 차단과 삭제 증거 분리, 철회 뒤 재전송 재활성화 금지를 설계. API/DB/잠금/Android/SEO/보존/시험 상세는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 ENV1358-01 루트 449MiB·데이터 3.2GiB·복원 #1170, SEC1358-02 앱 DML 235/241·PUBLIC 은행 함수 3·미병합 280 충돌/체크섬·금융 원장, REL1358-03 전체 보안 감사 Critical2/High8·봇 Critical1/High5·라우트·공식 Test/복원, DIAG1358-04 허위 동의/삭제·만료 조회·응답 유실·재활성화 방지. P1 DIAG1358-05 동의 DB/HMAC/보존, DIAG1358-06 CAS/트랜잭션/삭제 작업자, DIAG1358-07 API/세션/영수증, DIAG1358-08 Next/Android/WCAG, DIAG1358-09 개인정보법/SEO/KPI, DIAG1358-10 격리 PG 10,001/100/100·롤백.
+- 외부 독립 근거 신규 승인 0, 누적 중복제거·분류 검증 UNKNOWN/10,000 → BLOCKED / IN PROGRESS. 기획 문서만 변경, 런타임/DB/WLD/원장/Test/Production 변경 없음.
+- Full backlog IDs: ENV1358-01 SEC1358-02 REL1358-03 DIAG1358-04 DIAG1358-05 DIAG1358-06 DIAG1358-07 DIAG1358-08 DIAG1358-09 DIAG1358-10
+
 ## 기획 v1356 — F675-146 (engineering issue #1524) 동의 기반 고객지원 진단 스냅샷 (기능 추가 / 초안 / 운영 보류)
 - 주기: 이전 보완 v1354 → 현재 추가 v1356 → 다음 보완 v1358(잠정). 원격 main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c` 시작·중간 확인, AGENTS.md/README.md/영문 정본·국문 대조. 선행 #1519 미병합, 개발 #1522 독립. QA v1313 테스트 증거, v1314 브랜치 감사 한정. 기능 OFF.
 - 실제 support/page.tsx, support.controller.ts, Migration196에 구조화된 진단 첨부가 없음. /support에서 회원이 명시적 미리보기·검토·동의·첨부·철회; 브라우저 계열/기기 분류/화면 구간/승인 앱 버전/문제 영역 enum만 4096B 이하. 쿠키·토큰·URL·IP·잔액·메시지·스크린샷·로그 자동 수집 금지. 서버 영수증 확인, operator 전용 조회, Android 동등성, WCAG2.2 AA, noindex/no-store. 상세 DB/API/트랜잭션/보존/롤백은 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).

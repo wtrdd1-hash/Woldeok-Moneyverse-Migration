@@ -1,3 +1,7 @@
+## 2026-10-27 13:07 KST — Planning v1358 F675-146 integrity improvement [DRAFT/HOLD]
+- Previous Addition v1356 → Current Improvement v1358 → Next Addition v1360 provisional. Main 584f01a9c8df3f9005a7e5aa6d13e4719914ae0c checked start/mid; predecessor #1525 unmerged, engineering #1524, QA v1315 lightweight/branch only, prior full QA v1313.
+- Clarified declared consent vs proven reading, withdrawal vs purge/backups, expiry fail-closed at read, scoped HMAC receipts, stable idempotency and post-withdraw replay denial. P0/P1 ENV1358-01 SEC1358-02 REL1358-03 DIAG1358-04 DIAG1358-05 DIAG1358-06 DIAG1358-07 DIAG1358-08 DIAG1358-09 DIAG1358-10. Root ~449MiB, data ~3.2GiB; full/bot audits and official Test/restore HOLD. New approved external evidence 0, cumulative UNKNOWN/10,000 BLOCKED. English/Korean integrated plans/reviews updated; docs-only, no deployment.
+
 ## 2026-10-27 Planning v1356 — F675-146 consent-only support diagnostics (DRAFT/HOLD)
 - Full backlog IDs: ENV1356-01 SEC1356-02 REL1356-03 DIAG1356-04 DIAG1356-05 DIAG1356-06 DIAG1356-07 DIAG1356-08 DIAG1356-09 DIAG1356-10
 
