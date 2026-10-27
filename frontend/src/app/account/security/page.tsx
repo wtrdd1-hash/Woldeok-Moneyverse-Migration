@@ -134,6 +134,8 @@ export default async function AccountSecurityPage({
                 ? '이메일 또는 비밀번호를 다시 확인해 주세요.'
                 : error === 'email-change'
                   ? '이메일 변경을 시작하지 못했습니다. 본인 확인 후 다시 시도해 주세요.'
+                  : error === 'logout'
+                    ? '다른 기기 종료 후 현재 기기 로그아웃을 확인하지 못했습니다. 세션 상태를 다시 확인해 주세요.'
                   : error === 'password-mismatch'
                     ? '새 비밀번호 확인 값이 일치하지 않습니다.'
                     : error === 'password-change'

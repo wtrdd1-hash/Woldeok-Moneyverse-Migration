@@ -11,11 +11,11 @@
 
 ## IN PROGRESS
 - [x] RED regression reproduced (4/5 behavioral tests failed on original main; parser import also failed before implementation)
-- [x] GREEN focused 10/10 tests; read-only parser and member security UI fail-closed changes
+- [x] GREEN focused 10/10 tests; owner-scoped parser, member security UI fail-closed changes, and readback-verified session revocation actions
 - [ ] Re-fetch main/planning and full release gates
 
 ## MIDPOINT — 2026-10-28 KST
-- Re-fetched `origin/main` and bilingual plans; focused tests 10/10 PASS, no DB/ledger change. Next: full exact-SHA verification, CI and isolated PG ACL evidence.
+- Re-fetched `origin/main` and bilingual plans; focused tests 18/18 PASS after additional receipt RED/GREEN, no DB/ledger change. Next: full exact-SHA verification, CI and isolated PG ACL evidence.
 
 ## FINISHED
 - Pending; Draft/HOLD until all gates pass.
