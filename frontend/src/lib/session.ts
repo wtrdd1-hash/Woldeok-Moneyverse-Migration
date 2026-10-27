@@ -59,13 +59,12 @@ export async function requireAdministrator(): Promise<readonly string[]> {
 
 /**
  * What the console's front door needs to decide what to render: the caller's
- * roles, whether they have a second factor, and whether the console session
- * is open.
+ * roles and whether the console session is open.
  *
- * An administrator session is a rotated session with a thirty-minute life and
- * a ten-minute idle lock, and opening one costs a reauthentication and a TOTP
- * code. Reading it here is also what moves the idle clock forward — loading
- * an administrator page is the activity that clock is measuring.
+ * Migration 246 makes opening the console depend on an authenticated admin
+ * session, not retired TOTP, and sets a 30-day lifetime / 24-hour idle window.
+ * Sensitive writes may separately require recent identity verification.
+ * Reading the console status also updates its idle activity timestamp.
  */
 export async function adminConsole(): Promise<AdminConsole> {
   await requireMember();

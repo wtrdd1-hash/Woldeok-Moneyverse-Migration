@@ -307,7 +307,7 @@ CI에서 `ALTER DATABASE woldeok_moneyverse_dev`를 실행하는 적용 이력 2
 
 | Gap ID | 도메인 | 이슈 요약 | 해결 커밋 및 조치 내용 | v522 상태 |
 |---|---|---|---|---|
-| **GAP-AUTH-01** | 인증/세션 | 장기 세션 유지 및 2FA 관리자 보안 | 365일 HttpOnly 세션 및 관리자 TOTP 2FA 스텝업 적용 | **FIXED** |
+| **GAP-AUTH-01** | 인증/세션 | 세션 유지 및 관리자 보안 | 과거 기록은 v368 결정으로 대체됨: Migration 197에서 관리자 TOTP를 폐지, 관리자 세션·권한·CSRF·필요 작업의 최근 본인 확인은 유지 | **기존 기록 정정(v2026.10.27.2)** |
 | **GAP-SEO-01** | 글로벌 SEO | 폐기된 Google ping 및 random 노이즈 | ping 410 처리 및 결정론적 통계 산출 모델로 정규화 | **FIXED** |
 | **GAP-SEO-02** | 프록시/로케일 | 신규 방문자 쿠키 오염 현상 | GeoIP 추정 로케일의 `LOCALE_COOKIE` 쓰기 제거 | **FIXED** |
 | **GAP-CASINO-01** | 카지노/컴플라이언스 | KR 법률 충돌 및 인덱싱/과장 문구 | `robots: noindex` 및 통계적 오차 검증 문구로 개편 | **FIXED** |

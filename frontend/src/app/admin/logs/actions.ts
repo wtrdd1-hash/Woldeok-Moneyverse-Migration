@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { ApiError } from '@/lib/api';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 import { spendSecondFactorCode } from '../step-up';
@@ -44,21 +43,8 @@ function checkCode(_code: string): ActionState | null {
   return null;
 }
 
-/**
- * A 401 here is the step-up refusing, not the session expiring: these routes
- * sit behind the administrator session guards, which answer 401 for a
- * stale reauthentication or a code that has already been spent. `failure`
- * reads 401 as "sign in", which would send an operator who is signed in to
- * the login page looking for a problem that is not there.
- */
+/** Keep the server's distinct expired-session and recent-reauth error codes. */
 function stepUpFailure(error: unknown, fallback: string): ActionState {
-  if (error instanceof ApiError && error.status === 401) {
-    return {
-      status: 'error',
-      message:
-        '최근 본인 확인과 인증 앱 코드가 필요해요. 내 계정에서 본인 확인을 마친 뒤 새 코드로 다시 시도해 주세요.',
-    };
-  }
   return failure(error, fallback);
 }
 

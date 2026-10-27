@@ -147,7 +147,7 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
                     국고 자금 긴급 제어 타워 (Step-Up Guard)
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    국고 자금의 주입 및 영구 소각은 불변 회계 감사 원장에 영구 기록되며, 2단계 인증(TOTP)이 강제됩니다.
+                    국고 자금의 주입 및 영구 소각은 불변 감사 원장에 기록되며, 최근 본인 확인과 관리자 권한 검사가 필요합니다. 폐지된 OTP 코드는 입력하지 않습니다.
                   </p>
                 </div>
               </div>
@@ -310,11 +310,11 @@ export function TreasuryOperationsDialog({ vaults }: Props) {
                 </div>
               </div>
 
-              {/* 3. Step-Up 2단계 보안 인증 필드 */}
+              {/* 3. Risk and reversal disclosure; retired TOTP code is not collected. */}
               <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-2">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300">
                   <ShieldAlert className="size-4" />
-                  <span>Step-Up 관리자 2단계 인증 승인</span>
+                  <span>관리자 작업 전 영향·복구 방법 확인</span>
                 </div>
                 <StepUpField id="treasury-operation" undo="국고 반대 거래(주입 시 소각, 소각 시 주입)를 역분개로 실행" />
               </div>
