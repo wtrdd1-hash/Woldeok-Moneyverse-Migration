@@ -14,3 +14,8 @@
 - [ ] Implement runtime validation and per-section failure alerts, retry navigation, and safe omission of unverified management actions.
 - [ ] Add bounded-list disclosure, no fabricated completeness claims; verify full gates and isolated database where feasible.
 - [ ] Refresh main/plan hashes, publish Draft PR, record HEAD exact-SHA and release HOLD.
+
+## MID — 08:46 KST, source correction
+- The initial source exploration used a **different local integration checkout**, not `origin/main`. Authoritative main already contains `content-evidence.ts`, per-feed alerts, bounded 50/100 labels and SSR tests (commits e37371b2e, 8476ba315). Initial duplicate tests were discarded without committing.
+- Re-scoped to a distinct proven P1 in authoritative main: `deleteAnnouncementAction` and `rejectPhotoAction` ignore real NestJS mutation receipts (`{deleted:false}` for a missing announcement, `{rejected:false,deleted:false}` for a missing photo) and falsely tell operators deletion succeeded.
+- Contract: `ContentService.adminDeleteAnnouncement` returns `{deleted:boolean}`; `ContentController.rejectPhoto` returns `{rejected:false,deleted:boolean}` from PostgreSQL `SECURITY DEFINER`. No backend/schema changes needed. Only affirmative receipts may report success.
