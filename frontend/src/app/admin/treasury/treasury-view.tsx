@@ -249,13 +249,13 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
           <CardHeader className="p-4 sm:p-5 pb-2">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2">
-                <CardTitle className="text-sm font-semibold">국고 회계 대사 무결성 상태 (Authoritative Reconciliation)</CardTitle>
-                <Badge className={overview.reconciliation.status === 'RECONCILED' ? 'bg-emerald-600 text-white text-[11px]' : 'bg-destructive text-white text-[11px]'}>
-                  {overview.reconciliation.status === 'RECONCILED' ? '대사 완료 (일치)' : '불일치 감지 (주의)'}
+                <CardTitle className="text-sm font-semibold">국고 회계 대사 검증 상태 (Reconciliation Evidence)</CardTitle>
+                <Badge className={overview.reconciliation.status === 'RECONCILED' ? 'bg-emerald-600 text-white text-[11px]' : overview.reconciliation.status === 'DISCREPANCY' ? 'bg-destructive text-white text-[11px]' : 'bg-amber-600 text-white text-[11px]'}>
+                  {overview.reconciliation.status === 'RECONCILED' ? '대사 완료 (일치)' : overview.reconciliation.status === 'DISCREPANCY' ? '불일치 감지 (주의)' : '대사 검증 미완료'}
                 </Badge>
               </div>
               <span className="text-[11px] text-muted-foreground font-mono">
-                최종 대사: {new Date(overview.reconciliation.last_reconciled_at).toLocaleTimeString('ko-KR')}
+                최종 대사: {overview.reconciliation.last_reconciled_at ? new Date(overview.reconciliation.last_reconciled_at).toLocaleTimeString('ko-KR') : '검증 기록 없음'}
               </span>
             </div>
           </CardHeader>
@@ -267,13 +267,18 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
               </div>
               <div className="rounded border bg-background p-2.5">
                 <span className="text-muted-foreground block text-[11px]">원장 누적 순흐름</span>
-                <span className="font-bold text-foreground font-mono text-sm">{groupDigits(overview.reconciliation.total_ledger_net_flow_wld)} WLD</span>
+                <span className="font-bold text-foreground font-mono text-sm">{overview.reconciliation.total_ledger_net_flow_wld === null ? '미검증' : `${groupDigits(overview.reconciliation.total_ledger_net_flow_wld)} WLD`}</span>
               </div>
               <div className="rounded border bg-background p-2.5">
                 <span className="text-muted-foreground block text-[11px]">회계 대사 오차 (Discrepancy)</span>
-                <span className="font-bold text-emerald-600 font-mono text-sm">{groupDigits(overview.reconciliation.discrepancy_amount_wld)} WLD (정상 0)</span>
+                <span className={overview.reconciliation.status === 'RECONCILED' ? 'font-bold text-emerald-600 font-mono text-sm' : overview.reconciliation.status === 'DISCREPANCY' ? 'font-bold text-destructive font-mono text-sm' : 'font-bold text-amber-700 font-mono text-sm'}>{overview.reconciliation.discrepancy_amount_wld === null ? '미검증' : `${groupDigits(overview.reconciliation.discrepancy_amount_wld)} WLD`}</span>
               </div>
             </div>
+            {overview.reconciliation.status === 'UNVERIFIED' && (
+              <p role="status" className="mt-3 text-xs text-amber-700">
+                금고 잔액은 조회되었지만 독립 원장 대사 증빙은 확인되지 않았습니다. 일치 여부는 미확인입니다.
+              </p>
+            )}
           </CardContent>
         </Card>
       )}

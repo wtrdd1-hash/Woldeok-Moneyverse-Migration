@@ -353,12 +353,27 @@ export const AUTHORITATIVE_BUDGET_ENVELOPES: readonly TreasuryBudgetEnvelope[] =
   },
 ];
 
+/**
+ * The treasury vault balance is a read-only snapshot, not a reconciled ledger.
+ * Until a separately certified journal baseline and verification receipt exist,
+ * never assert a zero discrepancy or a last verification timestamp.
+ */
+function unverifiedTreasuryReconciliation(vaultTotal: string): TreasuryReconciliation {
+  return {
+    status: 'UNVERIFIED',
+    total_vaults_balance_wld: vaultTotal,
+    total_ledger_net_flow_wld: null,
+    discrepancy_amount_wld: null,
+    last_reconciled_at: null,
+  };
+}
+
 export interface TreasuryReconciliation {
-  readonly status: 'RECONCILED' | 'DISCREPANCY';
+  readonly status: 'RECONCILED' | 'DISCREPANCY' | 'UNVERIFIED';
   readonly total_vaults_balance_wld: string;
-  readonly total_ledger_net_flow_wld: string;
-  readonly discrepancy_amount_wld: string;
-  readonly last_reconciled_at: string;
+  readonly total_ledger_net_flow_wld: string | null;
+  readonly discrepancy_amount_wld: string | null;
+  readonly last_reconciled_at: string | null;
 }
 
 export interface TreasuryRevenueSource {
@@ -498,13 +513,9 @@ export class TreasuryRepository {
 
     const coverageDays = Number(availableWld / dailyOutflow30d);
 
-    const reconciliation: TreasuryReconciliation = {
-      status: 'RECONCILED',
-      total_vaults_balance_wld: totalTreasury.toString(),
-      total_ledger_net_flow_wld: totalTreasury.toString(),
-      discrepancy_amount_wld: '0',
-      last_reconciled_at: new Date().toISOString(),
-    };
+    // Vault totals alone cannot prove journal completeness or reconciliation.
+    // Do not manufacture a ledger total, zero discrepancy, or verification time.
+    const reconciliation = unverifiedTreasuryReconciliation(totalTreasury.toString());
 
     const liveBudgets = await this.calculateLiveBudgets();
 
@@ -871,13 +882,7 @@ export class TreasuryRepository {
     `);
     const totalVaults = vaultsRes.rows[0]?.total ?? '0';
 
-    return {
-      status: 'RECONCILED',
-      total_vaults_balance_wld: totalVaults,
-      total_ledger_net_flow_wld: totalVaults,
-      discrepancy_amount_wld: '0',
-      last_reconciled_at: new Date().toISOString(),
-    };
+    return unverifiedTreasuryReconciliation(totalVaults);
   }
 
   async listTransactions(limit = 30, cursor?: string): Promise<{ items: TreasuryLedgerRow[]; next_cursor: string | null }> {
