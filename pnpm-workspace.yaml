@@ -17,3 +17,7 @@ packages:
 # holds.
 overrides:
   postcss: '>=8.5.18'
+  fast-uri: 3.1.8
+  'brace-expansion@^1.0.0': 1.1.20
+  'brace-expansion@^5.0.0': 5.0.11
+  vite: 7.3.7

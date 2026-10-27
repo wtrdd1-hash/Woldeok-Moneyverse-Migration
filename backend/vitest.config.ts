@@ -11,6 +11,5 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     globals: false,
     maxWorkers: 2,
-    minWorkers: 1,
   },
 });
