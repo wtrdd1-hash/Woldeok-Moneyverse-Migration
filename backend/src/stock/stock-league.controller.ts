@@ -13,7 +13,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
-import { SessionGuard } from '../auth/guards/session.guard';
+import { OptionalSessionGuard, SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { StockLeagueInputError, StockLeagueRepository } from './stock-league.repository';
@@ -37,6 +37,7 @@ export class StockLeagueController {
   ) {}
 
   @Get('current')
+  @UseGuards(OptionalSessionGuard)
   @ApiOperation({ summary: '현재 진행 중인 주식 챔피언십 리그 현황 및 리더보드, 고래 트레이더 목록 조회' })
   async getCurrentLeague(@Req() req: RequestWithSession) {
     if (!this.repository) {
@@ -65,11 +66,10 @@ export class StockLeagueController {
     let mySubscriptions: any[] = [];
 
     if (currentUserId) {
-      const myRank = leaderboard.find((p) => p.userId === currentUserId);
-      if (myRank) {
-        myParticipation = myRank;
-      }
-      mySubscriptions = await this.repository.getMySubscriptions(currentUserId);
+      [myParticipation, mySubscriptions] = await Promise.all([
+        this.repository.getMyParticipation(currentSeason.id, currentUserId),
+        this.repository.getMySubscriptions(currentUserId),
+      ]);
     }
 
     return {
