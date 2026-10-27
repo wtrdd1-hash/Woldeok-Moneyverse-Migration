@@ -677,8 +677,8 @@ export function getBlogPostBySlug(slug: string): BlogPost | undefined {
   return post;
 }
 
-export function addBlogPost(post: BlogPost, options?: { bypassEditorialReview?: boolean }): void {
-  if (process.env.NODE_ENV !== 'test' && !options?.bypassEditorialReview) {
+export function addBlogPost(post: BlogPost): void {
+  if (process.env.NODE_ENV !== 'test') {
     throw new Error('EDITORIAL_REVIEW_REQUIRED: blog publication is disabled until verified editorial approval');
   }
   const current = loadPostsFromDisk();
@@ -1055,6 +1055,6 @@ ${template.references.map((ref, i) => `[${i + 1}] ${ref}`).join('\n')}
 }
 
 export function publishBlogPost(post: BlogPost): void {
-  addBlogPost(post, { bypassEditorialReview: true });
+  addBlogPost(post);
 }
 
