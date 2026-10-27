@@ -125,6 +125,9 @@ export class TreasuryService {
   }
 
   async getTopDonors(limit = 10) {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new TreasuryInputError('limit must be an integer between 1 and 100');
+    }
     return this.repository.getTopDonors(limit);
   }
 
