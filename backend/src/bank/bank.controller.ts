@@ -26,6 +26,7 @@ import {
   BankBondPurchaseDto,
   BankBorrowSmartDto,
   BankRepayDto,
+  BankRepayPreviewDto,
   BankTransferDto,
   IdempotentDto,
 } from './bank.dto';
@@ -140,6 +141,17 @@ export class BankController {
           body.amount,
         ),
       'failed to repay loan',
+    );
+  }
+
+  @Post('repay-preview')
+  @Header('Cache-Control', 'private, no-store')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Read-only, nonbinding loan repayment impact preview for the authenticated member' })
+  repayPreview(@Req() request: RequestWithSession, @Body() body: BankRepayPreviewDto) {
+    return this.guarded(
+      () => this.repository().previewRepayment(requireUserId(request), body.loanId, body.amount),
+      'failed to preview repayment',
     );
   }
 

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
+import type { BankRepayPreview } from './types';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -75,6 +76,29 @@ export async function borrowAction(_previous: ActionState, formData: FormData): 
     return { status: 'ok', message: `${groupDigits(amount)} WLD 스마트 신용 대출이 승인 및 지급되었습니다.` };
   } catch (error) {
     return failure(error, '대출 실행이 거절되었습니다. 신용 한도 또는 기존 미상환 대출 여부를 확인해 주세요.');
+  }
+}
+
+export async function previewRepayAction(formData: FormData): Promise<
+  | { readonly status: 'ok'; readonly preview: BankRepayPreview }
+  | { readonly status: 'error'; readonly message: string }
+> {
+  const loanId = String(formData.get('loanId') ?? '').trim();
+  const amount = wholeAmount(formData.get('amount'));
+  if (!UUID.test(loanId) || !amount || amount.length > 78) {
+    return { status: 'error', message: '대출 식별자와 1 WLD 이상의 정수 금액을 확인해 주세요.' };
+  }
+  try {
+    const preview = await mutate<BankRepayPreview>('/api/v1/banking/repay-preview', {
+      body: { loanId, amount },
+    });
+    if (!preview || preview.nonbinding !== true || preview.loanId !== loanId || preview.requestedAmount !== amount) {
+      return { status: 'error', message: '상환 예상 결과를 검증할 수 없습니다. 다시 조회해 주세요.' };
+    }
+    return { status: 'ok', preview };
+  } catch (error) {
+    const state = failure(error, '상환 예상 결과를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+    return { status: 'error', message: state.message ?? '상환 예상 조회 실패' };
   }
 }
 

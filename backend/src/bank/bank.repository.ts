@@ -128,6 +128,66 @@ export class BankRepository {
     );
   }
 
+  /** Nonbinding estimate from one actor-scoped SQL snapshot; never queries a raw loan table. */
+  async previewRepayment(actor: unknown, loanId: unknown, amountStr: unknown): Promise<{
+    loanId: string;
+    requestedAmount: string;
+    payableAmount: string;
+    cashBefore: string;
+    cashAfter: string | null;
+    debtBefore: string;
+    debtAfter: string;
+    adjustmentAmount: string;
+    eligible: boolean;
+    reason: 'ready' | 'insufficient_cash';
+    observedAt: string;
+    nonbinding: true;
+  }> {
+    assertUuid(actor, 'actor');
+    assertUuid(loanId, 'loan id');
+    if (typeof amountStr !== 'string' || !/^[1-9][0-9]{0,77}$/.test(amountStr)) {
+      throw new BankInputError('amount must be a positive integer string (max 78 digits)');
+    }
+    const standingValue = await this.getStanding(actor);
+    if (!standingValue || typeof standingValue !== 'object' || Array.isArray(standingValue)) {
+      throw new BankInputError('active loan unavailable');
+    }
+    const standing = standingValue as Record<string, unknown>;
+    const loanValue = standing['active_loan'];
+    if (!loanValue || typeof loanValue !== 'object' || Array.isArray(loanValue)) {
+      throw new BankInputError('active loan unavailable');
+    }
+    const loan = loanValue as Record<string, unknown>;
+    if (loan['loan_id'] !== loanId || (loan['status'] !== 'active' && loan['status'] !== 'overdue')) {
+      throw new BankInputError('active loan unavailable');
+    }
+    const cashRaw = standing['cash_balance'];
+    const debtRaw = loan['outstanding_amount'];
+    if (typeof cashRaw !== 'string' || !/^[0-9]{1,78}$/.test(cashRaw) ||
+        typeof debtRaw !== 'string' || !/^[1-9][0-9]{0,77}$/.test(debtRaw)) {
+      throw new Error('bank standing is invalid');
+    }
+    const cash = BigInt(cashRaw);
+    const debt = BigInt(debtRaw);
+    const requested = BigInt(amountStr);
+    const payable = requested < debt ? requested : debt;
+    const eligible = cash >= payable;
+    return {
+      loanId,
+      requestedAmount: requested.toString(),
+      payableAmount: payable.toString(),
+      cashBefore: cash.toString(),
+      cashAfter: eligible ? (cash - payable).toString() : null,
+      debtBefore: debt.toString(),
+      debtAfter: (debt - payable).toString(),
+      adjustmentAmount: (requested - payable).toString(),
+      eligible,
+      reason: eligible ? 'ready' : 'insufficient_cash',
+      observedAt: new Date().toISOString(),
+      nonbinding: true,
+    };
+  }
+
   async purchaseBond(
     key: unknown,
     actor: unknown,
