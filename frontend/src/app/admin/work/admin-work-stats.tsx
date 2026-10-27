@@ -17,6 +17,7 @@ import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import type { AdminWorkDailyCapBucket, AdminWorkJobRanking, AdminWorkRealtimeStats, AdminWorkTrendDay } from '../types';
 import { autoTuneWorkPolicyAction } from './actions';
+import { WorkAutoTuneReauthHelp } from './work-reauth-help';
 
 const JOB_LABELS: Readonly<Record<string, { label: string; icon: string; color: string }>> = {
   farmer: { label: '농부', icon: 'farmer', color: 'bg-emerald-500' },
@@ -93,10 +94,10 @@ export function WorkAutoTuneCard({ stats }: WorkStatsProps) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <CardTitle className="text-base flex items-center gap-2">
-              AI 경제 지표 기반 일일 캡 & 보상 자동 조절 (Auto-Tuning)
+              직업 수행 지표 기반 일일 캡 & 보상 규칙 조절
             </CardTitle>
             <CardDescription>
-              최근 24시간 통화 유출량, 캡 도달 인원 비율, 직업 완료 건수를 실시간 분석하여 최적 밸런스를 자동 산출합니다.
+              최근 24시간 보상 지급액, 캡 도달 인원 비율, 직업 완료 건수에 정해진 임계값을 적용해 권장 정책을 계산합니다. AI 예측이나 최적 결과를 보증하지 않습니다.
             </CardDescription>
           </div>
           <Badge className={statusConfig.badgeClass}>
@@ -153,13 +154,15 @@ export function WorkAutoTuneCard({ stats }: WorkStatsProps) {
           </div>
         )}
 
+        <WorkAutoTuneReauthHelp errorCode={state.errorCode} />
+
         {/* 자동 조절 실행 폼 */}
         <form action={formAction} className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t">
           <div className="text-xs text-muted-foreground">
             버튼을 누르면 현재 경제 지표 분석 결과(추천 일일 캡: <strong className="text-foreground">{groupDigits(stats.recommended_daily_cap)} WLD</strong>, 감액률: <strong className="text-foreground">{stats.recommended_decay_percent}%</strong>)가 즉시 직업 정책에 반영됩니다.
           </div>
-          <Button type="submit" size="sm" disabled={isPending}>
-            {isPending ? '밸런싱 정책 반영 중...' : '1-클릭 경제 밸런싱 정책 즉시 적용'}
+          <Button type="submit" size="sm" className="min-h-11" disabled={isPending}>
+            {isPending ? '밸런싱 정책 반영 중...' : '직업 보상 규칙 기반 정책 즉시 적용'}
           </Button>
         </form>
       </CardContent>

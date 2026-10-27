@@ -19,6 +19,7 @@ import { Figure } from '../economy/economy-parts';
 import type { AdminJobLevel, AdminWorkPolicy, AdminWorkRealtimeStats, AdminWorkTask } from '../types';
 import { WorkPolicyTuningCard, WorkTaskTuningTable } from './admin-work-forms';
 import { WorkStatsDashboard } from './admin-work-stats';
+import { parseAdminWorkStatsResponse } from './work-stats-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,14 +57,12 @@ export default async function AdminWorkPage() {
       readonly jobLevels: readonly AdminJobLevel[];
       readonly policy: AdminWorkPolicy;
     }>('/api/v1/admin/work'),
-    apiOrNull<AdminWorkRealtimeStats & { readonly stats?: AdminWorkRealtimeStats }>(
+    apiOrNull<unknown>(
       '/api/v1/admin/work/stats',
     ),
   ]);
 
-  const stats: AdminWorkRealtimeStats | null = rawStats
-    ? (rawStats.stats ?? rawStats)
-    : null;
+  const stats: AdminWorkRealtimeStats | null = parseAdminWorkStatsResponse(rawStats);
 
   return (
     <div data-page="admin-work" className="mv-page mv-page--admin grid gap-6">
@@ -80,6 +79,11 @@ export default async function AdminWorkPage() {
       ) : (
         <>
           {/* 실시간 직업 수행 순위 및 캡 통계 시각화 & 자동 밸런싱 대시보드 */}
+          {stats === null && (
+            <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+              직업 수행 통계를 검증하지 못했습니다. 수치를 추정하거나 자동 조절을 제공하지 않습니다. 잠시 후 다시 조회해 주세요.
+            </div>
+          )}
           {stats !== null && (
             <section aria-labelledby="work-stats-dashboard" className="grid gap-4">
               <SectionHeader

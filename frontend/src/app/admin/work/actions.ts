@@ -204,7 +204,7 @@ export async function autoTuneWorkPolicyAction(
     const res = response.result;
     return {
       status: 'ok',
-      message: `경제 기반 자동 밸런싱이 적용되었습니다 (상태: ${res.status.toUpperCase()}, 일일캡: ${res.tuned_cap} WLD, 반복감액: ${res.decay_percent}%).`,
+      message: `직업 보상 규칙 기반 자동 조절이 적용되었습니다 (상태: ${res.status.toUpperCase()}, 일일캡: ${res.tuned_cap} WLD, 반복감액: ${res.decay_percent}%).`,
     };
   } catch (error) {
     return explain(error, '경제 기반 자동 밸런싱을 실행하지 못했습니다.');
