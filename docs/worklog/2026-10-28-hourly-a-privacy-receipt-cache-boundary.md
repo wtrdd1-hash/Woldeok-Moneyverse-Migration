@@ -14,12 +14,12 @@
 ## In progress
 - [x] RED tests
 - [x] GREEN implementation
-- [ ] Isolated PostgreSQL and full regression
+- [x] Isolated PostgreSQL and full regression (with baseline failures recorded)
 - [x] Midpoint main/planning refresh
-- [ ] GitHub PR and CI
+- [ ] GitHub PR and CI (pending)
 
 ## Finished
-- Pending evidence. Production RELEASE HOLD.
+- Code implemented and verified locally with blockers. Final PR/CI evidence to follow. Production RELEASE HOLD.
 
 ### Midpoint checkpoint — 03:31 KST
 - RED confirmed: Backend header metadata 2 failures; Android gateway/privacy page 7 failures; middleware-before-guard 1 failure. GREEN: backend 4 PASS; frontend 25 PASS.
@@ -28,3 +28,11 @@
 - QA #1610 handles migration lineage/blog lint, not migration 015 privacy function; preserve and do not duplicate its SQL. PR #1386 overlaps privacy frontend/controller and requires reconciliation.
 - Main and integrated EN/KO plans re-fetched; main remains b1cd54fda1123fb07ca81b6e5b3ead70f59f556c.
 - All Test/Production writes, deployments, financial changes and branch deletion remain forbidden.
+
+### Full gate checkpoint — 03:37 KST
+- Backend full 1,692 PASS / 430 SKIP; Frontend full 1,687 PASS; contract 180 PASS; typecheck and full build PASS; changed-file lint PASS.
+- Database package 32 PASS / 3 SKIP / 1 FAIL (duplicate 283 / missing 285). Whole-repo lint 2 existing blog errors. Bot 8 PASS after isolated offline dependency install; Bot audit 1 Critical / 5 High; root audit threshold high PASS (2 Low / 9 Moderate).
+- Isolated real PostgreSQL read/ACL PASS, new privacy intake FAIL on baseline migration 015 SQL ambiguity; issue #1625 filed. Test container removed, no shared DB touched.
+- Official Test /api/version 6f697e74b7bf0cd1e4521d36534cfd9c140f8010; Production 6a989b5ac0c6155587d43426d64f6def6b62c917; neither candidate, Test symlink dangling.
+- Remote non-main 365 at pre-PR (363 unique ahead, 2 contained); open PRs 358, draft 343, conflicting 104, failed-check 233, duplicate head SHA 0; branch deletion 0.
+- Exact-head official Test login/E2E/backup restore/SEO/accessibility/Production GitOps gates BLOCKED. No merge or deployment.
