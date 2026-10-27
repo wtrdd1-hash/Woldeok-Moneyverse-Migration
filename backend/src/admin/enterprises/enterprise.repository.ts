@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 
@@ -165,94 +165,20 @@ export class EnterpriseRepository {
     return res.rows;
   }
 
-  async distributeSoeDividends(adminId?: string): Promise<{
+  /**
+   * P0 #1080: legacy SOE remittance is not atomic or idempotent. No caller,
+   * including scheduled jobs or direct repository users, may execute it.
+   * Re-enable only through an independently verified DB-owned ledger settlement.
+   */
+  async distributeSoeDividends(_adminId?: string): Promise<{
     total_dividends_collected: string;
     enterprises_processed: number;
     treasury_balance_after: string;
   }> {
-    const soes = await this.listStateEnterprises();
-    let totalDividends = BigInt(0);
-    let count = 0;
-
-    const vaultRes = await this.pool.query<{ id: string; balance_wld: string }>(`
-      SELECT id, balance_wld FROM public.system_treasury_vaults WHERE code = 'VAULT_MAIN' LIMIT 1
-    `);
-    const mainVault = vaultRes.rows[0];
-    if (!mainVault) {
-      throw new Error('중앙 국고 금고(VAULT_MAIN)를 찾을 수 없습니다.');
-    }
-
-    let currentBalance = BigInt(mainVault.balance_wld);
-
-    for (const soe of soes) {
-      if (soe.status !== 'ACTIVE') continue;
-
-      const profit = BigInt(soe.net_profit_hourly_wld);
-      if (profit <= BigInt(0)) continue;
-
-      const dividend = (profit * BigInt(soe.dividend_rate_bps)) / BigInt(10000);
-      if (dividend <= BigInt(0)) continue;
-
-      totalDividends += dividend;
-      count++;
-
-      const before = currentBalance;
-      currentBalance += dividend;
-
-      const validActorUuid =
-        typeof adminId === 'string' &&
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adminId)
-          ? adminId
-          : null;
-
-      // 1. system_treasury_ledger 기록
-      const ledgerRes = await this.pool.query<{ id: string }>(`
-        INSERT INTO public.system_treasury_ledger (
-          vault_id, tx_type, amount_wld, actor_id, reason, balance_before, balance_after
-        ) VALUES (
-          $1, 'FEE_RECIRCULATION', $2, $3, $4, $5, $6
-        ) RETURNING id
-      `, [
-        mainVault.id,
-        dividend.toString(),
-        validActorUuid,
-        `[공기업 배당 국고 귀속] ${soe.name} 30% 법정 이익배당금 납입 (경영평가: ${soe.eval_grade}등급)`,
-        before.toString(),
-        currentBalance.toString(),
-      ]);
-
-      const ledgerId = ledgerRes.rows[0]?.id;
-
-      // 2. state_enterprise_dividend_logs 기록
-      await this.pool.query(`
-        INSERT INTO public.state_enterprise_dividend_logs (
-          enterprise_id, dividend_amount_wld, revenue_wld, net_profit_wld, eval_grade, ledger_tx_id
-        ) VALUES (
-          $1, $2, $3, $4, $5, $6
-        )
-      `, [
-        soe.id,
-        dividend.toString(),
-        soe.operating_revenue_hourly_wld,
-        soe.net_profit_hourly_wld,
-        soe.eval_grade,
-        ledgerId ?? null,
-      ]);
-    }
-
-    if (totalDividends > BigInt(0)) {
-      await this.pool.query(`
-        UPDATE public.system_treasury_vaults
-        SET balance_wld = $1, updated_at = NOW()
-        WHERE id = $2
-      `, [currentBalance.toString(), mainVault.id]);
-    }
-
-    return {
-      total_dividends_collected: totalDividends.toString(),
-      enterprises_processed: count,
-      treasury_balance_after: currentBalance.toString(),
-    };
+    throw new ServiceUnavailableException({
+      code: 'SOE_DIVIDEND_LEDGER_UNAVAILABLE',
+      message: 'SOE dividend remittance is suspended pending atomic ledger verification',
+    });
   }
 
   async updateSoeStatus(code: string, status: string, dividendRateBps?: number): Promise<boolean> {

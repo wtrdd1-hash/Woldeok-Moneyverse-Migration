@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
@@ -51,6 +51,7 @@ export class AdminEnterpriseController {
   }
 
   @Post('soes/harvest')
+  @ApiResponse({ status: 503, description: 'SOE_DIVIDEND_LEDGER_UNAVAILABLE: atomic dividend settlement not certified' })
   @ApiOperation({ summary: '3대 국가 기간 공기업 법정 배당금 국고 즉시 수취 집행' })
   async harvestSoeDividends(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);

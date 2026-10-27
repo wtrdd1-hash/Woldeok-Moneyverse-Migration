@@ -10,8 +10,6 @@ import {
   Landmark,
   ShieldAlert,
   ArrowUpRight,
-  RefreshCw,
-  CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -129,40 +127,8 @@ export function EnterpriseControlTower({
   const [overview] = useState<StateHoldingOverviewItem>(initialOverview);
   const [soes, setSoes] = useState<StateEnterpriseItem[]>(initialSoes);
   const [privateEnterprises] = useState<PrivateEnterpriseItem[]>(initialPrivate);
-  const [dividendLogs, setDividendLogs] = useState<DividendLogItem[]>(initialDividendLogs);
-  const [isHarvesting, setIsHarvesting] = useState(false);
+  const dividendLogs = initialDividendLogs;
   const [loadingCode, setLoadingCode] = useState<string | null>(null);
-
-  const handleHarvestDividends = async () => {
-    setIsHarvesting(true);
-    try {
-      const res = await fetch('/api/admin/enterprises/harvest', { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '배당 수취 실패');
-
-      toast.success(
-        `🏛️ 공기업 법정 배당금 수취 완료: +${Number(data.total_dividends_collected).toLocaleString('ko-KR')} WLD (국고 잔액: ${Number(data.treasury_balance_after).toLocaleString('ko-KR')} WLD)`,
-      );
-
-      // 즉시 로그 갱신
-      const updatedLogs: DividendLogItem[] = soes.map((s) => ({
-        id: crypto.randomUUID(),
-        enterprise_id: s.id,
-        enterprise_code: s.code,
-        enterprise_name: s.name,
-        dividend_amount_wld: ((BigInt(s.net_profit_hourly_wld) * BigInt(s.dividend_rate_bps)) / BigInt(10000)).toString(),
-        revenue_wld: s.operating_revenue_hourly_wld,
-        net_profit_wld: s.net_profit_hourly_wld,
-        eval_grade: s.eval_grade,
-        created_at: new Date().toISOString(),
-      }));
-      setDividendLogs((prev) => [...updatedLogs, ...prev].slice(0, 20));
-    } catch (err: any) {
-      toast.error(err.message || '공기업 배당금 수취 중 오류가 발생했습니다.');
-    } finally {
-      setIsHarvesting(false);
-    }
-  };
 
   const handleToggleStatus = async (soe: StateEnterpriseItem) => {
     const nextStatus = soe.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
@@ -211,12 +177,14 @@ export function EnterpriseControlTower({
               <Button
                 size="sm"
                 className="gap-1.5 text-xs h-9 bg-primary text-primary-foreground font-semibold"
-                onClick={handleHarvestDividends}
-                disabled={isHarvesting}
+                disabled
+                aria-describedby="soe-dividend-ledger-hold"
               >
-                <RefreshCw className={`h-3.5 w-3.5 ${isHarvesting ? 'animate-spin' : ''}`} />
                 공기업 배당 국고 즉시 수취
               </Button>
+              <p id="soe-dividend-ledger-hold" role="status" className="max-w-56 text-xs text-amber-700 dark:text-amber-400">
+                원장 정산 검증 전까지 배당 수취가 중지되었습니다.
+              </p>
             </div>
           </div>
         </CardHeader>
@@ -235,7 +203,7 @@ export function EnterpriseControlTower({
               </div>
             </div>
             <div className="rounded-lg border bg-muted/20 p-3">
-              <div className="text-muted-foreground text-[11px]">시간당 국고 배당 납입 (30%)</div>
+              <div className="text-muted-foreground text-[11px]">시간당 예상 배당 (실제 납입 아님)</div>
               <div className="mt-1 font-mono font-bold text-base text-primary">
                 +{groupDigits(overview.hourly_soe_dividends_wld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </div>
@@ -404,9 +372,9 @@ export function EnterpriseControlTower({
       {/* 4. 최근 공기업 법정 배당 국고 귀속 이력 */}
       <Card className="border shadow-xs">
         <CardHeader className="p-4 sm:p-5">
-          <CardTitle className="text-base font-semibold">공기업 법정 배당 국고 귀속 감사 이력 (Authoritative Dividend Logs)</CardTitle>
+          <CardTitle className="text-base font-semibold">기존 공기업 배당 기록 (원장 대사 미검증)</CardTitle>
           <CardDescription className="text-xs text-muted-foreground mt-0.5">
-            3대 공기업이 당기순이익의 30%를 국가 중앙 금고(VAULT_MAIN)로 실시간 납입한 불변 이력 명세
+            기존 데이터베이스에 기록된 배당 내역이며 독립 원장 대사 증빙은 확인되지 않았습니다.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 sm:p-5 sm:pt-0">

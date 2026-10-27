@@ -1,17 +1,12 @@
 import { NextResponse } from 'next/server';
-import { api } from '@/lib/api';
 
+// P0 #1080: no proxy path may invoke non-atomic SOE dividend remittance.
 export async function POST() {
-  try {
-    const data = await api('/api/v1/admin/enterprises/soes/harvest', {
-      method: 'POST',
-      body: {},
-    });
-    return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || '공기업 배당금 국고 수취 요청에 실패했습니다.' },
-      { status: error?.status || 500 },
-    );
-  }
+  return NextResponse.json(
+    {
+      code: 'SOE_DIVIDEND_LEDGER_UNAVAILABLE',
+      error: '원장 정산 검증 전까지 공기업 배당 수취가 중지되었습니다.',
+    },
+    { status: 503, headers: { 'Cache-Control': 'no-store' } },
+  );
 }
