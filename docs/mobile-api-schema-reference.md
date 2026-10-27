@@ -4158,7 +4158,7 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
-| interval | true | number=86400 \| number=60 \| number=300 \| number=1800 \| number=3600 \| number=7200 \| number=14400 \| number=604800 |  |
+| interval | true | number=604800 \| number=86400 \| number=60 \| number=300 \| number=1800 \| number=3600 \| number=7200 \| number=14400 |  |
 | candles[] | true | object[] |  |
 | candles[] | true | object |  |
 | candles[].bucket_at | true | string (date-time) |  |

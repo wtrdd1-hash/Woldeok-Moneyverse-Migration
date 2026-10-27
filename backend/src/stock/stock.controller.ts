@@ -28,6 +28,22 @@ import { StockService } from './stock.service';
 
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 
+/**
+ * Public price endpoints must reject coercible query strings before reaching
+ * the SQL read model. Repository clamps remain a separate defensive boundary.
+ */
+function parseStockQueryInteger(value: unknown, maximum: number, name: string): number | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string' || !/^[1-9]\d*$/.test(value)) {
+    throw new BadRequestException(`${name} must be a decimal integer between 1 and ${maximum}`);
+  }
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed > maximum) {
+    throw new BadRequestException(`${name} must be a decimal integer between 1 and ${maximum}`);
+  }
+  return parsed;
+}
+
 export class WatchlistDto {
   @ApiProperty({ type: Boolean })
   @IsBoolean()
@@ -122,10 +138,7 @@ export class StockController {
   @SkipInternalToken()
   @ApiOperation({ summary: 'Recent prices for every listed stock' })
   async sparklines(@Query('limit') limit?: string) {
-    const requested = limit === undefined ? undefined : Number(limit);
-    if (requested !== undefined && !Number.isSafeInteger(requested)) {
-      throw new BadRequestException('limit must be a whole number');
-    }
+    const requested = parseStockQueryInteger(limit, 240, 'limit');
     return { series: await this.service().sparkSeries(requested) };
   }
 
@@ -140,10 +153,7 @@ export class StockController {
   @SkipInternalToken()
   @ApiOperation({ summary: 'Recorded price history for one stock' })
   async prices(@Param('id', ParseUUIDPipe) stockId: string, @Query('limit') limit?: string) {
-    const requested = limit === undefined ? undefined : Number(limit);
-    if (requested !== undefined && !Number.isSafeInteger(requested)) {
-      throw new BadRequestException('limit must be a whole number');
-    }
+    const requested = parseStockQueryInteger(limit, 240, 'limit');
     return { prices: await this.service().priceHistory(stockId, requested) };
   }
 
@@ -155,8 +165,8 @@ export class StockController {
     @Query('interval') interval?: string,
     @Query('limit') limit?: string,
   ) {
-    const seconds = interval === undefined ? 86400 : Number(interval);
-    const count = limit === undefined ? undefined : Number(limit);
+    const seconds = parseStockQueryInteger(interval, 604800, 'interval') ?? 86400;
+    const count = parseStockQueryInteger(limit, 400, 'limit');
     if (!isCandleInterval(seconds)) {
       throw new BadRequestException('unsupported candle interval');
     }
