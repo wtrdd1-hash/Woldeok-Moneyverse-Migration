@@ -85,8 +85,8 @@ export function parseSeoObservation(value: unknown, observedAt: string): SeoInit
   if (!Array.isArray(recentLogs) || recentLogs.length > 100 || !recentLogs.every(log) || !unique(recentLogs, 'id')) return null;
   if (!text(indexNowKey) || !indexNowKey.trim() || !sitemapUrl(value.sitemapUrl)) return null;
 
-  const sum = (values: Record<string, number>) => Object.values(values).reduce((total, entry) => total + entry, 0);
-  if (sum(botDistribution) !== totalHits24h || sum(statusDistribution) !== totalHits24h) return null;
+  const sum = (values: Record<string, number>) => Object.values(values).reduce((total, entry) => total + BigInt(entry), 0n);
+  if (sum(botDistribution) !== BigInt(totalHits24h) || sum(statusDistribution) !== BigInt(totalHits24h)) return null;
   if (targetUrls.filter((entry) => entry.category === 'stock').length !== stockCoverage.total) return null;
   if (targetUrls.filter((entry) => entry.category === 'guide').length !== guideCoverage.total) return null;
 
@@ -126,7 +126,7 @@ export function unavailableSeoObservation(): SeoInitialData {
     indexNowKey: '',
     sitemapUrl: '',
     provenance: {
-      source: 'fallback',
+      source: 'unavailable',
       observedAt: null,
       freshness: 'unknown',
       status: 'unavailable',

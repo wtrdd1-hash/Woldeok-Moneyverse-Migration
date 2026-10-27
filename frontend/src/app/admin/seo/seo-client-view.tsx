@@ -61,7 +61,7 @@ export interface SeoInitialData {
   readonly indexNowKey: string;
   readonly sitemapUrl: string;
   readonly provenance?: {
-    readonly source: 'seo-status-api' | 'fallback';
+    readonly source: 'seo-status-api' | 'fallback' | 'unavailable';
     readonly observedAt: string | null;
     readonly freshness: 'fresh' | 'unknown';
     readonly status: 'operational' | 'unavailable';
