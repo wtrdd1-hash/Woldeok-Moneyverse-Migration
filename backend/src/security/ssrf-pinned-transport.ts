@@ -65,7 +65,11 @@ export async function fetchPinnedUrl(
     connections: 1,
     pipelining: 1,
     connect: {
-      lookup: (hostname, options, callback) => {
+      lookup: (
+        hostname: string,
+        options: { all?: boolean },
+        callback: (err: Error | null, addressOrAddresses?: any, family?: number) => void,
+      ) => {
         if (hostname.toLowerCase() !== expectedHost) {
           callback(new Error('Outbound socket hostname differs from validated destination'), '', 4);
           return;
