@@ -12,13 +12,26 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    environmentMatchGlobs: [
-      ['**/*.test.tsx', 'jsdom'],
-      ['**/components/**/*.test.ts', 'jsdom'],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'dom',
+          environment: 'jsdom',
+          include: ['src/**/*.test.tsx', 'src/**/components/**/*.test.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'node',
+          environment: 'node',
+          include: ['src/**/*.test.ts'],
+          exclude: ['src/**/components/**/*.test.ts'],
+        },
+      },
     ],
     setupFiles: ['./src/testing/setup.ts'],
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     maxWorkers: 2,
-    minWorkers: 1,
   },
 });
