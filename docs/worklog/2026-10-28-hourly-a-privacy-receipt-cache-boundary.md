@@ -16,7 +16,7 @@
 - [x] GREEN implementation
 - [x] Isolated PostgreSQL and full regression (with baseline failures recorded)
 - [x] Midpoint main/planning refresh
-- [ ] GitHub PR and CI (pending)
+- [x] GitHub PR and CI (Draft #1626; runtime checks failed, release HOLD)
 
 ## Finished
 - Code implemented and verified locally with blockers. Final PR/CI evidence to follow. Production RELEASE HOLD.
@@ -36,3 +36,10 @@
 - Official Test /api/version 6f697e74b7bf0cd1e4521d36534cfd9c140f8010; Production 6a989b5ac0c6155587d43426d64f6def6b62c917; neither candidate, Test symlink dangling.
 - Remote non-main 365 at pre-PR (363 unique ahead, 2 contained); open PRs 358, draft 343, conflicting 104, failed-check 233, duplicate head SHA 0; branch deletion 0.
 - Exact-head official Test login/E2E/backup restore/SEO/accessibility/Production GitOps gates BLOCKED. No merge or deployment.
+
+### PR and CI checkpoint — 03:44 KST
+- Draft PR #1626 opened from the isolated branch; pre-PR main still b1cd54fda1123fb07ca81b6e5b3ead70f59f556c. No merge.
+- Initial final-document SHA 0ee48a9c9e7307eba06c993522efda49dfb48efd: full Backend 1,692 PASS / 430 SKIP, Frontend 1,687 PASS, typecheck/build/contract/bot PASS, root audit high PASS. Root test/database parity FAIL, whole-repo lint FAIL, Bot audit FAIL.
+- GitHub CI #40561981528 and Build Test Candidate #40561944186: both FAILURE, runtime checks blocked by existing blog ESLint two errors; 5 success, 2 failure, 3 skipped check contexts. Candidate build/Production gate SKIPPED.
+- New baseline issue #1625 tracks privacy_create_my_request ambiguous created_at; no unreviewed migration repair. No official Test exact SHA; Test symlink target missing.
+- Production RELEASE HOLD; branch/PR preserved, no deletion, no Test/Production deploy or rollback.

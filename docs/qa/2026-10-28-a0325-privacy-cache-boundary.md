@@ -27,3 +27,6 @@
 - Main refreshed start, midpoint, pre-integration; unchanged. PR #1386 overlaps privacy page/controller/gateway and needs conflict/behavior reconciliation; QA #1610 is a separate migration/blog repair.
 - Official Test `/api/version`: `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; Production `6a989b5ac0c6155587d43426d64f6def6b62c917`; neither is this candidate. Test symlink target missing.
 - **DRAFT / HOLD:** no merge, no Test/Production deploy, no live DB/ledger write, no feature activation, no rollback or branch deletion. Rollback would revert app code only; stored privacy receipts remain unchanged.
+
+## PR and CI addendum
+- Draft PR #1626. At SHA `0ee48a9c9e7307eba06c993522efda49dfb48efd`, GitHub CI #40561981528 and Build Test Candidate #40561944186 both FAIL on the existing blog lint errors. Candidate build and Production Gate SKIPPED. The next docs-only SHA requires independent check results before any approval.
