@@ -90,6 +90,23 @@ describe('admin SEO audit: real authority and honest evidence', () => {
     expect(body.telemetryStatus).toBe('unavailable');
   });
 
+  it('does not label malformed crawler measurements as observed', async () => {
+    apiMock.mockImplementation(async (path: string) => path === '/api/v1/admin/security'
+      ? { consoleSession: { state: 'open' } }
+      : { totalHits24h: 10, totalHits7d: 10, avgDurationMs: 4, botDistribution: { Googlebot: 99 } });
+    const res = await GET();
+    const body = await res.json();
+    expect(body.telemetry).toBeNull();
+    expect(body.telemetryStatus).toBe('unavailable');
+  });
+
+  it('rejects forged IndexNow success without a valid upstream receipt', async () => {
+    submitMock.mockResolvedValueOnce({ success: true, submittedCount: '2', status: 202 });
+    const res = await POST(postRequest());
+    expect(res.status).toBe(502);
+    expect((await res.json()).ok).toBe(false);
+  });
+
   it('reports IndexNow acceptance, never confirmed indexing', async () => {
     submitMock.mockResolvedValueOnce({ success: true, submittedCount: 2, status: 202 });
     const res = await POST(postRequest());
