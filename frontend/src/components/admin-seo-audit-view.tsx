@@ -90,7 +90,7 @@ export function AdminSeoAuditView() {
         </Button>
       </div>
       <div role="status" aria-live="polite" className="text-sm text-muted-foreground">
-        {loading ? '감사 정보 불러오는 중…' : error ?? (audit ? `관측 기준: ${new Date(audit.timestamp).toLocaleString('ko-KR')}` : '정보 없음')}
+        {loading ? '감사 정보 불러오는 중…' : error ?? (audit ? `응답 시각: ${new Date(audit.timestamp).toLocaleString('ko-KR')} (개별 크롤러 측정 시각 아님)` : '정보 없음')}
       </div>
       {error && <Button type="button" variant="outline" onClick={() => void load()} className="min-h-11">다시 시도</Button>}
       {audit && <>

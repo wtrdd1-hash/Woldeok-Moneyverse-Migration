@@ -22,6 +22,10 @@ export interface IndexNowReceipt {
   readonly indexingConfirmed: false;
 }
 
+const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const MAX_RESPONSE_AGE_MS = 10 * 60 * 1000;
+const MAX_CLOCK_SKEW_MS = 2 * 60 * 1000;
+
 const BOT_LABELS = new Set([
   'Googlebot', 'Bingbot', 'DuckDuckBot', 'Baiduspider', 'Applebot',
   'YandexBot', 'Yeti', 'Naver', 'Other',
@@ -57,8 +61,12 @@ export function parseSeoTelemetry(value: unknown): SeoAuditTelemetry | null {
 }
 
 export function parseSeoAuditSnapshot(value: unknown): SeoAuditSnapshot | null {
-  if (!record(value) || typeof value.timestamp !== 'string' ||
-      !Number.isFinite(Date.parse(value.timestamp)) || !count(value.candidateUrlCount) ||
+  if (!record(value) || typeof value.timestamp !== 'string' || !ISO_UTC.test(value.timestamp) ||
+      !Number.isFinite(Date.parse(value.timestamp)) ||
+      new Date(value.timestamp).toISOString() !== value.timestamp ||
+      Date.now() - Date.parse(value.timestamp) > MAX_RESPONSE_AGE_MS ||
+      Date.parse(value.timestamp) - Date.now() > MAX_CLOCK_SKEW_MS ||
+      !count(value.candidateUrlCount) ||
       value.indexingStatus !== 'not_measured' || value.schemaValidationStatus !== 'not_measured') return null;
   if (value.telemetryStatus === 'unavailable' && value.telemetry === null) {
     return { timestamp: value.timestamp, candidateUrlCount: value.candidateUrlCount,

@@ -6,7 +6,7 @@ const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
 vi.mock('sonner', () => ({ toast }));
 
 const snapshot = {
-  timestamp: '2026-10-28T00:00:00.000Z', candidateUrlCount: 2,
+  timestamp: new Date().toISOString(), candidateUrlCount: 2,
   telemetry: { totalHits24h: 12, totalHits7d: 30, avgDurationMs: 87, botDistribution: { Googlebot: 7 } },
   telemetryStatus: 'observed', indexingStatus: 'not_measured', schemaValidationStatus: 'not_measured',
 };
@@ -34,6 +34,7 @@ describe('admin SEO audit UI evidence and accessibility', () => {
     render(<AdminSeoAuditView />);
     const submit = await screen.findByRole('button', { name: /IndexNow URL 제출/ });
     await waitFor(() => expect((submit as HTMLButtonElement).disabled).toBe(false));
+    expect(screen.getByText(/응답 시각:/)).toBeTruthy();
     fireEvent.click(submit);
     await waitFor(() => expect(toast.error).toHaveBeenCalled());
     expect(toast.success).not.toHaveBeenCalled();

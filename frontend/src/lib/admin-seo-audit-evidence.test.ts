@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parseSeoTelemetry, parseSeoAuditSnapshot, parseIndexNowReceipt } from './admin-seo-audit-evidence';
 
 const telemetry = { totalHits24h: 12, totalHits7d: 30, avgDurationMs: 87, botDistribution: { Googlebot: 7 } };
-const snapshot = { timestamp: '2026-10-28T00:00:00.000Z', candidateUrlCount: 2, telemetry,
+const snapshot = { timestamp: new Date().toISOString(), candidateUrlCount: 2, telemetry,
   telemetryStatus: 'observed', indexingStatus: 'not_measured', schemaValidationStatus: 'not_measured' };
 
 describe('admin SEO audit evidence', () => {
@@ -24,6 +24,8 @@ describe('admin SEO audit evidence', () => {
   it('rejects a forged observed state or invalid audit timestamps', () => {
     expect(parseSeoAuditSnapshot({ ...snapshot, telemetry: null })).toBeNull();
     expect(parseSeoAuditSnapshot({ ...snapshot, timestamp: 'invalid' })).toBeNull();
+    expect(parseSeoAuditSnapshot({ ...snapshot, timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString() })).toBeNull();
+    expect(parseSeoAuditSnapshot({ ...snapshot, timestamp: new Date(Date.now() + 60 * 60 * 1000).toISOString() })).toBeNull();
     expect(parseSeoAuditSnapshot({ ...snapshot, candidateUrlCount: -1 })).toBeNull();
     expect(parseSeoAuditSnapshot({ ...snapshot, indexingStatus: 'indexed' })).toBeNull();
     expect(parseSeoAuditSnapshot({ ...snapshot, telemetry: null, telemetryStatus: 'unavailable' })?.telemetry).toBeNull();
