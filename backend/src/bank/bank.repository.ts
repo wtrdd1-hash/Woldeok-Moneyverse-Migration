@@ -218,7 +218,7 @@ export class BankRepository {
       this.pool,
       `SELECT pocket_id::text, pocket_name, new_pocket_balance::text,
               new_cash_balance::text, transfer_amount::text, direction
-       FROM public.bank_transfer_pocket($1, $2, $3, $4, $5)`,
+       FROM public.bank_transfer_pocket($1::uuid, $2::uuid, $3::uuid, $4::text, $5::bigint)`,
       [key, actor, pocketId, direction, amount.toString()],
     );
   }
@@ -237,7 +237,7 @@ export class BankRepository {
     return queryOne(
       this.pool,
       `SELECT pocket_id::text, theme_color, icon_code, cost_wld::text, remaining_cash::text
-       FROM public.bank_customize_pocket($1, $2, $3, $4, $5)`,
+       FROM public.bank_customize_pocket($1::uuid, $2::uuid, $3::uuid, $4::text, $5::text)`,
       [key, actor, pocketId, themeColor || 'sky', iconCode || 'piggy-bank'],
     );
   }
@@ -250,7 +250,7 @@ export class BankRepository {
     return queryOne(
       this.pool,
       `SELECT pocket_id::text, returned_balance::text, cost_wld::text, new_cash_balance::text
-       FROM public.bank_archive_pocket($1, $2, $3)`,
+       FROM public.bank_archive_pocket($1::uuid, $2::uuid, $3::uuid)`,
       [key, actor, pocketId],
     );
   }
