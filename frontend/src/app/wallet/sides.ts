@@ -31,6 +31,8 @@ export interface Overview {
     readonly totalAvailableAmount: string;
   };
   readonly recentTransactions: readonly TransactionView[];
+  /** Missing on an older API release; never assume a full ledger in that case. */
+  readonly recentTransactionsHasMore?: boolean;
 }
 
 /**

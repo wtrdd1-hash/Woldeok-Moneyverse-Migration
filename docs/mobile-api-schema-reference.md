@@ -4751,6 +4751,7 @@ _No request body._
 | recentTransactions[].bankDelta | false | undefined \| string & object |  |
 | recentTransactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
 | recentTransactions[].occurredAt | true | string |  |
+| recentTransactionsHasMore | true | boolean |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

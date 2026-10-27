@@ -421,7 +421,7 @@ export default async function WalletPage() {
               <div className="flex items-center gap-2">
                 <ExportLedgerCsvButton transactions={recentTransactions} />
                 <Button asChild variant="outline" size="sm" className="h-8 text-xs">
-                  <Link href="/wallet/activity">전체 내역 보기 →</Link>
+                  <Link href="/wallet/activity">최근 기록 더 보기 →</Link>
                 </Button>
               </div>
             </div>

@@ -15093,12 +15093,16 @@
                 "occurredAt"
               ]
             }
+          },
+          "recentTransactionsHasMore": {
+            "type": "boolean"
           }
         },
         "required": [
           "userId",
           "balances",
-          "recentTransactions"
+          "recentTransactions",
+          "recentTransactionsHasMore"
         ]
       },
       "responseCompatibility": {

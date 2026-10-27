@@ -83,7 +83,7 @@ describe('app API route compatibility', () => {
 
   it('preserves bounded wallet activity period queries through the Android app API', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ recentTransactions: [] }), {
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ recentTransactions: [], recentTransactionsHasMore: true }), {
       status: 200, headers: { 'content-type': 'application/json' },
     }));
     vi.stubGlobal('fetch', fetchSpy);
@@ -94,6 +94,7 @@ describe('app API route compatibility', () => {
     expect(target.searchParams.get('recent')).toBe('50');
     expect(target.searchParams.get('period')).toBe('7d');
     expect(response.headers.get('cache-control')).toContain('no-store');
+    expect((await response.json()).recentTransactionsHasMore).toBe(true);
   });
 
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
