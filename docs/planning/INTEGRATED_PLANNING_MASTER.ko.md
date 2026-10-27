@@ -1,3 +1,33 @@
+# F675-148 / 기획 v1366 — 고객지원 운영시간의 시각·출처·철회 무결성 (기능 보완 / 초안·운영 보류)
+**회차:** 이전 기능 추가 v1364 → 현재 기능 보완 v1366 → 다음 기능 추가 v1368(잠정). **이슈:** #1548. **선행:** 미병합 Draft PR #1549(상위 #1541), 독립 병합 금지. **시작·중간 main:** `c2a9306ddc0424438bc0ab297ea9543bb167aee6`; 최신 main의 AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 국문 대조 확인. 문서만 변경, 런타임·DB·원장·WLD·Test·Production 변경 금지.
+
+## 실제 근거와 v1364의 설계 취약점
+- main의 `frontend/src/app/support/page.tsx`, `actions.ts`는 회원 문의·답변만 제공한다. `backend/src/support/support.controller.ts`는 인증된 문의 API, `frontend/src/lib/api.ts:200`은 SWR 재검증 `publicApi`, 앱 게이트웨이는 `support` 그룹만 인식한다. Migration 196에 상담시간·독립 승인·게시 API는 없다. 실제 상담 인력·SLA·운영시간·장애는 확인되지 않았다.
+- v1364의 공개 `?at=ISO8601`은 **사용자가 지정한 시각**과 **현재 상담 가능 여부**를 혼동한다. `(revision_id,date,slot_index)` 고유 제약은 중복 슬롯 번호만 막고 **시간 겹침을 방지하지 못한다**. 오래된 캐시 작업자가 과거 게시를 재활성화할 수 있으며 `sourceId`만으로 출처 검증을 증명할 수 없다. 이는 예방적 설계 문제이지 실제 사고 확인이 아니다.
+- F675-148의 검증된 주간 운영시간·임시 예외·안전한 문의 연결만 범위에 포함한다. 자동 답변, SLA/대기시간 예측, 직원 감시, 문의 상태 변경, WLD/금융/인프라 상태와 분리. 구현 전 사람의 설계 승인이 필요하다.
+
+## 사용자 흐름·권한·화면·상태
+- 공개 `/support/availability`: 검증된 날짜별 운영시간·Asia/Seoul·검증 시각·**안내된 운영시간은 참고 정보이며 답변 시각을 보장하지 않습니다** 고지. **문의하기** CTA는 기존 로그인 회원 `/support`로 연결. 비로그인 시 기존 로그인 후 자동 복귀가 구현됐다고 주장하지 말고 필요하면 `/support`로 다시 이동하도록 안내. 회원은 상담시간 외에도 기존 문의를 제출할 수 있다.
+- 관리자 `/admin/support/availability`: operator는 초안/미리보기/심사 요청, 현재 승인권자 중 작성자와 다른 사람만 승인·게시·철회. 공개 `UNVERIFIED|STALE|PUBLISHED|EXCEPTION_CLOSED|EXCEPTION_CHANGED|UNAVAILABLE`; 서버가 현재 유효 창을 검증하지 못하면 `OPEN_NOW` 금지. 관리자 `DRAFT→IN_REVIEW→APPROVED_PENDING_PUBLICATION→PUBLISHED_CONFIRMED`, 철회 `WITHDRAW_PENDING_PURGE→WITHDRAWN`, 예외 `CONFLICT|ERROR|REVALIDATION_REQUIRED`. 만료/철회된 공지를 이전 성공 캐시로 보여주지 않는다. 한국어·영어 날짜/시간대, 시맨틱 일정 목록, 스크린리더 상태 갱신, 키보드·포커스·320px·200% 확대·44px 터치 목표, WCAG 2.2 AA 검증.
+
+## 시각·출처 진실 계약
+- 공개 `GET /api/v1/support/availability`의 **현재** 판단은 DB/서버의 권위 있는 시각만 사용한다. 공개 `?at` 제거; 선택 `?date=YYYY-MM-DD`는 오늘~30일 뒤 **일정 미리보기**로 제한하며 `preview=true`, `openNow=true`/미래 근무 보장 금지. 과거·존재하지 않는 날짜·31일 이상은 422. 브라우저 시계/헤더가 게시 유효성을 결정하지 않는다. 응답 `{evaluatedAt,validUntil,sourceVerifiedAt,revisionId,generation,timezone,preview,state,windows,notice,disclaimer}`. DB 시각 또는 출처 검증 장애는 `UNAVAILABLE/STALE`, 검증된 시간표는 비공개.
+- 모든 시간은 로컬 반열림 구간 `[startMinute,endMinute)`, `0≤start<end≤1440`; 1440은 종료 시각 전용, 00:00은 다음 날 시작. 자정 넘김은 두 날짜 구간으로 분리한다. 전일 휴무는 `start=end`나 빈 시간표가 아닌 별도 CLOSED 표시. 날짜별 예외는 해당 날짜의 주간 시간표를 **전부 대체**(CLOSED 또는 REPLACEMENT_WINDOWS)하며 병합하지 않는다. 겹침·상충 예외 거절. IANA `Asia/Seoul`, 정규 UTC 시각·현지 날짜·tzdata 버전을 관리하며 윤년·연말·일→월·UTC↔KST 경계·시계 오차를 검증한다.
+- `sourceId`는 증거 자체가 아니다. `support_hours_sources`에 승인 권한자/출처 종류, 불변 내용 해시, 검증자, verifiedAt, expiresAt, supersededAt, 감사 영수증을 보존하고 작성·심사·승인·게시·공개 조회 시 유효성을 재검증한다. 게시 API의 임의 외부 URL 조회 금지. 실제 담당 조직의 확인 없는 인력·상담시간 추정 금지.
+
+## DB·트랜잭션·API·관리자 보안
+- Migration 280 충돌(#1147) 해결 후 **새 순방향 마이그레이션** 배정, 적용된 196/280 수정 금지. `support_hours_day_slots(revision_id,local_date,start_minute,end_minute,kind)`에 CHECK, 중복 구간 방지 GiST 배제 제약 `(revision_id =,local_date =,int4range(start_minute,end_minute,'[)') &&)` 적용 전 `btree_gist` 가용성 검증. 확장 설치 불가 시 직렬화된 revision 잠금과 DB 충돌 트리거를 설계하며 애플리케이션 검증만으로 대체 금지. `support_hours_sources`, 승인 payload/source 해시가 포함된 불변 `support_hours_revisions`, 세대 번호가 증가하는 단일 `support_hours_current(id=1,generation,revision_id,status)`, `(actor_id,intent_id)` 유일한 영수증 `support_hours_intents`, 추가 전용 `support_hours_audit`, `(generation,operation)` 유일한 outbox. 인덱스 `(revision_id,local_date,start_minute)`, `(status,generation DESC)`, `(outbox_state,next_attempt_at,generation)`.
+- 게시 트랜잭션은 현재 포인터→출처→초안을 고정 순서로 잠그고 현재 관리자 역할·독립 승인·출처 해시/만료·승인된 payload 해시·CAS 버전을 재검증한다. 세대 번호 증가·감사·outbox를 원자적으로 기록한다. 외부 캐시 제거와 공개 경로 재조회 증명 전 `PUBLISHED_CONFIRMED` 금지. **늦게 도착한 이전 세대 작업자는 현재 세대를 승인/복구할 수 없다**. 철회 시 DB 공개 포인터부터 차단하고 캐시 제거. ETag·HEAD·304로 만료/철회 공지를 재노출하지 않는다. 캐시 증거가 없으면 공개 상태 `UNVERIFIED/UNAVAILABLE`. Next.js `cache:'no-store'`, `dynamic='force-dynamic'`; 이 API에서 SWR `publicApi(...,revalidate)` 사용 금지.
+- 고정 search_path·최소 EXECUTE의 SECURITY DEFINER 함수, PUBLIC 실행 권한 철회, app/PUBLIC 테이블 직접 DML 금지. 서버 세션에서 actor 식별, 현재 역할·CSRF·작성자≠승인자·불변 감사·요청량 제한. 동일 actor/intent/payload는 기존 영수증 반환, 다른 payload는 409; 23505 경합은 영수증 재조회, 40001 제한 재시도. 401 세션, 403 권한, 409 충돌, 422 시간 겹침/날짜, 429 제한, 503 출처·감사·캐시 불명. Android `/app-api/v1/support/availability`는 명시 등록 후 공개 읽기만, 관리자 변경 경로 차단. 공개 응답·검색·로그에 직원 이름/개인 근무표/문의 ID/PII 포함 금지.
+
+## SEO·KPI·시험·배포
+- 확인된 유효 게시만 `/support/availability` canonical/색인/사이트맵 허용; 미확인·만료는 noindex·제외, 가짜 OpeningHours 구조화 데이터나 SLA 금지. 회원·관리자 noindex/no-store. KPI: 오래된 일정 노출 목표 0, 승인 게시율, 출처 재검증 경과, 철회→공개 차단 p95 **시험 목표 ≤60초**(DB 차단 즉시), 날짜 경계 오판 0, 일정→문의 CTA 전환. 개인 식별자 없는 집계. 외부 독립 근거 후보 RFC 9111·PostgreSQL 배제 제약·W3C WCAG 2.2: **신규 최종 승인 0건**, 누적 독립 중복 제거·분류 승인 **UNKNOWN/10,000**, BLOCKED/IN PROGRESS. 후보는 승인 수량에 산입하지 않는다.
+- **미실행** 수용 시험: 합성 10,001 구간, 동시 게시/철회/재시도 100, 위조 관리자 100, 자정·야간·윤년·연말·겹침·출처 만료, 오래된 outbox 작업자, 캐시 제거 실패·304/HEAD, DB/감사 장애, 시계 오차, KO/EN·Android 동등성, 320px/200% 접근성, 격리 실제 PG ACL/복원/롤백. `support_verified_hours_v1` 기본 OFF. 개발 예약에서 별도 브랜치·TDD→전체 보안/QA→독립 암호화 백업 복원→정확 SHA Test 인증 E2E→승인된 GitOps 카나리. 롤백은 기능 OFF+DB 공개 포인터 차단+캐시 제거, 감사 보존, 적용된 DB 마이그레이션 역행 금지. 운영 승격 BLOCKED.
+
+## P0/P1 개발 백로그 (기획만)
+- **P0 `ENV1366-01`** 루트 79%·데이터 72% 여유/깨진 `/srv/moneyverse` 링크/독립 복원·실제 런타임 확인; **P0 `SEC1366-02`** migration 280 충돌·앱/PUBLIC 권한·SECURITY DEFINER·원장 격리; **P0 `REL1366-03`** QA v1318은 스케줄러 전용, 전체 보안·정확 SHA Test 미검증; **P0 `HOURS1366-04`** 사용자 시각 조작·만료 출처·겹침·오래된 캐시·거짓 OPEN_NOW 방지.
+- **P1 `HOURS1366-05`** 날짜별 슬롯/배제 제약·세대 포인터·인덱스; **P1 `HOURS1366-06`** 출처 확인·독립 승인·CAS·불변 감사·세대 차단 outbox; **P1 `HOURS1366-07`** NestJS 공개/관리자·Android 읽기·권한·속도 제한·영수증; **P1 `HOURS1366-08`** 공개/회원/관리자 UI·KO/EN·모바일/a11y; **P1 `HOURS1366-09`** SEO·개인정보·분석·악용 방지; **P1 `HOURS1366-10`** 실제 PG·10,001/100/100·캐시/회귀/롤백. 모든 시험 미실행. QA v1318 공개 HTTP 24건 성공, 로그인 필요 2건 미검증, 전체 기능 QA 미인증. 배포 보류.
+
 # F675-148 / 기획 v1364 — 검증된 고객지원 운영시간·예외 공지 (기능 추가 / 초안 / 운영 보류)
 **회차:** 이전 기능 보완 v1362 → 현재 기능 추가 v1364 → 다음 기능 보완 v1366(잠정). **개발 이슈:** #1548. **선행:** 미병합 기획 Draft #1541, 독립 병합 금지. **시작·중간 main:** `c2a9306ddc0424438bc0ab297ea9543bb167aee6`; 최신 main AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·국문 대조 문서를 확인. 런타임·DB·원장·WLD·기능 스위치·Test·운영 변경 없음.
 
