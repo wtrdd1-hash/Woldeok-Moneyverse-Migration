@@ -1,4 +1,4 @@
--- NEW 280 migration: DRAFT ONLY. Do not apply to production-linked DB.
+-- NEW 282 migration: DRAFT ONLY. Do not apply to production-linked DB.
 -- Verified public help articles; no publishing or source import in this slice.
 -- An approved source + independent reviewer + unexpired evidence is mandatory.
 BEGIN;
