@@ -51,17 +51,7 @@ export class BankRepository {
       overdue_count: number;
     }>(
       this.pool,
-      `SELECT
-         GREATEST(0, FLOOR(EXTRACT(EPOCH FROM (now() - u.created_at)) / 86400))::integer AS account_age_days,
-         COALESCE((SELECT MAX(j.level) FROM public.user_job_progress j
-                   WHERE j.user_id = u.id AND j.is_active), 0)::integer AS job_level,
-         (SELECT COUNT(*)::integer FROM public.virtual_bank_loan_repayments r
-          JOIN public.virtual_bank_loans l ON l.id = r.loan_id
-          WHERE l.user_id = u.id) AS repayment_count,
-         (SELECT COUNT(*)::integer FROM public.virtual_bank_loans l
-          WHERE l.user_id = u.id AND (l.overdue_at IS NOT NULL OR l.status = 'overdue')) AS overdue_count
-       FROM public.users u
-       WHERE u.id = $1::uuid AND u.status = 'active'::public.user_status`,
+      `SELECT * FROM public.bank_my_credit_facts($1)`,
       [actor],
     );
     if (!row) throw new Error('credit profile unavailable');

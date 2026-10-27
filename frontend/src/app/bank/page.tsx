@@ -31,6 +31,7 @@ import {
 import { SavingsGoalProgressRing } from './savings-progress-ring';
 import { SavingPocketsCard } from './saving-pockets-card';
 import { BankLiquidityCard } from './bank-liquidity-card';
+import { BankPrivacyNotice } from './bank-privacy-notice';
 import { CreditScoreCard, type CreditRatingData } from './credit-score-card';
 import { SavingsPotCard } from '@/components/savings-pot-card';
 import { TossBankHeroCard } from './toss-bank-hero-card';
@@ -125,6 +126,8 @@ export default async function BankPage() {
           {localeLabel(locale, '가이드 보기', 'Guide', 'ガイドを見る', '查看指南')}
         </Link>
       </div>
+
+      <BankPrivacyNotice locale={locale} />
 
       {/* 3. 3대 핵심 서브 탭 UI (저축/모으기, 대출/신용, 통계/자산분석) */}
       <Tabs defaultValue="savings" className="space-y-6">

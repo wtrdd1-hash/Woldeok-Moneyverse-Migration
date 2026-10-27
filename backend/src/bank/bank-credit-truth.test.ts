@@ -20,9 +20,9 @@ describe('Actor-derived game credit evidence (v716)', () => {
     });
     expect(seen).toHaveLength(1);
     expect(seen[0]?.values).toEqual([actor]);
-    expect(seen[0]?.sql).toContain('public.virtual_bank_loan_repayments');
-    expect(seen[0]?.sql).toContain('public.user_job_progress');
-    expect(seen[0]?.sql).toContain('public.users');
+    expect(seen[0]?.sql).toContain('public.bank_my_credit_facts($1)');
+    expect(seen[0]?.sql).not.toContain('public.virtual_bank_loans');
+    expect(seen[0]?.sql).not.toContain('public.users');
   });
 
   it('fails closed if user record is missing', async () => {

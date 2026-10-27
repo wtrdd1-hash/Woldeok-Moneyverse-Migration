@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -56,6 +57,7 @@ export class BankController {
   }
 
   @Get('standing')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Bank overview: cash, deposit balance, compound interest, loans, bonds' })
   standing(@Req() request: RequestWithSession) {
     return this.guarded(
@@ -172,6 +174,7 @@ export class BankController {
   }
 
   @Get('credit-rating')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Get game-only personal credit score (Tiers 1-10) and borrowing limit' })
   creditRating(@Req() request: RequestWithSession) {
     return this.guarded(
