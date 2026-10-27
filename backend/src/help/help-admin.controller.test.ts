@@ -41,6 +41,28 @@ describe('help management trust boundary', () => {
       .rejects.toMatchObject({ status: 409 });
     expect(adminPublish).toHaveBeenCalledOnce();
   });
+  it('does not offer publication of expired evidence in the administrator queue', async () => {
+    vi.stubEnv('VERIFIED_HELP_CENTER_V1','true');
+    const adminQueue = vi.fn().mockResolvedValue([
+      { article_id: article, author_id: '00000000-0000-0000-0000-000000000002',
+        reviewed_until: new Date('2000-01-01T00:00:00Z'), state: 'draft' },
+      { article_id: '00000000-0000-0000-0000-000000000125',
+        author_id: '00000000-0000-0000-0000-000000000002',
+        reviewed_until: new Date('2999-01-01T00:00:00Z'), state: 'draft' },
+    ]);
+    const controller = new AdminHelpController({ adminQueue } as unknown as HelpRepository);
+    const result = await controller.queue(req(['approver']));
+    expect(result.articles[0]).toMatchObject({ evidenceExpired: true, canApprove: false });
+    expect(result.articles[1]).toMatchObject({ evidenceExpired: false, canApprove: true });
+  });
+  it('maps expired publication evidence to HTTP 400 rather than a false success', async () => {
+    vi.stubEnv('VERIFIED_HELP_CENTER_V1','true');
+    const expired = Object.assign(new Error('help source review expired'), { code: '22023' });
+    const adminPublish = vi.fn().mockRejectedValue(expired);
+    const controller = new AdminHelpController({ adminPublish } as unknown as HelpRepository);
+    await expect(controller.publish(req(['approver']), article, { idempotencyKey: key, expectedVersion: '1' }))
+      .rejects.toMatchObject({ status: 400 });
+  });
   it('requires a committed DB receipt before reporting publication', async () => {
     vi.stubEnv('VERIFIED_HELP_CENTER_V1','true');
     const adminPublish = vi.fn().mockResolvedValue(null);

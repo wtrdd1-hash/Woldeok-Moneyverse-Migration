@@ -121,6 +121,11 @@ BEGIN
     OR p_source_sha !~ '^[a-f0-9]{64}$' OR p_reviewed_until IS NULL THEN
     RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='invalid help draft or source';
   END IF;
+  -- Receipt validity is bounded by the same source-review deadline as public reads.
+  -- Validate BEFORE looking up a replay key so an expired draft never returns 2xx.
+  IF p_reviewed_until <= clock_timestamp() OR p_reviewed_until > clock_timestamp()+interval '1 year' THEN
+    RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='source review is expired or unbounded';
+  END IF;
   v_digest := encode(sha256(convert_to(jsonb_build_array(p_actor,p_locale,p_slug,p_category,
     p_title,p_summary,p_body,p_source_url,p_source_sha,p_reviewed_until)::text,'UTF8')),'hex');
   PERFORM pg_advisory_xact_lock(hashtextextended(p_key::text,0));
@@ -135,9 +140,6 @@ BEGIN
       RETURN v_existing.article_id;
     END IF;
     RAISE EXCEPTION USING ERRCODE='23505', MESSAGE='help idempotency payload mismatch';
-  END IF;
-  IF p_reviewed_until <= clock_timestamp() OR p_reviewed_until > clock_timestamp()+interval '1 year' THEN
-    RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='source review is expired or unbounded';
   END IF;
   INSERT INTO public.help_articles(locale,slug,category,created_by)
     VALUES(p_locale,p_slug,p_category,p_actor) RETURNING id INTO v_id;
@@ -154,7 +156,7 @@ CREATE FUNCTION public.help_admin_publish(
   p_actor uuid,p_session uuid,p_key uuid,p_article uuid,p_expected_version bigint
 ) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE v_article public.help_articles%ROWTYPE; v_revision public.help_article_revisions%ROWTYPE;
-  v_existing public.help_article_events%ROWTYPE; v_digest text; v_state text;
+  v_existing public.help_article_events%ROWTYPE; v_digest text; v_reviewed_until timestamptz;
 BEGIN
   PERFORM public.help_admin_check(p_actor,p_session,'approver');
   IF p_key IS NULL OR p_article IS NULL OR p_expected_version IS NULL OR p_expected_version<1 THEN
@@ -166,10 +168,15 @@ BEGIN
   IF FOUND THEN
     IF v_existing.actor_id=p_actor AND v_existing.article_id=p_article AND
       v_existing.event_kind='published' AND v_existing.request_digest=v_digest THEN
-      -- A retracted article cannot be reported as newly published on retry.
-      SELECT state INTO v_state FROM public.help_articles WHERE id=v_existing.article_id FOR UPDATE;
-      IF v_state IS DISTINCT FROM 'published' THEN
+      -- A retracted or evidence-expired article cannot be reported as public on retry.
+      SELECT * INTO v_article FROM public.help_articles WHERE id=v_existing.article_id FOR UPDATE;
+      IF v_article.state IS DISTINCT FROM 'published' THEN
         RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='help publication replay is stale';
+      END IF;
+      SELECT reviewed_until INTO v_reviewed_until FROM public.help_article_revisions
+        WHERE id=v_article.published_revision_id AND article_id=v_article.id;
+      IF v_reviewed_until IS NULL OR v_reviewed_until <= clock_timestamp() THEN
+        RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='help source review expired';
       END IF;
       RETURN v_existing.article_id;
     END IF;
