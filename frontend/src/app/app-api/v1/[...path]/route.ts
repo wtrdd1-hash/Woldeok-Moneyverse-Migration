@@ -48,7 +48,7 @@ function contractJson(payload: unknown, init: ResponseInit = {}): NextResponse {
 function gatewayProblem(status: number, title: string, code: string, detail: string): NextResponse {
   return contractJson(
     { type: 'about:blank', title, status, code, detail },
-    { status, headers: { 'content-type': 'application/problem+json' } },
+    { status, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store' } },
   );
 }
 
@@ -147,7 +147,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
-  if (parts[0] === 'wallet') headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || (parts[0] === 'shop' && parts[1] === 'holdings')) {
+    headers.set('cache-control', 'private, no-store');
+  }
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

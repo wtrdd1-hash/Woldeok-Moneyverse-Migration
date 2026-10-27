@@ -97,6 +97,28 @@ describe('app API route compatibility', () => {
     expect((await response.json()).recentTransactionsHasMore).toBe(true);
   });
 
+  it('forwards private shop upkeep filters without caching an upstream public response', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ holdings: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/shop/holdings?status=attention'), context('shop', 'holdings'));
+    expect(response.status).toBe(200);
+    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(target.pathname).toBe('/api/v1/shop/holdings');
+    expect(target.searchParams.get('status')).toBe('attention');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('never caches a failed private shop holdings gateway response', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+    const response = await GET(request('/app-api/v1/shop/holdings?status=attention'), context('shop', 'holdings'));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     const fetchSpy = vi.fn();
