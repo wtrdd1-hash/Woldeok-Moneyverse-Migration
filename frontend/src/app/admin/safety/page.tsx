@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { ShieldCheck, AlertTriangle, MessageSquareWarning, FileText } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -17,9 +19,18 @@ import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
-import { TakedownActionDialog, type TakedownItem } from './takedown-action-dialog';
-import { ChatReportEvidenceDialog, type ChatReportItem } from './chat-report-evidence-dialog';
+import { TakedownActionDialog } from './takedown-action-dialog';
+import { ChatReportEvidenceDialog } from './chat-report-evidence-dialog';
 import { ChatReportActionDialog } from './chat-report-action-dialog';
+import {
+  MODERATION_MAX_OFFSET,
+  MODERATION_PAGE_SIZE,
+  moderationPageHref,
+  parseChatQueue,
+  parseTakedownQueue,
+  readModerationOffset,
+  safeTargetHref,
+} from './moderation-queue';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,23 +86,81 @@ function chatReportReasonBadge(reason: string) {
   }
 }
 
-export default async function AdminSafetyPage() {
+function EvidenceTargetLink({ url }: { readonly url: string }) {
+  const href = safeTargetHref(url);
+  if (!href) return <span className="block max-w-[280px] break-all text-muted-foreground">{url}</span>;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer"
+      className="block max-w-[280px] break-all text-muted-foreground underline hover:text-primary">
+      {url}
+    </a>
+  );
+}
+
+function QueuePager({
+  view, offset, otherOffset, loadedCount,
+}: {
+  readonly view: 'chat-reports' | 'takedowns';
+  readonly offset: number;
+  readonly otherOffset: number;
+  readonly loadedCount: number | null;
+}) {
+  const href = (newOffset: number) => view === 'chat-reports'
+    ? moderationPageHref(view, newOffset, otherOffset)
+    : moderationPageHref(view, otherOffset, newOffset);
+  return (
+    <nav aria-label={view === 'chat-reports' ? '채팅 신고 페이지 이동' : '긴급 삭제 요청 페이지 이동'}
+      className="flex flex-wrap items-center gap-3 px-4 pb-4 text-sm">
+      <span aria-live="polite" className="text-muted-foreground">
+        {offset / MODERATION_PAGE_SIZE + 1}페이지 · 현재 페이지 {loadedCount === null ? '조회 불가' : String(loadedCount) + '건'} (전체 건수 아님)
+      </span>
+      {offset > 0 && (
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={href(offset - MODERATION_PAGE_SIZE)}>이전 50건</Link>
+        </Button>
+      )}
+      {loadedCount === MODERATION_PAGE_SIZE && offset < MODERATION_MAX_OFFSET && (
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={href(offset + MODERATION_PAGE_SIZE)}>다음 50건 확인</Link>
+        </Button>
+      )}
+      {loadedCount === null && (
+        <Button asChild variant="outline" className="min-h-11">
+          <a href={href(offset)}>다시 조회</a>
+        </Button>
+      )}
+    </nav>
+  );
+}
+
+export default async function AdminSafetyPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await requireAdminConsole(AREA.href);
+  const params = await searchParams;
+  const chatOffset = readModerationOffset(params.chatOffset);
+  const takedownOffset = readModerationOffset(params.takedownOffset);
+  const selectedView = params.view === 'takedowns' ? 'takedowns' : 'chat-reports';
 
-  // 병렬로 채팅 신고 큐와 긴급 삭제 큐 조회
-  const [chatReportsRes, takedownsRes] = await Promise.all([
-    apiOrNull<{ items: ChatReportItem[]; count: number }>('/api/v1/admin/safety/chat-reports'),
-    apiOrNull<{ items: TakedownItem[]; count: number }>('/api/v1/admin/safety/takedowns'),
+  // The backend count is the current page length, not a global pending total.
+  const [chatRaw, takedownRaw] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/admin/safety/chat-reports?limit=50&offset=' + chatOffset),
+    apiOrNull<unknown>('/api/v1/admin/safety/takedowns?limit=50&offset=' + takedownOffset),
   ]);
-
-  const chatReports = chatReportsRes?.items ?? [];
-  const takedowns = takedownsRes?.items ?? [];
-
-  const pendingChatReports = chatReports.filter((r) => r.status === 'SUBMITTED').length;
-  const pendingTakedowns = takedowns.filter((t) => t.status === 'SUBMITTED').length;
-  const actionedTotal =
-    chatReports.filter((r) => r.status !== 'SUBMITTED').length +
-    takedowns.filter((t) => t.status.startsWith('ACTIONED')).length;
+  const chatQueue = parseChatQueue(chatRaw);
+  const takedownQueue = parseTakedownQueue(takedownRaw);
+  const chatReports = chatQueue?.items ?? [];
+  const takedowns = takedownQueue?.items ?? [];
+  const pendingChatReports = chatQueue
+    ? chatReports.filter((r) => r.status === 'SUBMITTED').length : null;
+  const pendingTakedowns = takedownQueue
+    ? takedowns.filter((t) => t.status === 'SUBMITTED').length : null;
+  const actionedPageCount = chatQueue && takedownQueue
+    ? chatReports.filter((r) => r.status.startsWith('ACTIONED')).length +
+      takedowns.filter((t) => t.status.startsWith('ACTIONED')).length
+    : null;
 
   return (
     <div data-page="admin-safety" className="mv-page mv-page--admin grid gap-6">
@@ -104,54 +173,54 @@ export default async function AdminSafetyPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <Card className="border shadow-sm">
           <CardHeader className="p-4 pb-2">
-            <CardDescription className="text-xs">미처리 1:1 채팅 신고 (SLA 긴급)</CardDescription>
+            <CardDescription className="text-xs">현재 페이지 미처리 채팅 신고</CardDescription>
             <CardTitle className="text-2xl font-bold tracking-tight text-destructive flex items-center gap-2">
               <MessageSquareWarning className="size-5" />
-              {pendingChatReports} <span className="text-sm font-normal text-muted-foreground">건</span>
+              {pendingChatReports === null ? '—' : pendingChatReports} <span className="text-sm font-normal text-muted-foreground">건</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 text-xs text-muted-foreground">
-            10개 메시지 증거 스냅샷 검토 및 즉시 제재 대상
+            현재 페이지 최대 50건 기준 · 전체 미처리 건수 아님
           </CardContent>
         </Card>
 
         <Card className="border shadow-sm">
           <CardHeader className="p-4 pb-2">
-            <CardDescription className="text-xs">미처리 긴급 삭제 (TAKE IT DOWN)</CardDescription>
+            <CardDescription className="text-xs">현재 페이지 미처리 긴급 삭제 요청</CardDescription>
             <CardTitle className="text-2xl font-bold tracking-tight text-amber-600 dark:text-amber-400 flex items-center gap-2">
               <AlertTriangle className="size-5" />
-              {pendingTakedowns} <span className="text-sm font-normal text-muted-foreground">건</span>
+              {pendingTakedowns === null ? '—' : pendingTakedowns} <span className="text-sm font-normal text-muted-foreground">건</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 text-xs text-muted-foreground">
-            사생활 침해/유해물 24시간 내 신속 격리 대상
+            현재 페이지 최대 50건 기준 · 전체 미처리 건수 아님
           </CardContent>
         </Card>
 
         <Card className="border shadow-sm">
           <CardHeader className="p-4 pb-2">
-            <CardDescription className="text-xs">누적 안전 조치 및 감사 완료</CardDescription>
+            <CardDescription className="text-xs">현재 페이지 조치 기록</CardDescription>
             <CardTitle className="text-2xl font-bold tracking-tight text-emerald-600 flex items-center gap-2">
               <ShieldCheck className="size-5" />
-              {actionedTotal} <span className="text-sm font-normal text-muted-foreground">건</span>
+              {actionedPageCount === null ? '—' : actionedPageCount} <span className="text-sm font-normal text-muted-foreground">건</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 text-xs text-muted-foreground">
-            모든 조치는 PostgreSQL audit_logs에 불변 기록됨
+            현재 조회한 두 목록의 조치 기록만 집계 · 감사 완료 여부 별도 확인
           </CardContent>
         </Card>
       </div>
 
       {/* 2대 안전 큐 탭 인터페이스 */}
-      <Tabs defaultValue="chat-reports" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md h-10 mb-2">
-          <TabsTrigger value="chat-reports" className="text-xs font-semibold gap-1.5">
+      <Tabs key={selectedView} defaultValue={selectedView} className="w-full">
+        <TabsList className="grid h-auto min-h-11 w-full max-w-md grid-cols-2 mb-2">
+          <TabsTrigger value="chat-reports" className="min-h-11 whitespace-normal break-words px-1 text-center text-xs font-semibold gap-1.5">
             <MessageSquareWarning className="size-3.5" />
-            1:1 채팅 신고 심사 ({pendingChatReports})
+            1:1 채팅 신고 심사 ({pendingChatReports === null ? '확인 불가' : pendingChatReports})
           </TabsTrigger>
-          <TabsTrigger value="takedowns" className="text-xs font-semibold gap-1.5">
+          <TabsTrigger value="takedowns" className="min-h-11 whitespace-normal break-words px-1 text-center text-xs font-semibold gap-1.5">
             <FileText className="size-3.5" />
-            긴급 콘텐츠 삭제 ({pendingTakedowns})
+            긴급 콘텐츠 삭제 ({pendingTakedowns === null ? '확인 불가' : pendingTakedowns})
           </TabsTrigger>
         </TabsList>
 
@@ -167,15 +236,19 @@ export default async function AdminSafetyPage() {
                   </CardDescription>
                 </div>
                 <Badge variant="outline" className="text-xs self-start sm:self-auto font-mono">
-                  총 {chatReports.length}건
+                  현재 페이지 {chatQueue === null ? '조회 불가' : chatReports.length + '건'}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0">
-              {chatReports.length === 0 ? (
+              {chatQueue === null ? (
+                <div role="alert" className="rounded-lg border border-destructive/40 p-4 text-sm text-destructive">
+                  채팅 신고 목록을 확인할 수 없습니다. 대기 신고가 0건이라는 뜻이 아닙니다.
+                </div>
+              ) : chatReports.length === 0 ? (
                 <EmptyState
-                  title="대기 중인 1:1 채팅 신고가 없습니다."
-                  description="신규 신고가 접수되면 증거 스냅샷과 함께 실시간으로 큐에 노출됩니다."
+                  title="현재 조회 페이지에 1:1 채팅 신고가 없습니다."
+                  description="새로 접수된 신고는 다시 조회할 때 확인할 수 있습니다."
                 />
               ) : (
                 <div className="overflow-x-auto">
@@ -228,6 +301,8 @@ export default async function AdminSafetyPage() {
                 </div>
               )}
             </CardContent>
+            <QueuePager view="chat-reports" offset={chatOffset} otherOffset={takedownOffset}
+              loadedCount={chatQueue?.count ?? null} />
           </Card>
         </TabsContent>
 
@@ -243,15 +318,19 @@ export default async function AdminSafetyPage() {
                   </CardDescription>
                 </div>
                 <Badge variant="outline" className="text-xs self-start sm:self-auto font-mono">
-                  총 {takedowns.length}건
+                  현재 페이지 {takedownQueue === null ? '조회 불가' : takedowns.length + '건'}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0">
-              {takedowns.length === 0 ? (
+              {takedownQueue === null ? (
+                <div role="alert" className="rounded-lg border border-destructive/40 p-4 text-sm text-destructive">
+                  긴급 삭제 요청 목록을 확인할 수 없습니다. 미처리 요청이 0건이라는 뜻이 아닙니다.
+                </div>
+              ) : takedowns.length === 0 ? (
                 <EmptyState
-                  title="대기 중인 긴급 삭제 요청이 없습니다."
-                  description="접수된 신규 요청이 들어오면 실시간으로 큐에 노출됩니다."
+                  title="현재 조회 페이지에 긴급 삭제 요청이 없습니다."
+                  description="새로 접수된 요청은 다시 조회할 때 확인할 수 있습니다."
                 />
               ) : (
                 <div className="overflow-x-auto">
@@ -280,14 +359,7 @@ export default async function AdminSafetyPage() {
                           </TableCell>
                           <TableCell className="text-xs">
                             <div className="font-medium text-foreground">{row.requester_email}</div>
-                            <a
-                              href={row.target_content_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-primary truncate block max-w-[280px]"
-                            >
-                              {row.target_content_url}
-                            </a>
+                            <EvidenceTargetLink url={row.target_content_url} />
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                             {new Date(row.created_at).toLocaleString('ko-KR', {
@@ -307,6 +379,8 @@ export default async function AdminSafetyPage() {
                 </div>
               )}
             </CardContent>
+            <QueuePager view="takedowns" offset={takedownOffset} otherOffset={chatOffset}
+              loadedCount={takedownQueue?.count ?? null} />
           </Card>
         </TabsContent>
       </Tabs>
