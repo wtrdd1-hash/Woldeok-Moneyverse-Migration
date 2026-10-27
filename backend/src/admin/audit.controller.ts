@@ -48,6 +48,17 @@ import { AuditRepository } from './audit.repository';
 const REASON_MIN = 10;
 const REASON_MAX = 1000;
 
+/** Parse the wire value before coercion: parseInt silently accepts `2junk`,
+ * exponential notation, and duplicate query parameters. A partial audit
+ * window must never look like the result of the requested window. */
+function parseAuditEventLimit(value: unknown): number {
+  if (value === undefined) return 30;
+  if (typeof value !== 'string' || !/^(?:[1-9]|[1-9][0-9]|100)$/.test(value)) {
+    throw new BadRequestException('limit must be an integer between 1 and 100');
+  }
+  return Number(value);
+}
+
 export class RevealAuditEventDto {
   @ApiProperty({ minLength: REASON_MIN, maxLength: REASON_MAX })
   @IsString()
@@ -204,7 +215,7 @@ export class AdminAuditController {
             clientIp: query.address,
             outcome: query.outcome,
             cursor: query.cursor,
-            limit: query.limit === undefined ? 30 : Number.parseInt(query.limit, 10),
+            limit: parseAuditEventLimit(query.limit),
           },
         }),
       'the audit trail could not be searched',
