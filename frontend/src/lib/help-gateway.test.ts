@@ -6,6 +6,8 @@ describe('verified help Android app API boundary', () => {
     expect(appGatewayPath(['help','categories'])).toBe('/api/v1/help/categories');
     expect(appGatewayPath(['help','search'])).toBe('/api/v1/help/search');
     expect(appGatewayPath(['help','articles','ko','account-login'])).toBe('/api/v1/help/articles/ko/account-login');
+    expect(appGatewayPath(['help','articles','ko','account-login','status'])).toBe('/api/v1/help/articles/ko/account-login/status');
+    expect(appGatewayPath(['help','articles','ko','account-login','admin'])).toBeNull();
     expect(appGatewayPath(['help','admin','drafts'])).toBeNull();
     expect(appGatewayPath(['admin','help','articles'])).toBeNull();
   });

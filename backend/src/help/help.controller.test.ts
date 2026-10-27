@@ -51,3 +51,26 @@ describe('verified help response-time expiry fence (Android and web share this A
     expect(result.articles.map(row => row.article_id)).toEqual(['valid']);
   });
 });
+
+
+describe('public live publication status (withdrawal fence)', () => {
+  it('returns a narrow status receipt for a currently published article', async () => {
+    vi.stubEnv('VERIFIED_HELP_CENTER_V1', 'true');
+    const status = vi.fn().mockResolvedValue({ article_id: 'a1', published_at: new Date('2026-10-27T07:00:00Z'), reviewed_until: new Date(Date.now() + 3600_000) });
+    const controller = new HelpController({ status } as unknown as HelpRepository);
+    const result = await controller.status('ko', 'account-login');
+    expect(result.current).toBe(true);
+    expect(result.articleId).toBe('a1');
+    expect(result.publishedAt).toBe('2026-10-27T07:00:00.000Z');
+    expect(status).toHaveBeenCalledWith('ko', 'account-login');
+  });
+  it('fails closed when retracted or expired before the response', async () => {
+    vi.stubEnv('VERIFIED_HELP_CENTER_V1', 'true');
+    const status = vi.fn().mockResolvedValueOnce(null).mockResolvedValueOnce({
+      article_id: 'a1', published_at: new Date(), reviewed_until: new Date('2020-01-01T00:00:00Z'),
+    });
+    const controller = new HelpController({ status } as unknown as HelpRepository);
+    await expect(controller.status('ko', 'account-login')).rejects.toThrow('not found');
+    await expect(controller.status('ko', 'account-login')).rejects.toThrow('not found');
+  });
+});

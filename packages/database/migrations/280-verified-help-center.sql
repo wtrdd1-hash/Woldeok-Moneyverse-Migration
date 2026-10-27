@@ -66,6 +66,20 @@ LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS 
     AND a.state = 'published' AND r.published_at IS NOT NULL AND r.approved_by IS NOT NULL
     AND r.approved_by <> r.author_id AND r.reviewed_until > clock_timestamp()
 $$;
+-- Narrow, body-free publication receipt for an already-open browser/Android view.
+-- A retracted or expired article returns no row; this is not a cacheable status.
+CREATE FUNCTION public.help_public_status(p_locale text, p_slug text)
+RETURNS TABLE(article_id uuid, published_at timestamptz, reviewed_until timestamptz)
+LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+  SELECT a.id, r.published_at, r.reviewed_until
+  FROM public.help_articles a
+  JOIN public.help_article_revisions r ON r.id=a.published_revision_id AND r.article_id=a.id
+  WHERE p_locale IN ('ko','en') AND a.locale=p_locale AND a.slug=p_slug
+    AND a.state='published' AND r.published_at IS NOT NULL AND r.approved_by IS NOT NULL
+    AND r.approved_by<>r.author_id AND r.reviewed_until>clock_timestamp()
+$$;
+REVOKE ALL ON FUNCTION public.help_public_status(text,text) FROM PUBLIC, moneyverse_app;
+GRANT EXECUTE ON FUNCTION public.help_public_status(text,text) TO moneyverse_app;
 REVOKE ALL ON FUNCTION public.help_public_search(text,text,text,integer) FROM PUBLIC, moneyverse_app;
 REVOKE ALL ON FUNCTION public.help_public_article(text,text) FROM PUBLIC, moneyverse_app;
 GRANT EXECUTE ON FUNCTION public.help_public_search(text,text,text,integer) TO moneyverse_app;

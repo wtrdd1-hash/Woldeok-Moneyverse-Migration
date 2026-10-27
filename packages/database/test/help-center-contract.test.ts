@@ -35,3 +35,13 @@ describe('published evidence freshness transparency', () => {
     expect(sql).toMatch(/RETURNS TABLE\(article_id uuid, locale text, slug text, category text, title text, summary text, body_plain text, source_url text, published_at timestamptz, reviewed_until timestamptz\)/i);
   });
 });
+
+
+describe('public live retraction receipt', () => {
+  it('exposes only a published current status with no table grants', () => {
+    expect(sql).toMatch(/CREATE FUNCTION public\.help_public_status\(/i);
+    expect(sql).toMatch(/GRANT EXECUTE ON FUNCTION public\.help_public_status\(text,text\) TO moneyverse_app/i);
+    expect(sql).toMatch(/REVOKE ALL ON FUNCTION public\.help_public_status\(text,text\) FROM PUBLIC, moneyverse_app/i);
+    expect(sql).toMatch(/a\.state\s*=\s*'published'/i);
+  });
+});

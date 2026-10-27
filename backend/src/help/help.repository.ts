@@ -24,6 +24,11 @@ export class HelpRepository {
       'SELECT article_id::text,locale,slug,category,title,summary,published_at,reviewed_until FROM public.help_public_search($1,$2,$3,$4)',
       [locale, category, query, limit]);
   }
+  status(locale: string, slug: string) {
+    return queryOne<{ article_id: string; published_at: Date; reviewed_until: Date }>(this.pool,
+      'SELECT article_id::text,published_at,reviewed_until FROM public.help_public_status($1,$2)',
+      [locale, slug]);
+  }
   article(locale: string, slug: string) {
     return queryOne<HelpArticle>(this.pool,
       'SELECT article_id::text,locale,slug,category,title,summary,body_plain,source_url,published_at,reviewed_until FROM public.help_public_article($1,$2)',

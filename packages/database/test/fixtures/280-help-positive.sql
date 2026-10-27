@@ -24,6 +24,12 @@ BEGIN
   IF (SELECT bool_and(reviewed_until > clock_timestamp()) FROM public.help_public_article('ko','account-login')) IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'article review deadline missing or expired';
   END IF;
+  IF (SELECT count(*) FROM public.help_public_status('ko','account-login')) <> 1 THEN
+    RAISE EXCEPTION 'published status receipt missing';
+  END IF;
+  IF (SELECT count(*) FROM public.help_public_status('ko','unapproved')) <> 0 THEN
+    RAISE EXCEPTION 'draft leaked via status';
+  END IF;
   IF (SELECT count(*) FROM public.help_public_article('ko','account-login')) <> 1 THEN
     RAISE EXCEPTION 'approved public article not visible';
   END IF;
@@ -42,5 +48,15 @@ BEGIN
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PASS direct table UPDATE denied';
   END;
+END $$;
+RESET ROLE;
+
+-- A published document can be withdrawn after a browser has opened it.
+UPDATE public.help_articles SET state='retracted',published_revision_id=NULL WHERE slug='account-login' AND locale='ko';
+SET ROLE moneyverse_app;
+DO $$ BEGIN
+  IF (SELECT count(*) FROM public.help_public_status('ko','account-login')) <> 0 THEN
+    RAISE EXCEPTION 'withdrawn help status still claims publication';
+  END IF;
 END $$;
 RESET ROLE;

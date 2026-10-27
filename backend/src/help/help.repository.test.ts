@@ -13,6 +13,15 @@ describe('verified help repository', () => {
     expect(sql).not.toMatch(/FROM\s+public\.help_articles/i);
     expect(args).toEqual(['ko', 'account', '로그인', 20]);
   });
+  it('reads status from a published-only function without body or direct table access', async () => {
+    const query = vi.fn().mockResolvedValue({ rows: [] });
+    const repo = new HelpRepository({ query });
+    expect(await repo.status('en', 'account-login')).toBeNull();
+    const [sql, args] = query.mock.calls[0] as [string, unknown[]];
+    expect(sql).toMatch(/public\.help_public_status\(/);
+    expect(sql).not.toMatch(/body_plain|source_url|FROM\s+public\.help_articles/i);
+    expect(args).toEqual(['en', 'account-login']);
+  });
   it('looks up one public article by locale and slug only', async () => {
     const query = vi.fn().mockResolvedValue({ rows: [] });
     const repo = new HelpRepository({ query });
