@@ -1,3 +1,9 @@
+## v1378 / F675-151 — 장애 구독 철회·팬아웃 무결성 (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1376 → 현재 보완 v1378 → 다음 추가 v1380(잠정). 시작·중간 main `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`; main AGENTS/README/영문 정본/국문 대조 확인. 이슈 #1583, 선행 미병합 Draft #1584(그 이전 #1578); 런타임 배포 없음.
+- 실제 상태 화면은 캐시된 수집 스냅샷이며 공식 장애 구독이 아니다. 알림 인증·CSRF 컨트롤러 및 OFFSET 조회는 존재하지만 승인 사건 개정과 소유자 전용 Outbox는 미병합 선행조건. 구독 대 게시 직렬화, 과거 알림 소급 발송을 막는 개정 워터마크, 철회 대 작업자 행 잠금, 불변 intent 영수증, at-least-once 재시도+고유 보이는 알림을 명세. 이미 커밋된 과거 알림은 소급 철회 불가.
+- 소유자 GET/PUT/DELETE/영수증·Android 동등성, 고정 intentId/버전, 소유자 결합 HMAC 커서, 409/410/423/429/503/UNKNOWN_COMMIT, 관리자 20명 이상 집계, noindex/no-store, KO/EN WCAG 2.2 AA, 커밋 영수증 KPI. 280 충돌 해결 후 전진형 스키마, SECURITY DEFINER 최소권한, 개정당 Outbox 1건과 제한된 작업자.
+- P0 ENV1378-01 SEC1378-02 REL1378-03 WATCH1378-04; P1 WATCH1378-05 WATCH1378-06 WATCH1378-07 WATCH1378-08 WATCH1378-09 WATCH1378-10. QA v1324 main 루트 FAIL(280 중복), 전체 감사 Critical 2/High 8·봇 Critical 1/High 5, Test/운영 링크 대상 없음, 정확 SHA Test·독립 복원 미검증. 10,001/100/100 시험 미실행. 신규 승인 근거 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS, 운영 보류.
+
 ## v1376 / F675-151 — 검증된 장애 구독·알림 (기능 추가 / 초안 / 배포 보류) — 이슈 #1583 — Draft PR #1584
 - 이전 기능 보완 v1374 → 현재 기능 추가 v1376 → 다음 기능 보완 v1378(잠정). 시작·중간 main 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c. 구독·승인 장애 이력은 아직 배포되지 않았다. 미병합 F675-150/#1578 및 F675-149/#1568의 공식 Test 정확 SHA 검증이 선행되어야 한다. 사건별 회원의 명시적 구독만 허용하고 점검 실패 자동 알림·푸시/문자/이메일·관리자 개인 명단·WLD 지급은 제외한다.
 - 공개 /status/incidents/[id]의 검증된 사건 구독 CTA, 회원 /account/notifications 알림, 관리자 20건 이상 집계 전용. NestJS/Android 인증·소유권 GET/POST/DELETE/영수증, 고정 intentId, 409 충돌·UNKNOWN_COMMIT 재확인·410 철회, no-store/noindex, 한국어/영어·WCAG 2.2 AA. 전진 전용 DB UNIQUE/FK/SECURITY DEFINER, 게시 트랜잭션 Outbox, 구독 세대 CAS, 해제 후 대기 알림 억제·중복 방지·OFF 롤백. 전체 명세는 영문 통합문서 및 한국어 동등 문서 참조.

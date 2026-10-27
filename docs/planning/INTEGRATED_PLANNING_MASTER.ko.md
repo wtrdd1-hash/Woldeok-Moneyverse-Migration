@@ -1,3 +1,45 @@
+## v1378 / F675-151 — 장애 구독·게시·철회 경합 및 전달 무결성 (기능 보완 / 초안 / 운영 보류) — 이슈 #1583
+
+**주기·근거.** 이전 기능 추가 v1376 → 현재 기능 보완 v1378 → 다음 기능 추가 v1380(잠정). 시작·중간 최신 main `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`; main의 `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md` 및 국문 대조 확인. 미병합 Draft #1584(선행 #1578, #1573) 위에만 누적하며 독립 병합 금지. 기획 문서만 수정하고 런타임·DB·WLD·원장·기능 스위치·예약 변경 금지. 개발 A/B/C/Gemini/QA의 구현·승격 업무와 분리.
+
+### 실제 코드 관찰과 v1376 설계 보정
+- `frontend/src/app/status/page.tsx`는 30초 캐시된 상태 수집 스냅샷이며 공식 장애 이력이나 구독 기능이 아니다. `backend/src/notification/notification.controller.ts`는 인증·동의 기반 조회 및 CSRF 보호 읽음 처리, `notification.service.ts`는 `public.in_app_notifications`를 OFFSET·시각 단독 정렬로 조회한다. 최신 main에서 장애 구독 API·트랜잭션·전달 작업자의 구현을 확인하지 못했다. F675-150 승인된 장애 개정과 F675-149 실제 소유자 전용 알림/Outbox는 여전히 미병합 선행조건이다.
+- v1376의 구독 세대 번호와 작업자 재검사만으로는 구독·게시 경합, 철회·알림 삽입 경합, 알림 커밋 후 작업자 ACK 이전 장애의 선후관계가 충분히 정의되지 않는다. 이는 **설계상 위험**이지 운영 장애나 정보 유출이 확인됐다는 뜻은 아니다.
+- **정확한 약속:** 서버가 구독 해제를 확정한 이후에는 새로운 앱 내 알림을 삽입하지 않는다. 그 전에 이미 커밋된 알림은 사용자가 별도 삭제를 요청하거나 보존 기간이 끝날 때까지 과거 기록으로 남을 수 있다. 동시 처리의 유효성은 DB 행 잠금과 커밋 순서로 판정한다. 네트워크의 exactly-once를 주장하지 않고, 내구성 있는 at-least-once 처리 + `(수신자,공식개정ID)`당 보이는 알림 1건을 보장하도록 설계한다.
+
+### 회원·관리자 동선, 상태, API
+- 공개 `/status` → `/status/incidents` → 검증된 `/status/incidents/[id]`에서 로그인 회원만 **검증된 업데이트 구독**. **구독 해제**, **알림 기록 보기**는 `/account/notifications?category=incident`로 연결한다. 비회원은 **로그인 후 구독**, 미검증·철회·선행 기능 중단 상태에서는 실행 불가 이유를 명확히 표시한다. 기존 `/status` 30초 캐시는 유지하고 개인 구독 화면은 동적/no-store로 처리한다.
+- 상태: LOADING, LOGIN_REQUIRED, VERIFIED_AVAILABLE, WATCHING, SAVING, UNKNOWN_COMMIT, UNWATCHED, WITHDRAWN, STALE_REVISION, DEPENDENCY_PAUSED, SESSION_EXPIRED, FORBIDDEN, RATE_LIMITED, UNAVAILABLE. 타임아웃 시 성공을 낙관 표시하지 않고 동일 `intentId`로 서버 영수증을 재조회한다. 구독 해제 성공 문구는 **이후 업데이트 중지; 이미 전달된 알림은 기록에 남을 수 있음**이다.
+- v1376의 소유자 전용 NestJS·Android 동등 API 유지: `GET /api/v1/status/incidents/:id/watch`, `GET /api/v1/status/incident-watches?limit=1..50&cursor=`, `PUT /api/v1/status/incidents/:id/watch`, `DELETE /api/v1/status/incidents/:id/watch`, `GET /api/v1/status/incidents/:id/watch/receipts/:intentId`. 쓰기는 현재 세션·동의·웹 CSRF·고정 UUID `intentId`·`expectedIncidentRevisionId`·`expectedWatchVersion` 필수. 요청 본문 actor/userId 신뢰 금지. 소유자 조회·영수증은 `private,no-store`, `Vary: Cookie`, 비공개/타인 자원은 불투명 404. 409 버전 또는 동일 intent 다른 본문, 410 철회, 423 선행 기능 중단, 429 속도 제한, 503 저장소 장애. UNKNOWN_COMMIT은 새 intent 재시도 대신 영수증 조회.
+- 구독 목록 커서는 HMAC 서명, 소유자 결합, `(subscribed_at,id)` 안정적 키셋, 짧은 유효기간과 키 교체를 적용한다. 위조·타인 커서 재사용을 거절한다. 서버 커밋 이전에는 구독자 수·미확인 수·전달 성공을 만들어 표시하지 않는다.
+
+### PostgreSQL 트랜잭션·팬아웃·철회 방어
+- 마이그레이션 280 중복과 체크섬 충돌을 해결한 다음에만 새로운 고유 번호의 전진형 마이그레이션을 작성한다. `incident_watches`: `UNIQUE(user_id,incident_id)`, `watch_generation/version BIGINT >=1`, `active`, `subscribed_at`, `revoked_at`, `last_seen_public_revision_seq BIGINT >=0`, 사용자·승인 사건 FK. 공식 사건 개정에는 단조 증가 `revision_seq`와 변경 불가능한 게시·철회 근거. `watch_intents`: `UNIQUE(user_id,intent_id)` 및 정규화 본문 해시·결과·커밋시각·불변 영수증. `incident_watch_delivery`: `UNIQUE(user_id,public_revision_id)`와 세대·상태·리스 토큰/만료·시도·오류 유형. `(state,next_attempt_at,id)`, `(incident_id,revision_seq,id)` 인덱스 및 보존 정책을 격리 PG에서 검증한다.
+- **직렬화 기준:** 구독과 공식 사건 게시 모두 먼저 사건 게시 행을 잠근다. 구독은 그다음 `(user_id,incident_id)` 구독 행을 잠그며 행이 없을 때는 별도 키 잠금으로 경쟁 생성을 막는다. 구독 시점의 커밋된 최신 `revision_seq`를 `last_seen_public_revision_seq`로 저장해 과거 사건 업데이트를 소급 발송하지 않는다. 게시는 승인 개정과 사건당 내구성 있는 팬아웃 이벤트 1건을 원자적으로 커밋한다. 게시 트랜잭션에서 모든 회원 알림을 생성하지 않는다. 작업자는 키셋 배치와 내구성 체크포인트로 순차 확장한다.
+- **전달 대 철회:** 작업자의 최종 알림 삽입과 구독 해제 모두 사건 게시 행을 먼저, 동일한 구독 행을 다음으로 잠그고 단일 트랜잭션 안에서 active·세대·가입 시각·개정 순서·공식 게시 상태·회원 계정 상태·동의를 재검증한다. 철회는 세대와 버전을 증가시키고 active=false, 의도 영수증·감사·대기 전달 억제를 원자적으로 기록한다. 철회가 먼저 커밋되면 이후 작업자는 삽입 불가. 작업자가 먼저 커밋한 알림은 과거 기록으로 남을 수 있다. 재구독은 새 세대·새 최신 개정 워터마크를 사용해 과거 큐 작업이 재활성화되지 않게 한다. 캐시된 active 값이나 트랜잭션 밖 조회만으로 승인하지 않는다.
+- **장애 재시도:** `FOR UPDATE SKIP LOCKED`, 제한된 리스·지수 백오프·DLQ 적용. 알림 삽입 커밋 후 ACK 전에 종료되어도 안정된 이벤트 ID와 `UNIQUE(user_id,public_revision_id)`로 기존 영수증을 반환한다. 만료·철회된 공식 개정은 신규 전달을 막고 대기 작업을 억제한다. 이미 전달된 기록의 링크는 현재 권한에 따라 검증·가림 처리하고 접근 불가 시 **업데이트를 볼 수 없음**으로 표시한다. 수신자 ID, 원시 호스트, 토큰, 내부 근거를 공개 페이로드·로그에 넣지 않는다.
+- `moneyverse_app` 및 PUBLIC에 비공개 구독·알림 테이블의 직접 DML·광범위 SELECT를 부여하지 않는다. `SECURITY DEFINER`에서 세션 기반 actor·소유권·현재 승인 상태를 검증하고 search_path 고정, 명시 EXECUTE 허용, PUBLIC REVOKE, ACL 부정 테스트 및 불변 감사를 적용한다. WLD·경제 원장 쓰기 금지. F675-149가 검증될 때까지 기존 알림 API 호환성을 유지한다.
+
+### 관리자·개인정보·SEO·접근성·KPI·검증
+- `/admin/status/incidents/[id]`는 고정·비중첩 기간의 20명 이상 코호트만 집계하고 보완 셀을 억제한다. 개인 구독자 목록·내보내기·원시 영수증 공개 금지. 사건 작성자와 독립 승인자 분리; 구독만으로 사건을 게시할 수 없다. 악용 방지 초기 시험 기준은 회원당 분당 신규 구독 10회·활성 구독 100건·제한된 큐/재시도이며 부하 시험 뒤 조정. 이메일·문자·푸시·WLD 보상·기본 자동 구독 없음.
+- 공개 사건 페이지는 별도 근거·SEO 승인 전 noindex. 개인 구독·영수증·관리자·알림은 항상 noindex/no-store; 분석·리퍼러에 개인 URL 금지. KO/EN·Android 동등성, 키보드/초점, 스크린리더 상태 알림, 44px 터치, 320px·200% 확대·동작 줄이기, WCAG 2.2 AA.
+- KPI는 커밋된 서버 영수증만 기준: 검증된 대상 개정, 검증된 조회 대비 구독률, 활성/철회 수, 실제 보이는 고유 알림 수, 게시→표시 p95, 리스 재시도, 오래된 세대 억제, 철회 후 삽입 위반(목표 0), 개인정보 사고(목표 0). 큐 ACK만으로 전달 성공 판단 금지.
+- **수용시험 명세(미실행):** 합성 구독/개정 10,001건, 동시 구독·게시·철회·재구독·개정 철회 100건의 잠금 순서 시험, 위조 actor/CSRF/커서/intent 100건, 삽입 커밋 후 ACK 이전 장애, 리스 만료, 역순 개정, 중복·상충 intent, 캐시/304/HEAD/CDN 재노출, Android·a11y·금융·보안 회귀, 공식 정확 SHA 인증 Test 연속 5회. 롤백은 기능 OFF와 작업자 중지/대기 억제이며 커밋 영수증은 삭제하지 않는다. 독립 복원 증거 및 무중단 승격 승인 전 운영 보류.
+
+### 개발 예약으로 전달할 우선순위 백로그 (이번 회차 구현하지 않음)
+- **P0 ENV1378-01:** 운영·Test 배포 심볼릭 링크의 누락 대상과 SHA 근거, 디스크·독립 암호화 백업 복원·롤백 경로 확인; 가동 서비스 임의 변경 금지.
+- **P0 SEC1378-02:** 마이그레이션 280 중복·적용 체크섬 충돌, `moneyverse_app`/PUBLIC DML·은행 EXECUTE·금융 원장 위험 해결 후 추가 스키마.
+- **P0 REL1378-03:** 전체 루트 테스트·보안 감사·인증 웹/Android E2E·정확 SHA 공식 Test·복원·롤백 게이트 충족 전 승격 금지.
+- **P0 WATCH1378-04:** 구독 해제와 작업자 커밋의 직렬화, 승인 개정 자격·세대 방어, 허위 전달·타인 조회 차단.
+- **P1 WATCH1378-05:** 단조 개정/워터마크, 구독·의도·전달 FK/고유/검사/인덱스 및 최소권한 부정 테스트.
+- **P1 WATCH1378-06:** 잠금 순서 있는 SECURITY DEFINER, 제한된 팬아웃, 멱등 영수증, SKIP LOCKED 작업자·장애 복구·철회 억제.
+- **P1 WATCH1378-07:** NestJS/Next.js/Android 소유자 API, HMAC 키셋 커서, 버전·intent 충돌, UNKNOWN_COMMIT 영수증.
+- **P1 WATCH1378-08:** 공개 사건 구독 CTA, 회원 설정/알림, 관리자 집계 화면, 정확한 KO/EN 상태와 WCAG 2.2 AA.
+- **P1 WATCH1378-09:** 개인정보·보존, 안전한 과거 링크, noindex/no-store, 악용 제한, 코호트 보호, 커밋 영수증 기반 KPI.
+- **P1 WATCH1378-10:** 격리 PostgreSQL 10,001/100/100 경합·위조·장애, 보안·금융 회귀, 공식 정확 SHA Test와 기능 OFF 롤백 검증.
+
+**최신 검토 QA v1324(2026-10-27 21:28 KST):** main 루트 FAIL(마이그레이션 280 중복, DB 19 PASS/1 FAIL/3 SKIP), 전체 감사 Critical 2/High 8, 봇 Critical 1/High 5. Test·운영 링크 대상 없음, 공식 정확 SHA Test·독립 복원 미검증. 23:03 KST 루트 45% 사용(53GiB 여유), 데이터 57%(82GiB 여유); 서비스 ACTIVE와 개발 DB 연결은 운영 승인 근거가 아니다. 외부 독립 근거 신규 최종 승인 **0건**, 누적 중복 제거·승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 제안 시험은 **미실행**.
+
 ## v1376 / F675-151 — 검증된 장애 이력의 자발적 구독·앱 내 알림 (기능 추가 / 초안 / 배포 보류) — Draft PR #1584
 
 **회차·정본.** 이전 기능 보완 v1374 → 현재 기능 추가 v1376 → 다음 기능 보완 v1378(잠정). 개발 이슈 #1583, 선행 미병합 Draft PR #1578(그 선행 #1573). 시작·중간 main `59cdc2e02f0e83e5401049309c4cb89ff57c2d4c`. 최신 main의 AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md 및 한국어 대조 문서 확인. 이번 회차는 기획 초안이며 런타임·DB·Test·Production 변경이 아니다. **독립 승인된 실제 장애 이력에 한해 회원이 명시적으로 구독하고 검증된 공개 업데이트만 알림받도록 한다.**
