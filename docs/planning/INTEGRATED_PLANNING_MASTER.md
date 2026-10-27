@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.27.1380 — TECH blog relevance, evidence and depth (PLANNING ONLY)
+
+- Screenshot incident: BigInt double-entry ledger engineering article presents an unrelated compound-interest slider, generic market/portfolio prose, finance references and an insufficient technical demonstration. Root cause in main: unconditional `BlogInlineCalculator` after Markdown block index 1 and TECH template assigned to compound calculator, plus shared finance body.
+- New TECH contract requires separate engineering editorial templates, primary technical citations linked to specific claims, runnable code/SQL/tests and reproducible benchmarks. Block synthetic page views and unsubstantiated '1 trillion transactions / 42.8' measurements. The embed default is NONE with an audited semantic widget allowlist; finance article calculators remain possible when relevant.
+- Existing TECH posts go to a **human/manual** correction queue; v1108 bans timer-driven auto-unpublication. Align with concurrent v1102 fail-closed publisher work; this does not approve legacy file publishing.
+- Status: **docs-only design**. No code, AI generation, live article edits, CI, official Test, or Production promotion. [Specification](TECH_BLOG_EDITORIAL_QUALITY_SPEC_v2026.10.27.1380.md) / [KO](TECH_BLOG_EDITORIAL_QUALITY_SPEC_v2026.10.27.1380.ko.md) · [Worklog](../worklog/2026-10-27-tech-blog-editorial-v1380.md).
+
+
 ## v2026.10.27.1318 — Scheduled QA rollout confirmation (OPS PRODUCTION_VERIFIED)
 
 - The v1317 hourly HTTP smoke and scoped QA scratch cleaner were merged via PR #1542 at main `0da3b886`, then staged as immutable QA-only operations release. Systemd service drop-in references the immutable runner, while original unit remained available for rollback. No application or DB deployment occurred.

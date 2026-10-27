@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.27.1380 — TECH blog relevance/evidence/depth corrective design (PLANNING ONLY)
+- [English TECH contract](docs/planning/TECH_BLOG_EDITORIAL_QUALITY_SPEC_v2026.10.27.1380.md) / [Korean specification](docs/planning/TECH_BLOG_EDITORIAL_QUALITY_SPEC_v2026.10.27.1380.ko.md) · [EN worklog](docs/worklog/2026-10-27-tech-blog-editorial-v1380.md) / [KO worklog](docs/worklog/2026-10-27-tech-blog-editorial-v1380.ko.md) · [Internal](docs/updates/v2026.10.27.1380-blog-tech-internal.md) / [KO](docs/updates/v2026.10.27.1380-blog-tech-internal.ko.md) · [GitHub](docs/updates/v2026.10.27.1380-blog-tech-github.md) / [KO](docs/updates/v2026.10.27.1380-blog-tech-github.ko.md). BigInt TECH article wrongly inherited compound widget, financial prose/refs and fabricated benchmark-like figures; proposal separates TECH, requires runnable code and per-claim evidence, and preserves manual-only correction per v1108. No runtime changes.
+
+
 ## v2026.10.27.3 — Existing branch summary (documentation only)
 - [EN full report](docs/audits/2026-10-27-current-branches-v2026.10.27.3.md) / [KO](docs/audits/2026-10-27-current-branches-v2026.10.27.3.ko.md) / [CSV](docs/audits/2026-10-27-current-branches-v2026.10.27.3.csv) · [version status](docs/releases/v2026.10.27.3.md). Web/backend 351, Android 7; Git history evidence only, no Test/Production deployment.
 
