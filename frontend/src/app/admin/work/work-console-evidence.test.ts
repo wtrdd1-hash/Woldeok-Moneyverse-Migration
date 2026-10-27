@@ -22,7 +22,7 @@ const response = { catalogue: [task], jobLevels: [job], policy };
 
 describe('admin work console PostgreSQL evidence boundary', () => {
   it('accepts verified catalogue, job levels and policy without coercing bigint WLD', () => {
-    expect(parseAdminWorkConsole(response)?.catalogue[0].base_reward).toBe('9007199254740993');
+    expect(parseAdminWorkConsole(response)?.catalogue[0]?.base_reward).toBe('9007199254740993');
   });
   it('accepts an explicitly absent policy but never fabricates an enabled version', () => {
     const absent = { ...policy, policy_id: null, effective_at: null, daily_cap: null,
