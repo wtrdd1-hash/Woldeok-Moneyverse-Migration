@@ -23,3 +23,9 @@
 - [ ] Re-fetch main and canonical EN/KO planning; rebase if advanced.
 - [ ] Run exact-HEAD lint, typecheck, tests, builds, security and app-api/DB/CI where available.
 - [ ] Publish Draft PR and hold if any required gate fails; do not modify other worktrees.
+
+### Candidate build incident
+- [x] Reproduce clean Alpine Turbopack Google font resolver failure in candidate workflow.
+- [x] RED regression for Dockerfile compiler selection.
+- [x] Use known-working Webpack build in candidate Dockerfile; GREEN regression.
+- [ ] Repeat exact-HEAD gates and candidate build.
