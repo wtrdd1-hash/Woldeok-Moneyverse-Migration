@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -46,8 +47,18 @@ export class AdminEnterpriseController {
 
   @Get('dividend-logs')
   @ApiOperation({ summary: '공기업 국고 배당 납입 이력 조회' })
-  async listDividendLogs(@Query('limit') limit?: number) {
-    return this.service.listRecentDividendLogs(limit ? Number(limit) : 20);
+  async listDividendLogs(@Query('limit') limit?: string) {
+    // Query parameters are untrusted strings (or arrays when repeated).
+    // Do not silently turn malformed financial-history paging into a valid request.
+    if (limit === undefined) return this.service.listRecentDividendLogs(20);
+    if (typeof limit !== 'string' || !/^[1-9][0-9]*$/.test(limit)) {
+      throw new BadRequestException('limit must be an integer from 1 to 100');
+    }
+    const requested = Number(limit);
+    if (!Number.isSafeInteger(requested) || requested > 100) {
+      throw new BadRequestException('limit must be an integer from 1 to 100');
+    }
+    return this.service.listRecentDividendLogs(requested);
   }
 
   @Post('soes/harvest')
