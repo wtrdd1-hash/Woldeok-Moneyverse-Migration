@@ -8,6 +8,7 @@ import { relaySetCookie } from '@/lib/cookie-relay';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 import { consoleReturnPath } from './areas';
 import { STEP_UP_CODE, spendSecondFactorCode } from './step-up';
+import { isValidIpBlockId } from './security/ip-block-evidence';
 
 /**
  * Getting into the operations console, and the second factor that costs.
@@ -164,7 +165,7 @@ export async function liftIpAddressBlock(
   const blockId = text(formData.get('blockId'));
   const reason = text(formData.get('reason'));
   const code = text(formData.get('code'));
-  if (blockId === '') return { status: 'error', message: '차단 기록을 확인할 수 없어요.' };
+  if (!isValidIpBlockId(blockId)) return { status: 'error', message: '유효한 차단 기록 식별자가 필요합니다.' };
   if (reason.length < 3 || reason.length > 1000) return { status: 'error', message: '해제 사유를 3~1000자로 입력해 주세요.' };
   if (!STEP_UP_CODE.test(code)) return { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' };
   try {
