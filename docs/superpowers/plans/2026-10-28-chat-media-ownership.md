@@ -9,11 +9,11 @@
 **Tech Stack:** NestJS, PostgreSQL 17, Vitest, Next.js.
 
 ## Tasks
-- [ ] Write failing HTTP/controller tests for owner and recipient authorization; run RED.
-- [ ] Add migration 286 registry and owner/recipient function, revoke PUBLIC/table privileges; add isolated PostgreSQL tests.
-- [ ] Add repository and backend controller wiring, fail closed, cleanup file on DB registration failure; run GREEN.
-- [ ] Add web/Android contract regression, verify no-store, noindex, accessibility and error behavior.
-- [ ] Recheck latest main and candidate SHA, run all feasible gates and hold merge/deploy on any failure.
+- [x] Write failing HTTP/controller tests for owner and recipient authorization; run RED.
+- [x] Add migration 286 registry and owner/recipient function, revoke PUBLIC/table privileges; add isolated PostgreSQL tests.
+- [x] Add repository and backend controller wiring, fail closed, cleanup file on DB registration failure; run GREEN.
+- [x] Add web/Android contract regression, verify no-store, noindex, accessibility and error behavior.
+- [x] Recheck latest main and candidate SHA, run all feasible gates and hold merge/deploy on any failure.
 
 ## Safety and rollback
 - No writes to shared dev/Production DB. Forward-only migration is additive; roll back application deployment, preserve registered metadata for later safe cleanup. Never edit an applied migration.

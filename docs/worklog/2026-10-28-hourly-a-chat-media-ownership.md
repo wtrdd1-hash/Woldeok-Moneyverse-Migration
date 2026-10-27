@@ -13,8 +13,8 @@
 - [x] RED tests: deny foreign keys, allow owner and valid message recipients, fail closed on unavailable DB.
 - [x] Forward-only owner registry and SQL authorization functions with least privilege.
 - [x] Backend upload/get checks, frontend and Android route contract, isolated PG regression.
-- [ ] Recheck main, build/lint/typecheck/unit/DB/security/a11y/SEO/E2E; commit, PR, CI, Test exact SHA and release gate.
-- [ ] End: record SHA, changes, gate outcomes, Test/Production/rollback, branch preservation.
+- [x] Recheck main, run and record all feasible gates; PR #1621 Draft/HOLD, official Test/Production blocked.
+- [x] End: record SHA, changes, gate outcomes, Test/Production/rollback, branch preservation.
 
 ## Checkpoints
 - 02:30 KST: baseline recorded; no live DB mutation.
@@ -29,3 +29,17 @@
 ## Admin-session hardening (02:34 KST)
 - Added the actual session UUID to the SQL authorization decision. Support admin reads require admin role AND `admin_session_touch` returning `open`; ordinary member login or locked/expired admin console cannot authorize a support image.
 - RED repository contract failed, GREEN 16 backend tests. Isolated PostgreSQL 17.11 synthetic fixtures with no shared DB access passed open-admin vs missing-admin-session, forged sender, owner, peer, outsider, legacy and direct-table-privilege checks. Ephemeral container removed.
+
+## End-of-implementation gates (02:42 KST)
+- Code SHA: `c0a3b85b57bd95a72c908f6410850903cca07f3d`; main rechecked and unchanged `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` before Draft PR #1621.
+- Backend 1,695 PASS / 430 SKIP; frontend 1,683 PASS. Typecheck, API contract, Backend build, Next Webpack build PASS. Focused backend 16 PASS and app-api 18 PASS. Bot 8 PASS after offline isolated dependency installation.
+- Root dependency audit threshold high PASS (2 low, 9 moderate); Bot audit FAIL (1 critical, 5 high). Full lint FAIL on 2 pre-existing blog template escape errors. Full project test FAIL on duplicate migration 283 and absent 285. Do not mark overall CI green.
+- Isolated PostgreSQL 17.11 SQL migration 286 and assertions PASS. Both ephemeral containers removed. This is a synthetic schema test, not a full migration-chain or Production DB ACL certification.
+- Remote branches 361 at start, 362 after branch push. Open PRs 354 at start; PR audit before creating #1621: 354 (339 draft), 230 with at least one failed check, 253 mergeability UNKNOWN, 101 MERGEABLE, 0 duplicate head SHAs. 359 non-main branches have unique/divergent commits; 2 contained branches preserved as integration/release references. Deleted 0.
+- Official Test `/api/version` HTTP 200 `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; Production HTTP 200 `6a989b5ac0c6155587d43426d64f6def6b62c917`. Neither equals candidate. Official Test symlink target absent. Exact-SHA Test/authenticated E2E/backup restore/GitOps release gate BLOCKED. No Test or Production deployment, rollback, live DB/ledger mutation, or feature switch changes.
+- Existing PRs #1589, #1616, QA #1610 and security issue #993 preserved. No other agent worktree modified. No branch deletion. The feature remains HOLD until integration and end-to-end gates pass.
+
+## Follow-up / integration requirements
+- Rebase safely onto a main that contains an approved forward-only 285 repair; do not alter applied SQL checksums. Re-run full migration chain, actual `moneyverse_app` grants and authenticated chat/support browser + Android E2E on the exact candidate SHA.
+- Resolve app-role SQL actor-spoofing and direct table DML issue #993, perform provenance-safe legacy image backfill (never infer ownership from a pasted key), complete backup restore, security audit and independent GitOps approval before promotion.
+- If deployment fails, roll back application image only and leave additive registry rows intact for later reconciliation; do not drop tables or modify balances.
