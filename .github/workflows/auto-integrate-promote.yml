@@ -49,6 +49,7 @@ jobs:
           conflict_count=0
           failed_validation_reconcile_count=0
           work_in_progress_skipped_count=0
+          release_gate_blocked_count=0
 
           reconcile_current_branch() {
             local reason="$1"
@@ -156,6 +157,15 @@ jobs:
               continue
             fi
 
+            # P0 #1088: a successful candidate build is not proof of an actual
+            # isolated-Test deployment, authenticated finance/admin E2E, database
+            # ACL, full security audit, or independent release authorization.
+            # Until a trusted exact-head attestation verifier exists, fail closed
+            # before ANY branch mutation, PR merge, or release dispatch.
+            release_gate_blocked_count=$((release_gate_blocked_count + 1))
+            echo "::warning::BLOCKED: independent isolated-Test and finance/auth/DB/security attestation unavailable for PR #${pr} at ${branch_sha}; no merge, cleanup or promotion"
+            continue
+
             if [[ "$ahead" -eq 0 ]]; then
               if [[ -n "$pr" ]]; then
                 gh api --method PATCH "repos/${REPO}/pulls/${pr}" -f state=closed >/dev/null || true
@@ -237,8 +247,8 @@ jobs:
 
           if [[ "$merged_count" -gt 0 ]]; then
             final_main_sha="$(gh api "repos/${REPO}/branches/main" --jq '.commit.sha')"
-            gh workflow run test-candidate.yml --repo "$REPO" --ref main -f promote=true
-            echo "dispatched promotable main Build Test Candidate for final main ${final_main_sha}"
+            gh workflow run test-candidate.yml --repo "$REPO" --ref main
+            echo "dispatched non-promoting main Build Test Candidate for final main ${final_main_sha}"
           fi
 
           {
@@ -255,6 +265,7 @@ jobs:
             echo "- draft/unknown PRs filtered before per-branch REST: ${draft_filtered_count}"
             echo "- eligible ready heads from snapshot: ${#branches[@]}"
             echo "- later work-in-progress PRs skipped: ${work_in_progress_skipped_count}"
+            echo "- ready PRs blocked by independent Test/E2E attestation gate: ${release_gate_blocked_count}"
             echo
-            echo 'Every reconciled branch head is explicitly revalidated by workflow_dispatch before merge; no reconciled SHA bypasses Build Test Candidate.'
+            echo 'P0 #1088: candidate CI is insufficient for merge authorization. Independent exact-SHA Test/finance/auth/DB/security attestation is not yet wired, so all ready PRs remain blocked and Production promotion is manual only.'
           } >> "$GITHUB_STEP_SUMMARY"
