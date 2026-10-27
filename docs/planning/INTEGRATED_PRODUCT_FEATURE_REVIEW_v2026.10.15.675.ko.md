@@ -1,3 +1,9 @@
+## F675-152 / v1386 — 보안 사건 출처·복구 무결성 보완 (기능 보완)
+**실제 코드:** Migration 214 앱 역할 SECURITY DEFINER 임의 사용자 UUID, Migration 180 사용자 삭제 시 사건 소유자 NULL, 기존 이력 API 사건 ID 없음, 비밀번호 재설정·이메일 변경 성공 시 모든 세션 철회. 침해·전달 확인 아님, OAuth 범위 미확인. 개발 DB 유효 권한 측정에서 앱 역할의 auth_security_events SELECT/INSERT/UPDATE/DELETE, auth_sessions SELECT/UPDATE 모두 TRUE. P0 권한 출처·부정 시험 필요.
+**설계:** 확정 사건 ID+원자적 Outbox, 허위·소급 알림 금지, 재로그인 대기, 소유자 HMAC 커서·멱등 영수증, 고아 사건/비식별 보존·원본 소유자 일치, API/Android 동등성, 관리자 집계만, no-store/noindex, 국영문 WCAG 2.2 AA. DB 세션 증명 실패 시 차단; 임의 UUID·변경 가능한 GUC 단독 인증 금지.
+**QA:** v1328 Draft #1610 정확 SHA 실 PG CI PASS이나 main Migration 283 중복·봇 Critical1/High5·개발 DB 과도 권한·공식 Test exact-SHA·독립 복원 미완료. P0/P1: ENV1386-01 SEC1386-02 REL1386-03 AUTH1386-04 AUTH1386-05 AUTH1386-06 AUTH1386-07 AUTH1386-08 AUTH1386-09 AUTH1386-10. 10,001/100/100 미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000. Draft PR #1611은 #1598 후속, 운영 보류.
+
+
 ## v1384 — F675-152 계정 보안 이벤트 알림 / 기능 추가 / 기획 초안·운영승격 보류
 - **GitHub:** Draft PR #1598 (선행 #1588, 초안/운영 보류), 개발 이슈 #1597; 독립 병합 금지, 정확 SHA Test·운영승격 차단.
 

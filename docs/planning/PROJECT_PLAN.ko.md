@@ -1,3 +1,11 @@
+## 2026-10-28 — 기획 v1386 / F675-152 보안 사건 출처·소유권·재로그인 복구 무결성 (기능 보완 / 초안 / 운영 보류)
+- GitHub Draft PR #1611(미병합 #1598 후속), 이슈 #1597; 이전 추가 v1384 → 현재 보완 v1386 → 다음 추가 v1388(잠정). 별도 블로그 v1380/v1382 변경 없음. main 4f5efd1f48615f0112701feec25a9b0fc67d9719 시작·중간, AGENTS·README·영어 정본/국문 기획 대조.
+- 실제 소스: Migration 214 SECURITY DEFINER가 세션 확인 없이 임의 사용자 UUID 수신, Migration 180의 사건 소유자 삭제 시 NULL, 기존 이력 API 사건 ID 누락, 비밀번호 재설정/이메일 변경 시 모든 세션 철회로 재로그인 전 앱 내 알림 열람 불가 가능성. 운영 침해·실제 전달 주장 금지, OAuth 근거 미확인. 개발 DB 읽기 전용 유효 권한: 앱 역할 auth_security_events SELECT/INSERT/UPDATE/DELETE 모두 TRUE, auth_sessions SELECT/UPDATE TRUE. 실제 침해 아닌 P0 최소권한 이탈.
+- 확정 사건 ID+동일 트랜잭션 Outbox, 위조 불가 세션 소유권 증명 실패 시 차단, GUC/UUID 단독 인증 금지, 삭제 고아 사건·익명 보존, 재로그인 대기 UX, 멱등 검토 영수증, no-store, 국영문 접근성·Android·관리자 비식별 집계·KPI·롤백 명세. 상세는 국영문 통합 마스터.
+- P0/P1: ENV1386-01 SEC1386-02 REL1386-03 AUTH1386-04 AUTH1386-05 AUTH1386-06 AUTH1386-07 AUTH1386-08 AUTH1386-09 AUTH1386-10. QA v1328 Draft #1610 정확 SHA 격리 PostgreSQL CI PASS(backend 2274/60 SKIP, DB37, frontend1681, API38), 하지만 main Migration 283 중복·개발 DB 권한/체크섬·봇 Critical 1/High 5·공식 인증 Test exact-SHA/독립 복원 미완료로 전체 QA FAILED/운영 BLOCKED. 10,001/100/100 시험 미실행. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- 문서 전용, A/B/C/Gemini/QA와 분리; 런타임·DB·WLD·원장·Test·운영·예약 미변경.
+
+
 ## v2026.10.28.1384 — F675-152 검증된 계정 보안 사건 알림 (기능 추가 / 기획 초안 / 운영승격 보류)
 - **GitHub:** Draft PR #1598 (선행 #1588, 초안/운영 보류), 개발 이슈 #1597; 독립 병합 금지, 정확 SHA Test·운영승격 차단.
 

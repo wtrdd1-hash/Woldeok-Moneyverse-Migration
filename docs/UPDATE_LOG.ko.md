@@ -1,3 +1,9 @@
+## 2026-10-28 — 기획 v1386 / F675-152 (기능 보완 / 초안 / 운영승격 보류)
+- Draft PR #1611은 #1598 후속, 이슈 #1597. 이전 추가 v1384 / 현재 보완 v1386 / 다음 추가 v1388. main 4f5efd1f48615f0112701feec25a9b0fc67d9719 재조회, 정본 AGENTS/README/영문·국문 기획 확인. 스킬 커넥터 빈 목록, miniPC 설치 스킬 사용.
+- Migration 214 임의 UUID SECDEF, 180 사건 소유자 ON DELETE SET NULL, 재설정·이메일 변경 시 세션 철회, 기존 이력 API 사건 ID 누락 확인. 운영 침해 주장 아님. 개발 DB 읽기 전용 유효 권한에서 앱 역할 auth_security_events SELECT/INSERT/UPDATE/DELETE 및 auth_sessions SELECT/UPDATE 모두 TRUE 확인, P0 권한 이탈이며 데이터 변경 시도 없음. QA v1328 Draft #1610 격리 실 PG CI PASS지만 main 283 중복·봇 Critical1/High5·공식 Test/복원 보류.
+- 국영문 통합 명세·P0/P1 10건 갱신: ENV1386-01 SEC1386-02 REL1386-03 AUTH1386-04 AUTH1386-05 AUTH1386-06 AUTH1386-07 AUTH1386-08 AUTH1386-09 AUTH1386-10. 10,001/100/100 시험 미실행. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·원장·Test·운영·예약 미변경.
+
+
 ## 2026-10-28 — 기획 v1384 / F675-152 계정 보안 사건 알림 (기획 초안 / 운영승격 보류)
 - **GitHub:** Draft PR #1598 (선행 #1588, 초안/운영 보류), 개발 이슈 #1597; 독립 병합 금지, 정확 SHA Test·운영승격 차단.
 - 회차 이전 기능 보완 v1378 → 현재 기능 추가 v1384 → 다음 기능 보완 v1386(잠정). 병렬 블로그 기획 v1380/v1382와 분리. 시작 main `656a89947f2261c12de20d4612e88f251ba6c6a6`, 미병합 Draft #1588 후속, 이슈 #1597.

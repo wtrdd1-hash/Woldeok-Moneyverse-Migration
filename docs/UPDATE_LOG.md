@@ -1,3 +1,9 @@
+## 2026-10-28 — Planning v1386 / F675-152 (Feature Improvement / DRAFT / RELEASE HOLD)
+- Draft PR #1611 stacked on #1598, issue #1597. Previous Addition v1384 / Current Improvement v1386 / Next Addition v1388. Main 4f5efd1f48615f0112701feec25a9b0fc67d9719 rechecked; canonical main AGENTS/README/EN-KO plans read. Local Superpowers skills used after skills connector returned empty.
+- Verified migration 214 arbitrary-UUID SECDEF, migration 180 event user_id ON DELETE SET NULL, reset/email-change session revocation, history API event ID omission; no production exploit asserted. Read-only dev DB confirms effective app-role auth_security_events SELECT/INSERT/UPDATE/DELETE and auth_sessions SELECT/UPDATE; P0 ACL drift, no mutation attempted. QA v1328 Draft #1610 isolated real-PG CI PASS but main duplicate 283, bot audit Critical1/High5, official Test/restore blocked.
+- Added bilingual integrated feature design and 10 P0/P1 items: ENV1386-01 SEC1386-02 REL1386-03 AUTH1386-04 AUTH1386-05 AUTH1386-06 AUTH1386-07 AUTH1386-08 AUTH1386-09 AUTH1386-10. Acceptance 10,001/100/100 NOT RUN. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. No runtime/DB/WLD/ledger/Test/Production/automation changes.
+
+
 ## 2026-10-28 — Planning v1384 / F675-152 Verified Account Security Event Alerts (DRAFT / RELEASE HOLD)
 - **GitHub:** Draft PR #1598 (base #1588, DRAFT/HOLD), implementation issue #1597; no independent merge, exact-SHA Test/Production blocked.
 - Cycle Previous Improvement v1378 → Current Addition v1384 → Next Improvement v1386 (provisional); v1380/v1382 already allocated to parallel blog planning. Main `656a89947f2261c12de20d4612e88f251ba6c6a6` start; stacked on Draft #1588; Issue #1597.

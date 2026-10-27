@@ -1,3 +1,9 @@
+## F675-152 / v1386 — Security Event Source and Recovery Hardening (Improvement)
+**Observed code:** migration 214 accepts an arbitrary user UUID through app-executable SECURITY DEFINER; migration 180 deletes the event owner by SET NULL on user deletion; current history API omits event IDs; password-reset and email-change success revoke all sessions before users can read in-app alerts. No exploit or user delivery verified. OAuth coverage not proven. Read-only dev DB ACL reports app role SELECT/INSERT/UPDATE/DELETE on auth_security_events and SELECT/UPDATE on auth_sessions; P0 grant-origin and negative tests.
+**Product contract:** source-event ID and transactional outbox; no fake alerts, no retroactive events, relogin-pending state, owner-only HMAC cursor, stable intent/receipt, deletion orphan/tombstone and source-owner consistency, API/Android parity, admin aggregate only, private no-store/noindex, KO/EN WCAG 2.2 AA. Explicit fail-closed DB session proof; client UUID or mutable GUC is insufficient.
+**QA:** v1328 Draft #1610 exact-head CI real-PG PASS, but main migration 283 collision, bot Critical1/High5, broad dev app ACL, official Test exact-SHA and independent restore remain blocking. P0/P1: ENV1386-01 SEC1386-02 REL1386-03 AUTH1386-04 AUTH1386-05 AUTH1386-06 AUTH1386-07 AUTH1386-08 AUTH1386-09 AUTH1386-10. 10,001/100/100 not run; external approved new 0, cumulative UNKNOWN/10,000. Draft PR #1611 stacked on #1598, release HOLD.
+
+
 ## v1384 — F675-152 Account Security Event Alerts / Feature Addition / DRAFT-HOLD
 - **GitHub:** Draft PR #1598 (base #1588, DRAFT/HOLD), implementation issue #1597; no independent merge, exact-SHA Test/Production blocked.
 

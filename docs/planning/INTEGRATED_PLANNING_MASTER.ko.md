@@ -1,3 +1,48 @@
+## v1386 / F675-152 — 계정 보안 사건 알림의 출처·소유권·복구 무결성 보완 (기능 보완 / 초안 / 운영승격 보류) — Draft PR #1611, 이슈 #1597
+
+**회차와 기준.** 이전 기능 추가 v1384 → 현재 기능 보완 v1386 → 다음 기능 추가 v1388(잠정). v1380/v1382는 별도 블로그 기획. 시작·중간 main `4f5efd1f48615f0112701feec25a9b0fc67d9719`, main AGENTS.md·README.md·영어 정본 PROJECT_PLAN.md·국문 동등 문서 확인. 본 PR은 미병합 Draft #1598 위에 쌓인 기획 전용 변경으로 독립 병합 금지. 실제 개발·배포는 A/B/C/Gemini/QA 소관.
+
+### 실제 소스에서 확인한 사항(침해 발생 주장 아님)
+1. Migration 214의 `account_recent_security_events(p_user_id,p_limit)`는 SECURITY DEFINER이면서 앱 역할에 EXECUTE가 허용되고, 함수 안에서 세션·행위자 검증 없이 입력 UUID로 조회한다. NestJS는 현재 인증된 `requireUserId(request)`를 전달하므로 운영 침해가 확인된 것은 아니지만, 앱 DB 역할로 임의 UUID를 직접 호출하는 경우의 타인 조회 위험을 격리 PostgreSQL에서 부정 시험해야 한다. 임의 UUID나 수정 가능한 GUC는 신뢰할 인증 증거가 아니다. **개발 DB 읽기 전용 카탈로그 확인(2026-10-28 01:11 KST):** moneyverse_app의 auth_security_events SELECT/INSERT/UPDATE/DELETE 권한 모두 TRUE, auth_sessions SELECT/UPDATE TRUE. 이는 유효 권한 측정이지 실제 변경 성공이나 운영 침해 증거가 아니다. 권한 부여 경로와 격리 DB 부정 시험을 P0로 지정한다.
+2. Migration 180의 `auth_security_events`는 고유 `id`가 있지만 `user_id`는 사용자 삭제 시 `ON DELETE SET NULL`이다. 현재 회원 보안 이력 API는 사건 종류·시각만 반환하고 고유 ID를 반환하지 않는다. 신규 알림은 시각 추정이 아닌 확정된 원본 사건 ID를 참조하고 삭제·고아 사건·익명 보존 규칙을 정해야 한다.
+3. Migration 209의 비밀번호 재설정 완료와 215의 이메일 변경 완료는 기존 모든 세션을 철회한 뒤 해당 사건을 동일 SQL 함수 트랜잭션에서 기록한다. 앱 내 알림은 **재로그인 전에는 회원이 읽지 못할 수 있으므로** 즉시 전달·확인 성공으로 표시하지 않는다. Migration 212의 비밀번호 변경은 다른 세션만 철회한다.
+4. 로컬 로그인·비밀번호·이메일 변경의 실제 DB 사건 기록은 확인했지만 OAuth 제공자별 기록은 미확인이다. `*_requested`를 완료 사건으로 처리하지 않으며 IP·기기·위치를 추정하지 않는다. 기존 알림함의 OFFSET 방식과 미병합 F675-149 선행조건도 유지한다.
+5. 최신 QA v1328(2026-10-28): Draft PR #1610의 정확 SHA `14dec5d3372875f4602688f388dd0f59c5aa0be1` GitHub CI는 격리 PostgreSQL에서 제안 Migration 285까지 적용하고 backend 2,274 PASS/60 SKIP, DB 37 PASS, frontend 1,681 PASS, API 38 PASS를 확인했다. **main 통과가 아니다.** 현재 main에는 Migration **283 중복**, 개발 DB 광범위 앱 권한·체크섬 차이, 봇 감사 Critical 1/High 5, 공식 인증 기반 Test exact-SHA·독립 복원 미완료가 남았다. 전체 QA FAILED / Production BLOCKED. QA 관측 루트/데이터 디스크 46%/63%, Test·운영 릴리스 링크 대상 누락, HTTP 24 PASS/인증 제외 2.
+
+### 채택 설계와 인증 경계
+**채택:** 확정 사건 ID + 동일 트랜잭션 Outbox + 소유자 전용 세션 증명 조회 + 불변 검토 영수증. DB 인증 경계의 격리 PostgreSQL 부정 시험 전 기능 OFF. **배제:** 시각만으로 사건 동일성 추정, 낙관적 완료 표시, UUID·사용자 설정 GUC만으로 DB 인증, 과거 사건 자동 소급 알림, 이메일·문자·푸시 발송. DB 함수는 위조하기 어려운 세션 증거를 서버와 DB 통제 영역에서 검증해야 하며, 앱 역할이 읽을 수 있는 세션 해시와 앱 역할 침해 위협을 먼저 조사한다. 공유 DB 역할에서 안전한 소유권 증명이 불가능하면 알림 조회 API를 차단한다. 기존 이력 API는 검증된 교체 경로가 마련되기 전까지 호환 유지한다.
+
+### 회원·관리자·API·상태
+- 회원 `/account/security`, `/account/notifications?category=security`: **보안 활동 확인·검토 완료·로그인 기기 확인**. 비밀번호 재설정/이메일 변경으로 세션이 철회되면 재로그인 후 미확인 알림을 확인할 수 있어야 한다. 비로그인 LOGIN_REQUIRED, 세션 철회 SESSION_EXPIRED/REAUTH_REQUIRED, 근거 미확인 SOURCE_UNVERIFIED, 응답 유실 UNKNOWN_COMMIT 후 영수증 재조회. 검토 완료는 안전하다는 인증도 세션 자동 종료도 아니다.
+- NestJS 제안 `GET /api/v1/account/security/alerts?limit=1..50&cursor=`, `GET /api/v1/account/security/alerts/:opaqueId`, `POST /api/v1/account/security/alerts/:opaqueId/review`(`intentId` UUID, `expectedVersion`), `GET /api/v1/account/security/alerts/receipts/:intentId`. Next BFF 동일 출처 CSRF·세션 전달, Android 동일 소유권 계약. 클라이언트 제공 userId·사건 종류·소유자 UUID·리다이렉트 신뢰 금지. `(created_at,id)` 기반 소유자 HMAC 키셋 커서·만료·키 교체; OFFSET 금지. 200 확정, 401 미인증, 타인/없는 자원 404, 409 버전·재시도 충돌, 410 보존 만료, 423 선행기능 중지, 429 제한, 503 출처 미확인. 응답 유실은 영수증 확정 전까지 UNKNOWN_COMMIT. 비공개 응답 `private,no-store`, `Vary: Cookie`; CDN/서비스워커/공개 ETag 금지.
+- 관리자에게는 고정·비중첩 기간의 20명 이상 집계와 보완 셀 억제를 적용한 지연·실패 통계만 제공한다. 개별 회원 사건·구독 내보내기 금지. 필수 보안 알림은 마케팅 수신 설정과 분리. 외부 메시지·WLD·자동 계정 조치는 제외한다.
+
+### DB·트랜잭션·삭제 및 복구
+- main Migration 283 중복·체크섬·권한 문제가 해결된 뒤 **새 순번의 전진 전용 Migration**으로만 구현한다. 적용된 180/214 수정 금지. `account_security_alerts(id,user_id,source_event_id,event_kind,created_at,reviewed_at,version)`에 `UNIQUE(user_id,source_event_id)`, 원본 FK, SECURITY DEFINER에서 원본 소유자 일치 확인, 사건 종류 CHECK·버전 CHECK, `(user_id,created_at DESC,id DESC)` 및 미확인 부분 인덱스. `security_alert_outbox`는 사건·종류 유일성, 제한된 재시도·리스 인덱스. `account_security_alert_intents`는 소유자·의도 ID·정규 본문 해시·결과·확정 시각을 불변 기록한다. 알림/감사에는 원시 IP·이메일·기기·토큰·메타데이터 금지.
+- 검증된 DB 함수 또는 AFTER INSERT 트리거로 **원본 사건과 Outbox를 동일 트랜잭션에 기록**한다. 사건 롤백 시 Outbox/알림 0건. 작업자는 `FOR UPDATE SKIP LOCKED`, 제한된 리스·재시도, `ON CONFLICT`로 화면 표시 알림 1건과 영수증을 확정한다. ACK 유실 재시도는 기존 결과를 반환한다. 작업자 성공은 회원 열람이 아니다. 과거 사건 자동 소급 발송 금지.
+- **삭제 경계:** 원본 user_id가 삭제 후 NULL이 되는 구조이므로 회원 삭제 시 미발송 작업을 중단하고, 알림·의도 테이블이 활성 소유자를 유지하거나 고아 사건을 신규 계정에 연결하지 못하도록 FK/ON DELETE·부정 시험을 정의한다. 법정 보존이 필요한 경우 개인정보 없는 비식별 처리 기록만 남긴다. 재가입 시 과거 사건 재활성화 금지. 보존 만료와 안전한 영수증 tombstone은 별도로 정의한다.
+- 검토 트랜잭션은 `(user,intentId)` 자문 잠금을 **재전송 조회 전에** 획득하고 소유자 알림 행 잠금·버전·본문 해시를 검증한 후 검토 상태와 불변 영수증을 함께 커밋한다. 동일 의도·동일 본문은 원결과, 동일 의도·다른 본문은 409. 사용자 삭제·재로그인·동시 요청 시 타인 정보 노출 금지.
+
+### 개인정보·접근성·KPI·시험·배포
+- 국영문, 320px 모바일·200% 확대·키보드·초점·모션 감소·WCAG 2.2 AA, 오프라인·만료·재로그인·확정 불명 상태. 보안 경로 noindex/no-store, 사이트맵·리퍼러·분석에 사건 식별자 금지. 읽기 30회/분·검토 20회/분은 검증 전 잠정치, 서버 작업자 배치 제한, 선행조건 실패 시 닫힘.
+- 확정 기록 기준 KPI: 유효 사건 수, Outbox 일치율, 사건당 표시 알림 1건, 전달 지연 p95, 중복 억제, 세션 철회 후 대기 수, 고아 사건 차단 수, 검토 영수증, 무권한 조회 거절, 개인정보 사고 0 목표. 작업자 ACK를 회원 열람으로 계산하지 않는다.
+- **수용시험 명세만 작성, 실행 안 함:** 합성 10,001건, 동시 사건/작업자/검토/삭제/재로그인 100건, 위조 UUID/세션/커서/CSRF/의도 100건, 원본 롤백, 동일 시각 다른 사건, OAuth 미지원, 세션 철회 후 재로그인, 사용자 삭제·NULL 소유자, 재시도·응답 유실, 보존 만료·재가입, 캐시·Android·접근성·금융/관리 회귀. 격리 실 PostgreSQL과 공식 인증 기반 Test exact-SHA, 독립 백업 복원, 봇 보안 해결, 릴리스 링크 검증, 승인된 GitOps 및 롤백 실증 후 운영승격. 기본 OFF; 롤백 시 신규 Outbox·작업자 중지, 확정 영수증 보존. 기획 예약은 배포하지 않는다.
+
+### P0/P1 개발 백로그 — 개발 예약 연계
+- **P0 ENV1386-01:** 운영·Test 링크, 암호화 백업·체크섬·독립 복원, 이미지/소스 정확 SHA 출처 검증.
+- **P0 SEC1386-02:** main Migration 283 중복·체크섬·개발 앱 역할 과도 DML·PUBLIC 은행 함수 EXECUTE 해결, Migration 214 임의 UUID/세션 증명/권한 부정 시험.
+- **P0 REL1386-03:** 봇 Critical 1/High 5 해결, 공식 Test exact-SHA 인증 기반 API/DB/Android/금융/관리 E2E, GitOps 승인·롤백. Draft #1610 CI 통과를 main·운영 통과로 간주 금지.
+- **P0 AUTH1386-04:** 위조 소유자·원본, 세션 철회 후 지연, 사용자 삭제 고아 사건, 타인 영수증, 부분 커밋 방지.
+- **P1 AUTH1386-05:** 신규 전진 Migration, 사건 ID·Outbox·알림·의도·영수증·FK/삭제·인덱스·보존·ACL.
+- **P1 AUTH1386-06:** 사건/Outbox 원자성, 제한된 작업자, 재전송·잠금·복구·삭제/세션 경합.
+- **P1 AUTH1386-07:** NestJS·Next BFF·Android 소유권 목록/상세/검토/영수증, 기존 이력 API 호환.
+- **P1 AUTH1386-08:** 보안/알림 UI, 재로그인 대기, 확정 불명 영수증 복구, 국영문 모바일 접근성.
+- **P1 AUTH1386-09:** 관리자 비식별 통계, SEO/no-store, 악용 방지, 감사·KPI·보존 고지.
+- **P1 AUTH1386-10:** 격리 PG 10,001/100/100 부정·회귀, 정확 SHA CI·공식 Test, 백업 복원·기능 OFF 롤백.
+
+**외부 근거 gate:** 이번 회차 독립 확인·중복 제거·승인 신규 **0건**, 누적 **UNKNOWN/10,000건**. BLOCKED / IN PROGRESS. 통합문서만 갱신하고 분산 세부기획 파일 추가 금지. 런타임·DB·WLD·원장·Test·운영·예약 미변경.
+
+
 ## v1384 / F675-152 — 검증된 계정 보안 이벤트 알림 및 본인 전용 영수증 (기능 추가 / 기획 초안 / 운영승격 보류) — 이슈 #1597
 - **GitHub:** Draft PR #1598 (선행 #1588, 초안/운영 보류), 개발 이슈 #1597; 독립 병합 금지, 정확 SHA Test·운영승격 차단.
 

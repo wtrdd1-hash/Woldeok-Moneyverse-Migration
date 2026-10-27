@@ -1,3 +1,11 @@
+## 2026-10-28 — Planning v1386 / F675-152 Security Event Source and Owner Recovery Integrity (Improvement / DRAFT / RELEASE HOLD)
+- GitHub Draft PR #1611 (stacked on unmerged #1598), issue #1597; previous Addition v1384 → current Improvement v1386 → next Addition v1388 (provisional); separate blog v1380/v1382 unchanged. Main 4f5efd1f48615f0112701feec25a9b0fc67d9719 read start/mid with AGENTS, README and canonical EN/KO plans.
+- Source: migration 214 SECURITY DEFINER accepts arbitrary user UUID without session verification; migration 180 security-event owner becomes NULL on user deletion; existing history API lacks event IDs; reset/email-change functions revoke all sessions so in-app alerts may be unreadable until re-login. No observed exploit or real delivery claimed. OAuth source unverified. Read-only dev DB effective ACL: auth_security_events SELECT/INSERT/UPDATE/DELETE TRUE for app role; auth_sessions SELECT/UPDATE TRUE. P0 least-privilege drift, not a verified exploit.
+- Design: committed source ID + atomic Outbox, session-proof owner binding (fail closed if unverifiable), no client GUC/UUID as DB identity, deletion/orphan tombstones, relogin-pending UX, durable idempotent review receipts, private no-store, KO/EN a11y, Android, aggregate-only admin, analytics and rollback. Full implementation in bilingual INTEGRATED_PLANNING_MASTER.
+- P0/P1: ENV1386-01 SEC1386-02 REL1386-03 AUTH1386-04 AUTH1386-05 AUTH1386-06 AUTH1386-07 AUTH1386-08 AUTH1386-09 AUTH1386-10. QA v1328 Draft #1610 exact-head isolated PostgreSQL CI PASS (backend 2274/60 skip, DB37, frontend1681, API38); main duplicate migration 283, bot audit 1 Critical/5 High, broad dev DB ACL/checksum drift, no official authenticated Test exact-SHA or independent restore => overall QA FAILED/Production BLOCKED. 10,001/100/100 tests designed NOT RUN. External new accepted 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- Documentation-only, no runtime/DB/WLD/ledger/Test/Production/automation changes; branch and records isolated from A/B/C/Gemini/QA.
+
+
 ## v2026.10.28.1384 — F675-152 Verified Account Security Event Alerts (Feature Addition / DRAFT / RELEASE HOLD)
 - **GitHub:** Draft PR #1598 (base #1588, DRAFT/HOLD), implementation issue #1597; no independent merge, exact-SHA Test/Production blocked.
 
