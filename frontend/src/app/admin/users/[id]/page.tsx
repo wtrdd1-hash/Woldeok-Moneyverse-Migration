@@ -66,8 +66,15 @@ export default async function AdminUserDetailPage({
       <div data-page="admin-users-id" className="mv-page mv-page--admin grid gap-5">
         <AdminBack href="/admin/users" label="사용자 관리로" />
         <PageHeader eyebrow="USER SAFETY" title="회원 상세 정보를 확인할 수 없습니다">
-          회원별 데이터베이스 조회가 실패했거나 응답을 검증할 수 없습니다. 회원이 삭제되었다는 의미는 아닙니다. 잠시 후 다시 시도해 주세요.
+          <p role="alert">
+            회원별 데이터베이스 조회가 실패했거나 응답을 검증할 수 없습니다. 회원이 삭제되었다는 의미는 아닙니다.
+          </p>
         </PageHeader>
+        <Button asChild variant="outline" className="min-h-11 w-fit">
+          <Link href={`/admin/users/${encodeURIComponent(userId)}`} prefetch={false}>
+            다시 확인
+          </Link>
+        </Button>
       </div>
     );
   }

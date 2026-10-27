@@ -15,7 +15,7 @@ vi.mock('../../admin-forms', () => ({
 }));
 vi.mock('../../security-abuse-forms', () => ({ PermanentSuspensionDialog: () => null }));
 
-import Page from './page';
+import Page, { metadata } from './page';
 
 const ID = 'c23eb10e-4389-42db-91bd-0fbf1a4cc732';
 const profile = { portfolio: {
@@ -41,6 +41,8 @@ describe('admin member detail page with bounded directory', () => {
     expect(mocks.api).toHaveBeenCalledWith(`/api/v1/admin/users/${ID}/portfolio`);
     expect(html).toContain('Verified member');
     expect(html).toContain('미확인 금액은');
+    expect(html).toContain('role="status"');
+    expect(metadata.robots).toEqual({ index: false, follow: false });
     expect(html).not.toContain('사용자를 찾을 수 없습니다');
     expect(html).not.toContain('0 WLD');
   });
@@ -51,6 +53,8 @@ describe('admin member detail page with bounded directory', () => {
     ));
     const html = await renderPage();
     expect(html).toContain('회원 상세 정보를 확인할 수 없습니다');
+    expect(html).toContain('다시 확인');
+    expect(html).toContain('role="alert"');
     expect(html).not.toContain('Verified member');
     expect(html).not.toContain('빠른 관리');
   });
