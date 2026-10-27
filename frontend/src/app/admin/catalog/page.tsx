@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -15,8 +16,8 @@ import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
-import type { AdminBusiness, AdminSeasonEvent } from '../types';
 import { NewSeasonEventForm, ToggleActive } from '../admin-forms';
+import { parseBusinessCatalog, parseSeasonCatalog } from './catalog-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,10 +30,12 @@ export const metadata: Metadata = {
 
 export default async function AdminCatalogPage() {
   await requireAdminConsole(AREA.href);
-  const [businesses, events] = await Promise.all([
-    apiOrNull<{ businessTypes: AdminBusiness[] }>('/api/v1/admin/business-types'),
-    apiOrNull<{ events: AdminSeasonEvent[] }>('/api/v1/admin/season-events'),
+  const [businessPayload, seasonPayload] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/admin/business-types'),
+    apiOrNull<unknown>('/api/v1/admin/season-events'),
   ]);
+  const businesses = parseBusinessCatalog(businessPayload);
+  const events = parseSeasonCatalog(seasonPayload);
 
   return (
     <div data-page="admin-catalog" className="mv-page mv-page--admin grid gap-5">
@@ -46,8 +49,11 @@ export default async function AdminCatalogPage() {
           </CardHeader>
           <CardContent>
             {businesses === null ? (
-              <EmptyState title="사업 목록을 불러오지 못했어요." />
-            ) : businesses.businessTypes.length === 0 ? (
+              <div role="alert" className="grid gap-3">
+                <EmptyState title="사업 목록을 확인하지 못했어요. 데이터가 유효하지 않거나 서버에 연결할 수 없습니다." />
+                <Link href="/admin/catalog" className="inline-flex min-h-11 items-center justify-center rounded-lg border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">사업 목록 다시 조회</Link>
+              </div>
+            ) : businesses.length === 0 ? (
               <EmptyState title="등록된 사업이 없습니다." />
             ) : (
               <div className="overflow-x-auto">
@@ -63,7 +69,7 @@ export default async function AdminCatalogPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {businesses.businessTypes.map((business) => (
+                    {businesses.map((business) => (
                       <TableRow key={business.id}>
                         <TableCell className="font-mono text-xs">{business.symbol}</TableCell>
                         <TableCell>{business.name}</TableCell>
@@ -97,10 +103,13 @@ export default async function AdminCatalogPage() {
             <CardTitle className="text-base">시즌 이벤트 목록</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6">
-            <NewSeasonEventForm />
+            {events !== null ? <NewSeasonEventForm /> : null}
             {events === null ? (
-              <EmptyState title="시즌 이벤트를 불러오지 못했어요." />
-            ) : events.events.length === 0 ? (
+              <div role="alert" className="grid gap-3">
+                <EmptyState title="시즌 이벤트를 확인하지 못했어요. 등록 및 변경은 확인 후 다시 시도해 주세요." />
+                <Link href="/admin/catalog" className="inline-flex min-h-11 items-center justify-center rounded-lg border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">시즌 이벤트 다시 조회</Link>
+              </div>
+            ) : events.length === 0 ? (
               <EmptyState title="등록된 시즌 이벤트가 없습니다." />
             ) : (
               <div className="overflow-x-auto">
@@ -115,7 +124,7 @@ export default async function AdminCatalogPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {events.events.map((event) => (
+                    {events.map((event) => (
                       <TableRow key={event.id}>
                         <TableCell className="text-muted-foreground">
                           {event.season_name}
