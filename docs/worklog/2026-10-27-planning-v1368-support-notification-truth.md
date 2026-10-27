@@ -1,5 +1,5 @@
 # Planning v1368 — Verified Support Reply Alerts (2026-10-27)
-**Status:** IN PROGRESS / DRAFT / RELEASE HOLD. Previous v1366 Improvement → Current v1368 Addition → Next v1370 Improvement (provisional). Issue #1562; predecessor unmerged Draft #1555.
+**Status:** PARTIAL / DRAFT / RELEASE HOLD. Previous v1366 Improvement → Current v1368 Addition → Next v1370 Improvement (provisional). Issue #1562; predecessor unmerged Draft #1555.
 
 ## Source evidence
 - Debian 13 miniPC connected; frontend/backend/bot/nginx active, dev PostgreSQL connected. Root 81% used (19GiB free), data 72% (53GiB free); /srv/moneyverse link target missing.
@@ -15,3 +15,6 @@
 
 ## Execution record
 Start and midpoint evidence are in miniPC planning-v1368-records. Updated existing English/Korean master, feature review, project plan and update logs; this worklog is the only new documentation file. No runtime, DB, WLD, ledger, feature switch, Test, Production or automation changes.
+
+## GitHub closeout
+Draft PR #1563 OPEN against unmerged predecessor #1555; development issue #1562 updated. Initial commit c5e72719f6c6fa4d477b363b706620a17598cbeb, 9 docs-only files, 118 additions. EN/KO backlog 10 identifiers in six planning docs PASS; git diff --check PASS. Full application QA and feature tests NOT RUN. Main c2a9306ddc0424438bc0ab297ea9543bb167aee6 unchanged through final remote check. Production promotion BLOCKED.
