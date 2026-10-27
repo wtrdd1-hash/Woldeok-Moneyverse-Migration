@@ -10,10 +10,8 @@
 ## IN PROGRESS
 - [x] RED tests: backend 2 FAIL; browser/Android 4 FAIL, 12 existing PASS.
 - [x] implementation: no-store for Nest image and profile JSON, browser relay and Android gateway; no SQL changes.
-- [ ] validation
+- [x] validation completed; full release remains blocked by pre-existing gates.
 
-## FINISHED
-- Pending.
 
 ### Mid-work checkpoint — 2026-10-27 21:14 KST
 - RED: Nest image 2 failures; browser/Android 4 failures; browser backend-unavailable/token-missing 2 failures. GREEN: image backend 2, profile GET metadata 4, browser relay + Android 23.
@@ -22,3 +20,11 @@
 - Known blocking gates: database parity 1 FAIL (duplicate 280, missing 282); root audit 2 Critical/8 High/11 Moderate/3 Low, bot 1 Critical/5 High. Official Test symlink target absent; public Test and Production SHA differ from main/candidate; authenticated E2E, independent restore, complete accessibility/SEO browser run and GitOps promotion not certified.
 - Mid-work remote main unchanged at 59cdc2e02f0e83e5401049309c4cb89ff57c2d4c; EN/KO integrated plan hashes unchanged. Remote audit: 367 non-main branches (353 diverged, 10 ahead, 4 merged); 358 open PRs (343 Draft), 65 conflicts, 214 with failed checks, no duplicate head SHA. No branch deletion; merged heads retained due other-worker ownership.
 - No writes to ledger, Test, Production, feature flags, migrations, or other workers' worktrees. Release remains HOLD.
+
+## FINISHED — 2026-10-27 21:19 KST
+- Implementation `59572d70b5d987e70fd3cfddc9f202ca1a319a05` on `auto/hourly-a-profile-image-revocation-20261027-2056`, Draft/HOLD PR #1579. 10 code/test files changed; 2 plan/worklog files; no schema migration.
+- Exact-SHA final backend **1,550 PASS/413 SKIP**, frontend **1,492 PASS**; Webpack frontend build, backend build, typecheck, lint (0 errors, 1,122 warnings), app-api 179 endpoint contract and bot 8 tests PASS. Isolated PostgreSQL 17.11 strict 001–097 migrations and 8 visibility tests PASS; container removed.
+- Database parity and PR CI runtime-check FAIL on main's duplicate migration 280/missing 282. Root security 2 Critical/8 High; bot 1 Critical/5 High. Official Test symlink target missing; public Test/Production SHA mismatch. Full Test auth/E2E, complete PG chain, WCAG/SEO browser, independent restore, GitOps approval BLOCKED.
+- End remote audit: 369 non-main branches, 360 open PRs, 345 Draft, 65 conflicts, 214 PRs with failed checks, 0 duplicate Head SHA groups. 0 deletions; preserve all unique/unmerged branches and 4 merged heads pending independent ownership check.
+- No main merge, Test/Production deployment, production/dev DB writes, ledger changes, feature flag activation, or rollback. Pre-merge rollback: abandon Draft PR/branch after preserving evidence. Future post-merge rollback: reviewed code revert only; no schema rollback.
+- QA/Release reports and full logs: `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-27-2056-*`. GitHub PR #1579 runtime-check and verify/runtime-check both FAIL on the main migration parity defect; candidate build and Production Gate SKIPPED. PR records failures and HOLD. Keep A/B/C/planning/QA automations active and schedules unchanged.
