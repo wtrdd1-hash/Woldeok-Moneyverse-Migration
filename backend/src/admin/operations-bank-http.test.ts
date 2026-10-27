@@ -61,6 +61,34 @@ describe('GET /api/v1/admin/bank HTTP evidence contract', () => {
     app = undefined;
   });
 
+  it.each([
+    '', ' ', '2junk', '1e2', '1.5', '0x10', '0', '-1', '201',
+    '9007199254740993', '01', '+2', 'Infinity', 'NaN',
+  ])('rejects non-canonical loan limit %j before any bank query', async (invalid) => {
+    const repository = await start('none');
+    const response = await request(app!.getHttpServer())
+      .get('/api/v1/admin/bank')
+      .query({ limit: invalid });
+    expect(response.status).toBe(400);
+    expect(repository.bankOverview).not.toHaveBeenCalled();
+    expect(repository.creditGrades).not.toHaveBeenCalled();
+    expect(repository.loanBook).not.toHaveBeenCalled();
+  });
+
+  it('rejects duplicate loan limits before any bank query', async () => {
+    const repository = await start('none');
+    const response = await request(app!.getHttpServer()).get('/api/v1/admin/bank?limit=2&limit=2');
+    expect(response.status).toBe(400);
+    expect(repository.loanBook).not.toHaveBeenCalled();
+  });
+
+  it.each(['1', '200'])('accepts canonical boundary loan limit %s', async (valid) => {
+    const repository = await start('none');
+    const response = await request(app!.getHttpServer()).get('/api/v1/admin/bank').query({ limit: valid });
+    expect(response.status).toBe(200);
+    expect(repository.loanBook).toHaveBeenCalledWith(ACTOR, Number(valid));
+  });
+
   it('returns complete authoritative bank data on success', async () => {
     await start('none');
     const response = await request(app!.getHttpServer()).get('/api/v1/admin/bank');
