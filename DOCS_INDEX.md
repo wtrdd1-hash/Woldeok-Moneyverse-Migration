@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.27.1382 — Blog end-to-end planning and verified implementation gaps (AUDIT / NOT DEPLOYED)
+- [Canonical EN acceptance](docs/planning/BLOG_END_TO_END_ACCEPTANCE_ADDENDUM_v2026.10.27.1382.md) / [한국어](docs/planning/BLOG_END_TO_END_ACCEPTANCE_ADDENDUM_v2026.10.27.1382.ko.md) · [EN source audit](docs/findings/BLOG_END_TO_END_PLANNING_CODE_AUDIT_v2026.10.27.1382.md) / [한국어 실증](docs/findings/BLOG_END_TO_END_PLANNING_CODE_AUDIT_v2026.10.27.1382.ko.md) · [internal KO](docs/updates/v2026.10.27.1382-blog-full-audit-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.27.1382-blog-full-audit-github.md). Updated main `cf56520b` now includes legacy 503 hold; operating live release remains unverified. Six discoverable guides dated October 15; 211 legacy records, including 17 TECH. v1108 overdue alert-only remains authoritative.
+
 ## v2026.10.27.3 — Existing branch summary (documentation only)
 - [EN full report](docs/audits/2026-10-27-current-branches-v2026.10.27.3.md) / [KO](docs/audits/2026-10-27-current-branches-v2026.10.27.3.ko.md) / [CSV](docs/audits/2026-10-27-current-branches-v2026.10.27.3.csv) · [version status](docs/releases/v2026.10.27.3.md). Web/backend 351, Android 7; Git history evidence only, no Test/Production deployment.
 

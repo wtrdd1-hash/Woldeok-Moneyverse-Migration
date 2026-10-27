@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.27.1382 — 블로그 전체 구현 수용조건 최신화 (감사/미배포)
+- [영문 기획 보완](BLOG_END_TO_END_ACCEPTANCE_ADDENDUM_v2026.10.27.1382.md) / [한국어 보완](BLOG_END_TO_END_ACCEPTANCE_ADDENDUM_v2026.10.27.1382.ko.md), [실코드 검증](../findings/BLOG_END_TO_END_PLANNING_CODE_AUDIT_v2026.10.27.1382.ko.md)에서 TECH/FINANCE 분리·수치/출처 재현·4개국 원어·안전 DB 발행/정정·관련도구/SEO·전체 QA를 계약화. v1108 검토 지연은 알림만, 자동 비공개 금지. 메인 `cf56520b`에 v1102 발행 차단 병합, 운영 적용 미확인. 단계 v1382.1–.6 구현/분리 Test/무중단 운영은 아직 미완료.
+
 ## v2026.10.24.1210 — F675-109 읽기 목록 삭제·커서·이어읽기 무결성 보완 (기획 초안 / 운영 보류)
 - 이전 기능 추가 v1208 / 현재 기능 보완 v1210 / 다음 기능 추가 v1212(잠정). main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` 시작·중간 동일, 선행 Draft #1087 미병합, QA v1213 FAILED/HOLD, 신규 P0 #1088. 문서만 변경.
 - 실제 Migration 175/259 공개 조회는 `deleted_at IS NULL`, 댓글 앵커는 `#comments-title`. v1208 RESTRICT FK를 승인된 완전 삭제가 가능한 CASCADE로 설계, 저장한 삭제 글은 본인만 제목 없이 제거, 회원→글 FOR SHARE→저장 행 잠금, 지문별 원본 영수증·묘비 재저장, 본인/세션 결합 HMAC 스냅샷 커서, 로그아웃 응답 무효화. 운영 한도 500건과 격리 합성 10,001건 페이지네이션 테스트를 분리.

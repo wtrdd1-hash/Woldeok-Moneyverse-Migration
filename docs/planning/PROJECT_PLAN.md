@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.27.1382 — Whole-blog implementation acceptance dependency (AUDIT ONLY)
+- The [end-to-end acceptance addendum](BLOG_END_TO_END_ACCEPTANCE_ADDENDUM_v2026.10.27.1382.md) and [verified audit](../findings/BLOG_END_TO_END_PLANNING_CODE_AUDIT_v2026.10.27.1382.md) reconcile TECH vs FINANCE composition, proven sources/benchmarks, 4 native countries, safe publication, manual correction, contextual tools/SEO and release QA. v1108 review overdue = alert only, not auto withdrawal. Main `cf56520b` carries v1102 source hold; Production parity and next engineering stages v1382.1–.6 remain unverified.
+
 ## v2026.10.24.1210 — F675-109 Reading List Deletion/Cursor/Resume Hardening (PLANNING DRAFT / RELEASE HOLD)
 - Cycle: Previous Addition v1208; Current Improvement v1210; Next Addition v1212 provisional. Authoritative main `54d5140ddb49dd3e2193a2f82b71a6a0a57cfede` unchanged start/mid; predecessor Draft #1087 unmerged. QA v1213 FAILED/HOLD; new P0 release gate #1088. Docs only.
 - Source: board public functions in migrations 175/259 only expose `deleted_at IS NULL` posts; post page's comments anchor is `#comments-title`. Fix v1208's proposed RESTRICT FK blocking authorized hard purge, allow redacted owner REMOVE of saved-but-unavailable post, lock actor→post FOR SHARE→saved row, immutable digest-bound receipts and tombstone re-save, owner/session-bound HMAC snapshot cursor, logout response fencing. Keep production 500 saved cap; 10,001-item pagination test only in isolated synthetic fixture.

@@ -1,5 +1,8 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.10.27.1382 — 블로그 전 기능 기획·코드·운영 증거 정합성 보완 (감사 / 미배포)
+- [영문 수용 정본](BLOG_END_TO_END_ACCEPTANCE_ADDENDUM_v2026.10.27.1382.md) / [한국어 상세](BLOG_END_TO_END_ACCEPTANCE_ADDENDUM_v2026.10.27.1382.ko.md), [영문 근거](../findings/BLOG_END_TO_END_PLANNING_CODE_AUDIT_v2026.10.27.1382.md) / [한국어 실코드 보고서](../findings/BLOG_END_TO_END_PLANNING_CODE_AUDIT_v2026.10.27.1382.ko.md). 중간 메인 재조회 `cf56520b`에서 C v1102 구형 발행 503 차단 병합 확인(운영 적용 미확인). 실제 공개 6편은 모두 10/15, 레거시 저장 211건/TECH17건. TECH의 복리·금융출처 강제삽입/근거없는 벤치마크, 국가 KR/US/JP/VN↔KR/US/JP/CN 불일치, 편집/발행 DB 권한·관련글/SEO 검증 공백을 보완기획에 반영. v1108 미검토 알림만/자동비공개 금지 유지. 개발·독립 Test·운영 승격 미실시, 상세 TECH v1380 작업과 분리.
+
 ## v2026.10.27.1318 — 예약 QA 운영 적용 검증 (예약 QA에 한정)
 
 - v1317 HTTP 스모크 검사/QA 전용 임시 정리 작업을 PR #1542로 main `0da3b886`에 병합하고 별도 버전 고정 예약 QA 실행 파일로 설치했다. systemd drop-in만 교체했으며 기존 서비스 설정은 복구 가능하게 유지했다. 애플리케이션이나 DB는 배포하지 않았다.
