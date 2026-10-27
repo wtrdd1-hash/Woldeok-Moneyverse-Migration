@@ -18,3 +18,9 @@
 - TDD RED: backend 3 failures; Next BFF 1 failure; modal positive-unread regression 1 failure under NODE_ENV=test (host NODE_ENV=production otherwise breaks React.act).
 - GREEN: backend 3 PASS; Next BFF + modal 8 PASS. New authenticated CSRF endpoint reads owner-scoped PostgreSQL update receipt and then authoritative unread count; web never assumes zero and refetches feed/count. No migration or finance writes.
 - Existing React race fixture adjusted to resolve the *old* request, not the newly issued post-mutation request. All unmerged branches preserved.
+
+### CONTRACT / REAL PG CHECKPOINT — 19:27 KST
+- Android app-api new read-all-receipt route documented; 180 generated endpoints (legacy integer read-all remains). EN canonical and KO schema reference regenerated. Contract version v2026.10.27.1925.
+- Read-only inspected live DB definitions: both existing functions are SECURITY DEFINER, owned by migrator, accepting a supplied UUID. **Existing app role has direct UPDATE privilege on in_app_notifications; P0 least-privilege blocker persists.** This change does not grant any new privilege.
+- Network-isolated PostgreSQL 17.11 imported the two live function definitions read-only and used synthetic rows: 2 actor notifications marked read, 1 foreign unread untouched, 1 new actor unread observed afterward; synthetic app-role UPDATE denied. Container removed. This is not an authenticated official Test E2E nor a proof of live DB ACL compliance.
+- Typecheck PASS; lint PASS (0 errors, 1,122 pre-existing warnings). Security/CI/full gates pending.
