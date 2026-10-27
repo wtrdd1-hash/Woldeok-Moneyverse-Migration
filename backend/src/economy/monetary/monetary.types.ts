@@ -52,14 +52,14 @@ export interface MonetaryTelemetryOverview {
   m_total: string;
   m_circulating: string;
   m_treasury: string;
-  m_bank_liquidity: string;
-  m_locked: string;
+  m_bank_liquidity: string | null;
+  m_locked: string | null;
   is_issuance_frozen: boolean;
   active_policy_orders_count: number;
   total_mint_certificates_count: number;
   total_retirement_certificates_count: number;
   verified_invariant: boolean;
-  last_reconciled_at: string;
+  last_reconciled_at: string | null;
 }
 
 export interface MonetaryAutoRegulationConfig {

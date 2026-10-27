@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import type {
@@ -13,52 +13,64 @@ export class CentralBankService {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable) {}
 
   async getMonetaryTelemetry(): Promise<MonetaryTelemetryOverview> {
-    // 1. Invariant check from DB function or raw queries
-    const invRes = await this.pool.query<{
-      treasury_wld: string;
-      user_balances_wld: string;
-      total_monetary_base_wld: string;
-      is_issuance_frozen: boolean;
-    }>(`
-      SELECT
-        coalesce((SELECT sum(balance_wld::numeric) FROM public.system_treasury_vaults), 0)::bigint::text AS treasury_wld,
-        coalesce((SELECT sum(ab.available_amount) FROM public.accounts a JOIN public.account_balances ab ON ab.account_id = a.id WHERE a.account_type IN ('USER_CASH', 'USER_BANK')), 0)::bigint::text AS user_balances_wld,
-        coalesce((SELECT is_issuance_frozen FROM public.monetary_system_status WHERE id = 1), false) AS is_issuance_frozen
-    `);
+    // An incomplete financial snapshot is unavailable, never a fabricated zero.
+    // This read does NOT certify the full bank/escrow ledger invariant.
+    try {
+      const invRes = await this.pool.query<{
+        treasury_wld: string;
+        user_balances_wld: string;
+        is_issuance_frozen: boolean | null;
+      }>(`
+        SELECT
+          coalesce((SELECT sum(balance_wld::numeric) FROM public.system_treasury_vaults), 0)::bigint::text AS treasury_wld,
+          coalesce((SELECT sum(ab.available_amount) FROM public.accounts a JOIN public.account_balances ab ON ab.account_id = a.id WHERE a.account_type IN ('USER_CASH', 'USER_BANK')), 0)::bigint::text AS user_balances_wld,
+          (SELECT is_issuance_frozen FROM public.monetary_system_status WHERE id = 1) AS is_issuance_frozen
+      `);
+      const row = invRes.rows[0];
+      if (!row || typeof row.is_issuance_frozen !== 'boolean' ||
+          !/^[0-9]+$/.test(row.treasury_wld) || !/^[0-9]+$/.test(row.user_balances_wld)) {
+        throw new Error('incomplete monetary state');
+      }
 
-    const row = invRes.rows[0];
-    const treasuryWld = BigInt(row?.treasury_wld || '0');
-    const userWld = BigInt(row?.user_balances_wld || '0');
-    const mTotal = (treasuryWld + userWld).toString();
+      const countsRes = await this.pool.query<{
+        active_orders: string;
+        mints: string;
+        retirements: string;
+      }>(`
+        SELECT
+          (SELECT count(*) FROM public.monetary_policy_orders WHERE status = 'APPROVED') AS active_orders,
+          (SELECT count(*) FROM public.mint_certificates) AS mints,
+          (SELECT count(*) FROM public.retirement_certificates) AS retirements
+      `);
+      const counts = countsRes.rows[0];
+      const activeOrders = Number(counts?.active_orders);
+      const mints = Number(counts?.mints);
+      const retirements = Number(counts?.retirements);
+      if (![activeOrders, mints, retirements].every((value) => Number.isSafeInteger(value) && value >= 0) ||
+          !counts || [counts.active_orders, counts.mints, counts.retirements]
+            .some((value) => !/^(0|[1-9][0-9]*)$/.test(value))) {
+        throw new Error('incomplete monetary counts');
+      }
 
-    // 2. Counts
-    const countsRes = await this.pool.query<{
-      active_orders: string;
-      mints: string;
-      retirements: string;
-    }>(`
-      SELECT
-        (SELECT count(*) FROM public.monetary_policy_orders WHERE status = 'APPROVED') AS active_orders,
-        (SELECT count(*) FROM public.mint_certificates) AS mints,
-        (SELECT count(*) FROM public.retirement_certificates) AS retirements
-    `).catch(() => ({ rows: [{ active_orders: '0', mints: '0', retirements: '0' }] }));
-
-    const counts = countsRes.rows[0];
-
-    return {
-      m_total: mTotal,
-      m_circulating: userWld.toString(),
-      m_treasury: treasuryWld.toString(),
-      m_bank_liquidity: '0',
-      m_locked: '0',
-      is_issuance_frozen: Boolean(row?.is_issuance_frozen),
-      active_policy_orders_count: Number(counts?.active_orders || 0),
-      total_mint_certificates_count: Number(counts?.mints || 0),
-      total_retirement_certificates_count: Number(counts?.retirements || 0),
-      // Bank and escrow holdings are not independently reconciled here.
-      verified_invariant: false,
-      last_reconciled_at: new Date().toISOString(),
-    };
+      const treasuryWld = BigInt(row.treasury_wld);
+      const userWld = BigInt(row.user_balances_wld);
+      return {
+        m_total: (treasuryWld + userWld).toString(),
+        m_circulating: userWld.toString(),
+        m_treasury: treasuryWld.toString(),
+        m_bank_liquidity: null,
+        m_locked: null,
+        is_issuance_frozen: row.is_issuance_frozen,
+        active_policy_orders_count: activeOrders,
+        total_mint_certificates_count: mints,
+        total_retirement_certificates_count: retirements,
+        verified_invariant: false,
+        last_reconciled_at: null,
+      };
+    } catch {
+      // Never expose DB errors or present an unverified state as healthy.
+      throw new ServiceUnavailableException('monetary telemetry evidence unavailable');
+    }
   }
 
   async proposePolicyOrder(
