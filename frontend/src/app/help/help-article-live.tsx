@@ -1,10 +1,21 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { helpReviewDeadline, type HelpLocale } from './locale';
 import { useHelpEvidenceClock } from './help-live-clock';
 
+type PublicationState = { readonly identity: string; readonly status: 'checking' | 'current' | 'unavailable' };
+
+/** Prevent a previous article's verified state from carrying over on client navigation. */
+export function publicationIsVerified(state: PublicationState, identity: string): boolean {
+  return state.identity === identity && state.status === 'current';
+}
+
 export type HelpArticleLiveArticle = {
+  article_id: string;
+  slug: string;
+  published_at: string;
   title: string;
   summary: string;
   body_plain: string;
@@ -19,6 +30,46 @@ export function HelpArticleLive({
   sourceHref: string | null;
 }) {
   const nowMs = useHelpEvidenceClock([article.reviewed_until]);
+  const identity = JSON.stringify([locale, article.article_id, article.published_at, article.reviewed_until, article.slug]);
+  const [publication, setPublication] = useState<PublicationState>({ identity, status: 'checking' });
+  useEffect(() => {
+    let active = true;
+    let generation = 0;
+    let pending: AbortController | null = null;
+    const verify = async () => {
+      pending?.abort();
+      const abort = new AbortController();
+      pending = abort;
+      const request = ++generation;
+      setPublication({ identity, status: 'checking' });
+      try {
+        const response = await fetch(`/api/help/verify?locale=${locale}&slug=${encodeURIComponent(article.slug)}`, {
+          cache: 'no-store', credentials: 'same-origin', signal: abort.signal,
+        });
+        if (!response.ok) throw new Error('publication unverified');
+        const receipt: unknown = await response.json();
+        const row = receipt as { current?: unknown; articleId?: unknown; publishedAt?: unknown; reviewedUntil?: unknown };
+        const current = row?.current === true && row.articleId === article.article_id &&
+          row.publishedAt === article.published_at && typeof row.reviewedUntil === 'string' &&
+          Number.isFinite(Date.parse(row.reviewedUntil)) && Date.parse(row.reviewedUntil) > Date.now();
+        if (active && request === generation) setPublication({ identity, status: current ? 'current' : 'unavailable' });
+      } catch {
+        if (active && request === generation && !abort.signal.aborted) setPublication({ identity, status: 'unavailable' });
+      }
+    };
+    void verify();
+    const timer = window.setInterval(() => { if (!document.hidden) void verify(); }, 30_000);
+    const onFocus = () => { if (!document.hidden) void verify(); };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    return () => {
+      active = false;
+      pending?.abort();
+      window.clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [article.article_id, article.published_at, article.reviewed_until, article.slug, identity, locale]);
   const freshness = helpReviewDeadline(article.reviewed_until, locale, nowMs);
   if (!freshness) {
     return <div role="status" className="rounded-xl border p-4">
@@ -26,6 +77,13 @@ export function HelpArticleLive({
       {' '}<Link href={locale === 'en' ? '/help?locale=en' : '/help'} className="underline">
         {locale === 'en' ? 'Search verified help' : '검증된 도움말 검색'}
       </Link>
+    </div>;
+  }
+  if (!publicationIsVerified(publication, identity)) {
+    return <div role="status" className="rounded-xl border p-4">
+      {(publication.identity !== identity || publication.status === 'checking')
+        ? (locale === 'en' ? 'Checking current publication…' : '현재 게시 상태를 확인하고 있습니다…')
+        : (locale === 'en' ? 'This article was withdrawn or could not be verified. Search for current guidance.' : '게시가 철회되었거나 검증할 수 없습니다. 최신 안내를 다시 검색해 주세요.')}
     </div>;
   }
   return <article className="grid gap-4">

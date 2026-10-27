@@ -48,6 +48,20 @@ export class HelpController {
     const nowMs = Date.now();
     return { articles: articles.filter(row => reviewIsCurrent(row.reviewed_until, nowMs)) };
   }
+  @Get('articles/:locale/:slug/status') @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Verify current publication without exposing article text' })
+  async status(@Param('locale') locale: string, @Param('slug') slug: string) {
+    const repo = this.repo();
+    if (!LOCALES.includes(locale as 'ko'|'en') || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 100) {
+      throw new NotFoundException('help article not found');
+    }
+    const row = await repo.status(locale, slug);
+    if (!row || !reviewIsCurrent(row.reviewed_until, Date.now())) throw new NotFoundException('help article not found');
+    const publishedAt = new Date(row.published_at);
+    if (!Number.isFinite(publishedAt.getTime())) throw new NotFoundException('help article not found');
+    return { current: true, articleId: row.article_id, publishedAt: publishedAt.toISOString(),
+      reviewedUntil: new Date(row.reviewed_until).toISOString() };
+  }
   @Get('articles/:locale/:slug') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Read a verified public help article' })
   async article(@Param('locale') locale: string, @Param('slug') slug: string) {
     const repo = this.repo();
