@@ -8,6 +8,6 @@ TDD 수정 전 실패 확인, 수정 후 Backend 집중 87건·Frontend 26건 �
 
 시작·중간 main `004be59307e389a4f293a0a0e71ee4144982936d`, 원격 브랜치 349개(비-main 348), 열린 PR 339개(Draft 324), 열린 PR 중복 Head SHA 0개. 기존 #1589 및 다른 개발 작업 보존.
 
-**남은 차단:** main의 마이그레이션 283 중복, `moneyverse_app`이 접근 불가한 private chat 테이블을 직접 읽는 기존 Repository 권한 결함, 전체 보안 감사, 공식 Test 정확 SHA 인증 E2E·접근성·SEO·5회 반복 QA·백업 복원·GitOps. 임의의 테이블 SELECT 권한 추가나 적용된 마이그레이션 변경은 하지 않았습니다. DB/원장/서비스/기능 스위치 변경 및 운영 배포 0건. 코드만 변경되어 승인된 revert로 롤백 가능하며 SQL 롤백은 없습니다.
+**남은 차단:** main의 마이그레이션 283 중복, Migration 220은 private chat 테이블 권한을 회수하도록 설계됐으나 실제 개발 DB 읽기 전용 점검(2026-10-28 00:40 KST)에서 `moneyverse_app`이 대화·메시지·참여자 상태 테이블 모두 SELECT/INSERT/UPDATE/DELETE 권한을 보유한 P0 최소권한 위반. Repository가 이 직접 권한에 의존하는 결함, 전체 보안 감사, 공식 Test 정확 SHA 인증 E2E·접근성·SEO·5회 반복 QA·백업 복원·GitOps. 임의의 테이블 SELECT 권한 추가나 적용된 마이그레이션 변경은 하지 않았습니다. DB/원장/서비스/기능 스위치 변경 및 운영 배포 0건. 코드만 변경되어 승인된 revert로 롤백 가능하며 SQL 롤백은 없습니다.
 
 검증: Backend 1,718 PASS/431 SKIP, Frontend 1,691 PASS, 전체 Typecheck·Build·app-api 180 엔드포인트 PASS, Bot 8 PASS(격리 작업공간 의존성 설치 후). DB 32 PASS/3 SKIP/1 FAIL(283 중복·285 누락), 전체 프로젝트 테스트 FAIL. 전체 Lint는 범위 밖 기존 블로그 코드 2오류로 FAIL(이번 변경 파일 Lint 0오류). 전체 의존성 2 Low/8 Moderate, Bot 1 Critical/5 High로 Bot 보안 감사 FAIL. 공식 Test 정확 SHA·실제 앱 역할 DB ACL·브라우저 접근성/SEO E2E·복원·GitOps는 미검증입니다.
