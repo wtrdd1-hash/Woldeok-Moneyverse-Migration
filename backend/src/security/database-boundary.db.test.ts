@@ -73,6 +73,28 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
       expect(result.rows[0]?.allowed).toBe(false);
     });
 
+    it('fails closed for season claims while keeping the read-only claim inventory', async () => {
+      const result = await app.query<{
+        execute_allowed: boolean;
+        select_allowed: boolean;
+        insert_allowed: boolean;
+        update_allowed: boolean;
+        delete_allowed: boolean;
+      }>(`SELECT
+        pg_catalog.has_function_privilege(current_user, 'public.season_claim_reward(uuid,uuid,uuid)', 'EXECUTE') AS execute_allowed,
+        pg_catalog.has_table_privilege(current_user, 'public.season_reward_claims', 'SELECT') AS select_allowed,
+        pg_catalog.has_table_privilege(current_user, 'public.season_reward_claims', 'INSERT') AS insert_allowed,
+        pg_catalog.has_table_privilege(current_user, 'public.season_reward_claims', 'UPDATE') AS update_allowed,
+        pg_catalog.has_table_privilege(current_user, 'public.season_reward_claims', 'DELETE') AS delete_allowed`);
+      expect(result.rows[0]).toEqual({
+        execute_allowed: false,
+        select_allowed: true,
+        insert_allowed: false,
+        update_allowed: false,
+        delete_allowed: false,
+      });
+    });
+
     it('keeps direct writes limited to the session layer and authorized domain tables', async () => {
       const result = await app.query<{ table_name: string; privilege_type: string }>(
         `SELECT grant_row.table_name, grant_row.privilege_type
@@ -115,8 +137,6 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
         { table_name: 'oauth_challenges', privilege_type: 'UPDATE' },
         { table_name: 'season_hall_of_fame', privilege_type: 'INSERT' },
         { table_name: 'season_hall_of_fame', privilege_type: 'UPDATE' },
-        { table_name: 'season_reward_claims', privilege_type: 'INSERT' },
-        { table_name: 'season_reward_claims', privilege_type: 'UPDATE' },
         { table_name: 'space_property_tax_payments', privilege_type: 'INSERT' },
         { table_name: 'space_property_tax_payments', privilege_type: 'UPDATE' },
         { table_name: 'user_spaces', privilege_type: 'DELETE' },

@@ -1,14 +1,10 @@
 'use client';
 
-import React, { useActionState } from 'react';
-import { Trophy, Sparkles, CheckCircle2, Gift, ArrowRight } from 'lucide-react';
-import { ActionAlert, SubmitButton } from '@/components/action-form';
+import React from 'react';
+import { Trophy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { TranslatedText as T } from '@/components/translated-text';
-import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
-import { claimSeasonRewardAction } from './actions';
 
 interface SeasonRewardClaimBannerProps {
   readonly seasonId: string;
@@ -20,15 +16,12 @@ interface SeasonRewardClaimBannerProps {
 }
 
 export function SeasonRewardClaimBanner({
-  seasonId,
   seasonName,
   tierRewardWld,
   tierTrophy,
   myTier,
   myRank,
 }: SeasonRewardClaimBannerProps) {
-  const [state, formAction] = useActionState(claimSeasonRewardAction, IDLE);
-
   if (tierRewardWld <= 0 && !tierTrophy) {
     return null;
   }
@@ -51,20 +44,14 @@ export function SeasonRewardClaimBanner({
             </div>
             <p className="text-xs text-muted-foreground">
               달성하신 랭킹에 따라 <strong className="text-foreground font-mono font-bold">+{groupDigits(tierRewardWld)} WLD</strong>
-              {tierTrophy ? ` 및 명예 트로피(${tierTrophy})` : ''}를 지금 바로 현금 지갑으로 수령할 수 있습니다.
+              {tierTrophy ? ` 및 명예 트로피(${tierTrophy})` : ''} 지급 예정 보상입니다. 실제 지급은 원장 검증이 완료될 때까지 보류됩니다.
             </p>
           </div>
         </div>
 
-        <form action={formAction} className="shrink-0 flex flex-col gap-2">
-          <input type="hidden" name="seasonId" value={seasonId} />
-          <SubmitButton className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm h-10 px-5 gap-1.5 shadow-sm">
-            <Gift className="size-4" />
-            <span>시즌 보상 수령하기</span>
-            <ArrowRight className="size-3.5" />
-          </SubmitButton>
-          <ActionAlert state={state} />
-        </form>
+        <p role="status" className="shrink-0 max-w-xs text-xs font-semibold text-amber-700 dark:text-amber-300">
+          시즌 보상 지급이 일시 중단되었습니다. 금융 원장 무결성 검증 후 수령 기능을 재개합니다.
+        </p>
       </CardContent>
     </Card>
   );

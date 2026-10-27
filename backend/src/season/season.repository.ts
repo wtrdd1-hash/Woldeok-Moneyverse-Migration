@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import type {
@@ -13,6 +14,16 @@ import type {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export class SeasonInputError extends Error {}
+
+/** P0 #1507: legacy season_claim_reward mutates balances without balanced ledger postings. */
+export class SeasonRewardLedgerHoldError extends ServiceUnavailableException {
+  constructor() {
+    super({
+      code: 'SEASON_REWARD_LEDGER_UNAVAILABLE',
+      message: 'Season reward claims are paused until balanced ledger settlement is verified.',
+    });
+  }
+}
 const id = (value: unknown, field: string): string => {
   if (typeof value !== 'string' || !UUID.test(value))
     throw new SeasonInputError(`${field} must be a UUID`);
@@ -288,41 +299,12 @@ export class PostgresSeasonRepository implements SeasonRepository {
   }
 
   async claimReward(
-    userId: string,
-    seasonId: string,
-    idempotencyKey: string,
+    _userId: string,
+    _seasonId: string,
+    _idempotencyKey: string,
   ): Promise<ClaimSeasonRewardResult> {
-    const uId = id(userId, 'user id');
-    const sId = id(seasonId, 'season id');
-    const iKey = id(idempotencyKey, 'idempotency key');
-
-    const row = await queryOne<{
-      claim_id: string;
-      season_id: string;
-      season_name: string;
-      tier: string;
-      rank: number | null;
-      reward_wld: string;
-      trophy_code: string | null;
-      claimed_at: Date;
-    }>(
-      this.pool,
-      `SELECT claim_id::text, season_id::text, season_name, tier, rank::int, reward_wld::text, trophy_code, claimed_at
-       FROM public.season_claim_reward($1::uuid, $2::uuid, $3::uuid);`,
-      [uId, sId, iKey],
-    );
-
-    if (!row) throw new Error('failed to claim season reward');
-
-    return {
-      claimId: row.claim_id,
-      seasonId: row.season_id,
-      seasonName: row.season_name,
-      tier: row.tier,
-      rank: row.rank,
-      rewardWld: Number(row.reward_wld),
-      trophyCode: row.trophy_code,
-      claimedAt: row.claimed_at,
-    };
+    // Do not call migration 231: it directly credits USER_CASH without postings.
+    // This repository guard also protects non-HTTP callers.
+    throw new SeasonRewardLedgerHoldError();
   }
 }

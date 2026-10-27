@@ -21,7 +21,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
-import { SeasonInputError } from './season.repository';
+import { SeasonInputError, SeasonRewardLedgerHoldError } from './season.repository';
 import { SeasonService } from './season.service';
 
 export class ConsumeDto {
@@ -131,11 +131,12 @@ export class SeasonController {
   @ApiOperation({ summary: '시즌 보상 청구 및 수령' })
   async claimReward(
     @Req() request: RequestWithSession,
-    @Body() body: ClaimSeasonRewardDto,
+    @Body() _body: ClaimSeasonRewardDto,
   ) {
     try {
-      const userId = requireUserId(request);
-      return await this.service().claimReward(userId, body.seasonId, body.idempotencyKey);
+      requireUserId(request);
+      // Keep auth/session/consent/CSRF guards; never invoke unsafe payout SQL.
+      throw new SeasonRewardLedgerHoldError();
     } catch (error: unknown) {
       if (error instanceof SeasonInputError) throw new BadRequestException(error.message);
       if (isExpectedCommandFailure(error)) {
