@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
+import { Button } from '@/components/ui/button';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -16,10 +18,11 @@ import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import { Figure } from '../economy/economy-parts';
-import type { AdminJobLevel, AdminWorkPolicy, AdminWorkRealtimeStats, AdminWorkTask } from '../types';
+import type { AdminWorkRealtimeStats } from '../types';
 import { WorkPolicyTuningCard, WorkTaskTuningTable } from './admin-work-forms';
 import { WorkStatsDashboard } from './admin-work-stats';
 import { parseAdminWorkStatsResponse } from './work-stats-evidence';
+import { parseAdminWorkConsole } from './work-console-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,17 +54,14 @@ function jobLabel(code: string): string {
 export default async function AdminWorkPage() {
   await requireAdminConsole(AREA.href);
 
-  const [console_, rawStats] = await Promise.all([
-    apiOrNull<{
-      readonly catalogue: readonly AdminWorkTask[];
-      readonly jobLevels: readonly AdminJobLevel[];
-      readonly policy: AdminWorkPolicy;
-    }>('/api/v1/admin/work'),
+  const [rawConsole, rawStats] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/admin/work'),
     apiOrNull<unknown>(
       '/api/v1/admin/work/stats',
     ),
   ]);
 
+  const console_ = parseAdminWorkConsole(rawConsole);
   const stats: AdminWorkRealtimeStats | null = parseAdminWorkStatsResponse(rawStats);
 
   return (
@@ -72,10 +72,15 @@ export default async function AdminWorkPage() {
       </PageHeader>
 
       {console_ === null ? (
-        <EmptyState
-          title="작업 현황을 불러오지 못했어요."
-          description="숫자를 추정해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
-        />
+        <div role="alert" aria-live="polite" className="grid gap-3">
+          <EmptyState
+            title="작업 현황을 검증하지 못했어요."
+            description="API 장애 또는 잘못된 카탈로그·정책 응답입니다. 금액과 관리자 변경 기능을 표시하지 않습니다."
+          />
+          <Button asChild variant="outline" className="min-h-11 w-full sm:w-fit">
+            <Link href="/admin/work">다시 조회</Link>
+          </Button>
+        </div>
       ) : (
         <>
           {/* 실시간 직업 수행 순위 및 캡 통계 시각화 & 자동 밸런싱 대시보드 */}
@@ -98,7 +103,13 @@ export default async function AdminWorkPage() {
           {/* 수동 전역 정책 정밀 튜닝 카드 */}
           <section aria-labelledby="work-policy" className="grid gap-4">
             <SectionHeader eyebrow="GLOBAL POLICY" title="보상 정책 수동 설정" id="work-policy" />
-            <WorkPolicyTuningCard policy={console_.policy} />
+            {console_.policy.policy_id === null ? (
+              <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+                적용 중인 보상 정책이 확인되지 않아 정책 변경 기능을 제공하지 않습니다.
+              </div>
+            ) : (
+              <WorkPolicyTuningCard policy={console_.policy} />
+            )}
           </section>
 
           {/* 24시간 실시간 직업 지표 요약 카드 */}
@@ -164,7 +175,13 @@ export default async function AdminWorkPage() {
           {/* 개별 작업 카탈로그 실시간 튜닝 테이블 */}
           <section aria-labelledby="work-catalogue" className="grid gap-3">
             <SectionHeader eyebrow="CATALOGUE TUNING" title="작업 카탈로그 및 보상/한도 정밀 튜닝" id="work-catalogue" />
-            <WorkTaskTuningTable tasks={console_.catalogue} />
+            {console_.policy.policy_id === null ? (
+              <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+                보상 정책이 확인될 때까지 개별 작업 변경 기능을 보류합니다.
+              </div>
+            ) : (
+              <WorkTaskTuningTable tasks={console_.catalogue} />
+            )}
           </section>
 
           {/* 직업별 숙련도 및 인원 현황 */}
