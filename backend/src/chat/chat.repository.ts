@@ -148,7 +148,9 @@ export class PostgresChatRepository {
   ): Promise<MessageRow[]> {
     if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
-    const safeLimit = Math.min(Math.max(1, limit), 100);
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new ChatInputError('limit must be an integer between 1 and 100');
+    }
 
     return queryRows<MessageRow>(
       this.client,
@@ -167,7 +169,7 @@ export class PostgresChatRepository {
          AND ($3::bigint IS NULL OR m.sequence < $3::bigint)
        ORDER BY m.sequence DESC
        LIMIT $4;`,
-      [actorUserId, conversationId, beforeSequence ?? null, safeLimit],
+      [actorUserId, conversationId, beforeSequence ?? null, limit],
     );
   }
 
@@ -179,7 +181,9 @@ export class PostgresChatRepository {
   ): Promise<MessageRow[]> {
     if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
-    const safeLimit = Math.min(Math.max(1, limit), 200);
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 200) {
+      throw new ChatInputError('limit must be an integer between 1 and 200');
+    }
 
     return queryRows<MessageRow>(
       this.client,
@@ -198,7 +202,7 @@ export class PostgresChatRepository {
          AND m.sequence > $3::bigint
        ORDER BY m.sequence ASC
        LIMIT $4;`,
-      [actorUserId, conversationId, sinceSequence, safeLimit],
+      [actorUserId, conversationId, sinceSequence, limit],
     );
   }
 
