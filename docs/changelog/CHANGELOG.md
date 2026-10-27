@@ -1,3 +1,6 @@
+## v2026.10.27.3 — Complete branch work inventory (documentation only)
+- 351 web/backend remote branches, 7 Android; 324 diverged / 14 ahead-only / 2 contained / 10 not comparable locally. Bilingual full register plus CSV. No runtime/Test/Production change. [Release](../releases/v2026.10.27.3.md).
+
 ## v2026.10.21.1067 — Fail-closed AI blog editorial hold and CI regression repair (candidate)
 
 ## v2026.10.21.1068 — Production deployed with acknowledged finance risk
