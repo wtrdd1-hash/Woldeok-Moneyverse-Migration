@@ -110,7 +110,7 @@ export function WorkPolicyTuningCard({
                     type="button"
                     variant={dailyCap === p.value ? 'default' : 'outline'}
                     size="sm"
-                    className="h-7 text-xs px-2"
+                    className="min-h-11 text-xs px-2"
                     onClick={() => setDailyCap(p.value)}
                   >
                     {p.label}
@@ -258,12 +258,13 @@ function WorkTaskRow({ task }: { readonly task: AdminWorkTask }) {
             <span className="text-xs text-muted-foreground whitespace-nowrap">보상:</span>
             <Input
               name="base_reward"
+              aria-label={`${task.name} 기본 보상 (WLD)`}
               type="number"
               min={1}
               max={1000000}
               value={baseReward}
               onChange={(e) => setBaseReward(e.target.value)}
-              className="h-8 w-24 font-mono text-right text-xs"
+              className="min-h-11 w-24 font-mono text-right text-xs"
               required
             />
             <span className="text-xs font-semibold">WLD</span>
@@ -273,12 +274,13 @@ function WorkTaskRow({ task }: { readonly task: AdminWorkTask }) {
             <span className="text-xs text-muted-foreground whitespace-nowrap">일일한도:</span>
             <Input
               name="daily_limit"
+              aria-label={`${task.name} 일일 작업 한도`}
               type="number"
               min={0}
               max={1000}
               value={dailyLimit}
               onChange={(e) => setDailyLimit(Number(e.target.value))}
-              className="h-8 w-20 font-mono text-right text-xs"
+              className="min-h-11 w-20 font-mono text-right text-xs"
               required
             />
             <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -290,32 +292,33 @@ function WorkTaskRow({ task }: { readonly task: AdminWorkTask }) {
             <span className="text-xs text-muted-foreground whitespace-nowrap">소요:</span>
             <Input
               name="minimum_duration_seconds"
+              aria-label={`${task.name} 최소 수행 시간 (초)`}
               type="number"
               min={5}
               max={86400}
               value={minDuration}
               onChange={(e) => setMinDuration(Number(e.target.value))}
-              className="h-8 w-20 font-mono text-right text-xs"
+              className="min-h-11 w-20 font-mono text-right text-xs"
               required
             />
             <span className="text-xs text-muted-foreground whitespace-nowrap">초</span>
           </div>
 
-          <label className="flex items-center gap-1.5 cursor-pointer text-xs pr-1">
+          <label className="flex min-h-11 items-center gap-1.5 cursor-pointer text-xs pr-1">
             <input
               type="checkbox"
               name="active"
               value="true"
               checked={active}
               onChange={(e) => setActive(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-gray-300 text-primary"
+              className="h-5 w-5 rounded border-gray-300 text-primary"
             />
             <span className={active ? 'text-primary font-medium' : 'text-muted-foreground'}>
               {active ? '제공 중' : '중지'}
             </span>
           </label>
 
-          <SubmitButton size="sm" className="h-8 px-2.5 text-xs font-semibold">
+          <SubmitButton size="sm" className="min-h-11 px-2.5 text-xs font-semibold">
             적용
           </SubmitButton>
         </form>

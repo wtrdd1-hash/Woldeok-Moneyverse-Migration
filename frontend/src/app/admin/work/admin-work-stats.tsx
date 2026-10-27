@@ -33,13 +33,14 @@ function getJobMeta(code: string) {
 
 interface WorkStatsProps {
   readonly stats: AdminWorkRealtimeStats;
+  readonly allowTuning?: boolean;
 }
 
-export function WorkStatsDashboard({ stats }: WorkStatsProps) {
+export function WorkStatsDashboard({ stats, allowTuning = true }: WorkStatsProps) {
   return (
     <div className="grid gap-6">
       {/* 1. 지능형 자동 밸런싱 엔진 및 경제 상태 요약 */}
-      <WorkAutoTuneCard stats={stats} />
+      <WorkAutoTuneCard stats={stats} allowTuning={allowTuning} />
 
       {/* 2. 직업별 랭킹 수평 바 차트 & 일일 캡 5단계 게이지 2열 그리드 */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -53,7 +54,7 @@ export function WorkStatsDashboard({ stats }: WorkStatsProps) {
   );
 }
 
-export function WorkAutoTuneCard({ stats }: WorkStatsProps) {
+export function WorkAutoTuneCard({ stats, allowTuning = true }: WorkStatsProps) {
   const [state, formAction, isPending] = useActionState(autoTuneWorkPolicyAction, IDLE);
 
   const statusConfig = {
@@ -154,9 +155,14 @@ export function WorkAutoTuneCard({ stats }: WorkStatsProps) {
           </div>
         )}
 
-        <WorkAutoTuneReauthHelp errorCode={state.errorCode} />
+        {allowTuning && <WorkAutoTuneReauthHelp errorCode={state.errorCode} />}
 
         {/* 자동 조절 실행 폼 */}
+        {!allowTuning ? (
+          <p role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+            적용 중인 보상 정책이 확인되지 않아 자동 정책 변경을 보류합니다.
+          </p>
+        ) : (
         <form action={formAction} className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t">
           <div className="text-xs text-muted-foreground">
             버튼을 누르면 현재 경제 지표 분석 결과(추천 일일 캡: <strong className="text-foreground">{groupDigits(stats.recommended_daily_cap)} WLD</strong>, 감액률: <strong className="text-foreground">{stats.recommended_decay_percent}%</strong>)가 즉시 직업 정책에 반영됩니다.
@@ -165,6 +171,7 @@ export function WorkAutoTuneCard({ stats }: WorkStatsProps) {
             {isPending ? '밸런싱 정책 반영 중...' : '직업 보상 규칙 기반 정책 즉시 적용'}
           </Button>
         </form>
+        )}
       </CardContent>
     </Card>
   );
