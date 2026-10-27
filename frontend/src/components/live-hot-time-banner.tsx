@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Flame, Clock, Sparkles, TrendingUp, Zap, ChevronRight, Coins, Briefcase } from 'lucide-react';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
-import { cn } from '@/lib/cn';
+import { parseHotTimeEvidence } from '@/lib/hot-time-evidence';
 
 export interface HotTimeBuffItem {
   readonly id: string;
@@ -25,31 +25,6 @@ export interface HotTimePayload {
   readonly serverTime: string;
 }
 
-const DEFAULT_BUFFS: HotTimeBuffItem[] = [
-  {
-    id: 'default-work',
-    buffKey: 'WORK_SALARY_BOOST_150',
-    title: '주말 골든 핫타임: 8대 직업 근무 급여 1.5배 부스트!',
-    description: '전 직업군의 1회 근무 완료 시 지급되는 WLD 급여가 1.5배(150%)로 특별 증액 지급됩니다.',
-    multiplier: 1.5,
-    targetDomain: 'work',
-    active: true,
-    startsAt: new Date().toISOString(),
-    endsAt: new Date(Date.now() + 4 * 86400000).toISOString(),
-  },
-  {
-    id: 'default-stock',
-    buffKey: 'STOCK_FEE_FREE',
-    title: '가상 주식 거래소 수수료 0원 완전 면제 페스티벌',
-    description: '상장 주식 매수 및 매도 체결 시 발생하는 금융 거래 수수료를 100% 면제합니다.',
-    multiplier: 1.0,
-    targetDomain: 'stocks',
-    active: true,
-    startsAt: new Date().toISOString(),
-    endsAt: new Date(Date.now() + 4 * 86400000).toISOString(),
-  },
-];
-
 export function LiveHotTimeBanner({ domainFilter }: { readonly domainFilter?: string }) {
   const { locale } = useLocale();
   const [buffs, setBuffs] = useState<HotTimeBuffItem[]>([]);
@@ -66,13 +41,9 @@ export function LiveHotTimeBanner({ domainFilter }: { readonly domainFilter?: st
       try {
         const res = await fetch('/app-api/v1/economy/hot-time/active', { cache: 'no-store' });
         if (res.ok) {
-          const data = (await res.json()) as HotTimePayload;
+          const data = parseHotTimeEvidence(await res.json() as unknown);
           if (isMounted) {
-            if (data.hasActiveHotTime && Array.isArray(data.activeBuffs) && data.activeBuffs.length > 0) {
-              setBuffs(data.activeBuffs.filter((b) => b.active) as HotTimeBuffItem[]);
-            } else {
-              setBuffs([]);
-            }
+            setBuffs(data?.activeBuffs ? [...data.activeBuffs] : []);
             setLoaded(true);
           }
         } else if (isMounted) {
@@ -95,7 +66,10 @@ export function LiveHotTimeBanner({ domainFilter }: { readonly domainFilter?: st
 
   // 남은 시간 실시간 1초 주기 틱
   useEffect(() => {
-    const targetTime = buffs[0]?.endsAt ? new Date(buffs[0].endsAt).getTime() : Date.now() + 86400000 * 3;
+    const target = domainFilter
+      ? buffs.find((b) => b.targetDomain === domainFilter || b.targetDomain === 'all')
+      : buffs[0];
+    const targetTime = target ? Date.parse(target.endsAt) : Date.now();
 
     function updateTimer() {
       const diff = Math.max(0, targetTime - Date.now());
@@ -108,11 +82,12 @@ export function LiveHotTimeBanner({ domainFilter }: { readonly domainFilter?: st
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [buffs]);
+  }, [buffs, domainFilter]);
 
-  const filteredBuffs = domainFilter
-    ? buffs.filter((b) => (b.targetDomain === domainFilter || b.targetDomain === 'all') && b.active)
-    : buffs.filter((b) => b.active);
+  const filteredBuffs = buffs.filter((b) =>
+    b.active && Date.parse(b.endsAt) > Date.now() &&
+    (!domainFilter || b.targetDomain === domainFilter || b.targetDomain === 'all')
+  );
 
   if (!loaded || filteredBuffs.length === 0) {
     return null;
@@ -158,7 +133,7 @@ export function LiveHotTimeBanner({ domainFilter }: { readonly domainFilter?: st
         <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
           <Link
             href={current.targetDomain === 'stocks' ? '/stocks' : '/work'}
-            className="inline-flex min-h-[36px] sm:min-h-9 items-center justify-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 px-3.5 py-1.5 text-xs font-bold text-zinc-950 shadow-xs transition-all shrink-0 cursor-pointer"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 px-3.5 py-1.5 text-xs font-bold text-zinc-950 shadow-xs transition-all shrink-0 cursor-pointer"
           >
             <span>{localeLabel(locale, '버프 혜택 받기', 'Claim Buff', 'バフを受け取る', '领取加成')}</span>
             <ChevronRight className="size-3.5" />
