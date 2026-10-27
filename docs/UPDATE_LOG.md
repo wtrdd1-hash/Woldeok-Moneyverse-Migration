@@ -1,3 +1,7 @@
+## 2026-10-27 — Planning v1364 / F675-148 (Feature Addition; DRAFT / RELEASE HOLD)
+- Previous Improvement v1362; Current Addition v1364; Next Improvement v1366 (provisional). Issue #1548; stacked predecessor #1541; main c2a9306ddc0424438bc0ab297ea9543bb167aee6 checked start/mid, EN canonical and KO parity reviewed.
+- Proposed independently approved, verified customer-support operating-hours and exception notices. No invented SLA/24x7 staffing; member support stays available; public/member/admin and Android contracts, forward-only DB/CAS/outbox, fail-closed publication, SEO/privacy/WCAG/KPI, P0/P1 ENV1364-01 SEC1364-02 REL1364-03 HOURS1364-04 HOURS1364-05 HOURS1364-06 HOURS1364-07 HOURS1364-08 HOURS1364-09 HOURS1364-10. QA v1318 scheduler-only, full release HOLD; external approved 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only, no runtime or financial mutation.
+
 ## 2026-10-27 15:00 KST — Planning v1362 F675-147 verified CSAT integrity [DRAFT/HOLD]
 **Final main recheck (15:04 KST):** `39f2c9354635c8059c8283debaccd9eb65d16f94` (branch-inventory documentation commit after mid-check); AGENTS/README/EN+KO canonical plan blob SHAs unchanged. Predecessor Draft base unchanged.
 - Previous Addition v1360 → Current Improvement v1362 → Next Addition v1364 provisional. Main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c` rechecked; predecessor Draft #1537 unmerged, issue #1536. Harden member-confirmed epoch, intent receipts, withdrawal tombstone, differential privacy and Android/Next parity.

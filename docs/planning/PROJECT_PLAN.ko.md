@@ -1,3 +1,9 @@
+## 기획 v1364 — F675-148 검증된 고객지원 운영시간·예외 공지 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1362 → 현재 기능 추가 v1364 → 다음 기능 보완 v1366(잠정). main c2a9306ddc0424438bc0ab297ea9543bb167aee6 시작·중간 확인, 선행 미병합 #1541, 개발 이슈 #1548. 최신 main AGENTS/README 및 영문 정본·국문 대조 확인. 문서만 변경.
+- 실제 회원 `/support`, NestJS SupportController, Migration 196에는 승인된 상담 운영시간/예외 게시가 없고 공개 `/support/availability` 및 관리자 `/admin/support/availability`도 없다. 검증된 주간 운영시간·임시 예외·답변 시각 보장 없음 안내를 제안한다. 문의 분류/에스컬레이션 및 인프라 상태와 구분하며 실제 인력/SLA 추정 금지.
+- operator 초안, 별도 현재 승인권자 공개/철회, 출처·만료 검증, 불변 감사/영수증, 버전 CAS, outbox와 캐시 무효화 실패 시 비공개. 공개 GET/Android 읽기 동등성, 관리자 쓰기는 세션·역할·CSRF 필수. Migration 280 충돌 해결 후 순방향 DB, 앱/PUBLIC 직접 DML 금지, WLD/원장/문의 내용 변경 없음. 승인·유효 공개 자료만 SEO 색인, 그 외 noindex, 320px/200% WCAG 2.2 AA, 개인정보/KPI, 기능 OFF.
+- P0/P1 백로그: ENV1364-01 SEC1364-02 REL1364-03 HOURS1364-04 HOURS1364-05 HOURS1364-06 HOURS1364-07 HOURS1364-08 HOURS1364-09 HOURS1364-10. 미실행 수용 시험: 합성 10,001건·동시 100건·위조 관리자 100건·시간대/야간/만료/캐시/롤백·격리 PG·정확 SHA 공식 Test 인증 E2E. QA v1318은 스케줄러 검증만, 운영 HOLD; 루트 78%/데이터 70%, 운영 링크 대상 재확인 필요. 외부 근거 신규 승인 0, 누적 중복 제거·분류 승인 UNKNOWN/10,000 — BLOCKED/IN PROGRESS. 화면·API·DB·트랜잭션·보안·관리자·모바일·SEO·KPI는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+
 ## 기획 v1362 — F675-147 검증된 고객지원 만족도 평가의 해결 회차·재시도·통계 개인정보 무결성 보완 (기능 보완 / 초안·운영 보류)
 **최종 main 재확인(15:04 KST):** `39f2c9354635c8059c8283debaccd9eb65d16f94` (중간 확인 뒤 브랜치 목록 문서 커밋); AGENTS/README/영문·국문 정본 blob SHA 동일. 선행 Draft 기반 변경 없음.
 **회차:** 이전 기능 추가 v1360 → 현재 기능 보완 v1362 → 다음 기능 추가 v1364(잠정). 시작·중간 main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c`, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md 및 국문 대조. 선행 Draft PR #1537 미병합, 이슈 #1536. 문서만 수정하며 런타임/DB/WLD/원장/Test/Production 변경 없음.

@@ -1,3 +1,32 @@
+# F675-148 / 기획 v1364 — 검증된 고객지원 운영시간·예외 공지 (기능 추가 / 초안 / 운영 보류)
+**회차:** 이전 기능 보완 v1362 → 현재 기능 추가 v1364 → 다음 기능 보완 v1366(잠정). **개발 이슈:** #1548. **선행:** 미병합 기획 Draft #1541, 독립 병합 금지. **시작·중간 main:** `c2a9306ddc0424438bc0ab297ea9543bb167aee6`; 최신 main AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·국문 대조 문서를 확인. 런타임·DB·원장·WLD·기능 스위치·Test·운영 변경 없음.
+
+## 목적·실제 근거·제외 범위
+- 실제 main의 `frontend/src/app/support/page.tsx`는 로그인 회원의 새 문의·답변과 `open|waiting_user|resolved` 상태를 제공한다. `backend/src/support/support.controller.ts`와 Migration 196에는 문의/메시지/관리자 상태 변경만 있으며 **독립 승인된 운영시간·예외 공지 계약이 없다**. `/support/availability`, `/admin/support/availability` 화면도 없다. 이는 설계 공백이지 실제 인력 배치, 장애, SLA 위반, 고객 수요가 확인됐다는 뜻이 아니다.
+- 목적: 방문자와 회원에게 **근거가 검증된 상담 담당자 운영시간과 임시 휴무/변경**을 표시하되 답변 보장시간을 만들어내지 않는다. F675-104 문의 에스컬레이션, F675-142 분류, F675-145 도움말, 인프라 상태 안내와 구분. 자동 SLA·대기시간 예측·문의 자동 종료·AI 답변·금융/원장 변경 금지.
+- 권한: 방문자/회원은 승인·유효한 공개 일정만 조회; 회원은 운영시간 외에도 기존 인증·동의·CSRF 절차로 문의 가능. operator는 초안 작성, **별도 현재 승인권자**만 공개/철회; 자기 초안 승인 금지. Android는 공개 조회만, 관리자 변경 불가.
+
+## 화면·진입점·CTA·상태
+- 공개 `/support/availability`, 회원 `/support`의 **운영시간 보기** → 주간 시간표·예외 날짜·`최종 검증 시각`(원본 UTC, 표시 Asia/Seoul) → **문의하기**(로그인 필요). 검증 자료가 없으면 **운영시간을 확인할 수 없습니다 / 문의는 접수할 수 있지만 답변 시각을 보장하지 않습니다**로 표시. 24시간 상담이라고 추측하지 않으며 기존 문의 작성은 차단하지 않는다.
+- 관리자 `/admin/support/availability`: **새 초안 / 주간 시간 수정 / 예외일 추가 / 미리보기 / 심사 요청 / 승인·게시 / 철회 / 게시 검증**. 작성자와 승인자는 분리하고 버전 충돌·출처 만료를 알린다. 초안은 공개 API·검색·Android에 노출 금지.
+- 공개 상태 `UNVERIFIED|PUBLISHED|EXCEPTION_CLOSED|EXCEPTION_CHANGED|STALE|UNAVAILABLE`, 관리자 상태 `DRAFT|IN_REVIEW|APPROVED_PENDING_PUBLICATION|PUBLISHED_CONFIRMED|WITHDRAW_PENDING_PURGE|WITHDRAWN|CONFLICT|ERROR`. `PUBLISHED_CONFIRMED`는 DB 게시 영수증과 캐시 무효화 검증을 모두 충족해야 한다. 상담 담당 시간과 문의 접수 가능 시간을 구분한다.
+
+## API·DB·트랜잭션
+- 공개 `GET /api/v1/support/availability?at=ISO8601`(시각은 선택, 기본 서버 기준): `{state,timezone:"Asia/Seoul",revisionId?,verifiedAt?,validUntil?,weeklyWindows?,exceptions?,notice?}`. 검증된 버전별 캐시/철회 체계가 입증되기 전 `no-store`, 초안·담당자 개인정보 제외. 만료/철회 문서는 304 응답으로 되살리지 않는다. Android `/app-api/v1/support/availability` 동등 계약, 공개 조회 속도 제한.
+- 관리자 `GET /api/v1/admin/support/availability`, `PUT /api/v1/admin/support/availability/draft`의 `{weeklyWindows,exceptions,sourceId,validUntil,expectedVersion,intentId}`, `POST .../submit-review`, `POST .../publish`, `POST .../withdraw`. 현재 관리자 세션·역할·CSRF·독립 승인·사유·멱등 키 필수. 겹치는 시간/예외·만료 출처·오래된 버전·무제한 날짜 범위 거절. 400/422 잘못된 입력, 401 세션 없음, 403 권한, 409 충돌, 410 만료, 429 제한, 503 감사/게시 장애. 요청의 임의 actorId를 권한 증명으로 사용 금지.
+- Migration 196/적용된 280 수정 금지. 열린 migration-280 번호 충돌(#1147) 해결 후 **새 순방향 번호 배정**. 제안 `support_hours_revisions`(UUID PK, version>0, timezone='Asia/Seoul', 주간 JSONB, valid_from/valid_until CHECK, 출처·작성자·승인자·게시/철회 시각), `support_hours_exceptions`(revision_id/date/slot_index 고유, 시작·종료 분 0..1440, 시작<종료, 예외 종류), `support_hours_intents`(actor+intent 고유, 본문 SHA-256, 영수증), append-only `support_hours_audit`, `support_hours_publication_outbox`(revision+operation 고유). 야간 운영은 날짜별 구간으로 분리하고 겹침/모순 예외 금지. 인덱스 게시 `(published_at DESC,id)`, 예외 `(revision_id,date,start_minute)`, outbox `(state,next_attempt_at,id)`. 고객 문의 본문은 이 테이블에 저장하지 않는다.
+- 고정 search_path의 최소권한 SECURITY DEFINER 함수만 공개하고 `moneyverse_app`/PUBLIC의 테이블 DML 금지. 현재 게시 포인터→초안 순으로 잠금, expectedVersion CAS, 출처 유효기간·독립 승인·시간 겹침 확인, 게시 영수증/감사/outbox를 한 트랜잭션에 기록. 캐시 무효화는 별도 멱등 작업자가 처리; 실패하면 `PENDING` 및 공개 `UNVERIFIED` 유지. 철회는 DB 공개 접근부터 차단한 뒤 캐시 제거; 재시도로 복구 금지. 23505 동일 멱등 요청은 원래 영수증, 다른 본문은 409, 40001 제한 재시도. 금융 원장 권한 완화 금지.
+
+## 관리자·보안·SEO·모바일·KPI·검증
+- 승인 당시와 공개 당시 현재 역할을 재확인, 출처·사유·작성자·승인자 감사, 세션 토큰 로그 금지. 담당자 실명·내부 근무표·연락처·근거 없는 답변 예상시간 공개 금지. 개인정보/보존기간 법적 승인 필요. 공개 조회/관리자 변경 제한, 출처 URL은 기본적으로 서버 자동 조회 금지·SSRF 허용목록 필요.
+- 검증·승인·유효한 공개 운영시간만 canonical `/support/availability`로 SEO 색인 가능; 미검증·만료는 `noindex,no-store` 및 사이트맵 제외. 회원·관리자 화면 `noindex,no-store`. 320px, 200% 확대, 키보드·포커스·44px 터치·스크린리더·한국어/영어 시간대·WCAG 2.2 AA·Android TalkBack/VoiceOver. KPI: 검증된 게시율, 오래된 일정 노출 0건 목표, 예외 수정 지연, 공개 CTA→로그인 문의 전환. 사용자 ID/검색어 수집 없이 집계.
+- **아직 미실행인 수용 시험:** 합성 일정/예외 10,001건, 동시 게시/철회 100건, 위조/익명 관리자 100건, 자정/23:59·야간 구간·윤일·시간대·겹침·출처 만료·권한 철회·감사 장애·캐시/304 재노출·Android API·접근성·SEO·격리 PostgreSQL ACL·트랜잭션 롤백. 기능 `support_verified_hours_v1` 기본 OFF. 개발은 별도 브랜치·RED/GREEN·공식 Test 정확 SHA 인증 E2E·전체 보안/금융 QA·독립 백업 복원·승인된 무중단 GitOps 후 진행. 롤백은 기능 OFF+공개 캐시 제거, 감사 기록 보존. 기획 PR은 병합/배포 금지.
+
+## P0/P1 개발 백로그 (기획)
+- **P0** `ENV1364-01`: 루트 78%·데이터 70%·깨진 /srv/moneyverse 링크·격리 복원; `SEC1364-02`: Migration 280 충돌, 앱/PUBLIC 권한 및 금융 원장; `REL1364-03`: 최신 QA v1318은 스케줄러 운영 검증일 뿐, 전체 보안 감사/공식 정확 SHA Test 미통과; `HOURS1364-04`: 허위 운영시간/ETA, 만료 예외, 오래된 CDN, 허위 게시 성공 차단.
+- **P1** `HOURS1364-05`: DB 제약·인덱스; `HOURS1364-06`: 독립 승인·CAS·outbox·불변 감사; `HOURS1364-07`: NestJS 공개/관리자 API·Android 공개 조회; `HOURS1364-08`: 공개/회원/관리자 화면·국영문·접근성; `HOURS1364-09`: SEO·개인정보·악용방지·KPI; `HOURS1364-10`: 격리 PG, 합성 10,001·동시 100·위조 100·시간대·캐시·회귀·롤백.
+- 외부 독립 레퍼런스 10,000건: 신규 검증·승인 **0건**, 누적 중복 제거·분류·승인 수량 **UNKNOWN**. Gate **BLOCKED / IN PROGRESS**. QA v1318 스케줄러 검증은 전체 제품 QA 아님. 운영 승격 **HOLD**.
+
 # F675-147 v1362 — 검증된 고객지원 만족도 평가의 해결 회차·재시도·통계 개인정보 무결성 보완 (기능 보완 / 초안·운영 보류)
 **최종 main 재확인(15:04 KST):** `39f2c9354635c8059c8283debaccd9eb65d16f94` (중간 확인 뒤 브랜치 목록 문서 커밋); AGENTS/README/영문·국문 정본 blob SHA 동일. 선행 Draft 기반 변경 없음.
 **회차:** 이전 기능 추가 v1360 → 현재 기능 보완 v1362 → 다음 기능 추가 v1364(잠정). 시작·중간 main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c`, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md 및 국문 대조. 선행 Draft PR #1537 미병합, 이슈 #1536. 문서만 수정하며 런타임/DB/WLD/원장/Test/Production 변경 없음.
