@@ -96,15 +96,20 @@ export function NotificationCenterModal() {
       const receipt: unknown = await res.json();
       const updatedCount = receipt && typeof receipt === 'object' && 'updatedCount' in receipt
         ? receipt.updatedCount : null;
-      if (typeof updatedCount !== 'number' || !Number.isSafeInteger(updatedCount) || updatedCount < 0) {
+      const remainingUnreadCount = receipt && typeof receipt === 'object' && 'remainingUnreadCount' in receipt
+        ? receipt.remainingUnreadCount : null;
+      if (typeof updatedCount !== 'number' || !Number.isSafeInteger(updatedCount) || updatedCount < 0 ||
+          typeof remainingUnreadCount !== 'number' || !Number.isSafeInteger(remainingUnreadCount) || remainingUnreadCount < 0) {
         throw new Error('Invalid mark-all receipt');
       }
-      // Ignore feed/count requests started before this confirmed mutation.
+      // Invalidate pre-mutation reads. A newly delivered notification may still be unread.
       feedRequestId.current += 1;
       countRequestId.current += 1;
-      setLoading(false);
-      setNotifications((prev) => filter === 'unread' ? [] : prev.map((n) => ({ ...n, is_read: true })));
-      setUnreadCount(0);
+      setNotifications([]);
+      setCheckedAt(null);
+      setUnreadCount(remainingUnreadCount);
+      void fetchUnreadCount();
+      void fetchNotifications();
     } catch {
       setActionError(true);
     } finally {

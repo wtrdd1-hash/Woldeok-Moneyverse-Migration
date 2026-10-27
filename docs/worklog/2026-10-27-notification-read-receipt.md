@@ -13,3 +13,8 @@
 
 ## FINISHED
 - Pending evidence. Production RELEASE HOLD. No merge, Test or Production deployment without exact-SHA gates.
+
+### MIDPOINT — 19:26 KST
+- TDD RED: backend 3 failures; Next BFF 1 failure; modal positive-unread regression 1 failure under NODE_ENV=test (host NODE_ENV=production otherwise breaks React.act).
+- GREEN: backend 3 PASS; Next BFF + modal 8 PASS. New authenticated CSRF endpoint reads owner-scoped PostgreSQL update receipt and then authoritative unread count; web never assumes zero and refetches feed/count. No migration or finance writes.
+- Existing React race fixture adjusted to resolve the *old* request, not the newly issued post-mutation request. All unmerged branches preserved.

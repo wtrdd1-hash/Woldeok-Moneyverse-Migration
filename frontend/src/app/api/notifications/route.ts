@@ -41,9 +41,14 @@ export async function POST(req: Request): Promise<NextResponse> {
     const { notificationId, markAll } = body;
 
     if (markAll === true && notificationId === undefined) {
-      const result = await mutate<number>('/api/v1/notifications/read-all');
-      if (!Number.isSafeInteger(result) || result < 0) throw new Error('Invalid read-all response');
-      return NextResponse.json({ updatedCount: result });
+      const receipt = await mutate<{ updatedCount: number; remainingUnreadCount: number }>(
+        '/api/v1/notifications/read-all-receipt',
+      );
+      if (!Number.isSafeInteger(receipt?.updatedCount) || receipt.updatedCount < 0 ||
+          !Number.isSafeInteger(receipt?.remainingUnreadCount) || receipt.remainingUnreadCount < 0) {
+        throw new Error('Invalid read-all receipt');
+      }
+      return NextResponse.json(receipt, { headers: { 'cache-control': 'private, no-store' } });
     }
 
     if (typeof notificationId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(notificationId) && markAll === undefined) {

@@ -76,6 +76,15 @@ export class NotificationController {
     );
   }
 
+  @Post('read-all-receipt')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Mark all owner notifications read and observe remaining unread count' })
+  markAllReadWithReceipt(@Req() request: RequestWithSession) {
+    return this.guarded(() =>
+      this.notificationService.markAllReadWithReceipt(requireUserId(request)),
+    );
+  }
+
   @Post('claim-all')
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Reward claim unavailable until atomic ledger-backed settlement is implemented' })
