@@ -6,6 +6,7 @@ import {
   Controller,
   Get,
   GoneException,
+  Header,
   Inject,
   NotFoundException,
   Param,
@@ -114,6 +115,7 @@ export class WalletController {
   }
 
   @Get('bank/loans')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Outstanding loans for the caller' })
   async loans(@Req() request: RequestWithSession) {
     return { loans: await this.service().loans(requireUserId(request)) };
