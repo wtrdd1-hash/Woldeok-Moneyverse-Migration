@@ -1,3 +1,28 @@
+# F675-147 v1362 — 검증된 고객지원 만족도 평가의 해결 회차·재시도·통계 개인정보 무결성 보완 (기능 보완 / 초안·운영 보류)
+**최종 main 재확인(15:04 KST):** `39f2c9354635c8059c8283debaccd9eb65d16f94` (중간 확인 뒤 브랜치 목록 문서 커밋); AGENTS/README/영문·국문 정본 blob SHA 동일. 선행 Draft 기반 변경 없음.
+**회차:** 이전 기능 추가 v1360 → 현재 기능 보완 v1362 → 다음 기능 추가 v1364(잠정). 시작·중간 main `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c`, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md 및 국문 대조. 선행 Draft PR #1537 미병합, 이슈 #1536. 문서만 수정하며 런타임/DB/WLD/원장/Test/Production 변경 없음.
+
+## 실제 코드 근거와 수정 이유
+- Migration 196의 `admin_support_set_status(...,'resolved')`는 관리자가 상태 문자열을 변경할 뿐 **회원의 해결 확인 영수증을 생성하지 않는다**. `admin_support_reply`는 상태를 `waiting_user`로 변경한다. 회원 화면에 해결 확인·만족도 UI가 없다. `resolved` 문자열·마지막 답변·시각·클라이언트 UUID만으로 평가 자격을 발급하면 안 된다. F675-138의 회원 확인과 서버 검증 불변 `(thread_id,owner_user_id,resolution_epoch,receipt_id,confirmed_at)`가 선행되어야 하며, 미구현 시 `RECEIPT_UNAVAILABLE` 및 기능 OFF.
+- 해결→재개방→재해결마다 문의 행 잠금 하에 `resolution_epoch` 단조 증가. 재개방은 이전 회차의 **쓰기 자격**을 즉시 무효화하며, 철회한 평가가 새 영수증으로 되살아나지 않는다. 관리자 상태 변경만으로 새 자격을 발급하지 않는다. 회원의 현재 세션에서 해당 해결 상태를 명시적으로 확인해야 한다.
+- 기존 `UNIQUE(thread_id,resolution_receipt_id)`만으로는 동시 수정, 철회 뒤 오래된 요청 재전송, 회차 간 재사용 및 중첩 통계의 개인 추론을 막지 못한다. 영수증 유일성·요청 지문·버전 CAS·회차별 비가역 철회 묘비를 추가한다.
+
+## 회원·관리자 흐름, API, 상태
+- 본인 문의 `/support` → 검증된 회원 해결 확인 → 선택적 **응대 평가** → 1~5점·허용된 이유 코드 → **제출** → 서버 영수증. **건너뛰기**는 평가 저장 없음. 최초 제출 24시간 내 1회만 **수정**, 보존기간 내 **철회** 가능. 자동 답변·문의 재개방·WLD 보상·강요 금지. 상태 `RECEIPT_UNAVAILABLE|INELIGIBLE|ELIGIBLE|SUBMITTING|UNKNOWN_COMMIT|SUBMITTED|EDITABLE|WITHDRAWING|WITHDRAWN|EXPIRED|REOPENED|SESSION_EXPIRED|ERROR`. 응답 유실 시 영수증 확인 전 성공 표시나 새 키 재전송 금지.
+- 본인 전용 `GET /api/v1/support/threads/:id/feedback-eligibility`, `GET /api/v1/support/threads/:id/feedback-receipts/:intentId`는 `private,no-store`. `PUT /api/v1/support/threads/:id/feedback`는 `{receiptId,epoch,rating,reason?,intentId,expectedVersion}`, `DELETE .../feedback`는 `{receiptId,epoch,intentId,expectedVersion}`. 소유자 ID는 현재 서버 세션에서 결정, 변경 요청 CSRF 필수. 정규화 본문 SHA-256 지문을 사용자·문의·회차·동작·의도에 결합. 동일 키·동일 본문은 기존 영수증, 동일 키·다른 본문 409, 철회/만료/오래된 회차 410/412. 세션 없음 401, 타인 문의 404, 해결 영수증 없음 428, 요청 한도 429, 감사/DB 실패 503. 타인 문의 존재 여부 노출 금지.
+- 관리자 `GET /api/v1/admin/support/feedback/summary`는 현재 operator와 검증된 관리자 세션 필요, approver 단독 불가. 개별 문의 조회 시마다 별도 권한 재확인. Next.js server-only API 경계, Android App API 회원 기능 동등성 및 관리자 API 차단. 키보드·레이블·초점·44px 터치·접근 가능한 오류/영수증 알림, WCAG 2.2 AA. 회원·관리자 평가 화면은 `noindex,no-store`, 사이트맵 제외.
+
+## PostgreSQL·개인정보·지표·배포
+- F675-138 구현 및 migration-280 충돌(#1147) 해결 후 **순방향 추가 마이그레이션**: 불변 `support_resolution_receipts`(문의·회차 복합 유일, 영수증 ID 유일, 소유자 FK), `support_resolution_feedback`(문의·영수증 유일, 점수 1..5 CHECK, 버전, 최초 제출, 수정 횟수 0..1 CHECK, 철회 시각), `support_feedback_intents`(사용자·의도 유일, 지문·결과), 추가 전용 감사/묘비. 영수증·문의·소유자·회차 결합을 복합 FK 또는 검증 함수로 강제. 인덱스 `(owner_user_id,updated_at DESC,id DESC)`, `(receipt_id,withdrawn_at)`, `(thread_id,epoch)`, `(feedback_id,created_at,id)`. 기존 Migration 196 수정 금지.
+- 트랜잭션: 세션·소유권 확인 → 문의·영수증·평가 순서로 잠금 → 서버 시계 기준 최초 14일·최초 제출 후 24시간 수정 1회 → expectedVersion CAS → 평가·의도 영수증·감사 원자적 저장. 감사 실패 시 전체 롤백, 23505는 동일 의도 결과 조회, 40001은 제한적 재시도. 철회는 불변 묘비를 남기고 집계에서 즉시 제외, 해당 회차 재추가/오래된 재전송 거부. `moneyverse_app`/PUBLIC 직접 DML 금지, 고정 search_path SECURITY DEFINER 최소 EXECUTE, 실제 세션 증명 필수, 앱 설정 GUC 단독 신뢰 금지. 원장·문의 상태 변경 없음.
+- 집계는 **활성 평가 20건 이상 + 자격 있는 해결 영수증 20건 이상**, 24시간 지연, 사전 승인한 중첩되지 않는 고정 기간, 최소 조회 기간, 보완 셀 억제와 필터 조합 제한을 모두 만족해야 한다. 중첩 기간·반복 적응형 질의로 개인을 역산할 수 있으면 거부. 미달 시 정확한 소수 건수를 숨긴 `SUPPRESSED`. 분모는 자격 있는 회원 확인 해결 영수증, 분자는 철회하지 않은 평가. 응답 편향 경고·근거 표시, 직원 순위 금지. 자유 서술·IP·쿠키·대화·토큰·잔액·공개 SEO·WLD 인센티브 금지. 식별 가능 데이터 90일·안전 집계 180일은 **법적 검토 전 잠정안**. 자격 실패·제출·UNKNOWN_COMMIT·철회 지연·통계 억제 측정, 점수/이유 원문 로그 금지.
+- 기능 스위치 `support_verified_csat_v1` 기본 OFF. 개발은 별도 브랜치·격리 PostgreSQL RED/GREEN·공식 Test 정확 SHA·금융/보안 회귀·감사·독립 백업 복원·승인된 무중단 GitOps·스위치 OFF 롤백. F675-138 미구현, 마이그레이션/권한/감사/개인정보 통계 실패, 용량/복원 게이트 미충족 시 활성화 금지.
+
+## P0/P1 개발 백로그 (기획만)
+- **P0** `ENV1362-01` 루트·데이터 용량 개선 원인/작업자 승인/독립 복원 및 깨진 /srv/moneyverse 링크 확인(#1170); `SEC1362-02` migration-280·체크섬·앱 DML/PUBLIC EXECUTE·금융 원장·서버 신원 검증(#1147/#1469/#1507); `REL1362-03` 최신 전체 QA·보안 감사·공식 Test 정확 SHA·롤백; `CSAT1362-04` 위조 해결 확인·과거 회차 재전송·철회 복원·통계 역산 방지.
+- **P1** `CSAT1362-05` 영수증/회차 DB·FK·인덱스·권한; `CSAT1362-06` 잠금·CAS·멱등 감사·철회; `CSAT1362-07` NestJS/Android 본인 API·불명 커밋 영수증; `CSAT1362-08` Next.js 회원·관리자 모바일 접근성; `CSAT1362-09` 개인정보·고정 집계 억제·SEO·KPI; `CSAT1362-10` 합성 10,001건, 동일 키 동시 100건, 타인 위조 100건, 19/20 임계값 및 차분 추론, 만료/재개방/철회, 23505/40001, 백업 복원·스위치 롤백.
+- **현황:** QA v1316은 브랜치/PR 감사 중심이며 신규 전체 QA 인증 아님; 이전 전체 QA 근거 v1313. 15:00 KST miniPC 루트 76%(여유 약 23GiB), 데이터 69%(약 60GiB)로 v1360보다 개선됐으나 독립 복원·전체 릴리스 게이트 미검증. `/srv/moneyverse`가 없는 `prod-v600`을 가리키는 깨진 심볼릭 링크 확인; 서비스 ACTIVE이나 운영 장애 단정 금지, 배포 전 조사. 외부 독립 근거 이전 후보 3건, **신규 승인 0건**, 누적 중복 제거·분류 승인 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
 # F675-147 — 검증된 고객지원 해결 건에 대한 자발적 만족도 평가(CSAT)
 **기획 v1360 / 기능 추가 / DRAFT / RELEASE HOLD.** 개발 이슈 #1536. 이전: 기능 보완 v1358, 현재: 기능 추가 v1360, 다음: 기능 보완 v1362(잠정). 시작·중간 확인한 main: `584f01a9c8df3f9005a7e5aa6d13e4719914ae0c`. 본 문서는 **제안서**이며 구현·시험·배포 완료를 뜻하지 않는다. 런타임 코드·마이그레이션·DB 데이터·WLD·원장·기능 스위치·Test·Production 변경 금지.
 
