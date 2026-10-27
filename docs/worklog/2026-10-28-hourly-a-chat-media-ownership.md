@@ -10,11 +10,18 @@
 
 ## Checklist
 - [x] Read main policy, README, English/Korean project plans, prior A and latest QA, open PRs, migration status.
-- [ ] RED tests: deny foreign keys, allow owner and valid message recipients, fail closed on unavailable DB.
-- [ ] Forward-only owner registry and SQL authorization functions with least privilege.
-- [ ] Backend upload/get checks, frontend and Android route contract, isolated PG regression.
+- [x] RED tests: deny foreign keys, allow owner and valid message recipients, fail closed on unavailable DB.
+- [x] Forward-only owner registry and SQL authorization functions with least privilege.
+- [x] Backend upload/get checks, frontend and Android route contract, isolated PG regression.
 - [ ] Recheck main, build/lint/typecheck/unit/DB/security/a11y/SEO/E2E; commit, PR, CI, Test exact SHA and release gate.
 - [ ] End: record SHA, changes, gate outcomes, Test/Production/rollback, branch preservation.
 
 ## Checkpoints
 - 02:30 KST: baseline recorded; no live DB mutation.
+
+## Midpoint (02:33 KST)
+- Re-fetched `origin/main`: `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, unchanged; no main migration 286.
+- RED HTTP/controller 3 failures, web app-api 2 failures; GREEN backend 16 tests and app-api 18 tests.
+- Added migration 286 with registry and owner/sender-verified recipient access; app role has no direct table privileges. Actual ephemeral PostgreSQL 17.11 applied SQL successfully and passed owner, legitimate peer, forged sender, support admin, stranger, legacy-key and least-privilege assertions. Container `mv-a-0225-pg` removed.
+- Existing main migration 283 collision / missing 285 and unmerged QA repair #1610 remain integration blockers. No shared/live DB writes.
+- Caveats: legacy unregistered images fail closed; admin console session proof is not enforced in this initial candidate; app-role SQL spoofing risk remains while wider DB least-privilege issue #993 is unresolved. HOLD, not a release-ready fix.

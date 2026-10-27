@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   NotFoundException,
+  ServiceUnavailableException,
   Optional,
   Param,
   Post,
@@ -21,8 +22,10 @@ import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
+import { requireUserId } from '../auth/session.context';
 import { AntivirusThreatError } from './antivirus-scanner.service';
 import { ChatImageStorage } from './chat-image-storage';
+import { ChatMediaRepository } from './chat-media.repository';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 
 @ApiTags('chat-upload')
@@ -31,6 +34,7 @@ export class ChatUploadController {
   constructor(
     private readonly chatStorage: ChatImageStorage,
     @Optional() @Inject(DiscordAlertService) private readonly discordAlert?: DiscordAlertService,
+    @Inject(ChatMediaRepository) private readonly mediaRepository?: ChatMediaRepository,
   ) {}
 
   @Post('upload')
@@ -53,10 +57,17 @@ export class ChatUploadController {
       throw new BadRequestException('업로드할 이미지 파일이 필요합니다.');
     }
 
-    const actorUserId = req.session?.user_id || 'unknown';
+    const actorUserId = requireUserId(req);
 
     try {
+      if (!this.mediaRepository) throw new ServiceUnavailableException('chat media registry unavailable');
       const stored = await this.chatStorage.save(file.buffer, file.originalname);
+      try {
+        await this.mediaRepository.register(actorUserId, stored.storageKey);
+      } catch {
+        await this.chatStorage.remove(stored.storageKey).catch(() => undefined);
+        throw new ServiceUnavailableException('chat media registry unavailable');
+      }
       return {
         success: true,
         url: stored.url,
@@ -67,6 +78,7 @@ export class ChatUploadController {
         size: stored.size,
       };
     } catch (error) {
+      if (error instanceof ServiceUnavailableException) throw error;
       if (error instanceof AntivirusThreatError) {
         // 관리자 디스코드 DM으로 긴급 보안 경보 전송
         if (this.discordAlert) {
@@ -101,7 +113,15 @@ export class ChatUploadController {
   @Get('media/:key')
   @UseGuards(SessionGuard, AuthenticatedGuard)
   @ApiOperation({ summary: 'Serve uploaded chat image bytes' })
-  async getChatMedia(@Param('key') key: string, @Res() res: Response): Promise<void> {
+  async getChatMedia(
+    @Req() req: RequestWithSession,
+    @Param('key') key: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    if (!this.mediaRepository) throw new ServiceUnavailableException('chat media access unavailable');
+    if (!(await this.mediaRepository.visibleTo(requireUserId(req), key))) {
+      throw new NotFoundException('요청한 이미지를 찾을 수 없습니다.');
+    }
     const result = await this.chatStorage.read(key);
     if (!result) {
       throw new NotFoundException('요청한 이미지를 찾을 수 없습니다.');
@@ -112,6 +132,7 @@ export class ChatUploadController {
     // Upload keys can appear in private messages and support cases. Never let a shared cache retain their bytes.
     res.setHeader('cache-control', 'private, no-store');
     res.setHeader('x-content-type-options', 'nosniff');
+    res.setHeader('x-robots-tag', 'noindex');
     res.end(result.buffer);
   }
 }

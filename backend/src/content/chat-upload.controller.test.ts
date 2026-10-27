@@ -7,6 +7,7 @@ import type { Response } from 'express';
 import { ChatUploadController } from './chat-upload.controller';
 import { AntivirusThreatError } from './antivirus-scanner.service';
 import type { ChatImageStorage } from './chat-image-storage';
+import type { ChatMediaRepository } from './chat-media.repository';
 import type { DiscordAlertService } from '../discord/discord-alert.service';
 import type { RequestWithSession } from '../auth/session.context';
 
@@ -14,18 +15,22 @@ describe('ChatUploadController', () => {
   let controller: ChatUploadController;
   let mockStorage: Partial<ChatImageStorage>;
   let mockDiscordAlert: Partial<DiscordAlertService>;
+  let mockMedia: Partial<ChatMediaRepository>;
 
   beforeEach(() => {
     mockStorage = {
       save: vi.fn(),
       read: vi.fn(),
+      remove: vi.fn().mockResolvedValue(true),
     };
     mockDiscordAlert = {
       sendAdminDirectMessage: vi.fn().mockResolvedValue(true),
     };
+    mockMedia = { register: vi.fn().mockResolvedValue(undefined), visibleTo: vi.fn().mockResolvedValue(true) };
     controller = new ChatUploadController(
       mockStorage as ChatImageStorage,
       mockDiscordAlert as DiscordAlertService,
+      mockMedia as ChatMediaRepository,
     );
   });
 
@@ -87,7 +92,30 @@ describe('ChatUploadController', () => {
       end: vi.fn(),
     } as unknown as Response;
 
-    await expect(controller.getChatMedia('non_existent.png', mockRes)).rejects.toThrow(NotFoundException);
+    await expect(controller.getChatMedia({ session: { user_id: 'user_1' } } as RequestWithSession, 'non_existent.png', mockRes)).rejects.toThrow(NotFoundException);
+  });
+
+  it('does not read bytes when a different member knows a private storage key', async () => {
+    vi.mocked(mockMedia.visibleTo!).mockResolvedValue(false);
+    const response = { setHeader: vi.fn(), end: vi.fn() } as unknown as Response;
+    await expect(controller.getChatMedia(
+      { session: { user_id: 'stranger' } } as RequestWithSession,
+      'chat_123.png', response,
+    )).rejects.toThrow(NotFoundException);
+    expect(mockStorage.read).not.toHaveBeenCalled();
+    expect(response.end).not.toHaveBeenCalled();
+  });
+
+  it('deletes orphan bytes when the owner registration fails closed', async () => {
+    const req = { session: { user_id: 'user_1' } } as RequestWithSession;
+    const file = { buffer: Buffer.from('clean'), originalname: 'clean.png', size: 5, mimetype: 'image/png' };
+    vi.mocked(mockStorage.save!).mockResolvedValue({
+      storageKey: 'chat_123.png', mimeType: 'image/png', width: 1, height: 1, size: 5,
+      url: '/api/v1/content/chat/media/chat_123.png',
+    });
+    vi.mocked(mockMedia.register!).mockRejectedValue(new Error('database offline'));
+    await expect(controller.uploadChatImage(req, file)).rejects.toThrow(/unavailable/i);
+    expect(mockStorage.remove).toHaveBeenCalledWith('chat_123.png');
   });
 
   it('requires session and authenticated identity before serving a chat image', () => {
@@ -103,10 +131,11 @@ describe('ChatUploadController', () => {
     vi.mocked(mockStorage.read!).mockResolvedValue({ buffer, mimeType: 'image/png' });
     const response = { setHeader: vi.fn(), end: vi.fn() } as unknown as Response;
 
-    await controller.getChatMedia('chat_123.png', response);
+    await controller.getChatMedia({ session: { user_id: 'user_1' } } as RequestWithSession, 'chat_123.png', response);
 
     expect(response.setHeader).toHaveBeenCalledWith('cache-control', 'private, no-store');
     expect(response.setHeader).toHaveBeenCalledWith('x-content-type-options', 'nosniff');
+    expect(response.setHeader).toHaveBeenCalledWith('x-robots-tag', 'noindex');
     expect(response.end).toHaveBeenCalledWith(buffer);
   });
 
