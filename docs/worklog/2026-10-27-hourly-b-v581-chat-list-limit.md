@@ -15,3 +15,6 @@
 - [ ] Verify focused/full tests, lint, typecheck, build, app-api, security, real isolated PostgreSQL and CI exact SHA.
 - [ ] Refresh main and plans at midpoint and before any merge; no merge or deploy without all gates.
 - [ ] Record internal and GitHub final result and protect other agents' work.
+## RED checkpoint (12:32 KST)
+- 38 new focused tests executed against main-based controller: 30 RED, 8 GREEN (expected pre-fix). No database reads performed in rejected-input expectations.
+- Mid-work main and English/Korean planning hashes refreshed; no other branch modified.
