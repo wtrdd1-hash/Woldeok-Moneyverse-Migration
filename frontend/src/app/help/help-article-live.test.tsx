@@ -6,12 +6,16 @@ import { HelpArticleLive } from './help-article-live';
 describe('open help article expiry', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ current: true, articleId: 'a1', publishedAt: '2026-10-27T06:00:00.000Z', reviewedUntil: '2026-10-27T07:00:01.000Z' }) }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ current: true, articleId: 'a1', publishedAt: '2026-10-27T06:00:00.000Z', reviewedUntil: '2026-10-28T07:00:00.000Z' }) }));
     vi.setSystemTime(new Date('2026-10-27T07:00:00.000Z'));
   });
   afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
   it('removes an open article body and source when its verified review expires', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({ ok: true, json: async () => ({
+      current: true, articleId: 'a1', publishedAt: '2026-10-27T06:00:00.000Z',
+      reviewedUntil: '2026-10-27T07:00:01.000Z',
+    }) } as Response);
     render(<HelpArticleLive locale="en" sourceHref="https://example.org/source"
       article={{ article_id: 'a1', slug: 'verified-article', published_at: '2026-10-27T06:00:00.000Z', title: 'Verified article', summary: 'Evidence', body_plain: 'Old instruction',
         reviewed_until: '2026-10-27T07:00:01.000Z' }} />);
@@ -48,6 +52,21 @@ describe('open help article expiry', () => {
     }) } as Response);
     await act(async () => { window.dispatchEvent(new Event('focus')); await Promise.resolve(); await Promise.resolve(); });
     expect(screen.queryByText('Private stale guidance')).toBeNull();
+  });
+
+  it('does not display an obsolete review deadline when the live status receipt has a different deadline', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({ ok: true, json: async () => ({
+      current: true, articleId: 'a1', publishedAt: '2026-10-27T06:00:00.000Z',
+      reviewedUntil: '2026-10-27T07:30:00.000Z',
+    }) } as Response);
+    render(<HelpArticleLive locale="en" sourceHref="https://example.org/source"
+      article={{ article_id: 'a1', slug: 'verified-article', published_at: '2026-10-27T06:00:00.000Z',
+        title: 'Verified article', summary: 'Evidence', body_plain: 'Obsolete review promise',
+        reviewed_until: '2026-10-28T07:00:00.000Z' }} />);
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    expect(screen.queryByText('Obsolete review promise')).toBeNull();
+    expect(screen.queryByRole('link', { name: 'View original' })).toBeNull();
+    expect(screen.getByRole('status').textContent).toMatch(/unavailable|withdrawn/i);
   });
 
   it('does not reuse an old verification when navigating to another article', async () => {

@@ -51,7 +51,11 @@ export function HelpArticleLive({
         const row = receipt as { current?: unknown; articleId?: unknown; publishedAt?: unknown; reviewedUntil?: unknown };
         const current = row?.current === true && row.articleId === article.article_id &&
           row.publishedAt === article.published_at && typeof row.reviewedUntil === 'string' &&
-          Number.isFinite(Date.parse(row.reviewedUntil)) && Date.parse(row.reviewedUntil) > Date.now();
+          Number.isFinite(Date.parse(row.reviewedUntil)) &&
+          // A current publication with a changed review deadline is a different SSR revision.
+          // Do not display a stale, longer verified-until claim while waiting for navigation.
+          Date.parse(row.reviewedUntil) === Date.parse(article.reviewed_until) &&
+          Date.parse(row.reviewedUntil) > Date.now();
         if (active && request === generation) setPublication({ identity, status: current ? 'current' : 'unavailable' });
       } catch {
         if (active && request === generation && !abort.signal.aborted) setPublication({ identity, status: 'unavailable' });
