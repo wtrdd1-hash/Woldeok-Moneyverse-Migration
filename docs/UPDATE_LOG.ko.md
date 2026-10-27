@@ -1,3 +1,7 @@
+## 기획 v1354 — F675-145 도움말 게시·캐시·문의 연결 무결성 (초안 / 운영 보류)
+- 이전 추가 v1352 / 현재 보완 v1354 / 다음 추가 v1356. main 5888176454648f51d5f986be60a22847bd234777 시작·중간 확인, 선행 Draft #1514·개발 #1513. 미구현 `/login?next=/support` 복귀 안내 정정, publicApi SWR·정적 사이트맵/robots 위험, 2단계 게시·DB 우선 철회·304/ETag·epoch 커서를 국영문 통합 마스터에 명세.
+- QA v1313 프론트 1,423·격리 PG migration/test 종료 0, 전체 감사 Critical2/High8·봇 Critical1/High5·라우트 증거 실패. 루트 약 691MiB·데이터 약 5.6GiB, 정확 SHA Test·복원 보류. ENV1354-01 SEC1354-02 REL1354-03 HELP1354-04 HELP1354-05 HELP1354-06 HELP1354-07 HELP1354-08 HELP1354-09 HELP1354-10. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서만 변경, 기능 OFF, 런타임/DB/WLD/원장/Test/Production 변경 없음.
+
 ## 기획 v1352 — F675-145 검증 도움말 센터 (초안 / 운영 보류)
 - 이전 보완 v1350 / 현재 추가 v1352 / 다음 보완 v1354(잠정). main 5888176454648f51d5f986be60a22847bd234777 시작·중간 확인, 선행 Draft #1505·개발 #1513. 방문자/회원 검증 문서·독립 작성/승인·출처/기한·민감 검색 보호·명시적 문의 연결·철회 캐시 안전 설계. 실제 구현 아님.
 - QA v1312 전체 감사 Critical2/High8·봇 Critical1/High5 FAIL, 루트 약 706MiB·데이터 약 6.4GiB, 정확 SHA Test/복원 BLOCKED. ENV1352-01 SEC1352-02 REL1352-03 HELP1352-04 HELP1352-05 HELP1352-06 HELP1352-07 HELP1352-08 HELP1352-09 HELP1352-10. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서만 변경, 기능 OFF, 런타임/DB/WLD/운영 변경 없음.

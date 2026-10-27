@@ -1,3 +1,10 @@
+## 기획 v1354 — F675-145 도움말 게시·캐시·문의 연결 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1352 → 현재 보완 v1354 → 다음 추가 v1356(잠정). main 5888176454648f51d5f986be60a22847bd234777 시작·중간 확인, AGENTS.md·README.md·영문 정본·국문 대조. 선행 미병합 Draft #1514, 개발 이슈 #1513.
+- 코드 근거: login/page.tsx는 `next`를 처리하지 않고 login/actions.ts는 로그인 성공 후 `/`로 이동하므로 기존 `/login?next=/support` 자동 복귀는 구현되지 않았다. 방문자 CTA는 `/login?error=login_required`와 로그인 후 직접 `/support` 재방문을 안내한다. publicApi()는 SWR 캐시를 사용하고 정적 사이트맵·1시간 robots 캐시는 게시 상태를 증명하지 못한다. 실제 도움말 구현·유출 사고 확인 아님.
+- P0: ENV1354-01 용량·격리 복원 #1170, SEC1354-02 앱 DML 235/241·PUBLIC 은행 3·체크섬 #1469·금융 #1507/#1502, REL1354-03 QA v1313 보안 감사·라우트 증거·정확 SHA Test, HELP1354-04 오래된 200/304/ISR/CDN 본문·허위 게시·로그인 복귀 오류. P1: HELP1354-05 상태/epoch/출처/인덱스, HELP1354-06 2단계 게시·철회/purge 영수증/CAS, HELP1354-07 no-store API·검색·ETag·커서, HELP1354-08 Next 로그인/사이트맵/Android/접근성, HELP1354-09 출처 SSRF·개인정보·SEO·KPI, HELP1354-10 격리 PG/CDN 10,001/100/100·회귀·롤백. 상세 명세는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- QA v1313 프론트 1,423건·격리 PG migration/test 종료 0, 전체 감사 Critical2/High8·봇 Critical1/High5 실패, 라우트 증거 실패; 루트 약 691MiB·데이터 약 5.6GiB 여유. 정확 main SHA 공식 Test 금융 E2E·독립 복원 미검증, 기능 OFF·운영 보류. 외부 신규 승인 0·누적 중복제거·분류 승인 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 변경.
+- 전체 백로그: ENV1354-01 SEC1354-02 REL1354-03 HELP1354-04 HELP1354-05 HELP1354-06 HELP1354-07 HELP1354-08 HELP1354-09 HELP1354-10
+
 ## 기획 v1352 — F675-145 검증된 셀프서비스 도움말 센터·안전한 문의 연결 (기능 추가 / 초안 / 운영 보류)
 - 이전 보완 v1350 → 현재 추가 v1352 → 다음 보완 v1354(잠정). 최신 main 5888176454648f51d5f986be60a22847bd234777 시작·중간 재확인, AGENTS.md·README.md·영문 정본·국문 대조. 선행 미병합 Draft #1505, 개발 이슈 #1513.
 - 현재 /support는 로그인 문의/답변만 있고 controller·Migration196에는 검증된 공개 도움말 API·테이블이 없으며 /help·/admin/help도 없다. 방문자/회원의 승인 문서 검색·읽기와 명시적 문의 연결, operator 작성/독립 approver 승인·철회, 출처 SHA·유효 기한·불변 버전/영수증·캐시 철회 무결성을 설계. 자동 답변·허위 정책·WLD 변경·기존 F675-139~144 중복 금지.
