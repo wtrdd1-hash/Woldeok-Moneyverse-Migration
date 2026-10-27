@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { appGatewayPath } from './app-gateway';
+import { addAppJsonCompatibility, appGatewayPath } from './app-gateway';
 
 describe('verified help Android app API boundary', () => {
   it('exposes only public help read routes', () => {
@@ -8,5 +8,15 @@ describe('verified help Android app API boundary', () => {
     expect(appGatewayPath(['help','articles','ko','account-login'])).toBe('/api/v1/help/articles/ko/account-login');
     expect(appGatewayPath(['help','admin','drafts'])).toBeNull();
     expect(appGatewayPath(['admin','help','articles'])).toBeNull();
+  });
+});
+
+describe('Android public evidence freshness response', () => {
+  it('preserves the ISO review deadline and camelCase compatibility alias', () => {
+    const date = '2030-01-02T03:04:00.000Z';
+    expect(addAppJsonCompatibility({ reviewed_until: date })).toEqual({
+      reviewed_until: date,
+      reviewedUntil: date,
+    });
   });
 });

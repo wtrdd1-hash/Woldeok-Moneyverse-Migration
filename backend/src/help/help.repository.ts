@@ -9,6 +9,7 @@ export interface HelpSummary {
   readonly title: string;
   readonly summary: string;
   readonly published_at: Date;
+  readonly reviewed_until: Date;
 }
 export interface HelpArticle extends HelpSummary {
   readonly body_plain: string;
@@ -20,12 +21,12 @@ export class HelpRepository {
   constructor(private readonly pool: Queryable) {}
   search(locale: string, category: string | null, query: string, limit: number) {
     return queryRows<HelpSummary>(this.pool,
-      'SELECT article_id::text,locale,slug,category,title,summary,published_at FROM public.help_public_search($1,$2,$3,$4)',
+      'SELECT article_id::text,locale,slug,category,title,summary,published_at,reviewed_until FROM public.help_public_search($1,$2,$3,$4)',
       [locale, category, query, limit]);
   }
   article(locale: string, slug: string) {
     return queryOne<HelpArticle>(this.pool,
-      'SELECT article_id::text,locale,slug,category,title,summary,body_plain,source_url,published_at FROM public.help_public_article($1,$2)',
+      'SELECT article_id::text,locale,slug,category,title,summary,body_plain,source_url,published_at,reviewed_until FROM public.help_public_article($1,$2)',
       [locale, slug]);
   }
   async adminCreate(actor: string, session: string, key: string, draft: HelpDraftInput): Promise<string | null> {

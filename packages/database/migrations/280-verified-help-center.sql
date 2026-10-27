@@ -41,9 +41,9 @@ REVOKE ALL ON TABLE public.help_articles FROM PUBLIC, moneyverse_app;
 REVOKE ALL ON TABLE public.help_article_revisions FROM PUBLIC, moneyverse_app;
 
 CREATE FUNCTION public.help_public_search(p_locale text, p_category text, p_query text, p_limit integer)
-RETURNS TABLE(article_id uuid, locale text, slug text, category text, title text, summary text, published_at timestamptz)
+RETURNS TABLE(article_id uuid, locale text, slug text, category text, title text, summary text, published_at timestamptz, reviewed_until timestamptz)
 LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
-  SELECT a.id, a.locale, a.slug, a.category, r.title, r.summary, r.published_at
+  SELECT a.id, a.locale, a.slug, a.category, r.title, r.summary, r.published_at, r.reviewed_until
   FROM public.help_articles a
   JOIN public.help_article_revisions r ON r.id = a.published_revision_id AND r.article_id = a.id
   WHERE p_locale IN ('ko','en') AND a.locale = p_locale
@@ -57,9 +57,9 @@ LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS 
   LIMIT greatest(1,least(coalesce(p_limit,20),50))
 $$;
 CREATE FUNCTION public.help_public_article(p_locale text, p_slug text)
-RETURNS TABLE(article_id uuid, locale text, slug text, category text, title text, summary text, body_plain text, source_url text, published_at timestamptz)
+RETURNS TABLE(article_id uuid, locale text, slug text, category text, title text, summary text, body_plain text, source_url text, published_at timestamptz, reviewed_until timestamptz)
 LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
-  SELECT a.id, a.locale, a.slug, a.category, r.title, r.summary, r.body_plain, r.source_url, r.published_at
+  SELECT a.id, a.locale, a.slug, a.category, r.title, r.summary, r.body_plain, r.source_url, r.published_at, r.reviewed_until
   FROM public.help_articles a
   JOIN public.help_article_revisions r ON r.id = a.published_revision_id AND r.article_id = a.id
   WHERE p_locale IN ('ko','en') AND a.locale = p_locale AND a.slug = p_slug
