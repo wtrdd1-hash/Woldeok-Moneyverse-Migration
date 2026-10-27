@@ -156,6 +156,20 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('profile images against
   });
 
   describe('who may be served the bytes', () => {
+    it('rechecks current visibility after a public image is made private', async () => {
+      await rolledBack(async (client) => {
+        const owner = await member(client);
+        const other = await member(client);
+        await setImage(client, owner, KEY);
+        await setVisibility(client, owner, 'public', { imageUrl: 'public' });
+        expect(await visible(client, other, KEY)).toBe(true);
+        expect(await visible(client, null, KEY)).toBe(true);
+        await setVisibility(client, owner, 'private', { imageUrl: 'private' });
+        expect(await visible(client, other, KEY)).toBe(false);
+        expect(await visible(client, null, KEY)).toBe(false);
+        expect(await visible(client, owner, KEY)).toBe(true);
+      });
+    });
     it('always answers the owner, whatever they chose', async () => {
       await rolledBack(async (client) => {
         const owner = await member(client);

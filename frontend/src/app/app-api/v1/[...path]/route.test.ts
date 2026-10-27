@@ -186,3 +186,26 @@ describe('app API route compatibility', () => {
   });
 
 });
+
+describe('Android profile privacy cache fencing', () => {
+  it.each([
+    ['profile', ['profile', 'settings']],
+    ['profile image', ['media', 'profile', '11111111-2222-4333-8444-555555555555.png']],
+  ])('overrides a public upstream cache header for %s', async (_label, parts) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ profile: {} }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    })));
+    const response = await GET(request(`/app-api/v1/${parts.join('/')}`), context(...parts));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('never caches profile upstream failures', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('upstream unavailable'); }));
+    const response = await GET(request('/app-api/v1/profile/settings'), context('profile', 'settings'));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+});

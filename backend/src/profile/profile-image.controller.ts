@@ -45,6 +45,8 @@ export class ProfileImageController {
     @Param('key') key: string,
     @Res() response: Response,
   ): Promise<void> {
+    // Every request must re-check SQL visibility after an owner revokes access.
+    response.setHeader('cache-control', 'private, no-store');
     if (!this.profiles || !this.storage) {
       throw new ServiceUnavailableException('profile service is unavailable');
     }
@@ -70,7 +72,6 @@ export class ProfileImageController {
     response.setHeader('content-type', mimeFor(key));
     response.setHeader('x-content-type-options', 'nosniff');
     response.setHeader('content-disposition', 'inline');
-    response.setHeader('cache-control', 'private, max-age=300');
     response.end(bytes);
   }
 }

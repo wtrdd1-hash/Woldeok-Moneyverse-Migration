@@ -170,7 +170,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
-  return proxy(request, (await context.params).path);
+  const parts = (await context.params).path;
+  const response = await proxy(request, parts);
+  // Owner-controlled profile visibility must be checked on every fetch, even
+  // after an upstream failure or an app-version rejection.
+  if (parts[0] === 'profile' || (parts[0] === 'media' && parts[1] === 'profile')) {
+    response.headers.set('cache-control', 'private, no-store');
+  }
+  return response;
 }
 
 export const GET = handle;

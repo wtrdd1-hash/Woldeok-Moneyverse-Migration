@@ -19,7 +19,10 @@ export async function GET(
   }
 
   const token = process.env.INTERNAL_API_TOKEN;
-  if (!token) throw new Error('INTERNAL_API_TOKEN is not configured');
+  if (!token) return NextResponse.json(
+    { error: 'image unavailable' },
+    { status: 503, headers: { 'cache-control': 'private, no-store' } },
+  );
 
   let cookieHeader = request.headers.get('cookie') ?? '';
   try {
@@ -40,17 +43,24 @@ export async function GET(
     ...(cookieHeader ? { cookie: cookieHeader } : {}),
   };
 
-  // Try /media/profile/:key first, then fall back to /api/media/profile/:key
-  let response = await fetch(`${API_ORIGIN}/media/profile/${key}`, {
-    headers,
-    cache: 'no-store',
-  });
-
-  if (!response.ok && response.status === 404) {
-    response = await fetch(`${API_ORIGIN}/api/media/profile/${key}`, {
+  // A failed visibility check must not fall back to stale browser bytes.
+  let response: Response;
+  try {
+    response = await fetch(`${API_ORIGIN}/media/profile/${key}`, {
       headers,
       cache: 'no-store',
     });
+    if (!response.ok && response.status === 404) {
+      response = await fetch(`${API_ORIGIN}/api/media/profile/${key}`, {
+        headers,
+        cache: 'no-store',
+      });
+    }
+  } catch {
+    return NextResponse.json(
+      { error: 'image unavailable' },
+      { status: 503, headers: { 'cache-control': 'private, no-store' } },
+    );
   }
 
   if (!response.ok) {
@@ -63,7 +73,8 @@ export async function GET(
   return new NextResponse(await response.arrayBuffer(), {
     headers: {
       'content-type': response.headers.get('content-type') ?? 'application/octet-stream',
-      'cache-control': response.headers.get('cache-control') ?? 'private, max-age=300',
+      // Visibility may be revoked at any moment; never reuse image bytes.
+      'cache-control': 'private, no-store',
       'content-disposition': 'inline',
       'x-content-type-options': 'nosniff',
     },

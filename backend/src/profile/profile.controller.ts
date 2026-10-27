@@ -6,6 +6,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  Header,
   HttpCode,
   Inject,
   NotFoundException,
@@ -145,6 +146,7 @@ export class ProfileController {
    * exists so a screen does not have to be told which member it belongs to.
    */
   @Get()
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'The caller’s own profile, with every field' })
   async mine(@Req() request: RequestWithSession) {
     const actor = requireUserId(request);
@@ -164,6 +166,7 @@ export class ProfileController {
    * putting it on a shape another member also receives invites the mistake.
    */
   @Get('titles')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Profile titles actually awarded to the caller' })
   async titles(@Req() request: RequestWithSession) {
     const titles = await this.guarded(
@@ -180,6 +183,7 @@ export class ProfileController {
   }
 
   @Get('settings')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'The caller’s own profile settings, as stored' })
   async settings(@Req() request: RequestWithSession) {
     return {
@@ -251,6 +255,7 @@ export class ProfileController {
    * null, which is a fact about what is shown rather than about what exists.
    */
   @Get(':userId')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Another member’s profile, as they have chosen to show it' })
   async member(@Req() request: RequestWithSession, @Param('userId', ParseUUIDPipe) userId: string) {
     return {

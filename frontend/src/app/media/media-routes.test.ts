@@ -90,7 +90,7 @@ describe('same-origin media relays', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.headers.get('cache-control')).toBe('private, max-age=300');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(fetch).toHaveBeenCalledWith(
       `${process.env.API_ORIGIN ?? 'http://127.0.0.1:3020'}/media/profile/${KEY}`,
       expect.objectContaining({
