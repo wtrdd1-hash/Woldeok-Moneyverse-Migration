@@ -212,3 +212,52 @@ describe('SeoClientView', () => {
   });
 });
 
+
+describe('SEO refresh evidence integrity', () => {
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
+
+  it('marks stale crawler data unavailable on HTTP failure and shows an accessible error', async () => {
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input) === '/api/admin/seo/status') {
+        return { ok: false, status: 503 } as Response;
+      }
+      return { ok: true, json: async () => ({}) } as Response;
+    }) as typeof fetch;
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
+    fireEvent.click(screen.getByRole('button', { name: '새로고침' }));
+    expect(await screen.findByText(/SEO 관측값 새로고침에 실패했습니다/)).toBeTruthy();
+    expect(screen.getAllByRole('alert').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('자료 없음').length).toBeGreaterThan(0);
+    expect(screen.queryByText('124')).toBeNull();
+  });
+
+  it('rejects a partial refresh payload and recovers only after a valid authenticated response', async () => {
+    let attempt = 0;
+    const validRefresh = {
+      ...mockInitialData,
+      totalHits24h: 1,
+      totalHits7d: 2,
+      botDistribution: { Googlebot: 1 },
+      statusDistribution: { '200': 1 },
+      stockCoverage: { indexed: 1, total: 1 },
+      guideCoverage: { indexed: 1, total: 1 },
+    };
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input) === '/api/admin/seo/status') {
+        attempt += 1;
+        return { ok: true, json: async () => attempt === 1 ? { totalHits24h: 99 } : validRefresh } as Response;
+      }
+      return { ok: true, json: async () => ({}) } as Response;
+    }) as typeof fetch;
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
+    fireEvent.click(screen.getByRole('button', { name: '새로고침' }));
+    expect(await screen.findByText(/SEO 관측값 새로고침에 실패했습니다/)).toBeTruthy();
+    expect(screen.queryByText('99')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '새로고침' }));
+    await waitFor(() => expect(screen.queryByText(/SEO 관측값 새로고침에 실패했습니다/)).toBeNull());
+    expect(screen.getAllByText('1 / 1').length).toBeGreaterThan(0);
+  });
+});

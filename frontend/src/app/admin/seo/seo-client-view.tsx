@@ -25,6 +25,7 @@ import { cn } from '@/lib/cn';
 import { GscAnalyticsCard } from './gsc-analytics-card';
 import { AdMonetizationCard } from './ad-monetization-card';
 import { TwitterPublisherCard } from './twitter-publisher-card';
+import { parseSeoObservation, unavailableSeoObservation } from './seo-observation';
 
 export interface CrawlerLog {
   readonly id: string;
@@ -60,7 +61,7 @@ export interface SeoInitialData {
   readonly indexNowKey: string;
   readonly sitemapUrl: string;
   readonly provenance?: {
-    readonly source: 'seo-status-api' | 'fallback';
+    readonly source: 'seo-status-api' | 'fallback' | 'unavailable';
     readonly observedAt: string | null;
     readonly freshness: 'fresh' | 'unknown';
     readonly status: 'operational' | 'unavailable';
@@ -92,6 +93,7 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
   const [relativeTimeNowMs, setRelativeTimeNowMs] = useState(initialNowMs);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshProblem, setRefreshProblem] = useState<string | null>(null);
   const [isAuditing, setIsAuditing] = useState(false);
   const [isSendingDigest, setIsSendingDigest] = useState(false);
   const [submitResult, setSubmitResult] = useState<string | null>(null);
@@ -132,25 +134,17 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
 
   const refreshData = async () => {
     setIsRefreshing(true);
+    setRefreshProblem(null);
     try {
-      const res = await fetch('/api/admin/seo/status');
-      if (res.ok) {
-        const json = await res.json();
-        if (json && typeof json === 'object') {
-          const observedAt = new Date().toISOString();
-          setData((prev) => ({
-            ...prev,
-            ...json,
-            provenance: {
-              source: 'seo-status-api',
-              observedAt,
-              freshness: 'fresh',
-              status: 'operational',
-            },
-          }));
-          setRelativeTimeNowMs(Date.now());
-        }
-      }
+      const response = await fetch('/api/admin/seo/status', { cache: 'no-store' });
+      if (!response.ok) throw new Error('SEO status unavailable');
+      const validated = parseSeoObservation(await response.json(), new Date().toISOString());
+      if (!validated) throw new Error('SEO status contract invalid');
+      setData(validated);
+      setRelativeTimeNowMs(Date.now());
+    } catch {
+      setData(unavailableSeoObservation());
+      setRefreshProblem('SEO 관측값 새로고침에 실패했습니다. 이전 수치는 더 이상 현재 상태로 표시하지 않습니다. 다시 조회해 주세요.');
     } finally {
       setIsRefreshing(false);
     }
@@ -279,6 +273,12 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
         )}
       </section>
 
+
+      {refreshProblem && (
+        <p role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+          {refreshProblem}
+        </p>
+      )}
 
       {/* Top Action Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-sm">
@@ -439,7 +439,7 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
       {/* Search Console sitemap submission lives in the authenticated GSC card above. */}
 
       {/* Google AdSense 광고 수익화 & 트래픽 관제 타워 */}
-      <AdMonetizationCard totalHits24h={initialData.totalHits24h} />
+      {hasObservedCrawlerData && <AdMonetizationCard totalHits24h={data.totalHits24h} />}
 
       {/* Bot Market Share Distribution */}
       <Card className="border-border/80 shadow-sm">
@@ -471,7 +471,7 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
             })}
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border/40 bg-surface/30 p-3 text-xs text-muted-foreground">
+          {hasObservedCrawlerData && <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border/40 bg-surface/30 p-3 text-xs text-muted-foreground">
             <span className="font-bold text-foreground">IndexNow 인증 규격:</span>
             <span className="font-mono text-[11px] bg-card px-2 py-0.5 rounded border border-border/60 text-foreground">
               Key: {data.indexNowKey}
@@ -492,7 +492,7 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
               /sitemap.xml 열람
               <ExternalLink className="size-3" />
             </Link>
-          </div>
+          </div>}
         </CardContent>
       </Card>
 

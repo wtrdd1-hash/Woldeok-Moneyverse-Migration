@@ -44,7 +44,10 @@ ENV APP_BASE_URL=${APP_BASE_URL} \
     ADS_ENABLED=${ADS_ENABLED} \
     ADSENSE_PUBLISHER_ID=${ADSENSE_PUBLISHER_ID} \
     ADSENSE_HOME_SLOT=${ADSENSE_HOME_SLOT}
-RUN pnpm --filter @moneyverse/contract build && pnpm --filter @moneyverse/frontend build
+# Turbopack's next/font Google font URL resolver can fail in the clean Alpine
+# candidate image (“next/font/google queries have exactly one entry”).
+# The same source builds under Webpack; pin the verified compiler for releases.
+RUN pnpm --filter @moneyverse/contract build && pnpm --filter @moneyverse/frontend exec next build --webpack
 
 FROM node:26.8.2-alpine
 

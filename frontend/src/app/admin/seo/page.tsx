@@ -7,7 +7,10 @@ import { getServerLocale } from '@/lib/locale-server';
 import { requireAdminConsole } from '@/lib/session';
 import { api } from '@/lib/api';
 import { SeoClientView, type SeoInitialData } from './seo-client-view';
+import { parseSeoObservation } from './seo-observation';
 import { SeoFunnelCard } from './seo-funnel-card';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'SEO 및 검색엔진 색인 관제 — 관리자',
@@ -15,66 +18,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-async function fetchSeoData(): Promise<SeoInitialData> {
+async function fetchSeoData(): Promise<SeoInitialData | null> {
   try {
-    const data = await api<SeoInitialData>('/api/v1/seo/status/admin');
-    return {
-      ...data,
-      provenance: {
-        source: 'seo-status-api',
-        observedAt: new Date().toISOString(),
-        freshness: 'fresh',
-        status: 'operational',
-      },
-    };
-  } catch (adminErr) {
-    console.warn('[AdminSeoPage] Failed to fetch /api/v1/seo/status/admin, attempting public status fallback:', adminErr);
+    const response = await api<unknown>('/api/v1/seo/status/admin');
+    return parseSeoObservation(response, new Date().toISOString());
+  } catch {
+    // A public aggregate cannot prove administrator-only crawler observations.
+    return null;
   }
-
-  try {
-    const publicData = await api<Partial<SeoInitialData>>('/api/v1/seo/status');
-    return {
-      totalHits24h: publicData.totalHits24h ?? 0,
-      totalHits7d: publicData.totalHits7d ?? 0,
-      avgDurationMs: publicData.avgDurationMs ?? 0,
-      botDistribution: publicData.botDistribution ?? {},
-      statusDistribution: publicData.statusDistribution ?? {},
-      stockCoverage: publicData.stockCoverage ?? { indexed: 0, total: 10 },
-      guideCoverage: publicData.guideCoverage ?? { indexed: 0, total: 18 },
-      targetUrls: publicData.targetUrls ?? [],
-      recentLogs: publicData.recentLogs ?? [],
-      indexNowKey: publicData.indexNowKey ?? 'moneyverse-indexnow-key-2026',
-      sitemapUrl: publicData.sitemapUrl ?? 'https://easy-scraping.com/sitemap.xml',
-      provenance: {
-        source: 'fallback',
-        observedAt: new Date().toISOString(),
-        freshness: 'fresh',
-        status: 'operational',
-      },
-    };
-  } catch (publicErr) {
-    console.warn('[AdminSeoPage] Failed to fetch /api/v1/seo/status fallback:', publicErr);
-  }
-
-  return {
-    totalHits24h: 0,
-    totalHits7d: 0,
-    avgDurationMs: 0,
-    botDistribution: {},
-    statusDistribution: {},
-    stockCoverage: { indexed: 0, total: 10 },
-    guideCoverage: { indexed: 0, total: 18 },
-    targetUrls: [],
-    recentLogs: [],
-    indexNowKey: 'moneyverse-indexnow-key-2026',
-    sitemapUrl: 'https://easy-scraping.com/sitemap.xml',
-    provenance: {
-      source: 'fallback',
-      observedAt: new Date().toISOString(),
-      freshness: 'unknown',
-      status: 'unavailable',
-    },
-  };
 }
 
 export default async function AdminSeoPage() {
@@ -129,8 +80,11 @@ export default async function AdminSeoPage() {
       {initialData ? (
         <SeoClientView initialData={initialData} initialNowMs={initialNowMs} />
       ) : (
-        <div role="status" className="rounded-lg border border-border p-5 text-sm text-muted-foreground">
-          관리자 SEO 데이터를 불러올 수 없습니다. 권한 및 서버 연결을 확인해 주세요.
+        <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-5 text-sm text-amber-700 dark:text-amber-300">
+          <p>관리자 SEO 데이터를 불러올 수 없습니다. 권한 및 서버 연결을 확인해 주세요. 관측값은 표시하지 않습니다.</p>
+          <Link href="/admin/seo?retry=1" className="mt-3 inline-flex min-h-[44px] items-center rounded-lg border border-current px-4 py-2 font-semibold">
+            다시 조회
+          </Link>
         </div>
       )}
     </div>
