@@ -1,4 +1,4 @@
-# [월덕 머니버스] 통합 구현 계획서 (현재: v250)
+# [월덕 머니버스] 통합 구현 계획서 (현재: v251)
 
 - **v235**: [공식 실전 이용 가이드(/guide, /guide/stock-trading, /guide/virtual-banking) 2026 최신 기획 전면 개편: 토스형 3분 입문 로드맵, 보유 주식 확인 및 원클릭 매도 방법, 월덕뱅크 단일 통장 원카드 및 실시간 복리이자 가이드 구축] (+120, -0)
 
@@ -9,6 +9,8 @@
 - **v208**: [대국민 공개 국고(Treasury) 포털 & 5대 국고 핵심 활용처 생태계 (기본배당, 창업그랜트, 긴급구호금, 바이백소각, 국채부스터) 구축] (+85, -0)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v251**: [관리자 34개 전체 서브메뉴 API 전수 실측 및 통화정책 404 소탕·API 헬스체크 BFF 연동 완료] (+36, -0)
+
 - **v250**: [관리자 SEO 관제 타워 404 에러 원인 규명 및 프로덕션 백엔드 최신화·다계층 회복성 폴백 배포] (+38, -0)
 
 - **v249**: [전수 브랜치 통합 및 운영 DB·전체 금융 기능 심층 검증 완료 (main 배포)] (+42, -0)
@@ -3638,3 +3640,24 @@ flowchart LR
   1. **백엔드 서비스 최신화**: `zz-v697-rollback.conf`를 최신 머지 경로(`/srv/moneyverse-data/releases/prod-v2026.10.22.toss-redesign/backend`)로 수정 후 백엔드 빌드(`nest build`) 및 무중단 재기동 완료. `/api/v1/seo/status` (200 OK) 및 `/api/v1/seo/status/admin` (401 인증 가드 정상 동작) 실측 검증.
   2. **프론트엔드 3계층 회복성 폴백 적용**: `frontend/src/app/admin/seo/page.tsx`의 `fetchSeoData()`에 1차(관리자 상세) ➔ 2차(공개 집계 `/api/v1/seo/status`) ➔ 3차(구조적 기본값) 다계층 폴백 구조 장착.
   3. **프로덕션 프론트엔드 608개 라우트 빌드 및 재기동**: 원격 서버 `main` 브랜치 최신화 및 Next.js Turbopack 빌드 성공, 서비스 재기동 완료.
+
+
+---
+## 🎯 [v251 Specification] 관리자 34개 전체 서브메뉴 API 전수 실측 및 통화정책 404 소탕·API 헬스체크 BFF 연동 완료
+- **적용 일시**: 2026-10-27
+- **전수 실측 현황**:
+  - 관리자 34개 서브메뉴(경제, 국고, 국채, 예보, FX, 연금, 기능스위치, 보안 등)에서 호출하는 107개 고유 내부 API 추출.
+  - 핵심 GET 엔드포인트 56개 전수를 운영 백엔드(포트 3000)로 직접 실측.
+  - **측정 결과**: 54개 정상(401 인증가드 53건, 200 OK 1건) 및 **미연결 404 엔드포인트 2건 적발**.
+- **적발된 404 엔드포인트 및 원인**:
+  1. `/api/v1/admin/economy/monetary/mint-certificates` (백엔드 실제 경로: `/api/v1/admin/economy/monetary/certificates/mints`)
+  2. `/api/v1/admin/economy/monetary/policy-orders` (백엔드 실제 경로: `/api/v1/admin/economy/monetary/orders`)
+- **조치 및 수정 내역**:
+  1. **백엔드 양방향 호환 라우트 추가**: `backend/src/economy/monetary/monetary.controller.ts`에 `@Get('policy-orders')`, `@Get('mint-certificates')` alias 엔드포인트 증설.
+  2. **프론트엔드 표준 엔드포인트 바인딩**: `frontend/src/app/admin/economy/page.tsx`의 호출 URL을 백엔드 표준 경로로 정정.
+  3. **재실측 결과**: 적발된 엔드포인트 전수 404 해소 (401 정상 인증 가드 응답 완료, 404 0건 달성).
+  4. **API 헬스체크 타워 BFF 연동**:
+     - 프론트엔드 신규 BFF 라우트 `frontend/src/app/api/admin/api-health/status/route.ts` 구축.
+     - 클라이언트 대시보드(`api-health-dashboard.tsx`)에서 브라우저 ➔ BFF ➔ 백엔드 간 안전한 세션 통신으로 실시간 텔레메트리 갱신 연결.
+     - 백엔드 `ApiHealthController`의 `CsrfGuard` GET 차단 문제 해결 및 `AdminGuard` 적용.
+  5. **프로덕션 배포**: 백엔드 `nest build` 및 프론트엔드 608개 라우트 빌드 성공 후 양측 서비스 무중단 재기동 완료.
