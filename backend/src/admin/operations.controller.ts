@@ -247,6 +247,19 @@ export class AdminBankOperationsController {
   }
 }
 
+/** Configuration evidence only: transport delivery must be measured separately. */
+export function resolveAdminDmConfiguration(
+  env: NodeJS.ProcessEnv,
+  alert: DiscordAlertService | null,
+): { configured: boolean; adminUserId: string | null } {
+  const explicitRecipient = env.DISCORD_ADMIN_ALERT_USER_ID;
+  if (!alert || !env.DISCORD_BOT_TOKEN || !explicitRecipient ||
+      !/^\d{17,20}$/.test(explicitRecipient) || alert.getAdminUserId() !== explicitRecipient) {
+    return { configured: false, adminUserId: null };
+  }
+  return { configured: true, adminUserId: explicitRecipient };
+}
+
 @ApiTags('admin')
 @Controller('admin/discord')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
@@ -265,10 +278,7 @@ export class AdminDiscordOperationsController {
       () => Promise.all([repository.outboxHealth(actor), repository.discordRoutes(actor)]),
       'the delivery console could not be read',
     );
-    const adminAlertInfo = {
-      adminUserId: this.discordAlert ? this.discordAlert.getAdminUserId() : '886478189520637992',
-      configured: !!process.env.DISCORD_BOT_TOKEN,
-    };
+    const adminAlertInfo = resolveAdminDmConfiguration(process.env, this.discordAlert);
     return { outbox, routes, adminAlertInfo };
   }
 
@@ -280,10 +290,11 @@ export class AdminDiscordOperationsController {
     @Body() body?: { preset?: string },
   ) {
     const actor = requireUserId(request);
-    if (!this.discordAlert) {
-      throw new ServiceUnavailableException('Discord alert service is not available');
+    const readiness = resolveAdminDmConfiguration(process.env, this.discordAlert);
+    if (!this.discordAlert || !readiness.configured || !readiness.adminUserId) {
+      throw new ServiceUnavailableException('Discord administrator DM recipient or token is not configured');
     }
-    const adminUserId = this.discordAlert.getAdminUserId();
+    const adminUserId = readiness.adminUserId;
     const preset = body?.preset ?? 'default';
 
     let result: { success: boolean; channelId?: string; error?: string };

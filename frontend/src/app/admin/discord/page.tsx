@@ -21,6 +21,7 @@ import type { AdminDiscordRoute, AdminOutboxHealth } from '../types';
 
 import { AdminDiscordDmTestButton } from './admin-discord-dm-test-button';
 import { AdminDiscordBroadcastTestButton } from './admin-discord-broadcast-test-button';
+import { getAdminDmReadiness } from './discord-dm-readiness';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,14 +38,13 @@ export default async function AdminDiscordPage() {
     readonly outbox: AdminOutboxHealth;
     readonly routes: readonly AdminDiscordRoute[];
     readonly adminAlertInfo?: {
-      readonly adminUserId: string;
+      readonly adminUserId: string | null;
       readonly configured: boolean;
     };
   }>('/api/v1/admin/discord');
 
   const stuck = console_ === null ? 0 : Number(console_.outbox.stuck_count);
-  const adminUserId = console_?.adminAlertInfo?.adminUserId || '886478189520637992';
-  const isConfigured = console_?.adminAlertInfo?.configured ?? true;
+  const { adminUserId, configured: isConfigured } = getAdminDmReadiness(console_?.adminAlertInfo);
 
   return (
     <div data-page="admin-discord" className="mv-page mv-page--admin grid gap-5">
@@ -68,16 +68,22 @@ export default async function AdminDiscordPage() {
                     관리자 다이렉트 알림 (DM)
                   </Badge>
                   <Badge variant="secondary" className="bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
-                    {isConfigured ? '봇 연동 활성 (ACTIVE)' : '토큰 미설정'}
+                    {isConfigured ? '토큰·수신자 설정 확인 (전달 미검증)' : '발송 설정 확인 필요'}
                   </Badge>
                 </div>
-                <CardTitle className="text-base mt-2">중요 정보 1:1 디스코드 DM 실시간 전송</CardTitle>
+                <CardTitle className="text-base mt-2">중요 정보 1:1 디스코드 DM 설정 점검</CardTitle>
                 <CardDescription>
-                  경제 원장 불일치, 비허용 음수 잔액, 감사 체인 변조, 긴급 관리자 경보 등 시스템 치명적 이벤트 발생 시 관리자 디스코드 ID로 다이렉트 DM이 실시간 발송됩니다.
+                  경제 원장 불일치, 비허용 음수 잔액, 감사 체인 변조, 긴급 관리자 경보 등 설정된 관리자 수신자를 표시합니다. 실제 DM 전달 성공 여부는 별도 전달 기록으로 확인해야 합니다.
                 </CardDescription>
               </div>
               <div className="shrink-0">
-                <AdminDiscordDmTestButton adminUserId={adminUserId} />
+                {isConfigured && adminUserId ? (
+                  <div className="[&_button]:min-h-[44px]"><AdminDiscordDmTestButton adminUserId={adminUserId} /></div>
+                ) : (
+                  <p role="status" className="text-xs text-amber-400" aria-live="polite">
+                    수신자와 봇 설정이 확인되지 않아 DM 테스트를 실행할 수 없습니다.
+                  </p>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -85,7 +91,7 @@ export default async function AdminDiscordPage() {
                 <div>
                   <span className="font-semibold text-foreground">수신 관리자 Discord ID:</span>{' '}
                   <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono text-indigo-300">
-                    {adminUserId}
+                    {adminUserId ?? '미확인'}
                   </code>
                 </div>
                 <div>
