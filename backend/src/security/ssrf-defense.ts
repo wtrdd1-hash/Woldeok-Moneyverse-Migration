@@ -1,4 +1,6 @@
 import dns from 'node:dns/promises';
+import type { LookupAddress } from 'node:dns';
+import { fetchPinnedUrl } from './ssrf-pinned-transport';
 import { isIP } from 'node:net';
 
 export class SsrffSecurityError extends Error {
@@ -48,7 +50,15 @@ function isPrivateIPv4(ip: string): boolean {
  * Checks if an IPv6 address falls into loopback, unique local, link-local, or IPv4-mapped private ranges.
  */
 function isPrivateIPv6(ip: string): boolean {
-  const normalized = ip.toLowerCase().trim();
+  // WHATWG URL canonicalizes expanded and dotted mapped IPv6 into a single
+  // hexadecimal representation. Without this, ::ffff:7f00:1 bypasses the
+  // dotted-IPv4-only private-range classifier.
+  let normalized: string;
+  try {
+    normalized = new URL('http://[' + ip.toLowerCase().trim() + ']/').hostname.slice(1, -1);
+  } catch {
+    return true;
+  }
 
   // ::1 / :: (Loopback / Unspecified)
   if (normalized === '::1' || normalized === '::' || normalized === '0:0:0:0:0:0:0:1' || normalized === '0:0:0:0:0:0:0:0') {
@@ -58,9 +68,14 @@ function isPrivateIPv6(ip: string): boolean {
   // IPv4-mapped IPv6 (::ffff:x.x.x.x)
   if (normalized.startsWith('::ffff:')) {
     const ipv4Part = normalized.slice(7);
-    if (isIP(ipv4Part) === 4) {
-      return isPrivateIPv4(ipv4Part);
-    }
+    if (isIP(ipv4Part) === 4) return isPrivateIPv4(ipv4Part);
+    const hexPair = /^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(ipv4Part);
+    if (!hexPair) return true;
+    const high = Number.parseInt(hexPair[1]!, 16);
+    const low = Number.parseInt(hexPair[2]!, 16);
+    return isPrivateIPv4([
+      high >>> 8, high & 255, low >>> 8, low & 255,
+    ].join('.'));
   }
 
   // fc00::/7 (Unique Local Address)
@@ -107,10 +122,15 @@ const BLOCKED_HOSTNAMES = new Set([
  *
  * @throws SsrffSecurityError if the URL is unsafe or points to a private network.
  */
-export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL> {
+interface ValidatedDestination {
+  readonly url: URL;
+  readonly addresses: readonly LookupAddress[];
+}
+
+async function resolveSafeOutboundUrl(urlInput: string | URL): Promise<ValidatedDestination> {
   let parsed: URL;
   try {
-    parsed = typeof urlInput === 'string' ? new URL(urlInput) : urlInput;
+    parsed = new URL(urlInput.toString());
   } catch {
     throw new SsrffSecurityError('Malformed or invalid URL provided for outbound request');
   }
@@ -126,7 +146,7 @@ export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL
     throw new SsrffSecurityError(`Forbidden outbound protocol: ${parsed.protocol}. Only http: and https: are allowed.`);
   }
 
-  const hostname = parsed.hostname.toLowerCase().trim();
+  const hostname = parsed.hostname.toLowerCase().trim().replace(/^\[|\]$/g, '').replace(/\.$/, '');
 
   // 2. Reject blocked hostnames and localhost aliases
   if (BLOCKED_HOSTNAMES.has(hostname) || hostname.endsWith('.localhost') || hostname.endsWith('.local') || hostname.endsWith('.internal')) {
@@ -138,10 +158,11 @@ export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL
     if (isPrivateIp(hostname)) {
       throw new SsrffSecurityError(`Blocked outbound destination: IP ${hostname} belongs to a private/reserved address space.`);
     }
-    return parsed;
+    return { url: parsed, addresses: [{ address: hostname, family: isIP(hostname) }] };
   }
 
   // 4. Perform Anti-DNS Rebinding verification: resolve all A & AAAA records
+  let validatedAddresses: LookupAddress[];
   try {
     const addresses = await dns.lookup(hostname, { all: true });
     if (!addresses || addresses.length === 0) {
@@ -155,12 +176,17 @@ export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL
         );
       }
     }
+    validatedAddresses = addresses;
   } catch (error) {
     if (error instanceof SsrffSecurityError) throw error;
     throw new SsrffSecurityError(`DNS resolution failure for host ${hostname}: ${(error as Error).message}`);
   }
 
-  return parsed;
+  return { url: parsed, addresses: validatedAddresses };
+}
+
+export async function assertSafeOutboundUrl(urlInput: string | URL): Promise<URL> {
+  return (await resolveSafeOutboundUrl(urlInput)).url;
 }
 
 const MAX_REDIRECTS = 3;
@@ -185,17 +211,26 @@ function carriesSensitiveOutboundState(init?: RequestInit): boolean {
  * Inspects all 3xx redirect locations to prevent DNS rebinding or redirect-based SSRF bypass.
  */
 export async function safeFetch(urlInput: string | URL, init?: RequestInit): Promise<Response> {
-  let currentUrl = await assertSafeOutboundUrl(urlInput);
+  // Do not allow callers to route a validated IP to a different HTTP virtual
+  // host. Undici will derive Host and TLS SNI from the immutable URL snapshot.
+  if (new Headers(init?.headers).has('host')) {
+    throw new SsrffSecurityError('Outbound Host header overrides are forbidden');
+  }
+  let destination = await resolveSafeOutboundUrl(urlInput);
+  let currentUrl = destination.url;
   const controller = new AbortController();
+  const combinedSignal = init?.signal
+    ? AbortSignal.any([init.signal, controller.signal])
+    : controller.signal;
   const timeoutId = setTimeout(() => controller.abort(), 10_000);
 
   try {
     let redirectsFollowed = 0;
     while (true) {
-      const response = await fetch(currentUrl.toString(), {
+      const response = await fetchPinnedUrl(currentUrl, destination.addresses, {
         ...init,
         redirect: 'manual',
-        signal: init?.signal ?? controller.signal,
+        signal: combinedSignal,
       });
 
       // 3xx Redirect 감지 시 수동 추적 및 전 홉 검증
@@ -220,7 +255,8 @@ export async function safeFetch(urlInput: string | URL, init?: RequestInit): Pro
           );
         }
         // Revalidate the destination of every redirect, including URL userinfo.
-        currentUrl = await assertSafeOutboundUrl(nextUrl);
+        destination = await resolveSafeOutboundUrl(nextUrl);
+        currentUrl = destination.url;
         continue;
       }
 
