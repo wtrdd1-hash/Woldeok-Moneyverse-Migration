@@ -70,3 +70,13 @@ test('rejects non-pass evidence without a defect identifier', () => {
   assert.equal(report.ok, false);
   assert.match(report.issues.join('\n'), /requires defectId/);
 });
+
+test('does not certify five-pass coverage containing FAIL or BLOCKED evidence', () => {
+  const ledger = completeLedger();
+  ledger.entries[0] = { ...ledger.entries[0], result: 'FAIL', defectId: 'QA-FAILED' };
+  ledger.entries[1] = { ...ledger.entries[1], result: 'BLOCKED', defectId: 'QA-BLOCKED' };
+  const report = verifyLedger({ inventory, fixtures, ledger });
+  assert.equal(report.ok, false, 'recording a defect is not equivalent to passing acceptance');
+  assert.match(report.issues.join('\n'), /result FAIL is not PASS/);
+  assert.match(report.issues.join('\n'), /result BLOCKED is not PASS/);
+});

@@ -62,6 +62,9 @@ export function verifyLedger({ inventory, fixtures, ledger }) {
     if (entry.result !== 'PASS' && !isNonEmptyString(entry.defectId)) {
       addIssue(issues, `${label} requires defectId for ${entry.result ?? 'non-pass'} result`);
     }
+    if (entry.result === 'FAIL' || entry.result === 'BLOCKED') {
+      addIssue(issues, `${label} result ${entry.result} is not PASS`);
+    }
     if (!entriesByRoute.has(entry.route)) entriesByRoute.set(entry.route, []);
     entriesByRoute.get(entry.route).push(entry);
   }
