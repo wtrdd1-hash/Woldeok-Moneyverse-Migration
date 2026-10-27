@@ -52,8 +52,8 @@ export function parseMarketStocks(value: unknown): AdminStock[] | null {
     parsed.push({ id: item.id, symbol: item.symbol, name: item.name, current_price: item.current_price,
       shares_outstanding: item.shares_outstanding, shares_available: item.shares_available,
       holders: item.holders, trades: item.trades, active: item.active,
-      halt_status: typeof item.halt_status === 'string' ? item.halt_status : undefined,
-      halted_at: typeof item.halted_at === 'string' ? item.halted_at : null });
+      ...(typeof item.halt_status === 'string' ? { halt_status: item.halt_status } : {}),
+      ...(typeof item.halted_at === 'string' || item.halted_at === null ? { halted_at: item.halted_at } : {}) });
   }
   return parsed;
 }
@@ -99,7 +99,7 @@ export function parseMarketEvents(value: unknown): AdminMarketEvent[] | null {
     const id = item.id.toLowerCase();
     if (ids.has(id)) return null;
     ids.add(id);
-    parsed.push({ id: item.id, stock_id: item.stock_id, symbol: item.symbol, name: item.name,
+    parsed.push({ id: item.id, stock_id: item.stock_id as string | null, symbol: item.symbol as string | null, name: item.name as string | null,
       direction: item.direction, strength: item.strength, headline: item.headline, body: item.body,
       source: item.source, starts_at: item.starts_at, ends_at: item.ends_at,
       cancelled_at: item.cancelled_at, live: item.live });
