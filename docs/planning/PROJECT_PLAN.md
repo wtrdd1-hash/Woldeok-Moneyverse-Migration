@@ -1,3 +1,8 @@
+## 2026-10-28 v1388 — F675-153 Verified Opt-in Virtual WLD Cash Watch (Feature Addition / DRAFT / RELEASE HOLD)
+- Previous Improvement v1386 → Current Addition v1388 → Next Improvement v1390 (provisional). Start/mid main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; canonical AGENTS/README/English project plan and Korean parity checked. This Draft stacks on unmerged #1611; issue #1619; not main-ready. No runtime/DB/ledger/Test/Production changes.
+- Existing wallet GET distinguishes USER_CASH/USER_BANK, but no owner cash-threshold watch API. Plan opt-in one private virtual-WLD cash threshold, verified as-of-time observation >=→< one notice per rearmed epoch, baseline-below/no-source UNKNOWN not a fabricated alert; no email/push/marketing/financial side effect. F675-149 inbox prerequisite. Full UI/CTA/API/DB/worker/permission/a11y/SEO/KPI specification in [integrated master](INTEGRATED_PLANNING_MASTER.md).
+- P0 ENV1388-01 SEC1388-02 REL1388-03 CASH1388-04; P1 CASH1388-05 CASH1388-06 CASH1388-07 CASH1388-08 CASH1388-09 CASH1388-10. QA v1329: development app DML 235/241 including balances/treasury, duplicate migration 283, missing Test release target; bot candidate audit 0 advisories is not main approval. Official exact-SHA Test/finance E2E/restore BLOCKED. Synthetic 10,001/100/100 tests NOT RUN. External new approved 0, cumulative UNKNOWN/10,000 BLOCKED / IN PROGRESS. Feature OFF and release HOLD.
+
 ## 2026-10-28 — Planning v1386 / F675-152 Security Event Source and Owner Recovery Integrity (Improvement / DRAFT / RELEASE HOLD)
 - GitHub Draft PR #1611 (stacked on unmerged #1598), issue #1597; previous Addition v1384 → current Improvement v1386 → next Addition v1388 (provisional); separate blog v1380/v1382 unchanged. Main 4f5efd1f48615f0112701feec25a9b0fc67d9719 read start/mid with AGENTS, README and canonical EN/KO plans.
 - Source: migration 214 SECURITY DEFINER accepts arbitrary user UUID without session verification; migration 180 security-event owner becomes NULL on user deletion; existing history API lacks event IDs; reset/email-change functions revoke all sessions so in-app alerts may be unreadable until re-login. No observed exploit or real delivery claimed. OAuth source unverified. Read-only dev DB effective ACL: auth_security_events SELECT/INSERT/UPDATE/DELETE TRUE for app role; auth_sessions SELECT/UPDATE TRUE. P0 least-privilege drift, not a verified exploit.
@@ -234,6 +239,8 @@
 
 
 # Woldeok Moneyverse — Living Project Plan
+
+
 - Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 - Main source addendum: frontend/src/components/floating-support-chat-widget.tsx also sends via /app-api/v1/support/threads and replies; its reply text is cleared before fetch and restored on handled errors, so unknown-commit/unmount loss needs explicit recovery. The widget supports image-URL attachments; v1328 drafts are TEXT-ONLY and must not silently strip, save or claim to restore attachments. Expose Save only for eligible text-only drafts (or link to /support); preserve existing attachment send behavior. Its localStorage mute preference is not draft storage. Test both /support and floating widget, plus Android parity.
 

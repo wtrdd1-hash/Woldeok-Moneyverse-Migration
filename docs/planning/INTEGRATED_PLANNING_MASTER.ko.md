@@ -1,3 +1,40 @@
+## v1388 / F675-153 — 검증된 가상 WLD 현금 지갑 잔액 임계치 자발적 알림 (기능 추가 / DRAFT / RELEASE HOLD) — 이슈 #1619
+
+**회차·정본:** 이전 기능 보완 v1386 → 현재 기능 추가 v1388 → 다음 기능 보완 v1390(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md 및 한국어 대조본 확인. 이 문서는 미병합 Draft #1611 후속 스택이며 main에 독립 병합할 수 없다. Gemini/개발 A·B·C/QA의 런타임·배포 담당 영역은 변경하지 않는다. **런타임·DB·Test·운영·기능 스위치·WLD·원장 변경 금지.**
+
+### 실제 구현 확인 및 중복 방지
+- `frontend/src/app/wallet/page.tsx`는 `GET /api/v1/wallet?recent=50`을 조회하며, `frontend/src/app/wallet/sides.ts`의 `balances.cash`, `balances.bank`, `totalAvailableAmount`는 정규 정수 문자열이다. `backend/src/wallet/wallet.service.ts`의 `USER_CASH`와 `USER_BANK`는 **서로 다른 지갑**이다. 은행 예금·대출·주식·총자산을 현금 잔액으로 오인하지 않는다.
+- 최신 main에는 본인 설정형 `cash-watch` API·DB·화면을 확인하지 못했다. 기존 `backend/src/notification` 알림 API가 있으나 F675-149의 본인 알림함·Outbox 기획은 미병합 선행 조건이다. F675-125 월간 명세서, F675-134 보안 활동 기록, F675-151 장애 구독과 중복하지 않는다.
+- WLD는 **서비스 내부 가상 단위**로 법정화폐·예금·투자상품이 아니다. 이 기능은 선택형 개인 안내이며 사기 예방, 손실 방지, 지급 보장, 재정 위험 경고를 약속하지 않는다. 공포를 이용한 재방문 마케팅 금지. 자동 송금·출금·발행·보상·구매·금융 원장 쓰기 금지.
+
+### 목적·권한·진입점·화면·상태
+- **목적:** 동의 완료·활성 상태의 로그인 회원이 현금 지갑의 임계치를 직접 설정하고, *검증된 관측값*이 임계치 이상에서 미만으로 이동했을 때 기준 시각이 표시된 앱 내 안내를 받도록 한다. 기본 OFF, 회원당 활성 설정 하나. 비회원·대리 계정·공개 조회·외부 발송 없음.
+- **진입:** `/wallet` 현금 패널 → `현금 잔액 알림 관리` → `/wallet/cash-watch`; `/account/notifications?category=wallet` → `알림 보기` → 본인 전용 상세. CTA `알림 켜기`, `임계치 저장`, `알림 끄기`, `알림 기록 보기`, `검증 상태 새로고침`. 항상 **가상 WLD·현금 지갑만·관측 기준 시각·실시간 보장 아님** 표기.
+- **상태:** OFF, SAVING, ENABLED_BASELINE_BELOW(최초 설정 시 이미 미만이면 새 하락 알림 생성 안 함), ARMED(최근 검증 현금 >= 임계치), BELOW_NOTIFIED(검증된 하락 알림 1건), DATA_UNAVAILABLE/STALE(0으로 가정하거나 알림 생성 금지), DISABLED/SESSION_EXPIRED, CONFLICT(현재 버전 제시, 덮어쓰기 금지), ERROR/RETRY. 임계치 이상 관측이 다시 확인된 경우에만 재무장한다. 임계치 변경은 새로운 세대와 기준값을 시작하며 과거 관측을 하락 사건으로 만들지 않는다.
+- **개인정보:** 현금 잔액·임계치·상대방·예금·대출·알림 본문은 공개 SEO, 이메일·문자·푸시·Discord, 분석, URL, 로그에 기록하지 않는다. 타인 설정은 조회 불가. 관리자는 고정 기간·지연 집계 및 k>=20 작은 셀 억제·차분 공격 방어를 적용한 총계만 본다.
+
+### 제안 API와 검증 계약
+- `GET /api/v1/wallet/cash-watch`: 세션·동의·본인 확인; `{enabled,thresholdWld,version,generation,state,observedCashWld,sourceObservedAt,stale,latestReceiptId}`. 검증 불가 현금값은 null, 임의 0 금지. 개인 응답 `Cache-Control: no-store`, `Vary: Cookie`. Next 서버 전용 BFF로 Nest 내부 토큰을 숨긴다.
+- `PUT /api/v1/wallet/cash-watch`: 세션·동의·CSRF, 정확히 `{enabled:boolean,thresholdWld:string,expectedVersion:string,idempotencyKey:UUID}`만 허용. 미지원 필드·클라이언트 소유자 ID 거부. 정규 양의 정수 `^[1-9][0-9]{0,17}$`, PostgreSQL NUMERIC·JS BigInt로만 비교, 부동소수점 금지. 활성화 시 임계치 필수, 비활성화 시 비공개 설정값 유지. CAS 충돌 409, 유효성 400/422, 과다 요청 429, 출처 장애 503. DB 커밋 영수증 전 성공 표시 금지. 동일 멱등 키·동일 내용은 기존 영수증, 내용이 다르면 거부.
+- `DELETE /api/v1/wallet/cash-watch`: 인증·CSRF, `{expectedVersion,idempotencyKey}`로 비활성 세대를 커밋하고 기존 작업자 차단. `GET /api/v1/wallet/cash-watch/events?cursor&limit`: 본인 불변 영수증, 소유자·세션 결합 불투명 서명 커서, `(observed_at,id)` 결정적 정렬, 페이지 최대 50. 타인·없는 ID는 동일 404, 계정 열거 불가. Android App API의 권한·오류·상태 계약 동등, 내부 토큰 전달 금지.
+- 이 기능은 지갑 조회·알림만 수행한다. 법적 금융 보호·24시간 상시 탐지·정확한 거래 발생 시각·즉시 발송을 보장하지 않는다.
+
+### PostgreSQL 제약·트랜잭션·작업자
+- **전진 전용 독립 심사 스키마 제안:** `wallet_cash_watch_settings` (회원 FK 및 소유자 UNIQUE, 삭제 시 개인정보·보존 검토 후 ON DELETE CASCADE, 임계치 NUMERIC(38,0) CHECK >0 및 <=999999999999999999, enabled, generation BIGINT, version BIGINT, 상태 CHECK, last_verified_cash nullable, last_observed_at, next_check_at, updated_at); `wallet_cash_watch_events` (설정 FK, 세대, transition_seq, 출처 스냅샷 해시, observed_at, 불변 영수증, UNIQUE(watch_id,generation,transition_seq)); `wallet_cash_watch_idempotency` (owner/key UNIQUE, 요청 해시·불변 응답); `wallet_cash_watch_outbox` (사건 FK UNIQUE, 전달 상태·리스·재시도). 작업자 인덱스 `(enabled,next_check_at,id)`, 본인 기록 인덱스 `(watch_id,observed_at DESC,id DESC)`. 기존 015 마이그레이션·원장 기록 수정이나 실제 회원 자동 소급 생성 금지.
+- **근거:** PostgreSQL 일관 읽기 스냅샷의 본인 `USER_CASH`만 사용하고 원장 정합성 확인. 잔액·원장 불일치, 누락, 오래된 스냅샷, DB 장애, 커밋 순서 불명, 정규 금액 위반은 **UNKNOWN / 알림 생성 금지**. 주기적 관측은 짧은 하락을 놓칠 수 있으므로 실제 거래 시각·거래 ID를 만들어내지 않고 관측 시각만 제공한다. 금융 소유자의 읽기 경계 승인 및 실 PostgreSQL 부정 권한 테스트 필요.
+- **원자성:** 제한된 작업자 리스 → 설정 행 `FOR UPDATE` → 세대·버전 검증 → 일관 관측 → CAS 상태 전이 + 사건·Outbox 삽입을 **하나의 트랜잭션**으로 처리하고 실패 시 전체 롤백. 알림 삽입 전 현재 세대·활성 상태 재검증, `UNIQUE(watch,generation,transition_seq)` 및 알림 고유 키로 재시도 중복 방지. 해제 커밋 이후 **신규** 알림 삽입 금지, 이전에 정상 발송된 알림은 과거 기록으로 남을 수 있다. 재활성화는 새 세대. 제한된 배치·지수 백오프·실패 격리, 금융 거래 재시도 없음.
+- **보안:** 앱 계정의 설정·사건·Outbox·원장 직접 DML 금지, 특권 함수 PUBLIC EXECUTE 금지. 함수의 `p_actor` UUID 또는 호출자 설정 GUC는 독립 인증 증거가 아니므로 신뢰할 수 있는 세션 결합·별도 제한 작업자 경계를 보안·DB 담당자가 설계하고 실제 앱 역할의 부정 테스트로 증명한다. 핵심 원장 트리거나 광범위 GRANT 추가 금지.
+
+### 관리자·접근성·SEO·분석·검증·배포
+- 관리자: 가입/활성 설정, 검증된 하락, UNKNOWN, 재시도, 중복 억제의 총계만, k>=20·차분 공격 억제·권한 감사. 회원별 잔액·임계치 열람 및 마케팅 대상 추출 금지. 비공개 화면 `noindex,nofollow,noarchive`, sitemap 제외, `no-store`, 구조화 데이터 금지.
+- 320/375/390/414px, 확대 200%, 키보드, 스크린리더 상태 알림, 44px 터치 영역, WCAG 2.2 AA, 국영문·Android 동등성. 오프라인/오류는 가짜 하락으로 표시 금지. KPI 기준선 UNKNOWN: 설정 완료, 검증된 하락, 세대당 중복 알림(목표 0), 허위 알림(목표 0), 관측 지연, 전달 지연, 해제, 개인정보 불만.
+- **P0 ENV1388-01:** Test/운영 링크 누락·DB 공유·독립 복원·용량; **SEC1388-02:** 앱 금융 직접 DML·마이그레이션 283 중복·세션/역할 경계·원장 대사; **REL1388-03:** 전체 감사·CI·정확 SHA 공식 Test 로그인·금융 E2E·복원·승인 GitOps; **CASH1388-04:** 타인·위조 임계치, 오래되거나 불일치하는 잔액, 중복·재무장·해제 경합 방지.
+- **P1 CASH1388-05:** DB 스키마/FK/CHECK/UNIQUE/인덱스·전진 마이그레이션; **CASH1388-06:** 일관 관측·CAS·원자적 Outbox·작업자 재시도; **CASH1388-07:** NestJS/Next.js/Android API·CSRF·오류·요청 제한; **CASH1388-08:** 회원·관리자 UI·국영문·접근성; **CASH1388-09:** 보존·법률·개인정보·SEO·KPI·악용 방지; **CASH1388-10:** 격리 PostgreSQL 권한·원장·10,001건 합성 관측, 동시 변경·작업자 경합 100건, 위조 소유자/CSRF 100건, 모바일/Android·복원·롤백 회귀. **수용시험 전부 미실행.**
+- QA v1329: main 마이그레이션 283 중복, 개발 DB 앱 역할 241개 테이블 중 235개 직접 DML 및 잔액·국고 변경 권한, Test 배포 링크 대상 누락. 봇 후보 브랜치의 의존성 감사 0건은 main/전체 보안 통과가 아니다. 정확 SHA 공식 Test·독립 복원·인증 금융 E2E·운영승격 **BLOCKED**. `wallet_cash_watch_v1` 기본 OFF. 별도 개발 브랜치 RED/GREEN → 실제 격리 DB 부정 테스트 → 정확 SHA 공식 Test → 승인된 무중단 GitOps·롤백 후에만 승격.
+- **외부 근거 게이트:** 신규 독립 승인 **0건**, 누적 중복 제거·승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 연구 후보 수와 표준 문서를 승인된 10,000건으로 계산 금지. OWASP ASVS 5·PostgreSQL 트랜잭션/권한·WCAG 2.2는 설계 참고자료이지 배포 증거가 아니다.
+
+---
+
 ## v1386 / F675-152 — 계정 보안 사건 알림의 출처·소유권·복구 무결성 보완 (기능 보완 / 초안 / 운영승격 보류) — Draft PR #1611, 이슈 #1597
 
 **회차와 기준.** 이전 기능 추가 v1384 → 현재 기능 보완 v1386 → 다음 기능 추가 v1388(잠정). v1380/v1382는 별도 블로그 기획. 시작·중간 main `4f5efd1f48615f0112701feec25a9b0fc67d9719`, main AGENTS.md·README.md·영어 정본 PROJECT_PLAN.md·국문 동등 문서 확인. 본 PR은 미병합 Draft #1598 위에 쌓인 기획 전용 변경으로 독립 병합 금지. 실제 개발·배포는 A/B/C/Gemini/QA 소관.

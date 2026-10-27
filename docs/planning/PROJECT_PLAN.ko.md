@@ -1,3 +1,8 @@
+## 2026-10-28 v1388 — F675-153 가상 WLD 현금 지갑 잔액 임계치 자발적 알림 (기능 추가 / DRAFT / RELEASE HOLD)
+- 이전 보완 v1386 → 현재 추가 v1388 → 다음 보완 v1390(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`; AGENTS·README·영문 정본 기획 및 국문 대조. 미병합 #1611 후속 Draft, 개발 이슈 #1619, 독립 main 병합 금지. 런타임·DB·원장·Test·운영 변경 없음.
+- 기존 지갑은 USER_CASH와 USER_BANK를 구분하지만 본인 임계치 알림 API는 없다. 가상 WLD 현금 지갑 하나를 자발적으로 설정하여 검증된 관측 >=→<일 때 세대당 한 번 안내, 최초 미만·출처 불명은 가짜 알림 금지, 실시간/금융 보호·마케팅 약속 금지, WLD 변경 없음. F675-149 알림함 선행. 화면·CTA·API·DB·작업자·권한·접근성·SEO·KPI 상세는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 ENV1388-01 SEC1388-02 REL1388-03 CASH1388-04; P1 CASH1388-05 CASH1388-06 CASH1388-07 CASH1388-08 CASH1388-09 CASH1388-10. QA v1329: 개발 앱 직접 DML 235/241(잔액·국고 포함), 마이그레이션 283 중복, Test 배포 링크 대상 누락. 봇 후보 감사 0건은 main 승인 아님. 정확 SHA 공식 Test·금융 E2E·복원 BLOCKED. 합성 10,001/100/100 미실행. 외부 근거 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED / IN PROGRESS. 기능 OFF, 운영 HOLD.
+
 ## 2026-10-28 — 기획 v1386 / F675-152 보안 사건 출처·소유권·재로그인 복구 무결성 (기능 보완 / 초안 / 운영 보류)
 - GitHub Draft PR #1611(미병합 #1598 후속), 이슈 #1597; 이전 추가 v1384 → 현재 보완 v1386 → 다음 추가 v1388(잠정). 별도 블로그 v1380/v1382 변경 없음. main 4f5efd1f48615f0112701feec25a9b0fc67d9719 시작·중간, AGENTS·README·영어 정본/국문 기획 대조.
 - 실제 소스: Migration 214 SECURITY DEFINER가 세션 확인 없이 임의 사용자 UUID 수신, Migration 180의 사건 소유자 삭제 시 NULL, 기존 이력 API 사건 ID 누락, 비밀번호 재설정/이메일 변경 시 모든 세션 철회로 재로그인 전 앱 내 알림 열람 불가 가능성. 운영 침해·실제 전달 주장 금지, OAuth 근거 미확인. 개발 DB 읽기 전용 유효 권한: 앱 역할 auth_security_events SELECT/INSERT/UPDATE/DELETE 모두 TRUE, auth_sessions SELECT/UPDATE TRUE. 실제 침해 아닌 P0 최소권한 이탈.
@@ -234,6 +239,8 @@
 
 
 # 월덕 머니버스 — Living Project Plan
+
+
 - Draft PR / 기획 초안: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1457 (stacked on #1452; no main merge). Engineering issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1456
 - 최신 main 추가 근거: frontend/src/components/floating-support-chat-widget.tsx도 /app-api/v1/support/threads 및 답장을 전송하며, 답장 텍스트를 fetch 전에 지우고 처리된 오류에서만 복구하므로 응답 불명/창 닫힘 시 유실 위험을 설계에 반영. 위젯에는 이미지 URL 첨부가 있으나 v1328 임시글은 **텍스트 전용**으로, 첨부를 몰래 제거·저장·복구한 척하지 않음. 텍스트만 저장 CTA 제공(또는 /support 안내), 기존 첨부 전송은 보존. localStorage 음소거 설정은 임시글 보관이 아님. /support·플로팅 위젯·Android 모두 회귀 검증.
 

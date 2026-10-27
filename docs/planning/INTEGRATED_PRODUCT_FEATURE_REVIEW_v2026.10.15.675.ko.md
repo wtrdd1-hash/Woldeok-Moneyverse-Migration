@@ -1,3 +1,12 @@
+## F675-153 / v1388 — 검증된 가상 WLD 현금 잔액 자발적 알림 (기능 추가 / DRAFT / RELEASE HOLD)
+**실제 공백:** main `/wallet`은 `/api/v1/wallet?recent=50`을 조회하고 `USER_CASH`·`USER_BANK` 및 정규 정수 문자열을 구분하지만, 회원 설정형 현금 임계치 알림 API·UI·DB는 확인되지 않았다. F675-149 본인 알림함은 미병합 선행 조건이다. 실시간 잔액 하락 탐지가 구현됐다는 근거 없음.
+**제품 계약:** 회원이 가상 현금 지갑만 선택적으로 설정; 최초 미만은 하락 알림 아님; 검증된 관측값 >=→< 변화만 세대당 앱 내 알림 1회, 다시 >= 확인 후 재무장. 관측 시각·UNKNOWN 상태를 정확히 표기하고 손실·사기·실물 금융 보호 약속 금지. 외부 문자·이메일·푸시, WLD·원장 변경 없음. 회원 `/wallet/cash-watch`, 비공개 알림 연결, 관리자 총계만.
+**개발 계약:** 본인 GET/PUT/DELETE 및 기록 GET, 정규 WLD/BigInt, CAS·버전·UUID 멱등성, 세션·동의·CSRF, 타인/없는 ID 동일 404, 충돌 409, 요청 제한 429, 근거 장애 503. 추가형 본인 UNIQUE 설정·세대·사건/Outbox/영수증 FK/CHECK/인덱스, 일관 스냅샷, 트랜잭션 상태+Outbox, 해제 세대 차단, 앱 직접 DML/PUBLIC 특권 실행 금지. `p_actor`/GUC 자체는 본인 증명 아님. Android·WCAG 2.2 AA·noindex/no-store·k>=20 관리자 총계·개인정보 KPI·OFF 스위치.
+**P0:** ENV1388-01, SEC1388-02, REL1388-03, CASH1388-04. **P1:** CASH1388-05, CASH1388-06, CASH1388-07, CASH1388-08, CASH1388-09, CASH1388-10. **시험 미실행:** 합성 관측 10,001건, 동시 CAS·작업자 경합 100건, 위조 소유자 100건, 격리 PG·원장 대사·Android/320px/200% 확대·정확 SHA Test·복원·롤백.
+**운영 보류:** QA v1329 봇 후보 감사 개선은 마이그레이션 283 중복, 개발 앱 역할 광범위 DML, Test 배포 대상 누락, 인증 E2E·복원 문제를 해결한 증거가 아니다. 운영 BLOCKED. 신규 승인 외부 근거 0, 누적 중복 제거·승인 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 문서만 변경; 별도 개발 이슈 #1619, #1611 후속 Draft.
+
+---
+
 ## F675-152 / v1386 — 보안 사건 출처·복구 무결성 보완 (기능 보완)
 **실제 코드:** Migration 214 앱 역할 SECURITY DEFINER 임의 사용자 UUID, Migration 180 사용자 삭제 시 사건 소유자 NULL, 기존 이력 API 사건 ID 없음, 비밀번호 재설정·이메일 변경 성공 시 모든 세션 철회. 침해·전달 확인 아님, OAuth 범위 미확인. main 알림 전체 읽음 후 남은 수 재조회 영수증은 이미 있으나 목록 OFFSET은 남아 있고 보안 사건 개별 검토 영수증은 별도다. 개발 DB 유효 권한 측정에서 앱 역할의 auth_security_events SELECT/INSERT/UPDATE/DELETE, auth_sessions SELECT/UPDATE 모두 TRUE. P0 권한 출처·부정 시험 필요.
 **설계:** 확정 사건 ID+원자적 Outbox, 허위·소급 알림 금지, 재로그인 대기, 소유자 HMAC 커서·멱등 영수증, 고아 사건/비식별 보존·원본 소유자 일치, API/Android 동등성, 관리자 집계만, no-store/noindex, 국영문 WCAG 2.2 AA. DB 세션 증명 실패 시 차단; 임의 UUID·변경 가능한 GUC 단독 인증 금지.

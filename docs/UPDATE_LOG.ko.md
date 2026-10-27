@@ -1,3 +1,7 @@
+## 2026-10-28 — 기획 v1388 / F675-153 현금 지갑 잔액 알림 (기능 추가 / DRAFT / RELEASE HOLD)
+- 이전 보완 v1386 → 현재 추가 v1388 → 다음 보완 v1390(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, 미병합 #1611 후속, 이슈 #1619. 영문 정본·국문 동등 기획/통합 검토·작업일지 반영; 런타임·DB·금융·Test·운영 변경 없음.
+- 실제 USER_CASH/USER_BANK 분리 및 임계치 알림 미구현 확인. 자발적 본인 관측 알림, 마케팅·실시간 보장·원장 변경 금지. P0 ENV1388-01 SEC1388-02 REL1388-03 CASH1388-04; P1 CASH1388-05 CASH1388-06 CASH1388-07 CASH1388-08 CASH1388-09 CASH1388-10. QA v1329 운영 보류, 합성 시험 미실행, 외부 신규 승인 0/누적 UNKNOWN/10,000 BLOCKED.
+
 ## 2026-10-28 — 기획 v1386 / F675-152 (기능 보완 / 초안 / 운영승격 보류)
 - Draft PR #1611은 #1598 후속, 이슈 #1597. 이전 추가 v1384 / 현재 보완 v1386 / 다음 추가 v1388. main 4f5efd1f48615f0112701feec25a9b0fc67d9719 재조회, 정본 AGENTS/README/영문·국문 기획 확인. 스킬 커넥터 빈 목록, miniPC 설치 스킬 사용.
 - Migration 214 임의 UUID SECDEF, 180 사건 소유자 ON DELETE SET NULL, 재설정·이메일 변경 시 세션 철회, 기존 이력 API 사건 ID 누락 확인. 운영 침해 주장 아님. 개발 DB 읽기 전용 유효 권한에서 앱 역할 auth_security_events SELECT/INSERT/UPDATE/DELETE 및 auth_sessions SELECT/UPDATE 모두 TRUE 확인, P0 권한 이탈이며 데이터 변경 시도 없음. QA v1328 Draft #1610 격리 실 PG CI PASS지만 main 283 중복·봇 Critical1/High5·공식 Test/복원 보류.
