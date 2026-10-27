@@ -83,7 +83,7 @@ describe('admin catalog authoritative evidence', () => {
   });
 
   it('uses independently validated unknown API payloads and withholds event creation on unavailable evidence', () => {
-    const source = readFileSync('src/app/admin/catalog/page.tsx', 'utf8');
+    const source = readFileSync(new URL('./page.tsx', import.meta.url), 'utf8');
     expect(source).toContain('parseBusinessCatalog');
     expect(source).toContain('parseSeasonCatalog');
     expect(source).toContain('apiOrNull<unknown>');
