@@ -23,13 +23,15 @@
 - This containment does not fix broad app-role DML, SQL authority, or frontend/Android unavailable UX.
 
 ### Task 1 — Test and implement HTTP/service containment
-- [ ] Add failing HTTP and service tests for borrow and repay, including guard metadata and GET preservation.
-- [ ] Run focused tests; record RED failure.
-- [ ] Implement HTTP 503 and service-level fail-closed behavior.
-- [ ] Run focused tests; record GREEN.
+- [x] Add failing HTTP and service tests for borrow and repay, including guard metadata and GET preservation.
+- [x] Run focused tests; record RED failure.
+- [x] Implement HTTP 503 and service-level fail-closed behavior.
+- [x] Run focused tests; record GREEN.
 
 ### Task 2 — Repository defense in depth and verification
-- [ ] Add failing repository tests asserting no Pool connection for borrow/repay.
-- [ ] Run tests; record RED.
-- [ ] Remove direct-balance mutation implementations and fail closed before SQL.
-- [ ] Run focused and broader gates, record exact SHA, limitations, review and PR.
+- [x] Add failing repository tests asserting no Pool connection for borrow/repay.
+- [x] Run tests; record RED.
+- [x] Remove direct-balance mutation implementations and fail closed before SQL.
+- [x] Run focused and broader gates, record exact SHA, limitations, review and PR.
+
+**Gate disposition:** Source-level containment implemented and focused tests pass; release BLOCKED by full frontend/DB/Test/E2E verification and Moderate `qs` advisory. Do not claim end-to-end functionality.
