@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-- Development handoff: [Issue #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789); planning Draft PR pending. Stacked on unmerged #1784 / #1780; no release.
+- Development handoff: [Issue #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789); [Draft PR #1790](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1790). Stacked on unmerged #1784 / #1780; no release.
 
 ## v1444 / F675-167 — Verified financial glossary self-check practice (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 

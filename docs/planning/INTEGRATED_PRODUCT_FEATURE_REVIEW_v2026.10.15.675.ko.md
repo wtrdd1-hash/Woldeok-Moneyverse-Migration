@@ -1,5 +1,7 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+- [Draft PR #1790](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1790)는 미병합 #1784를 기반으로 한 문서 전용 기획.
+
 ## v2026.10.29.1444 — F675-167 검증 가능한 금융 용어 자가점검 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - 이전 기능 보완 v1442 → 현재 기능 추가 v1444 → 다음 기능 보완 v1446(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 동일, QA v1357 FAILED/HOLD. 미병합 #1784/#1780 후속 기획이며 [개발 이슈 #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789)로 연계.
 - main에는 금융 용어 50개·별도 시스템 용어 12개, 4개 언어 정적 페이지와 86400초 ISR이 있지만 조사 범위에 검증된 퀴즈 문제은행·본인 시도/점수 영수증·대응 DB가 없다. 회원이 선택하는 5문항은 언어별 독립 승인된 서로 다른 용어 5개, 문항당 선택지 4개·정답 1개, 불변 개정·서버 전용 정답·원본 영수증을 요구한다. 자동 읽음·숙련·보상·WLD·원장 변경 없음.

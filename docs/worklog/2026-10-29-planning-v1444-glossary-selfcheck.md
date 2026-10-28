@@ -9,3 +9,5 @@ Source: frontend/src/config/pseo-glossary.config.ts (50 finance terms), frontend
 Design: five independently approved questions per selected locale with four choices, server-only answer key, immutable bank and term revision, explicit private start/submit and committed owner receipt, 10 starts/day, 30-minute expiry, 90-day retention, admin independent review/revoke, no WLD or automatic learning claims. Full technical contract, API/DB/CTA/status/SEO/a11y/KPI/rollback and ENV1444-01 FIN1444-02 SEC1444-03 REL1444-04 QUIZ1444-05 QUIZ1444-06 QUIZ1444-07 QUIZ1444-08 QUIZ1444-09 QUIZ1444-10 are in the existing bilingual integrated master. Development only after isolated branch and exact-SHA official Test gates.
 
 External reference gate: newly accepted 0, cumulative UNKNOWN/10,000, BLOCKED / IN PROGRESS. No production-linked database, runtime, balances, Test or Production changed. No merges. Planning-only artifact awaits review.
+
+Draft PR #1790: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1790 (unmerged; stacked on #1784).

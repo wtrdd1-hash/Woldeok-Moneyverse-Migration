@@ -9,3 +9,5 @@
 기획: 언어별 독립 검토된 5문항·선택지 4개·정답 1개, 서버 전용 정답, 불변 용어/문제 개정, 회원 본인 시작·제출·원본 영수증, 하루 10회·30분 만료·90일 보존, 관리자 작성자/심사자 분리·철회, 보상/원장 변경 없음. 전체 화면/API/DB/권한/SEO/접근성/KPI/회귀/롤백과 ENV1444-01 FIN1444-02 SEC1444-03 REL1444-04 QUIZ1444-05 QUIZ1444-06 QUIZ1444-07 QUIZ1444-08 QUIZ1444-09 QUIZ1444-10는 기존 국영문 통합 마스터에 반영했다. 별도 개발 브랜치와 공식 Test exact-SHA 전 운영승격 금지.
 
 외부 독립 레퍼런스 신규 승인 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 런타임·운영 연결 DB·잔액·Test·Production 변경이나 병합 없음. 기획 초안 심사 대기.
+
+Draft PR #1790: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1790 (unmerged; stacked on #1784).

@@ -1,6 +1,6 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-- 개발 연계: [이슈 #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789); 기획 Draft PR 작성 예정. 미병합 #1784 / #1780 후속이며 운영 미승격.
+- 개발 연계: [이슈 #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789); [Draft PR #1790](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1790). 미병합 #1784 / #1780 후속이며 운영 미승격.
 
 ## v1444 / F675-167 — 검증 가능한 금융 용어사전 자가점검 퀴즈 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
