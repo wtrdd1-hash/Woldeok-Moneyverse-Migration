@@ -1,5 +1,7 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+[Draft PR #1794](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1794) — documentation-only, unmerged, release HOLD.
+
 ## v2026.10.29.1446 — F675-167 quiz/daily-quest boundary and receipt hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - Previous Addition v1444 -> Current Improvement v1446 -> Next Addition v1448 (provisional); main `35971c600f25869c96f1c666d4b9f58927202730` unchanged start/mid, QA v1358 FAILED/HOLD. Draft planning stacked on #1790/#1784/#1780; not implemented.
 - **Source conflict:** existing daily station advertises `quest_financial_quiz` for 1,000 WLD and `/#financial-quiz` has no target anchor in inspected main. `DopamineRepository.claimDailyQuest` does not check actual quiz completion; controller fallback can fabricate a success response if repository missing. This is a source risk, not proven Production abuse. Existing finance issue [#1321](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1321) owns payout remediation.

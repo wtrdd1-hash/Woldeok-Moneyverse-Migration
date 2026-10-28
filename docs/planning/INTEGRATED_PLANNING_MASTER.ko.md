@@ -2,6 +2,8 @@
 
 ## v1446 / F675-167 — 금융 용어 퀴즈·보상 퀘스트 격리 및 영수증 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
 
+**개발 인계:** [Draft PR #1794](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1794) (선행 #1790/#1784/#1780), [이슈 #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789).
+
 **주기·기준.** 이전 기능 추가 v1444 → 현재 기능 보완 v1446 → 다음 기능 추가 v1448(잠정). 시작·중간 main `35971c600f25869c96f1c666d4b9f58927202730`, QA v1358 FAILED/HOLD. 미병합 #1790의 F675-167을 보완하며 선행 #1784/#1780 의존성을 유지한다. 실제 퀴즈 구현이 아닌 문서 초안이다.
 
 ### 실제 코드 충돌과 결정

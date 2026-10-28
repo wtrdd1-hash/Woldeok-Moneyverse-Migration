@@ -1,5 +1,7 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+[Draft PR #1794](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1794) — documentation-only, unmerged, release HOLD.
+
 ## v2026.10.29.1446 — F675-167 퀴즈·일일 보상 격리와 영수증 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 - 이전 추가 v1444 → 현재 보완 v1446 → 다음 추가 v1448(잠정). 시작·중간 main `35971c600f25869c96f1c666d4b9f58927202730` 동일, QA v1358 FAILED/HOLD. 미병합 #1790/#1784/#1780 의존, 미구현.
 - **실제 코드 충돌:** 일일 퀘스트 `quest_financial_quiz`는 1,000 WLD 보상과 `/#financial-quiz` 링크를 표시하나 검색한 main에 대응 앵커는 없다. `DopamineRepository.claimDailyQuest`는 퀴즈 완료 증빙을 검사하지 않고 저장소 부재 시 컨트롤러 모의 성공 응답 경로가 있다. 이는 소스상 위험이며 운영 악용 입증이 아니다. 보상 정산은 기존 금융 이슈 [#1321](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1321)이 담당한다.

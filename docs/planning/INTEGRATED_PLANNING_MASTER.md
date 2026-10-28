@@ -2,6 +2,8 @@
 
 ## v1446 / F675-167 — Quiz/quest reward boundary and receipt integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
+**Handoff:** [Draft PR #1794](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1794) (stacked on #1790/#1784/#1780); [development issue #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789).
+
 **Cycle / authority.** Previous Feature Addition v1444 -> Current Feature Improvement v1446 -> Next Feature Addition v1448 (provisional). Main `35971c600f25869c96f1c666d4b9f58927202730` checked at start and midpoint, QA v1358 FAILED/HOLD. This proposal extends unmerged F675-167 Draft #1790, itself stacked on #1784/#1780. It is a documentation-only candidate; no verified glossary quiz exists in inspected main.
 
 ### Source-backed conflict and decision
