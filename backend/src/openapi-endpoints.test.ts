@@ -61,13 +61,14 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
     expect(settleRes.settledAmountWld).toBe(144000);
   });
 
-  it('가상 파생상품 & 10x 레버리지 선물 엔드포인트 정상 동작', async () => {
+  it('derivatives read APIs reject unverified synthetic markets, positions and settlement history', async () => {
     const controller = new DerivativesController();
-    const markets = await controller.listMarkets();
-    expect(markets.markets.length).toBeGreaterThan(0);
-
-    const positions = await controller.listMyPositions(mockReq);
-    expect(positions.positions.length).toBeGreaterThan(0);
+    for (const read of [() => controller.listMarkets(), () => controller.listMyPositions(), () => controller.getTradeHistory()]) {
+      expect(read).toThrow(expect.objectContaining({
+        status: 503,
+        response: expect.objectContaining({ code: 'DERIVATIVES_DATA_UNVERIFIED' }),
+      }));
+    }
 
     // Unbacked leverage actions are deliberately blocked until the ledger is authoritative.
     await expect(controller.openPosition(mockReq, {
@@ -82,8 +83,6 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
       idempotencyKey: 'b1b2c3d4-e5f6-7890-abcd-ef1234567891',
     })).rejects.toMatchObject({ status: 503 });
 
-    const history = await controller.getTradeHistory(mockReq);
-    expect(history.history.length).toBeGreaterThan(0);
   });
 
   it('가상 스타트업 VC 엔젤투자 & 크라우드펀딩 엔드포인트 정상 동작', async () => {
