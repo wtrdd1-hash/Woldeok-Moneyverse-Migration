@@ -11,3 +11,8 @@
 
 ## Finished
 - Pending tests and release disposition.
+
+### Code checkpoint
+- RED: 3 backend and 1 frontend regressions failed on original main (`red-backend.log`, `red-frontend.log`).
+- Removed autonomous synthetic tax, portfolio, coupon and direct account balance SQL from `evaluateAndRebalance`; scheduler never arms even with both environment flags. Preserved read-only SWF and config functions, and separate liquidation path (integration with #1751 required).
+- Nest admin rebalance endpoint now 503 with CSRF guard; Next admin gateway 503 before any upstream dispatch. This is a safety hold, not a funded SWF implementation.
