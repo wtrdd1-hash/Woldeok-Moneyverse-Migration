@@ -1,5 +1,44 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1446 / F675-167 — 금융 용어 퀴즈·보상 퀘스트 격리 및 영수증 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
+
+**주기·기준.** 이전 기능 추가 v1444 → 현재 기능 보완 v1446 → 다음 기능 추가 v1448(잠정). 시작·중간 main `35971c600f25869c96f1c666d4b9f58927202730`, QA v1358 FAILED/HOLD. 미병합 #1790의 F675-167을 보완하며 선행 #1784/#1780 의존성을 유지한다. 실제 퀴즈 구현이 아닌 문서 초안이다.
+
+### 실제 코드 충돌과 결정
+- `frontend/src/components/daily-economic-quest-station.tsx`는 `quest_financial_quiz`에 **1,000 WLD 보상**을 표시하고 `/#financial-quiz`로 연결하지만, main 프론트엔드 검색에서 대응 앵커 요소는 확인되지 않았다. `backend/src/engagement/dopamine.repository.ts`의 `claimDailyQuest`는 퀘스트 ID와 당일 청구 이력을 검사하지만 확인한 경로에는 **실제 정답 제출·완료 영수증 검증이 없다**. `dopamine.controller.ts`는 저장소가 없을 때 모의 성공 응답을 반환한다. 이는 소스상 위험이지 운영 악용·실제 지급의 입증이 아니다. 보상 정산 문제는 기존 [#1321](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1321)이 담당하며 A/B/C/QA의 코드를 덮어쓰지 않는다.
+- F675-167은 별도의 **보상 없는 자발적 교육 퀴즈**이며 `glossary_practice` 네임스페이스만 사용한다. 일일 보상 API `/app-api/v1/engagement/dopamine/daily-quest/claim` 호출, `quest_financial_quiz` 완료 이벤트, `all_clear` 조건 충족, 업적·WLD 지급, 지갑·국고·`ledger_transactions`·`ledger_postings`·`account_balances`·금융 outbox 변경을 **모두 금지**한다. 퀴즈와 보상 청구의 요청 UUID·영수증도 공유하지 않는다. 기존 `/#financial-quiz` 링크를 보상 없는 퀴즈로 조용히 변경하거나 1,000 WLD를 준다고 암시하지 않는다.
+- 추후 사용자가 보상 연계를 별도 승인할 때만 신뢰할 수 있는 서버 완료 증빙(회원·퀘스트·날짜·개정), 일회성 적격성, DB 소유 원자적 복식분개, 원장 대사, 악용 방지, 원본 멱등 영수증, 공식 Test·운영승격을 포함하는 **독립 금융 명세**가 필요하다. 본 기획으로 보상 지급이나 과거 소급 지급은 승인되지 않는다.
+
+### 진입점·화면·권한·상태·문구
+- 공개 `/guide/glossary` 및 검증된 정규 용어 페이지에는 선택적 **금융 용어 5문항 연습(보상 없음)** CTA만 제공한다. 비회원은 시작 없이 로그인 안내, 인증된 동의 회원은 `/account/learning/glossary/practice`에서 `ko|en|ja|zh`를 선택하고 명시적으로 시작한다. 언어별 승인된 서로 다른 금융 용어 5개, 각 4개 선택지, 건너뛰기, 30분 만료, UTC 기준 최근 24시간 시작 10회, 언어당 활성 시도 1개, 비공개 기록 90일 보존. 읽음·학습성취 자동 표시 금지, 0~5점은 투자능력 인증이 아니다.
+- 상태: SIGN_IN_REQUIRED, UNAVAILABLE_NO_APPROVED_BANK, READY, STARTING, IN_PROGRESS, SUBMITTING, RECEIPT_UNKNOWN, SUBMITTED_VERIFIED, EXPIRED, REVOKED, CONFLICT_409, RATE_LIMITED_429, SERVER_UNVERIFIED_503, ERROR. 클라이언트 추측으로 성공·점수·보상을 표시하지 않는다. 타임아웃이면 **같은 UUID**로 원본 영수증을 조회하고, 미존재가 확인된 경우에만 동일 페이로드로 재시도한다. 로그아웃·계정 전환은 진행 중 응답·선택지·커서·비공개 캐시를 무효화한다. no-store/noindex, 공개 공유 링크·사이트맵·분석에 개인 결과 제외.
+- 키보드 라디오 그룹, 독립 검수한 4개 언어 문구, 320px·200% 확대, 포커스 복구, TalkBack, 상태 알림 영역, 색상 외 정오표시를 보장한다. 만료된 시도는 UI 타이머로 연장하지 않고 할당량 내 새 시도를 안내한다. 별도 보상 일일 퀘스트와 관계없음을 명시한다.
+
+### 문제은행·정답 보안·발행 검증
+- **공개 가능한 메타데이터**(문제은행 ID/개정, 언어, 용어 ID, 검수 출처, 콘텐츠 SHA, 실제 배포 SHA)와 **서버 전용 정답 자료**(정답 choice ID, 채점 매핑, 제출 전 해설)를 물리적·권한상 분리한다. 네 가지 선택지나 정답 ID는 경우의 수가 적으므로 단순 해시도 정답 보안을 보장하지 않는다. Next 정적/ISR·Android 번들·CDN·로그·분석·소스맵에 정답, 정답 해시, 채점 분기 또는 관리자 미리보기를 노출하지 않는다. 난독화 대신 서버 최소권한을 적용한다.
+- 편집자와 서로 다른 검토자가 언어별 불변 문항 개정, 중복 없는 선택지 4개·정답 1개, 실제 근거와 이용권을 승인한다. 승인 내역을 `term_id`, `term_revision`, `locale`, `bank_revision`, 문항/선택지 지문 및 배포 SHA에 연결한다. 출처·개정·배포가 검증되지 않거나 철회되면 시작을 차단한다. 자기 초안 자기 승인 금지, 외부 URL 허용목록, 회원 입력 임의 URL의 서버 fetch 금지. 철회 후 새 시도·미제출 시도 차단, 이미 확정된 영수증은 당시 개정 그대로 보존한다.
+
+### API·DB·트랜잭션·동시성·오류 계약
+- v1444의 비공개 웹/NestJS/Android `/api/v1/guide/glossary-practice` 및 `/app-api/v1/...` 계약을 유지하고 engagement/dopamine 보상 경로와 분리한다. `POST /attempts`: 인증 회원에서 파생한 actor, requestId UUID, expectedBankRevision. `POST /attempts/:id/submit`: 해당 시도의 문항 5개, 서버 발급 선택지 ID 또는 null, requestId UUID, expectedVersion/BankRevision. `GET /receipts/:requestId`는 회원·세션 한정 불변 원본 영수증, 목록은 회원·세션·필터·만료 HMAC 커서. 클라이언트 userId·점수·보상 플래그·정오 여부를 권한으로 신뢰하지 않는다.
+- 순방향 추가형 PostgreSQL 설계: 회원+시도 복합 FK, `(user_id,request_id)`에 operation+정규 페이로드 지문 결합, `(attempt_id,position)` 1~5 유일성, 서로 다른 용어 5개, 시작 당시 선택지 순서·문항 개정 불변 스냅샷, 서버 전용 정답 저장. 고정 search_path의 제한된 SECURITY DEFINER, PUBLIC EXECUTE·앱 직접 DML 금지. 회원→시도→문항 순서로 잠금, 최근 24시간 할당량·제출을 직렬화한다. 같은 UUID 다른 내용은 409, 오래된 개정 409, 철회/만료 410, 선택지 오류 422, 할당량 429, 검증 불가능한 은행/배포 503. 저장소나 채점 권위가 없으면 **503 실패 차단**하고 모의 성공·점수를 반환하지 않는다. 채점 결과와 영수증을 한 트랜잭션에 확정하고 동일 재시도에는 원본 영수증을 반환한다.
+- 제출 전 정답 추측을 돕는 오류·시간 차이를 방지하고 확정 제출 전 정오 정보 제공 금지. 문항 노출은 회원/IP 속도제한과 서버가 고정한 선택지 순서로 제한하되 접근성 재시도는 부당하게 차단하지 않는다. 관리자의 승인·철회는 최근 재인증·독립 검토·감사 기록이 필요하다. 관리자 KPI는 대상 회원 20명 이상 집계만, 개인 선택 답변은 일반 분석에 넣지 않는다.
+
+### 회귀시험·배포·P0/P1 개발 인계
+- **P0 ENV1446-01:** QA v1358 루트 98%(약 2.0GiB), 데이터 99%(약 3.4GiB), `/tmp` 97%. 용량 확보·독립 오프사이트 암호화 백업 복호화/복원 선행, 타 작업자 자료 보존.
+- **P0 FIN1446-02:** USER_CASH 18명 총 +18,000 WLD 불일치와 기존 보상 퀘스트 증빙·정산 [#1321](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1321). 교육 퀴즈에서 WLD 보상 호출 완전 차단, 금융 담당자가 별도 원장·적격성 검증. 가짜 분개 금지.
+- **P0 SEC1446-03:** 앱 직접 쓰기 239개 관계, PUBLIC 은행 함수 3개, 체크섬 불일치 5개/미적용 20개. 회원 권한·서버 전용 정답·저장소 부재 503 실패 차단 검증, 기존 마이그레이션 수정 금지.
+- **P0 REL1446-04:** main runtime CI SKIPPED, 공식 Test SHA `cfb13272...`가 main과 불일치, 운영 버전 unknown. 정확 HEAD 전체 CI·격리 실제 PG·인증 Test exact-main E2E·백업/롤백·승인 GitOps 필수. 빌드 성공만으로 병합·운영승격 금지.
+- **P1 QUIZ1446-05:** 문제은행·용어·배포 개정, 서버 전용 정답 분리, 독립 검토·철회, 공개 manifest의 약한 정답 해시 금지.
+- **P1 QUIZ1446-06:** PostgreSQL 회원 복합 FK·5개 불변 스냅샷·24시간 한도·원자 채점/영수증·동시 UUID 재시도·잠금 순서.
+- **P1 QUIZ1446-07:** NestJS·Next·Android API/DTO·no-store 회원 영수증 동등성, 503/409/410/422/429, 세션·CSRF·앱 bearer 음성시험.
+- **P1 QUIZ1446-08:** 보상 없는 별도 CTA, 기존 일일 퀘스트 앵커 #1321 검토, 4개 언어 접근성, 계정 전환·타임아웃 복구.
+- **P1 QUIZ1446-09:** 독립 관리자 편집·심사·철회 감사, 개인정보 삭제, SEO·집계 KPI, 정답 오라클·스크래핑 방지.
+- **P1 QUIZ1446-10:** 격리 실제 PG 합성 시도 10,001건, 동시 시작/제출 100건, 타인/CSRF/UUID 위조 100건, 저장소 부재·정답 유출·철회·ISR·30분 만료·원본 영수증·일일 퀘스트 완전 격리 및 **연습 기능에 의한 WLD/원장 변화 0** 검증. 동시 다른 금융 활동이 있는 운영 총합이 아니라 격리된 통제 시험으로 입증한다.
+- 기능 플래그 기본 OFF, 롤백 시 새 시작·제출 차단과 기존 영수증 보존, 파괴적 DB 작업 금지. 구현은 개발 담당의 별도 브랜치·정확 SHA Test 게이트·승인 후 진행. QA v1358의 공개 HTTP 50/50·모바일 36/36 통과는 회원 인증 퀴즈·금융 E2E 통과가 아니다. 운영승격 보류.
+
+**외부 독립 근거 게이트:** 신규 중복제거·검증 승인 **0건**, 누적 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 용어·문항·GitHub 이슈·합성 기록·발행기관 수는 승인된 외부 독립 근거 수가 아니다. 이번 결과는 기획 초안이며 구현·배포가 아니다.
+
+
 - 개발 연계: [이슈 #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789); [Draft PR #1790](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1790). 미병합 #1784 / #1780 후속이며 운영 미승격.
 
 ## v1444 / F675-167 — 검증 가능한 금융 용어사전 자가점검 퀴즈 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
