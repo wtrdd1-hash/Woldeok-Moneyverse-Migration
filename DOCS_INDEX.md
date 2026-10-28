@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.28.1423 — Treasury dividend Production DB-only containment
+- [EN worklog](docs/worklog/2026-10-28-treasury-db-production-containment-v1423.md) · [KO](docs/worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md) · [Internal EN](docs/updates/v2026.10.28.1423-internal.md) · [Internal KO](docs/updates/v2026.10.28.1423-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.28.1423-github.md) · [GitHub KO](docs/updates/v2026.10.28.1423-github.ko.md) · [Release](docs/releases/v2026.10.28.1423.md).
+
 ## v2026.10.28.1422 — Treasury payout ledger label CI fix
 - [KO evidence](docs/worklog/2026-10-28-treasury-wallet-label-v1422.ko.md) · [EN](docs/worklog/2026-10-28-treasury-wallet-label-v1422.md) · [Internal](docs/updates/v2026.10.28.1422-internal.ko.md) · [GitHub](docs/updates/v2026.10.28.1422-github.md).
 
