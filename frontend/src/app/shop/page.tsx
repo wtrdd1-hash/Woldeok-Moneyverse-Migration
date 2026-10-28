@@ -90,7 +90,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           />
         </PageHeader>
 
-        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl flex-wrap gap-2" role="search">
+        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2 flex-wrap" role="search">
           <input
             type="search"
             name="q"
