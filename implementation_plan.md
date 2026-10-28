@@ -1018,3 +1018,13 @@ flowchart TD
   1. 기존 최상단 추천 글(featuredPost)에만 국한되던 썸네일 노출을 하단 '최신 금융 아티클 목록(regularPosts)' 전체 카드로 전격 확장.
   2. 각 카드 상단에 16:9 비율의 전용 이미지 뷰어 컨테이너(spect-[16/9], group-hover:scale-105)를 탑재.
   3. 아티클에 heroImage가 없거나 레거시 글인 경우에도 기본 인포그래픽 SVG(/images/blog/compound-interest-72-rule.svg)가 fallback으로 자동 바인딩되어 화면상에 이미지가 없는 빈 카드가 절대 발생하지 않도록 100% 보장.
+---
+## 🚀 [v264 Specification] Nginx 블로그 라우팅 단일화(3484 ➔ 3354 원자적 전환) 및 라이브 실측 완료
+- **적용 일시**: 2026-10-29 08:53 KST
+- **작업 내용**:
+  1. 기존 Nginx 설정에 잔존하던 과거 임시 릴리즈 포트(3484)를 정식 최신 프로덕션 프론트엔드 포트(3354)로 전면 단일화.
+  2. Nginx 설정 문법 검증(
+ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
+  3. 라이브 HTTPS 실측 검증:
+     - 대상: https://easy-scraping.com/blog
+     - 결과: 블로그 허브 내 전체 14개 아티클 카드에서 고해상도 SVG 인포그래픽 이미지가 **14건 모두 100% 정상 렌더링**됨을 실측 확인.
