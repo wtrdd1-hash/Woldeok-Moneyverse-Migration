@@ -1,5 +1,13 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v2026.10.29.1442 — F675-166 금융 용어 정규 식별자·언어별 읽음 무결성 강화 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- 사이클: Previous Addition v1440 → Current Improvement v1442 → Next Addition v1444(잠정). 원격 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재확인, 선행 Draft #1780 미병합. 마지막 확인 가능 QA v1355 FAILED/HOLD, 새 QA 결과는 미인증.
+- 실제 소스: 정규 PSEO 금융 용어 50개, 별도 서비스 용어 ID 12개(교집합 0), 다국어 별칭 5개. volatility → sharpe-ratio는 동의어가 아니다. ko/en/ja/zh 페이지의 86400초 ISR과 언어 변경을 고려하여 불변 term ID·namespace, 검증된 별칭만 허용, 언어별 읽음 revision을 명세했다.
+- 회원만 저장/삭제, 언어별 자발적 읽음/취소, 원본 digest 영수증, 회원·세션·필터·스냅샷 서명 커서, 100개 제한, 409 revision/422 별칭/503 권위 불일치 구분, Android 동등성, 개인정보/noindex/a11y/롤백. 상세 계약은 영문·국문 통합문서. 보상·학습 성취·WLD·원장 효과 없음.
+- P0 ENV1442-01 FIN1442-02 SEC1442-03 REL1442-04; P1 GLOS1442-05 GLOS1442-06 GLOS1442-07 GLOS1442-08 GLOS1442-09 GLOS1442-10. 개발 DB 실측 247개 public 테이블 중 235개 moneyverse_app INSERT/UPDATE/DELETE 가능, 루트 98%·데이터 99%, 이전 QA 18,000 WLD 차이·마이그레이션/복원/정확 SHA 미해결. RELEASE HOLD.
+- 외부 독립 중복제거·검증 승인 신규 0건, 누적 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS. 문서 전용이며 runtime/DB/WLD/Test/Production/main 병합 없음.
+
+
 ## v2026.10.29.1440 — F675-166 회원 전용 금융 용어 학습 목록 (기능 추가 / DRAFT / RELEASE HOLD)
 - GitHub 연계: [Draft PR #1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780), [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779). 미병합·운영 보류.
 - 이전 기능 보완 v1438 → 현재 기능 추가 v1440 → 다음 기능 보완 v1442(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재조회, QA v1355. 실제 main의 GLOSSARY_TERMS 공개 용어 상세는 24시간 ISR이며 본인 전용 용어 저장/읽음 API는 없다. 미병합 F675-165 정정 제안과 별도 기능.

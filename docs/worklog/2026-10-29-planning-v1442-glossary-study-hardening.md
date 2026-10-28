@@ -1,0 +1,7 @@
+# v1442 — F675-166 planning worklog (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- START 2026-10-29 05:08 KST: miniPC Debian 13.6, skills__list empty; installed Superpowers using-superpowers/brainstorming/writing-plans/worktrees/verification skills read. Canonical main AGENTS.md, README.md, PROJECT_PLAN.md and PROJECT_PLAN.ko.md read; remote main SHA 35971c600f25869c96f1c666d4b9f58927202730; predecessor #1780 open.
+- MID 05:11 KST: remote main and predecessor unchanged; real source inventory confirms 50 canonical finance slugs, 12 distinct in-guide glossary IDs, 5 locale aliases with volatility -> sharpe-ratio semantic mismatch, 24h ISR. Read-only dev DB: 247 public tables, moneyverse_app INSERT/UPDATE/DELETE on 235; root/data disk 98%/99%. Last available QA v1355, no new QA result certified.
+- DESIGN: Keep F675-166 scope but replace slug-owned state with immutable term_id, reviewed alias quarantine, ko/en/ja/zh per-revision voluntary read marks, owner/session-bound cursor and original digest receipts. No feature code or DB deployment.
+- BACKLOG: P0 ENV1442-01 FIN1442-02 SEC1442-03 REL1442-04; P1 GLOS1442-05 through GLOS1442-10. Full contract in bilingual integrated master.
+- END: documentation-only stacked PR after #1780, GitHub issue #1779 update and CI status recorded separately. No claim of passing actual PostgreSQL, exact-SHA Test, backup restore, finance reconciliation or Production promotion.
+- External reference gate: 0 new approved, cumulative UNKNOWN / 10,000, BLOCKED / IN PROGRESS. No runtime/DB/WLD/Test/Production changes.
