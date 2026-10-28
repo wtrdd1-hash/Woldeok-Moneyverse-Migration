@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v1404 — F675-157 verified member support unread receipts (Feature Addition / DRAFT / RELEASE HOLD)
+- Previous Improvement v1402 → Current Addition v1404 → Next Improvement v1406 (provisional). Canonical main `a28bed9aa40ff74d492824ae12892a7d52132fdd` start/mid; issue #1669. Docs only, independent of A/B/C/QA and blog work. Full implementation-ready EN/KO design in `INTEGRATED_PLANNING_MASTER.md` and companion.
+- Source-backed gap: `/support` and floating support widget show administrator messages without persistent member read state; migration 196 has no support read receipt, and `waiting_user` does not mean unread. Read-only DEV 3 threads/6 messages; app role can UPDATE support_threads and DELETE support_messages. Design explicit owner-only mark-read, atomic per-thread sequence, legacy cutover baseline (not a claim of past read), immutable replay receipts, no GET side effects, NestJS/Next/Android parity, private no-store/noindex, WCAG 2.2 AA, aggregate-only admin KPI.
+- P0 `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04`; P1 `SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`. QA v1337 #1663 PR mass-closure, #1661 blog ACL, #1660 smoke failure; current main full QA, official Test exact-SHA, independent restore and Production promotion NOT verified. Feature OFF, no code/DB/WLD/Test/Production writes, acceptance tests specified not run. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- Full IDs: `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
+
+
 ## v2026.10.28.1405 — Blog two-hour multilingual publishing directive (SOURCE CANDIDATE)
 - Latest owner policy overrides mandatory human review. Two-hour KST country×topic rotation, four native languages and ECONOMY/CODING/COMPUTER. Automated independent quality validation gates publication; no verified article auto-unpublishes; administrator may optionally edit/private/delete later. Unverifiable finance/AI claims skipped (not sent for mandatory human review).
 - [Full EN spec](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.md) / [KO](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.ko.md). Pure rotation, scheduler and policy code only, not live writer. No official Test, production or DB content modifications. Google-served ads cannot be placed on uncurated auto-generated pages; ads and public visibility have separate policies.

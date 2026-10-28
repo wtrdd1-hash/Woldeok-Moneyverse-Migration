@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v1404 — F675-157 관리자 문의 새 답변·읽음 영수증 (Feature Addition / 기획 초안 / 배포 보류)
+- 이전 Improvement v1402 → 현재 Addition v1404 → 다음 Improvement v1406(잠정). 시작·중간 main `a28bed9aa40ff74d492824ae12892a7d52132fdd`, 이슈 #1669. A/B/C/QA·블로그와 분리한 문서 기획이며 상세 영문 정본·한국어 동등 명세는 `INTEGRATED_PLANNING_MASTER.md` 및 한국어 대조본 참조.
+- 실제 코드의 `/support`·플로팅 위젯에는 회원 읽음 상태가 없고 Migration 196에도 영수증이 없다. `waiting_user`는 읽지 않음의 증거가 아니다. 개발 DB 읽기 전용 3개 문의/6개 메시지, 앱 역할의 문의 UPDATE·메시지 DELETE 권한 확인. 회원 소유 명시적 읽음, 스레드별 원자적 순번, 도입 전 과거 메시지의 읽음 여부 미확인 기준선, 불변 멱등 영수증, GET 부작용 금지, NestJS/Next/Android 동등성, no-store/noindex, WCAG 2.2 AA, 관리자 집계만 설계.
+- P0 `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04`; P1 `SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`. QA v1337 #1663 미병합 PR 대량 닫힘, #1661 블로그 권한, #1660 스모크 실패. 최신 main 전체 QA·공식 Test 정확 SHA·독립 복원·운영 승격 미검증. 기능 기본 OFF, 코드/DB/WLD/Test/Production 미변경, 수용시험 명세만 작성. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- 전체 ID: `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
+
+
 ## v2026.10.28.1405 — 2시간 국가·주제 자동 블로그 최신 사용자 지시(코드 후보)
 - 사람의 필수 사전·사후 검토는 없애고, KR/US/JP/CN 원어·경제/코딩/컴퓨터 소재를 KST 2시간마다 순환. 사실·원문 출처·중복·권리 자동검증 적합 글만 바로 공개, 관리자만 나중에 선택적 수정/비공개/삭제. 미검토 경과 시간에 따른 자동 비공개·삭제 전면 금지. 검증 실패 글은 공개 건너뜀.
 - [국문 상세](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.ko.md) / [영문](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.md). 순수 로테이션/스케줄러 코드만 작성했으며 AI 원어 작성·신규 DB 발행·공식 Test/운영 미적용. Google 광고는 수동 큐레이션 없는 자동 콘텐츠에서 제외해야 함.

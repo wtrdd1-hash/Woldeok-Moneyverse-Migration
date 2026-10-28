@@ -1,5 +1,12 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1404 — F675-157 verified member support unread receipts (Feature Addition / DRAFT / RELEASE HOLD)
+- Previous Improvement v1402 → Current Addition v1404 → Next Improvement v1406 (provisional). Canonical main `a28bed9aa40ff74d492824ae12892a7d52132fdd` start/mid; issue #1669. Docs only, independent of A/B/C/QA and blog work. Full implementation-ready EN/KO design in `INTEGRATED_PLANNING_MASTER.md` and companion.
+- Source-backed gap: `/support` and floating support widget show administrator messages without persistent member read state; migration 196 has no support read receipt, and `waiting_user` does not mean unread. Read-only DEV 3 threads/6 messages; app role can UPDATE support_threads and DELETE support_messages. Design explicit owner-only mark-read, atomic per-thread sequence, legacy cutover baseline (not a claim of past read), immutable replay receipts, no GET side effects, NestJS/Next/Android parity, private no-store/noindex, WCAG 2.2 AA, aggregate-only admin KPI.
+- P0 `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04`; P1 `SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`. QA v1337 #1663 PR mass-closure, #1661 blog ACL, #1660 smoke failure; current main full QA, official Test exact-SHA, independent restore and Production promotion NOT verified. Feature OFF, no code/DB/WLD/Test/Production writes, acceptance tests specified not run. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- Full IDs: `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
+
+
 ## F675-06 detailed adoption — v2026.10.15.688
 
 - [Google Search Evidence & Canonical Action Center](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) is the next v675 adopted **detailed planning** feature. Reuses /admin/seo and v685; identifies top-10-only GSC data, missing date=0, GSC PT/freshness, crawler-indexed mislabel and legacy index submission success/Google Indexing API misclaims. Separates source/submission/Google indexed-version/performance into independently verifiable evidence, 16 Google/WCAG references and D0–D7 gated implementation. Not a live SEO audit or deployed feature.

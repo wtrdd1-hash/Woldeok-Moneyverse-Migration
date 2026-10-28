@@ -1,5 +1,12 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1404 — F675-157 관리자 문의 새 답변·읽음 영수증 (Feature Addition / 기획 초안 / 배포 보류)
+- 이전 Improvement v1402 → 현재 Addition v1404 → 다음 Improvement v1406(잠정). 시작·중간 main `a28bed9aa40ff74d492824ae12892a7d52132fdd`, 이슈 #1669. A/B/C/QA·블로그와 분리한 문서 기획이며 상세 영문 정본·한국어 동등 명세는 `INTEGRATED_PLANNING_MASTER.md` 및 한국어 대조본 참조.
+- 실제 코드의 `/support`·플로팅 위젯에는 회원 읽음 상태가 없고 Migration 196에도 영수증이 없다. `waiting_user`는 읽지 않음의 증거가 아니다. 개발 DB 읽기 전용 3개 문의/6개 메시지, 앱 역할의 문의 UPDATE·메시지 DELETE 권한 확인. 회원 소유 명시적 읽음, 스레드별 원자적 순번, 도입 전 과거 메시지의 읽음 여부 미확인 기준선, 불변 멱등 영수증, GET 부작용 금지, NestJS/Next/Android 동등성, no-store/noindex, WCAG 2.2 AA, 관리자 집계만 설계.
+- P0 `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04`; P1 `SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`. QA v1337 #1663 미병합 PR 대량 닫힘, #1661 블로그 권한, #1660 스모크 실패. 최신 main 전체 QA·공식 Test 정확 SHA·독립 복원·운영 승격 미검증. 기능 기본 OFF, 코드/DB/WLD/Test/Production 미변경, 수용시험 명세만 작성. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- 전체 ID: `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
+
+
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
 
 - [GSC 실제 검색성과·색인 증거 센터 상세기획](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 정식 상세기획으로 채택. 기존 /admin/seo·v685 재사용, GSC 날짜/상위 10개·무행0·크롤러 색인 오인·레거시 제출 성공/Google Indexing API 안내 오류 기록, 기술·제출·Google 색인본·검색 노출 실제 증거 분리, 구글/WCAG 16개 자료·D0~D7. 실제 SEO/GSC 운영 검증이나 코드 배포 아님.
