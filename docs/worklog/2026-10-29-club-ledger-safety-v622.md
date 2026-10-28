@@ -10,7 +10,7 @@ Status: IN PROGRESS / HOLD. Base: `35971c600f25869c96f1c666d4b9f58927202730`.
 
 ## Plan and checkpoints
 - [x] Inspect main, AGENTS, README, English/Korean plans, open PRs, QA and CI; use isolated worktree.
-- [ ] RED: prove both routes can call mutating services and repositories.
+- [x] RED: 4/5 new tests fail on main behavior (HTTP 201 twice, direct service and repository writes accepted); read-only directory passes. See internal red.log.
 - [ ] GREEN: reject both routes with HTTP 503 and stable `CLUB_LEDGER_SETTLEMENT_UNAVAILABLE` code before DB access.
 - [ ] Verify regression tests, lint, typecheck, build, security and API contract.
 - [ ] Recheck latest main and CI; record Test exact-SHA and Production release gates.
