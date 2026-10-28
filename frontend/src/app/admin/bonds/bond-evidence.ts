@@ -37,7 +37,7 @@ function count(value: unknown): number {
 }
 
 function percent(value: unknown): string {
-  if (typeof value !== 'string' || !yieldPattern.test(value)) throw new Error('Invalid bond yield');
+  if (typeof value !== 'string' || (value !== '—' && !yieldPattern.test(value))) throw new Error('Invalid bond yield');
   return value;
 }
 

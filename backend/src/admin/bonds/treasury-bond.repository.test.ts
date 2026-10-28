@@ -44,3 +44,23 @@ describe('TreasuryBondRepository subscription refusal', () => {
     expect(query).toHaveBeenCalledWith('ROLLBACK');
   });
 });
+
+
+describe('TreasuryBondRepository coupon-interest overview accounting', () => {
+  it('excludes maturity principal repayments from cumulative coupon interest', async () => {
+    const query = vi.fn(async (statement: string) => {
+      if (statement.includes('SUM(amount_wld)')) {
+        // The real event ledger contains both interest and principal payouts.
+        return { rows: [{ total: statement.includes("event_type = 'COUPON_INTEREST'") ? '42' : '10042' }] };
+      }
+      if (statement.includes('COUNT(*)::text')) return { rows: [{ count: '0', total_funded: '0' }] };
+      if (statement.includes('COUNT(DISTINCT')) return { rows: [{ count: '0' }] };
+      if (statement.includes('SUM(principal_wld)')) return { rows: [{ total: '0' }] };
+      return { rows: [] };
+    });
+    const repository = new TreasuryBondRepository({ query } as unknown as Pool);
+    const overview = await repository.getOverview();
+    expect(overview.totalCouponsPaidWld).toBe('42');
+    expect(query.mock.calls.some(([sql]) => sql.includes("event_type = 'COUPON_INTEREST'"))).toBe(true);
+  });
+});

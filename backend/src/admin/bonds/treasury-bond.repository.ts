@@ -179,6 +179,7 @@ export class TreasuryBondRepository {
       this.pool.query<{ total: string }>(`
         SELECT COALESCE(SUM(amount_wld), 0)::text as total
         FROM public.treasury_bond_coupon_logs
+        WHERE event_type = 'COUPON_INTEREST'
       `),
       this.pool.query<{ total: string }>(`
         SELECT COALESCE(SUM(principal_wld), 0)::text as total
