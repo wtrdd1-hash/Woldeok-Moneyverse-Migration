@@ -30,7 +30,7 @@ describe('v1414 automated official source search', () => {
     const trusted = 'https://www.bok.or.kr/portal/bbs/B0000552/view.do?nttId=1001';
     const rss = `<rss><channel><item><title>물가와 경제 분석</title><link>${trusted.replaceAll('&', '&amp;')}</link></item></channel></rss>`;
     const longArticle = '<article>' + '검증 가능한 물가 정책 기초 설명 '.repeat(120) + '</article>';
-    const fetcher = vi.fn(async (url: RequestInfo | URL) => {
+    const fetcher = vi.fn(async (url: RequestInfo | URL, _init?: RequestInit) => {
       if (String(url).includes('/news.rss')) return response(rss, 'application/rss+xml');
       if (String(url) === trusted) return response(longArticle, 'text/html');
       return response('<html>fallback</html>', 'text/html');
