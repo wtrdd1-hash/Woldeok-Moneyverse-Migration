@@ -1,0 +1,12 @@
+# Development A1325 — authenticated chat media ownership recovery
+Date: 2026-10-28 (Asia/Seoul). Status: PARTIAL / HOLD.
+
+Start: Debian 13.6 miniPC services active; development PostgreSQL connected. Root/data disk 55%/88%. main a28bed9aa40ff74d492824ae12892a7d52132fdd. Remote branches 25 (including main); open PRs 23; 352 local incident recovery refs retained. Previous PR #1621 is CLOSED/UNMERGED; its original head a11e9835934ea26c1c4cc855c4a9a7de631cfcf5 remains available.
+
+Isolation: auto/hourly-a-chat-media-ownership-recovery-20261028-1325, separate worktree under /home/debian. No other agent worktree changed. Original 286-chat-media-ownership was deliberately NOT restored under its old number: main already has immutable 286-privacy-request-returning-binding. New forward-only 291-chat-media-ownership.sql.
+
+RED: three controller assertions failed and repository/HTTP suites could not load the absent repository. GREEN: 16/16 focused backend and 27/27 Android gateway tests. Additional RED/GREEN proved that denied 404 media responses initially omitted cache-control, then received private/no-store and noindex headers before authorization. First disposable PostgreSQL attempt failed because migration was executed as postgres while functions were owned by migrator; corrected isolated harness to SET ROLE moneyverse_migrator. Second run PASS: owner, legitimate recipient, forged sender, support admin, outsider, legacy unknown key, and direct table access denied. Disposable container removed; no shared database writes.
+
+Gates before final commit: lint PASS (warnings), typecheck PASS, migration parity 6 PASS, Android contract 180 endpoints PASS, build PASS (Next Turbopack), root security audit high+ PASS (3 low, 9 moderate), Bot 11 PASS after offline dependency install and Bot audit PASS. Root test: backend 1,934 PASS / 440 SKIP, database 45 PASS / 3 SKIP, frontend 1,866 PASS / 1 FAIL. The failing admin-blog test and component Git blobs match main exactly, so this is an existing baseline mismatch; it still blocks integration. Final exact-SHA CI must be checked after push.
+
+Security/release HOLD: actor identity binding and app-role privilege risk #993 unresolved, legacy media cannot be safely backfilled without provenance and may fail closed, full-schema PostgreSQL and official exact-SHA Test authenticated E2E unavailable. No main merge, Test/Production promotion, live DB/ledger modification, branch deletion or rollback. Preserve all unique changes and all 352 incident refs.
