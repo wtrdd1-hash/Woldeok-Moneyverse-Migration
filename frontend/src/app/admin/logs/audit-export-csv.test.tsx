@@ -4,7 +4,16 @@ import { AuditLogsView } from './audit-logs-view';
 import { auditCsvCell, auditCsvDocument } from './audit-export-csv';
 
 describe('admin audit CSV export', () => {
-  it.each(['=HYPERLINK("https://bad.invalid","click")', '+SUM(1,2)', '-1+2', '@SUM(A1:A2)', '\t=1+1', '\r\n=2+2', '  =3+3', '\uFEFF=4+4'])('neutralizes spreadsheet formula prefix %j', (value) => {
+  it.each([
+    '=HYPERLINK("https://bad.invalid","click")',
+    '+SUM(1,2)',
+    '-1+2',
+    '@SUM(A1:A2)',
+    '\t=1+1',
+    '\r\n=2+2',
+    '  =3+3',
+    '\uFEFF=4+4',
+  ])('neutralizes spreadsheet formula prefix %j', (value) => {
     expect(auditCsvCell(value)).toBe(`"'${value.replace(/"/g, '""')}"`);
   });
   it('preserves ordinary text, quotes, commas and newlines without altering evidence', () => {
@@ -13,8 +22,15 @@ describe('admin audit CSV export', () => {
     expect(auditCsvCell(200)).toBe('"200"');
   });
   it('exports exactly the supplied current-page rows with an explicit scope marker', () => {
-    expect(auditCsvDocument(['action', 'actor'], [['login', '=cmd'], ['logout', 'safe']]))
-      .toBe('"action","actor"\r\n"login","\'=cmd"\r\n"logout","safe"');
+    expect(
+      auditCsvDocument(
+        ['action', 'actor'],
+        [
+          ['login', '=cmd'],
+          ['logout', 'safe'],
+        ],
+      ),
+    ).toBe('"action","actor"\r\n"login","\'=cmd"\r\n"logout","safe"');
   });
 });
 

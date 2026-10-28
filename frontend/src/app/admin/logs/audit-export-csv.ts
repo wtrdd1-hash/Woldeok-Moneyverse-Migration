@@ -4,7 +4,8 @@
  * Prefix a text marker before any cell that a spreadsheet could parse as a formula,
  * even after leading invisible characters. JSON export keeps the unmodified field values.
  */
-const FORMULA_PREFIX = /^[\u0000-\u0020\u007f\u00a0\u200b-\u200f\u2028-\u202f\u2060\ufeff]*[=+\-@]/u;
+const FORMULA_PREFIX =
+  /^[\u0000-\u0020\u007f\u00a0\u200b-\u200f\u2028-\u202f\u2060\ufeff]*[=+\-@]/u;
 
 export function auditCsvCell(value: unknown): string {
   const raw = value === null || value === undefined ? '' : String(value);
