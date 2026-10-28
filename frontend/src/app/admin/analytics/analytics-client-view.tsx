@@ -26,6 +26,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import type { AdminUser, AdminStock, ReconciliationHealth, FeatureSwitch } from '../types';
 import type { SeoInitialData } from '../seo/seo-client-view';
 import type { AnalyticsDomainEvidence } from './analytics-evidence';
+import { calculateSampleMoney } from './analytics-money';
 
 export interface AnalyticsClientViewProps {
   users?: readonly AdminUser[];
@@ -106,30 +107,8 @@ export function AnalyticsClientView({
     return { total, hau, dau, wau, mau, newUsersToday, dormant, stickiness };
   }, [effectiveUsers]);
 
-  // 2. 가상 통화량(M0/M1/M2) 및 구성 분포 계산
-  const monetaryStats = useMemo(() => {
-    let m0 = 0;
-    let bank = 0;
-    let bond = 0;
-    let stockEval = 0;
-
-    effectiveUsers.forEach((u) => {
-      m0 += Number(u.cash_balance) || 0;
-      bank += Number(u.bank_balance) || 0;
-      bond += Number(u.bond_balance) || 0;
-      stockEval += Number(u.stock_eval) || 0;
-    });
-
-    const m1 = m0 + bank;
-    const m2 = m1 + bond + stockEval;
-
-    const m0Percent = m2 > 0 ? ((m0 / m2) * 100).toFixed(1) : '0';
-    const bankPercent = m2 > 0 ? ((bank / m2) * 100).toFixed(1) : '0';
-    const bondPercent = m2 > 0 ? ((bond / m2) * 100).toFixed(1) : '0';
-    const stockPercent = m2 > 0 ? ((stockEval / m2) * 100).toFixed(1) : '0';
-
-    return { m0, bank, m1, bond, stockEval, m2, m0Percent, bankPercent, bondPercent, stockPercent };
-  }, [effectiveUsers]);
+  // The authenticated admin-user API supplies canonical integer strings; never round WLD through Number.
+  const monetaryStats = useMemo(() => calculateSampleMoney(effectiveUsers), [effectiveUsers]);
 
   // 3. 5분위 자산 계층 통계
   const quintileStats = useMemo(() => {
@@ -218,12 +197,12 @@ export function AnalyticsClientView({
     lines.push(`Dormant Users,${usersAvailable ? cohortStats.dormant : 'UNAVAILABLE'}`);
     lines.push('');
     lines.push('=== BOUNDED USER SAMPLE BALANCES (NOT GLOBAL MONEY SUPPLY) ===');
-    lines.push(`Sample Cash,${usersAvailable ? monetaryStats.m0 : 'UNAVAILABLE'}`);
-    lines.push(`Sample Bank Deposits,${usersAvailable ? monetaryStats.bank : 'UNAVAILABLE'}`);
-    lines.push(`Sample M1 Proxy,${usersAvailable ? monetaryStats.m1 : 'UNAVAILABLE'}`);
-    lines.push(`Sample Bonds,${usersAvailable ? monetaryStats.bond : 'UNAVAILABLE'}`);
-    lines.push(`Sample Stock Evaluation,${usersAvailable ? monetaryStats.stockEval : 'UNAVAILABLE'}`);
-    lines.push(`Sample Asset Sum Proxy,${usersAvailable ? monetaryStats.m2 : 'UNAVAILABLE'}`);
+    lines.push(`Sample Cash,${usersAvailable && monetaryStats !== null ? monetaryStats.m0 : 'UNAVAILABLE'}`);
+    lines.push(`Sample Bank Deposits,${usersAvailable && monetaryStats !== null ? monetaryStats.bank : 'UNAVAILABLE'}`);
+    lines.push(`Sample M1 Proxy,${usersAvailable && monetaryStats !== null ? monetaryStats.m1 : 'UNAVAILABLE'}`);
+    lines.push(`Sample Bonds,${usersAvailable && monetaryStats !== null ? monetaryStats.bond : 'UNAVAILABLE'}`);
+    lines.push(`Sample Stock Evaluation,${usersAvailable && monetaryStats !== null ? monetaryStats.stockEval : 'UNAVAILABLE'}`);
+    lines.push(`Sample Asset Sum Proxy,${usersAvailable && monetaryStats !== null ? monetaryStats.m2 : 'UNAVAILABLE'}`);
     lines.push('');
     lines.push('=== BOUNDED SAMPLE WEALTH DISTRIBUTION (NOT GLOBAL) ===');
     lines.push('Quintile,User Count,Total Wealth,Average Wealth,Share Ratio (%)');
@@ -504,26 +483,31 @@ export function AnalyticsClientView({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {usersAvailable && monetaryStats === null && (
+                  <p role="alert" className="rounded-lg border border-amber-500/50 p-3 text-sm text-amber-300">
+                    표본 금액을 검증하지 못했습니다. 원본 정수 문자열이 누락되거나 유효하지 않아 금액과 비율을 표시하지 않습니다.
+                  </p>
+                )}
                 <div className="h-6 w-full rounded-full bg-slate-950 overflow-hidden flex border border-slate-800 shadow-inner">
                   <div
                     className="bg-emerald-500 h-full transition-all duration-500"
-                    style={{ width: `${Math.max(2, Number(monetaryStats.m0Percent))}%` }}
-                    title={`M0 현금: ${monetaryStats.m0Percent}%`}
+                    style={{ width: `${monetaryStats ? Math.max(2, Number(monetaryStats?.m0Percent ?? 0)) : 0}%` }}
+                    title={`M0 현금: ${monetaryStats?.m0Percent ?? '미확인'}%`}
                   />
                   <div
                     className="bg-blue-500 h-full transition-all duration-500"
-                    style={{ width: `${Math.max(2, Number(monetaryStats.bankPercent))}%` }}
-                    title={`은행 예금: ${monetaryStats.bankPercent}%`}
+                    style={{ width: `${monetaryStats ? Math.max(2, Number(monetaryStats?.bankPercent ?? 0)) : 0}%` }}
+                    title={`은행 예금: ${monetaryStats?.bankPercent ?? '미확인'}%`}
                   />
                   <div
                     className="bg-indigo-500 h-full transition-all duration-500"
-                    style={{ width: `${Math.max(2, Number(monetaryStats.bondPercent))}%` }}
-                    title={`가상 국채: ${monetaryStats.bondPercent}%`}
+                    style={{ width: `${monetaryStats ? Math.max(2, Number(monetaryStats?.bondPercent ?? 0)) : 0}%` }}
+                    title={`가상 국채: ${monetaryStats?.bondPercent ?? '미확인'}%`}
                   />
                   <div
                     className="bg-amber-500 h-full transition-all duration-500"
-                    style={{ width: `${Math.max(2, Number(monetaryStats.stockPercent))}%` }}
-                    title={`주식 평가액: ${monetaryStats.stockPercent}%`}
+                    style={{ width: `${monetaryStats ? Math.max(2, Number(monetaryStats?.stockPercent ?? 0)) : 0}%` }}
+                    title={`주식 평가액: ${monetaryStats?.stockPercent ?? '미확인'}%`}
                   />
                 </div>
 
@@ -533,8 +517,8 @@ export function AnalyticsClientView({
                       <span className="w-2 h-2 rounded-full bg-emerald-500" />
                       M0 현금
                     </div>
-                    <p className="text-sm font-bold font-mono text-white mt-1">{monetaryStats.m0.toLocaleString()} WLD</p>
-                    <p className="text-[10px] text-slate-400">{monetaryStats.m0Percent}% 점유</p>
+                    <p className="text-sm font-bold font-mono text-white mt-1">{monetaryStats?.m0.toLocaleString() ?? '미확인'}{monetaryStats ? ' WLD' : ''}</p>
+                    <p className="text-[10px] text-slate-400">{monetaryStats?.m0Percent ?? '미확인'}% 점유</p>
                   </div>
 
                   <div className="rounded-lg bg-slate-950/60 p-2.5 border border-slate-800">
@@ -542,8 +526,8 @@ export function AnalyticsClientView({
                       <span className="w-2 h-2 rounded-full bg-blue-500" />
                       은행 예금
                     </div>
-                    <p className="text-sm font-bold font-mono text-white mt-1">{monetaryStats.bank.toLocaleString()} WLD</p>
-                    <p className="text-[10px] text-slate-400">{monetaryStats.bankPercent}% 점유</p>
+                    <p className="text-sm font-bold font-mono text-white mt-1">{monetaryStats?.bank.toLocaleString() ?? '미확인'}{monetaryStats ? ' WLD' : ''}</p>
+                    <p className="text-[10px] text-slate-400">{monetaryStats?.bankPercent ?? '미확인'}% 점유</p>
                   </div>
 
                   <div className="rounded-lg bg-slate-950/60 p-2.5 border border-slate-800">
@@ -551,8 +535,8 @@ export function AnalyticsClientView({
                       <span className="w-2 h-2 rounded-full bg-indigo-500" />
                       가상 국채
                     </div>
-                    <p className="text-sm font-bold font-mono text-white mt-1">{monetaryStats.bond.toLocaleString()} WLD</p>
-                    <p className="text-[10px] text-slate-400">{monetaryStats.bondPercent}% 점유</p>
+                    <p className="text-sm font-bold font-mono text-white mt-1">{monetaryStats?.bond.toLocaleString() ?? '미확인'}{monetaryStats ? ' WLD' : ''}</p>
+                    <p className="text-[10px] text-slate-400">{monetaryStats?.bondPercent ?? '미확인'}% 점유</p>
                   </div>
 
                   <div className="rounded-lg bg-slate-950/60 p-2.5 border border-slate-800">
@@ -560,8 +544,8 @@ export function AnalyticsClientView({
                       <span className="w-2 h-2 rounded-full bg-amber-500" />
                       주식 평가액
                     </div>
-                    <p className="text-sm font-bold font-mono text-white mt-1">{monetaryStats.stockEval.toLocaleString()} WLD</p>
-                    <p className="text-[10px] text-slate-400">{monetaryStats.stockPercent}% 점유</p>
+                    <p className="text-sm font-bold font-mono text-white mt-1">{monetaryStats?.stockEval.toLocaleString() ?? '미확인'}{monetaryStats ? ' WLD' : ''}</p>
+                    <p className="text-[10px] text-slate-400">{monetaryStats?.stockPercent ?? '미확인'}% 점유</p>
                   </div>
                 </div>
               </CardContent>

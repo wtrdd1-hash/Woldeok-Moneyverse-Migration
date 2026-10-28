@@ -5,6 +5,50 @@ import { AnalyticsClientView } from './analytics-client-view';
 import type { AdminUser, AdminStock, ReconciliationHealth, FeatureSwitch } from '../types';
 
 describe('AnalyticsClientView', () => {
+
+  it('renders exact high-value WLD sample balances rather than Number-rounded amounts', () => {
+    const largeUser: AdminUser = {
+      user_id: 'precise-user', display_name: 'Precise User', status: 'active',
+      restricted_at: null, restriction_reason: null, created_at: new Date().toISOString(),
+      cash_balance: '9007199254740993', bank_balance: '0', bond_balance: '0', stock_eval: '0',
+    };
+    render(<AnalyticsClientView users={[largeUser]} />);
+    expect(screen.getByText('9,007,199,254,740,993 WLD')).toBeDefined();
+  });
+
+  it('exports the exact WLD string to CSV and never substitutes zero for invalid data', () => {
+    const user: AdminUser = {
+      user_id: 'csv-user', display_name: 'CSV User', status: 'active',
+      restricted_at: null, restriction_reason: null, created_at: new Date().toISOString(),
+      cash_balance: '9007199254740993', bank_balance: '2', bond_balance: '0', stock_eval: '0',
+    };
+    const attrs = vi.spyOn(HTMLAnchorElement.prototype, 'setAttribute');
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const { rerender } = render(<AnalyticsClientView users={[user]} />);
+    fireEvent.click(screen.getByRole('button', { name: /CSV 리포트 내보내기/ }));
+    const firstHref = attrs.mock.calls.find(([name, value]) => name === 'href' && value.startsWith('data:text/csv'))?.[1] ?? '';
+    expect(decodeURI(firstHref)).toContain('Sample Cash,9007199254740993');
+    expect(decodeURI(firstHref)).toContain('Sample M1 Proxy,9007199254740995');
+    attrs.mockClear();
+    rerender(<AnalyticsClientView users={[{ ...user, cash_balance: 'bad' }]} />);
+    fireEvent.click(screen.getByRole('button', { name: /CSV 리포트 내보내기/ }));
+    const secondHref = attrs.mock.calls.find(([name, value]) => name === 'href' && value.startsWith('data:text/csv'))?.[1] ?? '';
+    expect(decodeURI(secondHref)).toContain('Sample Cash,UNAVAILABLE');
+    attrs.mockRestore();
+    click.mockRestore();
+  });
+
+  it('marks invalid sample money unavailable instead of rendering it as zero', () => {
+    const badUser: AdminUser = {
+      user_id: 'bad-user', display_name: 'Bad User', status: 'active',
+      restricted_at: null, restriction_reason: null, created_at: new Date().toISOString(),
+      cash_balance: 'bad', bank_balance: '0', bond_balance: '0', stock_eval: '0',
+    };
+    render(<AnalyticsClientView users={[badUser]} />);
+    expect(screen.getByText(/표본 금액을 검증하지 못했습니다/)).toBeDefined();
+    expect(screen.queryByText('0 WLD')).toBeNull();
+  });
+
   it('does not claim route uptime, successful IndexNow delivery or real-time refresh without evidence', () => {
     render(<AnalyticsClientView usersAvailable={false} apiDomains={null} seoData={null} />);
     expect(screen.queryByText(/99\.99%/)).toBeNull();
