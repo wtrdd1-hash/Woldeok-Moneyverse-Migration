@@ -49,6 +49,26 @@ function filterShopItems<T extends SearchableShopItem>(items: readonly T[], quer
   );
 }
 
+/** Optional member catalogue stock selector. Reject arrays and unknown values before SQL. */
+export function requireShopStockFilter(value: unknown): 'available' | undefined {
+  if (value === undefined) return undefined;
+  if (value === 'available') return 'available';
+  throw new BadRequestException('stock must be available');
+}
+
+/** A listed stock of null is unlimited; zero is sold out, not a price promise. */
+export function filterShopStock<T extends { readonly quantity: number | null }>(
+  items: readonly T[],
+  stock: 'available' | undefined,
+): T[] {
+  if (!stock) return [...items];
+  return items.filter(
+    (item) =>
+      item.quantity === null ||
+      (typeof item.quantity === 'number' && Number.isSafeInteger(item.quantity) && item.quantity > 0),
+  );
+}
+
 /**
  * ShopController for Store 2.0 & Cosmetics
  */
@@ -133,13 +153,18 @@ export class ShopController {
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; optional q searches code/name/description/category' })
-  async catalog(@Req() request: RequestWithSession, @Query('q') query?: string) {
+  @ApiOperation({ summary: 'The member catalogue; optional q and stock=available filters' })
+  async catalog(
+    @Req() request: RequestWithSession,
+    @Query('q') query?: string,
+    @Query('stock') stock?: unknown,
+  ) {
+    const availability = requireShopStockFilter(stock);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+    return { catalogItems: filterShopStock(filterShopItems(catalogItems, query), availability) };
   }
 
   @Get('holdings')

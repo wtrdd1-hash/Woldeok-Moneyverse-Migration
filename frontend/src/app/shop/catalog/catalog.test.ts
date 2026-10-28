@@ -11,6 +11,7 @@ import {
   purchaseLimitLabel,
   purchaseMessage,
   stockLabel,
+  stockCatalogApiPath,
   useMessage,
 } from './catalog';
 import type { CatalogItem } from './catalog';
@@ -290,5 +291,17 @@ describe('useMessage', () => {
     });
     expect(message).toContain('지금 확인할 수 없어요');
     expect(message).not.toContain('0개');
+  });
+});
+
+
+describe('member catalogue stock query', () => {
+  it('uses the owner-only catalogue and forwards the available-stock selector', () => {
+    expect(stockCatalogApiPath('available')).toBe('/api/v1/shop/catalog?stock=available');
+  });
+
+  it('does not send unknown selectors to the member API', () => {
+    expect(stockCatalogApiPath(undefined)).toBe('/api/v1/shop/catalog');
+    expect(stockCatalogApiPath('invalid')).toBe('/api/v1/shop/catalog');
   });
 });
