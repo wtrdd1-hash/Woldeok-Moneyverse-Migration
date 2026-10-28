@@ -14,3 +14,5 @@
 
 ## Finished
 - Pending final gate evidence and release disposition.
+
+- RED: focused receipt test fails before implementation (exit 1).
