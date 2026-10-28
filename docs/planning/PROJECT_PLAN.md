@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.29.1432 — F675-164 private support drafts (PLANNING DRAFT / HOLD)
+- Previous Improvement v1430, Current Addition v1432, Next Improvement v1434 provisional. Actual /support lacks server drafts; propose 20 slots/30-day retention, atomic send, immutable receipts, Android/a11y and private API. Ten P0/P1 backlog IDs: [Integrated EN](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md). QA v1351 blockers, disk 99%, official Test/restore unverified, external newly accepted 0/cumulative UNKNOWN of 10,000. Docs only.
+
+
 ## v2026.10.28.1423 — Treasury DB-only safety promotion (no app cutover)
 - Applied migration 291 to authority Production PostgreSQL after fresh verified backup and isolated Production-schema rehearsal. Existing unaudited citizen dividend fails closed, four-arg canonical payout registered; account sums/ledger transaction count unchanged and live backend health200. Finance PR #1706 CI PASS merged to main `3c251d93`, not a live frontend/backend code deployment. Historical 18k WLD discrepancy, zero canonical Treasury funding, migrations 269–287 gap, official Test and disk97% leave full app release gated. [Evidence](../worklog/2026-10-28-treasury-db-production-containment-v1423.md).
 

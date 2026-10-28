@@ -1,5 +1,34 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v1432 / F675-164 — Private support drafts and verified resume (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+Cycle: previous Feature Improvement v1430; current Feature Addition v1432; next Feature Improvement v1434 (provisional). Source main 35971c600f25869c96f1c666d4b9f58927202730. Source files: frontend/src/app/support/page.tsx and actions.ts, backend/src/support/support.controller.ts and support.repository.ts, packages/database/migrations/196-user-admin-support-chat.sql. The existing member support flow has new-thread and reply forms that send immediately; no server-side draft routes or draft schema. This is a proposed new feature, not an implemented change or evidence of Production data loss.
+
+Purpose: members can save and resume unfinished support inquiries and replies across web and Android. Entry: /support and /support?thread=<owner-verified UUID>. Actions: Save draft, Resume, Discard, Send, Resolve conflict. States: EDITING, SAVING, SAVED_SERVER(version,time), FAILED, OFFLINE_UNSAVED, CONFLICT, EXPIRED, THREAD_UNAVAILABLE, SUBMIT_UNKNOWN, SENT_RECEIPT, DISCARDED. No success before durable receipt. Default explicit Save; optional opt-in autosave with 1.5-second debounce. Max 20 drafts per member: one new inquiry and 19 replies. Subject <=120, body <=2000 characters. Drafts expire 30 days after last successful save; GET never renews expiry. Never store message bodies in browser localStorage or show them to administrators.
+
+Proposed API (not deployed): GET /api/v1/support/drafts?limit=20&cursor=opaque returns owner-only metadata; GET /api/v1/support/drafts/:id returns private body; POST creates kind=new|reply slot; PUT with If-Match version and UUID Idempotency-Key updates; DELETE tombstones; POST /api/v1/support/drafts/:id/send atomically creates support thread/message, consumes draft and returns receiptId, threadId/messageId, replayed and stateAtCommit. Existing direct support API remains. On timeout query receipt by the same key. Errors 400 malformed, 401 guest, 403 consent/CSRF/inactive, indistinguishable 404 foreign/missing, 409 CAS or replay mismatch, 410 expired owner draft, 429 quota, 503 unknown. Actor from session only. NestJS/Next.js BFF/Android App API parity and private no-store required.
+
+DB proposal: support_drafts(UUID PK,user FK,kind,thread FK nullable,subject/body,version>0,status active/consumed/discarded,saved_at,expires_at); CHECK new has NULL thread and reply has non-NULL thread. Partial unique active new per user and active reply per user/thread. Owner keyset index (user_id,saved_at DESC,id DESC), expiry index (expires_at,id). Immutable support_draft_receipts unique(user_id,request_key), operation, normalized payload digest, version and result IDs, no raw content. Transaction: lock owner row then draft then support thread, verify ownership and version, call existing support_create_thread or support_add_message with stable key, mark draft consumed and record receipt in same transaction. Replays cannot restore consumed/discarded drafts. Review lock ordering against admin writers. SECURITY DEFINER with pg_catalog,pg_temp search_path, schema-qualified tables, active-member checks, REVOKE direct app/PUBLIC table DML and minimum EXECUTE. Additive migration only; coordinate numbering with other workers.
+
+Security and UX: no admin access to drafts, no public previews, SEO noindex/nofollow, no sitemap, no-store, redact content from logs/analytics/notifications. Origin, Sec-Fetch-Site, session, consent, CSRF, account/IP rate limits, content-size checks. Verify backup encryption before claiming encryption. Legal hold and 30-day purge do not delete submitted messages. Account switch fences stale requests and clears private memory. WCAG 2.2 AA keyboard, aria-live save states, zoom 200%, 320px layout, reduced motion, Android TalkBack. KPI aggregate consented save/resume/send, conflicts, unknown outcomes, expiration, denial and duplicate rate.
+
+P0/P1 backlog:
+- P0 ENV1432-01: shared data disk 99%, 2.6GiB free, backup incident #1718, independently verified off-host restore and safe capacity.
+- P0 FIN1432-02: QA v1351 development database 18 account balance differences totaling 18,000 WLD; no unverified ledger adjustment.
+- P0 SEC1432-03: member draft ownership, database grants and migration parity, support privacy.
+- P0 REL1432-04: official Test exact-SHA, authenticated support and finance checks, rollback approval.
+- P1 SUP1432-05: schema, unique constraints, indexes and immutable receipts.
+- P1 SUP1432-06: per-owner limits, version CAS, atomic send and retry concurrency.
+- P1 SUP1432-07: NestJS, Next.js BFF and Android App API parity.
+- P1 SUP1432-08: accessible draft UI, save/resume/discard/send and account isolation.
+- P1 SUP1432-09: aggregate-only administration, privacy, SEO and KPI.
+- P1 SUP1432-10: isolated PostgreSQL regression with 10,001 synthetic drafts, 100 concurrent requests and 100 authorization negatives; tests not run.
+
+Acceptance: two-device resume returns last acknowledged version; concurrent edits return 409; timeout and retry create one message and one receipt; unsubmitted drafts are never in the admin inbox; other members cannot access them; expired drafts cannot be sent; GET never writes. Engineering requires separate branch and TDD, feature switch support_private_drafts OFF. Additive migration, isolated database checks, official Test exact-SHA web/Android/admin verification, staged opt-in and approved Production only after all P0 gates. Rollback turns feature OFF while retaining receipts; no destructive schema rollback. Planning does not deploy.
+
+External independent evidence gate: newly accepted 0, cumulative deduplicated verified accepted UNKNOWN / 10,000; BLOCKED / IN PROGRESS. Searched pages and synthetic fixtures do not count.
+
+
 ## v2026.10.28.1423 — Production DB-only treasury dividend protection
 - Real Production migration291 applied after verified encrypted backup; blocking old direct-wallet payout and adding canonical UUID transaction entrypoint. Exact PostgreSQL schema acceptance and authorized-role rejection probes PASS; 890 journal transactions and 18k WLD account-sum unchanged, no restart. PR #1706 source merged to main `3c251d93`. Not a full app release: historical 18k drift, Treasury 0 funds, SQL gap269–287, official Test mismatch and data disk97% remain. Owner accepted existing DML grants, unchanged. [Worklog](../worklog/2026-10-28-treasury-db-production-containment-v1423.md).
 

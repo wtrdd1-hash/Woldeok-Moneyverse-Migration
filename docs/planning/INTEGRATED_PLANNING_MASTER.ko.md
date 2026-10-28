@@ -1,5 +1,36 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1432 / F675-164 — 회원 고객지원 문의 임시저장·이어쓰기 (기능 추가 / 기획 초안 / 운영승격 보류)
+
+주기: 이전 기능 보완 v1430 → 현재 기능 추가 v1432 → 다음 기능 보완 v1434(잠정). 기준 main 35971c600f25869c96f1c666d4b9f58927202730, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조본. 기획 문서만 변경하며 런타임·DB·WLD·Test·Production은 변경하지 않는다. 기존 F675-157 고객지원 미읽음 영수증과 F675-105 비공개 첨부 보관소는 별개다.
+
+실제 코드: frontend/src/app/support/page.tsx는 새 문의 제목/본문과 답장 입력란을 제공하지만 서버 임시저장·이어쓰기 기능이 없다. frontend/src/app/support/actions.ts는 제출 때 새 UUID를 만들어 즉시 전송한다. backend/src/support/support.controller.ts는 인증된 문의/메시지 조회와 CSRF 보호된 제출 API를 제공한다. support.repository.ts는 DB 함수를 호출한다. 마이그레이션 196-user-admin-support-chat.sql에는 support_threads/messages만 있고 임시저장 테이블이 없다. 운영 데이터 유실이 발생했다는 증거는 아니다. 목적은 인증·활성·동의 회원이 웹과 Android에서 미완성 문의와 답장을 안전하게 저장·이어쓰는 것이다.
+
+진입점: /support 및 /support?thread=<본인 확인 UUID>, 선택적 비공개 /support?view=drafts. 버튼: 임시저장, 이어쓰기, 버리기, 보내기, 충돌 해결. 상태: EDITING, SAVING, SAVED_SERVER(버전·시각), FAILED, OFFLINE_UNSAVED, CONFLICT, EXPIRED, THREAD_UNAVAILABLE, SUBMIT_UNKNOWN, SENT_RECEIPT, DISCARDED. 서버 영수증 전 저장/전송 성공 표시 금지. 기본은 명시적 저장; 1.5초 자동저장은 사전 선택한 회원에게만 허용. 회원당 신규 문의 1개와 답장 19개, 총 20개. 제목 최대 120자, 본문 2,000자; 임시글 부분 입력 허용, 실제 전송에는 공백 제거 후 필수값 검증. 마지막 성공 저장 30일 후 만료, GET은 만료 연장하지 않음. 접근 불가능한 원본 문의는 임시글 버리기만 허용. localStorage에 본문 저장 금지, 자동 전송·메일·푸시 없음. 계정 전환 시 이전 응답과 메모리 내용 격리. 320px·200% 확대·키보드·aria-live·포커스·움직임 감소·Android TalkBack·WCAG 2.2 AA.
+
+API(미구현): GET /api/v1/support/drafts?limit=20&cursor=opaque는 본인 메타데이터만, GET /api/v1/support/drafts/:id는 본인 내용/버전/만료 조회. POST는 new/reply 슬롯 생성, PUT는 If-Match 버전·UUID 멱등키·요청 해시로 저장, DELETE는 삭제 영수증 기록. POST /api/v1/support/drafts/:id/send는 같은 키로 실제 문의/답장을 생성하고 임시글 소비·불변 영수증 기록을 PostgreSQL 한 트랜잭션에서 처리한다. 결과 threadId/messageId, receiptId, replayed, stateAtCommit. 기존 직접 전송 API는 유지하며 임시글을 임의 삭제하지 않는다. 타임아웃은 같은 키로 영수증 확인 후 재시도. 400 입력, 401 미인증, 403 CSRF/동의/회원상태, 404 타인·미존재 구분 없이, 409 버전/키 충돌, 410 만료, 429 한도, 503 미확정. 회원 ID는 세션에서만 취득. NestJS·Next.js BFF·Android App API 응답·오류·비공개 no-store 동등성.
+
+DB: 추가형 support_drafts(UUID PK,회원 FK,유형 new/reply,원본 문의 FK,제목/본문,version>0,상태 active/consumed/discarded,저장/만료시각). new는 thread_id NULL, reply는 NOT NULL CHECK. 활성 신규글 회원당 1개, 활성 답장글 (회원,문의)별 1개 부분 UNIQUE. 본인 목록 (user_id,saved_at DESC,id DESC), 만료 (expires_at,id) 인덱스. support_draft_receipts는 (user_id,request_key) UNIQUE, 작업·정규화 해시·버전·결과 ID·시각만 불변 보관, 원문 제외. 회원 행 잠금→임시글→필요 시 원본 문의→기존 support_create_thread/support_add_message→소비/영수증을 원자 처리. 버전 CAS로 동시 수정 409, 재시도로 삭제/소비한 임시글 부활 금지.
+
+관리자 답장 잠금 순서도 검토. SECURITY DEFINER search_path=pg_catalog,pg_temp, 스키마 명시, 활성 회원·문의 소유권 검사, PUBLIC·앱 직접 DML 회수, 최소 EXECUTE. 적용된 마이그레이션 수정 금지, A/B/C/QA와 번호 충돌 확인. 관리자 /admin/support는 제출된 문의만 열람하고 미제출 원문은 열람 불가. 세션·동의·CSRF·Origin/Sec-Fetch-Site, 계정/IP 속도 제한, 크기·주입 검사. 원문을 로그·분석·알림·URL·관리자 내보내기에 기록하지 않는다. 백업/저장 암호화는 검증 후에만 보장. 30일 삭제·법적 보류 예외 감사, 제출 메시지는 삭제하지 않는다. 비공개 noindex/nofollow·사이트맵 제외·no-store. 동의 기반 집계 KPI: 저장·복원·제출 전환, 충돌, 미확정, 만료, 타인 접근 차단, 중복 문의율.
+
+P0/P1 백로그(총 10건):
+- P0 ENV1432-01: 데이터 디스크 99%, 여유 약 2.6GiB, 백업 사고 #1718, 외부 백업·독립 복원·안전한 용량 확보.
+- P0 FIN1432-02: QA v1351 개발 DB 회원 계좌 18건 총 18,000 WLD 원장 차이 대사, 근거 없는 조정 금지.
+- P0 SEC1432-03: 회원 소유권·DB 권한, 앱 계정 235/243 테이블 직접 DML, PUBLIC 은행 함수 3개, 체크섬 불일치 5·미적용 20건 검증.
+- P0 REL1432-04: 공식 Test 정확 SHA, 인증 고객지원·금융 E2E, 전체 보안·DB·Android·독립 복원 검증.
+- P1 SUP1432-05: 추가형 스키마, 유일 제약·인덱스·불변 영수증.
+- P1 SUP1432-06: 회원 잠금, 20개 한도, 버전 CAS, 원자 전송·재시도·경합.
+- P1 SUP1432-07: NestJS·Next.js BFF·Android App API 동등성.
+- P1 SUP1432-08: 접근성, 저장·이어쓰기·버리기·전송, 계정 격리.
+- P1 SUP1432-09: 관리자 집계만, 개인정보·보존·SEO·KPI.
+- P1 SUP1432-10: 독립 PostgreSQL 합성 10,001건, 동시 100건, 권한 음성 100건, 20개·30일·409/410/503·원장 무변화 회귀(미실행).
+
+수용·배포: 두 기기에서 마지막 서버 확인 버전만 이어쓰기, 동시 수정 409, 타임아웃 재시도에도 문의/메시지 1개와 영수증 1개, 미제출 임시글 관리자 비노출, 타 계정 접근 거부, 만료 글 전송 차단, GET 무부작용을 실제 DB로 검증한다. 개발 별도 브랜치·TDD, 기능 스위치 support_private_drafts 기본 OFF. 추가형 마이그레이션→본인 권한 검증→공식 Test 정확 SHA 웹/Android/관리자 회귀→단계적 활성화→P0 전체 통과 후 승인된 운영승격. 롤백은 스위치 OFF·영수증 보존, 파괴적 스키마 롤백 금지. 기획은 배포하지 않는다.
+
+외부 독립 근거 10,000건 게이트: 신규 승인 0, 누적 중복 제거·검증 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 검색 결과·합성 자료를 승인 건수에 포함하지 않는다.
+
+
 ## v2026.10.28.1423 — 금융 운영 DB 291 보호 승격 확인 (전체 서버 코드는 기존)
 - 신규 배당 4인자 멱등 복식분개 함수와 구형 무분개 배당 차단을 실제 Production DB에 적용. 신규 암호화 백업 체크섬/운영 스키마 모사시험/운영 app역할 차단/잔액 불변 검증 완료, 서버 다운 없음. PR #1706 코드 main 3c251d93 병합(운영 앱 실행 SHA는 별도). 운영 TREASURY 계정 0 WLD, 과거 18명 18,000 WLD 원장 미대사, 누락 migration269~287, 공식 Test SHA·디스크97%로 **앱 전체 승격은 HOLD**. 권한은 사용자 의사에 따라 변경하지 않음. [국문기록](../worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md).
 
