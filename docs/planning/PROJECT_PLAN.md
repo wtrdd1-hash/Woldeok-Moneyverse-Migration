@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.29.1434 — F675-164 Support draft integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1432 / Current Improvement v1434 / Next Addition v1436 provisional. Main 35971c600 unchanged at start/mid, prior Draft #1759 unmerged. Verified migration196 create-thread replay omits subject/body comparison; direct Next.js sends generate new UUID; resolved replies reopen threads; expired active drafts occupy proposed unique slots; shared DB role cannot authenticate p_actor. Correct with digest-bound immutable receipts, stable send UUID, write-side expiry, member/session cursor, resolved-thread reconfirmation and forged-actor DB tests. Backlog: ENV1434-01 FIN1434-02 SEC1434-03 REL1434-04 SUP1434-05 SUP1434-06 SUP1434-07 SUP1434-08 SUP1434-09 SUP1434-10. QA v1352: 18,000 WLD drift, 5 checksum mismatches/20 unapplied, app DML 235/243 and 3 PUBLIC bank functions. Disk 99% at 00:14 versus 97% at 01:08 is not remediation proof. External approved 0 new/cumulative UNKNOWN of 10,000; no deployment. Details: [EN](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md).
+
+
 ## v2026.10.29.1432 — F675-164 private support drafts (PLANNING DRAFT / HOLD)
 - Previous Improvement v1430, Current Addition v1432, Next Improvement v1434 provisional. Actual /support lacks server drafts; propose 20 slots/30-day retention, atomic send, immutable receipts, Android/a11y and private API. Ten P0/P1 backlog IDs: [Integrated EN](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md). QA v1351 blockers, disk 99%, official Test/restore unverified, external newly accepted 0/cumulative UNKNOWN of 10,000. Docs only.
 

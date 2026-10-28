@@ -7,8 +7,11 @@
 ## 진행 중
 - [x] main 기준 문서와 지원 기능 SQL/컨트롤러/저장소/액션 확인.
 - [x] 다른 본문 동일 키 재실행, 직접 전송 UUID 변경, 해결된 문의 재개방, 만료 슬롯 인덱스, 공용 DB 역할의 회원 ID 위조 경계 파악.
-- [ ] 영문·국문 통합 문서/프로젝트 계획/기능 검토/업데이트 로그 반영.
+- [x] 영문·국문 통합 문서/프로젝트 계획/기능 검토/업데이트 로그 반영.
 - [ ] 중간 main 재조회, GitHub 전달, 문서 전용 검증 및 완료 기록.
 
 ## 운영승격 보류
 - 문서 기획만 수행. 외부 승인 신규 0건, 누적 UNKNOWN/10,000. 공식 Test 정확 SHA, 실제 PostgreSQL, 백업 독립 복원, 금융 원장 대사 미인증.
+
+## MIDPOINT
+- 01:10 KST: origin/main 35971c600 unchanged; canonical EN/KO project plans rechecked; predecessor #1759 OPEN/DRAFT. Integrated design and backlog added.

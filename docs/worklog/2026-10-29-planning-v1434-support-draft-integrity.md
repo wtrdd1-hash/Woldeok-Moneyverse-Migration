@@ -7,8 +7,11 @@
 ## IN PROGRESS
 - [x] Read main authority docs and support source migration/controller/repository/actions.
 - [x] Identify changed-body replay, unstable direct-send UUID, resolved-thread behavior, expired slot index, and shared-role actor spoofing boundary.
-- [ ] Integrate bilingual master, project plan, feature review, update log and task notes.
+- [x] Integrate bilingual master, project plan, feature review, update log and task notes.
 - [ ] Midpoint main/plan recheck, GitHub handoff, docs-only validation and final evidence.
 
 ## RELEASE HOLD
 - Proposed documentation only. External accepted 0 new, cumulative UNKNOWN / 10,000. Official exact-SHA Test, real PostgreSQL, backup restore and finance reconciliation not certified.
+
+## MIDPOINT
+- 01:10 KST: origin/main 35971c600 unchanged; canonical EN/KO project plans rechecked; predecessor #1759 OPEN/DRAFT. Integrated design and backlog added.
