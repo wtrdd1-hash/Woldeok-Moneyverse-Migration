@@ -1,0 +1,18 @@
+# A0725 — 회원 업무 오늘의 추천만 보기
+
+## 작업 전
+기준 main `35971c600f25869c96f1c666d4b9f58927202730`. 기존 업무 보드는 일일 한도를 소진한 업무를 이미 제외하므로 중복 기능을 개발하지 않습니다. 회원별 추천 업무만 보기 토글, 엄격한 쿼리 검증, 기존 권한 경계 유지, Android app-api 쿼리 전달을 구현합니다. 원장/마이그레이션/권한/운영 DB는 변경하지 않습니다.
+
+## 진행 중
+- [ ] 테스트 선작성 및 실패 확인
+- [ ] API·DB 조회·웹 UI·앱 게이트웨이 통합
+- [ ] 최종 SHA 검증 및 PR
+
+## 종료
+검증 전. 운영 배포 금지.
+
+## 중간 검증 — 07:35 KST
+Backend 9개, Frontend 검색·앱 게이트웨이 31개, 실제 DOM 토글 1개 PASS. Backend/Frontend 타입검사 PASS, Lint 오류 0개(기존 경고 1,099개). DB 통합 테스트는 아직 별도 격리 DB 증거가 없어 PASS로 간주하지 않습니다. 기존 main 동일, 타 개발 작업 보호.
+
+## 로컬 검증 종료 — 07:45 KST
+추천만 보기 API·회원별 DB 조회·접근성 토글·Android app-api를 구현했습니다. Backend 1,948 PASS/440 SKIP, Frontend 1,875 PASS, DB 46 PASS/4 SKIP, Bot 11 PASS. 격리 PostgreSQL 17.11에 290개 마이그레이션 적용 후 업무 31 PASS, 앱 계정의 직접 테이블 SELECT 거부 확인. 타입검사·Lint·Backend/Frontend 빌드 PASS(Next 빌드 워커 2개로 제한). 보안감사 High/Critical 0건, Moderate 1건. 기존 18,000 WLD 잔액 차이·권한·마이그레이션·복원·공식 Test SHA 불일치로 **운영 배포 HOLD**. PR/CI 결과는 별도 기록하며 다른 개발자의 브랜치/PR/데이터는 삭제하지 않았습니다.

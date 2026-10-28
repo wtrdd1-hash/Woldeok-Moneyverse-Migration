@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { databaseUrl, rejectionOf } from '../testing/database';
+import { WorkRepository } from './work.repository';
 
 /**
  * Migration 095, executed, and the one thing it must not get wrong.
@@ -106,6 +107,19 @@ describe.skipIf(!DATABASE_URL)('the work board against a real database', () => {
       if (!row) throw new Error('the seeded task catalogue is empty');
       return { id: row.id, minimum: row.minimum_duration_seconds, jobType: row.job_type };
     };
+
+    it('filters the actor-scoped board to server-selected recommendations without reading private tables directly', async () => {
+      await rolledBack(async (client) => {
+        const actor = await member(client);
+        const repository = new WorkRepository(client);
+        const all = await repository.tasks(actor);
+        const picks = await repository.tasks(actor, 'true');
+        expect(all.length).toBeGreaterThan(3);
+        expect(picks.length).toBe(3);
+        expect(picks.every((task) => task.recommended)).toBe(true);
+        expect(picks.every((task) => all.some((item) => item.task_id === task.task_id))).toBe(true);
+      });
+    });
 
     it('offers the whole active catalogue, and suggests three of it', async () => {
       await rolledBack(async (client) => {

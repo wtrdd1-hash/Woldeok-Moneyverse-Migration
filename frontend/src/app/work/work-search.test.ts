@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { WorkTask } from './work';
-import { filterWorkTasks } from './work-search';
+import { filterRecommendedWorkTasks, filterWorkTasks } from './work-search';
 
 function task(overrides: Partial<WorkTask> = {}): WorkTask {
   return {
@@ -46,5 +46,17 @@ describe('filterWorkTasks', () => {
 
   it('returns the original list for blank search text', () => {
     expect(filterWorkTasks(tasks, '   ')).toBe(tasks);
+  });
+});
+
+describe('member recommendations', () => {
+  const tasks = [task({ recommended: false }), task({ code: 'recommended', recommended: true })];
+  it('keeps all tasks by default and returns only server-flagged recommendations on demand', () => {
+    expect(filterRecommendedWorkTasks(tasks, false)).toBe(tasks);
+    expect(filterRecommendedWorkTasks(tasks, true).map((item) => item.code)).toEqual(['recommended']);
+  });
+  it('composes with the existing member search without changing the task payload', () => {
+    const recommended = filterRecommendedWorkTasks(tasks, true);
+    expect(filterWorkTasks(recommended, 'recommended')).toEqual([tasks[1]]);
   });
 });

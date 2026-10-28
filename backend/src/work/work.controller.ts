@@ -14,7 +14,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -101,13 +101,17 @@ export class WorkController {
   }
 
   @Get('tasks')
-  @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
-  async tasks(@Req() request: RequestWithSession) {
+  @ApiOperation({ summary: 'Member task board, optionally limited to today’s recommended tasks' })
+  @ApiQuery({ name: 'recommendedOnly', required: false, enum: ['true', 'false'] })
+  async tasks(
+    @Req() request: RequestWithSession,
+    @Query('recommendedOnly') recommendedOnly?: string,
+  ) {
     const repository = this.repository();
     const actor = requireUserId(request);
     const [featureState, tasks] = await Promise.all([
       repository.featureState(),
-      this.guarded(() => repository.tasks(actor), 'the task board is unavailable'),
+      this.guarded(() => repository.tasks(actor, recommendedOnly), 'the task board is unavailable'),
     ]);
     return { featureState, tasks };
   }
