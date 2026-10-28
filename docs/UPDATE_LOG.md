@@ -1,3 +1,7 @@
+## 2026-10-28 v1428 — F675-163 member calendar event watchlist (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1426 / Current Addition v1428 / Next Improvement v1430 provisional. Main 35971c600f25869c96f1c666d4b9f58927202730 checked start/mid. Existing /calendar source lacks persistent watch. Only verified season and shop-deadline UUID sources in scope; daily/weekly excluded. P0 ENV1428-01 FIN1428-02 SEC1428-03 REL1428-04; P1 CAL1428-05 CAL1428-06 CAL1428-07 CAL1428-08 CAL1428-09 CAL1428-10. [Draft PR #1749](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1749), [issue #1748](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748).
+- Owner-only watch/unwatch, 100 cap, receipts, stale event redaction, API/Android parity, WCAG/noindex/no-store; no automatic reminders, financial mutation or delivery claim. QA v1349 FAILED, v1350 in progress at mid, disk98%, 18k WLD drift, official Test/restore HOLD. External newly accepted 0; cumulative UNKNOWN/10,000 BLOCKED. Documentation only.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)

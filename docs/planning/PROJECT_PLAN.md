@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.28.1428 — F675-163 verified member calendar event watchlist (PLANNING DRAFT / RELEASE HOLD)
+- Previous Improvement v1426 → Current Addition v1428 → Next Improvement v1430 (provisional). Main 35971c600f25869c96f1c666d4b9f58927202730 verified start/mid. QA v1349 FAILED, v1350 running at midpoint. Source: /calendar reads seasons/events, early-game/today, engagement/early-game, shop/catalog, but no persistent owner watch. Season event UUID + end timestamp and shop catalogue UUID + sale deadline are available; daily/weekly cards excluded without stable watch IDs. Distinct from F675-160 item wishlist.
+- Propose explicit member Save/Remove and watched-only list; verified source time, expired/unpublished redaction, owner-locked cap 100, idempotent original receipts, monotonic version, owner/session-bound opaque keyset cursor, Nest/Next/Android parity, noindex/no-store and WCAG 2.2 AA. No event enrollment, WLD movement, price freeze, reward, push/email or notification-delivery claim.
+- P0 ENV1428-01 FIN1428-02 SEC1428-03 REL1428-04; P1 CAL1428-05 CAL1428-06 CAL1428-07 CAL1428-08 CAL1428-09 CAL1428-10. [Full EN specification](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md); [development issue #1748](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748); [Draft PR #1749](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1749).
+- Data volume 98%, historical 18,000 WLD account/ledger difference, QA v1349 app UPDATE/DELETE on 235/243 tables, 3 PUBLIC bank EXECUTE, 5 checksum mismatches/20 unapplied migrations, independent restore and exact-SHA official Test remain RELEASE HOLD. External independent evidence newly approved 0, cumulative accepted UNKNOWN / 10,000 BLOCKED / IN PROGRESS. Docs-only; no runtime/DB/ledger/Test/Production changes.
+
+
 ## v2026.10.28.1423 — Treasury DB-only safety promotion (no app cutover)
 - Applied migration 291 to authority Production PostgreSQL after fresh verified backup and isolated Production-schema rehearsal. Existing unaudited citizen dividend fails closed, four-arg canonical payout registered; account sums/ledger transaction count unchanged and live backend health200. Finance PR #1706 CI PASS merged to main `3c251d93`, not a live frontend/backend code deployment. Historical 18k WLD discrepancy, zero canonical Treasury funding, migrations 269–287 gap, official Test and disk97% leave full app release gated. [Evidence](../worklog/2026-10-28-treasury-db-production-containment-v1423.md).
 

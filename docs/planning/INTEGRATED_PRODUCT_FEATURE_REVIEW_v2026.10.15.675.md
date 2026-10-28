@@ -1,5 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-163 — v1428 member calendar event watchlist (ADDITION / DRAFT / HOLD)
+- Verified main /calendar has season events, shop sale deadlines, daily events and weekly goals but no member-owned saved event list. Only season UUID and shop deadline UUID are eligible v1; daily/weekly lack stable IDs in this page. No overlap with F675-160 merchandise wishlist.
+- Proposed typed FK watch rows, owner-only SECURITY DEFINER, active cap 100 under actor lock, durable idempotency and tombstones, unavailable redaction, no notifications/auto-entry/WLD, Next/Nest/Android parity, a11y, private SEO and exact-SHA rollback gates. P0 ENV1428-01 FIN1428-02 SEC1428-03 REL1428-04; P1 CAL1428-05..10. [Integrated EN](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md). [Issue #1748](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748) · [Draft PR #1749](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1749).
+- QA v1349 FAILED; data disk98%, historical 18k WLD, restore and official Test HOLD. External new accepted 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only.
+
+
 ## F675-06 detailed adoption — v2026.10.15.688
 
 - [Google Search Evidence & Canonical Action Center](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) is the next v675 adopted **detailed planning** feature. Reuses /admin/seo and v685; identifies top-10-only GSC data, missing date=0, GSC PT/freshness, crawler-indexed mislabel and legacy index submission success/Google Indexing API misclaims. Separates source/submission/Google indexed-version/performance into independently verifiable evidence, 16 Google/WCAG references and D0–D7 gated implementation. Not a live SEO audit or deployed feature.

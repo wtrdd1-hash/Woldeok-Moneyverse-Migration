@@ -1,3 +1,7 @@
+## 2026-10-28 v1428 — F675-163 회원 이벤트 캘린더 저장 목록 (기능 추가 / 초안 / 보류)
+- 이전 기능 보완 v1426 / 현재 기능 추가 v1428 / 다음 기능 보완 v1430(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 확인. 기존 /calendar에 회원별 저장 기능 없음. 시즌·상점 마감 UUID만 지원, 오늘·주간 제외. P0 ENV1428-01 FIN1428-02 SEC1428-03 REL1428-04; P1 CAL1428-05 CAL1428-06 CAL1428-07 CAL1428-08 CAL1428-09 CAL1428-10. [Draft PR #1749](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1749), [이슈 #1748](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748).
+- 본인 저장/해제·100개 제한·영수증·비공개 비식별화·Android·WCAG·noindex/no-store, 자동 알림·금융 변경 없음. QA v1349 FAILED, v1350 중간 진행 중, 디스크98%, 18,000 WLD 원장 차이, Test·복원 보류. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED. 문서만 변경.
+
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
 
 ## 2026-10-24 v1210 — F675-109 게시판 읽기 목록 삭제·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 보류)
