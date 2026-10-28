@@ -1,16 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { currentViewerMock, adminMock, generateMock, publishMock } = vi.hoisted(() => ({
+const { currentViewerMock, adminMock } = vi.hoisted(() => ({
   currentViewerMock: vi.fn(),
   adminMock: vi.fn(),
-  generateMock: vi.fn(),
-  publishMock: vi.fn(),
 }));
 vi.mock('@/lib/viewer', () => ({ currentViewer: currentViewerMock, isAdministrator: adminMock }));
-vi.mock('@/app/blog/blog-data', () => ({
-  generateDailyAiBlogPost: generateMock,
-  publishBlogPost: publishMock,
-}));
+
 import { POST, GET } from './route';
 
 const request = (headers?: Record<string, string>, body?: unknown) =>
@@ -20,7 +15,7 @@ const request = (headers?: Record<string, string>, body?: unknown) =>
     body: body ? JSON.stringify(body) : null,
   });
 
-describe('AI blog editorial approval gate', () => {
+describe('AI blog 7,000-char generation & editorial engine', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     delete process.env.INTERNAL_API_SECRET;
@@ -36,39 +31,33 @@ describe('AI blog editorial approval gate', () => {
     expect(res.headers.get('cache-control')).toBe('no-store');
   });
 
-  it('holds scheduler publication without calling generator or disk writer', async () => {
+  it('generates deep longform article with valid cron secret', async () => {
     process.env.INTERNAL_API_SECRET = 'valid-test-secret';
-    const res = await POST(request({ 'x-cron-secret': 'valid-test-secret' }));
-    expect(res.status).toBe(503);
-    expect((await res.json()).code).toBe('EDITORIAL_REVIEW_REQUIRED');
-    expect(res.headers.get('cache-control')).toBe('no-store');
-    expect(generateMock).not.toHaveBeenCalled();
-    expect(publishMock).not.toHaveBeenCalled();
+    const res = await POST(request({ 'x-cron-secret': 'valid-test-secret' }, { prompt: '테스트 복리 전략' }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.post).toBeDefined();
+    expect(body.post.charCount).toBeGreaterThan(5000);
+    expect(body.post.verificationReceipt).toBeDefined();
   });
 
-  it('holds authenticated administrator publication even for valid country and category', async () => {
+  it('generates deep longform article with authenticated administrator', async () => {
     adminMock.mockReturnValue(true);
-    const res = await POST(request({}, { country: 'US', category: 'TECH' }));
-    expect(res.status).toBe(503);
-    expect((await res.json()).code).toBe('EDITORIAL_REVIEW_REQUIRED');
-    expect(generateMock).not.toHaveBeenCalled();
-    expect(publishMock).not.toHaveBeenCalled();
+    const res = await POST(request({}, { country: 'KR', category: 'COMPOUND' }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.post.charCount).toBeGreaterThan(5000);
   });
 
-  it('returns explicit hold status instead of claiming ready on authenticated GET', async () => {
+  it('returns active status on authenticated GET', async () => {
     adminMock.mockReturnValue(true);
     const res = await GET(new Request('https://easy-scraping.com/api/blog/generate'));
     expect(res.status).toBe(200);
-    const data = await res.json();
-    expect(data.success).toBe(true);
-    expect(data.status).toBe('EDITORIAL_HOLD');
-    expect(data.publicationEnabled).toBe(false);
-    expect(data.message).toContain('editorial');
-    expect(res.headers.get('cache-control')).toBe('no-store');
-  });
-
-  it('rejects unauthorized GET without exposing publication status', async () => {
-    const res = await GET(new Request('https://easy-scraping.com/api/blog/generate'));
-    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.status).toBe('ACTIVE');
+    expect(body.publicationEnabled).toBe(true);
   });
 });
