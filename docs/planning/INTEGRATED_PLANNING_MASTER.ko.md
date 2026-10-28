@@ -1,4 +1,5 @@
 ## v1418 / F675-160 — 상점 저장 목록의 정확성·상한·삭제 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- Draft PR #1720(#1714 후속), 개발 이슈 #1713, 문서 후보 SHA 60ded3774ede210a839e8de9112bf3969a801c3c; PR classify/release-input CI 확인 당시 PENDING, 공식 Test 미검증.
 
 **회차·근거·상태.** 이전 기능 추가 v1416 → 현재 기능 보완 v1418 → 다음 기능 추가 v1420(잠정). 2026-10-28 17:08 KST, 최신 `origin/main` d12c948ac454b0762cfb7fb0cddf83703a775172(작업 중 재확인), 미병합 선행 Draft #1714 SHA b9b55ea4f3dacbe3d0bc4ace5ed053a0ff01f9ea, QA v1344 FAILED/HOLD. v1416의 **문서 전용 후속 보완**으로 main에 구현되지 않았고 독립 병합 불가하다. main의 AGENTS·README·영문 정본·한국어 계획, Next 상점, NestJS 컨트롤러/저장소, SQL 071/075, 열린 PR을 조사했다. 개발 A/B/C·Gemini·QA 브랜치는 변경하지 않는다.
 

@@ -33,4 +33,4 @@
 ## Execution evidence / 수행 근거
 - START: 17:08 KST miniPC Debian 13.6 connected, Superpowers local skills read, main and PR #1714 inspected.
 - MID: 17:xx KST main re-fetched d12c948a; QA v1344, shop_catalog_list_v2, backup #1718 verified; separate worktree, docs only.
-- FINAL: pending remote PR/CI check; no runtime deployment.
+- FINAL: Draft PR #1720 OPEN, stacked on #1714; candidate SHA 60ded3774ede210a839e8de9112bf3969a801c3c; main d12c948a unchanged at final recheck; classify/release-input PENDING at observation; no runtime deployment.

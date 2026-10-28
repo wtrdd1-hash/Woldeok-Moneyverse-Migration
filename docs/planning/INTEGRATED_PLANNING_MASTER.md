@@ -1,4 +1,5 @@
 ## v1418 / F675-160 — Shop saved-items correctness, capacity and deletion hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- Draft PR #1720 (stacked on #1714), backlog #1713; candidate source SHA 60ded3774ede210a839e8de9112bf3969a801c3c; PR classify/release-input CI PENDING at 17:xx KST, no official Test.
 
 **Cycle / source / status.** Previous Feature Addition v1416 → Current Feature Improvement v1418 → Next Feature Addition v1420 (provisional). 2026-10-28 17:08 KST; authoritative `origin/main` d12c948ac454b0762cfb7fb0cddf83703a775172 (rechecked mid-run), predecessor unmerged Draft #1714 SHA b9b55ea4f3dacbe3d0bc4ace5ed053a0ff01f9ea; QA v1344 FAILED/HOLD. This is a stacked, docs-only refinement of v1416, NOT a main implementation or independently mergeable PR. Latest main AGENTS.md, README.md, canonical English/Korean plans, Next /shop/catalog, NestJS shop controller/repository, migrations 071/075 and active PRs reviewed. Keep A/B/C/Gemini/QA branches untouched.
 
