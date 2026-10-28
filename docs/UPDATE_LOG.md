@@ -1248,3 +1248,4 @@
 - Branch: .
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
+- Final GitHub record: planning v1404 Draft PR #1670 OPEN / issue #1669 OPEN, main a28bed9aa40ff74d492824ae12892a7d52132fdd unchanged, PR classify/verify pending. Source-only DRAFT/HOLD, no deployment.

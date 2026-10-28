@@ -6,3 +6,8 @@
 - 코드/DB/금융/Test/운영 미변경, 테스트는 명세만 작성. QA v1337 및 #1663/#1661/#1660 보류, 공식 Test 정확 SHA·독립 복원·운영승격 미검증. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED.
 
 **상세 명세:** [영문 정본](../planning/INTEGRATED_PLANNING_MASTER.md) / [한국어](../planning/INTEGRATED_PLANNING_MASTER.ko.md).
+
+### GitHub 및 검증 최종 기록 (2026-10-28 10:14 KST)
+- Draft PR #1670 OPEN(main 대상), 이슈 #1669 OPEN; 최초 푸시 SHA `a1df79023da2b9e634673eba43de7a8e7048faec`.
+- 시작·중간·최종 main `a28bed9aa40ff74d492824ae12892a7d52132fdd`. 영한 6쌍 문서의 백로그 ID 10개와 문서 변경 검사 PASS. PR release-input SUCCESS, classify/verify 진행 중. main 병합·런타임 테스트·공식 Test·독립 복원·운영 승격 없음.
+- 외부 독립 10,000건 승인 게이트 BLOCKED / IN PROGRESS: 신규 승인 0, 누적 UNKNOWN.

@@ -1301,3 +1301,4 @@
 - Branch: .
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
+- 최종 GitHub 기록: 기획 v1404 Draft PR #1670 OPEN / 이슈 #1669 OPEN, main a28bed9aa40ff74d492824ae12892a7d52132fdd 유지, PR 분류·정책 검사 진행 중. 문서 초안·배포 보류.
