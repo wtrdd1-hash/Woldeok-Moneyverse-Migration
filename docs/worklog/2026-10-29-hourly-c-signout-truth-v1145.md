@@ -12,5 +12,11 @@
 - Executable action tests: 4 RED / 6 PASS on missing, unrelated, nonempty and nonexpiring session-clearing cookies (`tdd-red2.log`). No production code changed yet.
 - Next: validate backend logout cookie-clear receipt before relaying; preserve existing `?error=logout` recovery and member-only/noindex UI.
 
+## In-progress verification — 2026-10-29 05:47 KST
+- `origin/main` re-fetched: unchanged `35971c600f25869c96f1c666d4b9f58927202730`.
+- Implemented strict session-clear cookie evidence: only empty `mv_session` or `__Host-mv_session`, `Path=/`, `Max-Age=0`; `__Host-` requires `Secure` and no `Domain`. Refuses unrelated/malformed cookies before relay and never reports completion on failure.
+- Updated existing success fixture to match real NestJS `clearSessionCookie()` response; no Backend, DB schema, API route or financial mutation.
+- Focused action/readback/mobile/noindex regression 29/29 PASS (4 test files).
+
 ## Finished
-- Pending verification; never interpret candidate image build as official Test promotion.
+- Pending exact-SHA full validation and PR review; never interpret candidate image build as official Test promotion.

@@ -65,10 +65,19 @@ describe('all-device sign-out completion receipt', () => {
     ['unrelated=; Max-Age=0'],
     ['__Host-mv_session=nonempty; Max-Age=0; Secure'],
     ['__Host-mv_session=; Max-Age=3600; Secure'],
+    ['__Host-mv_session=; Max-Age=0; Path=/'],
+    ['__Host-mv_session=; Max-Age=0; Path=/; Secure; Domain=example.com'],
   ])('rejects logout response without an authentic clearing session cookie: %j', async (setCookie) => {
     mocks.apiWithCookie.mockResolvedValue({ payload: null, setCookie });
     await expect(terminateAllSessions()).rejects.toThrow('REDIRECT:/account/security?error=logout');
     expect(mocks.relaySetCookie).not.toHaveBeenCalled();
+  });
+
+  it('accepts a correctly cleared local HTTP session cookie', async () => {
+    const cookie = 'mv_session=; Path=/; Max-Age=0; HttpOnly';
+    mocks.apiWithCookie.mockResolvedValue({ payload: null, setCookie: [cookie] });
+    await expect(terminateAllSessions()).rejects.toThrow('REDIRECT:/login?signed_out_all=1');
+    expect(mocks.relaySetCookie).toHaveBeenCalledWith([cookie]);
   });
 
   it('does not report success when browser cookie relay fails', async () => {

@@ -63,6 +63,22 @@ export async function terminateOtherSessions(): Promise<void> {
   redirect(`/account/security?revoked=${revokedSessions}`);
 }
 
+/** Backend logout must supply an actionable browser cookie deletion, not just a 2xx response. */
+function hasSessionClearCookie(headers: readonly string[]): boolean {
+  return headers.some((header) => {
+    const [pair, ...rawAttributes] = header.split(';');
+    const cookie = pair?.trim() ?? '';
+    if (cookie !== 'mv_session=' && cookie !== '__Host-mv_session=') return false;
+    const attributes = rawAttributes.map((attribute) => attribute.trim().toLowerCase());
+    if (!attributes.includes('max-age=0') || !attributes.includes('path=/')) return false;
+    if (cookie.startsWith('__Host-') &&
+      (!attributes.includes('secure') || attributes.some((attribute) => attribute.startsWith('domain=')))) {
+      return false;
+    }
+    return true;
+  });
+}
+
 /** Ends every active session for the caller, including this browser. */
 export async function terminateAllSessions(): Promise<void> {
   try {
@@ -82,6 +98,7 @@ export async function terminateAllSessions(): Promise<void> {
       method: 'POST',
       csrfToken,
     });
+    if (!hasSessionClearCookie(setCookie)) throw new Error('logout clear-cookie evidence missing');
     await relaySetCookie(setCookie);
   } catch {
     // Revoking other sessions is not evidence that this browser logged out.
