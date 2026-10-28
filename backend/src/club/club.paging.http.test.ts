@@ -13,13 +13,14 @@ const actor = '11111111-2222-4333-8444-555555555555';
 
 describe('Club paging HTTP integration', () => {
   let app: INestApplication;
+  const listClubs = vi.fn().mockResolvedValue([]);
   const listClubMembers = vi.fn().mockResolvedValue([]);
   const listClubFeed = vi.fn().mockResolvedValue([]);
 
   beforeAll(async () => {
     const testingModule = await Test.createTestingModule({
       controllers: [ClubController],
-      providers: [{ provide: ClubService, useValue: { listClubMembers, listClubFeed } }],
+      providers: [{ provide: ClubService, useValue: { listClubs, listClubMembers, listClubFeed } }],
     })
       .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
@@ -34,6 +35,23 @@ describe('Club paging HTTP integration', () => {
   });
 
   afterAll(async () => { await app?.close(); });
+
+  it('rejects malformed and duplicate club directory pagination before querying', async () => {
+    listClubs.mockClear();
+    for (const suffix of ['?limit=2junk', '?limit=1e2', '?limit=0', '?limit=101',
+      '?offset=-1', '?offset=10001', '?offset=1junk', '?limit=1&limit=2',
+      '?offset=0&offset=1', '?limit=', '?offset=']) {
+      await request(app.getHttpServer()).get('/clubs' + suffix).expect(400);
+    }
+    expect(listClubs).not.toHaveBeenCalled();
+  });
+
+  it('preserves valid club directory paging and the actor boundary', async () => {
+    await request(app.getHttpServer()).get('/clubs').expect(200);
+    expect(listClubs).toHaveBeenLastCalledWith(actor, undefined, 50, 0);
+    await request(app.getHttpServer()).get('/clubs?search=ALPHA&limit=100&offset=10000').expect(200);
+    expect(listClubs).toHaveBeenLastCalledWith(actor, 'ALPHA', 100, 10000);
+  });
 
   it('returns 400 for malformed and duplicate roster pagination without service calls', async () => {
     listClubMembers.mockClear();

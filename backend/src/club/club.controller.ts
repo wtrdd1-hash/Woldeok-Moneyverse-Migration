@@ -132,8 +132,8 @@ export class ClubController {
     @Query('offset') offset?: string,
   ) {
     const actorUserId = requireUserId(req);
-    const parsedLimit = limit ? Number.parseInt(limit, 10) : 50;
-    const parsedOffset = offset ? Number.parseInt(offset, 10) : 0;
+    const parsedLimit = parseClubPagingNumber(limit, 50, 1, 100, 'limit');
+    const parsedOffset = parseClubPagingNumber(offset, 0, 0, 10000, 'offset');
     const clubs = await this.clubService.listClubs(actorUserId, search, parsedLimit, parsedOffset);
     return { clubs };
   }
