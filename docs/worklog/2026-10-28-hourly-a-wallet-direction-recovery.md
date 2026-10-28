@@ -21,3 +21,9 @@
 ### RED checkpoint 10:24 KST
 - Test-only original PR #1647 patch applied; baseline Backend wallet period **5 FAIL / 3 PASS** after building contract (first attempt lacked contract build), Frontend wallet period **1 FAIL / 3 PASS**. Failure is missing direction selector and fourth SQL bind, not environment after retry.
 - No runtime implementation yet. Test logs in miniPC reports. Other agents' worktrees untouched.
+
+### GREEN and concurrent-change reconciliation checkpoint
+- Transplanted only PR #1647's six runtime files, not stale repository snapshots. Conflict in Android app-api cache boundary resolved by UNION: wallet + bank + banking + chat + content/chat all remain private/no-store.
+- Backend wallet focused 8/8 PASS; Frontend wallet + Android app-api focused 30/30 PASS. No ledger writes or migrations.
+- Mid-work remote main still a28bed9aa; EN/KO integrated plan hashes unchanged.
+- Awaiting isolated real PostgreSQL, full gates, CI, exact-SHA Test.
