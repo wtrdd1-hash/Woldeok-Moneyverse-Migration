@@ -11,3 +11,7 @@
 ## MID — pending
 
 ## END — pending
+
+## MID — scope correction (18:51 KST)
+- Critical verification: the root checkout was stale. The fresh `origin/main` worktree already contains `analytics-evidence.ts`, which replaces fabricated 14-domain success/latency values. No duplicate implementation; initial hypothesis rejected. Branch renamed to `auto/hourly-c-analytics-money-precision-v1131-20261028-1845`, initial docs-only branch safely superseded.
+- New P1 proven on actual main: `analytics-client-view.tsx` converts integer WLD balance strings through `Number()` for sample cash/bank/bond/stock aggregation and CSV. Values above 2^53 lose precision, and malformed values become zero. Implement strict integer-string BigInt aggregate, fail closed on malformed data, preserve bounded-sample disclaimer, exact CSV and screen, percentage rounding only for visualization. Existing authenticated `/api/v1/admin/users` backend contract supplies the values; no new database permissions or writes.
