@@ -24,3 +24,10 @@ Status: IN PROGRESS — read-only diagnosis, no content change or promotion.
 - Verified list API returns HTTP 500; old public list API HTTP 200.
 - Production backend BLOG_TWO_HOUR_PUBLISHER_ENABLED is unset; scheduler done != publication.
 - Listing mobile smoke passed all widths; article subcomponents and authenticated admin not attested.
+
+## Finished
+- [x] Detailed bilingual findings and internal/GitHub update logs recorded.
+- [x] Latest main re-fetched and compared at mid-work; the inspected main remained a28bed9aa.
+- [x] Browser and HTTP evidence summarized; caveats preserved.
+- Actual Test, protected admin DELETE, verified live DB migration, Production promotion and source-level fix: NOT DONE; separately required.
+- Keep this docs-only QA branch independent of other code/Gemini work.
