@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { api, apiWithCookie } from '@/lib/api';
 import { relaySetCookie } from '@/lib/cookie-relay';
 import { mutate } from '@/lib/mutate';
+import { isVerifiedCredentialReceipt } from './credential-receipts';
 import { parseSecuritySessions } from './account-security-evidence';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -111,9 +112,10 @@ export async function reauthenticateWithLocalPassword(formData: FormData): Promi
   if (!email || !password) redirect('/account/security?error=local-reauth');
 
   try {
-    await mutate<{ outcome: 'reauthenticated' }>('/api/v1/auth/local/reauthentication', {
+    const receipt: unknown = await mutate<unknown>('/api/v1/auth/local/reauthentication', {
       body: { email, password },
     });
+    if (!isVerifiedCredentialReceipt(receipt, 'reauthentication')) throw new Error('unverified reauthentication receipt');
   } catch {
     redirect('/account/security?error=local-reauth');
   }
@@ -126,7 +128,8 @@ export async function changeLocalPassword(formData: FormData): Promise<void> {
   const confirm = String(formData.get('confirmPassword') ?? '');
   if (!password || password !== confirm) redirect('/account/security?error=password-mismatch');
   try {
-    await mutate<{ outcome: 'password-changed' }>('/api/v1/auth/local/password/change', { body: { password } });
+    const receipt: unknown = await mutate<unknown>('/api/v1/auth/local/password/change', { body: { password } });
+    if (!isVerifiedCredentialReceipt(receipt, 'password-change')) throw new Error('unverified password change receipt');
   } catch {
     redirect('/account/security?error=password-change');
   }
@@ -138,7 +141,8 @@ export async function requestLocalEmailChange(formData: FormData): Promise<void>
   const email = String(formData.get('email') ?? '').trim();
   if (!email) redirect('/account/security?error=email-change');
   try {
-    await mutate<{ accepted: true; verificationRequired: true }>('/api/v1/auth/local/email-change/request', { body: { email } });
+    const receipt: unknown = await mutate<unknown>('/api/v1/auth/local/email-change/request', { body: { email } });
+    if (!isVerifiedCredentialReceipt(receipt, 'email-change')) throw new Error('unverified email change receipt');
   } catch {
     redirect('/account/security?error=email-change');
   }
