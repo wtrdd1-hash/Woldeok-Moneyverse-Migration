@@ -24,7 +24,7 @@ describe('P0 repo-loan unjournaled WLD containment', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [PublicTreasuryBondController],
       providers: [{ provide: TreasuryBondService, useValue: { createRepoLoan, repayRepoLoan, listUserRepoLoans } }],
     })
@@ -33,7 +33,7 @@ describe('P0 repo-loan unjournaled WLD containment', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
   afterAll(async () => { await app?.close(); });
