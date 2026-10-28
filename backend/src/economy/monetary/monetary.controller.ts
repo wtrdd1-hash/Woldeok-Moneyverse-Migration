@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
@@ -10,6 +10,15 @@ import { CentralBankService } from './central-bank.service';
 import { MintBureauService } from './mint-bureau.service';
 import { AutoMonetaryRegulationService } from './auto-monetary-regulation.service';
 import type { MonetaryOrderType, MonetaryTargetEnvelope } from './monetary.types';
+
+/** Accept only canonical decimal limits; reject arrays and coercible query values before DB access. */
+function parseMonetaryListLimit(value: unknown): number {
+  if (value === undefined) return 20;
+  if (typeof value !== 'string' || !/^(?:[1-9]|[1-4][0-9]|50)$/.test(value)) {
+    throw new BadRequestException('limit must be a decimal integer from 1 to 50');
+  }
+  return Number(value);
+}
 
 @ApiTags('Admin Monetary & Central Bank')
 @ApiBearerAuth()
@@ -61,8 +70,8 @@ export class MonetaryController {
 
   @Get('auto-regulation/events')
   @ApiOperation({ summary: '화폐량 자동 조절 집행 타임라인 로그 목록' })
-  async getAutoRegulationEvents(@Query('limit') limit?: number) {
-    return this.autoRegulation.getRecentEvents(limit ? Number(limit) : 20);
+  async getAutoRegulationEvents(@Query('limit') limit?: string) {
+    return this.autoRegulation.getRecentEvents(parseMonetaryListLimit(limit));
   }
 
   @Get('ai-council/recommendation')
@@ -87,14 +96,14 @@ export class MonetaryController {
 
   @Get('orders')
   @ApiOperation({ summary: '중앙은행 통화정책 명령서 목록 조회' })
-  async listOrders(@Query('limit') limit?: number) {
-    return this.centralBank.listPolicyOrders(limit ? Number(limit) : 20);
+  async listOrders(@Query('limit') limit?: string) {
+    return this.centralBank.listPolicyOrders(parseMonetaryListLimit(limit));
   }
 
   @Get('policy-orders')
   @ApiOperation({ summary: '중앙은행 통화정책 명령서 목록 조회 (호환성 별칭)' })
-  async listPolicyOrdersAlias(@Query('limit') limit?: number) {
-    return this.centralBank.listPolicyOrders(limit ? Number(limit) : 20);
+  async listPolicyOrdersAlias(@Query('limit') limit?: string) {
+    return this.centralBank.listPolicyOrders(parseMonetaryListLimit(limit));
   }
 
   @Post('orders/propose')
@@ -144,20 +153,20 @@ export class MonetaryController {
 
   @Get('certificates/mints')
   @ApiOperation({ summary: '조폐국 정식 발행 인증서 목록 조회' })
-  async listMints(@Query('limit') limit?: number) {
-    return this.mintBureau.listMintCertificates(limit ? Number(limit) : 20);
+  async listMints(@Query('limit') limit?: string) {
+    return this.mintBureau.listMintCertificates(parseMonetaryListLimit(limit));
   }
 
   @Get('mint-certificates')
   @ApiOperation({ summary: '조폐국 정식 발행 인증서 목록 조회 (호환성 별칭)' })
-  async listMintCertificatesAlias(@Query('limit') limit?: number) {
-    return this.mintBureau.listMintCertificates(limit ? Number(limit) : 20);
+  async listMintCertificatesAlias(@Query('limit') limit?: string) {
+    return this.mintBureau.listMintCertificates(parseMonetaryListLimit(limit));
   }
 
   @Get('certificates/retirements')
   @ApiOperation({ summary: '조폐국 정식 소각 인증서 목록 조회' })
-  async listRetirements(@Query('limit') limit?: number) {
-    return this.mintBureau.listRetirementCertificates(limit ? Number(limit) : 20);
+  async listRetirements(@Query('limit') limit?: string) {
+    return this.mintBureau.listRetirementCertificates(parseMonetaryListLimit(limit));
   }
 
   @Post('execute-mint')
