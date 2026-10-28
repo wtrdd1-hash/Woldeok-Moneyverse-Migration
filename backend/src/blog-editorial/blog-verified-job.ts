@@ -34,7 +34,8 @@ export function createVerifiedBlogJob(
     } catch(error:unknown) {
       const reason = error instanceof Error ? error.message : 'UNKNOWN_WRITER_ERROR';
       report(slot.periodKey + ' ' + reason);
-      return { skipped:true, reason, periodKey:slot.periodKey };
+      // The scheduler records a failed claim instead of a false succeeded event.
+      throw error instanceof Error ? error : new Error(reason);
     }
   };
 }

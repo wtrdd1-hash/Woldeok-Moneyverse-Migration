@@ -15,7 +15,7 @@ const request = (headers?: Record<string, string>, body?: unknown) =>
     body: body ? JSON.stringify(body) : null,
   });
 
-describe('AI blog 7,000-char generation & editorial engine', () => {
+describe('retired unverified JSON publisher (verified DB publisher only)', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     delete process.env.INTERNAL_API_SECRET;
@@ -24,43 +24,42 @@ describe('AI blog 7,000-char generation & editorial engine', () => {
     adminMock.mockReturnValue(false);
   });
 
-  it('rejects unauthenticated posting without valid credentials', async () => {
+  it('rejects unauthenticated publishing without accepted credentials', async () => {
     const res = await POST(request({ 'x-cron-secret': 'invalid-key' }));
     expect(res.status).toBe(403);
     expect((await res.json()).code).toBe('BLOG_PUBLISH_FORBIDDEN');
     expect(res.headers.get('cache-control')).toBe('no-store');
   });
 
-  it('generates deep longform article with valid cron secret and guaranteed heroImage', async () => {
+  it('does not publish a synthetic reviewed article with cron credentials', async () => {
     process.env.INTERNAL_API_SECRET = 'valid-test-secret';
     const res = await POST(request({ 'x-cron-secret': 'valid-test-secret' }, { prompt: '테스트 복리 전략' }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
     const body = await res.json();
-    expect(body.success).toBe(true);
-    expect(body.post).toBeDefined();
-    expect(body.post.charCount).toBeGreaterThan(5000);
-    expect(body.post.heroImage).toBeDefined();
-    expect(body.post.heroImage).toMatch(/^\/images\/blog\/[a-z0-9-]+\.svg$/);
-    expect(body.post.verificationReceipt).toBeDefined();
+    expect(body.success).toBe(false);
+    expect(body.code).toBe('LEGACY_UNVERIFIED_PUBLISHER_RETIRED');
+    expect(body).not.toHaveProperty('post');
   });
 
-  it('generates deep longform article with authenticated administrator', async () => {
+  it('does not bypass primary-source verification even for an administrator', async () => {
     adminMock.mockReturnValue(true);
     const res = await POST(request({}, { country: 'KR', category: 'COMPOUND' }));
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.success).toBe(true);
-    expect(body.post.charCount).toBeGreaterThan(5000);
-    expect(body.post.heroImage).toBe('/images/blog/compound-interest-72-rule.svg');
+    expect(res.status).toBe(503);
+    expect((await res.json()).verifiedBackendPublisher).toBe('blog.rotation_2h');
   });
 
-  it('returns active status on authenticated GET', async () => {
+  it('never reports that legacy file publication is active', async () => {
     adminMock.mockReturnValue(true);
     const res = await GET(new Request('https://easy-scraping.com/api/blog/generate'));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.success).toBe(true);
-    expect(body.status).toBe('ACTIVE');
-    expect(body.publicationEnabled).toBe(true);
+    expect(body.status).toBe('LEGACY_FILE_PUBLISHER_RETIRED');
+    expect(body.publicationEnabled).toBe(false);
+    expect(body.supportedCountries).toEqual(['KR','US','JP','CN']);
+  });
+
+  it('does not reveal editorial internals to unauthenticated visitors', async () => {
+    const res = await GET(new Request('https://easy-scraping.com/api/blog/generate'));
+    expect(res.status).toBe(403);
   });
 });
