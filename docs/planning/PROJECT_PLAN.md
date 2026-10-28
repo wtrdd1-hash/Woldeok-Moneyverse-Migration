@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.28.1415 — Sovereign finance truthful containment (SOURCE CANDIDATE / RELEASE HOLD)
+- Finance audit v1401 P0 response: public treasury disclosure now fails closed rather than fabricating balances or disbursements; legacy in-memory mint/bank panels and APIs no longer imply genuine issuance; uncertified treasury transfers and mint execution return 503; SWF parameter types fixed, manual money mutation held. Mini-PC code tests, lint/typecheck, build and public HTTP preview passed. **Official exact-SHA Test authenticated financial/DB proof and Production cutover NOT completed.** [EN worklog](../worklog/2026-10-28-sovereign-finance-truth-v1415.md) / [KO](../worklog/2026-10-28-sovereign-finance-truth-v1415.ko.md).
+
 ## v2026.10.28.1405 — Blog two-hour multilingual publishing directive (SOURCE CANDIDATE)
 - Latest owner policy overrides mandatory human review. Two-hour KST country×topic rotation, four native languages and ECONOMY/CODING/COMPUTER. Automated independent quality validation gates publication; no verified article auto-unpublishes; administrator may optionally edit/private/delete later. Unverifiable finance/AI claims skipped (not sent for mandatory human review).
 - [Full EN spec](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.md) / [KO](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.ko.md). Pure rotation, scheduler and policy code only, not live writer. No official Test, production or DB content modifications. Google-served ads cannot be placed on uncurated auto-generated pages; ads and public visibility have separate policies.

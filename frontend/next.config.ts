@@ -55,6 +55,9 @@ const config: NextConfig = {
     minimumCacheTTL: 86400,
   },
   experimental: {
+    // Avoid 15 parallel static-generation workers exhausting the mini-PC memory.
+    // CI may override after measuring available RAM; keep a safe default for on-host builds.
+    cpus: Math.max(1, Math.min(4, Number(process.env.MONEYVERSE_NEXT_BUILD_CPUS || 2) || 2)),
     // The contract package ships CommonJS from a workspace path.
     externalDir: true,
     optimizePackageImports: [

@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.28.1415 — Treasury / Mint / Central Bank containment candidate
+- [EN worklog](docs/worklog/2026-10-28-sovereign-finance-truth-v1415.md) / [KO](docs/worklog/2026-10-28-sovereign-finance-truth-v1415.ko.md) · [Internal](docs/updates/v2026.10.28.1415-internal.md) / [KO](docs/updates/v2026.10.28.1415-internal.ko.md) · [GitHub](docs/updates/v2026.10.28.1415-github.md) / [KO](docs/updates/v2026.10.28.1415-github.ko.md). Fake finance display removed, uncertified financial mutation 503, SWF SQL type corrected; full canonical settlement & Production finance release remain BLOCKED.
+
 ## v2026.10.28.1412 — Original-country verified AI blog writer and DB publisher source candidate
 - [EN worklog](docs/worklog/2026-10-28-blog-verified-publisher-v1412.md) / [KO](docs/worklog/2026-10-28-blog-verified-publisher-v1412.ko.md), [internal EN](docs/updates/v2026.10.28.1412-blog-verified-internal.md) / [KO](docs/updates/v2026.10.28.1412-blog-verified-internal.ko.md), [GitHub EN](docs/updates/v2026.10.28.1412-blog-verified-github.md) / [KO](docs/updates/v2026.10.28.1412-blog-verified-github.ko.md). Source implementation only, no verified live auto-publication or Production deployment.
 

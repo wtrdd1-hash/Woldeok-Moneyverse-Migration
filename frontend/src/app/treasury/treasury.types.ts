@@ -21,13 +21,14 @@ export interface TreasuryProgramMeta {
 }
 
 export interface TreasuryOverviewData {
+  readonly verified?: boolean;
   readonly totalBalanceWld: string;
   readonly safeReserveWld: string;
   readonly availableBalanceWld: string;
   readonly reserveRatioPercent: number; // typically 30%
   readonly totalCumulativeDisbursedWld: string;
   readonly totalBurnedWld: string;
-  readonly beneficiaryCount: number;
+  readonly beneficiaryCount: number | null;
   readonly activeProgramsCount: number;
   readonly lastDisbursedAt: string;
 }

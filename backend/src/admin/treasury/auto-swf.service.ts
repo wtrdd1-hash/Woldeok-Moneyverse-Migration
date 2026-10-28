@@ -826,9 +826,9 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
       await client.query(
         `INSERT INTO public.treasury_swf_events (event_type, amount_wld, summary, metadata)
          VALUES (
-            'PORTFOLIO_LIQUIDATED_TO_VAULT', $1,
-            '국고 자금 정상화 회수 완료: 주식 투자금 +' || $1 || ' WLD 회수 환원, 국고 현금 ' || $2 || ' WLD 확보 (포트폴리오 잔여 ' || $3 || ' WLD)',
-            $4
+            'PORTFOLIO_LIQUIDATED_TO_VAULT', $1::numeric,
+            '국고 자금 정상화 회수 완료: 주식 투자금 +' || $1::text || ' WLD 회수 환원, 국고 현금 ' || $2::text || ' WLD 확보 (포트폴리오 잔여 ' || $3::text || ' WLD)',
+            $4::jsonb
          )`,
         [
           totalToLiquidate.toString(),

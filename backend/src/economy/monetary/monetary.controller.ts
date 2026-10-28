@@ -11,6 +11,8 @@ import { MintBureauService } from './mint-bureau.service';
 import { AutoMonetaryRegulationService } from './auto-monetary-regulation.service';
 import type { MonetaryOrderType, MonetaryTargetEnvelope } from './monetary.types';
 
+import { unverifiedFinanceOperation } from './finance-hold';
+
 @ApiTags('Admin Monetary & Central Bank')
 @ApiBearerAuth()
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
@@ -42,6 +44,7 @@ export class MonetaryController {
       circuit_breaker_freeze_pct?: number;
     },
   ) {
+    if (body.is_enabled === true) return unverifiedFinanceOperation('MONETARY_SETTLEMENT');
     return this.autoRegulation.updateConfig(
       body.is_enabled,
       body.target_faucet_sink_ratio,
@@ -53,10 +56,8 @@ export class MonetaryController {
 
   @Post('auto-regulation/run')
   @ApiOperation({ summary: '화폐량 자동 조절 즉시 1회 수동 평가 및 집행' })
-  async runAutoRegulationManually(@Req() req: RequestWithSession) {
-    const adminId = requireUserId(req);
-    const event = await this.autoRegulation.evaluateAndExecute(adminId);
-    return { event };
+  async runAutoRegulationManually(@Req() _req: RequestWithSession) {
+    return unverifiedFinanceOperation('MONETARY_SETTLEMENT');
   }
 
   @Get('auto-regulation/events')
@@ -163,22 +164,15 @@ export class MonetaryController {
   @Post('execute-mint')
   @ApiOperation({ summary: '승인된 명령에 따른 조폐국 정식 발행 실행' })
   async executeMint(
-    @Req() req: RequestWithSession,
+    @Req() _req: RequestWithSession,
     @Body()
-    body: {
+    _body: {
       policy_order_id: string;
       amount_wld: string;
       recipient_user_id?: string | null;
       idempotency_key: string;
     },
   ) {
-    const adminId = requireUserId(req);
-    return this.mintBureau.executeAuthorizedMint(
-      adminId,
-      body.policy_order_id,
-      body.amount_wld,
-      body.recipient_user_id ?? null,
-      body.idempotency_key,
-    );
+    return unverifiedFinanceOperation('MONETARY_SETTLEMENT');
   }
 }
