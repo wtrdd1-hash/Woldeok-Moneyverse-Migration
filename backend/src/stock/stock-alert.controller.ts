@@ -77,9 +77,12 @@ export class StockAlertController {
 
   @Get('events')
   @ApiOperation({ summary: 'Recent virtual-stock alert events belonging to the caller' })
-  async events(@Req() request: RequestWithSession, @Query('limit') limit?: string) {
+  async events(@Req() request: RequestWithSession, @Query('limit') limit?: unknown) {
+    // Reject noncanonical wire values before querying the owner's event history.
+    if (limit !== undefined && (typeof limit !== 'string' || !/^(?:[1-9]|[1-9][0-9]|100)$/.test(limit))) {
+      throw new BadRequestException('limit must be a decimal integer between 1 and 100');
+    }
     const parsed = limit === undefined ? 20 : Number(limit);
-    if (!Number.isSafeInteger(parsed)) throw new BadRequestException('limit must be a whole number');
     return { events: await this.repository().events(requireUserId(request), parsed) };
   }
 
