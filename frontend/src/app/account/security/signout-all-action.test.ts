@@ -61,13 +61,13 @@ describe('all-device sign-out completion receipt', () => {
   });
 
   it.each([
-    [],
-    ['unrelated=; Max-Age=0'],
-    ['__Host-mv_session=nonempty; Max-Age=0; Secure'],
-    ['__Host-mv_session=; Max-Age=3600; Secure'],
-    ['__Host-mv_session=; Max-Age=0; Path=/'],
-    ['__Host-mv_session=; Max-Age=0; Path=/; Secure; Domain=example.com'],
-  ])('rejects logout response without an authentic clearing session cookie: %j', async (setCookie) => {
+    { reason: 'missing', setCookie: [] as string[] },
+    { reason: 'unrelated', setCookie: ['unrelated=; Max-Age=0'] },
+    { reason: 'nonempty', setCookie: ['__Host-mv_session=nonempty; Max-Age=0; Secure'] },
+    { reason: 'not expired', setCookie: ['__Host-mv_session=; Max-Age=3600; Secure'] },
+    { reason: 'missing secure', setCookie: ['__Host-mv_session=; Max-Age=0; Path=/'] },
+    { reason: 'forbidden domain', setCookie: ['__Host-mv_session=; Max-Age=0; Path=/; Secure; Domain=example.com'] },
+  ])('rejects logout response with $reason clear-cookie evidence', async ({ setCookie }) => {
     mocks.apiWithCookie.mockResolvedValue({ payload: null, setCookie });
     await expect(terminateAllSessions()).rejects.toThrow('REDIRECT:/account/security?error=logout');
     expect(mocks.relaySetCookie).not.toHaveBeenCalled();
