@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.29.1440 — F675-166 verified private glossary study list (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- Previous Feature Improvement v1438 → Current Feature Addition v1440 → Next Feature Improvement v1442 (provisional). Main 35971c600f25869c96f1c666d4b9f58927202730 rechecked start/mid; QA v1355. No owner glossary save/read endpoint exists in main; GLOSSARY_TERMS drives public pages with 24h detail ISR. No overlap with unmerged F675-165 glossary corrections.
+- Propose explicit Save/Remove and voluntary Read/Unread, private /account/learning/glossary, immutable deployed slug/revision registry, owner-only receipt-bound API, Android parity, CAS/100-cap, 409 vs 503, tombstones, SEO/a11y/privacy and rollback. Reading mark does NOT prove comprehension, reward, or WLD. [Development issue #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779); full EN/KO in integrated master.
+- P0 ENV1440-01 FIN1440-02 SEC1440-03 REL1440-04; P1 GLOS1440-05 GLOS1440-06 GLOS1440-07 GLOS1440-08 GLOS1440-09 GLOS1440-10. QA: root/data ~98%, 18 USER_CASH/18,000 WLD drift, 239 app-writable tables, 3 PUBLIC bank EXECUTEs, 5 checksum mismatches/20 unapplied; off-host restore and official Test exact-SHA unverified. RELEASE HOLD.
+- Independent external verified sources new 0, cumulative deduplicated approved UNKNOWN / 10,000, BLOCKED / IN PROGRESS. Docs-only, no runtime/DB/WLD/Test/Production change.
+
+
 ## v2026.10.28.1423 — Treasury DB-only safety promotion (no app cutover)
 - Applied migration 291 to authority Production PostgreSQL after fresh verified backup and isolated Production-schema rehearsal. Existing unaudited citizen dividend fails closed, four-arg canonical payout registered; account sums/ledger transaction count unchanged and live backend health200. Finance PR #1706 CI PASS merged to main `3c251d93`, not a live frontend/backend code deployment. Historical 18k WLD discrepancy, zero canonical Treasury funding, migrations 269–287 gap, official Test and disk97% leave full app release gated. [Evidence](../worklog/2026-10-28-treasury-db-production-containment-v1423.md).
 

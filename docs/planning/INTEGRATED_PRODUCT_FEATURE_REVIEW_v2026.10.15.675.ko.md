@@ -1,5 +1,12 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v2026.10.29.1440 — F675-166 회원 전용 금융 용어 학습 목록 (기능 추가 / DRAFT / RELEASE HOLD)
+- 이전 기능 보완 v1438 → 현재 기능 추가 v1440 → 다음 기능 보완 v1442(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재조회, QA v1355. 실제 main의 GLOSSARY_TERMS 공개 용어 상세는 24시간 ISR이며 본인 전용 용어 저장/읽음 API는 없다. 미병합 F675-165 정정 제안과 별도 기능.
+- 회원 직접 저장/취소 및 자발적 읽음/취소, 비공개 /account/learning/glossary, 실제 배포 slug·개정 검증, 원본 영수증·본인 API·Android 동등성·CAS·100개 제한·409/503·삭제 용어 묘비·SEO/접근성/개인정보/롤백 설계. 읽음은 숙달·보상·WLD 증거가 아니다. [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779); 영문 정본·국문 상세는 통합 기획 참조.
+- P0 ENV1440-01 FIN1440-02 SEC1440-03 REL1440-04; P1 GLOS1440-05 GLOS1440-06 GLOS1440-07 GLOS1440-08 GLOS1440-09 GLOS1440-10. QA: 루트/데이터 ~98%, 18명 18,000 WLD 차이, 앱 쓰기 가능 239개 테이블, PUBLIC 은행 실행 3개, 체크섬 불일치 5/미적용 20, 외부 복원·공식 Test 정확 SHA 미검증. 운영승격 보류.
+- 외부 독립 근거 신규 승인 0, 누적 중복 제거 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 문서만 변경, 런타임·DB·WLD·Test·운영 불변.
+
+
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
 
 - [GSC 실제 검색성과·색인 증거 센터 상세기획](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 정식 상세기획으로 채택. 기존 /admin/seo·v685 재사용, GSC 날짜/상위 10개·무행0·크롤러 색인 오인·레거시 제출 성공/Google Indexing API 안내 오류 기록, 기술·제출·Google 색인본·검색 노출 실제 증거 분리, 구글/WCAG 16개 자료·D0~D7. 실제 SEO/GSC 운영 검증이나 코드 배포 아님.

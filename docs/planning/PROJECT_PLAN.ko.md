@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.29.1440 — F675-166 회원 전용 금융 용어 학습 목록 (기능 추가 / DRAFT / RELEASE HOLD)
+- 이전 기능 보완 v1438 → 현재 기능 추가 v1440 → 다음 기능 보완 v1442(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재조회, QA v1355. 실제 main의 GLOSSARY_TERMS 공개 용어 상세는 24시간 ISR이며 본인 전용 용어 저장/읽음 API는 없다. 미병합 F675-165 정정 제안과 별도 기능.
+- 회원 직접 저장/취소 및 자발적 읽음/취소, 비공개 /account/learning/glossary, 실제 배포 slug·개정 검증, 원본 영수증·본인 API·Android 동등성·CAS·100개 제한·409/503·삭제 용어 묘비·SEO/접근성/개인정보/롤백 설계. 읽음은 숙달·보상·WLD 증거가 아니다. [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779); 영문 정본·국문 상세는 통합 기획 참조.
+- P0 ENV1440-01 FIN1440-02 SEC1440-03 REL1440-04; P1 GLOS1440-05 GLOS1440-06 GLOS1440-07 GLOS1440-08 GLOS1440-09 GLOS1440-10. QA: 루트/데이터 ~98%, 18명 18,000 WLD 차이, 앱 쓰기 가능 239개 테이블, PUBLIC 은행 실행 3개, 체크섬 불일치 5/미적용 20, 외부 복원·공식 Test 정확 SHA 미검증. 운영승격 보류.
+- 외부 독립 근거 신규 승인 0, 누적 중복 제거 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 문서만 변경, 런타임·DB·WLD·Test·운영 불변.
+
+
 ## v2026.10.28.1423 — 국고배당 운영 DB 보호 승격 (앱 전체는 유지)
 - 17:18 KST 실제 권위 운영 DB에 migration 291 적용해 구형 미분개 배당 차단 및 신규 UUID 멱등 복식원장 함수 등록. 최신 암호화 백업, 운영 실제 스키마 격리시험 및 운영 app역할 비인가/구형 지급 거부 확인. 원장거래 890→890, 전체 계좌 합 18,000→18,000, backend HTTP200. GitHub PR #1706은 CI PASS로 main 병합 `3c251d93`. 앱 전체 운영 교체는 **미수행**: 18,000 WLD 원장 차이, 국고 정식 재원 0, 269~287 누락, 공식 Test/디스크97% 문제. [기록](../worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md).
 
