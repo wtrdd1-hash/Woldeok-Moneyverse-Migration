@@ -264,7 +264,7 @@ export async function POST(req: Request) {
       relatedCalculatorHref: category === 'COMPOUND' ? '/tools/compound-calculator' : category === 'STOCKS' ? '/tools/stock-calculator' : '/tools/loan-interest-calculator',
       relatedCalculatorName: category === 'COMPOUND' ? '복리 계산기' : category === 'STOCKS' ? '주식 계산기' : '대출 계산기',
       heroImage: generated.heroImage,
-      infographicType: category === 'COMPOUND' ? 'COMPOUND_GROWTH' : category === 'TAX' ? 'TAX_SAVINGS' : 'PORTFOLIO_ALLOCATION',
+      infographicType: category === 'COMPOUND' ? 'COMPOUND_CURVE' : category === 'TAX' ? 'TAX_WATERFALL' : category === 'MACRO' ? 'MACRO_RADAR' : 'DCA_BENCHMARK',
       isAiGenerated: false, // 감수 완료 정식 아티클
       status: 'PUBLISHED',
       country,
