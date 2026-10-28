@@ -1,0 +1,19 @@
+# Development A — Wallet direction filter recovery (2026-10-28 10:25 KST)
+
+## BEFORE WORK
+- Latest main: `a28bed9aa40ff74d492824ae12892a7d52132fdd` (re-fetched immediately before worktree creation).
+- Source: previously closed without merge PR #1647, protected head `ed5289f3cabb28fd00c863c96ae5cb1358356920` and recovery ref `refs/moneyverse-recovery/2026-10-28/1647`.
+- Incident #1663: 352 unique/unmerged PR heads locally preserved. No remote cleanup, PR closures or branch deletions authorized.
+- Existing main lacks member wallet direction filtering. Recover only the verified feature delta into a fresh isolated branch; never overwrite concurrent A/B/C/QA/Gemini changes.
+- English integrated plan is canonical; Korean plan is companion. AGENTS/README and recent QA reviewed.
+- Invariants: authenticated owner-only ledger function, server-side filter BEFORE limit, signed integer-string precision, exact app-api parity, no schema/ledger mutation, no-store.
+- Acceptance: RED-GREEN tests; focused backend/frontend/app-api; full lint/typecheck/build/unit/integration/real-PG/security/accessibility/SEO/E2E; exact-SHA Test and GitOps before merge/release. Block on any missing gate.
+
+## IN PROGRESS
+- [ ] RED: transplant original tests only and observe baseline failure.
+- [ ] GREEN: transplant original implementation, reconcile latest main, review.
+- [ ] Re-read latest main and EN/KO plans mid-work and before integration.
+- [ ] Verify exact SHA, CI, official Test; record blockers honestly.
+
+## FINISHED
+- Pending.
