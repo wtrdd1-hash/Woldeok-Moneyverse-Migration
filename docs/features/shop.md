@@ -29,3 +29,7 @@ Database-side constraints reject invalid prices or impossible stock states, such
 - `/shop/catalog`
 - member inventory/collections
 - quests and progression
+
+## Verified rarity filter (Development A candidate)
+
+The public `/shop` and member `/shop/catalog` screens can select one exact database rarity: `common`, `uncommon`, `rare`, `epic`, `legendary`, `mythic`. Backend public/member catalog endpoints filter only `shop_catalog_list_v2` results; invalid values return 400. Search and rarity combine, prices remain integer strings, and owner inventory remains session-scoped. Android can use `GET /app-api/v1/shop/catalog?rarity=rare` with a persistent session. This is a Draft PR candidate only, not released.

@@ -15,7 +15,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -31,6 +31,7 @@ import {
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
+import { filterCatalogRarity, parseShopRarity, SHOP_RARITY_VALUES } from './shop-rarity-filter';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -122,24 +123,28 @@ export class ShopController {
   }
 
   @Get('public-catalog')
-  @ApiOperation({ summary: 'The public catalogue; optional q searches code/name/description/category' })
-  async publicCatalog(@Query('q') query?: string) {
+  @ApiOperation({ summary: 'Public catalogue; optional q and exact rarity filters' })
+  @ApiQuery({ name: 'rarity', required: false, enum: SHOP_RARITY_VALUES })
+  async publicCatalog(@Query('q') query?: string, @Query('rarity') rawRarity?: unknown) {
+    const rarity = parseShopRarity(rawRarity);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+    return { catalogItems: filterCatalogRarity(filterShopItems(catalogItems, query), rarity) };
   }
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; optional q searches code/name/description/category' })
-  async catalog(@Req() request: RequestWithSession, @Query('q') query?: string) {
+  @ApiOperation({ summary: 'Member catalogue; optional q and exact rarity filters' })
+  @ApiQuery({ name: 'rarity', required: false, enum: SHOP_RARITY_VALUES })
+  async catalog(@Req() request: RequestWithSession, @Query('q') query?: string, @Query('rarity') rawRarity?: unknown) {
+    const rarity = parseShopRarity(rawRarity);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+    return { catalogItems: filterCatalogRarity(filterShopItems(catalogItems, query), rarity) };
   }
 
   @Get('holdings')

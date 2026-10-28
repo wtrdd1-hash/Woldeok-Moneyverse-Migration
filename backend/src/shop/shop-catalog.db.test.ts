@@ -76,6 +76,14 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
       expect(BigInt(gloves?.price ?? '0') > 0n).toBe(true);
     });
 
+    it('exposes only the database rarity CHECK values through the application read function', async () => {
+      const rows = await catalogue().catalog(UNKNOWN_MEMBER);
+      const allowed = new Set(['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']);
+      expect(rows.length).toBeGreaterThan(0);
+      expect(rows.every((row) => allowed.has(row.rarity))).toBe(true);
+      expect(rows.every((row) => typeof row.price === 'string')).toBe(true);
+    });
+
     it('carries the weekly upkeep 075 attaches to a vehicle', async () => {
       const rows = await catalogue().catalog(UNKNOWN_MEMBER);
       const bicycle = rows.find((row) => row.code === 'used_bicycle');

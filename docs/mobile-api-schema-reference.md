@@ -3717,7 +3717,10 @@ _No request body._
 
 ### Path/query parameters
 
-_None._
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| q | query | false | string |  |
+| rarity | query | false | string | enum="common","uncommon","rare","epic","legendary","mythic" |
 
 ### Request body
 

@@ -21,3 +21,7 @@
 - `/shop/catalog`
 - 회원 인벤토리/컬렉션
 - 퀘스트 및 성장
+
+## 희귀도 필터 (개발 A 후보)
+
+공개 `/shop` 및 회원 `/shop/catalog`에서 데이터베이스 희귀도(`common`, `uncommon`, `rare`, `epic`, `legendary`, `mythic`)를 정확히 선택할 수 있습니다. 서버는 `shop_catalog_list_v2`에서 권한 검증을 거친 결과만 필터링하며, 잘못된 희귀도는 400을 반환합니다. 검색어와 함께 사용할 수 있고 가격은 정수 문자열로 유지합니다. Android 앱은 로그인 세션으로 `GET /app-api/v1/shop/catalog?rarity=rare`를 사용합니다. 아직 배포되지 않은 Draft PR 후보입니다.

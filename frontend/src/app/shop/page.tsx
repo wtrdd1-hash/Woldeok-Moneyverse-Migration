@@ -11,14 +11,23 @@ import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 import { ShopMembershipSection } from './shop-membership-section';
+import { SHOP_RARITIES, shopFilterQuery } from './shop-rarity';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: 'WLD 아이템 상점',
   description: '월덕 머니버스의 게임 전용 WLD로 아이템·치장품·컬렉션을 확인하고 구매하는 가상 상점입니다.',
   alternates: { canonical: canonicalUrl('/shop') },
 };
+
+export async function generateMetadata({ searchParams }: ShopPageProps): Promise<Metadata> {
+  const { q, rarity } = await searchParams;
+  return {
+    ...BASE_METADATA,
+    ...(q || rarity ? { robots: { index: false, follow: false } } : {}),
+  };
+}
 
 const PRINCIPLES = [
   { ko: '11개 카테고리 78종 상품 완비', en: '11 categories & 78 items' },
@@ -28,14 +37,15 @@ const PRINCIPLES = [
 ];
 
 interface ShopPageProps {
-  readonly searchParams: Promise<{ q?: string }>;
+  readonly searchParams: Promise<{ q?: string; rarity?: string }>;
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const loggedIn = await isLoggedInMember();
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
-  const querySuffix = query ? `?q=${encodeURIComponent(query)}` : '';
+  const rarity = params.rarity ?? '';
+  const querySuffix = shopFilterQuery({ q: query, rarity });
 
   const [catalogData, walletData, profileData] = await Promise.all([
     loggedIn
@@ -80,7 +90,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           />
         </PageHeader>
 
-        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2" role="search">
+        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl flex-wrap gap-2" role="search">
           <input
             type="search"
             name="q"
@@ -89,10 +99,21 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             aria-label="상점 검색"
             className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
           />
+          <select
+            name="rarity"
+            defaultValue={SHOP_RARITIES.some((option) => option.value === rarity) ? rarity : ''}
+            aria-label="상품 희귀도"
+            className="min-h-11 rounded-md border border-border bg-card px-3 text-sm"
+          >
+            <option value="">전체 희귀도</option>
+            {SHOP_RARITIES.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
           <Button type="submit">
             <T korean="검색" english="Search" />
           </Button>
-          {query ? (
+          {query || rarity ? (
             <Button asChild type="button" variant="outline">
               <Link href="/shop">
                 <T korean="초기화" english="Reset" />
@@ -100,9 +121,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             </Button>
           ) : null}
         </form>
-        {query ? (
+        {query || rarity ? (
           <p className="text-sm text-muted-foreground">
-            “{query}” 검색 결과 {items.length}개
+            검색 조건에 맞는 상품 {catalogData ? items.length : "확인 불가"}개
           </p>
         ) : null}
 
@@ -127,14 +148,20 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       </div>
 
       {/* Moneyverse Plus VIP Membership Tier Card */}
-      <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} />
+      {catalogData ? <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} /> : null}
 
-      <ShopStoreView
-        items={items}
-        userBalance={userBalance}
-        currentUsername={username}
-        userAvatarUrl={avatarUrl}
-      />
+      {catalogData ? (
+        <ShopStoreView
+          items={items}
+          userBalance={userBalance}
+          currentUsername={username}
+          userAvatarUrl={avatarUrl}
+        />
+      ) : (
+        <p role="alert" className="text-sm text-destructive">
+          상점 목록을 확인할 수 없습니다. 검색 조건을 확인하거나 잠시 후 다시 시도해 주세요.
+        </p>
+      )}
     </div>
   );
 }
