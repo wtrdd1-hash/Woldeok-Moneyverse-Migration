@@ -25,3 +25,8 @@
 - Integration dependencies: open Draft #1746 (bond coupon) and #1751 (manual SWF liquidation) both touch `auto-swf.service.ts`; #1754 (C) touches SWF UI. Preserve all unique changes during future integration. Frontend C should replace the manual rebalance CTA's generic waiting toast with explicit unavailable wording; this BFF already returns 503.
 - Historical 18,000 WLD ledger drift, applied migration/checksum mismatches, broad app DML and 98–99% data disk utilization are independent blockers. This candidate does NOT repair or deploy existing financial data.
 - PR must remain Draft + hold. No main merge, Test/Production deployment, migration, DB write, service restart, branch cleanup or schedule change.
+
+### Expanded HTTP regression / final correction
+- Treasury integration tests initially exposed a **new test-fixture dependency error**: the Nest test module lacked the newly attached `CsrfGuard` provider. This was not a Production bypass or a financial write.
+- Updated only the donor-ranking test's existing mock guard setup and added a real Nest/Supertest `POST /admin/treasury/swf/rebalance` assertion: HTTP 503 and zero service invocation. Expanded treasury suite now **98 PASS / 13 SKIPPED** (10 test files pass, 5 DB files skipped). The isolated real-PostgreSQL requirement remains BLOCKED.
+- No guard was removed or bypassed in the actual application. CSRF remains required for the protected mutation route.

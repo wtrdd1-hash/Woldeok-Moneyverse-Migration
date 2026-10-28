@@ -6,6 +6,7 @@ import type { Queryable } from '../../core/db';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminTreasuryController } from './treasury.controller';
 import { TreasuryRepository } from './treasury.repository';
@@ -67,23 +68,31 @@ describe('P1 treasury donor ranking direct-call bounds', () => {
 describe('P1 treasury donor ranking HTTP boundary', () => {
   let app: INestApplication;
   const getTopDonors = vi.fn().mockResolvedValue([]);
+  const evaluateAndRebalance = vi.fn();
   beforeAll(async () => {
     const testingModule = await Test.createTestingModule({
       controllers: [AdminTreasuryController],
       providers: [
         { provide: TreasuryService, useValue: { getTopDonors } },
-        { provide: AutoSovereignWealthFundService, useValue: {} },
+        { provide: AutoSovereignWealthFundService, useValue: { evaluateAndRebalance } },
       ],
     })
       .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     await app.init();
   });
   afterAll(async () => { await app?.close(); });
+
+  it('returns HTTP 503 on SWF rebalance without calling settlement service', async () => {
+    evaluateAndRebalance.mockClear();
+    await request(app.getHttpServer()).post('/admin/treasury/swf/rebalance').send({}).expect(503);
+    expect(evaluateAndRebalance).not.toHaveBeenCalled();
+  });
 
   it('returns HTTP 400 for malformed and duplicate query without service call', async () => {
     getTopDonors.mockClear();
