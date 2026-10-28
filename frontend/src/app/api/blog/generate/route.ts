@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
 import type { BlogPost, BlogCategory, BlogCountry } from '@/app/blog/blog.types';
 
@@ -10,6 +11,9 @@ export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'no-store' } as const;
 
 function getSharedBlogStorePath(): string {
+  if (process.env.NODE_ENV === 'test') {
+    return path.join(os.tmpdir(), `moneyverse-blog-test-${process.pid}.json`);
+  }
   const shared = '/srv/moneyverse-data/shared/blog-posts.json';
   if (fs.existsSync(path.dirname(shared))) return shared;
   return path.join(process.cwd(), 'data', 'blog-posts.json');

@@ -18,6 +18,9 @@ function cleanFormulaText(raw: string): string {
     .replace(/\\ln/g, 'ln')
     .replace(/\\lim_\{([^}]+)\}/g, 'lim($1)')
     .replace(/\\mathcal\{O\}/g, 'O')
+    .replace(/\\\{/g, '')
+    .replace(/\\\}/g, '')
+    .replace(/\{([a-zA-Z0-9_+*-]+)\}/g, '$1')
     .replace(/\\/g, '')
     .trim();
 }

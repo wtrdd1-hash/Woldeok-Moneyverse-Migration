@@ -40,7 +40,7 @@ describe('Blog Markdown rendering regression v969', () => {
   it('renders math display blocks and inline formulas without raw LaTeX artifacts', () => {
     const mathContent = '$$P(t) = P_0 \\left(1 + \\frac{r}{m}\\right)^{mt}$$\n\n이자율 $R = 8$과 공식 `T = 72 / R`을 적용합니다.';
     const rendered = html(mathContent);
-    expect(rendered).toContain('수학적 공식');
+    expect(rendered).toContain('수식 모델링 공식');
     expect(rendered).toContain('P(t) = P_0 (1 + (r / m))^mt');
     expect(rendered).toContain('<code');
     expect(rendered).toContain('T = 72 / R');
