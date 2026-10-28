@@ -15,3 +15,8 @@
 ## 중간 — 08:46 KST
 - 첫 소스 탐색 경로가 최신 main이 아닌 통합 체크아웃이었음을 발견. 최신 main에는 이미 조회 증빙·오류 안내·50/100건 한도 및 테스트가 구현되어 있어 중복 개발 중단, 미커밋 테스트 제거.
 - 새로운 실제 P1: 공지/사진 삭제의 PostgreSQL 변경 영수증이 `deleted:false`를 반환해도 성공 메시지를 표시함. 기존 NestJS·DB 계약 `{deleted:boolean}`, `{rejected:false,deleted:boolean}` 확인. 이 기능만 집중 수정.
+
+## 중간 — 09:05 KST, main/의존성 재확인
+- main `b1cd54fd` → `e2708730` → `f396d009` 전진. 영문·국문 기획서 변경과 A/B/QA 병합 내역 확인 후 충돌 없이 rebase.
+- 이전 공유 체크아웃의 `node_modules`에 최신 main이 선언한 `undici@7.30.1`이 없어 재검증에서 Backend 테스트·타입 검사·빌드가 실패. 다른 작업환경을 수정하지 않고 이번 독립 worktree의 심볼릭 링크만 제거한 후 `pnpm install --frozen-lockfile`로 846개 의존성 독립 설치(잠금파일 변경 없음).
+- 최초 SHA의 집중 테스트 10건, 프론트 1,687건, 백엔드 단위 1,688건, 실제 격리 PostgreSQL 2,273건 통과. DB 권한 기대값 1건 실패. 새 main 재검증에서 프론트 1,850건·Lint·Webpack·API 계약 통과, 보안 감사와 CI는 미통과. 최종 HEAD에서 전체 재검증 예정.
