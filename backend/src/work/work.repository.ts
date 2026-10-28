@@ -17,6 +17,19 @@ function assertUuid(value: unknown, field: string): asserts value is string {
   }
 }
 
+/** Optional read-only filter. Never interpolate member-supplied values into SQL. */
+export function parseWorkTaskMaxDuration(value: unknown): number | null {
+  if (value === undefined) return null;
+  if (typeof value !== 'string' || !/^[1-9][0-9]*$/.test(value)) {
+    throw new WorkInputError('maxDurationSeconds must be a whole number from 1 to 86400');
+  }
+  const seconds = Number(value);
+  if (!Number.isSafeInteger(seconds) || seconds > 86400) {
+    throw new WorkInputError('maxDurationSeconds must be a whole number from 1 to 86400');
+  }
+  return seconds;
+}
+
 export type WorkFeatureState = 'enabled' | 'paused' | 'safe_mode' | 'disabled';
 
 export interface WorkAssignmentRow {
@@ -202,7 +215,7 @@ export class WorkRepository {
     );
   }
 
-  async tasks(actor: unknown): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown, maxDurationSeconds: number | null = null): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
     const rows = await queryRows<WorkTaskRow>(
       this.pool,
@@ -212,8 +225,9 @@ export class WorkRepository {
               task.daily_limit, task.taken_today, task.reward_preview::text,
               public.work_experience_preview($1, task.task_id)::text AS experience_preview,
               task.recommended
-       FROM public.work_task_board($1) AS task`,
-      [actor],
+       FROM public.work_task_board($1) AS task
+       WHERE ($2::integer IS NULL OR task.minimum_duration_seconds <= $2::integer)`,
+      [actor, maxDurationSeconds],
     );
     const now = Date.now();
     return rows.map((task) => {

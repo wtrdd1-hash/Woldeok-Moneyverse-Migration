@@ -56,10 +56,12 @@ function QuickCareerSwitchButton({
 
 export function CareerTasksBoard({
   tasks,
+  selectedMaxDuration,
   activeJobType,
   quotaBlock,
 }: {
   readonly tasks: readonly WorkTask[];
+  readonly selectedMaxDuration?: string | null;
   readonly activeJobType?: string | null | undefined;
   readonly quotaBlock?: WorkQuotaBlock | null;
 }) {
@@ -129,6 +131,29 @@ export function CareerTasksBoard({
           )}
         </div>
 
+        <form action="/work" method="get" className="flex flex-wrap items-end gap-2">
+          <label htmlFor="work-max-duration" className="grid gap-1 text-xs text-muted-foreground">
+            <span>{isEn ? 'Maximum required task time' : '필요 수행시간 상한'}</span>
+            <select
+              id="work-max-duration"
+              name="maxDurationSeconds"
+              defaultValue={selectedMaxDuration ?? ''}
+              className="h-9 min-w-44 rounded-md border border-input bg-background px-2 text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">{isEn ? 'Any duration' : '전체 시간'}</option>
+              <option value="60">{isEn ? 'Up to 1 minute' : '1분 이하'}</option>
+              <option value="120">{isEn ? 'Up to 2 minutes' : '2분 이하'}</option>
+              <option value="180">{isEn ? 'Up to 3 minutes' : '3분 이하'}</option>
+              <option value="300">{isEn ? 'Up to 5 minutes' : '5분 이하'}</option>
+              <option value="600">{isEn ? 'Up to 10 minutes' : '10분 이하'}</option>
+              <option value="900">{isEn ? 'Up to 15 minutes' : '15분 이하'}</option>
+            </select>
+          </label>
+          <Button type="submit" size="sm" variant="outline" className="min-h-9">
+            {isEn ? 'Apply duration' : '시간 필터 적용'}
+          </Button>
+        </form>
+
         <label className="grid gap-1 text-xs text-muted-foreground min-w-0">
           <span>{isEn ? 'Find a task' : '업무 검색'}</span>
           <input
@@ -150,9 +175,13 @@ export function CareerTasksBoard({
               ? isEn
                 ? 'No work tasks match your search.'
                 : '검색 조건에 맞는 업무가 없어요.'
-              : isEn
-                ? 'No tasks available in this category.'
-                : '선택한 직업에 등록된 업무가 없어요.'
+              : selectedMaxDuration
+                ? isEn
+                  ? 'No tasks fit the selected time limit.'
+                  : '선택한 수행시간 이내의 업무가 없어요.'
+                : isEn
+                  ? 'No tasks available in this category.'
+                  : '선택한 직업에 등록된 업무가 없어요.'
           }
         />
       ) : (

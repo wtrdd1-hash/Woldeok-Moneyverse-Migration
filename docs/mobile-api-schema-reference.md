@@ -5011,7 +5011,7 @@ _No request body._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
-## `GET` `/app-api/v1/work/tasks` — Every task on offer, with this member’s standing against each
+## `GET` `/app-api/v1/work/tasks` — Member-scoped work tasks, optionally capped by minimum duration
 
 - Authorization: 로그인 필요(기능에 따라 최신 동의 필요)
 - Success status: 200
@@ -5021,7 +5021,9 @@ _No request body._
 
 ### Path/query parameters
 
-_None._
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| maxDurationSeconds | query | false | integer | minimum=1; maximum=86400; description="Inclusive maximum of the authoritative minimum task duration in seconds" |
 
 ### Request body
 

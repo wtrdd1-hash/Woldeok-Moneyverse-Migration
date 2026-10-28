@@ -5021,7 +5021,9 @@ _요청 본문 없음._
 
 ### 경로/쿼리 파라미터
 
-_None._
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| maxDurationSeconds | query | false | integer | minimum=1; maximum=86400; description="Inclusive maximum of the authoritative minimum task duration in seconds" |
 
 ### 요청 본문
 

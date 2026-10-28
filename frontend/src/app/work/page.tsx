@@ -18,6 +18,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { ClaimButton, JobSwitchButton, SubmitTaskButton } from './work-forms';
 import { CareerTasksBoard } from './career-tasks-board';
+import { normalizedWorkDuration, workTasksApiPath } from './work-duration-filter';
 import { CareerQualificationsCard } from './career-qualifications-card';
 import { CareerMasteryCard } from './career-mastery-card';
 import { WorkQuotaDashboard } from './work-quota-card';
@@ -57,13 +58,16 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function WorkPage() {
+export default async function WorkPage({ searchParams }: {
+  readonly searchParams?: Promise<{ maxDurationSeconds?: string }>;
+}) {
   await requireMember();
+  const maxDurationSeconds = normalizedWorkDuration((await searchParams)?.maxDurationSeconds);
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
   const [board, assignments, receipts, profile, summary, qualificationsRes] = await Promise.all([
-    apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks'),
+    apiOrNull<{ tasks: readonly WorkTask[] }>(workTasksApiPath(maxDurationSeconds)),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
     apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
     apiOrNull<JobProfileResponse>('/api/v1/work/profile'),
@@ -302,6 +306,7 @@ export default async function WorkPage() {
         </div>
 
         <CareerTasksBoard
+          selectedMaxDuration={maxDurationSeconds}
           tasks={tasks}
           activeJobType={activeJob?.job_type}
           quotaBlock={quotaBlock}

@@ -137,6 +137,29 @@ describe('app API route compatibility', () => {
     expect((await response.json()).recentTransactionsHasMore).toBe(true);
   });
 
+  it('preserves the member work maximum duration filter for Android without public caching', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(
+      async (_input: RequestInfo | URL) =>
+        new Response(JSON.stringify({ featureState: 'enabled', tasks: [] }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+    );
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/work/tasks?maxDurationSeconds=300'),
+      context('work', 'tasks'),
+    );
+    expect(response.status).toBe(200);
+    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(target.pathname).toBe('/api/v1/work/tasks');
+    expect(target.searchParams.get('maxDurationSeconds')).toBe('300');
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+    expect((await response.json()).tasks).toEqual([]);
+  });
+
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     const fetchSpy = vi.fn();
