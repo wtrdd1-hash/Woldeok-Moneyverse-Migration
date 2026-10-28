@@ -1,5 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v2026.10.29.1448 — F675-168 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1446 → 현재 기능 추가 v1448 → 다음 기능 보완 v1450(잠정). 시작 main f05efcb5d7c21d9553f68df227f9771217a30671 → 중간 main 8ba355374a2553926f67140febbf85c114f00ba1 변경(implementation_plan.md만 수정, 기획 원본 동일), QA v1359 FAILED/HOLD. 블로그 본문에 공유 버튼만 있고 검증된 회원 저장 기능이 없으며 정적 AI 글과 검증 게시 글은 구분해야 한다. 개발 이슈 #1800, 런타임 변경 없음.
+- 독립 승인된 PUBLISHED 글만 명시적으로 저장/해제·수동 읽음 변경, 회원당 최대 100건, 개인 /account/reading/blog, 불변 게시 UUID·언어·epoch·영수증, 서명 커서·UUID 멱등성, 본인 전용 SECURITY DEFINER, 철회 tombstone. NestJS/Next/Android 동등성, CSRF, WCAG 2.2 AA, noindex/no-store, 관리자 감사·집계 KPI, WLD 영향 0.
+- P0: ENV1448-01(용량/독립 복원), FIN1448-02(18계좌/+18,000 WLD), SEC1448-03(쓰기 239/공개 은행 3/체크섬 5/미적용 20, 블로그 278/279 포함), REL1448-04(정확 SHA Test/배포). P1: BLOG1448-05, BLOG1448-06, BLOG1448-07, BLOG1448-08, BLOG1448-09, BLOG1448-10 게시 근거, 트랜잭션, API, 화면, 관리자·개인정보·SEO, 실제 PG 회귀. 합성 10,001건·동시 100건·위조 100건은 수용 조건이며 미실행. 운영 BLOCKED.
+- 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 독립 기획 파일 추가 없음. 전체 영문·국문 계약은 통합 마스터 및 https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800에 반영.
+
 [Draft PR #1794](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1794) — documentation-only, unmerged, release HOLD.
 
 ## v2026.10.29.1446 — F675-167 퀴즈·일일 보상 격리와 영수증 무결성 보완 (기능 보완 / 초안 / 운영 보류)

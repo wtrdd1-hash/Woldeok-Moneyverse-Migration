@@ -1,5 +1,42 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1448 / F675-168 — 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
+
+**기준과 주기.** 이전 기능 보완 v1446 → 현재 기능 추가 v1448 → 다음 기능 보완 v1450(잠정). 시작 main f05efcb5d7c21d9553f68df227f9771217a30671 및 중간 main 8ba355374a2553926f67140febbf85c114f00ba1을 확인(implementation_plan.md만 변경)했고 QA v1359는 FAILED/HOLD다. 구현·배포된 기능이 아닌 개발 인계용 기획이다. GitHub 이슈 #1800에 P0/P1을 연결한다. 신규 독립 기획 파일을 만들지 않는다.
+
+### 실제 소스 확인 및 중복 방지
+- Next.js 블로그 본문에는 공유하기 버튼이 있으나 회원별 저장·해제 CTA가 없다. BlogPost에는 slug, country, PUBLISHED/WITHDRAWN, 선택적 verificationReceipt가 있으며 공개 검증 API는 PUBLISHED 글과 영수증을 반환한다. 조사한 범위에서 회원 전용 저장 API·DB 테이블·Android 계약은 없다. GitHub 검색에서 동일 블로그 읽기 목록 이슈를 찾지 못했다. 게시판 읽기 목록 이슈 #1086은 별개 기능이다.
+- **추가 소스 위험:** 마이그레이션 288은 blog_verified_articles의 receipt UUID와 앱 계정 직접 SELECT 권한을 만들고, 290의 REVISE는 본문·content_digest를 바꾸면서 기존 receipt를 유지한다. 게시 코드의 evidence.humanReviewRequired=false이므로 영수증 존재만으로 독립 사람 검토나 불변 콘텐츠 개정을 증명할 수 없다. 신규 개정·epoch·독립 검토 근거와 호환 SECURITY DEFINER 읽기를 먼저 구현한 뒤 기존 SELECT 권한을 단계적으로 회수해야 한다. QA v1359에서 288~290은 적용 목록, 278/279는 미적용 목록이므로 마이그레이션 의존성·정합성을 별도 검증한다.
+- 블로그 편집 기반 마이그레이션 278/279는 QA v1359 기준 미적용 20건에 포함된다. 정적 글이나 AI 생성 콘텐츠를 독립 검토된 근거로 간주하지 않는다. 자격 조건은 승인된 출처, 불변 게시 영수증, 검토된 게시 개정 및 서버 게시 레지스트리다. 이를 증명할 수 없으면 저장 버튼을 비활성화하고 성공을 꾸미지 않는다.
+- 브라우저 localStorage만 쓰는 대안은 기기 간 동기화·삭제·철회 무결성을 보장하지 못하므로 제외한다. 자동 읽음 추적도 개인정보와 오인 가능성 때문에 제외하고 명시적 회원 동작만 허용한다.
+
+### 목적, 대상, 진입점과 화면 상태
+- 목적은 회원이 독립 검증된 경제·코딩·컴퓨터 글을 명시적으로 저장해 웹·Android에서 이어 읽는 것이다. 비회원은 공개 글을 읽을 수 있지만 저장하려면 로그인해야 하며 로그인 전 성공으로 표시하지 않는다.
+- 공개 진입점은 /blog/[slug]와 기존 ko/en/ja/zh 국가별 글 경로다. 검증된 글에서만 **나중에 읽기** / **목록에서 제거** CTA를 제공한다. 개인 목록 /account/reading/blog는 계정 메뉴와 저장 완료 화면에서 연결한다. 제목, 언어·국가, 검토된 콘텐츠 개정, 저장일, 사용자가 직접 설정한 읽음 상태 및 열기/제거 CTA를 보여준다. 계정 간 캐시 재사용은 금지한다.
+- 상태: GUEST_SIGN_IN_REQUIRED, INELIGIBLE_UNVERIFIED, READY_UNSAVED, SAVING, RECEIPT_UNKNOWN, SAVED_VERIFIED, UNSAVING, READ_MARKING, CONTENT_REVISED_REVIEW, WITHDRAWN_TOMBSTONE, EMPTY, OWNER_CONFLICT_409, RATE_LIMIT_429, SOURCE_UNVERIFIED_503, ERROR. 타임아웃은 성공이 아니라 RECEIPT_UNKNOWN이며 영수증 조회 후 같은 요청 UUID로 재시도한다. 철회 글의 본문 링크는 숨긴다.
+- 회원당 활성 저장 최대 100건, 페이지당 20건, 서버 저장시각 내림차순과 UUID 보조 정렬. 읽음/읽지 않음은 명시적 수동 변경만 허용한다. 저장은 학습 완료·정확성 보증·투자 권유가 아니다. WLD, 퀘스트, 광고 노출, 추천 보상, 공개 인기도, 알림 및 금융 원장과 완전히 분리한다.
+
+### 게시 근거 및 불변 식별자
+- slug는 URL 별칭일 뿐 불변 식별자가 아니다. 서버가 승인한 article UUID, 언어(ko|en|ja|zh), 국가(KR|US|JP|CN), 게시 개정, 출처 증빙 참조, 검토 콘텐츠 SHA-256, 검증 영수증 UUID, 게시 시각, 게시 epoch, PUBLISHED|WITHDRAWN|REVOKED 상태를 권위 레지스트리에 유지한다. 독립 검토된 PUBLISHED 개정만 저장 가능하며 클라이언트 slug/영수증/제목만으로 권한을 부여하지 않는다.
+- 정적 글과 검증 글이 같은 slug를 사용하면 검증 게시 ID를 우선 확인하고 정적 글로 자동 연결하지 않는다. 개정이 바뀌면 회원에게 변경 사실을 표시하고 재확인받는다. 철회·취소된 글은 다시 열지 않는다. 철회 후 재게시에는 새 epoch·영수증이 필요하며 과거 저장을 자동 부활시키지 않는다. 권위 출처 오류나 서버 장애는 503으로 실패 차단한다.
+
+### PostgreSQL 소유권, 제약, 트랜잭션
+- 개발 예약에서 별도 신규 마이그레이션으로 blog_publication_registry(게시 UUID·언어·국가·개정·SHA·근거·영수증·epoch·상태·독립 검토자·시각), blog_member_reading_items(회원·게시 UUID·언어·저장 개정·epoch·저장일·선택적 읽음일·CAS 버전), blog_reading_operation_receipts(회원·요청 UUID·작업·정규 요청 해시·불변 결과·시각)를 제안한다. 게시 ID+언어+개정 및 영수증 유일성, 회원+게시 ID+언어 복합 PK/FK, 회원·저장일·UUID 키셋 인덱스, 상태·언어 CHECK, 변경 불가 감사 제약을 둔다. 영수증에 본문·민감정보를 저장하지 않는다.
+- 목록/저장/해제/읽음/영수증 조회는 PostgreSQL SECURITY DEFINER 함수로 구현한다. 앱 계정에는 EXECUTE만 부여하고 직접 테이블 DML/SELECT를 주지 않는다. 회원 신원은 검증된 세션 또는 Android bearer에서 도출해야 하며 SQL p_actor만으로 인증됐다고 보지 않는다. 회원 잠금 → 게시 레지스트리 잠금 순서를 고정해 100건 제한과 철회 경합을 원자적으로 처리한다. 오래된 게시 개정은 409로 거부한다.
+- 동일 요청 UUID+동일 정규 내용은 최초 영수증을 반환하고 다른 내용 재사용은 409로 거부한다. 해제·읽음 변경에는 본인 행과 CAS 버전이 필요하다. 개인 목록 커서는 회원·정렬·필터·만료를 HMAC으로 결합하고 위조·다른 회원·만료 커서는 422로 거부한다. 금융 테이블·기존 마이그레이션·PUBLIC 은행 권한을 수정하지 않는다.
+
+### API·관리자·보안·SEO·접근성·KPI
+- NestJS 회원 인증 API /api/v1/blog/reading-queue: GET 목록(limit<=20,cursor), POST /items(게시 ID·언어·기대 개정·requestId), DELETE /items/:publicationId(언어·요청 UUID·기대 버전), PATCH /items/:publicationId/read(언어·읽음 여부·요청 UUID·기대 버전), GET /operations/:requestId(영수증 복구). Next.js는 기존 server-only 내부 API 경로를 이용하고 Android는 /app-api/v1 프록시로 동등한 DTO·상태코드를 제공한다. 웹 CSRF, Android bearer, 회원/IP별 제한, no-store를 강제한다. 200/201 검증 영수증, 400 형식, 401 미로그인, 403 권한, 404 소유 항목 없음, 409 개정·멱등 충돌, 410 철회, 422 언어·커서, 429 제한, 503 게시 권위/DB 검증 실패를 구분한다.
+- 관리자는 게시 철회·감사·개인정보를 제거한 집계만 처리하며 다른 회원의 비공개 목록을 임의 조회·대리 저장하지 못한다. 기존 단일 슈퍼관리자 권한을 따른다. 회원 삭제 시 목록·작업 영수증을 권한 있는 함수로 삭제하고 백업 보존기간을 문서화한다. 저장 해제 후 최소 tombstone은 30일 뒤 만료하며 활성 저장은 회원 제거/계정 삭제까지 보존한다. 본문 스냅샷은 저장하지 않는다.
+- 공개 글의 canonical/hreflang/robots는 기존 검증 게시 정책을 유지한다. 개인 목록은 noindex/nofollow/no-store, 사이트맵·공개 OG 제외. WCAG 2.2 AA: 키보드, aria-pressed, 포커스 복귀, role=status 영수증, 320px, 200% 확대, 동작 감소, TalkBack, 4개 언어의 검토된 문구를 요구한다.
+- KPI는 검증 게시 글 수, 명시적 저장 사용자 수, 영수증 성공률, 409·503 비율, 목록에서 열기, 자발적 제거, 철회 노출 억제 지연이다. 개인정보 보호된 집계만 허용하고 자동 읽음 추적·광고 타깃팅·가짜 참여 수치는 금지한다.
+
+### P0/P1 개발 백로그, 수용시험 및 운영 차단
+- P0 ENV1448-01: 루트 99%, 데이터 99%(이번 작업 중 100% 측정), 타 작업 자산 삭제 금지, 외부 암호화 백업 독립 복원. P0 FIN1448-02: QA v1359 회원 18계좌 +18,000 WLD 불일치, 임의 조정 금지, 기능 원인 WLD 변화 0 검증. P0 SEC1448-03: 앱 직접 쓰기 239개 관계, PUBLIC 은행 함수 3개, 체크섬 불일치 5개, 미적용 20개(블로그 278/279 포함), 최소 권한·게시 근거 확인. P0 REL1448-04: 정확 main 전체 CI, 공식 Test 정확 SHA 인증 DB/API/웹/Android E2E, 승인된 무중단 운영승격·롤백 증빙.
+- P1 BLOG1448-05: 검증 게시 레지스트리·DB 제약/인덱스. BLOG1448-06: 본인 전용 원자적 트랜잭션·영수증. BLOG1448-07: NestJS/Next/Android 인증·계약 동등성. BLOG1448-08: 웹·모바일 화면과 접근성. BLOG1448-09: 관리자·개인정보·SEO·KPI. BLOG1448-10: 격리 실제 PostgreSQL 회귀·롤백. 합성 10,001건, 동시 저장/해제/읽음 100건, 타인 회원·CSRF·UUID·커서 위조 100건, 철회·재게시·개정·언어 충돌, 계정 전환, 320px/TalkBack, 원장 변화 0건을 검증해야 한다. 아직 시험을 실행하지 않았다.
+- 기능 플래그 기본 OFF, 승인된 추가형 마이그레이션과 이전/신규 코드 공존, 공식 Test 정확 SHA 검증 후 승인된 배포만 허용한다. 실패 시 신규 쓰기를 차단하고 영수증을 보존한 채 롤백한다. 기획 예약은 Test/Production이나 런타임을 변경하지 않는다. 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS이며 달성으로 주장하지 않는다.
+
+
 ## v1446 / F675-167 — 금융 용어 퀴즈·보상 퀘스트 격리 및 영수증 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류)
 
 **개발 인계:** [Draft PR #1794](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1794) (선행 #1790/#1784/#1780), [이슈 #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789).

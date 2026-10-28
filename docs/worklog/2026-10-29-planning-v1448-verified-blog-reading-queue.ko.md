@@ -1,0 +1,18 @@
+# v1448 — 검증된 블로그 글 회원 전용 나중에 읽기 (초안 / 운영 보류)
+
+주기: 이전 기능 보완 v1446 → 현재 기능 추가 v1448 → 다음 기능 보완 v1450(잠정).
+
+## 점검 및 작업 기록
+- [x] miniPC 설치 using-superpowers/brainstorming/worktree/검증 스킬 읽음. skills 커넥터 URI 없음.
+- [x] Debian 13.6, GitHub main, AGENTS.md, README, 영어 원본·한국어 대조, frontend/backend/API/DB, QA v1359 검토.
+- [x] GitHub 중복 검색; 게시판 읽기 목록 #1086과 블로그 기능을 구분.
+- [x] 기존 영문·국문 통합 마스터·기획서·기능 검토·업데이트 로그 갱신. 신규 독립 기능 기획서 없음.
+- [x] 개발 인계 이슈 #1800, P0/P1 및 외부 근거 검증 게이트 유지.
+- [ ] 정확 SHA GitHub CI·독립 Test/Production 운영승격(기획 권한 밖).
+
+## 실측 및 결정
+시작 main f05efcb5d7c21d9553f68df227f9771217a30671 → 중간 8ba355374a2553926f67140febbf85c114f00ba1 (기획 문서 변경 없음). QA v1359 FAILED/HOLD, 회원 18계좌 +18,000 WLD, 앱 직접 쓰기 239개, PUBLIC 은행 함수 3개, 체크섬 5개 불일치, 미적용 20개(블로그 278/279 포함). 루트/데이터 사용률 99%, 이번 격리 작업 공간 생성 중 데이터 100% 측정. 기존 블로그에는 공유하기만 있고 본인 저장은 없으며 검증 게시 영수증을 확인하기 전에는 CTA를 활성화할 수 없다.
+
+독립 검토된 게시 글만 회원이 직접 저장/읽음 표시한다. 자동 읽음·가짜 집계·WLD·원장 변경 금지. 합성 10,001건, 동시 100건, 위조 100건 시험은 명세만 작성했고 실행하지 않았다. 외부 독립 검증 신규 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
+GitHub 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800. 기획 Draft PR: PENDING. 런타임/DB/금융/Test/Production 변경 없음.

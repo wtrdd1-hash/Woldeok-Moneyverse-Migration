@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.29.1448 — F675-168 verified member blog reading queue (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- Previous Feature Improvement v1446 -> Current Feature Addition v1448 -> Next Feature Improvement v1450 (provisional); main start f05efcb5d7c21d9553f68df227f9771217a30671 -> mid 8ba355374a2553926f67140febbf85c114f00ba1 (implementation_plan.md only), QA v1359 FAILED/HOLD. Source: blog article has Share but no verified owner Save; static AI posts and verified publication rows must not be conflated. GitHub development issue #1800; no runtime changes.
+- Explicit opt-in save/unsave and manual read/unread for independently approved PUBLISHED blog editions, <=100/member, private /account/reading/blog, immutable publication UUID+edition+epoch+receipt, signed pagination, digest-bound UUID idempotency, owner SECURITY DEFINER and safe withdrawal tombstones. Next/NestJS/Android parity, CSRF, a11y WCAG 2.2 AA, private noindex/no-store, admin audit, aggregate KPI and zero WLD effects.
+- P0: ENV1448-01 (disk/independent restore), FIN1448-02 (18 accounts/+18,000 WLD), SEC1448-03 (239 DML/3 PUBLIC EXECUTE/5 checksum mismatches/20 unapplied including blog 278/279), REL1448-04 (exact SHA Test/release). P1: BLOG1448-05, BLOG1448-06, BLOG1448-07, BLOG1448-08, BLOG1448-09, BLOG1448-10 publication registry, transaction, API, UI, admin/privacy/SEO and real PostgreSQL regression. Proposed 10,001 synthetic rows, 100 concurrency, 100 negative tests; NOT RUN. Production BLOCKED.
+- External independent approved/deduplicated evidence: newly approved 0, cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS. No new standalone planning file. Full bilingual implementation contract in integrated master and https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800.
+
 [Draft PR #1794](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1794) — documentation-only, unmerged, release HOLD.
 
 ## v2026.10.29.1446 — F675-167 quiz/daily-quest boundary and receipt hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
