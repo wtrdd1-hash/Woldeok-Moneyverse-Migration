@@ -65,15 +65,16 @@ export class TreasuryService {
     }
   }
 
-  async disburseCitizenDividend(adminId: string, amountPerUserWld: string, reason: string) {
+  async disburseCitizenDividend(adminId: string, amountPerUserWld: string, reason: string, idempotencyKey?: string) {
     if (!amountPerUserWld || !/^\d+$/.test(amountPerUserWld) || BigInt(amountPerUserWld) <= BigInt(0)) {
       throw new TreasuryInputError('1인당 배당금은 1 WLD 이상의 정수여야 합니다.');
     }
     if (!reason || typeof reason !== 'string' || reason.trim().length < 10) {
       throw new TreasuryInputError('지출 감사 사유는 최소 10자 이상 입력해야 합니다.');
     }
+    if (!idempotencyKey || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey)) throw new TreasuryInputError('배당 요청 UUID가 필요합니다.');
     try {
-      return await this.repository.disburseCitizenDividend(adminId, amountPerUserWld, reason);
+      return await this.repository.disburseCitizenDividend(adminId, amountPerUserWld, reason, idempotencyKey);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       throw new TreasuryInputError(msg);

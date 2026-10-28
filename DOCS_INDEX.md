@@ -1,5 +1,14 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.28.1422 — Treasury payout ledger label CI fix
+- [KO evidence](docs/worklog/2026-10-28-treasury-wallet-label-v1422.ko.md) · [EN](docs/worklog/2026-10-28-treasury-wallet-label-v1422.md) · [Internal](docs/updates/v2026.10.28.1422-internal.ko.md) · [GitHub](docs/updates/v2026.10.28.1422-github.md).
+
+## v2026.10.28.1421 — Treasury dividend isolated SQL acceptance
+- [Korean record](docs/worklog/2026-10-28-treasury-dividend-release-v1421.ko.md) · [English record](docs/worklog/2026-10-28-treasury-dividend-release-v1421.md) · [Internal update](docs/updates/v2026.10.28.1421-internal.ko.md) · [GitHub update](docs/updates/v2026.10.28.1421-github.md).
+## v2026.10.28.1420 — Treasury dividend canonical ledger candidate
+- [EN worklog](docs/worklog/2026-10-28-treasury-dividend-ledger-v1420.md) · [KO worklog](docs/worklog/2026-10-28-treasury-dividend-ledger-v1420.ko.md). Immutable migration291, backend and frontend retry-stable payout identity, CI-only disposable SQL acceptance, no Production data changes.
+
+
 ## v2026.10.28.1412 — Original-country verified AI blog writer and DB publisher source candidate
 - [EN worklog](docs/worklog/2026-10-28-blog-verified-publisher-v1412.md) / [KO](docs/worklog/2026-10-28-blog-verified-publisher-v1412.ko.md), [internal EN](docs/updates/v2026.10.28.1412-blog-verified-internal.md) / [KO](docs/updates/v2026.10.28.1412-blog-verified-internal.ko.md), [GitHub EN](docs/updates/v2026.10.28.1412-blog-verified-github.md) / [KO](docs/updates/v2026.10.28.1412-blog-verified-github.ko.md). Source implementation only, no verified live auto-publication or Production deployment.
 

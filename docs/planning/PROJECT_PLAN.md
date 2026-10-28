@@ -1,5 +1,14 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.28.1422 — Citizen dividend wallet ledger labeling
+- Fixed a failing exact-SHA backend test: `TREASURY_CITIZEN_DIVIDEND` now displays a specific Korean user wallet label (29 tests PASS). Financial readiness and official Test remain BLOCKED. [Evidence](../worklog/2026-10-28-treasury-wallet-label-v1422.md).
+
+## v2026.10.28.1421 — Treasury dividend SQL foreign-key and release acceptance
+- Fixed non-existent policy FK reference, replayed all 290 migrations in isolated PostgreSQL and passed rollback-only canonical payout, balance and authorization test. Production has unresolved historical 18k WLD drift and zero proven Treasury account cash; exact-SHA Test and Production gated. [Evidence](../worklog/2026-10-28-treasury-dividend-release-v1421.md).
+## v2026.10.28.1420 — Canonical citizen dividend payout (SOURCE CANDIDATE / NOT LIVE)
+- v291 introduces stable UUID request-bound all-or-none canonical double-entry, vault and beneficiary receipts, blocking legacy direct-wallet payout. The actual Treasury ledger account has 0 WLD and cannot fund payouts until provenance is certified; historical 18,000 WLD drift remains under investigation, not reissued or fabricated. No change to general app database grants as directed. [Worklog](../worklog/2026-10-28-treasury-dividend-ledger-v1420.md). Actual isolated PostgreSQL CI, official Test and Production promotion not yet verified.
+
+
 ## v2026.10.28.1405 — Blog two-hour multilingual publishing directive (SOURCE CANDIDATE)
 - Latest owner policy overrides mandatory human review. Two-hour KST country×topic rotation, four native languages and ECONOMY/CODING/COMPUTER. Automated independent quality validation gates publication; no verified article auto-unpublishes; administrator may optionally edit/private/delete later. Unverifiable finance/AI claims skipped (not sent for mandatory human review).
 - [Full EN spec](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.md) / [KO](BLOG_TWO_HOUR_AUTOPUBLISH_SPEC_v2026.10.28.1405.ko.md). Pure rotation, scheduler and policy code only, not live writer. No official Test, production or DB content modifications. Google-served ads cannot be placed on uncurated auto-generated pages; ads and public visibility have separate policies.

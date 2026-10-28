@@ -1,0 +1,5 @@
+# v2026.10.28.1422 — Wallet label fixes CI release regression
+
+The owner requests production deployment; exact-SHA, financial reconciliation and Test gates remain in force. Original first full CI after SQL FK fix, run 40643871611, passed database tests (20 suites/50 tests) and all application lint, typecheck, build, but backend transaction-label test failed on new canonical type `TREASURY_CITIZEN_DIVIDEND`. Added the accurate Korean wallet label `국고 시민배당 지급` in `backend/src/wallet/wallet.service.ts`; 29 wallet label regression tests now pass.
+
+Production read-only audit confirms financial preflight exit 2, 18 unexplained accounts / 18,000 WLD, canonical Treasury ledger account balance zero. Legacy citizen dividend records: 3 payouts totaling 63,000 WLD (15,000 and 30,000 on Sep 30; 18,000 on Oct 28). History requires per-beneficiary provenance. Production has 269 logged migrations, missing 269–287 while 288–290 blog-only SQL are present. Official Test reports blog SHA 4688e84 rather than our candidate. No Production/Test funds were modified; actual isolated PostgreSQL rollover test passed and was rolled back. Production promotion remains gated.

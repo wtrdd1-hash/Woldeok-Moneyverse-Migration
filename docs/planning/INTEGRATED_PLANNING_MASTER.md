@@ -1,5 +1,14 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.28.1422 — Accurate member wallet dividend label
+- Added canonical treasury payout transaction label, allowing CI label coverage. Existing historical divergence and absent approved treasury funding still block finance Production. [Evidence](../worklog/2026-10-28-treasury-wallet-label-v1422.md).
+
+## v2026.10.28.1421 — Real DB treasury journal acceptance
+- Corrected failing policy FK, applied all forward migrations on isolated PostgreSQL and passed balanced ledger/idempotency/unauthorized/zero-Treasury SQL negatives in ROLLBACK. Production financial provenance and exact-SHA gated. [Evidence](../worklog/2026-10-28-treasury-dividend-release-v1421.md).
+## v2026.10.28.1420 — Canonical citizen dividend payout (SOURCE CANDIDATE / NOT LIVE)
+- v291 introduces stable UUID request-bound all-or-none canonical double-entry, vault and beneficiary receipts, blocking legacy direct-wallet payout. The actual Treasury ledger account has 0 WLD and cannot fund payouts until provenance is certified; historical 18,000 WLD drift remains under investigation, not reissued or fabricated. No change to general app database grants as directed. [Worklog](../worklog/2026-10-28-treasury-dividend-ledger-v1420.md). Actual isolated PostgreSQL CI, official Test and Production promotion not yet verified.
+
+
 ## v2026.10.28.1418 — Mobile admin publisher status Production release
 - Production screenshot root cause: manual AI publish controls were hard-disabled and mobile admin header/badge wrapped poorly. PR #1707 code SHA cfb13272beea53c4d8c20eff7f379b6f66343033, CI #40644673371 PASS, exact official Test PASS, v1418 blog-only Production backend 3483 and frontend 3484 promoted with Nginx scoped blog cutover and previous Next bundle fallback. Fixed Production blog frontend API_ORIGIN from legacy 3000 to verified 3483. Admin-only read-only verified writer status/refresh displays real scheduler/model flags, DB post count and next KST country/topic. No false manual AI publisher. Live blog mobile QA 320–1024 PASS, 4-country/old pages 200, anonymous admin status 403/401; financial/member runtimes unchanged. Model-generated publication remains OFF/zero verified articles; legacy JSON write guard prevents old admin edits, logged-in admin flow not E2E tested. See v1418 bilingual release worklog.
 

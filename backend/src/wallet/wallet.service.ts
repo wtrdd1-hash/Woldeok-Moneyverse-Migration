@@ -57,6 +57,7 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   VIRTUAL_DICE_GAME: '주사위 게임',
   EARLY_EVENT_REWARD: '초반 사건 보상',
   TREASURY_USER_DONATION: '국고 자발적 기부',
+  TREASURY_CITIZEN_DIVIDEND: '국고 시민배당 지급',
   STOCK_LEAGUE_ENTRY: '주식 챔피언십 참가비',
   MARKETPLACE_APPRAISAL: '마켓 감정서 발급 수수료',
   SHOP_MAINTENANCE: '주간 유지비',
