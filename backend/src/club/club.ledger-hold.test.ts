@@ -23,7 +23,7 @@ describe('P0 club WLD settlement boundary', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [ClubController],
       providers: [{ provide: ClubService, useValue: { createClub, contributeToProject, listClubs } }],
     })
@@ -31,7 +31,7 @@ describe('P0 club WLD settlement boundary', () => {
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     app.use((req: { session?: unknown }, _res: unknown, next: () => void) => {
       req.session = { user_id: actor };
       next();

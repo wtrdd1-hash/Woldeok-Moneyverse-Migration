@@ -89,28 +89,15 @@ export class PostgresClubRepository {
   constructor(private readonly client: Queryable) {}
 
   async createClub(
-    actorUserId: string,
-    tag: string,
-    name: string,
-    description: string,
-    charter: string,
-    joinMode: string,
-    idempotencyKey: string,
+    _actorUserId: string,
+    _tag: string,
+    _name: string,
+    _description: string,
+    _charter: string,
+    _joinMode: string,
+    _idempotencyKey: string,
   ): Promise<CreateClubResult> {
-    rejectUnjournaledClubSettlement();
-    if (!UUID_REGEX.test(actorUserId)) throw new ClubInputError('actorUserId must be a valid UUID');
-    if (!UUID_REGEX.test(idempotencyKey)) throw new ClubInputError('idempotencyKey must be a valid UUID');
-    if (!tag || tag.length < 2 || tag.length > 8) throw new ClubInputError('tag must be 2-8 uppercase alphanumeric');
-    if (!name || name.length < 2 || name.length > 30) throw new ClubInputError('name must be 2-30 characters');
-
-    const row = await queryOne<CreateClubResult>(
-      this.client,
-      `SELECT club_id, tag, name, status, created_at
-       FROM public.club_create($1::uuid, $2::text, $3::text, $4::text, $5::text, $6::text, $7::uuid);`,
-      [actorUserId, tag.toUpperCase().trim(), name.trim(), description.trim(), charter.trim(), joinMode, idempotencyKey],
-    );
-    if (!row) throw new Error('failed to create club');
-    return row;
+    return rejectUnjournaledClubSettlement();
   }
 
   async listClubs(
@@ -326,27 +313,13 @@ export class PostgresClubRepository {
   }
 
   async contributeToProject(
-    actorUserId: string,
-    clubId: string,
-    projectId: string,
-    amountWld: number,
-    idempotencyKey: string,
+    _actorUserId: string,
+    _clubId: string,
+    _projectId: string,
+    _amountWld: number,
+    _idempotencyKey: string,
   ): Promise<ContributeProjectResult> {
-    rejectUnjournaledClubSettlement();
-    if (!UUID_REGEX.test(actorUserId)) throw new ClubInputError('actorUserId must be a valid UUID');
-    if (!UUID_REGEX.test(clubId)) throw new ClubInputError('clubId must be a valid UUID');
-    if (!UUID_REGEX.test(projectId)) throw new ClubInputError('projectId must be a valid UUID');
-    if (!UUID_REGEX.test(idempotencyKey)) throw new ClubInputError('idempotencyKey must be a valid UUID');
-    if (amountWld <= 0) throw new ClubInputError('amountWld must be positive');
-
-    const row = await queryOne<ContributeProjectResult>(
-      this.client,
-      `SELECT contribution_id, accepted_amount::text, project_current_wld, project_status
-       FROM public.club_contribute_project($1::uuid, $2::uuid, $3::uuid, $4::numeric, $5::uuid);`,
-      [actorUserId, clubId, projectId, amountWld, idempotencyKey],
-    );
-    if (!row) throw new Error('failed to contribute to project');
-    return row;
+    return rejectUnjournaledClubSettlement();
   }
 
   async listClubFeed(clubId: string, limit = 50): Promise<ClubFeedPostRow[]> {
