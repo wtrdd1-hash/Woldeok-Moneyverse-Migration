@@ -48,3 +48,14 @@ describe('filterWorkTasks', () => {
     expect(filterWorkTasks(tasks, '   ')).toBe(tasks);
   });
 });
+
+describe('selected difficulty query', () => {
+  it.each(['1', '2', '3', '4', '5'])('accepts difficulty %s', async (level) => {
+    const { selectedWorkDifficulty } = await import('./work-search');
+    expect(selectedWorkDifficulty(level)).toBe(level);
+  });
+  it.each([undefined, '', '0', '6', '01', '2.0', ['2']])('ignores invalid web query %j', async (raw) => {
+    const { selectedWorkDifficulty } = await import('./work-search');
+    expect(selectedWorkDifficulty(raw)).toBeNull();
+  });
+});

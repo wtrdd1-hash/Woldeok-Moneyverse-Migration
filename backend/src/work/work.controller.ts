@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -29,7 +30,7 @@ import {
   WorkCompletionDto,
   WorkDashboardResponseDto,
 } from './work.dto';
-import { WorkInputError, WorkRepository } from './work.repository';
+import { parseWorkDifficulty, WorkInputError, WorkRepository } from './work.repository';
 import { refuseUnjournaledQualification } from './work-qualification-hold';
 
 @ApiTags('work')
@@ -101,15 +102,20 @@ export class WorkController {
   }
 
   @Get('tasks')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
-  async tasks(@Req() request: RequestWithSession) {
-    const repository = this.repository();
-    const actor = requireUserId(request);
-    const [featureState, tasks] = await Promise.all([
-      repository.featureState(),
-      this.guarded(() => repository.tasks(actor), 'the task board is unavailable'),
-    ]);
-    return { featureState, tasks };
+  async tasks(@Req() request: RequestWithSession, @Query('difficulty') rawDifficulty?: unknown) {
+    return this.guarded(async () => {
+      const difficulty = parseWorkDifficulty(rawDifficulty);
+      const repository = this.repository();
+      const actor = requireUserId(request);
+      const [featureState, tasks] = await Promise.all([
+        repository.featureState(),
+        repository.tasks(actor, difficulty),
+      ]);
+      return { featureState, tasks };
+    }, 'the task board is unavailable');
   }
 
   @Post('tasks/:id/complete')

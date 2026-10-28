@@ -306,3 +306,26 @@ describe('Android chat bigint cursor and private cache boundary', () => {
     expect(failed.headers.get('cache-control')).toBe('private, no-store');
   });
 });
+
+describe('work task difficulty on Android gateway', () => {
+  it.each([200, 401, 403, 500])('forwards canonical difficulty and never caches member work status %s', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ tasks: [] }), {
+      status,
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/work/tasks?difficulty=3'), context('work', 'tasks'));
+    expect(response.status).toBe(status);
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/work/tasks?difficulty=3');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+  it('never caches gateway failures', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('down'); }));
+    const response = await GET(request('/app-api/v1/work/tasks?difficulty=2'), context('work', 'tasks'));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+});

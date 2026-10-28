@@ -58,10 +58,12 @@ export function CareerTasksBoard({
   tasks,
   activeJobType,
   quotaBlock,
+  selectedDifficulty,
 }: {
   readonly tasks: readonly WorkTask[];
   readonly activeJobType?: string | null | undefined;
   readonly quotaBlock?: WorkQuotaBlock | null;
+  readonly selectedDifficulty?: string | null;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
@@ -74,7 +76,7 @@ export function CareerTasksBoard({
   const myTasks = activeJobType ? tasks.filter((t) => t.job_type === activeJobType) : [];
   const myCompletedToday = myTasks.reduce((sum, t) => sum + t.taken_today, 0);
 
-  const scopedTasks = filter === 'my_job' && activeJobType && myTasks.length > 0 ? myTasks : tasks;
+  const scopedTasks = filter === 'my_job' && activeJobType ? myTasks : tasks;
   const displayTasks = boardOrder(filterWorkTasks(scopedTasks, searchQuery), activeJobType);
 
   return (
@@ -129,6 +131,25 @@ export function CareerTasksBoard({
           )}
         </div>
 
+        <form action="/work" method="get" className="flex flex-wrap items-end gap-2" aria-label={isEn ? 'Filter tasks by difficulty' : '업무 난이도 필터'}>
+          <label htmlFor="work-difficulty" className="grid gap-1 text-xs text-muted-foreground min-w-0 flex-1 sm:max-w-56">
+            <span>{isEn ? 'Difficulty' : '업무 난이도'}</span>
+            <select
+              key={selectedDifficulty ?? 'all'}
+              id="work-difficulty"
+              name="difficulty"
+              defaultValue={selectedDifficulty ?? ''}
+              className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">{isEn ? 'All difficulties' : '전체 난이도'}</option>
+              {[1, 2, 3, 4, 5].map((level) => (
+                <option key={level} value={String(level)}>{difficultyLabel(level, locale)}</option>
+              ))}
+            </select>
+          </label>
+          <Button type="submit" variant="outline" className="min-h-11">{isEn ? 'Apply' : '적용'}</Button>
+        </form>
+
         <label className="grid gap-1 text-xs text-muted-foreground min-w-0">
           <span>{isEn ? 'Find a task' : '업무 검색'}</span>
           <input
@@ -146,7 +167,7 @@ export function CareerTasksBoard({
       {displayTasks.length === 0 ? (
         <EmptyState
           title={
-            searchQuery.trim()
+            searchQuery.trim() || selectedDifficulty
               ? isEn
                 ? 'No work tasks match your search.'
                 : '검색 조건에 맞는 업무가 없어요.'

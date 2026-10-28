@@ -13,3 +13,8 @@ export function filterWorkTasks(
     ),
   );
 }
+
+/** Strict URL query parser; never reflect malformed filters into the private API. */
+export function selectedWorkDifficulty(raw: unknown): string | null {
+  return typeof raw === 'string' && /^[1-5]$/.test(raw) ? raw : null;
+}
