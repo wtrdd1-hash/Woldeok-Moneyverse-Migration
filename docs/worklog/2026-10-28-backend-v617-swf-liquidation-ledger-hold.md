@@ -15,8 +15,14 @@
 ## In progress
 - Initial source inspection complete. Existing direct vault credit and portfolio decrement are not canonical ledger settlement.
 
-## Finished
-- Pending verification. No merge or deployment authorized.
+## Finished — 2026-10-28 22:51 KST
+- Code/test evidence commit `d7f515e0e5b885a1c7380e150b8d6d73a56f6d3c` on independent `auto/hourly-b-swf-liquidation-ledger-hold-v617-20261028-2235`; main `35971c600f25869c96f1c666d4b9f58927202730` unchanged after repeated fetch.
+- Draft/HOLD PR #1751 created; issue #1275 updated and active B v616 PR #1746 notified about same-file integration. Prior closed #1265/#1245/#1271 branches preserved.
+- Final implementation Backend 1,944 PASS / 440 SKIPPED; DB 46 PASS / 4 SKIPPED; focused HTTP/service 5 PASS; root lint 0 errors, full typecheck and backend build PASS; API 180 and policy 23 PASS.
+- Remote CI initial policy/classification PASS, runtime and candidate verification pending at closeout; no full required CI PASS claimed.
+- Production and official Test unchanged (Test `cfb13272beea53c4d8c20eff7f379b6f66343033`, Production `unknown`); no main merge, release, branch deletion, service restart, DB or WLD changes.
+- **PARTIAL / BLOCKED**: security audit, disk 98%, full frontend/build, isolated PG and authenticated Test exact-SHA/finance E2E and release authorization remain unresolved. Safety containment is source-only.
+
 
 ### TDD checkpoint — 22:38 KST
 - RED: `vitest run src/admin/treasury/auto-swf-liquidation-hold.test.ts --maxWorkers=1` produced **4 expected failures** on main, including DB-client access before any safety gate and retained direct portfolio/vault SQL.
