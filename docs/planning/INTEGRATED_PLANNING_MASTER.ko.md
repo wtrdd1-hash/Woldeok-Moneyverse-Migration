@@ -35,6 +35,8 @@
 | P1 | NPC1402-10 | QA: 격리 PG 10,001/100/100·타인 키·정확 SHA·OFF 롤백 |
 
 
+- **최종 main/런타임 재검증(09:10 KST):** main이 b323647636a3f594c67ca7c95b039d86882530b4로 변경됐으나 f396d009 이후 신규 근본원인 분석서·implementation_plan.md만 변경되고 NPC/퀘스트/마이그레이션/영문 정본은 동일. Nginx·systemd를 읽기 전용 실측한 결과 운영 기본 서버는 백엔드 127.0.0.1:3343 → v1083 릴리스, 프론트 127.0.0.1:3388 → repair-v1401 후보를 연결하며, 별도 moneyverse-backend/frontend 서비스는 prod-v2026.10.22.toss-redesign을 가리킨다. 최신 릴리스가 실제 사용자에게 제공된다는 증거가 아닌 라우팅·릴리스 식별 드리프트이다. P0 ENV1402-01/REL1402-03은 Nginx upstream→PID→systemd 작업경로→불변 manifest→정확 SHA·롤백 검증을 필수로 한다. 서비스/프록시 변경 없음.
+
 ## v1400 / F675-156 — 검증된 활성 NPC 주문 목록 (기능 추가 / DRAFT / RELEASE HOLD) — 이슈 #1650
 
 **주기:** 이전 기능 보완 v1398 → 현재 기능 추가 v1400 → 다음 기능 보완 v1402(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조본 확인. 미병합 기획 Draft #1645 위에 쌓는 문서 전용 변경이며 Gemini/A/B/C/QA 코드·WLD·원장·DB·스위치·Test·운영 변경 없음.

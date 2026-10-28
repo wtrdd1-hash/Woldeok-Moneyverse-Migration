@@ -40,6 +40,8 @@
 | P1 | NPC1402-10 | QA: isolated PG 10,001/100/100, cross-actor and cross-NPC negative, exact-SHA Test and OFF rollback |
 
 
+- **Final main/runtime recheck (09:10 KST):** main advanced to b323647636a3f594c67ca7c95b039d86882530b4; only new root-cause analysis and implementation_plan.md changed since f396d009, not NPC/quest/migration or canonical plan files. Independently read Nginx and systemd: production default server proxies backend 127.0.0.1:3343 to active v1083 release, frontend 127.0.0.1:3388 to active repair-v1401 candidate, while moneyverse-backend/frontend units point to different prod-v2026.10.22.toss-redesign directories. This is verified runtime routing/identity drift, not proof that the newer release is serving users. P0 ENV1402-01 / REL1402-03 must require live Nginx upstream → process PID → systemd WorkingDirectory → immutable release manifest → exact SHA attestation and rollback rehearsal before any Production claim. No service or proxy change made.
+
 ## v1400 / F675-156 — Verified Live NPC Order Directory (Feature Addition / DRAFT / RELEASE HOLD) — Issue #1650
 
 **Cycle:** Previous Feature Improvement v1398 → Current Feature Addition v1400 → Next Feature Improvement v1402 (provisional). Main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` rechecked at start/midpoint; canonical main AGENTS.md, README.md, PROJECT_PLAN.md and Korean counterpart checked. This documentation-only branch stacks on unmerged planning Draft #1645; no changes to Gemini/A/B/C/QA code, WLD, ledger, DB, flags, Test or Production.

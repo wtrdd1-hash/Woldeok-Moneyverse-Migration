@@ -3,6 +3,8 @@
 - migration 082 NPC 주문 재실행은 UUID만 확인하여 회원/NPC/명령 결속이 없고, 타인 키는 replayed=true/affinity NULL로 반환 가능하며 같은 회원의 다른 NPC 키도 거짓 재실행으로 보일 수 있다. active 조회에 FOR SHARE가 없어 비활성화 경합이 가능. P0는 불변 주문 영수증·과거 모호한 키 보수적 거부·비활성화 직렬화·DB actor 위조 #993 해결. 키셋 커서는 안정된 스냅샷이 아님.
 - P0 ENV1402-01 SEC1402-02 REL1402-03 NPC1402-04 (P0 #1656), P1 NPC1402-05 NPC1402-06 NPC1402-07 NPC1402-08 NPC1402-09 NPC1402-10. 상세 UX/API/DB/관리자/개인정보/SEO/Android/a11y/KPI/테스트/롤백은 영문·국문 통합 기획서. 합성 10,001/100/100 미실행, 외부 근거 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 코드·DB·원장·WLD·Test·운영 변경 없음.
 
+- **최종 main/런타임 재검증(09:10 KST):** main이 b323647636a3f594c67ca7c95b039d86882530b4로 변경됐으나 f396d009 이후 신규 근본원인 분석서·implementation_plan.md만 변경되고 NPC/퀘스트/마이그레이션/영문 정본은 동일. Nginx·systemd를 읽기 전용 실측한 결과 운영 기본 서버는 백엔드 127.0.0.1:3343 → v1083 릴리스, 프론트 127.0.0.1:3388 → repair-v1401 후보를 연결하며, 별도 moneyverse-backend/frontend 서비스는 prod-v2026.10.22.toss-redesign을 가리킨다. 최신 릴리스가 실제 사용자에게 제공된다는 증거가 아닌 라우팅·릴리스 식별 드리프트이다. P0 ENV1402-01/REL1402-03은 Nginx upstream→PID→systemd 작업경로→불변 manifest→정확 SHA·롤백 검증을 필수로 한다. 서비스/프록시 변경 없음.
+
 ## 2026-10-28 — 기획 v1400 F675-156 (기능 추가 / DRAFT / RELEASE HOLD)
 - 이전 기능 보완 v1398 → 현재 기능 추가 v1400 → 다음 기능 보완 v1402. DB 활성 상태가 검증된 NPC 목록·회원/Android GET·키셋·직접 권한 금지·금융 쓰기 0건. 이슈 #1650; 백로그 ENV1400-01 SEC1400-02 REL1400-03 NPC1400-04 NPC1400-05 NPC1400-06 NPC1400-07 NPC1400-08 NPC1400-09 NPC1400-10. QA #1646 후보 CI PASS는 main/공식 Test 승인 아님; 운영 HOLD. 합성 10,001/100/100 미실행, 신규 외부 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 코드/DB/WLD/원장/Test/운영 변경 없음.
 - GitHub 연계: Draft PR #1651은 #1645 위에 누적, 개발 이슈 #1650; 문서 전용·운영 보류.
