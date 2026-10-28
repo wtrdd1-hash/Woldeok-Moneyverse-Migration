@@ -1,8 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
-import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 import { apiOrNull } from '@/lib/api';
 
 export interface DailyQuestClaimResult {
@@ -27,30 +25,12 @@ export async function claimDailyQuestAction(
     return { status: 'error', message: '퀘스트 식별자가 지정되지 않았습니다.' };
   }
 
-  try {
-    const key = idempotencyKey();
-    const result = await mutate<DailyQuestClaimResult>(
-      '/app-api/v1/engagement/dopamine/daily-quest/claim',
-      {
-        method: 'POST',
-        body: {
-          questId,
-          idempotencyKey: key,
-        },
-      },
-    );
-
-    revalidatePath('/');
-    revalidatePath('/wallet');
-
-    return {
-      status: 'ok',
-      message: `${result.rewardAmount.toLocaleString()} WLD 퀘스트 보상이 지갑으로 정산되었습니다!`,
-      result,
-    };
-  } catch (error) {
-    return failure(error, '퀘스트 보상 수령 처리에 실패했습니다. 오늘 이미 수령했거나 조건을 확인해 주세요.');
-  }
+  // A browser action must not claim a payout without verified eligibility
+  // and an atomic, immutable ledger receipt.
+  return {
+    status: 'error',
+    message: '일일 퀘스트 WLD 보상 정산은 검증 완료 전까지 중단되어 있습니다.',
+  };
 }
 
 export async function fetchDailyQuestStatusAction(): Promise<DailyQuestStatusResult | null> {

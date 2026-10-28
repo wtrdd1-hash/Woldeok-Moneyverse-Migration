@@ -25,3 +25,16 @@ Pending evidence and release decision.
 ### RED checkpoint — 07:34 KST
 
 New tests fail against the original implementation: Backend 4/4 RED (authenticated HTTP returns 200; absent repository fabricates success and empty history; direct repository issues SQL); Frontend action 1/1 RED (returns `ok` without a settlement receipt). No shared database was queried. These are test-double/source-path reproductions, not evidence of actual Production payouts.
+
+### GREEN checkpoint — 07:35 KST
+
+- Authenticated NestJS HTTP reward POST returns 503 `DAILY_QUEST_SETTLEMENT_UNAVAILABLE` without calling the repository.
+- Controller with missing repository returns 503 rather than invented 500 WLD / balance 1,000.
+- Repository direct calls throw before any SQL, including replay attempts.
+- Missing status evidence returns 503 rather than invented empty history.
+- Browser server action refuses rewards before any mutation request; UI preserves practice navigation, disables WLD claim, discards localStorage reward assertions, and distinguishes missing ledger evidence.
+- Focused backend 4/4 PASS, frontend action/UI 2/2 PASS. No shared database writes or service changes.
+
+### Code review notes
+
+No applied migration modified. Session, authentication, consent and CSRF guards remain on the controller. Existing wallet ledger reads are unaffected. The GET daily quest status retains its historical ledger-tagged claim list when available; the UI does not treat localStorage as a ledger receipt. The reward program remains unavailable until a new approved, atomic, server-verified settlement function and client receipt flow exist.

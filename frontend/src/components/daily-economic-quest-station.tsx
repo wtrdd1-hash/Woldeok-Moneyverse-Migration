@@ -4,23 +4,18 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   CheckCircle2,
-  Circle,
-  Gift,
   Trophy,
   Sparkles,
   ArrowRight,
   TrendingUp,
   Landmark,
-  Compass,
   HelpCircle,
-  Flame,
   Award,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { claimDailyQuestAction, fetchDailyQuestStatusAction } from '@/app/actions/daily-quest';
-import { toast } from 'sonner';
+import { fetchDailyQuestStatusAction } from '@/app/actions/daily-quest';
 
 interface QuestItem {
   readonly id: string;
@@ -28,7 +23,6 @@ interface QuestItem {
   readonly titleEn: string;
   readonly descriptionKo: string;
   readonly descriptionEn: string;
-  readonly rewardWld: number;
   readonly icon: 'stock' | 'bank' | 'wheel' | 'quiz';
   readonly targetUrl: string;
 }
@@ -40,7 +34,6 @@ const DAILY_QUESTS: readonly QuestItem[] = [
     titleEn: 'Virtual Stock Market Analysis',
     descriptionKo: '관심 가상 주식 종목 또는 호가창 시뮬레이터를 1회 분석하세요.',
     descriptionEn: 'Explore virtual stock orderbook or price charts once today.',
-    rewardWld: 500,
     icon: 'stock',
     targetUrl: '/stocks',
   },
@@ -50,7 +43,6 @@ const DAILY_QUESTS: readonly QuestItem[] = [
     titleEn: 'Compound Interest Savings',
     descriptionKo: '은행 복리 예금 계좌를 확인하거나 이자를 조회하세요.',
     descriptionEn: 'Check bank standing or compound interest deposit account.',
-    rewardWld: 1000,
     icon: 'bank',
     targetUrl: '/bank',
   },
@@ -60,7 +52,6 @@ const DAILY_QUESTS: readonly QuestItem[] = [
     titleEn: 'Daily Lucky Wheel Spin',
     descriptionKo: '매일 1회 무료 럭키 룰렛을 돌려 보너스 지원금을 획득하세요.',
     descriptionEn: 'Spin the free daily lucky wheel to win retention rewards.',
-    rewardWld: 500,
     icon: 'wheel',
     targetUrl: '/#attendance',
   },
@@ -70,142 +61,49 @@ const DAILY_QUESTS: readonly QuestItem[] = [
     titleEn: 'Daily Financial Trivia',
     descriptionKo: '오늘의 금융 퀴즈 스테이션에서 1문제를 풀고 금융 지식을 넓히세요.',
     descriptionEn: 'Answer today’s financial trivia question and expand your literacy.',
-    rewardWld: 1000,
     icon: 'quiz',
     targetUrl: '/#financial-quiz',
   },
 ];
 
 const STORAGE_KEY_PREFIX = 'mv_daily_quests_';
-const ALL_CLEAR_BONUS = 2000;
 
 export function DailyEconomicQuestStation() {
   const [completedQuests, setCompletedQuests] = useState<Record<string, boolean>>({});
   const [claimedQuests, setClaimedQuests] = useState<Record<string, boolean>>({});
-  const [allClearClaimed, setAllClearClaimed] = useState<boolean>(false);
-  const [streakDays, setStreakDays] = useState<number>(3);
-  const [showCelebration, setShowCelebration] = useState<boolean>(false);
-  const [totalEarnedToday, setTotalEarnedToday] = useState<number>(0);
-
-  const [isClaimingId, setIsClaimingId] = useState<string | null>(null);
-
+  const [allClearClaimed, setAllClearClaimed] = useState(false);
+  const [hasLedgerEvidence, setHasLedgerEvidence] = useState(false);
   const todayKey = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    // 1. 로컬 저장소 우선 복원
-    let localCompleted: Record<string, boolean> = {};
-    let localClaimed: Record<string, boolean> = {};
-    let localAllClear = false;
-    let localEarned = 0;
-
+    // Local practice progress is never proof of a WLD claim or completion.
     try {
       const stored = localStorage.getItem(`${STORAGE_KEY_PREFIX}${todayKey}`);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        localCompleted = parsed.completed || {};
-        localClaimed = parsed.claimed || {};
-        localAllClear = parsed.allClearClaimed || false;
-        localEarned = parsed.totalEarned || 0;
-        setCompletedQuests(localCompleted);
-        setClaimedQuests(localClaimed);
-        setAllClearClaimed(localAllClear);
-        setTotalEarnedToday(localEarned);
-      } else {
-        localCompleted = { quest_stock_analysis: true };
-        setCompletedQuests(localCompleted);
-      }
-    } catch {
-      // Storage error fallback
-    }
-
-    // 2. 서버 권위 원장 수령 상태 동기화
-    fetchDailyQuestStatusAction()
-      .then((serverStatus) => {
-        if (serverStatus) {
-          const mergedClaimed = { ...localClaimed, ...serverStatus.claimedQuests };
-          const mergedCompleted = { ...localCompleted, ...serverStatus.claimedQuests };
-          const mergedAllClear = localAllClear || serverStatus.allClearClaimed;
-          const mergedEarned = Math.max(localEarned, serverStatus.totalEarnedToday);
-
-          setClaimedQuests(mergedClaimed);
-          setCompletedQuests(mergedCompleted);
-          setAllClearClaimed(mergedAllClear);
-          setTotalEarnedToday(mergedEarned);
+      const parsed: unknown = stored ? JSON.parse(stored) : null;
+      if (parsed && typeof parsed === 'object' && 'completed' in parsed) {
+        const progress = parsed.completed;
+        if (progress && typeof progress === 'object' && !Array.isArray(progress)) {
+          setCompletedQuests(Object.fromEntries(
+            DAILY_QUESTS.map((quest) => [quest.id, (progress as Record<string, unknown>)[quest.id] === true]),
+          ));
         }
-      })
-      .catch(() => {
-        // 네트워크 오류 시 로컬 캐시 유지
-      });
-  }, [todayKey]);
-
-  const saveState = (
-    newCompleted: Record<string, boolean>,
-    newClaimed: Record<string, boolean>,
-    newAllClear: boolean,
-    newEarned: number
-  ) => {
-    setCompletedQuests(newCompleted);
-    setClaimedQuests(newClaimed);
-    setAllClearClaimed(newAllClear);
-    setTotalEarnedToday(newEarned);
-    try {
-      localStorage.setItem(
-        `${STORAGE_KEY_PREFIX}${todayKey}`,
-        JSON.stringify({
-          completed: newCompleted,
-          claimed: newClaimed,
-          allClearClaimed: newAllClear,
-          totalEarned: newEarned,
-        })
-      );
+      }
     } catch {
-      // ignore
+      // Unavailable local storage is not a successful or failed ledger read.
     }
-  };
 
-  const handleClaim = async (quest: QuestItem) => {
-    if (claimedQuests[quest.id] || isClaimingId !== null) return;
-    setIsClaimingId(quest.id);
-
-    try {
-      const res = await claimDailyQuestAction(quest.id);
-      if (res.status === 'ok') {
-        toast.success(res.message);
-        const newCompleted = { ...completedQuests, [quest.id]: true };
-        const newClaimed = { ...claimedQuests, [quest.id]: true };
-        const newEarned = totalEarnedToday + quest.rewardWld;
-        saveState(newCompleted, newClaimed, allClearClaimed, newEarned);
-      } else {
-        toast.error(res.message || '보상 수령에 실패했습니다.');
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : '보상 수령 요청 중 오류가 발생했습니다.');
-    } finally {
-      setIsClaimingId(null);
-    }
-  };
-
-  const handleAllClearClaim = async () => {
-    if (allClearClaimed || isClaimingId !== null) return;
-    setIsClaimingId('all_clear');
-
-    try {
-      const res = await claimDailyQuestAction('all_clear');
-      if (res.status === 'ok') {
-        toast.success(res.message);
-        setShowCelebration(true);
-        const newEarned = totalEarnedToday + ALL_CLEAR_BONUS;
-        saveState(completedQuests, claimedQuests, true, newEarned);
-        setTimeout(() => setShowCelebration(false), 5000);
-      } else {
-        toast.error(res.message || '올클리어 보너스 수령에 실패했습니다.');
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : '올클리어 보너스 요청 중 오류가 발생했습니다.');
-    } finally {
-      setIsClaimingId(null);
-    }
-  };
+    fetchDailyQuestStatusAction()
+      .then((status) => {
+        if (!status) {
+          setHasLedgerEvidence(false);
+          return;
+        }
+        setClaimedQuests(status.claimedQuests);
+        setAllClearClaimed(status.allClearClaimed);
+        setHasLedgerEvidence(true);
+      })
+      .catch(() => setHasLedgerEvidence(false));
+  }, [todayKey]);
 
   const completedCount = DAILY_QUESTS.filter((q) => completedQuests[q.id]).length;
   const isAllCompleted = completedCount === DAILY_QUESTS.length;
@@ -238,21 +136,20 @@ export function DailyEconomicQuestStation() {
                 <Trophy className="size-4" />
               </div>
               <CardTitle className="text-base font-bold text-foreground">
-                일일 경제 퀘스트 & 챌린지 패스
+                일일 경제 퀘스트 — 연습 모드
               </CardTitle>
             </div>
             <CardDescription className="text-xs text-muted-foreground mt-1">
-              매일 4대 필수 금융 미션을 완료하고 최대 5,000 WLD 지원금과 전용 칭호를 획득하세요.
+              금융 학습 미션은 둘러볼 수 있지만, 검증되지 않은 WLD 보상 정산은 중단되어 있습니다.
             </CardDescription>
           </div>
 
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="flex items-center gap-1.5 py-1 px-2.5 text-xs font-bold border-amber-500/30 text-amber-400 bg-amber-500/5">
-              <Flame className="size-3.5 fill-amber-400" />
-              <span>{streakDays}일 연속 스트릭</span>
+              <span>WLD 정산 중단</span>
             </Badge>
             <Badge variant="secondary" className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10">
-              +{totalEarnedToday.toLocaleString()} WLD 획득
+              {hasLedgerEvidence ? '기존 원장 이력 조회 가능' : '원장 이력 확인 불가'}
             </Badge>
           </div>
         </div>
@@ -260,7 +157,7 @@ export function DailyEconomicQuestStation() {
         {/* Quest Progress Bar */}
         <div className="mt-4 pt-3 border-t border-border/50">
           <div className="flex items-center justify-between text-xs font-medium text-muted-foreground mb-1.5">
-            <span>오늘의 미션 달성도</span>
+            <span>이 기기에 저장된 연습 표시 (원장 증빙 아님)</span>
             <span className="font-mono font-bold text-foreground">
               {completedCount} / {DAILY_QUESTS.length} 완료 ({progressPercent}%)
             </span>
@@ -300,7 +197,7 @@ export function DailyEconomicQuestStation() {
                     <div className="flex items-center gap-1.5">
                       <h4 className="text-xs font-bold text-foreground truncate">{quest.titleKo}</h4>
                       <span className="text-[10px] font-mono font-bold text-emerald-400 shrink-0">
-                        +{quest.rewardWld.toLocaleString()} WLD
+                        WLD 보상 중단
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
@@ -313,17 +210,11 @@ export function DailyEconomicQuestStation() {
                   {isClaimed ? (
                     <Badge variant="outline" className="text-[11px] font-bold text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
                       <CheckCircle2 className="size-3 mr-1" />
-                      수령완료
+                      기존 원장 기록
                     </Badge>
                   ) : isCompleted ? (
-                    <Button
-                      size="sm"
-                      disabled={isClaimingId !== null}
-                      onClick={() => handleClaim(quest)}
-                      className="h-7 text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
-                    >
-                      <Gift className="size-3.5 mr-1" />
-                      {isClaimingId === quest.id ? '수령 처리 중...' : '보상 받기'}
+                    <Button size="sm" disabled className="h-7 text-xs">
+                      보상 정산 중단
                     </Button>
                   ) : (
                     <Button
@@ -367,11 +258,11 @@ export function DailyEconomicQuestStation() {
                   🏆 일일 퀘스트 올클리어 골든 보너스
                 </span>
                 <Badge variant="secondary" className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10">
-                  +{ALL_CLEAR_BONUS.toLocaleString()} WLD + 전용 칭호
+                  WLD 정산 중단
                 </Badge>
               </div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                오늘의 4대 퀘스트를 모두 완료하면 황금 상자가 잠금 해제됩니다.
+                연습 진행과 실제 보상 지급은 별개입니다. 검증된 정산 기능이 준비될 때까지 지급되지 않습니다.
               </p>
             </div>
           </div>
@@ -380,31 +271,18 @@ export function DailyEconomicQuestStation() {
             {allClearClaimed ? (
               <Badge className="bg-emerald-500 text-white font-bold text-xs py-1.5 px-3">
                 <Sparkles className="size-3.5 mr-1" />
-                골든 보너스 수령 완료!
+                기존 원장 수령 기록
               </Badge>
             ) : isAllCompleted ? (
-              <Button
-                onClick={handleAllClearClaim}
-                disabled={isClaimingId !== null}
-                className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-extrabold text-xs shadow-md"
-              >
-                <Gift className="size-4 mr-1.5" />
-                {isClaimingId === 'all_clear' ? '보너스 지급 중...' : `황금 상자 열기 (${ALL_CLEAR_BONUS.toLocaleString()} WLD)`}
-              </Button>
+              <Button disabled className="text-xs">보상 정산 중단</Button>
             ) : (
               <Button disabled variant="outline" size="sm" className="text-xs opacity-60">
-                미션 완료 후 해제 ({completedCount}/4)
+                연습 진행 {completedCount}/4 — 보상 중단
               </Button>
             )}
           </div>
         </div>
 
-        {/* Celebration Banner */}
-        {showCelebration && (
-          <div className="p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-center text-xs font-bold text-emerald-300 animate-bounce">
-            🎉 축하합니다! 오늘의 올클리어 보너스 {ALL_CLEAR_BONUS.toLocaleString()} WLD를 수령했습니다! 칭호 [월덱 자산가]가 부여되었습니다.
-          </div>
-        )}
       </CardContent>
     </Card>
   );

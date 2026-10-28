@@ -10,6 +10,7 @@ import {
   InternalServerErrorException,
   Post,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -325,50 +326,25 @@ export class DopamineController {
         throw new InternalServerErrorException(msg);
       }
     }
-    return { claimedQuests: {}, allClearClaimed: false, totalEarnedToday: 0 };
+    throw new ServiceUnavailableException({
+      code: 'DAILY_QUEST_EVIDENCE_UNAVAILABLE',
+      message: 'Daily quest ledger evidence is unavailable',
+    });
   }
 
   @Post('daily-quest/claim')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim official daily quest reward into authoritative ledger (DEF-004 fix)' })
+  @ApiOperation({ summary: 'Daily quest WLD settlement is unavailable pending verified eligibility and ledger receipts' })
   async claimDailyQuest(
     @Req() request: RequestWithSession,
-    @Body() body: DailyQuestClaimDto,
+    @Body() _body: DailyQuestClaimDto,
   ) {
-    const userId = requireUserId(request);
-    if (!body?.questId) {
-      throw new BadRequestException('questId is required');
-    }
-    const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
-      ? body.idempotencyKey
-      : randomUUID();
-
-    if (this.repository) {
-      try {
-        return await this.repository.claimDailyQuest({
-          actorUserId: userId,
-          idempotencyKey: key,
-          questId: body.questId,
-        });
-      } catch (error: unknown) {
-        if (error instanceof DopamineInputError) {
-          throw new BadRequestException(error.message);
-        }
-        const msg = error instanceof Error ? error.message : String(error);
-        throw new InternalServerErrorException(msg);
-      }
-    }
-
-    return {
-      success: true,
-      userId,
-      questId: body.questId,
-      transactionId: randomUUID(),
-      rewardAmount: 500,
-      newBalance: '1000',
-      claimedAt: new Date().toISOString(),
-    };
+    requireUserId(request);
+    // An actor-selected quest ID is not completion evidence; the multi-query mint
+    // path has no atomic per-day receipt. Never report an unjournaled payout.
+    throw new ServiceUnavailableException({
+      code: 'DAILY_QUEST_SETTLEMENT_UNAVAILABLE',
+      message: 'Daily quest WLD settlement requires verified eligibility and atomic ledger receipts',
+    });
   }
 }
-
-
