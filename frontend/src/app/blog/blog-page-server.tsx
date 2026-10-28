@@ -30,11 +30,21 @@ const PAGE_DESCRIPTIONS: Record<BlogLocale, string> = {
   zh: '面向中国家庭的储蓄复利、股息税、ETF、房贷、物价、养老知识与官方参考资料。',
 };
 
-function safeHeroImage(url?: string): string | undefined {
-  if (!url || !/^\/images\/blog\/[a-zA-Z0-9._/-]+\.(png|webp|jpg|jpeg|svg)$/.test(url) || url.includes('..')) {
-    return undefined;
+function safeHeroImage(url?: string, category?: string): string {
+  if (url && /^\/images\/blog\/[a-zA-Z0-9._/-]+\.(png|webp|jpg|jpeg|svg)$/.test(url) && !url.includes('..')) {
+    if (fs.existsSync(path.join(process.cwd(), 'public', url.slice(1)))) {
+      return url;
+    }
   }
-  return fs.existsSync(path.join(process.cwd(), 'public', url.slice(1))) ? url : undefined;
+  const categoryMap: Record<string, string> = {
+    COMPOUND: '/images/blog/compound-interest-72-rule.svg',
+    MACRO: '/images/blog/macro-global-forex-pulse.svg',
+    WEALTH: '/images/blog/wealth-portfolio-roadmap.svg',
+    STOCKS: '/images/blog/stocks-valuation-dca.svg',
+    TAX: '/images/blog/tax-saving-isa-pension.svg',
+    TECH: '/images/blog/tech-distributed-ledger.svg',
+  };
+  return categoryMap[category || ''] || '/images/blog/compound-interest-72-rule.svg';
 }
 
 export function metadataForHub(locale: BlogLocale): Metadata {
@@ -57,7 +67,7 @@ export function metadataForArticle(slug: string, locale: BlogLocale): Metadata {
   const post = getBlogCountryEdition(original, locale);
   if (!post) return { title: 'Article not found', robots: { index: false, follow: false } };
   const canonical = blogUrl(slug, locale);
-  const hero = safeHeroImage(post.heroImage);
+  const hero = safeHeroImage(post.heroImage, post.category);
   return {
     title: post.title, description: post.excerpt, keywords: [...post.tags],
     ...(isBlogDiscoverable(original) ? {} : { robots: { index: false, follow: true } }),
@@ -74,8 +84,9 @@ export function metadataForArticle(slug: string, locale: BlogLocale): Metadata {
 
 export function summarizeBlogPost(post: BlogPost) {
   const { slug, title, excerpt, category, categoryLabel, publishedAt, readTimeMinutes, tags, views, viewCountVerified, author, heroImage, relatedCalculatorHref, relatedCalculatorName } = post;
-  return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,viewCountVerified,author,heroImage:safeHeroImage(heroImage),relatedCalculatorHref,relatedCalculatorName};
+  return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,viewCountVerified,author,heroImage:safeHeroImage(heroImage, category),relatedCalculatorHref,relatedCalculatorName};
 }
+
 export function renderBlogHub(locale: BlogLocale) {
   const posts = countryBlogPosts(getAllBlogPosts().filter(isBlogDiscoverable), locale);
   const canonical = blogHubUrl(locale);
@@ -128,6 +139,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
   const post = getBlogCountryEdition(original, locale);
   if (!post) notFound();
   const canonical = blogUrl(slug, locale);
+  const guaranteedHero = safeHeroImage(post.heroImage, post.category);
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'BlogPosting',
     mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
@@ -136,7 +148,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
     inLanguage: ({ ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN' })[locale],
     author: { '@type': 'Organization', name: post.author.name },
     publisher: { '@type': 'Organization', name: 'Woldeok Moneyverse', url: 'https://easy-scraping.com' },
-    ...(safeHeroImage(post.heroImage) ? { image: 'https://easy-scraping.com' + safeHeroImage(post.heroImage) } : {}),
+    ...(guaranteedHero ? { image: 'https://easy-scraping.com' + guaranteedHero } : {}),
   };
   return (
     <>
@@ -149,7 +161,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
             보관된 기존 AI 생성 글입니다. 출처와 수치의 사실 검증 및 편집 승인이 완료되지 않아 신규 독자에게 추천하지 않으며 검색 색인에서 제외하도록 요청 중입니다.
           </p>
         )}
-        <BlogPostClient post={{ ...post, heroImage: safeHeroImage(post.heroImage) }} locale={locale} />
+        <BlogPostClient post={{ ...post, heroImage: guaranteedHero }} locale={locale} />
       </div>
     </>
   );

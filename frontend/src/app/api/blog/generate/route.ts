@@ -15,6 +15,18 @@ function getSharedBlogStorePath(): string {
   return path.join(process.cwd(), 'data', 'blog-posts.json');
 }
 
+export function getCategoryHeroImage(category: BlogCategory): string {
+  const images: Record<BlogCategory, string> = {
+    COMPOUND: '/images/blog/compound-interest-72-rule.svg',
+    MACRO: '/images/blog/macro-global-forex-pulse.svg',
+    WEALTH: '/images/blog/wealth-portfolio-roadmap.svg',
+    STOCKS: '/images/blog/stocks-valuation-dca.svg',
+    TAX: '/images/blog/tax-saving-isa-pension.svg',
+    TECH: '/images/blog/tech-distributed-ledger.svg',
+  };
+  return images[category] || '/images/blog/compound-interest-72-rule.svg';
+}
+
 export async function GET(_req: Request) {
   const viewer = await currentViewer();
   if (!isAdministrator(viewer)) {
@@ -31,14 +43,15 @@ export async function GET(_req: Request) {
       engine: 'AI Financial & Tech 7,000-Char Deep Editorial Engine v2026',
       supportedCountries: ['KR', 'US', 'JP', 'VN'],
       supportedCategories: ['WEALTH', 'COMPOUND', 'STOCKS', 'TAX', 'MACRO', 'TECH'],
-      message: 'Automatic deep publication engine is active and serving 7,000+ char SEO articles.',
+      message: 'Automatic deep publication engine is active and serving 7,000+ char SEO articles with guaranteed hero illustrations.',
     },
     { status: 200, headers },
   );
 }
 
-export function generateDeepLongformContent(prompt: string, category: BlogCategory, country: BlogCountry): { title: string; excerpt: string; content: string; tags: string[] } {
+export function generateDeepLongformContent(prompt: string, category: BlogCategory, country: BlogCountry): { title: string; excerpt: string; content: string; tags: string[]; heroImage: string } {
   const targetTopic = prompt || '2026 글로벌 거시경제 펄스와 디파이 복리 자산 배분 전략';
+  const heroImage = getCategoryHeroImage(category);
   
   const title = `[AI 심층 금융분석] ${targetTopic}: 72의 법칙과 정밀 수치 모델링을 통한 10억 자산 포트폴리오 로드맵`;
   const excerpt = `${targetTopic}에 대한 7,000자 이상의 학술·수학적 심층 분석 보고서입니다. 테일러 급수와 자연로그 기반 복리 증명, 실시간 거시경제 벤치마크, 파이썬 몬테카를로 시뮬레이션 및 국가별 세제 최적화 전략을 포괄적으로 제시합니다.`;
@@ -51,6 +64,7 @@ export function generateDeepLongformContent(prompt: string, category: BlogCatego
     `---`,
     `## 2. 실시간 글로벌 거시경제 펄스 벤치마크 분석 (Macro-Financial Pulse)`,
     `현대 금융 시장에서 개별 자산의 수익률은 독립적으로 결정되지 않으며, 글로벌 유동성과 무위험 수익률(Risk-Free Rate), 그리고 환율 변동성이라는 거시적 거울에 투영되어 결정됩니다. 2026년 하반기 현재 주요 거시경제 지표 실측치는 다음과 같습니다.`,
+    `![${targetTopic} 핵심 금융 인포그래픽 데이터](${heroImage})`,
     `### 🌐 주요 거시경제 벤치마크 지표 비교표`,
     `| 거시 경제 지표 | 현재 실측 수치 | 5년 역사적 평균 | 통화정책 기준선 / 시사점 | 주요 데이터 출처 |`,
     `| :--- | :---: | :---: | :--- | :--- |`,
@@ -181,7 +195,7 @@ export function generateDeepLongformContent(prompt: string, category: BlogCatego
   const content = sections.join('\n\n');
   const tags = ['복리계산기', '72의법칙', '거시경제', '자산배분', '포트폴리오', '절세계좌', 'ISA', '월드코인'];
 
-  return { title, excerpt, content, tags };
+  return { title, excerpt, content, tags, heroImage };
 }
 
 export async function POST(req: Request) {
@@ -233,7 +247,7 @@ export async function POST(req: Request) {
       excerpt: generated.excerpt,
       content: generated.content,
       category,
-      categoryLabel: category === 'COMPOUND' ? '복리 & 저축' : category === 'MACRO' ? '거시 경제' : '자산 설계',
+      categoryLabel: category === 'COMPOUND' ? '복리 & 저축' : category === 'MACRO' ? '거시 경제' : category === 'WEALTH' ? '자산 설계' : category === 'STOCKS' ? '가상 주식' : category === 'TAX' ? '세제 혜택' : '핀테크 공학',
       author: {
         name: '덕이 (Deoki)',
         role: '월덕 금융연구소 수석 AI 애널리스트',
@@ -243,8 +257,10 @@ export async function POST(req: Request) {
       updatedAt: new Date().toISOString(),
       readTimeMinutes: Math.ceil(generated.content.length / 500),
       tags: generated.tags,
-      relatedCalculatorHref: '/tools/compound-calculator',
-      relatedCalculatorName: '복리 계산기',
+      relatedCalculatorHref: category === 'COMPOUND' ? '/tools/compound-calculator' : category === 'STOCKS' ? '/tools/stock-calculator' : '/tools/loan-interest-calculator',
+      relatedCalculatorName: category === 'COMPOUND' ? '복리 계산기' : category === 'STOCKS' ? '주식 계산기' : '대출 계산기',
+      heroImage: generated.heroImage,
+      infographicType: category === 'COMPOUND' ? 'COMPOUND_GROWTH' : category === 'TAX' ? 'TAX_SAVINGS' : 'PORTFOLIO_ALLOCATION',
       isAiGenerated: false, // 감수 완료 정식 아티클
       status: 'PUBLISHED',
       country,
@@ -273,13 +289,15 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Successfully generated and published deep longform 7,000+ char article',
+        message: 'Successfully generated and published deep longform 7,000+ char article with guaranteed hero illustration',
         post: {
           slug: newPost.slug,
           title: newPost.title,
           category: newPost.category,
           charCount: newPost.content.length,
           readTimeMinutes: newPost.readTimeMinutes,
+          heroImage: newPost.heroImage,
+          infographicType: newPost.infographicType,
           verificationReceipt: newPost.verificationReceipt,
           url: `https://easy-scraping.com/blog/${newPost.slug}`,
         },

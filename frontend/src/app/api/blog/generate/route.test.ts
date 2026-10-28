@@ -31,7 +31,7 @@ describe('AI blog 7,000-char generation & editorial engine', () => {
     expect(res.headers.get('cache-control')).toBe('no-store');
   });
 
-  it('generates deep longform article with valid cron secret', async () => {
+  it('generates deep longform article with valid cron secret and guaranteed heroImage', async () => {
     process.env.INTERNAL_API_SECRET = 'valid-test-secret';
     const res = await POST(request({ 'x-cron-secret': 'valid-test-secret' }, { prompt: '테스트 복리 전략' }));
     expect(res.status).toBe(200);
@@ -39,6 +39,8 @@ describe('AI blog 7,000-char generation & editorial engine', () => {
     expect(body.success).toBe(true);
     expect(body.post).toBeDefined();
     expect(body.post.charCount).toBeGreaterThan(5000);
+    expect(body.post.heroImage).toBeDefined();
+    expect(body.post.heroImage).toMatch(/^\/images\/blog\/[a-z0-9-]+\.svg$/);
     expect(body.post.verificationReceipt).toBeDefined();
   });
 
@@ -49,6 +51,7 @@ describe('AI blog 7,000-char generation & editorial engine', () => {
     const body = await res.json();
     expect(body.success).toBe(true);
     expect(body.post.charCount).toBeGreaterThan(5000);
+    expect(body.post.heroImage).toBe('/images/blog/compound-interest-72-rule.svg');
   });
 
   it('returns active status on authenticated GET', async () => {

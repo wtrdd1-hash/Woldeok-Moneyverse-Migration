@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <title>Tax Strategy and Tax-Deferred Compounding</title>
+  <desc>Comparison of taxable ordinary accounts versus ISA and pension tax-deferred compounding shields.</desc>
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#120f0a"/>
+      <stop offset="50%" stop-color="#1f180f"/>
+      <stop offset="100%" stop-color="#0d0a06"/>
+    </linearGradient>
+    <linearGradient id="amberGold" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#451a03" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Grid -->
+  <g opacity="0.1" stroke="#f59e0b" stroke-width="1">
+    <line x1="80" y1="130" x2="1120" y2="130"/>
+    <line x1="80" y1="240" x2="1120" y2="240"/>
+    <line x1="80" y1="350" x2="1120" y2="350"/>
+    <line x1="80" y1="460" x2="1120" y2="460"/>
+    <line x1="340" y1="90" x2="340" y2="560"/>
+    <line x1="600" y1="90" x2="600" y2="560"/>
+    <line x1="860" y1="90" x2="860" y2="560"/>
+  </g>
+
+  <!-- Header -->
+  <text x="80" y="70" fill="#f59e0b" font-family="system-ui, sans-serif" font-size="14" font-weight="700" letter-spacing="2">TAX OPTIMIZATION &amp; TAX-DEFERRED SHIELD</text>
+  <text x="80" y="105" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="28" font-weight="900">비과세 절세 계좌와 과세이연 복리 시뮬레이션</text>
+  <text x="80" y="132" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="14">중개형 ISA(비과세 400만 원), 연금저축/IRP 세액공제(최대 148만 원) 및 미국 Roth IRA 비교</text>
+
+  <!-- Cards -->
+  <g transform="translate(80, 160)">
+    <rect width="320" height="110" rx="14" fill="url(#cardBg)" stroke="#b45309"/>
+    <text x="20" y="34" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" font-weight="600">ISA 최대 비과세 한도</text>
+    <text x="20" y="72" fill="#f59e0b" font-family="monospace" font-size="28" font-weight="800">4,000,000원</text>
+    <text x="20" y="96" fill="#fde68a" font-family="system-ui, sans-serif" font-size="11">초과분 9.9% 분리과세 종결</text>
+
+    <g transform="translate(360, 0)">
+      <rect width="320" height="110" rx="14" fill="url(#cardBg)" stroke="#b45309"/>
+      <text x="20" y="34" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" font-weight="600">연말정산 세액공제 환급액</text>
+      <text x="20" y="72" fill="#38bdf8" font-family="monospace" font-size="28" font-weight="800">1,485,000원</text>
+      <text x="20" y="96" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11">연금 900만 원 납입 시 최대 16.5%</text>
+    </g>
+
+    <g transform="translate(720, 0)">
+      <rect width="320" height="110" rx="14" fill="url(#cardBg)" stroke="#b45309"/>
+      <text x="20" y="34" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" font-weight="600">20년 과세이연 재투자 이익</text>
+      <text x="20" y="72" fill="#10b981" font-family="monospace" font-size="28" font-weight="800">+64,800,000원</text>
+      <text x="20" y="96" fill="#34d399" font-family="system-ui, sans-serif" font-size="11">배당소득세(15.4%) 전액 복리 재투자</text>
+    </g>
+  </g>
+
+  <!-- Visual Section -->
+  <g transform="translate(80, 300)">
+    <rect width="1040" height="250" rx="16" fill="url(#cardBg)" stroke="#b45309"/>
+    <text x="24" y="32" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="14" font-weight="700">일반 과세 계좌(매년 15.4% 누수) vs 비과세 계좌 자산 격차</text>
+
+    <!-- General Account Line (Tax Drag) -->
+    <path d="M 50,190 Q 400,160 650,130 T 980,95" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="4,4"/>
+    <text x="860" y="115" fill="#fca5a5" font-family="monospace" font-size="11">일반 계좌 (Tax Drag -15.4%)</text>
+
+    <!-- Tax-Free Shield Line -->
+    <path d="M 50,190 Q 400,140 650,85 T 980,35" fill="none" stroke="url(#amberGold)" stroke-width="5"/>
+    <circle cx="980" cy="35" r="7" fill="#f59e0b"/>
+    <text x="840" y="25" fill="#fde68a" font-family="monospace" font-size="12" font-weight="bold">비과세 복리 실드 (100% 보존)</text>
+  </g>
+
+  <text x="80" y="585" fill="#64748b" font-family="monospace" font-size="11">WOLDEOK TAX RESEARCH CENTER · WEALTH PLANNING LAB</text>
+  <text x="1120" y="585" text-anchor="end" fill="#64748b" font-family="monospace" font-size="11">TAX SHIELD SIMULATOR v2026</text>
+</svg>
