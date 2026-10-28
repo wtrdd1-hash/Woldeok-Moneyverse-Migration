@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ gate: vi.fn(), api: vi.fn() }));
 vi.mock('@/lib/session', () => ({ requireAdminConsole: mocks.gate }));
 vi.mock('@/lib/api', () => ({ api: mocks.api }));
-import { GET } from './backups/route';
+import { GET } from './backup-inventory/route';
 
 const inventory = { backupDir: '/private', r2Configured: false, r2Bucket: 'bucket', retentionDays: 30,
   totalBackups: 0, totalSizeBytes: 0, totalSizeMb: 0, files: [], lastBackupAt: null };
