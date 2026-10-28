@@ -8,7 +8,9 @@
 - State: BEFORE / IN PROGRESS. Release HOLD pending all required gates and official exact-SHA Test.
 
 ## In progress
-- Pending TDD RED/GREEN, source and test changes.
+- TDD RED reproduced two false-success cases: contradictory 2xx payload and missing session cookie; helper import also failed before implementation. GREEN: focused frontend activation tests and NestJS controller receipt contract pass.
+- Added exact backend receipt and browser cookie verification before relay, one-cookie-only boundary, unconfirmed/re-login UX; 320px-friendly controls and noindex unchanged. No DB/migration/financial changes.
+- Preparing full HEAD gates and official Test evidence; no release promotion without independent validation.
 
 ## Finished
 - Pending exact-SHA validation, PR and release decision.
