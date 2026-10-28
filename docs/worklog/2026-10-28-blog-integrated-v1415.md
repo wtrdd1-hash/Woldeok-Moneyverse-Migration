@@ -20,3 +20,13 @@ Status: STARTED. Version sequence: 1415.1 audit, 1415.2 source fixes, 1415.3 tes
 
 ## Finished
 Pending evidence.
+
+## v1415.2 implementation checkpoint (2026-10-28 KST)
+- Combined scoped changes from existing owner branches v1413, v1412.2 and v1414 in a fresh origin/main worktree; no concurrent developer/Gemini branch mutation.
+- Retired authenticated legacy JSON writer (admin/cron now fail-closed 503, anonymous 403); no direct JSON overwrite/fabricated receipt/AI disclosure spoofing in that endpoint.
+- Verified DB articles now appear in native SSR hubs and canonical metadata; admin can list PUBLISHED/WITHDRAWN DB posts, and BFF delegates explicit DB edit/withdraw via existing authenticated API.
+- Added dynamic source discovery and independent primary-source gate; fixed broken CN central bank economy URL with checked official source.
+- Corrected isBlogDiscoverable to reject WITHDRAWN even for older manual posts; legacy owner withdrawal remains authoritative; no automatic timed withdrawal introduced.
+- Real sitemap re-check CORRECTS earlier v1413 assumption: ordinary /sitemap.xml has no blog article slugs, but /sitemap-blog.xml does include active live slugs, and /sitemap-index.xml lists that blog sitemap, while robots references the index. No main sitemap inclusion defect proven.
+- Live production woldeok_moneyverse_dev database lacks blog_verified_articles, blog_publish_verified, blog_admin_moderate (read-only query). This explains an important likely reason for new verified GET HTTP 500; no production migrations were applied.
+- Focused 39 backend and 19 frontend tests PASS, contract build + both TypeScript + changed-file lint PASS. Full suite/build/official Test pending.

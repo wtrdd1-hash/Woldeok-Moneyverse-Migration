@@ -30,11 +30,11 @@ describe('primary source provenance',()=>{
     const fail=vi.fn().mockResolvedValue(new Response('redirect',{status:302,headers:{'content-type':'text/html'}}));
     await expect(retrievePrimarySource(slot,fail)).rejects.toThrow('SOURCE_NOT_AVAILABLE');
     expect(fail.mock.calls[0]![1]).toMatchObject({redirect:'manual'});
-    const short=vi.fn().mockResolvedValue(new Response('<p>short</p>',{status:200,headers:{'content-type':'text/html'}}));
+    const short=vi.fn().mockImplementation(async()=>new Response('<p>short</p>',{status:200,headers:{'content-type':'text/html'}}));
     await expect(retrievePrimarySource(slot,short)).rejects.toThrow('SOURCE_SIZE_INVALID');
   });
   it('pins exact source URL and its content hash',async()=>{
-    const load=vi.fn().mockResolvedValue(new Response('<div>' + 'documented official content '.repeat(130)+'</div>',
+    const load=vi.fn().mockImplementation(async()=>new Response('<div>' + 'documented official content '.repeat(130)+'</div>',
       {status:200,headers:{'content-type':'text/html'}}));
     const result=await retrievePrimarySource(slot,load);
     expect(result.url).toBe(source.url);

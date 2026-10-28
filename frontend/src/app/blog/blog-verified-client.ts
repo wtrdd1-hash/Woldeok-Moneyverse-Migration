@@ -24,23 +24,28 @@ function isVerifiedRow(v:unknown):v is VerifiedRow {
 function toBlogPost(row:VerifiedRow):BlogPost {
   const edition = { KR:'ko',US:'en',JP:'ja',CN:'zh' }[row.country] as 'ko'|'en'|'ja'|'zh';
   const category = row.topic==='ECONOMY' ? 'MACRO':'TECH';
-  const tags = row.topic==='ECONOMY'
-    ? ['경제원리','기초경제',row.country]
-    : [row.topic==='CODING'?'Programming':'Computer Systems',row.country];
+  const nativeLabels = {
+    KR:{ECONOMY:'경제 원리',CODING:'코딩',COMPUTER:'컴퓨터 시스템'},
+    US:{ECONOMY:'Economics',CODING:'Programming',COMPUTER:'Computer Systems'},
+    JP:{ECONOMY:'経済の基礎',CODING:'プログラミング',COMPUTER:'コンピュータシステム'},
+    CN:{ECONOMY:'经济基础',CODING:'编程',COMPUTER:'计算机系统'},
+  } as const;
+  const categoryLabel = nativeLabels[row.country][row.topic];
+  const tags = [categoryLabel,row.country];
   const translated:BlogTranslation = {
     title:row.title,excerpt:row.excerpt,content:row.content,tags,
   };
   const translations = edition==='ko' ? undefined : { [edition]:translated };
   return {
     slug:row.slug,title:row.title,excerpt:row.excerpt,content:row.content,
-    category,categoryLabel:row.topic==='ECONOMY'?'경제 원리':'컴퓨터 공학',
+    category,categoryLabel,
     author:{name:'Woldeok Editorial AI',role:'Independent source-grounded education',badge:'AI'},
     publishedAt:row.published_at,updatedAt:row.updated_at,
     readTimeMinutes:Math.max(1,Math.ceil(row.content.length/600)),
     tags,relatedCalculatorHref:row.topic==='ECONOMY'?'/tools/compound-calculator':'/blog',
     relatedCalculatorName:row.topic==='ECONOMY'?'기초 계산':'개발 블로그',
     isAiGenerated:true,views:0,country:row.country as BlogCountry,
-    status:'PUBLISHED',verificationReceipt:row.receipt,
+    status:row.status==='WITHDRAWN'?'WITHDRAWN':'PUBLISHED',verificationReceipt:row.receipt,
     ...(translations ? {translations}:{}),
   };
 }
@@ -58,6 +63,17 @@ async function readVerified(endpoint:string):Promise<unknown> {
   });
   if (!response.ok) return null;
   return response.json();
+}
+/** Private administrator projection; only callers behind elevated session guard may invoke. */
+export function verifiedArticlesForAdmin(rows:unknown):BlogPost[] {
+  if (!Array.isArray(rows)) return [];
+  return rows.flatMap(value => {
+    if (!value || typeof value!=='object') return [];
+    const raw=value as Record<string,unknown>;
+    if (!['PUBLISHED','WITHDRAWN'].includes(String(raw.status))) return [];
+    const candidate={...raw,status:'PUBLISHED'};
+    return isVerifiedRow(candidate) ? [toBlogPost(value as VerifiedRow)] : [];
+  });
 }
 export async function verifiedPublicArticles():Promise<BlogPost[]> {
   try {
