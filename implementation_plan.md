@@ -981,3 +981,21 @@ flowchart TD
 
 
 
+
+### 3. 검증 결과 및 운영 반영 내역 (v261 완결)
+- **브랜치 통합 및 원격 정리 결과**:
+  - 통합 브랜치: elease/v2026.10.29-consolidated (4대 최신 체인 완벽 머지 후 main 승격)
+  - 원격 삭제 브랜치: 109개 전수 삭제 완료 (origin/main 단일 브랜치만 유지)
+  - 원격 서버 로컬 잔여 워크트리 및 stale 브랜치 정리 완료
+- **프로덕션 빌드 및 서비스 재기동**:
+  - 프론트엔드 빌드: Next.js 16.3.8 609개 라우트 빌드 성공 (종료 코드 0)
+  - 백엔드 빌드: NestJS 빌드 성공 (종료 코드 0)
+  - systemctl restart moneyverse-release-v1106-seo-frontend: 정상 기동 (active running)
+  - systemctl restart moneyverse-backend: 정상 기동 (active running)
+- **라이브 발행 및 실측 검증**:
+  - 발급 파일 불변 플래그(chattr -i) 해제 후 즉시 발행 파이프라인 검증
+  - 신규 실측 아티클: 2026-10-28-kr-compound-be34ed02
+  - 글자 수: **9,769자** (7,000자 요건 대비 139% 달성)
+  - SVG 인포그래픽 이미지: /images/blog/compound-interest-72-rule.svg 100% 보장
+  - 공인 금융 출처 링크: 한국은행 ECOS, 연준 FRED, Yahoo Finance 등 **13개 출처 링크 자동 연동**
+  - 라이브 페이지 응답: **HTTP/2 200 OK** (https://easy-scraping.com/blog/2026-10-28-kr-compound-be34ed02)
