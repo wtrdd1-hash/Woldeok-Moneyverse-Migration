@@ -18,3 +18,6 @@
 - 독립 PostgreSQL Migration 290개(002~291) 적용, 원장 UPDATE·감사 DELETE 권한 거부 확인. 임시 컨테이너 제거, 공유 DB 변경 없음.
 - 기존 P0 #1718에서 루트 백업 테스트가 실제 스크립트를 실행한 이력이 있어 로컬 `pnpm test` 통합 명령은 실행하지 않고 패키지별 테스트만 실행. 공식 인증 Test exact-SHA E2E 미완료.
 - 운영 의존성 Moderate 1건, 전체 Low 3/Moderate 9건으로 보안 감사 FAIL. main 재확인 동일, GitOps·Test·운영·병합·롤백·브랜치 삭제 없음. PR은 Draft/HOLD로 유지.
+
+## CI 정책 실패 수정 — 2026-10-29 05:03 KST
+- 최초 SHA `9f9c4d822` CI/후보 빌드는 보안 정책상 추적 금지된 `backups/` 경로에 Next API 소스가 있어 실패. 로그로 원인 재현 후 인증 GET API 경로를 `/api/admin/api-health/backup-inventory`로 변경하고 화면·테스트를 수정. 새 SHA에서 전체 검증 재실행, 백업 스크립트 실행 없음.

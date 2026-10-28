@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { read, gate } = vi.hoisted(() => ({ read: vi.fn(), gate: vi.fn() }));
 vi.mock('@/lib/api', () => ({ api: read }));
 vi.mock('@/lib/session', () => ({ requireAdminConsole: gate }));
-import { GET } from './backups/route';
+import { GET } from './backup-inventory/route';
 
 beforeEach(() => { vi.resetAllMocks(); });
 describe('authenticated read-only backup inventory gateway', () => {

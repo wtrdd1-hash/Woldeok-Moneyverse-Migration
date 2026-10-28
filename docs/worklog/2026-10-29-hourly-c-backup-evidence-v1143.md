@@ -21,3 +21,6 @@
 - Isolated PostgreSQL migration 290 files (002..291) PASS, app role `account_balances UPDATE=false`, `audit_logs DELETE=false`. Ephemeral container removed; no shared DB writes.
 - Root `pnpm test` intentionally NOT run locally because existing P0 #1718 documents a backup test executing live host scripts; equivalent package suites and isolated database tests were executed separately. This does not establish official authenticated exact-SHA Test E2E.
 - Security audit FAIL: production 1 Moderate; complete 3 Low + 9 Moderate. Release HOLD independent of GitHub CI. No GitOps, official Test or Production change; no rollback or branch deletion. Main refetched unchanged at start/mid/pre-PR. CI candidate and required checks to be recorded on PR; keep draft until release gate is satisfied.
+
+## CI policy RED and remediation — 2026-10-29 05:03 KST
+- Initial exact-SHA `9f9c4d822` CI #40759575722 and candidate #40759566816 failed repository-security policy, **not build/test**: `.gitignore` and security guard forbid any tracked `backups/` path, including a Next API route. Reproduced from failed job logs. Renamed GET-only Next route to `/api/admin/api-health/backup-inventory` (no ignored runtime-data directory); updated UI and tests. Re-run full gates on the new HEAD. No backup script executed.

@@ -111,7 +111,7 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
 
   const fetchBackupStatus = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/api-health/backups', { cache: 'no-store' });
+      const res = await fetch('/api/admin/api-health/backup-inventory', { cache: 'no-store' });
       if (!res.ok) {
         setBackupData(null);
         return;
