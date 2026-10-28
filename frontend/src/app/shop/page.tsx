@@ -11,6 +11,8 @@ import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 import { ShopMembershipSection } from './shop-membership-section';
+import { normalizeShopPriceCeiling } from './shop-price-ceiling';
+import { hasVerifiedVipPass } from './shop-membership-status';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,16 +30,20 @@ const PRINCIPLES = [
 ];
 
 interface ShopPageProps {
-  readonly searchParams: Promise<{ q?: string }>;
+  readonly searchParams: Promise<{ q?: string | string[]; maxPrice?: string | string[] }>;
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const loggedIn = await isLoggedInMember();
   const params = await searchParams;
-  const query = params.q?.trim() ?? '';
-  const querySuffix = query ? `?q=${encodeURIComponent(query)}` : '';
+  const query = typeof params.q === 'string' ? params.q.trim().slice(0, 120) : '';
+  const { value: maxPrice, invalid: invalidMaxPrice } = normalizeShopPriceCeiling(params.maxPrice);
+  const queryParams = new URLSearchParams();
+  if (query) queryParams.set('q', query);
+  if (maxPrice) queryParams.set('maxPrice', maxPrice);
+  const querySuffix = queryParams.size > 0 ? `?${queryParams.toString()}` : '';
 
-  const [catalogData, walletData, profileData] = await Promise.all([
+  const [catalogData, walletData, profileData, membershipCatalogData] = await Promise.all([
     loggedIn
       ? apiOrNull<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/catalog${querySuffix}`)
       : publicApi<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/public-catalog${querySuffix}`, 60),
@@ -47,6 +53,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           '/api/v1/profile',
         )
       : null,
+    loggedIn && querySuffix
+      ? apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog')
+      : null,
   ]);
 
   const items = catalogData?.catalogItems || [];
@@ -54,10 +63,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 
-  const vipPassItem = items.find(
-    (item) => item.code === 'item_vip_lounge_pass' || item.code.includes('vip_lounge'),
-  );
-  const isPlusMember = Boolean(vipPassItem && vipPassItem.user_owned_quantity > 0);
+  // Visible filters must not make a member's existing VIP entitlement disappear.
+  const isPlusMember = hasVerifiedVipPass(membershipCatalogData?.catalogItems ?? items);
 
   return (
     <div data-page="shop" className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16 w-full max-w-full">
@@ -84,15 +91,28 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           <input
             type="search"
             name="q"
+            maxLength={120}
             defaultValue={query}
             placeholder="상품명, 설명, 카테고리 검색"
             aria-label="상점 검색"
             className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
           />
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            name="maxPrice"
+            maxLength={19}
+            defaultValue={maxPrice}
+            placeholder="최대 WLD 가격"
+            aria-label="최대 WLD 가격"
+            aria-invalid={invalidMaxPrice}
+            className="w-32 min-w-0 rounded-xl border border-border bg-card px-3 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
+          />
           <Button type="submit">
             <T korean="검색" english="Search" />
           </Button>
-          {query ? (
+          {query || maxPrice || invalidMaxPrice ? (
             <Button asChild type="button" variant="outline">
               <Link href="/shop">
                 <T korean="초기화" english="Reset" />
@@ -100,9 +120,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             </Button>
           ) : null}
         </form>
-        {query ? (
-          <p className="text-sm text-muted-foreground">
-            “{query}” 검색 결과 {items.length}개
+        {invalidMaxPrice ? (
+          <p role="alert" className="text-sm text-destructive">가격 상한은 0 이상인 정수 WLD로 입력해 주세요.</p>
+        ) : null}
+        {query || maxPrice ? (
+          <p aria-live="polite" className="text-sm text-muted-foreground">
+            {query ? `“${query}” · ` : ''}{maxPrice ? `최대 ${maxPrice} WLD · ` : ''}검색 결과 {items.length}개
           </p>
         ) : null}
 
