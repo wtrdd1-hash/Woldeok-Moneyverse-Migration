@@ -7,6 +7,7 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { requireUserId, type RequestWithSession } from '../auth/session.context';
 import { BlogVerifiedRepository } from './blog-verified.repository';
+import { selectTwoHourBlogSlot } from './blog-two-hour-rotation';
 
 @Controller('admin/blog-verified')
 @UseGuards(SessionGuard,AuthenticatedGuard,ConsentGuard,AdminGuard,AdminSessionGuard)
@@ -15,6 +16,34 @@ export class BlogVerifiedAdminController {
   @Get()
   async list() {
     return {posts: await this.repo.listForAdmin()};
+  }
+
+  /** Administrator-only operational truth. No fake model or scheduler readiness. */
+  @Get('publisher-status')
+  async publisherStatus() {
+    const now = new Date();
+    const koreaHour = new Date(now.getTime() + 9 * 60 * 60 * 1000).getUTCHours();
+    const nextSlot = selectTwoHourBlogSlot(
+      new Date(now.getTime() + (koreaHour % 2 === 0 ? 0 : 60 * 60 * 1000)),
+    );
+    const schedulerEnabled = process.env.MONEYVERSE_SCHEDULER_ENABLED === 'true'
+      && process.env.BLOG_TWO_HOUR_PUBLISHER_ENABLED === 'true';
+    const modelVerified = process.env.BLOG_EDITORIAL_MODEL_VERIFIED === 'true';
+    const posts = await this.repo.list();
+    return {
+      success: true,
+      automaticEnabled: schedulerEnabled && modelVerified,
+      manualEnabled: false, // No authenticated, rate-limited verified manual job is implemented.
+      modelVerified,
+      verifiedPublishedCount: posts.length,
+      nextSlot: nextSlot ? {
+        country: nextSlot.country,
+        topic: nextSlot.topic,
+        periodKey: nextSlot.periodKey,
+      } : null,
+      reason: !modelVerified ? 'MODEL_VERIFICATION_PENDING'
+        : !schedulerEnabled ? 'VERIFIED_SCHEDULER_DISABLED' : 'AUTOMATIC_SCHEDULER_CONFIGURED',
+    };
   }
 
   @Post(':slug/moderate')
