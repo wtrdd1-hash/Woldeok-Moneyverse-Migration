@@ -10,97 +10,69 @@ on:
     - cron: '7,37 * * * *'
   workflow_dispatch:
 
+# Incident #1663: inventory only. Even an apparently merged head must be
+# independently reviewed before any PR closure or remote branch deletion.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 concurrency:
   group: cleanup-merged-branches
   cancel-in-progress: false
 
 jobs:
-  delete-merged-pr-branch:
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref != 'main'
+  inventory-merged-pr-branches:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          # Read-only checkout credentials are needed to fetch private branch refs.
           persist-credentials: true
 
-      - name: Delete merged source branch
-        env:
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          git push --force-with-lease="refs/heads/${HEAD_REF}:${HEAD_SHA}" origin ":refs/heads/${HEAD_REF}" || {
-            echo "branch moved after merge, is already absent, or is protected: $HEAD_REF"
-          }
-
-  prune-contained-branches:
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          fetch-depth: 0
-          persist-credentials: true
-
-      - name: Close stale PRs and delete branches fully contained in main
+      - name: Inventory branch retention evidence (no mutation)
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          # Batch GitHub evidence once rather than issuing 3 API calls per branch.
-          # A merged PR alone is not proof that a stacked/squashed head reached main.
           git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
           main_sha="$(git rev-parse refs/remotes/origin/main)"
           merged_evidence="$(mktemp)"
           open_heads="$(mktemp)"
           trap 'rm -f "$merged_evidence" "$open_heads"' EXIT
-          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=closed&base=main&per_page=100" \
-            --jq '.[] | select(.merged_at != null and .head.repo.full_name == .base.repo.full_name) | [.head.ref, .head.sha, (.number|tostring)] | @tsv' > "$merged_evidence"
-          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=open&base=main&per_page=100" \
-            --jq '.[] | select(.head.repo.full_name == .base.repo.full_name) | .head.ref' > "$open_heads"
 
-          deleted=0
-          closed=0
-          retained=0
+          # A closed-but-unmerged PR is not merge evidence. API errors abort
+          # the inventory rather than turning missing data into cleanup proof.
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=closed&base=main&per_page=100" \
+            --jq '.[] | select(.merged_at != null and (.head.repo.full_name // "") == .base.repo.full_name) | [.head.ref, .head.sha, (.number|tostring)] | @tsv' > "$merged_evidence"
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=open&base=main&per_page=100" \
+            --jq '.[] | select((.head.repo.full_name // "") == .base.repo.full_name) | .head.ref' > "$open_heads"
+
+          active=0
+          merged_and_contained=0
+          preserved_other=0
           while read -r branch branch_sha; do
-            case "$branch" in
-              main|production|staging|develop|release/*|planning/*) continue ;;
-            esac
+            [[ "$branch" == main ]] && continue
             if grep -Fxq "$branch" "$open_heads"; then
-              echo "retain branch with active PR: $branch"
-              retained=$((retained + 1))
+              active=$((active + 1))
               continue
             fi
-            # Only an exact merged PR head and an ancestor of current main can
-            # be deleted; work-in-progress branches and stacked missing code stay.
             merged_pr="$(awk -F '\t' -v b="$branch" -v s="$branch_sha" '$1==b && $2==s {print $3;exit}' "$merged_evidence")"
-            if [[ -z "$merged_pr" ]] || ! git merge-base --is-ancestor "$branch_sha" "$main_sha"; then
-              retained=$((retained + 1))
-              continue
-            fi
-            echo "deleting exact already-integrated merged PR #${merged_pr} branch: $branch"
-            if git push --force-with-lease="refs/heads/${branch}:${branch_sha}" origin ":refs/heads/${branch}" >/dev/null 2>&1; then
-              deleted=$((deleted + 1))
+            if [[ -n "$merged_pr" ]] && git merge-base --is-ancestor "$branch_sha" "$main_sha"; then
+              echo "REVIEW ONLY: merged PR #${merged_pr} head contained in main: ${branch} ${branch_sha}"
+              merged_and_contained=$((merged_and_contained + 1))
             else
-              echo "retain branch: moved, absent or protected: $branch"
-              retained=$((retained + 1))
+              preserved_other=$((preserved_other + 1))
             fi
-          done < <(git for-each-ref --merged="$main_sha" --format='%(refname:strip=3) %(objectname)' refs/remotes/origin)
+          done < <(git for-each-ref --format='%(refname:strip=3) %(objectname)' refs/remotes/origin)
 
           {
-            echo '## Contained branch cleanup summary'
+            echo '## Read-only merged branch retention inventory'
             echo
-            echo "- stale PRs closed: ${closed}"
-            echo "- contained branches deleted: ${deleted}"
+            echo "- main SHA: ${main_sha}"
+            echo "- branches with open PRs: ${active}"
+            echo "- merged and ancestor-confirmed heads (review only): ${merged_and_contained}"
+            echo "- other retained heads: ${preserved_other}"
+            echo '- PRs closed: 0; branches deleted: 0; releases dispatched: 0'
           } >> "$GITHUB_STEP_SUMMARY"
