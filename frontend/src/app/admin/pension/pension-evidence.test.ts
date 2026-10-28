@@ -34,6 +34,8 @@ describe('verified NPS admin evidence', () => {
     expect(parsePensionOverview({ ...overview, totalAumWld: Number('9007199254740993') })).toBeNull();
     expect(parsePensionOverview({ ...overview, vaultMainBalanceWld: 'NaN' })).toBeNull();
     expect(parsePensionOverview({ ...overview, benchmarkAnnualPayoutRate: 'javascript:alert(1)' })).toBeNull();
+    expect(parsePensionOverview({ ...overview, benchmarkAnnualPayoutRate: '101%' })).toBeNull();
+    expect(parsePensionOverview({ ...overview, totalAumWld: '1'.repeat(39) })).toBeNull();
   });
   it('rejects invalid payout rows and duplicate or oversized log sets', () => {
     expect(parsePensionPayoutLogs([{ ...payout, created_at: 'not-a-date' }])).toBeNull();
@@ -41,5 +43,9 @@ describe('verified NPS admin evidence', () => {
     expect(parsePensionPayoutLogs([payout, payout])).toBeNull();
     expect(parsePensionPayoutLogs(Array(31).fill(payout))).toBeNull();
     expect(parsePensionPayoutLogs({ items: [] })).toBeNull();
+    expect(parsePensionPayoutLogs([{ ...payout, payout_amount_wld: '0' }])).toBeNull();
+    expect(parsePensionPayoutLogs([{ ...payout, created_at: '2099-01-01T00:00:00.000Z' }])).toBeNull();
+    expect(parsePensionPayoutLogs([{ ...payout, payout_amount_wld: '1'.repeat(39) }])).toBeNull();
+    expect(parsePensionPayoutLogs([payout, { ...payout, id: payout.id.toUpperCase() }])).toBeNull();
   });
 });

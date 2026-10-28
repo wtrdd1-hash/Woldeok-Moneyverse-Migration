@@ -1,9 +1,9 @@
 import type { NationalPensionOverview, PayoutLogItem } from './pension-control-tower';
 
-const unsignedWld = /^(0|[1-9]\d*)$/;
-const signedWld = /^-?(0|[1-9]\d*)$/;
+const unsignedWld = /^(0|[1-9]\d{0,37})$/;
+const signedWld = /^-?(0|[1-9]\d{0,37})$/;
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const rate = /^(?:0|[1-9]\d{0,2})(?:\.\d{1,2})?%$/;
+const rate = /^(?:0|[1-9]\d?)(?:\.\d{1,2})?%$|^100(?:\.0{1,2})?%$/;
 
 function record(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -46,16 +46,17 @@ export function parsePensionPayoutLogs(value: unknown): PayoutLogItem[] | null {
   for (const item of value) {
     const data = record(item);
     if (!data ||
-      typeof data.id !== 'string' || !uuid.test(data.id) || ids.has(data.id) ||
+      typeof data.id !== 'string' || !uuid.test(data.id) || ids.has(data.id.toLowerCase()) ||
       typeof data.account_id !== 'string' || !uuid.test(data.account_id) ||
       typeof data.user_id !== 'string' || !uuid.test(data.user_id) ||
-      !wld(data.payout_amount_wld) ||
+      !wld(data.payout_amount_wld) || data.payout_amount_wld === '0' ||
       !wld(data.snapshot_accumulated_wld) ||
       typeof data.created_at !== 'string' ||
       !/^\d{4}-\d\d-\d\dT/.test(data.created_at) ||
-      !Number.isFinite(Date.parse(data.created_at))
+      !Number.isFinite(Date.parse(data.created_at)) ||
+      Date.parse(data.created_at) > Date.now() + 5 * 60_000
     ) return null;
-    ids.add(data.id);
+    ids.add(data.id.toLowerCase());
     result.push({
       id: data.id,
       account_id: data.account_id,
