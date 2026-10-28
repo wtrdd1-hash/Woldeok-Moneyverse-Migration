@@ -27,6 +27,19 @@ describe('Blog Markdown rendering regression v969', () => {
     expect(rendered).not.toContain('**');
   });
 
+  it('filters out 5-column alignment rows completely without bleeding into tbody', () => {
+    const tableContent = [
+      '| 거시 경제 지표 | 현재 실측 수치 | 5년 역사적 평균 | 통화정책 기준선 / 시사점 | 주요 데이터 출처 |',
+      '|:---|:---:|:---:|:---|:---|',
+      '| **원/달러 환율 (USD/KRW)** | **1,385.50원** | 1,280.00원 | 1,350원 기준선 상회 | 한국은행 ECOS |',
+    ].join('\n');
+    const rendered = html(tableContent);
+    expect(rendered).toContain('<strong>원/달러 환율 (USD/KRW)</strong>');
+    expect(rendered).not.toContain(':---');
+    expect(rendered).not.toContain('---');
+    expect(rendered).not.toContain('|:---|');
+  });
+
   it('renders lists, blockquote, and code fences as distinct safe blocks', () => {
     const rendered = html('## 복리\n\n1. **원금**\n2. 매월 납입\n\n> 본문 인용\n\n```txt\nP * (1+r)\n```');
     expect(rendered).toContain('<h2');

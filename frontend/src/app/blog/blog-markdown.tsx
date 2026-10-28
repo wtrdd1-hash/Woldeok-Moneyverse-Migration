@@ -88,7 +88,13 @@ function cells(row: string): string[] {
 }
 
 function isAlignment(row: string): boolean {
-  return isTable(row) && cells(row).every(cell => /^:?-{3,}:?$/.test(cell.replace(/\s/g, '')));
+  if (!isTable(row)) return false;
+  const cList = cells(row);
+  if (cList.length === 0) return false;
+  return cList.every(cell => {
+    const trimmed = cell.replace(/\s/g, '');
+    return /^:?-+:?$/.test(trimmed) || /^:?[-—–]+:?$/.test(trimmed);
+  });
 }
 
 /**
@@ -173,7 +179,15 @@ export function renderBlogMarkdownBlocks(content: string): React.ReactElement[] 
       const rows: string[] = [];
       while (i < lines.length && isTable((lines[i] ?? '').trim())) rows.push((lines[i++] ?? '').trim());
       const header = cells(rows[0] ?? '||');
-      const body = rows.slice(1).filter(row => !isAlignment(row)).map(cells);
+      const dataRows = rows.slice(1);
+      const body = dataRows
+        .filter((row, idx) => {
+          if (idx === 0 && (isAlignment(row) || row.includes('---') || row.includes('--'))) {
+            return false;
+          }
+          return !isAlignment(row);
+        })
+        .map(cells);
       blocks.push(
         <div key={key} className="max-w-full overflow-x-auto my-4 rounded-xl border border-border/60" role="region" aria-label="Article data table" tabIndex={0}>
           <table className="w-full min-w-[420px] text-xs text-left border-collapse">
