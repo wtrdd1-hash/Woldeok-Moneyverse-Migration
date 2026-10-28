@@ -95,10 +95,12 @@ export class WalletController {
     if (recent === undefined) {
       return this.service().overview(requireUserId(request), periodDays ? { periodDays } : {});
     }
-    const parsed = Number(recent);
-    if (!Number.isSafeInteger(parsed)) {
-      throw new BadRequestException('recent must be a whole number');
+    // Reject coercible non-decimal and duplicate query values before any DB read.
+    // The service/repository enforce the same 1..50 bound for direct callers.
+    if (typeof recent !== 'string' || !/^(?:[1-9]|[1-4][0-9]|50)$/.test(recent)) {
+      throw new BadRequestException('recent must be a decimal integer between 1 and 50');
     }
+    const parsed = Number(recent);
     return this.service().overview(requireUserId(request), { recentLimit: parsed, ...(periodDays ? { periodDays } : {}) });
   }
 
