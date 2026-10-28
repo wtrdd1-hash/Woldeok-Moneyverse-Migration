@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.28.1422 — 국고 시민배당 사용자 지갑 거래명칭 CI 수정
+- 신규 TREASURY_CITIZEN_DIVIDEND 거래유형의 한국어 지갑 표시 누락을 수정하여 라벨 회귀 29건 PASS. SQL 원자결제 Test PASS와 별개로 운영의 18,000 WLD 원장 차이, 국고실재원 0, 269~287 마이그레이션 공백, 공식 Test SHA 불일치가 해소되지 않아 금융 운영승격 차단. [기록](../worklog/2026-10-28-treasury-wallet-label-v1422.ko.md).
+
 ## v2026.10.28.1421 — 배당 운영승격 SQL FK 오류 해결 / 게이트 진행
 - 원장 정책 FK에 없는 treasury.v1420 사용 문제를 NULL 정책으로 교정, 격리 PostgreSQL 17.11 마이그레이션 290개+실제 배당/원장/권한 음성테스트 ROLLBACK PASS. 운영 배당 18,000 WLD 원장 대사, TREASURY 현금 재원, 공식 Test 정확SHA/운영 금융 release gate는 별개. [기록](../worklog/2026-10-28-treasury-dividend-release-v1421.ko.md).
 ## v2026.10.28.1420 — 국고배당 복식원장 전환 개발 (운영 미적용)

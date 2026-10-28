@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.28.1422 — Accurate member wallet dividend label
+- Added canonical treasury payout transaction label, allowing CI label coverage. Existing historical divergence and absent approved treasury funding still block finance Production. [Evidence](../worklog/2026-10-28-treasury-wallet-label-v1422.md).
+
 ## v2026.10.28.1421 — Real DB treasury journal acceptance
 - Corrected failing policy FK, applied all forward migrations on isolated PostgreSQL and passed balanced ledger/idempotency/unauthorized/zero-Treasury SQL negatives in ROLLBACK. Production financial provenance and exact-SHA gated. [Evidence](../worklog/2026-10-28-treasury-dividend-release-v1421.md).
 ## v2026.10.28.1420 — Canonical citizen dividend payout (SOURCE CANDIDATE / NOT LIVE)

@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.28.1422 — Treasury payout ledger label CI fix
+- [KO evidence](docs/worklog/2026-10-28-treasury-wallet-label-v1422.ko.md) · [EN](docs/worklog/2026-10-28-treasury-wallet-label-v1422.md) · [Internal](docs/updates/v2026.10.28.1422-internal.ko.md) · [GitHub](docs/updates/v2026.10.28.1422-github.md).
+
 ## v2026.10.28.1421 — Treasury dividend isolated SQL acceptance
 - [Korean record](docs/worklog/2026-10-28-treasury-dividend-release-v1421.ko.md) · [English record](docs/worklog/2026-10-28-treasury-dividend-release-v1421.md) · [Internal update](docs/updates/v2026.10.28.1421-internal.ko.md) · [GitHub update](docs/updates/v2026.10.28.1421-github.md).
 ## v2026.10.28.1420 — Treasury dividend canonical ledger candidate

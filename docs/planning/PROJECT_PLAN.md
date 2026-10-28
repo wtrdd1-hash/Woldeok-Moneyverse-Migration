@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.28.1422 — Citizen dividend wallet ledger labeling
+- Fixed a failing exact-SHA backend test: `TREASURY_CITIZEN_DIVIDEND` now displays a specific Korean user wallet label (29 tests PASS). Financial readiness and official Test remain BLOCKED. [Evidence](../worklog/2026-10-28-treasury-wallet-label-v1422.md).
+
 ## v2026.10.28.1421 — Treasury dividend SQL foreign-key and release acceptance
 - Fixed non-existent policy FK reference, replayed all 290 migrations in isolated PostgreSQL and passed rollback-only canonical payout, balance and authorization test. Production has unresolved historical 18k WLD drift and zero proven Treasury account cash; exact-SHA Test and Production gated. [Evidence](../worklog/2026-10-28-treasury-dividend-release-v1421.md).
 ## v2026.10.28.1420 — Canonical citizen dividend payout (SOURCE CANDIDATE / NOT LIVE)
