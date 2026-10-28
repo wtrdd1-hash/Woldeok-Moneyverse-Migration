@@ -81,6 +81,21 @@ export class MemberPhotoRepository {
     );
   }
 
+  /** Withdrawal is a single, owner-scoped PostgreSQL command; no table DML. */
+  withdraw(actor: unknown, photoId: unknown, idempotencyKey: unknown): Promise<{
+    photo_id: string;
+    withdrawn_at: Date;
+    replayed: boolean;
+  } | null> {
+    assertUuid(actor, 'actor');
+    assertUuid(photoId, 'photo');
+    assertUuid(idempotencyKey, 'idempotency key');
+    return queryOne(this.pool,
+      'SELECT receipt.photo_id::text, receipt.withdrawn_at, receipt.replayed FROM public.member_withdraw_pending_photo($1, $2, $3) AS receipt',
+      [actor, photoId, idempotencyKey],
+    );
+  }
+
   mine(actor: unknown): Promise<MemberPhotoRow[]> {
     assertUuid(actor, 'actor');
     return queryRows<MemberPhotoRow>(

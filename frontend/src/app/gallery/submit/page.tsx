@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { randomUUID } from 'node:crypto';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
@@ -11,6 +12,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { TranslatedText as T } from '@/components/translated-text';
 import { PhotoSubmissionForm } from './submit-forms';
+import { WithdrawPendingPhotoForm } from './withdraw-photo-form';
 
 /** One member's own submissions. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -126,6 +128,9 @@ export default async function GallerySubmitPage() {
                     <p className="text-sm text-muted-foreground [word-break:keep-all]">
                       {submission.alt_text}
                     </p>
+                    {!submission.published && (
+                      <WithdrawPendingPhotoForm photoId={submission.photo_id} idempotencyKey={randomUUID()} />
+                    )}
                   </CardContent>
                 </Card>
               </li>

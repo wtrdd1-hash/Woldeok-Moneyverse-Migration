@@ -306,3 +306,29 @@ describe('Android chat bigint cursor and private cache boundary', () => {
     expect(failed.headers.get('cache-control')).toBe('private, no-store');
   });
 });
+
+describe('private photo withdrawal gateway', () => {
+  it.each([200, 403, 409, 500])('fences authenticated Android photo POST response %s', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(
+      JSON.stringify({ photo_id: 'f', replayed: false }),
+      { status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=999' } },
+    ));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await POST(
+      new NextRequest('https://easy-scraping.com/app-api/v1/photos/withdraw', {
+        method: 'POST',
+        headers: { host: 'easy-scraping.com', cookie: 'session=example', 'x-csrf-token': 'token', 'content-type': 'application/json' },
+        body: JSON.stringify({ photoId: 'x', idempotencyKey: 'y' }),
+      }),
+      context('photos', 'withdraw'),
+    );
+    expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const [, forwarded] = fetchSpy.mock.calls[0]!;
+    expect(new Headers(forwarded?.headers).get('x-csrf-token')).toBe('token');
+    expect(new Headers(forwarded?.headers).get('cookie')).toBe('session=example');
+  });
+});
