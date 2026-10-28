@@ -1,6 +1,5 @@
 import type { Pool } from 'pg';
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
 import { DiscordAlertService } from '../../discord/discord-alert.service';

@@ -3,6 +3,7 @@ import type { Pool } from 'pg';
 import type { DiscordAlertService } from '../../discord/discord-alert.service';
 import { AutoSovereignWealthFundService } from './auto-swf.service';
 import { AdminTreasuryController } from './treasury.controller';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 
 describe('P0 autonomous SWF ledger containment', () => {
   afterEach(() => {
@@ -43,6 +44,11 @@ describe('P0 autonomous SWF ledger containment', () => {
     expect(pool.query).not.toHaveBeenCalled();
     expect(pool.connect).not.toHaveBeenCalled();
     service.onModuleDestroy();
+  });
+
+  it('requires CSRF guard on the admin rebalance mutation boundary', () => {
+    const guards = Reflect.getMetadata('__guards__', AdminTreasuryController.prototype.triggerSwfRebalance);
+    expect(guards).toContain(CsrfGuard);
   });
 
   it('admin mutation endpoint returns 503 without dispatching SWF work', async () => {
