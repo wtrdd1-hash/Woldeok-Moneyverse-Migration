@@ -79,6 +79,46 @@ describe('v719 GSC sitemap submission authority and actual receipts', () => {
       body: { sitemapUrl: 'https://easy-scraping.com/sitemap.xml' },
     });
   });
+  it('rejects success for a different sitemap instead of attributing it to the requested URL', async () => {
+    mutateMock.mockResolvedValue({
+      success: true,
+      sitemapUrl: 'https://easy-scraping.com/sitemap-stocks.xml',
+      propertyUrl: 'sc-domain:easy-scraping.com',
+      directConsoleUrl: 'https://search.google.com/search-console/sitemaps',
+    });
+    const response = await POST(request());
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({ success: false, indexingConfirmed: false });
+  });
+
+  it('rejects missing or foreign GSC property evidence', async () => {
+    for (const propertyUrl of [undefined, 'sc-domain:attacker.invalid', 'https://attacker.invalid/']) {
+      mutateMock.mockResolvedValue({
+        success: true, sitemapUrl: 'https://easy-scraping.com/sitemap.xml', propertyUrl,
+      });
+      const response = await POST(request());
+      expect(response.status).toBe(502);
+      expect((await response.json()).success).toBe(false);
+    }
+  });
+
+  it('rejects an unsafe console URL rather than publishing a backend-provided phishing link', async () => {
+    mutateMock.mockResolvedValue({
+      success: true,
+      sitemapUrl: 'https://easy-scraping.com/sitemap.xml',
+      propertyUrl: 'sc-domain:easy-scraping.com',
+      directConsoleUrl: 'https://attacker.invalid/phishing',
+    });
+    const response = await POST(request());
+    expect(response.status).toBe(502);
+    expect((await response.json()).directConsoleUrl).toBeUndefined();
+  });
+
+  it('rejects success with absent receipt identity', async () => {
+    mutateMock.mockResolvedValue({ success: true });
+    expect((await POST(request())).status).toBe(502);
+  });
+
   it('rejects a backend false-success payload rather than inventing a receipt', async () => {
     mutateMock.mockResolvedValue({ success: false });
     const response = await POST(request());
