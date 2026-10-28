@@ -23,7 +23,7 @@ describe('first-party email verification activation evidence', () => {
     expect(hasVerifiedEmailActivationReceipt(payload, [secureCookie])).toBe(false);
   });
 
-  it.each([
+  const invalidCookieSets: readonly (readonly string[])[] = [
     [],
     [secureCookie, 'other=surprise; Path=/'],
     [`__Host-mv_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure`],
@@ -36,7 +36,9 @@ describe('first-party email verification activation evidence', () => {
     [`mv_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=15552000; Domain=example.com`],
     [`mv_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=15552000; Max-Age=0`],
     [`other_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=15552000`],
-  ])('rejects missing, foreign or browser-rejected session cookies %#', (cookies) => {
+  ];
+
+  it.each(invalidCookieSets.map((cookies) => [cookies] as const))('rejects missing, foreign or browser-rejected session cookies %#', (cookies) => {
     expect(hasVerifiedEmailActivationReceipt(validReceipt, cookies)).toBe(false);
   });
 });
