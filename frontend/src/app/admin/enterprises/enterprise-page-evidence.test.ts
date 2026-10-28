@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const page = readFileSync(new URL('./page.tsx', import.meta.url), 'utf8');
 const view = readFileSync(new URL('./enterprise-control-tower.tsx', import.meta.url), 'utf8');
-const nextRoute = readFileSync(new URL('../../../api/admin/enterprises/status/route.ts', import.meta.url), 'utf8');
+const nextRoute = readFileSync(new URL('../../api/admin/enterprises/status/route.ts', import.meta.url), 'utf8');
 
 describe('enterprise admin fail-closed page', () => {
   it('never passes missing portfolio responses as genuine empty arrays', () => {
