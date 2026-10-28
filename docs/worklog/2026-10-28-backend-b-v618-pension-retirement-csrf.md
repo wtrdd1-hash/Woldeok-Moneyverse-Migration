@@ -14,3 +14,9 @@
 
 ## Finished
 - Pending verification. Production HOLD.
+
+## Implementation checkpoint
+- [x] RED: Nest HTTP test missing/invalid CSRF returned 201 instead of 403; missing consent returned 201 instead of 428 (2 failures). Next BFF rejected neither cross-origin nor missing-origin requests (2 failures, upstream mock error returned 500).
+- [x] GREEN: Nest real `CsrfGuard` + `ConsentGuard` HTTP 3/3 PASS. Next same-origin BFF 2/2 PASS, including missing/cross-site Origin denial and server-side CSRF mutation helper.
+- [x] No database, migration, wallet or retirement business-logic changes. Other pension finance mutation paths remain separately held/unchanged.
+- [ ] Full gate evidence and final SHA validation pending.

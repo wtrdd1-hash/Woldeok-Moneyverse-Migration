@@ -13,6 +13,7 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import { SkipInternalToken } from '../../auth/guards/skip-internal-token.decorator';
 import type { RequestWithSession } from '../../auth/session.context';
@@ -81,7 +82,7 @@ export class PublicNationalPensionController {
   }
 
   @Post('toggle-retire')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: '은퇴 연금 수령 개시 / 적립 모드 전환' })
   async toggleRetire(@Req() req: RequestWithSession) {
     const userId = requireUserId(req);
