@@ -27,3 +27,10 @@ Node 로컬 모의 HTTP 서버에서 공개 글 0건/1건과 운영 URL 거부 �
 - 09:40 KST 신규 글 2건이 또 생성됨(슬러그 2026-10-28-kr-compound-e8ad9c2e 및 2026-10-28-kr-compound-195200b4, 본문 각 9천여자). 새 글에 사전검증 없음·isAiGenerated:false·임의 receipt 표시를 확인. 사용자 '시간 경과 자동 비공개/삭제 금지'에 따라 이 새 글 2건은 임의 철회하지 않음. 기존 사용자 철회 대상에만 조치.
 - v1413 브랜치에서 구형 API를 fail-closed. GET은 관리자에게도 LEGACY_FILE_PUBLISHER_RETIRED 및 false 공개 상태를 정확히 알리고, POST는 익명 403/관리자·구형 크론 인증자 503 LEGACY_UNVERIFIED_PUBLISHER_RETIRED. 파일 쓰기·임의 출처·가짜 실측·가짜 승인 영수증 코드 완전 제거. v1412 백엔드 blog.rotation_2h 검증 DB 발행 스케줄러는 유지하며 영향을 주지 않음.
 - 신규 API 회귀 5 PASS, 프론트 전체 352파일/1,863 PASS, 타입검사/변경린트 PASS. 이 코드는 아직 격리 브랜치이며 3354 실제 운영 구형 API가 차단됐다는 증거는 아니다. 운영 무중단 배포·실제 DB 2시간 게시 QA 필수.
+
+## v1413.4 — 운영 JSON 재노출 재발 대응 / 읽기 전용 쓰기 장벽
+- 09:42 KST 실제 생산 Nginx는 백엔드 3000/프론트 3354를 사용. 프론트는 moneyverse-release-v1106-seo-frontend.service의 구형 JSON 발행기를 제공했고, 구형 04:00 Cron도 남아 있음. 실제 백엔드 MONEYVERSE_SCHEDULER_ENABLED=true지만 새 v1412 BLOG_TWO_HOUR_PUBLISHER_ENABLED가 유효하게 켜져 있다는 증거 없음.
+- 기존 글 상태를 한 번 복구한 뒤에도 공유 JSON에 사용자 v1406 수동철회 대상이 190건 이상 다시 PUBLISHED로 나타나며 신규 가짜 영수증 글이 09:41 KST 1건 더 생성된 것을 확인. 재확인 시 원본 총 201건(PUBLISHED 194, WITHDRAWN 7), 신규 3건은 2026-10-28 00:40~00:41Z에 작성된 별도 글. 이전 사용자 철회 대상과 혼동 금지.
+- 변경 전 파일 SHA256 d4e4bb278b523a86fb2848ed6e553b6ed202eb8ebd42934b7d370334dfbe7f88, 원본을 /srv/moneyverse-data/ops/private/blog-withdraw-20261028-v1413-recovery/에 0600 비공개 백업. 사전 검증한 191건(기존 글, v1406 철회 지시보다 과거 게시)만 WITHDRAWN으로 재조정, 새 3건은 유지. 원자 교체+fsync·inode/hash 동시변경검사 후 최종 파일 sha256 c93c9c02fa094eabb548cc472dd3d82c31e7a3da0a09ae4b5757a1be99ac1414, mode 0444 임시 읽기전용 쓰기 장벽 적용. 총 201건, 이전 글 활성 0, 신규 활성 3. 운영/Test /api/blog에서 각 3건 확인.
+- 0444는 구형 Next fs.writeFileSync 직접 덮어쓰기를 막는 긴급 운영 보호이나 관리자 JSON 편집에도 영향을 줄 수 있어 신규 검증 DB 발행기(정식 권한·감사)에 이관한 다음 필요시 복구해야 한다. 이 조치는 자동 리뷰 타임아웃 비공개가 아니라 사용자 과거 명시적 수동철회 지시의 재적용임. 신규 3건 임의 비공개/삭제 없음. 실제 DB/금융/회원 데이터·Nginx 포인터 불변.
+- 최신 원격 main d5dc1545 등 병렬 장문 수정이 수시로 들어오므로 v1413 안전 코드의 SHA·CI·운영 배포가 일치하기 전에는 구형 발행기 운영 차단 완료라고 주장하지 않는다.
