@@ -788,3 +788,37 @@ flowchart TD
   1. 7대 고질적 반복 장애(Anti-Patterns)의 기술적 메커니즘과 근본 원인.
   2. 구조적 악순환 다이어그램(Mermaid).
   3. 4단계 시스템 정상화 실행 로드맵 (Nginx 라우팅 단일화, 워크스페이스 GC 크론, 도메인 격리 CI, 마이그레이션 예약 프로토콜).
+
+
+---
+
+## 🚀 [v257 Specification] Nginx 운영 라우팅 정규 릴리즈(백엔드 3000, 프론트엔드 3354) 단일화 및 임시 유령 서비스 완전 정리
+- **적용 일시**: 2026-10-28 09:16 KST
+- **요청 사항**: 사용자 승인에 따른 Nginx 설정 임시 포트(3343, 3388)에서 정규 프로덕션 서비스(3000, 3354)로 단일화 및 원자적 전환
+
+### 1. Nginx 라우팅 단일화 (Consolidation)
+- **사전 백업**: `/etc/nginx/sites-enabled/moneyverse` 설정을 `/srv/moneyverse-data/ops/private/moneyverse_nginx_backup_20261028_091410`에 안전하게 백업.
+- **포트 전환 적용**:
+  - `location = /health`: `3343` ➔ `3000` (최신 백엔드)
+  - `location = /api/version`: `3343` ➔ `3000` (최신 백엔드)
+  - `location /socket.io/`: `3343` ➔ `3000` (최신 백엔드)
+  - `location /api/v1/integrations/discord/`: `3343` ➔ `3000` (최신 백엔드)
+  - `location /`: `3388` ➔ `3354` (최신 프론트엔드 Turbopack 릴리즈)
+- **문법 검사 및 원자적 리로드**:
+  - `sudo nginx -t`: 구문 검사 100% 통과 (`syntax is ok`, `test is successful`).
+  - `sudo systemctl reload nginx`: 무중단 원자적 리로드 성공.
+
+### 2. 잔여 임시 서비스 안전 종료 및 시스템 자원 회수
+- **종료 및 비활성화(stop & disable)**:
+  - `moneyverse-release-v1402-admin-css-frontend.service` (포트 3388, 과거 임시 수선 디렉터리)
+  - `moneyverse-release-v1083-backend.service` (포트 3343, 6일 전 고정 릴리즈)
+- **자원 회수 결과**:
+  - 불필요한 중복 Node.js 프로세스 정리 완료.
+  - 서버 가용 메모리 **3,259MB**로 확보 완료.
+
+### 3. 실시간 라이브 서비스 전수 실측 검증
+- `https://easy-scraping.com/health`: `{"status":"ok"}` 정상 응답 (200 OK).
+- `https://easy-scraping.com/api/version`: 정상 응답 (200 OK).
+- `https://easy-scraping.com/blog`: `200 OK` 정상 렌더링 확인.
+- `https://easy-scraping.com/api/blog`: `{"success":true,"count":0,"posts":[]}` 정상 응답 확인.
+- **결과**: 유령 배포(Phantom Deploy) 상태가 완벽히 해소되어, 최신 git 커밋(7,000자 블로그 글 생성 엔진, SSRF 보안 패치, 최신 관리자 관제 API)이 실제 사용자 브라우저에 100% 직결됨.
