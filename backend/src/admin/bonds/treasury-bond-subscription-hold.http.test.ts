@@ -19,7 +19,7 @@ describe('member bond subscription finance containment', () => {
   const subscribeBond = vi.fn().mockResolvedValue({ holdingId: 'unexpected', totalPriceWld: '100' });
   const listUserHoldings = vi.fn().mockResolvedValue([]);
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [PublicTreasuryBondController],
       providers: [{ provide: TreasuryBondService, useValue: { subscribeBond, listUserHoldings } }],
     })
@@ -28,7 +28,7 @@ describe('member bond subscription finance containment', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
   afterAll(async () => { await app?.close(); });

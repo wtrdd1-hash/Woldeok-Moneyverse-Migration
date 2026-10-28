@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ServiceUnavailableException,
   Body,
   Controller,
   Get,

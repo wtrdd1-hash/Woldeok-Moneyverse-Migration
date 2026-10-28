@@ -18,3 +18,13 @@
 - GREEN 14/14 focused HTTP/service/repository tests pass. New POST now returns 503 without calling service; service and repository independently fail closed before SQL or Discord. Consent/CSRF guards checked; read-only holdings preserved.
 - Removed unsafe direct-debit subscription implementation; no database migrations or WLD changes.
 - Full test, lint/typecheck/build/security and official Test gates still pending.
+
+## Finished — 2026-10-28 19:50 KST
+- Main checked before, during and after: 35971c600f25869c96f1c666d4b9f58927202730 (unchanged). Independent worktree and branch only.
+- Tracking issue #1735; Draft/hold PR #1736. No main merge, Test deployment, Production deployment or branch cleanup.
+- Code: POST /api/v1/bonds/subscribe returns 503 with CSRF/consent/auth guards; service/repository independently fail closed; no SQL calls, ledger writes or Discord success notifications. Existing read-only bond holdings and market routes remain.
+- RED 8 failing / 5 passing; GREEN 14/14 focused tests. Root pnpm test PASS: frontend 1,871/1,871, backend 1,941 PASS / 440 SKIP, database 46 PASS / 4 SKIP, contract 38 PASS, policy scripts PASS. Lint PASS 0 errors / 1,099 warnings. Typecheck PASS. Backend build PASS. API contract 180 endpoints PASS. Bot tests 11 PASS and audit 0 vulnerabilities. Security advisory policy 9 PASS.
+- Full Next.js build FAIL: first 1GiB Node heap OOM; second 2GiB retry failed next/font Google loader TypeError. The shared host was under memory pressure; no frontend source change was made. Production dependency audit FAIL: qs Moderate GHSA-6pq8-jhm2-2vcw.
+- Isolated real PostgreSQL and authenticated official Test exact-SHA were not completed. No SQL migration; no shared/live DB reads or writes during this change. QA v1347 still reports 18,000 WLD ledger drift, 235 app DML tables, 3 PUBLIC bank EXECUTE, 5 migration checksum mismatches, 20 unapplied migrations, stale official Test and unknown Production version.
+- GitOps release gates FAIL/BLOCKED. Permanent ledger-atomic subscription, immutable receipt, DB ACL and frontend/Android unavailable UX require separate A/C coordination. Other bond mutation routes require independent review.
+- Release decision: DRAFT + HOLD, Production prohibited. Other agents' branches, recovery refs, timers and reservations untouched.
