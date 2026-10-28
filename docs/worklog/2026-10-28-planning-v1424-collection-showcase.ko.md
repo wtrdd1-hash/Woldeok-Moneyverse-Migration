@@ -6,7 +6,7 @@
 - **코드 근거:** `frontend/src/app/collections/curation-retention-flow.tsx`의 고정 `?showcase=arch-1063` 공유 링크, `DEFAULT_PIECES` 및 localStorage 대체 표시; `backend/src/collection/collection.repository.ts`의 조회 시 4개 조각 자동 INSERT와 직접 테이블 조회/변경; migration 232에는 획득 증빙 연결이 없음. 이는 검증된 소유권이 아님.
 - **운영 차단:** QA v1347 FAILED, 과거 18,000 WLD 원장 불일치, 데이터 디스크 97–98%, 독립 백업 복원 미검증, 앱 계정 DML 및 마이그레이션 차이, 운영 버전 unknown, 공식 Test exact-SHA 미검증.
 - **외부 근거:** 독립 근거 10,000건 게이트: 신규 승인 0, 누적 중복 제거 승인 UNKNOWN, BLOCKED / IN PROGRESS.
-- **점검:** [x] 스킬·main 확인 [x] UI/API/DB/앱 경로 조사 [ ] 영문·국문 통합 기획 [ ] 프로젝트 계획·검토·로그 반영 [ ] 문서 대조 및 diff 검사 [ ] GitHub 이슈·Draft PR [ ] 완료 기록.
+- **점검:** [x] 스킬·main 확인 [x] UI/API/DB/앱 경로 조사 [x] 영문·국문 통합 기획 [x] 프로젝트 계획·검토·로그 반영 [x] 문서 대조 및 diff 검사 [x] GitHub 이슈·Draft PR [x] 완료 기록.
 
 ## Design checkpoint / 설계 중간 기록
 
@@ -54,3 +54,9 @@
 - **P0:** ENV1424-01(디스크 98%·독립 복원), FIN1424-02(과거 18,000 WLD 불일치·국고 0, 본 기능과 분리), SEC1424-03(허위 소유권·공개 링크·DB 최소권한), REL1424-04(정확 SHA·공식 Test·미병합 PR 보존).
 - **P1:** COL1424-05(스키마·인덱스·증빙), COL1424-06(트랜잭션·철회·만료·멱등), COL1424-07(NestJS/Next.js/Android), COL1424-08(회원 UI·동의·접근성), COL1424-09(관리자·개인정보·SEO·KPI), COL1424-10(격리 PostgreSQL·회귀·롤백). 개발 예약이 각각 독립 브랜치와 실행 근거를 소유한다.
 - **외부 독립 레퍼런스 10,000건 게이트:** 이전 검토 발행처 PostgreSQL·OWASP·W3C, 이번 신규 승인 0, 누적 실제 획득·중복 제거·근거 분류·승인 UNKNOWN/10,000. **BLOCKED / IN PROGRESS**. 합성 시험, GitHub 이슈, 발행처 수를 검증된 독립 레퍼런스 수로 세지 않는다. 새로운 분산 기획 파일 없이 통합 정본에 흡수한다.
+
+## Final checkpoint / 완료 기록
+- GitHub issue #1739 OPEN; Draft PR #1740 OPEN. Two prior documentation-only commits on branch; final log commit to follow. No main merge.
+- EN/KO eight-document and ten backlog-ID checks PASS; git diff --check PASS; docs-only scope verified. No runtime, SQL or financial tests executed in this planning run. GitHub CI release-input/classify were IN_PROGRESS at initial PR check; do not call CI complete.
+- Main 35971c600f25869c96f1c666d4b9f58927202730 unchanged on midpoint and pre-final fetch; QA v1347 FAILED, disk 98%, independent restore and exact-SHA Test unverified, 18k WLD divergence. Release HOLD. New approved external references 0, cumulative UNKNOWN/10,000 BLOCKED.
+- Work remains on separate development branch with actual issuer evidence, exact-SHA official Test, real PostgreSQL privileges and authorized GitOps; no Production or feature switch changes. Next cycle Feature Improvement v1426 provisional.

@@ -6,7 +6,7 @@
 - **Source evidence:** `frontend/src/app/collections/curation-retention-flow.tsx` hard-codes `?showcase=arch-1063` and starts with `DEFAULT_PIECES`, with browser localStorage fallback; `backend/src/collection/collection.repository.ts` seeds four pieces on read and directly reads/writes `user_collections`; migration 232 has no award-proof linkage. These do **not** constitute verified ownership.
 - **Release gate:** QA v1347 FAILED, 18,000 WLD historical divergence, data disk 97–98%, backup restore unverified, app-role DML and migration parity gaps, Production version unknown, official Test exact-SHA unverified. No promotion.
 - **External evidence:** 10,000 independent-reference gate: new approved 0; cumulative deduplicated accepted UNKNOWN; BLOCKED / IN PROGRESS. Do not invent totals.
-- **Checklist:** [x] read skills and authoritative main [x] inspect user/admin/API/DB/app-api [ ] draft EN/KO integrated design [ ] update EN/KO plans, review and logs [ ] run document parity and diff checks [ ] GitHub issue and Draft PR [ ] final status.
+- **Checklist:** [x] read skills and authoritative main [x] inspect user/admin/API/DB/app-api [x] draft EN/KO integrated design [x] update EN/KO plans, review and logs [x] run document parity and diff checks [x] GitHub issue and Draft PR [x] final status.
 
 ## Design checkpoint / 설계 중간 기록
 
@@ -54,3 +54,9 @@
 - **P0 backlog:** ENV1424-01 (98% disk/backup restore); FIN1424-02 (historical 18k WLD/zero Treasury, unrelated to showcase); SEC1424-03 (fake ownership/public link and DB least privilege); REL1424-04 (exact-SHA/official Test/PR preservation).
 - **P1 backlog:** COL1424-05 (schema/index/proof); COL1424-06 (transactions/expiry/revoke/idempotency); COL1424-07 (NestJS/Next.js/Android); COL1424-08 (UI/consent/a11y); COL1424-09 (admin/privacy/SEO/KPI); COL1424-10 (isolated PG/regression/rollback). Each must have a separate development branch, owner and executable acceptance evidence.
 - **External research gate:** reviewed publishers previously PostgreSQL, OWASP, W3C; this cycle newly approved 0, cumulative independently acquired/deduplicated/evidence-classified UNKNOWN of required 10,000. **BLOCKED / IN PROGRESS**, never count synthetic tests, GitHub issues or a publisher as a validated external reference. No new distributed planning files; this integrated master remains the authoritative design proposal.
+
+## Final checkpoint / 완료 기록
+- GitHub issue #1739 OPEN; Draft PR #1740 OPEN. Two prior documentation-only commits on branch; final log commit to follow. No main merge.
+- EN/KO eight-document and ten backlog-ID checks PASS; git diff --check PASS; docs-only scope verified. No runtime, SQL or financial tests executed in this planning run. GitHub CI release-input/classify were IN_PROGRESS at initial PR check; do not call CI complete.
+- Main 35971c600f25869c96f1c666d4b9f58927202730 unchanged on midpoint and pre-final fetch; QA v1347 FAILED, disk 98%, independent restore and exact-SHA Test unverified, 18k WLD divergence. Release HOLD. New approved external references 0, cumulative UNKNOWN/10,000 BLOCKED.
+- Work remains on separate development branch with actual issuer evidence, exact-SHA official Test, real PostgreSQL privileges and authorized GitOps; no Production or feature switch changes. Next cycle Feature Improvement v1426 provisional.

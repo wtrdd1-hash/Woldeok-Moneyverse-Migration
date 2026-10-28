@@ -2,7 +2,7 @@
 
 ## v1424 / F675-162 — 검증 가능한 회원 동의형 컬렉션 쇼케이스 (기능 추가 / 초안 / 운영 보류)
 
-**회차:** 이전 기능 보완 v1422 → 현재 기능 추가 v1424 → 다음 기능 보완 v1426(잠정). **기준 main:** 35971c600f25869c96f1c666d4b9f58927202730 (시작·중간 재확인), AGENTS.md·README.md·영문 PROJECT_PLAN.md 정본·국문 PROJECT_PLAN.ko.md 대조. **개발 전달:** [이슈 #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739). QA v1347 FAILED. 문서 설계일 뿐 실제 구현·DB·미디어·WLD·Test·Production 변경 없음.
+**회차:** 이전 기능 보완 v1422 → 현재 기능 추가 v1424 → 다음 기능 보완 v1426(잠정). **기준 main:** 35971c600f25869c96f1c666d4b9f58927202730 (시작·중간 재확인), AGENTS.md·README.md·영문 PROJECT_PLAN.md 정본·국문 PROJECT_PLAN.ko.md 대조. **개발 전달:** [이슈 #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739); [Draft PR #1740](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1740). QA v1347 FAILED. 문서 설계일 뿐 실제 구현·DB·미디어·WLD·Test·Production 변경 없음.
 
 ### 1. 실제 코드 근거, 목적 및 제외 범위
 - frontend/src/app/collections/curation-retention-flow.tsx는 회원이나 선택 항목과 무관하게 고정된 /collections?showcase=arch-1063 링크를 복사한다. collections 페이지에는 해당 쿼리의 공개 조회 기능이 없다. DEFAULT_PIECES를 먼저 표시하고 통신 실패 시 localStorage 자료를 대신 보여준다. 복사 링크와 로컬 데이터는 서버가 확인한 소유권 증거가 아니다.

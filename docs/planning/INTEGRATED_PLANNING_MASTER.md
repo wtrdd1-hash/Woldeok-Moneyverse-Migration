@@ -2,7 +2,7 @@
 
 ## v1424 / F675-162 — Verified, opt-in member collection showcase (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**Cycle:** Previous Feature Improvement v1422 → Current Feature Addition v1424 → Next Feature Improvement v1426 (provisional). **Authoritative main:** 35971c600f25869c96f1c666d4b9f58927202730 at start and midpoint, confirmed against AGENTS.md, README.md and both PROJECT_PLAN documents. **Handoff:** [issue #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739). QA v1347 FAILED. This is a design proposal, not a verified deployed feature; no runtime, DB, media, WLD, Test or Production mutations.
+**Cycle:** Previous Feature Improvement v1422 → Current Feature Addition v1424 → Next Feature Improvement v1426 (provisional). **Authoritative main:** 35971c600f25869c96f1c666d4b9f58927202730 at start and midpoint, confirmed against AGENTS.md, README.md and both PROJECT_PLAN documents. **Handoff:** [issue #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739); [Draft PR #1740](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1740). QA v1347 FAILED. This is a design proposal, not a verified deployed feature; no runtime, DB, media, WLD, Test or Production mutations.
 
 ### 1. Observed behavior, user need, scope and exclusions
 - In frontend/src/app/collections/curation-retention-flow.tsx, the showcase modal copies a fixed /collections?showcase=arch-1063 link regardless of member or selection. The collections page does not implement a public resolver for that query. DEFAULT_PIECES render immediately; failed fetch may show browser localStorage content. Neither a copied URL nor cached display proves server ownership.
