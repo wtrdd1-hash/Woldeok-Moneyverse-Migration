@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -101,13 +102,15 @@ export class WorkController {
   }
 
   @Get('tasks')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
-  async tasks(@Req() request: RequestWithSession) {
+  async tasks(@Req() request: RequestWithSession, @Query('minReward') minReward?: string) {
     const repository = this.repository();
     const actor = requireUserId(request);
     const [featureState, tasks] = await Promise.all([
       repository.featureState(),
-      this.guarded(() => repository.tasks(actor), 'the task board is unavailable'),
+      this.guarded(() => repository.tasks(actor, minReward), 'the task board is unavailable'),
     ]);
     return { featureState, tasks };
   }

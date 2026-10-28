@@ -19,7 +19,7 @@ import { IDLE } from '@/lib/action-state';
 import { switchJobAction } from './actions';
 import { TakeButton } from './work-forms';
 import { dailyQuotaLabel } from './work-quota';
-import { filterWorkTasks } from './work-search';
+import { filterWorkTasks, filterWorkTasksByMinReward } from './work-search';
 import {
   boardOrder,
   difficultyLabel,
@@ -68,6 +68,7 @@ export function CareerTasksBoard({
 
   const [filter, setFilter] = useState<'my_job' | 'all'>(activeJobType ? 'my_job' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [minReward, setMinReward] = useState('');
 
   const activeJobName = activeJobType ? jobLabel(activeJobType, locale) : '';
 
@@ -75,7 +76,7 @@ export function CareerTasksBoard({
   const myCompletedToday = myTasks.reduce((sum, t) => sum + t.taken_today, 0);
 
   const scopedTasks = filter === 'my_job' && activeJobType && myTasks.length > 0 ? myTasks : tasks;
-  const displayTasks = boardOrder(filterWorkTasks(scopedTasks, searchQuery), activeJobType);
+  const displayTasks = boardOrder(filterWorkTasksByMinReward(filterWorkTasks(scopedTasks, searchQuery), minReward), activeJobType);
 
   return (
     <div className="grid gap-4 w-full max-w-full min-w-0">
@@ -141,15 +142,29 @@ export function CareerTasksBoard({
             className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs sm:text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
           />
         </label>
+        <label className="grid gap-1 text-xs text-muted-foreground min-w-0">
+          <span>{isEn ? 'Minimum estimated WLD reward' : '최소 예상 WLD 보상'}</span>
+          <select
+            aria-label={isEn ? 'Minimum WLD reward' : '최소 WLD 보상'}
+            value={minReward}
+            onChange={(event) => setMinReward(event.target.value)}
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs sm:text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value="">{isEn ? 'Any reward' : '전체 보상'}</option>
+            {['50', '100', '200', '500', '1000'].map((value) => (
+              <option key={value} value={value}>{value} WLD+</option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {displayTasks.length === 0 ? (
         <EmptyState
           title={
-            searchQuery.trim()
+            searchQuery.trim() || minReward
               ? isEn
-                ? 'No work tasks match your search.'
-                : '검색 조건에 맞는 업무가 없어요.'
+                ? 'No work tasks match your filters.'
+                : '선택한 조건에 맞는 업무가 없어요.'
               : isEn
                 ? 'No tasks available in this category.'
                 : '선택한 직업에 등록된 업무가 없어요.'
