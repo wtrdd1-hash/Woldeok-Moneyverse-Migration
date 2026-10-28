@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.28.1416 — Blog source merged; Treasury 18k dividend root cause found
+- PR #1695 merged to main 2f2169a99698fdcf3a03867f532caca3ff599d77 after CI #3971 and premerge exact-SHA Test success. 18 USER_CASH account variances of +1000 WLD correspond exactly to a contemporaneous audited 18-person Treasury citizen dividend and Treasury audit journal; migration 240 updates available_amount directly without ledger_postings. Source identified but main-ledger reconciliation, 3 core app DML privileges and Production DB migration 268 remain outstanding. A real Test AI publication attempt failed at 125-second model generation timeout, zero verified posts. No Production code cutover or two-hour publisher activation. See docs/worklog/2026-10-28-blog-main-finance-v1416.md.
+
 ## v2026.10.28.1415.8 — Emergency legacy blog filesystem write containment
 - After public Nginx legacy generator POST was retired, an internal JSON writer still generated two additional duplicate unsourced Korean finance posts (11 to 13) at 14:43 KST. Existing published articles were not automatically withdrawn. Production shared blog-posts.json is now backed up to a restricted 0600 file, SHA-256 verified and protected by filesystem immutable flag; write-denial as the debian service account tested PASS. This blocks legacy JSON admin edits/withdrawals until controlled removal; it is not a substitute for DB verified publisher. Full source app promotion remains held on finance/ledger integrity. See worklog v1415.8.
 
