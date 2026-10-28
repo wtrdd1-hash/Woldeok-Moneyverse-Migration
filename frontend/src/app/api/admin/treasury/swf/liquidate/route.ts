@@ -1,19 +1,16 @@
 import { NextResponse } from 'next/server';
-import { api, ApiError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json().catch(() => ({}));
-    const data = await api('/api/v1/admin/treasury/swf/liquidate', {
-      method: 'POST',
-      body,
-    });
-    return NextResponse.json(data);
-  } catch (error) {
-    const status = error instanceof ApiError ? error.status : 500;
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return NextResponse.json({ error: message }, { status });
-  }
+// No canonical ledger settlement receipt exists for manual SWF liquidation.
+// Never parse or forward a request, even if the caller bypasses the admin UI.
+export async function POST(_request: Request) {
+  return NextResponse.json(
+    {
+      success: false,
+      code: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE',
+      error: '국부펀드 수동 회수는 원장 정산 및 검증 가능한 영수증 구현 전까지 중단됩니다.',
+    },
+    { status: 503, headers: { 'Cache-Control': 'private, no-store' } },
+  );
 }

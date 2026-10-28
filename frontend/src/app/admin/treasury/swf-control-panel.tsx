@@ -53,7 +53,6 @@ export function SwfControlPanel({
   const [portfolios, setPortfolios] = useState<SwfPortfolioItem[]>(initialPortfolios);
   const [events, setEvents] = useState<SwfEvent[]>(initialEvents);
   const [rebalancing, setRebalancing] = useState(false);
-  const [liquidating, setLiquidating] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
 
   // 국고 자금 안전 보존 및 투자 거버넌스 튜닝 상태
@@ -131,39 +130,6 @@ export function SwfControlPanel({
       toast.error('성장 엔진 집행 요청 중 오류가 발생했습니다.');
     } finally {
       setRebalancing(false);
-    }
-  }
-
-  async function handleLiquidateToTreasury() {
-    if (!window.confirm('과도하게 투자된 주식 자금을 매도 회수하여 국고 금고 현금으로 환원(현금 85% : 주식 15% 목표)하시겠습니까?')) {
-      return;
-    }
-    setLiquidating(true);
-    try {
-      const res = await fetch('/api/admin/treasury/swf/liquidate', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ targetPortfolioAumWld: '20000000' }),
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data.success) {
-        toast.success('국고 자금 정상화 회수가 성공적으로 집행되었습니다!', {
-          description: `회수된 현금: +${Number(data.liquidatedWld || 0).toLocaleString()} WLD | 확보된 국고 현금: ${Number(data.vaultCashAfter || 0).toLocaleString()} WLD | 잔여 포트폴리오: ${Number(data.portfolioAfter || 0).toLocaleString()} WLD`,
-        });
-        const refreshRes = await fetch('/api/admin/treasury/swf');
-        if (refreshRes.ok) {
-          const refreshed = await refreshRes.json();
-          if (refreshed.portfolios) setPortfolios(refreshed.portfolios);
-          if (refreshed.events) setEvents(refreshed.events);
-        }
-      } else {
-        toast.error(data.error || '자금 회수 중 오류가 발생했습니다.');
-      }
-    } catch {
-      toast.error('네트워크 통신 중 오류가 발생했습니다.');
-    } finally {
-      setLiquidating(false);
     }
   }
 
@@ -380,14 +346,24 @@ export function SwfControlPanel({
               </CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
-              <Button
-                size="sm"
-                onClick={handleLiquidateToTreasury}
-                disabled={liquidating}
-                className="bg-emerald-700 hover:bg-emerald-600 text-white font-semibold shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto"
-              >
-                {liquidating ? '회수 환원 진행 중...' : '🏦 주식 자금 즉시 회수 (현금 85% 정상화)'}
-              </Button>
+              <div className="flex min-w-0 flex-col gap-2 w-full sm:w-auto">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled
+                  aria-describedby="swf-manual-liquidation-hold"
+                  className="min-h-11 w-full sm:w-auto whitespace-normal text-left"
+                >
+                  수동 회수 — 원장 검증 전 중단
+                </Button>
+                <p
+                  id="swf-manual-liquidation-hold"
+                  role="status"
+                  className="max-w-sm text-xs leading-relaxed text-amber-200"
+                >
+                  국고 자산 매도·현금 회수는 복식부기 원장 정산과 검증 가능한 영수증이 확인될 때까지 실행할 수 없습니다.
+                </p>
+              </div>
               <Button
                 size="sm"
                 onClick={handleTriggerRebalance}
