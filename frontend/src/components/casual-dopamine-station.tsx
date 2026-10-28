@@ -55,7 +55,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              {t('arcade.desc', locale, '매일 가볍게 즐기는 5대 미니게임과 일일 퀘스트로 WLD 보상을 획득하세요.')}
+              {t('arcade.desc', locale, '가볍게 즐기는 미니게임입니다. 연습 게임은 WLD를 지급하지 않습니다.')}
             </p>
           </div>
         </div>
@@ -98,7 +98,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              {t('arcade.fever.desc', locale, '10초 동안 황금 코인을 광클하여 최대 1,000 WLD 잭팟 획득! (1일 1회)')}
+              {t('arcade.fever.desc', locale, '10초 동안 황금 오리를 탭하는 무료 연습 게임입니다. WLD 지급은 없습니다.')}
             </p>
           </div>
         </div>
@@ -213,9 +213,6 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
         isOpen={activeModal === 'fever'}
         onClose={() => setActiveModal(null)}
         enableFloatingSpawn={false}
-        onClaimReward={(totalWld) => {
-          showRewardNotice(`황금 오리 피버 완료! +${totalWld.toLocaleString()} WLD가 지갑에 지급되었습니다.`);
-        }}
       />
 
       {/* Deoki Pet Modal Container */}

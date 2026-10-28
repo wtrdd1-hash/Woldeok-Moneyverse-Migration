@@ -1,129 +1,53 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act, cleanup, waitFor } from '@testing-library/react';
-import React from 'react';
 import { GoldenDuckFever } from './golden-duck-fever';
-import * as dopamineActions from '@/app/actions/dopamine';
+import * as actions from '@/app/actions/dopamine';
 
-// Mock dopamine server actions
 vi.mock('@/app/actions/dopamine', () => ({
+  getGoldenDuckStatusAction: vi.fn().mockResolvedValue({ state: 'verified', claimedToday: false }),
   claimGoldenDuckAction: vi.fn(),
 }));
 
-describe('GoldenDuckFever Component', () => {
-  beforeEach(() => {
+describe('Golden Duck practice (no WLD transfer)', () => {
+  beforeEach(() => vi.clearAllMocks());
+  afterEach(() => { cleanup(); vi.useRealTimers(); });
+
+  it('renders a keyboard-operable local practice with explicit no-WLD disclosure', () => {
+    render(<GoldenDuckFever isOpen />);
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    expect(screen.getByText(/연습 점수/)).toBeTruthy();
+    expect(screen.getByText(/WLD 지급 없음/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /오리 탭 연습/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /WLD 보상 수령/i })).toBeNull();
+  });
+
+  it('increments only local points, never calls reward action or wallet event', () => {
+    const callback = vi.fn();
+    render(<GoldenDuckFever isOpen onClaimReward={callback} />);
+    fireEvent.click(screen.getByRole('button', { name: /오리 탭 연습/i }));
+    expect(screen.getByText(/10점/)).toBeTruthy();
+    expect(vi.mocked(actions.claimGoldenDuckAction)).not.toHaveBeenCalled();
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it('ends after 10 seconds with local score only', () => {
     vi.useFakeTimers();
-    vi.clearAllMocks();
+    render(<GoldenDuckFever isOpen />);
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(screen.getByText(/연습 종료/)).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /닫기/i }).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/WLD 획득/)).toBeNull();
   });
 
-  afterEach(() => {
-    cleanup();
-    vi.useRealTimers();
+  it('shows owner-verified ledger history only when the backend confirms it', async () => {
+    vi.mocked(actions.getGoldenDuckStatusAction).mockResolvedValue({ state: 'verified', claimedToday: true });
+    render(<GoldenDuckFever isOpen />);
+    await waitFor(() => expect(screen.getByText(/오늘 원장 지급 기록: 있음/)).toBeTruthy());
   });
 
-  it('renders modal with timer and interactive elements when isOpen is true', () => {
-    render(<GoldenDuckFever isOpen={true} />);
-
-    expect(screen.getByText(/황금 오리 광클 피버 타임/)).toBeDefined();
-    expect(screen.getByText(/10초 남음/)).toBeDefined();
-    expect(screen.getByRole('button', { name: /피버 코인 광클하기/ })).toBeDefined();
-  });
-
-  it('increments taps, combo and earned WLD on coin click', () => {
-    render(<GoldenDuckFever isOpen={true} />);
-
-    const coinButton = screen.getByRole('button', { name: /피버 코인 광클하기/ });
-
-    // 1st click
-    act(() => {
-      fireEvent.pointerDown(coinButton);
-    });
-
-    expect(screen.getByText(/콤보/)).toBeDefined();
-    expect(screen.getByText('+10')).toBeDefined();
-
-    // 2nd click
-    act(() => {
-      fireEvent.pointerDown(coinButton);
-    });
-
-    expect(screen.getByText('+20')).toBeDefined();
-  });
-
-  it('transitions to finished screen when 10 seconds elapse', () => {
-    render(<GoldenDuckFever isOpen={true} />);
-
-    // Fast-forward 10 seconds step by step
-    for (let i = 0; i < 11; i++) {
-      act(() => {
-        vi.advanceTimersByTime(1000);
-      });
-    }
-
-    expect(screen.getByText(/🎉 피버 타임 종료!/)).toBeDefined();
-    expect(screen.getByRole('button', { name: /지갑에 WLD 보상 수령하기/ })).toBeDefined();
-  });
-
-  it('calls claimGoldenDuckAction and displays success feedback upon claim', async () => {
-    vi.mocked(dopamineActions.claimGoldenDuckAction).mockResolvedValue({
-      success: true,
-      rewardAmount: 1250,
-      newBalance: '15000',
-      message: '1,250 WLD가 지갑에 성공적으로 입금되었습니다!',
-    });
-
-    const onClaimReward = vi.fn();
-    render(<GoldenDuckFever isOpen={true} onClaimReward={onClaimReward} />);
-
-    const coinButton = screen.getByRole('button', { name: /피버 코인 광클하기/ });
-    act(() => {
-      fireEvent.pointerDown(coinButton);
-      fireEvent.pointerDown(coinButton);
-    });
-
-    // Finish 10s
-    for (let i = 0; i < 11; i++) {
-      act(() => {
-        vi.advanceTimersByTime(1000);
-      });
-    }
-    vi.useRealTimers();
-
-    const claimButton = screen.getByRole('button', { name: /지갑에 WLD 보상 수령하기/ });
-    await act(async () => {
-      fireEvent.click(claimButton);
-    });
-
-    await waitFor(() => {
-      expect(dopamineActions.claimGoldenDuckAction).toHaveBeenCalled();
-      expect(screen.getByText(/1,250 WLD가 지갑에 성공적으로 입금되었습니다!/)).toBeDefined();
-    });
-    expect(onClaimReward).toHaveBeenCalledWith(1250, 2);
-  });
-
-  it('prompts user to log in if requiresLogin is returned from server action', async () => {
-    vi.mocked(dopamineActions.claimGoldenDuckAction).mockResolvedValue({
-      success: false,
-      requiresLogin: true,
-      message: '로그인 후 WLD 보상을 지갑에 수령할 수 있습니다.',
-    });
-
-    render(<GoldenDuckFever isOpen={true} />);
-
-    for (let i = 0; i < 11; i++) {
-      act(() => {
-        vi.advanceTimersByTime(1000);
-      });
-    }
-    vi.useRealTimers();
-
-    const claimButton = screen.getByRole('button', { name: /지갑에 WLD 보상 수령하기/ });
-    await act(async () => {
-      fireEvent.click(claimButton);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(/획득한 WLD를 지갑에 적립하려면 로그인이 필요합니다/)).toBeDefined();
-      expect(screen.getByRole('link', { name: /로그인하고 WLD 수령하기/ })).toBeDefined();
-    });
+  it('shows unavailable rather than a false zero when the DB cannot be reached', async () => {
+    vi.mocked(actions.getGoldenDuckStatusAction).mockResolvedValue({ state: 'unavailable' });
+    render(<GoldenDuckFever isOpen />);
+    await waitFor(() => expect(screen.getByText(/원장 기록 조회 불가/)).toBeTruthy());
   });
 });
