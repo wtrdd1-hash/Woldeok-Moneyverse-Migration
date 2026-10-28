@@ -7,3 +7,7 @@
 - Reproducible P1 gap: /admin/safety converts API failures to empty arrays and zero pending, describes only first 50 rows as total, offers no navigation to older reports. Backend supports validated limit/offset, returns page-length count, not a global total. Unsafe user-supplied target links need safe handling.
 - Plan: RED tests for evidence and paging; validate API envelope and page, render unavailable separately, use backend limit=51 for exact has-next and 50 visible rows, safe external URL rendering, keyboard-accessible links, noindex, focused regression; verify all release gates. No migrations, no finance writes, no production changes.
 - Status: IN PROGRESS; Test/Production RELEASE HOLD until full exact-SHA gates.
+
+## MID — 2026-10-29 01:46 KST
+- Correction: the initial safety pagination hypothesis came from the old integration worktree, not authoritative origin/main. Current main already has validated queue pagination, unavailable states and safe URL links. Removed uncommitted duplicate prototype; no overlapping change will be submitted.
+- Verified new P1 gap on actual main: chat moderation SQL migration 228 only updates report status and audit_logs; it does not block accounts or deliver warnings. UI currently claims account blocked/warning sent, and server action treats any HTTP success as completed enforcement. Pivot to truthful status-only moderation receipts, end-to-end Backend contract and UI copy, with regression tests.
