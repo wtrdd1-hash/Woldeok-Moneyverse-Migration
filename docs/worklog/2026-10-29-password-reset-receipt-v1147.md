@@ -16,3 +16,6 @@
 - Pending final gate evidence and release disposition.
 
 - RED: focused receipt test fails before implementation (exit 1).
+
+- RED behavioral evidence: 6 failed / 2 passed (unverified responses previously redirected to login success).
+- GREEN: strict exact `{ outcome: 'password-reset' }` runtime evidence, unverified-response error with honest Korean copy, and existing form validation preserved. Focused test evidence in `/tmp/mv-c-v1147-green.log`.

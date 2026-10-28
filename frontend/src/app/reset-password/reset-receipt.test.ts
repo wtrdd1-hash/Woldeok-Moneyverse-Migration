@@ -36,7 +36,7 @@ describe('password reset mutation receipt', () => {
 
   it.each([undefined, null, {}, { outcome: 'password-changed' }, { outcome: 'password-reset', success: false }])('refuses a contradictory or missing success receipt: %s', async (response) => {
     mocks.api.mockResolvedValue(response);
-    await expect(completePasswordReset(form())).rejects.toThrow('REDIRECT:/reset-password?error=invalid&token=');
+    await expect(completePasswordReset(form())).rejects.toThrow('REDIRECT:/reset-password?error=unverified&token=');
     expect(mocks.redirect).not.toHaveBeenCalledWith('/login?password_reset=1');
   });
 
