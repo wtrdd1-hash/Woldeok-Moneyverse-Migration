@@ -17,7 +17,7 @@ describe('Member pension retirement toggle HTTP authorization boundary', () => {
   const hasCurrentUserConsent = vi.fn().mockResolvedValue(true);
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [PublicNationalPensionController],
       providers: [
         { provide: NationalPensionService, useValue: { toggleRetirement } },
@@ -34,7 +34,7 @@ describe('Member pension retirement toggle HTTP authorization boundary', () => {
       })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
 
