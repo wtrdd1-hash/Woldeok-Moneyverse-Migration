@@ -10,3 +10,5 @@
 
 ## 완료 기준
 - 영문 정본·한국어 동등성, 문서 전용 diff, 10개 백로그 ID, GitHub PR/이슈, 원격 SHA, 독립 외부 근거 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED 확인. 실제 실행 증거는 기록 파일을 따른다. 런타임·DB·WLD·Test·Production 미변경.
+
+- Draft PR #1759 and backlog issue #1758; first commit e922796a563c37cd12b80a1cb6cce0d4a9b9693b. Docs only, no merge/deploy.
