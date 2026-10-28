@@ -306,3 +306,20 @@ describe('Android chat bigint cursor and private cache boundary', () => {
     expect(failed.headers.get('cache-control')).toBe('private, no-store');
   });
 });
+
+describe('Android verified notification privacy', () => {
+  it.each([200, 401, 403, 500])('never publicly caches notification response %s', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const spy = vi.fn(async () => new Response(JSON.stringify({ notifications: [] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', spy);
+    const response = await GET(
+      request('/app-api/v1/notifications?category=TRANSACTIONAL&offset=20'),
+      context('notifications'),
+    );
+    expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(spy.mock.calls[0]?.[0].toString()).toContain('category=TRANSACTIONAL&offset=20');
+  });
+});

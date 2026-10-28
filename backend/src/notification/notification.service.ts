@@ -20,10 +20,11 @@ export class NotificationService {
               is_read, read_at, created_at
        FROM public.in_app_notifications
        WHERE user_id = $1
-         AND ($2::boolean IS NULL OR is_read = FALSE)
-       ORDER BY created_at DESC
-       LIMIT $3 OFFSET $4`,
-      [actor, unreadOnly, limit, offset],
+         AND ($2::text IS NULL OR category = $2::text)
+         AND ($3::boolean IS NULL OR is_read = FALSE)
+       ORDER BY created_at DESC, id DESC
+       LIMIT $4 OFFSET $5`,
+      [actor, query.category ?? null, unreadOnly, limit, offset],
     );
   }
 
