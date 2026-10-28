@@ -15,3 +15,10 @@ Branch: auto/hourly-c-scenario-truth-v1142-20261029-0345.
 Pending tests and implementation.
 ## Finished
 Pending verification and release decision.
+
+### 03:50 KST — implementation checkpoint
+- RED: page-level Vitest 2 assertion failures on fabricated AI evidence / absent status notice, after correcting initial test harness invocation.
+- GREEN: three page-level regression tests pass with authenticated real projection, failure case, nonindex/responsive status.
+- Removed hard-coded dual-model votes, false rationales, fake approval and fake AI payload from scenario page; preserved existing authenticated deterministic Backend API and numeric projection.
+- Updated quick-jumper description to reflect no AI review. No financial write, migration, live DB access or service restart.
+- Mid-work fetch origin/main: unchanged at 35971c600f25869c96f1c666d4b9f58927202730.
