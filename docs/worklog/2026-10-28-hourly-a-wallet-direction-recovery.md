@@ -17,3 +17,7 @@
 
 ## FINISHED
 - Pending.
+
+### RED checkpoint 10:24 KST
+- Test-only original PR #1647 patch applied; baseline Backend wallet period **5 FAIL / 3 PASS** after building contract (first attempt lacked contract build), Frontend wallet period **1 FAIL / 3 PASS**. Failure is missing direction selector and fourth SQL bind, not environment after retry.
+- No runtime implementation yet. Test logs in miniPC reports. Other agents' worktrees untouched.

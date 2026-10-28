@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { activityPeriod, activityPeriodUrl, activityCompletenessNotice } from './period';
+import { activityPeriod, activityPeriodUrl, activityDirection, activityCompletenessNotice } from './period';
 
 describe('wallet activity rolling periods', () => {
   it('distinguishes verified truncated, complete and unknown results without guessing', () => {
@@ -14,6 +14,16 @@ describe('wallet activity rolling periods', () => {
     expect(activityPeriod('all')).toBe('all');
     expect(activityPeriod(undefined)).toBe('all');
     expect(activityPeriod('7d&recent=100000')).toBe('all');
+  });
+
+  it('accepts only server-supported direction selectors and preserves both filters', () => {
+    expect(activityDirection('in')).toBe('in');
+    expect(activityDirection('out')).toBe('out');
+    expect(activityDirection('neutral')).toBe('neutral');
+    expect(activityDirection('in&recent=10000')).toBe('all');
+    expect(activityPeriodUrl('30d', 'out')).toBe('/wallet/activity?period=30d&direction=out');
+    expect(activityPeriodUrl('all', 'neutral')).toBe('/wallet/activity?direction=neutral');
+    expect(activityPeriodUrl('7d', 'all')).toBe('/wallet/activity?period=7d');
   });
 
   it('constructs canonical navigation without user-controlled URL injection', () => {
