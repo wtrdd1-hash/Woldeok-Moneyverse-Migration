@@ -9,6 +9,9 @@ describe('admin backup ACL and evidence', () => {
     expect(guards).toContain(AdminGuard);
   });
   it('does not claim successful backup execution without durable completion evidence', async () => {
+    const source = AdminBackupController.prototype.triggerBackup.toString();
+    // Check for dangerous process execution before ever invoking the method in a test.
+    expect(source).not.toMatch(/\bspawn\b|\bexec\s*\(|\bfork\s*\(/);
     const controller = new AdminBackupController();
     await expect(controller.triggerBackup()).rejects.toMatchObject({ status: 503 });
   });
