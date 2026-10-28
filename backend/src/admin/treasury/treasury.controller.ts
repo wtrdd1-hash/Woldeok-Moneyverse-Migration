@@ -7,6 +7,7 @@ import {
   Put,
   Query,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -14,6 +15,7 @@ import { IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validato
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
@@ -384,12 +386,11 @@ export class AdminTreasuryController {
   }
 
   @Post('swf/rebalance')
-  @ApiOperation({ summary: '자율 국부펀드(ASWF) 잉여 세수 시장 재순환 즉시 집행' })
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Autonomous SWF settlement unavailable until canonical ledger certification' })
   async triggerSwfRebalance() {
-    if (!this.swfService) {
-      return { executed: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
-    }
-    return this.swfService.evaluateAndRebalance();
+    // An HTTP 200 with executed:false is not a reliable financial release boundary.
+    throw new ServiceUnavailableException('SWF_LEDGER_SETTLEMENT_UNAVAILABLE');
   }
 
   @Post('swf/liquidate')
