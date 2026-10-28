@@ -1,5 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v2026.10.28.1424 — F675-162 검증 가능한 회원 컬렉션 쇼케이스 (기획 초안 / 운영 보류)
+- 이전 기능 보완 v1422 → 현재 기능 추가 v1424 → 다음 기능 보완 v1426(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재확인, QA v1347 FAILED. 실제 코드는 고정 /collections?showcase=arch-1063, DEFAULT_PIECES/localStorage, GET 시 4개 예시 INSERT, migration 232의 지급 증빙 부재. **예시를 검증 소유권으로 표시 금지.**
+- 명시적 동의·검증 조각만 비공개 공유, 7일 만료·활성 링크 5개·192비트 토큰 지문·발행 증빙·철회·no-store/noindex·Android 동등성·WCAG 명세. P0 ENV1424-01 FIN1424-02 SEC1424-03 REL1424-04; P1 COL1424-05 COL1424-06 COL1424-07 COL1424-08 COL1424-09 COL1424-10. [영문 통합](INTEGRATED_PLANNING_MASTER.md) / [국문](INTEGRATED_PLANNING_MASTER.ko.md); [전달 이슈 #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739).
+- 디스크 98%, 독립 백업 복원 UNKNOWN, 18,000 WLD 원장 차이, 앱 계정 DML 235개 테이블, 마이그레이션 체크섬 5개 불일치/미적용 20개, 공식 Test 정확 SHA·전체 운영승격 BLOCKED. 외부 근거 신규 승인 0, 누적 UNKNOWN/10,000. 문서만 변경.
+
+
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
 
 - [GSC 실제 검색성과·색인 증거 센터 상세기획](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 정식 상세기획으로 채택. 기존 /admin/seo·v685 재사용, GSC 날짜/상위 10개·무행0·크롤러 색인 오인·레거시 제출 성공/Google Indexing API 안내 오류 기록, 기술·제출·Google 색인본·검색 노출 실제 증거 분리, 구글/WCAG 16개 자료·D0~D7. 실제 SEO/GSC 운영 검증이나 코드 배포 아님.
