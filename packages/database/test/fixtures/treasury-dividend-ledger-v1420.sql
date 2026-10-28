@@ -61,6 +61,20 @@ BEGIN
     '1000','isolated audited citizen dividend');
  EXCEPTION WHEN SQLSTATE '55000' THEN rejected:=true; END;
  IF NOT rejected THEN RAISE EXCEPTION 'legacy payout bypass enabled'; END IF;
+ rejected:=false;
+ BEGIN
+  PERFORM public.treasury_disburse_citizen_dividend(current_setting('mv1420.recipient')::uuid,
+    '1000','non-operator cannot issue citizen dividends',pg_catalog.gen_random_uuid());
+ EXCEPTION WHEN SQLSTATE '42501' THEN rejected:=true; END;
+ IF NOT rejected THEN RAISE EXCEPTION 'unauthorized citizen payout executed'; END IF;
+ UPDATE public.account_balances SET available_amount=0
+ WHERE account_id=(SELECT id FROM public.accounts WHERE account_type='TREASURY');
+ rejected:=false;
+ BEGIN
+  PERFORM public.treasury_disburse_citizen_dividend(current_setting('mv1420.actor')::uuid,
+    '1000','zero canonical treasury must not pay',pg_catalog.gen_random_uuid());
+ EXCEPTION WHEN SQLSTATE '55000' THEN rejected:=true; END;
+ IF NOT rejected THEN RAISE EXCEPTION 'unfunded treasury produced money'; END IF;
 END;
 $verify$;
 SELECT 'V1420_TREASURY_DIVIDEND_LEDGER_ATOMIC_PASS' AS verdict;

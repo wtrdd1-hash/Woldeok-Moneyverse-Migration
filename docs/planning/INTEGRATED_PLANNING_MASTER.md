@@ -1,4 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
+
+## v2026.10.28.1421 — Real DB treasury journal acceptance
+- Corrected failing policy FK, applied all forward migrations on isolated PostgreSQL and passed balanced ledger/idempotency/unauthorized/zero-Treasury SQL negatives in ROLLBACK. Production financial provenance and exact-SHA gated. [Evidence](../worklog/2026-10-28-treasury-dividend-release-v1421.md).
 ## v2026.10.28.1420 — Canonical citizen dividend payout (SOURCE CANDIDATE / NOT LIVE)
 - v291 introduces stable UUID request-bound all-or-none canonical double-entry, vault and beneficiary receipts, blocking legacy direct-wallet payout. The actual Treasury ledger account has 0 WLD and cannot fund payouts until provenance is certified; historical 18,000 WLD drift remains under investigation, not reissued or fabricated. No change to general app database grants as directed. [Worklog](../worklog/2026-10-28-treasury-dividend-ledger-v1420.md). Actual isolated PostgreSQL CI, official Test and Production promotion not yet verified.
 

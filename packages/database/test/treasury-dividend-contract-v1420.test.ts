@@ -7,6 +7,8 @@ describe('v1420 treasury payout schema contract', () => {
     const source = sql();
     expect(source).toContain('p_request_key uuid');
     expect(source).toContain('public.economy_post_transaction(');
+    expect(source).toContain("p_request_key,'TREASURY_CITIZEN_DIVIDEND',p_actor,NULL,");
+    expect(source).not.toContain("'treasury.v1420'");
     expect(source).toContain('ledger_transaction_id');
     expect(source).toContain('request_key');
     expect(source).toContain('beneficiary_account_ids');

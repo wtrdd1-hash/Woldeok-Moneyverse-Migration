@@ -1,4 +1,7 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
+
+## v2026.10.28.1421 — Treasury dividend isolated SQL acceptance
+- [Korean record](docs/worklog/2026-10-28-treasury-dividend-release-v1421.ko.md) · [English record](docs/worklog/2026-10-28-treasury-dividend-release-v1421.md) · [Internal update](docs/updates/v2026.10.28.1421-internal.ko.md) · [GitHub update](docs/updates/v2026.10.28.1421-github.md).
 ## v2026.10.28.1420 — Treasury dividend canonical ledger candidate
 - [EN worklog](docs/worklog/2026-10-28-treasury-dividend-ledger-v1420.md) · [KO worklog](docs/worklog/2026-10-28-treasury-dividend-ledger-v1420.ko.md). Immutable migration291, backend and frontend retry-stable payout identity, CI-only disposable SQL acceptance, no Production data changes.
 

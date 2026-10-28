@@ -87,7 +87,7 @@ BEGIN
  -- Exactly one canonical balanced posting, cash balance mutation, and outbox.
  -- Remaining audit writes occur in the same PostgreSQL transaction.
  SELECT public.economy_post_transaction(
-  p_request_key,'TREASURY_CITIZEN_DIVIDEND',p_actor,'treasury.v1420',
+  p_request_key,'TREASURY_CITIZEN_DIVIDEND',p_actor,NULL,
   v_postings,'treasury.citizen_dividend.settled',
   pg_catalog.jsonb_build_object('citizenCount',v_count,'amountWld',v_total::text,
    'sourceVault','VAULT_MAIN','beneficiaryAccountIds',v_recipients)

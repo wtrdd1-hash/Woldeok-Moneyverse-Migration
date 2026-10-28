@@ -1,4 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
+
+## v2026.10.28.1421 — 배당 운영승격 SQL FK 오류 해결 / 게이트 진행
+- 원장 정책 FK에 없는 treasury.v1420 사용 문제를 NULL 정책으로 교정, 격리 PostgreSQL 17.11 마이그레이션 290개+실제 배당/원장/권한 음성테스트 ROLLBACK PASS. 운영 배당 18,000 WLD 원장 대사, TREASURY 현금 재원, 공식 Test 정확SHA/운영 금융 release gate는 별개. [기록](../worklog/2026-10-28-treasury-dividend-release-v1421.ko.md).
 ## v2026.10.28.1420 — 국고배당 복식원장 전환 개발 (운영 미적용)
 - 기존 240 배당 함수의 18명×1,000 WLD 실지급/복식분개 누락 재발 방지: 새 마이그레이션 291로 원자분개, UUID 멱등, 감사영수증, 금고/정식 국고 원장 잔고 확인. 기존 지급 재실행이나 근거 없는 원장 조정 금지. DB 역할 권한은 현 사용자 지시에 따라 이번 범위에서 변경하지 않음. [기록](../worklog/2026-10-28-treasury-dividend-ledger-v1420.ko.md). GitHub CI 격리 E2E/운영 적용은 미완료.
 
