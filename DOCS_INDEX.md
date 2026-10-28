@@ -370,3 +370,6 @@ Debian 13 가상화 인프라, 백업/복구, 반응형 디자인 시스템 및 
 - [Worklog / 작업 기록](docs/worklog/2026-10-14-service-ui-audit-v624.ko.md) · [Internal update](docs/updates/v2026.10.14.624-internal.ko.md) · [GitHub update](docs/updates/v2026.10.14.624-github.ko.md)
 
 Read-only findings; not a full browser acceptance, Test deployment, or Production release.
+
+## v2026.10.28.1413 — Verified blog QA candidate
+- [KO worklog](docs/worklog/2026-10-28-blog-publication-qa-v1413.ko.md), [EN worklog](docs/worklog/2026-10-28-blog-publication-qa-v1413.md), [GitHub](docs/updates/v2026.10.28.1413-blog-release-qa-github.md): read-only QA; not deployed.
