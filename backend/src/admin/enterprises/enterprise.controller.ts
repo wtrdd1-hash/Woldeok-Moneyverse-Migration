@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ServiceUnavailableException,
   Body,
   Controller,
   Get,
@@ -62,7 +63,10 @@ export class AdminEnterpriseController {
   }
 
   @Post('soes/harvest')
-  @ApiResponse({ status: 503, description: 'SOE_DIVIDEND_LEDGER_UNAVAILABLE: atomic dividend settlement not certified' })
+  @ApiResponse({
+    status: 503,
+    description: 'SOE_DIVIDEND_LEDGER_UNAVAILABLE: atomic dividend settlement not certified',
+  })
   @ApiOperation({ summary: '3대 국가 기간 공기업 법정 배당금 국고 즉시 수취 집행' })
   async harvestSoeDividends(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
@@ -76,11 +80,15 @@ export class AdminEnterpriseController {
     @Body('status') status: string,
     @Body('dividendRateBps') dividendRateBps?: number,
   ) {
-    return {
-      success: await this.service.updateSoeStatus(code, status, dividendRateBps),
-      code,
-      status,
-    };
+    // The legacy repository performs direct app-role table DML and does not
+    // provide an auditable DB-owned receipt. No HTTP caller may execute it.
+    void code;
+    void status;
+    void dividendRateBps;
+    throw new ServiceUnavailableException({
+      code: 'SOE_STATUS_MUTATION_UNVERIFIED',
+      message: 'SOE status updates are suspended pending least-privilege receipt verification',
+    });
   }
 }
 
