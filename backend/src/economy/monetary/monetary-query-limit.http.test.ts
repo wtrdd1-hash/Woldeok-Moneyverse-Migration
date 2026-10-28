@@ -39,7 +39,7 @@ describe('admin monetary listing limits HTTP boundary', () => {
   let isAdmin = true;
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [MonetaryController],
       providers: [
         { provide: CentralBankService, useValue: { listPolicyOrders: methods.listPolicyOrders } },
@@ -55,7 +55,7 @@ describe('admin monetary listing limits HTTP boundary', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => isAdmin })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
 
