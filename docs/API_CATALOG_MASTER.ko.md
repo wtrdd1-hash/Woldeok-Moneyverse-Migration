@@ -192,15 +192,15 @@
 ## 도메인 06: 가상 파생상품 & 10x 레버리지 선물 (Derivatives & Futures)
 
 ### 1. `GET /api/v1/stocks/derivatives/markets`
-- **요약**: 가상 선물 시장 종목(삼성전자 10x, NAVER 5x, 월덕100 10x) 및 8시간 펀딩비 조회
+- **현재 계약**: 검증된 시세 공급원이 없으므로 HTTP 503 `DERIVATIVES_DATA_UNVERIFIED`. 웹의 선물 화면은 실제 거래소가 아닌 명시적 시뮬레이션입니다.
 - **권한**: Authenticated User
 
 ### 2. `GET /api/v1/stocks/derivatives/positions`
-- **요약**: 내 활성 롱/숏 레버리지 선물 포지션 목록 및 실시간 미실현 손익(PnL) 조회
+- **현재 계약**: 회원별 정식 파생상품 원장이 없으므로 HTTP 503 `DERIVATIVES_DATA_UNVERIFIED`. 예시 증거금·손익을 실제 회원 데이터로 반환하지 않습니다.
 - **권한**: Authenticated User
 
 ### 3. `POST /api/v1/stocks/derivatives/open`
-- **요약**: 레버리지 선물 포지션 진입 (증거금 잠금)
+- **현재 계약**: HTTP 503 (원장 정산 미구현, 증거금 잠금 없음)
 - **요청 본문 (JSON)**:
   ```json
   {
@@ -213,7 +213,12 @@
   ```
 
 ### 4. `POST /api/v1/stocks/derivatives/:id/close`
-- **요약**: 시장가 포지션 청산 및 손익/증거금 즉시 정산
+- **현재 계약**: HTTP 503 (원장 정산 미구현, 지급 없음)
+
+---
+
+### 5. `GET /api/v1/stocks/derivatives/history`
+- **현재 계약**: 검증된 회원별 정산 이력이 없으므로 HTTP 503 `DERIVATIVES_DATA_UNVERIFIED`.
 
 ---
 
