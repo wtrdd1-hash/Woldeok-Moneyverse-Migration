@@ -760,3 +760,31 @@ flowchart TD
   - 운영 OS 디스크 (`/dev/sdb1`): 99GB 중 48GB 사용, **여유 47GB (사용률 52%)** -> `/` 마운트.
   - 데이터 전용 디스크 (`/dev/sda1`): 197GB 중 149GB 사용, **여유 39GB (사용률 80%)** -> `/srv/moneyverse-data` 마운트.
   - 총 **86GB 가용 공간** 확보 상태 유지.
+
+
+---
+
+## 🔍 [v256 Specification] 312건 문서 및 운영 인프라 전수 분석 기반 7대 반복 장애 규명 및 Nginx 포트 드리프트("유령 배포") 실체 적발
+- **적용 일시**: 2026-10-28 09:15 KST
+- **요청 사항**: 모든 문서 보면서 계속 발생하는 문제는 무엇인가 인지 분석하고 문서로 남기고 모든 개발 기록과 문서 종합 분석
+
+### 1. 긴급 적발: "유령 배포(Phantom Deploy)"의 구조적 실체
+- **현상**: 최신 git 커밋(`main`)을 빌드하고 배포해도 실제 웹사이트(`easy-scraping.com`)에는 반영되지 않던 고질적 문제의 원인을 서버 Nginx 및 systemd 전수 실측으로 규명:
+  - **운영 Nginx 프론트엔드 라우팅**: 포트 `3388` (`moneyverse-release-v1402-admin-css-frontend`, `/srv/moneyverse-data/releases/repair-v1401-admin-css-candidate`) -> 새벽 CSS 핫픽스 임시 디렉터리에 고정.
+  - **운영 Nginx 백엔드 라우팅**: 포트 `3343` (`moneyverse-release-v1083-backend`, `/srv/moneyverse-data/releases/prod-v2026.10.21.1083-6a989b5ac0c6`) -> 6일 전 고정 릴리즈에 고정.
+  - **결과**: 정식 프로덕션 디렉터리(`/srv/moneyverse-data/releases/prod-v2026.10.22.toss-redesign`, 백엔드 3000 / 프론트엔드 3354)에서 최신 빌드를 완료해도 Nginx가 트래픽을 임시 포트로 보내고 있어 최신 기능(7,000자 블로그, SSRF 패치 등)이 격리된 채 사용자에게 닿지 않았음.
+
+### 2. 최근 5일간 312건 문서 전수 키워드 및 패턴 분석
+- **HOLD 292회 / 131개 파일**: 사소한 봇 취약점이나 블로그 린트 에러로 인해 전체 CI가 `fail-closed`되어 정상 PR들이 모조리 동결됨.
+- **typecheck 167회 / 126개 파일**: 엄격 TypeScript 모드(`exactOptionalPropertyTypes`) 하에서 콜백 타입 불일치로 빌드 차단.
+- **503 / 404 75회 / 46개 파일**: Nginx 프록시 포트 불일치 및 SSR 회복성 폴백 결여.
+- **blocker / conflict 70회 / 59개 파일**: BFF 프록시(`route.ts`) 동시 수정 병목 및 마이그레이션 번호 충돌.
+- **collision 13회 / 11개 파일**: 283번, 286번 마이그레이션 번호 중복 생성.
+- **withdraw 13회 / 6개 파일**: 1,000자 내외 짧은 템플릿 글과 합성 조회수로 인한 198건 전수 비공개 철회 사태.
+
+### 3. 영구 보존 종합 분석 문서 작성
+- **문서 경로**: `docs/analysis/RECURRING_SYSTEMIC_ISSUES_AND_ROOT_CAUSE_ANALYSIS.ko.md`
+- **핵심 수록 내용**:
+  1. 7대 고질적 반복 장애(Anti-Patterns)의 기술적 메커니즘과 근본 원인.
+  2. 구조적 악순환 다이어그램(Mermaid).
+  3. 4단계 시스템 정상화 실행 로드맵 (Nginx 라우팅 단일화, 워크스페이스 GC 크론, 도메인 격리 CI, 마이그레이션 예약 프로토콜).
