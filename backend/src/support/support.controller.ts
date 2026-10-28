@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Get, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
+  BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
   Put, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -35,8 +35,16 @@ export class SupportController {
   constructor(@Inject(SupportRepository) private readonly support: SupportRepository | null) {}
   private repo() { if (!this.support) throw new ServiceUnavailableException('support is unavailable'); return this.support; }
 
-  @Get('threads') @ApiOperation({ summary: 'My administrator support conversations' })
-  async threads(@Req() req: RequestWithSession) { return { threads: await this.repo().myThreads(requireUserId(req)) }; }
+  @Get('threads') @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'My recent administrator support conversations (optional recent-100 subject search)' })
+  async threads(@Req() req: RequestWithSession, @Query('q') q?: string) {
+    if (q !== undefined && typeof q !== 'string') throw new BadRequestException('invalid support search');
+    const search = q?.trim();
+    if (search && (search.length > 80 || /[\x00-\x1f\x7f]/.test(search))) {
+      throw new BadRequestException('support search must be 1-80 printable characters');
+    }
+    return { threads: await this.repo().myThreads(requireUserId(req), 50, search || undefined) };
+  }
 
   @Post('threads') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Open an administrator support conversation' })
   async create(@Req() req: RequestWithSession, @Body() body: NewThreadDto) {
