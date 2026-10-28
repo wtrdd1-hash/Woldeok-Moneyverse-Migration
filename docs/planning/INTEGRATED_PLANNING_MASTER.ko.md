@@ -1,3 +1,35 @@
+## v1406 / F675-157 — 문의 미읽음·읽음 영수증 정합성 및 기존 기획 통합 (기능 보완 / 초안 / 운영 보류) — #1669
+
+**회차·근거.** 이전 **Feature Addition v1404** → 현재 **Feature Improvement v1406** → 다음 **Feature Addition v1408**(잠정). 2026-10-28 11:09~11:13 KST 시작·중간 origin/main `a28bed9aa40ff74d492824ae12892a7d52132fdd` 동일. `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md` 및 한국어 대조 확인. 이번 문서는 미병합 기획 Draft #1670 위에 쌓이며 개발 C Draft #1671의 **관리자 답변 쓰기 영수증**과 **회원 읽음 영수증**은 다른 작업이다. QA v1338 자료·공개 버전 확인 결과 운영 `unknown`, Test `6f697e74b7bf0cd1e4521d36534cfd9c140f8010`; 공식 정확 SHA Test·독립 복원 미검증. 데이터 볼륨 사용률 85%, 프로세스 ACTIVE는 운영 릴리스 증거가 아님.
+
+**중복 기획 통합.** 기존 F675-136(이슈 #1415)은 회원 읽음 커서와 화면에 실제 반환된 메시지의 서버 서명 증명을 이미 제안했다. F675-149(이슈 #1562)는 별도 **알림 피드 Outbox** 설계다. F675-157은 F675-136을 통합한 **단일 문의 읽음 MVP**로 정의하고 서명된 표시 범위 증명을 재사용한다. F675-149 알림 피드/워커는 후속 범위로 분리하며 화면의 6개 예시 알림을 실제 알림으로 오인하지 않는다. 중복 읽음 테이블·이벤트 카운터·워커 생성 금지.
+
+**실제 코드 위험.** Migration 196의 `support_thread_messages`는 `created_at,id ASC LIMIT 200`으로 **최신이 아닌 가장 오래된 200개**를 반환한다. `support_my_threads`도 50개 제한이다. `support_add_message`, `admin_support_reply`는 스레드 행 잠금 전에 메시지를 INSERT하고 이후 UPDATE한다. 생성시각 또는 처음 200개 메시지 기준 읽음은 새 답변을 숨길 수 있다. 전역 고유 `support_messages.idempotency_key`의 동시 INSERT 충돌 시 원본과 actor/thread/body 동일성 재검증이 필요하다. 이는 소스에서 확인한 잠재 위험이며 실제 장애 확인이 아니다. 적용된 196번 마이그레이션은 수정하지 않는다.
+
+**회원 흐름·화면·상태.** `/support` 및 문의 전용 플로팅 위젯에서 기준선 이후 실제 커밋된 관리자 답변 중 확인된 읽음 커서보다 큰 답변 수만 표시. CTA는 `새 답변 보기`, `이 답변까지 읽음`, `다시 시도`, `이전 메시지 불러오기`. 목록 50개에 한정된 합계는 **표시 중인 대화**로 명시하고, **전체** 미읽음 배지는 회원 소유 모든 스레드를 집계하는 별도 인덱스 조회 API로 산출한다. `waiting_user`는 미읽음 증거가 아니다. `UNTRACKED_LEGACY/UNREAD/READ_CONFIRMED/READING/STALE/OFFLINE/ERROR/REAUTH/CLOSED/ACCOUNT_CHANGED` 상태를 분리하고 GET·SSR·프리패치·스크롤·포커스·폴링으로 읽음 변경 금지. 실패·지연 응답은 확인된 0건으로 표시 금지. 한국어/영어, WCAG 2.2 AA, 키보드, 44px 터치, 320px 모바일, 확정 영수증에만 aria-live 적용.
+
+**DB·마이그레이션·동시성.** 스레드별 단조 증가 `support_messages.thread_seq BIGINT`, `support_threads.next_message_seq`, `UNIQUE(thread_id,thread_seq)`, 양수 검사, `(thread_id,sender_kind,thread_seq DESC)` 인덱스, 회원+스레드 읽음 상태 및 불변 영수증 키/요청 지문. 기능 OFF에서 **확장→과거 데이터 순차 백필→검증→제약 확정**: nullable 순번 추가, 모든 쓰기 경로의 스레드 행 잠금 선적용, `created_at,id` 기반 과거 순서에 `LEGACY_ORDER_APPROXIMATION` 표시, NULL/중복 검사 후 NOT NULL·고유 제약 확정. 10,001건 격리 데이터로 배치/잠금 시간을 검증하고 CONCURRENTLY 인덱스는 트랜잭션 밖에서 생성. 구버전 쓰기가 순번 없이 계속되는 동안 기준선 생성·기능 활성화 금지. 신규 스레드의 첫 메시지도 같은 트랜잭션에서 순번 배정. 회원/관리자 답변 모두 **INSERT 전에 `support_threads FOR UPDATE`**; 읽음 처리도 같은 잠금으로 직렬화. 읽음 잠금 뒤 커밋된 관리자 답변은 미읽음 유지. 과거 기준선은 **추적 대상 제외**이지 실제 읽었다는 주장이 아니다. 계정 삭제·FK·보존 정책 준수, 롤백 시 과거 데이터 파괴 금지.
+
+**표시 증명·멱등성.** `GET /api/v1/support/threads/:id/messages?beforeSeq=&limit=1..100`는 SQL에서 최신 `thread_seq DESC` 키셋 페이지를 조회한 후 UI에는 시간순 정렬, `nextBeforeSeq`·`highestDisplayedAdminSeq`·단기 서버 서명 표시 증명을 반환한다. 증명은 actor/session/thread/최대 표시 관리자 seq/만료에 결속되지만 **실제 사람이 읽었다는 증거는 아니다**. `POST /api/v1/support/threads/:id/read`는 `{throughMessageId,idempotencyKey,displayProof}`와 Session/Authenticated/Consent/CSRF·본인 소유·동일 세션을 요구한다. 표시 범위를 넘는 대상, 타인/회원 메시지, 만료/위조 증명, 키와 actor/thread/target/지문 불일치 거절. 동일 잠금 트랜잭션에서 커서 단조 증가+불변 영수증 기록, 정확 재시도 시 원본 영수증 반환. 유니크 충돌도 원본 재조회·전체 지문 비교 후 처리. 응답에는 과거 `receiptReadThroughSeq`와 최신 `currentReadThroughSeq/currentUnreadAdminCount/currentStateVersion`을 구분해 오래된 재시도가 최신 읽음 상태를 덮지 못하게 한다. 메시지 본문·서명 증명은 로그/URL/분석/푸시/SEO에 기록 금지.
+
+**API·보안·관리자.** 기존 `GET /api/v1/support/threads`에 호환 필드 추가, 전체 배지용 `GET /api/v1/support/unread-summary` 별도 제공, 기존 메시지 배열을 조용히 바꾸지 말고 페이지 버전 구분. 모든 성공·오류 응답 private no-store/noindex, `401/403/404/409/429/503` 계약, 회원/IP 호출 제한. NestJS actor는 인증 세션에서만 추출하고 DB SECURITY DEFINER는 본인 소유·고정 search_path·PUBLIC EXECUTE 금지. DB의 `p_actor` 인자 자체는 인증 증명이 아니므로 앱 역할의 support_threads UPDATE·support_messages DELETE 과다 권한을 P0로 회수하고 위조 부정 테스트. Android app-api도 인증/CSRF/오류/영수증 동등성 및 로그아웃·계정 전환 응답 격리. 관리자 `/admin/support`는 강화 세션, 집계 지표만 조회, 회원 대신 읽음 처리 금지. KPI는 배지 정확도·답변 발견→확인 시간·실패율·p95이며 실측 전 목표 수치 확정 금지.
+
+**P0/P1 실행 백로그.**
+- **P0 ENV1406-01:** Nginx→프로세스→manifest SHA, 데이터 볼륨 85%, 암호화 백업 독립 복원·롤백.
+- **P0 SEC1406-02:** 문의 테이블 앱 직접 UPDATE/DELETE·PUBLIC 함수 권한 회수, 위조 actor/SQL 주입 부정 테스트; 별도 블로그 QA #1661 분리.
+- **P0 REL1406-03:** #1663 닫힌 고유 PR 보존, 실제 정확 SHA Test/DB/인증 금융 E2E·GitOps 승격, 빌드 성공만으로 병합 금지.
+- **P0 SUP1406-04:** 오래된 200개 조회·50개 목록 누락·답변/읽음 경합·재시도·계정 변경·허위 0건 차단.
+- **P1 SUP1406-05:** 단계적 순번 마이그레이션·제약·인덱스·기준선·계정 삭제 FK.
+- **P1 SUP1406-06:** 모든 쓰기 INSERT 전 행 잠금, 원자적 읽음 커서·요청 지문 불변 영수증.
+- **P1 SUP1406-07:** NestJS/Next/Android API, 서명 표시 증명, 전체 미읽음 집계, no-store/오류 계약.
+- **P1 SUP1406-08:** 문의/위젯 UI·페이지·CTA·다국어·접근성·지연 응답 격리.
+- **P1 SUP1406-09:** 관리자 집계·개인정보/보존/SEO·실측 KPI.
+- **P1 SUP1406-10:** 격리 PG 10,001메시지/100스레드/100동시성·100위조·중복 키·롤백·원장 불변 회귀.
+
+**수용/승격 조건.** 201번째 최신 답변 표시, 51번째 스레드 전체 배지 포함, 읽음 중 관리자 답변 경합, 동일 키 100요청→영수증 1건, 다른 본문/대상 동일 키 100건 거부, 구/신 쓰기 혼재 차단, 증명 만료·세션 변경 거부, 비소유자 404, DB 오류 503에서 0건 표시 금지, 기존 API 호환 확인. **테스트는 명세만 작성, 미실행.** 기능 기본 OFF, 별도 개발 브랜치 RED/GREEN 격리 PG→정확 HEAD CI→공식 Test 인증 검증→독립 복원→승인 GitOps 운영 승격. 이번 기획은 런타임/DB/WLD/원장/Test/운영 미변경. 외부 독립 검증·중복제거·근거 분류 신규 승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**.
+
+**백로그 ID:** `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04 SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10`.
+
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v1404 / F675-157 — 관리자 문의 새 답변 확인 및 명시적 읽음 영수증 (기능 추가 / 기획 초안 / 배포 보류) — #1669
