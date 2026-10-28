@@ -24,9 +24,9 @@
 - Preview wallet must not be labeled as a real-time ledger.
 
 ## Task 1 — RED evidence
-- [ ] Add failing Backend controller and HTTP tests for unverified venture reads.
-- [ ] Add failing frontend test for live-ledger claim.
-- [ ] Run both RED suites and record expected failures.
+- [x] Add failing real HTTP tests for unverified venture reads.
+- [x] Add failing frontend test for live-ledger claim.
+- [x] Run both RED suites and record expected failures.
 
 ## Task 2 — GREEN implementation
 - [ ] Replace fabricated backend venture GET payloads with 503 evidence boundary.

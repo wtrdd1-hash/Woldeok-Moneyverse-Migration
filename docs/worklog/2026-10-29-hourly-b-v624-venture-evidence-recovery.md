@@ -9,7 +9,7 @@
 - No current open venture PR; existing write endpoints already return 503. No financial settlement or owner-scoped venture persistence exists.
 
 ## In progress
-- [ ] RED tests and root-cause reproduction.
+- [x] RED: two real NestJS HTTP requests returned 200 instead of required 503; frontend badge still called hardcoded WLD a live ledger. Evidence: `v624-logs/red-backend.log`, `red-frontend.log`.
 - [ ] GREEN code and contract tests.
 - [ ] Full gates, CI, final main sync, and release hold.
 
