@@ -5,7 +5,7 @@
 - **Planned design** — F675-163 member-only saved calendar events; no scheduled push/email, auto-enrolment, WLD, purchase, or reward. Owner-scoped typed source IDs, atomic watch/unwatch, verified live schedule and unavailable redaction, cap, idempotency, mobile parity, admin aggregates, noindex/no-store, accessible states, real PostgreSQL regression, exact-SHA Test/rollback.
 - **P0** — disk/backup/restore; 18,000 WLD historical ledger mismatch; DB ownership/privileges and stale-event visibility; exact-SHA Test/release gate. **P1** — schema/read model, concurrency/receipt, API, UI/a11y, admin/privacy/KPI, regression/rollback.
 - **MID 22:13 KST** — main unchanged, QA v1349 FAILED and v1350 ongoing, data disk 98%, 67 open PRs. Drafted EN/KO integrated design from actual season/shop SQL and UI. Created development issue #1748 and Draft PR #1749.
-- **END** — pending verification, commit, remote SHA, Draft PR and issue links.
+- **END 22:17 KST** — EN/KO parity 7/7, P0/P1 IDs 10/10, 14/14 changed paths documentation-only, git diff --check PASS; node classify-release tests 17 PASS / 0 FAIL. Draft PR #1749 OPEN and issue #1748 OPEN. GitHub CI for midpoint commit: classify/policy/release-input/verify-classify PASS, runtime SKIPPED, verify/policy PENDING; final commit CI must be checked independently. Main unchanged at latest recheck. QA v1349 FAILED; v1350 ongoing. Test exact-SHA, independent restore and Production remain BLOCKED. No runtime/DB/ledger/WLD/Test/Production changes.
 
 **External evidence gate:** 10,000 independent deduplicated, evidence-classified records required. Newly accepted 0; cumulative verified UNKNOWN/10,000; BLOCKED / IN PROGRESS. Do not equate publisher families or references reviewed with accepted records.
 
