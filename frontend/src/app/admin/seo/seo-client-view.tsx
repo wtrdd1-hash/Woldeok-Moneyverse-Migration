@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { parseIndexNowSubmissionReceipt } from './seo-submit-evidence';
 import {
   Globe,
   Activity,
@@ -184,14 +185,17 @@ export function SeoClientView({ initialData, initialNowMs }: SeoClientViewProps)
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       });
-      const result = await res.json();
-      if (res.ok && result.success) {
+      const result: unknown = await res.json();
+      const receipt = res.ok ? parseIndexNowSubmissionReceipt(result) : null;
+      if (receipt?.success && receipt.acceptedEndpoints > 0) {
         setSubmitResult(
-          `URL 변경 알림 접수: ${result.indexNowResponses?.filter((item: { status: number }) => item.status === 200 || item.status === 202).length ?? 0}/${result.indexNowResponses?.length ?? 0}개 검색엔진 엔드포인트. 실제 검색 색인은 보장되지 않습니다.`,
+          `URL 변경 알림 접수: ${receipt.acceptedEndpoints}/${receipt.totalEndpoints}개 검색엔진 엔드포인트. 실제 검색 색인은 보장되지 않습니다.`,
         );
         refreshData();
+      } else if (res.ok && !receipt) {
+        setSubmitResult('제출 응답을 검증하지 못했습니다. 중복 제출 전에 관리자 기록을 확인해 주세요.');
       } else {
-        setSubmitResult(result.message || 'IndexNow URL 변경 알림이 접수되지 않았습니다. 검색엔진 응답 상태를 확인해 주세요.');
+        setSubmitResult('IndexNow URL 변경 알림이 접수되지 않았습니다. 검색엔진 응답 상태를 확인해 주세요.');
       }
     } catch {
       setSubmitResult('IndexNow URL 변경 통보 중 통신 오류가 발생했습니다.');
