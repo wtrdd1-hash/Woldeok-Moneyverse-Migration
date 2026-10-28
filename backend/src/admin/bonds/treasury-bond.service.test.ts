@@ -95,13 +95,13 @@ describe('TreasuryBondService Unit Tests', () => {
     );
   });
 
-  it('국채 담보 80% LTV 레포 대출 신청 및 상환을 성공적으로 처리한다', async () => {
-    const loanRes = await service.createRepoLoan('test-user-id', 'holding-1');
-    expect(loanRes.loanId).toBe('repo-loan-1');
-    expect(loanRes.loanAmountWld).toBe('40000');
-
-    const repayRes = await service.repayRepoLoan('test-user-id', 'repo-loan-1');
-    expect(repayRes.repaidAmountWld).toBe('40050');
+  it('holds repo borrowing and repayment before unjournaled balance mutations', async () => {
+    vi.mocked(mockRepo.createRepoLoan).mockClear();
+    vi.mocked(mockRepo.repayRepoLoan).mockClear();
+    await expect(service.createRepoLoan('test-user-id', 'holding-1')).rejects.toMatchObject({ status: 503 });
+    await expect(service.repayRepoLoan('test-user-id', 'repo-loan-1')).rejects.toMatchObject({ status: 503 });
+    expect(mockRepo.createRepoLoan).not.toHaveBeenCalled();
+    expect(mockRepo.repayRepoLoan).not.toHaveBeenCalled();
   });
 
   it('만기 시 자동 롤오버 재투자 설정을 정상적으로 토글한다', async () => {

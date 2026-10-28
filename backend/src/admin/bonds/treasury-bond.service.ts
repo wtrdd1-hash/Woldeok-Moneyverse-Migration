@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import {
   TreasuryBondRepository,
   type BondCouponLogRow,
@@ -7,6 +7,7 @@ import {
   type TreasuryBondsOverview,
 } from './treasury-bond.repository';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
+import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
 
 @Injectable()
 export class TreasuryBondService {
@@ -109,14 +110,14 @@ export class TreasuryBondService {
     return this.repository.listUserRepoLoans(userId);
   }
 
-  async createRepoLoan(userId: string, holdingId: string) {
-    this.logger.log(`User ${userId} taking repo loan against bond holding ${holdingId}`);
-    return this.repository.createRepoLoan(userId, holdingId);
+  async createRepoLoan(_userId: string, _holdingId: string): Promise<never> {
+    // Internal callers must not bypass the HTTP hold and mint unposted WLD.
+    throw new ServiceUnavailableException(BOND_REPO_LOAN_HOLD_REASON);
   }
 
-  async repayRepoLoan(userId: string, loanId: string) {
-    this.logger.log(`User ${userId} repaying repo loan ${loanId}`);
-    return this.repository.repayRepoLoan(userId, loanId);
+  async repayRepoLoan(_userId: string, _loanId: string): Promise<never> {
+    // Repayment must be atomic with the principal debit and collateral release.
+    throw new ServiceUnavailableException(BOND_REPO_LOAN_HOLD_REASON);
   }
 
   async toggleAutoRollover(userId: string, holdingId: string, enabled: boolean) {

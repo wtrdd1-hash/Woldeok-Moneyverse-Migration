@@ -1,6 +1,7 @@
-import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
+import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
 
 export interface TreasuryBondRow {
   id: string;
@@ -382,146 +383,20 @@ export class TreasuryBondRepository {
     }
   }
 
-  /**
-   * 국채 담보 저리 대출 (Repo Loan) 신청
-   * 국채 원금의 80% LTV 한도로 긴급 현금 대출 집행
-   */
   async createRepoLoan(
-    userId: string,
-    holdingId: string,
-  ): Promise<{
-    loanId: string;
-    loanAmountWld: string;
-  }> {
-    const client: PoolClient = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
-
-      const holdingRes = await client.query<{
-        id: string;
-        user_id: string;
-        units: string;
-        par_value_wld: string;
-        purchase_price_total_wld: string;
-        collateral_locked: boolean;
-        status: string;
-      }>(`
-        SELECT h.*, b.par_value_wld::text
-        FROM public.treasury_bond_holdings h
-        JOIN public.treasury_bonds b ON b.id = h.bond_id
-        WHERE h.id = $1 AND h.user_id = $2 FOR UPDATE
-      `, [holdingId, userId]);
-
-      const holding = holdingRes.rows[0];
-      if (!holding) throw new Error('해당 국채 보유 원장을 찾을 수 없습니다.');
-      if (holding.status !== 'HOLDING') throw new Error('만기 또는 매도된 국채는 담보로 제공할 수 없습니다.');
-      if (holding.collateral_locked) throw new Error('이미 대출 담보로 잠겨있는 채권입니다.');
-
-      const principalValue = BigInt(holding.units) * BigInt(holding.par_value_wld);
-      // LTV 80%
-      const loanAmount = (principalValue * BigInt(80)) / BigInt(100);
-
-      // 담보 잠금
-      await client.query(`
-        UPDATE public.treasury_bond_holdings SET collateral_locked = true, updated_at = now() WHERE id = $1
-      `, [holdingId]);
-
-      // 대출 계좌 입금
-      const accountId = await this.ensureUserCashAccount(client, userId);
-      await client.query(`
-        UPDATE public.account_balances
-        SET available_amount = available_amount + $1, updated_at = now()
-        WHERE account_id = $2
-      `, [loanAmount.toString(), accountId]);
-
-      // 레포 대출 계약서 등록
-      const loanRes = await client.query<{ id: string }>(`
-        INSERT INTO public.treasury_bond_repo_loans (
-          holding_id, user_id, principal_wld, annual_interest_rate_bps, hourly_interest_rate_bps, ltv_percent, status
-        ) VALUES (
-          $1, $2, $3, 250, 3, 80, 'ACTIVE'
-        ) RETURNING id
-      `, [holdingId, userId, loanAmount.toString()]);
-
-      await client.query('COMMIT');
-
-      const createdLoan = loanRes.rows[0];
-      if (!createdLoan) throw new Error('레포 대출 계약 생성에 실패했습니다.');
-
-      return {
-        loanId: createdLoan.id,
-        loanAmountWld: loanAmount.toString(),
-      };
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-    } finally {
-      client.release();
-    }
+    _userId: string,
+    _holdingId: string,
+  ): Promise<{ loanId: string; loanAmountWld: string }> {
+    // No direct account_balances credit is permitted without balanced postings.
+    throw new ServiceUnavailableException(BOND_REPO_LOAN_HOLD_REASON);
   }
 
-  /**
-   * 국채 담보 대출 상환
-   */
   async repayRepoLoan(
-    userId: string,
-    loanId: string,
-  ): Promise<{
-    repaidAmountWld: string;
-  }> {
-    const client: PoolClient = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
-
-      const loanRes = await client.query<{
-        id: string;
-        holding_id: string;
-        user_id: string;
-        principal_wld: string;
-        accrued_interest_wld: string;
-        status: string;
-      }>(`
-        SELECT * FROM public.treasury_bond_repo_loans WHERE id = $1 AND user_id = $2 FOR UPDATE
-      `, [loanId, userId]);
-
-      const loan = loanRes.rows[0];
-      if (!loan) throw new Error('대출 계약을 찾을 수 없습니다.');
-      if (loan.status !== 'ACTIVE') throw new Error('이미 상환된 대출입니다.');
-
-      const totalRepay = BigInt(loan.principal_wld) + BigInt(loan.accrued_interest_wld);
-
-      // 계좌 잔액 확인 및 차감
-      const accountId = await this.ensureUserCashAccount(client, userId);
-      const balRes = await client.query<{ available_amount: string }>(`
-        SELECT available_amount::text FROM public.account_balances WHERE account_id = $1 FOR UPDATE
-      `, [accountId]);
-      const currentBal = BigInt(balRes.rows[0]?.available_amount ?? '0');
-      if (currentBal < totalRepay) throw new Error('대출 상환을 위한 계좌 잔액이 부족합니다.');
-
-      await client.query(`
-        UPDATE public.account_balances SET available_amount = available_amount - $1, updated_at = now() WHERE account_id = $2
-      `, [totalRepay.toString(), accountId]);
-
-      // 대출 상태 REPAID 및 담보 잠금 해제
-      await client.query(`
-        UPDATE public.treasury_bond_repo_loans SET status = 'REPAID', updated_at = now() WHERE id = $1
-      `, [loanId]);
-
-      await client.query(`
-        UPDATE public.treasury_bond_holdings SET collateral_locked = false, updated_at = now() WHERE id = $1
-      `, [loan.holding_id]);
-
-      await client.query('COMMIT');
-
-      return {
-        repaidAmountWld: totalRepay.toString(),
-      };
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-    } finally {
-      client.release();
-    }
+    _userId: string,
+    _loanId: string,
+  ): Promise<{ repaidAmountWld: string }> {
+    // Do not debit balances or unlock collateral without a replay-safe receipt.
+    throw new ServiceUnavailableException(BOND_REPO_LOAN_HOLD_REASON);
   }
 
   async toggleAutoRollover(userId: string, holdingId: string, enabled: boolean): Promise<boolean> {

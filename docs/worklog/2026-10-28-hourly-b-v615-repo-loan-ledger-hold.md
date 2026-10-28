@@ -7,11 +7,16 @@
 - [x] Create independent v615 branch/worktree. No live database writes, migrations, branch cleanup or deployment.
 
 ## In progress
-- [ ] TDD RED: HTTP borrow/repay must return 503 before service access; consent/CSRF guard metadata; service and repository reject before any SQL; owner read route remains.
-- [ ] GREEN: remove unsafe repo-loan WLD mutations at controller/service/repository boundaries.
+- [x] TDD RED: HTTP borrow/repay must return 503 before service access; consent/CSRF guard metadata; service and repository reject before any SQL; owner read route remains.
+- [x] GREEN: remove unsafe repo-loan WLD mutations at controller/service/repository boundaries.
 - [ ] Verify focused tests, backend tests, typecheck/lint/build as capacity permits; re-fetch main and planning.
 
 ## Finished
 - [ ] Record exact candidate SHA, tests, PR, CI, official Test SHA and Production HOLD.
 
 **Scope:** source-level fail-closed containment only. No ledger-backed repo-loan implementation or database privilege repair. Existing repo-loan records remain unchanged. Frontend/Android must display unavailable state before a complete user-flow release. Existing automated bond coupon settlement remains a separate P0 risk.
+
+## Midpoint — 2026-10-28 20:46 KST
+- RED: 12 failures / 13 cases in focused HTTP/service/repository test; 503 guards absent, direct SQL reachable.
+- GREEN: 18/18 focused + existing service tests pass; HTTP, service and repository reject both mutations before SQL.
+- Re-fetched origin/main and reread planning. Main remains `35971c600f25869c96f1c666d4b9f58927202730`.
