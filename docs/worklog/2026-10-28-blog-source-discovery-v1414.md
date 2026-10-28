@@ -6,7 +6,7 @@ Owner reported the live administrator page blocked in editorial-review hold and 
 Read `AGENTS.md`, `docs/RELEASING.md`, EN integrated master and KR v1405 policy, v1412 worklog, v1412.1 concurrent PR #1665 and v1413 E2E PR #1662. This isolated branch changes *only* source discovery and its focused regression tests, avoiding active admin/SEO/quality/DB modifications. Requirements: genuine automated online primary-source discovery (prefer official RSS/index pages), strict HTTPS allowlists and path checks, prompt-injection/SSRF/redirect protection, bounded fetch/read/selection and tested fallback; no invented freshness or publication status.
 
 ## Midpoint
-Pending tests, code and integration results.
+New bounded BOK/Federal Reserve official RSS and localized MDN index discovery added. Read-only MiniPC verification: BOK RSS HTTP 200, 220204 bytes; US Fed RSS HTTP 200; MDN JS page 203914 bytes. Focused tests added. Current main f7552b1608cde18676c877792753787fe5709bc7 was rechecked; PR #1666 isolated from #1665/#1662. Exact-head CI is running, and no Test or Production publication is claimed.
 
 ## End
 Pending CI and official Test/Production gates. Production scheduler remains OFF; no claim of public posts.
