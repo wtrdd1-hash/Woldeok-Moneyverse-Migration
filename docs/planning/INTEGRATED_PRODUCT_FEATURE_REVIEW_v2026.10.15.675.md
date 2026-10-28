@@ -1,5 +1,9 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-165 / v1436 — Verified glossary correction feedback (FEATURE ADDITION / HOLD)
+- Source main 35971c600f25869c96f1c666d4b9f58927202730 unchanged start/mid, QA v1353 FAILED/HOLD, disk 98%/4.5GiB, 18,000 WLD drift, 5 checksum mismatches, 20 unapplied migrations, app grants and PUBLIC bank functions. Static glossary has no member correction receipts. Proposed revision-bound member feedback, reviewer audit, separate content PR, no direct public mutation. Issue #1769. Backlog ENV1436-01 FIN1436-02 SEC1436-03 REL1436-04 GLOS1436-05 GLOS1436-06 GLOS1436-07 GLOS1436-08 GLOS1436-09 GLOS1436-10. External new accepted 0, cumulative UNKNOWN/10,000, BLOCKED; docs only.
+
+
 ## F675-06 detailed adoption — v2026.10.15.688
 
 - [Google Search Evidence & Canonical Action Center](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) is the next v675 adopted **detailed planning** feature. Reuses /admin/seo and v685; identifies top-10-only GSC data, missing date=0, GSC PT/freshness, crawler-indexed mislabel and legacy index submission success/Google Indexing API misclaims. Separates source/submission/Google indexed-version/performance into independently verifiable evidence, 16 Google/WCAG references and D0–D7 gated implementation. Not a live SEO audit or deployed feature.

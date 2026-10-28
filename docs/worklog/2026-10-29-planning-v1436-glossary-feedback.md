@@ -1,0 +1,6 @@
+# Planning v1436 — Verified glossary correction feedback
+Date 2026-10-29 KST. Previous Improvement v1434, Current Addition v1436, Next Improvement v1438.
+START: skills__list empty; skills__read BLOCKED; miniPC installed using-superpowers, brainstorming, writing-plans, using-git-worktrees, verification-before-completion read. Debian 13.6, services ACTIVE, DB connected (read-only), disk 98%/4.5GiB. Duplicate board draft #1102 rejected.
+MID: main and canonical EN/KO plans rechecked, glossary source/QA v1353 and A/B/C open PRs reviewed.
+DELIVERABLE: Source main 35971c600f25869c96f1c666d4b9f58927202730 unchanged start/mid, QA v1353 FAILED/HOLD, disk 98%/4.5GiB, 18,000 WLD drift, 5 checksum mismatches, 20 unapplied migrations, app grants and PUBLIC bank functions. Static glossary has no member correction receipts. Proposed revision-bound member feedback, reviewer audit, separate content PR, no direct public mutation. Issue #1769. Backlog ENV1436-01 FIN1436-02 SEC1436-03 REL1436-04 GLOS1436-05 GLOS1436-06 GLOS1436-07 GLOS1436-08 GLOS1436-09 GLOS1436-10. External new accepted 0, cumulative UNKNOWN/10,000, BLOCKED; docs only.
+No real DB acceptance, runtime code, financial, Test, Production or other agents changes. External evidence gate BLOCKED.

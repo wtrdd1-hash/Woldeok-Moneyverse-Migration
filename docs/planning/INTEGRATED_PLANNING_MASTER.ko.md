@@ -1,5 +1,46 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1436 / F675-165 — 금융 용어사전 정정 제안과 검증 영수증 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**주기:** 이전 기능 보완 v1434 → 현재 기능 추가 v1436 → 다음 기능 보완 v1438(잠정). 기준 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 동일, QA v1353 FAILED/HOLD, 개발 이슈 #1769. 실제 구현·배포가 아닌 신규 기획이다.
+
+### 현행 코드와 목적
+frontend/src/app/guide/glossary/[term]/page.tsx는 frontend/src/config/pseo-glossary.config.ts의 용어 목록으로 공개 정적 페이지를 생성한다. generateStaticParams, canonical/DefinedTerm JSON-LD, revalidate=86400을 사용한다. 목록은 frontend/src/app/guide/glossary/page.tsx이고 /admin/help는 별도 관리자 화면이다. 확인한 main에는 용어별 회원 정정 제안·본인 영수증·심사 API가 없다. 최초 게시판 임시글 후보는 기존 이슈 #1102와 중복되어 제외했다. 회원 제안은 사실 오류의 증명, 승인된 정정 또는 WLD 보상이 아니며 공개 문구를 자동 변경하지 않는다.
+
+### 대상·화면·CTA·상태
+인증·동의·활성 회원이 /guide/glossary/[term]에서 정정 제안 CTA를 선택한다. 비회원은 로그인 안내만 본다. 사유 DEFINITION/FORMULA/TRANSLATION/OUTDATED, 설명 유니코드 20~1000자, 선택적 HTTPS 출처 URL 2048자 이내, 제출·취소 버튼을 제공한다. 비공개 /account/glossary-feedback에서 본인 영수증·심사 상태를 보고 PENDING일 때만 철회한다. EDITING→SUBMITTING→PENDING→UNDER_REVIEW→ACCEPTED/REJECTED/CLOSED, PENDING→WITHDRAWN. CONTENT_CHANGED는 원본 개정 불일치, NETWORK_UNKNOWN은 영수증 재조회가 필요한 결과 불명이다. 심사 중 원본이 바뀌면 STALE_REVIEW_REQUIRED로 재검토한다. ACCEPTED는 PUBLISHED가 아니다. 금융 관련 내용 수정은 독립 2인 검토를 거친다.
+
+### 원본 개정과 공개 무결성
+정확한 배포 GLOSSARY_TERMS slug 허용 목록, locale, releaseSha, 공개 필드의 명시적 순서·UTF-8·정규화 JSON에 대한 SHA-256 contentRevision을 결합한다. 릴리스 산출물의 불변 개정 매니페스트와 DB 등록부 일치를 기능 활성화 전에 확인한다. 24시간 ISR 시각을 개정번호로 사용하지 않는다. 오래된 개정 제출은 409와 현재 공개 개정 메타데이터를 반환하고 회원 재확인을 요구한다. 심사 ACCEPTED는 별도 콘텐츠 PR 검토만 촉발하며 공개 문구·canonical·JSON-LD·OG·캐시는 승인된 정확 SHA 배포에서만 바뀐다. 기능 OFF·심사 대기에는 공개 용어사전이 변하지 않는다.
+
+### 제안 API (미구현)
+GET /api/v1/guide/glossary-feedback?limit=20&cursor=opaque: 본인 메타데이터·세션 결합 서명 커서. GET /api/v1/guide/glossary-feedback/:id: 본인 상세. POST /api/v1/guide/glossary-feedback 입력 {termSlug,contentRevision,locale,reason,explanation,sourceUrl?,requestId}, 결과 {feedbackId,receiptId,status,sourceRevision,replayed}. POST /api/v1/guide/glossary-feedback/:id/withdraw 입력 {requestId,expectedVersion}, 불변 철회 영수증. 관리자 GET /api/v1/admin/guide/glossary-feedback, POST /api/v1/admin/guide/glossary-feedback/:id/decision은 심사 권한·사유·expectedVersion·감사 필수. NestJS→Next server-only BFF→Android /app-api/v1/guide/glossary-feedback 계약 동등. 400 형식/URL, 401 비인증, 403 정지/동의/CSRF, 404 타인·부재 동일, 409 원본/CAS/키 본문 불일치, 429 한도, 503 불명. 회원·관리자 응답 private,no-store, 브라우저 세션/동의/CSRF/Origin, Android 별도 인증. INTERNAL_API_TOKEN 노출 금지.
+
+### DB·제약·인덱스·트랜잭션
+순방향 glossary_term_registry(slug PK,active,current_revision,release_sha,updated_at)는 검토된 릴리스 매니페스트로만 갱신한다. glossary_feedback(id UUID PK,user_id FK,term_slug FK,source_revision CHAR(64),locale,reason CHECK,explanation 20..1000 CHECK,source_url,status CHECK,version>0,created_at,updated_at,withdrawn_at). glossary_feedback_receipts(id UUID PK,user_id FK,request_id UUID,operation,normalized_payload_sha256,feedback_id FK,committed_status,committed_version,created_at,UNIQUE(user_id,request_id))는 추가 전용. glossary_feedback_reviews는 심사자·결정·사유·전후 버전·시각·콘텐츠 PR을 불변 기록한다. 인덱스 (user_id,created_at DESC,id DESC), (term_slug,status,created_at DESC,id), (status,created_at,id), (user_id,term_slug,created_at DESC). 앱 계정 테이블 직접 DML·PUBLIC EXECUTE 금지, 최소 EXECUTE SECURITY DEFINER, search_path pg_catalog,pg_temp, 스키마 명시와 세션 신원 검증 필수. 공용 DB 역할의 p_actor 인자는 자체 인증 수단이 아니다.
+
+인증 회원 행을 먼저 잠근 뒤 회원당 활성 제안 최대 10개, 회원·용어당 최근 24시간 3건(철회 포함)을 직렬화 검증한다. 제안과 정규화 본문 해시 영수증을 원자적으로 기록한다. 같은 requestId/같은 본문은 원래 결과 재현, 다른 본문은 409. 철회는 회원→제안 잠금·불변 tombstone, 심사는 제안 잠금·버전 CAS·감사 기록을 같은 트랜잭션에서 수행한다. 심사/철회 경합은 한쪽만 성공한다. 타인 제안 존재 여부를 응답으로 노출하지 않는다. 금융 DB 변경 없음.
+
+### 관리자·보안·SEO·모바일·접근성·KPI
+회원 입력 URL을 서버에서 절대 자동 조회하지 않는다(SSRF·사설망 리다이렉트 방지). HTTPS·호스트·인증정보를 검증하고 안전한 링크만 출력한다. 실행 가능한 HTML/Markdown 금지, 로그·분석에 설명·URL·회원 ID 원문 기록 금지, 계정/IP 속도 제한·CSRF·BOLA·심사 RBAC. 철회 자료 30일, 종결 자료 180일 보존(법적 보존 예외), 개인정보 삭제와 감사 최소화. 관리자 심사는 공개 댓글이 아니고 정적 원본 직접 수정 권한도 아니다. 공개 용어 페이지는 기존 색인·canonical·DefinedTerm 유지, 본인·관리자 페이지 noindex,nofollow 및 사이트맵 제외, 제안은 공개 JSON-LD 제외. WCAG 2.2 AA 키보드/초점 복귀/aria-live, 320px/200% 확대, 모션 감소, Android TalkBack, 로그아웃·계정 변경 시 응답 차단. 오프라인 UNSENT를 SAVED로 표시하지 않는다. KPI는 익명 집계(CTA→확정 영수증, 개정 충돌, 심사 지연, 콘텐츠 PR 반영, 악용·접근성)만 사용한다.
+
+### P0/P1 개발 백로그 — 이슈 #1769
+- P0 ENV1436-01: 02:07 KST 디스크 98%·약 4.5GiB 여유, 암호화 백업 저널은 독립 복원 증거 아님. 외부 복원·보존·안전 공간 확보, 임의 삭제 금지.
+- P0 FIN1436-02: QA v1353 회원 현금 18계정 총 18,000 WLD 원장 차이. 근거 없는 조정·중복 배당 금지.
+- P0 SEC1436-03: 본인/BOLA·심사 권한·SSRF·불변 영수증, 앱 광범위 DML·PUBLIC 은행 함수 3개·체크섬 5건·소스 미적용 20건.
+- P0 REL1436-04: 후보 정확 SHA CI, 격리 실제 PostgreSQL ACL·마이그레이션, 공식 Test 웹·Android·관리자·금융 인증 E2E, 독립 복원, GitOps 승인.
+- P1 GLOS1436-05: 용어 개정 매니페스트·순방향 DB·CHECK/FK/유일 인덱스·불변 영수증/심사 감사.
+- P1 GLOS1436-06: 회원 잠금·한도·본문 해시 멱등성·CAS·원본 개정 경합·불명 결과 복구.
+- P1 GLOS1436-07: NestJS/Next BFF/Android API 동등성·인증/CSRF·오류 변환.
+- P1 GLOS1436-08: 용어 CTA·본인 상태·반응형/접근성·오프라인·계정 분리.
+- P1 GLOS1436-09: 독립 심사·콘텐츠 PR 근거·개인정보·SEO·집계 KPI.
+- P1 GLOS1436-10: 격리 PostgreSQL 합성 10,001건, 생성/재실행/심사·철회 동시 100건, 타인 권한/악성 URL 100건, 24시간 한도, Android·320px/200% 회귀, 기능 OFF 롤백. 시험 명세만 작성, 실행하지 않음.
+
+무중단 배포: 별도 개발 브랜치·test 폴더·격리 DB, 번호 검토한 순방향 마이그레이션, glossary_feedback 기본 OFF, 공식 Test 정확 SHA 인증·금융·보안·독립 복원 게이트, 제한 카나리·모니터링·승인 후 Production. 롤백은 기능 OFF, 영수증·감사 보존, 공개 원본 유지. 파괴적 역마이그레이션 금지. A/B/C/QA/Gemini 작업 불변.
+
+외부 독립 근거 10,000건 게이트: 신규 중복 제거 승인 0, 누적 검증 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 회원 URL·출판사 페이지·합성 시험 10,001건은 승인 근거가 아니다. 이번 회차 런타임/DB/WLD/Test/Production 변경 없음.
+
+
 ## v2026.10.28.1423 — 금융 운영 DB 291 보호 승격 확인 (전체 서버 코드는 기존)
 - 신규 배당 4인자 멱등 복식분개 함수와 구형 무분개 배당 차단을 실제 Production DB에 적용. 신규 암호화 백업 체크섬/운영 스키마 모사시험/운영 app역할 차단/잔액 불변 검증 완료, 서버 다운 없음. PR #1706 코드 main 3c251d93 병합(운영 앱 실행 SHA는 별도). 운영 TREASURY 계정 0 WLD, 과거 18명 18,000 WLD 원장 미대사, 누락 migration269~287, 공식 Test SHA·디스크97%로 **앱 전체 승격은 HOLD**. 권한은 사용자 의사에 따라 변경하지 않음. [국문기록](../worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md).
 

@@ -1,5 +1,9 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## F675-165 / v1436 — 검증 가능한 용어사전 정정 제안 (FEATURE ADDITION / HOLD)
+- main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 동일, QA v1353 FAILED/HOLD, 디스크 98%/4.5GiB, 18,000 WLD 차이, 체크섬 5건/미적용 20건, 앱 권한/PUBLIC 은행 함수 문제. 정적 용어사전에 회원 정정 영수증 없음. 개정 결합 제안·심사 감사·별도 콘텐츠 PR 기획, 공개 자동 수정 금지. 이슈 #1769. 백로그 ENV1436-01 FIN1436-02 SEC1436-03 REL1436-04 GLOS1436-05 GLOS1436-06 GLOS1436-07 GLOS1436-08 GLOS1436-09 GLOS1436-10. 외부 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED, 문서 전용.
+
+
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
 
 - [GSC 실제 검색성과·색인 증거 센터 상세기획](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 정식 상세기획으로 채택. 기존 /admin/seo·v685 재사용, GSC 날짜/상위 10개·무행0·크롤러 색인 오인·레거시 제출 성공/Google Indexing API 안내 오류 기록, 기술·제출·Google 색인본·검색 노출 실제 증거 분리, 구글/WCAG 16개 자료·D0~D7. 실제 SEO/GSC 운영 검증이나 코드 배포 아님.

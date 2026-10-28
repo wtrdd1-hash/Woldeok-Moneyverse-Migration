@@ -1,5 +1,10 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.29.1436 — F675-165 검증 가능한 용어사전 정정 제안 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- Previous Improvement v1434 / Current Addition v1436 / Next Improvement v1438 provisional. main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 동일, QA v1353 FAILED/HOLD, 디스크 98%/4.5GiB, 18,000 WLD 차이, 체크섬 5건/미적용 20건, 앱 권한/PUBLIC 은행 함수 문제. 정적 용어사전에 회원 정정 영수증 없음. 개정 결합 제안·심사 감사·별도 콘텐츠 PR 기획, 공개 자동 수정 금지. 이슈 #1769. 백로그 ENV1436-01 FIN1436-02 SEC1436-03 REL1436-04 GLOS1436-05 GLOS1436-06 GLOS1436-07 GLOS1436-08 GLOS1436-09 GLOS1436-10. 외부 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED, 문서 전용.
+- Full contract in INTEGRATED_PLANNING_MASTER.md and INTEGRATED_PLANNING_MASTER.ko.md.
+
+
 ## v2026.10.28.1423 — 국고배당 운영 DB 보호 승격 (앱 전체는 유지)
 - 17:18 KST 실제 권위 운영 DB에 migration 291 적용해 구형 미분개 배당 차단 및 신규 UUID 멱등 복식원장 함수 등록. 최신 암호화 백업, 운영 실제 스키마 격리시험 및 운영 app역할 비인가/구형 지급 거부 확인. 원장거래 890→890, 전체 계좌 합 18,000→18,000, backend HTTP200. GitHub PR #1706은 CI PASS로 main 병합 `3c251d93`. 앱 전체 운영 교체는 **미수행**: 18,000 WLD 원장 차이, 국고 정식 재원 0, 269~287 누락, 공식 Test/디스크97% 문제. [기록](../worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md).
 
