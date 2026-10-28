@@ -18,4 +18,12 @@
 - Remaining gates: frontend/full build, database package, security audit, remote CI, official Test exact-SHA. No financial or production database touched.
 
 ## Finished
-- Pending.
+- Implementation commit: 15e48d8820f6d121004aef2051b0ee5ee54cecda; independent Draft PR #1716 with hold label.
+- RED (before code): 45 failures / 67 passes; GREEN: 112 focused tests PASS.
+- Isolated PostgreSQL 17.11 synthetic 105-club fixture: 3 PASS, read-only app-role UPDATE/DELETE denied; ephemeral container removed. This is not the complete production schema.
+- Repository lint: PASS with 0 errors / 1,099 warnings; typecheck: PASS; backend build: PASS; backend suite: 1,984 PASS / 443 SKIPPED; database suite: 45 PASS / 3 SKIPPED; API contract: 180 endpoints PASS; security advisory-floor policy: 9 PASS; Discord Bot: 11 PASS; Bot audit: 0 vulnerabilities.
+- Blocking gates: frontend suite FAIL (402 failed / 1,429 passed; React.act runtime errors); full build FAIL (Next.js worker SIGABRT); root dependency audit FAIL (3 low, 9 moderate). Full required test gate cannot pass.
+- Official Test /api/version = cfb13272beea53c4d8c20eff7f379b6f66343033, different from candidate; Production /api/version = unknown. Authenticated exact-SHA E2E, full schema finance checks, backup restore and GitOps release gates are NOT VERIFIED.
+- No migrations, WLD, ledger, DEV DB, Production DB, Test deployment, main merge, Production deployment or other worker worktrees changed. Only own 926MB Next.js build cache removed after failure.
+- Release verdict: PARTIAL / BLOCKED; PR stays Draft + hold; no merge or Production promotion. Main was fetched at start, middle and before final worklog update, unchanged at d12c948ac454b0762cfb7fb0cddf83703a775172.
+
