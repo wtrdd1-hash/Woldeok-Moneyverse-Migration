@@ -1,0 +1,8 @@
+# QA A1125 — Shop upkeep attention recovery (HOLD)
+
+- Candidate branch: `auto/hourly-a-shop-upkeep-recovery-20261028-1125`; base main `a28bed9aa40ff74d492824ae12892a7d52132fdd`. Exact candidate SHA and gate exit codes: host evidence directory `Moneyverse-A-2026-10-28-1125` and GitHub PR.
+- Focused RED before implementation: backend 2 suites failed to resolve missing implementation; frontend 1 suite failed. GREEN: backend 5/5 and frontend 29/29 (including Android gateway).
+- Full backend 1,932 PASS / 440 SKIP; frontend 1,868 PASS / 1 FAIL (unrelated main admin-blog UI/test disagreement: expected `편집 검토 대기`); database 45 PASS / 3 SKIP. Contract check 180 endpoints PASS; typecheck PASS; lint 0 errors PASS; build PASS. Bot initially failed due to uninstalled workspace dependencies, then 11 PASS after isolated `npm ci`.
+- Full root `pnpm test` exceeded the 140-second local cap and was terminated; **not PASS**. Isolated PostgreSQL 17.11 (no public port) executed the migration-123 `shop_my_items_v2` function in a synthetic schema: actor A 3, actor B 1, foreign and expired hidden, bigint exact, direct table SELECT denied. This is not full migration/production-role certification.
+- Static accessibility/SEO: keyboard-visible focus and `aria-current` on member filter, minimum 44px controls, member page `noindex`, `force-dynamic`, owner API `private, no-store`. Real authenticated browser E2E/a11y/SEO and full security/rollback restore remain **BLOCKED**.
+- P0 #1663: 352 preserved recovery refs; never treat a closed PR as merged. Main merge and Test/Production deployment are **HOLD** pending all exact-SHA gates, role-bound PostgreSQL, verified backup restore and GitOps release checks.
