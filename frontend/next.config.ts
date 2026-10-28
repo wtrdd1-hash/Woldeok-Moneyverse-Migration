@@ -55,6 +55,8 @@ const config: NextConfig = {
     minimumCacheTTL: 86400,
   },
   experimental: {
+    // Keep static generation within the small release host memory budget.
+    cpus: 2,
     // The contract package ships CommonJS from a workspace path.
     externalDir: true,
     optimizePackageImports: [

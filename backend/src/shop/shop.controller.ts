@@ -31,6 +31,7 @@ import {
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
+import { filterShopMinimumPrice, parseShopMinimumPrice } from './shop-price-floor';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -122,24 +123,26 @@ export class ShopController {
   }
 
   @Get('public-catalog')
-  @ApiOperation({ summary: 'The public catalogue; optional q searches code/name/description/category' })
-  async publicCatalog(@Query('q') query?: string) {
+  @ApiOperation({ summary: 'The public catalogue; optional q and exact minPrice filter' })
+  async publicCatalog(@Query('q') query?: string, @Query('minPrice') minPrice?: string) {
+    const minimum = parseShopMinimumPrice(minPrice);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+    return { catalogItems: filterShopMinimumPrice(filterShopItems(catalogItems, query), minimum) };
   }
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; optional q searches code/name/description/category' })
-  async catalog(@Req() request: RequestWithSession, @Query('q') query?: string) {
+  @ApiOperation({ summary: 'The member catalogue; optional q and exact minPrice filter' })
+  async catalog(@Req() request: RequestWithSession, @Query('q') query?: string, @Query('minPrice') minPrice?: string) {
+    const minimum = parseShopMinimumPrice(minPrice);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+    return { catalogItems: filterShopMinimumPrice(filterShopItems(catalogItems, query), minimum) };
   }
 
   @Get('holdings')

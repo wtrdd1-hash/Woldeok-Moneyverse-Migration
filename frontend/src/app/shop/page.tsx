@@ -11,6 +11,7 @@ import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 import { ShopMembershipSection } from './shop-membership-section';
+import { shopMinimumPriceQuery } from './shop-price-floor';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,14 +29,16 @@ const PRINCIPLES = [
 ];
 
 interface ShopPageProps {
-  readonly searchParams: Promise<{ q?: string }>;
+  readonly searchParams: Promise<{ q?: string; minPrice?: string }>;
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const loggedIn = await isLoggedInMember();
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
-  const querySuffix = query ? `?q=${encodeURIComponent(query)}` : '';
+  const priceInput = params.minPrice ?? '';
+  const priceQuery = shopMinimumPriceQuery(query, priceInput);
+  const querySuffix = priceQuery.valid ? priceQuery.query : shopMinimumPriceQuery(query, '').query;
 
   const [catalogData, walletData, profileData] = await Promise.all([
     loggedIn
@@ -80,19 +83,34 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           />
         </PageHeader>
 
-        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2" role="search">
+        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2 flex-wrap items-end" role="search">
           <input
             type="search"
             name="q"
             defaultValue={query}
             placeholder="상품명, 설명, 카테고리 검색"
             aria-label="상점 검색"
-            className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
+            className="min-w-[10rem] flex-1 rounded-xl border border-border bg-card px-4 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
           />
+          <label className="flex min-w-0 flex-col gap-1 text-xs text-muted-foreground">
+            <span>최소 가격 (WLD)</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              name="minPrice"
+              defaultValue={priceInput}
+              maxLength={19}
+              aria-label="최소 WLD 가격"
+              aria-invalid={!priceQuery.valid}
+              aria-describedby={!priceQuery.valid ? 'shop-price-error' : undefined}
+              className="w-32 min-w-0 rounded-xl border border-border bg-card px-3 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
+            />
+          </label>
           <Button type="submit">
             <T korean="검색" english="Search" />
           </Button>
-          {query ? (
+          {query || priceInput ? (
             <Button asChild type="button" variant="outline">
               <Link href="/shop">
                 <T korean="초기화" english="Reset" />
@@ -100,9 +118,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             </Button>
           ) : null}
         </form>
-        {query ? (
-          <p className="text-sm text-muted-foreground">
-            “{query}” 검색 결과 {items.length}개
+        {!priceQuery.valid ? (
+          <p id="shop-price-error" role="alert" className="text-sm text-destructive">
+            최소 가격은 0부터 9223372036854775807까지의 정수로 입력해 주세요. 필터 없이 상품을 표시합니다.
+          </p>
+        ) : query || priceInput ? (
+          <p role="status" className="text-sm text-muted-foreground">
+            조건에 맞는 상품 {items.length}개
           </p>
         ) : null}
 
