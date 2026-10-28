@@ -40,6 +40,24 @@ describe('Blog Markdown rendering regression v969', () => {
     expect(rendered).not.toContain('|:---|');
   });
 
+  it('merges loose tables with blank lines into a single valid table without orphan delimiter tables', () => {
+    const looseContent = [
+      '| 거시 경제 지표 | 현재 실측 수치 |',
+      '',
+      '| :--- | :---: |',
+      '',
+      '| 원달러 | 1380원 |',
+      '',
+      '| 코스피 | 2600pt |',
+    ].join('\n');
+    const rendered = html(looseContent);
+    const tableCount = (rendered.match(/<table/g) || []).length;
+    expect(tableCount).toBe(1);
+    expect(rendered).toContain('원달러');
+    expect(rendered).toContain('코스피');
+    expect(rendered).not.toContain(':---');
+  });
+
   it('renders lists, blockquote, and code fences as distinct safe blocks', () => {
     const rendered = html('## 복리\n\n1. **원금**\n2. 매월 납입\n\n> 본문 인용\n\n```txt\nP * (1+r)\n```');
     expect(rendered).toContain('<h2');

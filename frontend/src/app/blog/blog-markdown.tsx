@@ -174,10 +174,26 @@ export function renderBlogMarkdownBlocks(content: string): React.ReactElement[] 
       i++; continue;
     }
 
-    // 4. Data Tables
+    // 4. Data Tables (Skip orphan alignment rows, merge rows with loose spacing)
+    if (isAlignment(line)) {
+      i++;
+      continue;
+    }
+
     if (isTable(line)) {
       const rows: string[] = [];
-      while (i < lines.length && isTable((lines[i] ?? '').trim())) rows.push((lines[i++] ?? '').trim());
+      while (i < lines.length) {
+        const cur = (lines[i] ?? '').trim();
+        if (isTable(cur)) {
+          rows.push(cur);
+          i++;
+        } else if (!cur && i + 1 < lines.length && isTable((lines[i + 1] ?? '').trim())) {
+          // 행 사이에 빈 줄이 끼어있는 경우에도 같은 테이블로 연속 수집
+          i++;
+        } else {
+          break;
+        }
+      }
       const header = cells(rows[0] ?? '||');
       const dataRows = rows.slice(1);
       const body = dataRows
