@@ -45,3 +45,9 @@
 - 최신 origin/main a28bed9aa, PR #1695 초안 HEAD 9f11360a, CI #3969 classify/policy PASS·runtime-check 진행 중.
 - 공식 Test 포인터는 후보가 아닌 10월 21일 과거 버전을 가리킴. 실제 릴리스 식별 재검증 필요.
 - 운영 서비스 실제 연결 DB, 금융 신원·백업·무중단 게이트를 읽기 전용으로 확인 후 필요한 수정 및 안전한 테스트 승격 시도.
+
+## v1415.6 CI 빌드 실패 원인과 해결 후보
+- GitHub PR CI #3969 pnpm build 실패. Next 16.4.2 Turbopack의 Noto Sans KR 한국어 폰트 로더에서 496건 URL 해석 오류.
+- Next Webpack 빌드 대체 실험: 컴파일/타입 검사/609개 정적 페이지 생성 통과, 마지막 빌드 추적 수집 도중 실험용 110초 제한에 걸려 정식 종료 확인은 미완료.
+- 프론트 build 스크립트만 next build --webpack으로 지정. 원어 폰트 CSS/사용자 UI 변경 없음. 새 CI 최종 통과 확인 필요.
+- 공식 Test/금융 DB 3개 직접 DML 권한과 운영승격 게이트는 별도.

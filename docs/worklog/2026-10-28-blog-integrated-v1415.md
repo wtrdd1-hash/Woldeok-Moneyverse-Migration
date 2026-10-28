@@ -49,3 +49,9 @@ Source branch builds/tests passed; official Test/Production release remains bloc
 - Latest origin/main a28bed9aa, PR #1695 draft head 9f11360a; GH CI #3969 classify/policy PASS and runtime-check IN PROGRESS on first inspection.
 - Observed Test test-current symlink points to immutable 2026-10-21 test generation, not candidate; published Test /api/version 9f39f041...; verify live symlink and target rather than trusting one prior host preflight exception.
 - Read release guide's financial/identity/backup contract, identify actual service/DB before migrations or traffic switches. Never take over someone else's Test/production release workstream without compatibility evidence.
+
+## v1415.6 CI build failure investigation
+- GitHub PR CI #3969 failed run pnpm build, NOT lint/policy. GitHub job log: Next 16.4.2 Turbopack emits 496 font resource errors (Noto Sans KR), specifically next/font/google queries have exactly one entry.
+- Reproduced alternative production build using Next explicit Webpack backend: compilation PASS, TypeScript PASS, generation of 609 pages PASS; local timeout 110 s occurred in trailing build-trace collection, not code compilation. Final build completion is not yet certified.
+- Scoped code change: frontend package build script uses next build --webpack until upstream Turbopack CJK font loader fixed. Does not change CJK font CSS or runtime content. Rerun full CI and complete local build required.
+- Remains blocked by official Test/Production identity and three finance app-role DML grants until independent gates pass.
