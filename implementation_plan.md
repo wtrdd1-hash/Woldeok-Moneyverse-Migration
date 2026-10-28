@@ -999,3 +999,12 @@ flowchart TD
   - SVG 인포그래픽 이미지: /images/blog/compound-interest-72-rule.svg 100% 보장
   - 공인 금융 출처 링크: 한국은행 ECOS, 연준 FRED, Yahoo Finance 등 **13개 출처 링크 자동 연동**
   - 라이브 페이지 응답: **HTTP/2 200 OK** (https://easy-scraping.com/blog/2026-10-28-kr-compound-be34ed02)
+---
+## 🚀 [v262 Specification] 원격 105개 잔여 브랜치 및 08:05 피처(C v1148, Planning v1448) 완전 통합 및 단일화 완결
+- **적용 일시**: 2026-10-29 08:13 KST
+- **작업 내용**:
+  1. 원격 누적 잔여 브랜치 105개 전수 안전 배치 삭제 완료.
+  2. 직전 발생한 신규 커밋 2종 (hourly-c-verify-email-receipt-v1148-20261029-0805, planning-v1448-verified-blog-reading-queue-20261029-0805)을 누락 없이 main으로 100% 무충돌 통합 머지 (6396094f, 8da8d476).
+  3. 머지 완료 후 해당 피처 브랜치 원격 삭제 완료.
+  4. 원격 저장소(origin) 상태: origin/main 단일 브랜치만 깔끔하게 보존 확인.
+  5. 운영 서버(/srv/moneyverse-data/releases/prod-v2026.10.22.toss-redesign) git pull origin main 완료.
