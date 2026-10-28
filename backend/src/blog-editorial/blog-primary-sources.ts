@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { discoverPrimaryCandidates } from './blog-source-discovery';
 import type { BlogRotationSlot } from './blog-two-hour-rotation';
 
 /** Official source per country and editorial topic. Unavailable sources fail closed. */
@@ -28,18 +29,30 @@ export async function retrievePrimarySource(
   slot: BlogRotationSlot,
   loader: typeof fetch = fetch,
 ): Promise<PrimarySourceEvidence> {
-  const url = sourceUrlFor(slot);
-  const response = await loader(url, {
-    redirect: 'manual',
-    signal: AbortSignal.timeout(12000),
-    headers: { 'User-Agent': 'Moneyverse-Source-Verification/1.0' },
-  });
-  if (response.status !== 200 || !/^text\/html/i.test(response.headers.get('content-type') || '')) {
-    throw new Error('SOURCE_NOT_AVAILABLE');
+  const candidates = await discoverPrimaryCandidates(slot, sourceUrlFor(slot), loader);
+  let failure = 'SOURCE_NOT_AVAILABLE';
+  for (const url of candidates) {
+    try {
+      const response = await loader(url, {
+        redirect: 'manual',
+        signal: AbortSignal.timeout(12000),
+        headers: { 'User-Agent': 'Moneyverse-Source-Verification/1.0' },
+      });
+      if (response.status !== 200 || !/^text\\/html/i.test(response.headers.get('content-type') || '')) {
+        throw new Error('SOURCE_NOT_AVAILABLE');
+      }
+      if (Number(response.headers.get('content-length') || 0) > 2000000) {
+        throw new Error('SOURCE_SIZE_INVALID');
+      }
+      const html = await response.text();
+      if (html.length < 1200 || html.length > 2000000) throw new Error('SOURCE_SIZE_INVALID');
+      const excerpt = extractPrimarySourceText(html).slice(0, 7500);
+      if (excerpt.length < 700) throw new Error('SOURCE_TEXT_TOO_SHORT');
+      return { url, excerpt, digest: createHash('sha256').update(excerpt).digest('hex') };
+    } catch (error: unknown) {
+      failure = error instanceof Error ? error.message : 'SOURCE_NOT_AVAILABLE';
+    }
   }
-  const html = await response.text();
-  if (html.length < 1200 || html.length > 2000000) throw new Error('SOURCE_SIZE_INVALID');
-  const excerpt = extractPrimarySourceText(html).slice(0, 7500);
-  if (excerpt.length < 700) throw new Error('SOURCE_TEXT_TOO_SHORT');
-  return { url, excerpt, digest: createHash('sha256').update(excerpt).digest('hex') };
+  // Never use an RSS snippet, redirect, error page or model assertion as evidence.
+  throw new Error(failure);
 }
