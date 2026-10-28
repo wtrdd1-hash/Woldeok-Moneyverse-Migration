@@ -233,6 +233,7 @@ describe('Android owner-scoped banking cache privacy', () => {
   it.each([
     ['loan history', ['bank', 'loans']],
     ['banking standing', ['banking', 'standing']],
+    ['bank standing snapshot', ['banking', 'standing', 'snapshot']],
     ['repayment preview', ['banking', 'repay-preview']],
   ])('never forwards public cache policy for %s', async (_label, parts) => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
@@ -243,6 +244,18 @@ describe('Android owner-scoped banking cache privacy', () => {
     const response = await GET(request(`/app-api/v1/${parts.join('/')}`), context(...parts));
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('keeps the owner-only bank snapshot private and noindex even when upstream says public', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ cashBalance: '900719925474099312345678' }), {
+      status: 200,
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    })));
+    const response = await GET(request('/app-api/v1/banking/standing/snapshot'), context('banking', 'standing', 'snapshot'));
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(await response.json()).toMatchObject({ cashBalance: '900719925474099312345678' });
   });
 
   it('never caches a bank loan gateway failure', async () => {

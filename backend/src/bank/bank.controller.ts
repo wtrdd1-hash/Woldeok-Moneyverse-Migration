@@ -67,6 +67,18 @@ export class BankController {
     );
   }
 
+  @Get('standing/snapshot')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({ summary: 'Read-only authenticated member bank standing snapshot (not a ledger reconciliation)' })
+  standingSnapshot(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.repository().getStandingSnapshot(requireUserId(request)),
+      'failed to load bank standing snapshot',
+    );
+  }
+
   @Post('deposit')
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Deposit WLD cash into bank compound interest deposit account' })
