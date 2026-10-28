@@ -23,3 +23,22 @@
 - Production dependency audit FAIL: `qs@6.16.0` Moderate GHSA-6pq8-jhm2-2vcw, patched 6.16.1. Avoid duplicate QA security work.
 - Mid main still `e7c22f4dbaa5f6540a2249567033305c4b23495f`. Official Test exact-SHA, real PG authenticated E2E, full Next build NOT certified; shared disk data 100%, root 99%, tmp 97%. Production HOLD.
 - Manual SWF liquidation remains separately unsafe in current main and requires PR #1751-equivalent containment; this patch does not certify all SWF financial mutations.
+
+## Finished — 2026-10-29 08:40 KST
+- [x] RED regression: 3 failed, 1 passed before implementation.
+- [x] Restore source safety and boundary from PR #1782 with current-main worktree isolation.
+- [x] GREEN: backend focused 42, frontend focused 1, backend full 1,955 PASS/440 SKIPPED, database 46 PASS/4 SKIPPED, security 12, API contract 180, typecheck/build/lint PASS.
+- [x] PR #1804 created as Draft + `hold`; no merge, Test deployment, Production promotion, or branch deletion.
+- [x] Fresh mid/final main remains `e7c22f4dbaa5f6540a2249567033305c4b23495f`.
+- [ ] Production audit: FAIL, `qs@6.16.0` Moderate; blocked by independent security fix.
+- [ ] Real PostgreSQL, full Next.js build/frontend E2E and official Test exact-SHA: BLOCKED, shared disk 100%, no authorized isolated Test release.
+- [ ] Remote CI at candidate SHA: queued when checked, not certified PASS.
+- [ ] GitOps release gate: BLOCKED. Production runtime SHA unknown; official Test `cfb13272beea53c4d8c20eff7f379b6f66343033` is not candidate.
+- [ ] Follow-up P0: manual SWF liquidation route and DB permissions remain separately unsafe; historical 18,000 WLD ledger drift and migration integrity remain open.
+
+### API/DB contract and operational conclusion
+- `POST /api/v1/admin/treasury/swf/rebalance`: HTTP 503, `SWF_LEDGER_SETTLEMENT_UNAVAILABLE`, with CSRF guard; no service dispatch.
+- `POST /api/admin/treasury/swf` (Next gateway): HTTP 503 with no-store, no backend dispatch.
+- `evaluateAndRebalance()` is non-mutating even with execution flag true; scheduler never arms.
+- SWF GET and config PUT unchanged; no migration, SQL financial write, balance change, ledger change or production deployment.
+- Overall status **PARTIAL / BLOCKED**; source safety is candidate-only until release gates pass.
