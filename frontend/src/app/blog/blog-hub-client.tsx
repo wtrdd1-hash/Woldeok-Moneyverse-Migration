@@ -189,12 +189,24 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {regularPosts.map((post) => (
+            {regularPosts.map((post) => {
+              const cardImage = post.heroImage || '/images/blog/compound-interest-72-rule.svg';
+              return (
               <Card
                 key={post.slug}
-                className="toss-card hover:border-indigo-500/40 transition-all flex flex-col justify-between"
+                className="toss-card hover:border-indigo-500/40 transition-all flex flex-col justify-between overflow-hidden"
               >
-                <CardHeader className="pb-3">
+                <Link href={blogUrl(post.slug,locale).replace("https://easy-scraping.com","")} className="block overflow-hidden border-b border-border/40 group aspect-[16/9] relative bg-muted/20">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={cardImage}
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </Link>
+
+                <CardHeader className="pb-3 pt-4">
                   <div className="flex items-center justify-between gap-2 mb-1.5">
                     <Badge variant="outline" className="text-[10px] text-muted-foreground border-border/80">
                       {post.categoryLabel}
@@ -238,7 +250,8 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>

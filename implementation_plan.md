@@ -1008,3 +1008,13 @@ flowchart TD
   3. 머지 완료 후 해당 피처 브랜치 원격 삭제 완료.
   4. 원격 저장소(origin) 상태: origin/main 단일 브랜치만 깔끔하게 보존 확인.
   5. 운영 서버(/srv/moneyverse-data/releases/prod-v2026.10.22.toss-redesign) git pull origin main 완료.
+---
+## 🚀 [v263 Specification] 블로그 허브 일반 카드 100% SVG 인포그래픽 이미지 노출 보장 UI 개편
+- **적용 일시**: 2026-10-29 08:48 KST
+- **요구사항**: "블로그 기능에 무조건 이미지 하나씩 넣게 해줘" 사용자 요건 및 감사(v1419) 대응.
+- **수정 파일**:
+  - rontend/src/app/blog/blog-hub-client.tsx
+- **핵심 변경점**:
+  1. 기존 최상단 추천 글(featuredPost)에만 국한되던 썸네일 노출을 하단 '최신 금융 아티클 목록(regularPosts)' 전체 카드로 전격 확장.
+  2. 각 카드 상단에 16:9 비율의 전용 이미지 뷰어 컨테이너(spect-[16/9], group-hover:scale-105)를 탑재.
+  3. 아티클에 heroImage가 없거나 레거시 글인 경우에도 기본 인포그래픽 SVG(/images/blog/compound-interest-72-rule.svg)가 fallback으로 자동 바인딩되어 화면상에 이미지가 없는 빈 카드가 절대 발생하지 않도록 100% 보장.
