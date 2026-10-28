@@ -20,3 +20,10 @@ Node 로컬 모의 HTTP 서버에서 공개 글 0건/1건과 운영 URL 거부 �
 - 한 트랜잭션에서 게시 영수증 생성, 동일 슬롯/본문 재전송시 신규 게시 없이 동일 영수증, 게시 행 1개·첫 게시 감사 1개, 앱 역할의 직접 INSERT 거부, 비관리자 관리자 철회 시 42501, 허용 관리자 수동 철회 및 감사 2개를 실제 PostgreSQL SQL로 검증. 모든 ASSERT 통과, 시험 트랜잭션 ROLLBACK 후 임시 데이터베이스 DROP을 확인(남은 DB 0개).
 - 전체 백엔드 테스트 233파일/1,929 PASS, DB·환경 조건 70파일/440 SKIP. 신규 공식 출처 테스트·발행기·로테이션 14 PASS, 계약 빌드/백엔드 타입검사/린트 PASS. 이 증거는 DB 함수 격리 재현이며 공식 Test 모델 원문 실게시, 운영 무중단 공개 확인과는 별개.
 - 운영/Test /api/v1/blog/verified 는 여전히 HTTP 404 app_gateway_path. 실제 Nginx 경로와 BLOG_API_ORIGIN 연결/공식 SHA 배포 미완료. v1412 원어 AI가 생성한 출처 검증 글의 운영 게시 영수증은 아직 없다.
+
+## v1413.3 — 운영 기존 글 재노출 긴급 조치 및 구형 발행기 차단
+- 최신 origin/main f7552b160에 다른 에이전트가 구형 Next /api/blog/generate를 7,000자 JSON 직접 발행으로 다시 활성화한 것을 발견. 공식 출처 검증 없이 '실측' 환율·금리·백테스트를 상수로 단정, isAiGenerated:false(감수 완료 위장) 및 crypto.randomUUID 영수증만 만들고 공유 JSON에 직접 overwrite함. 국가 KR/US/JP/VN(승인한 CN과 불일치), 본문 모든 주제에 무관한 복리 계산기 삽입. 이는 사용자 최종 v1405 정책·v1412 DB 영수증 발행과 충돌하는 명백한 안전 회귀.
+- 2026-10-28 09:36 KST 운영 및 Test /api/blog에 기존 190건이 재노출됨을 확인. 실제 공유 파일은 198건(기존 철회 8, 재공개 190), 최신 글 publishedAt 10월27일 16:08Z로 모두 v1406 사용자의 10월28일 01:09 KST 철회 지시 이전 글. SHA256 3190ad5af44ff1b62b2b2f2b4d84a4b44ab3053931e2165d3342a471d86d023b, 전용 private 경로 0600 원본 백업 후 동시변경 CAS·fsync·원자 교체로 190건만 다시 WITHDRAWN. 198/198 철회, 운영/Test API 공개 0, 새 글 없음. 데이터 자체 삭제하지 않음.
+- 09:40 KST 신규 글 2건이 또 생성됨(슬러그 2026-10-28-kr-compound-e8ad9c2e 및 2026-10-28-kr-compound-195200b4, 본문 각 9천여자). 새 글에 사전검증 없음·isAiGenerated:false·임의 receipt 표시를 확인. 사용자 '시간 경과 자동 비공개/삭제 금지'에 따라 이 새 글 2건은 임의 철회하지 않음. 기존 사용자 철회 대상에만 조치.
+- v1413 브랜치에서 구형 API를 fail-closed. GET은 관리자에게도 LEGACY_FILE_PUBLISHER_RETIRED 및 false 공개 상태를 정확히 알리고, POST는 익명 403/관리자·구형 크론 인증자 503 LEGACY_UNVERIFIED_PUBLISHER_RETIRED. 파일 쓰기·임의 출처·가짜 실측·가짜 승인 영수증 코드 완전 제거. v1412 백엔드 blog.rotation_2h 검증 DB 발행 스케줄러는 유지하며 영향을 주지 않음.
+- 신규 API 회귀 5 PASS, 프론트 전체 352파일/1,863 PASS, 타입검사/변경린트 PASS. 이 코드는 아직 격리 브랜치이며 3354 실제 운영 구형 API가 차단됐다는 증거는 아니다. 운영 무중단 배포·실제 DB 2시간 게시 QA 필수.
