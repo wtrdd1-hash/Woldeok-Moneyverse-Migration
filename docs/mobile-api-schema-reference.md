@@ -2873,7 +2873,7 @@ _No request body._
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
 | npc_code | true | string |  |
-| affinity | true | null \| number |  |
+| affinity | true | number |  |
 | replayed | true | boolean |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.

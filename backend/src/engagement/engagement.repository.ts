@@ -136,19 +136,16 @@ export interface EngagementProgressRow {
 
 /**
  * public.engagement_record_npc_order RETURNS TABLE:
- * packages/database/migrations/082-engagement-loop-functions.sql
+ * packages/database/migrations/291-npc-order-replay-integrity.sql
  *
- * `affinity` is nullable on the replay path and only there. That path looks
- * the key up in `engagement_progress_receipts` -- which every engagement
- * command shares -- and then reads the caller's own relationship with the
- * named NPC; a key already spent on something other than an order with this
- * NPC leaves nothing to read. Typed as null rather than defaulted to zero,
- * because "no relationship was found for this key" is not the same fact as
- * "the relationship stands at zero".
+ * A successful acceptance persists the original actor, NPC, command and
+ * affinity outcome. An exact retry returns that original outcome even if
+ * the NPC was later deactivated or the relationship grew. A borrowed key,
+ * conflicting NPC or ambiguous legacy progress receipt fails closed.
  */
 export interface EngagementNpcOrderRow {
   readonly npc_code: string;
-  readonly affinity: number | null;
+  readonly affinity: number;
   readonly replayed: boolean;
 }
 
