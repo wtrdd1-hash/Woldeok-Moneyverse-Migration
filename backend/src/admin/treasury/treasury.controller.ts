@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ServiceUnavailableException,
   Body,
   Controller,
   Get,
@@ -367,16 +368,11 @@ export class AdminTreasuryController {
 
   @Get('swf')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 포트폴리오 및 잉여 세수 재순환 현황 조회' })
-  async getSwfStatus() {
+  async getSwfStatus(@Req() request: RequestWithSession) {
     if (!this.swfService) {
-      return { config: null, portfolios: [], events: [] };
+      throw new ServiceUnavailableException('Administrator SWF evidence unavailable');
     }
-    const [config, portfolios, events] = await Promise.all([
-      this.swfService.getConfig(),
-      this.swfService.getPortfolios(),
-      this.swfService.getRecentEvents(20),
-    ]);
-    return { config, portfolios, events };
+    return this.swfService.getAdminSnapshot(requireUserId(request));
   }
 
   @Post('swf/rebalance')

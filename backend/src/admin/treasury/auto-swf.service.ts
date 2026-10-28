@@ -1,5 +1,5 @@
 import type { Pool } from 'pg';
-import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
@@ -98,6 +98,27 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
       clearInterval(this.timer);
       this.timer = null;
     }
+  }
+
+  /** Admin read only: database enforces the actor role and keeps SWF tables private. */
+  async getAdminSnapshot(actorId: string): Promise<{
+    config: SwfConfig;
+    portfolios: SwfPortfolioItem[];
+    events: SwfEvent[];
+  }> {
+    const rows = await queryRows<{ snapshot: {
+      config: SwfConfig;
+      portfolios: SwfPortfolioItem[];
+      events: SwfEvent[];
+    } | null }>(
+      this.pool,
+      'SELECT public.admin_swf_snapshot($1::uuid) AS snapshot',
+      [actorId],
+    );
+    if (!rows[0]?.snapshot) {
+      throw new ServiceUnavailableException('Administrator SWF evidence unavailable');
+    }
+    return rows[0].snapshot;
   }
 
   async getConfig(): Promise<SwfConfig> {
