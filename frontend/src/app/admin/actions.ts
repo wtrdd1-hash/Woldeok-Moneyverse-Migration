@@ -555,12 +555,17 @@ export async function disburseCitizenDividendAction(
 ): Promise<ActionState> {
   const amountPerUserWld = formData.get('amountPerUserWld');
   const reason = formData.get('reason');
+  const stableKey = formData.get('idempotencyKey');
 
   if (typeof amountPerUserWld !== 'string' || !/^\d+$/.test(amountPerUserWld) || BigInt(amountPerUserWld) <= BigInt(0)) {
     return { status: 'error', message: '1인당 배당금은 1 WLD 이상의 정수여야 합니다.' };
   }
   if (typeof reason !== 'string' || reason.trim().length < 10) {
     return { status: 'error', message: '감사 사유를 10자 이상 구체적으로 적어 주세요.' };
+  }
+
+  if (typeof stableKey !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(stableKey)) {
+    return { status: 'error', message: '중복 지급 방지용 고정 요청 번호가 필요합니다.' };
   }
 
   try {
@@ -574,6 +579,7 @@ export async function disburseCitizenDividendAction(
       body: {
         amountPerUserWld: amountPerUserWld.trim(),
         reason: reason.trim(),
+        idempotencyKey: stableKey,
       },
     });
 

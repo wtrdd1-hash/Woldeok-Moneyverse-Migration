@@ -1,4 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
+## v2026.10.28.1420 — Canonical citizen dividend payout (SOURCE CANDIDATE / NOT LIVE)
+- v291 introduces stable UUID request-bound all-or-none canonical double-entry, vault and beneficiary receipts, blocking legacy direct-wallet payout. The actual Treasury ledger account has 0 WLD and cannot fund payouts until provenance is certified; historical 18,000 WLD drift remains under investigation, not reissued or fabricated. No change to general app database grants as directed. [Worklog](../worklog/2026-10-28-treasury-dividend-ledger-v1420.md). Actual isolated PostgreSQL CI, official Test and Production promotion not yet verified.
+
 
 ## v2026.10.28.1405 — Blog two-hour multilingual publishing directive (SOURCE CANDIDATE)
 - Latest owner policy overrides mandatory human review. Two-hour KST country×topic rotation, four native languages and ECONOMY/CODING/COMPUTER. Automated independent quality validation gates publication; no verified article auto-unpublishes; administrator may optionally edit/private/delete later. Unverifiable finance/AI claims skipped (not sent for mandatory human review).

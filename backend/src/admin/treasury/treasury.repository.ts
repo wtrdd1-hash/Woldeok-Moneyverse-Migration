@@ -789,10 +789,11 @@ export class TreasuryRepository {
     adminId: string,
     amountPerUserWld: string,
     reason: string,
+    idempotencyKey: string,
   ): Promise<TreasuryCitizenDividendResult> {
     const res = await this.pool.query<{ result: TreasuryCitizenDividendResult }>(
-      `SELECT public.treasury_disburse_citizen_dividend($1::uuid, $2::text, $3::text) AS result`,
-      [adminId, amountPerUserWld, reason],
+      `SELECT public.treasury_disburse_citizen_dividend($1::uuid, $2::text, $3::text, $4::uuid) AS result`,
+      [adminId, amountPerUserWld, reason, idempotencyKey],
     );
     return res.rows[0]?.result as TreasuryCitizenDividendResult;
   }

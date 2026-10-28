@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Coins,
   Gift,
@@ -75,6 +75,8 @@ export function TreasuryDisburseDialog({ vaults }: Props) {
 
   // 전 시민 일괄 배당 탭 상태
   const [perUserAmount, setPerUserAmount] = useState<string>('1000');
+  const payoutKey = useRef<string | null>(null);
+  const broadcastedKeys = useRef<Set<string>>(new Set());
   const [dividendReason, setDividendReason] = useState<string>(
     '2026년 정기 국고 세수 잉여금 시민 보편 환원 기본소득 배당 집행'
   );
@@ -149,6 +151,9 @@ export function TreasuryDisburseDialog({ vaults }: Props) {
     const formData = new FormData(e.currentTarget);
     formData.set('amountPerUserWld', perUserAmount);
     formData.set('reason', dividendReason.trim());
+    payoutKey.current ??= crypto.randomUUID();
+    const currentKey = payoutKey.current;
+    formData.set('idempotencyKey', currentKey);
 
     try {
       const res = await disburseCitizenDividendAction({ status: 'idle' }, formData);
@@ -156,7 +161,9 @@ export function TreasuryDisburseDialog({ vaults }: Props) {
         setMessage({ status: 'ok', text: res.message ?? '시민 배당이 성공적으로 집행되었습니다.' });
 
         // 디스코드 채널 및 관리자 DM 브로드캐스트 자동 전파
-        fetch('/api/discord/broadcast', {
+        if (!broadcastedKeys.current.has(currentKey)) {
+          broadcastedKeys.current.add(currentKey);
+          fetch('/api/discord/broadcast', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -171,7 +178,9 @@ export function TreasuryDisburseDialog({ vaults }: Props) {
               { name: '집행 사유', value: dividendReason.trim(), inline: false },
             ],
           }),
-        }).catch(() => {});
+          }).catch(() => {});
+        }
+        payoutKey.current = null;
       } else {
         setMessage({ status: 'error', text: res.message ?? '배당 집행에 실패했습니다.' });
       }
@@ -461,7 +470,7 @@ export function TreasuryDisburseDialog({ vaults }: Props) {
                 <input
                   type="text"
                   value={perUserAmount}
-                  onChange={(e) => setPerUserAmount(e.target.value)}
+                  onChange={(e) => { payoutKey.current = null; setPerUserAmount(e.target.value); }}
                   className="w-full rounded-xl border border-input bg-background p-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary font-mono"
                   placeholder="1000"
                 />
@@ -471,7 +480,7 @@ export function TreasuryDisburseDialog({ vaults }: Props) {
                 <label className="text-xs font-bold text-foreground">지출 감사 사유 (최소 10자)</label>
                 <textarea
                   value={dividendReason}
-                  onChange={(e) => setDividendReason(e.target.value)}
+                  onChange={(e) => { payoutKey.current = null; setDividendReason(e.target.value); }}
                   rows={2}
                   className="w-full rounded-xl border border-input bg-background p-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />

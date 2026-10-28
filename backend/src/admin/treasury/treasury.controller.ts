@@ -37,6 +37,10 @@ export class TreasuryOperationDto {
 }
 
 export class TreasuryDisburseDividendDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  idempotencyKey!: string;
+
   @ApiProperty({ example: '1000', description: '1인당 지급 배당금 (정수 WLD)' })
   @IsString()
   @Matches(/^\d+$/, { message: 'amountPerUserWld must be an integer string' })
@@ -232,7 +236,7 @@ export class AdminTreasuryController {
     @Body() dto: TreasuryDisburseDividendDto,
   ) {
     const adminId = requireUserId(request);
-    return this.service.disburseCitizenDividend(adminId, dto.amountPerUserWld, dto.reason);
+    return this.service.disburseCitizenDividend(adminId, dto.amountPerUserWld, dto.reason, dto.idempotencyKey);
   }
 
   @Get('disburse/targeted-preview')
