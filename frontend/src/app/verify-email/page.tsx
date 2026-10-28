@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 const STATUS_COPY: Readonly<Record<string, string>> = {
   invalid: '인증 링크 형식이 올바르지 않아요. 회원가입을 다시 진행해 주세요.',
   failed: '인증 링크가 만료되었거나 이미 사용되었습니다. 회원가입을 다시 진행해 새 인증 링크를 받아 주세요.',
+  unconfirmed: '인증 처리 결과 또는 로그인 세션을 확인하지 못했습니다. 이미 인증되었을 수 있으니 로그인하여 확인해 주세요.',
 };
 
 export default async function VerifyEmailPage({
