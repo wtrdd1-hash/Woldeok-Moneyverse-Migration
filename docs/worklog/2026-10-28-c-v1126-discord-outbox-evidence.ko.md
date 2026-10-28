@@ -7,8 +7,12 @@
 - `/admin/discord`는 Backend JSON을 검증하지 않고 표시하여 비정상 카운트·경로·수신자를 신뢰할 수 있는 P1 문제.
 - 기존 PostgreSQL SECURITY DEFINER 읽기 계약을 유지하면서 검증기·실패 UI·회귀테스트 구현. 모든 릴리스 게이트 통과 전 배포 금지.
 
-## 진행
-- [ ] RED 테스트; [ ] 코드; [ ] main 재확인; [ ] 전체 검증; [ ] PR/CI.
+## 진행 — 2026-10-28 15:42 KST
+- RED 실패 확인 후 검증기 및 SSR 수정, 집중 테스트 25/25 통과.
+- 기존 테스트의 실제 DB 응답 필드 `delivered_count` 누락 보완. 미검증 자료는 경고·재조회만 표시하며 DM 테스트·숫자 숨김.
+- 인증된 NestJS 및 기존 SECURITY DEFINER 읽기 함수 유지, DB·WLD 변경 없음.
+- 중간 main 재조회 `952e487d...` 동일, 국영문 기획 변경 없음. 전체 검증 진행.
+
 
 ## 종료
 - 검증 대기. 공식 Test/Production 변경 없음.
