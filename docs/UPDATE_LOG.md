@@ -1,4 +1,5 @@
 ## 2026-10-28 v1430 — F675-163 calendar watch source and revision integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Draft PR #1753 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1753) and issue #1748 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748); base is unmerged #1749; no independent merge.
 - Previous Addition v1428 / Current Improvement v1430 / Next Addition v1432 provisional; main 35971c600f25869c96f1c666d4b9f58927202730 rechecked start/mid; prior #1749 unmerged.
 - Corrected sale deadline source (shop_catalog.sale_ends_at, NOT shop_inventory.ends_at), detected helper missing future-only filter and tests without clock, separated inventory visibility. Added immutable source revision/occurrence, explicit changed-deadline confirmation, fail-closed UNKNOWN, 100-cap/ACL/idempotency/Android/a11y and release rollback.
 - P0 ENV1430-01 FIN1430-02 SEC1430-03 REL1430-04; P1 CAL1430-05 CAL1430-06 CAL1430-07 CAL1430-08 CAL1430-09 CAL1430-10. QA v1350 FAILED, disk98%, historical 18,000 WLD difference, migration/ACL and Test/restore HOLD. External new accepted 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only.

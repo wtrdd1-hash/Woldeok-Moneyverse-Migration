@@ -1,4 +1,5 @@
 ## 2026-10-28 v1430 — F675-163 캘린더 저장 마감 출처·개정 무결성 (기능 보완 / DRAFT / 보류)
+- Draft PR #1753 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1753) and issue #1748 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748); base is unmerged #1749; no independent merge.
 - 이전 추가 v1428 / 현재 보완 v1430 / 다음 추가 v1432(잠정); main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 확인, 선행 #1749 미병합.
 - 마감 출처는 shop_catalog.sale_ends_at이며 shop_inventory.ends_at이 아님을 정정, 과거 마감 필터·시계 테스트 누락 발견, 재고 노출과 구분. 불변 출처 개정·발생 회차, 일정 변경 시 명시적 재확인, 출처 장애 차단, 100개 제한/권한/멱등성/Android/접근성·롤백 명세.
 - P0 ENV1430-01 FIN1430-02 SEC1430-03 REL1430-04; P1 CAL1430-05 CAL1430-06 CAL1430-07 CAL1430-08 CAL1430-09 CAL1430-10. QA v1350 FAILED, 디스크98%, 과거 18,000 WLD 차이, 마이그레이션·권한·Test·복원 HOLD. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서 전용.

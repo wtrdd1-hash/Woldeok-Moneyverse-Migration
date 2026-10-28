@@ -1,6 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.28.1430 — F675-163 캘린더 저장 마감 출처·개정 무결성 (기획 초안 / 운영 보류)
+- Draft PR #1753 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1753) and issue #1748 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748); base is unmerged #1749; no independent merge.
 - 이전 기능 추가 v1428 → 현재 기능 보완 v1430 → 다음 기능 추가 v1432(잠정). 최신 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 확인. 선행 Draft #1749 미병합, 별도 문서 전용 브랜치.
 - 실제 코드 정정: shop-deadlines.ts는 지난 날짜를 제거하지 않고 테스트에 현재 시각 주입이 없다. shop_catalog_list_v2의 sale_ends_at 출처는 shop_catalog이며 shop_inventory.ends_at은 별도 판매 노출 제약이다. 시즌 마감은 virtual_seasons.ends_at. 출처 UUID가 같아도 마감은 변경될 수 있다.
 - 저장 회차 source_revision·유효 마감·출처를 불변 기록하고 운영자 수정/원복(ABA) 시 자동 재구독하지 않는다. 회원이 새 회차를 명시적으로 확인하며 SOURCE_UNKNOWN과 EXPIRED를 구별하고 출처 삭제 후에도 본인 해제를 허용한다. 모든 관리자 수정 경로에서 동일 트랜잭션으로 개정번호 증가.

@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.28.1430 — F675-163 calendar watch deadline provenance and revision integrity (PLANNING DRAFT / RELEASE HOLD)
+- Draft PR #1753 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1753) and issue #1748 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748); base is unmerged #1749; no independent merge.
 - Previous Addition v1428 → Current Improvement v1430 → Next Addition v1432 provisional. Latest main 35971c600f25869c96f1c666d4b9f58927202730 checked start/mid. Predecessor Draft #1749 is unmerged; docs-only stacked branch.
 - Source correction: calendar shop-deadlines.ts currently does not exclude past dates; its tests lack an injected clock. shop_catalog_list_v2 takes sale_ends_at from shop_catalog, NOT shop_inventory.ends_at; inventory availability is a separate gate. Season event deadline is virtual_seasons.ends_at. A source UUID alone does not freeze a deadline.
 - Harden watch to immutable source_revision + saved effective deadline + provenance, no silent resubscription after admin changes or ABA edit/revert. Explicit member confirmation for new revision, source UNKNOWN distinct from EXPIRED, owner-only removal after source deletion. All admin mutation paths must increment revision atomically.

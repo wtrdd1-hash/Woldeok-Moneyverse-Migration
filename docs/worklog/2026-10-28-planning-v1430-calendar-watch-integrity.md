@@ -10,9 +10,9 @@
 
 ## IN PROGRESS
 - [x] Inspect actual main and unmerged predecessor.
-- [ ] Write canonical English and Korean parity changes in existing integrated planning.
-- [ ] Validate ten backlog IDs, all EN/KO pairs, docs-only diff, no secrets.
-- [ ] Push Draft PR and GitHub issue handoff.
+- [x] Write canonical English and Korean parity changes in existing integrated planning.
+- [x] Validate ten backlog IDs, all EN/KO pairs, docs-only diff, no secrets.
+- [x] Push Draft PR and GitHub issue handoff.
 
 
 ## MIDPOINT — 23:11 KST
@@ -20,4 +20,7 @@
 - Source correction and explicit revision-bound deadline confirmation documented. QA v1350 FAILED; external accepted newly 0, cumulative UNKNOWN / 10,000 BLOCKED / IN PROGRESS; release HOLD.
 
 ## FINISHED
-- PENDING: final verification, SHA and PR evidence.
+- 23:12 KST: seven EN/KO pairs PASS, ten unique backlog IDs PASS, fourteen docs-only changed, git diff --check PASS, release classifier 17/17 PASS.
+- Draft PR #1753 and issue #1748 updated; stacked on unmerged #1749, no independent merge. Content commit 15214c2c952d999c73601c9fdd751c89ffc7b565.
+- GitHub classify, release-input and verify/classify PASS; policy and verify/policy PENDING at 23:12. Official Test and Production remain uncertified. QA v1350 FAILED, disk 98% / 3.9GiB free, RELEASE HOLD.
+- External independent accepted new 0, cumulative UNKNOWN / 10,000 BLOCKED / IN PROGRESS. No runtime/DB/WLD/Test/Production changes. Final SHA in miniPC completion record.

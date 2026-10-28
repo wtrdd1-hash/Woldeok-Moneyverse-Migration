@@ -10,9 +10,9 @@
 
 ## 진행 중
 - [x] 최신 main과 선행 미병합 PR 대조.
-- [ ] 기존 통합 영문·국문 기획 반영.
-- [ ] 백로그 10개, 영문·국문 대조, 문서 전용 변경 검사.
-- [ ] Draft PR 및 GitHub 이슈 전달.
+- [x] 기존 통합 영문·국문 기획 반영.
+- [x] 백로그 10개, 영문·국문 대조, 문서 전용 변경 검사.
+- [x] Draft PR 및 GitHub 이슈 전달.
 
 
 ## 중간 점검 — 23:11 KST
@@ -20,4 +20,7 @@
 - 마감 출처 정정과 개정번호 기반 회원 재확인 명세. QA v1350 FAILED, 외부 신규 승인 0·누적 UNKNOWN / 10,000 BLOCKED / IN PROGRESS, 운영승격 HOLD.
 
 ## 완료
-- 대기: 검증, SHA, PR 증거.
+- 23:12 KST: 7쌍 영문·국문 대조 PASS, 백로그 10개 고유 ID PASS, 14개 문서만 변경, git diff --check PASS, 릴리스 분류 테스트 17/17 PASS.
+- Draft PR #1753 및 이슈 #1748에 개발 요구사항 전달. 선행 #1749 미병합, 별도 병합 금지. 문서 본문 커밋 15214c2c952d999c73601c9fdd751c89ffc7b565.
+- GitHub classify, release-input, verify/classify PASS, policy 및 verify/policy 23:12 당시 PENDING; 공식 Test·운영승격 미검증. QA v1350 FAILED, 디스크 98%/여유 3.9GiB, RELEASE HOLD.
+- 외부 독립 승인 신규 0건, 누적 UNKNOWN / 10,000 BLOCKED / IN PROGRESS. 런타임/DB/WLD/Test/Production 변경 없음. 최종 SHA는 miniPC 완료 기록 참조.
